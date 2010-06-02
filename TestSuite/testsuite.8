@@ -1,0 +1,45 @@
+\" To see this file do man -l testsuite.8
+.TH testsuite.pl 8  "December 11, 2009" "version 2.0" "DMRG++"
+.SH NAME
+testsuite.pl \- Systematically run tests for DMRG++ 
+.SH SYNOPSIS
+.B ./testsuite.pl 
+[\-\-all | \-n number] [\-l libraries] 
+.SH DESCRIPTION
+Without options testsuite.pl will display a list of tests
+and ask which test to run. The command will create
+a driver program, a Makefile, and an input file; and it 
+will build DMRG++ and run it.
+Then it will compare the results of the test with
+precomputed tests, and produce a diff file under diffOfTest*.txt.
+.SH OPTIONS
+.TP
+\-\-all
+Runs all available tests sequentially.
+.TP
+\-n number
+If number is non-negative, runs the test with the given number.
+If number is negative, runs all tests from -number.
+.SH OPTIONS AVAILABLE IN THE CPC VERSION ONLY:
+.TP
+\-l libraries
+Use the specified libraries for LAPACK.
+For instance
+.B ./testsuite.pl -l \(lq'-llapack -L/path/to/lapack'\(rq
+.PP
+will link with the specified string. Note the single quotes
+inside double quotes. Both are necessary if the string has spaces,
+the outer quotes are for the shell, the inner ones for perl.
+.SH AUTHOR
+G.A.
+.SH BUGS
+Tests numbers specified with -n refer to the offset from the
+first test, whereas test numbers entered interactively follow
+an internal scheme.
+.SH LIMITATIONS
+Currently, testsuite.pl does not support MPI tests, or pthread
+tests. Also, a lot of DMRG++ functionality needs corresponding tests
+in the testsuite. This will be added eventually.
+.SH SEE ALSO
+configure.pl(1)
+

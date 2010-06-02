@@ -1,0 +1,144 @@
+%% File README
+ 	
+Licensing
+The full software license for DMRG++ version 2.0.0 
+can be found in
+file LICENSE in the root directory of the code.
+DMRG++ is a free and open source implementation of the 
+DMRG algorithm. You are welcome to use it and publish data 
+obtained with DMRG++. If you do, please cite this
+work (see next subsection).
+
+How To Cite This Work
+
+@article{re:alvarez09,
+author="G. Alvarez",
+title="The density matrix renormalization group for strongly correlated electron
+systems: A generic implementation",
+journal="Computer Physics Communications",
+volume="180",
+pages="1572",
+year="2009"}
+
+And also:
+
+@article{
+re:webDmrgPlusPlus,
+Author = {G. Alvarez},
+Title = {DMRG++ Website},
+Publisher = {\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
+
+What's new in Version 2
+
+* Engine: SU(2) symmetry now supported and integrated
+* Engine: Checkpointing
+* Engine: DiskStack to support checkpointing
+* Engine: Faster WaveFunctionTransformation for local symmetries
+* User Interface: Customizable finite sweeps
+* New Model: FeBasedSc for Fe-based Superconductors
+* New Geometry: GeometryLadderFeAs to go with FeBasedSc
+* Tests: TestSuite added (under /TestSuite)
+* Documentation: Manual added (under /doc)
+
+Building and Running DMRG++
+Required Software
+
+* (required) GNU C++
+* (required) The LAPACK library.
+This library is available for most platforms.
+The configure.pl script will ask for the LDFLAGS variable 
+to pass to the compiler/linker. If the linux platform was
+chosen the default/suggested LDFLAGS will include -llapack.
+If the osx platform was chosen the default/suggested LDFLAGS will
+include  -framework Accelerate.
+For other platforms the appropriate linker flags must be given.
+More information on LAPACK is here: http://netlib.org/lapack/
+* (optional) make or gmake (only needed to use the Makefile)
+* (optional) perl (only needed to run the configure.pl script)
+
+Quick Start
+To Build DMRG++:
+
+cd src
+perl configure.pl
+(please answer questions regarding model, etc)
+make
+
+To Run DMRG++:
+
+./dmrg input.inp
+
+The files created by \cppFile{configure.pl} are the following:
+
+\cppFile{main.cpp}: 
+\cppFile{configure.pl} will create the file \cppFile{main.cpp}
+which contains the entry point (function int main()) for DMRG++,
+according to the answers to questions given.
+
+\cppFile{Makefile}:
+\cppFile{configure.pl} will create the file \cppFile{Makefile}
+according to the answers to questions given. 
+In the Makefile, LDFLAGS must contain the linker flags to 
+link with the LAPACK library. Defaults provided 
+ automatically by configure.pl should work in most cases.
+If MPI is not selected (serial code) then the compiler will be chosen to be g++.
+Other compilers may work but only the GNU C++ compiler, g++, was tested.
+If MPI is selected then the compiler will be chosen to be mpicxx, which 
+is usually a wrapper script around g++ to take care of linking with MPI libraries 
+and to include MPI headers. Depending on your MPI installation you might need to
+change the name of this script.
+
+\cppFile{input.inp}:
+\cppFile{configure.pl} will create the file \cppFile{input.inp}
+according to the answers to questions given.
+This file can be used as input to run the DMRG++ program, in the following way:
+for serial code:
+
+./dmrg input.inp
+
+for MPI code: (actual command will vary according to MPI Installation):
+
+mpirun ./dmrg input.inp
+
+The Input File
+There is a single input file that is passed as the first
+and only argument to the program.
+There are two kinds of parameters in the input file:
+(i) model parameters, and (ii) DMRG Solver parameters.
+The Model parameters vary from model to model.
+The DMRG Solver parameters are discussed below.
+
+\inputItem{Options}
+A comma-separated list of strings. At least one of the following strings must be provided:
+\inputSubItem{none}  Use this when no options are given, since the list of strings must be non-null.
+Note that ``none'' does not disable other options.\\
+\inputSubItem{hasQuantumNumbers} If this option is given, the program will read the line ``QNS'' 
+described below and act accordingly. It is recommended that you set this option.  \\
+\inputSubItem{wft}  Use the Wave Function Transformation speed-up, which is disabled by default.\\
+\inputSubItem{useSu2Symmetry} Use the SU(2) symmetry for the model, and interpret quantum numbers in 
+the line ``QNS'' appropriately. The option ``hasQuantumNumbers'' must be set for this to work.\\
+\inputSubItem{nofiniteloops}  Don't do finite loops, even if provided under ``FiniteLoops'' below.\\
+\inputItem{version}  A mandatory string that is read and ignored. Usually contains the result
+of doing ``git rev-parse HEAD''.\\
+\inputItem{outputfile}  The output file. This file will be created if non-existent, and if it
+exits it will be truncated.\\
+\inputItem{InfiniteLoopKeptStates}  ``m'' value for the infinite algorithm.\\
+\inputItem{FiniteLoops} A series of space-separated numbers. More than one space is allowed.
+The first number is the number of finite algorithm ``movements'', followed by series
+of three numbers for each ``movement''. Of the three numbers, the first
+is the number of sites to go forward if positive or backward if negative.
+The second number is the ``m'' for this ``movement' and the last number is either 0 or 1,
+0 will not save state data to disk and 1 will save all data to be able to calculate observables.
+The first ``movement'' starts from where the infinite loop left off, at the middle of the lattice.\\
+\inputItem{QNS}  A space-separated list of numbers. More than one space is allowed.
+The first number is the number of numbers to follow, these numbers being the density of quantum
+numbers for each conserved quantum number to be used.
+In a simpler way, usually this is 3 followed by $n_\uparrow n_\downarrow 0$  if not using
+SU(2) symmetry, where  $n_\uparrow$, and $n_\downarrow$ are the densities of up and down
+electrons respectively. If there is SU(2) symmetry then this is 3 followed by $n_\uparrow n_\downarrow j$,
+where $n_\uparrow$, and $n_\downarrow$ are the densities of up and down
+electrons respectively, and $j$ is twice the angular momentum divided by the number of sites.
+
+%% Extracted from the DMRG++ Manual
+%% by ../scripts/extractFromManual.pl for README
+ 	

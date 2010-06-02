@@ -1,0 +1,36 @@
+linSize 8
+hoppings 8 8
+0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0
+ 1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0
+ 0.0 1.0 0.0 1.0 0.0 0.0 0.0 0.0
+ 0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0
+ 0.0 0.0 0.0 1.0 0.0 1.0 0.0 0.0
+ 0.0 0.0 0.0 0.0 1.0 0.0 1.0 0.0
+ 0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0
+ 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
+
+hubbardU	8 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0
+potentialV	 16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+density 1.0
+options hasQuantumNumbers,wft,nosu2,TimeStepTargetting
+version 6ce41a4b7dfa08978e53fa756f7f139e2fb18251
+outputfile		data5.txt
+InfiniteLoopKeptStates	 64
+FiniteLoops 3  7 100 0 -7 100 0 -7 100 0 
+QNS 2 0.5 0.5
+
+FILENAME tst5.txt
+TIMESTEP 0.01
+SITE 1 7
+STARTINGLOOP 1 2
+TIMEEVOLUTION raw 
+RAW_MATRIX 4 4
+1.0    0.0    0.0   0.0
+0.0    1.0    0.0   0.0
+0.0    0.0    1.0   0.0 
+0.0    0.0    0.0   1.0 
+FERMIONSIGN 1
+JMVALUES 0 0
+angularFactor 1
+
+   

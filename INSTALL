@@ -1,0 +1,29 @@
+
+Synopsis:
+To Build DMRG++:
+cd src
+perl configure.pl
+(please answer questions regarding model, etc)
+make
+
+To Run DMRG++:
+./dmrg input.inp
+
+
+Required Software:
+1) GNU C++
+2) The LAPACK library.
+This library is available for most platforms.
+The configure.pl script will ask for the LDFLAGS variable 
+to pass to the compiler/linker. If the linux platform was
+chosen the default/suggested LDFLAGS will include -llapack.
+If the osx platform was chosen the default/suggested LDFLAGS will
+include  -framework Accelerate.
+For other platforms the appropriate linker flags must be given.
+More information on LAPACK is here: http://netlib.org/lapack/
+
+Optional Software:
+3) make or gmake (only needed to use the Makefile)
+4) perl (only needed to run the configure.pl script)
+
+

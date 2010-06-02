@@ -1,0 +1,27 @@
+This directory contains FeAS model
+To use with DMRG++
+Read ../src/README and ../src/INSTALL in the src directory.
+This model is undocumented.
+Do not distribute contents of this directory for now.
+Thanks,
+G.A.
+
+
+Synopsis:
+
+Main code:
+make
+./dmrgFeAs inputFeAs.inp
+
+Observables code:
+make dmrgFeAsObserve
+./dmrgFeAsObserve inputFeAs.inp SomeDataFile.txt
+
+Free case results (U=J=0) for comparison:
+make freeFeAs
+./freeFeAs inputFeAs.inp
+
+New input file
+perl configFeAs.pl > inputFeAsNew.inp
+
+

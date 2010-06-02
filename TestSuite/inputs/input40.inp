@@ -1,0 +1,23 @@
+linSize 4
+hoppings 2 2
+-0.058 0
+0 -0.2196
+hoppings 2 2
+-0.2196 0
+0 -0.058
+hoppings 2 2
++0.20828 +0.079
++0.079 +0.20828
+hoppings 2 2
++0.20828 -0.079
+-0.079 +0.20828
+hubbardU	4 0.0 0.0 0.0 0.0
+potentialV	4 0.0 0.0 0.0 0.0
+density 1.0
+options hasQuantumNumbers,nowft,useSu2Symmetry,
+version 61289987cdd32b8485213ac0415baf4e9cd16432
+outputfile		data40.txt
+InfiniteLoopKeptStates	 60
+FiniteLoops 4  3 100 0 -3 100 0 -3 100 0 3 100 0 
+QNS 3 1.0 1.0 0.0
+

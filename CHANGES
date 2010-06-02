@@ -1,0 +1,18 @@
+%% File CHANGES
+ 	
+What's new in Version 2
+
+* Engine: SU(2) symmetry now supported and integrated
+* Engine: Checkpointing
+* Engine: DiskStack to support checkpointing
+* Engine: Faster WaveFunctionTransformation for local symmetries
+* User Interface: Customizable finite sweeps
+* New Model: FeBasedSc for Fe-based Superconductors
+* New Geometry: GeometryLadderFeAs to go with FeBasedSc
+* Tests: TestSuite added (under /TestSuite)
+* Documentation: Manual added (under /doc)
+
+
+%% Extracted from the DMRG++ Manual
+%% by ../scripts/extractFromManual.pl for CHANGES
+ 	

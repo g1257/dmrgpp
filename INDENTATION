@@ -1,0 +1,84 @@
+DMRG++ is indented using "hard" tabs and Kernighan and Ritchie indentation. 
+This is the indentation style used by the Linux Kernel. 
+Note that the tab character is octal 011, decimal 9, hex. 09, or '\t' (horizontal tab). 
+You can represent tabs with any number of spaces you want (I use 8 by the way). 
+Regardless, a tab is saved to disk as a single character: hex. 09, and *not* as 8 spaces.
+
+I repeat the same thing more formally now:
+DMRG++ is indented following the Linux coding style(*), with the following exceptions:
+
+1. I do not impose a limit of 80 columns. This is unintended, future versions
+of DMRG++ will not allow this exception.
+
+2. Exceptions due to the Linux style applying to C, but DMRG++ is written in C++:
+	2.1. Classes are indented like this:
+		class A {
+		};
+		That is, they are indented as for loops and not as functions.
+		This is because classes can be nested, so this is the most accurate
+		way of following K&R.
+	
+	2.2. Constructors and destructors are indented as functions.
+		This is kind of obvious but I mention it because 'indent' gets
+		confused if you try using, let's say
+			 indent -kr -i8 -ln 200 myFile.h
+		with constructors and destructors.
+	
+	2.3. 'Private:', 'Protected:' and 'Public:' labels.
+		In C this would be just labels for goto statements, of course, and
+		this is the way that 'indent' interprets them. 
+		In DMRG++ I have not followed a consistent indentation of these labels.
+		This is unintended, and in the future I will follow Linux conventions
+		for these labels.
+----------------------------------------------------------------------------------------
+
+(*) Formally specified in many places, see, for example, a current version of
+'man indent' and search for Linux coding style. In 'indent' parlance, it's:
+
+-nbad -bap -nbc -bbo -hnl -br -brs -c33 -cd33 -ncdb -ce -ci4
+-cli0 -d0 -di1 -nfc1 -i8 -ip0 -l80 -lp -npcs -nprs -npsl -sai
+-saf -saw -ncs -nsc -sob -nfca -cp33 -ss -ts8 -il1
+
+I do not follow '-l80', and the labels switches, such as -il1, although I plan to, in
+the future. Regardless, 'indent' currently does not indent C++ files correctly. 
+For example, it gets confused with constructors and destructors.
+
+----------------------------------------------------------------------------------------
+
+-nbad		Do not force blank lines after declarations.
+-bap		Forces a blank line after every procedure body.
+-nbc		Do not force newlines after commas in declarations.
+-bbo		Prefer to break long lines before boolean operators.
+-hnl		Prefer to break long lines at the position of newlines in the input.
+-br		Put braces on line with if, etc.
+-brs		Put braces on struct declaration line.
+-c33		Put comments to the right of code in column 33.
+-cd33		Put comments to the right of the declarations in column 33.
+-ncdb		Do not put comment delimiters on blank lines.
+-ce		Cuddle else and preceding `}´.
+-ci4		Continuation indent of 4 spaces.
+-cli0		Case label indent of 0 spaces (do not indent case labels).
+-d0		Set indentation of comments not to the right of code to 0 spaces.
+		(i.e., do not unindent comments)
+-di1		Put variables in column 1. (space between type and variable)
+-nfc1		Do not format comments in the first column as normal.
+-i8		Set indentation level to 8 spaces. 
+		Used in conjunction with -ts8
+-ip0		(does not apply to C++)
+-l80		Set maximum line length for non-comment lines to 80.
+-lp		Line up continued lines at parentheses.
+-npcs		Do not put space after the function in function calls.
+-nprs		Do not put a space after every ´(´ and before every ´)´.
+-npsl		Put the type of a procedure on the same line as its name.
+-sai		Put a space after each if.
+-saf		Put a space after each for.
+-saw		Put a space after each while.
+-ncs		Do not put a space after cast operators.
+-nsc		Do not put the `*´ character at the left of comments.
+-sob		Swallow optional blank lines.
+-nfca		Do not format any comments.
+-cp33		Put comments to the right of #else and #endif statements in column 33
+-ss		On one-line for and while statements, force a blank before the semicolon.
+-ts8		Set tab size to 8 spaces. 
+-il1		Set offset for labels to column 1.
+----------------------------------------------------------------------------------------
