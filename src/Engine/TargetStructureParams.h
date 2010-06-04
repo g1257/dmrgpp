@@ -104,12 +104,16 @@ namespace Dmrg {
 		
 		void init(
 				const std::string& filename,
-    				RealType timeStep,
+    				RealType tau,
+				size_t timeSteps,
+    				size_t advanceEach,
     				const std::vector<size_t>& sites,
 			  	const std::vector<size_t>& loops)
 		{
 			targetStruct_.filename = filename;
-			targetStruct_.timeStep = timeStep;
+			targetStruct_.tau = tau;
+			targetStruct_.timeSteps = timeSteps;
+			targetStruct_.advanceEach = advanceEach;
 			targetStruct_.sites=sites;
 			targetStruct_.startingLoops=loops;
 			data_.resize(sites.size());

@@ -94,7 +94,9 @@ namespace Dmrg {
 	template<typename OperatorType>
 	struct TimeStepStructure {
 		std::string filename;
-		typename OperatorType::RealType timeStep;
+		typename OperatorType::RealType tau;
+		size_t timeSteps;
+		size_t advanceEach;
 		std::vector<size_t> sites;
 		std::vector<size_t> startingLoops;
 		std::vector<OperatorType> aOperators;
@@ -121,12 +123,16 @@ namespace Dmrg {
 		std::vector<size_t> sites,loops;
 		std::string s;
 		reader.read(s); // filename
-		RealType timeStep=0;
-		reader.read(timeStep);
+		RealType tau=0;
+		reader.read(tau);
+		size_t timeSteps=0;
+		reader.read(timeSteps);
+		size_t advanceEach=0;
+		reader.read(advanceEach);
 		reader.read(sites);
 		reader.read(loops);
 		
-		tsp.init(s,timeStep,sites,loops);
+		tsp.init(s,tau,timeSteps,advanceEach,sites,loops);
 		
 		for (size_t i=0;i<sites.size();i++) {
 			//std::string s;
@@ -163,7 +169,9 @@ namespace Dmrg {
 		os<<"TimeStepStructure.site="<<t.sites<<"\n";
 		os<<"TimeStepStructure.startingLoop="<<t.startingLoops<<"\n";
 		os<<"TimeStepStructure.filename="<<t.filename<<"\n";
-		os<<"TimeVectorsfilename.timeStep="<<t.timeStep<<"\n";
+		os<<"TimeVectorsfilename.tau="<<t.tau<<"\n";
+		os<<"TimeVectorsfilename.timeSteps="<<t.timeSteps<<"\n";
+		os<<"TimeVectorsfilename.advanceEach="<<t.advanceEach<<"\n";
 		return os;
 	}
 	
@@ -208,8 +216,7 @@ namespace Dmrg {
 			INFINITE=WaveFunctionTransformationType::INFINITE};
 			
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
-			static const size_t ADVANCE_EACH = 2;
-			static const size_t MAX_TIMES = 10;
+			
 			enum {INDEX_NOADVANCE=0,INDEX_ADVANCE=1};
 			
 			TimeStepTargetting(
@@ -222,13 +229,13 @@ namespace Dmrg {
 				: stage_(tstStruct.sites.size(),DISABLED),basisS_(basisS),basisE_(basisE),basisSE_(basisSE),
 					model_(model),tstStruct_(tstStruct),waveFunctionTransformation_(wft),
 					progress_("TimeStepTargetting",0),currentTime_(0),
-							times_(MAX_TIMES),weight_(MAX_TIMES),targetVectors_(MAX_TIMES),
+							times_(tstStruct_.timeSteps),weight_(tstStruct_.timeSteps),targetVectors_(tstStruct_.timeSteps),
 						io_(tstStruct_.filename,parallelRank_)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" TimeStepTargetting "
 							"needs an enabled wft\n");
 				
-				RealType tau =tstStruct_.timeStep;
+				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
 				times_[INDEX_NOADVANCE]=0;
 				weight_[INDEX_NOADVANCE]=1.0/3.0;
@@ -251,10 +258,11 @@ namespace Dmrg {
 				}
 				
 				
-				for (size_t i=0;i<10;i++) {
-					times_[i] = 0.1*i;
-					weight_[i] = 0.1;
+				for (size_t i=0;i<times_.size();i++) {
+					times_[i] = i*tau/times_.size();
+					weight_[i] = 1.0/(times_.size()+2);
 				}
+				weight_[0] = weight_[9] = 2.0/(times_.size()+2);
 				sum = 1.0;
 				
 				gsWeight_=1.0-sum;
@@ -325,7 +333,7 @@ namespace Dmrg {
 				if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
 				else stage_[i]=WFT_NOADVANCE;
 				
-				if (timesWithoutAdvancement >= ADVANCE_EACH) {
+				if (timesWithoutAdvancement >= tstStruct_.advanceEach) {
 					stage_[i] = WFT_ADVANCE;
 					if (i==max) {
 						currentTime_ += times_[INDEX_ADVANCE];
