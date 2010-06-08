@@ -159,7 +159,7 @@ namespace Dmrg {
 		{
 			if (useSu2Symmetry_) symmSu2_.set(basisData);
 			electrons_.resize(basisData.electronsUp.size());
-			for (size_t i=0;i<basisData.electronsUp.size();i++) 
+			for (size_t i=0;i<basisData.electronsUp.size();i++)
 				electrons_[i]=basisData.electronsUp[i]+basisData.electronsDown[i];
 			findQuantumNumbers(quantumNumbers_,basisData);
 			findPermutationAndPartition();

@@ -154,6 +154,7 @@ namespace Dmrg {
 					useReflection_,io_,quantumSector_,waveFunctionTransformation_)
 		{
 			io_.print(parameters_);
+			io_.print(targetStruct_);
 			std::string s = utils::getTimeDate();
 			io_.print(s);
 			if (parameters_.options.find("verbose")!=std::string::npos) verbose_=true;

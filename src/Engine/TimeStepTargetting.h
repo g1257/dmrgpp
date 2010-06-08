@@ -163,15 +163,19 @@ namespace Dmrg {
 	inline std::ostream&
 	operator<<(std::ostream& os,const TimeStepStructure<OperatorType>& t)
 	{
-		for (size_t i=0;i<t.aOperators.size();i++)
+		os<<"#TimeStepStructure.operators"<<t.aOperators.size()<<"\n";
+		for (size_t i=0;i<t.aOperators.size();i++) {
+			os<<"#TimeStepStructure.operator "<<i<<"\n";
 			os<<t.aOperators[i];
+		}
+		os<<"#TimeStepStructure.electrons\n";
 		os<<t.electrons;
-		os<<"TimeStepStructure.site="<<t.sites<<"\n";
-		os<<"TimeStepStructure.startingLoop="<<t.startingLoops<<"\n";
-		os<<"TimeStepStructure.filename="<<t.filename<<"\n";
-		os<<"TimeVectorsfilename.tau="<<t.tau<<"\n";
-		os<<"TimeVectorsfilename.timeSteps="<<t.timeSteps<<"\n";
-		os<<"TimeVectorsfilename.advanceEach="<<t.advanceEach<<"\n";
+		os<<"#TimeStepStructure.site="<<t.sites;
+		os<<"#TimeStepStructure.startingLoop="<<t.startingLoops<<"\n";
+		os<<"#TimeStepStructure.filename="<<t.filename<<"\n";
+		os<<"#TimeVectorsfilename.tau="<<t.tau<<"\n";
+		os<<"#TimeVectorsfilename.timeSteps="<<t.timeSteps<<"\n";
+		os<<"#TimeVectorsfilename.advanceEach="<<t.advanceEach<<"\n";
 		return os;
 	}
 	
@@ -217,7 +221,7 @@ namespace Dmrg {
 			
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
 			
-			enum {INDEX_NOADVANCE=0,INDEX_ADVANCE=1};
+			//enum {INDEX_NOADVANCE=0,INDEX_ADVANCE=1};
 			
 			TimeStepTargetting(
 	  				const BasisWithOperatorsType& basisS,
@@ -237,37 +241,19 @@ namespace Dmrg {
 				
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
-				times_[INDEX_NOADVANCE]=0;
-				weight_[INDEX_NOADVANCE]=1.0/3.0;
-				sum += weight_[INDEX_NOADVANCE];
-				if (times_.size()>INDEX_ADVANCE) {
-					times_[INDEX_ADVANCE]=tau;
-					weight_[INDEX_ADVANCE]=1.0/3.0;
-					sum += weight_[INDEX_ADVANCE];
+				size_t n = times_.size();
+				for (size_t i=0;i<n;i++) {
+					times_[i] = i*tau/(n-1);
+					weight_[i] = 1.0/(n+2);
+					sum += weight_[i];
 				}
-				if (times_.size()>2) {
-					times_[2]=tau/3.;
-					weight_[2]=1.5/12.0;
-					sum += weight_[2];
-				}
-				
-				if (times_.size()>3) {
-					times_[3]=2.0*tau/3.;
-					weight_[3]=1.5/12.0;
-					sum += weight_[3];
-				}
-				
-				
-				for (size_t i=0;i<times_.size();i++) {
-					times_[i] = i*tau/times_.size();
-					weight_[i] = 1.0/(times_.size()+2);
-				}
-				weight_[0] = weight_[9] = 2.0/(times_.size()+2);
-				sum = 1.0;
+				sum -= weight_[0];
+				weight_[0] = weight_[n-1] = 2.0/(n+2);
+				sum += weight_[0];
 				
 				gsWeight_=1.0-sum;
-				sum = gsWeight_;
-				for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
+				sum += gsWeight_;
+				//for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
 				if (fabs(sum-1.0)>1e-5) throw std::runtime_error("Weights don't amount to one\n");
 				printHeader();
 			}
@@ -314,8 +300,8 @@ namespace Dmrg {
 
 			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
 			{
-				for (size_t i=0;i<tstStruct_.sites.size();i++) 
-					evolve(i,Eg,direction,block,loopNumber);	
+				for (size_t i=0;i<tstStruct_.sites.size();i++)
+					evolve(i,Eg,direction,block,loopNumber);
 			}
 
 			void evolve(size_t i,RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
@@ -336,7 +322,7 @@ namespace Dmrg {
 				if (timesWithoutAdvancement >= tstStruct_.advanceEach) {
 					stage_[i] = WFT_ADVANCE;
 					if (i==max) {
-						currentTime_ += times_[INDEX_ADVANCE];
+						currentTime_ += tstStruct_.tau;
 						timesWithoutAdvancement=0;
 					}
 				} else {
@@ -346,16 +332,20 @@ namespace Dmrg {
 				
 				std::ostringstream msg;
 				msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
+				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
 				
 				VectorWithOffsetType phi; // phi = A|psi>
 				computePhi(i,phi,direction);
 				if (norm(phi)==0) throw std::runtime_error("Norm of phi is zero\n");
 				test(i,psi_,direction,"<PSI|A|PSI>",site);
-				test(i,phi,direction,"<PHI|A|PHI>",site);
+				//test(i,phi,direction,"<PHI|A|PHI>",site);
 
 				calcTimeVectors(Eg,phi);
-				test(i,targetVectors_[INDEX_ADVANCE],direction,"<PTAU|A|PTAU>",site);
+				for (size_t j=0;j<targetVectors_.size();j++) {
+					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
+					test(i,targetVectors_[j],direction,s,site);
+				}
 				printVectors();
 			}
 
@@ -400,14 +390,16 @@ namespace Dmrg {
 			
 			void computePhi(size_t i,VectorWithOffsetType& phi,size_t systemOrEnviron)
 			{
+				size_t indexAdvance = times_.size()-1;
+				size_t indexNoAdvance = 0;
 				if (stage_[i]==OPERATOR) {
 					std::ostringstream msg;
 					msg<<"Applying local operator...";
 					progress_.printline(msg,std::cout);
 					applyLocalOp(phi,psi_,tstStruct_.aOperators[i],tstStruct_.electrons,systemOrEnviron);
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
-					size_t advance = INDEX_NOADVANCE;
-					if (stage_[i] == WFT_ADVANCE) advance = INDEX_ADVANCE;
+					size_t advance = indexNoAdvance;
+					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
 					std::ostringstream msg;
 					msg<<"Applying wft...";
 					progress_.printline(msg,std::cout);
@@ -505,7 +497,7 @@ namespace Dmrg {
 				ComplexVectorType tmp(n2);
 				r.resize(n2);
 				calcR(r,T,V,phi,Eg,eigs,t,steps);
-				psimag::BLAS::GEMV('C', n2, n2, zone, &(T(0,0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1 );
+				psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0,0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1 );
 				r.resize(n);
 				psimag::BLAS::GEMV('N', n,  n2, zone, &(V(0,0)), n, &(tmp[0]),1, zzero, &(r[0]),   1 );
 				
@@ -535,7 +527,7 @@ namespace Dmrg {
 					for (size_t kprime=0;kprime<n2;kprime++) {
 						ComplexType tmpV = calcVTimesPhi(kprime,V,phi);
 						//if (k==0) std::cerr<<"HERE:"<<tmpV<<" "<<V(0,kprime)<<"\n";
-						sum += T(k,kprime)*tmpV;
+						sum += conj(T(kprime,k))*tmpV;
 					}
 					//if (t!=0) throw std::runtime_error("time is not zero\n");
 					RealType tmp = (eigs[k]-Eg)*t;
