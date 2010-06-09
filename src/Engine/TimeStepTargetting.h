@@ -341,7 +341,7 @@ namespace Dmrg {
 				test(i,psi_,direction,"<PSI|A|PSI>",site);
 				//test(i,phi,direction,"<PHI|A|PHI>",site);
 
-				calcTimeVectors(Eg,phi);
+				calcTimeVectors(Eg,phi,direction);
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
 					test(i,targetVectors_[j],direction,s,site);
@@ -419,7 +419,10 @@ namespace Dmrg {
 				normalize(phi);
 			}
 			
-			void calcTimeVectors(RealType Eg,const VectorWithOffsetType& phi)
+			void calcTimeVectors(
+						RealType Eg,
+      						const VectorWithOffsetType& phi,
+						size_t systemOrEnviron)
 			{
 				std::vector<ComplexMatrixType> V(phi.sectors());
 				std::vector<ComplexMatrixType> T(phi.sectors());
@@ -433,7 +436,7 @@ namespace Dmrg {
 				for (size_t ii=0;ii<phi.sectors();ii++) 
 					utils::diag(T[ii],eigs[ii],'V');
 				
-				calcTargetVectors(phi,T,V,Eg,eigs,steps);
+				calcTargetVectors(phi,T,V,Eg,eigs,steps,systemOrEnviron);
 			}
 			
 			void calcTargetVectors(
@@ -442,16 +445,28 @@ namespace Dmrg {
 						const std::vector<ComplexMatrixType>& V,
 						RealType Eg,
       						const std::vector<VectorType>& eigs,
-	    					std::vector<size_t> steps)
+	    					std::vector<size_t> steps,
+					      	size_t systemOrEnviron)
 			{
 				targetVectors_[0] = phi;
 				for (size_t i=1;i<times_.size();i++) {
 					//targetVectors_[i] = targetVectors_[0]; <-- ONLY FOR TESTING!!
-					//! Only time differences here (i.e. times_[i] not times_[i]+currentTime_) 
-					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
+					//! Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
+					if (tstStruct_.aOperators.size()!=1) throw "Unimplemented (sorry)\n";
+					if (stage_[0]==OPERATOR) {
+						calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
+					} else {
+						VectorWithOffsetType v = phi;
+					
+						// OK, now that we got the partition number right, let's wft:
+						waveFunctionTransformation_.setInitialVector(v,targetVectors_[i],
+							basisS_,basisE_,basisSE_); // generalize for su(2)
+						v.collapseSectors();
+						targetVectors_[i] = v;
+					}
 					normalize(targetVectors_[i]);
 					RealType norma = std::norm(targetVectors_[i]);
-					std::cerr<<"norma after normalize="<<norma<<"\n";
+					//std::cerr<<"norma after normalize="<<norma<<"\n";
 					if (fabs(norma-1.0)>1e-5) throw std::runtime_error("Norm is not 1\n");
 				}
 			}

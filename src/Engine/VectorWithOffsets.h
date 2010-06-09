@@ -395,8 +395,8 @@ namespace Dmrg {
 		FieldType norma = std::norm(v);
 		FieldType eps = 1e-5;
 		if (fabs(norma-1.0)<eps) {
-			std::cerr<<"VectorWithOffsets::normalize():";
-			std::cerr<<"norm is already one, nothing to do\n";
+			//std::cerr<<"VectorWithOffsets::normalize():";
+			//std::cerr<<"norm is already one, nothing to do\n";
 			return;
 		} 
 		//std::cerr<<"norm="<<norma<<"\n";
