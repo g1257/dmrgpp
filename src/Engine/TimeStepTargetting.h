@@ -452,10 +452,10 @@ namespace Dmrg {
 				for (size_t i=1;i<times_.size();i++) {
 					//targetVectors_[i] = targetVectors_[0]; <-- ONLY FOR TESTING!!
 					//! Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-					if (tstStruct_.aOperators.size()!=1) throw "Unimplemented (sorry)\n";
-					if (stage_[0]==OPERATOR) {
+					//if (tstStruct_.aOperators.size()!=1) throw "Unimplemented (sorry)\n";
+					//if (stage_[0]==OPERATOR) {
 						calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
-					} else {
+					/*} else {
 						VectorWithOffsetType v = phi;
 					
 						// OK, now that we got the partition number right, let's wft:
@@ -463,7 +463,7 @@ namespace Dmrg {
 							basisS_,basisE_,basisSE_); // generalize for su(2)
 						v.collapseSectors();
 						targetVectors_[i] = v;
-					}
+					}*/
 					normalize(targetVectors_[i]);
 					RealType norma = std::norm(targetVectors_[i]);
 					//std::cerr<<"norma after normalize="<<norma<<"\n";
