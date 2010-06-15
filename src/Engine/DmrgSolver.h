@@ -321,7 +321,7 @@ namespace Dmrg {
 			
 			size_t direction=SHRINK_ENVIRON;
 			if (stepLength<0) direction=SHRINK_SYSTEM;
-
+			std::cerr<<"PUSHING DIRECTION="<<getDirection(direction)<<"\n";
 			static int prevDirection = 0;
 			int resetCounter = WaveFunctionTransformationType::RESET_COUNTER;
 			if (prevDirection == SHRINK_SYSTEM && direction == SHRINK_SYSTEM)
@@ -405,7 +405,14 @@ namespace Dmrg {
 			}
 			return false;
 		}
-
+		
+		std::string getDirection(size_t dir) const
+		{
+			if (dir==INFINITE) return  "INFINITE";
+			if (dir==SHRINK_SYSTEM) return "SHRINK_SYSTEM";
+			return "SHRINK_ENVIRON";
+		}
+		
 		//! add block X to basis pS and get basis pSprime
 		MyBasisWithOperators grow(MyBasisWithOperators &pSprime,const MyBasisWithOperators &pS,BlockType const &X,int dir)
 		{

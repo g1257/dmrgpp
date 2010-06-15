@@ -296,19 +296,26 @@ namespace Dmrg {
 				case INFINITE:
 					if (option==0) {
 						wsStack_.push(transform);
+						dmrgWave_.ws=transform;
 					} else {
 						weStack_.push(transform);
+						dmrgWave_.we=transform;
+						std::cerr<<"CHANGED dmrgWave_.we to transform\n";
+						std::cerr<<"PUSHING "<<transform.n_row()<<"x"<<transform.n_col()<<"\n";
 					}
 					break;
 				case SHRINK_SYSTEM:
 					if (option==0) throw std::logic_error("SHRINK_SYSTEM but option==0\n");
 					dmrgWave_.we=transform;
+					dmrgWave_.ws=transform;
 					//vectorConvert(dmrgWave_.psi,psi);
 					weStack_.push(transform);
+					std::cerr<<"PUSHING (POPPING) We "<<weStack_.size()<<"\n";
 					break;
 				case SHRINK_ENVIRON:
 					if (option==1) throw std::logic_error("SHRINK_ENVIRON but option==1\n");
 					dmrgWave_.ws=transform;
+					dmrgWave_.we=transform;
 					//vectorConvert(dmrgWave_.psi,psi);
 					wsStack_.push(transform);
 					break;
@@ -345,15 +352,28 @@ namespace Dmrg {
 		void beforeWft(const BasisWithOperatorsType& pSprime,
 				  const BasisWithOperatorsType& pEprime,const BasisType& pSE)
 		{
-			if (wsStack_.size()>=1 && stage_==SHRINK_SYSTEM) {
-				dmrgWave_.ws=wsStack_.top();
-				wsStack_.pop();
-			}
-			if (weStack_.size()>=1 && stage_==SHRINK_ENVIRON) {
-				dmrgWave_.we=weStack_.top();
-				weStack_.pop();
+			if (stage_==SHRINK_SYSTEM) {
+				if (wsStack_.size()>=1) {
+					dmrgWave_.ws=wsStack_.top();
+					wsStack_.pop();
+				} else {
+					std::cerr<<"PUSHING STACK ERROR S\n";
+					throw std::runtime_error("System Stack is empty\n");
+				}
 			}
 			
+			if (stage_==SHRINK_ENVIRON) {
+				if (weStack_.size()>=1) { 
+					dmrgWave_.we=weStack_.top();
+					weStack_.pop();
+					std::cerr<<"CHANGED We taken from stack\n";
+				} else {
+					std::cerr<<"PUSHING STACK ERROR E\n";
+					throw std::runtime_error("Environ Stack is empty\n");
+				}
+			}
+			std::cerr<<"PUSHING (POPPING) STACKSIZE="<<weStack_.size()<<" ";
+			std::cerr<<pSprime.block().size()<<"+"<<pEprime.block().size()<<"\n";
 			if (counter_==0 && stage_==SHRINK_ENVIRON) {
 // 				dmrgWave_.pEprime=pEprime;
 // 				dmrgWave_.pSE=pSE;
@@ -365,14 +385,14 @@ namespace Dmrg {
 			}
 			
 			if (counter_==0 && stage_==SHRINK_SYSTEM) {
-				matrixIdentity(dmrgWave_.we,sizeOfOneSiteHilbertSpace_);
-				matrixIdentity(dmrgWave_.ws,dmrgWave_.ws.n_row());
+				//matrixIdentity(dmrgWave_.we,sizeOfOneSiteHilbertSpace_);
+				//matrixIdentity(dmrgWave_.ws,dmrgWave_.ws.n_row());
 // 				dmrgWave_.pEprime=pEprime;
 // 				dmrgWave_.pSE=pSE;
 // 				dmrgWave_.pSprime=pSprime;
 // 				dmrgWave_.m=m;
 // 				counter_++;
-				throw std::runtime_error("WFT::beforeWft(): Can't apply WFT\n");
+				//throw std::runtime_error("WFT::beforeWft(): Can't apply WFT\n");
 				//return;
 			}
 		}
@@ -436,7 +456,7 @@ namespace Dmrg {
 			size_t nk = sizeOfOneSiteHilbertSpace_;
 			size_t nip = pSE.permutationInverse().size()/pEprime.permutationInverse().size();
 			size_t njp = pEprime.permutationInverse().size()/nk;
-			
+			printDmrgWave();
 			if (dmrgWave_.pSprime.permutationInverse().size()!=dmrgWave_.ws.n_row()) {
 				printDmrgWave();
 				throw std::runtime_error("transformVector1():"
@@ -541,7 +561,7 @@ namespace Dmrg {
 			size_t nk = sizeOfOneSiteHilbertSpace_;
 			size_t nip = pSprime.permutationInverse().size()/nk;
 			size_t nalpha = pSprime.permutationInverse().size();
-			
+			printDmrgWave();
 			if (dmrgWave_.pEprime.permutationInverse().size()!=dmrgWave_.we.n_row()) {
 				printDmrgWave();
 				throw std::runtime_error("transformVector2():"
