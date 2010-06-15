@@ -96,6 +96,7 @@ my $compareTool = "kompare"; # Not needed, just in case you have it
 my $executable;
 my $testNumber;
 my $all;
+my @GlobalHashTable;
 my ($generateFlag,$buildFlag,$runFlag,$cmpFlag) = (1,1,1,1);
 GetOptions ("exe=s" => \$executable,"n=i" => \$testNumber,"all"  => \$all,
 	"g=i" => \$generateFlag,"b=i" => \$buildFlag, "r=i" => \$runFlag,"c=i" => \$cmpFlag);
@@ -140,7 +141,10 @@ sub testSuite
 
 	runTest($tn,$executable) if ($runFlag);
 
-	validateTest($tn) if ($cmpFlag);
+	if ($cmpFlag) {
+		validateEnergy($tn);
+		validateProfile($tn);
+	}
 	return $executable;
 }
 
@@ -164,16 +168,31 @@ sub runTest
 	print "The run has been completed.\n";
 }
 
-sub validateTest
+sub validateEnergy
 {
 	my ($testNumber) = @_;
-	system("grep Energy oracles/dataValidated$testNumber.txt  > validated$testNumber.txt");
 	system("grep Energy data$testNumber.txt > resultsOfTest$testNumber.txt");
-	system("diff validated$testNumber.txt resultsOfTest$testNumber.txt > diffOfTest$testNumber.txt ");
+	system("diff oracles/validatedEnergy$testNumber.txt resultsOfTest$testNumber.txt > diffOfTest$testNumber.txt ");
 	my $rCode = system("$compareTool validated$testNumber.txt resultsOfTest$testNumber.txt >& /dev/null");
 	if ($rCode != 0) {	
 		print "See file diffOfTest$testNumber.txt\n";
 	}
+}
+
+sub validateProfile
+{
+	my ($testNumber) = @_;
+	system("gprof ../src/dmrg > profileOfTest$testNumber.txt");
+	system("diff profileOfTest$testNumber.txt oracles/validateProfile$testNumber.txt > diffOfProfile$testNumber.txt");
+}
+
+
+sub validateChargeCorrelations
+{
+	my ($testNumber) = @_;
+	system("../src/observe input$testNumber.inp data$testNumber.txt  > observeData$testNumber.txt");
+	system("diff oracles/validateObserve$testNumber.txt observeData$testNumber.txt");
+	
 }
 
 sub askWhatTest
@@ -190,7 +209,7 @@ sub askWhatTest
 	return $_;
 }
 
-sub createExecutable
+sub createExecutableOld
 {
 	my ($testNumber) = @_;
 	my $tn = $testNumber;
@@ -210,6 +229,58 @@ sub createExecutable
 	chdir ("../TestSuite");
 	return "nice -10 ../src/dmrg";
 }
+
+sub createExecutable
+{
+	my ($testNumber) = @_;
+	my ($exeIndex,$h);
+	($exeIndex,$h) = getExecHashAndIndex($testNumber);
+	
+	if ($exeIndex<0) {
+		print "Trying to create executable for test $testNumber...\n";
+		chdir("../src");
+		my $specFile = getSpecFile($testNumber);
+		my $rCode = 0;
+	
+		if ($generateFlag) {
+			$rCode = system("perl configure.pl < $specFile >& /dev/null"); 
+			die "Problem creating executable (configure.pl failed)\n" if ($rCode != 0);
+		}
+		if ($buildFlag) {
+			$rCode = system("make");
+			die "Problem creating executable (make failed)\n" if ($rCode != 0);
+			system("cp dmrg dmrg-$h");
+		}
+		chdir ("../TestSuite");
+	}
+	
+	return "nice -10 ../src/dmrg-$h";
+}
+
+
+sub getExecHashAndIndex
+{
+		my ($tn)=@_;
+		my $specFile = getSpecFile($tn);
+		open(PIPE,"md5sum $specFile |") or die "Cannot open pipe: $!\n";
+		$_ = <PIPE>;
+		my @temp = split;
+		close(PIPE);
+		my $i = getExeIndex($temp[0]);
+		return ($i,$temp[0]);
+}
+
+sub getExeIndex
+{
+	my ($h) = @_;
+	my $n = $#GlobalHashTable+1;
+	for (my $i=0;$i<$n;$i++) {
+		return $i if ($GlobalHashTable[$i] eq $h);
+	}
+	$GlobalHashTable[$n] = $h;
+	return -1;
+}
+
 
 sub getSpecFile
 {

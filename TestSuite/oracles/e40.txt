@@ -1,0 +1,15 @@
+#Energy=-1.8915644
+#Energy=-3.0675593
+#Energy=-4.2411609
+#Energy=-4.22362
+#Energy=-4.2420236
+#Energy=-4.27855
+#Energy=-4.27855
+#Energy=-4.27994
+#Energy=-4.2914781
+#Energy=-4.2927993
+#Energy=-4.3070864
+#Energy=-4.3400469
+#Energy=-4.3400469
+#Energy=-4.3426885
+#Energy=-4.3488196
