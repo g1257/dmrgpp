@@ -118,7 +118,6 @@ namespace Dmrg {
 			{
 				bool found = false;
 				size_ = someBasis.size();
-				std::cerr<<"SETTING ENTER "<<found<<"\n";
 				for (size_t i=0;i<v.size();i++) {
 					if (v[i].size()>0) {
 						if (found) throw std::runtime_error("VectorWithOffset::"
@@ -127,10 +126,8 @@ namespace Dmrg {
 						data_ = v[i];
 						offset_ = someBasis.partition(i);
 						found = true;
-						std::cerr<<"SETTING TO "<<data_.size()<<"\n";
 					}
 				}
-				std::cerr<<"SETTING EXIT "<<found<<" "<<size_<<" "<<data_.size()<<"\n";
 				if (!found) throw std::runtime_error("Set failed\n");
 			}
 			
@@ -156,7 +153,6 @@ namespace Dmrg {
 				size_ = v.size();
 				data_.resize(total);
 				for (size_t i=0;i<total;i++) data_[i] = v[i+offset_];
-				std::cerr<<"SETTING FROM FULL\n";
 				return p;
 			}
 			
