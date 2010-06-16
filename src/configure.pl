@@ -446,7 +446,7 @@ template<
 	typename MySparseMatrix
 >
 void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverType& dmrgSolverParams,
-		ConcurrencyType& concurrency, Dmrg::SimpleReader& reader)
+		ConcurrencyType& concurrency, Dmrg::SimpleReader& reader,bool hasTimeEvolution)
 {
 	typedef ReflectionSymmetryEmpty<MatrixElementType,MySparseMatrix> ReflectionSymmetryType;
 	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
@@ -475,7 +475,8 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 	TargettingStructureType targetStruct;
 	typedef TargetStructureParams<TargettingStructureType,ModelType> TargetStructureParamsType;
 	TargetStructureParamsType tsp(targetStruct,model);
-	reader.load(tsp);
+
+	if (hasTimeEvolution) reader.load(tsp);
 
 	//! Setup the dmrg solver:
 	SolverType dmrgSolver(dmrgSolverParams,model,concurrency,targetStruct);
@@ -558,24 +559,24 @@ print FOUT<<EOF;
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 				$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,TimeStepTargetting,
 				MySparseMatrixComplex>
-			(mp,geometry,dmrgSolverParams,concurrency,reader);
+			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
 		} else {
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 				$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
 				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,reader);
+			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
 		}
 	} else {
 		 if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 				$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffsets,GroundStateTargetting,
 				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,reader);
+			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
 		} else {
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 				$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
 				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,reader);
+			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
 		}
 	}
 }

@@ -143,6 +143,9 @@ namespace Dmrg {
 				targetStruct_(targetStruct),
 				verbose_(false),
 				useReflection_(false),
+				pSprime_("pSprime"),
+				pEprime_("pEprime"),
+				pSE_("pSE"),
 				io_(parameters_.filename,concurrency.rank()),
 				ioIn_(parameters_.filename),
 				progress_("DmrgSolver",concurrency.rank()),
@@ -193,11 +196,13 @@ namespace Dmrg {
 			model_.setNaturalBasis(creationMatrix,hmatrix,q,E);
 			MyBasisWithOperators pE("pE",E,hmatrix,q);
 			pE.setOperators(creationMatrix);
-
+			
+			TargettingType psi(pSprime_,pEprime_,pSE_,model_,targetStruct_,waveFunctionTransformation_);
+			
 			if (parameters_.options.find("checkpoint")!=std::string::npos)
 				checkpointLoad(pS,pE,parameters_.checkpoint.index);
 			else
-				infiniteDmrgLoop(S,X,Y,E,pS,pE);
+				infiniteDmrgLoop(S,X,Y,E,pS,pE,psi);
 
 			stepCurrent_=X.size();
 
@@ -205,7 +210,7 @@ namespace Dmrg {
 
 			useReflection_=false; // disable reflection symmetry for finite loop if it was enabled:
 
-			finiteDmrgLoops(S,E,pS,pE,X.size());
+			finiteDmrgLoops(S,E,pS,pE,X.size(),psi);
 		}
 
 	private:
@@ -214,6 +219,8 @@ namespace Dmrg {
 		ConcurrencyType& concurrency_;
 		const TargettingStructureType& targetStruct_;
 		bool verbose_,useReflection_;
+		MyBasisWithOperators pSprime_,pEprime_;
+		MyBasis pSE_;
 		typename IoType::Out io_;
 		typename IoType::In ioIn_;
 		ProgressIndicator progress_;
@@ -225,13 +232,10 @@ namespace Dmrg {
 		DiagonalizationType diagonalization_;
 		
 		void infiniteDmrgLoop(BlockType const &S,std::vector<BlockType> const &X,std::vector<BlockType> const &Y,BlockType const &E,
-				      MyBasisWithOperators &pS,MyBasisWithOperators &pE)
+				      MyBasisWithOperators &pS,MyBasisWithOperators &pE,TargettingType& psi)
 		{
 			int ns,ne;
-			MyBasisWithOperators pSprime("pSprime"),pEprime("pEprime");
-			MyBasis pSE("pSE");
-			TargettingType psi(pSprime,pEprime,pSE,model_,targetStruct_,waveFunctionTransformation_);
-			
+
 			// empty the stacks
 			systemStack_.empty();
 			envStack_.empty();
@@ -244,29 +248,29 @@ namespace Dmrg {
 				msg<<"infinite-dmrg, step "<<step<<" out of "<<Y.size()<<" size of block added="<<Y[step].size();
 				progress_.printline(msg,std::cout);
 				
-				grow(pSprime,pS,X[step],GROW_RIGHT); // grow system
-				grow(pEprime,pE,Y[step],GROW_LEFT); // grow environment
+				grow(pSprime_,pS,X[step],GROW_RIGHT); // grow system
+				grow(pEprime_,pE,Y[step],GROW_LEFT); // grow environment
 					
 				
 				progress_.print("Growth done.\n",std::cout);
-				msg<<"inf: SetToProduct, size="<<pSprime.size()<<"x"<<pEprime.size();
-				msg<<" and block="<<pSprime.block().size()<<"+"<<pEprime.block().size();
+				msg<<"inf: SetToProduct, size="<<pSprime_.size()<<"x"<<pEprime_.size();
+				msg<<" and block="<<pSprime_.block().size()<<"+"<<pEprime_.block().size();
 				progress_.printline(msg,std::cout);
 				
-				updateQuantumSector(pSprime.block().size()+pEprime.block().size());
+				updateQuantumSector(pSprime_.block().size()+pEprime_.block().size());
 				
-				pSE.setToProduct(pSprime,pEprime,quantumSector_);
+				pSE_.setToProduct(pSprime_,pEprime_,quantumSector_);
 				
 				diagonalization_(psi,INFINITE,X[step]);
 
 				progress_.print("Truncating basis now...\n",std::cout);
 				if (verbose_ && concurrency_.root()) std::cerr<<"Truncating basis now...\n";
 				
-				ns=pSprime.size();
-				ne=pEprime.size();
+				ns=pSprime_.size();
+				ne=pEprime_.size();
 				
-				changeAndTruncateBasis(pS,psi,pSprime,pEprime,pSE,parameters_.keptStatesInfinite,0);
-				changeAndTruncateBasis(pE,psi,pEprime,pSprime,pSE,parameters_.keptStatesInfinite,1);
+				changeAndTruncateBasis(pS,psi,pSprime_,pEprime_,pSE_,parameters_.keptStatesInfinite,0);
+				changeAndTruncateBasis(pE,psi,pEprime_,pSprime_,pSE_,parameters_.keptStatesInfinite,1);
 				
 				systemStack_.push(pS); 
 				envStack_.push(pE);
@@ -279,11 +283,9 @@ namespace Dmrg {
      					BlockType const &E,
 					MyBasisWithOperators &pS,
      					MyBasisWithOperators &pE,
-	  				int l)
+	  				int l,
+       					TargettingType& psi)
 		{
-			MyBasisWithOperators pSprime("pSprime"),pEprime("pEprime");
-			MyBasis pSE("pSE");
-			TargettingType target(pSprime,pEprime,pSE,model_,targetStruct_,waveFunctionTransformation_);
 			
 			for (size_t i=0;i<parameters_.finiteLoop.size();i++)  {
 				std::ostringstream msg;
@@ -299,7 +301,7 @@ namespace Dmrg {
 						if (parameters_.finiteLoop[i].stepLength<0) stepCurrent_--;
 					}
 				}
-				finiteStep(S,E,pS,pE,i,target,pSprime,pEprime,pSE);
+				finiteStep(S,E,pS,pE,i,psi);
 			}
 		}
 		
@@ -309,10 +311,7 @@ namespace Dmrg {
 				MyBasisWithOperators &pS,
 				MyBasisWithOperators &pE,
 				size_t loopIndex,
-    				TargettingType& target,
-				MyBasisWithOperators& pSprime,
-				MyBasisWithOperators& pEprime,
-				MyBasis& pSE)
+    				TargettingType& target)
 		{
 			int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 			size_t keptStates = parameters_.finiteLoop[loopIndex].keptStates;
@@ -337,37 +336,37 @@ namespace Dmrg {
 				std::ostringstream msg;
 				if (size_t(stepCurrent_)>=sitesIndices_.size()) throw std::runtime_error("stepCurrent_ too large!\n");
 				if (direction==SHRINK_ENVIRON) {
-					grow(pSprime,pS,sitesIndices_[stepCurrent_],GROW_RIGHT);             //grow system
-					shrink(pEprime,envStack_); //shrink env
+					grow(pSprime_,pS,sitesIndices_[stepCurrent_],GROW_RIGHT);             //grow system
+					shrink(pEprime_,envStack_); //shrink env
 				} else {
-					grow(pEprime,pE,sitesIndices_[stepCurrent_],GROW_LEFT);   // grow env.
-					shrink(pSprime,systemStack_); // shrink system
+					grow(pEprime_,pE,sitesIndices_[stepCurrent_],GROW_LEFT);   // grow env.
+					shrink(pSprime_,systemStack_); // shrink system
 				}
 				
-				msg<<"finite (dir="<<direction<<"): SetToProduct, size="<<pSprime.size()<<"x"<<pEprime.size();
-				msg<<" and block="<<pSprime.block().size()<<"+"<<pEprime.block().size();
+				msg<<"finite (dir="<<direction<<"): SetToProduct, size="<<pSprime_.size()<<"x"<<pEprime_.size();
+				msg<<" and block="<<pSprime_.block().size()<<"+"<<pEprime_.block().size();
 				msg<<" stackS="<<systemStack_.size()<<" stackE="<<envStack_.size()<< " step="<<stepCurrent_;
 				msg<<" loopIndex="<<loopIndex<<" length="<<stepLength<<" StepFinal="<<stepFinal;
 				progress_.printline(msg,std::cout);
 				
-				updateQuantumSector(pSprime.block().size()+pEprime.block().size());
+				updateQuantumSector(pSprime_.block().size()+pEprime_.block().size());
 				
-				pSE.setToProduct(pSprime,pEprime,quantumSector_);
+				pSE_.setToProduct(pSprime_,pEprime_,quantumSector_);
 				//if (target.gs().size()==0) throw std:runtime_error("DmrgSolver:: target.size==0 before\n");
 				gsEnergy =diagonalization_(target,direction,sitesIndices_[stepCurrent_],loopIndex);
 				//if (target.gs().size()==0) throw std:runtime_error("DmrgSolver:: target.size==0 after\n");
 				progress_.print("Truncating (env) basis now...\n",std::cout);
 				
 				if (saveOption==SAVE_TO_DISK) {
-					if (direction==SHRINK_ENVIRON) saveToDiskCompatibility(pS,pSprime,pSE,target); // obsolete
-					else saveToDiskCompatibility(pE,pEprime,pSE,target); // obsolete
+					if (direction==SHRINK_ENVIRON) saveToDiskCompatibility(pS,pSprime_,pSE_,target); // obsolete
+					else saveToDiskCompatibility(pE,pEprime_,pSE_,target); // obsolete
 				}
 				
 				if (direction==SHRINK_ENVIRON) {
-					changeAndTruncateBasis(pS,target,pSprime,pEprime,pSE,keptStates,0,saveOption);
+					changeAndTruncateBasis(pS,target,pSprime_,pEprime_,pSE_,keptStates,0,saveOption);
 					systemStack_.push(pS);
 				} else {
-					changeAndTruncateBasis(pE,target,pEprime,pSprime,pSE,keptStates,1,saveOption);
+					changeAndTruncateBasis(pE,target,pEprime_,pSprime_,pSE_,keptStates,1,saveOption);
 					envStack_.push(pE);
 				}
 				if (finalStep(stepLength,stepFinal)) break;
@@ -375,10 +374,10 @@ namespace Dmrg {
 				
 			}
 			if (direction==SHRINK_ENVIRON) {
-				pE = pEprime;
+				pE = pEprime_;
 				
 			} else {
-				pS = pSprime;
+				pS = pSprime_;
 			}
 			if (saveOption==SAVE_TO_DISK) {
 				std::string s="#WAVEFUNCTION_ENERGY="+utils::ttos(gsEnergy);

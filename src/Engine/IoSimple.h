@@ -94,7 +94,7 @@ namespace Dmrg {
 	public:
 		class Out {
 			public:
-				Out() {}
+				Out()  : rank_(0) {}
 				Out(const std::string& fn,int rank) : rank_(rank),filename_(fn)
 				{
 					if (rank_!=0) return;
@@ -169,6 +169,7 @@ namespace Dmrg {
 				void print(const T&  something)
 				{
 					if (rank_!=0) return;
+					if (!fout_ || !fout_.good()) throw std::runtime_error("Out: file not open!\n");
 					fout_<<something;
 				}
 

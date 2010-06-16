@@ -83,6 +83,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Utils.h"
 #include "ProgressIndicator.h"
+#include "VectorWithOffset.h" // includes the std::norm functions
+#include "VectorWithOffsets.h" // includes the std::norm functions
 
 namespace Dmrg {
 	
@@ -183,6 +185,7 @@ namespace Dmrg {
 			
 			typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 			VectorWithOffsetType initialVector(weights,pSE);
+			
 			waveFunctionTransformation_.triggerOn(pSprime,pEprime,pSE);
 			target.initialGuess(initialVector);
 			
@@ -239,6 +242,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				counter++;
 			}
+			
 			target.setGs(vecSaved,pSE);
 
 			if (concurrency_.root()) {

@@ -93,7 +93,7 @@ namespace Dmrg {
 			typedef std::pair<size_t,size_t> PairType;
 			typedef std::vector<FieldType> VectorType;
 			
-			VectorWithOffset() { }
+			VectorWithOffset()  : size_(0),offset_(0) { }
 			
 			template<typename SomeBasisType>
 			VectorWithOffset(const std::vector<size_t>& weights,const SomeBasisType& someBasis) 
@@ -118,6 +118,7 @@ namespace Dmrg {
 			{
 				bool found = false;
 				size_ = someBasis.size();
+				std::cerr<<"SETTING ENTER "<<found<<"\n";
 				for (size_t i=0;i<v.size();i++) {
 					if (v[i].size()>0) {
 						if (found) throw std::runtime_error("VectorWithOffset::"
@@ -126,8 +127,11 @@ namespace Dmrg {
 						data_ = v[i];
 						offset_ = someBasis.partition(i);
 						found = true;
+						std::cerr<<"SETTING TO "<<data_.size()<<"\n";
 					}
 				}
+				std::cerr<<"SETTING EXIT "<<found<<" "<<size_<<" "<<data_.size()<<"\n";
+				if (!found) throw std::runtime_error("Set failed\n");
 			}
 			
 			size_t sectors() const { return 1; }
@@ -152,6 +156,7 @@ namespace Dmrg {
 				size_ = v.size();
 				data_.resize(total);
 				for (size_t i=0;i<total;i++) data_[i] = v[i+offset_];
+				std::cerr<<"SETTING FROM FULL\n";
 				return p;
 			}
 			

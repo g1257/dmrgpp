@@ -93,6 +93,13 @@ namespace Dmrg {
 	
 	template<typename OperatorType>
 	struct TimeStepStructure {
+		TimeStepStructure() :
+			tau(0),
+			timeSteps(0),
+			advanceEach(0)
+		{
+		}
+		
 		std::string filename;
 		typename OperatorType::RealType tau;
 		size_t timeSteps;

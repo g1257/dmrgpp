@@ -380,8 +380,16 @@ namespace Dmrg {
 // 				dmrgWave_.pSprime=pSprime;
 // 				dmrgWave_.m=m;
 // 				counter_++;
-				throw std::runtime_error("WFT::beforeWft(): Can't apply WFT\n");
+				//throw std::runtime_error("WFT::beforeWft(): Can't apply WFT\n");
 				//return;
+				if (weStack_.size()>=1) { 
+					dmrgWave_.we=weStack_.top();
+					//weStack_.pop();
+					std::cerr<<"CHANGED-COUNTER0 We taken from stack\n";
+				} else {
+					std::cerr<<"PUSHING-COUNTER0 STACK ERROR E\n";
+					throw std::runtime_error("Environ Stack is empty\n");
+				}
 			}
 			
 			if (counter_==0 && stage_==SHRINK_SYSTEM) {
@@ -394,6 +402,7 @@ namespace Dmrg {
 // 				counter_++;
 				//throw std::runtime_error("WFT::beforeWft(): Can't apply WFT\n");
 				//return;
+				
 			}
 		}
 		
@@ -433,11 +442,15 @@ namespace Dmrg {
 		void transformVector(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
 		{
-			if (stage_==SHRINK_SYSTEM)
+			if (stage_==SHRINK_SYSTEM) {
 				transformVector1(psiDest,psiSrc,pSprime,pEprime,pSE);
-			if (stage_==SHRINK_ENVIRON)
-				transformVector2(psiDest,psiSrc,pSprime,pEprime,pSE);
+			}
+			if (stage_==SHRINK_ENVIRON) {
+ 				if (counter_==0) transformVector2test(psiDest,psiSrc,pSprime,pEprime,pSE);
+				else transformVector2(psiDest,psiSrc,pSprime,pEprime,pSE);
+			}
 		}
+		
 		
 		template<typename SomeVectorType>
 		void transformVector1(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
@@ -884,6 +897,106 @@ namespace Dmrg {
 			std::cerr<<"wsStack="<<wsStack_.size()<<"\n";
 			std::cerr<<"weStack="<<weStack_.size()<<"\n";
 			std::cerr<<"counter="<<counter_<<"\n"; 
+		}
+		
+		template<typename SomeVectorType>
+		void transformVector2test(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
+				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
+		{
+			for (size_t ii=0;ii<psiDest.sectors();ii++) {
+				size_t i0 = psiDest.sector(ii);
+				transformVector2test(psiDest,psiSrc,pSprime,pEprime,pSE,i0);
+			}
+		}
+		
+
+		template<typename SomeVectorType>
+		void transformVector2test(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
+				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t i0) const
+		{
+			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nip = pSprime.permutationInverse().size()/nk;
+			size_t nalpha = pSprime.permutationInverse().size();
+			printDmrgWave();
+			if (dmrgWave_.pEprime.permutationInverse().size()!=dmrgWave_.we.n_row()) {
+				printDmrgWave();
+				throw std::runtime_error("transformVector2():"
+						"PpermutationInverse.size()!=dmrgWave_.we.n_row()\n");
+			}
+			if (nip!=dmrgWave_.ws.n_col()) {
+				printDmrgWave();
+				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
+						"nip!=dmrgWave_.ws.n_row()\n");
+			}
+			if (dmrgWave_.pSE.permutationInverse().size()!=psiSrc.size()) {
+				printDmrgWave();
+				std::cerr<<"SEpermutationInverse.size="<<dmrgWave_.pSE.permutationInverse().size();
+				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
+				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
+						" dmrgWave_.SEpermutationInverse.size()!=dmrgWave_.psi.size()\n");
+			}
+
+			size_t start = psiDest.offset(i0);
+			size_t final = psiDest.effectiveSize(i0)+start;
+			
+			SparseMatrixType we(dmrgWave_.we);
+			SparseMatrixType ws(dmrgWave_.ws);
+			SparseMatrixType wsT;
+			transposeConjugate(wsT,ws);
+			
+			for (size_t x=start;x<final;x++) {
+				size_t isn,jen;
+				utils::getCoordinates(isn,jen,(size_t)pSE.permutation(x),nalpha);
+				size_t is,jpl;
+				utils::getCoordinates(is,jpl,(size_t)pSprime.permutation(isn),nip);
+				//size_t jk,je;
+				//utils::getCoordinates(jk,je,(size_t)pEprime.permutation(jen),npk);
+				psiDest[x]=createAux2btest(psiSrc,is,jpl,jen,wsT,we);
+			}
+			
+		}
+		
+		
+		// FIXME: INCOMING jen needs to be 4 times as big!!
+		template<typename SomeVectorType>
+		SparseElementType createAux2btest(const SomeVectorType& psiSrc,size_t is,size_t jpl,size_t jen,
+					const SparseMatrixType& wsT,const SparseMatrixType& we) const
+		{
+			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nalpha=dmrgWave_.pSprime.permutationInverse().size();
+			
+			//size_t beta = dmrgWave_.pEprime.permutationInverse(kp+jp*nk);
+			/*size_t eqn =  dmrgWave_.pEprime.qn(beta,BasisType::BEFORE_TRANSFORM);
+			int totalb = dmrgWave_.we.n_col();
+			size_t offsetb = 0;
+			int mb =  dmrgWave_.pEprime.partitionFromQn(eqn);
+			if (mb>=0) {
+				totalb = dmrgWave_.pEprime.partition(mb+1)-dmrgWave_.pEprime.partition(mb);
+				offsetb = dmrgWave_.pEprime.partition(mb);
+			}
+			
+			eqn =  dmrgWave_.pSprime.qn(ip);*/
+			//int ma =  dmrgWave_.pSprime.partitionFromQn(eqn,DmrgBasisType::BEFORE_TRANSFORM);
+			//int totala = dmrgWave_.pSprime.partition(ma+1,DmrgBasisType::BEFORE_TRANSFORM)-
+			//		dmrgWave_.pSprime.partition(ma,DmrgBasisType::BEFORE_TRANSFORM);
+			//size_t offseta = dmrgWave_.pSprime.partition(ma,DmrgBasisType::BEFORE_TRANSFORM);
+			
+			SparseElementType sum=0;
+			
+			for (int k=wsT.getRowPtr(is);k<wsT.getRowPtr(is+1);k++) {
+				//SparseElementType sum2=0;
+				size_t ip = wsT.getCol(k);
+				SparseElementType sum2 = 0;
+				//for (int k2=we.getRowPtr(jen);k2<we.getRowPtr(jen+1);k2++) {
+					size_t jpr = jen; //we.getCol(k2);
+					size_t jp = dmrgWave_.pEprime.permutationInverse(jpl + jpr*nk);
+					size_t y = dmrgWave_.pSE.permutationInverse(ip + jp*nalpha);
+					sum2 += wsT.getValue(k)*psiSrc[y]; //*we.getValue(k2);
+					
+				//}
+				sum += sum2;
+			}
+			return sum;
 		}
 	}; // class WaveFunctionTransformation
 } // namespace Dmrg
