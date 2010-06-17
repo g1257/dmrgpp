@@ -12,7 +12,6 @@ if(!defined($inputFile) && !defined($inputDir)) {
 } elsif(defined($inputFile) && defined($inputDir)) {
 	print "ERROR: Only one type of input can be specified!\n";
 } else {
-	
 	if (defined($inputDir)) {
 		hashDirectory($inputDir,$outputFile,$extension) if(validateDirectory($inputDir));
 	} else {

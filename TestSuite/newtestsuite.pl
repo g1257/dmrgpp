@@ -92,30 +92,34 @@ Note 2: This test suite does not support pthreaded tests yet.
 
 use strict;
 use Getopt::Long;
-my ($executable,$testNumber,$all);
+my ($executable, $inputFile,$dataFile,$testNumber,$all);  #missing input and data implementation
+my $hashTable = "hashTable.txt";
 my ($generateFlag,$buildFlag,$runFlag,$cmpFlag) = (1,1,1,1);	#Enable ?,?, runSingleTest, ?
 
-GetOptions("exe=s" => \$executable, "n=i" => \$testNumber, "all" => \$all, "g=i" => \$generateFlag, "b=i" => \$buildFlag, "r=i" => \$runFlag, "c=i" => \$cmpFlag);	#Provides command options when running the script
+GetOptions("exe=s" => \$executable, "inp=s" => \$inputFile, "dat=s" => \$dataFile, "n=i" => \$testNumber, "all" => \$all, "g=i" => \$generateFlag, "b=i" => \$buildFlag, "r=i" => \$runFlag, "c=i" => \$cmpFlag);	#Provides command options when running the script
+
+#my @GlobalHashTable = loadHashTable($hashTable);
 
 & selectTests();	#Starts running the script
 
 sub selectTests
 {
 	if(!defined($all) && !defined($testNumber)) {		#If no test is explicitly defined
-		$all = 0;
 		$testNumber = askWhatTest();	#Make the user select a test from the available ones
-	} elsif($all) {
+	}
+	
+	if($all) {
 		runAllTests(0);		#Run all tests
 	} elsif($testNumber < 0) {
 		runAllTests(-$testNumber);	#Run all tests starting at $testNumber
 	} else {
-		testSuite($testNumber,$executable);	#Run specified test
+		testSuite($testNumber);	#Run specified test
 	}
 }
 
 sub askWhatTest
 {
-	my $available = getAvailableTests(1);	#Get a numerical list of the available tests
+	my $available = getAvailableTests();	#Get a numerical list of the available tests
 	my @temp;
 	my @testArray;
 	
@@ -126,7 +130,6 @@ sub askWhatTest
 		print "Default: 0 (press ENTER) ";
 		chomp(my $tn = <STDIN>);	#Input test number
 		$tn = 0 if($tn eq "");
-
 		@testArray = split(/ /,$available);	#Split string into test numbers
 		@temp = grep(/$tn/,@testArray);		#Search if the wanted test is available
 		
@@ -137,33 +140,170 @@ sub askWhatTest
 			undef @temp;
 			return $tn;		#If valid selection then continue to run the test
 		}
-	}	
+	}
 }
 
 sub getAvailableTests
 {
 	my $available = "";
-	my ($needsPrinting) = @_;
 	
-	open(THIS,$0) or die "ERROR: Cannot open file $0: $!\n";	#Open this file: testsuite.pl
+	open(THIS,$0) || die "ERROR: Cannot open file $0: $!\n";	#Open this file: testsuite.pl
 	while(<THIS>) {
 		last if(/^\#TAGEND/);		#TAGEND delimits the available tests in this document
 		if(/(^\d+)\)/) {
 			$available = $available.$1." ";	
 		}
-		print if($needsPrinting);		#Display the available tests with their descriptions provided
+		print;	#Display the available tests with their descriptions provided
 	}
 	close(THIS);	
 
-	my @temp = split(/ /,$available);	#Split the numbers of the tests
+	my @testsArray = split(/ /,$available);	#Split the numbers of the tests
 	
-	for(my $i = 0;$i <= $#temp; $i++) {	
-		$_ = $temp[$i] + 100;
+	for(my $i = 0;$i <= $#testsArray; $i++) {	
+		$_ = $testsArray[$i] + 100;
 		$available = $available." ".$_;		#Add to the list the tests with no SU(2) symmetry
 	}
 	
 	return $available;
 }
+
+sub validateFile	#Verifies if the file given exists
+{
+	my ($file) = @_;
+
+	if(-e $file) {		#Check if the file exists
+		return 1;
+	} else {
+		print "ERROR: The input file does not exists.\n";
+		return 0;
+	}
+}
+
+sub executableExists
+{
+	my ($file) = @_;
+	my $hashKey;
+	
+	if(validateFile($file)) {
+		$hashKey = createHashKey($file);
+	
+		if(foundHashKey($hashKey,$hashTable)) {
+			$executable = "../src/dmrg-$hashKey";
+			return 1;
+		} else {
+			print "The hash key for $file was not found in the hash table.\n";
+			return 0;
+		}
+	} else {
+		print "The file $file does not exists.\n";
+		return 0;
+	}
+}
+
+sub createHashKey
+{
+	my ($file) = @_;
+	
+	open(MYHASH,"md5sum $file|") || die "Cannot open for system command: $!\n";	#Use 'md5sum' to create 128-bit hash key
+	my $hashKey = substr(<MYHASH>,0,10);	#Use only the first 10 characters as the hash key
+	close(MYHASH);
+	
+	return $hashKey;
+}
+
+sub foundHashKey	#Verify if a certain hash key is found in the output file
+{
+	my ($searchKey,$outfile) = @_;
+	my $key;
+	my $found = 0;
+
+	open(FILE,$outfile) || die "Cannot open file $outfile: $!\n";
+	while(<FILE>) {		#Iterate through the all the hash values
+		chomp;
+		chomp;
+		$found = 1 if($_ eq $searchKey);	#Return 'true' if the hash key was matched
+	}	
+	close(FILE);
+
+	return $found;
+}
+
+#-------------------------------until here is good
+sub testSuite  #this function should verify for $executable, $inputFile , $dataFile
+{
+	my ($tn) = @_;
+	
+	if(defined($executable)) {
+		#do stuff with  executable
+		#validate the name of executable
+		runSingleTest($tn) if($runFlag);
+	} elsif(defined($inputFile)) {
+		#do stuff with input.inp
+	} elsif(defined($dataFile)) {
+		#do stuff with data.txt
+	} else {
+		my $searchFile = "inputs/model$tn".".spec";
+		
+		if(!executableExists($searchFile)) {	#verify if the executable for test number already exists
+			$executable = createExecutable($tn);	#creates executable
+			print "Executable was created.\n";
+		} else {
+			print "Executable existed.\n";
+		}
+		
+		runSingleTest($tn) if($runFlag);
+	}
+	
+	
+	#if(inHashTable($tn)) {
+	#	print "Test number $tn has already been built and compiled.\n";
+	#}
+		
+	if($cmpFlag) {
+		#validateEnergy($tn);
+		#validateProfile($tn);
+		#S,N,C	
+	}
+}
+
+sub createExecutable
+{
+	my ($tn) = @_;
+	$tn -= 100 if($tn >= 100);
+	print "Trying to create executable for test $tn...\n";
+	chdir("../src");
+	my $specFile = "../TestSuite/inputs/model$tn.spec";
+	my $rCode = 0;
+	
+	if($generateFlag) {
+		$rCode = system("perl configure.pl < $specFile >& /dev/null");
+		die "Error creating executable (configure.pl failed)\n" if($rCode != 0);
+	}
+	
+	if($buildFlag) {
+		$rCode = system("make -f Makefile");
+		die "Error creating executable (make failed)\n" if($rCode != 0);
+	}
+	my $hashKey = createHashKey($specFile);
+	system("mv dmrg dmrg-$hashKey");
+	chdir("../TestSuite");
+	print "Executable was succesfully created.\n";
+	
+	return "../src/dmrg";	
+}
+
+sub runSingleTest
+{
+	my ($tn) = @_;
+	print "Please wait while the test is run...\n";
+	unlink("data$tn.txt");
+	my $rCode = system("$executable inputs/input$tn.inp >& /dev/null ");
+	die "$0: Test cannot be run to completion\n" if ($rCode != 0);
+	print "The run has been completed.\n";
+}
+
+#----------------------------------until here under construction
+
 
 sub runAllTests
 {
@@ -173,29 +313,4 @@ sub runAllTests
 	my @temp = split(/ /,$available);
 	
 	print "All tests done succesfully.\n";
-}
-
-sub testSuite
-{
-	my ($tn,$executable) = @_;
-	
-	if(inHashTable($tn)) {
-		print "Test number $tn has already been built and compiled.\n";
-	}
-	
-	$executable = createExecutable($tn) if(!defined($executable));
-	
-	runSingleTest($tn,$executable) if($runFlag);
-	
-	if($cmpFlag) {
-		#validateEnergy($tn);
-		#validateProfile($tn);
-		#S,N,C	
-	}
-}
-
-sub inHashTable
-{
-	my 
-	return
 }
