@@ -236,7 +236,7 @@ namespace Dmrg {
 				
 				j = pSE.qn(pSE.partition(i));
 				std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
-				msg<<"target resides in partition "<<i<<" of size="<<vecSaved[i].size();
+				msg<<"Found target in partition "<<i<<" of size="<<vecSaved[i].size();
 				msg<<" with qns=";
 				for (size_t k=0;k<qns.size();k++) msg<<qns[k]<<" ";
 				progress_.printline(msg,std::cout);
@@ -296,7 +296,7 @@ namespace Dmrg {
 					throw std::logic_error("Exiting due to option test in the input file\n");
 			}
 			std::ostringstream msg;
-			msg<<"Size of Matrix block="<<modelHelper.size();
+			msg<<"I will now diagonalize a matrix of size="<<modelHelper.size();
 			progress_.printline(msg,std::cerr);
 			diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,initialVector,iter,eps);
 		}

@@ -178,7 +178,12 @@ namespace Dmrg {
 			std::vector<BlockType> X,Y;
 			BasisDataType q;
 			SparseMatrixType hmatrix;
-
+			
+			std::ostringstream msg;
+			msg<<"Turning the engine on";
+			progress_.printline(msg,std::cout);
+				
+			
 			io_.print(model_);
 
 			model_.setBlocksOfSites(S,X,Y,E); //! split sites into system, environment, X and Y
@@ -211,6 +216,10 @@ namespace Dmrg {
 			useReflection_=false; // disable reflection symmetry for finite loop if it was enabled:
 
 			finiteDmrgLoops(S,E,pS,pE,X.size(),psi);
+			
+			std::ostringstream msg2;
+			msg2<<"Turning off the engine. Putting transmission into park. We've arrived!";
+			progress_.printline(msg2,std::cout);
 		}
 
 	private:
@@ -245,7 +254,7 @@ namespace Dmrg {
 			envStack_.push(pE);
 			for (size_t step=0;step<X.size();step++) {
 				std::ostringstream msg;
-				msg<<"infinite-dmrg, step "<<step<<" out of "<<Y.size()<<" size of block added="<<Y[step].size();
+				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
 				progress_.printline(msg,std::cout);
 				
 				grow(pSprime_,pS,X[step],GROW_RIGHT); // grow system
@@ -253,7 +262,7 @@ namespace Dmrg {
 					
 				
 				progress_.print("Growth done.\n",std::cout);
-				msg<<"inf: SetToProduct, size="<<pSprime_.size()<<"x"<<pEprime_.size();
+				msg<<"Infinite-loop: sys-env. size="<<pSprime_.size()<<"x"<<pEprime_.size();
 				msg<<" and block="<<pSprime_.block().size()<<"+"<<pEprime_.block().size();
 				progress_.printline(msg,std::cout);
 				
@@ -264,7 +273,6 @@ namespace Dmrg {
 				diagonalization_(psi,INFINITE,X[step]);
 
 				progress_.print("Truncating basis now...\n",std::cout);
-				if (verbose_ && concurrency_.root()) std::cerr<<"Truncating basis now...\n";
 				
 				ns=pSprime_.size();
 				ne=pEprime_.size();
@@ -320,7 +328,7 @@ namespace Dmrg {
 			
 			size_t direction=SHRINK_ENVIRON;
 			if (stepLength<0) direction=SHRINK_SYSTEM;
-			std::cerr<<"PUSHING DIRECTION="<<getDirection(direction)<<"\n";
+			//std::cerr<<"PUSHING DIRECTION="<<getDirection(direction)<<"\n";
 			static int prevDirection = 0;
 			int resetCounter = WaveFunctionTransformationType::RESET_COUNTER;
 			if (prevDirection == SHRINK_SYSTEM && direction == SHRINK_SYSTEM)
@@ -343,10 +351,12 @@ namespace Dmrg {
 					shrink(pSprime_,systemStack_); // shrink system
 				}
 				
-				msg<<"finite (dir="<<direction<<"): SetToProduct, size="<<pSprime_.size()<<"x"<<pEprime_.size();
+				msg<<"finite (dir="<<direction<<"): sys-env: "<<pSprime_.size()<<"x"<<pEprime_.size();
 				msg<<" and block="<<pSprime_.block().size()<<"+"<<pEprime_.block().size();
-				msg<<" stackS="<<systemStack_.size()<<" stackE="<<envStack_.size()<< " step="<<stepCurrent_;
-				msg<<" loopIndex="<<loopIndex<<" length="<<stepLength<<" StepFinal="<<stepFinal;
+				if (verbose_) {
+					msg<<" stackS="<<systemStack_.size()<<" stackE="<<envStack_.size()<< " step="<<stepCurrent_;
+					msg<<" loopIndex="<<loopIndex<<" length="<<stepLength<<" StepFinal="<<stepFinal;
+				}
 				progress_.printline(msg,std::cout);
 				
 				updateQuantumSector(pSprime_.block().size()+pEprime_.block().size());

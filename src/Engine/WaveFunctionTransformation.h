@@ -177,7 +177,7 @@ namespace Dmrg {
 				doNextOne_=false;
 			}
 			std::ostringstream msg;
-			msg<<"Trigger On";
+			msg<<"I'm ready to take passengers";
 			progress_.printline(msg,std::cout);
 		}
 		
@@ -246,7 +246,7 @@ namespace Dmrg {
 			afterWft(pSprime,pEprime,pSE); //,m);	
 			doNextOne_=true;
 			std::ostringstream msg;
-			msg<<"Trigger Off";
+			msg<<"No more passengers, please";
 			progress_.printline(msg,std::cout);
 		}
 		
@@ -262,7 +262,7 @@ namespace Dmrg {
 			}
 			if (!isEnabled_) return; // don't make noise unless enabled
 			std::ostringstream msg;
-			msg<<"RandomVector";
+			msg<<"Yes, I'm awake, but there's nothing heavy to do now";
 			progress_.printline(msg,std::cout);
 		}
 		
@@ -300,8 +300,8 @@ namespace Dmrg {
 					} else {
 						weStack_.push(transform);
 						dmrgWave_.we=transform;
-						std::cerr<<"CHANGED dmrgWave_.we to transform\n";
-						std::cerr<<"PUSHING "<<transform.n_row()<<"x"<<transform.n_col()<<"\n";
+						//std::cerr<<"CHANGED dmrgWave_.we to transform\n";
+						//std::cerr<<"PUSHING "<<transform.n_row()<<"x"<<transform.n_col()<<"\n";
 					}
 					break;
 				case SHRINK_SYSTEM:
@@ -310,7 +310,7 @@ namespace Dmrg {
 					dmrgWave_.ws=transform;
 					//vectorConvert(dmrgWave_.psi,psi);
 					weStack_.push(transform);
-					std::cerr<<"PUSHING (POPPING) We "<<weStack_.size()<<"\n";
+					//std::cerr<<"PUSHING (POPPING) We "<<weStack_.size()<<"\n";
 					break;
 				case SHRINK_ENVIRON:
 					if (option==1) throw std::logic_error("SHRINK_ENVIRON but option==1\n");
@@ -330,7 +330,7 @@ namespace Dmrg {
 				dmrgWave_.pEprime=pBasis;
 			}
 			std::ostringstream msg;
-			msg<<"Push: option="<<option<<" stage="<<stage_;
+			msg<<"OK, pushing option="<<option<<" and stage="<<stage_;
 			progress_.printline(msg,std::cout);
 		}
 
@@ -367,14 +367,14 @@ namespace Dmrg {
 				if (weStack_.size()>=1) { 
 					dmrgWave_.we=weStack_.top();
 					weStack_.pop();
-					std::cerr<<"CHANGED We taken from stack\n";
+					//std::cerr<<"CHANGED We taken from stack\n";
 				} else {
 					std::cerr<<"PUSHING STACK ERROR E\n";
 					throw std::runtime_error("Environ Stack is empty\n");
 				}
 			}
-			std::cerr<<"PUSHING (POPPING) STACKSIZE="<<weStack_.size()<<" ";
-			std::cerr<<pSprime.block().size()<<"+"<<pEprime.block().size()<<"\n";
+			//std::cerr<<"PUSHING (POPPING) STACKSIZE="<<weStack_.size()<<" ";
+			//std::cerr<<pSprime.block().size()<<"+"<<pEprime.block().size()<<"\n";
 			if (counter_==0 && stage_==SHRINK_ENVIRON) {
 // 				dmrgWave_.pEprime=pEprime;
 // 				dmrgWave_.pSE=pSE;
@@ -386,7 +386,7 @@ namespace Dmrg {
 				if (weStack_.size()>=1) { 
 					dmrgWave_.we=weStack_.top();
 					//weStack_.pop();
-					std::cerr<<"CHANGED-COUNTER0 We taken from stack\n";
+					//std::cerr<<"CHANGED-COUNTER0 We taken from stack\n";
 				} else {
 					std::cerr<<"PUSHING-COUNTER0 STACK ERROR E\n";
 					throw std::runtime_error("Environ Stack is empty\n");
@@ -424,7 +424,7 @@ namespace Dmrg {
 				throw std::runtime_error(" createVector(): norm<1\n");
 			}
 			std::ostringstream msg;
-			msg<<"createVector";
+			msg<<"I'm working hard!";
 			progress_.printline(msg,std::cout);
 		}
 			
@@ -443,7 +443,7 @@ namespace Dmrg {
 		void transformVector(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
 		{
-			std::cerr<<"counter="<<counter_<<"direction = "<<stage_<<"\n";
+			//std::cerr<<"counter="<<counter_<<"direction = "<<stage_<<"\n";
 			if (stage_==SHRINK_SYSTEM) {
 				if (firstCall_) throw std::runtime_error("WFT: This corner case is unimplmemented yet (sorry!)\n");
 				else if (counter_==0) transformVector1bounce(psiDest,psiSrc,pSprime,pEprime,pSE);
@@ -474,7 +474,7 @@ namespace Dmrg {
 			size_t nk = sizeOfOneSiteHilbertSpace_;
 			size_t nip = pSE.permutationInverse().size()/pEprime.permutationInverse().size();
 			size_t njp = pEprime.permutationInverse().size()/nk;
-			printDmrgWave();
+			//printDmrgWave();
 			if (dmrgWave_.pSprime.permutationInverse().size()!=dmrgWave_.ws.n_row()) {
 				printDmrgWave();
 				throw std::runtime_error("transformVector1():"
@@ -579,7 +579,7 @@ namespace Dmrg {
 			size_t nk = sizeOfOneSiteHilbertSpace_;
 			size_t nip = pSprime.permutationInverse().size()/nk;
 			size_t nalpha = pSprime.permutationInverse().size();
-			printDmrgWave();
+			//printDmrgWave();
 			if (dmrgWave_.pEprime.permutationInverse().size()!=dmrgWave_.we.n_row()) {
 				printDmrgWave();
 				throw std::runtime_error("transformVector2():"
@@ -623,20 +623,6 @@ namespace Dmrg {
 			size_t nalpha=dmrgWave_.pSprime.permutationInverse().size();
 			
 			size_t beta = dmrgWave_.pEprime.permutationInverse(kp+jp*nk);
-			/*size_t eqn =  dmrgWave_.pEprime.qn(beta,BasisType::BEFORE_TRANSFORM);
-			int totalb = dmrgWave_.we.n_col();
-			size_t offsetb = 0;
-			int mb =  dmrgWave_.pEprime.partitionFromQn(eqn);
-			if (mb>=0) {
-				totalb = dmrgWave_.pEprime.partition(mb+1)-dmrgWave_.pEprime.partition(mb);
-				offsetb = dmrgWave_.pEprime.partition(mb);
-			}
-			
-			eqn =  dmrgWave_.pSprime.qn(ip);*/
-			//int ma =  dmrgWave_.pSprime.partitionFromQn(eqn,DmrgBasisType::BEFORE_TRANSFORM);
-			//int totala = dmrgWave_.pSprime.partition(ma+1,DmrgBasisType::BEFORE_TRANSFORM)-
-			//		dmrgWave_.pSprime.partition(ma,DmrgBasisType::BEFORE_TRANSFORM);
-			//size_t offseta = dmrgWave_.pSprime.partition(ma,DmrgBasisType::BEFORE_TRANSFORM);
 			
 			SparseElementType sum=0;
 			
@@ -744,22 +730,8 @@ namespace Dmrg {
 			size_t ni=dmrgWave_.ws.n_col();
 			const FactorsType& factorsS = dmrgWave_.pSprime.getFactors();
 			SparseElementType sum=0;
-			//int m = dmrgWave_.m;
 			size_t nip = dmrgWave_.pSprime.permutationInverse().size()/nk;
-			//size_t final = dmrgWave_.pSE.partition(m+1);
-			//size_t start = dmrgWave_.pSE.partition(m);
-
-// 			for (size_t x=start;x<final;x++) {
-// 				for (int kI = factorsInverseSE.getRowPtr(x); kI < factorsInverseSE.getRowPtr(x+1);kI++) {
-// 					size_t i,j;
-// 					utils::getCoordinates(i,j,(size_t)factorsInverseSE.getCol(kI),ni);
-// 					for (int k2I=factorsS.getRowPtr(ip+kp*nip);k2I<factorsS.getRowPtr(ip+kp*nip+1);k2I++) {
-// 						size_t alpha = factorsS.getCol(k2I);
-// 						sum += dmrgWave_.ws(alpha,i)*dmrgWave_.we(j,jp)*dmrgWave_.psi[x]*
-// 								factorsInverseSE.getValue(kI)*factorsS.getValue(k2I);;
-// 					}
-// 				}
-// 			}
+			
 			size_t ipkp=ip+kp*nip;
 			for (int k2I=factorsS.getRowPtr(ipkp);k2I<factorsS.getRowPtr(ipkp+1);k2I++) {
 				size_t alpha = factorsS.getCol(k2I);
@@ -922,7 +894,11 @@ namespace Dmrg {
 			size_t nk = sizeOfOneSiteHilbertSpace_;
 			size_t nip = pSprime.permutationInverse().size()/nk;
 			size_t nalpha = pSprime.permutationInverse().size();
-			printDmrgWave();
+			
+			std::ostringstream msg;
+			msg<<" We're moving to the finite loop, bumpy ride ahead!";
+			progress_.printline(msg,std::cout);
+			
 			if (dmrgWave_.pEprime.permutationInverse().size()!=dmrgWave_.we.n_row()) {
 				printDmrgWave();
 				throw std::runtime_error("transformVector2():"
@@ -970,21 +946,7 @@ namespace Dmrg {
 			size_t nk = sizeOfOneSiteHilbertSpace_;
 			size_t nalpha=dmrgWave_.pSprime.permutationInverse().size();
 			
-			//size_t beta = dmrgWave_.pEprime.permutationInverse(kp+jp*nk);
-			/*size_t eqn =  dmrgWave_.pEprime.qn(beta,BasisType::BEFORE_TRANSFORM);
-			int totalb = dmrgWave_.we.n_col();
-			size_t offsetb = 0;
-			int mb =  dmrgWave_.pEprime.partitionFromQn(eqn);
-			if (mb>=0) {
-				totalb = dmrgWave_.pEprime.partition(mb+1)-dmrgWave_.pEprime.partition(mb);
-				offsetb = dmrgWave_.pEprime.partition(mb);
-			}
 			
-			eqn =  dmrgWave_.pSprime.qn(ip);*/
-			//int ma =  dmrgWave_.pSprime.partitionFromQn(eqn,DmrgBasisType::BEFORE_TRANSFORM);
-			//int totala = dmrgWave_.pSprime.partition(ma+1,DmrgBasisType::BEFORE_TRANSFORM)-
-			//		dmrgWave_.pSprime.partition(ma,DmrgBasisType::BEFORE_TRANSFORM);
-			//size_t offseta = dmrgWave_.pSprime.partition(ma,DmrgBasisType::BEFORE_TRANSFORM);
 			
 			SparseElementType sum=0;
 			
@@ -1021,7 +983,10 @@ namespace Dmrg {
 			size_t nk = sizeOfOneSiteHilbertSpace_;
 			size_t nip = pSE.permutationInverse().size()/pEprime.permutationInverse().size();
 			//size_t njp = pEprime.permutationInverse().size()/nk;
-			printDmrgWave();
+			//printDmrgWave();
+			std::ostringstream msg;
+			msg<<" We're bouncing on the right, so buckle up!";
+			progress_.printline(msg,std::cout);
 			
 			if (dmrgWave_.pSE.permutationInverse().size()!=psiSrc.size()) {
 				printDmrgWave();
@@ -1039,7 +1004,7 @@ namespace Dmrg {
 			SparseMatrixType weT;
 			transposeConjugate(weT,we);
 			*/
-			std::cerr<<"ALTERNATIVE\n";
+			//std::cerr<<"ALTERNATIVE\n";
 			size_t nalpha=dmrgWave_.pSprime.permutationInverse().size();
 			for (size_t x=start;x<final;x++) {
 				size_t ip,beta,kp,jp;
@@ -1069,7 +1034,11 @@ namespace Dmrg {
 			size_t nk = sizeOfOneSiteHilbertSpace_;
 			size_t nip = pSprime.permutationInverse().size()/nk;
 			size_t nalpha = pSprime.permutationInverse().size();
-			printDmrgWave();
+			//printDmrgWave();
+			
+			std::ostringstream msg;
+			msg<<" We're bouncing on the left, so buckle up!";
+			progress_.printline(msg,std::cout);
 			
 			if (dmrgWave_.pSE.permutationInverse().size()!=psiSrc.size()) {
 				printDmrgWave();

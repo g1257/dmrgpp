@@ -401,14 +401,14 @@ namespace Dmrg {
 				size_t indexNoAdvance = 0;
 				if (stage_[i]==OPERATOR) {
 					std::ostringstream msg;
-					msg<<"Applying local operator...";
+					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
 					applyLocalOp(phi,psi_,tstStruct_.aOperators[i],tstStruct_.electrons,systemOrEnviron);
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
 					size_t advance = indexNoAdvance;
 					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
 					std::ostringstream msg;
-					msg<<"Applying wft...";
+					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 					
 					if (tstStruct_.aOperators.size()==1) guessPhiSectors(phi,i,systemOrEnviron);
