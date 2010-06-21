@@ -486,13 +486,13 @@ namespace Dmrg {
 				throw std::runtime_error("WaveFunctionTransformation::transformVector1():"
 						"njp!=dmrgWave_.we.n_col()\n");
 			}
-			if (dmrgWave_.pSE.permutationInverse().size()!=psiSrc.size()) {
+			/*if (dmrgWave_.pSE.permutationInverse().size()!=psiSrc.size()) {
 				printDmrgWave();
 				std::cerr<<"SEpermutationInverse.size="<<dmrgWave_.pSE.permutationInverse().size();
 				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
 				throw std::runtime_error("WaveFunctionTransformation::transformVector1():"
 						" dmrgWave_.SEpermutationInverse.size()!=dmrgWave_.psi.size()\n");
-			}
+			}*/
 			
 			size_t start = psiDest.offset(i0);
 			size_t final = psiDest.effectiveSize(i0)+start;
@@ -590,13 +590,13 @@ namespace Dmrg {
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
 						"nip!=dmrgWave_.ws.n_row()\n");
 			}
-			if (dmrgWave_.pSE.permutationInverse().size()!=psiSrc.size()) {
+			/*if (dmrgWave_.pSE.permutationInverse().size()!=psiSrc.size()) {
 				printDmrgWave();
 				std::cerr<<"SEpermutationInverse.size="<<dmrgWave_.pSE.permutationInverse().size();
 				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
 						" dmrgWave_.SEpermutationInverse.size()!=dmrgWave_.psi.size()\n");
-			}
+			}*/
 
 			size_t start = psiDest.offset(i0);
 			size_t final = psiDest.effectiveSize(i0)+start;

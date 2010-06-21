@@ -220,16 +220,16 @@ namespace Dmrg {
 			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
 			typedef ComplexVectorType TargetVectorType;
 			typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
-			
+
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 			enum {SHRINK_SYSTEM=WaveFunctionTransformationType::SHRINK_SYSTEM,
 			SHRINK_ENVIRON=WaveFunctionTransformationType::SHRINK_ENVIRON,
 			INFINITE=WaveFunctionTransformationType::INFINITE};
-			
+
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
-			
+
 			//enum {INDEX_NOADVANCE=0,INDEX_ADVANCE=1};
-			
+
 			TimeStepTargetting(
 	  				const BasisWithOperatorsType& basisS,
        					const BasisWithOperatorsType& basisE,
@@ -264,14 +264,14 @@ namespace Dmrg {
 				if (fabs(sum-1.0)>1e-5) throw std::runtime_error("Weights don't amount to one\n");
 				printHeader();
 			}
-			
+
 			RealType weight(size_t i) const
 			{
 				if (allStages(DISABLED)) throw std::runtime_error("TST: What are you doing here?\n");
 				return weight_[i];
 				//return 1.0;
 			}
-			
+
 			RealType gsWeight() const
 			{
 				if (allStages(DISABLED)) return 1.0;
@@ -309,6 +309,10 @@ namespace Dmrg {
 			{
 				for (size_t i=0;i<tstStruct_.sites.size();i++)
 					evolve(i,Eg,direction,block,loopNumber);
+				
+				cocoon(direction,block); // in-situ
+				
+				printVectors(); // for post-processing
 			}
 
 			void evolve(size_t i,RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
@@ -345,15 +349,9 @@ namespace Dmrg {
 				VectorWithOffsetType phi; // phi = A|psi>
 				computePhi(i,phi,direction);
 				if (norm(phi)==0) throw std::runtime_error("Norm of phi is zero\n");
-				test(i,psi_,direction,"<PSI|A|PSI>",site);
-				//test(i,phi,direction,"<PHI|A|PHI>",site);
-
+				
 				calcTimeVectors(Eg,phi,direction);
-				for (size_t j=0;j<targetVectors_.size();j++) {
-					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
-					test(i,targetVectors_[j],direction,s,site);
-				}
-				printVectors();
+	
 			}
 
 			const BasisType& basisSE() const { return basisSE_; }
@@ -368,6 +366,18 @@ namespace Dmrg {
 			}
 
 		private:
+			
+			// in situ computation:
+			void cocoon(size_t direction,const BlockType& block) const
+			{
+				size_t site = block[0];
+				test(site,psi_,direction,"<PSI|A|PSI>",site);
+				
+				for (size_t j=0;j<targetVectors_.size();j++) {
+					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
+					test(site,targetVectors_[j],direction,s,site);
+				}
+			}
 			
 			bool allStages(size_t x) const
 			{
@@ -635,7 +645,7 @@ namespace Dmrg {
 					const VectorWithOffsetType& src,
 				     	const OperatorType& A,
 	  				const std::vector<size_t>& electrons,
-					size_t systemOrEnviron)
+					size_t systemOrEnviron) const
 			{
 				if (systemOrEnviron == SHRINK_ENVIRON) applyLocalOpSystem(dest,src,A,electrons);
 				else applyLocalOpEnviron(dest,src,A);
@@ -645,7 +655,7 @@ namespace Dmrg {
 					VectorWithOffsetType& dest,
 					const VectorWithOffsetType& src,
 					const OperatorType& A,
-	  				const std::vector<size_t>& electrons)
+	  				const std::vector<size_t>& electrons) const
 			{
 				TargetVectorType dest2(basisSE_.size());
 				
@@ -663,7 +673,7 @@ namespace Dmrg {
 					const VectorWithOffsetType& src,
 					const OperatorType& A,
 	  				const std::vector<size_t>& electrons,
-					size_t i0)
+					size_t i0) const
 			{
 				size_t offset = src.offset(i0);
 				size_t final = offset + src.effectiveSize(i0);
@@ -692,7 +702,7 @@ namespace Dmrg {
 			void applyLocalOpEnviron(
 					VectorWithOffsetType& dest,
 					const VectorWithOffsetType& src,
-					const OperatorType& A)
+					const OperatorType& A) const
 			{
 				TargetVectorType dest2(basisSE_.size());
 				
@@ -709,7 +719,7 @@ namespace Dmrg {
 					TargetVectorType& dest2,
 					const VectorWithOffsetType& src,
 				     	const OperatorType& A,
-					size_t i0)
+					size_t i0) const
 			{
 				size_t offset = src.offset(i0);
 				size_t final = offset + src.effectiveSize(i0);
@@ -776,10 +786,10 @@ namespace Dmrg {
 					const VectorWithOffsetType& src,
 					size_t systemOrEnviron,
 				 	const std::string& label,
-					size_t site)
+					size_t site) const
 			{
 				VectorWithOffsetType dest;
-				OperatorType A = tstStruct_.aOperators[ind];
+				OperatorType A = tstStruct_.aOperators[0];
 				CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
 				CrsMatrix<ComplexType> tmpCt;
 				transposeConjugate(tmpCt,tmpC);
