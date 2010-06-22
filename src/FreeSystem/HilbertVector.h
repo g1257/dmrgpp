@@ -108,7 +108,7 @@ namespace Dmrg {
 			typedef unsigned int long long UnsignedIntegerType;
 			//static size_t const SPIN_UP=0,SPIN_DOWN=1;
 			typedef FlavoredState<UnsignedIntegerType> FlavoredStateType;
-			
+			typedef HilbertVector<FieldType> HilbertVectorType;
 			
 		public:
 			typedef HilbertTerm<FieldType,FlavoredStateType> HilbertTermType;
@@ -158,10 +158,19 @@ namespace Dmrg {
 			template<typename T>
 			friend std::ostream& operator<<(std::ostream& os,const HilbertVector<T>& v);
 
+			FieldType scalarProduct(const HilbertVectorType& v) const
+			{
+				if (size_!=v.size_ || dof_!=v.dof_) throw std::runtime_error("ScalarProduct\n");
+				FieldType sum = 0;
+				for (size_t i=0;i<data_.size();i++) {
+					int x = utils::isInVector(v.data_,data_[i]);
+					if (x<0) continue;
+					sum += std::conj(v.values_[x]) * values_[i];
+				}
+				return sum;
+			}
+
 		private:
-			
-			
-			
 			size_t size_;
 			size_t dof_;
 			std::vector<FlavoredStateType> data_;
@@ -180,6 +189,12 @@ namespace Dmrg {
 			os<<term;
 		}
 		return os;
+	}
+	
+	template<typename T>
+	T scalarProduct(const HilbertVector<T>& v1,const HilbertVector<T>& v2)
+	{
+		return v1.scalarProduct(v2);
 	}
 } // namespace Dmrg 
 

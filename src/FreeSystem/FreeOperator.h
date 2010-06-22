@@ -104,16 +104,18 @@ namespace Dmrg {
 				HilbertVectorType& dest,
 				const HilbertVectorType& src) const
 			{
+				dest.clear();
 				for (size_t i=0;i<src.terms();i++) {
 					apply(dest,src.term(i));
 				}
 			}
 			
+		private:	
 			void apply(
 					HilbertVectorType& dest,
 					const HilbertTermType& src) const
 			{
-				dest.clear();
+				
 				size_t size = U_.n_row()/dof_;
 				typename HilbertVectorType::HilbertTermType term = src;
 				
@@ -122,11 +124,12 @@ namespace Dmrg {
 					applyInternal(term,src,lambda); // term.value contains sign
 					FieldType factor = U_(site_+flavor_*size,lambda);
 					term.value *= factor;
+					if  (term.value ==0) continue;
 					dest.add(term);
 				}
 			}
 
-		private:
+		
 			template<typename HilbertTermType>
 			void applyInternal(
 					HilbertTermType& dest,
@@ -135,7 +138,7 @@ namespace Dmrg {
 			{
 				dest = src;
 				int sign = dest.state.apply(label_,flavor_,lambda);
-				dest.value *= sign; 
+				dest.value *= sign;
 			}
 			
 			const MatrixType& U_;
