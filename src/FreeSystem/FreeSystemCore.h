@@ -91,44 +91,45 @@ namespace Dmrg {
 	template<typename FieldType>
 	class FreeSystemCore {
 			
-			typedef HilbertVector<FieldType> HilbertVectorType;
 			typedef psimag::Matrix<FieldType> MatrixType;
-			typedef FreeOperator<MatrixType> FreeOperatorType;
-			
-			//static size_t const SPIN_UP=0,SPIN_DOWN=1;
-			static const size_t DOF = 2; // spin up and down
-			
+	
 		public:
+			
+			typedef HilbertVector<FieldType> HilbertVectorType;
+			typedef FreeOperator<MatrixType,HilbertVectorType> FreeOperatorType;
 			typedef typename HilbertVectorType::HilbertTermType HilbertTermType;
 			
-			FreeSystemCore(const MatrixType& t,size_t numberOfElectrons,bool verbose=false) :
-				t_(t), numberOfElectrons_(numberOfElectrons),verbose_(verbose)
+			FreeSystemCore(const MatrixType& t,size_t dof,bool verbose=false) :
+				t_(t),dof_(dof),verbose_(verbose)
 			{
 				diagonalize();
+				std::cerr<<"Created core "<<eigenvectors_.n_row()<<"  times "<<eigenvectors_.n_col()<<"\n";
 			}
 			
-			void apply(
-				HilbertVectorType& dest,
-				const HilbertVectorType& src,
-    				const FreeOperatorType& freeOp)
+			HilbertVectorType newState()
 			{
-				size_t n = t_.n_row();
-				for (size_t i=0;i<src.size();i++) {
-					HilbertVectorType tmp(n,DOF);
-					applyToOne(tmp,src.term(i),freeOp);
-					dest.add(tmp); // this checks for duplicates
-				}
+				HilbertVectorType tmp(t_.n_row(),dof_);
+				return tmp;	
 			}
 			
-			void applyToOne(HilbertVectorType& dest,const HilbertTermType& src,const FreeOperatorType& freeOp)
+			HilbertVectorType newGroundState(const std::vector<size_t>& ne)
 			{
-				freeOp.apply(dest,src);
+				HilbertVectorType tmp(t_.n_row(),dof_);
+				tmp.fill(ne);
+				return tmp;	
 			}
+			
+			FreeOperatorType newSimpleOperator(const std::string& label,size_t site,size_t flavor)
+			{
+				FreeOperatorType tmp(eigenvectors_,label,site,flavor,dof_);
+				return tmp;
+			}
+			
 		private:
 		
 			void diagonalize()
 			{
-				MatrixType eigenvectors_ = t_;
+				eigenvectors_ = t_;
 				
 				if (verbose_) {
 					std::cerr<<"Matrix\n";
@@ -145,7 +146,7 @@ namespace Dmrg {
 			}
 
 			const MatrixType& t_;
-			size_t numberOfElectrons_;
+			size_t dof_;
 			bool verbose_;
 			psimag::Matrix<FieldType> eigenvectors_;
 			std::vector<FieldType> eigenvalues_;

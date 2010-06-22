@@ -86,22 +86,61 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	// All interactions == 0
-	template<typename MatrixType>
+	template<typename MatrixType,typename HilbertVectorType>
 	class FreeOperator {
 			typedef unsigned int long long UnsignedIntegerType;
 			//static size_t const SPIN_UP=0,SPIN_DOWN=1;
 			typedef FlavoredState<UnsignedIntegerType> FlavoredStateType;
-			
+			typedef typename MatrixType::value_type FieldType;
+			typedef typename HilbertVectorType::HilbertTermType HilbertTermType;
 		public:
-			FreeOperator(const MatrixType& U,size_t flavor,size_t dof) :
-				U_(U),flavor_(flavor),dof_(dof)
+			FreeOperator(const MatrixType& U,const std::string& label,size_t site,size_t flavor,size_t dof) :
+				U_(U),label_(label),site_(site),flavor_(flavor),dof_(dof)
 			{
 			}
 			
+			void apply(
+				
+				HilbertVectorType& dest,
+				const HilbertVectorType& src) const
+			{
+				for (size_t i=0;i<src.terms();i++) {
+					apply(dest,src.term(i));
+				}
+			}
+			
+			void apply(
+					HilbertVectorType& dest,
+					const HilbertTermType& src) const
+			{
+				dest.clear();
+				size_t size = U_.n_row()/dof_;
+				typename HilbertVectorType::HilbertTermType term = src;
+				
+				for (size_t lambda = 0;lambda < U_.n_col();lambda++) {
+					
+					applyInternal(term,src,lambda); // term.value contains sign
+					FieldType factor = U_(site_+flavor_*size,lambda);
+					term.value *= factor;
+					dest.add(term);
+				}
+			}
 
 		private:
+			template<typename HilbertTermType>
+			void applyInternal(
+					HilbertTermType& dest,
+					const HilbertTermType& src,
+					size_t lambda) const
+			{
+				dest = src;
+				int sign = dest.state.apply(label_,flavor_,lambda);
+				dest.value *= sign; 
+			}
 			
 			const MatrixType& U_;
+			std::string label_;
+			size_t site_;
 			size_t flavor_;
 			size_t dof_;
 	}; // FreeOperator

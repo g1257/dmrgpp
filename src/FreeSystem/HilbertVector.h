@@ -90,9 +90,18 @@ namespace Dmrg {
 	
 	template<typename FieldType,typename FlavoredStateType>
 	struct HilbertTerm {
-		const FlavoredStateType* state;
-		const FieldType* value;	
+		HilbertTerm(const FlavoredStateType& state1,const FieldType& value1) :
+				state(state1),value(value1) { }
+		FlavoredStateType state;
+		FieldType value;
 	};
+	
+	template<typename T,typename V>
+	std::ostream& operator<<(std::ostream& os,const HilbertTerm<T,V>& v)
+	{
+		os<<v.state<<" "<<v.value<<"\n";
+		return os;	
+	}
 	
 	template<typename FieldType>
 	class HilbertVector {
@@ -109,26 +118,11 @@ namespace Dmrg {
 			{
 			}
 			
-			void add(const HilbertVector& another)
+			void add(const HilbertTermType& term)
 			{
-				for (size_t i=0;i<another.data_.size();i++) {
-					internalAdd(another.data_[i],another.values_[i]);
-				}
-			}
-			
-			HilbertTermType term(size_t i)
-			{
-				HilbertTermType t;
-				t.state = &(data_[i]);
-				t.value = &(values_[i]);
-				return t;
-			}
-
-		private:
-			
-			void internalAdd(const FlavoredStateType& state,const FieldType& value)
-			{
-				size_t x = utils::isInVector(data_,state);
+				const FlavoredStateType& state = term.state;
+				const FieldType& value = term.value;
+				int x = utils::isInVector(data_,state);
 				if (x<0) {
 					data_.push_back(state);
 					values_.push_back(value);
@@ -137,12 +131,56 @@ namespace Dmrg {
 				}
 			}
 			
+			HilbertTermType term(size_t i) const
+			{
+				return HilbertTermType(data_[i],values_[i]);
+			}
+			
+			size_t terms() const { return data_.size(); }
+			
+			void fill(const std::vector<size_t>& ne)
+			{
+				if (ne.size()!=dof_) throw std::runtime_error("HilbertVector::fill()\n");
+				
+				FlavoredStateType fstate(dof_,size_);
+				fstate.fill(ne);
+				clear();
+				data_.push_back(fstate);
+				values_.push_back(1.0);
+			}
+			
+			void clear()
+			{
+				data_.clear();
+				values_.clear();
+			}
+			
+			template<typename T>
+			friend std::ostream& operator<<(std::ostream& os,const HilbertVector<T>& v);
+
+		private:
+			
+			
+			
 			size_t size_;
 			size_t dof_;
 			std::vector<FlavoredStateType> data_;
 			std::vector<FieldType> values_;
 			
 	}; // HilbertVector
+	
+	template<typename T>
+	std::ostream& operator<<(std::ostream& os,const HilbertVector<T>& v)
+	{
+		
+		os<<"size="<<v.size_<<"\n";
+		os<<"dof="<<v.dof_<<"\n";
+		for (size_t i=0;i<v.data_.size();i++) {
+			typename HilbertVector<T>::HilbertTermType term(v.data_[i],v.values_[i]);
+			os<<term;
+		}
+		return os;
+	}
 } // namespace Dmrg 
 
 /*@}*/
