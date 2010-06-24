@@ -307,24 +307,27 @@ namespace Dmrg {
 
 			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
 			{
+				size_t count =0;
 				for (size_t i=0;i<tstStruct_.sites.size();i++)
-					evolve(i,Eg,direction,block,loopNumber);
+					count += evolve(i,Eg,direction,block,loopNumber);
+				if (count==0) return;
 				
 				cocoon(direction,block); // in-situ
 				
 				printVectors(); // for post-processing
 			}
 
-			void evolve(size_t i,RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
+			size_t evolve(size_t i,RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
 			{
+				
 				static size_t  timesWithoutAdvancement=0;
-				if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return;
+				if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return 0;
 				if (block.size()!=1) throw 
 					std::runtime_error("TimeStepTargetting::evolve(...):"
 							" blocks of size != 1 are unsupported (sorry)\n");
 				size_t site = block[0];
 				size_t max = tstStruct_.aOperators.size()-1;
-				if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return;
+				if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return 0;
 				
 				
 				if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
@@ -348,10 +351,10 @@ namespace Dmrg {
 				
 				VectorWithOffsetType phi; // phi = A|psi>
 				computePhi(i,phi,direction);
-				if (norm(phi)==0) throw std::runtime_error("Norm of phi is zero\n");
+				
 				
 				calcTimeVectors(Eg,phi,direction);
-	
+				return 1;
 			}
 
 			const BasisType& basisSE() const { return basisSE_; }
@@ -371,11 +374,11 @@ namespace Dmrg {
 			void cocoon(size_t direction,const BlockType& block) const
 			{
 				size_t site = block[0];
-				test(site,psi_,direction,"<PSI|A|PSI>",site);
+				test(psi_,direction,"<PSI|A|PSI>",site);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
-					test(site,targetVectors_[j],direction,s,site);
+					test(targetVectors_[j],direction,s,site);
 				}
 			}
 			
@@ -432,7 +435,9 @@ namespace Dmrg {
 				} else {
 					throw std::runtime_error("It's 5 am, do you know what line your code is exec-ing?\n");
 				}
-				
+				RealType norma = norm(phi);
+				if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
+				std::cerr<<"Norm of phi="<<norma<<"\n";
 				normalize(phi);
 			}
 			
@@ -782,7 +787,7 @@ namespace Dmrg {
 				io_.printline(s);
 			}
 
-			void test(	size_t ind,
+			void test(	
 					const VectorWithOffsetType& src,
 					size_t systemOrEnviron,
 				 	const std::string& label,
