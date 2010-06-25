@@ -1,9 +1,9 @@
-#!/usr/bin/perl -w
+#! /usr/bin/perl -w
 
 =pod
 // BEGIN LICENSE BLOCK
 /*
-Copyright © 2008 , UT-Battelle, LLC
+Copyright ? 2008 , UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -43,297 +43,374 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 "Program testing can be a very effective way to show the presence of bugs, 
 but it is hopelessly inadequate for showing their absence." -- Edsger Dijkstra
-
-#TAGSTART DO NOT REMOVE THIS TAG
-List of Standard Tests for DMRG++ version 2.0.0
-(See Notation in the doc directory)
-Tests *with* SU(2) symmetry:
-0) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites. 
-	INF(100)+7(100)-7(100)-7(100)+7(100)
-1) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=2 with 8+8 sites
-	INF(60)+7(100)-7(100)-7(100)+7(100)
-2) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=2 with 8+8 sites
-        INF(100)+7(200)-7(200)-7(200)+7(200) [to calculate correlations]
-3) Hubbard Model One Orbital (HuStd-1orb) on a ladder (CubicStd2d) for U=0 with 8+8 sites
-	INF(100)+7(200)-7(200)-7(200)+7(200) [to calculate correlations]
-4) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
-        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargetting "creation op"
-5) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
-        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargetting "identity op"
-6) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 V=-0.5 with 30+30 sites.
-        INF(226)+29(226)-29(226)-29(226)+29(226) with angularMomentum j=5 (as in the literature)
-7) Like test 4 but with many times
-8) Like test 5 but with many times
-20) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1 with 16+16 sites
-	INF(60)+7(100)-7(100)-7(100)+7(100)
-21) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=2.5 with 8+8 sites
-	INF(100)+7(200)-7(200)-7(200)+7(200)
-22) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8+8 sites
-	INF(100)+7(200)-7(200)-7(200)+7(200)+7(200)+1(200) [to calculate correlations]
-23) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8+8 sites
-        checkpointA
-24) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8+8 sites
-        checkpointB
-25)  Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=2.5 with 8+8 sites
-        INF(100)+7(200)-7(200)-7(200)+7(200) To check the WFT
-40) Fe-based Superconductors model (HuFeAS-2orb) on a ladder (LadderFeAs) with U=0 J=0 with 4+4 sites
-	 INF(60)+7(100)-7(100)-7(100)+7(100)
-41) Fe-based Superconductors model (HuFeAS-2orb) on a ladder (LadderFeAs) with U=1 J=1 with 4+4 sites
-	INF(60)+7(100)-7(100)-7(100)+7(100)
-60) t-J one-Orbital (tjOneOrbital) on a chain with t=1 J=1 with 16+16 sites
-	 INF(60)+7(100)-7(100)-7(100)+7(100)
-
-Note 1: Tests *without* SU(2) symmetry: Add 100 to the above test.
-	For example test 102) is test 2) with SU(2) symmetry *disabled*.
-
-Note 2: This test suite does not support pthreaded tests yet.
-#TAGEND DO NOT REMOVE THIS TAG
 =cut
 
 use strict;
 use Getopt::Long;
-my $compareTool = "kompare"; # Not needed, just in case you have it
-my $executable;
-my $testNumber;
-my $all;
-my @GlobalHashTable;
-my ($generateFlag,$buildFlag,$runFlag,$cmpFlag) = (1,1,1,1);
-GetOptions ("exe=s" => \$executable,"n=i" => \$testNumber,"all"  => \$all,
-	"g=i" => \$generateFlag,"b=i" => \$buildFlag, "r=i" => \$runFlag,"c=i" => \$cmpFlag);
 
-$all=0 if (!defined($all));
+my ($executable,$testNumber,$all,$update); 
+my $hashTable = "hashTable.txt";
+my ($generateFlag,$buildFlag,$runFlag,$cmpFlag,$observeFlag) = (1,1,1,1,0);	#Enable driver,enable makefile, enable test run,enable validations, enable cooking of observables
 
-$testNumber = askWhatTest() if (!defined($testNumber) and $all==0);
+GetOptions("exe=s" => \$executable, "n=i" => \$testNumber, "all" => \$all, "update" => \$update, "g=i" => \$generateFlag, "b=i" => \$buildFlag, "r=i" => \$runFlag, "c=i" => \$cmpFlag, "o=i" => \$observeFlag);	#Provides command options when running the script
 
-if ($all) { # Run all tests 
-	runAllTests(0);
-} elsif ($testNumber<0) { # Run all tests starting from -$testNumber
-	my $start = -$testNumber;
-	runAllTests($start);
-} else { # Run test number $testNumber
-	testSuite($testNumber,$executable);
-}
+if($update) {
+	updateHashTable();
+} 
 
-sub runAllTests
-{
-	my ($start)=@_;
-	my $available = getAvailableTests(0);
-	my @temp = split(/ /,$available);
-	my $execSaved;
-	for (my $i=0;$i<$#temp+1;$i++) {
-		next if ($temp[$i] eq "");
-		next if ($temp[$i]<$start);
-		my $exec;
-		$exec = $execSaved if ($i>0 && $temp[$i]!=100 && thisSpecEqualToPrevSpec($temp[$i],$temp[$i-1]));
+selectTests();	#Starts running the script
+
+#~ sub updateHashTable  #incompleete
+#~ {
+	#~ chdir("../src");
+	#~ my @searchFiles = glob "dmrg-*";	#Put into an array all the executables found
+	#~ print "Initiating update process...\n";
+	#~ chdir("../TestSuite");
+	#~ my (@searchKeys, $tempK, $file);
+	
+	#~ if(!@searchFiles) {
+		#~ system("echo -n > $hashTable >& /dev/null");
+		#~ die "All keys were deleted from $hashTable.\n";
+	#~ }
 		
-		$execSaved = testSuite($temp[$i],$exec);
+	#~ foreach $file(@searchFiles) {
+		#~ push(@searchKeys,substr($file,5,10));
+	#~ }
+		
+	#~ foreach $tempK(@searchKeys) {
+		#~ if(!findKey($tempK,$hashTable)) {
+			#~ addKey($tempK);
+		#~ }		
+	#~ }
+	
+	#~ my @contents;
+	#~ open(MYTABLE, $hashTable) || die "Cannot open file $hashTable: $!\n";
+	#~ while($tempK = <MYTABLE>) {		#Iterate through the all the hash values
+		#~ chomp($tempK);
+		#~ chomp($tempK);
+		#~ push(@contents, $tempK);
+		#~ print @contents."--".@searchKeys;
+		#~ #if (grep(!/$tempK/, @searchKeys)) {
+			#~ #@contents = grep(!/$tempK/, @contents);
+			#~ #print @contents."hola\n";
+		#~ }
+	#~ close(MYTABLE);
+#~ }
+
+sub selectTests
+{
+	if(!defined($all) && !defined($testNumber)) {		#If no test is explicitly defined
+		$testNumber = askWhatTest();	#Make the user select a test from the available ones
 	}
-	print "All tests done successfully.\n";
+	
+	if($all) {
+		runAllTests(0);		#Run all tests
+	} elsif($testNumber < 0) {
+		runAllTests(-$testNumber);	#Run all tests starting at $testNumber
+	} else {
+		testSuite($testNumber);	#Run specified test
+	}
 }
 
-sub testSuite
+sub askWhatTest
+{
+	my $available = getAvailableTests(1);	#Get a numerical list of the available tests
+	my @temp;
+	my @testArray;
+
+	#Here the user selects a test to be run
+	while() {
+		print "Please type the number of the test you want to run\n";
+		print "Available: $available\n";
+		print "Default: 0 (press ENTER) ";
+		chomp(my $tn = <STDIN>);	#Input test number
+		
+		if($tn eq "") {
+			$tn = 0;
+		}
+		
+		my $searchNum = abs($tn);
+		@testArray = split(/ /,$available);	#Split string into test numbers
+		@temp = grep(/$searchNum/,@testArray);		#Search if the wanted test is available
+		
+		if(!@temp) {		#If user selection is not a valid test number then produce error
+			print "\nERROR: An incorrect test was selected! Please try again.\n\n";
+		} else {
+			print "Preparing to run test number $tn\n";
+			undef @temp;
+			return $tn;		#If valid selection then continue to run the test
+		}
+	}
+}
+
+sub getAvailableTests
+{
+	my ($pFLAG) = @_;
+	my $available = "";
+	my $descriptionFile = "inputs/descriptions.txt";
+	
+	open(FILE,$descriptionFile) || die "ERROR: Cannot open file $descriptionFile: $!\n";	#Open this file: testsuite.pl
+	while(<FILE>) {
+		last if(/^\#TAGEND/);		#TAGEND delimits the available tests in this document
+		if(/(^\d+)\)/) {
+			$available = $available.$1." ";	
+		}
+		print if($pFLAG);	#Display the available tests with their descriptions provided
+	}
+	close(FILE);	
+
+	my @testsArray = split(/ /,$available);	#Split the numbers of the tests
+	
+	for(my $i = 0;$i <= $#testsArray; $i++) {	
+		$_ = $testsArray[$i] + 100;
+		$available = $available." ".$_;		#Add to the list the tests with no SU(2) symmetry
+	}
+	
+	return $available;
+}
+
+sub validateFile	#Verifies if the file given exists
+{
+	my ($file) = @_;
+
+	if(-e $file) {		#Check if the file exists
+		return 1;
+	} else {
+		print "ERROR: The file $file does not exists.\n";
+		return 0;
+	}
+}
+
+sub removeKey
+{
+	my ($mkey,$table) = @_;
+	my @contents;
+	my $line;
+	
+	open FILE, "<$table";
+	while($line = <FILE>) {
+		last if($line eq "" || $line eq "\n");
+		next if(substr($line,0,10) eq $mkey) ;
+		push(@contents,$line);
+	}
+	close FILE;
+	shift(@contents);
+	open (OUT, ">$table");
+	foreach $line(@contents) {
+		print  OUT $line;
+	}
+	print OUT "\n";
+	close (OUT);
+	
+	print "The key $mkey has been removed.\n";
+}
+
+sub executableExists
+{
+	my ($tn, $model) = @_;
+	my $modelKey = createHashKey($model);
+
+	if(findKey($modelKey,$hashTable)) {
+		if(!findTn($modelKey,$tn,$hashTable)) {
+			addTn($modelKey,$tn,$hashTable);
+		}
+		
+		$executable = "../src/dmrg-$modelKey";
+		return 1;
+		
+	} else {
+		print "The hash key for $model was not found in the hash table.\n";
+		return 0;
+	}
+}
+
+sub addTn
+{
+	my ($key,$tn,$table) = @_;
+	my @contents;
+	my $line;
+	my $old;
+	
+	open (FILE, "<$table");
+	while($line = <FILE>) {
+		last if($line eq "" || $line eq "\n");
+		if(substr($line,0,10) eq $key) {
+			chomp($line);
+			$old = $line;
+		} else {
+			push(@contents,$line);
+		}
+	}
+	close (FILE);
+	
+	my $new = $old." ".$tn;
+	push(@contents,$new);
+	
+	open (OUT, ">$table");
+	foreach $line(@contents) {
+		print  OUT $line;
+	}
+	print OUT "\n";
+	close (OUT);
+	
+	print "Test number was added: $new.\n";
+}
+
+sub addKey
+{
+	my ($mkey,$tn,$table) = @_;
+	
+	open FILE, ">>$table";
+	print FILE "$mkey - $tn\n";
+	close FILE;
+	
+	print "New key: $mkey - $tn\n";	
+}
+
+sub findKey
+{
+	my ($mkey,$table) = @_;
+	open FILE, "<$table" or die "Can't open $table: $!";
+	while (my $line = <FILE>) {
+		if (substr($line,0,10) eq $mkey) {
+			close FILE;
+#			print "Model key found.\n";
+			return 1;
+		}
+	}
+	close FILE;
+	
+#	print "Model key not found.\n";
+	return 0;	
+}
+
+
+sub findTn
+{
+	my ($key,$tn,$table) = @_;
+	my $line;
+	my $found = 0;
+	
+	open FILE, $table;
+	do { $line = <FILE> } until substr($line,0,10) eq $key || eof;
+	close FILE;
+
+	my @temp = split(" ",$line);
+	shift(@temp);
+	shift(@temp);
+	
+	if(!grep {$_ == $tn} @temp) {
+		print "Test number $tn has not been compiled.\n";
+	} else {
+		$found = 1;
+		print "Test number $tn is already compiled.\n";
+	}
+	
+	return $found;
+}
+
+sub createHashKey
+{
+	my ($file) = @_;
+	
+	open(MYHASH,"md5sum $file|") || die "Cannot open for system command: $!\n";	#Use 'md5sum' to create 128-bit hash key
+	my $hashKey = substr(<MYHASH>,0,10);	#Use only the first 10 characters as the hash key
+	close(MYHASH);
+	
+	return $hashKey;
+}
+
+sub testSuite  #this function should verify for $executable, $inputFile , $dataFile
+{
+	my ($tn) = @_;
+	my $inputFile = "inputs/input$tn.inp";
+	
+	my $temp = $tn;
+	$temp -= 100 if($tn >= 100);
+	my $modelFile = "inputs/model$temp".".spec";
+	die "An input file is missing: $inputFile\n" if(!validateFile($inputFile));
+	
+	if(defined($executable)) {
+		die "Missing executable file: $executable" if(!validateFile($executable));
+		
+		#think about the hash and hashTable
+	
+	} else {
+		if(validateFile($modelFile)) {
+			if(!executableExists($tn,$modelFile)) {	#verify if the executable for test number already exists
+				$executable = createExecutable($tn);	#creates executable
+			} else {
+				print "Retrieving existing executable.\n";
+			}
+		} else {   #die
+		die "Execution aborted: $modelFile is missing.\n";
+		}
+	}
+	
+	runSingleTest($tn,$executable) if($runFlag);
+	undef $executable;	
+	
+	if($cmpFlag) {
+		#validateEnergy($tn);
+		#validateProfile($tn);
+		#S,N,C	
+	}
+}
+
+sub createExecutable
+{
+	my ($tn) = @_;
+	chdir("../src");
+
+	$tn -= 100 if($tn >= 100);
+	print "Creating executable for test $tn...\n";
+	print "***********************************\n";
+	
+	my $specFile = "../TestSuite/inputs/model$tn.spec";
+	my $rCode = 0;
+	
+	if($generateFlag) {
+		$rCode = system("perl configure.pl < $specFile >& /dev/null");
+		die "Error creating executable (configure.pl failed)\n" if($rCode != 0);
+	}
+
+	if($buildFlag) {
+		$rCode = system("make -f Makefile");
+		die "Error creating executable (make failed)\n" if($rCode != 0);
+	}
+	print "***********************************\n";
+	my $specKey = createHashKey($specFile);
+	$rCode = system("mv dmrg dmrg-$specKey");
+	die "Error renaming the executable file\n" if($rCode != 0);
+	chdir("../TestSuite");
+	addKey($specKey,$tn,$hashTable);
+	print "Executable was succesfully created.\n";
+	
+	return "../src/dmrg-$specKey";	
+}
+
+sub runSingleTest
 {
 	my ($tn,$executable) = @_;
-	
-	return "nothing" if (skipMe($tn));
-	
-	$executable = createExecutable($tn) if (!defined($executable));
-
-	runTest($tn,$executable) if ($runFlag);
-
-	if ($cmpFlag) {
-		validateEnergy($tn);
-		validateProfile($tn);
-	}
-	return $executable;
-}
-
-sub skipMe
-{
-	my ($tn)=@_;
-	open(PIPE,"inputs/input$tn.inp") or die "Cannot open inputs/input$tn.inp: $!\n";
-	$_=<PIPE>;
-	close(PIPE);
-	return 1 if (/^skip/i);
-	return 0;
-}
-
-sub runTest
-{
-	my ($tn,$executable) = @_;
-	print "Please Wait while the test is run...\n";
-	unlink("data$tn.txt"); 
+	print "Please wait while the test is run...\n";
+	unlink("data$tn.txt");
 	my $rCode = system("$executable inputs/input$tn.inp >& /dev/null ");
 	die "$0: Test cannot be run to completion\n" if ($rCode != 0);
 	print "The run has been completed.\n";
 }
 
-sub validateEnergy
+sub runAllTests
 {
-	my ($testNumber) = @_;
-	system("grep Energy data$testNumber.txt > resultsOfTest$testNumber.txt");
-	system("diff oracles/validatedEnergy$testNumber.txt resultsOfTest$testNumber.txt > diffOfTest$testNumber.txt ");
-	my $rCode = system("$compareTool validated$testNumber.txt resultsOfTest$testNumber.txt >& /dev/null");
-	if ($rCode != 0) {	
-		print "See file diffOfTest$testNumber.txt\n";
-	}
-}
-
-sub validateProfile
-{
-	my ($testNumber) = @_;
-	system("gprof ../src/dmrg > profileOfTest$testNumber.txt");
-	system("diff profileOfTest$testNumber.txt oracles/validateProfile$testNumber.txt > diffOfProfile$testNumber.txt");
-}
-
-
-sub validateChargeCorrelations
-{
-	my ($testNumber) = @_;
-	system("../src/observe input$testNumber.inp data$testNumber.txt  > observeData$testNumber.txt");
-	system("diff oracles/validateObserve$testNumber.txt observeData$testNumber.txt");
+	my ($start) = @_;
+	print "Running all tests starting from test #$start\n";
 	
-}
-
-sub askWhatTest
-{
-	my $available = getAvailableTests(1);
-	print "Please type the number of the test you want to run\n";
-	print "Available: $available\n";
-	print "Default: 0 (press ENTER) ";
-	$_ = <STDIN>;
-	chomp;
-	s/ //g;
-	$_ = "0" if ($_ eq "");
-	print "OK, I'll run test number $_\n";
-	return $_;
-}
-
-sub createExecutableOld
-{
-	my ($testNumber) = @_;
-	my $tn = $testNumber;
-	$tn -= 100 if ($tn>=100);
-	print "Trying to create executable for test $testNumber...\n";
-	chdir("../src");
-	my $specFile = getSpecFile($tn);
-	my $rCode = 0;
-	if ($generateFlag) {
-		$rCode = system("perl configure.pl < $specFile >& /dev/null"); 
-		die "Problem creating executable (configure.pl failed)\n" if ($rCode != 0);
-	}
-	if ($buildFlag) {
-		$rCode = system("make");
-		die "Problem creating executable (make failed)\n" if ($rCode != 0);
-	}
-	chdir ("../TestSuite");
-	return "nice -10 ../src/dmrg";
-}
-
-sub createExecutable
-{
-	my ($testNumber) = @_;
-	my ($exeIndex,$h);
-	($exeIndex,$h) = getExecHashAndIndex($testNumber);
-	
-	if ($exeIndex<0) {
-		print "Trying to create executable for test $testNumber...\n";
-		chdir("../src");
-		my $specFile = getSpecFile($testNumber);
-		my $rCode = 0;
-	
-		if ($generateFlag) {
-			$rCode = system("perl configure.pl < $specFile >& /dev/null"); 
-			die "Problem creating executable (configure.pl failed)\n" if ($rCode != 0);
-		}
-		if ($buildFlag) {
-			$rCode = system("make");
-			die "Problem creating executable (make failed)\n" if ($rCode != 0);
-			system("cp dmrg dmrg-$h");
-		}
-		chdir ("../TestSuite");
-	}
-	
-	return "nice -10 ../src/dmrg-$h";
-}
-
-
-sub getExecHashAndIndex
-{
-		my ($tn)=@_;
-		my $specFile = getSpecFile($tn);
-		open(PIPE,"md5sum $specFile |") or die "Cannot open pipe: $!\n";
-		$_ = <PIPE>;
-		my @temp = split;
-		close(PIPE);
-		my $i = getExeIndex($temp[0]);
-		return ($i,$temp[0]);
-}
-
-sub getExeIndex
-{
-	my ($h) = @_;
-	my $n = $#GlobalHashTable+1;
-	for (my $i=0;$i<$n;$i++) {
-		return $i if ($GlobalHashTable[$i] eq $h);
-	}
-	$GlobalHashTable[$n] = $h;
-	return -1;
-}
-
-
-sub getSpecFile
-{
-	my ($tn) = @_;
-	my $t = $tn;
-	$t = $tn -100 if ($tn>=100);
-	return "../TestSuite/inputs/model$t.spec";
-}
-
-sub thisSpecEqualToPrevSpec
-{
-	my ($tnNew,$tnOld)=@_;
-	my $fNew = getSpecFile($tnNew);
-	my $fOld = getSpecFile($tnOld);
-	return filesAreEqual($fNew,$fOld);
-}
-
-sub filesAreEqual
-{
-	my ($f1,$f2) = @_;
-	#print "Comparing $f1 with $f2\n";
-	open(PIPE,"diff $f1 $f2 | wc -l | ") or return 0;
-	$_ = <PIPE>;
-	close(PIPE);
-	return 1 if (/^0$/);
-	#die "Files not equal $f1 $f2 $_\n";
-	return 0;
-}
-
-sub getAvailableTests
-{
-	my ($needsPrinting)=@_; # print all available tests?
-	
-	open(MYSELF,$0) or die "Cannot open file $0: $!\n";
-	while(<MYSELF>) {
-		last if (/^\#TAGSTART/);
-	}
-	my $available = "";
-	while(<MYSELF>) {
-		last if (/^\#TAGEND/);
-		if (/(^\d+)\)/) {
-			$available = $available.$1." ";
-		} 
-		print if ($needsPrinting);
-	}
-	close(MYSELF);
-
+	my $available = getAvailableTests(0);
 	my @temp = split(/ /,$available);
-	for (my $i=0;$i<=$#temp;$i++)  {
-		$_ = $temp[$i] + 100;
-		$available = $available." ".$_;
+	
+	for (my $i=0;$i<$#temp+1;$i++) {
+		next if ($temp[$i] eq "");
+		next if ($temp[$i]<$start);
+		testSuite($temp[$i]);
 	}
-	return $available;
+	print "All tests done succesfully.\n";
 }
-
-
