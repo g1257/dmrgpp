@@ -48,20 +48,24 @@ but it is hopelessly inadequate for showing their absence." -- Edsger Dijkstra
 use strict;
 use Getopt::Long;
 
-my ($executable,$testNumber,$all,$update); 
+my ($executable,$testNumber,$all,$update,$verbose,$noModel) = (undef,undef,0,0,0,0); 
+my ($generateFlag,$buildFlag,$runFlag,$cmpFlag,$observeFlag,$rmFlag) = (1,1,1,1,0,0);	#Enable driver,enable makefile, enable test run,enable validations, enable cooking of observables
+
+GetOptions("x=s" => \$executable, "n=i" => \$testNumber, "all" => \$all, "u" => \$update,
+"g" => \$generateFlag, "b" => \$buildFlag, "r" => \$runFlag, "c" => \$cmpFlag, "o" => \$observeFlag,
+"rm" => \$rmFlag, "v" => \$verbose, "m" => \$noModel);	#Provides command options when running the script
+
+my $oraclesDir = "oracles/";		#Specifies the output folder for the oracles results
+my $srcDir = "../src/";
+my $testDir = "../TestSuite/";
 my $hashTable = "hashTable.txt";
-my ($generateFlag,$buildFlag,$runFlag,$cmpFlag,$observeFlag) = (1,1,1,1,0);	#Enable driver,enable makefile, enable test run,enable validations, enable cooking of observables
+my $resultsDir = "results/";
 
-GetOptions("exe=s" => \$executable, "n=i" => \$testNumber, "all" => \$all, "update" => \$update, "g=i" => \$generateFlag, "b=i" => \$buildFlag, "r=i" => \$runFlag, "c=i" => \$cmpFlag, "o=i" => \$observeFlag);	#Provides command options when running the script
 
-if($update) {
-	updateHashTable();
-} 
+selectTest();
 
-selectTests();	#Starts running the script
-
-#~ sub updateHashTable  #incompleete
-#~ {
+sub updateHashTable  #incompleete
+{
 	#~ chdir("../src");
 	#~ my @searchFiles = glob "dmrg-*";	#Put into an array all the executables found
 	#~ print "Initiating update process...\n";
@@ -95,49 +99,67 @@ selectTests();	#Starts running the script
 			#~ #print @contents."hola\n";
 		#~ }
 	#~ close(MYTABLE);
-#~ }
+}
 
-sub selectTests
+sub selectTest
 {
-	if(!defined($all) && !defined($testNumber)) {		#If no test is explicitly defined
-		$testNumber = askWhatTest();	#Make the user select a test from the available ones
+	if($update) {
+		updateHashTable();
+	} 
+
+	if(validateFile($hashTable) && validateDirectory($srcDir) && validateDirectory($testDir) && validateDirectory($oraclesDir) && validateDirectory($resultsDir)) {
+		if(!($all) && !defined($testNumber)) {		#If no test is explicitly defined
+			$testNumber = askWhatTest();	#Make the user select a test from the available ones
+		}
+		
+		if($all) {
+			runAllTests(0);		#Run all tests
+		} elsif($testNumber < 0) {
+			runAllTests(-$testNumber);	#Run all tests starting at $testNumber
+		} else {
+			testSuite($testNumber);	#Run specified test
+		}
+	}
+}
+
+sub validateDirectory	
+{
+	my ($dir) = @_;
+	
+	if(!-d $dir) {
+		if($dir eq $oraclesDir || $dir eq $resultsDir) {
+			my $rCode = system("mkdir $dir");
+			die "Error making $dir: $!\n" if($rCode);
+			print "Directory created: $dir\n";
+		} else {
+			die "Error searching for $dir: $!\n";
+		}
 	}
 	
-	if($all) {
-		runAllTests(0);		#Run all tests
-	} elsif($testNumber < 0) {
-		runAllTests(-$testNumber);	#Run all tests starting at $testNumber
-	} else {
-		testSuite($testNumber);	#Run specified test
-	}
+	return 1;
 }
 
 sub askWhatTest
 {
-	my $available = getAvailableTests(1);	#Get a numerical list of the available tests
+	my $available = getAvailableTests();	#Get a numerical list of the available tests
 	my @temp;
 	my @testArray;
-
+	my $searchNum;
 	#Here the user selects a test to be run
 	while() {
 		print "Please type the number of the test you want to run\n";
 		print "Available: $available\n";
 		print "Default: 0 (press ENTER) ";
 		chomp(my $tn = <STDIN>);	#Input test number
+		$tn = 0 if($tn eq "");
 		
-		if($tn eq "") {
-			$tn = 0;
-		}
-		
-		my $searchNum = abs($tn);
+		$searchNum = abs($tn);
 		@testArray = split(/ /,$available);	#Split string into test numbers
 		@temp = grep(/$searchNum/,@testArray);		#Search if the wanted test is available
 		
 		if(!@temp) {		#If user selection is not a valid test number then produce error
-			print "\nERROR: An incorrect test was selected! Please try again.\n\n";
+			print "Error: An incorrect test was selected! Try again.\n";
 		} else {
-			print "Preparing to run test number $tn\n";
-			undef @temp;
 			return $tn;		#If valid selection then continue to run the test
 		}
 	}
@@ -145,25 +167,25 @@ sub askWhatTest
 
 sub getAvailableTests
 {
-	my ($pFLAG) = @_;
 	my $available = "";
 	my $descriptionFile = "inputs/descriptions.txt";
 	
-	open(FILE,$descriptionFile) || die "ERROR: Cannot open file $descriptionFile: $!\n";	#Open this file: testsuite.pl
+	open(FILE,$descriptionFile) || die "Error opening $descriptionFile: $!\n";	#Open this file: testsuite.pl
 	while(<FILE>) {
 		last if(/^\#TAGEND/);		#TAGEND delimits the available tests in this document
 		if(/(^\d+)\)/) {
 			$available = $available.$1." ";	
 		}
-		print if($pFLAG);	#Display the available tests with their descriptions provided
+		print if($verbose);	#Display the available tests with their descriptions provided
 	}
 	close(FILE);	
 
 	my @testsArray = split(/ /,$available);	#Split the numbers of the tests
+	my $temp;
 	
 	for(my $i = 0;$i <= $#testsArray; $i++) {	
-		$_ = $testsArray[$i] + 100;
-		$available = $available." ".$_;		#Add to the list the tests with no SU(2) symmetry
+		$temp = $testsArray[$i] + 100;
+		$available = $available." ".$temp;		#Add to the list the tests with no SU(2) symmetry
 	}
 	
 	return $available;
@@ -175,8 +197,12 @@ sub validateFile	#Verifies if the file given exists
 
 	if(-e $file) {		#Check if the file exists
 		return 1;
+	} elsif($file eq $hashTable) {
+		my $rCode = system("touch $hashTable");
+		print "Error creating hash table: $!\n";
+		return 1;
 	} else {
-		print "ERROR: The file $file does not exists.\n";
+		print "Error: The file $file does not exists.\n";
 		return 0;
 	}
 }
@@ -203,6 +229,27 @@ sub removeKey
 	close (OUT);
 	
 	print "The key $mkey has been removed.\n";
+}
+
+sub removeFiles
+{
+	my ($tn) = @_;
+	my $rmTest = "raw$tn.txt gmon.out";
+	my $rmSrc = "Makefile* main* freeSystem* dmrg gmon.out observe.* input.*";
+	my $rCode;
+	my $tst = 0;
+	
+	if($observeFlag) {
+		$rCode = system("rm $rmTest");
+		#die "Error removing file: $!\n" if($rCode);
+		$rmSrc = $rmSrc." observe";
+	}
+	
+	chdir("$srcDir");
+	$rCode = system("rm $rmSrc");
+	#die "Error removing file: $!\n" if($rCode);
+	chdir("$testDir");
+	print "All temporary files were removed.\n";
 }
 
 sub executableExists
@@ -323,80 +370,311 @@ sub createHashKey
 sub testSuite  #this function should verify for $executable, $inputFile , $dataFile
 {
 	my ($tn) = @_;
-	my $inputFile = "inputs/input$tn.inp";
-	
+	my $inputFile = $testDir."inputs/input$tn.inp";
 	my $temp = $tn;
 	$temp -= 100 if($tn >= 100);
-	my $modelFile = "inputs/model$temp".".spec";
-	die "An input file is missing: $inputFile\n" if(!validateFile($inputFile));
+	my $specFile = $testDir."inputs/model$temp.spec";
+	
+	exit() if(!validateFile($inputFile) || !validateFile($specFile));
+	print "Preparing to run test $tn...\n";
 	
 	if(defined($executable)) {
 		die "Missing executable file: $executable" if(!validateFile($executable));
 		
 		#think about the hash and hashTable
 	
+	} elsif(!executableExists($tn,$specFile)) {	#verify if the executable for test number already exists
+				$executable = createExecutable($tn,$specFile);	#creates executable
 	} else {
-		if(validateFile($modelFile)) {
-			if(!executableExists($tn,$modelFile)) {	#verify if the executable for test number already exists
-				$executable = createExecutable($tn);	#creates executable
-			} else {
-				print "Retrieving existing executable.\n";
-			}
-		} else {   #die
-		die "Execution aborted: $modelFile is missing.\n";
-		}
+		print "Retrieving existing executable.\n";
 	}
 	
-	runSingleTest($tn,$executable) if($runFlag);
-	undef $executable;	
-	
+	runSingleTest($tn,$executable,$specFile,$inputFile) if($runFlag);
+	#--------------------
+	system("mv data$tn.txt results/");
 	if($cmpFlag) {
-		#validateEnergy($tn);
-		#validateProfile($tn);
-		#S,N,C	
+		validateEnergy($tn);
+		validateProfile($tn);
+		validateSNC($tn);	
 	}
+	
+	undef $executable;
+	undef $tn;
+	print "******END OF TEST $tn********\n";
 }
+
+sub validateEnergy
+{
+	
+	
+}
+
+sub validateProfile
+{
+	
+	
+}
+
+sub validateSNC
+{
+	
+	
+}
+
 
 sub createExecutable
 {
-	my ($tn) = @_;
-	chdir("../src");
-
+	my ($tn,$spec) = @_;
+	
+	chdir("$srcDir");
 	$tn -= 100 if($tn >= 100);
 	print "Creating executable for test $tn...\n";
+	my $rCode;
+	
 	print "***********************************\n";
-	
-	my $specFile = "../TestSuite/inputs/model$tn.spec";
-	my $rCode = 0;
-	
 	if($generateFlag) {
-		$rCode = system("perl configure.pl < $specFile >& /dev/null");
-		die "Error creating executable (configure.pl failed)\n" if($rCode != 0);
+		$rCode = system("./configure.pl < $spec >& /dev/null");
+		die "Error creating executable (configure.pl failed)\n" if($rCode);
 	}
 
 	if($buildFlag) {
 		$rCode = system("make -f Makefile");
-		die "Error creating executable (make failed)\n" if($rCode != 0);
+		die "Error creating executable (make failed)\n" if($rCode);
 	}
 	print "***********************************\n";
-	my $specKey = createHashKey($specFile);
+	my $specKey = createHashKey($spec);
 	$rCode = system("mv dmrg dmrg-$specKey");
-	die "Error renaming the executable file\n" if($rCode != 0);
-	chdir("../TestSuite");
+	die "Error renaming the executable file\n" if($rCode);
+	chdir("$testDir");
+	
 	addKey($specKey,$tn,$hashTable);
 	print "Executable was succesfully created.\n";
 	
-	return "../src/dmrg-$specKey";	
+	return $srcDir."dmrg-$specKey";	
 }
 
 sub runSingleTest
 {
-	my ($tn,$executable) = @_;
+	my ($tn,$executable,$spec,$input) = @_;
 	print "Please wait while the test is run...\n";
-	unlink("data$tn.txt");
-	my $rCode = system("$executable inputs/input$tn.inp >& /dev/null ");
-	die "$0: Test cannot be run to completion\n" if ($rCode != 0);
+	my $profFile = $testDir.$resultsDir."prof$tn.txt";
+	my $rCode = system("$executable $input >& /dev/null ");
+	die "$0: Test cannot be run to completion\n" if ($rCode);
 	print "The run has been completed.\n";
+	profile($executable,$profFile);
+	my $hashKey = createHashKey($spec);
+	my $dataFile = $srcDir."data$tn.txt";
+	my $rawFile = "raw$tn.txt";
+	my $energyOut = $resultsDir."e$tn.txt";
+	
+	
+	extractEnergy($dataFile,$energyOut);
+	observables($tn,$input,$dataFile,$rawFile) if($observeFlag);
+	$rCode = system("mv $dataFile $resultsDir");
+	die "Error moving $dataFile: $!\n" if($rCode);
+	removeFiles($tn) if($rmFlag);
+	print "Completed running test $tn.\n";
+}
+
+sub observables
+{
+	my ($tn,$input,$data,$raw) = @_;
+
+	chdir("$srcDir");
+	my $rCode = system("make observe -f Makefile");
+	die "Error with making observe: $!\n" if($rCode);
+	chdir("$testDir");
+	
+	$rCode = system($srcDir."observe $input $data > $raw"); 
+	die "Error running observables: $!\n" if($rCode);
+
+	my $cOut = $resultsDir."operatorC$tn.txt";
+	my $nOut = $resultsDir."operatorN$tn.txt";
+	my $sOut = $resultsDir."operatorS$tn.txt";
+	
+	extractOperatorC($raw,$cOut);
+	extractOperatorN($raw,$nOut);
+	extractOperatorS($raw,$sOut);
+	
+}
+
+
+sub extractEnergy
+{
+	my ($data,$energyOut) = @_;
+        my $rCode = system("grep Energy $data > $energyOut");
+	die "Error extracting energy values: $!\n" if($rCode);
+        print "Energy extraction was succesful!\n";
+}
+
+sub profile
+{
+	my ($exe,$prof) = @_;
+	my $rCode = system("gprof $exe > $prof"); 
+	die "Error with gprof: $!\n" if($rCode); 
+	 print "Profiling was succesful!\n";
+}
+
+#~ sub cookRaw
+#~ {
+	#~ my ($tn,$input,$data,$output,$hashKey) = @_;
+	
+	#~ chdir("../src/");
+	#~ my $rCode = system("make observe -f Makefile");
+	#~ die "Error make observe.\n" if($rCode);
+	#~ $rCode = system("mv observe observe-$hashKey");
+	#~ die "Error renaming the executable file\n" if($rCode != 0);
+	#~ chdir("../TestSuite/");
+	
+	#~ $rCode = system("../src/observe-$hashKey $input $data > $output"); 
+	#~ die "Error execute observe.\n" if($rCode);
+	
+	#~ my $line;
+	#~ my $opC;
+	#~ my $opN;
+	#~ my $opS;
+
+	#~ open(FILE,"<$output") || die "ERROR: Cannot open file: $!\n";	#Open this file: testsuite.pl
+		#~ while($line = <FILE>) {
+			
+			#~ if($line =~ /^OperatorC/) {
+				#~ $opC = $line;
+				#~ $line = <FILE>;
+				#~ $opC = $opC.$line;
+				#~ my @temp1 = split(/ /,$line);
+
+				#~ for(my $i = 0; $i < $temp1[0]; $i++) {
+					#~ $line = <FILE>;
+					#~ $opC = $opC.$line;
+				#~ }
+				
+			#~ }
+			
+			#~ if($line =~ /^OperatorN/) {
+				#~ $opN = $line;
+				#~ $line = <FILE>;
+				#~ $opN = $opN.$line;
+				#~ my @temp2 = split(/ /,$line);
+				#~ for(my $i = 0; $i < $temp2[0]; $i++) {
+					#~ $line = <FILE>;
+					#~ $opN = $opN.$line;
+				#~ }
+				
+			#~ }
+		
+			#~ if($line =~ /^OperatorS/) {
+				#~ $opS = $line;
+				#~ $line = <FILE>;
+				#~ $opS = $opS.$line;
+				#~ my @temp3 = split(/ /,$line);
+				#~ for(my $i = 0; $i < $temp3[0]; $i++) {
+					#~ $line = <FILE>;
+					#~ $opS = $opS.$line;
+				#~ }
+				
+			#~ }
+			
+	#~ }
+	#~ close(FILE);	
+	
+	#~ open (FILE, ">results/operatorC$tn.txt");
+	#~ print FILE $opC;
+	#~ close (FILE);
+	
+	#~ open (FILE, ">results/operatorN$tn.txt");
+	#~ print FILE $opN;
+	#~ close (FILE);
+	
+	#~ open (FILE, ">results/operatorS$tn.txt");
+	#~ print FILE $opS;
+	#~ close (FILE);	
+#~ }
+
+sub extractOperatorC
+{
+	my ($raw,$cOut) = @_;
+	my $line;
+	my $opC;
+	open(INFILE,"<$raw") || die "Error opening file: $!\n";
+		while($line = <INFILE>) {
+			if($line =~ /^OperatorC/) {
+				$opC = $line;
+				$line = <INFILE>;
+				$opC = $opC.$line;
+				my @temp1 = split(/ /,$line);
+
+				for(my $i = 0; $i < $temp1[0]; $i++) {
+					$line = <INFILE>;
+					$opC = $opC.$line;
+				}
+			}
+		}
+	close(INFILE);
+	
+	open (OUTFILE, ">$cOut");
+	print OUTFILE $opC;
+	close (OUTFILE);
+	print "OperatorC extraction was succesful!\n";
+}
+
+
+sub extractOperatorN
+{
+	my ($raw,$nOut) = @_;
+	my $line;
+	my $opN;
+	open(INFILE,"<$raw") || die "Error opening file: $!\n";	#Open this file: testsuite.pl
+		while($line = <INFILE>) {
+			
+			if($line =~ /^OperatorN/) {
+				$opN = $line;
+				$line = <INFILE>;
+				$opN = $opN.$line;
+				my @temp1 = split(/ /,$line);
+
+				for(my $i = 0; $i < $temp1[0]; $i++) {
+					$line = <INFILE>;
+					$opN = $opN.$line;
+				}
+				
+			}
+		}
+	close(INFILE);
+	
+	open (OUTFILE, ">$nOut");
+	print OUTFILE $opN;
+	close (OUTFILE);
+	print "OperatorN extraction was succesful!\n";
+}
+
+
+sub extractOperatorS
+{
+	my ($raw,$sOut) = @_;
+	my $line;
+	my $opS;
+	open(INFILE,"<$raw") || die "Error: Cannot open file: $!\n";
+		while($line = <INFILE>) {
+			
+			if($line =~ /^OperatorS/) {
+				$opS = $line;
+				$line = <INFILE>;
+				$opS = $opS.$line;
+				my @temp1 = split(/ /,$line);
+
+				for(my $i = 0; $i < $temp1[0]; $i++) {
+					$line = <INFILE>;
+					$opS = $opS.$line;
+				}
+				
+			}
+		}
+	close(INFILE);
+	
+	open (OUTFILE, ">$sOut");
+	print OUTFILE $opS;
+	close (OUTFILE);	
+	print "OperatorSz extraction was succesful!\n";
 }
 
 sub runAllTests
