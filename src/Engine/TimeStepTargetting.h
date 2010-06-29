@@ -278,6 +278,11 @@ namespace Dmrg {
 				return gsWeight_;
 				//return 1.0;
 			}
+			
+			RealType normSquared(size_t i) const
+			{
+				return real(multiply(targetVectors_[i],targetVectors_[i])); // call to mult will conj()
+			}
 
 			template<typename SomeBasisType>
 			void setGs(const std::vector<TargetVectorType>& v,//const std::vector<size_t>& weights,
@@ -439,7 +444,7 @@ namespace Dmrg {
 					throw std::runtime_error("It's 5 am, do you know what line your code is exec-ing?\n");
 				}
 				
-				//normalize(phi);
+				normalize(phi);
 			}
 			
 			void calcTimeVectors(
@@ -473,24 +478,9 @@ namespace Dmrg {
 			{
 				targetVectors_[0] = phi;
 				for (size_t i=1;i<times_.size();i++) {
-					//targetVectors_[i] = targetVectors_[0]; <-- ONLY FOR TESTING!!
-					//! Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-					//if (tstStruct_.aOperators.size()!=1) throw "Unimplemented (sorry)\n";
-					//if (stage_[0]==OPERATOR) {
-						calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
-					/*} else {
-						VectorWithOffsetType v = phi;
-					
-						// OK, now that we got the partition number right, let's wft:
-						waveFunctionTransformation_.setInitialVector(v,targetVectors_[i],
-							basisS_,basisE_,basisSE_); // generalize for su(2)
-						v.collapseSectors();
-						targetVectors_[i] = v;
-					}*/
-					//normalize(targetVectors_[i]);
-					//RealType norma = std::norm(targetVectors_[i]);
-					//std::cerr<<"norma after normalize="<<norma<<"\n";
-					//if (fabs(norma-1.0)>1e-5) throw std::runtime_error("Norm is not 1\n");
+					// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
+					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
+					normalize(targetVectors_[i]);
 				}
 			}
 

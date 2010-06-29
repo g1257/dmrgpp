@@ -282,7 +282,7 @@ namespace Dmrg {
 			
 			for (size_t i=0;i<target.size();i++) 
 				sum += densityMatrixOneTarget(alpha1,alpha2,target(i),
-					pBasisSummed,pSE,option)*target.weight(i);
+					pBasisSummed,pSE,option)*target.weight(i)/target.normSquared(i);
 
 			return sum;
 		}

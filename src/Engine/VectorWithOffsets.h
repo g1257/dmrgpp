@@ -282,8 +282,9 @@ namespace Dmrg {
 			template<typename FieldType2>
 			friend FieldType2 std::norm(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
 			
-			//template<typename FieldType2>
-			//friend void normalize(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
+			template<typename FieldType2>
+			friend std::complex<FieldType2> multiply(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v1,
+				  const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v2);
 	
 			template<typename FieldType2>
 			friend void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
@@ -373,19 +374,6 @@ namespace std {
 		return sum;
 	}
 	
-	/*template<typename FieldType>
-	inline void normalize(const Dmrg::VectorWithOffsets<FieldType>& v)
-	{
-		FieldType norma = std::norm(v);
-		FieldType eps = 1e-5;
-		if (fabs(norma-1.0)<eps) {
-			std::cerr<<"VectorWithOffsets::"
-			"normalize(): norm is already one, nothing to do\n";
-			return;
-		}
-		for (size_t i=0;i<v.data_.size();i++) v.data_[i] /= norma;
-		
-	}*/
 }
 
 namespace Dmrg {
@@ -404,6 +392,18 @@ namespace Dmrg {
 		for (size_t i=0;i<v.data_.size();i++) for (size_t j=0;j<v.data_[i].size();j++) 
 				v.data_[i][j] /= norma;
 		
+	}
+	
+	template<typename FieldType>
+	inline std::complex<FieldType> multiply(const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v1,
+				  const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v2)
+	{
+		std::complex<FieldType> sum=0;
+		for (size_t ii=0;ii<v1.nonzeroSectors_.size();ii++) {
+			size_t i = v1.nonzeroSectors_[ii];
+			sum += v1.data_[i]*v2.data_[i]; // call to * will conj()
+		}
+		return sum;
 	}
 }
 /*@}*/
