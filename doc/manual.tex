@@ -854,6 +854,35 @@ A sum should be assumed for all indices except $\eta_p$.
 \subsection{Shared-memory Parallelization}
 
 \section{Static Observables}
+A quick run with the calculation of static observables can be done like so:
+\begin{verbatim}
+cd src/
+perl configure.pl
+(all default answers here)
+make
+make observe
+./dmrg ../TestSuite/input2.inp
+./observe ../TestSuite/input2.inp data2.txt
+\end{verbatim}
+You will see something like this:
+\begin{verbatim}
+OperatorC:
+8 16
+0.5 0.426244 -2.84172e-08 ...
+0 0.5 -0.252775 1.67222e-07 0.0586682 ...
+...
+\end{verbatim}
+Here we are computing $C_{ij} = \langle c_{i\uparrow}c_{j\uparrow}\rangle$, where $8 16$ are the dimensions of the matrix 
+that follow ($C_{ij}$ is not computed for $i>j$).
+For example $C_{00}=0.5$, $C_{01}=0.426244$, $C_{12}=-0.252775$. 
+
+The same is done for $N_{ij} = \langle n_{i}n_{j}\rangle$, where $n_i = n_{i\uparrow}+n_{i\downarrow}$, and also for $\langle S_{i}^zS_{j}^z\rangle$
+
+The observer driver (\verb=observe.cpp=) controls what is calculated. Please have a look at it and modify as necessary.
+
+THIS SECTION NEEDS MORE WORK. IN PARTICULAR HOW TO SETUP THE INPUT FILE TO BE ABLE TO PRODUCE DATA FOR THE OBSERVER.
+
+
 \subsection{Ground State Energy and Error}
 \subsection{Static Correlations}
 \subsection{Observables Driver}

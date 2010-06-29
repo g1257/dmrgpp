@@ -159,7 +159,7 @@ namespace Dmrg {
 		os<<"parameters.density="<<parameters.density<<"\n";
 		utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
 		utils::vectorPrint(parameters.potentialV,"potentialV",os);
-		utils::matrixPrint(parameters.hoppings,os);
+		utils::matrixPrint(parameters.hoppings,os); // comment out this line if using gcc v3
 		return os;
 	}
 } // namespace Dmrg

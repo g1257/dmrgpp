@@ -417,6 +417,9 @@ namespace Dmrg {
 					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
 					applyLocalOp(phi,psi_,tstStruct_.aOperators[i],tstStruct_.electrons,systemOrEnviron);
+					RealType norma = norm(phi);
+					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
+					std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
 					size_t advance = indexNoAdvance;
 					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
@@ -435,10 +438,8 @@ namespace Dmrg {
 				} else {
 					throw std::runtime_error("It's 5 am, do you know what line your code is exec-ing?\n");
 				}
-				RealType norma = norm(phi);
-				if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
-				std::cerr<<"Norm of phi="<<norma<<"\n";
-				normalize(phi);
+				
+				//normalize(phi);
 			}
 			
 			void calcTimeVectors(
@@ -486,10 +487,10 @@ namespace Dmrg {
 						v.collapseSectors();
 						targetVectors_[i] = v;
 					}*/
-					normalize(targetVectors_[i]);
-					RealType norma = std::norm(targetVectors_[i]);
+					//normalize(targetVectors_[i]);
+					//RealType norma = std::norm(targetVectors_[i]);
 					//std::cerr<<"norma after normalize="<<norma<<"\n";
-					if (fabs(norma-1.0)>1e-5) throw std::runtime_error("Norm is not 1\n");
+					//if (fabs(norma-1.0)>1e-5) throw std::runtime_error("Norm is not 1\n");
 				}
 			}
 

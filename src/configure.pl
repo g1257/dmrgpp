@@ -956,7 +956,9 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,//ParametersSolverT
 	
 	size_t n=mp.linSize;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
-	Observe<RealType,FieldType,IoSimple,ConcurrencyType> observe(datafile,n,opInfo.n_row(),concurrency);
+	size_t timeSteps = 0;
+	bool verbose = false;
+	Observe<RealType,FieldType,IoSimple,ConcurrencyType> observe(datafile,n,opInfo.n_row(),timeSteps,concurrency,verbose);
 EOF
 	if ($targetting=~/timestep/i) {
 print OBSOUT<<EOF;

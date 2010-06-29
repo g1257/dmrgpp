@@ -95,7 +95,7 @@ namespace Dmrg {
 		
 		
 		
-		Precomputed(const std::string& filename,size_t nf,bool verbose=true) 
+		Precomputed(const std::string& filename,size_t nf,size_t stepTimes,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
 				SpermutationInverse_(nf),Spermutation_(nf),
@@ -107,7 +107,7 @@ namespace Dmrg {
 				currentPos_(0),
 				verbose_(verbose),
 				nf_(nf),
-				stepTimes_(7)
+				stepTimes_(stepTimes)
 		{
 			rewind(true);
 			for (size_t i=0;i<nf-1;i++) {
@@ -125,8 +125,8 @@ namespace Dmrg {
 			}
 			FieldType dummy = 0;
 			initTimeVectors(dummy);
-			
-			if (verbose_) std::cerr<<(*this);
+			// Line below might cause trouble under gcc v3
+			//if (verbose_) std::cerr<<(*this);
 		}
 		
 		void setPointer(size_t pos)

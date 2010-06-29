@@ -103,9 +103,10 @@ namespace Dmrg {
 		static size_t const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
 		
 	public:
-		Observe(const std::string& filename,size_t n,size_t n1,ConcurrencyType& concurrency)
-		: precomp_(filename,2*n,true),halfLatticeSize_(n),
-			    oneSiteHilbertSize_(n1),skeleton_(precomp_),fourpoint_(precomp_,skeleton_),concurrency_(concurrency)
+		Observe(const std::string& filename,size_t n,size_t n1,size_t stepTimes,ConcurrencyType& concurrency,bool verbose=false)
+		: precomp_(filename,2*n,stepTimes,verbose),halfLatticeSize_(n),
+			    oneSiteHilbertSize_(n1),skeleton_(precomp_),fourpoint_(precomp_,skeleton_),concurrency_(concurrency),
+				verbose_(verbose)
 		{}
 		
 		psimag::Matrix<FieldType> correlations(size_t n,const MatrixType& O1,const MatrixType& O2,int fermionicSign,
@@ -126,7 +127,7 @@ namespace Dmrg {
 					//std::cerr<<"About to do i="<<i<<" and j="<<j<<"\n";
 					//try {
 						v[j]  = calcCorrelation(i,j,O1,O2,fermionicSign);
-						std::cerr<<"Result for i="<<i<<" and j="<<j<<" is "<<v[j]<<"\n";
+						if (verbose_) std::cerr<<"Result for i="<<i<<" and j="<<j<<" is "<<v[j]<<"\n";
 					//} catch (std::exception& e) {
 					//	std::cerr<<"Result for i="<<i<<" and j="<<j<<" exception caught: "<<e.what()<<"\n";
 					//}
@@ -301,9 +302,9 @@ namespace Dmrg {
 				int nt=i-1;
 				if (nt<0) nt=0;
 				MatrixType Oinc = Osrc;
-				std::cerr<<"Precomputing "<<i<<" out of "<<(ns-1)<<"\n";
+				if (verbose_) std::cerr<<"Precomputing "<<i<<" out of "<<(ns-1)<<"\n";
 				for (size_t s=nt+1;s<nfinal;s++) {
-					std::cerr<<"\tPrecomputing "<<s<<" out of "<<(nfinal-1)<<"\n";
+					if (verbose_) std::cerr<<"\tPrecomputing "<<s<<" out of "<<(nfinal-1)<<"\n";
 					growRecursive(grownOperators_[i][s-nt-1],Oinc,i,fermionicSign,s-1);
 					Oinc = grownOperators_[i][s-nt-1];
 					//growDirectly(grownOperators_[i][s-nt-1],Osrc,i,fermionicSign,s);
@@ -349,6 +350,7 @@ namespace Dmrg {
 		CorrelationsSkeletonType skeleton_;
 		FourPointCorrelationsType fourpoint_;
 		ConcurrencyType& concurrency_;
+		bool verbose_;
 		std::vector<size_t> growCached_;
 		std::vector<std::vector<MatrixType> > grownOperators_;
 		
