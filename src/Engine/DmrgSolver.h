@@ -218,7 +218,7 @@ namespace Dmrg {
 			finiteDmrgLoops(S,E,pS,pE,X.size(),psi);
 			
 			std::ostringstream msg2;
-			msg2<<"Turning off the engine. Putting transmission into park. We've arrived!";
+			msg2<<"Turning off the engine.";
 			progress_.printline(msg2,std::cout);
 		}
 

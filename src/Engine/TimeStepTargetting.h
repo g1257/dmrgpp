@@ -548,7 +548,7 @@ namespace Dmrg {
 				
 				ComplexVectorType tmp(n2);
 				r.resize(n2);
-				calcR(r,T,V,phi,Eg,eigs,t,steps);
+				calcR(r,T,V,phi,Eg,eigs,t,steps,i0);
 				psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0,0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1 );
 				r.resize(n);
 				psimag::BLAS::GEMV('N', n,  n2, zone, &(V(0,0)), n, &(tmp[0]),1, zzero, &(r[0]),   1 );
@@ -572,12 +572,13 @@ namespace Dmrg {
     				RealType Eg,
 				const VectorType& eigs,
     				RealType t,
-				size_t n2)
+				size_t n2,
+				size_t i0)
 			{
 				for (size_t k=0;k<n2;k++) {
 					ComplexType sum = 0.0;
 					for (size_t kprime=0;kprime<n2;kprime++) {
-						ComplexType tmpV = calcVTimesPhi(kprime,V,phi);
+						ComplexType tmpV = calcVTimesPhi(kprime,V,phi,i0);
 						//if (k==0) std::cerr<<"HERE:"<<tmpV<<" "<<V(0,kprime)<<"\n";
 						sum += conj(T(kprime,k))*tmpV;
 					}
@@ -588,17 +589,18 @@ namespace Dmrg {
 				}
 			}
 
-			ComplexType calcVTimesPhi(size_t kprime,const ComplexMatrixType& V,const VectorWithOffsetType& phi)
+			ComplexType calcVTimesPhi(size_t kprime,const ComplexMatrixType& V,const VectorWithOffsetType& phi,
+						 size_t i0)
 			{
 				ComplexType ret = 0;
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i = phi.sector(ii);
-					size_t total = phi.effectiveSize(i);
+				//for (size_t ii=0;ii<phi.sectors();ii++) {
+					//size_t i = phi.sector(ii);
+					size_t total = phi.effectiveSize(i0);
 					//size_t offset = phi.offset(i);
 				
 					for (size_t j=0;j<total;j++)
-						ret += conj(V(j,kprime))*phi.fastAccess(i,j);
-				}
+						ret += conj(V(j,kprime))*phi.fastAccess(i0,j);
+				//}
 				
 				return ret;
 			}
