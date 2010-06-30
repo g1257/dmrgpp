@@ -313,16 +313,34 @@ namespace Dmrg {
 			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
 			{
 				size_t count =0;
-				for (size_t i=0;i<tstStruct_.sites.size();i++)
-					count += evolve(i,Eg,direction,block,loopNumber);
+				VectorWithOffsetType phiOld = psi_;
+				VectorWithOffsetType phiNew;
+				size_t max = tstStruct_.sites.size();
+				
+				if (noStageIs(DISABLED)) max = 1;
+				
+				for (size_t i=0;i<max;i++) {
+					count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber);
+					phiOld = phiNew;
+				}
+				
 				if (count==0) return;
+				
+				calcTimeVectors(Eg,phiNew,direction);
 				
 				cocoon(direction,block); // in-situ
 				
 				printVectors(); // for post-processing
 			}
 
-			size_t evolve(size_t i,RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
+			size_t evolve(
+					size_t i,
+					VectorWithOffsetType& phiNew,
+					VectorWithOffsetType& phiOld,
+					RealType Eg,
+					size_t direction,
+					const BlockType& block,
+					size_t loopNumber)
 			{
 				
 				static size_t  timesWithoutAdvancement=0;
@@ -354,11 +372,9 @@ namespace Dmrg {
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
 				
-				VectorWithOffsetType phi; // phi = A|psi>
-				computePhi(i,phi,direction);
+				// phi = A|psi>
+				computePhi(i,phiNew,phiOld,direction);
 				
-				
-				calcTimeVectors(Eg,phi,direction);
 				return 1;
 			}
 
@@ -394,6 +410,13 @@ namespace Dmrg {
 				return true;
 			}
 			
+			bool noStageIs(size_t x) const
+			{
+				for (size_t i=0;i<stage_.size();i++)
+					if (stage_[i]==x) return false;
+				return true;
+			}
+			
 			std::string getStage(size_t i) const
 			{
 				switch (stage_[i]) {
@@ -413,7 +436,8 @@ namespace Dmrg {
 				return "undefined";
 			}
 			
-			void computePhi(size_t i,VectorWithOffsetType& phi,size_t systemOrEnviron)
+			void computePhi(size_t i,VectorWithOffsetType& phiNew,
+					VectorWithOffsetType& phiOld,size_t systemOrEnviron)
 			{
 				size_t indexAdvance = times_.size()-1;
 				size_t indexNoAdvance = 0;
@@ -421,8 +445,8 @@ namespace Dmrg {
 					std::ostringstream msg;
 					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
-					applyLocalOp(phi,psi_,tstStruct_.aOperators[i],tstStruct_.electrons,systemOrEnviron);
-					RealType norma = norm(phi);
+					applyLocalOp(phiNew,phiOld,tstStruct_.aOperators[i],tstStruct_.electrons,systemOrEnviron);
+					RealType norma = norm(phiNew);
 					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
 					std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
@@ -432,19 +456,19 @@ namespace Dmrg {
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 					
-					if (tstStruct_.aOperators.size()==1) guessPhiSectors(phi,i,systemOrEnviron);
-					else phi.populateSectors(basisSE_);
+					if (tstStruct_.aOperators.size()==1) guessPhiSectors(phiNew,i,systemOrEnviron);
+					else phiNew.populateSectors(basisSE_);
 					
 					// OK, now that we got the partition number right, let's wft:
-					waveFunctionTransformation_.setInitialVector(phi,targetVectors_[advance],
+					waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[advance],
 							basisS_,basisE_,basisSE_); // generalize for su(2)
-					phi.collapseSectors();
+					phiNew.collapseSectors();
 					
 				} else {
 					throw std::runtime_error("It's 5 am, do you know what line your code is exec-ing?\n");
 				}
 				
-				normalize(phi);
+				//normalize(phi);
 			}
 			
 			void calcTimeVectors(
@@ -480,7 +504,7 @@ namespace Dmrg {
 				for (size_t i=1;i<times_.size();i++) {
 					// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
 					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
-					normalize(targetVectors_[i]);
+					//normalize(targetVectors_[i]);
 				}
 			}
 
