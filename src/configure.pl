@@ -595,6 +595,7 @@ sub createInput
 	my $connectorValues=createConnectors($connectorValue);
 	my $version=getVersion();
 	my $qns = "2 0.5 0.5";
+	my $inputForTimeEvolution = getTimeEvolutionInput();
 	
 	if ($su2Symmetry=~/y/i) {
 		$_ = $electrons/(4*$linSize);
@@ -663,11 +664,45 @@ FiniteLoops $finiteLoops
 QNS $qns
    
 EOF
-	print FOUT "Threads $nthreads\n\n" if ($pthreads);
+	print FOUT "Threads $nthreads\n" if ($pthreads);
+	print FOUT "$inputForTimeEvolution\n\n" if ($targetting=~/timestep/i);
 	print STDERR "File input.inp has been written\n";
 	close(FOUT);
 }
 
+sub getTimeEvolutionInput
+{
+	return "#NO_TIME_EVOLUTION" unless ($targetting=~/timestep/i);
+	my $ret <<EOF;
+FILENAME tst.txt
+TIMESTEP 0.1
+MAXTIMES 4 
+ADVANCEEACH 5 
+SITE  2 10 11 
+STARTINGLOOP 2 0 0 
+
+TIMEEVOLUTION raw 
+RAW_MATRIX 4 4
+0.0    0.0    0.0   0.0
+0.0   0.0    0.0   -1.0
+0.0    0.0    0.0   1.0 
+0.0    0.0    0.0   0.0 
+FERMIONSIGN -1
+JMVALUES 0 0
+angularFactor 1
+
+TIMEEVOLUTION raw
+RAW_MATRIX 4 4
+0.0    0.0    0.0   0.0
+1.0    0.0    0.0   0.0
+1.0    0.0    0.0   0.0
+0.0    0.0    0.0   0.0
+FERMIONSIGN -1
+JMVALUES 0 0
+angularFactor 1
+EOF
+	return $ret;
+}
 
 # Unused 
 sub createInputJsn

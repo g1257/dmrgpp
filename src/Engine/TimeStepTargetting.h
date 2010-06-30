@@ -320,7 +320,7 @@ namespace Dmrg {
 				if (noStageIs(DISABLED)) max = 1;
 				
 				for (size_t i=0;i<max;i++) {
-					count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber);
+					count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber,max-1);
 					phiOld = phiNew;
 				}
 				
@@ -340,7 +340,8 @@ namespace Dmrg {
 					RealType Eg,
 					size_t direction,
 					const BlockType& block,
-					size_t loopNumber)
+					size_t loopNumber,
+				     	size_t lastI)
 			{
 				
 				static size_t  timesWithoutAdvancement=0;
@@ -349,7 +350,7 @@ namespace Dmrg {
 					std::runtime_error("TimeStepTargetting::evolve(...):"
 							" blocks of size != 1 are unsupported (sorry)\n");
 				size_t site = block[0];
-				size_t max = tstStruct_.aOperators.size()-1;
+				//size_t max = tstStruct_.aOperators.size()-1;
 				if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return 0;
 				
 				
@@ -358,14 +359,15 @@ namespace Dmrg {
 				
 				if (timesWithoutAdvancement >= tstStruct_.advanceEach) {
 					stage_[i] = WFT_ADVANCE;
-					if (i==max) {
+					if (i==lastI) {
 						currentTime_ += tstStruct_.tau;
 						timesWithoutAdvancement=0;
 					}
 				} else {
-					if (i==max && stage_[i]==WFT_NOADVANCE) 
+					if (i==lastI && stage_[i]==WFT_NOADVANCE) 
 						timesWithoutAdvancement++;
 				}
+				std::cerr<<"timesWithoutAdvancement="<<timesWithoutAdvancement<<"\n";
 				
 				std::ostringstream msg;
 				msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
