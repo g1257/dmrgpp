@@ -12,16 +12,16 @@ GetOptions("n=i" => \$testNumber, "all" => \$all, "v" => \$verbose, "rm" => \$rm
 my $oraclesDir = "oracles/";		#Specifies the output folder for the oracles results
 my $srcDir = "../src/";
 my $testDir = "../TestSuite/";
+my $inputsDir = "inputs/";
 
-selectTest();
+runScript();
 
-sub selectTest
+sub runScript
 {
-	if(validateDirectory($srcDir) && validateDirectory($testDir) && validateDirectory($oraclesDir)) {
+	if(validateDirectory($srcDir) && validateDirectory($testDir) && validateDirectory($oraclesDir) && validateDirectory($inputsDir)) {
 		if(!defined($testNumber) && !($all)) {
 			$testNumber = selectOracle();
 		}
-		
 		
 		if($all) {
 			runAllOracles(0);
@@ -45,7 +45,8 @@ sub validateDirectory
 			die "Error making $dir: $!\n" if($rCode);
 			print "Directory created: $dir\n";
 		} else {
-			die "Error searching for $dir: $!\n";
+			print "Error searching for $dir: $!\n";
+			return 0;
 		}
 	}
 	
@@ -82,7 +83,7 @@ sub selectOracle
 sub getAvailableTests
 {
 	my $available = "";
-	my $descriptionFile = "inputs/descriptions.txt";
+	my $descriptionFile = $inputsDir."descriptions.txt";
 	
 	open(FILE,$descriptionFile) || die "Error opening $descriptionFile: $!\n";
 	while(<FILE>) {
@@ -113,7 +114,7 @@ sub validateFile	#Verifies if the file given exists
 	if(-e $file) {		#Check if the file exists
 		return 1;
 	} else {
-		print "Error: $file does not exists.\n";
+		#print "Error: $file does not exists.\n";
 		return 0;
 	}
 }
@@ -121,61 +122,67 @@ sub validateFile	#Verifies if the file given exists
 sub runOracle
 {
 	my ($tn) = @_;
-	my $inputFile = $testDir."inputs/input$tn.inp";
+	my $configFile = $srcDir."configure.pl";
+	my $inputFile = $testDir.$inputsDir."input$tn.inp";
 	my $executable = $srcDir."dmrg";
-	my $temp = $tn;
-	$temp -= 100 if($tn >= 100);
-	my $specFile = $testDir."inputs/model$temp.spec";
+	my $profFile = $testDir.$oraclesDir."prof$tn.txt";
 	
-	exit() if(!validateFile($inputFile) || !validateFile($specFile));
 	print "Preparing to run oracle of test $tn...\n";
 	
 	chdir("$srcDir");
-	my $profFile = $testDir.$oraclesDir."prof$tn.txt";
-	my $rCode = 0;
+	my $rCode;
 	
 	if($noModel) {
-		$rCode = system("./configure.pl");
-		die "Error with configure.pl: $!\n" if($rCode);
+		$rCode = system("./$configFile");
+		die "Error with $configFile: $!\n" if($rCode);
 	} else {
-		$rCode = system("./configure.pl < $specFile");
-		die "Error with configure.pl: $!\n" if($rCode);
+		my $temp = $tn;	
+		$temp -= 100 if($tn >= 100);
+		my $specFile = $testDir.$inputsDir."model$temp.spec";
+		die "Error: Model file is missing.\n" if(!validateFile($specFile));
+		$rCode = system("./$configFile < $specFile");
+		die "Error with $configFile: $!\n" if($rCode);
 	}
+	
+	die "Error: Input file is missing.\n" if(!validateFile($inputFile));
 	
 	$rCode = system("make -f Makefile");
 	die "Error with the Makefile: $!\n" if($rCode);
 	$rCode = system("./$executable $inputFile");
 	die "Error running test: $!\n" if($rCode);
-	profile($executable,$profFile);
+	profile($profFile,$executable);
 	chdir("$testDir");
 	
 	my $dataFile = $srcDir."data$tn.txt";
-	my $rawFile = "raw$tn.txt";
-	my $energyOut = "oracles/e$tn.txt";
+	my $rawFile = $testDir."raw$tn.txt";
+	my $energyOut = $testDir.$oraclesDir."e$tn.txt";
 	my $tstFile = $srcDir."tst$tn.txt";
 	my $envStack = $srcDir."EnvironStackdata$tn.txt";
 	my $sysStack = $srcDir."SystemStackdata$tn.txt";
-	my $line;
-	
-	open FILE,"<$specFile" || die "Error opening file: $!\n";
-	while($line = <FILE>) {
-		if(grep (/^TimeStepTargetting/, $line)) {
-			$rCode = system("mv $tstFile oracles/");
-			die "Error moving time step targetting: $!\n" if($rCode);
-		} elsif(grep (/^DiskStack/,$line)) {
-			$rCode = system("mv $envStack $sysStack oracles/");
-			die "Error moving stack file: $!\n" if($rCode);
-		}
-	}
-	close FILE;
-	
+
+	observables($tn,$inputFile,$dataFile,$rawFile) if($observeFlag);
 	extractEnergy($dataFile,$energyOut);
-	observables($tn,$inputFile,$dataFile,$rawFile) if($observeFlag);	
-	$rCode = system("mv $dataFile oracles/");
-	die "Error moving $dataFile: $!\n" if($rCode);
+	moveFiles($dataFile,$tstFile,$envStack,$sysStack);
 	removeFiles($tn) if($rmFlag);
 	print "Completed running oracle for test $tn.\n";
+}
+
+sub moveFiles
+{
+	my (@files) = @_;
+	my $rCode;
 	
+	foreach my $f (@files) {
+		$rCode = system("mv $f ".$testDir.$oraclesDir) if(validateFile("$f"));
+	}
+	
+	chdir("$srcDir");
+	foreach my $f (@files) {
+		$rCode = system("mv $f ".$testDir.$oraclesDir) if(validateFile("$f"));
+	}
+	chdir("$testDir");
+	
+	print "All results were succesfully stored.\n";
 }
 
 sub extractOperatorC
@@ -274,12 +281,13 @@ sub observables
 	die "Error with making observe: $!\n" if($rCode);
 	chdir("$testDir");
 	
-	$rCode = system($srcDir."observe $input $data > $raw"); 
+	my $obsFile = $srcDir."observe";
+	$rCode = system("$obsFile $input $data > $raw"); 
 	die "Error running observables: $!\n" if($rCode);
 
-	my $cOut = $oraclesDir."operatorC$tn.txt";
-	my $nOut = $oraclesDir."operatorN$tn.txt";
-	my $sOut = $oraclesDir."operatorS$tn.txt";
+	my $cOut = $testDir.$oraclesDir."operatorC$tn.txt";
+	my $nOut = $testDir.$oraclesDir."operatorN$tn.txt";
+	my $sOut = $testDir.$oraclesDir."operatorS$tn.txt";
 	
 	extractOperatorC($raw,$cOut);
 	extractOperatorN($raw,$nOut);
@@ -289,19 +297,18 @@ sub observables
 
 sub profile
 {
-	my ($exe,$prof) = @_;
+	my ($prof,$exe) = @_;
 	my $rCode = system("gprof $exe > $prof"); 
 	die "Error with gprof: $!\n" if($rCode); 
-	 print "Profiling was succesful!\n";
+	print "Profiling was succesful!\n";
 }
 
 sub removeFiles
 {
 	my ($tn) = @_;
 	my $rmTest = "raw$tn.txt gmon.out";
-	my $rmSrc = "Makefile* main* freeSystem* dmrg gmon.out observe.* input.*";
+	my $rmSrc = "Makefile* main* freeSystem* dmrg gmon.out observe.*";
 	my $rCode;
-	my $tst = 0;
 	
 	if($observeFlag) {
 		$rCode = system("rm $rmTest");
@@ -310,9 +317,11 @@ sub removeFiles
 	}
 	
 	chdir("$srcDir");
+	$rmSrc = $rmSrc." input.*" if(validateFile("input.inp") || validateFile("input.o") || validateFile("input.bak"));
 	$rCode = system("rm $rmSrc");
 	#die "Error removing file: $!\n" if($rCode);
 	chdir("$testDir");
+	
 	print "All temporary files were removed.\n";
 }
 
@@ -323,10 +332,12 @@ sub runAllOracles
 	
 	my $available = getAvailableTests();
 	my @temp = split(/ /,$available);
+	my @notFunctionalTests = (4,24,60,104,105,106,107,108,124,125,141,160);
 	
-	for (my $i=0;$i<$#temp+1;$i++) {
-		next if ($temp[$i] eq "");
-		next if ($temp[$i]<$start);
+	for (my $i=0;$i<=$#temp;$i++) {
+		next if($temp[$i] eq "");
+		next if($temp[$i]<$start);
+		next if(grep {$_ eq $temp[$i]}@notFunctionalTests);
 		runOracle($temp[$i]);
 	}
 	
