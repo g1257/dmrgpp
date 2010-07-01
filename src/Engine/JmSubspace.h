@@ -85,20 +85,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define JM_SUBSPACE_H
 
 #include "Utils.h"
-#include "Su2SymmetryLimits.h"
+#include "Su2SymmetryGlobals.h"
 
 namespace Dmrg {
 	template<typename FieldType,typename SparseMatrixType,typename SymmetryRelatedType>
 	class JmSubspace {
 			typedef std::pair<size_t,size_t> PairType;
 			typedef std::pair<PairType,PairType> TwoPairsType;
-			typedef Su2SymmetryLimits<FieldType> Su2SymmetryLimitsType;
-			typedef typename Su2SymmetryLimitsType::ClebschGordanType ClebschGordanType;
+			typedef Su2SymmetryGlobals<FieldType> Su2SymmetryGlobalsType;
+			typedef typename Su2SymmetryGlobalsType::ClebschGordanType ClebschGordanType;
 		public:
 			typedef std::pair<PairType,TwoPairsType> FlavorType;
 
 			JmSubspace(const PairType& jm,size_t index,const PairType& jm1,const PairType& jm2,size_t nelectrons,int heavy=1)
-			:	jm_(jm),nelectrons_(nelectrons),heavy_(heavy),cgObject_(&(Su2SymmetryLimitsType::clebschGordanObject))
+			:	jm_(jm),nelectrons_(nelectrons),heavy_(heavy),cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
 			{
 				
 				push(index,jm1,jm2,nelectrons);

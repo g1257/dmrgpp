@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define REDUCEDOP_IMPL_H
 
 #include "Utils.h"
-#include "Su2SymmetryLimits.h"
+#include "Su2SymmetryGlobals.h"
 #include "Operator.h"
 
 namespace Dmrg {
@@ -95,13 +95,13 @@ namespace Dmrg {
 			typedef typename OperatorType::PairType PairType;
 			typedef ClebschGordanCached<RealType> ClebschGordanType;
 			typedef psimag::Matrix<SparseElementType> DenseMatrixType;
-			typedef Su2SymmetryLimits<RealType> Su2SymmetryLimitsType;
+			typedef Su2SymmetryGlobals<RealType> Su2SymmetryGlobalsType;
 			
 		public:
 			ReducedOperators(const DmrgBasisType* thisBasis,size_t dof,size_t orbitals) 
 				: thisBasis_(thisBasis),useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
 					     dof_(dof),nOrbitals_(orbitals),
-					cgObject_(&(Su2SymmetryLimitsType::clebschGordanObject))
+					cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
 			{
 			}
 

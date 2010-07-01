@@ -75,20 +75,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Su2SymmetryLimits.h
+/*! \file Su2SymmetryGlobals.h
  *
  *
  *
  */
-#ifndef SU2_LIMITS_H
-#define SU2_LIMITS_H
+#ifndef SU2_GLOBALS_H
+#define SU2_GLOBALS_H
 
 #include "ClebschGordanCached.h"
 
 namespace Dmrg {
 	
 	template<typename FieldType>
-	struct Su2SymmetryLimits {
+	struct Su2SymmetryGlobals {
 		typedef ClebschGordanCached<FieldType> ClebschGordanType;
 		static void init(bool hasSu2Symmetry)
 		{
@@ -101,17 +101,17 @@ namespace Dmrg {
 		static size_t MaximumJValue; // this is the maximum allowed \tile{j}=2j value (j is half this value)
 		static size_t NumberOfFactorials; // number of factorials for the Clebsch-Gordan coefficients
 		static ClebschGordanType clebschGordanObject;
-	}; // ProgramLimits
+	}; // Su2SymmetryGlobals
 	
 	template<typename ClebschGordanType>
-	size_t Su2SymmetryLimits<ClebschGordanType>::MaximumJValue = 2;
+	size_t Su2SymmetryGlobals<ClebschGordanType>::MaximumJValue = 2;
 	
 	template<typename ClebschGordanType>
-	size_t Su2SymmetryLimits<ClebschGordanType>::NumberOfFactorials = 2;
+	size_t Su2SymmetryGlobals<ClebschGordanType>::NumberOfFactorials = 2;
 	
 	template<typename FieldType>
-	ClebschGordanCached<FieldType> Su2SymmetryLimits<FieldType>::clebschGordanObject(2);
+	ClebschGordanCached<FieldType> Su2SymmetryGlobals<FieldType>::clebschGordanObject(2);
 	
 }; // namespace Dmrg
 /*@}*/
-#endif //SU2_LIMITS_H
+#endif //SU2_GLOBALS_H

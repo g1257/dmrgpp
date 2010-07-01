@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ModelCommon.h"
 #include "BasisWithOperators.h"
-#include "Su2SymmetryLimits.h"
+#include "Su2SymmetryGlobals.h"
 
 namespace Dmrg {
 	//! Interface to models for the dmrg solver.
@@ -113,7 +113,7 @@ namespace Dmrg {
 			ModelBase(int DEGREES_OF_FREEDOM,const DmrgGeometryType& dmrgGeometry) :
 					modelCommon_(DEGREES_OF_FREEDOM,dmrgGeometry) 
 			{
-				Su2SymmetryLimits<RealType>::init(ModelHelperType::isSu2());
+				Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 				MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
 			}  
 

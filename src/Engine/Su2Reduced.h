@@ -75,7 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define SU2_REDUCED_HEADER_H
 
 #include "BasisWithOperators.h"
-#include "Su2SymmetryLimits.h"
+#include "Su2SymmetryGlobals.h"
 
 /** \ingroup DMRG */
 /*@{*/
@@ -97,8 +97,8 @@ namespace Dmrg {
 			typedef typename BasisType::RealType RealType;
 			typedef std::pair<size_t,size_t> PairType;
 			typedef typename OperatorsType::OperatorType OperatorType;
-			typedef Su2SymmetryLimits<RealType> Su2SymmetryLimitsType;
-			typedef typename Su2SymmetryLimitsType::ClebschGordanType ClebschGordanType;
+			typedef Su2SymmetryGlobals<RealType> Su2SymmetryGlobalsType;
+			typedef typename Su2SymmetryGlobalsType::ClebschGordanType ClebschGordanType;
 			
 			static const size_t System=0,Environ=1;
 			static const BasisType* basis1Ptr_;
@@ -123,7 +123,7 @@ namespace Dmrg {
 			basis2_(basis2),
 			basis3_(basis3),
 			nOrbitals_(nOrbitals),
-			cgObject_(Su2SymmetryLimitsType::clebschGordanObject)
+			cgObject_(Su2SymmetryGlobalsType::clebschGordanObject)
 			{
 				std::vector<PairType> jsEffective;
 				std::vector<size_t> jvalues;
