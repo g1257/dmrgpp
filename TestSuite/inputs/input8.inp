@@ -9,31 +9,31 @@ hoppings 8 8
  0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0
  0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
 
-hubbardU	8 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0
+hubbardU	8 0 0 0 0 0 0 0 0
 potentialV	 16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 density 1.0
 options hasQuantumNumbers,wft,nosu2,TimeStepTargetting
 version 6ce41a4b7dfa08978e53fa756f7f139e2fb18251
 outputfile		data8.txt
-InfiniteLoopKeptStates	 64
-FiniteLoops 8  7 100 0 -7 100 0 -7 100 0 7 100 0
-		7 100 0 -7 100 0 -7 100 0 7 100 0
+InfiniteLoopKeptStates	200 
+FiniteLoops 12  4 200 0 -4 200 0 4 200 0 -4 200 0 
+		4 200 0 -4 200 0 4 200 0 -4 200 0
+		4 200 0 -4 200 0 4 200 0 -4 200 0
+
 QNS 2 0.5 0.5
-
-FILENAME tst8.txt
-TIMESTEP 0.01
-MAXTIMES 10
-ADVANCEEACH 2
-SITE 1 7
-STARTINGLOOP 1 2
-
+FILENAME tst9.txt
+TIMESTEP 0.1
+MAXTIMES 5 
+ADVANCEEACH 100 
+SITE  1 10
+STARTINGLOOP 1 0 
 TIMEEVOLUTION raw 
 RAW_MATRIX 4 4
+0.0    0.0    0.0   0.0
 1.0    0.0    0.0   0.0
-0.0    1.0    0.0   0.0
+0.0    0.0    0.0   0.0 
 0.0    0.0    1.0   0.0 
-0.0    0.0    0.0   1.0 
-FERMIONSIGN 1
+FERMIONSIGN -1
 JMVALUES 0 0
 angularFactor 1
 
