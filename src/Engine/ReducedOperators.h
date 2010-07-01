@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define REDUCEDOP_IMPL_H
 
 #include "Utils.h"
-#include "ClebschGordanCached.h"
+#include "Su2SymmetryLimits.h"
 #include "Operator.h"
 
 namespace Dmrg {
@@ -95,11 +95,13 @@ namespace Dmrg {
 			typedef typename OperatorType::PairType PairType;
 			typedef ClebschGordanCached<RealType> ClebschGordanType;
 			typedef psimag::Matrix<SparseElementType> DenseMatrixType;
+			typedef Su2SymmetryLimits<RealType> Su2SymmetryLimitsType;
 			
 		public:
 			ReducedOperators(const DmrgBasisType* thisBasis,size_t dof,size_t orbitals) 
 				: thisBasis_(thisBasis),useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
-					     dof_(dof),nOrbitals_(orbitals) 
+					     dof_(dof),nOrbitals_(orbitals),
+					cgObject_(&(Su2SymmetryLimitsType::clebschGordanObject))
 			{
 			}
 
@@ -340,11 +342,11 @@ namespace Dmrg {
 			bool useSu2Symmetry_;
 			size_t dof_;
 			size_t nOrbitals_;
+			ClebschGordanType* cgObject_;
 			std::vector<size_t> momentumOfOperators_;
 			std::vector<size_t> basisrinverse_;
 			std::vector<OperatorType> reducedOperators_;
 			SparseMatrixType reducedHamiltonian_;
-			mutable ClebschGordanType cgObject_;
 			size_t j1Max_,j2Max_;
 			std::vector<std::vector<SparseElementType> > lfactorLeft_;
 			std::vector<std::vector<SparseElementType> > lfactorRight_;
@@ -468,7 +470,7 @@ namespace Dmrg {
 						PairType jmPrime = thisBasis_->jmValue(iprime);
 						RealType divisor = opSrc.angularFactor*(jmPrime.first+1);
 						opDest1(basisrinverse_[i],basisrinverse_[iprime]) += 
-									opSrc.data(i,iprime)*cgObject_(jmPrime,jm,opSrc.jm)/divisor;
+									opSrc.data(i,iprime)*cgObject_->operator()(jmPrime,jm,opSrc.jm)/divisor;
 					}
 				}
 			}
@@ -565,10 +567,10 @@ namespace Dmrg {
 							if (m1 - x + mCapital < 0) continue;
 							if (m1 - x + mCapital != m1prime) continue;
 
-							sum +=  cgObject_(jmPrime,jmCapital,jm)*
-								cgObject_(jm,jm1,jm2)*
-								cgObject_(jm1prime,jmCapital,jm1)*
-								cgObject_(jmPrime,jm1prime,jm2);
+							sum +=  cgObject_->operator()(jmPrime,jmCapital,jm)*
+								cgObject_->operator()(jm,jm1,jm2)*
+								cgObject_->operator()(jm1prime,jmCapital,jm1)*
+								cgObject_->operator()(jmPrime,jm1prime,jm2);
 						}
 					}
 				}
@@ -618,10 +620,10 @@ namespace Dmrg {
 							if (m2 - x + mCapital < 0) continue;
 							if (m2 - x + mCapital != m2prime) continue;
 
-							sum +=  cgObject_(jmPrime,jmCapital,jm)*
-								cgObject_(jm,jm1,jm2)*
-								cgObject_(jm2prime,jmCapital,jm2)*
-								cgObject_(jmPrime,jm1,jm2prime);
+							sum +=  cgObject_->operator()(jmPrime,jmCapital,jm)*
+								cgObject_->operator()(jm,jm1,jm2)*
+								cgObject_->operator()(jm2prime,jmCapital,jm2)*
+								cgObject_->operator()(jmPrime,jm1,jm2prime);
 						}
 					}
 				}

@@ -75,7 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define SU2_REDUCED_HEADER_H
 
 #include "BasisWithOperators.h"
-#include "ClebschGordanCached.h"
+#include "Su2SymmetryLimits.h"
 
 /** \ingroup DMRG */
 /*@{*/
@@ -95,9 +95,11 @@ namespace Dmrg {
 			typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
 			typedef typename OperatorsType::BasisType BasisType;
 			typedef typename BasisType::RealType RealType;
-			typedef ClebschGordanCached<RealType> ClebschGordanType;
 			typedef std::pair<size_t,size_t> PairType;
 			typedef typename OperatorsType::OperatorType OperatorType;
+			typedef Su2SymmetryLimits<RealType> Su2SymmetryLimitsType;
+			typedef typename Su2SymmetryLimitsType::ClebschGordanType ClebschGordanType;
+			
 			static const size_t System=0,Environ=1;
 			static const BasisType* basis1Ptr_;
 
@@ -111,7 +113,7 @@ namespace Dmrg {
 			std::vector<PairType> reducedEffective_;
 			psimag::Matrix<size_t> reducedInverse_;
 			std::vector<size_t> flavorsOldInverse_;
-			mutable ClebschGordanType cgObject_;
+			ClebschGordanType& cgObject_;
 
 		public:
 			Su2Reduced(int m,const BasisType& basis1,  const BasisWithOperatorsType& basis2,
@@ -120,7 +122,8 @@ namespace Dmrg {
 			basis1_(basis1),
 			basis2_(basis2),
 			basis3_(basis3),
-			nOrbitals_(nOrbitals)
+			nOrbitals_(nOrbitals),
+			cgObject_(Su2SymmetryLimitsType::clebschGordanObject)
 			{
 				std::vector<PairType> jsEffective;
 				std::vector<size_t> jvalues;

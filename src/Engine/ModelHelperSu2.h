@@ -122,7 +122,7 @@ namespace Dmrg {
 		{
 		}
 
-		bool isSu2() const { return true; }
+		static bool isSu2() { return true; }
 
 		const BasisType& basis1() const { return basis1_; }
 

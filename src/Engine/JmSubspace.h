@@ -85,19 +85,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define JM_SUBSPACE_H
 
 #include "Utils.h"
-#include "ClebschGordan.h"
+#include "Su2SymmetryLimits.h"
 
 namespace Dmrg {
 	template<typename FieldType,typename SparseMatrixType,typename SymmetryRelatedType>
 	class JmSubspace {
 			typedef std::pair<size_t,size_t> PairType;
 			typedef std::pair<PairType,PairType> TwoPairsType;
-			typedef ClebschGordan<FieldType> ClebschGordanType;
+			typedef Su2SymmetryLimits<FieldType> Su2SymmetryLimitsType;
+			typedef typename Su2SymmetryLimitsType::ClebschGordanType ClebschGordanType;
 		public:
 			typedef std::pair<PairType,TwoPairsType> FlavorType;
 
 			JmSubspace(const PairType& jm,size_t index,const PairType& jm1,const PairType& jm2,size_t nelectrons,int heavy=1)
-			:	jm_(jm),nelectrons_(nelectrons),heavy_(heavy)
+			:	jm_(jm),nelectrons_(nelectrons),heavy_(heavy),cgObject_(&(Su2SymmetryLimitsType::clebschGordanObject))
 			{
 				
 				push(index,jm1,jm2,nelectrons);
@@ -227,10 +228,10 @@ namespace Dmrg {
 			PairType jm_;
 			size_t nelectrons_;
 			int heavy_;
+			ClebschGordanType* cgObject_;
 			std::vector<size_t> indices_;
 			std::vector<FieldType> cg_,values_;
 			std::vector<size_t> flavors_,flavorIndices_;
-			ClebschGordanType cgObject_;
 			
 			static const std::vector<size_t>* ne1_;
 			static const std::vector<size_t>* ne2_;
@@ -254,7 +255,7 @@ namespace Dmrg {
 				flavorIndices_.push_back(calculateFlavor(flavorPair2));
 
 				FieldType value = 0;
-				if (heavy_) value=cgObject_(jm_,jm1,jm2);
+				if (heavy_) value=cgObject_->operator()(jm_,jm1,jm2);
 				values_.push_back(value);
 			}
 

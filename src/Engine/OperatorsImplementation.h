@@ -94,7 +94,8 @@ namespace Dmrg {
 		OperatorsImplementation(const DmrgBasisType* thisBasis,
 				       size_t dof,size_t nOrbitals) :
 			useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),reducedOpImpl_(thisBasis,dof,nOrbitals) 
-		{}
+		{
+		}
 
 		void setOperators(const std::vector<OperatorType>& ops)
 		{
@@ -280,7 +281,8 @@ namespace Dmrg {
 			permute(matrixTmp,v,permutation);
 			permuteInverse(v,matrixTmp,permutation);
 		}
-	}; //class OperatorsImplementation 
+	}; //class OperatorsImplementation
+
 } // namespace Dmrg
 
 /*@}*/

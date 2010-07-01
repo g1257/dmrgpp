@@ -95,7 +95,7 @@ namespace Dmrg {
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
 		OperatorsBase(const BasisType* thisBasis,size_t dof,size_t nOrbitals) :
-			useSu2Symmetry_(BasisType::useSu2Symmetry()),operatorsImpl_(thisBasis,dof,nOrbitals),
+			operatorsImpl_(thisBasis,dof,nOrbitals),
 					progress_("Operators",0) 
 		{ }
 
@@ -225,7 +225,6 @@ namespace Dmrg {
 		}
 
 	private:
-		bool useSu2Symmetry_;
 		OperatorsImplementation<OperatorType,BasisType> operatorsImpl_;
 		ProgressIndicator progress_;
 	}; //class OperatorsBase 

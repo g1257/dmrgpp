@@ -161,8 +161,8 @@ namespace Dmrg {
 			std::string s = utils::getTimeDate();
 			io_.print(s);
 			if (parameters_.options.find("verbose")!=std::string::npos) verbose_=true;
-			if (parameters_.options.find("useReflection")!=std::string::npos) useReflection_=true;
-			if (parameters_.options.find("useSu2Symmetry")!=std::string::npos) MyBasis::useSu2Symmetry(true);
+			if (parameters_.options.find("useReflection")!=std::string::npos)
+				useReflection_=true;
 			ModelType::SharedMemoryType::setThreads(parameters_.nthreads);
 		}
 

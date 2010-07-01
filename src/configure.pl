@@ -673,7 +673,7 @@ EOF
 sub getTimeEvolutionInput
 {
 	return "#NO_TIME_EVOLUTION" unless ($targetting=~/timestep/i);
-	my $ret <<EOF;
+	my $ret = <<EOF;
 FILENAME tst.txt
 TIMESTEP 0.1
 MAXTIMES 4 

@@ -75,23 +75,43 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ProgramLimits.h
+/*! \file Su2SymmetryLimits.h
  *
  *
  *
  */
-#ifndef PROGRAM_LIMITS_H
-#define PROGRAM_LIMITS_H
+#ifndef SU2_LIMITS_H
+#define SU2_LIMITS_H
+
+#include "ClebschGordanCached.h"
 
 namespace Dmrg {
-	struct ProgramLimits {
-		static size_t const MaxNumberOfSites = 300; // max number of sites that a model can use
-		static size_t const MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
-		static size_t const LanczosSteps = 200; // max number of external Lanczos steps
-		static double const LanczosTolerance; // tolerance of the Lanczos Algorithm
+	
+	template<typename FieldType>
+	struct Su2SymmetryLimits {
+		typedef ClebschGordanCached<FieldType> ClebschGordanType;
+		static void init(bool hasSu2Symmetry)
+		{
+			if (!hasSu2Symmetry) return;
+			MaximumJValue=20;
+			NumberOfFactorials=100;
+			clebschGordanObject.init(MaximumJValue,NumberOfFactorials);
+		}
+		
+		static size_t MaximumJValue; // this is the maximum allowed \tile{j}=2j value (j is half this value)
+		static size_t NumberOfFactorials; // number of factorials for the Clebsch-Gordan coefficients
+		static ClebschGordanType clebschGordanObject;
 	}; // ProgramLimits
 	
-	double const ProgramLimits::LanczosTolerance = 1e-12;
+	template<typename ClebschGordanType>
+	size_t Su2SymmetryLimits<ClebschGordanType>::MaximumJValue = 2;
+	
+	template<typename ClebschGordanType>
+	size_t Su2SymmetryLimits<ClebschGordanType>::NumberOfFactorials = 2;
+	
+	template<typename FieldType>
+	ClebschGordanCached<FieldType> Su2SymmetryLimits<FieldType>::clebschGordanObject(2);
+	
 }; // namespace Dmrg
 /*@}*/
-#endif
+#endif //SU2_LIMITS_H
