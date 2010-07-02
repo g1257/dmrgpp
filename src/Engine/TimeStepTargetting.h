@@ -642,7 +642,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cerr);*/
 				lanczosSolver.tridiagonalDecomposition(phi2,ab,V);
 				ab.buildDenseMatrix(T);
-				check1(V,phi2);
+				//check1(V,phi2);
 				return lanczosSolver.steps();
 			}
 
