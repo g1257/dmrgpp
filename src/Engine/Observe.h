@@ -104,7 +104,14 @@ namespace Dmrg {
 		
 	public:
 		Observe(const std::string& filename,size_t n,size_t n1,size_t stepTimes,ConcurrencyType& concurrency,bool verbose=false)
-		: precomp_(filename,2*n,stepTimes,verbose),halfLatticeSize_(n),
+		: precomp_(filename,2*n,verbose),halfLatticeSize_(n),
+			    oneSiteHilbertSize_(n1),skeleton_(precomp_),fourpoint_(precomp_,skeleton_),concurrency_(concurrency),
+				verbose_(verbose)
+		{}
+				
+		Observe(const std::string& filename,const std::string& timeFilename,size_t n,size_t n1,size_t stepTimes,
+			ConcurrencyType& concurrency,bool verbose=false)
+		: precomp_(filename,timeFilename,2*n,stepTimes,verbose),halfLatticeSize_(n),
 			    oneSiteHilbertSize_(n1),skeleton_(precomp_),fourpoint_(precomp_,skeleton_),concurrency_(concurrency),
 				verbose_(verbose)
 		{}
@@ -203,8 +210,9 @@ namespace Dmrg {
 			
 			size_t n = O1.n_row();
 			MatrixType Oid=identity(n);
-			if (i==0) return calcCorrelation_(0,1,O1,Oid,1,NON_DIAGONAL,PrecomputedType::USETIMEVECTOR);
-			return calcCorrelation_(i-1,i,Oid,O1,1,DIAGONAL,PrecomputedType::USETIMEVECTOR);
+			const MatrixType& test1 = Oid;
+			if (i==0) return calcCorrelation_(0,1,test1,Oid,1,NON_DIAGONAL,PrecomputedType::USETIMEVECTOR);
+			return calcCorrelation_(i-1,i,Oid,test1,1,DIAGONAL,PrecomputedType::USETIMEVECTOR);
 		}
 	
 	private:

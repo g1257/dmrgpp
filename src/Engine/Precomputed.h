@@ -95,9 +95,26 @@ namespace Dmrg {
 		
 		
 		
-		Precomputed(const std::string& filename,size_t nf,size_t stepTimes,bool verbose=true) 
+		Precomputed(const std::string& filename,size_t nf,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
+				SpermutationInverse_(nf),Spermutation_(nf),
+				SEpermutationInverse_(nf),SEpermutation_(nf),
+				electrons_(nf),
+				transform_(nf),
+				wavefunction_(nf),
+				psiTimeVector_(nf),
+				currentPos_(0),
+				verbose_(verbose),
+				nf_(nf)
+		{
+			init(nf);
+		}
+		
+		Precomputed(const std::string& filename,const std::string& timeFilename,size_t nf,size_t stepTimes,bool verbose=true) 
+			:	filename_(filename),
+				io_(filename),
+				io2_(timeFilename),
 				SpermutationInverse_(nf),Spermutation_(nf),
 				SEpermutationInverse_(nf),SEpermutation_(nf),
 				electrons_(nf),
@@ -109,24 +126,7 @@ namespace Dmrg {
 				nf_(nf),
 				stepTimes_(stepTimes)
 		{
-			rewind(true);
-			for (size_t i=0;i<nf-1;i++) {
-				if (verbose_) std::cerr<<"Precomputed "<<i<<" out of "<<(nf-1)<<"\n";
-				size_t j = 0; // = i;
-				
-				getPermutation(Spermutation_[i],SpermutationInverse_[i],
-						"#pSprime.permutationInverse_sites",j);
-				getPermutation(SEpermutation_[i],SEpermutationInverse_[i],
-						"#pSE.permutationInverse_sites=",j);
-				getWaveFunction(wavefunction_[i],j);
-				getElectrons(electrons_[i],j);
-				getTransform(transform_[i],j);
-				
-			}
-			FieldType dummy = 0;
-			initTimeVectors(dummy);
-			// Line below might cause trouble under gcc v3
-			//if (verbose_) std::cerr<<(*this);
+			init(nf);
 		}
 		
 		void setPointer(size_t pos)
@@ -215,6 +215,27 @@ namespace Dmrg {
 			Precomputed<RealType1,FieldType1,IoType1,MatrixType1,VectorTemplate1>& precomp);
 
 	private:
+		void init(size_t nf)
+		{
+			rewind(true);
+			for (size_t i=0;i<nf-1;i++) {
+				if (verbose_) std::cerr<<"Precomputed "<<i<<" out of "<<(nf-1)<<"\n";
+				size_t j = 0; // = i;
+				
+				getPermutation(Spermutation_[i],SpermutationInverse_[i],
+						"#pSprime.permutationInverse_sites",j);
+				getPermutation(SEpermutation_[i],SEpermutationInverse_[i],
+						"#pSE.permutationInverse_sites=",j);
+				getWaveFunction(wavefunction_[i],j);
+				getElectrons(electrons_[i],j);
+				getTransform(transform_[i],j);
+				
+			}
+			FieldType dummy = 0;
+			initTimeVectors(dummy);
+			// Line below might cause trouble under gcc v3
+			//if (verbose_) std::cerr<<(*this);	
+		}
 		
 		void initTimeVectors(size_t nf,RealType dummy)
 		{
@@ -223,17 +244,21 @@ namespace Dmrg {
 		
 		void initTimeVectors(std::complex<RealType> dummy)
 		{
+			std::cerr<<"steptimes = "<<stepTimes_<<"\n";
 			for (size_t i=0;i<stepTimes_;i++) {
 				size_t j = 0;
 				getTimeVector(psiTimeVector_[i],j);
-				std::cerr<<psiTimeVector_[i];
-				std::cerr<<"----------------------------------\n";
+				std::cerr<<"time vector "<<i<<" has size "<<psiTimeVector_[i].size()<<"\n";
+				//std::cerr<<"----------------------------------\n";
 			}
 		}
 		
 		void rewind(bool doIt=false) 
 		{
-			if (doIt) io_.rewind();
+			if (doIt) {
+				io_.rewind();
+				io2_.rewind();
+			}
 		}
 
 		void  getPermutation(std::vector<IndexType>& pS,std::vector<IndexType>& pSi,
@@ -266,12 +291,13 @@ namespace Dmrg {
 		
 		void getTimeVector(VectorType& wavefunction,size_t ns)
 		{
-			io_.readSparseVector(wavefunction,"targetVector0",ns);
+			io2_.readSparseVector(wavefunction,"targetVector0",ns);
 			rewind();
 		}
 
 		std::string filename_; 
 		typename IoType::In io_;
+		typename IoType::In io2_;
 		std::vector<std::vector<IndexType> >	SpermutationInverse_,Spermutation_,
   							SEpermutationInverse_,SEpermutation_,
 	 						electrons_;

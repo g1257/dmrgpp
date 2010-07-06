@@ -397,12 +397,14 @@ namespace Dmrg {
 			void cocoon(size_t direction,const BlockType& block) const
 			{
 				size_t site = block[0];
+				std::cerr<<"-------------&*&*&* Cocoon output starts\n";
 				test(psi_,direction,"<PSI|A|PSI>",site);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
 					test(targetVectors_[j],direction,s,site);
 				}
+				std::cerr<<"-------------&*&*&* Cocoon output ends\n";
 			}
 			
 			bool allStages(size_t x) const

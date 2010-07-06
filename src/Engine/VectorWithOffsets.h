@@ -171,7 +171,7 @@ namespace Dmrg {
 					}
 				}
 				std::ostringstream msg;
-				msg<<"Collapsed. Non-zero sectors now are"<<nonzeroSectors_.size();
+				msg<<"Collapsed. Non-zero sectors now are "<<nonzeroSectors_.size();
 				progress_.printline(msg,std::cout);
 			}
 			
