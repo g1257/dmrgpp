@@ -129,7 +129,8 @@ namespace Dmrg {
 			waveFunctionTransformation_(waveFunctionTransformation)
 		{}
 		
-		RealType operator()(TargettingType& target,size_t direction,const BlockType& block,size_t loopIndex=0)
+		RealType operator()(TargettingType& target,size_t direction,const BlockType& block,size_t loopIndex=0,
+				   bool needsPrinting = false)
 		{
 			const BasisType& pSE= target.basisSE();
 			const BasisWithOperatorsType& pSprime= target.basisS();
@@ -254,7 +255,7 @@ namespace Dmrg {
 			}
 			
 			// time step targetting: 
-			target.evolve(gsEnergy,direction,block,loopIndex);
+			target.evolve(gsEnergy,direction,block,loopIndex,needsPrinting);
 			waveFunctionTransformation_.triggerOff(pSprime,pEprime,pSE); //,m);
 			return gsEnergy;
 		}

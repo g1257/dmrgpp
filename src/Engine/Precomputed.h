@@ -127,6 +127,7 @@ namespace Dmrg {
 				stepTimes_(stepTimes)
 		{
 			init(nf);
+			integrityChecks();
 		}
 		
 		void setPointer(size_t pos)
@@ -235,6 +236,15 @@ namespace Dmrg {
 			initTimeVectors(dummy);
 			// Line below might cause trouble under gcc v3
 			//if (verbose_) std::cerr<<(*this);	
+		}
+		
+		void integrityChecks()
+		{
+			if (SEpermutation_.size()!=psiTimeVector_.size()) throw std::runtime_error("Error 1\n");
+			for (size_t x=0;x<SEpermutation_.size();x++) {
+				if (SEpermutation_[x].size()!=psiTimeVector_[x].size()) throw std::runtime_error("Error 2\n");
+			}
+			
 		}
 		
 		void initTimeVectors(size_t nf,RealType dummy)

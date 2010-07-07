@@ -180,7 +180,7 @@ namespace Dmrg {
 				throw std::runtime_error("GroundStateTargetting::operator()(...)\n");
 			}
 			
-			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
+			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber,bool needsPrinting)
 			{
 				// Nothing to see here
 			}

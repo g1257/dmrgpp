@@ -117,6 +117,14 @@ namespace Dmrg {
 				offsets_[weights.size()]=size_;
 			}
 			
+			void resize(size_t x)
+			{
+				size_ = x;
+				data_.clear();
+				offsets_.clear();
+				nonzeroSectors_.clear();
+			}
+			
 			template<typename SomeBasisType>
 			void set(const std::vector<VectorType>& v,//const std::vector<size_t>& weights,
 				 const SomeBasisType& someBasis)

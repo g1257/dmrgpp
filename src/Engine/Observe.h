@@ -210,7 +210,7 @@ namespace Dmrg {
 			
 			size_t n = O1.n_row();
 			MatrixType Oid=identity(n);
-			const MatrixType& test1 = Oid;
+			const MatrixType& test1 = O1;
 			if (i==0) return calcCorrelation_(0,1,test1,Oid,1,NON_DIAGONAL,PrecomputedType::USETIMEVECTOR);
 			return calcCorrelation_(i-1,i,Oid,test1,1,DIAGONAL,PrecomputedType::USETIMEVECTOR);
 		}

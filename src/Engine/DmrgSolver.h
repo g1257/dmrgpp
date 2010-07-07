@@ -363,7 +363,8 @@ namespace Dmrg {
 				
 				pSE_.setToProduct(pSprime_,pEprime_,quantumSector_);
 				//if (target.gs().size()==0) throw std:runtime_error("DmrgSolver:: target.size==0 before\n");
-				gsEnergy =diagonalization_(target,direction,sitesIndices_[stepCurrent_],loopIndex);
+				bool needsPrinting = (saveOption==SAVE_TO_DISK);
+				gsEnergy =diagonalization_(target,direction,sitesIndices_[stepCurrent_],loopIndex,needsPrinting);
 				//if (target.gs().size()==0) throw std:runtime_error("DmrgSolver:: target.size==0 after\n");
 				progress_.print("Truncating (env) basis now...\n",std::cout);
 				

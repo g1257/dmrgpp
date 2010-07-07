@@ -279,9 +279,11 @@ namespace Dmrg {
 			CrsMatrix<FieldType> Acrs(A);
 			FieldType sum=0;
 			//size_t counter=0;
+			if (vec.size()!=precomp_.SEpermutation()) throw std::runtime_error("Error\n");
 			for (size_t x=0;x<vec.indices();x++) {
 				size_t t=vec.index(x);
 				size_t eta,r;
+				
 				utils::getCoordinates(r,eta,precomp_.SEpermutation(t),precomp_.Spermutation().size());
 				//for (size_t r2=0;r2<A.n_col();r2++) {
 				for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {

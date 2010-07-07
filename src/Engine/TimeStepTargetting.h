@@ -310,7 +310,8 @@ namespace Dmrg {
 				return targetVectors_[i];
 			}
 
-			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
+			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber,
+				   bool needsPrinting)
 			{
 				size_t count =0;
 				VectorWithOffsetType phiOld = psi_;
@@ -324,13 +325,20 @@ namespace Dmrg {
 					phiOld = phiNew;
 				}
 				
-				if (count==0) return;
+				if (count==0) {
+					// always print to keep observer driver sync
+					if (needsPrinting) {
+						zeroOutVectors();
+						printVectors();
+					}
+					return;
+				}
 				
 				calcTimeVectors(Eg,phiNew,direction);
 				
 				cocoon(direction,block); // in-situ
 				
-				printVectors(); // for post-processing
+				if (needsPrinting) printVectors(); // for post-processing
 			}
 
 			size_t evolve(
@@ -787,6 +795,12 @@ namespace Dmrg {
 				}
 				applyLocalOp(phi,psi_,tstStruct_.aOperators[i],tstStruct_.electrons,
 								systemOrEnviron);
+			}
+			
+			void zeroOutVectors()
+			{
+				for (size_t i=0;i<targetVectors_.size();i++) 
+					targetVectors_[i].resize(basisSE_.size());
 			}
 
 			void printVectors()
