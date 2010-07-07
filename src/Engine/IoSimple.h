@@ -314,9 +314,11 @@ namespace Dmrg {
 					std::string tempSaved="NOTFOUND";
 					int counter=0;
 					bool found=false;
+					//size_t c = 0;
 					while(!fin_.eof()) {
 						fin_>>temp;
-						//std::cerr<<"Line="<<temp<<"\n";
+						//c++;
+						//if (temp[0]=='#') std::cerr<<"Line="<<temp<<" target="<<s<<" count="<<c<<"\n";
 						if (fin_.eof() || !fin_.good() || fin_.bad()) break;
 						
 						if (temp.substr(0,s.size())==s) {
@@ -328,6 +330,7 @@ namespace Dmrg {
 							counter++;
 						}
 					}
+					//std::cerr<<"count="<<c<<"\n";
 					if (!found && tempSaved=="NOTFOUND") {
 						std::cerr<<"Not found "<<s<<" in file "<<filename_;
 						std::cerr<<" level="<<level<<" counter="<<counter<<"\n";

@@ -106,11 +106,13 @@ namespace Dmrg {
 				psiTimeVector_(nf),
 				currentPos_(0),
 				verbose_(verbose),
-				nf_(nf)
+				nf_(nf),
+				stepTimes_(0)
 		{
 			init(nf);
 		}
 		
+		//! stepTimes must always be equal to nf
 		Precomputed(const std::string& filename,const std::string& timeFilename,size_t nf,size_t stepTimes,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
@@ -256,11 +258,11 @@ namespace Dmrg {
 		void initTimeVectors(std::complex<RealType> dummy)
 		{
 			std::cerr<<"steptimes = "<<stepTimes_<<"\n";
-			for (size_t i=0;i<stepTimes_;i++) {
+			for (size_t i=0;i<stepTimes_;i++) { // up to i<nf-1 FIXME
 				size_t j = 0;
 				getTimeVector(psiTimeVector_[i],j);
 				std::cerr<<"time vector "<<i<<" has size "<<psiTimeVector_[i].size()<<"\n";
-				RealType tmp = norm(psiTimeVector_[i]);
+				RealType tmp = std::norm(psiTimeVector_[i]);
 				std::cerr<<"Mod="<<tmp<<"\n";
 				//std::cerr<<"----------------------------------\n";
 			}

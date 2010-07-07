@@ -103,7 +103,7 @@ namespace Dmrg {
 		static size_t const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
 		
 	public:
-		Observe(const std::string& filename,size_t n,size_t n1,size_t stepTimes,ConcurrencyType& concurrency,bool verbose=false)
+		Observe(const std::string& filename,size_t n,size_t n1,ConcurrencyType& concurrency,bool verbose=false)
 		: precomp_(filename,2*n,verbose),halfLatticeSize_(n),
 			    oneSiteHilbertSize_(n1),skeleton_(precomp_),fourpoint_(precomp_,skeleton_),concurrency_(concurrency),
 				verbose_(verbose)
@@ -207,12 +207,9 @@ namespace Dmrg {
 					const MatrixType& O1,
 					int fermionicSign)
 		{
-			
-			size_t n = O1.n_row();
-			MatrixType Oid=identity(n);
-			const MatrixType& test1 = O1;
-			if (i==0) return calcCorrelation_(0,1,test1,Oid,1,NON_DIAGONAL,PrecomputedType::USETIMEVECTOR);
-			return calcCorrelation_(i-1,i,Oid,test1,1,DIAGONAL,PrecomputedType::USETIMEVECTOR);
+			size_t pnter=i+1;
+			precomp_.setPointer(pnter);
+			return skeleton_.bracket(O1,PrecomputedType::USETIMEVECTOR);
 		}
 	
 	private:
