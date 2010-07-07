@@ -242,6 +242,7 @@ namespace Dmrg {
 		{
 			if (SEpermutation_.size()!=psiTimeVector_.size()) throw std::runtime_error("Error 1\n");
 			for (size_t x=0;x<SEpermutation_.size();x++) {
+				if (SEpermutation_[x].size()==0) continue;
 				if (SEpermutation_[x].size()!=psiTimeVector_[x].size()) throw std::runtime_error("Error 2\n");
 			}
 			
@@ -259,6 +260,8 @@ namespace Dmrg {
 				size_t j = 0;
 				getTimeVector(psiTimeVector_[i],j);
 				std::cerr<<"time vector "<<i<<" has size "<<psiTimeVector_[i].size()<<"\n";
+				RealType tmp = norm(psiTimeVector_[i]);
+				std::cerr<<"Mod="<<tmp<<"\n";
 				//std::cerr<<"----------------------------------\n";
 			}
 		}

@@ -935,7 +935,7 @@ sub createObserverDriver
 	my $obsArg = "datafile,n,opInfo.n_row(),concurrency,verbose";
 	if ($targetting=~/timestep/i) {
 		$chooseRealOrComplexForObservables = "typedef ComplexType FieldType;\n";
-		$obsArg = "datafile,tstStruct.filename,n,opInfo.n_row(),2*n,concurrency,verbose";
+		$obsArg = "datafile,tstStruct.filename,n,opInfo.n_row(),2*n-1,concurrency,verbose";
 	}
 	
 	open(OBSOUT,">$observerDriver") or die "Cannot open file $observerDriver for writing: $!\n";

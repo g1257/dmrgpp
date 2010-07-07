@@ -321,6 +321,8 @@ namespace Dmrg {
 				size_t loopIndex,
     				TargettingType& target)
 		{
+			static size_t prevDirection = 0;
+			
 			int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 			size_t keptStates = parameters_.finiteLoop[loopIndex].keptStates;
 			int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
@@ -329,9 +331,8 @@ namespace Dmrg {
 			size_t direction=SHRINK_ENVIRON;
 			if (stepLength<0) direction=SHRINK_SYSTEM;
 			//std::cerr<<"PUSHING DIRECTION="<<getDirection(direction)<<"\n";
-			static int prevDirection = 0;
 			int resetCounter = WaveFunctionTransformationType::RESET_COUNTER;
-			if (prevDirection == SHRINK_SYSTEM && direction == SHRINK_SYSTEM)
+			if (prevDirection ==  direction)
 				resetCounter = WaveFunctionTransformationType::DO_NOT_RESET_COUNTER;
 			prevDirection = direction;
 

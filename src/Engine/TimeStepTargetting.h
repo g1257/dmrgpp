@@ -375,7 +375,9 @@ namespace Dmrg {
 					if (i==lastI && stage_[i]==WFT_NOADVANCE) 
 						timesWithoutAdvancement++;
 				}
-				std::cerr<<"timesWithoutAdvancement="<<timesWithoutAdvancement<<"\n";
+				std::ostringstream msg2;
+				msg2<<"Steps without advance: "<<timesWithoutAdvancement;
+				if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
 				
 				std::ostringstream msg;
 				msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;

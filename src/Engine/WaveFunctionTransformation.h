@@ -443,7 +443,7 @@ namespace Dmrg {
 		void transformVector(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
 		{
-			//std::cerr<<"counter="<<counter_<<"direction = "<<stage_<<"\n";
+			std::cerr<<"counter="<<counter_<<"direction = "<<stage_<<"\n";
 			if (stage_==SHRINK_SYSTEM) {
 				if (firstCall_) throw std::runtime_error("WFT: This corner case is unimplmemented yet (sorry!)\n");
 				else if (counter_==0) transformVector1bounce(psiDest,psiSrc,pSprime,pEprime,pSE);
