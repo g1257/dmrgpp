@@ -208,19 +208,22 @@ namespace Dmrg {
 					const MatrixType& A,
 					int fermionicSign)
 		{
-// 			size_t pnter=i+1;
-// 			precomp_.setPointer(pnter);
-// 			return skeleton_.bracket(O1,PrecomputedType::USETIMEVECTOR);
-// 			
-// 			const VectorWithOffsetType& src,
-// 			//size_t systemOrEnviron,
-// 			//const std::string& label,
-// 				
-// 			VectorWithOffsetType dest;
-// 			applyOpLocal_(dest,src,A,tstStruct_.electrons,systemOrEnviron);
-// 				
-// 			return dest*src;
-			return -1;
+			ApplyOperatorLocalType applyOpLocal(
+					precomp_.basisS(),
+       					precomp_.basisE(),
+	    				precomp_.basisSE(),
+					size_t shrinkEnv);
+			size_t pnter=i;
+			precomp_.setPointer(pnter);
+		
+			const VectorWithOffsetType& src,
+			size_t systemOrEnviron = SHRINK_ENVIRON;
+			//const std::string& label,
+				
+			VectorWithOffsetType dest;
+			applyOpLocal_(dest,precomp_.getTimeVector(),A,fs,systemOrEnviron);
+				
+			return dest*src;
 			//std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_<<" "<<label<<std::norm(src)<<" "<<std::norm(dest)<<"\n";
 		}
 	

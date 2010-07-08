@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define APPLY_OPERATOR_LOCAL_H
 
 #include "Utils.h"
+#include "FermionSign.h"
 
 namespace Dmrg {
 	
@@ -94,8 +95,8 @@ namespace Dmrg {
 
 		public:
 			ApplyOperatorLocal(
-					const BasisWithOperatorsType& basisS,
-       					const BasisWithOperatorsType& basisE,
+					const BasisType& basisS,
+       					const BasisType& basisE,
 	    				const BasisType& basisSE,
 					size_t shrinkEnv)
 			: basisS_(basisS),basisE_(basisE),basisSE_(basisSE),SHRINK_ENVIRON(shrinkEnv)
@@ -106,10 +107,10 @@ namespace Dmrg {
 					VectorWithOffsetType& dest,
 					const VectorWithOffsetType& src,
 				     	const OperatorType& A,
-	  				const std::vector<size_t>& electrons,
+	  				const FermionSign& fermionSign,
 					size_t systemOrEnviron) const
 			{
-				if (systemOrEnviron == SHRINK_ENVIRON) applyLocalOpSystem(dest,src,A,electrons);
+				if (systemOrEnviron == SHRINK_ENVIRON) applyLocalOpSystem(dest,src,A,fermionSign);
 				else applyLocalOpEnviron(dest,src,A);
 			}
 			
@@ -118,7 +119,7 @@ namespace Dmrg {
 					VectorWithOffsetType& dest,
 					const VectorWithOffsetType& src,
 					const OperatorType& A,
-	  				const std::vector<size_t>& electrons) const
+	  				const FermionSign& fermionSign) const
 			{
 				TargetVectorType dest2(basisSE_.size());
 				
@@ -126,7 +127,7 @@ namespace Dmrg {
 				
 				for (size_t ii=0;ii<src.sectors();ii++) {
 					size_t i = src.sector(ii);
-					applyLocalOpSystem(dest2,src,A,electrons,i);
+					applyLocalOpSystem(dest2,src,A,fermionSign,i);
 				}
 				dest.fromFull(dest2,basisSE_);
 			}
@@ -135,7 +136,7 @@ namespace Dmrg {
 					TargetVectorType& dest2,
 					const VectorWithOffsetType& src,
 					const OperatorType& A,
-	  				const std::vector<size_t>& electrons,
+	  				const FermionSign& fermionSign,
 					size_t i0) const
 			{
 				size_t offset = src.offset(i0);
@@ -149,9 +150,10 @@ namespace Dmrg {
 					utils::getCoordinates(x,y,basisSE_.permutation(i),ns);
 					size_t x0=0,x1=0;
 					utils::getCoordinates(x0,x1,basisS_.permutation(x),nx);
-					int nx0 = basisS_.electrons(x)-electrons[x1];
+					/*int nx0 = basisS_.electrons(x)-electrons[x1];
 					if (nx0<0) throw std::runtime_error("TimeStepTargetting::applyLocalOpSystem(...)\n");
-					RealType sign = ((nx0%2)==0) ? 1 : A.fermionSign;
+					*/
+					RealType sign = fermionSign(x,A.fermionSign);
 					for (int k=A.data.getRowPtr(x1);k<A.data.getRowPtr(x1+1);k++) {
 						size_t x1prime = A.data.getCol(k);
 						size_t xprime = basisS_.permutationInverse(x0+x1prime*nx);
@@ -205,8 +207,8 @@ namespace Dmrg {
 				}
 			}
 
-			const BasisWithOperatorsType& basisS_;
-			const BasisWithOperatorsType& basisE_;
+			const BasisType& basisS_;
+			const BasisType& basisE_;
 			const BasisType& basisSE_;
 			size_t const SHRINK_ENVIRON;
 	}; // class ApplyOperatorLocal

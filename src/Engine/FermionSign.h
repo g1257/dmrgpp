@@ -90,8 +90,24 @@ namespace Dmrg {
 			FermionSign(const std::vector<size_t>& electrons) 
 				: signs_(electrons.size())
 			{
-				for (size_t i=0;i<signs_.size();i++)
-					signs_[i] = (electrons[i] & 1);
+				init(electrons);
+			}
+			
+			template<typename SomeBasisType>
+			FermionSign(const SomeBasisType& basis,const std::vector<size_t>& electrons)
+				: signs_(basis.size())
+			{
+				size_t nx = basis.size()/electrons.size();
+				std::vector<size_t> el(basis.size());
+				//if (basis.size()!=basis.permutationInverse().size()) throw std::runtime_error("Problem\n");
+				for (size_t x=0;x<basis.size();x++) {
+					size_t x0,x1;
+					utils::getCoordinates(x0,x1,basis.permutation(x),nx);
+					int nx0 = basis.electrons(x)-electrons[x1];
+					if (nx0<0) throw std::runtime_error("FermionSign::ctor(...)\n");
+					el[x] = nx0;
+				}
+				init(el);
 			}
 			
 			int operator()(size_t i,size_t f) const
@@ -112,6 +128,13 @@ namespace Dmrg {
 			}
 			
 		private:
+			
+			void init(const std::vector<size_t>& electrons)
+			{
+				for (size_t i=0;i<signs_.size();i++)
+					signs_[i] = (electrons[i] & 1);
+			}
+			
 			std::vector<bool> signs_;
 	}; // class FermionSign
 } // namespace Dmrg 

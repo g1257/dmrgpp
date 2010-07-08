@@ -364,7 +364,8 @@ namespace Dmrg {
 					std::ostringstream msg;
 					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
-					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],tstStruct_.electrons,systemOrEnviron);
+					FermionSign fs(basisS_,tstStruct_.electrons);
+					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
 					RealType norma = norm(phiNew);
 					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
 					std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
@@ -588,16 +589,17 @@ namespace Dmrg {
 			// Update: When more than one op. needs to apply all of 'em:
 			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
 			{
+				FermionSign fs(basisS_,tstStruct_.electrons);
 				if (allStages(WFT_NOADVANCE)) {
 					VectorWithOffsetType tmpVector = psi_;
 					for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
-						applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],tstStruct_.electrons,
+						applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],fs,
 							systemOrEnviron);
 						tmpVector = phi;
 					}
 					return;
 				}
-				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],tstStruct_.electrons,
+				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,
 								systemOrEnviron);
 			}
 			
@@ -640,7 +642,8 @@ namespace Dmrg {
 				multiply(A.data,tmpCt,tmpC);
 				A.fermionSign = 1;
 				//A.data = tmpC;
-				applyOpLocal_(dest,src,A,tstStruct_.electrons,systemOrEnviron);
+				FermionSign fs(basisS_,tstStruct_.electrons);
+				applyOpLocal_(dest,src,A,fs,systemOrEnviron);
 				
 				
 				ComplexType sum = 0;

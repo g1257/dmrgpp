@@ -265,7 +265,7 @@ namespace Dmrg {
 				
 				progress_.print("Growth done.\n",std::cout);
 				msg<<"Infinite-loop: sys-env. size="<<pSprime_.size()<<"x"<<pEprime_.size();
-				msg<<" and block="<<pSprime_.block().size()<<"+"<<pEprime_.block().size();
+				msg<<" and block="<<pSprime_.block().size()<<"+"<<pEprime_.block().size()<<"*";
 				progress_.printline(msg,std::cout);
 				
 				updateQuantumSector(pSprime_.block().size()+pEprime_.block().size());
@@ -474,7 +474,7 @@ namespace Dmrg {
 					std::ostringstream msg;
 					msg<<"Updating targets to "<<targetQuantumNumbers[0]<<" "<<	targetQuantumNumbers[1];
 					msg<<" "<<targetQuantumNumbers[2];
-					progress_.printline(msg,std::cerr);
+					progress_.printline(msg,std::cout);
 				}
 				quantumSector_=MyBasis::pseudoQuantumNumber(targetQuantumNumbers);
 			} else quantumSector_= -1;

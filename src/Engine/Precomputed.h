@@ -120,7 +120,7 @@ namespace Dmrg {
 				io_(filename),
 				io2_(timeFilename),
 				bogusBasis_("Bogus"),
-				fermionSigns_(nf),
+				fermionSigns_(nf,bogusBasis_.electrons()),
 				basisS_(nf,bogusBasis_),
 				basisE_(nf,bogusBasis_),
 				basisSE_(nf,bogusBasis_),

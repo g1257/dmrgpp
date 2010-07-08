@@ -158,9 +158,9 @@ namespace Dmrg {
 				if (verbose_) {
 					j = pSE.qn(pSE.partition(i));
 					std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
-					std::cerr<<"partition "<<i<<" of size="<<bs<<" has qns=";
+					//std::cerr<<"partition "<<i<<" of size="<<bs<<" has qns=";
 					for (size_t k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
-					std::cerr<<"\n";
+					//std::cerr<<"\n";
 				}
 
 				size_t tmp = pSE.electrons(counter);
@@ -205,7 +205,7 @@ namespace Dmrg {
 				if (verbose_) {
 					msg<<" diagonaliseOneBlock, i="<<i<<" and proc="<<concurrency_.rank()<<" and weight="<<weights[i];
 				}
-				progress_.printline(msg,std::cerr);
+				progress_.printline(msg,std::cout);
 				TargetVectorType initialVectorBySector(weights[i]);
 				initialVector.extract(initialVectorBySector,i);
 				diagonaliseOneBlock(i,tmpVec,gsEnergy,pSprime,pEprime,pSE,initialVectorBySector);
@@ -298,7 +298,7 @@ namespace Dmrg {
 			}
 			std::ostringstream msg;
 			msg<<"I will now diagonalize a matrix of size="<<modelHelper.size();
-			progress_.printline(msg,std::cerr);
+			progress_.printline(msg,std::cout);
 			diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,initialVector,iter,eps);
 		}
 		
