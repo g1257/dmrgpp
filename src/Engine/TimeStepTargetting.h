@@ -84,108 +84,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TIMESTEPTARGETTING_H
 #define TIMESTEPTARGETTING_H
 #include <iostream>
-#include "SimpleReader.h"
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "TargetStructureParams.h"
+#include "TimeStepStructure.h"
+#include "ApplyOperatorLocal.h"
 
 namespace Dmrg {
-	
-	template<typename OperatorType>
-	struct TimeStepStructure {
-		TimeStepStructure() :
-			tau(0),
-			timeSteps(0),
-			advanceEach(0)
-		{
-		}
-		
-		std::string filename;
-		typename OperatorType::RealType tau;
-		size_t timeSteps;
-		size_t advanceEach;
-		std::vector<size_t> sites;
-		std::vector<size_t> startingLoops;
-		std::vector<OperatorType> aOperators;
-		std::vector<size_t> electrons;
-	};
-	
-	/*template<typename OperatorType>
-	inline TimeStepStructure<OperatorType>&
-	operator<=(TimeStepStructure<OperatorType>& t,SimpleReader& reader)
-	{
-		reader.read(t.aOperator);
-		reader.read(t.electrons);
-		reader.read(t.site);
-		reader.read(t.startingLoop);
-		reader.read(t.filename);
-		return t;
-	}*/
-	
-	template<typename OperatorType,typename ModelType>
-	inline TargetStructureParams<TimeStepStructure<OperatorType>,ModelType>&
-	operator<=(TargetStructureParams<TimeStepStructure<OperatorType>,ModelType>& tsp,SimpleReader& reader)
-	{
-		typedef typename ModelType::RealType RealType;
-		std::vector<size_t> sites,loops;
-		std::string s;
-		reader.read(s); // filename
-		RealType tau=0;
-		reader.read(tau);
-		size_t timeSteps=0;
-		reader.read(timeSteps);
-		size_t advanceEach=0;
-		reader.read(advanceEach);
-		reader.read(sites);
-		reader.read(loops);
-		
-		tsp.init(s,tau,timeSteps,advanceEach,sites,loops);
-		
-		for (size_t i=0;i<sites.size();i++) {
-			//std::string s;
-			reader.read(s);
-			if (s == "cooked") {
-				reader.read(s);
-				std::vector<size_t> v;
-				reader.read(v);
-				tsp.setCookedData(i,s,v);
-			} else {
-				psimag::Matrix<RealType> m;
-				reader.read(m);
-				tsp.setRawData(i,m);
-			}
-			int fermiSign=0;
-			reader.read(fermiSign);
-			std::pair<size_t,size_t> jmValues;
-			reader.read(jmValues);
-			RealType angularFactor;
-			reader.read(angularFactor);
-			tsp.set(i,fermiSign,jmValues,angularFactor);
-		}
-		
-		return tsp;
-	}
-	
-	template<typename OperatorType>
-	inline std::ostream&
-	operator<<(std::ostream& os,const TimeStepStructure<OperatorType>& t)
-	{
-		os<<"#TimeStepStructure.operators"<<t.aOperators.size()<<"\n";
-		for (size_t i=0;i<t.aOperators.size();i++) {
-			os<<"#TimeStepStructure.operator "<<i<<"\n";
-			os<<t.aOperators[i];
-		}
-		os<<"#TimeStepStructure.electrons\n";
-		os<<t.electrons;
-		os<<"#TimeStepStructure.site="<<t.sites;
-		os<<"#TimeStepStructure.startingLoop="<<t.startingLoops<<"\n";
-		os<<"#TimeStepStructure.filename="<<t.filename<<"\n";
-		os<<"#TimeVectorsfilename.tau="<<t.tau<<"\n";
-		os<<"#TimeVectorsfilename.timeSteps="<<t.timeSteps<<"\n";
-		os<<"#TimeVectorsfilename.advanceEach="<<t.advanceEach<<"\n";
-		return os;
-	}
-	
 	template<
 			template<typename,typename> class LanczosSolverTemplate,
    			template<typename,typename> class InternalProductTemplate,
@@ -220,7 +124,8 @@ namespace Dmrg {
 			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
 			typedef ComplexVectorType TargetVectorType;
 			typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
-
+			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorLocalType;
+			
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 			enum {SHRINK_SYSTEM=WaveFunctionTransformationType::SHRINK_SYSTEM,
 			SHRINK_ENVIRON=WaveFunctionTransformationType::SHRINK_ENVIRON,
@@ -241,7 +146,7 @@ namespace Dmrg {
 					model_(model),tstStruct_(tstStruct),waveFunctionTransformation_(wft),
 					progress_("TimeStepTargetting",0),currentTime_(0),
 							times_(tstStruct_.timeSteps),weight_(tstStruct_.timeSteps),targetVectors_(tstStruct_.timeSteps),
-						io_(tstStruct_.filename,parallelRank_)
+						io_(tstStruct_.filename,parallelRank_),applyOpLocal_(basisS,basisE,basisSE,SHRINK_ENVIRON)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" TimeStepTargetting "
 							"needs an enabled wft\n");
@@ -459,7 +364,7 @@ namespace Dmrg {
 					std::ostringstream msg;
 					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
-					applyLocalOp(phiNew,phiOld,tstStruct_.aOperators[i],tstStruct_.electrons,systemOrEnviron);
+					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],tstStruct_.electrons,systemOrEnviron);
 					RealType norma = norm(phiNew);
 					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
 					std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
@@ -657,7 +562,8 @@ namespace Dmrg {
 				//check1(V,phi2);
 				return lanczosSolver.steps();
 			}
-
+			
+			//! This check is invalid if there are more than one sector
 			void check1(const ComplexMatrixType& V,const TargetVectorType& phi2)
 			{
 				if (V.n_col()>V.n_row()) throw std::runtime_error("cols > rows\n");
@@ -674,110 +580,6 @@ namespace Dmrg {
 				}
 			}
 
-			//! FIXME: we need to make a fast version for when we're just
-			//! figuring out where the (non-zero) partition is
-			void applyLocalOp(
-					VectorWithOffsetType& dest,
-					const VectorWithOffsetType& src,
-				     	const OperatorType& A,
-	  				const std::vector<size_t>& electrons,
-					size_t systemOrEnviron) const
-			{
-				if (systemOrEnviron == SHRINK_ENVIRON) applyLocalOpSystem(dest,src,A,electrons);
-				else applyLocalOpEnviron(dest,src,A);
-			}
-
-			void applyLocalOpSystem(
-					VectorWithOffsetType& dest,
-					const VectorWithOffsetType& src,
-					const OperatorType& A,
-	  				const std::vector<size_t>& electrons) const
-			{
-				TargetVectorType dest2(basisSE_.size());
-				
-				for (size_t i=0;i<dest2.size();i++) dest2[i] = 0;
-				
-				for (size_t ii=0;ii<src.sectors();ii++) {
-					size_t i = src.sector(ii);
-					applyLocalOpSystem(dest2,src,A,electrons,i);
-				}
-				dest.fromFull(dest2,basisSE_);
-			}
-
-			void applyLocalOpSystem(
-					TargetVectorType& dest2,
-					const VectorWithOffsetType& src,
-					const OperatorType& A,
-	  				const std::vector<size_t>& electrons,
-					size_t i0) const
-			{
-				size_t offset = src.offset(i0);
-				size_t final = offset + src.effectiveSize(i0);
-				//size_t counter=0;
-				size_t ns = basisS_.size();
-				size_t nx = basisS_.size()/A.data.rank();
-				
-				for (size_t i=offset;i<final;i++) {
-					size_t x=0,y=0;
-					utils::getCoordinates(x,y,basisSE_.permutation(i),ns);
-					size_t x0=0,x1=0;
-					utils::getCoordinates(x0,x1,basisS_.permutation(x),nx);
-					int nx0 = basisS_.electrons(x)-electrons[x1];
-					if (nx0<0) throw std::runtime_error("TimeStepTargetting::applyLocalOpSystem(...)\n");
-					RealType sign = ((nx0%2)==0) ? 1 : A.fermionSign;
-					for (int k=A.data.getRowPtr(x1);k<A.data.getRowPtr(x1+1);k++) {
-						size_t x1prime = A.data.getCol(k);
-						size_t xprime = basisS_.permutationInverse(x0+x1prime*nx);
-						size_t j = basisSE_.permutationInverse(xprime+y*ns);
-						dest2[j] += src[i]*A.data.getValue(k)*sign;
-					}
-				}
-				
-			}
-
-			void applyLocalOpEnviron(
-					VectorWithOffsetType& dest,
-					const VectorWithOffsetType& src,
-					const OperatorType& A) const
-			{
-				TargetVectorType dest2(basisSE_.size());
-				
-				for (size_t i=0;i<dest2.size();i++) dest2[i] = 0;
-				
-				for (size_t ii=0;ii<src.sectors();ii++) {
-					size_t i = src.sector(ii);
-					applyLocalOpEnviron(dest2,src,A,i);
-				}
-				dest.fromFull(dest2,basisSE_);
-			}
-
-			void applyLocalOpEnviron(
-					TargetVectorType& dest2,
-					const VectorWithOffsetType& src,
-				     	const OperatorType& A,
-					size_t i0) const
-			{
-				size_t offset = src.offset(i0);
-				size_t final = offset + src.effectiveSize(i0);
-				
-				size_t ns = basisS_.size();
-				size_t nx = A.data.rank();
-				
-				for (size_t i=offset;i<final;i++) {
-					size_t x=0,y=0;
-					utils::getCoordinates(x,y,basisSE_.permutation(i),ns);
-					size_t y0=0,y1=0;
-					utils::getCoordinates(y0,y1,basisE_.permutation(y),nx);
-					RealType sign = basisS_.fermionicSign(x,A.fermionSign);
-					for (int k=A.data.getRowPtr(y0);k<A.data.getRowPtr(y0+1);k++) {
-						size_t y0prime = A.data.getCol(k);
-						size_t yprime = basisE_.permutationInverse(y0prime+y1*nx);
-						size_t j = basisSE_.permutationInverse(x+yprime*ns);
-						dest2[j] += src[i]*A.data.getValue(k)*sign;
-					}
-				}
-			}
-
 			// hack to get the current partition, note that this:
 			// size_t partition = targetVectors_[0].findPartition(basisSE_);
 			// doesn't work, since targetVectors_[0] is stale at this point
@@ -789,13 +591,13 @@ namespace Dmrg {
 				if (allStages(WFT_NOADVANCE)) {
 					VectorWithOffsetType tmpVector = psi_;
 					for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
-						applyLocalOp(phi,tmpVector,tstStruct_.aOperators[j],tstStruct_.electrons,
+						applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],tstStruct_.electrons,
 							systemOrEnviron);
 						tmpVector = phi;
 					}
 					return;
 				}
-				applyLocalOp(phi,psi_,tstStruct_.aOperators[i],tstStruct_.electrons,
+				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],tstStruct_.electrons,
 								systemOrEnviron);
 			}
 			
@@ -838,7 +640,7 @@ namespace Dmrg {
 				multiply(A.data,tmpCt,tmpC);
 				A.fermionSign = 1;
 				//A.data = tmpC;
-				applyLocalOp(dest,src,A,tstStruct_.electrons,systemOrEnviron);
+				applyOpLocal_(dest,src,A,tstStruct_.electrons,systemOrEnviron);
 				
 				
 				ComplexType sum = 0;
@@ -869,6 +671,7 @@ namespace Dmrg {
 			std::vector<VectorWithOffsetType> targetVectors_;
 			RealType gsWeight_;
 			typename IoType::Out io_;
+			ApplyOperatorLocalType applyOpLocal_;
 	};     //class TimeStepTargetting
 } // namespace Dmrg
 /*@}*/
