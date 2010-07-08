@@ -165,6 +165,8 @@ sub runOracle
 	moveFiles($dataFile,$tstFile,$envStack,$sysStack);
 	removeFiles($tn) if($rmFlag);
 	print "Completed running oracle for test $tn.\n";
+	undef $tn;
+	undef $executable;
 }
 
 sub moveFiles
