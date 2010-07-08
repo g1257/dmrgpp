@@ -1023,7 +1023,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	size_t n=mp.linSize;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
 	bool verbose = false;
-	Observe<RealType,FieldType,IoSimple,ConcurrencyType> observe($obsArg);
+	Observe<FieldType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
 EOF
 	if ($targetting=~/timestep/i) {
 print OBSOUT<<EOF;

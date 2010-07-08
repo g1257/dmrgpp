@@ -107,12 +107,13 @@ namespace Dmrg {
 		return os;
 	}
 	
-	template<typename RealType,typename FieldType,typename IoType,
- 		typename MatrixType,template<typename> class VectorTemplate>
+	template<typename IoType,typename MatrixType,typename VectorType,typename BasisType>
 	class CorrelationsSkeleton {
 		//typedef typename MatrixType::value_type FieldType;
 		typedef size_t IndexType;
-		typedef Precomputed<RealType,FieldType,IoType,MatrixType,VectorTemplate> PrecomputedType;
+		typedef Precomputed<IoType,MatrixType,VectorType,BasisType> PrecomputedType;
+		typedef typename VectorType::value_type FieldType;
+		typedef typename BasisType::RealType RealType;
 		
 	public:
 		enum {GROW_RIGHT,GROW_LEFT};
@@ -163,7 +164,7 @@ namespace Dmrg {
 		// Perfomance critical:	
 		void fluffUp(MatrixType& ret2,const MatrixType& O,const std::vector<int>& signs,int growOption=GROW_RIGHT)
 		{
-			size_t n = precomp_.SpermutationInverse().size();
+			size_t n = precomp_.basisS().size();
 			MatrixType ret(n,n);
 
 			for (size_t e=0;e<n;e++) {
@@ -180,20 +181,20 @@ namespace Dmrg {
 		{
 			
 			size_t n = O.n_row();
-			size_t m = size_t(precomp_.Spermutation().size()/n);
+			size_t m = size_t(precomp_.basisS().size()/n);
 			FieldType sign = static_cast<FieldType>(1.0);
 			
 			// Sperm[e] = i +k*n or e= k + i*m
 			// Sperm[e2] = j+k*n or e2=k+j*m
 			size_t i,j,k,k2;
 			if (growOption==GROW_RIGHT) {	
-				if (size_t(precomp_.Spermutation(e)/n)!=size_t(precomp_.Spermutation(e2)/n)) return 0;
-				utils::getCoordinates(i,k,precomp_.Spermutation(e),n);
-				utils::getCoordinates(j,k2,precomp_.Spermutation(e2),n);
+				if (size_t(precomp_.basisS().permutation(e)/n)!=size_t(precomp_.basisS().permutation(e2)/n)) return 0;
+				utils::getCoordinates(i,k,precomp_.basisS().permutation(e),n);
+				utils::getCoordinates(j,k2,precomp_.basisS().permutation(e2),n);
 			} else {
-				if (size_t(precomp_.Spermutation(e)%m)!=size_t(precomp_.Spermutation(e2)%m)) return 0;
-				utils::getCoordinates(k,i,precomp_.Spermutation(e),m);
-				utils::getCoordinates(k2,j,precomp_.Spermutation(e2),m);
+				if (size_t(precomp_.basisS().permutation(e)%m)!=size_t(precomp_.basisS().permutation(e2)%m)) return 0;
+				utils::getCoordinates(k,i,precomp_.basisS().permutation(e),m);
+				utils::getCoordinates(k2,j,precomp_.basisS().permutation(e2),m);
 				sign = signs[k];
 			}
 			FieldType ret=0;
@@ -225,8 +226,8 @@ namespace Dmrg {
 				for (size_t r2=0;r2<result.n_col();r2++)
 					result(r,r2)=0;
 			
-			if (precomp_.Spermutation().size()!=sprime) {
-				std::cerr<<"WARNING: "<<precomp_.Spermutation().size()<<"!="<<sprime<<"\n";
+			if (precomp_.basisS().size()!=sprime) {
+				std::cerr<<"WARNING: "<<precomp_.basisS().size()<<"!="<<sprime<<"\n";
 				throw std::runtime_error("problem\n");
 			}
 			
@@ -234,11 +235,11 @@ namespace Dmrg {
 				//size_t r,eta;
 				//utils::getCoordinates(r,eta,precomp_.SEpermutation(x),ni*nj);
 				size_t e,u;
-				utils::getCoordinates(e,u,precomp_.Spermutation(r),ni);
+				utils::getCoordinates(e,u,precomp_.basisS().permutation(r),ni);
 				FieldType f = precomp_.fermionicSign(e,fermionicSign);
 				for (size_t e2=0;e2<ni;e2++) {	
 					for (size_t u2=0;u2<nj;u2++) {
-						size_t r2 = precomp_.SpermutationInverse()[e2 + u2*ni];
+						size_t r2 = precomp_.basisS().permutationInverse(e2 + u2*ni);
 						//size_t x2 = r2 + eta*envSize;
 						result(r,r2) += O1(e,e2)*O2(u,u2)*f;
 					}
@@ -273,22 +274,22 @@ namespace Dmrg {
 			RealType norma = std::norm(vec);
 			//std::cerr<<"MatrixA\n";
 			//std::cerr<<A;
-			if (verbose_) std::cerr<<"SE.size="<<precomp_.SEpermutation()<<"\n";
+			if (verbose_) std::cerr<<"SE.size="<<precomp_.basisSE().size()<<"\n";
 			
 			//if (precomp_.SEpermutation()!=A.size()) throw std::runtime_error("problem in bracket\n");
 			CrsMatrix<FieldType> Acrs(A);
 			FieldType sum=0;
 			//size_t counter=0;
-			if (vec.size()!=precomp_.SEpermutation()) throw std::runtime_error("Error\n");
+			if (vec.size()!=precomp_.basisSE().size()) throw std::runtime_error("Error\n");
 			for (size_t x=0;x<vec.indices();x++) {
 				size_t t=vec.index(x);
 				size_t eta,r;
 				
-				utils::getCoordinates(r,eta,precomp_.SEpermutation(t),precomp_.Spermutation().size());
+				utils::getCoordinates(r,eta,precomp_.basisSE().permutation(t),precomp_.basisS().size());
 				//for (size_t r2=0;r2<A.n_col();r2++) {
 				for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
 					size_t r2 = Acrs.getCol(k);
-					size_t t2 = precomp_.SEpermutationInverse(r2+eta*A.n_col());
+					size_t t2 = precomp_.basisSE().permutationInverse(r2+eta*A.n_col());
 					if (vec[t2]==zeroc) continue;
 					//if (A(r,r2)==0) continue;
 					//counter++;

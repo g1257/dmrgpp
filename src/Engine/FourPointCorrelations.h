@@ -88,13 +88,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CorrelationsSkeleton.h"
 
 namespace Dmrg {
-	template<typename FieldType,typename RealType,typename IoType,typename MatrixType,template<typename> class VectorTemplate>
+	template<typename IoType,typename MatrixType,typename VectorType,typename BasisType>
 	class FourPointCorrelations {
 		//typedef typename MatrixType::value_type FieldType;
 		typedef size_t IndexType;
-		typedef Precomputed<FieldType,RealType,IoType,MatrixType,VectorTemplate> PrecomputedType;
-		typedef CorrelationsSkeleton<FieldType,RealType,IoType,MatrixType,VectorTemplate> CorrelationsSkeletonType;
+		typedef Precomputed<IoType,MatrixType,VectorType,BasisType> PrecomputedType;
+		typedef CorrelationsSkeleton<IoType,MatrixType,VectorType,BasisType> CorrelationsSkeletonType;
 		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
+		typedef typename VectorType::value_type FieldType;
+		typedef typename BasisType::RealType RealType;
 		
 	public:
 		FourPointCorrelations(PrecomputedType& precomp,CorrelationsSkeletonType& skeleton,bool verbose=false)

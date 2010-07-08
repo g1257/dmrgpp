@@ -88,14 +88,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename RealType,typename FieldType,typename IoType,typename ConcurrencyType>
+	template<typename FieldType,typename BasisType,typename IoType,typename ConcurrencyType>
 	class Observe {
 		typedef size_t IndexType;
 		typedef SparseVector<FieldType> VectorType;
 		typedef psimag::Matrix<FieldType> MatrixType;
-		typedef Precomputed<RealType,FieldType,IoType,MatrixType,SparseVector> PrecomputedType;
-		typedef CorrelationsSkeleton<RealType,FieldType,IoType,MatrixType,SparseVector> CorrelationsSkeletonType;
-		typedef FourPointCorrelations<RealType,FieldType,IoType,MatrixType,SparseVector>  FourPointCorrelationsType;
+		typedef typename BasisType::RealType RealType;
+		typedef Precomputed<IoType,MatrixType,VectorType,BasisType> PrecomputedType;
+		typedef CorrelationsSkeleton<IoType,MatrixType,VectorType,BasisType> CorrelationsSkeletonType;
+		typedef FourPointCorrelations<IoType,MatrixType,VectorType,BasisType>  FourPointCorrelationsType;
 		
 		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		static size_t const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;

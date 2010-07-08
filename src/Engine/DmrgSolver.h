@@ -194,6 +194,7 @@ namespace Dmrg {
 			std::vector<OperatorType> creationMatrix;
 			model_.setNaturalBasis(creationMatrix,hmatrix,q,S);
 			MyBasisWithOperators pS("pS",S,hmatrix,q);
+			printOneSiteElectrons(pS);
 			pS.setOperators(creationMatrix);
 			waveFunctionTransformation_.init(hmatrix.rank());
 			if (parameters_.options.find("nowft")!=std::string::npos) waveFunctionTransformation_.disable();
@@ -370,8 +371,9 @@ namespace Dmrg {
 				progress_.print("Truncating (env) basis now...\n",std::cout);
 				
 				if (saveOption==SAVE_TO_DISK) {
-					if (direction==SHRINK_ENVIRON) saveToDiskCompatibility(pS,pSprime_,pSE_,target); // obsolete
-					else saveToDiskCompatibility(pE,pEprime_,pSE_,target); // obsolete
+					//if (direction==SHRINK_ENVIRON) saveToDiskCompatibility(pS,pSprime_,pSE_,target); // obsolete
+					//else saveToDiskCompatibility(pE,pEprime_,pSE_,target); // obsolete
+					saveToDiskForObserver(pSprime_,pEprime_,pSE_,target);
 				}
 				
 				if (direction==SHRINK_ENVIRON) {
@@ -534,42 +536,24 @@ namespace Dmrg {
 		}
 
 		// Save to disk everything needed to compute any observable (OBSOLETE!!)
-		void saveToDiskCompatibility(
-			MyBasisWithOperators const &pS,
-			MyBasisWithOperators const &pSprime,
+		void saveToDiskForObserver(
+			MyBasis const &pS,
+			MyBasis const &pE,
 			MyBasis const &pSE,
 			TargettingType const  &target) 
 		{
-			// save operators (not needed, they will be re-built)
-			// save permutation for system
-			std::string label = "#pSprime.permutationInverse_sites=";
-
-			for (size_t i=0;i<pSprime.block().size();i++) {
-				label += utils::ttos(pSprime.block()[i])+",";
-			}
-
-			io_.printVector(pSprime.permutationInverse(),label);
-			// save permutation for system-environment
-			label = "#pSE.permutationInverse_sites=";
-			for (size_t i=0;i<pSE.block().size();i++) {
-				label += utils::ttos(pSE.block()[i])+",";
-			}
-			io_.printVector(pSE.permutationInverse(),label);
+			pS.save(io_);
+			pE.save(io_);
+			pSE.save(io_);
 
 			// save wavefunction
-			label = "#WAVEFUNCTION_sites=";
+			std::string label = "#WAVEFUNCTION_sites=";
 			for (size_t i=0;i<pSE.block().size();i++) {
 				label += utils::ttos(pSE.block()[i])+",";
 			}
 			//SparseVector<typename TargettingType::TargetVectorType::value_type> psiSparse(target.gs());
 			io_.printSparseVector(target.gs(),label);
 
-			// save electrons
-			label = "#ELECTRONS_sites=";
-			for (size_t i=0;i<pSprime.block().size();i++) {
-				label += utils::ttos(pSprime.block()[i])+",";
-			}
-			io_.printVector(pS.electrons(),label);
 		}
 
 		// Save to disk transform
@@ -597,6 +581,14 @@ namespace Dmrg {
 			return dir + s1 + suf;
 					
 		}
+		
+		void printOneSiteElectrons(const MyBasis& b)
+		{
+			std::string s = "#ONE_SITE_ELECTRONS\n";
+			if (b.block().size()!=1) throw std::runtime_error("printOneSiteElectrons failed\n");
+			b.save(io_);
+		}
+		
 	}; //class DmrgSolver
 } // namespace Dmrg
 

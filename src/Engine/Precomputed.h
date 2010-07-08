@@ -85,22 +85,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramLimits.h"
 
 namespace Dmrg {
-	template<typename RealType,typename FieldType,typename IoType,
- 		typename MatrixType,template<typename> class VectorTemplate>
+	template<typename IoType,typename MatrixType,typename VectorType_,typename BasisType>
 	class Precomputed {
 	public:
+		typedef VectorType_ VectorType;
 		typedef size_t IndexType;
-		typedef VectorTemplate<FieldType> VectorType;
+		typedef typename VectorType::value_type FieldType;
+		typedef typename BasisType::RealType RealType;
 		enum {NOTIMEVECTOR=0,USETIMEVECTOR=1};
-		
-		
 		
 		Precomputed(const std::string& filename,size_t nf,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
-				SpermutationInverse_(nf),Spermutation_(nf),
-				SEpermutationInverse_(nf),SEpermutation_(nf),
-				electrons_(nf),
+				bogusBasis_("Bogus"),
+				basisS_(nf,bogusBasis_),
+				basisE_(nf,bogusBasis_),
+				basisSE_(nf,bogusBasis_),
 				transform_(nf),
 				wavefunction_(nf),
 				psiTimeVector_(nf),
@@ -117,9 +117,10 @@ namespace Dmrg {
 			:	filename_(filename),
 				io_(filename),
 				io2_(timeFilename),
-				SpermutationInverse_(nf),Spermutation_(nf),
-				SEpermutationInverse_(nf),SEpermutation_(nf),
-				electrons_(nf),
+				bogusBasis_("Bogus"),
+				basisS_(nf,bogusBasis_),
+				basisE_(nf,bogusBasis_),
+				basisSE_(nf,bogusBasis_),
 				transform_(nf),
 				wavefunction_(nf),
 				psiTimeVector_(nf),
@@ -150,47 +151,33 @@ namespace Dmrg {
 // 		
 		int fermionicSign(size_t i,int f) const
 		{
-			return (electrons_[currentPos_][i] & 1) ? f : 1;
+			//FIXME: NEEDS TO SUBSTRACT BLOCK OF ONE!!!
+			return (basisS_[currentPos_].electrons(i) & 1) ? f : 1;
 		}
 		
 		size_t fermionicSigns() const 
 		{ 
-			return electrons_[currentPos_].size();
+			return basisS_[currentPos_].size();
 		}
 		
 		/*IndexType electrons(size_t i) const
 		{
 			return electrons_[currentPos_][i];
 		}*/
-
-		IndexType SEpermutation(size_t i) const
+		
+		const BasisType& basisS() const 
 		{
-			return SEpermutation_[currentPos_][i];
+			return basisS_[currentPos_];
 		}
 
-		IndexType SEpermutation() const
+		const BasisType& basisE() const 
 		{
-			return SEpermutation_[currentPos_].size();
+			return basisE_[currentPos_];
 		}
-
-		IndexType SEpermutationInverse(size_t i) const
+		
+		const BasisType& basisSE() const 
 		{
-			return SEpermutationInverse_[currentPos_][i];
-		}
-
-		IndexType Spermutation(size_t i) const
-		{
-			return 	Spermutation_[currentPos_][i];
-		}
-
-		const std::vector<IndexType>&   Spermutation() const
-		{
-			return 	Spermutation_[currentPos_];
-		}
-
-		const std::vector<IndexType>&  SpermutationInverse() const
-		{
-			return SpermutationInverse_[currentPos_];
+			return basisSE_[currentPos_];
 		}
 
 		void transform(MatrixType& ret,MatrixType& O)
@@ -222,40 +209,62 @@ namespace Dmrg {
 			return psiTimeVector_[currentPos_]; //-nf_+1+stepTimes_];	
 		}
 		
-		template<typename RealType1,
-  			typename FieldType1,typename IoType1,typename MatrixType1,template<typename> class VectorTemplate1>
+		template<typename IoType1,typename MatrixType1,typename VectorType1,typename BasisType1>
 		friend std::ostream& operator<<(std::ostream& os,
-			Precomputed<RealType1,FieldType1,IoType1,MatrixType1,VectorTemplate1>& precomp);
+			Precomputed<IoType1,MatrixType1,VectorType1,BasisType1>& precomp);
 
 	private:
 		void init(size_t nf)
 		{
 			rewind(true);
+			electrons_.clear();
+			std::vector<size_t> el0;
+			getElectronsOneSite(el0);
 			for (size_t i=0;i<nf-1;i++) {
 				if (verbose_) std::cerr<<"Precomputed "<<i<<" out of "<<(nf-1)<<"\n";
 				size_t j = 0; // = i;
 				
-				getPermutation(Spermutation_[i],SpermutationInverse_[i],
+				/*getPermutation(Spermutation_[i],SpermutationInverse_[i],
 						"#pSprime.permutationInverse_sites",j);
 				getPermutation(SEpermutation_[i],SEpermutationInverse_[i],
 						"#pSE.permutationInverse_sites=",j);
+				*/
+				basisS_[i].load(io_);
+				basisE_[i].load(io_);
+				basisSE_[i].load(io_);
 				getWaveFunction(wavefunction_[i],j);
-				getElectrons(electrons_[i],j);
+				//getElectrons(electrons_[i],j);
 				getTransform(transform_[i],j);
-				
+				std::vector<size_t> tmpV;
+				calcElectrons(tmpV,el0,i);
+				electrons_.push_back(tmpV);
 			}
+			
 			FieldType dummy = 0;
 			initTimeVectors(dummy);
 			// Line below might cause trouble under gcc v3
 			//if (verbose_) std::cerr<<(*this);	
 		}
 		
+		void calcElectrons(std::vector<size_t>& el,const std::vector<size_t>& el0,size_t stage) const
+		{
+			el.resize(basisS_[stage].size());
+			size_t nx = basisS_[stage].size()/el0.size();
+			for (size_t x=0;x<el.size();x++) {
+				size_t x0,x1;
+				utils::getCoordinates(x0,x1,basisS_[stage].permutation(x),nx);
+				int nx0 = basisS_[stage].electrons(x)-el0[x1];
+				if (nx0<0) throw std::runtime_error("calcElectrons::applyLocalOpSystem(...)\n");
+				el[x] = nx0;
+			}
+		}
+		
 		void integrityChecks()
 		{
-			if (SEpermutation_.size()!=psiTimeVector_.size()) throw std::runtime_error("Error 1\n");
-			for (size_t x=0;x<SEpermutation_.size();x++) {
-				if (SEpermutation_[x].size()==0) continue;
-				if (SEpermutation_[x].size()!=psiTimeVector_[x].size()) throw std::runtime_error("Error 2\n");
+			if (basisSE_.size()!=psiTimeVector_.size()) throw std::runtime_error("Error 1\n");
+			for (size_t x=0;x<basisSE_.size();x++) {
+				if (basisSE_[x].size()==0) continue;
+				if (basisSE_[x].size()!=psiTimeVector_[x].size()) throw std::runtime_error("Error 2\n");
 			}
 			
 		}
@@ -285,26 +294,19 @@ namespace Dmrg {
 				io2_.rewind();
 			}
 		}
-
-		void  getPermutation(std::vector<IndexType>& pS,std::vector<IndexType>& pSi,
-				     const std::string& label,int ns)
+		
+		void getElectronsOneSite(std::vector<size_t>& el0)
 		{
-			io_.read(pSi,label,ns);
-			rewind();
-			pS.resize(pSi.size());
-			for (size_t i=0;i<pSi.size();i++) pS[pSi[i]]=i;
-			
+			BasisType b("one site");
+			b.load(io_);
+			if (b.block().size()!=1) throw std::runtime_error("getElectronsOneSite\n");
+			el0 = b.electrons();
 		}
+		
 
 		void getTransform(MatrixType& transform,int ns)
 		{
 			io_.readMatrix(transform,"#TRANSFORM_sites",ns);
-			rewind();
-		}
-
-		void getElectrons(std::vector<IndexType>& electrons,int ns)
-		{
-			io_.read(electrons,"#ELECTRONS_sites=",ns);
 			rewind();
 		}
 
@@ -323,9 +325,9 @@ namespace Dmrg {
 		std::string filename_; 
 		typename IoType::In io_;
 		typename IoType::In io2_;
-		std::vector<std::vector<IndexType> >	SpermutationInverse_,Spermutation_,
-  							SEpermutationInverse_,SEpermutation_,
-	 						electrons_;
+		BasisType bogusBasis_;
+		std::vector<BasisType> basisS_,basisE_,basisSE_;
+		std::vector<std::vector<size_t> > electrons_;
 		std::vector<MatrixType> transform_;
 		std::vector<VectorType> wavefunction_;
 		std::vector<VectorType> psiTimeVector_;
@@ -335,10 +337,9 @@ namespace Dmrg {
 		size_t stepTimes_;
 	};  //Precomputed
 
-	template<typename RealType1,typename FieldType1,typename IoType1,
- 		typename MatrixType1,template<typename> class VectorTemplate1>
+	template<typename IoType1,typename MatrixType1,typename VectorType1,typename BasisType1>
 	std::ostream& operator<<(std::ostream& os,
-		Precomputed<RealType1,FieldType1,IoType1,MatrixType1,VectorTemplate1>& p)
+		Precomputed<IoType1,MatrixType1,VectorType1,BasisType1>& p)
 	{
 		for (size_t i=0;i<p.SpermutationInverse_.size();i++) {
 			os<<"i="<<i<<"\n";
