@@ -121,17 +121,17 @@ namespace Dmrg {
 		
 		CorrelationsSkeleton(PrecomputedType& precomp,bool verbose = false) : precomp_(precomp),verbose_(verbose) { } 
 		
-		void createSigns(std::vector<int>& signs,int f)
+		/*void createSigns(std::vector<int>& signs,int f)
 		{
 			signs.resize(precomp_.fermionicSigns());
 			for (size_t i=0;i<signs.size();i++) signs[i] = precomp_.fermionicSign(i,f);
-		}
+		}*/
 		
 		//! i can be zero here!!
 		void growDirectly(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns)
 		{
 			Odest =Osrc;
-			std::vector<int> signs;
+			//std::vector<int> signs;
 			// from 0 --> i
 			int nt=i-1;
 			if (nt<0) nt=0;
@@ -153,30 +153,31 @@ namespace Dmrg {
 				}
 				/*io_.rewind();
 				io_.read(electrons_,"#ELECTRONS_sites=",s);*/
-				createSigns(signs,fermionicSign);
+				//createSigns(signs,fermionicSign);
 				MatrixType Onew(precomp_.transform().n_col(),precomp_.transform().n_col());
-				fluffUp(Onew,Odest,signs,growOption);
+				fluffUp(Onew,Odest,fermionicSign,growOption);
 				Odest = Onew;
 				
 			}
 		}
 		
 		// Perfomance critical:	
-		void fluffUp(MatrixType& ret2,const MatrixType& O,const std::vector<int>& signs,int growOption=GROW_RIGHT)
+		void fluffUp(MatrixType& ret2,const MatrixType& O,int fermionicSign,
+			     int growOption=GROW_RIGHT)
 		{
 			size_t n = precomp_.basisS().size();
 			MatrixType ret(n,n);
 
 			for (size_t e=0;e<n;e++) {
 				for (size_t e2=0;e2<n;e2++) {
-					ret(e,e2) = fluffUp(O,e,e2,signs,growOption);
+					ret(e,e2) = fluffUp(O,e,e2,fermionicSign,growOption);
 				}
 			}
 			precomp_.transform(ret2,ret);
 		}
 
 		// Perfomance critical:
-		FieldType fluffUp(const MatrixType& O,size_t e,size_t e2,const std::vector<int>& signs,
+		FieldType fluffUp(const MatrixType& O,size_t e,size_t e2,int fermionicSign,
 					  int growOption=GROW_RIGHT)	
 		{
 			
@@ -195,7 +196,7 @@ namespace Dmrg {
 				if (size_t(precomp_.basisS().permutation(e)%m)!=size_t(precomp_.basisS().permutation(e2)%m)) return 0;
 				utils::getCoordinates(k,i,precomp_.basisS().permutation(e),m);
 				utils::getCoordinates(k2,j,precomp_.basisS().permutation(e2),m);
-				sign = signs[k];
+				sign = precomp_.fermionicSign(k,fermionicSign); // signs[k];
 			}
 			FieldType ret=0;
 			if (k==k2) ret=O(i,j)*sign;

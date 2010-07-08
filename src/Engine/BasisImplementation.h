@@ -285,6 +285,8 @@ namespace Dmrg {
 				truncate(removedIndices);
 			}
 			
+			// N.B.: false below means that we don't truncate the permutation vectors
+			//	because they're needed for the WFT
 			findPermutationAndPartition(false);
 			std::ostringstream msg;
 			msg<<"Done with changeBasis";

@@ -355,10 +355,10 @@ namespace Dmrg {
 			}
 			/* io_.rewind();
 			io_.read(electrons_,"#ELECTRONS_sites=",s);*/
-			skeleton_.createSigns(signs,fermionicSign);
+			//skeleton_.createSigns(signs,fermionicSign);
 			MatrixType Onew(precomp_.transform().n_col(),precomp_.transform().n_col());
 			Odest = Onew;
-			skeleton_.fluffUp(Odest,Osrc,signs,growOption);
+			skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption);
 		}
 
 		PrecomputedType precomp_;

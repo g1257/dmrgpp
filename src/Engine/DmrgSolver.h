@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LanczosSolver.h"
 #include "Diagonalization.h"
 #include "ProgressIndicator.h"
+#include "FermionSign.h"
 
 namespace Dmrg {
 
@@ -368,14 +369,15 @@ namespace Dmrg {
 				bool needsPrinting = (saveOption==SAVE_TO_DISK);
 				gsEnergy =diagonalization_(target,direction,sitesIndices_[stepCurrent_],loopIndex,needsPrinting);
 				//if (target.gs().size()==0) throw std:runtime_error("DmrgSolver:: target.size==0 after\n");
-				progress_.print("Truncating (env) basis now...\n",std::cout);
 				
 				if (saveOption==SAVE_TO_DISK) {
 					//if (direction==SHRINK_ENVIRON) saveToDiskCompatibility(pS,pSprime_,pSE_,target); // obsolete
 					//else saveToDiskCompatibility(pE,pEprime_,pSE_,target); // obsolete
-					saveToDiskForObserver(pSprime_,pEprime_,pSE_,target);
+					FermionSign fs(pS.electrons());
+					saveToDiskForObserver(fs,pSprime_,pEprime_,pSE_,target);
 				}
 				
+				progress_.print("Truncating (env) basis now...\n",std::cout);
 				if (direction==SHRINK_ENVIRON) {
 					changeAndTruncateBasis(pS,target,pSprime_,pEprime_,pSE_,keptStates,0,saveOption);
 					systemStack_.push(pS);
@@ -383,6 +385,7 @@ namespace Dmrg {
 					changeAndTruncateBasis(pE,target,pEprime_,pSprime_,pSE_,keptStates,1,saveOption);
 					envStack_.push(pE);
 				}
+				
 				if (finalStep(stepLength,stepFinal)) break;
 				if (stepCurrent_<0) throw std::runtime_error("DmrgSolver::finiteStep() currentStep_ is negative\n");
 				
@@ -537,11 +540,13 @@ namespace Dmrg {
 
 		// Save to disk everything needed to compute any observable (OBSOLETE!!)
 		void saveToDiskForObserver(
+			const FermionSign& fs,
 			MyBasis const &pS,
 			MyBasis const &pE,
 			MyBasis const &pSE,
 			TargettingType const  &target) 
 		{
+			fs.save(io_);
 			pS.save(io_);
 			pE.save(io_);
 			pSE.save(io_);

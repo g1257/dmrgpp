@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PRECOMPUTED_H
 #include "SparseVector.h"
 #include "ProgramLimits.h"
+#include "FermionSign.h"
 
 namespace Dmrg {
 	template<typename IoType,typename MatrixType,typename VectorType_,typename BasisType>
@@ -98,6 +99,7 @@ namespace Dmrg {
 			:	filename_(filename),
 				io_(filename),
 				bogusBasis_("Bogus"),
+				fermionSigns_(nf,bogusBasis_.electrons()),
 				basisS_(nf,bogusBasis_),
 				basisE_(nf,bogusBasis_),
 				basisSE_(nf,bogusBasis_),
@@ -118,6 +120,7 @@ namespace Dmrg {
 				io_(filename),
 				io2_(timeFilename),
 				bogusBasis_("Bogus"),
+				fermionSigns_(nf),
 				basisS_(nf,bogusBasis_),
 				basisE_(nf,bogusBasis_),
 				basisSE_(nf,bogusBasis_),
@@ -144,26 +147,11 @@ namespace Dmrg {
 			return transform_[currentPos_];
 		}
 
-// 		const std::vector<IndexType>& electrons() const
-// 		{
-// 			return electrons_[currentPos_];
-// 		}
-// 		
 		int fermionicSign(size_t i,int f) const
 		{
-			//FIXME: NEEDS TO SUBSTRACT BLOCK OF ONE!!!
-			return (basisS_[currentPos_].electrons(i) & 1) ? f : 1;
+			return fermionSigns_[currentPos_](i,f);
 		}
 		
-		size_t fermionicSigns() const 
-		{ 
-			return basisS_[currentPos_].size();
-		}
-		
-		/*IndexType electrons(size_t i) const
-		{
-			return electrons_[currentPos_][i];
-		}*/
 		
 		const BasisType& basisS() const 
 		{
@@ -217,8 +205,7 @@ namespace Dmrg {
 		void init(size_t nf)
 		{
 			rewind(true);
-			electrons_.clear();
-			std::vector<size_t> el0;
+			std::vector<size_t> el0; // not really needed, but needs to read to keep in sync
 			getElectronsOneSite(el0);
 			for (size_t i=0;i<nf-1;i++) {
 				if (verbose_) std::cerr<<"Precomputed "<<i<<" out of "<<(nf-1)<<"\n";
@@ -229,34 +216,19 @@ namespace Dmrg {
 				getPermutation(SEpermutation_[i],SEpermutationInverse_[i],
 						"#pSE.permutationInverse_sites=",j);
 				*/
+				fermionSigns_[i].load(io_);
 				basisS_[i].load(io_);
 				basisE_[i].load(io_);
 				basisSE_[i].load(io_);
 				getWaveFunction(wavefunction_[i],j);
 				//getElectrons(electrons_[i],j);
 				getTransform(transform_[i],j);
-				std::vector<size_t> tmpV;
-				calcElectrons(tmpV,el0,i);
-				electrons_.push_back(tmpV);
 			}
 			
 			FieldType dummy = 0;
 			initTimeVectors(dummy);
 			// Line below might cause trouble under gcc v3
 			//if (verbose_) std::cerr<<(*this);	
-		}
-		
-		void calcElectrons(std::vector<size_t>& el,const std::vector<size_t>& el0,size_t stage) const
-		{
-			el.resize(basisS_[stage].size());
-			size_t nx = basisS_[stage].size()/el0.size();
-			for (size_t x=0;x<el.size();x++) {
-				size_t x0,x1;
-				utils::getCoordinates(x0,x1,basisS_[stage].permutation(x),nx);
-				int nx0 = basisS_[stage].electrons(x)-el0[x1];
-				if (nx0<0) throw std::runtime_error("calcElectrons::applyLocalOpSystem(...)\n");
-				el[x] = nx0;
-			}
 		}
 		
 		void integrityChecks()
@@ -295,6 +267,8 @@ namespace Dmrg {
 			}
 		}
 		
+		// Not needed, but if you remove this, also remove in DmrgSolver the corresponding
+		// printing of the first basis to keep everythign in sync
 		void getElectronsOneSite(std::vector<size_t>& el0)
 		{
 			BasisType b("one site");
@@ -326,8 +300,8 @@ namespace Dmrg {
 		typename IoType::In io_;
 		typename IoType::In io2_;
 		BasisType bogusBasis_;
+		std::vector<FermionSign> fermionSigns_;
 		std::vector<BasisType> basisS_,basisE_,basisSE_;
-		std::vector<std::vector<size_t> > electrons_;
 		std::vector<MatrixType> transform_;
 		std::vector<VectorType> wavefunction_;
 		std::vector<VectorType> psiTimeVector_;
