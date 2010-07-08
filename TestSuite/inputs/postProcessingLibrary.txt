@@ -1,0 +1,55 @@
+# $output  is whatever is in the inputX.inp under rootname  
+
+[energy]
+Let $result = $resultsDir.e$testNum.txt
+Let $oracle = $oraclesDir.e$testNum.txt
+Let $diff = $resultsDir.e$testNum.diff
+Let $output = $srcDir.data$testNum.txt
+Grep Energy $output > $result
+Diff $result $oracle > $diff 
+
+[observables]
+Let $input = $inputsDir.input$testNum.inp
+Let $output = $srcDir.data$testNum.txt
+Let $raw = $srcDir.raw$testNum.txt
+Make observe
+Execute ../src/observe $input $output > $raw
+
+[C]
+Let $result = $resultsDir.operatorC$testNum.txt
+Let $oracle = $resultsDir.operatorC$testNum.txt
+Let $raw = $srcDir.raw$testNum.txt
+Let $diff = $resultsDir.operatorC$testNum.diff
+CallOnce observables 
+Execute extractOperatorC($raw,$result)
+Diff $result $oracle > $diff
+
+[N]
+Let $result = $resultsDir.operatorN$testNum.txt
+Let $oracle = $resultsDir.operatorN$testNum.txt
+Let $raw = $srcDir.raw$testNum.txt
+Let $diff = $resultsDir.operatorN$testNum.diff
+CallOnce observables
+Execute extractOperatorN($raw,$result)
+Diff $result $oracle > $diff
+
+[Sz]
+Let $result = $resultsDir.operatorSz$testNum.txt
+Let $oracle = $resultsDir.operatorSz$testNum.txt
+Let $raw = $srcDir.raw$testNum.txt
+Let $diff = $resultsDir.operatorSz$testNum.diff
+CallOnce observables
+Execute extractOperatorSz($raw,$result)
+Diff $result $oracle > $diff
+
+[gprof]
+Let $result = $resultsDir.prof$testNum.txt
+Let $oracle = $oraclesDir.prof$testNum.txt
+Let $diff = $resultsDir.prof$testNum.diff
+Gprof ../src/dmrg > $result
+Diff $result $oracle > $diff
+
+[rawTimeEvolution]
+#please add the lets here...
+Grep '|A|' $stdoutAndStdErr > $result
+Diff $result $oracle > $diff
