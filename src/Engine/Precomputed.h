@@ -143,15 +143,25 @@ namespace Dmrg {
 			return transform_[currentPos_];
 		}
 
-		const std::vector<IndexType>& electrons() const
+// 		const std::vector<IndexType>& electrons() const
+// 		{
+// 			return electrons_[currentPos_];
+// 		}
+// 		
+		int fermionicSign(size_t i,int f) const
 		{
-			return electrons_[currentPos_];
+			return (electrons_[currentPos_][i] & 1) ? f : 1;
 		}
-
-		IndexType electrons(size_t i) const
+		
+		size_t fermionicSigns() const 
+		{ 
+			return electrons_[currentPos_].size();
+		}
+		
+		/*IndexType electrons(size_t i) const
 		{
 			return electrons_[currentPos_][i];
-		}
+		}*/
 
 		IndexType SEpermutation(size_t i) const
 		{

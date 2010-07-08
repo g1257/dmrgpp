@@ -122,8 +122,8 @@ namespace Dmrg {
 		
 		void createSigns(std::vector<int>& signs,int f)
 		{
-			signs.resize(precomp_.electrons().size());
-			for (size_t i=0;i<precomp_.electrons().size();i++) signs[i] = (precomp_.electrons(i) %2) ? 1 : f;
+			signs.resize(precomp_.fermionicSigns());
+			for (size_t i=0;i<signs.size();i++) signs[i] = precomp_.fermionicSign(i,f);
 		}
 		
 		//! i can be zero here!!
@@ -235,7 +235,7 @@ namespace Dmrg {
 				//utils::getCoordinates(r,eta,precomp_.SEpermutation(x),ni*nj);
 				size_t e,u;
 				utils::getCoordinates(e,u,precomp_.Spermutation(r),ni);
-				FieldType f = (precomp_.electrons(e)%2) ? 1.0 : fermionicSign;
+				FieldType f = precomp_.fermionicSign(e,fermionicSign);
 				for (size_t e2=0;e2<ni;e2++) {	
 					for (size_t u2=0;u2<nj;u2++) {
 						size_t r2 = precomp_.SpermutationInverse()[e2 + u2*ni];

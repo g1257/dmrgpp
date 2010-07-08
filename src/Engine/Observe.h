@@ -203,13 +203,24 @@ namespace Dmrg {
 		}
 
 		FieldType onePoint(
-					size_t i,
-					const MatrixType& O1,
+					size_t site,
+					const MatrixType& A,
 					int fermionicSign)
 		{
-			size_t pnter=i+1;
-			precomp_.setPointer(pnter);
-			return skeleton_.bracket(O1,PrecomputedType::USETIMEVECTOR);
+// 			size_t pnter=i+1;
+// 			precomp_.setPointer(pnter);
+// 			return skeleton_.bracket(O1,PrecomputedType::USETIMEVECTOR);
+// 			
+// 			const VectorWithOffsetType& src,
+// 			//size_t systemOrEnviron,
+// 			//const std::string& label,
+// 				
+// 			VectorWithOffsetType dest;
+// 			applyOpLocal_(dest,src,A,tstStruct_.electrons,systemOrEnviron);
+// 				
+// 			return dest*src;
+			return -1;
+			//std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_<<" "<<label<<std::norm(src)<<" "<<std::norm(dest)<<"\n";
 		}
 	
 	private:

@@ -413,6 +413,26 @@ namespace Dmrg {
 		}
 		return sum;
 	}
+	
+	//! Isn't this function equal to the prev.? need to check FIXME
+	template<typename FieldType>
+	inline std::complex<FieldType> operator*(
+				const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v1,
+				const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v2)
+	{
+		std::complex<FieldType> sum = 0;
+		for (size_t ii=0;ii<v1.sectors();ii++) {
+			size_t i = v1.sector(ii);
+			for (size_t jj=0;jj<v1.sectors();jj++) {
+				size_t j = v2.sector(jj);
+				if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+				size_t offset = v1.offset(i);
+				for (size_t k=0;k<v1.effectiveSize(i);k++) 
+					sum+= v1[k+offset] * conj(v2[k+offset]);
+			}
+		}
+		return sum;
+	}
 }
 /*@}*/
 #endif
