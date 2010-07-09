@@ -86,14 +86,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename BasisWithOperatorsType,typename VectorWithOffsetType,typename TargetVectorType>
+	template<typename BasisWithOperatorsType,typename VectorWithOffsetType_,typename TargetVectorType>
 	class ApplyOperatorLocal {
 			
-			typedef typename BasisWithOperatorsType::BasisType BasisType;
-			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
+			
 			typedef typename BasisWithOperatorsType::RealType RealType;
 
 		public:
+			typedef typename BasisWithOperatorsType::BasisType BasisType;
+			typedef VectorWithOffsetType_ VectorWithOffsetType;
+			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
+			
 			ApplyOperatorLocal(
 					const BasisType& basisS,
        					const BasisType& basisE,

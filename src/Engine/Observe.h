@@ -85,18 +85,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "CorrelationsSkeleton.h"
 #include "FourPointCorrelations.h"
+#include "VectorWithOffsets.h" // for operator*
+#include "VectorWithOffset.h" // for operator*
 
 namespace Dmrg {
 	
-	template<typename FieldType,typename BasisType,typename IoType,typename ConcurrencyType>
+	template<typename FieldType,typename VectorWithOffsetType,typename BasisType,typename IoType,typename ConcurrencyType>
 	class Observe {
 		typedef size_t IndexType;
 		typedef SparseVector<FieldType> VectorType;
 		typedef psimag::Matrix<FieldType> MatrixType;
 		typedef typename BasisType::RealType RealType;
-		typedef Precomputed<IoType,MatrixType,VectorType,BasisType> PrecomputedType;
-		typedef CorrelationsSkeleton<IoType,MatrixType,VectorType,BasisType> CorrelationsSkeletonType;
-		typedef FourPointCorrelations<IoType,MatrixType,VectorType,BasisType>  FourPointCorrelationsType;
+		typedef Precomputed<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> PrecomputedType;
+		typedef CorrelationsSkeleton<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> CorrelationsSkeletonType;
+		typedef FourPointCorrelations<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType>  FourPointCorrelationsType;
 		
 		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		static size_t const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
@@ -203,30 +205,40 @@ namespace Dmrg {
 			return fourpoint_(mod1,i1,O1,mod2,i2,O2,mod3,i3,O3,mod4,i4,O4,fermionicSign);
 		}
 
-		FieldType onePoint(
-					size_t site,
-					const MatrixType& A,
-					int fermionicSign)
+		template<typename ApplyOperatorType>
+		FieldType onePoint(size_t site,const typename ApplyOperatorType::OperatorType& A,int fermionicSign,size_t shrinkWhat)
 		{
-			ApplyOperatorLocalType applyOpLocal(
-					precomp_.basisS(),
-       					precomp_.basisE(),
-	    				precomp_.basisSE(),
-					size_t shrinkEnv);
-			size_t pnter=i;
+			const BasisType& basisS = precomp_.basisS();
+			const BasisType& basisE = precomp_.basisE();
+			const BasisType& basisSE = precomp_.basisSE();
+			ApplyOperatorType applyOpLocal1(basisS,basisE,basisSE,shrinkWhat);
+					
+			size_t pnter=site;
 			precomp_.setPointer(pnter);
 		
-			const VectorWithOffsetType& src,
-			size_t systemOrEnviron = SHRINK_ENVIRON;
+			const VectorWithOffsetType& src = precomp_.timeVector();
 			//const std::string& label,
 				
 			VectorWithOffsetType dest;
-			applyOpLocal_(dest,precomp_.getTimeVector(),A,fs,systemOrEnviron);
+			applyOpLocal1(dest,src,A,precomp_.fermionicSign(),shrinkWhat);
 				
-			return dest*src;
+			FieldType sum = static_cast<FieldType>(0.0);
+			const VectorWithOffsetType& v1 = dest;
+			const VectorWithOffsetType& v2 = src;
+			for (size_t ii=0;ii<v1.sectors();ii++) {
+				size_t i = v1.sector(ii);
+				for (size_t jj=0;jj<v1.sectors();jj++) {
+					size_t j = v2.sector(jj);
+					if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+					size_t offset = v1.offset(i);
+					for (size_t k=0;k<v1.effectiveSize(i);k++) 
+						sum+= v1[k+offset] * std::conj(v2[k+offset]);
+				}
+			}
+			return sum;
 			//std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_<<" "<<label<<std::norm(src)<<" "<<std::norm(dest)<<"\n";
 		}
-	
+		
 	private:
 		
 		FieldType calcDiagonalCorrelation(
@@ -252,8 +264,7 @@ namespace Dmrg {
 					const MatrixType& O1,
 					const MatrixType& O2,
 					int fermionicSign,
-					size_t isDiagonal=NON_DIAGONAL,
-					size_t useTimeVector=PrecomputedType::NOTIMEVECTOR)
+					size_t isDiagonal=NON_DIAGONAL)
 		{
 			MatrixType O1g,O2g,O1m,O2m;
 			skeleton_.createWithModification(O1m,O1,'n');
@@ -264,7 +275,7 @@ namespace Dmrg {
 			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns);
 			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);
 			
-			return skeleton_.bracket(O2g,useTimeVector);
+			return skeleton_.bracket(O2g);
 		}
 
 		MatrixType identity(size_t n)

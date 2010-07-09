@@ -84,9 +84,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SparseVector.h"
 #include "ProgramLimits.h"
 #include "FermionSign.h"
+#include "VectorWithOffsets.h" // to include norm
+#include "VectorWithOffset.h" // to include norm
 
 namespace Dmrg {
-	template<typename IoType,typename MatrixType,typename VectorType_,typename BasisType>
+	template<typename IoType,typename MatrixType,typename VectorType_,typename VectorWithOffsetType,typename BasisType>
 	class Precomputed {
 	public:
 		typedef VectorType_ VectorType;
@@ -99,7 +101,7 @@ namespace Dmrg {
 			:	filename_(filename),
 				io_(filename),
 				bogusBasis_("Bogus"),
-				fermionSigns_(nf,bogusBasis_.electrons()),
+				fermionSigns_(nf,bogusBasis_.electronsVector()),
 				basisS_(nf,bogusBasis_),
 				basisE_(nf,bogusBasis_),
 				basisSE_(nf,bogusBasis_),
@@ -120,7 +122,7 @@ namespace Dmrg {
 				io_(filename),
 				io2_(timeFilename),
 				bogusBasis_("Bogus"),
-				fermionSigns_(nf,bogusBasis_.electrons()),
+				fermionSigns_(nf,bogusBasis_.electronsVector()),
 				basisS_(nf,bogusBasis_),
 				basisE_(nf,bogusBasis_),
 				basisSE_(nf,bogusBasis_),
@@ -147,9 +149,9 @@ namespace Dmrg {
 			return transform_[currentPos_];
 		}
 
-		int fermionicSign(size_t i,int f) const
+		const FermionSign& fermionicSign() const
 		{
-			return fermionSigns_[currentPos_](i,f);
+			return fermionSigns_[currentPos_];
 		}
 		
 		
@@ -189,7 +191,7 @@ namespace Dmrg {
 			return wavefunction_[currentPos_];
 		}
 		
-		const VectorType& timeVector() const
+		const VectorWithOffsetType& timeVector() const
 		{
 			if (currentPos_>=psiTimeVector_.size() || 
 						 psiTimeVector_[currentPos_].size()==0)
@@ -197,9 +199,9 @@ namespace Dmrg {
 			return psiTimeVector_[currentPos_]; //-nf_+1+stepTimes_];	
 		}
 		
-		template<typename IoType1,typename MatrixType1,typename VectorType1,typename BasisType1>
+		template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
 		friend std::ostream& operator<<(std::ostream& os,
-			Precomputed<IoType1,MatrixType1,VectorType1,BasisType1>& precomp);
+			Precomputed<IoType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& precomp);
 
 	private:
 		void init(size_t nf)
@@ -274,7 +276,7 @@ namespace Dmrg {
 			BasisType b("one site");
 			b.load(io_);
 			if (b.block().size()!=1) throw std::runtime_error("getElectronsOneSite\n");
-			el0 = b.electrons();
+			el0 = b.electronsVector();
 		}
 		
 
@@ -290,9 +292,9 @@ namespace Dmrg {
 			rewind();
 		}
 		
-		void getTimeVector(VectorType& wavefunction,size_t ns)
+		void getTimeVector(VectorWithOffsetType& timeVector,size_t ns)
 		{
-			io2_.readSparseVector(wavefunction,"targetVector0",ns);
+			io2_.readSparseVector(timeVector,"targetVector0",ns);
 			rewind();
 		}
 
@@ -304,16 +306,16 @@ namespace Dmrg {
 		std::vector<BasisType> basisS_,basisE_,basisSE_;
 		std::vector<MatrixType> transform_;
 		std::vector<VectorType> wavefunction_;
-		std::vector<VectorType> psiTimeVector_;
+		std::vector<VectorWithOffsetType> psiTimeVector_;
 		size_t currentPos_;
 		bool verbose_;
 		size_t nf_;
 		size_t stepTimes_;
 	};  //Precomputed
 
-	template<typename IoType1,typename MatrixType1,typename VectorType1,typename BasisType1>
+	template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
 	std::ostream& operator<<(std::ostream& os,
-		Precomputed<IoType1,MatrixType1,VectorType1,BasisType1>& p)
+		Precomputed<IoType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& p)
 	{
 		for (size_t i=0;i<p.SpermutationInverse_.size();i++) {
 			os<<"i="<<i<<"\n";

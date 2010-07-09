@@ -124,7 +124,7 @@ namespace Dmrg {
 			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
 			typedef ComplexVectorType TargetVectorType;
 			typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
-			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorLocalType;
+			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 			enum {SHRINK_SYSTEM=WaveFunctionTransformationType::SHRINK_SYSTEM,
@@ -674,7 +674,7 @@ namespace Dmrg {
 			std::vector<VectorWithOffsetType> targetVectors_;
 			RealType gsWeight_;
 			typename IoType::Out io_;
-			ApplyOperatorLocalType applyOpLocal_;
+			ApplyOperatorType applyOpLocal_;
 	};     //class TimeStepTargetting
 } // namespace Dmrg
 /*@}*/

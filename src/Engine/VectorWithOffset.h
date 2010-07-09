@@ -112,6 +112,13 @@ namespace Dmrg {
 				}
 			}
 			
+			void resize(size_t x)
+			{
+				size_ = x;
+				data_.clear();
+				offset_=0;
+			}
+			
 			template<typename SomeBasisType>
 			void set(const std::vector<VectorType>& v,//const std::vector<size_t>& weights,
 				 const SomeBasisType& someBasis)
@@ -250,6 +257,14 @@ namespace std {
 	inline FieldType norm(const Dmrg::VectorWithOffset<std::complex<FieldType> >& v)
 	{
 		return std::norm(v.data_);
+	}
+	
+	template<typename FieldType>
+	inline std::complex<FieldType> operator*(
+				const Dmrg::VectorWithOffset<std::complex<FieldType> >& v1,
+				const Dmrg::VectorWithOffset<std::complex<FieldType> >& v2)
+	{
+		throw std::runtime_error("Unimplemented\n");
 	}
 }
 /*@}*/

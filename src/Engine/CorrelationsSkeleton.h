@@ -107,11 +107,11 @@ namespace Dmrg {
 		return os;
 	}
 	
-	template<typename IoType,typename MatrixType,typename VectorType,typename BasisType>
+	template<typename IoType,typename MatrixType,typename VectorType,typename VectorWithOffsetType,typename BasisType>
 	class CorrelationsSkeleton {
 		//typedef typename MatrixType::value_type FieldType;
 		typedef size_t IndexType;
-		typedef Precomputed<IoType,MatrixType,VectorType,BasisType> PrecomputedType;
+		typedef Precomputed<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> PrecomputedType;
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisType::RealType RealType;
 		
@@ -196,7 +196,7 @@ namespace Dmrg {
 				if (size_t(precomp_.basisS().permutation(e)%m)!=size_t(precomp_.basisS().permutation(e2)%m)) return 0;
 				utils::getCoordinates(k,i,precomp_.basisS().permutation(e),m);
 				utils::getCoordinates(k2,j,precomp_.basisS().permutation(e2),m);
-				sign = precomp_.fermionicSign(k,fermionicSign); // signs[k];
+				sign = precomp_.fermionicSign()(k,fermionicSign); // signs[k];
 			}
 			FieldType ret=0;
 			if (k==k2) ret=O(i,j)*sign;
@@ -237,7 +237,7 @@ namespace Dmrg {
 				//utils::getCoordinates(r,eta,precomp_.SEpermutation(x),ni*nj);
 				size_t e,u;
 				utils::getCoordinates(e,u,precomp_.basisS().permutation(r),ni);
-				FieldType f = precomp_.fermionicSign(e,fermionicSign);
+				FieldType f = precomp_.fermionicSign()(e,fermionicSign);
 				for (size_t e2=0;e2<ni;e2++) {	
 					for (size_t u2=0;u2<nj;u2++) {
 						size_t r2 = precomp_.basisS().permutationInverse(e2 + u2*ni);
@@ -255,19 +255,14 @@ namespace Dmrg {
 			precomp_.transform(result2,result);*/
 		}
 		
-		FieldType bracket(const MatrixType& A,size_t useTimeVector=PrecomputedType::NOTIMEVECTOR)
+		FieldType bracket(const MatrixType& A)
 		{
-			if (useTimeVector == PrecomputedType::NOTIMEVECTOR) {
-				const typename PrecomputedType::VectorType& v = precomp_.wavefunction();
-				return bracket_(A,v);
-			} else {
-				const typename PrecomputedType::VectorType& v2 = precomp_.timeVector();
-				return bracket_(A,v2);
-			}
+			const VectorType& v = precomp_.wavefunction();
+			return bracket_(A,v);
 		}
 		
-		template<typename SomeVectorType>
-		FieldType bracket_(const MatrixType& A,const SomeVectorType& vec)
+		//template<typename SomeVectorType>
+		FieldType bracket_(const MatrixType& A,const VectorType& vec)
 		{
 			//typedef typename SomeVectorType::value_type ComplexOrRealType;
 			FieldType zeroc = 0;

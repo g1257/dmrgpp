@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef VECTOR_WITH_OFFSETS_H
 #define VECTOR_WITH_OFFSETS_H
 #include "Utils.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 	template<typename FieldType>

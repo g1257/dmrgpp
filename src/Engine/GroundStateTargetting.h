@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <string>
 #include "TargetStructureParams.h"
+#include "ApplyOperatorLocal.h"
 
 namespace Dmrg {
 	
@@ -125,6 +126,7 @@ namespace Dmrg {
 			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 			typedef VectorType TargetVectorType;
 			typedef int TargettingStructureType;
+			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			//enum {SYSTEM,ENVIRON};
 			
 			GroundStateTargetting(

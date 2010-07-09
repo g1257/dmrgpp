@@ -984,7 +984,7 @@ typedef  IoSimple MyIo;
 	template<typename,typename> class InternalProductTemplate,
 	template<typename> class VectorWithOffsetTemplate,
 	template<template<typename,typename> class,template<typename,typename> class,
-		typename,typename,typename,typename,template<typename> class> class TargettingType,
+		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
 	typename MySparseMatrix
 >
 void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvolution,
@@ -994,6 +994,8 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	typedef Operator<RealType,MySparseMatrix> OperatorType;
 	typedef Basis<RealType,MySparseMatrix> BasisType;
 	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
+	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef ModelHelperTemplate<OperatorsType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
 	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,$pthreadsName> ModelType;
 	
@@ -1005,10 +1007,14 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
                         MyIo,
                         WaveFunctionTransformation,
                         MemoryStack,
-                        TargettingType,
+                        TargettingTemplate,
                         VectorWithOffsetTemplate
                 > SolverType; // only used for types
-
+	
+	typedef typename SolverType::TargettingType TargettingType;
+	typedef typename SolverType::WaveFunctionTransformationType WaveFunctionTransformationType;
+	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
 	ModelType model(mp,geometry);
 
 	 //! Read TimeEvolution if applicable:
@@ -1023,14 +1029,17 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	size_t n=mp.linSize;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
 	bool verbose = false;
-	Observe<FieldType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
+	Observe<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
 EOF
 	if ($targetting=~/timestep/i) {
 print OBSOUT<<EOF;
 		{
-			const psimag::Matrix<FieldType>& opN = model.getOperator("n");
+			SparseMatrixType matrixN(model.getOperator("n"));
+			Su2RelatedType su2Related1;
+			OperatorType opN(matrixN,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+			size_t SHRINK_ENVIRON = WaveFunctionTransformationType::SHRINK_ENVIRON;
 			for (size_t i0 = 0;i0<2*n-1;i0++) {
-                                FieldType tmp = observe.onePoint(i0,opN,1);
+                                FieldType tmp = observe.template onePoint<ApplyOperatorType>(i0,opN,1,SHRINK_ENVIRON);
                                 std::cout<<i0<<" "<<tmp<<"\\n";
                         }
 			return;
