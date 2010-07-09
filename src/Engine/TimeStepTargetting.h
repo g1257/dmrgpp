@@ -644,8 +644,7 @@ namespace Dmrg {
 				//A.data = tmpC;
 				FermionSign fs(basisS_,tstStruct_.electrons);
 				applyOpLocal_(dest,src,A,fs,systemOrEnviron);
-				
-				
+
 				ComplexType sum = 0;
 				for (size_t ii=0;ii<dest.sectors();ii++) {
 					size_t i = dest.sector(ii);

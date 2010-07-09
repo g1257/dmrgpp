@@ -208,13 +208,10 @@ namespace Dmrg {
 		template<typename ApplyOperatorType>
 		FieldType onePoint(size_t site,const typename ApplyOperatorType::OperatorType& A,int fermionicSign,size_t shrinkWhat)
 		{
-			const BasisType& basisS = precomp_.basisS();
-			const BasisType& basisE = precomp_.basisE();
-			const BasisType& basisSE = precomp_.basisSE();
-			ApplyOperatorType applyOpLocal1(basisS,basisE,basisSE,shrinkWhat);
-					
 			size_t pnter=site;
 			precomp_.setPointer(pnter);
+			
+			ApplyOperatorType applyOpLocal1(precomp_.basisS(),precomp_.basisE(),precomp_.basisSE(),shrinkWhat);
 		
 			const VectorWithOffsetType& src = precomp_.timeVector();
 			//const std::string& label,

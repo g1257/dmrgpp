@@ -103,7 +103,9 @@ namespace Dmrg {
 	    				const BasisType& basisSE,
 					size_t shrinkEnv)
 			: basisS_(basisS),basisE_(basisE),basisSE_(basisSE),SHRINK_ENVIRON(shrinkEnv)
-			{}
+			{
+				//std::cerr<<"APPLY "<<basisSE_.size()<<" "<<basisSE.size()<<"\n";
+			}
 					//! FIXME: we need to make a fast version for when we're just
 			//! figuring out where the (non-zero) partition is
 			void operator()(
@@ -113,6 +115,7 @@ namespace Dmrg {
 	  				const FermionSign& fermionSign,
 					size_t systemOrEnviron) const
 			{
+				//std::cerr<<"APPLY-OPERTOR() "<<basisSE_.size()<<"\n";
 				if (systemOrEnviron == SHRINK_ENVIRON) applyLocalOpSystem(dest,src,A,fermionSign);
 				else applyLocalOpEnviron(dest,src,A);
 			}
@@ -145,13 +148,16 @@ namespace Dmrg {
 				size_t offset = src.offset(i0);
 				size_t final = offset + src.effectiveSize(i0);
 				//size_t counter=0;
-				size_t ns = basisS_.size();
-				size_t nx = basisS_.size()/A.data.rank();
+				size_t ns = basisS_.permutationVector().size();
+				size_t nx = ns/A.data.rank();
+				if (src.size()!=basisSE_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem SE\n");
 				
 				for (size_t i=offset;i<final;i++) {
 					size_t x=0,y=0;
 					utils::getCoordinates(x,y,basisSE_.permutation(i),ns);
+					//if (y>=basisE_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem E\n");
 					size_t x0=0,x1=0;
+					if (x>=basisS_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem S\n");
 					utils::getCoordinates(x0,x1,basisS_.permutation(x),nx);
 					/*int nx0 = basisS_.electrons(x)-electrons[x1];
 					if (nx0<0) throw std::runtime_error("TimeStepTargetting::applyLocalOpSystem(...)\n");
