@@ -49,7 +49,6 @@ use strict;
 use Getopt::Long;
 use Cwd 'abs_path';
 use File::Basename;
-use Switch;
 
 my ($executable,$testNum,$all) = (undef,undef,undef); 
 my ($rmFlag,$update,$verbose,$noModel,$force) = (0,0,0,0,0);
@@ -60,24 +59,27 @@ GetOptions("x=s" => \$executable, "n=i" => \$testNum, "a" => \$all, "u" => \$upd
 my ($testDir, $srcDir);
 my $PATH = $testDir = $srcDir = abs_path($0);
 my $filename = basename($PATH);		
+
 $testDir =~ s/$filename$//;
 $srcDir =~ s/TestSuite.*/src\//;
 my $oraclesDir = $testDir."oracles/";	
 my $resultsDir = $testDir."results/";
 my $inputsDir = $testDir."inputs/";
+
 my $hashTable = $testDir."hashTable.txt";
 my %hash;
+my $specKey;
 
-startProgram();
+&startProgram();
 
 sub startProgram{
 	if($update) {
 		updateHashTable();
 	} elsif(validateDirectory($srcDir) && validateDirectory($testDir) && validateFile($hashTable)) {
 		loadHash() if(!$noModel);
-		
+
 		if(!($all) && !defined($testNum)) {		#If no test is explicitly defined
-			$testNum = selectTest();	#Make the user select a test from the available ones
+			selectTest();	#Make the user select a test from the available ones
 		}elsif($all) {
 			runAllTests(0);		#Run all tests
 		}
@@ -87,51 +89,14 @@ sub startProgram{
 		} else {
 			testSuite() if(validateTest());	#Run specified test
 		}
+	} else {
+		die "Missing source and/or test suite directories.\n";
 	}
 }
 
 #~ sub updateHashTable
 #~ {
-	#~ my @delKeys;
-	#~ my @delFiles;
-	#~ my @delTn;
-	#~ my @srcFiles = <$srcDir."*">;
-	
-	#~ chdir($srcDir);
-	#~ foreach my $a (keys %hash) {
-		#~ my @files = glob $a;
-		#~ if(!@files) {
-			#~ push @delKeys, $a;
-		#~ }
-	#~ }
-	#~ chdir($testDir);
-	
-	#~ removeKeys(@delKeys);
-	
-	#~ foreach my $v (values %hash) {
-		#~ foreach my $tn (@{$v}) {
-			#~ if(!validateFile($inputsDir."inputs$tn.inp")) {
-				#~ push @delTn, $v;
-				#~ push @delTn, $tn;
-			#~ }
-		#~ }
-	#~ }
-	
-	#~ removeTns(@delTn);
-	
-	#~ foreach my $f (@srcFiles) {
-		#~ if($f =~ /^dmrg-[a-z0-9]{10}/i) {
-			#~ push @delFiles, $f if(!findKey(substr($f,5,15)));
-		#~ }
-	#~ }
-	
-	#~ chdir($srcDir);
-	#~ foreach my $x (@delFiles) {
-		#~ print "Do you want to remove the file $x? (y/n): ";
-		#~ if(<STDIN> =~ /^[y]/i) {
-			#~ system("rm $x") || die "Could not remove file\n";
-		#~ }
-	#~ }
+
 #~ }
 
 sub validateDirectory	
@@ -140,27 +105,25 @@ sub validateDirectory
 	
 	if(-d $dir) {		
 		return 1;
-	} elsif($dir eq $oraclesDir || $dir eq $resultsDir){
+	} elsif($dir eq $resultsDir){
 		system("mkdir $dir");
 		print "Directory created: $dir\n";
-		return 0;
-	} else {
-		return 0;
 	}
+	
+	return 0;
 }
 
 sub validateTest
 {
 	my $searchNum = abs($testNum);
-	my @testArray = split(/ /,getAvailableTests());	
-	my @found = grep(/$searchNum/,@testArray);	
+	my @found = grep(/$searchNum/, split(/ /,getAvailableTests()));	
 	
 	if(!@found) {	
 		print "\nError: An incorrect test was selected! Try again.\n\n";
 		return 0;
-	} else {
-		return 1;		
 	}
+
+	return 1;
 }
 
 sub selectTest
@@ -171,7 +134,7 @@ sub selectTest
 		print "Default is 0 (press ENTER): ";
 		chomp($testNum = <STDIN>);	
 		$testNum = 0 if($testNum eq "");
-		return $testNum if(validateTest());
+		last if(validateTest());
 	}
 }
 
@@ -184,7 +147,7 @@ sub getAvailableTests
 	while(<FILE>) {
 		last if(/^\#TAGEND/);		
 		if(/(^\d+)\)/) {
-			$available = $available.$1." ";	
+			$available .= "$1 ";	
 		}
 		print if($verbose);	
 	}
@@ -195,7 +158,7 @@ sub getAvailableTests
 	
 	for(my $i = 0;$i <= $#testsArray; $i++) {	
 		$temp = $testsArray[$i] + 100;
-		$available = $available." ".$temp;		
+		$available .= " $temp";		
 	}
 	
 	return $available;
@@ -375,9 +338,10 @@ sub testSuite
 	my $specFile = $inputsDir."model$temp.spec";
 	my $configFile = "configure.pl";
 	my $inputFile = $inputsDir."input$testNum.inp";
-	my $specKey = substr(`md5sum $specFile`,0,10);
 	my $postFile = $inputsDir."postProcessing$testNum.txt";
 	my $postProcLib = $inputsDir."postProcessingLibrary.txt";
+	
+	$specKey = substr(`md5sum $specFile`,0,10);
 	
 	if(defined($executable)){
 		print "Using executable supplied.\n";
@@ -390,7 +354,7 @@ sub testSuite
 		addKey($specKey);
 	} else {
 		print "Retrieving existing executable...\n";
-		$executable = $srcDir."dmrg-".$specKey;
+		$executable = $srcDir."dmrg-$specKey";
 		validateFile($executable) || die "Error retrieving $executable: $!\n";
 	
 		if(!findTn($specKey) ){
@@ -464,59 +428,102 @@ sub postProcessing
 		$opsHash{$a} = join(":", @commands);   #Grep cmd*:Diff cmd*
 	}
 	
-	my @recognizeCommands = ("Grep", "Diff");
-	
-	foreach my $key (keys %opsHash) {
-		my @comm = split(/:/, "$opsHash{$key}");
-		my @args;
+	my @metaLang = ("Grep", "Make", "Call", "Execute", "Diff");
+	my @recognizeCommands = ("Grep", "Make", "Diff");
+	my %opsCount;  #contains @analyses count
+	my %opsStack;
 
-		if(@args = grep {/Grep/} @comm) {
-			foreach my $arg (@args) {
-				#~ #eval("runGrep($arg);");
+	foreach my $a (@analyses) {
+		$opsCount{$a} = 0;
+	}
+	
+	foreach my $a (keys %opsHash) {
+		my @comm = split(/:/, "$opsHash{$a}");
+		my @args;
+		my @tmpLang = @metaLang;
+		my $search;
+		
+		foreach my $key (@tmpLang) {
+			$search = shift @tmpLang;			
+			if(@args = grep {/$search/} @comm) {
+				if(grep {/$search/} @recognizeCommands) {
+					foreach my $arg (@args) {
+						$arg =~ s/(\w+)/\l$1/;
+						eval("hook$search(\$arg);");
+					}
+				} else {
+					#command not recognized
+				}
 			}
 		}
-	}
-	#grep diff; gprof; make execute diff
-	
-	#~ foreach my $key (keys %opsHash) {
-		#~ print $opsHash{$key}."\n";
 		
-	#~ }
+		$opsCount{$a}++;
+	}
 	
 	print "Post processing has been completed.\n";
 }
 
-sub runGrep
+sub hookDiff
 {
-	my ($arg) = @_;
+	my $rCode = system(@_);
+	die "Error diff.\n" if($rCode);
 	
-	print "Hola : ";
+	print "Diff successful.\n";
+	
+}
+
+sub hookMake
+{
+	chdir($srcDir);
+	my $rCode = system(@_);
+	die "Error make.\n" if($rCode);
+	rename "observe", "observe-$specKey";
+	chdir($testDir);
+	
+	print "Make successful.\n";
+	
+}
+
+sub hookGrep
+{
+	my $rCode = system(@_);
+	die "Error grep.\n" if($rCode);
+	
+	print "Grep successful.\n";
 }
 
 sub keyValueParser
 {
 	my ($opsRef, $analysis) = @_;
-	my @tmp;
+	my @tmpKV;
 	my $keyword = "Let";
 	my %tmpHash;
 	my @commands;
+	my %varHash;
+	my @varArray = ("\$srcDir", "\$inputsDir", "\$resultsDir", "\$oraclesDir", "\$testNum");
 	
-	if(@tmp = grep {/^$keyword/} @{$opsRef}) {
+	foreach (@varArray) {
+		$varHash{$_} = eval($_);
+	}
+	
+	if(@tmpKV = grep {/^$keyword/} @{$opsRef}) {
 		@{$opsRef} = grep {!/^$keyword/} @{$opsRef};
-		grep {s/(^$keyword\s+|\s+)//g} @tmp;
-		foreach my $keyval (@tmp) {
-			my @t = split(/=/, $keyval);
+		grep {s/(^$keyword\s+)//g} @tmpKV;
+		foreach my $keyval (@tmpKV) {
+			my @t = split(/ = /, $keyval);
 			$tmpHash{$t[0]} = $t[1];
 		}
 		
 		foreach my $comm (@{$opsRef}) {
 			grep {s/(\$\w+)/$tmpHash{$1}/g} $comm;
+			grep {s/(\$\w+)/$varHash{$1}/g} $comm;
+			grep {s/\/\s+/\//g} $comm;
 			push @commands, $comm;
 		}
 	} else {
 		die "Missing values for \"$analysis\" substitutions.\nVerify the post processing library file.\n";
 	}
-	
+		
 	return @commands;
 }
 

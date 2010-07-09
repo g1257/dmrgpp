@@ -1,6 +1,8 @@
 energy
 gprof
+observables
 C
 N
 Sz
-observables
+executable
+

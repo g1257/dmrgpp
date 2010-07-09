@@ -1,51 +1,56 @@
-# $output  is whatever is in the inputX.inp under rootname  
+[executable]
+Let $input = $inputsDir input$testNum.inp
+Make dmrg
+Execute ../src/dmrg $input
 
 [energy]
-Let $result = $resultsDir.e$testNum.txt
-Let $oracle = $oraclesDir.e$testNum.txt
-Let $diff = $resultsDir.e$testNum.diff
-Let $output = $srcDir.data$testNum.txt
+Let $result = $resultsDir e$testNum.txt
+Let $oracle = $oraclesDir e$testNum.txt
+Let $diff = $resultsDir e$testNum.diff
+Let $output = $resultsDir data$testNum.txt
+Call executable
 Grep Energy $output > $result
 Diff $result $oracle > $diff 
 
 [observables]
-Let $input = $inputsDir.input$testNum.inp
-Let $output = $srcDir.data$testNum.txt
-Let $raw = $srcDir.raw$testNum.txt
+Let $input = $inputsDir input$testNum.inp
+Let $output = $resultsDir data$testNum.txt
+Let $raw = $srcDir raw$testNum.txt
 Make observe
 Execute ../src/observe $input $output > $raw
 
 [C]
-Let $result = $resultsDir.operatorC$testNum.txt
-Let $oracle = $resultsDir.operatorC$testNum.txt
-Let $raw = $srcDir.raw$testNum.txt
-Let $diff = $resultsDir.operatorC$testNum.diff
-CallOnce observables 
+Let $result = $resultsDir operatorC$testNum.txt
+Let $oracle = $oraclesDir operatorC$testNum.txt
+Let $raw = $srcDir raw$testNum.txt
+Let $diff = $resultsDir operatorC$testNum.diff
+Call observables 
 Execute extractOperatorC($raw,$result)
 Diff $result $oracle > $diff
 
 [N]
-Let $result = $resultsDir.operatorN$testNum.txt
-Let $oracle = $resultsDir.operatorN$testNum.txt
-Let $raw = $srcDir.raw$testNum.txt
-Let $diff = $resultsDir.operatorN$testNum.diff
-CallOnce observables
+Let $result = $resultsDir operatorN$testNum.txt
+Let $oracle = $oraclesDir operatorN$testNum.txt
+Let $raw = $srcDir raw$testNum.txt
+Let $diff = $resultsDir operatorN$testNum.diff
+Call observables
 Execute extractOperatorN($raw,$result)
 Diff $result $oracle > $diff
 
 [Sz]
-Let $result = $resultsDir.operatorSz$testNum.txt
-Let $oracle = $resultsDir.operatorSz$testNum.txt
-Let $raw = $srcDir.raw$testNum.txt
-Let $diff = $resultsDir.operatorSz$testNum.diff
-CallOnce observables
+Let $result = $resultsDir operatorSz$testNum.txt
+Let $oracle = $oraclesDir operatorSz$testNum.txt
+Let $raw = $srcDir raw$testNum.txt
+Let $diff = $resultsDir operatorSz$testNum.diff
+Call observables
 Execute extractOperatorSz($raw,$result)
 Diff $result $oracle > $diff
 
 [gprof]
-Let $result = $resultsDir.prof$testNum.txt
-Let $oracle = $oraclesDir.prof$testNum.txt
-Let $diff = $resultsDir.prof$testNum.diff
+Let $result = $resultsDir prof$testNum.txt
+Let $oracle = $oraclesDir prof$testNum.txt
+Let $diff = $resultsDir prof$testNum.diff
+Call executable
 Gprof ../src/dmrg > $result
 Diff $result $oracle > $diff
 
