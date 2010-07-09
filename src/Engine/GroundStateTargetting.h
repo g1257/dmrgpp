@@ -127,7 +127,10 @@ namespace Dmrg {
 			typedef VectorType TargetVectorType;
 			typedef int TargettingStructureType;
 			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
-			//enum {SYSTEM,ENVIRON};
+			
+			enum {SHRINK_SYSTEM=WaveFunctionTransformationType::SHRINK_SYSTEM,
+			SHRINK_ENVIRON=WaveFunctionTransformationType::SHRINK_ENVIRON,
+			INFINITE=WaveFunctionTransformationType::INFINITE};
 			
 			GroundStateTargetting(
 	  				const BasisWithOperatorsType& basisS,

@@ -279,8 +279,8 @@ namespace Dmrg {
 				ns=pSprime_.size();
 				ne=pEprime_.size();
 				
-				changeAndTruncateBasis(pS,psi,pSprime_,pEprime_,pSE_,parameters_.keptStatesInfinite,0);
-				changeAndTruncateBasis(pE,psi,pEprime_,pSprime_,pSE_,parameters_.keptStatesInfinite,1);
+				changeAndTruncateBasis(pS,psi,pSprime_,pEprime_,pSE_,parameters_.keptStatesInfinite,SHRINK_ENVIRON);
+				changeAndTruncateBasis(pE,psi,pEprime_,pSprime_,pSE_,parameters_.keptStatesInfinite,SHRINK_SYSTEM);
 				
 				systemStack_.push(pS); 
 				envStack_.push(pE);
@@ -371,18 +371,16 @@ namespace Dmrg {
 				//if (target.gs().size()==0) throw std:runtime_error("DmrgSolver:: target.size==0 after\n");
 				
 				if (saveOption==SAVE_TO_DISK) {
-					//if (direction==SHRINK_ENVIRON) saveToDiskCompatibility(pS,pSprime_,pSE_,target); // obsolete
-					//else saveToDiskCompatibility(pE,pEprime_,pSE_,target); // obsolete
 					FermionSign fs(pS.electronsVector());
 					saveToDiskForObserver(fs,pSprime_,pEprime_,pSE_,target);
 				}
 				
 				progress_.print("Truncating (env) basis now...\n",std::cout);
 				if (direction==SHRINK_ENVIRON) {
-					changeAndTruncateBasis(pS,target,pSprime_,pEprime_,pSE_,keptStates,0,saveOption);
+					changeAndTruncateBasis(pS,target,pSprime_,pEprime_,pSE_,keptStates,direction,saveOption);
 					systemStack_.push(pS);
 				} else {
-					changeAndTruncateBasis(pE,target,pEprime_,pSprime_,pSE_,keptStates,1,saveOption);
+					changeAndTruncateBasis(pE,target,pEprime_,pSprime_,pSE_,keptStates,direction,saveOption);
 					envStack_.push(pE);
 				}
 				
@@ -484,16 +482,16 @@ namespace Dmrg {
 		template<typename TargetType>
 		void changeAndTruncateBasis(MyBasisWithOperators &rSprime,const TargetType& target,
 			MyBasisWithOperators const &pBasis,MyBasisWithOperators const &pBasisSummed,MyBasis const &pSE,
-   			size_t keptStates,int option,int saveOption=DO_NOT_SAVE)
+   			size_t keptStates,size_t direction,int saveOption=DO_NOT_SAVE)
 		{
 			typedef DensityMatrixTemplate<RealType,MyBasis,MyBasisWithOperators,TargetType> DensityMatrixType;
-			DensityMatrixType dmS(target,pBasis,pBasisSummed,pSE,option);
-			dmS.check(option);
+			DensityMatrixType dmS(target,pBasis,pBasisSummed,pSE,direction);
+			dmS.check(direction);
 			
 			if (verbose_ && concurrency_.root()) std::cerr<<"Trying to diagonalize density-matrix with size="<<dmS.rank()<<"\n";
 			std::vector<RealType> eigs;
 			dmS.diag(eigs,'V',concurrency_);
-			dmS.check2(option);
+			dmS.check2(direction);
 			
 			if (verbose_ && concurrency_.root()) std::cerr<<"Done with density-matrix diag.\n";
 			
@@ -504,7 +502,7 @@ namespace Dmrg {
 			
 			RealType error = rSprime.changeBasis(ftransform,dmS(),eigs,keptStates,parameters_,concurrency_);
 			if (saveOption==SAVE_TO_DISK) saveToDisk(ftransform,rSprime);
-			waveFunctionTransformation_.push(ftransform,option,rSprime,pBasisSummed,pSE); //,target.m());
+			waveFunctionTransformation_.push(ftransform,direction,rSprime,pBasisSummed,pSE); //,target.m());
 
 			std::ostringstream msg;
 			msg<<"new size of basis="<<rSprime.size();

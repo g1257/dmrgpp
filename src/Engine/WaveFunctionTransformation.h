@@ -283,7 +283,7 @@ namespace Dmrg {
 		template<typename SomeMatrixType>
 		void push(
 			const SomeMatrixType& transform,
-			int option,
+			size_t direction,
    			//const SomeVectorType& psi,
       			const BasisWithOperatorsType& pBasis,
 			const BasisWithOperatorsType& pBasisSummed,
@@ -294,7 +294,7 @@ namespace Dmrg {
 			
 			switch (stage_) {
 				case INFINITE:
-					if (option==0) {
+					if (direction==SHRINK_ENVIRON) {
 						wsStack_.push(transform);
 						dmrgWave_.ws=transform;
 					} else {
@@ -305,7 +305,7 @@ namespace Dmrg {
 					}
 					break;
 				case SHRINK_SYSTEM:
-					if (option==0) throw std::logic_error("SHRINK_SYSTEM but option==0\n");
+					if (direction!=SHRINK_SYSTEM) throw std::logic_error("SHRINK_SYSTEM but option==0\n");
 					dmrgWave_.we=transform;
 					dmrgWave_.ws=transform;
 					//vectorConvert(dmrgWave_.psi,psi);
@@ -313,7 +313,7 @@ namespace Dmrg {
 					//std::cerr<<"PUSHING (POPPING) We "<<weStack_.size()<<"\n";
 					break;
 				case SHRINK_ENVIRON:
-					if (option==1) throw std::logic_error("SHRINK_ENVIRON but option==1\n");
+					if (direction!=SHRINK_ENVIRON) throw std::logic_error("SHRINK_ENVIRON but option==1\n");
 					dmrgWave_.ws=transform;
 					dmrgWave_.we=transform;
 					//vectorConvert(dmrgWave_.psi,psi);
@@ -322,7 +322,7 @@ namespace Dmrg {
 			}
 
 			dmrgWave_.pSE=pSE;
-			if (option==0) { // transforming the system
+			if (direction==SHRINK_ENVIRON) { // transforming the system
 				dmrgWave_.pEprime=pBasisSummed;
 				dmrgWave_.pSprime=pBasis;
 			} else {
@@ -330,7 +330,7 @@ namespace Dmrg {
 				dmrgWave_.pEprime=pBasis;
 			}
 			std::ostringstream msg;
-			msg<<"OK, pushing option="<<option<<" and stage="<<stage_;
+			msg<<"OK, pushing option="<<direction<<" and stage="<<stage_;
 			progress_.printline(msg,std::cout);
 		}
 
