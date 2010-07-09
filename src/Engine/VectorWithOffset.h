@@ -167,7 +167,15 @@ namespace Dmrg {
 			{
 				v=data_;
 			}
-
+			
+			template<typename SparseVectorType>
+			void toSparse(SparseVectorType& sv) const
+			{
+				sv.resize(size_);
+				for (size_t i=0;i<data_.size();i++)
+					sv[i+offset_] = data_[i];
+			}
+			
 			template<typename IoOutputter>
 			void save(IoOutputter& io,const std::string& label) const
 			{
@@ -180,7 +188,7 @@ namespace Dmrg {
 			}
 			
 			template<typename IoInputter>
-			void load(IoInputter& io,const std::string& label,size_t counter=0) const
+			void load(IoInputter& io,const std::string& label,size_t counter=0)
 			{
 				io.advance(label,counter);
 				int x = 0;

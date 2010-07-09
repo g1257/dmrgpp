@@ -265,6 +265,17 @@ namespace Dmrg {
 				nonzeroSectors_=f.nonzeroSectors_;
 				return *this;
 			}
+			
+			template<typename SparseVectorType>
+			void toSparse(SparseVectorType& sv) const
+			{
+				sv.resize(size_);
+				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+					size_t j =  nonzeroSectors_[jj];
+					for (size_t i=0;i<data_[j].size();i++)
+						sv[i+offsets_[j]] = data_[j][i];
+				}
+			}
 
 			template<typename IoOutputter>
 			void save(IoOutputter& io,const std::string& label) const
@@ -284,7 +295,7 @@ namespace Dmrg {
 			}
 			
 			template<typename IoInputter>
-			void load(IoInputter& io,const std::string& label,size_t counter=0) const
+			void load(IoInputter& io,const std::string& label,size_t counter=0)
 			{
 				io.advance(label,counter);
 				int x = 0;
@@ -298,8 +309,10 @@ namespace Dmrg {
 				nonzeroSectors_.resize(x);
 				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
 					io.readline(x,"#sector=");
-					if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): sector<0\n");
-					if (x>=data_.size()) throw std::runtime_error("VectorWithOffsets::load(...): sector too big\n");
+					if (x<0) 
+						throw std::runtime_error("VectorWithOffsets::load(...): sector<0\n");
+					if (size_t(x)>=data_.size()) 
+						throw std::runtime_error("VectorWithOffsets::load(...): sector too big\n");
 					nonzeroSectors_[jj] = x;
 					io.read(data_[x],"#sector=");
 				}

@@ -142,13 +142,13 @@ namespace Dmrg {
 					for (size_t i=0;i<x.size();i++) fout_<<x[i]<<"\n";
 				}
 
-				template<typename X>
-				void printSparseVector(X const &x,std::string const &label)
-				{
-					if (rank_!=0) return;
-					x.save(fout_,label);
-					
-				}
+// 				template<typename X>
+// 				void printSparseVector(X const &x,std::string const &label)
+// 				{
+// 					if (rank_!=0) return;
+// 					x.print(fout_,label);
+// 					
+// 				}
 				
 				template<typename X>
 				void printStack(const std::stack<X>& st,std::string const &label)

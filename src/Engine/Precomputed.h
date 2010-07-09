@@ -288,7 +288,9 @@ namespace Dmrg {
 
 		void getWaveFunction(VectorType& wavefunction,size_t ns)
 		{
-			io_.readSparseVector(wavefunction,"#WAVEFUNCTION_sites=",ns);
+			VectorWithOffsetType tmpV;
+			tmpV.load(io_,"#WAVEFUNCTION_sites=",ns);
+			tmpV.toSparse(wavefunction);
 			rewind();
 		}
 		
