@@ -97,13 +97,15 @@ namespace Dmrg {
 			FermionSign(const SomeBasisType& basis,const std::vector<size_t>& electrons)
 				: signs_(basis.size())
 			{
-				size_t nx = basis.size()/electrons.size();
-				std::vector<size_t> el(basis.size());
-				//if (basis.size()!=basis.permutationInverse().size()) throw std::runtime_error("Problem\n");
-				for (size_t x=0;x<basis.size();x++) {
+				
+				const std::vector<size_t>& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
+				if (basisElectrons.size()!=basis.permutationInverse().size()) throw std::runtime_error("Problem\n");
+				size_t nx = basisElectrons.size()/electrons.size();
+				std::vector<size_t> el(basisElectrons.size());
+				for (size_t x=0;x<basisElectrons.size();x++) {
 					size_t x0,x1;
 					utils::getCoordinates(x0,x1,basis.permutation(x),nx);
-					int nx0 = basis.electrons(x)-electrons[x1];
+					int nx0 = basisElectrons[x]-electrons[x1];
 					if (nx0<0) throw std::runtime_error("FermionSign::ctor(...)\n");
 					el[x] = nx0;
 				}

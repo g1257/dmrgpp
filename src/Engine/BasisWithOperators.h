@@ -143,7 +143,7 @@ namespace Dmrg {
 					if (!this->useSu2Symmetry()) {
 						const OperatorType& myOp =  basis2.getOperatorByIndex(i);
 						if (savedSign != myOp.fermionSign) {
-							fillFermionicSigns(fermionicSigns,basis2.electrons(),myOp.fermionSign);
+							fillFermionicSigns(fermionicSigns,basis2.electronsVector(),myOp.fermionSign);
 							savedSign = myOp.fermionSign;
 						}
 					
@@ -156,7 +156,7 @@ namespace Dmrg {
 						const OperatorType& myOp = basis3.getOperatorByIndex(i-basis2.numberOfOperators());
 
 						if (savedSign != myOp.fermionSign) {
-							fillFermionicSigns(fermionicSigns,basis2.electrons(),myOp.fermionSign);
+							fillFermionicSigns(fermionicSigns,basis2.electronsVector(),myOp.fermionSign);
 							savedSign = myOp.fermionSign;
 						}
 					

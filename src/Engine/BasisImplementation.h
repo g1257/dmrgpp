@@ -163,6 +163,7 @@ namespace Dmrg {
 				electrons_[i]=basisData.electronsUp[i]+basisData.electronsDown[i];
 			findQuantumNumbers(quantumNumbers_,basisData);
 			findPermutationAndPartition();
+			electronsOld_=electrons_;
 		}
 
 		static void findQuantumNumbers(std::vector<size_t>& qn,const BasisDataType& basisData) 
@@ -206,6 +207,7 @@ namespace Dmrg {
 			findPermutationAndPartition();
 
 			reorder();
+			electronsOld_ = electrons_;
 		}
 
 		size_t getFlavor(size_t i) const
@@ -234,7 +236,11 @@ namespace Dmrg {
 
 		size_t getNe(size_t i) const { return electrons_[i]; }
 
-		const std::vector<size_t>& electrons() const {return electrons_; }
+		const std::vector<size_t>& electronsVector(size_t beforeOrAfterTransform) const 
+		{
+			if (beforeOrAfterTransform == AFTER_TRANSFORM) return electrons_;
+			return electronsOld_;
+		}
 
 		int fermionicSign(size_t i,int f) const { return ((electrons_[i]%2)==0) ? 1 : f; }
 
@@ -416,6 +422,7 @@ namespace Dmrg {
 		std::vector<size_t> quantumNumbers_;
 		std::vector<size_t> quantumNumbersOld_;
 		std::vector<size_t> electrons_;
+		std::vector<size_t> electronsOld_;
 		std::vector<size_t> partition_;
 		std::vector<size_t> partitionOld_;
 		std::vector<size_t> permutationVector_;
@@ -434,6 +441,7 @@ namespace Dmrg {
 			io.read(block_,"#BLOCK");
 			io.read(quantumNumbers_,"#QN");
 			io.read(electrons_,"#ELECTRONS");
+			io.read(electronsOld_,"#0OLDELECTRONS");
 			io.read(partition_,"#PARTITION");
 			io.read(permInverse_,"#PERMUTATIONINVERSE");
 			permutationVector_.resize(permInverse_.size());
@@ -453,6 +461,7 @@ namespace Dmrg {
 			io.printVector(block_,"#BLOCK");
 			io.printVector(quantumNumbers_,"#QN");
 			io.printVector(electrons_,"#ELECTRONS");
+			io.printVector(electronsOld_,"#0OLDELECTRONS");
 			io.printVector(partition_,"#PARTITION");
 			io.printVector(permInverse_,"#PERMUTATIONINVERSE");
 

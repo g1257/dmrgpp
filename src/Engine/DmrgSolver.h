@@ -373,7 +373,7 @@ namespace Dmrg {
 				if (saveOption==SAVE_TO_DISK) {
 					//if (direction==SHRINK_ENVIRON) saveToDiskCompatibility(pS,pSprime_,pSE_,target); // obsolete
 					//else saveToDiskCompatibility(pE,pEprime_,pSE_,target); // obsolete
-					FermionSign fs(pS.electrons());
+					FermionSign fs(pS.electronsVector());
 					saveToDiskForObserver(fs,pSprime_,pEprime_,pSE_,target);
 				}
 				

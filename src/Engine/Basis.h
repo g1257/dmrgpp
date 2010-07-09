@@ -243,7 +243,10 @@ namespace Dmrg {
 		}
 
 		//! Returns the vector of electrons for this basis
-		const std::vector<size_t>& electrons() const {return basisImplementation_.electrons(); }
+		const std::vector<size_t>& electronsVector(size_t beforeOrAfterTransform=AFTER_TRANSFORM) const 
+		{
+			return basisImplementation_.electronsVector(beforeOrAfterTransform);
+		}
 
 		//! Returns the fermionic sign for state i
 		int fermionicSign(size_t i,int f) const { return basisImplementation_.fermionicSign(i,f); }
