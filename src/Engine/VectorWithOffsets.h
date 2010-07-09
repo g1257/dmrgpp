@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 #include "ProgressIndicator.h"
 
+// FIXME: a more generic solution is needed instead of tying the non-zero structure to basis
 namespace Dmrg {
 	template<typename FieldType>
 	class VectorWithOffsets {
@@ -223,19 +224,6 @@ namespace Dmrg {
 				v=data_[i];
 			}
 			
-			void print(std::ostream& os,const std::string& label) const
-			{
-				os<<label<<"\n";
-				os<<size_<<"\n";
-				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-					size_t j =  nonzeroSectors_[jj];
-					size_t offset = offsets_[j];
-					os<<data_[j].size()<<"\n";
-					for (size_t i=0;i<data_[j].size();i++) 
-						os<<(i+offset)<<" "<<data_[j][i]<<"\n";
-				}
-			}
-			
 			size_t size() const { return size_; }
 			
 			size_t effectiveSize(size_t i) const { return data_[i].size(); }
@@ -255,13 +243,7 @@ namespace Dmrg {
 					else return zero_;
 				}*/
 				
-				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-					size_t j = nonzeroSectors_[jj];
-					if (i>=offsets_[j] && i<offsets_[j+1]) {
-						return data_[j][i-offsets_[j]];
-					}
-				}
-				return zero_;
+				return findValue(i);
 			}
 			
 			FieldType& operator[](size_t i) //__attribute__((always_inline))
@@ -272,7 +254,7 @@ namespace Dmrg {
 						return data_[j][i-offsets_[j]];
 					}
 				}
-				throw std::runtime_error("VectorWithOffsets\n");
+				throw std::runtime_error("VectorWithOffsets can't build itself dynamically yet (sorry!)\n");
 			}
 			
 			ThisType& operator= (const ThisType& f)
@@ -281,8 +263,46 @@ namespace Dmrg {
 				data_=f.data_;
 				offsets_=f.offsets_;
 				nonzeroSectors_=f.nonzeroSectors_;
-				//firstSector_ = f.firstSector_;
 				return *this;
+			}
+
+			template<typename IoOutputter>
+			void save(IoOutputter& io,const std::string& label) const
+			{
+				io.printline(label);
+				std::string s="#size="+utils::ttos(size_);
+				io.printline(s);
+				io.printVector(offsets_,"#offsets");
+				s = "#nonzero="+utils::ttos(nonzeroSectors_.size());
+				io.printline(s);
+				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+					size_t j =  nonzeroSectors_[jj];
+					s="#sector="+utils::ttos(j);
+					io.printline(s);
+					io.printVector(data_[j],s);
+				}
+			}
+			
+			template<typename IoInputter>
+			void load(IoInputter& io,const std::string& label,size_t counter=0) const
+			{
+				io.advance(label,counter);
+				int x = 0;
+				io.readline(x,"#size=");
+				if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): size<0\n");
+				size_ = x;
+				io.read(offsets_,"#offsets");
+				data_.resize(offsets_.size());
+				io.readline(x,"#nonzero=");
+				if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): nonzerosectors<0\n");
+				nonzeroSectors_.resize(x);
+				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+					io.readline(x,"#sector=");
+					if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): sector<0\n");
+					if (x>=data_.size()) throw std::runtime_error("VectorWithOffsets::load(...): sector too big\n");
+					nonzeroSectors_[jj] = x;
+					io.read(data_[x],"#sector=");
+				}
 			}
 			
 			template<typename FieldType2>
@@ -342,6 +362,17 @@ namespace Dmrg {
 				return true; 
 			}
 			
+			const FieldType& findValue(size_t i) const
+			{
+				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+					size_t j = nonzeroSectors_[jj];
+					if (i>=offsets_[j] && i<offsets_[j+1]) {
+						return data_[j][i-offsets_[j]];
+					}
+				}
+				return zero_;
+			}
+			
 			ProgressIndicator progress_;
 			const FieldType zero_;
 			size_t size_;
@@ -351,12 +382,15 @@ namespace Dmrg {
 			//size_t firstSector_;
 	}; // class VectorWithOffset
 	
-	/*template<typename FieldType>
-	std::ostream& operator<<(std::ostream& os,const VectorWithOffsets<FieldType>& s)
-	{
-		s.print(os,"VectorWithOffsets");
-		return os;
-	}*/
+// 	template<typename FieldType>
+// 	std::ostream& operator<<(std::ostream& os,const VectorWithOffsets<FieldType>& s)
+// 	{
+// 		os<<size_<<"\n";
+// 		os<<data_;
+// 		os<<offsets_;
+// 		os<<nonzeroSectors_;
+// 		return os;
+// 	}
 	
 } // namespace Dmrg
 

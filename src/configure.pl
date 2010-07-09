@@ -958,6 +958,7 @@ print OBSOUT<<EOF;
 #include "Connectors.h"
 #include "InternalProductOnTheFly.h"
 #include "VectorWithOffset.h"
+#include "VectorWithOffsets.h"
 #include "GroundStateTargetting.h"
 #include "DmrgSolver.h" // only used for types
 #include "DensityMatrix.h" // only used for types
@@ -1181,9 +1182,14 @@ print OBSOUT<<EOF;
 	// FIXME: See if we need VectorWithOffsets sometimes
 	// FIXME: Does it make sense to have ModelHelperSu2 here sometimes?
 	typedef CrsMatrix<RealType> MySparseMatrixReal;
-	mainLoop<ParametersModelType,GeometryType,MyConcurrency,$modelName,
-		ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,
-		GroundStateTargetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,reader,argv[2]);
+	if (hasTimeEvolution)
+		mainLoop<ParametersModelType,GeometryType,MyConcurrency,$modelName,
+			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,reader,argv[2]);
+	else
+		mainLoop<ParametersModelType,GeometryType,MyConcurrency,$modelName,
+			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,reader,argv[2]);
 } // main
 
 EOF

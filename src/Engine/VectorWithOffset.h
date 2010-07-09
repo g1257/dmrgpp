@@ -167,15 +167,30 @@ namespace Dmrg {
 			{
 				v=data_;
 			}
-			
-			void print(std::ostream& os,const std::string& label) const
+
+			template<typename IoOutputter>
+			void save(IoOutputter& io,const std::string& label) const
 			{
-				os<<label<<"\n";
-				os<<size_<<"\n";
-				os<<data_.size()<<"\n";
-				for (size_t i=0;i<data_.size();i++) {
-					os<<(i+offset_)<<" "<<data_[i]<<"\n";
-				}
+				io.printline(label);
+				std::string s="#size="+utils::ttos(size_);
+				io.printline(s);
+				s="#offset="+utils::ttos(offset_);
+				io.printline(s);
+				io.printVector(data_,"#data");
+			}
+			
+			template<typename IoInputter>
+			void load(IoInputter& io,const std::string& label,size_t counter=0) const
+			{
+				io.advance(label,counter);
+				int x = 0;
+				io.readline(x,"#size=");
+				if (x<0) throw std::runtime_error("VectorWithOffset::load(...): size<0\n");
+				size_ = x;
+				io.readline(x,"#offset=");
+				if (x<0) throw std::runtime_error("VectorWithOffset::load(...): offset<0\n");
+				offset_ = x;
+				io.read(data_,"#data");
 			}
 			
 			size_t size() const { return size_; }

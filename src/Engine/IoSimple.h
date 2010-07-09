@@ -146,7 +146,7 @@ namespace Dmrg {
 				void printSparseVector(X const &x,std::string const &label)
 				{
 					if (rank_!=0) return;
-					x.print(fout_,label);
+					x.save(fout_,label);
 					
 				}
 				

@@ -613,7 +613,7 @@ namespace Dmrg {
 			{
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					std::string label = "targetVector"+utils::ttos(i)+"_"+utils::ttos(currentTime_);
-					io_.printSparseVector(targetVectors_[i],label);
+					targetVectors_[i].save(io_,label);
 				}
 			}
 

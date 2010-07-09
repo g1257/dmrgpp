@@ -557,7 +557,7 @@ namespace Dmrg {
 				label += utils::ttos(pSE.block()[i])+",";
 			}
 			//SparseVector<typename TargettingType::TargetVectorType::value_type> psiSparse(target.gs());
-			io_.printSparseVector(target.gs(),label);
+			target.gs().save(io_,label);
 
 		}
 

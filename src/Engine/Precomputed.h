@@ -294,7 +294,7 @@ namespace Dmrg {
 		
 		void getTimeVector(VectorWithOffsetType& timeVector,size_t ns)
 		{
-			io2_.readSparseVector(timeVector,"targetVector0",ns);
+			timeVector.load(io2_,"targetVector0",ns);
 			rewind();
 		}
 
