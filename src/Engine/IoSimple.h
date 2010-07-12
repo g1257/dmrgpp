@@ -264,8 +264,8 @@ namespace Dmrg {
 						}
 					}
 					if (!foundOnce || (!found && level!=LAST_INSTANCE)) {
-						std::cerr<<"Not found "<<s<<" in file "<<filename_<<"\n";
-						throw std::runtime_error("IoSimple::In::readline()\n");
+						std::string emessage = "IoSimple::In::readline(): Not found "+s+" in file "+filename_;
+						throw std::runtime_error(s);
 					}
 
 					if (level==LAST_INSTANCE) {

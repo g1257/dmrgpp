@@ -177,7 +177,7 @@ namespace Dmrg {
 			return dSerializerV_[currentPos_].wavefunction();
 		}
 		
-		size_t time() const
+		RealType time() const
 		{
 			return timeSerializerV_[currentPos_].time();	
 		}
