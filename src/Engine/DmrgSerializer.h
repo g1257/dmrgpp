@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Utils.h"
 #include "BLAS.h"
+#include "IoSimple.h"
 
 namespace Dmrg {
 	//! Move also checkpointing from DmrgSolver to here (FIXME)
@@ -107,8 +108,8 @@ namespace Dmrg {
 			  direction_(direction)
 			{}
 			
-			template<typename IoInputter>
-			DmrgSerializer(IoInputter& io,bool bogus = false) 
+			
+			DmrgSerializer(typename IoSimple::In& io,bool bogus = false) 
 			: fs_(io,bogus),pS_(io,"pS",bogus),pE_(io,"pE",bogus),pSE_(io,"pSE",bogus)
 			{
 				if (bogus) return;

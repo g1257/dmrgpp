@@ -935,7 +935,7 @@ sub createObserverDriver
 	my $obsArg = "datafile,n,opInfo.n_row(),concurrency,verbose";
 	if ($targetting=~/timestep/i) {
 		$chooseRealOrComplexForObservables = "typedef ComplexType FieldType;\n";
-		$obsArg = "datafile,tstStruct.filename,n,opInfo.n_row(),nf,concurrency,verbose";
+		$obsArg = "datafile,tstStruct.filename,n,opInfo.n_row(),concurrency,verbose";
 	}
 	
 	open(OBSOUT,">$observerDriver") or die "Cannot open file $observerDriver for writing: $!\n";
@@ -1030,7 +1030,6 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	size_t n=mp.linSize;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
 	bool verbose = false;
-	size_t nf = 2*n-1;
 	Observer<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
 	if (hasTimeEvolution) {
 		SparseMatrixType matrixN(model.getOperator("c",0));
@@ -1040,9 +1039,10 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 		multiply(A,matrix2,matrixN);
 		Su2RelatedType su2Related1;
 		OperatorType opN(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-		for (size_t i0 = 0;i0<nf-1;i0++) {
+		std::cout<<"site value time\\n";
+		for (size_t i0 = 0;i0<observe.size();i0++) {
 			FieldType tmp = observe.template onePoint<ApplyOperatorType>(i0,opN);
-			std::cout<<(i0+1)<<" "<<tmp<<"\\n";
+			std::cout<<observe.site()<<" "<<tmp<<" "<<observe.time()<<"\\n";
 		}
 		return;
 	}

@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TIME_SERIAL_H
 
 #include "Utils.h"
+#include "IoSimple.h"
 
 namespace Dmrg {
 	
@@ -94,7 +95,7 @@ namespace Dmrg {
 			TimeSerializer() { }
 			
 			TimeSerializer(
-				size_t currentTime,
+				RealType currentTime,
 				size_t site,
 				const std::vector<VectorType>& targetVectors)
 			: currentTime_(currentTime),
@@ -102,8 +103,7 @@ namespace Dmrg {
 			  targetVectors_(targetVectors)
 			{}
 			
-			template<typename IoInputter>
-			TimeSerializer(IoInputter& io)
+			TimeSerializer(typename IoSimple::In& io)
 			{
 				RealType x=0;
 				std::string s = "#TIME=";
@@ -132,7 +132,12 @@ namespace Dmrg {
 				return  targetVectors_[i].size();
 			}
 			
-			size_t time() const { return currentTime_; }
+			RealType time() const { return currentTime_; }
+			
+			size_t site() const
+			{
+				return  site_;
+			}
 			
 			const VectorType& vector(size_t i=0) const 
 			{
@@ -156,7 +161,7 @@ namespace Dmrg {
 			}
 
 		private:
-			size_t currentTime_;
+			RealType currentTime_;
 			size_t site_;
 			std::vector<VectorType> targetVectors_;
 	}; // class TimeSerializer

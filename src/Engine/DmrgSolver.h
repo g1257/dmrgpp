@@ -200,7 +200,7 @@ namespace Dmrg {
 			std::vector<OperatorType> creationMatrix;
 			model_.setNaturalBasis(creationMatrix,hmatrix,q,S);
 			MyBasisWithOperators pS("pS",S,hmatrix,q);
-			printOneSiteElectrons(pS);
+			//printOneSiteElectrons(pS);
 			pS.setOperators(creationMatrix);
 			waveFunctionTransformation_.init(hmatrix.rank());
 			if (parameters_.options.find("nowft")!=std::string::npos) waveFunctionTransformation_.disable();
@@ -529,7 +529,7 @@ namespace Dmrg {
 			io_.printline(msg2);
 		}
 
-		//! checkpoint save
+		//! checkpoint save: move this to the Serializer FIXME
 		void checkpointSave(MyBasisWithOperators &pS,MyBasisWithOperators &pE,size_t loop) 
 		{
 			pS.save(io_,"#CHKPOINTSYSTEM");
@@ -537,7 +537,7 @@ namespace Dmrg {
 			
 		}
 
-		//! checkpoint load
+		//! checkpoint load: move this to the Serializer FIXME
 		void checkpointLoad(MyBasisWithOperators &pS,MyBasisWithOperators &pE,size_t loop)
 		{
 			typename IoType::In ioTmp(parameters_.checkpoint.filename);
@@ -567,12 +567,12 @@ namespace Dmrg {
 					
 		}
 		
-		void printOneSiteElectrons(const MyBasis& b)
+		/*void printOneSiteElectrons(const MyBasis& b)
 		{
 			std::string s = "#ONE_SITE_ELECTRONS\n";
 			if (b.block().size()!=1) throw std::runtime_error("printOneSiteElectrons failed\n");
 			b.save(io_);
-		}
+		}*/
 		
 	}; //class DmrgSolver
 } // namespace Dmrg

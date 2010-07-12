@@ -105,23 +105,21 @@ namespace Dmrg {
 		ObserverHelper(const std::string& filename,size_t nf,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
-				dSerializerV_(nf,DmrgSerializerType(io_,true)),
+				dSerializerV_(1,DmrgSerializerType(io_,true)),
 				currentPos_(0),
-				verbose_(verbose),
-				nf_(nf)
+				verbose_(verbose)
 		{
 			init(nf);
 		}
 		
-		ObserverHelper(const std::string& filename,const std::string& timeFilename,size_t nf,bool verbose=true) 
+		ObserverHelper(const std::string& filename,const std::string& timeFilename,size_t nf=0,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
 				io2_(timeFilename),
-				dSerializerV_(nf,DmrgSerializerType(io_,true)),
+				dSerializerV_(1,DmrgSerializerType(io_,true)),
 				timeSerializerV_(nf),
 				currentPos_(0),
-				verbose_(verbose),
-				nf_(nf)
+				verbose_(verbose)
 		{
 			init(nf);
 			integrityChecks();
@@ -190,12 +188,17 @@ namespace Dmrg {
 			return timeSerializerV_[currentPos_].site();
 		}
 		
+		size_t size() const
+		{
+			return dSerializerV_.size()-1;
+		}
+		
 		const VectorWithOffsetType& timeVector() const
 		{
 			if (currentPos_>=timeSerializerV_.size() || 
 						 timeSerializerV_[currentPos_].size()==0)
 				throw std::runtime_error("timeVector has a problem\n");
-			return timeSerializerV_[currentPos_].vector(); //-nf_+1+stepTimes_];	
+			return timeSerializerV_[currentPos_].vector();
 		}
 		
 		template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
@@ -206,16 +209,24 @@ namespace Dmrg {
 		void init(size_t nf)
 		{
 			rewind(true);
-			std::vector<size_t> el0; // not really needed, but needs to read to keep in sync
-			getElectronsOneSite(el0);
-			for (size_t i=0;i<nf-1;i++) {
-				if (verbose_) std::cerr<<"ObserverHelper "<<i<<" out of "<<(nf-1)<<"\n";
-				DmrgSerializerType dSerializer(io_);
-				dSerializerV_[i] = dSerializer;
+			//std::vector<size_t> el0; // not really needed, but needs to read to keep in sync
+			//getElectronsOneSite(el0);
+			//for (size_t i=0;i<nf-1;i++) {
+			dSerializerV_.clear();
+			while(true) {
+				if (nf>0 && dSerializerV_.size()>=nf) break;
+				if (verbose_) std::cerr<<"ObserverHelper "<<dSerializerV_.size()<<"\n";
+				try {
+					DmrgSerializerType dSerializer(io_);
+					dSerializerV_.push_back(dSerializer);
+				} catch (std::exception& e)
+				{
+					break;
+				}
 			}
 			
 			FieldType dummy = 0;
-			initTimeVectors(dummy);
+			initTimeVectors(dSerializerV_.size(),dummy);
 			// Line below might cause trouble under gcc v3
 			//if (verbose_) std::cerr<<(*this);	
 		}
@@ -223,7 +234,8 @@ namespace Dmrg {
 		void integrityChecks()
 		{
 			if (dSerializerV_.size()!=timeSerializerV_.size()) throw std::runtime_error("Error 1\n");
-			for (size_t x=0;x<dSerializerV_.size();x++) {
+			if (dSerializerV_.size()==0) return;
+			for (size_t x=0;x<dSerializerV_.size()-1;x++) {
 				if (dSerializerV_[x].basisSE().size()==0) continue;
 				if (dSerializerV_[x].basisSE().size()!=timeSerializerV_[x].size()) throw std::runtime_error("Error 2\n");
 			}
@@ -235,8 +247,9 @@ namespace Dmrg {
 			
 		}
 		
-		void initTimeVectors(std::complex<RealType> dummy)
+		void initTimeVectors(size_t nf,std::complex<RealType> dummy)
 		{
+			if (nf!=timeSerializerV_.size()) timeSerializerV_.resize(nf);
 			for (size_t i=0;i<timeSerializerV_.size();i++) { // up to i<nf-1 FIXME
 				TimeSerializerType ts(io2_);
 				timeSerializerV_[i] = ts;
@@ -257,12 +270,12 @@ namespace Dmrg {
 		
 		// Not needed, but if you remove this, also remove in DmrgSolver the corresponding
 		// printing of the first basis to keep everythign in sync
-		void getElectronsOneSite(std::vector<size_t>& el0)
+		/*void getElectronsOneSite(std::vector<size_t>& el0)
 		{
 			BasisType b(io_,"one site");
 			if (b.block().size()!=1) throw std::runtime_error("getElectronsOneSite\n");
 			el0 = b.electronsVector();
-		}
+		}*/
 		
 
 		void getTransform(MatrixType& transform,int ns)
@@ -298,7 +311,6 @@ namespace Dmrg {
 		std::vector<TimeSerializerType> timeSerializerV_;
 		size_t currentPos_;
 		bool verbose_;
-		size_t nf_;
 	};  //ObserverHelper
 
 	template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>

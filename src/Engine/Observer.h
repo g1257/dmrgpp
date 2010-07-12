@@ -112,13 +112,20 @@ namespace Dmrg {
 				verbose_(verbose)
 		{}
 				
-		Observer(const std::string& filename,const std::string& timeFilename,size_t n,size_t n1,size_t nf,
-			ConcurrencyType& concurrency,bool verbose=false)
+		Observer(const std::string& filename,const std::string& timeFilename,size_t n,size_t n1,
+			ConcurrencyType& concurrency,size_t nf = 0,bool verbose=false)
 		: helper_(filename,timeFilename,nf,verbose),halfLatticeSize_(n),
 			    oneSiteHilbertSize_(n1),skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
 				verbose_(verbose)
 		{}
+				
 		
+		size_t size() const { return helper_.size(); }
+		
+		RealType time() const { return helper_.time(); }
+				
+		size_t site() const { return helper_.site(); }
+				
 		psimag::Matrix<FieldType> correlations(size_t n,const MatrixType& O1,const MatrixType& O2,int fermionicSign,
 						      size_t n1=0,size_t nf=0)
 		{
