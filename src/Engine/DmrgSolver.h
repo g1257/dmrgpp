@@ -501,7 +501,7 @@ namespace Dmrg {
 			if (verbose_ && concurrency_.root()) std::cerr<<"About to changeBasis...\n";
 			
 			RealType error = rSprime.changeBasis(ftransform,dmS(),eigs,keptStates,parameters_,concurrency_);
-			if (saveOption==SAVE_TO_DISK) saveToDisk(ftransform,rSprime);
+			if (saveOption==SAVE_TO_DISK) saveToDisk(ftransform,rSprime,direction);
 			waveFunctionTransformation_.push(ftransform,direction,rSprime,pBasisSummed,pSE); //,target.m());
 
 			std::ostringstream msg;
@@ -562,13 +562,15 @@ namespace Dmrg {
 		// Save to disk transform
 		template<typename SomeMatrixType>
 		void saveToDisk(const SomeMatrixType& ftransform,
-			MyBasisWithOperators const &pS)
+			MyBasisWithOperators const &pS,size_t direction)
 		{
 			std::string label = "#TRANSFORM_sites=";
 			for (size_t i=0;i<pS.block().size();i++) {
 				label += utils::ttos(pS.block()[i])+",";
 			}
 			io_.printMatrix(ftransform,label);
+			std::string s = "#DIRECTION="+utils::ttos(direction);
+			io_.printline(s);
 		}
 
 		//! Move elsewhere

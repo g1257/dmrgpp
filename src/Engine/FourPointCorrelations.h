@@ -92,14 +92,14 @@ namespace Dmrg {
 	class FourPointCorrelations {
 		//typedef typename MatrixType::value_type FieldType;
 		typedef size_t IndexType;
-		typedef Precomputed<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> PrecomputedType;
+		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> ObserverHelperType;
 		typedef CorrelationsSkeleton<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> CorrelationsSkeletonType;
 		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisType::RealType RealType;
 		
 	public:
-		FourPointCorrelations(PrecomputedType& precomp,CorrelationsSkeletonType& skeleton,bool verbose=false)
+		FourPointCorrelations(ObserverHelperType& precomp,CorrelationsSkeletonType& skeleton,bool verbose=false)
 			: precomp_(precomp),skeleton_(skeleton),verbose_(verbose)
 		{
 		}
@@ -241,7 +241,7 @@ namespace Dmrg {
 		
 		
 		
-		PrecomputedType& precomp_; // <-- NB: not the owner
+		ObserverHelperType& precomp_; // <-- NB: not the owner
 		CorrelationsSkeletonType& skeleton_; // <-- NB: not the owner
 		bool verbose_;
 	};  //class FourPointCorrelations

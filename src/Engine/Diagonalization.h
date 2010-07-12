@@ -271,8 +271,8 @@ namespace Dmrg {
      					BasisType const &pSE,
 					const SomeVectorType& initialVector)
 		{
-			RealType eps=ProgramLimits::LanczosTolerance;
-			int iter=ProgramLimits::LanczosSteps;
+			RealType eps=ProgramGlobals::LanczosTolerance;
+			int iter=ProgramGlobals::LanczosSteps;
 			std::vector<RealType> tmpVec1,tmpVec2;
 			//srand48(7123443);
 			

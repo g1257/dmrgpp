@@ -146,7 +146,7 @@ namespace Dmrg {
 					model_(model),tstStruct_(tstStruct),waveFunctionTransformation_(wft),
 					progress_("TimeStepTargetting",0),currentTime_(0),
 							times_(tstStruct_.timeSteps),weight_(tstStruct_.timeSteps),targetVectors_(tstStruct_.timeSteps),
-						io_(tstStruct_.filename,parallelRank_),applyOpLocal_(basisS,basisE,basisSE,EXPAND_SYSTEM)
+						io_(tstStruct_.filename,parallelRank_),applyOpLocal_(basisS,basisE,basisSE)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" TimeStepTargetting "
 							"needs an enabled wft\n");
@@ -545,8 +545,8 @@ namespace Dmrg {
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			
 				size_t mode = LanczosSolverType::WITH_INFO;
-				RealType eps= 0.01*ProgramLimits::LanczosTolerance;
-				size_t iter= ProgramLimits::LanczosSteps;
+				RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
+				size_t iter= ProgramGlobals::LanczosSteps;
 
 				//srand48(3243447);
 				LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,parallelRank_,mode);

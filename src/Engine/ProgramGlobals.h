@@ -75,7 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ProgramLimits.h
+/*! \file ProgramGlobals.h
  *
  *
  *
@@ -84,14 +84,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PROGRAM_LIMITS_H
 
 namespace Dmrg {
-	struct ProgramLimits {
+	struct ProgramGlobals {
 		static size_t const MaxNumberOfSites = 300; // max number of sites that a model can use
 		static size_t const MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
 		static size_t const LanczosSteps = 200; // max number of external Lanczos steps
 		static double const LanczosTolerance; // tolerance of the Lanczos Algorithm
-	}; // ProgramLimits
+		enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
+	}; // ProgramGlobals
 	
-	double const ProgramLimits::LanczosTolerance = 1e-12;
+	double const ProgramGlobals::LanczosTolerance = 1e-12;
 }; // namespace Dmrg
 /*@}*/
 #endif

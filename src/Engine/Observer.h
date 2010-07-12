@@ -74,14 +74,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file DmrgObserve.h
+/*! \file Observer.h
  *
  *  A class to perform post-processing calculation of observables
  *
  */
 #ifndef DMRG_OBSERVE_H
 #define DMRG_OBSERVE_H
-#include "Precomputed.h"
+#include "ObserverHelper.h"
 #include "CrsMatrix.h"
 #include "CorrelationsSkeleton.h"
 #include "FourPointCorrelations.h"
@@ -91,12 +91,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	
 	template<typename FieldType,typename VectorWithOffsetType,typename BasisType,typename IoType,typename ConcurrencyType>
-	class Observe {
+	class Observer {
 		typedef size_t IndexType;
 		typedef SparseVector<FieldType> VectorType;
 		typedef psimag::Matrix<FieldType> MatrixType;
 		typedef typename BasisType::RealType RealType;
-		typedef Precomputed<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> PrecomputedType;
+		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> ObserverHelperType;
 		typedef CorrelationsSkeleton<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> CorrelationsSkeletonType;
 		typedef FourPointCorrelations<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType>  FourPointCorrelationsType;
 		
@@ -106,16 +106,16 @@ namespace Dmrg {
 		static size_t const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
 		
 	public:
-		Observe(const std::string& filename,size_t n,size_t n1,ConcurrencyType& concurrency,bool verbose=false)
-		: precomp_(filename,2*n,verbose),halfLatticeSize_(n),
-			    oneSiteHilbertSize_(n1),skeleton_(precomp_),fourpoint_(precomp_,skeleton_),concurrency_(concurrency),
+		Observer(const std::string& filename,size_t n,size_t n1,ConcurrencyType& concurrency,bool verbose=false)
+		: helper_(filename,2*n,verbose),halfLatticeSize_(n),
+			    oneSiteHilbertSize_(n1),skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
 				verbose_(verbose)
 		{}
 				
-		Observe(const std::string& filename,const std::string& timeFilename,size_t n,size_t n1,size_t stepTimes,
+		Observer(const std::string& filename,const std::string& timeFilename,size_t n,size_t n1,size_t stepTimes,
 			ConcurrencyType& concurrency,bool verbose=false)
-		: precomp_(filename,timeFilename,2*n,stepTimes,verbose),halfLatticeSize_(n),
-			    oneSiteHilbertSize_(n1),skeleton_(precomp_),fourpoint_(precomp_,skeleton_),concurrency_(concurrency),
+		: helper_(filename,timeFilename,2*n,stepTimes,verbose),halfLatticeSize_(n),
+			    oneSiteHilbertSize_(n1),skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
 				verbose_(verbose)
 		{}
 		
@@ -206,18 +206,18 @@ namespace Dmrg {
 		}
 
 		template<typename ApplyOperatorType>
-		FieldType onePoint(size_t site,const typename ApplyOperatorType::OperatorType& A,int fermionicSign,size_t shrinkWhat)
+		FieldType onePoint(size_t site,const typename ApplyOperatorType::OperatorType& A)
 		{
 			size_t pnter=site;
-			precomp_.setPointer(pnter);
+			helper_.setPointer(pnter);
 			
-			ApplyOperatorType applyOpLocal1(precomp_.basisS(),precomp_.basisE(),precomp_.basisSE(),shrinkWhat);
+			ApplyOperatorType applyOpLocal1(helper_.basisS(),helper_.basisE(),helper_.basisSE());
 		
-			const VectorWithOffsetType& src = precomp_.timeVector();
+			const VectorWithOffsetType& src = helper_.timeVector();
 			//const std::string& label,
 				
 			VectorWithOffsetType dest;
-			applyOpLocal1(dest,src,A,precomp_.fermionicSign(),shrinkWhat);
+			applyOpLocal1(dest,src,A,helper_.fermionicSign(),helper_.direction());
 				
 			FieldType sum = static_cast<FieldType>(0.0);
 			const VectorWithOffsetType& v1 = dest;
@@ -356,7 +356,7 @@ namespace Dmrg {
 			calcSpermutation(s);
 			//std::cerr<<"*****************======="<<transform_.n_row()<<"\n";
 			io_.readMatrix(transform_,"#TRANSFORM_sites",s);*/
-			precomp_.setPointer(s);
+			helper_.setPointer(s);
 			//std::cerr<<"%%%%%%%%%%%%%%%%%======="<<transform_.n_row()<<"\n";
 			int growOption = GROW_RIGHT;
 			//if (i==1 && s==0) growOption = GROW_LEFT;// <-- not needed since nt>0
@@ -367,12 +367,12 @@ namespace Dmrg {
 			/* io_.rewind();
 			io_.read(electrons_,"#ELECTRONS_sites=",s);*/
 			//skeleton_.createSigns(signs,fermionicSign);
-			MatrixType Onew(precomp_.transform().n_col(),precomp_.transform().n_col());
+			MatrixType Onew(helper_.transform().n_col(),helper_.transform().n_col());
 			Odest = Onew;
 			skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption);
 		}
 
-		PrecomputedType precomp_;
+		ObserverHelperType helper_;
 		size_t halfLatticeSize_;
 		size_t oneSiteHilbertSize_;
 		CorrelationsSkeletonType skeleton_;
@@ -382,7 +382,7 @@ namespace Dmrg {
 		std::vector<size_t> growCached_;
 		std::vector<std::vector<MatrixType> > grownOperators_;
 		
-	};  //class Observe
+	};  //class Observer
 } // namespace Dmrg
 
 /*@}*/

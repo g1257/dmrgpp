@@ -123,8 +123,6 @@ namespace Dmrg {
 	template<typename BasisWithOperatorsType>
 	class WaveFunctionTransformation {
 		public:
-		
-		enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
 		enum {DO_NOT_RESET_COUNTER,RESET_COUNTER};
 
 		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
@@ -133,6 +131,9 @@ namespace Dmrg {
 		typedef std::vector<SparseElementType> VectorType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef typename BasisType::FactorsType FactorsType;
+		static const size_t INFINITE = ProgramGlobals::INFINITE;
+		static const size_t EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
+		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 		
 		WaveFunctionTransformation() 
 			: isEnabled_(true),useSu2Symmetry_(BasisType::useSu2Symmetry()),

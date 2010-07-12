@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "JmPairs.h"
 #include "VerySparseMatrix.h"
 #include "JmSubspace.h"
-#include "ProgramLimits.h"
+#include "ProgramGlobals.h"
 #include "CrsMatrix.h"
 
 namespace Dmrg {
@@ -107,7 +107,7 @@ namespace Dmrg {
 		public:
 			typedef CrsMatrix<RealType> FactorsType;
 			
-			static size_t const MAX = ProgramLimits::MaxNumberOfSites;
+			static size_t const MAX = ProgramGlobals::MaxNumberOfSites;
 			
 			PairType jmValue(size_t i) const { return jmValues_[i]; }
 

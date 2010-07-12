@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Precomputed.h
+/*! \file ObserverHelper.h
  *
  *  A class to read and serve precomputed data to the observer
  *
@@ -82,14 +82,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PRECOMPUTED_H
 #define PRECOMPUTED_H
 #include "SparseVector.h"
-#include "ProgramLimits.h"
+#include "ProgramGlobals.h"
 #include "FermionSign.h"
 #include "VectorWithOffsets.h" // to include norm
 #include "VectorWithOffset.h" // to include norm
 
 namespace Dmrg {
 	template<typename IoType,typename MatrixType,typename VectorType_,typename VectorWithOffsetType,typename BasisType>
-	class Precomputed {
+	class ObserverHelper {
 	public:
 		typedef VectorType_ VectorType;
 		typedef size_t IndexType;
@@ -97,7 +97,7 @@ namespace Dmrg {
 		typedef typename BasisType::RealType RealType;
 		enum {NOTIMEVECTOR=0,USETIMEVECTOR=1};
 		
-		Precomputed(const std::string& filename,size_t nf,bool verbose=true) 
+		ObserverHelper(const std::string& filename,size_t nf,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
 				bogusBasis_("Bogus"),
@@ -106,6 +106,7 @@ namespace Dmrg {
 				basisE_(nf,bogusBasis_),
 				basisSE_(nf,bogusBasis_),
 				transform_(nf),
+				directions_(nf),
 				wavefunction_(nf),
 				psiTimeVector_(nf),
 				currentPos_(0),
@@ -117,7 +118,7 @@ namespace Dmrg {
 		}
 		
 		//! stepTimes must always be equal to nf
-		Precomputed(const std::string& filename,const std::string& timeFilename,size_t nf,size_t stepTimes,bool verbose=true) 
+		ObserverHelper(const std::string& filename,const std::string& timeFilename,size_t nf,size_t stepTimes,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
 				io2_(timeFilename),
@@ -127,6 +128,7 @@ namespace Dmrg {
 				basisE_(nf,bogusBasis_),
 				basisSE_(nf,bogusBasis_),
 				transform_(nf),
+				directions_(nf),
 				wavefunction_(nf),
 				psiTimeVector_(nf),
 				currentPos_(0),
@@ -185,6 +187,11 @@ namespace Dmrg {
 					   &(transform_[currentPos_](0,0)),nBig,&(fmTmp(0,0)),nBig,beta,&(ret(0,0)),nSmall);
 			
 		}
+		
+		size_t direction() const
+		{
+			return directions_[currentPos_];
+		}
 
 		const VectorType& wavefunction() const
 		{
@@ -201,7 +208,7 @@ namespace Dmrg {
 		
 		template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
 		friend std::ostream& operator<<(std::ostream& os,
-			Precomputed<IoType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& precomp);
+			ObserverHelper<IoType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& precomp);
 
 	private:
 		void init(size_t nf)
@@ -210,7 +217,7 @@ namespace Dmrg {
 			std::vector<size_t> el0; // not really needed, but needs to read to keep in sync
 			getElectronsOneSite(el0);
 			for (size_t i=0;i<nf-1;i++) {
-				if (verbose_) std::cerr<<"Precomputed "<<i<<" out of "<<(nf-1)<<"\n";
+				if (verbose_) std::cerr<<"ObserverHelper "<<i<<" out of "<<(nf-1)<<"\n";
 				size_t j = 0; // = i;
 				
 				/*getPermutation(Spermutation_[i],SpermutationInverse_[i],
@@ -225,6 +232,10 @@ namespace Dmrg {
 				getWaveFunction(wavefunction_[i],j);
 				//getElectrons(electrons_[i],j);
 				getTransform(transform_[i],j);
+				int x = 0;
+				getDirection(x,j);
+				if (x<0) throw std::runtime_error("OBserverHelper:: direction must be non-negative\n");
+				directions_[i] = x;
 			}
 			
 			FieldType dummy = 0;
@@ -294,6 +305,12 @@ namespace Dmrg {
 			rewind();
 		}
 		
+		void getDirection(int& x,int ns)
+		{
+			io_.readline(x,"#DIRECTION=",ns);
+			rewind();
+		}
+		
 		void getTimeVector(VectorWithOffsetType& timeVector,size_t ns)
 		{
 			timeVector.load(io2_,"targetVector0",ns);
@@ -307,17 +324,18 @@ namespace Dmrg {
 		std::vector<FermionSign> fermionSigns_;
 		std::vector<BasisType> basisS_,basisE_,basisSE_;
 		std::vector<MatrixType> transform_;
+		std::vector<size_t> directions_;
 		std::vector<VectorType> wavefunction_;
 		std::vector<VectorWithOffsetType> psiTimeVector_;
 		size_t currentPos_;
 		bool verbose_;
 		size_t nf_;
 		size_t stepTimes_;
-	};  //Precomputed
+	};  //ObserverHelper
 
 	template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
 	std::ostream& operator<<(std::ostream& os,
-		Precomputed<IoType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& p)
+		ObserverHelper<IoType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& p)
 	{
 		for (size_t i=0;i<p.SpermutationInverse_.size();i++) {
 			os<<"i="<<i<<"\n";

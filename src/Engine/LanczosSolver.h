@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LANCZOSSOLVER_HEADER_H
  
 #include "Utils.h"
-#include "ProgramLimits.h"
+#include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
 #include "TridiagonalMatrix.h"
 
@@ -276,7 +276,7 @@ namespace Dmrg {
 					y[i] = x[i] / ab.b(j) ;
 					x[i] = -ab.b(j)  * tmp;
 				}
-				if (eps_>=ProgramLimits::LanczosTolerance) return;
+				if (eps_>=ProgramGlobals::LanczosTolerance) return;
 			}
 			
 			/*std::cerr<<"Trying lanczosVectors with max_nstep="<<max_nstep<<"\n";
@@ -326,7 +326,7 @@ namespace Dmrg {
 			int i, k, l, m;
 			RealType c, dd, f, g, h, p, r, *d, *e, *v = 0, *vki;
 			int long intCounter=0;
-			int long maxCounter=ProgramLimits::MaxLanczosSteps;
+			int long maxCounter=ProgramGlobals::MaxLanczosSteps;
   
 			if (gs.size()>0) {
 				v  = new RealType[n*n];

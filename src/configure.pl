@@ -944,7 +944,7 @@ print OBSOUT<<EOF;
  * This driver program was written by configure.pl
  * DMRG++ ($brand) by G.A.*/
 	
-#include "Observe.h"
+#include "Observer.h"
 #include "IoSimple.h"
 #include "$modelName.h" 
 #include "$operatorsName.h" 
@@ -1030,7 +1030,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	size_t n=mp.linSize;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
 	bool verbose = false;
-	Observe<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
+	Observer<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
 	if (hasTimeEvolution) {
 		SparseMatrixType matrixN(model.getOperator("c",0.0));
 		SparseMatrixType matrix2;
@@ -1039,9 +1039,8 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 		multiply(A,matrix2,matrixN);
 		Su2RelatedType su2Related1;
 		OperatorType opN(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-		size_t EXPAND_SYSTEM = WaveFunctionTransformationType::EXPAND_SYSTEM;
 		for (size_t i0 = 0;i0<2*n-2;i0++) {
-			FieldType tmp = observe.template onePoint<ApplyOperatorType>(i0,opN,1,EXPAND_SYSTEM);
+			FieldType tmp = observe.template onePoint<ApplyOperatorType>(i0,opN);
 			std::cout<<(i0+1)<<" "<<tmp<<"\\n";
 		}
 		return;

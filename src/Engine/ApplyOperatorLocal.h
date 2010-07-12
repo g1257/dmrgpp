@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Utils.h"
 #include "FermionSign.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 	
@@ -100,9 +101,8 @@ namespace Dmrg {
 			ApplyOperatorLocal(
 					const BasisType& basisS,
        					const BasisType& basisE,
-	    				const BasisType& basisSE,
-					size_t shrinkEnv)
-			: basisS_(basisS),basisE_(basisE),basisSE_(basisSE),SHRINK_ENVIRON(shrinkEnv)
+	    				const BasisType& basisSE)
+			: basisS_(basisS),basisE_(basisE),basisSE_(basisSE)
 			{
 				//std::cerr<<"APPLY "<<basisSE_.size()<<" "<<basisSE.size()<<"\n";
 			}
@@ -116,7 +116,7 @@ namespace Dmrg {
 					size_t systemOrEnviron) const
 			{
 				//std::cerr<<"APPLY-OPERTOR() "<<basisSE_.size()<<"\n";
-				if (systemOrEnviron == SHRINK_ENVIRON) applyLocalOpSystem(dest,src,A,fermionSign);
+				if (systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM) applyLocalOpSystem(dest,src,A,fermionSign);
 				else applyLocalOpEnviron(dest,src,A);
 			}
 			
@@ -219,7 +219,6 @@ namespace Dmrg {
 			const BasisType& basisS_;
 			const BasisType& basisE_;
 			const BasisType& basisSE_;
-			size_t const SHRINK_ENVIRON;
 	}; // class ApplyOperatorLocal
 } // namespace Dmrg 
 

@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CLEBSCH_GORDAN_H
 
 #include "Utils.h"
-#include "ProgramLimits.h"
+#include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
 
 namespace Dmrg {

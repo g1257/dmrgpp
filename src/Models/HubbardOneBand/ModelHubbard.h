@@ -90,7 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
 #include "IoSimple.h"
-#include "ProgramLimits.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 	//! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
@@ -108,7 +108,7 @@ namespace Dmrg {
 			typedef typename SparseMatrixType::value_type SparseElementType;
 		private:
 			
-			static int const maxNumberOfSites=ProgramLimits::MaxNumberOfSites;;
+			static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 			static const int FERMION_SIGN = -1;
 			static const int DEGREES_OF_FREEDOM=2;
 			static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
