@@ -240,7 +240,7 @@ namespace Dmrg {
 					}
 				}
 			}
-			if (result.n_row()!=helper_.columns()) {
+			if (result.n_row()!=helper_.rows()) {
 				std::cerr<<result.n_row()<<" "<<helper_.rows()<<"\n";
 				throw std::runtime_error("dmrgMultiply: mismatch in transform\n");
 			}
