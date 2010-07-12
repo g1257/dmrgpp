@@ -96,6 +96,20 @@ namespace Dmrg {
 			useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),reducedOpImpl_(thisBasis,dof,nOrbitals) 
 		{
 		}
+		
+		template<typename IoInputter>
+		OperatorsImplementation(IoInputter& io,size_t level,const DmrgBasisType* thisBasis,
+					size_t dof,size_t orbitals) 
+			: useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
+			  reducedOpImpl_(io,level,thisBasis,dof,orbitals) 
+		{
+			if (!useSu2Symmetry_)
+				io.read(operators_,"#OPERATORS");
+			//else reducedOpImpl_.load(io,level);
+
+			io.readMatrix(hamiltonian_,"#HAMILTONIAN");
+			reducedOpImpl_.setHamiltonian(hamiltonian_);
+		}
 
 		void setOperators(const std::vector<OperatorType>& ops)
 		{
@@ -255,17 +269,6 @@ namespace Dmrg {
 			if (!useSu2Symmetry_) io.printVector(operators_,"#OPERATORS");
 			else reducedOpImpl_.save(io,s);
 			io.printMatrix(hamiltonian_,"#HAMILTONIAN");
-		}
-
-		template<typename IoInputter>
-		void load(IoInputter& io,size_t level) 
-		{
-			if (!useSu2Symmetry_)
-				io.read(operators_,"#OPERATORS");
-			else reducedOpImpl_.load(io,level);
-
-			io.readMatrix(hamiltonian_,"#HAMILTONIAN");
-			reducedOpImpl_.setHamiltonian(hamiltonian_);
 		}
 
 	private:

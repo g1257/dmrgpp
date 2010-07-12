@@ -117,7 +117,7 @@ namespace Dmrg {
 			:	filename_(filename),
 				io_(filename),
 				io2_(timeFilename),
-				dSerializerV_(nf),
+				dSerializerV_(nf,DmrgSerializerType(io_,true)),
 				timeSerializerV_(nf),
 				currentPos_(0),
 				verbose_(verbose),

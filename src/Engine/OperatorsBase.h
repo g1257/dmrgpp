@@ -98,6 +98,13 @@ namespace Dmrg {
 			operatorsImpl_(thisBasis,dof,nOrbitals),
 					progress_("Operators",0) 
 		{ }
+					
+		template<typename IoInputter>
+		OperatorsBase(IoInputter& io,size_t level,const BasisType* thisBasis,
+			      size_t dof,size_t orbitals) 
+			: operatorsImpl_(io,level,thisBasis,dof,orbitals),progress_("Operators",0) 
+		{
+		}
 
 		void setOperators(const std::vector<OperatorType>& ops)
 		{
@@ -216,12 +223,6 @@ namespace Dmrg {
 		void save(IoOutputter& io,const std::string& s) const
 		{
 			operatorsImpl_.save(io,s);
-		}
-
-		template<typename IoInputter>
-		void load(IoInputter& io,size_t level)
-		{
-			operatorsImpl_.load(io,level);
 		}
 
 	private:

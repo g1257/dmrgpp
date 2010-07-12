@@ -104,6 +104,16 @@ namespace Dmrg {
 					cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
 			{
 			}
+			
+			template<typename IoInputter>
+			ReducedOperators(IoInputter& io,size_t level,const DmrgBasisType* thisBasis,size_t dof,size_t orbitals)
+			 : thisBasis_(thisBasis),useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
+					     dof_(dof),nOrbitals_(orbitals),
+					cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
+			{
+				if (!useSu2Symmetry_) return;
+				io.read(reducedOperators_,"#OPERATORS");
+			}
 
 			const OperatorType& getReducedOperatorByIndex(int i) const 
 			{
@@ -323,12 +333,6 @@ namespace Dmrg {
 			void broadcast( ConcurrencyType& concurrency)
 			{
 				Dmrg::broadcast(reducedOperators_,concurrency);
-			}
-
-			template<typename IoInputter>
-			void load(IoInputter& io,size_t level) 
-			{
-				io.read(reducedOperators_,"#OPERATORS");
 			}
 
 			template<typename IoOutputter>

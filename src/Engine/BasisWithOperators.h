@@ -114,7 +114,20 @@ namespace Dmrg {
 			this->setSymmetryRelated(qm);
 			setHamiltonian(h);
 		}
+		
+		template<typename IoInputter>
+		BasisWithOperators(IoInputter& io,const std::string& ss,size_t counter=0)
+				: BasisType(io,ss,counter),operators_(io,counter,this)
+		{
+		}
 
+		/*template<typename IoInputter>
+		BasisWithOperators(IoInputter& io,size_t counter=0) 
+		{
+			BasisType::load(io,counter); // parent loads
+			operators_.load(io,counter);
+		}*/
+		
 		//! set this basis to the outer product of   basis2 and basis3 or basis3 and basis2  depending on dir
 		void setToProduct(const ThisType& basis2,const ThisType& basis3,int dir)
 		{
@@ -261,20 +274,6 @@ namespace Dmrg {
 		{
 			BasisType::save(io); // parent saves
 			operators_.save(io,this->name());
-		}
-
-		template<typename IoInputter>
-		void load(IoInputter& io,const std::string& ss,size_t counter=0) 
-		{
-			BasisType::load(io,ss,counter); // parent loads
-			operators_.load(io,counter);
-		}
-
-		template<typename IoInputter>
-		void load(IoInputter& io,size_t counter=0)
-		{
-			BasisType::load(io,counter); // parent loads
-			operators_.load(io,counter);
 		}
 
 	private:

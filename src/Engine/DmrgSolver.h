@@ -541,9 +541,10 @@ namespace Dmrg {
 		void checkpointLoad(MyBasisWithOperators &pS,MyBasisWithOperators &pE,size_t loop)
 		{
 			typename IoType::In ioTmp(parameters_.checkpoint.filename);
-			
-			pS.load(ioTmp,"#CHKPOINTSYSTEM",loop);
-			pE.load(ioTmp,"#CHKPOINTENVIRON");
+			MyBasisWithOperators pS1(ioTmp,"#CHKPOINTSYSTEM",loop);
+			pS=pS1;
+			MyBasisWithOperators pE1(ioTmp,"#CHKPOINTENVIRON");
+			pE=pE1;
 			
 			//load also the stacks here!!!
 			std::string s = appendWithDir(ENVIRON_STACK_STRING,parameters_.checkpoint.filename);

@@ -119,7 +119,7 @@ namespace Dmrg {
 		}
 
 		// use this if you don't know the name
-		template<typename IoInputter>
+		/*template<typename IoInputter>
 		BasisImplementation(IoInputter& io,size_t counter=0,bool bogus = false)
 				: dmrgTransformed_(false), name_("#NAME"), progress_("#NAME",0)
 		{
@@ -128,7 +128,7 @@ namespace Dmrg {
 			name_ = sc.first.substr(nn.size(),sc.first.size());
 			loadInternal(io);
 			
-		}
+		}*/
 
 		const std::string& name() const { return name_; }
 
