@@ -556,7 +556,6 @@ namespace Dmrg {
 			}
 			//SparseVector<typename TargettingType::TargetVectorType::value_type> psiSparse(target.gs());
 			target.gs().save(io_,label);
-
 		}
 
 		// Save to disk transform

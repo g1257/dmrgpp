@@ -112,9 +112,9 @@ namespace Dmrg {
 				verbose_(verbose)
 		{}
 				
-		Observer(const std::string& filename,const std::string& timeFilename,size_t n,size_t n1,size_t stepTimes,
+		Observer(const std::string& filename,const std::string& timeFilename,size_t n,size_t n1,size_t nf,
 			ConcurrencyType& concurrency,bool verbose=false)
-		: helper_(filename,timeFilename,2*n,stepTimes,verbose),halfLatticeSize_(n),
+		: helper_(filename,timeFilename,nf,verbose),halfLatticeSize_(n),
 			    oneSiteHilbertSize_(n1),skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
 				verbose_(verbose)
 		{}

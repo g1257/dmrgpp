@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SparseVector.h"
 #include "ProgramGlobals.h"
 #include "FermionSign.h"
+#include "TimeSerializer.h"
 #include "VectorWithOffsets.h" // to include norm
 #include "VectorWithOffset.h" // to include norm
 
@@ -95,6 +96,8 @@ namespace Dmrg {
 		typedef size_t IndexType;
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisType::RealType RealType;
+		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+		
 		enum {NOTIMEVECTOR=0,USETIMEVECTOR=1};
 		
 		ObserverHelper(const std::string& filename,size_t nf,bool verbose=true) 
@@ -108,17 +111,14 @@ namespace Dmrg {
 				transform_(nf),
 				directions_(nf),
 				wavefunction_(nf),
-				psiTimeVector_(nf),
 				currentPos_(0),
 				verbose_(verbose),
-				nf_(nf),
-				stepTimes_(0)
+				nf_(nf)
 		{
 			init(nf);
 		}
 		
-		//! stepTimes must always be equal to nf
-		ObserverHelper(const std::string& filename,const std::string& timeFilename,size_t nf,size_t stepTimes,bool verbose=true) 
+		ObserverHelper(const std::string& filename,const std::string& timeFilename,size_t nf,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
 				io2_(timeFilename),
@@ -130,11 +130,10 @@ namespace Dmrg {
 				transform_(nf),
 				directions_(nf),
 				wavefunction_(nf),
-				psiTimeVector_(nf),
+				timeSerializerVector_(nf),
 				currentPos_(0),
 				verbose_(verbose),
-				nf_(nf),
-				stepTimes_(stepTimes)
+				nf_(nf)
 		{
 			init(nf);
 			integrityChecks();
@@ -198,12 +197,23 @@ namespace Dmrg {
 			return wavefunction_[currentPos_];
 		}
 		
+		size_t time() const
+		{
+			return timeSerializerVector_[currentPos_].time();	
+		}
+		
+		//! This applies more generally (ie. not only to time)
+		size_t site() const
+		{
+			return timeSerializerVector_[currentPos_].site();
+		}
+		
 		const VectorWithOffsetType& timeVector() const
 		{
-			if (currentPos_>=psiTimeVector_.size() || 
-						 psiTimeVector_[currentPos_].size()==0)
+			if (currentPos_>=timeSerializerVector_.size() || 
+						 timeSerializerVector_[currentPos_].size()==0)
 				throw std::runtime_error("timeVector has a problem\n");
-			return psiTimeVector_[currentPos_]; //-nf_+1+stepTimes_];	
+			return timeSerializerVector_[currentPos_].vector(); //-nf_+1+stepTimes_];	
 		}
 		
 		template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
@@ -246,10 +256,10 @@ namespace Dmrg {
 		
 		void integrityChecks()
 		{
-			if (basisSE_.size()!=psiTimeVector_.size()) throw std::runtime_error("Error 1\n");
+			if (basisSE_.size()!=timeSerializerVector_.size()) throw std::runtime_error("Error 1\n");
 			for (size_t x=0;x<basisSE_.size();x++) {
 				if (basisSE_[x].size()==0) continue;
-				if (basisSE_[x].size()!=psiTimeVector_[x].size()) throw std::runtime_error("Error 2\n");
+				if (basisSE_[x].size()!=timeSerializerVector_[x].size()) throw std::runtime_error("Error 2\n");
 			}
 			
 		}
@@ -261,13 +271,12 @@ namespace Dmrg {
 		
 		void initTimeVectors(std::complex<RealType> dummy)
 		{
-			std::cerr<<"steptimes = "<<stepTimes_<<"\n";
-			for (size_t i=0;i<stepTimes_;i++) { // up to i<nf-1 FIXME
-				size_t j = 0;
-				getTimeVector(psiTimeVector_[i],j);
-				std::cerr<<"time vector "<<i<<" has size "<<psiTimeVector_[i].size()<<"\n";
-				RealType tmp = std::norm(psiTimeVector_[i]);
-				std::cerr<<"Mod="<<tmp<<"\n";
+			for (size_t i=0;i<timeSerializerVector_.size();i++) { // up to i<nf-1 FIXME
+				TimeSerializerType ts(io2_);
+				timeSerializerVector_[i] = ts;
+				//std::cerr<<"time vector "<<i<<" has size "<<psiTimeVector_[i].size()<<"\n";
+				//RealType tmp = std::norm(psiTimeVector_[i]);
+				//std::cerr<<"Mod="<<tmp<<"\n";
 				//std::cerr<<"----------------------------------\n";
 			}
 		}
@@ -326,11 +335,10 @@ namespace Dmrg {
 		std::vector<MatrixType> transform_;
 		std::vector<size_t> directions_;
 		std::vector<VectorType> wavefunction_;
-		std::vector<VectorWithOffsetType> psiTimeVector_;
+		std::vector<TimeSerializerType> timeSerializerVector_;
 		size_t currentPos_;
 		bool verbose_;
 		size_t nf_;
-		size_t stepTimes_;
 	};  //ObserverHelper
 
 	template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>

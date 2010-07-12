@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BLAS.h"
 #include "TimeStepStructure.h"
 #include "ApplyOperatorLocal.h"
+#include "TimeSerializer.h"
 
 namespace Dmrg {
 	template<
@@ -125,6 +126,7 @@ namespace Dmrg {
 			typedef ComplexVectorType TargetVectorType;
 			typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
 			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 			
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
@@ -234,7 +236,7 @@ namespace Dmrg {
 					// always print to keep observer driver sync
 					if (needsPrinting) {
 						zeroOutVectors();
-						printVectors();
+						printVectors(block);
 					}
 					return;
 				}
@@ -243,7 +245,7 @@ namespace Dmrg {
 				
 				cocoon(direction,block); // in-situ
 				
-				if (needsPrinting) printVectors(); // for post-processing
+				if (needsPrinting) printVectors(block); // for post-processing
 			}
 
 			size_t evolve(
@@ -609,12 +611,12 @@ namespace Dmrg {
 					targetVectors_[i].resize(basisSE_.size());
 			}
 
-			void printVectors()
+			void printVectors(const std::vector<int>& block)
 			{
-				for (size_t i=0;i<targetVectors_.size();i++) {
-					std::string label = "targetVector"+utils::ttos(i)+"_"+utils::ttos(currentTime_);
-					targetVectors_[i].save(io_,label);
-				}
+				if (block.size()!=1) throw std::runtime_error("TST only supports blocks of size 1\n");
+				
+				TimeSerializerType ts(currentTime_,block[0],targetVectors_);
+				ts.save(io_);
 			}
 
 			void printHeader()
