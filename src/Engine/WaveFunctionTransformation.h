@@ -124,7 +124,7 @@ namespace Dmrg {
 	class WaveFunctionTransformation {
 		public:
 		
-		enum {INFINITE=0,SHRINK_SYSTEM=1,SHRINK_ENVIRON=2};
+		enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
 		enum {DO_NOT_RESET_COUNTER,RESET_COUNTER};
 
 		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
@@ -161,10 +161,10 @@ namespace Dmrg {
 				case INFINITE:
 					allow=false;
 					break;
-				case SHRINK_ENVIRON:
+				case EXPAND_SYSTEM:
 					allow=true;
 					
-				case SHRINK_SYSTEM:
+				case EXPAND_ENVIRON:
 					allow=true;
 			}
 			// FIXME: Must check the below change when using SU(2)!!
@@ -195,10 +195,10 @@ namespace Dmrg {
 				case INFINITE:
 					allow=false;
 					break;
-				case SHRINK_ENVIRON:
+				case EXPAND_SYSTEM:
 					allow=true;
 					
-				case SHRINK_SYSTEM:
+				case EXPAND_ENVIRON:
 					allow=true;
 			}
 			// FIXME: Must check the below change when using SU(2)!!
@@ -233,10 +233,10 @@ namespace Dmrg {
 				case INFINITE:
 					allow=false;
 					break;
-				case SHRINK_ENVIRON:
+				case EXPAND_SYSTEM:
 					allow=true;
 					
-				case SHRINK_SYSTEM:
+				case EXPAND_ENVIRON:
 					allow=true;
 			}
 			// FIXME: Must check the below change when using SU(2)!!
@@ -294,7 +294,7 @@ namespace Dmrg {
 			
 			switch (stage_) {
 				case INFINITE:
-					if (direction==SHRINK_ENVIRON) {
+					if (direction==EXPAND_SYSTEM) {
 						wsStack_.push(transform);
 						dmrgWave_.ws=transform;
 					} else {
@@ -304,16 +304,16 @@ namespace Dmrg {
 						//std::cerr<<"PUSHING "<<transform.n_row()<<"x"<<transform.n_col()<<"\n";
 					}
 					break;
-				case SHRINK_SYSTEM:
-					if (direction!=SHRINK_SYSTEM) throw std::logic_error("SHRINK_SYSTEM but option==0\n");
+				case EXPAND_ENVIRON:
+					if (direction!=EXPAND_ENVIRON) throw std::logic_error("EXPAND_ENVIRON but option==0\n");
 					dmrgWave_.we=transform;
 					dmrgWave_.ws=transform;
 					//vectorConvert(dmrgWave_.psi,psi);
 					weStack_.push(transform);
 					//std::cerr<<"PUSHING (POPPING) We "<<weStack_.size()<<"\n";
 					break;
-				case SHRINK_ENVIRON:
-					if (direction!=SHRINK_ENVIRON) throw std::logic_error("SHRINK_ENVIRON but option==1\n");
+				case EXPAND_SYSTEM:
+					if (direction!=EXPAND_SYSTEM) throw std::logic_error("EXPAND_SYSTEM but option==1\n");
 					dmrgWave_.ws=transform;
 					dmrgWave_.we=transform;
 					//vectorConvert(dmrgWave_.psi,psi);
@@ -322,7 +322,7 @@ namespace Dmrg {
 			}
 
 			dmrgWave_.pSE=pSE;
-			if (direction==SHRINK_ENVIRON) { // transforming the system
+			if (direction==EXPAND_SYSTEM) { // transforming the system
 				dmrgWave_.pEprime=pBasisSummed;
 				dmrgWave_.pSprime=pBasis;
 			} else {
@@ -353,7 +353,7 @@ namespace Dmrg {
 		void beforeWft(const BasisWithOperatorsType& pSprime,
 				  const BasisWithOperatorsType& pEprime,const BasisType& pSE)
 		{
-			if (stage_==SHRINK_SYSTEM) {
+			if (stage_==EXPAND_ENVIRON) {
 				if (wsStack_.size()>=1) {
 					dmrgWave_.ws=wsStack_.top();
 					wsStack_.pop();
@@ -363,7 +363,7 @@ namespace Dmrg {
 				}
 			}
 			
-			if (stage_==SHRINK_ENVIRON) {
+			if (stage_==EXPAND_SYSTEM) {
 				if (weStack_.size()>=1) { 
 					dmrgWave_.we=weStack_.top();
 					weStack_.pop();
@@ -375,7 +375,7 @@ namespace Dmrg {
 			}
 			//std::cerr<<"PUSHING (POPPING) STACKSIZE="<<weStack_.size()<<" ";
 			//std::cerr<<pSprime.block().size()<<"+"<<pEprime.block().size()<<"\n";
-			if (counter_==0 && stage_==SHRINK_ENVIRON) {
+			if (counter_==0 && stage_==EXPAND_SYSTEM) {
 // 				dmrgWave_.pEprime=pEprime;
 // 				dmrgWave_.pSE=pSE;
 // 				dmrgWave_.pSprime=pSprime;
@@ -393,7 +393,7 @@ namespace Dmrg {
 				}
 			}
 			
-			if (counter_==0 && stage_==SHRINK_SYSTEM) {
+			if (counter_==0 && stage_==EXPAND_ENVIRON) {
 				//matrixIdentity(dmrgWave_.we,sizeOfOneSiteHilbertSpace_);
 				//matrixIdentity(dmrgWave_.ws,dmrgWave_.ws.n_row());
 // 				dmrgWave_.pEprime=pEprime;
@@ -444,12 +444,12 @@ namespace Dmrg {
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
 		{
 			//std::cerr<<"counter="<<counter_<<"direction = "<<stage_<<"\n";
-			if (stage_==SHRINK_SYSTEM) {
+			if (stage_==EXPAND_ENVIRON) {
 				if (firstCall_) throw std::runtime_error("WFT: This corner case is unimplmemented yet (sorry!)\n");
 				else if (counter_==0) transformVector1bounce(psiDest,psiSrc,pSprime,pEprime,pSE);
 				else transformVector1(psiDest,psiSrc,pSprime,pEprime,pSE);
 			}
-			if (stage_==SHRINK_ENVIRON) {
+			if (stage_==EXPAND_SYSTEM) {
 				if (firstCall_) transformVector2FromInfinite(psiDest,psiSrc,pSprime,pEprime,pSE);
  				else if (counter_==0) transformVector2bounce(psiDest,psiSrc,pSprime,pEprime,pSE);
 				else transformVector2(psiDest,psiSrc,pSprime,pEprime,pSE);
@@ -644,9 +644,9 @@ namespace Dmrg {
 		void transformVectorSu2(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
 		{
-			if (stage_==SHRINK_SYSTEM)
+			if (stage_==EXPAND_ENVIRON)
 				transformVector1Su2(psiDest,psiSrc,pSprime,pEprime,pSE);
-			if (stage_==SHRINK_ENVIRON)
+			if (stage_==EXPAND_SYSTEM)
 				transformVector2Su2(psiDest,psiSrc,pSprime,pEprime,pSE);
 		}
 		

@@ -127,8 +127,8 @@ namespace Dmrg {
 			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
-			enum {SHRINK_SYSTEM=WaveFunctionTransformationType::SHRINK_SYSTEM,
-			SHRINK_ENVIRON=WaveFunctionTransformationType::SHRINK_ENVIRON,
+			enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
+			EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransformationType::INFINITE};
 
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
@@ -146,7 +146,7 @@ namespace Dmrg {
 					model_(model),tstStruct_(tstStruct),waveFunctionTransformation_(wft),
 					progress_("TimeStepTargetting",0),currentTime_(0),
 							times_(tstStruct_.timeSteps),weight_(tstStruct_.timeSteps),targetVectors_(tstStruct_.timeSteps),
-						io_(tstStruct_.filename,parallelRank_),applyOpLocal_(basisS,basisE,basisSE,SHRINK_ENVIRON)
+						io_(tstStruct_.filename,parallelRank_),applyOpLocal_(basisS,basisE,basisSE,EXPAND_SYSTEM)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" TimeStepTargetting "
 							"needs an enabled wft\n");

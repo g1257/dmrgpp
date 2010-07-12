@@ -99,7 +99,7 @@ namespace Dmrg {
 		typedef BlockMatrix<DensityMatrixElementType,psimag::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
 		static bool const enforceSymmetry = false;
-		enum {SHRINK_ENVIRON = TargettingType::SHRINK_ENVIRON };
+		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
 		
 	public:
 		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
@@ -304,7 +304,7 @@ namespace Dmrg {
 			int ne = pBasisSummed.size();
 			int ns = pSE.size()/ne;
 			size_t total=pBasisSummed.size();
-			if (direction!=SHRINK_ENVIRON) {
+			if (direction!=EXPAND_SYSTEM) {
 				ns=pBasisSummed.size();
 				ne=pSE.size()/ns;
 			}
@@ -322,7 +322,7 @@ namespace Dmrg {
 				int i1 = alpha1+beta*ns;
 				int i2 = alpha2+beta*ns;
 				// sum over system:
-				if (direction!=SHRINK_ENVIRON) {
+				if (direction!=EXPAND_SYSTEM) {
 					i1 = beta + alpha1*ns;
 					i2 = beta + alpha2*ns;
 				}		
@@ -348,7 +348,7 @@ namespace Dmrg {
 		{
 			int ne = pBasisSummed.size();
 			int ns = pSE.size()/ne;
-			if (direction!=SHRINK_ENVIRON) {
+			if (direction!=EXPAND_SYSTEM) {
 				ns=pBasisSummed.size();
 				ne=pSE.size()/ns;
 			}
@@ -358,7 +358,7 @@ namespace Dmrg {
 
 			for (size_t beta=0;beta<total;beta++) {
 				size_t ii=0,jj=0;
-				if (direction==SHRINK_ENVIRON) { // summing over environment
+				if (direction==EXPAND_SYSTEM) { // summing over environment
 					jj = pSE.permutationInverse(alpha2+beta*ns);
 					ii = pSE.permutationInverse(alpha1+beta*ns);
 				} else { // summing over system

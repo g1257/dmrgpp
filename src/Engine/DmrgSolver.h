@@ -126,8 +126,8 @@ namespace Dmrg {
 		typedef Diagonalization<ParametersDmrgSolver<RealType>,TargettingType,InternalProductTemplate> DiagonalizationType;
 		
 		enum {SAVE_TO_DISK=1,DO_NOT_SAVE=0};
-		enum {SHRINK_SYSTEM=WaveFunctionTransformationType::SHRINK_SYSTEM,
-			SHRINK_ENVIRON=WaveFunctionTransformationType::SHRINK_ENVIRON,
+		enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
+			EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransformationType::INFINITE};
 		
 		DmrgSolver(
@@ -279,8 +279,8 @@ namespace Dmrg {
 				ns=pSprime_.size();
 				ne=pEprime_.size();
 				
-				changeAndTruncateBasis(pS,psi,pSprime_,pEprime_,pSE_,parameters_.keptStatesInfinite,SHRINK_ENVIRON);
-				changeAndTruncateBasis(pE,psi,pEprime_,pSprime_,pSE_,parameters_.keptStatesInfinite,SHRINK_SYSTEM);
+				changeAndTruncateBasis(pS,psi,pSprime_,pEprime_,pSE_,parameters_.keptStatesInfinite,EXPAND_SYSTEM);
+				changeAndTruncateBasis(pE,psi,pEprime_,pSprime_,pSE_,parameters_.keptStatesInfinite,EXPAND_ENVIRON);
 				
 				systemStack_.push(pS); 
 				envStack_.push(pE);
@@ -330,8 +330,8 @@ namespace Dmrg {
 			int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 			RealType gsEnergy=0;
 			
-			size_t direction=SHRINK_ENVIRON;
-			if (stepLength<0) direction=SHRINK_SYSTEM;
+			size_t direction=EXPAND_SYSTEM;
+			if (stepLength<0) direction=EXPAND_ENVIRON;
 			//std::cerr<<"PUSHING DIRECTION="<<getDirection(direction)<<"\n";
 			int resetCounter = WaveFunctionTransformationType::RESET_COUNTER;
 			if (prevDirection ==  direction)
@@ -346,7 +346,7 @@ namespace Dmrg {
 				
 				std::ostringstream msg;
 				if (size_t(stepCurrent_)>=sitesIndices_.size()) throw std::runtime_error("stepCurrent_ too large!\n");
-				if (direction==SHRINK_ENVIRON) {
+				if (direction==EXPAND_SYSTEM) {
 					grow(pSprime_,pS,sitesIndices_[stepCurrent_],GROW_RIGHT);             //grow system
 					shrink(pEprime_,envStack_); //shrink env
 				} else {
@@ -376,7 +376,7 @@ namespace Dmrg {
 				}
 				
 				progress_.print("Truncating (env) basis now...\n",std::cout);
-				if (direction==SHRINK_ENVIRON) {
+				if (direction==EXPAND_SYSTEM) {
 					changeAndTruncateBasis(pS,target,pSprime_,pEprime_,pSE_,keptStates,direction,saveOption);
 					systemStack_.push(pS);
 				} else {
@@ -388,7 +388,7 @@ namespace Dmrg {
 				if (stepCurrent_<0) throw std::runtime_error("DmrgSolver::finiteStep() currentStep_ is negative\n");
 				
 			}
-			if (direction==SHRINK_ENVIRON) {
+			if (direction==EXPAND_SYSTEM) {
 				pE = pEprime_;
 				
 			} else {
@@ -423,8 +423,8 @@ namespace Dmrg {
 		std::string getDirection(size_t dir) const
 		{
 			if (dir==INFINITE) return  "INFINITE";
-			if (dir==SHRINK_SYSTEM) return "SHRINK_SYSTEM";
-			return "SHRINK_ENVIRON";
+			if (dir==EXPAND_ENVIRON) return "EXPAND_ENVIRON";
+			return "EXPAND_SYSTEM";
 		}
 		
 		//! add block X to basis pS and get basis pSprime

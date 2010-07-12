@@ -1031,26 +1031,22 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
 	bool verbose = false;
 	Observe<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
-EOF
-	if ($targetting=~/timestep/i) {
-print OBSOUT<<EOF;
-		{
-			SparseMatrixType matrixN(model.getOperator("c",0.0));
-			SparseMatrixType matrix2;
-			transposeConjugate(matrix2,matrixN);
-			SparseMatrixType A;
-			multiply(A,matrix2,matrixN);
-			Su2RelatedType su2Related1;
-			OperatorType opN(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-			size_t SHRINK_ENVIRON = WaveFunctionTransformationType::SHRINK_ENVIRON;
-			for (size_t i0 = 0;i0<2*n-2;i0++) {
-                                FieldType tmp = observe.template onePoint<ApplyOperatorType>(i0,opN,1,SHRINK_ENVIRON);
-                                std::cout<<(i0+1)<<" "<<tmp<<"\\n";
-                        }
-			return;
+	if (hasTimeEvolution) {
+		SparseMatrixType matrixN(model.getOperator("c",0.0));
+		SparseMatrixType matrix2;
+		transposeConjugate(matrix2,matrixN);
+		SparseMatrixType A;
+		multiply(A,matrix2,matrixN);
+		Su2RelatedType su2Related1;
+		OperatorType opN(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+		size_t EXPAND_SYSTEM = WaveFunctionTransformationType::EXPAND_SYSTEM;
+		for (size_t i0 = 0;i0<2*n-2;i0++) {
+			FieldType tmp = observe.template onePoint<ApplyOperatorType>(i0,opN,1,EXPAND_SYSTEM);
+			std::cout<<(i0+1)<<" "<<tmp<<"\\n";
 		}
-EOF
+		return;
 	}
+EOF
 	if  ($modelName=~/heisenberg/i) {
 	} else {
 		print OBSOUT<<EOF;
