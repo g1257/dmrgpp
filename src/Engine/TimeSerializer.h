@@ -88,6 +88,11 @@ namespace Dmrg {
 	template<typename RealType,typename VectorType>
 	class TimeSerializer {
 		public:
+			
+			// Unfortunately we need a default ctor
+			// to build an array of these
+			TimeSerializer() { }
+			
 			TimeSerializer(
 				size_t currentTime,
 				size_t site,
@@ -117,7 +122,7 @@ namespace Dmrg {
 				if (xi<=0) throw std::runtime_error("TimeSerializer:: n. of vectors must be positive\n");
 				targetVectors_.resize(xi);
 				for (size_t i=0;i<targetVectors_.size();i++) {
-					s = "targetVector0";
+					s = "targetVector"+utils::ttos(i);
 					targetVectors_[i].load(io,s);
 				}
 			}

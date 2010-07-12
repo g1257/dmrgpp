@@ -108,6 +108,27 @@ namespace Dmrg {
 		{
 			symmLocal_.createDummyFactors(1,1);
 		}
+		
+		// use this if you know the name
+		template<typename IoInputter>
+		BasisImplementation(IoInputter& io,const std::string& ss,size_t counter=0,bool bogus = false)
+				: dmrgTransformed_(false), name_(ss), progress_(ss,0) 
+		{
+			io.advance("#NAME="+ss,counter);
+			loadInternal(io);
+		}
+
+		// use this if you don't know the name
+		template<typename IoInputter>
+		BasisImplementation(IoInputter& io,size_t counter=0,bool bogus = false)
+				: dmrgTransformed_(false), name_("#NAME"), progress_("#NAME",0)
+		{
+			std::string nn="#NAME=";
+			std::pair<std::string,size_t> sc = io.advance(nn,counter);
+			name_ = sc.first.substr(nn.size(),sc.first.size());
+			loadInternal(io);
+			
+		}
 
 		const std::string& name() const { return name_; }
 
@@ -377,25 +398,6 @@ namespace Dmrg {
 		}
 		
 		bool dmrgTransformed() const { return dmrgTransformed_; }
-		
-		// use this if you know the name
-		template<typename IoInputter>
-		void load(IoInputter& io,const std::string& ss,size_t counter=0) 
-		{
-			io.advance("#NAME="+ss,counter);
-			loadInternal(io);
-		}
-
-		// use this if you don't know the name
-		template<typename IoInputter>
-		void load(IoInputter& io,size_t counter=0) 
-		{
-			std::string nn="#NAME=";
-			std::pair<std::string,size_t> sc = io.advance(nn,counter);
-			name_ = sc.first.substr(nn.size(),sc.first.size());
-			loadInternal(io);
-			
-		}
 
 		template<typename IoOutputter>
 		void save(IoOutputter& io,const std::string& ss) const

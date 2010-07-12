@@ -112,6 +112,13 @@ namespace Dmrg {
 				init(el);
 			}
 			
+			template<typename IoInputter>
+			FermionSign(IoInputter& io,bool bogus = false)
+			{
+				if (bogus) return;
+				io.read(signs_,"#FERMIONICSIGN");
+			}
+			
 			int operator()(size_t i,size_t f) const
 			{
 				return (signs_[i]) ? f : 1;
@@ -121,12 +128,6 @@ namespace Dmrg {
 			void save(IoOutputter& io) const
 			{
 				io.printVector(signs_,"#FERMIONICSIGN");
-			}
-			
-			template<typename IoInputter>
-			void load(IoInputter& io) 
-			{
-				io.read(signs_,"#FERMIONICSIGN");
 			}
 			
 		private:

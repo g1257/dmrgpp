@@ -148,7 +148,7 @@ namespace Dmrg {
 				/*io_.rewind();
 				io_.read(electrons_,"#ELECTRONS_sites=",s);*/
 				//createSigns(signs,fermionicSign);
-				MatrixType Onew(helper_.transform().n_col(),helper_.transform().n_col());
+				MatrixType Onew(helper_.columns(),helper_.columns());
 				fluffUp(Onew,Odest,fermionicSign,growOption);
 				Odest = Onew;
 				
@@ -240,8 +240,8 @@ namespace Dmrg {
 					}
 				}
 			}
-			if (result.n_row()!=helper_.transform().n_row()) {
-				std::cerr<<result.n_row()<<" "<<helper_.transform().n_row()<<"\n";
+			if (result.n_row()!=helper_.columns()) {
+				std::cerr<<result.n_row()<<" "<<helper_.rows()<<"\n";
 				throw std::runtime_error("dmrgMultiply: mismatch in transform\n");
 			}
 			/*size_t trunc = helper_.transform().n_col();
@@ -251,8 +251,11 @@ namespace Dmrg {
 		
 		FieldType bracket(const MatrixType& A)
 		{
-			const VectorType& v = helper_.wavefunction();
-			return bracket_(A,v);
+			const VectorWithOffsetType& v = helper_.wavefunction();
+			VectorType w(v.size());
+			v.toSparse(w);
+			
+			return bracket_(A,w);
 		}
 		
 		//template<typename SomeVectorType>

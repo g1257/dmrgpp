@@ -367,7 +367,7 @@ namespace Dmrg {
 			/* io_.rewind();
 			io_.read(electrons_,"#ELECTRONS_sites=",s);*/
 			//skeleton_.createSigns(signs,fermionicSign);
-			MatrixType Onew(helper_.transform().n_col(),helper_.transform().n_col());
+			MatrixType Onew(helper_.columns(),helper_.columns());
 			Odest = Onew;
 			skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption);
 		}

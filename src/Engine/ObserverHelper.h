@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "FermionSign.h"
 #include "TimeSerializer.h"
+#include "DmrgSerializer.h"
 #include "VectorWithOffsets.h" // to include norm
 #include "VectorWithOffset.h" // to include norm
 
@@ -97,20 +98,14 @@ namespace Dmrg {
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisType::RealType RealType;
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+		typedef DmrgSerializer<RealType,VectorWithOffsetType,MatrixType,BasisType,FermionSign> DmrgSerializerType;
 		
 		enum {NOTIMEVECTOR=0,USETIMEVECTOR=1};
 		
 		ObserverHelper(const std::string& filename,size_t nf,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
-				bogusBasis_("Bogus"),
-				fermionSigns_(nf,bogusBasis_.electronsVector()),
-				basisS_(nf,bogusBasis_),
-				basisE_(nf,bogusBasis_),
-				basisSE_(nf,bogusBasis_),
-				transform_(nf),
-				directions_(nf),
-				wavefunction_(nf),
+				dSerializerV_(nf,DmrgSerializerType(io_,true)),
 				currentPos_(0),
 				verbose_(verbose),
 				nf_(nf)
@@ -122,15 +117,8 @@ namespace Dmrg {
 			:	filename_(filename),
 				io_(filename),
 				io2_(timeFilename),
-				bogusBasis_("Bogus"),
-				fermionSigns_(nf,bogusBasis_.electronsVector()),
-				basisS_(nf,bogusBasis_),
-				basisE_(nf,bogusBasis_),
-				basisSE_(nf,bogusBasis_),
-				transform_(nf),
-				directions_(nf),
-				wavefunction_(nf),
-				timeSerializerVector_(nf),
+				dSerializerV_(nf),
+				timeSerializerV_(nf),
 				currentPos_(0),
 				verbose_(verbose),
 				nf_(nf)
@@ -145,75 +133,69 @@ namespace Dmrg {
 			currentPos_=pos;
 		}
 
-		const MatrixType& transform() const
+		void transform(MatrixType& ret,const MatrixType& O2) const
 		{
-			return transform_[currentPos_];
+			return dSerializerV_[currentPos_].transform(ret,O2);
 		}
-
+		
+		size_t columns() const
+		{
+			return dSerializerV_[currentPos_].columns();
+		}
+		
+		size_t rows() const
+		{
+			return dSerializerV_[currentPos_].rows();
+		}
+		
 		const FermionSign& fermionicSign() const
 		{
-			return fermionSigns_[currentPos_];
+			return dSerializerV_[currentPos_].fermionicSign();
 		}
 		
 		
 		const BasisType& basisS() const 
 		{
-			return basisS_[currentPos_];
+			return dSerializerV_[currentPos_].basisS();
 		}
 
 		const BasisType& basisE() const 
 		{
-			return basisE_[currentPos_];
+			return dSerializerV_[currentPos_].basisE();
 		}
 		
 		const BasisType& basisSE() const 
 		{
-			return basisSE_[currentPos_];
-		}
-
-		void transform(MatrixType& ret,MatrixType& O)
-		{
-			//typedef typename MatrixType::value_type FieldType;
-			int nBig = O.n_row();
-			int nSmall = transform_[currentPos_].n_col();
-			MatrixType fmTmp(nSmall,nBig);
-			FieldType alpha=1.0,beta=0.0;
-		
-			psimag::BLAS::GEMM('N','N',nBig,nSmall,nBig,alpha,
-					   &(O(0,0)),nBig,&(transform_[currentPos_](0,0)),nBig,beta,&(fmTmp(0,0)),nBig);
-			
-			psimag::BLAS::GEMM('C','N',nSmall,nSmall,nBig,alpha,
-					   &(transform_[currentPos_](0,0)),nBig,&(fmTmp(0,0)),nBig,beta,&(ret(0,0)),nSmall);
-			
+			return dSerializerV_[currentPos_].basisSE();
 		}
 		
 		size_t direction() const
 		{
-			return directions_[currentPos_];
+			return dSerializerV_[currentPos_].direction();
 		}
 
-		const VectorType& wavefunction() const
+		const VectorWithOffsetType& wavefunction() const
 		{
-			return wavefunction_[currentPos_];
+			return dSerializerV_[currentPos_].wavefunction();
 		}
 		
 		size_t time() const
 		{
-			return timeSerializerVector_[currentPos_].time();	
+			return timeSerializerV_[currentPos_].time();	
 		}
 		
 		//! This applies more generally (ie. not only to time)
 		size_t site() const
 		{
-			return timeSerializerVector_[currentPos_].site();
+			return timeSerializerV_[currentPos_].site();
 		}
 		
 		const VectorWithOffsetType& timeVector() const
 		{
-			if (currentPos_>=timeSerializerVector_.size() || 
-						 timeSerializerVector_[currentPos_].size()==0)
+			if (currentPos_>=timeSerializerV_.size() || 
+						 timeSerializerV_[currentPos_].size()==0)
 				throw std::runtime_error("timeVector has a problem\n");
-			return timeSerializerVector_[currentPos_].vector(); //-nf_+1+stepTimes_];	
+			return timeSerializerV_[currentPos_].vector(); //-nf_+1+stepTimes_];	
 		}
 		
 		template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
@@ -228,24 +210,8 @@ namespace Dmrg {
 			getElectronsOneSite(el0);
 			for (size_t i=0;i<nf-1;i++) {
 				if (verbose_) std::cerr<<"ObserverHelper "<<i<<" out of "<<(nf-1)<<"\n";
-				size_t j = 0; // = i;
-				
-				/*getPermutation(Spermutation_[i],SpermutationInverse_[i],
-						"#pSprime.permutationInverse_sites",j);
-				getPermutation(SEpermutation_[i],SEpermutationInverse_[i],
-						"#pSE.permutationInverse_sites=",j);
-				*/
-				fermionSigns_[i].load(io_);
-				basisS_[i].load(io_);
-				basisE_[i].load(io_);
-				basisSE_[i].load(io_);
-				getWaveFunction(wavefunction_[i],j);
-				//getElectrons(electrons_[i],j);
-				getTransform(transform_[i],j);
-				int x = 0;
-				getDirection(x,j);
-				if (x<0) throw std::runtime_error("OBserverHelper:: direction must be non-negative\n");
-				directions_[i] = x;
+				DmrgSerializerType dSerializer(io_);
+				dSerializerV_[i] = dSerializer;
 			}
 			
 			FieldType dummy = 0;
@@ -256,10 +222,10 @@ namespace Dmrg {
 		
 		void integrityChecks()
 		{
-			if (basisSE_.size()!=timeSerializerVector_.size()) throw std::runtime_error("Error 1\n");
-			for (size_t x=0;x<basisSE_.size();x++) {
-				if (basisSE_[x].size()==0) continue;
-				if (basisSE_[x].size()!=timeSerializerVector_[x].size()) throw std::runtime_error("Error 2\n");
+			if (dSerializerV_.size()!=timeSerializerV_.size()) throw std::runtime_error("Error 1\n");
+			for (size_t x=0;x<dSerializerV_.size();x++) {
+				if (dSerializerV_[x].basisSE().size()==0) continue;
+				if (dSerializerV_[x].basisSE().size()!=timeSerializerV_[x].size()) throw std::runtime_error("Error 2\n");
 			}
 			
 		}
@@ -271,9 +237,9 @@ namespace Dmrg {
 		
 		void initTimeVectors(std::complex<RealType> dummy)
 		{
-			for (size_t i=0;i<timeSerializerVector_.size();i++) { // up to i<nf-1 FIXME
+			for (size_t i=0;i<timeSerializerV_.size();i++) { // up to i<nf-1 FIXME
 				TimeSerializerType ts(io2_);
-				timeSerializerVector_[i] = ts;
+				timeSerializerV_[i] = ts;
 				//std::cerr<<"time vector "<<i<<" has size "<<psiTimeVector_[i].size()<<"\n";
 				//RealType tmp = std::norm(psiTimeVector_[i]);
 				//std::cerr<<"Mod="<<tmp<<"\n";
@@ -293,8 +259,7 @@ namespace Dmrg {
 		// printing of the first basis to keep everythign in sync
 		void getElectronsOneSite(std::vector<size_t>& el0)
 		{
-			BasisType b("one site");
-			b.load(io_);
+			BasisType b(io_,"one site");
 			if (b.block().size()!=1) throw std::runtime_error("getElectronsOneSite\n");
 			el0 = b.electronsVector();
 		}
@@ -329,13 +294,8 @@ namespace Dmrg {
 		std::string filename_; 
 		typename IoType::In io_;
 		typename IoType::In io2_;
-		BasisType bogusBasis_;
-		std::vector<FermionSign> fermionSigns_;
-		std::vector<BasisType> basisS_,basisE_,basisSE_;
-		std::vector<MatrixType> transform_;
-		std::vector<size_t> directions_;
-		std::vector<VectorType> wavefunction_;
-		std::vector<TimeSerializerType> timeSerializerVector_;
+		std::vector<DmrgSerializerType> dSerializerV_;
+		std::vector<TimeSerializerType> timeSerializerV_;
 		size_t currentPos_;
 		bool verbose_;
 		size_t nf_;
