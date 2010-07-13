@@ -1109,6 +1109,11 @@ EOF
 
 int main(int argc,char *argv[])
 {
+	if (argc>2) {
+		std::string s = "The observer driver takes only one argument now: \\n";
+		s = s + "the name of the input file. The data file is now read from the input file.\\n";
+		throw std::runtime_error(s);
+	}
 	using namespace Dmrg;
 	//typedef CrsMatrix<MatrixElementType> MySparseMatrixReal;
 	typedef   Dmrg::$concurrencyName<RealType> MyConcurrency; 
@@ -1185,11 +1190,11 @@ print OBSOUT<<EOF;
 	if (hasTimeEvolution)
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,
-			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,reader,argv[2]);
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,reader,dmrgSolverParams.filename);
 	else
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,
-			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,reader,argv[2]);
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,reader,dmrgSolverParams.filename);
 } // main
 
 EOF

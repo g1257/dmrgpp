@@ -110,7 +110,7 @@ namespace Dmrg {
 			
 			
 			DmrgSerializer(typename IoSimple::In& io,bool bogus = false) 
-			: fs_(io,bogus),pS_(io,"pS",bogus),pE_(io,"pE",bogus),pSE_(io,"pSE",bogus)
+			: fs_(io,bogus),pS_(io,"",bogus),pE_(io,"",bogus),pSE_(io,"",bogus)
 			{
 				if (bogus) return;
 				std::string s = "#WAVEFUNCTION_sites=";

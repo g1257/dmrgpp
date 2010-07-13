@@ -16,9 +16,9 @@ options hasQuantumNumbers,wft,nosu2,TimeStepTargetting
 version 6ce41a4b7dfa08978e53fa756f7f139e2fb18251
 outputfile		data9.txt
 InfiniteLoopKeptStates	200 
-FiniteLoops 12  4 200 0 -4 200 0 4 200 0 -4 200 0 
-		4 200 0 -4 200 0 4 200 0 -4 200 0
-		4 200 0 -4 200 0 4 200 0 -4 200 0
+FiniteLoops 12  4 200 1 -4 200 1 4 200 1 -4 200 1 
+		4 200 1 -4 200 1 4 200 1 -4 200 1
+		4 200 1 -4 200 1 4 200 1 -4 200 1
 
 QNS 2 0.5 0.5
 FILENAME tst9.txt

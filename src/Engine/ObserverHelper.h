@@ -109,6 +109,7 @@ namespace Dmrg {
 				currentPos_(0),
 				verbose_(verbose)
 		{
+			std::cerr<<"Observer will use file: "<<filename<<" for core DMRG data\n";
 			init(nf);
 		}
 		
@@ -121,6 +122,8 @@ namespace Dmrg {
 				currentPos_(0),
 				verbose_(verbose)
 		{
+			std::cerr<<"Observer will use file: "<<filename<<" for core DMRG data\n";
+			std::cerr<<"Observer will use file: "<<timeFilename<<" for time DMRG data\n";
 			init(nf);
 			integrityChecks();
 		}
@@ -221,6 +224,10 @@ namespace Dmrg {
 					dSerializerV_.push_back(dSerializer);
 				} catch (std::exception& e)
 				{
+					if (dSerializerV_.size()==0) {
+						std::cerr<<e.what()<<" rethrowing...\n";
+						throw e;
+					}
 					break;
 				}
 			}
