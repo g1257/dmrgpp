@@ -148,6 +148,13 @@ namespace Dmrg {
 		std::vector<ConnectorType> connectors_;
 			
 	}; //Connectors
+	
+// 	template<typename FieldType>
+// 	std::ostream& operator<<(std::ostream& os,Connectors<FieldType>& connectors)
+// 	{
+// 		os<<connectors.connectors_;
+// 		return os;
+// 	}
 } // namespace Dmrg
 /*@}*/
 #endif //TJ_ONEORBITAL_HEADER_H

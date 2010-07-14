@@ -182,7 +182,7 @@ namespace Dmrg {
 		
 		RealType time() const
 		{
-			return timeSerializerV_[currentPos_].time();	
+			return timeSerializerV_[currentPos_].time();
 		}
 		
 		//! This applies more generally (ie. not only to time)
@@ -228,6 +228,7 @@ namespace Dmrg {
 						std::cerr<<e.what()<<" rethrowing...\n";
 						throw e;
 					}
+					std::cerr<<"Ignore prev. error, if any. It simply means there's no more data\n";
 					break;
 				}
 			}

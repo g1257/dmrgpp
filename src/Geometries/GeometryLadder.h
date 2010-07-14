@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
+		
 	//! Class to handle the connection between System and Environ
 	//! in the dmrg algorithm: case of a ladder
 	//! Numbering is
@@ -103,10 +104,22 @@ namespace Dmrg {
 		static const int SystemSystem=0,SystemEnviron=1,EnvironSystem=2,EnvironEnviron=3;
 		typedef  typename GeometryBase<Field,ConnectorsType>::BlockType BlockType;
 		
+				
 		GeometryLadder(ConnectorsType& connectors,int sizeOfInitialBlock,int leg):
 			connectors_(connectors), leg_(leg),progress_("GeometryLadder",0)
 		{
 			split(sizeOfInitialBlock);
+// 			std::ostringstream msg;
+// 			msg<<"Connectors:\n";
+// 			size_t n = connectors_.n_row();
+// 			for (size_t i=0;i<n;i++) {
+// 				for (size_t j=0;j<n;j++) {
+// 					msg<<connectors_(i,j);
+// 				}
+// 				msg<<"\n";
+// 			}
+// 			msg<<"End of Connectors\n";
+// 			progress_.printline(msg,std::cerr);
 		}
 		
 		

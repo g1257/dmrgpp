@@ -271,6 +271,7 @@ namespace Dmrg {
 				
 				if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
 				else stage_[i]=WFT_NOADVANCE;
+				if (stage_[i] == OPERATOR) checkOrder(i);
 				
 				if (timesWithoutAdvancement >= tstStruct_.advanceEach) {
 					stage_[i] = WFT_ADVANCE;
@@ -322,6 +323,21 @@ namespace Dmrg {
 					test(targetVectors_[j],direction,s,site);
 				}
 				std::cerr<<"-------------&*&*&* Cocoon output ends\n";
+			}
+			
+			//! If we see site[i] then make sure we've seen all sites site[j] for j less than i
+			void checkOrder(size_t i) const
+			{
+				if (i==0) return;
+				for (size_t j=0;j<i;j++) {
+					if (stage_[j] == DISABLED) {
+						std::string s ="TST:: Seeing tst site "+utils::ttos(tstStruct_.sites[i]);
+						s =s + " before having seen";
+						s = s + " site "+utils::ttos(j);
+						s = s +". Please order your tst sites in order of appearance.\n";
+						throw std::runtime_error(s);
+					}
+				}
 			}
 			
 			bool allStages(size_t x) const
