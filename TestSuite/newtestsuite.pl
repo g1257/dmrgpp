@@ -68,7 +68,6 @@ my $inputsDir = $testDir."inputs/";
 
 my $hashTable = $testDir."hashTable.txt";
 my %hash;
-my $specKey;
 
 &startProgram();
 
@@ -76,28 +75,32 @@ sub startProgram{
 	if($update) {
 		updateHashTable();
 	} elsif(validateDirectory($srcDir) && validateDirectory($testDir) && validateFile($hashTable)) {
-		loadHash() if(!$noModel);
+		
+		if(!($all) && !defined($testNum)) {	
+			selectTest();	
+		}
 
-		if(!($all) && !defined($testNum)) {		#If no test is explicitly defined
-			selectTest();	#Make the user select a test from the available ones
-		}elsif($all) {
-			runAllTests(0);		#Run all tests
+		loadHashTable() if(!$noModel);
+
+		if($testNum < 0) {
+			runAllTests(-$testNum);
+		} elsif($all) {
+			runAllTests(0);
+		} else {
+			testSuite();
 		}
 		
-		if($testNum < 0) {
-			runAllTests(-$testNum) if(validateTest());	#Run all tests starting at $testNumber
-		} else {
-			testSuite() if(validateTest());	#Run specified test
-		}
+		saveHashTable() if(!$noModel);
+			
 	} else {
 		die "Missing source and/or test suite directories.\n";
 	}
 }
 
-#~ sub updateHashTable
-#~ {
-
-#~ }
+sub updateHashTable
+{
+	print "The update action for the hash table is incomplete.\n";
+}
 
 sub validateDirectory	
 {
@@ -106,8 +109,11 @@ sub validateDirectory
 	if(-d $dir) {		
 		return 1;
 	} elsif($dir eq $resultsDir){
-		system("mkdir $dir");
-		print "Directory created: $dir\n";
+		my $rCode = mkdir $dir;
+		if($rCode) {
+			print "Directory created: $dir\n";
+			return 1;
+		}
 	}
 	
 	return 0;
@@ -115,8 +121,10 @@ sub validateDirectory
 
 sub validateTest
 {
+	my ($a) = @_;
+	
 	my $searchNum = abs($testNum);
-	my @found = grep(/$searchNum/, split(/ /,getAvailableTests()));	
+	my @found = grep(/$searchNum/, split(/ /,$a));	
 	
 	if(!@found) {	
 		print "\nError: An incorrect test was selected! Try again.\n\n";
@@ -128,13 +136,15 @@ sub validateTest
 
 sub selectTest
 {
+	my $available = getAvailableTests();
+	
 	while() {
 		print "Type the number of the test you want to run.\n";
-		print "Available tests: ".getAvailableTests()."\n";
+		print "Available tests: $available\n";
 		print "Default is 0 (press ENTER): ";
-		chomp($testNum = <STDIN>);	
+		chomp($testNum = <STDIN>);
 		$testNum = 0 if($testNum eq "");
-		last if(validateTest());
+		last if(validateTest($available));
 	}
 }
 
@@ -145,7 +155,8 @@ sub getAvailableTests
 	
 	open(FILE,$descriptionFile) || die "Error opening $descriptionFile: $!\n";	
 	while(<FILE>) {
-		last if(/^\#TAGEND/);		
+		last if(/^\#TAGEND/);
+		next if(/^\#TAGSTART/);
 		if(/(^\d+)\)/) {
 			$available .= "$1 ";	
 		}
@@ -171,15 +182,18 @@ sub validateFile
 	if(-e $file) {		
 		return 1;
 	} elsif($file eq $hashTable) {
-		system("touch $hashTable >& /dev/null");
-		print "File created: $hashTable\n";
-		return 0;
-	} else {
-		return 0;
+		my $rCode = open(FILE, ">$hashTable") || die "Error creating $hashTable: $!\n";
+		close(FILE);
+		if($rCode) {
+			print "File created: $hashTable\n";
+			return 1;
+		}
 	}
+	
+	return 0;
 } 
 
-sub loadHash
+sub loadHashTable
 {
 	open FILE, "<$hashTable" || die "Could not open file: $hashTable\n";
 	while(<FILE>) {
@@ -266,7 +280,7 @@ sub addKey
 	#~ }
 #~ }
 
-sub saveHash
+sub saveHashTable
 {
 	open FILE, ">$hashTable" || die "Could not open file: $hashTable\n";
 	foreach my $key (sort keys %hash) {
@@ -278,8 +292,9 @@ sub saveHash
 sub createManualExecutable
 {
 	my ($config) = @_;
-	my $arg1 = "./$config";
+	my $arg1 = "./$config >& /dev/null";
 	my $arg2 = "make -f Makefile >& /dev/null";
+	grep {s/>.*//} $arg1 if($verbose);
 	grep {s/>.*//} $arg2 if($verbose);
 	
 	print "Creating executable for current test...\n";
@@ -331,45 +346,48 @@ sub runTest
 	print "The run has been completed.\n";	
 }
 
-sub testSuite
-{
-	my $temp = $testNum;
-	$temp -= 100 if($testNum >= 100);
-	my $specFile = $inputsDir."model$temp.spec";
-	my $configFile = "configure.pl";
-	my $inputFile = $inputsDir."input$testNum.inp";
-	my $postFile = $inputsDir."postProcessing$testNum.txt";
-	my $postProcLib = $inputsDir."postProcessingLibrary.txt";
+#~ sub testSuite
+#~ {
+	#~ my $temp = $testNum;
+	#~ $temp -= 100 if($testNum >= 100);
+	#~ my $specFile = $inputsDir."model$temp.spec";
+	#~ my $configFile = "configure.pl";
+	#~ my $inputFile = $inputsDir."input$testNum.inp";
+	#~ my $procFile = $inputsDir."processing$testNum.txt";
+	#~ my $procLib = $inputsDir."processingLibrary.txt";
 	
-	$specKey = substr(`md5sum $specFile`,0,10);
+	#~ $specKey = substr(`md5sum $specFile`,0,10);
 	
-	if(defined($executable)){
-		print "Using executable supplied.\n";
-		$executable = $srcDir.$executable;
-		die "Missing executable file: $executable" if(!validateFile($executable));
-	}elsif($noModel) {
-		$executable = createManualExecutable($configFile);
-	}elsif(!findKey($specKey) || $force) {
-		$executable = createAutoExecutable($specFile,$specKey,$configFile);
-		addKey($specKey);
-	} else {
-		print "Retrieving existing executable...\n";
-		$executable = $srcDir."dmrg-$specKey";
-		validateFile($executable) || die "Error retrieving $executable: $!\n";
+	#~ if(defined($executable)){
+		#~ print "Using executable supplied.\n";
+		#~ $executable = $srcDir.$executable;
+		#~ die "Missing executable file: $executable" if(!validateFile($executable));
+	#~ }elsif($noModel) {
+		#~ $executable = createManualExecutable($configFile);
+	#~ }elsif(!findKey($specKey) || $force) {
+		#~ $executable = createAutoExecutable($specFile,$specKey,$configFile);
+		#~ addKey($specKey);
+	#~ } else {
+		#~ print "Retrieving existing executable...\n";
+		#~ $executable = $srcDir."dmrg-$specKey";
+		#~ validateFile($executable) || die "Error retrieving $executable: $!\n";
 	
-		if(!findTn($specKey) ){
-			addTn($specKey);
-		}
-	}
+		#~ if(!findTn($specKey) ){
+			#~ addTn($specKey);
+		#~ }
+	#~ }
 	
-	saveHash();
-	#runTest($inputFile);
-	if(validateFile($postFile)) {
-		my @analyses = extractAnalyses($postFile) ;
-		(@analyses) ? (postProcessing(@analyses, $postProcLib)) : (print "Test $testNum does not includes any post processing analysis.\n");
-	} else {
-		print "The file for post processing does not exists for Test $testNum.\n";
-	}
+	#~ #runTest($inputFile);
+	#~ if(validateFile($procLib)) {
+		#~ if(validateFile($procFile)) {
+			#~ my @analyses = extractAnalyses($procFile) ;
+			#~ (@analyses) ? (processing(@analyses, $procLib)) : (print "Test $testNum does not includes any processing analyses.\n");
+		#~ } else {
+			#~ print "The file for processing does not exists for Test $testNum.\n";
+		#~ }
+	#~ } else {
+		#~ print "The library for processing does not exists.\n";
+	#~ }
 	
 	#~ if($observeFlag) {
 		#~ if(!observableExists($specKey)) {
@@ -394,102 +412,344 @@ sub testSuite
 	
 	
 	
-	#moveFiles($dataFile,$tstFile,$envStack,$sysStack);
-	#removeFiles() if($rmFlag);
+	#~ #moveFiles($dataFile,$tstFile,$envStack,$sysStack);
+	#~ #removeFiles() if($rmFlag);
+	#~ print "******END OF TEST ".$testNum."******\n";
+#~ }
+
+#~ sub testConfiguration
+#~ {
+	#~ my ($spec, $config) = @_;
+	#~ my $arg;
+	
+	#~ if($noModel) {
+		#~ $arg = "$config";
+	#~ } else {
+		#~ $arg = "$config < $spec >& /dev/null";
+		#~ grep {s/(>.*)//} $arg if($verbose);
+	#~ }
+	
+	#~ chdir($srcDir);
+	#~ system($arg);
+	#~ chdir($testDir);
+
+	#~ print "Test configuration is complete.\n";	
+#~ }
+
+sub getSpecFile
+{
+	my $temp = $testNum;
+	$temp -= 100 if($testNum >= 100);
+	my $specFile = $inputsDir."model$temp.spec";
+	
+	return $specFile;
+}
+
+sub testSuite
+{
+	#my $configFile = $srcDir."configure.pl";
+	my $procFile = $inputsDir."processing$testNum.txt";
+	my $procLib = $inputsDir."processingLibrary.txt";
+	#my $specFile = getSpecFile();
+	
+	#testConfiguration($specFile, $configFile);
+	
+	if(validateFile($procLib)) {
+		if(validateFile($procFile)) {
+			my @analyses = extractAnalyses($procFile) ;
+			(@analyses) ? (processing(@analyses, $procLib)) : (print "Test $testNum does not includes any processing analyses.\n");
+		} else {
+			print "The file for processing does not exists for Test $testNum.\n";
+		}
+	} else {
+		print "The library for processing does not exists.\n";
+	}
+
 	print "******END OF TEST ".$testNum."******\n";
 }
 
 END {
-	removeFiles() if($rmFlag);
+	removeFiles() if($rmFlag && !$update);
 }
 
-sub postProcessing
+sub processing
 {
 	my $lib = pop(@_);
 	my (@analyses) = @_;
-	my %opsHash;
+	my %procHash;
+	my @commands;
 	
-	foreach my $a(@analyses) {
-		my @blockOps;
+	foreach my $analysis(@analyses) {
+		my @operations;
 		open LIB, "<$lib" || die "Could not open file.\n";
 		while(<LIB>) {
-			if(/^\[$a\]/i) {
+			if(/^\[$analysis\]/i) {
 				while(<LIB>) {
 					chomp;
 					last if($_ eq "");
 					next if(/^#/);
-					push @blockOps, $_;
+					push @operations, $_;
 				}
 			}
 		}
 		close LIB;
 		
-		my @commands = keyValueParser(\@blockOps, $a);		
-		$opsHash{$a} = join(":", @commands);   #Grep cmd*:Diff cmd*
+		die "Error due to non-active analysis in library: [$analysis]\nVerify the processing file for Test $testNum\n" if(!@operations);
+		my @commands = keyValueParser(\@operations, $analysis);		
+		$procHash{$analysis} = join(":", @commands);
 	}
 	
-	my @metaLang = ("Grep", "Make", "Call", "Execute", "Diff");
-	my @recognizeCommands = ("Grep", "Make", "Diff");
-	my %opsCount;  #contains @analyses count
-	my %opsStack;
+	my %procCount;
+	my %tmpHash = %procHash;
+	my @dependencies;
+	my $depFlag;
+	my @depKeys;
+	my $keyword = "CallOnce";
+	my $prevCount = 0;
 
-	foreach my $a (@analyses) {
-		$opsCount{$a} = 0;
+	foreach my $analysis (keys %tmpHash) {
+		$procCount{$analysis} = 0;
 	}
 	
-	foreach my $a (keys %opsHash) {
-		my @comm = split(/:/, "$opsHash{$a}");
-		my @args;
-		my @tmpLang = @metaLang;
-		my $search;
-		
-		foreach my $key (@tmpLang) {
-			$search = shift @tmpLang;			
-			if(@args = grep {/$search/} @comm) {
-				if(grep {/$search/} @recognizeCommands) {
-					foreach my $arg (@args) {
-						$arg =~ s/(\w+)/\l$1/;
-						eval("hook$search(\$arg);");
+	while($prevCount = keys %tmpHash) {
+		foreach my $analysis( keys %tmpHash) {
+			$depFlag = 0;
+			@commands = split(/:/, $tmpHash{$analysis});
+			if(@dependencies = grep{/$keyword/} @commands) {
+				@depKeys = grep{s/$keyword|\s+//g} @dependencies;
+				foreach my $a(@depKeys) {
+					if($procCount{$a} eq 0) {
+						$depFlag = 1;
 					}
+				}
+
+				if($depFlag) {
+					next;
 				} else {
-					#command not recognized
+					@commands = grep {!/$keyword/} @commands;
 				}
 			}
+			
+			die "Error due to no runable command in library analysis [$analysis].\n" if(!@commands);
+			commandsInterpreter(@commands, $analysis);
+			$procCount{$analysis}++;
+			delete $tmpHash{$analysis};
 		}
-		
-		$opsCount{$a}++;
+
+		die "Error with processing dependencies.\n" if($prevCount == keys %tmpHash);
 	}
 	
-	print "Post processing has been completed.\n";
+	print "Processing has been completed.\n";
+}
+
+sub commandsInterpreter
+{
+	my $analysis = pop(@_);
+	my (@commands) = @_;
+	my @metaLang = ("Grep", "Make", "Execute", "Gprof", "Diff");
+	my @tmpLang = @metaLang;
+	
+	foreach my $arg (@commands) {
+		my @tmpFunc = $arg =~ /^(\w+)/;
+		my $func = $tmpFunc[0];
+		$arg =~ s/^\s*(\w+)\s*//;
+		
+		if(grep {/$func/} @metaLang) {
+			foreach my $action (@tmpLang) {
+				if($func eq $action) {
+					eval("hook$func(\$analysis,\$arg);");
+				}
+			}
+		} else {
+			die "Error with unknown command in library analysis [$analysis]: $func\n";
+		}
+	}
+}
+
+sub hookExecute
+{
+	my ($analysis, $arg) = @_;
+	
+	$arg =~ s/(\()/$1"/g;
+	$arg =~ s/(\s*)(,)(\s*)/"$2"/g;
+	$arg =~ s/(\))/"$1/g;
+	
+	eval("$arg;");
+	warn $@ if $@;
+	
+	print "Execute was successful.\n";
+}
+
+sub runDmrg
+{
+	my ($inputFile) = @_;
+	my $temp = $testNum;
+	$temp -= 100 if($testNum >= 100);
+	my $specFile = $inputsDir."model$temp.spec";
+	my $configFile = "configure.pl";
+	
+	my $specKey = substr(`md5sum $specFile`,0,10);
+	
+	 if(defined($executable)){
+		print "Using executable supplied.\n";
+		$executable = $srcDir.$executable;
+		die "Missing executable file: $executable" if(!validateFile($executable));
+	}elsif($noModel) {
+		$executable = createManualExecutable($configFile);
+	}elsif(!findKey($specKey) || $force) {
+		$executable = createAutoExecutable($specFile,$specKey,$configFile);
+		addKey($specKey);
+	} else {
+		print "Retrieving existing executable...\n";
+		$executable = $srcDir."dmrg-$specKey";
+		validateFile($executable) || die "Error retrieving $executable: $!\n";
+	
+		if(!findTn($specKey) ){
+			addTn($specKey);
+		}
+	}
+	
+	runTest($inputFile);
+
+}
+
+sub runObserve
+{
+	my ($input, $raw) = @_;
+	
+	system("../src/observe $input > $raw");
+	print "run observe\n";
+	
+}
+
+sub hookGprof
+{
+	my ($analysis, $arg) = @_;
+	
+	my $rCode = system("gprof $arg");
+	die "Error gprof.\n" if($rCode);
+	
+	print "Gprof was successful.\n";
+	
 }
 
 sub hookDiff
 {
-	my $rCode = system(@_);
+	my ($analysis, $arg) = @_;
+	
+	my $rCode = system("diff $arg");
 	die "Error diff.\n" if($rCode);
 	
-	print "Diff successful.\n";
+	print "Diff was successful.\n";
 	
 }
 
 sub hookMake
 {
+	my ($analysis, $arg) = @_;
+	
 	chdir($srcDir);
-	my $rCode = system(@_);
+	my $rCode = system("make $arg");
 	die "Error make.\n" if($rCode);
-	rename "observe", "observe-$specKey";
 	chdir($testDir);
 	
-	print "Make successful.\n";
-	
+	print "Make was successful.\n";
 }
 
 sub hookGrep
 {
-	my $rCode = system(@_);
+	my ($analysis, $arg) = @_;
+	
+	my $rCode = system("grep $arg");
 	die "Error grep.\n" if($rCode);
 	
-	print "Grep successful.\n";
+	print "Grep was successful.\n";
+}
+
+sub extractOperatorC
+{
+	my ($raw,$cOut) = @_;
+	my $line;
+	my $opC;
+	
+	open(INFILE,"<$raw") || die "Error opening file: $!\n";
+		while($line = <INFILE>) {
+			if($line =~ /^OperatorC/) {
+				$opC = $line;
+				$line = <INFILE>;
+				$opC = $opC.$line;
+				my @temp1 = split(/ /,$line);
+
+				for(my $i = 0; $i < $temp1[0]; $i++) {
+					$line = <INFILE>;
+					$opC = $opC.$line;
+				}
+			}
+		}
+	close(INFILE);
+	
+	open (OUTFILE, ">$cOut");
+	print OUTFILE $opC;
+	close (OUTFILE);
+	print "OperatorC extraction was succesful!\n";
+}
+
+sub extractOperatorN
+{
+	my ($raw,$nOut) = @_;
+	my $line;
+	my $opN;
+	open(INFILE,"<$raw") || die "Error opening file: $!\n";	#Open this file: testsuite.pl
+		while($line = <INFILE>) {
+			
+			if($line =~ /^OperatorN/) {
+				$opN = $line;
+				$line = <INFILE>;
+				$opN = $opN.$line;
+				my @temp1 = split(/ /,$line);
+
+				for(my $i = 0; $i < $temp1[0]; $i++) {
+					$line = <INFILE>;
+					$opN = $opN.$line;
+				}
+				
+			}
+		}
+	close(INFILE);
+	
+	open (OUTFILE, ">$nOut");
+	print OUTFILE $opN;
+	close (OUTFILE);
+	print "OperatorN extraction was succesful!\n";
+}
+
+
+sub extractOperatorS
+{
+	my ($raw,$sOut) = @_;
+	my $line;
+	my $opS;
+	open(INFILE,"<$raw") || die "Error: Cannot open file: $!\n";
+		while($line = <INFILE>) {
+			
+			if($line =~ /^OperatorS/) {
+				$opS = $line;
+				$line = <INFILE>;
+				$opS = $opS.$line;
+				my @temp1 = split(/ /,$line);
+
+				for(my $i = 0; $i < $temp1[0]; $i++) {
+					$line = <INFILE>;
+					$opS = $opS.$line;
+				}
+				
+			}
+		}
+	close(INFILE);
+	
+	open (OUTFILE, ">$sOut");
+	print OUTFILE $opS;
+	print "OperatorSz extraction was succesful!\n";
 }
 
 sub keyValueParser
@@ -513,15 +773,15 @@ sub keyValueParser
 			my @t = split(/ = /, $keyval);
 			$tmpHash{$t[0]} = $t[1];
 		}
-		
-		foreach my $comm (@{$opsRef}) {
+	}	
+
+	foreach my $comm (@{$opsRef}) {
+		if(@tmpKV) {
 			grep {s/(\$\w+)/$tmpHash{$1}/g} $comm;
 			grep {s/(\$\w+)/$varHash{$1}/g} $comm;
 			grep {s/\/\s+/\//g} $comm;
-			push @commands, $comm;
 		}
-	} else {
-		die "Missing values for \"$analysis\" substitutions.\nVerify the post processing library file.\n";
+		push @commands, $comm;
 	}
 		
 	return @commands;
@@ -529,17 +789,19 @@ sub keyValueParser
 
 sub extractAnalyses
 {
-	my ($postProc) = @_;
+	my ($procFile) = @_;
 	my @analyses;
 
-	open FILE, "<$postProc" || die "Could not open file.\n";
+	open FILE, "<$procFile" || die "Could not open file.\n";
 	while(<FILE>) {
 		chomp;
 		last if($_ eq "");
+		next if(/^#/);
 		push(@analyses, $_);
 	}
 	close FILE;
 	
+	die "No analyses were found in $procFile for Test $testNum\n" if(!@analyses);
 	return @analyses;
 }
 
