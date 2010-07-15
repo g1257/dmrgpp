@@ -1,0 +1,44 @@
+#TAGSTART DO NOT REMOVE THIS TAG
+List of Standard Tests for DMRG++ version 2.0.0
+(See Notation in the doc directory)
+Tests *with* SU(2) symmetry:
+0) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
+	INF(100)+7(100)-7(100)-7(100)+7(100)
+1) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=2 with 8+8 sites
+	INF(60)+7(100)-7(100)-7(100)+7(100)
+2) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=2 with 8+8 sites
+        INF(100)+7(200)-7(200)-7(200)+7(200) [to calculate correlations]
+3) Hubbard Model One Orbital (HuStd-1orb) on a ladder (CubicStd2d) for U=0 with 8+8 sites
+	INF(100)+7(200)-7(200)-7(200)+7(200) [to calculate correlations]
+4) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
+        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargetting "creation op"
+5) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
+        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargetting "identity op"
+6) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 V=-0.5 with 30+30 sites.
+        INF(226)+29(226)-29(226)-29(226)+29(226) with angularMomentum j=5 (as in the literature)
+7) Like test 4 but with many times
+8) Like test 5 but with many times
+20) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1 with 16+16 sites
+	INF(60)+7(100)-7(100)-7(100)+7(100)
+21) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=2.5 with 8+8 sites
+	INF(100)+7(200)-7(200)-7(200)+7(200)
+22) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8+8 sites
+	INF(100)+7(200)-7(200)-7(200)+7(200)+7(200)+1(200) [to calculate correlations]
+23) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8+8 sites
+        checkpointA
+24) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8+8 sites
+        checkpointB
+25)  Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=2.5 with 8+8 sites
+        INF(100)+7(200)-7(200)-7(200)+7(200) To check the WFT
+40) Fe-based Superconductors model (HuFeAS-2orb) on a ladder (LadderFeAs) with U=0 J=0 with 4+4 sites
+	 INF(60)+7(100)-7(100)-7(100)+7(100)
+41) Fe-based Superconductors model (HuFeAS-2orb) on a ladder (LadderFeAs) with U=1 J=1 with 4+4 sites
+	INF(60)+7(100)-7(100)-7(100)+7(100)
+60) t-J one-Orbital (tjOneOrbital) on a chain with t=1 J=1 with 16+16 sites
+	 INF(60)+7(100)-7(100)-7(100)+7(100)
+
+Note 1: Tests *without* SU(2) symmetry: Add 100 to the above test.
+	For example test 102) is test 2) with SU(2) symmetry *disabled*.
+
+Note 2: This test suite does not support pthreaded tests yet.
+#TAGEND DO NOT REMOVE THIS TAG

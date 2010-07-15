@@ -73,7 +73,7 @@ sub askQuestions
 	if ($platform=~/Darwin/i) {
 		$lapack = " -framework Accelerate ";
 	} else { # I'll assume it's linux
-		$lapack = " -llapack "; 
+		$lapack = " -llapack -lblas"; 
 	}
 	
 	print "Do you want to compile with MPI enabled?\n";

@@ -49,7 +49,7 @@ use strict;
 use Getopt::Long;
 use Cwd 'abs_path';
 use File::Basename;
-use File::Copy;
+#use File::Copy;
 
 my ($testNum,$all) = (undef,undef); 
 my ($rmFlag,$update,$verbose,$noModel,$force) = (0,0,0,0,0);
@@ -320,7 +320,6 @@ sub runTest
 {
 	my ($input) = @_;
 	my $arg = "$executable $input >& /dev/null";
-	
 	grep {s/&//} $arg if($verbose);
 	
 	print "Please wait while the test is run...\n";
@@ -572,7 +571,7 @@ sub runDmrg
 	}
 	
 	runTest($inputFile);
-	move($srcDir.$dataFile, $resultsDir.$dataFile);
+	system("mv $srcDir$dataFile $resultsDir$dataFile");
 }
 
 sub runObserve
@@ -805,6 +804,7 @@ sub runAllTests
 		next if ($testsList[$i]<$start);
 		next if(grep {$_ eq $testsList[$i]}@nonFunctionalTests);
 		testSuite($testsList[$i]);
+		undef $executable;
 		undef $testNum;
 	}
 	print "******ALL TESTS COMPLETED SUCCESSFULLY******\n";
