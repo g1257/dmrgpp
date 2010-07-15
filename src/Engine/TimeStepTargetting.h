@@ -84,101 +84,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TIMESTEPTARGETTING_H
 #define TIMESTEPTARGETTING_H
 #include <iostream>
-#include "SimpleReader.h"
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "TargetStructureParams.h"
+#include "TimeStepStructure.h"
+#include "ApplyOperatorLocal.h"
+#include "TimeSerializer.h"
 
 namespace Dmrg {
-	
-	template<typename OperatorType>
-	struct TimeStepStructure {
-		std::string filename;
-		typename OperatorType::RealType tau;
-		size_t timeSteps;
-		size_t advanceEach;
-		std::vector<size_t> sites;
-		std::vector<size_t> startingLoops;
-		std::vector<OperatorType> aOperators;
-		std::vector<size_t> electrons;
-	};
-	
-	/*template<typename OperatorType>
-	inline TimeStepStructure<OperatorType>&
-	operator<=(TimeStepStructure<OperatorType>& t,SimpleReader& reader)
-	{
-		reader.read(t.aOperator);
-		reader.read(t.electrons);
-		reader.read(t.site);
-		reader.read(t.startingLoop);
-		reader.read(t.filename);
-		return t;
-	}*/
-	
-	template<typename OperatorType,typename ModelType>
-	inline TargetStructureParams<TimeStepStructure<OperatorType>,ModelType>&
-	operator<=(TargetStructureParams<TimeStepStructure<OperatorType>,ModelType>& tsp,SimpleReader& reader)
-	{
-		typedef typename ModelType::RealType RealType;
-		std::vector<size_t> sites,loops;
-		std::string s;
-		reader.read(s); // filename
-		RealType tau=0;
-		reader.read(tau);
-		size_t timeSteps=0;
-		reader.read(timeSteps);
-		size_t advanceEach=0;
-		reader.read(advanceEach);
-		reader.read(sites);
-		reader.read(loops);
-		
-		tsp.init(s,tau,timeSteps,advanceEach,sites,loops);
-		
-		for (size_t i=0;i<sites.size();i++) {
-			//std::string s;
-			reader.read(s);
-			if (s == "cooked") {
-				reader.read(s);
-				std::vector<size_t> v;
-				reader.read(v);
-				tsp.setCookedData(i,s,v);
-			} else {
-				psimag::Matrix<RealType> m;
-				reader.read(m);
-				tsp.setRawData(i,m);
-			}
-			int fermiSign=0;
-			reader.read(fermiSign);
-			std::pair<size_t,size_t> jmValues;
-			reader.read(jmValues);
-			RealType angularFactor;
-			reader.read(angularFactor);
-			tsp.set(i,fermiSign,jmValues,angularFactor);
-		}
-		
-		return tsp;
-	}
-	
-	template<typename OperatorType>
-	inline std::ostream&
-	operator<<(std::ostream& os,const TimeStepStructure<OperatorType>& t)
-	{
-		os<<"#TimeStepStructure.operators"<<t.aOperators.size()<<"\n";
-		for (size_t i=0;i<t.aOperators.size();i++) {
-			os<<"#TimeStepStructure.operator "<<i<<"\n";
-			os<<t.aOperators[i];
-		}
-		os<<"#TimeStepStructure.electrons\n";
-		os<<t.electrons;
-		os<<"#TimeStepStructure.site="<<t.sites;
-		os<<"#TimeStepStructure.startingLoop="<<t.startingLoops<<"\n";
-		os<<"#TimeStepStructure.filename="<<t.filename<<"\n";
-		os<<"#TimeVectorsfilename.tau="<<t.tau<<"\n";
-		os<<"#TimeVectorsfilename.timeSteps="<<t.timeSteps<<"\n";
-		os<<"#TimeVectorsfilename.advanceEach="<<t.advanceEach<<"\n";
-		return os;
-	}
-	
 	template<
 			template<typename,typename> class LanczosSolverTemplate,
    			template<typename,typename> class InternalProductTemplate,
@@ -213,16 +125,18 @@ namespace Dmrg {
 			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
 			typedef ComplexVectorType TargetVectorType;
 			typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
+			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 			
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
-			enum {SHRINK_SYSTEM=WaveFunctionTransformationType::SHRINK_SYSTEM,
-			SHRINK_ENVIRON=WaveFunctionTransformationType::SHRINK_ENVIRON,
+			enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
+			EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransformationType::INFINITE};
-			
+
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
-			
+
 			//enum {INDEX_NOADVANCE=0,INDEX_ADVANCE=1};
-			
+
 			TimeStepTargetting(
 	  				const BasisWithOperatorsType& basisS,
        					const BasisWithOperatorsType& basisE,
@@ -234,7 +148,7 @@ namespace Dmrg {
 					model_(model),tstStruct_(tstStruct),waveFunctionTransformation_(wft),
 					progress_("TimeStepTargetting",0),currentTime_(0),
 							times_(tstStruct_.timeSteps),weight_(tstStruct_.timeSteps),targetVectors_(tstStruct_.timeSteps),
-						io_(tstStruct_.filename,parallelRank_)
+						io_(tstStruct_.filename,parallelRank_),applyOpLocal_(basisS,basisE,basisSE)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" TimeStepTargetting "
 							"needs an enabled wft\n");
@@ -257,19 +171,24 @@ namespace Dmrg {
 				if (fabs(sum-1.0)>1e-5) throw std::runtime_error("Weights don't amount to one\n");
 				printHeader();
 			}
-			
+
 			RealType weight(size_t i) const
 			{
 				if (allStages(DISABLED)) throw std::runtime_error("TST: What are you doing here?\n");
 				return weight_[i];
 				//return 1.0;
 			}
-			
+
 			RealType gsWeight() const
 			{
 				if (allStages(DISABLED)) return 1.0;
 				return gsWeight_;
 				//return 1.0;
+			}
+			
+			RealType normSquared(size_t i) const
+			{
+				return real(multiply(targetVectors_[i],targetVectors_[i])); // call to mult will conj()
 			}
 
 			template<typename SomeBasisType>
@@ -298,55 +217,85 @@ namespace Dmrg {
 				return targetVectors_[i];
 			}
 
-			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
+			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber,
+				   bool needsPrinting)
 			{
-				for (size_t i=0;i<tstStruct_.sites.size();i++)
-					evolve(i,Eg,direction,block,loopNumber);
+				size_t count =0;
+				VectorWithOffsetType phiOld = psi_;
+				VectorWithOffsetType phiNew;
+				size_t max = tstStruct_.sites.size();
+				
+				if (noStageIs(DISABLED)) max = 1;
+				
+				for (size_t i=0;i<max;i++) {
+					count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber,max-1);
+					phiOld = phiNew;
+				}
+				
+				if (count==0) {
+					// always print to keep observer driver sync
+					if (needsPrinting) {
+						zeroOutVectors();
+						printVectors(block);
+					}
+					return;
+				}
+				
+				calcTimeVectors(Eg,phiNew,direction);
+				
+				cocoon(direction,block); // in-situ
+				
+				if (needsPrinting) printVectors(block); // for post-processing
 			}
 
-			void evolve(size_t i,RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
+			size_t evolve(
+					size_t i,
+					VectorWithOffsetType& phiNew,
+					VectorWithOffsetType& phiOld,
+					RealType Eg,
+					size_t direction,
+					const BlockType& block,
+					size_t loopNumber,
+				     	size_t lastI)
 			{
+				
 				static size_t  timesWithoutAdvancement=0;
-				if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return;
+				if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return 0;
 				if (block.size()!=1) throw 
 					std::runtime_error("TimeStepTargetting::evolve(...):"
 							" blocks of size != 1 are unsupported (sorry)\n");
 				size_t site = block[0];
-				size_t max = tstStruct_.aOperators.size()-1;
-				if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return;
+				//size_t max = tstStruct_.aOperators.size()-1;
+				if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return 0;
 				
 				
 				if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
 				else stage_[i]=WFT_NOADVANCE;
+				if (stage_[i] == OPERATOR) checkOrder(i);
 				
 				if (timesWithoutAdvancement >= tstStruct_.advanceEach) {
 					stage_[i] = WFT_ADVANCE;
-					if (i==max) {
+					if (i==lastI) {
 						currentTime_ += tstStruct_.tau;
 						timesWithoutAdvancement=0;
 					}
 				} else {
-					if (i==max && stage_[i]==WFT_NOADVANCE) 
+					if (i==lastI && stage_[i]==WFT_NOADVANCE) 
 						timesWithoutAdvancement++;
 				}
+				std::ostringstream msg2;
+				msg2<<"Steps without advance: "<<timesWithoutAdvancement;
+				if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
 				
 				std::ostringstream msg;
 				msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
 				
-				VectorWithOffsetType phi; // phi = A|psi>
-				computePhi(i,phi,direction);
-				if (norm(phi)==0) throw std::runtime_error("Norm of phi is zero\n");
-				test(i,psi_,direction,"<PSI|A|PSI>",site);
-				//test(i,phi,direction,"<PHI|A|PHI>",site);
-
-				calcTimeVectors(Eg,phi,direction);
-				for (size_t j=0;j<targetVectors_.size();j++) {
-					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
-					test(i,targetVectors_[j],direction,s,site);
-				}
-				printVectors();
+				// phi = A|psi>
+				computePhi(i,phiNew,phiOld,direction);
+				
+				return 1;
 			}
 
 			const BasisType& basisSE() const { return basisSE_; }
@@ -362,10 +311,46 @@ namespace Dmrg {
 
 		private:
 			
+			// in situ computation:
+			void cocoon(size_t direction,const BlockType& block) const
+			{
+				size_t site = block[0];
+				std::cerr<<"-------------&*&*&* Cocoon output starts\n";
+				test(psi_,direction,"<PSI|A|PSI>",site);
+				
+				for (size_t j=0;j<targetVectors_.size();j++) {
+					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
+					test(targetVectors_[j],direction,s,site);
+				}
+				std::cerr<<"-------------&*&*&* Cocoon output ends\n";
+			}
+			
+			//! If we see site[i] then make sure we've seen all sites site[j] for j less than i
+			void checkOrder(size_t i) const
+			{
+				if (i==0) return;
+				for (size_t j=0;j<i;j++) {
+					if (stage_[j] == DISABLED) {
+						std::string s ="TST:: Seeing tst site "+utils::ttos(tstStruct_.sites[i]);
+						s =s + " before having seen";
+						s = s + " site "+utils::ttos(j);
+						s = s +". Please order your tst sites in order of appearance.\n";
+						throw std::runtime_error(s);
+					}
+				}
+			}
+			
 			bool allStages(size_t x) const
 			{
 				for (size_t i=0;i<stage_.size();i++)
 					if (stage_[i]!=x) return false;
+				return true;
+			}
+			
+			bool noStageIs(size_t x) const
+			{
+				for (size_t i=0;i<stage_.size();i++)
+					if (stage_[i]==x) return false;
 				return true;
 			}
 			
@@ -388,35 +373,40 @@ namespace Dmrg {
 				return "undefined";
 			}
 			
-			void computePhi(size_t i,VectorWithOffsetType& phi,size_t systemOrEnviron)
+			void computePhi(size_t i,VectorWithOffsetType& phiNew,
+					VectorWithOffsetType& phiOld,size_t systemOrEnviron)
 			{
 				size_t indexAdvance = times_.size()-1;
 				size_t indexNoAdvance = 0;
 				if (stage_[i]==OPERATOR) {
 					std::ostringstream msg;
-					msg<<"Applying local operator...";
+					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
-					applyLocalOp(phi,psi_,tstStruct_.aOperators[i],tstStruct_.electrons,systemOrEnviron);
+					FermionSign fs(basisS_,tstStruct_.electrons);
+					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
+					RealType norma = norm(phiNew);
+					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
+					std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
 					size_t advance = indexNoAdvance;
 					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
 					std::ostringstream msg;
-					msg<<"Applying wft...";
+					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 					
-					if (tstStruct_.aOperators.size()==1) guessPhiSectors(phi,i,systemOrEnviron);
-					else phi.populateSectors(basisSE_);
+					if (tstStruct_.aOperators.size()==1) guessPhiSectors(phiNew,i,systemOrEnviron);
+					else phiNew.populateSectors(basisSE_);
 					
 					// OK, now that we got the partition number right, let's wft:
-					waveFunctionTransformation_.setInitialVector(phi,targetVectors_[advance],
+					waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[advance],
 							basisS_,basisE_,basisSE_); // generalize for su(2)
-					phi.collapseSectors();
+					phiNew.collapseSectors();
 					
 				} else {
 					throw std::runtime_error("It's 5 am, do you know what line your code is exec-ing?\n");
 				}
 				
-				normalize(phi);
+				//normalize(phi);
 			}
 			
 			void calcTimeVectors(
@@ -450,24 +440,9 @@ namespace Dmrg {
 			{
 				targetVectors_[0] = phi;
 				for (size_t i=1;i<times_.size();i++) {
-					//targetVectors_[i] = targetVectors_[0]; <-- ONLY FOR TESTING!!
-					//! Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-					//if (tstStruct_.aOperators.size()!=1) throw "Unimplemented (sorry)\n";
-					//if (stage_[0]==OPERATOR) {
-						calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
-					/*} else {
-						VectorWithOffsetType v = phi;
-					
-						// OK, now that we got the partition number right, let's wft:
-						waveFunctionTransformation_.setInitialVector(v,targetVectors_[i],
-							basisS_,basisE_,basisSE_); // generalize for su(2)
-						v.collapseSectors();
-						targetVectors_[i] = v;
-					}*/
-					normalize(targetVectors_[i]);
-					RealType norma = std::norm(targetVectors_[i]);
-					//std::cerr<<"norma after normalize="<<norma<<"\n";
-					if (fabs(norma-1.0)>1e-5) throw std::runtime_error("Norm is not 1\n");
+					// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
+					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
+					//normalize(targetVectors_[i]);
 				}
 			}
 
@@ -511,7 +486,7 @@ namespace Dmrg {
 				
 				ComplexVectorType tmp(n2);
 				r.resize(n2);
-				calcR(r,T,V,phi,Eg,eigs,t,steps);
+				calcR(r,T,V,phi,Eg,eigs,t,steps,i0);
 				psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0,0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1 );
 				r.resize(n);
 				psimag::BLAS::GEMV('N', n,  n2, zone, &(V(0,0)), n, &(tmp[0]),1, zzero, &(r[0]),   1 );
@@ -535,12 +510,13 @@ namespace Dmrg {
     				RealType Eg,
 				const VectorType& eigs,
     				RealType t,
-				size_t n2)
+				size_t n2,
+				size_t i0)
 			{
 				for (size_t k=0;k<n2;k++) {
 					ComplexType sum = 0.0;
 					for (size_t kprime=0;kprime<n2;kprime++) {
-						ComplexType tmpV = calcVTimesPhi(kprime,V,phi);
+						ComplexType tmpV = calcVTimesPhi(kprime,V,phi,i0);
 						//if (k==0) std::cerr<<"HERE:"<<tmpV<<" "<<V(0,kprime)<<"\n";
 						sum += conj(T(kprime,k))*tmpV;
 					}
@@ -551,17 +527,18 @@ namespace Dmrg {
 				}
 			}
 
-			ComplexType calcVTimesPhi(size_t kprime,const ComplexMatrixType& V,const VectorWithOffsetType& phi)
+			ComplexType calcVTimesPhi(size_t kprime,const ComplexMatrixType& V,const VectorWithOffsetType& phi,
+						 size_t i0)
 			{
 				ComplexType ret = 0;
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i = phi.sector(ii);
-					size_t total = phi.effectiveSize(i);
+				//for (size_t ii=0;ii<phi.sectors();ii++) {
+					//size_t i = phi.sector(ii);
+					size_t total = phi.effectiveSize(i0);
 					//size_t offset = phi.offset(i);
 				
 					for (size_t j=0;j<total;j++)
-						ret += conj(V(j,kprime))*phi.fastAccess(i,j);
-				}
+						ret += conj(V(j,kprime))*phi.fastAccess(i0,j);
+				//}
 				
 				return ret;
 			}
@@ -586,8 +563,8 @@ namespace Dmrg {
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			
 				size_t mode = LanczosSolverType::WITH_INFO;
-				RealType eps= 0.01*ProgramLimits::LanczosTolerance;
-				size_t iter= ProgramLimits::LanczosSteps;
+				RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
+				size_t iter= ProgramGlobals::LanczosSteps;
 
 				//srand48(3243447);
 				LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,parallelRank_,mode);
@@ -601,10 +578,11 @@ namespace Dmrg {
 				progress_.printline(msg,std::cerr);*/
 				lanczosSolver.tridiagonalDecomposition(phi2,ab,V);
 				ab.buildDenseMatrix(T);
-				check1(V,phi2);
+				//check1(V,phi2);
 				return lanczosSolver.steps();
 			}
-
+			
+			//! This check is invalid if there are more than one sector
 			void check1(const ComplexMatrixType& V,const TargetVectorType& phi2)
 			{
 				if (V.n_col()>V.n_row()) throw std::runtime_error("cols > rows\n");
@@ -621,110 +599,6 @@ namespace Dmrg {
 				}
 			}
 
-			//! FIXME: we need to make a fast version for when we're just
-			//! figuring out where the (non-zero) partition is
-			void applyLocalOp(
-					VectorWithOffsetType& dest,
-					const VectorWithOffsetType& src,
-				     	const OperatorType& A,
-	  				const std::vector<size_t>& electrons,
-					size_t systemOrEnviron)
-			{
-				if (systemOrEnviron == SHRINK_ENVIRON) applyLocalOpSystem(dest,src,A,electrons);
-				else applyLocalOpEnviron(dest,src,A);
-			}
-
-			void applyLocalOpSystem(
-					VectorWithOffsetType& dest,
-					const VectorWithOffsetType& src,
-					const OperatorType& A,
-	  				const std::vector<size_t>& electrons)
-			{
-				TargetVectorType dest2(basisSE_.size());
-				
-				for (size_t i=0;i<dest2.size();i++) dest2[i] = 0;
-				
-				for (size_t ii=0;ii<src.sectors();ii++) {
-					size_t i = src.sector(ii);
-					applyLocalOpSystem(dest2,src,A,electrons,i);
-				}
-				dest.fromFull(dest2,basisSE_);
-			}
-
-			void applyLocalOpSystem(
-					TargetVectorType& dest2,
-					const VectorWithOffsetType& src,
-					const OperatorType& A,
-	  				const std::vector<size_t>& electrons,
-					size_t i0)
-			{
-				size_t offset = src.offset(i0);
-				size_t final = offset + src.effectiveSize(i0);
-				//size_t counter=0;
-				size_t ns = basisS_.size();
-				size_t nx = basisS_.size()/A.data.rank();
-				
-				for (size_t i=offset;i<final;i++) {
-					size_t x=0,y=0;
-					utils::getCoordinates(x,y,basisSE_.permutation(i),ns);
-					size_t x0=0,x1=0;
-					utils::getCoordinates(x0,x1,basisS_.permutation(x),nx);
-					int nx0 = basisS_.electrons(x)-electrons[x1];
-					if (nx0<0) throw std::runtime_error("TimeStepTargetting::applyLocalOpSystem(...)\n");
-					RealType sign = ((nx0%2)==0) ? 1 : A.fermionSign;
-					for (int k=A.data.getRowPtr(x1);k<A.data.getRowPtr(x1+1);k++) {
-						size_t x1prime = A.data.getCol(k);
-						size_t xprime = basisS_.permutationInverse(x0+x1prime*nx);
-						size_t j = basisSE_.permutationInverse(xprime+y*ns);
-						dest2[j] += src[i]*A.data.getValue(k)*sign;
-					}
-				}
-				
-			}
-
-			void applyLocalOpEnviron(
-					VectorWithOffsetType& dest,
-					const VectorWithOffsetType& src,
-					const OperatorType& A)
-			{
-				TargetVectorType dest2(basisSE_.size());
-				
-				for (size_t i=0;i<dest2.size();i++) dest2[i] = 0;
-				
-				for (size_t ii=0;ii<src.sectors();ii++) {
-					size_t i = src.sector(ii);
-					applyLocalOpEnviron(dest2,src,A,i);
-				}
-				dest.fromFull(dest2,basisSE_);
-			}
-
-			void applyLocalOpEnviron(
-					TargetVectorType& dest2,
-					const VectorWithOffsetType& src,
-				     	const OperatorType& A,
-					size_t i0)
-			{
-				size_t offset = src.offset(i0);
-				size_t final = offset + src.effectiveSize(i0);
-				
-				size_t ns = basisS_.size();
-				size_t nx = A.data.rank();
-				
-				for (size_t i=offset;i<final;i++) {
-					size_t x=0,y=0;
-					utils::getCoordinates(x,y,basisSE_.permutation(i),ns);
-					size_t y0=0,y1=0;
-					utils::getCoordinates(y0,y1,basisE_.permutation(y),nx);
-					RealType sign = basisS_.fermionicSign(x,A.fermionSign);
-					for (int k=A.data.getRowPtr(y0);k<A.data.getRowPtr(y0+1);k++) {
-						size_t y0prime = A.data.getCol(k);
-						size_t yprime = basisE_.permutationInverse(y0prime+y1*nx);
-						size_t j = basisSE_.permutationInverse(x+yprime*ns);
-						dest2[j] += src[i]*A.data.getValue(k)*sign;
-					}
-				}
-			}
-
 			// hack to get the current partition, note that this:
 			// size_t partition = targetVectors_[0].findPartition(basisSE_);
 			// doesn't work, since targetVectors_[0] is stale at this point
@@ -733,25 +607,32 @@ namespace Dmrg {
 			// Update: When more than one op. needs to apply all of 'em:
 			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
 			{
+				FermionSign fs(basisS_,tstStruct_.electrons);
 				if (allStages(WFT_NOADVANCE)) {
 					VectorWithOffsetType tmpVector = psi_;
 					for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
-						applyLocalOp(phi,tmpVector,tstStruct_.aOperators[j],tstStruct_.electrons,
+						applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],fs,
 							systemOrEnviron);
 						tmpVector = phi;
 					}
 					return;
 				}
-				applyLocalOp(phi,psi_,tstStruct_.aOperators[i],tstStruct_.electrons,
+				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,
 								systemOrEnviron);
 			}
-
-			void printVectors()
+			
+			void zeroOutVectors()
 			{
-				for (size_t i=0;i<targetVectors_.size();i++) {
-					std::string label = "targetVector"+utils::ttos(i)+"_"+utils::ttos(currentTime_);
-					io_.printSparseVector(targetVectors_[i],label);
-				}
+				for (size_t i=0;i<targetVectors_.size();i++) 
+					targetVectors_[i].resize(basisSE_.size());
+			}
+
+			void printVectors(const std::vector<int>& block)
+			{
+				if (block.size()!=1) throw std::runtime_error("TST only supports blocks of size 1\n");
+				
+				TimeSerializerType ts(currentTime_,block[0],targetVectors_);
+				ts.save(io_);
 			}
 
 			void printHeader()
@@ -765,23 +646,23 @@ namespace Dmrg {
 				io_.printline(s);
 			}
 
-			void test(	size_t ind,
+			void test(	
 					const VectorWithOffsetType& src,
 					size_t systemOrEnviron,
 				 	const std::string& label,
-					size_t site)
+					size_t site) const
 			{
 				VectorWithOffsetType dest;
-				OperatorType A = tstStruct_.aOperators[ind];
+				OperatorType A = tstStruct_.aOperators[0];
 				CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
 				CrsMatrix<ComplexType> tmpCt;
 				transposeConjugate(tmpCt,tmpC);
 				multiply(A.data,tmpCt,tmpC);
 				A.fermionSign = 1;
 				//A.data = tmpC;
-				applyLocalOp(dest,src,A,tstStruct_.electrons,systemOrEnviron);
-				
-				
+				FermionSign fs(basisS_,tstStruct_.electrons);
+				applyOpLocal_(dest,src,A,fs,systemOrEnviron);
+
 				ComplexType sum = 0;
 				for (size_t ii=0;ii<dest.sectors();ii++) {
 					size_t i = dest.sector(ii);
@@ -810,6 +691,7 @@ namespace Dmrg {
 			std::vector<VectorWithOffsetType> targetVectors_;
 			RealType gsWeight_;
 			typename IoType::Out io_;
+			ApplyOperatorType applyOpLocal_;
 	};     //class TimeStepTargetting
 } // namespace Dmrg
 /*@}*/

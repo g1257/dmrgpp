@@ -74,87 +74,98 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Connectors.h
+/*! \file TimeSerializer.h
  *
- *  FIXME
- *
+ *  Serialize time data
  */
-#ifndef CONNECTORS_H
-#define CONNECTORS_H
+#ifndef TIME_SERIAL_H
+#define TIME_SERIAL_H
 
-#include "Connector.h"
+#include "Utils.h"
+#include "IoSimple.h"
 
 namespace Dmrg {
 	
-	template<typename FieldType>
-	class Connectors {
-	public:
-		
-		typedef Connector<FieldType> ConnectorType;
-		
-		Connectors(size_t dof,size_t linSize) : dof_(dof), linSize_(linSize) 
-		{
-		}
-		
-		void push(const psimag::Matrix<FieldType>& connectorMatrix,FieldType defaultConnector) 
+	template<typename RealType,typename VectorType>
+	class TimeSerializer {
+		public:
 			
-		{
-			ConnectorType c(connectorMatrix,defaultConnector);
-			connectors_.push_back(c);
-		}
-		
-		void push(const psimag::Matrix<FieldType>& connectorMatrix,const std::vector<FieldType>& defaultConnector) 
+			// Unfortunately we need a default ctor
+			// to build an array of these
+			TimeSerializer() { }
 			
-		{
-			ConnectorType c(connectorMatrix,defaultConnector);
-			connectors_.push_back(c);
-		}
+			TimeSerializer(
+				RealType currentTime,
+				size_t site,
+				const std::vector<VectorType>& targetVectors)
+			: currentTime_(currentTime),
+			  site_(site),
+			  targetVectors_(targetVectors)
+			{}
+			
+			TimeSerializer(typename IoSimple::In& io)
+			{
+				RealType x=0;
+				std::string s = "#TIME=";
+				io.readline(x,s);
+				if (x<0) throw std::runtime_error("TimeSerializer:: time cannot be negative\n");
+				currentTime_ = x;
+				
+				s = "#TCENTRALSITE=";
+				int xi=0;
+				io.readline(xi,s);
+				if (xi<0) throw std::runtime_error("TimeSerializer:: site cannot be negative\n");
+				site_ = xi;
+				
+				s = "#TNUMBEROFVECTORS=";
+				io.readline(xi,s);
+				if (xi<=0) throw std::runtime_error("TimeSerializer:: n. of vectors must be positive\n");
+				targetVectors_.resize(xi);
+				for (size_t i=0;i<targetVectors_.size();i++) {
+					s = "targetVector"+utils::ttos(i);
+					targetVectors_[i].load(io,s);
+				}
+			}
+			
+			size_t size(size_t i=0) const
+			{
+				return  targetVectors_[i].size();
+			}
+			
+			RealType time() const { return currentTime_; }
+			
+			size_t site() const
+			{
+				return  site_;
+			}
+			
+			const VectorType& vector(size_t i=0) const 
+			{
+				return targetVectors_[i];
+			}
+			
+			
+			template<typename IoOutputter>
+			void save(IoOutputter& io) const
+			{
+				std::string s = "#TIME=" + utils::ttos(currentTime_);
+				io.printline(s);
+				s = "#TCENTRALSITE=" + utils::ttos(site_);
+				io.printline(s);
+				s = "#TNUMBEROFVECTORS="+utils::ttos(targetVectors_.size());
+				io.printline(s);
+				for (size_t i=0;i<targetVectors_.size();i++) {
+					std::string label = "targetVector"+utils::ttos(i)+"_"+utils::ttos(currentTime_);
+					targetVectors_[i].save(io,label);
+				}
+			}
 
-		void push(	const std::vector<psimag::Matrix<FieldType> >& connectorsOneSite,
-	  			size_t numberOfOrbitals,
-				size_t leg) 
-		{
-		
-			ConnectorType c(connectorsOneSite,linSize_,numberOfOrbitals,dof_,leg);
-			connectors_.push_back(c);
-		}
-		
-		size_t linSize() const { return linSize_; }
-		
-		size_t dof() const { return dof_; }
-		
-		FieldType getMatrix(size_t i,size_t j,size_t what = 0) const
-		{
-			return connectors_[what].getMatrix(i,j);
-		}
-		
-		FieldType operator()(size_t i,size_t j,size_t what = 0) const
-		{
-			return connectors_[what](i,j);
-		}
-		
-		FieldType defaultValue(size_t dir = 0, size_t a = 0, size_t b = 0,size_t what = 0) const
-		{
-			return connectors_[what].defaultValue(dir,a,b);
-		}
-		
-		size_t n_row(size_t what = 0) const { return connectors_[what].n_row(); }
-		
-		size_t size() const { return connectors_.size(); }
-		
-		
-	private:
-		size_t dof_,linSize_;
-		std::vector<ConnectorType> connectors_;
-			
-	}; //Connectors
-	
-// 	template<typename FieldType>
-// 	std::ostream& operator<<(std::ostream& os,Connectors<FieldType>& connectors)
-// 	{
-// 		os<<connectors.connectors_;
-// 		return os;
-// 	}
-} // namespace Dmrg
+		private:
+			RealType currentTime_;
+			size_t site_;
+			std::vector<VectorType> targetVectors_;
+	}; // class TimeSerializer
+} // namespace Dmrg 
+
 /*@}*/
-#endif //TJ_ONEORBITAL_HEADER_H
+#endif

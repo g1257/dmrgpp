@@ -107,7 +107,7 @@ namespace std {
 	}
 	
 	template<class X>
-	X operator*(std::vector<X> const &v,std::vector<X> const &w)
+	inline X operator*(std::vector<X> const &v,std::vector<X> const &w)
 	{
 		X result=0;
 		for (size_t i=0;i<v.size();i++) result += v[i]*conj(w[i]);

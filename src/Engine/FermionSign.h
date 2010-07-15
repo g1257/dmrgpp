@@ -74,87 +74,73 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Connectors.h
+/*! \file FermionSign.h
  *
- *  FIXME
- *
+ *  FIXME documentation
  */
-#ifndef CONNECTORS_H
-#define CONNECTORS_H
+#ifndef FEMION_SIGN_H
+#define FEMION_SIGN_H
 
-#include "Connector.h"
+#include "Utils.h"
 
 namespace Dmrg {
 	
-	template<typename FieldType>
-	class Connectors {
-	public:
-		
-		typedef Connector<FieldType> ConnectorType;
-		
-		Connectors(size_t dof,size_t linSize) : dof_(dof), linSize_(linSize) 
-		{
-		}
-		
-		void push(const psimag::Matrix<FieldType>& connectorMatrix,FieldType defaultConnector) 
+	class FermionSign {
+		public:
+			FermionSign(const std::vector<size_t>& electrons) 
+				: signs_(electrons.size())
+			{
+				init(electrons);
+			}
 			
-		{
-			ConnectorType c(connectorMatrix,defaultConnector);
-			connectors_.push_back(c);
-		}
-		
-		void push(const psimag::Matrix<FieldType>& connectorMatrix,const std::vector<FieldType>& defaultConnector) 
+			template<typename SomeBasisType>
+			FermionSign(const SomeBasisType& basis,const std::vector<size_t>& electrons)
+				: signs_(basis.size())
+			{
+				
+				const std::vector<size_t>& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
+				if (basisElectrons.size()!=basis.permutationInverse().size()) throw std::runtime_error("Problem\n");
+				size_t nx = basisElectrons.size()/electrons.size();
+				std::vector<size_t> el(basisElectrons.size());
+				for (size_t x=0;x<basisElectrons.size();x++) {
+					size_t x0,x1;
+					utils::getCoordinates(x0,x1,basis.permutation(x),nx);
+					int nx0 = basisElectrons[x]-electrons[x1];
+					if (nx0<0) throw std::runtime_error("FermionSign::ctor(...)\n");
+					el[x] = nx0;
+				}
+				init(el);
+			}
 			
-		{
-			ConnectorType c(connectorMatrix,defaultConnector);
-			connectors_.push_back(c);
-		}
+			template<typename IoInputter>
+			FermionSign(IoInputter& io,bool bogus = false)
+			{
+				if (bogus) return;
+				io.read(signs_,"#FERMIONICSIGN");
+			}
+			
+			int operator()(size_t i,size_t f) const
+			{
+				return (signs_[i]) ? f : 1;
+			}
+			
+			template<typename IoOutputter>
+			void save(IoOutputter& io) const
+			{
+				io.printVector(signs_,"#FERMIONICSIGN");
+			}
+			
+		private:
+			
+			void init(const std::vector<size_t>& electrons)
+			{
+				for (size_t i=0;i<signs_.size();i++)
+					signs_[i] = (electrons[i] & 1);
+			}
+			
+			std::vector<bool> signs_;
+	}; // class FermionSign
+} // namespace Dmrg 
 
-		void push(	const std::vector<psimag::Matrix<FieldType> >& connectorsOneSite,
-	  			size_t numberOfOrbitals,
-				size_t leg) 
-		{
-		
-			ConnectorType c(connectorsOneSite,linSize_,numberOfOrbitals,dof_,leg);
-			connectors_.push_back(c);
-		}
-		
-		size_t linSize() const { return linSize_; }
-		
-		size_t dof() const { return dof_; }
-		
-		FieldType getMatrix(size_t i,size_t j,size_t what = 0) const
-		{
-			return connectors_[what].getMatrix(i,j);
-		}
-		
-		FieldType operator()(size_t i,size_t j,size_t what = 0) const
-		{
-			return connectors_[what](i,j);
-		}
-		
-		FieldType defaultValue(size_t dir = 0, size_t a = 0, size_t b = 0,size_t what = 0) const
-		{
-			return connectors_[what].defaultValue(dir,a,b);
-		}
-		
-		size_t n_row(size_t what = 0) const { return connectors_[what].n_row(); }
-		
-		size_t size() const { return connectors_.size(); }
-		
-		
-	private:
-		size_t dof_,linSize_;
-		std::vector<ConnectorType> connectors_;
-			
-	}; //Connectors
-	
-// 	template<typename FieldType>
-// 	std::ostream& operator<<(std::ostream& os,Connectors<FieldType>& connectors)
-// 	{
-// 		os<<connectors.connectors_;
-// 		return os;
-// 	}
-} // namespace Dmrg
 /*@}*/
-#endif //TJ_ONEORBITAL_HEADER_H
+#endif // FEMION_SIGN_H

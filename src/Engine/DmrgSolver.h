@@ -87,6 +87,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LanczosSolver.h"
 #include "Diagonalization.h"
 #include "ProgressIndicator.h"
+#include "FermionSign.h"
+#include "DmrgSerializer.h"
 
 namespace Dmrg {
 
@@ -123,10 +125,14 @@ namespace Dmrg {
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef typename TargettingType::TargettingStructureType TargettingStructureType;
 		typedef Diagonalization<ParametersDmrgSolver<RealType>,TargettingType,InternalProductTemplate> DiagonalizationType;
-		
+		typedef DensityMatrixTemplate<RealType,MyBasis,MyBasisWithOperators,TargettingType> DensityMatrixType;
+		typedef typename DensityMatrixType::BuildingBlockType TransformType;
+		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
+		typedef DmrgSerializer<RealType,VectorWithOffsetType,TransformType,MyBasis,FermionSign> DmrgSerializerType;
+
 		enum {SAVE_TO_DISK=1,DO_NOT_SAVE=0};
-		enum {SHRINK_SYSTEM=WaveFunctionTransformationType::SHRINK_SYSTEM,
-			SHRINK_ENVIRON=WaveFunctionTransformationType::SHRINK_ENVIRON,
+		enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
+			EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransformationType::INFINITE};
 		
 		DmrgSolver(
@@ -143,6 +149,9 @@ namespace Dmrg {
 				targetStruct_(targetStruct),
 				verbose_(false),
 				useReflection_(false),
+				pSprime_("pSprime"),
+				pEprime_("pEprime"),
+				pSE_("pSE"),
 				io_(parameters_.filename,concurrency.rank()),
 				ioIn_(parameters_.filename),
 				progress_("DmrgSolver",concurrency.rank()),
@@ -158,8 +167,8 @@ namespace Dmrg {
 			std::string s = utils::getTimeDate();
 			io_.print(s);
 			if (parameters_.options.find("verbose")!=std::string::npos) verbose_=true;
-			if (parameters_.options.find("useReflection")!=std::string::npos) useReflection_=true;
-			if (parameters_.options.find("useSu2Symmetry")!=std::string::npos) MyBasis::useSu2Symmetry(true);
+			if (parameters_.options.find("useReflection")!=std::string::npos)
+				useReflection_=true;
 			ModelType::SharedMemoryType::setThreads(parameters_.nthreads);
 		}
 
@@ -175,7 +184,12 @@ namespace Dmrg {
 			std::vector<BlockType> X,Y;
 			BasisDataType q;
 			SparseMatrixType hmatrix;
-
+			
+			std::ostringstream msg;
+			msg<<"Turning the engine on";
+			progress_.printline(msg,std::cout);
+				
+			
 			io_.print(model_);
 
 			model_.setBlocksOfSites(S,X,Y,E); //! split sites into system, environment, X and Y
@@ -186,6 +200,7 @@ namespace Dmrg {
 			std::vector<OperatorType> creationMatrix;
 			model_.setNaturalBasis(creationMatrix,hmatrix,q,S);
 			MyBasisWithOperators pS("pS",S,hmatrix,q);
+			//printOneSiteElectrons(pS);
 			pS.setOperators(creationMatrix);
 			waveFunctionTransformation_.init(hmatrix.rank());
 			if (parameters_.options.find("nowft")!=std::string::npos) waveFunctionTransformation_.disable();
@@ -193,11 +208,13 @@ namespace Dmrg {
 			model_.setNaturalBasis(creationMatrix,hmatrix,q,E);
 			MyBasisWithOperators pE("pE",E,hmatrix,q);
 			pE.setOperators(creationMatrix);
-
+			
+			TargettingType psi(pSprime_,pEprime_,pSE_,model_,targetStruct_,waveFunctionTransformation_);
+			
 			if (parameters_.options.find("checkpoint")!=std::string::npos)
 				checkpointLoad(pS,pE,parameters_.checkpoint.index);
 			else
-				infiniteDmrgLoop(S,X,Y,E,pS,pE);
+				infiniteDmrgLoop(S,X,Y,E,pS,pE,psi);
 
 			stepCurrent_=X.size();
 
@@ -205,7 +222,11 @@ namespace Dmrg {
 
 			useReflection_=false; // disable reflection symmetry for finite loop if it was enabled:
 
-			finiteDmrgLoops(S,E,pS,pE,X.size());
+			finiteDmrgLoops(S,E,pS,pE,X.size(),psi);
+			
+			std::ostringstream msg2;
+			msg2<<"Turning off the engine.";
+			progress_.printline(msg2,std::cout);
 		}
 
 	private:
@@ -214,6 +235,8 @@ namespace Dmrg {
 		ConcurrencyType& concurrency_;
 		const TargettingStructureType& targetStruct_;
 		bool verbose_,useReflection_;
+		MyBasisWithOperators pSprime_,pEprime_;
+		MyBasis pSE_;
 		typename IoType::Out io_;
 		typename IoType::In ioIn_;
 		ProgressIndicator progress_;
@@ -225,13 +248,10 @@ namespace Dmrg {
 		DiagonalizationType diagonalization_;
 		
 		void infiniteDmrgLoop(BlockType const &S,std::vector<BlockType> const &X,std::vector<BlockType> const &Y,BlockType const &E,
-				      MyBasisWithOperators &pS,MyBasisWithOperators &pE)
+				      MyBasisWithOperators &pS,MyBasisWithOperators &pE,TargettingType& psi)
 		{
 			int ns,ne;
-			MyBasisWithOperators pSprime("pSprime"),pEprime("pEprime");
-			MyBasis pSE("pSE");
-			TargettingType psi(pSprime,pEprime,pSE,model_,targetStruct_,waveFunctionTransformation_);
-			
+
 			// empty the stacks
 			systemStack_.empty();
 			envStack_.empty();
@@ -241,32 +261,32 @@ namespace Dmrg {
 			envStack_.push(pE);
 			for (size_t step=0;step<X.size();step++) {
 				std::ostringstream msg;
-				msg<<"infinite-dmrg, step "<<step<<" out of "<<Y.size()<<" size of block added="<<Y[step].size();
+				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
 				progress_.printline(msg,std::cout);
 				
-				grow(pSprime,pS,X[step],GROW_RIGHT); // grow system
-				grow(pEprime,pE,Y[step],GROW_LEFT); // grow environment
+				grow(pSprime_,pS,X[step],GROW_RIGHT); // grow system
+				grow(pEprime_,pE,Y[step],GROW_LEFT); // grow environment
 					
 				
 				progress_.print("Growth done.\n",std::cout);
-				msg<<"inf: SetToProduct, size="<<pSprime.size()<<"x"<<pEprime.size();
-				msg<<" and block="<<pSprime.block().size()<<"+"<<pEprime.block().size();
+				msg<<"Infinite-loop: sys-env. size="<<pSprime_.size()<<"x"<<pEprime_.size();
+				msg<<" and block="<<pSprime_.block().size()<<"+"<<pEprime_.block().size()<<"*";
 				progress_.printline(msg,std::cout);
 				
-				updateQuantumSector(pSprime.block().size()+pEprime.block().size());
+				updateQuantumSector(pSprime_.block().size()+pEprime_.block().size());
 				
-				pSE.setToProduct(pSprime,pEprime,quantumSector_);
+				pSE_.setToProduct(pSprime_,pEprime_,quantumSector_);
 				
 				diagonalization_(psi,INFINITE,X[step]);
 
 				progress_.print("Truncating basis now...\n",std::cout);
-				if (verbose_ && concurrency_.root()) std::cerr<<"Truncating basis now...\n";
 				
-				ns=pSprime.size();
-				ne=pEprime.size();
+				ns=pSprime_.size();
+				ne=pEprime_.size();
 				
-				changeAndTruncateBasis(pS,psi,pSprime,pEprime,pSE,parameters_.keptStatesInfinite,0);
-				changeAndTruncateBasis(pE,psi,pEprime,pSprime,pSE,parameters_.keptStatesInfinite,1);
+				TransformType transform;
+				changeAndTruncateBasis(pS,psi,pSprime_,pEprime_,transform,parameters_.keptStatesInfinite,EXPAND_SYSTEM);
+				changeAndTruncateBasis(pE,psi,pEprime_,pSprime_,transform,parameters_.keptStatesInfinite,EXPAND_ENVIRON);
 				
 				systemStack_.push(pS); 
 				envStack_.push(pE);
@@ -279,11 +299,9 @@ namespace Dmrg {
      					BlockType const &E,
 					MyBasisWithOperators &pS,
      					MyBasisWithOperators &pE,
-	  				int l)
+	  				int l,
+       					TargettingType& psi)
 		{
-			MyBasisWithOperators pSprime("pSprime"),pEprime("pEprime");
-			MyBasis pSE("pSE");
-			TargettingType target(pSprime,pEprime,pSE,model_,targetStruct_,waveFunctionTransformation_);
 			
 			for (size_t i=0;i<parameters_.finiteLoop.size();i++)  {
 				std::ostringstream msg;
@@ -299,7 +317,7 @@ namespace Dmrg {
 						if (parameters_.finiteLoop[i].stepLength<0) stepCurrent_--;
 					}
 				}
-				finiteStep(S,E,pS,pE,i,target,pSprime,pEprime,pSE);
+				finiteStep(S,E,pS,pE,i,psi);
 			}
 		}
 		
@@ -309,22 +327,20 @@ namespace Dmrg {
 				MyBasisWithOperators &pS,
 				MyBasisWithOperators &pE,
 				size_t loopIndex,
-    				TargettingType& target,
-				MyBasisWithOperators& pSprime,
-				MyBasisWithOperators& pEprime,
-				MyBasis& pSE)
+    				TargettingType& target)
 		{
+			static size_t prevDirection = 0;
+			
 			int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 			size_t keptStates = parameters_.finiteLoop[loopIndex].keptStates;
 			int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 			RealType gsEnergy=0;
 			
-			size_t direction=SHRINK_ENVIRON;
-			if (stepLength<0) direction=SHRINK_SYSTEM;
-
-			static int prevDirection = 0;
+			size_t direction=EXPAND_SYSTEM;
+			if (stepLength<0) direction=EXPAND_ENVIRON;
+			//std::cerr<<"PUSHING DIRECTION="<<getDirection(direction)<<"\n";
 			int resetCounter = WaveFunctionTransformationType::RESET_COUNTER;
-			if (prevDirection == SHRINK_SYSTEM && direction == SHRINK_SYSTEM)
+			if (prevDirection ==  direction)
 				resetCounter = WaveFunctionTransformationType::DO_NOT_RESET_COUNTER;
 			prevDirection = direction;
 
@@ -336,55 +352,72 @@ namespace Dmrg {
 				
 				std::ostringstream msg;
 				if (size_t(stepCurrent_)>=sitesIndices_.size()) throw std::runtime_error("stepCurrent_ too large!\n");
-				if (direction==SHRINK_ENVIRON) {
-					grow(pSprime,pS,sitesIndices_[stepCurrent_],GROW_RIGHT);             //grow system
-					shrink(pEprime,envStack_); //shrink env
+				if (direction==EXPAND_SYSTEM) {
+					grow(pSprime_,pS,sitesIndices_[stepCurrent_],GROW_RIGHT);             //grow system
+					shrink(pEprime_,envStack_); //shrink env
 				} else {
-					grow(pEprime,pE,sitesIndices_[stepCurrent_],GROW_LEFT);   // grow env.
-					shrink(pSprime,systemStack_); // shrink system
+					grow(pEprime_,pE,sitesIndices_[stepCurrent_],GROW_LEFT);   // grow env.
+					shrink(pSprime_,systemStack_); // shrink system
 				}
 				
-				msg<<"finite (dir="<<direction<<"): SetToProduct, size="<<pSprime.size()<<"x"<<pEprime.size();
-				msg<<" and block="<<pSprime.block().size()<<"+"<<pEprime.block().size();
-				msg<<" stackS="<<systemStack_.size()<<" stackE="<<envStack_.size()<< " step="<<stepCurrent_;
-				msg<<" loopIndex="<<loopIndex<<" length="<<stepLength<<" StepFinal="<<stepFinal;
+				msg<<"finite (dir="<<direction<<"): sys-env: "<<pSprime_.size()<<"x"<<pEprime_.size();
+				msg<<" and block="<<pSprime_.block().size()<<"+"<<pEprime_.block().size();
+				if (verbose_) {
+					msg<<" stackS="<<systemStack_.size()<<" stackE="<<envStack_.size()<< " step="<<stepCurrent_;
+					msg<<" loopIndex="<<loopIndex<<" length="<<stepLength<<" StepFinal="<<stepFinal;
+				}
 				progress_.printline(msg,std::cout);
 				
-				updateQuantumSector(pSprime.block().size()+pEprime.block().size());
+				updateQuantumSector(pSprime_.block().size()+pEprime_.block().size());
 				
-				pSE.setToProduct(pSprime,pEprime,quantumSector_);
-				//if (target.gs().size()==0) throw std:runtime_error("DmrgSolver:: target.size==0 before\n");
-				gsEnergy =diagonalization_(target,direction,sitesIndices_[stepCurrent_],loopIndex);
-				//if (target.gs().size()==0) throw std:runtime_error("DmrgSolver:: target.size==0 after\n");
-				progress_.print("Truncating (env) basis now...\n",std::cout);
+				pSE_.setToProduct(pSprime_,pEprime_,quantumSector_);
 				
-				if (saveOption==SAVE_TO_DISK) {
-					if (direction==SHRINK_ENVIRON) saveToDiskCompatibility(pS,pSprime,pSE,target); // obsolete
-					else saveToDiskCompatibility(pE,pEprime,pSE,target); // obsolete
-				}
+				bool needsPrinting = (saveOption==SAVE_TO_DISK);
+				gsEnergy =diagonalization_(target,direction,sitesIndices_[stepCurrent_],loopIndex,needsPrinting);
 				
-				if (direction==SHRINK_ENVIRON) {
-					changeAndTruncateBasis(pS,target,pSprime,pEprime,pSE,keptStates,0,saveOption);
-					systemStack_.push(pS);
-				} else {
-					changeAndTruncateBasis(pE,target,pEprime,pSprime,pSE,keptStates,1,saveOption);
-					envStack_.push(pE);
-				}
+				changeTruncateAndSerialize(pS,pE,target,keptStates,direction,saveOption);
+				
 				if (finalStep(stepLength,stepFinal)) break;
 				if (stepCurrent_<0) throw std::runtime_error("DmrgSolver::finiteStep() currentStep_ is negative\n");
 				
 			}
-			if (direction==SHRINK_ENVIRON) {
-				pE = pEprime;
+			if (direction==EXPAND_SYSTEM) {
+				pE = pEprime_;
 				
 			} else {
-				pS = pSprime;
+				pS = pSprime_;
 			}
 			if (saveOption==SAVE_TO_DISK) {
 				std::string s="#WAVEFUNCTION_ENERGY="+utils::ttos(gsEnergy);
 				io_.printline(s);
 			}
 			checkpointSave(pS,pE,loopIndex);
+		}
+		
+		void changeTruncateAndSerialize(MyBasisWithOperators& pS,MyBasisWithOperators& pE,
+			    const TargettingType& target,size_t keptStates,size_t direction,size_t saveOption)
+		{
+			std::vector<size_t> electronsVector = pS.electronsVector();
+
+			progress_.print("Truncating (env) basis now...\n",std::cout);
+			TransformType transform;
+			if (direction==EXPAND_SYSTEM) {
+				changeAndTruncateBasis(pS,target,pSprime_,pEprime_,transform,keptStates,direction);
+				systemStack_.push(pS);
+			} else {
+				changeAndTruncateBasis(pE,target,pEprime_,pSprime_,transform,keptStates,direction);
+				envStack_.push(pE);
+			}
+			
+			if (saveOption==SAVE_TO_DISK) serialize(electronsVector,target.gs(),transform,direction);
+		}
+		
+		void serialize(const std::vector<size_t>& electronsVector,const VectorWithOffsetType& psi,
+			      const TransformType& transform,size_t direction)
+		{
+			FermionSign fs(electronsVector);
+			DmrgSerializerType ds(fs,pSprime_,pEprime_,pSE_,psi,transform,direction);
+			ds.save(io_);
 		}
 
 		bool finalStep(int stepLength,int stepFinal)
@@ -405,7 +438,14 @@ namespace Dmrg {
 			}
 			return false;
 		}
-
+		
+		std::string getDirection(size_t dir) const
+		{
+			if (dir==INFINITE) return  "INFINITE";
+			if (dir==EXPAND_ENVIRON) return "EXPAND_ENVIRON";
+			return "EXPAND_SYSTEM";
+		}
+		
 		//! add block X to basis pS and get basis pSprime
 		MyBasisWithOperators grow(MyBasisWithOperators &pSprime,const MyBasisWithOperators &pS,BlockType const &X,int dir)
 		{
@@ -451,37 +491,34 @@ namespace Dmrg {
 					std::ostringstream msg;
 					msg<<"Updating targets to "<<targetQuantumNumbers[0]<<" "<<	targetQuantumNumbers[1];
 					msg<<" "<<targetQuantumNumbers[2];
-					progress_.printline(msg,std::cerr);
+					progress_.printline(msg,std::cout);
 				}
 				quantumSector_=MyBasis::pseudoQuantumNumber(targetQuantumNumbers);
 			} else quantumSector_= -1;
 		}
 
 		//! Truncate basis 
-		template<typename TargetType>
-		void changeAndTruncateBasis(MyBasisWithOperators &rSprime,const TargetType& target,
-			MyBasisWithOperators const &pBasis,MyBasisWithOperators const &pBasisSummed,MyBasis const &pSE,
-   			size_t keptStates,int option,int saveOption=DO_NOT_SAVE)
+		void changeAndTruncateBasis(MyBasisWithOperators &rSprime,const TargettingType& target,
+			MyBasisWithOperators const &pBasis,MyBasisWithOperators const &pBasisSummed,TransformType& ftransform,
+   			size_t keptStates,size_t direction)
 		{
-			typedef DensityMatrixTemplate<RealType,MyBasis,MyBasisWithOperators,TargetType> DensityMatrixType;
-			DensityMatrixType dmS(target,pBasis,pBasisSummed,pSE,option);
-			dmS.check(option);
+			DensityMatrixType dmS(target,pBasis,pBasisSummed,pSE_,direction);
+			dmS.check(direction);
 			
 			if (verbose_ && concurrency_.root()) std::cerr<<"Trying to diagonalize density-matrix with size="<<dmS.rank()<<"\n";
 			std::vector<RealType> eigs;
 			dmS.diag(eigs,'V',concurrency_);
-			dmS.check2(option);
+			dmS.check2(direction);
 			
 			if (verbose_ && concurrency_.root()) std::cerr<<"Done with density-matrix diag.\n";
 			
 			//! transform basis: dmS^\dagger * operator matrix * dms
 			rSprime = pBasis;
-			typename DensityMatrixType::BuildingBlockType ftransform;
 			if (verbose_ && concurrency_.root()) std::cerr<<"About to changeBasis...\n";
 			
 			RealType error = rSprime.changeBasis(ftransform,dmS(),eigs,keptStates,parameters_,concurrency_);
-			if (saveOption==SAVE_TO_DISK) saveToDisk(ftransform,rSprime);
-			waveFunctionTransformation_.push(ftransform,option,rSprime,pBasisSummed,pSE); //,target.m());
+			
+			waveFunctionTransformation_.push(ftransform,direction,rSprime,pBasisSummed,pSE_); //,target.m());
 
 			std::ostringstream msg;
 			msg<<"new size of basis="<<rSprime.size();
@@ -492,7 +529,7 @@ namespace Dmrg {
 			io_.printline(msg2);
 		}
 
-		//! checkpoint save
+		//! checkpoint save: move this to the Serializer FIXME
 		void checkpointSave(MyBasisWithOperators &pS,MyBasisWithOperators &pE,size_t loop) 
 		{
 			pS.save(io_,"#CHKPOINTSYSTEM");
@@ -500,70 +537,20 @@ namespace Dmrg {
 			
 		}
 
-		//! checkpoint load
+		//! checkpoint load: move this to the Serializer FIXME
 		void checkpointLoad(MyBasisWithOperators &pS,MyBasisWithOperators &pE,size_t loop)
 		{
 			typename IoType::In ioTmp(parameters_.checkpoint.filename);
-			
-			pS.load(ioTmp,"#CHKPOINTSYSTEM",loop);
-			pE.load(ioTmp,"#CHKPOINTENVIRON");
+			MyBasisWithOperators pS1(ioTmp,"#CHKPOINTSYSTEM",loop);
+			pS=pS1;
+			MyBasisWithOperators pE1(ioTmp,"#CHKPOINTENVIRON");
+			pE=pE1;
 			
 			//load also the stacks here!!!
 			std::string s = appendWithDir(ENVIRON_STACK_STRING,parameters_.checkpoint.filename);
 			envStack_.load(s);
 			s = appendWithDir(SYSTEM_STACK_STRING,parameters_.checkpoint.filename);
 			systemStack_.load(s);
-		}
-
-		// Save to disk everything needed to compute any observable (OBSOLETE!!)
-		void saveToDiskCompatibility(
-			MyBasisWithOperators const &pS,
-			MyBasisWithOperators const &pSprime,
-			MyBasis const &pSE,
-			TargettingType const  &target) 
-		{
-			// save operators (not needed, they will be re-built)
-			// save permutation for system
-			std::string label = "#pSprime.permutationInverse_sites=";
-
-			for (size_t i=0;i<pSprime.block().size();i++) {
-				label += utils::ttos(pSprime.block()[i])+",";
-			}
-
-			io_.printVector(pSprime.permutationInverse(),label);
-			// save permutation for system-environment
-			label = "#pSE.permutationInverse_sites=";
-			for (size_t i=0;i<pSE.block().size();i++) {
-				label += utils::ttos(pSE.block()[i])+",";
-			}
-			io_.printVector(pSE.permutationInverse(),label);
-
-			// save wavefunction
-			label = "#WAVEFUNCTION_sites=";
-			for (size_t i=0;i<pSE.block().size();i++) {
-				label += utils::ttos(pSE.block()[i])+",";
-			}
-			//SparseVector<typename TargettingType::TargetVectorType::value_type> psiSparse(target.gs());
-			io_.printSparseVector(target.gs(),label);
-
-			// save electrons
-			label = "#ELECTRONS_sites=";
-			for (size_t i=0;i<pSprime.block().size();i++) {
-				label += utils::ttos(pSprime.block()[i])+",";
-			}
-			io_.printVector(pS.electrons(),label);
-		}
-
-		// Save to disk transform
-		template<typename SomeMatrixType>
-		void saveToDisk(const SomeMatrixType& ftransform,
-			MyBasisWithOperators const &pS)
-		{
-			std::string label = "#TRANSFORM_sites=";
-			for (size_t i=0;i<pS.block().size();i++) {
-				label += utils::ttos(pS.block()[i])+",";
-			}
-			io_.printMatrix(ftransform,label);
 		}
 
 		//! Move elsewhere
@@ -579,6 +566,14 @@ namespace Dmrg {
 			return dir + s1 + suf;
 					
 		}
+		
+		/*void printOneSiteElectrons(const MyBasis& b)
+		{
+			std::string s = "#ONE_SITE_ELECTRONS\n";
+			if (b.block().size()!=1) throw std::runtime_error("printOneSiteElectrons failed\n");
+			b.save(io_);
+		}*/
+		
 	}; //class DmrgSolver
 } // namespace Dmrg
 

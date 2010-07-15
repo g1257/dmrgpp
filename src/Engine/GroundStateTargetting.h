@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <string>
 #include "TargetStructureParams.h"
+#include "ApplyOperatorLocal.h"
 
 namespace Dmrg {
 	
@@ -125,7 +126,11 @@ namespace Dmrg {
 			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 			typedef VectorType TargetVectorType;
 			typedef int TargettingStructureType;
-			//enum {SYSTEM,ENVIRON};
+			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+			
+			enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
+			EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
+			INFINITE=WaveFunctionTransformationType::INFINITE};
 			
 			GroundStateTargetting(
 	  				const BasisWithOperatorsType& basisS,
@@ -138,6 +143,11 @@ namespace Dmrg {
 				       waveFunctionTransformation_(wft),
 				       progress_("GroundStateTargetting",0)
 			{
+			}
+			
+			RealType normSquared(size_t i) const
+			{
+				throw std::runtime_error("GST: What are you doing here?\n");
 			}
 			
 			RealType weight(size_t i) const
@@ -175,7 +185,7 @@ namespace Dmrg {
 				throw std::runtime_error("GroundStateTargetting::operator()(...)\n");
 			}
 			
-			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
+			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber,bool needsPrinting)
 			{
 				// Nothing to see here
 			}
@@ -188,6 +198,8 @@ namespace Dmrg {
 			
 			void initialGuess(VectorWithOffsetType& initialVector) const
 			{
+				RealType eps = 1e-6;
+				if (psi_.size()>0 && std::norm(psi_)<eps) throw std::runtime_error("psi's norm is zero\n");
 				waveFunctionTransformation_.setInitialVector(initialVector,psi_,basisS_,basisE_,basisSE_);	
 			}
 			

@@ -94,7 +94,7 @@ namespace Dmrg {
 	public:
 		class Out {
 			public:
-				Out() {}
+				Out()  : rank_(0) {}
 				Out(const std::string& fn,int rank) : rank_(rank),filename_(fn)
 				{
 					if (rank_!=0) return;
@@ -142,13 +142,13 @@ namespace Dmrg {
 					for (size_t i=0;i<x.size();i++) fout_<<x[i]<<"\n";
 				}
 
-				template<typename X>
-				void printSparseVector(X const &x,std::string const &label)
-				{
-					if (rank_!=0) return;
-					x.print(fout_,label);
-					
-				}
+// 				template<typename X>
+// 				void printSparseVector(X const &x,std::string const &label)
+// 				{
+// 					if (rank_!=0) return;
+// 					x.print(fout_,label);
+// 					
+// 				}
 				
 				template<typename X>
 				void printStack(const std::stack<X>& st,std::string const &label)
@@ -169,6 +169,7 @@ namespace Dmrg {
 				void print(const T&  something)
 				{
 					if (rank_!=0) return;
+					if (!fout_ || !fout_.good()) throw std::runtime_error("Out: file not open!\n");
 					fout_<<something;
 				}
 
@@ -222,7 +223,8 @@ namespace Dmrg {
 
 				In(std::string const &fn) : filename_(fn), fin_(fn.c_str())
 				{
-					
+					if (!fin_ || !fin_.good() || fin_.bad()) 
+						throw std::runtime_error("IoSimple::ctor(...): Can't open file\n");
 				}
 
 				void open(std::string const &fn)
@@ -262,8 +264,8 @@ namespace Dmrg {
 						}
 					}
 					if (!foundOnce || (!found && level!=LAST_INSTANCE)) {
-						std::cerr<<"Not found "<<s<<" in file "<<filename_<<"\n";
-						throw std::runtime_error("IoSimple::In::readline()\n");
+						std::string emessage = "IoSimple::In::readline(): Not found "+s+" in file "+filename_;
+						throw std::runtime_error(s);
 					}
 
 					if (level==LAST_INSTANCE) {
@@ -313,9 +315,11 @@ namespace Dmrg {
 					std::string tempSaved="NOTFOUND";
 					int counter=0;
 					bool found=false;
+					//size_t c = 0;
 					while(!fin_.eof()) {
 						fin_>>temp;
-						//std::cerr<<"Line="<<temp<<"\n";
+						//c++;
+						//if (temp[0]=='#') std::cerr<<"Line="<<temp<<" target="<<s<<" count="<<c<<"\n";
 						if (fin_.eof() || !fin_.good() || fin_.bad()) break;
 						
 						if (temp.substr(0,s.size())==s) {
@@ -327,6 +331,7 @@ namespace Dmrg {
 							counter++;
 						}
 					}
+					//std::cerr<<"count="<<c<<"\n";
 					if (!found && tempSaved=="NOTFOUND") {
 						std::cerr<<"Not found "<<s<<" in file "<<filename_;
 						std::cerr<<" level="<<level<<" counter="<<counter<<"\n";

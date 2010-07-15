@@ -446,7 +446,7 @@ template<
 	typename MySparseMatrix
 >
 void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverType& dmrgSolverParams,
-		ConcurrencyType& concurrency, Dmrg::SimpleReader& reader)
+		ConcurrencyType& concurrency, Dmrg::SimpleReader& reader,bool hasTimeEvolution)
 {
 	typedef ReflectionSymmetryEmpty<MatrixElementType,MySparseMatrix> ReflectionSymmetryType;
 	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
@@ -475,7 +475,8 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 	TargettingStructureType targetStruct;
 	typedef TargetStructureParams<TargettingStructureType,ModelType> TargetStructureParamsType;
 	TargetStructureParamsType tsp(targetStruct,model);
-	reader.load(tsp);
+
+	if (hasTimeEvolution) reader.load(tsp);
 
 	//! Setup the dmrg solver:
 	SolverType dmrgSolver(dmrgSolverParams,model,concurrency,targetStruct);
@@ -558,24 +559,24 @@ print FOUT<<EOF;
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 				$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,TimeStepTargetting,
 				MySparseMatrixComplex>
-			(mp,geometry,dmrgSolverParams,concurrency,reader);
+			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
 		} else {
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 				$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
 				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,reader);
+			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
 		}
 	} else {
 		 if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 				$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffsets,GroundStateTargetting,
 				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,reader);
+			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
 		} else {
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 				$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
 				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,reader);
+			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
 		}
 	}
 }
@@ -594,6 +595,7 @@ sub createInput
 	my $connectorValues=createConnectors($connectorValue);
 	my $version=getVersion();
 	my $qns = "2 0.5 0.5";
+	my $inputForTimeEvolution = getTimeEvolutionInput();
 	
 	if ($su2Symmetry=~/y/i) {
 		$_ = $electrons/(4*$linSize);
@@ -662,11 +664,45 @@ FiniteLoops $finiteLoops
 QNS $qns
    
 EOF
-	print FOUT "Threads $nthreads\n\n" if ($pthreads);
+	print FOUT "Threads $nthreads\n" if ($pthreads);
+	print FOUT "$inputForTimeEvolution\n\n" if ($targetting=~/timestep/i);
 	print STDERR "File input.inp has been written\n";
 	close(FOUT);
 }
 
+sub getTimeEvolutionInput
+{
+	return "#NO_TIME_EVOLUTION" unless ($targetting=~/timestep/i);
+	my $ret = <<EOF;
+FILENAME tst.txt
+TIMESTEP 0.1
+MAXTIMES 4 
+ADVANCEEACH 5 
+SITE  2 10 11 
+STARTINGLOOP 2 0 0 
+
+TIMEEVOLUTION raw 
+RAW_MATRIX 4 4
+0.0    0.0    0.0   0.0
+0.0   0.0    0.0   -1.0
+0.0    0.0    0.0   1.0 
+0.0    0.0    0.0   0.0 
+FERMIONSIGN -1
+JMVALUES 0 0
+angularFactor 1
+
+TIMEEVOLUTION raw
+RAW_MATRIX 4 4
+0.0    0.0    0.0   0.0
+1.0    0.0    0.0   0.0
+1.0    0.0    0.0   0.0
+0.0    0.0    0.0   0.0
+FERMIONSIGN -1
+JMVALUES 0 0
+angularFactor 1
+EOF
+	return $ret;
+}
 
 # Unused 
 sub createInputJsn
@@ -896,9 +932,10 @@ sub createObserverDriver
 	my $modelName = getModelName();
 	my $operatorsName = getOperatorsName();
 	my $chooseRealOrComplexForObservables = "typedef RealType FieldType;\n";
-	
+	my $obsArg = "datafile,n,opInfo.n_row(),concurrency,verbose";
 	if ($targetting=~/timestep/i) {
 		$chooseRealOrComplexForObservables = "typedef ComplexType FieldType;\n";
+		$obsArg = "datafile,tstStruct.filename,n,opInfo.n_row(),concurrency,verbose";
 	}
 	
 	open(OBSOUT,">$observerDriver") or die "Cannot open file $observerDriver for writing: $!\n";
@@ -907,7 +944,7 @@ print OBSOUT<<EOF;
  * This driver program was written by configure.pl
  * DMRG++ ($brand) by G.A.*/
 	
-#include "Observe.h"
+#include "Observer.h"
 #include "IoSimple.h"
 #include "$modelName.h" 
 #include "$operatorsName.h" 
@@ -921,14 +958,24 @@ print OBSOUT<<EOF;
 #include "Connectors.h"
 #include "InternalProductOnTheFly.h"
 #include "VectorWithOffset.h"
+#include "VectorWithOffsets.h"
 #include "GroundStateTargetting.h"
+#include "DmrgSolver.h" // only used for types
+#include "DensityMatrix.h" // only used for types
+#include "WaveFunctionTransformation.h"// only used for types
+#include "$stackTemplate.h" // only used for types
+#include "TimeStepTargetting.h" // only used for types
+#include "GroundStateTargetting.h" // only used for types
 
 using namespace Dmrg;
 
 typedef double RealType;
 typedef std::complex<RealType> ComplexType;
 $chooseRealOrComplexForObservables
-	
+
+typedef Dmrg::$concurrencyName<RealType> MyConcurrency;
+typedef  IoSimple MyIo;
+
 	template<
 	typename ParametersModelType,
 	typename GeometryType,
@@ -938,36 +985,68 @@ $chooseRealOrComplexForObservables
 	template<typename,typename> class InternalProductTemplate,
 	template<typename> class VectorWithOffsetTemplate,
 	template<template<typename,typename> class,template<typename,typename> class,
-		typename,typename,typename,typename,template<typename> class> class TargettingType,
+		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
 	typename MySparseMatrix
 >
-void mainLoop(ParametersModelType& mp,GeometryType& geometry,//ParametersSolverType& dmrgSolverParams,
+void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvolution,
 		ConcurrencyType& concurrency, Dmrg::SimpleReader& reader,const std::string& datafile)
 {
 	typedef ReflectionSymmetryEmpty<RealType,MySparseMatrix> ReflectionSymmetryType;
 	typedef Operator<RealType,MySparseMatrix> OperatorType;
 	typedef Basis<RealType,MySparseMatrix> BasisType;
 	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
+	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef ModelHelperTemplate<OperatorsType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
 	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,$pthreadsName> ModelType;
 	
-	ModelType model(mp,geometry);
+	typedef DmrgSolver<
+                        InternalProductTemplate,
+                        DensityMatrix,
+                        ModelType,
+                        MyConcurrency,
+                        MyIo,
+                        WaveFunctionTransformation,
+                        MemoryStack,
+                        TargettingTemplate,
+                        VectorWithOffsetTemplate
+                > SolverType; // only used for types
 	
+	typedef typename SolverType::TargettingType TargettingType;
+	typedef typename SolverType::WaveFunctionTransformationType WaveFunctionTransformationType;
+	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
+	ModelType model(mp,geometry);
+
+	 //! Read TimeEvolution if applicable:
+        // this doesn't work(?): typedef typename SolverType::TargettingStructureType TargettingStructureType;
+	typedef TimeStepStructure<OperatorType> TargettingStructureType;
+        TargettingStructureType tstStruct;
+        typedef TargetStructureParams<TargettingStructureType,ModelType> TargetStructureParamsType;
+        TargetStructureParamsType tsp(tstStruct,model);
+
+        if (hasTimeEvolution) reader.load(tsp);
+
 	size_t n=mp.linSize;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
-	Observe<RealType,FieldType,IoSimple,ConcurrencyType> observe(datafile,n,opInfo.n_row(),concurrency);
-EOF
-	if ($targetting=~/timestep/i) {
-print OBSOUT<<EOF;
-		{
-			const psimag::Matrix<FieldType>& opN = model.getOperator("n");
-			size_t i0 = 7;
-			FieldType tmp = observe.onePoint(i0,opN,1);
-			std::cout<<"tmp="<<tmp<<"\\n";
-			return;
+	bool verbose = false;
+	Observer<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
+	if (hasTimeEvolution) {
+		SparseMatrixType matrixN(model.getOperator("c",0));
+		SparseMatrixType matrix2;
+		transposeConjugate(matrix2,matrixN);
+		SparseMatrixType A;
+		multiply(A,matrix2,matrixN);
+		Su2RelatedType su2Related1;
+		OperatorType opN(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+		std::cout<<"site value time\\n";
+		for (size_t i0 = 0;i0<observe.size();i0++) {
+			FieldType tmp = observe.template onePoint<ApplyOperatorType>(i0,opN);
+			std::cout<<observe.site()<<" "<<tmp<<" "<<observe.time()<<"\\n";
 		}
-EOF
+		return;
 	}
+EOF
 	if  ($modelName=~/heisenberg/i) {
 	} else {
 		print OBSOUT<<EOF;
@@ -1030,6 +1109,11 @@ EOF
 
 int main(int argc,char *argv[])
 {
+	if (argc>2) {
+		std::string s = "The observer driver takes only one argument now: \\n";
+		s = s + "the name of the input file. The data file is now read from the input file.\\n";
+		throw std::runtime_error(s);
+	}
 	using namespace Dmrg;
 	//typedef CrsMatrix<MatrixElementType> MySparseMatrixReal;
 	typedef   Dmrg::$concurrencyName<RealType> MyConcurrency; 
@@ -1046,8 +1130,14 @@ int main(int argc,char *argv[])
 	typedef $geometryName<RealType,ConnectorsType> GeometryType;
 	
 	ParametersModelType mp;
+	ParametersDmrgSolver<FieldType> dmrgSolverParams;
 	SimpleReader reader(argv[1]);
 	reader.load(mp);
+	reader.load(dmrgSolverParams);	
+	bool hasTimeEvolution=false;
+        if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) hasTimeEvolution=true;
+
+
 EOF
 	if ($modelName =~ /febasedsc/i) {
 		$connectorsArgs= "mp.hoppingsOneSite,2,2";
@@ -1097,9 +1187,14 @@ print OBSOUT<<EOF;
 	// FIXME: See if we need VectorWithOffsets sometimes
 	// FIXME: Does it make sense to have ModelHelperSu2 here sometimes?
 	typedef CrsMatrix<RealType> MySparseMatrixReal;
-	mainLoop<ParametersModelType,GeometryType,MyConcurrency,$modelName,
-		ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,
-		GroundStateTargetting,MySparseMatrixReal>(mp,geometry,concurrency,reader,argv[2]);
+	if (hasTimeEvolution)
+		mainLoop<ParametersModelType,GeometryType,MyConcurrency,$modelName,
+			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,reader,dmrgSolverParams.filename);
+	else
+		mainLoop<ParametersModelType,GeometryType,MyConcurrency,$modelName,
+			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,reader,dmrgSolverParams.filename);
 } // main
 
 EOF

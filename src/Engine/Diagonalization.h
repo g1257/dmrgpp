@@ -83,6 +83,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Utils.h"
 #include "ProgressIndicator.h"
+#include "VectorWithOffset.h" // includes the std::norm functions
+#include "VectorWithOffsets.h" // includes the std::norm functions
 
 namespace Dmrg {
 	
@@ -127,7 +129,8 @@ namespace Dmrg {
 			waveFunctionTransformation_(waveFunctionTransformation)
 		{}
 		
-		RealType operator()(TargettingType& target,size_t direction,const BlockType& block,size_t loopIndex=0)
+		RealType operator()(TargettingType& target,size_t direction,const BlockType& block,size_t loopIndex=0,
+				   bool needsPrinting = false)
 		{
 			const BasisType& pSE= target.basisSE();
 			const BasisWithOperatorsType& pSprime= target.basisS();
@@ -155,9 +158,9 @@ namespace Dmrg {
 				if (verbose_) {
 					j = pSE.qn(pSE.partition(i));
 					std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
-					std::cerr<<"partition "<<i<<" of size="<<bs<<" has qns=";
+					//std::cerr<<"partition "<<i<<" of size="<<bs<<" has qns=";
 					for (size_t k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
-					std::cerr<<"\n";
+					//std::cerr<<"\n";
 				}
 
 				size_t tmp = pSE.electrons(counter);
@@ -183,6 +186,7 @@ namespace Dmrg {
 			
 			typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 			VectorWithOffsetType initialVector(weights,pSE);
+			
 			waveFunctionTransformation_.triggerOn(pSprime,pEprime,pSE);
 			target.initialGuess(initialVector);
 			
@@ -201,7 +205,7 @@ namespace Dmrg {
 				if (verbose_) {
 					msg<<" diagonaliseOneBlock, i="<<i<<" and proc="<<concurrency_.rank()<<" and weight="<<weights[i];
 				}
-				progress_.printline(msg,std::cerr);
+				progress_.printline(msg,std::cout);
 				TargetVectorType initialVectorBySector(weights[i]);
 				initialVector.extract(initialVectorBySector,i);
 				diagonaliseOneBlock(i,tmpVec,gsEnergy,pSprime,pEprime,pSE,initialVectorBySector);
@@ -233,12 +237,13 @@ namespace Dmrg {
 				
 				j = pSE.qn(pSE.partition(i));
 				std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
-				msg<<"target resides in partition "<<i<<" of size="<<vecSaved[i].size();
+				msg<<"Found target in partition "<<i<<" of size="<<vecSaved[i].size();
 				msg<<" with qns=";
 				for (size_t k=0;k<qns.size();k++) msg<<qns[k]<<" ";
 				progress_.printline(msg,std::cout);
 				counter++;
 			}
+			
 			target.setGs(vecSaved,pSE);
 
 			if (concurrency_.root()) {
@@ -250,7 +255,7 @@ namespace Dmrg {
 			}
 			
 			// time step targetting: 
-			target.evolve(gsEnergy,direction,block,loopIndex);
+			target.evolve(gsEnergy,direction,block,loopIndex,needsPrinting);
 			waveFunctionTransformation_.triggerOff(pSprime,pEprime,pSE); //,m);
 			return gsEnergy;
 		}
@@ -266,8 +271,8 @@ namespace Dmrg {
      					BasisType const &pSE,
 					const SomeVectorType& initialVector)
 		{
-			RealType eps=ProgramLimits::LanczosTolerance;
-			int iter=ProgramLimits::LanczosSteps;
+			RealType eps=ProgramGlobals::LanczosTolerance;
+			int iter=ProgramGlobals::LanczosSteps;
 			std::vector<RealType> tmpVec1,tmpVec2;
 			//srand48(7123443);
 			
@@ -284,7 +289,7 @@ namespace Dmrg {
 				psimag::Matrix<typename SparseMatrixType::value_type> fullm2;
 				crsMatrixToFullMatrix(fullm2,fullm);
 				if (isZero(fullm2)) std::cerr<<"Matrix is zero\n";
-				
+				std::cerr<<fullm2;
 				std::vector<RealType> eigs(fullm2.n_row());
 				utils::diag(fullm2,eigs,'V');
 				std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
@@ -292,8 +297,8 @@ namespace Dmrg {
 					throw std::logic_error("Exiting due to option test in the input file\n");
 			}
 			std::ostringstream msg;
-			msg<<"Size of Matrix block="<<modelHelper.size();
-			progress_.printline(msg,std::cerr);
+			msg<<"I will now diagonalize a matrix of size="<<modelHelper.size();
+			progress_.printline(msg,std::cout);
 			diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,initialVector,iter,eps);
 		}
 		

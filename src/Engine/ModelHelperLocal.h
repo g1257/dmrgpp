@@ -130,7 +130,7 @@ namespace Dmrg {
 
 		size_t m() const { return m_; }
 
-		bool isSu2() const { return false; }
+		static bool isSu2() { return false; }
 
 		const BasisType& basis1() const { return basis1_; }
 

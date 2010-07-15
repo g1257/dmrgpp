@@ -95,6 +95,10 @@ namespace Dmrg {
 		
 		OperatorsHubbard(const DmrgBasisType* thisBasis) : OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_,NUMBER_OF_ORBITALS) { }
 		
+		template<typename IoInputter>
+		OperatorsHubbard(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
+				OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_,NUMBER_OF_ORBITALS) { }
+		
 		const OperatorType& getOperator(int i,int sigma) const 
 		{ 
 			int k = sigma+i*_dof_;

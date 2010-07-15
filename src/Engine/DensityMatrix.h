@@ -99,6 +99,8 @@ namespace Dmrg {
 		typedef BlockMatrix<DensityMatrixElementType,psimag::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
 		static bool const enforceSymmetry = false;
+		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
+		
 	public:
 		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 		
@@ -107,10 +109,10 @@ namespace Dmrg {
 			const DmrgBasisWithOperatorsType& pBasis,
 			const DmrgBasisWithOperatorsType& pBasisSummed,
 			const DmrgBasisType& pSE,
-			int option,bool debug=false,bool verbose=false) : data_(pBasis.size() ,pBasis.partition()-1),mMaximal_(pBasis.partition()-1),pBasis_(pBasis),
+			size_t direction,bool debug=false,bool verbose=false) : data_(pBasis.size() ,pBasis.partition()-1),mMaximal_(pBasis.partition()-1),pBasis_(pBasis),
 				debug_(debug),verbose_(verbose)
 		{
-			init(target,pBasis,pBasisSummed,pSE,option);
+			init(target,pBasis,pBasisSummed,pSE,direction);
 		}
 		
 		BlockMatrixType& operator()()
@@ -120,12 +122,12 @@ namespace Dmrg {
 		
 		size_t rank() { return data_.rank(); }
 		
-		void check(int option)
+		void check(int direction)
 		{
 			if (!DmrgBasisType::useSu2Symmetry() || !debug_) return;
 			
 			
-			if (verbose_) std::cerr<<"CHECKING DENSITY-MATRIX WITH OPTION="<<option<<"\n";
+			if (verbose_) std::cerr<<"CHECKING DENSITY-MATRIX WITH OPTION="<<direction<<"\n";
 			for (size_t m=0;m<data_.blocks();m++) {
 				// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
 				size_t p = mMaximal_[m];
@@ -136,10 +138,10 @@ namespace Dmrg {
 			}
 		}
 
-		void check2(int option)
+		void check2(int direction)
 		{
 			if (!DmrgBasisType::useSu2Symmetry()|| !debug_) return;
-			if (verbose_) std::cerr<<"CHECKING DMRG-TRANFORM WITH OPTION="<<option<<"\n";
+			if (verbose_) std::cerr<<"CHECKING DMRG-TRANFORM WITH OPTION="<<direction<<"\n";
 			for (size_t m=0;m<data_.blocks();m++) {
 				// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
 				size_t p = mMaximal_[m];
@@ -191,7 +193,7 @@ namespace Dmrg {
 				DmrgBasisWithOperatorsType const &pBasis,
 				const DmrgBasisWithOperatorsType& pBasisSummed,
 				DmrgBasisType const &pSE,
-				int option)
+				int direction)
 		{
 			BuildingBlockType matrixBlock;
 			
@@ -210,7 +212,7 @@ namespace Dmrg {
 					for (size_t j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
 						
 						matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m))=
-							densityMatrixAux(i,j,target,pBasisSummed,pSE,option);
+							densityMatrixAux(i,j,target,pBasisSummed,pSE,direction);
 						
 					}
 				}
@@ -219,7 +221,7 @@ namespace Dmrg {
 			if (!DmrgBasisType::useSu2Symmetry()) return;
 			
 			if (verbose_) {
-				std::cerr<<"DENSITYMATRIXPRINT option="<<option<<"\n";
+				std::cerr<<"DENSITYMATRIXPRINT option="<<direction<<"\n";
 				std::cerr<<(*this);
 				std::cerr<<"***********\n";
 				std::cerr<<"Calling ae from init()...\n";
@@ -272,37 +274,37 @@ namespace Dmrg {
 		}
 		
 		DensityMatrixElementType densityMatrixAux(size_t alpha1,size_t alpha2,const TargettingType& target,
-			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,int option)
+			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,size_t direction)
 		{
 			DensityMatrixElementType sum=0;
 			// The g.s. has to be treated separately because it's usually a vector of double, whereas
 			// the other targets might be complex, and C++ generic programming capabilities are weak... we need D!!!
 			if (target.includeGroundStage()) sum +=  densityMatrixOneTarget(alpha1,alpha2,target.gs(),
-			    		pBasisSummed,pSE,option)*target.gsWeight();
+			    		pBasisSummed,pSE,direction)*target.gsWeight();
 			
 			for (size_t i=0;i<target.size();i++) 
 				sum += densityMatrixOneTarget(alpha1,alpha2,target(i),
-					pBasisSummed,pSE,option)*target.weight(i);
+					pBasisSummed,pSE,direction)*target.weight(i)/target.normSquared(i);
 
 			return sum;
 		}
 		
 		template<typename TargetVectorType>
 		DensityMatrixElementType densityMatrixOneTarget(size_t alpha1,size_t alpha2,const TargetVectorType& v,
-			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,int option)
+			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,size_t direction)
 		{
-			if (DmrgBasisType::useSu2Symmetry()) return densityMatrixHasFactors(alpha1,alpha2,v,pBasisSummed,pSE,option);
-			return densityMatrixNoFactors(alpha1,alpha2,v,pBasisSummed,pSE,option);
+			if (DmrgBasisType::useSu2Symmetry()) return densityMatrixHasFactors(alpha1,alpha2,v,pBasisSummed,pSE,direction);
+			return densityMatrixNoFactors(alpha1,alpha2,v,pBasisSummed,pSE,direction);
 		}
 		
 		template<typename TargetVectorType>
 		DensityMatrixElementType densityMatrixHasFactors(size_t alpha1,size_t alpha2,const TargetVectorType& v,
-			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,int option)
+			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,size_t direction)
 		{
 			int ne = pBasisSummed.size();
 			int ns = pSE.size()/ne;
 			size_t total=pBasisSummed.size();
-			if (option!=0) {
+			if (direction!=EXPAND_SYSTEM) {
 				ns=pBasisSummed.size();
 				ne=pSE.size()/ns;
 			}
@@ -320,7 +322,7 @@ namespace Dmrg {
 				int i1 = alpha1+beta*ns;
 				int i2 = alpha2+beta*ns;
 				// sum over system:
-				if (option!=0) {
+				if (direction!=EXPAND_SYSTEM) {
 					i1 = beta + alpha1*ns;
 					i2 = beta + alpha2*ns;
 				}		
@@ -342,11 +344,11 @@ namespace Dmrg {
 		
 		template<typename TargetVectorType>
 		DensityMatrixElementType densityMatrixNoFactors(size_t alpha1,size_t alpha2,const TargetVectorType& v,
-			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,int option)
+			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,size_t direction)
 		{
 			int ne = pBasisSummed.size();
 			int ns = pSE.size()/ne;
-			if (option!=0) {
+			if (direction!=EXPAND_SYSTEM) {
 				ns=pBasisSummed.size();
 				ne=pSE.size()/ns;
 			}
@@ -356,7 +358,7 @@ namespace Dmrg {
 
 			for (size_t beta=0;beta<total;beta++) {
 				size_t ii=0,jj=0;
-				if (option==0) { // summing over environment
+				if (direction==EXPAND_SYSTEM) { // summing over environment
 					jj = pSE.permutationInverse(alpha2+beta*ns);
 					ii = pSE.permutationInverse(alpha1+beta*ns);
 				} else { // summing over system

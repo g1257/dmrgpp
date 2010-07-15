@@ -71,90 +71,28 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 */
 // END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Connectors.h
+/*! \file ProgramGlobals.h
  *
- *  FIXME
+ *
  *
  */
-#ifndef CONNECTORS_H
-#define CONNECTORS_H
-
-#include "Connector.h"
+#ifndef PROGRAM_LIMITS_H
+#define PROGRAM_LIMITS_H
 
 namespace Dmrg {
+	struct ProgramGlobals {
+		static size_t const MaxNumberOfSites = 300; // max number of sites that a model can use
+		static size_t const MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
+		static size_t const LanczosSteps = 200; // max number of external Lanczos steps
+		static double const LanczosTolerance; // tolerance of the Lanczos Algorithm
+		enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
+	}; // ProgramGlobals
 	
-	template<typename FieldType>
-	class Connectors {
-	public:
-		
-		typedef Connector<FieldType> ConnectorType;
-		
-		Connectors(size_t dof,size_t linSize) : dof_(dof), linSize_(linSize) 
-		{
-		}
-		
-		void push(const psimag::Matrix<FieldType>& connectorMatrix,FieldType defaultConnector) 
-			
-		{
-			ConnectorType c(connectorMatrix,defaultConnector);
-			connectors_.push_back(c);
-		}
-		
-		void push(const psimag::Matrix<FieldType>& connectorMatrix,const std::vector<FieldType>& defaultConnector) 
-			
-		{
-			ConnectorType c(connectorMatrix,defaultConnector);
-			connectors_.push_back(c);
-		}
-
-		void push(	const std::vector<psimag::Matrix<FieldType> >& connectorsOneSite,
-	  			size_t numberOfOrbitals,
-				size_t leg) 
-		{
-		
-			ConnectorType c(connectorsOneSite,linSize_,numberOfOrbitals,dof_,leg);
-			connectors_.push_back(c);
-		}
-		
-		size_t linSize() const { return linSize_; }
-		
-		size_t dof() const { return dof_; }
-		
-		FieldType getMatrix(size_t i,size_t j,size_t what = 0) const
-		{
-			return connectors_[what].getMatrix(i,j);
-		}
-		
-		FieldType operator()(size_t i,size_t j,size_t what = 0) const
-		{
-			return connectors_[what](i,j);
-		}
-		
-		FieldType defaultValue(size_t dir = 0, size_t a = 0, size_t b = 0,size_t what = 0) const
-		{
-			return connectors_[what].defaultValue(dir,a,b);
-		}
-		
-		size_t n_row(size_t what = 0) const { return connectors_[what].n_row(); }
-		
-		size_t size() const { return connectors_.size(); }
-		
-		
-	private:
-		size_t dof_,linSize_;
-		std::vector<ConnectorType> connectors_;
-			
-	}; //Connectors
-	
-// 	template<typename FieldType>
-// 	std::ostream& operator<<(std::ostream& os,Connectors<FieldType>& connectors)
-// 	{
-// 		os<<connectors.connectors_;
-// 		return os;
-// 	}
-} // namespace Dmrg
+	double const ProgramGlobals::LanczosTolerance = 1e-12;
+}; // namespace Dmrg
 /*@}*/
-#endif //TJ_ONEORBITAL_HEADER_H
+#endif

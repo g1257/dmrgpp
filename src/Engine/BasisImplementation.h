@@ -108,6 +108,27 @@ namespace Dmrg {
 		{
 			symmLocal_.createDummyFactors(1,1);
 		}
+		
+		// use this if you know the name
+		template<typename IoInputter>
+		BasisImplementation(IoInputter& io,const std::string& ss,size_t counter=0,bool bogus = false)
+				: dmrgTransformed_(false), name_(ss), progress_(ss,0) 
+		{
+			io.advance("#NAME="+ss,counter);
+			loadInternal(io);
+		}
+
+		// use this if you don't know the name
+		/*template<typename IoInputter>
+		BasisImplementation(IoInputter& io,size_t counter=0,bool bogus = false)
+				: dmrgTransformed_(false), name_("#NAME"), progress_("#NAME",0)
+		{
+			std::string nn="#NAME=";
+			std::pair<std::string,size_t> sc = io.advance(nn,counter);
+			name_ = sc.first.substr(nn.size(),sc.first.size());
+			loadInternal(io);
+			
+		}*/
 
 		const std::string& name() const { return name_; }
 
@@ -163,6 +184,7 @@ namespace Dmrg {
 				electrons_[i]=basisData.electronsUp[i]+basisData.electronsDown[i];
 			findQuantumNumbers(quantumNumbers_,basisData);
 			findPermutationAndPartition();
+			electronsOld_=electrons_;
 		}
 
 		static void findQuantumNumbers(std::vector<size_t>& qn,const BasisDataType& basisData) 
@@ -206,6 +228,7 @@ namespace Dmrg {
 			findPermutationAndPartition();
 
 			reorder();
+			electronsOld_ = electrons_;
 		}
 
 		size_t getFlavor(size_t i) const
@@ -234,7 +257,11 @@ namespace Dmrg {
 
 		size_t getNe(size_t i) const { return electrons_[i]; }
 
-		const std::vector<size_t>& electrons() const {return electrons_; }
+		const std::vector<size_t>& electronsVector(size_t beforeOrAfterTransform) const 
+		{
+			if (beforeOrAfterTransform == AFTER_TRANSFORM) return electrons_;
+			return electronsOld_;
+		}
 
 		int fermionicSign(size_t i,int f) const { return ((electrons_[i]%2)==0) ? 1 : f; }
 
@@ -285,6 +312,8 @@ namespace Dmrg {
 				truncate(removedIndices);
 			}
 			
+			// N.B.: false below means that we don't truncate the permutation vectors
+			//	because they're needed for the WFT
 			findPermutationAndPartition(false);
 			std::ostringstream msg;
 			msg<<"Done with changeBasis";
@@ -369,25 +398,6 @@ namespace Dmrg {
 		}
 		
 		bool dmrgTransformed() const { return dmrgTransformed_; }
-		
-		// use this if you know the name
-		template<typename IoInputter>
-		void load(IoInputter& io,const std::string& ss,size_t counter=0) 
-		{
-			io.advance("#NAME="+ss,counter);
-			loadInternal(io);
-		}
-
-		// use this if you don't know the name
-		template<typename IoInputter>
-		void load(IoInputter& io,size_t counter=0) 
-		{
-			std::string nn="#NAME=";
-			std::pair<std::string,size_t> sc = io.advance(nn,counter);
-			name_ = sc.first.substr(nn.size(),sc.first.size());
-			loadInternal(io);
-			
-		}
 
 		template<typename IoOutputter>
 		void save(IoOutputter& io,const std::string& ss) const
@@ -414,6 +424,7 @@ namespace Dmrg {
 		std::vector<size_t> quantumNumbers_;
 		std::vector<size_t> quantumNumbersOld_;
 		std::vector<size_t> electrons_;
+		std::vector<size_t> electronsOld_;
 		std::vector<size_t> partition_;
 		std::vector<size_t> partitionOld_;
 		std::vector<size_t> permutationVector_;
@@ -432,6 +443,7 @@ namespace Dmrg {
 			io.read(block_,"#BLOCK");
 			io.read(quantumNumbers_,"#QN");
 			io.read(electrons_,"#ELECTRONS");
+			io.read(electronsOld_,"#0OLDELECTRONS");
 			io.read(partition_,"#PARTITION");
 			io.read(permInverse_,"#PERMUTATIONINVERSE");
 			permutationVector_.resize(permInverse_.size());
@@ -451,6 +463,7 @@ namespace Dmrg {
 			io.printVector(block_,"#BLOCK");
 			io.printVector(quantumNumbers_,"#QN");
 			io.printVector(electrons_,"#ELECTRONS");
+			io.printVector(electronsOld_,"#0OLDELECTRONS");
 			io.printVector(partition_,"#PARTITION");
 			io.printVector(permInverse_,"#PERMUTATIONINVERSE");
 

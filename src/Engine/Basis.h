@@ -112,7 +112,21 @@ namespace Dmrg {
 
 		//! Constructor, s=name of this basis 
 		Basis(const std::string& s) : basisImplementation_(s) {  }
+		
+		//! Loads this basis from memory or disk
+		template<typename IoInputter>
+		Basis(IoInputter& io,const std::string& ss,size_t counter=0,bool bogus = false) 
+			: basisImplementation_(io,ss,counter,bogus)
+		{
+		}
+		
+		//! Loads this basis from memory or disk
+		/*template<typename IoInputter>
+		Basis(IoInputter& io,size_t counter=0,bool bogus = false) : basisImplementation_(io,counter,bogus)
+		{
+		}*/
 
+		
 		//! Returns the name of this basis
 		const std::string& name() const { return  basisImplementation_.name(); }
 
@@ -243,7 +257,10 @@ namespace Dmrg {
 		}
 
 		//! Returns the vector of electrons for this basis
-		const std::vector<size_t>& electrons() const {return basisImplementation_.electrons(); }
+		const std::vector<size_t>& electronsVector(size_t beforeOrAfterTransform=AFTER_TRANSFORM) const 
+		{
+			return basisImplementation_.electronsVector(beforeOrAfterTransform);
+		}
 
 		//! Returns the fermionic sign for state i
 		int fermionicSign(size_t i,int f) const { return basisImplementation_.fermionicSign(i,f); }
@@ -288,20 +305,6 @@ namespace Dmrg {
 		size_t jMax() const 
 		{ 
 			return basisImplementation_.jMax(); 
-		}
-
-		//! Loads this basis from memory or disk
-		template<typename IoInputter>
-		void load(IoInputter& io,const std::string& ss,size_t counter=0) 
-		{
-			basisImplementation_.load(io,ss,counter);
-		}
-
-		//! Loads this basis from memory or disk
-		template<typename IoInputter>
-		void load(IoInputter& io,size_t counter=0) 
-		{
-			basisImplementation_.load(io,counter);
 		}
 
 		//! saves this basis to disk

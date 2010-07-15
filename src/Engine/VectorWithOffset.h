@@ -93,7 +93,7 @@ namespace Dmrg {
 			typedef std::pair<size_t,size_t> PairType;
 			typedef std::vector<FieldType> VectorType;
 			
-			VectorWithOffset() { }
+			VectorWithOffset()  : size_(0),offset_(0) { }
 			
 			template<typename SomeBasisType>
 			VectorWithOffset(const std::vector<size_t>& weights,const SomeBasisType& someBasis) 
@@ -112,6 +112,13 @@ namespace Dmrg {
 				}
 			}
 			
+			void resize(size_t x)
+			{
+				size_ = x;
+				data_.clear();
+				offset_=0;
+			}
+			
 			template<typename SomeBasisType>
 			void set(const std::vector<VectorType>& v,//const std::vector<size_t>& weights,
 				 const SomeBasisType& someBasis)
@@ -128,6 +135,7 @@ namespace Dmrg {
 						found = true;
 					}
 				}
+				if (!found) throw std::runtime_error("Set failed\n");
 			}
 			
 			size_t sectors() const { return 1; }
@@ -160,14 +168,37 @@ namespace Dmrg {
 				v=data_;
 			}
 			
-			void print(std::ostream& os,const std::string& label) const
+			template<typename SparseVectorType>
+			void toSparse(SparseVectorType& sv) const
 			{
-				os<<label<<"\n";
-				os<<size_<<"\n";
-				os<<data_.size()<<"\n";
-				for (size_t i=0;i<data_.size();i++) {
-					os<<(i+offset_)<<" "<<data_[i]<<"\n";
-				}
+				sv.resize(size_);
+				for (size_t i=0;i<data_.size();i++)
+					sv[i+offset_] = data_[i];
+			}
+			
+			template<typename IoOutputter>
+			void save(IoOutputter& io,const std::string& label) const
+			{
+				io.printline(label);
+				std::string s="#size="+utils::ttos(size_);
+				io.printline(s);
+				s="#offset="+utils::ttos(offset_);
+				io.printline(s);
+				io.printVector(data_,"#data");
+			}
+			
+			template<typename IoInputter>
+			void load(IoInputter& io,const std::string& label,size_t counter=0)
+			{
+				io.advance(label,counter);
+				int x = 0;
+				io.readline(x,"#size=");
+				if (x<0) throw std::runtime_error("VectorWithOffset::load(...): size<0\n");
+				size_ = x;
+				io.readline(x,"#offset=");
+				if (x<0) throw std::runtime_error("VectorWithOffset::load(...): offset<0\n");
+				offset_ = x;
+				io.read(data_,"#data");
 			}
 			
 			size_t size() const { return size_; }
@@ -249,6 +280,14 @@ namespace std {
 	inline FieldType norm(const Dmrg::VectorWithOffset<std::complex<FieldType> >& v)
 	{
 		return std::norm(v.data_);
+	}
+	
+	template<typename FieldType>
+	inline std::complex<FieldType> operator*(
+				const Dmrg::VectorWithOffset<std::complex<FieldType> >& v1,
+				const Dmrg::VectorWithOffset<std::complex<FieldType> >& v2)
+	{
+		throw std::runtime_error("Unimplemented\n");
 	}
 }
 /*@}*/

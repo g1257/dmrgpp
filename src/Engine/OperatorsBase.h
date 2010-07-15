@@ -95,9 +95,16 @@ namespace Dmrg {
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
 		OperatorsBase(const BasisType* thisBasis,size_t dof,size_t nOrbitals) :
-			useSu2Symmetry_(BasisType::useSu2Symmetry()),operatorsImpl_(thisBasis,dof,nOrbitals),
+			operatorsImpl_(thisBasis,dof,nOrbitals),
 					progress_("Operators",0) 
 		{ }
+					
+		template<typename IoInputter>
+		OperatorsBase(IoInputter& io,size_t level,const BasisType* thisBasis,
+			      size_t dof,size_t orbitals) 
+			: operatorsImpl_(io,level,thisBasis,dof,orbitals),progress_("Operators",0) 
+		{
+		}
 
 		void setOperators(const std::vector<OperatorType>& ops)
 		{
@@ -218,14 +225,7 @@ namespace Dmrg {
 			operatorsImpl_.save(io,s);
 		}
 
-		template<typename IoInputter>
-		void load(IoInputter& io,size_t level)
-		{
-			operatorsImpl_.load(io,level);
-		}
-
 	private:
-		bool useSu2Symmetry_;
 		OperatorsImplementation<OperatorType,BasisType> operatorsImpl_;
 		ProgressIndicator progress_;
 	}; //class OperatorsBase 

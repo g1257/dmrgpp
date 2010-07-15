@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef CORRELATIONS_SK_H
 #define CORRELATIONS_SK_H
-#include "Precomputed.h"
+#include "ObserverHelper.h"
 #include "CrsMatrix.h"
 
 
@@ -107,30 +107,25 @@ namespace Dmrg {
 		return os;
 	}
 	
-	template<typename RealType,typename FieldType,typename IoType,
- 		typename MatrixType,template<typename> class VectorTemplate>
+	template<typename IoType,typename MatrixType,typename VectorType,typename VectorWithOffsetType,typename BasisType>
 	class CorrelationsSkeleton {
 		//typedef typename MatrixType::value_type FieldType;
 		typedef size_t IndexType;
-		typedef Precomputed<RealType,FieldType,IoType,MatrixType,VectorTemplate> PrecomputedType;
+		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> ObserverHelperType;
+		typedef typename VectorType::value_type FieldType;
+		typedef typename BasisType::RealType RealType;
 		
 	public:
 		enum {GROW_RIGHT,GROW_LEFT};
 		enum {DIAGONAL,NON_DIAGONAL};
 		
-		CorrelationsSkeleton(PrecomputedType& precomp,bool verbose = false) : precomp_(precomp),verbose_(verbose) { } 
-		
-		void createSigns(std::vector<int>& signs,int f)
-		{
-			signs.resize(precomp_.electrons().size());
-			for (size_t i=0;i<precomp_.electrons().size();i++) signs[i] = (precomp_.electrons(i) %2) ? 1 : f;
-		}
+		CorrelationsSkeleton(ObserverHelperType& helper,bool verbose = false) : helper_(helper),verbose_(verbose) { } 
 		
 		//! i can be zero here!!
 		void growDirectly(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns)
 		{
 			Odest =Osrc;
-			std::vector<int> signs;
+			//std::vector<int> signs;
 			// from 0 --> i
 			int nt=i-1;
 			if (nt<0) nt=0;
@@ -142,7 +137,7 @@ namespace Dmrg {
 				calcSpermutation(s);
 				//std::cerr<<"*****************======="<<transform_.n_row()<<"\n";
 				io_.readMatrix(transform_,"#TRANSFORM_sites",s);*/
-				precomp_.setPointer(s);
+				helper_.setPointer(s);
 				//std::cerr<<"%%%%%%%%%%%%%%%%%======="<<transform_.n_row()<<"\n";
 				int growOption = GROW_RIGHT;
 				//if (i==1 && s==0) growOption = GROW_LEFT;// <-- not needed since nt>0
@@ -152,49 +147,50 @@ namespace Dmrg {
 				}
 				/*io_.rewind();
 				io_.read(electrons_,"#ELECTRONS_sites=",s);*/
-				createSigns(signs,fermionicSign);
-				MatrixType Onew(precomp_.transform().n_col(),precomp_.transform().n_col());
-				fluffUp(Onew,Odest,signs,growOption);
+				//createSigns(signs,fermionicSign);
+				MatrixType Onew(helper_.columns(),helper_.columns());
+				fluffUp(Onew,Odest,fermionicSign,growOption);
 				Odest = Onew;
 				
 			}
 		}
 		
 		// Perfomance critical:	
-		void fluffUp(MatrixType& ret2,const MatrixType& O,const std::vector<int>& signs,int growOption=GROW_RIGHT)
+		void fluffUp(MatrixType& ret2,const MatrixType& O,int fermionicSign,
+			     int growOption=GROW_RIGHT)
 		{
-			size_t n = precomp_.SpermutationInverse().size();
+			size_t n = helper_.basisS().size();
 			MatrixType ret(n,n);
 
 			for (size_t e=0;e<n;e++) {
 				for (size_t e2=0;e2<n;e2++) {
-					ret(e,e2) = fluffUp(O,e,e2,signs,growOption);
+					ret(e,e2) = fluffUp(O,e,e2,fermionicSign,growOption);
 				}
 			}
-			precomp_.transform(ret2,ret);
+			helper_.transform(ret2,ret);
 		}
 
 		// Perfomance critical:
-		FieldType fluffUp(const MatrixType& O,size_t e,size_t e2,const std::vector<int>& signs,
+		FieldType fluffUp(const MatrixType& O,size_t e,size_t e2,int fermionicSign,
 					  int growOption=GROW_RIGHT)	
 		{
 			
 			size_t n = O.n_row();
-			size_t m = size_t(precomp_.Spermutation().size()/n);
+			size_t m = size_t(helper_.basisS().size()/n);
 			FieldType sign = static_cast<FieldType>(1.0);
 			
 			// Sperm[e] = i +k*n or e= k + i*m
 			// Sperm[e2] = j+k*n or e2=k+j*m
 			size_t i,j,k,k2;
 			if (growOption==GROW_RIGHT) {	
-				if (size_t(precomp_.Spermutation(e)/n)!=size_t(precomp_.Spermutation(e2)/n)) return 0;
-				utils::getCoordinates(i,k,precomp_.Spermutation(e),n);
-				utils::getCoordinates(j,k2,precomp_.Spermutation(e2),n);
+				if (size_t(helper_.basisS().permutation(e)/n)!=size_t(helper_.basisS().permutation(e2)/n)) return 0;
+				utils::getCoordinates(i,k,helper_.basisS().permutation(e),n);
+				utils::getCoordinates(j,k2,helper_.basisS().permutation(e2),n);
 			} else {
-				if (size_t(precomp_.Spermutation(e)%m)!=size_t(precomp_.Spermutation(e2)%m)) return 0;
-				utils::getCoordinates(k,i,precomp_.Spermutation(e),m);
-				utils::getCoordinates(k2,j,precomp_.Spermutation(e2),m);
-				sign = signs[k];
+				if (size_t(helper_.basisS().permutation(e)%m)!=size_t(helper_.basisS().permutation(e2)%m)) return 0;
+				utils::getCoordinates(k,i,helper_.basisS().permutation(e),m);
+				utils::getCoordinates(k2,j,helper_.basisS().permutation(e2),m);
+				sign = helper_.fermionicSign()(k,fermionicSign); // signs[k];
 			}
 			FieldType ret=0;
 			if (k==k2) ret=O(i,j)*sign;
@@ -215,8 +211,8 @@ namespace Dmrg {
 			std::cerr<<"Mult,O2\n";
 			std::cerr<<O2;*/
 			
-			precomp_.setPointer(ns);
-			//size_t wfsize = precomp_.wavefunction().size();
+			helper_.setPointer(ns);
+			//size_t wfsize = helper_.wavefunction().size();
 			//size_t envSize = wfsize/(ni*nj);
 			size_t sprime = ni*nj;
 			result.resize(sprime,sprime);
@@ -225,47 +221,45 @@ namespace Dmrg {
 				for (size_t r2=0;r2<result.n_col();r2++)
 					result(r,r2)=0;
 			
-			if (precomp_.Spermutation().size()!=sprime) {
-				std::cerr<<"WARNING: "<<precomp_.Spermutation().size()<<"!="<<sprime<<"\n";
+			if (helper_.basisS().size()!=sprime) {
+				std::cerr<<"WARNING: "<<helper_.basisS().size()<<"!="<<sprime<<"\n";
 				throw std::runtime_error("problem\n");
 			}
 			
 			for (size_t r=0;r<sprime;r++) {
 				//size_t r,eta;
-				//utils::getCoordinates(r,eta,precomp_.SEpermutation(x),ni*nj);
+				//utils::getCoordinates(r,eta,helper_.SEpermutation(x),ni*nj);
 				size_t e,u;
-				utils::getCoordinates(e,u,precomp_.Spermutation(r),ni);
-				FieldType f = (precomp_.electrons(e)%2) ? 1.0 : fermionicSign;
+				utils::getCoordinates(e,u,helper_.basisS().permutation(r),ni);
+				FieldType f = helper_.fermionicSign()(e,fermionicSign);
 				for (size_t e2=0;e2<ni;e2++) {	
 					for (size_t u2=0;u2<nj;u2++) {
-						size_t r2 = precomp_.SpermutationInverse()[e2 + u2*ni];
+						size_t r2 = helper_.basisS().permutationInverse(e2 + u2*ni);
 						//size_t x2 = r2 + eta*envSize;
 						result(r,r2) += O1(e,e2)*O2(u,u2)*f;
 					}
 				}
 			}
-			if (result.n_row()!=precomp_.transform().n_row()) {
-				std::cerr<<result.n_row()<<" "<<precomp_.transform().n_row()<<"\n";
+			if (result.n_row()!=helper_.rows()) {
+				std::cerr<<result.n_row()<<" "<<helper_.rows()<<"\n";
 				throw std::runtime_error("dmrgMultiply: mismatch in transform\n");
 			}
-			/*size_t trunc = precomp_.transform().n_col();
+			/*size_t trunc = helper_.transform().n_col();
 			result2.resize(trunc,trunc);
-			precomp_.transform(result2,result);*/
+			helper_.transform(result2,result);*/
 		}
 		
-		FieldType bracket(const MatrixType& A,size_t useTimeVector=PrecomputedType::NOTIMEVECTOR)
+		FieldType bracket(const MatrixType& A)
 		{
-			if (useTimeVector == PrecomputedType::NOTIMEVECTOR) {
-				const typename PrecomputedType::VectorType& v = precomp_.wavefunction();
-				return bracket_(A,v);
-			} else {
-				const typename PrecomputedType::VectorType& v2 = precomp_.timeVector();
-				return bracket_(A,v2);
-			}
+			const VectorWithOffsetType& v = helper_.wavefunction();
+			VectorType w(v.size());
+			v.toSparse(w);
+			
+			return bracket_(A,w);
 		}
 		
-		template<typename SomeVectorType>
-		FieldType bracket_(const MatrixType& A,const SomeVectorType& vec)
+		//template<typename SomeVectorType>
+		FieldType bracket_(const MatrixType& A,const VectorType& vec)
 		{
 			//typedef typename SomeVectorType::value_type ComplexOrRealType;
 			FieldType zeroc = 0;
@@ -273,20 +267,22 @@ namespace Dmrg {
 			RealType norma = std::norm(vec);
 			//std::cerr<<"MatrixA\n";
 			//std::cerr<<A;
-			if (verbose_) std::cerr<<"SE.size="<<precomp_.SEpermutation()<<"\n";
+			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
 			
-			//if (precomp_.SEpermutation()!=A.size()) throw std::runtime_error("problem in bracket\n");
+			//if (helper_.SEpermutation()!=A.size()) throw std::runtime_error("problem in bracket\n");
 			CrsMatrix<FieldType> Acrs(A);
 			FieldType sum=0;
 			//size_t counter=0;
+			if (vec.size()!=helper_.basisSE().size()) throw std::runtime_error("Error\n");
 			for (size_t x=0;x<vec.indices();x++) {
 				size_t t=vec.index(x);
 				size_t eta,r;
-				utils::getCoordinates(r,eta,precomp_.SEpermutation(t),precomp_.Spermutation().size());
+				
+				utils::getCoordinates(r,eta,helper_.basisSE().permutation(t),helper_.basisS().size());
 				//for (size_t r2=0;r2<A.n_col();r2++) {
 				for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
 					size_t r2 = Acrs.getCol(k);
-					size_t t2 = precomp_.SEpermutationInverse(r2+eta*A.n_col());
+					size_t t2 = helper_.basisSE().permutationInverse(r2+eta*A.n_col());
 					if (vec[t2]==zeroc) continue;
 					//if (A(r,r2)==0) continue;
 					//counter++;
@@ -312,7 +308,7 @@ namespace Dmrg {
 		}
 		
 	private:
-		PrecomputedType& precomp_; //<-- NB: We are not the owner
+		ObserverHelperType& helper_; //<-- NB: We are not the owner
 		bool verbose_;
 		
 	};  //class CorrelationsSkeleton

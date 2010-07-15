@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CLEBSCH_GORDANCACHED_H
 
 #include "ClebschGordan.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 	
@@ -91,15 +92,29 @@ namespace Dmrg {
 			typedef ClebschGordan<FieldType> ClebschGordanType;
 			typedef typename ClebschGordanType::PairType PairType;
 			
-			static size_t const jmax_=ProgramLimits::MaximumJValue;
-			static std::vector<FieldType> data_;
-			ClebschGordanType cgObject_;
-			static int const UNDEFINED_VALUE;
-			static size_t max2_,max22_;
-			
 		public:
-			ClebschGordanCached(size_t dummy=0) 
-			{		
+			ClebschGordanCached(size_t jmax) 
+			: progress_("ClebschGordanCached",0),
+			  UNDEFINED_VALUE(-1000),
+			jmax_(jmax),
+			 max2_(((jmax_-1)*(jmax_+2))/2+1),max22_(max2_*max2_),
+			data_(max22_*jmax_*2,UNDEFINED_VALUE),cgObject_(2)
+			{
+				init(jmax,2);
+			}
+			
+			void init(size_t jmax,size_t nfactorials)
+			{
+				jmax_=jmax;
+				max2_=((jmax_-1)*(jmax_+2))/2+1;
+				max22_=max2_*max2_;
+				data_.resize(max22_*jmax_*2,UNDEFINED_VALUE);
+				cgObject_.init(nfactorials);
+				//std::ostringstream msg;
+				//msg<<"init called "<<copies_<<" times, jmax="<<jmax<<"\n";
+				//progress_.printline(msg,std::cout);
+				copies_++;
+				if (copies_>2) throw std::runtime_error("ClebschGordanCached: too many copies\n");
 			}
 
 			FieldType operator()(const PairType& jm,const PairType& jm1,const PairType& jm2) 
@@ -165,17 +180,19 @@ namespace Dmrg {
 				if (x<0 || jm1.second+jm2.second<size_t(x)) return -1;
 				return jm1.second+jm2.second-x;
 			}
+			
+			static size_t copies_;
+			ProgressIndicator progress_;
+			int UNDEFINED_VALUE;
+			size_t jmax_;
+			size_t max2_,max22_;
+			std::vector<FieldType> data_;
+			ClebschGordanType cgObject_;
 	}; // class ClebschGordanCached
 	
 	template<typename FieldType>
-	const int ClebschGordanCached<FieldType>::UNDEFINED_VALUE= -1000;
-	template<typename FieldType>
-	size_t ClebschGordanCached<FieldType>::max2_=((jmax_-1)*(jmax_+2))/2+1;
-	template<typename FieldType>
-	size_t ClebschGordanCached<FieldType>::max22_=(max2_*max2_);
-	template<typename FieldType>
-	std::vector<FieldType> ClebschGordanCached<FieldType>::data_(max22_*jmax_*2,UNDEFINED_VALUE);
-			
+	size_t ClebschGordanCached<FieldType>::copies_=0;
+	
 }; // namespace Dmrg
 /*@}*/
 #endif

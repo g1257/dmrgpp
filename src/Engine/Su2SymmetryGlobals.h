@@ -71,90 +71,47 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 */
 // END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Connectors.h
+/*! \file Su2SymmetryGlobals.h
  *
- *  FIXME
+ *
  *
  */
-#ifndef CONNECTORS_H
-#define CONNECTORS_H
+#ifndef SU2_GLOBALS_H
+#define SU2_GLOBALS_H
 
-#include "Connector.h"
+#include "ClebschGordanCached.h"
 
 namespace Dmrg {
 	
 	template<typename FieldType>
-	class Connectors {
-	public:
-		
-		typedef Connector<FieldType> ConnectorType;
-		
-		Connectors(size_t dof,size_t linSize) : dof_(dof), linSize_(linSize) 
+	struct Su2SymmetryGlobals {
+		typedef ClebschGordanCached<FieldType> ClebschGordanType;
+		static void init(bool hasSu2Symmetry)
 		{
+			if (!hasSu2Symmetry) return;
+			MaximumJValue=20;
+			NumberOfFactorials=100;
+			clebschGordanObject.init(MaximumJValue,NumberOfFactorials);
 		}
 		
-		void push(const psimag::Matrix<FieldType>& connectorMatrix,FieldType defaultConnector) 
-			
-		{
-			ConnectorType c(connectorMatrix,defaultConnector);
-			connectors_.push_back(c);
-		}
-		
-		void push(const psimag::Matrix<FieldType>& connectorMatrix,const std::vector<FieldType>& defaultConnector) 
-			
-		{
-			ConnectorType c(connectorMatrix,defaultConnector);
-			connectors_.push_back(c);
-		}
-
-		void push(	const std::vector<psimag::Matrix<FieldType> >& connectorsOneSite,
-	  			size_t numberOfOrbitals,
-				size_t leg) 
-		{
-		
-			ConnectorType c(connectorsOneSite,linSize_,numberOfOrbitals,dof_,leg);
-			connectors_.push_back(c);
-		}
-		
-		size_t linSize() const { return linSize_; }
-		
-		size_t dof() const { return dof_; }
-		
-		FieldType getMatrix(size_t i,size_t j,size_t what = 0) const
-		{
-			return connectors_[what].getMatrix(i,j);
-		}
-		
-		FieldType operator()(size_t i,size_t j,size_t what = 0) const
-		{
-			return connectors_[what](i,j);
-		}
-		
-		FieldType defaultValue(size_t dir = 0, size_t a = 0, size_t b = 0,size_t what = 0) const
-		{
-			return connectors_[what].defaultValue(dir,a,b);
-		}
-		
-		size_t n_row(size_t what = 0) const { return connectors_[what].n_row(); }
-		
-		size_t size() const { return connectors_.size(); }
-		
-		
-	private:
-		size_t dof_,linSize_;
-		std::vector<ConnectorType> connectors_;
-			
-	}; //Connectors
+		static size_t MaximumJValue; // this is the maximum allowed \tile{j}=2j value (j is half this value)
+		static size_t NumberOfFactorials; // number of factorials for the Clebsch-Gordan coefficients
+		static ClebschGordanType clebschGordanObject;
+	}; // Su2SymmetryGlobals
 	
-// 	template<typename FieldType>
-// 	std::ostream& operator<<(std::ostream& os,Connectors<FieldType>& connectors)
-// 	{
-// 		os<<connectors.connectors_;
-// 		return os;
-// 	}
-} // namespace Dmrg
+	template<typename ClebschGordanType>
+	size_t Su2SymmetryGlobals<ClebschGordanType>::MaximumJValue = 2;
+	
+	template<typename ClebschGordanType>
+	size_t Su2SymmetryGlobals<ClebschGordanType>::NumberOfFactorials = 2;
+	
+	template<typename FieldType>
+	ClebschGordanCached<FieldType> Su2SymmetryGlobals<FieldType>::clebschGordanObject(2);
+	
+}; // namespace Dmrg
 /*@}*/
-#endif //TJ_ONEORBITAL_HEADER_H
+#endif //SU2_GLOBALS_H

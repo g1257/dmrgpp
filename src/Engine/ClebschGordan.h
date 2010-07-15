@@ -83,7 +83,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CLEBSCH_GORDAN_H
 
 #include "Utils.h"
-#include "ProgramLimits.h"
+#include "ProgramGlobals.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 	//! This is a class to compute ClebschGordan Coefficients
@@ -96,11 +97,22 @@ namespace Dmrg {
 			typedef FieldType LongType;
 		public:
 			typedef std::pair<size_t,size_t> PairType;
-			ClebschGordan(size_t dummy=0) 
+			ClebschGordan(size_t numberOfFactorials) :
+				factorial_(numberOfFactorials),
+					   progress_("ClebschGordan",0)
 			{
-				static int firstcall=1;
-				if (firstcall) createFactorials();
-				firstcall=0;
+				init(numberOfFactorials);
+			}
+
+			void init(size_t numberOfFactorials)
+			{
+				factorial_.resize(numberOfFactorials),
+				createFactorials();
+				//std::ostringstream msg;
+				//msg<<"init called "<<copies_<<" times, numberOfFactorials="<<numberOfFactorials<<"\n";
+				//progress_.printline(msg,std::cout);
+				copies_++;
+				if (copies_>3) throw std::runtime_error("ClebschGordanCached: too many copies\n");
 			}
 
 			// receiving format is (2*j,j+m)
@@ -115,7 +127,6 @@ namespace Dmrg {
 			}
 
 		private:
-			static std::vector<LongType> factorial_;
 			
 			bool passesHurdles(FieldType j,FieldType m,FieldType j1,FieldType m1,FieldType j2,FieldType m2) const
 			{
@@ -213,11 +224,14 @@ namespace Dmrg {
 				if (x%2==0) return 1;
 				return -1;
 			}
+			
+			static size_t copies_;
+			std::vector<LongType> factorial_;
+			ProgressIndicator progress_;
 	}; // ClebschGordan
 	
-	
 	template<typename FieldType>
-	std::vector<FieldType> ClebschGordan<FieldType>::factorial_(ProgramLimits::NumberOfFactorials);
+	size_t ClebschGordan<FieldType>::copies_=0;
 } // namespace Dmrg
 
 /*@}*/

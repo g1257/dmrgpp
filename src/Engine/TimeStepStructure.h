@@ -71,29 +71,107 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 */
 // END LICENSE BLOCK
-
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ProgramLimits.h
+/*! \file TimeStepStructure.h
  *
- *
- *
+ *  FIXME DOCumentation
  */
-#ifndef PROGRAM_LIMITS_H
-#define PROGRAM_LIMITS_H
+#ifndef TIMESTEP_STRUCT_H
+#define TIMESTEP_STRUCT_H
+
+#include "Utils.h"
+#include "TargetStructureParams.h"
+#include "SimpleReader.h"
 
 namespace Dmrg {
-	struct ProgramLimits {
-		static size_t const MaximumJValue=20; // this is the maximum allowed \tile{j}=2j value (j is half this value)
-		static size_t const NumberOfFactorials = 100; // number of factorials for the Clebsch-Gordan coefficients
-		static size_t const MaxNumberOfSites = 300; // max number of sites that a model can use
-		static size_t const MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
-		static size_t const LanczosSteps = 200; // max number of external Lanczos steps
-		static double const LanczosTolerance; // tolerance of the Lanczos Algorithm
-	}; // ProgramLimits
+		
+	template<typename OperatorType>
+	struct TimeStepStructure {
+		TimeStepStructure() :
+			tau(0),
+			timeSteps(0),
+			advanceEach(0)
+		{
+		}
+		
+		std::string filename;
+		typename OperatorType::RealType tau;
+		size_t timeSteps;
+		size_t advanceEach;
+		std::vector<size_t> sites;
+		std::vector<size_t> startingLoops;
+		std::vector<OperatorType> aOperators;
+		std::vector<size_t> electrons;
+	};
 	
-	double const ProgramLimits::LanczosTolerance = 1e-12;
-}; // namespace Dmrg
+	template<typename OperatorType,typename ModelType>
+	inline TargetStructureParams<TimeStepStructure<OperatorType>,ModelType>&
+	operator<=(TargetStructureParams<TimeStepStructure<OperatorType>,ModelType>& tsp,SimpleReader& reader)
+	{
+		typedef typename ModelType::RealType RealType;
+		std::vector<size_t> sites,loops;
+		std::string s;
+		reader.read(s); // filename
+		RealType tau=0;
+		reader.read(tau);
+		size_t timeSteps=0;
+		reader.read(timeSteps);
+		size_t advanceEach=0;
+		reader.read(advanceEach);
+		reader.read(sites);
+		reader.read(loops);
+		
+		tsp.init(s,tau,timeSteps,advanceEach,sites,loops);
+		
+		for (size_t i=0;i<sites.size();i++) {
+			//std::string s;
+			reader.read(s);
+			if (s == "cooked") {
+				reader.read(s);
+				std::vector<size_t> v;
+				reader.read(v);
+				tsp.setCookedData(i,s,v);
+			} else {
+				psimag::Matrix<RealType> m;
+				reader.read(m);
+				tsp.setRawData(i,m);
+			}
+			int fermiSign=0;
+			reader.read(fermiSign);
+			std::pair<size_t,size_t> jmValues;
+			reader.read(jmValues);
+			RealType angularFactor;
+			reader.read(angularFactor);
+			tsp.set(i,fermiSign,jmValues,angularFactor);
+		}
+		
+		return tsp;
+	}
+	
+	template<typename OperatorType>
+	inline std::ostream&
+	operator<<(std::ostream& os,const TimeStepStructure<OperatorType>& t)
+	{
+		os<<"#TimeStepStructure.operators"<<t.aOperators.size()<<"\n";
+		for (size_t i=0;i<t.aOperators.size();i++) {
+			os<<"#TimeStepStructure.operator "<<i<<"\n";
+			os<<t.aOperators[i];
+		}
+		os<<"#TimeStepStructure.electrons\n";
+		os<<t.electrons;
+		os<<"#TimeStepStructure.site="<<t.sites;
+		os<<"#TimeStepStructure.startingLoop="<<t.startingLoops<<"\n";
+		os<<"#TimeStepStructure.filename="<<t.filename<<"\n";
+		os<<"#TimeVectorsfilename.tau="<<t.tau<<"\n";
+		os<<"#TimeVectorsfilename.timeSteps="<<t.timeSteps<<"\n";
+		os<<"#TimeVectorsfilename.advanceEach="<<t.advanceEach<<"\n";
+		return os;
+	}
+	
+	
+} // namespace Dmrg 
+
 /*@}*/
-#endif
+#endif //TIMESTEP_STRUCT_H
