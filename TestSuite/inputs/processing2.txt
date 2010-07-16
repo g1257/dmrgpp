@@ -1,8 +1,8 @@
 energy
-#gprof
-#observables
-#C
-#N
-#Sz
+gprof
+observables
+C
+N
+Sz
 executable
 

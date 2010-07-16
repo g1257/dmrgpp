@@ -49,7 +49,7 @@ use strict;
 use Getopt::Long;
 use Cwd 'abs_path';
 use File::Basename;
-#use File::Copy;
+use File::Copy;
 
 my ($testNum,$all) = (undef,undef); 
 my ($rmFlag,$update,$verbose,$noModel,$force) = (0,0,0,0,0);
@@ -67,7 +67,7 @@ my $oraclesDir = $testDir."oracles/";
 my $resultsDir = $testDir."results/";
 my $inputsDir = $testDir."inputs/";
 
-my $executable ;
+my $executable = "";
 my $hashTable = $testDir."hashTable.txt";
 my %hash;
 
@@ -82,10 +82,10 @@ sub startProgram{
 
 		loadHashTable() if(!$noModel);
 
-		if($testNum < 0) {
-			runAllTests(-$testNum);
-		} elsif($all) {
+		if($all) {
 			runAllTests(0);
+		} elsif(grep {/-/} $testNum) {
+			runAllTests(-$testNum);
 		} else {
 			testSuite();
 		}
@@ -269,7 +269,7 @@ sub addKey
 	$hash{$key} = [$testNum];
 }
 
-#~ sub removeKeys
+#~ sub Keys
 #~ {
 	#~ my (@delKeys) = @_;
 	
@@ -293,7 +293,7 @@ sub createExecutable
 {
 	my ($specFile,$specKey,$configFile) = @_;
 	my $arg1 = "./$configFile < $specFile >& /dev/null";
-	my $arg2 = "make -f Makefile >& /dev/null";
+	my $arg2 = "make dmrg -f Makefile >& /dev/null";
 	
 	grep {s/<.*//} $arg1 if($noModel);
 	grep {s/>.*//} $arg1 if($verbose);
@@ -329,82 +329,11 @@ sub runTest
 	print "The run has been completed.\n";	
 }
 
-#~ sub testSuite
-#~ {
-	#~ my $temp = $testNum;
-	#~ $temp -= 100 if($testNum >= 100);
-	#~ my $specFile = $inputsDir."model$temp.spec";
-	#~ my $configFile = "configure.pl";
-	#~ my $inputFile = $inputsDir."input$testNum.inp";
-	#~ my $procFile = $inputsDir."processing$testNum.txt";
-	#~ my $procLib = $inputsDir."processingLibrary.txt";
-	
-	#~ $specKey = substr(`md5sum $specFile`,0,10);
-	
-	#~ if(defined($executable)){
-		#~ print "Using executable supplied.\n";
-		#~ $executable = $srcDir.$executable;
-		#~ die "Missing executable file: $executable" if(!validateFile($executable));
-	#~ }elsif($noModel) {
-		#~ $executable = createManualExecutable($configFile);
-	#~ }elsif(!findKey($specKey) || $force) {
-		#~ $executable = createAutoExecutable($specFile,$specKey,$configFile);
-		#~ addKey($specKey);
-	#~ } else {
-		#~ print "Retrieving existing executable...\n";
-		#~ $executable = $srcDir."dmrg-$specKey";
-		#~ validateFile($executable) || die "Error retrieving $executable: $!\n";
-	
-		#~ if(!findTn($specKey) ){
-			#~ addTn($specKey);
-		#~ }
-	#~ }
-	
-	#~ #runTest($inputFile);
-	#~ if(validateFile($procLib)) {
-		#~ if(validateFile($procFile)) {
-			#~ my @analyses = extractAnalyses($procFile) ;
-			#~ (@analyses) ? (processing(@analyses, $procLib)) : (print "Test $testNum does not includes any processing analyses.\n");
-		#~ } else {
-			#~ print "The file for processing does not exists for Test $testNum.\n";
-		#~ }
-	#~ } else {
-		#~ print "The library for processing does not exists.\n";
-	#~ }
-	
-	#~ if($observeFlag) {
-		#~ if(!observableExists($specKey)) {
-			#~ $observable = createObservable($tn,$specKey);
-		#~ }
-	#~ }
-	
-	
-	
-	#~ my $profFile = $resultsDir."prof$tn.txt";
-	#~ profile($profFile);
-	#~ chdir("$testDir");
-	
-	#~ my $dataFile = $srcDir."data$tn.txt";
-	#~ my $rawFile = $testDir."raw$tn.txt";
-	#~ my $energyOut = $resultsDir."e$tn.txt";
-	#~ my $tstFile = $srcDir."tst$tn.txt";
-	#~ my $envStack = $srcDir."EnvironStackdata$tn.txt";
-	#~ my $sysStack = $srcDir."SystemStackdata$tn.txt";
-	
-	#~ observables($tn,$inputFile,$dataFile,$rawFile) if($observeFlag);
-	
-	
-	
-	#~ #moveFiles($dataFile,$tstFile,$envStack,$sysStack);
-	#~ #removeFiles() if($rmFlag);
-	#~ print "******END OF TEST ".$testNum."******\n";
-#~ }
-
 sub getSpecFileAndKey
 {
-	my $temp = $testNum;
-	$temp -= 100 if($testNum >= 100);
-	my $specFile = $inputsDir."model$temp.spec";
+	my $tempNum = $testNum;
+	$tempNum -= 100 if($testNum >= 100);
+	my $specFile = $inputsDir."model$tempNum.spec";
 	
 	my $specKey = substr(`md5sum $specFile`,0,10);
 	
@@ -413,8 +342,12 @@ sub getSpecFileAndKey
 
 sub testSuite
 {
-	my $procFile = $inputsDir."processing$testNum.txt";
+	my $tempNum = $testNum;
+	$tempNum -= 100 if($testNum >= 100);
+	my $procFile = $inputsDir."processing$tempNum.txt";
 	my $procLib = $inputsDir."processingLibrary.txt";
+	
+	print "******START OF TEST $testNum*******\n";
 	
 	if(validateFile($procLib)) {
 		if(validateFile($procFile)) {
@@ -459,7 +392,7 @@ sub processing
 		if(!@operations) {
 			print "No commands are described in Test $testNum for [$analysis] analysis.\n";
 		} else {
-			my @commands = keyValueParser(\@operations, $analysis);		
+			my @commands = keyValueParser(\@operations);		
 			$procHash{$analysis} = join(":", @commands);
 		}
 	}
@@ -571,26 +504,54 @@ sub runDmrg
 	}
 	
 	runTest($inputFile);
-	system("mv $srcDir$dataFile $resultsDir$dataFile");
+	#move("$srcDir$dataFile", "$resultsDir$dataFile");
 }
 
 sub runObserve
 {
 	my ($input, $raw) = @_;
+	my ($specFile, $specKey) = getSpecFileAndKey();
+	my $configFile = "configure.pl";
+	my $observable = "observe";
 	
-	system("../src/observe $input > $raw");
-	print "run observe\n";
+	chdir($srcDir);
+	if(!validateFile("Makefile")) {
+		my $arg1 = "./$configFile < $specFile >& /dev/null";
+		grep {s/<.*//} $arg1 if($noModel);
+		grep {s/>.*//} $arg1 if($verbose);
+		system($arg1);
+		print "Configuration of Test $testNum was successful...\n";
+	}
 	
+	my $arg2 = "make observe -f Makefile >& /dev/null";
+	grep {s/>.*//} $arg2 if($verbose);
+	
+	print "Creating executable for Test $testNum...\n";
+	system($arg2);
+	if(!$noModel) {
+		my $oldObs = $observable;
+		$observable = $observable."-".$specKey;
+		rename($oldObs, $observable);
+	}
+	
+	print "Observable was succesfully created.\n";
+	my $arg = "./$observable $input > $raw";
+	print "Please wait while the observable is run...\n";
+	system($arg);
+	chdir($testDir);
+	print "The run has been completed.\n";
 }
 
 sub hookGprof
 {
 	my ($analysis, $arg) = @_;
 	
-	my $rCode = system("gprof $arg");
+	chdir($srcDir);
+	my $rCode = eval("system(\"gprof $arg\");");
 	die "Error gprof.\n" if($rCode);
+	chdir($testDir);
 	
-	print "Gprof was successful.\n";
+	print "$analysis:Gprof was successful.\n";
 	
 }
 
@@ -598,10 +559,9 @@ sub hookDiff
 {
 	my ($analysis, $arg) = @_;
 	
-	my $rCode = system("diff $arg");
-	die "Error diff.\n" if($rCode);
-	
-	print "Diff was successful.\n";
+	system("diff $arg");
+
+	print "$analysis:Diff was successful.\n";
 	
 }
 
@@ -614,7 +574,7 @@ sub hookMake
 	die "Error make.\n" if($rCode);
 	chdir($testDir);
 	
-	print "Make was successful.\n";
+	print "$analysis:Make was successful.\n";
 }
 
 sub hookGrep
@@ -624,7 +584,7 @@ sub hookGrep
 	my $rCode = system("grep $arg");
 	die "Error grep.\n" if($rCode);
 	
-	print "Grep was successful.\n";
+	print "$analysis:Grep was successful.\n";
 }
 
 sub extractOperatorC
@@ -685,7 +645,7 @@ sub extractOperatorN
 }
 
 
-sub extractOperatorS
+sub extractOperatorSz
 {
 	my ($raw,$sOut) = @_;
 	my $line;
@@ -715,16 +675,22 @@ sub extractOperatorS
 
 sub keyValueParser
 {
-	my ($opsRef, $analysis) = @_;
+	my ($opsRef) = @_;
 	my @tmpKV;
 	my $keyword = "Let";
 	my %tmpHash;
 	my @commands;
 	my %varHash;
-	my @varArray = ("\$srcDir", "\$inputsDir", "\$resultsDir", "\$oraclesDir", "\$testNum");
+	my @varArray = ("\$executable", "\$srcDir", "\$inputsDir", "\$resultsDir", "\$oraclesDir", "\$testNum");
+	my @nonSubsArray = ("\$executable");
 	
 	foreach (@varArray) {
-		$varHash{$_} = eval($_);
+		my $tmp = "\\$_";
+		if(grep {/$tmp/} @nonSubsArray) {
+			$varHash{$_} = $_;
+		} else {
+			$varHash{$_} = eval($_);
+		}
 	}
 	
 	if(@tmpKV = grep {/^$keyword/} @{$opsRef}) {
@@ -738,14 +704,15 @@ sub keyValueParser
 	
 	foreach my $comm (@{$opsRef}) {
 		if(@tmpKV) {
-			#me falta validar los $key/values
 			grep {s/(\$\w+)/$tmpHash{$1}/g} $comm;
-			grep {s/(\$\w+)\s+/$varHash{$1}/g} $comm;
+			grep {s/(\$\w+)(\s+)([^<>])/$varHash{$1}$3/g} $comm;
 			grep {s/(\$\w+)/$varHash{$1}/g} $comm;
+			
 		}
+		
 		push @commands, $comm;
 	}
-		
+	
 	return @commands;
 }
 
@@ -776,8 +743,6 @@ sub removeFiles
 	system("rm @files >& /dev/null");
 	chdir($testDir);
 	system("rm @files >& /dev/null");
-	
-	print "All temporary files were removed.\n";
 }
 
 #~ sub moveFiles
@@ -797,15 +762,16 @@ sub runAllTests
 	print "Preparing to run all tests starting from Test $start...\n";
 
 	my @testsList = split(/ /,getAvailableTests());
-	my @nonFunctionalTests = (4,24,60,104,105,106,107,108,124,125,141,160);
+	my @nonFunctionalTests = (4,6,20,21,22,23,24,25,40,41,60,104,105,106,107,108,120,121,122,123,124,125,140,141,160);
 	
 	for (my $i=0;$i<=$#testsList;$i++) {
 		next if ($testsList[$i] eq "");
 		next if ($testsList[$i]<$start);
 		next if(grep {$_ eq $testsList[$i]}@nonFunctionalTests);
-		testSuite($testsList[$i]);
-		undef $executable;
-		undef $testNum;
+		$testNum = $testsList[$i];
+		testSuite();
+		$executable = "";
+		removeFiles() if($rmFlag);
 	}
 	print "******ALL TESTS COMPLETED SUCCESSFULLY******\n";
 }

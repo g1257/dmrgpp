@@ -2,6 +2,8 @@
 
 use strict;
 use Getopt::Long;
+use Cwd 'abs_path';
+use File::Basename;
 my ($testNumber, $all, $verbose, $rmFlag,$noModel, $observeFlag) = (undef,0,0,0,0,0);
 
 #User can either select a specific test number, a range of tests (negative number), or all tests
@@ -9,10 +11,14 @@ my ($testNumber, $all, $verbose, $rmFlag,$noModel, $observeFlag) = (undef,0,0,0,
 GetOptions("n=i" => \$testNumber, "all" => \$all, "v" => \$verbose, "rm" => \$rmFlag
 , "m" => \$noModel, "o" => \$observeFlag);
 
-my $oraclesDir = "oracles/";		#Specifies the output folder for the oracles results
-my $srcDir = "../src/";
-my $testDir = "../TestSuite/";
-my $inputsDir = "inputs/";
+my ($testDir, $srcDir);
+my $PATH = $testDir = $srcDir = abs_path($0);
+my $filename = basename($PATH);	
+
+$testDir =~ s/$filename$//;
+$srcDir =~ s/TestSuite.*/src\//;
+my $oraclesDir = $testDir."oracles/";	
+my $inputsDir = $testDir."inputs/";
 
 runScript();
 
@@ -122,10 +128,10 @@ sub validateFile	#Verifies if the file given exists
 sub runOracle
 {
 	my ($tn) = @_;
-	my $configFile = $srcDir."configure.pl";
-	my $inputFile = $testDir.$inputsDir."input$tn.inp";
-	my $executable = $srcDir."dmrg";
-	my $profFile = $testDir.$oraclesDir."prof$tn.txt";
+	my $configFile = "configure.pl";
+	my $inputFile = $inputsDir."input$tn.inp";
+	my $executable = "dmrg";
+	my $profFile = $oraclesDir."prof$tn.txt";
 	
 	print "Preparing to run oracle of test $tn...\n";
 	
@@ -138,7 +144,7 @@ sub runOracle
 	} else {
 		my $temp = $tn;	
 		$temp -= 100 if($tn >= 100);
-		my $specFile = $testDir.$inputsDir."model$temp.spec";
+		my $specFile = $inputsDir."model$temp.spec";
 		die "Error: Model file is missing.\n" if(!validateFile($specFile));
 		$rCode = system("./$configFile < $specFile");
 		die "Error with $configFile: $!\n" if($rCode);
@@ -155,12 +161,12 @@ sub runOracle
 	
 	my $dataFile = $srcDir."data$tn.txt";
 	my $rawFile = $testDir."raw$tn.txt";
-	my $energyOut = $testDir.$oraclesDir."e$tn.txt";
+	my $energyOut = $oraclesDir."e$tn.txt";
 	my $tstFile = $srcDir."tst$tn.txt";
 	my $envStack = $srcDir."EnvironStackdata$tn.txt";
 	my $sysStack = $srcDir."SystemStackdata$tn.txt";
 
-	observables($tn,$inputFile,$dataFile,$rawFile) if($observeFlag);
+	observables($tn,$inputFile,$rawFile) if($observeFlag);
 	extractEnergy($dataFile,$energyOut);
 	moveFiles($dataFile,$tstFile,$envStack,$sysStack);
 	removeFiles($tn) if($rmFlag);
@@ -175,12 +181,12 @@ sub moveFiles
 	my $rCode;
 	
 	foreach my $f (@files) {
-		$rCode = system("mv $f ".$testDir.$oraclesDir) if(validateFile("$f"));
+		$rCode = system("mv $f ".$oraclesDir) if(validateFile("$f"));
 	}
 	
 	chdir("$srcDir");
 	foreach my $f (@files) {
-		$rCode = system("mv $f ".$testDir.$oraclesDir) if(validateFile("$f"));
+		$rCode = system("mv $f ".$oraclesDir) if(validateFile("$f"));
 	}
 	chdir("$testDir");
 	
@@ -245,7 +251,7 @@ sub extractOperatorN
 }
 
 
-sub extractOperatorS
+sub extractOperatorSz
 {
 	my ($raw,$sOut) = @_;
 	my $line;
@@ -276,24 +282,24 @@ sub extractOperatorS
 
 sub observables
 {
-	my ($tn,$input,$data,$raw) = @_;
+	my ($tn,$input,$raw) = @_;
 
 	chdir("$srcDir");
 	my $rCode = system("make observe -f Makefile");
 	die "Error with making observe: $!\n" if($rCode);
-	chdir("$testDir");
+	
 	
 	my $obsFile = $srcDir."observe";
-	$rCode = system("$obsFile $input $data > $raw"); 
+	$rCode = system("$obsFile $input > $raw"); 
 	die "Error running observables: $!\n" if($rCode);
-
-	my $cOut = $testDir.$oraclesDir."operatorC$tn.txt";
-	my $nOut = $testDir.$oraclesDir."operatorN$tn.txt";
-	my $sOut = $testDir.$oraclesDir."operatorS$tn.txt";
+	chdir("$testDir");
+	my $cOut = $oraclesDir."operatorC$tn.txt";
+	my $nOut = $oraclesDir."operatorN$tn.txt";
+	my $sOut = $oraclesDir."operatorSz$tn.txt";
 	
 	extractOperatorC($raw,$cOut);
 	extractOperatorN($raw,$nOut);
-	extractOperatorS($raw,$sOut);
+	extractOperatorSz($raw,$sOut);
 	
 }
 
