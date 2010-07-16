@@ -93,7 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "IoSimple.h"
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
-#include "ProgramLimits.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {	
 	
@@ -126,7 +126,7 @@ namespace Dmrg {
 
 		static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
 		static const int DEGREES_OF_FREEDOM=2; // spin up and down
-		static int const maxNumberOfSites=ProgramLimits::MaxNumberOfSites;
+		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;
 
 	public:
 		typedef std::vector<HilbertStateType> HilbertBasisType;

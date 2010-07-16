@@ -96,7 +96,13 @@ namespace Dmrg {
 		//static int fermionSign()  { return 1; } // S+, Sz commute on different sites
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 		
-		OperatorsHeisenberg(const DmrgBasisType* thisBasis) : OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_,NUMBER_OF_ORBITALS) { }
+		OperatorsHeisenberg(const DmrgBasisType* thisBasis) : 
+				OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_,NUMBER_OF_ORBITALS) 
+		{}
+		
+		template<typename IoInputter>
+		OperatorsHeisenberg(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
+				OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_,NUMBER_OF_ORBITALS) { }
 		
 		const OperatorType& getOperator(const std::string& label,int i) const 
 		{ 

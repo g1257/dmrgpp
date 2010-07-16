@@ -90,7 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include "IoSimple.h"
 #include "LinkProductFeAs.h"
-#include "ProgramLimits.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 	template<
@@ -117,7 +117,7 @@ namespace Dmrg {
 		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef typename HilbertSpaceFeAsType::HilbertState HilbertState;
 		
-		static int const maxNumberOfSites=ProgramLimits::MaxNumberOfSites;;
+		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;
 		static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
 		static const int DEGREES_OF_FREEDOM=OperatorsType::DEGREES_OF_FREEDOM;
