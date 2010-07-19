@@ -360,9 +360,12 @@ namespace Dmrg {
 				hamiltonian = basis3_.hamiltonian();
 				//ns = 
 			}
-
+			std::cerr<<__FILE__<<":"<<__LINE__<<":\n";
+			psimag::Matrix<SparseElementType> fullm;
+			crsMatrixToFullMatrix(fullm,hamiltonian);
+			std::cerr<<fullm;
 			matrixBlock.resize(bs);
-
+			
 			int counter=0;
 			for (size_t i=offset;i<basis1_.partition(m+1);i++) {
 				matrixBlock.setRow(i-offset,counter);

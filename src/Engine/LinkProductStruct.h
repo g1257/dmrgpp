@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	template<typename FieldType>
 	struct LinkProductStruct {
-		std::vector<size_t> isaved,jsaved,dof1saved,dof2saved;
+		std::vector<size_t> isaved,jsaved; //,dof1saved,dof2saved;
 		std::vector<int> typesaved;
 		std::vector<FieldType> tmpsaved;
 		std::vector<size_t> connectionsaved;

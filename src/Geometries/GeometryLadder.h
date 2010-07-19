@@ -98,10 +98,13 @@ namespace Dmrg {
 	//! RESTIRCTION: homogeneous system only!!
 	template<typename Field,typename ConnectorsType_>
 	class GeometryLadder : public GeometryBase<Field,ConnectorsType_> {
-		
+		static const size_t SystemSystem=ProgramGlobals::SYSTEM_SYSTEM;
+		static const size_t SystemEnviron=ProgramGlobals::SYSTEM_ENVIRON;
+		static const size_t EnvironSystem=ProgramGlobals::ENVIRON_SYSTEM;
+		static const size_t EnvironEnviron=ProgramGlobals::ENVIRON_ENVIRON;
 	public:
 		typedef ConnectorsType_ ConnectorsType;
-		static const int SystemSystem=0,SystemEnviron=1,EnvironSystem=2,EnvironEnviron=3;
+		//static const int SystemSystem=0,SystemEnviron=1,EnvironSystem=2,EnvironEnviron=3;
 		typedef  typename GeometryBase<Field,ConnectorsType>::BlockType BlockType;
 		
 				
@@ -133,7 +136,7 @@ namespace Dmrg {
 			E=E_;
 		}
 
-		Field calcConnectorValue(int type,int ind,int spin1,int jnd,int spin2,int smax,int emin,size_t what = 0) const 
+		Field calcConnectorValue(int type,int ind,int jnd,int smax,int emin,size_t what) const 
 		{
 			//! There are four cases:
 			//! 1. (ind,jnd) in SUX --> use input connectors

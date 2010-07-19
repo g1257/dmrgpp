@@ -123,11 +123,6 @@ namespace Dmrg {
 		
 		size_t dof() const { return dof_; }
 		
-		FieldType getMatrix(size_t i,size_t j,size_t what = 0) const
-		{
-			return connectors_[what].getMatrix(i,j);
-		}
-		
 		FieldType operator()(size_t i,size_t j,size_t what = 0) const
 		{
 			return connectors_[what](i,j);

@@ -324,9 +324,9 @@ namespace Dmrg {
 			int i,j,n=block.size();
 			int type;
 			SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
-			int smax,emin;
+			size_t smax,emin;
 			
-			geometry_.findExtremes(smax,emin,block);
+			utils::findExtremes(smax,emin,block,geometry_.systemBlock());
 			hmatrix.makeDiagonal(cm[0].data.rank());
 
 			for (i=0;i<n;i++) {
@@ -336,7 +336,8 @@ namespace Dmrg {
 					
 					// 0.5*(S^+_i S^-_j + S^-_i S^+_j)
 					type = geometry_.calcConnectorType(block[i],block[j]);
-					SparseElementType tmp = geometry_.calcConnectorValue(type,block[i],0,block[j],0,smax,emin);
+					size_t dir = 0;
+					SparseElementType tmp = geometry_.calcConnectorValue(type,block[i],block[j],smax,emin,dir);
 					
 					if (tmp==static_cast<SparseElementType>(0)) continue;
 					

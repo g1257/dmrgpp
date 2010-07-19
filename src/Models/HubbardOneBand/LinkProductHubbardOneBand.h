@@ -115,11 +115,12 @@ namespace Dmrg {
 					size_t ix = threadNum * blockSize + p;
 					size_t i=lps_.isaved[ix];
 					size_t j=lps_.jsaved[ix];
-					size_t dof1=lps_.dof1saved[ix];
-					size_t dof2=lps_.dof2saved[ix];
+					//size_t dof1=lps_.dof1saved[ix];
+					//size_t dof2=lps_.dof2saved[ix];
 					int type=lps_.typesaved[ix];
+					size_t what = lps_.connectionsaved[ix];
 					SparseElementType tmp=lps_.tmpsaved[ix];
-					linkProduct(xtemp,y_,i,dof1,j,dof2,type,tmp,modelHelper_);
+					linkProduct(xtemp,y_,i,j,type,tmp,modelHelper_,what);
 					
 				}	
 				if (myMutex) pthread_mutex_lock( myMutex);
@@ -129,13 +130,15 @@ namespace Dmrg {
 			} 
 			
 			//! Adds a tight-binding bond between system and environment
-			static size_t calcBond(int i,int sigma,int j,int sigma2,int type,
+			static size_t calcBond(int i,int j,int type,
 				SparseElementType  &val,
 				SparseMatrixType &matrixBlock,
-				const ModelHelperType& modelHelper,size_t what = 0) 
+				const ModelHelperType& modelHelper,size_t what)
 			{
-				if (sigma!=sigma2) return 0;
-				int const SystemEnviron=1,EnvironSystem=2;
+				size_t sigma = what;
+				size_t sigma2 = sigma;
+				//if (sigma!=sigma2) return 0;
+				//int const SystemEnviron=1,EnvironSystem=2;
 				SparseMatrixType A,B;
 				//int k=sigma + i*pSprime.dof();
 				//int k2=sigma2 + j*pSprime.dof();
@@ -144,7 +147,7 @@ namespace Dmrg {
 				RealType angularFactor  = 1.0;
 				if (sigma==1) angularFactor  = -1.0;
 				
-				if (type==SystemEnviron) {
+				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
 					
 // 					A=modelHelper.basis2().getOperator(i,sigma).data;
 // 					transposeConjugate(B,modelHelper.basis3().getOperator(j-offset,sigma).data);
@@ -156,7 +159,7 @@ namespace Dmrg {
 							
 					
 				} else {
-					if (type!=EnvironSystem) std::cerr<<"ERRRRRRRRRRORRRRRRRR\n";
+					if (type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"ERRRRRRRRRRORRRRRRRR\n";
 // 					A=modelHelper.basis3().getOperator(i-offset,sigma).data;
 // 					transposeConjugate(B,modelHelper.basis2().getOperator(j,sigma).data);
 // 					modelHelper.fastOpProdInter(A,B,type,val,matrixBlock,true);
@@ -176,7 +179,11 @@ namespace Dmrg {
 			{
 				return std::norm(x_);
 			}
-		
+			
+			static size_t bonds() { return 2; }
+			
+			static size_t tmpDir(size_t what) { return 0; }
+			
 		private:
 			size_t dof_;
 			const ModelHelperType& modelHelper_;
@@ -186,19 +193,20 @@ namespace Dmrg {
 		
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
 			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
-					int i,int sigma,int j,int sigma2,int type,
+					int i,int j,int type,
 			     SparseElementType  &val,
-			     ModelHelperType const &modelHelper)  const
+			     ModelHelperType const &modelHelper,size_t what)  const
 			{
-				if (sigma!=sigma2) return;
-				int const SystemEnviron=1,EnvironSystem=2;
+				size_t sigma = what;
+				size_t sigma2 = what;
+				//int const SystemEnviron=1,EnvironSystem=2;
 				
 				int offset = modelHelper.basis2().block().size();
 				size_t angularMomentum=1;
 				RealType angularFactor  = 1.0;
 				if (sigma==1) angularFactor  = -1.0;
 				
-				if (type==SystemEnviron) {
+				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
 					
 					//A=modelHelper.basis2().getOperator(i,sigma);
 					//transposeConjugate(B,modelHelper.basis3().getOperator(j-offset,sigma));
@@ -207,7 +215,7 @@ namespace Dmrg {
 					modelHelper.fastOpProdInter(x,y,A,B,type,val,true,angularMomentum,angularFactor,sigma);
 							
 				} else {
-					if (type!=EnvironSystem) std::cerr<<"ERRRRRRRRRRORRRRRRRR\n";
+					if (type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"ERRRRRRRRRRORRRRRRRR\n";
 						//A=modelHelper.basis3().getOperator(i-offset,sigma);
 						//transposeConjugate(B,modelHelper.basis2().getOperator(j,sigma));
 					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i-offset,sigma,ModelHelperType::Environ);

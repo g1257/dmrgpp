@@ -350,7 +350,7 @@ all: \$(EXENAME)
 OBJECTSCOMMON = 
 OBJECTSDMRG    = main.o  
 
-all: clean dmrg
+all: dmrg
 
 dmrg: \$(OBJECTSDMRG) \$(OBJECTSCOMMON) 
 	\$(CXX) -o dmrg  \$(OBJECTSCOMMON) \$(OBJECTSDMRG)  \$(LDFLAGS) 

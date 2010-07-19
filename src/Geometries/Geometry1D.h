@@ -89,10 +89,14 @@ namespace Dmrg {
 	//! This class implements GeometryBase for one-dimensional chains
 	template<typename Field,typename ConnectorsType_>
 	class Geometry1D : public GeometryBase<Field,ConnectorsType_> {
-
+		static const size_t SystemSystem=ProgramGlobals::SYSTEM_SYSTEM;
+		static const size_t SystemEnviron=ProgramGlobals::SYSTEM_ENVIRON;
+		static const size_t EnvironSystem=ProgramGlobals::ENVIRON_SYSTEM;
+		static const size_t EnvironEnviron=ProgramGlobals::ENVIRON_ENVIRON;
+		
 	public:
 		typedef ConnectorsType_ ConnectorsType;
-		static const int SystemSystem=0,SystemEnviron=1,EnvironSystem=2,EnvironEnviron=3;
+		
 		typedef  typename GeometryBase<Field,ConnectorsType>::BlockType BlockType;
 		
 		Geometry1D(ConnectorsType& connectors,int sizeOfInitialBlock=1,int leg=1):
@@ -112,7 +116,7 @@ namespace Dmrg {
 			E=E_;
 		}
 
-		Field calcConnectorValue(int type,int ind,int dof1,int jnd,int dof2,int smax,int emin,size_t what=0) const 
+		Field calcConnectorValue(int type,int ind,int jnd,int smax,int emin,size_t what) const 
 		{
 			//! There are four cases:
 			//! 1. (ind,jnd) in SUX --> use input connectors
@@ -127,11 +131,11 @@ namespace Dmrg {
 					break;
 				
 				case EnvironSystem:
-					x=connector(ind,jnd,smax,emin,0,what);
+					x=connector(ind,jnd,smax,emin,type,what);
 					break;
 				
 				case SystemEnviron:
-					x=connector(ind,jnd,smax,emin,1,what);
+					x=connector(ind,jnd,smax,emin,type,what);
 					break;
 				case SystemSystem:
 					x=connectors_(ind,jnd,what);
@@ -140,9 +144,9 @@ namespace Dmrg {
 			return x;
 		}
 
-		int calcConnectorType(int ind,int jnd) const { return  calcConnectorType(ind,jnd,systemBlock_); }
+		size_t calcConnectorType(int ind,int jnd) const { return  calcConnectorType(ind,jnd,systemBlock_); }
 
-		int calcConnectorType(int ind,int jnd,BlockType const &sBlock) const 
+		size_t calcConnectorType(int ind,int jnd,BlockType const &sBlock) const 
 		{
 			//! There are four cases:
 			//! 1. (ind,jnd) in SUX --> use input connectors
@@ -188,14 +192,14 @@ namespace Dmrg {
 		//! if (type!=0) viceversa
 		//! smax = max_{current superblock} {i; such that i is in the system}
 		//! emin = min_{current superblock} {i; such that i is in the environment}
-		Field connector(int ind,int jnd,int smax,int emin,int type,size_t what=0) const
+		Field connector(int ind,int jnd,int smax,int emin,int type,size_t what) const
 		{
 			Field t=connectors_.defaultValue(0,0,0,what);
-			if (type==0) { // ind in env, jnd in the system
+			if (type==ProgramGlobals::ENVIRON_SYSTEM) { // ind in env, jnd in the system
 				if (jnd<int(connectors_.n_row(what))-1) t=connectors_(jnd,jnd+1,what);
 				if (ind==emin && jnd==smax) return t;
 			} else { // ind in system, jnd in env
-				return connector(jnd,ind,smax,emin,0);
+				return connector(jnd,ind,smax,emin,ProgramGlobals::ENVIRON_SYSTEM,what);
 			}
 			return static_cast<Field>(0.0);
 		}

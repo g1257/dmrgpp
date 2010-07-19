@@ -308,11 +308,11 @@ namespace Dmrg {
 
 			RealType x=0;
 			switch (type) {
-				case DmrgGeometryType::EnvironEnviron:
+				case ProgramGlobals::ENVIRON_ENVIRON:
 					x=modelParameters_.hubbardU[dmrgGeometry_.findReflection(ind)];
 					break;
 
-				case DmrgGeometryType::SystemSystem:
+				case ProgramGlobals::SYSTEM_SYSTEM:
 					x=modelParameters_.hubbardU[ind];
 					break;
 			}
@@ -328,11 +328,11 @@ namespace Dmrg {
 			int totalS=modelParameters_.linSize;
 			RealType x=0;
 			switch (type) {
-				case DmrgGeometryType::EnvironEnviron:
+				case ProgramGlobals::ENVIRON_ENVIRON:
 					x=modelParameters_.potentialV[dmrgGeometry_.findReflection(ind)+sigma*totalS];
 					break;
 
-				case DmrgGeometryType::SystemSystem:
+				case ProgramGlobals::SYSTEM_SYSTEM:
 					x=modelParameters_.potentialV[ind+sigma*totalS];
 					break;
 			}
@@ -362,16 +362,6 @@ namespace Dmrg {
 			SparseMatrixType creationMatrix(cm);
 			return 	creationMatrix;
 		}
-
-		//! find all states in the natural basis for a block of n sites
-		/*void setNaturalBasisOld(std::vector<typename HilbertSpaceHubbardType::HilbertState>  &basis,int n) const
-		{
-			typename HilbertSpaceHubbardType::HilbertState a=0;
-			typename HilbertSpaceHubbardType::HilbertState total = (1<<n);
-			
-			if (dof()==2) total *= total;
-			for (a=0;a<total;a++) basis.push_back(a);
-		}*/
 
 		//! find quantum numbers for each state of this basis, 
 		//! considered symmetries for this model are: n_up and n_down
@@ -480,13 +470,14 @@ namespace Dmrg {
 			for (i=0;i<n;i++) {
 				//! hopping part
 				for (j=0;j<n;j++) {
+					for (size_t connectionType=0;connectionType<LinkProductType::bonds();connectionType++) {
+						type = dmrgGeometry_.calcConnectorType(block[i],block[j]);
+						size_t tmpDir = LinkProductType::tmpDir(connectionType);
+						RealType tmp = dmrgGeometry_.calcConnectorValue(type,block[i],block[j],smax,emin,tmpDir);
 					
-					type = dmrgGeometry_.calcConnectorType(block[i],block[j]);
-					RealType tmp = dmrgGeometry_.calcConnectorValue(type,block[i],0,block[j],0,smax,emin);
-					
-					if (i==j || tmp==0.0) continue;
+						if (i==j || tmp==0.0) continue;
 			
-					for (sigma=0;sigma<dof();sigma++) {
+						size_t sigma = connectionType;
 						transposeConjugate(tmpMatrix2,cm[sigma+j*dof()].data);
 						multiply(tmpMatrix,cm[sigma+i*dof()].data,tmpMatrix2);
 						multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));

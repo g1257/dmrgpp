@@ -111,11 +111,12 @@ namespace Dmrg {
 					size_t ix = threadNum * blockSize + p;
 					size_t i=lps_.isaved[ix];
 					size_t j=lps_.jsaved[ix];
-					size_t dof1=lps_.dof1saved[ix];
-					size_t dof2=lps_.dof2saved[ix];
+					//size_t dof1=lps_.dof1saved[ix];
+					//size_t dof2=lps_.dof2saved[ix];
 					int type=lps_.typesaved[ix];
 					SparseElementType tmp=lps_.tmpsaved[ix];
-					linkProduct(xtemp,y_,i,dof1,j,dof2,type,tmp,modelHelper_);
+					size_t connectionType = lps_.connectionsaved[ix];
+					linkProduct(xtemp,y_,i,j,type,tmp,modelHelper_,connectionType);
 					
 				}
 				if (myMutex) pthread_mutex_lock( myMutex);
@@ -125,13 +126,12 @@ namespace Dmrg {
 			}
 
 			//! Adds an Exchange bond between system and environment
-			static size_t calcBond(int i,int sigma,int j,int sigma2,int type,
+			static size_t calcBond(int i,int j,int type,
 					SparseElementType  val,
 					SparseMatrixType &matrix,
-					const ModelHelperType& modelHelper,size_t what = 0) 
+					const ModelHelperType& modelHelper,size_t what) 
 			{
-				if (sigma!=sigma2 || sigma!=0) return 0;
-				int const SystemEnviron=1,EnvironSystem=2;
+				//int const SystemEnviron=1,EnvironSystem=2;
 				int offset = modelHelper.basis2().block().size();
 				SparseMatrixType matrixBlock;
 				size_t of=1;
@@ -142,7 +142,7 @@ namespace Dmrg {
 				SparseElementType valOver2 = val*0.5;
 				size_t angularMomentum=2;
 
-				if (type==SystemEnviron) {
+				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
 					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i,0,ModelHelperType::System);
 					const SparseMatrixType& B=modelHelper.getReducedOperator('N',j-offset,0,ModelHelperType::Environ);
 					SparseMatrixType Aconj=modelHelper.getReducedOperator('C',i,0,ModelHelperType::System);
@@ -164,7 +164,7 @@ namespace Dmrg {
 					modelHelper.fastOpProdInter(Az,Bz,type,val,matrixBlock,false,angularMomentum,angularFactor,1);
 					matrix += matrixBlock;
 				} else {	
-					if (type!=EnvironSystem) std::cerr<<"EEEEEEEERRRRRRRRRRRROOOOOOOOOOORRRRRRRRRRR\n";
+					if (type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"EEEEEEEERRRRRRRRRRRROOOOOOOOOOORRRRRRRRRRR\n";
 				
 					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i-offset,0,ModelHelperType::Environ);
 					const SparseMatrixType& B=modelHelper.getReducedOperator('N',j,0,ModelHelperType::System);
@@ -189,6 +189,10 @@ namespace Dmrg {
 				}
 				return matrix.nonZero();
 			}
+			
+			static size_t bonds() { return 1; }
+			
+			static size_t tmpDir(size_t what) { return 0; }
 
 		private:
 			size_t dof_;
@@ -198,12 +202,11 @@ namespace Dmrg {
 			const std::vector<SparseElementType>& y_;
 
 		void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
-					int i,int dof1,int j,int dof2,int type,
+					int i,int j,int type,
 			     SparseElementType  val,
-			     const ModelHelperType& modelHelper)  const
+			     const ModelHelperType& modelHelper,size_t what)  const
 		{
-			if (dof1!=dof2 || dof1!=0) return;
-			int const SystemEnviron=1,EnvironSystem=2;
+			//int const SystemEnviron=1,EnvironSystem=2;
 			int offset = modelHelper.basis2().block().size();
 			size_t of=1;
 			if (modelHelper.isSu2()) {
@@ -213,7 +216,7 @@ namespace Dmrg {
 			SparseElementType valOver2 = val*0.5;
 			size_t angularMomentum=2;
 
-			if (type==SystemEnviron) {
+			if (type==ProgramGlobals::SYSTEM_ENVIRON) {
 				const SparseMatrixType& A=modelHelper.getReducedOperator('N',i,0,ModelHelperType::System);
 				const SparseMatrixType& B=modelHelper.getReducedOperator('N',j-offset,0,ModelHelperType::Environ);
 				SparseMatrixType Aconj=modelHelper.getReducedOperator('C',i,0,ModelHelperType::System);
@@ -233,7 +236,7 @@ namespace Dmrg {
 				angularFactor = 1.0/2.0; // needs to be in sync with LinkProductHeisenberg.h
 				modelHelper.fastOpProdInter(x,y,Az,Bz,type,val,false,angularMomentum,angularFactor,1);
 			} else {
-				if (type!=EnvironSystem) std::cerr<<"EEEEEEEERRRRRRRRRRRROOOOOOOOOOORRRRRRRRRRR\n";
+				if (type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"EEEEEEEERRRRRRRRRRRROOOOOOOOOOORRRRRRRRRRR\n";
 
 				const SparseMatrixType& A=modelHelper.getReducedOperator('N',i-offset,0,ModelHelperType::Environ);
 				const SparseMatrixType& B=modelHelper.getReducedOperator('N',j,0,ModelHelperType::System);

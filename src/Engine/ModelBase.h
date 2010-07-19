@@ -188,14 +188,14 @@ namespace Dmrg {
 			int getTargetSector(const std::vector<int>& quantumNumbers) const;
 			
 			//! Return H, the hamiltonian of the FeAs model for basis1 and partition m consisting of the external product
-		//! of basis2 \otimes basis3
-		//! Note: Used only for debugging purposes
-		void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const
-		{
-			modelCommon_.fullHamiltonian(matrix,modelHelper);
-		}
-
-
+			//! of basis2 \otimes basis3
+			//! Note: Used only for debugging purposes
+			void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const
+			{
+				modelCommon_.fullHamiltonian(matrix,modelHelper);
+			}
+	
+	
 		private:
 			ModelCommonType modelCommon_;
 	};     //class ModelBase
