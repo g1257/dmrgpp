@@ -79,10 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <sys/time.h>
 #include <sys/resource.h>
-
 #include "Matrix.h" // psimag
-
-   
 
 extern "C" void   zheev_(char *,char *,int *,std::complex<double> *, int *, double *, 
 	std::complex<double> *,int *, double *, int *);
