@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#! /usr/bin/perl
 
 =pod
 // BEGIN LICENSE BLOCK
@@ -46,38 +46,46 @@ but it is hopelessly inadequate for showing their absence." -- Edsger Dijkstra
 =cut
 
 use strict;
+use warnings;
 use Getopt::Long;
 use Cwd 'abs_path';
 use File::Basename;
-use File::Copy;
 
-my ($testNum,$all) = (undef,undef); 
-my ($rmFlag,$update,$verbose,$noModel,$force) = (0,0,0,0,0);
-
-GetOptions("n=i" => \$testNum, "a" => \$all, "u" => \$update, 
-"r" => \$rmFlag, "v" => \$verbose, "m" => \$noModel, "f" => \$force);
-
+my ($testNum) = (undef); 
+my ($all,$rmFlag,$update,$verbose,$noModel,$force) = (0,0,0,0,0,0);
 my ($testDir, $srcDir);
 my $PATH = $testDir = $srcDir = abs_path($0);
 my $filename = basename($PATH);	
-
 $testDir =~ s/$filename$//;
 $srcDir =~ s/TestSuite.*/src\//;
 my $oraclesDir = $testDir."oracles/";	
 my $resultsDir = $testDir."results/";
 my $inputsDir = $testDir."inputs/";
-
 my $executable = "";
 my $hashTable = $testDir."hashTable.txt";
 my %hash;
 
+eval {
+die "Unknown command line options$!" unless GetOptions("n=i" => \$testNum, "a" => \$all, "u" => \$update, 
+"r" => \$rmFlag, "v" => \$verbose, "m" => \$noModel, "f" => \$force);
+
 &startProgram();
+};
+if($@) {
+	die "TestSuite aborted -> $@";
+}
 
 sub startProgram{
+	print "*******INIT PROCESS*******\n";
+	validateDirectory($srcDir);
+	validateDirectory($testDir);
+	validateFile($hashTable);
+	validateDirectory($resultsDir);
+	print "Initialization process is complete.\n";
+	
 	if($update) {
 		updateHashTable();
-	} elsif(validateDirectory($srcDir) && validateDirectory($testDir) && validateDirectory($resultsDir) && validateFile($hashTable)) {
-		
+	} else {		
 		selectTest() if(!($all) && !defined($testNum));
 
 		loadHashTable() if(!$noModel);
@@ -91,9 +99,6 @@ sub startProgram{
 		}
 		
 		saveHashTable() if(!$noModel);
-			
-	} else {
-		die "Missing source and/or test suite directories.\n";
 	}
 }
 
@@ -109,14 +114,13 @@ sub validateDirectory
 	if(-d $dir) {		
 		return 1;
 	} elsif($dir eq $resultsDir){
-		my $rCode = mkdir $dir;
-		if($rCode) {
-			print "Directory created: $dir\n";
-			return 1;
-		}
+		mkdir($dir) || die "Making directory $dir: $!";
+		$dir = basename($dir);
+		print "Directory created: $dir/\n";
+		return 1;
 	}
 	
-	return 0;
+	die "$dir: $!";
 }
 
 sub validateTest
@@ -178,19 +182,18 @@ sub getAvailableTests
 sub validateFile	
 {
 	my ($file) = @_;
-
+	
 	if(-e $file) {		
 		return 1;
 	} elsif($file eq $hashTable) {
-		my $rCode = open(FILE, ">$hashTable") || die "Error creating $hashTable: $!\n";
-		close(FILE);
-		if($rCode) {
-			print "File created: $hashTable\n";
-			return 1;
-		}
+		open(FILE, ">$file") || die "Creating $file: $!";
+		close(FILE) || die "Closing $file: $!";
+		$file = basename($file);
+		print "File created: $file\n";
+		return 1;
 	}
 	
-	return 0;
+	die "$file: $!";
 } 
 
 sub loadHashTable
@@ -223,13 +226,13 @@ sub findTn
 	
 	foreach my $k (keys %hash) {
 		if($key eq $k) {
-			if($testNum ~~ @{$hash{$key}}) {
+			if(grep $_ eq $testNum, @{$hash{$key}}) {
 				print "Hash table is up-to-date.\n";
 				return 1;
 			} 
 		}
 	}
-
+	
 	return 0;
 }
 
@@ -359,12 +362,9 @@ sub testSuite
 	} else {
 		print "The library for processing does not exists.\n";
 	}
-
-	print "******END OF TEST ".$testNum."******\n";
-}
-
-END {
+	
 	removeFiles() if($rmFlag && !$update);
+	print "******END OF TEST ".$testNum."******\n";
 }
 
 sub processing

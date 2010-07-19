@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DIAGONALIZATION_HEADER_H
 #define DIAGONALIZATION_HEADER_H
-
 #include "Utils.h"
 #include "ProgressIndicator.h"
 #include "VectorWithOffset.h" // includes the std::norm functions

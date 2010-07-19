@@ -329,6 +329,7 @@ sub createMakefile
 {
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
 	my $compiler = compilerName();
+	my $headerFiles = join(' ', glob("Engine/*.h Models/*.h Geometries/*.h"));
 	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 print FOUT<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Modify configure.pl instead
@@ -347,20 +348,15 @@ if ($mpi) {
 }
 print FOUT<<EOF;
 all: \$(EXENAME)
-OBJECTSCOMMON = 
-OBJECTSDMRG    = main.o  
+HEADERSH = $headerFiles
 
-all: clean dmrg
+all: dmrg
 
-dmrg: \$(OBJECTSDMRG) \$(OBJECTSCOMMON) 
-	\$(CXX) -o dmrg  \$(OBJECTSCOMMON) \$(OBJECTSDMRG)  \$(LDFLAGS) 
+dmrg:  \$(HEADERSH) 
+	\$(CXX) -o dmrg  \$(CPPFLAGS)  dmrg.cpp \$(LDFLAGS)  
 
-# This target is work in progress...:	
-observe: clean observe.o \$(OBJECTSCOMMON)
-	\$(CXX) -o observe observe.o \$(OBJECTSCOMMON) \$(LDFLAGS)
-
-freeSystem: clean freeSystem.o \$(OBJECTSCOMMON)
-	\$(CXX) -o freeSystem freeSystem.o \$(OBJECTSCOMMON) \$(LDFLAGS)
+observe:  \$(HEADERSH)
+	\$(CXX) -o observe \$(CPPFLAGS) observe.cpp \$(LDFLAGS)
 
 clean:
 	rm -f core* \$(EXENAME) *.o *.ii *.tt
@@ -375,8 +371,8 @@ EOF
 sub createDriver
 {
 
-	system("cp main.cpp main.bak") if (-r "main.cpp");
-	open(FOUT,">main.cpp") or die "Cannot open file main.cpp for writing: $!\n";
+	system("cp dmrg.cpp dmrg.bak") if (-r "dmrg.cpp");
+	open(FOUT,">dmrg.cpp") or die "Cannot open file dmrg.cpp for writing: $!\n";
 	my $license=getLicense();
 	my $concurrencyName = getConcurrencyName();
 	my $parametersName = getParametersName();
@@ -583,7 +579,7 @@ print FOUT<<EOF;
 
 EOF
 	close(FOUT);
-	print STDERR "File main.cpp has been written\n";
+	print STDERR "File dmrg.cpp has been written\n";
 
 }
 
