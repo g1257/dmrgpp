@@ -509,18 +509,23 @@ namespace Dmrg {
 				//! hopping part
 				for (size_t j=0;j<n;j++) {
 					int type = geometry_.calcConnectorType(block[i],block[j]);
-					for (size_t dof1=0;dof1<dof();dof1++) {
-						for (size_t dof2=0;dof2<dof();dof2++) {
-							SparseElementType tmp = geometry_.calcConnectorValue(type,block[i],dof1,
-									block[j],dof2,smax,emin);
+					for (size_t connectionType=0;connectionType<LinkProductType::bonds();connectionType++) {
+						SparseElementType tmp = geometry_.calcConnectorValue(type,block[i],
+								block[j],smax,emin,connectionType);
 
-							if (i==j || tmp==0.0) continue;
-
-							transposeConjugate(tmpMatrix2,cm[dof2+j*dof()].data);
-							multiply(tmpMatrix,cm[dof1+i*dof()].data,tmpMatrix2);
-							multiplyScalar(tmpMatrix2,tmpMatrix,tmp);
-							hmatrix += tmpMatrix2;
-						}
+						if (i==j || tmp==0.0) continue;
+						size_t orb1 = 0;
+						size_t orb2 = 0;
+						size_t spin=0;
+						if (connectionType>3) spin=1;
+						if (spin==0) LinkProductType::getOrbitals(orb1,orb2,connectionType);
+						else LinkProductType::getOrbitals(orb1,orb2,connectionType-4);
+						size_t dof1 = orb1 + spin*2;
+						size_t dof2 = orb2 + spin*2;
+						transposeConjugate(tmpMatrix2,cm[dof2+j*dof()].data);
+						multiply(tmpMatrix,cm[dof1+i*dof()].data,tmpMatrix2);
+						multiplyScalar(tmpMatrix2,tmpMatrix,tmp);
+						hmatrix += tmpMatrix2;
 					}
 				}
 				addInteraction(hmatrix,cm,i);
@@ -685,7 +690,6 @@ namespace Dmrg {
 			std::cout<<str<<" diagTest size="<<fullm.rank()<<" eigs[0]="<<eigs[0]<<"\n";
 			std::cout<<fullm;
 		}
-
 	};     //class ModelFeBasedSc
 
 	template<

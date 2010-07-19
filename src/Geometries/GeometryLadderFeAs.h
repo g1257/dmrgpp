@@ -122,7 +122,12 @@ namespace Dmrg {
 			E=E_;
 		}
 		
-		// FIXME: spread the what!!
+		void getOrbitals(size_t& orb1,size_t& orb2,size_t what) const
+		{
+			orb1 = what / 2;
+			orb2 = what % 2;
+		}
+		
 		Field calcConnectorValue(int type,int ind,int jnd,int smax,int emin,size_t what) const 
 		{
 			//! There are four cases:
@@ -134,6 +139,15 @@ namespace Dmrg {
 			//int total = S_.size()+X_.size()+Y_.size()+E_.size(); 
 			Field x=0;
 			size_t indR=0,jndR=0;
+			size_t orb1 = 0;
+			size_t orb2 = 0;
+			size_t spin=0;
+			if (what>3) spin=1;
+			if (spin==0) getOrbitals(orb1,orb2,what);
+			else getOrbitals(orb1,orb2,what-4);
+			size_t dof1 = orb1 + spin*2;
+			size_t dof2 = orb2 + spin*2;
+			
 			switch (type) {
 				case EnvironEnviron:
 					indR = findReflection(ind);
@@ -145,12 +159,12 @@ namespace Dmrg {
 				
 				case EnvironSystem:
 					//x=calcHoppingAux(ind,jnd,smax,emin,0);
-					x=connector(ind,dof1,jnd,dof2,smax,emin,0);
+					x=connector(ind,dof1,jnd,dof2,smax,emin,type);
 					break;
 				
 				case SystemEnviron:
 					//x=calcHoppingAux(ind,jnd,smax,emin,1);
-					x=connector(ind,dof1,jnd,dof2,smax,emin,1);
+					x=connector(ind,dof1,jnd,dof2,smax,emin,type);
 					break;
 				case SystemSystem:
 					x= connectors_(dof1+ind*dof_,dof2+jnd*dof_);
@@ -224,12 +238,12 @@ namespace Dmrg {
 		
 		Field connector(int ind,size_t dof1,int jnd,size_t dof2,int smax,int emin,int type) const
 		{
-			if (type==0) {// ind in env, jnd in the system
+			if (type==ProgramGlobals::ENVIRON_SYSTEM) {// ind in env, jnd in the system
 				int n = smax+1;
 				if (n%leg_==0) return connectorComplete(jnd,dof2,ind,dof1,smax,emin,type);
 				return connectorIncomplete(jnd,dof2,ind,dof1,smax,emin,type);
 			} else { // ind in system, jnd in env
-				return connector(jnd,dof2,ind,dof1,smax,emin,0);
+				return connector(jnd,dof2,ind,dof1,smax,emin,ProgramGlobals::ENVIRON_SYSTEM);
 			}
 			return static_cast<Field>(0);
 		}

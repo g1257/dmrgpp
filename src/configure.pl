@@ -329,7 +329,7 @@ sub createMakefile
 {
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
 	my $compiler = compilerName();
-	my $headerFiles = join(' ', glob("Engine/*.h Models/*.h Geometries/*.h"));
+	my $headerFiles = join(' ', glob("Engine/*.h Models/*/*.h Geometries/*.h"));
 	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 print FOUT<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Modify configure.pl instead

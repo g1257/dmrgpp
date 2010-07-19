@@ -134,12 +134,7 @@ namespace Dmrg {
 		}
 		
 		size_t n_row() const { return connectorMatrix_.n_row(); }
-		
-		FieldType getMatrix(size_t i,size_t j) const
-		{
-			return connectorMatrix_(i,j);
-		}
-		
+
 	private:
 		std::vector<psimag::Matrix<FieldType> > defaultConnector_;
 		psimag::Matrix<FieldType>  connectorMatrix_;
