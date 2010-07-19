@@ -139,10 +139,6 @@ namespace Dmrg {
 					const ModelHelperType& modelHelper) const
 			{
 				size_t n=modelHelper.basis1().block().size();
-				int smax,emin;
-				
-				dmrgGeometry_.findExtremes(smax,emin,modelHelper.basis1().block());
-				
 				
 				VerySparseMatrixType matrix2(matrix.rank());
 				
@@ -153,7 +149,7 @@ namespace Dmrg {
 							for (size_t dof2=0;dof2<dof_;dof2++) {
 								//if (i==j) continue; 
 								SparseMatrixType matrixBlock(matrix.rank(),matrix.rank());
-								int res = hamiltonianConnection(i,dof1,j,dof2,smax,emin,
+								int res = hamiltonianConnection(i,dof1,j,dof2,
 										&matrixBlock,modelHelper);
 								if (res<0) continue;
 								VerySparseMatrixType vsm(matrixBlock);
@@ -172,11 +168,8 @@ namespace Dmrg {
 				const ModelHelperType& modelHelper) const
 			{
 				size_t n=modelHelper.basis1().block().size();
-				int smax,emin;
 
 				SparseMatrixType matrix;
-
-				dmrgGeometry_.findExtremes(smax,emin,modelHelper.basis1().block());
 
 				typename LinkProductType::LinkProductStructType lps;
 
@@ -185,7 +178,7 @@ namespace Dmrg {
 						for (size_t dof1=0;dof1<dof_;dof1++) {
 							for (size_t dof2=0;dof2<dof_;dof2++) { 	
 								if (i==j) continue; 
-								hamiltonianConnection(i,dof1,j,dof2,smax,emin,0,modelHelper,&lps);
+								hamiltonianConnection(i,dof1,j,dof2,0,modelHelper,&lps);
 								
 							}
 						}
@@ -232,13 +225,14 @@ namespace Dmrg {
 			const DmrgGeometryType& dmrgGeometry_;
 			
 			int hamiltonianConnection(size_t i,size_t dof1, size_t j,size_t dof2,
-					size_t smax,
-     					size_t emin,
 					SparseMatrixType* matrixBlock,
 					const ModelHelperType& modelHelper,
      					typename LinkProductType::LinkProductStructType* lps=0) const
 			{
 				int flag = -1;
+				size_t smax,emin;
+				utils::findExtremes(smax,emin,modelHelper.basis1().block(),dmrgGeometry_.systemBlock());
+				
 				for (size_t connectionType=0;connectionType<dmrgGeometry_.connectorValues();connectionType++) {
 					int type = dmrgGeometry_.calcConnectorType(modelHelper.basis1().block()[i],
 							modelHelper.basis1().block()[j]);

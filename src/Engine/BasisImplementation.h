@@ -100,7 +100,7 @@ namespace Dmrg {
 		typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 		typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
 		typedef  BasisData<PairType> BasisDataType;
-		typedef std::vector<int> BlockType;
+		typedef std::vector<size_t> BlockType;
 		
 		enum {BEFORE_TRANSFORM,AFTER_TRANSFORM};
 		

@@ -213,12 +213,6 @@ namespace Dmrg {
 			}
 		}
 
-		//! set block of sites S X Y and E (see paper for geometry description)
-		void setBlocksOfSites(Block &S,std::vector<Block> &X,std::vector<Block> &Y,Block &E) const 
-		{
-			geometry_.setBlocksOfSites(S,X,Y,E);
-		}
-
 		psimag::Matrix<SparseElementType> getOperator(const std::string& what,size_t orbital=0,size_t spin=0) const
 		{
 			Block block;
@@ -506,11 +500,11 @@ namespace Dmrg {
 		{
 			size_t n=block.size();
 			SparseMatrixType tmpMatrix,tmpMatrix2;
-			int smax,emin;
 
-			geometry_.findExtremes(smax,emin,block);
 			hmatrix.makeDiagonal(cm[0].data.rank());
-
+			size_t smax,emin;
+			utils::findExtremes(smax,emin,block,geometry_.systemBlock());
+			
 			for (size_t i=0;i<n;i++) {
 				//! hopping part
 				for (size_t j=0;j<n;j++) {
@@ -692,27 +686,6 @@ namespace Dmrg {
 			std::cout<<fullm;
 		}
 
-		void saveConnectionToDisk(VerySparseMatrix<SparseElementType>& vsm,const ModelHelperType& modelHelper,
-					 const std::string& rootname) const
-		{
-			{
-				typename IoSimple::Out outHandle(rootname+"0.txt",0);
-				vsm.saveToDisk(outHandle);
-			} 	// this scope is so that the output file gets closed (DO NOT REMOVE SCOPE!!)
-
-			vsm.clear(); 
-			std::cerr<<"Wrote left/right block to disk\n";
-			utils::memoryUsage(std::cerr);
-			//! contribution to Hamiltonian from connection system-environment
-
-			size_t counter = this->addHamiltonianConnection(vsm,rootname,1,modelHelper);
-			utils::memoryUsage(std::cerr);
-
-			// load matrix
-			std::cerr<<"Finished crs-->vsm\n";
-
-			this->sumDiskVsms(vsm,0,counter,rootname,modelHelper.size());
-		}
 	};     //class ModelFeBasedSc
 
 	template<

@@ -627,7 +627,7 @@ namespace Dmrg {
 					targetVectors_[i].resize(basisSE_.size());
 			}
 
-			void printVectors(const std::vector<int>& block)
+			void printVectors(const std::vector<size_t>& block)
 			{
 				if (block.size()!=1) throw std::runtime_error("TST only supports blocks of size 1\n");
 				

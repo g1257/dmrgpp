@@ -138,12 +138,6 @@ namespace Dmrg {
 
 		const BasisWithOperatorsType& basis3() const  { return basis3_; }
 
-		const SparseMatrixType& getTcOperator(int i,size_t type) const
-		{
-			if (type==System) return basis2tc_[i];
-			return basis3tc_[i];
-		}		
-
 		const SparseMatrixType& getReducedOperator(char modifier,size_t i,size_t sigma,size_t type) const
 		{
 			size_t ii = i*numberOfOperators_+sigma;
@@ -434,6 +428,12 @@ namespace Dmrg {
 		size_t numberOfOperators_;
 		//RightLeftLocalType rightLeftLocal_;
 		
+		const SparseMatrixType& getTcOperator(int i,size_t type) const
+		{
+			if (type==System) return basis2tc_[i];
+			return basis3tc_[i];
+		}
+		
 		void createBuffer() 
 		{
 			size_t ns=basis2_.size();
@@ -468,7 +468,10 @@ namespace Dmrg {
 			}
 		}
 		
-		
+		/*void findExtremes(int& smax,int& emin,BlockType const &B) const
+		{
+			findExtremes(smax,emin,B,systemBlock_);
+		}*/
 		
 	}; // class ModelHelperLocal
 } // namespace Dmrg

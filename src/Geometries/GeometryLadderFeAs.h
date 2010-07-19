@@ -107,7 +107,9 @@ namespace Dmrg {
 		{
 			split(sizeOfInitialBlock);
 		}
-
+		
+		const BlockType& systemBlock() const { return systemBlock_; }
+		
 		//! split into S X Y and E
 		void setBlocksOfSites(BlockType &S,std::vector<BlockType> &X,std::vector<BlockType> &Y,BlockType &E) const 
 		{
@@ -202,29 +204,6 @@ namespace Dmrg {
 			
 		}
 
-		void findExtremes(int& smax,int& emin,BlockType const &B) const
-		{
-			findExtremes(smax,emin,B,systemBlock_);
-		}
-
-		//! Find smax and emin such that:
-		//! smax = maximum(B intersection sBlock)
-		//! emin = minimum(B intersection envBlock)
-		void findExtremes(int& smax,int& emin,BlockType const &B,BlockType const &sBlock) const
-		{
-			smax = -1;
-			emin = 1000;
-			for (size_t i=0;i<B.size();i++) {
-				int r = utils::isInVector(sBlock,B[i]);
-				if (r<0) { //it's in the environment
-					if (B[i]<emin) emin=B[i];
-				} else { //it's in the system
-					if (B[i]>smax) smax=B[i];
-				}
-			}
-			
-		}
-		
 		size_t connectorValues() const
 		{
 			return connectors_.size();

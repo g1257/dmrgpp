@@ -472,9 +472,9 @@ namespace Dmrg {
 			int i,j,n=block.size();
 			int type,sigma;
 			SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
-			int smax,emin;
+			size_t smax,emin;
 
-			dmrgGeometry_.findExtremes(smax,emin,block);
+			utils::findExtremes(smax,emin,block,dmrgGeometry_.systemBlock());
 			hmatrix.makeDiagonal(cm[0].data.rank());
 
 			for (i=0;i<n;i++) {

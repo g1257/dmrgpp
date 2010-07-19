@@ -482,7 +482,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 	SolverType dmrgSolver(dmrgSolverParams,model,concurrency,targetStruct);
 
 	//! Calculate observables:
-	dmrgSolver.main();
+	dmrgSolver.main(geometry);
 }
 
 int main(int argc,char *argv[])

@@ -91,14 +91,14 @@ namespace Dmrg {
 	template<typename Field,typename ConnectorType>
 	class GeometryBase {
 	protected:
-		typedef std::vector<int> BlockType;
+		typedef std::vector<size_t> BlockType;
 		
 		//! split into S X Y and E
 		//! S is the initial system
 		//! X is a vector of blocks that are to be added to S sequentially one-by-one
 		//! Y is a vector of blocks that are to be added to E sequentially one-by-one
 		//! E is the initial environment (see corresponding Figure in paper)
-		void setBlocksOfSites(BlockType &S,std::vector<BlockType> &X,std::vector<BlockType> &Y,BlockType &E) const; 
+		//void setBlocksOfSites(BlockType &S,std::vector<BlockType> &X,std::vector<BlockType> &Y,BlockType &E) const; 
 
 		//! Returns what type of connection between ind and jnd is, 
 		//! either SystemSyste, SystemEnviron, EnvironSystem or EnvironEnviron
@@ -113,13 +113,6 @@ namespace Dmrg {
 		Field calcConnectorValue(int type,int ind,int jnd,int smax,int emin,size_t what) const;
 		
 		size_t connectorValues() const;
-		
-		//! smax: maximum_{i in B intersection system}
-		//! emin: minimum_{i in B intersection environment} 
-		void findExtremes(int& smax,int& emin,BlockType const &B) const;
-
-		//! same as above assuming system is sBlock
-		void findExtremes(int& smax,int& emin,BlockType const &B,BlockType const &sBlock) const;
 
 		//! given i in the environment returns the site symmetric to i (in the system)
 		int findReflection(int i) const;

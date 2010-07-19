@@ -109,9 +109,10 @@ namespace Dmrg {
 			typedef BasisWithOperators<OperatorsType,ConcurrencyType> MyBasisWithOperators;
 			typedef SharedMemoryTemplate<LinkProductType> SharedMemoryType;
 			typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryType> ModelCommonType;
+			typedef DmrgGeometryType GeometryType;
 			
 			ModelBase(int DEGREES_OF_FREEDOM,const DmrgGeometryType& dmrgGeometry) :
-					modelCommon_(DEGREES_OF_FREEDOM,dmrgGeometry) 
+					modelCommon_(DEGREES_OF_FREEDOM,dmrgGeometry)
 			{
 				Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 				MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
