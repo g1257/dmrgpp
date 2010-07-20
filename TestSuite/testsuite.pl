@@ -329,11 +329,11 @@ sub createExecutable
 	
 	my $err = chdir($srcDir);
 	die "Changing directory to $srcDir: $!" if(!$err);
-	my $err = system($arg1);
+	$err = system($arg1);
 	die "Configuration error using $configFile with $specFile: $!" if($err);
 	print "Configuration of Test $testNum was successful.\n";
 	print "Creating executable for Test $testNum...\n";
-	my $err = system($arg2);
+	$err = system($arg2);
 	die "Make command for dmrg: $!" if($err);
 	if(!$noModel) {
 		my $oldExe = $executable;
@@ -341,7 +341,7 @@ sub createExecutable
 		my $err = rename($oldExe, $executable);
 		die "Renaming $oldExe to $executable: $!" if(!$err);
 	}
-	my $err = chdir($testDir);
+	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
 	
 	print "Executable was succesfully created.\n";
@@ -478,7 +478,7 @@ sub commandsInterpreter
 		if(grep {/$func/} @metaLang) {
 			eval("hook$func(\$analysis,\$arg);");
 			if($@) {
-				my $subr = caller(0)[3];
+				my $subr = (caller(0))[3];
 				die "Subroutine $subr: $@";
 			}
 		} else {
@@ -497,7 +497,7 @@ sub hookExecute
 	
 	eval("$arg;");
 	if($@) {
-		my $subr = caller(0)[3];
+		my $subr = (caller(0))[3];
 		die "Subroutine $subr: $@";
 	}
 }
@@ -529,9 +529,9 @@ sub runDmrg
 	print "Please wait while the test is ran...\n";
 	my $err = chdir($srcDir);
 	die "Changing directory to $srcDir: $!" if(!$err);
-	my $err = system($arg);
+	$err = system($arg);
 	die "Running test using $executable with $inputFile: $!" if($err);
-	my $err = chdir($testDir);
+	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
 	print "The run has been completed.\n";
 	
@@ -560,7 +560,7 @@ sub runObserve
 	grep {s/>.*//} $arg2 if($verbose);
 	
 	print "Creating executable for Test $testNum...\n";
-	my $err = system($arg2);
+	$err = system($arg2);
 	die "Make command for observables: $!" if($err);
 	if(!$noModel) {
 		my $oldObs = $observable;
@@ -572,9 +572,9 @@ sub runObserve
 	print "Observable was succesfully created.\n";
 	my $arg = "./$observable $input > $raw";
 	print "Please wait while the observable is run...\n";
-	my $err = system($arg);
+	$err = system($arg);
 	die "Running test using $observable with $input: $!" if($err);
-	my $err = chdir($testDir);
+	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
 	print "The run has been completed.\n";
 }
@@ -587,10 +587,10 @@ sub hookGprof
 	die "Changing directory to $srcDir: $!" if(!$err);
 	eval("system(\"gprof $arg\");");
 	if($@) {
-		my $subr = caller(0)[3];
+		my $subr = (caller(0))[3];
 		die "Subroutine $subr: $@";
 	}
-	my $err = chdir($testDir);
+	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
 	
 	print "$analysis:Gprof was successful.\n";
@@ -603,7 +603,7 @@ sub hookDiff
 	
 	eval("system(\"diff $arg\");");
 	if($@) {
-		my $subr = caller(0)[3];
+		my $subr = (caller(0))[3];
 		die "Subroutine $subr: $@";
 	}
 
@@ -619,10 +619,10 @@ sub hookMake
 	die "Changing directory to $srcDir: $!" if(!$err);
 	eval("system(\"make $arg\");");
 	if($@) {
-		my $subr = caller(0)[3];
+		my $subr = (caller(0))[3];
 		die "Subroutine $subr: $@";
 	}
-	my $err = chdir($testDir);
+	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
 	
 	print "$analysis:Make was successful.\n";
@@ -634,7 +634,7 @@ sub hookGrep
 	
 	eval("system(\"grep $arg\");");
 	if($@) {
-		my $subr = caller(0)[3];
+		my $subr = (caller(0))[3];
 		die "Subroutine $subr: $@";
 	}
 	
@@ -789,16 +789,14 @@ sub extractAnalyses
 
 sub removeFiles
 {
-	my @files = ("Makefile*", "main*", "observe", "freeSystem*", "observe.*", "input.*", "raw$testNum.txt", "gmon.out");
+	my @files = ("Makefile*", "dmrg*", "observe", "freeSystem*", "observe.*", "input.*", "raw$testNum.txt", "gmon.out");
 
 	my $err = chdir($srcDir);
 	die "Changing directory to $srcDir: $!" if(!$err);
-	my $err = system("rm @files >& /dev/null");
-	die "Removing files: $!" if($err);
-	my $err = chdir($testDir);
+	system("rm @files >& /dev/null");
+	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
-	my $err = system("rm @files >& /dev/null");
-	die "Removing files: $!" if($err);
+	system("rm @files >& /dev/null");
 }
 
 #~ sub moveFiles
