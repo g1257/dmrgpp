@@ -111,6 +111,14 @@ namespace Dmrg {
 			
 			size_t terms() const { return geometryImpl_.terms(); }
 			
+			void split(BlockType& S,std::vector<BlockType>& X,std::vector<BlockType>& Y,BlockType& E) const
+			{
+				geometryImpl_.split(S,X,Y,E);
+			}
+			
+			size_t numberOfSites() const { return geometryImpl_.numberOfSites(); }
+			
+			
 		private:
 			GeometryImplementationType geometryImpl_;
 	}; // class GeometryBase

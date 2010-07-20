@@ -464,7 +464,8 @@ namespace Dmrg {
 			SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
 			
 			hmatrix.makeDiagonal(cm[0].data.rank());
-
+			size_t linSize = dmrgGeometry_.numberOfSites();
+			
 			for (size_t i=0;i<n;i++) {
 				//! hopping part
 				for (size_t j=0;j<n;j++) {
@@ -501,12 +502,12 @@ namespace Dmrg {
 				hmatrix += tmpMatrix2;
 
 				// V_iup term
-				tmp = modelParameters_.potentialV[block[i]+0*modelParameters_.linSize]; //computeOnsitePotential(type,block[i],0,smax,emin);
+				tmp = modelParameters_.potentialV[block[i]+0*linSize]; //computeOnsitePotential(type,block[i],0,smax,emin);
 				multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
 				hmatrix += tmpMatrix;
 
 				// V_idown term
-				tmp = modelParameters_.potentialV[block[i]+1*modelParameters_.linSize]; //computeOnsitePotential(type,block[i],1,smax,emin);
+				tmp = modelParameters_.potentialV[block[i]+1*linSize]; //computeOnsitePotential(type,block[i],1,smax,emin);
 				multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
 				hmatrix += tmpMatrix;
 			}

@@ -134,9 +134,32 @@ namespace Dmrg {
 			
 			size_t terms() const { return terms_.size(); }
 			
+			size_t numberOfSites() const { return linSize_; }
+			
+			void split(BlockType& S,std::vector<BlockType>& X,std::vector<BlockType>& Y,BlockType& E) const
+			{
+				size_t middle = linSize_/2;
+				S.push_back(0);
+				for (size_t i=1;i<middle;i++) {
+					std::vector<size_t> tmpV(1);
+					tmpV[0] = i;
+					X.push_back(tmpV);
+				}
+				
+				for (size_t i=middle;i<linSize_-1;i++) {
+					std::vector<size_t> tmpV(1);
+					tmpV[0] = i;
+					Y.push_back(tmpV);
+				}
+				
+				E.push_back(linSize_-1);
+			}
 		private:
+			
+		
 			size_t linSize_;
 			std::vector<GeometryTermType> terms_;
+			
 	}; // class GeometryImplementation
 } // namespace Dmrg 
 

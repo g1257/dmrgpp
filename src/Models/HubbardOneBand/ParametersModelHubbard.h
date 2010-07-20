@@ -104,8 +104,6 @@ namespace Dmrg {
 		std::vector<Field> hubbardU; 
 		// Onsite potential values, one for each site
 		std::vector<Field> potentialV;
-		// total number of sites in the system
-		int linSize;
 		// target number of electrons  in the system
 		int nOfElectrons;
 		// target density

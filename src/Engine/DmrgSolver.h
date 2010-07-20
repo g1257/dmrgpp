@@ -192,7 +192,7 @@ namespace Dmrg {
 				
 			
 			io_.print(model_);
-
+			geometry.split(S,X,Y,E);
 			for (size_t i=0;i<X.size();i++) 
 				sitesIndices_.push_back(X[i]);
 			for (size_t i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
