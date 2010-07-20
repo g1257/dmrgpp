@@ -106,50 +106,50 @@ namespace Dmrg {
 		std::vector<size_t> electrons;
 	};
 	
-	template<typename OperatorType,typename ModelType>
-	inline TargetStructureParams<TimeStepStructure<OperatorType>,ModelType>&
-	operator<=(TargetStructureParams<TimeStepStructure<OperatorType>,ModelType>& tsp,SimpleReader& reader)
-	{
-		typedef typename ModelType::RealType RealType;
-		std::vector<size_t> sites,loops;
-		std::string s;
-		reader.read(s); // filename
-		RealType tau=0;
-		reader.read(tau);
-		size_t timeSteps=0;
-		reader.read(timeSteps);
-		size_t advanceEach=0;
-		reader.read(advanceEach);
-		reader.read(sites);
-		reader.read(loops);
-		
-		tsp.init(s,tau,timeSteps,advanceEach,sites,loops);
-		
-		for (size_t i=0;i<sites.size();i++) {
-			//std::string s;
-			reader.read(s);
-			if (s == "cooked") {
-				reader.read(s);
-				std::vector<size_t> v;
-				reader.read(v);
-				tsp.setCookedData(i,s,v);
-			} else {
-				psimag::Matrix<RealType> m;
-				reader.read(m);
-				tsp.setRawData(i,m);
-			}
-			int fermiSign=0;
-			reader.read(fermiSign);
-			std::pair<size_t,size_t> jmValues;
-			reader.read(jmValues);
-			RealType angularFactor;
-			reader.read(angularFactor);
-			tsp.set(i,fermiSign,jmValues,angularFactor);
-		}
-		
-		return tsp;
-	}
-	
+// 	template<typename OperatorType,typename ModelType>
+// 	inline TargetStructureParams<TimeStepStructure<OperatorType>,ModelType>&
+// 	operator<=(TargetStructureParams<TimeStepStructure<OperatorType>,ModelType>& tsp,SimpleReader& reader)
+// 	{
+// 		typedef typename ModelType::RealType RealType;
+// 		std::vector<size_t> sites,loops;
+// 		std::string s;
+// 		reader.read(s); // filename
+// 		RealType tau=0;
+// 		reader.read(tau);
+// 		size_t timeSteps=0;
+// 		reader.read(timeSteps);
+// 		size_t advanceEach=0;
+// 		reader.read(advanceEach);
+// 		reader.read(sites);
+// 		reader.read(loops);
+// 		
+// 		tsp.init(s,tau,timeSteps,advanceEach,sites,loops);
+// 		
+// 		for (size_t i=0;i<sites.size();i++) {
+// 			//std::string s;
+// 			reader.read(s);
+// 			if (s == "cooked") {
+// 				reader.read(s);
+// 				std::vector<size_t> v;
+// 				reader.read(v);
+// 				tsp.setCookedData(i,s,v);
+// 			} else {
+// 				psimag::Matrix<RealType> m;
+// 				reader.read(m);
+// 				tsp.setRawData(i,m);
+// 			}
+// 			int fermiSign=0;
+// 			reader.read(fermiSign);
+// 			std::pair<size_t,size_t> jmValues;
+// 			reader.read(jmValues);
+// 			RealType angularFactor;
+// 			reader.read(angularFactor);
+// 			tsp.set(i,fermiSign,jmValues,angularFactor);
+// 		}
+// 		
+// 		return tsp;
+// 	}
+// 	
 	template<typename OperatorType>
 	inline std::ostream&
 	operator<<(std::ostream& os,const TimeStepStructure<OperatorType>& t)

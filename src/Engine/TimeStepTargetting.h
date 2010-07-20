@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "TimeStepStructure.h"
+#include "TargetStructureParams.h"
 #include "ApplyOperatorLocal.h"
 #include "TimeSerializer.h"
 
@@ -120,7 +120,7 @@ namespace Dmrg {
 			typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 			typedef typename BasisWithOperatorsType::BasisType BasisType;
-			typedef TimeStepStructure<OperatorType> TargettingStructureType;
+			typedef TargetStructureParams<ModelType> TargettingStructureType;
 			typedef typename BasisType::BlockType BlockType;
 			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
 			typedef ComplexVectorType TargetVectorType;

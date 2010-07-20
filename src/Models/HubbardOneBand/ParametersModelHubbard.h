@@ -88,10 +88,18 @@ namespace Dmrg {
 	//! Hubbard Model Parameters
 	template<typename Field>
 	struct ParametersModelHubbard {
-
-		// Matrix of Hopping values, hoppings(i,j) 
-		// indicate hoppings between sites i and j
-		psimag::Matrix<Field> hoppings; 
+		
+		template<typename IoInputType>
+		ParametersModelHubbard(IoInputType& io) 
+		{
+	
+			io.read(hubbardU,"hubbardU");
+			io.read(potentialV,"potentialV");
+			io.readline(density,"density=");
+		}
+		
+		// Do not include here connection parameters
+		// those are handled by the Geometry
 		// Hubbard U values (one for each site)
 		std::vector<Field> hubbardU; 
 		// Onsite potential values, one for each site
@@ -102,8 +110,6 @@ namespace Dmrg {
 		int nOfElectrons;
 		// target density
 		Field density;
-		// for compatibility
-		std::vector<psimag::Matrix<Field> > hoppingsOneSite;
 	};
 
 
@@ -126,40 +132,13 @@ namespace Dmrg {
 		return parameters;
 	} */
 	
-	//! Operator to read Model Parameters from inp file.
-	template<typename FieldType>
-	ParametersModelHubbard<FieldType>&
-	operator <= (ParametersModelHubbard<FieldType>& parameters,  SimpleReader& reader) 
-	{
-		reader.read(parameters.linSize);
-		reader.read(parameters.hoppings);
-		if (int(parameters.hoppings.n_row())!=parameters.linSize) {
-			std::cerr<<"row="<<parameters.hoppings.n_row()<<" expected "<<parameters.linSize<<"\n";
-			throw std::runtime_error("ParametersModelHeisenberg<FieldType>: operator <= : hoppings size incorrect\n");
-		}
-		if (int(parameters.hoppings.n_col())!=parameters.linSize) {
-			std::cerr<<"row="<<parameters.hoppings.n_col()<<" expected "<<parameters.linSize<<"\n";
-			throw std::runtime_error("ParametersModelHeisenberg<FieldType>: operator <= : hoppings size incorrect\n");
-		}
-		reader.read(parameters.hubbardU);
-		reader.read(parameters.potentialV);
-		reader.read(parameters.density);
-		psimag::Matrix<FieldType> tmp(1,1);
-		tmp(0,0) = parameters.hoppings(0,1);
-		parameters.hoppingsOneSite.push_back(tmp);
-		
-		return parameters;
-	}
-	
 	//! Function that prints model parameters to stream os
 	template<typename FieldType>
 	std::ostream& operator<<(std::ostream &os,const ParametersModelHubbard<FieldType>& parameters)
 	{
-		os<<"parameters.linSize="<<parameters.linSize<<"\n";
 		os<<"parameters.density="<<parameters.density<<"\n";
 		utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
 		utils::vectorPrint(parameters.potentialV,"potentialV",os);
-		utils::matrixPrint(parameters.hoppings,os); // comment out this line if using gcc v3
 		return os;
 	}
 } // namespace Dmrg

@@ -96,14 +96,17 @@ namespace Dmrg {
 			: linSize_(linSize),leg_(1)
 			{
 				int x;
-				io.readline(x,"DegreesOfFreedom");
+				io.readline(x,"DegreesOfFreedom=");
 				if (x<=0) throw std::runtime_error("DegreesOfFreedom<=0 is an error\n");
+				std::cerr<<"DegreesOfFreedom "<<x<<"\n";
 				edof_ = x;
 				std::string s;
-				io.readline(s,"GeometryKind");
+				io.readline(s,"GeometryKind=");
+				std::cerr<<"GeometryKind "<<s<<"\n";
 				geometryKind_=getGeometry(s);
 				std::string gOptions;
-				io.readline(gOptions,"GeometryOptions");
+				io.readline(gOptions,"GeometryOptions=");
+				std::cerr<<"GeometryOptions "<<gOptions<<"\n";
 				size_t dirs = 0;
 				switch (geometryKind_) {
 					case GeometryDirectionType::LADDER:
@@ -111,7 +114,7 @@ namespace Dmrg {
 						// no break here!
 					case GeometryDirectionType::LADDERX:
 						if (dirs==0) dirs=4;
-						io.readline(x,"LadderLeg");
+						io.readline(x,"LadderLeg=");
 						if (x<2) throw std::runtime_error("LadderLeg<2 is an error\n");
 						leg_=x;
 						break;
@@ -139,9 +142,18 @@ namespace Dmrg {
 				return 	cachedValues_[p];
 			}
 			
-		private:	
-			const RealType& calcValue(size_t i1,size_t edof1,size_t i2,size_t edof2) const
+			const RealType& defaultConnector
+				(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
+				size_t dir = calcDir(i1,i2);
+				return directions_[dir].defaultConnector(edof1,edof2);
+			}
+			
+		private:	
+			const RealType calcValue(size_t i1,size_t edof1,size_t i2,size_t edof2) const
+			{
+				RealType zero = 0;
+				if (!connected(i1,i2)) return zero;
 				size_t dir = calcDir(i1,i2);
 				if (directions_[dir].constantValues()) {
 					return directions_[dir](edof1,edof2);
@@ -198,7 +210,32 @@ namespace Dmrg {
 				if (c1 == c2) return true;
 				return false;
 			}
-
+			
+			bool connected(size_t i1,size_t i2) const
+			{
+				switch (geometryKind_) {
+					case GeometryDirectionType::CHAIN:
+						return neighbors(i1,i2);
+						break;
+					case GeometryDirectionType::LADDERX:
+					case GeometryDirectionType::LADDER:
+						size_t c1 = i1/leg_;
+						size_t c2 = i2/leg_;
+						size_t r1 = i1%leg_;
+						size_t r2 = i2%leg_;
+						if (c1==c2) return neighbors(r1,r2);
+						if (r1==r2) return neighbors(c1,c2);
+						return (geometryKind_==GeometryDirectionType::LADDERX
+							&& neighbors(r1,r2) && neighbors(c1,c2));
+				}
+				throw std::runtime_error("Unknown geometry\n");
+			}
+			
+			bool neighbors(size_t i1,size_t i2) const
+			{
+				return (i1-i2==1 || i2-i1==1);
+			}
+			
 			size_t linSize_;
 			size_t leg_;
 			size_t edof_;

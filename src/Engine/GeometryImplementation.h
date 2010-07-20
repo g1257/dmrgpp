@@ -96,11 +96,13 @@ namespace Dmrg {
 			GeometryImplementation(IoInputter& io)
 			{
 				int x;
-				io.readline(x,"TotalNumberOfSites");
+				io.readline(x,"TotalNumberOfSites=");
 				if (x<0) throw std::runtime_error("TotalNumberOfSites<0 is an error\n");
+				std::cerr<<"TotalNumberOfSites "<<x<<"\n";
 				linSize_ = x;
 
-				io.readline(x,"NumberOfTerms");
+				io.readline(x,"NumberOfTerms=");
+				std::cerr<<"NumberOfTerms "<<x<<"\n";
 				if (x<0) throw std::runtime_error("NumberOfTerms<0 is an error\n");
 
 				for (size_t i=0;i<size_t(x);i++) {
@@ -122,6 +124,12 @@ namespace Dmrg {
 				(size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
 			{
 				return terms_[term](i1,edof1,i2,edof2);
+			}
+			
+			const RealType& defaultConnector
+				(size_t edof1,size_t edof2,size_t term) const
+			{
+				return terms_[term].defaultConnector(edof1,edof2);
 			}
 			
 			size_t terms() const { return terms_.size(); }

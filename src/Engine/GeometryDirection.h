@@ -98,8 +98,8 @@ namespace Dmrg {
 					  size_t geometryKind,size_t leg,const std::string& options) 
 			: dirId_(dirId),linSize_(linSize),geometryKind_(geometryKind),leg_(leg)
 			{
-				size_t n=0;
-				checkOptions(n,options);
+				size_t n = getVectorSize(options);
+				std::cerr<<"vectorsize="<<n<<"\n";
 				if (edof==1) {
 					io.read(dataNumbers_,"Connectors");
 					dataType_ = NUMBERS;
@@ -115,6 +115,10 @@ namespace Dmrg {
 					}
 					dataType_ = MATRICES;
 				}
+				std::vector<size_t> v(2);
+				io.readKnownSize(v,"DefaultSites");
+				
+				defaultHandle_ = handle(v[0],v[1]);
 			}
 
 			const RealType& operator()(size_t i,size_t j) const
@@ -125,10 +129,16 @@ namespace Dmrg {
 
 			const RealType& operator()(size_t i,size_t edof1,size_t j,size_t edof2) const
 			{
-				size_t imin = (i<j) ? i : j;
-				size_t h = handle(imin);
+				
+				size_t h = handle(i,j);
 				if (dataType_==NUMBERS) return dataNumbers_[h];
-				return dataMatrices_[h](i,j);	
+				return dataMatrices_[h](edof1,edof2);
+			}
+			
+			const RealType& defaultConnector(size_t edof1,size_t edof2) const
+			{
+				if (dataType_==NUMBERS) return dataNumbers_[defaultHandle_];
+				return dataMatrices_[defaultHandle_](edof1,edof2);
 			}
 
 			size_t size() const
@@ -144,8 +154,9 @@ namespace Dmrg {
 			}
 
 		private:
-			size_t handle(size_t imin) const
+			size_t handle(size_t i,size_t j) const
 			{
+				size_t imin = (i<j) ? i : j;
 				switch(dirId_) {
 					case DIRECTION_X:
 						return imin;
@@ -159,30 +170,28 @@ namespace Dmrg {
 				throw std::runtime_error("Unknown direction\n");
 			}
 
-			void checkOptions(size_t& vectorSize,const std::string& s)
+			size_t getVectorSize(const std::string& s)
 			{
-				if (s.find("ConstantValues")!=std::string::npos) {
-					vectorSize = 1;
-				} else {
-					switch (geometryKind_) {
-						case CHAIN:
-							if (dirId_!=DIRECTION_X)
-								throw std::runtime_error("Chain must have direction 0\n");
-							vectorSize_ = linSize_;
-							break;
-						case LADDERX:
-							if (dirId_==DIRECTION_XPY) vectorSize_=linSize_ - linSize_/leg_;
-							else if (dirId_==DIRECTION_XMY) vectorSize_=linSize_ - linSize_/leg_;
-							// no break here
-						
-						case LADDER:
-							if (dirId_==DIRECTION_X) vectorSize_=linSize_-leg_;
-							else if (dirId_==DIRECTION_Y) vectorSize_=linSize_ - linSize_/leg_;
-							else if (geometryKind_!=LADDERX)
-								throw std::runtime_error("Ladder: wrong direction\n");
-							break;
-					}
+				if (s.find("ConstantValues")!=std::string::npos)
+					return 1;
+				
+				switch (geometryKind_) {
+					case CHAIN:
+						if (dirId_!=DIRECTION_X)
+							throw std::runtime_error("Chain must have direction 0\n");
+						return linSize_;
+					case LADDERX:
+						if (dirId_==DIRECTION_XPY) return linSize_ - linSize_/leg_;
+						else if (dirId_==DIRECTION_XMY) return linSize_ - linSize_/leg_;
+						// no break here
+					
+					case LADDER:
+						if (dirId_==DIRECTION_X) return linSize_-leg_;
+						else if (dirId_==DIRECTION_Y) return linSize_ - linSize_/leg_;
+						else if (geometryKind_!=LADDERX)
+							throw std::runtime_error("Ladder: wrong direction\n");
 				}
+				throw std::runtime_error("Unknown geometry\n");
 			}
 			
 			size_t dirId_;
@@ -190,7 +199,7 @@ namespace Dmrg {
 			size_t geometryKind_;
 			size_t leg_;
 			size_t dataType_;
-			size_t vectorSize_;
+			size_t defaultHandle_;
 			std::vector<RealType> dataNumbers_;
 			std::vector<MatrixType> dataMatrices_;
 	}; // class GeometryDirection

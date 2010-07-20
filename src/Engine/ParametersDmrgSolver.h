@@ -113,6 +113,14 @@ namespace Dmrg {
 		bool enabled;
 		size_t index;
 		std::string filename;
+		
+		template<typename IoInputType>
+		void load(IoInputType& io)
+		{
+			io.readline(enabled,"CheckPointEnabled=");
+			io.readline(index,"index=");
+			io.readline(filename,"filename=");
+		}
 	};
 
 	std::istream &operator>>(std::istream& is,DmrgCheckPoint& c)
@@ -134,6 +142,26 @@ namespace Dmrg {
 		std::vector<FieldType> targetQuantumNumbers;
 		DmrgCheckPoint checkpoint;
 		size_t nthreads;
+		
+		//! Read Dmrg parameters from inp file
+		template<typename IoInputType>
+		ParametersDmrgSolver(IoInputType& io) 
+		{
+			io.readline(options,"SolverOptions="); 
+			io.readline(version,"Version=");
+			io.readline(filename,"OutputFile=");
+			io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
+			io.read(finiteLoop,"FiniteLoops");
+			if (options.find("hasQuantumNumbers")!=std::string::npos) 
+				io.read(targetQuantumNumbers,"TargetQuantumNumbers");
+			if (options.find("checkpoint")!=std::string::npos)
+				checkpoint.load(io);
+			nthreads=1; // provide a default value
+			if (options.find("hasThreads")!=std::string::npos)
+				io.readline(nthreads,"Threads=");
+			
+		} 
+
 	};
 
 	//! Read Dmrg parameters from JSON file
@@ -148,26 +176,6 @@ namespace Dmrg {
 		
 		return parameters;
 	} */
-
-	//! Read Dmrg parameters from inp file
-	template<typename FieldType>
-	ParametersDmrgSolver<FieldType>&
-	operator <= (ParametersDmrgSolver<FieldType>& parameters,  SimpleReader& reader) 
-	{
-		reader.read(parameters.options); 
-		reader.read(parameters.version);
-		reader.read(parameters.filename);
-		reader.read(parameters.keptStatesInfinite);
-		reader.read(parameters.finiteLoop);
-		if (parameters.options.find("hasQuantumNumbers")!=std::string::npos) 
-			reader.read(parameters.targetQuantumNumbers);
-		if (parameters.options.find("checkpoint")!=std::string::npos)
-			reader.read(parameters.checkpoint);
-		parameters.nthreads=1; // provide a default value
-		if (parameters.options.find("hasThreads")!=std::string::npos)
-			reader.read(parameters.nthreads);
-		return parameters;
-	} 
 
 	//! print dmrg parameters
 	template<typename FieldType>

@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
-	template<typename TargettingStructureType,typename ModelType>
+	template<typename ModelType>
 	class TargetStructureParams {
 		public:
 		typedef typename ModelType::RealType RealType;
@@ -97,32 +97,59 @@ namespace Dmrg {
 		typedef typename SparseMatrixType::value_type ComplexOrReal;
 		typedef psimag::Matrix<ComplexOrReal> MatrixType;
 		
-		TargetStructureParams(TargettingStructureType& targetStruct,const ModelType& model)
-			: targetStruct_(targetStruct),model_(model)
+		TargetStructureParams(const ModelType& model)
+			: filename("tst.txt"),tau(0),timeSteps(0),advanceEach(0),sites(0),startingLoops(0),
+				model_(model)
 		{
 		}
 		
-		void init(
-				const std::string& filename,
-    				RealType tau,
-				size_t timeSteps,
-    				size_t advanceEach,
-    				const std::vector<size_t>& sites,
-			  	const std::vector<size_t>& loops)
+		template<typename IoInputter>
+		TargetStructureParams(IoInputter& io,const ModelType& model) : model_(model)
 		{
-			targetStruct_.filename = filename;
-			targetStruct_.tau = tau;
-			targetStruct_.timeSteps = timeSteps;
-			targetStruct_.advanceEach = advanceEach;
-			targetStruct_.sites=sites;
-			targetStruct_.startingLoops=loops;
+			io.readline(filename,"TSPFilename="); // filename
+			io.readline(tau,"TSPTau=");
+			io.readline(timeSteps,"TSPTimeSteps=");
+			io.readline(advanceEach,"TSPAdvanceEach=");
+			io.read(sites,"TSPSites");
+			io.read(startingLoops,"TSPLoops");
+		
 			data_.resize(sites.size());
-			targetStruct_.aOperators.resize(sites.size());
+			aOperators.resize(sites.size());
 			typename ModelType::HilbertBasisType basis;
 			model_.setNaturalBasis(basis,1);
-			model_.findElectrons(targetStruct_.electrons,basis);
-			
+			model_.findElectrons(electrons,basis);
+		
+			for (size_t i=0;i<sites.size();i++) {
+				std::string s;
+				io.readline(s,"TSPOperator=");
+				if (s == "cooked") {
+					io.readline(s,"COOKED_OPERATOR=");
+					std::vector<size_t> v;
+					io.read(v,"COOKED_EXTRA");
+					setCookedData(i,s,v);
+				} else {
+					psimag::Matrix<RealType> m;
+					io.readMatrix(m,"RAW_MATRIX");
+					setRawData(i,m);
+				}
+				int fermiSign=0;
+				io.readline(fermiSign,"FERMIONSIGN=");
+				std::pair<size_t,size_t> jmValues;
+				std::vector<size_t> v(2);
+				io.readKnownSize(v,"JMVALUES");
+				jmValues.first = v[0]; jmValues.second = v[1];
+				RealType angularFactor;
+				io.readline(angularFactor,"AngularFactor=");
+				//tsp.set(i,fermiSign,jmValues,angularFactor);
+				SparseMatrixType data(data_[i]);
+
+				// FIXME: su2related needs to be set properly for when SU(2) is running: 
+				typename OperatorType::Su2RelatedType su2Related; 
+				OperatorType myOp(data,fermiSign, jmValues,angularFactor,su2Related);
+				aOperators[i] = myOp;
+			}
 		}
+		
 		
 		void setCookedData(size_t i,const std::string& s,const std::vector<size_t>& v)
 		{
@@ -136,19 +163,43 @@ namespace Dmrg {
 		
 		void set(size_t i,int fermiSign,const PairType& jmValues,RealType angularFactor)
 		{
-			SparseMatrixType data(data_[i]);
-
-			// FIXME: su2related needs to be set properly for when SU(2) is running: 
-			typename OperatorType::Su2RelatedType su2Related; 
-			OperatorType myOp(data,fermiSign, jmValues,angularFactor,su2Related);
-			targetStruct_.aOperators[i] = myOp;
+			
 		}
 		
+		
+		std::string filename;
+		typename OperatorType::RealType tau;
+		size_t timeSteps;
+		size_t advanceEach;
+		std::vector<size_t> sites;
+		std::vector<size_t> startingLoops;
+		std::vector<OperatorType> aOperators;
+		std::vector<size_t> electrons;
+		
 		private:
-		TargettingStructureType& targetStruct_;
 		const ModelType& model_;
 		std::vector<MatrixType> data_; 
 	}; // class TargetStructureParams
+	
+	template<typename ModelType>
+	inline std::ostream&
+	operator<<(std::ostream& os,const TargetStructureParams<ModelType>& t)
+	{
+		os<<"#TimeStepStructure.operators"<<t.aOperators.size()<<"\n";
+		for (size_t i=0;i<t.aOperators.size();i++) {
+			os<<"#TimeStepStructure.operator "<<i<<"\n";
+			os<<t.aOperators[i];
+		}
+		os<<"#TimeStepStructure.electrons\n";
+		os<<t.electrons;
+		os<<"#TimeStepStructure.site="<<t.sites;
+		os<<"#TimeStepStructure.startingLoop="<<t.startingLoops<<"\n";
+		os<<"#TimeStepStructure.filename="<<t.filename<<"\n";
+		os<<"#TimeVectorsfilename.tau="<<t.tau<<"\n";
+		os<<"#TimeVectorsfilename.timeSteps="<<t.timeSteps<<"\n";
+		os<<"#TimeVectorsfilename.advanceEach="<<t.advanceEach<<"\n";
+		return os;
+	}
 } // namespace Dmrg 
 
 /*@}*/
