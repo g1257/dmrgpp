@@ -83,40 +83,36 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRYBASE_HEADER_H
 
 #include "Utils.h"
+#include "GeometryImplementation.h"
 
 namespace Dmrg {
 	//! Interface to Geometry dependence of dmrg.
 	//! Note that geometry proper is handled by the model connector's array (if any)
 	//! To implement a new geometry inherit from this class and implement this interface
-	template<typename Field,typename ConnectorType>
+	template<typename RealType>
 	class GeometryBase {
-	protected:
-		typedef std::vector<size_t> BlockType;
-		
-		//! split into S X Y and E
-		//! S is the initial system
-		//! X is a vector of blocks that are to be added to S sequentially one-by-one
-		//! Y is a vector of blocks that are to be added to E sequentially one-by-one
-		//! E is the initial environment (see corresponding Figure in paper)
-		//void setBlocksOfSites(BlockType &S,std::vector<BlockType> &X,std::vector<BlockType> &Y,BlockType &E) const; 
+		public:
+			typedef std::vector<size_t> BlockType;
+			typedef GeometryImplementation<RealType> GeometryImplementationType;
+			template<typename IoInputter>
+			GeometryBase(IoInputter& io) : geometryImpl_(io)
+			{
+			}
 
-		//! Returns what type of connection between ind and jnd is, 
-		//! either SystemSyste, SystemEnviron, EnvironSystem or EnvironEnviron
-		int calcConnectorType(int ind,int jnd) const;
-
-		//! same as above assuming system is sBlock
-		int calcConnectorType(int ind,int jnd,BlockType const &sBlock) const;
-
-		//! value of the connector between sites ind and jnd
-		//! knowing that the type of connection is type
-		//! and that smax and emin are gives as in findExtremes
-		Field calcConnectorValue(int type,int ind,int jnd,int smax,int emin,size_t what) const;
-		
-		size_t connectorValues() const;
-
-		//! given i in the environment returns the site symmetric to i (in the system)
-		int findReflection(int i) const;
-		
+			size_t connectionKind(size_t ind,size_t jnd) const
+			{
+				return geometryImpl_.connectionKind(ind,jnd);
+			}
+			
+			RealType operator()(size_t ind,size_t edof1,size_t jnd,size_t edof2,size_t term) const
+			{
+				return geometryImpl_(ind,edof1,jnd,edof2,term);
+			}
+			
+			size_t terms() const { return geometryImpl_.terms(); }
+			
+		private:
+			GeometryImplementationType geometryImpl_;
 	}; // class GeometryBase
 } // namespace Dmrg 
 

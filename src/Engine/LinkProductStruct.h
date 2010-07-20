@@ -89,7 +89,7 @@ namespace Dmrg {
 		std::vector<size_t> isaved,jsaved; //,dof1saved,dof2saved;
 		std::vector<int> typesaved;
 		std::vector<FieldType> tmpsaved;
-		std::vector<size_t> connectionsaved;
+		std::vector<size_t> dofssaved,termsaved;
 #ifdef NOMUTEX
 		mutable std::vector<std::vector<FieldType> > xtemp;
 #endif

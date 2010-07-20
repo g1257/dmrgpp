@@ -82,12 +82,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_IMPL_H
 
 #include "Utils.h"
+#include "GeometryTerm.h"
 
 namespace Dmrg {
 	
 	template<typename RealType>
 	class GeometryImplementation {
 		public:
+			typedef GeometryTerm<RealType> GeometryTermType;
+			typedef std::vector<size_t> BlockType;
+
 			template<typename IoInputter>
 			GeometryImplementation(IoInputter& io)
 			{
@@ -95,18 +99,36 @@ namespace Dmrg {
 				io.readline(x,"TotalNumberOfSites");
 				if (x<0) throw std::runtime_error("TotalNumberOfSites<0 is an error\n");
 				linSize_ = x;
-				
+
 				io.readline(x,"NumberOfTerms");
 				if (x<0) throw std::runtime_error("NumberOfTerms<0 is an error\n");
-				
-				for (size_t i=0;i<x;i++) {
-					GeometryTerm t(io);
+
+				for (size_t i=0;i<size_t(x);i++) {
+					GeometryTermType t(io,i,linSize_);
 					terms_.push_back(t);
 				}
 			}
-
+			
+			size_t connectionKind(size_t ind,size_t jnd) const
+			{
+				size_t middle = linSize_/2;
+				if (ind<middle && jnd>=middle) return ProgramGlobals::ENVIRON_SYSTEM;
+				if (jnd<middle && ind>=middle) return ProgramGlobals::SYSTEM_ENVIRON;
+				if (ind<middle) return ProgramGlobals::SYSTEM_SYSTEM;
+				return ProgramGlobals::ENVIRON_ENVIRON;
+			}
+			
+			const RealType& operator()
+				(size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
+			{
+				return terms_[term](i1,edof1,i2,edof2);
+			}
+			
+			size_t terms() const { return terms_.size(); }
+			
 		private:
-		
+			size_t linSize_;
+			std::vector<GeometryTermType> terms_;
 	}; // class GeometryImplementation
 } // namespace Dmrg 
 

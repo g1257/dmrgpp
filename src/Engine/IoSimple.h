@@ -291,19 +291,6 @@ namespace Dmrg {
 					}
 					return sc;
 				}
-				
-				template<typename X>
-				std::pair<std::string,size_t> readKnownSize(X &x,std::string const &s,int level=0)
-				{
-					std::pair<std::string,size_t> sc = advance(s,level);
-					
-					for (int i=0;i<xsize;i++) {
-						typename X::value_type tmp;
-						fin_>>tmp;
-						x[i]=tmp;
-					}
-					return sc;
-				}
 
 				template<typename X>
 				void read(std::stack<X>& x,const std::string& s,size_t level=0)

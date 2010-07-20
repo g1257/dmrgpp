@@ -459,34 +459,33 @@ namespace Dmrg {
 		//! Full hamiltonian from creation matrices cm
 		void calcHamiltonian(SparseMatrixType &hmatrix,std::vector<OperatorType> const &cm,Block const &block) const
 		{
-			int i,j,n=block.size();
-			int type,sigma;
+			size_t n=block.size();
+			//int type,sigma;
 			SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
-			size_t smax,emin;
-
-			utils::findExtremes(smax,emin,block,dmrgGeometry_.systemBlock());
+			
 			hmatrix.makeDiagonal(cm[0].data.rank());
 
-			for (i=0;i<n;i++) {
+			for (size_t i=0;i<n;i++) {
 				//! hopping part
-				for (j=0;j<n;j++) {
-					for (size_t connectionType=0;connectionType<LinkProductType::bonds();connectionType++) {
-						type = dmrgGeometry_.calcConnectorType(block[i],block[j]);
-						size_t tmpDir = LinkProductType::tmpDir(connectionType);
-						RealType tmp = dmrgGeometry_.calcConnectorValue(type,block[i],block[j],smax,emin,tmpDir);
-					
-						if (i==j || tmp==0.0) continue;
-			
-						size_t sigma = connectionType;
-						transposeConjugate(tmpMatrix2,cm[sigma+j*dof()].data);
-						multiply(tmpMatrix,cm[sigma+i*dof()].data,tmpMatrix2);
-						multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
-						hmatrix += tmpMatrix2;
+				for (size_t j=0;j<n;j++) {
+					for (size_t term=0;term<dmrgGeometry_.terms();term++) {
+						for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
+							std::pair<size_t,size_t> edofs = LinkProductType::edofs(dofs,term);
+							RealType tmp = dmrgGeometry_(block[i],edofs.first,block[j],edofs.second,term);
+						
+							if (i==j || tmp==0.0) continue;
+				
+							size_t sigma = dofs;
+							transposeConjugate(tmpMatrix2,cm[sigma+j*dof()].data);
+							multiply(tmpMatrix,cm[sigma+i*dof()].data,tmpMatrix2);
+							multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
+							hmatrix += tmpMatrix2;
+						}
 					}
 				}
 				// onsite U hubbard 
 				//n_i up
-				sigma =0; // up sector
+				size_t sigma =0; // up sector
 				transposeConjugate(tmpMatrix,cm[sigma+i*dof()].data);
 				multiply(niup,tmpMatrix,cm[sigma+i*dof()].data);
 				//n_i down
@@ -495,19 +494,19 @@ namespace Dmrg {
 				multiply(nidown,tmpMatrix,cm[sigma+i*dof()].data);
 				 
 				multiply(tmpMatrix,niup,nidown);
-				type = dmrgGeometry_.calcConnectorType(block[i],block[i]);
-				RealType tmp = computeHubbardUValue(type,block[i],smax,emin);
+				//type = dmrgGeometry_.calcConnectorType(block[i],block[i]);
+				RealType tmp = modelParameters_.hubbardU[block[i]]; //computeHubbardUValue(type,block[i],smax,emin);
 				multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
 
 				hmatrix += tmpMatrix2;
 
 				// V_iup term
-				tmp = computeOnsitePotential(type,block[i],0,smax,emin);
+				tmp = modelParameters_.potentialV[block[i]+0*modelParameters_.linSize]; //computeOnsitePotential(type,block[i],0,smax,emin);
 				multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
 				hmatrix += tmpMatrix;
 
 				// V_idown term
-				tmp = computeOnsitePotential(type,block[i],1,smax,emin);
+				tmp = modelParameters_.potentialV[block[i]+1*modelParameters_.linSize]; //computeOnsitePotential(type,block[i],1,smax,emin);
 				multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
 				hmatrix += tmpMatrix;
 			}

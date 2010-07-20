@@ -82,34 +82,131 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_TERM_H
 
 #include "Utils.h"
+#include "GeometryDirection.h"
 
 namespace Dmrg {
 	
 	template<typename RealType>
 	class GeometryTerm {
 		public:
+			typedef GeometryDirection<RealType> GeometryDirectionType;
+			
 			template<typename IoInputter>
-			void GeometryTerm(IoInputter& io,size_t i)
+			GeometryTerm(IoInputter& io,size_t termId,size_t linSize)
+			: linSize_(linSize),leg_(1)
 			{
+				int x;
 				io.readline(x,"DegreesOfFreedom");
 				if (x<=0) throw std::runtime_error("DegreesOfFreedom<=0 is an error\n");
-				dof_ = x;
+				edof_ = x;
+				std::string s;
 				io.readline(s,"GeometryKind");
-				checkGeometry(s);
-				io.readline(s,"GeometryOptions");
-				checkOptions(s);
-				if (geometryKind_==LADDER || geometryKind_==LADDERX) {
-					io.readline(x,"LadderLeg");
-					if (x<2) throw std::runtime_error("LadderLeg<2 is an error\n");
-					leg_=x;
+				geometryKind_=getGeometry(s);
+				std::string gOptions;
+				io.readline(gOptions,"GeometryOptions");
+				size_t dirs = 0;
+				switch (geometryKind_) {
+					case GeometryDirectionType::LADDER:
+						dirs = 2;
+						// no break here!
+					case GeometryDirectionType::LADDERX:
+						if (dirs==0) dirs=4;
+						io.readline(x,"LadderLeg");
+						if (x<2) throw std::runtime_error("LadderLeg<2 is an error\n");
+						leg_=x;
+						break;
+					case GeometryDirectionType::CHAIN:
+						dirs = 1;
 				}
-				// here we read a vector of either numbers of matrices
-				// need to find a way to make this possible
-				io.readKnownSize();
+				for (size_t i=0;i<dirs;i++) {
+					GeometryDirectionType gd(io,i,linSize_,edof_,geometryKind_,leg_,gOptions);
+					directions_.push_back(gd);
+				}
 				
+				cachedValues_.resize(linSize_*linSize_*edof_*edof_);
+				
+				for (size_t i1=0;i1<linSize_;i1++)
+					for (size_t i2=0;i2<linSize_;i2++) 
+						for (size_t edof1=0;edof1<edof_;edof1++)
+							for (size_t edof2=0;edof2<edof_;edof2++)
+								cachedValues_[pack(i1,edof1,i2,edof2)]=
+									calcValue(i1,edof1,i2,edof2);
 			}
+			
+			const RealType& operator()(size_t i1,size_t edof1,size_t i2,size_t edof2) const
+			{
+				size_t p = pack(i1,edof1,i2,edof2);
+				return 	cachedValues_[p];
+			}
+			
+		private:	
+			const RealType& calcValue(size_t i1,size_t edof1,size_t i2,size_t edof2) const
+			{
+				size_t dir = calcDir(i1,i2);
+				if (directions_[dir].constantValues()) {
+					return directions_[dir](edof1,edof2);
+				}
+				
+				return directions_[dir](i1,edof1,i2,edof2);
+			}
+			
+			size_t pack(size_t i1,size_t edof1,size_t i2,size_t edof2) const
+			{
+				return edof1+i1*edof_+(edof2+i2*edof_)*linSize_*edof_;
+			}
+			
+			size_t getGeometry(const std::string& s) const
+			{
+				size_t x = 0;
+				if (s=="chain") x=GeometryDirectionType::CHAIN;
+				else if (s=="ladder") x=GeometryDirectionType::LADDER;
+				else if (s=="ladderx") x=GeometryDirectionType::LADDERX;
+				else throw std::runtime_error("unknown geometry\n");
+				return x;
+			}
+			
+			size_t calcDir(size_t i1,size_t i2) const
+			{
+				switch (geometryKind_) {
+					case GeometryDirectionType::CHAIN:
+						return GeometryDirectionType::DIRECTION_X;	
+					case GeometryDirectionType::LADDER:
+						if (sameColumn(i1,i2)) return GeometryDirectionType::DIRECTION_Y;
+						return GeometryDirectionType::DIRECTION_X;
+					case GeometryDirectionType::LADDERX:
+						if (sameColumn(i1,i2)) return GeometryDirectionType::DIRECTION_Y;
+						if (sameRow(i1,i2)) return GeometryDirectionType::DIRECTION_X;
+						size_t imin = (i1<i2) ? i1 : i2;
+						if (imin&1) return GeometryDirectionType::DIRECTION_XPY;
+						return GeometryDirectionType::DIRECTION_XMY;
+				}
+				throw std::runtime_error("Unknown geometry\n");
+			}
+			
+			bool sameColumn(size_t i1,size_t i2) const
+			{
+				size_t c1 = i1/leg_;
+				size_t c2 = i2/leg_;
+				if (c1 == c2) return true;
+				return false;
+			}
+			
+			bool sameRow(size_t i1,size_t i2) const
+			{
+				size_t c1 = i1%leg_;
+				size_t c2 = i2%leg_;
+				if (c1 == c2) return true;
+				return false;
+			}
+
+			size_t linSize_;
+			size_t leg_;
+			size_t edof_;
+			size_t geometryKind_;
+			std::vector<GeometryDirectionType> directions_;
+			std::vector<RealType> cachedValues_;
 	}; // class GeometryTerm
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // GEOMETRY_TERM_H

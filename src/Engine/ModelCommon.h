@@ -221,39 +221,37 @@ namespace Dmrg {
      					typename LinkProductType::LinkProductStructType* lps=0) const
 			{
 				int flag = -1;
-				size_t smax,emin;
-				utils::findExtremes(smax,emin,modelHelper.basis1().block(),dmrgGeometry_.systemBlock());
-				SparseMatrixType mBlock;
-
-				for (size_t connectionType=0;connectionType<LinkProductType::bonds();connectionType++) {
-					int type = dmrgGeometry_.calcConnectorType(modelHelper.basis1().block()[i],
-							modelHelper.basis1().block()[j]);
-					size_t tmpDir = LinkProductType::tmpDir(connectionType);
-					SparseElementType tmp = dmrgGeometry_.calcConnectorValue(type,modelHelper.basis1().block()[i],
-							modelHelper.basis1().block()[j],smax,emin,tmpDir);
-
-					if (tmp==0.0) continue;
-					
-					type = dmrgGeometry_.calcConnectorType(modelHelper.basis1().block()[i],
-									modelHelper.basis1().block()[j],modelHelper.basis2().block());	
-					if (type==ProgramGlobals::SYSTEM_SYSTEM  ||
-						type==ProgramGlobals::ENVIRON_ENVIRON) continue; // already included
-					flag += (connectionType + 1);
-					//std::cerr<<"Adding "<<i<<" "<<j<<" "<<connectionType<<" value="<<tmp<<"\n";
-					if (lps!=0) {
-						lps->isaved.push_back(i);
-						lps->jsaved.push_back(j);
-						//lps->dof1saved.push_back(dof1);
-						//lps->dof2saved.push_back(dof2);
-						lps->typesaved.push_back(type);
-						lps->tmpsaved.push_back(tmp);
-						lps->connectionsaved.push_back(connectionType);
-					} else {
-						LinkProductType::calcBond(i,j,type,tmp,mBlock,
-								modelHelper,connectionType);
-						*matrixBlock += mBlock;
+				size_t ind = modelHelper.basis1().block()[i];
+				size_t jnd = modelHelper.basis1().block()[j];
+				size_t type = dmrgGeometry_.connectionKind(ind,jnd);
+				if (type==ProgramGlobals::SYSTEM_SYSTEM || 
+					type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
+				
+				for (size_t term=0;term<dmrgGeometry_.terms();term++) {
+					for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
+						std::pair<size_t,size_t> edofs = LinkProductType::edofs(dofs,term);
+						SparseElementType tmp = dmrgGeometry_(ind,edofs.first,jnd,edofs.second,term);
+				
+						if (tmp==0.0) continue;
+						
+						flag += (term  + dofs + 1);
+						//std::cerr<<"Adding "<<i<<" "<<j<<" "<<connectionType<<" value="<<tmp<<"\n";
+						if (lps!=0) {
+							lps->isaved.push_back(i);
+							lps->jsaved.push_back(j);
+							//lps->dof1saved.push_back(dof1);
+							//lps->dof2saved.push_back(dof2);
+							lps->typesaved.push_back(type);
+							lps->tmpsaved.push_back(tmp);
+							lps->termsaved.push_back(term);
+							lps->dofssaved.push_back(dofs);
+						} else {
+							SparseMatrixType mBlock;
+							LinkProductType::calcBond(i,j,type,tmp,mBlock,
+									modelHelper,term,dofs);
+							*matrixBlock += mBlock;
+						}
 					}
-					
 				}
 				return flag;
 			}
