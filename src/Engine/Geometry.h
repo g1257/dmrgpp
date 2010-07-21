@@ -74,12 +74,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file GeometryImplementation.h
+/*! \file Geometry.h
  *
  *  DOC NEEDED FIXME
  */
-#ifndef GEOMETRY_IMPL_H
-#define GEOMETRY_IMPL_H
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
 
 #include "Utils.h"
 #include "GeometryTerm.h"
@@ -87,13 +87,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	
 	template<typename RealType>
-	class GeometryImplementation {
+	class Geometry {
 		public:
 			typedef GeometryTerm<RealType> GeometryTermType;
 			typedef std::vector<size_t> BlockType;
 
 			template<typename IoInputter>
-			GeometryImplementation(IoInputter& io)
+			Geometry(IoInputter& io)
 			{
 				int x;
 				io.readline(x,"TotalNumberOfSites=");
@@ -124,6 +124,8 @@ namespace Dmrg {
 				(size_t smax,size_t emin,
 				 size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
 			{
+				std::cerr<<"smax="<<smax<<" emin="<<emin<<"\n";
+				if (smax+1==emin) return terms_[term](i1,edof1,i2,edof2);
 				return terms_[term](smax,emin,i1,edof1,i2,edof2);
 			}
 			
@@ -167,14 +169,21 @@ namespace Dmrg {
 			{
 				return terms_[0].connected(i1,i2); // any term will do
 			}
+			
+			// should be static
+			bool connected(size_t smax,size_t emin,size_t i1,size_t i2) const
+			{
+				if (smax+1==emin) return terms_[0].connected(i1,i2); // any term will do
+				return terms_[0].connected(smax,emin,i1,i2); // any term will do
+			}
 		private:
 			
 		
 			size_t linSize_;
 			std::vector<GeometryTermType> terms_;
 			
-	}; // class GeometryImplementation
+	}; // class Geometry
 } // namespace Dmrg 
 
 /*@}*/
-#endif // GEOMETRY_IMPL_H
+#endif // GEOMETRY_H

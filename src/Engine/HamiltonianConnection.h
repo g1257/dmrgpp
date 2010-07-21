@@ -110,7 +110,7 @@ namespace Dmrg {
 				size_t ind = modelHelper_.basis1().block()[i];
 				size_t jnd = modelHelper_.basis1().block()[j];
 				//throw std::runtime_error("system block is not correct here, think finite algorithm!!!\n"); 
-				if (!geometry_.connected(ind,jnd)) return flag;
+				if (!geometry_.connected(smax_,emin_,ind,jnd)) return flag;
 				size_t type = geometry_.connectionKind(smax_,ind,jnd);
 				
 				if (type==ProgramGlobals::SYSTEM_SYSTEM || 

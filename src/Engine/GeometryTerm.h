@@ -143,11 +143,15 @@ namespace Dmrg {
 				return cachedValues_[p];
 			}
 			
+			//assumes 1<smax+1 < emin
 			const RealType& operator()(size_t smax,size_t emin,
 				size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
+				bool bothFringe = (fringe(i1,smax,emin) && fringe(i2,smax,emin));
 				size_t p = pack(i1,edof1,i2,edof2);
-				std::cerr<<"FIXME NEEDS GROWTH PART\n";
+				//std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
+				if (!bothFringe) return cachedValues_[p];
+				
 				return cachedValues_[p];
 			}
 			
@@ -158,9 +162,19 @@ namespace Dmrg {
 				return directions_[dir].defaultConnector(edof1,edof2);
 			}
 			
+			bool connected(size_t smax,size_t emin,size_t i1,size_t i2) const
+			{
+				if (i1==i2) return false;
+				bool bothFringe = (fringe(i1,smax,emin) && fringe(i2,smax,emin));
+				if (!bothFringe) return connected(i1,i2);
+				std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
+				return false;
+			}
+			
 			// should be static
 			bool connected(size_t i1,size_t i2) const
 			{
+				if (i1==i2) return false;
 				switch (geometryKind_) {
 					case GeometryDirectionType::CHAIN:
 						return neighbors(i1,i2);
@@ -248,6 +262,27 @@ namespace Dmrg {
 			bool neighbors(size_t i1,size_t i2) const
 			{
 				return (i1-i2==1 || i2-i1==1);
+			}
+			
+			bool fringe(size_t i,size_t smax,size_t emin) const
+			{
+				bool a,b;
+				switch (geometryKind_) {
+					case GeometryDirectionType::CHAIN:
+						return (i==smax || i==emin);
+					case GeometryDirectionType::LADDER:
+						a = (i<emin && i>=smax-1);
+						b = (i>smax && i<=emin+1);
+						return (a || b);
+					case GeometryDirectionType::LADDERX:
+						a = (i<emin && i>=smax-1);
+						b = (i>smax && i<=emin+1);
+						if (smax & 1) return (a || b);
+						a = (i<emin && i>=smax-2);
+						b = (i>smax && i<=emin+2);
+						return (a || b);
+				}
+				throw std::runtime_error("Unknown geometry\n");
 			}
 			
 			size_t linSize_;

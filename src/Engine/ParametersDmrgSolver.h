@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PARAMETERSDMRGSOLVER_HEADER_H
 
 #include "Utils.h"
-#include "SimpleReader.h"
+//#include "SimpleReader.h"
 
 namespace Dmrg {
 	struct FiniteLoop {

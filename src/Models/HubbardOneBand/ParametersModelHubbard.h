@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PARAMETERSMODELHUBBARD_H
 #define PARAMETERSMODELHUBBARD_H
 #include "Utils.h"
-#include "SimpleReader.h"
+//#include "SimpleReader.h"
 
 namespace Dmrg {
 	//! Hubbard Model Parameters
