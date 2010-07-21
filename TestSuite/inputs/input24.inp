@@ -1,18 +1,14 @@
-linSize 8
-jvalues 8 8
-0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0
- 1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0
- 0.0 1.0 0.0 1.0 0.0 0.0 0.0 0.0
- 0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0
- 0.0 0.0 0.0 1.0 0.0 1.0 0.0 0.0
- 0.0 0.0 0.0 0.0 1.0 0.0 1.0 0.0
- 0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0
- 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
+TotalNumberOfSites=16
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
 
-options hasQuantumNumbers,nowft,nosu2,,checkpoint
-version 55460ffd4e0d2587072e9595d7d4ed211c66e83e
-outputfile		data24.txt
-InfiniteLoopKeptStates	 64
+SolverOptions=hasQuantumNumbers,nowft,nosu2,,checkpoint
+Version 55460ffd4e0d2587072e9595d7d4ed211c66e83e
+OutputFile=data24.txt
+InfiniteLoopKeptStates=64
 FiniteLoops 4  7 200 0 -7 200 0 -7 200 0 7 200 0 
-QNS 2 0.5 0.5
+TargetQuantumNumbers 2 0.5 0.5
 checkpoint 1 3 oracles/dataValidated23.txt   

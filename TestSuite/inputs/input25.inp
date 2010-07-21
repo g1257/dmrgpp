@@ -1,19 +1,15 @@
-linSize 8
-jvalues 8 8
-0.0 2.5 0.0 0.0 0.0 0.0 0.0 0.0
- 2.5 0.0 2.5 0.0 0.0 0.0 0.0 0.0
- 0.0 2.5 0.0 2.5 0.0 0.0 0.0 0.0
- 0.0 0.0 2.5 0.0 2.5 0.0 0.0 0.0
- 0.0 0.0 0.0 2.5 0.0 2.5 0.0 0.0
- 0.0 0.0 0.0 0.0 2.5 0.0 2.5 0.0
- 0.0 0.0 0.0 0.0 0.0 2.5 0.0 2.5
- 0.0 0.0 0.0 0.0 0.0 0.0 2.5 0.0
+TotalNumberOfSites=16
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 2.5
 
-options hasQuantumNumbers,wft,noSu2
-version 247b335fe1542909b90be8647456bfd8fd56191c
-outputfile		data25.txt
-InfiniteLoopKeptStates	 60
+SolverOptions=hasQuantumNumbers,wft,noSu2
+Version=247b335fe1542909b90be8647456bfd8fd56191c
+OutputFile=data25.txt
+InfiniteLoopKeptStates=60
 FiniteLoops 4  7 100 0 -7 100 0 -7 100 0 7 100 0 
-QNS 3 0.5 0.5 0
+TargetQuantumNumbers 3 0.5 0.5 0
 
    

@@ -113,10 +113,11 @@ namespace Dmrg {
 					size_t j=lps_.jsaved[ix];
 					//size_t dof1=lps_.dof1saved[ix];
 					//size_t dof2=lps_.dof2saved[ix];
-					int type=lps_.typesaved[ix];
+					size_t type=lps_.typesaved[ix];
+					size_t term = lps_.termsaved[ix];
+					size_t dofs = lps_.dofssaved[ix];
 					SparseElementType tmp=lps_.tmpsaved[ix];
-					size_t connectionType = lps_.connectionsaved[ix];
-					linkProduct(xtemp,y_,i,j,type,tmp,modelHelper_,connectionType);
+					linkProduct(xtemp,y_,i,j,type,tmp,modelHelper_,term,dofs);
 					
 				}
 				if (myMutex) pthread_mutex_lock( myMutex);
@@ -126,10 +127,10 @@ namespace Dmrg {
 			}
 
 			//! Adds an Exchange bond between system and environment
-			static size_t calcBond(int i,int j,int type,
+			static size_t calcBond(size_t i,size_t j,size_t type,
 					SparseElementType  val,
 					SparseMatrixType &matrix,
-					const ModelHelperType& modelHelper,size_t what) 
+					const ModelHelperType& modelHelper,size_t term,size_t dofs)
 			{
 				//int const SystemEnviron=1,EnvironSystem=2;
 				int offset = modelHelper.basis2().block().size();
@@ -190,9 +191,13 @@ namespace Dmrg {
 				return matrix.nonZero();
 			}
 			
-			static size_t bonds() { return 1; }
+			static size_t dofs() { return 1; }
 			
-			static size_t tmpDir(size_t what) { return 0; }
+			// up up and down down are the only connections possible for this model
+			static std::pair<size_t,size_t> edofs(size_t dofs,size_t term)
+			{
+				return std::pair<size_t,size_t>(0,0); // no orbital and no anisotropy
+			}
 
 		private:
 			size_t dof_;
@@ -202,9 +207,9 @@ namespace Dmrg {
 			const std::vector<SparseElementType>& y_;
 
 		void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
-					int i,int j,int type,
+					size_t i,size_t j,int type,
 			     SparseElementType  val,
-			     const ModelHelperType& modelHelper,size_t what)  const
+			     const ModelHelperType& modelHelper,size_t term,size_t dofs)  const
 		{
 			//int const SystemEnviron=1,EnvironSystem=2;
 			int offset = modelHelper.basis2().block().size();

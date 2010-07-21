@@ -117,7 +117,7 @@ namespace Dmrg {
 					size_t j=lps_.jsaved[ix];
 					//size_t dof1=lps_.dof1saved[ix];
 					//size_t dof2=lps_.dof2saved[ix];
-					int type=lps_.typesaved[ix];
+					size_t type=lps_.typesaved[ix];
 					size_t term = lps_.termsaved[ix];
 					size_t dofs = lps_.dofssaved[ix];
 					SparseElementType tmp=lps_.tmpsaved[ix];
@@ -198,7 +198,7 @@ namespace Dmrg {
 		
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
 			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
-					int i,int j,int type,
+					size_t i,size_t j,size_t type,
 			     SparseElementType  &val,
 			     ModelHelperType const &modelHelper,size_t term,size_t dofs)  const
 			{
