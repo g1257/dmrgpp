@@ -96,7 +96,7 @@ namespace Dmrg {
 			typedef std::pair<size_t,size_t> PairType;
 			typedef std::vector<FieldType> VectorType;
 			
-			VectorWithOffsets() : progress_("VectorWithOffsets",0),zero_(0) { }
+			VectorWithOffsets() : progress_("VectorWithOffsets",0),zero_(0),size_(0) { }
 			
 			template<typename SomeBasisType>
 			VectorWithOffsets(const std::vector<size_t>& weights,
