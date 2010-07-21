@@ -85,13 +85,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "VerySparseMatrix.h"
 #include "IoSimple.h"
-#include "Basis.h"
+//#include "Basis.h"
+#include "HamiltonianConnection.h"
 
 namespace Dmrg {
 	//! Common functions for various models
 	
 	template<typename ModelHelperType,
-	typename SparseMatrixType,
+	typename SparseMatrixType, // <-- kill this template, deduced from ModelHelper FIXME
  	typename DmrgGeometryType,
 	typename LinkProductType,
 	typename SharedMemoryType>
@@ -100,7 +101,10 @@ namespace Dmrg {
 			typedef typename ModelHelperType::RealType RealType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			typedef VerySparseMatrix<SparseElementType> VerySparseMatrixType;
-			
+			typedef typename LinkProductType::LinkProductStructType LinkProductStructType;
+			typedef HamiltonianConnection<DmrgGeometryType,ModelHelperType,
+					LinkProductType> HamiltonianConnectionType;
+
 			ModelCommon(int DEGREES_OF_FREEDOM,const DmrgGeometryType& dmrgGeometry)
 			: dof_(DEGREES_OF_FREEDOM),dmrgGeometry_(dmrgGeometry)
 			{
@@ -142,12 +146,12 @@ namespace Dmrg {
 				
 				VerySparseMatrixType matrix2(matrix.rank());
 				
+				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
+				
 				for (size_t i=0;i<n;i++) {
 					for (size_t j=0;j<n;j++) {
 						SparseMatrixType matrixBlock(matrix.rank(),matrix.rank());
-						int res = hamiltonianConnection(i,j,
-								&matrixBlock,modelHelper);
-						if (res<0) continue;
+						if (!hc.compute(i,j,&matrixBlock)) continue;
 						VerySparseMatrixType vsm(matrixBlock);
 						matrix2+=vsm;
 					}
@@ -164,12 +168,12 @@ namespace Dmrg {
 
 				SparseMatrixType matrix;
 
-				typename LinkProductType::LinkProductStructType lps;
-
+				LinkProductStructType lps;
+				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
+				
 				for (size_t i=0;i<n;i++) {
 					for (size_t j=0;j<n;j++) {
-						if (i==j) continue; 
-						hamiltonianConnection(i,j,0,modelHelper,&lps);
+						hc.compute(i,j,0,&lps);
 					}
 				}
 				size_t total = lps.isaved.size();
@@ -215,49 +219,6 @@ namespace Dmrg {
 			size_t dof_;
 			const DmrgGeometryType& dmrgGeometry_;
 			
-			int hamiltonianConnection(size_t i, size_t j,
-					SparseMatrixType* matrixBlock,
-					const ModelHelperType& modelHelper,
-     					typename LinkProductType::LinkProductStructType* lps=0) const
-			{
-				int flag = -1;
-				size_t ind = modelHelper.basis1().block()[i];
-				size_t jnd = modelHelper.basis1().block()[j];
-				throw std::runtime_error("system block is not correct here, think finite algorithm!!!\n"); 
-				const typename DmrgGeometryType::BlockType& systemBlock = modelHelper.basis2().block();
-				size_t type = dmrgGeometry_.connectionKind(systemBlock,ind,jnd);
-				
-				if (type==ProgramGlobals::SYSTEM_SYSTEM || 
-					type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
-				
-				for (size_t term=0;term<dmrgGeometry_.terms();term++) {
-					for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
-						std::pair<size_t,size_t> edofs = LinkProductType::edofs(dofs,term);
-						SparseElementType tmp = dmrgGeometry_(systemBlock,ind,edofs.first,jnd,edofs.second,term);
-				
-						if (tmp==0.0) continue;
-						
-						flag += (term  + dofs + 1);
-						//std::cerr<<"Adding "<<i<<" "<<j<<" "<<connectionType<<" value="<<tmp<<"\n";
-						if (lps!=0) {
-							lps->isaved.push_back(i);
-							lps->jsaved.push_back(j);
-							//lps->dof1saved.push_back(dof1);
-							//lps->dof2saved.push_back(dof2);
-							lps->typesaved.push_back(type);
-							lps->tmpsaved.push_back(tmp);
-							lps->termsaved.push_back(term);
-							lps->dofssaved.push_back(dofs);
-						} else {
-							SparseMatrixType mBlock;
-							LinkProductType::calcBond(i,j,type,tmp,mBlock,
-									modelHelper,term,dofs);
-							*matrixBlock += mBlock;
-						}
-					}
-				}
-				return flag;
-			}
 	};     //class ModelCommon
 } // namespace Dmrg
 /*@}*/

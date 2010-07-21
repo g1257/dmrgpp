@@ -143,11 +143,40 @@ namespace Dmrg {
 				return cachedValues_[p];
 			}
 			
+			const RealType& operator()(size_t smax,size_t emin,
+				size_t i1,size_t edof1,size_t i2,size_t edof2) const
+			{
+				size_t p = pack(i1,edof1,i2,edof2);
+				std::cerr<<"FIXME NEEDS GROWTH PART\n";
+				return cachedValues_[p];
+			}
+			
 			const RealType& defaultConnector
 				(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
 				size_t dir = calcDir(i1,i2);
 				return directions_[dir].defaultConnector(edof1,edof2);
+			}
+			
+			// should be static
+			bool connected(size_t i1,size_t i2) const
+			{
+				switch (geometryKind_) {
+					case GeometryDirectionType::CHAIN:
+						return neighbors(i1,i2);
+						break;
+					case GeometryDirectionType::LADDERX:
+					case GeometryDirectionType::LADDER:
+						size_t c1 = i1/leg_;
+						size_t c2 = i2/leg_;
+						size_t r1 = i1%leg_;
+						size_t r2 = i2%leg_;
+						if (c1==c2) return neighbors(r1,r2);
+						if (r1==r2) return neighbors(c1,c2);
+						return (geometryKind_==GeometryDirectionType::LADDERX
+							&& neighbors(r1,r2) && neighbors(c1,c2));
+				}
+				throw std::runtime_error("Unknown geometry\n");
 			}
 			
 		private:	
@@ -214,26 +243,6 @@ namespace Dmrg {
 				size_t c2 = i2%leg_;
 				if (c1 == c2) return true;
 				return false;
-			}
-			
-			bool connected(size_t i1,size_t i2) const
-			{
-				switch (geometryKind_) {
-					case GeometryDirectionType::CHAIN:
-						return neighbors(i1,i2);
-						break;
-					case GeometryDirectionType::LADDERX:
-					case GeometryDirectionType::LADDER:
-						size_t c1 = i1/leg_;
-						size_t c2 = i2/leg_;
-						size_t r1 = i1%leg_;
-						size_t r2 = i2%leg_;
-						if (c1==c2) return neighbors(r1,r2);
-						if (r1==r2) return neighbors(c1,c2);
-						return (geometryKind_==GeometryDirectionType::LADDERX
-							&& neighbors(r1,r2) && neighbors(c1,c2));
-				}
-				throw std::runtime_error("Unknown geometry\n");
 			}
 			
 			bool neighbors(size_t i1,size_t i2) const

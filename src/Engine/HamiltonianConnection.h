@@ -74,107 +74,88 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file GeometryImplementation.h
+/*! \file HamiltonianConnection.h
  *
- *  DOC NEEDED FIXME
+ * DOC TBW FIXME
  */
-#ifndef GEOMETRY_IMPL_H
-#define GEOMETRY_IMPL_H
+#ifndef HAMILTONIAN_CONNECTION_H
+#define HAMILTONIAN_CONNECTION_H
 
 #include "Utils.h"
-#include "GeometryTerm.h"
 
 namespace Dmrg {
 	
-	template<typename RealType>
-	class GeometryImplementation {
+	template<typename GeometryType,typename ModelHelperType,typename LinkProductType>
+	class HamiltonianConnection {
 		public:
-			typedef GeometryTerm<RealType> GeometryTermType;
-			typedef std::vector<size_t> BlockType;
-
-			template<typename IoInputter>
-			GeometryImplementation(IoInputter& io)
+			typedef typename ModelHelperType::RealType RealType;
+			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+			typedef typename SparseMatrixType::value_type SparseElementType;
+			typedef typename LinkProductType::LinkProductStructType LinkProductStructType;
+			
+			HamiltonianConnection(const GeometryType& geometry,const ModelHelperType& modelHelper)
+			: geometry_(geometry),modelHelper_(modelHelper),
+				systemBlock_(modelHelper.basis2().block()),
+				envBlock_(modelHelper.basis3().block()),
+				smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
+				emin_(*std::min_element(envBlock_.begin(),envBlock_.end()))
 			{
-				int x;
-				io.readline(x,"TotalNumberOfSites=");
-				if (x<0) throw std::runtime_error("TotalNumberOfSites<0 is an error\n");
-				std::cerr<<"TotalNumberOfSites "<<x<<"\n";
-				linSize_ = x;
-
-				io.readline(x,"NumberOfTerms=");
-				std::cerr<<"NumberOfTerms "<<x<<"\n";
-				if (x<0) throw std::runtime_error("NumberOfTerms<0 is an error\n");
-
-				for (size_t i=0;i<size_t(x);i++) {
-					GeometryTermType t(io,i,linSize_);
-					terms_.push_back(t);
-				}
 			}
 			
-			size_t connectionKind(size_t smax,size_t ind,size_t jnd) const
+			bool compute(size_t i, size_t j,SparseMatrixType* matrixBlock,
+     					LinkProductStructType* lps=0) const
 			{
-				size_t middle = smax + 1;
-				if (ind<middle && jnd>=middle) return ProgramGlobals::SYSTEM_ENVIRON;
-				if (jnd<middle && ind>=middle) return ProgramGlobals::ENVIRON_SYSTEM;
-				if (ind<middle) return ProgramGlobals::SYSTEM_SYSTEM;
-				return ProgramGlobals::ENVIRON_ENVIRON;
-			}
-			
-			RealType operator()
-				(size_t smax,size_t emin,
-				 size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
-			{
-				return terms_[term](smax,emin,i1,edof1,i2,edof2);
-			}
-			
-			RealType operator()
-				(size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
-			{
-				return terms_[term](i1,edof1,i2,edof2);
-			}
-			
-			const RealType& defaultConnector
-				(size_t edof1,size_t edof2,size_t term) const
-			{
-				return terms_[term].defaultConnector(edof1,edof2);
-			}
-			
-			size_t terms() const { return terms_.size(); }
-			
-			size_t numberOfSites() const { return linSize_; }
-			
-			void split(BlockType& S,std::vector<BlockType>& X,std::vector<BlockType>& Y,BlockType& E) const
-			{
-				size_t middle = linSize_/2;
-				S.push_back(0);
-				for (size_t i=1;i<middle;i++) {
-					std::vector<size_t> tmpV(1);
-					tmpV[0] = i;
-					X.push_back(tmpV);
-				}
 				
-				for (int j=linSize_-2;j>=int(middle);j--) {
-					std::vector<size_t> tmpV(1);
-					tmpV[0] = j;
-					Y.push_back(tmpV);
-				}
+				bool flag=false;
+				size_t ind = modelHelper_.basis1().block()[i];
+				size_t jnd = modelHelper_.basis1().block()[j];
+				//throw std::runtime_error("system block is not correct here, think finite algorithm!!!\n"); 
+				if (!geometry_.connected(ind,jnd)) return flag;
+				size_t type = geometry_.connectionKind(smax_,ind,jnd);
 				
-				E.push_back(linSize_-1);
+				if (type==ProgramGlobals::SYSTEM_SYSTEM || 
+					type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
+				
+				for (size_t term=0;term<geometry_.terms();term++) {
+					for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
+						std::pair<size_t,size_t> edofs = LinkProductType::edofs(dofs,term);
+						SparseElementType tmp = geometry_(smax_,emin_,
+								ind,edofs.first,jnd,edofs.second,term);
+				
+						if (tmp==0.0) continue;
+						
+						flag = true;
+						// if .. else here is inefficient FIXME
+						//std::cerr<<"Adding "<<i<<" "<<j<<" "<<connectionType<<" value="<<tmp<<"\n";
+						if (lps!=0) {
+							lps->isaved.push_back(i);
+							lps->jsaved.push_back(j);
+							//lps->dof1saved.push_back(dof1);
+							//lps->dof2saved.push_back(dof2);
+							lps->typesaved.push_back(type);
+							lps->tmpsaved.push_back(tmp);
+							lps->termsaved.push_back(term);
+							lps->dofssaved.push_back(dofs);
+						} else {
+							SparseMatrixType mBlock;
+							LinkProductType::calcBond(i,j,type,tmp,mBlock,
+									modelHelper_,term,dofs);
+							*matrixBlock += mBlock;
+						}
+					}
+				}
+				return flag;
 			}
 			
-			// should be static
-			bool connected(size_t i1,size_t i2) const
-			{
-				return terms_[0].connected(i1,i2); // any term will do
-			}
+			
 		private:
-			
-		
-			size_t linSize_;
-			std::vector<GeometryTermType> terms_;
-			
-	}; // class GeometryImplementation
+			const GeometryType& geometry_;
+			const ModelHelperType& modelHelper_;
+			const typename GeometryType::BlockType& systemBlock_;
+			const typename GeometryType::BlockType& envBlock_;
+			size_t smax_,emin_;
+	}; // class HamiltonianConnection
 } // namespace Dmrg 
 
 /*@}*/
-#endif // GEOMETRY_IMPL_H
+#endif // HAMILTONIAN_CONNECTION_H

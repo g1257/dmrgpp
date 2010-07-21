@@ -99,15 +99,20 @@ namespace Dmrg {
 			{
 			}
 
-			size_t connectionKind(const BlockType& systemBlock,size_t ind,size_t jnd) const
+			size_t connectionKind(size_t smax,size_t ind,size_t jnd) const
 			{
-				return geometryImpl_.connectionKind(systemBlock,ind,jnd);
+				return geometryImpl_.connectionKind(smax,ind,jnd);
 			}
 			
-			RealType operator()(const BlockType& systemBlock,
+			RealType operator()(size_t smax,size_t emin,
 					  size_t ind,size_t edof1,size_t jnd,size_t edof2,size_t term) const
 			{
-				return geometryImpl_(systemBlock,ind,edof1,jnd,edof2,term);
+				return geometryImpl_(smax,emin,ind,edof1,jnd,edof2,term);
+			}
+			
+			RealType operator()(size_t ind,size_t edof1,size_t jnd,size_t edof2,size_t term) const
+			{
+				return geometryImpl_(ind,edof1,jnd,edof2,term);
 			}
 			
 			size_t terms() const { return geometryImpl_.terms(); }
@@ -115,6 +120,11 @@ namespace Dmrg {
 			void split(BlockType& S,std::vector<BlockType>& X,std::vector<BlockType>& Y,BlockType& E) const
 			{
 				geometryImpl_.split(S,X,Y,E);
+			}
+			
+			bool connected(size_t i,size_t j) const
+			{
+				return geometryImpl_.connected(i,j);
 			}
 			
 			size_t numberOfSites() const { return geometryImpl_.numberOfSites(); }
