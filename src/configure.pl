@@ -940,7 +940,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
            //     tspPtr = &tsp;
         //}
 
-	size_t n=mp.linSize;
+	size_t n=geometry.numberOfSites()/2;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
 	bool verbose = false;
 	Observer<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
@@ -1042,7 +1042,7 @@ int main(int argc,char *argv[])
         //! Read the parameters for this run
 	typedef  $parametersName<RealType> ParametersModelType; 
         ParametersModelType mp(io);
-        ParametersDmrgSolver<MatrixElementType> dmrgSolverParams(io);
+        ParametersDmrgSolver<FieldType> dmrgSolverParams(io);
 
 	bool hasTimeEvolution=false;
         if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) hasTimeEvolution=true;
