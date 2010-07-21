@@ -223,14 +223,17 @@ namespace Dmrg {
 				int flag = -1;
 				size_t ind = modelHelper.basis1().block()[i];
 				size_t jnd = modelHelper.basis1().block()[j];
-				size_t type = dmrgGeometry_.connectionKind(ind,jnd);
+				throw std::runtime_error("system block is not correct here, think finite algorithm!!!\n"); 
+				const typename DmrgGeometryType::BlockType& systemBlock = modelHelper.basis2().block();
+				size_t type = dmrgGeometry_.connectionKind(systemBlock,ind,jnd);
+				
 				if (type==ProgramGlobals::SYSTEM_SYSTEM || 
 					type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
 				
 				for (size_t term=0;term<dmrgGeometry_.terms();term++) {
 					for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
 						std::pair<size_t,size_t> edofs = LinkProductType::edofs(dofs,term);
-						SparseElementType tmp = dmrgGeometry_(ind,edofs.first,jnd,edofs.second,term);
+						SparseElementType tmp = dmrgGeometry_(systemBlock,ind,edofs.first,jnd,edofs.second,term);
 				
 						if (tmp==0.0) continue;
 						

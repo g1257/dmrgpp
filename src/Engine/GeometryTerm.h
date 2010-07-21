@@ -134,12 +134,13 @@ namespace Dmrg {
 							for (size_t edof2=0;edof2<edof_;edof2++)
 								cachedValues_[pack(i1,edof1,i2,edof2)]=
 									calcValue(i1,edof1,i2,edof2);
+				//std::cerr<<cachedValues_;
 			}
 			
 			const RealType& operator()(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
 				size_t p = pack(i1,edof1,i2,edof2);
-				return 	cachedValues_[p];
+				return cachedValues_[p];
 			}
 			
 			const RealType& defaultConnector
@@ -150,10 +151,14 @@ namespace Dmrg {
 			}
 			
 		private:	
-			const RealType calcValue(size_t i1,size_t edof1,size_t i2,size_t edof2) const
+			RealType calcValue(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
-				RealType zero = 0;
-				if (!connected(i1,i2)) return zero;
+				if (!connected(i1,i2)) {
+					//i2 = findReflection(i1);
+					//if (!equal(i1,i2)) 
+					return 0.0;
+				}
+				
 				size_t dir = calcDir(i1,i2);
 				if (directions_[dir].constantValues()) {
 					return directions_[dir](edof1,edof2);

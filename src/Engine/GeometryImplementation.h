@@ -111,19 +111,24 @@ namespace Dmrg {
 				}
 			}
 			
-			size_t connectionKind(size_t ind,size_t jnd) const
+			size_t connectionKind(const BlockType& systemBlock,size_t ind,size_t jnd) const
 			{
-				size_t middle = linSize_/2;
-				if (ind<middle && jnd>=middle) return ProgramGlobals::ENVIRON_SYSTEM;
-				if (jnd<middle && ind>=middle) return ProgramGlobals::SYSTEM_ENVIRON;
+				size_t middle = *std::max_element(systemBlock.begin(),systemBlock.end());
+				middle++;
+				std::cerr<<"Middle="<<middle<<" system="<<systemBlock[0];
+				std::cerr<<" ind="<<ind<<" jnd="<<jnd<<"\n";
+				if (ind<middle && jnd>=middle) return ProgramGlobals::SYSTEM_ENVIRON;
+				if (jnd<middle && ind>=middle) return ProgramGlobals::ENVIRON_SYSTEM;
 				if (ind<middle) return ProgramGlobals::SYSTEM_SYSTEM;
 				return ProgramGlobals::ENVIRON_ENVIRON;
 			}
 			
-			const RealType& operator()
-				(size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
+			RealType operator()
+				(const BlockType& systemBlock,
+				 size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
 			{
-				return terms_[term](i1,edof1,i2,edof2);
+				throw std::runtime_error("Geometry needs to take into account system block\n");
+				return terms_[term](systemBlock,i1,edof1,i2,edof2);
 			}
 			
 			const RealType& defaultConnector
@@ -146,9 +151,9 @@ namespace Dmrg {
 					X.push_back(tmpV);
 				}
 				
-				for (size_t i=middle;i<linSize_-1;i++) {
+				for (int j=linSize_-2;j>=int(middle);j--) {
 					std::vector<size_t> tmpV(1);
-					tmpV[0] = i;
+					tmpV[0] = j;
 					Y.push_back(tmpV);
 				}
 				
