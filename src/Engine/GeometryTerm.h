@@ -148,30 +148,41 @@ namespace Dmrg {
 				size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
 				bool bothFringe = (fringe(i1,smax,emin) && fringe(i2,smax,emin));
-				size_t p = pack(i1,edof1,i2,edof2);
-				//std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
-				if (!bothFringe) return cachedValues_[p];
+				size_t siteNew1 = i1;
+				size_t siteNew2 = i2;
+				size_t edofNew1 = edof1;
+				size_t edofNew2 = edof2;
+				if (bothFringe) {
+					if (i2<i1) {
+						siteNew1 = i2;
+						siteNew2 = i1;
+						edofNew1 = edof2;
+						edofNew2 = edof1;
+					}
+					siteNew2 = getSubstituteSite(smax,emin,siteNew2);
+				}
 				
+				size_t p = pack(siteNew1,edofNew1,siteNew2,edofNew2);
 				return cachedValues_[p];
 			}
 			
-			const RealType& defaultConnector
-				(size_t i1,size_t edof1,size_t i2,size_t edof2) const
-			{
-				size_t dir = calcDir(i1,i2);
-				return directions_[dir].defaultConnector(edof1,edof2);
-			}
+// 			const RealType& defaultConnector
+// 				(size_t i1,size_t edof1,size_t i2,size_t edof2) const
+// 			{
+// 				size_t dir = calcDir(i1,i2);
+// 				return directions_[dir].defaultConnector(edof1,edof2);
+// 			}
 			
 			bool connected(size_t smax,size_t emin,size_t i1,size_t i2) const
 			{
 				if (i1==i2) return false;
 				bool bothFringe = (fringe(i1,smax,emin) && fringe(i2,smax,emin));
 				if (!bothFringe) return connected(i1,i2);
-				std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
-				return false;
+				//std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
+				return true;
 			}
 			
-			// should be static
+			// should be static and private
 			bool connected(size_t i1,size_t i2) const
 			{
 				if (i1==i2) return false;
@@ -196,12 +207,8 @@ namespace Dmrg {
 		private:	
 			RealType calcValue(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
-				if (!connected(i1,i2)) {
-					//i2 = findReflection(i1);
-					//if (!equal(i1,i2)) 
-					return 0.0;
-				}
-				
+				if (!connected(i1,i2)) return 0.0;
+
 				size_t dir = calcDir(i1,i2);
 				if (directions_[dir].constantValues()) {
 					return directions_[dir](edof1,edof2);
@@ -281,6 +288,21 @@ namespace Dmrg {
 						a = (i<emin && i>=smax-2);
 						b = (i>smax && i<=emin+2);
 						return (a || b);
+				}
+				throw std::runtime_error("Unknown geometry\n");
+			}
+			
+			
+			// siteNew2 is fringe in the environment
+			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+			{
+				switch (geometryKind_) {
+					case GeometryDirectionType::CHAIN:
+						return smax+1;
+					case GeometryDirectionType::LADDER:
+						return smax+siteNew2-emin+1;
+					case GeometryDirectionType::LADDERX:
+						return smax+siteNew2-emin+1;
 				}
 				throw std::runtime_error("Unknown geometry\n");
 			}

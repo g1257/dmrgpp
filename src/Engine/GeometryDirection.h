@@ -115,10 +115,10 @@ namespace Dmrg {
 					}
 					dataType_ = MATRICES;
 				}
-				std::vector<size_t> v(2);
-				io.readKnownSize(v,"DefaultSites");
-				
-				defaultHandle_ = handle(v[0],v[1]);
+// 				std::vector<size_t> v(2);
+// 				io.readKnownSize(v,"DefaultSites");
+// 				
+// 				defaultHandle_ = handle(v[0],v[1]);
 			}
 
 			const RealType& operator()(size_t i,size_t j) const
@@ -135,11 +135,11 @@ namespace Dmrg {
 				return dataMatrices_[h](edof1,edof2);
 			}
 			
-			const RealType& defaultConnector(size_t edof1,size_t edof2) const
-			{
-				if (dataType_==NUMBERS) return dataNumbers_[defaultHandle_];
-				return dataMatrices_[defaultHandle_](edof1,edof2);
-			}
+// 			const RealType& defaultConnector(size_t edof1,size_t edof2) const
+// 			{
+// 				if (dataType_==NUMBERS) return dataNumbers_[defaultHandle_];
+// 				return dataMatrices_[defaultHandle_](edof1,edof2);
+// 			}
 
 			size_t size() const
 			{
@@ -199,7 +199,7 @@ namespace Dmrg {
 			size_t geometryKind_;
 			size_t leg_;
 			size_t dataType_;
-			size_t defaultHandle_;
+			//size_t defaultHandle_;
 			std::vector<RealType> dataNumbers_;
 			std::vector<MatrixType> dataMatrices_;
 	}; // class GeometryDirection

@@ -124,7 +124,7 @@ namespace Dmrg {
 				(size_t smax,size_t emin,
 				 size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
 			{
-				std::cerr<<"smax="<<smax<<" emin="<<emin<<"\n";
+				//std::cerr<<"smax="<<smax<<" emin="<<emin<<"\n";
 				if (smax+1==emin) return terms_[term](i1,edof1,i2,edof2);
 				return terms_[term](smax,emin,i1,edof1,i2,edof2);
 			}
@@ -135,11 +135,11 @@ namespace Dmrg {
 				return terms_[term](i1,edof1,i2,edof2);
 			}
 			
-			const RealType& defaultConnector
-				(size_t edof1,size_t edof2,size_t term) const
-			{
-				return terms_[term].defaultConnector(edof1,edof2);
-			}
+// 			const RealType& defaultConnector
+// 				(size_t edof1,size_t edof2,size_t term) const
+// 			{
+// 				return terms_[term].defaultConnector(edof1,edof2);
+// 			}
 			
 			size_t terms() const { return terms_.size(); }
 			
@@ -165,11 +165,11 @@ namespace Dmrg {
 			}
 			
 			// should be static
-			bool connected(size_t i1,size_t i2) const
-			{
-				return terms_[0].connected(i1,i2); // any term will do
-			}
-			
+// 			bool connected(size_t i1,size_t i2) const
+// 			{
+// 				return terms_[0].connected(i1,i2); // any term will do
+// 			}
+// 			
 			// should be static
 			bool connected(size_t smax,size_t emin,size_t i1,size_t i2) const
 			{
