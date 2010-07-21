@@ -465,18 +465,10 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 	//! Read TimeEvolution if applicable:
 	typedef typename SolverType::TargettingType TargettingType;
         typedef typename TargettingType::TargettingStructureType TargettingStructureType;
-        TargettingStructureType *tspPtr;
-        if (hasTimeEvolution) {
-                TargettingStructureType tsp(io,model);
-                tspPtr = &tsp;
-        } else {
-                TargettingStructureType tsp(model);
-                tspPtr = &tsp;
-        }
-
+        TargettingStructureType tsp(io,model,hasTimeEvolution);
 
         //! Setup the dmrg solver:
-        SolverType dmrgSolver(dmrgSolverParams,model,concurrency,*tspPtr);
+        SolverType dmrgSolver(dmrgSolverParams,model,concurrency,tsp);
 
 	//! Calculate observables:
 	dmrgSolver.main(geometry);
@@ -931,14 +923,6 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	 //! Read TimeEvolution if applicable:
         typedef typename SolverType::TargettingType TargettingType;
         typedef typename TargettingType::TargettingStructureType TargettingStructureType;
-        //TargettingStructureType *tspPtr;
-        if (hasTimeEvolution) {
-                TargettingStructureType tsp(io,model);
-               // tspPtr = &tsp;
-        } //else {
-           //     TargettingStructureType tsp(model);
-           //     tspPtr = &tsp;
-        //}
 
 	size_t n=geometry.numberOfSites()/2;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);

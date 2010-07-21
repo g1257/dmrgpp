@@ -1,25 +1,21 @@
-linSize 8
-hoppings 8 8
-0 1.0 1.0 0 0 0 0 0
- 1.0 0 0 1.0 0 0 0 0
- 1.0 0 0 1.0 1.0 0 0 0
- 0 1.0 1.0 0 0 1.0 0 0
- 0 0 1.0 0 0 1.0 1.0 0
- 0 0 0 1.0 1.0 0 0 1.0
- 0 0 0 0 1.0 0 0 1.0
- 0 0 0 0 0 1.0 1.0 0
+TotalNumberOfSites=16 
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
 
-hubbardU	8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-potentialV	 16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-density 1.0
-options hasQuantumNumbers,wft,noSu2,,hasThreads
-version aec8964f7a782d87d587c27276acd41760808139
-outputfile		data3.txt
-InfiniteLoopKeptStates	 100
+hubbardU	16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+potentialV	32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+		0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+density=1.0
+SolverOptions=hasQuantumNumbers,wft,noSu2,,hasThreads
+Version=aec8964f7a782d87d587c27276acd41760808139
+OutputFile=data3.txt
+InfiniteLoopKeptStates=100
 FiniteLoops 6  7 400 0 -7 400 0 -7 400 0 7 400 1 
 	7 400 1 -1 400 1 
-QNS 3 0.5 0.5 0
-
+TargetQuantumNumbers 3 0.5 0.5 0
    
-Threads 2
+Threads=2
 

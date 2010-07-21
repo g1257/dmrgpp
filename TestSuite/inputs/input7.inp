@@ -1,37 +1,34 @@
-linSize 8
-hoppings 8 8
-0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0
- 1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0
- 0.0 1.0 0.0 1.0 0.0 0.0 0.0 0.0
- 0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0
- 0.0 0.0 0.0 1.0 0.0 1.0 0.0 0.0
- 0.0 0.0 0.0 0.0 1.0 0.0 1.0 0.0
- 0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0
- 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
+TotalNumberOfSites=16 
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
 
-hubbardU	8 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0
-potentialV	 16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-density 1.0
-options hasQuantumNumbers,wft,nosu2,TimeStepTargetting
-version 6ce41a4b7dfa08978e53fa756f7f139e2fb18251
-outputfile		data7.txt
-InfiniteLoopKeptStates	 64
+hubbardU	16 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0
+potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+	0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+density=1.0
+SolverOptions=hasQuantumNumbers,wft,nosu2,TimeStepTargetting
+Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
+OutputFile=data7.txt
+InfiniteLoopKeptStates=64
 FiniteLoops 8  7 100 0 -7 100 0 -7 100 0 7 100 0
 	       7 100 0 -7 100 0 -7 100 0 7 100 0 
-QNS 2 0.5 0.5
+TargetQuantumNumbers 2 0.5 0.5
 
-FILENAME tst7.txt
-TIMESTEP 0.01
-MAXTIMES 10
-ADVANCEEACH 2
-SITE 1 7
-STARTINGLOOP 1 2
+TSPFilename=tst7.txt
+TSPTau=0.01
+TSPTimeSteps=10
+TSPAdvanceEach=2
+TSPSites 1 7
+TSPLoops 1 2
 
-TIMEEVOLUTION cooked
-COOKED_OPERATOR c
+TSPOperator=cooked
+COOKED_OPERATOR=c
 COOKED_EXTRA 2 0 0
-FERMIONSIGN -1
+FERMIONSIGN=-1
 JMVALUES 0 0
-angularFactor 1
+AngularFactor=1
 
    
