@@ -856,7 +856,6 @@ print OBSOUT<<EOF;
 #include "$pthreadsName.h" 
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
-#include "Connectors.h"
 #include "InternalProductOnTheFly.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
