@@ -342,12 +342,12 @@ namespace Dmrg {
 							SparseMatrixType tJ, tI;
 							transposeConjugate(tJ,sPlusOperatorJ);
 							transposeConjugate(tI,sPlusOperatorI);
-							hmatrix += 0.5*(sPlusOperatorI*tJ);
-							hmatrix += 0.5*(tI*sPlusOperatorJ);
+							hmatrix += 0.5*tmp*(sPlusOperatorI*tJ);
+							hmatrix += 0.5*tmp*(tI*sPlusOperatorJ);
 		
 							// S^z_i S^z_j
 							SparseMatrixType szOperatorJ=cm[j+n].data; //S^z_j
-							hmatrix += szOperatorI*szOperatorJ;
+							hmatrix += tmp*szOperatorI*szOperatorJ;
 						}
 					}
 				}
