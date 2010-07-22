@@ -21,8 +21,11 @@ Let $result = $resultsDir operatorC$testNum.txt
 Let $oracle = $oraclesDir operatorC$testNum.txt
 Let $raw = $srcDir raw$testNum.txt
 Let $diff = $resultsDir operatorC$testNum.diff
+Let $smdiff = $resultsDir operatorC$testNum.smdiff
+Let $opName = C
 CallOnce observables
-Execute extractOperatorC($raw,$result)
+Execute extractOperator($opName, $raw,$result)
+Execute smartDiff($opName, $result, $oracle, $smdiff)
 Diff $result $oracle > $diff
 
 [N]
@@ -30,8 +33,11 @@ Let $result = $resultsDir operatorN$testNum.txt
 Let $oracle = $oraclesDir operatorN$testNum.txt
 Let $raw = $srcDir raw$testNum.txt
 Let $diff = $resultsDir operatorN$testNum.diff
+Let $smdiff = $resultsDir operatorN$testNum.smdiff
+Let $opName = N
 CallOnce observables
-Execute extractOperatorN($raw,$result)
+Execute extractOperator($opName, $raw,$result)
+Execute smartDiff($opName, $result, $oracle, $smdiff)
 Diff $result $oracle > $diff
 
 [Sz]
@@ -39,8 +45,11 @@ Let $result = $resultsDir operatorSz$testNum.txt
 Let $oracle = $oraclesDir operatorSz$testNum.txt
 Let $raw = $srcDir raw$testNum.txt
 Let $diff = $resultsDir operatorSz$testNum.diff
+Let $smdiff = $resultsDir operatorSz$testNum.smdiff
+Let $opName = Sz
 CallOnce observables
-Execute extractOperatorSz($raw,$result)
+Execute extractOperator($opName, $raw,$result)
+Execute smartDiff($opName, $result, $oracle, $smdiff)
 Diff $result $oracle > $diff
 
 [gprof]
@@ -54,5 +63,5 @@ Diff $result $oracle > $diff
 
 [rawTimeEvolution]
 #please add the lets here...
-Grep '|A|' $stdoutAndStdErr > $result
+#Grep '|A|' $stdoutAndStdErr > $result
 Diff $result $oracle > $diff

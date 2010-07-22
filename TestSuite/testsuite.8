@@ -1,45 +1,64 @@
-\" To see this file do man -l testsuite.8
-.TH testsuite.pl 8  "December 11, 2009" "version 2.0" "DMRG++"
+\" To see this file do less testsuite.8
+.TH testsuite.pl 8  "July 21, 2010" "version 1.0" "DMRG++"
 .SH NAME
 testsuite.pl \- Systematically run tests for DMRG++ 
 .SH SYNOPSIS
 .B ./testsuite.pl 
-[\-\-all | \-n number] [\-l libraries] 
+[\-a|\-\-all] [\-n test num] [\-l limit test num] [\-r remove] [\-v verbose] [\-m manual] [\-f force] [\-u update]
 .SH DESCRIPTION
-Without options testsuite.pl will display a list of tests
-and ask which test to run. The command will create
-a driver program, a Makefile, and an input file; and it 
-will build DMRG++ and run it.
-Then it will compare the results of the test with
-precomputed tests, and produce a diff file under diffOfTest*.txt.
+If a test number is not given to testsuite.pl, it will display a list of available tests and ask which test to run. The command will create
+a driver program, a Makefile, and it will build DMRG++ and run it. Then interpretation of results will be made and the test suite will compare the results of the test with
+precomputed results, and produce a system diff and a smart diff file under the .diff and .smdiff extensions, respectively.
 .SH OPTIONS
 .TP
-\-\-all
+.B \-a,\-\-all
 Runs all available tests sequentially.
 .TP
-\-n number
-If number is non-negative, runs the test with the given number.
-If number is negative, runs all tests from -number.
-.SH OPTIONS AVAILABLE IN THE CPC VERSION ONLY:
+.B \-n test num
+If test number is non-negative, runs the test with the given number.
+If test number is negative, runs all tests starting from test number to the end
+.B (or until limit test number).
 .TP
-\-l libraries
-Use the specified libraries for LAPACK.
-For instance
-.B ./testsuite.pl -l \(lq'-llapack -L/path/to/lapack'\(rq
-.PP
-will link with the specified string. Note the single quotes
-inside double quotes. Both are necessary if the string has spaces,
-the outer quotes are for the shell, the inner ones for perl.
+.B \-l limit test num
+Specificies the last test to run when running multiple tests sequentially. Applied when using the
+.B \-\-all
+option or given a
+.B negative test number.
+.TP
+.B \-r remove
+When set all temporary files created during test configuration, compilation, and execution of DMRG++.
+.TP
+.B \-v verbose
+Outputs to bash messages created during test selection, configuration, compilation, and execution of DMRG++. Descriptions of all tests are found in
+.B inputs/descriptions.txt.
+.TP
+.B \-m manual
+Provides the functionality for the user to manually enter configuration parameters prior to test compilation and execution.
+.TP
+.B \-f force
+Runs the compilation process even though the compilation had already been made previously and a valid executable exists for that test number.
+.TP
+.B \-u update
+Synchronizes and updates the hash table in 
+.B hashTable.txt
+with the existing executables in the 
+.B src/
+directory.
+.SH FILE ASSOCIATIONS
+Each test has a file associated with it
+.B (inputs/processing#.txt)
+which specifies the types of analyses to be done for that test. The implementation of each analysis is denoted with a custom meta language in
+.B inputs/processingLibrary.txt.
+This implementation of the test suite allows for scalability by adding new analyses to the processing library and connecting them with new subroutines in testsuite.pl.
 .SH AUTHOR
-G.A.
+G.A. & E.P.
 .SH BUGS
-Tests numbers specified with -n refer to the offset from the
-first test, whereas test numbers entered interactively follow
-an internal scheme.
+User has to enter configuration parameters for every executable of the same test if manual configuration is selected.
+Needs improvement in exception handling procedure.
 .SH LIMITATIONS
 Currently, testsuite.pl does not support MPI tests, or pthread
 tests. Also, a lot of DMRG++ functionality needs corresponding tests
 in the testsuite. This will be added eventually.
 .SH SEE ALSO
-configure.pl(1)
+configure.pl
 
