@@ -887,7 +887,7 @@ sub runAllTests
 	print "Preparing to run all tests starting from Test $start...\n";
 
 	my @testsList = split(/ /,getAvailableTests());
-	my @nonFunctionalTests = (4,6,24,60,104,105,106,107,108,124,125,141,160);
+	my @nonFunctionalTests = (24,60,104,105,106,107,108,124,125,141,160);
 	
 	for (my $i=0;$i<=$#testsList;$i++) {
 		next if ($testsList[$i] eq "");

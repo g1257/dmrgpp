@@ -107,11 +107,11 @@ namespace Dmrg {
 				
 			}
 			
-			static void getOrbitals(size_t& orb1,size_t& orb2,size_t what)
-			{
-				orb1 = what / 2;
-				orb2 = what % 2;
-			}
+// 			static void getOrbitals(size_t& orb1,size_t& orb2,size_t what)
+// 			{
+// 				orb1 = what / 2;
+// 				orb2 = what % 2;
+// 			}
 			
 			void thread_function_(size_t threadNum,size_t blockSize,pthread_mutex_t* myMutex)
 			{
@@ -124,10 +124,11 @@ namespace Dmrg {
 					size_t j=lps_.jsaved[ix];
 					//size_t dof1=lps_.dof1saved[ix];
 					//size_t dof2=lps_.dof2saved[ix];
-					int type=lps_.typesaved[ix];
+					size_t type=lps_.typesaved[ix];
+					size_t term = lps_.termsaved[ix];
+					size_t dofs = lps_.dofssaved[ix];
 					SparseElementType tmp=lps_.tmpsaved[ix];
-					size_t connectionType = lps_.connectionsaved[ix];
-					linkProduct(xtemp,y_,i,j,type,tmp,modelHelper_,connectionType);
+					linkProduct(xtemp,y_,i,j,type,tmp,modelHelper_,term,dofs);
 					
 				}
 				if (myMutex) pthread_mutex_lock( myMutex);
@@ -139,20 +140,20 @@ namespace Dmrg {
 
 			
 			//! Adds a tight-binding bond between system and environment
-			static size_t calcBond(int i,int j,int type,
+			static size_t calcBond(size_t i,size_t j,size_t type,
 				SparseElementType  &val,
 				SparseMatrixType &matrixBlock,
 				const ModelHelperType& modelHelper,
-				size_t what) 
+				size_t term,size_t dofs)
 			{
-				//int const SystemEnviron=1,EnvironSystem=2;
+				size_t spin = dofs/4;
+				size_t xtmp = (spin==0) ? 0 : 4;
+				xtmp = dofs - xtmp;
+				size_t orb1 = xtmp/2;
+				size_t orb2 = (xtmp & 1);
+				
 				SparseMatrixType A,B;
-				size_t orb1 = 0;
-				size_t orb2 = 0;
-				size_t spin=0;
-				if (size_t(what/4)>0) spin=1;
-				if (spin==0) getOrbitals(orb1,orb2,what);
-				else getOrbitals(orb1,orb2,what-4);
+				
 				size_t sigma = orb1 + spin*2;
 				size_t sigma2 = orb2 + spin*2;
 				int offset = modelHelper.basis2().block().size();
@@ -189,9 +190,18 @@ namespace Dmrg {
 				return std::norm(x_);
 			}
 			
-			static size_t bonds() { return 8; }
+			static size_t dofs() { return 8; }
 			
-			static size_t tmpDir(size_t what) { return what; }
+			// up up and down down are the only connections possible for this model
+			static std::pair<size_t,size_t> edofs(size_t dofs,size_t term)
+			{
+				size_t spin = dofs/4;
+				size_t xtmp = (spin==0) ? 0 : 4;
+				xtmp = dofs - xtmp;
+				size_t orb1 = xtmp/2;
+				size_t orb2 = (xtmp & 1);
+				return std::pair<size_t,size_t>(orb1,orb2); // has only dependence on orbital
+			}
 			
 		private:
 			size_t dof_;
@@ -203,17 +213,17 @@ namespace Dmrg {
 			
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
 			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
-						int i,int j,int type,
+						size_t i,size_t j,size_t type,
 				SparseElementType  &val,
-				const ModelHelperType& modelHelper,size_t what)  const
+				const ModelHelperType& modelHelper,size_t term,size_t dofs)  const
 			{
 				int offset =modelHelper.basis2().block().size();
-				size_t orb1 = 0;
-				size_t orb2 = 0;
-				size_t spin=0;
-				if (what>3) spin=1;
-				if (spin==0) getOrbitals(orb1,orb2,what);
-				else getOrbitals(orb1,orb2,what-4);
+				size_t spin = dofs/4;
+				size_t xtmp = (spin==0) ? 0 : 4;
+				xtmp = dofs - xtmp;
+				size_t orb1 = xtmp/2;
+				size_t orb2 = (xtmp & 1);
+				
 				size_t sigma = orb1 + spin*2;
 				size_t sigma2 = orb2 + spin*2;
 				

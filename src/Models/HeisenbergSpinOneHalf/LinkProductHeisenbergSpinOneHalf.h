@@ -193,7 +193,6 @@ namespace Dmrg {
 			
 			static size_t dofs() { return 1; }
 			
-			// up up and down down are the only connections possible for this model
 			static std::pair<size_t,size_t> edofs(size_t dofs,size_t term)
 			{
 				return std::pair<size_t,size_t>(0,0); // no orbital and no anisotropy

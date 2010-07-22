@@ -13,7 +13,7 @@ potentialV 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 density=1.0
 SolverOptions=hasQuantumNumbers,wft,nosu2,,hasThreads,GroundStateTargetting
 Version=6b9dc12805519cb864e80fa0957129a010711116
-OutputFile=data.txt
+OutputFile=data11.txt
 InfiniteLoopKeptStates=150
 FiniteLoops 6  7 200 0 -7 200 0 -7 200 0 7 200 1
 		7 200 1 -1 200 1 

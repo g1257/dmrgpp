@@ -502,30 +502,30 @@ namespace Dmrg {
 			SparseMatrixType tmpMatrix,tmpMatrix2;
 
 			hmatrix.makeDiagonal(cm[0].data.rank());
-			size_t smax,emin;
-			utils::findExtremes(smax,emin,block,geometry_.systemBlock());
 			
 			for (size_t i=0;i<n;i++) {
 				//! hopping part
 				for (size_t j=0;j<n;j++) {
-					int type = geometry_.calcConnectorType(block[i],block[j]);
-					for (size_t connectionType=0;connectionType<LinkProductType::bonds();connectionType++) {
-						SparseElementType tmp = geometry_.calcConnectorValue(type,block[i],
-								block[j],smax,emin,connectionType);
+					for (size_t term=0;term<geometry_.terms();term++) {
+						for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
+							std::pair<size_t,size_t> edofs = LinkProductType::edofs(dofs,term);
+							RealType tmp = geometry_(block[i],edofs.first,block[j],edofs.second,term);
+						
+							if (i==j || tmp==0.0) continue;
 
-						if (i==j || tmp==0.0) continue;
-						size_t orb1 = 0;
-						size_t orb2 = 0;
-						size_t spin=0;
-						if (connectionType>3) spin=1;
-						if (spin==0) LinkProductType::getOrbitals(orb1,orb2,connectionType);
-						else LinkProductType::getOrbitals(orb1,orb2,connectionType-4);
-						size_t dof1 = orb1 + spin*2;
-						size_t dof2 = orb2 + spin*2;
-						transposeConjugate(tmpMatrix2,cm[dof2+j*dof()].data);
-						multiply(tmpMatrix,cm[dof1+i*dof()].data,tmpMatrix2);
-						multiplyScalar(tmpMatrix2,tmpMatrix,tmp);
-						hmatrix += tmpMatrix2;
+							size_t spin = dofs/4;
+							size_t xtmp = (spin==0) ? 0 : 4;
+							xtmp = dofs - xtmp;
+							size_t orb1 = xtmp/2;
+							size_t orb2 = (xtmp & 1);
+							
+							size_t dof1 = orb1 + spin*2;
+							size_t dof2 = orb2 + spin*2;
+							transposeConjugate(tmpMatrix2,cm[dof2+j*dof()].data);
+							multiply(tmpMatrix,cm[dof1+i*dof()].data,tmpMatrix2);
+							multiplyScalar(tmpMatrix2,tmpMatrix,tmp);
+							hmatrix += tmpMatrix2;
+						}
 					}
 				}
 				addInteraction(hmatrix,cm,i);
