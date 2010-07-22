@@ -836,7 +836,7 @@ sub createObserverDriver
 	my $obsArg = "datafile,n,opInfo.n_row(),concurrency,verbose";
 	if ($targetting=~/timestep/i) {
 		$chooseRealOrComplexForObservables = "typedef ComplexType FieldType;\n";
-		$obsArg = "datafile,tstStruct.filename,n,opInfo.n_row(),concurrency,verbose";
+		$obsArg = "datafile,tsp.filename,n,opInfo.n_row(),concurrency,verbose";
 	}
 	
 	open(OBSOUT,">$observerDriver") or die "Cannot open file $observerDriver for writing: $!\n";
@@ -922,7 +922,8 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	 //! Read TimeEvolution if applicable:
         typedef typename SolverType::TargettingType TargettingType;
         typedef typename TargettingType::TargettingStructureType TargettingStructureType;
-
+	TargettingStructureType tsp(io,model,hasTimeEvolution);
+	
 	size_t n=geometry.numberOfSites()/2;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
 	bool verbose = false;
