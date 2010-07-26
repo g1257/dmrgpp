@@ -1,6 +1,7 @@
 [dmrg]
 Let $input = $inputsDir input$testNum.inp
-Execute runDmrg($input)
+Let $raw = $resultsDir stderrAndOut$testNum.txt
+Execute runDmrg($input,$raw)
 
 [energy]
 Let $result = $resultsDir e$testNum.txt
@@ -61,7 +62,11 @@ CallOnce dmrg
 Gprof $executable > $result
 Diff $result $oracle > $diff
 
-[rawTimeEvolution]
-#please add the lets here...
-#Grep '|A|' $stdoutAndStdErr > $result
+[InSituTimeEvolution]
+Let $result = $resultsDir timeEvolution$testNum.txt
+Let $oracle = $oraclesDir timeEvolution$testNum.txt
+Let $stdoutAndStdErr = $resultsDir stderrAndOut$testNum.txt
+Let $diff = $resultsDir timeEvolution$testNum.diff
+CallOnce executable
+Grep '|A|' $stdoutAndStdErr > $result
 Diff $result $oracle > $diff

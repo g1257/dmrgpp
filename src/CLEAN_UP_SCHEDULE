@@ -7,4 +7,5 @@ eliminate Basis::electrons(...) and use FermionSign instead
 observer must be able to tell if main run was done with reals or complex
 place save(...) functions next to "load" ctors.
 checkpoint load and save shoudl go to the serializer
-configure.pl should not write free system any longer
+string name for basis objects
+checkpointing is broooookeeeeeeeeeeen!!!

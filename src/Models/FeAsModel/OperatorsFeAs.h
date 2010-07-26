@@ -76,7 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file OperatorsFeAs.h
  *
- *  
+ *
  *
  */
 #ifndef OPERATORS_FEAS_H
@@ -92,7 +92,7 @@ namespace Dmrg {
 		static int const NUMBER_OF_ORBITALS=2;
 		static int const DEGREES_OF_FREEDOM=2*NUMBER_OF_ORBITALS;
 		
-		OperatorsFeAs(const DmrgBasisType* thisBasis) : 
+		OperatorsFeAs(const DmrgBasisType* thisBasis) :
 			OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,DEGREES_OF_FREEDOM,NUMBER_OF_ORBITALS) 
 		{}
 

@@ -82,100 +82,42 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PARAMETERSMODELFEAS_H
 #define PARAMETERSMODELFEAS_H
 #include "Utils.h"
-#include "SimpleReader.h"
 
 namespace Dmrg {
 	//! FeAs Model Parameters
 	template<typename Field>
 	struct ParametersModelFeAs {
-
-		// Matrix of Hopping values, hoppings(i,gamma,j,gamma') 
-		// indicate hoppings between sites i and j
-		// with internal degrees of freedom gamma and gamma' respectively
-		psimag::Matrix<Field> hoppings; 
+		// no connections here please!!
+		// connections are handled by the geometry
 		
-		// one-site hoppings for x,y, x+y and x-y directions
-		std::vector<psimag::Matrix<Field> > hoppingsOneSite;
-		 
+		template<typename IoInputType>
+		ParametersModelFeAs(IoInputType& io) 
+		{
+	
+			io.read(hubbardU,"hubbardU");
+			io.read(potentialV,"potentialV");
+			io.readline(density,"density=");
+		}
+		
 		// Hubbard U values (one for each site)
 		std::vector<Field> hubbardU; 
 		// Onsite potential values, one for each site
 		std::vector<Field> potentialV;
-		// total number of sites in the system
-		int linSize;
 		// target number of electrons  in the system
 		int nOfElectrons;
 		// target density
 		Field density;
 	};
-
-
-	//! Operator to read Model Parameters from JSON file.
-	/* template<typename FieldType>
-	ParametersModelHubbard<FieldType>&
-	operator <= (ParametersModelHubbard<FieldType>& parameters, const dca::JsonReader& reader) 
-	{
-
-		const dca::JsonAccessor<std::string>& dmrg(reader["programSpecific"]["DMRG"]);
-		
-		parameters.hubbardU <= dmrg["hubbardU"];
-		parameters.potentialV <= dmrg["potentialV"];
-
-		parameters.linSize <= dmrg["linSize"];
-		
-		parameters.density <= dmrg["density"];
-		parameters.hoppings.resize(parameters.linSize,parameters.linSize);
-		parameters.hoppings  <= dmrg["hoppings"]["data"];
-		return parameters;
-	} */
-	
-	
-	
-	
-	
-	//! Operator to read Model Parameters from inp file.
-	template<typename FieldType>
-	ParametersModelFeAs<FieldType>&
-	operator <= (ParametersModelFeAs<FieldType>& parameters,  SimpleReader& reader) 
-	{
-		reader.read(parameters.linSize);
-		
-		for (size_t direction=0;direction<4;direction++) {
-			psimag::Matrix<FieldType> matrixTmp;
-			reader.read(matrixTmp);
-			parameters.hoppingsOneSite.push_back(matrixTmp);
-		}
-		
-		/*if (parameters.hoppings.n_row()!=parameters.linSize) {
-			std::cerr<<"row="<<parameters.hoppings.n_row()<<" expected "<<parameters.linSize<<"\n";
-			throw std::runtime_error("ParametersModelHeisenberg<FieldType>: operator <= : hoppings size incorrect\n");
-		}
-		if (parameters.hoppings.n_col()!=parameters.linSize) {
-			std::cerr<<"row="<<parameters.hoppings.n_col()<<" expected "<<parameters.linSize<<"\n";
-			throw std::runtime_error("ParametersModelHeisenberg<FieldType>: operator <= : hoppings size incorrect\n");
-		}*/
-		reader.read(parameters.hubbardU);
-		reader.read(parameters.potentialV);
-		reader.read(parameters.density);
-		
-		
-		return parameters;
-	}
 	
 	//! Function that prints model parameters to stream os
 	template<typename FieldType>
 	std::ostream& operator<<(std::ostream &os,const ParametersModelFeAs<FieldType>& parameters)
 	{
-		os<<"parameters.linSize="<<parameters.linSize<<"\n";
 		os<<"parameters.density="<<parameters.density<<"\n";
 		utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
 		utils::vectorPrint(parameters.potentialV,"potentialV",os);
-		utils::matrixPrint(parameters.hoppings,os);
 		return os;
 	}
-	
-	
-	
 } // namespace Dmrg
 
 /*@}*/

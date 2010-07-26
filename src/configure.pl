@@ -55,7 +55,6 @@ createInput() if ($createInput=~/^y/i);
 
 createObserverDriver();
 
-createFreeSystemDriver();
 
 sub welcome
 {
@@ -222,13 +221,13 @@ sub askQuestions
 	}
 	$infiniteKeptStates=$_;
 
-	print "Enter the length of the chain (system only)\n";
+	print "Enter the total number of sites (system+environment)\n";
 	print "Available: any\n";
-	print "Default is: 8 (press ENTER): ";
+	print "Default is: 16 (press ENTER): ";
 	$_=<STDIN>;
 	chomp;
 	if ($_ eq "" or $_ eq "\n") {
-		$_=8;
+		$_=16;
 	}
 	$linSize=$_;
 
@@ -274,16 +273,16 @@ sub askQuestions
 	}
 	$su2Symmetry=$_;
 	if ($su2Symmetry=~/y/i) {
-		print "There will be ".(2*$linSize)." sites in total, so...\n";
+		print "There will be ".($linSize)." sites in total, so...\n";
 		print "how many total electrons should I consider?\n";
-		print "Default is: ".(2*$linSize)." (press ENTER): ";
+		print "Default is: ".($linSize)." (press ENTER): ";
 		$_=<STDIN>;
 		chomp;
 		if ($_ eq "" or $_ eq "\n") {
-                	$_=2*$linSize;
+                	$_=$linSize;
         	}
 		$electrons=$_;
-		print "If there are ".(2*$linSize)." sites in total...\n";
+		print "If there are ".($linSize)." sites in total...\n";
                 print "What value of angular momentum j do you want?\n";
                 print "Default is: 0 (press ENTER): ";
                 $_=<STDIN>;
@@ -329,7 +328,7 @@ sub createMakefile
 {
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
 	my $compiler = compilerName();
-	my $headerFiles = join(' ', glob("Engine/*.h Models/*.h Geometries/*.h"));
+	my $headerFiles = join(' ', glob("Engine/*.h Models/*/*.h Geometries/*.h"));
 	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 print FOUT<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Modify configure.pl instead
@@ -377,7 +376,6 @@ sub createDriver
 	my $concurrencyName = getConcurrencyName();
 	my $parametersName = getParametersName();
 	my $pthreadsName = getPthreadsName();
-	my $geometryName = getGeometryName();
 	my $modelName = getModelName();
 	my $operatorsName = getOperatorsName();
 	
@@ -397,14 +395,13 @@ print FOUT<<EOF;
 #include "$concurrencyName.h"
 #include "$modelName.h"
 #include "$operatorsName.h"
-#include "$geometryName.h"
+#include "Geometry.h"
 #include "$pthreadsName.h"
 #include "ReflectionSymmetryEmpty.h"
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
 #include "InternalProductOnTheFly.h"
 #include "InternalProductStored.h"
-#include "Connectors.h"
 #include "GroundStateTargetting.h"
 #include "TimeStepTargetting.h"
 #include "VectorWithOffset.h"
@@ -415,8 +412,6 @@ typedef std::complex<MatrixElementType> ComplexType;
 typedef  Dmrg::CrsMatrix<ComplexType> MySparseMatrixComplex;
 typedef  Dmrg::CrsMatrix<MatrixElementType> MySparseMatrixReal;
 
-typedef Dmrg::Connectors<MatrixElementType> ConnectorsType;
-
 using namespace Dmrg;
 
 typedef double Field;
@@ -425,7 +420,7 @@ typedef double Field;
 //typedef BlockMatrix<MatrixElementType,psimag::Matrix<MatrixElementType> > MyDenseBlockMatrix;
 typedef Dmrg::$concurrencyName<MatrixElementType> MyConcurrency;
 typedef $parametersName<MatrixElementType> ParametersModelType;
-typedef $geometryName<MatrixElementType,ConnectorsType> GeometryType;;
+typedef Geometry<MatrixElementType> GeometryType;;
 typedef  IoSimple MyIo;
 
 template<
@@ -433,16 +428,17 @@ template<
 	typename GeometryType,
 	typename ParametersSolverType,
 	typename ConcurrencyType,
+	typename IoInputType,
 	template<typename,typename,typename,template<typename> class> class ModelTemplate,
 	template<typename,typename,typename> class ModelHelperTemplate,
 	template<typename,typename> class InternalProductTemplate,
 	template<typename> class VectorWithOffsetTemplate,
 	template<template<typename,typename> class,template<typename,typename> class,
-		typename,typename,typename,typename,template<typename> class> class TargettingType,
+		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
 	typename MySparseMatrix
 >
 void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverType& dmrgSolverParams,
-		ConcurrencyType& concurrency, Dmrg::SimpleReader& reader,bool hasTimeEvolution)
+		ConcurrencyType& concurrency, IoInputType& io,bool hasTimeEvolution)
 {
 	typedef ReflectionSymmetryEmpty<MatrixElementType,MySparseMatrix> ReflectionSymmetryType;
 	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
@@ -459,7 +455,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 			MyIo,
 			$wftransformation,
 			$stackTemplate,
-			TargettingType,
+			TargettingTemplate,
 			VectorWithOffsetTemplate
 		> SolverType;
 	
@@ -467,82 +463,34 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 	ModelType model(mp,geometry);
 
 	//! Read TimeEvolution if applicable:
-	typedef typename SolverType::TargettingStructureType TargettingStructureType;
-	TargettingStructureType targetStruct;
-	typedef TargetStructureParams<TargettingStructureType,ModelType> TargetStructureParamsType;
-	TargetStructureParamsType tsp(targetStruct,model);
+	typedef typename SolverType::TargettingType TargettingType;
+        typedef typename TargettingType::TargettingStructureType TargettingStructureType;
+        TargettingStructureType tsp(io,model,hasTimeEvolution);
 
-	if (hasTimeEvolution) reader.load(tsp);
-
-	//! Setup the dmrg solver:
-	SolverType dmrgSolver(dmrgSolverParams,model,concurrency,targetStruct);
+        //! Setup the dmrg solver:
+        SolverType dmrgSolver(dmrgSolverParams,model,concurrency,tsp);
 
 	//! Calculate observables:
-	dmrgSolver.main();
+	dmrgSolver.main(geometry);
 }
 
 int main(int argc,char *argv[])
 {
-	//! Read the parameters for this run
+	//! setup distributed parallelization
 	MyConcurrency concurrency(argc,argv);
-	ParametersModelType mp;
-	ParametersDmrgSolver<MatrixElementType> dmrgSolverParams;
-	Dmrg::SimpleReader reader(argv[1]);
-	reader.load(mp);
-	reader.load(dmrgSolverParams);
 	
+	//Setup the Geometry
+	typedef IoSimple::In IoInputType;
+	IoInputType io(argv[1]);
+	GeometryType geometry(io);
+
+	//! Read the parameters for this run
+	ParametersModelType mp(io);
+	ParametersDmrgSolver<MatrixElementType> dmrgSolverParams(io);
+
 	// print license
 	std::string license = $license;
 	if (concurrency.root()) std::cerr<<license;
-	
-	
-EOF
-	if ($modelName =~ /febasedsc/i) {
-		$connectorsArgs= "mp.hoppingsOneSite,2,2";
-		$dof = 4;
-	} elsif ($modelName =~ /tjoneorbital/i) {
-		$connectorsArgs= "mp.jvalues,defaultConnectors\n";
-		$connectorsArgs2="mp.hoppings,defaultConnectors2";
-		$dof = 2;
-	} else  {
-		$connectorsArgs="mp.$connectors,defaultConnectors";
-		$dof = 2;
-	}
-	
-
-if ($geometry=~/ladder$/i) {
-	$geometryArgs = "connectors,1,$legOfLadder"; 
-	print FOUT "\tstd::vector<Field> defaultConnectors(2);\n";
-	print FOUT "\tdefaultConnectors[0] = mp.$connectors(0,2); // x-direction\n";
-	print FOUT "\tdefaultConnectors[1] = mp.$connectors(0,1); // y-direction\n";
-	if (defined($connectorsArgs2)) {
-		print FOUT "\tstd::vector<Field> defaultConnectors2(2);\n";
-		print FOUT "\tdefaultConnectors2[0] = mp.jvalues(0,2); // x-direction\n";
-		print FOUT "\tdefaultConnectors2[1] = mp.jvalues(0,1); // y-direction\n";
-	}
-} elsif ($geometry=~/1d/i) {
-	print FOUT "\tstd::vector<Field> defaultConnectors(1);\n";
-	print FOUT "\tdefaultConnectors[0] = mp.$connectors(0,1); // x-direction\n";
-	if (defined($connectorsArgs2)) {
-		print FOUT "\tstd::vector<Field> defaultConnectors2(1);\n";
-		print FOUT "\tdefaultConnectors2[0] = mp.jvalues(0,1); // x-direction\n";
-	}
-	$geometryArgs = "connectors";
-
-} elsif ($geometry=~/ladderfeas/i) {
-	$geometryArgs = "connectors,1,2";
-
-}
-print FOUT<<EOF;
-	//Setup the connectors
-	ConnectorsType connectors($dof,mp.linSize);
-	connectors.push($connectorsArgs);
-EOF
-	print FOUT "\t	connectors.push($connectorsArgs2);\n" if (defined($connectorsArgs2)) ;
-
-print FOUT<<EOF;
-	//Setup the Geometry
-	GeometryType geometry($geometryArgs);
 
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;
@@ -553,26 +501,30 @@ print FOUT<<EOF;
 	if (!su2) {
 		if (hasTimeEvolution) { 
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
+				IoInputType,
 				$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,TimeStepTargetting,
 				MySparseMatrixComplex>
-			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
+			(mp,geometry,dmrgSolverParams,concurrency,io,hasTimeEvolution);
 		} else {
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
+				IoInputType,
 				$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
 				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
+			(mp,geometry,dmrgSolverParams,concurrency,io,hasTimeEvolution);
 		}
 	} else {
 		 if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
+				IoInputType,
 				$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffsets,GroundStateTargetting,
 				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
+			(mp,geometry,dmrgSolverParams,concurrency,io,hasTimeEvolution);
 		} else {
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
+				IoInputType,
 				$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
 				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,reader,hasTimeEvolution);
+			(mp,geometry,dmrgSolverParams,concurrency,io,hasTimeEvolution);
 		}
 	}
 }
@@ -592,17 +544,24 @@ sub createInput
 	my $version=getVersion();
 	my $qns = "2 0.5 0.5";
 	my $inputForTimeEvolution = getTimeEvolutionInput();
+	my $geometryName = getGeometryName();
 	
 	if ($su2Symmetry=~/y/i) {
-		$_ = $electrons/(4*$linSize);
-		$momentumJ /= (2*$linSize);
+		$_ = $electrons/(2*$linSize);
+		$momentumJ /= ($linSize);
 		$qns="3 $_ $_ $momentumJ\n";
 		$su2Symmetry="useSu2Symmetry";
 	} else {
 		$su2Symmetry="nosu2";
 	}
-	
-	print FOUT "linSize $linSize\n";
+	my $terms = 1; # it is 2 for t-j model
+	my $edof = 1;
+	print FOUT "TotalNumberOfSites=$linSize\n";
+	print FOUT "NumberOfTerms=$terms\n";
+	print FOUT "DegreesOfFreedom=$edof\n";
+	print FOUT "GeometryKind=$geometryName\n";
+	print FOUT "GeometryOptions=ConstantValues\n";
+	print FOUT "Connectors 1 1.0\n"; # FIXME only valid for hubbard model
 	if ($model=~/febasedsc/i) {
 	$qns = "3 1.0 1.0 0.0"; 
 	print FOUT<<EOF;
@@ -620,17 +579,7 @@ hoppings 2 2
 -0.079 +0.20828
 EOF
 	} else {
-		print FOUT<<EOF;
-$connectors $linSize $linSize
-$connectorValues
-EOF
-	if (defined($connectors2)) {
-		my $connectorValues2=createConnectors($connectorValue2);
-		print FOUT<<EOF;
-$connectors2 $linSize $linSize
-$connectorValues2
-EOF
-		}
+		# FIXME
 	}
 	
 	if ($model=~/hubbard/i or $model=~/febasedsc/i) {	
@@ -644,7 +593,7 @@ EOF
 
 print FOUT<<EOF;
 potentialV	$potentialv
-density 1.0
+density=1.0
 EOF
 	}
 
@@ -652,15 +601,15 @@ EOF
 	$hasThreads = "hasThreads" if ($pthreads);
 
 	print FOUT<<EOF;
-options hasQuantumNumbers,nowft,$su2Symmetry,$hasLoops,$hasThreads,$targetting
-version $version
-outputfile		data.txt
-InfiniteLoopKeptStates	 $infiniteKeptStates
+SolverOptions=hasQuantumNumbers,nowft,$su2Symmetry,$hasLoops,$hasThreads,$targetting
+Version=$version
+OutputFile=data.txt
+InfiniteLoopKeptStates=$infiniteKeptStates
 FiniteLoops $finiteLoops
-QNS $qns
+TargetQuantumNumbers $qns
    
 EOF
-	print FOUT "Threads $nthreads\n" if ($pthreads);
+	print FOUT "Threads=$nthreads\n" if ($pthreads);
 	print FOUT "$inputForTimeEvolution\n\n" if ($targetting=~/timestep/i);
 	print STDERR "File input.inp has been written\n";
 	close(FOUT);
@@ -698,49 +647,6 @@ JMVALUES 0 0
 angularFactor 1
 EOF
 	return $ret;
-}
-
-# Unused 
-sub createInputJsn
-{
-	system("cp input.jsn input.bak") if (-r "input.jsn");
-	open(FOUT,">input.jsn") or die "Cannot open file input.jsn for writing: $!\n";
-	my $connectorValues=createConnectors();
-	my $version=getVersion();
-	
-print FOUT<<EOF;
-{"programSpecific":
-	{"DMRG": {
-		"options"	: "none",
-		"linSize"	: $linSize,
-		"density"	: 1.0,
-		"delta"		: 0.01,
-		"$connectors" : {
-			"rows" : $linSize,
-			"cols" : $linSize,
-			"data" : $connectorValues
-   		},
-EOF
-if ($model=~/hubbard/i) {	
-	my $potentialv=createPotentialV();
-	my $hubbardu=createHubbardU();
-print FOUT<<EOF;
-		"hubbardU" 	: $hubbardu,
-		"potentialV" 	: $potentialv,
-EOF
-}
-print FOUT<<EOF;
-		"solverDmrg": {
-			"version" : \"$version\",
-			"infiteLoopKeptStates"	: $infiniteKeptStates,
-			"outputfile"		: "data.txt",
-			"finiteLoops"		: $finiteLoops}
-   		}
-	}
-}
-EOF
-	print STDERR "File input.jsn has been written\n";
-	close(FOUT);
 }
 
 sub createConnectors
@@ -924,7 +830,6 @@ sub createObserverDriver
 	my $concurrencyName = getConcurrencyName();
 	my $parametersName = getParametersName();
 	my $pthreadsName = getPthreadsName();
-	my $geometryName = getGeometryName();
 	my $modelName = getModelName();
 	my $operatorsName = getOperatorsName();
 	my $chooseRealOrComplexForObservables = "typedef RealType FieldType;\n";
@@ -945,13 +850,12 @@ print OBSOUT<<EOF;
 #include "$modelName.h" 
 #include "$operatorsName.h" 
 #include "$concurrencyName.h" 
-#include "$geometryName.h" 
+#include "Geometry.h" 
 #include "CrsMatrix.h"
 #include "ReflectionSymmetryEmpty.h"
 #include "$pthreadsName.h" 
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
-#include "Connectors.h"
 #include "InternalProductOnTheFly.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
@@ -976,6 +880,7 @@ typedef  IoSimple MyIo;
 	typename ParametersModelType,
 	typename GeometryType,
 	typename ConcurrencyType,
+	typename IoInputType,
 	template<typename,typename,typename,template<typename> class> class ModelTemplate,
 	template<typename,typename,typename> class ModelHelperTemplate,
 	template<typename,typename> class InternalProductTemplate,
@@ -985,7 +890,7 @@ typedef  IoSimple MyIo;
 	typename MySparseMatrix
 >
 void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvolution,
-		ConcurrencyType& concurrency, Dmrg::SimpleReader& reader,const std::string& datafile)
+		ConcurrencyType& concurrency, IoInputType& io,const std::string& datafile)
 {
 	typedef ReflectionSymmetryEmpty<RealType,MySparseMatrix> ReflectionSymmetryType;
 	typedef Operator<RealType,MySparseMatrix> OperatorType;
@@ -1015,15 +920,10 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	ModelType model(mp,geometry);
 
 	 //! Read TimeEvolution if applicable:
-        // this doesn't work(?): typedef typename SolverType::TargettingStructureType TargettingStructureType;
-	typedef TimeStepStructure<OperatorType> TargettingStructureType;
-        TargettingStructureType tstStruct;
-        typedef TargetStructureParams<TargettingStructureType,ModelType> TargetStructureParamsType;
-        TargetStructureParamsType tsp(tstStruct,model);
+        typedef typename SolverType::TargettingType TargettingType;
+        typedef typename TargettingType::TargettingStructureType TargettingStructureType;
 
-        if (hasTimeEvolution) reader.load(tsp);
-
-	size_t n=mp.linSize;
+	size_t n=geometry.numberOfSites()/2;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
 	bool verbose = false;
 	Observer<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
@@ -1111,86 +1011,36 @@ int main(int argc,char *argv[])
 		throw std::runtime_error(s);
 	}
 	using namespace Dmrg;
-	//typedef CrsMatrix<MatrixElementType> MySparseMatrixReal;
+	
 	typedef   Dmrg::$concurrencyName<RealType> MyConcurrency; 
-	typedef Connectors<RealType> ConnectorsType;
+	
 	MyConcurrency concurrency(argc,argv);
 	
- 	//typedef std::vector<size_t> MyBlock;
+	//Setup the Geometry
+        typedef Geometry<RealType> GeometryType;
+	typedef IoSimple::In IoInputType;
+        IoInputType io(argv[1]);
+        GeometryType geometry(io);
+
+        //! Read the parameters for this run
 	typedef  $parametersName<RealType> ParametersModelType; 
-	//typedef  CrsMatrix<MatrixElementType> MySparseMatrix;
-	//typedef ReflectionSymmetryEmpty<MatrixElementType,MySparseMatrix> ReflectionSymmetryType;
-	//typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
-	//typedef Basis<MatrixElementType,MySparseMatrix> BasisType;
-	//typedef  $operatorsName<OperatorType,BasisType> OperatorsType;
-	typedef $geometryName<RealType,ConnectorsType> GeometryType;
-	
-	ParametersModelType mp;
-	ParametersDmrgSolver<FieldType> dmrgSolverParams;
-	SimpleReader reader(argv[1]);
-	reader.load(mp);
-	reader.load(dmrgSolverParams);	
+        ParametersModelType mp(io);
+        ParametersDmrgSolver<FieldType> dmrgSolverParams(io);
+
 	bool hasTimeEvolution=false;
         if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) hasTimeEvolution=true;
-
-
-EOF
-	if ($modelName =~ /febasedsc/i) {
-		$connectorsArgs= "mp.hoppingsOneSite,2,2";
-		$dof = 4;
-	} elsif ($modelName =~ /tjoneorbital/i) {
-		$connectorsArgs= "mp.jvalues,defaultConnectors\n";
-		$connectorsArgs2="mp.hoppings,defaultConnectors2";
-		$dof = 2;
-	} else  {
-		$connectorsArgs="mp.$connectors,defaultConnectors";
-		$dof = 2;
-	}
-	
-	if ($geometry=~/ladder$/i) {
-		$geometryArgs = "connectors,1,$legOfLadder"; 
-		print OBSOUT "\tstd::vector<RealType> defaultConnectors(2);\n";
-		print OBSOUT "\tdefaultConnectors[0] = mp.$connectors(0,2); // x-direction\n";
-		print OBSOUT "\tdefaultConnectors[1] = mp.$connectors(0,1); // y-direction\n";
-		if (defined($connectorsArgs2)) {
-			print OBSOUT "\tstd::vector<RealType> defaultConnectors2(2);\n";
-			print OBSOUT "\tdefaultConnectors2[0] = mp.jvalues(0,2); // x-direction\n";
-			print OBSOUT "\tdefaultConnectors2[1] = mp.jvalues(0,1); // y-direction\n";
-		}
-	} elsif ($geometry=~/1d/i) {
-		print OBSOUT "\tstd::vector<RealType> defaultConnectors(1);\n";
-		print OBSOUT "\tdefaultConnectors[0] = mp.$connectors(0,1); // x-direction\n";
-		if (defined($connectorsArgs2)) {
-			print OBSOUT "\tstd::vector<RealType> defaultConnectors2(1);\n";
-			print OBSOUT "\tdefaultConnectors2[0] = mp.jvalues(0,1); // x-direction\n";
-		}
-		$geometryArgs = "connectors";
-
-	} elsif ($geometry=~/ladderfeas/i) {
-		$geometryArgs = "connectors,1,2";
-	}
-print OBSOUT<<EOF;
-	//Setup the connectors
-	ConnectorsType connectors($dof,mp.linSize);
-	connectors.push($connectorsArgs);
-EOF
-	print OBSOUT "\tconnectors.push($connectorsArgs2);\n" if (defined($connectorsArgs2));
-	
-print OBSOUT<<EOF;
-	//Setup the Geometry
-	GeometryType geometry($geometryArgs);
 	
 	// FIXME: See if we need VectorWithOffsets sometimes
 	// FIXME: Does it make sense to have ModelHelperSu2 here sometimes?
 	typedef CrsMatrix<RealType> MySparseMatrixReal;
 	if (hasTimeEvolution)
-		mainLoop<ParametersModelType,GeometryType,MyConcurrency,$modelName,
+		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,
-			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,reader,dmrgSolverParams.filename);
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename);
 	else
-		mainLoop<ParametersModelType,GeometryType,MyConcurrency,$modelName,
+		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,
-			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,reader,dmrgSolverParams.filename);
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename);
 } // main
 
 EOF
@@ -1232,7 +1082,7 @@ sub askAboutFiniteLoops
 		return;
 	}
 	my ($log,$m);
-	my $x = $linSize-1;
+	my $x = $linSize/2-1;
 	my $counter=1;
 	while (1) {
 		$m = addFiniteLoop();
@@ -1267,116 +1117,6 @@ sub addFiniteLoop
 
 }
 
-sub createFreeSystemDriver
-{
-
-	system("cp freeSystem.cpp freeSystem.bak") if (-r "freeSystem.cpp");
-	open(FOUT,">freeSystem.cpp") or die "Cannot open file freeSystem.cpp for writing: $!\n";
-	my $license=getLicense();
-	my $concurrencyName = getConcurrencyName();
-	my $parametersName = getParametersName();
-	my $pthreadsName = getPthreadsName();
-	my $geometryName = getGeometryName();
-	my $modelName = getModelName();
-	my $operatorsName = getOperatorsName();
-	my $leg = 1;
-	my $orbitals = 1;
-	if ($modelName eq "ModelFeBasedSc") {
-		$leg = 2;
-		$orbitals = 2;
-	}
-	$leg =2 if ($geometryName=~/ladder/i);
-
-print FOUT<<EOF;
-#include "$parametersName.h"
-#include "SimpleReader.h"
-#include "$geometryName.h"
-#include "FreeSystem.h"
-#include "Connectors.h"
-
-int main(int argc,char *argv[])
-{
-	typedef double FieldType;
-	typedef Dmrg::$parametersName<FieldType> ParametersModelType;
-	typedef Dmrg::Connectors<FieldType> ConnectorsType;
-	typedef std::vector<size_t> BlockType;
-	typedef Dmrg::$geometryName<FieldType,BlockType,ConnectorsType> GeometryType;
-	typedef Dmrg::FreeSystem<FieldType,BlockType,ParametersModelType,GeometryType> FreeSystemType;
-	
-	size_t orbitals=$orbitals;
-	size_t dof=2*orbitals;
-	size_t leg=$leg;
-	bool verbose=false;
-	if (argc==3) verbose=true;
-	Dmrg::SimpleReader reader(argv[1]);
-	ParametersModelType mp;
-	
-	reader.load(mp);
-	
-	FreeSystemType freeSystem(mp,leg,orbitals,dof,verbose);
-	
-	std::cerr<<mp;
-	size_t x = mp.linSize;
-	//for (size_t x=4;x<=size_t(2*mp.linSize);x+=2) {
-		FieldType energy = freeSystem.energy(x);
-		std::cout<<"Energy for size="<<x<<" is "<<energy<<"\\n";
-		/*size_t gamma=0,gamma2=0;
-		for (size_t i=0;i<x;i++) {
-			 for (size_t j=0;j<x;j++) {
-			 	std::cout<<"DeltaCorrelation for i="<<i<<" and j="<<j<<" is ";
-				std::cout<<freeSystem.deltaCorrelation(i,gamma,j,gamma2,x)<<"\\n";
-			}
-		}*/
-		std::cout<<"**************************\\n\\n";
-		FieldType upe=0,downe=0;
-		psimag::Matrix<FieldType> matrix(x,x);
-		for (size_t i=0;i<x;i++) {
-			FieldType upe1=0,downe1=0;
-			for (size_t gamma=0;gamma<orbitals;gamma++) {
-				upe1 += freeSystem.cCorrelation(i,gamma,0,i,gamma,0,x);
-				downe1 += freeSystem.cCorrelation(i,gamma,1,i,gamma,1,x);
-			}
-			upe += upe1;
-			downe += downe1;
-			std::cout<<"ni for i="<<i<<" is "<<upe1<<" "<<downe1<<"\\n";
-			for (size_t j=0;j<x;j++) {
-				FieldType tmp = freeSystem.cCorrelation(i,0,0,j,0,0,x);
-				if (fabs(tmp)<1e-8) tmp = 0;
-				matrix(i,j) = tmp; 
-			}
-		}
-		std::cout<<"downe="<<downe<<" upe="<<upe<<"\\n";
-		std::cout<<"C-Correlation\\n";
-		std::cout<<matrix;	
-		
-		//std::cerr<<"Up electrons="<<upe<<" down="<<downe<<"\\n";
-		for (size_t i=0;i<x;i++) {
-			for (size_t j=0;j<x;j++) {
-				FieldType tmp = freeSystem.szCorrelation(i,j,x);
-				if (fabs(tmp)<1e-8) tmp = 0;
-				matrix(i,j) = tmp; 
-			}
-		}
-		std::cout<<"Sz-Correlation\\n";
-		std::cout<<matrix;
-		
-		for (size_t i=0;i<x;i++) {
-			for (size_t j=0;j<x;j++) {
-				FieldType tmp = freeSystem.ninj(i,j,x);
-				if (fabs(tmp)<1e-8) tmp = 0;
-				matrix(i,j) = tmp; 
-			}
-		}
-		std::cout<<"ninj-Correlation\\n";
-		std::cout<<matrix;
-	//}
-}
-
-EOF
-close(FOUT);
-print "File freeSystem.cpp has been written.\n";
-}
-
 sub getParametersName
 {
 	my $parametersName="UNKNOWN";
@@ -1407,11 +1147,11 @@ sub getGeometryName
 {
 	my $geometryName = "UNKNOWN";
 	if ($geometry=~/1d/i) {
-		$geometryName = "Geometry1D";
+		$geometryName = "chain";
 	} elsif ($geometry=~/ladder$/i) {
-		$geometryName = "GeometryLadder";
+		$geometryName = "ladder";
 	} elsif ($geometry=~/ladderfeas/i) {
-		$geometryName = "GeometryLadderFeAs";
+		$geometryName = "ladderx";
 	}
 	return $geometryName;
 }

@@ -321,35 +321,35 @@ namespace Dmrg {
 		//! Full hamiltonian from operator matrices cm
 		void calcHamiltonian(SparseMatrixType &hmatrix,std::vector<OperatorType> const &cm,Block const &block) const
 		{
-			int i,j,n=block.size();
-			int type;
+			size_t n=block.size();
 			SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
-			int smax,emin;
-			
-			geometry_.findExtremes(smax,emin,block);
-			hmatrix.makeDiagonal(cm[0].data.rank());
 
-			for (i=0;i<n;i++) {
+			hmatrix.makeDiagonal(cm[0].data.rank());
+			
+			//! exchange
+			for (size_t i=0;i<n;i++) {
 				SparseMatrixType sPlusOperatorI = cm[i].data; //S^+_i
 				SparseMatrixType szOperatorI =cm[i+n].data; //S^z_i
-				for (j=0;j<n;j++) {
-					
-					// 0.5*(S^+_i S^-_j + S^-_i S^+_j)
-					type = geometry_.calcConnectorType(block[i],block[j]);
-					SparseElementType tmp = geometry_.calcConnectorValue(type,block[i],0,block[j],0,smax,emin);
-					
-					if (tmp==static_cast<SparseElementType>(0)) continue;
-					
-					SparseMatrixType sPlusOperatorJ = cm[j].data;//S^+_j
-					SparseMatrixType tJ, tI;
-					transposeConjugate(tJ,sPlusOperatorJ);
-					transposeConjugate(tI,sPlusOperatorI);
-					hmatrix += 0.5*(sPlusOperatorI*tJ);
-					hmatrix += 0.5*(tI*sPlusOperatorJ);
-
-					// S^z_i S^z_j
-					SparseMatrixType szOperatorJ=cm[j+n].data; //S^z_j
-					hmatrix += szOperatorI*szOperatorJ;
+				for (size_t j=0;j<n;j++) {
+					for (size_t term=0;term<geometry_.terms();term++) {
+						for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
+							std::pair<size_t,size_t> edofs = LinkProductType::edofs(dofs,term);
+							RealType tmp = geometry_(block[i],edofs.first,block[j],edofs.second,term);
+						
+							if (i==j || tmp==0.0) continue;
+			
+							SparseMatrixType sPlusOperatorJ = cm[j].data;//S^+_j
+							SparseMatrixType tJ, tI;
+							transposeConjugate(tJ,sPlusOperatorJ);
+							transposeConjugate(tI,sPlusOperatorI);
+							hmatrix += 0.5*tmp*(sPlusOperatorI*tJ);
+							hmatrix += 0.5*tmp*(tI*sPlusOperatorJ);
+		
+							// S^z_i S^z_j
+							SparseMatrixType szOperatorJ=cm[j+n].data; //S^z_j
+							hmatrix += tmp*szOperatorI*szOperatorJ;
+						}
+					}
 				}
 			}
 		}

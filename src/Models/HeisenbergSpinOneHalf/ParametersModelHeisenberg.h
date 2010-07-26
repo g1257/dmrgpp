@@ -82,70 +82,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PARAMETERSMODELHEISENBERG_H
 #define PARAMETERSMODELHEISENBERG_H
 #include "Utils.h"
-#include "SimpleReader.h"
 
 namespace Dmrg {
 	//! Heisenberg Model Parameters
 	template<typename Field>
 	struct ParametersModelHeisenberg {
-
-		// Matrix of connector values, connectors(i,j) 
-		// indicate jvalues between sites i and j
-		psimag::Matrix<Field> jvalues; 
-		
-		// total number of sites in the system
-		size_t linSize;
-		
+		// no connectors here, connectors are handled by the geometry
+		template<typename IoInputType>
+		ParametersModelHeisenberg(IoInputType& io) { }
 	};
-
-
-	//! Operator to read Model Parameters from JSON file.
-	/* template<typename FieldType>
-	ParametersModelHeisenberg<FieldType>&
-	operator <= (ParametersModelHeisenberg<FieldType>& parameters, const dca::JsonReader& reader) 
-	{
-
-		const dca::JsonAccessor<std::string>& dmrg(reader["programSpecific"]["DMRG"]);
-		parameters.linSize <= dmrg["linSize"];
-		parameters.jvalues.resize(parameters.linSize,parameters.linSize);
-		parameters.jvalues  <= dmrg["jvalues"]["data"];
-		// divide parameters.jvalues by 8
-		//parameters.jvalues /= static_cast<FieldType>(8.0);
-		return parameters;
-	} */
-	
-	//! Operator to read Model Parameters from inp file.
-	template<typename FieldType>
-	ParametersModelHeisenberg<FieldType>&
-	operator <= (ParametersModelHeisenberg<FieldType>& parameters,  SimpleReader& reader) 
-	{
-
-		reader.read(parameters.linSize);
-		
-		
-		reader.read(parameters.jvalues);
-		if (parameters.jvalues.n_row()!=parameters.linSize) {
-			throw std::runtime_error("ParametersModelHeisenberg<FieldType>: operator <= : jvalues size incorrect\n");
-		}
-		// divide parameters.jvalues by 8
-		//parameters.jvalues /= static_cast<FieldType>(8.0);
-		return parameters;
-	} 
-	
-	//! Function that prints model parameters to stream os
-	template<typename FieldType>
-	void print(ParametersModelHeisenberg<FieldType>& parameters,std::ostream &os)
-	{
-		os<<"parameters.linSize="<<parameters.linSize<<"\n";
-		utils::matrixPrint(parameters.jvalues,os);
-	}
 	
 	//! Function that prints model parameters to stream os
 	template<typename FieldType>
 	std::ostream& operator<<(std::ostream &os,const ParametersModelHeisenberg<FieldType>& parameters)
 	{
-		os<<"parameters.linSize="<<parameters.linSize<<"\n";
-		utils::matrixPrint(parameters.jvalues,os);
 		return os;
 	}
 } // namespace Dmrg

@@ -85,13 +85,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "VerySparseMatrix.h"
 #include "IoSimple.h"
-#include "Basis.h"
+//#include "Basis.h"
+#include "HamiltonianConnection.h"
 
 namespace Dmrg {
 	//! Common functions for various models
 	
 	template<typename ModelHelperType,
-	typename SparseMatrixType,
+	typename SparseMatrixType, // <-- kill this template, deduced from ModelHelper FIXME
  	typename DmrgGeometryType,
 	typename LinkProductType,
 	typename SharedMemoryType>
@@ -100,7 +101,10 @@ namespace Dmrg {
 			typedef typename ModelHelperType::RealType RealType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			typedef VerySparseMatrix<SparseElementType> VerySparseMatrixType;
-			
+			typedef typename LinkProductType::LinkProductStructType LinkProductStructType;
+			typedef HamiltonianConnection<DmrgGeometryType,ModelHelperType,
+					LinkProductType> HamiltonianConnectionType;
+
 			ModelCommon(int DEGREES_OF_FREEDOM,const DmrgGeometryType& dmrgGeometry)
 			: dof_(DEGREES_OF_FREEDOM),dmrgGeometry_(dmrgGeometry)
 			{
@@ -139,28 +143,17 @@ namespace Dmrg {
 					const ModelHelperType& modelHelper) const
 			{
 				size_t n=modelHelper.basis1().block().size();
-				int smax,emin;
-				
-				dmrgGeometry_.findExtremes(smax,emin,modelHelper.basis1().block());
-				
 				
 				VerySparseMatrixType matrix2(matrix.rank());
 				
+				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
+				
 				for (size_t i=0;i<n;i++) {
 					for (size_t j=0;j<n;j++) {
-						//if (modelHelper.basis1().block()[i]>modelHelper.basis1().block()[j]) continue; // do not count twice
-						for (size_t dof1=0;dof1<dof_;dof1++) {
-							for (size_t dof2=0;dof2<dof_;dof2++) {
-								//if (i==j) continue; 
-								SparseMatrixType matrixBlock(matrix.rank(),matrix.rank());
-								int res = hamiltonianConnection(i,dof1,j,dof2,smax,emin,
-										&matrixBlock,modelHelper);
-								if (res<0) continue;
-								VerySparseMatrixType vsm(matrixBlock);
-								//matrixBlock.clear();
-								matrix2+=vsm;
-							}
-						}
+						SparseMatrixType matrixBlock(matrix.rank(),matrix.rank());
+						if (!hc.compute(i,j,&matrixBlock)) continue;
+						VerySparseMatrixType vsm(matrixBlock);
+						matrix2+=vsm;
 					}
 				}
 				matrix += matrix2;
@@ -172,23 +165,15 @@ namespace Dmrg {
 				const ModelHelperType& modelHelper) const
 			{
 				size_t n=modelHelper.basis1().block().size();
-				int smax,emin;
 
 				SparseMatrixType matrix;
 
-				dmrgGeometry_.findExtremes(smax,emin,modelHelper.basis1().block());
-
-				typename LinkProductType::LinkProductStructType lps;
-
+				LinkProductStructType lps;
+				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
+				
 				for (size_t i=0;i<n;i++) {
 					for (size_t j=0;j<n;j++) {
-						for (size_t dof1=0;dof1<dof_;dof1++) {
-							for (size_t dof2=0;dof2<dof_;dof2++) { 	
-								if (i==j) continue; 
-								hamiltonianConnection(i,dof1,j,dof2,smax,emin,0,modelHelper,&lps);
-								
-							}
-						}
+						hc.compute(i,j,0,&lps);
 					}
 				}
 				size_t total = lps.isaved.size();
@@ -199,7 +184,7 @@ namespace Dmrg {
 
 			}
 			
-			//! Return H, the hamiltonian of the FeAs model for basis1 and partition m consisting of the external product
+			//! Return H, the hamiltonian of the model for basis1 and partition m consisting of the external product
 			//! of basis2 \otimes basis3
 			//! Note: Used only for debugging purposes
 			void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const
@@ -213,11 +198,14 @@ namespace Dmrg {
 				crsMatrixToFullMatrix(fm,matrix);
 				std::vector<RealType> e(matrix.rank());
 				utils::diag(fm,e,'N');
-				
+				std::cerr<<"eSystem[0]="<<e[0]<<"\n";
 	
 				//! contribution to Hamiltonian from current envirnoment
 				modelHelper.calcHamiltonianPart(matrixBlock,false);
 				matrix += matrixBlock;
+				crsMatrixToFullMatrix(fm,matrixBlock);
+				utils::diag(fm,e,'N');
+				std::cerr<<"eEnv[0]="<<e[0]<<"\n";
 				matrixBlock.clear();
 	
 				VerySparseMatrixType vsm(matrix);
@@ -230,54 +218,6 @@ namespace Dmrg {
 		private:
 			size_t dof_;
 			const DmrgGeometryType& dmrgGeometry_;
-			
-			int hamiltonianConnection(size_t i,size_t dof1, size_t j,size_t dof2,
-					size_t smax,
-     					size_t emin,
-					SparseMatrixType* matrixBlock,
-					const ModelHelperType& modelHelper,
-     					typename LinkProductType::LinkProductStructType* lps=0) const
-			{
-				int flag = -1;
-				for (size_t connectionType=0;connectionType<dmrgGeometry_.connectorValues();connectionType++) {
-					int type = dmrgGeometry_.calcConnectorType(modelHelper.basis1().block()[i],
-							modelHelper.basis1().block()[j]);
-					SparseElementType tmp = dmrgGeometry_.calcConnectorValue(type,modelHelper.basis1().block()[i],
-							dof1,modelHelper.basis1().block()[j],dof2,smax,emin,connectionType);
-
-					if (tmp==0.0) continue;
-					
-					type = dmrgGeometry_.calcConnectorType(modelHelper.basis1().block()[i],
-									modelHelper.basis1().block()[j],modelHelper.basis2().block());	
-					if (type==DmrgGeometryType::SystemSystem  ||
-						type==DmrgGeometryType::EnvironEnviron) continue; // already included
-					flag += (connectionType + 1);
-					
-					if (lps!=0) {
-						lps->isaved.push_back(i);
-						lps->jsaved.push_back(j);
-						lps->dof1saved.push_back(dof1);
-						lps->dof2saved.push_back(dof2);
-						lps->typesaved.push_back(type);
-						lps->tmpsaved.push_back(tmp);
-						lps->connectionsaved.push_back(connectionType);
-					} else {
-						LinkProductType::calcBond(i,dof1,j,dof2,type,tmp,*matrixBlock,
-								modelHelper,connectionType);
-					}
-					
-				}
-				return flag;
-			}
-			
-// 			void saveToDisk(VerySparseMatrix<MatrixElementType>& vsm,const std::string& rootname,size_t counter) const
-// 			{
-// 				typename IoSimple::Out outHandle(rootname+utils::ttos(counter)+".txt",0);
-// 				VerySparseMatrix<MatrixElementType> vsmPure(vsm,1e-8);
-// 				vsm.clear();
-// 				vsmPure.saveToDisk(outHandle);
-// 				vsmPure.clear();
-// 			}
 			
 	};     //class ModelCommon
 } // namespace Dmrg

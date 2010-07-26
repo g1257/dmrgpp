@@ -213,12 +213,6 @@ namespace Dmrg {
 			}
 		}
 
-		//! set block of sites S X Y and E (see paper for geometry description)
-		void setBlocksOfSites(Block &S,std::vector<Block> &X,std::vector<Block> &Y,Block &E) const 
-		{
-			geometry_.setBlocksOfSites(S,X,Y,E);
-		}
-
 		psimag::Matrix<SparseElementType> getOperator(const std::string& what,size_t orbital=0,size_t spin=0) const
 		{
 			Block block;
@@ -506,22 +500,27 @@ namespace Dmrg {
 		{
 			size_t n=block.size();
 			SparseMatrixType tmpMatrix,tmpMatrix2;
-			int smax,emin;
 
-			geometry_.findExtremes(smax,emin,block);
 			hmatrix.makeDiagonal(cm[0].data.rank());
-
+			
 			for (size_t i=0;i<n;i++) {
 				//! hopping part
 				for (size_t j=0;j<n;j++) {
-					int type = geometry_.calcConnectorType(block[i],block[j]);
-					for (size_t dof1=0;dof1<dof();dof1++) {
-						for (size_t dof2=0;dof2<dof();dof2++) {
-							SparseElementType tmp = geometry_.calcConnectorValue(type,block[i],dof1,
-									block[j],dof2,smax,emin);
-
+					for (size_t term=0;term<geometry_.terms();term++) {
+						for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
+							std::pair<size_t,size_t> edofs = LinkProductType::edofs(dofs,term);
+							RealType tmp = geometry_(block[i],edofs.first,block[j],edofs.second,term);
+						
 							if (i==j || tmp==0.0) continue;
 
+							size_t spin = dofs/4;
+							size_t xtmp = (spin==0) ? 0 : 4;
+							xtmp = dofs - xtmp;
+							size_t orb1 = xtmp/2;
+							size_t orb2 = (xtmp & 1);
+							
+							size_t dof1 = orb1 + spin*2;
+							size_t dof2 = orb2 + spin*2;
 							transposeConjugate(tmpMatrix2,cm[dof2+j*dof()].data);
 							multiply(tmpMatrix,cm[dof1+i*dof()].data,tmpMatrix2);
 							multiplyScalar(tmpMatrix2,tmpMatrix,tmp);
@@ -690,28 +689,6 @@ namespace Dmrg {
 			utils::diag(fullm2,eigs,'V');
 			std::cout<<str<<" diagTest size="<<fullm.rank()<<" eigs[0]="<<eigs[0]<<"\n";
 			std::cout<<fullm;
-		}
-
-		void saveConnectionToDisk(VerySparseMatrix<SparseElementType>& vsm,const ModelHelperType& modelHelper,
-					 const std::string& rootname) const
-		{
-			{
-				typename IoSimple::Out outHandle(rootname+"0.txt",0);
-				vsm.saveToDisk(outHandle);
-			} 	// this scope is so that the output file gets closed (DO NOT REMOVE SCOPE!!)
-
-			vsm.clear(); 
-			std::cerr<<"Wrote left/right block to disk\n";
-			utils::memoryUsage(std::cerr);
-			//! contribution to Hamiltonian from connection system-environment
-
-			size_t counter = this->addHamiltonianConnection(vsm,rootname,1,modelHelper);
-			utils::memoryUsage(std::cerr);
-
-			// load matrix
-			std::cerr<<"Finished crs-->vsm\n";
-
-			this->sumDiskVsms(vsm,0,counter,rootname,modelHelper.size());
 		}
 	};     //class ModelFeBasedSc
 

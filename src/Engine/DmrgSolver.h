@@ -129,7 +129,8 @@ namespace Dmrg {
 		typedef typename DensityMatrixType::BuildingBlockType TransformType;
 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef DmrgSerializer<RealType,VectorWithOffsetType,TransformType,MyBasis,FermionSign> DmrgSerializerType;
-
+		typedef typename ModelType::GeometryType GeometryType;
+		
 		enum {SAVE_TO_DISK=1,DO_NOT_SAVE=0};
 		enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
@@ -178,7 +179,7 @@ namespace Dmrg {
 			io_.print(s);
 		}
 
-		void main()
+		void main(const GeometryType& geometry)
 		{
 			BlockType S,E;
 			std::vector<BlockType> X,Y;
@@ -191,8 +192,7 @@ namespace Dmrg {
 				
 			
 			io_.print(model_);
-
-			model_.setBlocksOfSites(S,X,Y,E); //! split sites into system, environment, X and Y
+			geometry.split(S,X,Y,E);
 			for (size_t i=0;i<X.size();i++) 
 				sitesIndices_.push_back(X[i]);
 			for (size_t i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);

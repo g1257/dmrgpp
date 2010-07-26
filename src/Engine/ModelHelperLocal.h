@@ -138,12 +138,6 @@ namespace Dmrg {
 
 		const BasisWithOperatorsType& basis3() const  { return basis3_; }
 
-		const SparseMatrixType& getTcOperator(int i,size_t type) const
-		{
-			if (type==System) return basis2tc_[i];
-			return basis3tc_[i];
-		}		
-
 		const SparseMatrixType& getReducedOperator(char modifier,size_t i,size_t sigma,size_t type) const
 		{
 			size_t ii = i*numberOfOperators_+sigma;
@@ -366,9 +360,12 @@ namespace Dmrg {
 				hamiltonian = basis3_.hamiltonian();
 				//ns = 
 			}
-
+			std::cerr<<__FILE__<<":"<<__LINE__<<":\n";
+			psimag::Matrix<SparseElementType> fullm;
+			crsMatrixToFullMatrix(fullm,hamiltonian);
+			std::cerr<<fullm;
 			matrixBlock.resize(bs);
-
+			
 			int counter=0;
 			for (size_t i=offset;i<basis1_.partition(m+1);i++) {
 				matrixBlock.setRow(i-offset,counter);
@@ -434,6 +431,12 @@ namespace Dmrg {
 		size_t numberOfOperators_;
 		//RightLeftLocalType rightLeftLocal_;
 		
+		const SparseMatrixType& getTcOperator(int i,size_t type) const
+		{
+			if (type==System) return basis2tc_[i];
+			return basis3tc_[i];
+		}
+		
 		void createBuffer() 
 		{
 			size_t ns=basis2_.size();
@@ -468,7 +471,10 @@ namespace Dmrg {
 			}
 		}
 		
-		
+		/*void findExtremes(int& smax,int& emin,BlockType const &B) const
+		{
+			findExtremes(smax,emin,B,systemBlock_);
+		}*/
 		
 	}; // class ModelHelperLocal
 } // namespace Dmrg

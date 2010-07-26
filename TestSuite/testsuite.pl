@@ -595,7 +595,7 @@ sub hookExecute
 
 sub runDmrg
 {
-	my ($inputFile) = @_;
+	my ($inputFile,$raw) = @_;
 	my ($specFile, $specKey) = ("", "");
 	($specFile, $specKey) = getSpecFileAndKey() if(!$noModel);
 	my $configFile = "configure.pl";
@@ -616,7 +616,7 @@ sub runDmrg
 		}
 	}
 
-	my $arg = "$executable $inputFile >& /dev/null";
+	my $arg = "$executable $inputFile >& $raw";
 	grep {s/&//} $arg if($verbose);
 	
 	print "Running dmrg test...\n";
@@ -879,4 +879,10 @@ sub removeFiles
 	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
 	system("rm @files >& /dev/null");
+<<<<<<< HEAD
 }
+=======
+	
+	print "All temporary files were successfully removed.\n";
+}
+>>>>>>> b1c36f8c4f259ca0cd0779eaa027ca5e9a4eb74e

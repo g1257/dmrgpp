@@ -119,8 +119,7 @@ namespace Dmrg {
 			numberOfOperators_(basis2.numberOfOperatorsPerSite()),
 			nOrbitals_(nOrbitals),	
 			su2reduced_(m,basis1,basis2,basis3,nOrbitals)
-		{
-		}
+		{}
 
 		static bool isSu2() { return true; }
 

@@ -1,40 +1,40 @@
-linSize 8
-hoppings 8 8
-0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0
- 1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0
- 0.0 1.0 0.0 1.0 0.0 0.0 0.0 0.0
- 0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0
- 0.0 0.0 0.0 1.0 0.0 1.0 0.0 0.0
- 0.0 0.0 0.0 0.0 1.0 0.0 1.0 0.0
- 0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0
- 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
+TotalNumberOfSites=16 
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
 
-hubbardU	8 0 0 0 0 0 0 0 0
-potentialV	 16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-density 1.0
-options hasQuantumNumbers,wft,nosu2,TimeStepTargetting
-version 6ce41a4b7dfa08978e53fa756f7f139e2fb18251
-outputfile		data9.txt
-InfiniteLoopKeptStates	200 
+hubbardU	16 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+		0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+density=1.0
+SolverOptions=hasQuantumNumbers,wft,nosu2,TimeStepTargetting
+Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
+OutputFile=data9.txt
+InfiniteLoopKeptStates=200 
 FiniteLoops 12  4 200 1 -4 200 1 4 200 1 -4 200 1 
 		4 200 1 -4 200 1 4 200 1 -4 200 1
 		4 200 1 -4 200 1 4 200 1 -4 200 1
 
-QNS 2 0.5 0.5
-FILENAME tst9.txt
-TIMESTEP 0.1
-MAXTIMES  5
-ADVANCEEACH 4 
-SITE  1 10
-STARTINGLOOP 1 0 
-TIMEEVOLUTION raw 
-RAW_MATRIX 4 4
+TargetQuantumNumbers 2 0.5 0.5
+
+TSPFilename=tst9.txt
+TSPTau=0.1
+TSPTimeSteps=5
+TSPAdvanceEach=4
+TSPSites 1 10
+TSPLoops 1 0
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
 0.0    0.0    0.0   0.0
 1.0    0.0    0.0   0.0
 0.0    0.0    0.0   0.0 
 0.0    0.0    1.0   0.0 
-FERMIONSIGN -1
+FERMIONSIGN=-1
 JMVALUES 0 0
-angularFactor 1
+AngularFactor=1
 
    

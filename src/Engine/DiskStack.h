@@ -135,10 +135,9 @@ namespace Dmrg {
 
 			DataType top()
 			{
-				DataType dt("bogusName");
-				debugPrint("top label_="+label_+" stack_.top="+utils::ttos(stack_.top()));
 				ioIn_.open(label_);
-				dt.load(ioIn_,stack_.top());
+				DataType dt(ioIn_,"",stack_.top());
+				debugPrint("top label_="+label_+" stack_.top="+utils::ttos(stack_.top()));
 				ioIn_.close();
 				return dt;
 			}

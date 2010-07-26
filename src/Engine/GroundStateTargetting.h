@@ -89,14 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename ModelType>
-	inline TargetStructureParams<int,ModelType>&
-	operator<=(TargetStructureParams<int,ModelType>& tsp,SimpleReader& reader)
-	{
-		// Nothing to see here
-		return tsp;
-	}
-	
 	template<
 			template<typename,typename> class LanczosSolverTemplate,
   			template<typename,typename> class InternalProductTemplate,
@@ -125,7 +117,7 @@ namespace Dmrg {
 			typedef typename BasisType::BlockType BlockType;
 			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 			typedef VectorType TargetVectorType;
-			typedef int TargettingStructureType;
+			typedef TargetStructureParams<ModelType> TargettingStructureType;
 			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			
 			enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,

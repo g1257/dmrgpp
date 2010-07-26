@@ -434,7 +434,25 @@ C           Wisniewski, J. A., (SNLA)
 		
 	}
 	
-	
+	//! Find smax and emin such that:
+	//! smax = maximum(B intersection sBlock)
+	//! emin = minimum(B intersection envBlock)
+	void findExtremes(size_t& smax,size_t& emin,std::vector<size_t> const &B,std::vector<size_t> const &sBlock)
+	{
+		smax = 0;
+		emin = 1000;
+		int r;
+		for (size_t i=0;i<B.size();i++) {
+			r = utils::isInVector(sBlock,B[i]);
+			if (r<0) { //it's in the environment
+				if (B[i]<emin) emin=B[i];
+			} else { //it's in the system
+				if (B[i]>smax) smax=B[i];
+			}
+		}
+		
+	}
+
 	template<class T>
 	void transposeConjugate(psimag::Matrix<T>& m2,const psimag::Matrix<T>& m)
 	{

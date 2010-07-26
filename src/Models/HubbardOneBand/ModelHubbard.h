@@ -308,11 +308,11 @@ namespace Dmrg {
 
 			RealType x=0;
 			switch (type) {
-				case DmrgGeometryType::EnvironEnviron:
+				case ProgramGlobals::ENVIRON_ENVIRON:
 					x=modelParameters_.hubbardU[dmrgGeometry_.findReflection(ind)];
 					break;
 
-				case DmrgGeometryType::SystemSystem:
+				case ProgramGlobals::SYSTEM_SYSTEM:
 					x=modelParameters_.hubbardU[ind];
 					break;
 			}
@@ -328,11 +328,11 @@ namespace Dmrg {
 			int totalS=modelParameters_.linSize;
 			RealType x=0;
 			switch (type) {
-				case DmrgGeometryType::EnvironEnviron:
+				case ProgramGlobals::ENVIRON_ENVIRON:
 					x=modelParameters_.potentialV[dmrgGeometry_.findReflection(ind)+sigma*totalS];
 					break;
 
-				case DmrgGeometryType::SystemSystem:
+				case ProgramGlobals::SYSTEM_SYSTEM:
 					x=modelParameters_.potentialV[ind+sigma*totalS];
 					break;
 			}
@@ -362,16 +362,6 @@ namespace Dmrg {
 			SparseMatrixType creationMatrix(cm);
 			return 	creationMatrix;
 		}
-
-		//! find all states in the natural basis for a block of n sites
-		/*void setNaturalBasisOld(std::vector<typename HilbertSpaceHubbardType::HilbertState>  &basis,int n) const
-		{
-			typename HilbertSpaceHubbardType::HilbertState a=0;
-			typename HilbertSpaceHubbardType::HilbertState total = (1<<n);
-			
-			if (dof()==2) total *= total;
-			for (a=0;a<total;a++) basis.push_back(a);
-		}*/
 
 		//! find quantum numbers for each state of this basis, 
 		//! considered symmetries for this model are: n_up and n_down
@@ -469,33 +459,34 @@ namespace Dmrg {
 		//! Full hamiltonian from creation matrices cm
 		void calcHamiltonian(SparseMatrixType &hmatrix,std::vector<OperatorType> const &cm,Block const &block) const
 		{
-			int i,j,n=block.size();
-			int type,sigma;
+			size_t n=block.size();
+			//int type,sigma;
 			SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
-			int smax,emin;
-
-			dmrgGeometry_.findExtremes(smax,emin,block);
-			hmatrix.makeDiagonal(cm[0].data.rank());
-
-			for (i=0;i<n;i++) {
-				//! hopping part
-				for (j=0;j<n;j++) {
-					
-					type = dmrgGeometry_.calcConnectorType(block[i],block[j]);
-					RealType tmp = dmrgGeometry_.calcConnectorValue(type,block[i],0,block[j],0,smax,emin);
-					
-					if (i==j || tmp==0.0) continue;
 			
-					for (sigma=0;sigma<dof();sigma++) {
-						transposeConjugate(tmpMatrix2,cm[sigma+j*dof()].data);
-						multiply(tmpMatrix,cm[sigma+i*dof()].data,tmpMatrix2);
-						multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
-						hmatrix += tmpMatrix2;
+			hmatrix.makeDiagonal(cm[0].data.rank());
+			size_t linSize = dmrgGeometry_.numberOfSites();
+			
+			for (size_t i=0;i<n;i++) {
+				//! hopping part
+				for (size_t j=0;j<n;j++) {
+					for (size_t term=0;term<dmrgGeometry_.terms();term++) {
+						for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
+							std::pair<size_t,size_t> edofs = LinkProductType::edofs(dofs,term);
+							RealType tmp = dmrgGeometry_(block[i],edofs.first,block[j],edofs.second,term);
+						
+							if (i==j || tmp==0.0) continue;
+				
+							size_t sigma = dofs;
+							transposeConjugate(tmpMatrix2,cm[sigma+j*dof()].data);
+							multiply(tmpMatrix,cm[sigma+i*dof()].data,tmpMatrix2);
+							multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
+							hmatrix += tmpMatrix2;
+						}
 					}
 				}
 				// onsite U hubbard 
 				//n_i up
-				sigma =0; // up sector
+				size_t sigma =0; // up sector
 				transposeConjugate(tmpMatrix,cm[sigma+i*dof()].data);
 				multiply(niup,tmpMatrix,cm[sigma+i*dof()].data);
 				//n_i down
@@ -504,19 +495,19 @@ namespace Dmrg {
 				multiply(nidown,tmpMatrix,cm[sigma+i*dof()].data);
 				 
 				multiply(tmpMatrix,niup,nidown);
-				type = dmrgGeometry_.calcConnectorType(block[i],block[i]);
-				RealType tmp = computeHubbardUValue(type,block[i],smax,emin);
+				//type = dmrgGeometry_.calcConnectorType(block[i],block[i]);
+				RealType tmp = modelParameters_.hubbardU[block[i]]; //computeHubbardUValue(type,block[i],smax,emin);
 				multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
 
 				hmatrix += tmpMatrix2;
 
 				// V_iup term
-				tmp = computeOnsitePotential(type,block[i],0,smax,emin);
+				tmp = modelParameters_.potentialV[block[i]+0*linSize]; //computeOnsitePotential(type,block[i],0,smax,emin);
 				multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
 				hmatrix += tmpMatrix;
 
 				// V_idown term
-				tmp = computeOnsitePotential(type,block[i],1,smax,emin);
+				tmp = modelParameters_.potentialV[block[i]+1*linSize]; //computeOnsitePotential(type,block[i],1,smax,emin);
 				multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
 				hmatrix += tmpMatrix;
 			}
