@@ -133,7 +133,6 @@ namespace Dmrg {
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::MyBasisWithOperators MyBasisWithOperators;
-		typedef SharedMemoryTemplate<LinkProductType> SharedMemoryType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		ModelHeisenberg(ParametersModelHeisenberg<RealType> const &mp,GeometryType const &geometry) 

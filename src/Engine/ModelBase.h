@@ -107,8 +107,10 @@ namespace Dmrg {
 			typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 			typedef Basis<RealType,SparseMatrixType> MyBasis;
 			typedef BasisWithOperators<OperatorsType,ConcurrencyType> MyBasisWithOperators;
-			typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelCommonType;
+			typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,
+   					LinkProductType,SharedMemoryTemplate> ModelCommonType;
 			typedef DmrgGeometryType GeometryType;
+			typedef typename ModelCommonType::SharedMemoryType SharedMemoryType;
 			
 			ModelBase(int DEGREES_OF_FREEDOM,const DmrgGeometryType& dmrgGeometry) :
 					modelCommon_(DEGREES_OF_FREEDOM,dmrgGeometry)

@@ -76,161 +76,55 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file LinkProductHubbardOneBand.h
  *
- *  A class to represent a generic solver for the Dmrg method
+ *  FIXME
  *
  */
 #ifndef LINK_PRODUCT_HubbardOneBand_H
 #define LINK_PRODUCT_HubbardOneBand_H
 
-#include "LinkProductStruct.h"
+#include "Utils.h"
 
 namespace Dmrg {
-	
-	
-	
+
 	template<typename ModelHelperType>
 	class LinkProductHubbardOneBand {
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			
+			typedef std::pair<size_t,size_t> PairType;
+
 		public:
 			typedef typename ModelHelperType::RealType RealType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 			
-			LinkProductHubbardOneBand(size_t dof,
-				   const ModelHelperType& modelHelper,
-				   const LinkProductStructType& lps,
-				    std::vector<SparseElementType>& x,
-				   const std::vector<SparseElementType>& y) : dof_(dof),modelHelper_(modelHelper),lps_(lps),
-					x_(x),y_(y)
+			static void setLinkData(
+					size_t dofs,
+     					bool isSu2,
+					size_t& fermionOrBoson,
+					PairType& ops,
+     					std::pair<char,char>& mods,
+					size_t& angularMomentum,
+     					RealType& angularFactor,
+					size_t& category)
 			{
+				fermionOrBoson = ProgramGlobals::FERMION;
 				
+				ops = PairType(dofs,dofs);
+				angularFactor = 1;
+				if (dofs==1) angularFactor = -1;
+				angularMomentum = 1;
+				category = dofs;
 			}
 			
-			void thread_function_(size_t threadNum,size_t blockSize,pthread_mutex_t* myMutex)
+			static void valueModifier(SparseElementType& value,size_t dofs,bool isSu2)
 			{
-				std::vector<SparseElementType> xtemp(x_.size(),0);
-				//for (size_t i=0;i<xtemp.size();i++) xtemp[i]=0;
-				for (size_t p=0;p<blockSize;p++) {
-					size_t ix = threadNum * blockSize + p;
-					size_t i=lps_.isaved[ix];
-					size_t j=lps_.jsaved[ix];
-					//size_t dof1=lps_.dof1saved[ix];
-					//size_t dof2=lps_.dof2saved[ix];
-					size_t type=lps_.typesaved[ix];
-					size_t term = lps_.termsaved[ix];
-					size_t dofs = lps_.dofssaved[ix];
-					SparseElementType tmp=lps_.tmpsaved[ix];
-					linkProduct(xtemp,y_,i,j,type,tmp,modelHelper_,term,dofs);
-					
-				}	
-				if (myMutex) pthread_mutex_lock( myMutex);
-				for (size_t i=0;i<x_.size();i++) x_[i]+=xtemp[i];
-				if (myMutex) pthread_mutex_unlock( myMutex );
-				
-			} 
-			
-			//! Adds a tight-binding bond between system and environment
-			static size_t calcBond(size_t i,size_t j,size_t type,
-				SparseElementType  &val,
-				SparseMatrixType &matrixBlock,
-				const ModelHelperType& modelHelper,size_t term,size_t dofs)
-			{
-				size_t sigma = dofs;
-				size_t sigma2 = dofs;
-				//if (sigma!=sigma2) return 0;
-				//int const SystemEnviron=1,EnvironSystem=2;
-				SparseMatrixType A,B;
-				//int k=sigma + i*pSprime.dof();
-				//int k2=sigma2 + j*pSprime.dof();
-				int offset = modelHelper.basis2().block().size();
-				size_t angularMomentum=1;
-				RealType angularFactor  = 1.0;
-				if (sigma==1) angularFactor  = -1.0;
-				
-				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
-					
-// 					A=modelHelper.basis2().getOperator(i,sigma).data;
-// 					transposeConjugate(B,modelHelper.basis3().getOperator(j-offset,sigma).data);
-// 					angularMomentum=0;
-//					modelHelper.fastOpProdInter(A,B,type,val,matrixBlock,true);
-					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i,sigma,ModelHelperType::System);
-					const SparseMatrixType& B=modelHelper.getReducedOperator('C',j-offset,sigma2,ModelHelperType::Environ);
-					modelHelper.fastOpProdInter(A,B,type,val,matrixBlock,true,angularMomentum,angularFactor,sigma);
-							
-					
-				} else {
-					if (type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"ERRRRRRRRRRORRRRRRRR\n";
-// 					A=modelHelper.basis3().getOperator(i-offset,sigma).data;
-// 					transposeConjugate(B,modelHelper.basis2().getOperator(j,sigma).data);
-// 					modelHelper.fastOpProdInter(A,B,type,val,matrixBlock,true);
-					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i-offset,sigma,ModelHelperType::Environ);
-					const SparseMatrixType& B=modelHelper.getReducedOperator('C',j,sigma2,ModelHelperType::System);
-					modelHelper.fastOpProdInter(A,B,type,val,matrixBlock,true,angularMomentum,angularFactor,sigma);
-					
-				}
-				
-				
-				return matrixBlock.nonZero();
-				
 			}
-			
-			// used only for testing 
-			RealType norm() const
-			{
-				return std::norm(x_);
-			}
-			
-			static size_t dofs() { return 2; }
 			
 			// up up and down down are the only connections possible for this model
-			static std::pair<size_t,size_t> edofs(size_t dofs,size_t term)
+			static size_t dofs() { return 2; }
+			
+			static std::pair<size_t,size_t> connectorDofs(size_t dofs,size_t term)
 			{
 				return std::pair<size_t,size_t>(0,0); // no orbital and no dependence on spin
 			}
-			
-		private:
-			size_t dof_;
-			const ModelHelperType& modelHelper_;
-			const LinkProductStructType& lps_;
-			std::vector<SparseElementType>& x_;
-			const std::vector<SparseElementType>& y_;
-		
-			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
-			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
-					size_t i,size_t j,size_t type,
-			     SparseElementType  &val,
-			     ModelHelperType const &modelHelper,size_t term,size_t dofs)  const
-			{
-				size_t sigma = dofs;
-				size_t sigma2 = dofs;
-				//int const SystemEnviron=1,EnvironSystem=2;
-				
-				int offset = modelHelper.basis2().block().size();
-				size_t angularMomentum=1;
-				RealType angularFactor  = 1.0;
-				if (sigma==1) angularFactor  = -1.0;
-				
-				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
-					
-					//A=modelHelper.basis2().getOperator(i,sigma);
-					//transposeConjugate(B,modelHelper.basis3().getOperator(j-offset,sigma));
-					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i,sigma,ModelHelperType::System);
-					const SparseMatrixType& B=modelHelper.getReducedOperator('C',j-offset,sigma2,ModelHelperType::Environ);
-					modelHelper.fastOpProdInter(x,y,A,B,type,val,true,angularMomentum,angularFactor,sigma);
-							
-				} else {
-					if (type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"ERRRRRRRRRRORRRRRRRR\n";
-						//A=modelHelper.basis3().getOperator(i-offset,sigma);
-						//transposeConjugate(B,modelHelper.basis2().getOperator(j,sigma));
-					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i-offset,sigma,ModelHelperType::Environ);
-					const SparseMatrixType& B=modelHelper.getReducedOperator('C',j,sigma2,ModelHelperType::System);
-					modelHelper.fastOpProdInter(x,y,A,B,type,val,true,angularMomentum,angularFactor,sigma);
-				}
-	
-				
-			}
-			
 	}; // class LinkProductHubbardOneBand
 } // namespace Dmrg
 /*@}*/

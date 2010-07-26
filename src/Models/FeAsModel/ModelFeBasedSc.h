@@ -127,7 +127,6 @@ namespace Dmrg {
 	public:
 		typedef std::vector<HilbertState> HilbertBasisType;
 		typedef LinkProductFeAs<ModelHelperType> LinkProductType;
-		typedef SharedMemoryTemplate<LinkProductType> SharedMemoryType;
 		typedef   ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::MyBasisWithOperators MyBasisWithOperators;
