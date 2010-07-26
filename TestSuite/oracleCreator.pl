@@ -340,7 +340,7 @@ sub runAllOracles
 	
 	my $available = getAvailableTests();
 	my @temp = split(/ /,$available);
-	my @notFunctionalTests = (4,24,60,104,105,106,107,108,124,125,141,160);
+	my @notFunctionalTests = (24,41,42,60,104,105,106,107,108,109,110,111,124,125,141,142,160);
 	
 	for (my $i=0;$i<=$#temp;$i++) {
 		next if($temp[$i] eq "");
