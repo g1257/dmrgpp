@@ -859,7 +859,7 @@ sub moveFiles
 
 sub removeFiles
 {
-	my @files = ("Makefile*", "dmrg.*", "observe.*", "freeSystem*", "input.*", "raw$testNum.txt", "gmon.out");
+	my @files = ("input.*", "raw$testNum.txt", "gmon.out");
 
 	my $err = chdir($srcDir);
 	die "Changing directory to $srcDir: $!" if(!$err);

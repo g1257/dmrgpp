@@ -75,7 +75,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MODELHELPER_LOC_HEADER_H
 
 #include "BasisWithOperators.h"
-#include "RightLeftLocal.h"
+//#include "RightLeftLocal.h"
+#include "Link.h"
 
 /** \ingroup DMRG */
 /*@{*/
@@ -102,7 +103,8 @@ namespace Dmrg {
 		typedef typename BasisType::BlockType BlockType;
 		typedef typename BasisType::RealType RealType;
 		typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
-		typedef RightLeftLocal<BasisType,BasisWithOperatorsType,SparseMatrixType> RightLeftLocalType;
+		//typedef RightLeftLocal<BasisType,BasisWithOperatorsType,SparseMatrixType> RightLeftLocalType;
+		typedef Link<SparseElementType,RealType> LinkType;
 		
 		static const size_t System=0,Environ=1;
 		
@@ -163,18 +165,19 @@ namespace Dmrg {
 		//! //! Does matrixBlock= (AB), A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
 		void fastOpProdInter(SparseMatrixType const &A,
 				SparseMatrixType const &B,
-				int type,
-				SparseElementType  &hop,
 				SparseMatrixType &matrixBlock,
-				bool operatorsAreFermions,size_t angularM=0,RealType angularF=0,size_t cat=0,bool flip=false) const
+				const LinkType& link,
+				bool flipped = false) const
 		{
-			int const SystemEnviron=1,EnvironSystem=2;
-			RealType fermionSign =  (operatorsAreFermions) ? -1 : 1;
+			//int const SystemEnviron=1,EnvironSystem=2;
+			RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
 			
 			//! work only on partition m
-			if (type==EnvironSystem)  {
-				SparseElementType hop2 =hop*fermionSign;
-				fastOpProdInter(B,A,SystemEnviron,hop2,matrixBlock,operatorsAreFermions,angularM,angularF,cat,true);
+			if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
+				LinkType link2 = link;
+				link2.value *= fermionSign;
+				link2.type = ProgramGlobals::SYSTEM_ENVIRON; 
+				fastOpProdInter(B,A,matrixBlock,link2,true);
 				return;
 			}		
 
@@ -201,8 +204,9 @@ namespace Dmrg {
 						   here the environ is applied first and has to "cross"
 						   the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
 						  */
-						SparseElementType tmp = A.getValue(k) * B.getValue(kk)*hop;
-						if (operatorsAreFermions) tmp *= basis2_.fermionicSign(alpha,int(fermionSign));
+						SparseElementType tmp = A.getValue(k) * B.getValue(kk)*link.value;
+						if (link.fermionOrBoson == ProgramGlobals::FERMION) 
+							tmp *= basis2_.fermionicSign(alpha,int(fermionSign));
 						//if (tmp==static_cast<MatrixElementType>(0.0)) continue;
 						
 						matrixBlock.pushCol(j);
@@ -213,18 +217,6 @@ namespace Dmrg {
 			} 
 			matrixBlock.setRow(i,counter);	
 		}
-		//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
-		//! Has been changed to accomodate for reflection symmetry
-		void fastOpProdInterNew(	std::vector<SparseElementType>  &x,
-					std::vector<SparseElementType>  const &y,
-					SparseMatrixType const &A,
-					SparseMatrixType const &B,
-					int type,
-					RealType  &hop,
-					bool operatorsAreFermions=true,size_t angularMomentum=1,RealType angularSign= -1.0,size_t category=0,bool dummy2=false) const
-		{
-			//rightLeftLocal_.fastOpProdInter(x,y,A,B,type,hop,operatorsAreFermions,angularMomentum,angularSign,category,dummy2);
-		}
 		
 		//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
 		//! Has been changed to accomodate for reflection symmetry
@@ -232,16 +224,17 @@ namespace Dmrg {
 					std::vector<SparseElementType>  const &y,
 					SparseMatrixType const &A,
 					SparseMatrixType const &B,
-					int type,
-					SparseElementType  &hop,
-					bool operatorsAreFermions=true,size_t angularMomentum=1,RealType angularSign= -1.0,size_t category=0,bool dummy2=false) const
+					const LinkType& link,
+				    	bool flipped = false) const
 		{
-			int const SystemEnviron=1,EnvironSystem=2;
-			RealType fermionSign =  (operatorsAreFermions) ? -1 : 1;
+			//int const SystemEnviron=1,EnvironSystem=2;
+			RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
 
-			if (type==EnvironSystem)  {
-				SparseElementType hop2 =hop*fermionSign;
-				fastOpProdInter(x,y,B,A,SystemEnviron,hop2,operatorsAreFermions);
+			if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
+				LinkType link2 = link;
+				link2.value *= fermionSign;
+				link2.type = ProgramGlobals::SYSTEM_ENVIRON; 
+				fastOpProdInter(x,y,B,A,link2,true);
 				return;
 			}
 			
@@ -267,9 +260,10 @@ namespace Dmrg {
 						   here the environ is applied first and has to "cross"
 						   the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
 						 */
-						SparseElementType tmp = A.getValue(k) * B.getValue(kk)*hop;
+						SparseElementType tmp = A.getValue(k) * B.getValue(kk)*link.value;
 						
-						if (operatorsAreFermions) tmp *= basis2_.fermionicSign(alpha,int(fermionSign));
+						if (link.fermionOrBoson == ProgramGlobals::FERMION)
+							tmp *= basis2_.fermionicSign(alpha,int(fermionSign));
 						//if (tmp==static_cast<MatrixElementType>(0.0)) continue;
 						reflection_.elementMultiplication(tmp , x,y,i,j);
 						//matrixBlock.pushCol(j-offset);

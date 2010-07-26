@@ -92,9 +92,15 @@ namespace Dmrg {
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			typedef typename LinkProductType::LinkProductStructType LinkProductStructType;
+			typedef typename ModelHelperType::LinkType LinkType;
 			
-			HamiltonianConnection(const GeometryType& geometry,const ModelHelperType& modelHelper)
-			: geometry_(geometry),modelHelper_(modelHelper),
+			HamiltonianConnection(
+				const GeometryType& geometry,
+				const ModelHelperType& modelHelper,
+				const LinkProductStructType* lps = 0,
+				std::vector<SparseElementType>* x = 0,
+				const std::vector<SparseElementType>* y = 0)
+			: lps_(*lps),x_(*x),y_(*y),geometry_(geometry),modelHelper_(modelHelper),
 				systemBlock_(modelHelper.basis2().block()),
 				envBlock_(modelHelper.basis3().block()),
 				smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
@@ -118,7 +124,7 @@ namespace Dmrg {
 				
 				for (size_t term=0;term<geometry_.terms();term++) {
 					for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
-						std::pair<size_t,size_t> edofs = LinkProductType::edofs(dofs,term);
+						std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(dofs,term);
 						SparseElementType tmp = geometry_(smax_,emin_,
 								ind,edofs.first,jnd,edofs.second,term);
 				
@@ -138,8 +144,7 @@ namespace Dmrg {
 							lps->dofssaved.push_back(dofs);
 						} else {
 							SparseMatrixType mBlock;
-							LinkProductType::calcBond(i,j,type,tmp,mBlock,
-									modelHelper_,term,dofs);
+							calcBond(mBlock,i,j,type,tmp,dofs);
 							*matrixBlock += mBlock;
 						}
 					}
@@ -147,8 +152,115 @@ namespace Dmrg {
 				return flag;
 			}
 			
+			void thread_function_(size_t threadNum,size_t blockSize,pthread_mutex_t* myMutex)
+			{
+				std::vector<SparseElementType> xtemp(x_.size(),0);
+				//for (size_t i=0;i<xtemp.size();i++) xtemp[i]=0;
+				for (size_t p=0;p<blockSize;p++) {
+					size_t ix = threadNum * blockSize + p;
+					if (ix>=lps_.isaved.size()) break;
+					size_t i=lps_.isaved[ix];
+					size_t j=lps_.jsaved[ix];
+					//size_t dof1=lps_.dof1saved[ix];
+					//size_t dof2=lps_.dof2saved[ix];
+					size_t type=lps_.typesaved[ix];
+					size_t term = lps_.termsaved[ix];
+					size_t dofs = lps_.dofssaved[ix];
+					SparseElementType tmp=lps_.tmpsaved[ix];
+					linkProduct(xtemp,y_,i,j,type,tmp,modelHelper_,term,dofs);
+					
+				}
+				if (myMutex) pthread_mutex_lock( myMutex);
+				for (size_t i=0;i<x_.size();i++) x_[i]+=xtemp[i];
+				if (myMutex) pthread_mutex_unlock( myMutex );
+			}
+
+			//! Adds a tight-binding bond between system and environment
+			size_t calcBond(
+				SparseMatrixType &matrixBlock,
+    				size_t i,
+				size_t j,
+    				size_t type,
+				const SparseElementType& value,
+    				size_t dofs) const
+			{
+				int offset = modelHelper_.basis2().block().size();
+				std::pair<size_t,size_t> ops;
+				size_t fermionOrBoson,angularMomentum,category;
+				RealType angularFactor;
+				LinkProductType::setLinkData(dofs,fermionOrBoson,ops,angularMomentum,angularFactor,category);
+				LinkType link(i,j,type, value,dofs,
+					      fermionOrBoson,ops,angularMomentum,angularFactor,category);
+				if (link.type==ProgramGlobals::SYSTEM_ENVIRON) {
+						
+					const SparseMatrixType& A=
+						modelHelper_.getReducedOperator('N',link.site1,
+							link.ops.first,ModelHelperType::System);
+					const SparseMatrixType& B=
+						modelHelper_.getReducedOperator('C',link.site2-offset,
+							link.ops.second,ModelHelperType::Environ);
+					modelHelper_.fastOpProdInter(A,B,matrixBlock,link);
+				} else {
+// 						
+					if (link.type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"EEEEEEEEEEEERRRRRRRRRRRRRRROR\n";
+					const SparseMatrixType& A=
+						modelHelper_.getReducedOperator('N',link.site1-offset,
+							link.ops.first,ModelHelperType::Environ);
+					const SparseMatrixType& B=
+						modelHelper_.getReducedOperator('C',link.site2,
+							link.ops.second,ModelHelperType::System);
+					modelHelper_.fastOpProdInter(A,B,matrixBlock,link);
+				}
+				
+				return matrixBlock.nonZero();
+				
+			}
+			
 			
 		private:
+			
+			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
+			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
+						size_t i,size_t j,size_t type,
+				SparseElementType  &value,
+				const ModelHelperType& modelHelper,size_t term,size_t dofs)  const
+			{
+				int offset =modelHelper.basis2().block().size();
+				std::pair<size_t,size_t> ops;
+				size_t fermionOrBoson,angularMomentum,category;
+				RealType angularFactor;
+				LinkProductType::setLinkData(dofs,fermionOrBoson,ops,angularMomentum,angularFactor,category);
+				LinkType link(i,j,type, value,dofs,
+					      fermionOrBoson,ops,angularMomentum,angularFactor,category);
+				
+				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
+					
+					//A=modelHelper.basis2().getOperator(i,sigma);
+					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i,
+							link.ops.first,ModelHelperType::System);
+					//B=modelHelper.getTcOperator(dof_*(j-offset)+sigma2,ModelHelperType::Environ);
+					const SparseMatrixType& B=modelHelper.getReducedOperator('C',j-offset,
+							link.ops.second,ModelHelperType::Environ);
+					modelHelper.fastOpProdInter(x,y,A,B,link);
+						
+				} else {		
+					if (type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"EEEEEEEEEEEERRRRRRRRRRRRRRROR\n";
+						//A=modelHelper.basis3().getOperator(i-offset,sigma);
+					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i-offset,
+							link.ops.first,ModelHelperType::Environ);
+						
+						//B=modelHelper.getTcOperator(j*dof_+sigma2,ModelHelperType::System);
+					const SparseMatrixType& B=modelHelper.getReducedOperator('C',j,
+							link.ops.second,ModelHelperType::System);
+					modelHelper.fastOpProdInter(x,y,A,B,link);
+						
+				}
+				
+				
+			}
+			const LinkProductStructType& lps_;
+			std::vector<SparseElementType>& x_;
+			const std::vector<SparseElementType>& y_;
 			const GeometryType& geometry_;
 			const ModelHelperType& modelHelper_;
 			const typename GeometryType::BlockType& systemBlock_;

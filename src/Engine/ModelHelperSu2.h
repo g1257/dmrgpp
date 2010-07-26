@@ -77,6 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BasisWithOperators.h"
 #include "ClebschGordanCached.h"
 #include "Su2Reduced.h"
+#include "Link.h"
 
 /** \ingroup DMRG */
 /*@{*/
@@ -107,6 +108,7 @@ namespace Dmrg {
 		typedef typename BasisType::RealType RealType;
 		typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
+		typedef Link<SparseElementType,RealType> LinkType;
 		
 		ModelHelperSu2(int m,const BasisType& basis1,  const BasisWithOperatorsType& basis2,
 			 const BasisWithOperatorsType& basis3,size_t nOrbitals,bool useReflection=false) 
@@ -151,22 +153,18 @@ namespace Dmrg {
 		//! //! Does matrixBlock= (AB), A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
 		void fastOpProdInter(SparseMatrixType const &A,
 				SparseMatrixType const &B,
-				int type,
-				SparseElementType  &hop,
 				SparseMatrixType &matrixBlock,
-				bool operatorsAreFermions,
-    				size_t angularMomentum,
-				RealType angularFactor,
-    				size_t category,
+				const LinkType& link,
 				bool flip=false) const
 		{
-			int const SystemEnviron=1,EnvironSystem=2;
-			RealType fermionSign =  (operatorsAreFermions) ? -1 : 1;
+			//int const SystemEnviron=1,EnvironSystem=2;
+			RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
 
-			if (type==EnvironSystem)  {
-				SparseElementType hop2 = hop*fermionSign;
-				fastOpProdInter(B,A,SystemEnviron,hop2,matrixBlock,operatorsAreFermions,
-						angularMomentum,angularFactor,category,true);
+			if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
+				LinkType link2 = link;
+				link2.value *= fermionSign;
+				link2.type = ProgramGlobals::SYSTEM_ENVIRON; 
+				fastOpProdInter(B,A,matrixBlock,link2,true);
 				return;
 			}
 
@@ -203,16 +201,16 @@ namespace Dmrg {
 						PairType jm2prime = basis3_.jmValue(basis3_.reducedIndex(i2prime));
 						SparseElementType lfactor;
 						size_t lf2 =jm1prime.first + jm2prime.first*basis2_.jMax();
-						lfactor=su2reduced_.reducedFactor(angularMomentum,category,flip,lf1,lf2);
+						lfactor=su2reduced_.reducedFactor(link.angularMomentum,link.category,flip,lf1,lf2);
 						if (lfactor==static_cast<SparseElementType>(0)) continue;
 
-						lfactor *= angularFactor;
+						lfactor *= link.angularFactor;
 
 						int jx = su2reduced_.flavorMapping(i1prime,i2prime)-offset;
 						if (jx<0 || jx >= int(matrixBlock.rank()) ) continue;
 
 						matrixBlock.pushCol(jx);
-						matrixBlock.pushValue(fsign*hop*lfactor*A.getValue(k1)*B.getValue(k2));
+						matrixBlock.pushValue(fsign*link.value*lfactor*A.getValue(k1)*B.getValue(k2));
 						counter++;
 					}
 				}
@@ -226,21 +224,17 @@ namespace Dmrg {
 					std::vector<SparseElementType>  const &y,
 					SparseMatrixType const &A,
 					SparseMatrixType const &B,
-					int type,
-					SparseElementType  &hop,
-					bool operatorsAreFermions,
-     					size_t angularMomentum,
-	  				RealType angularFactor,
-       					size_t category,
-	    				bool flip=false) const 
+					const LinkType& link,
+	    				bool flipped=false) const 
 		{
-			int const SystemEnviron=1,EnvironSystem=2;
-			RealType fermionSign =  (operatorsAreFermions) ? -1 : 1;
+			//int const SystemEnviron=1,EnvironSystem=2;
+			RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
 			
-			if (type==EnvironSystem)  {
-				SparseElementType hop2 = hop*fermionSign;
-				fastOpProdInter(x,y,B,A,SystemEnviron,hop2,operatorsAreFermions,
-						angularMomentum,angularFactor,category,true);
+			if (link.type == ProgramGlobals::ENVIRON_SYSTEM)  {
+				LinkType link2 = link;
+				link2.value *= fermionSign;
+				link2.type = ProgramGlobals::SYSTEM_ENVIRON; 
+				fastOpProdInter(x,y,B,A,link2,true);
 				return;
 			}
 
@@ -273,14 +267,14 @@ namespace Dmrg {
 						SparseElementType lfactor;
 						size_t lf2 =jm1prime.first + jm2prime.first*basis2_.jMax();
 
-						lfactor=su2reduced_.reducedFactor(angularMomentum,category,flip,lf1,lf2);
+						lfactor=su2reduced_.reducedFactor(link.angularMomentum,link.category,flipped,lf1,lf2);
 						if (lfactor==static_cast<SparseElementType>(0)) continue;
-						lfactor *= angularFactor;
+						lfactor *= link.angularFactor;
 
 						int jx = su2reduced_.flavorMapping(i1prime,i2prime)-offset;
 						if (jx<0 || jx >= int(y.size()) ) continue;
 
-						x[ix] += fsign*hop*lfactor*A.getValue(k1)*B.getValue(k2)*y[jx];
+						x[ix] += fsign*link.value*lfactor*A.getValue(k1)*B.getValue(k2)*y[jx];
 					}
 				}
 			}

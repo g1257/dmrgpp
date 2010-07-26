@@ -74,78 +74,45 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LinkProductFeAs.h
+/*! \file Link.h
  *
- *  A class to represent product of operators that form a link or bond for this model
- *
+ *  DOC NEEDED FIXME
  */
-#ifndef LINK_PRODUCT_H
-#define LINK_PRODUCT_H
+#ifndef LINK_H
+#define LINK_H
 
-#include "LinkProductStruct.h"
+#include "Utils.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 	
-	template<typename ModelHelperType>
-	class LinkProductFeAs {
-			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
-			//typedef typename ModelHelperType::LinkType LinkType;
-			
-		public:
-			typedef typename ModelHelperType::RealType RealType;
-			typedef LinkProductStruct<SparseElementType> LinkProductStructType;
-			
-			static size_t dofs() { return 8; }
-			
-			// has only dependence on orbital
-			static std::pair<size_t,size_t> connectorDofs(size_t dofs,size_t term)
-			{
-				size_t spin = dofs/4;
-				size_t xtmp = (spin==0) ? 0 : 4;
-				xtmp = dofs - xtmp;
-				size_t orb1 = xtmp/2;
-				size_t orb2 = (xtmp & 1);
-				return std::pair<size_t,size_t>(orb1,orb2); // has only dependence on orbital
-			}
-			
-			// spin is diagonal
-			static std::pair<size_t,size_t> operatorDofs(size_t dofs)
-			{
-				size_t spin = dofs/4;
-				size_t xtmp = (spin==0) ? 0 : 4;
-				xtmp = dofs - xtmp;
-				size_t orb1 = xtmp/2;
-				size_t orb2 = (xtmp & 1);
-				size_t op1 = orb1 + spin*2;
-				size_t op2 = orb2 + spin*2;
-				return std::pair<size_t,size_t>(op1,op2);
-			}
-			
-			static size_t getSpin(size_t dofs)
-			{
-				return dofs/4;
-			}
-			
-			static void setLinkData(
-					size_t dofs,
-					size_t& fermionOrBoson,
-					std::pair<size_t,size_t>& ops,
-					size_t& angularMomentum,
-     					RealType& angularFactor,
-					size_t& category)
-			{
-				fermionOrBoson = ProgramGlobals::FERMION;
-				size_t spin = getSpin(dofs);
-				ops = operatorDofs(dofs);
-				angularFactor = 1;
-				if (spin==1) angularFactor = -1;
-				angularMomentum = 1;
-				category = spin;
-			}
-			
-		private:
-	}; // class LinkPRoductFeAs
-} // namespace Dmrg
+	template<typename FieldType,typename RealType>
+	struct Link {
+		typedef std::pair<size_t,size_t> PairType;
+		Link(size_t i,size_t j,size_t type1,const FieldType& value1,size_t dofs1,
+		    	size_t fOb,const PairType& ops1,
+       			size_t aM,RealType aF,
+	  		size_t cat) 
+			: site1(i),site2(j),
+			type(type1),value(value1),dofs(dofs1),
+			fermionOrBoson(fOb),ops(ops1),
+       			angularMomentum(aM),angularFactor(aF),
+	  		category(cat) 
+		{
+		}
+		
+		size_t site1,site2;
+		size_t type;
+		FieldType value;
+		size_t dofs;
+		size_t fermionOrBoson;
+		std::pair<size_t,size_t> ops; // operator indices
+		size_t angularMomentum;
+		RealType angularFactor;
+		size_t category;
+		
+	}; // struct Link
+} // namespace Dmrg 
+
 /*@}*/
-#endif
+#endif // LINK_H

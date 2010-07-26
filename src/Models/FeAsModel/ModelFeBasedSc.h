@@ -508,7 +508,7 @@ namespace Dmrg {
 				for (size_t j=0;j<n;j++) {
 					for (size_t term=0;term<geometry_.terms();term++) {
 						for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
-							std::pair<size_t,size_t> edofs = LinkProductType::edofs(dofs,term);
+							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(dofs,term);
 							RealType tmp = geometry_(block[i],edofs.first,block[j],edofs.second,term);
 						
 							if (i==j || tmp==0.0) continue;

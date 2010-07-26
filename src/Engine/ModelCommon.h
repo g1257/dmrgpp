@@ -95,7 +95,7 @@ namespace Dmrg {
 	typename SparseMatrixType, // <-- kill this template, deduced from ModelHelper FIXME
  	typename DmrgGeometryType,
 	typename LinkProductType,
-	typename SharedMemoryType>
+	template<typename> class SharedMemoryTemplate>
 	class ModelCommon  {
 		public:	
 			typedef typename ModelHelperType::RealType RealType;
@@ -104,7 +104,8 @@ namespace Dmrg {
 			typedef typename LinkProductType::LinkProductStructType LinkProductStructType;
 			typedef HamiltonianConnection<DmrgGeometryType,ModelHelperType,
 					LinkProductType> HamiltonianConnectionType;
-
+			typedef SharedMemoryTemplate<HamiltonianConnectionType> SharedMemoryType;
+			
 			ModelCommon(int DEGREES_OF_FREEDOM,const DmrgGeometryType& dmrgGeometry)
 			: dof_(DEGREES_OF_FREEDOM),dmrgGeometry_(dmrgGeometry)
 			{
@@ -169,7 +170,7 @@ namespace Dmrg {
 				SparseMatrixType matrix;
 
 				LinkProductStructType lps;
-				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
+				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper,&lps,&x,&y);
 				
 				for (size_t i=0;i<n;i++) {
 					for (size_t j=0;j<n;j++) {
@@ -178,9 +179,8 @@ namespace Dmrg {
 				}
 				size_t total = lps.isaved.size();
 
-				LinkProductType pfh(dof_,modelHelper,lps,x,y);
 				SharedMemoryType pthreads;
-				pthreads.loopCreate(total,pfh);
+				pthreads.loopCreate(total,hc);
 
 			}
 			
