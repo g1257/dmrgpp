@@ -1,0 +1,19 @@
+TotalNumberOfSites=60
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=none
+Connectors 59 0.118 
+		0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+		0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+		0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+		0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+	      0.118
+SolverOptions=hasQuantumNumbers,nowft,noSu2,,hasThreads
+Version=aec8964f7a782d87d587c27276acd41760808139
+OutputFile=data.txt
+InfiniteLoopKeptStates=100
+FiniteLoops 6  29 100 0 -29 100 0 -29 100 0 29 100 1
+	29 100 1 -1 100 1 
+TargetQuantumNumbers 3 0.5 0.5 0
+Threads=2

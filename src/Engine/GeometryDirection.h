@@ -99,7 +99,7 @@ namespace Dmrg {
 			: dirId_(dirId),linSize_(linSize),geometryKind_(geometryKind),leg_(leg)
 			{
 				size_t n = getVectorSize(options);
-				std::cerr<<"vectorsize="<<n<<"\n";
+				//std::cerr<<"vectorsize="<<n<<"\n";
 				if (edof==1) {
 					io.read(dataNumbers_,"Connectors");
 					dataType_ = NUMBERS;
@@ -179,7 +179,7 @@ namespace Dmrg {
 					case CHAIN:
 						if (dirId_!=DIRECTION_X)
 							throw std::runtime_error("Chain must have direction 0\n");
-						return linSize_;
+						return linSize_-1;
 					case LADDERX:
 						if (dirId_==DIRECTION_XPY) return linSize_ - linSize_/leg_;
 						else if (dirId_==DIRECTION_XMY) return linSize_ - linSize_/leg_;
