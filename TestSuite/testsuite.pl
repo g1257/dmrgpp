@@ -879,10 +879,4 @@ sub removeFiles
 	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
 	system("rm @files >& /dev/null");
-<<<<<<< HEAD
 }
-=======
-	
-	print "All temporary files were successfully removed.\n";
-}
->>>>>>> b1c36f8c4f259ca0cd0779eaa027ca5e9a4eb74e
