@@ -1,4 +1,4 @@
-[executable]
+[dmrg]
 Let $input = $inputsDir input$testNum.inp
 Execute runDmrg($input)
 
@@ -7,9 +7,9 @@ Let $result = $resultsDir e$testNum.txt
 Let $oracle = $oraclesDir e$testNum.txt
 Let $diff = $resultsDir e$testNum.diff
 Let $output = $srcDir data$testNum.txt
-CallOnce executable
+CallOnce dmrg
 Grep Energy $output > $result
-Diff $result $oracle > $diff 
+Diff $result $oracle > $diff
 
 [observables]
 Let $input = $inputsDir input$testNum.inp
@@ -57,7 +57,7 @@ Let $result = $resultsDir prof$testNum.txt
 Let $oracle = $oraclesDir prof$testNum.txt
 Let $diff = $resultsDir prof$testNum.diff
 Let $executable = $executable
-CallOnce executable
+CallOnce dmrg
 Gprof $executable > $result
 Diff $result $oracle > $diff
 

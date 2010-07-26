@@ -4,22 +4,21 @@
 testsuite.pl \- Systematically run tests for DMRG++ 
 .SH SYNOPSIS
 .B ./testsuite.pl 
-[\-a|\-\-all] [\-n test num] [\-l limit test num] [\-r remove] [\-v verbose] [\-m manual] [\-f force] [\-u update]
+[\-a|\-\-all] [\-n int] [\-l int] [\-r] [\-v] [\-m] [\-f] [\-u]
 .SH DESCRIPTION
 If a test number is not given to testsuite.pl, it will display a list of available tests and ask which test to run. The command will create
-a driver program, a Makefile, and it will build DMRG++ and run it. Then interpretation of results will be made and the test suite will compare the results of the test with
-precomputed results, and produce a system diff and a smart diff file under the .diff and .smdiff extensions, respectively.
+a driver program, a Makefile, and it will build DMRG++ and run it. Followed by interpretation of the results and comparisons using precomputed results. At any given time, the user can escape the testsuite.pl execution by pressing Control+C.
 .SH OPTIONS
 .TP
 .B \-a,\-\-all
 Runs all available tests sequentially.
 .TP
-.B \-n test num
+.B \-n=test num
 If test number is non-negative, runs the test with the given number.
 If test number is negative, runs all tests starting from test number to the end
 .B (or until limit test number).
 .TP
-.B \-l limit test num
+.B \-l=limit test num
 Specificies the last test to run when running multiple tests sequentially. Applied when using the
 .B \-\-all
 option or given a
@@ -29,14 +28,14 @@ option or given a
 When set all temporary files created during test configuration, compilation, and execution of DMRG++.
 .TP
 .B \-v verbose
-Outputs to bash messages created during test selection, configuration, compilation, and execution of DMRG++. Descriptions of all tests are found in
+Displays messages created during test selection, configuration, compilation, and execution of DMRG++. Descriptions of all tests are found in
 .B inputs/descriptions.txt.
 .TP
-.B \-m manual
-Provides the functionality for the user to manually enter configuration parameters prior to test compilation and execution.
+.B \-m manual config
+Provides the functionality for the user to manually enter configuration parameters prior to test compilation and execution. Auto configuration is the default setting.
 .TP
 .B \-f force
-Runs the compilation process even though the compilation had already been made previously and a valid executable exists for that test number.
+Runs the configuration and compilation processes even though they had already been made previously and valid executables exist for that test number.
 .TP
 .B \-u update
 Synchronizes and updates the hash table in 
@@ -50,6 +49,8 @@ Each test has a file associated with it
 which specifies the types of analyses to be done for that test. The implementation of each analysis is denoted with a custom meta language in
 .B inputs/processingLibrary.txt.
 This implementation of the test suite allows for scalability by adding new analyses to the processing library and connecting them with new subroutines in testsuite.pl.
+.SH PROCESSING LIBRARY
+.SH TESTS PROCESSING FILES
 .SH AUTHOR
 G.A. & E.P.
 .SH BUGS

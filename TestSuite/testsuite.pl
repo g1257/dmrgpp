@@ -45,17 +45,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 but it is hopelessly inadequate for showing their absence." -- Edsger Dijkstra
 =cut
 
+#Declarations of Perl modules required
 use strict;
 use warnings;
 use Getopt::Long;
 use Cwd 'abs_path';
-use File::Basename;
 
+#Global variables and command line options
 my ($testNum,$lastTest) = ("",-1); 
 my ($all,$rmFlag,$update,$verbose,$noModel,$force) = (0,0,0,0,0,0);
 my ($testDir, $srcDir);
 my $PATH = $testDir = $srcDir = abs_path($0);
-my $filename = basename($PATH);	
+chomp(my $filename = `basename $0`);
 $testDir =~ s/$filename$//;
 $srcDir =~ s/TestSuite.*/src\//;
 my $oraclesDir = $testDir."oracles/";	
@@ -63,37 +64,39 @@ my $resultsDir = $testDir."results/";
 my $inputsDir = $testDir."inputs/";
 my $executable = "";
 my $hashTable = $testDir."hashTable.txt";
-my %dmrgHash;
-my %observeHash;
-my $globalRunFlag;
-my @nonFunctionalTests = (4,6,24,60,104,105,106,107,108,124,125,141,160);
+my %dmrgHash = ();
+my %observeHash = ();
+my $globalRunFlag = 0;
 
+#Signals for Control+C escape and warnings
 $SIG{INT} = \&exit_handler;
+$SIG{__WARN__} = sub {die @_};
 
+#Handler for Control+C escape signal
 sub exit_handler
 {
-	print "\nTestSuite aborted -> manual cancellation\n";
+	print "\nTestSuite aborted -> Manual cancellation\n";
 	removeFiles();
-	my $err = system("kill -9 $$");
-	die "Killing current TestSuite process $$: $!" if($err);
+	kill 9, $$;
 }
 
 eval {
-	my $err = GetOptions("n=i" => \$testNum, "l=i" => \$lastTest, "all" => \$all, "u" => \$update, 
-	"r" => \$rmFlag, "v" => \$verbose, "m" => \$noModel, "f" => \$force);
-	die "Unknown command line options$!" if(!$err);
+	#Get command line options
+	die $! if(!GetOptions("n=i" => \$testNum, "l=i" => \$lastTest, "all" => \$all, "u" => \$update, 
+	"r" => \$rmFlag, "v" => \$verbose, "m" => \$noModel, "f" => \$force));
 	
+	#Activate testsuite program
 	$globalRunFlag = 1;
 	
 	while($globalRunFlag) {
+		#Starts main program
 		startProgram();
 	}
 };
 if($@) {
-	print "\nTestSuite aborted -> $@\n";
+	print "\nTestSuite aborted -> $@";
 	removeFiles();
-	my $err = system("kill -9 $$");
-	die "Killing current TestSuite process $$: $!" if($err);
+	kill 9, $$;
 }
 
 sub startProgram{
@@ -218,15 +221,19 @@ sub validateTest
 {
 	my ($available) = @_;
 	
-	if($testNum =~ /\d/) {
+	if($testNum =~ /(^-?\d+$)/) {
 		my $searchNum = abs($testNum);
 		my @found = grep(/$searchNum/, split(/ /,$available));
-	} else {	
-		print "\nError: An incorrect test was selected! Try again.\n\n";
-		return 0;
-	}
-
-	return 1;
+		if(@found) {
+			if($testNum eq "-0") {
+				$testNum = 0;
+				$all = 1;
+			}
+			return 1;
+		}
+	}	
+	print "\n<Error>: An incorrect test was selected! Try again.\n\n";
+	return 0;
 }
 
 sub validateDirectory	
@@ -237,7 +244,6 @@ sub validateDirectory
 		return 1;
 	} elsif($dir eq $resultsDir){
 		mkdir($dir) || die "Making directory $dir: $!";
-		$dir = basename($dir);
 		print "Directory created: $dir/\n";
 		return 1;
 	}
@@ -254,7 +260,6 @@ sub validateFile
 	} elsif($file eq $hashTable) {
 		open(FILE, ">$file") || die "Creating $file: $!";
 		close(FILE) || die "Closing $file: $!";
-		$file = basename($file);
 		print "File created: $file\n";
 		return 1;
 	}
@@ -381,11 +386,13 @@ sub testSuite
 	
 	moveFiles();
 	removeFiles() if($rmFlag);
+	print "All temporary files were successfully removed.\n";
 }
 
 sub runAllTests
 {
 	my ($start) = @_;
+	my @nonFunctionalTests = (24,60,104,105,106,107,108,124,125,141,160);
 	print "Preparing to run all tests starting from Test $start...\n";
 
 	my @testsList = split(/ /,getAvailableTests());
@@ -433,7 +440,7 @@ sub processing
 			if(/^\[$analysis\]/i) {
 				while(<LIB>) {
 					chomp;
-					last if($_ eq "");
+					last if($_ eq "" || /(^\[)*(\])/);
 					next if(/^#/);
 					push @operations, $_;
 				}
@@ -442,10 +449,14 @@ sub processing
 		close(LIB) || die "Closing $lib: $!";
 		
 		if(!@operations) {
-			print "No commands are described in Test $testNum for [$analysis] analysis.\n";
+			print "<Warning>: Missing descriptions for [$analysis] analysis in $lib.\n";
 		} else {
-			my @commands = keyValueParser(\@operations);		
-			$procHash{$analysis} = join(":", @commands);
+			my @commands = keyValueParser(\@operations);
+			if(!@commands) {
+				print "<Warning>: No runnable commands for [$analysis] analysis in $lib.>\n";
+			} else {
+				$procHash{$analysis} = join(":", @commands);
+			}
 		}
 	}
 	
@@ -458,7 +469,7 @@ sub processing
 	my @depKeys;
 	my $keyword = "CallOnce";
 	my $prevCount = 0;
-
+	
 	foreach my $analysis (keys %tmpHash) {
 		$procCount{$analysis} = 0;
 	}
@@ -470,7 +481,9 @@ sub processing
 			if(@dependencies = grep{/$keyword/} @commands) {
 				@depKeys = grep{s/$keyword|\s+//g} @dependencies;
 				foreach my $a(@depKeys) {
-					if($procCount{$a} eq 0) {
+					if(!defined($procCount{$a})) {
+						die "Unresolved dependency for analysis [$analysis]: inactive analysis [$a]. Verify the processing file for Test $testNum or processing library.\n";
+					} elsif($procCount{$a} eq 0) {
 						$depFlag = 1;
 					}
 				}
@@ -528,7 +541,6 @@ sub keyValueParser
 			grep {s/(\$\w+)/$tmpHash{$1}/g} $comm;
 			grep {s/(\$\w+)(\s+)([^<>])/$varHash{$1}$3/g} $comm;
 			grep {s/(\$\w+)/$varHash{$1}/g} $comm;
-			
 		}
 		
 		push @commands, $comm;
@@ -587,7 +599,6 @@ sub runDmrg
 	my ($specFile, $specKey) = ("", "");
 	($specFile, $specKey) = getSpecFileAndKey() if(!$noModel);
 	my $configFile = "configure.pl";
-	my $dataFile = "data$testNum.txt";
 	$executable = "dmrg";
 
 	if(!findKey(\%dmrgHash, $specKey) || $force || $noModel) {
@@ -659,7 +670,7 @@ sub createExecutables
 	my ($specFile,$refKey,$configFile, $execType) = @_;
 	my $arg1 = "./$configFile < $specFile >& /dev/null";
 	my $arg2 = "make $execType -f Makefile >& /dev/null";
-	
+
 	grep {s/<.*//} $arg1 if($noModel);
 	grep {s/>.*//} $arg1 if($verbose);
 	grep {s/>.*//} $arg2 if($verbose);
@@ -868,6 +879,4 @@ sub removeFiles
 	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
 	system("rm @files >& /dev/null");
-	
-	print "All temporary files were successfully removed.\n";
 }
