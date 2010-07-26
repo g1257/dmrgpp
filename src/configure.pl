@@ -976,7 +976,8 @@ EOF
 		print print OBSOUT<<EOF;
 		// Si^+ Sj^-
 		const psimag::Matrix<FieldType>& sPlus = model.getOperator("+");
-		const psimag::Matrix<FieldType>& v4=observe.correlations(n,sPlus,sPlus,1);
+		psimag::Matrix<FieldType> sPlusT = transposeConjugate(sPlus);
+		const psimag::Matrix<FieldType>& v4=observe.correlations(n,sPlus,sPlusT,1);
 		if (concurrency.root()) {
 			std::cout<<"OperatorSplus:\\n";
 			std::cout<<v4;
@@ -984,7 +985,8 @@ EOF
 	
 		// Si^- Sj^+
 		const psimag::Matrix<FieldType>& sMinus = model.getOperator("-");
-		const psimag::Matrix<FieldType>& v5=observe.correlations(n,sMinus,sMinus,1);
+		psimag::Matrix<FieldType> sMinusT = transposeConjugate(sMinus);
+		const psimag::Matrix<FieldType>& v5=observe.correlations(n,sMinus,sMinusT,1);
 		if (concurrency.root()) {
 			std::cout<<"OperatorMinus:\\n";
 			std::cout<<v5;

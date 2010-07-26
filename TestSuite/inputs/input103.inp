@@ -1,22 +1,25 @@
-linSize 8
-hoppings 8 8
-0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0
- 1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0
- 0.0 1.0 0.0 1.0 0.0 0.0 0.0 0.0
- 0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0
- 0.0 0.0 0.0 1.0 0.0 1.0 0.0 0.0
- 0.0 0.0 0.0 0.0 1.0 0.0 1.0 0.0
- 0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0
- 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0
-
-hubbardU	8 2.0 2.0 2.0 2.0 2.0 2.0 2.0 2.0
-potentialV	 16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-density 1.0
-options hasQuantumNumbers,wft,noSu2,,
-version 356c507fd063201fd29fe86afaa269d0cad94162
-outputfile		data103.txt
-InfiniteLoopKeptStates	 60
-FiniteLoops 4  7 100 0 -7 100 0 -7 100 0 7 100 0 
-QNS 3 0.5 0.5 0
-
+TotalNumberOfSites=32 
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+LadderLeg=2
+Connectors 1 1.0
+Connectors 1 1.0
+hubbardU	32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+			 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+potentialV	64 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+		0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+		0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+                0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+density=1.0
+SolverOptions=hasQuantumNumbers,wft,noSu2,,hasThreads
+Version=aec8964f7a782d87d587c27276acd41760808139
+OutputFile=data103.txt
+InfiniteLoopKeptStates=100
+FiniteLoops 6  7 400 0 -7 400 0 -7 400 0 7 400 1 
+	7 400 1 -1 400 1 
+TargetQuantumNumbers 3 0.5 0.5 0
    
+Threads=2
+
