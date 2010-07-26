@@ -18,6 +18,9 @@ Tests *with* SU(2) symmetry:
         INF(226)+29(226)-29(226)-29(226)+29(226) with angularMomentum j=5 (as in the literature)
 7) Like test 4 but with many times
 8) Like test 5 but with many times
+9) Time Evolution
+10) Time Evolution
+11) Hubbard Ladder 
 20) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1 with 16+16 sites
 	INF(60)+7(100)-7(100)-7(100)+7(100)
 21) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=2.5 with 8+8 sites
@@ -30,15 +33,16 @@ Tests *with* SU(2) symmetry:
         checkpointB
 25)  Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=2.5 with 8+8 sites
         INF(100)+7(200)-7(200)-7(200)+7(200) To check the WFT
+26) Fig 6(c) of PhysRevB48-10345
 40) Fe-based Superconductors model (HuFeAS-2orb) on a ladder (LadderFeAs) with U=0 J=0 with 4+4 sites
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
 41) Fe-based Superconductors model (HuFeAS-2orb) on a ladder (LadderFeAs) with U=1 J=1 with 4+4 sites
 	INF(60)+7(100)-7(100)-7(100)+7(100)
 60) t-J one-Orbital (tjOneOrbital) on a chain with t=1 J=1 with 16+16 sites
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
+100) same as 0 but without su(2) symmetry
+101) same as 1 but without su(2) symmetry
+102) same as 2 but without su(2) symmetry
+103) same as 3 but without su(2) symmetry
 
-Note 1: Tests *without* SU(2) symmetry: Add 100 to the above test.
-	For example test 102) is test 2) with SU(2) symmetry *disabled*.
-
-Note 2: This test suite does not support pthreaded tests yet.
 #TAGEND DO NOT REMOVE THIS TAG

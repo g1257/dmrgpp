@@ -332,7 +332,7 @@ namespace Dmrg {
 					while(!fin_.eof()) {
 						fin_>>temp;
 						//c++;
-						//if (temp[0]=='#') std::cerr<<"Line="<<temp<<" target="<<s<<" count="<<c<<"\n";
+						//std::cerr<<"Line="<<temp<<" target="<<s<<"\n";
 						if (fin_.eof() || !fin_.good() || fin_.bad()) break;
 						
 						if (temp.substr(0,s.size())==s) {

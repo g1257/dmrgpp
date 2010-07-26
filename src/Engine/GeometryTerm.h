@@ -98,15 +98,15 @@ namespace Dmrg {
 				int x;
 				io.readline(x,"DegreesOfFreedom=");
 				if (x<=0) throw std::runtime_error("DegreesOfFreedom<=0 is an error\n");
-				std::cerr<<"DegreesOfFreedom "<<x<<"\n";
+				//std::cerr<<"DegreesOfFreedom "<<x<<"\n";
 				edof_ = x;
 				std::string s;
 				io.readline(s,"GeometryKind=");
-				std::cerr<<"GeometryKind "<<s<<"\n";
+				//std::cerr<<"GeometryKind "<<s<<"\n";
 				geometryKind_=getGeometry(s);
 				std::string gOptions;
 				io.readline(gOptions,"GeometryOptions=");
-				std::cerr<<"GeometryOptions "<<gOptions<<"\n";
+				//std::cerr<<"GeometryOptions "<<gOptions<<"\n";
 				size_t dirs = 0;
 				switch (geometryKind_) {
 					case GeometryDirectionType::LADDER:

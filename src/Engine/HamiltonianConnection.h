@@ -189,8 +189,8 @@ namespace Dmrg {
 				int offset = modelHelper_.basis2().block().size();
 				PairType ops;
 				std::pair<char,char> mods('N','C');
-				size_t fermionOrBoson,angularMomentum,category;
-				RealType angularFactor;
+				size_t fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
+				RealType angularFactor=0;
 				bool isSu2 = modelHelper_.isSu2();
 				SparseElementType value = valuec;
 				LinkProductType::valueModifier(value,dofs,isSu2);
@@ -231,8 +231,8 @@ namespace Dmrg {
 				int offset =modelHelper_.basis2().block().size();
 				std::pair<size_t,size_t> ops;
 				std::pair<char,char> mods('N','C');
-				size_t fermionOrBoson,angularMomentum,category;
-				RealType angularFactor;
+				size_t fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
+				RealType angularFactor=0;
 				bool isSu2 = modelHelper_.isSu2();
 				LinkProductType::setLinkData(dofs,isSu2,
 						fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
