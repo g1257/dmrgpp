@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define HAMILTONIAN_CONNECTION_H
 
 #include "Utils.h"
+#include "LinkProductStruct.h"
 
 namespace Dmrg {
 	
@@ -91,8 +92,9 @@ namespace Dmrg {
 			typedef typename ModelHelperType::RealType RealType;
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef typename LinkProductType::LinkProductStructType LinkProductStructType;
+			typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 			typedef typename ModelHelperType::LinkType LinkType;
+			typedef std::pair<size_t,size_t> PairType;
 			
 			HamiltonianConnection(
 				const GeometryType& geometry,
@@ -167,7 +169,7 @@ namespace Dmrg {
 					size_t term = lps_.termsaved[ix];
 					size_t dofs = lps_.dofssaved[ix];
 					SparseElementType tmp=lps_.tmpsaved[ix];
-					linkProduct(xtemp,y_,i,j,type,tmp,modelHelper_,term,dofs);
+					linkProduct(xtemp,y_,i,j,type,tmp,term,dofs);
 					
 				}
 				if (myMutex) pthread_mutex_lock( myMutex);
@@ -175,39 +177,43 @@ namespace Dmrg {
 				if (myMutex) pthread_mutex_unlock( myMutex );
 			}
 
-			//! Adds a tight-binding bond between system and environment
+			//! Adds a connector between system and environment
 			size_t calcBond(
 				SparseMatrixType &matrixBlock,
     				size_t i,
 				size_t j,
     				size_t type,
-				const SparseElementType& value,
+				const SparseElementType& valuec,
     				size_t dofs) const
 			{
 				int offset = modelHelper_.basis2().block().size();
-				std::pair<size_t,size_t> ops;
+				PairType ops;
+				std::pair<char,char> mods('N','C');
 				size_t fermionOrBoson,angularMomentum,category;
 				RealType angularFactor;
-				LinkProductType::setLinkData(dofs,fermionOrBoson,ops,angularMomentum,angularFactor,category);
+				bool isSu2 = modelHelper_.isSu2();
+				SparseElementType value = valuec;
+				LinkProductType::valueModifier(value,dofs,isSu2);
+				LinkProductType::setLinkData(dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				LinkType link(i,j,type, value,dofs,
-					      fermionOrBoson,ops,angularMomentum,angularFactor,category);
+					      fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				if (link.type==ProgramGlobals::SYSTEM_ENVIRON) {
 						
 					const SparseMatrixType& A=
-						modelHelper_.getReducedOperator('N',link.site1,
+						modelHelper_.getReducedOperator(link.mods.first,link.site1,
 							link.ops.first,ModelHelperType::System);
 					const SparseMatrixType& B=
-						modelHelper_.getReducedOperator('C',link.site2-offset,
+						modelHelper_.getReducedOperator(link.mods.second,link.site2-offset,
 							link.ops.second,ModelHelperType::Environ);
 					modelHelper_.fastOpProdInter(A,B,matrixBlock,link);
 				} else {
 // 						
 					if (link.type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"EEEEEEEEEEEERRRRRRRRRRRRRRROR\n";
 					const SparseMatrixType& A=
-						modelHelper_.getReducedOperator('N',link.site1-offset,
+						modelHelper_.getReducedOperator(link.mods.first,link.site1-offset,
 							link.ops.first,ModelHelperType::Environ);
 					const SparseMatrixType& B=
-						modelHelper_.getReducedOperator('C',link.site2,
+						modelHelper_.getReducedOperator(link.mods.second,link.site2,
 							link.ops.second,ModelHelperType::System);
 					modelHelper_.fastOpProdInter(A,B,matrixBlock,link);
 				}
@@ -215,44 +221,46 @@ namespace Dmrg {
 				return matrixBlock.nonZero();
 				
 			}
-			
-			
+
 		private:
-			
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
 			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
 						size_t i,size_t j,size_t type,
-				SparseElementType  &value,
-				const ModelHelperType& modelHelper,size_t term,size_t dofs)  const
+				const SparseElementType  &valuec,size_t term,size_t dofs)  const
 			{
-				int offset =modelHelper.basis2().block().size();
+				int offset =modelHelper_.basis2().block().size();
 				std::pair<size_t,size_t> ops;
+				std::pair<char,char> mods('N','C');
 				size_t fermionOrBoson,angularMomentum,category;
 				RealType angularFactor;
-				LinkProductType::setLinkData(dofs,fermionOrBoson,ops,angularMomentum,angularFactor,category);
-				LinkType link(i,j,type, value,dofs,
-					      fermionOrBoson,ops,angularMomentum,angularFactor,category);
+				bool isSu2 = modelHelper_.isSu2();
+				LinkProductType::setLinkData(dofs,isSu2,
+						fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
+				SparseElementType value = valuec;
+				LinkProductType::valueModifier(value,dofs,isSu2);
 				
+				LinkType link(i,j,type, value,dofs,
+					      fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
 					
 					//A=modelHelper.basis2().getOperator(i,sigma);
-					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i,
+					const SparseMatrixType& A=modelHelper_.getReducedOperator(mods.first,i,
 							link.ops.first,ModelHelperType::System);
 					//B=modelHelper.getTcOperator(dof_*(j-offset)+sigma2,ModelHelperType::Environ);
-					const SparseMatrixType& B=modelHelper.getReducedOperator('C',j-offset,
+					const SparseMatrixType& B=modelHelper_.getReducedOperator(mods.second,j-offset,
 							link.ops.second,ModelHelperType::Environ);
-					modelHelper.fastOpProdInter(x,y,A,B,link);
+					modelHelper_.fastOpProdInter(x,y,A,B,link);
 						
 				} else {		
 					if (type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"EEEEEEEEEEEERRRRRRRRRRRRRRROR\n";
 						//A=modelHelper.basis3().getOperator(i-offset,sigma);
-					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i-offset,
+					const SparseMatrixType& A=modelHelper_.getReducedOperator(mods.first,i-offset,
 							link.ops.first,ModelHelperType::Environ);
 						
 						//B=modelHelper.getTcOperator(j*dof_+sigma2,ModelHelperType::System);
-					const SparseMatrixType& B=modelHelper.getReducedOperator('C',j,
+					const SparseMatrixType& B=modelHelper_.getReducedOperator(mods.second,j,
 							link.ops.second,ModelHelperType::System);
-					modelHelper.fastOpProdInter(x,y,A,B,link);
+					modelHelper_.fastOpProdInter(x,y,A,B,link);
 						
 				}
 				

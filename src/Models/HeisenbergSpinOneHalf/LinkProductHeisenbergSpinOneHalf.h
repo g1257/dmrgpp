@@ -87,181 +87,66 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	template<typename ModelHelperType>
 	class LinkProductHeisenbergSpinOneHalf {
-			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			
 		public:
-			typedef typename ModelHelperType::RealType RealType;
+			typedef std::pair<size_t,size_t> PairType;
+			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef LinkProductStruct<SparseElementType> LinkProductStructType;
-			
-			LinkProductHeisenbergSpinOneHalf(size_t dof,
-				   const ModelHelperType& modelHelper,
-				   const LinkProductStructType& lps,
-				    std::vector<SparseElementType>& x,
-				   const std::vector<SparseElementType>& y) : dof_(dof),modelHelper_(modelHelper),lps_(lps),
-					x_(x),y_(y)
-			{
-			}
+			typedef typename ModelHelperType::RealType RealType;
 
-			void thread_function_(size_t threadNum,size_t blockSize,pthread_mutex_t* myMutex)
+			static void setLinkData(
+					size_t dofs,
+     					bool isSu2,
+					size_t& fermionOrBoson,
+					std::pair<size_t,size_t>& ops,
+					std::pair<char,char>& mods,
+					size_t& angularMomentum,
+     					RealType& angularFactor,
+					size_t& category)
 			{
-				std::vector<SparseElementType> xtemp(x_.size());
-				for (size_t i=0;i<xtemp.size();i++) xtemp[i]=0;
-				for (size_t p=0;p<blockSize;p++) {
-					size_t ix = threadNum * blockSize + p;
-					size_t i=lps_.isaved[ix];
-					size_t j=lps_.jsaved[ix];
-					//size_t dof1=lps_.dof1saved[ix];
-					//size_t dof2=lps_.dof2saved[ix];
-					size_t type=lps_.typesaved[ix];
-					size_t term = lps_.termsaved[ix];
-					size_t dofs = lps_.dofssaved[ix];
-					SparseElementType tmp=lps_.tmpsaved[ix];
-					linkProduct(xtemp,y_,i,j,type,tmp,modelHelper_,term,dofs);
-					
+				fermionOrBoson = ProgramGlobals::BOSON;
+				ops = operatorDofs(dofs,isSu2);
+				angularMomentum = 2;
+				char tmp = mods.first;
+				switch (dofs) {
+					case 0:
+						angularFactor = -1;
+						category = 2;
+						break;
+					case 1:
+						angularFactor = -1;
+						category = 0;
+						mods.first = mods.second;
+						mods.second = tmp;
+						break;
+					case 2:
+						angularFactor = 0.5;
+						category = 1;
+						break;
 				}
-				if (myMutex) pthread_mutex_lock( myMutex);
-				for (size_t i=0;i<x_.size();i++) x_[i]+=xtemp[i];
-				if (myMutex) pthread_mutex_unlock( myMutex );
-				
-			}
-
-			//! Adds an Exchange bond between system and environment
-			static size_t calcBond(size_t i,size_t j,size_t type,
-					SparseElementType  val,
-					SparseMatrixType &matrix,
-					const ModelHelperType& modelHelper,size_t term,size_t dofs)
-			{
-				//int const SystemEnviron=1,EnvironSystem=2;
-				int offset = modelHelper.basis2().block().size();
-				SparseMatrixType matrixBlock;
-				size_t of=1;
-				if (modelHelper.isSu2()) {
-					of=0;
-					val = -val;
-				}
-				SparseElementType valOver2 = val*0.5;
-				size_t angularMomentum=2;
-
-				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
-					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i,0,ModelHelperType::System);
-					const SparseMatrixType& B=modelHelper.getReducedOperator('N',j-offset,0,ModelHelperType::Environ);
-					SparseMatrixType Aconj=modelHelper.getReducedOperator('C',i,0,ModelHelperType::System);
-					SparseMatrixType Bconj=modelHelper.getReducedOperator('C',j-offset,0,ModelHelperType::Environ);
-				
-					// 0.5*S^+_i S^-_j
-					RealType angularFactor = -1.0;	
-					modelHelper.fastOpProdInter(A,Bconj,type,valOver2,matrix,false,angularMomentum,angularFactor,2);
-					
-					// 0.5*S^-_i S^+_j
-					angularFactor = -1.0;	
-					modelHelper.fastOpProdInter(Aconj,B,type,valOver2,matrixBlock,false,angularMomentum,angularFactor,0);
-					matrix += matrixBlock;
-					
-					// S^z_i*S^z_j
-					const SparseMatrixType& Az=modelHelper.getReducedOperator('N',i,of,ModelHelperType::System);
-					const SparseMatrixType& Bz=modelHelper.getReducedOperator('C',j-offset,of,ModelHelperType::Environ);
-					angularFactor = 1.0/2.0; // needs to be in sync with LinkProductHeisenberg.h
-					modelHelper.fastOpProdInter(Az,Bz,type,val,matrixBlock,false,angularMomentum,angularFactor,1);
-					matrix += matrixBlock;
-				} else {	
-					if (type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"EEEEEEEERRRRRRRRRRRROOOOOOOOOOORRRRRRRRRRR\n";
-				
-					const SparseMatrixType& A=modelHelper.getReducedOperator('N',i-offset,0,ModelHelperType::Environ);
-					const SparseMatrixType& B=modelHelper.getReducedOperator('N',j,0,ModelHelperType::System);
-					SparseMatrixType Aconj=modelHelper.getReducedOperator('C',i-offset,0,ModelHelperType::Environ);
-					SparseMatrixType Bconj=modelHelper.getReducedOperator('C',j,0,ModelHelperType::System);
-					
-					// 0.5*S^+_i S^-_j	
-					RealType angularFactor = -1.0;
-					modelHelper.fastOpProdInter(A,Bconj,type,valOver2,matrix,false,angularMomentum,angularFactor,2);
-					
-					// 0.5*S^-_i S^+_j
-					angularFactor = -1.0;
-					modelHelper.fastOpProdInter(Aconj,B,type,valOver2,matrixBlock,false,angularMomentum,angularFactor,0);
-					matrix += matrixBlock;
-					
-					// S^z_i*S^z_j
-					const SparseMatrixType& Az=modelHelper.getReducedOperator('N',i-offset,of,ModelHelperType::Environ);
-					const SparseMatrixType& Bz=modelHelper.getReducedOperator('C',j,of,ModelHelperType::System);
-					angularFactor = 1.0/2.0; // needs to be in sync with LinkProductHeisenberg.h
-					modelHelper.fastOpProdInter(Az,Bz,type,val,matrixBlock,false,angularMomentum,angularFactor,1);
-					matrix += matrixBlock;
-				}
-				return matrix.nonZero();
 			}
 			
-			static size_t dofs() { return 1; }
+			static void valueModifier(SparseElementType& value,size_t dofs,bool isSu2)
+			{
+				if (isSu2) value = -value;
+				if (dofs<2) value *= 0.5;
+			}
 			
-			static std::pair<size_t,size_t> edofs(size_t dofs,size_t term)
+			static size_t dofs() { return 3; }
+			
+			static PairType connectorDofs(size_t dofs,size_t term)
 			{
 				return std::pair<size_t,size_t>(0,0); // no orbital and no anisotropy
 			}
 
 		private:
-			size_t dof_;
-			const ModelHelperType& modelHelper_;
-			const LinkProductStructType& lps_;
-			std::vector<SparseElementType>& x_;
-			const std::vector<SparseElementType>& y_;
-
-		void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
-					size_t i,size_t j,int type,
-			     SparseElementType  val,
-			     const ModelHelperType& modelHelper,size_t term,size_t dofs)  const
-		{
-			//int const SystemEnviron=1,EnvironSystem=2;
-			int offset = modelHelper.basis2().block().size();
-			size_t of=1;
-			if (modelHelper.isSu2()) {
-				of=0;
-				val = -val;
-			}
-			SparseElementType valOver2 = val*0.5;
-			size_t angularMomentum=2;
-
-			if (type==ProgramGlobals::SYSTEM_ENVIRON) {
-				const SparseMatrixType& A=modelHelper.getReducedOperator('N',i,0,ModelHelperType::System);
-				const SparseMatrixType& B=modelHelper.getReducedOperator('N',j-offset,0,ModelHelperType::Environ);
-				SparseMatrixType Aconj=modelHelper.getReducedOperator('C',i,0,ModelHelperType::System);
-				SparseMatrixType Bconj=modelHelper.getReducedOperator('C',j-offset,0,ModelHelperType::Environ);
 			
-				// 0.5*S^+_i S^-_j
-				RealType angularFactor = -1.0;	
-				modelHelper.fastOpProdInter(x,y,A,Bconj,type,valOver2,false,angularMomentum,angularFactor,2);
-				
-				// 0.5*S^-_i S^+_j
-				angularFactor = -1.0;	
-				modelHelper.fastOpProdInter(x,y,Aconj,B,type,valOver2,false,angularMomentum,angularFactor,0);
-				
-				// S^z_i*S^z_j
-				const SparseMatrixType& Az=modelHelper.getReducedOperator('N',i,of,ModelHelperType::System);
-				const SparseMatrixType& Bz=modelHelper.getReducedOperator('C',j-offset,of,ModelHelperType::Environ);
-				angularFactor = 1.0/2.0; // needs to be in sync with LinkProductHeisenberg.h
-				modelHelper.fastOpProdInter(x,y,Az,Bz,type,val,false,angularMomentum,angularFactor,1);
-			} else {
-				if (type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"EEEEEEEERRRRRRRRRRRROOOOOOOOOOORRRRRRRRRRR\n";
-
-				const SparseMatrixType& A=modelHelper.getReducedOperator('N',i-offset,0,ModelHelperType::Environ);
-				const SparseMatrixType& B=modelHelper.getReducedOperator('N',j,0,ModelHelperType::System);
-				SparseMatrixType Aconj=modelHelper.getReducedOperator('C',i-offset,0,ModelHelperType::Environ);
-				SparseMatrixType Bconj=modelHelper.getReducedOperator('C',j,0,ModelHelperType::System);
-				
-				// 0.5*S^+_i S^-_j	
-				RealType angularFactor = -1.0;
-				modelHelper.fastOpProdInter(x,y,A,Bconj,type,valOver2,false,angularMomentum,angularFactor,2);
-				
-				// 0.5*S^-_i S^+_j
-				angularFactor = -1.0;
-				modelHelper.fastOpProdInter(x,y,Aconj,B,type,valOver2,false,angularMomentum,angularFactor,0);
-				
-				// S^z_i*S^z_j
-				const SparseMatrixType& Az=modelHelper.getReducedOperator('N',i-offset,of,ModelHelperType::Environ);
-				const SparseMatrixType& Bz=modelHelper.getReducedOperator('C',j,of,ModelHelperType::System);
-				angularFactor = 1.0/2.0; // needs to be in sync with LinkProductHeisenberg.h
-				modelHelper.fastOpProdInter(x,y,Az,Bz,type,val,false,angularMomentum,angularFactor,1);
+			static PairType operatorDofs(size_t dofs,bool isSu2)
+			{
+				if (dofs<2) return PairType(0,0);
+				size_t x = (isSu2) ? 0 : 1;
+				return PairType(x,x);
 			}
-		}
 	}; // class LinkProductHeisenbergSpinOneHalf
 } // namespace Dmrg
 /*@}*/

@@ -90,12 +90,12 @@ namespace Dmrg {
 	struct Link {
 		typedef std::pair<size_t,size_t> PairType;
 		Link(size_t i,size_t j,size_t type1,const FieldType& value1,size_t dofs1,
-		    	size_t fOb,const PairType& ops1,
+		    	size_t fOb,const PairType& ops1,const std::pair<char,char>& mods1,
        			size_t aM,RealType aF,
 	  		size_t cat) 
 			: site1(i),site2(j),
 			type(type1),value(value1),dofs(dofs1),
-			fermionOrBoson(fOb),ops(ops1),
+			fermionOrBoson(fOb),ops(ops1),mods(mods1),
        			angularMomentum(aM),angularFactor(aF),
 	  		category(cat) 
 		{
@@ -107,6 +107,7 @@ namespace Dmrg {
 		size_t dofs;
 		size_t fermionOrBoson;
 		std::pair<size_t,size_t> ops; // operator indices
+		std::pair<char,char> mods; // operator modifiers
 		size_t angularMomentum;
 		RealType angularFactor;
 		size_t category;

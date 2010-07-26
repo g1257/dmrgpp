@@ -82,33 +82,54 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_PRODUCT_H
 #define LINK_PRODUCT_H
 
-#include "LinkProductStruct.h"
-
 namespace Dmrg {
 	
 	template<typename ModelHelperType>
 	class LinkProductFeAs {
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
-			//typedef typename ModelHelperType::LinkType LinkType;
+			typedef std::pair<size_t,size_t> PairType;
 			
 		public:
 			typedef typename ModelHelperType::RealType RealType;
-			typedef LinkProductStruct<SparseElementType> LinkProductStructType;
+			//typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 			
 			static size_t dofs() { return 8; }
 			
 			// has only dependence on orbital
-			static std::pair<size_t,size_t> connectorDofs(size_t dofs,size_t term)
+			static PairType connectorDofs(size_t dofs,size_t term)
 			{
 				size_t spin = dofs/4;
 				size_t xtmp = (spin==0) ? 0 : 4;
 				xtmp = dofs - xtmp;
 				size_t orb1 = xtmp/2;
 				size_t orb2 = (xtmp & 1);
-				return std::pair<size_t,size_t>(orb1,orb2); // has only dependence on orbital
+				return PairType(orb1,orb2); // has only dependence on orbital
 			}
 			
+			static void setLinkData(
+					size_t dofs,
+     					bool isSu2,
+					size_t& fermionOrBoson,
+					PairType& ops,
+     					std::pair<char,char>& mods,
+					size_t& angularMomentum,
+     					RealType& angularFactor,
+					size_t& category)
+			{
+				fermionOrBoson = ProgramGlobals::FERMION;
+				size_t spin = getSpin(dofs);
+				ops = operatorDofs(dofs);
+				angularFactor = 1;
+				if (spin==1) angularFactor = -1;
+				angularMomentum = 1;
+				category = spin;
+			}
+			
+			static void valueModifier(SparseElementType& value,size_t dofs,bool isSu2)
+			{
+			}
+		private:
 			// spin is diagonal
 			static std::pair<size_t,size_t> operatorDofs(size_t dofs)
 			{
@@ -126,25 +147,6 @@ namespace Dmrg {
 			{
 				return dofs/4;
 			}
-			
-			static void setLinkData(
-					size_t dofs,
-					size_t& fermionOrBoson,
-					std::pair<size_t,size_t>& ops,
-					size_t& angularMomentum,
-     					RealType& angularFactor,
-					size_t& category)
-			{
-				fermionOrBoson = ProgramGlobals::FERMION;
-				size_t spin = getSpin(dofs);
-				ops = operatorDofs(dofs);
-				angularFactor = 1;
-				if (spin==1) angularFactor = -1;
-				angularMomentum = 1;
-				category = spin;
-			}
-			
-		private:
 	}; // class LinkPRoductFeAs
 } // namespace Dmrg
 /*@}*/

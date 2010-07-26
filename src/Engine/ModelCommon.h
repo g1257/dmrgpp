@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "VerySparseMatrix.h"
 #include "IoSimple.h"
-//#include "Basis.h"
 #include "HamiltonianConnection.h"
 
 namespace Dmrg {
@@ -101,9 +100,9 @@ namespace Dmrg {
 			typedef typename ModelHelperType::RealType RealType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			typedef VerySparseMatrix<SparseElementType> VerySparseMatrixType;
-			typedef typename LinkProductType::LinkProductStructType LinkProductStructType;
 			typedef HamiltonianConnection<DmrgGeometryType,ModelHelperType,
 					LinkProductType> HamiltonianConnectionType;
+			typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 			typedef SharedMemoryTemplate<HamiltonianConnectionType> SharedMemoryType;
 			
 			ModelCommon(int DEGREES_OF_FREEDOM,const DmrgGeometryType& dmrgGeometry)
