@@ -4,5 +4,4 @@ observables
 C
 N
 Sz
-executable
-
+dmrg

@@ -67,6 +67,6 @@ Let $result = $resultsDir timeEvolution$testNum.txt
 Let $oracle = $oraclesDir timeEvolution$testNum.txt
 Let $stdoutAndStdErr = $resultsDir stderrAndOut$testNum.txt
 Let $diff = $resultsDir timeEvolution$testNum.diff
-CallOnce executable
+CallOnce dmrg
 Grep '|A|' $stdoutAndStdErr > $result
 Diff $result $oracle > $diff

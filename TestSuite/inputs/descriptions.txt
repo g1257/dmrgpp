@@ -18,6 +18,9 @@ Tests *with* SU(2) symmetry:
         INF(226)+29(226)-29(226)-29(226)+29(226) with angularMomentum j=5 (as in the literature)
 7) Like test 4 but with many times
 8) Like test 5 but with many times
+9)
+10)
+11)
 20) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1 with 16+16 sites
 	INF(60)+7(100)-7(100)-7(100)+7(100)
 21) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=2.5 with 8+8 sites
@@ -34,6 +37,7 @@ Tests *with* SU(2) symmetry:
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
 41) Fe-based Superconductors model (HuFeAS-2orb) on a ladder (LadderFeAs) with U=1 J=1 with 4+4 sites
 	INF(60)+7(100)-7(100)-7(100)+7(100)
+42)
 60) t-J one-Orbital (tjOneOrbital) on a chain with t=1 J=1 with 16+16 sites
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
 

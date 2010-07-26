@@ -68,11 +68,11 @@ my %dmrgHash = ();
 my %observeHash = ();
 my $globalRunFlag = 0;
 
-#Signals for Control+C escape and warnings
+#Interrupt signals when Control+C is pressed or a warning occurs
 $SIG{INT} = \&exit_handler;
 $SIG{__WARN__} = sub {die @_};
 
-#Handler for Control+C escape signal
+#Handler routine for aborting testsuite with Control+C signal
 sub exit_handler
 {
 	print "\nTestSuite aborted -> Manual cancellation\n";
@@ -85,32 +85,41 @@ eval {
 	die $! if(!GetOptions("n=i" => \$testNum, "l=i" => \$lastTest, "all" => \$all, "u" => \$update, 
 	"r" => \$rmFlag, "v" => \$verbose, "m" => \$noModel, "f" => \$force));
 	
-	#Activate testsuite program
+	#Activate testsuite program to run
 	$globalRunFlag = 1;
 	
 	while($globalRunFlag) {
-		#Starts main program
 		startProgram();
 	}
 };
+#Exception handling, catches any error from the testsuite program
 if($@) {
 	print "\nTestSuite aborted -> $@";
 	removeFiles();
 	kill 9, $$;
 }
 
+#Main routine: validates required directories, selects test/s, and runs the testsuite
 sub startProgram{
-	print "*******INITIAL PROCESSING*******\n";
+	print "*******INITIAL CONFIGURATIONS*******\n";
 	die "$!" if(!validateDirectory($srcDir));
 	die "$!" if(!validateDirectory($testDir));
 	die "$!" if(!validateFile($hashTable));
 	die "$!" if(!validateDirectory($resultsDir));
 	
 	if($update) {
-		updateHashTables();
-	} else {		
-		selectTest() if(!($all) && ($testNum eq ""));
-
+		updateHashTable();
+	} else {	
+		if(!($all)) {
+			if($testNum eq "") {
+				selectTest();
+			} else {
+				if(!validateTest(getAvailableTests())) {
+					selectTest();
+				}
+			}
+		}			
+		
 		if($all) {
 			runAllTests(0);
 		} elsif($testNum < 0) {
@@ -119,13 +128,16 @@ sub startProgram{
 			testSuite();
 		}
 		
-		print "*******FINAL PROCESSING*******\n";
+		print "*******FINAL CONFIGURATIONS*******\n";
 	}
 	
+	#Stop the testsuite program
 	$globalRunFlag = 0;
 }
 
-sub updateHashTables
+#Update the hash table by synchronizing between executable files in the src directory
+#and the key:value pairs in the hash table
+sub updateHashTable
 {
 	my $err = chdir($srcDir);
 	die "Changing directory to $srcDir: $!" if(!$err);
@@ -176,6 +188,7 @@ sub updateHashTables
 	print "*******END OF UPDATE*******\n";
 }
 
+#Displays available tests until user selects a valid one
 sub selectTest
 {
 	my $available = getAvailableTests();
@@ -190,6 +203,7 @@ sub selectTest
 	}
 }
 
+#Extracts from the descriptions file all the available tests that can be run
 sub getAvailableTests
 {
 	my $available = "";
@@ -217,6 +231,7 @@ sub getAvailableTests
 	return $available;
 }
 
+#Verifies if the test selected is valid
 sub validateTest
 {
 	my ($available) = @_;
@@ -224,18 +239,14 @@ sub validateTest
 	if($testNum =~ /(^-?\d+$)/) {
 		my $searchNum = abs($testNum);
 		my @found = grep(/$searchNum/, split(/ /,$available));
-		if(@found) {
-			if($testNum eq "-0") {
-				$testNum = 0;
-				$all = 1;
-			}
-			return 1;
-		}
-	}	
+		return 1 if(@found);
+	}
+	
 	print "\n<Error>: An incorrect test was selected! Try again.\n\n";
 	return 0;
 }
 
+#Verifies if a directory exists; creates a results directory if required
 sub validateDirectory	
 {
 	my ($dir) = @_;
@@ -244,13 +255,14 @@ sub validateDirectory
 		return 1;
 	} elsif($dir eq $resultsDir){
 		mkdir($dir) || die "Making directory $dir: $!";
-		print "Directory created: $dir/\n";
+		print "Directory created: $dir\n";
 		return 1;
 	}
 	
 	return 0;
 }
 
+#Verifies if a file exists; creates a hash table file if required
 sub validateFile	
 {
 	my ($file) = @_;
@@ -267,8 +279,11 @@ sub validateFile
 	return 0;
 } 
 
+#Reads from the hash table file all the key:value pairs and loads them into memory
 sub loadHashTable
 {
+	print "Loading hash table...\n";
+	
 	open(FILE, "<$hashTable") || die "Opening $hashTable: $!";
 	while(<FILE>) {
 		chomp;
@@ -293,10 +308,9 @@ sub loadHashTable
 		}
 	}
 	close(FILE) || die "Closing $hashTable: $!";
-	
-	print "Loading of hash table was successful.\n";
 }
 
+#Searches for a key in the hash table, returns if found or not
 sub findKey
 {
 	my ($refHash, $key) = @_;
@@ -308,22 +322,21 @@ sub findKey
 	return 0;
 }
 
+#Search for a value associated with the given key in the hash table
 sub findTn
 {
 	my ($refHash, $key) = @_;
 	
 	foreach my $k (keys %{$refHash}) {
 		if($key eq $k) {
-			if(grep $_ eq $testNum, @{${$refHash}{$key}}) {
-				print "Hash table is up-to-date.\n";
-				return 1;
-			} 
+			return 1 if(grep $_ eq $testNum, @{${$refHash}{$key}}) ;
 		}
 	}
 	
 	return 0;
 }
 
+#Adds a key:value entry to the hash table
 sub addKey
 {
 	my ($refHash, $key) = @_;
@@ -331,6 +344,7 @@ sub addKey
 	${$refHash}{$key} = [$testNum];
 }
 
+#Adds a test number associated to a specific key
 sub addTn
 {
 	my ($refHash, $key) = @_;
@@ -340,8 +354,11 @@ sub addTn
 	}
 }
 
+#Writes the hash table in memory to the hash table file
 sub saveHashTable
 {
+	print "Saving hash table...\n";
+	
 	open(FILE, ">$hashTable") || die "Opening $hashTable: $!";
 	if(keys %dmrgHash) {
 		print FILE "[dmrg]\n";
@@ -358,10 +375,9 @@ sub saveHashTable
 		}
 	}
 	close(FILE) || die "Closing $hashTable: $!";
-	
-	print "Saving of hash table was successful.\n";
 }
 
+#Runs a single test
 sub testSuite
 {
 	my $tempNum = $testNum;
@@ -384,18 +400,29 @@ sub testSuite
 		die "$!";
 	}
 	
+	print "Saving result files...\n";
 	moveFiles();
-	removeFiles() if($rmFlag);
-	print "All temporary files were successfully removed.\n";
+	if($rmFlag) {
+		print "Removing temporary files...\n";
+		removeFiles() ;
+	}
 }
 
+#Runs multiple tests by invoking the testSuite routine for each test
 sub runAllTests
 {
 	my ($start) = @_;
-	my @nonFunctionalTests = (24,60,104,105,106,107,108,124,125,141,160);
-	print "Preparing to run all tests starting from Test $start...\n";
-
+	#All test numbers declared in @nonFunctionalTests will be skipped and not ran
+	my @nonFunctionalTests = (24,41,42,60,104,105,106,107,108,109,110,111,124,125,141,142,160);
 	my @testsList = split(/ /,getAvailableTests());
+	
+	if($lastTest != -1) {
+		die "<Error>: Invalid tests range ($start,$lastTest).\n" if($lastTest < $start);
+		print "Preparing to run all tests from Test $start to Test $lastTest.\n";
+	} else {
+		print "Preparing to run all tests starting from Test $start...\n";
+		$lastTest = $testsList[$#testsList];
+	}
 	
 	for (my $i=0;$i<=$#testsList;$i++) {
 		next if ($testsList[$i] eq "");
@@ -406,9 +433,9 @@ sub runAllTests
 		$executable = "";
 		last if($testsList[$i] == $lastTest);
 	}
-	print "******ALL TESTS COMPLETED SUCCESSFULLY******\n";
 }
 
+#Reads all analyses described in the processing file for a specific test
 sub extractAnalyses
 {
 	my ($procFile) = @_;
@@ -426,12 +453,16 @@ sub extractAnalyses
 	return @analyses;
 }
 
+#Extracts the commands for each analysis of the current test, sends them to a key:value parser routine,
+#and then the commands are sent to an interpreter routine for execution
 sub processing
 {
 	my $lib = pop(@_);
 	my (@analyses) = @_;
 	my %procHash;
 	my @commands;
+	
+	print "Starting processing phase...\n";
 	
 	foreach my $analysis(@analyses) {
 		my @operations;
@@ -462,12 +493,14 @@ sub processing
 	
 	die "No analysis was found for Test $testNum.\n" if(!keys %procHash);
 	
+	#The following section of code resolves dependencies among the different analysis in the
+	#processing file for the current test
 	my %procCount;
 	my %tmpHash = %procHash;
 	my @dependencies;
 	my $depFlag;
 	my @depKeys;
-	my $keyword = "CallOnce";
+	my $keyword = "CallOnce";	#Keyword that establishes dependencies in the processing library
 	my $prevCount = 0;
 	
 	foreach my $analysis (keys %tmpHash) {
@@ -504,18 +537,22 @@ sub processing
 		die "Unresolved processing dependencies in $lib.\n" if($prevCount == keys %tmpHash);
 	}
 	
-	print "Processing completion successful.\n";
+	print "Ending processing phase...\n";
 }
 
+#Resolves the variables in the commands for each analysis of the current test
 sub keyValueParser
 {
 	my ($opsRef) = @_;
 	my @tmpKV;
-	my $keyword = "Let";
+	my $keyword = "Let";	#Keyword that marks key:value pairs used in the parsing action
 	my %tmpHash;
 	my @commands;
 	my %varHash;
+	#Only variables found in @varArray can be used in the processing library for substitution purposes
 	my @varArray = ("\$executable", "\$srcDir", "\$inputsDir", "\$resultsDir", "\$oraclesDir", "\$testNum");
+	#Variables in @nonSubsArray will not be resolved during the parsing, instead
+	#they are resolved prior to executing the command
 	my @nonSubsArray = ("\$executable");
 	
 	foreach (@varArray) {
@@ -549,10 +586,14 @@ sub keyValueParser
 	return @commands;
 }
 
+#Executes commands from the processing library by hooking the command to its routine
 sub commandsInterpreter
 {
 	my $analysis = pop(@_);
 	my (@commands) = @_;
+	#Keywords in @metaLang are used to hook a command with its routine
+	#Routines, in conjunction with meta language keywords, can be added to expand the runable commands in the processing library
+	#The commands will be executed following the order below from left to right
 	my @metaLang = ("Grep", "Execute", "Gprof", "Diff");
 	my @arrangeCommands;
 	
@@ -578,6 +619,8 @@ sub commandsInterpreter
 	}
 }
 
+#Subroutine for the 'Execute' keyword
+#'Execute' is used when the user defines custom routines 
 sub hookExecute
 {
 	my ($analysis, $arg) = @_;
@@ -591,8 +634,11 @@ sub hookExecute
 		my $subr = (caller(0))[3];
 		die "$subr: $@";
 	}
+	
+	print "$analysis:Execute command was successful.\n" if($verbose);
 }
 
+#Custom routine that creates the dmrg executable, if necessary, and runs it
 sub runDmrg
 {
 	my ($inputFile,$raw) = @_;
@@ -613,6 +659,8 @@ sub runDmrg
 		if(!findTn(\%dmrgHash, $specKey) ){
 			print "Updating hash table...\n";
 			addTn(\%dmrgHash, $specKey);
+		} else {
+			print "Hash table is up-to-date.\n";
 		}
 	}
 
@@ -626,9 +674,10 @@ sub runDmrg
 	die "Running test using $executable with $inputFile: $!" if($err);
 	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
-	print "The dmrg run has been completed.\n";
+	print "Completion of dmrg test.\n";
 }
 
+#Custom routine that creates the observe executable, if necessary, and runs it
 sub runObserve
 {
 	my ($inputFile, $raw) = @_;
@@ -649,6 +698,8 @@ sub runObserve
 		if(!findTn(\%observeHash, $specKey) ){
 			print "Updating hash table...\n";
 			addTn(\%observeHash, $specKey);
+		} else {
+			print "Hash table is up-to-date.\n";
 		}
 	}
 	
@@ -662,9 +713,10 @@ sub runObserve
 	die "Running test using $executable with $inputFile: $!" if($err);
 	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
-	print "The observe run has been completed.\n";
+	print "Completion of observe test.\n";
 }
 
+#Configures the current test, either manually or automatically (model spec file), and creates the executable
 sub createExecutables
 {
 	my ($specFile,$refKey,$configFile, $execType) = @_;
@@ -677,9 +729,9 @@ sub createExecutables
 	
 	my $err = chdir($srcDir);
 	die "Changing directory to $srcDir: $!" if(!$err);
+	print "Configuring $execType in Test $testNum...\n";
 	$err = system($arg1);
 	die "Configuration error using $configFile with $specFile: $!" if($err);
-	print "Configuration of $execType Test $testNum was successful.\n";
 	print "Creating $execType executable for Test $testNum...\n";
 	$err = system($arg2);
 	die "Make command for $execType: $!" if($err);
@@ -711,6 +763,7 @@ sub createExecutables
 	return $srcDir.$executable;	
 }
 
+#Retrieves model spec file of current test and returns the file with its hash key
 sub getSpecFileAndKey
 {
 	my $tempNum = $testNum;
@@ -722,6 +775,7 @@ sub getSpecFileAndKey
 	return $specFile, $specKey;
 }
 
+#Retrieves the data for the Operators C, N, and Sz from the observe run
 sub extractOperator
 {
 	my ($opName, $raw,$out) = @_;
@@ -747,9 +801,10 @@ sub extractOperator
 	open (OUTFILE, ">$out") || die "Opening $out: $!";
 	print OUTFILE $op;
 	close (OUTFILE) || die "Closing $out: $!";
-	print "Operator$opName extraction was succesful!\n";
+	print "Operator$opName extraction was succesful.\n" if($verbose);
 }
 
+#Searches for differences between the data in the operators oracles with the recently computed operators
 sub smartDiff
 {
 	my ($opName, $raw, $oracle, $output) = @_;
@@ -793,26 +848,27 @@ sub smartDiff
 		}
 	}
 	
+	open (FILE, ">$output") || die "Opening $output: $!";
 	if(scalar keys %mapPos) {
-		open (FILE, ">$output") || die "Opening $output: $!";
 		print FILE "Position    Raw    Oracle\n";
 		print FILE "--------    ---    ------\n";
 		foreach my $key (sort keys %mapPos) {
 			print FILE "$key : $mapPos{$key}\n";
-		}	
-		close (FILE) || die "Closing $output: $!";
+		}
 	}
+	close (FILE) || die "Closing $output: $!";
 		
-	print "Smart diff for Operator$opName was successful.\n";
+	print "Smart diff for Operator$opName was successful.\n" if($verbose);
 }
 
+#Hook routine for the 'gprof' command
 sub hookGprof
 {
 	my ($analysis, $arg) = @_;
 	
 	my $err = chdir($srcDir);
 	die "Changing directory to $srcDir: $!" if(!$err);
-	eval("system(\"gprof $arg\");");
+	eval("system(\"gprof $arg\") == 0 || die;");
 	if($@) {
 		my $subr = (caller(0))[3];
 		die "$subr: $@";
@@ -820,10 +876,10 @@ sub hookGprof
 	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
 	
-	print "$analysis:Gprof was successful.\n" if($verbose);
-	
+	print "$analysis:Gprof command was successful.\n" if($verbose);
 }
 
+#Hook routine for the 'diff' command
 sub hookDiff
 {
 	my ($analysis, $arg) = @_;
@@ -834,25 +890,27 @@ sub hookDiff
 		die "$subr: $@";
 	}
 
-	print "$analysis:Diff was successful.\n" if($verbose);
-	
+	print "$analysis:Diff command was successful.\n" if($verbose);
 }
 
+#Hook routine for the 'grep' command
 sub hookGrep
 {
 	my ($analysis, $arg) = @_;
 	
-	eval("system(\"grep $arg\");");
+	eval("system(\"grep $arg\") == 0 || die;");
 	if($@) {
 		my $subr = (caller(0))[3];
 		die "$subr: $@";
 	}
 	
-	print "$analysis:Grep was successful.\n" if($verbose);
+	print "$analysis:Grep command was successful.\n" if($verbose);
 }
 
+#Moves and organizes files created during the processing phase to a single directory
 sub moveFiles
 {
+	#Additional files can be added to @files and $destination can be modified as wanted
 	my @files = ("data$testNum.txt", "tst$testNum.txt", "SystemStackdata$testNum.txt", "EnvironStackdata$testNum.txt", "timeEvolution$testNum.txt");
 	my $destination = $resultsDir;
 	my $err = chdir($srcDir);
@@ -868,9 +926,11 @@ sub moveFiles
 	die "Changing directory to $testDir: $!" if(!$err);
 }
 
+#Cleans and removes unnecessary and temporary files during the final processing phase
 sub removeFiles
 {
-	my @files = ("Makefile*", "dmrg.*", "observe.*", "freeSystem*", "input.*", "raw$testNum.txt", "gmon.out");
+	#Additional files can be added to @files to be removed
+	my @files = ("Makefile*", "dmrg.*", "observe.*", "freeSystem*", "input.*", "raw$testNum.txt", "gmon.out", "data$testNum.txt", "tst$testNum.txt", "SystemStackdata$testNum.txt", "EnvironStackdata$testNum.txt", "timeEvolution$testNum.txt");
 
 	my $err = chdir($srcDir);
 	die "Changing directory to $srcDir: $!" if(!$err);
