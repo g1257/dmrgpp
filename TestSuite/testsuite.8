@@ -4,40 +4,51 @@
 testsuite.pl \- Systematically run tests for DMRG++ 
 .SH SYNOPSIS
 .B ./testsuite.pl 
-[\-a|\-\-all] [\-n int] [\-l int] [\-r] [\-v] [\-m] [\-f] [\-u]
+[\-a] [\-n int] [\-l int] [\-r] [\-v] [\-m] [\-f] [\-u]
 .SH DESCRIPTION
-If a test number is not given to testsuite.pl, it will display a list of available tests and ask which test to run. The command will create
-a driver program, a Makefile, and it will build DMRG++ and run it. Followed by interpretation of the results and comparisons using precomputed results. At any given time, the user can escape the testsuite.pl execution by pressing Control+C.
+If a test number is not given to testsuite.pl, it will display a list of available tests and ask which test to run. The testsuite will create
+a driver program, a Makefile, and it will build DMRG++ and run it. Followed by interpretation of the results and comparisons with precomputed results. 
+At any given time, the user can escape the 
+.B testsuite.pl
+execution by pressing Control+C.
 .SH OPTIONS
 .TP
 .B \-a,\-\-all
-Runs all available tests sequentially.
+Runs all available tests sequentially starting from the lowest one.
 .TP
-.B \-n=test num
-If test number is non-negative, runs the test with the given number.
+.B \-n=[test number]
+If test number is positive, runs the test with the given number.
 If test number is negative, runs all tests starting from test number to the end
 .B (or until limit test number).
 .TP
-.B \-l=limit test num
-Specificies the last test to run when running multiple tests sequentially. Applied when using the
+.B \-l=[last test number]
+Number that specifies the last test to run when running multiple tests. Can be used to specify a range of
+tests to be ran. Applied when using the
 .B \-\-all
 option or given a
 .B negative test number.
 .TP
-.B \-r remove
-When set all temporary files created during test configuration, compilation, and execution of DMRG++.
+.B \-r, --remove
+Deletes all temporary files created during test configuration, compilation, and execution of DMRG++.
+To modify which files to remove, go to the
+.B removeFiles
+subroutine in
+.B testsuite.pl.
 .TP
-.B \-v verbose
-Displays messages created during test selection, configuration, compilation, and execution of DMRG++. Descriptions of all tests are found in
+.B \-v, --verbose
+Displays messages created during test selection, configuration, compilation, and execution of DMRG++. This includes
+the descriptions of all tests which are found in
 .B inputs/descriptions.txt.
 .TP
-.B \-m manual config
-Provides the functionality for the user to manually enter configuration parameters prior to test compilation and execution. Auto configuration is the default setting.
+.B \-m, --manual
+Provides the functionality for the user to manually enter the configuration parameters for 
+.B configure.pl
+prior to test compilation and execution. Auto configuration is the default setting.
 .TP
-.B \-f force
+.B \-f, --force
 Runs the configuration and compilation processes even though they had already been made previously and valid executables exist for that test number.
 .TP
-.B \-u update
+.B \-u, --update
 Synchronizes and updates the hash table in 
 .B hashTable.txt
 with the existing executables in the 
@@ -48,18 +59,67 @@ Each test has a file associated with it
 .B (inputs/processing#.txt)
 which specifies the types of analyses to be done for that test. The implementation of each analysis is denoted with a custom meta language in
 .B inputs/processingLibrary.txt.
-This implementation of the test suite allows for scalability by adding new analyses to the processing library and connecting them with new subroutines in testsuite.pl.
-.SH PROCESSING LIBRARY
+This implementation of the testsuite allows it to be scalable by adding new analyses to the processing library and hooking them with new subroutines in
+.B testsuite.pl.
 .SH TESTS PROCESSING FILES
+The processing files describe the types of analyses to be performed for each test. The analyses available are found in
+.B processingLibrary.txt
+as tags enclosed in square brackets
+.B [dmrg]
+, with a series of commands following it. The analyses associated with each test are independent from the other tests.
+An analysis can be set inactive by appending the analysis with the pound sign (#). The order of the analyses does not matters since the dependencies among analyses,
+if any, are specified in the processing library file.
+.SH PROCESSING LIBRARY
+The library
+.B (inputs/processingLibrary.txt)
+identifies the available analyses that can be used in the testsuite. Using a simple meta language, the user can specify
+the type of commands and form dependencies among analyses. Each analyses is independent from the others in terms of parameters and key:value pairs.
+The basic keywords are:
+.TP
+.B Let [key]=[value]
+Associates a key:value pair for the commands pertaining to that test. For each pair, the key and value have to be appended by the dollar sign ($) and an equal sign (=)
+should be between them. The keys (left) are established by the user and can be used in the commands. The values (right) can be composed of user names, and variables
+allowed in the
+.B keyValueParser
+subroutine in
+.B testsuite.pl.
+
+Example: Let $resultFile = mydata.txt
+.TP
+.B CallOnce [analysis]
+Creates dependencies among analyses. This means that the analysis specified with CallOnce has to occur before the
+analysis establishing the dependency. Its parameter is the name of another analysis.
+
+Example: CallOnce analysis1, where analysis2 is describing its dependency to analysis1
+.TP
+.B Execute [subroutine]
+Runs a custom subroutine for that analysis. The name of the subroutine is user-defined and must be available in
+.B testsuite.pl.
+Passing parameters is allowed.
+
+Example: Execute createSimulation($geometry, $output)
+.TP
+.B [Others]
+The additional commands are common linux commands which are then hooked to a subroutine which will run them.
+In order to add an additional linux command, look for a similar command in
+.B testsuite.pl
+and copy the subroutine, change the name to "hook[command]", and change the command in the system call.
+The command availables should be specified in the
+.B commandsInterpreter
+subroutine in
+.B testsuite.pl.
+Available commands: Grep, Gprof, Diff
+Example: Grep $file1 $file2 > $output
 .SH AUTHOR
-G.A. & E.P.
+Gonzalo Alvarez & Eduardo Ponce
 .SH BUGS
-User has to enter configuration parameters for every executable of the same test if manual configuration is selected.
-Needs improvement in exception handling procedure.
+Cannot catch and stop execution when a Diff command error occurs.
 .SH LIMITATIONS
-Currently, testsuite.pl does not support MPI tests, or pthread
+Currently,
+.B testsuite.pl
+does not support MPI tests, or pthread
 tests. Also, a lot of DMRG++ functionality needs corresponding tests
 in the testsuite. This will be added eventually.
 .SH SEE ALSO
-configure.pl
+configure.pl, testsuite.pl, processingLibrary.txt
 

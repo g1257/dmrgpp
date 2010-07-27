@@ -52,7 +52,7 @@ use Getopt::Long;
 use Cwd 'abs_path';
 
 #Global variables and command line options
-my ($testNum,$lastTest) = ("",-1); 
+my ($testNum,$lastTest) = ("",""); 
 my ($all,$rmFlag,$update,$verbose,$noModel,$force) = (0,0,0,0,0,0);
 my ($testDir, $srcDir);
 my $PATH = $testDir = $srcDir = abs_path($0);
@@ -82,8 +82,8 @@ sub exit_handler
 
 eval {
 	#Get command line options
-	die $! if(!GetOptions("n=i" => \$testNum, "l=i" => \$lastTest, "all" => \$all, "u" => \$update, 
-	"r" => \$rmFlag, "v" => \$verbose, "m" => \$noModel, "f" => \$force));
+	die $! if(!GetOptions("n=i" => \$testNum, "l=i" => \$lastTest, "all" => \$all, "update" => \$update, 
+	"remove" => \$rmFlag, "verbose" => \$verbose, "manual" => \$noModel, "force" => \$force));
 	
 	#Activate testsuite program to run
 	$globalRunFlag = 1;
@@ -416,8 +416,8 @@ sub runAllTests
 	my @nonFunctionalTests = (24,41,42,60,104,105,106,107,108,109,110,111,124,125,141,142,160);
 	my @testsList = split(/ /,getAvailableTests());
 	
-	if($lastTest != -1) {
-		die "<Error>: Invalid tests range ($start,$lastTest).\n" if($lastTest < $start);
+	if($lastTest ne "") {
+		die "<Error>: Invalid tests range [$start,$lastTest].\n" if($lastTest < $start);
 		print "Preparing to run all tests from Test $start to Test $lastTest.\n";
 	} else {
 		print "Preparing to run all tests starting from Test $start...\n";
@@ -635,7 +635,7 @@ sub hookExecute
 		die "$subr: $@";
 	}
 	
-	print "$analysis:Execute command was successful.\n" if($verbose);
+	print "[$analysis]:Execute command was successful.\n" if($verbose);
 }
 
 #Custom routine that creates the dmrg executable, if necessary, and runs it
@@ -850,7 +850,7 @@ sub smartDiff
 	
 	open (FILE, ">$output") || die "Opening $output: $!";
 	if(scalar keys %mapPos) {
-		print FILE "Position    Raw    Oracle\n";
+		print FILE "(Row,Col)   Raw    Oracle\n";
 		print FILE "--------    ---    ------\n";
 		foreach my $key (sort keys %mapPos) {
 			print FILE "$key : $mapPos{$key}\n";
@@ -876,7 +876,7 @@ sub hookGprof
 	$err = chdir($testDir);
 	die "Changing directory to $testDir: $!" if(!$err);
 	
-	print "$analysis:Gprof command was successful.\n" if($verbose);
+	print "[$analysis]:Gprof command was successful.\n" if($verbose);
 }
 
 #Hook routine for the 'diff' command
@@ -890,7 +890,7 @@ sub hookDiff
 		die "$subr: $@";
 	}
 
-	print "$analysis:Diff command was successful.\n" if($verbose);
+	print "[$analysis]:Diff command was successful.\n" if($verbose);
 }
 
 #Hook routine for the 'grep' command
@@ -904,7 +904,7 @@ sub hookGrep
 		die "$subr: $@";
 	}
 	
-	print "$analysis:Grep command was successful.\n" if($verbose);
+	print "[$analysis]:Grep command was successful.\n" if($verbose);
 }
 
 #Moves and organizes files created during the processing phase to a single directory
