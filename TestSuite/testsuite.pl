@@ -113,10 +113,9 @@ sub startProgram{
 		if(!($all)) {
 			if($testNum eq "") {
 				selectTest();
-			} else {
-				if(!validateTest(getAvailableTests())) {
+			} elsif(!validateTest(getAvailableTests())) {
 					selectTest();
-				}
+
 			}
 		}			
 		
@@ -236,7 +235,11 @@ sub validateTest
 {
 	my ($available) = @_;
 	
-	if($testNum =~ /(^-?\d+$)/) {
+	if($testNum eq "-0") {
+		$all = 1;
+		$testNum = "";
+		return 1;
+	} elsif($testNum =~ /(^-?\d+$)/) {
 		my $searchNum = abs($testNum);
 		my @found = grep(/$searchNum/, split(/ /,$available));
 		return 1 if(@found);
