@@ -114,13 +114,14 @@ namespace Dmrg {
 			static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
 			
 			typedef unsigned int long long WordType;
-			typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
-			typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
+		
 			typedef typename ModelHelperType::BlockType Block;
 			typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 			typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 
 	public:
+		typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
+		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 		typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
