@@ -246,9 +246,15 @@ namespace Dmrg {
 		WaveFunctionTransformationType waveFunctionTransformation_;
 		std::vector<BlockType> sitesIndices_;
 		DiagonalizationType diagonalization_;
-		
-		void infiniteDmrgLoop(BlockType const &S,std::vector<BlockType> const &X,std::vector<BlockType> const &Y,BlockType const &E,
-				      MyBasisWithOperators &pS,MyBasisWithOperators &pE,TargettingType& psi)
+
+		void infiniteDmrgLoop(
+				BlockType const &S,
+				std::vector<BlockType> const &X,
+				std::vector<BlockType> const &Y,
+				BlockType const &E,
+				MyBasisWithOperators &pS,
+				MyBasisWithOperators &pE,
+				TargettingType& psi)
 		{
 			int ns,ne;
 
@@ -293,7 +299,7 @@ namespace Dmrg {
 			}
 			progress_.print("Infinite dmrg loop has been done!\n",std::cout);
 		}
-		
+
 		void finiteDmrgLoops(
 					BlockType const &S,
      					BlockType const &E,
@@ -320,7 +326,7 @@ namespace Dmrg {
 				finiteStep(S,E,pS,pE,i,psi);
 			}
 		}
-		
+
 		void finiteStep(
 				BlockType const &S,
 				BlockType const &E,
@@ -393,7 +399,7 @@ namespace Dmrg {
 			}
 			checkpointSave(pS,pE,loopIndex);
 		}
-		
+
 		void changeTruncateAndSerialize(MyBasisWithOperators& pS,MyBasisWithOperators& pE,
 			    const TargettingType& target,size_t keptStates,size_t direction,size_t saveOption)
 		{
@@ -411,7 +417,7 @@ namespace Dmrg {
 			
 			if (saveOption==SAVE_TO_DISK) serialize(electronsVector,target.gs(),transform,direction);
 		}
-		
+
 		void serialize(const std::vector<size_t>& electronsVector,const VectorWithOffsetType& psi,
 			      const TransformType& transform,size_t direction)
 		{
@@ -438,14 +444,14 @@ namespace Dmrg {
 			}
 			return false;
 		}
-		
+
 		std::string getDirection(size_t dir) const
 		{
 			if (dir==INFINITE) return  "INFINITE";
 			if (dir==EXPAND_ENVIRON) return "EXPAND_ENVIRON";
 			return "EXPAND_SYSTEM";
 		}
-		
+
 		//! add block X to basis pS and get basis pSprime
 		MyBasisWithOperators grow(MyBasisWithOperators &pSprime,const MyBasisWithOperators &pS,BlockType const &X,int dir)
 		{
@@ -462,7 +468,7 @@ namespace Dmrg {
 
 			if (dir==GROW_RIGHT) model_.addHamiltonianConnection(matrix,pSprime,pS,Xbasis,model_.orbitals());
 			else		     model_.addHamiltonianConnection(matrix,pSprime,Xbasis,pS,model_.orbitals());
-			
+
 			pSprime.setHamiltonian(matrix);
 			
 			return Xbasis;
@@ -565,14 +571,6 @@ namespace Dmrg {
 			return dir + s1 + suf;
 					
 		}
-		
-		/*void printOneSiteElectrons(const MyBasis& b)
-		{
-			std::string s = "#ONE_SITE_ELECTRONS\n";
-			if (b.block().size()!=1) throw std::runtime_error("printOneSiteElectrons failed\n");
-			b.save(io_);
-		}*/
-		
 	}; //class DmrgSolver
 } // namespace Dmrg
 

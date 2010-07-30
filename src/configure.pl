@@ -128,7 +128,7 @@ sub askQuestions
 	}
 	
 	print "What model do you want to compile?\n";
-	print "Available: Hubbard, Heisenberg or FeBasedSc or TjOneOrbital\n";
+	print "Available: Hubbard, Heisenberg or FeBasedSc or TjOneOrbital or ExtendedHubbard1Orbital\n";
 	print "Default is: Hubbard (press ENTER): ";
 	$_=<STDIN>;
 	chomp;
@@ -140,20 +140,24 @@ sub askQuestions
 	$modelFullName="HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i); 
 	$modelFullName="FeAsModel" if ($model=~/febasedsc/i);
 	$modelFullName="FeAsModel" if ($model=~/tjoneorbital/i);
+	$modelFullName="ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
 	
 	$modelLocation="Models/HubbardOneBand";
 	$modelLocation="Models/HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i); 
 	$modelLocation="Models/FeAsModel" if ($model=~/febasedsc/i);
 	$modelLocation="Models/TjOneOrbital" if ($model=~/tjoneorbital/i);
+	$modelLocation="Model/ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
 	
-	if ($model=~/hubbard/i or $model=~/febasedsc/i or $model=~/tjoneorbital/i) {
+	if ($model=~/hubbard/i or $model=~/febasedsc/i or $model=~/tjoneorbital/i
+		or $model=~/extendedhubbard1orb/i) {
 		$connectors="hoppings";
 	} elsif ($model=~/heisenberg/i) {
 		$connectors="jvalues";
 	}
 	
 	$connectors2="jvalues" if ($model=~/tjoneorbital/i);
-
+	$connectors2="ninjConnectors" if ($model=~/extendedhubbard1orb/i);
+	
 	if ($model=~/febasedsc/i) {
 		$geometry="ladderfeas";
 	} else {
@@ -329,6 +333,9 @@ sub createMakefile
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
 	my $compiler = compilerName();
 	my $headerFiles = join(' ', glob("Engine/*.h Models/*/*.h Geometries/*.h"));
+	if ($modelLocation=~/extendedhubbard1orb/i) {
+		$modelLocation = $modelLocation." -IModels/HubbardOneBand ";
+	}
 	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 print FOUT<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Modify configure.pl instead
@@ -1175,14 +1182,16 @@ sub getModelName()
 {
 	my $modelName = "UNKNOWN";
 
-	if ($model=~/hubbard/i) {
-		$modelName = "ModelHubbard";
-	} elsif ($model=~/heisenberg/i) {
+	if ($model=~/heisenberg/i) {
 		$modelName="ModelHeisenberg";
 	} elsif ($model=~/febasedsc/i) {
 		$modelName = "ModelFeBasedSc";
 	} elsif ($model=~/tjoneorbital/i) {
 		$modelName = "TjOneOrbital";
+	} elsif ($model=~/extendedhubbard1orb/i) {
+		$modelName = "ExtendedHubbard1Orb";
+	} elsif ($model=~/hubbard/i) {
+		$modelName = "ModelHubbard"; # after extended
 	}
 	return $modelName;
 }
