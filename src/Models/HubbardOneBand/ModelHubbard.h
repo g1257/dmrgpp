@@ -137,22 +137,13 @@ namespace Dmrg {
 
 		void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
-		//! internal degrees of freedom
-		int dof() const { return DEGREES_OF_FREEDOM; }
-
 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
 
-		//! return the maximum system size
-		int absoluteSystemSize() const { return modelParameters_.linSize; }
-
 		//! size of the hamiltonian matrix
-		int getSize(ModelHelperType const &modelHelper) const 
-		{
-			return modelHelper.size();
-		}
-
-		//! Return the target density
-		double density() const { return modelParameters_.density; }
+// 		int getSize(ModelHelperType const &modelHelper) const 
+// 		{
+// 			return modelHelper.size();
+// 		}
 
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
@@ -183,14 +174,14 @@ namespace Dmrg {
 			//! Set the operators c^\daggger_{i\sigma} in the natural basis
 			creationMatrix.clear();
 			for (size_t i=0;i<block.size();i++) {
-				for (int sigma=0;sigma<dof();sigma++) {
+				for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
 					tmpMatrix = findOperatorMatrices(i,sigma,natBasis);
 					int asign= 1;
 					if (sigma>0) asign= 1;
 					typename OperatorType::Su2RelatedType su2related;
 					if (sigma==0) {
-						su2related.source.push_back(i*dof());
-						su2related.source.push_back(i*dof()+1);	
+						su2related.source.push_back(i*DEGREES_OF_FREEDOM);
+						su2related.source.push_back(i*DEGREES_OF_FREEDOM+1);	
 						su2related.transpose.push_back(-1);
 						su2related.transpose.push_back(-1);
 						su2related.offset = NUMBER_OF_ORBITALS;
@@ -200,12 +191,6 @@ namespace Dmrg {
 					creationMatrix.push_back(myOp);
 				}
 			}
-		}
-
-		//! set block of sites S X Y and E (see paper for geometry description)
-		void setBlocksOfSites(Block &S,std::vector<Block> &X,std::vector<Block> &Y,Block &E) const 
-		{
-			dmrgGeometry_.setBlocksOfSites(S,X,Y,E);
 		}
 
 		psimag::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const
@@ -256,7 +241,7 @@ namespace Dmrg {
 		void setNaturalBasis(HilbertBasisType  &basis,int n) const
 		{
 			HilbertState a=0;
-			int sitesTimesDof=n*dof();
+			int sitesTimesDof=n*DEGREES_OF_FREEDOM;
 			HilbertState total = (1<<sitesTimesDof);
 
 			HilbertBasisType  basisTmp;
@@ -477,8 +462,8 @@ namespace Dmrg {
 							if (i==j || tmp==0.0) continue;
 				
 							size_t sigma = dofs;
-							transposeConjugate(tmpMatrix2,cm[sigma+j*dof()].data);
-							multiply(tmpMatrix,cm[sigma+i*dof()].data,tmpMatrix2);
+							transposeConjugate(tmpMatrix2,cm[sigma+j*DEGREES_OF_FREEDOM].data);
+							multiply(tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data,tmpMatrix2);
 							multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
 							hmatrix += tmpMatrix2;
 						}
@@ -487,12 +472,12 @@ namespace Dmrg {
 				// onsite U hubbard 
 				//n_i up
 				size_t sigma =0; // up sector
-				transposeConjugate(tmpMatrix,cm[sigma+i*dof()].data);
-				multiply(niup,tmpMatrix,cm[sigma+i*dof()].data);
+				transposeConjugate(tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
+				multiply(niup,tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
 				//n_i down
 				sigma =1; // down sector
-				transposeConjugate(tmpMatrix,cm[sigma+i*dof()].data);
-				multiply(nidown,tmpMatrix,cm[sigma+i*dof()].data);
+				transposeConjugate(tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
+				multiply(nidown,tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
 				 
 				multiply(tmpMatrix,niup,nidown);
 				//type = dmrgGeometry_.calcConnectorType(block[i],block[i]);

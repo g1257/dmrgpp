@@ -156,7 +156,7 @@ namespace Dmrg {
 				io_(parameters_.filename,concurrency.rank()),
 				ioIn_(parameters_.filename),
 				progress_("DmrgSolver",concurrency.rank()),
-				quantumSector_(-1),
+				quantumSector_(0),
 				stepCurrent_(0),
 				systemStack_(SYSTEM_STACK_STRING+parameters_.filename),
 				envStack_(ENVIRON_STACK_STRING+parameters_.filename),
@@ -240,7 +240,7 @@ namespace Dmrg {
 		typename IoType::Out io_;
 		typename IoType::In ioIn_;
 		ProgressIndicator progress_;
-		int quantumSector_;
+		size_t quantumSector_;
 		int stepCurrent_;
 		StackType systemStack_,envStack_;
 		WaveFunctionTransformationType waveFunctionTransformation_;
@@ -460,8 +460,8 @@ namespace Dmrg {
 			
 			SparseMatrixType matrix=pSprime.hamiltonian();
 
-			if (dir==GROW_RIGHT) model_.addHamiltonianConnection(matrix,pSprime,pS,Xbasis,model_.dof(),model_.orbitals());
-			else		     model_.addHamiltonianConnection(matrix,pSprime,Xbasis,pS,model_.dof(),model_.orbitals());
+			if (dir==GROW_RIGHT) model_.addHamiltonianConnection(matrix,pSprime,pS,Xbasis,model_.orbitals());
+			else		     model_.addHamiltonianConnection(matrix,pSprime,Xbasis,pS,model_.orbitals());
 			
 			pSprime.setHamiltonian(matrix);
 			
@@ -477,24 +477,23 @@ namespace Dmrg {
 
 		void updateQuantumSector(size_t sites)
 		{
-			if (parameters_.options.find("hasQuantumNumbers")!=std::string::npos) {
-				std::vector<size_t> targetQuantumNumbers(parameters_.targetQuantumNumbers.size());
-				for (size_t ii=0;ii<targetQuantumNumbers.size();ii++) 
-					targetQuantumNumbers[ii]=int(parameters_.targetQuantumNumbers[ii]*sites);
-				if (MyBasis::useSu2Symmetry()) {
-					size_t ne = targetQuantumNumbers[0]+targetQuantumNumbers[1];
-					if (ne%2==0) {
-						if (targetQuantumNumbers[2]%2!=0) targetQuantumNumbers[2]++;
-					} else {
-						if (targetQuantumNumbers[2]%2==0) targetQuantumNumbers[2]++;
-					}
-					std::ostringstream msg;
-					msg<<"Updating targets to "<<targetQuantumNumbers[0]<<" "<<	targetQuantumNumbers[1];
-					msg<<" "<<targetQuantumNumbers[2];
-					progress_.printline(msg,std::cout);
+			
+			std::vector<size_t> targetQuantumNumbers(parameters_.targetQuantumNumbers.size());
+			for (size_t ii=0;ii<targetQuantumNumbers.size();ii++) 
+				targetQuantumNumbers[ii]=int(parameters_.targetQuantumNumbers[ii]*sites);
+			if (MyBasis::useSu2Symmetry()) {
+				size_t ne = targetQuantumNumbers[0]+targetQuantumNumbers[1];
+				if (ne%2==0) {
+					if (targetQuantumNumbers[2]%2!=0) targetQuantumNumbers[2]++;
+				} else {
+					if (targetQuantumNumbers[2]%2==0) targetQuantumNumbers[2]++;
 				}
-				quantumSector_=MyBasis::pseudoQuantumNumber(targetQuantumNumbers);
-			} else quantumSector_= -1;
+				std::ostringstream msg;
+				msg<<"Updating targets to "<<targetQuantumNumbers[0]<<" "<<	targetQuantumNumbers[1];
+				msg<<" "<<targetQuantumNumbers[2];
+				progress_.printline(msg,std::cout);
+			}
+			quantumSector_=MyBasis::pseudoQuantumNumber(targetQuantumNumbers);
 		}
 
 		//! Truncate basis 

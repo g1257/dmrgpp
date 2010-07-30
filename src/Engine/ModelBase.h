@@ -117,13 +117,7 @@ namespace Dmrg {
 			{
 				Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 				MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
-			}  
-
-			//! return internal degrees of freedom for this model
-			int dof() const;
-
-			//! return the maximum system size
-			int absoluteSystemSize() const;
+			}
 
 			//! Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
 			//! of basis2 \otimes basis3
@@ -134,14 +128,8 @@ namespace Dmrg {
 				modelCommon_.matrixVectorProduct(x,y,modelHelper);
 			}
 
-			//! site of the hamiltonian matrix
-			int getSize(ModelHelperType const &modelHelper) const; 
-
-			//! electronic density
-			double density() const;
-
 			void addHamiltonianConnection(SparseMatrixType &matrix,MyBasis const &basis1,MyBasisWithOperators const &basis2,
-				MyBasisWithOperators const &basis3,size_t dof,size_t nOrbitals) const
+				MyBasisWithOperators const &basis3,size_t nOrbitals) const
 			{	
 				int bs,offset;
 				SparseMatrixType matrixBlock;
@@ -177,16 +165,8 @@ namespace Dmrg {
 			//! set operator matrices for sites in block
 			void setOperatorMatrices(std::vector<SparseMatrixType> &operatorMatrix,Block const &block) const;
 
-			//! split into S X Y and E
-			void setBlocksOfSites(Block &S,std::vector<Block> &X,std::vector<Block> &Y,Block &E) const; 
-
 			//! print model or model parameters
 			void print(std::ostream& os) const;
-
-			//! Given a vector of quantum numbers, return the effective quantum number 
-			//! (see paper for definition of "effective quantum number")
-			//! THis is used to run a single symmetry sector as specified in the input file
-			int getTargetSector(const std::vector<int>& quantumNumbers) const;
 			
 			//! Return H, the hamiltonian of the FeAs model for basis1 and partition m consisting of the external product
 			//! of basis2 \otimes basis3
@@ -195,8 +175,7 @@ namespace Dmrg {
 			{
 				modelCommon_.fullHamiltonian(matrix,modelHelper);
 			}
-	
-	
+
 		private:
 			ModelCommonType modelCommon_;
 	};     //class ModelBase

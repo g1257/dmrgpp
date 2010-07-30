@@ -144,20 +144,7 @@ namespace Dmrg {
 
 		void print(std::ostream& os) const { os<<modelParameters_; }
 
-		//! returns internal degrees of freedom for this model
-		int dof() const { return DEGREES_OF_FREEDOM; } 
-
 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
-
-		int absoluteSystemSize() const {return modelParameters_.linSize; }
-
-		//! site of the hamiltonian matrix
-		int getSize(ModelHelperType const &modelHelper) const 
-		{
-			return modelHelper.size();
-		}
-
-		double density() const { return 1.0; } // density of Heisenberg is constant and equal to 1
 
 		//! find  operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
@@ -192,9 +179,9 @@ namespace Dmrg {
 				tmpMatrix=findSplusMatrices(i,natBasis);
 
 				typename OperatorType::Su2RelatedType su2related;
-				su2related.source.push_back(i*dof());
-				su2related.source.push_back(i*dof()+NUMBER_OF_ORBITALS);	
-				su2related.source.push_back(i*dof());
+				su2related.source.push_back(i*DEGREES_OF_FREEDOM);
+				su2related.source.push_back(i*DEGREES_OF_FREEDOM+NUMBER_OF_ORBITALS);	
+				su2related.source.push_back(i*DEGREES_OF_FREEDOM);
 				su2related.transpose.push_back(-1);
 				su2related.transpose.push_back(-1);
 				su2related.transpose.push_back(1);
@@ -209,12 +196,6 @@ namespace Dmrg {
 				OperatorType myOp2(tmpMatrix,1,typename OperatorType::PairType(2,1),1.0/sqrt(2.0),su2related2);
 				operatorMatrices.push_back(myOp2);
 			}
-		}
-
-		//! set block of sites S X Y and E (see paper for geometry description)
-		void setBlocksOfSites(Block &S,std::vector<Block> &X,std::vector<Block> &Y,Block &E) const 
-		{
-			geometry_.setBlocksOfSites(S,X,Y,E);
 		}
 		
 		psimag::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const

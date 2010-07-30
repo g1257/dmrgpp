@@ -111,21 +111,20 @@ namespace Dmrg {
 			    oneSiteHilbertSize_(n1),skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
 				verbose_(verbose)
 		{}
-				
+
 		Observer(const std::string& filename,const std::string& timeFilename,size_t n,size_t n1,
 			ConcurrencyType& concurrency,size_t nf = 0,bool verbose=false)
 		: helper_(filename,timeFilename,nf,verbose),halfLatticeSize_(n),
 			    oneSiteHilbertSize_(n1),skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
 				verbose_(verbose)
 		{}
-				
-		
+
 		size_t size() const { return helper_.size(); }
-		
+
 		RealType time() const { return helper_.time(); }
-				
+
 		size_t site() const { return helper_.site(); }
-				
+
 		psimag::Matrix<FieldType> correlations(size_t n,const MatrixType& O1,const MatrixType& O2,int fermionicSign,
 						      size_t n1=0,size_t nf=0)
 		{
@@ -160,7 +159,7 @@ namespace Dmrg {
 			clearCache(n1, nf);
                         precomputeGrowth(O1,fermionicSign,n1,nf);
 		}
-	
+
 		// Return the vector: O1 * O2 |psi>
 		// where |psi> is the g.s. 
 		// Note1: O1 is applied to site i and O2 is applied to site j
@@ -182,7 +181,7 @@ namespace Dmrg {
 			}
 			return c;
 		}
-		
+
 		MatrixType multiplyTranspose(const MatrixType& O1,const MatrixType& O2)
 		{
 			size_t n=O1.n_row();
@@ -193,7 +192,7 @@ namespace Dmrg {
 						ret(s,t) += std::conj(O1(s,w))*O2(w,t);
 			return ret;
 		}
-		
+
 		MatrixType add(const MatrixType& O1,const MatrixType& O2)
 		{
 			size_t n=O1.n_row();
@@ -242,7 +241,7 @@ namespace Dmrg {
 			return sum;
 			//std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_<<" "<<label<<std::norm(src)<<" "<<std::norm(dest)<<"\n";
 		}
-		
+
 	private:
 		
 		FieldType calcDiagonalCorrelation(

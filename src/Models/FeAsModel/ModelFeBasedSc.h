@@ -143,21 +143,6 @@ namespace Dmrg {
 
 		void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
-		//! internal degrees of freedom
-		size_t dof() const { return DEGREES_OF_FREEDOM; }
-
-		//! return the maximum system size
-		int absoluteSystemSize() const { return modelParameters_.linSize; }
-
-		//! size of the hamiltonian matrix
-		int getSize(ModelHelperType const &modelHelper) const 
-		{
-			return modelHelper.size();
-		}
-
-		//! Return the target density
-		double density() const { return modelParameters_.density; }
-
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
 		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,SparseMatrixType &hamiltonian,
@@ -190,7 +175,7 @@ namespace Dmrg {
 			//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 			creationMatrix.clear();
 			for (size_t i=0;i<block.size();i++) {
-				for (size_t sigma=0;sigma<dof();sigma++) {
+				for (size_t sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
 					findOperatorMatrices(tmpMatrix,i,sigma,natBasis);
 					size_t m=0;
 					int asign=1;
@@ -200,8 +185,8 @@ namespace Dmrg {
 					}
 					typename OperatorType::Su2RelatedType su2related;
 					if (sigma <2) {
-						su2related.source.push_back(i*dof()+sigma);
-						su2related.source.push_back(i*dof()+sigma + NUMBER_OF_ORBITALS);	
+						su2related.source.push_back(i*DEGREES_OF_FREEDOM+sigma);
+						su2related.source.push_back(i*DEGREES_OF_FREEDOM+sigma + NUMBER_OF_ORBITALS);	
 						su2related.transpose.push_back(-1);
 						su2related.transpose.push_back(-1);
 						su2related.offset = NUMBER_OF_ORBITALS;
@@ -257,7 +242,7 @@ namespace Dmrg {
 		void setNaturalBasis(std::vector<HilbertState>  &basis,int n) const
 		{
 			HilbertState a=0;
-			int sitesTimesDof=n*dof();
+			int sitesTimesDof=n*DEGREES_OF_FREEDOM;
 			HilbertState total = (1<<sitesTimesDof);
 
 			std::vector<HilbertState>  basisTmp;
@@ -298,7 +283,7 @@ namespace Dmrg {
 		RealType sign(HilbertState const &ket, int i,size_t sigma) const
 		{
 			int value=0;
-			for (size_t alpha=0;alpha<dof();alpha++) 
+			for (size_t alpha=0;alpha<DEGREES_OF_FREEDOM;alpha++) 
 				value += HilbertSpaceFeAsType::calcNofElectrons(ket,0,i,alpha);
 			// add electron on site 0 if needed
 			if (i>0) value += HilbertSpaceFeAsType::electronsAtGivenSite(ket,0);
@@ -520,8 +505,8 @@ namespace Dmrg {
 							
 							size_t dof1 = orb1 + spin*2;
 							size_t dof2 = orb2 + spin*2;
-							transposeConjugate(tmpMatrix2,cm[dof2+j*dof()].data);
-							multiply(tmpMatrix,cm[dof1+i*dof()].data,tmpMatrix2);
+							transposeConjugate(tmpMatrix2,cm[dof2+j*DEGREES_OF_FREEDOM].data);
+							multiply(tmpMatrix,cm[dof1+i*DEGREES_OF_FREEDOM].data,tmpMatrix2);
 							multiplyScalar(tmpMatrix2,tmpMatrix,tmp);
 							hmatrix += tmpMatrix2;
 						}

@@ -112,7 +112,7 @@ namespace Dmrg {
 			std::cerr<<"Observer will use file: "<<filename<<" for core DMRG data\n";
 			init(nf);
 		}
-		
+
 		ObserverHelper(const std::string& filename,const std::string& timeFilename,size_t nf=0,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
@@ -127,7 +127,7 @@ namespace Dmrg {
 			init(nf);
 			integrityChecks();
 		}
-		
+
 		void setPointer(size_t pos)
 		{
 			//std::cerr<<"POS="<<pos<<"\n";
@@ -138,23 +138,22 @@ namespace Dmrg {
 		{
 			return dSerializerV_[currentPos_].transform(ret,O2);
 		}
-		
+
 		size_t columns() const
 		{
 			return dSerializerV_[currentPos_].columns();
 		}
-		
+
 		size_t rows() const
 		{
 			return dSerializerV_[currentPos_].rows();
 		}
-		
+
 		const FermionSign& fermionicSign() const
 		{
 			return dSerializerV_[currentPos_].fermionicSign();
 		}
-		
-		
+
 		const BasisType& basisS() const 
 		{
 			return dSerializerV_[currentPos_].basisS();
@@ -164,12 +163,12 @@ namespace Dmrg {
 		{
 			return dSerializerV_[currentPos_].basisE();
 		}
-		
+
 		const BasisType& basisSE() const 
 		{
 			return dSerializerV_[currentPos_].basisSE();
 		}
-		
+
 		size_t direction() const
 		{
 			return dSerializerV_[currentPos_].direction();
@@ -179,12 +178,12 @@ namespace Dmrg {
 		{
 			return dSerializerV_[currentPos_].wavefunction();
 		}
-		
+
 		RealType time() const
 		{
 			return timeSerializerV_[currentPos_].time();
 		}
-		
+
 		//! This applies more generally (ie. not only to time)
 		size_t site() const
 		{
@@ -195,7 +194,7 @@ namespace Dmrg {
 		{
 			return dSerializerV_.size()-1;
 		}
-		
+
 		const VectorWithOffsetType& timeVector() const
 		{
 			if (currentPos_>=timeSerializerV_.size() || 
@@ -203,7 +202,7 @@ namespace Dmrg {
 				throw std::runtime_error("timeVector has a problem\n");
 			return timeSerializerV_[currentPos_].vector();
 		}
-		
+
 		template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
 		friend std::ostream& operator<<(std::ostream& os,
 			ObserverHelper<IoType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& precomp);
@@ -238,7 +237,7 @@ namespace Dmrg {
 			// Line below might cause trouble under gcc v3
 			//if (verbose_) std::cerr<<(*this);	
 		}
-		
+
 		void integrityChecks()
 		{
 			if (dSerializerV_.size()!=timeSerializerV_.size()) throw std::runtime_error("Error 1\n");

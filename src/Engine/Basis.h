@@ -137,7 +137,7 @@ namespace Dmrg {
 		void setSymmetryRelated(BasisDataType const &q) { basisImplementation_.setSymmetryRelated(q); }
 
 		//! sets this basis to the outer product of basis2 basis3
-		void setToProduct(ThisType const &basis2,ThisType const &basis3,int q= -1)
+		void setToProduct(ThisType const &basis2,ThisType const &basis3,int q =  -1)
 		{
 			basisImplementation_.setToProduct(basis2.basisImplementation_,basis3.basisImplementation_,q);
 		}

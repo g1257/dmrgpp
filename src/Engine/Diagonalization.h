@@ -114,7 +114,7 @@ namespace Dmrg {
 				const bool& verbose,
     				const bool& useReflection,
 				IoOutType& io,
-    				const int& quantumSector,
+    				size_t quantumSector,
     				WaveFunctionTransformationType& waveFunctionTransformation) 
 			:
 			parameters_(parameters),
@@ -162,15 +162,12 @@ namespace Dmrg {
 					//std::cerr<<"\n";
 				}
 
-				size_t tmp = pSE.electrons(counter);
-				if (quantumSector_<0 && model_.density()*pSE.block().size()!=tmp) weights[i]=0;
 				else weights[i]=bs;
 				
 				// Do only one sector unless we're doing search 
 				// Note if we're doing search then quantumSector_ will be negative
-				if (quantumSector_>=0 &&
-						pSE.pseudoEffectiveNumber(pSE.partition(i))!=size_t(quantumSector_) && 
-								weights[i]>0) {
+				if (pSE.pseudoEffectiveNumber(pSE.partition(i))!=quantumSector_ && 
+						weights[i]>0) {
 					weights[i]=0;
 				}
 				
@@ -231,9 +228,7 @@ namespace Dmrg {
 			counter=0;
 			for (i=0;i<pSE.partition()-1;i++) {
 				if (weights[i]==0) continue;
-				if (quantumSector_<0) // && fabs(energySaved[i]-gsEnergy)>1e-6) 
-					throw std::runtime_error("DmrgSolver: quantumSector_ must be greater than 0\n");
-				
+
 				j = pSE.qn(pSE.partition(i));
 				std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
 				msg<<"Found target in partition "<<i<<" of size="<<vecSaved[i].size();
@@ -313,7 +308,7 @@ namespace Dmrg {
        					int reflectionSector= -1)
 		{
 			if (reflectionSector>=0) modelHelper.setReflectionSymmetry(reflectionSector);
-			int n = model_.getSize(modelHelper);
+			int n = modelHelper.size();
 			if (verbose_) std::cerr<<"Lanczos: About to do block number="<<i<<" of size="<<n<<"\n";
 			typedef InternalProductTemplate<typename SomeVectorType::value_type,ModelType> MyInternalProduct;
 			typedef LanczosSolver<MyInternalProduct,SomeVectorType> LanczosSolverType;
@@ -344,7 +339,7 @@ namespace Dmrg {
 		const bool& useReflection_;
 		IoOutType& io_;
 		ProgressIndicator progress_;
-		const int& quantumSector_;
+		size_t quantumSector_;
 		WaveFunctionTransformationType& waveFunctionTransformation_;
 	}; // class Diagonalization
 } // namespace Dmrg 
