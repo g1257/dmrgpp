@@ -1,4 +1,4 @@
-\" To see this file do less testsuite.8
+\" To see this file do less testsuite.8 or man -l testsuite.8
 .TH testsuite.pl 8  "July 21, 2010" "version 1.0" "DMRG++"
 .SH NAME
 testsuite.pl \- Systematically run tests for DMRG++ 
@@ -109,7 +109,8 @@ The command availables should be specified in the
 subroutine in
 .B testsuite.pl.
 Available commands: Grep, Gprof, Diff
-Example: Grep $file1 $file2 > $output
+
+Example: Diff $file1 $file2 > $output
 .SH AUTHOR
 Gonzalo Alvarez & Eduardo Ponce
 .SH BUGS
@@ -121,5 +122,5 @@ does not support MPI tests, or pthread
 tests. Also, a lot of DMRG++ functionality needs corresponding tests
 in the testsuite. This will be added eventually.
 .SH SEE ALSO
-configure.pl, testsuite.pl, processingLibrary.txt
+configure.pl, testsuite.pl, oracleCreator.pl, processingLibrary.txt
 
