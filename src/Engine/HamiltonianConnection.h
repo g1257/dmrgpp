@@ -125,8 +125,8 @@ namespace Dmrg {
 					type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
 				
 				for (size_t term=0;term<geometry_.terms();term++) {
-					for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
-						std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(dofs,term);
+					for (size_t dofs=0;dofs<LinkProductType::dofs(term);dofs++) {
+						std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs);
 						SparseElementType tmp = geometry_(smax_,emin_,
 								ind,edofs.first,jnd,edofs.second,term);
 				
@@ -146,7 +146,7 @@ namespace Dmrg {
 							lps->dofssaved.push_back(dofs);
 						} else {
 							SparseMatrixType mBlock;
-							calcBond(mBlock,i,j,type,tmp,dofs);
+							calcBond(mBlock,i,j,type,tmp,term,dofs);
 							*matrixBlock += mBlock;
 						}
 					}
@@ -177,6 +177,8 @@ namespace Dmrg {
 				if (myMutex) pthread_mutex_unlock( myMutex );
 			}
 
+			
+		private:
 			//! Adds a connector between system and environment
 			size_t calcBond(
 				SparseMatrixType &matrixBlock,
@@ -184,6 +186,7 @@ namespace Dmrg {
 				size_t j,
     				size_t type,
 				const SparseElementType& valuec,
+				size_t term,
     				size_t dofs) const
 			{
 				int offset = modelHelper_.basis2().block().size();
@@ -193,8 +196,9 @@ namespace Dmrg {
 				RealType angularFactor=0;
 				bool isSu2 = modelHelper_.isSu2();
 				SparseElementType value = valuec;
-				LinkProductType::valueModifier(value,dofs,isSu2);
-				LinkProductType::setLinkData(dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
+				LinkProductType::valueModifier(value,term,dofs,isSu2);
+				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,
+						ops,mods,angularMomentum,angularFactor,category);
 				LinkType link(i,j,type, value,dofs,
 					      fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				if (link.type==ProgramGlobals::SYSTEM_ENVIRON) {
@@ -222,7 +226,6 @@ namespace Dmrg {
 				
 			}
 
-		private:
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
 			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
 						size_t i,size_t j,size_t type,
@@ -234,10 +237,10 @@ namespace Dmrg {
 				size_t fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
 				RealType angularFactor=0;
 				bool isSu2 = modelHelper_.isSu2();
-				LinkProductType::setLinkData(dofs,isSu2,
+				LinkProductType::setLinkData(term,dofs,isSu2,
 						fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				SparseElementType value = valuec;
-				LinkProductType::valueModifier(value,dofs,isSu2);
+				LinkProductType::valueModifier(value,term,dofs,isSu2);
 				
 				LinkType link(i,j,type, value,dofs,
 					      fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);

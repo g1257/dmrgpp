@@ -130,7 +130,7 @@ namespace Dmrg {
 		typedef std::vector<HilbertState> HilbertBasisType;
 		
 		ModelHubbard(ParametersModelHubbard<RealType> const &mp,DmrgGeometryType const &dmrgGeometry) 
-			: ModelBaseType(DEGREES_OF_FREEDOM,dmrgGeometry),modelParameters_(mp), dmrgGeometry_(dmrgGeometry),
+			: ModelBaseType(dmrgGeometry),modelParameters_(mp), dmrgGeometry_(dmrgGeometry),
 					    spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 					   reinterpretX_(maxNumberOfSites),reinterpretY_(maxNumberOfSites)
 		{
@@ -450,8 +450,8 @@ namespace Dmrg {
 				//! hopping part
 				for (size_t j=0;j<n;j++) {
 					for (size_t term=0;term<dmrgGeometry_.terms();term++) {
-						for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
-							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(dofs,term);
+						for (size_t dofs=0;dofs<LinkProductType::dofs(term);dofs++) {
+							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs);
 							RealType tmp = dmrgGeometry_(block[i],edofs.first,block[j],edofs.second,term);
 						
 							if (i==j || tmp==0.0) continue;

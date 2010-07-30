@@ -136,7 +136,7 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		ModelHeisenberg(ParametersModelHeisenberg<RealType> const &mp,GeometryType const &geometry) 
-			: ModelBaseType(DEGREES_OF_FREEDOM,geometry),modelParameters_(mp), geometry_(geometry), 
+			: ModelBaseType(geometry),modelParameters_(mp), geometry_(geometry), 
 			spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 					reinterpretX_(maxNumberOfSites),reinterpretY_(maxNumberOfSites)
 		{
@@ -312,8 +312,8 @@ namespace Dmrg {
 				SparseMatrixType szOperatorI =cm[i+n].data; //S^z_i
 				for (size_t j=0;j<n;j++) {
 					for (size_t term=0;term<geometry_.terms();term++) {
-						for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
-							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(dofs,term);
+						for (size_t dofs=0;dofs<LinkProductType::dofs(term);dofs++) {
+							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs);
 							RealType tmp = geometry_(block[i],edofs.first,block[j],edofs.second,term);
 						
 							if (i==j || tmp==0.0) continue;

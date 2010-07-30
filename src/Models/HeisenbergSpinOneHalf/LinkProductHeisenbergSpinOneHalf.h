@@ -95,6 +95,7 @@ namespace Dmrg {
 			typedef typename ModelHelperType::RealType RealType;
 
 			static void setLinkData(
+					size_t term,
 					size_t dofs,
      					bool isSu2,
 					size_t& fermionOrBoson,
@@ -126,15 +127,15 @@ namespace Dmrg {
 				}
 			}
 			
-			static void valueModifier(SparseElementType& value,size_t dofs,bool isSu2)
+			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2)
 			{
 				if (isSu2) value = -value;
 				if (dofs<2) value *= 0.5;
 			}
 			
-			static size_t dofs() { return 3; }
+			static size_t dofs(size_t term) { return 3; }
 			
-			static PairType connectorDofs(size_t dofs,size_t term)
+			static PairType connectorDofs(size_t term,size_t dofs)
 			{
 				return std::pair<size_t,size_t>(0,0); // no orbital and no anisotropy
 			}

@@ -94,10 +94,10 @@ namespace Dmrg {
 			typedef typename ModelHelperType::RealType RealType;
 			//typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 			
-			static size_t dofs() { return 8; }
+			static size_t dofs(size_t term) { return 8; }
 			
 			// has only dependence on orbital
-			static PairType connectorDofs(size_t dofs,size_t term)
+			static PairType connectorDofs(size_t term,size_t dofs)
 			{
 				size_t spin = dofs/4;
 				size_t xtmp = (spin==0) ? 0 : 4;
@@ -108,6 +108,7 @@ namespace Dmrg {
 			}
 			
 			static void setLinkData(
+					size_t term,
 					size_t dofs,
      					bool isSu2,
 					size_t& fermionOrBoson,
@@ -126,7 +127,7 @@ namespace Dmrg {
 				category = spin;
 			}
 			
-			static void valueModifier(SparseElementType& value,size_t dofs,bool isSu2)
+			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2)
 			{
 			}
 		private:

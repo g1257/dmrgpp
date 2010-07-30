@@ -112,8 +112,8 @@ namespace Dmrg {
 			typedef DmrgGeometryType GeometryType;
 			typedef typename ModelCommonType::SharedMemoryType SharedMemoryType;
 			
-			ModelBase(int DEGREES_OF_FREEDOM,const DmrgGeometryType& dmrgGeometry) :
-					modelCommon_(DEGREES_OF_FREEDOM,dmrgGeometry)
+			ModelBase(const DmrgGeometryType& dmrgGeometry) :
+					modelCommon_(dmrgGeometry)
 			{
 				Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 				MyBasis::useSu2Symmetry(ModelHelperType::isSu2());

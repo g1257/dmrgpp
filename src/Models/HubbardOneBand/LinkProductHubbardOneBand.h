@@ -96,6 +96,7 @@ namespace Dmrg {
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			
 			static void setLinkData(
+					size_t term,
 					size_t dofs,
      					bool isSu2,
 					size_t& fermionOrBoson,
@@ -114,14 +115,14 @@ namespace Dmrg {
 				category = dofs;
 			}
 			
-			static void valueModifier(SparseElementType& value,size_t dofs,bool isSu2)
+			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2)
 			{
 			}
 			
 			// up up and down down are the only connections possible for this model
-			static size_t dofs() { return 2; }
+			static size_t dofs(size_t term) { return 2; }
 			
-			static std::pair<size_t,size_t> connectorDofs(size_t dofs,size_t term)
+			static std::pair<size_t,size_t> connectorDofs(size_t term,size_t dofs)
 			{
 				return std::pair<size_t,size_t>(0,0); // no orbital and no dependence on spin
 			}

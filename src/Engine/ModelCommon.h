@@ -105,8 +105,8 @@ namespace Dmrg {
 			typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 			typedef SharedMemoryTemplate<HamiltonianConnectionType> SharedMemoryType;
 			
-			ModelCommon(int DEGREES_OF_FREEDOM,const DmrgGeometryType& dmrgGeometry)
-			: dof_(DEGREES_OF_FREEDOM),dmrgGeometry_(dmrgGeometry)
+			ModelCommon(const DmrgGeometryType& dmrgGeometry)
+			: dmrgGeometry_(dmrgGeometry)
 			{
 			}
 
@@ -215,7 +215,6 @@ namespace Dmrg {
 
 
 		private:
-			size_t dof_;
 			const DmrgGeometryType& dmrgGeometry_;
 			
 	};     //class ModelCommon

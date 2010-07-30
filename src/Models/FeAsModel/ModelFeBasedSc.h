@@ -120,7 +120,7 @@ namespace Dmrg {
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;
 		static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
-		static const int DEGREES_OF_FREEDOM=OperatorsType::DEGREES_OF_FREEDOM;
+		static const size_t DEGREES_OF_FREEDOM=OperatorsType::DEGREES_OF_FREEDOM;
 		static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
 		static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
 
@@ -133,7 +133,7 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		ModelFeBasedSc(ParametersModelFeAs<RealType> const &mp,GeometryType const &geometry) 
-			: ModelBaseType(DEGREES_OF_FREEDOM,geometry),reinterpretX_(6),reinterpretY_(9),modelParameters_(mp), geometry_(geometry),
+			: ModelBaseType(geometry),reinterpretX_(6),reinterpretY_(9),modelParameters_(mp), geometry_(geometry),
 					   spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 		{
 			setPauliMatrix();
@@ -491,8 +491,8 @@ namespace Dmrg {
 				//! hopping part
 				for (size_t j=0;j<n;j++) {
 					for (size_t term=0;term<geometry_.terms();term++) {
-						for (size_t dofs=0;dofs<LinkProductType::dofs();dofs++) {
-							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(dofs,term);
+						for (size_t dofs=0;dofs<LinkProductType::dofs(term);dofs++) {
+							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs);
 							RealType tmp = geometry_(block[i],edofs.first,block[j],edofs.second,term);
 						
 							if (i==j || tmp==0.0) continue;

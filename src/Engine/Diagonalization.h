@@ -114,7 +114,7 @@ namespace Dmrg {
 				const bool& verbose,
     				const bool& useReflection,
 				IoOutType& io,
-    				size_t quantumSector,
+    				const size_t& quantumSector,
     				WaveFunctionTransformationType& waveFunctionTransformation) 
 			:
 			parameters_(parameters),
@@ -162,24 +162,16 @@ namespace Dmrg {
 					//std::cerr<<"\n";
 				}
 
-				else weights[i]=bs;
+				weights[i]=bs;
 				
-				// Do only one sector unless we're doing search 
-				// Note if we're doing search then quantumSector_ will be negative
-				if (pSE.pseudoEffectiveNumber(pSE.partition(i))!=quantumSector_ && 
-						weights[i]>0) {
+				// Do only one sector unless doing su(2) with j>0, then do all m's
+				if (pSE.pseudoEffectiveNumber(pSE.partition(i))!=quantumSector_ ) 
 					weights[i]=0;
-				}
 				
 				counter+=bs;
 				vecSaved[i].resize(weights[i]);
 			}
 
-			// legacy part, need to update code to remove support for search sectors
-			if (parameters_.options.find("hasQuantumNumbers")==std::string::npos){
-				throw std::runtime_error("DmrgSolver:: You must have quantum number in the input file!\n");
-			}
-			
 			typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 			VectorWithOffsetType initialVector(weights,pSE);
 			
@@ -339,7 +331,7 @@ namespace Dmrg {
 		const bool& useReflection_;
 		IoOutType& io_;
 		ProgressIndicator progress_;
-		size_t quantumSector_;
+		const size_t& quantumSector_; // this needs to be a reference since DmrgSolver will change it
 		WaveFunctionTransformationType& waveFunctionTransformation_;
 	}; // class Diagonalization
 } // namespace Dmrg 

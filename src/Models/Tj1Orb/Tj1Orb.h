@@ -74,36 +74,38 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ExtendedHubbard1Orb.h
+/*! \file Tj1Orb.h
  *
- *  Hubbard + V_{ij} n_i n_j
+ *  Hubbard + Heisenberg
  *
  */
-#ifndef EXTENDED_HUBBARD_1ORB_H
-#define EXTENDED_HUBBARD_1ORB_H
+#ifndef TJ_1ORB_H
+#define TJ_1ORB_H
 #include "ModelHubbard.h"
-#include "LinkProdExtendedHubbard1Orb.h"
+#include "ModelHeisenberg.h"
+#include "LinkProdTj1Orb.h"
 
 namespace Dmrg {
-	//! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
+	//! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment
 	template<typename ModelHelperType_,
 	typename SparseMatrixType,
 	typename DmrgGeometryType,
 	template<typename> class SharedMemoryTemplate>
-	class ExtendedHubbard1Orb : public ModelBase<ModelHelperType_,SparseMatrixType,DmrgGeometryType,
- 		LinkProdExtendedHubbard1Orb<ModelHelperType_>,SharedMemoryTemplate> {
+	class Tj1Orb : public ModelBase<ModelHelperType_,SparseMatrixType,DmrgGeometryType,
+ 		LinkProdTj1Orb<ModelHelperType_>,SharedMemoryTemplate> {
 		public:
 			typedef ModelHubbard<ModelHelperType_,SparseMatrixType,DmrgGeometryType,
  			SharedMemoryTemplate> ModelHubbardType;
+			typedef ModelHeisenberg<ModelHelperType_,SparseMatrixType,DmrgGeometryType,
+ 			SharedMemoryTemplate> ModelHeisenbergType;
 			typedef ModelHelperType_ ModelHelperType;
 			typedef typename ModelHelperType::OperatorsType OperatorsType;
 			typedef typename OperatorsType::OperatorType OperatorType;
 			typedef typename ModelHelperType::RealType RealType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
-			
 
 	public:
-		typedef LinkProdExtendedHubbard1Orb<ModelHelperType> LinkProductType;
+		typedef LinkProdTj1Orb<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::MyBasisWithOperators MyBasisWithOperators;
@@ -112,7 +114,7 @@ namespace Dmrg {
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
 		
-		ExtendedHubbard1Orb(ParametersModelHubbard<RealType> const &mp,DmrgGeometryType const &dmrgGeometry) 
+		Tj1Orb(ParametersModelHubbard<RealType> const &mp,DmrgGeometryType const &dmrgGeometry) 
 			: ModelBaseType(dmrgGeometry),modelParameters_(mp), dmrgGeometry_(dmrgGeometry),
 				modelHubbard_(mp,dmrgGeometry)
 		{
@@ -243,4 +245,4 @@ namespace Dmrg {
 	}
 } // namespace Dmrg
 /*@}*/
-#endif // EXTENDED_HUBBARD_1ORB_H
+#endif // TJ_1ORB_H

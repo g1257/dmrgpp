@@ -1,1 +1,0 @@
-../HubbardOneBand/HilbertSpaceHubbard.h

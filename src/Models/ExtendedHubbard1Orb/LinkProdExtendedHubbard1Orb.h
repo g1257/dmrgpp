@@ -90,12 +90,14 @@ namespace Dmrg {
 	class LinkProdExtendedHubbard1Orb {
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef std::pair<size_t,size_t> PairType;
+			enum {TERM_HOPPING=0,TERM_NINJ=2};
 
 		public:
 			typedef typename ModelHelperType::RealType RealType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
-/*			
+			
 			static void setLinkData(
+					size_t term,
 					size_t dofs,
      					bool isSu2,
 					size_t& fermionOrBoson,
@@ -105,26 +107,28 @@ namespace Dmrg {
      					RealType& angularFactor,
 					size_t& category)
 			{
-				fermionOrBoson = ProgramGlobals::FERMION;
+				if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
+				else fermionOrBoson = ProgramGlobals::FERMION;
 				
 				ops = PairType(dofs,dofs);
 				angularFactor = 1;
 				if (dofs==1) angularFactor = -1;
 				angularMomentum = 1;
+				if (term==TERM_NINJ) angularMomentum = 0;
 				category = dofs;
 			}
 			
-			static void valueModifier(SparseElementType& value,size_t dofs,bool isSu2)
+			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2)
 			{
 			}
 			
 			// 
-			static size_t dofs() { return 2; }
+			static size_t dofs(size_t term) { return (term==TERM_NINJ) ? 1 : 2; }
 			
-			static std::pair<size_t,size_t> connectorDofs(size_t dofs,size_t term)
+			static std::pair<size_t,size_t> connectorDofs(size_t term,size_t dofs)
 			{
 				return std::pair<size_t,size_t>(0,0); // no orbital and no dependence on spin
-			}*/
+			}
 	}; // class LinkProdExtendedHubbard1Orb
 } // namespace Dmrg
 /*@}*/
