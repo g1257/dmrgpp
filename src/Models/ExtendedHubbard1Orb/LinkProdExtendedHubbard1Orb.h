@@ -90,7 +90,7 @@ namespace Dmrg {
 	class LinkProdExtendedHubbard1Orb {
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef std::pair<size_t,size_t> PairType;
-			enum {TERM_HOPPING=0,TERM_NINJ=2};
+			enum {TERM_HOPPING=0,TERM_NINJ=1};
 
 		public:
 			typedef typename ModelHelperType::RealType RealType;
@@ -109,8 +109,8 @@ namespace Dmrg {
 			{
 				if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
 				else fermionOrBoson = ProgramGlobals::FERMION;
-				
-				ops = PairType(dofs,dofs);
+				if (term==TERM_NINJ) ops = PairType(2,2);
+				else ops = PairType(dofs,dofs);
 				angularFactor = 1;
 				if (dofs==1) angularFactor = -1;
 				angularMomentum = 1;
@@ -122,7 +122,7 @@ namespace Dmrg {
 			{
 			}
 			
-			// 
+			//
 			static size_t dofs(size_t term) { return (term==TERM_NINJ) ? 1 : 2; }
 			
 			static std::pair<size_t,size_t> connectorDofs(size_t term,size_t dofs)

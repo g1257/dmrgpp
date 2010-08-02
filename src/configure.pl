@@ -716,7 +716,9 @@ sub getOperatorsName()
 {
 	my $operatorsName = "UNKNOWN";
 
-	if ($model=~/hubbard/i) {
+	if ($model=~/extendedhubbard1orb/i) {
+		$operatorsName = "OpsExtendedHubbard1Orb";
+	} elsif ($model=~/hubbard/i) {
 		$operatorsName = "OperatorsHubbard";
 	} elsif ($model=~/heisenberg/i) {
 		$operatorsName = "OperatorsHeisenberg";

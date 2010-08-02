@@ -129,8 +129,9 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef std::vector<HilbertState> HilbertBasisType;
 		
-		ModelHubbard(ParametersModelHubbard<RealType> const &mp,DmrgGeometryType const &dmrgGeometry) 
-			: ModelBaseType(dmrgGeometry),modelParameters_(mp), dmrgGeometry_(dmrgGeometry),
+		ModelHubbard(ParametersModelHubbard<RealType> const &mp,DmrgGeometryType const &dmrgGeometry,
+			    size_t offset = DEGREES_OF_FREEDOM) 
+			: ModelBaseType(dmrgGeometry),modelParameters_(mp), dmrgGeometry_(dmrgGeometry),offset_(offset),
 					    spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 					   reinterpretX_(maxNumberOfSites),reinterpretY_(maxNumberOfSites)
 		{
@@ -175,8 +176,8 @@ namespace Dmrg {
 					if (sigma>0) asign= 1;
 					typename OperatorType::Su2RelatedType su2related;
 					if (sigma==0) {
-						su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-						su2related.source.push_back(i*DEGREES_OF_FREEDOM+1);	
+						su2related.source.push_back(i*offset_);
+						su2related.source.push_back(i*offset_+1);	
 						su2related.transpose.push_back(-1);
 						su2related.transpose.push_back(-1);
 						su2related.offset = NUMBER_OF_ORBITALS;
@@ -255,6 +256,7 @@ namespace Dmrg {
 	private:
 		const ParametersModelHubbard<RealType>&  modelParameters_;
 		const DmrgGeometryType &dmrgGeometry_;
+		size_t offset_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 		size_t reinterpretX_,reinterpretY_;
@@ -340,7 +342,7 @@ namespace Dmrg {
 			}
 
 			SparseMatrixType creationMatrix(cm);
-			return 	creationMatrix;
+			return creationMatrix;
 		}
 
 		//! find quantum numbers for each state of this basis, 
@@ -445,6 +447,7 @@ namespace Dmrg {
 			
 			hmatrix.makeDiagonal(cm[0].data.rank());
 			size_t linSize = dmrgGeometry_.numberOfSites();
+			assert(block.size()==1);
 			
 			for (size_t i=0;i<n;i++) {
 				//! hopping part
@@ -457,8 +460,8 @@ namespace Dmrg {
 							if (i==j || tmp==0.0) continue;
 				
 							size_t sigma = dofs;
-							transposeConjugate(tmpMatrix2,cm[sigma+j*DEGREES_OF_FREEDOM].data);
-							multiply(tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data,tmpMatrix2);
+							transposeConjugate(tmpMatrix2,cm[sigma+j*offset_].data);
+							multiply(tmpMatrix,cm[sigma+i*offset_].data,tmpMatrix2);
 							multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
 							hmatrix += tmpMatrix2;
 						}
@@ -467,12 +470,12 @@ namespace Dmrg {
 				// onsite U hubbard 
 				//n_i up
 				size_t sigma =0; // up sector
-				transposeConjugate(tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
-				multiply(niup,tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
+				transposeConjugate(tmpMatrix,cm[sigma+i*offset_].data);
+				multiply(niup,tmpMatrix,cm[sigma+i*offset_].data);
 				//n_i down
 				sigma =1; // down sector
-				transposeConjugate(tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
-				multiply(nidown,tmpMatrix,cm[sigma+i*DEGREES_OF_FREEDOM].data);
+				transposeConjugate(tmpMatrix,cm[sigma+i*offset_].data);
+				multiply(nidown,tmpMatrix,cm[sigma+i*offset_].data);
 				 
 				multiply(tmpMatrix,niup,nidown);
 				//type = dmrgGeometry_.calcConnectorType(block[i],block[i]);

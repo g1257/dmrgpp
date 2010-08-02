@@ -134,7 +134,7 @@ namespace Dmrg {
 						
 						flag = true;
 						// if .. else here is inefficient FIXME
-						//std::cerr<<"Adding "<<i<<" "<<j<<" "<<connectionType<<" value="<<tmp<<"\n";
+						//std::cerr<<"Adding "<<i<<" "<<j<<" term"<<term<<" dofs="<<dofs<<" value="<<tmp<<"\n";
 						if (lps!=0) {
 							lps->isaved.push_back(i);
 							lps->jsaved.push_back(j);
@@ -241,7 +241,6 @@ namespace Dmrg {
 						fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				SparseElementType value = valuec;
 				LinkProductType::valueModifier(value,term,dofs,isSu2);
-				
 				LinkType link(i,j,type, value,dofs,
 					      fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				if (type==ProgramGlobals::SYSTEM_ENVIRON) {

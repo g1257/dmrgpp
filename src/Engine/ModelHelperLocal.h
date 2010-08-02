@@ -208,7 +208,6 @@ namespace Dmrg {
 						if (link.fermionOrBoson == ProgramGlobals::FERMION) 
 							tmp *= basis2_.fermionicSign(alpha,int(fermionSign));
 						//if (tmp==static_cast<MatrixElementType>(0.0)) continue;
-						
 						matrixBlock.pushCol(j);
 						matrixBlock.pushValue(tmp);
 						counter++;

@@ -194,11 +194,13 @@ namespace Dmrg {
 			
 			for (size_t ii=0;ii<natBasis.size();ii++) {
 				typename HilbertSpaceHubbardType::HilbertState ket=natBasis[ii];
+				cm(ii,ii) = 0.0;
 				for (size_t sigma=0;sigma<2;sigma++) 
 					if (HilbertSpaceHubbardType::isNonZero(ket,i,sigma)) 
 						cm(ii,ii) += 1.0;
 			}
-
+// 			std::cout<<cm;
+// 			std::cout<<"******************************\n";
 			SparseMatrixType creationMatrix(cm);
 			return creationMatrix;
 		}
