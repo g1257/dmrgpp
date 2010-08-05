@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ApplyOperatorLocal.h"
 #include "TimeSerializer.h"
 
+
 namespace Dmrg {
 	template<
 			template<typename,typename> class LanczosSolverTemplate,
@@ -306,7 +307,17 @@ namespace Dmrg {
 
 			void initialGuess(VectorWithOffsetType& v) const
 			{
-				waveFunctionTransformation_.createRandomVector(v);
+				//waveFunctionTransformation_.createRandomVector(v);
+				waveFunctionTransformation_.setInitialVector(v,psi_,basisS_,basisE_,basisSE_);
+				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
+				if (!b) return;
+				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
+				for (size_t i=0;i<targetVectors_.size();i++) {
+					waveFunctionTransformation_.setInitialVector(vv[i],
+						targetVectors_[i],basisS_,basisE_,basisSE_);
+					VectorWithOffsetType w= weight_[i]*vv[i];
+					v += w;
+				}
 			}
 
 		private:

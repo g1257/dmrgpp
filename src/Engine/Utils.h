@@ -163,6 +163,21 @@ namespace std {
 		dest.resize(src.size());
 		for (size_t i=0;i<dest.size();i++) dest[i] = src[i];
 	}
+	
+	template<typename FieldType,typename FieldType2>
+	inline std::vector<FieldType2> operator*=(const std::vector<FieldType2>& v,FieldType value)
+	{
+		std::vector<FieldType2> w = v;
+		for (size_t i=0;i<w.size();i++) w[i] *= value;
+		return w;
+	}
+	
+	template<typename FieldType>
+	inline std::vector<FieldType> operator+=(std::vector<FieldType>& v,const std::vector<FieldType>& w)
+	{
+		for (size_t i=0;i<w.size();i++) v[i] += w[i];
+		return v;
+	}
 }
 	
 namespace utils {
