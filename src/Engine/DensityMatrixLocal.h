@@ -242,10 +242,12 @@ namespace Dmrg {
 			size_t total=pBasisSummed.size();
 			
 			DensityMatrixElementType sum=0;
-
+			
+			size_t x2 = alpha2*ns;
+			size_t x1 = alpha1*ns;
 			for (size_t beta=0;beta<total;beta++) {
-				size_t jj = pSE.permutationInverse(beta + alpha2*ns);
-				size_t ii = pSE.permutationInverse(beta + alpha1*ns);
+				size_t jj = pSE.permutationInverse(beta + x2);
+				size_t ii = pSE.permutationInverse(beta + x1);
 				sum += v[ii] * std::conj(v[jj]);
 			}
 			return sum;

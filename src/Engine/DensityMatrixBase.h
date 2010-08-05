@@ -103,7 +103,11 @@ namespace Dmrg {
 	public:
 		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 		
-		
+		virtual ~DensityMatrixBase()
+		{
+                        // avoids compiler warning
+                }
+
 		virtual BlockMatrixType& operator()()=0;
 		
 		virtual size_t rank()=0;
