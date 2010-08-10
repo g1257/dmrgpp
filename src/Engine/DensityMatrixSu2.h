@@ -181,6 +181,14 @@ namespace Dmrg {
 			BuildingBlockType matrixBlock;
 			
 			for (size_t m=0;m<pBasis.partition()-1;m++) {
+				// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
+				
+				if (DmrgBasisType::useSu2Symmetry()) {
+					mMaximal_[m] = findMaximalPartition(m,pBasis);
+					//if (enforceSymmetry && size_t(m)!=mMaximal_[m]) continue; 
+					// we'll fill non-maximal partitions later
+				}
+
 				size_t bs = pBasis.partition(m+1)-pBasis.partition(m);
 				
 				matrixBlock.resize(bs,bs);
@@ -219,6 +227,19 @@ namespace Dmrg {
 		std::vector<size_t> mMaximal_;
 		const DmrgBasisWithOperatorsType& pBasis_;
 		bool debug_,verbose_;
+		
+		size_t findMaximalPartition(size_t p,DmrgBasisWithOperatorsType const &pBasis)
+		{
+			std::pair<size_t,size_t> jm2 = pBasis.jmValue(pBasis.partition(p));
+			size_t ne2 = pBasis.electrons(pBasis.partition(p));
+			if (jm2.first==jm2.second) return p;
+			for (size_t m=0;m<pBasis.partition()-1;m++) { 
+				std::pair<size_t,size_t> jm1 = pBasis.jmValue(pBasis.partition(m));
+				size_t ne1 = pBasis.electrons(pBasis.partition(m));
+				if (jm1.first==jm2.first && jm1.first==jm1.second && ne1==ne2) return m;
+			}
+			throw std::runtime_error("	findMaximalPartition : none found\n");
+		}
 
 		//! only used for debugging
 		bool areAllMsEqual(DmrgBasisWithOperatorsType const &pBasis)
