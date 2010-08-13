@@ -76,8 +76,22 @@ $SIG{__WARN__} = sub {die @_};
 sub exit_handler
 {
 	print "\nTestSuite aborted -> Manual cancellation\n";
-	removeFiles();
+	cleanUp();
 	kill 9, $$;
+}
+
+sub cleanUp
+{
+	#Additional files can be added to @files to be removed
+	my @files = ("freeSystem*", "input.*", "raw$testNum.txt", "gmon.out", "data$testNum.txt", "tst$testNum.txt", "SystemStackdata$testNum.txt", "EnvironStackdata$testNum.txt", "timeEvolution$testNum.txt", "stderrAndOut$testNum.txt");
+
+	my $err = chdir($srcDir);
+	die "Changing directory to $srcDir: $!" if(!$err);
+	
+	system("rm @files >& /dev/null");
+	$err = chdir($testDir);
+	die "Changing directory to $testDir: $!" if(!$err);
+	system("rm @files >& /dev/null");
 }
 
 eval {
@@ -95,7 +109,7 @@ eval {
 #Exception handling, catches any error from the testsuite program
 if($@) {
 	print "\nTestSuite aborted -> $@";
-	removeFiles();
+	cleanUp();
 	kill 9, $$;
 }
 
@@ -406,6 +420,8 @@ sub testSuite
 		print "Removing temporary files...\n";
 		removeFiles() ;
 	}
+	$executable = "";
+	$testNum = "";
 }
 
 #Runs multiple tests by invoking the testSuite routine for each test
@@ -430,7 +446,6 @@ sub runAllTests
 		next if(grep {$_ eq $testsList[$i]}@nonFunctionalTests);
 		$testNum = $testsList[$i];
 		testSuite();
-		$executable = "";
 		last if($testsList[$i] == $lastTest);
 	}
 }
@@ -646,7 +661,7 @@ sub runDmrg
 	($specFile, $specKey) = getSpecFileAndKey() if(!$noModel);
 	my $configFile = "configure.pl";
 	$executable = "dmrg";
-
+	
 	if(!findKey(\%dmrgHash, $specKey) || $force || $noModel) {
 		$executable = createExecutables($specFile,\$specKey,$configFile, $executable);
 		print "Updating hash table...\n";
@@ -663,6 +678,8 @@ sub runDmrg
 			print "Hash table is up-to-date.\n";
 		}
 	}
+
+	die "Missing input file: $!" if(!validateFile($inputFile));
 
 	my $arg = "$executable $inputFile >& $raw";
 	grep {s/&//} $arg if($verbose);
@@ -801,7 +818,7 @@ sub extractOperator
 	open (OUTFILE, ">$out") || die "Opening $out: $!";
 	print OUTFILE $op;
 	close (OUTFILE) || die "Closing $out: $!";
-	print "Operator$opName extraction was succesful.\n" if($verbose);
+	print "Operator$opName extraction was successful.\n" if($verbose);
 }
 
 #Searches for differences between the data in the operators oracles with the recently computed operators
