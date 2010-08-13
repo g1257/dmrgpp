@@ -96,7 +96,7 @@ namespace Dmrg {
 	
 			io.read(hubbardU,"hubbardU");
 			io.read(potentialV,"potentialV");
-			io.readline(density,"density=");
+			//io.readline(density,"density=");
 		}
 		
 		// Hubbard U values (one for each site)
@@ -106,14 +106,14 @@ namespace Dmrg {
 		// target number of electrons  in the system
 		int nOfElectrons;
 		// target density
-		Field density;
+		//Field density;
 	};
 	
 	//! Function that prints model parameters to stream os
 	template<typename FieldType>
 	std::ostream& operator<<(std::ostream &os,const ParametersModelFeAs<FieldType>& parameters)
 	{
-		os<<"parameters.density="<<parameters.density<<"\n";
+		//os<<"parameters.density="<<parameters.density<<"\n";
 		utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
 		utils::vectorPrint(parameters.potentialV,"potentialV",os);
 		return os;

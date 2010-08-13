@@ -6,6 +6,4 @@ Heisenberg
 
 
 
-n
-
 

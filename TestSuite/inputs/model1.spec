@@ -6,5 +6,4 @@ Hubbard
 
 
 
-n
 

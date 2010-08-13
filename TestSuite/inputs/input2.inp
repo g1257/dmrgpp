@@ -10,7 +10,6 @@ Connectors
 hubbardU	16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
 	0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-density=1.0
 SolverOptions=hasQuantumNumbers,wft,nosu2,,hasThreads,
 Version=18846b60983586e6185bd2d797e7d639cc92ce0e
 OutputFile=data2.txt
