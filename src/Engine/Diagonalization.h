@@ -143,7 +143,6 @@ namespace Dmrg {
 			TargetVectorType tmpVec;
 			std::vector<TargetVectorType> vecSaved;
 			std::vector<RealType> energySaved;
-			size_t i,j,bs,counter;
 			RealType gsEnergy;
 			size_t total = pSE.partition()-1;
 
@@ -151,11 +150,11 @@ namespace Dmrg {
 			vecSaved.resize(total);
 			std::vector<size_t> weights(total);
 
-			counter=0;
-			for (i=0;i<total;i++) {
-				bs = pSE.partition(i+1)-pSE.partition(i);
+			size_t counter=0;
+			for (size_t i=0;i<total;i++) {
+				size_t bs = pSE.partition(i+1)-pSE.partition(i);
 				if (verbose_) {
-					j = pSE.qn(pSE.partition(i));
+					size_t j = pSE.qn(pSE.partition(i));
 					std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
 					//std::cerr<<"partition "<<i<<" of size="<<bs<<" has qns=";
 					for (size_t k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
@@ -178,20 +177,19 @@ namespace Dmrg {
 			waveFunctionTransformation_.triggerOn(pSprime,pEprime,pSE);
 			target.initialGuess(initialVector);
 			
-			concurrency_.loopCreate(total,weights);
 
-			while (concurrency_.loop(i)) {
+			for (size_t i=0;i<total;i++) {
 				if (weights[i]==0) continue;
 				std::ostringstream msg;
 				msg<<"About to diag. sector with quantum numbs. ";
-				j = pSE.qn(pSE.partition(i));
+				size_t j = pSE.qn(pSE.partition(i));
 				std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
 				for (size_t k=0;k<qns.size();k++) msg<<qns[k]<<" ";
 				msg<<" pseudo="<<pSE.pseudoEffectiveNumber(pSE.partition(i));
 				msg<<" quantumSector="<<quantumSector_;
 				
-				if (verbose_) {
-					msg<<" diagonaliseOneBlock, i="<<i<<" and proc="<<concurrency_.rank()<<" and weight="<<weights[i];
+				if (verbose_ && concurrency_.root()) {
+					msg<<" diagonaliseOneBlock, i="<<i<<" and weight="<<weights[i];
 				}
 				progress_.printline(msg,std::cout);
 				TargetVectorType initialVectorBySector(weights[i]);
@@ -200,17 +198,11 @@ namespace Dmrg {
 				vecSaved[i] = tmpVec;
 				energySaved[i]=gsEnergy;
 			}
-			
-			concurrency_.gather(energySaved);
-			concurrency_.gather(vecSaved);
-			
-			concurrency_.broadcast(energySaved);
-			concurrency_.broadcast(vecSaved);
 				
 			// calc gs energy
 			if (verbose_ && concurrency_.root()) std::cerr<<"About to calc gs energy\n";
 			gsEnergy=1e6;
-			for (i=0;i<total;i++) {
+			for (size_t i=0;i<total;i++) {
 				if (weights[i]==0) continue;
 				if (energySaved[i]<gsEnergy) gsEnergy=energySaved[i];
 			}
@@ -218,10 +210,10 @@ namespace Dmrg {
 			if (verbose_ && concurrency_.root()) std::cerr<<"About to calc gs vector\n";
 			//target.reset();
 			counter=0;
-			for (i=0;i<pSE.partition()-1;i++) {
+			for (size_t i=0;i<pSE.partition()-1;i++) {
 				if (weights[i]==0) continue;
 
-				j = pSE.qn(pSE.partition(i));
+				size_t j = pSE.qn(pSE.partition(i));
 				std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
 				msg<<"Found target in partition "<<i<<" of size="<<vecSaved[i].size();
 				msg<<" with qns=";
