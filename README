@@ -1,5 +1,5 @@
 PsimagLite contains utilities for use in codes for the simulation of strongly correlated electrons.
-It is inspired in T.S.'s Psimag software (but it is not a fork of Psimag).
+It is inspired in T.S.'s Psimag software (but PsimagLite is not a fork of Psimag).
 The amount of functionality included in PsimagLite will be exactly this (subject to change):
 
 ModuleName	Description
