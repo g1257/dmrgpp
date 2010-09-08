@@ -21,6 +21,7 @@ Please see full open source license included in file LICENSE.
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
 #include "Vector.h"
 #include "AkimaSpline.h"
 
@@ -38,7 +39,7 @@ void readTwoColumnData(const std::string& file,VectorType& v0,VectorType& v1)
 		std::string s;
 		fin>>s;
 		if (s[0]=='#') continue;
-		FieldType x = atof(s.c_str());
+		FieldType x = std::atof(s.c_str());
 		size_t size=v0.size();
 		if (size>1 && x<v0[size-1]) break;
 		v0.push_back(x);

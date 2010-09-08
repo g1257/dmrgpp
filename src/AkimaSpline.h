@@ -27,13 +27,13 @@ class AkimaSpline {
 			VectorType sprime;
 			calculateSprime(sprime,x,s);
 			for (size_t i=0;i<x.size()-1;i++) {
-				RealType u = x[i+1]-x[i];
-				RealType a2 = u*(sprime[i+1]-sprime[i])-2*(s[i+1]-s[i]);
-				RealType a3 = 3*u*(s[i+1]-s[i])-u*u*(sprime[i+1]+2*sprime[i]);
-				RealType ucube = u*u*u;
 				AkimaStruct ak;
 				ak.x0=x[i]; ak.x1=x[i+1];
-				ak.a0=s[i]; ak.a1=sprime[i]; ak.a2=a2/ucube; ak.a3=a3/ucube;
+				ak.a0=s[i]; ak.a1=sprime[i];
+				RealType u = x[i+1]-x[i];
+				RealType ds = (s[i+1]-s[i]);
+				ak.a2 = (3*ds-(2*sprime[i]+sprime[i+1])*u)/(u*u);
+				ak.a3 = ((sprime[i]+sprime[i+1])*u-2*ds)/(u*u*u);
 				akimaStruct_.push_back(ak);
 			}
 			size_t k = akimaStruct_.size()-1;
