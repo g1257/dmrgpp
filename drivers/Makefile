@@ -1,7 +1,7 @@
 
 LDFLAGS =       -lm  -lpthread 
 CPPFLAGS = -Werror -Wall -I../src
-CXX = g++ -pg -O2 -DNDEBUG
+CXX = g++ -pg -g3 -DNDEBUG
 all: $(EXENAME)
 HEADERSH = ../src/AkimaSpline.h ../src/Vector.h 
 
