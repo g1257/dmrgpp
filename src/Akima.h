@@ -2,17 +2,24 @@
 #define AKIMA_H_
 
 //! A class to interpolate using akima spline
+template<typename VectorType>
 class Akima {
+	typedef typename VectorType::ValueType RealType;
+	
 	struct AkimaStruct {
 		RealType x0,x1,a0,a1,a2,a3;
 	};
-
+	
+	
 	public:
 		Akima(const VectorType& x,const VectorType& s)
 		{
+			if (x.size()!=s.size())
+				throw std::runtime_error("Number of X and Y points must be the same\n");
+
 			std::vector<RealType> sprime;
 			calculateSprime(sprime,x,s);
-			for (size_t i=0;i<n;i++) {
+			for (size_t i=0;i<x.size();i++) {
 				RealType u = x[i+1]-x[i];
 				RealType a2 = u*(sprime[i+1]-sprime[i])-2*(s[i+1]-s[i]));
 				RealType a3 = 3*u*(s[i+1]-s[i])-u*u*(sprime[i+1]+2*sprime[i]);
@@ -50,6 +57,27 @@ class Akima {
 				i = (l+i)/2;
 			}
 			return i;
+		}
+		
+		void calculateSprime(VectorType& sprime,const VectorType& x,const VectorType& s)
+		{
+			VectorType d,w;
+			calculateD(d,x,s);
+			for (size_t i=0;i<x.size();i++) {
+				if (cornerCase()) {
+					// do corner case
+					continue;
+				}
+				sprime[i] = w[i]*d[i]+w[i+1]*d[i+1];
+				sprime[i] /= (w[i]+w[i+1]);
+			}
+		}
+		
+		void calculateD(VectorType& d,const VectorType& x,const VectorType& s)
+		{
+			for (size_t i=2;i<x.size();i++) 
+				d[i] = (s[i+1]-s[i])/(x[i+1]-x[i]);
+			
 		}
 		
 		std::vector<AkimaStruct> akimaStruct_;

@@ -1,0 +1,27 @@
+PsimagLite contains utilities for use in codes for the simulation of strongly correlated electrons.
+It is inspired in T.S.'s Psimag software (but it is not a fork of Psimag).
+The amount of functionality included in PsimagLite will be exactly this (subject to change):
+
+ModuleName	Description
+[Misc]	PSIMAGAssert.h
+[LinearAlgebra]	Includes BLAS/LAPACK wrappers, Matrix.h and a new Vector.h class.
+[Json] 	Json support (taken from M.S.'s new implementation which doesn't depend on anything at all)
+[Xml] 	Xml support (M.S.'s Tag*.h files) I will include but not maintain this.
+[Io]	Brandnew and fresh input output support
+[Concurrency]	Concurrency classes taken from DCA++ (gbranch)
+[SystemInfo]	Basic time/date capability, os, hostname, compiler info
+[Profiling]	Profiling through constructor/destructor paradigm as done by M.S in DCA++
+[RandomNumberGenerator]	Will include a good rng and a bad one/easy one for testing
+[Interpolation] Akima splines
+
+The reason for PsimagLite is to share code among SpinPhononFermion, DCA++ and DMRG++. 
+
+PsimagLite is free software (see file LICENSE) 
+
+PsimagLite and DMRG++
+Users will notice no change. Developers should not change DMRG++'s PSimagLite but do development on PsimagLite's separate repo instead. The fact that PsimagLite is in DMRG++'s repo is simply a convenience for users.
+In the future, users might need to download PsimagLite to be able to compile DMRG++. I will post a notice if this becomes true.
+
+PsimagLite and SpinPhononFermion
+Same as DMRG++ above. 
+
