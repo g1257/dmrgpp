@@ -54,14 +54,14 @@ int main(int argc,char *argv[])
 {
 	VectorType x,s;
 	readTwoColumnData(argv[1],x,s);
-	size_t total = atoi(argv[2]);
 
 	AkimaSplineType akimaSpline(x,s);
-	IntervalType interval = akimaSpline.getInterval();
+	FieldType xstart = std::atof(argv[2]);
+	FieldType xend = std::atof(argv[3]);
+	size_t total = std::atoi(argv[4]);
+	FieldType xstep = (xend-xstart)/total;
 
-	FieldType dx = (interval.second-interval.first)/total;
-	for (size_t i=0;i<total;i++) {
-		FieldType x = i*dx + interval.first;
+	for (FieldType x=xstart;x<xend;x+=xstep) {
 		std::cout<<x<<" "<<akimaSpline(x)<<"\n";
 	}
 }
