@@ -1,6 +1,6 @@
 // BEGIN LICENSE BLOCK
 /*
-Copyright © 2008 , UT-Battelle, LLC
+Copyright  2008 , UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 1.0.0]
@@ -100,13 +100,14 @@ namespace Dmrg {
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 		typedef DmrgSerializer<RealType,VectorWithOffsetType,MatrixType,BasisType,FermionSign> DmrgSerializerType;
 		
-		enum {NOTIMEVECTOR=0,USETIMEVECTOR=1};
+		//enum {NOTIMEVECTOR=0,USETIMEVECTOR=1};
 		
 		ObserverHelper(const std::string& filename,size_t nf,bool verbose=true) 
 			:	filename_(filename),
 				io_(filename),
 				dSerializerV_(1,DmrgSerializerType(io_,true)),
 				currentPos_(0),
+				useTimeVector_(false),
 				verbose_(verbose)
 		{
 			std::cerr<<"Observer will use file: "<<filename<<" for core DMRG data\n";
@@ -120,6 +121,7 @@ namespace Dmrg {
 				dSerializerV_(1,DmrgSerializerType(io_,true)),
 				timeSerializerV_(nf),
 				currentPos_(0),
+				useTimeVector_(true),
 				verbose_(verbose)
 		{
 			std::cerr<<"Observer will use file: "<<filename<<" for core DMRG data\n";
@@ -193,6 +195,11 @@ namespace Dmrg {
 		size_t size() const
 		{
 			return dSerializerV_.size()-1;
+		}
+
+		bool hasTimeVector() const
+		{
+			return useTimeVector_;
 		}
 
 		const VectorWithOffsetType& timeVector() const
@@ -317,6 +324,7 @@ namespace Dmrg {
 		std::vector<DmrgSerializerType> dSerializerV_;
 		std::vector<TimeSerializerType> timeSerializerV_;
 		size_t currentPos_;
+		bool useTimeVector_;
 		bool verbose_;
 	};  //ObserverHelper
 

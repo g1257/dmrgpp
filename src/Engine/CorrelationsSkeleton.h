@@ -1,6 +1,6 @@
 // BEGIN LICENSE BLOCK
 /*
-Copyright © 2008 , UT-Battelle, LLC
+Copyright  2008 , UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 1.0.0]
@@ -251,6 +251,13 @@ namespace Dmrg {
 		
 		FieldType bracket(const MatrixType& A)
 		{
+			if (helper_.hasTimeVector()) {
+				const VectorWithOffsetType& v = helper_.timeVector();
+				VectorType w(v.size());
+				v.toSparse(w);
+				return bracket_(A,w);
+			}
+			
 			const VectorWithOffsetType& v = helper_.wavefunction();
 			VectorType w(v.size());
 			v.toSparse(w);
