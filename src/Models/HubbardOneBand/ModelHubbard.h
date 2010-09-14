@@ -215,7 +215,16 @@ namespace Dmrg {
 				psimag::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[spin].data);
 				return tmp;
+			} else if (what=="nup") {
+                                psimag::Matrix<SparseElementType> cup = getOperator("c",0,0);
+                                psimag::Matrix<SparseElementType> nup = multiplyTransposeConjugate(cup,cup);
+                                return nup;
+                        } else if (what=="ndown") {
+                                psimag::Matrix<SparseElementType> cdown = getOperator("c",0,1);
+                                psimag::Matrix<SparseElementType> ndown = multiplyTransposeConjugate(cdown,cdown);
+                                return ndown;
 			}
+			std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 		}
 		
