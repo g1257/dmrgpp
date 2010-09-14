@@ -517,14 +517,19 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	bool verbose = false;
 	Observer<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
 	if (hasTimeEvolution) {
-		SparseMatrixType matrixN(model.getOperator("c",0));
-		SparseMatrixType matrix2;
-		transposeConjugate(matrix2,matrixN);
+		SparseMatrixType matrixNup(model.getOperator("nup"));
+		SparseMatrixType matrixNdown(model.getOperator("ndown"));
 		SparseMatrixType A;
-		multiply(A,matrix2,matrixN);
+		multiply(A,matrixNup,matrixNdown);
 		Su2RelatedType su2Related1;
+		std::cout<<"#Using Matrix A:\\n";
+		for (int i=0;i<A.rank();i++) {
+			for (int j=0;j<A.rank();j++)
+				std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
+			std::cout<<"\\n";
+		}
 		OperatorType opN(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-		std::cout<<"site value time\\n";
+		std::cout<<"site nUpnDown time\\n";
 		for (size_t i0 = 0;i0<observe.size();i0++) {
 			FieldType tmp = observe.template onePoint<ApplyOperatorType>(i0,opN);
 			std::cout<<observe.site()<<" "<<tmp<<" "<<observe.time()<<"\\n";
