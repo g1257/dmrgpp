@@ -159,7 +159,10 @@ namespace Dmrg {
 				psimag::Matrix<SparseElementType> cup = modelHubbard_.getOperator(what,0,0);
 				psimag::Matrix<SparseElementType> nup = multiplyTransposeConjugate(cup,cup);
 				return nup;
-				
+			} else if (what=="ndown") {
+				psimag::Matrix<SparseElementType> cdown = modelHubbard_.getOperator(what,0,1);
+                                psimag::Matrix<SparseElementType> ndown = multiplyTransposeConjugate(cdown,cdown);
+                                return ndown;
 			} else {
 				return modelHubbard_.getOperator(what,gamma,spin);
 			}
