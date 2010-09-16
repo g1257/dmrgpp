@@ -565,6 +565,18 @@ EOF
 		std::cout<<v3;
 	}
 EOF
+	if  ($modelName=~/febasedsc/i) {
+		print print OBSOUT<<EOF;
+		const psimag::Matrix<FieldType>& oDelta = model.getOperator("d");
+		psimag::Matrix<FieldType> oDeltaT;
+		transposeConjugate(oDeltaT,oDelta);
+		const psimag::Matrix<FieldType>& vDelta=observe.correlations(n,oDelta,oDeltaT,1);
+		if (concurrency.root()) {
+			std::cout<<"DeltaDeltaDagger:\\n";
+			std::cout<<vDelta;
+		}
+EOF
+	}
 	if  ($modelName=~/heisenberg/i) {
 		print print OBSOUT<<EOF;
 		// Si^+ Sj^-

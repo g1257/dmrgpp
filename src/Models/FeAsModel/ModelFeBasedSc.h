@@ -234,6 +234,9 @@ namespace Dmrg {
 				crsMatrixToFullMatrix(tmp,creationMatrix[orbital + spin*NUMBER_OF_ORBITALS].data);
 				return tmp;
 			}
+			if (what=="d") { // delta = c^\dagger * c^dagger
+				return multiplyTc(creationMatrix[orbital].data,creationMatrix[orbital+NUMBER_OF_ORBITALS].data);
+			}
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 		}
 		
