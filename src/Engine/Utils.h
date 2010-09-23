@@ -806,6 +806,14 @@ C           Wisniewski, J. A., (SNLA)
 namespace psimag {
 	
 	
+	template<typename T>
+	void transposeConjugate(psimag::Matrix<T>& dest,const psimag::Matrix<T>& src)
+	{
+		size_t n = src.n_row();
+		if (n!=src.n_col()) throw std::runtime_error("transposeConjugate: only for square matrices\n");
+		dest.resize(n,n);
+		for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++) dest(i,j)=conj(src(j,i));
+	}
 	
 	template<typename T>
 	psimag::Matrix<T> multiplyTransposeConjugate(const psimag::Matrix<T>& O1,const psimag::Matrix<T>& O2,char modifier='C')

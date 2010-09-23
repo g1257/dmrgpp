@@ -205,7 +205,7 @@ namespace Dmrg {
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 
-			if (what=="+") {
+			if (what=="+" or what=="i") {
 				psimag::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[0].data,creationMatrix[2].data);
 				psimag::Matrix<SparseElementType> tmp2 = multiplyTc(creationMatrix[1].data,creationMatrix[3].data);
 				return tmp+tmp2;
@@ -237,6 +237,7 @@ namespace Dmrg {
 			if (what=="d") { // delta = c^\dagger * c^dagger
 				return multiplyTc(creationMatrix[orbital].data,creationMatrix[orbital+NUMBER_OF_ORBITALS].data);
 			}
+			std::cerr<<"what="<<what<<"\n";
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 		}
 		
