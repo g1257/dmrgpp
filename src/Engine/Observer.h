@@ -217,11 +217,27 @@ namespace Dmrg {
 			size_t pnter=site;
 			helper_.setPointer(pnter);
 			
-			ApplyOperatorType applyOpLocal1(helper_.basisS(),helper_.basisE(),helper_.basisSE());
-		
 			const VectorWithOffsetType& src = helper_.timeVector();
 			//const std::string& label,
-				
+			return onePointInternal<ApplyOperatorType>(site,A,src);
+		}
+
+		template<typename ApplyOperatorType>
+		FieldType onePointGs(size_t site,const typename ApplyOperatorType::OperatorType& A)
+		{
+			size_t pnter=site;
+			helper_.setPointer(pnter);
+			const VectorWithOffsetType& src = helper_.wavefunction();
+			return onePointInternal<ApplyOperatorType>(site,A,src);
+		}   
+
+
+		template<typename ApplyOperatorType>
+		FieldType onePointInternal(size_t site,const typename ApplyOperatorType::OperatorType& A,
+				const VectorWithOffsetType& src)
+		{
+			
+			ApplyOperatorType applyOpLocal1(helper_.basisS(),helper_.basisE(),helper_.basisSE());
 			VectorWithOffsetType dest;
 			applyOpLocal1(dest,src,A,helper_.fermionicSign(),helper_.direction());
 				

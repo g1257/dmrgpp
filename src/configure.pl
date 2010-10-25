@@ -529,11 +529,33 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 			std::cout<<"\\n";
 		}
 		OperatorType opN(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-		std::cout<<"site nUpnDown time\\n";
+		std::cout<<"site nupNdown(gs) nupNdown(timevector) time\\n";
 		for (size_t i0 = 0;i0<observe.size();i0++) {
-			FieldType tmp = observe.template onePoint<ApplyOperatorType>(i0,opN);
-			std::cout<<observe.site()<<" "<<tmp<<" "<<observe.time()<<"\\n";
+			// for g.s. use this one:
+			FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opN);
+			// for time vector use this one:
+			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opN);
+			std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
 		}
+		// measuring charge:
+		A = matrixNup;
+		A += matrixNdown;
+		std::cout<<"#Using Matrix A:\\n";
+		for (int i=0;i<A.rank();i++) {
+			for (int j=0;j<A.rank();j++)
+				std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
+			std::cout<<"\\n";
+		}
+		OperatorType opCharge(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+		std::cout<<"site nUp+nDown(gs) nup+ndown(timevector) time\\n";
+		for (size_t i0 = 0;i0<observe.size();i0++) {
+			//for g.s. use this one:
+			FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opCharge);
+			// for h.d. use this one:
+			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opCharge);
+			std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
+		}
+
 		return;
 	}
 EOF
