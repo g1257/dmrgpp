@@ -753,10 +753,8 @@ sub compilerName
 	my $ret;
 	my $compiler;
 	foreach my $comp (@tryThis) {
-		system("$comp >& /dev/null");
-		next if ($? == -1 or ($? & 127) );
-		$ret = $? >> 8;
-		if ($ret < 2) {
+		my $ret = system("which $comp >& /dev/null");
+		if ($ret==0) {
 			$compiler = $comp;
 			last;
 		} 
