@@ -143,13 +143,13 @@ namespace Dmrg {
 				DmrgBasisType const &pSE,
 				int direction)
 		{
-			BuildingBlockType matrixBlock;
 			
 			for (size_t m=0;m<pBasis.partition()-1;m++) {
 				size_t bs = pBasis.partition(m+1)-pBasis.partition(m);
 				
-				matrixBlock.resize(bs,bs);
-				RealType w = 1.0;
+				BuildingBlockType matrixBlock(bs,bs);
+				//matrixBlock.resize(bs,bs);
+				RealType w = target.gsWeight();
 				if (target.includeGroundStage())
 					initPartition(matrixBlock,pBasis,m,target.gs(),pBasisSummed,pSE,direction,w);
 				for (size_t i=0;i<target.size();i++) {
@@ -203,7 +203,7 @@ namespace Dmrg {
 			for (size_t i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
 				for (size_t j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
 						
-					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m))=
+					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m)) +=
 						densityMatrixExpandEnviron(i,j,v,pBasisSummed,pSE,ns,ne)*weight;
 					}
 				}
@@ -223,7 +223,7 @@ namespace Dmrg {
 			for (size_t i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
 				for (size_t j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
 						
-					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m))=
+					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m)) +=
 						densityMatrixExpandSystem(i,j,v,pBasisSummed,pSE,ns,ne)*weight;
 				}
 			}

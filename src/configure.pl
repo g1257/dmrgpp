@@ -520,8 +520,13 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 		SparseMatrixType matrixNup(model.getOperator("nup"));
 		SparseMatrixType matrixNdown(model.getOperator("ndown"));
 		SparseMatrixType A;
-		multiply(A,matrixNup,matrixNdown);
 		Su2RelatedType su2Related1;
+		A.makeDiagonal(4,1.0);
+		OperatorType opIdentity(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+		FieldType superDensity = observe.template onePoint<ApplyOperatorType>(0,opIdentity);
+		std::cout<<"SuperDensity(Weight of the timeVector)="<<superDensity<<"\\n";
+
+		multiply(A,matrixNup,matrixNdown);
 		std::cout<<"#Using Matrix A:\\n";
 		for (int i=0;i<A.rank();i++) {
 			for (int j=0;j<A.rank();j++)
