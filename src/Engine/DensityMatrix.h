@@ -1,190 +1,178 @@
-// BEGIN LICENSE BLOCK
-/*
-Copyright (c) 2009, UT-Battelle, LLC
-All rights reserved
+/*2:*/
+#line 11 "DensityMatrix.w"
 
-[DMRG++, Version 2.0.0]
-[by G.A., Oak Ridge National Laboratory]
-
-UT Battelle Open Source Software License 11242008
-
-OPEN SOURCE LICENSE
-
-Subject to the conditions of this License, each
-contributor to this software hereby grants, free of
-charge, to any person obtaining a copy of this software
-and associated documentation files (the "Software"), a
-perpetual, worldwide, non-exclusive, no-charge,
-royalty-free, irrevocable copyright license to use, copy,
-modify, merge, publish, distribute, and/or sublicense
-copies of the Software.
-
-1. Redistributions of Software must retain the above
-copyright and license notices, this list of conditions,
-and the following disclaimer.  Changes or modifications
-to, or derivative works of, the Software should be noted
-with comments and the contributor and organization's
-name.
-
-2. Neither the names of UT-Battelle, LLC or the
-Department of Energy nor the names of the Software
-contributors may be used to endorse or promote products
-derived from this software without specific prior written
-permission of UT-Battelle.
-
-3. The software and the end-user documentation included
-with the redistribution, with or without modification,
-must include the following acknowledgment:
-
-"This product includes software produced by UT-Battelle,
-LLC under Contract No. DE-AC05-00OR22725  with the
-Department of Energy."
- 
-*********************************************************
-DISCLAIMER
-
-THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER, CONTRIBUTORS, UNITED STATES GOVERNMENT,
-OR THE UNITED STATES DEPARTMENT OF ENERGY BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGE.
-
-NEITHER THE UNITED STATES GOVERNMENT, NOR THE UNITED
-STATES DEPARTMENT OF ENERGY, NOR THE COPYRIGHT OWNER, NOR
-ANY OF THEIR EMPLOYEES, REPRESENTS THAT THE USE OF ANY
-INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
-DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
-
-*********************************************************
-
-
-*/
-// END LICENSE BLOCK
-/** \ingroup DMRG */
-/*@{*/
-
-/*! \file DensityMatrix.h
- *
- *  
- *
- */
 #ifndef DENSITY_MATRIX_H
 #define DENSITY_MATRIX_H
 
+/*:2*//*3:*/
+#line 18 "DensityMatrix.w"
+
 #include "Utils.h"
+
+/*:3*//*4:*/
+#line 27 "DensityMatrix.w"
+
 #include "BlockMatrix.h"
+
+/*:4*//*5:*/
+#line 32 "DensityMatrix.w"
+
 #include "DensityMatrixLocal.h"
 #include "DensityMatrixSu2.h"
 
-namespace Dmrg {
-	//!
-	template<
-		typename RealType,
-		typename DmrgBasisType,
-		typename DmrgBasisWithOperatorsType,
-		typename TargettingType
-		>
-	class DensityMatrix {
-		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
-		typedef BlockMatrix<DensityMatrixElementType,psimag::Matrix<DensityMatrixElementType> > BlockMatrixType;
-		typedef typename DmrgBasisType::FactorsType FactorsType;
-		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
-		typedef DensityMatrixLocal<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType> DensityMatrixLocalType;
-		typedef DensityMatrixSu2<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType> DensityMatrixSu2Type;
-		typedef DensityMatrixBase<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType> DensityMatrixBaseType;
+namespace Dmrg{
 
-	public:
-		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
-		
-		DensityMatrix(
-			const TargettingType& target,
-			const DmrgBasisWithOperatorsType& pBasis,
-			const DmrgBasisWithOperatorsType& pBasisSummed,
-			const DmrgBasisType& pSE,
-			size_t direction,bool debug=false,bool verbose=false)
-			: densityMatrixLocal_(target,pBasis,pBasisSummed,pSE,direction,debug,verbose),
-				densityMatrixSu2_(target,pBasis,pBasisSummed,pSE,direction,debug,verbose)
-		{
-			if (DmrgBasisType::useSu2Symmetry()) {
-				densityMatrixImpl_ = &densityMatrixSu2_;
-			} else {
-				densityMatrixImpl_ = &densityMatrixLocal_;
-			}
-			densityMatrixImpl_->init(target,pBasis,pBasisSummed,pSE,direction);
-		}
-		
-		BlockMatrixType& operator()()
-		{
-			return densityMatrixImpl_->operator()();
-		}
-		
-		size_t rank() { return densityMatrixImpl_->rank(); }
-		
-		void check(int direction)
-		{
-			return densityMatrixImpl_->check(direction);
-		}
+/*:5*//*6:*/
+#line 44 "DensityMatrix.w"
 
-		void check2(int direction)
-		{
-			densityMatrixImpl_->check2(direction);
-		}
-		
-		
-		template<typename ConcurrencyType>
-		void diag(std::vector<RealType>& eigs,char jobz,ConcurrencyType& concurrency)
-		{
-			if (!DmrgBasisType::useSu2Symmetry()) {
-				densityMatrixLocal_.diag(eigs,jobz,concurrency);
-			} else {
-				densityMatrixSu2_.diag(eigs,jobz,concurrency);
-			}
-			
-		}
-		template<
-			typename RealType_,
-			typename DmrgBasisType_,
-			typename DmrgBasisWithOperatorsType_,
-   			typename TargettingType_
-			> 
-		friend std::ostream& operator<<(std::ostream& os,
-				const DensityMatrix<RealType_,
-    					DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_>& dm);
-	private:
-		DensityMatrixLocalType densityMatrixLocal_;
-		DensityMatrixSu2Type densityMatrixSu2_;
-		DensityMatrixBaseType* densityMatrixImpl_;
+template<
+typename RealType,
+typename DmrgBasisType,
+typename DmrgBasisWithOperatorsType,
+typename TargettingType
+> 
+class DensityMatrix{
 
-		
-	}; // class DensityMatrix
-	
-	template<
-		typename RealType,
-		typename DmrgBasisType,
-		typename DmrgBasisWithOperatorsType,
-  		typename TargettingType
-		> 
-	std::ostream& operator<<(std::ostream& os,
-				const DensityMatrix<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType>& dm)
-	{
-		os<<(*dm.densityMatrixImpl_);
-		return os;
-	}
-} // namespace Dmrg
+/*:6*//*7:*/
+#line 55 "DensityMatrix.w"
 
-/*@}*/
+typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
+typedef BlockMatrix<DensityMatrixElementType,psimag::Matrix<DensityMatrixElementType> > 
+BlockMatrixType;
+typedef typename DmrgBasisType::FactorsType FactorsType;
+enum{EXPAND_SYSTEM= TargettingType::EXPAND_SYSTEM};
+typedef DensityMatrixLocal<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,
+TargettingType> DensityMatrixLocalType;
+typedef DensityMatrixSu2<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,
+TargettingType> DensityMatrixSu2Type;
+typedef DensityMatrixBase<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,
+TargettingType> DensityMatrixBaseType;
+
+/*:7*//*8:*/
+#line 71 "DensityMatrix.w"
+
+public:
+typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
+
+/*:8*//*9:*/
+#line 87 "DensityMatrix.w"
+
+DensityMatrix(
+const TargettingType&target,
+const DmrgBasisWithOperatorsType&pBasis,
+const DmrgBasisWithOperatorsType&pBasisSummed,
+const DmrgBasisType&pSE,
+size_t direction,
+bool debug= false,
+bool verbose= false)
+
+/*:9*//*10:*/
+#line 102 "DensityMatrix.w"
+
+:densityMatrixLocal_(target,pBasis,pBasisSummed,pSE,direction,debug,verbose),
+densityMatrixSu2_(target,pBasis,pBasisSummed,pSE,direction,debug,verbose)
+{
+
+/*:10*//*11:*/
+#line 112 "DensityMatrix.w"
+
+if(DmrgBasisType::useSu2Symmetry()){
+densityMatrixImpl_= &densityMatrixSu2_;
+}else{
+densityMatrixImpl_= &densityMatrixLocal_;
+}
+/*:11*//*12:*/
+#line 123 "DensityMatrix.w"
+
+densityMatrixImpl_->init(target,pBasis,pBasisSummed,pSE,direction);
+}
+
+/*:12*//*13:*/
+#line 135 "DensityMatrix.w"
+
+BlockMatrixType&operator()()
+{
+return densityMatrixImpl_->operator()();
+}
+
+/*:13*//*14:*/
+#line 145 "DensityMatrix.w"
+
+size_t rank(){return densityMatrixImpl_->rank();}
+
+/*:14*//*15:*/
+#line 149 "DensityMatrix.w"
+
+void check(int direction)
+{
+return densityMatrixImpl_->check(direction);
+}
+
+/*:15*//*16:*/
+#line 156 "DensityMatrix.w"
+
+void check2(int direction)
+{
+densityMatrixImpl_->check2(direction);
+}
+
+/*:16*//*17:*/
+#line 165 "DensityMatrix.w"
+
+template<typename ConcurrencyType> 
+void diag(std::vector<RealType> &eigs,char jobz,ConcurrencyType&concurrency)
+{
+if(!DmrgBasisType::useSu2Symmetry()){
+densityMatrixLocal_.diag(eigs,jobz,concurrency);
+}else{
+densityMatrixSu2_.diag(eigs,jobz,concurrency);
+}
+
+}
+
+/*:17*//*18:*/
+#line 179 "DensityMatrix.w"
+
+template<
+typename RealType_,
+typename DmrgBasisType_,
+typename DmrgBasisWithOperatorsType_,
+typename TargettingType_
+> 
+friend std::ostream&operator<<(std::ostream&os,
+const DensityMatrix<RealType_,
+DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_> &dm);
+
+/*:18*//*19:*/
+#line 195 "DensityMatrix.w"
+
+private:
+DensityMatrixLocalType densityMatrixLocal_;
+DensityMatrixSu2Type densityMatrixSu2_;
+DensityMatrixBaseType*densityMatrixImpl_;
+
+
+};
+
+/*:19*//*20:*/
+#line 207 "DensityMatrix.w"
+
+template<
+typename RealType,
+typename DmrgBasisType,
+typename DmrgBasisWithOperatorsType,
+typename TargettingType
+> 
+std::ostream&operator<<(std::ostream&os,
+const DensityMatrix<RealType,DmrgBasisType,
+DmrgBasisWithOperatorsType,TargettingType> &dm)
+{
+os<<(*dm.densityMatrixImpl_);
+return os;
+}
+}
+
 #endif
 
- 
+/*:20*/
