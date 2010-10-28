@@ -1,0 +1,24 @@
+This is work in progress.
+To obtain documentation do the following steps:
+
+1) Download nuweb
+
+2) Apply the patch nuweb-latex.patch found in
+this directory:
+patch -i nuweb-latex.patch latex.c
+
+3) Compile nuweb (follow program instructions) 
+make nuweb 
+
+4) Then, for example:
+cd src/Engine
+nuweb -v -l  -s  -d DensityMatrix.w
+
+5) Then typeset it and rerun nuweb for references as needed:
+pdflatex DensityMatrix.tex
+nuweb -v -l  -s  -d DensityMatrix.w
+pdflatex DensityMatrix.tex
+
+6) and you should get the documentation in
+DensityMatrix.pdf
+

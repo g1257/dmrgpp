@@ -776,11 +776,11 @@ sub getOperatorsName()
 
 sub compilerName
 {
-	my @tryThis = ("g++4","g++");
+	my @tryThis = ("g++","g++4");
 	my $ret;
 	my $compiler;
 	foreach my $comp (@tryThis) {
-		my $ret = system("which $comp >& /dev/null");
+		my $ret = system("$comp &>2 /dev/null");
 		if ($ret==0) {
 			$compiler = $comp;
 			last;
