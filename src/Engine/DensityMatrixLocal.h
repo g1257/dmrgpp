@@ -1,4 +1,4 @@
-// BEGIN LICENSE BLOCK
+
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -67,18 +67,8 @@ INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
 DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
-
-
 */
-// END LICENSE BLOCK
-/** \ingroup DMRG */
-/*@{*/
 
-/*! \file DensityMatrixLocal.h
- *
- *  
- *
- */
 #ifndef DENSITY_MATRIX_LOCAL_H
 #define DENSITY_MATRIX_LOCAL_H
 
@@ -94,6 +84,7 @@ namespace Dmrg {
 		typename DmrgBasisWithOperatorsType,
 		typename TargettingType
 		>
+
 	class DensityMatrixLocal : public DensityMatrixBase<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType> {
 		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
@@ -101,27 +92,30 @@ namespace Dmrg {
 		typedef BlockMatrix<DensityMatrixElementType,psimag::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
 		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
-		
+
 	public:
 		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
-		
+
 		DensityMatrixLocal(
 			const TargettingType& target,
 			const DmrgBasisWithOperatorsType& pBasis,
 			const DmrgBasisWithOperatorsType& pBasisSummed,
 			const DmrgBasisType& pSE,
-			size_t direction,bool debug=false,bool verbose=false) : data_(pBasis.size() ,pBasis.partition()-1),
+			size_t direction,bool debug=false,bool verbose=false) 
+
+		: data_(pBasis.size() ,pBasis.partition()-1),
 				debug_(debug),verbose_(verbose)
 		{
 		}
-		
+
+
 		virtual BlockMatrixType& operator()()
 		{
 			return data_;
 		}
-		
+
 		virtual size_t rank() { return data_.rank(); }
-		
+
 		virtual void check(int direction)
 		{
 		}
@@ -135,27 +129,35 @@ namespace Dmrg {
 		{
 			diagonalise<DensityMatrixElementType,RealType,ConcurrencyType>(data_,eigs,jobz,concurrency);
 		}
-		
 		virtual void init(
 				const TargettingType& target,
 				DmrgBasisWithOperatorsType const &pBasis,
 				const DmrgBasisWithOperatorsType& pBasisSummed,
 				DmrgBasisType const &pSE,
 				int direction)
-		{
-			
+		{	
+			//loop over all partitions:
 			for (size_t m=0;m<pBasis.partition()-1;m++) {
+				// size of this partition
 				size_t bs = pBasis.partition(m+1)-pBasis.partition(m);
 				
+				// density matrix block for this partition:
 				BuildingBlockType matrixBlock(bs,bs);
-				//matrixBlock.resize(bs,bs);
+				
+				// weight of the ground state:
 				RealType w = target.gsWeight();
+				
+				// if we are to target the ground state do it now:
 				if (target.includeGroundStage())
 					initPartition(matrixBlock,pBasis,m,target.gs(),pBasisSummed,pSE,direction,w);
+				
+				// target all other states if any:
 				for (size_t i=0;i<target.size();i++) {
 					w = target.weight(i)/target.normSquared(i);
 					initPartition(matrixBlock,pBasis,m,target(i),pBasisSummed,pSE,direction,w);
 				}
+				
+				// set this matrix block into data_
 				data_.setBlock(m,pBasis.partition(m),matrixBlock);
 			}
 		}
@@ -169,10 +171,11 @@ namespace Dmrg {
 		friend std::ostream& operator<<(std::ostream& os,
 				const DensityMatrixLocal<RealType_,
     					DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_>& dm);
+
 	private:
 		BlockMatrixType data_;
 		bool debug_,verbose_;
-		
+
 		void initPartition(BuildingBlockType& matrixBlock,
 				DmrgBasisWithOperatorsType const &pBasis,
 				size_t m,
@@ -187,7 +190,7 @@ namespace Dmrg {
 			else
 				initPartitionExpandSystem(matrixBlock,pBasis,m,v,pBasisSummed,pSE,weight);
 		}
-				
+
 		void initPartitionExpandEnviron(BuildingBlockType& matrixBlock,
 				DmrgBasisWithOperatorsType const &pBasis,
 				size_t m,
@@ -208,7 +211,7 @@ namespace Dmrg {
 					}
 				}
 		}
-		
+
 		void initPartitionExpandSystem(BuildingBlockType& matrixBlock,
 				DmrgBasisWithOperatorsType const &pBasis,
 				size_t m,
@@ -252,7 +255,7 @@ namespace Dmrg {
 			}
 			return sum;
 		}
-		
+
 		DensityMatrixElementType densityMatrixExpandSystem(
 				size_t alpha1,
 				size_t alpha2,
@@ -275,7 +278,7 @@ namespace Dmrg {
 			return sum;
 		}
 	}; // class DensityMatrixLocal
-	
+
 	template<
 		typename RealType,
 		typename DmrgBasisType,
@@ -294,7 +297,4 @@ namespace Dmrg {
 	}
 } // namespace Dmrg
 
-/*@}*/
 #endif
-
- 

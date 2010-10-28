@@ -1,4 +1,6 @@
 \documentclass{report}
+\usepackage[T1]{fontenc}
+\usepackage{bera}
 
 \usepackage[pdftex,usenames,dvipsnames]{color}
 \usepackage{listings}
@@ -6,13 +8,28 @@
 \lstset{language=c++,tabsize=1,basicstyle=\scriptsize,backgroundcolor=\color{mycode}}
 
 \usepackage{hyperref}
+\usepackage{fancyhdr}
+\rhead{DensityMatrix.h}
+\pagestyle{fancy}
+\usepackage{verbatim}
 \begin{document}
 
-\title{The DensityMatrix Class}
-\author{G.A.}
-\maketitle
+%\title{The DensityMatrix Class}
+%\author{G.A.}
+%\maketitle
 
-The \verb|DensityMatrix| Class. This class contains the implemenation of 
+\section{The DensityMatrix Class}
+\begin{comment}
+@o DensityMatrix.h -t
+@{
+/*
+@i license.txt
+*/
+@}
+\end{comment}
+
+
+ This class contains the implementation of 
 the density matrix calculation  and diagonalization for the DMRG algorithm.
 This is a lazy class, it doesn't do much but instead delegates the work%'
 to either the |DensityMatrixLocal| for when there's only local symmetries,
@@ -146,7 +163,7 @@ described in (not sure how to cross reference with literate programming, need to
 OK so here we need to see if we are using only local symmetries or we're also using the %'
 SU(2) symmetry. As you can imagine, things are different in each case. 
 Both \verb|DensityMatrixLocal| and \verb|DensityMatrixSu2| derive from a common parent class.
-The trick is to select which one we need and have the \verb|densityMatrixImpl\_| pointer point to the
+The trick is to select which one we need and have the \verb|densityMatrixImpl_| pointer point to the
 correct one.
 @o DensityMatrix.h -t
 @{
@@ -161,13 +178,12 @@ We delay initializing the actual density matrix class until here.
 This is because we only need one type (either local or SU(2)) per run, 
 and initializing both would be a waste of 
 resources (both CPU and memory).
-Note, however, that created both |densityMatrixLocal\_| and |densityMatrixSu2\_|; but their creation
+Note, however, that created both \verb|densityMatrixLocal_| and \verb|densityMatrixSu2_|; but their creation
 is light as explained before.
 @o DensityMatrix.h -t
 @{
 			densityMatrixImpl_->init(target,pBasis,pBasisSummed,pSE,direction);
 		}
-
 @}
 
 The \verb|operator()| function is a public member function that returns the actual density matrix.
@@ -176,15 +192,14 @@ wait for it\ldots matrix, of
 course, you know like $\rho_{ij}$. So, how do we implement that? Well, we can't, simply%'
 because remember that we need to consider two cases, local and local plus SU(2) symmetries.
 So, the best we can do here is delegate it to the appropriate class, either 
-|DensityMatrixLocal| or |DensityMatrixSu2|. Remember, however, that we already set the pointer
-|densityMatrixImpl\_| to the right object, so we simply call its \verb|operator()| function.
+\verb|DensityMatrixLocal| or \verb|DensityMatrixSu2|. Remember, however, that we already set the pointer
+\verb|densityMatrixImpl_| to the right object, so we simply call its \verb|operator()| function.
 @o DensityMatrix.h -t
 @{
 		BlockMatrixType& operator()()
 		{
 			return densityMatrixImpl_->operator()();
 		}
-
 @}
 The rank function comes below, and returns the rank (as in the number of rows). I don't remember why this
 function is needed at all. Need to check where it's used. It seems that having the matrix is
@@ -193,7 +208,6 @@ Again nothing can be actually done here, we simply delegate to the appropriate c
 @o DensityMatrix.h -t
 @{
 		size_t rank() { return densityMatrixImpl_->rank(); }
-		
 @}
 
 These are just checks to see if everything is OK.
@@ -203,7 +217,6 @@ These are just checks to see if everything is OK.
 		{
 			return densityMatrixImpl_->check(direction);
 		}
-		
 @}
 
 And more checks to see if everything is OK.
@@ -213,7 +226,6 @@ And more checks to see if everything is OK.
 		{
 			densityMatrixImpl_->check2(direction);
 		}
-		
 @}
 The function \verb|diag| diagonalizes the density matrix, which, if you remember, is one
 of the key steps of the DMRG algorithm. 
@@ -235,9 +247,7 @@ it's some other class's problem.%'
 			} else {
 				densityMatrixSu2_.diag(eigs,jobz,concurrency);
 			}
-			
 		}
-
 @}
 The following statement (see the semicolon at the end) makes the function \verb|operator<<| a friend
 of this class. This function will enable printing this class for debugging purposes.
@@ -253,14 +263,13 @@ of this class. This function will enable printing this class for debugging purpo
 			const DensityMatrix<RealType_,DmrgBasisType_,
 				DmrgBasisWithOperatorsType_,TargettingType_>&
 						dm);
-
 @}
 
 This class has 3 data memeber, all of them private. 
 We've already seen \verb|densityMatrixLocal_| that does the real work
 for the density matrix when there's local symmetries, and  also
-\verb|densityMatrixSu2\_| that does the real work when there's local symmetries and the SU(2) symmetry.%'
-As we explained above, \verb|densityMatrixImpl\_| is a pointer that points to the 
+\verb|densityMatrixSu2_| that does the real work when there's local symmetries and the SU(2) symmetry.%'
+As we explained above, \verb|densityMatrixImpl_| is a pointer that points to the 
 correct object, depending on which symmetries the user chose.
 @o DensityMatrix.h -t
 @{
@@ -268,13 +277,11 @@ correct object, depending on which symmetries the user chose.
 		DensityMatrixLocalType densityMatrixLocal_;
 		DensityMatrixSu2Type densityMatrixSu2_;
 		DensityMatrixBaseType* densityMatrixImpl_;
-
-		
 	}; // class DensityMatrix
 @}
 
 Below is a companion function that prints the density matrix object for debugging purposes.
-Note that we just print the pointer |densityMatrixImpl\_|, and so, again we're delegating%'
+Note that we just print the pointer \verb|densityMatrixImpl_|, and so, again we're delegating%'
 all the work to the appropriate class(es).
 @o DensityMatrix.h -t
 @{

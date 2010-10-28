@@ -22,6 +22,10 @@
 <                           }
 ---
 >                           }*/
+150c150
+<                                fputs("\\end{minipage}\\vspace{4ex}\n",  tex_file);
+---
+>                                fputs("\\end{minipage}\n",  tex_file);
 448c448
 <   { "\\verb@", "@", "@{\\tt @}\\verb@", "\\mbox{}", "\\\\" },
 ---
