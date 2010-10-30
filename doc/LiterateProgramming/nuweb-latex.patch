@@ -1,7 +1,7 @@
 107c107
 <                             fputs("\\vspace{-1ex}\n\\begin{list}{}{} \\item\n", tex_file);
 ---
->                             fputs("\\vspace{-1ex}\n\\begin{lstlisting}\n", tex_file);
+>                             fputs("\\vspace{-1ex}\n\\begin{lstlisting}%AAAA\n", tex_file);
 110c110
 <                             fputs("{\\NWsep}\n\\end{list}\n", tex_file);
 ---
@@ -26,21 +26,118 @@
 <                                fputs("\\end{minipage}\\vspace{4ex}\n",  tex_file);
 ---
 >                                fputs("\\end{minipage}\n",  tex_file);
-448c448
+217,218c217,219
+<                             fputs("\\vspace{-1ex}\n\\begin{list}{}{} \\item\n", tex_file);
+<                             extra_scraps = 0;
+---
+>                             //fputs("\\vspace{-1ex}\n\\begin{list}{}{} \\item\n", tex_file);
+>                             fputs("\\begin{lstlisting}%BBBB\n", tex_file);
+> 			    extra_scraps = 0;
+220c221,222
+<                             fputs("{\\NWsep}\n\\end{list}\n", tex_file);
+---
+>                             //fputs("{\\NWsep}\n\\end{list}\n", tex_file);
+> 			    fputs("\\end{lstlisting}\n", tex_file);
+223c225
+<                           {
+---
+>                           /*{
+228,229c230
+<                             fputs("\\setlength{\\itemindent}{-\\leftmargin}}\n", tex_file);}
+<                           
+---
+>                             fputs("\\setlength{\\itemindent}{-\\leftmargin}}\n", tex_file);} */
+231c232
+<                           {
+---
+>                           /*{
+236c237
+<                           }
+---
+>                           }*/
+238c239
+<                           {
+---
+>                           /*{
+259c260
+<                           }
+---
+>                           }*/
+263c264
+<                           {
+---
+>                           /*{
+266c267
+<                           }
+---
+>                           }*/
+448c449
 <   { "\\verb@", "@", "@{\\tt @}\\verb@", "\\mbox{}", "\\\\" },
 ---
 >   { "\\verb@", " ", " ", " "," " },
-470c470
+470c471
 <     if((delimit_scrap[0][0]=strdup("\\lstinline@")) == NULL) {
 ---
 >     if((delimit_scrap[0][0]=strdup(" ")) == NULL) {
-521c521
+521c522
 <                    while (delta > 0) {
 ---
 >                    /*while (delta > 0) {
-524c524,526
+524c525,527
 <                    }
 ---
 >                    }*/
 > 		   delta = 0;
 > 		   putc('\t', file);
+580,582c583,585
+<                              if (prefix)
+<                                fputs("\\hbox{", file);
+<                              fputs("$\\langle\\,${\\it ", file);
+---
+>                              //%CCC if (prefix)
+>                              //%CCC  fputs("\\hbox{", file);
+>                              //%CCC fputs("$\\langle\\,${\\it ", file);
+598c601
+<                              fputs("}\\nobreak\\ ", file);
+---
+>                              //%CCC fputs("}\\nobreak\\ ", file);
+608c611
+<                                     fputs("{\\footnotesize ", file);
+---
+>                                     //%CCC fputs("{\\footnotesize ", file);
+611c614
+<                                     fputs(" }", file);
+---
+>                                     //%CCC fputs(" }", file);
+629c632
+<                              fprintf(file, "{\\footnotesize ");
+---
+>                              //%CCC fprintf(file, "{\\footnotesize ");
+634,636c637,639
+<                                  fputs("\\NWlink{nuweb", file);
+<                                  write_single_scrap_ref(file, p->scrap);
+<                                  fputs("}{", file);
+---
+>                                  //%CCC fputs("\\NWlink{nuweb", file);
+>                                  //%CCC write_single_scrap_ref(file, p->scrap);
+>                                  //%CCC fputs("}{", file);
+638c641
+<                                  fputs("}", file);
+---
+>                                  //%CCC fputs("}", file);
+640,641c643,644
+<                                  if (p)
+<                                    fputs(", \\ldots\\ ", file);
+---
+>                                  //%CCC if (p)
+>                                  //%CCC  fputs(", \\ldots\\ ", file);
+648,651c651,654
+<                              fputs("}$\\,\\rangle$", file);
+<                              if (prefix)
+<                                 fputs("}", file);
+<                              fputs(delimit_scrap[scrap_type][0], file);
+---
+>                              //%CCC fputs("}$\\,\\rangle$", file);
+>                              //%CCC if (prefix)
+>                              //%CCC   fputs("}", file);
+>                              //%CCC fputs(delimit_scrap[scrap_type][0], file);
