@@ -9,7 +9,6 @@
 
 \usepackage{hyperref}
 \usepackage{fancyhdr}
-\rhead{DensityMatrixLocal.h}
 \pagestyle{fancy}
 \usepackage{verbatim}
 \begin{document}
@@ -118,9 +117,9 @@ or if the user specified TSTLoops with numbers greater than zero, those numbers 
 before time-dependent observables are computed.
 \item OPERATOR
 In this stage we're applying an operator%'
-\item WFT_NOADVANCE
+\item WFT\_NOADVANCE
 In this stage we're adavancing in space with the wave function transformation (WFT) but not advancing in time.%'
-\item WFT_NOADVANCE
+\item WFT\_NOADVANCE
 In this stage we're adavancing in space and time%'
 \end{enumerate}
 @o TimeStepTargetting.h -t
@@ -459,8 +458,8 @@ We delegate that to function \verb|computePhi| that will be explain below.
 			}
 @}
 
-Let us look at computephi. If we're in the stage of applying operator $i$, then we %'
-call \verb|applyLocal| (see function \verb|operator()| in file \verb|ApplyLocalOperator.h)
+Let us look at \verb|computephi|. If we're in the stage of applying operator $i$, then we %'
+call \verb|applyLocal| (see function \verb|operator()| in file \verb|ApplyLocalOperator.h|)
 to apply this operator to state \verb|phiOld| and store the result in \verb|phiNew|.
 @d computephi1
 @{
@@ -638,7 +637,8 @@ This function returns a string (human-readable) representation of the stage give
 
 @o TimeStepTargetting.h -t
 @{
-@<computephi@>
+@<computephi1@>
+@<computephi2@>
 @}
 
 The function below is a crucial one. It applies $exp(iHt)$ to vector \verb|phi|.
@@ -753,7 +753,10 @@ It is the vector calculated by \verb|calcR| as explained below.
 			}
 @}
 
-FIXME FIXME FIXME
+This does one more step in the formula 
+$\psi(t)=V^\dagger T^\dagger exp(iDt) T V \phi$.
+Note that $D$ is diagonal, its diagonal values are \verb|eigs| below, but we need
+to substract the ground state energy \verb|Eg|. This returns the vector $exp(iDt) T V \phi$.
 @o TimeStepTargetting.h -t
 @{
 			void calcR(
@@ -780,7 +783,7 @@ FIXME FIXME FIXME
 			}
 @}
 
-This function does $\sum_x V_{k',x} phi_{x}$%'
+This function does $\sum_x V_{k',x} phi_{x}$, that is $V\phi$%'
 @o TimeStepTargetting.h -t
 @{
 			ComplexType calcVTimesPhi(size_t kprime,const ComplexMatrixType& V,const VectorWithOffsetType& phi,
@@ -842,6 +845,9 @@ And now for each symmetry sector:
 			}
 @}
 
+A validity check
+@o TimeStepTargetting.h -t
+@{
 			//! This check is invalid if there are more than one sector
 			void check1(const ComplexMatrixType& V,const TargetVectorType& phi2)
 			{
@@ -858,13 +864,21 @@ And now for each symmetry sector:
 						std::cerr<<"WARNING: r["<<k<<"]="<<r[k]<<" !=0\n";
 				}
 			}
+@}
 
-			// hack to get the current partition, note that this:
-			// size_t partition = targetVectors_[0].findPartition(basisSE_);
-			// doesn't work, since targetVectors_[0] is stale at this point
-			// This hack could cause performance problems, must be checked
-			// any other ideas?
-			// Update: When more than one op. needs to apply all of 'em:
+As explained above (cross reference here), we need know before applying an operator
+were the non-zero sectors are going to be. The operator (think ``easy'' exciton) 
+does not necessarily have the symmetry of the Hamiltonian, so non-zero sectors of the original
+vector are not going to coincide with the non-zero sectors of the result vector, neither
+do the empty sectors be the same.
+Note that using simpy
+\begin{verbatim}:
+size_t partition = targetVectors_[0].findPartition(basisSE_);
+\end{verbatim}
+doesn't work, since \verb|targetVectors_[0]| is stale at this point%'
+This function should not be called one more than one operators will be applied.
+@o TimeStepTargetting.h -t
+@{
 			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
 			{
 				FermionSign fs(basisS_,tstStruct_.electrons);
@@ -880,21 +894,33 @@ And now for each symmetry sector:
 				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,
 								systemOrEnviron);
 			}
-			
+@}
+
+The function below makes all target vectors empty:
+@o TimeStepTargetting.h -t
+@{
 			void zeroOutVectors()
 			{
 				for (size_t i=0;i<targetVectors_.size();i++) 
 					targetVectors_[i].resize(basisSE_.size());
 			}
-
+@}
+The function below prints all target vectors to disk, using the \verb|TimeSerializer| class.
+@o TimeStepTargetting.h -t
+@{
 			void printVectors(const std::vector<size_t>& block)
 			{
-				if (block.size()!=1) throw std::runtime_error("TST only supports blocks of size 1\n");
+				if (block.size()!=1) throw std::runtime_error(
+					"TST only supports blocks of size 1\n");
 				
 				TimeSerializerType ts(currentTime_,block[0],targetVectors_);
 				ts.save(io_);
 			}
+@}
 
+Print header to disk to index the time vectors. This indexing wil lbe used at postprocessing.
+@o TimeStepTargetting.h -t
+@{
 			void printHeader()
 			{
 				io_.print(tstStruct_);
@@ -905,7 +931,12 @@ And now for each symmetry sector:
 				std::string s = "GsWeight="+utils::ttos(gsWeight_);
 				io_.printline(s);
 			}
+@}
 
+The \verb|test| function below performs a measurement \emph{in situ}.
+This is mainly for testing purposes, since measurements are better done, post-processing.
+@o TimeStepTargetting.h -t
+@{
 			void test(	
 					const VectorWithOffsetType& src,
 					size_t systemOrEnviron,
@@ -934,14 +965,17 @@ And now for each symmetry sector:
 							sum+= dest[k+offset] * conj(src[k+offset]);
 					}
 				}
-				std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_<<" "<<label<<std::norm(src)<<" "<<std::norm(dest)<<"\n";
+				std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_;
+				std::cerr<<" "<<label<<std::norm(src)<<" "<<std::norm(dest)<<"\n";
 			}
+@}
+
 @o TimeStepTargetting.h -t
 @{
 @<privatedata@>
-@}
-			
 	};     //class TimeStepTargetting
 } // namespace Dmrg
-/*@}*/
+
 #endif
+@}
+\end{document}
