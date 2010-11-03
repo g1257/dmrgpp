@@ -3,8 +3,8 @@
 use strict;
 
 #dmrgpp52.o165
-my @files;
-buildFilenames();
+my @files=@ARGV;
+buildFilenames() if (!defined($files[0]);
 
 my $firstSite = 1;
 my $n = 12;
