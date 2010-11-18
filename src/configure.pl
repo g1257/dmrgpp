@@ -776,6 +776,7 @@ sub getOperatorsName()
 
 sub compilerName
 {
+	return "g++";
 	my @tryThis = ("g++","g++4");
 	my $ret;
 	my $compiler;

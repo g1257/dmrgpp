@@ -153,6 +153,9 @@ namespace Dmrg {
 				return false;
 			}
 
+			template<typename RealType_>
+			friend std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType_>& gd);
+
 		private:
 			size_t handle(size_t i,size_t j) const
 			{
@@ -203,6 +206,25 @@ namespace Dmrg {
 			std::vector<RealType> dataNumbers_;
 			std::vector<MatrixType> dataMatrices_;
 	}; // class GeometryDirection
+
+	template<typename RealType>
+	std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType>& gd)
+	{
+		os<<"#GeometrydirId="<<gd.dirId_<<"\n";
+		if (gd.dataType_==GeometryDirection<RealType>::NUMBERS) {
+			os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
+			os<<"#GeometryNumbers=";
+			for (size_t i=0;i<gd.dataNumbers_.size();i++) {
+				os<<gd.dataNumbers_[i]<<" ";
+			}
+			os<<"\n";
+		} else {
+			os<<"#GeometryMatrixSize="<<gd.dataMatrices_.size()<<"\n";
+			for (size_t i=0;i<gd.dataMatrices_.size();i++) 
+				os<<gd.dataMatrices_[i];
+		}
+		return os;
+	}
 } // namespace Dmrg 
 
 /*@}*/

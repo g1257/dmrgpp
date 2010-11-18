@@ -235,7 +235,11 @@ namespace Dmrg {
 				return tmp;
 			}
 			if (what=="d") { // delta = c^\dagger * c^dagger
-				return multiplyTc(creationMatrix[orbital].data,creationMatrix[orbital+NUMBER_OF_ORBITALS].data);
+				SparseMatrixType atmp;
+				multiply(atmp,creationMatrix[orbital+orbital+NUMBER_OF_ORBITALS].data,creationMatrix[orbital].data);
+				psimag::Matrix<SparseElementType> tmp;
+				crsMatrixToFullMatrix(tmp,atmp);
+				return tmp;
 			}
 			std::cerr<<"what="<<what<<"\n";
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");

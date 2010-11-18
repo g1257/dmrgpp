@@ -181,6 +181,8 @@ namespace Dmrg {
 
 		void main(const GeometryType& geometry)
 		{
+			
+			io_.print(geometry);
 			BlockType S,E;
 			std::vector<BlockType> X,Y;
 			BasisDataType q;

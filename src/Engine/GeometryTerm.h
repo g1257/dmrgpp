@@ -203,7 +203,10 @@ namespace Dmrg {
 				}
 				throw std::runtime_error("Unknown geometry\n");
 			}
-			
+
+			template<typename RealType_>	
+			friend std::ostream& operator<<(std::ostream& os,const GeometryTerm<RealType_>& gt);
+	
 		private:	
 			RealType calcValue(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
@@ -314,6 +317,14 @@ namespace Dmrg {
 			std::vector<GeometryDirectionType> directions_;
 			std::vector<RealType> cachedValues_;
 	}; // class GeometryTerm
+
+	template<typename RealType>
+	std::ostream& operator<<(std::ostream& os,const GeometryTerm<RealType>& gt)
+	{
+		os<<"#GeometryDirections="<<gt.directions_.size()<<"\n";
+		for (size_t i=0;i<gt.directions_.size();i++) os<<gt.directions_[i];
+		return os;
+	}
 } // namespace Dmrg
 
 /*@}*/

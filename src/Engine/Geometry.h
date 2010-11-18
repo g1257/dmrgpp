@@ -176,13 +176,24 @@ namespace Dmrg {
 				if (smax+1==emin) return terms_[0].connected(i1,i2); // any term will do
 				return terms_[0].connected(smax,emin,i1,i2); // any term will do
 			}
-		private:
 			
-		
+			template<typename RealType_>
+			friend std::ostream& operator<<(std::ostream& os,const Geometry<RealType_>& g);
+
+		private:
 			size_t linSize_;
 			std::vector<GeometryTermType> terms_;
 			
 	}; // class Geometry
+
+	template<typename RealType>
+	std::ostream& operator<<(std::ostream& os,const Geometry<RealType>& g) 
+	{
+		os<<"#GeometrySize="<<g.linSize_<<"\n";
+		os<<"#GeometryTerms="<<g.terms_.size()<<"\n";
+		for (size_t i=0;i<g.terms_.size();i++) os<<g.terms_[i];
+		return os;
+	}
 } // namespace Dmrg 
 
 /*@}*/
