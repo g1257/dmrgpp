@@ -128,8 +128,8 @@ namespace Dmrg {
 		psimag::Matrix<FieldType> correlations(size_t n,const MatrixType& O1,const MatrixType& O2,int fermionicSign,
 						      size_t n1=0,size_t nf=0)
 		{
-			if (nf==0) nf = 2*n-1;
-			if (n1==0) n1 = n-1;
+			if (nf==0) nf = 2*n;
+			if (n1==0) n1 = n;
 			/*clearCache(n1, nf);
 			precomputeGrowth(O1,fermionicSign,n1,nf);*/
 			initCache(O1,n1,nf,fermionicSign);

@@ -153,7 +153,9 @@ namespace Dmrg {
 					sum += weight_[i];
 				}
 				sum -= weight_[0];
+				sum -= weight_[n-1];
 				weight_[0] = weight_[n-1] = 2.0/(n+2);
+				sum += weight_[n-1];
 				sum += weight_[0];
 				
 				gsWeight_=1.0-sum;

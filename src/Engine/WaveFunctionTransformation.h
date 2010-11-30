@@ -900,11 +900,11 @@ namespace Dmrg {
 			msg<<" We're moving to the finite loop, bumpy ride ahead!";
 			progress_.printline(msg,std::cout);
 			
-			if (dmrgWave_.pEprime.permutationInverse().size()!=dmrgWave_.we.n_row()) {
+			/*if (dmrgWave_.pEprime.permutationInverse().size()!=dmrgWave_.we.n_row()) {
 				printDmrgWave();
 				throw std::runtime_error("transformVector2():"
 						"PpermutationInverse.size()!=dmrgWave_.we.n_row()\n");
-			}
+			}*/
 			if (nip!=dmrgWave_.ws.n_col()) {
 				printDmrgWave();
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
