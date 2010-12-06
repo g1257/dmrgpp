@@ -1,0 +1,267 @@
+
+--------------------------------------------------------
+Top level files:
+
+CODE MAP
+	This file. Short description of the various directories and source files.
+README
+	README file
+CHANGES
+	Summary of changes from v1.0.0
+INDENTATION
+	Indentation style of DMRG++
+INSTALL
+	Software requirements to build and run DMRG++
+LICENSE
+	DMRG++ License
+--------------------------------------------------------
+
+src/dmrg.cpp
+	This is the main program (contains the entry point or int main()). 
+	This file is not included in the package, but it is written when 
+	configure.pl is executed.
+--------------------------------------------------------
+
+src/configure.pl
+	This script asks for the parameters of the run that are selected
+	at compile-time, it creates the file main.cpp (containing the
+	main program), it writes the Makefile, and it creates a sample
+	input.inp file (containing run-time parameters)
+--------------------------------------------------------
+
+src/Geometries/ contains
+the geometry classes, which are:
+GeometryLadder.h
+	Ladder for one orbital 
+Geometry1D.h
+	One dimensional geometry (chain)
+GeometryLadderFeAs.h
+	Ladder for multiple orbitals
+--------------------------------------------------------
+
+src/Models contains
+sample models under separate sub-directories.
+These sample models are:
+1) HeisenbergSpinOneHalf/
+which contains:
+ModelHeisenberg.h
+	The model implementation
+ParametersModelHeisenberg.h
+	The model parameters (basically J_ij)
+OperatorsHeisenberg.h
+	The Heisenberg operators needed to
+	assemble the Hamiltonian. In this case, S^z_i and S^+_i
+HilbertSpaceHubbard.h
+	Hilbert space for this model (same as Hubbard's)
+LinkProductHeisenbergSpinOneHalf.h
+	Hamiltonian connections for this model. There are
+	two types: S_i^+ S_j^- and S^z_i S^z_j
+	
+2) FeAsModel/ for iron based superconductors,
+which contains:
+ModelFeBasedSc.h
+	The model implementation
+ParametersModelFeAs.h
+	The model parameters.
+OperatorsFeAs.h
+	The model's operators needed to
+	assemble the Hamiltonian. In this case, 
+	c^\dagger_{i\gamma\sigma}
+HilbertSpaceFeAs.h
+	Hilbert space for this model (spin and two-orbitals,
+	i.e. 16 states per site)
+LinkProductFeAs.h
+	Hamiltonian connections for this model.
+	These are c^\dagger_{i\gamma\sigma} c_{j\gamma'\sigma}
+
+3) HubbardOneBand/
+which contains:	
+ModelHubbard.h
+	The model's implementation
+ParametersModelHubbard.h
+	The model's parameters (U_i, V_i, t_{ij})
+OperatorsHubbard.h
+	The model's operators needed to
+	assemble the Hamiltonian. In this case, 
+	c^\dagger_{i\sigma}
+HilbertSpaceHubbard.h
+LinkProductHubbardOneBand.h
+	Hamiltonian connections for this model.
+	These are c^\dagger_{i\sigma} c_{j'\sigma}
+--------------------------------------------------------
+
+src/DmrgEngine/
+contains the DMRG++ engine, i.e. those tasks that
+are both model and geometry independent.
+The engine is instantiated with a given model and geometry.
+Its files can be classified in the following way:
+
+*) The interfaces. These abstract classes allows expansion 
+and modularity of functionality:
+ModelBase.h
+	Models must implement this interface.
+	For example, ModelHubbard does.
+BasisData.h
+	Helper interface to ModelBase.h
+OperatorsBase.h
+	Operators must implement this interface.
+	For example, OperatorsHubbard does
+GeometryBase.h
+	Geometries must implement this interface.
+	For example, Geometry1D does.
+Concurrency.h
+	Concurrency paradigms must implement this interface.
+	For example ConcurrencyMpi does.
+
+*) The core classes. These are:
+DmrgSolver.h
+	A class to represent a generic solver for the Dmrg method
+Basis.h
+	Hilbert space basis to deal with symmetries.
+BasisImplementation.h
+	Helper to Basis.h
+BasisWithOperators.h
+	Hilbert space basis that includes operators
+Operator.h
+	An unmangled operator.
+OperatorsImplementation.h
+	Default (or common) implementation of OperatorsBase.h
+InternalProductOnTheFly.h
+	Internal product done on-the-fly.
+InternalProductStored.h
+	Internal product stored (for future use)
+ModelCommon.h
+	Default (or common) implementation of ModelBase.h
+ReflectionSymmetryEmpty.h
+	Hook to implement the reflection symmetry present in the infinite algorithm.
+WaveFunctionTransformation.h
+	Speed-up that computes a good guess for the initial Lanczos vector
+LanczosSolver.h
+	The generic Lanczos algorithm implementation
+DensityMatrix.h
+	Class to represent the density matrix.
+	
+*) Concurrency classes.
+ConcurrencySerial.h
+	Serial program.
+NoPthreads.h
+	Serial program, no pthreads.
+ConcurrencyMpi.h
+	MPI program.
+ConcurrencyMpiFunctions.h
+	Helper for ConcurrencyMpi.
+Pthreads.h
+	Pthreaded program.
+	
+*) Local Symmetry classes	
+ModelHelperLocal.h
+	A class to contain state information about the Hamiltonian to help with the calculation of x+=Hy
+HamiltonianSymmetryLocal.h
+	This class contains the implementation of local symmetries
+	An object of this class is contained by DmrgBasisImplementation
+
+*) SU(2) Symmetry classes
+JmSubspace.h
+	Each object of this class contains a subspace of the outer product.
+	States (a,b) in this subspace give rise to a state c in the outer product
+	with given quantum numbers (j,m,q) [See paper for more info]
+ApplyFactors.h
+	Applies the factors of Eq~(1) in the paper to the operators.
+ClebschGordan.h
+	This is a class to compute ClebschGordan Coefficients
+        //! Don't use this class directly, use ClebschGordanCached instead, it'll improve performance
+        // Parts taken from Ref.S = http://caps.gsfc.nasa.gov/simpson/software/cg_f90.txt
+ClebschGordanCached.h
+	Helper to ClebschGordan
+ReducedOperators.h
+	Reduced operators as in Eqs~(6-7) in the paper.
+Su2Reduced.h
+	Implemenation of WignerEckart Theorem to speed up SU(2) algorithm 
+	(see corresponding section in paper for more info)
+JmPairs.h
+	This is a "vector" containing (2j,m+j) pairs.
+	Repeated entries are stored only once
+	Provides a transparent access as if it were a normal vector
+HamiltonianSymmetrySu2.h
+	An object of this class is meant to be contained by a Hilbert Space basis
+        and then this class help creating the outer product states necessary to preserve the SU(2) symmetry
+        THe counterpart to this class is HamiltonianSymmetryLocal.h for local symmetries only
+ModelHelperSu2.h
+	A class to contain state information about the Hamiltonian
+	to help with the calculation of x+=Hy (for when there's su2 symmetry)
+SpinSquared.h
+	Encapsulates the calculation of the Casimir operator S^2 from creation
+	and anihilation operators. Works in conjunction with SpinSquaredHelper
+SpinSquaredHelper.h
+	Helper to SpinSquared
+
+*) Classes to do sparse linear algebra.
+VerySparseMatrix.h
+	A class to represent a sparse matrix in trivial format
+SparseVector.h
+	A class to represent sparse vectors
+BlockMatrix.h
+	A class to represent a block diagonal matrix
+CrsMatrix.h
+	A class to represent a sparse matrix in Compressed Row Storage (CRS)
+	
+*) Classes related to input and output (io)
+SimpleReader.h
+	Parses the input file
+DiskStack.h
+	A disk stack, similar to std::stack but stores in disk not in memory
+MemoryStack.h
+	A memory stack, based on std::stack. It's the counterpart to DiskStack
+IoSimple.h
+	This class handles Input/Output for the DMRG++ program in a simple way
+ParametersDmrgSolver.h
+	Contains the parameters for the DmrgSolver class and implements functionality to
+	read them from a file
+
+*) Misc. classes:
+Utils.h
+	Misc. functions
+ProgressIndicator.h
+	This class handles output to a progress indicator (usually the terminal)
+ProgramLimits.h
+	Contains the maximum values that the program should not exceed.
+
+--------------------------------------------------------
+
+PartialPsimag/
+	PSIMAG classes. Short description:
+Matrix.h
+	A dense matrix class in C++
+LAPACK.h
+	LAPACK function wrappers for C++.
+BLAS.h
+	BLAS function wrappers for C++. 
+
+--------------------------------------------------------
+
+TestSuite/
+	A test suite for the program.
+testsuite.pl
+	the script that runs the testsuite.pl (see README for instructions on how to run it)
+testsuite.8
+	The man page for testsuite.pl	
+	man -l testsuite.8
+	or
+	less testsuite.8
+	will give you the documentation.
+inputs/
+	Inputs for the testsuite. There are two types of files here: input*inp, as those
+	produced by configure.pl, and model*spec files, which are the answers to configure.pl
+	in each case.
+oracles/
+	Precomputed data, used by testsuite.pl to determine if the result of the tests
+	is valid.	
+
+--------------------------------------------------------
+scripts/
+countLines.pl
+	perl countLines.pl
+	will tell you how many effective lines of code there are in DMRG++
+
+#EOF
+

@@ -269,7 +269,8 @@ namespace Dmrg {
 				else stage_[i]=WFT_NOADVANCE;
 				if (stage_[i] == OPERATOR) checkOrder(i);
 
-				if (timesWithoutAdvancement >= tstStruct_.advanceEach) {
+				// Do not advance near the border, somehow it causes stability problems:
+				if (timesWithoutAdvancement >= tstStruct_.advanceEach && !isBorder(site)) {
 					stage_[i] = WFT_ADVANCE;
 					if (i==lastI) {
 						currentTime_ += tstStruct_.tau;
@@ -329,6 +330,13 @@ namespace Dmrg {
 					test(targetVectors_[j],direction,s,site);
 				}
 				std::cerr<<"-------------&*&*&* Cocoon output ends\n";
+			}
+
+			bool isBorder(size_t site) const
+			{
+				size_t totalSites = basisSE_.block().size();
+				if (site==2 || site == totalSites-3) return true;
+				return false;
 			}
 
 			void checkOrder(size_t i) const
