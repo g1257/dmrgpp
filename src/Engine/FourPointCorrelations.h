@@ -143,8 +143,8 @@ namespace Dmrg {
 			
 			//ns++;
 			precomp_.setPointer(ns);
-			size_t trunc = precomp_.transform().n_col();
-			MatrixType O2gt(trunc,trunc);
+			//size_t trunc = precomp_.transform().n_col();
+			MatrixType O2gt; //(trunc,trunc);
 			precomp_.transform(O2gt,O2g);
 			if (verbose_) {
 				std::cerr<<"O2gt\n";
@@ -166,8 +166,8 @@ namespace Dmrg {
 				std::cerr<<O3g;
 			}
 			precomp_.setPointer(ns);
-			trunc = precomp_.transform().n_col();
-			MatrixType O3gt(trunc,trunc);
+			//trunc = precomp_.transform().n_col();
+			MatrixType O3gt; //(trunc,trunc);
 			precomp_.transform(O3gt,O3g);
 			if (verbose_) {
 				std::cerr<<"O3gt\n";
@@ -210,9 +210,10 @@ namespace Dmrg {
 				
 				/*io_.rewind();
 				io_.read(electrons_,"#ELECTRONS_sites=",s);*/
-				skeleton_.createSigns(signs,fermionicSign);
-				MatrixType Onew(precomp_.transform().n_col(),precomp_.transform().n_col());
-				skeleton_.fluffUp(Onew,Odest,signs,growOption);
+				//skeleton_.createSigns(signs,fermionicSign);
+				MatrixType Onew(precomp_.columns(),precomp_.columns());
+				//skeleton_.fluffUp(Onew,Odest,signs,growOption);
+				skeleton_.fluffUp(Onew,Odest,fermionicSign,growOption);
 				Odest = Onew;
 				
 			}
