@@ -187,6 +187,7 @@ namespace Dmrg {
 		}
 			
 	private:
+			
 		//! i can be zero here!!
 		void growDirectly4p(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns)
 		{
@@ -237,10 +238,6 @@ namespace Dmrg {
 // 			if (isZero(ret)) throw std::runtime_error("ret is zero\n");
 // 			
 // 		}
-		
-		
-		
-		
 		
 		ObserverHelperType& precomp_; // <-- NB: not the owner
 		CorrelationsSkeletonType& skeleton_; // <-- NB: not the owner

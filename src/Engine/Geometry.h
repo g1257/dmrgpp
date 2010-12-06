@@ -110,6 +110,8 @@ namespace Dmrg {
 					terms_.push_back(t);
 				}
 			}
+
+			std::string label(size_t i) const { return terms_[i].label(); }
 			
 			size_t connectionKind(size_t smax,size_t ind,size_t jnd) const
 			{

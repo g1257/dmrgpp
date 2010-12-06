@@ -426,7 +426,8 @@ sub createObserverDriver
 		$chooseRealOrComplexForObservables = "typedef ComplexType FieldType;\n";
 		$obsArg = "datafile,tsp.filename,n,opInfo.n_row(),concurrency,verbose";
 	}
-	
+
+	system("cp observe.cpp observe.bak") if (-e "observe.cpp");	
 	open(OBSOUT,">$observerDriver") or die "Cannot open file $observerDriver for writing: $!\n";
 print OBSOUT<<EOF;
 /* DO NOT EDIT!!! Changes will be lost. Modify configure.pl instead
@@ -464,6 +465,57 @@ $chooseRealOrComplexForObservables
 typedef Dmrg::$concurrencyName<RealType> MyConcurrency;
 typedef  IoSimple MyIo;
 
+template<typename ModelType,typename ObserverType,typename SparseMatrixType,
+typename OperatorType,typename TargettingType>
+void measureTimeObs(const ModelType& model,ObserverType& observe)
+{
+	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
+	typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
+	SparseMatrixType matrixNup(model.getOperator("nup"));
+	SparseMatrixType matrixNdown(model.getOperator("ndown"));
+	SparseMatrixType A;
+	Su2RelatedType su2Related1;
+	A.makeDiagonal(4,1.0);
+	OperatorType opIdentity(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+	FieldType superDensity = observe.template onePoint<ApplyOperatorType>(0,opIdentity);
+	std::cout<<"SuperDensity(Weight of the timeVector)="<<superDensity<<"\\n";
+
+	multiply(A,matrixNup,matrixNdown);
+	std::cout<<"#Using Matrix A:\\n";
+	for (int i=0;i<A.rank();i++) {
+		for (int j=0;j<A.rank();j++)
+			std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
+		std::cout<<"\\n";
+	}
+	OperatorType opN(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+	std::cout<<"site nupNdown(gs) nupNdown(timevector) time\\n";
+	for (size_t i0 = 0;i0<observe.size();i0++) {
+		// for g.s. use this one:
+		FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opN);
+		// for time vector use this one:
+		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opN);
+		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
+	}
+	// measuring charge:
+	A = matrixNup;
+	A += matrixNdown;
+	std::cout<<"#Using Matrix A:\\n";
+	for (int i=0;i<A.rank();i++) {
+		for (int j=0;j<A.rank();j++)
+			std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
+		std::cout<<"\\n";
+	}
+	OperatorType opCharge(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+	std::cout<<"site nUp+nDown(gs) nup+ndown(timevector) time\\n";
+	for (size_t i0 = 0;i0<observe.size();i0++) {
+		//for g.s. use this one:
+		FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opCharge);
+		// for h.d. use this one:
+		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opCharge);
+		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
+	}
+
+}		
 	template<
 	typename ParametersModelType,
 	typename GeometryType,
@@ -478,13 +530,13 @@ typedef  IoSimple MyIo;
 	typename MySparseMatrix
 >
 void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvolution,
-		ConcurrencyType& concurrency, IoInputType& io,const std::string& datafile)
+		ConcurrencyType& concurrency, IoInputType& io,const std::string& datafile,
+		const std::string& obsOptions)
 {
 	typedef ReflectionSymmetryEmpty<RealType,MySparseMatrix> ReflectionSymmetryType;
 	typedef Operator<RealType,MySparseMatrix> OperatorType;
 	typedef Basis<RealType,MySparseMatrix> BasisType;
 	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
-	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef ModelHelperTemplate<OperatorsType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
 	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,$pthreadsName> ModelType;
@@ -504,7 +556,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	typedef typename SolverType::TargettingType TargettingType;
 	typedef typename SolverType::WaveFunctionTransformationType WaveFunctionTransformationType;
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
+	
 	ModelType model(mp,geometry);
 
 	 //! Read TimeEvolution if applicable:
@@ -515,85 +567,58 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	size_t n=geometry.numberOfSites()/2;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
 	bool verbose = false;
-	Observer<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> observe($obsArg);
+	typedef Observer<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> 
+		ObserverType;
+	ObserverType observe($obsArg);
+	
 	if (hasTimeEvolution) {
-		SparseMatrixType matrixNup(model.getOperator("nup"));
-		SparseMatrixType matrixNdown(model.getOperator("ndown"));
-		SparseMatrixType A;
-		Su2RelatedType su2Related1;
-		A.makeDiagonal(4,1.0);
-		OperatorType opIdentity(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-		FieldType superDensity = observe.template onePoint<ApplyOperatorType>(0,opIdentity);
-		std::cout<<"SuperDensity(Weight of the timeVector)="<<superDensity<<"\\n";
-
-		multiply(A,matrixNup,matrixNdown);
-		std::cout<<"#Using Matrix A:\\n";
-		for (int i=0;i<A.rank();i++) {
-			for (int j=0;j<A.rank();j++)
-				std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
-			std::cout<<"\\n";
-		}
-		OperatorType opN(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-		std::cout<<"site nupNdown(gs) nupNdown(timevector) time\\n";
-		for (size_t i0 = 0;i0<observe.size();i0++) {
-			// for g.s. use this one:
-			FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opN);
-			// for time vector use this one:
-			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opN);
-			std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
-		}
-		// measuring charge:
-		A = matrixNup;
-		A += matrixNdown;
-		std::cout<<"#Using Matrix A:\\n";
-		for (int i=0;i<A.rank();i++) {
-			for (int j=0;j<A.rank();j++)
-				std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
-			std::cout<<"\\n";
-		}
-		OperatorType opCharge(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-		std::cout<<"site nUp+nDown(gs) nup+ndown(timevector) time\\n";
-		for (size_t i0 = 0;i0<observe.size();i0++) {
-			//for g.s. use this one:
-			FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opCharge);
-			// for h.d. use this one:
-			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opCharge);
-			std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
-		}
-
+		measureTimeObs<ModelType,ObserverType,SparseMatrixType,
+			OperatorType,TargettingType>(model,observe);
 		return;
 	}
 EOF
 	if  ($modelName=~/heisenberg/i) {
 	} else {
-		print OBSOUT<<EOF;
-		const psimag::Matrix<FieldType>& opC = model.getOperator("c",0,0);
+print OBSOUT<<EOF;
+	// OPERATOR C:
+	if (obsOptions.find("cc")!=std::string::npos) {
+		const psimag::Matrix<FieldType>& opC = model.getOperator("c",0,0); // c_{0,0} spin up
+		
 		psimag::Matrix<FieldType> opCtranspose = transposeConjugate(opC);
 		const psimag::Matrix<FieldType>& v=observe.correlations(n,opC,opCtranspose,-1);;
 		if (concurrency.root()) {
 			std::cout<<"OperatorC:\\n";
 			std::cout<<v;
 		}
+	}
 	
+	// OPERATOR N
+	if (obsOptions.find("nn")!=std::string::npos) {
 		const psimag::Matrix<FieldType>& opN = model.getOperator("n");
 		const psimag::Matrix<FieldType>& v2=observe.correlations(n,opN,opN,1);
 		if (concurrency.root()) {
 			std::cout<<"OperatorN:\\n";
 			std::cout<<v2;
 		}
+	}
 EOF
 	}
-	print OBSOUT<<EOF;
-	
-	const psimag::Matrix<FieldType>& Sz = model.getOperator("z");
-	const psimag::Matrix<FieldType>& v3=observe.correlations(n,Sz,Sz,1);
-	if (concurrency.root()) {
-		std::cout<<"OperatorSz:\\n";
-		std::cout<<v3;
+print OBSOUT<<EOF;
+	// OPERATOR SZ
+	if (obsOptions.find("szsz")!=std::string::npos) {
+		const psimag::Matrix<FieldType>& Sz = model.getOperator("z");
+		const psimag::Matrix<FieldType>& v3=observe.correlations(n,Sz,Sz,1);
+		if (concurrency.root()) {
+			std::cout<<"OperatorSz:\\n";
+			std::cout<<v3;
+		}
 	}
 EOF
 	if  ($modelName=~/febasedsc/i) {
-		print print OBSOUT<<EOF;
+print print OBSOUT<<EOF;
+	// TWO-POINT DELTA-DELTA^DAGGER:
+	if (obsOptions.find("dd")!=std::string::npos && 
+			geometry.label(0).find("ladder")==std::string::npos) {
 		const psimag::Matrix<FieldType>& oDelta = model.getOperator("d");
 		psimag::Matrix<FieldType> oDeltaT;
 		transposeConjugate(oDeltaT,oDelta);
@@ -602,10 +627,23 @@ EOF
 			std::cout<<"DeltaDeltaDagger:\\n";
 			std::cout<<vDelta;
 		}
+	}
+	
+	// FOUR-POINT DELTA-DELTA^DAGGER:
+	if (obsOptions.find("dd")!=std::string::npos && 
+			geometry.label(0).find("ladder")!=std::string::npos) {
+		std::vector<FieldType> fpd;
+		std::vector<size_t> gammas(4,0);
+		observe.fourPointDeltas(fpd,n,gammas,model);
+		for (size_t i=0;i<fpd.size();i++) {
+			std::cout<<"fpd["<<i<<"]="<<fpd[i]<<"\\n";
+		}
+	}
 EOF
 	}
 	if  ($modelName=~/heisenberg/i) {
-		print print OBSOUT<<EOF;
+	print print OBSOUT<<EOF;
+		// Heisenberg model: needs formatting and also obsOptions: FIXME
 		// Si^+ Sj^-
 		const psimag::Matrix<FieldType>& sPlus = model.getOperator("+");
 		psimag::Matrix<FieldType> sPlusT = transposeConjugate(sPlus);
@@ -640,9 +678,10 @@ EOF
 
 int main(int argc,char *argv[])
 {
-	if (argc>2) {
-		std::string s = "The observer driver takes only one argument now: \\n";
-		s = s + "the name of the input file. The data file is now read from the input file.\\n";
+	if (argc!=3) {
+		std::string s = "The observer driver takes two  arguments now: \\n";
+		s = s + "(i) the name of the input file";
+		s = s+ " and (ii) a comma-separated list of options of what to compute\\n";
 		throw std::runtime_error(s);
 	}
 	using namespace Dmrg;
@@ -671,11 +710,11 @@ int main(int argc,char *argv[])
 	if (hasTimeEvolution)
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,
-			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename);
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename,argv[2]);
 	else
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,
-			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename);
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename,argv[2]);
 } // main
 
 EOF

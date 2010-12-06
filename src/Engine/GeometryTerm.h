@@ -204,10 +204,27 @@ namespace Dmrg {
 				throw std::runtime_error("Unknown geometry\n");
 			}
 
+			std::string label() const
+			{
+				switch (geometryKind_) {
+					case GeometryDirectionType::CHAIN:
+						return "chain";
+					case GeometryDirectionType::LADDERX:
+						return "ladderx";
+					case GeometryDirectionType::LADDER:
+						return "ladder";
+					default:
+						throw std::runtime_error("label(): Unknown geometry\n");
+						return "unknown";
+
+				}
+			}
+
 			template<typename RealType_>	
 			friend std::ostream& operator<<(std::ostream& os,const GeometryTerm<RealType_>& gt);
 	
 		private:	
+			
 			RealType calcValue(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
 				if (!connected(i1,i2)) return 0.0;

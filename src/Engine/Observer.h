@@ -211,6 +211,25 @@ namespace Dmrg {
 			return fourpoint_(mod1,i1,O1,mod2,i2,O2,mod3,i3,O3,mod4,i4,O4,fermionicSign);
 		}
 
+		template<typename SomeModelType>
+		void fourPointDeltas(std::vector<FieldType>& fpd,size_t n,const std::vector<size_t>& gammas,const SomeModelType& model)
+		{
+			if (gammas.size()!=4) {
+				std::cerr<<"Observer: fourPointDeltas(...):  wrong number of gammas ";
+				std::cerr<<" expected "<<4<<" got "<<gammas.size()<<"\n";
+				throw std::runtime_error("Observer::fourPointDeltas(...)\n");
+			}
+			for (size_t i=0;i<n;i++) {
+				if (i>0 && i%2!=0) continue;
+				if (i+1>=n-1) continue; 
+				for (size_t j=i+2;j<n;j++) {
+					if (j%2!=0) continue;
+					if (i+1>=n-1) continue; 
+					fpd.push_back(fourPointDelta(i,j,gammas,model));
+				}
+			}
+		}
+
 		template<typename ApplyOperatorType>
 		FieldType onePoint(size_t site,const typename ApplyOperatorType::OperatorType& A)
 		{
@@ -259,7 +278,27 @@ namespace Dmrg {
 		}
 
 	private:
-		
+
+		template<typename SomeModelType>
+		FieldType fourPointDelta(size_t i,size_t j,const std::vector<size_t>& gammas,const SomeModelType& model)
+		{
+			const psimag::Matrix<FieldType>& opC0 = model.getOperator("c",gammas[0],0); // C_{gamma0,up}
+			const psimag::Matrix<FieldType>& opC1 = model.getOperator("c",gammas[1],1); // C_{gamma1,down}
+			const psimag::Matrix<FieldType>& opC2 = model.getOperator("c",gammas[2],1); // C_{gamma2,down}
+			const psimag::Matrix<FieldType>& opC3 = model.getOperator("c",gammas[3],0); // C_{gamma3,up}
+
+			//if (i+1>=n-1 || j+1>=n-1) return 0;
+			
+			FieldType tmp = fourpoint_(
+					'C',i,opC0,
+			       'N',i+1,opC1,
+			       'C',j,opC2,
+			       'N',j+1,opC3,-1);
+			std::cerr<<"DEBUG: fourPointDelta i="<<i<<" j="<<j<<" value="<<tmp<<"\n";
+			return tmp;
+			
+		}
+			
 		FieldType calcDiagonalCorrelation(
 					size_t i,
 					const MatrixType& O1,
