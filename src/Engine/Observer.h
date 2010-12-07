@@ -291,8 +291,8 @@ namespace Dmrg {
 			
 			FieldType tmp = fourpoint_(
 					'C',i,opC0,
-			       'N',i+1,opC1,
-			       'C',j,opC2,
+			       'C',i+1,opC1,
+			       'N',j,opC2,
 			       'N',j+1,opC3,-1);
 			std::cerr<<"DEBUG: fourPointDelta i="<<i<<" j="<<j<<" value="<<tmp<<"\n";
 			return tmp;
