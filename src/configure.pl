@@ -31,7 +31,7 @@ my $hubbardUvalue=1.0;
 my $potentialVvalue=0.0;
 my ($infiniteKeptStates,$finiteLoops,$hasLoops);
 my ($model,$linSize,$modelLocation,$modelFullName);
-my ($geometryArgs,$nthreads);
+my ($geometryArgs);
 my $wftransformation="WaveFunctionTransformation";
 my $stackTemplate="MemoryStack";
 my ($electrons,$momentumJ,$su2Symmetry);
@@ -96,18 +96,6 @@ sub askQuestions
 		}
 		$pthreadsLib=" -lpthread ";
 		$pthreads=1	if ($_=~/^y/i);
-	}
-	
-	if ($pthreads) {
-		print "How many threads?\n";
-		print "Available: Any\n";
-		print "Default is: 2 (press ENTER): ";
-		$_=<STDIN>;
-		chomp;
-		if ($_ eq "" or $_ eq "\n") {
-			$_=2;
-		}
-		$nthreads = $_;
 	}
 	
 	if ($mpi!=1) {	
@@ -678,31 +666,33 @@ EOF
 
 int main(int argc,char *argv[])
 {
-	if (argc!=3) {
-		std::string s = "The observer driver takes two  arguments now: \\n";
-		s = s + "(i) the name of the input file";
-		s = s+ " and (ii) a comma-separated list of options of what to compute\\n";
-		throw std::runtime_error(s);
-	}
+	
 	using namespace Dmrg;
 	
 	typedef   Dmrg::$concurrencyName<RealType> MyConcurrency; 
 	
 	MyConcurrency concurrency(argc,argv);
 	
+	if (argc!=3 && concurrency.name()=="serial") {
+		std::string s = "The observer driver takes two  arguments now: \\n";
+		s = s + "(i) the name of the input file";
+		s = s+ " and (ii) a comma-separated list of options of what to compute\\n";
+		throw std::runtime_error(s);
+	}
+	
 	//Setup the Geometry
-        typedef Geometry<RealType> GeometryType;
+	typedef Geometry<RealType> GeometryType;
 	typedef IoSimple::In IoInputType;
-        IoInputType io(argv[1]);
-        GeometryType geometry(io);
+	IoInputType io(argv[1]);
+	GeometryType geometry(io);
 
-        //! Read the parameters for this run
+	//! Read the parameters for this run
 	typedef  $parametersName<RealType> ParametersModelType; 
-        ParametersModelType mp(io);
-        ParametersDmrgSolver<FieldType> dmrgSolverParams(io);
+	ParametersModelType mp(io);
+	ParametersDmrgSolver<FieldType> dmrgSolverParams(io);
 
 	bool hasTimeEvolution=false;
-        if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) hasTimeEvolution=true;
+	if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) hasTimeEvolution=true;
 	
 	// FIXME: See if we need VectorWithOffsets sometimes
 	// FIXME: Does it make sense to have ModelHelperSu2 here sometimes?

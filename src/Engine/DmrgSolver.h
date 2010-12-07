@@ -181,29 +181,28 @@ namespace Dmrg {
 
 		void main(const GeometryType& geometry)
 		{
-			
 			io_.print(geometry);
-			BlockType S,E;
-			std::vector<BlockType> X,Y;
-			BasisDataType q;
-			SparseMatrixType hmatrix;
-			
+			checkFiniteLoops(parameters_.finiteLoop,geometry.numberOfSites());
 			std::ostringstream msg;
 			msg<<"Turning the engine on";
 			progress_.printline(msg,std::cout);
-				
-			
+
 			io_.print(model_);
+			BlockType S,E;
+			std::vector<BlockType> X,Y;
 			geometry.split(S,X,Y,E);
 			for (size_t i=0;i<X.size();i++) 
 				sitesIndices_.push_back(X[i]);
 			for (size_t i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
 
 			std::vector<OperatorType> creationMatrix;
+			SparseMatrixType hmatrix;
+			BasisDataType q;
+
 			model_.setNaturalBasis(creationMatrix,hmatrix,q,S);
 			MyBasisWithOperators pS("pS",S,hmatrix,q);
-			//printOneSiteElectrons(pS);
 			pS.setOperators(creationMatrix);
+			
 			waveFunctionTransformation_.init(hmatrix.rank());
 			if (parameters_.options.find("nowft")!=std::string::npos) waveFunctionTransformation_.disable();
 
@@ -217,12 +216,6 @@ namespace Dmrg {
 				checkpointLoad(pS,pE,parameters_.checkpoint.index);
 			else
 				infiniteDmrgLoop(S,X,Y,E,pS,pE,psi);
-
-			stepCurrent_=X.size();
-
-			if (parameters_.options.find("nofiniteloops")!=std::string::npos) return;
-
-			useReflection_=false; // disable reflection symmetry for finite loop if it was enabled:
 
 			finiteDmrgLoops(S,E,pS,pE,X.size(),psi);
 			
@@ -267,6 +260,7 @@ namespace Dmrg {
 			// infinite dmrg loop
 			systemStack_.push(pS);
 			envStack_.push(pE);
+			if (parameters_.options.find("nofiniteloops")!=std::string::npos) return;
 			for (size_t step=0;step<X.size();step++) {
 				std::ostringstream msg;
 				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
@@ -310,6 +304,8 @@ namespace Dmrg {
 	  				int l,
        					TargettingType& psi)
 		{
+			useReflection_=false; // disable reflection symmetry for finite loop if it was enabled:
+			stepCurrent_=l;
 			
 			for (size_t i=0;i<parameters_.finiteLoop.size();i++)  {
 				std::ostringstream msg;

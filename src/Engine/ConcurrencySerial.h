@@ -92,6 +92,8 @@ namespace Dmrg {
 		int nprocs() { return 1;}
 		
 		int rank() { return 0; }
+
+		std::string name() const { return "serial"; }
 		
 		template<typename DataType>
 		void gather(DataType &v) { }

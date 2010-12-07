@@ -98,6 +98,8 @@ namespace Dmrg {
 			
 		}
 
+		std::string name() const { return "mpi"; }
+
 		~ConcurrencyMpi()
 		{
 			MPI_Finalize();

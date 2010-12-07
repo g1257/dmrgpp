@@ -93,6 +93,44 @@ namespace Dmrg {
 		int saveOption; // to save or not to save	
 	};
 
+	inline void checkFiniteLoops(const std::vector<FiniteLoop>& finiteLoop,size_t totalSites)
+	{
+		std::string s = "checkFiniteLoops: I'm falling out of the lattice ";
+		std::string loops = "";
+		int x = totalSites/2-1; // must be signed
+		int prevDeltaSign = 1;
+		for (size_t i=0;i<finiteLoop.size();i++)  {
+			// naive location:
+			int delta = finiteLoop[i].stepLength;
+			x += delta;
+			loops = loops + utils::ttos(delta) + " ";
+			
+			// take care of bounces:
+			if (delta*prevDeltaSign < 0) x += prevDeltaSign;
+			prevDeltaSign = 1;
+			if (delta<0) prevDeltaSign = -1;
+
+			// check that we don't fall out
+			bool flag = false;
+			if (x<=0) {
+				s = s + "on the left end\n";
+				flag = true;
+			}
+			if (size_t(x)>=totalSites-1) {
+				s = s + "on the right end\n";
+				flag = true;
+			}
+			if (!flag) continue;
+
+			// complain and die if we fell out: 
+			s = s + "Loops so far: " + loops + "\n";
+			s =s + "x=" + utils::ttos(x) + " last delta=" + utils::ttos(delta);
+			s =s + " sites=" + utils::ttos(totalSites); 
+			throw std::runtime_error(s.c_str());
+		}
+			
+	}
+	
 	std::istream &operator>>(std::istream& is,FiniteLoop& fl)
 	{
 		is>>fl.stepLength;
