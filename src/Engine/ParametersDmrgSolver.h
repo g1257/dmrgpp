@@ -104,9 +104,9 @@ namespace Dmrg {
 			int delta = finiteLoop[i].stepLength;
 			x += delta;
 			loops = loops + utils::ttos(delta) + " ";
-			
+				
 			// take care of bounces:
-			if (delta*prevDeltaSign < 0) x += prevDeltaSign;
+			if (i>0 && delta*prevDeltaSign < 0) x += prevDeltaSign;
 			prevDeltaSign = 1;
 			if (delta<0) prevDeltaSign = -1;
 
