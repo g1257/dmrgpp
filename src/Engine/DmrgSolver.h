@@ -260,7 +260,6 @@ namespace Dmrg {
 			// infinite dmrg loop
 			systemStack_.push(pS);
 			envStack_.push(pE);
-			if (parameters_.options.find("nofiniteloops")!=std::string::npos) return;
 			for (size_t step=0;step<X.size();step++) {
 				std::ostringstream msg;
 				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
@@ -307,6 +306,7 @@ namespace Dmrg {
 			useReflection_=false; // disable reflection symmetry for finite loop if it was enabled:
 			stepCurrent_=l;
 			
+			if (parameters_.options.find("nofiniteloops")!=std::string::npos) return;
 			for (size_t i=0;i<parameters_.finiteLoop.size();i++)  {
 				std::ostringstream msg;
 				msg<<"Finite loop number "<<i;

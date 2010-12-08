@@ -25,6 +25,7 @@ use strict;
 my $mpi=0;
 my $platform="linux";
 my $lapack="-llapack";
+my $PsimagLite="../../PsimagLite/src";
 my $connectors;
 my $connectorValue=1.0;
 my $hubbardUvalue=1.0;
@@ -71,7 +72,18 @@ sub askQuestions
 	} else { # I'll assume it's linux
 		$lapack = " -llapack -lblas"; 
 	}
-	
+
+	print "Where is your PsimagLite distribution?\n";
+	print "(can be obtained from github.com/g1257)\n";
+	print "Available: any\n";
+	print "Default is: $PsimagLite (press ENTER): ";
+	$_=<STDIN>;
+	chomp;
+	if ($_ eq "" or $_ eq "\n") {
+		$_=$PsimagLite;
+	}
+	$PsimagLite=$_;
+
 	print "Do you want to compile with MPI enabled?\n";
 	print "Available: y or n\n";
 	print "Default is: n (press ENTER): ";
@@ -183,7 +195,7 @@ print FOUT<<EOF;
 # MPI: $mpi
 
 LDFLAGS =    $lapack  -lm $pthreadsLib
-CPPFLAGS = -Werror -Wall -I../PartialPsimag -IEngine -I$modelLocation -IGeometries
+CPPFLAGS = -Werror -Wall -I../PartialPsimag -IEngine -I$modelLocation -IGeometries -I$PsimagLite
 EOF
 if ($mpi) {
 	print FOUT "CXX = mpicxx -O2 -DNDEBUG \n";

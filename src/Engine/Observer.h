@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "FourPointCorrelations.h"
 #include "VectorWithOffsets.h" // for operator*
 #include "VectorWithOffset.h" // for operator*
+#include "Profiling.h"
 
 namespace Dmrg {
 	
@@ -99,7 +100,8 @@ namespace Dmrg {
 		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> ObserverHelperType;
 		typedef CorrelationsSkeleton<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> CorrelationsSkeletonType;
 		typedef FourPointCorrelations<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType>  FourPointCorrelationsType;
-		
+		typedef PsimagLite::Profiling ProfilingType;
+
 		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		static size_t const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
 		static size_t const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
@@ -138,6 +140,7 @@ namespace Dmrg {
 				concurrency_.loopCreate(nf-1);
 				std::vector<FieldType> v(nf-1);
 				size_t j = i;
+				ProfilingType profile("correlations loop i=" + utils::ttos(i));
 				while(concurrency_.loop(j)) {
 				//for (size_t j=i;j<nf-1;j++) {
 					//std::cerr<<"About to do i="<<i<<" and j="<<j<<"\n";
@@ -157,7 +160,7 @@ namespace Dmrg {
 		void initCache(const MatrixType& O1,size_t n1, size_t nf,int fermionicSign)
 		{
 			clearCache(n1, nf);
-            precomputeGrowth(O1,fermionicSign,n1,nf);
+            precomputeGrowth(O1,fermionicSign,n1,nf-1);
 		}
 
 		// Return the vector: O1 * O2 |psi>
@@ -305,7 +308,6 @@ namespace Dmrg {
 					const MatrixType& O2,
 					int fermionicSign)
 		{
-			
 			size_t n = O1.n_row();
 			MatrixType O1new=identity(n);
 			//for (size_t s=0;s<n;s++)  O1new(s,s)=static_cast<FieldType>(1.0);
@@ -324,6 +326,8 @@ namespace Dmrg {
 					int fermionicSign,
 					size_t isDiagonal=NON_DIAGONAL)
 		{
+			
+			ProfilingType profile("calcDiagonalCorrelation for i="+utils::ttos(i)+" j="+utils::ttos(j));
 			MatrixType O1g,O2g,O1m,O2m;
 			skeleton_.createWithModification(O1m,O1,'n');
 			skeleton_.createWithModification(O2m,O2,'n');
