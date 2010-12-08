@@ -140,7 +140,7 @@ namespace Dmrg {
 				concurrency_.loopCreate(nf-1);
 				std::vector<FieldType> v(nf-1);
 				size_t j = i;
-				ProfilingType profile("correlations loop i=" + utils::ttos(i));
+				//ProfilingType profile("correlations loop i=" + utils::ttos(i));
 				while(concurrency_.loop(j)) {
 				//for (size_t j=i;j<nf-1;j++) {
 					//std::cerr<<"About to do i="<<i<<" and j="<<j<<"\n";
@@ -297,7 +297,7 @@ namespace Dmrg {
 			       'C',i+1,opC1,
 			       'N',j,opC2,
 			       'N',j+1,opC3,-1);
-			std::cerr<<"DEBUG: fourPointDelta i="<<i<<" j="<<j<<" value="<<tmp<<"\n";
+			//std::cerr<<"DEBUG: fourPointDelta i="<<i<<" j="<<j<<" value="<<tmp<<"\n";
 			return tmp;
 			
 		}
@@ -327,7 +327,7 @@ namespace Dmrg {
 					size_t isDiagonal=NON_DIAGONAL)
 		{
 			
-			ProfilingType profile("calcDiagonalCorrelation for i="+utils::ttos(i)+" j="+utils::ttos(j));
+			//ProfilingType profile("calcDiagonalCorrelation for i="+utils::ttos(i)+" j="+utils::ttos(j));
 			MatrixType O1g,O2g,O1m,O2m;
 			skeleton_.createWithModification(O1m,O1,'n');
 			skeleton_.createWithModification(O2m,O2,'n');

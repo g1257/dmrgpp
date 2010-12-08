@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CORRELATIONS_SK_H
 #include "ObserverHelper.h"
 #include "CrsMatrix.h"
-
+#include "Profiling.h"
 
 namespace Dmrg {
 	
@@ -114,7 +114,8 @@ namespace Dmrg {
 		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> ObserverHelperType;
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisType::RealType RealType;
-		
+		typedef PsimagLite::Profiling ProfilingType;
+
 	public:
 		enum {GROW_RIGHT,GROW_LEFT};
 		enum {DIAGONAL,NON_DIAGONAL};
@@ -124,6 +125,7 @@ namespace Dmrg {
 		//! i can be zero here!!
 		void growDirectly(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns)
 		{
+			//ProfilingType profile("growDirectly "+utils::ttos(i)+" ns="+utils::ttos(ns));
 			Odest =Osrc;
 			//std::vector<int> signs;
 			// from 0 --> i
@@ -203,6 +205,7 @@ namespace Dmrg {
 					int fermionicSign,
 				 	size_t ns)
 		{
+			//ProfilingType profile("dmrgMultiply ns="+utils::ttos(ns));
 			size_t ni=O1.n_row();
 			size_t nj=O2.n_row();
 			/*std::cerr<<"Mult,O1\n";
@@ -251,25 +254,26 @@ namespace Dmrg {
 		
 		FieldType bracket(const MatrixType& A)
 		{
+			//ProfilingType profile("bracket");
 			if (helper_.hasTimeVector()) {
 				const VectorWithOffsetType& v = helper_.timeVector();
-				VectorType w(v.size());
-				v.toSparse(w);
-				return bracket_(A,w);
+				//VectorType w(v.size());
+				//v.toSparse(w);
+				return bracket_(A,v);
 			}
 			
 			const VectorWithOffsetType& v = helper_.wavefunction();
-			VectorType w(v.size());
-			v.toSparse(w);
+			//VectorType w(v.size());
+			//v.toSparse(w);
 			
-			return bracket_(A,w);
+			return bracket_(A,v);
 		}
 		
 		//template<typename SomeVectorType>
-		FieldType bracket_(const MatrixType& A,const VectorType& vec)
+		FieldType bracket_(const MatrixType& A,const VectorWithOffsetType& vec)
 		{
+			//ProfilingType profile("bracket_");
 			//typedef typename SomeVectorType::value_type ComplexOrRealType;
-			FieldType zeroc = 0;
 			
 			RealType norma = std::norm(vec);
 			//std::cerr<<"MatrixA\n";
@@ -281,24 +285,28 @@ namespace Dmrg {
 			FieldType sum=0;
 			//size_t counter=0;
 			if (vec.size()!=helper_.basisSE().size()) throw std::runtime_error("Error\n");
-			for (size_t x=0;x<vec.indices();x++) {
-				size_t t=vec.index(x);
-				size_t eta,r;
+			for (size_t x=0;x<vec.sectors();x++) {
+				size_t sector = vec.sector(x);
+				size_t offset = vec.offset(sector);
+				size_t total = offset + vec.effectiveSize(sector);
+				for (size_t t=offset;t<total;t++) {
+					size_t eta,r;
 				
-				utils::getCoordinates(r,eta,helper_.basisSE().permutation(t),helper_.basisS().size());
-				//for (size_t r2=0;r2<A.n_col();r2++) {
-				for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
-					size_t r2 = Acrs.getCol(k);
-					size_t t2 = helper_.basisSE().permutationInverse(r2+eta*A.n_col());
-					if (vec[t2]==zeroc) continue;
-					//if (A(r,r2)==0) continue;
-					//counter++;
-					//try {
-					sum += //A(r,r2)
-						Acrs.getValue(k)*vec.value(x)*vec[t2]/norma;
-					//} catch (std::exception& exception) {
-						
-					//}
+					utils::getCoordinates(r,eta,helper_.basisSE().permutation(t),helper_.basisS().size());
+					//for (size_t r2=0;r2<A.n_col();r2++) {
+					for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
+						size_t r2 = Acrs.getCol(k);
+						size_t t2 = helper_.basisSE().permutationInverse(r2+eta*A.n_col());
+						if (t2<offset || t2>=total) continue;
+						//if (A(r,r2)==0) continue;
+						//counter++;
+						//try {
+						sum += //A(r,r2)
+							Acrs.getValue(k)*vec[t]*vec[t2]/norma;
+						//} catch (std::exception& exception) {
+							
+						//}
+					}
 				}
 			}
 			//std::cerr<<"counter="<<counter<<"\n";
@@ -307,6 +315,7 @@ namespace Dmrg {
 		
 		void createWithModification(MatrixType& Om,const MatrixType& O,char mod)
 		{
+			//ProfilingType profile("create with modification="+mod);
 			if (mod == 'n' || mod == 'N') {
 				Om = O;
 				return;

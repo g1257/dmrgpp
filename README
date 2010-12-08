@@ -44,6 +44,7 @@ Building and Running DMRG++
 Required Software
 
 * (required) GNU C++
+* (required) PsimagLite https://github.com/g1257/PsimagLite
 * (required) The LAPACK library.
 This library is available for most platforms.
 The configure.pl script will ask for the LDFLAGS variable 

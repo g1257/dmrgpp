@@ -1,0 +1,96 @@
+
+MOVING FUNCTIONALITY FROM DMRG++ TO PSIMAGLITE
+
+SCHEDULE
+This file will be updated as things are moved
+*** marks files that already made the transition to PsimagLite
+^^^ marks files that are already in PsimagLite but not used
+--- marks files that need preparation before transitioning
+
+MARKED FOR MOVE TO PSIMAGLITE:
+
+[Concurrency]
+Engine/Concurrency.h
+Engine/ConcurrencyMpiFunctions.h
+Engine/ConcurrencyMpi.h
+Engine/ConcurrencySerial.h
+Engine/Pthreads.h
+Engine/NoPthreads.h
+
+[Stacks]
+Engine/DiskStack.h
+Engine/MemoryStack.h
+
+[IO]
+Engine/IoSimple.h
+
+[Lanczos]
+--- Engine/LanczosSolver.h 
+(Needs ProgramGlobals as templated type)
+Engine/TridiagonalMatrix.h
+
+[Profiling]
+*** Profiling.h
+Engine/ProgressIndicator.h
+getTimeDate()
+getrusageForLinux()
+memoryUsage()
+
+[LINALG.Vector]
+Engine/Sort.h
+operator*()
+operator*=()
+operator+=()
+operator/()
+operator==()
+norm()
+reverse()
+operator!=()
+truncate()
+reorder()
+max()
+isInVector()
+operator<<
+
+[LINALG.Sparse]
+Engine/SparseVector.h
+Engine/CrsMatrix.h
+Engine/VectorWithOffset.h
+Engine/VectorWithOffsets.h
+Engine/BlockMatrix.h
+
+[LINALG.Dense]
+reorder()
+transposeConjugate()
+operator<<()
+diag()
+isZero()
+similarityTransform()
+BLAS.h
+LAPACK.h
+^^^ Vector.h
+--- Matrix.h (needs rewrite)
+
+[std.complex]
+for doubles and floats:
+conj()
+real()
+imag()
+
+[std.pair]
+operator<<()
+
+[std.cmath]
+square()
+getCoordinates()
+
+[Conversions]
+ttos()
+
+[Asserts]
+PSIMAGAssert.h
+
+[random]
+myRandomT()
+
+

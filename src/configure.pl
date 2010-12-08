@@ -74,7 +74,7 @@ sub askQuestions
 	}
 
 	print "Where is your PsimagLite distribution?\n";
-	print "(can be obtained from github.com/g1257)\n";
+	print "(can be obtained from https://github.com/g1257/PsimagLite)\n";
 	print "Available: any\n";
 	print "Default is: $PsimagLite (press ENTER): ";
 	$_=<STDIN>;
