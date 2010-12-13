@@ -155,9 +155,9 @@ namespace Dmrg {
 		template<typename IoInputType>
 		void load(IoInputType& io)
 		{
-			io.readline(enabled,"CheckPointEnabled=");
-			io.readline(index,"index=");
-			io.readline(filename,"filename=");
+			io.readline(enabled,"CheckpointEnabled=");
+			io.readline(index,"CheckpointIndex=");
+			io.readline(filename,"CheckpointFilename=");
 		}
 	};
 

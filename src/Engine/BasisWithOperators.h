@@ -117,7 +117,7 @@ namespace Dmrg {
 		
 		template<typename IoInputter>
 		BasisWithOperators(IoInputter& io,const std::string& ss,size_t counter=0)
-				: BasisType(io,ss,counter),operators_(io,counter,this)
+				: BasisType(io,ss,counter),operators_(io,0,this)
 		{
 		}
 

@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "FermionSign.h"
 #include "DmrgSerializer.h"
+#include "Checkpoint.h"
 
 namespace Dmrg {
 
@@ -109,8 +110,6 @@ namespace Dmrg {
 		typedef typename ModelType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		
-		std::string SYSTEM_STACK_STRING;
-		std::string ENVIRON_STACK_STRING;
 	public:
 		typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelType::MyBasis MyBasis;
@@ -124,13 +123,15 @@ namespace Dmrg {
   				ModelType,ConcurrencyType,IoType,VectorWithOffsetTemplate> TargettingType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef typename TargettingType::TargettingStructureType TargettingStructureType;
-		typedef Diagonalization<ParametersDmrgSolver<RealType>,TargettingType,InternalProductTemplate> DiagonalizationType;
+		typedef ParametersDmrgSolver<RealType> ParametersType;
+		typedef Diagonalization<ParametersType,TargettingType,InternalProductTemplate> DiagonalizationType;
 		typedef DensityMatrixTemplate<RealType,MyBasis,MyBasisWithOperators,TargettingType> DensityMatrixType;
 		typedef typename DensityMatrixType::BuildingBlockType TransformType;
 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef DmrgSerializer<RealType,VectorWithOffsetType,TransformType,MyBasis,FermionSign> DmrgSerializerType;
 		typedef typename ModelType::GeometryType GeometryType;
-		
+		typedef Checkpoint<RealType,MyBasisWithOperators,ParametersType,StackType,IoType> CheckpointType;
+				
 		enum {SAVE_TO_DISK=1,DO_NOT_SAVE=0};
 		enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
@@ -141,9 +142,6 @@ namespace Dmrg {
 				ModelType const &model,
 				ConcurrencyType &concurrency,
 			  	TargettingStructureType& targetStruct) :
-				
-				SYSTEM_STACK_STRING("SystemStack"),
-				ENVIRON_STACK_STRING("EnvironStack"),
 				parameters_(parameters),
 				model_(model),
 				concurrency_(concurrency),
@@ -158,8 +156,7 @@ namespace Dmrg {
 				progress_("DmrgSolver",concurrency.rank()),
 				quantumSector_(0),
 				stepCurrent_(0),
-				systemStack_(SYSTEM_STACK_STRING+parameters_.filename),
-				envStack_(ENVIRON_STACK_STRING+parameters_.filename),
+				checkpoint_(parameters_),
 				diagonalization_(parameters,model,concurrency,verbose_,
 					useReflection_,io_,quantumSector_,waveFunctionTransformation_)
 		{
@@ -182,7 +179,10 @@ namespace Dmrg {
 		void main(const GeometryType& geometry)
 		{
 			io_.print(geometry);
-			checkFiniteLoops(parameters_.finiteLoop,geometry.numberOfSites());
+			if (checkpoint_())
+				std::cerr<<"WARNING: Will not check finite loops for consistency while checkpoint is in use\n";
+			 else 
+				checkFiniteLoops(parameters_.finiteLoop,geometry.numberOfSites());
 			std::ostringstream msg;
 			msg<<"Turning the engine on";
 			progress_.printline(msg,std::cout);
@@ -212,8 +212,8 @@ namespace Dmrg {
 			
 			TargettingType psi(pSprime_,pEprime_,pSE_,model_,targetStruct_,waveFunctionTransformation_);
 			
-			if (parameters_.options.find("checkpoint")!=std::string::npos)
-				checkpointLoad(pS,pE,parameters_.checkpoint.index);
+			if (checkpoint_())
+				checkpoint_.load(pS,pE);
 			else
 				infiniteDmrgLoop(S,X,Y,E,pS,pE,psi);
 
@@ -237,7 +237,7 @@ namespace Dmrg {
 		ProgressIndicator progress_;
 		size_t quantumSector_;
 		int stepCurrent_;
-		StackType systemStack_,envStack_;
+		CheckpointType checkpoint_;
 		WaveFunctionTransformationType waveFunctionTransformation_;
 		std::vector<BlockType> sitesIndices_;
 		DiagonalizationType diagonalization_;
@@ -252,14 +252,8 @@ namespace Dmrg {
 				TargettingType& psi)
 		{
 			int ns,ne;
-
-			// empty the stacks
-			systemStack_.empty();
-			envStack_.empty();
+			checkpoint_.push(pS,pE,CheckpointType::FIRST_CALL);
 			
-			// infinite dmrg loop
-			systemStack_.push(pS);
-			envStack_.push(pE);
 			for (size_t step=0;step<X.size();step++) {
 				std::ostringstream msg;
 				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
@@ -289,8 +283,7 @@ namespace Dmrg {
 				changeAndTruncateBasis(pS,psi,pSprime_,pEprime_,transform,parameters_.keptStatesInfinite,EXPAND_SYSTEM);
 				changeAndTruncateBasis(pE,psi,pEprime_,pSprime_,transform,parameters_.keptStatesInfinite,EXPAND_ENVIRON);
 				
-				systemStack_.push(pS); 
-				envStack_.push(pE);
+				checkpoint_.push(pS,pE);
 			}
 			progress_.print("Infinite dmrg loop has been done!\n",std::cout);
 		}
@@ -358,16 +351,17 @@ namespace Dmrg {
 				if (size_t(stepCurrent_)>=sitesIndices_.size()) throw std::runtime_error("stepCurrent_ too large!\n");
 				if (direction==EXPAND_SYSTEM) {
 					grow(pSprime_,pS,sitesIndices_[stepCurrent_],GROW_RIGHT);             //grow system
-					shrink(pEprime_,envStack_); //shrink env
+					checkpoint_.shrink(pEprime_,CheckpointType::ENVIRON); //shrink env
 				} else {
 					grow(pEprime_,pE,sitesIndices_[stepCurrent_],GROW_LEFT);   // grow env.
-					shrink(pSprime_,systemStack_); // shrink system
+					checkpoint_.shrink(pSprime_,CheckpointType::SYSTEM); // shrink system
 				}
 				
 				msg<<"finite (dir="<<direction<<"): sys-env: "<<pSprime_.size()<<"x"<<pEprime_.size();
 				msg<<" and block="<<pSprime_.block().size()<<"+"<<pEprime_.block().size();
 				if (verbose_) {
-					msg<<" stackS="<<systemStack_.size()<<" stackE="<<envStack_.size()<< " step="<<stepCurrent_;
+					msg<<" stackS="<<checkpoint_.stackSize(CheckpointType::SYSTEM);
+					msg<<" stackE="<<checkpoint_.stackSize(CheckpointType::ENVIRON)<< " step="<<stepCurrent_;
 					msg<<" loopIndex="<<loopIndex<<" length="<<stepLength<<" StepFinal="<<stepFinal;
 				}
 				progress_.printline(msg,std::cout);
@@ -395,7 +389,7 @@ namespace Dmrg {
 				std::string s="#WAVEFUNCTION_ENERGY="+utils::ttos(gsEnergy);
 				io_.printline(s);
 			}
-			checkpointSave(pS,pE,loopIndex);
+			checkpoint_.save(pS,pE,loopIndex,io_);
 		}
 
 		void changeTruncateAndSerialize(MyBasisWithOperators& pS,MyBasisWithOperators& pE,
@@ -407,10 +401,12 @@ namespace Dmrg {
 			TransformType transform;
 			if (direction==EXPAND_SYSTEM) {
 				changeAndTruncateBasis(pS,target,pSprime_,pEprime_,transform,keptStates,direction);
-				systemStack_.push(pS);
+				//systemStack_.push(pS);
+				checkpoint_.push(pS,CheckpointType::SYSTEM);
 			} else {
 				changeAndTruncateBasis(pE,target,pEprime_,pSprime_,transform,keptStates,direction);
-				envStack_.push(pE);
+				//envStack_.push(pE);
+				checkpoint_.push(pE,CheckpointType::ENVIRON);
 			}
 			
 			if (saveOption==SAVE_TO_DISK) serialize(electronsVector,target.gs(),transform,direction);
@@ -472,16 +468,8 @@ namespace Dmrg {
 			return Xbasis;
 		}
 
-		//! shrink pSprime (we don't really shrink, we just undo the growth)
-		void shrink(MyBasisWithOperators &pSprime,StackType& thisStack)
-		{
-			thisStack.pop();
-			pSprime=thisStack.top();
-		}
-
 		void updateQuantumSector(size_t sites)
 		{
-			
 			std::vector<size_t> targetQuantumNumbers(parameters_.targetQuantumNumbers.size());
 			for (size_t ii=0;ii<targetQuantumNumbers.size();ii++) 
 				targetQuantumNumbers[ii]=int(parameters_.targetQuantumNumbers[ii]*sites);
@@ -530,44 +518,6 @@ namespace Dmrg {
 			std::ostringstream msg2;
 			msg2<<"#Error="<<error;
 			io_.printline(msg2);
-		}
-
-		//! checkpoint save: move this to the Serializer FIXME
-		void checkpointSave(MyBasisWithOperators &pS,MyBasisWithOperators &pE,size_t loop) 
-		{
-			pS.save(io_,"#CHKPOINTSYSTEM");
-			pE.save(io_,"#CHKPOINTENVIRON");
-			
-		}
-
-		//! checkpoint load: move this to the Serializer FIXME
-		void checkpointLoad(MyBasisWithOperators &pS,MyBasisWithOperators &pE,size_t loop)
-		{
-			typename IoType::In ioTmp(parameters_.checkpoint.filename);
-			MyBasisWithOperators pS1(ioTmp,"#CHKPOINTSYSTEM",loop);
-			pS=pS1;
-			MyBasisWithOperators pE1(ioTmp,"#CHKPOINTENVIRON");
-			pE=pE1;
-			
-			//load also the stacks here!!!
-			std::string s = appendWithDir(ENVIRON_STACK_STRING,parameters_.checkpoint.filename);
-			envStack_.load(s);
-			s = appendWithDir(SYSTEM_STACK_STRING,parameters_.checkpoint.filename);
-			systemStack_.load(s);
-		}
-
-		//! Move elsewhere
-		//! returns s1+s2 if s2 has no '/', 
-		//! if s2 = s2a + '/' + s2b return s2a + '/' + s1 + s2b
-		std::string appendWithDir(const std::string& s1,const std::string& s2) const
-		{
-			size_t x = s2.find("/");
-			if (x==std::string::npos) return s1 + s2;
-			std::string suf = s2.substr(x+1,s2.length());
-			std::string dir = s2.substr(0,s2.length()-suf.length());
-			//throw std::runtime_error("testing\n");
-			return dir + s1 + suf;
-					
 		}
 	}; //class DmrgSolver
 } // namespace Dmrg

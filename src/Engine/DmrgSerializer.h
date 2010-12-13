@@ -181,7 +181,7 @@ namespace Dmrg {
 						&(transform_(0,0)),nBig,&(fmTmp(0,0)),nBig,beta,&(ret(0,0)),nSmall);
 				
 			}
-			
+
 		private:
 			FermionSignType fs_;
 			BasisType pS_;
