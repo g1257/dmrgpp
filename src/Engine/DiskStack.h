@@ -82,35 +82,48 @@ namespace Dmrg {
 	template<typename DataType>
 	class DiskStack {
 	
-			typedef typename IoSimple::In IoInType;
-			typedef typename IoSimple::Out IoOutType;
+		typedef typename IoSimple::In IoInType;
+		typedef typename IoSimple::Out IoOutType;
+
 		public:
-			DiskStack(std::string const &name,size_t rank=0,bool debug=true) :
+			DiskStack(const std::string &fileout,const std::string& filein,bool hasLoad,size_t rank=0,bool debug=false) :
 				rank_(rank),
-				label_(name),
+				label_(fileout),
 				total_(0),
 				debug_(debug)
 			{
-				debugPrint("Constructor name="+name);
+				if (!hasLoad) {
+					debugPrint("Constructor name="+label_);
+					ioOut_.open(label_,std::ios_base::trunc,rank_);
+					ioOut_.close();
+					return;
+				}
+				try {
+					ioIn_.open(filein);
+				} catch (std::exception& e) {
+					std::cerr<<"Problem opening reading file "<<filein<<"\n";
+					throw std::runtime_error("DiskStack::load(...)\n");
+				}
+				ioIn_.readline(rank_,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
+				ioIn_.readline(total_,"#STACKMETATOTAL=");
+				ioIn_.readline(debug_,"#STACKMETADEBUG=");
+				ioIn_.advance("#STACKMETASTACK");
+				ioIn_>>stack_;
+				ioIn_.close();
+				label_=filein;
 			}
 			
 			~DiskStack()
 			{
+				//ioOut_.open(label_,std::ios_base::trunc,rank_);
 				ioOut_.open(label_,std::ios_base::app,rank_);
 				ioOut_.printline("#STACKMETARANK="+utils::ttos(rank_));
 				
 				ioOut_.printline("#STACKMETATOTAL="+utils::ttos(total_));
 				ioOut_.printline("#STACKMETADEBUG="+utils::ttos(debug_));
-				ioOut_.printStack(stack_,"#STACKMETASTACK");
+				ioOut_<<"#STACKMETASTACK\n";
+				ioOut_<<stack_;
 				ioOut_.close();
-			}
-
-			void empty()
-			{
-				ioOut_.open(label_,std::ios_base::trunc,rank_);
-				ioOut_.close();
-				total_=0;
-				stack_.empty();
 			}
 
 			void push(DataType const &d) 
@@ -144,21 +157,8 @@ namespace Dmrg {
 
 			size_t size() const { return stack_.size(); }
 
-			void load(const std::string& file)
-			{
-				try {
-					ioIn_.open(file);
-				} catch (std::exception& e) {
-					std::cerr<<"Problem opening reading file "<<file<<"\n";
-					throw std::runtime_error("DiskStack::load(...)\n");
-				}
-				ioIn_.readline(rank_,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
-				label_=file;
-				ioIn_.readline(total_,"#STACKMETATOTAL=");
-				ioIn_.readline(debug_,"#STACKMETADEBUG=");
-				ioIn_.read(stack_,"#STACKMETASTACK");
-				ioIn_.close();
-			}
+			template<typename DataType_>
+			friend std::ostream& operator<<(std::ostream& os,const DiskStack<DataType_>& ds);
 
 		private:
 			void debugPrint(const std::string& s)
@@ -174,6 +174,15 @@ namespace Dmrg {
 			IoOutType ioOut_;
 			std::stack<int> stack_;
 	}; // class DiskStack
+
+	template<typename DataType>
+	std::ostream& operator<<(std::ostream& os,const DiskStack<DataType>& ds)
+	{
+		os<<"DISKSTACK: label: "<<ds.label_<<"\n";
+		os<<"total="<<ds.total_<<"\n";
+		os<<ds.stack_;
+		return os;
+	}
 } // namespace DMrg
 
 #endif

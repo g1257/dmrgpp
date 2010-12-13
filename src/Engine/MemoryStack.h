@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 template<typename DataType>
 class MemoryStack : public std::stack<DataType> {
 	public:
-		MemoryStack(std::string const &name) :std::stack<DataType>() { }
+		MemoryStack(const std::string &file1,const std::string& file2,bool hasLoad,size_t rank=0,bool debug=false) :std::stack<DataType>() { }
 		void load(const std::string& file) 
 		{
 			throw std::runtime_error("MemoryStack::load(): Unimplemented (Maybe you should use DiskStack instead?)\n");

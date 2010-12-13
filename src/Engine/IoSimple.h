@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <string>
 #include <vector>
-#include <stack>
 #include "Matrix.h"
 
 namespace Dmrg {
@@ -142,29 +141,6 @@ namespace Dmrg {
 					for (size_t i=0;i<x.size();i++) fout_<<x[i]<<"\n";
 				}
 
-// 				template<typename X>
-// 				void printSparseVector(X const &x,std::string const &label)
-// 				{
-// 					if (rank_!=0) return;
-// 					x.print(fout_,label);
-// 					
-// 				}
-				
-				template<typename X>
-				void printStack(const std::stack<X>& st,std::string const &label)
-				{
-					if (rank_!=0) return;
-					std::stack<X> st2=st;
-					
-					fout_<<label<<"\n";
-					fout_<<st.size()<<"\n";
-					while(st2.size()>0) {
-						X x = st2.top();
-						st2.pop();
-						fout_<<x<<"\n";
-					}
-				}
-
 				template<class T>
 				void print(const T&  something)
 				{
@@ -209,6 +185,9 @@ namespace Dmrg {
 					fout_.close();
 				}
 
+				template<typename X>
+				friend void operator<<(Out& io,X& t);
+				
 			private:
 				int rank_;
 				std::string filename_;
@@ -223,8 +202,10 @@ namespace Dmrg {
 
 				In(std::string const &fn) : filename_(fn), fin_(fn.c_str())
 				{
-					if (!fin_ || !fin_.good() || fin_.bad()) 
-						throw std::runtime_error("IoSimple::ctor(...): Can't open file\n");
+					if (!fin_ || !fin_.good() || fin_.bad()) {
+						std::string s = "IoSimple::ctor(...): Can't open file "+filename_+"\n";
+						throw std::runtime_error(s.c_str());
+					}
 				}
 
 				void open(std::string const &fn)
@@ -232,7 +213,8 @@ namespace Dmrg {
 					filename_=fn;
 					fin_.open(fn.c_str());
 					if (!fin_ || !fin_.good() || fin_.bad()) {
-						throw std::runtime_error("IoSimpleIn::open(...) failed\n");
+						std::string s = "IoSimpleIn::open(...) failed for file " + filename_ + "\n";
+						throw std::runtime_error(s.c_str());
 					}
 				}
 
@@ -303,23 +285,6 @@ namespace Dmrg {
 						x[i]=tmp;
 					}
 					return sc;
-				}
-
-				template<typename X>
-				void read(std::stack<X>& x,const std::string& s,size_t level=0)
-				{
-					std::vector<X> tmpVec;
-					std::pair<std::string,size_t> sc = read(tmpVec,s,level);
-					if (sc.second!=level) {
-						fin_.close();
-						fin_.open(filename_.c_str());
-						read(tmpVec,s,sc.second-1);
-					}
-					x.empty();
-					for (int i=tmpVec.size()-1;i>=0;i--)
-					{
-						x.push(tmpVec[i]);
-					}
 				}
 
 				std::pair<std::string,size_t> advance(std::string const &s,int level=0)
@@ -425,11 +390,26 @@ namespace Dmrg {
 
 				~In() { fin_.close(); }
 
+				template<typename X>
+				friend void operator>>(In& io,X& t);
+				
 			private:
 				std::string filename_;
 				std::ifstream 	fin_;
 		};
 	}; //class IoSimple
+
+	template<typename T>
+	void operator<<(IoSimple::Out& io,T& t)
+	{
+		io.fout_<<t;
+	}
+
+	template<typename T>
+	void operator>>(IoSimple::In& io,T& t)
+	{
+		io.fin_>>t;
+	}
 } // namespace Dmrg
 
 /*@}*/	

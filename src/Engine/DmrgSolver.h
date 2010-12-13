@@ -156,7 +156,7 @@ namespace Dmrg {
 				progress_("DmrgSolver",concurrency.rank()),
 				quantumSector_(0),
 				stepCurrent_(0),
-				checkpoint_(parameters_),
+				checkpoint_(parameters_,concurrency.rank(),true),
 				diagonalization_(parameters,model,concurrency,verbose_,
 					useReflection_,io_,quantumSector_,waveFunctionTransformation_)
 		{
@@ -252,7 +252,7 @@ namespace Dmrg {
 				TargettingType& psi)
 		{
 			int ns,ne;
-			checkpoint_.push(pS,pE,CheckpointType::FIRST_CALL);
+			checkpoint_.push(pS,pE);
 			
 			for (size_t step=0;step<X.size();step++) {
 				std::ostringstream msg;

@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <sys/time.h>
 #include <sys/resource.h>
+#include <stack>
 #include <cassert>
 #include "Matrix.h" // psimag
 #include "Sort.h"
@@ -178,6 +179,42 @@ namespace std {
 	{
 		for (size_t i=0;i<w.size();i++) v[i] += w[i];
 		return v;
+	}
+
+	template<typename FieldType>
+	istream& operator>>(istream& is,vector<FieldType>& x)
+	{
+		int y = 0;
+		is>>y;
+		if (y<0) throw std::runtime_error("Vector size cannot be negative\n");
+		x.resize(y);
+		for (size_t i=0;i<size_t(y);i++) is>>x[i];
+		return is;	
+	}
+
+	template<typename FieldType>
+	ostream& operator<<(ostream& os,const stack<FieldType>& st)
+	{
+		stack<FieldType> st2 = st;
+		os<<st2.size()<<"\n";
+		while(!st2.empty()) {
+			FieldType x = st2.top();
+			os<<x<<"\n";
+			st2.pop();
+		}
+		return os;
+
+	}
+
+	template<typename X>
+	istream& operator>>(istream& is,stack<X>& x)
+	{
+		std::vector<X> tmpVec;
+		is>>tmpVec;
+		for (int i=tmpVec.size()-1;i>=0;i--) {
+				x.push(tmpVec[i]);
+		}
+		return is;
 	}
 }
 	

@@ -50,7 +50,7 @@ truncate()
 reorder()
 max()
 isInVector()
-operator<<
+operator<<()
 
 [LINALG.Sparse]
 Engine/SparseVector.h
@@ -92,5 +92,4 @@ PSIMAGAssert.h
 
 [random]
 myRandomT()
-
 
