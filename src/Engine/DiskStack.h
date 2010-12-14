@@ -76,6 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <stack>
 #include "IoSimple.h"
+#include "ProgressIndicator.h"
 
 //! A disk stack, similar to std::stack but stores in disk not in memory
 namespace Dmrg {
@@ -86,31 +87,33 @@ namespace Dmrg {
 		typedef typename IoSimple::Out IoOutType;
 
 		public:
-			DiskStack(const std::string &fileout,const std::string& filein,bool hasLoad,size_t rank=0,bool debug=false) :
+			DiskStack(const std::string &file,bool hasLoad,size_t rank=0) :
 				rank_(rank),
-				label_(fileout),
+				label_(file),
 				total_(0),
-				debug_(debug)
+				progress_("DiskStack",rank)
 			{
 				if (!hasLoad) {
-					debugPrint("Constructor name="+label_);
 					ioOut_.open(label_,std::ios_base::trunc,rank_);
 					ioOut_.close();
 					return;
 				}
 				try {
-					ioIn_.open(filein);
+					ioIn_.open(label_);
 				} catch (std::exception& e) {
-					std::cerr<<"Problem opening reading file "<<filein<<"\n";
+					std::cerr<<"Problem opening reading file "<<label_<<"\n";
 					throw std::runtime_error("DiskStack::load(...)\n");
 				}
 				ioIn_.readline(rank_,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
 				ioIn_.readline(total_,"#STACKMETATOTAL=");
-				ioIn_.readline(debug_,"#STACKMETADEBUG=");
+				//ioIn_.readline(debug_,"#STACKMETADEBUG=");
 				ioIn_.advance("#STACKMETASTACK");
 				ioIn_>>stack_;
 				ioIn_.close();
-				label_=filein;
+				std::ostringstream msg;
+				msg<<"Attempting to read from file " + label_ + " succeeded";
+				progress_.printline(msg,std::cout);
+				
 			}
 			
 			~DiskStack()
@@ -120,7 +123,7 @@ namespace Dmrg {
 				ioOut_.printline("#STACKMETARANK="+utils::ttos(rank_));
 				
 				ioOut_.printline("#STACKMETATOTAL="+utils::ttos(total_));
-				ioOut_.printline("#STACKMETADEBUG="+utils::ttos(debug_));
+				//ioOut_.printline("#STACKMETADEBUG="+utils::ttos(debug_));
 				ioOut_<<"#STACKMETASTACK\n";
 				ioOut_<<stack_;
 				ioOut_.close();
@@ -136,21 +139,30 @@ namespace Dmrg {
 				stack_.push(total_);
 				total_++;
 
-				std::string s = "push label_="+label_+" total="+utils::ttos(total_);
-				debugPrint(s);
+				std::string s = "Pushing with label="+label_+" and total="+utils::ttos(total_);
+				//debugPrint(s);
+				std::ostringstream msg;
+				msg<<s;
+				progress_.printline(msg,std::cout);
 			}
 
 			void pop()
 			{
 				stack_.pop();
-				debugPrint("pop\n");
+				std::string s = "Popping with label="+label_+" stack_.top="+utils::ttos(stack_.top());
+				std::ostringstream msg;
+				msg<<s;
+				progress_.printline(msg,std::cout);
 			}
 
 			DataType top()
 			{
 				ioIn_.open(label_);
 				DataType dt(ioIn_,"",stack_.top());
-				debugPrint("top label_="+label_+" stack_.top="+utils::ttos(stack_.top()));
+				std::string s = "Topping with label="+label_+" stack_.top="+utils::ttos(stack_.top());
+				std::ostringstream msg;
+				msg<<s;
+				progress_.printline(msg,std::cout);
 				ioIn_.close();
 				return dt;
 			}
@@ -161,15 +173,11 @@ namespace Dmrg {
 			friend std::ostream& operator<<(std::ostream& os,const DiskStack<DataType_>& ds);
 
 		private:
-			void debugPrint(const std::string& s)
-			{
-				if (debug_) std::cerr<<s<<"\n";
-			}
 
 			size_t rank_;
 			std::string label_;
 			int total_;
-			bool debug_;
+			ProgressIndicator progress_;
 			IoInType ioIn_;
 			IoOutType ioOut_;
 			std::stack<int> stack_;

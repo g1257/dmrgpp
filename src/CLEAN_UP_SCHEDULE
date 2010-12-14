@@ -13,9 +13,6 @@ place save(...) functions next to "load" ctors.
 
 string name for basis objects
 
-checkpoint load and save shoudl go to the serializer
-checkpointing is broooookeeeeeeeeeeen!!!
-
 configure.pl should not create inputs!! move input creation to input.pl
 
 json format for input?

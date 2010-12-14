@@ -88,7 +88,6 @@ namespace Dmrg {
 	template<typename RealType,typename BasisType,typename ParametersType,typename StackType,typename IoType> 
 	class Checkpoint {
 		public:
-			//enum {FIRST_CALL,OTHER_CALL};
 			enum {SYSTEM,ENVIRON};
 			
 			const std::string SYSTEM_STACK_STRING;
@@ -98,10 +97,9 @@ namespace Dmrg {
 				SYSTEM_STACK_STRING("SystemStack"),
 				ENVIRON_STACK_STRING("EnvironStack"),
 				parameters_(parameters),
-				debug_(debug),
 				enabled_(parameters_.options.find("checkpoint")!=std::string::npos),
-				systemStack_(SYSTEM_STACK_STRING+parameters_.filename,SYSTEM_STACK_STRING+parameters_.checkpoint.filename,enabled_,rank,debug),
-				envStack_(ENVIRON_STACK_STRING+parameters_.filename,ENVIRON_STACK_STRING+parameters_.checkpoint.filename,enabled_,rank,debug)
+				systemStack_((enabled_) ? SYSTEM_STACK_STRING+parameters_.checkpoint.filename : SYSTEM_STACK_STRING+parameters_.filename,enabled_,rank),
+				envStack_((enabled_) ? ENVIRON_STACK_STRING+parameters_.checkpoint.filename : ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank)
 			{
 			}
 			
@@ -113,23 +111,11 @@ namespace Dmrg {
 
 			void load(BasisType &pS,BasisType &pE)
 			{
-				size_t loop = parameters_.checkpoint.index;
-				load_(pS,pE,loop,parameters_.checkpoint.filename);
-			
-				//load also the stacks here!!!
-				/*std::string s = appendWithDir(ENVIRON_STACK_STRING,parameters_.checkpoint.filename);
-				envStack_.load(s);
-				if (debug_) {
-					std::cerr<<"Reading envStack:\n";
-					std::cerr<<envStack_;
-				}
-				s = appendWithDir(SYSTEM_STACK_STRING,parameters_.checkpoint.filename);
-				systemStack_.load(s);
-				if (debug_) {
-					std::cerr<<"Reading systemStack:\n";
-					std::cerr<<systemStack_;
-				}*/
-				
+				typename IoType::In ioTmp(parameters_.checkpoint.filename);
+				BasisType pS1(ioTmp,"#CHKPOINTSYSTEM",parameters_.checkpoint.index);
+				pS=pS1;
+				BasisType pE1(ioTmp,"#CHKPOINTENVIRON");
+				pE=pE1;
 			}
 
 			void push(const BasisType &pS,const BasisType &pE)
@@ -160,7 +146,6 @@ namespace Dmrg {
 
 		private:
 			const ParametersType& parameters_;
-			bool debug_;
 			bool enabled_;
 			StackType systemStack_,envStack_; // <--we're the owner
 
@@ -169,23 +154,6 @@ namespace Dmrg {
 			{
 				thisStack.pop();
 				pSprime=thisStack.top();
-			}
-
-			void load_(BasisType &pS,BasisType &pE,size_t loop,const std::string& filename) const
-			{
-				typename IoType::In ioTmp(filename);
-				BasisType pS1(ioTmp,"#CHKPOINTSYSTEM",loop);
-				pS=pS1;
-				if (debug_) {
-					std::cerr<<"Reading pS:\n";
-					std::cerr<<pS;
-				}
-				BasisType pE1(ioTmp,"#CHKPOINTENVIRON");
-				pE=pE1;
-				if (debug_) {
-					std::cerr<<"Reading pE:\n";
-					std::cerr<<pE;
-				}
 			}
 			
 			//! Move elsewhere

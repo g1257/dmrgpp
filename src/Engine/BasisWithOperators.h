@@ -106,14 +106,6 @@ namespace Dmrg {
 		typedef typename BasisType::FactorsType FactorsType;
 
 		BasisWithOperators(const std::string& s) :BasisType(s),operators_(this) {}
-
-		BasisWithOperators(const std::string& s,BlockType const &block,SparseMatrixType const &h,BasisDataType const &qm)
-				  :BasisType(s),operators_(this)
-		{
-			set(block);
-			this->setSymmetryRelated(qm);
-			setHamiltonian(h);
-		}
 		
 		template<typename IoInputter>
 		BasisWithOperators(IoInputter& io,const std::string& ss,size_t counter=0)
@@ -214,8 +206,11 @@ namespace Dmrg {
 
 		SparseMatrixType reducedHamiltonian() const { return operators_.reducedHamiltonian(); }
 
-		void setOperators(const std::vector<OperatorType>& ops)
+		void setVarious(BlockType const &block,SparseMatrixType const &h,BasisDataType const &qm,const std::vector<OperatorType>& ops)
 		{
+			set(block);
+			this->setSymmetryRelated(qm);
+			setHamiltonian(h);
 			operators_.setOperators(ops);
 		}
 

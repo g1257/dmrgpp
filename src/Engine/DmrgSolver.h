@@ -156,7 +156,7 @@ namespace Dmrg {
 				progress_("DmrgSolver",concurrency.rank()),
 				quantumSector_(0),
 				stepCurrent_(0),
-				checkpoint_(parameters_,concurrency.rank(),true),
+				checkpoint_(parameters_,concurrency.rank()),
 				diagonalization_(parameters,model,concurrency,verbose_,
 					useReflection_,io_,quantumSector_,waveFunctionTransformation_)
 		{
@@ -200,29 +200,27 @@ namespace Dmrg {
 
 			
 			TargettingType psi(pSprime_,pEprime_,pSE_,model_,targetStruct_,waveFunctionTransformation_);
-			
-			if (checkpoint_()) {
-				MyBasisWithOperators pS("pS");
-				MyBasisWithOperators pE("pE");
+
+			MyBasisWithOperators pS("pS");
+			MyBasisWithOperators pE("pE");
+
+			if (checkpoint_()) {	
 				checkpoint_.load(pS,pE);
-				stepCurrent_ = pS.block().size()-1;
-				finiteDmrgLoops(S,E,pS,pE,psi);
 			} else { // move this block elsewhere:
 				std::vector<OperatorType> creationMatrix;
 				SparseMatrixType hmatrix;
 				BasisDataType q;
 				
 				model_.setNaturalBasis(creationMatrix,hmatrix,q,E);
-				MyBasisWithOperators pE("pE",E,hmatrix,q);
-				pE.setOperators(creationMatrix);
+				pE.setVarious(E,hmatrix,q,creationMatrix);
 			
 				model_.setNaturalBasis(creationMatrix,hmatrix,q,S);
-				MyBasisWithOperators pS("pS",S,hmatrix,q);
-				pS.setOperators(creationMatrix);
+				pS.setVarious(S,hmatrix,q,creationMatrix);
 				infiniteDmrgLoop(S,X,Y,E,pS,pE,psi);
-				stepCurrent_=pS.block().size()-1;
-				finiteDmrgLoops(S,E,pS,pE,psi);
 			}
+
+			stepCurrent_ = pS.block().size()-1;
+			finiteDmrgLoops(S,E,pS,pE,psi);
 			
 			std::ostringstream msg2;
 			msg2<<"Turning off the engine.";
@@ -457,9 +455,9 @@ namespace Dmrg {
 			BasisDataType q;
 			std::vector<OperatorType> creationMatrix;
 			model_.setNaturalBasis(creationMatrix,hmatrix,q,X);
-			MyBasisWithOperators Xbasis("Xbasis",X,hmatrix,q);
+			MyBasisWithOperators Xbasis("Xbasis");
 			
-			Xbasis.setOperators(creationMatrix);
+			Xbasis.setVarious(X,hmatrix,q,creationMatrix);
 			pSprime.setToProduct(pS,Xbasis,dir);
 			
 			SparseMatrixType matrix=pSprime.hamiltonian();
