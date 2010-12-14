@@ -120,6 +120,8 @@ namespace Dmrg {
 
 		size_t orbitals() const { return modelHubbard_.orbitals(); }
 
+		size_t hilbertSize() const { return modelHubbard_.hilbertSize(); } 
+
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
 		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,SparseMatrixType &hamiltonian,

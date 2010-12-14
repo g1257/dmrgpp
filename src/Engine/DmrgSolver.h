@@ -195,29 +195,34 @@ namespace Dmrg {
 				sitesIndices_.push_back(X[i]);
 			for (size_t i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
 
-			std::vector<OperatorType> creationMatrix;
-			SparseMatrixType hmatrix;
-			BasisDataType q;
-
-			model_.setNaturalBasis(creationMatrix,hmatrix,q,S);
-			MyBasisWithOperators pS("pS",S,hmatrix,q);
-			pS.setOperators(creationMatrix);
-			
-			waveFunctionTransformation_.init(hmatrix.rank());
+			waveFunctionTransformation_.init(model_.hilbertSize());
 			if (parameters_.options.find("nowft")!=std::string::npos) waveFunctionTransformation_.disable();
 
-			model_.setNaturalBasis(creationMatrix,hmatrix,q,E);
-			MyBasisWithOperators pE("pE",E,hmatrix,q);
-			pE.setOperators(creationMatrix);
 			
 			TargettingType psi(pSprime_,pEprime_,pSE_,model_,targetStruct_,waveFunctionTransformation_);
 			
-			if (checkpoint_())
+			if (checkpoint_()) {
+				MyBasisWithOperators pS("pS");
+				MyBasisWithOperators pE("pE");
 				checkpoint_.load(pS,pE);
-			else
+				stepCurrent_ = pS.block().size()-1;
+				finiteDmrgLoops(S,E,pS,pE,psi);
+			} else { // move this block elsewhere:
+				std::vector<OperatorType> creationMatrix;
+				SparseMatrixType hmatrix;
+				BasisDataType q;
+				
+				model_.setNaturalBasis(creationMatrix,hmatrix,q,E);
+				MyBasisWithOperators pE("pE",E,hmatrix,q);
+				pE.setOperators(creationMatrix);
+			
+				model_.setNaturalBasis(creationMatrix,hmatrix,q,S);
+				MyBasisWithOperators pS("pS",S,hmatrix,q);
+				pS.setOperators(creationMatrix);
 				infiniteDmrgLoop(S,X,Y,E,pS,pE,psi);
-
-			finiteDmrgLoops(S,E,pS,pE,X.size(),psi);
+				stepCurrent_=pS.block().size()-1;
+				finiteDmrgLoops(S,E,pS,pE,psi);
+			}
 			
 			std::ostringstream msg2;
 			msg2<<"Turning off the engine.";
@@ -293,11 +298,10 @@ namespace Dmrg {
      					BlockType const &E,
 					MyBasisWithOperators &pS,
      					MyBasisWithOperators &pE,
-	  				int l,
+	  				//int l,
        					TargettingType& psi)
 		{
 			useReflection_=false; // disable reflection symmetry for finite loop if it was enabled:
-			stepCurrent_=l;
 			
 			if (parameters_.options.find("nofiniteloops")!=std::string::npos) return;
 			for (size_t i=0;i<parameters_.finiteLoop.size();i++)  {

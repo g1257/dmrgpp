@@ -141,6 +141,8 @@ namespace Dmrg {
 
 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
 
+		size_t hilbertSize() const { return pow(2,2*NUMBER_OF_ORBITALS); }
+
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
 		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,SparseMatrixType &hamiltonian,
