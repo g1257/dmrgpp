@@ -137,7 +137,7 @@ namespace Dmrg {
 			
 			
 			std::ostringstream msg;
-			msg<<"Setting up ham. pse.size="<<pSE.size();
+			msg<<"Setting up Hamiltonian basis of size="<<pSE.size();
 			progress_.printline(msg,std::cout);
 		
 			TargetVectorType tmpVec;

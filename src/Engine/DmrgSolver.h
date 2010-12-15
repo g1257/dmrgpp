@@ -219,7 +219,6 @@ namespace Dmrg {
 				infiniteDmrgLoop(S,X,Y,E,pS,pE,psi);
 			}
 
-			stepCurrent_ = pS.block().size()-1;
 			finiteDmrgLoops(S,E,pS,pE,psi);
 			
 			std::ostringstream msg2;
@@ -300,8 +299,29 @@ namespace Dmrg {
        					TargettingType& psi)
 		{
 			useReflection_=false; // disable reflection symmetry for finite loop if it was enabled:
-			
 			if (parameters_.options.find("nofiniteloops")!=std::string::npos) return;
+			if (parameters_.finiteLoop.size()==0)
+				throw std::runtime_error("finiteDmrgLoops(...): there are no finite loops! (and nofiniteloops is not set)\n");
+			
+			// set initial site to add to either system or environment:
+			// this is a bit tricky and has been a source of endless bugs
+			// basically we have pS on the left and pE on the right, 
+			// and we need to determine which site is to be added
+			// let us set the initial direction first:
+			size_t direction = EXPAND_SYSTEM;
+			if (parameters_.finiteLoop[0].stepLength<0) direction=EXPAND_ENVIRON;
+			// all right, now we can get the actual site to add:
+
+			std::vector<size_t> siteToAdd(1,pE.block()[0]); // left-most site of pE
+			if (direction==EXPAND_ENVIRON) {
+				siteToAdd[0] = pS.block()[pS.block().size()-1]; // right-most site of pS
+			}
+			// now stepCurrent_ is such that sitesIndices_[stepCurrent_] = siteToAdd
+			// so:
+			int sc = utils::isInVector(sitesIndices_,siteToAdd);
+			if (sc<0) throw std::runtime_error("finiteDmrgLoops(...): internal error: siteIndices_\n");
+			stepCurrent_ = sc; // phew!!, that's all folks, now bugs, go away!!
+			
 			for (size_t i=0;i<parameters_.finiteLoop.size();i++)  {
 				std::ostringstream msg;
 				msg<<"Finite loop number "<<i;

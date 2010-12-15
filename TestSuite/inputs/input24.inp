@@ -8,7 +8,9 @@ Connectors 1 1.0
 SolverOptions=hasQuantumNumbers,nowft,nosu2,,checkpoint
 Version=55460ffd4e0d2587072e9595d7d4ed211c66e83e
 OutputFile=data24.txt
-InfiniteLoopKeptStates=64
-FiniteLoops 4  7 200 0 -7 200 0 -7 200 0 7 200 0 
+InfiniteLoopKeptStates=60
+FiniteLoops 2   -7 200 0 7 200 0 
 TargetQuantumNumbers 2 0.5 0.5
-checkpoint 1 3 oracles/dataValidated23.txt   
+CheckpointEnabled=1
+CheckpointFilename=data23.txt
+

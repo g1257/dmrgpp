@@ -849,7 +849,47 @@ the new system-environment permutation $P^{SE}_p$, the new environment permutati
 the old system-environment permutation $P^{SE}$, and the new system permutation $P^S$.
 A sum should be assumed for all indices except $\eta_p$.
 \subsection{SU(2) Reduced Operators}
+
 \subsection{Checkpointing}
+Let's say you want to first run 3 moves on a 16-site lattice:
+\verb=7 100 0 -5 100 0 -2 100 0=, and then continue it with 2 more
+\verb=-7 200 0 7 200 0=. Then one needs to set up input files as in 
+\verb=TestSuite/inputs/input23.inp=
+and
+\verb=TestSuite/inputs/input24.inp=.
+When you run \verb=configure.pl= make sure that you select \verb=DiskStacks= as
+the stacks will need to be saved to disk for resuming.
+Then, compile and do the first run:
+\begin{verbatim}
+cd src/
+perl configure.pl < ../TestSuite/inputs/model23.spec
+(or say ModelHeisenberg and DiskStack)
+make
+./dmrg ../TestSuite/inputs/input23.inp
+\end{verbatim}
+and now, one should see files
+\verb=SystemStackdata.txt= and \verb=EnvironStackdata.txt= as well
+as a fatter than usual data23.txt. You are ready for the continuation of this run now with:
+\begin{verbatim}
+./dmrg ../TestSuite/inputs/input24.inp
+\end{verbatim}
+Note that the continued run's input (\verb=input24.inp=) has the option checkpoint, the CheckpointEnabled tag
+and the CheckpointFilename tag.
+Continued (raw) results will be in file \verb=data24= as usual.
+
+Note the following caveats and ``todos'':
+\begin{itemize}
+\item Run will be (slightly?) slower due to the use of DiskStacks.
+\item There's no check (yet) of finite loops for consistency while checkpoint is in use.
+Therefore, make sure the second run is starting at a point on the lattice where the
+previous to-be-continued run left off.
+\item Bases are stored ("checkpointed") into disk and accumulate without being purged.
+\item Stacks are written to disk and never purged.
+\end{itemize} 
+The last two caveats have the positive effect of allowing to resume at any point of a previous run.
+On the other hand, a option to purge and leave only the most recent resume checkpoint would be useful, as it
+would reduce disk usage, and loading times later.
+
 \subsection{Distributed Parallelization}
 \subsection{Shared-memory Parallelization}
 

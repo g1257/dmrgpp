@@ -359,7 +359,7 @@ namespace Dmrg {
 					dmrgWave_.ws=wsStack_.top();
 					wsStack_.pop();
 				} else {
-					std::cerr<<"PUSHING STACK ERROR S\n";
+					//std::cerr<<"PUSHING STACK ERROR S\n";
 					throw std::runtime_error("System Stack is empty\n");
 				}
 			}
@@ -370,7 +370,7 @@ namespace Dmrg {
 					weStack_.pop();
 					//std::cerr<<"CHANGED We taken from stack\n";
 				} else {
-					std::cerr<<"PUSHING STACK ERROR E\n";
+					//std::cerr<<"PUSHING STACK ERROR E\n";
 					throw std::runtime_error("Environ Stack is empty\n");
 				}
 			}

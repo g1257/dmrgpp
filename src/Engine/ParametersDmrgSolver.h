@@ -156,7 +156,12 @@ namespace Dmrg {
 		void load(IoInputType& io)
 		{
 			io.readline(enabled,"CheckpointEnabled=");
-			io.readline(index,"CheckpointIndex=");
+			try {
+				io.readline(index,"CheckpointIndex=");
+			} catch (std::exception& e) {
+				io.rewind();
+				index=0;
+			}
 			io.readline(filename,"CheckpointFilename=");
 		}
 	};

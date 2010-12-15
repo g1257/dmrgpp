@@ -685,12 +685,14 @@ int main(int argc,char *argv[])
 	
 	MyConcurrency concurrency(argc,argv);
 	
-	if (argc!=3 && concurrency.name()=="serial") {
-		std::string s = "The observer driver takes two  arguments now: \\n";
+	if (argc<2) {
+		std::string s = "The observer driver takes at least one  argumentw: \\n";
 		s = s + "(i) the name of the input file";
-		s = s+ " and (ii) a comma-separated list of options of what to compute\\n";
+		s = s+ " and, optionally, (ii) a comma-separated list of options of what to compute\\n";
 		throw std::runtime_error(s);
 	}
+	std::string options = "cc,nn,szsz";
+	if (argc>2) options = argv[2];
 	
 	//Setup the Geometry
 	typedef Geometry<RealType> GeometryType;
@@ -712,11 +714,11 @@ int main(int argc,char *argv[])
 	if (hasTimeEvolution)
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,
-			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename,argv[2]);
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename,options);
 	else
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,
-			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename,argv[2]);
+			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename,options);
 } // main
 
 EOF

@@ -287,7 +287,7 @@ namespace Dmrg {
 					return sc;
 				}
 
-				std::pair<std::string,size_t> advance(std::string const &s,int level=0)
+				std::pair<std::string,size_t> advance(std::string const &s,int level=0,bool beQuiet=false)
 				{
 					std::string temp="NOTFOUND";
 					std::string tempSaved="NOTFOUND";
@@ -311,12 +311,32 @@ namespace Dmrg {
 					}
 					//std::cerr<<"count="<<c<<"\n";
 					if (!found && tempSaved=="NOTFOUND") {
-						std::cerr<<"Not found "<<s<<" in file "<<filename_;
-						std::cerr<<" level="<<level<<" counter="<<counter<<"\n";
+						if (!beQuiet) {
+							std::cerr<<"Not found "<<s<<" in file "<<filename_;
+							std::cerr<<" level="<<level<<" counter="<<counter<<"\n";
+						}
 						throw std::runtime_error("IoSimple::In::read()\n");
 					}
 					//std::cerr<<"------------\n";
 					return std::pair<std::string,size_t>(tempSaved,counter);
+				}
+
+				size_t count(const std::string& s)
+				{
+					size_t i = 0;
+					while(i<1000) {
+						try {
+							advance(s,0,true);
+							i++;
+						} catch (std::exception& e) {
+							rewind();
+							return i;
+						}
+					}
+					std::string ss = "IoSimple::count(...): too many "
+						+s+" in file "+filename_+"\n";
+					throw std::runtime_error(s.c_str());
+					
 				}
 
 				template<typename T>

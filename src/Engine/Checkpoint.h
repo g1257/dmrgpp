@@ -77,6 +77,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file Checkpoint.h
  *
  *  checkpointing functions
+ *  this class also owns the stacks since they 
+ *  are so related to checkpointing
  */
 #ifndef CHECKPOINT_H
 #define CHECKPOINT_H
@@ -112,7 +114,19 @@ namespace Dmrg {
 			void load(BasisType &pS,BasisType &pE)
 			{
 				typename IoType::In ioTmp(parameters_.checkpoint.filename);
-				BasisType pS1(ioTmp,"#CHKPOINTSYSTEM",parameters_.checkpoint.index);
+				size_t loop = ioTmp.count("#NAME=#CHKPOINTSYSTEM");
+				if (loop<1) {
+					std::cerr<<"There are no resumable loops in file "<<parameters_.checkpoint.filename<<"\n";
+					throw std::runtime_error("Checkpoint::load(...)\n");
+				}
+				loop--;
+				if (loop<parameters_.checkpoint.index) {
+					std::cerr<<"There are "<<loop<<" resumable checkpoints\n";
+					std::cerr<<"But you requested to go back "<<parameters_.checkpoint.index<<"\n";
+					throw std::runtime_error("Checkpoint::load(...)\n");
+				}
+				loop -= parameters_.checkpoint.index;
+				BasisType pS1(ioTmp,"#CHKPOINTSYSTEM",loop);
 				pS=pS1;
 				BasisType pE1(ioTmp,"#CHKPOINTENVIRON");
 				pE=pE1;
