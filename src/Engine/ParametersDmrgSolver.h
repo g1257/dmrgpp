@@ -98,6 +98,7 @@ namespace Dmrg {
 		std::string s = "checkFiniteLoops: I'm falling out of the lattice ";
 		std::string loops = "";
 		int x = totalSites/2-1; // must be signed
+		if (finiteLoop[0].stepLength<0) x++;
 		int prevDeltaSign = 1;
 		for (size_t i=0;i<finiteLoop.size();i++)  {
 			// naive location:
