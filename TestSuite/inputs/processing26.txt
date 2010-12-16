@@ -4,5 +4,5 @@ gprof
 #C
 #N
 #Sz
-executable
+dmrg
 

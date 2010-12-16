@@ -305,6 +305,7 @@ namespace Dmrg {
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					waveFunctionTransformation_.setInitialVector(vv[i],
 						targetVectors_[i],basisS_,basisE_,basisSE_);
+					if (norm(vv[i])<1e-6) continue;
 					VectorWithOffsetType w= weight_[i]*vv[i];
 					v += w;
 				}

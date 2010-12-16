@@ -218,7 +218,7 @@ namespace Dmrg {
 				RealType eps = 1e-6;
 				if (std::norm(src)<eps) throw std::runtime_error("src's norm is zero\n");
 				createVector(dest,src,pSprime,pEprime,pSE);
-				if (std::norm(dest)<eps) throw std::runtime_error("dest's norm is zero\n");
+				//if (std::norm(dest)<eps) throw std::runtime_error("dest's norm is zero\n");
 				//afterWft(pSprime,pEprime,pSE,m);	
 			} else {
 				createRandomVector(dest);
@@ -422,7 +422,7 @@ namespace Dmrg {
 				std::cerr<<"ATTENTION norm="<<std::norm(psiDest)<<" is too small\n";
 				std::cerr<<"ATTENTION originalNorm="<<std::norm(psiSrc)<<"\n";
 				//createRandomVector(psiDest);
-				throw std::runtime_error(" createVector(): norm<1\n");
+				//throw std::runtime_error(" createVector(): norm<1\n");
 			}
 			std::ostringstream msg;
 			msg<<"I'm working hard!";

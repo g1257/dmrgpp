@@ -141,7 +141,7 @@ namespace Dmrg {
 
 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
 
-		size_t hilbertSize() const { return pow(2,NUMBER_OF_ORBITALS*2); } 
+		size_t hilbertSize() const { return (size_t)pow(2,NUMBER_OF_ORBITALS*2); } 
 
 		void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
