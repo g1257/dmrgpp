@@ -90,13 +90,13 @@ namespace Dmrg {
 			typedef psimag::Matrix<RealType> MatrixType;
 			enum {NUMBERS,MATRICES};
 		public:
-			enum {DIRECTION_X,DIRECTION_Y,DIRECTION_XPY,DIRECTION_XMY};
-			enum {CHAIN,LADDER,LADDERX};
+			enum {DIRECTION_X=0,DIRECTION_Y=1,DIRECTION_XPY=2,DIRECTION_XMY=3,DIRECTION_BATH=2};
+			enum {CHAIN,LADDER,LADDERX,BATHEDCLUSTER};
 			
 			template<typename IoInputter>
 			GeometryDirection(IoInputter& io,size_t dirId,size_t linSize,size_t edof,
-					  size_t geometryKind,size_t leg,const std::string& options) 
-			: dirId_(dirId),linSize_(linSize),geometryKind_(geometryKind),leg_(leg)
+					  size_t geometryKind,size_t leg,const std::string& options,size_t bathSitesPerSite)
+			: dirId_(dirId),linSize_(linSize),geometryKind_(geometryKind),leg_(leg),bathSitesPerSite_(bathSitesPerSite)
 			{
 				size_t n = getVectorSize(options);
 				//std::cerr<<"vectorsize="<<n<<"\n";
@@ -115,10 +115,6 @@ namespace Dmrg {
 					}
 					dataType_ = MATRICES;
 				}
-// 				std::vector<size_t> v(2);
-// 				io.readKnownSize(v,"DefaultSites");
-// 				
-// 				defaultHandle_ = handle(v[0],v[1]);
 			}
 
 			const RealType& operator()(size_t i,size_t j) const
@@ -134,12 +130,6 @@ namespace Dmrg {
 				if (dataType_==NUMBERS) return dataNumbers_[h];
 				return dataMatrices_[h](edof1,edof2);
 			}
-			
-// 			const RealType& defaultConnector(size_t edof1,size_t edof2) const
-// 			{
-// 				if (dataType_==NUMBERS) return dataNumbers_[defaultHandle_];
-// 				return dataMatrices_[defaultHandle_](edof1,edof2);
-// 			}
 
 			size_t size() const
 			{
@@ -178,7 +168,13 @@ namespace Dmrg {
 				if (s.find("ConstantValues")!=std::string::npos)
 					return 1;
 				
+				size_t clusterSize = linSize_/(1+bathSitesPerSite_);
+
 				switch (geometryKind_) {
+					case BATHEDCLUSTER:
+						if (dirId_==DIRECTION_X) return clusterSize-leg_;
+						else if (dirId_==DIRECTION_Y) return clusterSize - clusterSize/leg_;
+						else return bathSitesPerSite_*clusterSize;
 					case CHAIN:
 						if (dirId_!=DIRECTION_X)
 							throw std::runtime_error("Chain must have direction 0\n");
@@ -187,7 +183,6 @@ namespace Dmrg {
 						if (dirId_==DIRECTION_XPY) return linSize_ - linSize_/leg_;
 						else if (dirId_==DIRECTION_XMY) return linSize_ - linSize_/leg_;
 						// no break here
-					
 					case LADDER:
 						if (dirId_==DIRECTION_X) return linSize_-leg_;
 						else if (dirId_==DIRECTION_Y) return linSize_ - linSize_/leg_;
@@ -201,6 +196,7 @@ namespace Dmrg {
 			size_t linSize_;
 			size_t geometryKind_;
 			size_t leg_;
+			size_t bathSitesPerSite_;
 			size_t dataType_;
 			//size_t defaultHandle_;
 			std::vector<RealType> dataNumbers_;

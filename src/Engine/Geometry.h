@@ -137,12 +137,6 @@ namespace Dmrg {
 				return terms_[term](i1,edof1,i2,edof2);
 			}
 			
-// 			const RealType& defaultConnector
-// 				(size_t edof1,size_t edof2,size_t term) const
-// 			{
-// 				return terms_[term].defaultConnector(edof1,edof2);
-// 			}
-			
 			size_t terms() const { return terms_.size(); }
 			
 			size_t numberOfSites() const { return linSize_; }
@@ -165,13 +159,7 @@ namespace Dmrg {
 				
 				E.push_back(linSize_-1);
 			}
-			
-			// should be static
-// 			bool connected(size_t i1,size_t i2) const
-// 			{
-// 				return terms_[0].connected(i1,i2); // any term will do
-// 			}
-// 			
+
 			// should be static
 			bool connected(size_t smax,size_t emin,size_t i1,size_t i2) const
 			{

@@ -76,7 +76,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file GeometryTerm.h
  *
- * FIXME DOC
+ * Each geometry term represents a Hamiltonian connection term of the form
+ * X_{ij} A_i B_j, where A and B are operators and X_{ij} are numbers.
+ * Note that on-site Hamiltonian terms aren't included in the geometry since
+ * they're trivially handled by the DMRG algorithm.
  */
 #ifndef GEOMETRY_TERM_H
 #define GEOMETRY_TERM_H
@@ -93,7 +96,7 @@ namespace Dmrg {
 			
 			template<typename IoInputter>
 			GeometryTerm(IoInputter& io,size_t termId,size_t linSize)
-			: linSize_(linSize),leg_(1)
+			: linSize_(linSize),leg_(1),bathSitesPerSite_(0)
 			{
 				int x;
 				io.readline(x,"DegreesOfFreedom=");
@@ -120,9 +123,19 @@ namespace Dmrg {
 						break;
 					case GeometryDirectionType::CHAIN:
 						dirs = 1;
+						break;
+					case GeometryDirectionType::BATHEDCLUSTER:
+						dirs = 3; // X,Y, and BATH
+						io.readline(x,"LadderLeg=");
+						if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
+						leg_=x;
+						io.readline(x,"BathSitesPerSite=");
+						if (x<0) throw std::runtime_error("BathSitesPerSite<0 is an error\n");
+						bathSitesPerSite_ = x;
+						break;
 				}
 				for (size_t i=0;i<dirs;i++) {
-					GeometryDirectionType gd(io,i,linSize_,edof_,geometryKind_,leg_,gOptions);
+					GeometryDirectionType gd(io,i,linSize_,edof_,geometryKind_,leg_,gOptions,bathSitesPerSite_);
 					directions_.push_back(gd);
 				}
 				
@@ -166,13 +179,6 @@ namespace Dmrg {
 				return cachedValues_[p];
 			}
 			
-// 			const RealType& defaultConnector
-// 				(size_t i1,size_t edof1,size_t i2,size_t edof2) const
-// 			{
-// 				size_t dir = calcDir(i1,i2);
-// 				return directions_[dir].defaultConnector(edof1,edof2);
-// 			}
-			
 			bool connected(size_t smax,size_t emin,size_t i1,size_t i2) const
 			{
 				if (i1==i2) return false;
@@ -186,10 +192,14 @@ namespace Dmrg {
 			bool connected(size_t i1,size_t i2) const
 			{
 				if (i1==i2) return false;
+
 				switch (geometryKind_) {
 					case GeometryDirectionType::CHAIN:
 						return neighbors(i1,i2);
 						break;
+					case GeometryDirectionType::BATHEDCLUSTER:
+						if (connectedBathLadder(i1,i2)) return true;
+						// no break
 					case GeometryDirectionType::LADDERX:
 					case GeometryDirectionType::LADDER:
 						size_t c1 = i1/leg_;
@@ -213,6 +223,8 @@ namespace Dmrg {
 						return "ladderx";
 					case GeometryDirectionType::LADDER:
 						return "ladder";
+					case GeometryDirectionType::BATHEDCLUSTER:
+						return "bathedcluster";
 					default:
 						throw std::runtime_error("label(): Unknown geometry\n");
 						return "unknown";
@@ -248,6 +260,7 @@ namespace Dmrg {
 				if (s=="chain") x=GeometryDirectionType::CHAIN;
 				else if (s=="ladder") x=GeometryDirectionType::LADDER;
 				else if (s=="ladderx") x=GeometryDirectionType::LADDERX;
+				else if (s=="bathedcluster") x=GeometryDirectionType::BATHEDCLUSTER;
 				else throw std::runtime_error("unknown geometry\n");
 				return x;
 			}
@@ -257,6 +270,9 @@ namespace Dmrg {
 				switch (geometryKind_) {
 					case GeometryDirectionType::CHAIN:
 						return GeometryDirectionType::DIRECTION_X;	
+					case GeometryDirectionType::BATHEDCLUSTER:
+						if (connectedBathLadder(i1,i2)) return GeometryDirectionType::DIRECTION_BATH;
+						// no break here
 					case GeometryDirectionType::LADDER:
 						if (sameColumn(i1,i2)) return GeometryDirectionType::DIRECTION_Y;
 						return GeometryDirectionType::DIRECTION_X;
@@ -294,9 +310,14 @@ namespace Dmrg {
 			bool fringe(size_t i,size_t smax,size_t emin) const
 			{
 				bool a,b;
+
 				switch (geometryKind_) {
 					case GeometryDirectionType::CHAIN:
 						return (i==smax || i==emin);
+					case GeometryDirectionType::BATHEDCLUSTER:
+						if (getClusterSite(i)>=0) return false; // no bath site is ever fringe
+						fringeBathLadder(i,smax,emin);
+						// no break here
 					case GeometryDirectionType::LADDER:
 						a = (i<emin && i>=smax-1);
 						b = (i>smax && i<=emin+1);
@@ -327,8 +348,98 @@ namespace Dmrg {
 				throw std::runtime_error("Unknown geometry\n");
 			}
 			
+			// are sites i1 and site i2 connected thru the bath?
+			bool connectedBathLadder(size_t& i1,size_t& i2) const
+			{
+				size_t middle = linSize_/2;
+				size_t clustersize = linSize_/(1+bathSitesPerSite_);
+				size_t totalBathSites = clustersize*bathSitesPerSite_;
+				size_t ismall = (i1<i2) ? i1 : i2;
+				size_t ibig = (i1<i2) ? i2 : i1;
+				size_t ii1 = (i1<middle) ? i1 : i1-totalBathSites;
+				size_t ii2 = (i2<middle) ? i2 : i2-totalBathSites;
+				i1 = ii1; i2=ii2;
+				if (ismall<middle && ibig>=middle) return false;
+				if (ismall<middle) {
+					// only chance is that ismall is in the cluster and ibig in in the bath:
+					int x = getClusterSite(ibig);
+					if (x<0) return false; // both in the cluster
+					if (size_t(x)==ismall) return true;
+					return false;
+				}
+				// ismall>=middle
+				// only chance is that ismall is in the bath and ibig in in the cluster:
+				int x = getClusterSite(ismall);
+				if (x<0) return false;
+				if (size_t(x)==ibig) return true;
+				return false;
+			}
+
+			void fringeBathLadder(size_t& i,size_t& smax,size_t& emin) const
+			{
+				size_t middle = linSize_/2;
+				size_t clustersize = linSize_/(1+bathSitesPerSite_);
+				size_t totalBathSites = clustersize*bathSitesPerSite_;
+				size_t ii = (i<middle) ? i : i-totalBathSites;
+				i = ii;
+				// find the maximum *cluster* site that is less or equal smax:
+				size_t newsmax = 0;
+				for (size_t i=0;i<=smax;i++) {
+					int x = getClusterSite(i);
+					if (x<0) { // i is in the cluster
+						if (i>newsmax) newsmax=i;
+					} else { // i is in the bath with cluster site x:
+						if (size_t(x)>newsmax) newsmax=x;
+					}
+				}
+				smax = (newsmax<middle) ? newsmax : newsmax-totalBathSites;
+
+				// find the minimum *cluster* site that is greater or equal emin:
+				size_t newemin = linSize_;
+				for (size_t i=0;i<=emin;i++) {
+					int x = getClusterSite(i);
+					if (x<0) { // i is in the cluster
+						if (i<newemin) newemin=i;
+					} else { // i is in the bath with cluster site x:
+						if (size_t(x)<newemin) newemin=x;
+					}
+				}
+				emin = (newemin<middle) ? newemin : newemin-totalBathSites;
+
+			}
+
+			// if i is in the cluster return -1
+			// else return the corresponding cluster site
+			int getClusterSite(size_t i) const
+			{
+				size_t middle = linSize_/2;
+				size_t c = linSize_/(1+bathSitesPerSite_); // clustersize
+				if (i<c/2 || i>=linSize_-c/2) return -1;
+				// ok, i is in the bath:
+				int s = -1;
+				if (i<middle) {
+					//find s such that i = s + c/2*x for some x=1,..bathSitesPerSite
+					for (size_t x=1;x<=bathSitesPerSite_;x++) {
+						if (i<c/2*x) continue;
+						s = i-c/2*x;
+						if (size_t(s)>=c/2) continue;
+						else break;
+					}
+					return s;
+				}
+				// i>=middle
+				//find s such that s = i + c/2*x for some x=1,..bathSitesPerSite
+				for (size_t x=1;x<=bathSitesPerSite_;x++) {
+					s = i + c/2*x;
+					if (size_t(s)<linSize_-c/2) continue;
+					else break;
+				}
+				return s;
+			}
+
 			size_t linSize_;
 			size_t leg_;
+			size_t bathSitesPerSite_;
 			size_t edof_;
 			size_t geometryKind_;
 			std::vector<GeometryDirectionType> directions_;
