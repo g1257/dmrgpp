@@ -140,14 +140,17 @@ namespace Dmrg {
 				}
 				
 				cachedValues_.resize(linSize_*linSize_*edof_*edof_);
-				
+
 				for (size_t i1=0;i1<linSize_;i1++)
 					for (size_t i2=0;i2<linSize_;i2++) 
 						for (size_t edof1=0;edof1<edof_;edof1++)
 							for (size_t edof2=0;edof2<edof_;edof2++)
 								cachedValues_[pack(i1,edof1,i2,edof2)]=
 									calcValue(i1,edof1,i2,edof2);
-				//std::cerr<<cachedValues_;
+
+				/*std::cerr<<"Cached values:\n";
+				std::cerr<<cachedValues_;
+				std::cerr<<"-----------\n";*/
 			}
 			
 			const RealType& operator()(size_t i1,size_t edof1,size_t i2,size_t edof2) const
@@ -192,6 +195,8 @@ namespace Dmrg {
 			bool connected(size_t i1,size_t i2) const
 			{
 				if (i1==i2) return false;
+				size_t j1 = i1;
+				size_t j2 = i2;
 
 				switch (geometryKind_) {
 					case GeometryDirectionType::CHAIN:
@@ -199,6 +204,8 @@ namespace Dmrg {
 						break;
 					case GeometryDirectionType::BATHEDCLUSTER:
 						if (connectedBathLadder(i1,i2)) return true;
+						// only chance of connection now is that both are cluster sites:
+						if (getClusterSite(j1)>=0 || getClusterSite(j2)>=0) return false;
 						// no break
 					case GeometryDirectionType::LADDERX:
 					case GeometryDirectionType::LADDER:
