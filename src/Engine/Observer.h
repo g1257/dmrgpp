@@ -1,6 +1,6 @@
 // BEGIN LICENSE BLOCK
 /*
-Copyright © 2008 , UT-Battelle, LLC
+Copyright ï¿½ 2008 , UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 1.0.0]
@@ -241,7 +241,7 @@ namespace Dmrg {
 			
 			const VectorWithOffsetType& src = helper_.timeVector();
 			//const std::string& label,
-			return onePointInternal<ApplyOperatorType>(site,A,src);
+			return onePointInternal<ApplyOperatorType>(site,A,src,src);
 		}
 
 		template<typename ApplyOperatorType>
@@ -250,22 +250,33 @@ namespace Dmrg {
 			size_t pnter=site;
 			helper_.setPointer(pnter);
 			const VectorWithOffsetType& src = helper_.wavefunction();
-			return onePointInternal<ApplyOperatorType>(site,A,src);
-		}   
+			return onePointInternal<ApplyOperatorType>(site,A,src,src);
+		}
 
+		template<typename ApplyOperatorType>
+		FieldType onePointMixed(size_t site,const typename ApplyOperatorType::OperatorType& A)
+		{
+			size_t pnter=site;
+			helper_.setPointer(pnter);
+			const VectorWithOffsetType& src1 = helper_.timeVector();
+			const VectorWithOffsetType& src2 = helper_.wavefunction();
+			return onePointInternal<ApplyOperatorType>(site,A,src1,src2);
+		}
+
+		private:
 
 		template<typename ApplyOperatorType>
 		FieldType onePointInternal(size_t site,const typename ApplyOperatorType::OperatorType& A,
-				const VectorWithOffsetType& src)
+				const VectorWithOffsetType& src1,const VectorWithOffsetType& src2)
 		{
 			
 			ApplyOperatorType applyOpLocal1(helper_.basisS(),helper_.basisE(),helper_.basisSE());
 			VectorWithOffsetType dest;
-			applyOpLocal1(dest,src,A,helper_.fermionicSign(),helper_.direction());
+			applyOpLocal1(dest,src1,A,helper_.fermionicSign(),helper_.direction());
 				
 			FieldType sum = static_cast<FieldType>(0.0);
 			const VectorWithOffsetType& v1 = dest;
-			const VectorWithOffsetType& v2 = src;
+			const VectorWithOffsetType& v2 = src2;
 			for (size_t ii=0;ii<v1.sectors();ii++) {
 				size_t i = v1.sector(ii);
 				for (size_t jj=0;jj<v1.sectors();jj++) {
@@ -279,8 +290,6 @@ namespace Dmrg {
 			return sum;
 			//std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_<<" "<<label<<std::norm(src)<<" "<<std::norm(dest)<<"\n";
 		}
-
-	private:
 
 		template<typename SomeModelType>
 		FieldType fourPointDelta(size_t i,size_t j,const std::vector<size_t>& gammas,const SomeModelType& model)

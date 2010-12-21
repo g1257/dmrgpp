@@ -324,11 +324,11 @@ namespace Dmrg {
 			{
 				size_t site = block[0];
 				std::cerr<<"-------------&*&*&* Cocoon output starts\n";
-				test(psi_,direction,"<PSI|A|PSI>",site);
+				test(psi_,psi_,direction,"<PSI|A|PSI>",site);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
-					test(targetVectors_[j],direction,s,site);
+					test(targetVectors_[j],psi_,direction,s,site);
 				}
 				std::cerr<<"-------------&*&*&* Cocoon output ends\n";
 			}
@@ -642,7 +642,8 @@ namespace Dmrg {
 			}
 
 			void test(	
-					const VectorWithOffsetType& src,
+					const VectorWithOffsetType& src1,
+					const VectorWithOffsetType& src2,
 					size_t systemOrEnviron,
 				 	const std::string& label,
 					size_t site) const
@@ -650,27 +651,31 @@ namespace Dmrg {
 				VectorWithOffsetType dest;
 				OperatorType A = tstStruct_.aOperators[0];
 				CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
-				CrsMatrix<ComplexType> tmpCt;
-				transposeConjugate(tmpCt,tmpC);
-				multiply(A.data,tmpCt,tmpC);
-				A.fermionSign = 1;
+				//std::cerr<<tmpC;
+				//throw std::runtime_error("testing\n");
+				//CrsMatrix<ComplexType> tmpCt;
+				//transposeConjugate(tmpCt,tmpC);
+				//transposeConjugate(A.data,tmpC);
+				//multiply(A.data,tmpCt,tmpC);
+				A.data = tmpC;
+				A.fermionSign = -1;
 				//A.data = tmpC;
 				FermionSign fs(basisS_,tstStruct_.electrons);
-				applyOpLocal_(dest,src,A,fs,systemOrEnviron);
+				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
 				ComplexType sum = 0;
 				for (size_t ii=0;ii<dest.sectors();ii++) {
 					size_t i = dest.sector(ii);
 					for (size_t jj=0;jj<dest.sectors();jj++) {
-						size_t j = src.sector(jj);
+						size_t j = src2.sector(jj);
 						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
 						size_t offset = dest.offset(i);
 						for (size_t k=0;k<dest.effectiveSize(i);k++) 
-							sum+= dest[k+offset] * conj(src[k+offset]);
+							sum+= dest[k+offset] * conj(src2[k+offset]);
 					}
 				}
 				std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_;
-				std::cerr<<" "<<label<<std::norm(src)<<" "<<std::norm(dest)<<"\n";
+				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
 			}
 
 

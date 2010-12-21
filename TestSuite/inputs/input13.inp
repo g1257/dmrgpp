@@ -12,11 +12,13 @@ ConnectorsBath 1 0.5
 hubbardU	8 0 0 0 0 0 0 0 0 
 potentialV     16 0 0 0 0 0 0 0 0 
 		  0 0 0 0 0 0 0 0
-SolverOptions=hasQuantumNumbers,nowft,useSu2Symmetry,
+SolverOptions=hasQuantumNumbers,wft,
 Version=264e71039cc5a47c6f1f375f2f9baaffd94e94fa
 OutputFile=data13.txt
-InfiniteLoopKeptStates=100
-FiniteLoops 4  3 100 0 -3 100 0 -3 100 0 3 100 0 
+InfiniteLoopKeptStates=256
+FiniteLoops 10 3 300 0 -3 300 0 -3 400 0 3 300 0
+	       3 300 0 -3 300 0 -3 300 0 3 400 1
+	       3 400 1 -1 400 1 
 TargetQuantumNumbers 3 0.25 0.25 0
 
    
