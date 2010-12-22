@@ -93,7 +93,7 @@ namespace Dmrg {
 			typedef std::vector<size_t> BlockType;
 
 			template<typename IoInputter>
-			Geometry(IoInputter& io)
+			Geometry(IoInputter& io,bool debug=false)
 			{
 				int x;
 				io.readline(x,"TotalNumberOfSites=");
@@ -106,7 +106,7 @@ namespace Dmrg {
 				if (x<0) throw std::runtime_error("NumberOfTerms<0 is an error\n");
 
 				for (size_t i=0;i<size_t(x);i++) {
-					GeometryTermType t(io,i,linSize_);
+					GeometryTermType t(io,i,linSize_,debug);
 					terms_.push_back(t);
 				}
 			}

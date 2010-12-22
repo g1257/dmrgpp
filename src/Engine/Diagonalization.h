@@ -125,7 +125,8 @@ namespace Dmrg {
 			io_(io),
 			progress_("Diagonalization",0),
 			quantumSector_(quantumSector),
-			waveFunctionTransformation_(waveFunctionTransformation)
+			waveFunctionTransformation_(waveFunctionTransformation),
+			oldEnergy_(0)
 		{}
 		
 		RealType operator()(TargettingType& target,size_t direction,const BlockType& block,size_t loopIndex=0,
@@ -134,7 +135,7 @@ namespace Dmrg {
 			const BasisType& pSE= target.basisSE();
 			const BasisWithOperatorsType& pSprime= target.basisS();
 			const BasisWithOperatorsType& pEprime= target.basisE();
-			
+			bool onlyWft = ((parameters_.finiteLoop[loopIndex].saveOption & 2)>0) ? true : false;
 			
 			std::ostringstream msg;
 			msg<<"Setting up Hamiltonian basis of size="<<pSE.size();
@@ -194,8 +195,13 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				TargetVectorType initialVectorBySector(weights[i]);
 				initialVector.extract(initialVectorBySector,i);
-				diagonaliseOneBlock(i,tmpVec,gsEnergy,pSprime,pEprime,pSE,initialVectorBySector);
-				vecSaved[i] = tmpVec;
+				if (onlyWft) {
+					vecSaved[i]=initialVectorBySector;
+					gsEnergy = oldEnergy_;
+				} else {
+					diagonaliseOneBlock(i,tmpVec,gsEnergy,pSprime,pEprime,pSE,initialVectorBySector);
+					vecSaved[i] = tmpVec;
+				}
 				energySaved[i]=gsEnergy;
 			}
 				
@@ -230,6 +236,7 @@ namespace Dmrg {
 				msg<<"#Energy="<<gsEnergy;
 				if (counter>1) msg<<" attention: found "<<counter<<" matrix blocks";
 				io_.printline(msg);
+				oldEnergy_=gsEnergy;
 			}
 			
 			// time step targetting: 
@@ -299,7 +306,6 @@ namespace Dmrg {
 			typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			size_t mode = LanczosSolverType::WITH_INFO;
 			if (parameters_.options.find("lanczosdebug")!=std::string::npos) mode =  LanczosSolverType::DEBUG;
-					
 			LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,concurrency_.rank(),mode);
 			
 			tmpVec.resize(lanczosHelper.rank());
@@ -325,6 +331,7 @@ namespace Dmrg {
 		ProgressIndicator progress_;
 		const size_t& quantumSector_; // this needs to be a reference since DmrgSolver will change it
 		WaveFunctionTransformationType& waveFunctionTransformation_;
+		double oldEnergy_;
 	}; // class Diagonalization
 } // namespace Dmrg 
 

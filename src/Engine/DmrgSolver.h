@@ -352,7 +352,7 @@ namespace Dmrg {
 			
 			int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 			size_t keptStates = parameters_.finiteLoop[loopIndex].keptStates;
-			int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
+			int saveOption = (parameters_.finiteLoop[loopIndex].saveOption & 1);
 			RealType gsEnergy=0;
 			
 			size_t direction=EXPAND_SYSTEM;

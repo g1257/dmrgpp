@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_DIR_H
 
 #include "Utils.h"
+#include "LadderBath.h"
 
 namespace Dmrg {
 	
@@ -90,13 +91,14 @@ namespace Dmrg {
 			typedef psimag::Matrix<RealType> MatrixType;
 			enum {NUMBERS,MATRICES};
 		public:
-			enum {DIRECTION_X=0,DIRECTION_Y=1,DIRECTION_XPY=2,DIRECTION_XMY=3,DIRECTION_BATH=2};
+			typedef LadderBath LadderBathType;
+			enum {DIRECTION_X=LadderBathType::DIRECTION_X,DIRECTION_Y=LadderBathType::DIRECTION_Y,DIRECTION_XPY,DIRECTION_XMY};
 			enum {CHAIN,LADDER,LADDERX,BATHEDCLUSTER};
 			
 			template<typename IoInputter>
 			GeometryDirection(IoInputter& io,size_t dirId,size_t linSize,size_t edof,
-					  size_t geometryKind,size_t leg,const std::string& options,size_t bathSitesPerSite)
-			: dirId_(dirId),linSize_(linSize),geometryKind_(geometryKind),leg_(leg),bathSitesPerSite_(bathSitesPerSite)
+					  size_t geometryKind,size_t leg,const std::string& options, LadderBathType& ladderBath)
+			: dirId_(dirId),linSize_(linSize),geometryKind_(geometryKind),leg_(leg),ladderBath_(ladderBath)
 			{
 				size_t n = getVectorSize(options);
 				//std::cerr<<"vectorsize="<<n<<"\n";
@@ -143,6 +145,18 @@ namespace Dmrg {
 				return false;
 			}
 
+			void operator=(const GeometryDirection<RealType>& g)
+			{
+				dirId_=g.dirId_;
+				linSize_=g.linSize_;
+				geometryKind_=g.geometryKind_;
+				leg_=g.leg_;
+				ladderBath_=g.ladderBath_;
+				dataType_=g.dataType_;
+				dataNumbers_=g.dataNumbers_;
+				dataMatrices_=g.dataMatrices_;
+			}
+
 			template<typename RealType_>
 			friend std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType_>& gd);
 
@@ -155,6 +169,8 @@ namespace Dmrg {
 						return imin;
 					case DIRECTION_Y:
 						return imin-imin/leg_;
+					//case DIRECTION_BATH: // CAUTION: equal to DIRECTION_XPY
+					//	if (geometryKind_==BATHEDCLUSTER) return handleLadderBath(i,j);
 					case DIRECTION_XPY: // only checked for leg_=2
 						return (imin-1)/leg_;
 					case DIRECTION_XMY:// only checked for leg_=2
@@ -167,14 +183,10 @@ namespace Dmrg {
 			{
 				if (s.find("ConstantValues")!=std::string::npos)
 					return 1;
-				
-				size_t clusterSize = linSize_/(1+bathSitesPerSite_);
 
 				switch (geometryKind_) {
 					case BATHEDCLUSTER:
-						if (dirId_==DIRECTION_X) return clusterSize-leg_;
-						else if (dirId_==DIRECTION_Y) return clusterSize - clusterSize/leg_;
-						else return bathSitesPerSite_*clusterSize;
+						return ladderBath_.getVectorSize(leg_,dirId_);
 					case CHAIN:
 						if (dirId_!=DIRECTION_X)
 							throw std::runtime_error("Chain must have direction 0\n");
@@ -192,11 +204,12 @@ namespace Dmrg {
 				throw std::runtime_error("Unknown geometry\n");
 			}
 			
+			// CAUTION: IF YOU ADD VARIABLES, ADD THEM ALSO TO OPERTOR= ABOVE!!
 			size_t dirId_;
 			size_t linSize_;
 			size_t geometryKind_;
 			size_t leg_;
-			size_t bathSitesPerSite_;
+			 LadderBathType& ladderBath_;
 			size_t dataType_;
 			//size_t defaultHandle_;
 			std::vector<RealType> dataNumbers_;

@@ -146,15 +146,16 @@ namespace Dmrg {
 				
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
+				RealType factor = 1.;
 				size_t n = times_.size();
 				for (size_t i=0;i<n;i++) {
 					times_[i] = i*tau/(n-1);
-					weight_[i] = 1.0/(n+2);
+					weight_[i] = factor/(n+2);
 					sum += weight_[i];
 				}
 				sum -= weight_[0];
 				sum -= weight_[n-1];
-				weight_[0] = weight_[n-1] = 2.0/(n+2);
+				weight_[0] = weight_[n-1] = 2*factor/(n+2);
 				sum += weight_[n-1];
 				sum += weight_[0];
 				
@@ -655,9 +656,9 @@ namespace Dmrg {
 				//throw std::runtime_error("testing\n");
 				//CrsMatrix<ComplexType> tmpCt;
 				//transposeConjugate(tmpCt,tmpC);
-				//transposeConjugate(A.data,tmpC);
+				transposeConjugate(A.data,tmpC);
 				//multiply(A.data,tmpCt,tmpC);
-				A.data = tmpC;
+				//A.data = tmpC;
 				A.fermionSign = -1;
 				//A.data = tmpC;
 				FermionSign fs(basisS_,tstStruct_.electrons);
