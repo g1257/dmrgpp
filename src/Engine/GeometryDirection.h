@@ -163,14 +163,18 @@ namespace Dmrg {
 		private:
 			size_t handle(size_t i,size_t j) const
 			{
+				if (geometryKind_==BATHEDCLUSTER) {
+					bool bypass = false;
+					size_t h = ladderBath_.handle(bypass,i,j);
+					if (!bypass) return h;
+				}
+
 				size_t imin = (i<j) ? i : j;
 				switch(dirId_) {
 					case DIRECTION_X:
 						return imin;
 					case DIRECTION_Y:
 						return imin-imin/leg_;
-					//case DIRECTION_BATH: // CAUTION: equal to DIRECTION_XPY
-					//	if (geometryKind_==BATHEDCLUSTER) return handleLadderBath(i,j);
 					case DIRECTION_XPY: // only checked for leg_=2
 						return (imin-1)/leg_;
 					case DIRECTION_XMY:// only checked for leg_=2

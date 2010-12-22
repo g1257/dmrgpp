@@ -1,24 +1,24 @@
-TotalNumberOfSites=8 
+TotalNumberOfSites=12 
 NumberOfTerms=1
 DegreesOfFreedom=1
 GeometryKind=bathedcluster
-GeometryOptions=none
+GeometryOptions=ConstantValues
 LadderLeg=2
-BathSitesPerSite=1
-ConnectorsX 2 1.0 1.0
-ConnectorsY 2 0.8 0.8
-ConnectorsBath 4 0.3 0.3 0.3 0.3
+BathSitesPerSite=2
+ConnectorsX 1 1.0
+ConnectorsY 1 0.8
+ConnectorsBath 1 0.5
 
-hubbardU	8 0 0 0 0 0 0 0 0 
-potentialV     16 0 0 0 0 0 0 0 0 
-		  0 0 0 0 0 0 0 0
+hubbardU	12 0 0 0 0 0 0 0 0 0 0 0 0 
+potentialV     24 0 0 0 0 0 0 0 0 0 0 0 0
+		  0 0 0 0 0 0 0 0 0 0 0 0
 SolverOptions=hasQuantumNumbers,wft,TimeStepTargetting
 Version=264e71039cc5a47c6f1f375f2f9baaffd94e94fa
 OutputFile=data16.txt
 InfiniteLoopKeptStates=256
-FiniteLoops 12 3 256 0 -3 256 0 -3 256 0 3 256 0
-	       3 256 0 -3 256 0 -3 256 0 3 256 0
-	       3 256 0 -3 256 0 -3 256 0 3 256 0
+FiniteLoops 12 5 256 0 -5 256 0 -5 256 0 5 256 0
+	       5 256 0 -5 256 0 -5 256 0 5 256 0
+	       5 256 0 -5 256 0 -5 256 0 5 256 0
 TargetQuantumNumbers 3 0.25 0.25 0
 TSPFilename=tst16.txt
 TSPTau=0.1

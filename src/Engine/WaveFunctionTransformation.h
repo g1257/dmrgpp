@@ -404,7 +404,14 @@ namespace Dmrg {
 // 				counter_++;
 				//throw std::runtime_error("WFT::beforeWft(): Can't apply WFT\n");
 				//return;
-				
+				if (wsStack_.size()>=1) {
+					dmrgWave_.ws=wsStack_.top();
+					//weStack_.pop();
+					//std::cerr<<"CHANGED-COUNTER0 We taken from stack\n";
+				} else {
+					std::cerr<<"PUSHING-COUNTER0 STACK ERROR E\n";
+					throw std::runtime_error("System Stack is empty\n");
+				}
 			}
 		}
 		

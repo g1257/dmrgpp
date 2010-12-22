@@ -118,7 +118,7 @@ namespace Dmrg {
 				bypass = false;
 				if (connectedBathLadder(i1,i2)) return true;
 				// only chance of connection now is that both are cluster sites:
-				if (getClusterSite(j1)>=0 || getClusterSite(j2)>=0) return false;
+				if (getClusterSite(j1).first>=0 || getClusterSite(j2).first>=0) return false;
 				bypass = true;
 				return true; // bogus
 			}
@@ -134,10 +134,40 @@ namespace Dmrg {
 			bool fringe(bool& bypass,size_t& i,size_t& smax,size_t& emin) const
 			{
 				bypass = false;
-				if (getClusterSite(i)>=0) return false; // no bath site is ever fringe
+				if (getClusterSite(i).first>=0) return false; // no bath site is ever fringe
 				bypass = true;
 				fringeBathLadder(i,smax,emin);
 				return true; //bogus
+			}
+
+			size_t handle(bool& bypass,size_t& i1,size_t& i2) const
+			{
+				bypass = false;
+				size_t j1=i1;
+				size_t j2=i2;
+				if (connectedBathLadder(i1,i2)) return handleBathLadder(j1,j2,i1,i2);
+				bypass = true;
+				return 0; //bogus
+			}
+
+		private:
+
+			size_t handleBathLadder(size_t i1,size_t i2,size_t v1,size_t v2) const
+			{
+				std::pair<int,int> cb1 = getClusterSite(i1);
+				std::pair<int,int> cb2 = getClusterSite(i2);
+				size_t cp = 0; // cluster point ("ladderized")
+				size_t bp = 0; // bath point order
+				if (cb1.first<0) { // i1 is in the cluster
+					cp = v1; // "ladderization" of i1
+					if (cb2.second<0) throw std::runtime_error("handleBathLadder: Internal Error 1\n");
+					bp = (size_t) cb2.second;
+				} else { // i2 is in the cluster
+					cp = v2; // "ladderization" of i2
+					if (cb1.second<0) throw std::runtime_error("handleBathLadder: Internal Error 2\n");
+					bp = (size_t) cb1.second;
+				}
+				return cp + bp*clusterSize_;
 			}
 
 			// are sites i1 and site i2 connected thru the bath?
@@ -154,14 +184,14 @@ namespace Dmrg {
 				if (ismall<middle && ibig>=middle) return false;
 				if (ismall<middle) {
 					// only chance is that ismall is in the cluster and ibig in in the bath:
-					int x = getClusterSite(ibig);
+					int x = getClusterSite(ibig).first;
 					if (x<0) return false; // both in the cluster
 					if (size_t(x)==ismall) return true;
 					return false;
 				}
 				// ismall>=middle
 				// only chance is that ismall is in the bath and ibig in in the cluster:
-				int x = getClusterSite(ismall);
+				int x = getClusterSite(ismall).first;
 				if (x<0) return false;
 				if (size_t(x)==ibig) return true;
 				return false;
@@ -177,7 +207,7 @@ namespace Dmrg {
 				// find the maximum *cluster* site that is less or equal smax:
 				size_t newsmax = 0;
 				for (size_t i=0;i<=smax;i++) {
-					int x = getClusterSite(i);
+					int x = getClusterSite(i).first;
 					if (x<0) { // i is in the cluster
 						if (i>newsmax) newsmax=i;
 					} else { // i is in the bath with cluster site x:
@@ -189,7 +219,7 @@ namespace Dmrg {
 				// find the minimum *cluster* site that is greater or equal emin:
 				size_t newemin = linSize_;
 				for (size_t i=0;i<=emin;i++) {
-					int x = getClusterSite(i);
+					int x = getClusterSite(i).first;
 					if (x<0) { // i is in the cluster
 						if (i<newemin) newemin=i;
 					} else { // i is in the bath with cluster site x:
@@ -200,36 +230,48 @@ namespace Dmrg {
 
 			}
 
-			// if i is in the cluster return -1
-			// else return the corresponding cluster site
-			int getClusterSite(size_t i) const
+			// if i is in the cluster return the pair (-1,-1)
+			// else return the corresponding cluster site c and the number
+			// of this bath site as a pair (c,b)
+			std::pair<int,int> getClusterSite(size_t i) const
 			{
 				size_t middle = linSize_/2;
 				size_t c = linSize_/(1+bathSitesPerSite_); // clustersize
-				if (i<c/2 || i>=linSize_-c/2) return -1;
+				if (i<c/2 || i>=linSize_-c/2 || bathSitesPerSite_==0) return std::pair<int,int>(-1,-1);
 				// ok, i is in the bath:
 				int s = -1;
 				if (i<middle) {
 					//find s such that i = s + c/2*x for some x=1,..bathSitesPerSite
-					for (size_t x=1;x<=bathSitesPerSite_;x++) {
+					size_t x = 1;
+					for (;x<=bathSitesPerSite_;x++) {
 						if (i<c/2*x) continue;
 						s = i-c/2*x;
-						if (size_t(s)>=c/2) continue;
-						else break;
+						if (size_t(s)>=c/2) {
+							continue;
+						} else {
+							x++;
+							break;
+						}
 					}
-					return s;
+					if (x<2) throw std::runtime_error("LadderBath: getClusterSite\n");
+					return std::pair<int,int>(s,x-2);
 				}
 				// i>=middle
 				//find s such that s = i + c/2*x for some x=1,..bathSitesPerSite
-				for (size_t x=1;x<=bathSitesPerSite_;x++) {
+				size_t x = 1;
+				for (;x<=bathSitesPerSite_;x++) {
 					s = i + c/2*x;
-					if (size_t(s)<linSize_-c/2) continue;
-					else break;
+					if (size_t(s)<linSize_-c/2) {
+						continue;
+					} else {
+						x++;
+						break;
+					}
 				}
-				return s;
+				if (x<2) throw std::runtime_error("LadderBath: getClusterSite\n");
+				return std::pair<int,int>(s,x-2);
 			}
 
-		private:
 			size_t linSize_;
 			size_t bathSitesPerSite_;
 			size_t clusterSize_;
