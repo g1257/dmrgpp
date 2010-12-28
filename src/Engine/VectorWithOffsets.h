@@ -91,19 +91,19 @@ namespace Dmrg {
 	template<typename FieldType>
 	class VectorWithOffsets {
 			typedef VectorWithOffsets<FieldType> ThisType;
+			static FieldType const zero_;
 		public:
 			typedef FieldType value_type;
 			typedef std::pair<size_t,size_t> PairType;
 			typedef std::vector<FieldType> VectorType;
 			
-			VectorWithOffsets() : progress_("VectorWithOffsets",0),zero_(0),size_(0) { }
+			VectorWithOffsets() : progress_("VectorWithOffsets",0),size_(0) { }
 			
 			template<typename SomeBasisType>
 			VectorWithOffsets(const std::vector<size_t>& weights,
 					 const SomeBasisType& someBasis)
 				: 
 				progress_("VectorWithOffsets",0),
-				zero_(0),
 				size_(someBasis.size()),
 				data_(weights.size()),
 				offsets_(weights.size()+1)
@@ -257,14 +257,14 @@ namespace Dmrg {
 				throw std::runtime_error("VectorWithOffsets can't build itself dynamically yet (sorry!)\n");
 			}
 			
-			ThisType& operator= (const ThisType& f)
+			/*ThisType& operator= (const ThisType& f)
 			{
 				size_=f.size_;
 				data_=f.data_;
 				offsets_=f.offsets_;
 				nonzeroSectors_=f.nonzeroSectors_;
 				return *this;
-			}
+			}*/
 			
 			template<typename SparseVectorType>
 			void toSparse(SparseVectorType& sv) const
@@ -400,7 +400,6 @@ namespace Dmrg {
 			}
 			
 			ProgressIndicator progress_;
-			const FieldType zero_;
 			size_t size_;
 			std::vector<VectorType> data_;
 			std::vector<size_t> offsets_;
@@ -505,6 +504,9 @@ namespace Dmrg {
 		}
 		return w;
 	}
+
+	template<typename FieldType>
+	const FieldType VectorWithOffsets<FieldType>::zero_ = 0;
 }
 /*@}*/
 #endif

@@ -97,8 +97,8 @@ namespace Dmrg {
 			
 			template<typename IoInputter>
 			GeometryDirection(IoInputter& io,size_t dirId,size_t linSize,size_t edof,
-					  size_t geometryKind,size_t leg,const std::string& options, LadderBathType& ladderBath)
-			: dirId_(dirId),linSize_(linSize),geometryKind_(geometryKind),leg_(leg),ladderBath_(ladderBath)
+					  size_t geometryKind,size_t leg,const std::string& options,const LadderBathType& ladderBath)
+			: dirId_(dirId),linSize_(linSize),geometryKind_(geometryKind),leg_(leg),ladderBath_(&ladderBath)
 			{
 				size_t n = getVectorSize(options);
 				//std::cerr<<"vectorsize="<<n<<"\n";
@@ -145,17 +145,18 @@ namespace Dmrg {
 				return false;
 			}
 
-			void operator=(const GeometryDirection<RealType>& g)
-			{
-				dirId_=g.dirId_;
-				linSize_=g.linSize_;
-				geometryKind_=g.geometryKind_;
-				leg_=g.leg_;
-				ladderBath_=g.ladderBath_;
-				dataType_=g.dataType_;
-				dataNumbers_=g.dataNumbers_;
-				dataMatrices_=g.dataMatrices_;
-			}
+//			GeometryDirection<RealType>& operator=(const GeometryDirection<RealType>& g)
+//			{
+//				dirId_=g.dirId_;
+//				linSize_=g.linSize_;
+//				geometryKind_=g.geometryKind_;
+//				leg_=g.leg_;
+//				ladderBath_=g.ladderBath_;
+//				dataType_=g.dataType_;
+//				dataNumbers_=g.dataNumbers_;
+//				dataMatrices_=g.dataMatrices_;
+//				return *this;
+//			}
 
 			template<typename RealType_>
 			friend std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType_>& gd);
@@ -165,7 +166,7 @@ namespace Dmrg {
 			{
 				if (geometryKind_==BATHEDCLUSTER) {
 					bool bypass = false;
-					size_t h = ladderBath_.handle(bypass,i,j);
+					size_t h = ladderBath_->handle(bypass,i,j);
 					if (!bypass) return h;
 				}
 
@@ -190,7 +191,7 @@ namespace Dmrg {
 
 				switch (geometryKind_) {
 					case BATHEDCLUSTER:
-						return ladderBath_.getVectorSize(leg_,dirId_);
+						return ladderBath_->getVectorSize(leg_,dirId_);
 					case CHAIN:
 						if (dirId_!=DIRECTION_X)
 							throw std::runtime_error("Chain must have direction 0\n");
@@ -208,12 +209,11 @@ namespace Dmrg {
 				throw std::runtime_error("Unknown geometry\n");
 			}
 			
-			// CAUTION: IF YOU ADD VARIABLES, ADD THEM ALSO TO OPERTOR= ABOVE!!
 			size_t dirId_;
 			size_t linSize_;
 			size_t geometryKind_;
 			size_t leg_;
-			 LadderBathType& ladderBath_;
+			const LadderBathType* ladderBath_; // arghh... if it's a reference then needs an explicit op=
 			size_t dataType_;
 			//size_t defaultHandle_;
 			std::vector<RealType> dataNumbers_;

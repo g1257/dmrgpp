@@ -137,7 +137,8 @@ namespace Dmrg {
 		
 		WaveFunctionTransformation() 
 			: isEnabled_(true),useSu2Symmetry_(BasisType::useSu2Symmetry()),
-				     stage_(INFINITE),counter_(0),doNextOne_(true),firstCall_(true),progress_("WaveFunctionTransformation",0)
+				     stage_(INFINITE),counter_(0),//doNextOne_(true),
+				     firstCall_(true),progress_("WaveFunctionTransformation",0)
 		{}
 
 		void init(size_t nk)
@@ -172,11 +173,11 @@ namespace Dmrg {
 			//if (m<0) allow = false; // isEnabled_=false;
 			
 			if (!isEnabled_ || !allow) return;
-			try {
+			//try {
 				beforeWft(pSprime,pEprime,pSE);
-			} catch (std::exception& e) {
-				doNextOne_=false;
-			}
+			//} catch (std::exception& e) {
+			//	doNextOne_=false;
+			//}
 			std::ostringstream msg;
 			msg<<"I'm ready to take passengers";
 			progress_.printline(msg,std::cout);
@@ -211,10 +212,10 @@ namespace Dmrg {
 				//} catch (std::exception& e) {
 				//	afterWft(pSprime,pEprime,pSE,m);
 				
-				if (!doNextOne_) {
+				/* if (!doNextOne_) {
 					createRandomVector(dest);
 					return;
-				}
+				}*/
 				RealType eps = 1e-6;
 				if (std::norm(src)<eps) throw std::runtime_error("src's norm is zero\n");
 				createVector(dest,src,pSprime,pEprime,pSE);
@@ -245,7 +246,7 @@ namespace Dmrg {
 			
 			if (!isEnabled_ || !allow) return;
 			afterWft(pSprime,pEprime,pSE); //,m);	
-			doNextOne_=true;
+			//doNextOne_=true;
 			std::ostringstream msg;
 			msg<<"No more passengers, please";
 			progress_.printline(msg,std::cout);
@@ -345,7 +346,7 @@ namespace Dmrg {
 		size_t sizeOfOneSiteHilbertSpace_;
 		size_t stage_;
 		size_t counter_;
-		bool doNextOne_;
+		//bool doNextOne_;
 		bool firstCall_;
 		ProgressIndicator progress_;
 		DmrgWaveStructure<BasisWithOperatorsType> dmrgWave_;

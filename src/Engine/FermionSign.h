@@ -119,7 +119,7 @@ namespace Dmrg {
 				io.read(signs_,"#FERMIONICSIGN");
 			}
 			
-			int operator()(size_t i,size_t f) const
+			int operator()(size_t i,int f) const
 			{
 				return (signs_[i]) ? f : 1;
 			}

@@ -146,7 +146,7 @@ namespace Dmrg {
 				
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
-				RealType factor = 1.;
+				RealType factor = 1.0;
 				size_t n = times_.size();
 				for (size_t i=0;i<n;i++) {
 					times_[i] = i*tau/(n-1);
@@ -654,11 +654,14 @@ namespace Dmrg {
 				CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
 				//std::cerr<<tmpC;
 				//throw std::runtime_error("testing\n");
-				//CrsMatrix<ComplexType> tmpCt;
+				CrsMatrix<ComplexType> tmpCt;
 				//transposeConjugate(tmpCt,tmpC);
-				transposeConjugate(A.data,tmpC);
+				//transposeConjugate(A.data,tmpC);
 				//multiply(A.data,tmpCt,tmpC);
-				//A.data = tmpC;
+				A.data = tmpC;
+				std::cerr<<"##########\n";
+				std::cerr<<A.data;
+				std::cerr<<"############\n";
 				A.fermionSign = -1;
 				//A.data = tmpC;
 				FermionSign fs(basisS_,tstStruct_.electrons);
@@ -667,12 +670,13 @@ namespace Dmrg {
 				ComplexType sum = 0;
 				for (size_t ii=0;ii<dest.sectors();ii++) {
 					size_t i = dest.sector(ii);
-					for (size_t jj=0;jj<dest.sectors();jj++) {
+					size_t offset1 = dest.offset(i);
+					for (size_t jj=0;jj<src2.sectors();jj++) {
 						size_t j = src2.sector(jj);
+						size_t offset2 = src2.offset(j);
 						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
-						size_t offset = dest.offset(i);
 						for (size_t k=0;k<dest.effectiveSize(i);k++) 
-							sum+= dest[k+offset] * conj(src2[k+offset]);
+							sum+= dest[k+offset1] * conj(src2[k+offset2]);
 					}
 				}
 				std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_;

@@ -133,9 +133,10 @@ namespace Dmrg {
 						ladderBath_.init(io);
 						break;
 				}
+				//directions_.resize(dirs);
 				for (size_t i=0;i<dirs;i++) {
-					GeometryDirectionType gd(io,i,linSize_,edof_,geometryKind_,leg_,gOptions,ladderBath_);
-					directions_.push_back(gd);
+					directions_.push_back(GeometryDirectionType(io,i,linSize_,edof_,geometryKind_,leg_,gOptions,ladderBath_));
+					//directions_.push_back(gd);
 				}
 				
 				cachedValues_.resize(linSize_*linSize_*edof_*edof_);
