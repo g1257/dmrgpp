@@ -81,200 +81,163 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LADDER_BATH_H
 #define LADDER_BATH_H
 
-#include "Utils.h"
+#include "GeometryBase.h"
+#include "Ladder.h"
 
 namespace Dmrg {
 	
-	class LadderBath {
+	class LadderBath : public GeometryBase {
+			typedef std::pair<int,int> PairType;
+			typedef Ladder LadderType;
 		public:
-			enum {DIRECTION_X,DIRECTION_Y,DIRECTION_BATH};
+			enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_BATH};
 
-			LadderBath(size_t linSize) : linSize_(linSize)
+			LadderBath(size_t linSize,size_t leg,size_t bathSitesPerSite) :
+				linSize_(linSize),bathSitesPerSite_(bathSitesPerSite),
+				clusterSize_(linSize_/(1+bathSitesPerSite_)),ladder_(clusterSize_,leg)
 			{
 			}
 
-			template<typename IoInputter>
-			void init(IoInputter& io)
+			virtual size_t getVectorSize(size_t dirId) const
 			{
-				int x = 0;
-				io.readline(x,"BathSitesPerSite=");
-				if (x<0) throw std::runtime_error("BathSitesPerSite<0 is an error\n");
-				bathSitesPerSite_ = x;
-				clusterSize_ = linSize_/(1+bathSitesPerSite_);
+				try {
+					ladder_.getVectorSize(dirId);
+				} catch (std::exception& e) {
+				}
+				return bathSitesPerSite_*clusterSize_;
 			}
 
-			size_t getVectorSize(size_t leg,size_t dirId) const
+			virtual bool connected(size_t i1,size_t i2) const
 			{
-				if (dirId==DIRECTION_X) return clusterSize_-leg;
-				else if (dirId==DIRECTION_Y) return clusterSize_ - clusterSize_/leg;
-				else return bathSitesPerSite_*clusterSize_;
-
+				if (i1==i2) return false;
+				int c1 = getClusterSite(i1).first;
+				int c2 = getClusterSite(i2).first;
+				//4 possibilites
+				// 1. both in the cluster
+				if (c1<0 && c2<0) return connectedInCluster(i1,i2);
+				// both in the bath:
+				if (c1>=0 && c2>=0) return false;
+				// cluster - bath
+				if (c1<0) {
+					return (size_t(c2)==i1) ? true : false;
+				}
+				// bath - cluster
+				return (size_t(c1)==i2) ? true : false;
 			}
 
-			bool connected(bool& bypass,size_t& i1,size_t& i2) const
+			// assumes i1 and i2 are connected
+			virtual size_t calcDir(size_t i1,size_t i2) const
 			{
-				size_t j1 = i1;
-				size_t j2 = i2;
-				bypass = false;
-				if (connectedBathLadder(i1,i2)) return true;
-				// only chance of connection now is that both are cluster sites:
-				if (getClusterSite(j1).first>=0 || getClusterSite(j2).first>=0) return false;
-				bypass = true;
-				return true; // bogus
+				int c1 = getClusterSite(i1).first;
+				int c2 = getClusterSite(i2).first;
+				// two possibilities
+				// 1. both in the cluster
+				if (c1<0 && c2<0) return calcDirInCluster(i1,i2);
+				// cluster - bath or bath cluster:
+				return DIRECTION_BATH;
 			}
 
-			size_t calcDir(bool& bypass,size_t& i1,size_t& i2) const
+			virtual bool fringe(size_t i,size_t smax,size_t emin) const
 			{
-				bypass = false;
-				if (connectedBathLadder(i1,i2)) return DIRECTION_BATH;
-				bypass = true;
-				return 0; // bogus
+				int c = getClusterSite(i).first;
+				if (c>=0) return false; // no bath site is ever fringe
+				return fringeInCluster(i,smax,emin);
 			}
 
-			bool fringe(bool& bypass,size_t& i,size_t& smax,size_t& emin) const
+			// assumes i1 and i2 are connected
+			virtual size_t handle(size_t i1,size_t i2) const
 			{
-				bypass = false;
-				if (getClusterSite(i).first>=0) return false; // no bath site is ever fringe
-				bypass = true;
-				fringeBathLadder(i,smax,emin);
-				return true; //bogus
+				PairType c1 = getClusterSite(i1);
+				PairType c2 = getClusterSite(i2);
+				// two possibilities
+				// 1. both in the cluster
+				if (c1.first<0 && c2.first<0) return handleInCluster(i1,i2);
+				// cluster - bath or bath cluster
+				PairType x =  (c1.first<0) ? c2 : c1;
+				if (x.first<0 || x.second<0) throw std::runtime_error("Internal error in handle\n");
+				size_t firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+				x.first -= firstClusterSite;
+
+				return x.first*bathSitesPerSite_+x.second;
 			}
 
-			size_t handle(bool& bypass,size_t& i1,size_t& i2) const
+			// siteNew2 is fringe in the environment
+			virtual size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
 			{
-				bypass = false;
-				size_t j1=i1;
-				size_t j2=i2;
-				if (connectedBathLadder(i1,i2)) return handleBathLadder(j1,j2,i1,i2);
-				bypass = true;
-				return 0; //bogus
+				throw std::runtime_error("Umhph, ouch, ayyayyayy, what?\n");
+			}
+
+			virtual std::string label() const
+			{
+				return "ladderbath";
 			}
 
 		private:
 
-			size_t handleBathLadder(size_t i1,size_t i2,size_t v1,size_t v2) const
-			{
-				std::pair<int,int> cb1 = getClusterSite(i1);
-				std::pair<int,int> cb2 = getClusterSite(i2);
-				size_t cp = 0; // cluster point ("ladderized")
-				size_t bp = 0; // bath point order
-				if (cb1.first<0) { // i1 is in the cluster
-					cp = v1; // "ladderization" of i1
-					if (cb2.second<0) throw std::runtime_error("handleBathLadder: Internal Error 1\n");
-					bp = (size_t) cb2.second;
-				} else { // i2 is in the cluster
-					cp = v2; // "ladderization" of i2
-					if (cb1.second<0) throw std::runtime_error("handleBathLadder: Internal Error 2\n");
-					bp = (size_t) cb1.second;
-				}
-				return cp + bp*clusterSize_;
-			}
-
-			// are sites i1 and site i2 connected thru the bath?
-			bool connectedBathLadder(size_t& i1,size_t& i2) const
-			{
-				size_t middle = linSize_/2;
-				size_t clustersize = linSize_/(1+bathSitesPerSite_);
-				size_t totalBathSites = clustersize*bathSitesPerSite_;
-				size_t ismall = (i1<i2) ? i1 : i2;
-				size_t ibig = (i1<i2) ? i2 : i1;
-				size_t ii1 = (i1<middle) ? i1 : i1-totalBathSites;
-				size_t ii2 = (i2<middle) ? i2 : i2-totalBathSites;
-				i1 = ii1; i2=ii2;
-				if (ismall<middle && ibig>=middle) return false;
-				if (ismall<middle) {
-					// only chance is that ismall is in the cluster and ibig in in the bath:
-					int x = getClusterSite(ibig).first;
-					if (x<0) return false; // both in the cluster
-					if (size_t(x)==ismall) return true;
-					return false;
-				}
-				// ismall>=middle
-				// only chance is that ismall is in the bath and ibig in in the cluster:
-				int x = getClusterSite(ismall).first;
-				if (x<0) return false;
-				if (size_t(x)==ibig) return true;
-				return false;
-			}
-
-			void fringeBathLadder(size_t& i,size_t& smax,size_t& emin) const
-			{
-				size_t middle = linSize_/2;
-				size_t clustersize = linSize_/(1+bathSitesPerSite_);
-				size_t totalBathSites = clustersize*bathSitesPerSite_;
-				size_t ii = (i<middle) ? i : i-totalBathSites;
-				i = ii;
-				// find the maximum *cluster* site that is less or equal smax:
-				size_t newsmax = 0;
-				for (size_t i=0;i<=smax;i++) {
-					int x = getClusterSite(i).first;
-					if (x<0) { // i is in the cluster
-						if (i>newsmax) newsmax=i;
-					} else { // i is in the bath with cluster site x:
-						if (size_t(x)>newsmax) newsmax=x;
-					}
-				}
-				smax = (newsmax<middle) ? newsmax : newsmax-totalBathSites;
-
-				// find the minimum *cluster* site that is greater or equal emin:
-				size_t newemin = linSize_;
-				for (size_t i=0;i<=emin;i++) {
-					int x = getClusterSite(i).first;
-					if (x<0) { // i is in the cluster
-						if (i<newemin) newemin=i;
-					} else { // i is in the bath with cluster site x:
-						if (size_t(x)<newemin) newemin=x;
-					}
-				}
-				emin = (newemin<middle) ? newemin : newemin-totalBathSites;
-
-			}
-
 			// if i is in the cluster return the pair (-1,-1)
 			// else return the corresponding cluster site c and the number
 			// of this bath site as a pair (c,b)
-			std::pair<int,int> getClusterSite(size_t i) const
+			PairType getClusterSite(size_t i) const
 			{
+				size_t firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+				size_t lastP1ClusterSite = firstClusterSite + clusterSize_;
+				if (i>=firstClusterSite && i<lastP1ClusterSite) return PairType(-1,-1);
+
 				size_t middle = linSize_/2;
-				size_t c = linSize_/(1+bathSitesPerSite_); // clustersize
-				if (i<c/2 || i>=linSize_-c/2 || bathSitesPerSite_==0) return std::pair<int,int>(-1,-1);
-				// ok, i is in the bath:
-				int s = -1;
-				if (i<middle) {
-					//find s such that i = s + c/2*x for some x=1,..bathSitesPerSite
-					size_t x = 1;
-					for (;x<=bathSitesPerSite_;x++) {
-						if (i<c/2*x) continue;
-						s = i-c/2*x;
-						if (size_t(s)>=c/2) {
-							continue;
-						} else {
-							x++;
-							break;
-						}
-					}
-					if (x<2) throw std::runtime_error("LadderBath: getClusterSite\n");
-					return std::pair<int,int>(s,x-2);
+				size_t cs = clusterSize_/2;
+				// now i is in the bath:
+				if (i<middle) { // i is in the system
+					return PairType(i%cs + firstClusterSite,i/cs);
 				}
-				// i>=middle
-				//find s such that s = i + c/2*x for some x=1,..bathSitesPerSite
-				size_t x = 1;
-				for (;x<=bathSitesPerSite_;x++) {
-					s = i + c/2*x;
-					if (size_t(s)<linSize_-c/2) {
-						continue;
-					} else {
-						x++;
-						break;
-					}
-				}
-				if (x<2) throw std::runtime_error("LadderBath: getClusterSite\n");
-				return std::pair<int,int>(s,x-2);
+				// is in the bath and in the environ:
+				size_t iprime = i - lastP1ClusterSite;
+				size_t offset = lastP1ClusterSite - cs;
+				return PairType(iprime%cs + offset,iprime/cs);
+			}
+
+			// assumes i1 and i2 are in the cluster
+			// if connected return true, else false
+			bool connectedInCluster(size_t i1,size_t i2) const
+			{
+				ladderize(i1,i2);
+				return ladder_.connected(i1,i2);
+			}
+
+			// assumes i1 and i2 are connected and in the cluster
+			size_t calcDirInCluster(size_t i1,size_t i2) const
+			{
+				ladderize(i1,i2);
+				return ladder_.calcDir(i1,i2);
+			}
+
+			// assumes i1 and i2 are in the cluster
+			bool fringeInCluster(size_t i,size_t smax,size_t emin) const
+			{
+				size_t firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+				i -= firstClusterSite;
+				smax -= firstClusterSite;
+				emin -= firstClusterSite;
+				return ladder_.fringe(i,smax,emin);
+			}
+
+			// assumes i1 and i2 are connected and in the cluster
+			size_t handleInCluster(size_t i1,size_t i2) const
+			{
+				ladderize(i1,i2);
+				return ladder_.handle(i1,i2);
+			}
+
+			void ladderize(size_t& i1,size_t& i2) const
+			{
+				size_t firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+				i1 -= firstClusterSite;
+				i2 -= firstClusterSite;
 			}
 
 			size_t linSize_;
 			size_t bathSitesPerSite_;
 			size_t clusterSize_;
+			LadderType ladder_;
 	}; // class LadderBath
 } // namespace Dmrg 
 

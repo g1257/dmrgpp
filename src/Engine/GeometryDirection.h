@@ -82,23 +82,24 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_DIR_H
 
 #include "Utils.h"
-#include "LadderBath.h"
+
 
 namespace Dmrg {
 	
-	template<typename RealType>
+	template<typename RealType,typename GeometryBaseType>
 	class GeometryDirection {
 			typedef psimag::Matrix<RealType> MatrixType;
 			enum {NUMBERS,MATRICES};
+
 		public:
-			typedef LadderBath LadderBathType;
-			enum {DIRECTION_X=LadderBathType::DIRECTION_X,DIRECTION_Y=LadderBathType::DIRECTION_Y,DIRECTION_XPY,DIRECTION_XMY};
-			enum {CHAIN,LADDER,LADDERX,BATHEDCLUSTER};
 			
+			enum {CHAIN,LADDER,LADDERX,BATHEDCLUSTER};
+
 			template<typename IoInputter>
-			GeometryDirection(IoInputter& io,size_t dirId,size_t linSize,size_t edof,
-					  size_t geometryKind,size_t leg,const std::string& options,const LadderBathType& ladderBath)
-			: dirId_(dirId),linSize_(linSize),geometryKind_(geometryKind),leg_(leg),ladderBath_(&ladderBath)
+			GeometryDirection(IoInputter& io,size_t dirId,size_t edof,
+					  const std::string& options,
+					  const GeometryBaseType* geometryBase)
+			: dirId_(dirId),geometryBase_(geometryBase)
 			{
 				size_t n = getVectorSize(options);
 				//std::cerr<<"vectorsize="<<n<<"\n";
@@ -128,7 +129,7 @@ namespace Dmrg {
 			const RealType& operator()(size_t i,size_t edof1,size_t j,size_t edof2) const
 			{
 				
-				size_t h = handle(i,j);
+				size_t h = geometryBase_->handle(i,j);
 				if (dataType_==NUMBERS) return dataNumbers_[h];
 				return dataMatrices_[h](edof1,edof2);
 			}
@@ -145,86 +146,32 @@ namespace Dmrg {
 				return false;
 			}
 
-//			GeometryDirection<RealType>& operator=(const GeometryDirection<RealType>& g)
-//			{
-//				dirId_=g.dirId_;
-//				linSize_=g.linSize_;
-//				geometryKind_=g.geometryKind_;
-//				leg_=g.leg_;
-//				ladderBath_=g.ladderBath_;
-//				dataType_=g.dataType_;
-//				dataNumbers_=g.dataNumbers_;
-//				dataMatrices_=g.dataMatrices_;
-//				return *this;
-//			}
 
-			template<typename RealType_>
-			friend std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType_>& gd);
+			template<typename RealType_,typename GeometryBaseType_>
+			friend std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType_,GeometryBaseType_>& gd);
 
 		private:
-			size_t handle(size_t i,size_t j) const
-			{
-				if (geometryKind_==BATHEDCLUSTER) {
-					bool bypass = false;
-					size_t h = ladderBath_->handle(bypass,i,j);
-					if (!bypass) return h;
-				}
-
-				size_t imin = (i<j) ? i : j;
-				switch(dirId_) {
-					case DIRECTION_X:
-						return imin;
-					case DIRECTION_Y:
-						return imin-imin/leg_;
-					case DIRECTION_XPY: // only checked for leg_=2
-						return (imin-1)/leg_;
-					case DIRECTION_XMY:// only checked for leg_=2
-						return imin/leg_;
-				}
-				throw std::runtime_error("Unknown direction\n");
-			}
 
 			size_t getVectorSize(const std::string& s)
 			{
 				if (s.find("ConstantValues")!=std::string::npos)
 					return 1;
 
-				switch (geometryKind_) {
-					case BATHEDCLUSTER:
-						return ladderBath_->getVectorSize(leg_,dirId_);
-					case CHAIN:
-						if (dirId_!=DIRECTION_X)
-							throw std::runtime_error("Chain must have direction 0\n");
-						return linSize_-1;
-					case LADDERX:
-						if (dirId_==DIRECTION_XPY) return linSize_ - linSize_/leg_;
-						else if (dirId_==DIRECTION_XMY) return linSize_ - linSize_/leg_;
-						// no break here
-					case LADDER:
-						if (dirId_==DIRECTION_X) return linSize_-leg_;
-						else if (dirId_==DIRECTION_Y) return linSize_ - linSize_/leg_;
-						else if (geometryKind_!=LADDERX)
-							throw std::runtime_error("Ladder: wrong direction\n");
-				}
-				throw std::runtime_error("Unknown geometry\n");
+				return geometryBase_->getVectorSize(dirId_);
 			}
 			
 			size_t dirId_;
-			size_t linSize_;
-			size_t geometryKind_;
-			size_t leg_;
-			const LadderBathType* ladderBath_; // arghh... if it's a reference then needs an explicit op=
+			const GeometryBaseType* geometryBase_;
 			size_t dataType_;
-			//size_t defaultHandle_;
 			std::vector<RealType> dataNumbers_;
 			std::vector<MatrixType> dataMatrices_;
 	}; // class GeometryDirection
 
-	template<typename RealType>
-	std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType>& gd)
+	template<typename RealType,typename GeometryBaseType>
+	std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType,GeometryBaseType>& gd)
 	{
 		os<<"#GeometrydirId="<<gd.dirId_<<"\n";
-		if (gd.dataType_==GeometryDirection<RealType>::NUMBERS) {
+		if (gd.dataType_==GeometryDirection<RealType,GeometryBaseType>::NUMBERS) {
 			os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
 			os<<"#GeometryNumbers=";
 			for (size_t i=0;i<gd.dataNumbers_.size();i++) {
