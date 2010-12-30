@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	
 	class GeometryBase {
+			static size_t refCounter_;
 		public:
 			enum {CHAIN,LADDER,LADDERX,LADDERBATH};
 			GeometryBase() : dirs_(0), // move to object.dirs()
@@ -97,10 +98,39 @@ namespace Dmrg {
 						ladder_(0),
 						ladderx_(0),
 						ladderbath_(0)
-			{}
+			{
+			}
+
+			// private, please don't use:
+			GeometryBase(const GeometryBase& g)
+			{
+				dirs_=g.dirs_; // move to object.dirs()
+				n_=g.n_;
+				chain_=g.chain_;
+				ladder_=g.ladder_;
+				ladderx_=g.ladderx_;
+				ladderbath_=g.ladderbath_;
+				refCounter_++;
+			}
+
+			GeometryBase& operator=(const GeometryBase& g)
+			{
+				dirs_=g.dirs_; // move to object.dirs()
+				n_=g.n_;
+				chain_=g.chain_;
+				ladder_=g.ladder_;
+				ladderx_=g.ladderx_;
+				ladderbath_=g.ladderbath_;
+				refCounter_++;
+				return *this;
+			}
 
 			~GeometryBase()
 			{
+				if (refCounter_>0) {
+					refCounter_--;
+					return;
+				}
 				switch(n_) {
 				case CHAIN:
 					if (chain_) delete chain_;
@@ -274,6 +304,8 @@ namespace Dmrg {
 				return x;
 			}
 
+			// ATTENTION: THIS CLASS HAS CUSTOM ASSIGNMENT OPERATOR
+			// AND COPY CONTRUCTORS
 			size_t dirs_; // move to object.dirs()
 			size_t n_;
 			Chain* chain_;
@@ -282,6 +314,7 @@ namespace Dmrg {
 			LadderBath* ladderbath_;
 	}; // class GeometryBase
 
+	size_t GeometryBase::refCounter_=0;
 
 } // namespace Dmrg 
 

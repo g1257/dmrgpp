@@ -106,8 +106,7 @@ namespace Dmrg {
 				if (x<0) throw std::runtime_error("NumberOfTerms<0 is an error\n");
 
 				for (size_t i=0;i<size_t(x);i++) {
-					GeometryTermType t(io,i,linSize_,debug);
-					terms_.push_back(t);
+					terms_.push_back(GeometryTermType(io,i,linSize_,debug));
 				}
 			}
 
@@ -130,7 +129,7 @@ namespace Dmrg {
 				if (smax+1==emin) return terms_[term](i1,edof1,i2,edof2);
 				return terms_[term](smax,emin,i1,edof1,i2,edof2);
 			}
-			
+
 			RealType operator()
 				(size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
 			{
