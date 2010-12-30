@@ -1,33 +1,29 @@
 TotalNumberOfSites=8 
 NumberOfTerms=1
 DegreesOfFreedom=1
-GeometryKind=bathedcluster
-GeometryOptions=none
+GeometryKind=ladder
+GeometryOptions=ConstantValues
 LadderLeg=2
-BathSitesPerSite=1
-ConnectorsX 2 1.0 1.0
-ConnectorsY 2 0.8 0.8
-ConnectorsBath 4 0.3 0.3 0.3 0.3
+ConnectorsX 1 1.0
+ConnectorsY 1 1.0 
 
 hubbardU	8 0 0 0 0 0 0 0 0 
-potentialV     16 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 
-                  0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1
-SolverOptions=hasQuantumNumbers,wft,TimeStepTargetting,
+potentialV     16 0 0 0 0 0 0 0 0 
+		  0 0 0 0 0 0 0 0
+SolverOptions=hasQuantumNumbers,wft,TimeStepTargetting
 Version=264e71039cc5a47c6f1f375f2f9baaffd94e94fa
-OutputFile=data15.txt
+OutputFile=data17.txt
 InfiniteLoopKeptStates=256
-FiniteLoops 24  3 400 0 -3 400 0 -3 400 0 3 400 0
+FiniteLoops 16  3 400 0 -3 400 0 -3 400 0 3 400 0
 		3 400 0 -3 400 0 -3 400 0 3 400 0
 		3 400 0 -3 400 0 -3 400 0 3 400 0
 		3 400 0 -3 400 0 -3 400 0 3 400 0
-                3 400 0 -3 400 0 -3 400 0 3 400 0
-                3 400 0 -3 400 0 -3 400 0 3 400 0
 TargetQuantumNumbers 3 0.25 0.25 0
-TSPFilename=tst15.txt
+TSPFilename=tst17.txt
 TSPTau=0.1
 TSPTimeSteps=5
-TSPAdvanceEach=200
-TSPSites 1 3 
+TSPAdvanceEach=6
+TSPSites 1 1
 TSPLoops 1 0
 
 TSPOperator=raw

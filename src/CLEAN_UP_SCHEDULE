@@ -20,3 +20,10 @@ json format for input?
 create test for non-constant hoppings --> done, test 26
 
 DensityMatrixSu2 needs optimization
+
+SU(2) + WFT is broookeeeeeen!!
+
+TestSuite: need to eliminate hashtable.txt usage
+
+GeometryFactory: needs to become a real factory (following Modern C++ Design)
+

@@ -304,10 +304,9 @@ namespace Dmrg {
 			typedef InternalProductTemplate<typename SomeVectorType::value_type,ModelType> MyInternalProduct;
 			typedef LanczosSolver<MyInternalProduct,SomeVectorType> LanczosSolverType;
 			typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
-			size_t mode = LanczosSolverType::WITH_INFO;
-			if (parameters_.options.find("lanczosdebug")!=std::string::npos) mode =  LanczosSolverType::DEBUG;
-			LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,concurrency_.rank(),mode);
 			
+			LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,concurrency_.rank(),parameters_.options);
+
 			tmpVec.resize(lanczosHelper.rank());
 			if (lanczosHelper.rank()==0) {
 				energyTmp=10000;

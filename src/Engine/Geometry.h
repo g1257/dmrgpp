@@ -136,6 +136,13 @@ namespace Dmrg {
 				return terms_[term](i1,edof1,i2,edof2);
 			}
 			
+			// needs to check all terms FIXME:
+			bool connected(size_t smax,size_t emin,size_t i1,size_t i2) const
+			{
+				if (smax+1==emin) return terms_[0].connected(i1,i2); // any term will do
+				return terms_[0].connected(smax,emin,i1,i2); // any term will do
+			}
+
 			size_t terms() const { return terms_.size(); }
 			
 			size_t numberOfSites() const { return linSize_; }
@@ -157,13 +164,6 @@ namespace Dmrg {
 				}
 				
 				E.push_back(linSize_-1);
-			}
-
-			// should be static
-			bool connected(size_t smax,size_t emin,size_t i1,size_t i2) const
-			{
-				if (smax+1==emin) return terms_[0].connected(i1,i2); // any term will do
-				return terms_[0].connected(smax,emin,i1,i2); // any term will do
 			}
 			
 			template<typename RealType_>

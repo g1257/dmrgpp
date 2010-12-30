@@ -12,7 +12,7 @@ ConnectorsBath 1 0.5
 hubbardU	8 0 0 0 0 0 0 0 0 
 potentialV     16 0 0 0 0 0 0 0 0 
 		  0 0 0 0 0 0 0 0
-SolverOptions=hasQuantumNumbers,wft,
+SolverOptions=hasQuantumNumbers,wft,lanczosAllowsZero
 Version=264e71039cc5a47c6f1f375f2f9baaffd94e94fa
 OutputFile=data13.txt
 InfiniteLoopKeptStates=256

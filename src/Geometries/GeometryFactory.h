@@ -78,7 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  *  Well, I need to read that chapter in
  *  Alexandrescu's "Modern C++ design" again to have
- *  a decent factory here, but this we'll have to do for now
+ *  a decent factory here, but this will have to do for now
  *
  */
 #ifndef GEOMETRY_FACTORY_H

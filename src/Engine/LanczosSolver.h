@@ -105,11 +105,13 @@ namespace Dmrg {
 		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 		typedef typename psimag::Matrix<VectorElementType> DenseMatrixType;
-		enum {WITH_INFO,WITHOUT_INFO,DEBUG};
+		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 		
-		LanczosSolver(MatrixType const &mat, size_t& max_nstep,RealType eps,size_t rank,size_t mode) : 
-			progress_("LanczosSolver",rank),mat_(mat),steps_(max_nstep),eps_(eps),mode_(mode) 
+		LanczosSolver(MatrixType const &mat, size_t& max_nstep,RealType eps,
+				size_t rank,const std::string& options="") :
+			progress_("LanczosSolver",rank),mat_(mat),steps_(max_nstep),eps_(eps),mode_(WITH_INFO)
 		{
+			setMode(options);
 			std::ostringstream msg;
 			msg<<"Lanczos Constructor, mat.rank="<<mat_.rank()<<" steps="<<steps_<<" eps="<<eps_;
 			progress_.printline(msg,std::cout);
@@ -117,7 +119,7 @@ namespace Dmrg {
 
 		void computeGroundState(RealType& gsEnergy,VectorType& z)
 		{
-			if (mode_ == DEBUG) return computeGroundStateTest(gsEnergy,z);
+			if (mode_ & DEBUG) return computeGroundStateTest(gsEnergy,z);
 			
 			size_t n =mat_.rank();
 			RealType atmp=0.0;
@@ -140,7 +142,7 @@ namespace Dmrg {
 				VectorType &z,
 	    			const VectorType& initialVector)
 		{
-			if (mode_ == DEBUG) {
+			if (mode_ & DEBUG) {
 				computeGroundStateTest(gsEnergy,z,initialVector);
 				return;
 			}
@@ -187,7 +189,7 @@ namespace Dmrg {
 					//x[i] = -btmp * tmp;
 				}
 			}
-			if (mode_ == WITH_INFO) info(gsEnergy,initialVector,std::cerr);
+			if (mode_ & WITH_INFO) info(gsEnergy,initialVector,std::cerr);
 			
 		}
 
@@ -231,6 +233,8 @@ namespace Dmrg {
 			lanczosVectors.resize(mat_.rank(),max_nstep);
 			ab.resize(max_nstep,0);
 			
+			if (mode_ & ALLOWS_ZERO && isHyZero(y,ab,lanczosVectors)) return;
+
 			RealType eold = 100.;
 			bool exitFlag=false;
 			size_t j = 0;
@@ -238,7 +242,7 @@ namespace Dmrg {
 			for (; j < max_nstep; j++) {
 				for (size_t i = 0; i < mat_.rank(); i++) 
 					lanczosVectors(i,j) = y[i];
-				mat_.matrixVectorProduct (x, y); // x+= y
+				mat_.matrixVectorProduct (x, y); // x+= Hy
 			
 				atmp = 0.0;
 				for (size_t i = 0; i < mat_.rank(); i++) atmp += utils::myProductT (y[i] ,x[i]);
@@ -306,6 +310,12 @@ namespace Dmrg {
 		RealType eps_;
 		size_t mode_;
 		
+		void setMode(const std::string& options)
+		{
+			if (options.find("lanczosdebug")!=std::string::npos) mode_ |=  DEBUG;
+			if (options.find("lanczosAllowsZero")!=std::string::npos) mode_ |= ALLOWS_ZERO;
+		}
+
 		void info(RealType energyTmp,const VectorType& x,std::ostream& os)
 		{
 			RealType norma=std::norm(x);
@@ -431,7 +441,7 @@ namespace Dmrg {
 			if (!ih) throw std::runtime_error("computeGroundState: Matrix not hermitian\n");
 
 			std::cerr<<"Matrix hermitian="<<ih<<"\n";
-			RealType eps2=1e-6;
+			/*RealType eps2=1e-6;
 			std::cerr.precision(8);
 			for (size_t i=0;i<n;i++) {
 				size_t counter=0;
@@ -442,7 +452,8 @@ namespace Dmrg {
 					}
 				}
 				if (counter>0) std::cerr<<"\n";
-			}
+			}*/
+			std::cerr<<a;
 
 			std::cerr<<"----------------\n";
 
@@ -455,6 +466,35 @@ namespace Dmrg {
 
 			throw std::runtime_error("testing lanczos solver\n");
 		}
+
+		// provides a gracious way to exit if Ay == 0 (we assume that then A=0)
+		bool isHyZero(const VectorType& y,
+				TridiagonalMatrixType& ab,
+			DenseMatrixType& lanczosVectors) const
+		{
+			std::ostringstream msg;
+			msg<<"Testing whether matrix is zero...";
+			progress_.printline(msg,std::cout);
+
+			VectorType x(mat_.rank());
+
+			for (size_t i = 0; i < x.size(); i++) x[i] = 0.0;
+
+			mat_.matrixVectorProduct (x, y); // x+= Hy
+
+			for (size_t i = 0; i < x.size(); i++)
+				if (utils::myProductT (x[i] ,x[i])!=0) return false;
+
+			for (size_t j=0; j < lanczosVectors.n_col(); j++) {
+				for (size_t i = 0; i < mat_.rank(); i++) {
+						lanczosVectors(i,j) = (i==j) ? 0.0 : 1.1;
+				}
+				ab.a(j) = 0.0;
+				ab.b(j) = 0.0;
+			}
+			return true;
+		}
+
 
 	}; // class LanczosSolver
 } // namespace Dmrg

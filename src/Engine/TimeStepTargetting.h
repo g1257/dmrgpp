@@ -563,12 +563,11 @@ namespace Dmrg {
 				 		//,useReflection_);
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			
-				size_t mode = LanczosSolverType::WITH_INFO;
 				RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 				size_t iter= ProgramGlobals::LanczosSteps;
 
 				//srand48(3243447);
-				LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,parallelRank_,mode);
+				LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,parallelRank_);
 				
 				TridiagonalMatrixType ab;
 				size_t total = phi.effectiveSize(i0);

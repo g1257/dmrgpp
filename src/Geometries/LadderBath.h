@@ -99,11 +99,8 @@ namespace Dmrg {
 
 			size_t getVectorSize(size_t dirId) const
 			{
-				try {
-					ladder_.getVectorSize(dirId);
-				} catch (std::exception& e) {
-				}
-				return bathSitesPerSite_*clusterSize_;
+				if (dirId==DIRECTION_BATH) return bathSitesPerSite_*clusterSize_;
+				return ladder_.getVectorSize(dirId);
 			}
 
 			bool connected(size_t i1,size_t i2) const
