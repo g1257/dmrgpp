@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename RealType,typename GeometryBaseType>
+	template<typename RealType,typename GeometryFactoryType>
 	class GeometryDirection {
 			typedef psimag::Matrix<RealType> MatrixType;
 			enum {NUMBERS,MATRICES};
@@ -96,8 +96,8 @@ namespace Dmrg {
 			template<typename IoInputter>
 			GeometryDirection(IoInputter& io,size_t dirId,size_t edof,
 					  const std::string& options,
-					  const GeometryBaseType& geometryBase)
-			: dirId_(dirId),geometryBase_(&geometryBase)
+					  const GeometryFactoryType& geometryFactory)
+			: dirId_(dirId),geometryFactory_(&geometryFactory)
 			{
 				size_t n = getVectorSize(options);
 				//std::cerr<<"vectorsize="<<n<<"\n";
@@ -127,7 +127,7 @@ namespace Dmrg {
 			const RealType& operator()(size_t i,size_t edof1,size_t j,size_t edof2) const
 			{
 				
-				size_t h = geometryBase_->handle(i,j);
+				size_t h = geometryFactory_->handle(i,j);
 				if (dataType_==NUMBERS) return dataNumbers_[h];
 				return dataMatrices_[h](edof1,edof2);
 			}
@@ -145,8 +145,8 @@ namespace Dmrg {
 			}
 
 
-			template<typename RealType_,typename GeometryBaseType_>
-			friend std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType_,GeometryBaseType_>& gd);
+			template<typename RealType_,typename GeometryFactoryType_>
+			friend std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType_,GeometryFactoryType_>& gd);
 
 		private:
 
@@ -155,21 +155,21 @@ namespace Dmrg {
 				if (s.find("ConstantValues")!=std::string::npos)
 					return 1;
 
-				return geometryBase_->getVectorSize(dirId_);
+				return geometryFactory_->getVectorSize(dirId_);
 			}
 			
 			size_t dirId_;
-			const GeometryBaseType* geometryBase_;
+			const GeometryFactoryType* geometryFactory_;
 			size_t dataType_;
 			std::vector<RealType> dataNumbers_;
 			std::vector<MatrixType> dataMatrices_;
 	}; // class GeometryDirection
 
-	template<typename RealType,typename GeometryBaseType>
-	std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType,GeometryBaseType>& gd)
+	template<typename RealType,typename GeometryFactoryType>
+	std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType,GeometryFactoryType>& gd)
 	{
 		os<<"#GeometrydirId="<<gd.dirId_<<"\n";
-		if (gd.dataType_==GeometryDirection<RealType,GeometryBaseType>::NUMBERS) {
+		if (gd.dataType_==GeometryDirection<RealType,GeometryFactoryType>::NUMBERS) {
 			os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
 			os<<"#GeometryNumbers=";
 			for (size_t i=0;i<gd.dataNumbers_.size();i++) {

@@ -86,13 +86,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Utils.h"
 #include "GeometryDirection.h"
-#include "GeometryBase.h"
+#include "GeometryFactory.h"
 
 namespace Dmrg {
 	
 	template<typename RealType>
 	class GeometryTerm {
-			typedef GeometryDirection<RealType,GeometryBase> GeometryDirectionType;
+			typedef GeometryDirection<RealType,GeometryFactory> GeometryDirectionType;
 		public:
 			
 			template<typename IoInputter>
@@ -112,10 +112,10 @@ namespace Dmrg {
 				io.readline(gOptions,"GeometryOptions=");
 				//std::cerr<<"GeometryOptions "<<gOptions<<"\n";
 
-				geometryBase_.init(io,s,linSize);
+				geometryFactory_.init(io,s,linSize);
 
-				for (size_t i=0;i<geometryBase_.dirs();i++) {
-					directions_.push_back(GeometryDirectionType(io,i,edof_,gOptions,geometryBase_));
+				for (size_t i=0;i<geometryFactory_.dirs();i++) {
+					directions_.push_back(GeometryDirectionType(io,i,edof_,gOptions,geometryFactory_));
 				}
 				
 				cachedValues_.resize(linSize*linSize*edof_*edof_);
@@ -144,7 +144,7 @@ namespace Dmrg {
 				size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
 
-				bool bothFringe = (geometryBase_.fringe(i1,smax,emin) && geometryBase_.fringe(i2,smax,emin));
+				bool bothFringe = (geometryFactory_.fringe(i1,smax,emin) && geometryFactory_.fringe(i2,smax,emin));
 				size_t siteNew1 = i1;
 				size_t siteNew2 = i2;
 				size_t edofNew1 = edof1;
@@ -156,7 +156,7 @@ namespace Dmrg {
 						edofNew1 = edof2;
 						edofNew2 = edof1;
 					}
-					siteNew2 = geometryBase_.getSubstituteSite(smax,emin,siteNew2);
+					siteNew2 = geometryFactory_.getSubstituteSite(smax,emin,siteNew2);
 				}
 				
 				size_t p = pack(siteNew1,edofNew1,siteNew2,edofNew2);
@@ -167,21 +167,21 @@ namespace Dmrg {
 			{
 				if (i1==i2) return false;
 
-				bool bothFringe = (geometryBase_.fringe(i1,smax,emin) && geometryBase_.fringe(i2,smax,emin));
+				bool bothFringe = (geometryFactory_.fringe(i1,smax,emin) && geometryFactory_.fringe(i2,smax,emin));
 
-				if (!bothFringe) return geometryBase_.connected(i1,i2);
+				if (!bothFringe) return geometryFactory_.connected(i1,i2);
 				//std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
 				return true;
 			}
 
 			bool connected(size_t i1,size_t i2) const
 			{
-				return geometryBase_.connected(i1,i2);
+				return geometryFactory_.connected(i1,i2);
 			}
 
 			std::string label() const
 			{
-				return geometryBase_.label();
+				return geometryFactory_.label();
 			}
 
 			template<typename RealType_>	
@@ -191,9 +191,9 @@ namespace Dmrg {
 			
 			RealType calcValue(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
-				if (!geometryBase_.connected(i1,i2)) return 0.0;
+				if (!geometryFactory_.connected(i1,i2)) return 0.0;
 
-				size_t dir = geometryBase_.calcDir(i1,i2);
+				size_t dir = geometryFactory_.calcDir(i1,i2);
 				if (directions_[dir].constantValues()) {
 					return directions_[dir](edof1,edof2);
 				}
@@ -208,7 +208,7 @@ namespace Dmrg {
 
 			size_t linSize_;
 			size_t edof_;
-			GeometryBase geometryBase_;
+			GeometryFactory geometryFactory_;
 			std::vector<GeometryDirectionType> directions_;
 			std::vector<RealType> cachedValues_;
 	}; // class GeometryTerm

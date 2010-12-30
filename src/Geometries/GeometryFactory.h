@@ -76,10 +76,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file GeometryBase.h
  *
- *  DOC NEEDED FIXME
+ *  Well, I need to read that chapter in
+ *  Alexandrescu's "Modern C++ design" again to have
+ *  a decent factory here, but this we'll have to do for now
+ *
  */
-#ifndef GEOMETRY_BASE_H
-#define GEOMETRY_BASE_H
+#ifndef GEOMETRY_FACTORY_H
+#define GEOMETRY_FACTORY_H
 
 #include "Chain.h"
 #include "Ladder.h"
@@ -88,11 +91,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	class GeometryBase {
+	class GeometryFactory {
 			static size_t refCounter_;
 		public:
 			enum {CHAIN,LADDER,LADDERX,LADDERBATH};
-			GeometryBase() : dirs_(0), // move to object.dirs()
+			GeometryFactory() : dirs_(0), // move to object.dirs()
 						n_(0),
 						chain_(0),
 						ladder_(0),
@@ -101,8 +104,7 @@ namespace Dmrg {
 			{
 			}
 
-			// private, please don't use:
-			GeometryBase(const GeometryBase& g)
+			GeometryFactory(const GeometryFactory& g)
 			{
 				dirs_=g.dirs_; // move to object.dirs()
 				n_=g.n_;
@@ -113,7 +115,7 @@ namespace Dmrg {
 				refCounter_++;
 			}
 
-			GeometryBase& operator=(const GeometryBase& g)
+			GeometryFactory& operator=(const GeometryFactory& g)
 			{
 				dirs_=g.dirs_; // move to object.dirs()
 				n_=g.n_;
@@ -125,7 +127,7 @@ namespace Dmrg {
 				return *this;
 			}
 
-			~GeometryBase()
+			~GeometryFactory()
 			{
 				if (refCounter_>0) {
 					refCounter_--;
@@ -312,9 +314,9 @@ namespace Dmrg {
 			Ladder* ladder_;
 			LadderX* ladderx_;
 			LadderBath* ladderbath_;
-	}; // class GeometryBase
+	}; // class GeometryFactory
 
-	size_t GeometryBase::refCounter_=0;
+	size_t GeometryFactory::refCounter_=0;
 
 } // namespace Dmrg 
 
