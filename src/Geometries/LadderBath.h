@@ -81,12 +81,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LADDER_BATH_H
 #define LADDER_BATH_H
 
-#include "GeometryBase.h"
 #include "Ladder.h"
 
 namespace Dmrg {
 	
-	class LadderBath : public GeometryBase {
+	class LadderBath  {
 			typedef std::pair<int,int> PairType;
 			typedef Ladder LadderType;
 		public:
@@ -98,7 +97,7 @@ namespace Dmrg {
 			{
 			}
 
-			virtual size_t getVectorSize(size_t dirId) const
+			size_t getVectorSize(size_t dirId) const
 			{
 				try {
 					ladder_.getVectorSize(dirId);
@@ -107,7 +106,7 @@ namespace Dmrg {
 				return bathSitesPerSite_*clusterSize_;
 			}
 
-			virtual bool connected(size_t i1,size_t i2) const
+			bool connected(size_t i1,size_t i2) const
 			{
 				if (i1==i2) return false;
 				int c1 = getClusterSite(i1).first;
@@ -126,7 +125,7 @@ namespace Dmrg {
 			}
 
 			// assumes i1 and i2 are connected
-			virtual size_t calcDir(size_t i1,size_t i2) const
+			size_t calcDir(size_t i1,size_t i2) const
 			{
 				int c1 = getClusterSite(i1).first;
 				int c2 = getClusterSite(i2).first;
@@ -137,7 +136,7 @@ namespace Dmrg {
 				return DIRECTION_BATH;
 			}
 
-			virtual bool fringe(size_t i,size_t smax,size_t emin) const
+			bool fringe(size_t i,size_t smax,size_t emin) const
 			{
 				int c = getClusterSite(i).first;
 				if (c>=0) return false; // no bath site is ever fringe
@@ -145,7 +144,7 @@ namespace Dmrg {
 			}
 
 			// assumes i1 and i2 are connected
-			virtual size_t handle(size_t i1,size_t i2) const
+			size_t handle(size_t i1,size_t i2) const
 			{
 				PairType c1 = getClusterSite(i1);
 				PairType c2 = getClusterSite(i2);
@@ -162,12 +161,12 @@ namespace Dmrg {
 			}
 
 			// siteNew2 is fringe in the environment
-			virtual size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
 			{
 				throw std::runtime_error("Umhph, ouch, ayyayyayy, what?\n");
 			}
 
-			virtual std::string label() const
+			std::string label() const
 			{
 				return "ladderbath";
 			}

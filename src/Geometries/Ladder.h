@@ -81,11 +81,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LADDER_H
 #define LADDER_H
 
-#include "GeometryBase.h"
-
 namespace Dmrg {
 	
-	class Ladder : public GeometryBase {
+	class Ladder  {
 		public:
 			enum {DIRECTION_X,DIRECTION_Y};
 
@@ -93,7 +91,7 @@ namespace Dmrg {
 			{
 			}
 
-			virtual size_t getVectorSize(size_t dirId) const
+			size_t getVectorSize(size_t dirId) const
 			{
 				if (dirId==DIRECTION_X) return linSize_-leg_;
 				else if (dirId==DIRECTION_Y) return linSize_ - linSize_/leg_;
@@ -102,26 +100,26 @@ namespace Dmrg {
 
 			}
 
-			virtual bool connected(size_t i1,size_t i2) const
+			bool connected(size_t i1,size_t i2) const
 			{
 				if (i1==i2) return false;
 				size_t c1 = i1/leg_;
 				size_t c2 = i2/leg_;
 				size_t r1 = i1%leg_;
 				size_t r2 = i2%leg_;
-				if (c1==c2) return neighbors(r1,r2);
-				if (r1==r2) return neighbors(c1,c2);
+				if (c1==c2) return utils::neighbors(r1,r2);
+				if (r1==r2) return utils::neighbors(c1,c2);
 				return false;
 			}
 
-			virtual size_t calcDir(size_t i1,size_t i2) const
+			size_t calcDir(size_t i1,size_t i2) const
 			{
 				if (!connected(i1,i2)) throw std::runtime_error("Calcdir\n");
 				if (sameColumn(i1,i2)) return DIRECTION_Y;
 				return DIRECTION_X;
 			}
 
-			virtual bool fringe(size_t i,size_t smax,size_t emin) const
+			bool fringe(size_t i,size_t smax,size_t emin) const
 			{
 				bool a = (i<emin && i>=smax-1);
 				bool b = (i>smax && i<=emin+1);
@@ -129,7 +127,7 @@ namespace Dmrg {
 
 			}
 
-			virtual size_t handle(size_t i1,size_t i2) const
+			size_t handle(size_t i1,size_t i2) const
 			{
 				size_t dir = calcDir(i1,i2);
 				size_t imin = (i1<i2) ? i1 : i2;
@@ -143,7 +141,7 @@ namespace Dmrg {
 			}
 
 			// siteNew2 is fringe in the environment
-			virtual size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
 			{
 				return smax+siteNew2-emin+1;
 			}
@@ -164,7 +162,7 @@ namespace Dmrg {
 				return false;
 			}
 
-			virtual std::string label() const
+			std::string label() const
 			{
 				return "ladder";
 			}

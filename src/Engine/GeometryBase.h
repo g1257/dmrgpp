@@ -81,32 +81,208 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GEOMETRY_BASE_H
 #define GEOMETRY_BASE_H
 
-#include "Utils.h"
+#include "Chain.h"
+#include "Ladder.h"
+#include "LadderX.h"
+#include "LadderBath.h"
 
 namespace Dmrg {
 	
 	class GeometryBase {
 		public:
+			enum {CHAIN,LADDER,LADDERX,LADDERBATH};
+			GeometryBase() : dirs_(0), // move to object.dirs()
+						n_(0),
+						chain_(0),
+						ladder_(0),
+						ladderx_(0),
+						ladderbath_(0)
+			{}
 
-			virtual size_t handle(size_t i,size_t j) const=0;
-
-			virtual size_t getVectorSize(size_t dirId) const=0;
-
-			virtual bool connected(size_t i1,size_t i2) const=0;
-
-			virtual size_t calcDir(size_t i1,size_t i2) const=0;
-
-			virtual bool fringe(size_t i,size_t smax,size_t emin) const=0;
-
-			virtual size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const=0;
-
-			virtual std::string label() const=0;
-
-			bool neighbors(size_t i1,size_t i2) const
+			~GeometryBase()
 			{
-				return (i1-i2==1 || i2-i1==1);
+				switch(n_) {
+				case CHAIN:
+					if (chain_) delete chain_;
+					break;
+				case LADDER:
+					if (ladder_) delete ladder_;
+					break;
+				case LADDERX:
+					if (ladderx_) delete ladderx_;
+					break;
+				case LADDERBATH:
+					if (ladderbath_) delete ladderbath_;
+					break;
+				}
 			}
+
+			template<typename IoType>
+			void init(IoType& io,const std::string& s,size_t linSize)
+			{
+				n_=getGeometry(s);
+				int x=0,tmp=0;
+				switch (n_) {
+				case CHAIN:
+					dirs_ = 1;
+					chain_ = new Chain(linSize);
+					break;
+				case LADDER:
+					dirs_ = 2;
+					io.readline(x,"LadderLeg=");
+					if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
+					ladder_ = new Ladder(linSize,x);
+					break;
+				case LADDERX:
+					dirs_ = 4;
+					io.readline(x,"LadderLeg=");
+					if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
+					ladderx_ = new LadderX(linSize,x);
+					break;
+				case LADDERBATH:
+					dirs_ = 3; // X,Y, and BATH
+					io.readline(x,"LadderLeg=");
+					if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
+					io.readline(tmp,"BathSitesPerSite=");
+					if (tmp<0) throw std::runtime_error("BathSitesPerSite<0 is an error\n");
+					ladderbath_ = new LadderBath(linSize,x,tmp);
+					break;
+				default:
+					throw std::runtime_error("Unknown geometry\n");
+				}
+
+			}
+
+			size_t dirs() const { return dirs_; } // <-- move elsewhere FIXME
+
+			size_t handle(size_t i,size_t j) const
+			{
+				switch (n_) {
+				case CHAIN:
+					return chain_->handle(i,j);
+				case LADDER:
+					return ladder_->handle(i,j);
+				case LADDERX:
+					return ladderx_->handle(i,j);
+				case LADDERBATH:
+					return ladderbath_->handle(i,j);
+				}
+				throw std::runtime_error("Unknown geometry\n");
+			}
+
+
+			size_t getVectorSize(size_t dirId) const
+			{
+				switch (n_) {
+				case CHAIN:
+					return chain_->getVectorSize(dirId);
+				case LADDER:
+					return ladder_->getVectorSize(dirId);
+				case LADDERX:
+					return ladderx_->getVectorSize(dirId);
+				case LADDERBATH:
+					return ladderbath_->getVectorSize(dirId);
+				}
+				throw std::runtime_error("Unknown geometry\n");
+			}
+
+			bool connected(size_t i1,size_t i2) const
+			{
+				switch(n_) {
+				case CHAIN:
+					return chain_->connected(i1,i2);
+				case LADDER:
+					return ladder_->connected(i1,i2);
+				case LADDERX:
+					return ladderx_->connected(i1,i2);
+				case LADDERBATH:
+					return ladderbath_->connected(i1,i2);
+				}
+				throw std::runtime_error("Unknown geometry\n");
+			}
+
+			size_t calcDir(size_t i1,size_t i2) const
+			{
+				switch (n_) {
+				case CHAIN:
+					return chain_->calcDir(i1,i2);
+				case LADDER:
+					return ladder_->calcDir(i1,i2);
+				case LADDERX:
+					return ladderx_->calcDir(i1,i2);
+				case LADDERBATH:
+					return ladderbath_->calcDir(i1,i2);
+				}
+				throw std::runtime_error("Unknown geometry\n");
+			}
+
+			bool fringe(size_t i,size_t smax,size_t emin) const
+			{
+				switch(n_) {
+				case CHAIN:
+					return chain_->fringe(i,smax,emin);
+				case LADDER:
+					return ladder_->fringe(i,smax,emin);
+				case LADDERX:
+					return ladderx_->fringe(i,smax,emin);
+				case LADDERBATH:
+					return ladderbath_->fringe(i,smax,emin);
+				}
+				throw std::runtime_error("Unknown geometry\n");
+			}
+
+			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+			{
+				switch(n_) {
+				case CHAIN:
+					return chain_->getSubstituteSite(smax,emin,siteNew2);
+				case LADDER:
+					return ladder_->getSubstituteSite(smax,emin,siteNew2);
+				case LADDERX:
+					return ladderx_->getSubstituteSite(smax,emin,siteNew2);
+				case LADDERBATH:
+					return ladderbath_->getSubstituteSite(smax,emin,siteNew2);
+				}
+				throw std::runtime_error("Unknown geometry\n");
+			}
+
+			std::string label() const
+			{
+				switch(n_) {
+				case CHAIN:
+					return chain_->label();
+				case LADDER:
+					return ladder_->label();
+				case LADDERX:
+					return ladderx_->label();
+				case LADDERBATH:
+					return ladderbath_->label();
+				}
+				throw std::runtime_error("Unknown geometry\n");
+			}
+
+		private:
+
+			size_t getGeometry(const std::string& s) const
+			{
+				size_t x = 0;
+				if (s=="chain") x=CHAIN;
+				else if (s=="ladder") x=LADDER;
+				else if (s=="ladderx") x=LADDERX;
+				else if (s=="bathedcluster") x=LADDERBATH;
+				else throw std::runtime_error("unknown geometry\n");
+				return x;
+			}
+
+			size_t dirs_; // move to object.dirs()
+			size_t n_;
+			Chain* chain_;
+			Ladder* ladder_;
+			LadderX* ladderx_;
+			LadderBath* ladderbath_;
 	}; // class GeometryBase
+
+
 } // namespace Dmrg 
 
 /*@}*/

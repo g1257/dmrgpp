@@ -240,6 +240,12 @@ namespace utils {
 		sort<double,ContainerTemplate<size_t,Field,Cmp,A>,Field>(x,iperm);				
 	}*/
 	
+	bool neighbors(size_t i1,size_t i2)
+	{
+		return (i1-i2==1 || i2-i1==1);
+	}
+
+
 	std::string getTimeDate()
 	{
 		struct timeval tv;

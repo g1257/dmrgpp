@@ -92,14 +92,12 @@ namespace Dmrg {
 			enum {NUMBERS,MATRICES};
 
 		public:
-			
-			enum {CHAIN,LADDER,LADDERX,BATHEDCLUSTER};
 
 			template<typename IoInputter>
 			GeometryDirection(IoInputter& io,size_t dirId,size_t edof,
 					  const std::string& options,
-					  const GeometryBaseType* geometryBase)
-			: dirId_(dirId),geometryBase_(geometryBase)
+					  const GeometryBaseType& geometryBase)
+			: dirId_(dirId),geometryBase_(&geometryBase)
 			{
 				size_t n = getVectorSize(options);
 				//std::cerr<<"vectorsize="<<n<<"\n";

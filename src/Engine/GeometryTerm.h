@@ -86,18 +86,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Utils.h"
 #include "GeometryDirection.h"
-#include "Chain.h"
-#include "Ladder.h"
-#include "LadderX.h"
-#include "LadderBath.h"
+#include "GeometryBase.h"
 
 namespace Dmrg {
 	
 	template<typename RealType>
 	class GeometryTerm {
+			typedef GeometryDirection<RealType,GeometryBase> GeometryDirectionType;
 		public:
-			typedef GeometryBase GeometryBaseType;
-			typedef GeometryDirection<RealType,GeometryBaseType> GeometryDirectionType;
 			
 			template<typename IoInputter>
 			GeometryTerm(IoInputter& io,size_t termId,size_t linSize,bool debug=false) :
@@ -111,40 +107,14 @@ namespace Dmrg {
 				std::string s;
 				io.readline(s,"GeometryKind=");
 				//std::cerr<<"GeometryKind "<<s<<"\n";
-				size_t geometryKind=getGeometry(s);
+
 				std::string gOptions;
 				io.readline(gOptions,"GeometryOptions=");
 				//std::cerr<<"GeometryOptions "<<gOptions<<"\n";
-				size_t dirs = 0;
-				int tmp=0;
-				switch (geometryKind) {
-					case GeometryDirectionType::CHAIN:
-						dirs = 1;
-						geometryBase_ = new Chain(linSize);
-						break;
-					case GeometryDirectionType::LADDER:
-						dirs = 2;
-						io.readline(x,"LadderLeg=");
-						if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
-						geometryBase_ = new Ladder(linSize,x);
-						break;
-					case GeometryDirectionType::LADDERX:
-						dirs=4;
-						io.readline(x,"LadderLeg=");
-						if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
-						geometryBase_ = new LadderX(linSize,x);
-						break;
-					case GeometryDirectionType::BATHEDCLUSTER:
-						dirs = 3; // X,Y, and BATH
-						io.readline(x,"LadderLeg=");
-						if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
-						io.readline(tmp,"BathSitesPerSite=");
-						if (tmp<0) throw std::runtime_error("BathSitesPerSite<0 is an error\n");
-						geometryBase_ = new LadderBath(linSize,x,tmp);
-						break;
-				}
 
-				for (size_t i=0;i<dirs;i++) {
+				geometryBase_.init(io,s,linSize);
+
+				for (size_t i=0;i<geometryBase_.dirs();i++) {
 					directions_.push_back(GeometryDirectionType(io,i,edof_,gOptions,geometryBase_));
 				}
 				
@@ -173,7 +143,8 @@ namespace Dmrg {
 			const RealType& operator()(size_t smax,size_t emin,
 				size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
-				bool bothFringe = (geometryBase_->fringe(i1,smax,emin) && geometryBase_->fringe(i2,smax,emin));
+
+				bool bothFringe = (geometryBase_.fringe(i1,smax,emin) && geometryBase_.fringe(i2,smax,emin));
 				size_t siteNew1 = i1;
 				size_t siteNew2 = i2;
 				size_t edofNew1 = edof1;
@@ -185,7 +156,7 @@ namespace Dmrg {
 						edofNew1 = edof2;
 						edofNew2 = edof1;
 					}
-					siteNew2 = geometryBase_->getSubstituteSite(smax,emin,siteNew2);
+					siteNew2 = geometryBase_.getSubstituteSite(smax,emin,siteNew2);
 				}
 				
 				size_t p = pack(siteNew1,edofNew1,siteNew2,edofNew2);
@@ -195,20 +166,22 @@ namespace Dmrg {
 			bool connected(size_t smax,size_t emin,size_t i1,size_t i2) const
 			{
 				if (i1==i2) return false;
-				bool bothFringe = (geometryBase_->fringe(i1,smax,emin) && geometryBase_->fringe(i2,smax,emin));
-				if (!bothFringe) return geometryBase_->connected(i1,i2);
+
+				bool bothFringe = (geometryBase_.fringe(i1,smax,emin) && geometryBase_.fringe(i2,smax,emin));
+
+				if (!bothFringe) return geometryBase_.connected(i1,i2);
 				//std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
 				return true;
 			}
 
 			bool connected(size_t i1,size_t i2) const
 			{
-				return geometryBase_->connected(i1,i2);
+				return geometryBase_.connected(i1,i2);
 			}
 
 			std::string label() const
 			{
-				return geometryBase_->label();
+				return geometryBase_.label();
 			}
 
 			template<typename RealType_>	
@@ -218,9 +191,9 @@ namespace Dmrg {
 			
 			RealType calcValue(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
-				if (!geometryBase_->connected(i1,i2)) return 0.0;
+				if (!geometryBase_.connected(i1,i2)) return 0.0;
 
-				size_t dir = geometryBase_->calcDir(i1,i2);
+				size_t dir = geometryBase_.calcDir(i1,i2);
 				if (directions_[dir].constantValues()) {
 					return directions_[dir](edof1,edof2);
 				}
@@ -232,21 +205,10 @@ namespace Dmrg {
 			{
 				return edof1+i1*edof_+(edof2+i2*edof_)*linSize_*edof_;
 			}
-			
-			size_t getGeometry(const std::string& s) const
-			{
-				size_t x = 0;
-				if (s=="chain") x=GeometryDirectionType::CHAIN;
-				else if (s=="ladder") x=GeometryDirectionType::LADDER;
-				else if (s=="ladderx") x=GeometryDirectionType::LADDERX;
-				else if (s=="bathedcluster") x=GeometryDirectionType::BATHEDCLUSTER;
-				else throw std::runtime_error("unknown geometry\n");
-				return x;
-			}
 
 			size_t linSize_;
-			GeometryBaseType* geometryBase_;
 			size_t edof_;
+			GeometryBase geometryBase_;
 			std::vector<GeometryDirectionType> directions_;
 			std::vector<RealType> cachedValues_;
 	}; // class GeometryTerm

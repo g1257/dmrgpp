@@ -74,107 +74,72 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LadderX.h
+/*! \file Chain.h
  *
  *  DOC NEEDED FIXME
  */
-#ifndef LADDERX_H
-#define LADDERX_H
+#ifndef CHAIN_H
+#define CHAIN_H
 
-#include "GeometryBase.h"
-#include "Ladder.h"
 
 namespace Dmrg {
 	
-	class LadderX : public GeometryBase {
-			typedef Ladder LadderType;
+	class Chain  {
 		public:
-			enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_XPY,DIRECTION_XMY};
+			enum { DIRECTION_X };
 
-			LadderX(size_t linSize,size_t leg) : ladder_(linSize,leg),linSize_(linSize),leg_(leg)
+			Chain(size_t linSize) : linSize_(linSize)
 			{
 			}
 
-			virtual size_t getVectorSize(size_t dirId) const
+			size_t handle(size_t i,size_t j) const
 			{
-				switch (dirId) {
-				case DIRECTION_XPY:
-						return linSize_ - linSize_/leg_;
-				case DIRECTION_XMY:
-					return linSize_ - linSize_/leg_;
-				}
-				return ladder_.getVectorSize(dirId);
+				return (i<j) ? i : j;
 			}
 
-			virtual bool connected(size_t i1,size_t i2) const
+			size_t getVectorSize(size_t dirId) const
+			{
+				if (dirId!=DIRECTION_X)
+				throw std::runtime_error("Chain must have direction 0\n");
+				return linSize_-1;
+			}
+
+			bool connected(size_t i1,size_t i2) const
 			{
 				if (i1==i2) return false;
-				if (ladder_.connected(i1,i2)) return true;
-				size_t c1 = i1/leg_;
-				size_t c2 = i2/leg_;
-				size_t r1 = i1%leg_;
-				size_t r2 = i2%leg_;
-				if (c1==c2) return this->neighbors(r1,r2);
-				if (r1==r2) return this->neighbors(c1,c2);
-				return (this->neighbors(r1,r2) && this->neighbors(c1,c2));
+				return utils::neighbors(i1,i2);
 			}
 
 			// assumes i1 and i2 are connected
-			virtual size_t calcDir(size_t i1,size_t i2) const
+			size_t calcDir(size_t i1,size_t i2) const
 			{
-				if (ladder_.sameColumn(i1,i2)) return DIRECTION_Y;
-				if (ladder_.sameRow(i1,i2)) return DIRECTION_X;
-				size_t imin = (i1<i2) ? i1 : i2;
-				if (imin&1) return DIRECTION_XPY;
-				return DIRECTION_XMY;
+				return DIRECTION_X;
 			}
 
-			virtual bool fringe(size_t i,size_t smax,size_t emin) const
+			bool fringe(size_t i,size_t smax,size_t emin) const
 			{
-				bool a = (i<emin && i>=smax-1);
-				bool b = (i>smax && i<=emin+1);
-				if (smax & 1) return (a || b);
-				a = (i<emin && i>=smax-2);
-				b = (i>smax && i<=emin+2);
-				return (a || b);
-			}
+				return (i==smax || i==emin);
 
-			// assumes i1 and i2 are connected
-			virtual size_t handle(size_t i1,size_t i2) const
-			{
-				size_t dir = calcDir(i1,i2);
-				size_t imin = (i1<i2) ? i1 : i2;
-				switch(dir) {
-					case DIRECTION_X:
-						return imin;
-					case DIRECTION_Y:
-						return imin-imin/leg_;
-					case DIRECTION_XPY: // only checked for leg_=2
-						return (imin-1)/leg_;
-					case DIRECTION_XMY:// only checked for leg_=2
-						return imin/leg_;
-				}
-				throw std::runtime_error("handle: Unknown direction\n");
 			}
 
 			// siteNew2 is fringe in the environment
-			virtual size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
 			{
-				return smax+siteNew2-emin+1;
+				return smax+1;
 			}
 
-			virtual std::string label() const
+			std::string label() const
 			{
-				return "ladderx";
+				return "chain";
 			}
 
 		private:
 
-			LadderType ladder_; // owner
 			size_t linSize_;
 			size_t leg_;
-	}; // class LadderBath
+	}; // class Ladder
 } // namespace Dmrg 
 
 /*@}*/
-#endif // GEOMETRY_H
+#endif // LADDER_H
+
