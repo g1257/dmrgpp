@@ -207,14 +207,17 @@ The body of the constructor follows:
 				
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
+				RealType factor = 1.0;
 				size_t n = times_.size();
 				for (size_t i=0;i<n;i++) {
 					times_[i] = i*tau/(n-1);
-					weight_[i] = 1.0/(n+2);
+					weight_[i] = factor/(n+2);
 					sum += weight_[i];
 				}
 				sum -= weight_[0];
-				weight_[0] = weight_[n-1] = 2.0/(n+2);
+				sum -= weight_[n-1];
+				weight_[0] = weight_[n-1] = 2*factor/(n+2);
+				sum += weight_[n-1];
 				sum += weight_[0];
 				
 				gsWeight_=1.0-sum;
@@ -526,6 +529,7 @@ When stages are advancing we need to weight each target WFtransformed  state  wi
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					waveFunctionTransformation_.setInitialVector(vv[i],
 						targetVectors_[i],basisS_,basisE_,basisSE_);
+					if (norm(vv[i])<1e-6) continue;
 					VectorWithOffsetType w= weight_[i]*vv[i];
 					v += w;
 				}
@@ -557,11 +561,11 @@ This is done only for debugging purposes, and uses the function \verb|test|.
 			{
 				size_t site = block[0];
 				std::cerr<<"-------------&*&*&* Cocoon output starts\n";
-				test(psi_,direction,"<PSI|A|PSI>",site);
+				test(psi_,psi_,direction,"<PSI|A|PSI>",site);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
-					test(targetVectors_[j],direction,s,site);
+					test(targetVectors_[j],psi_,direction,s,site);
 				}
 				std::cerr<<"-------------&*&*&* Cocoon output ends\n";
 			}
@@ -824,12 +828,11 @@ And now for each symmetry sector:
 				 		//,useReflection_);
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			
-				size_t mode = LanczosSolverType::WITH_INFO;
 				RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 				size_t iter= ProgramGlobals::LanczosSteps;
 
 				//srand48(3243447);
-				LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,parallelRank_,mode);
+				LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,parallelRank_);
 				
 				TridiagonalMatrixType ab;
 				size_t total = phi.effectiveSize(i0);
@@ -938,7 +941,8 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 @o TimeStepTargetting.h -t
 @{
 			void test(	
-					const VectorWithOffsetType& src,
+					const VectorWithOffsetType& src1,
+					const VectorWithOffsetType& src2,
 					size_t systemOrEnviron,
 				 	const std::string& label,
 					size_t site) const
@@ -946,27 +950,28 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 				VectorWithOffsetType dest;
 				OperatorType A = tstStruct_.aOperators[0];
 				CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
-				CrsMatrix<ComplexType> tmpCt;
+				/*CrsMatrix<ComplexType> tmpCt;
 				transposeConjugate(tmpCt,tmpC);
-				multiply(A.data,tmpCt,tmpC);
-				A.fermionSign = 1;
-				//A.data = tmpC;
+				multiply(A.data,tmpCt,tmpC);*/
+				A.fermionSign = -1;
+				A.data = tmpC;
 				FermionSign fs(basisS_,tstStruct_.electrons);
-				applyOpLocal_(dest,src,A,fs,systemOrEnviron);
+				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
 				ComplexType sum = 0;
 				for (size_t ii=0;ii<dest.sectors();ii++) {
 					size_t i = dest.sector(ii);
-					for (size_t jj=0;jj<dest.sectors();jj++) {
-						size_t j = src.sector(jj);
+					size_t offset1 = dest.offset(i);
+					for (size_t jj=0;jj<src2.sectors();jj++) {
+						size_t j = src2.sector(jj);
+						size_t offset2 = src2.offset(j);
 						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
-						size_t offset = dest.offset(i);
 						for (size_t k=0;k<dest.effectiveSize(i);k++) 
-							sum+= dest[k+offset] * conj(src[k+offset]);
+							sum+= dest[k+offset1] * conj(src2[k+offset2]);
 					}
 				}
 				std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_;
-				std::cerr<<" "<<label<<std::norm(src)<<" "<<std::norm(dest)<<"\n";
+				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
 			}
 @}
 

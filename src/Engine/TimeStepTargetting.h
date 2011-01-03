@@ -270,8 +270,7 @@ namespace Dmrg {
 				else stage_[i]=WFT_NOADVANCE;
 				if (stage_[i] == OPERATOR) checkOrder(i);
 
-				// Do not advance near the border, somehow it causes stability problems:
-				if (timesWithoutAdvancement >= tstStruct_.advanceEach && !isBorder(site)) {
+				if (timesWithoutAdvancement >= tstStruct_.advanceEach) {
 					stage_[i] = WFT_ADVANCE;
 					if (i==lastI) {
 						currentTime_ += tstStruct_.tau;
@@ -332,13 +331,6 @@ namespace Dmrg {
 					test(targetVectors_[j],psi_,direction,s,site);
 				}
 				std::cerr<<"-------------&*&*&* Cocoon output ends\n";
-			}
-
-			bool isBorder(size_t site) const
-			{
-				size_t totalSites = basisSE_.block().size();
-				if (site==2 || site == totalSites-3) return true;
-				return false;
 			}
 
 			void checkOrder(size_t i) const
@@ -651,18 +643,11 @@ namespace Dmrg {
 				VectorWithOffsetType dest;
 				OperatorType A = tstStruct_.aOperators[0];
 				CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
-				//std::cerr<<tmpC;
-				//throw std::runtime_error("testing\n");
-				CrsMatrix<ComplexType> tmpCt;
-				//transposeConjugate(tmpCt,tmpC);
-				//transposeConjugate(A.data,tmpC);
-				//multiply(A.data,tmpCt,tmpC);
-				A.data = tmpC;
-				std::cerr<<"##########\n";
-				std::cerr<<A.data;
-				std::cerr<<"############\n";
+				/*CrsMatrix<ComplexType> tmpCt;
+				transposeConjugate(tmpCt,tmpC);
+				multiply(A.data,tmpCt,tmpC);*/
 				A.fermionSign = -1;
-				//A.data = tmpC;
+				A.data = tmpC;
 				FermionSign fs(basisS_,tstStruct_.electrons);
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
