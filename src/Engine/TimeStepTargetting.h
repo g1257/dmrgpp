@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	template<
-			template<typename,typename> class LanczosSolverTemplate,
+			template<typename,typename,typename> class LanczosSolverTemplate,
    			template<typename,typename> class InternalProductTemplate,
 	 		typename WaveFunctionTransformationType_,
     			typename ModelType_,
@@ -102,7 +102,7 @@ namespace Dmrg {
 			//typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
 			typedef std::vector<ComplexType> ComplexVectorType;
 			//typedef std::VectorWithOffset<ComplexType> VectorWithOffsetType;
-			typedef LanczosSolverTemplate<InternalProductType,ComplexVectorType> LanczosSolverType;
+			typedef LanczosSolverTemplate<RealType,InternalProductType,ComplexVectorType> LanczosSolverType;
 			typedef std::vector<RealType> VectorType;
 			//typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			typedef psimag::Matrix<ComplexType> ComplexMatrixType;

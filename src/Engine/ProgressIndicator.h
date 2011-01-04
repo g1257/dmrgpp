@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <vector>
 
 namespace Dmrg {

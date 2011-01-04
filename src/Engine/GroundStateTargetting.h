@@ -90,7 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	
 	template<
-			template<typename,typename> class LanczosSolverTemplate,
+			template<typename,typename,typename> class LanczosSolverTemplate,
   			template<typename,typename> class InternalProductTemplate,
      			typename WaveFunctionTransformationType_,
      			typename ModelType_,
@@ -107,7 +107,7 @@ namespace Dmrg {
 			typedef typename ModelType::RealType RealType;
 			typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 			typedef std::vector<RealType> VectorType;
-			typedef LanczosSolverTemplate<InternalProductType,VectorType> LanczosSolverType;
+			typedef LanczosSolverTemplate<RealType,InternalProductType,VectorType> LanczosSolverType;
 			typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
 			typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			//typedef psimag::Matrix<RealType> MatrixType;

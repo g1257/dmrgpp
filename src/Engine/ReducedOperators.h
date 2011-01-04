@@ -467,7 +467,7 @@ namespace Dmrg {
 
 			void createReducedOperator(DenseMatrixType& opDest1,const OperatorType& opSrc)
 			{
-				for (int i=0;i<opSrc.data.rank();i++) {
+				for (size_t i=0;i<opSrc.data.rank();i++) {
 					PairType jm = thisBasis_->jmValue(i);
 					for (int l=opSrc.data.getRowPtr(i);l<opSrc.data.getRowPtr(i+1);l++) {
 						size_t iprime = opSrc.data.getCol(l);

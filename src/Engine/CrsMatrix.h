@@ -243,7 +243,7 @@ namespace Dmrg {
 		void operator+=(CrsMatrix<T> const &m) 
 		{
 			CrsMatrix<T> c;
-			if (this->size_>=m.rank()) operatorPlus(c,*this,m);
+			if (size_t(this->size_)>=m.rank()) operatorPlus(c,*this,m);
 			else operatorPlus(c,m,*this);
 			*this =c;
 		}
@@ -269,7 +269,7 @@ namespace Dmrg {
 		}
 		
 
-		int rank() const { return size_; }
+		size_t rank() const { return size_; }
 
 		void pushCol(int i) { colind_.push_back(i); }
 
@@ -544,8 +544,8 @@ namespace Dmrg {
 	template<typename S,typename S2>
 	void multiply(CrsMatrix<S> &C,CrsMatrix<S> const &A,CrsMatrix<S2> const &B)
 	{
-		int i,j,k,l,s,mlast,itemp,jbk;
-		int n = A.rank();
+		int j,k,s,mlast,itemp,jbk;
+		size_t n = A.rank();
 		std::vector<int> ptr(n),index(n);
 		std::vector<S> temp(n);
 		S tmp;
@@ -556,9 +556,9 @@ namespace Dmrg {
 		
 		// mlast pointer to the last place we updated in the C vector 
 		mlast = 0;
-		for (l=0;l<n;l++) ptr[l] = -1;
+		for (size_t l=0;l<n;l++) ptr[l] = -1;
 		// over the rows of A
-		for (i=0;i<n;i++) {
+		for (size_t i=0;i<n;i++) {
 			C.setRow(i,mlast);
 			// start calculations for row 
 			itemp = 0;
@@ -711,8 +711,7 @@ namespace Dmrg {
 	template<class T>
 	void operatorPlus(CrsMatrix<T> &A,CrsMatrix<T> const &B,CrsMatrix<T> const &C)
 	{
-		int i,k,counter;
-		int n = B.rank();
+		size_t n = B.rank();
 		T tmp;
 
 		if (n<C.rank()) {
@@ -724,18 +723,18 @@ namespace Dmrg {
 		std::vector<int> index;
 		A.resize(n);
 
-		counter=0;
-		for (k=0;k<n;k++) valueTmp[k]= static_cast<T>(0.0);
+		size_t counter=0;
+		for (size_t k2=0;k2<n;k2++) valueTmp[k2]= static_cast<T>(0.0);
 		
-		for (i = 0; i < n; i++) {
-
+		for (size_t i = 0; i < n; i++) {
+			int k;
 			A.setRow(i,counter);
 
 			if (i<C.rank()) {
 				// inspect this
 				index.clear();
 				for (k=B.getRowPtr(i);k<B.getRowPtr(i+1);k++) {
-					if (B.getCol(k)>=n || B.getCol(k)<0) throw std::runtime_error("operatorPlus (1)\n");
+					if (B.getCol(k)<0 || size_t(B.getCol(k))>=n) throw std::runtime_error("operatorPlus (1)\n");
 					valueTmp[B.getCol(k)]=B.getValue(k);
 					index.push_back(B.getCol(k));
 				}
@@ -753,7 +752,7 @@ namespace Dmrg {
 				for (size_t kk=0;kk<index.size();kk++) {
 					if (k==index[kk]) continue;
 					k=index[kk];
-					if (k>=n || k<0) throw std::runtime_error("operatorPlus (3)\n");
+					if (k<0 || size_t(k)>=n) throw std::runtime_error("operatorPlus (3)\n");
 					tmp = valueTmp[k];
 					if (tmp!=static_cast<T>(0.0)) {
 						A.pushCol(k);
@@ -777,7 +776,7 @@ namespace Dmrg {
 	template<typename T>
 	bool isHermitian(const CrsMatrix<T>& A)
 	{
-		for (int i=0;i<A.rank();i++) {
+		for (size_t i=0;i<A.rank();i++) {
 			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 				if (psimag::norm(A.getValue(k)-std::conj(A(A.getCol(k),i)))>1e-6) return false;
 			}
@@ -786,29 +785,27 @@ namespace Dmrg {
 	}
 
 	template<class T>
-	void sumBlock(CrsMatrix<T> &A,CrsMatrix<T> const &B,int offset)
+	void sumBlock(CrsMatrix<T> &A,CrsMatrix<T> const &B,size_t offset)
 	{
 		int counter=0;
-		int i,ii,j,jj;
-		T tmp;
 		CrsMatrix<T> Bfull;
 		
 		Bfull.resize(A.rank());
-		for (i=0;i<offset;i++) Bfull.setRow(i,counter);
-		for (ii=0;ii<B.rank();ii++) {
-			i=ii+offset;
+		for (size_t i=0;i<offset;i++) Bfull.setRow(i,counter);
+		for (size_t ii=0;ii<B.rank();ii++) {
+			size_t i=ii+offset;
 			Bfull.setRow(i,counter);
-			for (jj=B.getRowPtr(ii);jj<B.getRowPtr(ii+1);jj++) {
-				j = B.getCol(jj)+offset;
-				tmp  = B.getValue(jj);
+			for (int jj=B.getRowPtr(ii);jj<B.getRowPtr(ii+1);jj++) {
+				size_t j = B.getCol(jj)+offset;
+				T tmp  = B.getValue(jj);
 				Bfull.pushCol(j);
 				Bfull.pushValue(tmp);
 				counter++;
 			}
 		}
-		if (i>A.rank()) throw std::runtime_error("sumBlock\n");
-		for (i=B.rank()+offset;i<A.rank();i++) Bfull.setRow(i,counter);
-		Bfull.setRow(i,counter);
+		//if (i>A.rank()) throw std::runtime_error("sumBlock\n");
+		for (size_t i=B.rank()+offset;i<A.rank();i++) Bfull.setRow(i,counter);
+		Bfull.setRow(A.rank(),counter);
 		A += Bfull;
 	}
 	

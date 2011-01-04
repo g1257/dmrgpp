@@ -80,7 +80,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef CONCURRENCY_SERIAL_HEADER_H
 #define CONCURRENCY_SERIAL_HEADER_H
+#include <vector>
 #include "Concurrency.h"
+
 namespace Dmrg {
 	//! Implements the Concurrency.h interface in the Serial case
 	template<typename FieldType>

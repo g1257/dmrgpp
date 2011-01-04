@@ -342,7 +342,7 @@ namespace Dmrg {
 		{ 
 			int m  = m_;
 			size_t offset = basis1_.partition(m);
-			int k,r,alphaPrime=0,betaPrime=0;
+			int k,alphaPrime=0,betaPrime=0;
 			int bs = basis1_.partition(m+1)-offset;
 			size_t ns=basis2_.size();
 			SparseMatrixType hamiltonian;
@@ -364,6 +364,7 @@ namespace Dmrg {
 				matrixBlock.setRow(i-offset,counter);
 				size_t alpha,beta;
 				utils::getCoordinates(alpha,beta,basis1_.permutation(i),ns);
+				size_t r=beta;
 				if (option) {
 					betaPrime=beta;
 					r = alpha;

@@ -102,8 +102,8 @@ namespace Dmrg {
 		class IoType,
 		template<typename> class WaveFunctionTransformationTemplate,
   		template<typename> class StackTemplate,
-    		template<template<typename,typename> class,template<typename,typename> class,
-      			typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
+  		template<template<typename,typename,typename> class,template<typename,typename> class,
+  		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
 	 	template<typename> class VectorWithOffsetTemplate>
 	class DmrgSolver {
 			

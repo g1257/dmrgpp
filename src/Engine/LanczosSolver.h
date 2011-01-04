@@ -96,11 +96,10 @@ namespace Dmrg {
 	//! 	matrixVectorProduct(std::vector<RealType>& x,const std::vector<RealType>& const y) 
 	//!    	   member function that implements the operation x += Hy
 
-	template<typename MatrixType,typename VectorType>
+	template<typename RealType,typename MatrixType,typename VectorType>
 	class LanczosSolver {
 		
 	public:
-		typedef typename MatrixType::RealType RealType;
 		typedef MatrixType LanczosMatrixType;
 		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
@@ -119,8 +118,8 @@ namespace Dmrg {
 
 		void computeGroundState(RealType& gsEnergy,VectorType& z)
 		{
-			if (mode_ & DEBUG) return computeGroundStateTest(gsEnergy,z);
-			
+
+
 			size_t n =mat_.rank();
 			RealType atmp=0.0;
 			RealType tmp;
@@ -130,6 +129,10 @@ namespace Dmrg {
 				utils::myRandomT(tmp);
 				y[i]=tmp;
 				atmp += utils::myProductT(y[i],y[i]);
+			}
+			if (mode_ & DEBUG) {
+				computeGroundStateTest(gsEnergy,z,y);
+				return;
 			}
 			atmp = 1.0 / sqrt (atmp);
 			for (size_t i = 0; i < n; i++) y[i] *= atmp;

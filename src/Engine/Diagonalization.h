@@ -302,7 +302,7 @@ namespace Dmrg {
 			int n = modelHelper.size();
 			if (verbose_) std::cerr<<"Lanczos: About to do block number="<<i<<" of size="<<n<<"\n";
 			typedef InternalProductTemplate<typename SomeVectorType::value_type,ModelType> MyInternalProduct;
-			typedef LanczosSolver<MyInternalProduct,SomeVectorType> LanczosSolverType;
+			typedef LanczosSolver<RealType,MyInternalProduct,SomeVectorType> LanczosSolverType;
 			typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			
 			LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,concurrency_.rank(),parameters_.options);

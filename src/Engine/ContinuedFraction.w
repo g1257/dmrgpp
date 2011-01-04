@@ -100,6 +100,7 @@ Now let us look at the private data of this class:
 @{
 const ModelType& model_;
 ProgressIndicator progress_;
+SparseMatrixType hamiltonian_;
 RealType gsEnergy_;
 VectorType gsVector_;
 @}
@@ -117,12 +118,9 @@ ContinuedFraction(const ModelType& model)
 	: model_(model),progress_("ContinuedFraction",0)
 {
 	printHeader();
-	// task 1: Compute Hamiltonian and c operators
-	SparseMatrixType hamiltonian;
-	computeHamiltonian(hamiltonian);
-				
+	// task 1: Compute Hamiltonian and
 	// task 2: Compute ground state |phi>
-	computeGroundState(hamiltonian);
+	computeGroundState();
 	
 	// task 3: compute |initVector> =\sum_x c_x|phi>, where 
 	// c_x are some operator
@@ -146,12 +144,23 @@ This is the Green function for site i, and site j, at time t.
 It should be complex, FIXME:
 @d publicfunctions
 @{
-			RealType greenFunction(size_t i,size_t j,RealType t) const
-			{
-				throw std::runtime_error("Unimplemented\n");
-			}
+@<gsEnergy@>
+@<greenFunction@>
 @}
 
+@d gsEnergy
+@{
+RealType gsEnergy() const
+{
+	return gsEnergy_;
+}
+@}
+
+@d greenFunction
+@{
+// nothing here yet
+@}
+	
 The private functions are as follows:
 
 @d privatefunctions
@@ -178,6 +187,8 @@ void computeHamiltonian(SparseMatrixType& hamiltonian)
 @{
 void computeGroundState(const SparseMatrixType& hamiltonian)
 {
+	computeHamiltonian(hamiltonian_);
+				
 	RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 	size_t iter= ProgramGlobals::LanczosSteps;
 	size_t parallelRank = 0;
@@ -193,8 +204,14 @@ void computeGroundState(const SparseMatrixType& hamiltonian)
 void computeInitVector(VectorType& initVector)
 {
 	VectorType tmpVector;
-	creationMatrix[6].multiply(tmpVector,gsVector);
-	creationMatrix[8].multiply(initVector,gsVector);
+	size_t i = 6;
+	size_t j = 6;
+	size_t spin = ModelType::SPIN_UP;
+	size_t destruction = ModelType::DESTRUCTION;
+	SparseMatrixType ci = model_.getOperator(destruction,i,spin);
+	SparseMatrixType cj = model_.getOperator(destruction,j,spin);
+	ci.multiply(tmpVector,gsVector);
+	cj.multiply(initVector,gsVector);
 	initVector += tmpVector;
 }
 @}

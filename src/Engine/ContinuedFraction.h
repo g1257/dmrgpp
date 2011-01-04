@@ -74,30 +74,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "ApplyOperatorLocal.h"
+#include "LanczosSolver.h"
 
 namespace Dmrg {
 	template<
-		template<typename,typename> class LanczosSolverTemplate,
     	typename ModelType_,
-	 	typename ConcurrencyType_,
-    	typename IoType_,
-       	template<typename> class VectorType>
+	 	typename ConcurrencyType_>
 	class ContinuedFraction  {
 	public:
 		
 		typedef ModelType_ ModelType;
 		typedef ConcurrencyType_ ConcurrencyType;
-		typedef IoType_ IoType;
 		typedef typename ModelType::RealType RealType;
-		typedef std::complex<RealType> ComplexType;
-		typedef typename ModelType::OperatorsType OperatorsType;
-		typedef std::vector<ComplexType> ComplexVectorType;
-		typedef LanczosSolverTemplate<InternalProductType,ComplexVectorType> LanczosSolverType;
-		typedef std::vector<RealType> VectorType;
-		typedef psimag::Matrix<ComplexType> ComplexMatrixType;
+		typedef typename ModelType::VectorType VectorType;
+		typedef typename ModelType::SparseMatrixType SparseMatrixType;
+		typedef typename VectorType::value_type FieldType;
+		typedef typename ModelType::BasisType BasisType;
+
+		typedef LanczosSolver<RealType,SparseMatrixType,VectorType> LanczosSolverType;
+		typedef psimag::Matrix<FieldType> MatrixType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-		typedef ComplexVectorType TargetVectorType;
 
 		static const size_t parallelRank_ = 0; // ContF needs to support concurrency FIXME
 		
@@ -105,14 +101,10 @@ namespace Dmrg {
 		ContinuedFraction(const ModelType& model)
 			: model_(model),progress_("ContinuedFraction",0)
 		{
-			printHeader();
-			// task 1: Compute Hamiltonian and c operators
-			SparseMatrixType hamiltonian;
-			std::vector<OperatorType> creationOps;
-			computeHamiltonian(hamiltonian,creationOps);
-						
+			//printHeader();
+			// task 1: Compute Hamiltonian and
 			// task 2: Compute ground state |phi>
-			computeGroundState(hamiltonian);
+			computeGroundState();
 			
 			// task 3: compute |initVector> =\sum_x c_x|phi>, where 
 			// c_x are some operator
@@ -121,7 +113,7 @@ namespace Dmrg {
 			MatrixType T;
 			
 			// task 4: tridiag H starting with |initVector>
-			tridiagonalize(T,initVector);
+			triDiagonalize(T,initVector);
 			
 			// task 5: diag. T and store the result
 			// to be able to produce GreenFuction(i,j)
@@ -129,33 +121,29 @@ namespace Dmrg {
 			diagonalizeAndStore(T,initVector);
 		}
 		
+		RealType gsEnergy() const
+		{
+			return gsEnergy_;
+		}
 		
-					RealType greenFunction(size_t i,size_t j,RealType t) const
-					{
-						throw std::runtime_error("Unimplemented\n");
-					}
-		
-	
 	private:
 		
 
-		void computeHamiltonian(SparseMatrixType& hamiltonian,
-				std::vector<OperatorType>& creationOps)
+		void computeHamiltonian(SparseMatrixType& hamiltonian)
 		{
-			BasisDataType q;
-			Block block(geometry.numberOfSites());
-			for (size_t i=0;i<block.size();i++) block[i] = i;
-			model.setNaturalBasis(creationMatrix,hamiltonian,q,block);
+			model_.setupHamiltonian(hamiltonian);
 		}
 		
 
-		void computeGroundState(const SparseMatrixType& hamiltonian)
+		void computeGroundState()
 		{
+			computeHamiltonian(hamiltonian_);
+						
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 			size_t iter= ProgramGlobals::LanczosSteps;
 			size_t parallelRank = 0;
 
-			LanczosSolverType lanczosSolver(hamiltonian,iter,eps,parallelRank);
+			LanczosSolverType lanczosSolver(hamiltonian_,iter,eps,parallelRank);
 
 			lanczosSolver.computeGroundState(gsEnergy_,gsVector_);
 		}
@@ -164,8 +152,16 @@ namespace Dmrg {
 		void computeInitVector(VectorType& initVector)
 		{
 			VectorType tmpVector;
-			creationMatrix[6].multiply(tmpVector,gsVector);
-			creationMatrix[8].multiply(initVector,gsVector);
+			size_t i = 6;
+			size_t j = 6;
+			size_t spin = ModelType::SPIN_UP;
+			size_t destruction = ModelType::DESTRUCTOR;
+			SparseMatrixType ci;
+			model_.getOperator(ci,destruction,i,spin);
+			SparseMatrixType cj;
+			model_.getOperator(cj,destruction,j,spin);
+			ci.matrixVectorProduct(tmpVector,gsVector_);
+			cj.matrixVectorProduct(initVector,gsVector_);
 			initVector += tmpVector;
 		}
 		
@@ -175,6 +171,13 @@ namespace Dmrg {
 			// tridiagonalize starting with tmpVector = c^\dagger_i|gsVector>
 			TridiagonalMatrixType ab;
 			MatrixType V;
+
+			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
+			size_t iter= ProgramGlobals::LanczosSteps;
+			size_t parallelRank = 0;
+
+			LanczosSolverType lanczosSolver(hamiltonian_,iter,eps,parallelRank);
+
 			lanczosSolver.tridiagonalDecomposition(initVector,ab,V);
 			ab.buildDenseMatrix(T);
 			//return lanczosSolver.steps();
@@ -183,19 +186,19 @@ namespace Dmrg {
 
 		void diagonalizeAndStore(MatrixType& T,const VectorType& initVector)
 		{
-			std::vector<>RealType> eig(T.n_row());
+			std::vector<RealType> eigs(T.n_row());
 			utils::diag(T,eigs,'V');
-			RealType norma = norm2(initVector);
+			//RealType norma = initVector*initVector;
+
 		}
-		
-		
 		
 		const ModelType& model_;
 		ProgressIndicator progress_;
+		SparseMatrixType hamiltonian_;
 		RealType gsEnergy_;
 		VectorType gsVector_;
 		
-	};
+	}; // class ContinuedFraction
 
 } // namespace Dmrg
 

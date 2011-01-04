@@ -274,7 +274,7 @@ namespace Dmrg {
      					const BasisWithOperatorsType& basis,
      					const std::vector<size_t>& basisrInverse)
 			{
-				for (int i=0;i<opSrc.data.rank();i++) {
+				for (size_t i=0;i<opSrc.data.rank();i++) {
 					PairType jm = basis.jmValue(i);
 					for (int l=opSrc.data.getRowPtr(i);l<opSrc.data.getRowPtr(i+1);l++) {
 						size_t iprime = opSrc.data.getCol(l);
