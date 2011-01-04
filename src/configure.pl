@@ -183,9 +183,11 @@ sub createMakefile
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
 	my $compiler = compilerName();
 	my $headerFiles = join(' ', glob("Engine/*.h Models/*/*.h Geometries/*.h"));
+	my @litProgFiles = glob("Engine/*.w Models/*/*.w Geometries/*.w");
 	if ($modelLocation=~/extendedhubbard1orb/i) {
 		$modelLocation = $modelLocation." -IModels/HubbardOneBand ";
 	}
+	my $litProgTargets = getLitProgTargets(\@litProgFiles);
 	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 print FOUT<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Modify configure.pl instead
@@ -214,14 +216,37 @@ dmrg:  \$(HEADERSH)
 observe:  \$(HEADERSH)
 	\$(CXX) -o observe \$(CPPFLAGS) observe.cpp \$(LDFLAGS)
 
+lanczos: \$(HEADERSH)
+	\$(CXX) -o lanczos \$(CPPFLAGS) lanczos.cpp \$(LDFLAGS)
+
 clean:
 	rm -f core* \$(EXENAME) *.o *.ii *.tt
 
+$litProgTargets
 ######## End of Makefile ########
 
 EOF
 	close(FOUT);
 	print STDERR "File Makefile has been written\n";
+}
+
+sub getLitProgTargets
+{
+	my ($array)=@_;
+	my $x = "";
+	my $litProgTool = "~/software/nuweb/nuweb -v -l  -s  -d ";
+	foreach my $f (@$array) {
+		my $fh = $f;
+		$fh =~ s/\.w$/\.h/;
+		$x = $x."$fh: $f\n";
+		my $dir = $f;
+		$dir =~ s/\/[^\/]+$/\//;
+		my $fnd = $f;
+		$fnd =~ s/$dir//;
+		$x = $x."\t cd $dir; $litProgTool $fnd\n";
+		$x = $x."\n";
+	}
+	return $x;
 }
 
 sub createDriver
