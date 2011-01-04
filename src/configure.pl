@@ -290,7 +290,7 @@ template<
 	template<typename,typename,typename> class ModelHelperTemplate,
 	template<typename,typename> class InternalProductTemplate,
 	template<typename> class VectorWithOffsetTemplate,
-	template<template<typename,typename> class,template<typename,typename> class,
+	template<template<typename,typename,typename> class,template<typename,typename> class,
 		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
 	typename MySparseMatrix
 >
@@ -482,8 +482,8 @@ void measureTimeObs(const ModelType& model,ObserverType& observe)
 
 	multiply(A,matrixNup,matrixNdown);
 	std::cout<<"#Using Matrix A:\\n";
-	for (int i=0;i<A.rank();i++) {
-		for (int j=0;j<A.rank();j++)
+	for (size_t i=0;i<A.rank();i++) {
+		for (size_t j=0;j<A.rank();j++)
 			std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
 		std::cout<<"\\n";
 	}
@@ -500,8 +500,8 @@ void measureTimeObs(const ModelType& model,ObserverType& observe)
 	A = matrixNup;
 	A += matrixNdown;
 	std::cout<<"#Using Matrix A:\\n";
-	for (int i=0;i<A.rank();i++) {
-		for (int j=0;j<A.rank();j++)
+	for (size_t i=0;i<A.rank();i++) {
+		for (size_t j=0;j<A.rank();j++)
 			std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
 		std::cout<<"\\n";
 	}
@@ -525,7 +525,7 @@ void measureTimeObs(const ModelType& model,ObserverType& observe)
 	template<typename,typename,typename> class ModelHelperTemplate,
 	template<typename,typename> class InternalProductTemplate,
 	template<typename> class VectorWithOffsetTemplate,
-	template<template<typename,typename> class,template<typename,typename> class,
+	template<template<typename,typename,typename> class,template<typename,typename> class,
 		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
 	typename MySparseMatrix
 >
