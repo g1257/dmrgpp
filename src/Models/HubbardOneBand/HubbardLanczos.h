@@ -78,11 +78,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename RealType_,typename ParametersType,typename GeometryType>
+	template<typename RealType_,typename IoInputType,typename ParametersType,
+		typename GeometryType>
 	class HubbardLanczos {
-		typedef psimag::Matrix<RealType_> MatrixType;
 		
+		typedef psimag::Matrix<RealType_> MatrixType; 
 	public:
+		
 		typedef BasisHubbardLanczos BasisType;
 		typedef typename BasisType::WordType WordType;
 		typedef RealType_ RealType;
@@ -91,12 +93,19 @@ namespace Dmrg {
 		enum {SPIN_UP,SPIN_DOWN};
 		enum {DESTRUCTOR,CONSTRUCTOR};
 		
-		HubbardLanczos(const ParametersType& mp,GeometryType& geometry)
-		: mp_(mp),geometry_(geometry)
+		
+		HubbardLanczos(IoInputType& io,const ParametersType& mp,GeometryType& geometry)
+			: mp_(mp),geometry_(geometry)
 		{
-			throw std::runtime_error("Need to set nup and ndown");
+			std::vector<RealType> qns;
+			io.read(qns,"TargetQuantumNumbers");
+			if (qns.size()<2) throw std::runtime_error("HubbardLanczos::ctor(...)\n");
+			nup_=geometry.numberOfSites()*qns[0];
+			ndown_=geometry.numberOfSites()*qns[1];
 		}
 		
+		
+
 		void setupHamiltonian(SparseMatrixType &matrix) const
 		{
 			size_t nsite = geometry_.numberOfSites();
@@ -105,17 +114,21 @@ namespace Dmrg {
 			setupHamiltonian(matrix,basis1,basis2);
 		}
 		
+
 		void getOperator(SparseMatrixType& matrix,size_t what,size_t i,size_t flavor) const
 		{
 			throw std::runtime_error("getOperator(...): Unimplemented\n");
 		}
-
+		
+		
 	private:
+		
 
 		RealType hoppings(size_t i,size_t j) const
 		{
 			return geometry_(i,0,j,0,0);
 		}
+		
 
 		void setupHamiltonian(SparseMatrixType &matrix,const BasisType &basis1,const BasisType& basis2) const
 		{
@@ -126,7 +139,6 @@ namespace Dmrg {
 			size_t nzero = countNonZero(diag,basis1,basis2);
 			
 			size_t nsite = geometry_.numberOfSites();
-			
 			
 			// Setup CRS matrix
 			matrix.resize(hilbert1*hilbert2,nzero);
@@ -162,7 +174,7 @@ namespace Dmrg {
 								WordType bra1= ket1 ^(BasisType::bitmask(i)|BasisType::bitmask(j));
 								size_t temp = perfectIndex(basis1,basis2,bra1,ket2);
 								matrix.setCol(nCounter,temp);
-								cTemp=hoppings(i,j)*doSign(ket1,ket2,i,j,0); // check SIGN FIXME
+								cTemp=hoppings(i,j)*doSign(ket1,ket2,i,j,SPIN_DOWN); // check SIGN FIXME
 								if (cTemp==0.0) {
 									std::cerr<<"ctemp=0 and hopping="<<hoppings(i,j)<<" and i="<<i<<" and j="<<j<<"\n";
 								}
@@ -173,7 +185,7 @@ namespace Dmrg {
 								WordType bra2= ket2 ^(BasisType::bitmask(i)|BasisType::bitmask(j));
 								size_t temp = perfectIndex(basis1,basis2,ket1,bra2);
 								matrix.setCol(nCounter,temp);
-								cTemp=hoppings(i,j)*doSign(ket1,ket2,i,j,1); // Check SIGN FIXME
+								cTemp=hoppings(i,j)*doSign(ket1,ket2,i,j,SPIN_UP); // Check SIGN FIXME
 								matrix.setValues(nCounter,cTemp);
 								nCounter++;					
 							}
@@ -186,58 +198,6 @@ namespace Dmrg {
 		}
 		
 
-		/*double calcNiup(int iind,int jind,vector<word> const &basis1,vector<word> const &basis2,vector<Complex> const &gsVector,
-		Parameters const &ether)
-		{
-			int hilbert1=basis1.size();
-			int hilbert2=basis2.size();
-			word bra1,bra2,ket1,ket2,s1j,s2j,s1i,s2i;
-			int temp,ispace1,ispace2;
-			double sum=0;
-			double normaliz=0;
-				
-			for (ispace1=0;ispace1<hilbert1*hilbert2;ispace1++) {	
-				normaliz += real(conj(gsVector[ispace1])*gsVector[ispace1]);
-			}
-			cout<<"Normalization="<<normaliz<<endl;
-			
-			for (ispace1=0;ispace1<hilbert1;ispace1++) {
-				ket1 = basis1[ispace1];
-				// cout<<"here ket1="<<ket1<<endl;
-				temp = perfectIndex(basis1, ket1,ether);
-				
-				for (ispace2=0;ispace2<hilbert2;ispace2++) {
-					ket2 = basis2[ispace2];
-					s1i=(ket1 & ether.bitmask[iind]);
-					s2i=(ket2 & ether.bitmask[iind]);
-					if (s1i>0) s1i=1;
-					if (s2i>0) s2i=1;
-					s1j= (ket1 & ether.bitmask[jind]);
-					s2j= (ket2 & ether.bitmask[jind]);
-					if (s1j>0) s1j=1;
-					if (s2j>0) s2j=1;
-					if (s1i+s1j==1) {
-						bra1= ket1 ^(ether.bitmask[iind]|ether.bitmask[jind]);
-						temp = perfectIndex(basis1,basis2,bra1,ket2,ether);
-						sum += real(conj(gsVector[ispace1+hilbert1*ispace2])*gsVector[temp])*doSign(ket1,ket2,iind,jind,0,ether); 
-					}
-					if (s2i+s2j==1) {
-						bra2= ket2 ^(ether.bitmask[iind]|ether.bitmask[jind]);
-						temp = perfectIndex(basis1,basis2,ket1,bra2,ether);
-						sum += real(conj(gsVector[ispace1+hilbert1*ispace2])*gsVector[temp])*doSign(ket1,ket2,iind,jind,1,ether); 							
-					}
-					if (s1i==1 && iind==jind) {
-						sum += real(conj(gsVector[ispace1+hilbert1*ispace2])*gsVector[ispace1+hilbert1*ispace2]);
-					}
-					if (s2i==1 && iind==jind) {
-						sum += real(conj(gsVector[ispace1+hilbert1*ispace2])*gsVector[ispace1+hilbert1*ispace2]); 
-					}
-					 
-				}
-			}
-			return sum;
-		}*/
-		
 		size_t countNonZero(MatrixType& diag,const BasisType &basis1,const BasisType& basis2) const
 		{
 			size_t hilbert1=basis1.size();
@@ -259,7 +219,7 @@ namespace Dmrg {
 						
 						// Hubbard term
 						if (s1i>0 && s2i>0 ) s += mp_.hubbardU[i];
-						
+								
 						// Potential term
 						if (s1i>0) s += mp_.potentialV[i];
 						if (s2i>0) s += mp_.potentialV[i];
@@ -288,6 +248,7 @@ namespace Dmrg {
 			return nzero;
 		}
 		
+
 		size_t perfectIndex(const BasisType& basis1,const BasisType& basis2,WordType ket1,WordType ket2) const
 		{
 			size_t hilbert2=basis2.size();
@@ -296,6 +257,7 @@ namespace Dmrg {
 
 			return n2 + n1*hilbert2;
 		}
+		
 
 		int doSign(WordType a, WordType b,size_t i,size_t j,size_t sector) const
 		{
@@ -309,7 +271,7 @@ namespace Dmrg {
 			WordType mask = a ^  b;
 			mask &= ((1 << (i+1)) - 1) ^ ((1 << j) - 1);
 			int s=(BasisType::bitcnt (mask) & 1) ? -1 : 1; // Parity of single occupied between i and j
-			
+
 			if (sector==SPIN_DOWN) { // Is there a down at j?
 				if (BasisType::bitmask(j) & b) s = -s;
 			}
@@ -340,7 +302,7 @@ namespace Dmrg {
 			if (sector==SPIN_UP) { // Is there an up at i?
 				if (BasisType::bitmask(i) & a) s = -s;
 			}
-			
+
 			return s;
 		}
 		
@@ -348,10 +310,10 @@ namespace Dmrg {
 		
 		const ParametersType& mp_;
 		const GeometryType& geometry_;
-		size_t nup_,ndown_;
+		size_t nup_;
+		size_t ndown_;
 		
-	}; // class HubbardLanczos
-	
-} // namespace Dmrg
+	}; // class HubbardLanczos 
+} // namespace
 #endif
 

@@ -95,13 +95,12 @@ namespace Dmrg {
 		typedef psimag::Matrix<FieldType> MatrixType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 
-		static const size_t parallelRank_ = 0; // ContF needs to support concurrency FIXME
-		
+		static const size_t parallelRank_ = 0; // ContF needs to support concurrency FIXME 
 		
 		ContinuedFraction(const ModelType& model)
 			: model_(model),progress_("ContinuedFraction",0)
 		{
-			//printHeader();
+			// printHeader();
 			// task 1: Compute Hamiltonian and
 			// task 2: Compute ground state |phi>
 			computeGroundState();
@@ -119,35 +118,37 @@ namespace Dmrg {
 			// to be able to produce GreenFuction(i,j)
 			// analytically
 			diagonalizeAndStore(T,initVector);
-		}
+		} 
 		
+
 		RealType gsEnergy() const
 		{
 			return gsEnergy_;
-		}
-		
-	private:
-		
+		} 
 
-		void computeHamiltonian(SparseMatrixType& hamiltonian)
-		{
-			model_.setupHamiltonian(hamiltonian);
-		}
+		// nothing here yet  
+	
+	private:
 		
 
 		void computeGroundState()
 		{
-			computeHamiltonian(hamiltonian_);
-						
+			model_.setupHamiltonian(hamiltonian_);
+			MatrixType fm;
+			crsMatrixToFullMatrix(fm,hamiltonian_);
+			std::cerr<<fm;
+			if (!isHermitian(fm)) throw std::runtime_error("Hamiltonian non Hermitian\n");
+			//std::cerr<<hamiltonian_;
+			std::cerr<<"Done setting up Hamiltonian\n";
+
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 			size_t iter= ProgramGlobals::LanczosSteps;
 			size_t parallelRank = 0;
 
 			LanczosSolverType lanczosSolver(hamiltonian_,iter,eps,parallelRank);
-
+			gsVector_.resize(hamiltonian_.rank());
 			lanczosSolver.computeGroundState(gsEnergy_,gsVector_);
-		}
-		
+		} 
 
 		void computeInitVector(VectorType& initVector)
 		{
@@ -163,8 +164,7 @@ namespace Dmrg {
 			ci.matrixVectorProduct(tmpVector,gsVector_);
 			cj.matrixVectorProduct(initVector,gsVector_);
 			initVector += tmpVector;
-		}
-		
+		} 
 
 		void triDiagonalize(MatrixType& T,const VectorType& initVector)
 		{
@@ -181,25 +181,21 @@ namespace Dmrg {
 			lanczosSolver.tridiagonalDecomposition(initVector,ab,V);
 			ab.buildDenseMatrix(T);
 			//return lanczosSolver.steps();
-		}
-		
+		} 
 
 		void diagonalizeAndStore(MatrixType& T,const VectorType& initVector)
 		{
 			std::vector<RealType> eigs(T.n_row());
 			utils::diag(T,eigs,'V');
-			//RealType norma = initVector*initVector;
-
-		}
+			// RealType norma = norm2(initVector);
+		}  
 		
 		const ModelType& model_;
 		ProgressIndicator progress_;
 		SparseMatrixType hamiltonian_;
 		RealType gsEnergy_;
-		VectorType gsVector_;
-		
+		VectorType gsVector_; 
 	}; // class ContinuedFraction
-
 } // namespace Dmrg
 
-#endif
+#endif 

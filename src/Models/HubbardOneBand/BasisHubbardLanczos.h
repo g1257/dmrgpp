@@ -77,16 +77,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	
 	class BasisHubbardLanczos {
-
 	public:
+		
 		typedef unsigned int long long WordType;
 		static size_t nsite_;
 		static psimag::Matrix<size_t> comb_;
-		static std::vector<WordType> bitmask_;
-
+		static std::vector<WordType> bitmask_; 
+		
 		BasisHubbardLanczos(size_t nsite, size_t npart) : npart_(npart)
 		{
-
 			if (nsite_>0 && nsite!=nsite_)
 				throw std::runtime_error("BasisHubbardLanczos: All basis must have same number of sites\n");
 			nsite_ = nsite;
@@ -109,6 +108,7 @@ namespace Dmrg {
 				data_[0]=0;
 				return;
 			}
+			
 			/* define basis states */
 			WordType ket = (1ul<<npart)-1;
 			for (size_t i=0;i<hilbert;i++) {
@@ -120,14 +120,15 @@ namespace Dmrg {
 				ket = ((ket+1)<<n) ^ ((1<<m)-1);
 			}
 			size_ = hilbert;
-		}
+		} 
+		
 
-		size_t size() const { return size_; }
+		size_t size() const { return size_; } 
 
 		const WordType& operator[](size_t i) const
 		{
 			return data_[i];
-		}
+		} 
 
 		size_t perfectIndex(WordType state) const
 		{
@@ -136,16 +137,16 @@ namespace Dmrg {
 				if (state&1) n += comb_(b,c++);
 
 			return n;
-		}
+		} 
 
 		static const WordType& bitmask(size_t i)
 		{
 			return bitmask_[i];
-		}
+		} 
 
 		static int bitcnt (WordType b)
 		{
-#if (ULONG_MAX == 0xfffffffful)
+		#if (ULONG_MAX == 0xfffffffful)
 			b = (0x55555555 & b) + (0x55555555 & (b >> 1));
 			b = (0x33333333 & b) + (0x33333333 & (b >> 2));
 			b = (0x0f0f0f0f & b) + (0x0f0f0f0f & (b >> 4));
@@ -153,7 +154,7 @@ namespace Dmrg {
 			b = (0x0000ffff & b) + (0x0000ffff & (b >> 16));
 
 			return (int) b;
-#else
+		#else
 			b = (0x5555555555555555 & b) + (0x5555555555555555 & (b >> 1));
 			b = (0x3333333333333333 & b) + (0x3333333333333333 & (b >> 2));
 			b = (0x0f0f0f0f0f0f0f0f & b) + (0x0f0f0f0f0f0f0f0f & (b >> 4));
@@ -162,10 +163,11 @@ namespace Dmrg {
 			b = (0x00000000ffffffff & b) + (0x00000000ffffffff & (b >> 32));
 
 			return (int) b;
-#endif
-		}
+		#endif
+		}  
 
 	private:
+		
 
 		void doCombinatorial()
 		{
@@ -184,7 +186,7 @@ namespace Dmrg {
 				for (;m<=n/2;m++,cnm=cnm*j/i,i++,j--)
 					comb_(n,m) = comb_(n,n-m) = cnm;
 			}
-		}
+		} 
 
 		void doBitmask()
 		{
@@ -192,18 +194,19 @@ namespace Dmrg {
 			bitmask_[0]=1ul;
 			for (size_t i=1;i<nsite_;i++)
 				bitmask_[i] = bitmask_[i-1]<<1;
-
-		}
-
+		} 
+		
+		
 		size_t size_;
 		size_t npart_;
 		std::vector<WordType> data_;
-
+		
 	}; // class BasisHubbardLanczos
 
 	size_t BasisHubbardLanczos::nsite_=0;
 	psimag::Matrix<size_t> BasisHubbardLanczos::comb_;
-	std::vector<typename BasisHubbardLanczos::WordType> BasisHubbardLanczos::bitmask_;
+	std::vector<typename BasisHubbardLanczos::WordType> BasisHubbardLanczos::bitmask_; 
+	
 } // namespace
 #endif
 
