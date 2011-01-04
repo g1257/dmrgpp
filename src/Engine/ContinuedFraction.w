@@ -29,7 +29,7 @@
 \section{Continued Fractions for Dynamic Observables}
 This class implements the dynamic observable computation described in
 Rev. Mod. Phys. 66, 763 (1993), pages 776ff. 
-Usually this algorithm is not at all accurate for the DMRG since
+Usually, this algorithm is not at all accurate for the DMRG since
 there are so few states due to the truncation.
 However, one use of this algorithm is to check the time-step targetting 
 (implemented in TimeStepTargetting.w) with a lanczos-only approach.
@@ -119,8 +119,7 @@ ContinuedFraction(const ModelType& model)
 	printHeader();
 	// task 1: Compute Hamiltonian and c operators
 	SparseMatrixType hamiltonian;
-	std::vector<OperatorType> creationOps;
-	computeHamiltonian(hamiltonian,creationOps);
+	computeHamiltonian(hamiltonian);
 				
 	// task 2: Compute ground state |phi>
 	computeGroundState(hamiltonian);
@@ -166,13 +165,12 @@ The private functions are as follows:
 
 @d computeHamiltonian
 @{
-void computeHamiltonian(SparseMatrixType& hamiltonian,
-		std::vector<OperatorType>& creationOps)
+void computeHamiltonian(SparseMatrixType& hamiltonian)
 {
-	BasisDataType q;
-	Block block(geometry.numberOfSites());
-	for (size_t i=0;i<block.size();i++) block[i] = i;
-	model.setNaturalBasis(creationMatrix,hamiltonian,q,block);
+	BasisType basis1(nsite,npart1,nhilbert1);
+	BasisType basis2(nsite,npart2,nhilbert2);
+	
+	model_.setupHamiltonian(hamiltonian,basis1,basis2);
 }
 @}
 
