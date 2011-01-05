@@ -86,6 +86,7 @@ namespace Dmrg {
 		typedef ModelType_ ModelType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename ModelType::RealType RealType;
+		typedef typename std::complex<RealType> ComplexType;
 		typedef typename ModelType::VectorType VectorType;
 		typedef typename ModelType::SparseMatrixType SparseMatrixType;
 		typedef typename VectorType::value_type FieldType;
@@ -128,7 +129,27 @@ namespace Dmrg {
 
 			norma = initVector*initVector;
 		}
-		 
+		
+
+		ComplexType continuedFraction(ComplexType z,const TridiagonalMatrixType& ab) const
+		{
+			static MatrixType T;
+			static bool firstcall = true;
+			static std::vector<RealType> eigs(T.n_row());
+			if (firstcall) {
+				ab.buildDenseMatrix(T);
+				utils::diag(T,eigs,'V');
+				firstcall = false;
+			}
+			ComplexType sum(0.0);
+			for (size_t i=0;i<T.n_row();i++) {
+				sum += T(i,0)*T(i,0)/(z-eigs[i]);
+			}
+			return sum;
+		}
+
+		
+		
 	
 	private:
 		
@@ -180,9 +201,9 @@ namespace Dmrg {
 			LanczosSolverType lanczosSolver(hamiltonian_,iter,eps,parallelRank);
 
 			lanczosSolver.tridiagonalDecomposition(initVector,ab,V);
-			//ab.buildDenseMatrix(T);
-			//return lanczosSolver.steps();
-		} 
+
+		}
+		
 		
 		
 		const ModelType& model_;

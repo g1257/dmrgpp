@@ -123,14 +123,17 @@ namespace Dmrg {
 			}
 		}
 		
-		FieldType computeContinuedFraction(FieldType z,FieldType isign) const
+		// not sure if this is correct, seems buggy in some tests:
+		/*
+		template<typename SomeFieldType>
+		SomeFieldType computeContinuedFraction(SomeFieldType z,typename SomeFieldType::value_type isign) const
 		{
-			FieldType r=0;
+			SomeFieldType r=0;
 			size_t n = a_.size()-1;
 			for (int i=n;i>0;i--) r = utils::square(b_[i-1])/(z-a_[i]*isign-r);
 			r=1.0/(z-a_[0]*isign-r);
 			return r;
-		}
+		}*/
 
 		size_t size() const { return a_.size(); }
 

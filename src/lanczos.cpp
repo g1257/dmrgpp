@@ -8,6 +8,7 @@
 
 using namespace Dmrg;
 typedef double RealType;
+typedef std::complex<RealType> ComplexType;
 typedef ConcurrencySerial<RealType> ConcurrencyType;
 typedef Geometry<RealType> GeometryType;
 typedef ParametersModelHubbard<RealType> ParametersModelType;
@@ -16,15 +17,26 @@ typedef HubbardLanczos<RealType,ParametersModelType,GeometryType> ModelType;
 typedef ContinuedFraction<ModelType,ConcurrencyType> ContinuedFractionType;
 typedef typename ContinuedFractionType::TridiagonalMatrixType TridiagonalMatrixType;
 
-RealType greenFunction(RealType z,
+
+ComplexType greenFunction(const TridiagonalMatrixType& ab,ComplexType z,RealType isign,
+		const ContinuedFractionType& cf)
+{
+	//return ab.computeContinuedFraction(z,isign);
+	return cf.continuedFraction(z,ab);
+}
+
+RealType greenFunction(RealType omega,RealType Eg,
 		const TridiagonalMatrixType& abPlus,RealType normaPlus,
-		const TridiagonalMatrixType& abMinus,RealType normaMinus)
+		const TridiagonalMatrixType& abMinus,RealType normaMinus,
+		const ContinuedFractionType& cf)
 {
 	RealType isign = 1.0;
-	RealType x = normaPlus * abPlus.computeContinuedFraction(z,isign);
+	RealType eps = 1e-6;
+	ComplexType z(omega + Eg,eps);
+	RealType x = normaPlus * imag(greenFunction(abPlus,z,isign,cf));
 	RealType normalizer = 2.0;
 	if (normaMinus!=0.0) {
-		x -= normaMinus * abMinus.computeContinuedFraction(z,isign);
+		x -= normaMinus * imag(greenFunction(abMinus,z,isign,cf));
 		normalizer = 4.0;
 	}
 	return x/normalizer;
@@ -76,7 +88,8 @@ int main(int argc,char *argv[])
 	ContinuedFractionType cf(model);
 
 	//! get the g.s.:
-	std::cout<<"Energy="<<cf.gsEnergy()<<"\n";
+	RealType Eg = cf.gsEnergy();
+	std::cout<<"Energy="<<Eg<<"\n";
 
 	std::cout<<"gf(i="<<i<<",j="<<j<<")\n";
 	RealType normaPlus=0,normaMinus=0;
@@ -85,8 +98,8 @@ int main(int argc,char *argv[])
 	if (i!=j) cf.getGreenFunction(abMinus,normaMinus,i,j,ContinuedFractionType::MINUS);
 	for (int i=0;i<atoi(argv[4]);i++) {
 		RealType omega = atof(argv[5])*i;
-		std::cout<<omega<<" "<<greenFunction(omega,abPlus,normaPlus,
-				abMinus,normaMinus)<<"\n";
+		std::cout<<omega<<" "<<greenFunction(omega,Eg,abPlus,normaPlus,
+				abMinus,normaMinus,cf)<<"\n";
 	}
 }
 
