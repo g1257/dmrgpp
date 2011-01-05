@@ -33,10 +33,10 @@ RealType greenFunction(RealType omega,RealType Eg,
 	RealType isign = 1.0;
 	RealType eps = 1e-6;
 	ComplexType z(omega + Eg,eps);
-	RealType x = normaPlus * imag(greenFunction(abPlus,z,isign,cf));
+	RealType x = normaPlus * real(greenFunction(abPlus,z,isign,cf));
 	RealType normalizer = 2.0;
 	if (normaMinus!=0.0) {
-		x -= normaMinus * imag(greenFunction(abMinus,z,isign,cf));
+		x -= normaMinus * real(greenFunction(abMinus,z,isign,cf));
 		normalizer = 4.0;
 	}
 	return x/normalizer;
