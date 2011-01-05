@@ -19,9 +19,11 @@ The reason for PsimagLite is to share code among SpinPhononFermion, DCA++ and DM
 PsimagLite is free software (see file LICENSE) 
 
 PsimagLite and DMRG++
-Users will notice no change. Developers should not change DMRG++'s PSimagLite but do development on PsimagLite's separate repo instead. The fact that PsimagLite is in DMRG++'s repo is simply a convenience for users.
-In the future, users might need to download PsimagLite to be able to compile DMRG++. I will post a notice if this becomes true.
+Users now need to download PsimagLite before compiling DMRG++.
+Note that PsimagLite is just a series of classes and needs no compilation (unless you want to use the drivers)
+Developers should notice that common code will migrate from DMRG++ into PsimagLite.
 
 PsimagLite and SpinPhononFermion
-Same as DMRG++ above. 
+Same as DMRG++ above, except that PsimagLite is still not a requirement for SpinPhononFermion.
+
 
