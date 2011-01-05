@@ -80,140 +80,140 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 	
-		template<typename T>
-		class SampleCRSMatrix {
-		public:
-			typedef T value_type;
-			
+	template<typename T>
+	class SampleCRSMatrix {
+	public:
+		typedef T value_type;
+		
 
-			SampleCRSMatrix(size_t rank) : rank_(rank),rowptr_(rank+1)
-			{
+		SampleCRSMatrix(size_t rank) : rank_(rank),rowptr_(rank+1)
+		{
+		}
+		
+
+		SampleCRSMatrix(size_t rank,T seed,size_t nonZeros,T maxValue) : rank_(rank),rowptr_(rank+1)
+		{
+			srand48(seed);
+			std::vector<size_t> rows,cols;
+			std::vector<T> vals;
+			for (size_t i=0;i<nonZeros;i++) {
+				// pick a row
+				size_t row = size_t(drand48()*rank);
+				// and a column
+				size_t col = size_t(drand48()*rank);
+				// and a value
+				T val = drand48()*maxValue;
+				rows.push_back(row);
+				cols.push_back(col);
+				vals.push_back(val);
 			}
-			
+			// fill the matrix with this data:
+			fillMatrix(rows,cols,vals);
+		}
+		
 
-			SampleCRSMatrix(size_t rank,T seed,size_t nonZeros,T maxValue) : rank_(rank),rowptr_(rank+1)
-			{
-				srand48(seed);
-				std::vector<size_t> rows,cols;
-				std::vector<T> vals;
-				for (size_t i=0;i<nonZeros;i++) {
-					// pick a row
-					size_t row = size_t(drand48()*rank);
-					// and a column
-					size_t col = size_t(drand48()*rank);
-					// and a value
-					T val = drand48()*maxValue;
-					rows.push_back(row);
-					cols.push_back(col);
-					vals.push_back(val);
+		template<typename SomeIoInputType>
+		SampleCRSMatrix(SomeIoInputType& io)
+		{
+			io>>rank_;
+			readVector(io,rowptr_);
+			readVector(io,colind_);
+			readVector(io,values_);
+		}
+		
+		
+		
+
+		void setRow(int n,int v)
+		{
+			rowptr_[n]=v;
+		}
+		
+
+		void pushCol(int i) { colind_.push_back(i); }
+		
+
+		void pushValue(const T& value) { values_.push_back(value); }
+		
+
+		void matrixVectorProduct(std::vector<T>& x, const std::vector<T>& y) const
+		{
+			for (size_t i = 0; i < y.size(); i++)
+				for (size_t j = rowptr_[i]; j < rowptr_[i + 1]; j++)
+					x[i] += values_[j] * y[colind_[j]];
+		}
+		
+
+		size_t rank() const { return rank_; }
+		
+
+		template<typename SomeIoOutputType>
+		void save(SomeIoOutputType& io) const
+		{
+			io<<rank_<<"\n";
+			saveVector(io,rowptr_);
+			saveVector(io,colind_);
+			saveVector(io,values_);
+		}
+		
+		
+	private:
+		
+
+		template<typename SomeIoOutputType,typename SomeFieldType>
+		void saveVector(SomeIoOutputType& io,const std::vector<SomeFieldType>& v) const
+		{
+			io<<v.size()<<"\n";
+			for (size_t i=0;i<v.size();i++) {
+				io<<v[i]<<" ";
+			}
+			io<<"\n";
+		}
+		
+
+		template<typename SomeIoInputType,typename SomeFieldType>
+		void readVector(SomeIoInputType& io,std::vector<SomeFieldType>& v) const
+		{
+			int size=0;
+			io>>size;
+			if (size<0) throw std::runtime_error("readVector: size is zero\n");
+			v.resize(size);
+			for (size_t i=0;i<v.size();i++) {
+				io>>v[i];
+			}
+		}
+		
+
+		void fillMatrix(std::vector<size_t>& rows,std::vector<size_t>& cols,
+				std::vector<T>& vals)
+		{
+			Sort<std::vector<size_t> > s;
+		    std::vector<size_t> iperm(rows.size());
+			s.sort(rows,iperm);
+			size_t counter = 0;
+			size_t prevRow = rows[0]+1;
+			for (size_t i=0;i<rows.size();i++) {
+				size_t row = rows[i];
+				if (prevRow!=row) {
+					// add new row
+					rowptr_[row] = counter++;
+					prevRow = row;
 				}
-				// fill the matrix with this data:
-				fillMatrix(rows,cols,vals);
+				colind_.push_back(cols[iperm[i]]);
+				values_.push_back(vals[iperm[i]]);
 			}
-			
-
-			template<typename SomeIoInputType>
-			SampleCRSMatrix(SomeIoInputType& io)
-			{
-				io>>rank_;
-				readVector(io,rowptr_);
-				readVector(io,colind_);
-				readVector(io,values_);
-			}
-			
-			
-			
-
-			void setRow(int n,int v)
-			{
-				rowptr_[n]=v;
-			}
-			
-
-			void pushCol(int i) { colind_.push_back(i); }
-			
-
-			void pushValue(const T& value) { values_.push_back(value); }
-			
-
-			void matrixVectorProduct(std::vector<T>& x, const std::vector<T>& y) const
-			{
-				for (size_t i = 0; i < y.size(); i++)
-					for (size_t j = rowptr_[i]; j < rowptr_[i + 1]; j++)
-						x[i] += values_[j] * y[colind_[j]];
-			}
-			
-
-			size_t rank() const { return rank_; }
-			
-
-			template<typename SomeIoOutputType>
-			void save(SomeIoOutputType& io) const
-			{
-				io<<rank_<<"\n";
-				saveVector(io,rowptr_);
-				saveVector(io,colind_);
-				saveVector(io,values_);
-			}
-			
-			
-		private:
-			
-
-			template<typename SomeIoOutputType,typename SomeFieldType>
-			void saveVector(SomeIoOutputType& io,const std::vector<SomeFieldType>& v) const
-			{
-				io<<v.size()<<"\n";
-				for (size_t i=0;i<v.size();i++) {
-					io<<v[i]<<" ";
-				}
-				io<<"\n";
-			}
-			
-
-			template<typename SomeIoInputType,typename SomeFieldType>
-			void readVector(SomeIoInputType& io,std::vector<SomeFieldType>& v) const
-			{
-				int size=0;
-				io>>size;
-				if (size<0) throw std::runtime_error("readVector: size is zero\n");
-				v.resize(size);
-				for (size_t i=0;i<v.size();i++) {
-					io>>v[i];
-				}
-			}
-			
-
-			void fillMatrix(std::vector<size_t>& rows,std::vector<size_t>& cols,
-					std::vector<T>& vals)
-			{
-				Sort<std::vector<size_t> > s;
-			    std::vector<size_t> iperm(rows.size());
-				s.sort(rows,iperm);
-				size_t counter = 0;
-				size_t prevRow = rows[0]+1;
-				for (size_t i=0;i<rows.size();i++) {
-					size_t row = rows[i];
-					if (prevRow!=row) {
-						// add new row
-						rowptr_[row] = counter++;
-						prevRow = row;
-					}
-					colind_.push_back(cols[iperm[i]]);
-					values_.push_back(vals[iperm[i]]);
-				}
-				size_t lastNonZeroRow = rows[rows.size()-1];
-				for (size_t i=lastNonZeroRow+1;i<=rank_;i++)
-					rowptr_[i] = counter;
-			}
-			
-			
-			
-			size_t rank_;
-			std::vector<size_t> rowptr_;
-			std::vector<size_t> colind_;
-			std::vector<T> values_;
-			
+			size_t lastNonZeroRow = rows[rows.size()-1];
+			for (size_t i=lastNonZeroRow+1;i<=rank_;i++)
+				rowptr_[i] = counter;
+		}
+		
+		
+		
+		size_t rank_;
+		std::vector<size_t> rowptr_;
+		std::vector<size_t> colind_;
+		std::vector<T> values_;
+		
 	}; // class SampleCRSMatrix
 	
 	

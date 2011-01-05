@@ -86,15 +86,15 @@ So, this is the class:
 
 @d theClassHere
 @{
-	template<typename T>
-	class SampleCRSMatrix {
-	public:
-		typedef T value_type;
-		@<constructors@>
-		@<publicFunctions@>
-	private:
-		@<privateFunctions@>
-		@<privateData@>
+template<typename T>
+class SampleCRSMatrix {
+public:
+	typedef T value_type;
+	@<constructors@>
+	@<publicFunctions@>
+private:
+	@<privateFunctions@>
+	@<privateData@>
 }; // class SampleCRSMatrix
 @}
 
