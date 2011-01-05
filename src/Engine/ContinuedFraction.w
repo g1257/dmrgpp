@@ -119,19 +119,6 @@ ContinuedFraction(const ModelType& model)
 	// task 2: Compute ground state |phi>
 	computeGroundState();
 	
-	// task 3: compute |initVector> =\sum_x c_x|phi>, where 
-	// c_x are some operator
-	VectorType initVector;
-	computeInitVector(initVector);
-	MatrixType T;
-	
-	// task 4: tridiag H starting with |initVector>
-	triDiagonalize(T,initVector);
-	
-	// task 5: diag. T and store the result
-	// to be able to produce GreenFuction(i,j)
-	// analytically
-	diagonalizeAndStore(T,initVector);
 } @}
 
 Note the tasks listed above. This will be performed under private functions below.
@@ -152,7 +139,20 @@ RealType gsEnergy() const
 
 @d greenFunction
 @{
-// nothing here yet @}
+void getGreenFunction(TridiagonalMatrixType& ab,RealType& norma,
+		size_t i,size_t j) const
+{
+	// task 3: compute |initVector> =\sum_x c_x|phi>, where
+	// c_x are some operator
+	VectorType initVector;
+	computeInitVector(initVector,i,j);
+
+	// task 4: tridiag H starting with |initVector>
+	triDiagonalize(ab,initVector);
+
+	norma = initVector*initVector;
+}
+@}
 	
 The private functions are as follows:
 
@@ -161,7 +161,7 @@ The private functions are as follows:
 @<computeGroundState@>
 @<computeInitVector@>
 @<triDiagonalize@>
-@<diagonalizeAndStore@> @}
+@}
 
 
 @d computeGroundState 
@@ -187,11 +187,10 @@ void computeGroundState()
 
 @d computeInitVector
 @{
-void computeInitVector(VectorType& initVector)
+void computeInitVector(VectorType& initVector,size_t i,size_t j) const
 {
-	VectorType tmpVector;
-	size_t i = 6;
-	size_t j = 6;
+	initVector.resize(model_.size());
+	VectorType tmpVector(initVector.size());
 	size_t spin = ModelType::SPIN_UP;
 	size_t destruction = ModelType::DESTRUCTOR;
 	SparseMatrixType ci;
@@ -205,10 +204,9 @@ void computeInitVector(VectorType& initVector)
 
 @d triDiagonalize 
 @{
-void triDiagonalize(MatrixType& T,const VectorType& initVector)
+void triDiagonalize(TridiagonalMatrixType& ab,const VectorType& initVector) const
 {
 	// tridiagonalize starting with tmpVector = c^\dagger_i|gsVector>
-	TridiagonalMatrixType ab;
 	MatrixType V;
 
 	RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
@@ -218,18 +216,10 @@ void triDiagonalize(MatrixType& T,const VectorType& initVector)
 	LanczosSolverType lanczosSolver(hamiltonian_,iter,eps,parallelRank);
 
 	lanczosSolver.tridiagonalDecomposition(initVector,ab,V);
-	ab.buildDenseMatrix(T);
+	//ab.buildDenseMatrix(T);
 	//return lanczosSolver.steps();
 } @}
 
-@d diagonalizeAndStore 
-@{
-void diagonalizeAndStore(MatrixType& T,const VectorType& initVector)
-{
-	std::vector<RealType> eigs(T.n_row());
-	utils::diag(T,eigs,'V');
-	// RealType norma = norm2(initVector);
-} @}
 
 
 \end{document}

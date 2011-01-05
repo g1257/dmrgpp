@@ -49,7 +49,7 @@ namespace Dmrg {
 And the class is:
 @d theClassHere
 @{
-template<typename RealType_,typename IoInputType,typename ParametersType,
+template<typename RealType_,typename ParametersType,
 	typename GeometryType>
 class HubbardLanczos {
 	@<privateTypesAndEnums@>
@@ -70,8 +70,8 @@ typedef psimag::Matrix<RealType_> MatrixType; @}
 @{
 const ParametersType& mp_;
 const GeometryType& geometry_;
-size_t nup_;
-size_t ndown_;
+BasisType basis1_;
+BasisType basis2_;
 @}
 
 @d publicTypesAndEnums
@@ -87,50 +87,104 @@ enum {DESTRUCTOR,CONSTRUCTOR};
 
 @d constructor
 @{
-HubbardLanczos(IoInputType& io,const ParametersType& mp,GeometryType& geometry)
-	: mp_(mp),geometry_(geometry)
+HubbardLanczos(size_t nup,size_t ndown,const ParametersType& mp,GeometryType& geometry)
+	: mp_(mp),geometry_(geometry),
+	  basis1_(geometry.numberOfSites(),nup),basis2_(geometry.numberOfSites(),ndown)
 {
-	std::vector<RealType> qns;
-	io.read(qns,"TargetQuantumNumbers");
-	if (qns.size()<2) throw std::runtime_error("HubbardLanczos::ctor(...)\n");
-	nup_=geometry.numberOfSites()*qns[0];
-	ndown_=geometry.numberOfSites()*qns[1];
 }
 @}
 
 @d publicFunctions
 @{
+@<size@>
 @<setupHamiltonian@>
 @<getOperator@>
+@}
+
+@d size
+@{
+	size_t size() const { return basis1_.size()*basis2_.size(); }
 @}
 
 @d setupHamiltonian
 @{
 void setupHamiltonian(SparseMatrixType &matrix) const
 {
-	size_t nsite = geometry_.numberOfSites();
-	BasisType basis1(nsite,nup_);
-	BasisType basis2(nsite,ndown_);
-	setupHamiltonian(matrix,basis1,basis2);
+	setupHamiltonian(matrix,basis1_,basis2_);
 }
 @}
 
 @d getOperator
 @{
-void getOperator(SparseMatrixType& matrix,size_t what,size_t i,size_t flavor) const
+void getOperator(SparseMatrixType& matrix,size_t what,size_t i,size_t sector) const
 {
-	throw std::runtime_error("getOperator(...): Unimplemented\n");
+	size_t hilbert1 = basis1_.size();
+	size_t hilbert2 = basis2_.size();
+
+	matrix.resize(hilbert1*hilbert2);
+
+	size_t nCounter = 0;
+	for (size_t ispace1=0;ispace1<hilbert1;ispace1++) {
+		WordType ket1 = basis1_[ispace1];
+		for (size_t ispace2=0;ispace2<hilbert2;ispace2++) {
+			matrix.setRow(ispace2+hilbert2*ispace1,nCounter);
+
+			WordType ket2 = basis2_[ispace2];
+			WordType bra1 = ket1;
+			WordType bra2 = ket2;
+			if (sector==SPIN_DOWN) {
+				// modify bra1
+				if (!getBra(bra1,ket1,what,i)) continue;
+			} else {
+				//modify bra2:
+				if (!getBra(bra2,ket2,what,i)) continue;
+			}
+			size_t temp = perfectIndex(basis1_,basis2_,bra1,bra2);
+			matrix.pushCol(temp);
+			RealType cTemp=doSign(ket1,ket2,i,sector); // check SIGN FIXME
+
+			matrix.pushValue(cTemp);
+			nCounter++;
+		}
+	}
+	matrix.setRow(hilbert1*hilbert2,nCounter);
 }
 @}
 
 @d privateFunctions
 @{
+@<getBra@>
 @<hoppings@>
 @<setupHamiltonianP@>
 @<countNonZero@>
 @<perfectIndex@>
 @<doSign1@>
 @<doSign2@>
+@}
+
+This functions computes $|bra\rangle=c_i|ket\rangle$, where $c_i$ is a creation or destruction
+operator (depending on whether \verb=what= is \verb=DESTRUCTOR= or \verb=CREATOR=)
+on site $i$:
+@d getBra
+@{
+bool getBra(WordType& bra, const WordType& ket,size_t what,size_t i) const
+{
+	WordType s1i=(ket & BasisType::bitmask(i));
+	if (what==DESTRUCTOR) {
+		if (s1i>0) {
+			bra = (ket ^ BasisType::bitmask(i));
+		} else {
+			return false; // cannot destroy, there's nothing
+		}
+	} else {
+		if (s1i==0) {
+			bra = (ket ^ BasisType::bitmask(i));
+		} else {
+			return false; // cannot contruct, there's already one
+		}
+	}
+	return true;
+}
 @}
 
 @d setupHamiltonianP

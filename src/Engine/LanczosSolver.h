@@ -292,17 +292,6 @@ namespace Dmrg {
 			else std::cerr<<"Passed lanczosVectors\n";*/
 			
 		}
-
-		RealType computeContinuedFraction(RealType const &z,TridiagonalMatrixType& ab,RealType isign,int steps)
-		{
-			RealType r=0;
-			int i;
-			int n = steps;
-			if (n<=0) n=ab.size()-1;
-			for (i=n;i>0;i--) r = utils::square(ab.b(i-1))/(z-ab.a(i)*isign-r);
-			r=1.0/(z-ab.a(0)*isign-r);
-			return r;
-		}
 		
 		size_t steps() const {return steps_; }
 		

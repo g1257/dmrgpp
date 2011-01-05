@@ -105,19 +105,6 @@ namespace Dmrg {
 			// task 2: Compute ground state |phi>
 			computeGroundState();
 			
-			// task 3: compute |initVector> =\sum_x c_x|phi>, where 
-			// c_x are some operator
-			VectorType initVector;
-			computeInitVector(initVector);
-			MatrixType T;
-			
-			// task 4: tridiag H starting with |initVector>
-			triDiagonalize(T,initVector);
-			
-			// task 5: diag. T and store the result
-			// to be able to produce GreenFuction(i,j)
-			// analytically
-			diagonalizeAndStore(T,initVector);
 		} 
 		
 
@@ -126,7 +113,20 @@ namespace Dmrg {
 			return gsEnergy_;
 		} 
 
-		// nothing here yet  
+		void getGreenFunction(TridiagonalMatrixType& ab,RealType& norma,
+				size_t i,size_t j) const
+		{
+			// task 3: compute |initVector> =\sum_x c_x|phi>, where
+			// c_x are some operator
+			VectorType initVector;
+			computeInitVector(initVector,i,j);
+
+			// task 4: tridiag H starting with |initVector>
+			triDiagonalize(ab,initVector);
+
+			norma = initVector*initVector;
+		}
+		 
 	
 	private:
 		
@@ -150,11 +150,10 @@ namespace Dmrg {
 			lanczosSolver.computeGroundState(gsEnergy_,gsVector_);
 		} 
 
-		void computeInitVector(VectorType& initVector)
+		void computeInitVector(VectorType& initVector,size_t i,size_t j) const
 		{
-			VectorType tmpVector;
-			size_t i = 6;
-			size_t j = 6;
+			initVector.resize(model_.size());
+			VectorType tmpVector(initVector.size());
 			size_t spin = ModelType::SPIN_UP;
 			size_t destruction = ModelType::DESTRUCTOR;
 			SparseMatrixType ci;
@@ -166,10 +165,9 @@ namespace Dmrg {
 			initVector += tmpVector;
 		} 
 
-		void triDiagonalize(MatrixType& T,const VectorType& initVector)
+		void triDiagonalize(TridiagonalMatrixType& ab,const VectorType& initVector) const
 		{
 			// tridiagonalize starting with tmpVector = c^\dagger_i|gsVector>
-			TridiagonalMatrixType ab;
 			MatrixType V;
 
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
@@ -179,16 +177,10 @@ namespace Dmrg {
 			LanczosSolverType lanczosSolver(hamiltonian_,iter,eps,parallelRank);
 
 			lanczosSolver.tridiagonalDecomposition(initVector,ab,V);
-			ab.buildDenseMatrix(T);
+			//ab.buildDenseMatrix(T);
 			//return lanczosSolver.steps();
 		} 
-
-		void diagonalizeAndStore(MatrixType& T,const VectorType& initVector)
-		{
-			std::vector<RealType> eigs(T.n_row());
-			utils::diag(T,eigs,'V');
-			// RealType norma = norm2(initVector);
-		}  
+		
 		
 		const ModelType& model_;
 		ProgressIndicator progress_;
