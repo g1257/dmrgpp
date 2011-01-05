@@ -182,6 +182,13 @@ namespace std {
 	}
 
 	template<typename FieldType>
+	inline std::vector<FieldType> operator-=(std::vector<FieldType>& v,const std::vector<FieldType>& w)
+	{
+		for (size_t i=0;i<w.size();i++) v[i] -= w[i];
+		return v;
+	}
+
+	template<typename FieldType>
 	istream& operator>>(istream& is,vector<FieldType>& x)
 	{
 		int y = 0;

@@ -132,6 +132,8 @@ namespace Dmrg {
 			return r;
 		}
 
+		size_t size() const { return a_.size(); }
+
 		private:
 		std::vector<FieldType> a_,b_;
 	}; // struct TridiagonalMatrix

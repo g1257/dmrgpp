@@ -91,7 +91,9 @@ typedef LanczosSolver<RealType,SparseMatrixType,VectorType> LanczosSolverType;
 typedef psimag::Matrix<FieldType> MatrixType;
 typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 
-static const size_t parallelRank_ = 0; // ContF needs to support concurrency FIXME @}
+static const size_t parallelRank_ = 0; // ContF needs to support concurrency FIXME
+enum {PLUS,MINUS};
+@}
 
 Now let us look at the private data of this class:
 @d privatedata 
@@ -140,12 +142,12 @@ RealType gsEnergy() const
 @d greenFunction
 @{
 void getGreenFunction(TridiagonalMatrixType& ab,RealType& norma,
-		size_t i,size_t j) const
+		size_t i,size_t j,size_t plusOrMinus) const
 {
 	// task 3: compute |initVector> =\sum_x c_x|phi>, where
 	// c_x are some operator
 	VectorType initVector;
-	computeInitVector(initVector,i,j);
+	computeInitVector(initVector,i,j,plusOrMinus);
 
 	// task 4: tridiag H starting with |initVector>
 	triDiagonalize(ab,initVector);
@@ -187,7 +189,7 @@ void computeGroundState()
 
 @d computeInitVector
 @{
-void computeInitVector(VectorType& initVector,size_t i,size_t j) const
+void computeInitVector(VectorType& initVector,size_t i,size_t j,size_t plusOrMinus) const
 {
 	initVector.resize(model_.size());
 	VectorType tmpVector(initVector.size());
@@ -199,7 +201,8 @@ void computeInitVector(VectorType& initVector,size_t i,size_t j) const
 	model_.getOperator(cj,destruction,j,spin);
 	ci.matrixVectorProduct(tmpVector,gsVector_);
 	cj.matrixVectorProduct(initVector,gsVector_);
-	initVector += tmpVector;
+	if (plusOrMinus == PLUS) initVector += tmpVector;
+	else initVector -= tmpVector;
 } @}
 
 @d triDiagonalize 

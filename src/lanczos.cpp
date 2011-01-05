@@ -16,13 +16,18 @@ typedef HubbardLanczos<RealType,ParametersModelType,GeometryType> ModelType;
 typedef ContinuedFraction<ModelType,ConcurrencyType> ContinuedFractionType;
 typedef typename ContinuedFractionType::TridiagonalMatrixType TridiagonalMatrixType;
 
-RealType greenFunction(const TridiagonalMatrixType& ab,RealType z,RealType norma)
+RealType greenFunction(RealType z,
+		const TridiagonalMatrixType& abPlus,RealType normaPlus,
+		const TridiagonalMatrixType& abMinus,RealType normaMinus)
 {
-	//std::vector<RealType> eigs(T.n_row());
-	//utils::diag(T,eigs,'V');
 	RealType isign = 1.0;
-	return norma * ab.computeContinuedFraction(z,isign);
-
+	RealType x = normaPlus * abPlus.computeContinuedFraction(z,isign);
+	RealType normalizer = 2.0;
+	if (normaMinus!=0.0) {
+		x -= normaMinus * abMinus.computeContinuedFraction(z,isign);
+		normalizer = 4.0;
+	}
+	return x/normalizer;
 }
 
 int main(int argc,char *argv[])
@@ -74,12 +79,14 @@ int main(int argc,char *argv[])
 	std::cout<<"Energy="<<cf.gsEnergy()<<"\n";
 
 	std::cout<<"gf(i="<<i<<",j="<<j<<")\n";
-	RealType norma;
-	TridiagonalMatrixType ab;
-	cf.getGreenFunction(ab,norma,i,j);
+	RealType normaPlus=0,normaMinus=0;
+	TridiagonalMatrixType abPlus,abMinus;
+	cf.getGreenFunction(abPlus,normaPlus,i,j,ContinuedFractionType::PLUS);
+	if (i!=j) cf.getGreenFunction(abMinus,normaMinus,i,j,ContinuedFractionType::MINUS);
 	for (int i=0;i<atoi(argv[4]);i++) {
 		RealType omega = atof(argv[5])*i;
-		std::cout<<omega<<" "<<greenFunction(ab,omega,norma)<<"\n";
+		std::cout<<omega<<" "<<greenFunction(omega,abPlus,normaPlus,
+				abMinus,normaMinus)<<"\n";
 	}
 }
 
