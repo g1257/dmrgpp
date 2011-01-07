@@ -46,6 +46,8 @@ extern "C" {
 }
 
 namespace PsimagLite {
+	@<MockVector@>
+	@<MyFunction@>
 	@<theClassHere@>
 } // namespace PsimagLite
 #endif // MINIMIZER_H
@@ -76,12 +78,11 @@ typedef typename FunctionType::FieldType FieldType;
 typedef std::vector<FieldType> VectorType;
 typedef Minimizer<RealType,FunctionType> ThisType;
 
-@<MockVector@>
 @}
 
 @d privateData
 @{
-const FunctionType& function_;
+FunctionType& function_;
 size_t maxIter_;
 const gsl_multimin_fminimizer_type *gslT_;
 gsl_multimin_fminimizer *gslS_;
@@ -89,7 +90,7 @@ gsl_multimin_fminimizer *gslS_;
 
 @d constructor
 @{
-Minimizer(const FunctionType& function,size_t maxIter)
+Minimizer(FunctionType& function,size_t maxIter)
 		: function_(function),
 		  maxIter_(maxIter),
 		  gslT_(gsl_multimin_fminimizer_nmsimplex2),
@@ -125,12 +126,12 @@ int simplex(VectorType& minVector)
 	gsl_vector *xs;
 	xs = gsl_vector_alloc (function_.size());
 	for (size_t i=0;i<minVector.size();i++)
-		gsl_vector_set (x, i, 1e-3);
+		gsl_vector_set (xs, i, 1e-3);
 
 	gsl_multimin_function func;
-	func.f= (RealType (*) (const gsl_vector*,void *))&ThisType::myFunction;
+	func.f= myFunction<FunctionType>;
 	func.n = function_.size();
-	func.params = 0; // unused
+	func.params = &function_;
 	gsl_multimin_fminimizer_set (gslS_, &func, x, xs);
 
 	size_t iter = 0;
@@ -143,7 +144,7 @@ int simplex(VectorType& minVector)
 		status = gsl_multimin_test_size(size, 1e-3);
 
 		if (status == GSL_SUCCESS) {
-			found(minVector,x,iter);
+			found(minVector,gslS_->x,iter);
 			gsl_vector_free (x);
 			gsl_vector_free (xs);
 			return iter;
@@ -157,12 +158,21 @@ int simplex(VectorType& minVector)
 
 @d privateFunctions
 @{
-@<myFunction@>
 @<found@>
+@}
+
+@d found
+@{
+void found(VectorType& minVector,gsl_vector* x,size_t iter)
+{
+	for (size_t i=0;i<minVector.size();i++)
+		minVector[i] = gsl_vector_get(x,i);
+}
 @}
 
 @d MockVector
 @{
+template<typename FieldType>
 class MockVector {
 public:
 	MockVector(const gsl_vector *v) : v_(v)
@@ -178,24 +188,16 @@ private:
 }; // class MockVector
 @}
 
-@d myFunction
+@d MyFunction
 @{
-RealType myFunction(const gsl_vector *v, void *params)
+template<typename FunctionType>
+typename FunctionType::FieldType myFunction(const gsl_vector *v, void *params)
 {
-	MockVector mv(v);
-	return function_(mv);
+	MockVector<typename FunctionType::FieldType> mv(v);
+	FunctionType* ft = (FunctionType *)params;
+	return ft->operator()(mv);
 }
 @}
-
-@d found
-@{
-void found(VectorType& minVector,gsl_vector* x,size_t iter)
-{
-	for (size_t i=0;i<minVector.size();i++)
-		minVector[i] = gsl_vector_get(x,i);
-}
-@}
-
 
 \end{document}
 
