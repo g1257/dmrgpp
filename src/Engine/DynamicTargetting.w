@@ -27,17 +27,16 @@
 \end{comment}
 
 \section{Dynamic Targetting To get Frequency Dependent Observables}
-This class implements the dynamic DMRG algorithm as described
-by Eric Jeckelmann in Phys. Rev. B {\bf 66}, 045114 2002.
+This class implements the dynamic DMRG algorithm as described in \cite{re:jeckelmann02}.
 Note that this class implements the \verb=Targetting= interface also
 used by GroundStateTargetting (static DMRG) and TimeStepTargetting (for
 time dependent DMRG)
 
-Following this paper, the name \emph{dyn-vectors} will be used for the four
+Following paper reference~\cite{re:jeckelmann02}, the name \emph{dyn-vectors} will be used for the four
 vector: (i) the ground state $|\psi_{gs}\rangle$,
 (ii) the vector $A|\psi_{gs}\rangle$, (iii)
-the ``correction vector'' $|Y\rangle_A$, and (iv)
-the ``correction vector'' $|X\rangle_A$, as defined in the paper.
+the ``correction vector'' $|Y_A\rangle$, and (iv)
+the ``correction vector'' $|X_A\rangle$, as defined in the paper.
 The last 3 vectors will be stored in the private member \verb|targetVectors_|,
 whereas the first one will be stored in the private member \verb|psi_|.
 
@@ -678,8 +677,14 @@ std::string getStage(size_t i) const
 }
 @}
 
-The function below is a crucial one.
-FIXME EXPLANATION
+The below function computes steps 3 and 4 of
+the algorithm described in page 3 of reference~\cite{re:jeckelmann02}.
+The incoming arguments are the ground state energy \verb=Eg=,
+the vector \verb|phi| or $|\phi\rangle$ which is $|\phi\rangle\equiv A|\psi_{gs}\rangle$, and
+the direction of growth specified in \verb|systemOrEnviron|.
+Note that \verb|phi| will be stored in \verb|targetVector_[0]|,
+$|Y_A\rangle$ in \verb|targetVector_[1]|,
+$|X_A\rangle$ in \verb|targetVector_[2]|.
 @d calcTimeVectors
 @{
 void calcTimeVectors(
@@ -687,7 +692,10 @@ void calcTimeVectors(
 					const VectorWithOffsetType& phi,
 					size_t systemOrEnviron)
 {
-	// to be written
+	VectorWithOffsetType phiMin;
+	minimizeFunctional(phiMin,Eg,phi,systemOrEnviron);
+	obtainYA(phiMin,Eg,phi,systemOrEnviron);
+	obtainXA(phiMin,Eg,phi,systemOrEnviron);
 }
 @}
 
@@ -736,7 +744,7 @@ The function below prints all target vectors to disk, using the \verb|TimeSerial
 void printVectors(const std::vector<size_t>& block)
 {
 	if (block.size()!=1) throw std::runtime_error(
-			"TST only supports blocks of size 1\n");
+			"DynamicTargetting only supports blocks of size 1\n");
 
 	TimeSerializerType ts(currentTime_,block[0],targetVectors_);
 	ts.save(io_);
@@ -796,6 +804,7 @@ void test(
 	std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
 }
 @}
-
+\bibliographystyle{plain}
+\bibliography{thesis}
 
 \end{document}
