@@ -67,7 +67,7 @@ everywhere except on the (targetted) symmetry sector(s).
 @{
 namespace Dmrg {
 	template<
-			template<typename,typename> class LanczosSolverTemplate,
+			template<typename,typename,typename> class LanczosSolverTemplate,
    			template<typename,typename> class InternalProductTemplate,
 	 		typename WaveFunctionTransformationType_,
     			typename ModelType_,
@@ -93,7 +93,7 @@ A long series of typedefs follow. Need to explain these maybe (FIXME).
 			//typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
 			typedef std::vector<ComplexType> ComplexVectorType;
 			//typedef std::VectorWithOffset<ComplexType> VectorWithOffsetType;
-			typedef LanczosSolverTemplate<InternalProductType,ComplexVectorType> LanczosSolverType;
+			typedef LanczosSolverTemplate<RealType,InternalProductType,ComplexVectorType> LanczosSolverType;
 			typedef std::vector<RealType> VectorType;
 			//typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			typedef psimag::Matrix<ComplexType> ComplexMatrixType;

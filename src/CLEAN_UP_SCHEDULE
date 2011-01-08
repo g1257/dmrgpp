@@ -13,8 +13,6 @@ place save(...) functions next to "load" ctors.
 
 string name for basis objects
 
-configure.pl should not create inputs!! move input creation to input.pl
-
 json format for input?
 
 create test for non-constant hoppings --> done, test 26
