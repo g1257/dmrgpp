@@ -342,7 +342,7 @@ namespace Dmrg {
 			friend void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
 			
 			template<typename FieldType3,typename FieldType2>
-			friend VectorWithOffsets<FieldType2> operator*(FieldType3 value,const VectorWithOffsets<FieldType2>& v);
+			friend VectorWithOffsets<FieldType2> operator*(const FieldType3& value,const VectorWithOffsets<FieldType2>& v);
 		
 		private:
 			template<typename SomeBasisType>
@@ -494,7 +494,7 @@ namespace Dmrg {
 	}
 	
 	template<typename FieldType,typename FieldType2>
-	inline VectorWithOffsets<FieldType2> operator*(FieldType value,const VectorWithOffsets<FieldType2>& v)
+	inline VectorWithOffsets<FieldType2> operator*(const FieldType& value,const VectorWithOffsets<FieldType2>& v)
 	{
 		VectorWithOffsets<FieldType2> w = v;
 

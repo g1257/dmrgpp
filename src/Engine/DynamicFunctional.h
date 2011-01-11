@@ -77,16 +77,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	
 	template<
-		typename RealType,typename SparseMatrixType,typename VectorWithOffsetType>
+		typename RealType,typename SparseMatrixType,typename VectorType>
 	class DynamicFunctional  {
 	public:
 		
 		typedef RealType FieldType; // see documentation
+		typedef std::complex<RealType> ComplexType;
+		typedef std::vector<ComplexType> VectorComplexType;
 		
 		
 		DynamicFunctional(
 				const SparseMatrixType& H,
-				const VectorWithOffsetType& aVector,
+				const VectorType& aVector,
 				RealType omega,
 				RealType E0,
 				RealType eta)
@@ -102,7 +104,8 @@ namespace Dmrg {
 		
 		
 
-		void packComplexToReal(std::vector<RealType>& svReal,const std::vector<std::complex<RealType> >& sv)
+		template<typename SomeRealVector>
+		void packComplexToReal(SomeRealVector& svReal,const VectorComplexType& sv) const
 		{
 			svReal.resize(sv.size()*2);
 			size_t j = 0;
@@ -113,7 +116,8 @@ namespace Dmrg {
 		}
 		
 
-		void packRealToComplex(std::vector<std::complex<RealType> >& sv,const std::vector<RealType>& svReal)
+		template<typename SomeRealVector>
+		void packRealToComplex(VectorComplexType& sv,const SomeRealVector& svReal) const
 		{
 			sv.resize(svReal.size()/2);
 			size_t j = 0;
@@ -127,17 +131,26 @@ namespace Dmrg {
 		template<typename SomeVectorType>
 		RealType operator()(const SomeVectorType &v) const
 		{
-			throw std::runtime_error("Neeeds implementation (sorry)\n");
+			VectorComplexType vC;
+			packRealToComplex(vC,v);
+			VectorComplexType x(vC.size(),0.0);
+
+			H_.matrixVectorProduct(x,vC); // x += H_ vC
+			RealType sum = utils::square(E0_+omega_) + utils::square(eta_);
+			sum -= 2*(E0_+omega_)*real(x*vC);
+			sum += real(x*x);
+			sum += 2*eta_*std::real(aVector_*vC);
+			return sum;
 		}
 		
 
-		size_t size() const {throw std::runtime_error("Neeeds implementation (sorry)\n");; }
+		size_t size() const {return 2*H_.rank(); }
 		
 		
 	private:
 		
 		const SparseMatrixType& H_;
-		const VectorWithOffsetType& aVector_;
+		const VectorType& aVector_;
 		RealType omega_;
 		RealType E0_;
 		RealType eta_;

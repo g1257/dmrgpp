@@ -109,7 +109,7 @@ namespace Dmrg {
 		//typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
-		typedef TargetStructureParams<ModelType> TargettingStructureType; //2b-01
+		typedef TargetStructureParams<ModelType> TargettingStructureType; //3a-01
 		typedef typename BasisType::BlockType BlockType;
 		typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
@@ -430,7 +430,7 @@ namespace Dmrg {
 		{
 			VectorWithOffsetType psiMin;
 			minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
-			obtainXA(targetVectors_[2],psiMin,tstStruct_.eta,Eg);
+			obtainXA(targetVectors_[2],psiMin,Eg);
 			targetVectors_[1] = phi;
 		}
 		
@@ -452,14 +452,16 @@ namespace Dmrg {
 		}
 		
 
-		void minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType&phi,size_t i)
+		void minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType& phi,size_t i)
 		{
 			size_t p = basisSE_.findPartitionNumber(phi.offset(i));
 			typename ModelType::ModelHelperType modelHelper(p,basisSE_,basisS_,basisE_,model_.orbitals());
 			typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 			LanczosMatrixType h(&model_,&modelHelper);
-			typedef DynamicFunctional<RealType,LanczosMatrixType,VectorWithOffsetType> DynamicFunctionalType;
-			DynamicFunctionalType wFunctional(h,phi,currentOmega_,Eg,tstStruct_.eta);
+			typedef DynamicFunctional<RealType,LanczosMatrixType,VectorType> DynamicFunctionalType;
+			VectorType aVector;
+			phi.extract(aVector,i);
+			DynamicFunctionalType wFunctional(h,aVector,currentOmega_,Eg,tstStruct_.eta);
 			size_t maxIter = 200;
 
 			PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
@@ -474,11 +476,29 @@ namespace Dmrg {
 
 		void obtainXA(
 				VectorWithOffsetType& xa,
-				const VectorWithOffsetType& psiMin,
-				RealType eta,
+				const VectorWithOffsetType& ya,
 				RealType Eg)
 		{
-			throw std::runtime_error("obtainXA: unimplemented\n");
+			xa = ya;
+			for (size_t i=0;i<ya.sectors();i++) {
+				obtainXA(xa,Eg,ya,i);
+			}
+		}
+		
+
+		void obtainXA(VectorWithOffsetType& xa,RealType Eg,const VectorWithOffsetType& ya,size_t i)
+		{
+			size_t p = basisSE_.findPartitionNumber(ya.offset(i));
+			typename ModelType::ModelHelperType modelHelper(p,basisSE_,basisS_,basisE_,model_.orbitals());
+			typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
+			LanczosMatrixType h(&model_,&modelHelper);
+			VectorType yaThisSector;
+			ya.extract(yaThisSector,i);
+			VectorType sv(yaThisSector.size(),0.0);
+			h.matrixVectorProduct(sv,yaThisSector); // sv = H * yaThisSector
+			RealType factor =  (Eg+currentOmega_)/tstStruct_.eta;
+			sv -= (yaThisSector * factor);
+			xa.setDataInSector(sv,i);
 		}
 		
 

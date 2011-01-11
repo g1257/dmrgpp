@@ -47,7 +47,7 @@ namespace Dmrg {
 @d theClassHere
 @{
 template<
-	typename RealType,typename SparseMatrixType,typename VectorWithOffsetType>
+	typename RealType,typename SparseMatrixType,typename VectorType>
 class DynamicFunctional  {
 public:
 	@<publicTypedefs@>
@@ -70,7 +70,7 @@ in \verb|WaveFunctionTransformation.h|.
 @{
 DynamicFunctional(
 		const SparseMatrixType& H,
-		const VectorWithOffsetType& aVector,
+		const VectorType& aVector,
 		RealType omega,
 		RealType E0,
 		RealType eta)
@@ -82,7 +82,7 @@ Now let us look at the private data of this class:
 @d privateData
 @{
 const SparseMatrixType& H_;
-const VectorWithOffsetType& aVector_;
+const VectorType& aVector_;
 RealType omega_;
 RealType E0_;
 RealType eta_;
@@ -101,15 +101,16 @@ eta_(eta),
 progress_("DynamicFunctional",0)
 @}
 
-This class needs to tell the minimizer (\verb=Minimizer.w=) class what type of scalar we'll be using%'
-The minimizer expects this in type called \verb=FieldType=.
-It turns out that here the vectors are complex, but the minimizer only takes real functions, since it is based
+This class needs to tell the minimizer (\verb=Minimizer.w=) class what type of scalar we'll be using.%'
+The minimizer expects this in a type that has to be named \verb=FieldType=.
+It turns out that here the vectors are complex, but the minimizer only takes functions of real vectors, since it is based
 on the gsl which uses \verb=gsl_vector= which is real.
 Arrrghhh!! To work around this problem we will map the complex vector \verb=v= of size \verb=n=
 into a real vector \verb=vReal= of size \verb=2*n=. This is implemented here:
 @d packComplex
 @{
-void packComplexToReal(std::vector<RealType>& svReal,const std::vector<std::complex<RealType> >& sv)
+template<typename SomeRealVector>
+void packComplexToReal(SomeRealVector& svReal,const VectorComplexType& sv) const
 {
 	svReal.resize(sv.size()*2);
 	size_t j = 0;
@@ -120,9 +121,11 @@ void packComplexToReal(std::vector<RealType>& svReal,const std::vector<std::comp
 }
 @}
 
+And this is the unpacking:
 @d packReal
 @{
-void packRealToComplex(std::vector<std::complex<RealType> >& sv,const std::vector<RealType>& svReal)
+template<typename SomeRealVector>
+void packRealToComplex(VectorComplexType& sv,const SomeRealVector& svReal) const
 {
 	sv.resize(svReal.size()/2);
 	size_t j = 0;
@@ -137,6 +140,8 @@ All right, so let us tell the minimizer that we are real:
 @d publicTypedefs
 @{
 typedef RealType FieldType; // see documentation
+typedef std::complex<RealType> ComplexType;
+typedef std::vector<ComplexType> VectorComplexType;
 @}
 
 
@@ -148,20 +153,32 @@ typedef RealType FieldType; // see documentation
 @<size@>
 @}
 
-The function below computes $W_{A,\eta}(\omega,\psi) for a fixed
+The function below computes $W_{A,\eta}(\omega,\psi)$ for a fixed
 $A$, $\eta$, and $\omega$. See Eq.~(14) of reference \cite{re:jeckelmann02}.
 @d operatorParens
 @{
 template<typename SomeVectorType>
 RealType operator()(const SomeVectorType &v) const
 {
-	throw std::runtime_error("Neeeds implementation (sorry)\n");
+	VectorComplexType vC;
+	packRealToComplex(vC,v);
+	VectorComplexType x(vC.size(),0.0);
+
+	H_.matrixVectorProduct(x,vC); // x += H_ vC
+	RealType sum = utils::square(E0_+omega_) + utils::square(eta_);
+	sum -= 2*(E0_+omega_)*real(x*vC);
+	sum += real(x*x);
+	sum += 2*eta_*std::real(aVector_*vC);
+	return sum;
 }
 @}
 
+The size of the vectors for this functional is equal to the rank of the Hamiltonian sector we are
+considering; the latter is stored in the private member \verb=H_=. However, since we need
+to use real vectors to simulate complex vectors (as explained above), the size is actually twice as big:
 @d size
 @{
-size_t size() const {throw std::runtime_error("Neeeds implementation (sorry)\n");; }
+size_t size() const {return 2*H_.rank(); }
 @}
 
 \bibliographystyle{plain}

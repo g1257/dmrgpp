@@ -463,6 +463,7 @@ We'll visit one function at a time. %'
 @<minimizeFunctional@>
 @<minimizeFunctional2@>
 @<obtainXA@>
+@<obtainXA2@>
 @<guessPhiSectors@>
 @<zeroOutVectors@>
 @<printVectors@>
@@ -698,7 +699,7 @@ void calcDynVectors(
 {
 	VectorWithOffsetType psiMin;
 	minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
-	obtainXA(targetVectors_[2],psiMin,tstStruct_.eta,Eg);
+	obtainXA(targetVectors_[2],psiMin,Eg);
 	targetVectors_[1] = phi;
 }
 @}
@@ -707,7 +708,7 @@ After \verb=calcDynVectors= is called, \verb=psiMin= contains $|Y_A\rangle$,
 		as explained in Eq.~(15).
 From Eq.~(16), \verb=iaw= contains $I_A(\omega)$.
 
-Below we minimize Eq.~(14) of reference~\cite{re:jeckelman02}, and obtain $\psi_{min}$ which is stored in psiMin.
+Below we minimize Eq.~(14) of reference~\cite{re:jeckelmann02}, and obtain $\psi_{min}$ which is stored in psiMin.
 @d minimizeFunctional
 @{
 void minimizeFunctional(
@@ -729,14 +730,16 @@ void minimizeFunctional(
 
 @d minimizeFunctional2
 @{
-void minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType&phi,size_t i)
+void minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType& phi,size_t i)
 {
 	size_t p = basisSE_.findPartitionNumber(phi.offset(i));
 	typename ModelType::ModelHelperType modelHelper(p,basisSE_,basisS_,basisE_,model_.orbitals());
 	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 	LanczosMatrixType h(&model_,&modelHelper);
-	typedef DynamicFunctional<RealType,LanczosMatrixType,VectorWithOffsetType> DynamicFunctionalType;
-	DynamicFunctionalType wFunctional(h,phi,currentOmega_,Eg,tstStruct_.eta);
+	typedef DynamicFunctional<RealType,LanczosMatrixType,VectorType> DynamicFunctionalType;
+	VectorType aVector;
+	phi.extract(aVector,i);
+	DynamicFunctionalType wFunctional(h,aVector,currentOmega_,Eg,tstStruct_.eta);
 	size_t maxIter = 200;
 
 	PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
@@ -749,17 +752,37 @@ void minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType&ph
 }
 @}
 
-The function below implements Eq.~(11) of reference \cite{re:jeckelman02}.
+The function below implements Eq.~(11) of reference \cite{re:jeckelmann02}.
 
 @d obtainXA
 @{
 void obtainXA(
 		VectorWithOffsetType& xa,
-		const VectorWithOffsetType& psiMin,
-		RealType eta,
+		const VectorWithOffsetType& ya,
 		RealType Eg)
 {
-	throw std::runtime_error("obtainXA: unimplemented\n");
+	xa = ya;
+	for (size_t i=0;i<ya.sectors();i++) {
+		obtainXA(xa,Eg,ya,i);
+	}
+}
+@}
+
+@d obtainXA2
+@{
+void obtainXA(VectorWithOffsetType& xa,RealType Eg,const VectorWithOffsetType& ya,size_t i)
+{
+	size_t p = basisSE_.findPartitionNumber(ya.offset(i));
+	typename ModelType::ModelHelperType modelHelper(p,basisSE_,basisS_,basisE_,model_.orbitals());
+	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
+	LanczosMatrixType h(&model_,&modelHelper);
+	VectorType yaThisSector;
+	ya.extract(yaThisSector,i);
+	VectorType sv(yaThisSector.size(),0.0);
+	h.matrixVectorProduct(sv,yaThisSector); // sv = H * yaThisSector
+	RealType factor =  (Eg+currentOmega_)/tstStruct_.eta;
+	sv -= (yaThisSector * factor);
+	xa.setDataInSector(sv,i);
 }
 @}
 

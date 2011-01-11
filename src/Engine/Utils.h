@@ -174,6 +174,14 @@ namespace std {
 		return w;
 	}
 	
+	template<typename FieldType,typename FieldType2>
+	inline std::vector<FieldType2> operator*(const std::vector<FieldType2>& v,const FieldType& value)
+	{
+		std::vector<FieldType2> w = v;
+		for (size_t i=0;i<w.size();i++) w[i] *= value;
+		return w;
+	}
+
 	template<typename FieldType>
 	inline std::vector<FieldType> operator+=(std::vector<FieldType>& v,const std::vector<FieldType>& w)
 	{
@@ -247,6 +255,9 @@ namespace utils {
 		sort<double,ContainerTemplate<size_t,Field,Cmp,A>,Field>(x,iperm);				
 	}*/
 	
+	template<typename T>
+	T square(const T& t) { return t*t; }
+
 	bool neighbors(size_t i1,size_t i2)
 	{
 		return (i1-i2==1 || i2-i1==1);
@@ -323,13 +334,6 @@ namespace utils {
 		ss>>str;
 		return str;
 	}
-
-	template<class T>
-	inline T square(T x)
-	{
-		return (x*x);
-	}
-	
 	
 	//! given ind and n, get x and y such that ind = x + y*n
 	inline void getCoordinates(size_t &x,size_t &y,size_t ind,size_t n)

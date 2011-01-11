@@ -196,7 +196,7 @@ print FOUT<<EOF;
 # Platform: $platform
 # MPI: $mpi
 
-LDFLAGS =    $lapack  -lm $pthreadsLib
+LDFLAGS =    $lapack  -lgsl  -lgslcblas $pthreadsLib
 CPPFLAGS = -Werror -Wall -I../PartialPsimag -IEngine -I$modelLocation -IGeometries -I$PsimagLite
 EOF
 if ($mpi) {
