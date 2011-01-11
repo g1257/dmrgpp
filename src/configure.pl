@@ -166,7 +166,7 @@ sub askQuestions
 	$lapack = $_;
 	
 	print "What should the observer driver target?\n";
-	print "Available: GroundStateTargetting TimeStepTargetting\n";
+	print "Available: GroundStateTargetting TimeStepTargetting DynamicTargetting\n";
 	print "Default is: GroundStateTargetting (press ENTER): ";
 	$_=<STDIN>;
 	chomp;
@@ -286,6 +286,7 @@ print FOUT<<EOF;
 #include "InternalProductStored.h"
 #include "GroundStateTargetting.h"
 #include "TimeStepTargetting.h"
+#include "DynamicTargetting.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
 
@@ -320,7 +321,7 @@ template<
 	typename MySparseMatrix
 >
 void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverType& dmrgSolverParams,
-		ConcurrencyType& concurrency, IoInputType& io,bool hasTimeEvolution)
+		ConcurrencyType& concurrency, IoInputType& io,const std::string& targettingString)
 {
 	typedef ReflectionSymmetryEmpty<MatrixElementType,MySparseMatrix> ReflectionSymmetryType;
 	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
@@ -346,11 +347,17 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 
 	//! Read TimeEvolution if applicable:
 	typedef typename SolverType::TargettingType TargettingType;
-        typedef typename TargettingType::TargettingStructureType TargettingStructureType;
-        TargettingStructureType tsp(io,model,hasTimeEvolution);
+	typedef typename TargettingType::TargettingStructureType TargettingStructureType;
+	size_t targetting = TargettingType::TargettingStructureType::GROUNDSTATE_TARGETTING;
+	if (targettingString == "TimeStepTargetting") {
+		targetting = TargettingType::TargettingStructureType::TIMESTEP_TARGETTING;
+	} else if (targettingString == "DynamicTargetting") {
+		targetting = TargettingType::TargettingStructureType::DYNAMIC_TARGETTING;
+	}
+	TargettingStructureType tsp(io,model,targetting);
 
-        //! Setup the dmrg solver:
-        SolverType dmrgSolver(dmrgSolverParams,model,concurrency,tsp);
+	//! Setup the dmrg solver:
+	SolverType dmrgSolver(dmrgSolverParams,model,concurrency,tsp);
 
 	//! Calculate observables:
 	dmrgSolver.main(geometry);
@@ -376,39 +383,49 @@ int main(int argc,char *argv[])
 
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;
-	bool hasTimeEvolution=false;
-	if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) hasTimeEvolution=true;
-	if (hasTimeEvolution && su2) throw std::runtime_error("Time Evolution and SU(2)"
- 		" not supported at the same time yet (sorry!)\\n");
-	if (!su2) {
-		if (hasTimeEvolution) { 
-			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
-				IoInputType,
-				$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,TimeStepTargetting,
-				MySparseMatrixComplex>
-			(mp,geometry,dmrgSolverParams,concurrency,io,hasTimeEvolution);
-		} else {
-			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
-				IoInputType,
-				$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
-				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,io,hasTimeEvolution);
-		}
-	} else {
-		 if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
+	std::string targetting="GroundStateTargetting";
+	if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) targetting="TimeStepTargetting";
+	if (dmrgSolverParams.options.find("DynamicTargetting")!=std::string::npos) targetting="DynamicTargetting";
+	if (targetting!="GroundStateTargetting" && su2) throw std::runtime_error("SU(2)"
+ 		" supports only GroundStateTargetting for now (sorry!)\\n");
+	if (su2) {
+		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 				IoInputType,
 				$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffsets,GroundStateTargetting,
 				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,io,hasTimeEvolution);
+			(mp,geometry,dmrgSolverParams,concurrency,io,targetting);
 		} else {
 			mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 				IoInputType,
 				$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
 				MySparseMatrixReal>
-			(mp,geometry,dmrgSolverParams,concurrency,io,hasTimeEvolution);
+			(mp,geometry,dmrgSolverParams,concurrency,io,targetting);
 		}
+		return 0;
 	}
+	if (targetting=="TimeStepTargetting") { 
+		mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
+			IoInputType,
+			$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,TimeStepTargetting,
+			MySparseMatrixComplex>
+			(mp,geometry,dmrgSolverParams,concurrency,io,targetting);
+			return 0;
+	}
+	if (targetting=="DynamicTargetting") {
+		mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
+			IoInputType,
+			$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,DynamicTargetting,
+			MySparseMatrixComplex>
+			(mp,geometry,dmrgSolverParams,concurrency,io,targetting);
+			return 0;
+	}
+	
+	mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
+		IoInputType,
+		$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
+		MySparseMatrixReal>
+		(mp,geometry,dmrgSolverParams,concurrency,io,targetting);
 }
 
 EOF

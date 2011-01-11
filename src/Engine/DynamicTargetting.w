@@ -48,6 +48,8 @@ whereas the first one will be stored in the private member \verb|psi_|.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "ApplyOperatorLocal.h"
+#include "TimeSerializer.h"
+#include "DynamicFunctional.h"
 
 namespace Dmrg {
 	@<theClassHere@>
@@ -78,7 +80,6 @@ everywhere except on the (targetted) symmetry sector(s).
 
 @d theClassHere
 @{
-namespace Dmrg {
 template<
 	template<typename,typename,typename> class LanczosSolverTemplate,
 	template<typename,typename> class InternalProductTemplate,
@@ -108,14 +109,15 @@ typedef ConcurrencyType_ ConcurrencyType;
 typedef IoType_ IoType;
 typedef typename ModelType::RealType RealType;
 typedef std::complex<RealType> ComplexType;
-typedef InternalProductTemplate<ComplexType,ModelType> InternalProductType;
+//typedef InternalProductTemplate<ComplexType,ModelType> InternalProductType;
 typedef typename ModelType::OperatorsType OperatorsType;
+typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
 typedef std::vector<ComplexType> ComplexVectorType;
-typedef LanczosSolverTemplate<InternalProductType,ComplexVectorType> LanczosSolverType;
+//typedef LanczosSolverTemplate<InternalProductType,ComplexVectorType> LanczosSolverType;
 typedef std::vector<RealType> VectorType;
 typedef psimag::Matrix<ComplexType> ComplexMatrixType;
-typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
+//typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 typedef typename BasisWithOperatorsType::BasisType BasisType;
 typedef TargetStructureParams<ModelType> TargettingStructureType; //@xtargettingstructure@x
@@ -124,6 +126,8 @@ typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
 typedef ComplexVectorType TargetVectorType;
 typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
 typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+typedef DynamicFunctional<RealType,SparseMatrixType,VectorWithOffsetTemplate> DynamicFunctionalType;
 @}
 
 And now a few enums and other constants. The first refers to the 4 steps in which the time-step algorithm can be.
@@ -183,6 +187,7 @@ const ModelType& model_;
 const TargettingStructureType& tstStruct_;
 const WaveFunctionTransformationType& waveFunctionTransformation_;
 ProgressIndicator progress_;
+RealType currentOmega_;
 std::vector<VectorWithOffsetType> targetVectors_;
 std::vector<RealType> weight_;
 RealType gsWeight_;
@@ -218,8 +223,10 @@ basisSE_(basisSE),
 model_(model),
 tstStruct_(tstStruct),
 waveFunctionTransformation_(wft),
-progress_("DynamicTargetting",0),currentTime_(0),
-targetVectors_(4),weight_(targetVectors_.size()),
+progress_("DynamicTargetting",0),
+currentOmega_(0),
+targetVectors_(4),
+weight_(targetVectors_.size()),
 io_(tstStruct_.filename,parallelRank_),
 applyOpLocal_(basisS,basisE,basisSE)
 @}
@@ -451,7 +458,9 @@ We'll visit one function at a time. %'
 @<allStages@>
 @<noStageIs@>
 @<getStage@>
-@<calcTimeVectors@>
+@<calcDynVectors@>
+@<minimizeFunctional@>
+@<obtainXA@>
 @<guessPhiSectors@>
 @<zeroOutVectors@>
 @<printVectors@>
@@ -524,10 +533,6 @@ Up to now, we simply set the stage but we are ready to apply the operator to the
 We delegate that to function \verb|computePhi| that will be explain below.
 @d computeAtimesPsi
 @{
-std::ostringstream msg2;
-msg2<<"Steps without advance: "<<timesWithoutAdvancement;
-if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
-				
 std::ostringstream msg;
 msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
 msg<<" Eg="<<Eg;
@@ -543,8 +548,6 @@ Let us look at \verb|computephi|, the next private function.
 void computePhi(size_t i,VectorWithOffsetType& phiNew,
 	VectorWithOffsetType& phiOld,size_t systemOrEnviron)
 {
-	size_t indexAdvance = times_.size()-1;
-	size_t indexNoAdvance = 0;
 	if (stage_[i]==OPERATOR) {
 		@<computePhiOperator@>
 	} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
@@ -553,6 +556,7 @@ void computePhi(size_t i,VectorWithOffsetType& phiNew,
 		throw std::runtime_error("It's 5 am, do you know what line "
 			" your code is exec-ing?\n");
 	}
+}
 @}
 If we're in the stage of applying operator $i$, then we %'
 call \verb|applyLocal| (see function \verb|operator()| in file \verb|ApplyLocalOperator.h|)
@@ -576,8 +580,6 @@ So, we need to either guess which sectors will be non-zero by calling \verb| gue
 or just populate all sectors with and then ``collapse'' the non-zero sectors for efficiency.
 @d computePhiAdvance
 @{
-size_t advance = indexNoAdvance;
-if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
 std::ostringstream msg;
 msg<<"I'm calling the WFT now";
 progress_.printline(msg,std::cout);
@@ -586,7 +588,7 @@ if (tstStruct_.aOperators.size()==1) guessPhiSectors(phiNew,i,systemOrEnviron);
 else phiNew.populateSectors(basisSE_);
 
 // OK, now that we got the partition number right, let's wft:
-waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[advance],
+waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[0],
 	basisS_,basisE_,basisSE_); // generalize for su(2)
 phiNew.collapseSectors();
 @}
@@ -682,20 +684,64 @@ the algorithm described in page 3 of reference~\cite{re:jeckelmann02}.
 The incoming arguments are the ground state energy \verb=Eg=,
 the vector \verb|phi| or $|\phi\rangle$ which is $|\phi\rangle\equiv A|\psi_{gs}\rangle$, and
 the direction of growth specified in \verb|systemOrEnviron|.
-Note that \verb|phi| will be stored in \verb|targetVector_[0]|,
-$|Y_A\rangle$ in \verb|targetVector_[1]|,
-$|X_A\rangle$ in \verb|targetVector_[2]|.
-@d calcTimeVectors
+Note that \verb|phi| will be stored in \verb|targetVectors_[0]|,
+$|Y_A\rangle$ in \verb|targetVectors_[1]|,
+$|X_A\rangle$ in \verb|targetVectors_[2]|.
+@d calcDynVectors
 @{
-void calcTimeVectors(
+void calcDynVectors(
 					RealType Eg,
 					const VectorWithOffsetType& phi,
 					size_t systemOrEnviron)
 {
-	VectorWithOffsetType phiMin;
-	minimizeFunctional(phiMin,Eg,phi,systemOrEnviron);
-	obtainYA(phiMin,Eg,phi,systemOrEnviron);
-	obtainXA(phiMin,Eg,phi,systemOrEnviron);
+	VectorWithOffsetType psiMin;
+	std::pair<RealType,RealType> w = minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
+	RealType iaw = -w.first*w.second*M_PI;
+	obtainXA(targetVectors_[2],psiMin,w.second,Eg);
+	targetVectors_[1] = phi;
+}
+@}
+After \verb=calcDynVectors= is called, \verb=psiMin= contains $|Y_A\rangle$,
+		as explained in Eq.~(15).
+From Eq.~(16), \verb=iaw= contains $I_A(\omega)$.
+
+Below we minimize Eq.~(14) of reference~\cite{re:jeckelman02}, and obtain $\psi_{min}$ which is stored in psiMin.
+@d minimizeFunctional
+@{
+std::pair<RealType,RealType> minimizeFunctional(
+		VectorWithOffsetType& psiMin,
+		RealType Eg,
+		const VectorWithOffsetType&phi,
+		size_t systemOrEnviron)
+{
+	DynamicFunctionalType wFunctional;
+	size_t maxIter = 200;
+	PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
+	VectorWithOffsetType phiCopy = phi;
+	psiMin = phi;
+	for (size_t i=0;i<phiCopy.sectors();i++) {
+		size_t ii = phiCopy.sector(i);
+		VectorType sv;
+		psiMin.extract(sv,i);
+		int iter = min.simplex(sv);
+		if (iter<0) throw std::runtime_error
+			("DynTargetting::minimizeFunctional(...):No minimum found\n");
+		psiMin.setDataInSector(sv,i);
+	}
+	return (wFunctional.eta(),wFunctional(psiMin));
+}
+@}
+
+The function below implements Eq.~(11) of reference \cite{re:jeckelman02}.
+
+@d obtainXA
+@{
+void obtainXA(
+		const VectorWithOffsetType& psiMin,
+		RealType eta,
+		RealType Eg)
+{
+	throw std::runtime_error("obtainXA: unimplemented\n");
 }
 @}
 
@@ -746,7 +792,7 @@ void printVectors(const std::vector<size_t>& block)
 	if (block.size()!=1) throw std::runtime_error(
 			"DynamicTargetting only supports blocks of size 1\n");
 
-	TimeSerializerType ts(currentTime_,block[0],targetVectors_);
+	TimeSerializerType ts(currentOmega_,block[0],targetVectors_);
 	ts.save(io_);
 }
 @}
@@ -757,11 +803,12 @@ Print header to disk to index the time vectors. This indexing wil lbe used at po
 void printHeader()
 {
 	io_.print(tstStruct_);
-	std::string label = "times";
-	io_.printVector(times_,label);
+	std::string label = "omega";
+	std::string s = "Omega=" + utils::ttos(currentOmega_);
+	io_.printline(s);
 	label = "weights";
 	io_.printVector(weight_,label);
-	std::string s = "GsWeight="+utils::ttos(gsWeight_);
+	s = "GsWeight="+utils::ttos(gsWeight_);
 	io_.printline(s);
 }
 @}
@@ -800,7 +847,7 @@ void test(
 				sum+= dest[k+offset1] * conj(src2[k+offset2]);
 		}
 	}
-	std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_;
+	std::cerr<<site<<" "<<sum<<" "<<" "<<currentOmega_;
 	std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
 }
 @}

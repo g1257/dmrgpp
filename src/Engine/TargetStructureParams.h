@@ -97,12 +97,14 @@ namespace Dmrg {
 			typedef typename SparseMatrixType::value_type ComplexOrReal;
 			typedef psimag::Matrix<ComplexOrReal> MatrixType;
 			
+			enum {GROUNDSTATE_TARGETTING,TIMESTEP_TARGETTING,DYNAMIC_TARGETTING};
+
 			template<typename IoInputter>
-			TargetStructureParams(IoInputter& io,const ModelType& model,bool hasTimeEvolution)
+			TargetStructureParams(IoInputter& io,const ModelType& model,size_t type)
 				: filename("tst.txt"),tau(0),timeSteps(0),advanceEach(0),sites(0),startingLoops(0),
-					model_(model),hasTimeEvolution_(hasTimeEvolution)
+					model_(model),type_(type)
 			{
-				if (!hasTimeEvolution) return;
+				if (type==GROUNDSTATE_TARGETTING) return;
 				io.readline(filename,"TSPFilename="); // filename
 				io.readline(tau,"TSPTau=");
 				io.readline(timeSteps,"TSPTimeSteps=");
@@ -145,19 +147,22 @@ namespace Dmrg {
 					OperatorType myOp(data,fermiSign, jmValues,angularFactor,su2Related);
 					aOperators[i] = myOp;
 				}
+
+				io.readline(eta,"TSPEta=");
 			}
 			
-			bool hasTimeEvolution() const { return hasTimeEvolution_; }
+			size_t type() const { return type_; }
 			
 			// I know, there is public data here FIXME!!
 			std::string filename;
-			typename OperatorType::RealType tau;
+			RealType tau;
 			size_t timeSteps;
 			size_t advanceEach;
 			std::vector<size_t> sites;
 			std::vector<size_t> startingLoops;
 			std::vector<OperatorType> aOperators;
 			std::vector<size_t> electrons;
+			RealType eta;
 		
 		private:
 			void setCookedData(size_t i,const std::string& s,const std::vector<size_t>& v)
@@ -176,7 +181,7 @@ namespace Dmrg {
 			}
 			
 			const ModelType& model_;
-			bool hasTimeEvolution_;
+			bool type_;
 			std::vector<MatrixType> data_; 
 	}; // class TargetStructureParams
 	
@@ -184,7 +189,7 @@ namespace Dmrg {
 	inline std::ostream&
 	operator<<(std::ostream& os,const TargetStructureParams<ModelType>& t)
 	{
-		if (!t.hasTimeEvolution()) return os;
+		if (t.type() == TargetStructureParams<ModelType>::GROUNDSTATE_TARGETTING) return os;
 		os<<"#TimeStepStructure.operators="<<t.aOperators.size()<<"\n";
 		for (size_t i=0;i<t.aOperators.size();i++) {
 			os<<"#TimeStepStructure.operator "<<i<<"\n";
@@ -198,6 +203,8 @@ namespace Dmrg {
 		os<<"#TimeVectorsfilename.tau="<<t.tau<<"\n";
 		os<<"#TimeVectorsfilename.timeSteps="<<t.timeSteps<<"\n";
 		os<<"#TimeVectorsfilename.advanceEach="<<t.advanceEach<<"\n";
+		if (t.type() == TargetStructureParams<ModelType>::DYNAMIC_TARGETTING) return os;
+		os<<"#TimeStepStructure.eta="<<t.eta<<"\n";
 		return os;
 	}
 } // namespace Dmrg 
