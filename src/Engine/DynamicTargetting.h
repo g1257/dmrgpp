@@ -112,11 +112,12 @@ namespace Dmrg {
 		typedef TargetStructureParams<ModelType> TargettingStructureType; //2b-01
 		typedef typename BasisType::BlockType BlockType;
 		typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
-		typedef typename  VectorWithOffsetType::VectorType VectorType;
+		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef ComplexVectorType TargetVectorType;
 		typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
 		typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+		
 		
 		enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 		enum {	EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
@@ -124,6 +125,7 @@ namespace Dmrg {
 				INFINITE=WaveFunctionTransformationType::INFINITE};
 
 		static const size_t parallelRank_ = 0; // DYNT needs to support concurrency FIXME
+		
 		
 		DynamicTargetting(
 				const BasisWithOperatorsType& basisS,
@@ -422,12 +424,12 @@ namespace Dmrg {
 		
 
 		void calcDynVectors(
-							RealType Eg,
-							const VectorWithOffsetType& phi,
-							size_t systemOrEnviron)
+				RealType Eg,
+				const VectorWithOffsetType& phi,
+				size_t systemOrEnviron)
 		{
 			VectorWithOffsetType psiMin;
-			 minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
+			minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
 			obtainXA(targetVectors_[2],psiMin,tstStruct_.eta,Eg);
 			targetVectors_[1] = phi;
 		}
@@ -449,6 +451,7 @@ namespace Dmrg {
 			}
 		}
 		
+
 		void minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType&phi,size_t i)
 		{
 			size_t p = basisSE_.findPartitionNumber(phi.offset(i));
@@ -461,12 +464,13 @@ namespace Dmrg {
 
 			PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
 			std::vector<RealType> svReal;
-			packComplexToReal(svReal,sv);
+			wFunctional.packComplexToReal(svReal,sv);
 			int iter = min.simplex(svReal);
 			if (iter<0) throw std::runtime_error
 					("DynTargetting::minimizeFunctional(...):No minimum found\n");
-			packRealToComplex(sv,svReal);
+			wFunctional.packRealToComplex(sv,svReal);
 		}
+		
 
 		void obtainXA(
 				VectorWithOffsetType& xa,
@@ -477,25 +481,6 @@ namespace Dmrg {
 			throw std::runtime_error("obtainXA: unimplemented\n");
 		}
 		
-		void packComplexToReal(std::vector<RealType>& svReal,const std::vector<std::complex<RealType> >& sv)
-		{
-			svReal.resize(sv.size()*2);
-			size_t j = 0;
-			for (size_t i=0;i<sv.size();i++) {
-				svReal[j++] = real(sv[i]);
-				svReal[j++] = imag(sv[i]);
-			}
-		}
-
-		void packRealToComplex(std::vector<std::complex<RealType> >& sv,const std::vector<RealType>& svReal)
-		{
-			sv.resize(svReal.size()/2);
-			size_t j = 0;
-			for (size_t i=0;i<sv.size();i++) {
-				sv[i] = std::complex<RealType>(svReal[j],svReal[j+1]);
-				j += 2;
-			}
-		}
 
 		void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
 		{

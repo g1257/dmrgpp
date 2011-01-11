@@ -50,6 +50,7 @@ whereas the first one will be stored in the private member \verb|psi_|.
 #include "ApplyOperatorLocal.h"
 #include "TimeSerializer.h"
 #include "DynamicFunctional.h"
+#include "Minimizer.h"
 
 namespace Dmrg {
 	@<theClassHere@>
@@ -109,13 +110,13 @@ typedef ConcurrencyType_ ConcurrencyType;
 typedef IoType_ IoType;
 typedef typename ModelType::RealType RealType;
 typedef std::complex<RealType> ComplexType;
-//typedef InternalProductTemplate<ComplexType,ModelType> InternalProductType;
+typedef InternalProductTemplate<ComplexType,ModelType> InternalProductType;
 typedef typename ModelType::OperatorsType OperatorsType;
-typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
+//typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
 typedef std::vector<ComplexType> ComplexVectorType;
-//typedef LanczosSolverTemplate<InternalProductType,ComplexVectorType> LanczosSolverType;
-typedef std::vector<RealType> VectorType;
+typedef LanczosSolverTemplate<RealType,InternalProductType,ComplexVectorType> LanczosSolverType;
+//typedef std::vector<RealType> VectorType;
 typedef psimag::Matrix<ComplexType> ComplexMatrixType;
 //typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 typedef typename BasisWithOperatorsType::OperatorType OperatorType;
@@ -123,11 +124,11 @@ typedef typename BasisWithOperatorsType::BasisType BasisType;
 typedef TargetStructureParams<ModelType> TargettingStructureType; //@xtargettingstructure@x
 typedef typename BasisType::BlockType BlockType;
 typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
+typedef typename VectorWithOffsetType::VectorType VectorType;
 typedef ComplexVectorType TargetVectorType;
 typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
 typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
-typedef DynamicFunctional<RealType,SparseMatrixType,VectorWithOffsetTemplate> DynamicFunctionalType;
 @}
 
 And now a few enums and other constants. The first refers to the 4 steps in which the time-step algorithm can be.
@@ -460,6 +461,7 @@ We'll visit one function at a time. %'
 @<getStage@>
 @<calcDynVectors@>
 @<minimizeFunctional@>
+@<minimizeFunctional2@>
 @<obtainXA@>
 @<guessPhiSectors@>
 @<zeroOutVectors@>
@@ -690,17 +692,17 @@ $|X_A\rangle$ in \verb|targetVectors_[2]|.
 @d calcDynVectors
 @{
 void calcDynVectors(
-					RealType Eg,
-					const VectorWithOffsetType& phi,
-					size_t systemOrEnviron)
+		RealType Eg,
+		const VectorWithOffsetType& phi,
+		size_t systemOrEnviron)
 {
 	VectorWithOffsetType psiMin;
-	std::pair<RealType,RealType> w = minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
-	RealType iaw = -w.first*w.second*M_PI;
-	obtainXA(targetVectors_[2],psiMin,w.second,Eg);
+	minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
+	obtainXA(targetVectors_[2],psiMin,tstStruct_.eta,Eg);
 	targetVectors_[1] = phi;
 }
 @}
+
 After \verb=calcDynVectors= is called, \verb=psiMin= contains $|Y_A\rangle$,
 		as explained in Eq.~(15).
 From Eq.~(16), \verb=iaw= contains $I_A(\omega)$.
@@ -708,27 +710,42 @@ From Eq.~(16), \verb=iaw= contains $I_A(\omega)$.
 Below we minimize Eq.~(14) of reference~\cite{re:jeckelman02}, and obtain $\psi_{min}$ which is stored in psiMin.
 @d minimizeFunctional
 @{
-std::pair<RealType,RealType> minimizeFunctional(
+void minimizeFunctional(
 		VectorWithOffsetType& psiMin,
 		RealType Eg,
 		const VectorWithOffsetType&phi,
 		size_t systemOrEnviron)
 {
-	DynamicFunctionalType wFunctional;
-	size_t maxIter = 200;
-	PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
 	VectorWithOffsetType phiCopy = phi;
 	psiMin = phi;
 	for (size_t i=0;i<phiCopy.sectors();i++) {
-		size_t ii = phiCopy.sector(i);
 		VectorType sv;
 		psiMin.extract(sv,i);
-		int iter = min.simplex(sv);
-		if (iter<0) throw std::runtime_error
-			("DynTargetting::minimizeFunctional(...):No minimum found\n");
+		minimizeFunctional(sv,Eg,phi,i);
 		psiMin.setDataInSector(sv,i);
 	}
-	return (wFunctional.eta(),wFunctional(psiMin));
+}
+@}
+
+@d minimizeFunctional2
+@{
+void minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType&phi,size_t i)
+{
+	size_t p = basisSE_.findPartitionNumber(phi.offset(i));
+	typename ModelType::ModelHelperType modelHelper(p,basisSE_,basisS_,basisE_,model_.orbitals());
+	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
+	LanczosMatrixType h(&model_,&modelHelper);
+	typedef DynamicFunctional<RealType,LanczosMatrixType,VectorWithOffsetType> DynamicFunctionalType;
+	DynamicFunctionalType wFunctional(h,phi,currentOmega_,Eg,tstStruct_.eta);
+	size_t maxIter = 200;
+
+	PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
+	std::vector<RealType> svReal;
+	wFunctional.packComplexToReal(svReal,sv);
+	int iter = min.simplex(svReal);
+	if (iter<0) throw std::runtime_error
+			("DynTargetting::minimizeFunctional(...):No minimum found\n");
+	wFunctional.packRealToComplex(sv,svReal);
 }
 @}
 
@@ -737,6 +754,7 @@ The function below implements Eq.~(11) of reference \cite{re:jeckelman02}.
 @d obtainXA
 @{
 void obtainXA(
+		VectorWithOffsetType& xa,
 		const VectorWithOffsetType& psiMin,
 		RealType eta,
 		RealType Eg)
@@ -744,6 +762,7 @@ void obtainXA(
 	throw std::runtime_error("obtainXA: unimplemented\n");
 }
 @}
+
 
 As explained above (cross reference here), we need to know before applying an operator
 were the non-zero sectors are going to be. The operator (think $c^\dagger$)

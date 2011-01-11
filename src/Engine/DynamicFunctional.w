@@ -47,23 +47,16 @@ namespace Dmrg {
 @d theClassHere
 @{
 template<
-	typename RealType,typename SparseMatrixType,template <typename> class VectorWithOffsetTemplate>
+	typename RealType,typename SparseMatrixType,typename VectorWithOffsetType>
 class DynamicFunctional  {
-	@<privateTypedefsAndConstants@>
 public:
+	@<publicTypedefs@>
 	@<constructor@>
 	@<publicFunctions@>
 private:
 	@<privateData@>
 }; // class DynamicFunctional
 @}
-
-@d privateTypedefsAndConstants
-@{
-typedef std::complex<RealType> ComplexType;
-typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
-@}
-
 
 Now comes the constructor which takes 6 arguments.
 The first 3 arguments are the system (left-block), environment (right-block), and superblock (system + environment).
@@ -108,9 +101,49 @@ eta_(eta),
 progress_("DynamicFunctional",0)
 @}
 
+This class needs to tell the minimizer (\verb=Minimizer.w=) class what type of scalar we'll be using%'
+The minimizer expects this in type called \verb=FieldType=.
+It turns out that here the vectors are complex, but the minimizer only takes real functions, since it is based
+on the gsl which uses \verb=gsl_vector= which is real.
+Arrrghhh!! To work around this problem we will map the complex vector \verb=v= of size \verb=n=
+into a real vector \verb=vReal= of size \verb=2*n=. This is implemented here:
+@d packComplex
+@{
+void packComplexToReal(std::vector<RealType>& svReal,const std::vector<std::complex<RealType> >& sv)
+{
+	svReal.resize(sv.size()*2);
+	size_t j = 0;
+	for (size_t i=0;i<sv.size();i++) {
+		svReal[j++] = real(sv[i]);
+		svReal[j++] = imag(sv[i]);
+	}
+}
+@}
+
+@d packReal
+@{
+void packRealToComplex(std::vector<std::complex<RealType> >& sv,const std::vector<RealType>& svReal)
+{
+	sv.resize(svReal.size()/2);
+	size_t j = 0;
+	for (size_t i=0;i<sv.size();i++) {
+		sv[i] = std::complex<RealType>(svReal[j],svReal[j+1]);
+		j += 2;
+	}
+}
+@}
+
+All right, so let us tell the minimizer that we are real:
+@d publicTypedefs
+@{
+typedef RealType FieldType; // see documentation
+@}
+
 
 @d publicFunctions
 @{
+@<packComplex@>
+@<packReal@>
 @<operatorParens@>
 @<size@>
 @}

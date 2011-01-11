@@ -79,11 +79,11 @@ namespace Dmrg {
 	template<
 		typename RealType,typename SparseMatrixType,typename VectorWithOffsetType>
 	class DynamicFunctional  {
-		
 	public:
 		
-		typedef RealType FieldType; // this function is real
-
+		typedef RealType FieldType; // see documentation
+		
+		
 		DynamicFunctional(
 				const SparseMatrixType& H,
 				const VectorWithOffsetType& aVector,
@@ -100,6 +100,28 @@ namespace Dmrg {
 		 	
 		{}
 		
+		
+
+		void packComplexToReal(std::vector<RealType>& svReal,const std::vector<std::complex<RealType> >& sv)
+		{
+			svReal.resize(sv.size()*2);
+			size_t j = 0;
+			for (size_t i=0;i<sv.size();i++) {
+				svReal[j++] = real(sv[i]);
+				svReal[j++] = imag(sv[i]);
+			}
+		}
+		
+
+		void packRealToComplex(std::vector<std::complex<RealType> >& sv,const std::vector<RealType>& svReal)
+		{
+			sv.resize(svReal.size()/2);
+			size_t j = 0;
+			for (size_t i=0;i<sv.size();i++) {
+				sv[i] = std::complex<RealType>(svReal[j],svReal[j+1]);
+				j += 2;
+			}
+		}
 		
 
 		template<typename SomeVectorType>
