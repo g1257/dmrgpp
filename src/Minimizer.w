@@ -115,7 +115,7 @@ Minimizer(FunctionType& function,size_t maxIter)
 
 @d simplex
 @{
-int simplex(VectorType& minVector)
+int simplex(VectorType& minVector,RealType delta=1e-3,RealType tolerance=1e-3)
 {
 	gsl_vector *x;
 	/* Starting point,  */
@@ -126,7 +126,7 @@ int simplex(VectorType& minVector)
 	gsl_vector *xs;
 	xs = gsl_vector_alloc (function_.size());
 	for (size_t i=0;i<minVector.size();i++)
-		gsl_vector_set (xs, i, 1e-3);
+		gsl_vector_set (xs, i, delta);
 
 	gsl_multimin_function func;
 	func.f= myFunction<FunctionType>;
@@ -134,14 +134,13 @@ int simplex(VectorType& minVector)
 	func.params = &function_;
 	gsl_multimin_fminimizer_set (gslS_, &func, x, xs);
 
-	size_t iter = 0;
 	for (size_t iter=0;iter<maxIter_;iter++) {
 		int status = gsl_multimin_fminimizer_iterate (gslS_);
 
 		if (status) throw std::runtime_error("Minimizer::simplex(...): Error encountered\n");
 
 		RealType size = gsl_multimin_fminimizer_size(gslS_);
-		status = gsl_multimin_test_size(size, 1e-3);
+		status = gsl_multimin_test_size(size, tolerance);
 
 		if (status == GSL_SUCCESS) {
 			found(minVector,gslS_->x,iter);
