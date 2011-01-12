@@ -225,8 +225,8 @@ model_(model),
 tstStruct_(tstStruct),
 waveFunctionTransformation_(wft),
 progress_("DynamicTargetting",0),
-currentOmega_(0),
-targetVectors_(4),
+currentOmega_(tstStruct_.omega),
+targetVectors_(3),
 weight_(targetVectors_.size()),
 io_(tstStruct_.filename,parallelRank_),
 applyOpLocal_(basisS,basisE,basisSE)
@@ -469,6 +469,8 @@ We'll visit one function at a time. %'
 @<printVectors@>
 @<printHeader@>
 @<test@>
+@<areAllTargetsSensible@>
+@<isThisTargetSensible@>
 @}
 
 The below function is called from the \verb|evolve| above and, if appropriate, applies operator $i$ to
@@ -697,10 +699,10 @@ void calcDynVectors(
 		const VectorWithOffsetType& phi,
 		size_t systemOrEnviron)
 {
-	VectorWithOffsetType psiMin;
 	minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
-	obtainXA(targetVectors_[2],psiMin,Eg);
-	targetVectors_[1] = phi;
+	obtainXA(targetVectors_[2],targetVectors_[1],Eg);
+	targetVectors_[0] = phi;
+	areAllTargetsSensible();
 }
 @}
 
@@ -740,15 +742,20 @@ void minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType& p
 	VectorType aVector;
 	phi.extract(aVector,i);
 	DynamicFunctionalType wFunctional(h,aVector,currentOmega_,Eg,tstStruct_.eta);
-	size_t maxIter = 200;
+	size_t maxIter = 1000;
 
 	PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
 	std::vector<RealType> svReal;
-	wFunctional.packComplexToReal(svReal,sv);
+	//wFunctional.packComplexToReal(svReal,sv);
+	for (size_t i=0;i<svReal.size();i++) svReal[i]=drand48();
+	RealType norma = std::norm(svReal);
+	for (size_t i=0;i<svReal.size();i++) svReal[i]/=norma;
+
 	int iter = min.simplex(svReal);
 	if (iter<0) throw std::runtime_error
 			("DynTargetting::minimizeFunctional(...):No minimum found\n");
 	wFunctional.packRealToComplex(sv,svReal);
+	std::cerr<<"DEBUG "<<wFunctional(svReal)<<"\n";
 }
 @}
 
@@ -780,12 +787,14 @@ void obtainXA(VectorWithOffsetType& xa,RealType Eg,const VectorWithOffsetType& y
 	ya.extract(yaThisSector,i);
 	VectorType sv(yaThisSector.size(),0.0);
 	h.matrixVectorProduct(sv,yaThisSector); // sv = H * yaThisSector
-	RealType factor =  (Eg+currentOmega_)/tstStruct_.eta;
+	RealType factor =  (Eg+currentOmega_);
 	sv -= (yaThisSector * factor);
+	sv *= (1/tstStruct_.eta);
 	xa.setDataInSector(sv,i);
 }
 @}
 
+void areAllTargetsSensible
 
 As explained above (cross reference here), we need to know before applying an operator
 were the non-zero sectors are going to be. The operator (think $c^\dagger$)
@@ -891,6 +900,25 @@ void test(
 	}
 	std::cerr<<site<<" "<<sum<<" "<<" "<<currentOmega_;
 	std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
+}
+@}
+
+The function below is just for checking:
+@d areAllTargetsSensible
+@{
+void areAllTargetsSensible() const
+{
+	for (size_t i=0;i<targetVectors_.size();i++)
+		isThisTargetSensible(i);
+}
+@}
+
+@d isThisTargetSensible
+@{
+void isThisTargetSensible(size_t i) const
+{
+	RealType norma = std::norm(targetVectors_[i]);
+	if (norma<1e-6) throw std::runtime_error("Norma is zero\n");
 }
 @}
 \bibliographystyle{plain}

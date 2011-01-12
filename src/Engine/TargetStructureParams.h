@@ -147,7 +147,8 @@ namespace Dmrg {
 					OperatorType myOp(data,fermiSign, jmValues,angularFactor,su2Related);
 					aOperators[i] = myOp;
 				}
-
+				if (type==TIMESTEP_TARGETTING) return;
+				io.readline(omega,"TSPOmega=");
 				io.readline(eta,"TSPEta=");
 			}
 			
@@ -162,6 +163,7 @@ namespace Dmrg {
 			std::vector<size_t> startingLoops;
 			std::vector<OperatorType> aOperators;
 			std::vector<size_t> electrons;
+			RealType omega;
 			RealType eta;
 		
 		private:
@@ -204,6 +206,7 @@ namespace Dmrg {
 		os<<"#TimeVectorsfilename.timeSteps="<<t.timeSteps<<"\n";
 		os<<"#TimeVectorsfilename.advanceEach="<<t.advanceEach<<"\n";
 		if (t.type() == TargetStructureParams<ModelType>::DYNAMIC_TARGETTING) return os;
+		os<<"#TimeStepStructure.omega="<<t.omega<<"\n";
 		os<<"#TimeStepStructure.eta="<<t.eta<<"\n";
 		return os;
 	}
