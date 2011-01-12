@@ -401,9 +401,9 @@ void evolve(RealType Eg,size_t direction,const BlockType& block,
 		return;
 	}
 
-	calcDynVectors(Eg,phiNew,direction);
+	ComplexType val = calcDynVectors(Eg,phiNew,direction);
 
-	cocoon(direction,block); // in-situ
+	cocoon(val,direction,block); // in-situ
 
 	if (needsPrinting) printVectors(block); // for post-processing
 }
@@ -602,16 +602,16 @@ The \verb|cocoon| function measures the density of all time vectors \emph{in sit
 This is done only for debugging purposes, and uses the function \verb|test|.
 @d cocoon
 @{
-void cocoon(size_t direction,const BlockType& block) const
+void cocoon(ComplexType& val,size_t direction,const BlockType& block) const
 {
 	size_t site = block[0];
 	std::cerr<<"-------------&*&*&* Cocoon output starts\n";
 	test(psi_,psi_,direction,"<PSI|A|PSI>",site);
-
-	for (size_t j=0;j<targetVectors_.size();j++) {
-		std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
-		test(targetVectors_[j],psi_,direction,s,site);
-	}
+	std::cerr<<currentOmega_<<" "<<imag(val)<<" "<<real(val)<<" "<<site<<"\n";
+//	for (size_t j=0;j<targetVectors_.size();j++) {
+//		std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
+//		test(targetVectors_[j],psi_,direction,s,site);
+//	}
 	std::cerr<<"-------------&*&*&* Cocoon output ends\n";
 }
 @}
@@ -694,15 +694,17 @@ $|Y_A\rangle$ in \verb|targetVectors_[1]|,
 $|X_A\rangle$ in \verb|targetVectors_[2]|.
 @d calcDynVectors
 @{
-void calcDynVectors(
+ComplexType calcDynVectors(
 		RealType Eg,
 		const VectorWithOffsetType& phi,
 		size_t systemOrEnviron)
 {
-	minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
+	RealType retIm = minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
 	obtainXA(targetVectors_[2],targetVectors_[1],Eg);
+	RealType retRe = -real(targetVectors_[2]*phi)/M_PI; // Eq.~(12a)
 	targetVectors_[0] = phi;
 	areAllTargetsSensible();
+	return ComplexType(retRe,retIm);
 }
 @}
 
@@ -713,7 +715,7 @@ From Eq.~(16), \verb=iaw= contains $I_A(\omega)$.
 Below we minimize Eq.~(14) of reference~\cite{re:jeckelmann02}, and obtain $\psi_{min}$ which is stored in psiMin.
 @d minimizeFunctional
 @{
-void minimizeFunctional(
+RealType minimizeFunctional(
 		VectorWithOffsetType& psiMin,
 		RealType Eg,
 		const VectorWithOffsetType&phi,
@@ -721,41 +723,59 @@ void minimizeFunctional(
 {
 	VectorWithOffsetType phiCopy = phi;
 	psiMin = phi;
+	RealType ret = 0;
 	for (size_t i=0;i<phiCopy.sectors();i++) {
 		VectorType sv;
-		psiMin.extract(sv,i);
-		minimizeFunctional(sv,Eg,phi,i);
-		psiMin.setDataInSector(sv,i);
+		size_t ii = phiCopy.sector(i);
+		psiMin.extract(sv,ii);
+		if (sv.size()==0) throw std::runtime_error("Non-zero sector is zero!\n");
+		ret += minimizeFunctional(sv,Eg,phi,ii);
+		psiMin.setDataInSector(sv,ii);
 	}
+	return ret;
 }
 @}
 
+The function computes the minimum of the $W$ functional and returns the complex number $Im[G(\omega+i\eta)]$.
+Note that the return values use (16).
 @d minimizeFunctional2
 @{
-void minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType& phi,size_t i)
+RealType minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType& phi,size_t ind)
 {
-	size_t p = basisSE_.findPartitionNumber(phi.offset(i));
+	size_t p = basisSE_.findPartitionNumber(phi.offset(ind));
 	typename ModelType::ModelHelperType modelHelper(p,basisSE_,basisS_,basisE_,model_.orbitals());
 	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 	LanczosMatrixType h(&model_,&modelHelper);
 	typedef DynamicFunctional<RealType,LanczosMatrixType,VectorType> DynamicFunctionalType;
 	VectorType aVector;
-	phi.extract(aVector,i);
+	phi.extract(aVector,ind);
 	DynamicFunctionalType wFunctional(h,aVector,currentOmega_,Eg,tstStruct_.eta);
 	size_t maxIter = 1000;
 
 	PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
-	std::vector<RealType> svReal;
+	std::vector<RealType> svReal(2*sv.size());
 	//wFunctional.packComplexToReal(svReal,sv);
 	for (size_t i=0;i<svReal.size();i++) svReal[i]=drand48();
 	RealType norma = std::norm(svReal);
 	for (size_t i=0;i<svReal.size();i++) svReal[i]/=norma;
 
-	int iter = min.simplex(svReal);
-	if (iter<0) throw std::runtime_error
+	int iter = -1;
+	RealType delta = 1e-3;
+	RealType tolerance = 1e-3;
+	size_t counter = 0;
+	while (iter<0 && counter<100) {
+		iter = min.simplex(svReal,delta,tolerance);
+		delta /= 2;
+		tolerance *= 1.2;
+		counter++;
+	}
+	if (iter<0) {
+		std::cerr<<"delta="<<delta<<" tol="<<tolerance<<"\n";
+		throw std::runtime_error
 			("DynTargetting::minimizeFunctional(...):No minimum found\n");
+	}
 	wFunctional.packRealToComplex(sv,svReal);
-	std::cerr<<"DEBUG "<<wFunctional(svReal)<<"\n";
+	return  -wFunctional(svReal)/(M_PI*tstStruct_.eta);
 }
 @}
 
@@ -770,7 +790,8 @@ void obtainXA(
 {
 	xa = ya;
 	for (size_t i=0;i<ya.sectors();i++) {
-		obtainXA(xa,Eg,ya,i);
+		size_t ii = ya.sector(i);
+		obtainXA(xa,Eg,ya,ii);
 	}
 }
 @}

@@ -137,10 +137,12 @@ namespace Dmrg {
 
 			H_.matrixVectorProduct(x,vC); // x += H_ vC
 			RealType sum = utils::square(E0_+omega_) + utils::square(eta_);
+			sum *= real(vC*vC);
 			sum -= 2*(E0_+omega_)*real(x*vC);
 			sum += real(x*x);
 			sum += 2*eta_*std::real(aVector_*vC);
-			return sum;
+			//checkProducts(vC,x);
+			return sum/vC.size();
 		}
 		
 
@@ -148,6 +150,20 @@ namespace Dmrg {
 		
 		
 	private:
+		
+
+		void checkProducts(VectorComplexType& v1,VectorComplexType& v2) const
+		{
+			ComplexType x = v1*v1;
+			ComplexType y = v2*v2;
+			ComplexType z = v2*v1;
+			RealType eps = 1e-6;
+			if (imag(x)>eps) throw std::runtime_error("DynFunctional: Internal Error 1\n");
+			if (imag(y)>eps) throw std::runtime_error("DynFunctional: Internal Error 2\n");
+			if (imag(z)>eps) throw std::runtime_error("DynFunctional: Internal Error 3\n");
+		}
+		
+		
 		
 		const SparseMatrixType& H_;
 		const VectorType& aVector_;
