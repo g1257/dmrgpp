@@ -175,6 +175,14 @@ If the osx platform was chosen the default/suggested LDFLAGS will
 include  -framework Accelerate.
 For other platforms the appropriate linker flags must be given.
 More information on LAPACK is here: http://netlib.org/lapack/
+\item (semi-optional) The GNU Scientific Library.
+This is found in \url{http://www.gnu.org/software/gsl/}. 
+However, you might not need to download it, since many linux distributions
+have it in their official repositories. (e.g. in SUSE the GSL is found 
+under the names of \verb=gsl= and \verb=gsl-devel=, 
+you need both). 
+This is marked semi-optional, since you can work \emph{without} the GSL, please
+see ``Removing GSL Dependencies'', in section~\ref{subsec:gsl} for more info.
 \item (optional) make or gmake (only needed to use the Makefile)
 \item (optional) perl (only needed to run the configure.pl script)
 \end{enumerate}
@@ -226,6 +234,18 @@ for MPI code: (actual command will vary according to MPI Installation):
 mpirun ./dmrg input.inp
 \end{verbatim}
 %METADisableREADME
+
+\subsection{Removing GSL Dependencies} \label{subsec:gsl}
+DMRG++ can run and compile fine without the GSL but you won't be able to use dynamic DMRG.
+To get rid of GSL dependencies do the following:
+\begin{itemize}
+\item Run configure.pl as usual
+\item Edit the generated Makefile and remove \verb=-lgsl  -lgslcblas= from it
+\item Edit the generated dmrg.cpp and replace the line \verb=#include "DynamicTargetting.h"=
+with \verb=#include "DynamicTargettingEmpty.h"=.
+\item Same as previous step for the generated observe.cpp file
+\item Run \verb=make= and \verb=make observe= as usual.
+\end{itemize} 
 
 \section{User's Guide}
 %METAEnableREADME

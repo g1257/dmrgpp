@@ -15,13 +15,17 @@ string name for basis objects
 
 json format for input?
 
-create test for non-constant hoppings --> done, test 26
-
 DensityMatrixSu2 needs optimization
 
-SU(2) + WFT is broookeeeeeen!!
+SU(2) + WFT is broookeeeeeen!! (issued posted on github)
 
 TestSuite: need to eliminate hashtable.txt usage
 
 GeometryFactory: needs to become a real factory (following Modern C++ Design)
 
+lanczos.cpp needs to be built by configure.pl
+
+tstSTruct is doing tDMRG and DDMRG, there should be two of these, 
+and we need to add scaffolding to select among them.
+
+observer need full spin correlations S_i S_j, where S is the full spin

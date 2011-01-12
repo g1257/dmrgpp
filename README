@@ -54,6 +54,7 @@ If the osx platform was chosen the default/suggested LDFLAGS will
 include  -framework Accelerate.
 For other platforms the appropriate linker flags must be given.
 More information on LAPACK is here: http://netlib.org/lapack/
+* (semi-optional) GNU Scientific Library (see doc/manual.pdf)
 * (optional) make or gmake (only needed to use the Makefile)
 * (optional) perl (only needed to run the configure.pl script)
 
