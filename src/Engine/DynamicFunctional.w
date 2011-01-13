@@ -172,7 +172,7 @@ RealType operator()(const SomeVectorType &v) const
 	sum += real(x*x);
 	sum += 2*eta_*std::real(aVector_*vC);
 	//checkProducts(vC,x);
-	return sum/vC.size();
+	return sum;
 }
 @}
 

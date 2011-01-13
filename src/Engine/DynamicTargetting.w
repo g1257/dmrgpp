@@ -147,7 +147,7 @@ In this stage we're adavancing in space and fequency%'
 
 @d enumsAndConstants
 @{
-enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
+enum {DISABLED,OPERATOR,CONVERGING};
 enum {	EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
 		EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
 		INFINITE=WaveFunctionTransformationType::INFINITE};
@@ -422,8 +422,7 @@ with the appropriate weights:
 void initialGuess(VectorWithOffsetType& v) const
 {
 	waveFunctionTransformation_.setInitialVector(v,psi_,basisS_,basisE_,basisSE_);
-	bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
-	if (!b) return;
+	if (!allStages(CONVERGING)) return;
 	std::vector<VectorWithOffsetType> vv(targetVectors_.size());
 	for (size_t i=0;i<targetVectors_.size();i++) {
 		waveFunctionTransformation_.setInitialVector(vv[i],
@@ -529,7 +528,7 @@ are presented to us by the DMRG sweeping. This is explained below under function
 @d checkOperator
 @{
 if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
-else stage_[i]=WFT_NOADVANCE;
+else stage_[i]=CONVERGING;
 if (stage_[i] == OPERATOR) checkOrder(i);
 @}
 
@@ -555,7 +554,7 @@ void computePhi(size_t i,VectorWithOffsetType& phiNew,
 {
 	if (stage_[i]==OPERATOR) {
 		@<computePhiOperator@>
-	} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
+	} else if (stage_[i]== CONVERGING) {
 		@<computePhiAdvance@>
 	} else {
 		throw std::runtime_error("It's 5 am, do you know what line "
@@ -608,10 +607,10 @@ void cocoon(ComplexType& val,size_t direction,const BlockType& block) const
 	std::cerr<<"-------------&*&*&* Cocoon output starts\n";
 	test(psi_,psi_,direction,"<PSI|A|PSI>",site);
 	std::cerr<<currentOmega_<<" "<<imag(val)<<" "<<real(val)<<" "<<site<<"\n";
-//	for (size_t j=0;j<targetVectors_.size();j++) {
-//		std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
-//		test(targetVectors_[j],psi_,direction,s,site);
-//	}
+	for (size_t j=0;j<targetVectors_.size();j++) {
+		std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
+		test(targetVectors_[j],targetVectors_[0],direction,s,site);
+	}
 	std::cerr<<"-------------&*&*&* Cocoon output ends\n";
 }
 @}
@@ -673,11 +672,8 @@ std::string getStage(size_t i) const
 	case OPERATOR:
 		return "Applying operator for the first time";
 		break;
-	case WFT_ADVANCE:
-		return "WFT with time stepping";
-		break;
-	case WFT_NOADVANCE:
-		return "WFT without time change";
+	case CONVERGING:
+		return "Converging DDMRG";
 		break;
 	}
 	return "undefined";
@@ -833,7 +829,7 @@ This function should not be called when more than one operator will be applied.
 void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
 {
 	FermionSign fs(basisS_,tstStruct_.electrons);
-	if (allStages(WFT_NOADVANCE)) {
+	if (allStages(CONVERGING)) {
 		VectorWithOffsetType tmpVector = psi_;
 		for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
 			applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],fs,
@@ -902,8 +898,8 @@ void test(
 	/*CrsMatrix<ComplexType> tmpCt;
 				transposeConjugate(tmpCt,tmpC);
 				multiply(A.data,tmpCt,tmpC);*/
-	A.fermionSign = -1;
-	A.data = tmpC;
+	A.fermionSign = 1;
+	A.data.makeDiagonal(tmpC.rank(),1.0);
 	FermionSign fs(basisS_,tstStruct_.electrons);
 	applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
