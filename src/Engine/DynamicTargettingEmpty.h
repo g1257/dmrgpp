@@ -73,6 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DYNAMICTARGETTING_H
 
 #include "ProgressIndicator.h"
+#include "GroundStateParams.h"
 
 namespace Dmrg {
 	
@@ -95,7 +96,7 @@ namespace Dmrg {
 		typedef std::complex<RealType> ComplexType;
 		typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
 		typedef std::vector<ComplexType> ComplexVectorType;
-		typedef TargetStructureParams<ModelType> TargettingStructureType; //3a-01
+		typedef GroundStateParams<ModelType> TargettingParamsType; //3a-01
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
@@ -111,7 +112,7 @@ namespace Dmrg {
 				const BasisWithOperatorsType& basisE,
 				const BasisType& basisSE,
 				const ModelType& model,
-				const TargettingStructureType& tstStruct,
+				const TargettingParamsType& tstStruct,
 				const WaveFunctionTransformationType& wft)
 		:	basisS_(basisS),
 		 	basisE_(basisE),

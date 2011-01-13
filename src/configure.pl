@@ -22,6 +22,8 @@ Please see full open source license included in file LICENSE.
 use warnings;
 use strict;
 
+my $hasGsl = "yes"; # say "no" here to remove GSL dependence
+
 my $mpi=0;
 my $platform="linux";
 my $lapack="-llapack";
@@ -40,6 +42,11 @@ my ($pthreads,$pthreadsLib)=(0,"");
 my $brand= "v2.0";
 my ($connectorsArgs,$connectorsArgs2,$dof,$connectors2,$connectorValue2);
 my $targetting;
+my $DynamicTargetting = "DynamicTargetting";
+$DynamicTargetting = "DynamicTargettingEmpty" if ($hasGsl=~/n/i);
+
+my $gslLibs = " -lgsl  -lgslcblas ";
+$gslLibs =" " if ($hasGsl=~/n/i);
 
 guessPlatform();
 
@@ -166,7 +173,7 @@ sub askQuestions
 	$lapack = $_;
 	
 	print "What should the observer driver target?\n";
-	print "Available: GroundStateTargetting TimeStepTargetting DynamicTargetting\n";
+	print "Available: GroundStateTargetting TimeStepTargetting $DynamicTargetting\n";
 	print "Default is: GroundStateTargetting (press ENTER): ";
 	$_=<STDIN>;
 	chomp;
@@ -174,7 +181,8 @@ sub askQuestions
 		$_="GroundStateTargetting";
 	}
 	$targetting = $_;
-
+	
+	
 }
 
 
@@ -196,7 +204,7 @@ print FOUT<<EOF;
 # Platform: $platform
 # MPI: $mpi
 
-LDFLAGS =    $lapack  -lgsl  -lgslcblas $pthreadsLib
+LDFLAGS =    $lapack  $gslLibs $pthreadsLib
 CPPFLAGS = -Werror -Wall -I../PartialPsimag -IEngine -I$modelLocation -IGeometries -I$PsimagLite
 EOF
 if ($mpi) {
@@ -234,7 +242,7 @@ sub getLitProgTargets
 {
 	my ($array)=@_;
 	my $x = "";
-	my $litProgTool = "~/software/nuweb/nuweb -v -l  -s  -d ";
+	my $litProgTool = "nuweb.pl -v -l  -s  -d ";
 	foreach my $f (@$array) {
 		my $fh = $f;
 		$fh =~ s/\.w$/\.h/;
@@ -286,7 +294,7 @@ print FOUT<<EOF;
 #include "InternalProductStored.h"
 #include "GroundStateTargetting.h"
 #include "TimeStepTargetting.h"
-#include "DynamicTargetting.h"
+#include "$DynamicTargetting.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
 

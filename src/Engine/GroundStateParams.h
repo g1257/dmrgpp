@@ -96,7 +96,7 @@ namespace Dmrg {
 	inline std::ostream&
 	operator<<(std::ostream& os,const GroundStateParams<ModelType>& t)
 	{
-		os<<"#TargetParams=GroundState\n";
+		os<<"#TargetParams.type=GroundState\n";
 		return os;
 	}
 } // namespace Dmrg 

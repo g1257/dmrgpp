@@ -31,7 +31,7 @@ ComplexType greenFunction(RealType omega,RealType Eg,
 		const ContinuedFractionType& cf)
 {
 	RealType isign = 1.0;
-	RealType eps = 1e-4;
+	RealType eps = 0.05;
 	ComplexType z(omega + Eg,eps);
 	ComplexType x = normaPlus * greenFunction(abPlus,z,isign,cf);
 	RealType normalizer = 2.0;

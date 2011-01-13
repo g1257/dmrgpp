@@ -240,7 +240,12 @@ mpirun ./dmrg input.inp
 
 \subsection{Removing GSL Dependencies} \label{subsec:gsl}
 DMRG++ can run and compile fine without the GSL but you won't be able to use dynamic DMRG.
-To get rid of GSL dependencies do the following:
+There are two ways of doing this.
+The \emph{preferred} way is to edit \verb=configure.pl= and where it says
+\verb!my $hasGsl = "yes";! replace it by \verb!my $hasGsl = "no";!.
+The run \verb=configure.pl=, then \verb=make= and \verb=make observe= as usual.
+
+The other way is more complicated and it involves the following steps:
 \begin{itemize}
 \item Run configure.pl as usual
 \item Edit the generated Makefile and remove \verb=-lgsl  -lgslcblas= from it
