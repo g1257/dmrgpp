@@ -1,7 +1,5 @@
 
-CLEAN UP SCHEDULE 
-
-clean WFT
+clean WFT--> actually we need two WFTs, one for Local Symm. and one for SU(2)
 
 ObserverHelper must have only one constructor
 

@@ -74,20 +74,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TargetStructureParams.h
+/*! \file TargetParamsCommon.h
  *
- *  A class to isolate the geometry dependence of the Dmrg method.
- *  This is an abstract class and meant to simply provide a public interface
+ *  FIXME
  */
-#ifndef TARGET_STRUCT_PARAMS_H
-#define TARGET_STRUCT_PARAMS_H
+#ifndef TARGET_PARAMS_COMMON_H
+#define TARGET_PARAMS_COMMON_H
 
 #include "Utils.h"
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
 	template<typename ModelType>
-	class TargetStructureParams {
+	class TargetParamsCommon {
 		public:
 			typedef typename ModelType::RealType RealType;
 			
@@ -96,19 +95,13 @@ namespace Dmrg {
 			typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type ComplexOrReal;
 			typedef psimag::Matrix<ComplexOrReal> MatrixType;
-			
-			enum {GROUNDSTATE_TARGETTING,TIMESTEP_TARGETTING,DYNAMIC_TARGETTING};
 
 			template<typename IoInputter>
-			TargetStructureParams(IoInputter& io,const ModelType& model,size_t type)
-				: filename("tst.txt"),tau(0),timeSteps(0),advanceEach(0),sites(0),startingLoops(0),
-					model_(model),type_(type)
+			TargetParamsCommon(IoInputter& io,const ModelType& model)
+				: filename("tst.txt"),sites(0),startingLoops(0),model_(model)
 			{
-				if (type==GROUNDSTATE_TARGETTING) return;
+
 				io.readline(filename,"TSPFilename="); // filename
-				io.readline(tau,"TSPTau=");
-				io.readline(timeSteps,"TSPTimeSteps=");
-				io.readline(advanceEach,"TSPAdvanceEach=");
 				io.read(sites,"TSPSites");
 				io.read(startingLoops,"TSPLoops");
 			
@@ -147,24 +140,14 @@ namespace Dmrg {
 					OperatorType myOp(data,fermiSign, jmValues,angularFactor,su2Related);
 					aOperators[i] = myOp;
 				}
-				if (type==TIMESTEP_TARGETTING) return;
-				io.readline(omega,"TSPOmega=");
-				io.readline(eta,"TSPEta=");
 			}
-			
-			size_t type() const { return type_; }
 			
 			// I know, there is public data here FIXME!!
 			std::string filename;
-			RealType tau;
-			size_t timeSteps;
-			size_t advanceEach;
 			std::vector<size_t> sites;
 			std::vector<size_t> startingLoops;
 			std::vector<OperatorType> aOperators;
 			std::vector<size_t> electrons;
-			RealType omega;
-			RealType eta;
 		
 		private:
 			void setCookedData(size_t i,const std::string& s,const std::vector<size_t>& v)
@@ -179,38 +162,29 @@ namespace Dmrg {
 			
 			void set(size_t i,int fermiSign,const PairType& jmValues,RealType angularFactor)
 			{
-				
 			}
 			
 			const ModelType& model_;
-			bool type_;
 			std::vector<MatrixType> data_; 
-	}; // class TargetStructureParams
+	}; // class TargetParamsCommon
 	
 	template<typename ModelType>
 	inline std::ostream&
-	operator<<(std::ostream& os,const TargetStructureParams<ModelType>& t)
+	operator<<(std::ostream& os,const TargetParamsCommon<ModelType>& t)
 	{
-		if (t.type() == TargetStructureParams<ModelType>::GROUNDSTATE_TARGETTING) return os;
-		os<<"#TimeStepStructure.operators="<<t.aOperators.size()<<"\n";
+		os<<"#TargetParams.operators="<<t.aOperators.size()<<"\n";
 		for (size_t i=0;i<t.aOperators.size();i++) {
-			os<<"#TimeStepStructure.operator "<<i<<"\n";
+			os<<"#TargetParams.operator "<<i<<"\n";
 			os<<t.aOperators[i];
 		}
-		os<<"#TimeStepStructure.electrons\n";
+		os<<"#TargetParams.electrons\n";
 		os<<t.electrons;
-		os<<"#TimeStepStructure.site="<<t.sites;
-		os<<"#TimeStepStructure.startingLoop="<<t.startingLoops<<"\n";
-		os<<"#TimeStepStructure.filename="<<t.filename<<"\n";
-		os<<"#TimeVectorsfilename.tau="<<t.tau<<"\n";
-		os<<"#TimeVectorsfilename.timeSteps="<<t.timeSteps<<"\n";
-		os<<"#TimeVectorsfilename.advanceEach="<<t.advanceEach<<"\n";
-		if (t.type() == TargetStructureParams<ModelType>::DYNAMIC_TARGETTING) return os;
-		os<<"#TimeStepStructure.omega="<<t.omega<<"\n";
-		os<<"#TimeStepStructure.eta="<<t.eta<<"\n";
+		os<<"#TargetParams.site="<<t.sites;
+		os<<"#TargetParams.startingLoop="<<t.startingLoops<<"\n";
+		os<<"#TargetParams.filename="<<t.filename<<"\n";
 		return os;
 	}
 } // namespace Dmrg 
 
 /*@}*/
-#endif
+#endif // TARGET_PARAMS_COMMON_H

@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GS_TARGETTING_H
 #include <iostream>
 #include <string>
-#include "TargetStructureParams.h"
+#include "GroundStateParams.h"
 #include "ApplyOperatorLocal.h"
 
 namespace Dmrg {
@@ -117,7 +117,7 @@ namespace Dmrg {
 			typedef typename BasisType::BlockType BlockType;
 			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 			typedef VectorType TargetVectorType;
-			typedef TargetStructureParams<ModelType> TargettingStructureType;
+			typedef GroundStateParams<ModelType> TargettingParamsType;
 			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			
 			enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
@@ -129,7 +129,7 @@ namespace Dmrg {
        					const BasisWithOperatorsType& basisE,
 	    				const BasisType& basisSE,
 					const ModelType& model,
-					const TargettingStructureType& t,
+					const TargettingParamsType& t,
      					const WaveFunctionTransformationType& wft) // ignored here 
 				: basisS_(basisS),basisE_(basisE),basisSE_(basisSE),
 				       waveFunctionTransformation_(wft),

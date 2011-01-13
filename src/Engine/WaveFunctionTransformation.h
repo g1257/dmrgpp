@@ -207,20 +207,9 @@ namespace Dmrg {
 			//if (m<0) allow = false; // isEnabled_=false;
 			
 			if (isEnabled_ && allow) {
-				//try {
-				//	beforeWft(pSprime,pEprime,pSE,m);
-				//} catch (std::exception& e) {
-				//	afterWft(pSprime,pEprime,pSE,m);
-				
-				/* if (!doNextOne_) {
-					createRandomVector(dest);
-					return;
-				}*/
 				RealType eps = 1e-6;
 				if (std::norm(src)<eps) throw std::runtime_error("src's norm is zero\n");
 				createVector(dest,src,pSprime,pEprime,pSE);
-				//if (std::norm(dest)<eps) throw std::runtime_error("dest's norm is zero\n");
-				//afterWft(pSprime,pEprime,pSE,m);	
 			} else {
 				createRandomVector(dest);
 			}
@@ -280,6 +269,7 @@ namespace Dmrg {
 			}
 			atmp = 1.0 / sqrt (atmp);
 			for (size_t i=offset;i<final;i++) y[i] *= atmp;
+
 		}
 
 		template<typename SomeMatrixType>
@@ -425,15 +415,8 @@ namespace Dmrg {
 			else
 				transformVector(psiDest,psiSrc,pSprime,pEprime,pSE);
 			
-			RealType eps = 1e-4;
-			if (std::norm(psiDest)<eps) {
-				std::cerr<<"ATTENTION norm="<<std::norm(psiDest)<<" is too small\n";
-				std::cerr<<"ATTENTION originalNorm="<<std::norm(psiSrc)<<"\n";
-				//createRandomVector(psiDest);
-				//throw std::runtime_error(" createVector(): norm<1\n");
-			}
 			std::ostringstream msg;
-			msg<<"I'm working hard!";
+			msg<<"Transformation completed";
 			progress_.printline(msg,std::cout);
 		}
 			

@@ -49,6 +49,7 @@ whereas the first one will be stored in the private member \verb|psi_|.
 #include "BLAS.h"
 #include "ApplyOperatorLocal.h"
 #include "TimeSerializer.h"
+#include "DynamicDmrgParams.h"
 #include "DynamicFunctional.h"
 #include "Minimizer.h"
 
@@ -121,7 +122,7 @@ typedef psimag::Matrix<ComplexType> ComplexMatrixType;
 //typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 typedef typename BasisWithOperatorsType::BasisType BasisType;
-typedef TargetStructureParams<ModelType> TargettingStructureType; //@xtargettingstructure@x
+typedef DynamicDmrgParams<ModelType> TargettingParamsType;
 typedef typename BasisType::BlockType BlockType;
 typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
 typedef typename VectorWithOffsetType::VectorType VectorType;
@@ -170,7 +171,7 @@ DynamicTargetting(
 		const BasisWithOperatorsType& basisE,
 		const BasisType& basisSE,
 		const ModelType& model,
-		const TargettingStructureType& tstStruct,
+		const TargettingParamsType& tstStruct,
 		const WaveFunctionTransformationType& wft)
 :	@<stackInitialization@>
 @<constructorBody@>
@@ -185,7 +186,7 @@ const BasisWithOperatorsType& basisS_;
 const BasisWithOperatorsType& basisE_;
 const BasisType& basisSE_;
 const ModelType& model_;
-const TargettingStructureType& tstStruct_;
+const TargettingParamsType& tstStruct_;
 const WaveFunctionTransformationType& waveFunctionTransformation_;
 ProgressIndicator progress_;
 RealType currentOmega_;
@@ -574,7 +575,7 @@ FermionSign fs(basisS_,tstStruct_.electrons);
 applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
 RealType norma = norm(phiNew);
 if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
-std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
+//std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 @}
 Else we need to advance in space with the WFT. In principle, to do this we just call
 function \verb|setInitialVector| in file \verb|WaveFunctionTransformation.h| as you can see below.
@@ -606,7 +607,7 @@ void cocoon(ComplexType& val,size_t direction,const BlockType& block) const
 	size_t site = block[0];
 	std::cerr<<"-------------&*&*&* Cocoon output starts\n";
 	test(psi_,psi_,direction,"<PSI|A|PSI>",site);
-	std::cerr<<currentOmega_<<" "<<imag(val)<<" "<<real(val)<<" "<<site<<"\n";
+	std::cerr<<"OMEGA "<<currentOmega_<<" "<<imag(val)<<" "<<real(val)<<" "<<site<<"\n";
 	for (size_t j=0;j<targetVectors_.size();j++) {
 		std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
 		test(targetVectors_[j],targetVectors_[0],direction,s,site);

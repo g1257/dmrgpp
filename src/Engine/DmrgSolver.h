@@ -122,7 +122,7 @@ namespace Dmrg {
 		typedef TargettingTemplate<LanczosSolver,InternalProductTemplate,WaveFunctionTransformationType,
   				ModelType,ConcurrencyType,IoType,VectorWithOffsetTemplate> TargettingType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
-		typedef typename TargettingType::TargettingStructureType TargettingStructureType;
+		typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 		typedef ParametersDmrgSolver<RealType> ParametersType;
 		typedef Diagonalization<ParametersType,TargettingType,InternalProductTemplate> DiagonalizationType;
 		typedef DensityMatrixTemplate<RealType,MyBasis,MyBasisWithOperators,TargettingType> DensityMatrixType;
@@ -141,7 +141,7 @@ namespace Dmrg {
 				ParametersDmrgSolver<RealType> const &parameters,
 				ModelType const &model,
 				ConcurrencyType &concurrency,
-			  	TargettingStructureType& targetStruct) :
+			  	TargettingParamsType& targetStruct) :
 				parameters_(parameters),
 				model_(model),
 				concurrency_(concurrency),
@@ -230,7 +230,7 @@ namespace Dmrg {
 		ParametersDmrgSolver<RealType> parameters_;
 		const ModelType& model_;
 		ConcurrencyType& concurrency_;
-		const TargettingStructureType& targetStruct_;
+		const TargettingParamsType& targetStruct_;
 		bool verbose_,useReflection_;
 		MyBasisWithOperators pSprime_,pEprime_;
 		MyBasis pSE_;

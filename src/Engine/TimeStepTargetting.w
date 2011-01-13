@@ -38,9 +38,9 @@ Eqs. (55) to (60)  on page 26.
 #include <iostream>
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "TargetStructureParams.h"
 #include "ApplyOperatorLocal.h"
 #include "TimeSerializer.h"
+#include "TimeStepParams.h"
 @}
 
 This class is templated on 7 templates, which are:
@@ -100,7 +100,7 @@ A long series of typedefs follow. Need to explain these maybe (FIXME).
 			typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 			typedef typename BasisWithOperatorsType::BasisType BasisType;
-			typedef TargetStructureParams<ModelType> TargettingStructureType; //@xtargettingstructure@x
+			typedef TimeStepParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
 			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
 			typedef ComplexVectorType TargetVectorType;
@@ -148,7 +148,7 @@ in \verb|WaveFunctionTransformation.h|.
        					const BasisWithOperatorsType& basisE,
 	    				const BasisType& basisSE,
 	 				const ModelType& model,
-					const TargettingStructureType& tstStruct,
+					const TargettingParamsType& tstStruct,
 					const WaveFunctionTransformationType& wft)
 @}
 
@@ -161,7 +161,7 @@ Now let us look at the private data of this class:
 			const BasisWithOperatorsType& basisE_;
 			const BasisType& basisSE_;
 			const ModelType& model_;
-			const TargettingStructureType& tstStruct_;
+			const TargettingParamsType& tstStruct_;
 			const WaveFunctionTransformationType& waveFunctionTransformation_;
 			ProgressIndicator progress_;
 			RealType currentTime_;
@@ -479,7 +479,7 @@ to apply this operator to state \verb|phiOld| and store the result in \verb|phiN
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
 					RealType norma = norm(phiNew);
 					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
-					std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
+					//std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 @}
 Else we need to advance in space with the WFT. In principle, to do this we just call
 function \verb|setInitialVector| in file \verb|WaveFunctionTransformation.h| as you can see below.

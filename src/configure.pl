@@ -347,14 +347,8 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 
 	//! Read TimeEvolution if applicable:
 	typedef typename SolverType::TargettingType TargettingType;
-	typedef typename TargettingType::TargettingStructureType TargettingStructureType;
-	size_t targetting = TargettingType::TargettingStructureType::GROUNDSTATE_TARGETTING;
-	if (targettingString == "TimeStepTargetting") {
-		targetting = TargettingType::TargettingStructureType::TIMESTEP_TARGETTING;
-	} else if (targettingString == "DynamicTargetting") {
-		targetting = TargettingType::TargettingStructureType::DYNAMIC_TARGETTING;
-	}
-	TargettingStructureType tsp(io,model,targetting);
+	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
+	TargettingParamsType tsp(io,model);
 
 	//! Setup the dmrg solver:
 	SolverType dmrgSolver(dmrgSolverParams,model,concurrency,tsp);
@@ -602,9 +596,9 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	ModelType model(mp,geometry);
 
 	 //! Read TimeEvolution if applicable:
-        typedef typename SolverType::TargettingType TargettingType;
-        typedef typename TargettingType::TargettingStructureType TargettingStructureType;
-	TargettingStructureType tsp(io,model,hasTimeEvolution);
+	typedef typename SolverType::TargettingType TargettingType;
+	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
+	TargettingParamsType tsp(io,model);
 	
 	size_t n=geometry.numberOfSites()/2;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
