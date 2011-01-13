@@ -205,7 +205,7 @@ namespace Dmrg {
 
 	size_t BasisHubbardLanczos::nsite_=0;
 	psimag::Matrix<size_t> BasisHubbardLanczos::comb_;
-	std::vector<typename BasisHubbardLanczos::WordType> BasisHubbardLanczos::bitmask_; 
+	std::vector<BasisHubbardLanczos::WordType> BasisHubbardLanczos::bitmask_; 
 	
 } // namespace
 #endif

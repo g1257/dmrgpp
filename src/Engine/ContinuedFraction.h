@@ -157,10 +157,11 @@ namespace Dmrg {
 		void computeGroundState()
 		{
 			model_.setupHamiltonian(hamiltonian_);
-			MatrixType fm;
+			/*MatrixType fm;
 			crsMatrixToFullMatrix(fm,hamiltonian_);
 			std::cerr<<fm;
 			if (!isHermitian(fm)) throw std::runtime_error("Hamiltonian non Hermitian\n");
+			*/
 			//std::cerr<<hamiltonian_;
 			std::cerr<<"Done setting up Hamiltonian\n";
 

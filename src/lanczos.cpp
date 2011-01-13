@@ -15,7 +15,7 @@ typedef ParametersModelHubbard<RealType> ParametersModelType;
 typedef IoSimple::In IoInputType;
 typedef HubbardLanczos<RealType,ParametersModelType,GeometryType> ModelType;
 typedef ContinuedFraction<ModelType,ConcurrencyType> ContinuedFractionType;
-typedef typename ContinuedFractionType::TridiagonalMatrixType TridiagonalMatrixType;
+typedef ContinuedFractionType::TridiagonalMatrixType TridiagonalMatrixType;
 
 
 ComplexType greenFunction(const TridiagonalMatrixType& ab,ComplexType z,RealType isign,
@@ -25,18 +25,18 @@ ComplexType greenFunction(const TridiagonalMatrixType& ab,ComplexType z,RealType
 	return cf.continuedFraction(z,ab);
 }
 
-RealType greenFunction(RealType omega,RealType Eg,
+ComplexType greenFunction(RealType omega,RealType Eg,
 		const TridiagonalMatrixType& abPlus,RealType normaPlus,
 		const TridiagonalMatrixType& abMinus,RealType normaMinus,
 		const ContinuedFractionType& cf)
 {
 	RealType isign = 1.0;
-	RealType eps = 1e-6;
+	RealType eps = 1e-4;
 	ComplexType z(omega + Eg,eps);
-	RealType x = normaPlus * real(greenFunction(abPlus,z,isign,cf));
+	ComplexType x = normaPlus * greenFunction(abPlus,z,isign,cf);
 	RealType normalizer = 2.0;
 	if (normaMinus!=0.0) {
-		x -= normaMinus * real(greenFunction(abMinus,z,isign,cf));
+		x -= normaMinus * greenFunction(abMinus,z,isign,cf);
 		normalizer = 4.0;
 	}
 	return x/normalizer;
@@ -78,8 +78,8 @@ int main(int argc,char *argv[])
 	std::vector<RealType> qns;
 	io.read(qns,"TargetQuantumNumbers");
 	if (qns.size()<2) throw std::runtime_error("HubbardLanczos::ctor(...)\n");
-	size_t nup=geometry.numberOfSites()*qns[0];
-	size_t ndown=geometry.numberOfSites()*qns[1];
+	size_t nup=size_t(geometry.numberOfSites()*qns[0]);
+	size_t ndown=size_t(geometry.numberOfSites()*qns[1]);
 	//! Setup the Model
 	ModelType model(nup,ndown,mp,geometry);
 	size_t i = atoi(argv[2]);
@@ -98,8 +98,8 @@ int main(int argc,char *argv[])
 	if (i!=j) cf.getGreenFunction(abMinus,normaMinus,i,j,ContinuedFractionType::MINUS);
 	for (int i=0;i<atoi(argv[4]);i++) {
 		RealType omega = atof(argv[5])*i;
-		std::cout<<omega<<" "<<greenFunction(omega,Eg,abPlus,normaPlus,
-				abMinus,normaMinus,cf)<<"\n";
+		std::cout<<omega<<" "<<std::imag(greenFunction(omega,Eg,abPlus,normaPlus,
+				abMinus,normaMinus,cf))<<"\n";
 	}
 }
 

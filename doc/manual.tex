@@ -174,7 +174,10 @@ chosen the default/suggested LDFLAGS will include -llapack.
 If the osx platform was chosen the default/suggested LDFLAGS will
 include  -framework Accelerate.
 For other platforms the appropriate linker flags must be given.
-More information on LAPACK is here: http://netlib.org/lapack/
+More information on LAPACK is here: \url{http://netlib.org/lapack/}
+\item (required) PsimagLite. This is here \url{https://github.com/g1257/PsimagLite/}.
+You can do \verb=git clone https://github.com/g1257/PsimagLite.git= in a separate directory
+outside of the DMRG++ distribution. \verb=configure.pl= will ask you where you put it.
 \item (semi-optional) The GNU Scientific Library.
 This is found in \url{http://www.gnu.org/software/gsl/}. 
 However, you might not need to download it, since many linux distributions

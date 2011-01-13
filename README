@@ -54,6 +54,9 @@ If the osx platform was chosen the default/suggested LDFLAGS will
 include  -framework Accelerate.
 For other platforms the appropriate linker flags must be given.
 More information on LAPACK is here: http://netlib.org/lapack/
+* (required) PsimagLite. This is here \url{https://github.com/g1257/PsimagLite/}.
+You can do \verb=git clone https://github.com/g1257/PsimagLite.git= in a separate directory
+outside of the DMRG++ distribution. \verb=configure.pl= will ask you where you put it.
 * (semi-optional) GNU Scientific Library (see doc/manual.pdf)
 * (optional) make or gmake (only needed to use the Makefile)
 * (optional) perl (only needed to run the configure.pl script)
