@@ -79,12 +79,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 //! A memory stack, based on std::stack 
 template<typename DataType>
 class MemoryStack : public std::stack<DataType> {
-	public:
-		MemoryStack(const std::string &file,bool hasLoad,size_t rank=0) :std::stack<DataType>() { }
-		void load(const std::string& file) 
-		{
-			throw std::runtime_error("MemoryStack::load(): Unimplemented (Maybe you should use DiskStack instead?)\n");
-		}
+public:
+	MemoryStack(const std::string &file,bool hasLoad,size_t rank=0) :std::stack<DataType>() { }
+	void load(const std::string& file)
+	{
+		throw std::runtime_error("MemoryStack::load(): Unimplemented (Maybe you should use DiskStack instead?)\n");
+	}
 }; // class MemoryStack
 
 #endif

@@ -242,7 +242,7 @@ sub getLitProgTargets
 {
 	my ($array)=@_;
 	my $x = "";
-	my $litProgTool = "nuweb.pl -v -l  -s  -d ";
+	my $litProgTool = "../nuweb.pl -v -l  -s  -d ";
 	foreach my $f (@$array) {
 		my $fh = $f;
 		$fh =~ s/\.w$/\.h/;

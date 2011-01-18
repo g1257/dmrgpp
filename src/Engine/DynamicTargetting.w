@@ -626,10 +626,10 @@ void checkOrder(size_t i) const
 	if (i==0) return;
 	for (size_t j=0;j<i;j++) {
 		if (stage_[j] == DISABLED) {
-			std::string s ="TST:: Seeing tst site "+utils::ttos(tstStruct_.sites[i]);
+			std::string s ="TST:: Seeing dynamic site "+utils::ttos(tstStruct_.sites[i]);
 			s =s + " before having seen";
 			s = s + " site "+utils::ttos(j);
-			s = s +". Please order your tst sites in order of appearance.\n";
+			s = s +". Please order your dynamic sites in order of appearance.\n";
 			throw std::runtime_error(s);
 		}
 	}
