@@ -17,7 +17,7 @@ my $templateBatch="batchDollar.pbs";
 my $rootDataFile="data";
 my $rootTstFile="tst";
 my $rootInput="input";
-my $rootBatchName="dmrgpp";
+my $rootBatchName="dmrg14_";
 my $rootBatchFile="batch";
 
 
@@ -28,10 +28,10 @@ if (defined($runs)) {
 	exit(0);
 }
 
-$vx=$vy=0;
+$vx=$vy=0.0;
 my $n = readLabel($templateInput,"TotalNumberOfSites=");
 
-fillVector(\@uvector,$n,5);
+fillVector(\@uvector,$n,10);
 
 my $counter=0;
 for ($tx=0.0;$tx<1.1;$tx+=0.1) {

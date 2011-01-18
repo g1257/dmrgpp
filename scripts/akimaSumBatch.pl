@@ -3,14 +3,16 @@ use strict;
 
 my ($root,$total,$ext)=@ARGV;
 $ext = ".txt" if !defined($ext);
-my ($start,$end,$points)=(0,5.5,100);
+my ($start,$end,$points)=(0,3.0,100);
 my @x;
 my @s;
 my $n = 0;
 for (my $i=0;$i<$total;$i++) {
 	my $file = getFile($i);
 	my $outfile = "tmp.txt";
-	system("./akimaSpline $file $start $end $points > $outfile");
+	print STDERR "$0: Procing $file  This is site=$i...\n";
+	my $ret = system("./akimaSpline $file $start $end $points > $outfile");
+	($ret ==0) or die "./akimaSpline command failed\n";
 	my @y;
 	$n = loadTwoColumnData(\@x,\@y,$outfile);
 	sumData(\@s,\@y,$n);
@@ -21,15 +23,20 @@ printData(\@x,\@s,$n);
 sub getFile
 {
 	my $i=shift;
-	my $j=$i+1;
+	my $j=$i;
 	my $f = "$root$j$ext";
-	open(FILE,$f) or die "Cannot open file $f: $!\n";
+	print STDERR "Opening file $f...\n";
+	open(FILE,$f) or die "$0: Cannot open file $f: $!\n";
+	print STDERR "$0: in getFile: reading file $f\n";
 	open(FOUT,">tmp2.txt");
 	my $firstTime=1;
 	my $prev = -10;
 	my $val = 0;
+	#while(<FILE>) {
+	#	last if (/^site/);
+	#}
 	while(<FILE>) {
-		next if (/^#/);
+		last if (/^#/);
 		
 		my @temp=split;
 		if ($firstTime) {
@@ -42,7 +49,7 @@ sub getFile
 		next if ($prev>=$temp[0]);
 		$prev = $temp[0];
 		$val = $temp[1];
-		print FOUT;
+		print FOUT "$temp[0] $temp[1]\n";
 	}
 	if ($prev<$end) {
 		print FOUT "$end $val\n";
@@ -79,8 +86,8 @@ sub sumData
 
 sub printData
 {
-        my ($x,$s,$n)=@_;
-        for (my $i=0;$i<$n;$i++) {
+    my ($x,$s,$n)=@_;
+	for (my $i=0;$i<$n;$i++) {
 		print "$x->[$i] $s->[$i]\n";
 	}
 }

@@ -8,7 +8,7 @@ defined($site) or die "$0: Undefined site\n";
 defined($file) or die "$0: Undefined file\n";
 
 my $sd = getSuperDensity($site,$file);
-open(FILE,$file) or die "Cannot open file $file: $!\n";
+open(FILE,$file) or die "$0: Cannot open file $file: $!\n";
 while(<FILE>) {
 	if (/^site nupNdown\(gs\) nupNdown\(timevector\) time/) {
 		last;
@@ -36,7 +36,7 @@ sub getSuperDensity
 {
 	my ($site,$file)=@_;
 	my $sd;
-	open(FILE,$file) or die "Cannot open file $file: $!\n";
+	open(FILE,$file) or die "$0: Cannot open file $file: $!\n";
 	while(<FILE>) {
 		if (/SuperDensity.*=\(([^,]+),/) {
 			$sd = $1;
