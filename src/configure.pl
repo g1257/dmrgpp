@@ -511,7 +511,7 @@ typedef  IoSimple MyIo;
 
 template<typename ModelType,typename ObserverType,typename SparseMatrixType,
 typename OperatorType,typename TargettingType>
-void measureTimeObs(const ModelType& model,ObserverType& observe)
+void measureTimeObs(const ModelType& model,ObserverType& observe, size_t numberOfSites)
 {
 	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 	typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
@@ -539,6 +539,15 @@ void measureTimeObs(const ModelType& model,ObserverType& observe)
 		// for time vector use this one:
 		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opN);
 		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
+		if (observe.isAtCorner()) { // also calculate next or prev. site:
+			size_t x = (observe.site()==1) ? 0 : numberOfSites-1;
+			// do the corner case
+			// for g.s. use this one:
+			FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opN,true);
+			// for time vector use this one:
+			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opN,true);
+			std::cout<<x<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
+		}
 	}
 	// measuring charge:
 	A = matrixNup;
@@ -617,7 +626,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	
 	if (hasTimeEvolution) {
 		measureTimeObs<ModelType,ObserverType,SparseMatrixType,
-			OperatorType,TargettingType>(model,observe);
+			OperatorType,TargettingType>(model,observe,geometry.numberOfSites());
 		return;
 	}
 EOF

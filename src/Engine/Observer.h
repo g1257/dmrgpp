@@ -127,6 +127,19 @@ namespace Dmrg {
 
 		size_t site() const { return helper_.site(); }
 
+		// return true if both conditions are met:
+		// (i) we're at site 1 or n-2, AND
+		// (ii) we're expanding the system
+		// condition (ii) is needed since we can't compute border sites
+		// while expanding the environment
+		bool isAtCorner() const
+		{
+			size_t numberOfSites = halfLatticeSize_*2;
+			if (helper_.direction() != ProgramGlobals::EXPAND_SYSTEM) return false;
+			if (helper_.site() ==  numberOfSites-2 || helper_.size()==1) return true;
+			return false;
+		}
+
 		psimag::Matrix<FieldType> correlations(size_t n,const MatrixType& O1,const MatrixType& O2,int fermionicSign,
 						      size_t n1=0,size_t nf=0)
 		{
@@ -234,23 +247,23 @@ namespace Dmrg {
 		}
 
 		template<typename ApplyOperatorType>
-		FieldType onePoint(size_t site,const typename ApplyOperatorType::OperatorType& A)
+		FieldType onePoint(size_t site,const typename ApplyOperatorType::OperatorType& A,bool corner = false)
 		{
 			size_t pnter=site;
 			helper_.setPointer(pnter);
 			
 			const VectorWithOffsetType& src = helper_.timeVector();
 			//const std::string& label,
-			return onePointInternal<ApplyOperatorType>(site,A,src,src);
+			return onePointInternal<ApplyOperatorType>(site,A,src,src,corner);
 		}
 
 		template<typename ApplyOperatorType>
-		FieldType onePointGs(size_t site,const typename ApplyOperatorType::OperatorType& A)
+		FieldType onePointGs(size_t site,const typename ApplyOperatorType::OperatorType& A,bool corner = false)
 		{
 			size_t pnter=site;
 			helper_.setPointer(pnter);
 			const VectorWithOffsetType& src = helper_.wavefunction();
-			return onePointInternal<ApplyOperatorType>(site,A,src,src);
+			return onePointInternal<ApplyOperatorType>(site,A,src,src,corner);
 		}
 
 		template<typename ApplyOperatorType>
@@ -267,12 +280,12 @@ namespace Dmrg {
 
 		template<typename ApplyOperatorType>
 		FieldType onePointInternal(size_t site,const typename ApplyOperatorType::OperatorType& A,
-				const VectorWithOffsetType& src1,const VectorWithOffsetType& src2)
+				const VectorWithOffsetType& src1,const VectorWithOffsetType& src2,bool corner = false)
 		{
 			
 			ApplyOperatorType applyOpLocal1(helper_.basisS(),helper_.basisE(),helper_.basisSE());
 			VectorWithOffsetType dest;
-			applyOpLocal1(dest,src1,A,helper_.fermionicSign(),helper_.direction());
+			applyOpLocal1(dest,src1,A,helper_.fermionicSign(),helper_.direction(),corner);
 				
 			FieldType sum = static_cast<FieldType>(0.0);
 			const VectorWithOffsetType& v1 = dest;
