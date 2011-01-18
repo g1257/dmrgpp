@@ -566,6 +566,15 @@ void measureTimeObs(const ModelType& model,ObserverType& observe, size_t numberO
 		// for h.d. use this one:
 		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opCharge);
 		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
+		if (observe.isAtCorner()) { // also calculate next or prev. site:
+			size_t x = (observe.site()==1) ? 0 : numberOfSites-1;
+			// do the corner case
+			// for g.s. use this one:
+			FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opCharge,true);
+			// for time vector use this one:
+			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opCharge,true);
+			std::cout<<x<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
+		}
 	}
 
 }		

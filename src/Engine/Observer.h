@@ -127,16 +127,14 @@ namespace Dmrg {
 
 		size_t site() const { return helper_.site(); }
 
-		// return true if both conditions are met:
-		// (i) we're at site 1 or n-2, AND
-		// (ii) we're expanding the system
-		// condition (ii) is needed since we can't compute border sites
-		// while expanding the environment
+		// return true if
+		// we're at site 1 or n-2
 		bool isAtCorner() const
 		{
 			size_t numberOfSites = halfLatticeSize_*2;
-			if (helper_.direction() != ProgramGlobals::EXPAND_SYSTEM) return false;
-			if (helper_.site() ==  numberOfSites-2 || helper_.size()==1) return true;
+			bool es = (helper_.direction() == ProgramGlobals::EXPAND_SYSTEM);
+			if (es && helper_.site() ==  numberOfSites-2) return true;
+			if ((!es) && helper_.site()==1) return true;
 			return false;
 		}
 

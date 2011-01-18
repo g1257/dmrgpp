@@ -123,8 +123,6 @@ namespace Dmrg {
 					else applyLocalOpEnviron(dest,src,A);
 					return;
 				}
-				if (systemOrEnviron != ProgramGlobals::EXPAND_SYSTEM)
-					throw std::runtime_error("ApplyOperatorLocal: No corner here\n");
 				applyLocalOpCorner(dest,src,A,fermionSign);
 			}
 			
@@ -147,11 +145,11 @@ namespace Dmrg {
 						applyLocalOpSystem(dest2,src,A,fermionSign,i);
 						break;
 					case LEFT_CORNER:
-						applyLocalOpLeftCorner(dest2,src,A,fermionSign,i);
+						throw std::runtime_error("applyLocalOpSystem: internal error\n");
 						break;
 					case RIGHT_CORNER:
-							applyLocalOpRightCorner(dest2,src,A,i);
-							break;
+						applyLocalOpRightCorner(dest2,src,A,i);
+						break;
 					}
 				}
 				dest.fromFull(dest2,basisSE_);
@@ -195,7 +193,8 @@ namespace Dmrg {
 			void applyLocalOpEnviron(
 					VectorWithOffsetType& dest,
 					const VectorWithOffsetType& src,
-					const OperatorType& A) const
+					const OperatorType& A,
+					size_t whichPartOfTheLattice = MIDDLE) const
 			{
 				TargetVectorType dest2(basisSE_.size());
 				
@@ -203,7 +202,17 @@ namespace Dmrg {
 				
 				for (size_t ii=0;ii<src.sectors();ii++) {
 					size_t i = src.sector(ii);
-					applyLocalOpEnviron(dest2,src,A,i);
+					switch (whichPartOfTheLattice) {
+					case MIDDLE:
+						applyLocalOpEnviron(dest2,src,A,i);
+						break;
+					case LEFT_CORNER:
+						applyLocalOpLeftCorner(dest2,src,A,i);
+						break;
+					case RIGHT_CORNER:
+						throw std::runtime_error("applyLocalOpEnviron: internal error\n");
+						break;
+					}
 				}
 				dest.fromFull(dest2,basisSE_);
 			}
@@ -239,32 +248,23 @@ namespace Dmrg {
 					TargetVectorType& dest2,
 					const VectorWithOffsetType& src,
 					const OperatorType& A,
-					const FermionSign& fermionSign,
 					size_t i0) const
 			{
 				size_t offset = src.offset(i0);
 				size_t final = offset + src.effectiveSize(i0);
-				//size_t counter=0;
-				size_t ns = basisS_.permutationVector().size();
-				size_t nx = ns/A.data.rank();
-				if (src.size()!=basisSE_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem SE\n");
+
+				size_t ns = basisS_.size();
 
 				for (size_t i=offset;i<final;i++) {
 					size_t x=0,y=0;
 					utils::getCoordinates(x,y,basisSE_.permutation(i),ns);
-					//if (y>=basisE_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem E\n");
-					size_t x0=0,x1=0;
-					if (x>=basisS_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem S\n");
-					utils::getCoordinates(x0,x1,basisS_.permutation(x),nx);
-					//RealType sign = fermionSign(x,A.fermionSign);
-					for (int k=A.data.getRowPtr(x0);k<A.data.getRowPtr(x0+1);k++) {
-						size_t x0prime = A.data.getCol(k);
-						size_t xprime = basisS_.permutationInverse(x0prime+x1*nx);
+
+					for (int k=A.data.getRowPtr(x);k<A.data.getRowPtr(x+1);k++) {
+						size_t xprime = A.data.getCol(k);
 						size_t j = basisSE_.permutationInverse(xprime+y*ns);
-						dest2[j] += src[i]*A.data.getValue(k); // *sign
+						dest2[j] += src[i]*A.data.getValue(k);
 					}
 				}
-
 			}
 
 			void applyLocalOpRightCorner(
@@ -305,7 +305,7 @@ namespace Dmrg {
 					applyLocalOpSystem(dest,src,A,fermionSign,RIGHT_CORNER);
 					return;
 				}
-				applyLocalOpSystem(dest,src,A,fermionSign,LEFT_CORNER);
+				applyLocalOpEnviron(dest,src,A,LEFT_CORNER);
 			}
 
 			const BasisType& basisS_;
