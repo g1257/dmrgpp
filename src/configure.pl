@@ -691,16 +691,24 @@ print print OBSOUT<<EOF;
 		}
 	}
 	
+
 	// FOUR-POINT DELTA-DELTA^DAGGER:
-	if (obsOptions.find("dd")!=std::string::npos && 
-			geometry.label(0).find("ladder")!=std::string::npos) {
-		std::vector<FieldType> fpd;
-		std::vector<size_t> gammas(4,0);
-		observe.fourPointDeltas(fpd,n,gammas,model);
-		for (size_t i=0;i<fpd.size();i++) {
-			std::cout<<"fpd["<<i<<"]="<<fpd[i]<<"\\n";
+	if (obsOptions.find("dd4")!=std::string::npos &&
+		geometry.label(0).find("ladder")!=std::string::npos) {
+		for (size_t g=0;g<16;g++) {
+			std::vector<FieldType> fpd;
+			std::vector<size_t> gammas(4,0); // TODO: WRITE COMBINATIONS
+			gammas[0] = (g & 1);
+			gammas[1] = (g & 2)>>1;
+			gammas[2] = (g & 4) >> 2;
+			gammas[3] = (g & 8) >> 3;
+			observe.fourPointDeltas(fpd,geometry.numberOfSites(),gammas,model);
+			for (size_t step=0;step<fpd.size();step++) {
+				// step --> (i,j) FIXME
+				std::cout<<step<<" "<<g<<" "<<fpd[step]<<"\n";
+			}
 		}
-	}
+	} // if dd4
 EOF
 	}
 	if  ($modelName=~/heisenberg/i) {

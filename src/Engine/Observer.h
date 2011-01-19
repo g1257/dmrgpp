@@ -235,10 +235,10 @@ namespace Dmrg {
 			}
 			for (size_t i=0;i<n;i++) {
 				if (i>0 && i%2!=0) continue;
-				if (i+1>=n-1) continue; 
 				for (size_t j=i+2;j<n;j++) {
+					if (j== n-2) continue;
 					if (j%2!=0) continue;
-					if (i+1>=n-1) continue; 
+					if (i+1>=n-1) continue;
 					fpd.push_back(fourPointDelta(i,j,gammas,model));
 				}
 			}
