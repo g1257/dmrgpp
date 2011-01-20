@@ -266,7 +266,7 @@ namespace Dmrg {
 			utils::transposeConjugate(Om,O);
 		}
 
-		FieldType bracket(const MatrixType& A,bool corner = false)
+		FieldType bracket(const MatrixType& A)
 		{
 			if (helper_.hasTimeVector()) {
 				const VectorWithOffsetType& v = helper_.timeVector();
@@ -276,6 +276,19 @@ namespace Dmrg {
 
 			const VectorWithOffsetType& v = helper_.wavefunction();
 			return bracket_(A,v);
+			//return bracketRightCorner_(A,v);
+		}
+
+		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,int fermionSign)
+		{
+			if (helper_.hasTimeVector()) {
+				const VectorWithOffsetType& v = helper_.timeVector();
+				return bracketRightCorner_(A,B,fermionSign,v);
+				//return bracketRightCorner_(A,v);
+			}
+
+			const VectorWithOffsetType& v = helper_.wavefunction();
+			return bracketRightCorner_(A,B,fermionSign,v);
 			//return bracketRightCorner_(A,v);
 		}
 
@@ -314,7 +327,7 @@ namespace Dmrg {
 						//counter++;
 						//try {
 						sum += //A(r,r2)
-							Acrs.getValue(k)*vec[t]*vec[t2]/norma;
+							Acrs.getValue(k)*vec[t]*vec[t2];
 						//} catch (std::exception& exception) {
 							
 						//}
@@ -322,9 +335,48 @@ namespace Dmrg {
 				}
 			}
 			//std::cerr<<"counter="<<counter<<"\n";
-			return std::real(sum);
+			return std::real(sum)/norma;
 		}
 		
+		FieldType bracketRightCorner_(
+				const MatrixType& A,
+				const MatrixType& B,
+				int fermionSign,
+				const VectorWithOffsetType& vec)
+		{
+
+			RealType norma = std::norm(vec);
+
+			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
+
+			CrsMatrix<FieldType> Acrs(A);
+			CrsMatrix<FieldType> Bcrs(B);
+			FieldType sum=0;
+
+			if (vec.size()!=helper_.basisSE().size()) throw std::runtime_error("Error\n");
+			for (size_t x=0;x<vec.sectors();x++) {
+				size_t sector = vec.sector(x);
+				size_t offset = vec.offset(sector);
+				size_t total = offset + vec.effectiveSize(sector);
+				for (size_t t=offset;t<total;t++) {
+					size_t eta,r;
+
+					utils::getCoordinates(r,eta,helper_.basisSE().permutation(t),helper_.basisS().size());
+					RealType sign = helper_.basisS().fermionicSign(r,fermionSign);
+					for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
+						size_t r2 = Acrs.getCol(k);
+						for (int k2 = Bcrs.getRowPtr(eta);k2<Bcrs.getRowPtr(eta+1);k2++) {
+							size_t eta2 = Bcrs.getCol(k2);
+							size_t t2 = helper_.basisSE().permutationInverse(r2+eta2*A.n_col());
+							if (t2<offset || t2>=total) continue;
+							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec[t]*vec[t2]*sign;
+						}
+					}
+				}
+			}
+			return std::real(sum)/norma;
+		}
+
 		ObserverHelperType& helper_; //<-- NB: We are not the owner
 		bool verbose_;
 	};  //class CorrelationsSkeleton

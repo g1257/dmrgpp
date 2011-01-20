@@ -171,6 +171,10 @@ namespace Dmrg {
 				std::cerr<<O3g;
 			}
 			precomp_.setPointer(ns);
+
+			if (i4==skeleton_.numberOfSites()-1) {
+				return skeleton_.bracketRightCorner(O3g,O4m,fermionicSign);
+			}
 			//trunc = precomp_.transform().n_col();
 			MatrixType O3gt; //(trunc,trunc);
 			precomp_.transform(O3gt,O3g);
@@ -178,6 +182,7 @@ namespace Dmrg {
 				std::cerr<<"O3gt\n";
 				std::cerr<<O3gt;
 			}
+
 			ns = i4-1;
 			if (ns<0) ns = 0;
 			precomp_.setPointer(ns);
