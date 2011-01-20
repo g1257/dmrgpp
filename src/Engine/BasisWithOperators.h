@@ -92,11 +92,12 @@ namespace Dmrg {
 
 	//! A class to represent a Dmrg Basis and encapsulate certain operations related to this basis, such as
 	//! outer product, truncation, storage of Hamiltonian and creation operators.  
-	template<typename OperatorsType,typename ConcurrencyType>
+	template<typename OperatorsType,typename ConcurrencyType_>
 		class	BasisWithOperators : public  OperatorsType::BasisType {
 
 		
-	public:	
+	public:
+		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename OperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;

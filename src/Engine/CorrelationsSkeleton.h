@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ObserverHelper.h"
 #include "CrsMatrix.h"
 #include "Profiling.h"
+#include "ApplyOperatorLocal.h"
 
 namespace Dmrg {
 	
@@ -107,21 +108,33 @@ namespace Dmrg {
 		return os;
 	}
 	
-	template<typename IoType,typename MatrixType,typename VectorType,typename VectorWithOffsetType,typename BasisType>
+	template<typename ObserverHelperType_>
 	class CorrelationsSkeleton {
 		//typedef typename MatrixType::value_type FieldType;
 		typedef size_t IndexType;
-		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> ObserverHelperType;
-		typedef typename VectorType::value_type FieldType;
-		typedef typename BasisType::RealType RealType;
-		typedef PsimagLite::Profiling ProfilingType;
 
 	public:
+		typedef ObserverHelperType_ ObserverHelperType;
+		typedef typename ObserverHelperType::IoType IoType;
+		typedef typename ObserverHelperType::MatrixType MatrixType;
+		typedef typename ObserverHelperType::VectorType VectorType ;
+		typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
+		typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType ;
+		typedef typename BasisWithOperatorsType::RealType RealType;
+
+		typedef typename VectorType::value_type FieldType;
+		typedef PsimagLite::Profiling ProfilingType;
+		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
+		typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,VectorType> ApplyOperatorType;
+
 		enum {GROW_RIGHT,GROW_LEFT};
 		enum {DIAGONAL,NON_DIAGONAL};
 		
-		CorrelationsSkeleton(ObserverHelperType& helper,bool verbose = false) : helper_(helper),verbose_(verbose) { } 
+		CorrelationsSkeleton(ObserverHelperType& helper,bool verbose = false)
+		: helper_(helper),verbose_(verbose) { }
 		
+		size_t numberOfSites() const { return helper_.basisSE().block().size(); }
+
 		//! i can be zero here!!
 		void growDirectly(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns)
 		{
@@ -205,19 +218,16 @@ namespace Dmrg {
 					int fermionicSign,
 				 	size_t ns)
 		{
-			//ProfilingType profile("dmrgMultiply ns="+utils::ttos(ns));
+//			size_t numberOfSites = helper_.basisSE().block().size();
+//			if (ns == numberOfSites-2) {
+//				dmrgMultiplyRightCorner(result,O1,O2,fermionicSign,ns);
+//				return;
+//			}
 			size_t ni=O1.n_row();
 			size_t nj=O2.n_row();
-			/*std::cerr<<"Mult,O1\n";
-			std::cerr<<O1;
-			
-			std::cerr<<"Mult,O2\n";
-			std::cerr<<O2;*/
 			
 			helper_.setPointer(ns);
-			//size_t wfsize = helper_.wavefunction().size();
-			//size_t envSize = wfsize/(ni*nj);
-			size_t sprime = ni*nj;
+			size_t sprime = helper_.basisS().size(); //ni*nj;
 			result.resize(sprime,sprime);
 			
 			for (size_t r=0;r<result.n_row();r++)
@@ -226,19 +236,16 @@ namespace Dmrg {
 			
 			if (helper_.basisS().size()!=sprime) {
 				std::cerr<<"WARNING: "<<helper_.basisS().size()<<"!="<<sprime<<"\n";
-				throw std::runtime_error("problem\n");
+				throw std::runtime_error("problem in dmrgMultiply\n");
 			}
 			
 			for (size_t r=0;r<sprime;r++) {
-				//size_t r,eta;
-				//utils::getCoordinates(r,eta,helper_.SEpermutation(x),ni*nj);
 				size_t e,u;
 				utils::getCoordinates(e,u,helper_.basisS().permutation(r),ni);
 				FieldType f = helper_.fermionicSign()(e,fermionicSign);
 				for (size_t e2=0;e2<ni;e2++) {	
 					for (size_t u2=0;u2<nj;u2++) {
 						size_t r2 = helper_.basisS().permutationInverse(e2 + u2*ni);
-						//size_t x2 = r2 + eta*envSize;
 						result(r,r2) += O1(e,e2)*O2(u,u2)*f;
 					}
 				}
@@ -247,27 +254,32 @@ namespace Dmrg {
 				std::cerr<<result.n_row()<<" "<<helper_.rows()<<"\n";
 				throw std::runtime_error("dmrgMultiply: mismatch in transform\n");
 			}
-			/*size_t trunc = helper_.transform().n_col();
-			result2.resize(trunc,trunc);
-			helper_.transform(result2,result);*/
 		}
-		
-		FieldType bracket(const MatrixType& A)
+
+		void createWithModification(MatrixType& Om,const MatrixType& O,char mod)
 		{
-			//ProfilingType profile("bracket");
+			//ProfilingType profile("create with modification="+mod);
+			if (mod == 'n' || mod == 'N') {
+				Om = O;
+				return;
+			}
+			utils::transposeConjugate(Om,O);
+		}
+
+		FieldType bracket(const MatrixType& A,bool corner = false)
+		{
 			if (helper_.hasTimeVector()) {
 				const VectorWithOffsetType& v = helper_.timeVector();
-				//VectorType w(v.size());
-				//v.toSparse(w);
 				return bracket_(A,v);
+				//return bracketRightCorner_(A,v);
 			}
-			
+
 			const VectorWithOffsetType& v = helper_.wavefunction();
-			//VectorType w(v.size());
-			//v.toSparse(w);
-			
 			return bracket_(A,v);
+			//return bracketRightCorner_(A,v);
 		}
+
+	private:
 		
 		//template<typename SomeVectorType>
 		FieldType bracket_(const MatrixType& A,const VectorWithOffsetType& vec)
@@ -313,20 +325,8 @@ namespace Dmrg {
 			return std::real(sum);
 		}
 		
-		void createWithModification(MatrixType& Om,const MatrixType& O,char mod)
-		{
-			//ProfilingType profile("create with modification="+mod);
-			if (mod == 'n' || mod == 'N') {
-				Om = O;
-				return;
-			}
-			utils::transposeConjugate(Om,O);
-		}
-		
-	private:
 		ObserverHelperType& helper_; //<-- NB: We are not the owner
 		bool verbose_;
-		
 	};  //class CorrelationsSkeleton
 } // namespace Dmrg
 

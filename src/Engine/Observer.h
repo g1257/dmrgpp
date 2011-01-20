@@ -91,15 +91,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename FieldType,typename VectorWithOffsetType,typename BasisType,typename IoType,typename ConcurrencyType>
+	template<typename FieldType,typename VectorWithOffsetType,typename BasisWithOperatorsType,typename IoType>
 	class Observer {
 		typedef size_t IndexType;
 		typedef SparseVector<FieldType> VectorType;
 		typedef psimag::Matrix<FieldType> MatrixType;
-		typedef typename BasisType::RealType RealType;
-		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> ObserverHelperType;
-		typedef CorrelationsSkeleton<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> CorrelationsSkeletonType;
-		typedef FourPointCorrelations<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType>  FourPointCorrelationsType;
+		typedef typename BasisWithOperatorsType::ConcurrencyType ConcurrencyType;
+		typedef typename BasisWithOperatorsType::RealType RealType;
+		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisWithOperatorsType> ObserverHelperType;
+		typedef CorrelationsSkeleton<ObserverHelperType> CorrelationsSkeletonType;
+		typedef FourPointCorrelations<CorrelationsSkeletonType>  FourPointCorrelationsType;
 		typedef PsimagLite::Profiling ProfilingType;
 
 		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
@@ -236,7 +237,7 @@ namespace Dmrg {
 			for (size_t i=0;i<n;i++) {
 				if (i>0 && i%2!=0) continue;
 				for (size_t j=i+2;j<n;j++) {
-					if (j== n-2) continue;
+					//if (j== n-2) continue;
 					if (j%2!=0) continue;
 					if (i+1>=n-1) continue;
 					fpd.push_back(fourPointDelta(i,j,gammas,model));

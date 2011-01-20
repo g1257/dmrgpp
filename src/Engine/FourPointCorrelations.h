@@ -1,6 +1,6 @@
 // BEGIN LICENSE BLOCK
 /*
-Copyright © 2008 , UT-Battelle, LLC
+Copyright ï¿½ 2008 , UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 1.0.0]
@@ -88,15 +88,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CorrelationsSkeleton.h"
 
 namespace Dmrg {
-	template<typename IoType,typename MatrixType,typename VectorType,typename VectorWithOffsetType,typename BasisType>
+	template<typename CorrelationsSkeletonType>
 	class FourPointCorrelations {
-		//typedef typename MatrixType::value_type FieldType;
+
+		typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
+		typedef typename ObserverHelperType::IoType IoType;
+		typedef typename ObserverHelperType::MatrixType MatrixType;
+		typedef typename ObserverHelperType::VectorType VectorType ;
+		typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
+		typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType ;
+
 		typedef size_t IndexType;
-		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> ObserverHelperType;
-		typedef CorrelationsSkeleton<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisType> CorrelationsSkeletonType;
 		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		typedef typename VectorType::value_type FieldType;
-		typedef typename BasisType::RealType RealType;
+		typedef typename BasisWithOperatorsType::RealType RealType;
 		
 	public:
 		FourPointCorrelations(ObserverHelperType& precomp,CorrelationsSkeletonType& skeleton,bool verbose=false)
@@ -105,7 +110,7 @@ namespace Dmrg {
 		}
 				
 		//! Four-point: these are expensive and uncached!!!
-		//! requires i<=j<=k<=l
+		//! requires i1<i2<i3<i4
 		FieldType operator()(
 				char mod1,size_t i1,const MatrixType& O1,
 				char mod2,size_t i2,const MatrixType& O2,
@@ -181,8 +186,8 @@ namespace Dmrg {
 				std::cerr<<"Otmp\n";
 				std::cerr<<Otmp;
 			}
+
 			skeleton_.dmrgMultiply(O4g,Otmp,O4m,fermionicSign,ns);
-			
 			return skeleton_.bracket(O4g);
 		}
 			

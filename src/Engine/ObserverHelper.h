@@ -90,14 +90,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // to include norm
 
 namespace Dmrg {
-	template<typename IoType,typename MatrixType,typename VectorType_,typename VectorWithOffsetType,typename BasisType>
+	template<typename IoType_,typename MatrixType_,typename VectorType_,
+		typename VectorWithOffsetType_,typename BasisWithOperatorsType_>
 	class ObserverHelper {
 	public:
+		typedef IoType_ IoType;
+		typedef MatrixType_ MatrixType;
 		typedef VectorType_ VectorType;
+		typedef VectorWithOffsetType_ VectorWithOffsetType;
+		typedef BasisWithOperatorsType_ BasisWithOperatorsType;
 		typedef size_t IndexType;
 		typedef typename VectorType::value_type FieldType;
-		typedef typename BasisType::RealType RealType;
+		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef DmrgSerializer<RealType,VectorWithOffsetType,MatrixType,BasisType,FermionSign> DmrgSerializerType;
 		
 		//enum {NOTIMEVECTOR=0,USETIMEVECTOR=1};

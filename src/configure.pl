@@ -600,6 +600,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	typedef Basis<RealType,MySparseMatrix> BasisType;
 	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
 	typedef ModelHelperTemplate<OperatorsType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
 	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,$pthreadsName> ModelType;
 	
@@ -629,7 +630,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	size_t n=geometry.numberOfSites()/2;
 	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
 	bool verbose = false;
-	typedef Observer<FieldType,VectorWithOffsetType,BasisType,IoSimple,ConcurrencyType> 
+	typedef Observer<FieldType,VectorWithOffsetType,BasisWithOperatorsType,IoSimple> 
 		ObserverType;
 	ObserverType observe($obsArg);
 	
@@ -705,7 +706,7 @@ print print OBSOUT<<EOF;
 			observe.fourPointDeltas(fpd,geometry.numberOfSites(),gammas,model);
 			for (size_t step=0;step<fpd.size();step++) {
 				// step --> (i,j) FIXME
-				std::cout<<step<<" "<<g<<" "<<fpd[step]<<"\n";
+				std::cout<<step<<" "<<g<<" "<<fpd[step]<<"\\n";
 			}
 		}
 	} // if dd4

@@ -160,7 +160,7 @@ Now comes the constructor which takes 6 arguments.
 The first 3 arguments are the system (left-block), environment (right-block), and superblock (system + environment).
 As usual, the first 2 are heavy objects---with operators---, and the superblock is light.
 The 4th argument is the model object. The 5th argument is a \verb|TargettingStructureType| object 
-which is a \verb|TargettingStructureParms| object (as you can see in~@xtargettingstructure@x).
+which is a \verb|TargettingStructureParms| object 
 A structure is just a bunch of data bundled together, and you can see this in the file \verb|TargetStructureParams.h|.
 The last argument is a \verb|WaveFunctionTransformation| object. More info about this class is
 in \verb|WaveFunctionTransformation.h|.
