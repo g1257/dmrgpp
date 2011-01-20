@@ -1,6 +1,6 @@
 // BEGIN LICENSE BLOCK
 /*
-Copyright � 2008 , UT-Battelle, LLC
+Copyright (c) 2008 , UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 1.0.0]
@@ -149,8 +149,8 @@ namespace Dmrg {
 			initCache(O1,n1,nf,fermionicSign);
 			psimag::Matrix<FieldType> w(n,nf);
 			for (size_t i=0;i<n1;i++) {
-				concurrency_.loopCreate(nf-1);
-				std::vector<FieldType> v(nf-1);
+				concurrency_.loopCreate(nf);
+				std::vector<FieldType> v(nf);
 				size_t j = i;
 				//ProfilingType profile("correlations loop i=" + utils::ttos(i));
 				while(concurrency_.loop(j)) {
@@ -164,7 +164,7 @@ namespace Dmrg {
 					//}
 				}
 				concurrency_.gather(v);
-				for (j=i;j<nf-1;j++) w(i,j) = v[j];
+				for (j=i;j<v.size();j++) w(i,j) = v[j];
 			}
 			return w;
 		}
@@ -335,26 +335,29 @@ namespace Dmrg {
 			MatrixType O2new=multiplyTranspose(O1,O2);
 			//for (size_t s=0;s<n;s++) for (size_t t=0;t<n;t++) for (size_t w=0;w<n;w++) O2new(s,t) += conj(O1(w,s))*O2(w,t);
 			if (i==0) return calcCorrelation_(0,1,O2new,O1new,1);
-			return calcCorrelation_(i-1,i,O1new,O2new,1,DIAGONAL);
+			return calcCorrelation_(i-1,i,O1new,O2new,1);
 		}
 
-		//! FIXME : make sure that i less than j, which is assumed here
 		FieldType calcCorrelation_(
 					size_t i,
 					size_t j,
 					const MatrixType& O1,
 					const MatrixType& O2,
-					int fermionicSign,
-					size_t isDiagonal=NON_DIAGONAL)
+					int fermionicSign)
 		{
 			
-			//ProfilingType profile("calcDiagonalCorrelation for i="+utils::ttos(i)+" j="+utils::ttos(j));
+			if (i>=j) throw std::runtime_error("Observer::calcCorrelation_(...): i must be smaller than j\n");
 			MatrixType O1g,O2g,O1m,O2m;
 			skeleton_.createWithModification(O1m,O1,'n');
 			skeleton_.createWithModification(O2m,O2,'n');
 			
-			int ns = j-1;
-			if (ns<0) ns = 0;
+			if (j==skeleton_.numberOfSites()-1) {
+				if (i==j-1) throw std::runtime_error("Observer::calcCorrelation_(...): can't deal with this case yet\n");
+				skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2);
+				helper_.setPointer(j-2);
+				return skeleton_.bracketRightCorner(O1g,O2m,fermionicSign);
+			}
+			size_t ns = j-1;
 			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns);
 			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);
 			

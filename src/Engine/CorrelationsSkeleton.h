@@ -1,6 +1,6 @@
 // BEGIN LICENSE BLOCK
 /*
-Copyright  2008 , UT-Battelle, LLC
+Copyright (c)  2008 , UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 1.0.0]
@@ -136,7 +136,8 @@ namespace Dmrg {
 		size_t numberOfSites() const { return helper_.basisSE().block().size(); }
 
 		//! i can be zero here!!
-		void growDirectly(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns)
+		void growDirectly(MatrixType& Odest,const MatrixType& Osrc,size_t i,
+				int fermionicSign,size_t ns,bool transform = true)
 		{
 			//ProfilingType profile("growDirectly "+utils::ttos(i)+" ns="+utils::ttos(ns));
 			Odest =Osrc;
@@ -164,15 +165,18 @@ namespace Dmrg {
 				io_.read(electrons_,"#ELECTRONS_sites=",s);*/
 				//createSigns(signs,fermionicSign);
 				MatrixType Onew(helper_.columns(),helper_.columns());
-				fluffUp(Onew,Odest,fermionicSign,growOption);
-				Odest = Onew;
-				
+				fluffUp(Onew,Odest,fermionicSign,growOption,false);
+				if (!transform && s == ns-1) {
+					Odest = Onew;
+					continue;
+				}
+				helper_.transform(Odest,Onew);
 			}
 		}
 		
-		// Perfomance critical:	
+		// Perfomance critical:
 		void fluffUp(MatrixType& ret2,const MatrixType& O,int fermionicSign,
-			     int growOption=GROW_RIGHT)
+			     int growOption=GROW_RIGHT,bool transform = true)
 		{
 			size_t n = helper_.basisS().size();
 			MatrixType ret(n,n);
@@ -182,7 +186,8 @@ namespace Dmrg {
 					ret(e,e2) = fluffUp(O,e,e2,fermionicSign,growOption);
 				}
 			}
-			helper_.transform(ret2,ret);
+			if (transform) helper_.transform(ret2,ret);
+			else ret2 = ret;
 		}
 
 		// Perfomance critical:
@@ -271,12 +276,10 @@ namespace Dmrg {
 			if (helper_.hasTimeVector()) {
 				const VectorWithOffsetType& v = helper_.timeVector();
 				return bracket_(A,v);
-				//return bracketRightCorner_(A,v);
 			}
 
 			const VectorWithOffsetType& v = helper_.wavefunction();
 			return bracket_(A,v);
-			//return bracketRightCorner_(A,v);
 		}
 
 		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,int fermionSign)
@@ -284,12 +287,10 @@ namespace Dmrg {
 			if (helper_.hasTimeVector()) {
 				const VectorWithOffsetType& v = helper_.timeVector();
 				return bracketRightCorner_(A,B,fermionSign,v);
-				//return bracketRightCorner_(A,v);
 			}
 
 			const VectorWithOffsetType& v = helper_.wavefunction();
 			return bracketRightCorner_(A,B,fermionSign,v);
-			//return bracketRightCorner_(A,v);
 		}
 
 	private:
@@ -297,18 +298,12 @@ namespace Dmrg {
 		//template<typename SomeVectorType>
 		FieldType bracket_(const MatrixType& A,const VectorWithOffsetType& vec)
 		{
-			//ProfilingType profile("bracket_");
-			//typedef typename SomeVectorType::value_type ComplexOrRealType;
-			
 			RealType norma = std::norm(vec);
-			//std::cerr<<"MatrixA\n";
-			//std::cerr<<A;
 			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
 			
-			//if (helper_.SEpermutation()!=A.size()) throw std::runtime_error("problem in bracket\n");
 			CrsMatrix<FieldType> Acrs(A);
 			FieldType sum=0;
-			//size_t counter=0;
+
 			if (vec.size()!=helper_.basisSE().size()) throw std::runtime_error("Error\n");
 			for (size_t x=0;x<vec.sectors();x++) {
 				size_t sector = vec.sector(x);
@@ -316,25 +311,16 @@ namespace Dmrg {
 				size_t total = offset + vec.effectiveSize(sector);
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
-				
+
 					utils::getCoordinates(r,eta,helper_.basisSE().permutation(t),helper_.basisS().size());
-					//for (size_t r2=0;r2<A.n_col();r2++) {
 					for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
 						size_t r2 = Acrs.getCol(k);
 						size_t t2 = helper_.basisSE().permutationInverse(r2+eta*A.n_col());
 						if (t2<offset || t2>=total) continue;
-						//if (A(r,r2)==0) continue;
-						//counter++;
-						//try {
-						sum += //A(r,r2)
-							Acrs.getValue(k)*vec[t]*vec[t2];
-						//} catch (std::exception& exception) {
-							
-						//}
+						sum += Acrs.getValue(k)*vec[t]*vec[t2];
 					}
 				}
 			}
-			//std::cerr<<"counter="<<counter<<"\n";
 			return std::real(sum)/norma;
 		}
 		
@@ -352,8 +338,15 @@ namespace Dmrg {
 			CrsMatrix<FieldType> Acrs(A);
 			CrsMatrix<FieldType> Bcrs(B);
 			FieldType sum=0;
+			size_t ni = helper_.basisS().size()/Bcrs.rank(); // = Acrs.rank()
 
-			if (vec.size()!=helper_.basisSE().size()) throw std::runtime_error("Error\n");
+			// some sanity checks:
+			if (vec.size()!=helper_.basisSE().size())
+				throw std::runtime_error("Observe::bracketRightCorner_(...): vec.size!=SE.size\n");
+			if (ni!=Acrs.rank())
+				throw std::runtime_error("Observe::bracketRightCorner_(...): ni!=Acrs.rank\n");
+
+			// ok, we're ready for the main course:
 			for (size_t x=0;x<vec.sectors();x++) {
 				size_t sector = vec.sector(x);
 				size_t offset = vec.offset(sector);
@@ -362,12 +355,16 @@ namespace Dmrg {
 					size_t eta,r;
 
 					utils::getCoordinates(r,eta,helper_.basisSE().permutation(t),helper_.basisS().size());
-					RealType sign = helper_.basisS().fermionicSign(r,fermionSign);
-					for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
-						size_t r2 = Acrs.getCol(k);
+					size_t r0,r1;
+					utils::getCoordinates(r0,r1,helper_.basisS().permutation(r),ni);
+					RealType sign = helper_.basisS().fermionicSign(r0,fermionSign);
+					sign *= helper_.basisE().fermionicSign(r1,fermionSign);
+					for (int k=Acrs.getRowPtr(r0);k<Acrs.getRowPtr(r0+1);k++) {
+						size_t r0prime = Acrs.getCol(k);
 						for (int k2 = Bcrs.getRowPtr(eta);k2<Bcrs.getRowPtr(eta+1);k2++) {
 							size_t eta2 = Bcrs.getCol(k2);
-							size_t t2 = helper_.basisSE().permutationInverse(r2+eta2*A.n_col());
+							size_t rprime = helper_.basisS().permutationInverse(r0prime+r1*ni);
+							size_t t2 = helper_.basisSE().permutationInverse(rprime+eta2*helper_.basisS().size());
 							if (t2<offset || t2>=total) continue;
 							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec[t]*vec[t2]*sign;
 						}

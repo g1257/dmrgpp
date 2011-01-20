@@ -1,6 +1,6 @@
 // BEGIN LICENSE BLOCK
 /*
-Copyright � 2008 , UT-Battelle, LLC
+Copyright (c) 2008 , UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 1.0.0]
