@@ -105,7 +105,7 @@ namespace Dmrg {
 		
 	public:
 		FourPointCorrelations(ObserverHelperType& precomp,CorrelationsSkeletonType& skeleton,bool verbose=false)
-			: precomp_(precomp),skeleton_(skeleton),verbose_(verbose)
+			: helper_(precomp),skeleton_(skeleton),verbose_(verbose)
 		{
 		}
 				
@@ -147,10 +147,10 @@ namespace Dmrg {
 			//std::cerr<<"Result="<<bracket(O2g)<<"\n";
 			
 			//ns++;
-			precomp_.setPointer(ns);
-			//size_t trunc = precomp_.transform().n_col();
+			helper_.setPointer(ns);
+			//size_t trunc = helper_.transform().n_col();
 			MatrixType O2gt; //(trunc,trunc);
-			precomp_.transform(O2gt,O2g);
+			helper_.transform(O2gt,O2g);
 			if (verbose_) {
 				std::cerr<<"O2gt\n";
 				std::cerr<<O2gt;
@@ -158,26 +158,36 @@ namespace Dmrg {
 			
 			ns = i3-1;
 			if (ns<0) ns = 0;
-			precomp_.setPointer(ns);
+			helper_.setPointer(ns);
 			MatrixType Otmp;
 			growDirectly4p(Otmp,O2gt,i2+1,fermionicSign,ns);
 			if (verbose_) {
 				std::cerr<<"Otmp\n";
 				std::cerr<<Otmp;
 			}
+
+			if (i4==skeleton_.numberOfSites()-1) {
+				if (i3<i4-1) { // not tested
+					skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns);
+					skeleton_.growDirectly(Otmp,O3g,i3,fermionicSign,i4-2);
+					helper_.setPointer(i4-2);
+					return skeleton_.bracketRightCorner(Otmp,O4m,fermionicSign);
+				}
+				helper_.setPointer(i4-2);
+				return skeleton_.bracketRightCorner(Otmp,O3m,O4m,fermionicSign);
+			}
+
 			skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns);
 			if (verbose_) {
 				std::cerr<<"O3g\n";
 				std::cerr<<O3g;
 			}
-			precomp_.setPointer(ns);
+			helper_.setPointer(ns);
 
-			if (i4==skeleton_.numberOfSites()-1) {
-				return skeleton_.bracketRightCorner(O3g,O4m,fermionicSign);
-			}
-			//trunc = precomp_.transform().n_col();
+
+			//trunc = helper_.transform().n_col();
 			MatrixType O3gt; //(trunc,trunc);
-			precomp_.transform(O3gt,O3g);
+			helper_.transform(O3gt,O3g);
 			if (verbose_) {
 				std::cerr<<"O3gt\n";
 				std::cerr<<O3gt;
@@ -185,7 +195,7 @@ namespace Dmrg {
 
 			ns = i4-1;
 			if (ns<0) ns = 0;
-			precomp_.setPointer(ns);
+			helper_.setPointer(ns);
 			growDirectly4p(Otmp,O3gt,i3+1,fermionicSign,ns);
 			if (verbose_) {
 				std::cerr<<"Otmp\n";
@@ -214,7 +224,7 @@ namespace Dmrg {
 				calcSpermutation(s);
 				//std::cerr<<"*****************======="<<transform_.n_row()<<"\n";
 				io_.readMatrix(transform_,"#TRANSFORM_sites",s);*/
-				precomp_.setPointer(s);
+				helper_.setPointer(s);
 				//std::cerr<<"%%%%%%%%%%%%%%%%%======="<<transform_.n_row()<<"\n";
 				int growOption = GROW_RIGHT;
 				//if (i==1 && s==0) growOption = GROW_LEFT;// <-- not needed since nt>0
@@ -222,7 +232,7 @@ namespace Dmrg {
 				/*io_.rewind();
 				io_.read(electrons_,"#ELECTRONS_sites=",s);*/
 				//skeleton_.createSigns(signs,fermionicSign);
-				MatrixType Onew(precomp_.columns(),precomp_.columns());
+				MatrixType Onew(helper_.columns(),helper_.columns());
 				//skeleton_.fluffUp(Onew,Odest,signs,growOption);
 				skeleton_.fluffUp(Onew,Odest,fermionicSign,growOption);
 				Odest = Onew;
@@ -249,7 +259,7 @@ namespace Dmrg {
 // 			
 // 		}
 		
-		ObserverHelperType& precomp_; // <-- NB: not the owner
+		ObserverHelperType& helper_; // <-- NB: not the owner
 		CorrelationsSkeletonType& skeleton_; // <-- NB: not the owner
 		bool verbose_;
 	};  //class FourPointCorrelations

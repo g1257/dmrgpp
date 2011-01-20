@@ -293,6 +293,17 @@ namespace Dmrg {
 			return bracketRightCorner_(A,B,fermionSign,v);
 		}
 
+		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,
+				const MatrixType& C,int fermionSign)
+		{
+			if (helper_.hasTimeVector()) {
+				const VectorWithOffsetType& v = helper_.timeVector();
+				return bracketRightCorner_(A,B,C,fermionSign,v);
+			}
+
+			const VectorWithOffsetType& v = helper_.wavefunction();
+			return bracketRightCorner_(A,B,C,fermionSign,v);
+		}
 	private:
 		
 		//template<typename SomeVectorType>
@@ -367,6 +378,62 @@ namespace Dmrg {
 							size_t t2 = helper_.basisSE().permutationInverse(rprime+eta2*helper_.basisS().size());
 							if (t2<offset || t2>=total) continue;
 							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec[t]*vec[t2]*sign;
+						}
+					}
+				}
+			}
+			return std::real(sum)/norma;
+		}
+
+		FieldType bracketRightCorner_(
+				const MatrixType& A1,
+				const MatrixType& A2,
+				const MatrixType& B,
+				int fermionSign,
+				const VectorWithOffsetType& vec)
+		{
+
+			RealType norma = std::norm(vec);
+
+			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
+
+			CrsMatrix<FieldType> A1crs(A1);
+			CrsMatrix<FieldType> A2crs(A2);
+			CrsMatrix<FieldType> Bcrs(B);
+			FieldType sum=0;
+			size_t ni = helper_.basisS().size()/Bcrs.rank(); // = Acrs.rank()
+
+			// some sanity checks:
+			if (vec.size()!=helper_.basisSE().size())
+				throw std::runtime_error("Observe::bracketRightCorner_(...): vec.size!=SE.size\n");
+			if (ni!=A1crs.rank())
+				throw std::runtime_error("Observe::bracketRightCorner_(...): ni!=A1crs.rank\n");
+			if (Bcrs.rank()!=A2crs.rank())
+				throw std::runtime_error("Observe::bracketRightCorner_(...): Bcrs.rank!=A2crs.rank\n");
+
+			// ok, we're ready for the main course:
+			for (size_t x=0;x<vec.sectors();x++) {
+				size_t sector = vec.sector(x);
+				size_t offset = vec.offset(sector);
+				size_t total = offset + vec.effectiveSize(sector);
+				for (size_t t=offset;t<total;t++) {
+					size_t eta,r;
+
+					utils::getCoordinates(r,eta,helper_.basisSE().permutation(t),helper_.basisS().size());
+					size_t r0,r1;
+					utils::getCoordinates(r0,r1,helper_.basisS().permutation(r),ni);
+					RealType sign =  helper_.basisE().fermionicSign(r1,fermionSign);
+					for (int k1=A1crs.getRowPtr(r0);k1<A1crs.getRowPtr(r0+1);k1++) {
+						size_t r0prime = A1crs.getCol(k1);
+						for (int k2=A2crs.getRowPtr(r1);k2<A2crs.getRowPtr(r1+1);k2++) {
+							size_t r1prime = A2crs.getCol(k2);
+								for (int k3 = Bcrs.getRowPtr(eta);k3<Bcrs.getRowPtr(eta+1);k3++) {
+									size_t eta2 = Bcrs.getCol(k3);
+									size_t rprime = helper_.basisS().permutationInverse(r0prime+r1prime*ni);
+									size_t t2 = helper_.basisSE().permutationInverse(rprime+eta2*helper_.basisS().size());
+									if (t2<offset || t2>=total) continue;
+									sum += A1crs.getValue(k1)*A2crs.getValue(k2)*Bcrs.getValue(k3)*vec[t]*vec[t2]*sign;
+								}
 						}
 					}
 				}

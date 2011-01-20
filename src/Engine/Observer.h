@@ -347,16 +347,24 @@ namespace Dmrg {
 		{
 			
 			if (i>=j) throw std::runtime_error("Observer::calcCorrelation_(...): i must be smaller than j\n");
-			MatrixType O1g,O2g,O1m,O2m;
+			MatrixType O1m,O2m;
 			skeleton_.createWithModification(O1m,O1,'n');
 			skeleton_.createWithModification(O2m,O2,'n');
 			
 			if (j==skeleton_.numberOfSites()-1) {
-				if (i==j-1) throw std::runtime_error("Observer::calcCorrelation_(...): can't deal with this case yet\n");
+				if (i==j-1) {
+					helper_.setPointer(j-2);
+					size_t ni = helper_.basisS().size()/helper_.basisE().size();
+					MatrixType O1g(ni,ni);
+					for (size_t x=0;x<O1g.n_row();x++) O1g(x,x) = 1.0;
+					return skeleton_.bracketRightCorner(O1g,O1m,O2m,fermionicSign);
+				}
+				MatrixType O1g,O2g;
 				skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2);
 				helper_.setPointer(j-2);
 				return skeleton_.bracketRightCorner(O1g,O2m,fermionicSign);
 			}
+			MatrixType O1g,O2g;
 			size_t ns = j-1;
 			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns);
 			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);

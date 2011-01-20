@@ -1,4 +1,14 @@
 
+BUGS:
+
+SU(2) + WFT is broookeeeeeen!! (issued posted on github)
+
+observer: need to fix fermion sign for corner case 
+	(i.e. correlations with last point)
+
+
+CLEANUPS:
+
 clean WFT--> actually we need two WFTs, one for Local Symm. and one for SU(2)
 
 ObserverHelper must have only one constructor
@@ -15,7 +25,6 @@ json format for input?
 
 DensityMatrixSu2 needs optimization
 
-SU(2) + WFT is broookeeeeeen!! (issued posted on github)
 
 TestSuite: need to eliminate hashtable.txt usage
 
@@ -27,3 +36,5 @@ tstSTruct is doing tDMRG and DDMRG, there should be two of these,
 and we need to add scaffolding to select among them.
 
 observer need full spin correlations S_i S_j, where S is the full spin
+
+
