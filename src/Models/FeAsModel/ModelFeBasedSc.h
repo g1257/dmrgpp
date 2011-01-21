@@ -114,7 +114,6 @@ namespace Dmrg {
 	private:
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
-		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef typename HilbertSpaceFeAsType::HilbertState HilbertState;
 		
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
@@ -125,11 +124,12 @@ namespace Dmrg {
 		static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
 
 	public:
+		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef std::vector<HilbertState> HilbertBasisType;
 		typedef LinkProductFeAs<ModelHelperType> LinkProductType;
 		typedef   ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
-		typedef	typename ModelBaseType::MyBasis MyBasis;
-		typedef	typename ModelBaseType::MyBasisWithOperators MyBasisWithOperators;
+		typedef	 typename ModelBaseType::MyBasis MyBasis;
+		typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		ModelFeBasedSc(ParametersModelFeAs<RealType> const &mp,GeometryType const &geometry) 

@@ -99,33 +99,33 @@ namespace Dmrg {
 	typename DmrgGeometryType,
 	template<typename> class SharedMemoryTemplate>
 	class ModelHubbard : public ModelBase<ModelHelperType_,SparseMatrixType,DmrgGeometryType,
- 		LinkProductHubbardOneBand<ModelHelperType_>,SharedMemoryTemplate> {
-		public:
-			typedef ModelHelperType_ ModelHelperType;
-			typedef typename ModelHelperType::OperatorsType OperatorsType;
-			typedef typename OperatorsType::OperatorType OperatorType;
-			typedef typename ModelHelperType::RealType RealType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
-		private:
-			
-			static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
-			static const int FERMION_SIGN = -1;
-			static const int DEGREES_OF_FREEDOM=2;
-			static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
-			
-			typedef unsigned int long long WordType;
-		
-			typedef typename ModelHelperType::BlockType Block;
-			typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
-			typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
+		LinkProductHubbardOneBand<ModelHelperType_>,SharedMemoryTemplate> {
+	public:
+		typedef ModelHelperType_ ModelHelperType;
+		typedef typename ModelHelperType::OperatorsType OperatorsType;
+		typedef typename OperatorsType::OperatorType OperatorType;
+		typedef typename ModelHelperType::RealType RealType;
+		typedef typename SparseMatrixType::value_type SparseElementType;
+	private:
+
+		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
+		static const int FERMION_SIGN = -1;
+		static const int DEGREES_OF_FREEDOM=2;
+		static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
+
+		typedef unsigned int long long WordType;
+
+		typedef typename ModelHelperType::BlockType Block;
+		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 
 	public:
+			typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 		typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
-		typedef	typename ModelBaseType::MyBasisWithOperators MyBasisWithOperators;
+		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef std::vector<HilbertState> HilbertBasisType;
 		

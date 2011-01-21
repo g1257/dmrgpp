@@ -91,14 +91,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename FieldType,typename VectorWithOffsetType,typename BasisWithOperatorsType,typename IoType>
+	template<typename FieldType,typename VectorWithOffsetType,typename ModelType,typename IoType>
 	class Observer {
 		typedef size_t IndexType;
 		typedef SparseVector<FieldType> VectorType;
 		typedef psimag::Matrix<FieldType> MatrixType;
-		typedef typename BasisWithOperatorsType::ConcurrencyType ConcurrencyType;
-		typedef typename BasisWithOperatorsType::RealType RealType;
-		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,BasisWithOperatorsType> ObserverHelperType;
+		typedef typename ModelType::ConcurrencyType ConcurrencyType;
+		typedef typename ModelType::RealType RealType;
+		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,ModelType> ObserverHelperType;
 		typedef CorrelationsSkeleton<ObserverHelperType> CorrelationsSkeletonType;
 		typedef FourPointCorrelations<CorrelationsSkeletonType>  FourPointCorrelationsType;
 		typedef PsimagLite::Profiling ProfilingType;
@@ -109,17 +109,28 @@ namespace Dmrg {
 		static size_t const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
 		
 	public:
-		Observer(const std::string& filename,size_t n,size_t n1,ConcurrencyType& concurrency,bool verbose=false)
-		: helper_(filename,2*n,verbose),halfLatticeSize_(n),
-			    oneSiteHilbertSize_(n1),skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
-				verbose_(verbose)
+		Observer(
+				const std::string& filename,
+				size_t n,
+				const ModelType& model,
+				ConcurrencyType& concurrency,
+				bool verbose=false)
+		: helper_(filename,model,2*n,verbose),halfLatticeSize_(n),
+		  skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
+		  verbose_(verbose)
 		{}
 
-		Observer(const std::string& filename,const std::string& timeFilename,size_t n,size_t n1,
-			ConcurrencyType& concurrency,size_t nf = 0,bool verbose=false)
-		: helper_(filename,timeFilename,nf,verbose),halfLatticeSize_(n),
-			    oneSiteHilbertSize_(n1),skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
-				verbose_(verbose)
+		Observer(
+				const std::string& filename,
+				const std::string& timeFilename,
+				size_t n,
+				const ModelType& model,
+				ConcurrencyType& concurrency,
+				size_t nf = 0,
+				bool verbose=false)
+		: helper_(filename,timeFilename,model,nf,verbose),halfLatticeSize_(n),
+		  skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
+		  verbose_(verbose)
 		{}
 
 		size_t size() const { return helper_.size(); }
@@ -275,7 +286,7 @@ namespace Dmrg {
 			return onePointInternal<ApplyOperatorType>(site,A,src1,src2);
 		}
 
-		private:
+	private:
 
 		template<typename ApplyOperatorType>
 		FieldType onePointInternal(size_t site,const typename ApplyOperatorType::OperatorType& A,
@@ -471,7 +482,6 @@ namespace Dmrg {
 
 		ObserverHelperType helper_;
 		size_t halfLatticeSize_;
-		size_t oneSiteHilbertSize_;
 		CorrelationsSkeletonType skeleton_;
 		FourPointCorrelationsType fourpoint_;
 		ConcurrencyType& concurrency_;

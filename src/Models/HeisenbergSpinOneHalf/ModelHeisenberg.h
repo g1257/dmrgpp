@@ -114,7 +114,6 @@ namespace Dmrg {
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
-		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef unsigned int long long WordType;
 		typedef HilbertSpaceHubbard<WordType> HilbertSpaceType;
 		typedef typename HilbertSpaceType::HilbertState HilbertStateType;
@@ -129,10 +128,11 @@ namespace Dmrg {
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;
 
 	public:
+		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef std::vector<HilbertStateType> HilbertBasisType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
-		typedef	typename ModelBaseType::MyBasisWithOperators MyBasisWithOperators;
+		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		ModelHeisenberg(ParametersModelHeisenberg<RealType> const &mp,GeometryType const &geometry) 

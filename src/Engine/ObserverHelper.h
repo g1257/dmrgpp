@@ -91,36 +91,47 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	template<typename IoType_,typename MatrixType_,typename VectorType_,
-		typename VectorWithOffsetType_,typename BasisWithOperatorsType_>
+		typename VectorWithOffsetType_,typename ModelType>
 	class ObserverHelper {
 	public:
 		typedef IoType_ IoType;
 		typedef MatrixType_ MatrixType;
 		typedef VectorType_ VectorType;
 		typedef VectorWithOffsetType_ VectorWithOffsetType;
-		typedef BasisWithOperatorsType_ BasisWithOperatorsType;
+		typedef typename ModelType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef size_t IndexType;
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
+		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 		typedef DmrgSerializer<RealType,VectorWithOffsetType,MatrixType,BasisType,FermionSign> DmrgSerializerType;
 		
 		//enum {NOTIMEVECTOR=0,USETIMEVECTOR=1};
 		
-		ObserverHelper(const std::string& filename,size_t nf,bool verbose=true) 
+		ObserverHelper(
+				const std::string& filename,
+				const ModelType& model,
+				size_t nf,
+				bool verbose)
 			:	filename_(filename),
 				io_(filename),
 				dSerializerV_(1,DmrgSerializerType(io_,true)),
 				currentPos_(0),
 				useTimeVector_(false),
+				model_(model),
 				verbose_(verbose)
 		{
 			std::cerr<<"Observer will use file: "<<filename<<" for core DMRG data\n";
 			init(nf);
 		}
 
-		ObserverHelper(const std::string& filename,const std::string& timeFilename,size_t nf=0,bool verbose=true) 
+		ObserverHelper(
+				const std::string& filename,
+				const std::string& timeFilename,
+				const ModelType& model,
+				size_t nf,
+				bool verbose)
 			:	filename_(filename),
 				io_(filename),
 				io2_(timeFilename),
@@ -128,6 +139,7 @@ namespace Dmrg {
 				timeSerializerV_(nf),
 				currentPos_(0),
 				useTimeVector_(true),
+				model_(model),
 				verbose_(verbose)
 		{
 			std::cerr<<"Observer will use file: "<<filename<<" for core DMRG data\n";
@@ -208,6 +220,8 @@ namespace Dmrg {
 			return useTimeVector_;
 		}
 
+		size_t electrons(size_t i) const { return electrons_[i]; }
+
 		const VectorWithOffsetType& timeVector() const
 		{
 			if (currentPos_>=timeSerializerV_.size() || 
@@ -223,6 +237,8 @@ namespace Dmrg {
 	private:
 		void init(size_t nf)
 		{
+			initElectrons();
+
 			rewind(true);
 			//std::vector<size_t> el0; // not really needed, but needs to read to keep in sync
 			//getElectronsOneSite(el0);
@@ -249,6 +265,19 @@ namespace Dmrg {
 			initTimeVectors(dSerializerV_.size(),dummy);
 			// Line below might cause trouble under gcc v3
 			//if (verbose_) std::cerr<<(*this);	
+		}
+
+		void initElectrons()
+		{
+			std::vector<OperatorType> creationMatrix;
+			typename OperatorType::SparseMatrixType hamiltonian;
+			typename BasisType::BasisDataType q;
+			typename BasisType::BlockType block(1,0);
+
+			model_.setNaturalBasis(creationMatrix,hamiltonian,q,block);
+			electrons_= q.electronsUp;
+			for (size_t i=0;i<electrons_.size();i++)
+				electrons_[i] += q.electronsDown[i];
 		}
 
 		void integrityChecks()
@@ -331,6 +360,8 @@ namespace Dmrg {
 		std::vector<TimeSerializerType> timeSerializerV_;
 		size_t currentPos_;
 		bool useTimeVector_;
+		const ModelType& model_;
+		std::vector<size_t> electrons_;
 		bool verbose_;
 	};  //ObserverHelper
 

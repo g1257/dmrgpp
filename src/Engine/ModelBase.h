@@ -106,7 +106,7 @@ namespace Dmrg {
 			typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 			typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 			typedef Basis<RealType,SparseMatrixType> MyBasis;
-			typedef BasisWithOperators<OperatorsType,ConcurrencyType> MyBasisWithOperators;
+			typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
 			typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,
    					LinkProductType,SharedMemoryTemplate> ModelCommonType;
 			typedef DmrgGeometryType GeometryType;
@@ -128,8 +128,8 @@ namespace Dmrg {
 				modelCommon_.matrixVectorProduct(x,y,modelHelper);
 			}
 
-			void addHamiltonianConnection(SparseMatrixType &matrix,MyBasis const &basis1,MyBasisWithOperators const &basis2,
-				MyBasisWithOperators const &basis3,size_t nOrbitals) const
+			void addHamiltonianConnection(SparseMatrixType &matrix,MyBasis const &basis1,BasisWithOperatorsType const &basis2,
+				BasisWithOperatorsType const &basis3,size_t nOrbitals) const
 			{	
 				int bs,offset;
 				SparseMatrixType matrixBlock;

@@ -370,6 +370,7 @@ namespace Dmrg {
 					utils::getCoordinates(r0,r1,helper_.basisS().permutation(r),ni);
 					RealType sign = helper_.basisS().fermionicSign(r0,fermionSign);
 					sign *= helper_.basisE().fermionicSign(r1,fermionSign);
+					//sign *= helper_.electrons(r1);
 					for (int k=Acrs.getRowPtr(r0);k<Acrs.getRowPtr(r0+1);k++) {
 						size_t r0prime = Acrs.getCol(k);
 						for (int k2 = Bcrs.getRowPtr(eta);k2<Bcrs.getRowPtr(eta+1);k2++) {

@@ -108,7 +108,7 @@ namespace Dmrg {
 		typedef LinkProdTj1Orb<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
-		typedef	typename ModelBaseType::MyBasisWithOperators MyBasisWithOperators;
+		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
 		typedef typename ModelHelperType::BlockType Block;

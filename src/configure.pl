@@ -22,7 +22,7 @@ Please see full open source license included in file LICENSE.
 use warnings;
 use strict;
 
-my $hasGsl = "yes"; # say "no" here to remove GSL dependence
+my $hasGsl = "no"; # say "no" here to remove GSL dependence
 
 my $mpi=0;
 my $platform="linux";
@@ -242,7 +242,7 @@ sub getLitProgTargets
 {
 	my ($array)=@_;
 	my $x = "";
-	my $litProgTool = "../nuweb.pl -v -l  -s  -d ";
+	my $litProgTool = "nuweb.pl -v -l  -s  -d ";
 	foreach my $f (@$array) {
 		my $fh = $f;
 		$fh =~ s/\.w$/\.h/;
@@ -251,10 +251,21 @@ sub getLitProgTargets
 		$dir =~ s/\/[^\/]+$/\//;
 		my $fnd = $f;
 		$fnd =~ s/$dir//;
-		$x = $x."\t cd $dir; $litProgTool $fnd\n";
+		my $dirChange = computeBackwardMovements($dir);
+		$x = $x."\t cd $dir; $dirChange$litProgTool $fnd\n";
 		$x = $x."\n";
 	}
 	return $x;
+}
+
+sub computeBackwardMovements
+{
+	my ($directory) = @_;
+	my $ret = "";
+	while ($directory =~ s/\///) {
+		$ret = $ret."../";
+	}
+	return $ret;	
 }
 
 sub createDriver
@@ -465,10 +476,10 @@ sub createObserverDriver
 	my $modelName = getModelName();
 	my $operatorsName = getOperatorsName();
 	my $chooseRealOrComplexForObservables = "typedef RealType FieldType;\n";
-	my $obsArg = "datafile,n,opInfo.n_row(),concurrency,verbose";
+	my $obsArg = "datafile,n,model,concurrency,verbose";
 	if ($targetting=~/timestep/i) {
 		$chooseRealOrComplexForObservables = "typedef ComplexType FieldType;\n";
-		$obsArg = "datafile,tsp.filename,n,opInfo.n_row(),concurrency,verbose";
+		$obsArg = "datafile,tsp.filename,n,model,concurrency,0,verbose";
 	}
 
 	system("cp observe.cpp observe.bak") if (-e "observe.cpp");	
@@ -628,9 +639,8 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	TargettingParamsType tsp(io,model);
 	
 	size_t n=geometry.numberOfSites()/2;
-	const psimag::Matrix<FieldType>& opInfo = model.getOperator("i",0,0);
 	bool verbose = false;
-	typedef Observer<FieldType,VectorWithOffsetType,BasisWithOperatorsType,IoSimple> 
+	typedef Observer<FieldType,VectorWithOffsetType,ModelType,IoSimple> 
 		ObserverType;
 	ObserverType observe($obsArg);
 	
