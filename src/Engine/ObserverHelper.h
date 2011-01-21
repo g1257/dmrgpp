@@ -220,7 +220,7 @@ namespace Dmrg {
 			return useTimeVector_;
 		}
 
-		size_t electrons(size_t i) const { return electrons_[i]; }
+//		size_t electrons(size_t i) const { return electrons_[i]; }
 
 		const VectorWithOffsetType& timeVector() const
 		{
@@ -237,7 +237,7 @@ namespace Dmrg {
 	private:
 		void init(size_t nf)
 		{
-			initElectrons();
+			//initElectrons();
 
 			rewind(true);
 			//std::vector<size_t> el0; // not really needed, but needs to read to keep in sync
@@ -267,18 +267,18 @@ namespace Dmrg {
 			//if (verbose_) std::cerr<<(*this);	
 		}
 
-		void initElectrons()
-		{
-			std::vector<OperatorType> creationMatrix;
-			typename OperatorType::SparseMatrixType hamiltonian;
-			typename BasisType::BasisDataType q;
-			typename BasisType::BlockType block(1,0);
-
-			model_.setNaturalBasis(creationMatrix,hamiltonian,q,block);
-			electrons_= q.electronsUp;
-			for (size_t i=0;i<electrons_.size();i++)
-				electrons_[i] += q.electronsDown[i];
-		}
+//		void initElectrons()
+//		{
+//			std::vector<OperatorType> creationMatrix;
+//			typename OperatorType::SparseMatrixType hamiltonian;
+//			typename BasisType::BasisDataType q;
+//			typename BasisType::BlockType block(1,0);
+//
+//			model_.setNaturalBasis(creationMatrix,hamiltonian,q,block);
+//			electrons_= q.electronsUp;
+//			for (size_t i=0;i<electrons_.size();i++)
+//				electrons_[i] += q.electronsDown[i];
+//		}
 
 		void integrityChecks()
 		{
@@ -361,7 +361,7 @@ namespace Dmrg {
 		size_t currentPos_;
 		bool useTimeVector_;
 		const ModelType& model_;
-		std::vector<size_t> electrons_;
+//		std::vector<size_t> electrons_;
 		bool verbose_;
 	};  //ObserverHelper
 
