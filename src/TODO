@@ -3,11 +3,11 @@ BUGS:
 
 SU(2) + WFT is broookeeeeeen!! (issued posted on github)
 
-observer: need to fix fermion sign for corner case 
-	(i.e. correlations with last point)
-
+observer: fails if lattice has less than 6 sites.
 
 CLEANUPS:
+
+WFT needs to be disabled if lattice has less than 6 sites.
 
 clean WFT--> actually we need two WFTs, one for Local Symm. and one for SU(2)
 
@@ -27,9 +27,12 @@ DensityMatrixSu2 needs optimization
 
 TestSuite: need to eliminate hashtable.txt usage
 
-lanczos.cpp needs to be built by configure.pl
+lanczos.cpp needs to be built by configure.pl --> move to new repository?
 
 observer need full spin correlations S_i S_j, where S is the full spin
 
-drivers: need virtual inheritance to simply code.
+drivers: need virtual inheritance to simplify code.
+
+DDMRG needs debugging
+
 

@@ -70,3 +70,10 @@ Let $diff = $resultsDir timeEvolution$testNum.diff
 CallOnce dmrg
 Grep '|A|' $stdoutAndStdErr > $result
 Diff $result $oracle > $diff
+
+[RawOutput]
+Let $oracle = $oraclesDir rawOutput$testNum.txt
+Let $result = $resultsDir stderrAndOut$testNum.txt
+Let $diff = $resultsDir rawOutput$testNum.diff
+CallOnce dmrg
+Diff $result $oracle > $diff
