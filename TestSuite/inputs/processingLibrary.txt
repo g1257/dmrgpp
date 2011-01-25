@@ -72,8 +72,11 @@ Grep '|A|' $stdoutAndStdErr > $result
 Diff $result $oracle > $diff
 
 [RawOutput]
+Let $input = $inputsDir input$testNum.inp
+Let $result = $srcDir rawOutput$testNum.txt
 Let $oracle = $oraclesDir rawOutput$testNum.txt
-Let $result = $resultsDir stderrAndOut$testNum.txt
 Let $diff = $resultsDir rawOutput$testNum.diff
 CallOnce dmrg
+Execute runObserve($input, $result)
 Diff $result $oracle > $diff
+

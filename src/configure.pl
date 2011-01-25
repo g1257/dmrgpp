@@ -320,7 +320,7 @@ typedef double Field;
 //typedef std::vector<int> MyBlock;
 //typedef BlockMatrix<MatrixElementType,MySparseMatrix> MySparseBlockMatrix;
 //typedef BlockMatrix<MatrixElementType,psimag::Matrix<MatrixElementType> > MyDenseBlockMatrix;
-typedef Dmrg::$concurrencyName<MatrixElementType> MyConcurrency;
+typedef PsimagLite::$concurrencyName<MatrixElementType> MyConcurrency;
 typedef $parametersName<MatrixElementType> ParametersModelType;
 typedef Geometry<MatrixElementType> GeometryType;;
 typedef  IoSimple MyIo;
@@ -347,7 +347,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 	typedef Basis<MatrixElementType,MySparseMatrix> BasisType;
 	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
 	typedef ModelHelperTemplate<OperatorsType,ReflectionSymmetryType,MyConcurrency> ModelHelperType;
-	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,$pthreadsName> ModelType;
+	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::$pthreadsName> ModelType;
 	
 	typedef DmrgSolver<
 			InternalProductTemplate,
@@ -517,7 +517,7 @@ typedef double RealType;
 typedef std::complex<RealType> ComplexType;
 $chooseRealOrComplexForObservables
 
-typedef Dmrg::$concurrencyName<RealType> MyConcurrency;
+typedef PsimagLite::$concurrencyName<RealType> MyConcurrency;
 typedef  IoSimple MyIo;
 
 template<typename ModelType,typename ObserverType,typename SparseMatrixType,
@@ -613,7 +613,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
 	typedef ModelHelperTemplate<OperatorsType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
-	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,$pthreadsName> ModelType;
+	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::$pthreadsName> ModelType;
 	
 	typedef DmrgSolver<
                         InternalProductTemplate,
@@ -762,7 +762,7 @@ int main(int argc,char *argv[])
 	
 	using namespace Dmrg;
 	
-	typedef   Dmrg::$concurrencyName<RealType> MyConcurrency; 
+	typedef   PsimagLite::$concurrencyName<RealType> MyConcurrency; 
 	
 	MyConcurrency concurrency(argc,argv);
 	

@@ -71,7 +71,7 @@ The wave function transformation is too long to explain here but it is a standar
 was introduce in 1996 by S. White (need to write here the corresponding PRB article FIXME).
 \item \verb|ModelType| is the model in question. These are classes under the directory Models.
 \item \verb|ConcurrenyType| is the type to deal with parallelization or lack thereof.
-\item \verb|IoType| is usually the \verb|IoSimple| class, and deals with writing to disk the time-vectors produced by this class.
+\item \verb|IoType| is usually the \verb|IoSimple| class, and deals with writing to disk the dyn-vectors produced by this class.
 \item \verb|VectorWithOffsetTemplate| is usually the \verb|VectorWithOffsets| class that encapsulates
 the functionality of a vector that is mostly zero except for chunks of non-zero numbers at certain offsets.
 Note that there is (for efficiency reasons) a \verb|VectorWithOffset| class that encapsulates the functionality
@@ -132,18 +132,16 @@ typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVec
 typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 @}
 
-And now a few enums and other constants. The first refers to the 4 steps in which the time-step algorithm can be.
+And now a few enums and other constants. The first refers to the 3 stages in which the dynamic algorithm can be.
 \begin{enumerate}
 \item DISABLED
-Time-step-targetting is disabled if we are not computing any time-dependent operator yet (like when we're in the infinite algorithm)%'
+Dynamic targetting is disabled if we are not computing any dyn-dependent operator yet (like when we're in the infinite algorithm)%'
 or if the user specified TSTLoops with numbers greater than zero, those numbers indicate the loops that must pass
-before time-dependent observables are computed.
+before dyn-dependent observables are computed.
 \item OPERATOR
 In this stage we're applying an operator%'
-\item WFT\_NOADVANCE
-In this stage we're adavancing in space with the wave function transformation (WFT) but not advancing in frequency.%'
-\item WFT\_NOADVANCE
-In this stage we're adavancing in space and fequency%'
+\item WFT\CONVERGING
+In this stage we're converging .%'
 \end{enumerate}
 
 @d enumsAndConstants
@@ -212,7 +210,7 @@ Multiple frequencies should be parallelized, and we need to provide a frequency 
 in the input file (FIXME)
 The \verb|weight|, which is a vector of weights, for each target state (except possibly the ground state)
 is set to 4 vectors.
-Next an \verb|io| or input/output object is constructed. This is needed to dump the time-vectors to disk
+Next an \verb|io| or input/output object is constructed. This is needed to dump the dyn vectors to disk
 since we don't do computations \emph{in-situ} here.%'
 All right, we may do something \emph{in situ} just to check.
 The \verb|applyLocal| operator described before is also initalized on the stack.
@@ -340,9 +338,9 @@ will always be.
 bool includeGroundStage() const {return true; }
 @}
 
-How many time vectors does the \verb|DensityMatrix| need to include, excepting
+How many dyn vectors does the \verb|DensityMatrix| need to include, excepting
 the ground state? The function below tells.
-Note that when all stages are disabled no time vectors are
+Note that when all stages are disabled no dyn vectors are
 included.
 @d size
 @{
@@ -353,7 +351,7 @@ size_t size() const
 }
 @}
 
-The function below returns the full time vector number $i$ as a vector with offsets:
+The function below returns the full dyn vector number $i$ as a vector with offsets:
 @d operatorParens
 @{
 const VectorWithOffsetType& operator()(size_t i) const
@@ -866,7 +864,7 @@ void printVectors(const std::vector<size_t>& block)
 }
 @}
 
-Print header to disk to index the time vectors. This indexing wil lbe used at postprocessing.
+Print header to disk to index the dyn vectors. This indexing wil lbe used at postprocessing.
 @d printHeader
 @{
 void printHeader()
