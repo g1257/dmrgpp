@@ -27,13 +27,10 @@ namespace std {
 	double imag(double t) { return 0.0; }
 
 	double conj(double t) { return t; }
-} // namespace std
-
-namespace PsimagLite {
-	template<typename T>
-	T norm(T t)
+	
+	double norm(double t)
 	{
-		return sqrt(std::real(t)*std::real(t) + std::imag(t)*std::imag(t));
+		return fabs(t);
 	}
 }
 

@@ -76,6 +76,14 @@ namespace PsimagLite {
 			nrow_=nrow; ncol_=ncol;
 			data_.resize(nrow*ncol);
 		}
+		
+		Matrix<T>& operator += (const Matrix<T>& other)
+		{
+			// domain checking ??? 
+			for(size_t i=0;i<ncol_*nrow_;i++) 
+				data_[i] += other.data_[i];
+			return *this;
+		}
 
 	private:
 		size_t nrow_,ncol_;
@@ -94,6 +102,39 @@ namespace PsimagLite {
 		return os;
 	}
 
+	template <class T>
+	std::istream& operator >> (std::istream& is, Matrix<T>& A)
+	{
+		size_t nrow=0,ncol=0;
+		is >> nrow >> ncol;
+		if(is) {
+			A.reset(nrow,ncol);
+			for (size_t j=0; j<A.n_col(); j++) for (size_t i=0; i<A.n_row(); i++) {
+				is >> A(i,j);
+			}
+		}
+		if(!is) {
+			throw std::range_error("ERROR istream& operator >> (std::istream&, Matrix<T>&): read past end stream");
+		}
+		return is;
+	}
+	
+	template<typename T>
+	Matrix<T> operator+(const Matrix<T>& a,const Matrix<T>& b)
+	{
+		Matrix<T> c(a.n_row(),a.n_col());
+		for (size_t i=0;i<a.n_row();i++) for (size_t j=0;j<a.n_col();j++) c(i,j) = a(i,j) + b(i,j);
+		return c;
+	}
+	
+	template<typename T>
+	Matrix<T> operator-(const Matrix<T>& a,const Matrix<T>& b)
+	{
+		Matrix<T> c(a.n_row(),a.n_col());
+		for (size_t i=0;i<a.n_row();i++) for (size_t j=0;j<a.n_col();j++) c(i,j) = a(i,j) - b(i,j);
+		return c;
+	}
+	
 
 	void diag(Matrix<double> &m,std::vector<double> &eigs,char option)
 	{
@@ -144,7 +185,7 @@ namespace PsimagLite {
 
 	}
 
-	template<class T>
+	template<typename T>
 	bool isHermitian(Matrix<T> const &A,bool verbose=false)
 	{
 		size_t n=A.n_row();
@@ -152,7 +193,7 @@ namespace PsimagLite {
 		if (n!=A.n_col()) throw std::runtime_error
 			("isHermitian called on a non-square matrix.\n");
 		for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++)
-			if (norm(A(i,j)-std::conj(A(j,i)))>eps) {
+			if (std::norm(A(i,j)-std::conj(A(j,i)))>eps) {
 				if (verbose) std::cerr<<"A("<<i<<","<<j<<")="<<A(i,j)<<" A("<<j<<","<<i<<")="<<A(j,i)<<"\n";
 			return false;
 		}

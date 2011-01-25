@@ -374,16 +374,18 @@ namespace PsimagLite {
 				}
 
 				template<typename X>
-				void readMatrix(Matrix<X> &mat,std::string const &s,int level= 0)
+				void readMatrix(X &mat,std::string const &s,int level= 0)
 				{
 					advance(s,level);
-					int nrow,ncol;
+					fin_>>mat;
+					/*int nrow,ncol;
 
 					fin_>>nrow;
 					fin_>>ncol;
 					mat.resize(nrow,ncol);
 
 					for (size_t i=0;i<mat.n_row();i++) for (size_t j=0;j<mat.n_col();j++) fin_>>mat(i,j);
+					*/
 				}
 
 				template<typename FieldType,template <typename> class SparseMatrixTemplate,
@@ -396,12 +398,12 @@ namespace PsimagLite {
 					fin_>>op.j;
 				}
 
-				template<typename X>
-				void readMatrix(X& mat,const std::string& s,int level=0)
-				{
-					advance(s,level);
-					fin_>>mat;
-				}
+//				template<typename X>
+//				void readMatrix(X& mat,const std::string& s,int level=0)
+//				{
+//					advance(s,level);
+//					fin_>>mat;
+//				}
 
 				void rewind()
 				{
