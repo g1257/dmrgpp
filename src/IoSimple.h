@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 #include "Matrix.h"
 
 namespace PsimagLite {
@@ -156,7 +157,7 @@ namespace PsimagLite {
 				}
 
 				template<typename X>
-				void printMatrix(psimag::Matrix<X> const &mat,std::string const &s)
+				void printMatrix(Matrix<X> const &mat,std::string const &s)
 				{
 					if (rank_!=0) return;
 					fout_<<s<<"\n";
@@ -373,7 +374,7 @@ namespace PsimagLite {
 				}
 
 				template<typename X>
-				void readMatrix(psimag::Matrix<X> &mat,std::string const &s,int level= 0)
+				void readMatrix(Matrix<X> &mat,std::string const &s,int level= 0)
 				{
 					advance(s,level);
 					int nrow,ncol;
