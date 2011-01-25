@@ -142,7 +142,7 @@ namespace Dmrg {
 		}
 
 		template<typename TransformElementType,typename ConcurrencyType>
-		void changeBasis(psimag::Matrix<TransformElementType> const &ftransform,const DmrgBasisType* thisBasis,
+		void changeBasis(PsimagLite::Matrix<TransformElementType> const &ftransform,const DmrgBasisType* thisBasis,
 					ConcurrencyType &concurrency)
 		{
 			size_t total = size();
@@ -178,7 +178,7 @@ namespace Dmrg {
 			return false; // disabled for now
 		}
 
-		void changeBasis(SparseMatrixType &v,psimag::Matrix<typename SparseMatrixType::value_type> const &ftransform)
+		void changeBasis(SparseMatrixType &v,PsimagLite::Matrix<typename SparseMatrixType::value_type> const &ftransform)
 		{
 			fullMatrixToCrsMatrix(v,transformFullFast(v,ftransform));
 		}

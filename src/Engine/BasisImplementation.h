@@ -296,7 +296,7 @@ namespace Dmrg {
 				utils::sort(removedIndices,perm);
 				std::ostringstream msg;
 				msg<<"Truncating transform...";
-				psimag::truncate(ftransform,removedIndices,false);
+				utils::truncate(ftransform,removedIndices,false);
 				progress_.printline(msg,std::cerr);
 				/*if (!isUnitary(ftransform)) { // only used for debugging
 					//std::cerr<<"------------------------------------\n";

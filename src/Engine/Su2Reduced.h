@@ -107,11 +107,11 @@ namespace Dmrg {
 			BasisType basis1_;
 			BasisWithOperatorsType basis2_,basis3_;
 			size_t nOrbitals_;
-			std::vector<psimag::Matrix<SparseElementType> > lfactor_;
-			psimag::Matrix<SparseElementType> lfactorHamiltonian_;
+			std::vector<PsimagLite::Matrix<SparseElementType> > lfactor_;
+			PsimagLite::Matrix<SparseElementType> lfactorHamiltonian_;
 			SparseMatrixType hamiltonian2_,hamiltonian3_;
 			std::vector<PairType> reducedEffective_;
-			psimag::Matrix<size_t> reducedInverse_;
+			PsimagLite::Matrix<size_t> reducedInverse_;
 			std::vector<size_t> flavorsOldInverse_;
 			ClebschGordanType& cgObject_;
 
@@ -262,14 +262,14 @@ namespace Dmrg {
 	  				size_t n,
        					size_t counter)
 			{
-				psimag::Matrix<SparseElementType> opDest1(n,n);
+				PsimagLite::Matrix<SparseElementType> opDest1(n,n);
 				for (size_t i=0;i<opSrc.size();i++) 
 					createReducedOperator(opDest1,*opSrc[i],basis,basisrInverse); //,PairType(k,mu1),mysign);
 				fullMatrixToCrsMatrix(opDest,opDest1);
 			}
 
 			void createReducedOperator(
-					psimag::Matrix<SparseElementType>& opDest1,
+					PsimagLite::Matrix<SparseElementType>& opDest1,
 					const OperatorType& opSrc,
      					const BasisWithOperatorsType& basis,
      					const std::vector<size_t>& basisrInverse)
@@ -288,7 +288,7 @@ namespace Dmrg {
 				}
 			}
 
-			void buildAdditional(psimag::Matrix<SparseElementType>& lfactor,size_t k,size_t mu1,size_t mu2,
+			void buildAdditional(PsimagLite::Matrix<SparseElementType>& lfactor,size_t k,size_t mu1,size_t mu2,
 					     std::vector<PairType>& jsEffective)
 			{
 				PairType kmu1(k,mu1);
@@ -318,7 +318,7 @@ namespace Dmrg {
 				}
 			}
 
-			void calcHamFactor(psimag::Matrix<SparseElementType>& lfactor)
+			void calcHamFactor(PsimagLite::Matrix<SparseElementType>& lfactor)
 			{
 				int offset = basis1_.partition(m_);
 				PairType jm=basis1_.jmValue(offset);
@@ -432,7 +432,7 @@ namespace Dmrg {
 				std::vector<size_t> perm(flavorsOldInverse_.size());
 				utils::sort(flavorsOldInverse_,perm);
 				std::vector<PairType> r(reducedEffective_.size());
-				psimag::Matrix<size_t> reducedInverse(reducedInverse_.n_row(),reducedInverse_.n_col());
+				PsimagLite::Matrix<size_t> reducedInverse(reducedInverse_.n_row(),reducedInverse_.n_col());
 
 				for (size_t i=0;i<reducedEffective_.size();i++) {
 					r[i]=reducedEffective_[perm[i]];

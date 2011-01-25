@@ -134,7 +134,7 @@ namespace Dmrg {
 		size_t numberOfOperators() const { return operatorsImpl_.size(); }
 
 		template<typename TransformElementType,typename ConcurrencyType>
-		void changeBasis(psimag::Matrix<TransformElementType> const &ftransform,const BasisType* thisBasis,
+		void changeBasis(PsimagLite::Matrix<TransformElementType> const &ftransform,const BasisType* thisBasis,
 					ConcurrencyType &concurrency)
 		{
 			return operatorsImpl_.changeBasis(ftransform,thisBasis,concurrency);
@@ -144,7 +144,7 @@ namespace Dmrg {
 		}
 
 		template<typename TransformElementType>
-		void changeBasis(SparseMatrixType &v,psimag::Matrix<TransformElementType> const &ftransform)
+		void changeBasis(SparseMatrixType &v,PsimagLite::Matrix<TransformElementType> const &ftransform)
 		{
 			operatorsImpl_.changeBasis(v,ftransform);
 		}

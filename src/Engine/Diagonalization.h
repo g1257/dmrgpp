@@ -271,9 +271,9 @@ namespace Dmrg {
 				
 				if (!isHermitian(fullm)) throw std::runtime_error("Not hermitian matrix block\n");
 				
-				psimag::Matrix<typename SparseMatrixType::value_type> fullm2;
+				PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 				crsMatrixToFullMatrix(fullm2,fullm);
-				if (isZero(fullm2)) std::cerr<<"Matrix is zero\n";
+				if (utils::isZero(fullm2)) std::cerr<<"Matrix is zero\n";
 				std::cerr<<fullm2;
 				std::vector<RealType> eigs(fullm2.n_row());
 				utils::diag(fullm2,eigs,'V');

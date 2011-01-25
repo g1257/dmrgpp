@@ -96,7 +96,7 @@ A long series of typedefs follow. Need to explain these maybe (FIXME).
 			typedef LanczosSolverTemplate<RealType,InternalProductType,ComplexVectorType> LanczosSolverType;
 			typedef std::vector<RealType> VectorType;
 			//typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-			typedef psimag::Matrix<ComplexType> ComplexMatrixType;
+			typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 			typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 			typedef typename BasisWithOperatorsType::BasisType BasisType;

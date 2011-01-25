@@ -173,7 +173,7 @@ namespace Dmrg {
 		friend std::ostream &operator<<(std::ostream &s,BlockMatrix<S,MatrixInBlockTemplate2> const &A);
 		
 		template<typename S,typename Field,typename ConcurrencyTemplate>
-		friend void diagonalise(BlockMatrix<S,psimag::Matrix<S> >  &C,std::vector<Field> &eigs,char option,ConcurrencyTemplate &concurrency);
+		friend void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,std::vector<Field> &eigs,char option,ConcurrencyTemplate &concurrency);
 		
 	private:
 		int rank_; //the rank of this matrix
@@ -189,7 +189,7 @@ namespace Dmrg {
 		for (size_t m=0;m<A.blocks();m++) {
 			int nrank = A.offsets(m+1)-A.offsets(m);
 			s<<"block number "<<m<<" has rank "<<nrank<<"\n";
-			A.data_[m].print(s);
+			s<<A.data_[m];
 		}
 		return s;
 	}
@@ -234,7 +234,7 @@ namespace Dmrg {
 
 	//! Parallel version of the diagonalization of a block diagonal matrix
 	template<typename S,typename Field,typename ConcurrencyTemplate>
-	void diagonalise(BlockMatrix<S,psimag::Matrix<S> >  &C,std::vector<Field> &eigs,char option,ConcurrencyTemplate &concurrency)
+	void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,std::vector<Field> &eigs,char option,ConcurrencyTemplate &concurrency)
 	{
 		std::vector<Field> eigsTmp;
 		std::vector<std::vector<Field> > eigsForGather;
@@ -253,7 +253,7 @@ namespace Dmrg {
 		
 		while(concurrency.loop(m)) {
 			utils::diag(C.data_[m],eigsTmp,option);
-			psimag::enforcePhase(C.data_[m]);
+			utils::enforcePhase(C.data_[m]);
 			for (int j=C.offsets(m);j< C.offsets(m+1);j++) eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
 		}
 		
@@ -282,11 +282,11 @@ namespace Dmrg {
 	}
 
 	template<class S>
-	void blockMatrixToFullMatrix(psimag::Matrix<S> &fm,BlockMatrix<S,psimag::Matrix<S> > const &B)
+	void blockMatrixToFullMatrix(PsimagLite::Matrix<S> &fm,BlockMatrix<S,PsimagLite::Matrix<S> > const &B)
 	{
 		int n = B.rank();
 		int i,j;
-		fm.resize(n,n);
+		fm.reset(n,n);
 		for (j=0;j<n;j++) for (i=0;i<n;i++) fm(i,j)=B(i,j);
 	}
 

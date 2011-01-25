@@ -94,7 +94,7 @@ namespace Dmrg {
 			typedef typename OperatorType::PairType PairType;
 			typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type ComplexOrReal;
-			typedef psimag::Matrix<ComplexOrReal> MatrixType;
+			typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
 			template<typename IoInputter>
 			TargetParamsCommon(IoInputter& io,const ModelType& model)
@@ -120,7 +120,7 @@ namespace Dmrg {
 						io.read(v,"COOKED_EXTRA");
 						setCookedData(i,s,v);
 					} else {
-						psimag::Matrix<RealType> m;
+						PsimagLite::Matrix<ComplexOrReal> m;
 						io.readMatrix(m,"RAW_MATRIX");
 						setRawData(i,m);
 					}

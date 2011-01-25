@@ -88,7 +88,7 @@ namespace Dmrg {
 	
 	template<typename RealType,typename GeometryFactoryType>
 	class GeometryDirection {
-			typedef psimag::Matrix<RealType> MatrixType;
+			typedef PsimagLite::Matrix<RealType> MatrixType;
 			enum {NUMBERS,MATRICES};
 
 		public:

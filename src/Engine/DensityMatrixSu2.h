@@ -97,7 +97,7 @@ namespace Dmrg {
 	class DensityMatrixSu2 : public DensityMatrixBase<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType> {
 		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
-		typedef BlockMatrix<DensityMatrixElementType,psimag::Matrix<DensityMatrixElementType> > BlockMatrixType;
+		typedef BlockMatrix<DensityMatrixElementType,PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
 		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
 		
@@ -191,7 +191,7 @@ namespace Dmrg {
 
 				size_t bs = pBasis.partition(m+1)-pBasis.partition(m);
 				
-				matrixBlock.resize(bs,bs);
+				matrixBlock.reset(bs,bs);
 				
 				for (size_t i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
 					for (size_t j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
@@ -253,7 +253,7 @@ namespace Dmrg {
 
 					if (jmPair1.first == jmPair2.first && ne1==ne2) {
 						
-						if (!almostEqual(data_(m),data_(p),1e-5)) {
+						if (!utils::almostEqual(data_(m),data_(p),1e-5)) {
 							std::cerr<<"Checking m="<<m<<" against p="<<p<<"\n";
 							throw std::runtime_error("error\n");
 						}
@@ -339,7 +339,7 @@ namespace Dmrg {
 
 			for (size_t i=0;i<bp1.n_row();i++) {
 				for (size_t j=0;j<bp1.n_col();j++) {
-					RealType x =psimag::norm(bp1(i,j)-bp2(i,j)); 
+					RealType x = std::norm(bp1(i,j)-bp2(i,j));
 					if (x>1e-5) {
 						std::cerr<<bp1(i,j)<<"!="<<bp2(i,j)<<" i="<<i<<" j= "<<j<<"\n";
 						std::cerr<<"difference="<<x<<" p1="<<p1<<" p2="<<p2<<"\n";
@@ -357,9 +357,9 @@ namespace Dmrg {
 		{ 
 			DensityMatrixElementType alpha=1.0,beta=0.0;
 			int n =bp1.n_col();
-			psimag::Matrix<DensityMatrixElementType> result(n,n);
+			PsimagLite::Matrix<DensityMatrixElementType> result(n,n);
 			psimag::BLAS::GEMM('C','N',n,n,n,alpha,&(bp1(0,0)),n,&(bp2(0,0)),n,beta,&(result(0,0)),n);
-			if (!psimag::isTheIdentity<DensityMatrixElementType,RealType>(result)) {
+			if (!utils::isTheIdentity<DensityMatrixElementType,RealType>(result)) {
 				//utils::matrixPrint(result,std::cerr);
 				std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
 				throw std::runtime_error("Density Matrix Check2: failed\n");

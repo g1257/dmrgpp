@@ -99,7 +99,7 @@ for these types. In other words, these are aliases to shorten things later.
 		typedef typename TargettingType::TargetVectorType::value_type
 			DensityMatrixElementType;
 		typedef BlockMatrix<DensityMatrixElementType,
-			psimag::Matrix<DensityMatrixElementType> > BlockMatrixType;
+			PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
 		typedef DensityMatrixLocal<RealType,DmrgBasisType,
 			DmrgBasisWithOperatorsType, TargettingType>

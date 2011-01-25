@@ -193,7 +193,7 @@ namespace Dmrg {
 				//! contribution to Hamiltonian from current system
 				modelHelper.calcHamiltonianPart(matrixBlock,true);
 				matrix = matrixBlock;
-				psimag::Matrix<SparseElementType> fm;
+				PsimagLite::Matrix<SparseElementType> fm;
 				crsMatrixToFullMatrix(fm,matrix);
 				std::vector<RealType> e(matrix.rank());
 				utils::diag(fm,e,'N');

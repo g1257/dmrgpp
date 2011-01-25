@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CRSMATRIX_HEADER_H
 #include "Utils.h"
 #include "Matrix.h" // in psimag
-#include <complex>
+#include "Complex.h"
 
 namespace Dmrg {
 
@@ -155,7 +155,7 @@ namespace Dmrg {
 			for (int i=0;i<values_.size();i++) values_[i]=real(a.getValue(i));
 		}
 
-		CrsMatrix(const psimag::Matrix<T>& a)
+		CrsMatrix(const PsimagLite::Matrix<T>& a)
 		{
 			//int i,j;
 			//int n=a.n_row();
@@ -168,7 +168,7 @@ namespace Dmrg {
 			for (size_t i = 0; i < a.n_row(); i++) {
 				setRow(i,counter);
 				for (size_t j=0;j<a.n_col();j++) {
-					if (psimag::norm(a(i,j))<=eps) continue;
+					if (std::norm(a(i,j))<=eps) continue;
 					pushValue(a(i,j));
 					pushCol(j);
 					counter++;
@@ -691,18 +691,18 @@ namespace Dmrg {
 
 	//! Sets A = B^\dagger * S * B
 	template<class T>
-	inline psimag::Matrix<T> transformFullFast(CrsMatrix<T> const &S,psimag::Matrix<T> const &fmB)
+	inline PsimagLite::Matrix<T> transformFullFast(CrsMatrix<T> const &S,PsimagLite::Matrix<T> const &fmB)
 	{
 		int nBig = S.rank();
 		int nSmall = fmB.n_col();
 		double alpha=1.0;
 		double beta=0.0;
-		psimag::Matrix<T> fmS,fmTmp(nBig,nSmall);
+		PsimagLite::Matrix<T> fmS,fmTmp(nBig,nSmall);
 		
 		crsMatrixToFullMatrix(fmS,S);
 
 		psimag::BLAS::GEMM('N','N',nBig,nSmall,nBig,alpha,&(fmS(0,0)),nBig,&(fmB(0,0)),nBig,beta,&(fmTmp(0,0)),nBig);
-		fmS.resize(nSmall,nSmall);
+		fmS.reset(nSmall,nSmall);
 		psimag::BLAS::GEMM('C','N',nSmall,nSmall,nBig,alpha,&(fmB(0,0)),nBig,&(fmTmp(0,0)),nBig,beta,&(fmS(0,0)),nSmall);
 		return fmS;
 	}
@@ -778,7 +778,7 @@ namespace Dmrg {
 	{
 		for (size_t i=0;i<A.rank();i++) {
 			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-				if (psimag::norm(A.getValue(k)-std::conj(A(A.getCol(k),i)))>1e-6) return false;
+				if (std::norm(A.getValue(k)-std::conj(A(A.getCol(k),i)))>1e-6) return false;
 			}
 		}
 		return true;
@@ -851,13 +851,13 @@ namespace Dmrg {
 	}	
 
 	template<typename T>
-	psimag::Matrix<T> multiplyTc(const CrsMatrix<T>& a,const CrsMatrix<T>& b)
+	PsimagLite::Matrix<T> multiplyTc(const CrsMatrix<T>& a,const CrsMatrix<T>& b)
 	{
 		
 		CrsMatrix<T> bb,c;
 		transposeConjugate(bb,b);
 		multiply(c,a,bb);
-		psimag::Matrix<T> cc;
+		PsimagLite::Matrix<T> cc;
 		crsMatrixToFullMatrix(cc,c);
 		return cc;
 	}

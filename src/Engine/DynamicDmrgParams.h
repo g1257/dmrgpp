@@ -98,7 +98,7 @@ namespace Dmrg {
 		typedef typename OperatorType::PairType PairType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type ComplexOrReal;
-		typedef psimag::Matrix<ComplexOrReal> MatrixType;
+		typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
 		template<typename IoInputter>
 		DynamicDmrgParams(IoInputter& io,const ModelType& model)

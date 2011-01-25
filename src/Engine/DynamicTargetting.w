@@ -118,7 +118,7 @@ typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
 typedef std::vector<ComplexType> ComplexVectorType;
 typedef LanczosSolverTemplate<RealType,InternalProductType,ComplexVectorType> LanczosSolverType;
 //typedef std::vector<RealType> VectorType;
-typedef psimag::Matrix<ComplexType> ComplexMatrixType;
+typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 //typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -186,7 +186,7 @@ const BasisType& basisSE_;
 const ModelType& model_;
 const TargettingParamsType& tstStruct_;
 const WaveFunctionTransformationType& waveFunctionTransformation_;
-ProgressIndicator progress_;
+PsimagLite::ProgressIndicator progress_;
 RealType currentOmega_;
 std::vector<VectorWithOffsetType> targetVectors_;
 std::vector<RealType> weight_;
@@ -760,6 +760,9 @@ RealType minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetTyp
 	size_t counter = 0;
 	while (iter<0 && counter<100) {
 		iter = min.simplex(svReal,delta,tolerance);
+		if (iter>=0) {
+			std::cerr<<"delta="<<delta<<" tolerance="<<tolerance<<"\n";
+		}
 		delta /= 2;
 		tolerance *= 1.2;
 		counter++;
@@ -770,7 +773,7 @@ RealType minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetTyp
 			("DynTargetting::minimizeFunctional(...):No minimum found\n");
 	}
 	wFunctional.packRealToComplex(sv,svReal);
-	return  -wFunctional(svReal)/(M_PI*tstStruct_.eta);
+	return  -wFunctional(svReal)/(M_PI*tstStruct_.eta); // Eq.~(16)
 }
 @}
 

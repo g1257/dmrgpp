@@ -96,8 +96,8 @@ namespace Dmrg {
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		
-		psimag::Matrix<SparseElementType> ws;
-		psimag::Matrix<SparseElementType> we;
+		PsimagLite::Matrix<SparseElementType> ws;
+		PsimagLite::Matrix<SparseElementType> we;
 		typename BasisWithOperatorsType::BasisType pSE;
 		BasisWithOperatorsType pSprime,pEprime;
 		//int m;
@@ -340,7 +340,7 @@ namespace Dmrg {
 		bool firstCall_;
 		PsimagLite::ProgressIndicator progress_;
 		DmrgWaveStructure<BasisWithOperatorsType> dmrgWave_;
-		std::stack<psimag::Matrix<SparseElementType> > wsStack_,weStack_;
+		std::stack<PsimagLite::Matrix<SparseElementType> > wsStack_,weStack_;
 		
 		void beforeWft(const BasisWithOperatorsType& pSprime,
 				  const BasisWithOperatorsType& pEprime,const BasisType& pSE)

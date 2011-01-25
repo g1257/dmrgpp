@@ -103,7 +103,7 @@ namespace Dmrg {
 		typedef MatrixType LanczosMatrixType;
 		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
-		typedef typename psimag::Matrix<VectorElementType> DenseMatrixType;
+		typedef typename PsimagLite::Matrix<VectorElementType> DenseMatrixType;
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 		
 		LanczosSolver(MatrixType const &mat, size_t& max_nstep,RealType eps,
@@ -275,7 +275,7 @@ namespace Dmrg {
   			}
 			if (j < max_nstep) {
 				max_nstep = j + 1;
-				lanczosVectors.resize(mat_.rank(),max_nstep);
+				lanczosVectors.reset(mat_.rank(),max_nstep);
 				ab.resize(max_nstep);
 				for (size_t i = 0; i < mat_.rank(); i++) {
 					lanczosVectors(i,j) = y[i];

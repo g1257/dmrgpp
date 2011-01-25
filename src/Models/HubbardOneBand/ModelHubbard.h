@@ -190,7 +190,7 @@ namespace Dmrg {
 			}
 		}
 
-		psimag::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const
+		PsimagLite::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const
 		{
 			Block block;
 			block.resize(1);
@@ -199,30 +199,30 @@ namespace Dmrg {
 			setOperatorMatrices(creationMatrix,block);
 
 			if (what=="+" or what=="i") {
-				psimag::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[0].data,creationMatrix[1].data);
+				PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[0].data,creationMatrix[1].data);
 				return tmp;
 			} else if (what=="-") {
-				psimag::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[1].data,creationMatrix[0].data);
+				PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[1].data,creationMatrix[0].data);
 				return tmp;
 			} else if (what=="z") {
-				psimag::Matrix<SparseElementType> tmp =multiplyTc(creationMatrix[0].data,creationMatrix[0].data);
-				psimag::Matrix<SparseElementType> tmp2 =multiplyTc(creationMatrix[1].data,creationMatrix[1].data);
+				PsimagLite::Matrix<SparseElementType> tmp =multiplyTc(creationMatrix[0].data,creationMatrix[0].data);
+				PsimagLite::Matrix<SparseElementType> tmp2 =multiplyTc(creationMatrix[1].data,creationMatrix[1].data);
 				return tmp-tmp2;
 			} else if (what=="n") {
-				psimag::Matrix<SparseElementType> tmp =  multiplyTc(creationMatrix[0].data,creationMatrix[0].data)
+				PsimagLite::Matrix<SparseElementType> tmp =  multiplyTc(creationMatrix[0].data,creationMatrix[0].data)
 						+ multiplyTc(creationMatrix[1].data,creationMatrix[1].data);
 				return tmp;
 			} else if (what=="c") {
-				psimag::Matrix<SparseElementType> tmp;
+				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[spin].data);
 				return tmp;
 			} else if (what=="nup") {
-                                psimag::Matrix<SparseElementType> cup = getOperator("c",0,0);
-                                psimag::Matrix<SparseElementType> nup = multiplyTransposeConjugate(cup,cup);
+                                PsimagLite::Matrix<SparseElementType> cup = getOperator("c",0,0);
+                                PsimagLite::Matrix<SparseElementType> nup = utils::multiplyTransposeConjugate(cup,cup);
                                 return nup;
                         } else if (what=="ndown") {
-                                psimag::Matrix<SparseElementType> cdown = getOperator("c",0,1);
-                                psimag::Matrix<SparseElementType> ndown = multiplyTransposeConjugate(cdown,cdown);
+                                PsimagLite::Matrix<SparseElementType> cdown = getOperator("c",0,1);
+                                PsimagLite::Matrix<SparseElementType> ndown = utils::multiplyTransposeConjugate(cdown,cdown);
                                 return ndown;
 			}
 			std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
@@ -336,7 +336,7 @@ namespace Dmrg {
 		{
 			typename HilbertSpaceHubbardType::HilbertState bra,ket;
 			int n = natBasis.size();
-			psimag::Matrix<typename SparseMatrixType::value_type> cm(n,n);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
 			
 			for (size_t ii=0;ii<natBasis.size();ii++) {
 				bra=ket=natBasis[ii];

@@ -81,17 +81,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sys/resource.h>
 #include <stack>
 #include <cassert>
-#include "Matrix.h" // psimag
+#include <map>
+#include <fstream>
+#include "Matrix.h"
+#include "BLAS.h"
+#include "LAPACK.h"
 #include "Sort.h"
+#include "Vector.h"
 
 extern "C" void   zheev_(char *,char *,int *,std::complex<double> *, int *, double *, 
 	std::complex<double> *,int *, double *, int *);
 extern "C" void dsyev_(char *,char *,int *,double *,int *, double *,double *,int *,int *);
 
+
 namespace std {
-	inline double conj(double const &v) { return v; }
-	inline double real(double const &v) { return v; }
-	inline double imag(double const &v) { return 0.0; }
 
 	template<class T1,class T2>
 	ostream &operator<<(std::ostream &os,const pair<T1,T2>& p)
@@ -99,22 +102,6 @@ namespace std {
 		os<<p.first<<" "<<p.second;
 		return os;
 	}
-	template<class X>
-	std::ostream &operator<<(std::ostream &s,std::vector<X> const &v)
-	{
-		s<<v.size()<<"\n";
-		for (size_t i=0;i<v.size();i++) s<<i<<" "<<v[i]<<"\n";
-		return s;
-	}
-	
-	template<class X>
-	inline X operator*(std::vector<X> const &v,std::vector<X> const &w)
-	{
-		X result=0;
-		for (size_t i=0;i<v.size();i++) result += v[i]*conj(w[i]);
-		return result;
-	}
-	
 	
 	template<class X>
 	X norm(std::vector<X> const &v)
@@ -181,20 +168,6 @@ namespace std {
 		std::vector<FieldType2> w = v;
 		for (size_t i=0;i<w.size();i++) w[i] *= value;
 		return w;
-	}
-
-	template<typename FieldType>
-	inline std::vector<FieldType> operator+=(std::vector<FieldType>& v,const std::vector<FieldType>& w)
-	{
-		for (size_t i=0;i<w.size();i++) v[i] += w[i];
-		return v;
-	}
-
-	template<typename FieldType>
-	inline std::vector<FieldType> operator-=(std::vector<FieldType>& v,const std::vector<FieldType>& w)
-	{
-		for (size_t i=0;i<w.size();i++) v[i] -= w[i];
-		return v;
 	}
 
 	template<typename FieldType>
@@ -295,9 +268,9 @@ namespace utils {
 	}
 	
 	template<typename SomeType>
-	void reorder(psimag::Matrix<SomeType>& v,std::vector<size_t> const &permutation)
+	void reorder(PsimagLite::Matrix<SomeType>& v,std::vector<size_t> const &permutation)
 	{
-		psimag::Matrix<SomeType> tmpVector(v.n_row(),v.n_col());
+		PsimagLite::Matrix<SomeType> tmpVector(v.n_row(),v.n_col());
 		for (size_t i=0;i<v.n_row();i++) 
 			for (size_t j=0;j<v.n_col();j++)
 				tmpVector(i,j)=v(permutation[i],permutation[j]); 
@@ -380,7 +353,7 @@ namespace utils {
 	}
 
 	template<class T>
-	void transposeConjugate(psimag::Matrix<T>& m2,const psimag::Matrix<T>& m)
+	void transposeConjugate(PsimagLite::Matrix<T>& m2,const PsimagLite::Matrix<T>& m)
 	{
 		size_t i,j;
 		m2.resize(m.n_row(),m.n_col());
@@ -438,7 +411,7 @@ namespace utils {
 	}
 	
 	template<class T>
-	void matrixPrint(psimag::Matrix<T> const &a,std::ostream &s,char separator='\t')
+	void matrixPrint(PsimagLite::Matrix<T> const &a,std::ostream &s,char separator='\t')
 	{
 		T eps=1e-8;
 		for (size_t i=0;i<a.n_row();i++) {
@@ -461,7 +434,7 @@ namespace utils {
 		}
 	}
 	
-	void diag(psimag::Matrix<double> &m,std::vector<double> &eigs,char option)
+	void diag(PsimagLite::Matrix<double> &m,std::vector<double> &eigs,char option)
 	{
 		char jobz=option;
 		char uplo='U';
@@ -474,7 +447,7 @@ namespace utils {
 		
 		// query:
 		dsyev_(&jobz,&uplo,&n,&(m(0,0)),&lda, &(eigs[0]),&(work[0]),&lwork, &info);
-		lwork = int(std::real(work[0]))+1;
+		lwork = int(work[0])+1;
 		work.resize(lwork+1);	
 		// real work:
 		dsyev_(&jobz,&uplo,&n,&(m(0,0)),&lda, &(eigs[0]),&(work[0]),&lwork, &info);
@@ -485,7 +458,7 @@ namespace utils {
 		
 	}
 	
-	void diag(psimag::Matrix<std::complex<double> > &m,std::vector<double> &eigs,char option)
+	void diag(PsimagLite::Matrix<std::complex<double> > &m,std::vector<double> &eigs,char option)
 	{
 		char jobz=option;
 		char uplo='U';
@@ -513,7 +486,7 @@ namespace utils {
 	template<typename T,typename CrsMatrixType>
 	void diagTest(const CrsMatrixType& m,const std::string& label,bool option=false)
 	{
-		psimag::Matrix<T> fullm;
+		PsimagLite::Matrix<T> fullm;
 		crsMatrixToFullMatrix(fullm,m);
 		
 		std::cerr<<"MAAATRIX"<<label<<" ";
@@ -534,7 +507,7 @@ namespace utils {
 	}
 	
 	template<typename T>
-	bool isZero(const psimag::Matrix<T>& m)
+	bool isZero(const PsimagLite::Matrix<T>& m)
 	{
 		bool eps=1e-5;
 		for (size_t i=0;i<m.n_row();i++)
@@ -544,13 +517,13 @@ namespace utils {
 	}
 	
 	template<typename T>
-	void transform(psimag::Matrix<T>& m,const psimag::Matrix<T>& transform)
+	void transform(PsimagLite::Matrix<T>& m,const PsimagLite::Matrix<T>& transform)
 	{		
 		int nBig = m.n_row();
 		int nSmall = transform.n_col();
 		double alpha=1.0;
 		double beta=0.0;
-		psimag::Matrix<T> fmS,fmTmp;
+		PsimagLite::Matrix<T> fmS,fmTmp;
 		
 		
 		
@@ -566,7 +539,7 @@ namespace utils {
 	
 	//! Sets A = B(i,perm(j)), A and B CRS matrices	
 	template<typename S>
-	void permute(psimag::Matrix<S>& A,const psimag::Matrix<S>& B,const std::vector<size_t>& perm)
+	void permute(PsimagLite::Matrix<S>& A,const PsimagLite::Matrix<S>& B,const std::vector<size_t>& perm)
 	{
 		size_t n = B.n_row();
 		A.resize(n,n);
@@ -580,7 +553,7 @@ namespace utils {
 	
 	//! Sets A = B(perm(i),j), A and B CRS matrices		
 	template<typename S>
-	void permuteInverse(psimag::Matrix<S>& A,const psimag::Matrix<S>& B,const std::vector<size_t>& perm)
+	void permuteInverse(PsimagLite::Matrix<S>& A,const PsimagLite::Matrix<S>& B,const std::vector<size_t>& perm)
 	{
 		size_t n = B.n_row();
 		A.resize(n,n);
@@ -597,7 +570,7 @@ namespace utils {
 	
 	//! swap column i and column j of matrix m
 	template<class Field>
-	void swapMatrix(psimag::Matrix<Field> &m,int i,int j)
+	void swapMatrix(PsimagLite::Matrix<Field> &m,int i,int j)
 	{
 		if (i==j) return;
 		size_t k;
@@ -614,7 +587,7 @@ namespace utils {
 	}
 	
 	template<class Field>
-	void sortTransform(psimag::Matrix<int> &m,std::vector<Field> const &v)
+	void sortTransform(PsimagLite::Matrix<int> &m,std::vector<Field> const &v)
 	{
 		size_t i,j;
 		for (i=0;i<m.n_row();i++) { 
@@ -710,48 +683,19 @@ namespace utils {
 	
 }
 
-
-
-
-namespace psimag {
-	
+namespace utils {
 	
 	template<typename T>
-	void transposeConjugate(psimag::Matrix<T>& dest,const psimag::Matrix<T>& src)
-	{
-		size_t n = src.n_row();
-		if (n!=src.n_col()) throw std::runtime_error("transposeConjugate: only for square matrices\n");
-		dest.resize(n,n);
-		for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++) dest(i,j)=conj(src(j,i));
-	}
-	
-	template<typename T>
-	psimag::Matrix<T> multiplyTransposeConjugate(const psimag::Matrix<T>& O1,const psimag::Matrix<T>& O2,char modifier='C')
+	PsimagLite::Matrix<T> multiplyTransposeConjugate(const PsimagLite::Matrix<T>& O1,const PsimagLite::Matrix<T>& O2,char modifier='C')
 	{
 		size_t n=O1.n_row();
-		psimag::Matrix<T> ret(n,n);
+		PsimagLite::Matrix<T> ret(n,n);
 		if (modifier=='C') {
 			for (size_t s=0;s<n;s++) for (size_t t=0;t<n;t++) for (size_t w=0;w<n;w++) ret(s,t) += conj(O1(w,s))*O2(w,t);
 		} else {
 			for (size_t s=0;s<n;s++) for (size_t t=0;t<n;t++) for (size_t w=0;w<n;w++) ret(s,t) += O1(w,s)*O2(w,t);
 		}
 		return ret;
-	}
-		
-	template<typename T>
-	psimag::Matrix<T> operator+(const psimag::Matrix<T>& a,const psimag::Matrix<T>& b)
-	{
-		psimag::Matrix<T> c(a.n_row(),a.n_col());
-		for (size_t i=0;i<a.n_row();i++) for (size_t j=0;j<a.n_col();j++) c(i,j) = a(i,j) + b(i,j);
-		return c;
-	}
-	
-	template<typename T>
-	psimag::Matrix<T> operator-(const psimag::Matrix<T>& a,const psimag::Matrix<T>& b)
-	{
-		psimag::Matrix<T> c(a.n_row(),a.n_col());
-		for (size_t i=0;i<a.n_row();i++) for (size_t j=0;j<a.n_col();j++) c(i,j) = a(i,j) - b(i,j);
-		return c;
 	}
 	
 	inline double norm(double const &v) { return fabs(v); }
@@ -767,8 +711,8 @@ namespace psimag {
 	{
 		T sign1=0;
 		for (size_t j=0;j<n;j++) {
-			if (psimag::norm(v[j])>1e-6) {
-				if (real(v[j])>0) sign1=1;
+			if (norm(v[j])>1e-6) {
+				if (std::real(v[j])>0) sign1=1;
 				else sign1= -1;
 				break;
 			}
@@ -784,7 +728,7 @@ namespace psimag {
 	}
 	
 	template<typename T>
-	void enforcePhase(psimag::Matrix<T>& a)
+	void enforcePhase(PsimagLite::Matrix<T>& a)
 	{
 		T* vpointer = &(a(0,0));
 		for (size_t i=0;i<a.n_col();i++) 
@@ -792,11 +736,11 @@ namespace psimag {
 	}
 	
 	template<typename T,typename T2>
-	bool almostEqual(const psimag::Matrix<T>& a,const psimag::Matrix<T>& b,const T2& eps)
+	bool almostEqual(const PsimagLite::Matrix<T>& a,const PsimagLite::Matrix<T>& b,const T2& eps)
 	{
 		for (size_t i=0;i<a.n_row();i++) {
 			for (size_t j=0;j<a.n_col();j++) { 
-				if (psimag::norm(a(i,j)-b(i,j))>eps) {
+				if (norm(a(i,j)-b(i,j))>eps) {
 					std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j);
 					std::cerr<<" b("<<i<<","<<j<<")="<<b(i,j)<<"\n";
 					throw std::runtime_error("almostEqual\n");
@@ -807,12 +751,12 @@ namespace psimag {
 	}
 	
 	template<typename T,typename T2>
-	bool isTheIdentity(psimag::Matrix<T> const &a,T2 eps = 1e-7)
+	bool isTheIdentity(PsimagLite::Matrix<T> const &a,T2 eps = 1e-7)
 	{
 		
 		for (size_t i=0;i<a.n_row();i++) { 
 			for (size_t j=0;j<a.n_col();j++) { 
-				if (i!=j && psimag::norm(a(i,j))>eps)  {
+				if (i!=j && norm(a(i,j))>eps)  {
 					std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j)<<"\n";
 					return false;
 				}
@@ -822,30 +766,20 @@ namespace psimag {
 		for (size_t i=0;i<a.n_row();i++) if (norm(a(i,i)-1.0)>eps) return false;
 			 
 		return true;
-	}	
+	}
 	
 	template<typename T>
-	bool isZero(psimag::Matrix<T> const &a,T eps = 1e-7)
+	bool isZero(PsimagLite::Matrix<std::complex<T> > const &a,T eps = 1e-7)
 	{
 		
 		for (size_t i=0;i<a.n_row();i++) 
 			for (size_t j=0;j<a.n_col();j++) 
-				if (psimag::norm(a(i,j))>eps) return false;
+				if (norm(a(i,j))>eps) return false;
 		return true;
 	}	
 	
 	template<typename T>
-	bool isZero(psimag::Matrix<std::complex<T> > const &a,T eps = 1e-7)
-	{
-		
-		for (size_t i=0;i<a.n_row();i++) 
-			for (size_t j=0;j<a.n_col();j++) 
-				if (psimag::norm(a(i,j))>eps) return false;
-		return true;
-	}	
-	
-	template<typename T>
-	void matrixIdentity(psimag::Matrix<T>& identity,size_t n)
+	void matrixIdentity(PsimagLite::Matrix<T>& identity,size_t n)
 	{
 		identity.resize(n,n);
 		for (size_t i=0;i<n;i++) {
@@ -856,14 +790,14 @@ namespace psimag {
 		}
 	}
 	template<typename T>
-	T maxElement(const psimag::Matrix<T>& S)
+	T maxElement(const PsimagLite::Matrix<T>& S)
 	{
 		size_t i0=0;
 		size_t j0=0;
 		T maxe = 0.0;
 		for (size_t i=0;i<S.n_row();i++) {
 			for (size_t j=0;j<S.n_col();j++) {
-				if (psimag::norm(maxe)<psimag::norm(S(i,j))) {
+				if (norm(maxe)<norm(S(i,j))) {
 					maxe = S(i,j);
 					i0 = i;
 					j0 = j;
@@ -875,34 +809,34 @@ namespace psimag {
 	}
 	
 	template<typename T,typename T2>
-	bool isUnitary(const psimag::Matrix<T>& S,const T2& eps)
+	bool isUnitary(const PsimagLite::Matrix<T>& S,const T2& eps)
 	{
 		size_t n = S.n_row();
 		size_t n2 = S.n_col();
 		T zzero = 0.0;
 		T zone = 1.0;
-		psimag::Matrix<T> C(n,n);
+		PsimagLite::Matrix<T> C(n,n);
 		psimag::BLAS::GEMM('N','C',n,n,n2,zone,&(S(0,0)),n,&(S(0,0)),n,zzero,&(C(0,0)),n);
 		for (size_t i=0;i<n;i++) C(i,i) -= 1.0;
 		T maxe = maxElement(C);
-		if (psimag::norm(maxe)<eps) return true;
+		if (norm(maxe)<eps) return true;
 		throw std::runtime_error("isUnitary: false!!\n");
 		return false;
 		
 	}
 	
 	template<typename T>
-	psimag::Matrix<T> transposeConjugate(const psimag::Matrix<T>& A)
+	PsimagLite::Matrix<T> transposeConjugate(const PsimagLite::Matrix<T>& A)
 	{
-		psimag::Matrix<T> ret(A.n_col(),A.n_row());
+		PsimagLite::Matrix<T> ret(A.n_col(),A.n_row());
 		for (size_t i=0;i<A.n_col();i++) for (size_t j=0;j<A.n_row();j++) ret(i,j)=conj(A(j,i));
 		return ret;
 	}
 	
 	template<typename T>
-	psimag::Matrix<T> multiply(const psimag::Matrix<T>& A,const psimag::Matrix<T>& B)
+	PsimagLite::Matrix<T> multiply(const PsimagLite::Matrix<T>& A,const PsimagLite::Matrix<T>& B)
 	{
-		psimag::Matrix<T> ret(A.n_row(),B.n_col());
+		PsimagLite::Matrix<T> ret(A.n_row(),B.n_col());
 		for (size_t i=0;i<A.n_row();i++) {
 			for (size_t j=0;j<B.n_col();j++) {
 				ret(i,j)=0;
@@ -916,14 +850,14 @@ namespace psimag {
 			
 	
 	template<class T>
-	void operator*=(Matrix<T> &A,T const &v)
+	void operator*=(PsimagLite::Matrix<T> &A,T const &v)
 	{
 		int i,j;
 		for (i=0;i<A.n_row();i++) for (j=0;j<A.n_col();j++) A(i,j)*=v;
 	}
 	
 	template<class T>
-	void accumulate(Matrix<T> &A,Matrix<T> const &B)
+	void accumulate(PsimagLite::Matrix<T> &A,PsimagLite::Matrix<T> const &B)
 	{
 		size_t i,j;
 		int nrow = B.n_row();
@@ -933,11 +867,11 @@ namespace psimag {
 	}
 	
 	template<class T>
-	bool isUnitary(Matrix<T> const &A)
+	bool isUnitary(PsimagLite::Matrix<T> const &A)
 	{
 		size_t i,j,k;
 		bool flag;
-		Matrix<T> m(A.n_col(),A.n_col());
+		PsimagLite::Matrix<T> m(A.n_col(),A.n_col());
 		double eps=1e-6;
 		
 		for (i=0;i<A.n_col();i++) {
@@ -969,7 +903,7 @@ namespace psimag {
 	
 	
 	template<class T>
-	void setValue(Matrix<T>  &A,int n,T const &value)
+	void setValue(PsimagLite::Matrix<T>  &A,int n,T const &value)
 	{
 		A.resize(n,n);
 		for (size_t i=0;i<n;i++) A(i,i)=value;
@@ -977,7 +911,7 @@ namespace psimag {
 	}
 	
 	template<class T>
-	int matrixRank(Matrix<T> const &A)
+	int matrixRank(PsimagLite::Matrix<T> const &A)
 	{
 		int n = A.n_row();
 		if (n!=A.n_col()) throw std::runtime_error("matrixRank: matrix must be square.\n");
@@ -985,12 +919,12 @@ namespace psimag {
 	}
 	
 	template<class T>
-	void invert(psimag::Matrix<T> &A)
+	void invert(PsimagLite::Matrix<T> &A)
 	{
 		int n = A.n_row();
 		int info;
 		std::vector<int> ipiv(n);
-		Matrix<T> identity;
+		PsimagLite::Matrix<T> identity;
 		int i,j;
 
 		// the identity
@@ -1002,7 +936,7 @@ namespace psimag {
 			}
 		}
 		// AA^(-1) = I
-		LAPACK::GESV(n,n,&(A(0,0)),n,&(ipiv[0]),&(identity(0,0)),n,info);
+		psimag::LAPACK::GESV(n,n,&(A(0,0)),n,&(ipiv[0]),&(identity(0,0)),n,info);
 		if (info<0) {
 			std::cerr<<"solver Linear: the "<<(-info)<<"-th argument had an illegal value.\n";
 			throw std::runtime_error("psimag::invert\n");
@@ -1019,7 +953,7 @@ namespace psimag {
 	}
 
 	template<class T>
-	void truncate(Matrix<T> &A,std::vector<size_t> const &removed,bool rowOption)
+	void truncate(PsimagLite::Matrix<T> &A,std::vector<size_t> const &removed,bool rowOption)
 	{
 		size_t j;
 		int x=removed.size();
@@ -1046,11 +980,11 @@ namespace psimag {
 			remap[i]=j;
 			j++;
 		}
-		if (j!=n-x) throw std::runtime_error("truncate: psimag::Matrix is throwing...\n");
+		if (j!=n-x) throw std::runtime_error("truncate: PsimagLite::Matrix is throwing...\n");
 		
 		//! truncate
 		if (rowOption) {
-			Matrix<T> B(nrow-x,ncol);
+			PsimagLite::Matrix<T> B(nrow-x,ncol);
 			for (size_t i=0;i<ncol;i++) {
 				for (j=0;j<nrow;j++) {
 					if (remap[j]<0) continue;
@@ -1059,7 +993,7 @@ namespace psimag {
 			}
 			A=B; 
 		} else {
-			Matrix<T> B(nrow,ncol-x);
+			PsimagLite::Matrix<T> B(nrow,ncol-x);
 			for (size_t i=0;i<nrow;i++) {
 				for (j=0;j<ncol;j++) {
 					if (remap[j]<0) continue;
@@ -1075,14 +1009,14 @@ namespace psimag {
 	
 	
 	template<class T>
-	bool isHermitian(Matrix<T> const &A,bool verbose=false)
+	bool isHermitian(PsimagLite::Matrix<T> const &A,bool verbose=false)
 	{
 		size_t n=A.n_row();
 		double eps=1e-6;
 		
 		if (n!=A.n_col()) throw std::runtime_error("isHermitian called on a non-square matrix.\n");
 		for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++) 
-			if (psimag::norm(A(i,j)-conj(A(j,i)))>eps) {
+			if (norm(A(i,j)-conj(A(j,i)))>eps) {
 				if (verbose) std::cerr<<"A("<<i<<","<<j<<")="<<A(i,j)<<" A("<<j<<","<<i<<")="<<A(j,i)<<"\n";
 				return false;
 			}
@@ -1090,7 +1024,7 @@ namespace psimag {
 	}
 	
 	template<class T>
-	void mathematicaPrint(std::ostream& os,Matrix<T> const &a)
+	void mathematicaPrint(std::ostream& os,PsimagLite::Matrix<T> const &a)
 	{
 		
 		os<<"{";
@@ -1109,7 +1043,7 @@ namespace psimag {
 	}
 	
 	
-} //namespace Dmrg
+} //namespace utils
 /*@}*/
 #endif
 

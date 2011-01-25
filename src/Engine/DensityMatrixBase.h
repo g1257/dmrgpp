@@ -96,7 +96,7 @@ namespace Dmrg {
 	class DensityMatrixBase {
 		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
-		typedef BlockMatrix<DensityMatrixElementType,psimag::Matrix<DensityMatrixElementType> > BlockMatrixType;
+		typedef BlockMatrix<DensityMatrixElementType,PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
 		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
 		

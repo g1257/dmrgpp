@@ -94,7 +94,7 @@ namespace Dmrg {
 			typedef typename DmrgBasisType::RealType RealType;
 			typedef typename OperatorType::PairType PairType;
 			typedef ClebschGordanCached<RealType> ClebschGordanType;
-			typedef psimag::Matrix<SparseElementType> DenseMatrixType;
+			typedef PsimagLite::Matrix<SparseElementType> DenseMatrixType;
 			typedef Su2SymmetryGlobals<RealType> Su2SymmetryGlobalsType;
 			
 		public:
@@ -275,7 +275,7 @@ namespace Dmrg {
 
 				int ki = utils::isInVector(momentumOfOperators_,angularMomentum);
 				if (ki<0) throw std::runtime_error("Operator has unknown momentum\n");
-				psimag::Matrix<SparseElementType> B(n,n);
+				PsimagLite::Matrix<SparseElementType> B(n,n);
 				externalProd_(B,basisA,basisB,A,ki,order,fermionSign);
 				fullMatrixToCrsMatrix(reducedOperators_[ind].data,B);
 				reducedOperators_[ind].fermionSign = fermionSign;
@@ -292,12 +292,12 @@ namespace Dmrg {
 				size_t n = thisBasis_->reducedSize();
 				const DmrgBasisType* basisA = &basis2;
 				const DmrgBasisType* basisB = &basis3;
-				psimag::Matrix<SparseElementType> B2(n,n);
+				PsimagLite::Matrix<SparseElementType> B2(n,n);
 				externalProd_(B2,basisA,basisB,h2,-1,true,1);
 
 				basisA = &basis3;
 				basisB = &basis2;
-				psimag::Matrix<SparseElementType> B3(n,n);
+				PsimagLite::Matrix<SparseElementType> B3(n,n);
 				externalProd_(B3,basisA,basisB,h3,-1,false,1);
 
 				B2 += B3;
@@ -355,9 +355,9 @@ namespace Dmrg {
 			std::vector<std::vector<SparseElementType> > lfactorLeft_;
 			std::vector<std::vector<SparseElementType> > lfactorRight_;
 			std::vector<SparseElementType> lfactorHamLeft_,lfactorHamRight_;
-			psimag::Matrix<int> reducedMapping_;
+			PsimagLite::Matrix<int> reducedMapping_;
 			std::vector<std::vector<size_t> > fastBasisLeft_,fastBasisRight_;
-			psimag::Matrix<size_t> flavorIndexCached_;
+			PsimagLite::Matrix<size_t> flavorIndexCached_;
 			DenseMatrixType ftransform_;
 
 			SparseElementType lfactor(int ki,bool order,size_t j1,size_t j2,size_t j1prime,size_t jProd,size_t jProdPrime) const
@@ -403,7 +403,7 @@ namespace Dmrg {
 					if (f>fMax) fMax=f;
 				}
 				fMax++;
-				reducedMapping_.resize(thisBasis_->jMax(),fMax);
+				reducedMapping_.reset(thisBasis_->jMax(),fMax);
 				for (size_t i=0;i<reducedMapping_.n_row();i++) 
 					for (size_t j=0;j<reducedMapping_.n_col();j++)
 						reducedMapping_(i,j)= -1; 
@@ -642,7 +642,7 @@ namespace Dmrg {
 				return true;
 			}
 
-			void externalProd_(psimag::Matrix<SparseElementType>& B,const DmrgBasisType* basisA,
+			void externalProd_(PsimagLite::Matrix<SparseElementType>& B,const DmrgBasisType* basisA,
 					  const DmrgBasisType* basisB,const SparseMatrixType& A,int ki,bool order,int fermionSign)
 			{
 				size_t n = B.n_row();
@@ -749,7 +749,7 @@ namespace Dmrg {
 			void cacheFlavorIndex(const DmrgBasisType& basis2,
 					  const DmrgBasisType& basis3)
 			{
-				flavorIndexCached_.resize(basis2.reducedSize(),basis3.reducedSize());
+				flavorIndexCached_.reset(basis2.reducedSize(),basis3.reducedSize());
 				for (size_t i1=0;i1<basis2.reducedSize();i1++) {
 					size_t ii1 = basis2.reducedIndex(i1);
 					size_t ne1 = basis2.electrons(ii1);
