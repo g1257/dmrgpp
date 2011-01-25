@@ -83,8 +83,8 @@ namespace Dmrg {
 	template<typename DataType>
 	class DiskStack {
 	
-		typedef typename IoSimple::In IoInType;
-		typedef typename IoSimple::Out IoOutType;
+		typedef typename PsimagLite::IoSimple::In IoInType;
+		typedef typename PsimagLite::IoSimple::Out IoOutType;
 
 		public:
 			DiskStack(const std::string &file,bool hasLoad,size_t rank=0) :
@@ -177,7 +177,7 @@ namespace Dmrg {
 			size_t rank_;
 			std::string label_;
 			int total_;
-			ProgressIndicator progress_;
+			PsimagLite::ProgressIndicator progress_;
 			IoInType ioIn_;
 			IoOutType ioOut_;
 			std::stack<int> stack_;

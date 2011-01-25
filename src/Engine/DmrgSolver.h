@@ -236,7 +236,7 @@ namespace Dmrg {
 		MyBasis pSE_;
 		typename IoType::Out io_;
 		typename IoType::In ioIn_;
-		ProgressIndicator progress_;
+		PsimagLite::ProgressIndicator progress_;
 		size_t quantumSector_;
 		int stepCurrent_;
 		CheckpointType checkpoint_;

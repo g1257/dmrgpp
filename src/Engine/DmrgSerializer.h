@@ -109,7 +109,7 @@ namespace Dmrg {
 			{}
 			
 			
-			DmrgSerializer(typename IoSimple::In& io,bool bogus = false) 
+			DmrgSerializer(typename PsimagLite::IoSimple::In& io,bool bogus = false) 
 			: fs_(io,bogus),pS_(io,"",bogus),pE_(io,"",bogus),pSE_(io,"",bogus)
 			{
 				if (bogus) return;

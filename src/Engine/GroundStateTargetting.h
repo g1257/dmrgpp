@@ -201,7 +201,7 @@ namespace Dmrg {
 			const BasisWithOperatorsType& basisE_;
 			const BasisType& basisSE_;
 			const WaveFunctionTransformationType& waveFunctionTransformation_;
-			ProgressIndicator progress_;
+			PsimagLite::ProgressIndicator progress_;
 	};     //class GroundStateTargetting
 } // namespace Dmrg
 /*@}*/

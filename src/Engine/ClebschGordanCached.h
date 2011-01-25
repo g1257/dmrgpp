@@ -182,7 +182,7 @@ namespace Dmrg {
 			}
 			
 			static size_t copies_;
-			ProgressIndicator progress_;
+			PsimagLite::ProgressIndicator progress_;
 			int UNDEFINED_VALUE;
 			size_t jmax_;
 			size_t max2_,max22_;

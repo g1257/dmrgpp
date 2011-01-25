@@ -87,7 +87,7 @@ const VectorType& aVector_;
 RealType omega_;
 RealType E0_;
 RealType eta_;
-ProgressIndicator progress_;
+PsimagLite::ProgressIndicator progress_;
 @}
 
 Now we get to the stack initialization of this object.

@@ -676,7 +676,7 @@ namespace Dmrg {
 			const ModelType& model_;
 			const TargettingParamsType& tstStruct_;
 			const WaveFunctionTransformationType& waveFunctionTransformation_;
-			ProgressIndicator progress_;
+			PsimagLite::ProgressIndicator progress_;
 			RealType currentTime_;
 			std::vector<RealType> times_,weight_;
 			std::vector<VectorWithOffsetType> targetVectors_;

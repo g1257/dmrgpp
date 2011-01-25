@@ -170,7 +170,7 @@ namespace Dmrg {
 		RealType omega_;
 		RealType E0_;
 		RealType eta_;
-		ProgressIndicator progress_;
+		PsimagLite::ProgressIndicator progress_;
 		
 	}; // class DynamicFunctional
 	

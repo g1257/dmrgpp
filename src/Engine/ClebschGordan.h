@@ -227,7 +227,7 @@ namespace Dmrg {
 			
 			static size_t copies_;
 			std::vector<LongType> factorial_;
-			ProgressIndicator progress_;
+			PsimagLite::ProgressIndicator progress_;
 	}; // ClebschGordan
 	
 	template<typename FieldType>

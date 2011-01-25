@@ -338,7 +338,7 @@ namespace Dmrg {
 		size_t counter_;
 		//bool doNextOne_;
 		bool firstCall_;
-		ProgressIndicator progress_;
+		PsimagLite::ProgressIndicator progress_;
 		DmrgWaveStructure<BasisWithOperatorsType> dmrgWave_;
 		std::stack<psimag::Matrix<SparseElementType> > wsStack_,weStack_;
 		

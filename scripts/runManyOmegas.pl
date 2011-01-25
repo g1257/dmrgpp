@@ -7,7 +7,7 @@ my ($n,$step)=@ARGV;
 for (my $i=0;$i<$n;$i++) {
 	my $omega = $i*$step;
 	my $outputFile = runThisOmega($i,$omega);
-	my $x = getResults($outputFile,$i,$omega);
+	my $x = getResults($outputFile,$i,"OMEGA ".$omega);
 	print "$omega $x\n";
 }
 

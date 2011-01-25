@@ -399,7 +399,7 @@ namespace Dmrg {
 				return zero_;
 			}
 			
-			ProgressIndicator progress_;
+			PsimagLite::ProgressIndicator progress_;
 			size_t size_;
 			std::vector<VectorType> data_;
 			std::vector<size_t> offsets_;

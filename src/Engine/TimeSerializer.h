@@ -103,7 +103,7 @@ namespace Dmrg {
 			  targetVectors_(targetVectors)
 			{}
 			
-			TimeSerializer(typename IoSimple::In& io)
+			TimeSerializer(typename PsimagLite::IoSimple::In& io)
 			{
 				RealType x=0;
 				std::string s = "#TIME=";

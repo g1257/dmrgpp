@@ -296,7 +296,7 @@ namespace Dmrg {
 		size_t steps() const {return steps_; }
 		
 	private:
-		ProgressIndicator progress_;
+		PsimagLite::ProgressIndicator progress_;
 		MatrixType const& mat_;
 		size_t steps_;
 		RealType eps_;

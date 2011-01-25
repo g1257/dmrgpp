@@ -323,7 +323,7 @@ typedef double Field;
 typedef PsimagLite::$concurrencyName<MatrixElementType> MyConcurrency;
 typedef $parametersName<MatrixElementType> ParametersModelType;
 typedef Geometry<MatrixElementType> GeometryType;;
-typedef  IoSimple MyIo;
+typedef  PsimagLite::IoSimple MyIo;
 
 template<
 	typename ParametersModelType,
@@ -382,7 +382,7 @@ int main(int argc,char *argv[])
 	MyConcurrency concurrency(argc,argv);
 	
 	//Setup the Geometry
-	typedef IoSimple::In IoInputType;
+	typedef PsimagLite::IoSimple::In IoInputType;
 	IoInputType io(argv[1]);
 	GeometryType geometry(io);
 
@@ -518,7 +518,7 @@ typedef std::complex<RealType> ComplexType;
 $chooseRealOrComplexForObservables
 
 typedef PsimagLite::$concurrencyName<RealType> MyConcurrency;
-typedef  IoSimple MyIo;
+typedef  PsimagLite::IoSimple MyIo;
 
 template<typename ModelType,typename ObserverType,typename SparseMatrixType,
 typename OperatorType,typename TargettingType>
@@ -640,7 +640,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	
 	size_t n=geometry.numberOfSites()/2;
 	bool verbose = false;
-	typedef Observer<FieldType,VectorWithOffsetType,ModelType,IoSimple> 
+	typedef Observer<FieldType,VectorWithOffsetType,ModelType,PsimagLite::IoSimple> 
 		ObserverType;
 	ObserverType observe($obsArg);
 	
@@ -777,7 +777,7 @@ int main(int argc,char *argv[])
 	
 	//Setup the Geometry
 	typedef Geometry<RealType> GeometryType;
-	typedef IoSimple::In IoInputType;
+	typedef PsimagLite::IoSimple::In IoInputType;
 	IoInputType io(argv[1]);
 	GeometryType geometry(io);
 

@@ -88,7 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
-#include "IoSimple.h"
 #include "LinkProductFeAs.h"
 #include "ProgramGlobals.h"
 

@@ -227,7 +227,7 @@ namespace Dmrg {
 
 	private:
 		OperatorsImplementation<OperatorType,BasisType> operatorsImpl_;
-		ProgressIndicator progress_;
+		PsimagLite::ProgressIndicator progress_;
 	}; //class OperatorsBase 
 } // namespace Dmrg
 

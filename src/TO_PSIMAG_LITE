@@ -31,7 +31,7 @@ Engine/TridiagonalMatrix.h
 
 [Profiling]
 *** Profiling.h
-Engine/ProgressIndicator.h
+*** Engine/ProgressIndicator.h
 getTimeDate()
 getrusageForLinux()
 memoryUsage()

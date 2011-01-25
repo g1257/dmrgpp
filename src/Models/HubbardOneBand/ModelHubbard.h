@@ -89,7 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
-#include "IoSimple.h"
 #include "ProgramGlobals.h"
 
 namespace Dmrg {

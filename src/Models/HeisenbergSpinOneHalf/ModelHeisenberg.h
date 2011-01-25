@@ -90,7 +90,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "HilbertSpaceHubbard.h"
 #include "CrsMatrix.h"
 #include "VerySparseMatrix.h"
-#include "IoSimple.h"
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "ProgramGlobals.h"

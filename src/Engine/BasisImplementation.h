@@ -419,7 +419,7 @@ namespace Dmrg {
 	private:
 		bool dmrgTransformed_;
 		std::string name_;
-		ProgressIndicator progress_;
+		PsimagLite::ProgressIndicator progress_;
 		static bool useSu2Symmetry_;
 		std::vector<size_t> quantumNumbers_;
 		std::vector<size_t> quantumNumbersOld_;

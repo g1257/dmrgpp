@@ -327,7 +327,7 @@ namespace Dmrg {
 		const bool& verbose_;
 		const bool& useReflection_;
 		IoOutType& io_;
-		ProgressIndicator progress_;
+		PsimagLite::ProgressIndicator progress_;
 		const size_t& quantumSector_; // this needs to be a reference since DmrgSolver will change it
 		WaveFunctionTransformationType& waveFunctionTransformation_;
 		double oldEnergy_;
