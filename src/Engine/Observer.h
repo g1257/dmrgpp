@@ -95,7 +95,7 @@ namespace Dmrg {
 	class Observer {
 		typedef size_t IndexType;
 		typedef SparseVector<FieldType> VectorType;
-		typedef psimag::Matrix<FieldType> MatrixType;
+		typedef PsimagLite::Matrix<FieldType> MatrixType;
 		typedef typename ModelType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelType::RealType RealType;
 		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,ModelType> ObserverHelperType;
@@ -150,7 +150,7 @@ namespace Dmrg {
 			return false;
 		}
 
-		psimag::Matrix<FieldType> correlations(size_t n,const MatrixType& O1,const MatrixType& O2,int fermionicSign,
+		PsimagLite::Matrix<FieldType> correlations(size_t n,const MatrixType& O1,const MatrixType& O2,int fermionicSign,
 						      size_t n1=0,size_t nf=0)
 		{
 			if (nf==0) nf = 2*n;
@@ -158,7 +158,7 @@ namespace Dmrg {
 			/*clearCache(n1, nf);
 			precomputeGrowth(O1,fermionicSign,n1,nf);*/
 			initCache(O1,n1,nf,fermionicSign);
-			psimag::Matrix<FieldType> w(n,nf);
+			PsimagLite::Matrix<FieldType> w(n,nf);
 			for (size_t i=0;i<n1;i++) {
 				concurrency_.loopCreate(nf);
 				std::vector<FieldType> v(nf);
@@ -317,10 +317,10 @@ namespace Dmrg {
 		template<typename SomeModelType>
 		FieldType fourPointDelta(size_t i,size_t j,const std::vector<size_t>& gammas,const SomeModelType& model)
 		{
-			const psimag::Matrix<FieldType>& opC0 = model.getOperator("c",gammas[0],0); // C_{gamma0,up}
-			const psimag::Matrix<FieldType>& opC1 = model.getOperator("c",gammas[1],1); // C_{gamma1,down}
-			const psimag::Matrix<FieldType>& opC2 = model.getOperator("c",gammas[2],1); // C_{gamma2,down}
-			const psimag::Matrix<FieldType>& opC3 = model.getOperator("c",gammas[3],0); // C_{gamma3,up}
+			const PsimagLite::Matrix<FieldType>& opC0 = model.getOperator("c",gammas[0],0); // C_{gamma0,up}
+			const PsimagLite::Matrix<FieldType>& opC1 = model.getOperator("c",gammas[1],1); // C_{gamma1,down}
+			const PsimagLite::Matrix<FieldType>& opC2 = model.getOperator("c",gammas[2],1); // C_{gamma2,down}
+			const PsimagLite::Matrix<FieldType>& opC3 = model.getOperator("c",gammas[3],0); // C_{gamma3,up}
 
 			//if (i+1>=n-1 || j+1>=n-1) return 0;
 			

@@ -691,7 +691,7 @@ namespace utils {
 		size_t n=O1.n_row();
 		PsimagLite::Matrix<T> ret(n,n);
 		if (modifier=='C') {
-			for (size_t s=0;s<n;s++) for (size_t t=0;t<n;t++) for (size_t w=0;w<n;w++) ret(s,t) += conj(O1(w,s))*O2(w,t);
+			for (size_t s=0;s<n;s++) for (size_t t=0;t<n;t++) for (size_t w=0;w<n;w++) ret(s,t) += std::conj(O1(w,s))*O2(w,t);
 		} else {
 			for (size_t s=0;s<n;s++) for (size_t t=0;t<n;t++) for (size_t w=0;w<n;w++) ret(s,t) += O1(w,s)*O2(w,t);
 		}
@@ -829,7 +829,7 @@ namespace utils {
 	PsimagLite::Matrix<T> transposeConjugate(const PsimagLite::Matrix<T>& A)
 	{
 		PsimagLite::Matrix<T> ret(A.n_col(),A.n_row());
-		for (size_t i=0;i<A.n_col();i++) for (size_t j=0;j<A.n_row();j++) ret(i,j)=conj(A(j,i));
+		for (size_t i=0;i<A.n_col();i++) for (size_t j=0;j<A.n_row();j++) ret(i,j)=std::conj(A(j,i));
 		return ret;
 	}
 	

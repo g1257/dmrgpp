@@ -319,7 +319,7 @@ using namespace Dmrg;
 typedef double Field;
 //typedef std::vector<int> MyBlock;
 //typedef BlockMatrix<MatrixElementType,MySparseMatrix> MySparseBlockMatrix;
-//typedef BlockMatrix<MatrixElementType,psimag::Matrix<MatrixElementType> > MyDenseBlockMatrix;
+//typedef BlockMatrix<MatrixElementType,PsimagLite::Matrix<MatrixElementType> > MyDenseBlockMatrix;
 typedef PsimagLite::$concurrencyName<MatrixElementType> MyConcurrency;
 typedef $parametersName<MatrixElementType> ParametersModelType;
 typedef Geometry<MatrixElementType> GeometryType;;
@@ -655,10 +655,10 @@ EOF
 print OBSOUT<<EOF;
 	// OPERATOR C:
 	if (obsOptions.find("cc")!=std::string::npos) {
-		const psimag::Matrix<FieldType>& opC = model.getOperator("c",0,0); // c_{0,0} spin up
+		const PsimagLite::Matrix<FieldType>& opC = model.getOperator("c",0,0); // c_{0,0} spin up
 		
-		psimag::Matrix<FieldType> opCtranspose = transposeConjugate(opC);
-		const psimag::Matrix<FieldType>& v=observe.correlations(n,opC,opCtranspose,-1);;
+		PsimagLite::Matrix<FieldType> opCtranspose = utils::transposeConjugate(opC);
+		const PsimagLite::Matrix<FieldType>& v=observe.correlations(n,opC,opCtranspose,-1);;
 		if (concurrency.root()) {
 			std::cout<<"OperatorC:\\n";
 			std::cout<<v;
@@ -667,8 +667,8 @@ print OBSOUT<<EOF;
 	
 	// OPERATOR N
 	if (obsOptions.find("nn")!=std::string::npos) {
-		const psimag::Matrix<FieldType>& opN = model.getOperator("n");
-		const psimag::Matrix<FieldType>& v2=observe.correlations(n,opN,opN,1);
+		const PsimagLite::Matrix<FieldType>& opN = model.getOperator("n");
+		const PsimagLite::Matrix<FieldType>& v2=observe.correlations(n,opN,opN,1);
 		if (concurrency.root()) {
 			std::cout<<"OperatorN:\\n";
 			std::cout<<v2;
@@ -679,8 +679,8 @@ EOF
 print OBSOUT<<EOF;
 	// OPERATOR SZ
 	if (obsOptions.find("szsz")!=std::string::npos) {
-		const psimag::Matrix<FieldType>& Sz = model.getOperator("z");
-		const psimag::Matrix<FieldType>& v3=observe.correlations(n,Sz,Sz,1);
+		const PsimagLite::Matrix<FieldType>& Sz = model.getOperator("z");
+		const PsimagLite::Matrix<FieldType>& v3=observe.correlations(n,Sz,Sz,1);
 		if (concurrency.root()) {
 			std::cout<<"OperatorSz:\\n";
 			std::cout<<v3;
@@ -692,10 +692,10 @@ print print OBSOUT<<EOF;
 	// TWO-POINT DELTA-DELTA^DAGGER:
 	if (obsOptions.find("dd")!=std::string::npos && 
 			geometry.label(0).find("ladder")==std::string::npos) {
-		const psimag::Matrix<FieldType>& oDelta = model.getOperator("d");
-		psimag::Matrix<FieldType> oDeltaT;
-		transposeConjugate(oDeltaT,oDelta);
-		const psimag::Matrix<FieldType>& vDelta=observe.correlations(n,oDelta,oDeltaT,1);
+		const PsimagLite::Matrix<FieldType>& oDelta = model.getOperator("d");
+		PsimagLite::Matrix<FieldType> oDeltaT;
+		utils::transposeConjugate(oDeltaT,oDelta);
+		const PsimagLite::Matrix<FieldType>& vDelta=observe.correlations(n,oDelta,oDeltaT,1);
 		if (concurrency.root()) {
 			std::cout<<"DeltaDeltaDagger:\\n";
 			std::cout<<vDelta;
@@ -726,24 +726,24 @@ EOF
 	print print OBSOUT<<EOF;
 		// Heisenberg model: needs formatting and also obsOptions: FIXME
 		// Si^+ Sj^-
-		const psimag::Matrix<FieldType>& sPlus = model.getOperator("+");
-		psimag::Matrix<FieldType> sPlusT = transposeConjugate(sPlus);
-		const psimag::Matrix<FieldType>& v4=observe.correlations(n,sPlus,sPlusT,1);
+		const PsimagLite::Matrix<FieldType>& sPlus = model.getOperator("+");
+		PsimagLite::Matrix<FieldType> sPlusT = utils::transposeConjugate(sPlus);
+		const PsimagLite::Matrix<FieldType>& v4=observe.correlations(n,sPlus,sPlusT,1);
 		if (concurrency.root()) {
 			std::cout<<"OperatorSplus:\\n";
 			std::cout<<v4;
 		}
 	
 		// Si^- Sj^+
-		const psimag::Matrix<FieldType>& sMinus = model.getOperator("-");
-		psimag::Matrix<FieldType> sMinusT = transposeConjugate(sMinus);
-		const psimag::Matrix<FieldType>& v5=observe.correlations(n,sMinus,sMinusT,1);
+		const PsimagLite::Matrix<FieldType>& sMinus = model.getOperator("-");
+		PsimagLite::Matrix<FieldType> sMinusT = utils::transposeConjugate(sMinus);
+		const PsimagLite::Matrix<FieldType>& v5=observe.correlations(n,sMinus,sMinusT,1);
 		if (concurrency.root()) {
 			std::cout<<"OperatorMinus:\\n";
 			std::cout<<v5;
 		}
 	
-		psimag::Matrix<FieldType> spinTotal(v5.n_row(),v5.n_col());
+		PsimagLite::Matrix<FieldType> spinTotal(v5.n_row(),v5.n_col());
 		
 		for (size_t i=0;i<spinTotal.n_row();i++) 
 			for (size_t j=0;j<spinTotal.n_col();j++) spinTotal(i,j) = 0.5*(v4(i,j) +v5(i,j)) + v3(i,j);
