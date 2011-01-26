@@ -198,7 +198,7 @@ namespace Dmrg {
 			}
 		}
 
-		psimag::Matrix<SparseElementType> getOperator(const std::string& what,size_t orbital=0,size_t spin=0) const
+		PsimagLite::Matrix<SparseElementType> getOperator(const std::string& what,size_t orbital=0,size_t spin=0) const
 		{
 			Block block;
 			block.resize(1);
@@ -207,38 +207,38 @@ namespace Dmrg {
 			setOperatorMatrices(creationMatrix,block);
 
 			if (what=="+" or what=="i") {
-				psimag::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[0].data,creationMatrix[2].data);
-				psimag::Matrix<SparseElementType> tmp2 = multiplyTc(creationMatrix[1].data,creationMatrix[3].data);
+				PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[0].data,creationMatrix[2].data);
+				PsimagLite::Matrix<SparseElementType> tmp2 = multiplyTc(creationMatrix[1].data,creationMatrix[3].data);
 				return tmp+tmp2;
 			}
 			if (what=="-") {
-				psimag::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[2].data,creationMatrix[0].data);
-				psimag::Matrix<SparseElementType> tmp2 = multiplyTc(creationMatrix[3].data,creationMatrix[1].data);
+				PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[2].data,creationMatrix[0].data);
+				PsimagLite::Matrix<SparseElementType> tmp2 = multiplyTc(creationMatrix[3].data,creationMatrix[1].data);
 				return tmp+tmp2;
 			}
 			if (what=="z") {
-				psimag::Matrix<SparseElementType> tmp =multiplyTc(creationMatrix[0].data,creationMatrix[0].data)
+				PsimagLite::Matrix<SparseElementType> tmp =multiplyTc(creationMatrix[0].data,creationMatrix[0].data)
 						+ multiplyTc(creationMatrix[1].data,creationMatrix[1].data);
-				psimag::Matrix<SparseElementType> tmp2 =multiplyTc(creationMatrix[2].data,creationMatrix[2].data)
+				PsimagLite::Matrix<SparseElementType> tmp2 =multiplyTc(creationMatrix[2].data,creationMatrix[2].data)
 						+ multiplyTc(creationMatrix[3].data,creationMatrix[3].data);
 				return tmp-tmp2;
 			}
 			if (what=="n") {
-				psimag::Matrix<SparseElementType> tmp =  multiplyTc(creationMatrix[0].data,creationMatrix[0].data)
+				PsimagLite::Matrix<SparseElementType> tmp =  multiplyTc(creationMatrix[0].data,creationMatrix[0].data)
 						+ multiplyTc(creationMatrix[1].data,creationMatrix[1].data)
 				 		+ multiplyTc(creationMatrix[2].data,creationMatrix[2].data)
 						+ multiplyTc(creationMatrix[3].data,creationMatrix[3].data);
 				return tmp;
 			} 
 			if (what=="c") {
-				psimag::Matrix<SparseElementType> tmp;
+				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[orbital + spin*NUMBER_OF_ORBITALS].data);
 				return tmp;
 			}
 			if (what=="d") { // delta = c^\dagger * c^dagger
 				SparseMatrixType atmp;
 				multiply(atmp,creationMatrix[orbital+orbital+NUMBER_OF_ORBITALS].data,creationMatrix[orbital].data);
-				psimag::Matrix<SparseElementType> tmp;
+				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,atmp);
 				return tmp;
 			}
@@ -285,7 +285,7 @@ namespace Dmrg {
 		GeometryType const &geometry_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
-		std::vector<psimag::Matrix<RealType> > pauliMatrix_;
+		std::vector<PsimagLite::Matrix<RealType> > pauliMatrix_;
 
 		//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS 
@@ -327,7 +327,7 @@ namespace Dmrg {
 		{
 			HilbertState bra,ket;
 			int n = natBasis.size();
-			psimag::Matrix<SparseElementType> cm(n,n);
+			PsimagLite::Matrix<SparseElementType> cm(n,n);
 
 			for (size_t ii=0;ii<natBasis.size();ii++) {
 				bra=ket=natBasis[ii];
@@ -444,12 +444,12 @@ namespace Dmrg {
 		//! SU(2) symmetry related block
 		//! Let |9> = |up a down b> and
 		//! Let |6> = |up b down a>  then
-		void reinterpret(psimag::Matrix<SparseElementType>& cm,std::vector<HilbertState>  const &basis) const
+		void reinterpret(PsimagLite::Matrix<SparseElementType>& cm,std::vector<HilbertState>  const &basis) const
 		{
 			int n  = cm.n_row();
 			if (n!=16) throw std::runtime_error("reinterpret (unimplemented case): "
 						"blocks must be of size 1, and basis of size 16\n");
-			psimag::Matrix<SparseElementType> cmCopy(n,n);
+			PsimagLite::Matrix<SparseElementType> cmCopy(n,n);
 			int i,j;
 			int x=utils::isInVector(basis,reinterpretX_);
 			int y=utils::isInVector(basis,reinterpretY_);
@@ -658,7 +658,7 @@ namespace Dmrg {
 
 		void setPauliMatrix()
 		{
-			psimag::Matrix<RealType> matrixTmp(2,2);
+			PsimagLite::Matrix<RealType> matrixTmp(2,2);
 			// x component
 			matrixTmp(0,0)=matrixTmp(1,0)=matrixTmp(0,1)=matrixTmp(1,1)=0;
 			matrixTmp(1,0)=matrixTmp(0,1)=1;
@@ -676,7 +676,7 @@ namespace Dmrg {
 		void diagTest(const SparseMatrixType& fullm,const std::string& str) const
 		{
 			if (fullm.rank()!=256) return;
-			psimag::Matrix<SparseElementType> fullm2;
+			PsimagLite::Matrix<SparseElementType> fullm2;
 			crsMatrixToFullMatrix(fullm2,fullm);
 			std::vector<SparseElementType> eigs(fullm2.n_row());
 			utils::diag(fullm2,eigs,'V');

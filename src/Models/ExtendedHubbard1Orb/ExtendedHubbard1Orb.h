@@ -145,7 +145,7 @@ namespace Dmrg {
 			setNi(creationMatrix,block);
 		}
 
-		psimag::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const
+		PsimagLite::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const
 		{
 			Block block;
 			block.resize(1);
@@ -154,7 +154,7 @@ namespace Dmrg {
 			setOperatorMatrices(creationMatrix,block);
 
 			if (what=="n") {
-				psimag::Matrix<SparseElementType> tmp;
+				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
 				return tmp;
 			} else {
@@ -192,7 +192,7 @@ namespace Dmrg {
 		{
 			
 			size_t n = natBasis.size();
-			psimag::Matrix<typename SparseMatrixType::value_type> cm(n,n);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
 			
 			for (size_t ii=0;ii<natBasis.size();ii++) {
 				typename HilbertSpaceHubbardType::HilbertState ket=natBasis[ii];

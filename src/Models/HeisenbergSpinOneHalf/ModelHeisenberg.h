@@ -199,7 +199,7 @@ namespace Dmrg {
 			}
 		}
 		
-		psimag::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const
+		PsimagLite::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const
 		{
 			Block block;
 			block.resize(1);
@@ -208,16 +208,16 @@ namespace Dmrg {
 			setOperatorMatrices(creationMatrix,block);
 
 			if (what=="+" or what=="i") { // S^+
-				psimag::Matrix<SparseElementType> tmp;
+				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[0].data);
 				return tmp;
 			} else if (what=="-") { // S^-
-				psimag::Matrix<SparseElementType> tmp;
+				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[0].data);
-				transposeConjugate(tmp);
+				utils::transposeConjugate(tmp);
 				return tmp;
 			} else if (what=="z") { // S^z
-				psimag::Matrix<SparseElementType> tmp;
+				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[1].data);
 				return tmp;
 			}
@@ -253,7 +253,7 @@ namespace Dmrg {
 		{
 			HilbertStateType bra,ket;
 			int n = natBasis.size();
-			psimag::Matrix<SparseElementType> cm(n,n);
+			PsimagLite::Matrix<SparseElementType> cm(n,n);
 
 			for (size_t ii=0;ii<natBasis.size();ii++) {
 				bra=ket=natBasis[ii];
@@ -276,7 +276,7 @@ namespace Dmrg {
 		{
 			HilbertStateType bra,ket;
 			int n = natBasis.size();
-			psimag::Matrix<SparseElementType> cm(n,n);
+			PsimagLite::Matrix<SparseElementType> cm(n,n);
 
 			for (size_t ii=0;ii<natBasis.size();ii++) {
 				bra=ket=natBasis[ii];
