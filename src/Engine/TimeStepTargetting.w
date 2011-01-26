@@ -669,7 +669,7 @@ Finally we are ready to $V^\dagger T^dagger \exp(i\epsilon t) TV$ in function \v
 				std::vector<std::vector<RealType> > eigs(phi.sectors());
 						
 				for (size_t ii=0;ii<phi.sectors();ii++) 
-					utils::diag(T[ii],eigs[ii],'V');
+					PsimagLite::diag(T[ii],eigs[ii],'V');
 				
 				calcTargetVectors(phi,T,V,Eg,eigs,steps,systemOrEnviron);
 			}

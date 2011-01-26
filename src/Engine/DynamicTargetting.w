@@ -749,11 +749,11 @@ RealType minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetTyp
 
 	PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
 	std::vector<RealType> svReal(2*sv.size());
-	//wFunctional.packComplexToReal(svReal,sv);
-	for (size_t i=0;i<svReal.size();i++) svReal[i]=drand48();
+	wFunctional.packComplexToReal(svReal,sv);
+	/*for (size_t i=0;i<svReal.size();i++) svReal[i]=drand48();
 	RealType norma = std::norm(svReal);
 	for (size_t i=0;i<svReal.size();i++) svReal[i]/=norma;
-
+*/
 	int iter = -1;
 	RealType delta = 1e-3;
 	RealType tolerance = 1e-3;

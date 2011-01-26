@@ -173,7 +173,7 @@ namespace Dmrg {
 				int nSmall = transform_.n_col();
 				MatrixType fmTmp(nSmall,nBig);
 				typename MatrixType::value_type alpha=1.0,beta=0.0;
-				if (ret.n_row()!=size_t(nSmall) || ret.n_col()!=size_t(nSmall)) ret.resize(nSmall,nSmall);	
+				if (ret.n_row()!=size_t(nSmall) || ret.n_col()!=size_t(nSmall)) ret.reset(nSmall,nSmall);	
 				psimag::BLAS::GEMM('N','N',nBig,nSmall,nBig,alpha,
 						&(O(0,0)),nBig,&(transform_(0,0)),nBig,beta,&(fmTmp(0,0)),nBig);
 				

@@ -679,7 +679,7 @@ namespace Dmrg {
 			PsimagLite::Matrix<SparseElementType> fullm2;
 			crsMatrixToFullMatrix(fullm2,fullm);
 			std::vector<SparseElementType> eigs(fullm2.n_row());
-			utils::diag(fullm2,eigs,'V');
+			PsimagLite::diag(fullm2,eigs,'V');
 			std::cout<<str<<" diagTest size="<<fullm.rank()<<" eigs[0]="<<eigs[0]<<"\n";
 			std::cout<<fullm;
 		}

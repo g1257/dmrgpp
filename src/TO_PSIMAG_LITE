@@ -22,7 +22,7 @@ Engine/DiskStack.h
 Engine/MemoryStack.h
 
 [IO]
-Engine/IoSimple.h
+***Engine/IoSimple.h
 
 [Lanczos]
 --- Engine/LanczosSolver.h 
@@ -38,12 +38,12 @@ memoryUsage()
 
 [LINALG.Vector]
 Engine/Sort.h
-operator*()
-operator*=()
-operator+=()
+*** operator*()
+*** operator*=()
+*** operator+=()
 operator/()
 operator==()
-norm()
+*** norm()
 reverse()
 operator!=()
 truncate()
@@ -63,19 +63,19 @@ Engine/BlockMatrix.h
 reorder()
 transposeConjugate()
 operator<<()
-diag()
+*** diag()
 isZero()
 similarityTransform()
-BLAS.h
-LAPACK.h
+*** BLAS.h
+*** LAPACK.h
 ^^^ Vector.h
---- Matrix.h (needs rewrite)
+*** Matrix.h
 
 [std.complex]
 for doubles and floats:
-conj()
-real()
-imag()
+*** conj()
+*** real()
+*** imag()
 
 [std.pair]
 operator<<()
