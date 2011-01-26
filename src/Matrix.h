@@ -106,11 +106,12 @@ namespace PsimagLite {
 	std::istream& operator >> (std::istream& is, Matrix<T>& A)
 	{
 		size_t nrow=0,ncol=0;
-		is >> nrow >> ncol;
+		is >> nrow;
+		is >> ncol;
 		if(is) {
 			A.reset(nrow,ncol);
-			for (size_t j=0; j<A.n_col(); j++) for (size_t i=0; i<A.n_row(); i++) {
-				is >> A(i,j);
+			for (size_t j=0; j<A.n_row(); j++) for (size_t i=0; i<A.n_col(); i++) {
+				is >> A(j,i);
 			}
 		}
 		if(!is) {
