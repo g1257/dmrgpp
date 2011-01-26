@@ -196,14 +196,14 @@ namespace Dmrg {
 				PsimagLite::Matrix<SparseElementType> fm;
 				crsMatrixToFullMatrix(fm,matrix);
 				std::vector<RealType> e(matrix.rank());
-				utils::diag(fm,e,'N');
+				PsimagLite::diag(fm,e,'N');
 				std::cerr<<"eSystem[0]="<<e[0]<<"\n";
 	
 				//! contribution to Hamiltonian from current envirnoment
 				modelHelper.calcHamiltonianPart(matrixBlock,false);
 				matrix += matrixBlock;
 				crsMatrixToFullMatrix(fm,matrixBlock);
-				utils::diag(fm,e,'N');
+				PsimagLite::diag(fm,e,'N');
 				std::cerr<<"eEnv[0]="<<e[0]<<"\n";
 				matrixBlock.clear();
 	

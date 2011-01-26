@@ -450,7 +450,7 @@ namespace Dmrg {
 			std::cerr<<"----------------\n";
 
 			std::vector<RealType> eigs(a.n_row());
-			utils::diag(a,eigs,'V');
+			PsimagLite::diag(a,eigs,'V');
 			for (size_t i=0;i<a.n_row();i++) std::cerr<<a(i,0)<<" ";
 			std::cerr<<"\n";
 			std::cerr<<"--------------------------------\n";

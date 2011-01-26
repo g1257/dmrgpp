@@ -276,7 +276,7 @@ namespace Dmrg {
 				if (utils::isZero(fullm2)) std::cerr<<"Matrix is zero\n";
 				std::cerr<<fullm2;
 				std::vector<RealType> eigs(fullm2.n_row());
-				utils::diag(fullm2,eigs,'V');
+				PsimagLite::diag(fullm2,eigs,'V');
 				std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
 				if (parameters_.options.find("test")!=std::string::npos)
 					throw std::logic_error("Exiting due to option test in the input file\n");

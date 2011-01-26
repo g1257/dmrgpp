@@ -252,7 +252,7 @@ namespace Dmrg {
 		concurrency.loopCreate(C.blocks(),weights);
 		
 		while(concurrency.loop(m)) {
-			utils::diag(C.data_[m],eigsTmp,option);
+			PsimagLite::diag(C.data_[m],eigsTmp,option);
 			utils::enforcePhase(C.data_[m]);
 			for (int j=C.offsets(m);j< C.offsets(m+1);j++) eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
 		}

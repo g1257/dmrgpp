@@ -950,11 +950,11 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 				VectorWithOffsetType dest;
 				OperatorType A = tstStruct_.aOperators[0];
 				CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
-				/*CrsMatrix<ComplexType> tmpCt;
+				CrsMatrix<ComplexType> tmpCt;
 				transposeConjugate(tmpCt,tmpC);
-				multiply(A.data,tmpCt,tmpC);*/
-				A.fermionSign = -1;
-				A.data = tmpC;
+				multiply(A.data,tmpCt,tmpC);
+				A.fermionSign = 1;
+				//A.data = tmpC;
 				FermionSign fs(basisS_,tstStruct_.electrons);
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 

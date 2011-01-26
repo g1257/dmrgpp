@@ -205,7 +205,7 @@ print FOUT<<EOF;
 # MPI: $mpi
 
 LDFLAGS =    $lapack  $gslLibs $pthreadsLib
-CPPFLAGS = -Werror -Wall -I../PartialPsimag -IEngine -I$modelLocation -IGeometries -I$PsimagLite
+CPPFLAGS = -Werror -Wall  -IEngine -I$modelLocation -IGeometries -I$PsimagLite
 EOF
 if ($mpi) {
 	print FOUT "CXX = mpicxx -O2 -DNDEBUG \n";

@@ -89,11 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h"
 #include "Vector.h"
 
-extern "C" void   zheev_(char *,char *,int *,std::complex<double> *, int *, double *, 
-	std::complex<double> *,int *, double *, int *);
-extern "C" void dsyev_(char *,char *,int *,double *,int *, double *,double *,int *,int *);
-
-
 namespace std {
 
 	template<class T1,class T2>
@@ -432,78 +427,6 @@ namespace utils {
 			for (int j=0;j<a.getSize();j++) s<<a(i,j)<<"\t";
 			s<<"\n";
 		}
-	}
-	
-	void diag(PsimagLite::Matrix<double> &m,std::vector<double> &eigs,char option)
-	{
-		char jobz=option;
-		char uplo='U';
-		int n=m.n_row();
-		int lda=m.n_col();
-		std::vector<double> work(3);
-		int info,lwork= -1;
-		
-		eigs.resize(n);
-		
-		// query:
-		dsyev_(&jobz,&uplo,&n,&(m(0,0)),&lda, &(eigs[0]),&(work[0]),&lwork, &info);
-		lwork = int(work[0])+1;
-		work.resize(lwork+1);	
-		// real work:
-		dsyev_(&jobz,&uplo,&n,&(m(0,0)),&lda, &(eigs[0]),&(work[0]),&lwork, &info);
-		if (info!=0) {
-			std::cerr<<"info="<<info<<"\n";
-			throw std::runtime_error("diag: dsyev_: failed with info!=0.\n");
-		}	
-		
-	}
-	
-	void diag(PsimagLite::Matrix<std::complex<double> > &m,std::vector<double> &eigs,char option)
-	{
-		char jobz=option;
-		char uplo='U';
-		int n=m.n_row();
-		int lda=m.n_col();
-		std::vector<std::complex<double> > work(3);
-		std::vector<double> rwork(3*n);
-		int info,lwork= -1;
-		
-		eigs.resize(n);
-		
-		// query:
-		zheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
-		lwork = int(real(work[0]))+1;
-		work.resize(lwork+1);	
-		// real work:
-		zheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
-		if (info!=0) {
-			std::cerr<<"info="<<info<<"\n";
-			throw std::runtime_error("diag: zheev: failed with info!=0.\n");
-		}	
-		
-	}
-	
-	template<typename T,typename CrsMatrixType>
-	void diagTest(const CrsMatrixType& m,const std::string& label,bool option=false)
-	{
-		PsimagLite::Matrix<T> fullm;
-		crsMatrixToFullMatrix(fullm,m);
-		
-		std::cerr<<"MAAATRIX"<<label<<" ";
-		for (size_t i=0;i<fullm.n_col();i++) 
-			std::cerr<<fullm(0,i)<<" ";
-		std::cerr<<"\n";			
-		std::vector<T> eigs(fullm.n_row());
-		utils::diag(fullm,eigs,'V');
-		std::cerr<<label<<" eigs[0]="<<eigs[0]<<"\n";
-					
-		
-		
-		if (!option) return;
-		std::cout<<"MAAAAAAAAAAAATRIX\n";
-		mathematicaPrint(std::cout,fullm);
-		std::cout<<"---------------------\n";
-					
 	}
 	
 	template<typename T>
