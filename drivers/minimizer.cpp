@@ -1,5 +1,6 @@
 
 #include "Minimizer.h"
+#include "Square.h"
 
 template<typename T>
 std::ostream& operator<<(std::ostream& os,const std::vector<T>& v)
@@ -22,26 +23,26 @@ public:
 	template<typename SomeVectorType>
 	FieldType operator()(const SomeVectorType &v) const
 	{
-		return (v[0]-2)*(v[0]-2);
+		return square(v[0]-2)+square(v[1]-3);
 	}
-	size_t size() const { return  1; }
+	size_t size() const { return  2; }
 };
 
 
 int main(int argc,char *argv[])
 {
-	size_t n=1;
+	size_t n=2;
 	std::vector<RealType> x(n);
 	
 	// inital guess:
 	for (size_t i=0;i<n;i++)
-		x[i] = 1.0;
+		x[i] = drand48();
 	
 	size_t maxIter = 100;
 	MyFunctionTest f;
 	Minimizer<RealType,MyFunctionTest> min(f,maxIter);
 
-	int iter = min.simplex(x);
+	int iter = min.simplex(x,1e-3,1e-5);
 	if (iter<0) {
 		std::cout<<"No minimum found\n";
 		return 1;

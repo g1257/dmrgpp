@@ -297,7 +297,7 @@ namespace PsimagLite {
 		}
 		
 		template<typename T>
-		void gather(std::vector<psimag::Matrix<T> > &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
+		void gather(std::vector<PsimagLite::Matrix<T> > &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
 		{
 			size_t i;
 

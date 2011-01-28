@@ -156,7 +156,7 @@ namespace PsimagLite {
 	}
 
 	template<>
-	void MpiBroadcast(psimag::Matrix<double> *m,int iproc)
+	void MpiBroadcast(PsimagLite::Matrix<double> *m,int iproc)
 	{
 		int total = m->n_row()*m->n_col();
 		MPI_Bcast(&((*m)(0,0)),total,MPI_DOUBLE,iproc,MPI_COMM_WORLD);
@@ -217,7 +217,7 @@ namespace PsimagLite {
 	}
 	
 	template<>
-	void MpiRecv(psimag::Matrix<double> *m,int iproc,int tag)
+	void MpiRecv(PsimagLite::Matrix<double> *m,int iproc,int tag)
 	{
 		int total = m->n_row()*m->n_col();
 		MPI_Status status;
@@ -273,7 +273,7 @@ namespace PsimagLite {
 	}
 
 
-	inline void MpiSend(psimag::Matrix<double> *m,int iproc,int tag)
+	inline void MpiSend(PsimagLite::Matrix<double> *m,int iproc,int tag)
 	{
 		int total = m->n_row()*m->n_col();
 		MPI_Send(&((*m)(0,0)),total,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
