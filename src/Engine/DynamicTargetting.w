@@ -459,6 +459,7 @@ We'll visit one function at a time. %'
 @<calcDynVectors@>
 @<minimizeFunctional@>
 @<minimizeFunctional2@>
+@<minimizeFunctionalRandom@>
 @<obtainXA@>
 @<obtainXA2@>
 @<guessPhiSectors@>
@@ -695,7 +696,7 @@ ComplexType calcDynVectors(
 {
 	RealType retIm = minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
 	obtainXA(targetVectors_[2],targetVectors_[1],Eg);
-	RealType retRe = -real(targetVectors_[2]*phi)/M_PI; // Eq.~(12a)
+	RealType retRe = 0; //-real(targetVectors_[2]*phi)/M_PI; // Eq.~(12a)
 	targetVectors_[0] = phi;
 	areAllTargetsSensible();
 	return ComplexType(retRe,retIm);
@@ -730,11 +731,37 @@ RealType minimizeFunctional(
 }
 @}
 
-The function computes the minimum of the $W$ functional and returns the complex number $Im[G(\omega+i\eta)]$.
-Note that the return values use (16).
 @d minimizeFunctional2
 @{
 RealType minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType& phi,size_t ind)
+{
+	VectorType svSaved;
+	RealType valueSaved = 1e6;
+	size_t randomDraws = 10;
+	for (size_t i=0;i<randomDraws;i++) {
+		RealType tmp = 0;
+		try {
+			tmp= minimizeFunctionalRandom(sv,Eg,phi,ind);
+			std::cerr<<"Value of minimum for i="<<i<<"is "<<tmp<<"\n";
+		} catch(std::except& e) {
+			continue;
+		}
+		if (tmp<valueSaved) {
+			valueSaved = tmp;
+			svSaved = sv;
+			std::cerr<<"Found new minimum="<<valueSaved<<" for i="<<i<<"\n";
+		}
+	}
+	sv = svSaved;
+	return -valueSaved/(M_PI*tstStruct_.eta); // Eq.~(16)
+}
+@}
+
+The function computes the minimum of the $W$ functional and returns the complex number $Im[G(\omega+i\eta)]$.
+Note that the return values use (16).
+@d minimizeFunctionalRandom
+@{
+RealType minimizeFunctionalRandom(VectorType& sv,RealType Eg,const VectorWithOffsetType& phi,size_t ind)
 {
 	size_t p = basisSE_.findPartitionNumber(phi.offset(ind));
 	typename ModelType::ModelHelperType modelHelper(p,basisSE_,basisS_,basisE_,model_.orbitals());
@@ -749,20 +776,20 @@ RealType minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetTyp
 	PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
 	std::vector<RealType> svReal(sv.size());
 	//wFunctional.packComplexToReal(svReal,sv);
-	for (size_t i=0;i<svReal.size();i++) svReal[i]=drand48();
-	RealType norma = std::norm(svReal);
-	for (size_t i=0;i<svReal.size();i++) svReal[i]/=norma;
+	for (size_t i=0;i<svReal.size();i++) svReal[i]=(0.5-drand48());
+	//RealType norma = std::norm(svReal);
+	//for (size_t i=0;i<svReal.size();i++) svReal[i]/=norma;
 
 	int iter = -1;
 	RealType delta = 0.01;
 	RealType tolerance = 1e-5;
 	size_t counter = 0;
-	while (iter<0 && counter<100) {
+	while (iter<0 && counter<10) {
 		iter = min.simplex(svReal,delta,tolerance);
 		if (iter>=0) {
 			std::cerr<<"delta="<<delta<<" tolerance="<<tolerance<<" counter="<<counter<<"\n";
 		}
-		//delta /= 2;
+		delta /= 1.2;
 		tolerance *= 1.5;
 		counter++;
 	}
@@ -773,7 +800,7 @@ RealType minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetTyp
 	}
 	//wFunctional.packRealToComplex(sv,svReal);
 	sv = svReal;
-	return  -wFunctional(svReal)/(M_PI*tstStruct_.eta); // Eq.~(16)
+	return  wFunctional(svReal);
 }
 @}
 
