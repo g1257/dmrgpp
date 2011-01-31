@@ -22,7 +22,7 @@ Please see full open source license included in file LICENSE.
 use warnings;
 use strict;
 
-my $hasGsl = "no"; # say "no" here to remove GSL dependence
+my $hasGsl = "yes"; # say "no" here to remove GSL dependence
 
 my $mpi=0;
 my $platform="linux";
@@ -429,7 +429,7 @@ int main(int argc,char *argv[])
 		mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 			IoInputType,
 			$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,DynamicTargetting,
-			MySparseMatrixComplex>
+			MySparseMatrixReal>
 			(mp,geometry,dmrgSolverParams,concurrency,io,targetting);
 			return 0;
 	}

@@ -82,8 +82,8 @@ namespace Dmrg {
 	public:
 		
 		typedef RealType FieldType; // see documentation
-		typedef std::complex<RealType> ComplexType;
-		typedef std::vector<ComplexType> VectorComplexType;
+		//typedef std::complex<RealType> ComplexType;
+		//typedef std::vector<ComplexType> VectorComplexType;
 		
 		
 		DynamicFunctional(
@@ -104,64 +104,28 @@ namespace Dmrg {
 		
 		
 
-		template<typename SomeRealVector>
-		void packComplexToReal(SomeRealVector& svReal,const VectorComplexType& sv) const
-		{
-			svReal.resize(sv.size()*2);
-			size_t j = 0;
-			for (size_t i=0;i<sv.size();i++) {
-				svReal[j++] = real(sv[i]);
-				svReal[j++] = imag(sv[i]);
-			}
-		}
-		
-
-		template<typename SomeRealVector>
-		void packRealToComplex(VectorComplexType& sv,const SomeRealVector& svReal) const
-		{
-			sv.resize(svReal.size()/2);
-			size_t j = 0;
-			for (size_t i=0;i<sv.size();i++) {
-				sv[i] = std::complex<RealType>(svReal[j],svReal[j+1]);
-				j += 2;
-			}
-		}
-		
-
 		template<typename SomeVectorType>
 		RealType operator()(const SomeVectorType &v) const
 		{
-			VectorComplexType vC;
-			packRealToComplex(vC,v);
-			VectorComplexType x(vC.size(),0.0);
+			VectorType vC(v.size());
+			for (size_t i=0;i<v.size();i++) vC[i] = v[i];
+			VectorType x(vC.size(),0.0);
 
 			H_.matrixVectorProduct(x,vC); // x += H_ vC
 			RealType sum = utils::square(E0_+omega_) + utils::square(eta_);
-			sum *= real(vC*vC);
-			sum -= 2*(E0_+omega_)*real(x*vC);
-			sum += real(x*x);
+			sum *= std::real(vC*vC);
+			sum -= 2*(E0_+omega_)*std::real(x*vC);
+			sum += std::real(x*x);
 			sum += 2*eta_*std::real(aVector_*vC);
 			//checkProducts(vC,x);
 			return sum;
 		}
 		
 
-		size_t size() const {return 2*H_.rank(); }
+		size_t size() const {return H_.rank(); }
 		
 		
 	private:
-		
-
-		void checkProducts(VectorComplexType& v1,VectorComplexType& v2) const
-		{
-			ComplexType x = v1*v1;
-			ComplexType y = v2*v2;
-			ComplexType z = v2*v1;
-			RealType eps = 1e-6;
-			if (imag(x)>eps) throw std::runtime_error("DynFunctional: Internal Error 1\n");
-			if (imag(y)>eps) throw std::runtime_error("DynFunctional: Internal Error 2\n");
-			if (imag(z)>eps) throw std::runtime_error("DynFunctional: Internal Error 3\n");
-		}
 		
 		
 		

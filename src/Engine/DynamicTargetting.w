@@ -52,6 +52,7 @@ whereas the first one will be stored in the private member \verb|psi_|.
 #include "DynamicDmrgParams.h"
 #include "DynamicFunctional.h"
 #include "Minimizer.h"
+#include "VectorWithOffsets.h"
 
 namespace Dmrg {
 	@<theClassHere@>
@@ -111,23 +112,21 @@ typedef ConcurrencyType_ ConcurrencyType;
 typedef IoType_ IoType;
 typedef typename ModelType::RealType RealType;
 typedef std::complex<RealType> ComplexType;
-typedef InternalProductTemplate<ComplexType,ModelType> InternalProductType;
+typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 typedef typename ModelType::OperatorsType OperatorsType;
 //typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
-typedef std::vector<ComplexType> ComplexVectorType;
-typedef LanczosSolverTemplate<RealType,InternalProductType,ComplexVectorType> LanczosSolverType;
 //typedef std::vector<RealType> VectorType;
-typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
+//typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 //typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 typedef typename BasisWithOperatorsType::BasisType BasisType;
 typedef DynamicDmrgParams<ModelType> TargettingParamsType;
 typedef typename BasisType::BlockType BlockType;
-typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
+typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 typedef typename VectorWithOffsetType::VectorType VectorType;
-typedef ComplexVectorType TargetVectorType;
-typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
+typedef LanczosSolverTemplate<RealType,InternalProductType,VectorType> LanczosSolverType;
+typedef VectorType TargetVectorType;
 typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 @}
@@ -299,7 +298,7 @@ This member function returns the squared norm of dynamic vector number $i$.
 RealType normSquared(size_t i) const
 {
 	// call to mult will conjugate one of the vector
-	return real(multiply(targetVectors_[i],targetVectors_[i]));
+	return std::real(multiply(targetVectors_[i],targetVectors_[i]));
 }
 @}
 
@@ -319,9 +318,9 @@ void setGs(const std::vector<TargetVectorType>& v,
 The functions below returns the $i-$th element of the ground state \verb|psi|.
 @d operatorBracket
 @{
-const ComplexType& operator[](size_t i) const { return psi_[i]; }
+const RealType& operator[](size_t i) const { return psi_[i]; }
 			
-ComplexType& operator[](size_t i) { return psi_[i]; }
+RealType& operator[](size_t i) { return psi_[i]; }
 @}
 
 The function below returns the full ground state vector as a vector with offset:
@@ -426,7 +425,7 @@ void initialGuess(VectorWithOffsetType& v) const
 	for (size_t i=0;i<targetVectors_.size();i++) {
 		waveFunctionTransformation_.setInitialVector(vv[i],
 				targetVectors_[i],basisS_,basisE_,basisSE_);
-		if (norm(vv[i])<1e-6) continue;
+		if (std::norm(vv[i])<1e-6) continue;
 		VectorWithOffsetType w= weight_[i]*vv[i];
 		v += w;
 	}
@@ -571,7 +570,7 @@ msg<<"I'm applying a local operator now";
 progress_.printline(msg,std::cout);
 FermionSign fs(basisS_,tstStruct_.electrons);
 applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
-RealType norma = norm(phiNew);
+RealType norma = std::norm(phiNew);
 if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
 //std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 @}
@@ -605,7 +604,7 @@ void cocoon(ComplexType& val,size_t direction,const BlockType& block) const
 	size_t site = block[0];
 	std::cerr<<"-------------&*&*&* Cocoon output starts\n";
 	test(psi_,psi_,direction,"<PSI|A|PSI>",site);
-	std::cerr<<"OMEGA "<<currentOmega_<<" "<<imag(val)<<" "<<real(val)<<" "<<site<<"\n";
+	std::cerr<<"OMEGA "<<currentOmega_<<" "<<std::imag(val)<<" "<<std::real(val)<<" "<<site<<"\n";
 	for (size_t j=0;j<targetVectors_.size();j++) {
 		std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
 		test(targetVectors_[j],targetVectors_[0],direction,s,site);
@@ -748,23 +747,23 @@ RealType minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetTyp
 	size_t maxIter = 1000;
 
 	PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
-	std::vector<RealType> svReal(2*sv.size());
-	wFunctional.packComplexToReal(svReal,sv);
-	/*for (size_t i=0;i<svReal.size();i++) svReal[i]=drand48();
+	std::vector<RealType> svReal(sv.size());
+	//wFunctional.packComplexToReal(svReal,sv);
+	for (size_t i=0;i<svReal.size();i++) svReal[i]=drand48();
 	RealType norma = std::norm(svReal);
 	for (size_t i=0;i<svReal.size();i++) svReal[i]/=norma;
-*/
+
 	int iter = -1;
-	RealType delta = 1e-3;
-	RealType tolerance = 1e-3;
+	RealType delta = 0.01;
+	RealType tolerance = 1e-5;
 	size_t counter = 0;
 	while (iter<0 && counter<100) {
 		iter = min.simplex(svReal,delta,tolerance);
 		if (iter>=0) {
-			std::cerr<<"delta="<<delta<<" tolerance="<<tolerance<<"\n";
+			std::cerr<<"delta="<<delta<<" tolerance="<<tolerance<<" counter="<<counter<<"\n";
 		}
-		delta /= 2;
-		tolerance *= 1.2;
+		//delta /= 2;
+		tolerance *= 1.5;
 		counter++;
 	}
 	if (iter<0) {
@@ -772,7 +771,8 @@ RealType minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetTyp
 		throw std::runtime_error
 			("DynTargetting::minimizeFunctional(...):No minimum found\n");
 	}
-	wFunctional.packRealToComplex(sv,svReal);
+	//wFunctional.packRealToComplex(sv,svReal);
+	sv = svReal;
 	return  -wFunctional(svReal)/(M_PI*tstStruct_.eta); // Eq.~(16)
 }
 @}
@@ -896,7 +896,7 @@ void test(
 {
 	VectorWithOffsetType dest;
 	OperatorType A = tstStruct_.aOperators[0];
-	CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
+	CrsMatrix<RealType> tmpC(model_.getOperator("c",0,0));
 	/*CrsMatrix<ComplexType> tmpCt;
 				transposeConjugate(tmpCt,tmpC);
 				multiply(A.data,tmpCt,tmpC);*/
@@ -905,7 +905,7 @@ void test(
 	FermionSign fs(basisS_,tstStruct_.electrons);
 	applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
-	ComplexType sum = 0;
+	RealType sum = 0;
 	for (size_t ii=0;ii<dest.sectors();ii++) {
 		size_t i = dest.sector(ii);
 		size_t offset1 = dest.offset(i);
@@ -914,7 +914,7 @@ void test(
 			size_t offset2 = src2.offset(j);
 			if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
 			for (size_t k=0;k<dest.effectiveSize(i);k++)
-				sum+= dest[k+offset1] * conj(src2[k+offset2]);
+				sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
 		}
 	}
 	std::cerr<<site<<" "<<sum<<" "<<" "<<currentOmega_;

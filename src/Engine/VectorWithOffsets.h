@@ -337,7 +337,11 @@ namespace Dmrg {
 			template<typename FieldType2>
 			friend std::complex<FieldType2> multiply(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v1,
 				  const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v2);
-	
+
+			template<typename FieldType2>
+			friend FieldType2 multiply(const Dmrg::VectorWithOffsets<FieldType2>& v1,
+					const Dmrg::VectorWithOffsets<FieldType2>& v2);
+
 			template<typename FieldType2>
 			friend void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
 			
@@ -384,7 +388,7 @@ namespace Dmrg {
 			{
 				double eps = 1e-5;
 				for (size_t i=0;i<v.size();i++)
-					if (fabs(real(v[i]))>eps || fabs(imag(v[i]))>eps) return false;
+					if (fabs(std::real(v[i]))>eps || fabs(std::imag(v[i]))>eps) return false;
 				return true; 
 			}
 			
@@ -473,6 +477,18 @@ namespace Dmrg {
 		return sum;
 	}
 	
+	template<typename FieldType>
+	inline FieldType multiply(const Dmrg::VectorWithOffsets<FieldType>& v1,
+			const Dmrg::VectorWithOffsets<FieldType>& v2)
+	{
+		FieldType sum=0;
+		for (size_t ii=0;ii<v1.nonzeroSectors_.size();ii++) {
+			size_t i = v1.nonzeroSectors_[ii];
+			sum += v1.data_[i]*v2.data_[i]; // call to * will conj()
+		}
+		return sum;
+	}
+
 	//! Isn't this function equal to the prev.? need to check FIXME
 	template<typename FieldType>
 	inline std::complex<FieldType> operator*(
