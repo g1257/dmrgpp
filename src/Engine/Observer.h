@@ -129,6 +129,8 @@ namespace Dmrg {
 
 		size_t site() const { return helper_.site(); }
 
+		bool endOfData() const { return helper_.endOfData(); }
+
 		// return true if
 		// we're at site 1 or n-2
 		bool isAtCorner() const
@@ -149,12 +151,12 @@ namespace Dmrg {
 		PsimagLite::Matrix<FieldType> correlations(size_t n,const MatrixType& O1,const MatrixType& O2,int fermionicSign,
 						      size_t n1=0,size_t nf=0)
 		{
-			if (nf==0) nf = 2*n;
-			if (n1==0) n1 = n;
+			if (nf==0) nf = n;
+			if (n1==0) n1 = n/2;
 			/*clearCache(n1, nf);
 			precomputeGrowth(O1,fermionicSign,n1,nf);*/
 			initCache(O1,n1,nf,fermionicSign);
-			PsimagLite::Matrix<FieldType> w(n,nf);
+			PsimagLite::Matrix<FieldType> w(n1,nf);
 			for (size_t i=0;i<n1;i++) {
 				concurrency_.loopCreate(nf);
 				std::vector<FieldType> v(nf);

@@ -459,7 +459,6 @@ sub createObserverDriver
 	my $modelName = getModelName();
 	my $operatorsName = getOperatorsName();
 	my $chooseRealOrComplexForObservables = "typedef RealType FieldType;\n";
-	my $obsArg = "datafile,0,n,model,concurrency,verbose";
 	if ($targetting=~/timestep/i) {
 		$chooseRealOrComplexForObservables = "typedef ComplexType FieldType;\n";
 	}
@@ -577,60 +576,19 @@ void measureTimeObs(const ModelType& model,ObserverType& observe, size_t numberO
 		}
 	}
 
-}		
-	template<
-	typename ParametersModelType,
-	typename GeometryType,
-	typename ConcurrencyType,
-	typename IoInputType,
-	template<typename,typename,typename,template<typename> class> class ModelTemplate,
-	template<typename,typename,typename> class ModelHelperTemplate,
-	template<typename,typename> class InternalProductTemplate,
-	template<typename> class VectorWithOffsetTemplate,
-	template<template<typename,typename,typename> class,template<typename,typename> class,
-		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
-	typename MySparseMatrix
->
-void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvolution,
-		ConcurrencyType& concurrency, IoInputType& io,const std::string& datafile,
-		const std::string& obsOptions)
-{
-	typedef ReflectionSymmetryEmpty<RealType,MySparseMatrix> ReflectionSymmetryType;
-	typedef Operator<RealType,MySparseMatrix> OperatorType;
-	typedef Basis<RealType,MySparseMatrix> BasisType;
-	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
-	typedef ModelHelperTemplate<OperatorsType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
-	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::$pthreadsName> ModelType;
-	
-	typedef DmrgSolver<
-                        InternalProductTemplate,
-                        DensityMatrix,
-                        ModelType,
-                        MyConcurrency,
-                        MyIo,
-                        WaveFunctionTransformation,
-                        TargettingTemplate,
-                        VectorWithOffsetTemplate
-                > SolverType; // only used for types
-	
-	typedef typename SolverType::TargettingType TargettingType;
-	typedef typename SolverType::WaveFunctionTransformationType WaveFunctionTransformationType;
-	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
-	
-	ModelType model(mp,geometry);
+}
 
-	 //! Read TimeEvolution if applicable:
-	typedef typename SolverType::TargettingType TargettingType;
-	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
-	TargettingParamsType tsp(io,model);
-	
-	size_t n=geometry.numberOfSites();
+template<typename ConcurrencyType,typename VectorWithOffsetType,typename ModelType,typename SparseMatrixType,
+typename OperatorType,typename TargettingType,typename GeometryType>
+bool observeOneFullSweep(size_t offset,const std::string& datafile,
+	const GeometryType& geometry,const ModelType& model,const std::string& obsOptions,
+		bool hasTimeEvolution,ConcurrencyType& concurrency)
+{
 	bool verbose = false;
+	size_t n=geometry.numberOfSites();
 	typedef Observer<FieldType,VectorWithOffsetType,ModelType,PsimagLite::IoSimple> 
 		ObserverType;
-	ObserverType observe($obsArg);
+	ObserverType observe(datafile,offset,n-2,model,concurrency,verbose);
 	
 	if (hasTimeEvolution) {
 		measureTimeObs<ModelType,ObserverType,SparseMatrixType,
@@ -744,6 +702,65 @@ EOF
 EOF
 	}
 	print OBSOUT<<EOF;
+	return observe.endOfData();
+}
+
+	template<
+	typename ParametersModelType,
+	typename GeometryType,
+	typename ConcurrencyType,
+	typename IoInputType,
+	template<typename,typename,typename,template<typename> class> class ModelTemplate,
+	template<typename,typename,typename> class ModelHelperTemplate,
+	template<typename,typename> class InternalProductTemplate,
+	template<typename> class VectorWithOffsetTemplate,
+	template<template<typename,typename,typename> class,template<typename,typename> class,
+		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
+	typename MySparseMatrix
+>
+void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvolution,
+		ConcurrencyType& concurrency, IoInputType& io,const std::string& datafile,
+		const std::string& obsOptions)
+{
+	typedef ReflectionSymmetryEmpty<RealType,MySparseMatrix> ReflectionSymmetryType;
+	typedef Operator<RealType,MySparseMatrix> OperatorType;
+	typedef Basis<RealType,MySparseMatrix> BasisType;
+	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
+	typedef ModelHelperTemplate<OperatorsType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
+	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::$pthreadsName> ModelType;
+	
+	typedef DmrgSolver<
+                        InternalProductTemplate,
+                        DensityMatrix,
+                        ModelType,
+                        MyConcurrency,
+                        MyIo,
+                        WaveFunctionTransformation,
+                        TargettingTemplate,
+                        VectorWithOffsetTemplate
+                > SolverType; // only used for types
+	
+	typedef typename SolverType::TargettingType TargettingType;
+	typedef typename SolverType::WaveFunctionTransformationType WaveFunctionTransformationType;
+	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
+	
+	ModelType model(mp,geometry);
+
+	 //! Read TimeEvolution if applicable:
+	typedef typename SolverType::TargettingType TargettingType;
+	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
+	TargettingParamsType tsp(io,model);
+	
+	size_t offset = 0;
+	size_t n=geometry.numberOfSites();
+	while (true) {
+		if (observeOneFullSweep<ConcurrencyType,VectorWithOffsetType,ModelType,
+			SparseMatrixType,OperatorType,TargettingType,GeometryType>
+			(offset,datafile,geometry,model,obsOptions,hasTimeEvolution,concurrency)) break;
+		offset += (n - 2);
+	}
 }
 
 int main(int argc,char *argv[])

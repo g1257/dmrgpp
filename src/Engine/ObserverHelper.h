@@ -118,16 +118,19 @@ namespace Dmrg {
 				bool verbose)
 			:	filename_(filename),
 				io_(filename),
-				dSerializerV_(1,DmrgSerializerType(io_,true)),
-				timeSerializerV_(nf),
+				dSerializerV_(),//(1,DmrgSerializerType(io_,true)),
+				timeSerializerV_(),//(nf),
 				currentPos_(0),
 				model_(model),
 				verbose_(verbose),
-				bracket_(2,GS_VECTOR)
+				bracket_(2,GS_VECTOR),
+				noMoreData_(false)
 		{
 			std::cerr<<"Observer will use file: "<<filename<<" for DMRG data\n";
 			init(offset,nf);
 		}
+
+		bool endOfData() const { return noMoreData_; }
 
 		void setPointer(size_t pos)
 		{
@@ -245,6 +248,7 @@ namespace Dmrg {
 						std::cerr<<e.what()<<" rethrowing...\n";
 						throw e;
 					}
+					noMoreData_ = true;
 					std::cerr<<"Ignore prev. error, if any. It simply means there's no more data\n";
 					break;
 				}
@@ -317,6 +321,7 @@ namespace Dmrg {
 		const ModelType& model_;
 		bool verbose_;
 		std::vector<size_t> bracket_;
+		bool noMoreData_;
 	};  //ObserverHelper
 
 	template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
