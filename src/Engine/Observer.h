@@ -97,7 +97,7 @@ namespace Dmrg {
 		typedef SparseVector<FieldType> VectorType;
 		typedef typename ModelType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelType::RealType RealType;
-		typedef PsimagLite::Matrix<RealType> MatrixType;
+		typedef PsimagLite::Matrix<FieldType> MatrixType;
 		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,ModelType> ObserverHelperType;
 		typedef CorrelationsSkeleton<ObserverHelperType> CorrelationsSkeletonType;
 		typedef FourPointCorrelations<CorrelationsSkeletonType>  FourPointCorrelationsType;
@@ -177,6 +177,7 @@ namespace Dmrg {
 				concurrency_.gather(v);
 				for (j=i;j<v.size();j++) w(i,j) = v[j];
 			}
+
 			return w;
 		}
 
@@ -342,9 +343,8 @@ namespace Dmrg {
 		{
 			size_t n = O1.n_row();
 			MatrixType O1new=identity(n);
-			//for (size_t s=0;s<n;s++)  O1new(s,s)=static_cast<FieldType>(1.0);
+
 			MatrixType O2new=multiplyTranspose(O1,O2);
-			//for (size_t s=0;s<n;s++) for (size_t t=0;t<n;t++) for (size_t w=0;w<n;w++) O2new(s,t) += conj(O1(w,s))*O2(w,t);
 			if (i==0) return calcCorrelation_(0,1,O2new,O1new,1);
 			return calcCorrelation_(i-1,i,O1new,O2new,1);
 		}
@@ -361,7 +361,7 @@ namespace Dmrg {
 			MatrixType O1m,O2m;
 			skeleton_.createWithModification(O1m,O1,'n');
 			skeleton_.createWithModification(O2m,O2,'n');
-			
+
 			if (j==skeleton_.numberOfSites()-1) {
 				if (i==j-1) {
 					helper_.setPointer(j-2);
@@ -379,7 +379,7 @@ namespace Dmrg {
 			size_t ns = j-1;
 			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns);
 			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);
-			
+
 			return skeleton_.bracket(O2g);
 		}
 

@@ -635,9 +635,9 @@ EOF
 print OBSOUT<<EOF;
 	// OPERATOR C:
 	if (obsOptions.find("cc")!=std::string::npos) {
-		PsimagLite::Matrix<RealType> opC = model.getOperator("c",0,0); // c_{0,0} spin up
-		
-		PsimagLite::Matrix<RealType> opCtranspose = utils::transposeConjugate(opC);
+		PsimagLite::Matrix<RealType> opC1 = model.getOperator("c",0,0); // c_{0,0} spin up
+		PsimagLite::Matrix<FieldType> opC = opC1;	
+		PsimagLite::Matrix<FieldType> opCtranspose = utils::transposeConjugate(opC1);
 		const PsimagLite::Matrix<FieldType>& v=observe.correlations(n,opC,opCtranspose,-1);;
 		if (concurrency.root()) {
 			std::cout<<"OperatorC:\\n";
@@ -647,7 +647,8 @@ print OBSOUT<<EOF;
 	
 	// OPERATOR N
 	if (obsOptions.find("nn")!=std::string::npos) {
-		PsimagLite::Matrix<RealType> opN = model.getOperator("n");
+		PsimagLite::Matrix<RealType> opN1 = model.getOperator("n");
+		PsimagLite::Matrix<FieldType> opN = opN1;
 		const PsimagLite::Matrix<FieldType>& v2=observe.correlations(n,opN,opN,1);
 		if (concurrency.root()) {
 			std::cout<<"OperatorN:\\n";
@@ -659,7 +660,8 @@ EOF
 print OBSOUT<<EOF;
 	// OPERATOR SZ
 	if (obsOptions.find("szsz")!=std::string::npos) {
-		PsimagLite::Matrix<RealType> Sz = model.getOperator("z");
+		PsimagLite::Matrix<RealType> Sz1 = model.getOperator("z");
+		PsimagLite::Matrix<FieldType> Sz = Sz1;
 		const PsimagLite::Matrix<FieldType>& v3=observe.correlations(n,Sz,Sz,1);
 		if (concurrency.root()) {
 			std::cout<<"OperatorSz:\\n";
