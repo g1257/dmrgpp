@@ -95,9 +95,9 @@ namespace Dmrg {
 	class Observer {
 		typedef size_t IndexType;
 		typedef SparseVector<FieldType> VectorType;
-		typedef PsimagLite::Matrix<FieldType> MatrixType;
 		typedef typename ModelType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelType::RealType RealType;
+		typedef PsimagLite::Matrix<RealType> MatrixType;
 		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,ModelType> ObserverHelperType;
 		typedef CorrelationsSkeleton<ObserverHelperType> CorrelationsSkeletonType;
 		typedef FourPointCorrelations<CorrelationsSkeletonType>  FourPointCorrelationsType;
@@ -386,7 +386,7 @@ namespace Dmrg {
 		MatrixType identity(size_t n)
 		{
 			MatrixType ret(n,n);
-			for (size_t s=0;s<n;s++)  ret(s,s)=static_cast<FieldType>(1.0);	
+			for (size_t s=0;s<n;s++)  ret(s,s)=static_cast<RealType>(1.0);
 			return ret;
 		}
 

@@ -191,13 +191,13 @@ namespace Dmrg {
 		}
 
 		// Perfomance critical:
-		FieldType fluffUp(const MatrixType& O,size_t e,size_t e2,int fermionicSign,
+		RealType fluffUp(const MatrixType& O,size_t e,size_t e2,int fermionicSign,
 					  int growOption=GROW_RIGHT)	
 		{
 			
 			size_t n = O.n_row();
 			size_t m = size_t(helper_.basisS().size()/n);
-			FieldType sign = static_cast<FieldType>(1.0);
+			RealType sign = static_cast<RealType>(1.0);
 			
 			// Sperm[e] = i +k*n or e= k + i*m
 			// Sperm[e2] = j+k*n or e2=k+j*m
@@ -212,7 +212,7 @@ namespace Dmrg {
 				utils::getCoordinates(k2,j,helper_.basisS().permutation(e2),m);
 				sign = helper_.fermionicSign()(k,fermionicSign); // signs[k];
 			}
-			FieldType ret=0;
+			RealType ret=0;
 			if (k==k2) ret=O(i,j)*sign;
 			return ret;
 		}
@@ -247,7 +247,7 @@ namespace Dmrg {
 			for (size_t r=0;r<sprime;r++) {
 				size_t e,u;
 				utils::getCoordinates(e,u,helper_.basisS().permutation(r),ni);
-				FieldType f = helper_.fermionicSign()(e,fermionicSign);
+				RealType f = helper_.fermionicSign()(e,fermionicSign);
 				for (size_t e2=0;e2<ni;e2++) {	
 					for (size_t u2=0;u2<nj;u2++) {
 						size_t r2 = helper_.basisS().permutationInverse(e2 + u2*ni);
@@ -307,12 +307,12 @@ namespace Dmrg {
 	private:
 		
 		//template<typename SomeVectorType>
-		FieldType bracket_(const MatrixType& A,const VectorWithOffsetType& vec)
+		RealType bracket_(const MatrixType& A,const VectorWithOffsetType& vec)
 		{
 			RealType norma = std::norm(vec);
 			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
 			
-			CrsMatrix<FieldType> Acrs(A);
+			CrsMatrix<RealType> Acrs(A);
 			FieldType sum=0;
 
 			if (vec.size()!=helper_.basisSE().size()) throw std::runtime_error("Error\n");
@@ -346,8 +346,8 @@ namespace Dmrg {
 
 			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
 
-			CrsMatrix<FieldType> Acrs(A);
-			CrsMatrix<FieldType> Bcrs(B);
+			CrsMatrix<RealType> Acrs(A);
+			CrsMatrix<RealType> Bcrs(B);
 			FieldType sum=0;
 			size_t ni = helper_.basisS().size()/Bcrs.rank(); // = Acrs.rank()
 
@@ -389,7 +389,7 @@ namespace Dmrg {
 			return std::real(sum)/norma;
 		}
 
-		FieldType bracketRightCorner_(
+		RealType bracketRightCorner_(
 				const MatrixType& A1,
 				const MatrixType& A2,
 				const MatrixType& B,
@@ -401,9 +401,9 @@ namespace Dmrg {
 
 			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
 
-			CrsMatrix<FieldType> A1crs(A1);
-			CrsMatrix<FieldType> A2crs(A2);
-			CrsMatrix<FieldType> Bcrs(B);
+			CrsMatrix<RealType> A1crs(A1);
+			CrsMatrix<RealType> A2crs(A2);
+			CrsMatrix<RealType> Bcrs(B);
 			FieldType sum=0;
 			size_t ni = helper_.basisS().size()/Bcrs.rank(); // = Acrs.rank()
 
