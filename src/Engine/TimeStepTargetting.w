@@ -168,7 +168,7 @@ Now let us look at the private data of this class:
 			std::vector<RealType> times_,weight_;
 			std::vector<VectorWithOffsetType> targetVectors_;
 			RealType gsWeight_;
-			typename IoType::Out io_;
+			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
 @}
 
@@ -195,7 +195,8 @@ The \verb|applyLocal| operator described before is also initalized on the stack.
 					progress_("TimeStepTargetting",0),currentTime_(0),
 					times_(tstStruct_.timeSteps),weight_(tstStruct_.timeSteps),
 					targetVectors_(tstStruct_.timeSteps),
-					io_(tstStruct_.filename,parallelRank_),applyOpLocal_(basisS,basisE,basisSE)
+					//io_(tstStruct_.filename,parallelRank_),
+					applyOpLocal_(basisS,basisE,basisSE)
 @}
 
 The body of the constructor follows:
@@ -224,7 +225,7 @@ The body of the constructor follows:
 				sum += gsWeight_;
 				//for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
 				if (fabs(sum-1.0)>1e-5) throw std::runtime_error("Weights don't amount to one\n");
-				printHeader();
+				//printHeader();
 			}
 @}
 
@@ -324,8 +325,7 @@ Returns the full time vector number $i$ as a vector with offsets:
 This function provides a hook to (possibly) start the computation of
 time-evolution. Five arguments are passed. First $Eg$, the ground state energy,
 then the \verb|direction| of expansion (system or environment), then the \verb|block|
-being currently grown or shrunk, then the \verb|loopNumber| of the finite algorithm,
-and finally a flag \verb|needsPrinting| 
+being currently grown or shrunk, then the \verb|loopNumber| of the finite algorithm.
 that indicates if time-vectors need to be printed to disk for post-processing or not.
 
 Here the main work is done two functions,  a different function \verb|evolve|
@@ -339,7 +339,7 @@ in order of appearance.
 @o TimeStepTargetting.h -t
 @{
 			void evolve(RealType Eg,size_t direction,const BlockType& block,
-				size_t loopNumber, bool needsPrinting)
+				size_t loopNumber)
 			{
 				size_t count =0;
 				VectorWithOffsetType phiOld = psi_;
@@ -357,18 +357,18 @@ in order of appearance.
 				
 				if (count==0) {
 					// always print to keep observer driver in sync
-					if (needsPrinting) {
-						zeroOutVectors();
-						printVectors(block);
-					}
-					return;
+//					if (needsPrinting) {
+//						zeroOutVectors();
+//						printVectors(block);
+//					}
+//					return;
 				}
 				
 				calcTimeVectors(Eg,phiNew,direction);
 				
 				cocoon(direction,block); // in-situ
 				
-				if (needsPrinting) printVectors(block); // for post-processing
+				//if (needsPrinting) printVectors(block); // for post-processing
 			}
 
 			@<load@>
@@ -548,7 +548,22 @@ or the environment objects, or rather, the references held by this class.
 
 			const BasisWithOperatorsType& basisE() const { return basisE_; }
 @}
-			
+
+The function below prints all target vectors to disk, using the \verb|TimeSerializer| class.
+@o TimeStepTargetting.h -t
+@{
+
+			template<typename IoOutputType>
+			void save(const std::vector<size_t>& block,IoOutputType& io) const
+			{
+				if (block.size()!=1) throw std::runtime_error(
+					"TST only supports blocks of size 1\n");
+
+				TimeSerializerType ts(currentTime_,block[0],targetVectors_);
+				ts.save(io);
+			}
+@}
+
 What remains are private (i.e. non-exported) code used only by this class.
 We'll visit one function at a time. %'
 
@@ -567,7 +582,7 @@ This is done only for debugging purposes, and uses the function \verb|test|.
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
-					test(targetVectors_[j],psi_,direction,s,site);
+					test(targetVectors_[j],targetVectors_[j],direction,s,site);
 				}
 				std::cerr<<"-------------&*&*&* Cocoon output ends\n";
 			}
@@ -910,32 +925,20 @@ The function below makes all target vectors empty:
 					targetVectors_[i].resize(basisSE_.size());
 			}
 @}
-The function below prints all target vectors to disk, using the \verb|TimeSerializer| class.
-@o TimeStepTargetting.h -t
-@{
-			void printVectors(const std::vector<size_t>& block)
-			{
-				if (block.size()!=1) throw std::runtime_error(
-					"TST only supports blocks of size 1\n");
-				
-				TimeSerializerType ts(currentTime_,block[0],targetVectors_);
-				ts.save(io_);
-			}
-@}
 
 Print header to disk to index the time vectors. This indexing wil lbe used at postprocessing.
 @o TimeStepTargetting.h -t
 @{
-			void printHeader()
-			{
-				io_.print(tstStruct_);
-				std::string label = "times";
-				io_.printVector(times_,label);
-				label = "weights";
-				io_.printVector(weight_,label);
-				std::string s = "GsWeight="+utils::ttos(gsWeight_);
-				io_.printline(s);
-			}
+//			void printHeader()
+//			{
+//				io_.print(tstStruct_);
+//				std::string label = "times";
+//				io_.printVector(times_,label);
+//				label = "weights";
+//				io_.printVector(weight_,label);
+//				std::string s = "GsWeight="+utils::ttos(gsWeight_);
+//				io_.printline(s);
+//			}
 @}
 
 The \verb|test| function below performs a measurement \emph{in situ}.

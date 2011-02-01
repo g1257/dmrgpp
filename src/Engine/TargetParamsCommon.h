@@ -98,10 +98,10 @@ namespace Dmrg {
 
 			template<typename IoInputter>
 			TargetParamsCommon(IoInputter& io,const ModelType& model)
-				: filename("tst.txt"),sites(0),startingLoops(0),model_(model)
+				: sites(0),startingLoops(0),model_(model)
 			{
 
-				io.readline(filename,"TSPFilename="); // filename
+				//io.readline(filename,"TSPFilename="); // filename
 				io.read(sites,"TSPSites");
 				io.read(startingLoops,"TSPLoops");
 			
@@ -143,7 +143,7 @@ namespace Dmrg {
 			}
 			
 			// I know, there is public data here FIXME!!
-			std::string filename;
+			//std::string filename;
 			std::vector<size_t> sites;
 			std::vector<size_t> startingLoops;
 			std::vector<OperatorType> aOperators;
@@ -181,7 +181,7 @@ namespace Dmrg {
 		os<<t.electrons;
 		os<<"#TargetParams.site="<<t.sites;
 		os<<"#TargetParams.startingLoop="<<t.startingLoops<<"\n";
-		os<<"#TargetParams.filename="<<t.filename<<"\n";
+		//os<<"#TargetParams.filename="<<t.filename<<"\n";
 		return os;
 	}
 } // namespace Dmrg 

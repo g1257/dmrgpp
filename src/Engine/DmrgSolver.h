@@ -429,15 +429,17 @@ namespace Dmrg {
 				checkpoint_.push(pE,CheckpointType::ENVIRON);
 			}
 			
-			if (saveOption==SAVE_TO_DISK) serialize(electronsVector,target.gs(),transform,direction);
+			if (saveOption==SAVE_TO_DISK) serialize(electronsVector,target,transform,direction);
 		}
 
-		void serialize(const std::vector<size_t>& electronsVector,const VectorWithOffsetType& psi,
+		void serialize(const std::vector<size_t>& electronsVector,const TargettingType& target,
 			      const TransformType& transform,size_t direction)
 		{
 			FermionSign fs(electronsVector);
-			DmrgSerializerType ds(fs,pSprime_,pEprime_,pSE_,psi,transform,direction);
+			DmrgSerializerType ds(fs,pSprime_,pEprime_,pSE_,target.gs(),transform,direction);
 			ds.save(io_);
+
+			target.save(sitesIndices_[stepCurrent_],io_);
 		}
 
 		bool finalStep(int stepLength,int stepFinal)

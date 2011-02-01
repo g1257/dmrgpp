@@ -138,7 +138,8 @@ namespace Dmrg {
 					progress_("TimeStepTargetting",0),currentTime_(0),
 					times_(tstStruct_.timeSteps),weight_(tstStruct_.timeSteps),
 					targetVectors_(tstStruct_.timeSteps),
-					io_(tstStruct_.filename,parallelRank_),applyOpLocal_(basisS,basisE,basisSE)
+					//io_(tstStruct_.filename,parallelRank_),
+					applyOpLocal_(basisS,basisE,basisSE)
 
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" TimeStepTargetting "
@@ -163,7 +164,7 @@ namespace Dmrg {
 				sum += gsWeight_;
 				//for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
 				if (fabs(sum-1.0)>1e-5) throw std::runtime_error("Weights don't amount to one\n");
-				printHeader();
+				//printHeader();
 			}
 
 			RealType weight(size_t i) const
@@ -213,7 +214,7 @@ namespace Dmrg {
 			}
 
 			void evolve(RealType Eg,size_t direction,const BlockType& block,
-				size_t loopNumber, bool needsPrinting)
+				size_t loopNumber)
 			{
 				size_t count =0;
 				VectorWithOffsetType phiOld = psi_;
@@ -231,18 +232,18 @@ namespace Dmrg {
 				
 				if (count==0) {
 					// always print to keep observer driver in sync
-					if (needsPrinting) {
-						zeroOutVectors();
-						printVectors(block);
-					}
-					return;
+//					if (needsPrinting) {
+//						zeroOutVectors();
+//						printVectors(block);
+//					}
+//					return;
 				}
 				
 				calcTimeVectors(Eg,phiNew,direction);
 				
 				cocoon(direction,block); // in-situ
 				
-				if (needsPrinting) printVectors(block); // for post-processing
+				//if (needsPrinting) printVectors(block); // for post-processing
 			}
 
 			
@@ -329,6 +330,17 @@ namespace Dmrg {
 
 			const BasisWithOperatorsType& basisE() const { return basisE_; }
 
+
+			template<typename IoOutputType>
+			void save(const std::vector<size_t>& block,IoOutputType& io) const
+			{
+				if (block.size()!=1) throw std::runtime_error(
+					"TST only supports blocks of size 1\n");
+
+				TimeSerializerType ts(currentTime_,block[0],targetVectors_);
+				ts.save(io);
+			}
+
 		private:
 			
 			// in situ computation:
@@ -340,7 +352,7 @@ namespace Dmrg {
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
-					test(targetVectors_[j],psi_,direction,s,site);
+					test(targetVectors_[j],targetVectors_[j],direction,s,site);
 				}
 				std::cerr<<"-------------&*&*&* Cocoon output ends\n";
 			}
@@ -625,25 +637,16 @@ namespace Dmrg {
 					targetVectors_[i].resize(basisSE_.size());
 			}
 
-			void printVectors(const std::vector<size_t>& block)
-			{
-				if (block.size()!=1) throw std::runtime_error(
-					"TST only supports blocks of size 1\n");
-				
-				TimeSerializerType ts(currentTime_,block[0],targetVectors_);
-				ts.save(io_);
-			}
-
-			void printHeader()
-			{
-				io_.print(tstStruct_);
-				std::string label = "times";
-				io_.printVector(times_,label);
-				label = "weights";
-				io_.printVector(weight_,label);
-				std::string s = "GsWeight="+utils::ttos(gsWeight_);
-				io_.printline(s);
-			}
+//			void printHeader()
+//			{
+//				io_.print(tstStruct_);
+//				std::string label = "times";
+//				io_.printVector(times_,label);
+//				label = "weights";
+//				io_.printVector(weight_,label);
+//				std::string s = "GsWeight="+utils::ttos(gsWeight_);
+//				io_.printline(s);
+//			}
 
 			void test(	
 					const VectorWithOffsetType& src1,
@@ -693,7 +696,7 @@ namespace Dmrg {
 			std::vector<RealType> times_,weight_;
 			std::vector<VectorWithOffsetType> targetVectors_;
 			RealType gsWeight_;
-			typename IoType::Out io_;
+			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
 
 	};     //class TimeStepTargetting

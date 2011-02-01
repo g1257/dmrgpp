@@ -190,7 +190,7 @@ RealType currentOmega_;
 std::vector<VectorWithOffsetType> targetVectors_;
 std::vector<RealType> weight_;
 RealType gsWeight_;
-typename IoType::Out io_;
+//typename IoType::Out io_;
 ApplyOperatorType applyOpLocal_;
 @}
 
@@ -226,7 +226,7 @@ progress_("DynamicTargetting",0),
 currentOmega_(tstStruct_.omega),
 targetVectors_(3),
 weight_(targetVectors_.size()),
-io_(tstStruct_.filename,parallelRank_),
+//io_(tstStruct_.filename,parallelRank_),
 applyOpLocal_(basisS,basisE,basisSE)
 @}
 
@@ -246,7 +246,7 @@ The body of the constructor follows:
 	gsWeight_=1.0-sum;
 	sum += gsWeight_;
 	if (fabs(sum-1.0)>1e-5) throw std::runtime_error("Weights don't amount to one\n");
-	printHeader();
+	//printHeader();
 }
 @}
 
@@ -264,6 +264,7 @@ The body of the constructor follows:
 @<evolve@>
 @<initialGuess@>
 @<BasisGetFunctions@>
+@<save@>
 @<load@>
 @}
 
@@ -363,8 +364,7 @@ const VectorWithOffsetType& operator()(size_t i) const
 This function provides a hook to (possibly) start the computation of
 dynamic observables. Five arguments are passed. First $Eg$, the ground state energy,
 then the \verb|direction| of expansion (system or environment), then the \verb|block|
-being currently grown or shrunk, then the \verb|loopNumber| of the finite algorithm,
-and finally a flag \verb|needsPrinting| 
+being currently grown or shrunk, then the \verb|loopNumber| of the finite algorithm.
 that indicates if dyn-vectors need to be printed to disk for post-processing or not.
 
 Here the main work is done two functions,  a different function \verb|evolve|
@@ -375,7 +375,7 @@ in order of appearance.
 @d evolve
 @{
 void evolve(RealType Eg,size_t direction,const BlockType& block,
-		size_t loopNumber, bool needsPrinting)
+		size_t loopNumber)
 {
 	size_t count =0;
 	VectorWithOffsetType phiOld = psi_;
@@ -392,11 +392,11 @@ void evolve(RealType Eg,size_t direction,const BlockType& block,
 	}
 
 	if (count==0) {
-		// always print to keep observer driver in sync
-		if (needsPrinting) {
-			zeroOutVectors();
-			printVectors(block);
-		}
+//		// always print to keep observer driver in sync
+//		if (needsPrinting) {
+//			zeroOutVectors();
+//			printVectors(block);
+//		}
 		return;
 	}
 
@@ -404,7 +404,7 @@ void evolve(RealType Eg,size_t direction,const BlockType& block,
 
 	cocoon(val,direction,block); // in-situ
 
-	if (needsPrinting) printVectors(block); // for post-processing
+	//if (needsPrinting) printVectors(block); // for post-processing
 }
 @}
 
@@ -473,7 +473,6 @@ We'll visit one function at a time. %'
 @<obtainXA2@>
 @<guessPhiSectors@>
 @<zeroOutVectors@>
-@<printVectors@>
 @<printHeader@>
 @<test@>
 @<areAllTargetsSensible@>
@@ -891,32 +890,33 @@ void zeroOutVectors()
 }
 @}
 The function below prints all target vectors to disk, using the \verb|TimeSerializer| class.
-@d printVectors
+@d save
 @{
-void printVectors(const std::vector<size_t>& block)
+template<typename IoOutputType>
+void save(const std::vector<size_t>& block,IoOutputType& io) const
 {
 	if (block.size()!=1) throw std::runtime_error(
 			"DynamicTargetting only supports blocks of size 1\n");
 
 	TimeSerializerType ts(currentOmega_,block[0],targetVectors_);
-	ts.save(io_);
+	ts.save(io);
 }
 @}
 
 Print header to disk to index the dyn vectors. This indexing wil lbe used at postprocessing.
 @d printHeader
 @{
-void printHeader()
-{
-	io_.print(tstStruct_);
-	std::string label = "omega";
-	std::string s = "Omega=" + utils::ttos(currentOmega_);
-	io_.printline(s);
-	label = "weights";
-	io_.printVector(weight_,label);
-	s = "GsWeight="+utils::ttos(gsWeight_);
-	io_.printline(s);
-}
+//void printHeader()
+//{
+//	io_.print(tstStruct_);
+//	std::string label = "omega";
+//	std::string s = "Omega=" + utils::ttos(currentOmega_);
+//	io_.printline(s);
+//	label = "weights";
+//	io_.printVector(weight_,label);
+//	s = "GsWeight="+utils::ttos(gsWeight_);
+//	io_.printline(s);
+//}
 @}
 
 The \verb|test| function below performs a measurement \emph{in situ}.

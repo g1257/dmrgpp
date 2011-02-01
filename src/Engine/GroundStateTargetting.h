@@ -177,7 +177,7 @@ namespace Dmrg {
 				throw std::runtime_error("GroundStateTargetting::operator()(...)\n");
 			}
 			
-			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber,bool needsPrinting)
+			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
 			{
 				// Nothing to see here
 			}
@@ -195,6 +195,9 @@ namespace Dmrg {
 				waveFunctionTransformation_.setInitialVector(initialVector,psi_,basisS_,basisE_,basisSE_);	
 			}
 			
+			template<typename IoOutputType>
+			void save(const std::vector<size_t>& block,IoOutputType& io) const { }
+
 			void load(const std::string& f) {}
 
 		private:

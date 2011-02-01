@@ -240,7 +240,7 @@ namespace Dmrg {
 			}
 			
 			// time step targetting: 
-			target.evolve(gsEnergy,direction,block,loopIndex,needsPrinting);
+			target.evolve(gsEnergy,direction,block,loopIndex);
 			waveFunctionTransformation_.triggerOff(pSprime,pEprime,pSE); //,m);
 			return gsEnergy;
 		}

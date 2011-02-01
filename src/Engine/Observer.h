@@ -107,28 +107,18 @@ namespace Dmrg {
 		static size_t const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
 		static size_t const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
 		static size_t const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
-		
+		enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
+		enum {LEFT_BRACKET=ObserverHelperType::LEFT_BRACKET,RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
+
 	public:
 		Observer(
 				const std::string& filename,
-				size_t n,
+				size_t offset,
+				size_t nf,
 				const ModelType& model,
 				ConcurrencyType& concurrency,
 				bool verbose=false)
-		: helper_(filename,model,2*n,verbose),halfLatticeSize_(n),
-		  skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
-		  verbose_(verbose)
-		{}
-
-		Observer(
-				const std::string& filename,
-				const std::string& timeFilename,
-				size_t n,
-				const ModelType& model,
-				ConcurrencyType& concurrency,
-				size_t nf = 0,
-				bool verbose=false)
-		: helper_(filename,timeFilename,model,nf,verbose),halfLatticeSize_(n),
+		: helper_(filename,model,offset,nf,verbose),
 		  skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
 		  verbose_(verbose)
 		{}
@@ -148,6 +138,12 @@ namespace Dmrg {
 			if (es && helper_.site() ==  numberOfSites-2) return true;
 			if ((!es) && helper_.site()==1) return true;
 			return false;
+		}
+
+		void setBrackets(const std::string& left,const std::string& right)
+		{
+
+			helper_.setBrackets(bracketStringToNumber(left),bracketStringToNumber(right));
 		}
 
 		PsimagLite::Matrix<FieldType> correlations(size_t n,const MatrixType& O1,const MatrixType& O2,int fermionicSign,
@@ -263,31 +259,20 @@ namespace Dmrg {
 			size_t pnter=site;
 			helper_.setPointer(pnter);
 			
-			const VectorWithOffsetType& src = helper_.timeVector();
-			//const std::string& label,
-			return onePointInternal<ApplyOperatorType>(site,A,src,src,corner);
-		}
+			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
+			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
 
-		template<typename ApplyOperatorType>
-		FieldType onePointGs(size_t site,const typename ApplyOperatorType::OperatorType& A,bool corner = false)
-		{
-			size_t pnter=site;
-			helper_.setPointer(pnter);
-			const VectorWithOffsetType& src = helper_.wavefunction();
-			return onePointInternal<ApplyOperatorType>(site,A,src,src,corner);
-		}
-
-		template<typename ApplyOperatorType>
-		FieldType onePointMixed(size_t site,const typename ApplyOperatorType::OperatorType& A)
-		{
-			size_t pnter=site;
-			helper_.setPointer(pnter);
-			const VectorWithOffsetType& src1 = helper_.timeVector();
-			const VectorWithOffsetType& src2 = helper_.wavefunction();
-			return onePointInternal<ApplyOperatorType>(site,A,src1,src2);
+			return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner);
 		}
 
 	private:
+
+		size_t bracketStringToNumber(const std::string& str) const
+		{
+			if (str=="gs") return GS_VECTOR;
+			if (str=="time") return TIME_VECTOR;
+			throw std::runtime_error("Observer::bracketStringToNumber(...): must be gs or time");
+		}
 
 		template<typename ApplyOperatorType>
 		FieldType onePointInternal(size_t site,const typename ApplyOperatorType::OperatorType& A,

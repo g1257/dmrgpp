@@ -146,7 +146,7 @@ namespace Dmrg {
 		 	currentOmega_(tstStruct_.omega),
 		 	targetVectors_(3),
 		 	weight_(targetVectors_.size()),
-		 	io_(tstStruct_.filename,parallelRank_),
+		 	//io_(tstStruct_.filename,parallelRank_),
 		 	applyOpLocal_(basisS,basisE,basisSE)
 		 	
 
@@ -163,7 +163,7 @@ namespace Dmrg {
 			gsWeight_=1.0-sum;
 			sum += gsWeight_;
 			if (fabs(sum-1.0)>1e-5) throw std::runtime_error("Weights don't amount to one\n");
-			printHeader();
+			//printHeader();
 		}
 		
 		
@@ -224,7 +224,7 @@ namespace Dmrg {
 		
 
 		void evolve(RealType Eg,size_t direction,const BlockType& block,
-				size_t loopNumber, bool needsPrinting)
+				size_t loopNumber)
 		{
 			size_t count =0;
 			VectorWithOffsetType phiOld = psi_;
@@ -241,11 +241,11 @@ namespace Dmrg {
 			}
 
 			if (count==0) {
-				// always print to keep observer driver in sync
-				if (needsPrinting) {
-					zeroOutVectors();
-					printVectors(block);
-				}
+		//		// always print to keep observer driver in sync
+		//		if (needsPrinting) {
+		//			zeroOutVectors();
+		//			printVectors(block);
+		//		}
 				return;
 			}
 
@@ -253,7 +253,7 @@ namespace Dmrg {
 
 			cocoon(val,direction,block); // in-situ
 
-			if (needsPrinting) printVectors(block); // for post-processing
+			//if (needsPrinting) printVectors(block); // for post-processing
 		}
 		
 
@@ -277,6 +277,17 @@ namespace Dmrg {
 		const BasisWithOperatorsType& basisS() const { return basisS_; }
 
 		const BasisWithOperatorsType& basisE() const { return basisE_; }
+		
+
+		template<typename IoOutputType>
+		void save(const std::vector<size_t>& block,IoOutputType& io) const
+		{
+			if (block.size()!=1) throw std::runtime_error(
+					"DynamicTargetting only supports blocks of size 1\n");
+
+			TimeSerializerType ts(currentOmega_,block[0],targetVectors_);
+			ts.save(io);
+		}
 		
 
 		void load(const std::string& f)
@@ -581,27 +592,17 @@ namespace Dmrg {
 		}
 		
 
-		void printVectors(const std::vector<size_t>& block)
-		{
-			if (block.size()!=1) throw std::runtime_error(
-					"DynamicTargetting only supports blocks of size 1\n");
-
-			TimeSerializerType ts(currentOmega_,block[0],targetVectors_);
-			ts.save(io_);
-		}
-		
-
-		void printHeader()
-		{
-			io_.print(tstStruct_);
-			std::string label = "omega";
-			std::string s = "Omega=" + utils::ttos(currentOmega_);
-			io_.printline(s);
-			label = "weights";
-			io_.printVector(weight_,label);
-			s = "GsWeight="+utils::ttos(gsWeight_);
-			io_.printline(s);
-		}
+		//void printHeader()
+		//{
+		//	io_.print(tstStruct_);
+		//	std::string label = "omega";
+		//	std::string s = "Omega=" + utils::ttos(currentOmega_);
+		//	io_.printline(s);
+		//	label = "weights";
+		//	io_.printVector(weight_,label);
+		//	s = "GsWeight="+utils::ttos(gsWeight_);
+		//	io_.printline(s);
+		//}
 		
 
 		void test(
@@ -667,7 +668,7 @@ namespace Dmrg {
 		std::vector<VectorWithOffsetType> targetVectors_;
 		std::vector<RealType> weight_;
 		RealType gsWeight_;
-		typename IoType::Out io_;
+		//typename IoType::Out io_;
 		ApplyOperatorType applyOpLocal_;
 		
 	}; // class DynamicTargetting

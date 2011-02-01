@@ -459,10 +459,9 @@ sub createObserverDriver
 	my $modelName = getModelName();
 	my $operatorsName = getOperatorsName();
 	my $chooseRealOrComplexForObservables = "typedef RealType FieldType;\n";
-	my $obsArg = "datafile,n,model,concurrency,verbose";
+	my $obsArg = "datafile,0,n,model,concurrency,verbose";
 	if ($targetting=~/timestep/i) {
 		$chooseRealOrComplexForObservables = "typedef ComplexType FieldType;\n";
-		$obsArg = "datafile,tsp.filename,n,model,concurrency,0,verbose";
 	}
 
 	system("cp observe.cpp observe.bak") if (-e "observe.cpp");	
@@ -528,16 +527,20 @@ void measureTimeObs(const ModelType& model,ObserverType& observe, size_t numberO
 	std::cout<<"site nupNdown(gs) nupNdown(timevector) time\\n";
 	for (size_t i0 = 0;i0<observe.size();i0++) {
 		// for g.s. use this one:
-		FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opN);
+		observe.setBrackets("gs","gs");
+		FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opN);
 		// for time vector use this one:
+		observe.setBrackets("time","time");
 		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opN);
 		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
 		if (observe.isAtCorner()) { // also calculate next or prev. site:
 			size_t x = (observe.site()==1) ? 0 : numberOfSites-1;
 			// do the corner case
 			// for g.s. use this one:
-			FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opN,true);
+			observe.setBrackets("gs","gs");
+			FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opN,true);
 			// for time vector use this one:
+			observe.setBrackets("time","time");
 			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opN,true);
 			std::cout<<x<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
 		}
@@ -555,16 +558,20 @@ void measureTimeObs(const ModelType& model,ObserverType& observe, size_t numberO
 	std::cout<<"site nUp+nDown(gs) nup+ndown(timevector) time\\n";
 	for (size_t i0 = 0;i0<observe.size();i0++) {
 		//for g.s. use this one:
-		FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opCharge);
+		observe.setBrackets("gs","gs");
+		FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opCharge);
 		// for h.d. use this one:
+		observe.setBrackets("time","time");
 		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opCharge);
 		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
 		if (observe.isAtCorner()) { // also calculate next or prev. site:
 			size_t x = (observe.site()==1) ? 0 : numberOfSites-1;
 			// do the corner case
 			// for g.s. use this one:
-			FieldType tmp1 = observe.template onePointGs<ApplyOperatorType>(i0,opCharge,true);
+			observe.setBrackets("gs","gs");
+			FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opCharge,true);
 			// for time vector use this one:
+			observe.setBrackets("time","time");
 			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opCharge,true);
 			std::cout<<x<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
 		}
@@ -619,7 +626,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 	TargettingParamsType tsp(io,model);
 	
-	size_t n=geometry.numberOfSites()/2;
+	size_t n=geometry.numberOfSites();
 	bool verbose = false;
 	typedef Observer<FieldType,VectorWithOffsetType,ModelType,PsimagLite::IoSimple> 
 		ObserverType;

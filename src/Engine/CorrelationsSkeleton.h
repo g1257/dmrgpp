@@ -129,7 +129,9 @@ namespace Dmrg {
 
 		enum {GROW_RIGHT,GROW_LEFT};
 		enum {DIAGONAL,NON_DIAGONAL};
-		
+		enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
+		enum {LEFT_BRACKET=ObserverHelperType::LEFT_BRACKET,RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
+
 		CorrelationsSkeleton(ObserverHelperType& helper,bool verbose = false)
 		: helper_(helper),verbose_(verbose) { }
 		
@@ -273,53 +275,44 @@ namespace Dmrg {
 
 		FieldType bracket(const MatrixType& A)
 		{
-			if (helper_.hasTimeVector()) {
-				const VectorWithOffsetType& v = helper_.timeVector();
-				return bracket_(A,v);
-			}
+			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
+			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
 
-			const VectorWithOffsetType& v = helper_.wavefunction();
-			return bracket_(A,v);
+			return bracket_(A,src1,src2);
 		}
 
 		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,int fermionSign)
 		{
-			if (helper_.hasTimeVector()) {
-				const VectorWithOffsetType& v = helper_.timeVector();
-				return bracketRightCorner_(A,B,fermionSign,v);
-			}
+			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
+			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
 
-			const VectorWithOffsetType& v = helper_.wavefunction();
-			return bracketRightCorner_(A,B,fermionSign,v);
+			return bracketRightCorner_(A,B,fermionSign,src1,src2);
 		}
 
 		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,
 				const MatrixType& C,int fermionSign)
 		{
-			if (helper_.hasTimeVector()) {
-				const VectorWithOffsetType& v = helper_.timeVector();
-				return bracketRightCorner_(A,B,C,fermionSign,v);
-			}
+			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
+			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
 
-			const VectorWithOffsetType& v = helper_.wavefunction();
-			return bracketRightCorner_(A,B,C,fermionSign,v);
+			return bracketRightCorner_(A,B,C,fermionSign,src1,src2);
 		}
 	private:
 		
 		//template<typename SomeVectorType>
-		RealType bracket_(const MatrixType& A,const VectorWithOffsetType& vec)
+		RealType bracket_(const MatrixType& A,const VectorWithOffsetType& vec1,const VectorWithOffsetType& vec2)
 		{
-			RealType norma = std::norm(vec);
+			RealType norma = std::norm(vec1);
 			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
 			
 			CrsMatrix<FieldType> Acrs(A);
 			FieldType sum=0;
 
-			if (vec.size()!=helper_.basisSE().size()) throw std::runtime_error("Error\n");
-			for (size_t x=0;x<vec.sectors();x++) {
-				size_t sector = vec.sector(x);
-				size_t offset = vec.offset(sector);
-				size_t total = offset + vec.effectiveSize(sector);
+			if (vec1.size()!=helper_.basisSE().size() || vec1.size()!=vec2.size()) throw std::runtime_error("Error\n");
+			for (size_t x=0;x<vec1.sectors();x++) {
+				size_t sector = vec1.sector(x);
+				size_t offset = vec1.offset(sector);
+				size_t total = offset + vec1.effectiveSize(sector);
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
@@ -328,7 +321,7 @@ namespace Dmrg {
 						size_t r2 = Acrs.getCol(k);
 						size_t t2 = helper_.basisSE().permutationInverse(r2+eta*A.n_col());
 						if (t2<offset || t2>=total) continue;
-						sum += Acrs.getValue(k)*vec[t]*vec[t2];
+						sum += Acrs.getValue(k)*vec1[t]*vec2[t2];
 					}
 				}
 			}
@@ -339,10 +332,11 @@ namespace Dmrg {
 				const MatrixType& A,
 				const MatrixType& B,
 				int fermionSign,
-				const VectorWithOffsetType& vec)
+				const VectorWithOffsetType& vec1,
+				const VectorWithOffsetType& vec2)
 		{
 
-			RealType norma = std::norm(vec);
+			RealType norma = std::norm(vec1);
 
 			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
 
@@ -352,16 +346,16 @@ namespace Dmrg {
 			size_t ni = helper_.basisS().size()/Bcrs.rank(); // = Acrs.rank()
 
 			// some sanity checks:
-			if (vec.size()!=helper_.basisSE().size())
+			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.basisSE().size())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): vec.size!=SE.size\n");
 			if (ni!=Acrs.rank())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): ni!=Acrs.rank\n");
 
 			// ok, we're ready for the main course:
-			for (size_t x=0;x<vec.sectors();x++) {
-				size_t sector = vec.sector(x);
-				size_t offset = vec.offset(sector);
-				size_t total = offset + vec.effectiveSize(sector);
+			for (size_t x=0;x<vec1.sectors();x++) {
+				size_t sector = vec1.sector(x);
+				size_t offset = vec1.offset(sector);
+				size_t total = offset + vec1.effectiveSize(sector);
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
@@ -381,7 +375,7 @@ namespace Dmrg {
 							size_t rprime = helper_.basisS().permutationInverse(r0prime+r1*ni);
 							size_t t2 = helper_.basisSE().permutationInverse(rprime+eta2*helper_.basisS().size());
 							if (t2<offset || t2>=total) continue;
-							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec[t]*vec[t2]*sign;
+							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec1[t]*vec2[t2]*sign;
 						}
 					}
 				}
@@ -394,10 +388,11 @@ namespace Dmrg {
 				const MatrixType& A2,
 				const MatrixType& B,
 				int fermionSign,
-				const VectorWithOffsetType& vec)
+				const VectorWithOffsetType& vec1,
+				const VectorWithOffsetType& vec2)
 		{
 
-			RealType norma = std::norm(vec);
+			RealType norma = std::norm(vec1);
 
 			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
 
@@ -408,7 +403,7 @@ namespace Dmrg {
 			size_t ni = helper_.basisS().size()/Bcrs.rank(); // = Acrs.rank()
 
 			// some sanity checks:
-			if (vec.size()!=helper_.basisSE().size())
+			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.basisSE().size())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): vec.size!=SE.size\n");
 			if (ni!=A1crs.rank())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): ni!=A1crs.rank\n");
@@ -416,10 +411,10 @@ namespace Dmrg {
 				throw std::runtime_error("Observe::bracketRightCorner_(...): Bcrs.rank!=A2crs.rank\n");
 
 			// ok, we're ready for the main course:
-			for (size_t x=0;x<vec.sectors();x++) {
-				size_t sector = vec.sector(x);
-				size_t offset = vec.offset(sector);
-				size_t total = offset + vec.effectiveSize(sector);
+			for (size_t x=0;x<vec1.sectors();x++) {
+				size_t sector = vec1.sector(x);
+				size_t offset = vec1.offset(sector);
+				size_t total = offset + vec1.effectiveSize(sector);
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
@@ -437,7 +432,7 @@ namespace Dmrg {
 									size_t rprime = helper_.basisS().permutationInverse(r0prime+r1prime*ni);
 									size_t t2 = helper_.basisSE().permutationInverse(rprime+eta2*helper_.basisS().size());
 									if (t2<offset || t2>=total) continue;
-									sum += A1crs.getValue(k1)*A2crs.getValue(k2)*Bcrs.getValue(k3)*vec[t]*vec[t2]*sign;
+									sum += A1crs.getValue(k1)*A2crs.getValue(k2)*Bcrs.getValue(k3)*vec1[t]*vec2[t2]*sign;
 								}
 						}
 					}

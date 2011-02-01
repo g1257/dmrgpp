@@ -107,45 +107,26 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 		typedef DmrgSerializer<RealType,VectorWithOffsetType,MatrixType,BasisType,FermionSign> DmrgSerializerType;
 		
-		//enum {NOTIMEVECTOR=0,USETIMEVECTOR=1};
+		enum {GS_VECTOR,TIME_VECTOR};
+		enum {LEFT_BRACKET=0,RIGHT_BRACKET=1};
 		
 		ObserverHelper(
 				const std::string& filename,
 				const ModelType& model,
+				size_t offset,
 				size_t nf,
 				bool verbose)
 			:	filename_(filename),
 				io_(filename),
-				dSerializerV_(1,DmrgSerializerType(io_,true)),
-				currentPos_(0),
-				useTimeVector_(false),
-				model_(model),
-				verbose_(verbose)
-		{
-			std::cerr<<"Observer will use file: "<<filename<<" for core DMRG data\n";
-			init(nf);
-		}
-
-		ObserverHelper(
-				const std::string& filename,
-				const std::string& timeFilename,
-				const ModelType& model,
-				size_t nf,
-				bool verbose)
-			:	filename_(filename),
-				io_(filename),
-				io2_(timeFilename),
 				dSerializerV_(1,DmrgSerializerType(io_,true)),
 				timeSerializerV_(nf),
 				currentPos_(0),
-				useTimeVector_(true),
 				model_(model),
-				verbose_(verbose)
+				verbose_(verbose),
+				bracket_(2,GS_VECTOR)
 		{
-			std::cerr<<"Observer will use file: "<<filename<<" for core DMRG data\n";
-			std::cerr<<"Observer will use file: "<<timeFilename<<" for time DMRG data\n";
-			init(nf);
-			integrityChecks();
+			std::cerr<<"Observer will use file: "<<filename<<" for DMRG data\n";
+			init(offset,nf);
 		}
 
 		void setPointer(size_t pos)
@@ -153,6 +134,14 @@ namespace Dmrg {
 			//std::cerr<<"POS="<<pos<<"\n";
 			currentPos_=pos;
 		}
+
+		void setBrackets(size_t left,size_t right)
+		{
+			bracket_[LEFT_BRACKET]=left;
+			bracket_[RIGHT_BRACKET]=right;
+		}
+
+		size_t bracket(size_t leftOrRight) const { return bracket_[leftOrRight]; }
 
 		void transform(MatrixType& ret,const MatrixType& O2) const
 		{
@@ -212,15 +201,16 @@ namespace Dmrg {
 		
 		size_t size() const
 		{
-			return dSerializerV_.size()-1;
+			return dSerializerV_.size(); //-1;
 		}
 
-		bool hasTimeVector() const
+		const VectorWithOffsetType& getVectorFromBracketId(size_t leftOrRight) const
 		{
-			return useTimeVector_;
+			if (bracket(leftOrRight)==GS_VECTOR) {
+				return wavefunction();
+			}
+			return timeVector();
 		}
-
-//		size_t electrons(size_t i) const { return electrons_[i]; }
 
 		const VectorWithOffsetType& timeVector() const
 		{
@@ -235,21 +225,20 @@ namespace Dmrg {
 			ObserverHelper<IoType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& precomp);
 
 	private:
-		void init(size_t nf)
+		void init(size_t offset,size_t nf)
 		{
-			//initElectrons();
 
-			rewind(true);
-			//std::vector<size_t> el0; // not really needed, but needs to read to keep in sync
-			//getElectronsOneSite(el0);
-			//for (size_t i=0;i<nf-1;i++) {
+			io_.rewind();
 			dSerializerV_.clear();
+
+			size_t counter=0;
 			while(true) {
-				if (nf>0 && dSerializerV_.size()>=nf) break;
+				if (nf>0 && dSerializerV_.size()==nf) break;
 				if (verbose_) std::cerr<<"ObserverHelper "<<dSerializerV_.size()<<"\n";
 				try {
 					DmrgSerializerType dSerializer(io_);
-					dSerializerV_.push_back(dSerializer);
+					if (counter>=offset) dSerializerV_.push_back(dSerializer);
+					counter++;
 				} catch (std::exception& e)
 				{
 					if (dSerializerV_.size()==0) {
@@ -262,23 +251,8 @@ namespace Dmrg {
 			}
 			
 			FieldType dummy = 0;
-			initTimeVectors(dSerializerV_.size(),dummy);
-			// Line below might cause trouble under gcc v3
-			//if (verbose_) std::cerr<<(*this);	
+			initTimeVectors(offset,nf,dummy);
 		}
-
-//		void initElectrons()
-//		{
-//			std::vector<OperatorType> creationMatrix;
-//			typename OperatorType::SparseMatrixType hamiltonian;
-//			typename BasisType::BasisDataType q;
-//			typename BasisType::BlockType block(1,0);
-//
-//			model_.setNaturalBasis(creationMatrix,hamiltonian,q,block);
-//			electrons_= q.electronsUp;
-//			for (size_t i=0;i<electrons_.size();i++)
-//				electrons_[i] += q.electronsDown[i];
-//		}
 
 		void integrityChecks()
 		{
@@ -291,46 +265,27 @@ namespace Dmrg {
 			
 		}
 		
-		void initTimeVectors(size_t nf,RealType dummy)
+		void initTimeVectors(size_t offset,size_t nf,RealType dummy)
 		{
 			
 		}
 		
-		void initTimeVectors(size_t nf,std::complex<RealType> dummy)
+		void initTimeVectors(size_t offset,size_t nf,std::complex<RealType> dummy)
 		{
-			if (nf!=timeSerializerV_.size()) timeSerializerV_.resize(nf);
-			for (size_t i=0;i<timeSerializerV_.size();i++) { // up to i<nf-1 FIXME
-				TimeSerializerType ts(io2_);
-				timeSerializerV_[i] = ts;
-				//std::cerr<<"time vector "<<i<<" has size "<<psiTimeVector_[i].size()<<"\n";
-				//RealType tmp = std::norm(psiTimeVector_[i]);
-				//std::cerr<<"Mod="<<tmp<<"\n";
-				//std::cerr<<"----------------------------------\n";
+			io_.rewind();
+			size_t counter=0;
+			while(true) {
+				TimeSerializerType ts(io_);
+				if (counter>=offset) timeSerializerV_.push_back(ts);
+				counter++;
+				if (timeSerializerV_.size()==nf) break;
 			}
 		}
-		
-		void rewind(bool doIt=false) 
-		{
-			if (doIt) {
-				io_.rewind();
-				io2_.rewind();
-			}
-		}
-		
-		// Not needed, but if you remove this, also remove in DmrgSolver the corresponding
-		// printing of the first basis to keep everythign in sync
-		/*void getElectronsOneSite(std::vector<size_t>& el0)
-		{
-			BasisType b(io_,"one site");
-			if (b.block().size()!=1) throw std::runtime_error("getElectronsOneSite\n");
-			el0 = b.electronsVector();
-		}*/
-		
 
 		void getTransform(MatrixType& transform,int ns)
 		{
 			io_.readMatrix(transform,"#TRANSFORM_sites",ns);
-			rewind();
+			io_.rewind();
 		}
 
 		void getWaveFunction(VectorType& wavefunction,size_t ns)
@@ -338,19 +293,19 @@ namespace Dmrg {
 			VectorWithOffsetType tmpV;
 			tmpV.load(io_,"#WAVEFUNCTION_sites=",ns);
 			tmpV.toSparse(wavefunction);
-			rewind();
+			io_.rewind();
 		}
 		
 		void getDirection(int& x,int ns)
 		{
 			io_.readline(x,"#DIRECTION=",ns);
-			rewind();
+			io_.rewind();
 		}
 		
 		void getTimeVector(VectorWithOffsetType& timeVector,size_t ns)
 		{
 			timeVector.load(io2_,"targetVector0",ns);
-			rewind();
+			io_.rewind();
 		}
 
 		std::string filename_; 
@@ -359,10 +314,9 @@ namespace Dmrg {
 		std::vector<DmrgSerializerType> dSerializerV_;
 		std::vector<TimeSerializerType> timeSerializerV_;
 		size_t currentPos_;
-		bool useTimeVector_;
 		const ModelType& model_;
-//		std::vector<size_t> electrons_;
 		bool verbose_;
+		std::vector<size_t> bracket_;
 	};  //ObserverHelper
 
 	template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
