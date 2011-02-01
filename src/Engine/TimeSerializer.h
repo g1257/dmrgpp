@@ -103,11 +103,12 @@ namespace Dmrg {
 			  targetVectors_(targetVectors)
 			{}
 			
-			TimeSerializer(typename PsimagLite::IoSimple::In& io)
+			TimeSerializer(typename PsimagLite::IoSimple::In& io,size_t lastInstance = 0)
 			{
 				RealType x=0;
 				std::string s = "#TIME=";
-				io.readline(x,s);
+				if (lastInstance) io.readline(x,s,lastInstance);
+				else io.readline(x,s);
 				if (x<0) throw std::runtime_error("TimeSerializer:: time cannot be negative\n");
 				currentTime_ = x;
 				

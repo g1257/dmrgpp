@@ -87,101 +87,109 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename RealType,typename BasisType,typename ParametersType,typename StackType,typename IoType> 
+	template<typename ParametersType,typename StackType,typename TargettingType>
 	class Checkpoint {
-		public:
-			enum {SYSTEM,ENVIRON};
-			
-			const std::string SYSTEM_STACK_STRING;
-			const std::string ENVIRON_STACK_STRING;
-			
-			Checkpoint(const ParametersType& parameters,size_t rank = 0,bool debug=false) :
-				SYSTEM_STACK_STRING("SystemStack"),
-				ENVIRON_STACK_STRING("EnvironStack"),
-				parameters_(parameters),
-				enabled_(parameters_.options.find("checkpoint")!=std::string::npos),
-				systemStack_((enabled_) ? SYSTEM_STACK_STRING+parameters_.checkpoint.filename : SYSTEM_STACK_STRING+parameters_.filename,enabled_,rank),
-				envStack_((enabled_) ? ENVIRON_STACK_STRING+parameters_.checkpoint.filename : ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank)
-			{
-			}
-			
-			void save(const BasisType &pS,const BasisType &pE,size_t loop,typename IoType::Out& io) const
-			{
-				pS.save(io,"#CHKPOINTSYSTEM");
-				pE.save(io,"#CHKPOINTENVIRON");
-			}
+	public:
+		typedef typename TargettingType::RealType  RealType;
+		typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+		typedef typename TargettingType::IoType IoType;
 
-			void load(BasisType &pS,BasisType &pE)
-			{
-				typename IoType::In ioTmp(parameters_.checkpoint.filename);
-				size_t loop = ioTmp.count("#NAME=#CHKPOINTSYSTEM");
-				if (loop<1) {
-					std::cerr<<"There are no resumable loops in file "<<parameters_.checkpoint.filename<<"\n";
-					throw std::runtime_error("Checkpoint::load(...)\n");
-				}
-				loop--;
-				if (loop<parameters_.checkpoint.index) {
-					std::cerr<<"There are "<<loop<<" resumable checkpoints\n";
-					std::cerr<<"But you requested to go back "<<parameters_.checkpoint.index<<"\n";
-					throw std::runtime_error("Checkpoint::load(...)\n");
-				}
-				loop -= parameters_.checkpoint.index;
-				BasisType pS1(ioTmp,"#CHKPOINTSYSTEM",loop);
-				pS=pS1;
-				BasisType pE1(ioTmp,"#CHKPOINTENVIRON");
-				pE=pE1;
-			}
+		enum {SYSTEM,ENVIRON};
 
-			void push(const BasisType &pS,const BasisType &pE)
-			{	
-				systemStack_.push(pS);
-				envStack_.push(pE);
-			}
+		const std::string SYSTEM_STACK_STRING;
+		const std::string ENVIRON_STACK_STRING;
 
-			void push(const BasisType &pSorE,size_t what)
-			{
-				if (what==ENVIRON) envStack_.push(pSorE);
-				else systemStack_.push(pSorE);
-			}
-			
-			void shrink(BasisType &pSorE,size_t what)
-			{
-				if (what==ENVIRON) shrink(pSorE,envStack_);
-				else shrink(pSorE,systemStack_);
-			}
-			
-			bool operator()() const { return enabled_; }
+		Checkpoint(const ParametersType& parameters,size_t rank = 0,bool debug=false) :
+			SYSTEM_STACK_STRING("SystemStack"),
+			ENVIRON_STACK_STRING("EnvironStack"),
+			parameters_(parameters),
+			enabled_(parameters_.options.find("checkpoint")!=std::string::npos),
+			systemStack_((enabled_) ? SYSTEM_STACK_STRING+parameters_.checkpoint.filename : SYSTEM_STACK_STRING+parameters_.filename,enabled_,rank),
+			envStack_((enabled_) ? ENVIRON_STACK_STRING+parameters_.checkpoint.filename : ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank)
+		{
+		}
 
-			size_t stackSize(size_t what) const
-			{
-				if (what==ENVIRON) return envStack_.size();
-				return systemStack_.size();
-			}
+		void save(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE,size_t loop,typename IoType::Out& io) const
+		{
+			pS.save(io,"#CHKPOINTSYSTEM");
+			pE.save(io,"#CHKPOINTENVIRON");
+		}
 
-		private:
-			const ParametersType& parameters_;
-			bool enabled_;
-			StackType systemStack_,envStack_; // <--we're the owner
+		void load(BasisWithOperatorsType &pS,BasisWithOperatorsType &pE,TargettingType& psi)
+		{
+			if (!StackType::persistent())
+				throw std::runtime_error("Checkpoint::load(...): use disk stacks\n");
 
-			//! shrink  (we don't really shrink, we just undo the growth)
-			void shrink(BasisType &pSprime,StackType& thisStack)
-			{
-				thisStack.pop();
-				pSprime=thisStack.top();
+			typename IoType::In ioTmp(parameters_.checkpoint.filename);
+			size_t loop = ioTmp.count("#NAME=#CHKPOINTSYSTEM");
+			if (loop<1) {
+				std::cerr<<"There are no resumable loops in file "<<parameters_.checkpoint.filename<<"\n";
+				throw std::runtime_error("Checkpoint::load(...)\n");
 			}
-			
-			//! Move elsewhere
-			//! returns s1+s2 if s2 has no '/', 
-			//! if s2 = s2a + '/' + s2b return s2a + '/' + s1 + s2b
-			std::string appendWithDir(const std::string& s1,const std::string& s2) const
-			{
-				size_t x = s2.find("/");
-				if (x==std::string::npos) return s1 + s2;
-				std::string suf = s2.substr(x+1,s2.length());
-				std::string dir = s2.substr(0,s2.length()-suf.length());
-				//throw std::runtime_error("testing\n");
-				return dir + s1 + suf;
-			}	
+			loop--;
+			if (loop<parameters_.checkpoint.index) {
+				std::cerr<<"There are "<<loop<<" resumable checkpoints\n";
+				std::cerr<<"But you requested to go back "<<parameters_.checkpoint.index<<"\n";
+				throw std::runtime_error("Checkpoint::load(...)\n");
+			}
+			loop -= parameters_.checkpoint.index;
+			BasisWithOperatorsType pS1(ioTmp,"#CHKPOINTSYSTEM",loop);
+			pS=pS1;
+			BasisWithOperatorsType pE1(ioTmp,"#CHKPOINTENVIRON");
+			pE=pE1;
+			psi.load(parameters_.checkpoint.filename2);
+		}
+
+		void push(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE)
+		{
+			systemStack_.push(pS);
+			envStack_.push(pE);
+		}
+
+		void push(const BasisWithOperatorsType &pSorE,size_t what)
+		{
+			if (what==ENVIRON) envStack_.push(pSorE);
+			else systemStack_.push(pSorE);
+		}
+
+		void shrink(BasisWithOperatorsType &pSorE,size_t what)
+		{
+			if (what==ENVIRON) shrink(pSorE,envStack_);
+			else shrink(pSorE,systemStack_);
+		}
+
+		bool operator()() const { return enabled_; }
+
+		size_t stackSize(size_t what) const
+		{
+			if (what==ENVIRON) return envStack_.size();
+			return systemStack_.size();
+		}
+
+	private:
+		const ParametersType& parameters_;
+		bool enabled_;
+		StackType systemStack_,envStack_; // <--we're the owner
+
+		//! shrink  (we don't really shrink, we just undo the growth)
+		void shrink(BasisWithOperatorsType &pSprime,StackType& thisStack)
+		{
+			thisStack.pop();
+			pSprime=thisStack.top();
+		}
+
+		//! Move elsewhere
+		//! returns s1+s2 if s2 has no '/',
+		//! if s2 = s2a + '/' + s2b return s2a + '/' + s1 + s2b
+		std::string appendWithDir(const std::string& s1,const std::string& s2) const
+		{
+			size_t x = s2.find("/");
+			if (x==std::string::npos) return s1 + s2;
+			std::string suf = s2.substr(x+1,s2.length());
+			std::string dir = s2.substr(0,s2.length()-suf.length());
+			//throw std::runtime_error("testing\n");
+			return dir + s1 + suf;
+		}
 	}; // class DmrgSerializer
 } // namespace Dmrg 
 

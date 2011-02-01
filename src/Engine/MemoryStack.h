@@ -85,6 +85,8 @@ public:
 	{
 		throw std::runtime_error("MemoryStack::load(): Unimplemented (Maybe you should use DiskStack instead?)\n");
 	}
+	static bool persistent() { return false; }
+
 }; // class MemoryStack
 
 #endif

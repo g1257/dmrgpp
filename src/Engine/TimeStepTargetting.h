@@ -245,6 +245,18 @@ namespace Dmrg {
 				if (needsPrinting) printVectors(block); // for post-processing
 			}
 
+			
+			void load(const std::string& f)
+			{
+				typename IoType::In io(f);
+				for (size_t i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
+
+				TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
+				for (size_t i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
+				currentTime_ = ts.time();
+			}
+			
+
 			size_t evolve(
 					size_t i,
 					VectorWithOffsetType& phiNew,

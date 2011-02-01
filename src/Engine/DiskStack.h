@@ -129,6 +129,8 @@ namespace Dmrg {
 				ioOut_.close();
 			}
 
+			static bool persistent() { return true; }
+
 			void push(DataType const &d) 
 			{
 				//std::string tmpLabel = label_ + utils::ttos(total_);

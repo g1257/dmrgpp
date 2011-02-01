@@ -357,9 +357,9 @@ namespace Dmrg {
 				for (size_t i=0;i<someBasis.partition()-1;i++) {
 					if (nonZeroPartition(v,someBasis,i)) {
 						if (found) {
-							std::ostringstream msg;
-							msg<<"More than one partition found";
-							progress_.printline(msg,std::cout);
+//							std::ostringstream msg;
+//							msg<<"More than one partition found";
+//							progress_.printline(msg,std::cout);
 							//throw std::runtime_error("quiting\n");
 						}
 						found = true;
@@ -372,6 +372,7 @@ namespace Dmrg {
 					progress_.printline(msg,std::cout);
 					//p.push_back(0);
 				}
+
 			}
 			
 			template<typename SomeBasisType>
@@ -408,7 +409,6 @@ namespace Dmrg {
 			std::vector<VectorType> data_;
 			std::vector<size_t> offsets_;
 			std::vector<size_t> nonzeroSectors_;
-			//size_t firstSector_;
 	}; // class VectorWithOffset
 	
 // 	template<typename FieldType>

@@ -152,6 +152,7 @@ namespace Dmrg {
 		bool enabled;
 		size_t index;
 		std::string filename;
+		std::string filename2; // used to hold time vectors or dyn vectors
 		
 		template<typename IoInputType>
 		void load(IoInputType& io)
@@ -164,6 +165,7 @@ namespace Dmrg {
 				index=0;
 			}
 			io.readline(filename,"CheckpointFilename=");
+			io.readline(filename2,"CheckpointFilename2=");
 		}
 	};
 
@@ -172,6 +174,7 @@ namespace Dmrg {
 		is>>c.enabled;
 		is>>c.index;
 		is>>c.filename;
+		is>>c.filename2;
 		return is;	
 	}
 

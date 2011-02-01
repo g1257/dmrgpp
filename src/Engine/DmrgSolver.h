@@ -130,7 +130,7 @@ namespace Dmrg {
 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef DmrgSerializer<RealType,VectorWithOffsetType,TransformType,MyBasis,FermionSign> DmrgSerializerType;
 		typedef typename ModelType::GeometryType GeometryType;
-		typedef Checkpoint<RealType,MyBasisWithOperators,ParametersType,StackType,IoType> CheckpointType;
+		typedef Checkpoint<ParametersType,StackType,TargettingType> CheckpointType;
 				
 		enum {SAVE_TO_DISK=1,DO_NOT_SAVE=0};
 		enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
@@ -205,7 +205,7 @@ namespace Dmrg {
 			MyBasisWithOperators pE("pE");
 
 			if (checkpoint_()) {	
-				checkpoint_.load(pS,pE);
+				checkpoint_.load(pS,pE,psi);
 			} else { // move this block elsewhere:
 				std::vector<OperatorType> creationMatrix;
 				SparseMatrixType hmatrix;

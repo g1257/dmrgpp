@@ -264,6 +264,7 @@ The body of the constructor follows:
 @<evolve@>
 @<initialGuess@>
 @<BasisGetFunctions@>
+@<load@>
 @}
 
 The public member function \verb|weight| returns the weight of target state $i$. This is needed for
@@ -441,6 +442,14 @@ const BasisType& basisSE() const { return basisSE_; }
 const BasisWithOperatorsType& basisS() const { return basisS_; }
 
 const BasisWithOperatorsType& basisE() const { return basisE_; }
+@}
+
+@d load
+@{
+void load(const std::string& f)
+{
+	std::cerr<<"WARNING: No load implemented for DynamicTargetting\n";
+}
 @}
 
 This completes the list of public functions.
@@ -743,7 +752,7 @@ RealType minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetTyp
 		try {
 			tmp= minimizeFunctionalRandom(sv,Eg,phi,ind);
 			std::cerr<<"Value of minimum for i="<<i<<"is "<<tmp<<"\n";
-		} catch(std::except& e) {
+		} catch(std::exception& e) {
 			continue;
 		}
 		if (tmp<valueSaved) {

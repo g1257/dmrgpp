@@ -278,6 +278,12 @@ namespace Dmrg {
 
 		const BasisWithOperatorsType& basisE() const { return basisE_; }
 		
+
+		void load(const std::string& f)
+		{
+			std::cerr<<"WARNING: No load implemented for DynamicTargetting\n";
+		}
+		
 		
 	private:
 		

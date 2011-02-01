@@ -195,6 +195,8 @@ namespace Dmrg {
 				waveFunctionTransformation_.setInitialVector(initialVector,psi_,basisS_,basisE_,basisSE_);	
 			}
 			
+			void load(const std::string& f) {}
+
 		private:
 			VectorWithOffsetType psi_;
 			const BasisWithOperatorsType& basisS_;

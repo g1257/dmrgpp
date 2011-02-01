@@ -370,6 +370,8 @@ in order of appearance.
 				
 				if (needsPrinting) printVectors(block); // for post-processing
 			}
+
+			@<load@>
 @}
 
 The below function is called from the \verb|evolve| above and, if appropriate, applies operator $i$ to
@@ -973,6 +975,19 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 				std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_;
 				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
 			}
+@}
+
+@d load
+@{
+void load(const std::string& f)
+{
+	typename IoType::In io(f);
+	for (size_t i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
+
+	TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
+	for (size_t i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
+	currentTime_ = ts.time();
+}
 @}
 
 @o TimeStepTargetting.h -t
