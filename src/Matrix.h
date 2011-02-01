@@ -48,6 +48,17 @@ namespace PsimagLite {
 			data_=m.data_;
 		}
 
+		template<typename RealType>
+		Matrix(const Matrix<RealType>& m)
+		{
+			nrow_=m.n_row();
+			ncol_=m.n_col();
+			data_.resize(nrow_*ncol_);
+			for (size_t i=0;i<nrow_;i++)
+				for (size_t j=0;j<ncol_;j++) 
+					data_[i+j*nrow_] = m(i,j);
+		}
+
 		// default assigment operator is fine
 
 		size_t n_row() const { return nrow_; } // legacy name
