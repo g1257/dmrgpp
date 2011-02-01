@@ -101,7 +101,6 @@ namespace Dmrg {
 		class ConcurrencyType,
 		class IoType,
 		template<typename> class WaveFunctionTransformationTemplate,
-  		template<typename> class StackTemplate,
   		template<template<typename,typename,typename> class,template<typename,typename> class,
   		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
 	 	template<typename> class VectorWithOffsetTemplate>
@@ -117,7 +116,6 @@ namespace Dmrg {
 		typedef typename MyBasis::BlockType BlockType;
 		typedef typename ModelType::MyBasisWithOperators MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
-		typedef StackTemplate<MyBasisWithOperators> StackType;
 		typedef WaveFunctionTransformationTemplate<MyBasisWithOperators> WaveFunctionTransformationType;
 		typedef TargettingTemplate<LanczosSolver,InternalProductTemplate,WaveFunctionTransformationType,
   				ModelType,ConcurrencyType,IoType,VectorWithOffsetTemplate> TargettingType;
@@ -130,7 +128,7 @@ namespace Dmrg {
 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef DmrgSerializer<RealType,VectorWithOffsetType,TransformType,MyBasis,FermionSign> DmrgSerializerType;
 		typedef typename ModelType::GeometryType GeometryType;
-		typedef Checkpoint<ParametersType,StackType,TargettingType> CheckpointType;
+		typedef Checkpoint<ParametersType,TargettingType> CheckpointType;
 				
 		enum {SAVE_TO_DISK=1,DO_NOT_SAVE=0};
 		enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,

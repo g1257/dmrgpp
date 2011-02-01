@@ -84,15 +84,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CHECKPOINT_H
 
 #include "Utils.h"
+#include <stack>
+#include "DiskStack.h"
 
 namespace Dmrg {
 
-	template<typename ParametersType,typename StackType,typename TargettingType>
+	template<typename ParametersType,typename TargettingType>
 	class Checkpoint {
 	public:
 		typedef typename TargettingType::RealType  RealType;
 		typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef typename TargettingType::IoType IoType;
+		typedef std::stack<BasisWithOperatorsType> MemoryStackType;
+		typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
 
 		enum {SYSTEM,ENVIRON};
 
@@ -104,21 +108,27 @@ namespace Dmrg {
 			ENVIRON_STACK_STRING("EnvironStack"),
 			parameters_(parameters),
 			enabled_(parameters_.options.find("checkpoint")!=std::string::npos),
-			systemStack_((enabled_) ? SYSTEM_STACK_STRING+parameters_.checkpoint.filename : SYSTEM_STACK_STRING+parameters_.filename,enabled_,rank),
-			envStack_((enabled_) ? ENVIRON_STACK_STRING+parameters_.checkpoint.filename : ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank)
+			systemDisk_(SYSTEM_STACK_STRING+parameters_.checkpoint.filename , SYSTEM_STACK_STRING+parameters_.filename,enabled_,rank),
+			envDisk_(ENVIRON_STACK_STRING+parameters_.checkpoint.filename , ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank)
 		{
+			if (enabled_) loadStacksDiskToMemory();
 		}
 
+		~Checkpoint()
+		{
+			 loadStacksMemoryToDisk();
+		}
+
+		// Not related to stacks
 		void save(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE,size_t loop,typename IoType::Out& io) const
 		{
 			pS.save(io,"#CHKPOINTSYSTEM");
 			pE.save(io,"#CHKPOINTENVIRON");
 		}
 
+		// Not related to stacks
 		void load(BasisWithOperatorsType &pS,BasisWithOperatorsType &pE,TargettingType& psi)
 		{
-			if (!StackType::persistent())
-				throw std::runtime_error("Checkpoint::load(...): use disk stacks\n");
 
 			typename IoType::In ioTmp(parameters_.checkpoint.filename);
 			size_t loop = ioTmp.count("#NAME=#CHKPOINTSYSTEM");
@@ -169,13 +179,37 @@ namespace Dmrg {
 	private:
 		const ParametersType& parameters_;
 		bool enabled_;
-		StackType systemStack_,envStack_; // <--we're the owner
+		MemoryStackType systemStack_,envStack_; // <--we're the owner
+		DiskStackType systemDisk_,envDisk_;
 
 		//! shrink  (we don't really shrink, we just undo the growth)
-		void shrink(BasisWithOperatorsType &pSprime,StackType& thisStack)
+		void shrink(BasisWithOperatorsType &pSprime,MemoryStackType& thisStack)
 		{
 			thisStack.pop();
 			pSprime=thisStack.top();
+		}
+
+		void loadStacksDiskToMemory()
+		{
+			loadStack(systemStack_,systemDisk_);
+			loadStack(envStack_,envDisk_);
+		}
+
+		void loadStacksMemoryToDisk()
+		{
+			loadStack(systemDisk_,systemStack_);
+			loadStack(envDisk_,envStack_);
+		}
+
+		template<typename StackType1,typename StackType2>
+		void loadStack(StackType1& stackInMemory,StackType2& stackInDisk)
+		{
+			while (stackInDisk.size()>0) {
+				BasisWithOperatorsType b = stackInDisk.top();
+				stackInMemory.push(b);
+				stackInDisk.pop();
+			}
+
 		}
 
 		//! Move elsewhere
@@ -190,7 +224,7 @@ namespace Dmrg {
 			//throw std::runtime_error("testing\n");
 			return dir + s1 + suf;
 		}
-	}; // class DmrgSerializer
+	}; // class Checkpoint
 } // namespace Dmrg 
 
 /*@}*/

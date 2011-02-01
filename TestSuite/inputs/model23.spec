@@ -2,7 +2,6 @@
 
 n
 n
-DiskStack
 Heisenberg
 
 

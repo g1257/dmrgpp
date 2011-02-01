@@ -36,7 +36,6 @@ my ($infiniteKeptStates,$finiteLoops,$hasLoops);
 my ($model,$linSize,$modelLocation,$modelFullName);
 my ($geometryArgs);
 my $wftransformation="WaveFunctionTransformation";
-my $stackTemplate="MemoryStack";
 my ($electrons,$momentumJ,$su2Symmetry);
 my ($pthreads,$pthreadsLib)=(0,"");
 my $brand= "v2.0";
@@ -115,20 +114,6 @@ sub askQuestions
 		}
 		$pthreadsLib=" -lpthread ";
 		$pthreads=1	if ($_=~/^y/i);
-	}
-	
-	if ($mpi!=1) {	
-		print "What stack class do you want to use?\n";
-		print "Available: MemoryStack or DiskStack\n";
-		print "Default is: MemoryStack (press ENTER): ";
-		$_=<STDIN>;
-		chomp;
-		if ($_ eq "" or $_ eq "\n") {
-			$_="MemoryStack";
-		}
-		$stackTemplate=$_;
-	} else {
-		$stackTemplate="MemoryStack";
 	}
 	
 	print "What model do you want to compile?\n";
@@ -291,7 +276,6 @@ print FOUT<<EOF;
 #include "IoSimple.h"
 #include "$wftransformation.h"
 #include "DensityMatrix.h"
-#include "$stackTemplate.h"
 #include "Operator.h"
 #include "$concurrencyName.h"
 #include "$modelName.h"
@@ -356,7 +340,6 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 			MyConcurrency,
 			MyIo,
 			$wftransformation,
-			$stackTemplate,
 			TargettingTemplate,
 			VectorWithOffsetTemplate
 		> SolverType;
@@ -507,7 +490,6 @@ print OBSOUT<<EOF;
 #include "DmrgSolver.h" // only used for types
 #include "DensityMatrix.h" // only used for types
 #include "WaveFunctionTransformation.h"// only used for types
-#include "$stackTemplate.h" // only used for types
 #include "TimeStepTargetting.h" // only used for types
 #include "GroundStateTargetting.h" // only used for types
 
@@ -622,7 +604,6 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
                         MyConcurrency,
                         MyIo,
                         WaveFunctionTransformation,
-                        MemoryStack,
                         TargettingTemplate,
                         VectorWithOffsetTemplate
                 > SolverType; // only used for types
