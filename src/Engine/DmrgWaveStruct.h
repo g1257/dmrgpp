@@ -81,6 +81,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_WAVE_H
 #define DMRG_WAVE_H
 
+#include "BasisWithOperators.h"
+
 namespace Dmrg {
 	
 template<typename BasisWithOperatorsType_>
@@ -104,14 +106,26 @@ template<typename BasisWithOperatorsType>
 std::ostream& operator<<(std::ostream& os,
 		const DmrgWaveStruct<BasisWithOperatorsType>& dmrgWave)
 {
-	os<<"ws.nrow="<<dmrgWave.ws.n_row()<<" ws.ncol="<<dmrgWave.ws.n_col()<<"\n";
-	os<<"we.nrow="<<dmrgWave.we.n_row()<<" we.ncol="<<dmrgWave.we.n_col()<<"\n";
-	os<<"SpermutationInverse.size="<<dmrgWave.pSprime.permutationInverse().size()<<"\n";
-	os<<"EpermutationInverse.size="<<dmrgWave.pEprime.permutationInverse().size()<<"\n";
-	os<<"SEpermutationInverse.size="<<dmrgWave.pSE.permutationInverse().size()<<"\n";
-	//os<<"psi.size="<<dmrgWave.psi.size()<<"\n";
+	os<<dmrgWave.ws;
+	os<<dmrgWave.we;
+	os<<dmrgWave.pSE;
+	os<<dmrgWave.pSprime;
+	os<<dmrgWave.pEprime;
 
 	return os;
+}
+
+template<typename BasisWithOperatorsType>
+std::istream& operator>>(std::istream& is,
+		DmrgWaveStruct<BasisWithOperatorsType>& dmrgWave)
+{
+	is>>dmrgWave.ws;
+	is>>dmrgWave.we;
+	is>>dmrgWave.pSE;
+	is>>dmrgWave.pSprime;
+	is>>dmrgWave.pEprime;
+
+	return is;
 }
 
 } // namespace Dmrg 

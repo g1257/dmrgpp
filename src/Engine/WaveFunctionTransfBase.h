@@ -99,8 +99,6 @@ namespace Dmrg {
 				const BasisWithOperatorsType& pEprime,
 				const BasisType& pSE) const=0;
 
-		virtual void init(size_t nk)=0;
-
 		virtual ~WaveFunctionTransfBase() {}
 
 	}; // class WaveFunctionTransfBase

@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "WaveFunctionTransfLocal.h"
 #include "WaveFunctionTransfSu2.h"
 #include "DmrgWaveStruct.h"
+#include "IoSimple.h"
 
 namespace Dmrg {
 	
@@ -96,6 +97,7 @@ namespace Dmrg {
 
 	template<typename BasisWithOperatorsType,typename VectorWithOffsetType>
 	class WaveFunctionTransfFactory {
+		typedef PsimagLite::IoSimple IoType;
 		public:
 		enum {DO_NOT_RESET_COUNTER,RESET_COUNTER};
 
@@ -118,27 +120,33 @@ namespace Dmrg {
 		static const size_t EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
 		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 		
-		WaveFunctionTransfFactory()
-		: isEnabled_(true), stage_(INFINITE),counter_(0),
-			     firstCall_(true),progress_("WaveFunctionTransformation",0)
+		template<typename SomeParametersType>
+		WaveFunctionTransfFactory(SomeParametersType& parameters,size_t nk)
+		: hilbertSpaceOneSite_(nk),
+		  isEnabled_(parameters.options.find("nowft")!=std::string::npos),
+		  stage_(INFINITE),
+		  counter_(0),
+		  firstCall_(true),
+		  progress_("WaveFunctionTransformation",0),
+		  filenameIn_(parameters.checkpoint.filename),
+		  filenameOut_(parameters.filename),
+		  WFT_STRING("Wft")
 		{
+			if (parameters.options.find("checkpoint")!=std::string::npos)
+				load();
 			if (BasisType::useSu2Symmetry()) {
-				wftImpl_=new WaveFunctionTransfSu2Type(stage_,
-						firstCall_,counter_,dmrgWaveStruct_);
+				wftImpl_=new WaveFunctionTransfSu2Type(hilbertSpaceOneSite_,
+						stage_,firstCall_,counter_,dmrgWaveStruct_);
 			} else {
-				wftImpl_=new WaveFunctionTransfLocalType(stage_,
-						firstCall_,counter_,dmrgWaveStruct_);
+				wftImpl_=new WaveFunctionTransfLocalType(hilbertSpaceOneSite_,
+						stage_,firstCall_,counter_,dmrgWaveStruct_);
 			}
 		}
 
 		~WaveFunctionTransfFactory()
 		{
+			save();
 			delete wftImpl_;
-		}
-
-		void init(size_t nk)
-		{
-			wftImpl_->init(nk);
 		}
 
 		void setStage(int stage,int option=RESET_COUNTER)
@@ -320,19 +328,11 @@ namespace Dmrg {
 			progress_.printline(msg,std::cout);
 		}
 
-		void disable() { isEnabled_=false; }
-		
+//		void disable() { isEnabled_=false; }
+//
 		bool isEnabled() const { return isEnabled_; }
 		
-	private:			
-		bool isEnabled_;
-		size_t stage_;
-		size_t counter_;
-		bool firstCall_;
-		PsimagLite::ProgressIndicator progress_;
-		DmrgWaveStructType dmrgWaveStruct_;
-		std::stack<PsimagLite::Matrix<SparseElementType> > wsStack_,weStack_;
-		WaveFunctionTransfBaseType* wftImpl_;
+	private:
 		
 		void beforeWft(const BasisWithOperatorsType& pSprime,
 				  const BasisWithOperatorsType& pEprime,const BasisType& pSE)
@@ -378,7 +378,7 @@ namespace Dmrg {
 			}
 			
 			if (counter_==0 && stage_==EXPAND_ENVIRON) {
-				//matrixIdentity(dmrgWaveStruct_.we,sizeOfOneSiteHilbertSpace_);
+				//matrixIdentity(dmrgWaveStruct_.we,hilbertSpaceOneSite_);
 				//matrixIdentity(dmrgWaveStruct_.ws,dmrgWaveStruct_.ws.n_row());
 // 				dmrgWaveStruct_.pEprime=pEprime;
 // 				dmrgWaveStruct_.pSE=pSE;
@@ -429,6 +429,44 @@ namespace Dmrg {
 			std::cerr<<"weStack="<<weStack_.size()<<"\n";
 			std::cerr<<"counter="<<counter_<<"\n";
 		}
+
+		void save() const
+		{
+			typename IoType::Out io(WFT_STRING + filenameOut_,0);
+			std::string s="isEnabled="+utils::ttos(isEnabled_);
+			io.printline(s);
+			s="stage="+utils::ttos(stage_);
+			io.printline(s);
+			s="counter="+utils::ttos(counter_);
+			io.printline(s);
+			io.printline("dmrgWaveStruct");
+			io.print(dmrgWaveStruct_);
+			io.printMatrix(wsStack_,"wsStack");
+			io.printMatrix(weStack_,"weStack");
+		}
+
+		void load()
+		{
+			typename IoType::In io(WFT_STRING + filenameIn_);
+			io.readline(isEnabled_,"isEnabled");
+			io.readline(stage_,"stage_");
+			io.readline(counter_,"counter_");
+			io.readRaw(dmrgWaveStruct_,"dmrgWaveStruct");
+			io.readMatrix(wsStack_,"wsStack");
+			io.readMatrix(weStack_,"weStack");
+		}
+
+		size_t hilbertSpaceOneSite_;
+		bool isEnabled_;
+		size_t stage_;
+		size_t counter_;
+		bool firstCall_;
+		PsimagLite::ProgressIndicator progress_;
+		std::string filenameIn_,filenameOut_;
+		const std::string WFT_STRING;
+		DmrgWaveStructType dmrgWaveStruct_;
+		std::stack<PsimagLite::Matrix<SparseElementType> > wsStack_,weStack_;
+		WaveFunctionTransfBaseType* wftImpl_;
 	}; // class WaveFunctionTransformation
 } // namespace Dmrg
 

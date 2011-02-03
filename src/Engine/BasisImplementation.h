@@ -551,6 +551,12 @@ namespace Dmrg {
 	}
 
 	template<typename RealType,typename SparseMatrixType>
+	std::istream& operator>>(std::istream& is,BasisImplementation<RealType,SparseMatrixType>& x)
+	{
+		throw std::runtime_error("Unimplemented >>");
+		return is;
+	}
+	template<typename RealType,typename SparseMatrixType>
 	bool BasisImplementation<RealType,SparseMatrixType>::useSu2Symmetry_=false;
 
 } // namespace Dmrg

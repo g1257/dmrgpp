@@ -325,6 +325,9 @@ namespace Dmrg {
 		template<typename RealType2,typename SparseMatrixType2>
 		friend std::ostream& operator<<(std::ostream& os,const Basis<RealType2,SparseMatrixType2>& x);
 
+		template<typename RealType2,typename SparseMatrixType2>
+		friend std::istream& operator>>(std::istream& is,Basis<RealType2,SparseMatrixType2>& x);
+
 	private:
 		BasisImplementationType basisImplementation_;
 	}; // class Basis
@@ -335,6 +338,14 @@ namespace Dmrg {
 		os<<x.basisImplementation_;
 		return os;
 	}
+
+	template<typename RealType,typename SparseMatrixType>
+	std::istream& operator>>(std::istream& is,Basis<RealType,SparseMatrixType>& x)
+	{
+		is>>x.basisImplementation_;
+		return is;
+	}
+
 } // namespace Dmrg
 
 /*@}*/

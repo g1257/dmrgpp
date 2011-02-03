@@ -108,11 +108,13 @@ namespace Dmrg {
 		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 		
 		WaveFunctionTransfLocal(
+				const size_t& hilbertSpaceOneSite,
 				const size_t& stage,
 				const bool& firstCall,
 				const size_t& counter,
 				const DmrgWaveStructType& dmrgWaveStruct)
-		: stage_(stage),
+		: hilbertSpaceOneSite_(hilbertSpaceOneSite),
+		  stage_(stage),
 		  firstCall_(firstCall),
 		  counter_(counter),
 		  dmrgWaveStruct_(dmrgWaveStruct),
@@ -139,11 +141,6 @@ namespace Dmrg {
 			}
 		}
 
-		virtual void init(size_t nk)
-		{
-			sizeOfOneSiteHilbertSpace_=nk;
-		}
-
 	private:
 		
 		template<typename SomeVectorType>
@@ -160,7 +157,7 @@ namespace Dmrg {
 		void transformVector1(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t i0) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = pSE.permutationInverse().size()/pEprime.permutationInverse().size();
 			size_t njp = pEprime.permutationInverse().size()/nk;
 			//printDmrgWave();
@@ -201,7 +198,7 @@ namespace Dmrg {
 		SparseElementType createAux1b(const SomeVectorType& psiSrc,size_t ip,size_t kp,size_t jp,
 					const SparseMatrixType& ws,const SparseMatrixType& weT) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t ni=dmrgWaveStruct_.ws.n_col();
 
 			//int m = dmrgWaveStruct_.m;
@@ -263,7 +260,7 @@ namespace Dmrg {
 		void transformVector2(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t i0) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = pSprime.permutationInverse().size()/nk;
 			size_t nalpha = pSprime.permutationInverse().size();
 			//printDmrgWave();
@@ -304,7 +301,7 @@ namespace Dmrg {
 		SparseElementType createAux2b(const SomeVectorType& psiSrc,size_t ip,size_t kp,size_t jp,
 					const SparseMatrixType& wsT,const SparseMatrixType& we) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nalpha=dmrgWaveStruct_.pSprime.permutationInverse().size();
 			
 			size_t beta = dmrgWaveStruct_.pEprime.permutationInverse(kp+jp*nk);
@@ -339,7 +336,7 @@ namespace Dmrg {
 		void transformVector2FromInfinite(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t i0) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = pSprime.permutationInverse().size()/nk;
 			size_t nalpha = pSprime.permutationInverse().size();
 			
@@ -389,7 +386,7 @@ namespace Dmrg {
 		SparseElementType createAux2bFromInfinite(const SomeVectorType& psiSrc,size_t is,size_t jpl,size_t jen,
 					const SparseMatrixType& wsT,const SparseMatrixType& we) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nalpha=dmrgWaveStruct_.pSprime.permutationInverse().size();
 			
 			
@@ -426,7 +423,7 @@ namespace Dmrg {
 		void transformVector1bounce(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t i0) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = pSE.permutationInverse().size()/pEprime.permutationInverse().size();
 			//size_t njp = pEprime.permutationInverse().size()/nk;
 			//printDmrgWave();
@@ -476,7 +473,7 @@ namespace Dmrg {
 		void transformVector2bounce(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t i0) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = pSprime.permutationInverse().size()/nk;
 			size_t nalpha = pSprime.permutationInverse().size();
 			//printDmrgWave();
@@ -508,12 +505,12 @@ namespace Dmrg {
 			
 		}
 
+		const size_t& hilbertSpaceOneSite_;
 		const size_t& stage_;
 		const bool& firstCall_;
 		const size_t& counter_;
 		const DmrgWaveStructType& dmrgWaveStruct_;
 		PsimagLite::ProgressIndicator progress_;
-		size_t sizeOfOneSiteHilbertSpace_;
 	}; // class WaveFunctionTransfLocal
 } // namespace Dmrg
 

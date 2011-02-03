@@ -293,22 +293,23 @@ namespace Dmrg {
 			operators_.setMomentumOfOperators(momentum);
 		}
 	}; // class BasisWithOperators
-
-	//! C= A*B
-// 	template<typename Field, typename SparseMatrixType>
-// 	void multiply(psimag::Matrix<Field> &C,SparseMatrixType const &A,SparseMatrixType const &B) 
-// 	{
-// 		int i,j,k,kk;
-// 		
-// 		for (i=0;i<C.n_row();i++) {
-// 			for (j=0;j<C.n_col();j++) {
-// 				C(i,j)=static_cast<Field>(0.0);
-// 				for (k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) 
-// 					C(i,j)+=A.getValue(k)*B(A.getCol(k),j);
-// 			}		 
-// 		}							
-// 	}
 	
+	template<typename OperatorsType,typename ConcurrencyType>
+	std::ostream& operator<<(std::ostream& os,
+			const BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
+	{
+		throw std::runtime_error("Unimplemented <<");
+		return os;
+	}
+
+	template<typename OperatorsType,typename ConcurrencyType>
+	std::istream& operator>>(std::istream& is,
+			BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
+	{
+		throw std::runtime_error("Unimplemented >>");
+		return is;
+	}
+
 
 
 } // namespace Dmrg

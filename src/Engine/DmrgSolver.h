@@ -160,6 +160,7 @@ namespace Dmrg {
 				quantumSector_(0),
 				stepCurrent_(0),
 				checkpoint_(parameters_,concurrency.rank()),
+				waveFunctionTransformation_(parameters_,model_.hilbertSize()),
 				diagonalization_(parameters,model,concurrency,verbose_,
 					useReflection_,io_,quantumSector_,waveFunctionTransformation_)
 		{
@@ -198,8 +199,8 @@ namespace Dmrg {
 				sitesIndices_.push_back(X[i]);
 			for (size_t i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
 
-			waveFunctionTransformation_.init(model_.hilbertSize());
-			if (parameters_.options.find("nowft")!=std::string::npos) waveFunctionTransformation_.disable();
+			//waveFunctionTransformation_.init();
+			//if (parameters_.options.find("nowft")!=std::string::npos) waveFunctionTransformation_.disable();
 
 			
 			TargettingType psi(pSprime_,pEprime_,pSE_,model_,targetStruct_,waveFunctionTransformation_);

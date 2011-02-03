@@ -106,13 +106,15 @@ namespace Dmrg {
 		static const size_t INFINITE = ProgramGlobals::INFINITE;
 		static const size_t EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
 		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
-		
+
 		WaveFunctionTransfSu2(
+				const size_t& hilbertSpaceOneSite,
 				const size_t& stage,
 				const bool& firstCall,
 				const size_t& counter,
 				const DmrgWaveStructType& dmrgWaveStruct)
-		: stage_(stage),
+		: hilbertSpaceOneSite_(hilbertSpaceOneSite),
+		  stage_(stage),
 		  firstCall_(firstCall),
 		  counter_(counter),
 		  dmrgWaveStruct_(dmrgWaveStruct),
@@ -133,18 +135,13 @@ namespace Dmrg {
 				transformVector2Su2(psiDest,psiSrc,pSprime,pEprime,pSE);
 		}
 
-		virtual void init(size_t nk)
-		{
-			sizeOfOneSiteHilbertSpace_=nk;
-		}
-
 	private:
 		
 		template<typename SomeVectorType>
 		void transformVector1Su2(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = pSE.getFactors().rank()/pEprime.getFactors().rank();
 			size_t njp = pEprime.getFactors().rank()/nk;
 
@@ -183,7 +180,7 @@ namespace Dmrg {
 			const FactorsType& factorsSE = pSE.getFactors();
 			const FactorsType& factorsSEOld = dmrgWaveStruct_.pSE.getFactors();
 			const FactorsType& factorsE = pEprime.getFactors();
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = pSE.getFactors().rank()/pEprime.getFactors().rank();
 			
 			FactorsType factorsInverseSE,
@@ -216,7 +213,7 @@ namespace Dmrg {
 					size_t ip,size_t kp,size_t jp, const FactorsType& factorsSE,
 					      const SparseMatrixType& ws,const SparseMatrixType& weT) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t ni=dmrgWaveStruct_.ws.n_col();
 			const FactorsType& factorsS = dmrgWaveStruct_.pSprime.getFactors();
 			SparseElementType sum=0;
@@ -245,7 +242,7 @@ namespace Dmrg {
 		void transformVector2Su2(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = pSprime.getFactors().rank()/nk;
 			
 			if (dmrgWaveStruct_.ws.n_row()!=dmrgWaveStruct_.pSprime.permutationInverse().size()) throw std::runtime_error("Error!!");
@@ -282,7 +279,7 @@ namespace Dmrg {
 		void transformVector2Su2(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
 				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t start,size_t final) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = pSprime.getFactors().rank()/nk;
 			size_t nalpha = pSprime.getFactors().rank();
 			
@@ -319,7 +316,7 @@ namespace Dmrg {
 		SparseElementType fastAux2bSu2(const SomeVectorType& psiSrc,size_t ip,size_t kp,size_t jp,
 					const SparseMatrixType& wsT,const SparseMatrixType& we) const
 		{
-			size_t nk = sizeOfOneSiteHilbertSpace_;
+			size_t nk = hilbertSpaceOneSite_;
 			size_t nalpha=dmrgWaveStruct_.pSprime.getFactors().rank();
 			SparseElementType sum=0;
 			const FactorsType& factorsE = dmrgWaveStruct_.pEprime.getFactors();
@@ -358,12 +355,13 @@ namespace Dmrg {
 			return sum;
 		}
 
+		const size_t& hilbertSpaceOneSite_;
 		const size_t& stage_;
 		const bool& firstCall_;
 		const size_t& counter_;
 		const DmrgWaveStructType& dmrgWaveStruct_;
 		PsimagLite::ProgressIndicator progress_;
-		size_t sizeOfOneSiteHilbertSpace_;
+
 	}; // class WaveFunctionTransfSu2
 } // namespace Dmrg
 
