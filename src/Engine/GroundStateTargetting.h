@@ -92,14 +92,13 @@ namespace Dmrg {
 	template<
 			template<typename,typename,typename> class LanczosSolverTemplate,
   			template<typename,typename> class InternalProductTemplate,
-     			typename WaveFunctionTransformationType_,
+     			template<typename,typename> class WaveFunctionTransfTemplate,
      			typename ModelType_,
 			typename ConcurrencyType_,
    			typename IoType_,
       			template<typename> class VectorWithOffsetTemplate>
 	class GroundStateTargetting  {
 		public:
-			typedef WaveFunctionTransformationType_ WaveFunctionTransformationType;
 			typedef ModelType_ ModelType;
 			typedef ConcurrencyType_ ConcurrencyType;
 			typedef IoType_ IoType;
@@ -119,10 +118,11 @@ namespace Dmrg {
 			typedef VectorType TargetVectorType;
 			typedef GroundStateParams<ModelType> TargettingParamsType;
 			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+			typedef WaveFunctionTransfTemplate<BasisWithOperatorsType,VectorWithOffsetType> WaveFunctionTransfType;
 			
-			enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
-			EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
-			INFINITE=WaveFunctionTransformationType::INFINITE};
+			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
+			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+			INFINITE=WaveFunctionTransfType::INFINITE};
 			
 			GroundStateTargetting(
 	  				const BasisWithOperatorsType& basisS,
@@ -130,7 +130,7 @@ namespace Dmrg {
 	    				const BasisType& basisSE,
 					const ModelType& model,
 					const TargettingParamsType& t,
-     					const WaveFunctionTransformationType& wft) // ignored here 
+     					const WaveFunctionTransfType& wft) // ignored here
 				: basisS_(basisS),basisE_(basisE),basisSE_(basisSE),
 				       waveFunctionTransformation_(wft),
 				       progress_("GroundStateTargetting",0)
@@ -205,7 +205,7 @@ namespace Dmrg {
 			const BasisWithOperatorsType& basisS_;
 			const BasisWithOperatorsType& basisE_;
 			const BasisType& basisSE_;
-			const WaveFunctionTransformationType& waveFunctionTransformation_;
+			const WaveFunctionTransfType& waveFunctionTransformation_;
 			PsimagLite::ProgressIndicator progress_;
 	};     //class GroundStateTargetting
 } // namespace Dmrg

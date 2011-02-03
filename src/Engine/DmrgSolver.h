@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "FermionSign.h"
 #include "DmrgSerializer.h"
 #include "Checkpoint.h"
+#include "WaveFunctionTransfFactory.h"
 
 namespace Dmrg {
 
@@ -100,9 +101,11 @@ namespace Dmrg {
 		class ModelType,
 		class ConcurrencyType,
 		class IoType,
-		template<typename> class WaveFunctionTransformationTemplate,
-  		template<template<typename,typename,typename> class,template<typename,typename> class,
-  		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
+  		template<template<typename,typename,typename> class,
+  			template<typename,typename> class,
+  			template<typename,typename> class,
+  			typename,typename,typename,
+  			template<typename> class> class TargettingTemplate,
 	 	template<typename> class VectorWithOffsetTemplate>
 	class DmrgSolver {
 			
@@ -116,8 +119,8 @@ namespace Dmrg {
 		typedef typename MyBasis::BlockType BlockType;
 		typedef typename ModelType::MyBasisWithOperators MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
-		typedef WaveFunctionTransformationTemplate<MyBasisWithOperators> WaveFunctionTransformationType;
-		typedef TargettingTemplate<LanczosSolver,InternalProductTemplate,WaveFunctionTransformationType,
+
+		typedef TargettingTemplate<LanczosSolver,InternalProductTemplate,WaveFunctionTransfFactory,
   				ModelType,ConcurrencyType,IoType,VectorWithOffsetTemplate> TargettingType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef typename TargettingType::TargettingParamsType TargettingParamsType;
@@ -126,14 +129,16 @@ namespace Dmrg {
 		typedef DensityMatrixTemplate<RealType,MyBasis,MyBasisWithOperators,TargettingType> DensityMatrixType;
 		typedef typename DensityMatrixType::BuildingBlockType TransformType;
 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
+		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
+
 		typedef DmrgSerializer<RealType,VectorWithOffsetType,TransformType,MyBasis,FermionSign> DmrgSerializerType;
 		typedef typename ModelType::GeometryType GeometryType;
 		typedef Checkpoint<ParametersType,TargettingType> CheckpointType;
 				
 		enum {SAVE_TO_DISK=1,DO_NOT_SAVE=0};
-		enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
-			EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
-			INFINITE=WaveFunctionTransformationType::INFINITE};
+		enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
+			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+			INFINITE=WaveFunctionTransfType::INFINITE};
 		
 		DmrgSolver(
 				ParametersDmrgSolver<RealType> const &parameters,
@@ -238,7 +243,7 @@ namespace Dmrg {
 		size_t quantumSector_;
 		int stepCurrent_;
 		CheckpointType checkpoint_;
-		WaveFunctionTransformationType waveFunctionTransformation_;
+		WaveFunctionTransfType waveFunctionTransformation_;
 		std::vector<BlockType> sitesIndices_;
 		DiagonalizationType diagonalization_;
 
@@ -356,9 +361,9 @@ namespace Dmrg {
 			size_t direction=EXPAND_SYSTEM;
 			if (stepLength<0) direction=EXPAND_ENVIRON;
 			//std::cerr<<"PUSHING DIRECTION="<<getDirection(direction)<<"\n";
-			int resetCounter = WaveFunctionTransformationType::RESET_COUNTER;
+			int resetCounter = WaveFunctionTransfType::RESET_COUNTER;
 			if (prevDirection ==  direction)
-				resetCounter = WaveFunctionTransformationType::DO_NOT_RESET_COUNTER;
+				resetCounter = WaveFunctionTransfType::DO_NOT_RESET_COUNTER;
 			prevDirection = direction;
 
 			waveFunctionTransformation_.setStage(direction,resetCounter); 

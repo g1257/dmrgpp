@@ -35,7 +35,7 @@ my $potentialVvalue=0.0;
 my ($infiniteKeptStates,$finiteLoops,$hasLoops);
 my ($model,$linSize,$modelLocation,$modelFullName);
 my ($geometryArgs);
-my $wftransformation="WaveFunctionTransformation";
+my $wftransformation="WaveFunctionTransfFactory";
 my ($electrons,$momentumJ,$su2Symmetry);
 my ($pthreads,$pthreadsLib)=(0,"");
 my $brand= "v2.0";
@@ -487,7 +487,7 @@ print OBSOUT<<EOF;
 #include "GroundStateTargetting.h"
 #include "DmrgSolver.h" // only used for types
 #include "DensityMatrix.h" // only used for types
-#include "WaveFunctionTransformation.h"// only used for types
+#include "WaveFunctionTransfFactory.h"// only used for types
 #include "TimeStepTargetting.h" // only used for types
 #include "GroundStateTargetting.h" // only used for types
 
@@ -593,6 +593,7 @@ bool observeOneFullSweep(size_t offset,const std::string& datafile,
 	if (hasTimeEvolution) {
 		measureTimeObs<ModelType,ObserverType,SparseMatrixType,
 			OperatorType,TargettingType>(model,observe,geometry.numberOfSites());
+		return;
 	}
 EOF
 	if  ($modelName=~/heisenberg/i) {
@@ -737,7 +738,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
                         ModelType,
                         MyConcurrency,
                         MyIo,
-                        WaveFunctionTransformation,
+                        WaveFunctionTransfFactory,
                         TargettingTemplate,
                         VectorWithOffsetTemplate
                 > SolverType; // only used for types

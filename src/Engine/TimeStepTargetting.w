@@ -49,7 +49,7 @@ This class is templated on 7 templates, which are:
 \item \verb|InternalProductTemplate|, being usually the \verb|InternalProductOnTheFly| class.
 This is a very short class that allows to compute the superblock matrix either on-the-fly or to store it.
 (by using \verb|InternalProductStored|). The latter option is limited to small systems due to memory constraints.
-\item \verb|WaveFunctionTransformationType| is usually the \verb|WaveFunctionTransformation| class. 
+\item \verb|WaveFunctionTransfType| is usually the \verb|WaveFunctionTransformation| class.
 The wave function transformation is too long to explain here but it is a standard computational trick in DMRG, and
 was introduce in 1996 by S. White (need to write here the corresponding PRB article FIXME).
 \item \verb|ModelType| is the model in question. These are classes under the directory Models.
@@ -69,7 +69,7 @@ namespace Dmrg {
 	template<
 			template<typename,typename,typename> class LanczosSolverTemplate,
    			template<typename,typename> class InternalProductTemplate,
-	 		typename WaveFunctionTransformationType_,
+	 		template<typename,typename> WaveFunctionTransfTemplate,
     			typename ModelType_,
 	 		typename ConcurrencyType_,
     			typename IoType_,
@@ -81,7 +81,6 @@ A long series of typedefs follow. Need to explain these maybe (FIXME).
 @o TimeStepTargetting.h -t
 @{
 		public:
-			typedef WaveFunctionTransformationType_ WaveFunctionTransformationType;
 			typedef ModelType_ ModelType;
 			typedef ConcurrencyType_ ConcurrencyType;
 			typedef IoType_ IoType;
@@ -103,6 +102,7 @@ A long series of typedefs follow. Need to explain these maybe (FIXME).
 			typedef TimeStepParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
 			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
+			typedef WaveFunctionTransfTemplate<BasisWithOperatorsType,VectorWithOffsetType> WaveFunctionTransfType;
 			typedef ComplexVectorType TargetVectorType;
 			typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
 			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
@@ -125,9 +125,9 @@ In this stage we're adavancing in space and time%'
 @o TimeStepTargetting.h -t
 @{
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
-			enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
-			EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
-			INFINITE=WaveFunctionTransformationType::INFINITE};
+			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
+			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+			INFINITE=WaveFunctionTransfType::INFINITE};
 
 
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
@@ -149,7 +149,7 @@ in \verb|WaveFunctionTransformation.h|.
 	    				const BasisType& basisSE,
 	 				const ModelType& model,
 					const TargettingParamsType& tstStruct,
-					const WaveFunctionTransformationType& wft)
+					const WaveFunctionTransfType& wft)
 @}
 
 Now let us look at the private data of this class:
@@ -162,7 +162,7 @@ Now let us look at the private data of this class:
 			const BasisType& basisSE_;
 			const ModelType& model_;
 			const TargettingParamsType& tstStruct_;
-			const WaveFunctionTransformationType& waveFunctionTransformation_;
+			const WaveFunctionTransfType& waveFunctionTransformation_;
 			PsimagLite::ProgressIndicator progress_;
 			RealType currentTime_;
 			std::vector<RealType> times_,weight_;

@@ -86,7 +86,7 @@ namespace Dmrg {
 	template<
 		template<typename,typename,typename> class LanczosSolverTemplate,
 		template<typename,typename> class InternalProductTemplate,
-		typename WaveFunctionTransformationType_,
+		template<typename,typename> class WaveFunctionTransfTemplate,
 		typename ModelType_,
 		typename ConcurrencyType_,
 		typename IoType_,
@@ -94,7 +94,6 @@ namespace Dmrg {
 	class DynamicTargetting  {
 	public:
 		
-		typedef WaveFunctionTransformationType_ WaveFunctionTransformationType;
 		typedef ModelType_ ModelType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef IoType_ IoType;
@@ -117,12 +116,13 @@ namespace Dmrg {
 		typedef VectorType TargetVectorType;
 		typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+		typedef WaveFunctionTransfTemplate<BasisWithOperatorsType,VectorWithOffsetType> WaveFunctionTransfType;
 		
 		
 		enum {DISABLED,OPERATOR,CONVERGING};
-		enum {	EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
-				EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
-				INFINITE=WaveFunctionTransformationType::INFINITE};
+		enum {	EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
+				EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+				INFINITE=WaveFunctionTransfType::INFINITE};
 
 		static const size_t parallelRank_ = 0; // DYNT needs to support concurrency FIXME
 		
@@ -133,7 +133,7 @@ namespace Dmrg {
 				const BasisType& basisSE,
 				const ModelType& model,
 				const TargettingParamsType& tstStruct,
-				const WaveFunctionTransformationType& wft)
+				const WaveFunctionTransfType& wft)
 		:	
 		 	stage_(tstStruct.sites.size(),DISABLED),
 		 	basisS_(basisS),
@@ -662,7 +662,7 @@ namespace Dmrg {
 		const BasisType& basisSE_;
 		const ModelType& model_;
 		const TargettingParamsType& tstStruct_;
-		const WaveFunctionTransformationType& waveFunctionTransformation_;
+		const WaveFunctionTransfType& waveFunctionTransformation_;
 		PsimagLite::ProgressIndicator progress_;
 		RealType currentOmega_;
 		std::vector<VectorWithOffsetType> targetVectors_;

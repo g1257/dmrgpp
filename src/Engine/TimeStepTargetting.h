@@ -82,7 +82,7 @@ namespace Dmrg {
 	template<
 			template<typename,typename,typename> class LanczosSolverTemplate,
    			template<typename,typename> class InternalProductTemplate,
-	 		typename WaveFunctionTransformationType_,
+	 		template<typename,typename> class WaveFunctionTransfTemplate,
     			typename ModelType_,
 	 		typename ConcurrencyType_,
     			typename IoType_,
@@ -90,7 +90,6 @@ namespace Dmrg {
 	class TimeStepTargetting  {
 
 		public:
-			typedef WaveFunctionTransformationType_ WaveFunctionTransformationType;
 			typedef ModelType_ ModelType;
 			typedef ConcurrencyType_ ConcurrencyType;
 			typedef IoType_ IoType;
@@ -112,15 +111,16 @@ namespace Dmrg {
 			typedef TimeStepParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
 			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
+			typedef WaveFunctionTransfTemplate<BasisWithOperatorsType,VectorWithOffsetType> WaveFunctionTransfType;
 			typedef ComplexVectorType TargetVectorType;
 			typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
 			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
-			enum {EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
-			EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
-			INFINITE=WaveFunctionTransformationType::INFINITE};
+			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
+			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+			INFINITE=WaveFunctionTransfType::INFINITE};
 
 
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
@@ -131,7 +131,7 @@ namespace Dmrg {
 	    				const BasisType& basisSE,
 	 				const ModelType& model,
 					const TargettingParamsType& tstStruct,
-					const WaveFunctionTransformationType& wft)
+					const WaveFunctionTransfType& wft)
 
 				: stage_(tstStruct.sites.size(),DISABLED),basisS_(basisS),basisE_(basisE),basisSE_(basisSE),
 					model_(model),tstStruct_(tstStruct),waveFunctionTransformation_(wft),
@@ -690,7 +690,7 @@ namespace Dmrg {
 			const BasisType& basisSE_;
 			const ModelType& model_;
 			const TargettingParamsType& tstStruct_;
-			const WaveFunctionTransformationType& waveFunctionTransformation_;
+			const WaveFunctionTransfType& waveFunctionTransformation_;
 			PsimagLite::ProgressIndicator progress_;
 			RealType currentTime_;
 			std::vector<RealType> times_,weight_;

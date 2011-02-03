@@ -95,7 +95,7 @@ namespace Dmrg {
 	class Diagonalization {
  public:
 	 
-	 	typedef typename TargettingType::WaveFunctionTransformationType WaveFunctionTransformationType;
+	 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 		typedef typename TargettingType::ModelType ModelType;
 		typedef typename TargettingType::ConcurrencyType ConcurrencyType;
 		typedef typename TargettingType::IoType IoType;
@@ -115,7 +115,7 @@ namespace Dmrg {
     				const bool& useReflection,
 				IoOutType& io,
     				const size_t& quantumSector,
-    				WaveFunctionTransformationType& waveFunctionTransformation) 
+    				WaveFunctionTransfType& waveFunctionTransformation)
 			:
 			parameters_(parameters),
 			model_(model),
@@ -329,7 +329,7 @@ namespace Dmrg {
 		IoOutType& io_;
 		PsimagLite::ProgressIndicator progress_;
 		const size_t& quantumSector_; // this needs to be a reference since DmrgSolver will change it
-		WaveFunctionTransformationType& waveFunctionTransformation_;
+		WaveFunctionTransfType& waveFunctionTransformation_;
 		double oldEnergy_;
 	}; // class Diagonalization
 } // namespace Dmrg 
