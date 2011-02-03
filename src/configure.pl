@@ -592,7 +592,7 @@ bool observeOneFullSweep(size_t offset,const std::string& datafile,
 	if (hasTimeEvolution) {
 		measureTimeObs<ModelType,ObserverType,SparseMatrixType,
 			OperatorType,TargettingType>(model,observe,geometry.numberOfSites());
-		return;
+		return true; // return here for testing only 
 	}
 EOF
 	if  ($modelName=~/heisenberg/i) {
@@ -624,13 +624,14 @@ EOF
 	}
 print OBSOUT<<EOF;
 	// OPERATOR SZ
+	PsimagLite::Matrix<FieldType>* v3;
 	if (obsOptions.find("szsz")!=std::string::npos) {
 		PsimagLite::Matrix<RealType> Sz1 = model.getOperator("z");
 		PsimagLite::Matrix<FieldType> Sz = Sz1;
-		const PsimagLite::Matrix<FieldType>& v3=observe.correlations(n,Sz,Sz,1);
+		v3=new PsimagLite::Matrix<FieldType>(observe.correlations(n,Sz,Sz,1));
 		if (concurrency.root()) {
 			std::cout<<"OperatorSz:\\n";
-			std::cout<<v3;
+			std::cout<<(*v3);
 		}
 	}
 EOF
@@ -693,7 +694,7 @@ EOF
 		PsimagLite::Matrix<FieldType> spinTotal(v5.n_row(),v5.n_col());
 		
 		for (size_t i=0;i<spinTotal.n_row();i++) 
-			for (size_t j=0;j<spinTotal.n_col();j++) spinTotal(i,j) = 0.5*(v4(i,j) +v5(i,j)) + v3(i,j);
+			for (size_t j=0;j<spinTotal.n_col();j++) spinTotal(i,j) = 0.5*(v4(i,j) +v5(i,j)) + (*v3)(i,j);
 	
 		if (concurrency.root()) {
 			std::cout<<"SpinTotal:\\n";

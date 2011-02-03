@@ -131,6 +131,11 @@ namespace Dmrg {
 			}
 		}
 
+		~WaveFunctionTransfFactory()
+		{
+			delete wftImpl_;
+		}
+
 		void init(size_t nk)
 		{
 			wftImpl_->init(nk);
