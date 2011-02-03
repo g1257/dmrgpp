@@ -35,7 +35,6 @@ my $potentialVvalue=0.0;
 my ($infiniteKeptStates,$finiteLoops,$hasLoops);
 my ($model,$linSize,$modelLocation,$modelFullName);
 my ($geometryArgs);
-my $wftransformation="WaveFunctionTransfFactory";
 my ($electrons,$momentumJ,$su2Symmetry);
 my ($pthreads,$pthreadsLib)=(0,"");
 my $brand= "v2.0";
@@ -274,7 +273,6 @@ print FOUT<<EOF;
 #include "BlockMatrix.h"
 #include "DmrgSolver.h"
 #include "IoSimple.h"
-#include "$wftransformation.h"
 #include "DensityMatrix.h"
 #include "Operator.h"
 #include "$concurrencyName.h"
@@ -319,8 +317,11 @@ template<
 	template<typename,typename,typename> class ModelHelperTemplate,
 	template<typename,typename> class InternalProductTemplate,
 	template<typename> class VectorWithOffsetTemplate,
-	template<template<typename,typename,typename> class,template<typename,typename> class,
-		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
+	template<template<typename,typename,typename> class,
+		template<typename,typename> class,
+		template<typename,typename> class,
+		typename,typename,typename,
+		template<typename> class> class TargettingTemplate,
 	typename MySparseMatrix
 >
 void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverType& dmrgSolverParams,
@@ -339,7 +340,6 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 			ModelType,
 			MyConcurrency,
 			MyIo,
-			$wftransformation,
 			TargettingTemplate,
 			VectorWithOffsetTemplate
 		> SolverType;
@@ -487,7 +487,6 @@ print OBSOUT<<EOF;
 #include "GroundStateTargetting.h"
 #include "DmrgSolver.h" // only used for types
 #include "DensityMatrix.h" // only used for types
-#include "WaveFunctionTransfFactory.h"// only used for types
 #include "TimeStepTargetting.h" // only used for types
 #include "GroundStateTargetting.h" // only used for types
 
@@ -715,8 +714,11 @@ EOF
 	template<typename,typename,typename> class ModelHelperTemplate,
 	template<typename,typename> class InternalProductTemplate,
 	template<typename> class VectorWithOffsetTemplate,
-	template<template<typename,typename,typename> class,template<typename,typename> class,
-		typename,typename,typename,typename,template<typename> class> class TargettingTemplate,
+	template<template<typename,typename,typename> class,
+		template<typename,typename> class,
+		template<typename,typename> class,
+		typename,typename,typename,
+		template<typename> class> class TargettingTemplate,
 	typename MySparseMatrix
 >
 void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvolution,
@@ -738,13 +740,11 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
                         ModelType,
                         MyConcurrency,
                         MyIo,
-                        WaveFunctionTransfFactory,
                         TargettingTemplate,
                         VectorWithOffsetTemplate
                 > SolverType; // only used for types
 	
 	typedef typename SolverType::TargettingType TargettingType;
-	typedef typename SolverType::WaveFunctionTransformationType WaveFunctionTransformationType;
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	
 	ModelType model(mp,geometry);
