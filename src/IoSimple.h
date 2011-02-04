@@ -355,6 +355,13 @@ namespace PsimagLite {
 					}
 				}
 
+				template<typename T>
+				void readRaw(T &x,std::string const &s,int level=0)
+				{
+					advance(s,level);
+					fin_>>x;
+				}
+
 				template<typename X,template<typename> class SomeType>
 				void readSparseVector(SomeType<X> &x,std::string const &s,int level=0)
 				{
