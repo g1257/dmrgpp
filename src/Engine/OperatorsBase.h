@@ -106,6 +106,12 @@ namespace Dmrg {
 		{
 		}
 
+		template<typename IoInputter>
+		void load(IoInputter& io)
+		{
+			operatorsImpl_.load(io);
+		}
+
 		void setOperators(const std::vector<OperatorType>& ops)
 		{
 			operatorsImpl_.setOperators(ops);

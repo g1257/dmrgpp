@@ -111,6 +111,17 @@ namespace Dmrg {
 			reducedOpImpl_.setHamiltonian(hamiltonian_);
 		}
 
+		template<typename IoInputter>
+		void load(IoInputter& io)
+		{
+			if (!useSu2Symmetry_)
+				io.read(operators_,"#OPERATORS");
+			else reducedOpImpl_.load(io);
+
+			io.readMatrix(hamiltonian_,"#HAMILTONIAN");
+			reducedOpImpl_.setHamiltonian(hamiltonian_);
+		}
+
 		void setOperators(const std::vector<OperatorType>& ops)
 		{
 			if (!useSu2Symmetry_) operators_=ops;

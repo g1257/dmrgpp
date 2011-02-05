@@ -121,10 +121,11 @@ namespace Dmrg {
 		}
 		
 		//! Loads this basis from memory or disk
-		/*template<typename IoInputter>
-		Basis(IoInputter& io,size_t counter=0,bool bogus = false) : basisImplementation_(io,counter,bogus)
+		template<typename IoInputter>
+		void load(IoInputter& io)
 		{
-		}*/
+			basisImplementation_.load(io);
+		}
 
 		
 		//! Returns the name of this basis

@@ -96,7 +96,9 @@ namespace Dmrg {
 			VectorWithOffset()  : size_(0),offset_(0) { }
 			
 			template<typename SomeBasisType>
-			VectorWithOffset(const std::vector<size_t>& weights,const SomeBasisType& someBasis) 
+			VectorWithOffset(
+					const std::vector<size_t>& weights,
+					const SomeBasisType& someBasis)
 			: size_(someBasis.size())
 			{
 				bool found = false;

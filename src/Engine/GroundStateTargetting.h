@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <string>
 #include "GroundStateParams.h"
 #include "ApplyOperatorLocal.h"
+#include <stdexcept>
 
 namespace Dmrg {
 	
@@ -103,6 +104,8 @@ namespace Dmrg {
 			typedef ConcurrencyType_ ConcurrencyType;
 			typedef IoType_ IoType;
 			
+			typedef PsimagLite::IoSimple::In IoInputType;
+
 			typedef typename ModelType::RealType RealType;
 			typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 			typedef std::vector<RealType> VectorType;
@@ -196,9 +199,29 @@ namespace Dmrg {
 			}
 			
 			template<typename IoOutputType>
-			void save(const std::vector<size_t>& block,IoOutputType& io) const { }
+			void save(const std::vector<size_t>& block,IoOutputType& io) const
+			{
+				std::ostringstream msg;
+				msg<<"Saving state...";
+				progress_.printline(msg,std::cout);
 
-			void load(const std::string& f) {}
+				if (block.size()!=1) throw std::runtime_error(
+						"GST only supports blocks of size 1\n");
+				std::string s = "#GSTCENTRALSITE=" + utils::ttos(block[0]);
+				io.printline(s);
+
+				psi_.save(io,"PSI");
+			}
+
+			void load(const std::string& f)
+			{
+				IoInputType io(f);
+				int site=0;
+				io.readline(site,"#GSTCENTRALSITE=");
+				if (site<0) throw std::runtime_error(
+						"GST::load(...): site cannot be negative\n");
+				psi_.load(io,"PSI");
+			}
 
 		private:
 			VectorWithOffsetType psi_;

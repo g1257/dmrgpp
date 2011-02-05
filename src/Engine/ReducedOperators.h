@@ -115,6 +115,13 @@ namespace Dmrg {
 				io.read(reducedOperators_,"#OPERATORS");
 			}
 
+			template<typename IoInputter>
+			void load(IoInputter& io)
+			{
+				if (!useSu2Symmetry_) return;
+				io.read(reducedOperators_,"#OPERATORS");
+			}
+
 			const OperatorType& getReducedOperatorByIndex(int i) const 
 			{
 				return reducedOperators_[i];	

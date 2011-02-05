@@ -123,15 +123,17 @@ namespace Dmrg {
 		template<typename SomeParametersType>
 		WaveFunctionTransfFactory(SomeParametersType& parameters,size_t nk)
 		: hilbertSpaceOneSite_(nk),
-		  isEnabled_(parameters.options.find("nowft")!=std::string::npos),
+		  isEnabled_(!(parameters.options.find("nowft")!=std::string::npos)),
 		  stage_(INFINITE),
 		  counter_(0),
 		  firstCall_(true),
 		  progress_("WaveFunctionTransformation",0),
 		  filenameIn_(parameters.checkpoint.filename),
 		  filenameOut_(parameters.filename),
-		  WFT_STRING("Wft")
+		  WFT_STRING("Wft"),
+		  wftImpl_(0)
 		{
+			if (!isEnabled_) return;
 			if (parameters.options.find("checkpoint")!=std::string::npos)
 				load();
 			if (BasisType::useSu2Symmetry()) {
@@ -145,6 +147,7 @@ namespace Dmrg {
 
 		~WaveFunctionTransfFactory()
 		{
+			if (!isEnabled_) return;
 			save();
 			delete wftImpl_;
 		}
@@ -424,7 +427,8 @@ namespace Dmrg {
 
 		void printDmrgWave() const
 		{
-			std::cerr<<dmrgWaveStruct_;
+			PsimagLite::IoSimple::Out io(std::cerr);
+			dmrgWaveStruct_.save(io);
 			std::cerr<<"wsStack="<<wsStack_.size()<<"\n";
 			std::cerr<<"weStack="<<weStack_.size()<<"\n";
 			std::cerr<<"counter="<<counter_<<"\n";
@@ -432,6 +436,9 @@ namespace Dmrg {
 
 		void save() const
 		{
+			if (!isEnabled_) throw std::runtime_error(
+					"WFT::save(...) called but wft is disabled\n");
+
 			typename IoType::Out io(WFT_STRING + filenameOut_,0);
 			std::string s="isEnabled="+utils::ttos(isEnabled_);
 			io.printline(s);
@@ -440,18 +447,22 @@ namespace Dmrg {
 			s="counter="+utils::ttos(counter_);
 			io.printline(s);
 			io.printline("dmrgWaveStruct");
-			io.print(dmrgWaveStruct_);
+			dmrgWaveStruct_.save(io);
 			io.printMatrix(wsStack_,"wsStack");
 			io.printMatrix(weStack_,"weStack");
 		}
 
 		void load()
 		{
+			if (!isEnabled_) throw std::runtime_error(
+					"WFT::load(...) called but wft is disabled\n");
+
 			typename IoType::In io(WFT_STRING + filenameIn_);
-			io.readline(isEnabled_,"isEnabled");
-			io.readline(stage_,"stage_");
-			io.readline(counter_,"counter_");
-			io.readRaw(dmrgWaveStruct_,"dmrgWaveStruct");
+			io.readline(isEnabled_,"isEnabled=");
+			io.readline(stage_,"stage=");
+			io.readline(counter_,"counter=");
+			io.advance("dmrgWaveStruct");
+			dmrgWaveStruct_.load(io);
 			io.readMatrix(wsStack_,"wsStack");
 			io.readMatrix(weStack_,"weStack");
 		}

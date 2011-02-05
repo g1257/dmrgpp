@@ -342,6 +342,8 @@ namespace Dmrg {
 				}
 				finiteStep(S,E,pS,pE,i,psi);
 			}
+			checkpoint_.save(pS,pE,io_);
+			psi.save(sitesIndices_[stepCurrent_],io_);
 		}
 
 		void finiteStep(
@@ -415,7 +417,6 @@ namespace Dmrg {
 				std::string s="#WAVEFUNCTION_ENERGY="+utils::ttos(gsEnergy);
 				io_.printline(s);
 			}
-			checkpoint_.save(pS,pE,loopIndex,io_);
 		}
 
 		void changeTruncateAndSerialize(MyBasisWithOperators& pS,MyBasisWithOperators& pE,

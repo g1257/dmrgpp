@@ -83,9 +83,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CHECKPOINT_H
 #define CHECKPOINT_H
 
-#include "Utils.h"
 #include <stack>
+#include "Utils.h"
 #include "DiskStack.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 
@@ -109,7 +110,8 @@ namespace Dmrg {
 			parameters_(parameters),
 			enabled_(parameters_.options.find("checkpoint")!=std::string::npos),
 			systemDisk_(SYSTEM_STACK_STRING+parameters_.checkpoint.filename , SYSTEM_STACK_STRING+parameters_.filename,enabled_,rank),
-			envDisk_(ENVIRON_STACK_STRING+parameters_.checkpoint.filename , ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank)
+			envDisk_(ENVIRON_STACK_STRING+parameters_.checkpoint.filename , ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank),
+			progress_("Checkpoint",rank)
 		{
 			if (enabled_) loadStacksDiskToMemory();
 		}
@@ -120,8 +122,11 @@ namespace Dmrg {
 		}
 
 		// Not related to stacks
-		void save(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE,size_t loop,typename IoType::Out& io) const
+		void save(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE,typename IoType::Out& io) const
 		{
+			std::ostringstream msg;
+			msg<<"Saving pS and pE...";
+			progress_.printline(msg,std::cout);
 			pS.save(io,"#CHKPOINTSYSTEM");
 			pE.save(io,"#CHKPOINTENVIRON");
 		}
@@ -137,17 +142,11 @@ namespace Dmrg {
 				throw std::runtime_error("Checkpoint::load(...)\n");
 			}
 			loop--;
-			if (loop<parameters_.checkpoint.index) {
-				std::cerr<<"There are "<<loop<<" resumable checkpoints\n";
-				std::cerr<<"But you requested to go back "<<parameters_.checkpoint.index<<"\n";
-				throw std::runtime_error("Checkpoint::load(...)\n");
-			}
-			loop -= parameters_.checkpoint.index;
 			BasisWithOperatorsType pS1(ioTmp,"#CHKPOINTSYSTEM",loop);
 			pS=pS1;
 			BasisWithOperatorsType pE1(ioTmp,"#CHKPOINTENVIRON");
 			pE=pE1;
-			psi.load(parameters_.checkpoint.filename2);
+			psi.load(parameters_.checkpoint.filename);
 		}
 
 		void push(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE)
@@ -181,6 +180,7 @@ namespace Dmrg {
 		bool enabled_;
 		MemoryStackType systemStack_,envStack_; // <--we're the owner
 		DiskStackType systemDisk_,envDisk_;
+		PsimagLite::ProgressIndicator progress_;
 
 		//! shrink  (we don't really shrink, we just undo the growth)
 		void shrink(BasisWithOperatorsType &pSprime,MemoryStackType& thisStack)
@@ -191,12 +191,19 @@ namespace Dmrg {
 
 		void loadStacksDiskToMemory()
 		{
+			std::ostringstream msg;
+			msg<<"Loading sys. and env. stacks from disk...";
+			progress_.printline(msg,std::cout);
+
 			loadStack(systemStack_,systemDisk_);
 			loadStack(envStack_,envDisk_);
 		}
 
 		void loadStacksMemoryToDisk()
 		{
+			std::ostringstream msg;
+			msg<<"Writing sys. and env. stacks to disk...";
+			progress_.printline(msg,std::cout);
 			loadStack(systemDisk_,systemStack_);
 			loadStack(envDisk_,envStack_);
 		}

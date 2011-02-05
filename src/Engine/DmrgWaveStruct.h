@@ -91,42 +91,37 @@ struct DmrgWaveStruct {
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename BasisWithOperatorsType::BasisType BasisType;
 
 	PsimagLite::Matrix<SparseElementType> ws;
 	PsimagLite::Matrix<SparseElementType> we;
-	typename BasisWithOperatorsType::BasisType pSE;
+	BasisType pSE;
 	BasisWithOperatorsType pSprime,pEprime;
-	//int m;
-	//std::vector<SparseElementType> psi;
 
 	DmrgWaveStruct() : pSE("pSE"),pSprime("pSprime"),pEprime("pEprime") { }
-};
 
-template<typename BasisWithOperatorsType>
-std::ostream& operator<<(std::ostream& os,
-		const DmrgWaveStruct<BasisWithOperatorsType>& dmrgWave)
-{
-	os<<dmrgWave.ws;
-	os<<dmrgWave.we;
-	os<<dmrgWave.pSE;
-	os<<dmrgWave.pSprime;
-	os<<dmrgWave.pEprime;
+	template<typename IoInputType>
+	void load(IoInputType& io)
+	{
+		io.readMatrix(ws,"Ws");
+		io.readMatrix(we,"We");
+		pSE.load(io);
+		pSprime.load(io);
+		pEprime.load(io);
 
-	return os;
-}
+	}
 
-template<typename BasisWithOperatorsType>
-std::istream& operator>>(std::istream& is,
-		DmrgWaveStruct<BasisWithOperatorsType>& dmrgWave)
-{
-	is>>dmrgWave.ws;
-	is>>dmrgWave.we;
-	is>>dmrgWave.pSE;
-	is>>dmrgWave.pSprime;
-	is>>dmrgWave.pEprime;
+	template<typename IoOutputType>
+	void save(IoOutputType& io) const
+	{
+		io.printMatrix(ws,"Ws");
+		io.printMatrix(we,"We");
+		pSE.save(io);
+		pSprime.save(io);
+		pEprime.save(io);
+	}
 
-	return is;
-}
+}; // struct DmrgWaveStruct
 
 } // namespace Dmrg 
 

@@ -114,13 +114,13 @@ namespace Dmrg {
 		{
 		}
 
-		/*template<typename IoInputter>
-		BasisWithOperators(IoInputter& io,size_t counter=0) 
+		template<typename IoInputter>
+		void load(IoInputter& io)
 		{
-			BasisType::load(io,counter); // parent loads
-			operators_.load(io,counter);
-		}*/
-		
+			BasisType::load(io); // parent loads
+			operators_.load(io);
+		}
+
 		//! set this basis to the outer product of   basis2 and basis3 or basis3 and basis2  depending on dir
 		void setToProduct(const ThisType& basis2,const ThisType& basis3,int dir)
 		{

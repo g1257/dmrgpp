@@ -119,16 +119,14 @@ namespace Dmrg {
 		}
 
 		// use this if you don't know the name
-		/*template<typename IoInputter>
-		BasisImplementation(IoInputter& io,size_t counter=0,bool bogus = false)
-				: dmrgTransformed_(false), name_("#NAME"), progress_("#NAME",0)
+		template<typename IoInputter>
+		void load(IoInputter& io)
 		{
 			std::string nn="#NAME=";
-			std::pair<std::string,size_t> sc = io.advance(nn,counter);
+			std::pair<std::string,size_t> sc = io.advance(nn);
 			name_ = sc.first.substr(nn.size(),sc.first.size());
 			loadInternal(io);
-			
-		}*/
+		}
 
 		const std::string& name() const { return name_; }
 
@@ -409,8 +407,12 @@ namespace Dmrg {
 		template<typename IoOutputter>
 		void save(IoOutputter& io) const
 		{
+			//std::ostringstream msg;
+			//msg<<"Now saving to disk";
+			//progress_.printline(msg,std::cerr);
 			io.printline("#NAME="+name_);
 			saveInternal(io);
+
 		}
 		
 		template<typename RealType2,typename SparseMatrixType2>

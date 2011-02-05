@@ -150,31 +150,13 @@ namespace Dmrg {
 
 	struct DmrgCheckPoint {
 		bool enabled;
-		size_t index;
 		std::string filename;
-		std::string filename2; // used to hold time vectors or dyn vectors
-		
-		template<typename IoInputType>
-		void load(IoInputType& io)
-		{
-			io.readline(enabled,"CheckpointEnabled=");
-			try {
-				io.readline(index,"CheckpointIndex=");
-			} catch (std::exception& e) {
-				io.rewind();
-				index=0;
-			}
-			io.readline(filename,"CheckpointFilename=");
-			io.readline(filename2,"CheckpointFilename2=");
-		}
 	};
 
 	std::istream &operator>>(std::istream& is,DmrgCheckPoint& c)
 	{
 		is>>c.enabled;
-		is>>c.index;
 		is>>c.filename;
-		is>>c.filename2;
 		return is;	
 	}
 
@@ -202,7 +184,7 @@ namespace Dmrg {
 			if (options.find("hasQuantumNumbers")!=std::string::npos) 
 				io.read(targetQuantumNumbers,"TargetQuantumNumbers");
 			if (options.find("checkpoint")!=std::string::npos)
-				checkpoint.load(io);
+				io.readline(checkpoint.filename,"CheckpointFilename=");
 			nthreads=1; // provide a default value
 			if (options.find("hasThreads")!=std::string::npos)
 				io.readline(nthreads,"Threads=");
@@ -210,19 +192,6 @@ namespace Dmrg {
 		} 
 
 	};
-
-	//! Read Dmrg parameters from JSON file
-	/* ParametersDmrgSolver&
-	operator <= (ParametersDmrgSolver& parameters, const dca::JsonReader& reader) 
-	{
-		const dca::JsonAccessor<std::string>& dmrg(reader["programSpecific"]["DMRG"]["solverDmrg"]);
-		
-		parameters.version <= dmrg["version"];
-		parameters.filename <= dmrg["outputfile"];
-		parameters.numberOfKeptStates <= dmrg["numberOfKeptStates"];
-		
-		return parameters;
-	} */
 
 	//! print dmrg parameters
 	template<typename FieldType>
