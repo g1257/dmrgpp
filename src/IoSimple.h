@@ -93,106 +93,121 @@ namespace PsimagLite {
 	class IoSimple {
 	public:
 		class Out {
-			public:
-				Out()  : rank_(0) {}
-				Out(const std::string& fn,int rank) : rank_(rank),filename_(fn)
-				{
-					if (rank_!=0) return;
-					fout_.open(fn.c_str());
-					if (!fout_ || !fout_.good()) throw std::runtime_error("Out: error while opening file!\n");
-				}
+		public:
+			Out()  : rank_(0),fout_(0) {}
 
-				void open(std::string const &fn,std::ios_base::openmode mode,int rank)
-				{
-					rank_=rank;
-					if (rank_!=0) return;
-					filename_=fn;
-					fout_.open(fn.c_str(),mode);
-					if (!fout_ || !fout_.good()) throw std::runtime_error("Out: error while opening file!\n");
-				}
+			Out(std::ostream& os) : rank_(0), filename_("OSTREAM")
+			{
+				fout_=(std::ofstream *)&os;
+			}
 
-				void close() 
-				{
-					filename_="FILE_IS_CLOSED"; 
-					fout_.close(); 
-				}
+			Out(const std::string& fn,int rank) : rank_(rank),filename_(fn),fout_(0)
+			{
+				if (rank_!=0) return;
+				if (!fout_) fout_=new std::ofstream;
+				fout_->open(fn.c_str());
+				if (!(*fout_) || !fout_->good())
+					throw std::runtime_error("Out: error while opening file!\n");
+			}
 
-				void printline(const std::string &s) 
-				{
-					if (rank_!=0) return;
-					fout_<<s<<"\n";
-				}
+			~Out()
+			{
+				if (rank_!=0) return;
+				if (filename_=="OSTREAM" || !fout_) return; 
+				fout_->close();
+				delete fout_;
+			}
 
-				void printline(std::ostringstream &s) 
-				{
-					if (rank_!=0) return;
-					fout_<<s.str()<<"\n";
-					s.flush();
-					s.seekp(std::ios_base::beg);
-				}
+			void open(
+					std::string const &fn,
+					std::ios_base::openmode mode,
+					int rank)
+			{
+				rank_=rank;
+				if (rank_!=0) return;
+				if (filename_=="OSTREAM") 
+					throw std::runtime_error("open: not possible\n");
+				filename_=fn;
+				if (!fout_) fout_=new std::ofstream;
+				fout_->open(fn.c_str(),mode);
+				if (!(*fout_) || !fout_->good())
+					throw std::runtime_error("Out: error while opening file!\n");
+			}
 
-				
+			void close()
+			{
+				if (filename_=="OSTREAM")
+					throw std::runtime_error("close: not possible\n");
+				filename_="FILE_IS_CLOSED";
+				fout_->close();
+			}
 
-				template<typename X>
-				void printVector(X const &x,std::string const &label)
-				{
-					if (rank_!=0) return;
-					fout_<<label<<"\n";
-					fout_<<x.size()<<"\n";
-					for (size_t i=0;i<x.size();i++) fout_<<x[i]<<"\n";
-				}
+			void printline(const std::string &s)
+			{
+				if (rank_!=0) return;
+				(*fout_)<<s<<"\n";
+			}
 
-				template<class T>
-				void print(const T&  something)
-				{
-					if (rank_!=0) return;
-					if (!fout_ || !fout_.good()) throw std::runtime_error("Out: file not open!\n");
-					fout_<<something;
-				}
+			void printline(std::ostringstream &s)
+			{
+				if (rank_!=0) return;
+				(*fout_)<<s.str()<<"\n";
+				s.flush();
+				s.seekp(std::ios_base::beg);
+			}
 
-				void print(const std::string& something)
-				{
-					if (rank_!=0) return;
-					fout_<<something;
-				}
 
-				template<typename X>
-				void printMatrix(Matrix<X> const &mat,std::string const &s)
-				{
-					if (rank_!=0) return;
-					fout_<<s<<"\n";
-					fout_<<mat.n_row()<<" "<<mat.n_col()<<"\n";
-					
-					for (size_t i=0;i<mat.n_row();i++) {
-						for (size_t j=0;j<mat.n_col();j++) fout_<<mat(i,j)<<" ";
-						fout_<<"\n";
-					}
-				}
 
-				template<typename X>
-				void printMatrix(X const &mat,std::string const &s)
-				{
-					if (rank_!=0) return;
-					fout_<<s<<"\n";
-					fout_<<mat;
-					
-				}
+			template<typename X>
+			void printVector(X const &x,std::string const &label)
+			{
+				if (rank_!=0) return;
+				(*fout_)<<label<<"\n";
+				(*fout_)<<x.size()<<"\n";
+				for (size_t i=0;i<x.size();i++) (*fout_)<<x[i]<<"\n";
+			}
 
-				int rank() { return rank_; }
+			template<class T>
+			void print(const T&  something)
+			{
+				if (rank_!=0) return;
+				if (!(*fout_) || !fout_->good())
+					throw std::runtime_error("Out: file not open!\n");
+				(*fout_)<<something;
+			}
 
-				~Out() 
-				{
-					if (rank_!=0) return;
-					fout_.close();
-				}
+			void print(const std::string& something)
+			{
+				if (rank_!=0) return;
+				(*fout_)<<something;
+			}
 
-				template<typename X>
-				friend void operator<<(Out& io,X& t);
-				
-			private:
-				int rank_;
-				std::string filename_;
-				std::ofstream 	fout_;
+			template<typename X>
+			void printMatrix(Matrix<X> const &mat,std::string const &s)
+			{
+				if (rank_!=0) return;
+				(*fout_)<<s<<"\n";
+				(*fout_)<<mat;
+			}
+
+			template<typename X>
+			void printMatrix(X const &mat,std::string const &s)
+			{
+				if (rank_!=0) return;
+				(*fout_)<<s<<"\n";
+				(*fout_)<<mat;
+
+			}
+
+			int rank() { return rank_; }
+
+			template<typename X>
+			friend void operator<<(Out& io,X& t);
+
+		private:
+			int rank_;
+			std::string filename_;
+			std::ofstream* fout_;
 		};
 
 		class In {
@@ -204,7 +219,8 @@ namespace PsimagLite {
 				In(std::string const &fn) : filename_(fn), fin_(fn.c_str())
 				{
 					if (!fin_ || !fin_.good() || fin_.bad()) {
-						std::string s = "IoSimple::ctor(...): Can't open file "+filename_+"\n";
+						std::string s = "IoSimple::ctor(...): Can't open file "
+								+filename_+"\n";
 						throw std::runtime_error(s.c_str());
 					}
 				}
@@ -214,7 +230,8 @@ namespace PsimagLite {
 					filename_=fn;
 					fin_.open(fn.c_str());
 					if (!fin_ || !fin_.good() || fin_.bad()) {
-						std::string s = "IoSimpleIn::open(...) failed for file " + filename_ + "\n";
+						std::string s = "IoSimpleIn::open(...) failed for file "
+								+ filename_ + "\n";
 						throw std::runtime_error(s.c_str());
 					}
 				}
@@ -237,7 +254,8 @@ namespace PsimagLite {
 						if (fin_.eof()) break;
 						if (temp.substr(0,s.size())==s) {
 							foundOnce =true;
-							std::istringstream temp2(temp.substr(s.size(),temp.size()));
+							std::istringstream temp2(temp.substr(s.size(),
+									temp.size()));
 							temp2 >> x;
 							if (counter==level) {
 								found=true;
@@ -247,7 +265,9 @@ namespace PsimagLite {
 						}
 					}
 					if (!foundOnce || (!found && level!=LAST_INSTANCE)) {
-						std::string emessage = "IoSimple::In::readline(): Not found "+s+" in file "+filename_;
+						std::string emessage =
+							"IoSimple::In::readline(): Not found "+s+
+							" in file "+filename_;
 						throw std::runtime_error(s);
 					}
 
@@ -261,7 +281,8 @@ namespace PsimagLite {
 				}
 
 				template<typename X>
-				std::pair<std::string,size_t> read(X &x,std::string const &s,int level=0)
+				std::pair<std::string,size_t> read(X &x,
+						std::string const &s,int level=0)
 				{
 					std::pair<std::string,size_t> sc = advance(s,level);
 					int xsize;
@@ -276,7 +297,8 @@ namespace PsimagLite {
 				}
 				
 				template<typename X>
-				std::pair<std::string,size_t> readKnownSize(X &x,std::string const &s,int level=0)
+				std::pair<std::string,size_t> readKnownSize(X &x,
+						std::string const &s,int level=0)
 				{
 					std::pair<std::string,size_t> sc = advance(s,level);
 					
@@ -288,7 +310,8 @@ namespace PsimagLite {
 					return sc;
 				}
 
-				std::pair<std::string,size_t> advance(std::string const &s,int level=0,bool beQuiet=false)
+				std::pair<std::string,size_t> advance(std::string const &s,
+						int level=0,bool beQuiet=false)
 				{
 					std::string temp="NOTFOUND";
 					std::string tempSaved="NOTFOUND";
@@ -341,7 +364,8 @@ namespace PsimagLite {
 				}
 
 				template<typename T>
-				void read(std::vector<std::pair<T,T> > &x,std::string const &s,int level=0)
+				void read(std::vector<std::pair<T,T> > &x,
+						std::string const &s,int level=0)
 				{
 					advance(s,level);
 					int xsize;
@@ -353,13 +377,6 @@ namespace PsimagLite {
 						fin_>>tmp2;
 						x[i]=std::pair<T,T>(tmp1,tmp2);
 					}
-				}
-
-				template<typename T>
-				void readRaw(T &x,std::string const &s,int level=0)
-				{
-					advance(s,level);
-					fin_>>x;
 				}
 
 				template<typename X,template<typename> class SomeType>
@@ -385,14 +402,6 @@ namespace PsimagLite {
 				{
 					advance(s,level);
 					fin_>>mat;
-					/*int nrow,ncol;
-
-					fin_>>nrow;
-					fin_>>ncol;
-					mat.resize(nrow,ncol);
-
-					for (size_t i=0;i<mat.n_row();i++) for (size_t j=0;j<mat.n_col();j++) fin_>>mat(i,j);
-					*/
 				}
 
 				template<typename FieldType,template <typename> class SparseMatrixTemplate,
@@ -405,17 +414,10 @@ namespace PsimagLite {
 					fin_>>op.j;
 				}
 
-//				template<typename X>
-//				void readMatrix(X& mat,const std::string& s,int level=0)
-//				{
-//					advance(s,level);
-//					fin_>>mat;
-//				}
-
 				void rewind()
 				{
-					fin_.clear();              // forget we hit the end of file
-					fin_.seekg(0, std::ios::beg);   // move to the start of the file
+					fin_.clear(); // forget we hit the end of file
+					fin_.seekg(0, std::ios::beg); // move to the start of the file
 				}
 
 				~In() { fin_.close(); }
@@ -432,7 +434,7 @@ namespace PsimagLite {
 	template<typename T>
 	void operator<<(IoSimple::Out& io,T& t)
 	{
-		io.fout_<<t;
+		(*(io.fout_))<<t;
 	}
 
 	template<typename T>
