@@ -80,32 +80,30 @@ namespace Dmrg {
 	template<
 		template<typename,typename,typename> class LanczosSolverTemplate,
 		template<typename,typename> class InternalProductTemplate,
-		typename WaveFunctionTransformationType_,
+		template<typename,typename> class WaveFunctionTransfTemplate,
 		typename ModelType_,
 		typename ConcurrencyType_,
 		typename IoType_,
 		template<typename> class VectorWithOffsetTemplate>
 	class DynamicTargetting  {
 	public:
-		
-		typedef WaveFunctionTransformationType_ WaveFunctionTransformationType;
 		typedef ModelType_ ModelType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef IoType_ IoType;
 		typedef typename ModelType::RealType RealType;
-		typedef std::complex<RealType> ComplexType;
 		typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
-		typedef std::vector<ComplexType> ComplexVectorType;
 		typedef GroundStateParams<ModelType> TargettingParamsType; //3a-01
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
-		typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
+		typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
-		typedef ComplexVectorType TargetVectorType;
-		
-		enum {	EXPAND_ENVIRON=WaveFunctionTransformationType::EXPAND_ENVIRON,
-						EXPAND_SYSTEM=WaveFunctionTransformationType::EXPAND_SYSTEM,
-						INFINITE=WaveFunctionTransformationType::INFINITE};
+		typedef VectorType TargetVectorType;
+		typedef WaveFunctionTransfTemplate<BasisWithOperatorsType,
+				VectorWithOffsetType> WaveFunctionTransfType;
+
+		enum {	EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
+						EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+						INFINITE=WaveFunctionTransfType::INFINITE};
 		
 		DynamicTargetting(
 				const BasisWithOperatorsType& basisS,
@@ -113,7 +111,7 @@ namespace Dmrg {
 				const BasisType& basisSE,
 				const ModelType& model,
 				const TargettingParamsType& tstStruct,
-				const WaveFunctionTransformationType& wft)
+				const WaveFunctionTransfType& wft)
 		:	basisS_(basisS),
 		 	basisE_(basisE),
 		 	basisSE_(basisSE)
@@ -136,6 +134,12 @@ namespace Dmrg {
 			return 0.0; // bogus
 		}
 
+		void load(const std::string& f) { }
+
+		template<typename IoOutputType>
+		void save(const std::vector<size_t>& block,IoOutputType& io) const
+		{}
+
 		template<typename SomeBasisType>
 		void setGs(const std::vector<TargetVectorType>& v,
 				const SomeBasisType& someBasis)
@@ -143,9 +147,9 @@ namespace Dmrg {
 			bogus();
 		}
 
-		const ComplexType& operator[](size_t i) const { return psi_[i]; } // bogus!!
+		const VectorType& operator[](size_t i) const { return psi_[i]; } // bogus!!
 
-		ComplexType& operator[](size_t i) { return psi_[i]; } // bogus!!
+		VectorType& operator[](size_t i) { return psi_[i]; } // bogus!!
 
 		const VectorWithOffsetType& gs() const { return psi_; } // bogus!!
 
@@ -162,7 +166,7 @@ namespace Dmrg {
 		}
 
 		void evolve(RealType Eg,size_t direction,const BlockType& block,
-				size_t loopNumber, bool needsPrinting)
+				size_t loopNumber)
 		{
 			bogus();
 		}
