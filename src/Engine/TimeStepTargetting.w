@@ -212,12 +212,12 @@ The body of the constructor follows:
 				size_t n = times_.size();
 				for (size_t i=0;i<n;i++) {
 					times_[i] = i*tau/(n-1);
-					weight_[i] = factor/(n+2);
+					weight_[i] = factor/(n+4);
 					sum += weight_[i];
 				}
 				sum -= weight_[0];
 				sum -= weight_[n-1];
-				weight_[0] = weight_[n-1] = 2*factor/(n+2);
+				weight_[0] = weight_[n-1] = 2*factor/(n+4);
 				sum += weight_[n-1];
 				sum += weight_[0];
 				

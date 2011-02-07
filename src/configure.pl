@@ -762,6 +762,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 			SparseMatrixType,OperatorType,TargettingType,GeometryType>
 			(offset,datafile,geometry,model,obsOptions,hasTimeEvolution,concurrency)) break;
 		offset += (n - 2);
+		if (!hasTimeEvolution) break;
 	}
 }
 
