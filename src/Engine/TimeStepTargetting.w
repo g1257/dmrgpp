@@ -595,14 +595,14 @@ This is done only for debugging purposes, and uses the function \verb|test|.
 			void cocoon(size_t direction,const BlockType& block) const
 			{
 				size_t site = block[0];
-				std::cerr<<"-------------&*&*&* Cocoon output starts\n";
+				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
 				test(psi_,psi_,direction,"<PSI|A|PSI>",site);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
 					test(targetVectors_[j],targetVectors_[j],direction,s,site);
 				}
-				std::cerr<<"-------------&*&*&* Cocoon output ends\n";
+				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
 			}
 @}
 

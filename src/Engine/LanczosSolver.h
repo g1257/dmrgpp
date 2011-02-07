@@ -317,9 +317,8 @@ namespace Dmrg {
 			
 			std::ostringstream msg;
 			msg.precision(8);
-
-			msg<<"Done block of size="<<mat_.rank()<<" after iter="<<iter;
-			msg<<" iterations, Energy="<<energyTmp<<" orig. norm="<<norma;
+			msg<<"Found Energy="<<energyTmp<<" after "<<iter;
+			msg<<" iterations, "<<" orig. norm="<<norma;
 			progress_.printline(msg,os);
 		}
 		

@@ -445,7 +445,7 @@ namespace Dmrg {
 			io.read(block_,"#BLOCK");
 			io.read(quantumNumbers_,"#QN");
 			io.read(electrons_,"#ELECTRONS");
-			//io.read(electronsOld_,"#0OLDELECTRONS");
+			io.read(electronsOld_,"#0OLDELECTRONS");
 			io.read(partition_,"#PARTITION");
 			io.read(permInverse_,"#PERMUTATIONINVERSE");
 			permutationVector_.resize(permInverse_.size());
@@ -465,7 +465,7 @@ namespace Dmrg {
 			io.printVector(block_,"#BLOCK");
 			io.printVector(quantumNumbers_,"#QN");
 			io.printVector(electrons_,"#ELECTRONS");
-			//io.printVector(electronsOld_,"#0OLDELECTRONS");
+			io.printVector(electronsOld_,"#0OLDELECTRONS");
 			io.printVector(partition_,"#PARTITION");
 			io.printVector(permInverse_,"#PERMUTATIONINVERSE");
 
