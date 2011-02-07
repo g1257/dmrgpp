@@ -212,7 +212,9 @@ namespace PsimagLite {
 
 		class In {
 			public:
-				static const size_t LAST_INSTANCE=4096;
+				static const int LAST_INSTANCE=-1;
+				typedef int long long LongIntegerType;
+				typedef unsigned int long long LongSizeType;
 
 				In() { }
 
@@ -243,12 +245,15 @@ namespace PsimagLite {
 				}
 
 				template<typename X>
-				size_t readline(X &x,const std::string &s,size_t level=0) 
+				size_t readline(
+						X &x,
+						const std::string &s,
+						LongIntegerType level=0)
 				{
 					std::string temp;
 					bool found=false;
 					bool foundOnce =false;
-					size_t counter=0;
+					LongSizeType counter=0;
 					while(!fin_.eof()) {
 						fin_>>temp;
 						if (fin_.eof()) break;
@@ -257,7 +262,7 @@ namespace PsimagLite {
 							std::istringstream temp2(temp.substr(s.size(),
 									temp.size()));
 							temp2 >> x;
-							if (counter==level) {
+							if (level>=0 && counter==LongSizeType(level)) {
 								found=true;
 								break;
 							}
@@ -281,8 +286,10 @@ namespace PsimagLite {
 				}
 
 				template<typename X>
-				std::pair<std::string,size_t> read(X &x,
-						std::string const &s,int level=0)
+				std::pair<std::string,size_t> read(
+						X &x,
+						std::string const &s,
+						LongIntegerType level=0)
 				{
 					std::pair<std::string,size_t> sc = advance(s,level);
 					int xsize;
@@ -297,8 +304,10 @@ namespace PsimagLite {
 				}
 				
 				template<typename X>
-				std::pair<std::string,size_t> readKnownSize(X &x,
-						std::string const &s,int level=0)
+				std::pair<std::string,size_t> readKnownSize(
+						X &x,
+						std::string const &s,
+						LongIntegerType level=0)
 				{
 					std::pair<std::string,size_t> sc = advance(s,level);
 					
@@ -310,12 +319,14 @@ namespace PsimagLite {
 					return sc;
 				}
 
-				std::pair<std::string,size_t> advance(std::string const &s,
-						int level=0,bool beQuiet=false)
+				std::pair<std::string,size_t> advance(
+						std::string const &s,
+						LongIntegerType level=0,
+						bool beQuiet=false)
 				{
 					std::string temp="NOTFOUND";
 					std::string tempSaved="NOTFOUND";
-					int counter=0;
+					LongSizeType counter=0;
 					bool found=false;
 					//size_t c = 0;
 					while(!fin_.eof()) {
@@ -326,7 +337,7 @@ namespace PsimagLite {
 						
 						if (temp.substr(0,s.size())==s) {
 							tempSaved = temp;
-							if (counter==level) {
+							if (level>=0 && counter==LongSizeType(level)) {
 								found=true;
 								break;
 							}
@@ -364,8 +375,10 @@ namespace PsimagLite {
 				}
 
 				template<typename T>
-				void read(std::vector<std::pair<T,T> > &x,
-						std::string const &s,int level=0)
+				void read(
+						std::vector<std::pair<T,T> > &x,
+						std::string const &s,
+						LongIntegerType level=0)
 				{
 					advance(s,level);
 					int xsize;
@@ -380,7 +393,10 @@ namespace PsimagLite {
 				}
 
 				template<typename X,template<typename> class SomeType>
-				void readSparseVector(SomeType<X> &x,std::string const &s,int level=0)
+				void readSparseVector(
+						SomeType<X> &x,
+						std::string const &s,
+						LongIntegerType level=0)
 				{
 					advance(s,level);
 					int xsize;
@@ -398,15 +414,24 @@ namespace PsimagLite {
 				}
 
 				template<typename X>
-				void readMatrix(X &mat,std::string const &s,int level= 0)
+				void readMatrix(
+						X &mat,
+						std::string const &s,
+						LongIntegerType level= 0)
 				{
 					advance(s,level);
 					fin_>>mat;
 				}
 
-				template<typename FieldType,template <typename> class SparseMatrixTemplate,
-    				template<typename,template<typename> class> class X>
-				void readMatrix(X<FieldType,SparseMatrixTemplate>& op,const std::string& s,int level=0)
+				template<
+					typename FieldType,
+					template <typename> class SparseMatrixTemplate,
+    				template<typename,template<typename> class>
+				class X>
+				void readMatrix(
+						X<FieldType,SparseMatrixTemplate>& op,
+						const std::string& s,
+						LongIntegerType level=0)
 				{
 					advance(s,level);
 					fin_>>op.data;
