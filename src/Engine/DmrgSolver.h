@@ -354,8 +354,6 @@ namespace Dmrg {
 				size_t loopIndex,
     				TargettingType& target)
 		{
-			static size_t prevDirection = 0;
-			
 			int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 			size_t keptStates = parameters_.finiteLoop[loopIndex].keptStates;
 			int saveOption = (parameters_.finiteLoop[loopIndex].saveOption & 1);
@@ -363,13 +361,8 @@ namespace Dmrg {
 			
 			size_t direction=EXPAND_SYSTEM;
 			if (stepLength<0) direction=EXPAND_ENVIRON;
-			//std::cerr<<"PUSHING DIRECTION="<<getDirection(direction)<<"\n";
-			int resetCounter = WaveFunctionTransfType::RESET_COUNTER;
-			if (prevDirection ==  direction)
-				resetCounter = WaveFunctionTransfType::DO_NOT_RESET_COUNTER;
-			prevDirection = direction;
 
-			waveFunctionTransformation_.setStage(direction,resetCounter); 
+			waveFunctionTransformation_.setStage(direction);
 
 			int stepFinal = stepCurrent_+stepLength;
 			

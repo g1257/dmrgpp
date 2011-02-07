@@ -207,7 +207,7 @@ namespace Dmrg {
 
 				if (block.size()!=1) throw std::runtime_error(
 						"GST only supports blocks of size 1\n");
-				std::string s = "#GSTCENTRALSITE=" + utils::ttos(block[0]);
+				std::string s = "#TCENTRALSITE=" + utils::ttos(block[0]);
 				io.printline(s);
 
 				psi_.save(io,"PSI");
@@ -217,7 +217,7 @@ namespace Dmrg {
 			{
 				IoInputType io(f);
 				int site=0;
-				io.readline(site,"#GSTCENTRALSITE=");
+				io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
 				if (site<0) throw std::runtime_error(
 						"GST::load(...): site cannot be negative\n");
 				psi_.load(io,"PSI");

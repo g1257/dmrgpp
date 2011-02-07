@@ -249,12 +249,15 @@ namespace Dmrg {
 			
 			void load(const std::string& f)
 			{
-				typename IoType::In io(f);
 				for (size_t i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
+
+				typename IoType::In io(f);
 
 				TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
 				for (size_t i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
 				currentTime_ = ts.time();
+
+				psi_.load(io,"PSI");
 			}
 			
 
@@ -334,11 +337,13 @@ namespace Dmrg {
 			template<typename IoOutputType>
 			void save(const std::vector<size_t>& block,IoOutputType& io) const
 			{
-				if (block.size()!=1) throw std::runtime_error(
-					"TST only supports blocks of size 1\n");
+				std::ostringstream msg;
+				msg<<"Saving state...";
+				progress_.printline(msg,std::cout);
 
 				TimeSerializerType ts(currentTime_,block[0],targetVectors_);
 				ts.save(io);
+				psi_.save(io,"PSI");
 			}
 
 		private:

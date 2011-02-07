@@ -14,6 +14,8 @@
 \usepackage{fancyvrb}
 \usepackage{hyperref}
 
+\usepackage{draftwatermark}
+
 \newcommand{\cppFile}[1]{\texttt{#1}}
 \newcommand{\inputItem}[1]{\noindent\texttt{\bf #1} ---}
 \newcommand{\inputSubItem}[1]{\indent\texttt{\it #1} --}
@@ -96,7 +98,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.\\[1cm]
 %\end{minipage}
 \noindent
 \begin{minipage}{0.4\textwidth}
-Copyright \copyright 2009, UT-Battelle, LLC\\
+Copyright \copyright 2009,\\
+ UT-Battelle, LLC\\
 All rights reserved
 \end{minipage}
 \hfill
@@ -301,16 +304,7 @@ electrons respectively, and $j$ is twice the angular momentum divided by the num
 \subsection{Finite Loops}
 
 \subsubsection{Enabling finite loops}
-There are two ways:
-\begin{enumerate}
-\item When you run configure.pl you can add as many finite loops as you want.
-\item After running configure.pl you can tailor the input.inp file produced by
-configure.pl as you want. Note that if you run configure.pl again input.inp will
-be overwritten. Make a backup copy.
-\item Make sure the input file does \emph{not} have the option \verb=nofiniteloops=
-\end{enumerate}
 
-\subsubsection{Finite loop related items in the input file}
 \begin{itemize}
 \item
 {\bf options line:} \verb=nofiniteloops=: Don'€™t do finite loops, even if provided under {\bf FiniteLoops} below.
@@ -343,7 +337,7 @@ In this case, DMRG++ stops when the infinite algorithm has finished.
 \item The syntax of the {\bf Finiteoops} line is not checked against errors. 
 \item Make sure the first number is the number of triplets that follow. 
 \item Make sure
-you don't fell off the lattice, by going forward or backwards too much.
+you don't fall off the lattice, by going forward or backwards too much.
 Remember that at least one site must remain for the ``system'' part of the lattice.
 So on a 16 site chain, when you start the finite loops you're at the middle, you
 can go forward at most 7 sites, and backwards at most 7 sites.
@@ -885,9 +879,7 @@ Let's say you want to first run 3 moves on a 16-site lattice:
 \verb=TestSuite/inputs/input23.inp=
 and
 \verb=TestSuite/inputs/input24.inp=.
-When you run \verb=configure.pl= make sure that you select \verb=DiskStacks= as
-the stacks will need to be saved to disk for resuming.
-Then, compile and do the first run:
+Compile and do the first run:
 \begin{verbatim}
 cd src/
 perl configure.pl < ../TestSuite/inputs/model23.spec
@@ -895,28 +887,20 @@ perl configure.pl < ../TestSuite/inputs/model23.spec
 make
 ./dmrg ../TestSuite/inputs/input23.inp
 \end{verbatim}
-and now, one should see files
-\verb=SystemStackdata.txt= and \verb=EnvironStackdata.txt= as well
-as a fatter than usual data23.txt. You are ready for the continuation of this run now with:
+You are ready for the continuation of this run now with:
 \begin{verbatim}
 ./dmrg ../TestSuite/inputs/input24.inp
 \end{verbatim}
-Note that the continued run's input (\verb=input24.inp=) has the option checkpoint, the CheckpointEnabled tag
+Note that the continued run's input (\verb=input24.inp=) has the option checkpoint, 
 and the CheckpointFilename tag.
 Continued (raw) results will be in file \verb=data24= as usual.
 
-Note the following caveats and ``todos'':
+Note the following caveat or ``todo'':
 \begin{itemize}
-\item Run will be (slightly?) slower due to the use of DiskStacks.
 \item There's no check (yet) of finite loops for consistency while checkpoint is in use.
 Therefore, make sure the second run is starting at a point on the lattice where the
 previous to-be-continued run left off.
-\item Bases are stored ("checkpointed") into disk and accumulate without being purged.
-\item Stacks are written to disk and never purged.
 \end{itemize} 
-The last two caveats have the positive effect of allowing to resume at any point of a previous run.
-On the other hand, a option to purge and leave only the most recent resume checkpoint would be useful, as it
-would reduce disk usage, and loading times later.
 
 \subsection{Distributed Parallelization}
 \subsection{Shared-memory Parallelization}

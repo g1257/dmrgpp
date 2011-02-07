@@ -112,7 +112,7 @@ namespace Dmrg {
 		{
 			setMode(options);
 			std::ostringstream msg;
-			msg<<"Lanczos Constructor, mat.rank="<<mat_.rank()<<" steps="<<steps_<<" eps="<<eps_;
+			msg<<"Constructing... mat.rank="<<mat_.rank()<<" steps="<<steps_<<" eps="<<eps_;
 			progress_.printline(msg,std::cout);
 		}
 

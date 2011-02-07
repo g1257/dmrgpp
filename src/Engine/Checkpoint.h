@@ -113,7 +113,12 @@ namespace Dmrg {
 			envDisk_(ENVIRON_STACK_STRING+parameters_.checkpoint.filename , ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank),
 			progress_("Checkpoint",rank)
 		{
-			if (enabled_) loadStacksDiskToMemory();
+			if (!enabled_) return;
+			if (parameters_.checkpoint.filename == parameters_.filename) {
+				throw std::runtime_error("Checkpoint::ctor(...): "
+						"this run will overwrite previous, throwing\n");
+			}
+			loadStacksDiskToMemory();
 		}
 
 		~Checkpoint()

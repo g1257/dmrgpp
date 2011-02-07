@@ -123,7 +123,7 @@ namespace Dmrg {
 			verbose_(verbose),
 			useReflection_(useReflection),
 			io_(io),
-			progress_("Diagonalization",0),
+			progress_("Diag.",0),
 			quantumSector_(quantumSector),
 			waveFunctionTransformation_(waveFunctionTransformation),
 			oldEnergy_(0)
@@ -221,7 +221,7 @@ namespace Dmrg {
 
 				size_t j = pSE.qn(pSE.partition(i));
 				std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
-				msg<<"Found target in partition "<<i<<" of size="<<vecSaved[i].size();
+				msg<<"Found targetted symmetry sector in partition "<<i<<" of size="<<vecSaved[i].size();
 				msg<<" with qns=";
 				for (size_t k=0;k<qns.size();k++) msg<<qns[k]<<" ";
 				progress_.printline(msg,std::cout);

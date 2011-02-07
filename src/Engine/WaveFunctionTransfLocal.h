@@ -119,7 +119,11 @@ namespace Dmrg {
 		  counter_(counter),
 		  dmrgWaveStruct_(dmrgWaveStruct),
 		  progress_("WaveFunctionTransfLocal",0)
-		{}
+		{
+			std::ostringstream msg;
+			msg<<"Constructing...";
+			progress_.printline(msg,std::cout);
+		}
 		
 		virtual void transformVector(
 						VectorWithOffsetType& psiDest,

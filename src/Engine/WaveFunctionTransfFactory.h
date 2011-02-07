@@ -127,7 +127,7 @@ namespace Dmrg {
 		  stage_(INFINITE),
 		  counter_(0),
 		  firstCall_(true),
-		  progress_("WaveFunctionTransformation",0),
+		  progress_("WaveFunctionTransf",0),
 		  filenameIn_(parameters.checkpoint.filename),
 		  filenameOut_(parameters.filename),
 		  WFT_STRING("Wft"),
@@ -152,10 +152,10 @@ namespace Dmrg {
 			delete wftImpl_;
 		}
 
-		void setStage(int stage,int option=RESET_COUNTER)
+		void setStage(size_t stage)
 		{
+			if (stage == stage_) return;
 			stage_=stage;
-			if (option==DO_NOT_RESET_COUNTER) return;
 			counter_=0;
 		}
 		
@@ -184,7 +184,7 @@ namespace Dmrg {
 			//	doNextOne_=false;
 			//}
 			std::ostringstream msg;
-			msg<<"I'm ready to take passengers";
+			msg<<"Window open, ready to transform vectors";
 			progress_.printline(msg,std::cout);
 		}
 		
@@ -242,7 +242,7 @@ namespace Dmrg {
 			afterWft(pSprime,pEprime,pSE); //,m);	
 			//doNextOne_=true;
 			std::ostringstream msg;
-			msg<<"No more passengers, please";
+			msg<<"Window closed, no more transformations, please";
 			progress_.printline(msg,std::cout);
 		}
 		
@@ -404,12 +404,12 @@ namespace Dmrg {
 		void createVector(VectorWithOffsetType& psiDest,const VectorWithOffsetType& psiSrc,const BasisWithOperatorsType& pSprime,
 				  const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
 		{
-			try {
+			//try {
 				wftImpl_->transformVector(psiDest,psiSrc,pSprime,pEprime,pSE);
-			} catch (std::exception& e) {
-				printDmrgWave();
-				throw e;
-			}
+			//} catch (std::exception& e) {
+			//	printDmrgWave();
+			//	throw e;
+			//}
 			std::ostringstream msg;
 			msg<<"Transformation completed";
 			progress_.printline(msg,std::cout);

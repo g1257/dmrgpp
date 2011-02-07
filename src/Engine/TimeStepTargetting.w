@@ -69,7 +69,7 @@ namespace Dmrg {
 	template<
 			template<typename,typename,typename> class LanczosSolverTemplate,
    			template<typename,typename> class InternalProductTemplate,
-	 		template<typename,typename> WaveFunctionTransfTemplate,
+	 		template<typename,typename> class WaveFunctionTransfTemplate,
     			typename ModelType_,
 	 		typename ConcurrencyType_,
     			typename IoType_,
@@ -556,16 +556,34 @@ The function below prints all target vectors to disk, using the \verb|TimeSerial
 			template<typename IoOutputType>
 			void save(const std::vector<size_t>& block,IoOutputType& io) const
 			{
-				if (block.size()!=1) throw std::runtime_error(
-					"TST only supports blocks of size 1\n");
+				std::ostringstream msg;
+				msg<<"Saving state...";
+				progress_.printline(msg,std::cout);
 
 				TimeSerializerType ts(currentTime_,block[0],targetVectors_);
 				ts.save(io);
+				psi_.save(io,"PSI");
 			}
 @}
 
 What remains are private (i.e. non-exported) code used only by this class.
 We'll visit one function at a time. %'
+
+@d load
+@{
+void load(const std::string& f)
+{
+	for (size_t i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
+
+	typename IoType::In io(f);
+
+	TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
+	for (size_t i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
+	currentTime_ = ts.time();
+
+	psi_.load(io,"PSI");
+}
+@}
 
 First the \verb|cocoon| function does measure the density of all time vectors \emph{in situ}.
 This is done only for debugging purposes, and uses the function \verb|test|.
@@ -978,19 +996,6 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 				std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_;
 				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
 			}
-@}
-
-@d load
-@{
-void load(const std::string& f)
-{
-	typename IoType::In io(f);
-	for (size_t i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
-
-	TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
-	for (size_t i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
-	currentTime_ = ts.time();
-}
 @}
 
 @o TimeStepTargetting.h -t
