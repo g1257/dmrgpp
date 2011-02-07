@@ -390,7 +390,7 @@ namespace Dmrg {
 		int i,k;
 		int size=crsMatrix.rank();
 
-		m.resize(size,size);
+		m.reset(size,size);
 		for (i = 0; i < size ; i++) {
 			for (k=0;k<size;k++) m(i,k)=0;
 			for (k=crsMatrix.getRowPtr(i);k<crsMatrix.getRowPtr(i+1);k++) 

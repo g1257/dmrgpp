@@ -461,6 +461,7 @@ namespace Dmrg {
 			io.readline(isEnabled_,"isEnabled=");
 			io.readline(stage_,"stage=");
 			io.readline(counter_,"counter=");
+			firstCall_=false;
 			io.advance("dmrgWaveStruct");
 			dmrgWaveStruct_.load(io);
 			io.readMatrix(wsStack_,"wsStack");
