@@ -76,7 +76,7 @@ $SIG{__WARN__} = sub {die @_};
 sub exit_handler
 {
 	print "\nTestSuite aborted -> Manual cancellation\n";
-	cleanUp();
+	#cleanUp();
 	kill 9, $$;
 }
 
@@ -109,7 +109,7 @@ eval {
 #Exception handling, catches any error from the testsuite program
 if($@) {
 	print "\nTestSuite aborted -> $@";
-	cleanUp();
+	#cleanUp();
 	kill 9, $$;
 }
 
@@ -415,7 +415,7 @@ sub testSuite
 	}
 	
 	print "Saving result files...\n";
-	moveFiles();
+	#moveFiles();
 	if($rmFlag) {
 		print "Removing temporary files...\n";
 		removeFiles() ;
@@ -429,7 +429,7 @@ sub runAllTests
 {
 	my ($start) = @_;
 	#All test numbers declared in @nonFunctionalTests will be skipped and not ran
-	my @nonFunctionalTests = (24,41,42,60,104,105,106,107,108,109,110,111,124,125,141,142,160);
+	my @nonFunctionalTests = (41,42,60,104,105,106,107,108,109,110,111,124,125,141,142,160);
 	my @testsList = split(/ /,getAvailableTests());
 	
 	if($lastTest ne "") {
