@@ -82,8 +82,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_OBSERVE_H
 #define DMRG_OBSERVE_H
 #include "ObserverHelper.h"
-#include "CrsMatrix.h"
+#include "OnePointCorrelations.h"
 #include "CorrelationsSkeleton.h"
+#include "TwoPointCorrelations.h"
 #include "FourPointCorrelations.h"
 #include "VectorWithOffsets.h" // for operator*
 #include "VectorWithOffset.h" // for operator*
@@ -98,8 +99,11 @@ namespace Dmrg {
 		typedef typename ModelType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelType::RealType RealType;
 		typedef PsimagLite::Matrix<FieldType> MatrixType;
-		typedef ObserverHelper<IoInputType,MatrixType,VectorType,VectorWithOffsetType,ModelType> ObserverHelperType;
+		typedef ObserverHelper<IoInputType,MatrixType,VectorType,
+				VectorWithOffsetType,ModelType> ObserverHelperType;
 		typedef CorrelationsSkeleton<ObserverHelperType> CorrelationsSkeletonType;
+		typedef OnePointCorrelations<ObserverHelperType> OnePointCorrelationsType;
+		typedef TwoPointCorrelations<CorrelationsSkeletonType,ConcurrencyType> TwoPointCorrelationsType;
 		typedef FourPointCorrelations<CorrelationsSkeletonType>  FourPointCorrelationsType;
 		typedef PsimagLite::Profiling ProfilingType;
 
@@ -119,8 +123,12 @@ namespace Dmrg {
 				ConcurrencyType& concurrency,
 				bool verbose=false)
 		: helper_(io,nf,hasTimeEvolution,model,verbose),
-		  skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
-		  verbose_(verbose)
+		  concurrency_(concurrency),
+		  verbose_(verbose),
+		  onepoint_(helper_),
+		  skeleton_(helper_,verbose),
+		  twopoint_(helper_,skeleton_,concurrency_),
+		  fourpoint_(helper_,skeleton_)
 		{}
 
 		size_t size() const { return helper_.size(); }
@@ -148,82 +156,15 @@ namespace Dmrg {
 			helper_.setBrackets(bracketStringToNumber(left),bracketStringToNumber(right));
 		}
 
-		PsimagLite::Matrix<FieldType> correlations(size_t n,const MatrixType& O1,const MatrixType& O2,int fermionicSign,
-						      size_t n1=0,size_t nf=0)
+		PsimagLite::Matrix<FieldType> correlations(
+				size_t n,
+				const MatrixType& O1,
+				const MatrixType& O2,
+				int fermionicSign,
+				size_t n1=0,
+				size_t nf=0)
 		{
-			if (nf==0) nf = n;
-			if (n1==0) n1 = n/2;
-			/*clearCache(n1, nf);
-			precomputeGrowth(O1,fermionicSign,n1,nf);*/
-			initCache(O1,n1,nf,fermionicSign);
-			PsimagLite::Matrix<FieldType> w(n1,nf);
-			for (size_t i=0;i<n1;i++) {
-				concurrency_.loopCreate(nf);
-				std::vector<FieldType> v(nf);
-				size_t j = i;
-				//ProfilingType profile("correlations loop i=" + utils::ttos(i));
-				while(concurrency_.loop(j)) {
-				//for (size_t j=i;j<nf-1;j++) {
-					//std::cerr<<"About to do i="<<i<<" and j="<<j<<"\n";
-					//try {
-						v[j]  = calcCorrelation(i,j,O1,O2,fermionicSign);
-						if (verbose_) std::cerr<<"Result for i="<<i<<" and j="<<j<<" is "<<v[j]<<"\n";
-					//} catch (std::exception& e) {
-					//	std::cerr<<"Result for i="<<i<<" and j="<<j<<" exception caught: "<<e.what()<<"\n";
-					//}
-				}
-				concurrency_.gather(v);
-				for (j=i;j<v.size();j++) w(i,j) = v[j];
-			}
-
-			return w;
-		}
-
-		void initCache(const MatrixType& O1,size_t n1, size_t nf,int fermionicSign)
-		{
-			clearCache(n1, nf);
-            precomputeGrowth(O1,fermionicSign,n1,nf-1);
-		}
-
-		// Return the vector: O1 * O2 |psi>
-		// where |psi> is the g.s. 
-		// Note1: O1 is applied to site i and O2 is applied to site j
-		// Note2: O1 and O2 operators must commute or anti-commute (set fermionicSign accordingly)
-		FieldType calcCorrelation(
-					size_t i,
-					size_t j,
-					const MatrixType& O1,
-					const MatrixType& O2,
-					int fermionicSign)
-		{
-			FieldType c = 0;
-			if (i==j) {
-				c=calcDiagonalCorrelation(i,O1,O2,fermionicSign);
-			} else if (i>j) {
-				c= -calcCorrelation_(j,i,O2,O1,fermionicSign);
-			} else {
-				c=calcCorrelation_(i,j,O1,O2,fermionicSign);
-			}
-			return c;
-		}
-
-		MatrixType multiplyTranspose(const MatrixType& O1,const MatrixType& O2)
-		{
-			size_t n=O1.n_row();
-			MatrixType ret(n,n);
-			for (size_t s=0;s<n;s++) 
-				for (size_t t=0;t<n;t++) 
-					for (size_t w=0;w<n;w++) 
-						ret(s,t) += std::conj(O1(s,w))*O2(w,t);
-			return ret;
-		}
-
-		MatrixType add(const MatrixType& O1,const MatrixType& O2)
-		{
-			size_t n=O1.n_row();
-			MatrixType ret(n,n);
-			for (size_t s=0;s<n;s++) for (size_t t=0;t<n;t++)  ret(s,t) += O1(s,t)+O2(s,t);
-			return ret;
+			return twopoint_(n,O1,O2,fermionicSign,n1,nf);
 		}
 
 		FieldType fourPoint(
@@ -237,7 +178,11 @@ namespace Dmrg {
 		}
 
 		template<typename SomeModelType>
-		void fourPointDeltas(std::vector<FieldType>& fpd,size_t n,const std::vector<size_t>& gammas,const SomeModelType& model)
+		void fourPointDeltas(
+				std::vector<FieldType>& fpd,
+				size_t n,
+				const std::vector<size_t>& gammas,
+				const SomeModelType& model)
 		{
 			if (gammas.size()!=4) {
 				std::cerr<<"Observer: fourPointDeltas(...):  wrong number of gammas ";
@@ -256,19 +201,13 @@ namespace Dmrg {
 		}
 
 		template<typename ApplyOperatorType>
-		FieldType onePoint(size_t site,const typename ApplyOperatorType::OperatorType& A,bool corner = false)
+		FieldType onePoint(
+				size_t site,
+				const typename ApplyOperatorType::OperatorType& A,
+				bool corner = false)
 		{
-			size_t pnter=site;
-			helper_.setPointer(pnter);
-			try {
-				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
-				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
-
-				return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner);
-			} catch (std::exception& e) {
-				std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
-				return 0;
-			}
+			return onepoint_.template operator()<ApplyOperatorType>
+				(site,A,corner);
 		}
 
 	private:
@@ -280,206 +219,53 @@ namespace Dmrg {
 			throw std::runtime_error("Observer::bracketStringToNumber(...): must be gs or time");
 		}
 
-		template<typename ApplyOperatorType>
-		FieldType onePointInternal(size_t site,const typename ApplyOperatorType::OperatorType& A,
-				const VectorWithOffsetType& src1,const VectorWithOffsetType& src2,bool corner = false)
-		{
-			
-			ApplyOperatorType applyOpLocal1(helper_.basisS(),helper_.basisE(),helper_.basisSE());
-			VectorWithOffsetType dest;
-			applyOpLocal1(dest,src1,A,helper_.fermionicSign(),helper_.direction(),corner);
-				
-			FieldType sum = static_cast<FieldType>(0.0);
-			const VectorWithOffsetType& v1 = dest;
-			const VectorWithOffsetType& v2 = src2;
-			for (size_t ii=0;ii<v1.sectors();ii++) {
-				size_t i = v1.sector(ii);
-				for (size_t jj=0;jj<v1.sectors();jj++) {
-					size_t j = v2.sector(jj);
-					if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
-					size_t offset = v1.offset(i);
-					for (size_t k=0;k<v1.effectiveSize(i);k++) 
-						sum+= v1[k+offset] * std::conj(v2[k+offset]);
-				}
-			}
-			return sum;
-			//std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_<<" "<<label<<std::norm(src)<<" "<<std::norm(dest)<<"\n";
-		}
 
 		template<typename SomeModelType>
 		FieldType fourPointDelta(size_t i,size_t j,const std::vector<size_t>& gammas,const SomeModelType& model)
 		{
-			const PsimagLite::Matrix<FieldType>& opC0 = model.getOperator("c",gammas[0],0); // C_{gamma0,up}
-			const PsimagLite::Matrix<FieldType>& opC1 = model.getOperator("c",gammas[1],1); // C_{gamma1,down}
-			const PsimagLite::Matrix<FieldType>& opC2 = model.getOperator("c",gammas[2],1); // C_{gamma2,down}
-			const PsimagLite::Matrix<FieldType>& opC3 = model.getOperator("c",gammas[3],0); // C_{gamma3,up}
+			const MatrixType& opC0 = model.getOperator("c",gammas[0],0); // C_{gamma0,up}
+			const MatrixType& opC1 = model.getOperator("c",gammas[1],1); // C_{gamma1,down}
+			const MatrixType& opC2 = model.getOperator("c",gammas[2],1); // C_{gamma2,down}
+			const MatrixType& opC3 = model.getOperator("c",gammas[3],0); // C_{gamma3,up}
 
 			//if (i+1>=n-1 || j+1>=n-1) return 0;
-			
-			FieldType tmp = fourpoint_(
+			return fourpoint_(
 					'C',i,opC0,
 			       'C',i+1,opC1,
 			       'N',j,opC2,
 			       'N',j+1,opC3,-1);
-			//std::cerr<<"DEBUG: fourPointDelta i="<<i<<" j="<<j<<" value="<<tmp<<"\n";
-			return tmp;
-			
 		}
 			
-		FieldType calcDiagonalCorrelation(
-					size_t i,
-					const MatrixType& O1,
-					const MatrixType& O2,
-					int fermionicSign)
-		{
-			size_t n = O1.n_row();
-			MatrixType O1new=identity(n);
 
-			MatrixType O2new=multiplyTranspose(O1,O2);
-			if (i==0) return calcCorrelation_(0,1,O2new,O1new,1);
-			return calcCorrelation_(i-1,i,O1new,O2new,1);
-		}
+//		MatrixType identity(size_t n)
+//		{
+//			MatrixType ret(n,n);
+//			for (size_t s=0;s<n;s++)  ret(s,s)=static_cast<RealType>(1.0);
+//			return ret;
+//		}
 
-		FieldType calcCorrelation_(
-					size_t i,
-					size_t j,
-					const MatrixType& O1,
-					const MatrixType& O2,
-					int fermionicSign)
-		{
-			
-			if (i>=j) throw std::runtime_error("Observer::calcCorrelation_(...): i must be smaller than j\n");
-			MatrixType O1m,O2m;
-			skeleton_.createWithModification(O1m,O1,'n');
-			skeleton_.createWithModification(O2m,O2,'n');
+//		void multiply(MatrixType& O1,FieldType x)
+//		{
+//			for (size_t i=0;i<O1.n_row();i++) for (size_t j=0;j<O1.n_col();j++) O1(i,j) *= x;
+//		}
 
-			if (j==skeleton_.numberOfSites()-1) {
-				if (i==j-1) {
-					helper_.setPointer(j-2);
-					size_t ni = helper_.basisS().size()/helper_.basisE().size();
-					MatrixType O1g(ni,ni);
-					for (size_t x=0;x<O1g.n_row();x++) O1g(x,x) = 1.0;
-					return skeleton_.bracketRightCorner(O1g,O1m,O2m,fermionicSign);
-				}
-				MatrixType O1g,O2g;
-				skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2);
-				helper_.setPointer(j-2);
-				return skeleton_.bracketRightCorner(O1g,O2m,fermionicSign);
-			}
-			MatrixType O1g,O2g;
-			size_t ns = j-1;
-			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns);
-			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);
-
-			return skeleton_.bracket(O2g);
-		}
-
-		MatrixType identity(size_t n)
-		{
-			MatrixType ret(n,n);
-			for (size_t s=0;s<n;s++)  ret(s,s)=static_cast<RealType>(1.0);
-			return ret;
-		}
-
-		void multiply(MatrixType& O1,FieldType x)
-		{
-			for (size_t i=0;i<O1.n_row();i++) for (size_t j=0;j<O1.n_col();j++) O1(i,j) *= x;
-		}
-
-		MatrixType sustract(const MatrixType& O1,const MatrixType& O2)
-		{
-			size_t n=O1.n_row();
-			MatrixType ret(n,n);
-			for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++) ret(i,j) = O1(i,j) - O2(i,j);
-			return ret;
-		}
+//		MatrixType sustract(const MatrixType& O1,const MatrixType& O2)
+//		{
+//			size_t n=O1.n_row();
+//			MatrixType ret(n,n);
+//			for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++) ret(i,j) = O1(i,j) - O2(i,j);
+//			return ret;
+//		}
 		
-		void clearCache(size_t  ns,size_t nf)
-		{
-			growCached_.clear();
-			grownOperators_.clear();
-			std::vector<MatrixType> v;
-			for (size_t i=0;i<nf;i++) {
-				MatrixType tmp(1,1);
-				v.push_back(tmp);
-			}
-			for (size_t i=0;i<ns;i++) 
-				grownOperators_.push_back(v);
-		}
-
-		//! i can be zero here!!
-		const MatrixType* grow(const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns,size_t isDiagonal)
-		{
-			if (isDiagonal==DIAGONAL) {
-				static MatrixType Ox;
-				skeleton_.growDirectly(Ox,Osrc,i,fermionicSign,ns);
-				return &Ox;
-			}	
-			int nt=i-1;
-			if (nt<0) nt=0;
-			return &(grownOperators_[i][ns-nt-1]);
-			//std::cerr<<"done grow for i="<<i<<" and ns="<<ns<<"\n";
-		}
-
-		//! i can be zero here!!
-		void precomputeGrowth(const MatrixType& Osrc,int fermionicSign,size_t ns,size_t nfinal)	 
-		{
-			//MatrixType tmp;
-			for (size_t i=0;i<ns;i++) {
-				int nt=i-1;
-				if (nt<0) nt=0;
-				MatrixType Oinc = Osrc;
-				if (verbose_) std::cerr<<"Precomputing "<<i<<" out of "<<(ns-1)<<"\n";
-				for (size_t s=nt+1;s<nfinal;s++) {
-					if (verbose_) std::cerr<<"\tPrecomputing "<<s<<" out of "<<(nfinal-1)<<"\n";
-					growRecursive(grownOperators_[i][s-nt-1],Oinc,i,fermionicSign,s-1);
-					Oinc = grownOperators_[i][s-nt-1];
-					//growDirectly(grownOperators_[i][s-nt-1],Osrc,i,fermionicSign,s);
-					//if (tmp!=grownOperators_[i][s-nt-1]) throw std::runtime_error("Not equal\n");
-				}
-			}
-			std::cerr<<"precomputeGrowth done\n";
-		}
-
-		//! i can be zero here!!
-		void growRecursive(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t s)
-		{
-			std::vector<int> signs;
-			// from 0 --> i
-			int nt=i-1;
-			if (nt<0) nt=0;
-			
-			// set appropriate privates which are:
-			// SpermutationInverse_(s) and transform_(s)
-			/*io_.rewind();
-			calcSpermutation(s);
-			//std::cerr<<"*****************======="<<transform_.n_row()<<"\n";
-			io_.readMatrix(transform_,"#TRANSFORM_sites",s);*/
-			helper_.setPointer(s);
-			//std::cerr<<"%%%%%%%%%%%%%%%%%======="<<transform_.n_row()<<"\n";
-			int growOption = GROW_RIGHT;
-			//if (i==1 && s==0) growOption = GROW_LEFT;// <-- not needed since nt>0
-			if (s==size_t(nt)) {
-				growOption = GROW_LEFT;
-				if (i==0) growOption = GROW_RIGHT;
-			}
-			/* io_.rewind();
-			io_.read(electrons_,"#ELECTRONS_sites=",s);*/
-			//skeleton_.createSigns(signs,fermionicSign);
-			MatrixType Onew(helper_.columns(),helper_.columns());
-			Odest = Onew;
-			skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption);
-		}
 
 		ObserverHelperType helper_;
-		size_t halfLatticeSize_;
-		CorrelationsSkeletonType skeleton_;
-		FourPointCorrelationsType fourpoint_;
 		ConcurrencyType& concurrency_;
 		bool verbose_;
-		std::vector<size_t> growCached_;
-		std::vector<std::vector<MatrixType> > grownOperators_;
-		
+		size_t halfLatticeSize_;
+		OnePointCorrelationsType onepoint_;
+		CorrelationsSkeletonType skeleton_;
+		TwoPointCorrelationsType twopoint_;
+		FourPointCorrelationsType fourpoint_;
 	};  //class Observer
 } // namespace Dmrg
 

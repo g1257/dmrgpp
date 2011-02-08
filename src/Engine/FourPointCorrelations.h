@@ -85,14 +85,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define FOURPOINT_C_H
 
 #include "CrsMatrix.h"
-#include "CorrelationsSkeleton.h"
 
 namespace Dmrg {
 	template<typename CorrelationsSkeletonType>
 	class FourPointCorrelations {
 
-		typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
-		//typedef typename ObserverHelperType::IoType IoType;
+		typedef typename CorrelationsSkeletonType::ObserverHelperType
+			ObserverHelperType;
 		typedef typename ObserverHelperType::MatrixType MatrixType;
 		typedef typename ObserverHelperType::VectorType VectorType ;
 		typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;

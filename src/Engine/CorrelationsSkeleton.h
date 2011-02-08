@@ -257,10 +257,10 @@ namespace Dmrg {
 					}
 				}
 			}
-			if (result.n_row()!=helper_.rows()) {
-				std::cerr<<result.n_row()<<" "<<helper_.rows()<<"\n";
-				throw std::runtime_error("dmrgMultiply: mismatch in transform\n");
-			}
+//			if (result.n_row()!=helper_.rows()) {
+//				std::cerr<<result.n_row()<<" "<<helper_.rows()<<"\n";
+//				throw std::runtime_error("dmrgMultiply: mismatch in transform\n");
+//			}
 		}
 
 		void createWithModification(MatrixType& Om,const MatrixType& O,char mod)
@@ -275,10 +275,17 @@ namespace Dmrg {
 
 		FieldType bracket(const MatrixType& A)
 		{
-			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
-			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
+			try {
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
 
-			return bracket_(A,src1,src2);
+				return bracket_(A,src1,src2);
+			} catch (std::exception& e) {
+				std::cerr<<"CAUGHT: "<<e.what();
+				std::cerr<<"WARNING: CorrelationsSkeleton::bracket(...):";
+				std::cerr<<" No data seen yet\n";
+				return 0;
+			}
 		}
 
 		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,int fermionSign)
