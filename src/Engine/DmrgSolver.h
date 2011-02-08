@@ -204,6 +204,7 @@ namespace Dmrg {
 
 			
 			TargettingType psi(pSprime_,pEprime_,pSE_,model_,targetStruct_,waveFunctionTransformation_);
+			io_.print(psi);
 
 			MyBasisWithOperators pS("pS");
 			MyBasisWithOperators pE("pE");

@@ -673,6 +673,25 @@ namespace Dmrg {
 		
 	}; // class DynamicTargetting
 	
+	
+	template<
+	template<typename,typename,typename> class LanczosSolverTemplate,
+	template<typename,typename> class InternalProductTemplate,
+	template<typename,typename> class WaveFunctionTransfTemplate,
+	typename ModelType_,
+	typename ConcurrencyType_,
+	typename IoType_,
+	template<typename> class VectorWithOffsetTemplate>
+	std::ostream& operator<<(std::ostream& os,
+			const DynamicTargetting<LanczosSolverTemplate,
+			InternalProductTemplate,
+			WaveFunctionTransfTemplate,ModelType_,ConcurrencyType_,IoType_,
+			VectorWithOffsetTemplate>& tst)
+	{
+		os<<"DT=NothingToSeeHereYet\n";
+		return os;
+	}
+	
 } // namespace
 #endif // DYNAMICTARGETTING_H
 

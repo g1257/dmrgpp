@@ -237,7 +237,8 @@ this would be an error.%
 @{
 			RealType weight(size_t i) const
 			{
-				if (allStages(DISABLED)) throw std::runtime_error("TST: What are you doing here?\n");
+				if (allStages(DISABLED)) throw std::runtime_error(
+						"TST: What are you doing here?\n");
 				return weight_[i];
 				//return 1.0;
 			}
@@ -372,6 +373,7 @@ in order of appearance.
 			}
 
 			@<load@>
+			@<friends@>
 @}
 
 The below function is called from the \verb|evolve| above and, if appropriate, applies operator $i$ to
@@ -998,10 +1000,50 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 			}
 @}
 
+@d friends
+@{
+template<
+template<typename,typename,typename> class LanczosSolverTemplate1,
+	template<typename,typename> class InternalProductTemplate1,
+	template<typename,typename> class WaveFunctionTransfTemplate1,
+	typename ModelType1,
+	typename ConcurrencyType1,
+	typename IoType1,
+		template<typename> class VectorWithOffsetTemplate1>
+friend std::ostream& operator<<(std::ostream& os,
+	const TimeStepTargetting<LanczosSolverTemplate1,
+	InternalProductTemplate1,
+	WaveFunctionTransfTemplate1,ModelType1,ConcurrencyType1,IoType1,
+	VectorWithOffsetTemplate1>& tst);
+
+@}
+
 @o TimeStepTargetting.h -t
 @{
 @<privatedata@>
 	};     //class TimeStepTargetting
+
+	template<
+		template<typename,typename,typename> class LanczosSolverTemplate,
+			template<typename,typename> class InternalProductTemplate,
+ 		template<typename,typename> class WaveFunctionTransfTemplate,
+			typename ModelType_,
+ 		typename ConcurrencyType_,
+			typename IoType_,
+   			template<typename> class VectorWithOffsetTemplate>
+	std::ostream& operator<<(std::ostream& os,
+			const TimeStepTargetting<LanczosSolverTemplate,
+			InternalProductTemplate,
+			WaveFunctionTransfTemplate,ModelType_,ConcurrencyType_,IoType_,
+			VectorWithOffsetTemplate>& tst)
+	{
+		os<<"TSTWeightsTimeVectors=";
+		for (size_t i=0;i<tst.weight_.size();i++)
+			os<<tst.weight_[i]<<" ";
+		os<<"\n";
+		os<<"TSTWeightGroundState="<<tst.gsWeight_<<"\n";
+		return os;
+	}
 } // namespace Dmrg
 
 #endif

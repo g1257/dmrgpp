@@ -56,6 +56,7 @@ whereas the first one will be stored in the private member \verb|psi_|.
 
 namespace Dmrg {
 	@<theClassHere@>
+	@<companions@>
 } // namespace
 #endif // DYNAMICTARGETTING_H
 
@@ -976,6 +977,28 @@ void isThisTargetSensible(size_t i) const
 	if (norma<1e-6) throw std::runtime_error("Norma is zero\n");
 }
 @}
+
+@d companions
+@{
+template<
+template<typename,typename,typename> class LanczosSolverTemplate,
+template<typename,typename> class InternalProductTemplate,
+template<typename,typename> class WaveFunctionTransfTemplate,
+typename ModelType_,
+typename ConcurrencyType_,
+typename IoType_,
+template<typename> class VectorWithOffsetTemplate>
+std::ostream& operator<<(std::ostream& os,
+		const DynamicTargetting<LanczosSolverTemplate,
+		InternalProductTemplate,
+		WaveFunctionTransfTemplate,ModelType_,ConcurrencyType_,IoType_,
+		VectorWithOffsetTemplate>& tst)
+{
+	os<<"DT=NothingToSeeHereYet\n";
+	return os;
+}
+@}
+
 \bibliographystyle{plain}
 \bibliography{thesis}
 
