@@ -115,7 +115,7 @@ namespace Dmrg {
 
 	public:
 		typedef ObserverHelperType_ ObserverHelperType;
-		typedef typename ObserverHelperType::IoType IoType;
+		//typedef typename ObserverHelperType::IoInputType IoInputType;
 		typedef typename ObserverHelperType::MatrixType MatrixType;
 		typedef typename ObserverHelperType::VectorType VectorType ;
 		typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;

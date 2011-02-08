@@ -92,7 +92,7 @@ namespace Dmrg {
 	class FourPointCorrelations {
 
 		typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
-		typedef typename ObserverHelperType::IoType IoType;
+		//typedef typename ObserverHelperType::IoType IoType;
 		typedef typename ObserverHelperType::MatrixType MatrixType;
 		typedef typename ObserverHelperType::VectorType VectorType ;
 		typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;

@@ -12,11 +12,10 @@ SolverOptions=hasQuantumNumbers,wft,nosu2,TimeStepTargetting
 Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
 OutputFile=data10.txt
 InfiniteLoopKeptStates=150 
-FiniteLoops 8  7 200 1 -7 200 1 7 200 1 -7 200 1
-		7 200 1 -7 200 1 7 200 1 -7 200 1
+FiniteLoops 8  7 200 1 -7 200 1 -7 200 1 7 200 1
+		7 200 1 -7 200 1 -7 200 1 7 200 1
 TargetQuantumNumbers 2 0.5 0.5
 
-TSPFilename=tst10.txt
 TSPTau=0.1
 TSPTimeSteps=5
 TSPAdvanceEach=4

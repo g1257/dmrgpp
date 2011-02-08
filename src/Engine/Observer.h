@@ -91,14 +91,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename FieldType,typename VectorWithOffsetType,typename ModelType,typename IoType>
+	template<typename FieldType,typename VectorWithOffsetType,typename ModelType,typename IoInputType>
 	class Observer {
 		typedef size_t IndexType;
 		typedef SparseVector<FieldType> VectorType;
 		typedef typename ModelType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelType::RealType RealType;
 		typedef PsimagLite::Matrix<FieldType> MatrixType;
-		typedef ObserverHelper<IoType,MatrixType,VectorType,VectorWithOffsetType,ModelType> ObserverHelperType;
+		typedef ObserverHelper<IoInputType,MatrixType,VectorType,VectorWithOffsetType,ModelType> ObserverHelperType;
 		typedef CorrelationsSkeleton<ObserverHelperType> CorrelationsSkeletonType;
 		typedef FourPointCorrelations<CorrelationsSkeletonType>  FourPointCorrelationsType;
 		typedef PsimagLite::Profiling ProfilingType;
@@ -112,13 +112,13 @@ namespace Dmrg {
 
 	public:
 		Observer(
-				const std::string& filename,
-				size_t offset,
+				IoInputType& io,
 				size_t nf,
+				bool hasTimeEvolution,
 				const ModelType& model,
 				ConcurrencyType& concurrency,
 				bool verbose=false)
-		: helper_(filename,model,offset,nf,verbose),
+		: helper_(io,nf,hasTimeEvolution,model,verbose),
 		  skeleton_(helper_),fourpoint_(helper_,skeleton_),concurrency_(concurrency),
 		  verbose_(verbose)
 		{}
@@ -260,11 +260,15 @@ namespace Dmrg {
 		{
 			size_t pnter=site;
 			helper_.setPointer(pnter);
-			
-			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
-			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
+			try {
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
 
-			return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner);
+				return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner);
+			} catch (std::exception& e) {
+				std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
+				return 0;
+			}
 		}
 
 	private:

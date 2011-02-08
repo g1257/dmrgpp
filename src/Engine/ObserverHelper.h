@@ -90,11 +90,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // to include norm
 
 namespace Dmrg {
-	template<typename IoType_,typename MatrixType_,typename VectorType_,
+	template<typename IoInputType_,typename MatrixType_,typename VectorType_,
 		typename VectorWithOffsetType_,typename ModelType>
 	class ObserverHelper {
 	public:
-		typedef IoType_ IoType;
+		typedef IoInputType_ IoInputType;
 		typedef MatrixType_ MatrixType;
 		typedef VectorType_ VectorType;
 		typedef VectorWithOffsetType_ VectorWithOffsetType;
@@ -109,15 +109,14 @@ namespace Dmrg {
 		
 		enum {GS_VECTOR,TIME_VECTOR};
 		enum {LEFT_BRACKET=0,RIGHT_BRACKET=1};
-		
+
 		ObserverHelper(
-				const std::string& filename,
-				const ModelType& model,
-				size_t offset,
+				IoInputType& io,
 				size_t nf,
+				bool hasTimeEvolution,
+				const ModelType& model,
 				bool verbose)
-			:	filename_(filename),
-				io_(filename),
+			:	io_(io),
 				dSerializerV_(),//(1,DmrgSerializerType(io_,true)),
 				timeSerializerV_(),//(nf),
 				currentPos_(0),
@@ -126,8 +125,8 @@ namespace Dmrg {
 				bracket_(2,GS_VECTOR),
 				noMoreData_(false)
 		{
-			std::cerr<<"Observer will use file: "<<filename<<" for DMRG data\n";
-			init(offset,nf);
+			if (!init(hasTimeEvolution,nf)) throw std::runtime_error(
+					"No more data to construct this object\n");
 		}
 
 		bool endOfData() const { return noMoreData_; }
@@ -223,39 +222,51 @@ namespace Dmrg {
 			return timeSerializerV_[currentPos_].vector();
 		}
 
-		template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
+		template<typename IoInputType1,typename MatrixType1,
+			typename VectorType1,typename VectorWithOffsetType1,
+			typename BasisType1>
 		friend std::ostream& operator<<(std::ostream& os,
-			ObserverHelper<IoType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& precomp);
+			ObserverHelper<IoInputType1,MatrixType1,VectorType1,
+			VectorWithOffsetType1,BasisType1>& precomp);
 
 	private:
-		void init(size_t offset,size_t nf)
+		bool init(bool hasTimeEvolution,size_t nf)
 		{
 
-			io_.rewind();
 			dSerializerV_.clear();
-
+			// the offset is not relevant since for performance reasons
+			// we need to keep the file open and search forward
+			// without ever rewinding
+			// In other words, file rewinding is left to the user
+			// of the observer/observerhelper class.
+			size_t offset = 0;
 			size_t counter=0;
 			while(true) {
 				if (nf>0 && dSerializerV_.size()==nf) break;
-				if (verbose_) std::cerr<<"ObserverHelper "<<dSerializerV_.size()<<"\n";
+				if (verbose_)
+					std::cerr<<"ObserverHelper "<<dSerializerV_.size()<<"\n";
 				try {
 					DmrgSerializerType dSerializer(io_);
 					if (counter>=offset) dSerializerV_.push_back(dSerializer);
+					if (hasTimeEvolution) {
+						TimeSerializerType ts(io_);
+						if (counter>=offset) timeSerializerV_.push_back(ts);
+					}
 					counter++;
 				} catch (std::exception& e)
 				{
-					if (dSerializerV_.size()==0) {
+					/*if (dSerializerV_.size()==0) {
 						std::cerr<<e.what()<<" rethrowing...\n";
 						throw e;
-					}
+					}*/
 					noMoreData_ = true;
 					std::cerr<<"Ignore prev. error, if any. It simply means there's no more data\n";
 					break;
 				}
 			}
+			if (dSerializerV_.size()==0 && noMoreData_) return false;
 			
-			FieldType dummy = 0;
-			initTimeVectors(offset,nf,dummy);
+			return true;
 		}
 
 		void integrityChecks()
@@ -267,23 +278,6 @@ namespace Dmrg {
 				if (dSerializerV_[x].basisSE().size()!=timeSerializerV_[x].size()) throw std::runtime_error("Error 2\n");
 			}
 			
-		}
-		
-		void initTimeVectors(size_t offset,size_t nf,RealType dummy)
-		{
-			
-		}
-		
-		void initTimeVectors(size_t offset,size_t nf,std::complex<RealType> dummy)
-		{
-			io_.rewind();
-			size_t counter=0;
-			while(true) {
-				TimeSerializerType ts(io_);
-				if (counter>=offset) timeSerializerV_.push_back(ts);
-				counter++;
-				if (timeSerializerV_.size()==nf) break;
-			}
 		}
 
 		void getTransform(MatrixType& transform,int ns)
@@ -306,15 +300,13 @@ namespace Dmrg {
 			io_.rewind();
 		}
 		
-		void getTimeVector(VectorWithOffsetType& timeVector,size_t ns)
-		{
-			timeVector.load(io2_,"targetVector0",ns);
-			io_.rewind();
-		}
+//		void getTimeVector(VectorWithOffsetType& timeVector,size_t ns)
+//		{
+//			timeVector.load(io2_,"targetVector0",ns);
+//			io_.rewind();
+//		}
 
-		std::string filename_; 
-		typename IoType::In io_;
-		typename IoType::In io2_;
+		IoInputType& io_;
 		std::vector<DmrgSerializerType> dSerializerV_;
 		std::vector<TimeSerializerType> timeSerializerV_;
 		size_t currentPos_;
@@ -324,9 +316,9 @@ namespace Dmrg {
 		bool noMoreData_;
 	};  //ObserverHelper
 
-	template<typename IoType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
+	template<typename IoInputType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
 	std::ostream& operator<<(std::ostream& os,
-		ObserverHelper<IoType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& p)
+		ObserverHelper<IoInputType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& p)
 	{
 		for (size_t i=0;i<p.SpermutationInverse_.size();i++) {
 			os<<"i="<<i<<"\n";

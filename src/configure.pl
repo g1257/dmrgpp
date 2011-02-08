@@ -497,7 +497,7 @@ typedef std::complex<RealType> ComplexType;
 $chooseRealOrComplexForObservables
 
 typedef PsimagLite::$concurrencyName<RealType> MyConcurrency;
-typedef  PsimagLite::IoSimple MyIo;
+typedef PsimagLite::IoSimple::In IoInputType;
 
 template<typename ModelType,typename ObserverType,typename SparseMatrixType,
 typename OperatorType,typename TargettingType>
@@ -579,20 +579,20 @@ void measureTimeObs(const ModelType& model,ObserverType& observe, size_t numberO
 
 template<typename ConcurrencyType,typename VectorWithOffsetType,typename ModelType,typename SparseMatrixType,
 typename OperatorType,typename TargettingType,typename GeometryType>
-bool observeOneFullSweep(size_t offset,const std::string& datafile,
+bool observeOneFullSweep(IoInputType& io,
 	const GeometryType& geometry,const ModelType& model,const std::string& obsOptions,
 		bool hasTimeEvolution,ConcurrencyType& concurrency)
 {
 	bool verbose = false;
 	size_t n=geometry.numberOfSites();
-	typedef Observer<FieldType,VectorWithOffsetType,ModelType,PsimagLite::IoSimple> 
+	typedef Observer<FieldType,VectorWithOffsetType,ModelType,IoInputType> 
 		ObserverType;
-	ObserverType observe(datafile,offset,n-2,model,concurrency,verbose);
+	ObserverType observe(io,n-2,hasTimeEvolution,model,concurrency,verbose);
 	
 	if (hasTimeEvolution) {
 		measureTimeObs<ModelType,ObserverType,SparseMatrixType,
 			OperatorType,TargettingType>(model,observe,geometry.numberOfSites());
-		return true; // return here for testing only 
+		return observe.endOfData(); // return here for testing only 
 	}
 EOF
 	if  ($modelName=~/heisenberg/i) {
@@ -740,7 +740,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
                         DensityMatrix,
                         ModelType,
                         MyConcurrency,
-                        MyIo,
+                        PsimagLite::IoSimple,
                         TargettingTemplate,
                         VectorWithOffsetTemplate
                 > SolverType; // only used for types
@@ -755,13 +755,19 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 	TargettingParamsType tsp(io,model);
 	
-	size_t offset = 0;
-	size_t n=geometry.numberOfSites();
-	while (true) {
-		if (observeOneFullSweep<ConcurrencyType,VectorWithOffsetType,ModelType,
-			SparseMatrixType,OperatorType,TargettingType,GeometryType>
-			(offset,datafile,geometry,model,obsOptions,hasTimeEvolution,concurrency)) break;
-		offset += (n - 2);
+	//size_t n=geometry.numberOfSites();
+	bool moreData = true;
+	IoInputType dataIo(datafile);
+	while (moreData) {
+		try {
+			moreData = !observeOneFullSweep<ConcurrencyType,VectorWithOffsetType,ModelType,
+				SparseMatrixType,OperatorType,TargettingType,GeometryType>
+			(dataIo,geometry,model,obsOptions,hasTimeEvolution,concurrency);
+		} catch (std::exception& e) {
+			std::cerr<<"There's no more data\\n";
+			break;
+		}
+
 		if (!hasTimeEvolution) break;
 	}
 }
@@ -786,7 +792,6 @@ int main(int argc,char *argv[])
 	
 	//Setup the Geometry
 	typedef Geometry<RealType> GeometryType;
-	typedef PsimagLite::IoSimple::In IoInputType;
 	IoInputType io(argv[1]);
 	GeometryType geometry(io);
 
