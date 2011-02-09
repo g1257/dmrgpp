@@ -328,7 +328,7 @@ namespace Dmrg {
 						size_t r2 = Acrs.getCol(k);
 						size_t t2 = helper_.basisSE().permutationInverse(r2+eta*A.n_col());
 						if (t2<offset || t2>=total) continue;
-						sum += Acrs.getValue(k)*vec1[t]*vec2[t2];
+						sum += Acrs.getValue(k)*vec1[t]*std::conj(vec2[t2]);
 					}
 				}
 			}
@@ -382,7 +382,7 @@ namespace Dmrg {
 							size_t rprime = helper_.basisS().permutationInverse(r0prime+r1*ni);
 							size_t t2 = helper_.basisSE().permutationInverse(rprime+eta2*helper_.basisS().size());
 							if (t2<offset || t2>=total) continue;
-							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec1[t]*vec2[t2]*sign;
+							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec1[t]*std::conj(vec2[t2])*sign;
 						}
 					}
 				}
@@ -439,7 +439,7 @@ namespace Dmrg {
 									size_t rprime = helper_.basisS().permutationInverse(r0prime+r1prime*ni);
 									size_t t2 = helper_.basisSE().permutationInverse(rprime+eta2*helper_.basisS().size());
 									if (t2<offset || t2>=total) continue;
-									sum += A1crs.getValue(k1)*A2crs.getValue(k2)*Bcrs.getValue(k3)*vec1[t]*vec2[t2]*sign;
+									sum += A1crs.getValue(k1)*A2crs.getValue(k2)*Bcrs.getValue(k3)*vec1[t]*std::conj(vec2[t2])*sign;
 								}
 						}
 					}

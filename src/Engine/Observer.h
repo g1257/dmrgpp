@@ -235,28 +235,6 @@ namespace Dmrg {
 			       'N',j,opC2,
 			       'N',j+1,opC3,-1);
 		}
-			
-
-//		MatrixType identity(size_t n)
-//		{
-//			MatrixType ret(n,n);
-//			for (size_t s=0;s<n;s++)  ret(s,s)=static_cast<RealType>(1.0);
-//			return ret;
-//		}
-
-//		void multiply(MatrixType& O1,FieldType x)
-//		{
-//			for (size_t i=0;i<O1.n_row();i++) for (size_t j=0;j<O1.n_col();j++) O1(i,j) *= x;
-//		}
-
-//		MatrixType sustract(const MatrixType& O1,const MatrixType& O2)
-//		{
-//			size_t n=O1.n_row();
-//			MatrixType ret(n,n);
-//			for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++) ret(i,j) = O1(i,j) - O2(i,j);
-//			return ret;
-//		}
-		
 
 		ObserverHelperType helper_;
 		ConcurrencyType& concurrency_;
