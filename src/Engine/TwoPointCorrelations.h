@@ -108,6 +108,8 @@ namespace Dmrg {
 		static size_t const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
 		static size_t const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
 		static size_t const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
+		static const size_t EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
+		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 
 	public:
 		TwoPointCorrelations(
@@ -129,12 +131,18 @@ namespace Dmrg {
 				size_t n1=0,
 				size_t nf=0)
 		{
+
 			if (nf==0) nf = n;
 			if (n1==0) n1 = n/2;
+			PsimagLite::Matrix<FieldType> w(n1,nf);
+			if (helper_.direction()!=EXPAND_SYSTEM) {
+				std::cerr<<"WARNING: TwoPointcorrealtions::(..) ignored\n";
+				return w;
+			}
 			/*clearCache(n1, nf);
 			precomputeGrowth(O1,fermionicSign,n1,nf);*/
 			initCache(O1,n1,nf,fermionicSign);
-			PsimagLite::Matrix<FieldType> w(n1,nf);
+
 			for (size_t i=0;i<n1;i++) {
 				concurrency_.loopCreate(nf);
 				std::vector<FieldType> v(nf);

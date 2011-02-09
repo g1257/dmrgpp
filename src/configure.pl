@@ -594,6 +594,7 @@ bool observeOneFullSweep(IoInputType& io,
 			OperatorType,TargettingType>(model,observe,geometry.numberOfSites());
 		return observe.endOfData(); // return here for testing only 
 	}
+	observe.setBrackets("gs","gs");
 EOF
 	if  ($modelName=~/heisenberg/i) {
 	} else {
