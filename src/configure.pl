@@ -592,7 +592,7 @@ bool observeOneFullSweep(IoInputType& io,
 	if (hasTimeEvolution) {
 		measureTimeObs<ModelType,ObserverType,SparseMatrixType,
 			OperatorType,TargettingType>(model,observe,geometry.numberOfSites());
-		return observe.endOfData(); // return here for testing only 
+		//return observe.endOfData(); // return here for testing only 
 	}
 	observe.setBrackets("gs","gs");
 EOF

@@ -84,13 +84,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 #include "BLAS.h"
 #include "IoSimple.h"
+#include "FermionSign.h"
 
 namespace Dmrg {
 	//! Move also checkpointing from DmrgSolver to here (FIXME)
-	template<typename RealType,typename VectorType,typename MatrixType,typename BasisType,
- 		typename FermionSignType> // <-- this last type should be gotten from BasisType in the future FIXME
+	template<typename BasisType,typename VectorType,typename MatrixType>
 	class DmrgSerializer {
 		public:
+			typedef FermionSign FermionSignType;
+			typedef typename BasisType::RealType RealType;
+
 			DmrgSerializer(
 				const FermionSignType& fs,
 				const BasisType& pS,

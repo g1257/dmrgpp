@@ -87,7 +87,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LanczosSolver.h"
 #include "Diagonalization.h"
 #include "ProgressIndicator.h"
-#include "FermionSign.h"
 #include "DmrgSerializer.h"
 #include "Checkpoint.h"
 #include "WaveFunctionTransfFactory.h"
@@ -131,7 +130,7 @@ namespace Dmrg {
 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 
-		typedef DmrgSerializer<RealType,VectorWithOffsetType,TransformType,MyBasis,FermionSign> DmrgSerializerType;
+		typedef DmrgSerializer<MyBasis,VectorWithOffsetType,TransformType> DmrgSerializerType;
 		typedef typename ModelType::GeometryType GeometryType;
 		typedef Checkpoint<ParametersType,TargettingType> CheckpointType;
 				
@@ -436,7 +435,7 @@ namespace Dmrg {
 		void serialize(const std::vector<size_t>& electronsVector,const TargettingType& target,
 			      const TransformType& transform,size_t direction)
 		{
-			FermionSign fs(electronsVector);
+			typename DmrgSerializerType::FermionSignType fs(electronsVector);
 			DmrgSerializerType ds(fs,pSprime_,pEprime_,pSE_,target.gs(),transform,direction);
 			ds.save(io_);
 

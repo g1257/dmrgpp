@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PRECOMPUTED_H
 #include "SparseVector.h"
 #include "ProgramGlobals.h"
-#include "FermionSign.h"
 #include "TimeSerializer.h"
 #include "DmrgSerializer.h"
 #include "VectorWithOffsets.h" // to include norm
@@ -105,7 +104,8 @@ namespace Dmrg {
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-		typedef DmrgSerializer<RealType,VectorWithOffsetType,MatrixType,BasisType,FermionSign> DmrgSerializerType;
+		typedef DmrgSerializer<BasisType,VectorWithOffsetType,MatrixType> DmrgSerializerType;
+		typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 		
 		enum {GS_VECTOR,TIME_VECTOR};
 		enum {LEFT_BRACKET=0,RIGHT_BRACKET=1};
@@ -137,6 +137,8 @@ namespace Dmrg {
 			currentPos_=pos;
 		}
 
+		size_t getPointer() const { return currentPos_; }
+
 		void setBrackets(size_t left,size_t right)
 		{
 			bracket_[LEFT_BRACKET]=left;
@@ -160,7 +162,7 @@ namespace Dmrg {
 			return dSerializerV_[currentPos_].rows();
 		}
 
-		const FermionSign& fermionicSign() const
+		const FermionSignType& fermionicSign() const
 		{
 			return dSerializerV_[currentPos_].fermionicSign();
 		}

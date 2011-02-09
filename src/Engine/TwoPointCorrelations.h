@@ -124,24 +124,19 @@ namespace Dmrg {
 		{}
 
 		PsimagLite::Matrix<FieldType> operator()(
-				size_t n,
 				const MatrixType& O1,
 				const MatrixType& O2,
 				int fermionicSign,
-				size_t n1=0,
-				size_t nf=0)
+				size_t rows,
+				size_t cols)
 		{
+			PsimagLite::Matrix<FieldType> w(rows,cols);
+//			if (helper_.direction()!=EXPAND_SYSTEM) {
+//				std::cerr<<"WARNING: TwoPointcorrealtions::(..) ignored\n";
+//				return w;
+//			}
 
-			if (nf==0) nf = n;
-			if (n1==0) n1 = n/2;
-			PsimagLite::Matrix<FieldType> w(n1,nf);
-			if (helper_.direction()!=EXPAND_SYSTEM) {
-				std::cerr<<"WARNING: TwoPointcorrealtions::(..) ignored\n";
-				return w;
-			}
-			/*clearCache(n1, nf);
-			precomputeGrowth(O1,fermionicSign,n1,nf);*/
-			initCache(O1,n1,nf,fermionicSign);
+			initCache(O1,rows,cols,fermionicSign);
 
 			for (size_t i=0;i<n1;i++) {
 				concurrency_.loopCreate(nf);
@@ -149,8 +144,6 @@ namespace Dmrg {
 				size_t j = i;
 				//ProfilingType profile("correlations loop i=" + utils::ttos(i));
 				while(concurrency_.loop(j)) {
-				//for (size_t j=i;j<nf-1;j++) {
-					//std::cerr<<"About to do i="<<i<<" and j="<<j<<"\n";
 					v[j]  = calcCorrelation(i,j,O1,O2,fermionicSign);
 					if (verbose_) {
 						std::cerr<<"Result for i="<<i;
@@ -272,19 +265,21 @@ namespace Dmrg {
 			return ret;
 		}
 
-		void multiply(MatrixType& O1,FieldType x)
-		{
-			for (size_t i=0;i<O1.n_row();i++)
-				for (size_t j=0;j<O1.n_col();j++) O1(i,j) *= x;
-		}
+//		void multiply(MatrixType& O1,FieldType x)
+//		{
+//			for (size_t i=0;i<O1.n_row();i++)
+//				for (size_t j=0;j<O1.n_col();j++) O1(i,j) *= x;
+//		}
 
-		MatrixType sustract(const MatrixType& O1,const MatrixType& O2)
-		{
-			size_t n=O1.n_row();
-			MatrixType ret(n,n);
-			for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++) ret(i,j) = O1(i,j) - O2(i,j);
-			return ret;
-		}
+//		MatrixType sustract(const MatrixType& O1,const MatrixType& O2)
+//		{
+//			size_t n=O1.n_row();
+//			MatrixType ret(n,n);
+//			for (size_t i=0;i<n;i++)
+//				for (size_t j=0;j<n;j++)
+//					ret(i,j) = O1(i,j) - O2(i,j);
+//			return ret;
+//		}
 		
 		void clearCache(size_t  ns,size_t nf)
 		{
@@ -315,7 +310,6 @@ namespace Dmrg {
 			int nt=i-1;
 			if (nt<0) nt=0;
 			return &(grownOperators_[i][ns-nt-1]);
-			//std::cerr<<"done grow for i="<<i<<" and ns="<<ns<<"\n";
 		}
 
 		//! i can be zero here!!
@@ -325,21 +319,23 @@ namespace Dmrg {
 				size_t ns,
 				size_t nfinal)
 		{
-			//MatrixType tmp;
 			for (size_t i=0;i<ns;i++) {
 				int nt=i-1;
 				if (nt<0) nt=0;
 				MatrixType Oinc = Osrc;
-				if (verbose_) std::cerr<<"Precomputing "<<i<<" out of "<<(ns-1)<<"\n";
+				if (verbose_)
+					std::cerr<<"Precomputing "<<i<<" out of "<<(ns-1)<<"\n";
 				for (size_t s=nt+1;s<nfinal;s++) {
-					if (verbose_) std::cerr<<"\tPrecomputing "<<s<<" out of "<<(nfinal-1)<<"\n";
-					growRecursive(grownOperators_[i][s-nt-1],Oinc,i,fermionicSign,s-1);
+					if (verbose_) {
+						std::cerr<<"\tPrecomputing "<<s;
+						std::cerr<<" out of "<<(nfinal-1)<<"\n";
+					}
+					growRecursive(grownOperators_[i][s-nt-1],Oinc,i,
+							fermionicSign,s-1);
 					Oinc = grownOperators_[i][s-nt-1];
-					//growDirectly(grownOperators_[i][s-nt-1],Osrc,i,fermionicSign,s);
-					//if (tmp!=grownOperators_[i][s-nt-1]) throw std::runtime_error("Not equal\n");
 				}
 			}
-			std::cerr<<"precomputeGrowth done\n";
+			if (verbose_) std::cerr<<"precomputeGrowth done\n";
 		}
 
 		//! i can be zero here!!
@@ -354,23 +350,9 @@ namespace Dmrg {
 			int nt=i-1;
 			if (nt<0) nt=0;
 			
-			// set appropriate privates which are:
-			// SpermutationInverse_(s) and transform_(s)
-			/*io_.rewind();
-			calcSpermutation(s);
-			//std::cerr<<"*****************======="<<transform_.n_row()<<"\n";
-			io_.readMatrix(transform_,"#TRANSFORM_sites",s);*/
 			helper_.setPointer(s);
-			//std::cerr<<"%%%%%%%%%%%%%%%%%======="<<transform_.n_row()<<"\n";
-			int growOption = GROW_RIGHT;
-			//if (i==1 && s==0) growOption = GROW_LEFT;// <-- not needed since nt>0
-			if (s==size_t(nt)) {
-				growOption = GROW_LEFT;
-				if (i==0) growOption = GROW_RIGHT;
-			}
-			/* io_.rewind();
-			io_.read(electrons_,"#ELECTRONS_sites=",s);*/
-			//skeleton_.createSigns(signs,fermionicSign);
+			size_t growOption = skeleton_.growthDirection(s,nt,i);
+
 			MatrixType Onew(helper_.columns(),helper_.columns());
 			Odest = Onew;
 			skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption);

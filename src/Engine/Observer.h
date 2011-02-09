@@ -141,9 +141,8 @@ namespace Dmrg {
 
 		// return true if
 		// we're at site 1 or n-2
-		bool isAtCorner() const
+		bool isAtCorner(size_t numberOfSites) const
 		{
-			size_t numberOfSites = halfLatticeSize_*2;
 			bool es = (helper_.direction() == ProgramGlobals::EXPAND_SYSTEM);
 			if (es && helper_.site() ==  numberOfSites-2) return true;
 			if ((!es) && helper_.site()==1) return true;
@@ -239,7 +238,6 @@ namespace Dmrg {
 		ObserverHelperType helper_;
 		ConcurrencyType& concurrency_;
 		bool verbose_;
-		size_t halfLatticeSize_;
 		OnePointCorrelationsType onepoint_;
 		CorrelationsSkeletonType skeleton_;
 		TwoPointCorrelationsType twopoint_;
