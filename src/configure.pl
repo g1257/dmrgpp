@@ -518,7 +518,7 @@ bool observeOneFullSweep(IoInputType& io,
 		observerLib.measureTime("nupNdown");
 		observerLib.measureTime("nup+ndown");
 	}
-	observerLib.setBrackets("gs","gs");
+	if (hasTimeEvolution) observerLib.setBrackets("time","time");
 EOF
 	if  ($modelName=~/heisenberg/i) {
 	} else {
