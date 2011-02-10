@@ -471,6 +471,7 @@ print OBSOUT<<EOF;
  * DMRG++ ($brand) by G.A.*/
 	
 #include "Observer.h"
+#include "ObservableLibrary.h"
 #include "IoSimple.h"
 #include "$modelName.h" 
 #include "$operatorsName.h" 
@@ -499,96 +500,6 @@ $chooseRealOrComplexForObservables
 typedef PsimagLite::$concurrencyName<RealType> MyConcurrency;
 typedef PsimagLite::IoSimple::In IoInputType;
 
-template<typename ModelType,typename ObserverType,typename SparseMatrixType,
-typename OperatorType,typename TargettingType>
-void measureTimeObsOne(
-	const SparseMatrixType& A,
-	const std::string& label,
-	ObserverType& observe,
-	size_t numberOfSites)
-{
-	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
-	typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
-	
-	Su2RelatedType su2Related1;
-	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
-	typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
-	
-	std::cout<<"#Using Matrix A:\\n";
-	for (size_t i=0;i<A.rank();i++) {
-		for (size_t j=0;j<A.rank();j++)
-			std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
-		std::cout<<"\\n";
-	}
-	OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-	std::cout<<"site "<<label<<"(gs) "<<label<<"(timevector) time\\n";
-	for (size_t i0 = 0;i0<observe.size();i0++) {
-		// for g.s. use this one:
-		observe.setBrackets("gs","gs");
-		FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opA);
-		// for time vector use this one:
-		observe.setBrackets("time","time");
-		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opA);
-		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
-		if (observe.isAtCorner(numberOfSites)) { // also calculate next or prev. site:
-			size_t x = (observe.site()==1) ? 0 : numberOfSites-1;
-			// do the corner case
-			// for g.s. use this one:
-			observe.setBrackets("gs","gs");
-			FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opA,true);
-			// for time vector use this one:
-			observe.setBrackets("time","time");
-			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opA,true);
-			std::cout<<x<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
-		}
-	}
-}
-
-template<typename ModelType,typename ObserverType,typename SparseMatrixType,
-typename OperatorType,typename TargettingType>
-void measureTimeObs(const ModelType& model,ObserverType& observe, size_t numberOfSites)
-{
-	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
-	typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
-	SparseMatrixType matrixNup(model.getOperator("nup"));
-	SparseMatrixType matrixNdown(model.getOperator("ndown"));
-	SparseMatrixType A;
-	Su2RelatedType su2Related1;
-	A.makeDiagonal(4,1.0);
-	OperatorType opIdentity(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-	FieldType superDensity = observe.template onePoint<ApplyOperatorType>(0,opIdentity);
-	std::cout<<"SuperDensity(Weight of the timeVector)="<<superDensity<<"\\n";
-
-	multiply(A,matrixNup,matrixNdown);
-	measureTimeObsOne<ModelType,ObserverType,SparseMatrixType,
-		OperatorType,TargettingType>(A,"nupNdown",observe,numberOfSites);
-
-	A = matrixNup;
-	A += matrixNdown;
-	measureTimeObsOne<ModelType,ObserverType,SparseMatrixType,
-		OperatorType,TargettingType>(A,"nup+ndown",observe,numberOfSites);
-}
-
-template<typename ObserveType,typename ConcurrencyType>
-void measureOne(
-	const std::string& label,
-	const PsimagLite::Matrix<FieldType>& op1,
-	const PsimagLite::Matrix<FieldType>& op2,
-	int fermionSign,
-	size_t rows,
-	size_t cols,
-	ObserveType& observe,
-	ConcurrencyType& concurrency)
-{
-	const PsimagLite::Matrix<FieldType>& v = 
-		observe.correlations(op1,op2,fermionSign,rows,cols);;
-	if (concurrency.root()) {
-		std::cout<<label<<":\\n";
-		std::cout<<v;
-	}
-}
-
-
 template<typename ConcurrencyType,typename VectorWithOffsetType,typename ModelType,typename SparseMatrixType,
 typename OperatorType,typename TargettingType,typename GeometryType>
 bool observeOneFullSweep(IoInputType& io,
@@ -599,108 +510,64 @@ bool observeOneFullSweep(IoInputType& io,
 	size_t n=geometry.numberOfSites();
 	typedef Observer<FieldType,VectorWithOffsetType,ModelType,IoInputType> 
 		ObserverType;
-	ObserverType observe(io,n-2,hasTimeEvolution,model,concurrency,verbose);
+	typedef ObservableLibrary<ObserverType,TargettingType> ObservableLibraryType;
+	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,concurrency,verbose);
 	
 	if (hasTimeEvolution && obsOptions.find("ot")!=std::string::npos) {
-		measureTimeObs<ModelType,ObserverType,SparseMatrixType,
-			OperatorType,TargettingType>(model,observe,geometry.numberOfSites());
-		//return observe.endOfData(); // return here for testing only 
+		observerLib.measureTime("superDensity");
+		observerLib.measureTime("nupNdown");
+		observerLib.measureTime("nup+ndown");
 	}
-	observe.setBrackets("gs","gs");
+	observerLib.setBrackets("gs","gs");
 EOF
 	if  ($modelName=~/heisenberg/i) {
 	} else {
 print OBSOUT<<EOF; 
 
 	if (obsOptions.find("cc")!=std::string::npos) {
-		PsimagLite::Matrix<RealType> opC = model.getOperator("c",0,0); // c_{0,0} spin up
-		PsimagLite::Matrix<FieldType> opCtranspose = utils::transposeConjugate(opC);
-		measureOne("OPERATOR C",opC,opCtranspose,-1,n/2,n,observe,concurrency);
+		observerLib.measure("cc",n/2,n);
 	}
 	
 	if (obsOptions.find("nn")!=std::string::npos) {
-		PsimagLite::Matrix<RealType> opN = model.getOperator("n");
-		measureOne("OPERATOR N",opN,opN,1,n/2,n,observe,concurrency);
+		observerLib.measure("nn",n/2,n);
 	}
 EOF
 	}
 print OBSOUT<<EOF;
-	// OPERATOR SZ
-	PsimagLite::Matrix<FieldType>* v3;
 	if (obsOptions.find("szsz")!=std::string::npos) {
-		PsimagLite::Matrix<RealType> Sz = model.getOperator("z");
-		v3=new PsimagLite::Matrix<FieldType>(observe.correlations(Sz,Sz,1,n/2,n));
-		if (concurrency.root()) {
-			std::cout<<"OperatorSz:\\n";
-			std::cout<<(*v3);
-		}
+		observerLib.measure("szsz",n/2,n);
 	}
 EOF
 	if  ($modelName=~/febasedsc/i) {
 print print OBSOUT<<EOF;
 	if (obsOptions.find("dd")!=std::string::npos && 
 			geometry.label(0).find("ladder")==std::string::npos) {
-		const PsimagLite::Matrix<FieldType>& oDelta = model.getOperator("d");
-		PsimagLite::Matrix<FieldType> oDeltaT;
-		utils::transposeConjugate(oDeltaT,oDelta);
-		measureOne("TWO-POINT DELTA-DELTA^DAGGER",oDelta,oDeltaT,1,n/2,n,
-			observe,concurrency);
+		observerLib.measure("dd",n/2,n);
 	}
 	
 
 	// FOUR-POINT DELTA-DELTA^DAGGER:
 	if (obsOptions.find("dd4")!=std::string::npos &&
 		geometry.label(0).find("ladder")!=std::string::npos) {
-		for (size_t g=0;g<16;g++) {
-			std::vector<FieldType> fpd;
-			std::vector<size_t> gammas(4,0); // TODO: WRITE COMBINATIONS
-			gammas[0] = (g & 1);
-			gammas[1] = (g & 2)>>1;
-			gammas[2] = (g & 4) >> 2;
-			gammas[3] = (g & 8) >> 3;
-			observe.fourPointDeltas(fpd,geometry.numberOfSites(),gammas,model);
-			for (size_t step=0;step<fpd.size();step++) {
-				// step --> (i,j) FIXME
-				std::cout<<step<<" "<<g<<" "<<fpd[step]<<"\\n";
-			}
-		}
+		observerLib.measure("dd4",n/2,n);
 	} // if dd4
 EOF
 	}
 	if  ($modelName=~/heisenberg/i) {
 	print print OBSOUT<<EOF;
-		// Heisenberg model: needs formatting and also obsOptions: FIXME
-		// Si^+ Sj^-
-		const PsimagLite::Matrix<FieldType>& sPlus = model.getOperator("+");
-		PsimagLite::Matrix<FieldType> sPlusT = utils::transposeConjugate(sPlus);
-		const PsimagLite::Matrix<FieldType>& v4=observe.correlations(sPlus,sPlusT,1,n/2,n);
-		if (concurrency.root()) {
-			std::cout<<"OperatorSplus:\\n";
-			std::cout<<v4;
+		if (obsOptions.find("s+s-")!=std::string::npos) {
+			observerLib.measure("s+s-",n/2,n);
 		}
-	
-		// Si^- Sj^+
-		const PsimagLite::Matrix<FieldType>& sMinus = model.getOperator("-");
-		PsimagLite::Matrix<FieldType> sMinusT = utils::transposeConjugate(sMinus);
-		const PsimagLite::Matrix<FieldType>& v5=observe.correlations(sMinus,sMinusT,1,n/2,n);
-		if (concurrency.root()) {
-			std::cout<<"OperatorMinus:\\n";
-			std::cout<<v5;
+		if (obsOptions.find("s-s+")!=std::string::npos) {
+			observerLib.measure("s-s+",n/2,n);
 		}
-	
-		PsimagLite::Matrix<FieldType> spinTotal(v5.n_row(),v5.n_col());
-		
-		for (size_t i=0;i<spinTotal.n_row();i++) 
-			for (size_t j=0;j<spinTotal.n_col();j++) spinTotal(i,j) = 0.5*(v4(i,j) +v5(i,j)) + (*v3)(i,j);
-	
-		if (concurrency.root()) {
-			std::cout<<"SpinTotal:\\n";
-			std::cout<<spinTotal;
+		if (obsOptions.find("ss")!=std::string::npos) {
+			observerLib.measure("ss",n/2,n);
 		}
 EOF
 	}
 	print OBSOUT<<EOF;
-	return observe.endOfData();
+	return observerLib.endOfData();
 }
 
 	template<

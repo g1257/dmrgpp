@@ -98,7 +98,6 @@ namespace Dmrg {
 		typename ModelType,
 		typename IoInputType>
 	class Observer {
-		typedef size_t IndexType;
 		typedef SparseVector<FieldType> VectorType;
 		typedef typename ModelType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelType::RealType RealType;
