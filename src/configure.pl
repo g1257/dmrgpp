@@ -501,6 +501,51 @@ typedef PsimagLite::IoSimple::In IoInputType;
 
 template<typename ModelType,typename ObserverType,typename SparseMatrixType,
 typename OperatorType,typename TargettingType>
+void measureTimeObsOne(
+	const SparseMatrixType& A,
+	const std::string& label,
+	ObserverType& observe,
+	size_t numberOfSites)
+{
+	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
+	typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
+	
+	Su2RelatedType su2Related1;
+	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
+	typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
+	
+	std::cout<<"#Using Matrix A:\\n";
+	for (size_t i=0;i<A.rank();i++) {
+		for (size_t j=0;j<A.rank();j++)
+			std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
+		std::cout<<"\\n";
+	}
+	OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+	std::cout<<"site "<<label<<"(gs) "<<label<<"(timevector) time\\n";
+	for (size_t i0 = 0;i0<observe.size();i0++) {
+		// for g.s. use this one:
+		observe.setBrackets("gs","gs");
+		FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opA);
+		// for time vector use this one:
+		observe.setBrackets("time","time");
+		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opA);
+		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
+		if (observe.isAtCorner(numberOfSites)) { // also calculate next or prev. site:
+			size_t x = (observe.site()==1) ? 0 : numberOfSites-1;
+			// do the corner case
+			// for g.s. use this one:
+			observe.setBrackets("gs","gs");
+			FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opA,true);
+			// for time vector use this one:
+			observe.setBrackets("time","time");
+			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opA,true);
+			std::cout<<x<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
+		}
+	}
+}
+
+template<typename ModelType,typename ObserverType,typename SparseMatrixType,
+typename OperatorType,typename TargettingType>
 void measureTimeObs(const ModelType& model,ObserverType& observe, size_t numberOfSites)
 {
 	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
@@ -515,67 +560,34 @@ void measureTimeObs(const ModelType& model,ObserverType& observe, size_t numberO
 	std::cout<<"SuperDensity(Weight of the timeVector)="<<superDensity<<"\\n";
 
 	multiply(A,matrixNup,matrixNdown);
-	std::cout<<"#Using Matrix A:\\n";
-	for (size_t i=0;i<A.rank();i++) {
-		for (size_t j=0;j<A.rank();j++)
-			std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
-		std::cout<<"\\n";
-	}
-	OperatorType opN(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-	std::cout<<"site nupNdown(gs) nupNdown(timevector) time\\n";
-	for (size_t i0 = 0;i0<observe.size();i0++) {
-		// for g.s. use this one:
-		observe.setBrackets("gs","gs");
-		FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opN);
-		// for time vector use this one:
-		observe.setBrackets("time","time");
-		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opN);
-		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
-		if (observe.isAtCorner(numberOfSites)) { // also calculate next or prev. site:
-			size_t x = (observe.site()==1) ? 0 : numberOfSites-1;
-			// do the corner case
-			// for g.s. use this one:
-			observe.setBrackets("gs","gs");
-			FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opN,true);
-			// for time vector use this one:
-			observe.setBrackets("time","time");
-			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opN,true);
-			std::cout<<x<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
-		}
-	}
-	// measuring charge:
+	measureTimeObsOne<ModelType,ObserverType,SparseMatrixType,
+		OperatorType,TargettingType>(A,"nupNdown",observe,numberOfSites);
+
 	A = matrixNup;
 	A += matrixNdown;
-	std::cout<<"#Using Matrix A:\\n";
-	for (size_t i=0;i<A.rank();i++) {
-		for (size_t j=0;j<A.rank();j++)
-			std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
-		std::cout<<"\\n";
-	}
-	OperatorType opCharge(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-	std::cout<<"site nUp+nDown(gs) nup+ndown(timevector) time\\n";
-	for (size_t i0 = 0;i0<observe.size();i0++) {
-		//for g.s. use this one:
-		observe.setBrackets("gs","gs");
-		FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opCharge);
-		// for h.d. use this one:
-		observe.setBrackets("time","time");
-		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opCharge);
-		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
-		if (observe.isAtCorner(numberOfSites)) { // also calculate next or prev. site:
-			size_t x = (observe.site()==1) ? 0 : numberOfSites-1;
-			// do the corner case
-			// for g.s. use this one:
-			observe.setBrackets("gs","gs");
-			FieldType tmp1 = observe.template onePoint<ApplyOperatorType>(i0,opCharge,true);
-			// for time vector use this one:
-			observe.setBrackets("time","time");
-			FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opCharge,true);
-			std::cout<<x<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
-		}
-	}
-
+	measureTimeObsOne<ModelType,ObserverType,SparseMatrixType,
+		OperatorType,TargettingType>(A,"nup+ndown",observe,numberOfSites);
 }
+
+template<typename ObserveType,typename ConcurrencyType>
+void measureOne(
+	const std::string& label,
+	const PsimagLite::Matrix<FieldType>& op1,
+	const PsimagLite::Matrix<FieldType>& op2,
+	int fermionSign,
+	size_t rows,
+	size_t cols,
+	ObserveType& observe,
+	ConcurrencyType& concurrency)
+{
+	const PsimagLite::Matrix<FieldType>& v = 
+		observe.correlations(op1,op2,fermionSign,rows,cols);;
+	if (concurrency.root()) {
+		std::cout<<label<<":\\n";
+		std::cout<<v;
+	}
+}
+
 
 template<typename ConcurrencyType,typename VectorWithOffsetType,typename ModelType,typename SparseMatrixType,
 typename OperatorType,typename TargettingType,typename GeometryType>
@@ -589,7 +601,7 @@ bool observeOneFullSweep(IoInputType& io,
 		ObserverType;
 	ObserverType observe(io,n-2,hasTimeEvolution,model,concurrency,verbose);
 	
-	if (hasTimeEvolution) {
+	if (hasTimeEvolution && obsOptions.find("ot")!=std::string::npos) {
 		measureTimeObs<ModelType,ObserverType,SparseMatrixType,
 			OperatorType,TargettingType>(model,observe,geometry.numberOfSites());
 		//return observe.endOfData(); // return here for testing only 
@@ -598,28 +610,17 @@ bool observeOneFullSweep(IoInputType& io,
 EOF
 	if  ($modelName=~/heisenberg/i) {
 	} else {
-print OBSOUT<<EOF;
-	// OPERATOR C:
+print OBSOUT<<EOF; 
+
 	if (obsOptions.find("cc")!=std::string::npos) {
-		PsimagLite::Matrix<RealType> opC1 = model.getOperator("c",0,0); // c_{0,0} spin up
-		PsimagLite::Matrix<FieldType> opC = opC1;	
-		PsimagLite::Matrix<FieldType> opCtranspose = utils::transposeConjugate(opC1);
-		const PsimagLite::Matrix<FieldType>& v=observe.correlations(opC,opCtranspose,-1,n/2,n);;
-		if (concurrency.root()) {
-			std::cout<<"OperatorC:\\n";
-			std::cout<<v;
-		}
+		PsimagLite::Matrix<RealType> opC = model.getOperator("c",0,0); // c_{0,0} spin up
+		PsimagLite::Matrix<FieldType> opCtranspose = utils::transposeConjugate(opC);
+		measureOne("OPERATOR C",opC,opCtranspose,-1,n/2,n,observe,concurrency);
 	}
 	
-	// OPERATOR N
 	if (obsOptions.find("nn")!=std::string::npos) {
-		PsimagLite::Matrix<RealType> opN1 = model.getOperator("n");
-		PsimagLite::Matrix<FieldType> opN = opN1;
-		const PsimagLite::Matrix<FieldType>& v2=observe.correlations(opN,opN,1,n/2,n);
-		if (concurrency.root()) {
-			std::cout<<"OperatorN:\\n";
-			std::cout<<v2;
-		}
+		PsimagLite::Matrix<RealType> opN = model.getOperator("n");
+		measureOne("OPERATOR N",opN,opN,1,n/2,n,observe,concurrency);
 	}
 EOF
 	}
@@ -627,8 +628,7 @@ print OBSOUT<<EOF;
 	// OPERATOR SZ
 	PsimagLite::Matrix<FieldType>* v3;
 	if (obsOptions.find("szsz")!=std::string::npos) {
-		PsimagLite::Matrix<RealType> Sz1 = model.getOperator("z");
-		PsimagLite::Matrix<FieldType> Sz = Sz1;
+		PsimagLite::Matrix<RealType> Sz = model.getOperator("z");
 		v3=new PsimagLite::Matrix<FieldType>(observe.correlations(Sz,Sz,1,n/2,n));
 		if (concurrency.root()) {
 			std::cout<<"OperatorSz:\\n";
@@ -638,17 +638,13 @@ print OBSOUT<<EOF;
 EOF
 	if  ($modelName=~/febasedsc/i) {
 print print OBSOUT<<EOF;
-	// TWO-POINT DELTA-DELTA^DAGGER:
 	if (obsOptions.find("dd")!=std::string::npos && 
 			geometry.label(0).find("ladder")==std::string::npos) {
 		const PsimagLite::Matrix<FieldType>& oDelta = model.getOperator("d");
 		PsimagLite::Matrix<FieldType> oDeltaT;
 		utils::transposeConjugate(oDeltaT,oDelta);
-		const PsimagLite::Matrix<FieldType>& vDelta=observe.correlations(oDelta,oDeltaT,1,n/2,n);
-		if (concurrency.root()) {
-			std::cout<<"DeltaDeltaDagger:\\n";
-			std::cout<<vDelta;
-		}
+		measureOne("TWO-POINT DELTA-DELTA^DAGGER",oDelta,oDeltaT,1,n/2,n,
+			observe,concurrency);
 	}
 	
 
@@ -789,7 +785,7 @@ int main(int argc,char *argv[])
 		s = s+ " and, optionally, (ii) a comma-separated list of options of what to compute\\n";
 		throw std::runtime_error(s);
 	}
-	std::string options = "cc,nn,szsz";
+	std::string options = "";
 	if (argc>2) options = argv[2];
 	
 	//Setup the Geometry

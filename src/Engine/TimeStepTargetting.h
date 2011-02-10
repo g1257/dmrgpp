@@ -262,20 +262,14 @@ namespace Dmrg {
 			}
 			
 			
-			template<
-			template<typename,typename,typename> class LanczosSolverTemplate1,
-				template<typename,typename> class InternalProductTemplate1,
-				template<typename,typename> class WaveFunctionTransfTemplate1,
-				typename ModelType1,
-				typename ConcurrencyType1,
-				typename IoType1,
-					template<typename> class VectorWithOffsetTemplate1>
-			friend std::ostream& operator<<(std::ostream& os,
-				const TimeStepTargetting<LanczosSolverTemplate1,
-				InternalProductTemplate1,
-				WaveFunctionTransfTemplate1,ModelType1,ConcurrencyType1,IoType1,
-				VectorWithOffsetTemplate1>& tst);
-
+				void print(std::ostream& os) const
+				{
+					os<<"TSTWeightsTimeVectors=";
+					for (size_t i=0;i<weight_.size();i++)
+						os<<weight_[i]<<" ";
+					os<<"\n";
+					os<<"TSTWeightGroundState="<<gsWeight_<<"\n";
+				}
 			
 
 			size_t evolve(
@@ -737,11 +731,7 @@ namespace Dmrg {
 			WaveFunctionTransfTemplate,ModelType_,ConcurrencyType_,IoType_,
 			VectorWithOffsetTemplate>& tst)
 	{
-		os<<"TSTWeightsTimeVectors=";
-		for (size_t i=0;i<tst.weight_.size();i++)
-			os<<tst.weight_[i]<<" ";
-		os<<"\n";
-		os<<"TSTWeightGroundState="<<tst.gsWeight_<<"\n";
+		tst.print(os);
 		return os;
 	}
 } // namespace Dmrg
