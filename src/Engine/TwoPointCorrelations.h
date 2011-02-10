@@ -131,16 +131,12 @@ namespace Dmrg {
 				size_t cols)
 		{
 			PsimagLite::Matrix<FieldType> w(rows,cols);
-//			if (helper_.direction()!=EXPAND_SYSTEM) {
-//				std::cerr<<"WARNING: TwoPointcorrealtions::(..) ignored\n";
-//				return w;
-//			}
 
 			initCache(O1,rows,cols,fermionicSign);
 
-			for (size_t i=0;i<n1;i++) {
-				concurrency_.loopCreate(nf);
-				std::vector<FieldType> v(nf);
+			for (size_t i=0;i<rows;i++) {
+				concurrency_.loopCreate(cols);
+				std::vector<FieldType> v(cols);
 				size_t j = i;
 				//ProfilingType profile("correlations loop i=" + utils::ttos(i));
 				while(concurrency_.loop(j)) {
@@ -264,22 +260,6 @@ namespace Dmrg {
 			for (size_t s=0;s<n;s++)  ret(s,s)=static_cast<RealType>(1.0);
 			return ret;
 		}
-
-//		void multiply(MatrixType& O1,FieldType x)
-//		{
-//			for (size_t i=0;i<O1.n_row();i++)
-//				for (size_t j=0;j<O1.n_col();j++) O1(i,j) *= x;
-//		}
-
-//		MatrixType sustract(const MatrixType& O1,const MatrixType& O2)
-//		{
-//			size_t n=O1.n_row();
-//			MatrixType ret(n,n);
-//			for (size_t i=0;i<n;i++)
-//				for (size_t j=0;j<n;j++)
-//					ret(i,j) = O1(i,j) - O2(i,j);
-//			return ret;
-//		}
 		
 		void clearCache(size_t  ns,size_t nf)
 		{

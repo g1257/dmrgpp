@@ -89,17 +89,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // to include norm
 
 namespace Dmrg {
-	template<typename IoInputType_,typename MatrixType_,typename VectorType_,
-		typename VectorWithOffsetType_,typename ModelType>
+	template<
+		typename IoInputType_,
+		typename MatrixType_,
+		typename VectorType_,
+		typename VectorWithOffsetType_,
+		typename BasisWithOperatorsType_>
 	class ObserverHelper {
 	public:
 		typedef IoInputType_ IoInputType;
 		typedef MatrixType_ MatrixType;
 		typedef VectorType_ VectorType;
 		typedef VectorWithOffsetType_ VectorWithOffsetType;
-		typedef typename ModelType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef size_t IndexType;
 		typedef typename VectorType::value_type FieldType;
+		typedef BasisWithOperatorsType_ BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -114,20 +118,20 @@ namespace Dmrg {
 				IoInputType& io,
 				size_t nf,
 				bool hasTimeEvolution,
-				const ModelType& model,
 				bool verbose)
 			:	io_(io),
 				dSerializerV_(),//(1,DmrgSerializerType(io_,true)),
 				timeSerializerV_(),//(nf),
 				currentPos_(0),
-				model_(model),
 				verbose_(verbose),
 				bracket_(2,GS_VECTOR),
 				noMoreData_(false)
 		{
 			if (!init(hasTimeEvolution,nf)) throw std::runtime_error(
 					"No more data to construct this object\n");
+
 		}
+
 
 		bool endOfData() const { return noMoreData_; }
 
@@ -312,7 +316,6 @@ namespace Dmrg {
 		std::vector<DmrgSerializerType> dSerializerV_;
 		std::vector<TimeSerializerType> timeSerializerV_;
 		size_t currentPos_;
-		const ModelType& model_;
 		bool verbose_;
 		std::vector<size_t> bracket_;
 		bool noMoreData_;

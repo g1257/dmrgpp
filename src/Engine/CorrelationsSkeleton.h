@@ -108,7 +108,7 @@ namespace Dmrg {
 		return os;
 	}
 	
-	template<typename ObserverHelperType_>
+	template<typename ObserverHelperType_,typename ModelType>
 	class CorrelationsSkeleton {
 		//typedef typename MatrixType::value_type FieldType;
 		typedef size_t IndexType;
@@ -140,8 +140,14 @@ namespace Dmrg {
 
 		CorrelationsSkeleton(
 				ObserverHelperType& helper,
+				const ModelType& model,
 				bool verbose = false)
-		: helper_(helper),verbose_(verbose) { }
+		: helper_(helper),verbose_(verbose)
+		{
+			typename ModelType::HilbertBasisType basis;
+			model.setNaturalBasis(basis,1);
+			model.findElectrons(oneSiteElectrons_,basis);
+		}
 		
 		size_t numberOfSites() const
 		{
@@ -319,14 +325,24 @@ namespace Dmrg {
 				std::cerr<<"!="<<eprime<<"\n";
 				throw std::runtime_error("problem in dmrgMultiply\n");
 			}
+			if (nj>oneSiteElectrons_.size())
+				throw std::runtime_error("Problem in dmrgMultiplyEnviron\n");
+
+			const std::vector<size_t>&  ve = helper_.basisE().
+					electronsVector(BasisType::BEFORE_TRANSFORM);
 
 			for (size_t r=0;r<eprime;r++) {
 				size_t e,u;
 				utils::getCoordinates(e,u,helper_.basisE().permutation(r),nj);
-				RealType f = 1; // FIXME!!
+				size_t nx0 = ve[r];
+				if (nx0<oneSiteElectrons_[e]) throw std::runtime_error(
+						"Problem in fluffUpEnviron_\n");
+				nx0 -= oneSiteElectrons_[e];
+				RealType f = (nx0 & 1) ? 1 : fermionicSign;
 				for (size_t e2=0;e2<nj;e2++) {
 					for (size_t u2=0;u2<ni;u2++) {
-						size_t r2 = helper_.basisE().permutationInverse(e2 + u2*nj);
+						size_t r2 = helper_.basisE().
+								permutationInverse(e2 + u2*nj);
 						if (r2>=eprime) throw std::runtime_error("Error\n");
 						result(r,r2) += O2(e,e2)*O1(u,u2)*f;
 					}
@@ -366,8 +382,11 @@ namespace Dmrg {
 		{
 			size_t n =helper_.basisE().size();
 
-			MatrixType ret(n,n);
+			if (growOption==GROW_LEFT &&
+					n/O.n_row()>oneSiteElectrons_.size())
+				throw std::runtime_error("Problem in fluffUpEnviron\n");
 
+			MatrixType ret(n,n);
 			for (size_t e=0;e<n;e++) {
 				for (size_t e2=0;e2<n;e2++) {
 					ret(e,e2) = fluffUpEnviron_(
@@ -402,11 +421,10 @@ namespace Dmrg {
 						size_t(helper_.basisS().permutation(e2)%m)) return 0;
 				utils::getCoordinates(k,i,helper_.basisS().permutation(e),m);
 				utils::getCoordinates(k2,j,helper_.basisS().permutation(e2),m);
-				sign = helper_.fermionicSign()(k,fermionicSign); // signs[k];
+				sign = helper_.fermionicSign()(k,fermionicSign);
 			}
-			FieldType ret=0;
-			if (k==k2) ret=O(i,j)*sign;
-			return ret;
+			if (k!=k2) return 0;
+			return O(i,j)*sign;
 		}
 
 		// Perfomance critical:
@@ -418,10 +436,12 @@ namespace Dmrg {
 		{
 			size_t n = O.n_row();
 			size_t m = size_t(helper_.basisE().size()/n);
-			RealType sign = static_cast<RealType>(1.0);
+			RealType sign = 1;
 
 			// Eperm[e] = i +k*n or e= k + i*m
 			// Eperm[e2] = j+k*n or e2=k+j*m
+			const std::vector<size_t>&  ve = helper_.basisE().
+				electronsVector(BasisType::BEFORE_TRANSFORM);
 
 			size_t i,j,k,k2;
 			if (growOption==GROW_RIGHT) {
@@ -430,12 +450,14 @@ namespace Dmrg {
 			} else {
 				utils::getCoordinates(k,i,helper_.basisE().permutation(e),m);
 				utils::getCoordinates(k2,j,helper_.basisE().permutation(e2),m);
-				sign = 1; // FIXME!!
+				size_t nx0 = ve[e];
+//				if (nx0<oneSiteElectrons_[k]) throw std::runtime_error(
+//						"Problem in fluffUpEnviron_\n");
+				nx0 -= oneSiteElectrons_[k];
+				sign = (nx0 & 1) ? 1 : fermionicSign;
 			}
-			FieldType ret=0;
-			if (i>=O.n_row() || j>=O.n_row()) throw std::runtime_error("Error2\n");
-			if (k==k2) ret=O(i,j)*sign;
-			return ret;
+			if (k!=k2) return 0;
+			return O(i,j)*sign;
 		}
 
 		RealType bracket_(
@@ -635,6 +657,7 @@ namespace Dmrg {
 
 		ObserverHelperType& helper_; //<-- NB: We are not the owner
 		bool verbose_;
+		std::vector<size_t> oneSiteElectrons_;
 	};  //class CorrelationsSkeleton
 } // namespace Dmrg
 

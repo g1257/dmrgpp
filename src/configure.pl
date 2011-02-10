@@ -531,7 +531,7 @@ void measureTimeObs(const ModelType& model,ObserverType& observe, size_t numberO
 		observe.setBrackets("time","time");
 		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opN);
 		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
-		if (observe.isAtCorner()) { // also calculate next or prev. site:
+		if (observe.isAtCorner(numberOfSites)) { // also calculate next or prev. site:
 			size_t x = (observe.site()==1) ? 0 : numberOfSites-1;
 			// do the corner case
 			// for g.s. use this one:
@@ -562,7 +562,7 @@ void measureTimeObs(const ModelType& model,ObserverType& observe, size_t numberO
 		observe.setBrackets("time","time");
 		FieldType tmp2 = observe.template onePoint<ApplyOperatorType>(i0,opCharge);
 		std::cout<<observe.site()<<" "<<tmp1<<" "<<tmp2<<" "<<observe.time()<<"\\n";
-		if (observe.isAtCorner()) { // also calculate next or prev. site:
+		if (observe.isAtCorner(numberOfSites)) { // also calculate next or prev. site:
 			size_t x = (observe.site()==1) ? 0 : numberOfSites-1;
 			// do the corner case
 			// for g.s. use this one:
@@ -604,7 +604,7 @@ print OBSOUT<<EOF;
 		PsimagLite::Matrix<RealType> opC1 = model.getOperator("c",0,0); // c_{0,0} spin up
 		PsimagLite::Matrix<FieldType> opC = opC1;	
 		PsimagLite::Matrix<FieldType> opCtranspose = utils::transposeConjugate(opC1);
-		const PsimagLite::Matrix<FieldType>& v=observe.correlations(n,opC,opCtranspose,-1);;
+		const PsimagLite::Matrix<FieldType>& v=observe.correlations(opC,opCtranspose,-1,n/2,n);;
 		if (concurrency.root()) {
 			std::cout<<"OperatorC:\\n";
 			std::cout<<v;
@@ -615,7 +615,7 @@ print OBSOUT<<EOF;
 	if (obsOptions.find("nn")!=std::string::npos) {
 		PsimagLite::Matrix<RealType> opN1 = model.getOperator("n");
 		PsimagLite::Matrix<FieldType> opN = opN1;
-		const PsimagLite::Matrix<FieldType>& v2=observe.correlations(n,opN,opN,1);
+		const PsimagLite::Matrix<FieldType>& v2=observe.correlations(opN,opN,1,n/2,n);
 		if (concurrency.root()) {
 			std::cout<<"OperatorN:\\n";
 			std::cout<<v2;
@@ -629,7 +629,7 @@ print OBSOUT<<EOF;
 	if (obsOptions.find("szsz")!=std::string::npos) {
 		PsimagLite::Matrix<RealType> Sz1 = model.getOperator("z");
 		PsimagLite::Matrix<FieldType> Sz = Sz1;
-		v3=new PsimagLite::Matrix<FieldType>(observe.correlations(n,Sz,Sz,1));
+		v3=new PsimagLite::Matrix<FieldType>(observe.correlations(Sz,Sz,1,n/2,n));
 		if (concurrency.root()) {
 			std::cout<<"OperatorSz:\\n";
 			std::cout<<(*v3);
@@ -644,7 +644,7 @@ print print OBSOUT<<EOF;
 		const PsimagLite::Matrix<FieldType>& oDelta = model.getOperator("d");
 		PsimagLite::Matrix<FieldType> oDeltaT;
 		utils::transposeConjugate(oDeltaT,oDelta);
-		const PsimagLite::Matrix<FieldType>& vDelta=observe.correlations(n,oDelta,oDeltaT,1);
+		const PsimagLite::Matrix<FieldType>& vDelta=observe.correlations(oDelta,oDeltaT,1,n/2,n);
 		if (concurrency.root()) {
 			std::cout<<"DeltaDeltaDagger:\\n";
 			std::cout<<vDelta;
@@ -677,7 +677,7 @@ EOF
 		// Si^+ Sj^-
 		const PsimagLite::Matrix<FieldType>& sPlus = model.getOperator("+");
 		PsimagLite::Matrix<FieldType> sPlusT = utils::transposeConjugate(sPlus);
-		const PsimagLite::Matrix<FieldType>& v4=observe.correlations(n,sPlus,sPlusT,1);
+		const PsimagLite::Matrix<FieldType>& v4=observe.correlations(sPlus,sPlusT,1,n/2,n);
 		if (concurrency.root()) {
 			std::cout<<"OperatorSplus:\\n";
 			std::cout<<v4;
@@ -686,7 +686,7 @@ EOF
 		// Si^- Sj^+
 		const PsimagLite::Matrix<FieldType>& sMinus = model.getOperator("-");
 		PsimagLite::Matrix<FieldType> sMinusT = utils::transposeConjugate(sMinus);
-		const PsimagLite::Matrix<FieldType>& v5=observe.correlations(n,sMinus,sMinusT,1);
+		const PsimagLite::Matrix<FieldType>& v5=observe.correlations(sMinus,sMinusT,1,n/2,n);
 		if (concurrency.root()) {
 			std::cout<<"OperatorMinus:\\n";
 			std::cout<<v5;
@@ -765,6 +765,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 				SparseMatrixType,OperatorType,TargettingType,GeometryType>
 			(dataIo,geometry,model,obsOptions,hasTimeEvolution,concurrency);
 		} catch (std::exception& e) {
+			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"There's no more data\\n";
 			break;
 		}

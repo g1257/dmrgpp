@@ -99,7 +99,7 @@ namespace Dmrg {
 		typedef typename ObserverHelperType::VectorWithOffsetType
 				VectorWithOffsetType;
 		typedef typename ObserverHelperType::BasisWithOperatorsType
-				BasisWithOperatorsType ;
+				BasisWithOperatorsType;
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 

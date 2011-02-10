@@ -92,27 +92,39 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename FieldType,typename VectorWithOffsetType,typename ModelType,typename IoInputType>
+	template<
+		typename FieldType,
+		typename VectorWithOffsetType,
+		typename ModelType,
+		typename IoInputType>
 	class Observer {
 		typedef size_t IndexType;
 		typedef SparseVector<FieldType> VectorType;
 		typedef typename ModelType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelType::RealType RealType;
 		typedef PsimagLite::Matrix<FieldType> MatrixType;
+		typedef typename ModelType::BasisWithOperatorsType
+				BasisWithOperatorsType;
 		typedef ObserverHelper<IoInputType,MatrixType,VectorType,
-				VectorWithOffsetType,ModelType> ObserverHelperType;
-		typedef CorrelationsSkeleton<ObserverHelperType> CorrelationsSkeletonType;
-		typedef OnePointCorrelations<ObserverHelperType> OnePointCorrelationsType;
-		typedef TwoPointCorrelations<CorrelationsSkeletonType,ConcurrencyType> TwoPointCorrelationsType;
-		typedef FourPointCorrelations<CorrelationsSkeletonType>  FourPointCorrelationsType;
+			VectorWithOffsetType,BasisWithOperatorsType> ObserverHelperType;
+		typedef CorrelationsSkeleton<ObserverHelperType,ModelType>
+			CorrelationsSkeletonType;
+		typedef OnePointCorrelations<ObserverHelperType>
+			OnePointCorrelationsType;
+		typedef TwoPointCorrelations<CorrelationsSkeletonType,ConcurrencyType>
+			TwoPointCorrelationsType;
+		typedef FourPointCorrelations<CorrelationsSkeletonType>
+			FourPointCorrelationsType;
 		typedef PsimagLite::Profiling ProfilingType;
 
 		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		static size_t const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
 		static size_t const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
 		static size_t const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
-		enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
-		enum {LEFT_BRACKET=ObserverHelperType::LEFT_BRACKET,RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
+		enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,
+			TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
+		enum {LEFT_BRACKET=ObserverHelperType::LEFT_BRACKET,
+			RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
 
 	public:
 		Observer(
@@ -122,11 +134,11 @@ namespace Dmrg {
 				const ModelType& model,
 				ConcurrencyType& concurrency,
 				bool verbose=false)
-		: helper_(io,nf,hasTimeEvolution,model,verbose),
+		: helper_(io,nf,hasTimeEvolution,verbose),
 		  concurrency_(concurrency),
 		  verbose_(verbose),
 		  onepoint_(helper_),
-		  skeleton_(helper_,verbose),
+		  skeleton_(helper_,model,verbose),
 		  twopoint_(helper_,skeleton_,concurrency_),
 		  fourpoint_(helper_,skeleton_)
 		{}
@@ -156,14 +168,13 @@ namespace Dmrg {
 		}
 
 		PsimagLite::Matrix<FieldType> correlations(
-				size_t n,
 				const MatrixType& O1,
 				const MatrixType& O2,
 				int fermionicSign,
-				size_t n1=0,
-				size_t nf=0)
+				size_t rows,
+				size_t cols)
 		{
-			return twopoint_(n,O1,O2,fermionicSign,n1,nf);
+			return twopoint_(O1,O2,fermionicSign,rows,cols);
 		}
 
 		FieldType fourPoint(
