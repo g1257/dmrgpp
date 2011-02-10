@@ -102,6 +102,22 @@ namespace Dmrg {
 		int prevDeltaSign = 1;
 		size_t sopt = 0; // have we started saving yet?
 		for (size_t i=0;i<finiteLoop.size();i++)  {
+			if (sopt == 1 && finiteLoop[i].saveOption ==0) {
+				s = "Error for finite loop number " + utils::ttos(i) + "\n";
+				s += "One you say 1 on a finite loop, then all";
+				s += " finite loops that follow must have 1.";
+				throw std::runtime_error(s.c_str());
+			}
+			if (sopt == 0 && finiteLoop[i].saveOption ==1) {
+				sopt = 1;
+				if (size_t(x) != 1 && size_t(x)!=totalSites-2) {
+					s = "Error for finite loop number "
+							+ utils::ttos(i) + "\n";
+					s += "Saving finite loops must start at the left or";
+					s += " right end of the lattice\n";
+					throw std::runtime_error(s.c_str());
+				}
+			}
 			// naive location:
 			int delta = finiteLoop[i].stepLength;
 			x += delta;
@@ -130,24 +146,6 @@ namespace Dmrg {
 				s =s + " sites=" + utils::ttos(totalSites);
 				throw std::runtime_error(s.c_str());
 			}
-
-			if (sopt == 1 && finiteLoop[i].saveOption ==0) {
-				s = "Error for finite loop number " + utils::ttos(i) + "\n";
-				s += "One you say 1 on a finite loop, then all";
-				s += " finite loops that follow must have 1.";
-				throw std::runtime_error(s.c_str());
-			}
-			if (sopt == 0 && finiteLoop[i].saveOption ==1) {
-				sopt = 1;
-				if (size_t(x) != 1 || size_t(x)!=totalSites-1) {
-					s = "Error for finite loop number "
-							+ utils::ttos(i) + "\n";
-					s += "Saving finite loops must start at the left or";
-					s += " right end of the lattice\n";
-					throw std::runtime_error(s.c_str());
-				}
-			}
-
 		}
 			
 	}
