@@ -12,7 +12,7 @@ SolverOptions=hasQuantumNumbers,wft,nosu2,checkpoint,TimeStepTargetting
 Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
 OutputFile=data201.txt
 InfiniteLoopKeptStates=150 
-FiniteLoops 4  7 200 1  -7 200 1 -7 200 1 7 200 1
+FiniteLoops 3  7 200 0  -7 200 1 -7 200 1 
 TargetQuantumNumbers 2 0.5 0.5
 CheckpointFilename=data10.txt
 

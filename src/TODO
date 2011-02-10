@@ -27,15 +27,17 @@ DensityMatrixSu2 needs optimization
 
 TestSuite: need to eliminate hashtable.txt usage
 
-lanczos.cpp needs to be built by configure.pl --> move to new repository?
-
 observer need full spin correlations S_i S_j, where S is the full spin
-
-drivers: need virtual inheritance to simplify code.
 
 DDMRG needs debugging,--> actually it needs rewriting :-(
 
 FourPoint needs optimization/parallelization
 
+finite loops aren't checked if checkpoint is an option
+
+unused stuff gets saved in data file
+
+cannot go backwards from infinite loop when WFT is in use
+(see WaveFunctionTransfFactory.h line 137)
 
 

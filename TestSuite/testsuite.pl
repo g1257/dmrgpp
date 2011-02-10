@@ -429,7 +429,8 @@ sub runAllTests
 {
 	my ($start) = @_;
 	#All test numbers declared in @nonFunctionalTests will be skipped and not ran
-	my @nonFunctionalTests = (41,42,60,104,105,106,107,108,109,110,111,124,125,141,142,160);
+	#test102 features wft+su2 which is currently broken
+	my @nonFunctionalTests = (41,42,60,102,104,105,106,107,108,109,110,111,124,125,141,142,160);
 	my @testsList = split(/ /,getAvailableTests());
 	
 	if($lastTest ne "") {
@@ -643,7 +644,7 @@ sub hookExecute
 	$arg =~ s/(\()/$1"/g;
 	$arg =~ s/(\s*)(,)(\s*)/"$2"/g;
 	$arg =~ s/(\))/"$1/g;
-	
+
 	eval("$arg;");
 	if($@) {
 		my $subr = (caller(0))[3];
@@ -697,7 +698,8 @@ sub runDmrg
 #Custom routine that creates the observe executable, if necessary, and runs it
 sub runObserve
 {
-	my ($inputFile, $raw) = @_;
+	my ($inputFile, $raw,$obsOptions) = @_;
+	$obsOptions = "ccnnszsz" if (!defined($obsOptions));
 	my ($specFile, $specKey) = ("", "");
 	($specFile, $specKey) = getSpecFileAndKey() if(!$noModel);
 	my $configFile = "configure.pl";
@@ -720,9 +722,9 @@ sub runObserve
 		}
 	}
 	
-	my $arg = "$executable $inputFile >& $raw";
+	my $arg = "$executable $inputFile $obsOptions >& $raw";
 	grep {s/&//} $arg if($verbose);
-	
+	#die "******-> $arg\n";	
 	print "Running observe test...\n";
 	my $err = chdir($srcDir);
 	die "Changing directory to $srcDir: $!" if(!$err);
@@ -816,6 +818,7 @@ sub extractOperator
 	close(INFILE) || die "Closing $raw: $!";
 	
 	open (OUTFILE, ">$out") || die "Opening $out: $!";
+	#die "Here <----------- $opName $raw\n";
 	print OUTFILE $op;
 	close (OUTFILE) || die "Closing $out: $!";
 	print "Operator$opName extraction was successful.\n" if($verbose);

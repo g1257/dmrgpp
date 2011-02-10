@@ -15,7 +15,8 @@ Diff $result $oracle > $diff
 [observables]
 Let $input = $inputsDir input$testNum.inp
 Let $raw = $srcDir raw$testNum.txt
-Execute runObserve($input, $raw)
+Let $options = ccnnszsz
+Execute runObserve($input, $raw,$options)
 
 [C]
 Let $result = $resultsDir operatorC$testNum.txt

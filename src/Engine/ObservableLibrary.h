@@ -129,10 +129,10 @@ namespace Dmrg {
 			if (label=="cc") {
 				MatrixType opC = model_.getOperator("c",0,0); // c_{0,0} spin up
 				MatrixType opCtranspose = utils::transposeConjugate(opC);
-				measureOne("OPERATOR C",opC,opCtranspose,-1,rows,cols);
+				measureOne("OperatorC",opC,opCtranspose,-1,rows,cols);
 			} else if (label=="nn") {
 				MatrixType opN = model_.getOperator("n");
-				measureOne("OPERATOR N",opN,opN,1,rows,cols);
+				measureOne("OperatorN",opN,opN,1,rows,cols);
 			} else if (label=="szsz") {
 				MatrixType Sz = model_.getOperator("z");
 				szsz_ = observe_.correlations(Sz,Sz,1,rows,cols);
@@ -155,7 +155,7 @@ namespace Dmrg {
 				MatrixType sMinusT = utils::transposeConjugate(sMinus);
 				sMinusSplus_= observe_.correlations(sMinus,sMinusT,1,rows,cols);
 				if (concurrency_.root()) {
-					std::cout<<"OperatorMinus:\n";
+					std::cout<<"OperatorSminus:\n";
 					std::cout<<sMinusSplus_;
 				}
 			} else if (label=="ss") {
@@ -249,6 +249,8 @@ namespace Dmrg {
 			const MatrixType& v =
 				observe_.correlations(op1,op2,fermionSign,rows,cols);;
 			if (concurrency_.root()) {
+				if (hasTimeEvolution_)
+					std::cout<<"#Time="<<observe_.time()<<"\n";
 				std::cout<<label<<":\n";
 				std::cout<<v;
 			}
@@ -297,7 +299,7 @@ namespace Dmrg {
 			}
 		}
 
-		void printSites() const
+		void printSites()
 		{
 			std::cout<<"#Sites=";
 			observe_.setPointer(0);
@@ -318,6 +320,7 @@ namespace Dmrg {
 		}
 
 		size_t numberOfSites_;
+		bool hasTimeEvolution_;
 		const ModelType& model_; // not the owner
 		ConcurrencyType& concurrency_; // not the owner
 		ObserverType observe_;

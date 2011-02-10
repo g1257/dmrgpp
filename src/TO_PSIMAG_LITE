@@ -19,7 +19,6 @@ MARKED FOR MOVE TO PSIMAGLITE:
 
 [Stacks]
 Engine/DiskStack.h
-Engine/MemoryStack.h
 
 [IO]
 ***Engine/IoSimple.h
