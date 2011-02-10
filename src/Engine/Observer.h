@@ -148,6 +148,8 @@ namespace Dmrg {
 
 		size_t site() const { return helper_.site(); }
 
+		void setPointer(size_t x) { helper_.setPointer(x); }
+
 		bool endOfData() const { return helper_.endOfData(); }
 
 		// return true if
@@ -162,8 +164,8 @@ namespace Dmrg {
 
 		void setBrackets(const std::string& left,const std::string& right)
 		{
-
-			helper_.setBrackets(bracketStringToNumber(left),bracketStringToNumber(right));
+			helper_.setBrackets(bracketStringToNumber(left),
+					bracketStringToNumber(right));
 		}
 
 		PsimagLite::Matrix<FieldType> correlations(

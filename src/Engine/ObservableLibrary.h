@@ -76,7 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file ObservableLibrary.h
  *
- *  A library of common observables
+ *  A library of most used observables
  */
 #ifndef OBSERVABLE_LIBRARY_H
 #define OBSERVABLE_LIBRARY_H
@@ -120,6 +120,23 @@ namespace Dmrg {
 
 		void measure(const std::string& label,size_t rows,size_t cols)
 		{
+			std::cout<<"#Sites=";
+			observe_.setPointer(0);
+			if (observe_.site()==1) std::cout<<"0 ";
+			if (observe_.site()==numberOfSites_-2)
+				std::cout<<(numberOfSites_-1)<<" ";
+			for (size_t i=0;i<observe_.size();i++) {
+				observe_.setPointer(i);
+				size_t x = observe_.site();
+				std::cout<<x<<" ";
+			}
+			if (observe_.site()==1) std::cout<<"0";
+			if (observe_.site() ==numberOfSites_-2) {
+				std::cout<<(numberOfSites_-1);
+			}
+
+			std::cout<<"\n";
+
 			if (label=="cc") {
 				MatrixType opC = model_.getOperator("c",0,0); // c_{0,0} spin up
 				MatrixType opCtranspose = utils::transposeConjugate(opC);

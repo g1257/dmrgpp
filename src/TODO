@@ -5,13 +5,13 @@ SU(2) + WFT is broookeeeeeen!! (issued posted on github)
 
 observer: fails if lattice has less than 6 sites.
 
+observer: backwards move give wrong results for fermionic ops.
+
+observer: backwards move does not compute edges
+
 CLEANUPS:
 
 WFT needs to be disabled if lattice has less than 6 sites.
-
-clean WFT--> actually we need two WFTs, one for Local Symm. and one for SU(2)
-
-ObserverHelper must have only one constructor
 
 eliminate Basis::electrons(...) and use FermionSign instead
 
@@ -33,6 +33,9 @@ observer need full spin correlations S_i S_j, where S is the full spin
 
 drivers: need virtual inheritance to simplify code.
 
-DDMRG needs debugging
+DDMRG needs debugging,--> actually it needs rewriting :-(
+
+FourPoint needs optimization/parallelization
+
 
 
