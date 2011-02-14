@@ -547,10 +547,18 @@ namespace Dmrg {
 				const VectorWithOffsetType& vec1,
 				const VectorWithOffsetType& vec2)
 		{
-			if (helper_.direction()!=EXPAND_SYSTEM) return 0;
+			if (helper_.direction()==EXPAND_SYSTEM)
+				return brRghtCrnrSystem_(A,B,fermionSign,vec1,vec2);
+			return brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2);
+		}
 
-			RealType norma = std::norm(vec1);
-
+		RealType brRghtCrnrSystem_(
+						const MatrixType& A,
+						const MatrixType& B,
+						int fermionSign,
+						const VectorWithOffsetType& vec1,
+						const VectorWithOffsetType& vec2)
+		{
 			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
 
 			CrsMatrix<FieldType> Acrs(A);
@@ -560,9 +568,11 @@ namespace Dmrg {
 
 			// some sanity checks:
 			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.basisSE().size())
-				throw std::runtime_error("Observe::bracketRightCorner_(...): vec.size!=SE.size\n");
+				throw std::runtime_error("Observe::brRghtCrnrSystem_(...): "
+						"vec.size!=SE.size\n");
 			if (ni!=Acrs.rank())
-				throw std::runtime_error("Observe::bracketRightCorner_(...): ni!=Acrs.rank\n");
+				throw std::runtime_error("Observe::brRghtCrnrSystem_(...): "
+						"ni!=Acrs.rank\n");
 
 			// ok, we're ready for the main course:
 			for (size_t x=0;x<vec1.sectors();x++) {
@@ -572,27 +582,90 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					utils::getCoordinates(r,eta,helper_.basisSE().permutation(t),helper_.basisS().size());
+					utils::getCoordinates(r,eta,helper_.basisSE().
+							permutation(t),helper_.basisS().size());
 					size_t r0,r1;
-					utils::getCoordinates(r0,r1,helper_.basisS().permutation(r),ni);
+					utils::getCoordinates(r0,r1,helper_.basisS().
+							permutation(r),ni);
 					size_t electrons = helper_.basisSE().electrons(t);
-					electrons -= helper_.basisE().electrons(eta); //helper_.electrons(eta);
+					electrons -= helper_.basisE().electrons(eta);
 					RealType sign = (electrons & 1) ? fermionSign : 1.0;
-					//RealType sign = helper_.basisS().fermionicSign(r0,fermionSign);
-					//sign *= helper_.basisE().fermionicSign(r1,fermionSign);
 
 					for (int k=Acrs.getRowPtr(r0);k<Acrs.getRowPtr(r0+1);k++) {
 						size_t r0prime = Acrs.getCol(k);
-						for (int k2 = Bcrs.getRowPtr(eta);k2<Bcrs.getRowPtr(eta+1);k2++) {
+						for (int k2 = Bcrs.getRowPtr(eta);
+								k2<Bcrs.getRowPtr(eta+1);k2++) {
 							size_t eta2 = Bcrs.getCol(k2);
-							size_t rprime = helper_.basisS().permutationInverse(r0prime+r1*ni);
-							size_t t2 = helper_.basisSE().permutationInverse(rprime+eta2*helper_.basisS().size());
+							size_t rprime = helper_.basisS().
+									permutationInverse(r0prime+r1*ni);
+							size_t t2 = helper_.basisSE().permutationInverse(
+									rprime+eta2*helper_.basisS().size());
 							if (t2<offset || t2>=total) continue;
-							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec1[t]*std::conj(vec2[t2])*sign;
+							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*
+									vec1[t]*std::conj(vec2[t2])*sign;
 						}
 					}
 				}
 			}
+			RealType norma = std::norm(vec1);
+			return std::real(sum)/norma;
+		}
+
+		RealType brLftCrnrEnviron_(
+				const MatrixType& A,
+				const MatrixType& B,
+				int fermionSign,
+				const VectorWithOffsetType& vec1,
+				const VectorWithOffsetType& vec2)
+		{
+			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
+
+			CrsMatrix<FieldType> Acrs(A);
+			CrsMatrix<FieldType> Bcrs(B);
+			FieldType sum=0;
+			size_t ni = Bcrs.rank();
+
+			// some sanity checks:
+			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.basisSE().size())
+				throw std::runtime_error("Observe::brLftCrnrEnviron_(...): "
+						"vec.size!=SE.size\n");
+			if (helper_.basisE().size()/Bcrs.rank()!=Acrs.rank())
+				throw std::runtime_error("Observe::bracketRightCorner_(...): "
+						"helper_.basisE().size()/Bcrs.rank()!=Acrs.rank\n");
+
+			// ok, we're ready for the main course:
+			for (size_t x=0;x<vec1.sectors();x++) {
+				size_t sector = vec1.sector(x);
+				size_t offset = vec1.offset(sector);
+				size_t total = offset + vec1.effectiveSize(sector);
+				for (size_t t=offset;t<total;t++) {
+					size_t eta,r;
+
+					utils::getCoordinates(eta,r,helper_.basisSE().
+							permutation(t),helper_.basisS().size());
+					size_t r0,r1;
+					utils::getCoordinates(r0,r1,helper_.basisE().permutation(r),ni);
+					//size_t electrons = helper_.basisSE().electrons(t);
+					size_t electrons = helper_.basisS().electrons(eta);
+					RealType sign = (electrons & 1) ? fermionSign : 1.0;
+
+					for (int k=Acrs.getRowPtr(r1);k<Acrs.getRowPtr(r1+1);k++) {
+						size_t r1prime = Acrs.getCol(k);
+						for (int k2 = Bcrs.getRowPtr(eta);
+								k2<Bcrs.getRowPtr(eta+1);k2++) {
+							size_t eta2 = Bcrs.getCol(k2);
+							size_t rprime = helper_.basisE().
+									permutationInverse(r0+r1prime*ni);
+							size_t t2 = helper_.basisSE().permutationInverse(
+									eta2+rprime*helper_.basisS().size());
+							if (t2<offset || t2>=total) continue;
+							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec1[t]*
+									std::conj(vec2[t2])*sign;
+						}
+					}
+				}
+			}
+			RealType norma = std::norm(vec1);
 			return std::real(sum)/norma;
 		}
 

@@ -513,12 +513,12 @@ bool observeOneFullSweep(IoInputType& io,
 	typedef ObservableLibrary<ObserverType,TargettingType> ObservableLibraryType;
 	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,concurrency,verbose);
 	
+	if (hasTimeEvolution) observerLib.setBrackets("time","time");
 	if (hasTimeEvolution && obsOptions.find("ot")!=std::string::npos) {
 		observerLib.measureTime("superDensity");
 		observerLib.measureTime("nupNdown");
 		observerLib.measureTime("nup+ndown");
 	}
-	if (hasTimeEvolution) observerLib.setBrackets("time","time");
 EOF
 	if  ($modelName=~/heisenberg/i) {
 	} else {

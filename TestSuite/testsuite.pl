@@ -786,7 +786,7 @@ sub createExecutables
 sub getSpecFileAndKey
 {
 	my $tempNum = $testNum;
-	$tempNum -= 100 if($testNum >= 100);
+	#$tempNum -= 100 if($testNum >= 100);
 	my $specFile = $inputsDir."model$tempNum.spec";
 	
 	my $specKey = substr(`md5sum $specFile`,0,10);
