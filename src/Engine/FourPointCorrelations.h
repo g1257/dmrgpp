@@ -202,7 +202,7 @@ namespace Dmrg {
 			}
 
 			skeleton_.dmrgMultiply(O4g,Otmp,O4m,fermionicSign,ns);
-			return skeleton_.bracket(O4g);
+			return skeleton_.bracket(O4g,fermionicSign);
 		}
 			
 	private:

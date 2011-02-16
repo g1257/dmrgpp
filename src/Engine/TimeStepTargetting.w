@@ -71,7 +71,7 @@ namespace Dmrg {
    			template<typename,typename> class InternalProductTemplate,
 	 		template<typename,typename> class WaveFunctionTransfTemplate,
     			typename ModelType_,
-	 		typename ConcurrencyType_,
+    			typename ConcurrencyType_,
     			typename IoType_,
        			template<typename> class VectorWithOffsetTemplate>
 	class TimeStepTargetting  {
@@ -86,9 +86,14 @@ A long series of typedefs follow. Need to explain these maybe (FIXME).
 			typedef IoType_ IoType;
 			typedef typename ModelType::RealType RealType;
 			typedef std::complex<RealType> ComplexType;
-			typedef InternalProductTemplate<ComplexType,ModelType> InternalProductType;
+			typedef InternalProductTemplate<ComplexType,ModelType>
+				InternalProductType;
 			typedef typename ModelType::OperatorsType OperatorsType;
-			typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
+			typedef typename ModelType::ModelHelperType ModelHelperType;
+			typedef typename ModelHelperType::LeftRightSuperType
+				LeftRightSuperType;
+			typedef typename LeftRightSuperType::BasisWithOperatorsType
+					BasisWithOperatorsType;
 			//typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
 			typedef std::vector<ComplexType> ComplexVectorType;
 			//typedef std::VectorWithOffset<ComplexType> VectorWithOffsetType;
@@ -102,10 +107,10 @@ A long series of typedefs follow. Need to explain these maybe (FIXME).
 			typedef TimeStepParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
 			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
-			typedef WaveFunctionTransfTemplate<BasisWithOperatorsType,VectorWithOffsetType> WaveFunctionTransfType;
+			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 			typedef ComplexVectorType TargetVectorType;
 			typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
-			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 @}
 
@@ -134,9 +139,10 @@ In this stage we're adavancing in space and time%'
 @}
 
 Now comes the constructor which takes 6 arguments.
-The first 3 arguments are the system (left-block), environment (right-block), and superblock (system + environment).
+The first  argument is left-right-and-superblock object,
+composed of the system (left-block), environment (right-block), and superblock (system + environment).
 As usual, the first 2 are heavy objects---with operators---, and the superblock is light.
-The 4th argument is the model object. The 5th argument is a \verb|TargettingStructureType| object 
+The 2th argument is the model object. The 3th argument is a \verb|TargettingStructureType| object
 which is a \verb|TargettingStructureParms| object (as you can see in~@xtargettingstructure@x).
 A structure is just a bunch of data bundled together, and you can see this in the file \verb|TargetStructureParams.h|.
 The last argument is a \verb|WaveFunctionTransformation| object. More info about this class is
@@ -144,9 +150,7 @@ in \verb|WaveFunctionTransformation.h|.
 @o TimeStepTargetting.h -t
 @{
 			TimeStepTargetting(
-	  				const BasisWithOperatorsType& basisS,
-       					const BasisWithOperatorsType& basisE,
-	    				const BasisType& basisSE,
+	  				const LeftRightSuperType& lrs,
 	 				const ModelType& model,
 					const TargettingParamsType& tstStruct,
 					const WaveFunctionTransfType& wft)
@@ -157,9 +161,7 @@ Now let us look at the private data of this class:
 @{
 			std::vector<size_t> stage_;
 			VectorWithOffsetType psi_;
-			const BasisWithOperatorsType& basisS_;
-			const BasisWithOperatorsType& basisE_;
-			const BasisType& basisSE_;
+			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
 			const TargettingParamsType& tstStruct_;
 			const WaveFunctionTransfType& waveFunctionTransformation_;
@@ -190,13 +192,13 @@ since we don't do computations \emph{in-situ} here.%'
 The \verb|applyLocal| operator described before is also initalized on the stack.
 @o TimeStepTargetting.h -t
 @{
-				: stage_(tstStruct.sites.size(),DISABLED),basisS_(basisS),basisE_(basisE),basisSE_(basisSE),
+				: stage_(tstStruct.sites.size(),DISABLED),lrs_(lrs),
 					model_(model),tstStruct_(tstStruct),waveFunctionTransformation_(wft),
 					progress_("TimeStepTargetting",0),currentTime_(0),
 					times_(tstStruct_.timeSteps),weight_(tstStruct_.timeSteps),
 					targetVectors_(tstStruct_.timeSteps),
 					//io_(tstStruct_.filename,parallelRank_),
-					applyOpLocal_(basisS,basisE,basisSE)
+					applyOpLocal_(lrs)
 @}
 
 The body of the constructor follows:
@@ -479,7 +481,7 @@ to apply this operator to state \verb|phiOld| and store the result in \verb|phiN
 					std::ostringstream msg;
 					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
-					FermionSign fs(basisS_,tstStruct_.electrons);
+					FermionSign fs(lrs_.left(),tstStruct_.electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
 					RealType norma = norm(phiNew);
 					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
@@ -501,11 +503,11 @@ or just populate all sectors with and then ``collapse'' the non-zero sectors for
 					progress_.printline(msg,std::cout);
 					
 					if (tstStruct_.aOperators.size()==1) guessPhiSectors(phiNew,i,systemOrEnviron);
-					else phiNew.populateSectors(basisSE_);
+					else phiNew.populateSectors(lrs_.super());
 					
 					// OK, now that we got the partition number right, let's wft:
 					waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[advance],
-							basisS_,basisE_,basisSE_); // generalize for su(2)
+							lrs_); // generalize for su(2)
 					phiNew.collapseSectors();
 					
 				} else {
@@ -526,29 +528,18 @@ When stages are advancing we need to weight each target WFtransformed  state  wi
 @{
 			void initialGuess(VectorWithOffsetType& v) const
 			{
-				waveFunctionTransformation_.setInitialVector(v,psi_,basisS_,basisE_,basisSE_);
+				waveFunctionTransformation_.setInitialVector(v,psi_,lrs_);
 				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
 				if (!b) return;
 				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					waveFunctionTransformation_.setInitialVector(vv[i],
-						targetVectors_[i],basisS_,basisE_,basisSE_);
+						targetVectors_[i],lrs_);
 					if (norm(vv[i])<1e-6) continue;
 					VectorWithOffsetType w= weight_[i]*vv[i];
 					v += w;
 				}
 			}
-@}
-
-Finally, the following 3 member public functions return the superblock object, the system (left-block)
-or the environment objects, or rather, the references held by this class.
-@o TimeStepTargetting.h -t
-@{
-			const BasisType& basisSE() const { return basisSE_; }
-
-			const BasisWithOperatorsType& basisS() const { return basisS_; }
-
-			const BasisWithOperatorsType& basisE() const { return basisE_; }
 @}
 
 The function below prints all target vectors to disk, using the \verb|TimeSerializer| class.
@@ -860,8 +851,8 @@ And now for each symmetry sector:
 @{
 			size_t triDiag(const VectorWithOffsetType& phi,ComplexMatrixType& T,ComplexMatrixType& V,size_t i0)
 			{
-				size_t p = basisSE_.findPartitionNumber(phi.offset(i0));
-				typename ModelType::ModelHelperType modelHelper(p,basisSE_,basisS_,basisE_,model_.orbitals());
+				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
+				typename ModelType::ModelHelperType modelHelper(p,lrs_,model_.orbitals());
 				 		//,useReflection_);
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			
@@ -913,7 +904,7 @@ vector are not going to coincide with the non-zero sectors of the result vector,
 do the empty sectors be the same.
 Note that using simpy
 \begin{verbatim}:
-size_t partition = targetVectors_[0].findPartition(basisSE_);
+size_t partition = targetVectors_[0].findPartition(lrs_.super());
 \end{verbatim}
 doesn't work, since \verb|targetVectors_[0]| is stale at this point%'
 This function should not be called one more than one operators will be applied.
@@ -921,7 +912,7 @@ This function should not be called one more than one operators will be applied.
 @{
 			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
 			{
-				FermionSign fs(basisS_,tstStruct_.electrons);
+				FermionSign fs(lrs_.left(),tstStruct_.electrons);
 				if (allStages(WFT_NOADVANCE)) {
 					VectorWithOffsetType tmpVector = psi_;
 					for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
@@ -942,7 +933,7 @@ The function below makes all target vectors empty:
 			void zeroOutVectors()
 			{
 				for (size_t i=0;i<targetVectors_.size();i++) 
-					targetVectors_[i].resize(basisSE_.size());
+					targetVectors_[i].resize(lrs_.super().size());
 			}
 @}
 
@@ -980,7 +971,7 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 				multiply(A.data,tmpCt,tmpC);
 				A.fermionSign = 1;
 				//A.data = tmpC;
-				FermionSign fs(basisS_,tstStruct_.electrons);
+				FermionSign fs(lrs_.left(),tstStruct_.electrons);
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
 				ComplexType sum = 0;

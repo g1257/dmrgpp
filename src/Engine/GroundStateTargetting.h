@@ -110,7 +110,10 @@ namespace Dmrg {
 			typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 			typedef std::vector<RealType> VectorType;
 			typedef LanczosSolverTemplate<RealType,InternalProductType,VectorType> LanczosSolverType;
-			typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
+			typedef typename ModelType::ModelHelperType ModelHelperType;
+			typedef typename ModelHelperType::LeftRightSuperType
+				LeftRightSuperType;
+			typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 			typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			//typedef psimag::Matrix<RealType> MatrixType;
 			//typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
@@ -120,21 +123,19 @@ namespace Dmrg {
 			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 			typedef VectorType TargetVectorType;
 			typedef GroundStateParams<ModelType> TargettingParamsType;
-			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
-			typedef WaveFunctionTransfTemplate<BasisWithOperatorsType,VectorWithOffsetType> WaveFunctionTransfType;
+			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 			
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
 			
 			GroundStateTargetting(
-	  				const BasisWithOperatorsType& basisS,
-       					const BasisWithOperatorsType& basisE,
-	    				const BasisType& basisSE,
-					const ModelType& model,
+	  				const LeftRightSuperType& lrs,
+ 					const ModelType& model,
 					const TargettingParamsType& t,
-     					const WaveFunctionTransfType& wft) // ignored here
-				: basisS_(basisS),basisE_(basisE),basisSE_(basisSE),
+     				const WaveFunctionTransfType& wft) // wft is ignored here
+				: lrs_(lrs),
 				       waveFunctionTransformation_(wft),
 				       progress_("GroundStateTargetting",0)
 			{
@@ -185,17 +186,17 @@ namespace Dmrg {
 				// Nothing to see here
 			}
 			
-			const BasisType& basisSE() const { return basisSE_; }
-			
-			const BasisWithOperatorsType& basisS() const { return basisS_; }
-			
-			const BasisWithOperatorsType& basisE() const { return basisE_; }
+//			const BasisType& basisSE() const { return basisSE_; }
+//
+//			const BasisWithOperatorsType& basisS() const { return basisS_; }
+//
+//			const BasisWithOperatorsType& basisE() const { return basisE_; }
 			
 			void initialGuess(VectorWithOffsetType& initialVector) const
 			{
 				RealType eps = 1e-6;
 				if (psi_.size()>0 && std::norm(psi_)<eps) throw std::runtime_error("psi's norm is zero\n");
-				waveFunctionTransformation_.setInitialVector(initialVector,psi_,basisS_,basisE_,basisSE_);	
+				waveFunctionTransformation_.setInitialVector(initialVector,psi_,lrs_);
 			}
 			
 			template<typename IoOutputType>
@@ -225,9 +226,7 @@ namespace Dmrg {
 
 		private:
 			VectorWithOffsetType psi_;
-			const BasisWithOperatorsType& basisS_;
-			const BasisWithOperatorsType& basisE_;
-			const BasisType& basisSE_;
+			const LeftRightSuperType& lrs_;
 			const WaveFunctionTransfType& waveFunctionTransformation_;
 			PsimagLite::ProgressIndicator progress_;
 	};     //class GroundStateTargetting

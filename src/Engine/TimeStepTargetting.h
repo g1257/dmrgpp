@@ -84,7 +84,7 @@ namespace Dmrg {
    			template<typename,typename> class InternalProductTemplate,
 	 		template<typename,typename> class WaveFunctionTransfTemplate,
     			typename ModelType_,
-	 		typename ConcurrencyType_,
+    			typename ConcurrencyType_,
     			typename IoType_,
        			template<typename> class VectorWithOffsetTemplate>
 	class TimeStepTargetting  {
@@ -95,9 +95,14 @@ namespace Dmrg {
 			typedef IoType_ IoType;
 			typedef typename ModelType::RealType RealType;
 			typedef std::complex<RealType> ComplexType;
-			typedef InternalProductTemplate<ComplexType,ModelType> InternalProductType;
+			typedef InternalProductTemplate<ComplexType,ModelType>
+				InternalProductType;
 			typedef typename ModelType::OperatorsType OperatorsType;
-			typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
+			typedef typename ModelType::ModelHelperType ModelHelperType;
+			typedef typename ModelHelperType::LeftRightSuperType
+				LeftRightSuperType;
+			typedef typename LeftRightSuperType::BasisWithOperatorsType
+					BasisWithOperatorsType;
 			//typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
 			typedef std::vector<ComplexType> ComplexVectorType;
 			//typedef std::VectorWithOffset<ComplexType> VectorWithOffsetType;
@@ -111,10 +116,10 @@ namespace Dmrg {
 			typedef TimeStepParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
 			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
-			typedef WaveFunctionTransfTemplate<BasisWithOperatorsType,VectorWithOffsetType> WaveFunctionTransfType;
+			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 			typedef ComplexVectorType TargetVectorType;
 			typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
-			typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
@@ -126,20 +131,18 @@ namespace Dmrg {
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
 
 			TimeStepTargetting(
-	  				const BasisWithOperatorsType& basisS,
-       					const BasisWithOperatorsType& basisE,
-	    				const BasisType& basisSE,
+	  				const LeftRightSuperType& lrs,
 	 				const ModelType& model,
 					const TargettingParamsType& tstStruct,
 					const WaveFunctionTransfType& wft)
 
-				: stage_(tstStruct.sites.size(),DISABLED),basisS_(basisS),basisE_(basisE),basisSE_(basisSE),
+				: stage_(tstStruct.sites.size(),DISABLED),lrs_(lrs),
 					model_(model),tstStruct_(tstStruct),waveFunctionTransformation_(wft),
 					progress_("TimeStepTargetting",0),currentTime_(0),
 					times_(tstStruct_.timeSteps),weight_(tstStruct_.timeSteps),
 					targetVectors_(tstStruct_.timeSteps),
 					//io_(tstStruct_.filename,parallelRank_),
-					applyOpLocal_(basisS,basisE,basisSE)
+					applyOpLocal_(lrs)
 
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" TimeStepTargetting "
@@ -325,24 +328,18 @@ namespace Dmrg {
 
 			void initialGuess(VectorWithOffsetType& v) const
 			{
-				waveFunctionTransformation_.setInitialVector(v,psi_,basisS_,basisE_,basisSE_);
+				waveFunctionTransformation_.setInitialVector(v,psi_,lrs_);
 				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
 				if (!b) return;
 				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					waveFunctionTransformation_.setInitialVector(vv[i],
-						targetVectors_[i],basisS_,basisE_,basisSE_);
+						targetVectors_[i],lrs_);
 					if (norm(vv[i])<1e-6) continue;
 					VectorWithOffsetType w= weight_[i]*vv[i];
 					v += w;
 				}
 			}
-
-			const BasisType& basisSE() const { return basisSE_; }
-
-			const BasisWithOperatorsType& basisS() const { return basisS_; }
-
-			const BasisWithOperatorsType& basisE() const { return basisE_; }
 
 
 			template<typename IoOutputType>
@@ -430,7 +427,7 @@ namespace Dmrg {
 					std::ostringstream msg;
 					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
-					FermionSign fs(basisS_,tstStruct_.electrons);
+					FermionSign fs(lrs_.left(),tstStruct_.electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
 					RealType norma = norm(phiNew);
 					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
@@ -445,11 +442,11 @@ namespace Dmrg {
 					progress_.printline(msg,std::cout);
 					
 					if (tstStruct_.aOperators.size()==1) guessPhiSectors(phiNew,i,systemOrEnviron);
-					else phiNew.populateSectors(basisSE_);
+					else phiNew.populateSectors(lrs_.super());
 					
 					// OK, now that we got the partition number right, let's wft:
 					waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[advance],
-							basisS_,basisE_,basisSE_); // generalize for su(2)
+							lrs_); // generalize for su(2)
 					phiNew.collapseSectors();
 					
 				} else {
@@ -590,8 +587,8 @@ namespace Dmrg {
 
 			size_t triDiag(const VectorWithOffsetType& phi,ComplexMatrixType& T,ComplexMatrixType& V,size_t i0)
 			{
-				size_t p = basisSE_.findPartitionNumber(phi.offset(i0));
-				typename ModelType::ModelHelperType modelHelper(p,basisSE_,basisS_,basisE_,model_.orbitals());
+				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
+				typename ModelType::ModelHelperType modelHelper(p,lrs_,model_.orbitals());
 				 		//,useReflection_);
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			
@@ -633,7 +630,7 @@ namespace Dmrg {
 
 			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
 			{
-				FermionSign fs(basisS_,tstStruct_.electrons);
+				FermionSign fs(lrs_.left(),tstStruct_.electrons);
 				if (allStages(WFT_NOADVANCE)) {
 					VectorWithOffsetType tmpVector = psi_;
 					for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
@@ -650,7 +647,7 @@ namespace Dmrg {
 			void zeroOutVectors()
 			{
 				for (size_t i=0;i<targetVectors_.size();i++) 
-					targetVectors_[i].resize(basisSE_.size());
+					targetVectors_[i].resize(lrs_.super().size());
 			}
 
 //			void printHeader()
@@ -679,7 +676,7 @@ namespace Dmrg {
 				multiply(A.data,tmpCt,tmpC);
 				A.fermionSign = 1;
 				//A.data = tmpC;
-				FermionSign fs(basisS_,tstStruct_.electrons);
+				FermionSign fs(lrs_.left(),tstStruct_.electrons);
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
 				ComplexType sum = 0;
@@ -701,9 +698,7 @@ namespace Dmrg {
 
 			std::vector<size_t> stage_;
 			VectorWithOffsetType psi_;
-			const BasisWithOperatorsType& basisS_;
-			const BasisWithOperatorsType& basisE_;
-			const BasisType& basisSE_;
+			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
 			const TargettingParamsType& tstStruct_;
 			const WaveFunctionTransfType& waveFunctionTransformation_;

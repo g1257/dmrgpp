@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_WAVE_H
 #define DMRG_WAVE_H
 
-#include "BasisWithOperators.h"
 
 namespace Dmrg {
 	

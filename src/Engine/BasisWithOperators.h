@@ -88,15 +88,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	enum {GROW_RIGHT,GROW_LEFT};
 
 	//! A class to represent a Dmrg Basis and encapsulate certain operations related to this basis, such as
 	//! outer product, truncation, storage of Hamiltonian and creation operators.  
-	template<typename OperatorsType,typename ConcurrencyType_>
-		class	BasisWithOperators : public  OperatorsType::BasisType {
+	template<typename OperatorsType_,typename ConcurrencyType_>
+		class	BasisWithOperators : public  OperatorsType_::BasisType {
 
 		
 	public:
+
+		typedef OperatorsType_ OperatorsType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename OperatorsType::BasisType BasisType;
@@ -106,6 +107,9 @@ namespace Dmrg {
 		typedef typename BasisType::BasisDataType BasisDataType;
 		typedef typename BasisType::FactorsType FactorsType;
 
+
+		enum {GROW_RIGHT,GROW_LEFT};
+		
 		BasisWithOperators(const std::string& s) :BasisType(s),operators_(this) {}
 		
 		template<typename IoInputter>

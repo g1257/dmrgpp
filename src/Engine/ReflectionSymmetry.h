@@ -74,7 +74,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef REFLECTION_SYMMETRY_H
 #define REFLECTION_SYMMETRY_H
 
-#include "DmrgBasisWithOperators.h"
 
 /** \ingroup DMRG */
 /*@{*/

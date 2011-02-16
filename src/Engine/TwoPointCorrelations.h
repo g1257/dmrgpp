@@ -251,7 +251,7 @@ namespace Dmrg {
 			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns);
 			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);
 
-			return skeleton_.bracket(O2g);
+			return skeleton_.bracket(O2g,fermionicSign);
 		}
 
 		MatrixType identity(size_t n)

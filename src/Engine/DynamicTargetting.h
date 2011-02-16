@@ -102,7 +102,10 @@ namespace Dmrg {
 		typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 		typedef typename ModelType::OperatorsType OperatorsType;
 		//typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
-		typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
+		typedef typename ModelType::ModelHelperType ModelHelperType;
+		typedef typename ModelHelperType::LeftRightSuperType
+			LeftRightSuperType;
+		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 		//typedef std::vector<RealType> VectorType;
 		//typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 		//typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
@@ -114,9 +117,9 @@ namespace Dmrg {
 		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef LanczosSolverTemplate<RealType,InternalProductType,VectorType> LanczosSolverType;
 		typedef VectorType TargetVectorType;
-		typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
-		typedef WaveFunctionTransfTemplate<BasisWithOperatorsType,VectorWithOffsetType> WaveFunctionTransfType;
+		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		
 		
 		enum {DISABLED,OPERATOR,CONVERGING};
@@ -259,7 +262,7 @@ namespace Dmrg {
 
 		void initialGuess(VectorWithOffsetType& v) const
 		{
-			waveFunctionTransformation_.setInitialVector(v,psi_,basisS_,basisE_,basisSE_);
+			waveFunctionTransformation_.setInitialVector(v,psi_,lrs_);
 			if (!allStages(CONVERGING)) return;
 			std::vector<VectorWithOffsetType> vv(targetVectors_.size());
 			for (size_t i=0;i<targetVectors_.size();i++) {

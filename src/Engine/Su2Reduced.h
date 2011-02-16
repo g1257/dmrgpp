@@ -74,7 +74,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SU2_REDUCED_HEADER_H
 #define SU2_REDUCED_HEADER_H
 
-#include "BasisWithOperators.h"
 #include "Su2SymmetryGlobals.h"
 
 /** \ingroup DMRG */
@@ -86,14 +85,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  */
 namespace Dmrg {
-	template<typename OperatorsType,
+	template<typename LeftRightSuperType,
 		typename ReflectionSymmetryType,
 		typename ConcurrencyType>
 	class Su2Reduced {
+			typedef typename LeftRightSuperType::OperatorsType OperatorsType;
 			typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
-			typedef typename OperatorsType::BasisType BasisType;
+			typedef typename LeftRightSuperType::BasisWithOperatorsType
+					BasisWithOperatorsType;
+			typedef typename LeftRightSuperType::BasisType BasisType;
 			typedef typename BasisType::RealType RealType;
 			typedef std::pair<size_t,size_t> PairType;
 			typedef typename OperatorsType::OperatorType OperatorType;
@@ -444,11 +445,11 @@ namespace Dmrg {
 
 	}; // class
 
-	template<typename OperatorsType,
+	template<typename LeftRightSuperType,
 		typename ReflectionSymmetryType,
 		typename ConcurrencyType>
-	const typename OperatorsType::BasisType* Su2Reduced<
- 	OperatorsType,ReflectionSymmetryType,ConcurrencyType>::basis1Ptr_=0;
+	const typename LeftRightSuperType::BasisType* Su2Reduced<
+	LeftRightSuperType,ReflectionSymmetryType,ConcurrencyType>::basis1Ptr_=0;
 } // namespace Dmrg
 /*@}*/
 #endif

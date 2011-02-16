@@ -74,7 +74,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODELHELPER_LOC_HEADER_H
 #define MODELHELPER_LOC_HEADER_H
 
-#include "BasisWithOperators.h"
 //#include "RightLeftLocal.h"
 #include "Link.h"
 
@@ -88,21 +87,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 
 namespace Dmrg { 	
-	template<typename OperatorsType_,
+	template<typename LeftRightSuperType_,
 		typename ReflectionSymmetryType_,
 		typename ConcurrencyType_>
 	class ModelHelperLocal {
 	public:	
-		typedef typename OperatorsType_::SparseMatrixType SparseMatrixType;
+		typedef LeftRightSuperType_ LeftRightSuperType;
+		typedef typename LeftRightSuperType::OperatorsType OperatorsType;
+		typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef OperatorsType_ OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef ReflectionSymmetryType_ ReflectionSymmetryType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef typename BasisType::RealType RealType;
-		typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
+		typedef typename LeftRightSuperType::BasisWithOperatorsType
+				BasisWithOperatorsType;
 		//typedef RightLeftLocal<BasisType,BasisWithOperatorsType,SparseMatrixType> RightLeftLocalType;
 		typedef Link<SparseElementType,RealType> LinkType;
 		

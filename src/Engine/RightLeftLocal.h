@@ -74,7 +74,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef RIGHT_LEFT_LOCAL_H
 #define RIGHT_LEFT_LOCAL_H
 
-#include "BasisWithOperators.h"
 #include "BLAS.h"
 
 /** \ingroup DMRG */

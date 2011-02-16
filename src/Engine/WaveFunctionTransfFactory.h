@@ -95,12 +95,14 @@ namespace Dmrg {
 	
 
 
-	template<typename BasisWithOperatorsType,typename VectorWithOffsetType>
+	template<typename LeftRightSuperType,typename VectorWithOffsetType>
 	class WaveFunctionTransfFactory {
 		typedef PsimagLite::IoSimple IoType;
 		public:
 		enum {DO_NOT_RESET_COUNTER,RESET_COUNTER};
 
+		typedef typename LeftRightSuperType::BasisWithOperatorsType
+			BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
@@ -193,9 +195,7 @@ namespace Dmrg {
 		void setInitialVector(	
 					SomeVectorType& dest,
 					const SomeVectorType2& src,
-					const BasisWithOperatorsType& pSprime,
-	  				const BasisWithOperatorsType& pEprime,
-      					const BasisType& pSE) const
+					const LeftRightSuperType& lrs) const
 		{
 			bool allow=false;
 			switch (stage_) {
@@ -213,8 +213,9 @@ namespace Dmrg {
 			
 			if (isEnabled_ && allow) {
 				RealType eps = 1e-6;
-				if (std::norm(src)<eps) throw std::runtime_error("src's norm is zero\n");
-				createVector(dest,src,pSprime,pEprime,pSE);
+				if (std::norm(src)<eps)
+					throw std::runtime_error("src's norm is zero\n");
+				createVector(dest,src,lrs);
 			} else {
 				createRandomVector(dest);
 			}
@@ -401,11 +402,13 @@ namespace Dmrg {
 			}
 		}
 		
-		void createVector(VectorWithOffsetType& psiDest,const VectorWithOffsetType& psiSrc,const BasisWithOperatorsType& pSprime,
-				  const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
+		void createVector(
+				VectorWithOffsetType& psiDest,
+				const VectorWithOffsetType& psiSrc,
+				const LeftRightSuperType& lrs) const
 		{
 			//try {
-				wftImpl_->transformVector(psiDest,psiSrc,pSprime,pEprime,pSE);
+				wftImpl_->transformVector(psiDest,psiSrc,lrs);
 			//} catch (std::exception& e) {
 			//	printDmrgWave();
 			//	throw e;

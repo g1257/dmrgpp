@@ -290,6 +290,8 @@ print FOUT<<EOF;
 #include "$DynamicTargetting.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
+#include "BasisWithOperators.h"
+#include "LeftRightSuper.h"
 
 typedef double MatrixElementType;
 typedef std::complex<MatrixElementType> ComplexType;
@@ -331,7 +333,9 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
 	typedef Basis<MatrixElementType,MySparseMatrix> BasisType;
 	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
-	typedef ModelHelperTemplate<OperatorsType,ReflectionSymmetryType,MyConcurrency> ModelHelperType;
+	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
+	typedef LeftRightSuper<BasisWithOperatorsType> LeftRightSuperType;
+	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,MyConcurrency> ModelHelperType;
 	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::$pthreadsName> ModelType;
 	
 	typedef DmrgSolver<
@@ -490,6 +494,8 @@ print OBSOUT<<EOF;
 #include "DensityMatrix.h" // only used for types
 #include "TimeStepTargetting.h" // only used for types
 #include "GroundStateTargetting.h" // only used for types
+#include "BasisWithOperators.h"
+#include "LeftRightSuper.h"
 
 using namespace Dmrg;
 
@@ -513,12 +519,13 @@ bool observeOneFullSweep(IoInputType& io,
 	typedef ObservableLibrary<ObserverType,TargettingType> ObservableLibraryType;
 	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,concurrency,verbose);
 	
-	if (hasTimeEvolution) observerLib.setBrackets("time","time");
 	if (hasTimeEvolution && obsOptions.find("ot")!=std::string::npos) {
 		observerLib.measureTime("superDensity");
 		observerLib.measureTime("nupNdown");
 		observerLib.measureTime("nup+ndown");
 	}
+
+	if (hasTimeEvolution) observerLib.setBrackets("time","time");
 EOF
 	if  ($modelName=~/heisenberg/i) {
 	} else {
@@ -596,7 +603,8 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
-	typedef ModelHelperTemplate<OperatorsType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
+	typedef LeftRightSuper<BasisWithOperatorsType> LeftRightSuperType;
+	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
 	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::$pthreadsName> ModelType;
 	
 	typedef DmrgSolver<

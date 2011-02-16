@@ -232,13 +232,13 @@ namespace Dmrg {
 			utils::transposeConjugate(Om,O);
 		}
 
-		FieldType bracket(const MatrixType& A)
+		FieldType bracket(const MatrixType& A,int fermionicSign)
 		{
 			try {
 				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
 				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
 
-				return bracket_(A,src1,src2);
+				return bracket_(A,src1,src2,fermionicSign);
 			} catch (std::exception& e) {
 				std::cerr<<"CAUGHT: "<<e.what();
 				std::cerr<<"WARNING: CorrelationsSkeleton::bracket(...):";
@@ -328,17 +328,19 @@ namespace Dmrg {
 			if (nj>oneSiteElectrons_.size())
 				throw std::runtime_error("Problem in dmrgMultiplyEnviron\n");
 
-			const std::vector<size_t>&  ve = helper_.basisE().
-					electronsVector(BasisType::BEFORE_TRANSFORM);
+//			const std::vector<size_t>&  ve = helper_.basisE().
+//					electronsVector(BasisType::BEFORE_TRANSFORM);
 
 			for (size_t r=0;r<eprime;r++) {
 				size_t e,u;
 				utils::getCoordinates(e,u,helper_.basisE().permutation(r),nj);
-				size_t nx0 = ve[r];
-				if (nx0<oneSiteElectrons_[e]) throw std::runtime_error(
-						"Problem in fluffUpEnviron_\n");
-				nx0 -= oneSiteElectrons_[e];
-				RealType f = (nx0 & 1) ? 1 : fermionicSign;
+//				size_t nx0 = ve[r];
+//				if (nx0<oneSiteElectrons_[e]) throw std::runtime_error(
+//						"Problem in fluffUpEnviron_\n");
+//				nx0 -= oneSiteElectrons_[e];
+				size_t nx0 = helper_.basisE().
+							electrons(BasisType::AFTER_TRANSFORM);
+				RealType f = (nx0 & 1) ? fermionicSign : 1;
 				for (size_t e2=0;e2<nj;e2++) {
 					for (size_t u2=0;u2<ni;u2++) {
 						size_t r2 = helper_.basisE().
@@ -440,21 +442,18 @@ namespace Dmrg {
 
 			// Eperm[e] = i +k*n or e= k + i*m
 			// Eperm[e2] = j+k*n or e2=k+j*m
-			const std::vector<size_t>&  ve = helper_.basisE().
-				electronsVector(BasisType::BEFORE_TRANSFORM);
 
 			size_t i,j,k,k2;
 			if (growOption==GROW_RIGHT) {
 				utils::getCoordinates(i,k,helper_.basisE().permutation(e),n);
 				utils::getCoordinates(j,k2,helper_.basisE().permutation(e2),n);
+				size_t nx0 = helper_.basisS().electrons(BasisType::AFTER_TRANSFORM);
+				sign = (nx0 & 1) ? fermionicSign : 1;
 			} else {
 				utils::getCoordinates(k,i,helper_.basisE().permutation(e),m);
 				utils::getCoordinates(k2,j,helper_.basisE().permutation(e2),m);
-				size_t nx0 = ve[e];
-//				if (nx0<oneSiteElectrons_[k]) throw std::runtime_error(
-//						"Problem in fluffUpEnviron_\n");
-				nx0 -= oneSiteElectrons_[k];
-				sign = (nx0 & 1) ? 1 : fermionicSign;
+				size_t nx0 = helper_.basisSE().electrons(BasisType::AFTER_TRANSFORM);
+				sign = (nx0 & 1) ?  fermionicSign : 1;
 			}
 			if (k!=k2) return 0;
 			return O(i,j)*sign;
@@ -463,7 +462,8 @@ namespace Dmrg {
 		RealType bracket_(
 				const MatrixType& A,
 				const VectorWithOffsetType& vec1,
-				const VectorWithOffsetType& vec2)
+				const VectorWithOffsetType& vec2,
+				int fermionicSign)
 		{
 			if (verbose_)
 				std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
@@ -476,7 +476,7 @@ namespace Dmrg {
 			if (helper_.direction()==EXPAND_SYSTEM) {
 				return bracketSystem_(A,vec1,vec2);
 			}
-			return bracketEnviron_(A,vec1,vec2);
+			return bracketEnviron_(A,vec1,vec2,fermionicSign);
 		}
 
 		RealType bracketSystem_(
@@ -512,7 +512,8 @@ namespace Dmrg {
 		RealType bracketEnviron_(
 						const MatrixType& A,
 						const VectorWithOffsetType& vec1,
-						const VectorWithOffsetType& vec2)
+						const VectorWithOffsetType& vec2,
+						int fermionicSign)
 		{
 			CrsMatrix<FieldType> Acrs(A);
 			FieldType sum=0;
@@ -527,12 +528,14 @@ namespace Dmrg {
 					utils::getCoordinates(r,eta,helper_.basisSE().
 							permutation(t),helper_.basisS().size());
 					if (eta>=Acrs.rank()) throw std::runtime_error("Error\n");
+					size_t nx0 = helper_.basisS().electrons(BasisType::AFTER_TRANSFORM);
+					RealType sign = (nx0 & 1) ? fermionicSign : 1;
 					for (int k=Acrs.getRowPtr(eta);k<Acrs.getRowPtr(eta+1);k++) {
 						size_t eta2 = Acrs.getCol(k);
 						size_t t2 = helper_.basisSE().
 							permutationInverse(r+eta2*helper_.basisS().size());
 						if (t2<offset || t2>=total) continue;
-						sum += Acrs.getValue(k)*vec1[t]*std::conj(vec2[t2]);
+						sum += Acrs.getValue(k)*vec1[t]*std::conj(vec2[t2])*sign;
 					}
 				}
 			}

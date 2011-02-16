@@ -88,24 +88,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	//! Move also checkpointing from DmrgSolver to here (FIXME)
-	template<typename BasisType,typename VectorType,typename MatrixType>
+	template<
+		typename LeftRightSuperType,
+		typename VectorType,
+		typename MatrixType>
 	class DmrgSerializer {
 		public:
+			typedef typename LeftRightSuperType::BasisType BasisType;
 			typedef FermionSign FermionSignType;
 			typedef typename BasisType::RealType RealType;
 
 			DmrgSerializer(
-				const FermionSignType& fs,
-				const BasisType& pS,
-				const BasisType& pE,
-				const BasisType& pSE,
+				const FermionSignType& fS,
+				const FermionSignType& fE,
+				const LeftRightSuperType& lrs,
 				const VectorType& wf,
 				const MatrixType& transform,
 				size_t direction)
-			: fs_(fs),
-			  pS_(pS),
-			  pE_(pE),
-			  pSE_(pSE),
+			: fS_(fS),
+			  fE_(fE),
+			  lrs_(lrs),
 			  wavefunction_(wf),
 			  transform_(transform),
 			  direction_(direction)
@@ -113,7 +115,9 @@ namespace Dmrg {
 			
 			
 			DmrgSerializer(typename PsimagLite::IoSimple::In& io,bool bogus = false) 
-			: fs_(io,bogus),pS_(io,"",bogus),pE_(io,"",bogus),pSE_(io,"",bogus)
+			: fS_(io,bogus),
+			  fE_(io,bogus),
+			  lrs_(io,"",bogus)
 			{
 				if (bogus) return;
 				std::string s = "#WAVEFUNCTION_sites=";
@@ -123,7 +127,8 @@ namespace Dmrg {
 				s = "#DIRECTION=";
 				int x = 0;
 				io.readline(x,s);
-				if (x<0) throw std::runtime_error("DmrgSerializer:: direction must be non-negative\n");
+				if (x<0) throw std::runtime_error(
+					"DmrgSerializer:: direction must be non-negative\n");
 				direction_ = x;
 			}
 			
@@ -131,36 +136,43 @@ namespace Dmrg {
 			template<typename IoOutputter>
 			void save(IoOutputter& io) const
 			{
-				fs_.save(io);
-				pS_.save(io);
-				pE_.save(io);
-				pSE_.save(io);
+				fS_.save(io);
+				fE_.save(io);
+				lrs_.save(io);
 	
 				// save wavefunction
 				std::string label = "#WAVEFUNCTION_sites=";
-				for (size_t i=0;i<pSE_.block().size();i++) {
-					label += utils::ttos(pSE_.block()[i])+",";
+				for (size_t i=0;i<lrs_.super().block().size();i++) {
+					label += utils::ttos(lrs_.super().block()[i])+",";
 				}
 				//SparseVector<typename TargettingType::TargetVectorType::value_type> psiSparse(target.gs());
 				wavefunction_.save(io,label);
 			
 				label = "#TRANSFORM_sites=";
-				for (size_t i=0;i<pS_.block().size();i++) {
-					label += utils::ttos(pS_.block()[i])+",";
+				for (size_t i=0;i<lrs_.left().block().size();i++) {
+					label += utils::ttos(lrs_.left().block()[i])+",";
 				}
 				io.printMatrix(transform_,label);
 				std::string s = "#DIRECTION="+utils::ttos(direction_);
 				io.printline(s);
 			}
 			
-			const FermionSignType& fermionicSign() const { return fs_; }
+			const FermionSignType& fermionicSignLeft() const
+			{
+				return fS_;
+			}
+
+			const FermionSignType& fermionicSignRight() const
+			{
+				return fE_;
+			}
 			
-			const BasisType& basisS() const { return pS_; }
-			
-			const BasisType& basisE() const { return pE_; }
-			
-			const BasisType& basisSE() const { return pSE_; }
-			
+//			const BasisType& basisS() const { return pS_; }
+//
+//			const BasisType& basisE() const { return pE_; }
+//
+//			const BasisType& basisSE() const { return pSE_; }
+//
 			const VectorType& wavefunction() const { return wavefunction_; }
 			
 			size_t columns() const { return transform_.n_col(); }
@@ -176,20 +188,20 @@ namespace Dmrg {
 				int nSmall = transform_.n_col();
 				MatrixType fmTmp(nSmall,nBig);
 				typename MatrixType::value_type alpha=1.0,beta=0.0;
-				if (ret.n_row()!=size_t(nSmall) || ret.n_col()!=size_t(nSmall)) ret.reset(nSmall,nSmall);	
+				if (ret.n_row()!=size_t(nSmall) || ret.n_col()!=
+						size_t(nSmall)) ret.reset(nSmall,nSmall);
 				psimag::BLAS::GEMM('N','N',nBig,nSmall,nBig,alpha,
-						&(O(0,0)),nBig,&(transform_(0,0)),nBig,beta,&(fmTmp(0,0)),nBig);
+						&(O(0,0)),nBig,&(transform_(0,0)),nBig,beta,
+						&(fmTmp(0,0)),nBig);
 				
 				psimag::BLAS::GEMM('C','N',nSmall,nSmall,nBig,alpha,
-						&(transform_(0,0)),nBig,&(fmTmp(0,0)),nBig,beta,&(ret(0,0)),nSmall);
-				
+						&(transform_(0,0)),nBig,&(fmTmp(0,0)),nBig,beta,
+						&(ret(0,0)),nSmall);
 			}
 
 		private:
-			FermionSignType fs_;
-			BasisType pS_;
-			BasisType pE_;
-			BasisType pSE_;
+			FermionSignType fS_,fE_;
+			LeftRightSuperType lrs_;
 			VectorType wavefunction_;
 			MatrixType transform_;
 			size_t direction_;

@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 
 #include "ModelCommon.h"
-#include "BasisWithOperators.h"
 #include "Su2SymmetryGlobals.h"
 
 namespace Dmrg {
@@ -103,10 +102,13 @@ namespace Dmrg {
 			typedef typename ModelHelperType::BlockType Block;
 			typedef typename ModelHelperType::RealType RealType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
-			typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
-			typedef Basis<RealType,SparseMatrixType> MyBasis;
-			typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
+			typedef typename ModelHelperType::ReflectionSymmetryType
+					ReflectionSymmetryType;
+			typedef typename ModelHelperType::ConcurrencyType
+					ConcurrencyType;
+			typedef typename ModelHelperType::BasisType MyBasis;
+			typedef typename ModelHelperType::BasisWithOperatorsType
+					BasisWithOperatorsType;
 			typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,
    					LinkProductType,SharedMemoryTemplate> ModelCommonType;
 			typedef DmrgGeometryType GeometryType;

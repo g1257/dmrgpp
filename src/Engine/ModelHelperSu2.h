@@ -74,7 +74,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODELHELPER_SU2_HEADER_H
 #define MODELHELPER_SU2_HEADER_H
 
-#include "BasisWithOperators.h"
 #include "ClebschGordanCached.h"
 #include "Su2Reduced.h"
 #include "Link.h"
@@ -91,22 +90,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg { 	
 	
-	template<typename OperatorsType_,
+	template<typename LeftRightSuperType_,
 		typename ReflectionSymmetryType_,
 		typename ConcurrencyType_>
 	class ModelHelperSu2  {
 		typedef std::pair<size_t,size_t> PairType;
 	public:	
 		static const size_t System=0,Environ=1;
-		typedef typename OperatorsType_::OperatorType OperatorType;
+		typedef LeftRightSuperType_ LeftRightSuperType;
+		typedef typename LeftRightSuperType::BasisWithOperatorsType
+				BasisWithOperatorsType;
+		typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
+		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-		typedef OperatorsType_ OperatorsType;
 		typedef ReflectionSymmetryType_ ReflectionSymmetryType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef typename BasisType::RealType RealType;
-		typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
+
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef Link<SparseElementType,RealType> LinkType;
 		
@@ -466,7 +468,7 @@ namespace Dmrg {
 		const BasisWithOperatorsType& basis3_;
 		ReflectionSymmetryType reflection_;
 		size_t numberOfOperators_,nOrbitals_;
-		Su2Reduced<OperatorsType_,ReflectionSymmetryType_,ConcurrencyType_>
+		Su2Reduced<LeftRightSuperType,ReflectionSymmetryType_,ConcurrencyType_>
 				su2reduced_;
 	};
 } // namespace Dmrg
