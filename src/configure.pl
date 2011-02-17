@@ -273,7 +273,6 @@ print FOUT<<EOF;
 #include "BlockMatrix.h"
 #include "DmrgSolver.h"
 #include "IoSimple.h"
-#include "DensityMatrix.h"
 #include "Operator.h"
 #include "$concurrencyName.h"
 #include "$modelName.h"
@@ -340,9 +339,8 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 	
 	typedef DmrgSolver<
 			InternalProductTemplate,
-			DensityMatrix,
+			ModelHelperTemplate,
 			ModelType,
-			MyConcurrency,
 			MyIo,
 			TargettingTemplate,
 			VectorWithOffsetTemplate
@@ -491,7 +489,6 @@ print OBSOUT<<EOF;
 #include "VectorWithOffsets.h"
 #include "GroundStateTargetting.h"
 #include "DmrgSolver.h" // only used for types
-#include "DensityMatrix.h" // only used for types
 #include "TimeStepTargetting.h" // only used for types
 #include "GroundStateTargetting.h" // only used for types
 #include "BasisWithOperators.h"
@@ -609,9 +606,8 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	
 	typedef DmrgSolver<
                         InternalProductTemplate,
-                        DensityMatrix,
+			ModelHelperTemplate,
                         ModelType,
-                        MyConcurrency,
                         PsimagLite::IoSimple,
                         TargettingTemplate,
                         VectorWithOffsetTemplate

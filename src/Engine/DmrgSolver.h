@@ -89,15 +89,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DmrgSerializer.h"
 #include "Checkpoint.h"
 #include "WaveFunctionTransfFactory.h"
+#include "DensityMatrix.h"
 
 namespace Dmrg {
 
 	//!  A class to represent a generic solver for the Dmrg method
 	template<
 		template<typename,typename> class InternalProductTemplate,
-		template<typename,typename,typename,typename> class DensityMatrixTemplate,
+		template<typename,typename,typename> class ModelHelperTemplate,
 		class ModelType,
-		class ConcurrencyType,
 		class IoType,
   		template<template<typename,typename,typename> class,
   			template<typename,typename> class,
@@ -116,18 +116,18 @@ namespace Dmrg {
 		typedef typename MyBasis::RealType RealType;
 		typedef typename MyBasis::BlockType BlockType;
 		typedef typename ModelType::MyBasisWithOperators MyBasisWithOperators;
-		typedef typename ModelType::ModelHelperType ModelHelperType;
-		typedef typename ModelHelperType::LeftRightSuperType
+		typedef typename ModelType::ModelHelperType::LeftRightSuperType
 				LeftRightSuperType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
-
+		typedef typename ModelType::ModelHelperType::ConcurrencyType
+				ConcurrencyType;
 		typedef TargettingTemplate<LanczosSolver,InternalProductTemplate,WaveFunctionTransfFactory,
   				ModelType,ConcurrencyType,IoType,VectorWithOffsetTemplate> TargettingType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 		typedef ParametersDmrgSolver<RealType> ParametersType;
 		typedef Diagonalization<ParametersType,TargettingType,InternalProductTemplate> DiagonalizationType;
-		typedef DensityMatrixTemplate<RealType,MyBasis,MyBasisWithOperators,TargettingType> DensityMatrixType;
+		typedef DensityMatrix<RealType,MyBasis,MyBasisWithOperators,TargettingType> DensityMatrixType;
 		typedef typename DensityMatrixType::BuildingBlockType TransformType;
 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
@@ -413,10 +413,10 @@ namespace Dmrg {
 		void changeTruncateAndSerialize(MyBasisWithOperators& pS,MyBasisWithOperators& pE,
 			    const TargettingType& target,size_t keptStates,size_t direction,size_t saveOption)
 		{
-			std::vector<size_t> eS = pS.electronsVector();
+			const std::vector<size_t>& eS = pS.electronsVector();
 			FermionSignType fsS(eS);
 
-			std::vector<size_t> eE = pS.electronsVector();
+			const std::vector<size_t>& eE = pS.electronsVector();
 			FermionSignType fsE(eE);
 
 			progress_.print("Truncating (env) basis now...\n",std::cout);

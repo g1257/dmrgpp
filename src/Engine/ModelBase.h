@@ -133,9 +133,9 @@ namespace Dmrg {
 			}
 
 			void addHamiltonianConnection(
-					SparseMatrixType &matrix,
-					const LeftRightSuperType& lrs,
-					size_t nOrbitals) const
+				SparseMatrixType &matrix,
+				const LeftRightSuperType& lrs,
+				size_t nOrbitals) const
 			{	
 				int bs,offset;
 				SparseMatrixType matrixBlock;
@@ -148,12 +148,6 @@ namespace Dmrg {
 					modelCommon_.addHamiltonianConnection(matrixBlock,modelHelper);
 					sumBlock(matrix,matrixBlock,offset);
 				}
-			}
-
-			//! Add Hamiltonian connection between basis2 and basis3 in the orderof basis1 for symmetry block m 
-			void addHamiltonianConnection(VerySparseMatrix<SparseElementType>& matrix,const ModelHelperType& modelHelper) const
-			{
-				modelCommon_.addHamiltonianConnection(matrix,modelHelper);
 			}
 
 			//! Let H_m be the Hamiltonian connection between basis2 and basis3 in the orderof basis1 for block m 
@@ -183,6 +177,15 @@ namespace Dmrg {
 			}
 
 		private:
+
+			//! Add Hamiltonian connection between basis2 and basis3 in the orderof basis1 for symmetry block m
+			void addHamiltonianConnection(
+					VerySparseMatrix<SparseElementType>& matrix,
+					const ModelHelperType& modelHelper) const
+			{
+				modelCommon_.addHamiltonianConnection(matrix,modelHelper);
+			}
+
 			ModelCommonType modelCommon_;
 	};     //class ModelBase
 } // namespace Dmrg

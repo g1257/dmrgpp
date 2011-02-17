@@ -412,14 +412,19 @@ namespace Dmrg {
 		}
 
 		void printFullMatrix(const SparseMatrixType& matrix) const
-                {
-                        reflection_.printFullMatrix(matrix);
-                }
+		{
+			reflection_.printFullMatrix(matrix);
+		}
 
 		void printFullMatrixMathematica(const SparseMatrixType& matrix) const
-                {
-                        reflection_.printFullMatrixMathematica(matrix);
-                }
+		{
+			reflection_.printFullMatrixMathematica(matrix);
+		}
+
+		const LeftRightSuperType& leftRightSuper() const
+		{
+			return lrs_;
+		}
 
 	private:
 		int m_;

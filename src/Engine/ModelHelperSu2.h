@@ -462,6 +462,11 @@ namespace Dmrg {
 
 		size_t m() const {return m_;}
 
+		const LeftRightSuperType& leftRightSuper() const
+		{
+			return lrs_;
+		}
+
 	private:
 		int m_;
 		const LeftRightSuperType&  lrs_;

@@ -128,7 +128,10 @@ namespace Dmrg {
 			}
 
 			//! Add Hamiltonian connection between basis2 and basis3 in the orderof basis1 for symmetry block m 
-			void addHamiltonianConnection(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const
+			template<typename SomeModelHelperType>
+			void addHamiltonianConnection(
+					SparseMatrixType& matrix,
+					const SomeModelHelperType& modelHelper) const
 			{
 				size_t n = matrix.rank();
 				VerySparseMatrixType vsm(n);
@@ -137,34 +140,15 @@ namespace Dmrg {
 				matrixBlock = vsm;
 				matrix += matrixBlock;
 			}
-			
-			//! Add Hamiltonian connection between basis2 and basis3 in the orderof basis1 for symmetry block m 
-			void addHamiltonianConnection(VerySparseMatrixType& matrix,
-					const ModelHelperType& modelHelper) const
-			{
-				size_t n=modelHelper.basis1().block().size();
-				
-				VerySparseMatrixType matrix2(matrix.rank());
-				
-				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
-				
-				for (size_t i=0;i<n;i++) {
-					for (size_t j=0;j<n;j++) {
-						SparseMatrixType matrixBlock(matrix.rank(),matrix.rank());
-						if (!hc.compute(i,j,&matrixBlock)) continue;
-						VerySparseMatrixType vsm(matrixBlock);
-						matrix2+=vsm;
-					}
-				}
-				matrix += matrix2;
-			}
 
 			//! Let H_m be the Hamiltonian connection between basis2 and basis3 in the orderof basis1 for block m 
 			//! Then this function does x+= H_m *y
-			void hamiltonianConnectionProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
-				const ModelHelperType& modelHelper) const
+			void hamiltonianConnectionProduct(
+					std::vector<SparseElementType> &x,
+					const std::vector<SparseElementType>& y,
+					const ModelHelperType& modelHelper) const
 			{
-				size_t n=modelHelper.basis1().block().size();
+				size_t n=modelHelper.leftRightSuper().super().block().size();
 
 				SparseMatrixType matrix;
 
@@ -215,6 +199,33 @@ namespace Dmrg {
 
 
 		private:
+
+			//! Add Hamiltonian connection between basis2 and basis3 in
+			// the orderof basis1 for symmetry block m
+			template<typename SomeModelHelperType>
+			void addHamiltonianConnection(VerySparseMatrixType& matrix,
+					const SomeModelHelperType& modelHelper) const
+			{
+				size_t n=modelHelper.leftRightSuper().sites();
+				size_t matrixRank = matrix.rank();
+				VerySparseMatrixType matrix2(matrixRank);
+				typedef HamiltonianConnection<
+						DmrgGeometryType,
+						SomeModelHelperType,
+						LinkProductType> SomeHamiltonianConnectionType;
+				SomeHamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
+
+				for (size_t i=0;i<n;i++) {
+					for (size_t j=0;j<n;j++) {
+						SparseMatrixType matrixBlock(matrixRank,matrixRank);
+						if (!hc.compute(i,j,&matrixBlock)) continue;
+						VerySparseMatrixType vsm(matrixBlock);
+						matrix2+=vsm;
+					}
+				}
+				matrix += matrix2;
+			}
+
 			const DmrgGeometryType& dmrgGeometry_;
 			
 	};     //class ModelCommon

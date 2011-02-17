@@ -103,8 +103,8 @@ namespace Dmrg {
 				std::vector<SparseElementType>* x = 0,
 				const std::vector<SparseElementType>* y = 0)
 			: lps_(*lps),x_(*x),y_(*y),geometry_(geometry),modelHelper_(modelHelper),
-				systemBlock_(modelHelper.basis2().block()),
-				envBlock_(modelHelper.basis3().block()),
+				systemBlock_(modelHelper.leftRightSuper().left().block()),
+				envBlock_(modelHelper.leftRightSuper().right().block()),
 				smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
 				emin_(*std::min_element(envBlock_.begin(),envBlock_.end()))
 			{
@@ -115,8 +115,8 @@ namespace Dmrg {
 			{
 				
 				bool flag=false;
-				size_t ind = modelHelper_.basis1().block()[i];
-				size_t jnd = modelHelper_.basis1().block()[j];
+				size_t ind = modelHelper_.leftRightSuper().super().block()[i];
+				size_t jnd = modelHelper_.leftRightSuper().super().block()[j];
 				//throw std::runtime_error("system block is not correct here, think finite algorithm!!!\n"); 
 				if (!geometry_.connected(smax_,emin_,ind,jnd)) return flag;
 				size_t type = geometry_.connectionKind(smax_,ind,jnd);
@@ -189,7 +189,7 @@ namespace Dmrg {
 				size_t term,
     				size_t dofs) const
 			{
-				int offset = modelHelper_.basis2().block().size();
+				int offset = modelHelper_.leftRightSuper().left().block().size();
 				PairType ops;
 				std::pair<char,char> mods('N','C');
 				size_t fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
@@ -231,7 +231,7 @@ namespace Dmrg {
 						size_t i,size_t j,size_t type,
 				const SparseElementType  &valuec,size_t term,size_t dofs)  const
 			{
-				int offset =modelHelper_.basis2().block().size();
+				int offset =modelHelper_.leftRightSuper().left().block().size();
 				std::pair<size_t,size_t> ops;
 				std::pair<char,char> mods('N','C');
 				size_t fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;

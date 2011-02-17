@@ -266,7 +266,7 @@ namespace Dmrg {
 		void transformVector2(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuper& lrs) const
+				const LeftRightSuperType& lrs) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -279,7 +279,7 @@ namespace Dmrg {
 		void transformVector2(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuper& lrs,size_t i0) const
+				const LeftRightSuperType& lrs,size_t i0) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = lrs.left().permutationInverse().size()/nk;
@@ -351,7 +351,7 @@ namespace Dmrg {
 		void transformVector2FromInfinite(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuper& lrs) const
+				const LeftRightSuperType& lrs) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -364,7 +364,7 @@ namespace Dmrg {
 		void transformVector2FromInfinite(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuper& lrs,
+				const LeftRightSuperType& lrs,
 				size_t i0) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
@@ -446,7 +446,7 @@ namespace Dmrg {
 		void transformVector1bounce(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuper& lrs) const
+				const LeftRightSuperType& lrs) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -458,7 +458,7 @@ namespace Dmrg {
 		void transformVector1bounce(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuper& lrs,
+				const LeftRightSuperType& lrs,
 				size_t i0) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
@@ -500,11 +500,11 @@ namespace Dmrg {
 		void transformVector2bounce(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuper& lrs) const
+				const LeftRightSuperType& lrs) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
-				transformVector2bounce(psiDest,psiSrc,pSprime,pEprime,pSE,i0);
+				transformVector2bounce(psiDest,psiSrc,lrs,i0);
 			}
 		}
 		
@@ -513,7 +513,7 @@ namespace Dmrg {
 		void transformVector2bounce(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuper& lrs,
+				const LeftRightSuperType& lrs,
 				size_t i0) const
 		{
 			size_t nk = hilbertSpaceOneSite_;

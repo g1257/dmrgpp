@@ -107,13 +107,13 @@ namespace Dmrg {
 				GROW_TO_THE_LEFT= BasisWithOperatorsType::GROW_LEFT};
 
 			template<typename IoInputter>
-			LeftRightSuper(IoInputter& io,bool bogus=false)
+			LeftRightSuper(IoInputter& io)
 			: progress_("LeftRightSuper",0),
 			  left_(0),right_(0),super_(0),refCounter_(0)
 			{
-				left_ = new BasisWithOperatorsType(io,"",bogus);
-				right_ = new BasisWithOperatorsType(io,"",bogus);
-				super_ = new SuperBlockType(io,"",bogus);
+				left_ = new BasisWithOperatorsType(io,"");
+				right_ = new BasisWithOperatorsType(io,"");
+				super_ = new SuperBlockType(io,"");
 			}
 
 			LeftRightSuper(
@@ -242,6 +242,8 @@ namespace Dmrg {
 			}
 		private:
 
+			LeftRightSuper(ThisType& rls);
+
 			//! add block X to basis pS and put the result in left_:
 			template<typename SomeModelType>
 			void grow(
@@ -261,14 +263,13 @@ namespace Dmrg {
 				leftOrRight.setToProduct(pS,Xbasis,dir);
 
 				SparseMatrixType matrix=leftOrRight.hamiltonian();
-				typedef LeftRightSuper<BasisWithOperatorsType,
-					BasisWithOperatorsType> LeftRightSuperFatType;
-				LeftRightSuperFatType* lrs;
 
+				ThisType* lrs;
+				BasisType* leftOrRightL =  &leftOrRight;
 				if (dir==GROW_TO_THE_RIGHT) {
-					lrs = new LeftRightSuperFatType(pS,Xbasis,leftOrRight);
+					lrs = new ThisType(pS,Xbasis,*leftOrRightL);
 				} else {
-					lrs = new  LeftRightSuperFatType(Xbasis,pS,leftOrRight);
+					lrs = new  ThisType(Xbasis,pS,*leftOrRightL);
 				}
 				model.addHamiltonianConnection(matrix,*lrs,model.orbitals());
 				delete lrs;

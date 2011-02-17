@@ -130,7 +130,7 @@ namespace Dmrg {
 		virtual void transformVector(
 						VectorWithOffsetType& psiDest,
 						const VectorWithOffsetType& psiSrc,
-						cconst LeftRightSuperType& lrs) const
+						const LeftRightSuperType& lrs) const
 		{
 			if (stage_==EXPAND_ENVIRON)
 				transformVector1Su2(psiDest,psiSrc,lrs);
@@ -173,7 +173,7 @@ namespace Dmrg {
 				size_t i = psiDest.sector(ii);
 				size_t start = psiDest.offset(i);
 				size_t final = psiDest.effectiveSize(i)+start;
-				transformVector1Su2(psiDest,psiSrc,pSprime,pEprime,pSE,start,final);
+				transformVector1Su2(psiDest,psiSrc,lrs,start,final);
 			}
 		}
 		
@@ -285,8 +285,7 @@ namespace Dmrg {
 				size_t i = psiDest.sector(ii);
 				size_t start = psiDest.offset(i);
 				size_t final = psiDest.effectiveSize(i)+start;
-				transformVector2Su2(psiDest,psiSrc,pSprime,
-				      pEprime,pSE,start,final);
+				transformVector2Su2(psiDest,psiSrc,lrs,start,final);
 			}
 		}
 		
