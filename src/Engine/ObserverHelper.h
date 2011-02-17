@@ -134,8 +134,15 @@ namespace Dmrg {
 					"No more data to construct this object\n");
 
 		}
-
-
+		
+		~ObserverHelper() 
+		{
+			for (size_t i=0;i<dSerializerV_.size();i++) {
+				DmrgSerializerType* p = dSerializerV_[i];
+				delete p;
+			}
+		}
+		
 		bool endOfData() const { return noMoreData_; }
 
 		void setPointer(size_t pos)
@@ -156,42 +163,42 @@ namespace Dmrg {
 
 		void transform(MatrixType& ret,const MatrixType& O2) const
 		{
-			return dSerializerV_[currentPos_].transform(ret,O2);
+			return dSerializerV_[currentPos_]->transform(ret,O2);
 		}
 
 		size_t columns() const
 		{
-			return dSerializerV_[currentPos_].columns();
+			return dSerializerV_[currentPos_]->columns();
 		}
 
 		size_t rows() const
 		{
-			return dSerializerV_[currentPos_].rows();
+			return dSerializerV_[currentPos_]->rows();
 		}
 
 		const FermionSignType& fermionicSignLeft() const
 		{
-			return dSerializerV_[currentPos_].fermionicSignLeft();
+			return dSerializerV_[currentPos_]->fermionicSignLeft();
 		}
 
 		const FermionSignType& fermionicSignRight() const
 		{
-			return dSerializerV_[currentPos_].fermionicSignRight();
+			return dSerializerV_[currentPos_]->fermionicSignRight();
 		}
 
 		const LeftRightSuperType& leftRightSuper() const
 		{
-			return dSerializerV_[currentPos_].leftRightSuper();
+			return dSerializerV_[currentPos_]->leftRightSuper();
 		}
 
 		size_t direction() const
 		{
-			return dSerializerV_[currentPos_].direction();
+			return dSerializerV_[currentPos_]->direction();
 		}
 
 		const VectorWithOffsetType& wavefunction() const
 		{
-			return dSerializerV_[currentPos_].wavefunction();
+			return dSerializerV_[currentPos_]->wavefunction();
 		}
 
 		RealType time() const
@@ -251,7 +258,8 @@ namespace Dmrg {
 				if (verbose_)
 					std::cerr<<"ObserverHelper "<<dSerializerV_.size()<<"\n";
 				try {
-					DmrgSerializerType dSerializer(io_);
+					DmrgSerializerType* dSerializer = new 
+						DmrgSerializerType(io_);
 					if (counter>=offset) dSerializerV_.push_back(dSerializer);
 					if (hasTimeEvolution) {
 						TimeSerializerType ts(io_);
@@ -279,8 +287,10 @@ namespace Dmrg {
 			if (dSerializerV_.size()!=timeSerializerV_.size()) throw std::runtime_error("Error 1\n");
 			if (dSerializerV_.size()==0) return;
 			for (size_t x=0;x<dSerializerV_.size()-1;x++) {
-				if (dSerializerV_[x].basisSE().size()==0) continue;
-				if (dSerializerV_[x].basisSE().size()!=timeSerializerV_[x].size()) throw std::runtime_error("Error 2\n");
+				size_t n = dSerializerV_[x]->leftRightSuper().super().size();
+				if (n==0) continue;
+				if (n!=timeSerializerV_[x].size())
+					throw std::runtime_error("Error 2\n");
 			}
 			
 		}
@@ -312,7 +322,7 @@ namespace Dmrg {
 //		}
 
 		IoInputType& io_;
-		std::vector<DmrgSerializerType> dSerializerV_;
+		std::vector<DmrgSerializerType*> dSerializerV_;
 		std::vector<TimeSerializerType> timeSerializerV_;
 		size_t currentPos_;
 		bool verbose_;

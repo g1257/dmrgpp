@@ -450,7 +450,7 @@ namespace Dmrg {
 			io.read(permInverse_,"#PERMUTATIONINVERSE");
 			permutationVector_.resize(permInverse_.size());
 			for (size_t i=0;i<permInverse_.size();i++) permutationVector_[permInverse_[i]]=i;
-			
+			dmrgTransformed_=false;	
 			if (useSu2Symmetry_)
 				symmSu2_.load(io);
 			else

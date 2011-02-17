@@ -204,22 +204,11 @@ namespace Dmrg {
 						&(ret(0,0)),nSmall);
 			}
 
-			DmrgSerializer(const ThisType& ds)
-			: fS_(ds.fS_),fE_(ds.fE_),lrs_(ds.lrs_),
-			  wavefunction_(ds.wavefunction_),
-			  transform_(ds.transform_),
-			  direction_(ds.direction_)
-			{
-				lrs_.deepCopy(ds.lrs_);
-			}
-//			ThisType& operator=(const ThisType& ds)
-//			{
-//
-//				return *this;
-//			}
-
 		private:
-			//DmrgSerializer(ThisType& ds);
+			// Disallowing copy and assignment here:
+			DmrgSerializer(const ThisType& ds);
+			ThisType& operator=(const ThisType& ds);
+			
 
 			FermionSignType fS_,fE_;
 			LeftRightSuperType lrs_;

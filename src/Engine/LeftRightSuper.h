@@ -111,10 +111,11 @@ namespace Dmrg {
 			: progress_("LeftRightSuper",0),
 			  left_(0),right_(0),super_(0),refCounter_(0)
 			{
+				// watch out: same order as save here:
+				super_ = new SuperBlockType(io,"");
 				left_ = new BasisWithOperatorsType(io,"");
 				right_ = new BasisWithOperatorsType(io,"");
-				super_ = new SuperBlockType(io,"");
-				load(io);
+				//load(io);
 			}
 
 			LeftRightSuper(
@@ -150,19 +151,17 @@ namespace Dmrg {
 			}
 
 			LeftRightSuper(const ThisType& rls)
-			: progress_("LeftRightSuper",0)
+			: progress_("LeftRightSuper",0),refCounter_(1)
 			{
 				left_=rls.left_;
 				right_=rls.right_;
 				super_=rls.super_;
-				refCounter_++;
 			}
 
 			// deep copy
 			ThisType& operator=(const ThisType& lrs)
 			{
 				deepCopy(lrs);
-				//refCounter_++;
 				return *this;
 			}
 
@@ -237,6 +236,7 @@ namespace Dmrg {
 				*left_=*rls.left_;
 				*right_=*rls.right_;
 				*super_=*rls.super_;
+				if (refCounter_>0) refCounter_--;
 			}
 
 			template<typename IoInputType>
