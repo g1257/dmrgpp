@@ -325,6 +325,16 @@ Returns the full time vector number $i$ as a vector with offsets:
 			}
 @}
 
+Finally, the following 3 member public functions return the superblock object, the system (left-block)
+or the environment objects, or rather, the references held by this class.
+@o TimeStepTargetting.h -t
+@{
+	const LeftRightSuperType& leftRightSuper() const
+	{
+		return lrs_;
+	}
+@}
+
 This function provides a hook to (possibly) start the computation of
 time-evolution. Five arguments are passed. First $Eg$, the ground state energy,
 then the \verb|direction| of expansion (system or environment), then the \verb|block|

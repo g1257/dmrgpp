@@ -186,12 +186,11 @@ namespace Dmrg {
 				// Nothing to see here
 			}
 			
-//			const BasisType& basisSE() const { return basisSE_; }
-//
-//			const BasisWithOperatorsType& basisS() const { return basisS_; }
-//
-//			const BasisWithOperatorsType& basisE() const { return basisE_; }
-			
+			const LeftRightSuperType& leftRightSuper() const
+			{
+				return lrs_;
+			}
+
 			void initialGuess(VectorWithOffsetType& initialVector) const
 			{
 				RealType eps = 1e-6;

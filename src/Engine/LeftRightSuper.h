@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename BasisWithOperatorsType_>
+	template<typename BasisWithOperatorsType_,typename SuperBlockType>
 	class LeftRightSuper {
 		public:
 			typedef BasisWithOperatorsType_ BasisWithOperatorsType;
@@ -100,6 +100,8 @@ namespace Dmrg {
 					OperatorType;
 			typedef typename BasisType::BlockType BlockType;
 			typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
+			typedef  LeftRightSuper<
+					BasisWithOperatorsType_,SuperBlockType> ThisType;
 
 			enum {GROW_TO_THE_RIGHT = BasisWithOperatorsType::GROW_RIGHT,
 				GROW_TO_THE_LEFT= BasisWithOperatorsType::GROW_LEFT};
@@ -107,8 +109,11 @@ namespace Dmrg {
 			template<typename IoInputter>
 			LeftRightSuper(IoInputter& io,bool bogus=false)
 			: progress_("LeftRightSuper",0),
-			  left_(io,"",bogus),right_(io,"",bogus),super_(io,"",bogus)
+			  left_(0),right_(0),super_(0),refCounter_(0)
 			{
+				left_ = new BasisWithOperatorsType(io,"",bogus);
+				right_ = new BasisWithOperatorsType(io,"",bogus);
+				super_ = new SuperBlockType(io,"",bogus);
 			}
 
 			LeftRightSuper(
@@ -116,53 +121,125 @@ namespace Dmrg {
 					const std::string& elabel,
 					const std::string& selabel)
 			: progress_("LeftRightSuper",0),
-			  left_(slabel),right_(elabel),super_(selabel)
-			  {}
-			
+			  left_(0),right_(0),super_(0),refCounter_(0)
+			{
+				left_ = new BasisWithOperatorsType("slabel");
+				right_ = new BasisWithOperatorsType("elabel");
+				super_ = new SuperBlockType("selabel");
+			}
+
+			~LeftRightSuper()
+			{
+				if (refCounter_>0) {
+					refCounter_--;
+					return;
+				}
+				delete left_;
+				delete right_;
+				delete super_;
+			}
+
+			LeftRightSuper(
+					BasisWithOperatorsType& left,
+					BasisWithOperatorsType& right,
+					SuperBlockType& super)
+			: progress_("LeftRightSuper",0),
+			  left_(&left),right_(&right),super_(&super),refCounter_(1)
+			{
+			}
+
+			LeftRightSuper(const ThisType& rls)
+			: progress_("LeftRightSuper",0)
+			{
+				left_=rls.left_;
+				right_=rls.right_;
+				super_=rls.super_;
+				refCounter_++;
+			}
+
+			ThisType& operator=(const ThisType& rls)
+			{
+				left_=rls.left_;
+				right_=rls.right_;
+				super_=rls.super_;
+				refCounter_++;
+				return *this;
+			}
+
 			template<typename SomeModelType>
 			void growLeftBlock(
 					const SomeModelType& model,
-					const BasisWithOperatorsType &pS,
+					BasisWithOperatorsType &pS,
 					BlockType const &X)
 			{
-				grow(model,pS,X,GROW_TO_THE_RIGHT);
+				grow(*left_,model,pS,X,GROW_TO_THE_RIGHT);
 			}
 
 			template<typename SomeModelType>
 			void growRightBlock(
 					const SomeModelType& model,
-					const BasisWithOperatorsType &pE,
+					BasisWithOperatorsType &pE,
 					BlockType const &X)
 			{
-				grow(right_,model,pE,X,GROW_TO_THE_LEFT);
+				grow(*right_,model,pE,X,GROW_TO_THE_LEFT);
 			}
 
 			void printSizes(const std::string& label,std::ostream& os) const
 			{
 				std::ostringstream msg;
-				msg<<label<<": left-block basis="<<left_.size();
-				msg<<", right-block basis="<<right_.size();
-				msg<<" sites="<<left_.block().size()<<"+";
-				msg<<right_.block().size();
+				msg<<label<<": left-block basis="<<left_->size();
+				msg<<", right-block basis="<<right_->size();
+				msg<<" sites="<<left_->block().size()<<"+";
+				msg<<right_->block().size();
 				progress_.printline(msg,os);
 			}
 
 			size_t sites() const
 			{
-				return left_.block().size() + right_.block().size();
+				return left_->block().size() + right_->block().size();
 			}
 
 			void setToProduct(size_t quantumSector)
 			{
-				super_.setToProduct(left_,right_,quantumSector);
+				super_->setToProduct(*left_,*right_,quantumSector);
 			}
 
-			const BasisType& left() const { return left_; }
+			template<typename IoInputType>
+			void load(IoInputType& io)
+			{
+				super_->load(io);
+				left_->load(io);
+				right_->load(io);
 
-			const BasisType& right() const { return right_; }
+			}
 
-			const BasisType& super() const { return super_; }
+			template<typename IoOutputType>
+			void save(IoOutputType& io) const
+			{
+				super_->save(io);
+				left_->save(io);
+				right_->save(io);
+			}
 
+			const BasisWithOperatorsType& left() const { return *left_; }
+
+			const BasisWithOperatorsType& right() const { return *right_; }
+
+			const SuperBlockType& super() const { return *super_; }
+
+			void left(const BasisWithOperatorsType& left)
+			{
+				if (refCounter_>0) throw std::runtime_error
+						("LeftRightSuper::left(...): not the owner\n");
+				*left_=left; // deep copy
+			}
+
+			void right(const BasisWithOperatorsType& right)
+			{
+				if (refCounter_>0) throw std::runtime_error
+						("LeftRightSuper::right(...): not the owner\n");
+				*right_=right; // deep copy
+			}
 		private:
 
 			//! add block X to basis pS and put the result in left_:
@@ -170,7 +247,7 @@ namespace Dmrg {
 			void grow(
 					BasisWithOperatorsType& leftOrRight,
 					const SomeModelType& model,
-					const BasisWithOperatorsType &pS,
+					BasisWithOperatorsType &pS,
 					BlockType const &X,
 					size_t dir)
 			{
@@ -184,21 +261,25 @@ namespace Dmrg {
 				leftOrRight.setToProduct(pS,Xbasis,dir);
 
 				SparseMatrixType matrix=leftOrRight.hamiltonian();
+				typedef LeftRightSuper<BasisWithOperatorsType,
+					BasisWithOperatorsType> LeftRightSuperFatType;
+				LeftRightSuperFatType* lrs;
 
-				if (dir==GROW_TO_THE_RIGHT)
-					model.addHamiltonianConnection(
-							matrix,leftOrRight,pS,Xbasis,model.orbitals());
-				else
-					model.addHamiltonianConnection(
-							matrix,leftOrRight,Xbasis,pS,model.orbitals());
-
+				if (dir==GROW_TO_THE_RIGHT) {
+					lrs = new LeftRightSuperFatType(pS,Xbasis,leftOrRight);
+				} else {
+					lrs = new  LeftRightSuperFatType(Xbasis,pS,leftOrRight);
+				}
+				model.addHamiltonianConnection(matrix,*lrs,model.orbitals());
+				delete lrs;
 				leftOrRight.setHamiltonian(matrix);
 			}
 
 			ProgressIndicatorType progress_;
-			BasisWithOperatorsType left_;
-			BasisWithOperatorsType right_;
-			BasisType super_;
+			BasisWithOperatorsType* left_;
+			BasisWithOperatorsType* right_;
+			SuperBlockType* super_;
+			size_t refCounter_;
 			
 	}; // class LeftRightSuper
 

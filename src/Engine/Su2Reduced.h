@@ -102,7 +102,7 @@ namespace Dmrg {
 			typedef typename Su2SymmetryGlobalsType::ClebschGordanType ClebschGordanType;
 			
 			static const size_t System=0,Environ=1;
-			static const BasisType* basis1Ptr_;
+			//static const BasisType* basis1Ptr_;
 
 			size_t m_;
 			BasisType basis1_;
@@ -117,12 +117,12 @@ namespace Dmrg {
 			ClebschGordanType& cgObject_;
 
 		public:
-			Su2Reduced(int m,const BasisType& basis1,  const BasisWithOperatorsType& basis2,
-			 const BasisWithOperatorsType& basis3,size_t nOrbitals,bool useReflection=false) :
+			Su2Reduced(
+					int m,
+					const LeftRightSuperType& lrs,
+					size_t nOrbitals,
+					bool useReflection=false) :
 			m_(m),
-			basis1_(basis1),
-			basis2_(basis2),
-			basis3_(basis3),
 			nOrbitals_(nOrbitals),
 			cgObject_(Su2SymmetryGlobalsType::clebschGordanObject)
 			{
@@ -130,8 +130,8 @@ namespace Dmrg {
 				std::vector<size_t> jvalues;
 				// find all possible j values
 				size_t counter=0;
-				for (size_t i=0;i<basis2.numberOfOperators();i++) {
-					size_t j = basis2.getReducedOperatorByIndex(i).jm.first;
+				for (size_t i=0;i<lrs.left().numberOfOperators();i++) {
+					size_t j = lrs.left().getReducedOperatorByIndex(i).jm.first;
 					int x = utils::isInVector(jvalues,j);
 					if (x<0) jvalues.push_back(j);
 					counter += (j+1);
@@ -150,7 +150,7 @@ namespace Dmrg {
 				calcHamFactor(lfactorHamiltonian_);
 				calcEffectiveStates(jsEffective);
 
-				basis1Ptr_ = &basis1;
+				//basis1Ptr_ = &basis1;
 				createReducedHamiltonian(hamiltonian2_,basis2_);
 
 				createReducedHamiltonian(hamiltonian3_,basis3_);
@@ -445,11 +445,11 @@ namespace Dmrg {
 
 	}; // class
 
-	template<typename LeftRightSuperType,
-		typename ReflectionSymmetryType,
-		typename ConcurrencyType>
-	const typename LeftRightSuperType::BasisType* Su2Reduced<
-	LeftRightSuperType,ReflectionSymmetryType,ConcurrencyType>::basis1Ptr_=0;
+//	template<typename LeftRightSuperType,
+//		typename ReflectionSymmetryType,
+//		typename ConcurrencyType>
+//	const typename LeftRightSuperType::BasisType* Su2Reduced<
+//	LeftRightSuperType,ReflectionSymmetryType,ConcurrencyType>::basis1Ptr_=0;
 } // namespace Dmrg
 /*@}*/
 #endif

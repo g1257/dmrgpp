@@ -217,6 +217,11 @@ namespace Dmrg {
 				return targetVectors_[i];
 			}
 
+	const LeftRightSuperType& leftRightSuper() const
+	{
+		return lrs_;
+	}
+
 			void evolve(RealType Eg,size_t direction,const BlockType& block,
 				size_t loopNumber)
 			{

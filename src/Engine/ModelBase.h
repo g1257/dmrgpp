@@ -113,7 +113,9 @@ namespace Dmrg {
    					LinkProductType,SharedMemoryTemplate> ModelCommonType;
 			typedef DmrgGeometryType GeometryType;
 			typedef typename ModelCommonType::SharedMemoryType SharedMemoryType;
-			
+			typedef typename ModelHelperType::LeftRightSuperType
+					LeftRightSuperType;
+
 			ModelBase(const DmrgGeometryType& dmrgGeometry) :
 					modelCommon_(dmrgGeometry)
 			{
@@ -130,17 +132,19 @@ namespace Dmrg {
 				modelCommon_.matrixVectorProduct(x,y,modelHelper);
 			}
 
-			void addHamiltonianConnection(SparseMatrixType &matrix,MyBasis const &basis1,BasisWithOperatorsType const &basis2,
-				BasisWithOperatorsType const &basis3,size_t nOrbitals) const
+			void addHamiltonianConnection(
+					SparseMatrixType &matrix,
+					const LeftRightSuperType& lrs,
+					size_t nOrbitals) const
 			{	
 				int bs,offset;
 				SparseMatrixType matrixBlock;
 
-				for (size_t m=0;m<basis1.partition()-1;m++) {
-					offset =basis1.partition(m);
-					bs = basis1.partition(m+1)-offset;
+				for (size_t m=0;m<lrs.super().partition()-1;m++) {
+					offset =lrs.super().partition(m);
+					bs = lrs.super().partition(m+1)-offset;
 					matrixBlock.makeDiagonal(bs);
-					ModelHelperType modelHelper(m,basis1,basis2,basis3,nOrbitals);
+					ModelHelperType modelHelper(m,lrs,nOrbitals);
 					modelCommon_.addHamiltonianConnection(matrixBlock,modelHelper);
 					sumBlock(matrix,matrixBlock,offset);
 				}

@@ -109,25 +109,26 @@ namespace Dmrg {
 		
 		static const size_t System=0,Environ=1;
 		
-		ModelHelperLocal(size_t m,const BasisType& basis1,  const BasisWithOperatorsType& basis2,
-			 const BasisWithOperatorsType& basis3,size_t orbitals,bool useReflection=false) 
+		ModelHelperLocal(
+				size_t m,
+				const LeftRightSuperType& lrs,
+				size_t orbitals,
+				bool useReflection=false)
 		:
 			m_(m),
-			basis1_(basis1),
-			basis2_(basis2),
-			basis3_(basis3),
-			buffer_(basis2_.size()),
-			basis2tc_(basis2_.numberOfOperators()),
-			basis3tc_(basis3_.numberOfOperators()),
-			alpha_(basis1_.size()),
-			beta_(basis1_.size()),
+			lrs_(lrs),
+			buffer_(lrs_.left().size()),
+			basis2tc_(lrs_.left().numberOfOperators()),
+			basis3tc_(lrs_.right().numberOfOperators()),
+			alpha_(lrs_.super().size()),
+			beta_(lrs_.super().size()),
 			reflection_(useReflection),
-			numberOfOperators_(basis2.numberOfOperatorsPerSite())
+			numberOfOperators_(lrs_.left().numberOfOperatorsPerSite())
 			//,rightLeftLocal_(m,basis1,basis2,basis3,orbitals,useReflection)
 		{
 			createBuffer();
-			createTcOperators(basis2tc_,basis2_);
-			createTcOperators(basis3tc_,basis3_);
+			createTcOperators(basis2tc_,lrs_.left());
+			createTcOperators(basis3tc_,lrs_.right());
 			createAlphaAndBeta();
 		}
 
@@ -135,35 +136,40 @@ namespace Dmrg {
 
 		static bool isSu2() { return false; }
 
-		const BasisType& basis1() const { return basis1_; }
+//		const BasisType& basis1() const { return basis1_; }
+//
+//		const BasisWithOperatorsType& basis2() const  { return basis2_; }
+//
+//		const BasisWithOperatorsType& basis3() const  { return basis3_; }
 
-		const BasisWithOperatorsType& basis2() const  { return basis2_; }
-
-		const BasisWithOperatorsType& basis3() const  { return basis3_; }
-
-		const SparseMatrixType& getReducedOperator(char modifier,size_t i,size_t sigma,size_t type) const
+		const SparseMatrixType& getReducedOperator(
+				char modifier,
+				size_t i,
+				size_t sigma,
+				size_t type) const
 		{
 			size_t ii = i*numberOfOperators_+sigma;
 			if (modifier=='N') {
-				if (type==System) return basis2_.getOperatorByIndex(ii).data;
-				return basis3_.getOperatorByIndex(ii).data;
+				if (type==System) return lrs_.left().getOperatorByIndex(ii).data;
+				return lrs_.right().getOperatorByIndex(ii).data;
 			}
 			return getTcOperator(ii,type);
 		}
 
 		int size() const
 		{
-			int tmp = basis1_.partition(m_+1)-basis1_.partition(m_);
+			int tmp = lrs_.super().partition(m_+1)-lrs_.super().partition(m_);
 			return reflection_.size(tmp);
 		}
 
 		int quantumNumber() const
 		{
-			int state = basis1_.partition(m_);
-			return basis1_.qn(state);
+			int state = lrs_.super().partition(m_);
+			return lrs_.super().qn(state);
 		}
 
-		//! //! Does matrixBlock= (AB), A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
+		//! Does matrixBlock= (AB), A belongs to pSprime and B
+		// belongs to pEprime or viceversa (inter)
 		void fastOpProdInter(SparseMatrixType const &A,
 				SparseMatrixType const &B,
 				SparseMatrixType &matrixBlock,
@@ -171,7 +177,8 @@ namespace Dmrg {
 				bool flipped = false) const
 		{
 			//int const SystemEnviron=1,EnvironSystem=2;
-			RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
+			RealType fermionSign =
+					(link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
 			
 			//! work only on partition m
 			if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
@@ -183,8 +190,8 @@ namespace Dmrg {
 			}		
 
 			int m = m_;
-			int offset = basis1_.partition(m);
-			int total = basis1_.partition(m+1) - offset;
+			int offset = lrs_.super().partition(m);
+			int total = lrs_.super().partition(m+1) - offset;
 			int counter=0;
 			matrixBlock.resize(total);
 
@@ -207,7 +214,7 @@ namespace Dmrg {
 						  */
 						SparseElementType tmp = A.getValue(k) * B.getValue(kk)*link.value;
 						if (link.fermionOrBoson == ProgramGlobals::FERMION) 
-							tmp *= basis2_.fermionicSign(alpha,int(fermionSign));
+							tmp *= lrs_.left().fermionicSign(alpha,int(fermionSign));
 						//if (tmp==static_cast<MatrixElementType>(0.0)) continue;
 						matrixBlock.pushCol(j);
 						matrixBlock.pushValue(tmp);
@@ -240,8 +247,8 @@ namespace Dmrg {
 			
 			//! work only on partition m
 			int m = m_;
-			int offset = basis1_.partition(m);
-			int total = basis1_.partition(m+1) - offset;
+			int offset = lrs_.super().partition(m);
+			int total = lrs_.super().partition(m+1) - offset;
 
 			for (int i=0;i<total;i++) {
 				if (reflection_.outsideReflectionBounds(i)) continue;
@@ -263,7 +270,7 @@ namespace Dmrg {
 						SparseElementType tmp = A.getValue(k) * B.getValue(kk)*link.value;
 						
 						if (link.fermionOrBoson == ProgramGlobals::FERMION)
-							tmp *= basis2_.fermionicSign(alpha,int(fermionSign));
+							tmp *= lrs_.left().fermionicSign(alpha,int(fermionSign));
 						//if (tmp==static_cast<MatrixElementType>(0.0)) continue;
 						reflection_.elementMultiplication(tmp , x,y,i,j);
 						//matrixBlock.pushCol(j-offset);
@@ -281,16 +288,16 @@ namespace Dmrg {
 		void hamiltonianLeftProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y) const 
 		{ 
 			int m = m_;
-			int offset = basis1_.partition(m);
+			int offset = lrs_.super().partition(m);
 			int i,k,alphaPrime;
-			int bs = basis1_.partition(m+1)-offset;
-			SparseMatrixType hamiltonian = basis2_.hamiltonian();
-			size_t ns = basis2_.size();
+			int bs = lrs_.super().partition(m+1)-offset;
+			SparseMatrixType hamiltonian = lrs_.left().hamiltonian();
+			size_t ns = lrs_.left().size();
 				
 			for (i=0;i<bs;i++) {
 				if (reflection_.outsideReflectionBounds(i)) continue;
 				size_t r,beta;
-				utils::getCoordinates(r,beta,basis1_.permutation(i+offset),ns);
+				utils::getCoordinates(r,beta,lrs_.super().permutation(i+offset),ns);
 
 				// row i of the ordered product basis
 				for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
@@ -311,16 +318,16 @@ namespace Dmrg {
 		void hamiltonianRightProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y) const 
 		{ 
 			int m = m_;
-			int offset = basis1_.partition(m);
+			int offset = lrs_.super().partition(m);
 			int i,k;
-			int bs = basis1_.partition(m+1)-offset;
-			SparseMatrixType hamiltonian = basis3_.hamiltonian();
-			size_t ns = basis2_.size();
+			int bs = lrs_.super().partition(m+1)-offset;
+			SparseMatrixType hamiltonian = lrs_.right().hamiltonian();
+			size_t ns = lrs_.left().size();
 
 			for (i=0;i<bs;i++) {
 				if (reflection_.outsideReflectionBounds(i)) continue;
 				size_t alpha,r;
-				utils::getCoordinates(alpha,r,basis1_.permutation(i+offset),ns);
+				utils::getCoordinates(alpha,r,lrs_.super().permutation(i+offset),ns);
 
 				// row i of the ordered product basis
 				for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
@@ -342,16 +349,16 @@ namespace Dmrg {
 		void calcHamiltonianPart(SparseMatrixType &matrixBlock,bool option) const 
 		{ 
 			int m  = m_;
-			size_t offset = basis1_.partition(m);
+			size_t offset = lrs_.super().partition(m);
 			int k,alphaPrime=0,betaPrime=0;
-			int bs = basis1_.partition(m+1)-offset;
-			size_t ns=basis2_.size();
+			int bs = lrs_.super().partition(m+1)-offset;
+			size_t ns=lrs_.left().size();
 			SparseMatrixType hamiltonian;
 			if (option) {
-				hamiltonian = basis2_.hamiltonian();
+				hamiltonian = lrs_.left().hamiltonian();
 				//ns = basis2_.size();
 			} else {
-				hamiltonian = basis3_.hamiltonian();
+				hamiltonian = lrs_.right().hamiltonian();
 				//ns = 
 			}
 			std::cerr<<__FILE__<<":"<<__LINE__<<":\n";
@@ -361,10 +368,10 @@ namespace Dmrg {
 			matrixBlock.resize(bs);
 			
 			int counter=0;
-			for (size_t i=offset;i<basis1_.partition(m+1);i++) {
+			for (size_t i=offset;i<lrs_.super().partition(m+1);i++) {
 				matrixBlock.setRow(i-offset,counter);
 				size_t alpha,beta;
-				utils::getCoordinates(alpha,beta,basis1_.permutation(i),ns);
+				utils::getCoordinates(alpha,beta,lrs_.super().permutation(i),ns);
 				size_t r=beta;
 				if (option) {
 					betaPrime=beta;
@@ -380,15 +387,15 @@ namespace Dmrg {
 					
 					if (option) alphaPrime = hamiltonian.getCol(k);
 					else 	    betaPrime  = hamiltonian.getCol(k);
-					size_t j = basis1_.permutationInverse(alphaPrime + betaPrime * ns);
-					if (j<offset || j>=basis1_.partition(m+1)) continue;
+					size_t j = lrs_.super().permutationInverse(alphaPrime + betaPrime * ns);
+					if (j<offset || j>=lrs_.super().partition(m+1)) continue;
 					SparseElementType tmp = hamiltonian.getValue(k);
 					matrixBlock.pushCol(j-offset);
 					matrixBlock.pushValue(tmp);
 					counter++;
 				}
 			}
-			matrixBlock.setRow(basis1_.partition(m+1)-offset,counter);
+			matrixBlock.setRow(lrs_.super().partition(m+1)-offset,counter);
 		}
 
 		void getReflectedEigs(
@@ -416,9 +423,7 @@ namespace Dmrg {
 
 	private:
 		int m_;
-		const BasisType&  basis1_;
-		const BasisWithOperatorsType& basis2_;
-		const BasisWithOperatorsType& basis3_;
+		const LeftRightSuperType&  lrs_;
 		std::vector<std::vector<int> > buffer_;
 		std::vector<SparseMatrixType> basis2tc_,basis3tc_;
 		std::vector<size_t> alpha_,beta_;
@@ -434,43 +439,42 @@ namespace Dmrg {
 		
 		void createBuffer() 
 		{
-			size_t ns=basis2_.size();
-			size_t ne=basis3_.size();
-			int offset = basis1_.partition(m_);
-			int total = basis1_.partition(m_+1) - offset;
+			size_t ns=lrs_.left().size();
+			size_t ne=lrs_.right().size();
+			int offset = lrs_.super().partition(m_);
+			int total = lrs_.super().partition(m_+1) - offset;
 
 			std::vector<int>  tmpBuffer(ne);
 			for (size_t alphaPrime=0;alphaPrime<ns;alphaPrime++) {
 				for (size_t betaPrime=0;betaPrime<ne;betaPrime++) {	
-					tmpBuffer[betaPrime] =basis1_.permutationInverse(alphaPrime + betaPrime*ns) - offset;
+					tmpBuffer[betaPrime] =lrs_.super().
+							permutationInverse(alphaPrime + betaPrime*ns) -
+								offset;
 					if (tmpBuffer[betaPrime]>=total) tmpBuffer[betaPrime]= -1 ;
 				}
 				buffer_[alphaPrime]=tmpBuffer;
 			}
 		}
 
-		void createTcOperators(std::vector<SparseMatrixType>& basistc,const BasisWithOperatorsType& basis)
+		void createTcOperators(std::vector<SparseMatrixType>& basistc,
+				const BasisWithOperatorsType& basis)
 		{
-			for (size_t i=0;i<basistc.size();i++)  transposeConjugate( basistc[i],basis.getOperatorByIndex(i).data);
+			for (size_t i=0;i<basistc.size();i++)
+				transposeConjugate( basistc[i],basis.getOperatorByIndex(i).data);
 		}
 
 		void createAlphaAndBeta()
 		{
-			size_t ns=basis2_.size();
-			int offset = basis1_.partition(m_);
-			int total = basis1_.partition(m_+1) - offset;
+			size_t ns=lrs_.left().size();
+			int offset = lrs_.super().partition(m_);
+			int total = lrs_.super().partition(m_+1) - offset;
 
 			for (int i=0;i<total;i++) {
 				// row i of the ordered product basis
-				utils::getCoordinates(alpha_[i],beta_[i],basis1_.permutation(i+offset),ns);
+				utils::getCoordinates(alpha_[i],beta_[i],
+						lrs_.super().permutation(i+offset),ns);
 			}
 		}
-		
-		/*void findExtremes(int& smax,int& emin,BlockType const &B) const
-		{
-			findExtremes(smax,emin,B,systemBlock_);
-		}*/
-		
 	}; // class ModelHelperLocal
 } // namespace Dmrg
 /*@}*/

@@ -89,15 +89,16 @@ namespace Dmrg {
 	template<typename DmrgWaveStructType,typename VectorWithOffsetType>
 	class WaveFunctionTransfBase {
 	public:
-		typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
+		typedef typename DmrgWaveStructType::LeftRightSuperType
+			LeftRightSuperType;
+		typedef typename DmrgWaveStructType::BasisWithOperatorsType
+			BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 
 		virtual void transformVector(
 				VectorWithOffsetType& psiDest,
 				const VectorWithOffsetType& psiSrc,
-				const BasisWithOperatorsType& pSprime,
-				const BasisWithOperatorsType& pEprime,
-				const BasisType& pSE) const=0;
+				const LeftRightSuperType& lrs) const=0;
 
 		virtual ~WaveFunctionTransfBase() {}
 

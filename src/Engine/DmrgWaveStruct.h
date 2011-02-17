@@ -84,9 +84,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-template<typename BasisWithOperatorsType_>
+template<typename LeftRightSuperType_>
 struct DmrgWaveStruct {
-	typedef BasisWithOperatorsType_ BasisWithOperatorsType;
+	typedef typename LeftRightSuperType_ LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType
+			BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -94,20 +96,16 @@ struct DmrgWaveStruct {
 
 	PsimagLite::Matrix<SparseElementType> ws;
 	PsimagLite::Matrix<SparseElementType> we;
-	BasisType pSE;
-	BasisWithOperatorsType pSprime,pEprime;
+	LeftRightSuperType lrs;
 
-	DmrgWaveStruct() : pSE("pSE"),pSprime("pSprime"),pEprime("pEprime") { }
+	DmrgWaveStruct() : lrs("pSE","pSprime","pEprime") { }
 
 	template<typename IoInputType>
 	void load(IoInputType& io)
 	{
 		io.readMatrix(ws,"Ws");
 		io.readMatrix(we,"We");
-		pSE.load(io);
-		pSprime.load(io);
-		pEprime.load(io);
-
+		lrs.load(io);
 	}
 
 	template<typename IoOutputType>
@@ -115,9 +113,7 @@ struct DmrgWaveStruct {
 	{
 		io.printMatrix(ws,"Ws");
 		io.printMatrix(we,"We");
-		pSE.save(io);
-		pSprime.save(io);
-		pEprime.save(io);
+		lrs.save(io);
 	}
 
 }; // struct DmrgWaveStruct

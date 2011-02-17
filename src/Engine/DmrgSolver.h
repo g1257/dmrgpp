@@ -267,7 +267,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				
 				lrs_.growLeftBlock(model_,pS,X[step]); // grow system
-				lrs_.growRightBlock(pE,Y[step]); // grow environment
+				lrs_.growRightBlock(model_,pE,Y[step]); // grow environment
 					
 				
 				progress_.print("Growth done.\n",std::cout);
@@ -370,11 +370,11 @@ namespace Dmrg {
 				std::ostringstream msg;
 				if (size_t(stepCurrent_)>=sitesIndices_.size()) throw std::runtime_error("stepCurrent_ too large!\n");
 				if (direction==EXPAND_SYSTEM) {
-					lrs_.growLeftBlock(pS,sitesIndices_[stepCurrent_]);             //grow system
-					checkpoint_.shrink(lrs_.right(),CheckpointType::ENVIRON); //shrink env
+					lrs_.growLeftBlock(model_,pS,sitesIndices_[stepCurrent_]);
+					lrs_.right(checkpoint_.shrink(CheckpointType::ENVIRON));
 				} else {
-					lrs_.growRightBlock(pE,sitesIndices_[stepCurrent_]);   // grow env.
-					checkpoint_.shrink(lrs_.left(),CheckpointType::SYSTEM); // shrink system
+					lrs_.growRightBlock(model_,pE,sitesIndices_[stepCurrent_]);
+					lrs_.left(checkpoint_.shrink(CheckpointType::SYSTEM));
 				}
 				
 				lrs_.printSizes("finite",std::cout);
@@ -535,8 +535,9 @@ namespace Dmrg {
 			if (verbose_ && concurrency_.root()) std::cerr<<"About to changeBasis...\n";
 			
 			RealType error = rSprime.changeBasis(ftransform,dmS(),eigs,keptStates,parameters_,concurrency_);
-			
-			waveFunctionTransformation_.push(ftransform,direction,rSprime,pBasisSummed,lrs_.super()); //,target.m());
+			LeftRightSuperType lrs(rSprime,(MyBasisWithOperators&) pBasisSummed,
+					(MyBasis&)lrs_.super());
+			waveFunctionTransformation_.push(ftransform,direction,lrs);
 
 			std::ostringstream msg;
 			msg<<"new size of basis="<<rSprime.size();

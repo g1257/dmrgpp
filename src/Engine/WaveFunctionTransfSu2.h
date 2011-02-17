@@ -96,13 +96,18 @@ namespace Dmrg {
 	class WaveFunctionTransfSu2  : public
 		WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> {
 	public:
-		typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
-		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+		typedef typename DmrgWaveStructType::BasisWithOperatorsType
+			BasisWithOperatorsType;
+		typedef typename BasisWithOperatorsType::SparseMatrixType
+			SparseMatrixType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef std::vector<SparseElementType> VectorType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef typename BasisType::FactorsType FactorsType;
+		typedef typename DmrgWaveStructType::LeftRightSuperType
+							LeftRightSuperType;
+
 		static const size_t INFINITE = ProgramGlobals::INFINITE;
 		static const size_t EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
 		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
@@ -125,27 +130,27 @@ namespace Dmrg {
 		virtual void transformVector(
 						VectorWithOffsetType& psiDest,
 						const VectorWithOffsetType& psiSrc,
-						const BasisWithOperatorsType& pSprime,
-						const BasisWithOperatorsType& pEprime,
-						const BasisType& pSE) const
+						cconst LeftRightSuperType& lrs) const
 		{
 			if (stage_==EXPAND_ENVIRON)
-				transformVector1Su2(psiDest,psiSrc,pSprime,pEprime,pSE);
+				transformVector1Su2(psiDest,psiSrc,lrs);
 			if (stage_==EXPAND_SYSTEM)
-				transformVector2Su2(psiDest,psiSrc,pSprime,pEprime,pSE);
+				transformVector2Su2(psiDest,psiSrc,lrs);
 		}
 
 	private:
 		
 		template<typename SomeVectorType>
-		void transformVector1Su2(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
+		void transformVector1Su2(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuperType& lrs) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nip = pSE.getFactors().rank()/pEprime.getFactors().rank();
-			size_t njp = pEprime.getFactors().rank()/nk;
+			size_t nip = lrs.super().getFactors().rank()/lrs.right().getFactors().rank();
+			size_t njp = lrs.right().getFactors().rank()/nk;
 
-			if ((size_t)dmrgWaveStruct_.pSprime.getFactors().rank()!=dmrgWaveStruct_.ws.n_row()) {
+			if ((size_t)dmrgWaveStruct_.lrs.left().getFactors().rank()!=dmrgWaveStruct_.ws.n_row()) {
 
 				throw std::runtime_error("transformVector1Su2(): getFactors.size()!=dmrgWaveStruct_.ws.n_row()\n");
 			}
@@ -156,9 +161,9 @@ namespace Dmrg {
 				throw std::runtime_error("WaveFunctionTransformation::transformVector1Su2():"
 						"njp!=dmrgWaveStruct_.we.n_col()\n");
 			}
-			if ((size_t)dmrgWaveStruct_.pSE.getFactors().rank()!=psiSrc.size()) {
+			if ((size_t)dmrgWaveStruct_.lrs.super().getFactors().rank()!=psiSrc.size()) {
 
-				std::cerr<<"getFactors.size="<<dmrgWaveStruct_.pSE.permutationInverse().size();
+				std::cerr<<"getFactors.size="<<dmrgWaveStruct_.lrs.super().permutationInverse().size();
 				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
 				throw std::runtime_error("WaveFunctionTransformation::transformVector1Su2():"
 						" dmrgWaveStruct_.getFactors.size()!=dmrgWaveStruct_.psi.size()\n");
@@ -173,15 +178,18 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector1Su2(SomeVectorType& psiDest,const SomeVectorType& psiSrc,
-			const BasisWithOperatorsType& pSprime,
-   			const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t start,size_t final) const
+		void transformVector1Su2(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuperType& lrs,
+				size_t start,
+				size_t final) const
 		{
-			const FactorsType& factorsSE = pSE.getFactors();
-			const FactorsType& factorsSEOld = dmrgWaveStruct_.pSE.getFactors();
-			const FactorsType& factorsE = pEprime.getFactors();
+			const FactorsType& factorsSE = lrs.super().getFactors();
+			const FactorsType& factorsSEOld = dmrgWaveStruct_.lrs.super().getFactors();
+			const FactorsType& factorsE = lrs.right().getFactors();
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nip = pSE.getFactors().rank()/pEprime.getFactors().rank();
+			size_t nip = lrs.super().getFactors().rank()/lrs.right().getFactors().rank();
 			
 			FactorsType factorsInverseSE,
    				//factorsInverseSEOld,
@@ -209,15 +217,20 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		SparseElementType createVectorAux1bSu2(const SomeVectorType& psiSrc,
-					size_t ip,size_t kp,size_t jp, const FactorsType& factorsSE,
-					      const SparseMatrixType& ws,const SparseMatrixType& weT) const
+		SparseElementType createVectorAux1bSu2(
+				const SomeVectorType& psiSrc,
+				size_t ip,
+				size_t kp,
+				size_t jp,
+				const FactorsType& factorsSE,
+				const SparseMatrixType& ws,
+				const SparseMatrixType& weT) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
 			size_t ni=dmrgWaveStruct_.ws.n_col();
-			const FactorsType& factorsS = dmrgWaveStruct_.pSprime.getFactors();
+			const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
 			SparseElementType sum=0;
-			size_t nip = dmrgWaveStruct_.pSprime.permutationInverse().size()/nk;
+			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/nk;
 			
 			size_t ipkp=ip+kp*nip;
 			for (int k2I=factorsS.getRowPtr(ipkp);k2I<factorsS.getRowPtr(ipkp+1);k2I++) {
@@ -239,16 +252,18 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector2Su2(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
+		void transformVector2Su2(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuperType& lrs) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nip = pSprime.getFactors().rank()/nk;
+			size_t nip = lrs.left().getFactors().rank()/nk;
 			
-			if (dmrgWaveStruct_.ws.n_row()!=dmrgWaveStruct_.pSprime.permutationInverse().size()) throw std::runtime_error("Error!!");
-			if (dmrgWaveStruct_.we.n_col()!=dmrgWaveStruct_.pEprime.size()) throw std::runtime_error("Error\n");
+			if (dmrgWaveStruct_.ws.n_row()!=dmrgWaveStruct_.lrs.left().permutationInverse().size()) throw std::runtime_error("Error!!");
+			if (dmrgWaveStruct_.we.n_col()!=dmrgWaveStruct_.lrs.right().size()) throw std::runtime_error("Error\n");
 
-			if ((size_t)dmrgWaveStruct_.pEprime.getFactors().rank()!=dmrgWaveStruct_.we.n_row()) {
+			if ((size_t)dmrgWaveStruct_.lrs.right().getFactors().rank()!=dmrgWaveStruct_.we.n_row()) {
 
 				throw std::runtime_error("transformVector2Su2():"
 						"PpermutationInverse.size()!=dmrgWaveStruct_.we.n_row()\n");
@@ -258,9 +273,9 @@ namespace Dmrg {
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2Su2():"
 						"nip!=dmrgWaveStruct_.ws.n_row()\n");
 			}
-			if (dmrgWaveStruct_.pSE.permutationInverse().size()!=psiSrc.size()) {
+			if (dmrgWaveStruct_.lrs.super().permutationInverse().size()!=psiSrc.size()) {
 
-				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.pSE.permutationInverse().size();
+				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.lrs.super().permutationInverse().size();
 				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2Su2():"
 						" dmrgWaveStruct_.SEpermutationInverse.size()!=dmrgWaveStruct_.psi.size()\n");
@@ -276,16 +291,20 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector2Su2(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t start,size_t final) const
+		void transformVector2Su2(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuperType& lrs,
+				size_t start,
+				size_t final) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nip = pSprime.getFactors().rank()/nk;
-			size_t nalpha = pSprime.getFactors().rank();
+			size_t nip = lrs.left().getFactors().rank()/nk;
+			size_t nalpha = lrs.left().getFactors().rank();
 			
-			const FactorsType& factorsSE = pSE.getFactors();
-			//const SparseMatrixType& factorsSEOld = dmrgWaveStruct_.pSE.getFactors();
-			const FactorsType& factorsS = pSprime.getFactors();
+			const FactorsType& factorsSE = lrs.super().getFactors();
+			//const SparseMatrixType& factorsSEOld = dmrgWaveStruct_.lrs.super().getFactors();
+			const FactorsType& factorsS = lrs.left().getFactors();
 			FactorsType factorsInverseSE,
    				//factorsInverseSEOld,
    					factorsInverseS;
@@ -297,11 +316,11 @@ namespace Dmrg {
 			
 			for (size_t x=start;x<final;x++) {
 				psiDest[x] = 0;
-				size_t xx = x; // pSE.permutationInverse(x);
+				size_t xx = x; // lrs.super().permutationInverse(x);
 				for (int kI=factorsInverseSE.getRowPtr(xx);kI<factorsInverseSE.getRowPtr(xx+1);kI++) {
 					size_t alpha,jp;
 					utils::getCoordinates(alpha,jp,(size_t)factorsInverseSE.getCol(kI),nalpha);
-					size_t alphax =  alpha; //pSprime.permutationInverse(alpha);
+					size_t alphax =  alpha; //lrs.left().permutationInverse(alpha);
 					for (int k2I=factorsInverseS.getRowPtr(alphax);k2I<factorsInverseS.getRowPtr(alphax+1);k2I++) {
 						size_t ip,kp;
 						utils::getCoordinates(ip,kp,(size_t)factorsInverseS.getCol(k2I),nip);
@@ -313,29 +332,34 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		SparseElementType fastAux2bSu2(const SomeVectorType& psiSrc,size_t ip,size_t kp,size_t jp,
-					const SparseMatrixType& wsT,const SparseMatrixType& we) const
+		SparseElementType fastAux2bSu2(
+				const SomeVectorType& psiSrc,
+				size_t ip,
+				size_t kp,
+				size_t jp,
+				const SparseMatrixType& wsT,
+				const SparseMatrixType& we) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nalpha=dmrgWaveStruct_.pSprime.getFactors().rank();
+			size_t nalpha=dmrgWaveStruct_.lrs.left().getFactors().rank();
 			SparseElementType sum=0;
-			const FactorsType& factorsE = dmrgWaveStruct_.pEprime.getFactors();
-			const FactorsType& factorsSE = dmrgWaveStruct_.pSE.getFactors();
+			const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
+			const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
 			//int m = dmrgWaveStruct_.m;
-			//size_t final = dmrgWaveStruct_.pSE.partition(m+1);
-			//size_t start = dmrgWaveStruct_.pSE.partition(m);
-			size_t eqn =  dmrgWaveStruct_.pSprime.qn(ip);
+			//size_t final = dmrgWaveStruct_.lrs.super().partition(m+1);
+			//size_t start = dmrgWaveStruct_.lrs.super().partition(m);
+			size_t eqn =  dmrgWaveStruct_.lrs.left().qn(ip);
 			
-			int ma =  dmrgWaveStruct_.pSprime.partitionFromQn(eqn,BasisType::BEFORE_TRANSFORM);
+			int ma =  dmrgWaveStruct_.lrs.left().partitionFromQn(eqn,BasisType::BEFORE_TRANSFORM);
 			if (ma<0) throw std::runtime_error("ma<0\n");
 			
 			size_t totala =  dmrgWaveStruct_.ws.n_row();
-			totala = dmrgWaveStruct_.pSprime.partition(ma+1,BasisType::BEFORE_TRANSFORM)-
-					dmrgWaveStruct_.pSprime.partition(ma,BasisType::BEFORE_TRANSFORM);
-			//size_t offseta = dmrgWaveStruct_.pSprime.partition(ma,DmrgBasisType::BEFORE_TRANSFORM);
+			totala = dmrgWaveStruct_.lrs.left().partition(ma+1,BasisType::BEFORE_TRANSFORM)-
+					dmrgWaveStruct_.lrs.left().partition(ma,BasisType::BEFORE_TRANSFORM);
+			//size_t offseta = dmrgWaveStruct_.lrs.left().partition(ma,DmrgBasisType::BEFORE_TRANSFORM);
 			
 			size_t kpjp = kp+jp*nk;
-			size_t kpjpx = dmrgWaveStruct_.pEprime.permutationInverse(kpjp);
+			size_t kpjpx = dmrgWaveStruct_.lrs.right().permutationInverse(kpjp);
 			
 			for (int k2I=factorsE.getRowPtr(kpjpx);k2I<factorsE.getRowPtr(kpjpx+1);k2I++) {
 				size_t beta = factorsE.getCol(k2I);

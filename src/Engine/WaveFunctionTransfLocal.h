@@ -103,6 +103,9 @@ namespace Dmrg {
 		typedef std::vector<SparseElementType> VectorType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef typename BasisType::FactorsType FactorsType;
+		typedef typename DmrgWaveStructType::LeftRightSuperType
+					LeftRightSuperType;
+
 		static const size_t INFINITE = ProgramGlobals::INFINITE;
 		static const size_t EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
 		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
@@ -128,44 +131,49 @@ namespace Dmrg {
 		virtual void transformVector(
 						VectorWithOffsetType& psiDest,
 						const VectorWithOffsetType& psiSrc,
-						const BasisWithOperatorsType& pSprime,
-						const BasisWithOperatorsType& pEprime,
-						const BasisType& pSE) const
+						const LeftRightSuperType& lrs) const
 		{
 			//std::cerr<<"counter="<<counter_<<"direction = "<<stage_<<"\n";
 			if (stage_==EXPAND_ENVIRON) {
-				if (firstCall_) throw std::runtime_error("WFT: This corner case is unimplmemented yet (sorry!)\n");
-				else if (counter_==0) transformVector1bounce(psiDest,psiSrc,pSprime,pEprime,pSE);
-				else transformVector1(psiDest,psiSrc,pSprime,pEprime,pSE);
+				if (firstCall_) throw std::runtime_error(
+					"WFT: This corner case is unimplmemented yet (sorry!)\n");
+				else if (counter_==0) transformVector1bounce(psiDest,psiSrc,lrs);
+				else transformVector1(psiDest,psiSrc,lrs);
 			}
 			if (stage_==EXPAND_SYSTEM) {
-				if (firstCall_) transformVector2FromInfinite(psiDest,psiSrc,pSprime,pEprime,pSE);
- 				else if (counter_==0) transformVector2bounce(psiDest,psiSrc,pSprime,pEprime,pSE);
-				else transformVector2(psiDest,psiSrc,pSprime,pEprime,pSE);
+				if (firstCall_) transformVector2FromInfinite(psiDest,psiSrc,lrs);
+ 				else if (counter_==0) transformVector2bounce(psiDest,psiSrc,lrs);
+				else transformVector2(psiDest,psiSrc,lrs);
 			}
 		}
 
 	private:
 		
 		template<typename SomeVectorType>
-		void transformVector1(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
+		void transformVector1(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuperType& lrs) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
-				transformVector1(psiDest,psiSrc,pSprime,pEprime,pSE,i0);
+				transformVector1(psiDest,psiSrc,lrs,i0);
 			}
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector1(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t i0) const
+		void transformVector1(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuperType& lrs,
+				size_t i0) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nip = pSE.permutationInverse().size()/pEprime.permutationInverse().size();
-			size_t njp = pEprime.permutationInverse().size()/nk;
+			size_t nip = lrs.super().permutationInverse().size()/
+					lrs.right().permutationInverse().size();
+			size_t njp = lrs.right().permutationInverse().size()/nk;
 			//printDmrgWave();
-			if (dmrgWaveStruct_.pSprime.permutationInverse().size()!=dmrgWaveStruct_.ws.n_row()) {
+			if (dmrgWaveStruct_.lrs.left().permutationInverse().size()!=dmrgWaveStruct_.ws.n_row()) {
 				throw std::runtime_error("transformVector1():"
 						"SpermutationInverse.size()!=dmrgWaveStruct_.ws.n_row()\n");
 			}
@@ -174,9 +182,9 @@ namespace Dmrg {
 				throw std::runtime_error("WaveFunctionTransformation::transformVector1():"
 						"njp!=dmrgWaveStruct_.we.n_col()\n");
 			}
-			/*if (dmrgWaveStruct_.pSE.permutationInverse().size()!=psiSrc.size()) {
+			/*if (dmrgWaveStruct_.lrs.super().permutationInverse().size()!=psiSrc.size()) {
 				printDmrgWave();
-				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.pSE.permutationInverse().size();
+				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.lrs.super().permutationInverse().size();
 				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
 				throw std::runtime_error("WaveFunctionTransformation::transformVector1():"
 						" dmrgWaveStruct_.SEpermutationInverse.size()!=dmrgWaveStruct_.psi.size()\n");
@@ -192,45 +200,50 @@ namespace Dmrg {
 			
 			for (size_t x=start;x<final;x++) {
 				size_t ip,beta,kp,jp;
-				utils::getCoordinates(ip,beta,(size_t)pSE.permutation(x),nip);
-				utils::getCoordinates(kp,jp,(size_t)pEprime.permutation(beta),nk);
+				utils::getCoordinates(ip,beta,(size_t)lrs.super().permutation(x),nip);
+				utils::getCoordinates(kp,jp,(size_t)lrs.right().permutation(beta),nk);
 				psiDest[x]=createAux1b(psiSrc,ip,kp,jp,ws,weT);
 			}
 		}
 
 		template<typename SomeVectorType>
-		SparseElementType createAux1b(const SomeVectorType& psiSrc,size_t ip,size_t kp,size_t jp,
-					const SparseMatrixType& ws,const SparseMatrixType& weT) const
+		SparseElementType createAux1b(
+				const SomeVectorType& psiSrc,
+				size_t ip,
+				size_t kp,
+				size_t jp,
+				const SparseMatrixType& ws,
+				const SparseMatrixType& weT) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
 			size_t ni=dmrgWaveStruct_.ws.n_col();
 
 			//int m = dmrgWaveStruct_.m;
-			//size_t final = dmrgWaveStruct_.pSE.partition(m+1);
-			//size_t start = dmrgWaveStruct_.pSE.partition(m);
+			//size_t final = dmrgWaveStruct_.lrs.super().partition(m+1);
+			//size_t start = dmrgWaveStruct_.lrs.super().partition(m);
 			
-			size_t nip = dmrgWaveStruct_.pSprime.permutationInverse().size()/nk;
-			size_t alpha = dmrgWaveStruct_.pSprime.permutationInverse(ip+kp*nip);
+			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/nk;
+			size_t alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip+kp*nip);
 			
 			size_t offseta = 0; 
 			size_t totala =dmrgWaveStruct_.ws.n_col();
-			if (totala == dmrgWaveStruct_.pSprime.size()) {
-				size_t eqn =  dmrgWaveStruct_.pSprime.qn(alpha,BasisType::BEFORE_TRANSFORM);
-				int ma = dmrgWaveStruct_.pSprime.partitionFromQn(eqn);
+			if (totala == dmrgWaveStruct_.lrs.left().size()) {
+				size_t eqn =  dmrgWaveStruct_.lrs.left().qn(alpha,BasisType::BEFORE_TRANSFORM);
+				int ma = dmrgWaveStruct_.lrs.left().partitionFromQn(eqn);
 				if (ma>=0) {
-					offseta = dmrgWaveStruct_.pSprime.partition(ma);
-					totala = dmrgWaveStruct_.pSprime.partition(ma+1) - offseta;
+					offseta = dmrgWaveStruct_.lrs.left().partition(ma);
+					totala = dmrgWaveStruct_.lrs.left().partition(ma+1) - offseta;
 				}
 			}
 
 			size_t offsetb = 0;
-			size_t totalb = dmrgWaveStruct_.pEprime.permutationInverse().size();
-			if  (dmrgWaveStruct_.pEprime.dmrgTransformed()) {
-				size_t eqn = dmrgWaveStruct_.pEprime.qn(jp);
-				int mb =  dmrgWaveStruct_.pEprime.partitionFromQn(eqn,BasisType::BEFORE_TRANSFORM);
+			size_t totalb = dmrgWaveStruct_.lrs.right().permutationInverse().size();
+			if  (dmrgWaveStruct_.lrs.right().dmrgTransformed()) {
+				size_t eqn = dmrgWaveStruct_.lrs.right().qn(jp);
+				int mb =  dmrgWaveStruct_.lrs.right().partitionFromQn(eqn,BasisType::BEFORE_TRANSFORM);
 				if (mb>=0) {
-					offsetb = dmrgWaveStruct_.pEprime.partition(mb,BasisType::BEFORE_TRANSFORM);
-					totalb = dmrgWaveStruct_.pEprime.partition(mb+1,BasisType::BEFORE_TRANSFORM) - offsetb;
+					offsetb = dmrgWaveStruct_.lrs.right().partition(mb,BasisType::BEFORE_TRANSFORM);
+					totalb = dmrgWaveStruct_.lrs.right().partition(mb+1,BasisType::BEFORE_TRANSFORM) - offsetb;
 				}
 			}
 			
@@ -240,7 +253,7 @@ namespace Dmrg {
 				size_t i = ws.getCol(k);
 				for (int k2=weT.getRowPtr(jp);k2<weT.getRowPtr(jp+1);k2++) {
 					size_t j = weT.getCol(k2);
-					size_t x = dmrgWaveStruct_.pSE.permutationInverse(i+j*ni);
+					size_t x = dmrgWaveStruct_.lrs.super().permutationInverse(i+j*ni);
 					sum += ws.getValue(k)*weT.getValue(k2)*psiSrc[x];
 					//counter++;
 				}
@@ -250,25 +263,29 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector2(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
+		void transformVector2(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuper& lrs) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
-				transformVector2(psiDest,psiSrc,pSprime,pEprime,pSE,i0);
+				transformVector2(psiDest,psiSrc,lrs,i0);
 			}
 		}
 		
 
 		template<typename SomeVectorType>
-		void transformVector2(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t i0) const
+		void transformVector2(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuper& lrs,size_t i0) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nip = pSprime.permutationInverse().size()/nk;
-			size_t nalpha = pSprime.permutationInverse().size();
+			size_t nip = lrs.left().permutationInverse().size()/nk;
+			size_t nalpha = lrs.left().permutationInverse().size();
 			//printDmrgWave();
-			if (dmrgWaveStruct_.pEprime.permutationInverse().size()!=dmrgWaveStruct_.we.n_row()) {
+			if (dmrgWaveStruct_.lrs.right().permutationInverse().size()!=dmrgWaveStruct_.we.n_row()) {
 				throw std::runtime_error("transformVector2():"
 						"PpermutationInverse.size()!=dmrgWaveStruct_.we.n_row()\n");
 			}
@@ -276,9 +293,9 @@ namespace Dmrg {
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
 						"nip!=dmrgWaveStruct_.ws.n_row()\n");
 			}
-			/*if (dmrgWaveStruct_.pSE.permutationInverse().size()!=psiSrc.size()) {
+			/*if (dmrgWaveStruct_.lrs.super().permutationInverse().size()!=psiSrc.size()) {
 				printDmrgWave();
-				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.pSE.permutationInverse().size();
+				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.lrs.super().permutationInverse().size();
 				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
 						" dmrgWaveStruct_.SEpermutationInverse.size()!=dmrgWaveStruct_.psi.size()\n");
@@ -294,21 +311,26 @@ namespace Dmrg {
 			
 			for (size_t x=start;x<final;x++) {
 				size_t ip,alpha,kp,jp;
-				utils::getCoordinates(alpha,jp,(size_t)pSE.permutation(x),nalpha);
-				utils::getCoordinates(ip,kp,(size_t)pSprime.permutation(alpha),nip);
+				utils::getCoordinates(alpha,jp,(size_t)lrs.super().permutation(x),nalpha);
+				utils::getCoordinates(ip,kp,(size_t)lrs.left().permutation(alpha),nip);
 				psiDest[x]=createAux2b(psiSrc,ip,kp,jp,wsT,we);
 			}
 			
 		}
 
 		template<typename SomeVectorType>
-		SparseElementType createAux2b(const SomeVectorType& psiSrc,size_t ip,size_t kp,size_t jp,
-					const SparseMatrixType& wsT,const SparseMatrixType& we) const
+		SparseElementType createAux2b(
+				const SomeVectorType& psiSrc,
+				size_t ip,
+				size_t kp,
+				size_t jp,
+				const SparseMatrixType& wsT,
+				const SparseMatrixType& we) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nalpha=dmrgWaveStruct_.pSprime.permutationInverse().size();
+			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			
-			size_t beta = dmrgWaveStruct_.pEprime.permutationInverse(kp+jp*nk);
+			size_t beta = dmrgWaveStruct_.lrs.right().permutationInverse(kp+jp*nk);
 			
 			SparseElementType sum=0;
 			
@@ -317,7 +339,7 @@ namespace Dmrg {
 				size_t alpha = wsT.getCol(k);
 				for (int k2=we.getRowPtr(beta);k2<we.getRowPtr(beta+1);k2++) {
 					size_t j = we.getCol(k2);
-					size_t x = dmrgWaveStruct_.pSE.permutationInverse(alpha+j*nalpha);
+					size_t x = dmrgWaveStruct_.lrs.super().permutationInverse(alpha+j*nalpha);
 					sum += wsT.getValue(k)*we.getValue(k2)*psiSrc[x];
 				}
 				//sum += sum2;
@@ -326,29 +348,34 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector2FromInfinite(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
+		void transformVector2FromInfinite(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuper& lrs) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
-				transformVector2FromInfinite(psiDest,psiSrc,pSprime,pEprime,pSE,i0);
+				transformVector2FromInfinite(psiDest,psiSrc,lrs,i0);
 			}
 		}
 		
 
 		template<typename SomeVectorType>
-		void transformVector2FromInfinite(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t i0) const
+		void transformVector2FromInfinite(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuper& lrs,
+				size_t i0) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nip = pSprime.permutationInverse().size()/nk;
-			size_t nalpha = pSprime.permutationInverse().size();
+			size_t nip = lrs.left().permutationInverse().size()/nk;
+			size_t nalpha = lrs.left().permutationInverse().size();
 			
 			std::ostringstream msg;
 			msg<<" We're moving to the finite loop, bumpy ride ahead!";
 			progress_.printline(msg,std::cout);
 			
-			/*if (dmrgWaveStruct_.pEprime.permutationInverse().size()!=dmrgWaveStruct_.we.n_row()) {
+			/*if (dmrgWaveStruct_.lrs.right().permutationInverse().size()!=dmrgWaveStruct_.we.n_row()) {
 				printDmrgWave();
 				throw std::runtime_error("transformVector2():"
 						"PpermutationInverse.size()!=dmrgWaveStruct_.we.n_row()\n");
@@ -357,8 +384,8 @@ namespace Dmrg {
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
 						"nip!=dmrgWaveStruct_.ws.n_row()\n");
 			}
-			if (dmrgWaveStruct_.pSE.permutationInverse().size()!=psiSrc.size()) {
-				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.pSE.permutationInverse().size();
+			if (dmrgWaveStruct_.lrs.super().permutationInverse().size()!=psiSrc.size()) {
+				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.lrs.super().permutationInverse().size();
 				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
 						" dmrgWaveStruct_.SEpermutationInverse.size()!=dmrgWaveStruct_.psi.size()\n");
@@ -374,11 +401,11 @@ namespace Dmrg {
 			
 			for (size_t x=start;x<final;x++) {
 				size_t isn,jen;
-				utils::getCoordinates(isn,jen,(size_t)pSE.permutation(x),nalpha);
+				utils::getCoordinates(isn,jen,(size_t)lrs.super().permutation(x),nalpha);
 				size_t is,jpl;
-				utils::getCoordinates(is,jpl,(size_t)pSprime.permutation(isn),nip);
+				utils::getCoordinates(is,jpl,(size_t)lrs.left().permutation(isn),nip);
 				//size_t jk,je;
-				//utils::getCoordinates(jk,je,(size_t)pEprime.permutation(jen),npk);
+				//utils::getCoordinates(jk,je,(size_t)lrs.right().permutation(jen),npk);
 				psiDest[x]=createAux2bFromInfinite(psiSrc,is,jpl,jen,wsT,we);
 			}
 			
@@ -387,14 +414,16 @@ namespace Dmrg {
 		
 		// FIXME: INCOMING jen needs to be 4 times as big!!
 		template<typename SomeVectorType>
-		SparseElementType createAux2bFromInfinite(const SomeVectorType& psiSrc,size_t is,size_t jpl,size_t jen,
-					const SparseMatrixType& wsT,const SparseMatrixType& we) const
+		SparseElementType createAux2bFromInfinite(
+				const SomeVectorType& psiSrc,
+				size_t is,
+				size_t jpl,
+				size_t jen,
+				const SparseMatrixType& wsT,
+				const SparseMatrixType& we) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nalpha=dmrgWaveStruct_.pSprime.permutationInverse().size();
-			
-			
-			
+			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			SparseElementType sum=0;
 			
 			for (int k=wsT.getRowPtr(is);k<wsT.getRowPtr(is+1);k++) {
@@ -403,8 +432,8 @@ namespace Dmrg {
 				SparseElementType sum2 = 0;
 				//for (int k2=we.getRowPtr(jen);k2<we.getRowPtr(jen+1);k2++) {
 					size_t jpr = jen; //we.getCol(k2);
-					size_t jp = dmrgWaveStruct_.pEprime.permutationInverse(jpl + jpr*nk);
-					size_t y = dmrgWaveStruct_.pSE.permutationInverse(ip + jp*nalpha);
+					size_t jp = dmrgWaveStruct_.lrs.right().permutationInverse(jpl + jpr*nk);
+					size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
 					sum2 += wsT.getValue(k)*psiSrc[y]; //*we.getValue(k2);
 					
 				//}
@@ -414,29 +443,34 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector1bounce(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
+		void transformVector1bounce(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuper& lrs) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
-				transformVector1bounce(psiDest,psiSrc,pSprime,pEprime,pSE,i0);
+				transformVector1bounce(psiDest,psiSrc,lrs,i0);
 			}
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector1bounce(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t i0) const
+		void transformVector1bounce(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuper& lrs,
+				size_t i0) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nip = pSE.permutationInverse().size()/pEprime.permutationInverse().size();
-			//size_t njp = pEprime.permutationInverse().size()/nk;
+			size_t nip = lrs.super().permutationInverse().size()/lrs.right().permutationInverse().size();
+			//size_t njp = lrs.right().permutationInverse().size()/nk;
 			//printDmrgWave();
 			std::ostringstream msg;
 			msg<<" We're bouncing on the right, so buckle up!";
 			progress_.printline(msg,std::cout);
 			
-			if (dmrgWaveStruct_.pSE.permutationInverse().size()!=psiSrc.size()) {
-				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.pSE.permutationInverse().size();
+			if (dmrgWaveStruct_.lrs.super().permutationInverse().size()!=psiSrc.size()) {
+				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.lrs.super().permutationInverse().size();
 				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
 				throw std::runtime_error("WaveFunctionTransformation::transformVector1():"
 						" dmrgWaveStruct_.SEpermutationInverse.size()!=dmrgWaveStruct_.psi.size()\n");
@@ -451,20 +485,22 @@ namespace Dmrg {
 			transposeConjugate(weT,we);
 			*/
 			//std::cerr<<"ALTERNATIVE\n";
-			size_t nalpha=dmrgWaveStruct_.pSprime.permutationInverse().size();
+			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			for (size_t x=start;x<final;x++) {
 				size_t ip,beta,kp,jp;
-				utils::getCoordinates(ip,beta,(size_t)pSE.permutation(x),nip);
-				utils::getCoordinates(kp,jp,(size_t)pEprime.permutation(beta),nk);
-				size_t ipkp = dmrgWaveStruct_.pSprime.permutationInverse(ip + kp*nip);
-				size_t y = dmrgWaveStruct_.pSE.permutationInverse(ipkp + jp*nalpha);
+				utils::getCoordinates(ip,beta,(size_t)lrs.super().permutation(x),nip);
+				utils::getCoordinates(kp,jp,(size_t)lrs.right().permutation(beta),nk);
+				size_t ipkp = dmrgWaveStruct_.lrs.left().permutationInverse(ip + kp*nip);
+				size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ipkp + jp*nalpha);
 				psiDest[x]=psiSrc[y];
 			}
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector2bounce(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE) const
+		void transformVector2bounce(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuper& lrs) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -474,20 +510,23 @@ namespace Dmrg {
 		
 
 		template<typename SomeVectorType>
-		void transformVector2bounce(SomeVectorType& psiDest,const SomeVectorType& psiSrc,const BasisWithOperatorsType& pSprime,
-				      const BasisWithOperatorsType& pEprime,const BasisType& pSE,size_t i0) const
+		void transformVector2bounce(
+				SomeVectorType& psiDest,
+				const SomeVectorType& psiSrc,
+				const LeftRightSuper& lrs,
+				size_t i0) const
 		{
 			size_t nk = hilbertSpaceOneSite_;
-			size_t nip = pSprime.permutationInverse().size()/nk;
-			size_t nalpha = pSprime.permutationInverse().size();
+			size_t nip = lrs.left().permutationInverse().size()/nk;
+			size_t nalpha = lrs.left().permutationInverse().size();
 			//printDmrgWave();
 			
 			std::ostringstream msg;
 			msg<<" We're bouncing on the left, so buckle up!";
 			progress_.printline(msg,std::cout);
 			
-			if (dmrgWaveStruct_.pSE.permutationInverse().size()!=psiSrc.size()) {
-				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.pSE.permutationInverse().size();
+			if (dmrgWaveStruct_.lrs.super().permutationInverse().size()!=psiSrc.size()) {
+				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.lrs.super().permutationInverse().size();
 				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
 						" dmrgWaveStruct_.SEpermutationInverse.size()!=dmrgWaveStruct_.psi.size()\n");
@@ -499,11 +538,11 @@ namespace Dmrg {
 			
 			for (size_t x=start;x<final;x++) {
 				size_t ip,alpha,kp,jp;
-				utils::getCoordinates(alpha,jp,(size_t)pSE.permutation(x),nalpha);
-				utils::getCoordinates(ip,kp,(size_t)pSprime.permutation(alpha),nip);
-				size_t kpjp = dmrgWaveStruct_.pEprime.permutationInverse(kp + jp*nk);
+				utils::getCoordinates(alpha,jp,(size_t)lrs.super().permutation(x),nalpha);
+				utils::getCoordinates(ip,kp,(size_t)lrs.left().permutation(alpha),nip);
+				size_t kpjp = dmrgWaveStruct_.lrs.right().permutationInverse(kp + jp*nk);
 				
-				size_t y = dmrgWaveStruct_.pSE.permutationInverse(ip + kpjp*nip);
+				size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + kpjp*nip);
 				psiDest[x]=psiSrc[y];
 			}
 			

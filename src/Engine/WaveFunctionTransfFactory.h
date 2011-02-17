@@ -109,7 +109,7 @@ namespace Dmrg {
 		typedef std::vector<SparseElementType> VectorType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef typename BasisType::FactorsType FactorsType;
-		typedef DmrgWaveStruct<BasisWithOperatorsType> DmrgWaveStructType;
+		typedef DmrgWaveStruct<LeftRightSuperType> DmrgWaveStructType;
 
 		typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType>
 					WaveFunctionTransfBaseType;
@@ -161,9 +161,7 @@ namespace Dmrg {
 			counter_=0;
 		}
 		
-		void triggerOn(const BasisWithOperatorsType& pSprime,
-	  			const BasisWithOperatorsType& pEprime,
-      				const BasisType& pSE)
+		void triggerOn(const LeftRightSuperType& lrs)
 		{
 			bool allow=false;
 			switch (stage_) {
@@ -181,7 +179,7 @@ namespace Dmrg {
 			
 			if (!isEnabled_ || !allow) return;
 			//try {
-				beforeWft(pSprime,pEprime,pSE);
+				beforeWft(lrs);
 			//} catch (std::exception& e) {
 			//	doNextOne_=false;
 			//}
@@ -221,9 +219,7 @@ namespace Dmrg {
 			}
 		}
 		
-		void triggerOff(const BasisWithOperatorsType& pSprime,
-	  			const BasisWithOperatorsType& pEprime,
-      				const BasisType& pSE) //,int m)
+		void triggerOff(const LeftRightSuperType& lrs)
 		{
 			bool allow=false;
 			switch (stage_) {
@@ -240,7 +236,7 @@ namespace Dmrg {
 			//if (m<0) allow = false; // isEnabled_=false;
 			
 			if (!isEnabled_ || !allow) return;
-			afterWft(pSprime,pEprime,pSE); //,m);	
+			afterWft(lrs);
 			//doNextOne_=true;
 			std::ostringstream msg;
 			msg<<"Window closed, no more transformations, please";
@@ -282,11 +278,7 @@ namespace Dmrg {
 		void push(
 			const SomeMatrixType& transform,
 			size_t direction,
-   			//const SomeVectorType& psi,
-      			const BasisWithOperatorsType& pBasis,
-			const BasisWithOperatorsType& pBasisSummed,
-   			const BasisType& pSE)
-//			 size_t m)
+			LeftRightSuperType& lrs)
 		{
 			if (!isEnabled_) return;
 			
@@ -319,14 +311,14 @@ namespace Dmrg {
 					break;
 			}
 
-			dmrgWaveStruct_.pSE=pSE;
-			if (direction==EXPAND_SYSTEM) { // transforming the system
-				dmrgWaveStruct_.pEprime=pBasisSummed;
-				dmrgWaveStruct_.pSprime=pBasis;
-			} else {
-				dmrgWaveStruct_.pSprime=pBasisSummed;
-				dmrgWaveStruct_.pEprime=pBasis;
-			}
+			dmrgWaveStruct_.lrs=lrs;
+//			if (direction==EXPAND_SYSTEM) { // transforming the system
+//				dmrgWaveStruct_.pEprime=pBasisSummed;
+//				dmrgWaveStruct_.pSprime=pBasis;
+//			} else {
+//				dmrgWaveStruct_.pSprime=pBasisSummed;
+//				dmrgWaveStruct_.pEprime=pBasis;
+//			}
 			std::ostringstream msg;
 			msg<<"OK, pushing option="<<direction<<" and stage="<<stage_;
 			progress_.printline(msg,std::cout);
@@ -338,8 +330,7 @@ namespace Dmrg {
 		
 	private:
 		
-		void beforeWft(const BasisWithOperatorsType& pSprime,
-				  const BasisWithOperatorsType& pEprime,const BasisType& pSE)
+		void beforeWft(const LeftRightSuperType& lrs)
 		{
 			if (stage_==EXPAND_ENVIRON) {
 				if (wsStack_.size()>=1) {
@@ -418,12 +409,9 @@ namespace Dmrg {
 			progress_.printline(msg,std::cout);
 		}
 			
-		void afterWft(const BasisWithOperatorsType& pSprime,
-				  const BasisWithOperatorsType& pEprime,const BasisType& pSE) //,size_t m)
+		void afterWft(const LeftRightSuperType& lrs)
 		{
-			dmrgWaveStruct_.pEprime=pEprime;
-			dmrgWaveStruct_.pSE=pSE;
-			dmrgWaveStruct_.pSprime=pSprime;
+			dmrgWaveStruct_.lrs=lrs;
 			firstCall_=false;
 			counter_++;
 		}

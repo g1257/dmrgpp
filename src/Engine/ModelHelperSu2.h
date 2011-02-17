@@ -112,44 +112,45 @@ namespace Dmrg {
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef Link<SparseElementType,RealType> LinkType;
 		
-		ModelHelperSu2(int m,const BasisType& basis1,  const BasisWithOperatorsType& basis2,
-			 const BasisWithOperatorsType& basis3,size_t nOrbitals,bool useReflection=false) 
+		ModelHelperSu2(
+				int m,
+				const LeftRightSuperType& lrs,
+				size_t nOrbitals,
+				bool useReflection=false)
 		:
 			m_(m),
-			basis1_(basis1),
-			basis2_(basis2),
-			basis3_(basis3),
+			lrs_(lrs),
 			reflection_(useReflection),
-			numberOfOperators_(basis2.numberOfOperatorsPerSite()),
+			numberOfOperators_(lrs_.left().numberOfOperatorsPerSite()),
 			nOrbitals_(nOrbitals),	
-			su2reduced_(m,basis1,basis2,basis3,nOrbitals)
+			su2reduced_(m,lrs,nOrbitals)
 		{}
 
 		static bool isSu2() { return true; }
 
-		const BasisType& basis1() const { return basis1_; }
-
-		const BasisWithOperatorsType& basis2() const  { return basis2_; }
-
-		const BasisWithOperatorsType& basis3() const  { return basis3_; }
+//		const BasisType& basis1() const { return basis1_; }
+//
+//		const BasisWithOperatorsType& basis2() const  { return basis2_; }
+//
+//		const BasisWithOperatorsType& basis3() const  { return basis3_; }
 
 		int size() const
 		{
-			int tmp = basis1_.partition(m_+1)-basis1_.partition(m_);
+			int tmp = lrs_.super().partition(m_+1)-lrs_.super().partition(m_);
 			return reflection_.size(tmp);
 		}
 
 		int quantumNumber() const
 		{
-			int state = basis1_.partition(m_);
-			return basis1_.qn(state);
+			int state = lrs_.super().partition(m_);
+			return lrs_.super().qn(state);
 		}
 	
 		const SparseMatrixType& getReducedOperator(char modifier,size_t i,size_t sigma,size_t type) const
 		{
 			size_t i0 = i*numberOfOperators_ + sigma;
-			if (type==System) return basis2_.getReducedOperatorByIndex(modifier,i0).data;
-			return basis3_.getReducedOperatorByIndex(modifier,i0).data;
+			if (type==System) return lrs_.left().getReducedOperatorByIndex(modifier,i0).data;
+			return lrs_.right().getReducedOperatorByIndex(modifier,i0).data;
 		}
 
 		//! //! Does matrixBlock= (AB), A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
@@ -172,8 +173,8 @@ namespace Dmrg {
 
 			//! work only on partition m
 			int m = m_;
-			int offset = basis1_.partition(m);
-			int total = basis1_.partition(m+1) - offset;
+			int offset = lrs_.super().partition(m);
+			int total = lrs_.super().partition(m+1) - offset;
 
 			matrixBlock.resize(total);
 
@@ -185,24 +186,24 @@ namespace Dmrg {
 				
 				size_t i1=su2reduced_.reducedEffective(i).first;
 				size_t i2=su2reduced_.reducedEffective(i).second;
-				PairType jm1 = basis2_.jmValue(basis2_.reducedIndex(i1));
+				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
 				
-				size_t n1=basis2_.electrons(basis2_.reducedIndex(i1));
+				size_t n1=lrs_.left().electrons(lrs_.left().reducedIndex(i1));
 				RealType fsign=1;
 				if (n1>0 && n1%2!=0) fsign= fermionSign;
 				
-				PairType jm2 = basis3_.jmValue(basis3_.reducedIndex(i2));
-				size_t lf1 =jm1.first + jm2.first*basis2_.jMax();
+				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
+				size_t lf1 =jm1.first + jm2.first*lrs_.left().jMax();
 					
 				for (int k1=A.getRowPtr(i1);k1<A.getRowPtr(i1+1);k1++) {
 					size_t i1prime = A.getCol(k1);
-					PairType jm1prime = basis2_.jmValue(basis2_.reducedIndex(i1prime));
+					PairType jm1prime = lrs_.left().jmValue(lrs_.left().reducedIndex(i1prime));
 
 					for (int k2=B.getRowPtr(i2);k2<B.getRowPtr(i2+1);k2++) {
 						size_t i2prime = B.getCol(k2);
-						PairType jm2prime = basis3_.jmValue(basis3_.reducedIndex(i2prime));
+						PairType jm2prime = lrs_.right().jmValue(lrs_.right().reducedIndex(i2prime));
 						SparseElementType lfactor;
-						size_t lf2 =jm1prime.first + jm2prime.first*basis2_.jMax();
+						size_t lf2 =jm1prime.first + jm2prime.first*lrs_.left().jMax();
 						lfactor=su2reduced_.reducedFactor(link.angularMomentum,link.category,flip,lf1,lf2);
 						if (lfactor==static_cast<SparseElementType>(0)) continue;
 
@@ -242,7 +243,7 @@ namespace Dmrg {
 
 			//! work only on partition m
 			int m = m_;
-			int offset = basis1_.partition(m);
+			int offset = lrs_.super().partition(m);
 
 			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 				int ix = su2reduced_.flavorMapping(i)-offset;
@@ -250,24 +251,24 @@ namespace Dmrg {
 
 				size_t i1=su2reduced_.reducedEffective(i).first;
 				size_t i2=su2reduced_.reducedEffective(i).second;
-				PairType jm1 = basis2_.jmValue(basis2_.reducedIndex(i1));
-				size_t n1=basis2_.electrons(basis2_.reducedIndex(i1));
+				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
+				size_t n1=lrs_.left().electrons(lrs_.left().reducedIndex(i1));
 				RealType fsign=1;
 
 				if (n1>0 && n1%2!=0) fsign= fermionSign;
 
-				PairType jm2 = basis3_.jmValue(basis3_.reducedIndex(i2));
-				size_t lf1 =jm1.first + jm2.first*basis2_.jMax();
+				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
+				size_t lf1 =jm1.first + jm2.first*lrs_.left().jMax();
 
 				for (int k1=A.getRowPtr(i1);k1<A.getRowPtr(i1+1);k1++) {
 					size_t i1prime = A.getCol(k1);
-					PairType jm1prime = basis2_.jmValue(basis2_.reducedIndex(i1prime));
+					PairType jm1prime = lrs_.left().jmValue(lrs_.left().reducedIndex(i1prime));
 
 					for (int k2=B.getRowPtr(i2);k2<B.getRowPtr(i2+1);k2++) {
 						size_t i2prime = B.getCol(k2);
-						PairType jm2prime = basis3_.jmValue(basis3_.reducedIndex(i2prime));
+						PairType jm2prime = lrs_.right().jmValue(lrs_.right().reducedIndex(i2prime));
 						SparseElementType lfactor;
-						size_t lf2 =jm1prime.first + jm2prime.first*basis2_.jMax();
+						size_t lf2 =jm1prime.first + jm2prime.first*lrs_.left().jMax();
 
 						lfactor=su2reduced_.reducedFactor(link.angularMomentum,link.category,flipped,lf1,lf2);
 						if (lfactor==static_cast<SparseElementType>(0)) continue;
@@ -291,7 +292,7 @@ namespace Dmrg {
 		{ 
 			//! work only on partition m
 			int m = m_;
-			int offset = basis1_.partition(m);
+			int offset = lrs_.super().partition(m);
 			const SparseMatrixType& A = su2reduced_.hamiltonianLeft();
 
 			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
@@ -301,8 +302,8 @@ namespace Dmrg {
 				size_t i1=su2reduced_.reducedEffective(i).first;
 				size_t i2=su2reduced_.reducedEffective(i).second;
 
-				PairType jm1 = basis2_.jmValue(basis2_.reducedIndex(i1));
-				PairType jm2 = basis3_.jmValue(basis3_.reducedIndex(i2));
+				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
+				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
 
 				for (int k1=A.getRowPtr(i1);k1<A.getRowPtr(i1+1);k1++) {
 					size_t i1prime = A.getCol(k1);
@@ -326,7 +327,7 @@ namespace Dmrg {
 		{ 
 			//! work only on partition m
 			int m = m_;
-			int offset = basis1_.partition(m);
+			int offset = lrs_.super().partition(m);
 			const SparseMatrixType& B = su2reduced_.hamiltonianRight();
 
 			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
@@ -335,8 +336,8 @@ namespace Dmrg {
 
 				size_t i1=su2reduced_.reducedEffective(i).first;
 				size_t i2=su2reduced_.reducedEffective(i).second;
-				PairType jm1 = basis2_.jmValue(basis2_.reducedIndex(i1));
-				PairType jm2 = basis3_.jmValue(basis3_.reducedIndex(i2));
+				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
+				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
 
 				for (int k2=B.getRowPtr(i2);k2<B.getRowPtr(i2+1);k2++) {
 					size_t i2prime = B.getCol(k2);
@@ -356,8 +357,8 @@ namespace Dmrg {
 		{
 			//! work only on partition m
 			int m = m_;
-			int offset = basis1_.partition(m);
-			int bs = basis1_.partition(m+1)-offset;
+			int offset = lrs_.super().partition(m);
+			int bs = lrs_.super().partition(m+1)-offset;
 			const SparseMatrixType& A = su2reduced_.hamiltonianLeft();
 			
 			matrixBlock.resize(bs);
@@ -369,8 +370,8 @@ namespace Dmrg {
 
 				size_t i1=su2reduced_.reducedEffective(i).first;
 				size_t i2=su2reduced_.reducedEffective(i).second;
-				PairType jm1 = basis2_.jmValue(basis2_.reducedIndex(i1));
-				PairType jm2 = basis3_.jmValue(basis3_.reducedIndex(i2));
+				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
+				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
 
 				for (int k1=A.getRowPtr(i1);k1<A.getRowPtr(i1+1);k1++) {
 					size_t i1prime = A.getCol(k1);
@@ -394,8 +395,8 @@ namespace Dmrg {
 		{
 			//! work only on partition m
 			int m = m_;
-			int offset = basis1_.partition(m);
-			int bs = basis1_.partition(m+1)-offset;
+			int offset = lrs_.super().partition(m);
+			int bs = lrs_.super().partition(m+1)-offset;
 			const SparseMatrixType& B = su2reduced_.hamiltonianRight();
 
 			matrixBlock.resize(bs);
@@ -407,8 +408,8 @@ namespace Dmrg {
 
 				size_t i1=su2reduced_.reducedEffective(i).first;
 				size_t i2=su2reduced_.reducedEffective(i).second;
-				PairType jm1 = basis2_.jmValue(basis2_.reducedIndex(i1));
-				PairType jm2 = basis3_.jmValue(basis3_.reducedIndex(i2));
+				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
+				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
 
 				for (int k2=B.getRowPtr(i2);k2<B.getRowPtr(i2+1);k2++) {
 					size_t i2prime = B.getCol(k2);
@@ -463,9 +464,7 @@ namespace Dmrg {
 
 	private:
 		int m_;
-		const BasisType&  basis1_;
-		const BasisWithOperatorsType& basis2_;
-		const BasisWithOperatorsType& basis3_;
+		const LeftRightSuperType&  lrs_;
 		ReflectionSymmetryType reflection_;
 		size_t numberOfOperators_,nOrbitals_;
 		Su2Reduced<LeftRightSuperType,ReflectionSymmetryType_,ConcurrencyType_>

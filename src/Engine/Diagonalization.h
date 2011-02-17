@@ -95,19 +95,23 @@ namespace Dmrg {
 	class Diagonalization {
  public:
 	 
-	 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
+	 	typedef typename TargettingType::WaveFunctionTransfType
+	 			WaveFunctionTransfType;
 		typedef typename TargettingType::ModelType ModelType;
 		typedef typename TargettingType::ConcurrencyType ConcurrencyType;
 		typedef typename TargettingType::IoType IoType;
 		typedef typename TargettingType::BasisType BasisType;
-		typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+		typedef typename TargettingType::BasisWithOperatorsType
+				BasisWithOperatorsType;
 		typedef typename TargettingType::BlockType BlockType;
 		typedef typename TargettingType::TargetVectorType TargetVectorType;
 		typedef typename TargettingType::RealType RealType;
 		typedef typename IoType::Out IoOutType;
 		typedef typename ModelType::OperatorsType OperatorsType;
 		typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
-		
+		typedef typename ModelType::ModelHelperType ModelHelperType;
+		typedef typename ModelHelperType::LeftRightSuperType
+						LeftRightSuperType;
 		Diagonalization(const ParametersType& parameters,
 				const ModelType& model,
     				ConcurrencyType& concurrency,
@@ -129,23 +133,27 @@ namespace Dmrg {
 			oldEnergy_(0)
 		{}
 		
-		RealType operator()(TargettingType& target,size_t direction,const BlockType& block,size_t loopIndex=0,
-				   bool needsPrinting = false)
+		RealType operator()(
+				TargettingType& target,
+				size_t direction,
+				const BlockType& block,
+				size_t loopIndex=0,
+				bool needsPrinting = false)
 		{
-			const BasisType& pSE= target.basisSE();
-			const BasisWithOperatorsType& pSprime= target.basisS();
-			const BasisWithOperatorsType& pEprime= target.basisE();
-			bool onlyWft = ((parameters_.finiteLoop[loopIndex].saveOption & 2)>0) ? true : false;
+			const LeftRightSuperType& lrs= target.leftRightSuper();
+
+			bool onlyWft = ((parameters_.finiteLoop[loopIndex].
+					saveOption & 2)>0) ? true : false;
 			
 			std::ostringstream msg;
-			msg<<"Setting up Hamiltonian basis of size="<<pSE.size();
+			msg<<"Setting up Hamiltonian basis of size="<<lrs.super().size();
 			progress_.printline(msg,std::cout);
 		
 			TargetVectorType tmpVec;
 			std::vector<TargetVectorType> vecSaved;
 			std::vector<RealType> energySaved;
 			RealType gsEnergy;
-			size_t total = pSE.partition()-1;
+			size_t total = lrs.super().partition()-1;
 
 			energySaved.resize(total);
 			vecSaved.resize(total);
@@ -153,9 +161,9 @@ namespace Dmrg {
 
 			size_t counter=0;
 			for (size_t i=0;i<total;i++) {
-				size_t bs = pSE.partition(i+1)-pSE.partition(i);
+				size_t bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 				if (verbose_) {
-					size_t j = pSE.qn(pSE.partition(i));
+					size_t j = lrs.super().qn(lrs.super().partition(i));
 					std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
 					//std::cerr<<"partition "<<i<<" of size="<<bs<<" has qns=";
 					for (size_t k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
@@ -165,17 +173,19 @@ namespace Dmrg {
 				weights[i]=bs;
 				
 				// Do only one sector unless doing su(2) with j>0, then do all m's
-				if (pSE.pseudoEffectiveNumber(pSE.partition(i))!=quantumSector_ ) 
+				if (lrs.super().pseudoEffectiveNumber(
+						lrs.super().partition(i))!=quantumSector_ )
 					weights[i]=0;
 				
 				counter+=bs;
 				vecSaved[i].resize(weights[i]);
 			}
 
-			typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
-			VectorWithOffsetType initialVector(weights,pSE);
+			typedef typename TargettingType::VectorWithOffsetType
+					VectorWithOffsetType;
+			VectorWithOffsetType initialVector(weights,lrs.super());
 			
-			waveFunctionTransformation_.triggerOn(pSprime,pEprime,pSE);
+			waveFunctionTransformation_.triggerOn(lrs);
 			target.initialGuess(initialVector);
 			
 
@@ -183,14 +193,16 @@ namespace Dmrg {
 				if (weights[i]==0) continue;
 				std::ostringstream msg;
 				msg<<"About to diag. sector with quantum numbs. ";
-				size_t j = pSE.qn(pSE.partition(i));
+				size_t j = lrs.super().qn(lrs.super().partition(i));
 				std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
 				for (size_t k=0;k<qns.size();k++) msg<<qns[k]<<" ";
-				msg<<" pseudo="<<pSE.pseudoEffectiveNumber(pSE.partition(i));
+				msg<<" pseudo="<<lrs.super().pseudoEffectiveNumber(
+						lrs.super().partition(i));
 				msg<<" quantumSector="<<quantumSector_;
 				
 				if (verbose_ && concurrency_.root()) {
-					msg<<" diagonaliseOneBlock, i="<<i<<" and weight="<<weights[i];
+					msg<<" diagonaliseOneBlock, i="<<i;
+					msg<<" and weight="<<weights[i];
 				}
 				progress_.printline(msg,std::cout);
 				TargetVectorType initialVectorBySector(weights[i]);
@@ -199,7 +211,7 @@ namespace Dmrg {
 					vecSaved[i]=initialVectorBySector;
 					gsEnergy = oldEnergy_;
 				} else {
-					diagonaliseOneBlock(i,tmpVec,gsEnergy,pSprime,pEprime,pSE,initialVectorBySector);
+					diagonaliseOneBlock(i,tmpVec,gsEnergy,lrs,initialVectorBySector);
 					vecSaved[i] = tmpVec;
 				}
 				energySaved[i]=gsEnergy;
@@ -216,19 +228,20 @@ namespace Dmrg {
 			if (verbose_ && concurrency_.root()) std::cerr<<"About to calc gs vector\n";
 			//target.reset();
 			counter=0;
-			for (size_t i=0;i<pSE.partition()-1;i++) {
+			for (size_t i=0;i<lrs.super().partition()-1;i++) {
 				if (weights[i]==0) continue;
 
-				size_t j = pSE.qn(pSE.partition(i));
+				size_t j = lrs.super().qn(lrs.super().partition(i));
 				std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
-				msg<<"Found targetted symmetry sector in partition "<<i<<" of size="<<vecSaved[i].size();
+				msg<<"Found targetted symmetry sector in partition "<<i;
+				msg<<" of size="<<vecSaved[i].size();
 				msg<<" with qns=";
 				for (size_t k=0;k<qns.size();k++) msg<<qns[k]<<" ";
 				progress_.printline(msg,std::cout);
 				counter++;
 			}
 			
-			target.setGs(vecSaved,pSE);
+			target.setGs(vecSaved,lrs.super());
 
 			if (concurrency_.root()) {
 				std::ostringstream msg;
@@ -241,19 +254,18 @@ namespace Dmrg {
 			
 			// time step targetting: 
 			target.evolve(gsEnergy,direction,block,loopIndex);
-			waveFunctionTransformation_.triggerOff(pSprime,pEprime,pSE); //,m);
+			waveFunctionTransformation_.triggerOff(lrs); //,m);
 			return gsEnergy;
 		}
+
  private:
 		//! Diagonalise the i-th block of the matrix, return its eigenvectors in tmpVec and its eigenvalues in energyTmp
 		template<typename SomeVectorType>
 		void diagonaliseOneBlock(
 					int i,
 					SomeVectorType &tmpVec,
-     					double &energyTmp,
-					BasisWithOperatorsType const &pSprime,
-					BasisWithOperatorsType const &pEprime,
-     					BasisType const &pSE,
+     				double &energyTmp,
+					const LeftRightSuperType& lrs,
 					const SomeVectorType& initialVector)
 		{
 			RealType eps=ProgramGlobals::LanczosTolerance;
@@ -261,15 +273,16 @@ namespace Dmrg {
 			std::vector<RealType> tmpVec1,tmpVec2;
 			//srand48(7123443);
 			
-			typename ModelType::ModelHelperType modelHelper(i,pSE,pSprime,pEprime,model_.orbitals(),useReflection_);
+			typename ModelType::ModelHelperType
+				modelHelper(i,lrs,model_.orbitals(),useReflection_);
 
 			if (parameters_.options.find("debugmatrix")!=std::string::npos) {
 				SparseMatrixType fullm;
 				
 				model_.fullHamiltonian(fullm,modelHelper);
 				
-				
-				if (!isHermitian(fullm)) throw std::runtime_error("Not hermitian matrix block\n");
+				if (!isHermitian(fullm))
+					throw std::runtime_error("Not hermitian matrix block\n");
 				
 				PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 				crsMatrixToFullMatrix(fullm2,fullm);
@@ -279,24 +292,26 @@ namespace Dmrg {
 				PsimagLite::diag(fullm2,eigs,'V');
 				std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
 				if (parameters_.options.find("test")!=std::string::npos)
-					throw std::logic_error("Exiting due to option test in the input file\n");
+					throw std::logic_error(
+							"Exiting due to option test in the input file\n");
 			}
 			std::ostringstream msg;
 			msg<<"I will now diagonalize a matrix of size="<<modelHelper.size();
 			progress_.printline(msg,std::cout);
-			diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,initialVector,iter,eps);
+			diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,
+					initialVector,iter,eps);
 		}
 		
 		template<typename SomeVectorType>
 		void diagonaliseOneBlock(
-					int i,
-     					SomeVectorType &tmpVec,
-	  				double &energyTmp,
-					typename ModelType::ModelHelperType& modelHelper,
-     					const SomeVectorType& initialVector,
-					size_t iter,
-     					RealType eps,
-       					int reflectionSector= -1)
+			int i,
+     		SomeVectorType &tmpVec,
+	  		double &energyTmp,
+			typename ModelType::ModelHelperType& modelHelper,
+     		const SomeVectorType& initialVector,
+			size_t iter,
+     		RealType eps,
+       		int reflectionSector= -1)
 		{
 			if (reflectionSector>=0) modelHelper.setReflectionSymmetry(reflectionSector);
 			int n = modelHelper.size();

@@ -166,10 +166,10 @@ namespace Dmrg {
 			else systemStack_.push(pSorE);
 		}
 
-		void shrink(BasisWithOperatorsType &pSorE,size_t what)
+		BasisWithOperatorsType shrink(size_t what)
 		{
-			if (what==ENVIRON) shrink(pSorE,envStack_);
-			else shrink(pSorE,systemStack_);
+			if (what==ENVIRON) return shrink(envStack_);
+			else return shrink(systemStack_);
 		}
 
 		bool operator()() const { return enabled_; }
@@ -188,10 +188,10 @@ namespace Dmrg {
 		PsimagLite::ProgressIndicator progress_;
 
 		//! shrink  (we don't really shrink, we just undo the growth)
-		void shrink(BasisWithOperatorsType &pSprime,MemoryStackType& thisStack)
+		BasisWithOperatorsType shrink(MemoryStackType& thisStack)
 		{
 			thisStack.pop();
-			pSprime=thisStack.top();
+			return thisStack.top();
 		}
 
 		void loadStacksDiskToMemory()

@@ -91,14 +91,18 @@ namespace Dmrg {
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef IoType_ IoType;
 		typedef typename ModelType::RealType RealType;
-		typedef typename ModelType::MyBasisWithOperators BasisWithOperatorsType;
+		typedef typename ModelType::ModelHelperType ModelHelperType;
+		typedef typename ModelHelperType::LeftRightSuperType
+						LeftRightSuperType;
+		typedef typename LeftRightSuperType::BasisWithOperatorsType
+				BasisWithOperatorsType;
 		typedef GroundStateParams<ModelType> TargettingParamsType; //3a-01
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef VectorType TargetVectorType;
-		typedef WaveFunctionTransfTemplate<BasisWithOperatorsType,
+		typedef WaveFunctionTransfTemplate<LeftRightSuperType,
 				VectorWithOffsetType> WaveFunctionTransfType;
 
 		enum {	EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -106,15 +110,11 @@ namespace Dmrg {
 						INFINITE=WaveFunctionTransfType::INFINITE};
 		
 		DynamicTargetting(
-				const BasisWithOperatorsType& basisS,
-				const BasisWithOperatorsType& basisE,
-				const BasisType& basisSE,
+				const LeftRightSuperType& lrs,
 				const ModelType& model,
 				const TargettingParamsType& tstStruct,
 				const WaveFunctionTransfType& wft)
-		:	basisS_(basisS),
-		 	basisE_(basisE),
-		 	basisSE_(basisSE)
+		:	lrs_(lrs)
 		{
 			bogus();
 		}
@@ -176,12 +176,10 @@ namespace Dmrg {
 			bogus();
 		}
 
-		const BasisType& basisSE() const { return basisSE_; }
-
-		const BasisWithOperatorsType& basisS() const { return basisS_; }
-
-		const BasisWithOperatorsType& basisE() const { return basisE_; }
-		
+		const LeftRightSuperType& leftRightSuper() const
+		{
+			return lrs_;
+		}
 	private:
 		
 		void bogus() const
@@ -191,9 +189,7 @@ namespace Dmrg {
 		}
 		
 		VectorWithOffsetType psi_;
-		const BasisWithOperatorsType& basisS_;
-		const BasisWithOperatorsType& basisE_;
-		const BasisType& basisSE_;
+		const LeftRightSuperType& lrs_;
 	}; // class DynamicTargettingEmpty
 
 	template<
