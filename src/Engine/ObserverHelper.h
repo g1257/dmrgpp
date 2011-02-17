@@ -94,7 +94,7 @@ namespace Dmrg {
 		typename MatrixType_,
 		typename VectorType_,
 		typename VectorWithOffsetType_,
-		typename BasisWithOperatorsType_>
+		typename LeftRightSuperType>
 	class ObserverHelper {
 	public:
 		typedef IoInputType_ IoInputType;
@@ -103,12 +103,15 @@ namespace Dmrg {
 		typedef VectorWithOffsetType_ VectorWithOffsetType;
 		typedef size_t IndexType;
 		typedef typename VectorType::value_type FieldType;
-		typedef BasisWithOperatorsType_ BasisWithOperatorsType;
+		typedef typename LeftRightSuperType::BasisWithOperatorsType
+				BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
-		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+		typedef TimeSerializer<RealType,VectorWithOffsetType>
+			TimeSerializerType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-		typedef DmrgSerializer<BasisType,VectorWithOffsetType,MatrixType> DmrgSerializerType;
+		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType,
+				MatrixType> DmrgSerializerType;
 		typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 		
 		enum {GS_VECTOR,TIME_VECTOR};
@@ -166,24 +169,19 @@ namespace Dmrg {
 			return dSerializerV_[currentPos_].rows();
 		}
 
-		const FermionSignType& fermionicSign() const
+		const FermionSignType& fermionicSignLeft() const
 		{
-			return dSerializerV_[currentPos_].fermionicSign();
+			return dSerializerV_[currentPos_].fermionicSignLeft();
 		}
 
-		const BasisType& basisS() const 
+		const FermionSignType& fermionicSignRight() const
 		{
-			return dSerializerV_[currentPos_].basisS();
+			return dSerializerV_[currentPos_].fermionicSignRight();
 		}
 
-		const BasisType& basisE() const 
+		const LeftRightSuperType& leftRightSuper() const
 		{
-			return dSerializerV_[currentPos_].basisE();
-		}
-
-		const BasisType& basisSE() const 
-		{
-			return dSerializerV_[currentPos_].basisSE();
+			return dSerializerV_[currentPos_].leftRightSuper();
 		}
 
 		size_t direction() const
@@ -230,10 +228,10 @@ namespace Dmrg {
 
 		template<typename IoInputType1,typename MatrixType1,
 			typename VectorType1,typename VectorWithOffsetType1,
-			typename BasisType1>
+			typename LeftSuperType1>
 		friend std::ostream& operator<<(std::ostream& os,
 			ObserverHelper<IoInputType1,MatrixType1,VectorType1,
-			VectorWithOffsetType1,BasisType1>& precomp);
+			VectorWithOffsetType1,LeftSuperType1>& precomp);
 
 	private:
 		bool init(bool hasTimeEvolution,size_t nf)
@@ -321,16 +319,30 @@ namespace Dmrg {
 		bool noMoreData_;
 	};  //ObserverHelper
 
-	template<typename IoInputType1,typename MatrixType1,typename VectorType1,typename VectorWithOffsetType1,typename BasisType1>
-	std::ostream& operator<<(std::ostream& os,
-		ObserverHelper<IoInputType1,MatrixType1,VectorType1,VectorWithOffsetType1,BasisType1>& p)
+	template<
+		typename IoInputType1,
+		typename MatrixType1,
+		typename VectorType1,
+		typename VectorWithOffsetType1,
+		typename LeftRightSuperType1>
+	std::ostream& operator<<(
+			std::ostream& os,
+			const ObserverHelper<
+				IoInputType1,
+				MatrixType1,
+				VectorType1,
+				VectorWithOffsetType1,
+				LeftRightSuperType1>& p)
 	{
 		for (size_t i=0;i<p.SpermutationInverse_.size();i++) {
 			os<<"i="<<i<<"\n";
-			os<<"\tS.size="<<p.SpermutationInverse_[i].size()<<" "<<p.Spermutation_[i].size()<<"\n";
-			os<<"\tSE.size="<<p.SEpermutationInverse_[i].size()<<" "<<p.SEpermutation_[i].size()<<"\n";
+			os<<"\tS.size="<<p.SpermutationInverse_[i].size();
+			os<<" "<<p.Spermutation_[i].size()<<"\n";
+			os<<"\tSE.size="<<p.SEpermutationInverse_[i].size();
+			os<<" "<<p.SEpermutation_[i].size()<<"\n";
 			os<<"\tElectrons.size="<<p.electrons_[i].size()<<"\n";
-			os<<"\tTransform="<<p.transform_[i].n_row()<<"x"<<p.transform_[i].n_col()<<"\n";
+			os<<"\tTransform="<<p.transform_[i].n_row()<<"x";
+			os<<p.transform_[i].n_col()<<"\n";
 			os<<"\tWF.size="<<p.wavefunction_[i].size()<<"\n";
 		}
 		return os;

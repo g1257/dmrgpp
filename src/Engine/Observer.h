@@ -104,8 +104,10 @@ namespace Dmrg {
 		typedef PsimagLite::Matrix<FieldType> MatrixType;
 		typedef typename ModelType::BasisWithOperatorsType
 				BasisWithOperatorsType;
+		typedef typename ModelType::ModelHelperType::LeftRightSuperType
+				LeftRightSuperType;
 		typedef ObserverHelper<IoInputType,MatrixType,VectorType,
-			VectorWithOffsetType,BasisWithOperatorsType> ObserverHelperType;
+			VectorWithOffsetType,LeftRightSuperType> ObserverHelperType;
 		typedef CorrelationsSkeleton<ObserverHelperType,ModelType>
 			CorrelationsSkeletonType;
 		typedef OnePointCorrelations<ObserverHelperType>

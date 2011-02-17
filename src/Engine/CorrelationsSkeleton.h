@@ -151,7 +151,7 @@ namespace Dmrg {
 		
 		size_t numberOfSites() const
 		{
-			return helper_.basisSE().block().size();
+			return helper_.leftRightSuper().sites();
 		}
 
 		//! i can be zero here!!
@@ -276,26 +276,26 @@ namespace Dmrg {
 			size_t nj=O2.n_row();
 
 			helper_.setPointer(ns);
-			size_t sprime = helper_.basisS().size(); //ni*nj;
+			size_t sprime = helper_.leftRightSuper().left().size(); //ni*nj;
 			result.resize(sprime,sprime);
 
 			for (size_t r=0;r<result.n_row();r++)
 				for (size_t r2=0;r2<result.n_col();r2++)
 					result(r,r2)=0;
 
-			if (helper_.basisS().size()!=sprime) {
-				std::cerr<<"WARNING: "<<helper_.basisS().size();
+			if (helper_.leftRightSuper().left().size()!=sprime) {
+				std::cerr<<"WARNING: "<<helper_.leftRightSuper().left().size();
 				std::cerr<<"!="<<sprime<<"\n";
 				throw std::runtime_error("problem in dmrgMultiply\n");
 			}
 
 			for (size_t r=0;r<sprime;r++) {
 				size_t e,u;
-				utils::getCoordinates(e,u,helper_.basisS().permutation(r),ni);
-				RealType f = helper_.fermionicSign()(e,fermionicSign);
+				utils::getCoordinates(e,u,helper_.leftRightSuper().left().permutation(r),ni);
+				RealType f = helper_.fermionicSignLeft()(e,fermionicSign);
 				for (size_t e2=0;e2<ni;e2++) {
 					for (size_t u2=0;u2<nj;u2++) {
-						size_t r2 = helper_.basisS().
+						size_t r2 = helper_.leftRightSuper().left().
 								permutationInverse(e2 + u2*ni);
 						result(r,r2) += O1(e,e2)*O2(u,u2)*f;
 					}
@@ -313,37 +313,37 @@ namespace Dmrg {
 			size_t nj=O2.n_row();
 
 			helper_.setPointer(ns);
-			size_t eprime = helper_.basisE().size(); //ni*nj;
+			size_t eprime = helper_.leftRightSuper().right().size(); //ni*nj;
 			result.resize(eprime,eprime);
 
 			for (size_t r=0;r<result.n_row();r++)
 				for (size_t r2=0;r2<result.n_col();r2++)
 					result(r,r2)=0;
 
-			if (helper_.basisE().size()!=eprime) {
-				std::cerr<<"WARNING: "<<helper_.basisE().size();
+			if (helper_.leftRightSuper().right().size()!=eprime) {
+				std::cerr<<"WARNING: "<<helper_.leftRightSuper().right().size();
 				std::cerr<<"!="<<eprime<<"\n";
 				throw std::runtime_error("problem in dmrgMultiply\n");
 			}
 			if (nj>oneSiteElectrons_.size())
 				throw std::runtime_error("Problem in dmrgMultiplyEnviron\n");
 
-//			const std::vector<size_t>&  ve = helper_.basisE().
+//			const std::vector<size_t>&  ve = helper_.leftRightSuper().right().
 //					electronsVector(BasisType::BEFORE_TRANSFORM);
 
 			for (size_t r=0;r<eprime;r++) {
 				size_t e,u;
-				utils::getCoordinates(e,u,helper_.basisE().permutation(r),nj);
+				utils::getCoordinates(e,u,helper_.leftRightSuper().right().permutation(r),nj);
 //				size_t nx0 = ve[r];
 //				if (nx0<oneSiteElectrons_[e]) throw std::runtime_error(
 //						"Problem in fluffUpEnviron_\n");
 //				nx0 -= oneSiteElectrons_[e];
-				size_t nx0 = helper_.basisE().
+				size_t nx0 = helper_.leftRightSuper().right().
 							electrons(BasisType::AFTER_TRANSFORM);
 				RealType f = (nx0 & 1) ? fermionicSign : 1;
 				for (size_t e2=0;e2<nj;e2++) {
 					for (size_t u2=0;u2<ni;u2++) {
-						size_t r2 = helper_.basisE().
+						size_t r2 = helper_.leftRightSuper().right().
 								permutationInverse(e2 + u2*nj);
 						if (r2>=eprime) throw std::runtime_error("Error\n");
 						result(r,r2) += O2(e,e2)*O1(u,u2)*f;
@@ -360,7 +360,7 @@ namespace Dmrg {
 				int growOption,
 				bool transform)
 		{
-			size_t n =helper_.basisS().size();
+			size_t n =helper_.leftRightSuper().left().size();
 
 			MatrixType ret(n,n);
 
@@ -382,7 +382,7 @@ namespace Dmrg {
 				int growOption,
 				bool transform)
 		{
-			size_t n =helper_.basisE().size();
+			size_t n =helper_.leftRightSuper().right().size();
 
 			if (growOption==GROW_LEFT &&
 					n/O.n_row()>oneSiteElectrons_.size())
@@ -407,23 +407,23 @@ namespace Dmrg {
 				int growOption)
 		{
 			size_t n = O.n_row();
-			size_t m = size_t(helper_.basisS().size()/n);
+			size_t m = size_t(helper_.leftRightSuper().left().size()/n);
 			RealType sign = static_cast<RealType>(1.0);
 
 			// Sperm[e] = i +k*n or e= k + i*m
 			// Sperm[e2] = j+k*n or e2=k+j*m
 			size_t i,j,k,k2;
 			if (growOption==GROW_RIGHT) {
-				if (size_t(helper_.basisS().permutation(e)/n)!=
-						size_t(helper_.basisS().permutation(e2)/n)) return 0;
-				utils::getCoordinates(i,k,helper_.basisS().permutation(e),n);
-				utils::getCoordinates(j,k2,helper_.basisS().permutation(e2),n);
+				if (size_t(helper_.leftRightSuper().left().permutation(e)/n)!=
+						size_t(helper_.leftRightSuper().left().permutation(e2)/n)) return 0;
+				utils::getCoordinates(i,k,helper_.leftRightSuper().left().permutation(e),n);
+				utils::getCoordinates(j,k2,helper_.leftRightSuper().left().permutation(e2),n);
 			} else {
-				if (size_t(helper_.basisS().permutation(e)%m)!=
-						size_t(helper_.basisS().permutation(e2)%m)) return 0;
-				utils::getCoordinates(k,i,helper_.basisS().permutation(e),m);
-				utils::getCoordinates(k2,j,helper_.basisS().permutation(e2),m);
-				sign = helper_.fermionicSign()(k,fermionicSign);
+				if (size_t(helper_.leftRightSuper().left().permutation(e)%m)!=
+						size_t(helper_.leftRightSuper().left().permutation(e2)%m)) return 0;
+				utils::getCoordinates(k,i,helper_.leftRightSuper().left().permutation(e),m);
+				utils::getCoordinates(k2,j,helper_.leftRightSuper().left().permutation(e2),m);
+				sign = helper_.fermionicSignLeft()(k,fermionicSign);
 			}
 			if (k!=k2) return 0;
 			return O(i,j)*sign;
@@ -437,7 +437,7 @@ namespace Dmrg {
 				int growOption)
 		{
 			size_t n = O.n_row();
-			size_t m = size_t(helper_.basisE().size()/n);
+			size_t m = size_t(helper_.leftRightSuper().right().size()/n);
 			RealType sign = 1;
 
 			// Eperm[e] = i +k*n or e= k + i*m
@@ -445,14 +445,14 @@ namespace Dmrg {
 
 			size_t i,j,k,k2;
 			if (growOption==GROW_RIGHT) {
-				utils::getCoordinates(i,k,helper_.basisE().permutation(e),n);
-				utils::getCoordinates(j,k2,helper_.basisE().permutation(e2),n);
-				size_t nx0 = helper_.basisS().electrons(BasisType::AFTER_TRANSFORM);
+				utils::getCoordinates(i,k,helper_.leftRightSuper().right().permutation(e),n);
+				utils::getCoordinates(j,k2,helper_.leftRightSuper().right().permutation(e2),n);
+				size_t nx0 = helper_.leftRightSuper().left().electrons(BasisType::AFTER_TRANSFORM);
 				sign = (nx0 & 1) ? fermionicSign : 1;
 			} else {
-				utils::getCoordinates(k,i,helper_.basisE().permutation(e),m);
-				utils::getCoordinates(k2,j,helper_.basisE().permutation(e2),m);
-				size_t nx0 = helper_.basisSE().electrons(BasisType::AFTER_TRANSFORM);
+				utils::getCoordinates(k,i,helper_.leftRightSuper().right().permutation(e),m);
+				utils::getCoordinates(k2,j,helper_.leftRightSuper().right().permutation(e2),m);
+				size_t nx0 = helper_.leftRightSuper().super().electrons(BasisType::AFTER_TRANSFORM);
 				sign = (nx0 & 1) ?  fermionicSign : 1;
 			}
 			if (k!=k2) return 0;
@@ -466,9 +466,9 @@ namespace Dmrg {
 				int fermionicSign)
 		{
 			if (verbose_)
-				std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
+				std::cerr<<"SE.size="<<helper_.leftRightSuper().super().size()<<"\n";
 
-			if (vec1.size()!=helper_.basisSE().size() ||
+			if (vec1.size()!=helper_.leftRightSuper().super().size() ||
 								vec1.size()!=vec2.size())
 				throw std::runtime_error(
 					"CorrelationsSkeleton::bracket_(...): Error\n");
@@ -494,11 +494,11 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					utils::getCoordinates(r,eta,helper_.basisSE().
-							permutation(t),helper_.basisS().size());
+					utils::getCoordinates(r,eta,helper_.leftRightSuper().super().
+							permutation(t),helper_.leftRightSuper().left().size());
 					for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
 						size_t r2 = Acrs.getCol(k);
-						size_t t2 = helper_.basisSE().
+						size_t t2 = helper_.leftRightSuper().super().
 								permutationInverse(r2+eta*A.n_col());
 						if (t2<offset || t2>=total) continue;
 						sum += Acrs.getValue(k)*vec1[t]*std::conj(vec2[t2]);
@@ -525,15 +525,15 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					utils::getCoordinates(r,eta,helper_.basisSE().
-							permutation(t),helper_.basisS().size());
+					utils::getCoordinates(r,eta,helper_.leftRightSuper().super().
+							permutation(t),helper_.leftRightSuper().left().size());
 					if (eta>=Acrs.rank()) throw std::runtime_error("Error\n");
-					size_t nx0 = helper_.basisS().electrons(BasisType::AFTER_TRANSFORM);
+					size_t nx0 = helper_.leftRightSuper().left().electrons(BasisType::AFTER_TRANSFORM);
 					RealType sign = (nx0 & 1) ? fermionicSign : 1;
 					for (int k=Acrs.getRowPtr(eta);k<Acrs.getRowPtr(eta+1);k++) {
 						size_t eta2 = Acrs.getCol(k);
-						size_t t2 = helper_.basisSE().
-							permutationInverse(r+eta2*helper_.basisS().size());
+						size_t t2 = helper_.leftRightSuper().super().
+							permutationInverse(r+eta2*helper_.leftRightSuper().left().size());
 						if (t2<offset || t2>=total) continue;
 						sum += Acrs.getValue(k)*vec1[t]*std::conj(vec2[t2])*sign;
 					}
@@ -562,15 +562,15 @@ namespace Dmrg {
 						const VectorWithOffsetType& vec1,
 						const VectorWithOffsetType& vec2)
 		{
-			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
+			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper().super().size()<<"\n";
 
 			CrsMatrix<FieldType> Acrs(A);
 			CrsMatrix<FieldType> Bcrs(B);
 			FieldType sum=0;
-			size_t ni = helper_.basisS().size()/Bcrs.rank(); // = Acrs.rank()
+			size_t ni = helper_.leftRightSuper().left().size()/Bcrs.rank(); // = Acrs.rank()
 
 			// some sanity checks:
-			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.basisSE().size())
+			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper().super().size())
 				throw std::runtime_error("Observe::brRghtCrnrSystem_(...): "
 						"vec.size!=SE.size\n");
 			if (ni!=Acrs.rank())
@@ -585,13 +585,13 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					utils::getCoordinates(r,eta,helper_.basisSE().
-							permutation(t),helper_.basisS().size());
+					utils::getCoordinates(r,eta,helper_.leftRightSuper().super().
+							permutation(t),helper_.leftRightSuper().left().size());
 					size_t r0,r1;
-					utils::getCoordinates(r0,r1,helper_.basisS().
+					utils::getCoordinates(r0,r1,helper_.leftRightSuper().left().
 							permutation(r),ni);
-					size_t electrons = helper_.basisSE().electrons(t);
-					electrons -= helper_.basisE().electrons(eta);
+					size_t electrons = helper_.leftRightSuper().super().electrons(t);
+					electrons -= helper_.leftRightSuper().right().electrons(eta);
 					RealType sign = (electrons & 1) ? fermionSign : 1.0;
 
 					for (int k=Acrs.getRowPtr(r0);k<Acrs.getRowPtr(r0+1);k++) {
@@ -599,10 +599,10 @@ namespace Dmrg {
 						for (int k2 = Bcrs.getRowPtr(eta);
 								k2<Bcrs.getRowPtr(eta+1);k2++) {
 							size_t eta2 = Bcrs.getCol(k2);
-							size_t rprime = helper_.basisS().
+							size_t rprime = helper_.leftRightSuper().left().
 									permutationInverse(r0prime+r1*ni);
-							size_t t2 = helper_.basisSE().permutationInverse(
-									rprime+eta2*helper_.basisS().size());
+							size_t t2 = helper_.leftRightSuper().super().permutationInverse(
+									rprime+eta2*helper_.leftRightSuper().left().size());
 							if (t2<offset || t2>=total) continue;
 							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*
 									vec1[t]*std::conj(vec2[t2])*sign;
@@ -621,7 +621,7 @@ namespace Dmrg {
 				const VectorWithOffsetType& vec1,
 				const VectorWithOffsetType& vec2)
 		{
-			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
+			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper().super().size()<<"\n";
 
 			CrsMatrix<FieldType> Acrs(A);
 			CrsMatrix<FieldType> Bcrs(B);
@@ -629,12 +629,12 @@ namespace Dmrg {
 			size_t ni = Bcrs.rank();
 
 			// some sanity checks:
-			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.basisSE().size())
+			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper().super().size())
 				throw std::runtime_error("Observe::brLftCrnrEnviron_(...): "
 						"vec.size!=SE.size\n");
-			if (helper_.basisE().size()/Bcrs.rank()!=Acrs.rank())
+			if (helper_.leftRightSuper().right().size()/Bcrs.rank()!=Acrs.rank())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): "
-						"helper_.basisE().size()/Bcrs.rank()!=Acrs.rank\n");
+						"helper_.leftRightSuper().right().size()/Bcrs.rank()!=Acrs.rank\n");
 
 			// ok, we're ready for the main course:
 			for (size_t x=0;x<vec1.sectors();x++) {
@@ -644,12 +644,12 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					utils::getCoordinates(eta,r,helper_.basisSE().
-							permutation(t),helper_.basisS().size());
+					utils::getCoordinates(eta,r,helper_.leftRightSuper().super().
+							permutation(t),helper_.leftRightSuper().left().size());
 					size_t r0,r1;
-					utils::getCoordinates(r0,r1,helper_.basisE().permutation(r),ni);
-					//size_t electrons = helper_.basisSE().electrons(t);
-					size_t electrons = helper_.basisS().electrons(eta);
+					utils::getCoordinates(r0,r1,helper_.leftRightSuper().right().permutation(r),ni);
+					//size_t electrons = helper_.leftRightSuper().super().electrons(t);
+					size_t electrons = helper_.leftRightSuper().left().electrons(eta);
 					RealType sign = (electrons & 1) ? fermionSign : 1.0;
 
 					for (int k=Acrs.getRowPtr(r1);k<Acrs.getRowPtr(r1+1);k++) {
@@ -657,10 +657,10 @@ namespace Dmrg {
 						for (int k2 = Bcrs.getRowPtr(eta);
 								k2<Bcrs.getRowPtr(eta+1);k2++) {
 							size_t eta2 = Bcrs.getCol(k2);
-							size_t rprime = helper_.basisE().
+							size_t rprime = helper_.leftRightSuper().right().
 									permutationInverse(r0+r1prime*ni);
-							size_t t2 = helper_.basisSE().permutationInverse(
-									eta2+rprime*helper_.basisS().size());
+							size_t t2 = helper_.leftRightSuper().super().permutationInverse(
+									eta2+rprime*helper_.leftRightSuper().left().size());
 							if (t2<offset || t2>=total) continue;
 							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec1[t]*
 									std::conj(vec2[t2])*sign;
@@ -684,16 +684,16 @@ namespace Dmrg {
 
 			RealType norma = std::norm(vec1);
 
-			if (verbose_) std::cerr<<"SE.size="<<helper_.basisSE().size()<<"\n";
+			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper().super().size()<<"\n";
 
 			CrsMatrix<FieldType> A1crs(A1);
 			CrsMatrix<FieldType> A2crs(A2);
 			CrsMatrix<FieldType> Bcrs(B);
 			FieldType sum=0;
-			size_t ni = helper_.basisS().size()/Bcrs.rank(); // = Acrs.rank()
+			size_t ni = helper_.leftRightSuper().left().size()/Bcrs.rank(); // = Acrs.rank()
 
 			// some sanity checks:
-			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.basisSE().size())
+			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper().super().size())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): vec.size!=SE.size\n");
 			if (ni!=A1crs.rank())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): ni!=A1crs.rank\n");
@@ -708,10 +708,10 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					utils::getCoordinates(r,eta,helper_.basisSE().permutation(t),helper_.basisS().size());
+					utils::getCoordinates(r,eta,helper_.leftRightSuper().super().permutation(t),helper_.leftRightSuper().left().size());
 					size_t r0,r1;
-					utils::getCoordinates(r0,r1,helper_.basisS().permutation(r),ni);
-					RealType sign =  helper_.basisE().fermionicSign(r1,fermionSign);
+					utils::getCoordinates(r0,r1,helper_.leftRightSuper().left().permutation(r),ni);
+					RealType sign =  helper_.leftRightSuper().right().fermionicSign(r1,fermionSign);
 
 					for (int k1=A1crs.getRowPtr(r0);k1<A1crs.getRowPtr(r0+1);k1++) {
 						size_t r0prime = A1crs.getCol(k1);
@@ -719,8 +719,8 @@ namespace Dmrg {
 							size_t r1prime = A2crs.getCol(k2);
 								for (int k3 = Bcrs.getRowPtr(eta);k3<Bcrs.getRowPtr(eta+1);k3++) {
 									size_t eta2 = Bcrs.getCol(k3);
-									size_t rprime = helper_.basisS().permutationInverse(r0prime+r1prime*ni);
-									size_t t2 = helper_.basisSE().permutationInverse(rprime+eta2*helper_.basisS().size());
+									size_t rprime = helper_.leftRightSuper().left().permutationInverse(r0prime+r1prime*ni);
+									size_t t2 = helper_.leftRightSuper().super().permutationInverse(rprime+eta2*helper_.leftRightSuper().left().size());
 									if (t2<offset || t2>=total) continue;
 									sum += A1crs.getValue(k1)*A2crs.getValue(k2)*Bcrs.getValue(k3)*vec1[t]*std::conj(vec2[t2])*sign;
 								}

@@ -143,11 +143,10 @@ namespace Dmrg {
 				bool corner = false)
 		{
 			
-			ApplyOperatorType applyOpLocal1(helper_.basisS(),
-					helper_.basisE(),
-					helper_.basisSE());
+			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper());
 			VectorWithOffsetType dest;
-			applyOpLocal1(dest,src1,A,helper_.fermionicSign(),helper_.direction(),corner);
+			applyOpLocal1(dest,src1,A,helper_.fermionicSignLeft(),
+					helper_.direction(),corner);
 				
 			FieldType sum = static_cast<FieldType>(0.0);
 			const VectorWithOffsetType& v1 = dest;
@@ -156,14 +155,13 @@ namespace Dmrg {
 				size_t i = v1.sector(ii);
 				for (size_t jj=0;jj<v1.sectors();jj++) {
 					size_t j = v2.sector(jj);
-					if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+					if (i!=j) continue;
 					size_t offset = v1.offset(i);
 					for (size_t k=0;k<v1.effectiveSize(i);k++) 
 						sum+= v1[k+offset] * std::conj(v2[k+offset]);
 				}
 			}
 			return sum;
-			//std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_<<" "<<label<<std::norm(src)<<" "<<std::norm(dest)<<"\n";
 		}
 
 		ObserverHelperType& helper_;

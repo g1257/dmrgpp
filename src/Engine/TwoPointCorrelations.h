@@ -236,7 +236,8 @@ namespace Dmrg {
 			if (j==skeleton_.numberOfSites()-1) {
 				if (i==j-1) {
 					helper_.setPointer(j-2);
-					size_t ni = helper_.basisS().size()/helper_.basisE().size();
+					size_t ni = helper_.leftRightSuper().left().size()/
+							helper_.leftRightSuper().right().size();
 					MatrixType O1g(ni,ni);
 					for (size_t x=0;x<O1g.n_row();x++) O1g(x,x) = 1.0;
 					return skeleton_.bracketRightCorner(O1g,O1m,O2m,fermionicSign);

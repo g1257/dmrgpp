@@ -94,7 +94,10 @@ namespace Dmrg {
 		typename MatrixType>
 	class DmrgSerializer {
 		public:
-			typedef typename LeftRightSuperType::BasisType BasisType;
+			typedef typename LeftRightSuperType::BasisWithOperatorsType
+					BasisWithOperatorsType;
+			typedef typename BasisWithOperatorsType::BasisType
+					BasisType;
 			typedef FermionSign FermionSignType;
 			typedef typename BasisType::RealType RealType;
 
@@ -117,7 +120,7 @@ namespace Dmrg {
 			DmrgSerializer(typename PsimagLite::IoSimple::In& io,bool bogus = false) 
 			: fS_(io,bogus),
 			  fE_(io,bogus),
-			  lrs_(io,"",bogus)
+			  lrs_(io)
 			{
 				if (bogus) return;
 				std::string s = "#WAVEFUNCTION_sites=";
@@ -167,12 +170,11 @@ namespace Dmrg {
 				return fE_;
 			}
 			
-//			const BasisType& basisS() const { return pS_; }
-//
-//			const BasisType& basisE() const { return pE_; }
-//
-//			const BasisType& basisSE() const { return pSE_; }
-//
+			const LeftRightSuperType& leftRightSuper() const
+			{
+				return lrs_;
+			}
+
 			const VectorType& wavefunction() const { return wavefunction_; }
 			
 			size_t columns() const { return transform_.n_col(); }
