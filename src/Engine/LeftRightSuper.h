@@ -114,6 +114,7 @@ namespace Dmrg {
 				left_ = new BasisWithOperatorsType(io,"");
 				right_ = new BasisWithOperatorsType(io,"");
 				super_ = new SuperBlockType(io,"");
+				load(io);
 			}
 
 			LeftRightSuper(
@@ -157,12 +158,11 @@ namespace Dmrg {
 				refCounter_++;
 			}
 
-			ThisType& operator=(const ThisType& rls)
+			// deep copy
+			ThisType& operator=(const ThisType& lrs)
 			{
-				left_=rls.left_;
-				right_=rls.right_;
-				super_=rls.super_;
-				refCounter_++;
+				deepCopy(lrs);
+				//refCounter_++;
 				return *this;
 			}
 
@@ -204,15 +204,6 @@ namespace Dmrg {
 				super_->setToProduct(*left_,*right_,quantumSector);
 			}
 
-			template<typename IoInputType>
-			void load(IoInputType& io)
-			{
-				super_->load(io);
-				left_->load(io);
-				right_->load(io);
-
-			}
-
 			template<typename IoOutputType>
 			void save(IoOutputType& io) const
 			{
@@ -240,8 +231,24 @@ namespace Dmrg {
 						("LeftRightSuper::right(...): not the owner\n");
 				*right_=right; // deep copy
 			}
-		private:
 
+			void deepCopy(const ThisType& rls)
+			{
+				*left_=*rls.left_;
+				*right_=*rls.right_;
+				*super_=*rls.super_;
+			}
+
+			template<typename IoInputType>
+			void load(IoInputType& io)
+			{
+				super_->load(io);
+				left_->load(io);
+				right_->load(io);
+
+			}
+
+		private:
 			LeftRightSuper(ThisType& rls);
 
 			//! add block X to basis pS and put the result in left_:

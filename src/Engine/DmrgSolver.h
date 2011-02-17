@@ -523,21 +523,38 @@ namespace Dmrg {
 			DensityMatrixType dmS(target,pBasis,pBasisSummed,lrs_.super(),direction);
 			dmS.check(direction);
 			
-			if (verbose_ && concurrency_.root()) std::cerr<<"Trying to diagonalize density-matrix with size="<<dmS.rank()<<"\n";
+			if (verbose_ && concurrency_.root()) {
+				std::cerr<<"Trying to diagonalize density-matrix with size=";
+				std::cerr<<dmS.rank()<<"\n";
+			}
 			std::vector<RealType> eigs;
 			dmS.diag(eigs,'V',concurrency_);
 			dmS.check2(direction);
 			
-			if (verbose_ && concurrency_.root()) std::cerr<<"Done with density-matrix diag.\n";
+			if (verbose_ && concurrency_.root())
+				std::cerr<<"Done with density-matrix diag.\n";
 			
 			//! transform basis: dmS^\dagger * operator matrix * dms
 			rSprime = pBasis;
-			if (verbose_ && concurrency_.root()) std::cerr<<"About to changeBasis...\n";
+			if (verbose_ && concurrency_.root())
+				std::cerr<<"About to changeBasis...\n";
 			
-			RealType error = rSprime.changeBasis(ftransform,dmS(),eigs,keptStates,parameters_,concurrency_);
-			LeftRightSuperType lrs(rSprime,(MyBasisWithOperators&) pBasisSummed,
-					(MyBasis&)lrs_.super());
-			waveFunctionTransformation_.push(ftransform,direction,lrs);
+			RealType error = rSprime.changeBasis(ftransform,dmS(),eigs,
+					keptStates,parameters_,concurrency_);
+			if (direction == EXPAND_SYSTEM) {
+				LeftRightSuperType lrs(
+						rSprime,
+						(MyBasisWithOperators&) pBasisSummed,
+						(MyBasis&)lrs_.super());
+				waveFunctionTransformation_.push(ftransform,direction,lrs);
+			} else {
+				LeftRightSuperType lrs(
+						(MyBasisWithOperators&) pBasisSummed,
+						rSprime,
+						(MyBasis&)lrs_.super());
+					waveFunctionTransformation_.push(ftransform,direction,lrs);
+			}
+
 
 			std::ostringstream msg;
 			msg<<"new size of basis="<<rSprime.size();
