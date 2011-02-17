@@ -344,18 +344,6 @@ namespace Dmrg {
 			SparseElementType sum=0;
 			const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
 			const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
-			//int m = dmrgWaveStruct_.m;
-			//size_t final = dmrgWaveStruct_.lrs.super().partition(m+1);
-			//size_t start = dmrgWaveStruct_.lrs.super().partition(m);
-			size_t eqn =  dmrgWaveStruct_.lrs.left().qn(ip);
-			
-			int ma =  dmrgWaveStruct_.lrs.left().partitionFromQn(eqn,BasisType::BEFORE_TRANSFORM);
-			if (ma<0) throw std::runtime_error("ma<0\n");
-			
-			size_t totala =  dmrgWaveStruct_.ws.n_row();
-			totala = dmrgWaveStruct_.lrs.left().partition(ma+1,BasisType::BEFORE_TRANSFORM)-
-					dmrgWaveStruct_.lrs.left().partition(ma,BasisType::BEFORE_TRANSFORM);
-			//size_t offseta = dmrgWaveStruct_.lrs.left().partition(ma,DmrgBasisType::BEFORE_TRANSFORM);
 			
 			size_t kpjp = kp+jp*nk;
 			size_t kpjpx = dmrgWaveStruct_.lrs.right().permutationInverse(kpjp);

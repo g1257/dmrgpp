@@ -5,7 +5,7 @@ GeometryKind=chain
 GeometryOptions=ConstantValues
 Connectors 1 1.0
 
-SolverOptions=hasQuantumNumbers,nowft,nosu2,,checkpoint
+SolverOptions=hasQuantumNumbers,wft,nosu2,,checkpoint
 Version=55460ffd4e0d2587072e9595d7d4ed211c66e83e
 OutputFile=data24.txt
 InfiniteLoopKeptStates=60

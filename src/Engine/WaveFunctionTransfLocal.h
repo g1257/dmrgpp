@@ -225,28 +225,6 @@ namespace Dmrg {
 			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/nk;
 			size_t alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip+kp*nip);
 			
-			size_t offseta = 0; 
-			size_t totala =dmrgWaveStruct_.ws.n_col();
-			if (totala == dmrgWaveStruct_.lrs.left().size()) {
-				size_t eqn =  dmrgWaveStruct_.lrs.left().qn(alpha,BasisType::BEFORE_TRANSFORM);
-				int ma = dmrgWaveStruct_.lrs.left().partitionFromQn(eqn);
-				if (ma>=0) {
-					offseta = dmrgWaveStruct_.lrs.left().partition(ma);
-					totala = dmrgWaveStruct_.lrs.left().partition(ma+1) - offseta;
-				}
-			}
-
-			size_t offsetb = 0;
-			size_t totalb = dmrgWaveStruct_.lrs.right().permutationInverse().size();
-			if  (dmrgWaveStruct_.lrs.right().dmrgTransformed()) {
-				size_t eqn = dmrgWaveStruct_.lrs.right().qn(jp);
-				int mb =  dmrgWaveStruct_.lrs.right().partitionFromQn(eqn,BasisType::BEFORE_TRANSFORM);
-				if (mb>=0) {
-					offsetb = dmrgWaveStruct_.lrs.right().partition(mb,BasisType::BEFORE_TRANSFORM);
-					totalb = dmrgWaveStruct_.lrs.right().partition(mb+1,BasisType::BEFORE_TRANSFORM) - offsetb;
-				}
-			}
-			
 			SparseElementType sum=0;
 
 			for (int k = ws.getRowPtr(alpha);k<ws.getRowPtr(alpha+1);k++) {

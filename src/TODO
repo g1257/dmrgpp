@@ -40,4 +40,6 @@ unused stuff gets saved in data file
 cannot go backwards from infinite loop when WFT is in use
 (see WaveFunctionTransfFactory.h line 137)
 
+basis.eq(...) could be uninitialized due to quantumNumbersOld_
+being uninitialized. Also true for other private data of BasisImplementation, need to fix
 
