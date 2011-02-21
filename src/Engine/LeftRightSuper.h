@@ -115,7 +115,6 @@ namespace Dmrg {
 				super_ = new SuperBlockType(io,"");
 				left_ = new BasisWithOperatorsType(io,"");
 				right_ = new BasisWithOperatorsType(io,"");
-				//load(io);
 			}
 
 			LeftRightSuper(
@@ -125,9 +124,9 @@ namespace Dmrg {
 			: progress_("LeftRightSuper",0),
 			  left_(0),right_(0),super_(0),refCounter_(0)
 			{
-				left_ = new BasisWithOperatorsType("slabel");
-				right_ = new BasisWithOperatorsType("elabel");
-				super_ = new SuperBlockType("selabel");
+				left_ = new BasisWithOperatorsType(slabel);
+				right_ = new BasisWithOperatorsType(elabel);
+				super_ = new SuperBlockType(selabel);
 			}
 
 			~LeftRightSuper()
@@ -231,13 +230,6 @@ namespace Dmrg {
 				*right_=right; // deep copy
 			}
 
-			void deepCopy(const ThisType& rls)
-			{
-				*left_=*rls.left_;
-				*right_=*rls.right_;
-				*super_=*rls.super_;
-				if (refCounter_>0) refCounter_--;
-			}
 
 			template<typename IoInputType>
 			void load(IoInputType& io)
@@ -245,11 +237,18 @@ namespace Dmrg {
 				super_->load(io);
 				left_->load(io);
 				right_->load(io);
-
 			}
 
 		private:
 			LeftRightSuper(ThisType& rls);
+
+			void deepCopy(const ThisType& rls)
+			{
+				*left_=*rls.left_;
+				*right_=*rls.right_;
+				*super_=*rls.super_;
+				if (refCounter_>0) refCounter_--;
+			}
 
 			//! add block X to basis pS and put the result in left_:
 			template<typename SomeModelType>

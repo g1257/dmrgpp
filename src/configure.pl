@@ -675,10 +675,11 @@ int main(int argc,char *argv[])
 	// FIXME: See if we need VectorWithOffsets sometimes
 	// FIXME: Does it make sense to have ModelHelperSu2 here sometimes?
 	typedef CrsMatrix<RealType> MySparseMatrixReal;
+	typedef CrsMatrix<FieldType> MySparseMatrixComplex;
 	if (hasTimeEvolution)
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,
-			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename,options);
+			$targetting,MySparseMatrixComplex>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename,options);
 	else
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,
