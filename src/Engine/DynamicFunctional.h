@@ -120,15 +120,11 @@ namespace Dmrg {
 			//checkProducts(vC,x);
 			return sum;
 		}
-		
 
 		size_t size() const {return H_.rank(); }
-		
-		
+
 	private:
-		
-		
-		
+
 		const SparseMatrixType& H_;
 		const VectorType& aVector_;
 		RealType omega_;

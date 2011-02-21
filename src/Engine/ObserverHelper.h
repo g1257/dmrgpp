@@ -268,10 +268,7 @@ namespace Dmrg {
 					counter++;
 				} catch (std::exception& e)
 				{
-					/*if (dSerializerV_.size()==0) {
-						std::cerr<<e.what()<<" rethrowing...\n";
-						throw e;
-					}*/
+					std::cerr<<"CAUGHT: "<<e.what();
 					noMoreData_ = true;
 					std::cerr<<"Ignore prev. error, if any. It simply means there's no more data\n";
 					break;

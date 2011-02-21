@@ -24,7 +24,7 @@ $sd = 1 if ($whatState eq "gs");
 
 open(FILE,$file) or die "Cannot open file $file: $!\n";
 while(<FILE>) {
-	if (/\Q${label}/) {
+	if (/\Q${label}/i) {
 		last;
 	}
 }

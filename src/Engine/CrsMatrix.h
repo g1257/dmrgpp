@@ -366,10 +366,12 @@ namespace Dmrg {
 	template<typename T>
 	std::istream &operator>>(std::istream &is,CrsMatrix<T>& m)
 	{
-		size_t n;
+		int n;
 		is>>n;
+		if (n<0) throw std::runtime_error(
+				"is>>CrsMatrix(...): Rank must be positive\n");
 		m.resize(n);
-		for (size_t i=0;i<n+1;i++) is>>m.rowptr_[i];
+		for (size_t i=0;i<size_t(n)+1;i++) is>>m.rowptr_[i];
 
 		size_t nonzero;
 		is>>nonzero;
