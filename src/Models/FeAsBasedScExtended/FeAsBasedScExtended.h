@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef FEAS_BASED_SC_EX
 #define FEAS_BASED_SC_EX
-#include "ModelFeAsBasedSc.h"
+#include "ModelFeBasedSc.h"
 #include "LinkProductFeAsExtended.h"
 
 namespace Dmrg {
@@ -98,10 +98,10 @@ namespace Dmrg {
 			SharedMemoryTemplate> {
 		
 	public:
-		typedef ModelFeAsBasedSc<ModelHelperType_,SparseMatrixType,
-			GeometryType,LinkProductFeAsExtended<ModelHelperType_>
-			ModelFeAsType;
-
+		typedef ModelFeBasedSc<ModelHelperType_,SparseMatrixType,
+			GeometryType,SharedMemoryTemplate> ModelFeAsType;
+		typedef typename ModelFeAsType::HilbertState HilbertState;
+		typedef typename ModelFeAsType::HilbertBasisType HilbertBasisType;
 		typedef ModelHelperType_ ModelHelperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
@@ -116,6 +116,10 @@ namespace Dmrg {
 		typedef	 typename ModelBaseType::BasisWithOperatorsType
 				MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
+		typedef typename MyBasis::BlockType BlockType;
+
+		static const size_t NUMBER_OF_ORBITALS =
+				ModelFeAsType::NUMBER_OF_ORBITALS;
 
 		FeAsBasedScExtended(ParametersModelFeAs<RealType> const &mp,
 				GeometryType const &geometry)
@@ -136,7 +140,7 @@ namespace Dmrg {
 				std::vector<OperatorType> &creationMatrix,
 				SparseMatrixType &hamiltonian,
 				BasisDataType &q,
-				Block const &block)  const
+				BlockType const &block)  const
 		{
 			modelFeAs_.setNaturalBasis(creationMatrix,hamiltonian,q,block);
 
@@ -157,7 +161,7 @@ namespace Dmrg {
 		//! set creation matrices for sites in block
 		void setOperatorMatrices(
 				std::vector<OperatorType> &creationMatrix,
-				Block const &block) const
+				BlockType const &block) const
 		{
 			modelFeAs_.setOperatorMatrices(creationMatrix,block);
 
@@ -173,7 +177,7 @@ namespace Dmrg {
 				size_t orbital=0,
 				size_t spin=0) const
 		{
-			Block block;
+			BlockType block;
 			block.resize(1);
 			block[0]=0;
 			std::vector<OperatorType> creationMatrix;
@@ -196,8 +200,9 @@ namespace Dmrg {
 			if (what=="-") { // delta = c^\dagger * c^dagger
 				PsimagLite::Matrix<SparseElementType> tmp;
 				size_t x = 2*NUMBER_OF_ORBITALS;
-				crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
-				transposeConjugate(creationMatrix,tmp);
+				SparseMatrixType tmp2;
+				transposeConjugate(tmp2,creationMatrix[x].data);
+				crsMatrixToFullMatrix(tmp,tmp2);
 				return tmp;
 			}
 			return modelFeAs_.getOperator(what,orbital,spin);
@@ -219,10 +224,44 @@ namespace Dmrg {
 		
 
 	private:
+
+		// add S^+_i to creationMatrix
+		void setSplus(
+				std::vector<OperatorType> &creationMatrix,
+				const BlockType& block) const
+		{
+			std::runtime_error("FeAsBasedScExtended: Unimplemented\n");
+		}
+
+		// add S^z_i to creationMatrix
+		void setSz(
+				std::vector<OperatorType> &creationMatrix,
+				const BlockType& block) const
+		{
+			std::runtime_error("FeAsBasedScExtended: Unimplemented\n");
+		}
+
+		// add J_{ij} S^+_i S^-_j + S^-_i S^+_j to Hamiltonia
+		void addSplusSminus(
+				SparseMatrixType &hamiltonian,
+				const std::vector<OperatorType> &creationMatrix,
+				const BlockType& block) const
+		{
+			std::runtime_error("FeAsBasedScExtended: Unimplemented\n");
+		}
+
+		// add J_{ij} S^z_i S^z_j to Hamiltonian
+		void addSzSz(
+				SparseMatrixType &hamiltonian,
+				const std::vector<OperatorType> &creationMatrix,
+				const BlockType& block) const
+		{
+			std::runtime_error("FeAsBasedScExtended: Unimplemented\n");
+		}
+
 		const ParametersModelFeAs<RealType>&  modelParameters_;
 		GeometryType const &geometry_;
 		ModelFeAsType modelFeAs_;
-
 	};     //class FeAsBasedScExtended
 
 	template<
@@ -231,7 +270,7 @@ namespace Dmrg {
 		typename GeometryType,
   		template<typename> class SharedMemoryTemplate
 		>
-	std::ostream &operator<<(std::ostream &os,const FeBasedScExtended<
+	std::ostream &operator<<(std::ostream &os,const FeAsBasedScExtended<
 		ModelHelperType,
 		SparseMatrixType,
 		GeometryType,

@@ -109,11 +109,10 @@ namespace Dmrg {
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
+		typedef typename HilbertSpaceFeAsType::HilbertState HilbertState;
 		
-	private:
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
-		typedef typename HilbertSpaceFeAsType::HilbertState HilbertState;
 		
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;

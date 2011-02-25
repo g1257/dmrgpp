@@ -116,7 +116,8 @@ sub askQuestions
 	}
 	
 	print "What model do you want to compile?\n";
-	print "Available: Hubbard, Heisenberg or FeBasedSc or TjOneOrbital or ExtendedHubbard1Orbital\n";
+	print "Available: Hubbard, Heisenberg or FeBasedSc or FeAsBasedScExtended ";
+	print " or TjOneOrbital or ExtendedHubbard1Orbital\n";
 	print "Default is: Hubbard (press ENTER): ";
 	$_=<STDIN>;
 	chomp;
@@ -127,23 +128,26 @@ sub askQuestions
 	$modelFullName="HubbardOneBand";
 	$modelFullName="HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i); 
 	$modelFullName="FeAsModel" if ($model=~/febasedsc/i);
-	$modelFullName="FeAsModel" if ($model=~/tjoneorbital/i);
+	$modelFullName="TjOneOrbital" if ($model=~/tjoneorbital/i);
+	$modelFullName="FeAsBasedScExtended" if ($model=~/feasbasedscextended/i);
 	$modelFullName="ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
 	
-	$modelLocation="Models/HubbardOneBand";
-	$modelLocation="Models/HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i); 
-	$modelLocation="Models/FeAsModel" if ($model=~/febasedsc/i);
-	$modelLocation="Models/TjOneOrbital" if ($model=~/tjoneorbital/i);
-	$modelLocation="Models/ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
+	$modelLocation="";
+	$modelLocation=" -IModels/HubbardOneBand" if ($model=~/hubbard/i);
+	$modelLocation.=" -IModels/HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i or $model=~/feasbasedscextended/i); 
+	$modelLocation.=" -IModels/FeAsModel" if ($model=~/febasedsc/i || $model=~/feasbasedscextended/i);
+	$modelLocation.=" -IModels/FeAsBasedScExtended" if ($model=~/feasbasedscextended/i);
+	$modelLocation=" -IModels/TjOneOrbital" if ($model=~/tjoneorbital/i);
+	$modelLocation.=" -IModels/ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
 	
 	if ($model=~/hubbard/i or $model=~/febasedsc/i or $model=~/tjoneorbital/i
-		or $model=~/extendedhubbard1orb/i) {
+		or $model=~/extendedhubbard1orb/i or $model=~/feasbasedscextended/i) {
 		$connectors="hoppings";
 	} elsif ($model=~/heisenberg/i) {
 		$connectors="jvalues";
 	}
 	
-	$connectors2="jvalues" if ($model=~/tjoneorbital/i);
+	$connectors2="jvalues" if ($model=~/tjoneorbital/i or $model=~/feasbasedscextended/i);
 	$connectors2="ninjConnectors" if ($model=~/extendedhubbard1orb/i);
 	
 	print "Please enter the linker flags, LDFLAGS\n";
@@ -176,9 +180,6 @@ sub createMakefile
 	my $compiler = compilerName();
 	my $headerFiles = join(' ', glob("Engine/*.h Models/*/*.h Geometries/*.h"));
 	my @litProgFiles = glob("Engine/*.w Models/*/*.w Geometries/*.w");
-	if ($modelLocation=~/extendedhubbard1orb/i) {
-		$modelLocation = $modelLocation." -IModels/HubbardOneBand ";
-	}
 	my $litProgTargets = getLitProgTargets(\@litProgFiles);
 	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 print FOUT<<EOF;
@@ -189,7 +190,7 @@ print FOUT<<EOF;
 # MPI: $mpi
 
 LDFLAGS =    $lapack  $gslLibs $pthreadsLib
-CPPFLAGS = -Werror -Wall  -IEngine -I$modelLocation -IGeometries -I$PsimagLite
+CPPFLAGS = -Werror -Wall  -IEngine $modelLocation -IGeometries -I$PsimagLite
 EOF
 if ($mpi) {
 	print FOUT "CXX = mpicxx -O2 -DNDEBUG \n";
@@ -542,7 +543,7 @@ print OBSOUT<<EOF;
 		observerLib.measure("szsz",n/2,n);
 	}
 EOF
-	if  ($modelName=~/febasedsc/i) {
+	if  ($modelName=~/febasedsc/i or $modelName=~/feasbasedscextended/i) {
 print print OBSOUT<<EOF;
 	if (obsOptions.find("dd")!=std::string::npos && 
 			geometry.label(0).find("ladder")==std::string::npos) {
@@ -717,6 +718,8 @@ sub getParametersName
 		$parametersName = "ParametersModelHeisenberg";
 	} elsif ($model=~/febasedsc/i) {
 		$parametersName = "ParametersModelFeAs";
+	} elsif ($model=~/feasbasedscextended/i) {
+		$parametersName = "ParametersModelFeAs";
 	} elsif ($model=~/tjoneorbital/i) {
 		$parametersName = "ParametersTjOneOrbital";
 	}
@@ -754,6 +757,8 @@ sub getModelName()
 		$modelName="ModelHeisenberg";
 	} elsif ($model=~/febasedsc/i) {
 		$modelName = "ModelFeBasedSc";
+	} elsif ($model=~/feasbasedscextended/i) {
+		$modelName = "FeAsBasedScExtended";
 	} elsif ($model=~/tjoneorbital/i) {
 		$modelName = "TjOneOrbital";
 	} elsif ($model=~/extendedhubbard1orb/i) {
@@ -776,6 +781,8 @@ sub getOperatorsName()
 		$operatorsName = "OperatorsHeisenberg";
 	} elsif ($model=~/febasedsc/i) {
 		$operatorsName="OperatorsFeAs";
+	} elsif ($model=~/feasbasedscextended/i) {
+		$operatorsName="OperatorsFeAsExtended";
 	} elsif ($model=~/tjoneorbital/i) {
 		$operatorsName="OperatorsTjOneOrbital";
 	}
