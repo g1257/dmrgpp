@@ -92,8 +92,11 @@ namespace Dmrg {
 			
 		public:
 			typedef typename ModelHelperType::RealType RealType;
-			//typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 			
+			//! There are 4 different orbitals
+			//! and 2 spins. Spin is diagonal so we end up with 8 possiblities
+			//! a up a up, a up b up, b up a up, b up, b up,
+			//! and similarly for spin down.
 			static size_t dofs(size_t term) { return 8; }
 			
 			// has only dependence on orbital

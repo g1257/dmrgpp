@@ -74,85 +74,57 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LinkProductHeisenbergSpinOneHalf.h
+/*! \file OperatorsFeAsExtended.h
  *
- *  LinkProduct for HeisenbergSpinOneHalf model
+ *
  *
  */
-#ifndef LINK_PRODUCT_HEIS_ONE_HALF_H
-#define LINK_PRODUCT_HEIS_ONE_HALF_H
+#ifndef OPERATORS_FEAS_EX_H
+#define OPERATORS_FEAS_EX_H
 
-#include "LinkProductStruct.h"
+#include "OperatorsBase.h"
 
 namespace Dmrg {
-	template<typename ModelHelperType>
-	class LinkProductHeisenbergSpinOneHalf {
-			
-		public:
-			typedef std::pair<size_t,size_t> PairType;
-			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef typename ModelHelperType::RealType RealType;
+	//! For this model the operators are c^_{i\sigma} 
+	template<typename OperatorType,typename DmrgBasisType>
+	class OperatorsFeAsExtended : public OperatorsBase<OperatorType,DmrgBasisType> {
+	public:	
+		static int const NUMBER_OF_ORBITALS=2;
+		static int const DEGREES_OF_FREEDOM=2*NUMBER_OF_ORBITALS;
+		
+		OperatorsFeAsExtended(const DmrgBasisType* thisBasis) :
+			OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,
+					DEGREES_OF_FREEDOM,NUMBER_OF_ORBITALS)
+		{}
 
-			static void setLinkData(
-					size_t term,
-					size_t dofs,
-     					bool isSu2,
-					size_t& fermionOrBoson,
-					std::pair<size_t,size_t>& ops,
-					std::pair<char,char>& mods,
-					size_t& angularMomentum,
-     					RealType& angularFactor,
-					size_t& category)
-			{
-				fermionOrBoson = ProgramGlobals::BOSON;
-				ops = operatorDofs(dofs,isSu2);
-				angularMomentum = 2;
-				char tmp = mods.first;
-				switch (dofs) {
-					case 0:
-						angularFactor = -1;
-						category = 2;
-						break;
-					case 1:
-						angularFactor = -1;
-						category = 0;
-						mods.first = mods.second;
-						mods.second = tmp;
-						break;
-					case 2:
-						angularFactor = 0.5;
-						category = 1;
-						break;
-				}
-			}
-			
-			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2)
-			{
-				if (isSu2) value = -value;
-				if (dofs<2) value *= 0.5;
-			}
-			
-			//! For TERM_J there are 3 terms:
-			//! Splus Sminus and
-			//! Sminus Splus and
-			//! Sz Sz
-			static size_t dofs(size_t term) { return 3; }
-			
-			static PairType connectorDofs(size_t term,size_t dofs)
-			{
-				return std::pair<size_t,size_t>(0,0); // no orbital and no anisotropy
-			}
+		template<typename IoInputter>
+		OperatorsFeAsExtended(
+				IoInputter& io,
+				size_t level,
+				const DmrgBasisType* thisBasis)
+		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,
+			thisBasis,DEGREES_OF_FREEDOM,NUMBER_OF_ORBITALS)
+		{}
 
-		private:
-			
-			static PairType operatorDofs(size_t dofs,bool isSu2)
-			{
-				if (dofs<2) return PairType(0,0);
-				size_t x = (isSu2) ? 0 : 1;
-				return PairType(x,x);
-			}
-	}; // class LinkProductHeisenbergSpinOneHalf
+		const OperatorType& getOperator(int i,int sigma) const 
+		{ 
+			int k = sigma+i*DEGREES_OF_FREEDOM;
+			return this->getOperatorByIndex(k);
+		}
+		
+		//! 4 operators per site: c^dagger_{a up} c^dagger_{b up}
+		//! 			: c^dagger_{a down} c^dagger_{b down}
+		//! Plus 2 more:
+		//! Splus and
+		//! Sz
+		static size_t numberOfOperatorsPerSite()
+		{
+			return DEGREES_OF_FREEDOM + 2;
+		}
+
+	}; //class OperatorsFeAsExtended
+	
 } // namespace Dmrg
+
 /*@}*/
-#endif
+#endif //OPERATORS_FEAS_EX_H

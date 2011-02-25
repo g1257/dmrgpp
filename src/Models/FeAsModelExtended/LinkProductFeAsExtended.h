@@ -74,85 +74,84 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LinkProductHeisenbergSpinOneHalf.h
+/*! \file LinkProductFeAsExtended.h
  *
- *  LinkProduct for HeisenbergSpinOneHalf model
+ *  A class to represent product of operators that form a link or
+ *  bond for this model
  *
  */
-#ifndef LINK_PRODUCT_HEIS_ONE_HALF_H
-#define LINK_PRODUCT_HEIS_ONE_HALF_H
-
-#include "LinkProductStruct.h"
+#ifndef LINK_PRODUCT_EX_H
+#define LINK_PRODUCT_EX_H
+#include "LinkProductHeisenbergSpinOneHalf.h"
+#include "LinkProductFeAs.h"
 
 namespace Dmrg {
+	
 	template<typename ModelHelperType>
-	class LinkProductHeisenbergSpinOneHalf {
-			
-		public:
-			typedef std::pair<size_t,size_t> PairType;
+	class LinkProductFeAsExtended {
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
+			typedef std::pair<size_t,size_t> PairType;
+			typedef LinkProductFeAs<ModelHelperType> LinkProductFeAsType;
+			typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType>
+				LinkProductHeisenbergType;
+			enum {TERM_HOPPING, TERM_J};
+			
+		public:
 			typedef typename ModelHelperType::RealType RealType;
+			
+			static size_t dofs(size_t term)
+			{
+				return (term==TERM_J) ?
+						LinkProductHeisenbergType::dofs(term) :
+						LinkProductFeAsType::dofs(term);
+			}
+			
+			// has only dependence on orbital
+			static PairType connectorDofs(size_t term,size_t dofs)
+			{
+				if (term==TERM_HOPPING)
+					return LinkProductFeAsType::connectorDofs(term,dofs);
 
+				return LinkProductHeisenbergType::connectorDofs(term,dofs);
+			}
+			
 			static void setLinkData(
 					size_t term,
 					size_t dofs,
      					bool isSu2,
 					size_t& fermionOrBoson,
-					std::pair<size_t,size_t>& ops,
-					std::pair<char,char>& mods,
+					PairType& ops,
+     					std::pair<char,char>& mods,
 					size_t& angularMomentum,
      					RealType& angularFactor,
 					size_t& category)
 			{
-				fermionOrBoson = ProgramGlobals::BOSON;
-				ops = operatorDofs(dofs,isSu2);
-				angularMomentum = 2;
-				char tmp = mods.first;
-				switch (dofs) {
-					case 0:
-						angularFactor = -1;
-						category = 2;
-						break;
-					case 1:
-						angularFactor = -1;
-						category = 0;
-						mods.first = mods.second;
-						mods.second = tmp;
-						break;
-					case 2:
-						angularFactor = 0.5;
-						category = 1;
-						break;
-				}
-			}
-			
-			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2)
-			{
-				if (isSu2) value = -value;
-				if (dofs<2) value *= 0.5;
-			}
-			
-			//! For TERM_J there are 3 terms:
-			//! Splus Sminus and
-			//! Sminus Splus and
-			//! Sz Sz
-			static size_t dofs(size_t term) { return 3; }
-			
-			static PairType connectorDofs(size_t term,size_t dofs)
-			{
-				return std::pair<size_t,size_t>(0,0); // no orbital and no anisotropy
-			}
+				if (term==TERM_HOPPING)
+					return LinkProductFeAsType::setLinkData(
+						term,dofs,isSu2,fermionOrBoson,ops,mods,
+						angularMomentum,angularFactor,category);
 
-		private:
-			
-			static PairType operatorDofs(size_t dofs,bool isSu2)
-			{
-				if (dofs<2) return PairType(0,0);
-				size_t x = (isSu2) ? 0 : 1;
-				return PairType(x,x);
+				return LinkProductHeisenbergType::setLinkData(
+						term,dofs,isSu2,fermionOrBoson,ops,mods,
+						angularMomentum,angularFactor,category);
 			}
-	}; // class LinkProductHeisenbergSpinOneHalf
+			
+			static void valueModifier(
+					SparseElementType& value,
+					size_t term,
+					size_t dofs,bool isSu2)
+			{
+				if (term==TERM_HOPPING) return
+						LinkProductFeAsType::valueModifier(
+							value,term,dofs,isSu2);
+				LinkProductHeisenbergType::valueModifier(
+						value,term,dofs,isSu2);
+
+			}
+		private:
+
+	}; // class LinkProductFeAsExtended
 } // namespace Dmrg
 /*@}*/
-#endif
+#endif //LINK_PRODUCT_EX_H
