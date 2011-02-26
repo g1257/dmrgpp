@@ -49,4 +49,5 @@ Tests *with* SU(2) symmetry:
 103) same as 3 but without su(2) symmetry
 200) Time Evolution
 201) Restart of 200, tests checkpointing with time vectors
+340) A test of the Fe-based Superconductors extended model
 #TAGEND DO NOT REMOVE THIS TAG

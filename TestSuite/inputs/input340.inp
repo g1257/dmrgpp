@@ -1,0 +1,35 @@
+TotalNumberOfSites=8 
+NumberOfTerms=2
+DegreesOfFreedom=2
+GeometryKind=ladderx
+GeometryOptions=ConstantValues
+LadderLeg=2
+Connectors 2 2
+-0.058 0
+0 -0.2196
+Connectors 2 2
+-0.2196 0
+0 -0.058
+Connectors 2 2
++0.20828 +0.079
++0.079 +0.20828
+Connectors 2 2
++0.20828 -0.079
+-0.079 +0.20828
+DegreesOfFreedom=1
+GeometryKind=ladderx
+GeometryOptions=ConstantValues
+LadderLeg=2
+Connectors 1 0.1
+Connectors 1 0.1
+Connectors 1 0.02
+Connectors 1 0.02 
+hubbardU	8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+potentialV	8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+SolverOptions=hasQuantumNumbers,nowft,seSu2Symmetry,
+Version=61289987cdd32b8485213ac0415baf4e9cd16432
+OutputFile=data340.txt
+InfiniteLoopKeptStates=60
+FiniteLoops 4  3 100 0 -3 100 0 -3 100 0 3 100 0 
+TargetQuantumNumbers 3 1.0 1.0 0.0
+

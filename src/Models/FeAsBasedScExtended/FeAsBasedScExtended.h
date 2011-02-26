@@ -107,6 +107,7 @@ namespace Dmrg {
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
+		typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 
 		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef LinkProductFeAsExtended<ModelHelperType> LinkProductType;
@@ -120,6 +121,10 @@ namespace Dmrg {
 
 		static const size_t NUMBER_OF_ORBITALS =
 				ModelFeAsType::NUMBER_OF_ORBITALS;
+		static const size_t SPIN_UP =
+						ModelFeAsType::SPIN_UP;
+		static const size_t SPIN_DOWN =
+						ModelFeAsType::SPIN_DOWN;
 
 		FeAsBasedScExtended(ParametersModelFeAs<RealType> const &mp,
 				GeometryType const &geometry)
@@ -142,6 +147,8 @@ namespace Dmrg {
 				BasisDataType &q,
 				BlockType const &block)  const
 		{
+			blockIsSize1OrThrow(block);
+
 			modelFeAs_.setNaturalBasis(creationMatrix,hamiltonian,q,block);
 
 			// add S^+_i to creationMatrix
@@ -163,6 +170,8 @@ namespace Dmrg {
 				std::vector<OperatorType> &creationMatrix,
 				BlockType const &block) const
 		{
+			blockIsSize1OrThrow(block);
+
 			modelFeAs_.setOperatorMatrices(creationMatrix,block);
 
 			// add S^+_i to creationMatrix
@@ -230,7 +239,21 @@ namespace Dmrg {
 				std::vector<OperatorType> &creationMatrix,
 				const BlockType& block) const
 		{
-			std::runtime_error("FeAsBasedScExtended: Unimplemented\n");
+			SparseMatrixType m;
+			cDaggerC(m,creationMatrix,block,1.0,SPIN_UP,SPIN_DOWN);
+			Su2RelatedType su2related;
+			size_t offset = 2*NUMBER_OF_ORBITALS;
+			su2related.source.push_back(offset);
+			su2related.source.push_back(offset+1);
+			su2related.source.push_back(offset);
+			su2related.transpose.push_back(-1);
+			su2related.transpose.push_back(-1);
+			su2related.transpose.push_back(1);
+			su2related.offset = 1;
+
+			OperatorType sPlus(m,1,typename OperatorType::PairType(2,2),-1,
+					su2related);
+			creationMatrix.push_back(sPlus);
 		}
 
 		// add S^z_i to creationMatrix
@@ -238,7 +261,35 @@ namespace Dmrg {
 				std::vector<OperatorType> &creationMatrix,
 				const BlockType& block) const
 		{
-			std::runtime_error("FeAsBasedScExtended: Unimplemented\n");
+			SparseMatrixType m;
+			cDaggerC(m,creationMatrix,block,1.0,SPIN_UP,SPIN_UP);
+			cDaggerC(m,creationMatrix,block,-1.0,SPIN_DOWN,SPIN_DOWN);
+			Su2RelatedType su2related2;
+			OperatorType sz(m,1,typename OperatorType::PairType(2,1),
+					1.0/sqrt(2.0),su2related2);
+			creationMatrix.push_back(sz);
+		}
+
+		// add S^+_i to creationMatrix
+		void cDaggerC(
+				SparseMatrixType& sum,
+				const std::vector<OperatorType> &creationMatrix,
+				const BlockType& block,
+				RealType value,
+				size_t spin1,
+				size_t spin2) const
+		{
+			SparseMatrixType tmpMatrix,tmpMatrix2;
+			for (size_t orbital=0;orbital<NUMBER_OF_ORBITALS;orbital++) {
+				transposeConjugate(tmpMatrix2,
+						creationMatrix[orbital+spin2*NUMBER_OF_ORBITALS].data);
+				multiply(tmpMatrix,
+						creationMatrix[orbital+spin1*NUMBER_OF_ORBITALS].data,
+						tmpMatrix2);
+				multiplyScalar(tmpMatrix2,tmpMatrix,value);
+				if (orbital == 0) sum = tmpMatrix2;
+				else sum += tmpMatrix2;
+			}
 		}
 
 		// add J_{ij} S^+_i S^-_j + S^-_i S^+_j to Hamiltonia
@@ -247,7 +298,7 @@ namespace Dmrg {
 				const std::vector<OperatorType> &creationMatrix,
 				const BlockType& block) const
 		{
-			std::runtime_error("FeAsBasedScExtended: Unimplemented\n");
+			// nothing if block.size == 1
 		}
 
 		// add J_{ij} S^z_i S^z_j to Hamiltonian
@@ -256,7 +307,15 @@ namespace Dmrg {
 				const std::vector<OperatorType> &creationMatrix,
 				const BlockType& block) const
 		{
-			std::runtime_error("FeAsBasedScExtended: Unimplemented\n");
+			// nothing if block.size == 1
+		}
+
+		void blockIsSize1OrThrow(const BlockType& block) const
+		{
+			if (block.size()==1) return;
+			throw std::runtime_error(
+				"FeAsBasedExtended:: Added blocks must be of size 1"
+					"or is unimplemented otherwise\n");
 		}
 
 		const ParametersModelFeAs<RealType>&  modelParameters_;

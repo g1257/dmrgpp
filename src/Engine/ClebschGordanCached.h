@@ -114,7 +114,10 @@ namespace Dmrg {
 				//msg<<"init called "<<copies_<<" times, jmax="<<jmax<<"\n";
 				//progress_.printline(msg,std::cout);
 				copies_++;
-				if (copies_>2) throw std::runtime_error("ClebschGordanCached: too many copies\n");
+				if (copies_>2) {//throw std::runtime_error("ClebschGordanCached: too many copies\n");
+					std::cerr<<"WARNING: ClebschGordanCached has ";
+					std::cerr<<copies_<<" copies.\n";
+				}
 			}
 
 			FieldType operator()(const PairType& jm,const PairType& jm1,const PairType& jm2) 

@@ -112,7 +112,10 @@ namespace Dmrg {
 				//msg<<"init called "<<copies_<<" times, numberOfFactorials="<<numberOfFactorials<<"\n";
 				//progress_.printline(msg,std::cout);
 				copies_++;
-				if (copies_>3) throw std::runtime_error("ClebschGordanCached: too many copies\n");
+				if (copies_>3) {//throw std::runtime_error("ClebschGordanCached: too many copies\n");
+					std::cerr<<"WARNING: ClebschGordan has ";
+					std::cerr<<copies_<<" copies.\n";
+				}
 			}
 
 			// receiving format is (2*j,j+m)
