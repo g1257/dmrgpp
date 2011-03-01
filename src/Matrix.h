@@ -212,6 +212,21 @@ namespace PsimagLite {
 		return true;
 	}
 
+	template<typename T>
+	void printNonZero(const Matrix<T>& m,std::ostream& os)
+	{
+		for (size_t i=0;i<m.n_row();i++) {
+			size_t nonzero = 0;
+			for (size_t j=0;j<m.n_col();j++) {
+				const T& val = m(i,j);
+				if (val!=0) {
+					os<<val<<" ";
+					nonzero++;
+				}
+			}
+			if (nonzero>0) os<<"\n";
+		}
+	}
 
 } // namespace PsimagLite
 #endif
