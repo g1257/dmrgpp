@@ -108,7 +108,7 @@ namespace PsimagLite {
 		size_t finalize(CrsMatrixType& matrix)
 		{
 			assert(cols_.size()==values_.size());
-			if (cols_.size()==0) return;
+			if (cols_.size()==0) return 0;
 
 			Sort<ColumnsType> s;
 			ColumnsType iperm(cols_.size());
@@ -121,14 +121,14 @@ namespace PsimagLite {
 					value += values_[iperm[i]];
 					continue;
 				}
-				matrix.setCol(counter,prevCol);
-				matrix.setValues(counter,value);
+				matrix.pushCol(prevCol);
+				matrix.pushValue(value);
 				counter++;
 				value = values_[iperm[i]];
 				prevCol = cols_[i];
 			}
-			matrix.setCol(counter,prevCol);
-			matrix.setValues(counter,value);
+			matrix.pushCol(prevCol);
+			matrix.pushValue(value);
 			counter++;
 			return counter;
 		}
