@@ -130,6 +130,7 @@ namespace Dmrg {
 		typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
+		static size_t const REINTERPRET  = 1;
 		ModelFeBasedSc(ParametersModelFeAs<RealType> const &mp,GeometryType const &geometry) 
 			: ModelBaseType(geometry),reinterpretX_(6),reinterpretY_(9),modelParameters_(mp), geometry_(geometry),
 					   spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
@@ -345,7 +346,7 @@ namespace Dmrg {
 					cm(ii,jj) =sign(ket,i,sigma);
 				}
 			}
-			reinterpret(cm,natBasis);
+			if (REINTERPRET) reinterpret(cm,natBasis);
 
 			SparseMatrixType temp;
 			fullMatrixToCrsMatrix(temp,cm);

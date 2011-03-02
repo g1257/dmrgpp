@@ -364,7 +364,7 @@ namespace Dmrg {
 			std::cerr<<__FILE__<<":"<<__LINE__<<":\n";
 			PsimagLite::Matrix<SparseElementType> fullm;
 			crsMatrixToFullMatrix(fullm,hamiltonian);
-			std::cerr<<fullm;
+			//printNonZero(fullm,std::cerr);
 			matrixBlock.resize(bs);
 			
 			int counter=0;

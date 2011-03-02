@@ -287,7 +287,7 @@ namespace Dmrg {
 				PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 				crsMatrixToFullMatrix(fullm2,fullm);
 				if (utils::isZero(fullm2)) std::cerr<<"Matrix is zero\n";
-				std::cerr<<fullm2;
+				printNonZero(fullm2,std::cerr);
 				std::vector<RealType> eigs(fullm2.n_row());
 				PsimagLite::diag(fullm2,eigs,'V');
 				std::cerr<<"eigs[0]="<<eigs[0]<<"\n";

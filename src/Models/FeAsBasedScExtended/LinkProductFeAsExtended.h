@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LINK_PRODUCT_EX_H
 #include "LinkProductHeisenbergSpinOneHalf.h"
 #include "LinkProductFeAs.h"
+#include "OperatorsFeAs.h"
 
 namespace Dmrg {
 	
@@ -95,6 +96,10 @@ namespace Dmrg {
 			typedef LinkProductFeAs<ModelHelperType> LinkProductFeAsType;
 			typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType>
 				LinkProductHeisenbergType;
+			typedef typename ModelHelperType::BasisType BasisType;
+			typedef typename ModelHelperType::OperatorType OperatorType;
+			typedef OperatorsFeAs<OperatorType,BasisType> OperatorsFeAsType;
+
 			enum {TERM_HOPPING, TERM_J};
 			
 		public:
@@ -132,9 +137,12 @@ namespace Dmrg {
 						term,dofs,isSu2,fermionOrBoson,ops,mods,
 						angularMomentum,angularFactor,category);
 
-				return LinkProductHeisenbergType::setLinkData(
+				LinkProductHeisenbergType::setLinkData(
 						term,dofs,isSu2,fermionOrBoson,ops,mods,
 						angularMomentum,angularFactor,category);
+				size_t offset1 = OperatorsFeAsType::numberOfOperatorsPerSite();
+				ops.first += offset1;
+				ops.second += offset1;
 			}
 			
 			static void valueModifier(

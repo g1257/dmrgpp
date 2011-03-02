@@ -187,7 +187,9 @@ namespace Dmrg {
 			if (checkpoint_())
 				std::cerr<<"WARNING: Will not check finite loops for consistency while checkpoint is in use\n";
 			 else 
-				checkFiniteLoops(parameters_.finiteLoop,geometry.numberOfSites());
+				if (parameters_.options.find("nofiniteloops")==std::string::npos)
+					checkFiniteLoops(parameters_.finiteLoop,geometry.numberOfSites());
+
 			std::ostringstream msg;
 			msg<<"Turning the engine on";
 			progress_.printline(msg,std::cout);

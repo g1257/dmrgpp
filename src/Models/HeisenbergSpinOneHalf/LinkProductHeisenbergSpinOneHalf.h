@@ -131,6 +131,7 @@ namespace Dmrg {
 			{
 				if (isSu2) value = -value;
 				if (dofs<2) value *= 0.5;
+				value *= 0.5;
 			}
 			
 			//! For TERM_J there are 3 terms:

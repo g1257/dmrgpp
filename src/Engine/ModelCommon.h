@@ -180,6 +180,7 @@ namespace Dmrg {
 				PsimagLite::Matrix<SparseElementType> fm;
 				crsMatrixToFullMatrix(fm,matrix);
 				std::vector<RealType> e(matrix.rank());
+				printNonZero(fm,std::cerr);
 				PsimagLite::diag(fm,e,'N');
 				std::cerr<<"eSystem[0]="<<e[0]<<"\n";
 	
@@ -187,6 +188,7 @@ namespace Dmrg {
 				modelHelper.calcHamiltonianPart(matrixBlock,false);
 				matrix += matrixBlock;
 				crsMatrixToFullMatrix(fm,matrixBlock);
+				printNonZero(fm,std::cerr);
 				PsimagLite::diag(fm,e,'N');
 				std::cerr<<"eEnv[0]="<<e[0]<<"\n";
 				matrixBlock.clear();

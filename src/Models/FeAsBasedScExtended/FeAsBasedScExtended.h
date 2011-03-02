@@ -261,10 +261,12 @@ namespace Dmrg {
 				std::vector<OperatorType> &creationMatrix,
 				const BlockType& block) const
 		{
-			SparseMatrixType m;
-			cDaggerC(m,creationMatrix,block,1.0,SPIN_UP,SPIN_UP);
-			cDaggerC(m,creationMatrix,block,-1.0,SPIN_DOWN,SPIN_DOWN);
+			SparseMatrixType m1,m2;
+			cDaggerC(m1,creationMatrix,block,0.5,SPIN_UP,SPIN_UP);
+			cDaggerC(m2,creationMatrix,block,-0.5,SPIN_DOWN,SPIN_DOWN);
 			Su2RelatedType su2related2;
+			SparseMatrixType m = m1;
+		       	m += m2;
 			OperatorType sz(m,1,typename OperatorType::PairType(2,1),
 					1.0/sqrt(2.0),su2related2);
 			creationMatrix.push_back(sz);
