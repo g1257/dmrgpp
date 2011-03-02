@@ -93,7 +93,7 @@ namespace PsimagLite {
 		typedef typename CrsMatrixType::value_type ValueType;
 		typedef std::vector<size_t> ColumnsType;
 
-		void add(size_t col,const ValueType& value)
+		void add(size_t col,ValueType value)
 		{
 			cols_.push_back(col);
 			values_.push_back(value);
