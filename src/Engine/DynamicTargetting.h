@@ -77,8 +77,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ApplyOperatorLocal.h"
 #include "TimeSerializer.h"
 #include "DynamicDmrgParams.h"
-#include "DynamicFunctional.h"
-#include "Minimizer.h"
 #include "VectorWithOffsets.h"
 
 namespace Dmrg {
@@ -120,7 +118,8 @@ namespace Dmrg {
 		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
-		
+		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
+		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
 		
 		enum {DISABLED,OPERATOR,CONVERGING};
 		enum {	EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -131,17 +130,13 @@ namespace Dmrg {
 		
 		
 		DynamicTargetting(
-				const BasisWithOperatorsType& basisS,
-				const BasisWithOperatorsType& basisE,
-				const BasisType& basisSE,
+				const LeftRightSuperType& lrs,
 				const ModelType& model,
 				const TargettingParamsType& tstStruct,
 				const WaveFunctionTransfType& wft)
 		:	
 		 	stage_(tstStruct.sites.size(),DISABLED),
-		 	basisS_(basisS),
-		 	basisE_(basisE),
-		 	basisSE_(basisSE),
+		 	lrs_(lrs),
 		 	model_(model),
 		 	tstStruct_(tstStruct),
 		 	waveFunctionTransformation_(wft),
@@ -150,7 +145,7 @@ namespace Dmrg {
 		 	targetVectors_(3),
 		 	weight_(targetVectors_.size()),
 		 	//io_(tstStruct_.filename,parallelRank_),
-		 	applyOpLocal_(basisS,basisE,basisSE)
+		 	applyOpLocal_(lrs)
 		 	
 
 		{
@@ -252,9 +247,9 @@ namespace Dmrg {
 				return;
 			}
 
-			ComplexType val = calcDynVectors(Eg,phiNew,direction);
+			calcDynVectors(Eg,phiNew,direction);
 
-			cocoon(val,direction,block); // in-situ
+			//cocoon(direction,block); // in-situ
 
 			//if (needsPrinting) printVectors(block); // for post-processing
 		}
@@ -267,20 +262,14 @@ namespace Dmrg {
 			std::vector<VectorWithOffsetType> vv(targetVectors_.size());
 			for (size_t i=0;i<targetVectors_.size();i++) {
 				waveFunctionTransformation_.setInitialVector(vv[i],
-						targetVectors_[i],basisS_,basisE_,basisSE_);
+						targetVectors_[i],lrs_);
 				if (std::norm(vv[i])<1e-6) continue;
 				VectorWithOffsetType w= weight_[i]*vv[i];
 				v += w;
 			}
 		}
 		
-
-		const BasisType& basisSE() const { return basisSE_; }
-
-		const BasisWithOperatorsType& basisS() const { return basisS_; }
-
-		const BasisWithOperatorsType& basisE() const { return basisE_; }
-		
+		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
 
 		template<typename IoOutputType>
 		void save(const std::vector<size_t>& block,IoOutputType& io) const
@@ -350,10 +339,12 @@ namespace Dmrg {
 				std::ostringstream msg;
 				msg<<"I'm applying a local operator now";
 				progress_.printline(msg,std::cout);
-				FermionSign fs(basisS_,tstStruct_.electrons);
-				applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
+				FermionSign fs(lrs_.left(),tstStruct_.electrons);
+				applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],
+						fs,systemOrEnviron);
 				RealType norma = std::norm(phiNew);
-				if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
+				if (norma==0) throw std::runtime_error(
+						"Norm of phi is zero\n");
 				//std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 				
 			} else if (stage_[i]== CONVERGING) {
@@ -362,12 +353,13 @@ namespace Dmrg {
 				msg<<"I'm calling the WFT now";
 				progress_.printline(msg,std::cout);
 
-				if (tstStruct_.aOperators.size()==1) guessPhiSectors(phiNew,i,systemOrEnviron);
-				else phiNew.populateSectors(basisSE_);
+				if (tstStruct_.aOperators.size()==1)
+					guessPhiSectors(phiNew,i,systemOrEnviron);
+				else phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
-				waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[0],
-					basisS_,basisE_,basisSE_); // generalize for su(2)
+				waveFunctionTransformation_.setInitialVector(
+						phiNew,targetVectors_[0],lrs_); // generalize for su(2)
 				phiNew.collapseSectors();
 				
 			} else {
@@ -375,21 +367,6 @@ namespace Dmrg {
 					" your code is exec-ing?\n");
 			}
 		}
-		
-
-		void cocoon(ComplexType& val,size_t direction,const BlockType& block) const
-		{
-			size_t site = block[0];
-			std::cerr<<"-------------&*&*&* Cocoon output starts\n";
-			test(psi_,psi_,direction,"<PSI|A|PSI>",site);
-			std::cerr<<"OMEGA "<<currentOmega_<<" "<<std::imag(val)<<" "<<std::real(val)<<" "<<site<<"\n";
-			for (size_t j=0;j<targetVectors_.size();j++) {
-				std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
-				test(targetVectors_[j],targetVectors_[0],direction,s,site);
-			}
-			std::cerr<<"-------------&*&*&* Cocoon output ends\n";
-		}
-		
 
 		void checkOrder(size_t i) const
 		{
@@ -439,141 +416,98 @@ namespace Dmrg {
 		}
 		
 
-		ComplexType calcDynVectors(
-				RealType Eg,
-				const VectorWithOffsetType& phi,
-				size_t systemOrEnviron)
-		{
-			RealType retIm = minimizeFunctional(targetVectors_[1],Eg,phi,systemOrEnviron);
-			obtainXA(targetVectors_[2],targetVectors_[1],Eg);
-			RealType retRe = 0; //-real(targetVectors_[2]*phi)/M_PI; // Eq.~(12a)
-			targetVectors_[0] = phi;
-			areAllTargetsSensible();
-			return ComplexType(retRe,retIm);
-		}
-		
-
-		RealType minimizeFunctional(
-				VectorWithOffsetType& psiMin,
+		void calcDynVectors(
 				RealType Eg,
 				const VectorWithOffsetType&phi,
 				size_t systemOrEnviron)
 		{
-			VectorWithOffsetType phiCopy = phi;
-			psiMin = phi;
-			RealType ret = 0;
-			for (size_t i=0;i<phiCopy.sectors();i++) {
+			for (size_t i=0;i<phi.sectors();i++) {
 				VectorType sv;
-				size_t ii = phiCopy.sector(i);
-				psiMin.extract(sv,ii);
-				if (sv.size()==0) throw std::runtime_error("Non-zero sector is zero!\n");
-				ret += minimizeFunctional(sv,Eg,phi,ii);
-				psiMin.setDataInSector(sv,ii);
+				size_t i0 = phi.sector(i);
+				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
+				phi.extract(sv,p);
+				DenseMatrixType V;
+				getLanczosVectors(V,sv,p);
+				setLanczosVectors(V,i0);
 			}
-			return ret;
+			setWeights();
 		}
+
 		
 
-		RealType minimizeFunctional(VectorType& sv,RealType Eg,const VectorWithOffsetType& phi,size_t ind)
+		void getLanczosVectors(
+				DenseMatrixType& V,
+				const VectorType& sv,
+				size_t p) const
 		{
-			VectorType svSaved;
-			RealType valueSaved = 1e6;
-			size_t randomDraws = 10;
-			for (size_t i=0;i<randomDraws;i++) {
-				RealType tmp = 0;
-				try {
-					tmp= minimizeFunctionalRandom(sv,Eg,phi,ind);
-					std::cerr<<"Value of minimum for i="<<i<<"is "<<tmp<<"\n";
-				} catch(std::exception& e) {
-					continue;
-				}
-				if (tmp<valueSaved) {
-					valueSaved = tmp;
-					svSaved = sv;
-					std::cerr<<"Found new minimum="<<valueSaved<<" for i="<<i<<"\n";
-				}
-			}
-			sv = svSaved;
-			return -valueSaved/(M_PI*tstStruct_.eta); // Eq.~(16)
-		}
-		
-
-		RealType minimizeFunctionalRandom(VectorType& sv,RealType Eg,const VectorWithOffsetType& phi,size_t ind)
-		{
-			size_t p = basisSE_.findPartitionNumber(phi.offset(ind));
-			typename ModelType::ModelHelperType modelHelper(p,basisSE_,basisS_,basisE_,model_.orbitals());
-			typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
+			typename ModelType::ModelHelperType modelHelper(
+					p,lrs_,model_.orbitals());
+			typedef typename LanczosSolverType::LanczosMatrixType
+					LanczosMatrixType;
 			LanczosMatrixType h(&model_,&modelHelper);
-			typedef DynamicFunctional<RealType,LanczosMatrixType,VectorType> DynamicFunctionalType;
-			VectorType aVector;
-			phi.extract(aVector,ind);
-			DynamicFunctionalType wFunctional(h,aVector,currentOmega_,Eg,tstStruct_.eta);
-			size_t maxIter = 1000;
 
-			PsimagLite::Minimizer<RealType,DynamicFunctionalType> min(wFunctional,maxIter);
-			std::vector<RealType> svReal(sv.size());
-			//wFunctional.packComplexToReal(svReal,sv);
-			for (size_t i=0;i<svReal.size();i++) svReal[i]=(0.5-drand48());
-			//RealType norma = std::norm(svReal);
-			//for (size_t i=0;i<svReal.size();i++) svReal[i]/=norma;
+			RealType eps= ProgramGlobals::LanczosTolerance;
+			size_t iter= ProgramGlobals::LanczosSteps;
 
-			int iter = -1;
-			RealType delta = 0.01;
-			RealType tolerance = 1e-5;
-			size_t counter = 0;
-			while (iter<0 && counter<10) {
-				iter = min.simplex(svReal,delta,tolerance);
-				if (iter>=0) {
-					std::cerr<<"delta="<<delta<<" tolerance="<<tolerance<<" counter="<<counter<<"\n";
-				}
-				delta /= 1.2;
-				tolerance *= 1.5;
-				counter++;
-			}
-			if (iter<0) {
-				std::cerr<<"delta="<<delta<<" tol="<<tolerance<<"\n";
-				throw std::runtime_error
-					("DynTargetting::minimizeFunctional(...):No minimum found\n");
-			}
-			//wFunctional.packRealToComplex(sv,svReal);
-			sv = svReal;
-			return  wFunctional(svReal);
+			//srand48(3243447);
+			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_);
+
+			TridiagonalMatrixType ab;
+
+			lanczosSolver.tridiagonalDecomposition(sv,ab,V);
+			calcIntensity(sv,V,ab);
 		}
 		
-
-		void obtainXA(
-				VectorWithOffsetType& xa,
-				const VectorWithOffsetType& ya,
-				RealType Eg)
+		void calcIntensity(
+				const VectorType& sv,
+				const DenseMatrixType& V,
+				const TridiagonalMatrixType& ab) const
 		{
-			xa = ya;
-			for (size_t i=0;i<ya.sectors();i++) {
-				size_t ii = ya.sector(i);
-				obtainXA(xa,Eg,ya,ii);
+			PsimagLite::Matrix<RealType> S;
+			ab.buildDenseMatrix(S);
+			std::vector<RealType> eigs(S.n_row());
+			diag(S,eigs,'V');
+			RealType delta= 0.01;
+			for (RealType omega = 0;omega < 10;omega+=0.1) {
+				ComplexType z(omega,delta);
+				ComplexType res = calcIntensity(sv,V,eigs,S,z);
+				std::cout<<omega<<" "<<res<<"\n";
 			}
 		}
-		
 
-		void obtainXA(VectorWithOffsetType& xa,RealType Eg,const VectorWithOffsetType& ya,size_t i)
+		ComplexType calcIntensity(
+				const VectorType& sv,
+				const DenseMatrixType& V,
+				const std::vector<RealType>& eigs,
+				const PsimagLite::Matrix<RealType>& S,
+				const ComplexType& z) const
+
 		{
-			size_t p = basisSE_.findPartitionNumber(ya.offset(i));
-			typename ModelType::ModelHelperType modelHelper(p,basisSE_,basisS_,basisE_,model_.orbitals());
-			typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
-			LanczosMatrixType h(&model_,&modelHelper);
-			VectorType yaThisSector;
-			ya.extract(yaThisSector,i);
-			VectorType sv(yaThisSector.size(),0.0);
-			h.matrixVectorProduct(sv,yaThisSector); // sv = H * yaThisSector
-			RealType factor =  (Eg+currentOmega_);
-			sv -= (yaThisSector * factor);
-			sv *= (1/tstStruct_.eta);
-			xa.setDataInSector(sv,i);
+			ComplexType sum = 0;
+			for (size_t k2=0;k2<sv.size();k2++)
+				for (size_t l=0;l<V.n_row();l++)
+					for (size_t m=0;m<sv.size();m++)
+						sum += std::conj(sv[k2]*V(0,k2)*S(l,0))*
+							S(l,0)*V(0,m)*sv[m]/(z-eigs[l]);
+
+			return sum;
 		}
-		
+
+		void setLanczosVectors(
+				const DenseMatrixType& V,
+				size_t i0)
+		{
+			for (size_t i=0;i<targetVectors_.size();i++) {
+				VectorType tmp(V.n_col());
+				for (size_t j=0;j<tmp.size();j++) tmp[j] = V(i,j);
+				targetVectors_[i].setDataInSector(tmp,i0);
+			}
+		}
+
 
 		void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
 		{
-			FermionSign fs(basisS_,tstStruct_.electrons);
+			FermionSign fs(lrs_.left(),tstStruct_.electrons);
 			if (allStages(CONVERGING)) {
 				VectorWithOffsetType tmpVector = psi_;
 				for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
@@ -587,11 +521,25 @@ namespace Dmrg {
 					systemOrEnviron);
 		}
 		
+		void setWeights()
+		{
+			RealType sum  = 0;
+			for (size_t i=0;i<weight_.size();i++) {
+				weight_[i] =0;
+				for (size_t j=0;j<targetVectors_[0].size();i++)
+					weight_[i] += utils::square(std::real(targetVectors_[0][j] *
+									targetVectors_[i][j]));
+				sum += weight_[i];
+			}
+			for (size_t i=0;i<weight_.size();i++) weight_[i] = 0.5/sum;
+			gsWeight_ = 0.5;
+
+		}
 
 		void zeroOutVectors()
 		{
 			for (size_t i=0;i<targetVectors_.size();i++)
-				targetVectors_[i].resize(basisSE_.size());
+				targetVectors_[i].resize(lrs_.super().size());
 		}
 		
 
@@ -623,7 +571,7 @@ namespace Dmrg {
 						multiply(A.data,tmpCt,tmpC);*/
 			A.fermionSign = 1;
 			A.data.makeDiagonal(tmpC.rank(),1.0);
-			FermionSign fs(basisS_,tstStruct_.electrons);
+			FermionSign fs(lrs_.left(),tstStruct_.electrons);
 			applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
 			RealType sum = 0;
@@ -660,9 +608,7 @@ namespace Dmrg {
 		
 		std::vector<size_t> stage_;
 		VectorWithOffsetType psi_;
-		const BasisWithOperatorsType& basisS_;
-		const BasisWithOperatorsType& basisE_;
-		const BasisType& basisSE_;
+		const LeftRightSuperType& lrs_;
 		const ModelType& model_;
 		const TargettingParamsType& tstStruct_;
 		const WaveFunctionTransfType& waveFunctionTransformation_;

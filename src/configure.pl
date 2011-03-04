@@ -41,7 +41,7 @@ my $brand= "v2.0";
 my ($connectorsArgs,$connectorsArgs2,$dof,$connectors2,$connectorValue2);
 my $targetting;
 my $DynamicTargetting = "DynamicTargetting";
-$DynamicTargetting = "DynamicTargettingEmpty" if ($hasGsl=~/n/i);
+#$DynamicTargetting = "DynamicTargettingEmpty" if ($hasGsl=~/n/i);
 
 my $gslLibs = " -lgsl  -lgslcblas ";
 $gslLibs =" " if ($hasGsl=~/n/i);
