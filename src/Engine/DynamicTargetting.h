@@ -163,9 +163,6 @@ namespace Dmrg {
 			if (fabs(sum-1.0)>1e-5) throw std::runtime_error("Weights don't amount to one\n");
 			//printHeader();
 		}
-		
-		
-		
 
 		RealType weight(size_t i) const
 		{
@@ -173,7 +170,6 @@ namespace Dmrg {
 			return weight_[i];
 			//return 1.0;
 		}
-		
 
 		RealType gsWeight() const
 		{
@@ -181,14 +177,12 @@ namespace Dmrg {
 			return gsWeight_;
 		}
 		
-
 		RealType normSquared(size_t i) const
 		{
 			// call to mult will conjugate one of the vector
 			return std::real(multiply(targetVectors_[i],targetVectors_[i]));
 		}
 		
-
 		template<typename SomeBasisType>
 		void setGs(const std::vector<TargetVectorType>& v,
 				const SomeBasisType& someBasis)
@@ -421,12 +415,15 @@ namespace Dmrg {
 				const VectorWithOffsetType&phi,
 				size_t systemOrEnviron)
 		{
+			for (size_t i=0;i<targetVectors_.size();i++)
+				targetVectors_[i] = phi;
+
 			for (size_t i=0;i<phi.sectors();i++) {
 				VectorType sv;
 				size_t i0 = phi.sector(i);
-				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
-				phi.extract(sv,p);
+				phi.extract(sv,i0);
 				DenseMatrixType V;
+				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
 				getLanczosVectors(V,sv,p);
 				setLanczosVectors(V,i0);
 			}
@@ -475,6 +472,7 @@ namespace Dmrg {
 			}
 		}
 
+		// FIXME: Needs optimization
 		ComplexType calcIntensity(
 				const VectorType& sv,
 				const DenseMatrixType& V,
@@ -483,14 +481,19 @@ namespace Dmrg {
 				const ComplexType& z) const
 
 		{
-			ComplexType sum = 0;
-			for (size_t k2=0;k2<sv.size();k2++)
-				for (size_t l=0;l<V.n_row();l++)
-					for (size_t m=0;m<sv.size();m++)
-						sum += std::conj(sv[k2]*V(0,k2)*S(l,0))*
-							S(l,0)*V(0,m)*sv[m]/(z-eigs[l]);
+			RealType tmp1 = 0;
+			for (size_t m=0;m<sv.size();m++)
+				tmp1 += V(m,0)*sv[m];
 
-			return sum;
+			RealType tmp2 = 0;
+			for (size_t k2=0;k2<sv.size();k2++)
+				tmp2 += std::conj(sv[k2]*V(k2,0));
+
+			ComplexType sum = 0;
+			for (size_t l=0;l<S.n_row();l++)
+				sum += std::conj(S(l,0))*S(l,0)/(z-eigs[l]);
+
+			return sum*tmp1*tmp2;
 		}
 
 		void setLanczosVectors(
@@ -498,8 +501,8 @@ namespace Dmrg {
 				size_t i0)
 		{
 			for (size_t i=0;i<targetVectors_.size();i++) {
-				VectorType tmp(V.n_col());
-				for (size_t j=0;j<tmp.size();j++) tmp[j] = V(i,j);
+				VectorType tmp(V.n_row());
+				for (size_t j=0;j<tmp.size();j++) tmp[j] = V(j,i);
 				targetVectors_[i].setDataInSector(tmp,i0);
 			}
 		}
@@ -524,16 +527,28 @@ namespace Dmrg {
 		void setWeights()
 		{
 			RealType sum  = 0;
-			for (size_t i=0;i<weight_.size();i++) {
-				weight_[i] =0;
-				for (size_t j=0;j<targetVectors_[0].size();i++)
-					weight_[i] += utils::square(std::real(targetVectors_[0][j] *
-									targetVectors_[i][j]));
-				sum += weight_[i];
+			for (size_t r=0;r<weight_.size();r++) {
+				weight_[r] =0;
+				for (size_t i=0;i<targetVectors_[0].sectors();i++) {
+					VectorType v,w;
+					size_t i0 = targetVectors_[0].sector(i);
+					targetVectors_[0].extract(v,i0);
+					targetVectors_[r].extract(w,i0);
+					weight_[r] += dynWeightOf(v,w);
+				}
+				sum += weight_[r];
 			}
-			for (size_t i=0;i<weight_.size();i++) weight_[i] = 0.5/sum;
+			for (size_t r=0;r<weight_.size();r++) weight_[r] = 0.5/sum;
 			gsWeight_ = 0.5;
 
+		}
+
+		RealType dynWeightOf(VectorType& v,const VectorType& w) const
+		{
+			RealType sum = 0;
+			for (size_t i=0;i<v.size();i++)
+				sum += utils::square(std::real(v[i]*w[i]));
+			return sum;
 		}
 
 		void zeroOutVectors()
@@ -621,7 +636,6 @@ namespace Dmrg {
 		ApplyOperatorType applyOpLocal_;
 		
 	}; // class DynamicTargetting
-	
 	
 	template<
 	template<typename,typename,typename> class LanczosSolverTemplate,
