@@ -141,32 +141,18 @@ namespace Dmrg {
 		 	tstStruct_(tstStruct),
 		 	waveFunctionTransformation_(wft),
 		 	progress_("DynamicTargetting",0),
-		 	currentOmega_(tstStruct_.omega),
-		 	targetVectors_(3),
-		 	weight_(targetVectors_.size()),
-		 	//io_(tstStruct_.filename,parallelRank_),
-		 	applyOpLocal_(lrs)
-		 	
+		 	applyOpLocal_(lrs),
+		 	gsWeight_(1.0)
 
 		{
 			if (!wft.isEnabled()) throw std::runtime_error(" DynamicTargetting "
 					"needs an enabled wft\n");
-			RealType sum = 0;
-			size_t n = weight_.size();
-			for (size_t i=0;i<n;i++) {
-				weight_[i] = 1.0/(n+1);
-				sum += weight_[i];
-			}
-
-			gsWeight_=1.0-sum;
-			sum += gsWeight_;
-			if (fabs(sum-1.0)>1e-5) throw std::runtime_error("Weights don't amount to one\n");
-			//printHeader();
 		}
 
 		RealType weight(size_t i) const
 		{
-			if (allStages(DISABLED)) throw std::runtime_error("TST: What are you doing here?\n");
+			if (allStages(DISABLED)) throw std::runtime_error(
+					"DynTarget: What are you doing here?\n");
 			return weight_[i];
 			//return 1.0;
 		}
@@ -268,10 +254,12 @@ namespace Dmrg {
 		template<typename IoOutputType>
 		void save(const std::vector<size_t>& block,IoOutputType& io) const
 		{
+			std::cerr<<"WARNING: DynTarget won't save\n";
+			return;
 			if (block.size()!=1) throw std::runtime_error(
 					"DynamicTargetting only supports blocks of size 1\n");
 
-			TimeSerializerType ts(currentOmega_,block[0],targetVectors_);
+			TimeSerializerType ts(0.0,block[0],targetVectors_);
 			ts.save(io);
 		}
 		
@@ -409,31 +397,31 @@ namespace Dmrg {
 			return "undefined";
 		}
 		
-
 		void calcDynVectors(
 				RealType Eg,
 				const VectorWithOffsetType&phi,
 				size_t systemOrEnviron)
 		{
-			for (size_t i=0;i<targetVectors_.size();i++)
-				targetVectors_[i] = phi;
-
 			for (size_t i=0;i<phi.sectors();i++) {
 				VectorType sv;
 				size_t i0 = phi.sector(i);
 				phi.extract(sv,i0);
 				DenseMatrixType V;
 				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
-				getLanczosVectors(V,sv,p);
+				getLanczosVectors(V,Eg,sv,p);
+				if (i==0) {
+					targetVectors_.resize(V.n_col());
+					for (size_t j=0;j<targetVectors_.size();j++)
+						targetVectors_[j] = phi;
+				}
 				setLanczosVectors(V,i0);
 			}
 			setWeights();
 		}
 
-		
-
 		void getLanczosVectors(
 				DenseMatrixType& V,
+				const RealType& Eg,
 				const VectorType& sv,
 				size_t p) const
 		{
@@ -452,10 +440,11 @@ namespace Dmrg {
 			TridiagonalMatrixType ab;
 
 			lanczosSolver.tridiagonalDecomposition(sv,ab,V);
-			calcIntensity(sv,V,ab);
+			calcIntensity(Eg,sv,V,ab);
 		}
 		
 		void calcIntensity(
+				const RealType& Eg,
 				const VectorType& sv,
 				const DenseMatrixType& V,
 				const TridiagonalMatrixType& ab) const
@@ -464,16 +453,17 @@ namespace Dmrg {
 			ab.buildDenseMatrix(S);
 			std::vector<RealType> eigs(S.n_row());
 			diag(S,eigs,'V');
-			RealType delta= 0.01;
-			for (RealType omega = 0;omega < 10;omega+=0.1) {
+			RealType delta= 0.04;
+			for (RealType omega = 0;omega <3;omega+=0.02) {
 				ComplexType z(omega,delta);
-				ComplexType res = calcIntensity(sv,V,eigs,S,z);
+				ComplexType res = calcIntensity(Eg,sv,V,eigs,S,z);
 				std::cout<<omega<<" "<<res<<"\n";
 			}
 		}
 
 		// FIXME: Needs optimization
 		ComplexType calcIntensity(
+				const RealType& Eg,
 				const VectorType& sv,
 				const DenseMatrixType& V,
 				const std::vector<RealType>& eigs,
@@ -491,7 +481,7 @@ namespace Dmrg {
 
 			ComplexType sum = 0;
 			for (size_t l=0;l<S.n_row();l++)
-				sum += std::conj(S(l,0))*S(l,0)/(z-eigs[l]);
+				sum += std::conj(S(0,l))*S(0,l)/(z-eigs[l]+Eg);
 
 			return sum*tmp1*tmp2;
 		}
@@ -527,6 +517,7 @@ namespace Dmrg {
 		void setWeights()
 		{
 			RealType sum  = 0;
+			weight_.resize(targetVectors_.size());
 			for (size_t r=0;r<weight_.size();r++) {
 				weight_[r] =0;
 				for (size_t i=0;i<targetVectors_[0].sectors();i++) {
@@ -570,57 +561,6 @@ namespace Dmrg {
 		//	io_.printline(s);
 		//}
 		
-
-		void test(
-				const VectorWithOffsetType& src1,
-				const VectorWithOffsetType& src2,
-				size_t systemOrEnviron,
-				const std::string& label,
-				size_t site) const
-		{
-			VectorWithOffsetType dest;
-			OperatorType A = tstStruct_.aOperators[0];
-			CrsMatrix<RealType> tmpC(model_.getOperator("c",0,0));
-			/*CrsMatrix<ComplexType> tmpCt;
-						transposeConjugate(tmpCt,tmpC);
-						multiply(A.data,tmpCt,tmpC);*/
-			A.fermionSign = 1;
-			A.data.makeDiagonal(tmpC.rank(),1.0);
-			FermionSign fs(lrs_.left(),tstStruct_.electrons);
-			applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
-
-			RealType sum = 0;
-			for (size_t ii=0;ii<dest.sectors();ii++) {
-				size_t i = dest.sector(ii);
-				size_t offset1 = dest.offset(i);
-				for (size_t jj=0;jj<src2.sectors();jj++) {
-					size_t j = src2.sector(jj);
-					size_t offset2 = src2.offset(j);
-					if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
-					for (size_t k=0;k<dest.effectiveSize(i);k++)
-						sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
-				}
-			}
-			std::cerr<<site<<" "<<sum<<" "<<" "<<currentOmega_;
-			std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
-		}
-		
-
-		void areAllTargetsSensible() const
-		{
-			for (size_t i=0;i<targetVectors_.size();i++)
-				isThisTargetSensible(i);
-		}
-		
-
-		void isThisTargetSensible(size_t i) const
-		{
-			RealType norma = std::norm(targetVectors_[i]);
-			if (norma<1e-6) throw std::runtime_error("Norma is zero\n");
-		}
-		
-		
-		
 		std::vector<size_t> stage_;
 		VectorWithOffsetType psi_;
 		const LeftRightSuperType& lrs_;
@@ -628,13 +568,13 @@ namespace Dmrg {
 		const TargettingParamsType& tstStruct_;
 		const WaveFunctionTransfType& waveFunctionTransformation_;
 		PsimagLite::ProgressIndicator progress_;
-		RealType currentOmega_;
+		ApplyOperatorType applyOpLocal_;
+		RealType gsWeight_;
 		std::vector<VectorWithOffsetType> targetVectors_;
 		std::vector<RealType> weight_;
-		RealType gsWeight_;
 		//typename IoType::Out io_;
-		ApplyOperatorType applyOpLocal_;
 		
+
 	}; // class DynamicTargetting
 	
 	template<
