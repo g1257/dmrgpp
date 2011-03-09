@@ -75,9 +75,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "ApplyOperatorLocal.h"
-#include "TimeSerializer.h"
+#include "DynamicSerializer.h"
 #include "DynamicDmrgParams.h"
 #include "VectorWithOffsets.h"
+#include "ContinuedFraction.h"
 
 namespace Dmrg {
 	
@@ -116,6 +117,10 @@ namespace Dmrg {
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
+		typedef ContinuedFraction<RealType,TridiagonalMatrixType>
+			ContinuedFractionType;
+		typedef DynamicSerializer<RealType,VectorWithOffsetType,
+				ContinuedFractionType> DynamicSerializerType;
 		
 		enum {DISABLED,OPERATOR,CONVERGING};
 		enum {	EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -265,13 +270,22 @@ namespace Dmrg {
 					"DynamicTargetting only supports blocks of size 1\n");
 
 			ContinuedFractionType cf(ab_,Eg_,weightForContinuedFraction_);
-			DynamicSerializerType dynS(block[0],cf);
+			DynamicSerializerType dynS(cf,block[0],targetVectors_);
 			dynS.save(io);
+			psi_.save(io,"PSI");
 		}
 		
 		void load(const std::string& f)
 		{
-			std::cerr<<"WARNING: No load implemented for DynamicTargetting\n";
+			for (size_t i=0;i<stage_.size();i++) stage_[i] = CONVERGING;
+
+			typename IoType::In io(f);
+
+			DynamicSerializerType dynS(io,IoType::In::LAST_INSTANCE);
+			for (size_t i=0;i<targetVectors_.size();i++)
+				targetVectors_[i] = dynS.vector(i);
+
+			psi_.load(io,"PSI");
 		}
 		
 		
@@ -426,7 +440,7 @@ namespace Dmrg {
 		void getLanczosVectors(
 				DenseMatrixType& V,
 				const VectorType& sv,
-				size_t p) const
+				size_t p)
 		{
 			typename ModelType::ModelHelperType modelHelper(
 					p,lrs_,model_.orbitals());
@@ -442,7 +456,6 @@ namespace Dmrg {
 
 			lanczosSolver.tridiagonalDecomposition(sv,ab_,V);
 			weightForContinuedFraction_ = weightForContinuedFraction(sv,V);
-
 			//calcIntensity(Eg,sv,V,ab);
 		}
 		

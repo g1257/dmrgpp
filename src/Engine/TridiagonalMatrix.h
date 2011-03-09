@@ -86,43 +86,59 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	
 	template<typename FieldType>
-	struct TridiagonalMatrix {
-		public:
+	class TridiagonalMatrix {
+	public:
 		typedef FieldType value_type;
-		
+
+		TridiagonalMatrix()  { }
+
+		template<typename IoInputType>
+		TridiagonalMatrix(IoInputType& io)
+		{
+			io.read(a_,"#Avector");
+			io.read(b_,"#Bvector");
+		}
+
+		template<typename IoOutputType>
+		void save(IoOutputType& io) const
+		{
+			io.printVector(a_,"#Avector");
+			io.printVector(b_,"#Bvector");
+		}
+
 		void resize(size_t n,FieldType value)
 		{
 			resize(n);
 			for (size_t i=0;i<n;i++) a_[i]=b_[i]=value;
 		}
-		
+
 		void resize(size_t n)
 		{
 			a_.resize(n);
 			b_.resize(n);
 		}
-		
+
 		FieldType& a(size_t i) { return a_[i]; }
 		FieldType& b(size_t i) { return b_[i]; }
-		
+
 		const FieldType& a(size_t i) const { return a_[i]; }
 		const FieldType& b(size_t i) const { return b_[i]; }
-		
+
 		template<typename SomeMatrixType>
 		void buildDenseMatrix(SomeMatrixType& m) const
 		{
 			m.resize(a_.size(),a_.size());
 			for (size_t i=0;i<m.n_row();i++) 
 				for (size_t j=0;j<m.n_col();j++)
-					 m(i,j)=0;
-	
+					m(i,j)=0;
+
 			for (size_t i=0;i<a_.size();i++) {
 				m(i,i) = a_[i];
 				if (i+1<a_.size()) m(i,i+1) = b_[i];
 				if (i>0) m(i,i-1) = b_[i];
 			}
 		}
-		
+
 		// not sure if this is correct, seems buggy in some tests:
 		/*
 		template<typename SomeFieldType>
@@ -137,7 +153,7 @@ namespace Dmrg {
 
 		size_t size() const { return a_.size(); }
 
-		private:
+	private:
 		std::vector<FieldType> a_,b_;
 	}; // struct TridiagonalMatrix
 } // namespace Dmrg 

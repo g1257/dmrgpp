@@ -74,97 +74,90 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TimeSerializer.h
+/*! \file DynamicSerializer.h
  *
- *  Serialize time data
+ *  Serialize dynamic DMRG data
  */
-#ifndef TIME_SERIAL_H
-#define TIME_SERIAL_H
+#ifndef DYN_SERIAL_H
+#define DYN_SERIAL_H
 
 #include "Utils.h"
 #include "IoSimple.h"
 
 namespace Dmrg {
 	
-	template<typename RealType,typename VectorType>
-	class TimeSerializer {
-		public:
-			
-			// Unfortunately we need a default ctor
-			// to build an array of these
-			TimeSerializer() { }
-			
-			TimeSerializer(
-				RealType currentTime,
+	template<
+		typename RealType,
+		typename VectorType,
+		typename ContinuedFractionType>
+	class DynamicSerializer {
+	public:
+
+		DynamicSerializer(
+				const ContinuedFractionType& cf,
 				size_t site,
 				const std::vector<VectorType>& targetVectors)
-			: currentTime_(currentTime),
-			  site_(site),
-			  targetVectors_(targetVectors)
-			{}
-			
-			TimeSerializer(typename PsimagLite::IoSimple::In& io,size_t lastInstance = 0)
-			{
-				RealType x=0;
-				std::string s = "#TIME=";
-				if (lastInstance) io.readline(x,s,lastInstance);
-				else io.readline(x,s);
-				if (x<0) throw std::runtime_error("TimeSerializer:: time cannot be negative\n");
-				currentTime_ = x;
-				
-				s = "#TCENTRALSITE=";
-				int xi=0;
-				io.readline(xi,s);
-				if (xi<0) throw std::runtime_error("TimeSerializer:: site cannot be negative\n");
-				site_ = xi;
-				
-				s = "#TNUMBEROFVECTORS=";
-				io.readline(xi,s);
-				if (xi<=0) throw std::runtime_error("TimeSerializer:: n. of vectors must be positive\n");
-				targetVectors_.resize(xi);
-				for (size_t i=0;i<targetVectors_.size();i++) {
-					s = "targetVector"+utils::ttos(i);
-					targetVectors_[i].load(io,s);
-				}
-			}
-			
-			size_t size(size_t i=0) const
-			{
-				return  targetVectors_[i].size();
-			}
-			
-			RealType time() const { return currentTime_; }
-			
-			size_t site() const
-			{
-				return  site_;
-			}
-			
-			const VectorType& vector(size_t i=0) const 
-			{
-				return targetVectors_[i];
-			}
-			
-			
-			template<typename IoOutputter>
-			void save(IoOutputter& io) const
-			{
-				std::string s = "#TIME=" + utils::ttos(currentTime_);
-				io.printline(s);
-				s = "#TCENTRALSITE=" + utils::ttos(site_);
-				io.printline(s);
-				s = "#TNUMBEROFVECTORS="+utils::ttos(targetVectors_.size());
-				io.printline(s);
-				for (size_t i=0;i<targetVectors_.size();i++) {
-					std::string label = "targetVector"+utils::ttos(i)+"_"+utils::ttos(currentTime_);
-					targetVectors_[i].save(io,label);
-				}
-			}
+		: cf_(cf),
+		  site_(site),
+		  targetVectors_(targetVectors)
+		{}
 
-		private:
-			RealType currentTime_;
-			size_t site_;
-			std::vector<VectorType> targetVectors_;
+		template<typename IoInputType>
+		DynamicSerializer(IoInputType& io,size_t lastInstance = 0)
+		: cf_(io)
+		{
+			std::string s = "#DCENTRALSITE=";
+			int xi=0;
+			io.readline(xi,s);
+			if (xi<0) throw std::runtime_error(
+					"DynamicSerializer:: site cannot be negative\n");
+			site_ = xi;
+
+			s = "#DNUMBEROFVECTORS=";
+			io.readline(xi,s);
+			if (xi<=0) throw std::runtime_error(
+					"DynamicSerializer:: n. of vectors must be positive\n");
+			targetVectors_.resize(xi);
+			for (size_t i=0;i<targetVectors_.size();i++) {
+				s = "targetVector"+utils::ttos(i);
+				targetVectors_[i].load(io,s);
+			}
+		}
+
+		template<typename IoOutputter>
+		void save(IoOutputter& io) const
+		{
+			cf_.save(io);
+
+			std::string s = "#DCENTRALSITE=" + utils::ttos(site_);
+			io.printline(s);
+			s = "#DNUMBEROFVECTORS="+utils::ttos(targetVectors_.size());
+			io.printline(s);
+			for (size_t i=0;i<targetVectors_.size();i++) {
+				std::string label = "targetVector"+utils::ttos(i);
+				targetVectors_[i].save(io,label);
+			}
+		}
+
+		size_t size(size_t i=0) const
+		{
+			return  targetVectors_[i].size();
+		}
+
+		size_t site() const
+		{
+			return  site_;
+		}
+
+		const VectorType& vector(size_t i=0) const
+		{
+			return targetVectors_[i];
+		}
+
+	private:
+		const ContinuedFractionType& cf_;
+		size_t site_;
+		std::vector<VectorType> targetVectors_;
 	}; // class TimeSerializer
 } // namespace Dmrg 
 

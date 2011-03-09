@@ -33,14 +33,14 @@ namespace Dmrg {
 	public:
 		
 		typedef typename std::complex<RealType> ComplexType;
-		typedef typename TridiagonalMatrixType::FieldType FieldType;
+		typedef typename TridiagonalMatrixType::value_type FieldType;
 		typedef PsimagLite::Matrix<FieldType> MatrixType;
 		
 		ContinuedFraction(
 				const TridiagonalMatrixType& ab,
 				const RealType& Eg,
 				RealType weight = 1)
-			: progress_("ContinuedFraction",0),ab_(ab),weight_(1),Eg_(Eg)
+			: progress_("ContinuedFraction",0),ab_(ab),Eg_(Eg),weight_(1)
 		{
 			MatrixType T;
 			ab_.buildDenseMatrix(T);
@@ -56,8 +56,8 @@ namespace Dmrg {
 		ContinuedFraction(IoInputType& io)
 		: progress_("ContinuedFraction",0),ab_(io)
 		{
-			io.readline("#CFWeight",weight_);
-			io.readline("#CFEnergy",Eg_);
+			io.readline(weight_,"#CFWeight");
+			io.readline(Eg_,"#CFEnergy");
 		}
 		
 		template<typename IoOutputType>
@@ -68,7 +68,7 @@ namespace Dmrg {
 			std::string s = "#CFWeight=" + utils::ttos(weight_);
 			io.printline(s);
 
-			std::string s = "#CFEnergy=" + utils::ttos(Eg_);
+			s = "#CFEnergy=" + utils::ttos(Eg_);
 			io.printline(s);
 		}
 
@@ -80,17 +80,17 @@ namespace Dmrg {
 		{
 			for (RealType omega = omega1;omega <omega2;omega+=deltaOmega) {
 				ComplexType z(omega,delta);
-				ComplexType res = calcIntensity(z);
+				ComplexType res = calcIntensity(z,Eg_);
 				std::cout<<omega<<" "<<real(res)<<" "<<imag(res)<<"\n";
 			}
 		} 
 
-		ComplexType iOfOmega(const ComplexType& z,RealType offset = Eg_) const
+		ComplexType iOfOmega(const ComplexType& z,RealType offset) const
 
 		{
 			ComplexType sum = 0;
-			for (size_t l=0;l<S.n_row();l++)
-				sum +=intensity_[i]/(z-eigs[l]+offset);
+			for (size_t l=0;l<intensity_.n_row();l++)
+				sum +=intensity_[l]/(z-eigs_[l]+offset);
 
 			return sum*weight_;
 		}
