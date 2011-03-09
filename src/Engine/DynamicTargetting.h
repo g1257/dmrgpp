@@ -99,14 +99,10 @@ namespace Dmrg {
 		typedef std::complex<RealType> ComplexType;
 		typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 		typedef typename ModelType::OperatorsType OperatorsType;
-		//typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::LeftRightSuperType
 			LeftRightSuperType;
 		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-		//typedef std::vector<RealType> VectorType;
-		//typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
-		//typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef DynamicDmrgParams<ModelType> TargettingParamsType;
@@ -125,6 +121,7 @@ namespace Dmrg {
 		enum {	EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 				EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 				INFINITE=WaveFunctionTransfType::INFINITE};
+		static size_t const PRODUCT = TargettingParamsType::PRODUCT;
 
 		static const size_t parallelRank_ = 0; // DYNT needs to support concurrency FIXME
 		
@@ -207,6 +204,8 @@ namespace Dmrg {
 			size_t count =0;
 			VectorWithOffsetType phiOld = psi_;
 			VectorWithOffsetType phiNew;
+			VectorWithOffsetType vectorSum;
+
 			size_t max = tstStruct_.sites.size();
 
 			if (noStageIs(DISABLED)) max = 1;
@@ -215,8 +214,14 @@ namespace Dmrg {
 			// in turn to the g.s.
 			for (size_t i=0;i<max;i++) {
 				count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber,max-1);
-				phiOld = phiNew;
+
+				if (tstStruct_.concatenation==PRODUCT) {
+					phiOld = phiNew;
+				} else {
+					vectorSum += phiNew;
+				}
 			}
+			if (tstStruct_.concatenation==PRODUCT) phiNew = vectorSum;
 
 			if (count==0) {
 		//		// always print to keep observer driver in sync
@@ -226,8 +231,8 @@ namespace Dmrg {
 		//		}
 				return;
 			}
-
-			calcDynVectors(Eg,phiNew,direction);
+			Eg_ = Eg;
+			calcDynVectors(phiNew,direction);
 
 			//cocoon(direction,block); // in-situ
 
@@ -259,11 +264,11 @@ namespace Dmrg {
 			if (block.size()!=1) throw std::runtime_error(
 					"DynamicTargetting only supports blocks of size 1\n");
 
-			TimeSerializerType ts(0.0,block[0],targetVectors_);
-			ts.save(io);
+			ContinuedFractionType cf(ab_,Eg_,weightForContinuedFraction_);
+			DynamicSerializerType dynS(block[0],cf);
+			dynS.save(io);
 		}
 		
-
 		void load(const std::string& f)
 		{
 			std::cerr<<"WARNING: No load implemented for DynamicTargetting\n";
@@ -398,7 +403,6 @@ namespace Dmrg {
 		}
 		
 		void calcDynVectors(
-				RealType Eg,
 				const VectorWithOffsetType&phi,
 				size_t systemOrEnviron)
 		{
@@ -408,7 +412,7 @@ namespace Dmrg {
 				phi.extract(sv,i0);
 				DenseMatrixType V;
 				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
-				getLanczosVectors(V,Eg,sv,p);
+				getLanczosVectors(V,sv,p);
 				if (i==0) {
 					targetVectors_.resize(V.n_col());
 					for (size_t j=0;j<targetVectors_.size();j++)
@@ -421,7 +425,6 @@ namespace Dmrg {
 
 		void getLanczosVectors(
 				DenseMatrixType& V,
-				const RealType& Eg,
 				const VectorType& sv,
 				size_t p) const
 		{
@@ -431,45 +434,57 @@ namespace Dmrg {
 					LanczosMatrixType;
 			LanczosMatrixType h(&model_,&modelHelper);
 
-			RealType eps= ProgramGlobals::LanczosTolerance;
+			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 			size_t iter= ProgramGlobals::LanczosSteps;
 
 			//srand48(3243447);
 			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_);
 
-			TridiagonalMatrixType ab;
+			lanczosSolver.tridiagonalDecomposition(sv,ab_,V);
+			weightForContinuedFraction_ = weightForContinuedFraction(sv,V);
 
-			lanczosSolver.tridiagonalDecomposition(sv,ab,V);
-			calcIntensity(Eg,sv,V,ab);
+			//calcIntensity(Eg,sv,V,ab);
 		}
 		
-		void calcIntensity(
-				const RealType& Eg,
-				const VectorType& sv,
-				const DenseMatrixType& V,
-				const TridiagonalMatrixType& ab) const
-		{
-			PsimagLite::Matrix<RealType> S;
-			ab.buildDenseMatrix(S);
-			std::vector<RealType> eigs(S.n_row());
-			diag(S,eigs,'V');
-			RealType delta= 0.04;
-			for (RealType omega = 0;omega <3;omega+=0.02) {
-				ComplexType z(omega,delta);
-				ComplexType res = calcIntensity(Eg,sv,V,eigs,S,z);
-				std::cout<<omega<<" "<<res<<"\n";
-			}
-		}
+//		void calcIntensity(
+//				const RealType& Eg,
+//				const VectorType& sv,
+//				const DenseMatrixType& V,
+//				const TridiagonalMatrixType& ab) const
+//		{
+//			PsimagLite::Matrix<RealType> S;
+//			ab.buildDenseMatrix(S);
+//			std::vector<RealType> eigs(S.n_row());
+//			diag(S,eigs,'V');
+//			RealType delta= 0.05;
+//			for (RealType omega = 0;omega <3;omega+=0.01) {
+//				ComplexType z(omega,delta);
+//				ComplexType res = calcIntensity(Eg,sv,V,eigs,S,z);
+//				std::cout<<omega<<" "<<res<<"\n";
+//			}
+//		}
 
 		// FIXME: Needs optimization
-		ComplexType calcIntensity(
-				const RealType& Eg,
-				const VectorType& sv,
-				const DenseMatrixType& V,
-				const std::vector<RealType>& eigs,
-				const PsimagLite::Matrix<RealType>& S,
-				const ComplexType& z) const
+//		ComplexType calcIntensity(
+//				const RealType& Eg,
+//				const VectorType& sv,
+//				const DenseMatrixType& V,
+//				const std::vector<RealType>& eigs,
+//				const PsimagLite::Matrix<RealType>& S,
+//				const ComplexType& z) const
+//
+//		{
+//			ComplexType sum = 0;
+//			for (size_t l=0;l<S.n_row();l++)
+//				sum += std::conj(S(0,l))*S(0,l)/(z-eigs[l]+Eg);
+//
+//			RealType weight = weightForContinuedFraction(sv,V);
+//			return sum*weight;
+//		}
 
+		RealType weightForContinuedFraction(
+				const VectorType& sv,
+				const DenseMatrixType& V) const
 		{
 			RealType tmp1 = 0;
 			for (size_t m=0;m<sv.size();m++)
@@ -478,12 +493,7 @@ namespace Dmrg {
 			RealType tmp2 = 0;
 			for (size_t k2=0;k2<sv.size();k2++)
 				tmp2 += std::conj(sv[k2]*V(k2,0));
-
-			ComplexType sum = 0;
-			for (size_t l=0;l<S.n_row();l++)
-				sum += std::conj(S(0,l))*S(0,l)/(z-eigs[l]+Eg);
-
-			return sum*tmp1*tmp2;
+			return tmp1 * tmp2;
 		}
 
 		void setLanczosVectors(
@@ -572,6 +582,9 @@ namespace Dmrg {
 		RealType gsWeight_;
 		std::vector<VectorWithOffsetType> targetVectors_;
 		std::vector<RealType> weight_;
+		TridiagonalMatrixType ab_;
+		RealType Eg_;
+		RealType weightForContinuedFraction_;
 		//typename IoType::Out io_;
 		
 

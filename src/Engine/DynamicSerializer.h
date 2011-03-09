@@ -74,56 +74,99 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file DynamicDmrgParams.h
+/*! \file TimeSerializer.h
  *
- *  This is a structure to represent the parameters of the
- *  Dynamic DMRG algorithm.
- *  Don't add functions to this class because
- *  this class's data is all public
+ *  Serialize time data
  */
-#ifndef DYNAMIC_DMRG_PARAMS_H
-#define DYNAMIC_DMRG_PARAMS_H
+#ifndef TIME_SERIAL_H
+#define TIME_SERIAL_H
 
-#include "TargetParamsCommon.h"
+#include "Utils.h"
+#include "IoSimple.h"
 
 namespace Dmrg {
-	//! Coordinates reading of TargetSTructure from input file
-	template<typename ModelType>
-	class DynamicDmrgParams : public TargetParamsCommon<ModelType> {
-	public:
-		typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
-		typedef typename ModelType::RealType RealType;
-			
-		typedef typename ModelType::OperatorType OperatorType;
-		typedef typename OperatorType::PairType PairType;
-		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-		typedef typename SparseMatrixType::value_type ComplexOrReal;
-		typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
-
-		static size_t const PRODUCT = TargetParamsCommonType::PRODUCT;
-		static size_t const SUM = TargetParamsCommonType::SUM;
-
-		template<typename IoInputter>
-		DynamicDmrgParams(IoInputter& io,const ModelType& model)
-		: TargetParamsCommonType(io,model)
-		  {
-			io.rewind();
-			this->concatenation = SUM;
-		  }
-
-	}; // class DynamicDmrgParams
 	
-	template<typename ModelType>
-	inline std::ostream&
-	operator<<(std::ostream& os,const DynamicDmrgParams<ModelType>& t)
-	{
-		os<<"#TargetParams.type=DynamicDmrg\n";
-		const typename TimeStepParams<ModelType>::TargetParamsCommonType&
-			tp = t;
-		os<<tp;
-		return os;
-	}
+	template<typename RealType,typename VectorType>
+	class TimeSerializer {
+		public:
+			
+			// Unfortunately we need a default ctor
+			// to build an array of these
+			TimeSerializer() { }
+			
+			TimeSerializer(
+				RealType currentTime,
+				size_t site,
+				const std::vector<VectorType>& targetVectors)
+			: currentTime_(currentTime),
+			  site_(site),
+			  targetVectors_(targetVectors)
+			{}
+			
+			TimeSerializer(typename PsimagLite::IoSimple::In& io,size_t lastInstance = 0)
+			{
+				RealType x=0;
+				std::string s = "#TIME=";
+				if (lastInstance) io.readline(x,s,lastInstance);
+				else io.readline(x,s);
+				if (x<0) throw std::runtime_error("TimeSerializer:: time cannot be negative\n");
+				currentTime_ = x;
+				
+				s = "#TCENTRALSITE=";
+				int xi=0;
+				io.readline(xi,s);
+				if (xi<0) throw std::runtime_error("TimeSerializer:: site cannot be negative\n");
+				site_ = xi;
+				
+				s = "#TNUMBEROFVECTORS=";
+				io.readline(xi,s);
+				if (xi<=0) throw std::runtime_error("TimeSerializer:: n. of vectors must be positive\n");
+				targetVectors_.resize(xi);
+				for (size_t i=0;i<targetVectors_.size();i++) {
+					s = "targetVector"+utils::ttos(i);
+					targetVectors_[i].load(io,s);
+				}
+			}
+			
+			size_t size(size_t i=0) const
+			{
+				return  targetVectors_[i].size();
+			}
+			
+			RealType time() const { return currentTime_; }
+			
+			size_t site() const
+			{
+				return  site_;
+			}
+			
+			const VectorType& vector(size_t i=0) const 
+			{
+				return targetVectors_[i];
+			}
+			
+			
+			template<typename IoOutputter>
+			void save(IoOutputter& io) const
+			{
+				std::string s = "#TIME=" + utils::ttos(currentTime_);
+				io.printline(s);
+				s = "#TCENTRALSITE=" + utils::ttos(site_);
+				io.printline(s);
+				s = "#TNUMBEROFVECTORS="+utils::ttos(targetVectors_.size());
+				io.printline(s);
+				for (size_t i=0;i<targetVectors_.size();i++) {
+					std::string label = "targetVector"+utils::ttos(i)+"_"+utils::ttos(currentTime_);
+					targetVectors_[i].save(io,label);
+				}
+			}
+
+		private:
+			RealType currentTime_;
+			size_t site_;
+			std::vector<VectorType> targetVectors_;
+	}; // class TimeSerializer
 } // namespace Dmrg 
 
 /*@}*/
-#endif //DYNAMIC_DMRG_PARAMS_H
+#endif

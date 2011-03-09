@@ -127,7 +127,7 @@ namespace Dmrg {
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
 
-
+			static size_t const PRODUCT = TargettingParamsType::PRODUCT;
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
 
 			TimeStepTargetting(
@@ -217,10 +217,10 @@ namespace Dmrg {
 				return targetVectors_[i];
 			}
 
-	const LeftRightSuperType& leftRightSuper() const
-	{
-		return lrs_;
-	}
+			const LeftRightSuperType& leftRightSuper() const
+			{
+				return lrs_;
+			}
 
 			void evolve(RealType Eg,size_t direction,const BlockType& block,
 				size_t loopNumber)
@@ -228,6 +228,7 @@ namespace Dmrg {
 				size_t count =0;
 				VectorWithOffsetType phiOld = psi_;
 				VectorWithOffsetType phiNew;
+				VectorWithOffsetType vectorSum;
 				size_t max = tstStruct_.sites.size();
 				
 				if (noStageIs(DISABLED)) max = 1;
@@ -236,8 +237,13 @@ namespace Dmrg {
 				// in turn to the g.s.
 				for (size_t i=0;i<max;i++) {
 					count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber,max-1);
-					phiOld = phiNew;
+					if (tstStruct_.concatenation==PRODUCT) {
+						phiOld = phiNew;
+					} else {
+						vectorSum += phiNew;
+					}
 				}
+				if (tstStruct_.concatenation==PRODUCT) phiNew = vectorSum;
 				
 				if (count==0) {
 					// always print to keep observer driver in sync
@@ -283,7 +289,7 @@ namespace Dmrg {
 			size_t evolve(
 					size_t i,
 					VectorWithOffsetType& phiNew,
-					VectorWithOffsetType& phiOld,
+					const VectorWithOffsetType& phiOld,
 					RealType Eg,
 					size_t direction,
 					const BlockType& block,
@@ -424,7 +430,7 @@ namespace Dmrg {
 
 
 			void computePhi(size_t i,VectorWithOffsetType& phiNew,
-					VectorWithOffsetType& phiOld,size_t systemOrEnviron)
+					const VectorWithOffsetType& phiOld,size_t systemOrEnviron)
 			{
 				size_t indexAdvance = times_.size()-1;
 				size_t indexNoAdvance = 0;
