@@ -117,7 +117,7 @@ namespace Dmrg {
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
-		typedef ContinuedFraction<RealType,TridiagonalMatrixType>
+		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
 			ContinuedFractionType;
 		typedef DynamicSerializer<RealType,VectorWithOffsetType,
 				ContinuedFractionType> DynamicSerializerType;
@@ -264,8 +264,6 @@ namespace Dmrg {
 		template<typename IoOutputType>
 		void save(const std::vector<size_t>& block,IoOutputType& io) const
 		{
-			std::cerr<<"WARNING: DynTarget won't save\n";
-			return;
 			if (block.size()!=1) throw std::runtime_error(
 					"DynamicTargetting only supports blocks of size 1\n");
 
@@ -274,7 +272,7 @@ namespace Dmrg {
 			dynS.save(io);
 			psi_.save(io,"PSI");
 		}
-		
+
 		void load(const std::string& f)
 		{
 			for (size_t i=0;i<stage_.size();i++) stage_[i] = CONVERGING;

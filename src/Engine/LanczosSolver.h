@@ -101,7 +101,7 @@ namespace Dmrg {
 		
 	public:
 		typedef MatrixType LanczosMatrixType;
-		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
+		typedef PsimagLite::TridiagonalMatrix<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 		typedef typename PsimagLite::Matrix<VectorElementType> DenseMatrixType;
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
