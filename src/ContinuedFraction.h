@@ -58,6 +58,8 @@ namespace PsimagLite {
 		{
 			io.readline(weight_,"#CFWeight");
 			io.readline(Eg_,"#CFEnergy");
+			io.read(eigs_,"#CFEigs");
+			io.read(intensity_,"#CFIntensities");
 		}
 		
 		template<typename IoOutputType>
@@ -70,6 +72,9 @@ namespace PsimagLite {
 
 			s = "#CFEnergy=" + typeToString(Eg_);
 			io.printline(s);
+
+			io.printVector(eigs_,"#CFEigs");
+			io.printVector(intensity_,"#CFIntensities");
 		}
 
 		void plot(

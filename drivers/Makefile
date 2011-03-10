@@ -1,5 +1,5 @@
 
-LDFLAGS =       -lm  -lpthread 
+LDFLAGS =       -lm  -lpthread -lblas -llapack
 CPPFLAGS = -Werror -Wall -I../src
 CXX = g++ -O3 -DNDEBUG
 all: $(EXENAME)
