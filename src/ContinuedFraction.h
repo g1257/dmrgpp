@@ -56,8 +56,8 @@ namespace PsimagLite {
 		ContinuedFraction(IoInputType& io)
 		: progress_("ContinuedFraction",0),ab_(io)
 		{
-			io.readline(weight_,"#CFWeight");
-			io.readline(Eg_,"#CFEnergy");
+			io.readline(weight_,"#CFWeight=");
+			io.readline(Eg_,"#CFEnergy=");
 			io.read(eigs_,"#CFEigs");
 			io.read(intensity_,"#CFIntensities");
 		}

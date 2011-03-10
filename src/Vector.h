@@ -54,6 +54,21 @@ namespace std {
 		for (size_t i=0;i<w.size();i++) v[i] -= w[i];
 		return v;
 	}
+
+	template<typename T1,typename T2>
+	inline std::vector<T1> operator/=(std::vector<T1>& v,const T2& t2) 
+	{
+		for (size_t i=0;i<v.size();i++) v[i] /= t2;
+		return v;
+	}
+
+	template<typename T1,typename T2>
+	inline std::vector<T1> operator+(const std::vector<T1>& v1,const std::vector<T2>& v2)
+	{
+		std::vector<T1> v3(v1.size());
+		for (size_t i=0;i<v1.size();i++) v3[i] = v1[i] + v2[i];
+		return v3;
+	}
 } // namespace std 
 
 namespace PsimagLite {
