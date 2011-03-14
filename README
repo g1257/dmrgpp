@@ -14,7 +14,7 @@ ModuleName	Description
 [RandomNumberGenerator]	Will include a good rng and a bad one/easy one for testing
 [Interpolation] Akima splines
 
-The reason for PsimagLite is to share code among SpinPhononFermion, DCA++ and DMRG++. 
+The reason for PsimagLite is to share code among SpinPhononFermion, DCA++ and DMRG++, Lanczos++, and FreeFermions. 
 
 PsimagLite is free software (see file LICENSE) 
 
