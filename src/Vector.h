@@ -37,7 +37,7 @@ namespace std {
 	std::ostream &operator<<(std::ostream &s,std::vector<X> const &v)
 	{
 		s<<v.size()<<"\n";
-		for (size_t i=0;i<v.size();i++) s<<i<<" "<<v[i]<<"\n";
+		for (size_t i=0;i<v.size();i++) s<<v[i]<<"\n";
 		return s;
 	}
 
@@ -68,6 +68,19 @@ namespace std {
 		std::vector<T1> v3(v1.size());
 		for (size_t i=0;i<v1.size();i++) v3[i] = v1[i] + v2[i];
 		return v3;
+	}
+
+	template<typename FieldType>
+	inline std::istream& operator>>(std::istream& is,std::vector<FieldType>& v)
+	{
+		int xsize = 0;
+		is>>xsize;
+		if (xsize<0) throw std::runtime_error(">> vector: size is negative\n");
+		v.resize(xsize);
+		for (size_t i=0;i<size_t(xsize);i++) {
+			is>>v[i];
+		}
+		return is;
 	}
 } // namespace std 
 
