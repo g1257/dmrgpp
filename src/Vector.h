@@ -33,6 +33,14 @@ namespace std {
 		return result;
 	}
 
+	template<typename T1,typename T2>
+	inline std::vector<T2> operator*(const T1& v1,const std::vector<T2>& v2)
+	{
+		std::vector<T2> v3(v2.size());
+		for (size_t i=0;i<v3.size();i++) v3[i] = v1 * v2[i];
+		return v3;
+	}
+
 	template<class X>
 	std::ostream &operator<<(std::ostream &s,std::vector<X> const &v)
 	{
@@ -67,6 +75,14 @@ namespace std {
 	{
 		std::vector<T1> v3(v1.size());
 		for (size_t i=0;i<v1.size();i++) v3[i] = v1[i] + v2[i];
+		return v3;
+	}
+
+	template<typename T1,typename T2>
+	inline std::vector<T1> operator-(const std::vector<T1>& v1,const std::vector<T2>& v2)
+	{
+		std::vector<T1> v3(v1.size());
+		for (size_t i=0;i<v1.size();i++) v3[i] = v1[i] - v2[i];
 		return v3;
 	}
 
