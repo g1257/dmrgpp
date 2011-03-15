@@ -87,9 +87,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <vector>
 #include "Matrix.h" // under psimag
- 
+#include "CrsMatrix.h"
+
 namespace PsimagLite {
+
 	
+
 	// MpiBroadcast non-template functions
 	inline void MpiBroadcast(std::vector<double> &v,int iproc)
 	{
@@ -124,8 +127,43 @@ namespace PsimagLite {
 	}
 	
 	// MpiBroadcast template functions
-	template<typename CrsMatrixType>
-	void MpiBroadcast(CrsMatrixType *S,int rank)
+	
+	void MpiBroadcast(double *v,int iproc)
+	{
+			MPI_Bcast(v,1,MPI_DOUBLE,iproc,MPI_COMM_WORLD);
+	}
+	
+	void MpiBroadcast(std::complex<double> *v,int iproc)
+	{
+			MPI_Bcast(v,2,MPI_DOUBLE,iproc,MPI_COMM_WORLD);
+	}
+	
+	void MpiBroadcast(int *v,int iproc)
+	{
+			MPI_Bcast(v,1,MPI_INTEGER,iproc,MPI_COMM_WORLD);
+	}
+
+	void MpiBroadcast(Matrix<double> *m,int iproc)
+	{
+		int total = m->n_row()*m->n_col();
+		MPI_Bcast(&((*m)(0,0)),total,MPI_DOUBLE,iproc,MPI_COMM_WORLD);
+	}
+
+	void MpiBroadcast(Matrix<std::complex<double> > *m,int iproc)
+	{
+		int total = m->n_row()*m->n_col();
+		total *= 2; // it's complex
+		MPI_Bcast(&((*m)(0,0)),total,MPI_DOUBLE,iproc,MPI_COMM_WORLD);
+	}
+	
+	void MpiBroadcast(std::vector<double> *v,int iproc)
+	{
+		int x = v->size();
+		MPI_Bcast(&((*v)[0]),x,MPI_DOUBLE,iproc,MPI_COMM_WORLD);
+	}
+
+	template<typename T> 
+	void MpiBroadcast(CrsMatrix<T> *S,int rank)
 	{
 		//std::cerr<<"rank="<<rank<<" broadcasting S.rowptr.size()="<<S->rowptr.size()<<"\n";
 		MpiBroadcast(S->rowptr_,rank);
@@ -136,44 +174,10 @@ namespace PsimagLite {
 		//std::cerr<<"rank="<<rank<<" broadcasting S.values.size()="<<S->values.size()<<"\n";
 		MpiBroadcast(S->values_,rank);
 	}
-	
-	template<>
-	void MpiBroadcast(double *v,int iproc)
-	{
-			MPI_Bcast(v,1,MPI_DOUBLE,iproc,MPI_COMM_WORLD);
-	}
-	
-	template<>
-	void MpiBroadcast(std::complex<double> *v,int iproc)
-	{
-			MPI_Bcast(v,2,MPI_DOUBLE,iproc,MPI_COMM_WORLD);
-	}
-	
-	template<>
-	void MpiBroadcast(int *v,int iproc)
-	{
-			MPI_Bcast(v,1,MPI_INTEGER,iproc,MPI_COMM_WORLD);
-	}
 
-	template<>
-	void MpiBroadcast(PsimagLite::Matrix<double> *m,int iproc)
-	{
-		int total = m->n_row()*m->n_col();
-		MPI_Bcast(&((*m)(0,0)),total,MPI_DOUBLE,iproc,MPI_COMM_WORLD);
-	}
-	
-	template<>
-	void MpiBroadcast(std::vector<double> *v,int iproc)
-	{
-		int x = v->size();
-		MPI_Bcast(&((*v)[0]),x,MPI_DOUBLE,iproc,MPI_COMM_WORLD);
-	}
-
-	
-	
 
 	// MpiRecv non-template functions
-	inline void MpiRecv(std::vector<int> &v,int iproc,int tag)
+	void MpiRecv(std::vector<int> &v,int iproc,int tag)
 	{
 		int x;
 		MPI_Status status;
@@ -182,7 +186,7 @@ namespace PsimagLite {
 		MPI_Recv(&(v[0]),x,MPI_INTEGER,iproc,tag,MPI_COMM_WORLD,&status);
 	}
 
-	inline void MpiRecv(std::vector<std::complex<double> > &v,int iproc,int tag)
+	void MpiRecv(std::vector<std::complex<double> > &v,int iproc,int tag)
 	{
 		int x;
 		MPI_Status status;
@@ -191,7 +195,7 @@ namespace PsimagLite {
 		MPI_Recv(&(v[0]),2*x,MPI_DOUBLE,iproc,iproc+tag,MPI_COMM_WORLD,&status);
 	}
 	
-	inline void MpiRecv(std::vector<double> &v,int iproc,int tag)
+	void MpiRecv(std::vector<double> &v,int iproc,int tag)
 	{
 		int x;
 		MPI_Status status;
@@ -202,8 +206,8 @@ namespace PsimagLite {
 	
 	// MpiRecv template functions
 	
-	template<typename CrsMatrixType>
-	inline void MpiRecv(CrsMatrixType *v,int iproc,int i)
+	template<typename T>
+	void MpiRecv(CrsMatrix<T> *v,int iproc,int i)
 	{
 		int tag1=1024,tag2=2048,tag3=3096,tag4=4096;
 		MPI_Status status;
@@ -216,45 +220,49 @@ namespace PsimagLite {
 		v->size_=x;
 	}
 	
-	template<>
-	void MpiRecv(PsimagLite::Matrix<double> *m,int iproc,int tag)
+	void MpiRecv(Matrix<double> *m,int iproc,int tag)
 	{
 		int total = m->n_row()*m->n_col();
 		MPI_Status status;
 		MPI_Recv(&((*m)(0,0)),total,MPI_DOUBLE,iproc,tag,MPI_COMM_WORLD,&status);
 	}
+
+	void MpiRecv(Matrix<std::complex<double> > *m,int iproc,int tag)
+	{
+		int total = m->n_row()*m->n_col();
+		total *= 2; // it's complex
+		MPI_Status status;
+		MPI_Recv(&((*m)(0,0)),total,MPI_DOUBLE,iproc,tag,MPI_COMM_WORLD,&status);
+	}
 	
-	template<>
 	void MpiRecv(int *v,int iproc,int tag)
 	{
 		MPI_Status status;
 		MPI_Recv(v,1,MPI_INTEGER,iproc,tag,MPI_COMM_WORLD,&status);
 	}
 	
-	template<>
 	void MpiRecv(double *v,int iproc,int tag)
 	{
 		MPI_Status status;
 		MPI_Recv(v,1,MPI_DOUBLE,iproc,tag,MPI_COMM_WORLD,&status);
 	}
-
 	
 	// send non-template
-	inline void MpiSend(std::vector<std::complex<double> > &v,int iproc,int tag)
+	void MpiSend(std::vector<std::complex<double> > &v,int iproc,int tag)
 	{
 		int x = v.size();
 		MPI_Send(&x,1,MPI_INTEGER,0,iproc+tag,MPI_COMM_WORLD);
 		MPI_Send(&(v[0]),2*x,MPI_DOUBLE,0,iproc+tag,MPI_COMM_WORLD);
 	}
 	
-	inline void MpiSend(std::vector<int> &v,int iproc,int tag)
+	void MpiSend(std::vector<int> &v,int iproc,int tag)
 	{
 		int x = v.size();
 		MPI_Send(&x,1,MPI_INTEGER,0,tag,MPI_COMM_WORLD);
 		MPI_Send(&(v[0]),x,MPI_INTEGER,0,tag,MPI_COMM_WORLD);
 	}
 
-	inline void MpiSend(std::vector<double> &v,int iproc,int tag)
+	void MpiSend(std::vector<double> &v,int iproc,int tag)
 	{
 		int x = v.size();
 		MPI_Send(&x,1,MPI_INTEGER,0,tag,MPI_COMM_WORLD);
@@ -262,25 +270,33 @@ namespace PsimagLite {
 	}
 
 
-	inline void MpiSend(double *v,int iproc,int tag)
+	void MpiSend(double *v,int iproc,int tag)
 	{
 		MPI_Send(v,1,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
 	}
 	
-	inline void MpiSend(int *v,int iproc,int tag)
+	void MpiSend(int *v,int iproc,int tag)
 	{
 		MPI_Send(v,1,MPI_INTEGER,0,tag,MPI_COMM_WORLD);
 	}
 
 
-	inline void MpiSend(PsimagLite::Matrix<double> *m,int iproc,int tag)
+	void MpiSend(Matrix<double> *m,int iproc,int tag)
 	{
 		int total = m->n_row()*m->n_col();
 		MPI_Send(&((*m)(0,0)),total,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
 	}
 
-	template<typename CrsMatrixType>
-	inline void MpiSend(CrsMatrixType  *v,int iproc,int i)
+	void MpiSend(Matrix<std::complex<double> > *m,int iproc,int tag)
+	{
+		int total = m->n_row()*m->n_col();
+		total *= 2; // it's complex
+		MPI_Send(&((*m)(0,0)),total,MPI_DOUBLE,0,tag,MPI_COMM_WORLD);
+	}
+
+
+	template<typename T>
+	void MpiSend(CrsMatrix<T>  *v,int iproc,int i)
 	{
 		int tag1=1024,tag2=2048,tag3=3096,tag4=4096;
 		int x;
@@ -292,7 +308,7 @@ namespace PsimagLite {
 		MPI_Send(&x,1,MPI_INTEGER,0,i+tag4,MPI_COMM_WORLD);
 	}
 	
-} // namespace Dmrg
+} // namespace  PsimagLite
 
 /*@}*/
 #endif
