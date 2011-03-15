@@ -20,5 +20,11 @@ namespace PsimagLite {
 	}
 }
 
+template<class T>
+std::string ttos(T t)
+{
+	return PsimagLite::typeToString(t);
+}
+
 #endif // TYPE_TO_STRING_H
 
