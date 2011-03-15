@@ -675,8 +675,8 @@ namespace Dmrg {
 			{
 				VectorWithOffsetType dest;
 				OperatorType A = tstStruct_.aOperators[0];
-				CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
-				CrsMatrix<ComplexType> tmpCt;
+				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
+				PsimagLite::CrsMatrix<ComplexType> tmpCt;
 				transposeConjugate(tmpCt,tmpC);
 				multiply(A.data,tmpCt,tmpC);
 				A.fermionSign = 1;

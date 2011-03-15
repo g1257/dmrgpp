@@ -89,7 +89,7 @@ namespace Dmrg {
 	template<typename RealType,typename SparseMatrixType>
 	class	HamiltonianSymmetryLocal {
 		typedef  BasisData<std::pair<size_t,size_t> > BasisDataType;
-		typedef CrsMatrix<RealType> FactorsType;
+		typedef PsimagLite::CrsMatrix<RealType> FactorsType;
 		
 		public:
 			static int const MAX = 100;

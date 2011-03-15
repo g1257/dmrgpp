@@ -166,17 +166,6 @@ namespace std {
 	}
 
 	template<typename FieldType>
-	istream& operator>>(istream& is,vector<FieldType>& x)
-	{
-		int y = 0;
-		is>>y;
-		if (y<0) throw std::runtime_error("Vector size cannot be negative\n");
-		x.resize(y);
-		for (size_t i=0;i<size_t(y);i++) is>>x[i];
-		return is;	
-	}
-
-	template<typename FieldType>
 	ostream& operator<<(ostream& os,const stack<FieldType>& st)
 	{
 		stack<FieldType> st2 = st;

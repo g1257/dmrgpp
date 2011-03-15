@@ -295,8 +295,8 @@ print FOUT<<EOF;
 
 typedef double MatrixElementType;
 typedef std::complex<MatrixElementType> ComplexType;
-typedef  Dmrg::CrsMatrix<ComplexType> MySparseMatrixComplex;
-typedef  Dmrg::CrsMatrix<MatrixElementType> MySparseMatrixReal;
+typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
+typedef  PsimagLite::CrsMatrix<MatrixElementType> MySparseMatrixReal;
 
 using namespace Dmrg;
 
@@ -675,8 +675,8 @@ int main(int argc,char *argv[])
 	
 	// FIXME: See if we need VectorWithOffsets sometimes
 	// FIXME: Does it make sense to have ModelHelperSu2 here sometimes?
-	typedef CrsMatrix<RealType> MySparseMatrixReal;
-	typedef CrsMatrix<FieldType> MySparseMatrixComplex;
+	typedef PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
+	typedef PsimagLite::CrsMatrix<FieldType> MySparseMatrixComplex;
 	if (hasTimeEvolution)
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,
