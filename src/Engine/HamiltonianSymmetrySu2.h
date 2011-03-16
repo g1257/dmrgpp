@@ -105,7 +105,7 @@ namespace Dmrg {
 			typedef  BasisData<PairType> BasisDataType;
 			
 		public:
-			typedef CrsMatrix<RealType> FactorsType;
+			typedef PsimagLite::CrsMatrix<RealType> FactorsType;
 			
 			static size_t const MAX = ProgramGlobals::MaxNumberOfSites;
 			

@@ -220,7 +220,7 @@ namespace Dmrg {
 				     bool option,ApplyFactorsType& apply)
 		{
 			if (useSu2Symmetry_) std::cerr<<"#######EEEEEEEEERRRRRRRRRRRRRROOOOOOOOOOORRRRRRRRRR\n"; 
-			Dmrg::externalProduct(operators_[i].data,m.data,x,fermionicSigns,option);
+			PsimagLite::externalProduct(operators_[i].data,m.data,x,fermionicSigns,option);
 			// don't forget to set fermion sign and j:
 			operators_[i].fermionSign=m.fermionSign;
 			operators_[i].jm=m.jm;
@@ -239,9 +239,9 @@ namespace Dmrg {
 		{
 			SparseMatrixType tmpMatrix;
 			std::vector<double> ones(h2.rank(),1.0);
-			Dmrg::externalProduct(hamiltonian_,h2,h3.rank(),ones,true);
+			PsimagLite::externalProduct(hamiltonian_,h2,h3.rank(),ones,true);
 
-			Dmrg::externalProduct(tmpMatrix,h3,h2.rank(),ones,false);
+			PsimagLite::externalProduct(tmpMatrix,h3,h2.rank(),ones,false);
 
 			hamiltonian_ += tmpMatrix;
 

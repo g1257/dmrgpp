@@ -128,6 +128,7 @@ namespace Dmrg {
 		typedef PsimagLite::Profiling ProfilingType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 		typedef ApplyOperatorLocal<BasisWithOperatorsType,VectorWithOffsetType,VectorType> ApplyOperatorType;
+		typedef PsimagLite::CrsMatrix<FieldType> SparseMatrixType;
 
 		enum {GROW_RIGHT,GROW_LEFT};
 		enum {DIAGONAL,NON_DIAGONAL};
@@ -484,7 +485,7 @@ namespace Dmrg {
 						const VectorWithOffsetType& vec1,
 						const VectorWithOffsetType& vec2)
 		{
-			CrsMatrix<FieldType> Acrs(A);
+			SparseMatrixType Acrs(A);
 			FieldType sum=0;
 
 			for (size_t x=0;x<vec1.sectors();x++) {
@@ -515,7 +516,7 @@ namespace Dmrg {
 						const VectorWithOffsetType& vec2,
 						int fermionicSign)
 		{
-			CrsMatrix<FieldType> Acrs(A);
+			SparseMatrixType Acrs(A);
 			FieldType sum=0;
 
 			for (size_t x=0;x<vec1.sectors();x++) {
@@ -564,8 +565,8 @@ namespace Dmrg {
 		{
 			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper().super().size()<<"\n";
 
-			CrsMatrix<FieldType> Acrs(A);
-			CrsMatrix<FieldType> Bcrs(B);
+			SparseMatrixType Acrs(A);
+			SparseMatrixType Bcrs(B);
 			FieldType sum=0;
 			size_t ni = helper_.leftRightSuper().left().size()/Bcrs.rank(); // = Acrs.rank()
 
@@ -623,8 +624,8 @@ namespace Dmrg {
 		{
 			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper().super().size()<<"\n";
 
-			CrsMatrix<FieldType> Acrs(A);
-			CrsMatrix<FieldType> Bcrs(B);
+			SparseMatrixType Acrs(A);
+			SparseMatrixType Bcrs(B);
 			FieldType sum=0;
 			size_t ni = Bcrs.rank();
 
@@ -686,9 +687,9 @@ namespace Dmrg {
 
 			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper().super().size()<<"\n";
 
-			CrsMatrix<FieldType> A1crs(A1);
-			CrsMatrix<FieldType> A2crs(A2);
-			CrsMatrix<FieldType> Bcrs(B);
+			SparseMatrixType A1crs(A1);
+			SparseMatrixType A2crs(A2);
+			SparseMatrixType Bcrs(B);
 			FieldType sum=0;
 			size_t ni = helper_.leftRightSuper().left().size()/Bcrs.rank(); // = Acrs.rank()
 
