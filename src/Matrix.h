@@ -157,10 +157,16 @@ namespace PsimagLite {
 		std::vector<double> work(3);
 		int info,lwork= -1;
 
+		if (lda<=0) throw std::runtime_error("lda<=0\n");
+
 		eigs.resize(n);
 
 		// query:
 		dsyev_(&jobz,&uplo,&n,&(m(0,0)),&lda, &(eigs[0]),&(work[0]),&lwork, &info);
+		if (info!=0) {
+			std::cerr<<"info="<<info<<"\n";
+			throw std::runtime_error("diag: dsyev_: failed with info!=0.\n");
+		}
 		lwork = int(work[0])+1;
 		work.resize(lwork+1);
 		// real work:

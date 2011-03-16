@@ -82,8 +82,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef CRSMATRIX_HEADER_H
 #define CRSMATRIX_HEADER_H
-#include "Utils.h"
-#include "Matrix.h" // in psimag
+#include <algorithm>
+#include "BLAS.h" 
+#include "Matrix.h" 
 #include "Complex.h"
 
 namespace PsimagLite {
@@ -297,13 +298,13 @@ namespace PsimagLite {
 
 		T getValue(int i) const { return values_[i]; }
 
-		bool operator==(const CrsMatrix<T>& B) const
+		/*bool operator==(const CrsMatrix<T>& B) const
 		{
 			if (!utils::vectorEqual(values_,B.values_)) return false;
 			if (!utils::vectorEqual(colind_,B.colind_)) return false;
 			if (!utils::vectorEqual(rowptr_,B.rowptr_)) return false;
 			return true;
-		}
+		}*/
 
 		void set(const std::vector<int> &rowptr,const std::vector<int>& colind,const std::vector<T>& values)
 		{
@@ -749,7 +750,7 @@ namespace PsimagLite {
 					valueTmp[C.getCol(k)] += tmp;
 					index.push_back(C.getCol(k));
 				}
-				sort(index.begin(),index.end());
+				std::sort(index.begin(),index.end());
 				k= -1;
 				for (size_t kk=0;kk<index.size();kk++) {
 					if (k==index[kk]) continue;
