@@ -27,7 +27,9 @@ class Sort {
 	
 	void sort(ContainerType& x,std::vector<size_t>& iperm)
 	{
-		std::vector<PairType> p(x.size());
+		if (x.size()==0) return;
+		PairType onep(x[0],0);
+		std::vector<PairType> p(x.size(),onep);
 		for (size_t i=0;i<x.size();i++) {
 			p[i].first = x[i];
 			p[i].second = i;
