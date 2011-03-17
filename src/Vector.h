@@ -22,6 +22,8 @@ Please see full open source license included in file LICENSE.
 
 #include <vector>
 #include <iostream>
+#include <stdexcept>
+#include "Complex.h"
 
 // temporary hack until Vector is used:
 namespace std {

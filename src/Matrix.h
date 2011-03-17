@@ -303,6 +303,26 @@ namespace PsimagLite {
 		}
 		return ret;
 	}
+	
+	template<class T>
+	void transposeConjugate(Matrix<T>& m2,const Matrix<T>& m)
+	{
+		m2.resize(m.n_row(),m.n_col());
+		for (size_t i=0;i<m2.n_row();i++)
+			for (size_t j=0;j<m2.n_col();j++) 
+				m2(i,j)=std::conj(m(j,i));
+		
+	}
+	
+	template<typename T>
+	PsimagLite::Matrix<T> transposeConjugate(const Matrix<T>& A)
+	{
+		PsimagLite::Matrix<T> ret(A.n_col(),A.n_row());
+		for (size_t i=0;i<A.n_col();i++)
+			for (size_t j=0;j<A.n_row();j++)
+				ret(i,j)=std::conj(A(j,i));
+		return ret;
+	}
 
 } // namespace PsimagLite
 #endif
