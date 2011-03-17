@@ -74,43 +74,41 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup PsimagLite */
 /*@{*/
 
-/*! \file Fermi.h
+/*! \file Stack.h
  *
- *  Fermi functions and their derivatives
+ *  std::stack companions
  */
   
-#ifndef FERMI_H_
-#define FERMI_H_
-namespace PsimagLite {
+#ifndef PSIMAGLITE_STACK_H_
+#define PSIMAGLITE_STACK_H_
+#include <stack>
+
+namespace std {
 	template<typename FieldType>
-	FieldType fermi(const FieldType& x)
+	ostream& operator<<(ostream& os,const stack<FieldType>& st)
 	{
-		if (x>50) return 0;
-		if (x<-50) return 1;
-		if (x<0) return 1.0/(1.0+exp(x));
-		return exp(-x)/(1.0+exp(-x));
-		
+		stack<FieldType> st2 = st;
+		os<<st2.size()<<"\n";
+		while(!st2.empty()) {
+			FieldType x = st2.top();
+			os<<x<<"\n";
+			st2.pop();
+		}
+		return os;
+
 	}
-	
-	// Derivative (prime) of Fermi's function
-	template<typename FieldType>
-	FieldType fermiPrime(const FieldType& x)
+
+	template<typename X>
+	istream& operator>>(istream& is,stack<X>& x)
 	{
-		FieldType res;
-		res= -fermi(x)*fermi(-x);
-		return res;
+		std::vector<X> tmpVec;
+		is>>tmpVec;
+		for (int i=tmpVec.size()-1;i>=0;i--) {
+				x.push(tmpVec[i]);
+		}
+		return is;
 	}
-	
-	template<typename FieldType>
-	FieldType logfermi(const FieldType& x)
-	{
-		FieldType res;
-		if (x>20) return -x;
-		if (x<-20) return 0;
-		res = -log(1.0+exp(x));
-		return res;
-	}
-} // namespace PsimagLite 
+} // namespace std 
 
 /*@}*/	
-#endif // FERMI_H_
+#endif // PSIMAGLITE_STACK_H_

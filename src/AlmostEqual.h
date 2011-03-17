@@ -74,43 +74,42 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup PsimagLite */
 /*@{*/
 
-/*! \file Fermi.h
+/*! \file AlmostEqual.h
  *
- *  Fermi functions and their derivatives
+ * Almost equal
  */
   
-#ifndef FERMI_H_
-#define FERMI_H_
+#ifndef ALMOST_EQUAL_H
+#define ALMOST_EQUAL_H
+#include "Matrix.h"
+
 namespace PsimagLite {
-	template<typename FieldType>
-	FieldType fermi(const FieldType& x)
-	{
-		if (x>50) return 0;
-		if (x<-50) return 1;
-		if (x<0) return 1.0/(1.0+exp(x));
-		return exp(-x)/(1.0+exp(-x));
+	template<typename RealType>
+	class AlmostEqual {
+	public:
+		AlmostEqual(const RealType& eps) : eps_(eps) { }
 		
-	}
-	
-	// Derivative (prime) of Fermi's function
-	template<typename FieldType>
-	FieldType fermiPrime(const FieldType& x)
-	{
-		FieldType res;
-		res= -fermi(x)*fermi(-x);
-		return res;
-	}
-	
-	template<typename FieldType>
-	FieldType logfermi(const FieldType& x)
-	{
-		FieldType res;
-		if (x>20) return -x;
-		if (x<-20) return 0;
-		res = -log(1.0+exp(x));
-		return res;
-	}
+		template<typename SomeType>
+		bool operator()(
+			const Matrix<SomeType>& a,
+			const Matrix<SomeType>& b)
+		{
+			for (size_t i=0;i<a.n_row();i++) {
+				for (size_t j=0;j<a.n_col();j++) { 
+					if (std::norm(a(i,j)-b(i,j))>eps_) {
+						std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j);
+						std::cerr<<" b("<<i<<","<<j<<")="<<b(i,j)<<"\n";
+						throw std::runtime_error("almostEqual\n");
+					}
+				}
+			}
+			return true;
+		}
+
+	private:
+		const RealType& eps_;
+	}; // class AlmostEqual
 } // namespace PsimagLite 
 
 /*@}*/	
-#endif // FERMI_H_
+#endif // ALMOST_EQUAL_H

@@ -74,43 +74,34 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup PsimagLite */
 /*@{*/
 
-/*! \file Fermi.h
+/*! \file PackIndices.h
  *
- *  Fermi functions and their derivatives
+ * PAcking and unpacking of indices
  */
   
-#ifndef FERMI_H_
-#define FERMI_H_
+#ifndef PACK_INDICES_H
+#define PACK_INDICES_H
+#include <cstdlib>
+
 namespace PsimagLite {
-	template<typename FieldType>
-	FieldType fermi(const FieldType& x)
-	{
-		if (x>50) return 0;
-		if (x<-50) return 1;
-		if (x<0) return 1.0/(1.0+exp(x));
-		return exp(-x)/(1.0+exp(-x));
-		
-	}
+	class PackIndices {
+	public:
+		PackIndices(size_t n) : n_(n) { }
 	
-	// Derivative (prime) of Fermi's function
-	template<typename FieldType>
-	FieldType fermiPrime(const FieldType& x)
-	{
-		FieldType res;
-		res= -fermi(x)*fermi(-x);
-		return res;
-	}
-	
-	template<typename FieldType>
-	FieldType logfermi(const FieldType& x)
-	{
-		FieldType res;
-		if (x>20) return -x;
-		if (x<-20) return 0;
-		res = -log(1.0+exp(x));
-		return res;
-	}
+		//! given ind and n, get x and y such that ind = x + y*n
+		void unpack(size_t& x,size_t& y,size_t ind) const
+		{
+			//y  = ind/n;
+			//x = ind - y*n;
+			//x= ind % n;
+			div_t q = div(ind, n_);
+			y = q.quot;
+			x = q.rem;
+		}
+	private:
+		size_t n_;
+	}; // class PackIndices
 } // namespace PsimagLite 
 
 /*@}*/	
-#endif // FERMI_H_
+#endif // PACK_INDICES_H

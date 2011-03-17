@@ -1,4 +1,6 @@
 // sort algorithm example
+#ifndef SORT_H_H
+#define SORT_H_H
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -41,5 +43,6 @@ class Sort {
 		}
 	}
 
-};
+}; //class Sort
 
+#endif // SORT_H_H

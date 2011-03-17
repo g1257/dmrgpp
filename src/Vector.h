@@ -62,6 +62,13 @@ namespace std {
 		for (size_t i=0;i<w.size();i++) v[i] -= w[i];
 		return v;
 	}
+	
+	template<typename T1,typename T2>
+	inline std::vector<T1> operator*=(std::vector<T1>& v,const T2& t2) 
+	{
+		for (size_t i=0;i<v.size();i++) v[i] *= t2;
+		return v;
+	}
 
 	template<typename T1,typename T2>
 	inline std::vector<T1> operator/=(std::vector<T1>& v,const T2& t2) 
@@ -115,7 +122,7 @@ namespace PsimagLite {
 		for (size_t i=0;i<v.size();i++) s<<name<<"["<<i<<"]="<<v[i]<<std::endl;
 	} 
 	
-		template<class X>
+	template<class X>
 	X norm(std::vector<X> const &v)
 	{
 		return sqrt(v*v);
@@ -127,6 +134,18 @@ namespace PsimagLite {
 		std::complex<X> x = v*v;
 		if (fabs(imag(x))>1e-5) throw std::runtime_error("Norm isn't real\n");
 		return sqrt(real(x));
+	}
+	
+	template<typename X,typename Y>
+	int isInVector(std::vector<X> const &natBasis,Y const &v)
+	{
+// 		if (natBasis.size()==0) return -1;
+// 		for (size_t ii=0;ii<natBasis.size();ii++) if (natBasis[ii]==v) return ii;
+// 		return -1;
+		typename std::vector<X>::const_iterator x = find(natBasis.begin(),natBasis.end(),v);
+		if (x==natBasis.end()) return -1;
+		return x-natBasis.begin();
+		
 	}
 }// namespace PsimagLite
 #endif // PSIVECTOR_H_

@@ -242,6 +242,67 @@ namespace PsimagLite {
 		}
 		os<<"\n";
 	}
+	
+	template<typename T>
+	bool isTheIdentity(Matrix<T> const &a)
+	{
+		
+		for (size_t i=0;i<a.n_row();i++) { 
+			for (size_t j=0;j<a.n_col();j++) { 
+				if (i!=j && std::norm(a(i,j))>0)  {
+					std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j)<<"\n";
+					return false;
+				}
+			}
+		}
+		
+		for (size_t i=0;i<a.n_row();i++) 
+			if (std::norm(a(i,i)-1.0)>0) return false;
+			 
+		return true;
+	}
+	
+	template<typename T>
+	bool isZero(Matrix<std::complex<T> > const &a)
+	{
+		
+		for (size_t i=0;i<a.n_row();i++) 
+			for (size_t j=0;j<a.n_col();j++) 
+				if (norm(a(i,j))>0) return false;
+		return true;
+	}
+	
+	template<typename T>
+	bool isZero(const PsimagLite::Matrix<T>& m)
+	{
+		bool eps=1e-5;
+		for (size_t i=0;i<m.n_row();i++)
+			for (size_t j=0;j<m.n_row();j++)
+				if (fabs(m(i,j))>eps) return false;
+		return true;
+	}
+
+	
+	template<typename T>
+	Matrix<T> multiplyTransposeConjugate(
+		const Matrix<T>& O1,
+		const Matrix<T>& O2,char modifier='C')
+	{
+		size_t n=O1.n_row();
+		Matrix<T> ret(n,n);
+		if (modifier=='C') {
+			for (size_t s=0;s<n;s++) 
+				for (size_t t=0;t<n;t++) 
+					for (size_t w=0;w<n;w++) 
+						ret(s,t) += std::conj(O1(w,s))*O2(w,t);
+		} else {
+			for (size_t s=0;s<n;s++) 
+				for (size_t t=0;t<n;t++) 
+					for (size_t w=0;w<n;w++) 
+						ret(s,t) += O1(w,s)*O2(w,t);
+		}
+		return ret;
+	}
 
 } // namespace PsimagLite
 #endif

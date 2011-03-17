@@ -74,43 +74,32 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup PsimagLite */
 /*@{*/
 
-/*! \file Fermi.h
+/*! \file HostInfo.h
  *
- *  Fermi functions and their derivatives
+ * Information about the host computer
  */
   
-#ifndef FERMI_H_
-#define FERMI_H_
+#ifndef HOST_INFO_H
+#define HOST_INFO_H
+
+#include <sys/time.h>
+#include <time.h>
+ 
 namespace PsimagLite {
-	template<typename FieldType>
-	FieldType fermi(const FieldType& x)
-	{
-		if (x>50) return 0;
-		if (x<-50) return 1;
-		if (x<0) return 1.0/(1.0+exp(x));
-		return exp(-x)/(1.0+exp(-x));
+	
+	class HostInfo {
+	public:
+		std::string getTimeDate()
+		{
+			struct timeval tv;
+			time_t tt;
 		
-	}
-	
-	// Derivative (prime) of Fermi's function
-	template<typename FieldType>
-	FieldType fermiPrime(const FieldType& x)
-	{
-		FieldType res;
-		res= -fermi(x)*fermi(-x);
-		return res;
-	}
-	
-	template<typename FieldType>
-	FieldType logfermi(const FieldType& x)
-	{
-		FieldType res;
-		if (x>20) return -x;
-		if (x<-20) return 0;
-		res = -log(1.0+exp(x));
-		return res;
-	}
+			gettimeofday(&tv,0);
+			tt=tv.tv_sec; /* seconds since 1970 */
+			return asctime(localtime(&tt));
+		}
+	}; // class HostInfo
 } // namespace PsimagLite 
 
 /*@}*/	
-#endif // FERMI_H_
+#endif // HOST_INFO_H
