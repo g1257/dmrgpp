@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef CHAIN_H
 #define CHAIN_H
-
+#include "Utils.h"
 
 namespace Dmrg {
 	

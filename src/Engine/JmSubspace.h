@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define JM_SUBSPACE_H
 
 #include "Sort.h" // in PsimagLite
+#include "PackIndices.h" // in PsimagLite
 #include "Su2SymmetryGlobals.h"
 
 namespace Dmrg {
@@ -94,6 +95,8 @@ namespace Dmrg {
 			typedef std::pair<PairType,PairType> TwoPairsType;
 			typedef Su2SymmetryGlobals<FieldType> Su2SymmetryGlobalsType;
 			typedef typename Su2SymmetryGlobalsType::ClebschGordanType ClebschGordanType;
+			typedef PsimagLite::PackIndices PackIndicesType;
+
 		public:
 			typedef std::pair<PairType,TwoPairsType> FlavorType;
 
@@ -243,7 +246,8 @@ namespace Dmrg {
 			void setFlavorsIndex(size_t i,const PairType& jm1,const PairType& jm2)
 			{
 				size_t alpha=0,beta=0;
-				utils::getCoordinates(alpha,beta,i,symm1_->size());
+				PackIndicesType pack(symm1_->size());
+				pack.unpack(alpha,beta,i);
 				
 				size_t ne1 = (*ne1_)[alpha];
 				size_t ne2 = (*ne2_)[beta];

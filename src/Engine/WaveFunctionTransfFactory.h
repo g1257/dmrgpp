@@ -458,31 +458,6 @@ namespace Dmrg {
 			io.readMatrix(weStack_,"weStack");
 		}
 
-		template<typename Field>
-		void myRandomT(std::complex<Field> &value)
-		{
-			value = std::complex<Field>(drand48 () - 0.5, drand48 () - 0.5);
-		}
-
-		template<typename Field>
-		void myRandomT(Field &value)
-		{
-			value = drand48 () - 0.5;
-		}
-
-		template<typename Field>
-		Field myProductT(Field const &value1,Field const &value2)
-		{
-			return std::real(value1*std::conj(value2));
-		}
-
-		template<typename Field>
-		Field myProductT(std::complex<Field> const &value1,
-				std::complex<Field> const &value2)
-		{
-			return real(value1*conj(value2));
-		}
-
 		size_t hilbertSpaceOneSite_;
 		bool isEnabled_;
 		size_t stage_;
