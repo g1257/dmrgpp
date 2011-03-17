@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef WFT_FACTORY_H
 #define WFT_FACTORY_H
- 
+#include "Utils.h"
 #include "ProgressIndicator.h"
 #include "WaveFunctionTransfLocal.h"
 #include "WaveFunctionTransfSu2.h"
@@ -264,9 +264,9 @@ namespace Dmrg {
 			typename SomeVectorType::value_type tmp;
    			RealType atmp=0;
 			for (size_t i=offset;i<final;i++) {
-				myRandomT(tmp);
+				utils::myRandomT(tmp);
 				y[i]=tmp;
-				atmp += myProductT(y[i],y[i]);
+				atmp += utils::myProductT(y[i],y[i]);
 			}
 			atmp = 1.0 / sqrt (atmp);
 			for (size_t i=offset;i<final;i++) y[i] *= atmp;

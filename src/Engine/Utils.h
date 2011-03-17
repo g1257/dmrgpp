@@ -76,6 +76,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Vector.h"
 
+namespace std {
+
+	template<class T1,class T2>
+	ostream &operator<<(std::ostream &os,const pair<T1,T2>& p)
+	{
+		os<<p.first<<" "<<p.second;
+		return os;
+	}
+} // namespace std
+
 //! Utility functions that are still needed
 namespace utils {
 	bool neighbors(size_t i1,size_t i2)
@@ -114,7 +124,7 @@ namespace utils {
 	{
 		std::vector<SomeType> tmpVector;
 		for (size_t i=0;i<v.size();i++) {
-			if (isInVector(removedIndices,i)>=0) continue;
+			if (PsimagLite::isInVector(removedIndices,i)>=0) continue;
 			tmpVector.push_back(v[i]);
 		}
 		v=tmpVector;

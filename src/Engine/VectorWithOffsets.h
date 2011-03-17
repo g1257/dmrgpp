@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef VECTOR_WITH_OFFSETS_H
 #define VECTOR_WITH_OFFSETS_H
+#include "Complex.h"
 #include "ProgressIndicator.h"
 
 // FIXME: a more generic solution is needed instead of tying the non-zero structure to basis
@@ -429,7 +430,7 @@ namespace std {
 		FieldType sum=0;
 		for (size_t ii=0;ii<v.nonzeroSectors_.size();ii++) {
 			size_t i = v.nonzeroSectors_[ii];
-			sum += std::norm(v.data_[i]);
+			sum += PsimagLite::norm(v.data_[i]);
 		}
 		return sum;
 	}
@@ -440,7 +441,7 @@ namespace std {
 		FieldType sum=0;
 		for (size_t ii=0;ii<v.nonzeroSectors_.size();ii++) {
 			size_t i = v.nonzeroSectors_[ii];
-			sum += std::norm(v.data_[i]);
+			sum += PsimagLite::norm(v.data_[i]);
 		}
 		return sum;
 	}

@@ -284,7 +284,7 @@ namespace Dmrg {
 			void truncate(std::vector<size_t> const &removedIndices,const std::vector<size_t>& electrons)
 			{
 				electronsMax_= * (std::max_element(
-						electrons.begin(),electrons().end()));
+						electrons.begin(),electrons.end()));
 				//electrons[utils::vectorMax<size_t,std::greater<size_t> >(electrons,0)];
 
 				utils::truncateVector(flavors_,removedIndices);

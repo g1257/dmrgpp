@@ -237,7 +237,7 @@ namespace Dmrg {
 	{
 		T sign1=0;
 		for (size_t j=0;j<n;j++) {
-			if (norm(v[j])>1e-6) {
+			if (std::norm(v[j])>1e-6) {
 				if (std::real(v[j])>0) sign1=1;
 				else sign1= -1;
 				break;

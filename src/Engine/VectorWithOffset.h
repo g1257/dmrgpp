@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef VECTOR_WITH_OFFSET_H
 #define VECTOR_WITH_OFFSET_H
+#include "Vector.h"
 
 namespace Dmrg {
 	template<typename FieldType>
@@ -274,13 +275,13 @@ namespace std {
 	template<typename FieldType>
 	inline FieldType norm(const Dmrg::VectorWithOffset<FieldType>& v)
 	{
-		return std::norm(v.data_);
+		return PsimagLite::norm(v.data_);
 	}
 	
 	template<typename FieldType>
 	inline FieldType norm(const Dmrg::VectorWithOffset<std::complex<FieldType> >& v)
 	{
-		return std::norm(v.data_);
+		return PsimagLite::norm(v.data_);
 	}
 	
 	template<typename FieldType>

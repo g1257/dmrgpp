@@ -362,7 +362,7 @@ namespace Dmrg {
 			int n =bp1.n_col();
 			PsimagLite::Matrix<DensityMatrixElementType> result(n,n);
 			psimag::BLAS::GEMM('C','N',n,n,n,alpha,&(bp1(0,0)),n,&(bp2(0,0)),n,beta,&(result(0,0)),n);
-			if (!isTheIdentity(result)) {
+			if (!PsimagLite::isTheIdentity(result)) {
 				//utils::matrixPrint(result,std::cerr);
 				std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
 				throw std::runtime_error("Density Matrix Check2: failed\n");

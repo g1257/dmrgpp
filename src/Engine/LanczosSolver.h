@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef LANCZOSSOLVER_HEADER_H
 #define LANCZOSSOLVER_HEADER_H
- 
+#include "Utils.h"
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
 #include "TridiagonalMatrix.h"
@@ -125,7 +125,7 @@ namespace Dmrg {
 			for (size_t i=0;i<n;i++) {
 				myRandomT(tmp);
 				y[i]=tmp;
-				atmp += myProductT(y[i],y[i]);
+				atmp += utils::myProductT(y[i],y[i]);
 			}
 			if (mode_ & DEBUG) {
 				computeGroundStateTest(gsEnergy,z,y);
@@ -155,7 +155,7 @@ namespace Dmrg {
 			RealType atmp=0.0;
 			for (size_t i=0;i<n;i++) {
 				y[i]=initialVector[i];
-				atmp += myProductT(y[i],y[i]);
+				atmp += utils::myProductT(y[i],y[i]);
 			}
 			atmp = 1.0 / sqrt (atmp);
 			for (size_t i = 0; i < mat_.rank(); i++) y[i] *= atmp;
@@ -224,7 +224,7 @@ namespace Dmrg {
 			RealType atmp = 0;
 			for (size_t i = 0; i < mat_.rank(); i++) {
 				z[i] = x[i] = 0;
-				atmp += myProductT (y[i] ,y[i]);
+				atmp += utils::myProductT (y[i] ,y[i]);
  			}
 
 			for (size_t i = 0; i < y.size(); i++) y[i] /= sqrt(atmp);
@@ -245,11 +245,11 @@ namespace Dmrg {
 				mat_.matrixVectorProduct (x, y); // x+= Hy
 			
 				atmp = 0.0;
-				for (size_t i = 0; i < mat_.rank(); i++) atmp += myProductT (y[i] ,x[i]);
+				for (size_t i = 0; i < mat_.rank(); i++) atmp += utils::myProductT (y[i] ,x[i]);
 				RealType btmp = 0.0;
 				for (size_t i = 0; i < mat_.rank(); i++) {
 					x[i] -= atmp * y[i];
-					btmp += myProductT (x[i] ,x[i]);
+					btmp += utils::myProductT (x[i] ,x[i]);
 				}
 
 				ab.a(j) = atmp;
@@ -307,7 +307,7 @@ namespace Dmrg {
 
 		void info(RealType energyTmp,const VectorType& x,std::ostream& os)
 		{
-			RealType norma=std::norm(x);
+			RealType norma=PsimagLite::norm(x);
 			size_t& iter = steps_;
 			
 			if (norma<1e-5 || norma>100) throw std::runtime_error("Norm\n");
@@ -471,7 +471,7 @@ namespace Dmrg {
 			mat_.matrixVectorProduct (x, y); // x+= Hy
 
 			for (size_t i = 0; i < x.size(); i++)
-				if (myProductT (x[i] ,x[i])!=0) return false;
+				if (utils::myProductT (x[i] ,x[i])!=0) return false;
 
 			for (size_t j=0; j < lanczosVectors.n_col(); j++) {
 				for (size_t i = 0; i < mat_.rank(); i++) {
@@ -482,32 +482,6 @@ namespace Dmrg {
 			}
 			return true;
 		}
-
-		template<typename Field>
-		void myRandomT(std::complex<Field> &value)
-		{
-			value = std::complex<Field>(drand48 () - 0.5, drand48 () - 0.5);
-		}
-
-		template<typename Field>
-		void myRandomT(Field &value)
-		{
-			value = drand48 () - 0.5;
-		}
-
-		template<typename Field>
-		Field myProductT(Field const &value1,Field const &value2)
-		{
-			return std::real(value1*std::conj(value2));
-		}
-
-		template<typename Field>
-		Field myProductT(std::complex<Field> const &value1,
-				std::complex<Field> const &value2)
-		{
-			return real(value1*conj(value2));
-		}
-
 	}; // class LanczosSolver
 } // namespace Dmrg
 
