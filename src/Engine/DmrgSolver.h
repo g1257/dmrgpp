@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SOLVER_DMRG_HEADER_H
 #define SOLVER_DMRG_HEADER_H
 
+#include "HostInfo.h"
 #include "ParametersDmrgSolver.h"
 #include "LanczosSolver.h"
 #include "Diagonalization.h"
@@ -167,7 +168,8 @@ namespace Dmrg {
 		{
 			io_.print(parameters_);
 			io_.print(targetStruct_);
-			std::string s = utils::getTimeDate();
+			PsimagLite::HostInfo hostInfo;
+			std::string s =hostInfo.getTimeDate();
 			io_.print(s);
 			if (parameters_.options.find("verbose")!=std::string::npos) verbose_=true;
 			if (parameters_.options.find("useReflection")!=std::string::npos)
@@ -177,7 +179,8 @@ namespace Dmrg {
 
 		~DmrgSolver()
 		{
-			std::string s = utils::getTimeDate();
+			PsimagLite::HostInfo hostInfo;
+			std::string s =hostInfo.getTimeDate();
 			io_.print(s);
 		}
 
@@ -407,7 +410,7 @@ namespace Dmrg {
 				pS = lrs_.left();
 			}
 			if (saveOption==SAVE_TO_DISK) {
-				std::string s="#WAVEFUNCTION_ENERGY="+utils::ttos(gsEnergy);
+				std::string s="#WAVEFUNCTION_ENERGY="+ttos(gsEnergy);
 				io_.printline(s);
 			}
 		}

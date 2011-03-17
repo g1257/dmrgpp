@@ -125,7 +125,7 @@ namespace Dmrg {
 				ioOut_.printline("#STACKMETARANK="+ttos(rank_));
 				
 				ioOut_.printline("#STACKMETATOTAL="+ttos(total_));
-				//ioOut_.printline("#STACKMETADEBUG="+utils::ttos(debug_));
+				//ioOut_.printline("#STACKMETADEBUG="+ttos(debug_));
 				ioOut_<<"#STACKMETASTACK\n";
 				ioOut_<<stack_;
 				ioOut_.close();
@@ -135,7 +135,7 @@ namespace Dmrg {
 
 			void push(DataType const &d) 
 			{
-				//std::string tmpLabel = fileOut_ + utils::ttos(total_);
+				//std::string tmpLabel = fileOut_ + ttos(total_);
 				ioOut_.open(fileOut_,std::ios_base::app,rank_);
 				d.save(ioOut_);
 				ioOut_.close();
@@ -143,7 +143,7 @@ namespace Dmrg {
 				stack_.push(total_);
 				total_++;
 
-				//std::string s = "Pushing with label="+fileOut_+" and total="+utils::ttos(total_);
+				//std::string s = "Pushing with label="+fileOut_+" and total="+ttos(total_);
 				//debugPrint(s);
 				//std::ostringstream msg;
 				//msg<<s;
@@ -153,7 +153,7 @@ namespace Dmrg {
 			void pop()
 			{
 				stack_.pop();
-//				std::string s = "Popping with label="+fileIn_+" stack_.top="+utils::ttos(stack_.top());
+//				std::string s = "Popping with label="+fileIn_+" stack_.top="+ttos(stack_.top());
 //				std::ostringstream msg;
 //				msg<<s;
 //				progress_.printline(msg,std::cout);
@@ -163,7 +163,7 @@ namespace Dmrg {
 			{
 				ioIn_.open(fileIn_);
 				DataType dt(ioIn_,"",stack_.top());
-//				std::string s = "Topping with label="+fileIn_+" stack_.top="+utils::ttos(stack_.top());
+//				std::string s = "Topping with label="+fileIn_+" stack_.top="+ttos(stack_.top());
 //				std::ostringstream msg;
 //				msg<<s;
 //				progress_.printline(msg,std::cout);

@@ -82,7 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef WFT_SU2_H
 #define WFT_SU2_H
- 
+
+#include "PackIndices.h"
 #include "ProgressIndicator.h"
 #include "VectorWithOffsets.h" // so that std::norm() becomes visible here
 #include "VectorWithOffset.h" // so that std::norm() becomes visible here
@@ -94,6 +95,9 @@ namespace Dmrg {
 	template<typename DmrgWaveStructType,typename VectorWithOffsetType>
 	class WaveFunctionTransfSu2  : public
 		WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> {
+
+		typedef PsimagLite::PackIndices PackIndicesType;
+
 	public:
 		typedef typename DmrgWaveStructType::BasisWithOperatorsType
 			BasisWithOperatorsType;

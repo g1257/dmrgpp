@@ -375,7 +375,7 @@ namespace Dmrg {
 				test(psi_,psi_,direction,"<PSI|A|PSI>",site);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
-					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
+					std::string s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
 					test(targetVectors_[j],targetVectors_[j],direction,s,site);
 				}
 				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
@@ -386,9 +386,9 @@ namespace Dmrg {
 				if (i==0) return;
 				for (size_t j=0;j<i;j++) {
 					if (stage_[j] == DISABLED) {
-						std::string s ="TST:: Seeing tst site "+utils::ttos(tstStruct_.sites[i]);
+						std::string s ="TST:: Seeing tst site "+ttos(tstStruct_.sites[i]);
 						s =s + " before having seen";
-						s = s + " site "+utils::ttos(j);
+						s = s + " site "+ttos(j);
 						s = s +". Please order your tst sites in order of appearance.\n";
 						throw std::runtime_error(s);
 					}
@@ -668,7 +668,7 @@ namespace Dmrg {
 //				io_.printVector(times_,label);
 //				label = "weights";
 //				io_.printVector(weight_,label);
-//				std::string s = "GsWeight="+utils::ttos(gsWeight_);
+//				std::string s = "GsWeight="+ttos(gsWeight_);
 //				io_.printline(s);
 //			}
 

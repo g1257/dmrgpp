@@ -460,7 +460,7 @@ namespace Dmrg {
 		template<typename IoOutputter>
 		void saveInternal(IoOutputter& io) const
 		{
-			std::string s="#useSu2Symmetry="+utils::ttos(useSu2Symmetry_);
+			std::string s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
 			io.printline(s);
 			io.printVector(block_,"#BLOCK");
 			io.printVector(quantumNumbers_,"#QN");

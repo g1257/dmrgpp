@@ -118,7 +118,7 @@ namespace Dmrg {
 					"DynamicSerializer:: n. of vectors must be positive\n");
 			targetVectors_.resize(xi);
 			for (size_t i=0;i<targetVectors_.size();i++) {
-				s = "targetVector"+utils::ttos(i);
+				s = "targetVector"+ttos(i);
 				targetVectors_[i].load(io,s);
 			}
 		}
@@ -128,12 +128,12 @@ namespace Dmrg {
 		{
 			cf_.save(io);
 
-			std::string s = "#DCENTRALSITE=" + utils::ttos(site_);
+			std::string s = "#DCENTRALSITE=" + ttos(site_);
 			io.printline(s);
-			s = "#DNUMBEROFVECTORS="+utils::ttos(targetVectors_.size());
+			s = "#DNUMBEROFVECTORS="+ttos(targetVectors_.size());
 			io.printline(s);
 			for (size_t i=0;i<targetVectors_.size();i++) {
-				std::string label = "targetVector"+utils::ttos(i);
+				std::string label = "targetVector"+ttos(i);
 				targetVectors_[i].save(io,label);
 			}
 		}

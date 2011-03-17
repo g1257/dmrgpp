@@ -372,9 +372,9 @@ namespace Dmrg {
 			if (i==0) return;
 			for (size_t j=0;j<i;j++) {
 				if (stage_[j] == DISABLED) {
-					std::string s ="TST:: Seeing dynamic site "+utils::ttos(tstStruct_.sites[i]);
+					std::string s ="TST:: Seeing dynamic site "+ttos(tstStruct_.sites[i]);
 					s =s + " before having seen";
-					s = s + " site "+utils::ttos(j);
+					s = s + " site "+ttos(j);
 					s = s +". Please order your dynamic sites in order of appearance.\n";
 					throw std::runtime_error(s);
 				}
@@ -574,11 +574,11 @@ namespace Dmrg {
 		//{
 		//	io_.print(tstStruct_);
 		//	std::string label = "omega";
-		//	std::string s = "Omega=" + utils::ttos(currentOmega_);
+		//	std::string s = "Omega=" + ttos(currentOmega_);
 		//	io_.printline(s);
 		//	label = "weights";
 		//	io_.printVector(weight_,label);
-		//	s = "GsWeight="+utils::ttos(gsWeight_);
+		//	s = "GsWeight="+ttos(gsWeight_);
 		//	io_.printline(s);
 		//}
 		

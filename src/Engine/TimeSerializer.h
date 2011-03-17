@@ -122,7 +122,7 @@ namespace Dmrg {
 				if (xi<=0) throw std::runtime_error("TimeSerializer:: n. of vectors must be positive\n");
 				targetVectors_.resize(xi);
 				for (size_t i=0;i<targetVectors_.size();i++) {
-					s = "targetVector"+utils::ttos(i);
+					s = "targetVector"+ttos(i);
 					targetVectors_[i].load(io,s);
 				}
 			}
@@ -148,14 +148,14 @@ namespace Dmrg {
 			template<typename IoOutputter>
 			void save(IoOutputter& io) const
 			{
-				std::string s = "#TIME=" + utils::ttos(currentTime_);
+				std::string s = "#TIME=" + ttos(currentTime_);
 				io.printline(s);
-				s = "#TCENTRALSITE=" + utils::ttos(site_);
+				s = "#TCENTRALSITE=" + ttos(site_);
 				io.printline(s);
-				s = "#TNUMBEROFVECTORS="+utils::ttos(targetVectors_.size());
+				s = "#TNUMBEROFVECTORS="+ttos(targetVectors_.size());
 				io.printline(s);
 				for (size_t i=0;i<targetVectors_.size();i++) {
-					std::string label = "targetVector"+utils::ttos(i)+"_"+utils::ttos(currentTime_);
+					std::string label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
 					targetVectors_[i].save(io,label);
 				}
 			}

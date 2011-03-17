@@ -132,15 +132,15 @@ namespace Dmrg {
 			return values_[x];
 		}
 
-		bool operator==(const VerySparseMatrix<T>& other) const 
-		{
-			if (rank_!=other.rank_) return notEqual("rank");
-
-			if (!utils::vectorEqual(values_,other.values_)) return notEqual("values");
-			if (!utils::vectorEqual(coordinates_,other.coordinates_)) return notEqual("coordinates");
-			if (sorted_!=other.sorted_) return notEqual("sorted");
-			return true;
-		}
+//		bool operator==(const VerySparseMatrix<T>& other) const
+//		{
+//			if (rank_!=other.rank_) return notEqual("rank");
+//
+//			if (!utils::vectorEqual(values_,other.values_)) return notEqual("values");
+//			if (!utils::vectorEqual(coordinates_,other.coordinates_)) return notEqual("coordinates");
+//			if (sorted_!=other.sorted_) return notEqual("sorted");
+//			return true;
+//		}
 
 		bool operator!=(const VerySparseMatrix<T>& other) const 
 		{
@@ -263,7 +263,7 @@ namespace Dmrg {
 		template<typename IoType>
 		void saveToDisk(IoType& outHandle)
 		{
-			std::string s = "rank="+utils::ttos(rank_);
+			std::string s = "rank="+ttos(rank_);
 			outHandle.printline(s);
 			outHandle.printVector(coordinates_,"coordinates");
 			outHandle.printVector(values_,"values");

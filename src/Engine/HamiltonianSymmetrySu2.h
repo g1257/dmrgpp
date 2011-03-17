@@ -242,7 +242,8 @@ namespace Dmrg {
 				// we sort the eigenvalues
 				// note: eigenvalues are not ordered because DensityMatrix is diagonalized in blocks
 				std::vector<size_t> perm(eigs.size());
-				utils::sort(eigs,perm);
+				PsimagLite::Sort<std::vector<RealType> > sort;
+				sort.sort(eigs,perm);
 				
 				if (eigs.size()<=kept) return;
 				size_t target = eigs.size()-kept;
@@ -271,10 +272,14 @@ namespace Dmrg {
 
 			void truncate(std::vector<size_t> const &removedIndices,const std::vector<size_t>& electrons)
 			{
-				electronsMax_=electrons[utils::vectorMax<size_t,std::greater<size_t> >(electrons,0)];
+				electronsMax_= * (std::max_element(
+						electrons.begin(),electrons().end()));
+				//electrons[utils::vectorMax<size_t,std::greater<size_t> >(electrons,0)];
 
 				utils::truncateVector(flavors_,removedIndices);
-				flavorsMax_=flavors_[utils::vectorMax<size_t,std::greater<size_t> >(flavors_,0)];
+				flavorsMax_=* (std::max_element(
+						flavors_.begin(),flavors_.end()));
+				//flavors_[utils::vectorMax<size_t,std::greater<size_t> >(flavors_,0)];
 
 				jmValues_.truncate(removedIndices);
 				jMax_=0;
@@ -302,11 +307,11 @@ namespace Dmrg {
 			{
 				jmValues_.save(io);
 				io.printVector(flavors_,"#su2flavors");
-				std::string s="#su2FlavorsMax=" + utils::ttos(flavorsMax_)+"\n";
+				std::string s="#su2FlavorsMax=" + ttos(flavorsMax_)+"\n";
 				io.print(s); 
-				s="#su2ElectronsMax="+utils::ttos(electronsMax_)+"\n";
+				s="#su2ElectronsMax="+ttos(electronsMax_)+"\n";
 				io.print(s); 
-				s="#su2JMax="+utils::ttos(jMax_)+"\n";
+				s="#su2JMax="+ttos(jMax_)+"\n";
 				io.print(s);
 				io.printVector(statesReduced_,"#su2StatesReduced");
 				io.printVector(jvals_,"#su2Jvals");

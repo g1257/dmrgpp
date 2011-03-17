@@ -207,7 +207,7 @@ namespace Dmrg {
 
 				if (block.size()!=1) throw std::runtime_error(
 						"GST only supports blocks of size 1\n");
-				std::string s = "#TCENTRALSITE=" + utils::ttos(block[0]);
+				std::string s = "#TCENTRALSITE=" + ttos(block[0]);
 				io.printline(s);
 
 				psi_.save(io,"PSI");

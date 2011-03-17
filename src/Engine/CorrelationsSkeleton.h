@@ -160,7 +160,7 @@ namespace Dmrg {
 				int fermionicSign,size_t ns,bool transform = true)
 		{
 			//ProfilingType profile("growDirectly "+
-			//	utils::ttos(i)+" ns="+utils::ttos(ns));
+			//	ttos(i)+" ns="+ttos(ns));
 			Odest =Osrc;
 			// from 0 --> i
 			int nt=i-1;

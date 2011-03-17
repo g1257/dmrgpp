@@ -82,6 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DENSITY_MATRIX_SU2_H
 #define DENSITY_MATRIX_SU2_H
 
+#include "Matrix.h" // in PsimagLite
+#include "AlmostEqual.h" // in PsimagLite
 #include "BlockMatrix.h"
 #include "DensityMatrixBase.h"
 
@@ -243,6 +245,8 @@ namespace Dmrg {
 		//! only used for debugging
 		bool areAllMsEqual(DmrgBasisWithOperatorsType const &pBasis)
 		{
+			PsimagLite::AlmostEqual<RealType> almostEqual(1e-5);
+
 			for (size_t m=0;m<pBasis.partition()-1;m++) {
 				std::pair<size_t,size_t> jmPair1 =  pBasis.jmValue(pBasis.partition(m));
 				size_t ne1 = pBasis.electrons(pBasis.partition(m));
@@ -252,7 +256,7 @@ namespace Dmrg {
 
 					if (jmPair1.first == jmPair2.first && ne1==ne2) {
 						
-						if (!utils::almostEqual(data_(m),data_(p),1e-5)) {
+						if (!almostEqual(data_(m),data_(p))) {
 							std::cerr<<"Checking m="<<m<<" against p="<<p<<"\n";
 							throw std::runtime_error("error\n");
 						}
@@ -358,7 +362,7 @@ namespace Dmrg {
 			int n =bp1.n_col();
 			PsimagLite::Matrix<DensityMatrixElementType> result(n,n);
 			psimag::BLAS::GEMM('C','N',n,n,n,alpha,&(bp1(0,0)),n,&(bp2(0,0)),n,beta,&(result(0,0)),n);
-			if (!utils::isTheIdentity<DensityMatrixElementType,RealType>(result)) {
+			if (!isTheIdentity(result)) {
 				//utils::matrixPrint(result,std::cerr);
 				std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
 				throw std::runtime_error("Density Matrix Check2: failed\n");

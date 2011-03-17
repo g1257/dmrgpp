@@ -82,7 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef WFT_LOCAL_HEADER_H
 #define WFT_LOCAL_HEADER_H
- 
+
+#include "PackIndices.h"
 #include "ProgressIndicator.h"
 #include "VectorWithOffsets.h" // so that std::norm() becomes visible here
 #include "VectorWithOffset.h" // so that std::norm() becomes visible here
@@ -94,6 +95,9 @@ namespace Dmrg {
 	template<typename DmrgWaveStructType,typename VectorWithOffsetType>
 	class WaveFunctionTransfLocal : public
 		WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> {
+
+		typedef PsimagLite::PackIndices PackIndicesType;
+
 	public:
 		typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
@@ -288,10 +292,12 @@ namespace Dmrg {
 			SparseMatrixType wsT;
 			transposeConjugate(wsT,ws);
 			
+			PackIndicesType pack1(nalpha);
+			PackIndicesType pack2(nip);
 			for (size_t x=start;x<final;x++) {
 				size_t ip,alpha,kp,jp;
-				utils::getCoordinates(alpha,jp,(size_t)lrs.super().permutation(x),nalpha);
-				utils::getCoordinates(ip,kp,(size_t)lrs.left().permutation(alpha),nip);
+				pack1.unpack(alpha,jp,(size_t)lrs.super().permutation(x));
+				pack2.unpack(ip,kp,(size_t)lrs.left().permutation(alpha));
 				psiDest[x]=createAux2b(psiSrc,ip,kp,jp,wsT,we);
 			}
 			
@@ -378,11 +384,13 @@ namespace Dmrg {
 			SparseMatrixType wsT;
 			transposeConjugate(wsT,ws);
 			
+			PackIndicesType pack1(nalpha);
+			PackIndicesType pack2(nip);
 			for (size_t x=start;x<final;x++) {
 				size_t isn,jen;
-				utils::getCoordinates(isn,jen,(size_t)lrs.super().permutation(x),nalpha);
+				pack1.unpack(isn,jen,(size_t)lrs.super().permutation(x));
 				size_t is,jpl;
-				utils::getCoordinates(is,jpl,(size_t)lrs.left().permutation(isn),nip);
+				pack2.unpack(is,jpl,(size_t)lrs.left().permutation(isn));
 				//size_t jk,je;
 				//utils::getCoordinates(jk,je,(size_t)lrs.right().permutation(jen),npk);
 				psiDest[x]=createAux2bFromInfinite(psiSrc,is,jpl,jen,wsT,we);
@@ -515,12 +523,13 @@ namespace Dmrg {
 
 			size_t start = psiDest.offset(i0);
 			size_t final = psiDest.effectiveSize(i0)+start;
-			
+			PackIndicesType pack1(nalpha);
+			PackIndicesType pack2(nip);
 			
 			for (size_t x=start;x<final;x++) {
 				size_t ip,alpha,kp,jp;
-				utils::getCoordinates(alpha,jp,(size_t)lrs.super().permutation(x),nalpha);
-				utils::getCoordinates(ip,kp,(size_t)lrs.left().permutation(alpha),nip);
+				pack1.unpack(alpha,jp,(size_t)lrs.super().permutation(x));
+				pack2.unpack(ip,kp,(size_t)lrs.left().permutation(alpha));
 				size_t kpjp = dmrgWaveStruct_.lrs.right().permutationInverse(kp + jp*nk);
 				
 				size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + kpjp*nip);
