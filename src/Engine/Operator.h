@@ -184,7 +184,7 @@ namespace Dmrg {
 	{
 		os<<op.data;
 		os<<op.fermionSign<<"\n";
-		os<<op.jm<<"\n";
+		os<<op.jm.first<<" "<<op.jm.second<<"\n";
 		os<<op.angularFactor<<"\n";
 		os<<op.su2Related;
 		return os;

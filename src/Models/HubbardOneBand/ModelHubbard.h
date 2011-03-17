@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODEL_HUBBARD_DMRG
 #define MODEL_HUBBARD_DMRG
 #include <cassert>
+#include "Sort.h" // in PsimagLite
 #include "ModelBase.h"
 #include "ParametersModelHubbard.h"
 #include "HilbertSpaceHubbard.h"
@@ -219,11 +220,11 @@ namespace Dmrg {
 				return tmp;
 			} else if (what=="nup") {
                                 PsimagLite::Matrix<SparseElementType> cup = getOperator("c",0,0);
-                                PsimagLite::Matrix<SparseElementType> nup = utils::multiplyTransposeConjugate(cup,cup);
+                                PsimagLite::Matrix<SparseElementType> nup = multiplyTransposeConjugate(cup,cup);
                                 return nup;
                         } else if (what=="ndown") {
                                 PsimagLite::Matrix<SparseElementType> cdown = getOperator("c",0,1);
-                                PsimagLite::Matrix<SparseElementType> ndown = utils::multiplyTransposeConjugate(cdown,cdown);
+                                PsimagLite::Matrix<SparseElementType> ndown = multiplyTransposeConjugate(cdown,cdown);
                                 return ndown;
 			}
 			std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
@@ -259,7 +260,8 @@ namespace Dmrg {
 			findQuantumNumbers(q,basisTmp,n);
 			std::vector<size_t> iperm(q.size());
 
-			utils::sort(q,iperm);
+			Sort<std::vector<size_t> > sort;
+			sort.sort(q,iperm);
 			basis.clear();
 			for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
 		}
@@ -345,7 +347,7 @@ namespace Dmrg {
 					
 				} else {
 					HilbertSpaceHubbardType::create(bra,i,sigma);
-					int jj = utils::isInVector(natBasis,bra);
+					int jj = PsimagLite::isInVector(natBasis,bra);
 					if (jj<0) throw std::runtime_error("findOperatorMatrices: internal error while"
 							"creating.\n");
 					cm(ii,jj) =sign(ket,i,sigma);

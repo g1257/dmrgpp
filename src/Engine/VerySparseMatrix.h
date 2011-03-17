@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef VERY_SPARSE_MATRIX_HEADER_H
 #define VERY_SPARSE_MATRIX_HEADER_H
 
+#include "Sort.h" // in PsimagLite
 
 namespace Dmrg {
 	//! Yet another sparse matrix class
@@ -122,7 +123,7 @@ namespace Dmrg {
 		T& operator()(size_t row,size_t col)
 		{
 			std::pair<size_t,size_t> coordinate(row,col);
-			int x=utils::isInVector(coordinates_,coordinate);
+			int x=PsimagLite::isInVector(coordinates_,coordinate);
 			if (x<0) {
 				coordinates_.push_back(coordinate);
 				values_.push_back(0);
@@ -180,7 +181,7 @@ namespace Dmrg {
 		T operator()(size_t row,size_t col) const
 		{
 			std::pair<size_t,size_t> coordinate(row,col);
-			int x=utils::isInVector(coordinates_,coordinate);
+			int x=PsimagLite::isInVector(coordinates_,coordinate);
 			if (x<0) {
 				//T value=0;
 				return 0;
@@ -221,7 +222,8 @@ namespace Dmrg {
 			}
 
 			perm.resize(rows.size());
-			utils::sort(rows,perm);
+			Sort<std::vector<size_t> > sort;
+			sort.sort(rows,perm);
 
 			for (size_t i=0;i<coordinates_.size();i++) {
 				coordinates_[i].first = rows[i];
@@ -396,7 +398,7 @@ namespace Dmrg {
 // 
 // 			for (size_t i=0;i<cols1.size();i++) {
 // 				size_t col = other.getColumn(cols1[i]);
-// 				int x = utils::isInVector(realCols2,col);
+// 				int x = PsimagLite\:\:isInVector(realCols2,col);
 // 				if (x<0) {
 // 					// add entry (thisRow,col) = other.getValue(cols1[i])
 // 					newCoordinates.push_back(PairType(thisRow,col));

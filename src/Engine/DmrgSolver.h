@@ -326,7 +326,7 @@ namespace Dmrg {
 			}
 			// now stepCurrent_ is such that sitesIndices_[stepCurrent_] = siteToAdd
 			// so:
-			int sc = utils::isInVector(sitesIndices_,siteToAdd);
+			int sc = PsimagLite::isInVector(sitesIndices_,siteToAdd);
 			if (sc<0) throw std::runtime_error("finiteDmrgLoops(...): internal error: siteIndices_\n");
 			stepCurrent_ = sc; // phew!!, that's all folks, now bugs, go away!!
 			

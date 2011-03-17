@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef APPLY_OPERATOR_LOCAL_H
 #define APPLY_OPERATOR_LOCAL_H
 
+#include "PackIndices.h" // in PsimagLite
 #include "FermionSign.h"
 #include "ProgramGlobals.h"
 
@@ -92,6 +93,7 @@ namespace Dmrg {
 		typedef typename LeftRightSuperType::BasisWithOperatorsType
 				BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
+		typedef PsimagLite::PackIndices PackIndicesType;
 
 	public:
 		enum {MIDDLE,LEFT_CORNER,RIGHT_CORNER};
@@ -165,14 +167,16 @@ namespace Dmrg {
 			if (src.size()!=lrs_.super().permutationVector().size())
 				throw std::runtime_error("applyLocalOpSystem SE\n");
 
+			PackIndicesType pack1(ns);
+			PackIndicesType pack2(nx);
 			for (size_t i=offset;i<final;i++) {
 				size_t x=0,y=0;
-				utils::getCoordinates(x,y,lrs_.super().permutation(i),ns);
+				pack1.unpack(x,y,lrs_.super().permutation(i));
 				//if (y>=basisE_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem E\n");
 				size_t x0=0,x1=0;
 				if (x>=lrs_.left().permutationVector().size())
 					throw std::runtime_error("applyLocalOpSystem S\n");
-				utils::getCoordinates(x0,x1,lrs_.left().permutation(x),nx);
+				pack2.unpack(x0,x1,lrs_.left().permutation(x));
 				/*int nx0 = basisS_.electrons(x)-electrons[x1];
 					if (nx0<0) throw std::runtime_error("TimeStepTargetting::applyLocalOpSystem(...)\n");
 				 */
@@ -225,12 +229,14 @@ namespace Dmrg {
 
 			size_t ns = lrs_.left().size();
 			size_t nx = A.data.rank();
+			PackIndicesType pack1(ns);
+			PackIndicesType pack2(nx);
 
 			for (size_t i=offset;i<final;i++) {
 				size_t x=0,y=0;
-				utils::getCoordinates(x,y,lrs_.super().permutation(i),ns);
+				pack1.unpack(x,y,lrs_.super().permutation(i));
 				size_t y0=0,y1=0;
-				utils::getCoordinates(y0,y1,lrs_.right().permutation(y),nx);
+				pack2.unpack(y0,y1,lrs_.right().permutation(y));
 				RealType sign = lrs_.left().fermionicSign(x,A.fermionSign);
 				for (int k=A.data.getRowPtr(y0);k<A.data.getRowPtr(y0+1);k++) {
 					size_t y0prime = A.data.getCol(k);
@@ -251,10 +257,11 @@ namespace Dmrg {
 			size_t final = offset + src.effectiveSize(i0);
 
 			size_t ns = lrs_.left().size();
+			PackIndicesType pack(ns);
 
 			for (size_t i=offset;i<final;i++) {
 				size_t x=0,y=0;
-				utils::getCoordinates(x,y,lrs_.super().permutation(i),ns);
+				pack.unpack(x,y,lrs_.super().permutation(i));
 
 				for (int k=A.data.getRowPtr(x);k<A.data.getRowPtr(x+1);k++) {
 					size_t xprime = A.data.getCol(k);
@@ -278,9 +285,11 @@ namespace Dmrg {
 			if (src.size()!=lrs_.super().permutationVector().size())
 				throw std::runtime_error("applyLocalOpSystem SE\n");
 
+			PackIndicesType pack(ns);
+
 			for (size_t i=offset;i<final;i++) {
 				size_t x=0,y=0;
-				utils::getCoordinates(x,y,lrs_.super().permutation(i),ns);
+				pack.unpack(x,y,lrs_.super().permutation(i));
 				//if (y>=basisE_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem E\n");
 				if (x>=lrs_.left().permutationVector().size())
 					throw std::runtime_error("applyLocalOpSystem S\n");

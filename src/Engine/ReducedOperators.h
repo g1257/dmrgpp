@@ -279,7 +279,7 @@ namespace Dmrg {
 					basisB = &basis2;
 				}
 
-				int ki = utils::isInVector(momentumOfOperators_,angularMomentum);
+				int ki = PsimagLite::isInVector(momentumOfOperators_,angularMomentum);
 				if (ki<0) throw std::runtime_error("Operator has unknown momentum\n");
 				PsimagLite::Matrix<SparseElementType> B(n,n);
 				externalProd_(B,basisA,basisB,A,ki,order,fermionSign);

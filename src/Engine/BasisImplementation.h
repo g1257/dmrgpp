@@ -476,7 +476,8 @@ namespace Dmrg {
 		RealType calcError(std::vector<RealType> const &eigs,std::vector<size_t> const &removedIndices)
 		{
 			RealType sum=static_cast<RealType>(0.0);
-			for (size_t i=0;i<eigs.size();i++) if (utils::isInVector(removedIndices,i)<0) sum+=eigs[i];
+			for (size_t i=0;i<eigs.size();i++)
+				if (PsimagLite::isInVector(removedIndices,i)<0) sum+=eigs[i];
 			return 1.0-sum;
 		}
 

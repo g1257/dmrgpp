@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef JM_SUBSPACE_H
 #define JM_SUBSPACE_H
 
+#include "Sort.h" // in PsimagLite
 #include "Su2SymmetryGlobals.h"
 
 namespace Dmrg {
@@ -134,7 +135,8 @@ namespace Dmrg {
 			{
 				flavors_.clear();
 				std::vector<size_t> perm(indices_.size());
-				utils::sort(flavorIndices_,perm);
+				Sort<std::vector<size_t> > sort;
+				sort.sort(flavorIndices_,perm);
 				size_t flavorSaved=flavorIndices_[0];
 				flavors_.push_back(flavorIndices_[0]);
 				size_t counter=0;
@@ -206,7 +208,7 @@ namespace Dmrg {
 			size_t findFreeRow(size_t counter,size_t total)
 			{
 				for (size_t i=counter;i<total;i++) {
-					int x=utils::isInVector(indices_,i);
+					int x=PsimagLite::isInVector(indices_,i);
 					if (x<0) return i;
 				}
 				throw std::runtime_error("findfreerow: no free rows\n");

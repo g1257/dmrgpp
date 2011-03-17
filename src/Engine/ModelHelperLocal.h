@@ -75,6 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MODELHELPER_LOC_HEADER_H
 
 //#include "RightLeftLocal.h"
+#include "PackIndices.h" // in PsimagLite
 #include "Link.h"
 
 /** \ingroup DMRG */
@@ -91,6 +92,9 @@ namespace Dmrg {
 		typename ReflectionSymmetryType_,
 		typename ConcurrencyType_>
 	class ModelHelperLocal {
+
+		typedef PsimagLite::PackIndices PackIndicesType;
+
 	public:	
 		typedef LeftRightSuperType_ LeftRightSuperType;
 		typedef typename LeftRightSuperType::OperatorsType OperatorsType;
@@ -293,11 +297,12 @@ namespace Dmrg {
 			int bs = lrs_.super().partition(m+1)-offset;
 			SparseMatrixType hamiltonian = lrs_.left().hamiltonian();
 			size_t ns = lrs_.left().size();
-				
+
+			PackIndicesType pack(ns);
 			for (i=0;i<bs;i++) {
 				if (reflection_.outsideReflectionBounds(i)) continue;
 				size_t r,beta;
-				utils::getCoordinates(r,beta,lrs_.super().permutation(i+offset),ns);
+				pack.unpack(r,beta,lrs_.super().permutation(i+offset));
 
 				// row i of the ordered product basis
 				for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
@@ -324,10 +329,11 @@ namespace Dmrg {
 			SparseMatrixType hamiltonian = lrs_.right().hamiltonian();
 			size_t ns = lrs_.left().size();
 
+			PackIndicesType pack(ns);
 			for (i=0;i<bs;i++) {
 				if (reflection_.outsideReflectionBounds(i)) continue;
 				size_t alpha,r;
-				utils::getCoordinates(alpha,r,lrs_.super().permutation(i+offset),ns);
+				pack.unpack(alpha,r,lrs_.super().permutation(i+offset));
 
 				// row i of the ordered product basis
 				for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
@@ -368,10 +374,11 @@ namespace Dmrg {
 			matrixBlock.resize(bs);
 			
 			int counter=0;
+			PackIndicesType pack(ns);
 			for (size_t i=offset;i<lrs_.super().partition(m+1);i++) {
 				matrixBlock.setRow(i-offset,counter);
 				size_t alpha,beta;
-				utils::getCoordinates(alpha,beta,lrs_.super().permutation(i),ns);
+				pack.unpack(alpha,beta,lrs_.super().permutation(i));
 				size_t r=beta;
 				if (option) {
 					betaPrime=beta;
@@ -474,10 +481,11 @@ namespace Dmrg {
 			int offset = lrs_.super().partition(m_);
 			int total = lrs_.super().partition(m_+1) - offset;
 
+			PackIndicesType pack(ns);
 			for (int i=0;i<total;i++) {
 				// row i of the ordered product basis
-				utils::getCoordinates(alpha_[i],beta_[i],
-						lrs_.super().permutation(i+offset),ns);
+				pack.unpack(alpha_[i],beta_[i],
+						lrs_.super().permutation(i+offset));
 			}
 		}
 	}; // class ModelHelperLocal

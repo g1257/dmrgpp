@@ -145,7 +145,7 @@ namespace Dmrg {
 			//}
 			
 			MatrixType* bm = &bMatrix_;
-			/*int ib = utils::isInVector(addressesB_,&B);
+			/*int ib = PsimagLite\:\:isInVector(addressesB_,&B);
 			
 			if (ib<0) {
 				bm = new MatrixType(rightSize,rightSize);
@@ -156,7 +156,7 @@ namespace Dmrg {
 				bm =  bMatrix_[ib];
 			}
 			
-			int ia = utils::isInVector(addressesA_,&A);*/
+			int ia = PsimagLite\:\:isInVector(addressesA_,&A);*/
 			MatrixType* am = &aMatrix_;
 			/*if (ia<0) {
 				am = new MatrixType(leftSize,leftSize);
@@ -205,9 +205,9 @@ namespace Dmrg {
 				for (size_t betaPrime=0;betaPrime<ne;betaPrime++) {	
 					int tmp =basis1_.permutationInverse(alphaPrime + betaPrime*ns) - offset;
 					if (tmp>=total || tmp<0) continue;
-					int x = utils::isInVector(leftPerm_,alphaPrime);
+					int x = PsimagLite\:\:isInVector(leftPerm_,alphaPrime);
 					if (x<0) leftPerm_.push_back(alphaPrime);
-					int y = utils::isInVector(rightPerm_,betaPrime);
+					int y = PsimagLite\:\:isInVector(rightPerm_,betaPrime);
 					if (y<0) rightPerm_.push_back(betaPrime);
 				}
 			}

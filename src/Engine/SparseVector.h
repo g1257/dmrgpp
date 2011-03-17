@@ -128,7 +128,7 @@ namespace Dmrg {
 
 			FieldType& operator[](size_t index)
 			{
-				int i=utils::isInVector(indices_,index);
+				int i=PsimagLite\:\:isInVector(indices_,index);
 				if (i<0) i=add(index,0);
 				return values_[i];	
 			}
@@ -136,7 +136,7 @@ namespace Dmrg {
 			//FIXME: disable due to performance reasons
 			FieldType operator[](size_t index) const
 			{
-				int i=utils::isInVector(indices_,index);
+				int i=PsimagLite\:\:isInVector(indices_,index);
 				if (i<0) {
 					//std::cerr<<"index="<<index<<"\n";
 					//utils::vectorPrint(indices_,"indices",std::cerr);

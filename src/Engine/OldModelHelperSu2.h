@@ -158,7 +158,7 @@ namespace Dmrg {
 								//if (fabs(tmp*factors.getValue(k4))<1e-8) continue;
 								int j = basis1_.permutationInverse(factors.getCol(k4)) -offset;
 								if (j<0 || j>=total) continue;
-								int x = utils::isInVector(columns,j);
+								int x = PsimagLite\:\:isInVector(columns,j);
 								if (x<0) {
 									columns.push_back(j);
 									values.push_back(tmp*factors.getValue(k4));
@@ -372,7 +372,7 @@ namespace Dmrg {
 						for (int k3=factors.getRowPtr(jj);k3<factors.getRowPtr(jj+1);k3++) {
 							int j = basis1_.permutationInverse(factors.getCol(k3))-offset;
 							if (j<0 || j>=bs) continue;
-							int x = utils::isInVector(columns,j);
+							int x = PsimagLite\:\:isInVector(columns,j);
 							if (x<0) {
 								columns.push_back(j);
 								values.push_back(tmp*factors.getValue(k3));
@@ -432,7 +432,7 @@ namespace Dmrg {
 						for (int k3=factors.getRowPtr(jj);k3<factors.getRowPtr(jj+1);k3++) {
 							int j = basis1_.permutationInverse(factors.getCol(k3))-offset;
 							if (j<0 || j>=bs) continue;
-							int x = utils::isInVector(columns,j);
+							int x = PsimagLite\:\:isInVector(columns,j);
 							if (x<0) {
 								columns.push_back(j);
 								values.push_back(tmp*factors.getValue(k3));

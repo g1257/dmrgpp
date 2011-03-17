@@ -291,8 +291,10 @@ namespace Dmrg {
 		{
 			std::vector<size_t> momentum;
 			for (size_t i=0;i<basis.numberOfOperators();i++) {
-				int x = utils::isInVector(momentum,basis.getReducedOperatorByIndex(i).jm.first);
-				if (x<0) momentum.push_back(basis.getReducedOperatorByIndex(i).jm.first);
+				int x = PsimagLite::isInVector(
+						momentum,basis.getReducedOperatorByIndex(i).jm.first);
+				if (x<0) momentum.push_back(
+						basis.getReducedOperatorByIndex(i).jm.first);
 			}
 			operators_.setMomentumOfOperators(momentum);
 		}

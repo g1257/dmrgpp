@@ -558,8 +558,10 @@ namespace Dmrg {
 		RealType dynWeightOf(VectorType& v,const VectorType& w) const
 		{
 			RealType sum = 0;
-			for (size_t i=0;i<v.size();i++)
-				sum += utils::square(std::real(v[i]*w[i]));
+			for (size_t i=0;i<v.size();i++) {
+				RealType tmp = std::real(v[i]*w[i]);
+				sum += tmp*tmp;
+			}
 			return sum;
 		}
 
