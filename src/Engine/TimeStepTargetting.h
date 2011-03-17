@@ -128,6 +128,7 @@ namespace Dmrg {
 			INFINITE=WaveFunctionTransfType::INFINITE};
 
 			static size_t const PRODUCT = TargettingParamsType::PRODUCT;
+			static size_t const SUM = TargettingParamsType::SUM;
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
 
 			TimeStepTargetting(
@@ -243,7 +244,7 @@ namespace Dmrg {
 						vectorSum += phiNew;
 					}
 				}
-				if (tstStruct_.concatenation==PRODUCT) phiNew = vectorSum;
+				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 				
 				if (count==0) {
 					// always print to keep observer driver in sync
