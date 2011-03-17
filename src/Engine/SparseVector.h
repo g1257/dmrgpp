@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_SPARSEVECTOR_H
 #define DMRG_SPARSEVECTOR_H
-#include "Utils.h"
 
 namespace Dmrg {
 	template<typename FieldType>

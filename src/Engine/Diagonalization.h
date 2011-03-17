@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DIAGONALIZATION_HEADER_H
 #define DIAGONALIZATION_HEADER_H
-#include "Utils.h"
 #include "ProgressIndicator.h"
 #include "VectorWithOffset.h" // includes the std::norm functions
 #include "VectorWithOffsets.h" // includes the std::norm functions
@@ -286,7 +285,7 @@ namespace Dmrg {
 				
 				PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 				crsMatrixToFullMatrix(fullm2,fullm);
-				if (utils::isZero(fullm2)) std::cerr<<"Matrix is zero\n";
+				if (isZero(fullm2)) std::cerr<<"Matrix is zero\n";
 				printNonZero(fullm2,std::cerr);
 				std::vector<RealType> eigs(fullm2.n_row());
 				PsimagLite::diag(fullm2,eigs,'V');

@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SPIN_SQUARED_H
 #define SPIN_SQUARED_H
 
-#include "Utils.h"
 
 namespace Dmrg {
 	template<typename CallbackType>

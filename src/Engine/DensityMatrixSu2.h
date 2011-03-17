@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DENSITY_MATRIX_SU2_H
 #define DENSITY_MATRIX_SU2_H
 
-#include "Utils.h"
 #include "BlockMatrix.h"
 #include "DensityMatrixBase.h"
 

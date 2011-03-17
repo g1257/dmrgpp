@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef SPIN_SQ_HELPER_H
 #define SPIN_SQ_HELPER_H
-#include "Utils.h"
 
 namespace Dmrg {	
 	template<typename FieldType_,typename Word_>

@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef APPLY_OPERATOR_LOCAL_H
 #define APPLY_OPERATOR_LOCAL_H
 
-#include "Utils.h"
 #include "FermionSign.h"
 #include "ProgramGlobals.h"
 

@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HAM_SYMM_LOCAL_H
 #define HAM_SYMM_LOCAL_H
 #include "BasisData.h"
-#include "Utils.h"
 
 namespace Dmrg {
 	template<typename RealType,typename SparseMatrixType>

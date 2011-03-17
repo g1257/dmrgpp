@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef VECTOR_WITH_OFFSETS_H
 #define VECTOR_WITH_OFFSETS_H
-#include "Utils.h"
 #include "ProgressIndicator.h"
 
 // FIXME: a more generic solution is needed instead of tying the non-zero structure to basis
@@ -281,14 +280,14 @@ namespace Dmrg {
 			void save(IoOutputter& io,const std::string& label) const
 			{
 				io.printline(label);
-				std::string s="#size="+utils::ttos(size_);
+				std::string s="#size="+ttos(size_);
 				io.printline(s);
 				io.printVector(offsets_,"#offsets");
-				s = "#nonzero="+utils::ttos(nonzeroSectors_.size());
+				s = "#nonzero="+ttos(nonzeroSectors_.size());
 				io.printline(s);
 				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
 					size_t j =  nonzeroSectors_[jj];
-					s="#sector="+utils::ttos(j);
+					s="#sector="+ttos(j);
 					io.printline(s);
 					io.printVector(data_[j],s);
 				}

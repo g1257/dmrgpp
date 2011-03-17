@@ -74,7 +74,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DISKSTACK_HEADER_H
 #define DISKSTACK_HEADER_H
 
-#include <stack>
+// All these includes are in PsimagLite
+#include "Stack.h"
 #include "IoSimple.h"
 #include "ProgressIndicator.h"
 
@@ -121,9 +122,9 @@ namespace Dmrg {
 			{
 				//ioOut_.open(fileOut_,std::ios_base::trunc,rank_);
 				ioOut_.open(fileOut_,std::ios_base::app,rank_);
-				ioOut_.printline("#STACKMETARANK="+utils::ttos(rank_));
+				ioOut_.printline("#STACKMETARANK="+ttos(rank_));
 				
-				ioOut_.printline("#STACKMETATOTAL="+utils::ttos(total_));
+				ioOut_.printline("#STACKMETATOTAL="+ttos(total_));
 				//ioOut_.printline("#STACKMETADEBUG="+utils::ttos(debug_));
 				ioOut_<<"#STACKMETASTACK\n";
 				ioOut_<<stack_;

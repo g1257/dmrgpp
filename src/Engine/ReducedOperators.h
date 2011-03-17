@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef REDUCEDOP_IMPL_H
 #define REDUCEDOP_IMPL_H
 
-#include "Utils.h"
 #include "Su2SymmetryGlobals.h"
 #include "Operator.h"
 

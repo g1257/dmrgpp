@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef VERY_SPARSE_MATRIX_HEADER_H
 #define VERY_SPARSE_MATRIX_HEADER_H
 
-#include "Utils.h"
 
 namespace Dmrg {
 	//! Yet another sparse matrix class

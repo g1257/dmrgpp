@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GEOMETRY_DIR_H
 #define GEOMETRY_DIR_H
 
-#include "Utils.h"
 
 
 namespace Dmrg {

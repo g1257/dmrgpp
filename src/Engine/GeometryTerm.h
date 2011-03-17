@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GEOMETRY_TERM_H
 #define GEOMETRY_TERM_H
 
-#include "Utils.h"
 #include "GeometryDirection.h"
 #include "GeometryFactory.h"
 

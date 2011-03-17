@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERSMODELFEAS_H
 #define PARAMETERSMODELFEAS_H
-#include "Utils.h"
 
 namespace Dmrg {
 	//! FeAs Model Parameters

@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef WFT_SU2_H
 #define WFT_SU2_H
  
-#include "Utils.h"
 #include "ProgressIndicator.h"
 #include "VectorWithOffsets.h" // so that std::norm() becomes visible here
 #include "VectorWithOffset.h" // so that std::norm() becomes visible here
@@ -201,14 +200,16 @@ namespace Dmrg {
 			SparseMatrixType ws(dmrgWaveStruct_.ws),we(dmrgWaveStruct_.we),weT;
 			transposeConjugate(weT,we);
 			
+			PackIndicesType pack1(nip);
+			PackIndicesType pack2(nk);
 			for (size_t x=start;x<final;x++) {
 				psiDest[x] = 0;
 				for (int kI = factorsInverseSE.getRowPtr(x);kI < factorsInverseSE.getRowPtr(x+1);kI++) {
 					size_t ip,beta;
-					utils::getCoordinates(ip,beta,(size_t)factorsInverseSE.getCol(kI),nip);
+					pack1.unpack(ip,beta,(size_t)factorsInverseSE.getCol(kI));
 					for (int k2I = factorsInverseE.getRowPtr(beta);k2I < factorsInverseE.getRowPtr(beta+1);k2I++) {
 						size_t kp,jp;
-						utils::getCoordinates(kp,jp,(size_t)factorsInverseE.getCol(k2I),nk);
+						pack2.unpack(kp,jp,(size_t)factorsInverseE.getCol(k2I));
 						psiDest[x] += createVectorAux1bSu2(psiSrc,ip,kp,jp,factorsSEOld,ws,weT)*
 								factorsInverseSE.getValue(kI)*factorsInverseE.getValue(k2I);
 					}
@@ -313,16 +314,18 @@ namespace Dmrg {
 			SparseMatrixType ws(dmrgWaveStruct_.ws),we(dmrgWaveStruct_.we),wsT;
 			transposeConjugate(wsT,ws);
 			
+			PackIndicesType pack1(nalpha);
+			PackIndicesType pack2(nip);
 			for (size_t x=start;x<final;x++) {
 				psiDest[x] = 0;
 				size_t xx = x; // lrs.super().permutationInverse(x);
 				for (int kI=factorsInverseSE.getRowPtr(xx);kI<factorsInverseSE.getRowPtr(xx+1);kI++) {
 					size_t alpha,jp;
-					utils::getCoordinates(alpha,jp,(size_t)factorsInverseSE.getCol(kI),nalpha);
+					pack1.unpack(alpha,jp,(size_t)factorsInverseSE.getCol(kI));
 					size_t alphax =  alpha; //lrs.left().permutationInverse(alpha);
 					for (int k2I=factorsInverseS.getRowPtr(alphax);k2I<factorsInverseS.getRowPtr(alphax+1);k2I++) {
 						size_t ip,kp;
-						utils::getCoordinates(ip,kp,(size_t)factorsInverseS.getCol(k2I),nip);
+						pack2.unpack(ip,kp,(size_t)factorsInverseS.getCol(k2I));
 						psiDest[x] += fastAux2bSu2(psiSrc,ip,kp,jp,wsT,we)* //factorsInverseSEOld)*
 								factorsInverseSE.getValue(kI)*factorsInverseS.getValue(k2I);
 					}

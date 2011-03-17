@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef JMPAIRS_HEADER_H
 #define JMPAIRS_HEADER_H
 
-#include "Utils.h"
 #include <algorithm>
 
 namespace Dmrg {

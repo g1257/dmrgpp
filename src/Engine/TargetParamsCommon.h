@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGET_PARAMS_COMMON_H
 #define TARGET_PARAMS_COMMON_H
 
-#include "Utils.h"
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file

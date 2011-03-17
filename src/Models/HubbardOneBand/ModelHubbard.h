@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef MODEL_HUBBARD_DMRG
 #define MODEL_HUBBARD_DMRG
+#include <cassert>
 #include "ModelBase.h"
 #include "ParametersModelHubbard.h"
 #include "HilbertSpaceHubbard.h"

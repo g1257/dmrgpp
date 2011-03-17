@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef WFT_LOCAL_HEADER_H
 #define WFT_LOCAL_HEADER_H
  
-#include "Utils.h"
 #include "ProgressIndicator.h"
 #include "VectorWithOffsets.h" // so that std::norm() becomes visible here
 #include "VectorWithOffset.h" // so that std::norm() becomes visible here
@@ -198,10 +197,12 @@ namespace Dmrg {
 			SparseMatrixType weT;
 			transposeConjugate(weT,we);
 			
+			PackIndicesType pack1(nip);
+			PackIndicesType pack2(nk);
 			for (size_t x=start;x<final;x++) {
 				size_t ip,beta,kp,jp;
-				utils::getCoordinates(ip,beta,(size_t)lrs.super().permutation(x),nip);
-				utils::getCoordinates(kp,jp,(size_t)lrs.right().permutation(beta),nk);
+				pack1.unpack(ip,beta,(size_t)lrs.super().permutation(x));
+				pack2.unpack(kp,jp,(size_t)lrs.right().permutation(beta));
 				psiDest[x]=createAux1b(psiSrc,ip,kp,jp,ws,weT);
 			}
 		}
@@ -464,10 +465,12 @@ namespace Dmrg {
 			*/
 			//std::cerr<<"ALTERNATIVE\n";
 			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
+			PackIndicesType pack1(nip);
+			PackIndicesType pack2(nk);
 			for (size_t x=start;x<final;x++) {
 				size_t ip,beta,kp,jp;
-				utils::getCoordinates(ip,beta,(size_t)lrs.super().permutation(x),nip);
-				utils::getCoordinates(kp,jp,(size_t)lrs.right().permutation(beta),nk);
+				pack1.unpack(ip,beta,(size_t)lrs.super().permutation(x));
+				pack2.unpack(kp,jp,(size_t)lrs.right().permutation(beta));
 				size_t ipkp = dmrgWaveStruct_.lrs.left().permutationInverse(ip + kp*nip);
 				size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ipkp + jp*nalpha);
 				psiDest[x]=psiSrc[y];

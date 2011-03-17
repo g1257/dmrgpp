@@ -232,6 +232,36 @@ namespace Dmrg {
 	 	
 	}
 
+	template<typename T>
+	void enforcePhase(T* v,size_t n)
+	{
+		T sign1=0;
+		for (size_t j=0;j<n;j++) {
+			if (norm(v[j])>1e-6) {
+				if (std::real(v[j])>0) sign1=1;
+				else sign1= -1;
+				break;
+			}
+		}
+		// get a consistent phase
+		for (size_t j=0;j<n;j++) v[j] *= sign1;
+	}
+
+	template<typename T>
+	void enforcePhase(std::vector<T>& v)
+	{
+		enforcePhase(&(v[0]),v.size());
+	}
+
+	template<typename T>
+	void enforcePhase(PsimagLite::Matrix<T>& a)
+	{
+		T* vpointer = &(a(0,0));
+		for (size_t i=0;i<a.n_col();i++)
+			enforcePhase(&(vpointer[i*a.n_row()]),a.n_row());
+	}
+
+
 	//! Parallel version of the diagonalization of a block diagonal matrix
 	template<typename S,typename Field,typename ConcurrencyTemplate>
 	void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,std::vector<Field> &eigs,char option,ConcurrencyTemplate &concurrency)
@@ -253,7 +283,7 @@ namespace Dmrg {
 		
 		while(concurrency.loop(m)) {
 			PsimagLite::diag(C.data_[m],eigsTmp,option);
-			utils::enforcePhase(C.data_[m]);
+			enforcePhase(C.data_[m]);
 			for (int j=C.offsets(m);j< C.offsets(m+1);j++) eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
 		}
 		

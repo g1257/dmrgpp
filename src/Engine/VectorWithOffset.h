@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef VECTOR_WITH_OFFSET_H
 #define VECTOR_WITH_OFFSET_H
-#include "Utils.h"
 
 namespace Dmrg {
 	template<typename FieldType>
@@ -182,9 +181,9 @@ namespace Dmrg {
 			void save(IoOutputter& io,const std::string& label) const
 			{
 				io.printline(label);
-				std::string s="#size="+utils::ttos(size_);
+				std::string s="#size="+ttos(size_);
 				io.printline(s);
-				s="#offset="+utils::ttos(offset_);
+				s="#offset="+ttos(offset_);
 				io.printline(s);
 				io.printVector(data_,"#data");
 			}

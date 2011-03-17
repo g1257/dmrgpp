@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DYN_SERIAL_H
 #define DYN_SERIAL_H
 
-#include "Utils.h"
 #include "IoSimple.h"
 
 namespace Dmrg {

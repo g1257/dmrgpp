@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CLEBSCH_GORDAN_H
 #define CLEBSCH_GORDAN_H
 
-#include "Utils.h"
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
 

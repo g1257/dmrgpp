@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef JM_SUBSPACE_H
 #define JM_SUBSPACE_H
 
-#include "Utils.h"
 #include "Su2SymmetryGlobals.h"
 
 namespace Dmrg {

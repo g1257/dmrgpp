@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef OPERATOR_H
 #define OPERATOR_H
-#include "Utils.h"
 
 namespace Dmrg {
 	//! This is a structure, don't add member functions here!
