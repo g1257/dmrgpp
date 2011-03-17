@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TIME_SERIAL_H
 
 #include "IoSimple.h"
+#include "TypeToString.h"
 
 namespace Dmrg {
 	

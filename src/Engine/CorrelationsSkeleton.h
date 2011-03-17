@@ -82,6 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CORRELATIONS_SK_H
 #define CORRELATIONS_SK_H
 #include "ObserverHelper.h"
+#include "Matrix.h"
+#include "PackIndices.h"
 #include "CrsMatrix.h"
 #include "Profiling.h"
 #include "ApplyOperatorLocal.h"
@@ -112,6 +114,7 @@ namespace Dmrg {
 	class CorrelationsSkeleton {
 		//typedef typename MatrixType::value_type FieldType;
 		typedef size_t IndexType;
+		typedef PsimagLite::PackIndices PackIndicesType;
 
 	public:
 		typedef ObserverHelperType_ ObserverHelperType;
@@ -230,7 +233,7 @@ namespace Dmrg {
 				Om = O;
 				return;
 			}
-			utils::transposeConjugate(Om,O);
+			transposeConjugate(Om,O);
 		}
 
 		FieldType bracket(const MatrixType& A,int fermionicSign)
@@ -290,9 +293,10 @@ namespace Dmrg {
 				throw std::runtime_error("problem in dmrgMultiply\n");
 			}
 
+			PackIndicesType pack(ni);
 			for (size_t r=0;r<sprime;r++) {
 				size_t e,u;
-				utils::getCoordinates(e,u,helper_.leftRightSuper().left().permutation(r),ni);
+				pack.unpack(e,u,helper_.leftRightSuper().left().permutation(r));
 				RealType f = helper_.fermionicSignLeft()(e,fermionicSign);
 				for (size_t e2=0;e2<ni;e2++) {
 					for (size_t u2=0;u2<nj;u2++) {
@@ -332,9 +336,10 @@ namespace Dmrg {
 //			const std::vector<size_t>&  ve = helper_.leftRightSuper().right().
 //					electronsVector(BasisType::BEFORE_TRANSFORM);
 
+			PackIndicesType pack(nj);
 			for (size_t r=0;r<eprime;r++) {
 				size_t e,u;
-				utils::getCoordinates(e,u,helper_.leftRightSuper().right().permutation(r),nj);
+				pack.unpack(e,u,helper_.leftRightSuper().right().permutation(r));
 //				size_t nx0 = ve[r];
 //				if (nx0<oneSiteElectrons_[e]) throw std::runtime_error(
 //						"Problem in fluffUpEnviron_\n");
@@ -417,13 +422,15 @@ namespace Dmrg {
 			if (growOption==GROW_RIGHT) {
 				if (size_t(helper_.leftRightSuper().left().permutation(e)/n)!=
 						size_t(helper_.leftRightSuper().left().permutation(e2)/n)) return 0;
-				utils::getCoordinates(i,k,helper_.leftRightSuper().left().permutation(e),n);
-				utils::getCoordinates(j,k2,helper_.leftRightSuper().left().permutation(e2),n);
+				PackIndicesType pack(n);
+				pack.unpack(i,k,helper_.leftRightSuper().left().permutation(e));
+				pack.unpack(j,k2,helper_.leftRightSuper().left().permutation(e2));
 			} else {
 				if (size_t(helper_.leftRightSuper().left().permutation(e)%m)!=
 						size_t(helper_.leftRightSuper().left().permutation(e2)%m)) return 0;
-				utils::getCoordinates(k,i,helper_.leftRightSuper().left().permutation(e),m);
-				utils::getCoordinates(k2,j,helper_.leftRightSuper().left().permutation(e2),m);
+				PackIndicesType pack(m);
+				pack.unpack(k,i,helper_.leftRightSuper().left().permutation(e));
+				pack.unpack(k2,j,helper_.leftRightSuper().left().permutation(e2));
 				sign = helper_.fermionicSignLeft()(k,fermionicSign);
 			}
 			if (k!=k2) return 0;
@@ -445,14 +452,17 @@ namespace Dmrg {
 			// Eperm[e2] = j+k*n or e2=k+j*m
 
 			size_t i,j,k,k2;
+
 			if (growOption==GROW_RIGHT) {
-				utils::getCoordinates(i,k,helper_.leftRightSuper().right().permutation(e),n);
-				utils::getCoordinates(j,k2,helper_.leftRightSuper().right().permutation(e2),n);
+				PackIndicesType pack(n);
+				pack.unpack(i,k,helper_.leftRightSuper().right().permutation(e));
+				pack.unpack(j,k2,helper_.leftRightSuper().right().permutation(e2));
 				size_t nx0 = helper_.leftRightSuper().left().electrons(BasisType::AFTER_TRANSFORM);
 				sign = (nx0 & 1) ? fermionicSign : 1;
 			} else {
-				utils::getCoordinates(k,i,helper_.leftRightSuper().right().permutation(e),m);
-				utils::getCoordinates(k2,j,helper_.leftRightSuper().right().permutation(e2),m);
+				PackIndicesType pack(m);
+				pack.unpack(k,i,helper_.leftRightSuper().right().permutation(e));
+				pack.unpack(k2,j,helper_.leftRightSuper().right().permutation(e2));
 				size_t nx0 = helper_.leftRightSuper().super().electrons(BasisType::AFTER_TRANSFORM);
 				sign = (nx0 & 1) ?  fermionicSign : 1;
 			}
@@ -487,7 +497,7 @@ namespace Dmrg {
 		{
 			SparseMatrixType Acrs(A);
 			FieldType sum=0;
-
+			PackIndicesType pack(helper_.leftRightSuper().left().size());
 			for (size_t x=0;x<vec1.sectors();x++) {
 				size_t sector = vec1.sector(x);
 				size_t offset = vec1.offset(sector);
@@ -495,8 +505,8 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					utils::getCoordinates(r,eta,helper_.leftRightSuper().super().
-							permutation(t),helper_.leftRightSuper().left().size());
+					pack.unpack(r,eta,helper_.leftRightSuper().super().
+							permutation(t));
 					for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
 						size_t r2 = Acrs.getCol(k);
 						size_t t2 = helper_.leftRightSuper().super().
@@ -518,6 +528,7 @@ namespace Dmrg {
 		{
 			SparseMatrixType Acrs(A);
 			FieldType sum=0;
+			PackIndicesType pack(helper_.leftRightSuper().left().size());
 
 			for (size_t x=0;x<vec1.sectors();x++) {
 				size_t sector = vec1.sector(x);
@@ -526,8 +537,8 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					utils::getCoordinates(r,eta,helper_.leftRightSuper().super().
-							permutation(t),helper_.leftRightSuper().left().size());
+					pack.unpack(r,eta,helper_.leftRightSuper().super().
+							permutation(t));
 					if (eta>=Acrs.rank()) throw std::runtime_error("Error\n");
 					size_t nx0 = helper_.leftRightSuper().left().electrons(BasisType::AFTER_TRANSFORM);
 					RealType sign = (nx0 & 1) ? fermionicSign : 1;
@@ -579,6 +590,8 @@ namespace Dmrg {
 						"ni!=Acrs.rank\n");
 
 			// ok, we're ready for the main course:
+			PackIndicesType pack1(helper_.leftRightSuper().left().size());
+			PackIndicesType pack2(ni);
 			for (size_t x=0;x<vec1.sectors();x++) {
 				size_t sector = vec1.sector(x);
 				size_t offset = vec1.offset(sector);
@@ -586,11 +599,11 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					utils::getCoordinates(r,eta,helper_.leftRightSuper().super().
-							permutation(t),helper_.leftRightSuper().left().size());
+					pack1.unpack(r,eta,helper_.leftRightSuper().super().
+							permutation(t));
 					size_t r0,r1;
-					utils::getCoordinates(r0,r1,helper_.leftRightSuper().left().
-							permutation(r),ni);
+					pack2.unpack(r0,r1,helper_.leftRightSuper().left().
+							permutation(r));
 					size_t electrons = helper_.leftRightSuper().super().electrons(t);
 					electrons -= helper_.leftRightSuper().right().electrons(eta);
 					RealType sign = (electrons & 1) ? fermionSign : 1.0;
@@ -638,6 +651,9 @@ namespace Dmrg {
 						"helper_.leftRightSuper().right().size()/Bcrs.rank()!=Acrs.rank\n");
 
 			// ok, we're ready for the main course:
+			PackIndicesType pack1(helper_.leftRightSuper().left().size());
+			PackIndicesType pack2(ni);
+
 			for (size_t x=0;x<vec1.sectors();x++) {
 				size_t sector = vec1.sector(x);
 				size_t offset = vec1.offset(sector);
@@ -645,10 +661,10 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					utils::getCoordinates(eta,r,helper_.leftRightSuper().super().
-							permutation(t),helper_.leftRightSuper().left().size());
+					pack1.unpack(eta,r,helper_.leftRightSuper().super().
+							permutation(t));
 					size_t r0,r1;
-					utils::getCoordinates(r0,r1,helper_.leftRightSuper().right().permutation(r),ni);
+					pack2.unpack(r0,r1,helper_.leftRightSuper().right().permutation(r));
 					//size_t electrons = helper_.leftRightSuper().super().electrons(t);
 					size_t electrons = helper_.leftRightSuper().left().electrons(eta);
 					RealType sign = (electrons & 1) ? fermionSign : 1.0;
@@ -702,6 +718,9 @@ namespace Dmrg {
 				throw std::runtime_error("Observe::bracketRightCorner_(...): Bcrs.rank!=A2crs.rank\n");
 
 			// ok, we're ready for the main course:
+			PackIndicesType pack1(helper_.leftRightSuper().left().size());
+			PackIndicesType pack2(ni);
+
 			for (size_t x=0;x<vec1.sectors();x++) {
 				size_t sector = vec1.sector(x);
 				size_t offset = vec1.offset(sector);
@@ -709,9 +728,11 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					utils::getCoordinates(r,eta,helper_.leftRightSuper().super().permutation(t),helper_.leftRightSuper().left().size());
+					pack1.unpack(r,eta,
+							helper_.leftRightSuper().super().permutation(t));
 					size_t r0,r1;
-					utils::getCoordinates(r0,r1,helper_.leftRightSuper().left().permutation(r),ni);
+					pack2.unpack(r0,r1,
+							helper_.leftRightSuper().left().permutation(r));
 					RealType sign =  helper_.leftRightSuper().right().fermionicSign(r1,fermionSign);
 
 					for (int k1=A1crs.getRowPtr(r0);k1<A1crs.getRowPtr(r0+1);k1++) {
