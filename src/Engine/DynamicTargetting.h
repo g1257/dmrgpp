@@ -127,6 +127,7 @@ namespace Dmrg {
 				EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 				INFINITE=WaveFunctionTransfType::INFINITE};
 		static size_t const PRODUCT = TargettingParamsType::PRODUCT;
+		static size_t const SUM = TargettingParamsType::SUM;
 
 		static const size_t parallelRank_ = 0; // DYNT needs to support concurrency FIXME
 		
@@ -219,14 +220,13 @@ namespace Dmrg {
 			// in turn to the g.s.
 			for (size_t i=0;i<max;i++) {
 				count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber,max-1);
-
 				if (tstStruct_.concatenation==PRODUCT) {
 					phiOld = phiNew;
 				} else {
 					vectorSum += phiNew;
 				}
 			}
-			if (tstStruct_.concatenation==PRODUCT) phiNew = vectorSum;
+			if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 
 			if (count==0) {
 		//		// always print to keep observer driver in sync
@@ -518,7 +518,6 @@ namespace Dmrg {
 			}
 		}
 
-
 		void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
 		{
 			FermionSign fs(lrs_.left(),tstStruct_.electrons);
@@ -550,7 +549,7 @@ namespace Dmrg {
 				}
 				sum += weight_[r];
 			}
-			for (size_t r=0;r<weight_.size();r++) weight_[r] = 0.5/sum;
+			for (size_t r=0;r<weight_.size();r++) weight_[r] *= 0.5/sum;
 			gsWeight_ = 0.5;
 
 		}

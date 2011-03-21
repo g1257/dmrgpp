@@ -320,7 +320,13 @@ namespace Dmrg {
 			
 			VectorWithOffsets<FieldType> operator+=(const VectorWithOffsets<FieldType>& v)
 			{
-				
+				if (nonzeroSectors_.size()==0) {
+					size_ = v.size_;
+					data_ = v.data_;
+					offsets_ = v.offsets_;
+					nonzeroSectors_ = v.nonzeroSectors_;
+					return *this;
+				}
 				for (size_t ii=0;ii<nonzeroSectors_.size();ii++) {
 					size_t i = nonzeroSectors_[ii];
 					data_[i] += v.data_[ii];
