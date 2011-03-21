@@ -44,12 +44,12 @@ namespace PsimagLite {
 		{
 			MatrixType T;
 			ab_.buildDenseMatrix(T);
+			eigs_.resize(T.n_row());
+			diag(T,eigs_,'V');
 			intensity_.resize(T.n_row());
 			for (size_t i=0;i<T.n_row();i++) {
 				intensity_[i]= T(i,0)*T(i,0);
 			}
-			eigs_.resize(T.n_row());
-			diag(T,eigs_,'V');
 		}
 
 		template<typename IoInputType>
