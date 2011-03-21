@@ -35,7 +35,8 @@ namespace PsimagLite {
 		typedef typename std::complex<RealType> ComplexType;
 		typedef typename TridiagonalMatrixType::value_type FieldType;
 		typedef Matrix<FieldType> MatrixType;
-		
+		typedef std::vector<std::pair<RealType,ComplexType> > PlotDataType;
+
 		ContinuedFraction(
 				const TridiagonalMatrixType& ab,
 				const RealType& Eg,
@@ -78,15 +79,21 @@ namespace PsimagLite {
 		}
 
 		void plot(
+				PlotDataType& result,
 				const RealType& omega1,
 				const RealType& omega2,
 				const RealType& deltaOmega,
 				const RealType& delta) const
 		{
+			size_t counter = 0;
+			size_t n = (omega2 - omega1)/deltaOmega + 1; 
+			if (result.size()==0) result.resize(n);
 			for (RealType omega = omega1;omega <omega2;omega+=deltaOmega) {
 				ComplexType z(omega,delta);
 				ComplexType res = iOfOmega(z,Eg_);
-				std::cout<<omega<<" "<<real(res)<<" "<<imag(res)<<"\n";
+				std::pair<RealType,ComplexType> p(omega,res);
+				result[counter++] = p;
+				//std::cout<<omega<<" "<<real(res)<<" "<<imag(res)<<"\n";
 			}
 		} 
 
