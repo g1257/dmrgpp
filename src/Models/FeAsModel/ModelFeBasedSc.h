@@ -261,7 +261,8 @@ namespace Dmrg {
 			std::vector<size_t> q;
 			findQuantumNumbers(q,basisTmp,n);
 			std::vector<size_t> iperm(q.size());
-			utils::sort(q,iperm);
+			Sort<std::vector<size_t> > sort;
+			sort.sort(q,iperm);
 			basis.clear();
 			for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
 		}
@@ -336,7 +337,7 @@ namespace Dmrg {
 					
 				} else {
 					HilbertSpaceFeAsType::create(bra,i,sigma);
-					int jj = PsimagLite\:\:isInVector(natBasis,bra);
+					int jj = PsimagLite::isInVector(natBasis,bra);
 					if (jj<0) throw std::runtime_error("findOperatorMatrices: internal error while"
 							"creating.\n");
 					if (ii==size_t(jj)) {
@@ -451,8 +452,8 @@ namespace Dmrg {
 						"blocks must be of size 1, and basis of size 16\n");
 			PsimagLite::Matrix<SparseElementType> cmCopy(n,n);
 			int i,j;
-			int x=PsimagLite\:\:isInVector(basis,reinterpretX_);
-			int y=PsimagLite\:\:isInVector(basis,reinterpretY_);
+			int x=PsimagLite::isInVector(basis,reinterpretX_);
+			int y=PsimagLite::isInVector(basis,reinterpretY_);
 
 			RealType factor = 0.7071067811865475244;
 			for (i=0;i<n;i++) {
