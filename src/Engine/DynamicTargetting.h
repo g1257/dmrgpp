@@ -415,7 +415,7 @@ namespace Dmrg {
 		}
 		
 		void calcDynVectors(
-				const VectorWithOffsetType&phi,
+				const VectorWithOffsetType& phi,
 				size_t systemOrEnviron)
 		{
 			for (size_t i=0;i<phi.sectors();i++) {
@@ -433,6 +433,8 @@ namespace Dmrg {
 				setLanczosVectors(V,i0);
 			}
 			setWeights();
+			weightForContinuedFraction_ = phi*phi;
+			weightForContinuedFraction_ = 1.0/weightForContinuedFraction_;
 		}
 
 		void getLanczosVectors(
@@ -453,7 +455,6 @@ namespace Dmrg {
 			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_);
 
 			lanczosSolver.tridiagonalDecomposition(sv,ab_,V);
-			weightForContinuedFraction_ = weightForContinuedFraction(sv,V);
 			//calcIntensity(Eg,sv,V,ab);
 		}
 		
@@ -497,14 +498,17 @@ namespace Dmrg {
 				const VectorType& sv,
 				const DenseMatrixType& V) const
 		{
-			RealType tmp1 = 0;
+			/*RealType tmp1 = 0;
 			for (size_t m=0;m<sv.size();m++)
 				tmp1 += V(m,0)*sv[m];
 
 			RealType tmp2 = 0;
 			for (size_t k2=0;k2<sv.size();k2++)
 				tmp2 += std::conj(sv[k2]*V(k2,0));
-			return tmp1 * tmp2;
+			return tmp1 * tmp2;*/
+			if (targetVectors_.size()==0) return 0.0;
+			RealType norma = targetVectors_[0]*targetVectors_[0];
+			return 1.0/norma;
 		}
 
 		void setLanczosVectors(
