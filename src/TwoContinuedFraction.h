@@ -47,6 +47,18 @@ std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
 	return v;
 }
 
+//template<typename RealType>
+//std::vector<std::pair<RealType,std::complex<RealType> > > equal1(
+//		const std::vector<std::pair<RealType,std::complex<RealType> > >& v1)
+//{
+//	std::vector<std::pair<RealType,std::complex<RealType> > > v(v1.size());
+//	for (size_t i=0;i<v1.size();i++) {
+//		v[i].first = v1[i].first;
+//		v[i].second = v1[i].second;
+//	}
+//	return v;
+//}
+
 	template<typename ContinuedFractionType>
 	class TwoContinuedFraction  {
 	public:
@@ -87,9 +99,16 @@ std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
 			result = result1 - result2;
 		}
 		
+		template<typename IoOutputType>
+		void save(IoOutputType& io) const
+		{
+			cf1_.save(io);
+			cf2_.save(io);
+		}
+
 	private:
 		ProgressIndicator progress_;
-		const ContinuedFractionType& cf1_,cf2_;
+		ContinuedFractionType cf1_,cf2_;
 	}; // class TwoContinuedFraction
 } // namespace PsimagLite 
 /*@}*/

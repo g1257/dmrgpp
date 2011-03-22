@@ -52,15 +52,7 @@ namespace PsimagLite {
 				RealType weight = 1)
 			: progress_("ContinuedFraction",0),ab_(ab),Eg_(Eg),weight_(weight)
 		{
-			if (weight_==0) return;
-			MatrixType T;
-			ab_.buildDenseMatrix(T);
-			eigs_.resize(T.n_row());
-			diag(T,eigs_,'V');
-			intensity_.resize(T.n_row());
-			for (size_t i=0;i<T.n_row();i++) {
-				intensity_[i]= T(i,0)*T(i,0);
-			}
+			diagonalize();
 		}
 
 		template<typename IoInputType>
@@ -71,6 +63,7 @@ namespace PsimagLite {
 			io.readline(Eg_,"#CFEnergy=");
 			io.read(eigs_,"#CFEigs");
 			io.read(intensity_,"#CFIntensities");
+			diagonalize();
 		}
 		
 		template<typename IoOutputType>
@@ -120,8 +113,22 @@ namespace PsimagLite {
 		}
 
 	private:
+
+		void diagonalize()
+		{
+			if (weight_==0) return;
+			MatrixType T;
+			ab_.buildDenseMatrix(T);
+			eigs_.resize(T.n_row());
+			diag(T,eigs_,'V');
+			intensity_.resize(T.n_row());
+			for (size_t i=0;i<T.n_row();i++) {
+				intensity_[i]= T(i,0)*T(i,0);
+			}
+		}
+
 		ProgressIndicator progress_;
-		const TridiagonalMatrixType& ab_;
+		TridiagonalMatrixType ab_;
 		RealType Eg_;
 		RealType weight_;
 		std::vector<RealType> eigs_;
