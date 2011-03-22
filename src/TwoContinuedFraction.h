@@ -36,14 +36,14 @@ Please see full open source license included in file LICENSE.
 namespace PsimagLite {
 
 template<typename RealType>
-std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
+std::vector<std::pair<RealType,std::complex<RealType> > > operator+(
 		const std::vector<std::pair<RealType,std::complex<RealType> > >& v1,
 		const std::vector<std::pair<RealType,std::complex<RealType> > >& v2)
 {
 	std::vector<std::pair<RealType,std::complex<RealType> > > v(v1.size());
 	for (size_t i=0;i<v1.size();i++) {
 		v[i].first = v1[i].first;
-		v[i].second = v1[i].second - v2[i].second;
+		v[i].second = v1[i].second + v2[i].second;
 	}
 	return v;
 }
@@ -99,7 +99,7 @@ std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
 			PlotDataType result2;
 			cf2_.plot(result2,omega1,omega2,deltaOmega,delta);
 
-			result = result1 - result2;
+			result = result1 + result2;
 		}
 		
 		template<typename IoOutputType>
