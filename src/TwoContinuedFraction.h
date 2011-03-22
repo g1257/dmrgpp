@@ -31,6 +31,7 @@ Please see full open source license included in file LICENSE.
 #ifndef TWO_CONTINUED_FRACTION_H
 #define TWO_CONTINUED_FRACTION_H
 #include <iostream>
+#include "LineMarker.h"
 
 namespace PsimagLite {
 
@@ -73,13 +74,15 @@ std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
 		TwoContinuedFraction(
 				const ContinuedFractionType& cf1,
 				const ContinuedFractionType& cf2)
-			: progress_("TwoContinuedFraction",0),cf1_(cf1),cf2_(cf2)
+			: progress_("TwoContinuedFraction",0),
+			  lmarker_("#TWOCONTINUEDFRACTION"),cf1_(cf1),cf2_(cf2)
 		{
 		}
 
 		template<typename IoInputType>
-		TwoContinuedFraction(IoInputType& io)
-		: progress_("ContinuedFraction",0),cf1_(io),cf2_(io)
+		TwoContinuedFraction(IoInputType& io,size_t level = 0)
+		: progress_("ContinuedFraction",0),
+		  lmarker_(io,"#TWOCONTINUEDFRACTION",level),cf1_(io),cf2_(io)
 		{
 		}
 		
@@ -102,12 +105,14 @@ std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
 		template<typename IoOutputType>
 		void save(IoOutputType& io) const
 		{
+			lmarker_.save(io);
 			cf1_.save(io);
 			cf2_.save(io);
 		}
 
 	private:
 		ProgressIndicator progress_;
+		PsimagLite::LineMarker lmarker_;
 		ContinuedFractionType cf1_,cf2_;
 	}; // class TwoContinuedFraction
 } // namespace PsimagLite 

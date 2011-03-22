@@ -83,7 +83,7 @@ int main(int argc,char *argv[])
 	}
 
 	IoSimple::In io(file);
-	TwoContinuedFractionType twoCf(io);
+	TwoContinuedFractionType twoCf(io,level);
 	typename TwoContinuedFractionType::PlotDataType v;
 	twoCf.plot(v,wbegin,wend,wstep,delta);
 	for (size_t x=0;x<v.size();x++) {
