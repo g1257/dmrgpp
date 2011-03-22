@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef OPERATOR_H
 #define OPERATOR_H
-#include "Utils.h"
 
 namespace Dmrg {
 	//! This is a structure, don't add member functions here!
@@ -185,7 +184,7 @@ namespace Dmrg {
 	{
 		os<<op.data;
 		os<<op.fermionSign<<"\n";
-		os<<op.jm<<"\n";
+		os<<op.jm.first<<" "<<op.jm.second<<"\n";
 		os<<op.angularFactor<<"\n";
 		os<<op.su2Related;
 		return os;

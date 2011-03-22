@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HAMILTONIAN_CONNECTION_H
 #define HAMILTONIAN_CONNECTION_H
 
-#include "Utils.h"
 #include "LinkProductStruct.h"
 
 namespace Dmrg {

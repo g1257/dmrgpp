@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef OBSERVABLE_LIBRARY_H
 #define OBSERVABLE_LIBRARY_H
 
-#include "Utils.h"
+#include "Matrix.h" // in PsimagLite
 
 namespace Dmrg {
 	
@@ -128,7 +128,7 @@ namespace Dmrg {
 
 			if (label=="cc") {
 				MatrixType opC = model_.getOperator("c",0,0); // c_{0,0} spin up
-				MatrixType opCtranspose = utils::transposeConjugate(opC);
+				MatrixType opCtranspose = transposeConjugate(opC);
 				measureOne("OperatorC",opC,opCtranspose,-1,rows,cols);
 			} else if (label=="nn") {
 				MatrixType opN = model_.getOperator("n");
@@ -143,7 +143,7 @@ namespace Dmrg {
 			} else if (label=="s+s-") {
 				// Si^+ Sj^-
 				const MatrixType& sPlus = model_.getOperator("+");
-				MatrixType sPlusT = utils::transposeConjugate(sPlus);
+				MatrixType sPlusT = transposeConjugate(sPlus);
 				sPlusSminus_ = observe_.correlations(sPlus,sPlusT,1,rows,cols);
 				if (concurrency_.root()) {
 						std::cout<<"OperatorSplus:\n";
@@ -152,7 +152,7 @@ namespace Dmrg {
 			} else if (label=="s-s+") {
 				// Si^- Sj^+
 				const MatrixType& sMinus = model_.getOperator("-");
-				MatrixType sMinusT = utils::transposeConjugate(sMinus);
+				MatrixType sMinusT = transposeConjugate(sMinus);
 				sMinusSplus_= observe_.correlations(sMinus,sMinusT,1,rows,cols);
 				if (concurrency_.root()) {
 					std::cout<<"OperatorSminus:\n";
@@ -178,7 +178,7 @@ namespace Dmrg {
 
 				const MatrixType& oDelta = model_.getOperator("d");
 				MatrixType oDeltaT;
-				utils::transposeConjugate(oDeltaT,oDelta);
+				transposeConjugate(oDeltaT,oDelta);
 				measureOne("TWO-POINT DELTA-DELTA^DAGGER",oDelta,oDeltaT,1,
 						rows,cols);
 			} else if (label=="dd4") {

@@ -214,7 +214,7 @@ namespace Dmrg {
 			} else if (what=="-") { // S^-
 				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[0].data);
-				utils::transposeConjugate(tmp);
+				transposeConjugate(tmp);
 				return tmp;
 			} else if (what=="z") { // S^z
 				PsimagLite::Matrix<SparseElementType> tmp;
@@ -261,7 +261,7 @@ namespace Dmrg {
 					// it is a down electron, then flip it:
 					HilbertSpaceType::destroy(bra,i,1);
 					HilbertSpaceType::create(bra,i,0);
-					int jj = utils::isInVector(natBasis,bra);
+					int jj = PsimagLite::isInVector(natBasis,bra);
 					if (jj<0) throw std::runtime_error("findOperatorMatrices: internal error while"
 								"creating.\n");
 					cm(ii,jj)=1.0;

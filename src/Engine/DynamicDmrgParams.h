@@ -100,17 +100,17 @@ namespace Dmrg {
 		typedef typename SparseMatrixType::value_type ComplexOrReal;
 		typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
+		static size_t const PRODUCT = TargetParamsCommonType::PRODUCT;
+		static size_t const SUM = TargetParamsCommonType::SUM;
+
 		template<typename IoInputter>
 		DynamicDmrgParams(IoInputter& io,const ModelType& model)
-		: TargetParamsCommonType(io,model),eta(0),omega(0)
+		: TargetParamsCommonType(io,model)
 		  {
 			io.rewind();
-			io.readline(eta,"TSPEta=");
-			io.readline(omega,"TSPOmega=");
+			this->concatenation = SUM;
 		  }
 
-		RealType eta;
-		RealType omega;
 	}; // class DynamicDmrgParams
 	
 	template<typename ModelType>
@@ -118,9 +118,8 @@ namespace Dmrg {
 	operator<<(std::ostream& os,const DynamicDmrgParams<ModelType>& t)
 	{
 		os<<"#TargetParams.type=DynamicDmrg\n";
-		os<<"#TargetParams.eta="<<t.eta<<"\n";
-		os<<"#TargetParams.omega="<<t.omega<<"\n";
-		const typename TimeStepParams<ModelType>::TargetParamsCommonType& tp = t;
+		const typename TimeStepParams<ModelType>::TargetParamsCommonType&
+			tp = t;
 		os<<tp;
 		return os;
 	}

@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_H
 #define LINK_H
 
-#include "Utils.h"
 #include "ProgramGlobals.h"
 
 namespace Dmrg {

@@ -74,72 +74,90 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TridiagonalMatrix.h
+/*! \file DynamicSerializer.h
  *
- *  A struct represent a tridiagonal matrix
+ *  Serialize dynamic DMRG data
  */
-#ifndef TRIDIAGONAL_MATRIX_H
-#define TRIDIAGONAL_MATRIX_H
+#ifndef DYN_SERIAL_H
+#define DYN_SERIAL_H
 
-#include "Utils.h"
+#include "IoSimple.h"
 
 namespace Dmrg {
 	
-	template<typename FieldType>
-	struct TridiagonalMatrix {
-		public:
-		typedef FieldType value_type;
-		
-		void resize(size_t n,FieldType value)
+	template<
+		typename RealType,
+		typename VectorType,
+		typename ContinuedFractionType>
+	class DynamicSerializer {
+	public:
+
+		DynamicSerializer(
+				const ContinuedFractionType& cf,
+				size_t site,
+				const std::vector<VectorType>& targetVectors)
+		: cf_(cf),
+		  site_(site),
+		  targetVectors_(targetVectors)
+		{}
+
+		template<typename IoInputType>
+		DynamicSerializer(IoInputType& io,size_t lastInstance = 0)
+		: cf_(io)
 		{
-			resize(n);
-			for (size_t i=0;i<n;i++) a_[i]=b_[i]=value;
-		}
-		
-		void resize(size_t n)
-		{
-			a_.resize(n);
-			b_.resize(n);
-		}
-		
-		FieldType& a(size_t i) { return a_[i]; }
-		FieldType& b(size_t i) { return b_[i]; }
-		
-		const FieldType& a(size_t i) const { return a_[i]; }
-		const FieldType& b(size_t i) const { return b_[i]; }
-		
-		template<typename SomeMatrixType>
-		void buildDenseMatrix(SomeMatrixType& m) const
-		{
-			m.resize(a_.size(),a_.size());
-			for (size_t i=0;i<m.n_row();i++) 
-				for (size_t j=0;j<m.n_col();j++)
-					 m(i,j)=0;
-	
-			for (size_t i=0;i<a_.size();i++) {
-				m(i,i) = a_[i];
-				if (i+1<a_.size()) m(i,i+1) = b_[i];
-				if (i>0) m(i,i-1) = b_[i];
+			std::string s = "#DCENTRALSITE=";
+			int xi=0;
+			io.readline(xi,s);
+			if (xi<0) throw std::runtime_error(
+					"DynamicSerializer:: site cannot be negative\n");
+			site_ = xi;
+
+			s = "#DNUMBEROFVECTORS=";
+			io.readline(xi,s);
+			if (xi<=0) throw std::runtime_error(
+					"DynamicSerializer:: n. of vectors must be positive\n");
+			targetVectors_.resize(xi);
+			for (size_t i=0;i<targetVectors_.size();i++) {
+				s = "targetVector"+ttos(i);
+				targetVectors_[i].load(io,s);
 			}
 		}
-		
-		// not sure if this is correct, seems buggy in some tests:
-		/*
-		template<typename SomeFieldType>
-		SomeFieldType computeContinuedFraction(SomeFieldType z,typename SomeFieldType::value_type isign) const
+
+		template<typename IoOutputter>
+		void save(IoOutputter& io) const
 		{
-			SomeFieldType r=0;
-			size_t n = a_.size()-1;
-			for (int i=n;i>0;i--) r = utils::square(b_[i-1])/(z-a_[i]*isign-r);
-			r=1.0/(z-a_[0]*isign-r);
-			return r;
-		}*/
+			cf_.save(io);
 
-		size_t size() const { return a_.size(); }
+			std::string s = "#DCENTRALSITE=" + ttos(site_);
+			io.printline(s);
+			s = "#DNUMBEROFVECTORS="+ttos(targetVectors_.size());
+			io.printline(s);
+			for (size_t i=0;i<targetVectors_.size();i++) {
+				std::string label = "targetVector"+ttos(i);
+				targetVectors_[i].save(io,label);
+			}
+		}
 
-		private:
-		std::vector<FieldType> a_,b_;
-	}; // struct TridiagonalMatrix
+		size_t size(size_t i=0) const
+		{
+			return  targetVectors_[i].size();
+		}
+
+		size_t site() const
+		{
+			return  site_;
+		}
+
+		const VectorType& vector(size_t i=0) const
+		{
+			return targetVectors_[i];
+		}
+
+	private:
+		const ContinuedFractionType& cf_;
+		size_t site_;
+		std::vector<VectorType> targetVectors_;
+	}; // class TimeSerializer
 } // namespace Dmrg 
 
 /*@}*/

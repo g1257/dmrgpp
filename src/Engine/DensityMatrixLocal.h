@@ -72,7 +72,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DENSITY_MATRIX_LOCAL_H
 #define DENSITY_MATRIX_LOCAL_H
 
-#include "Utils.h"
 #include "BlockMatrix.h"
 #include "DensityMatrixBase.h"
 

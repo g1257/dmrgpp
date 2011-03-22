@@ -83,8 +83,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PARAMETERSDMRGSOLVER_HEADER_H
 #define PARAMETERSDMRGSOLVER_HEADER_H
 
-#include "Utils.h"
-//#include "SimpleReader.h"
+#include "TypeToString.h"
+#include "Vector.h"
 
 namespace Dmrg {
 	struct FiniteLoop {
@@ -103,7 +103,7 @@ namespace Dmrg {
 		size_t sopt = 0; // have we started saving yet?
 		for (size_t i=0;i<finiteLoop.size();i++)  {
 			if (sopt == 1 && finiteLoop[i].saveOption ==0) {
-				s = "Error for finite loop number " + utils::ttos(i) + "\n";
+				s = "Error for finite loop number " + ttos(i) + "\n";
 				s += "Once you say 1 on a finite loop, then all";
 				s += " finite loops that follow must have 1.";
 				throw std::runtime_error(s.c_str());
@@ -112,7 +112,7 @@ namespace Dmrg {
 				sopt = 1;
 				if (size_t(x) != 1 && size_t(x)!=totalSites-2) {
 					s = "Error for finite loop number "
-						+ utils::ttos(i) + "\n";
+						+ ttos(i) + "\n";
 					s += "Saving finite loops must start at the left or";
 					s += " right end of the lattice\n";
 					throw std::runtime_error(s.c_str());
@@ -121,7 +121,7 @@ namespace Dmrg {
 			// naive location:
 			int delta = finiteLoop[i].stepLength;
 			x += delta;
-			loops = loops + utils::ttos(delta) + " ";
+			loops = loops + ttos(delta) + " ";
 				
 			// take care of bounces:
 			if (i>0 && delta*prevDeltaSign < 0) x += prevDeltaSign;
@@ -141,9 +141,9 @@ namespace Dmrg {
 			if (flag) {
 				// complain and die if we fell out:
 				s = s + "Loops so far: " + loops + "\n";
-				s =s + "x=" + utils::ttos(x) + " last delta=" +
-						utils::ttos(delta);
-				s =s + " sites=" + utils::ttos(totalSites);
+				s =s + "x=" + ttos(x) + " last delta=" +
+						ttos(delta);
+				s =s + " sites=" + ttos(totalSites);
 				throw std::runtime_error(s.c_str());
 			}
 		}
@@ -220,7 +220,9 @@ namespace Dmrg {
 		os<<"parameters.filename="<<parameters.filename<<"\n";
 		os<<"parameters.options="<<parameters.options<<"\n";
 		os<<"parameters.keptStatesInfinite="<<parameters.keptStatesInfinite<<"\n";
-		utils::vectorPrint(parameters.finiteLoop,"finiteLoop",os);
+		os<<"finiteLoop\n";
+		os<<parameters.finiteLoop;
+		//utils::vectorPrint(parameters.finiteLoop,"finiteLoop",os);
 		if (parameters.options.find("hasQuantumNumbers")!=std::string::npos) {
 			os<<"parameters.targetQuantumNumbers=";
 			for (size_t i=0;i<parameters.targetQuantumNumbers.size();i++) os<<parameters.targetQuantumNumbers[i]<<" ";

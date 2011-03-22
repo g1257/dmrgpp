@@ -84,8 +84,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef JMPAIRS_HEADER_H
 #define JMPAIRS_HEADER_H
 
-#include "Utils.h"
 #include <algorithm>
+#include "Utils.h"
 
 namespace Dmrg {
 
@@ -105,7 +105,7 @@ namespace Dmrg {
 				jmPairs_.clear();
 				indices_.clear();
 				for (size_t i=0;i<jmpairs.size();i++) {
-					int x = utils::isInVector(jmPairs_,jmpairs[i]);
+					int x = PsimagLite::isInVector(jmPairs_,jmpairs[i]);
 					if (x<0) {
 						jmPairs_.push_back(jmpairs[i]);
 						x=jmPairs_.size()-1;
@@ -118,7 +118,7 @@ namespace Dmrg {
 			//! indices_[alpha] = jm
 			void push(const PairType& jm,size_t alpha)
 			{
-				int x = utils::isInVector(jmPairs_,jm);
+				int x = PsimagLite::isInVector(jmPairs_,jm);
 
 				if (x<0) {
 					jmPairs_.push_back(jm);
@@ -194,7 +194,7 @@ namespace Dmrg {
 				std::vector<PairType> tmpVector(jmPairs_.size()-unusedPairs.size());
 				
 				for (size_t i=0;i<jmPairs_.size();i++) {
-					if (utils::isInVector(unusedPairs,i)>=0) continue;
+					if (PsimagLite::isInVector(unusedPairs,i)>=0) continue;
 					tmpVector[counter]=jmPairs_[i];
 					neworder[i]=counter;
 					counter++;

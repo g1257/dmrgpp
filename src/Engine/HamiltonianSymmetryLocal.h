@@ -82,8 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef HAM_SYMM_LOCAL_H
 #define HAM_SYMM_LOCAL_H
+#include "Sort.h" // in PsimagLite
 #include "BasisData.h"
-#include "Utils.h"
 
 namespace Dmrg {
 	template<typename RealType,typename SparseMatrixType>
@@ -144,7 +144,8 @@ namespace Dmrg {
 				// we sort the eigenvalues
 				// note: eigenvalues are not ordered because DensityMatrix is diagonalized in blocks
 				std::vector<size_t> perm(eigs.size());
-				utils::sort(eigs,perm);
+				Sort<std::vector<RealType> > sort;
+				sort.sort(eigs,perm);
 				std::vector<size_t> permInverse(perm.size());
 				for (size_t i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
 				
@@ -153,7 +154,7 @@ namespace Dmrg {
 				removedIndices.clear();
 				for (size_t i=0;i<target;i++) {
 					if (removedIndices.size()>=target) break;
-					if (utils::isInVector(removedIndices,perm[i])>=0) continue;
+					if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
 					removedIndices.push_back(perm[i]);
 					
 					
@@ -184,7 +185,7 @@ namespace Dmrg {
 			void save(IoOutputter& io) const
 			{
 				// don't print factors since they're the identity anywaysfactors_
-				std::string tmp = utils::ttos(factors_.rank());
+				std::string tmp = ttos(factors_.rank());
 				std::string s="#FACTORSSIZE="+tmp;
 				io.printline(s);
 			}

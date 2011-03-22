@@ -255,11 +255,11 @@ namespace Dmrg {
 			for (size_t i=0;i<reflectionPermutation_.size();i++) {
 				
 				size_t k = getReflectedState(i);
-				if (utils::isInVector(rvector,i)>=0) continue;
-				if (utils::isInVector(rvector,k)>=0) continue;
+				if (PsimagLite\:\:isInVector(rvector,i)>=0) continue;
+				if (PsimagLite\:\:isInVector(rvector,k)>=0) continue;
 				if (k==i) {
 					std::cerr<<"FFFFFFFFFFFFFF"<<k<<"\n";
-					if (utils::isInVector(selves,i)<0) selves.push_back(i);
+					if (PsimagLite\:\:isInVector(selves,i)<0) selves.push_back(i);
 					continue;
 				} 
 				rvector.push_back(k);

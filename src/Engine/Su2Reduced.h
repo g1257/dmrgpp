@@ -74,6 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SU2_REDUCED_HEADER_H
 #define SU2_REDUCED_HEADER_H
 
+#include <map>
 #include "Su2SymmetryGlobals.h"
 
 /** \ingroup DMRG */
@@ -121,7 +122,7 @@ namespace Dmrg {
 				size_t counter=0;
 				for (size_t i=0;i<lrs.left().numberOfOperators();i++) {
 					size_t j = lrs.left().getReducedOperatorByIndex(i).jm.first;
-					int x = utils::isInVector(jvalues,j);
+					int x = PsimagLite::isInVector(jvalues,j);
 					if (x<0) jvalues.push_back(j);
 					counter += (j+1);
 				}
@@ -296,7 +297,7 @@ namespace Dmrg {
 								if (sum!=static_cast<SparseElementType>(0)) {
 									counter++;
 									PairType jj(PairType(lrs_.left().jVals(i1),lrs_.right().jVals(i2)));
-									int x3=utils::isInVector(jsEffective,jj);
+									int x3=PsimagLite::isInVector(jsEffective,jj);
 									if (x3<0) jsEffective.push_back(jj);
 								}
 								lfactor(lrs_.left().jVals(i1)+lrs_.right().jVals(i2)*lrs_.left().jMax(),
@@ -420,7 +421,8 @@ namespace Dmrg {
 			{
 				if (flavorsOldInverse_.size()==0) return;
 				std::vector<size_t> perm(flavorsOldInverse_.size());
-				utils::sort(flavorsOldInverse_,perm);
+				Sort<std::vector<size_t> > sort;
+				sort.sort(flavorsOldInverse_,perm);
 				std::vector<PairType> r(reducedEffective_.size());
 				PsimagLite::Matrix<size_t> reducedInverse(reducedInverse_.n_row(),reducedInverse_.n_col());
 

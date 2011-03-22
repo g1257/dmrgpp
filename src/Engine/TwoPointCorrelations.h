@@ -138,7 +138,7 @@ namespace Dmrg {
 				concurrency_.loopCreate(cols);
 				std::vector<FieldType> v(cols);
 				size_t j = i;
-				//ProfilingType profile("correlations loop i=" + utils::ttos(i));
+				//ProfilingType profile("correlations loop i=" + ttos(i));
 				while(concurrency_.loop(j)) {
 					v[j]  = calcCorrelation(i,j,O1,O2,fermionicSign);
 					if (verbose_) {

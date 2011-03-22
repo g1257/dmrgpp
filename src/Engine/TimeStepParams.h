@@ -93,11 +93,15 @@ namespace Dmrg {
 			typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
 			typedef typename ModelType::RealType RealType;
 
+			static size_t const PRODUCT = TargetParamsCommonType::PRODUCT;
+
 			template<typename IoInputter>
 			TimeStepParams(IoInputter& io,const ModelType& model)
-				: TargetParamsCommonType(io,model),tau(0),timeSteps(0),advanceEach(0)
+				: TargetParamsCommonType(io,model),tau(0),timeSteps(0),
+				  advanceEach(0)
 			{
 				io.rewind();
+				this->concatenation = PRODUCT;
 				io.readline(tau,"TSPTau=");
 				io.readline(timeSteps,"TSPTimeSteps=");
 				io.readline(advanceEach,"TSPAdvanceEach=");

@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERSMODELFEAS_H
 #define PARAMETERSMODELFEAS_H
-#include "Utils.h"
 
 namespace Dmrg {
 	//! FeAs Model Parameters
@@ -114,8 +113,12 @@ namespace Dmrg {
 	std::ostream& operator<<(std::ostream &os,const ParametersModelFeAs<FieldType>& parameters)
 	{
 		//os<<"parameters.density="<<parameters.density<<"\n";
-		utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
-		utils::vectorPrint(parameters.potentialV,"potentialV",os);
+		os<<"hubbardU\n";
+		os<<parameters.hubbardU;
+		//utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
+		os<<"potentialV\n";
+		os<<parameters.potentialV;
+		//utils::vectorPrint(parameters.potentialV,"potentialV",os);
 		return os;
 	}
 } // namespace Dmrg

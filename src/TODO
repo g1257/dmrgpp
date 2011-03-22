@@ -7,8 +7,6 @@ observer: fails if lattice has less than 6 sites.
 
 observer: backwards move give wrong results for fermionic ops.
 
-observer: backwards move does not compute edges
-
 CLEANUPS:
 
 WFT needs to be disabled if lattice has less than 6 sites.
@@ -29,7 +27,7 @@ TestSuite: need to eliminate hashtable.txt usage
 
 observer need full spin correlations S_i S_j, where S is the full spin
 
-DDMRG needs debugging,--> actually it needs rewriting :-(
+DDMRG needs debugging,--> actually it needs rewriting :-( <-- now under testing
 
 FourPoint needs optimization/parallelization
 

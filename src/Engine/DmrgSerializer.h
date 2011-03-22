@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_SERIAL_H
 #define DMRG_SERIAL_H
 
-#include "Utils.h"
 #include "BLAS.h"
 #include "IoSimple.h"
 #include "FermionSign.h"
@@ -149,17 +148,17 @@ namespace Dmrg {
 				// save wavefunction
 				std::string label = "#WAVEFUNCTION_sites=";
 				for (size_t i=0;i<lrs_.super().block().size();i++) {
-					label += utils::ttos(lrs_.super().block()[i])+",";
+					label += ttos(lrs_.super().block()[i])+",";
 				}
 				//SparseVector<typename TargettingType::TargetVectorType::value_type> psiSparse(target.gs());
 				wavefunction_.save(io,label);
 			
 				label = "#TRANSFORM_sites=";
 				for (size_t i=0;i<lrs_.left().block().size();i++) {
-					label += utils::ttos(lrs_.left().block()[i])+",";
+					label += ttos(lrs_.left().block()[i])+",";
 				}
 				io.printMatrix(transform_,label);
-				std::string s = "#DIRECTION="+utils::ttos(direction_);
+				std::string s = "#DIRECTION="+ttos(direction_);
 				io.printline(s);
 			}
 			

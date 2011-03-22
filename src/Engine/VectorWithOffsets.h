@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef VECTOR_WITH_OFFSETS_H
 #define VECTOR_WITH_OFFSETS_H
-#include "Utils.h"
+#include "Complex.h"
 #include "ProgressIndicator.h"
 
 // FIXME: a more generic solution is needed instead of tying the non-zero structure to basis
@@ -281,14 +281,14 @@ namespace Dmrg {
 			void save(IoOutputter& io,const std::string& label) const
 			{
 				io.printline(label);
-				std::string s="#size="+utils::ttos(size_);
+				std::string s="#size="+ttos(size_);
 				io.printline(s);
 				io.printVector(offsets_,"#offsets");
-				s = "#nonzero="+utils::ttos(nonzeroSectors_.size());
+				s = "#nonzero="+ttos(nonzeroSectors_.size());
 				io.printline(s);
 				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
 					size_t j =  nonzeroSectors_[jj];
-					s="#sector="+utils::ttos(j);
+					s="#sector="+ttos(j);
 					io.printline(s);
 					io.printVector(data_[j],s);
 				}
@@ -320,10 +320,16 @@ namespace Dmrg {
 			
 			VectorWithOffsets<FieldType> operator+=(const VectorWithOffsets<FieldType>& v)
 			{
-				
+				if (nonzeroSectors_.size()==0) {
+					size_ = v.size_;
+					data_ = v.data_;
+					offsets_ = v.offsets_;
+					nonzeroSectors_ = v.nonzeroSectors_;
+					return *this;
+				}
 				for (size_t ii=0;ii<nonzeroSectors_.size();ii++) {
 					size_t i = nonzeroSectors_[ii];
-					data_[i] += v.data_[ii];
+					data_[i] += v.data_[i];
 				}
 				return *this;
 			}
@@ -430,7 +436,7 @@ namespace std {
 		FieldType sum=0;
 		for (size_t ii=0;ii<v.nonzeroSectors_.size();ii++) {
 			size_t i = v.nonzeroSectors_[ii];
-			sum += std::norm(v.data_[i]);
+			sum += PsimagLite::norm(v.data_[i]);
 		}
 		return sum;
 	}
@@ -441,7 +447,7 @@ namespace std {
 		FieldType sum=0;
 		for (size_t ii=0;ii<v.nonzeroSectors_.size();ii++) {
 			size_t i = v.nonzeroSectors_[ii];
-			sum += std::norm(v.data_[i]);
+			sum += PsimagLite::norm(v.data_[i]);
 		}
 		return sum;
 	}
@@ -509,6 +515,25 @@ namespace Dmrg {
 		return sum;
 	}
 	
+	template<typename FieldType>
+	inline FieldType operator*(
+				const Dmrg::VectorWithOffsets<FieldType>& v1,
+				const Dmrg::VectorWithOffsets<FieldType>& v2)
+		{
+			FieldType sum = 0;
+			for (size_t ii=0;ii<v1.sectors();ii++) {
+				size_t i = v1.sector(ii);
+				for (size_t jj=0;jj<v1.sectors();jj++) {
+					size_t j = v2.sector(jj);
+					if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+					size_t offset = v1.offset(i);
+					for (size_t k=0;k<v1.effectiveSize(i);k++)
+						sum+= v1[k+offset] * std::conj(v2[k+offset]);
+				}
+			}
+			return sum;
+		}
+
 	template<typename FieldType,typename FieldType2>
 	inline VectorWithOffsets<FieldType2> operator*(const FieldType& value,const VectorWithOffsets<FieldType2>& v)
 	{

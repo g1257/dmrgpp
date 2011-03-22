@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -81,64 +81,67 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef FEMION_SIGN_H
 #define FEMION_SIGN_H
 
-#include "Utils.h"
+#include "PackIndices.h"
 
 namespace Dmrg {
-	
+
 	class FermionSign {
-		public:
-			FermionSign(const std::vector<size_t>& electrons) 
-				: signs_(electrons.size())
-			{
-				init(electrons);
+		typedef PsimagLite::PackIndices PackIndicesType;
+
+	public:
+		FermionSign(const std::vector<size_t>& electrons)
+		: signs_(electrons.size())
+		{
+			init(electrons);
+		}
+
+		template<typename SomeBasisType>
+		FermionSign(const SomeBasisType& basis,const std::vector<size_t>& electrons)
+		: signs_(basis.size())
+		  {
+
+			const std::vector<size_t>& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
+			if (basisElectrons.size()!=basis.permutationInverse().size()) throw std::runtime_error("Problem\n");
+			size_t nx = basisElectrons.size()/electrons.size();
+			std::vector<size_t> el(basisElectrons.size());
+			PackIndicesType pack(nx);
+			for (size_t x=0;x<basisElectrons.size();x++) {
+				size_t x0,x1;
+				pack.unpack(x0,x1,basis.permutation(x));
+				int nx0 = basisElectrons[x]-electrons[x1];
+				if (nx0<0) throw std::runtime_error("FermionSign::ctor(...)\n");
+				el[x] = nx0;
 			}
-			
-			template<typename SomeBasisType>
-			FermionSign(const SomeBasisType& basis,const std::vector<size_t>& electrons)
-				: signs_(basis.size())
-			{
-				
-				const std::vector<size_t>& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
-				if (basisElectrons.size()!=basis.permutationInverse().size()) throw std::runtime_error("Problem\n");
-				size_t nx = basisElectrons.size()/electrons.size();
-				std::vector<size_t> el(basisElectrons.size());
-				for (size_t x=0;x<basisElectrons.size();x++) {
-					size_t x0,x1;
-					utils::getCoordinates(x0,x1,basis.permutation(x),nx);
-					int nx0 = basisElectrons[x]-electrons[x1];
-					if (nx0<0) throw std::runtime_error("FermionSign::ctor(...)\n");
-					el[x] = nx0;
-				}
-				init(el);
-			}
-			
-			template<typename IoInputter>
-			FermionSign(IoInputter& io,bool bogus = false)
-			{
-				if (bogus) return;
-				io.read(signs_,"#FERMIONICSIGN");
-			}
-			
-			int operator()(size_t i,int f) const
-			{
-				return (signs_[i]) ? f : 1;
-			}
-			
-			template<typename IoOutputter>
-			void save(IoOutputter& io) const
-			{
-				io.printVector(signs_,"#FERMIONICSIGN");
-			}
-			
-		private:
-			
-			void init(const std::vector<size_t>& electrons)
-			{
-				for (size_t i=0;i<signs_.size();i++)
-					signs_[i] = (electrons[i] & 1);
-			}
-			
-			std::vector<bool> signs_;
+			init(el);
+		  }
+
+		template<typename IoInputter>
+		FermionSign(IoInputter& io,bool bogus = false)
+		{
+			if (bogus) return;
+			io.read(signs_,"#FERMIONICSIGN");
+		}
+
+		int operator()(size_t i,int f) const
+		{
+			return (signs_[i]) ? f : 1;
+		}
+
+		template<typename IoOutputter>
+		void save(IoOutputter& io) const
+		{
+			io.printVector(signs_,"#FERMIONICSIGN");
+		}
+
+	private:
+
+		void init(const std::vector<size_t>& electrons)
+		{
+			for (size_t i=0;i<signs_.size();i++)
+				signs_[i] = (electrons[i] & 1);
+		}
+
+		std::vector<bool> signs_;
 	}; // class FermionSign
 } // namespace Dmrg 
 

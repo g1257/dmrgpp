@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef WFT_FACTORY_H
 #define WFT_FACTORY_H
- 
 #include "Utils.h"
 #include "ProgressIndicator.h"
 #include "WaveFunctionTransfLocal.h"
@@ -431,11 +430,11 @@ namespace Dmrg {
 					"WFT::save(...) called but wft is disabled\n");
 
 			typename IoType::Out io(WFT_STRING + filenameOut_,0);
-			std::string s="isEnabled="+utils::ttos(isEnabled_);
+			std::string s="isEnabled="+ttos(isEnabled_);
 			io.printline(s);
-			s="stage="+utils::ttos(stage_);
+			s="stage="+ttos(stage_);
 			io.printline(s);
-			s="counter="+utils::ttos(counter_);
+			s="counter="+ttos(counter_);
 			io.printline(s);
 			io.printline("dmrgWaveStruct");
 			dmrgWaveStruct_.save(io);

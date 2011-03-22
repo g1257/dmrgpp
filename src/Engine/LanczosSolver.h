@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef LANCZOSSOLVER_HEADER_H
 #define LANCZOSSOLVER_HEADER_H
- 
 #include "Utils.h"
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
@@ -101,7 +100,7 @@ namespace Dmrg {
 		
 	public:
 		typedef MatrixType LanczosMatrixType;
-		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
+		typedef PsimagLite::TridiagonalMatrix<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 		typedef typename PsimagLite::Matrix<VectorElementType> DenseMatrixType;
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
@@ -118,15 +117,13 @@ namespace Dmrg {
 
 		void computeGroundState(RealType& gsEnergy,VectorType& z)
 		{
-
-
 			size_t n =mat_.rank();
 			RealType atmp=0.0;
 			RealType tmp;
 			std::vector<RealType> y(n);
 
 			for (size_t i=0;i<n;i++) {
-				utils::myRandomT(tmp);
+				myRandomT(tmp);
 				y[i]=tmp;
 				atmp += utils::myProductT(y[i],y[i]);
 			}
@@ -310,7 +307,7 @@ namespace Dmrg {
 
 		void info(RealType energyTmp,const VectorType& x,std::ostream& os)
 		{
-			RealType norma=std::norm(x);
+			RealType norma=PsimagLite::norm(x);
 			size_t& iter = steps_;
 			
 			if (norma<1e-5 || norma>100) throw std::runtime_error("Norm\n");
@@ -485,8 +482,6 @@ namespace Dmrg {
 			}
 			return true;
 		}
-
-
 	}; // class LanczosSolver
 } // namespace Dmrg
 

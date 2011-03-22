@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_PRODUCT_HubbardOneBand_H
 #define LINK_PRODUCT_HubbardOneBand_H
 
-#include "Utils.h"
 
 namespace Dmrg {
 

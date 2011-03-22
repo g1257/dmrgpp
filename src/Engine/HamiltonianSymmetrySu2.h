@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HAM_SYMM_SU2_H
 #define HAM_SYMM_SU2_H
 
+#include "Sort.h" // in PsimagLite
 #include "JmPairs.h"
 #include "VerySparseMatrix.h"
 #include "JmSubspace.h"
@@ -115,11 +116,19 @@ namespace Dmrg {
 			{
 				jmValues_=basisData.jmValues;
 				flavors_=basisData.flavors;
-				flavorsMax_=flavors_[utils::vectorMax<size_t,std::greater<size_t> >(flavors_,0)];
-				size_t electronsMax1=basisData.electronsUp[utils::vectorMax<size_t,std::greater<size_t>
-						>(basisData.electronsUp,0)];
-				size_t electronsMax2=basisData.electronsDown[utils::vectorMax<size_t,std::greater<size_t>
-						>(basisData.electronsDown,0)];
+				flavorsMax_= *(std::max_element(
+						flavors_.begin(),flavors_.end()));
+					//flavors_[utils::vectorMax<size_t,std::greater<size_t> >(flavors_,0)];
+
+				size_t electronsMax1 = *(std::max_element(
+						basisData.electronsUp.begin(),basisData.electronsUp.end()));
+					// basisData.electronsUp[utils::vectorMax<size_t,std::greater<size_t>
+					//	>(basisData.electronsUp,0)];
+
+				size_t electronsMax2 = *(std::max_element(
+						basisData.electronsDown.begin(),basisData.electronsDown.end()));
+					// basisData.electronsDown[utils::vectorMax<size_t,std::greater<size_t>
+					//	>(basisData.electronsDown,0)];
 				electronsMax_=electronsMax1+electronsMax2;
 				jMax_=0;
 				jmValues_.maxFirst<std::greater<size_t> >(jMax_);
@@ -205,7 +214,9 @@ namespace Dmrg {
 				calcReducedBasis();
 				normalizeFlavors();
 				setElectrons(electrons,quantumNumbers);
-				electronsMax_=electrons[utils::vectorMax<size_t,std::greater<size_t> >(electrons,0)];
+				electronsMax_ = *(std::max_element(
+						electrons.begin(),electrons.end()));
+		//				electrons[utils::vectorMax<size_t,std::greater<size_t> >(electrons,0)];
 			}
 
 			size_t pseudoEffectiveNumber(size_t nelectrons,size_t jtilde) const
@@ -242,7 +253,8 @@ namespace Dmrg {
 				// we sort the eigenvalues
 				// note: eigenvalues are not ordered because DensityMatrix is diagonalized in blocks
 				std::vector<size_t> perm(eigs.size());
-				utils::sort(eigs,perm);
+				Sort<std::vector<RealType> > sort;
+				sort.sort(eigs,perm);
 				
 				if (eigs.size()<=kept) return;
 				size_t target = eigs.size()-kept;
@@ -271,10 +283,14 @@ namespace Dmrg {
 
 			void truncate(std::vector<size_t> const &removedIndices,const std::vector<size_t>& electrons)
 			{
-				electronsMax_=electrons[utils::vectorMax<size_t,std::greater<size_t> >(electrons,0)];
+				electronsMax_= * (std::max_element(
+						electrons.begin(),electrons.end()));
+				//electrons[utils::vectorMax<size_t,std::greater<size_t> >(electrons,0)];
 
 				utils::truncateVector(flavors_,removedIndices);
-				flavorsMax_=flavors_[utils::vectorMax<size_t,std::greater<size_t> >(flavors_,0)];
+				flavorsMax_=* (std::max_element(
+						flavors_.begin(),flavors_.end()));
+				//flavors_[utils::vectorMax<size_t,std::greater<size_t> >(flavors_,0)];
 
 				jmValues_.truncate(removedIndices);
 				jMax_=0;
@@ -302,11 +318,11 @@ namespace Dmrg {
 			{
 				jmValues_.save(io);
 				io.printVector(flavors_,"#su2flavors");
-				std::string s="#su2FlavorsMax=" + utils::ttos(flavorsMax_)+"\n";
+				std::string s="#su2FlavorsMax=" + ttos(flavorsMax_)+"\n";
 				io.print(s); 
-				s="#su2ElectronsMax="+utils::ttos(electronsMax_)+"\n";
+				s="#su2ElectronsMax="+ttos(electronsMax_)+"\n";
 				io.print(s); 
-				s="#su2JMax="+utils::ttos(jMax_)+"\n";
+				s="#su2JMax="+ttos(jMax_)+"\n";
 				io.print(s);
 				io.printVector(statesReduced_,"#su2StatesReduced");
 				io.printVector(jvals_,"#su2Jvals");
@@ -386,7 +402,8 @@ namespace Dmrg {
 			{
 				flavorsOld_=flavors_;
 				std::vector<size_t> perm(flavors_.size());
-				utils::sort(flavors_,perm);
+				Sort<std::vector<size_t> > sort;
+				sort.sort(flavors_,perm);
 
 				size_t counter=0;
 				size_t flavorSaved=flavors_[0];
@@ -452,7 +469,7 @@ namespace Dmrg {
 						PairType jm = jmSubspaces_[i].getJmValue();
 						std::cerr<<" pseudo="<<pseudoEffectiveNumber(nelectrons,jm.first);
 						
-						std::cerr<<" jm="<<jm;
+						std::cerr<<" jm=("<<jm.first<<","<<jm.second<<")\n";
 						std::cerr<<" heavy="<<jmSubspaces_[i].heavy()<<"\n";
 						std::cerr<<"--------------------------------------------\n";
 					}
@@ -498,7 +515,7 @@ namespace Dmrg {
 				std::pair<PairType,size_t> triplet;
 				triplet.first=jm;
 				triplet.second=nelectrons;
-				int x = utils::isInVector(jmSubspaces_,triplet);
+				int x = PsimagLite::isInVector(jmSubspaces_,triplet);
 				if (x<0) { // add new jmSubspace
 					JmSubspace<RealType,VerySparseMatrixType,ThisType> jmSubspace(jm,index,jm1,jm2,nelectrons,heavy);
 					jmSubspaces_.push_back(jmSubspace);
@@ -514,7 +531,7 @@ namespace Dmrg {
 				for (size_t i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
 
 				for (size_t i=0;i<target;i++) {
-					if (utils::isInVector(removedIndices,perm[i])>=0) continue;
+					if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
 					removedIndices.push_back(perm[i]);
 				}
 
@@ -522,7 +539,7 @@ namespace Dmrg {
 					for (size_t j=0;j<eigs.size();j++) {
 						
 						if (flavors_[j]==flavors_[perm[i]] && jmValues_[j].first==jmValues_[perm[i]].first) {
-							int x = utils::isInVector(removedIndices,j);
+							int x = PsimagLite::isInVector(removedIndices,j);
 							if (x<0) {
 								std::vector<size_t>::iterator p1 =
 										find(removedIndices.begin(),removedIndices.end(),perm[i]);
@@ -532,8 +549,12 @@ namespace Dmrg {
 									std::cerr<<"ind="<<perm[i]<<" j="<<permInverse[j];
 									std::cerr<<" e[ind]="<<eigs[i];
 									std::cerr<<" e[j]="<<eigs[permInverse[j]]<<"\n";
-									std::cerr<<"flavor="<<flavors_[j]<<" jm="<<jmValues_[j];
-									std::cerr<<" jm[ind]="<<jmValues_[perm[i]]<<"\n";
+									std::cerr<<"flavor="<<flavors_[j];
+									std::cerr<<" jm=("<<jmValues_[j].first<<",";
+									std::cerr<<jmValues_[j].second<<") ";
+									std::cerr<<" jm[ind]=(";
+									std::cerr<<jmValues_[perm[i]].first<<",";
+									std::cerr<<jmValues_[perm[i]].second<<")\n";
 								}
 								break;
 							}
@@ -550,21 +571,25 @@ namespace Dmrg {
 
 				for (size_t i=0;i<target;i++) {
 					if (removedIndices.size()>=target) break;
-                                        if (utils::isInVector(removedIndices,perm[i])>=0) continue;
-                                        removedIndices.push_back(perm[i]);
+					if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
+                    removedIndices.push_back(perm[i]);
 
 					for (size_t j=0;j<eigs.size();j++) {
 
 						if (flavors_[j]==flavors_[perm[i]] && jmValues_[j].first==jmValues_[perm[i]].first) {
-							int x = utils::isInVector(removedIndices,j);
+							int x = PsimagLite::isInVector(removedIndices,j);
 							if (x<0) {
 								removedIndices.push_back(j);
 								if (fabs(eigs[permInverse[j]]-eigs[i])>1e-6) {
 									std::cerr<<"ind="<<perm[i]<<" j="<<permInverse[j];
 									std::cerr<<" e[ind]="<<eigs[i];
 									std::cerr<<" e[j]="<<eigs[permInverse[j]]<<"\n";
-									std::cerr<<"flavor="<<flavors_[j]<<" jm="<<jmValues_[j];
-									std::cerr<<" jm[ind]="<<jmValues_[perm[i]]<<"\n";
+									std::cerr<<"flavor="<<flavors_[j]<<" jm=";
+									std::cerr<<jmValues_[j].first<<" ";
+									std::cerr<<jmValues_[j].second<<" ";
+									std::cerr<<" jm[ind]=";
+									std::cerr<<jmValues_[perm[i]].first<<" ";
+									std::cerr<<jmValues_[perm[i]].second<<"\n";
 								}
 							}
 						}
@@ -580,7 +605,7 @@ namespace Dmrg {
 					PairType jm1 = jmValues_[i1];
 					if (jm1.first!=jm1.second) continue;
 					statesReduced_.push_back(i1);
-					int x = utils::isInVector(jvals_,jm1.first);
+					int x = PsimagLite::isInVector(jvals_,jm1.first);
 					if (x<0) jvals_.push_back(jm1.first);
 				}
 			}

@@ -26,7 +26,7 @@ Engine/DiskStack.h
 [Lanczos]
 --- Engine/LanczosSolver.h 
 (Needs ProgramGlobals as templated type)
-Engine/TridiagonalMatrix.h
+*** Engine/TridiagonalMatrix.h
 
 [Profiling]
 *** Profiling.h

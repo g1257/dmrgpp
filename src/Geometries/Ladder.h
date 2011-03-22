@@ -81,6 +81,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LADDER_H
 #define LADDER_H
 
+#include "Utils.h"
+
 namespace Dmrg {
 	
 	class Ladder  {

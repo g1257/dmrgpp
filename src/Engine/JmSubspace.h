@@ -84,7 +84,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef JM_SUBSPACE_H
 #define JM_SUBSPACE_H
 
-#include "Utils.h"
+#include "Sort.h" // in PsimagLite
+#include "PackIndices.h" // in PsimagLite
 #include "Su2SymmetryGlobals.h"
 
 namespace Dmrg {
@@ -94,6 +95,8 @@ namespace Dmrg {
 			typedef std::pair<PairType,PairType> TwoPairsType;
 			typedef Su2SymmetryGlobals<FieldType> Su2SymmetryGlobalsType;
 			typedef typename Su2SymmetryGlobalsType::ClebschGordanType ClebschGordanType;
+			typedef PsimagLite::PackIndices PackIndicesType;
+
 		public:
 			typedef std::pair<PairType,TwoPairsType> FlavorType;
 
@@ -135,7 +138,8 @@ namespace Dmrg {
 			{
 				flavors_.clear();
 				std::vector<size_t> perm(indices_.size());
-				utils::sort(flavorIndices_,perm);
+				Sort<std::vector<size_t> > sort;
+				sort.sort(flavorIndices_,perm);
 				size_t flavorSaved=flavorIndices_[0];
 				flavors_.push_back(flavorIndices_[0]);
 				size_t counter=0;
@@ -207,7 +211,7 @@ namespace Dmrg {
 			size_t findFreeRow(size_t counter,size_t total)
 			{
 				for (size_t i=counter;i<total;i++) {
-					int x=utils::isInVector(indices_,i);
+					int x=PsimagLite::isInVector(indices_,i);
 					if (x<0) return i;
 				}
 				throw std::runtime_error("findfreerow: no free rows\n");
@@ -242,7 +246,8 @@ namespace Dmrg {
 			void setFlavorsIndex(size_t i,const PairType& jm1,const PairType& jm2)
 			{
 				size_t alpha=0,beta=0;
-				utils::getCoordinates(alpha,beta,i,symm1_->size());
+				PackIndicesType pack(symm1_->size());
+				pack.unpack(alpha,beta,i);
 				
 				size_t ne1 = (*ne1_)[alpha];
 				size_t ne2 = (*ne2_)[beta];

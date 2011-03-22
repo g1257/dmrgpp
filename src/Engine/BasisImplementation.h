@@ -82,6 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef BASIS_IMPL_H
 #define BASIS_IMPL_H
 
+#include "Utils.h"
+#include "Sort.h" // in PsimagLite
 #include "HamiltonianSymmetryLocal.h"
 #include "HamiltonianSymmetrySu2.h"
 #include "ProgressIndicator.h"
@@ -291,7 +293,8 @@ namespace Dmrg {
 
 			if (removedIndices.size()>0) {
 				std::vector<size_t> perm(removedIndices.size());
-				utils::sort(removedIndices,perm);
+				Sort<std::vector<size_t> > sort;
+				sort.sort(removedIndices,perm);
 				std::ostringstream msg;
 				msg<<"Truncating transform...";
 				utils::truncate(ftransform,removedIndices,false);
@@ -460,7 +463,7 @@ namespace Dmrg {
 		template<typename IoOutputter>
 		void saveInternal(IoOutputter& io) const
 		{
-			std::string s="#useSu2Symmetry="+utils::ttos(useSu2Symmetry_);
+			std::string s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
 			io.printline(s);
 			io.printVector(block_,"#BLOCK");
 			io.printVector(quantumNumbers_,"#QN");
@@ -476,7 +479,8 @@ namespace Dmrg {
 		RealType calcError(std::vector<RealType> const &eigs,std::vector<size_t> const &removedIndices)
 		{
 			RealType sum=static_cast<RealType>(0.0);
-			for (size_t i=0;i<eigs.size();i++) if (utils::isInVector(removedIndices,i)<0) sum+=eigs[i];
+			for (size_t i=0;i<eigs.size();i++)
+				if (PsimagLite::isInVector(removedIndices,i)<0) sum+=eigs[i];
 			return 1.0-sum;
 		}
 
@@ -502,7 +506,8 @@ namespace Dmrg {
 					for (size_t i=0;i<permutationVector_.size();i++) 
 						permutationVector_[i]=i;
 				} else 	{
-					utils::sort(quantumNumbers_,permutationVector_);
+					Sort<std::vector<size_t> > sort;
+					sort.sort(quantumNumbers_,permutationVector_);
 				}
 			}
 			
@@ -537,16 +542,26 @@ namespace Dmrg {
 	{
 		os<<"dmrgTransformed="<<x.dmrgTransformed_<<"\n";
 		os<<"name="<<x.name_<<"\n";
-		utils::vectorPrint(x.quantumNumbers_,"quantumNumbers",os);
+		os<<"quantumNumbers\n";
+		os<<x.quantumNumbers_;
+		//utils::vectorPrint(x.quantumNumbers_,"quantumNumbers",os);
 		//std::vector<size_t> quantumNumbersOld_;
-		utils::vectorPrint(x.electrons_,"electrons",os);
-		utils::vectorPrint(x.partition_,"partition",os);
+		os<<"electrons\n";
+		os<<x.electrons_;
+		//utils::vectorPrint(x.electrons_,"electrons",os);
+		os<<"partition\n";
+		os<<x.partition_;
+		//utils::vectorPrint(x.partition_,"partition",os);
 		//std::vector<size_t> partitionOld_;
-		utils::vectorPrint(x.permutationVector_,"permutation",os);
+		os<<"permutation\n";
+		os<<x.permutationVector_;
+		//utils::vectorPrint(x.permutationVector_,"permutation",os);
 		//std::vector<size_t> permInverse_;
 		//HamiltonianSymmetryLocalType symmLocal_;
 		//HamiltonianSymmetrySu2Type symmSu2_;
-		utils::vectorPrint(x.block_,"block",os);
+		os<<"block\n";
+		os<<x.block_;
+		//utils::vectorPrint(x.block_,"block",os);
 		//for (size_t i=0;i<x.size();i++) 
 		//	os<<"i="<<i<<" jm="<<x.jmValue(i)<<" f="<<x.getFlavor(i)<<" e="<<x.getNe(i)<<"\n";
 		return os;

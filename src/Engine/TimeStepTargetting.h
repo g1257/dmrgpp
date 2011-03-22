@@ -127,7 +127,8 @@ namespace Dmrg {
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
 
-
+			static size_t const PRODUCT = TargettingParamsType::PRODUCT;
+			static size_t const SUM = TargettingParamsType::SUM;
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
 
 			TimeStepTargetting(
@@ -217,10 +218,10 @@ namespace Dmrg {
 				return targetVectors_[i];
 			}
 
-	const LeftRightSuperType& leftRightSuper() const
-	{
-		return lrs_;
-	}
+			const LeftRightSuperType& leftRightSuper() const
+			{
+				return lrs_;
+			}
 
 			void evolve(RealType Eg,size_t direction,const BlockType& block,
 				size_t loopNumber)
@@ -228,6 +229,7 @@ namespace Dmrg {
 				size_t count =0;
 				VectorWithOffsetType phiOld = psi_;
 				VectorWithOffsetType phiNew;
+				VectorWithOffsetType vectorSum;
 				size_t max = tstStruct_.sites.size();
 				
 				if (noStageIs(DISABLED)) max = 1;
@@ -236,8 +238,13 @@ namespace Dmrg {
 				// in turn to the g.s.
 				for (size_t i=0;i<max;i++) {
 					count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber,max-1);
-					phiOld = phiNew;
+					if (tstStruct_.concatenation==PRODUCT) {
+						phiOld = phiNew;
+					} else {
+						vectorSum += phiNew;
+					}
 				}
+				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 				
 				if (count==0) {
 					// always print to keep observer driver in sync
@@ -283,7 +290,7 @@ namespace Dmrg {
 			size_t evolve(
 					size_t i,
 					VectorWithOffsetType& phiNew,
-					VectorWithOffsetType& phiOld,
+					const VectorWithOffsetType& phiOld,
 					RealType Eg,
 					size_t direction,
 					const BlockType& block,
@@ -369,7 +376,7 @@ namespace Dmrg {
 				test(psi_,psi_,direction,"<PSI|A|PSI>",site);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
-					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
+					std::string s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
 					test(targetVectors_[j],targetVectors_[j],direction,s,site);
 				}
 				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
@@ -380,9 +387,9 @@ namespace Dmrg {
 				if (i==0) return;
 				for (size_t j=0;j<i;j++) {
 					if (stage_[j] == DISABLED) {
-						std::string s ="TST:: Seeing tst site "+utils::ttos(tstStruct_.sites[i]);
+						std::string s ="TST:: Seeing tst site "+ttos(tstStruct_.sites[i]);
 						s =s + " before having seen";
-						s = s + " site "+utils::ttos(j);
+						s = s + " site "+ttos(j);
 						s = s +". Please order your tst sites in order of appearance.\n";
 						throw std::runtime_error(s);
 					}
@@ -424,7 +431,7 @@ namespace Dmrg {
 
 
 			void computePhi(size_t i,VectorWithOffsetType& phiNew,
-					VectorWithOffsetType& phiOld,size_t systemOrEnviron)
+					const VectorWithOffsetType& phiOld,size_t systemOrEnviron)
 			{
 				size_t indexAdvance = times_.size()-1;
 				size_t indexNoAdvance = 0;
@@ -662,7 +669,7 @@ namespace Dmrg {
 //				io_.printVector(times_,label);
 //				label = "weights";
 //				io_.printVector(weight_,label);
-//				std::string s = "GsWeight="+utils::ttos(gsWeight_);
+//				std::string s = "GsWeight="+ttos(gsWeight_);
 //				io_.printline(s);
 //			}
 

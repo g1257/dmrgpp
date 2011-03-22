@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CHECKPOINT_H
 
 #include <stack>
-#include "Utils.h"
 #include "DiskStack.h"
 #include "ProgressIndicator.h"
 

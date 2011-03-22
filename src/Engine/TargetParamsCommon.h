@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGET_PARAMS_COMMON_H
 #define TARGET_PARAMS_COMMON_H
 
-#include "Utils.h"
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
@@ -96,9 +95,12 @@ namespace Dmrg {
 			typedef typename SparseMatrixType::value_type ComplexOrReal;
 			typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
+			enum {PRODUCT,SUM};
+
 			template<typename IoInputter>
 			TargetParamsCommon(IoInputter& io,const ModelType& model)
-				: sites(0),startingLoops(0),model_(model)
+				: sites(0),startingLoops(0),concatenation(PRODUCT),
+				  model_(model)
 			{
 
 				//io.readline(filename,"TSPFilename="); // filename
@@ -146,8 +148,11 @@ namespace Dmrg {
 			//std::string filename;
 			std::vector<size_t> sites;
 			std::vector<size_t> startingLoops;
+			size_t concatenation;
 			std::vector<OperatorType> aOperators;
 			std::vector<size_t> electrons;
+			//! Concatenation specifies what to do with
+			//! operators at different sites, add them or multiply them
 		
 		private:
 			void setCookedData(size_t i,const std::string& s,const std::vector<size_t>& v)
