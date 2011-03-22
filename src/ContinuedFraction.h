@@ -17,10 +17,19 @@ Please see full open source license included in file LICENSE.
 *********************************************************
 
 */
+/** \ingroup DMRG */
+/*@{*/
 
-#ifndef CONTINUED_FRACTION_H 
+/*! \file ContinuedFraction.h
+ *
+ * A continued fraction as explained in, e.g.,
+ * E. Dagotto, Rev. Mod. Phys., 66, 763, (2004).
+ */
+
+#ifndef CONTINUED_FRACTION_H
 #define CONTINUED_FRACTION_H
 #include <iostream>
+#include "Complex.h"
 #include "TypeToString.h"
 #include "ProgressIndicator.h"
 #include "Random48.h"
@@ -28,10 +37,10 @@ Please see full open source license included in file LICENSE.
 namespace PsimagLite {
 	template<
 		typename RealType,
-    	typename TridiagonalMatrixType>
+    	typename TridiagonalMatrixType_>
 	class ContinuedFraction  {
 	public:
-		
+		typedef TridiagonalMatrixType_ TridiagonalMatrixType;
 		typedef typename std::complex<RealType> ComplexType;
 		typedef typename TridiagonalMatrixType::value_type FieldType;
 		typedef Matrix<FieldType> MatrixType;
@@ -43,6 +52,7 @@ namespace PsimagLite {
 				RealType weight = 1)
 			: progress_("ContinuedFraction",0),ab_(ab),Eg_(Eg),weight_(weight)
 		{
+			if (weight_==0) return;
 			MatrixType T;
 			ab_.buildDenseMatrix(T);
 			eigs_.resize(T.n_row());
@@ -100,13 +110,15 @@ namespace PsimagLite {
 		ComplexType iOfOmega(const ComplexType& z,RealType offset) const
 
 		{
+			if (weight_==0) return ComplexType(0,0);
+
 			ComplexType sum = 0;
 			for (size_t l=0;l<intensity_.size();l++)
 				sum +=intensity_[l]/(z-eigs_[l]+offset);
 
 			return sum*weight_;
 		}
-		
+
 	private:
 		ProgressIndicator progress_;
 		const TridiagonalMatrixType& ab_;
@@ -116,5 +128,5 @@ namespace PsimagLite {
 		std::vector<RealType> intensity_;
 	}; // class ContinuedFraction
 } // namespace PsimagLite 
-
-#endif 
+/*@}*/
+#endif  //CONTINUED_FRACTION_H
