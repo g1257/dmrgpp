@@ -35,31 +35,31 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-template<typename RealType>
-std::vector<std::pair<RealType,std::complex<RealType> > > operator+(
-		const std::vector<std::pair<RealType,std::complex<RealType> > >& v1,
-		const std::vector<std::pair<RealType,std::complex<RealType> > >& v2)
-{
-	std::vector<std::pair<RealType,std::complex<RealType> > > v(v1.size());
-	for (size_t i=0;i<v1.size();i++) {
-		v[i].first = v1[i].first;
-		v[i].second = v1[i].second + v2[i].second;
-	}
-	return v;
-}
-
-template<typename RealType>
-std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
-		const std::vector<std::pair<RealType,std::complex<RealType> > >& v1,
-		const std::vector<std::pair<RealType,std::complex<RealType> > >& v2)
-{
-	std::vector<std::pair<RealType,std::complex<RealType> > > v(v1.size());
-	for (size_t i=0;i<v1.size();i++) {
-		v[i].first = v1[i].first;
-		v[i].second = v1[i].second - v2[i].second;
-	}
-	return v;
-}
+//template<typename RealType>
+//std::vector<std::pair<RealType,std::complex<RealType> > > operator+(
+//		const std::vector<std::pair<RealType,std::complex<RealType> > >& v1,
+//		const std::vector<std::pair<RealType,std::complex<RealType> > >& v2)
+//{
+//	std::vector<std::pair<RealType,std::complex<RealType> > > v(v1.size());
+//	for (size_t i=0;i<v1.size();i++) {
+//		v[i].first = v1[i].first;
+//		v[i].second = v1[i].second + v2[i].second;
+//	}
+//	return v;
+//}
+//
+//template<typename RealType>
+//std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
+//		const std::vector<std::pair<RealType,std::complex<RealType> > >& v1,
+//		const std::vector<std::pair<RealType,std::complex<RealType> > >& v2)
+//{
+//	std::vector<std::pair<RealType,std::complex<RealType> > > v(v1.size());
+//	for (size_t i=0;i<v1.size();i++) {
+//		v[i].first = v1[i].first;
+//		v[i].second = v1[i].second - v2[i].second;
+//	}
+//	return v;
+//}
 
 //template<typename RealType>
 //std::vector<std::pair<RealType,std::complex<RealType> > > equal1(
@@ -102,7 +102,7 @@ std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
 						ttos(n);
 				throw std::runtime_error(s.c_str());
 			}
-			for (size_t i=0;i<n;i++) {
+			for (size_t i=0;i<size_t(n);i++) {
 				ContinuedFractionType cf(io);
 				data_.push_back(cf);
 			}
@@ -132,11 +132,36 @@ std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
 			for (size_t i=0;i<data_.size();i++) {
 				PlotDataType result1;
 				data_[i].plot(result1,omega1,omega2,deltaOmega,delta);
-				result += result1;
+				accumulate(result, result1);
 			}
 		}
 
 	private:
+
+		void accumulate(PlotDataType& v1,const PlotDataType& v2) const
+		{
+			bool wasEmpty = false;
+			if (v1.size()==0) {
+				wasEmpty = true;
+				v1.resize(v2.size());
+			} else {
+				if (v1.size()!=v2.size()) {
+					std::string s = "ContinuedFractionCollection::acc...(...)";
+					s += " vectors must be of same length\n";
+					throw std::runtime_error(s.c_str());
+				}
+			}
+			for (size_t i=0;i<v1.size();i++) {
+
+				if (wasEmpty) {
+					v1[i].first = v2[i].first;
+					v1[i].second = v2[i].second;
+				} else {
+					v1[i].second += v2[i].second;
+				}
+			}
+		}
+
 		ProgressIndicator progress_;
 		std::vector<ContinuedFractionType> data_;
 	}; // class ContinuedFractionCollection
