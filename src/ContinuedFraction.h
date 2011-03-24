@@ -55,6 +55,9 @@ namespace PsimagLite {
 			diagonalize();
 		}
 
+		ContinuedFraction() : progress_("ContinuedFraction",0),
+			ab_(),Eg_(0),weight_(0) { }
+
 		template<typename IoInputType>
 		ContinuedFraction(IoInputType& io)
 		: progress_("ContinuedFraction",0),ab_(io)
@@ -79,6 +82,17 @@ namespace PsimagLite {
 
 			io.printVector(eigs_,"#CFEigs");
 			io.printVector(intensity_,"#CFIntensities");
+		}
+
+		void set(
+			const TridiagonalMatrixType& ab,
+			const RealType& Eg,
+			RealType weight = 1)
+		{
+			ab_ = ab;
+			Eg_ = Eg;
+			weight_ = weight;
+			diagonalize();
 		}
 
 		void plot(

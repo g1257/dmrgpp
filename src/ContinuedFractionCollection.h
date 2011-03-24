@@ -20,18 +20,18 @@ Please see full open source license included in file LICENSE.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TwoContinuedFraction.h
+/*! \file ContinuedFractionCollection.h
  *
- * We need two cont. fractions for the Green's function
+ * We need many cont. fractions for the Green's function
  * on different sites, because, you know, we need
- * c_i + c_j and also c_i - c_j
+ * c_i + c_j and also c_i - c_j, and so on.
  * This class handles the composition
  */
 
-#ifndef TWO_CONTINUED_FRACTION_H
-#define TWO_CONTINUED_FRACTION_H
+#ifndef CONTINUED_FRACTION_COLL_H
+#define CONTINUED_FRACTION_COLL_H
 #include <iostream>
-#include "LineMarker.h"
+#include "TypeToString.h" // in PsimagLite
 
 namespace PsimagLite {
 
@@ -73,10 +73,11 @@ std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
 //	return v;
 //}
 
-	template<typename ContinuedFractionType>
-	class TwoContinuedFraction  {
+	template<typename ContinuedFractionType_>
+	class ContinuedFractionCollection  {
 	public:
 		
+		typedef ContinuedFractionType_ ContinuedFractionType;
 		typedef typename ContinuedFractionType::ComplexType ComplexType;
 		typedef typename ContinuedFractionType::TridiagonalMatrixType
 				TridiagonalMatrixType;
@@ -84,21 +85,43 @@ std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
 		typedef typename ContinuedFractionType::MatrixType MatrixType;
 		typedef typename ContinuedFractionType::PlotDataType PlotDataType;
 
-		TwoContinuedFraction(
-				const ContinuedFractionType& cf1,
-				const ContinuedFractionType& cf2)
-			: progress_("TwoContinuedFraction",0),
-			  lmarker_("#TWOCONTINUEDFRACTION"),cf1_(cf1),cf2_(cf2)
+		ContinuedFractionCollection()
+			: progress_("ContinuedFractionCollection",0)
 		{
 		}
 
 		template<typename IoInputType>
-		TwoContinuedFraction(IoInputType& io,size_t level = 0)
-		: progress_("ContinuedFraction",0),
-		  lmarker_(io,"#TWOCONTINUEDFRACTION",level),cf1_(io),cf2_(io)
+		ContinuedFractionCollection(IoInputType& io,size_t level = 0)
+		: progress_("ContinuedFractionCollection",0)
 		{
+			int n = 0;
+			io.readline(n,"#CONTINUEDFRACTIONCOLLECTION=",level);
+			if (n<=0) {
+				std::string s = "ContinuedFractionCollection::ctor(...): ";
+				s += "Expected a positive number of items, got " +
+						ttos(n);
+				throw std::runtime_error(s.c_str());
+			}
+			for (size_t i=0;i<n;i++) {
+				ContinuedFractionType cf(io);
+				data_.push_back(cf);
+			}
 		}
 		
+		template<typename IoOutputType>
+		void save(IoOutputType& io) const
+		{
+			std::string s = "#CONTINUEDFRACTIONCOLLECTION=";
+			s += ttos(data_.size());
+			io.printline(s);
+			for (size_t i=0;i<data_.size();i++) data_[i].save(io);
+		}
+
+		void push(const ContinuedFractionType& cf)
+		{
+			data_.push_back(cf);
+		}
+
 		void plot(
 				PlotDataType& result,
 				const RealType& omega1,
@@ -106,28 +129,17 @@ std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
 				const RealType& deltaOmega,
 				const RealType& delta) const
 		{
-			PlotDataType result1;
-			cf1_.plot(result1,omega1,omega2,deltaOmega,delta);
-
-			PlotDataType result2;
-			cf2_.plot(result2,omega1,omega2,deltaOmega,delta);
-
-			result = result1 - result2;
-		}
-		
-		template<typename IoOutputType>
-		void save(IoOutputType& io) const
-		{
-			lmarker_.save(io);
-			cf1_.save(io);
-			cf2_.save(io);
+			for (size_t i=0;i<data_.size();i++) {
+				PlotDataType result1;
+				data_[i].plot(result1,omega1,omega2,deltaOmega,delta);
+				result += result1;
+			}
 		}
 
 	private:
 		ProgressIndicator progress_;
-		PsimagLite::LineMarker lmarker_;
-		ContinuedFractionType cf1_,cf2_;
-	}; // class TwoContinuedFraction
+		std::vector<ContinuedFractionType> data_;
+	}; // class ContinuedFractionCollection
 } // namespace PsimagLite 
 /*@}*/
-#endif  //TWO_CONTINUED_FRACTION_H
+#endif  //CONTINUED_FRACTION_COLL_H

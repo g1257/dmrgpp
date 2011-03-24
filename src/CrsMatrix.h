@@ -263,10 +263,9 @@ namespace PsimagLite {
 		template<typename S>
 		void matrixVectorProduct (std::vector<S> &x, std::vector<S> const &y) const
 		{ 
-			
-			unsigned int i;
-			int j;
-			for (i = 0; i < y.size(); i++) for (j = rowptr_[i]; j < rowptr_[i + 1]; j++) x[i] += values_[j] * y[colind_[j]];
+			for (size_t i = 0; i < y.size(); i++)
+				for (int j = rowptr_[i]; j < rowptr_[i + 1]; j++)
+					x[i] += values_[j] * y[colind_[j]];
 		}
 		
 
