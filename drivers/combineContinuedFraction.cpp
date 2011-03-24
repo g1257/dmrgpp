@@ -25,13 +25,14 @@ Please see full open source license included in file LICENSE.
 #include "IoSimple.h"
 #include "TridiagonalMatrix.h"
 #include "ContinuedFraction.h"
-#include "TwoContinuedFraction.h"
+#include "ContinuedFractionCollection.h"
 
 using namespace PsimagLite;
 typedef double RealType;
 typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 typedef ContinuedFraction<RealType,TridiagonalMatrixType> ContinuedFractionType;
-typedef TwoContinuedFraction<ContinuedFractionType> TwoContinuedFractionType;
+typedef ContinuedFractionCollection<ContinuedFractionType>
+	ContinuedFractionCollectionType;
 
 void usage(const char *progName)
 {
@@ -45,21 +46,20 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
+	ContinuedFractionCollectionType cfCollection;
+
 	IoSimple::In io1(argv[1]);
 	ContinuedFractionType cfPlus(io1);
-	ContinuedFractionType *cfMinus;
+	cfCollection.push(cfPlus);
 	
 	if (argc==3) {
 		IoSimple::In io2(argv[2]);
-		cfMinus = new ContinuedFractionType(io2);
-	} else {
-		TridiagonalMatrixType ab;
-		cfMinus = new ContinuedFractionType(ab,0,0);
+		ContinuedFractionType cfMinus(io2);
+		cfCollection.push(cfMinus);
 	}
 
-	TwoContinuedFractionType twoCf(cfPlus,*cfMinus);
 	IoSimple::Out ioOut(std::cout);
-	twoCf.save(ioOut);
+	cfCollection.save(ioOut);
 
 }
 
