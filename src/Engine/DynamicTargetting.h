@@ -434,7 +434,7 @@ namespace Dmrg {
 			}
 			setWeights();
 			weightForContinuedFraction_ = phi*phi;
-			weightForContinuedFraction_ = 1.0/weightForContinuedFraction_;
+			//weightForContinuedFraction_ = 1.0/weightForContinuedFraction_;
 		}
 
 		void getLanczosVectors(
