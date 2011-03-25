@@ -517,9 +517,9 @@ bool observeOneFullSweep(IoInputType& io,
 	typedef ObservableLibrary<ObserverType,TargettingType> ObservableLibraryType;
 	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,concurrency,verbose);
 	
-	my $ot = 0;
-	if (obsOptions.find("ot") || obsOptions.find("time")) $ot = 1;
-	if (hasTimeEvolution && $ot) {
+	bool ot = false;
+	if (obsOptions.find("ot") || obsOptions.find("time")) ot = true;
+	if (hasTimeEvolution && ot) {
 		observerLib.measureTime("superDensity");
 		observerLib.measureTime("nupNdown");
 		observerLib.measureTime("nup+ndown");
