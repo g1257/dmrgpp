@@ -50,9 +50,9 @@ int main(int argc,char *argv[])
 	RealType wend = 0;
 	RealType wstep = 0;
 	RealType delta = 0;
-
+	int isign = 1;
 	while ((opt = getopt(argc, argv,
-		"f:l:b:e:s:d:")) != -1) {
+		"f:l:b:e:s:d:m")) != -1) {
 		switch (opt) {
 		case 'f':
 			file = optarg;
@@ -72,6 +72,9 @@ int main(int argc,char *argv[])
 		case 'd':
 			delta = atof(optarg);
 			break;
+		case 'm':
+			isign = -1;
+			break;
 		default:
 			usage(argv[0]);
 			return 1;
@@ -86,7 +89,7 @@ int main(int argc,char *argv[])
 	IoSimple::In io(file);
 	ContinuedFractionCollectionType cfCollection(io,level);
 	typename ContinuedFractionCollectionType::PlotDataType v;
-	cfCollection.plot(v,wbegin,wend,wstep,delta);
+	cfCollection.plot(v,wbegin,wend,wstep,delta,isign);
 	for (size_t x=0;x<v.size();x++) {
 		std::cout<<v[x].first<<" "<<std::real(v[x].second);
 		std::cout<<" "<<std::imag(v[x].second)<<"\n";

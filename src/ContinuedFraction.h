@@ -100,28 +100,36 @@ namespace PsimagLite {
 				const RealType& omega1,
 				const RealType& omega2,
 				const RealType& deltaOmega,
-				const RealType& delta) const
+				const RealType& delta,
+				int isign) const
 		{
 			size_t counter = 0;
 			size_t n = (omega2 - omega1)/deltaOmega + 1; 
 			if (result.size()==0) result.resize(n);
 			for (RealType omega = omega1;omega <omega2;omega+=deltaOmega) {
 				ComplexType z(omega,delta);
-				ComplexType res = iOfOmega(z,Eg_);
+				ComplexType res = iOfOmega(z,Eg_,isign);
 				std::pair<RealType,ComplexType> p(omega,res);
 				result[counter++] = p;
 				//std::cout<<omega<<" "<<real(res)<<" "<<imag(res)<<"\n";
 			}
 		} 
 
-		ComplexType iOfOmega(const ComplexType& z,RealType offset) const
+		//! Cases: 
+		//! (1) <phi0|A (z+(E0-e_k))^{-1}|A^\dagger|phi0> and
+		//! (2) <phi0|A^\dagger (z-(E0-e_k))^{-1}|A|phi0>
+		//! (There are actually 4 cases for the off-diagonal gf because
+		//! A has two cases:
+		//! (1) A = c_i + c_j and
+		//! (2) A = c_i - c_j
+		ComplexType iOfOmega(const ComplexType& z,RealType offset,int isign) const
 
 		{
 			if (weight_==0) return ComplexType(0,0);
 
 			ComplexType sum = 0;
 			for (size_t l=0;l<intensity_.size();l++)
-				sum +=intensity_[l]/(z-eigs_[l]+offset);
+				sum +=intensity_[l]/(z-isign*(offset - eigs_[l]));
 
 			return sum*weight_;
 		}

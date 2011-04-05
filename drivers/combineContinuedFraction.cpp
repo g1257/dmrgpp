@@ -48,14 +48,10 @@ int main(int argc,char *argv[])
 
 	ContinuedFractionCollectionType cfCollection;
 
-	IoSimple::In io1(argv[1]);
-	ContinuedFractionType cfPlus(io1);
-	cfCollection.push(cfPlus);
-	
-	if (argc==3) {
-		IoSimple::In io2(argv[2]);
-		ContinuedFractionType cfMinus(io2);
-		cfCollection.push(cfMinus);
+	for (int x = 1;x<argc;x++) {
+		IoSimple::In io(argv[x]);
+		ContinuedFractionType cf(io);
+		cfCollection.push(cf);
 	}
 
 	IoSimple::Out ioOut(std::cout);
