@@ -142,7 +142,7 @@ namespace Dmrg {
 				  model_(model),
 				  correctionStruct_(correctionStruct),
 				  waveFunctionTransformation_(wft),
-				  progress_("GroundStateTargetting",0),
+				  progress_("CorrectionTargetting",0),
 				  stage_(DISABLED),
 				  targetVectors_(1),
 				  applyOpLocal_(lrs)
@@ -240,8 +240,10 @@ namespace Dmrg {
 				msg<<"Saving state...";
 				progress_.printline(msg,std::cout);
 
-				CorrectionSerializerType cs(block[0],targetVectors_);
-				cs.save(io);
+				if (block.size()!=1) throw std::runtime_error(
+						"GST only supports blocks of size 1\n");
+				std::string s = "#TCENTRALSITE=" + ttos(block[0]);
+				io.printline(s);
 
 				psi_.save(io,"PSI");
 			}
