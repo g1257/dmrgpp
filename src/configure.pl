@@ -40,7 +40,6 @@ my ($pthreads,$pthreadsLib)=(0,"");
 my $brand= "v2.0";
 my ($connectorsArgs,$connectorsArgs2,$dof,$connectors2,$connectorValue2);
 my $targetting;
-my $DynamicTargetting = "DynamicTargetting";
 #$DynamicTargetting = "DynamicTargettingEmpty" if ($hasGsl=~/n/i);
 
 my $gslLibs = " -lgsl  -lgslcblas ";
@@ -161,7 +160,7 @@ sub askQuestions
 	$lapack = $_;
 	
 	print "What should the observer driver target?\n";
-	print "Available: GroundStateTargetting TimeStepTargetting $DynamicTargetting\n";
+	print "Available: GroundStateTargetting TimeStepTargetting DynamicTargetting CorrectionTargetting\n";
 	print "Default is: GroundStateTargetting (press ENTER): ";
 	$_=<STDIN>;
 	chomp;
@@ -287,7 +286,8 @@ print FOUT<<EOF;
 #include "InternalProductStored.h"
 #include "GroundStateTargetting.h"
 #include "TimeStepTargetting.h"
-#include "$DynamicTargetting.h"
+#include "DynamicTargetting.h"
+#include "CorrectionTargetting.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
 #include "BasisWithOperators.h"
@@ -385,6 +385,7 @@ int main(int argc,char *argv[])
 	std::string targetting="GroundStateTargetting";
 	if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) targetting="TimeStepTargetting";
 	if (dmrgSolverParams.options.find("DynamicTargetting")!=std::string::npos) targetting="DynamicTargetting";
+	if (dmrgSolverParams.options.find("CorrectionTargetting")!=std::string::npos) targetting="CorrectionTargetting";
 	if (targetting!="GroundStateTargetting" && su2) throw std::runtime_error("SU(2)"
  		" supports only GroundStateTargetting for now (sorry!)\\n");
 	if (su2) {
@@ -419,7 +420,14 @@ int main(int argc,char *argv[])
 			(mp,geometry,dmrgSolverParams,concurrency,io,targetting);
 			return 0;
 	}
-	
+	if (targetting=="CorrectionTargetting") {
+		mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
+			IoInputType,
+			$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,CorrectionTargetting,
+			MySparseMatrixReal>
+			(mp,geometry,dmrgSolverParams,concurrency,io,targetting);
+			return 0;
+	}
 	mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 		IoInputType,
 		$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
@@ -491,7 +499,7 @@ print OBSOUT<<EOF;
 #include "GroundStateTargetting.h"
 #include "DmrgSolver.h" // only used for types
 #include "TimeStepTargetting.h" // only used for types
-#include "GroundStateTargetting.h" // only used for types
+#include "CorrectionTargetting.h" // only used for types
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
 

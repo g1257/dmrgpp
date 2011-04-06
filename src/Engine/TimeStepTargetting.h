@@ -277,14 +277,14 @@ namespace Dmrg {
 			}
 			
 			
-				void print(std::ostream& os) const
-				{
-					os<<"TSTWeightsTimeVectors=";
-					for (size_t i=0;i<weight_.size();i++)
-						os<<weight_[i]<<" ";
-					os<<"\n";
-					os<<"TSTWeightGroundState="<<gsWeight_<<"\n";
-				}
+			void print(std::ostream& os) const
+			{
+				os<<"TSTWeightsTimeVectors=";
+				for (size_t i=0;i<weight_.size();i++)
+					os<<weight_[i]<<" ";
+				os<<"\n";
+				os<<"TSTWeightGroundState="<<gsWeight_<<"\n";
+			}
 			
 
 			size_t evolve(

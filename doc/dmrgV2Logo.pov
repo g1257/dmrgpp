@@ -4,8 +4,8 @@
 background { color White }
 
 camera {
-	location <-2,-15,-1>
-	look_at <-2,0,0>
+	location <-1,-15,-1>
+	look_at <-1,0,0>
 	rotate 10*x
 	rotate <0,0,clock*360>
 } 

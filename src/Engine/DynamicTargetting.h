@@ -457,59 +457,6 @@ namespace Dmrg {
 			lanczosSolver.tridiagonalDecomposition(sv,ab_,V);
 			//calcIntensity(Eg,sv,V,ab);
 		}
-		
-//		void calcIntensity(
-//				const RealType& Eg,
-//				const VectorType& sv,
-//				const DenseMatrixType& V,
-//				const TridiagonalMatrixType& ab) const
-//		{
-//			PsimagLite::Matrix<RealType> S;
-//			ab.buildDenseMatrix(S);
-//			std::vector<RealType> eigs(S.n_row());
-//			diag(S,eigs,'V');
-//			RealType delta= 0.05;
-//			for (RealType omega = 0;omega <3;omega+=0.01) {
-//				ComplexType z(omega,delta);
-//				ComplexType res = calcIntensity(Eg,sv,V,eigs,S,z);
-//				std::cout<<omega<<" "<<res<<"\n";
-//			}
-//		}
-
-		// FIXME: Needs optimization
-//		ComplexType calcIntensity(
-//				const RealType& Eg,
-//				const VectorType& sv,
-//				const DenseMatrixType& V,
-//				const std::vector<RealType>& eigs,
-//				const PsimagLite::Matrix<RealType>& S,
-//				const ComplexType& z) const
-//
-//		{
-//			ComplexType sum = 0;
-//			for (size_t l=0;l<S.n_row();l++)
-//				sum += std::conj(S(0,l))*S(0,l)/(z-eigs[l]+Eg);
-//
-//			RealType weight = weightForContinuedFraction(sv,V);
-//			return sum*weight;
-//		}
-
-		RealType weightForContinuedFraction(
-				const VectorType& sv,
-				const DenseMatrixType& V) const
-		{
-			/*RealType tmp1 = 0;
-			for (size_t m=0;m<sv.size();m++)
-				tmp1 += V(m,0)*sv[m];
-
-			RealType tmp2 = 0;
-			for (size_t k2=0;k2<sv.size();k2++)
-				tmp2 += std::conj(sv[k2]*V(k2,0));
-			return tmp1 * tmp2;*/
-			if (targetVectors_.size()==0) return 0.0;
-			RealType norma = targetVectors_[0]*targetVectors_[0];
-			return 1.0/norma;
-		}
 
 		void setLanczosVectors(
 				const DenseMatrixType& V,
