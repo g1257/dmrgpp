@@ -69,7 +69,7 @@ int main(int argc,char *argv[])
 	std::cout<<"#Found "<<n<<" points in file "<<file<<"\n";
 	LinearPredictionType linearPrediction(y);
 	linearPrediction.predict(p);
-	for (size_t i=n;i<p+n;i++) {
+	for (size_t i=0;i<p+n;i++) {
 		std::cout<<i<<" "<<linearPrediction(i)<<"\n";
 	}
 }

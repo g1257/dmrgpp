@@ -139,7 +139,7 @@ namespace PsimagLite {
 			lwork = work[0];
 			if (lwork<=0) throw
 				std::runtime_error("LinearPrediction:: internal error\n");
-			work.resize(lwork,lwork);
+			work.resize(lwork);
 			// actual work:
 			psimag::LAPACK::DGETRI(n, &(A(0,0)), n,  &(ipiv[0]),
 								&(work[0]), lwork,info );
@@ -177,3 +177,4 @@ namespace PsimagLite {
 
 /*@}*/	
 #endif // LINEAR_PREDICTION_H
+
