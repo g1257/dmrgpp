@@ -88,7 +88,7 @@ int main(int argc,char *argv[])
 
 	IoSimple::In io(file);
 	ContinuedFractionCollectionType cfCollection(io,level);
-	typename ContinuedFractionCollectionType::PlotDataType v;
+	ContinuedFractionCollectionType::PlotDataType v;
 	cfCollection.plot(v,wbegin,wend,wstep,delta,isign);
 	for (size_t x=0;x<v.size();x++) {
 		std::cout<<v[x].first<<" "<<std::real(v[x].second);

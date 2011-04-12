@@ -104,13 +104,14 @@ namespace PsimagLite {
 				int isign) const
 		{
 			size_t counter = 0;
-			size_t n = (omega2 - omega1)/deltaOmega + 1; 
+			size_t n = size_t((omega2 - omega1)/deltaOmega); 
 			if (result.size()==0) result.resize(n);
 			for (RealType omega = omega1;omega <omega2;omega+=deltaOmega) {
 				ComplexType z(omega,delta);
 				ComplexType res = iOfOmega(z,Eg_,isign);
 				std::pair<RealType,ComplexType> p(omega,res);
 				result[counter++] = p;
+				if (counter>=result.size()) break;
 				//std::cout<<omega<<" "<<real(res)<<" "<<imag(res)<<"\n";
 			}
 		} 
