@@ -127,12 +127,11 @@ namespace PsimagLite {
 				const RealType& omega1,
 				const RealType& omega2,
 				const RealType& deltaOmega,
-				const RealType& delta,
-				int isign) const
+				const RealType& delta) const
 		{
 			for (size_t i=0;i<data_.size();i++) {
 				PlotDataType result1;
-				data_[i].plot(result1,omega1,omega2,deltaOmega,delta,isign);
+				data_[i].plot(result1,omega1,omega2,deltaOmega,delta);
 				accumulate(result, result1);
 			}
 		}

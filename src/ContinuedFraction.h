@@ -49,14 +49,16 @@ namespace PsimagLite {
 		ContinuedFraction(
 				const TridiagonalMatrixType& ab,
 				const RealType& Eg,
-				RealType weight = 1)
-			: progress_("ContinuedFraction",0),ab_(ab),Eg_(Eg),weight_(weight)
+				RealType weight,
+			        int isign)
+			: progress_("ContinuedFraction",0),ab_(ab),
+			Eg_(Eg),weight_(weight),isign_(isign)
 		{
 			diagonalize();
 		}
 
 		ContinuedFraction() : progress_("ContinuedFraction",0),
-			ab_(),Eg_(0),weight_(0) { }
+			ab_(),Eg_(0),weight_(0),isign_(1) { }
 
 		template<typename IoInputType>
 		ContinuedFraction(IoInputType& io)
@@ -64,6 +66,7 @@ namespace PsimagLite {
 		{
 			io.readline(weight_,"#CFWeight=");
 			io.readline(Eg_,"#CFEnergy=");
+			io.readline(isign_,"#CFIsign=");
 			io.read(eigs_,"#CFEigs");
 			io.read(intensity_,"#CFIntensities");
 			diagonalize();
@@ -80,6 +83,9 @@ namespace PsimagLite {
 			s = "#CFEnergy=" + typeToString(Eg_);
 			io.printline(s);
 
+			s="#CFIsign=" + typeToString(isign_);
+			io.printline(s);
+
 			io.printVector(eigs_,"#CFEigs");
 			io.printVector(intensity_,"#CFIntensities");
 		}
@@ -87,11 +93,14 @@ namespace PsimagLite {
 		void set(
 			const TridiagonalMatrixType& ab,
 			const RealType& Eg,
-			RealType weight = 1)
+			RealType weight,
+			int isign)
 		{
 			ab_ = ab;
 			Eg_ = Eg;
 			weight_ = weight;
+			isign_ = isign;
+
 			diagonalize();
 		}
 
@@ -100,15 +109,14 @@ namespace PsimagLite {
 				const RealType& omega1,
 				const RealType& omega2,
 				const RealType& deltaOmega,
-				const RealType& delta,
-				int isign) const
+				const RealType& delta) const
 		{
 			size_t counter = 0;
 			size_t n = size_t((omega2 - omega1)/deltaOmega); 
 			if (result.size()==0) result.resize(n);
 			for (RealType omega = omega1;omega <omega2;omega+=deltaOmega) {
 				ComplexType z(omega,delta);
-				ComplexType res = iOfOmega(z,Eg_,isign);
+				ComplexType res = iOfOmega(z,Eg_,isign_);
 				std::pair<RealType,ComplexType> p(omega,res);
 				result[counter++] = p;
 				if (counter>=result.size()) break;
@@ -154,6 +162,7 @@ namespace PsimagLite {
 		TridiagonalMatrixType ab_;
 		RealType Eg_;
 		RealType weight_;
+		int isign_;
 		std::vector<RealType> eigs_;
 		std::vector<RealType> intensity_;
 	}; // class ContinuedFraction
