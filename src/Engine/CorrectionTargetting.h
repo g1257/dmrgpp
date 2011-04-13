@@ -195,11 +195,6 @@ namespace Dmrg {
 			{
 				if (direction==INFINITE) return;
 				stage_ = ENABLED;
-				// block.size()==1 or throw
-//				size_t i = block[0]; // center site
-//				FermionSign fs(lrs_.left(),correctionStruct_.electrons);
-//				const BasisWithOperatorsType *basis = (direction==EXPAND_SYSTEM) ?
-//						&(lrs_.left()) : &(lrs_.right());
 
 				// operators in the one-site basis:
 				std::vector<OperatorType> creationMatrix;

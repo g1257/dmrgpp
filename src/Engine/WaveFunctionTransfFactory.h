@@ -366,8 +366,8 @@ namespace Dmrg {
 					//weStack_.pop();
 					//std::cerr<<"CHANGED-COUNTER0 We taken from stack\n";
 				} else {
-					std::cerr<<"PUSHING-COUNTER0 STACK ERROR E\n";
-					throw std::runtime_error("Environ Stack is empty\n");
+//					std::cerr<<"PUSHING-COUNTER0 STACK ERROR E\n";
+//					throw std::runtime_error("Environ Stack is empty\n");
 				}
 			}
 			
@@ -386,8 +386,8 @@ namespace Dmrg {
 					//weStack_.pop();
 					//std::cerr<<"CHANGED-COUNTER0 We taken from stack\n";
 				} else {
-					std::cerr<<"PUSHING-COUNTER0 STACK ERROR E\n";
-					throw std::runtime_error("System Stack is empty\n");
+//					std::cerr<<"PUSHING-COUNTER0 STACK ERROR E\n";
+//					throw std::runtime_error("System Stack is empty\n");
 				}
 			}
 		}

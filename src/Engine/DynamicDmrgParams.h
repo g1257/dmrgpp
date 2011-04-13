@@ -109,7 +109,9 @@ namespace Dmrg {
 		  {
 			io.rewind();
 			this->concatenation = SUM;
+			io.readline(type,"DynamicDmrgType=");
 		  }
+		size_t type;
 
 	}; // class DynamicDmrgParams
 	
@@ -121,6 +123,7 @@ namespace Dmrg {
 		const typename TimeStepParams<ModelType>::TargetParamsCommonType&
 			tp = t;
 		os<<tp;
+		os<<"DynamicDmrgType="<<t.type<<"\n";
 		return os;
 	}
 } // namespace Dmrg 

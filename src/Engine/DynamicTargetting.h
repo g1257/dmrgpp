@@ -266,8 +266,11 @@ namespace Dmrg {
 		{
 			if (block.size()!=1) throw std::runtime_error(
 					"DynamicTargetting only supports blocks of size 1\n");
-
-			ContinuedFractionType cf(ab_,Eg_,weightForContinuedFraction_);
+			size_t type = tstStruct_.type;
+			int s = (type&1) ? -1 : 1;
+			int s2 = (type>1) ? -1 : 1;
+			ContinuedFractionType cf(ab_,Eg_,s2*weightForContinuedFraction_,
+				s);
 			DynamicSerializerType dynS(cf,block[0],targetVectors_);
 			dynS.save(io);
 			psi_.save(io,"PSI");
