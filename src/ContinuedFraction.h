@@ -154,7 +154,7 @@ namespace PsimagLite {
 			diag(T,eigs_,'V');
 			intensity_.resize(T.n_row());
 			for (size_t i=0;i<T.n_row();i++) {
-				intensity_[i]= T(i,0)*T(i,0);
+				intensity_[i]= T(0,i)*T(0,i);
 			}
 		}
 
