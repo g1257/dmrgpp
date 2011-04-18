@@ -203,8 +203,22 @@ namespace Dmrg {
 			return targetVectors_[i];
 		}
 		
-
 		void evolve(RealType Eg,size_t direction,const BlockType& block,
+					size_t loopNumber)
+		{
+			if (block.size()!=1) throw
+					std::runtime_error("DynamicTargetting::evolve(...):"
+							" blocks of size != 1 are unsupported (sorry)\n");
+			size_t site = block[0];
+			evolve(Eg,direction,site,loopNumber);
+			size_t numberOfSites = lrs_.super().block().size();
+			if (site>1 && site<numberOfSites-2) return;
+			// //corner case
+			size_t x = (site==1) ? 0 : numberOfSites-1;
+			evolve(Eg,direction,x,loopNumber);
+		}
+
+		void evolve(RealType Eg,size_t direction,size_t site,
 				size_t loopNumber)
 		{
 			size_t count =0;
@@ -219,7 +233,7 @@ namespace Dmrg {
 			// Loop over each operator that needs to be applied
 			// in turn to the g.s.
 			for (size_t i=0;i<max;i++) {
-				count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber,max-1);
+				count += evolve(i,phiNew,phiOld,Eg,direction,site,loopNumber,max-1);
 				if (tstStruct_.concatenation==PRODUCT) {
 					phiOld = phiNew;
 				} else {
@@ -299,18 +313,12 @@ namespace Dmrg {
 				VectorWithOffsetType& phiOld,
 				RealType Eg,
 				size_t direction,
-				const BlockType& block,
+				size_t site,
 				size_t loopNumber,
 				size_t lastI)
 		{
 			
 			if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return 0;
-			
-			
-			if (block.size()!=1) throw
-			std::runtime_error("DynamicTargetting::evolve(...):"
-				" blocks of size != 1 are unsupported (sorry)\n");
-			size_t site = block[0];
 			
 			
 			if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return 0;
@@ -327,37 +335,50 @@ namespace Dmrg {
 			progress_.printline(msg,std::cout);
 							
 			// phi = A|psi>
-			computePhi(i,phiNew,phiOld,direction);
+			computePhi(i,site,phiNew,phiOld,direction);
 			
 			return 1;
 		}
 		
 
-		void computePhi(size_t i,VectorWithOffsetType& phiNew,
-			VectorWithOffsetType& phiOld,size_t systemOrEnviron)
+		void computePhi(
+				size_t i,
+				size_t site,
+				VectorWithOffsetType& phiNew,
+				VectorWithOffsetType& phiOld,
+				size_t systemOrEnviron)
 		{
+			size_t numberOfSites = lrs_.super().block().size();
 			if (stage_[i]==OPERATOR) {
-				
+
+				bool corner = (tstStruct_.sites[i]==0 ||
+						tstStruct_.sites[i]==numberOfSites -1) ? true : false;
+
 				std::ostringstream msg;
 				msg<<"I'm applying a local operator now";
 				progress_.printline(msg,std::cout);
 				FermionSign fs(lrs_.left(),tstStruct_.electrons);
 				applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],
-						fs,systemOrEnviron);
+						fs,systemOrEnviron,corner);
 				RealType norma = std::norm(phiNew);
 				if (norma==0) throw std::runtime_error(
 						"Norm of phi is zero\n");
 				//std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 				
 			} else if (stage_[i]== CONVERGING) {
-				
+				if (site==0 || site==numberOfSites -1)  {
+					// don't wft since we did it before
+					phiNew = targetVectors_[0];
+					return;
+				}
 				std::ostringstream msg;
 				msg<<"I'm calling the WFT now";
 				progress_.printline(msg,std::cout);
 
-				if (tstStruct_.aOperators.size()==1)
-					guessPhiSectors(phiNew,i,systemOrEnviron);
-				else phiNew.populateSectors(lrs_.super());
+				//if (tstStruct_.aOperators.size()==1)
+				//	guessPhiSectors(phiNew,i,systemOrEnviron);
+				//else
+					phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
 				waveFunctionTransformation_.setInitialVector(
