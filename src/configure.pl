@@ -39,7 +39,7 @@ my ($electrons,$momentumJ,$su2Symmetry);
 my ($pthreads,$pthreadsLib)=(0,"");
 my $brand= "v2.0";
 my ($connectorsArgs,$connectorsArgs2,$dof,$connectors2,$connectorValue2);
-my $targetting;
+#my $targetting;
 #$DynamicTargetting = "DynamicTargettingEmpty" if ($hasGsl=~/n/i);
 
 my $gslLibs = " -lgsl  -lgslcblas ";
@@ -159,15 +159,16 @@ sub askQuestions
 	}
 	$lapack = $_;
 	
-	print "What should the observer driver target?\n";
-	print "Available: GroundStateTargetting TimeStepTargetting DynamicTargetting CorrectionTargetting\n";
-	print "Default is: GroundStateTargetting (press ENTER): ";
-	$_=<STDIN>;
-	chomp;
-	if ($_ eq "" or $_ eq "\n") {
-		$_="GroundStateTargetting";
-	}
-	$targetting = $_;
+	#print "Will the targetting involve real or complex vectors?\n";
+	#print "(Note: Only TimeStepTargetting involves complex vectors.)\n";
+	#print "Available: Real Complex\n";
+	#print "Default is: Real (press ENTER): ";
+	#$_=<STDIN>;
+	#chomp;
+	#if ($_ eq "" or $_ eq "\n") {
+	#	$_="Real";
+	#}
+	#$targetting = $_;
 	
 	
 }
@@ -469,10 +470,10 @@ sub createObserverDriver
 	my $pthreadsName = getPthreadsName();
 	my $modelName = getModelName();
 	my $operatorsName = getOperatorsName();
-	my $chooseRealOrComplexForObservables = "typedef RealType FieldType;\n";
-	if ($targetting=~/timestep/i) {
-		$chooseRealOrComplexForObservables = "typedef ComplexType FieldType;\n";
-	}
+	#my $chooseRealOrComplexForObservables = "typedef RealType FieldType;\n";
+	#if ($targetting=~/complex/i) {
+	#	$chooseRealOrComplexForObservables = "typedef ComplexType FieldType;\n";
+	#}
 
 	system("cp observe.cpp observe.bak") if (-e "observe.cpp");	
 	open(OBSOUT,">$observerDriver") or die "Cannot open file $observerDriver for writing: $!\n";
@@ -499,6 +500,7 @@ print OBSOUT<<EOF;
 #include "GroundStateTargetting.h"
 #include "DmrgSolver.h" // only used for types
 #include "TimeStepTargetting.h" // only used for types
+#include "DynamicTargetting.h"
 #include "CorrectionTargetting.h" // only used for types
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
@@ -507,7 +509,9 @@ using namespace Dmrg;
 
 typedef double RealType;
 typedef std::complex<RealType> ComplexType;
-$chooseRealOrComplexForObservables
+
+typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
+typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
 
 typedef PsimagLite::$concurrencyName<RealType> MyConcurrency;
 typedef PsimagLite::IoSimple::In IoInputType;
@@ -520,6 +524,7 @@ bool observeOneFullSweep(IoInputType& io,
 {
 	bool verbose = false;
 	size_t n=geometry.numberOfSites();
+	typedef typename SparseMatrixType::value_type FieldType;
 	typedef Observer<FieldType,VectorWithOffsetType,ModelType,IoInputType> 
 		ObserverType;
 	typedef ObservableLibrary<ObserverType,TargettingType> ObservableLibraryType;
@@ -601,7 +606,7 @@ EOF
 		template<typename> class> class TargettingTemplate,
 	typename MySparseMatrix
 >
-void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvolution,
+void mainLoop(ParametersModelType& mp,GeometryType& geometry,const std::string& targetting,
 		ConcurrencyType& concurrency, IoInputType& io,const std::string& datafile,
 		const std::string& obsOptions)
 {
@@ -637,6 +642,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,bool hasTimeEvoluti
 	//size_t n=geometry.numberOfSites();
 	bool moreData = true;
 	IoInputType dataIo(datafile);
+	bool hasTimeEvolution = (targetting == "TimeStepTargetting") ? true : false;
 	while (moreData) {
 		try {
 			moreData = !observeOneFullSweep<ConcurrencyType,VectorWithOffsetType,ModelType,
@@ -678,23 +684,56 @@ int main(int argc,char *argv[])
 	//! Read the parameters for this run
 	typedef  $parametersName<RealType> ParametersModelType; 
 	ParametersModelType mp(io);
-	ParametersDmrgSolver<FieldType> dmrgSolverParams(io);
+	ParametersDmrgSolver<RealType> dmrgSolverParams(io);
 
-	bool hasTimeEvolution=false;
-	if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) hasTimeEvolution=true;
+	bool su2=false;
+	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;
+	std::string targetting="GroundStateTargetting";
+	if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) targetting="TimeStepTargetting";
+	if (dmrgSolverParams.options.find("DynamicTargetting")!=std::string::npos) targetting="DynamicTargetting";
+	if (dmrgSolverParams.options.find("CorrectionTargetting")!=std::string::npos) targetting="CorrectionTargetting";
+	if (targetting!="GroundStateTargetting" && su2) throw std::runtime_error("SU(2)"
+ 		" supports only GroundStateTargetting for now (sorry!)\\n");
 	
-	// FIXME: See if we need VectorWithOffsets sometimes
-	// FIXME: Does it make sense to have ModelHelperSu2 here sometimes?
-	typedef PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
-	typedef PsimagLite::CrsMatrix<FieldType> MySparseMatrixComplex;
-	if (hasTimeEvolution)
+	if (su2) {
+		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
+			mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
+				ModelHelperSu2,InternalProductOnTheFly,VectorWithOffsets,GroundStateTargetting,
+				MySparseMatrixReal>
+				(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+		} else {
+			mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
+				ModelHelperSu2,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
+				MySparseMatrixReal>
+				(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+		}
+		return 0;
+	}
+	if (targetting=="TimeStepTargetting") { 
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
-			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,
-			$targetting,MySparseMatrixComplex>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename,options);
-	else
+			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,TimeStepTargetting,
+			MySparseMatrixComplex>
+			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+		return 0;
+	}
+	if (targetting=="DynamicTargetting") {
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
-			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,
-			$targetting,MySparseMatrixReal>(mp,geometry,hasTimeEvolution,concurrency,io,dmrgSolverParams.filename,options);
+			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,DynamicTargetting,
+			MySparseMatrixReal>
+			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+		return 0;
+	}
+	if (targetting=="CorrectionTargetting") {
+		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
+			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,CorrectionTargetting,
+			MySparseMatrixReal>
+			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+		return 0;
+	}
+	mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
+		ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
+		MySparseMatrixReal>
+		(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
 } // main
 
 EOF
