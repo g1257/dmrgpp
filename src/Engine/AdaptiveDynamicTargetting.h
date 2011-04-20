@@ -210,7 +210,7 @@ namespace Dmrg {
 		size_t size() const
 		{
 			if (allStages(DISABLED)) return 0;
-			return targetVectors_.size();
+			return (lastLanczosVector_==1) ? 2 : targetVectors_.size();
 		}
 		
 
@@ -259,7 +259,7 @@ namespace Dmrg {
 			if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 
 			Eg_ = Eg;
-			wftDynVectors();
+			wftAllDynVectorsExceptZero();
 			if (dynCounter_==0 || (dynCounter_%tstStruct_.advanceEach) == 0)
 				calcDynVectors(phiNew,direction);
 
@@ -399,9 +399,9 @@ namespace Dmrg {
 			}
 		}
 
-		void wftDynVectors()
+		void wftAllDynVectorsExceptZero()
 		{
-			for (size_t i=0;i<targetVectors_.size();i++)
+			for (size_t i=1;i<targetVectors_.size();i++)
 				wftOneDynVector(i);
 		}
 
@@ -551,15 +551,15 @@ namespace Dmrg {
 			RealType sum  = 0;
 			weight_.resize(targetVectors_.size());
 			for (size_t r=0;r<weight_.size();r++) {
-				weight_[r] =0;
-				if (r>lastLanczosVector_) continue;
-				for (size_t i=0;i<targetVectors_[0].sectors();i++) {
-					VectorType v,w;
-					size_t i0 = targetVectors_[0].sector(i);
-					targetVectors_[0].extract(v,i0);
-					targetVectors_[r].extract(w,i0);
-					weight_[r] += dynWeightOf(v,w);
-				}
+				weight_[r] = (r>lastLanczosVector_) ? 0 : 1;
+
+//				for (size_t i=0;i<targetVectors_[0].sectors();i++) {
+//					VectorType v,w;
+//					size_t i0 = targetVectors_[0].sector(i);
+//					targetVectors_[0].extract(v,i0);
+//					targetVectors_[r].extract(w,i0);
+//					weight_[r] += dynWeightOf(v,w);
+//				}
 				sum += weight_[r];
 			}
 			for (size_t r=0;r<weight_.size();r++) weight_[r] *= 0.5/sum;
@@ -570,6 +570,7 @@ namespace Dmrg {
 		{
 			RealType sum = 0;
 			for (size_t i=0;i<v.size();i++) {
+				if (i>=w.size()) continue;
 				RealType tmp = std::real(v[i]*w[i]);
 				sum += tmp*tmp;
 			}
