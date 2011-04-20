@@ -72,16 +72,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file DynamicTargetting.h
+/*! \file AdaptiveDynamicTargetting.h
  *
  * Implements the targetting required by
- * a simple continued fraction calculation
- * of dynamical observables
+ * arXiv:1012.5543v1
  *
  */
 
-#ifndef DYNAMICTARGETTING_H
-#define DYNAMICTARGETTING_H
+#ifndef ADAPTIVE_DYN_TARGETTING_H
+#define ADAPTIVE_DYN_TARGETTING_H
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
@@ -101,7 +100,7 @@ namespace Dmrg {
 		typename ConcurrencyType_,
 		typename IoType_,
 		template<typename> class VectorWithOffsetTemplate>
-	class DynamicTargetting  {
+	class AdaptiveDynamicTargetting  {
 	public:
 		
 		typedef ModelType_ ModelType;
@@ -143,7 +142,7 @@ namespace Dmrg {
 		static const size_t parallelRank_ = 0; // DYNT needs to support concurrency FIXME
 		
 		
-		DynamicTargetting(
+		AdaptiveDynamicTargetting(
 				const LeftRightSuperType& lrs,
 				const ModelType& model,
 				const TargettingParamsType& tstStruct,
@@ -199,7 +198,10 @@ namespace Dmrg {
 		const VectorWithOffsetType& gs() const { return psi_; }
 		
 
-		bool includeGroundStage() const {return true; }
+		bool includeGroundStage() const
+		{
+			return (gsWeight_==0) ?  false : true;
+		}
 		
 
 		size_t size() const
@@ -486,6 +488,10 @@ namespace Dmrg {
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 			size_t iter= ProgramGlobals::LanczosSteps;
 
+			if (firstCall) {
+				// f0 == sv
+
+			}
 			//srand48(3243447);
 			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_);
 
@@ -608,5 +614,4 @@ namespace Dmrg {
 	
 } // namespace
 /*@}*/
-#endif // DYNAMICTARGETTING_H
-
+#endif // ADAPTIVE_DYN_TARGETTING_H

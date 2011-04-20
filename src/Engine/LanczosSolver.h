@@ -244,16 +244,12 @@ namespace Dmrg {
 					lanczosVectors(i,j) = y[i];
 				mat_.matrixVectorProduct (x, y); // x+= Hy
 			
-				atmp = 0.0;
-				for (size_t i = 0; i < mat_.rank(); i++) atmp += utils::myProductT (y[i] ,x[i]);
-				RealType btmp = 0.0;
-				for (size_t i = 0; i < mat_.rank(); i++) {
-					x[i] -= atmp * y[i];
-					btmp += utils::myProductT (x[i] ,x[i]);
-				}
-
+				RealType btmp = 0;
+				oneStepDecomposition(x,y,atmp,btmp);
 				ab.a(j) = atmp;
-				ab.b(j) = (btmp = sqrt (btmp));
+				ab.b(j) = btmp;
+
+
 				RealType enew = 0;
 				if (eps_>0) {
 					ground (enew,j+1, ab,nullVector);
@@ -262,24 +258,13 @@ namespace Dmrg {
 				}
 
 				eold = enew;
-				
-				for (size_t i = 0; i < mat_.rank(); i++) {
-					//lanczosVectors(i,j) = y[i];
-					VectorElementType tmp = y[i];
-					y[i] = x[i] / btmp;
-					x[i] = -btmp * tmp;
-				}
   			}
 			if (j < max_nstep) {
 				max_nstep = j + 1;
 				lanczosVectors.reset(mat_.rank(),max_nstep);
 				ab.resize(max_nstep);
-				for (size_t i = 0; i < mat_.rank(); i++) {
-					lanczosVectors(i,j) = y[i];
-					VectorElementType tmp = y[i];
-					y[i] = x[i] / ab.b(j) ;
-					x[i] = -ab.b(j)  * tmp;
-				}
+//				throw std::runtime_error(
+//					"LanczosSolver::tridiag(): Unsupported\n");
 				if (eps_>=ProgramGlobals::LanczosTolerance) return;
 			}
 			
@@ -290,6 +275,30 @@ namespace Dmrg {
 			
 		}
 		
+		void oneStepDecomposition(
+				VectorType& x,
+				VectorType& y,
+				RealType& atmp,
+				RealType& btmp) const
+		{
+			atmp = 0.0;
+			for (size_t i = 0; i < mat_.rank(); i++)
+				atmp += utils::myProductT (y[i] ,x[i]);
+			btmp = 0.0;
+			for (size_t i = 0; i < mat_.rank(); i++) {
+				x[i] -= atmp * y[i];
+				btmp += utils::myProductT (x[i] ,x[i]);
+			}
+			btmp = sqrt (btmp);
+
+			for (size_t i = 0; i < mat_.rank(); i++) {
+				//lanczosVectors(i,j) = y[i];
+				VectorElementType tmp = y[i];
+				y[i] = x[i] / btmp;
+				x[i] = -btmp * tmp;
+			}
+		}
+
 		size_t steps() const {return steps_; }
 		
 	private:
