@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BLAS.h"
 #include "ApplyOperatorLocal.h"
 #include "DynamicSerializer.h"
-#include "DynamicDmrgParams.h"
+#include "AdaptiveDynamicParams.h"
 #include "VectorWithOffsets.h"
 #include "ContinuedFraction.h"
 
@@ -116,7 +116,7 @@ namespace Dmrg {
 		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
-		typedef DynamicDmrgParams<ModelType> TargettingParamsType;
+		typedef AdaptiveDynamicParams<ModelType> TargettingParamsType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
@@ -153,9 +153,12 @@ namespace Dmrg {
 		 	model_(model),
 		 	tstStruct_(tstStruct),
 		 	waveFunctionTransformation_(wft),
+		 	lastLanczosVector_(0),
+		 	dynCounter_(0),
 		 	progress_("DynamicTargetting",0),
 		 	applyOpLocal_(lrs),
-		 	gsWeight_(1.0)
+		 	gsWeight_(1.0),
+		 	targetVectors_(3)
 
 		{
 			if (!wft.isEnabled()) throw std::runtime_error(" DynamicTargetting "
@@ -255,20 +258,12 @@ namespace Dmrg {
 			}
 			if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 
-			if (count==0) {
-		//		// always print to keep observer driver in sync
-		//		if (needsPrinting) {
-		//			zeroOutVectors();
-		//			printVectors(block);
-		//		}
-				return;
-			}
 			Eg_ = Eg;
-			calcDynVectors(phiNew,direction);
+			wftDynVectors();
+			if (dynCounter_==0 || (dynCounter_%tstStruct_.advanceEach) == 0)
+				calcDynVectors(phiNew,direction);
 
-			//cocoon(direction,block); // in-situ
-
-			//if (needsPrinting) printVectors(block); // for post-processing
+			if (allStages(CONVERGING)) dynCounter_++;
 		}
 		
 
@@ -359,7 +354,7 @@ namespace Dmrg {
 				size_t site,
 				VectorWithOffsetType& phiNew,
 				VectorWithOffsetType& phiOld,
-				size_t systemOrEnviron)
+				size_t systemOrEnviron) const
 		{
 			size_t numberOfSites = lrs_.super().block().size();
 			if (stage_[i]==OPERATOR) {
@@ -402,6 +397,25 @@ namespace Dmrg {
 				throw std::runtime_error("It's 5 am, do you know what line "
 					" your code is exec-ing?\n");
 			}
+		}
+
+		void wftDynVectors()
+		{
+			for (size_t i=0;i<targetVectors_.size();i++)
+				wftOneDynVector(i);
+		}
+
+		void wftOneDynVector(size_t i)
+		{
+			VectorWithOffsetType result;
+			result.populateSectors(lrs_.super());
+
+			// OK, now that we got the partition number right, let's wft:
+
+			waveFunctionTransformation_.setInitialVector(result,targetVectors_[i],
+					lrs_); // generalize for su(2)
+			result.collapseSectors();
+			targetVectors_[i] = result;
 		}
 
 		void checkOrder(size_t i) const
@@ -459,23 +473,20 @@ namespace Dmrg {
 				VectorType sv;
 				size_t i0 = phi.sector(i);
 				phi.extract(sv,i0);
-				DenseMatrixType V;
 				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
-				getLanczosVectors(V,sv,p);
 				if (i==0) {
-					targetVectors_.resize(V.n_col());
-					for (size_t j=0;j<targetVectors_.size();j++)
-						targetVectors_[j] = phi;
+					size_t xLast = (lastLanczosVector_==0) ? 1 : 2;
+					targetVectors_[xLast] = phi;
 				}
-				setLanczosVectors(V,i0);
+				setLanczosVectors(i0,sv,p);
 			}
 			setWeights();
 			weightForContinuedFraction_ = phi*phi;
 			//weightForContinuedFraction_ = 1.0/weightForContinuedFraction_;
 		}
 
-		void getLanczosVectors(
-				DenseMatrixType& V,
+		void setLanczosVectors(
+				size_t i0,
 				const VectorType& sv,
 				size_t p)
 		{
@@ -488,26 +499,35 @@ namespace Dmrg {
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 			size_t iter= ProgramGlobals::LanczosSteps;
 
-			if (firstCall) {
-				// f0 == sv
 
-			}
 			//srand48(3243447);
 			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_);
-
-			lanczosSolver.tridiagonalDecomposition(sv,ab_,V);
-			//calcIntensity(Eg,sv,V,ab);
-		}
-
-		void setLanczosVectors(
-				const DenseMatrixType& V,
-				size_t i0)
-		{
-			for (size_t i=0;i<targetVectors_.size();i++) {
-				VectorType tmp(V.n_row());
-				for (size_t j=0;j<tmp.size();j++) tmp[j] = V(j,i);
-				targetVectors_[i].setDataInSector(tmp,i0);
+			RealType a=0,b=0;
+			VectorType x(sv.size(),0.0);
+			VectorType y = sv;
+			if(lastLanczosVector_>0) {
+				targetVectors_[1].extract(y,i0);
+				targetVectors_[0].extract(x,i0);
+				x *= -ab_.b(lastLanczosVector_-1);
 			}
+			lanczosSolver.oneStepDecomposition(x,y,a,b);
+			ab_.push(a,b);
+			lastLanczosVector_++;
+			if(lastLanczosVector_==1) {
+				// f0 is wft'd, do nothing
+				targetVectors_[1].setDataInSector(y,i0);
+				return;
+			}
+			if(lastLanczosVector_==2) {
+				//f0 is wft'd, do nothing
+				//f1 is wft'd, do nothing
+				targetVectors_[2].setDataInSector(y,i0);
+				return;
+			}
+			for (size_t i=0;i<targetVectors_.size()-1;i++)
+				targetVectors_[i] = targetVectors_[i+1];
+
+			targetVectors_[2].setDataInSector(y,i0);
 		}
 
 		void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
@@ -532,6 +552,7 @@ namespace Dmrg {
 			weight_.resize(targetVectors_.size());
 			for (size_t r=0;r<weight_.size();r++) {
 				weight_[r] =0;
+				if (r>lastLanczosVector_) continue;
 				for (size_t i=0;i<targetVectors_[0].sectors();i++) {
 					VectorType v,w;
 					size_t i0 = targetVectors_[0].sector(i);
@@ -542,8 +563,7 @@ namespace Dmrg {
 				sum += weight_[r];
 			}
 			for (size_t r=0;r<weight_.size();r++) weight_[r] *= 0.5/sum;
-			gsWeight_ = 0.5;
-
+			gsWeight_ = (lastLanczosVector_==1) ? 0.5 : 0.0;
 		}
 
 		RealType dynWeightOf(VectorType& v,const VectorType& w) const
@@ -562,33 +582,22 @@ namespace Dmrg {
 				targetVectors_[i].resize(lrs_.super().size());
 		}
 		
-
-		//void printHeader()
-		//{
-		//	io_.print(tstStruct_);
-		//	std::string label = "omega";
-		//	std::string s = "Omega=" + ttos(currentOmega_);
-		//	io_.printline(s);
-		//	label = "weights";
-		//	io_.printVector(weight_,label);
-		//	s = "GsWeight="+ttos(gsWeight_);
-		//	io_.printline(s);
-		//}
-		
 		std::vector<size_t> stage_;
 		VectorWithOffsetType psi_;
 		const LeftRightSuperType& lrs_;
 		const ModelType& model_;
 		const TargettingParamsType& tstStruct_;
 		const WaveFunctionTransfType& waveFunctionTransformation_;
+		size_t lastLanczosVector_;
+		size_t dynCounter_;
 		PsimagLite::ProgressIndicator progress_;
 		ApplyOperatorType applyOpLocal_;
 		RealType gsWeight_;
 		std::vector<VectorWithOffsetType> targetVectors_;
 		std::vector<RealType> weight_;
-		TridiagonalMatrixType ab_;
 		RealType Eg_;
 		RealType weightForContinuedFraction_;
+		TridiagonalMatrixType ab_;
 		//typename IoType::Out io_;
 		
 
@@ -603,7 +612,7 @@ namespace Dmrg {
 	typename IoType_,
 	template<typename> class VectorWithOffsetTemplate>
 	std::ostream& operator<<(std::ostream& os,
-			const DynamicTargetting<LanczosSolverTemplate,
+			const AdaptiveDynamicTargetting<LanczosSolverTemplate,
 			InternalProductTemplate,
 			WaveFunctionTransfTemplate,ModelType_,ConcurrencyType_,IoType_,
 			VectorWithOffsetTemplate>& tst)

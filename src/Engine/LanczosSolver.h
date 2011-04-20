@@ -242,7 +242,6 @@ namespace Dmrg {
 			for (; j < max_nstep; j++) {
 				for (size_t i = 0; i < mat_.rank(); i++) 
 					lanczosVectors(i,j) = y[i];
-				mat_.matrixVectorProduct (x, y); // x+= Hy
 			
 				RealType btmp = 0;
 				oneStepDecomposition(x,y,atmp,btmp);
@@ -281,6 +280,8 @@ namespace Dmrg {
 				RealType& atmp,
 				RealType& btmp) const
 		{
+			mat_.matrixVectorProduct (x, y); // x+= Hy
+
 			atmp = 0.0;
 			for (size_t i = 0; i < mat_.rank(); i++)
 				atmp += utils::myProductT (y[i] ,x[i]);

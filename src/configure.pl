@@ -288,6 +288,7 @@ print FOUT<<EOF;
 #include "GroundStateTargetting.h"
 #include "TimeStepTargetting.h"
 #include "DynamicTargetting.h"
+#include "AdaptiveDynamicTargetting.h"
 #include "CorrectionTargetting.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
@@ -386,6 +387,7 @@ int main(int argc,char *argv[])
 	std::string targetting="GroundStateTargetting";
 	if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) targetting="TimeStepTargetting";
 	if (dmrgSolverParams.options.find("DynamicTargetting")!=std::string::npos) targetting="DynamicTargetting";
+	if (dmrgSolverParams.options.find("AdaptiveDynamicTargetting")!=std::string::npos) targetting="AdaptiveDynamicTargetting";
 	if (dmrgSolverParams.options.find("CorrectionTargetting")!=std::string::npos) targetting="CorrectionTargetting";
 	if (targetting!="GroundStateTargetting" && su2) throw std::runtime_error("SU(2)"
  		" supports only GroundStateTargetting for now (sorry!)\\n");
@@ -417,6 +419,14 @@ int main(int argc,char *argv[])
 		mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 			IoInputType,
 			$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,DynamicTargetting,
+			MySparseMatrixReal>
+			(mp,geometry,dmrgSolverParams,concurrency,io,targetting);
+			return 0;
+	}
+	if (targetting=="AdaptiveDynamicTargetting") {
+		mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
+			IoInputType,
+			$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,AdaptiveDynamicTargetting,
 			MySparseMatrixReal>
 			(mp,geometry,dmrgSolverParams,concurrency,io,targetting);
 			return 0;
@@ -499,9 +509,10 @@ print OBSOUT<<EOF;
 #include "VectorWithOffsets.h"
 #include "GroundStateTargetting.h"
 #include "DmrgSolver.h" // only used for types
-#include "TimeStepTargetting.h" // only used for types
+#include "TimeStepTargetting.h"
 #include "DynamicTargetting.h"
-#include "CorrectionTargetting.h" // only used for types
+#include "AdaptiveDynamicTargetting.h"
+#include "CorrectionTargetting.h" 
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
 
@@ -691,6 +702,7 @@ int main(int argc,char *argv[])
 	std::string targetting="GroundStateTargetting";
 	if (dmrgSolverParams.options.find("TimeStepTargetting")!=std::string::npos) targetting="TimeStepTargetting";
 	if (dmrgSolverParams.options.find("DynamicTargetting")!=std::string::npos) targetting="DynamicTargetting";
+	if (dmrgSolverParams.options.find("AdaptiveDynamicTargetting")!=std::string::npos) targetting="AdaptiveDynamicTargetting";
 	if (dmrgSolverParams.options.find("CorrectionTargetting")!=std::string::npos) targetting="CorrectionTargetting";
 	if (targetting!="GroundStateTargetting" && su2) throw std::runtime_error("SU(2)"
  		" supports only GroundStateTargetting for now (sorry!)\\n");
@@ -719,6 +731,13 @@ int main(int argc,char *argv[])
 	if (targetting=="DynamicTargetting") {
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
 			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,DynamicTargetting,
+			MySparseMatrixReal>
+			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+		return 0;
+	}
+	if (targetting=="AdaptiveDynamicTargetting") {
+		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
+			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,AdaptiveDynamicTargetting,
 			MySparseMatrixReal>
 			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
 		return 0;
