@@ -31,47 +31,9 @@ Please see full open source license included in file LICENSE.
 #ifndef CONTINUED_FRACTION_COLL_H
 #define CONTINUED_FRACTION_COLL_H
 #include <iostream>
-#include "TypeToString.h" // in PsimagLite
+#include "TypeToString.h"
 
 namespace PsimagLite {
-
-//template<typename RealType>
-//std::vector<std::pair<RealType,std::complex<RealType> > > operator+(
-//		const std::vector<std::pair<RealType,std::complex<RealType> > >& v1,
-//		const std::vector<std::pair<RealType,std::complex<RealType> > >& v2)
-//{
-//	std::vector<std::pair<RealType,std::complex<RealType> > > v(v1.size());
-//	for (size_t i=0;i<v1.size();i++) {
-//		v[i].first = v1[i].first;
-//		v[i].second = v1[i].second + v2[i].second;
-//	}
-//	return v;
-//}
-//
-//template<typename RealType>
-//std::vector<std::pair<RealType,std::complex<RealType> > > operator-(
-//		const std::vector<std::pair<RealType,std::complex<RealType> > >& v1,
-//		const std::vector<std::pair<RealType,std::complex<RealType> > >& v2)
-//{
-//	std::vector<std::pair<RealType,std::complex<RealType> > > v(v1.size());
-//	for (size_t i=0;i<v1.size();i++) {
-//		v[i].first = v1[i].first;
-//		v[i].second = v1[i].second - v2[i].second;
-//	}
-//	return v;
-//}
-
-//template<typename RealType>
-//std::vector<std::pair<RealType,std::complex<RealType> > > equal1(
-//		const std::vector<std::pair<RealType,std::complex<RealType> > >& v1)
-//{
-//	std::vector<std::pair<RealType,std::complex<RealType> > > v(v1.size());
-//	for (size_t i=0;i<v1.size();i++) {
-//		v[i].first = v1[i].first;
-//		v[i].second = v1[i].second;
-//	}
-//	return v;
-//}
 
 	template<typename ContinuedFractionType_>
 	class ContinuedFractionCollection  {
@@ -84,6 +46,7 @@ namespace PsimagLite {
 		typedef typename	TridiagonalMatrixType::value_type RealType;
 		typedef typename ContinuedFractionType::MatrixType MatrixType;
 		typedef typename ContinuedFractionType::PlotDataType PlotDataType;
+		typedef typename ContinuedFractionType::PlotParamsType PlotParamsType;
 
 		ContinuedFractionCollection()
 			: progress_("ContinuedFractionCollection",0)
@@ -124,17 +87,24 @@ namespace PsimagLite {
 
 		void plot(
 				PlotDataType& result,
-				const RealType& omega1,
-				const RealType& omega2,
-				const RealType& deltaOmega,
-				const RealType& delta) const
+				const PlotParamsType& params) const
 		{
 			for (size_t i=0;i<data_.size();i++) {
 				PlotDataType result1;
-				data_[i].plot(result1,omega1,omega2,deltaOmega,delta);
+				data_[i].plot(result1,params);
 				accumulate(result, result1);
 			}
 		}
+
+		void plotOne(
+				size_t i,
+				PlotDataType& result,
+				const PlotParamsType& params) const
+		{
+			data_[i].plot(result,params);
+		}
+
+		size_t size() const { return data_.size(); }
 
 	private:
 
@@ -157,6 +127,7 @@ namespace PsimagLite {
 					v1[i].first = v2[i].first;
 					v1[i].second = v2[i].second;
 				} else {
+					if (v1[i].first!=v2[i].first) throw std::runtime_error("CF: x coordinate different\n");
 					v1[i].second += v2[i].second;
 				}
 			}

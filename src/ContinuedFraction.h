@@ -33,6 +33,7 @@ Please see full open source license included in file LICENSE.
 #include "TypeToString.h"
 #include "ProgressIndicator.h"
 #include "Random48.h"
+#include "PlotParams.h"
 
 namespace PsimagLite {
 	template<
@@ -45,6 +46,7 @@ namespace PsimagLite {
 		typedef typename TridiagonalMatrixType::value_type FieldType;
 		typedef Matrix<FieldType> MatrixType;
 		typedef std::vector<std::pair<RealType,ComplexType> > PlotDataType;
+		typedef PlotParams<RealType> PlotParamsType;
 
 		ContinuedFraction(
 				const TridiagonalMatrixType& ab,
@@ -106,16 +108,13 @@ namespace PsimagLite {
 
 		void plot(
 				PlotDataType& result,
-				const RealType& omega1,
-				const RealType& omega2,
-				const RealType& deltaOmega,
-				const RealType& delta) const
+				const PlotParamsType& params) const
 		{
 			size_t counter = 0;
-			size_t n = size_t((omega2 - omega1)/deltaOmega); 
+			size_t n = size_t((params.omega2 - params.omega1)/params.deltaOmega); 
 			if (result.size()==0) result.resize(n);
-			for (RealType omega = omega1;omega <omega2;omega+=deltaOmega) {
-				ComplexType z(omega,delta);
+			for (RealType omega = params.omega1;omega <params.omega2;omega+=params.deltaOmega) {
+				ComplexType z(omega,params.delta);
 				ComplexType res = iOfOmega(z,Eg_,isign_);
 				std::pair<RealType,ComplexType> p(omega,res);
 				result[counter++] = p;

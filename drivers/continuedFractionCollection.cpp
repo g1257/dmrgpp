@@ -33,12 +33,38 @@ typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 typedef ContinuedFraction<RealType,TridiagonalMatrixType> ContinuedFractionType;
 typedef ContinuedFractionCollection<ContinuedFractionType>
 	ContinuedFractionCollectionType;
+typedef ContinuedFractionType::PlotParamsType PlotParamsType;
 
 void usage(const char *progName)
 {
 	std::cerr<<"Usage: "<<progName<<" -f file -l level -b omega1";
 	std::cerr<<" -e omega2 -s omegaStep -d delta\n";
 	std::cerr<<"Conditions: omega1<omega2 omegaStep>0 delta>0\n";
+}
+
+void plotAll(const ContinuedFractionCollectionType& cfCollection,
+		const PlotParamsType& params)
+{
+	ContinuedFractionCollectionType::PlotDataType v;
+	cfCollection.plot(v,params);
+	for (size_t x=0;x<v.size();x++) {
+		std::cout<<v[x].first<<" "<<std::real(v[x].second);
+		std::cout<<" "<<std::imag(v[x].second)<<"\n";
+	}
+}
+
+void plotOneByOne(const ContinuedFractionCollectionType& cfCollection,
+		const PlotParamsType& params)
+{
+	
+	for (size_t i=0;i<cfCollection.size();i++) {
+		ContinuedFractionCollectionType::PlotDataType v;
+		cfCollection.plotOne(i,v,params);
+		for (size_t x=0;x<v.size();x++) {
+			std::cout<<v[x].first<<" "<<std::real(v[x].second);
+			std::cout<<" "<<std::imag(v[x].second)<<"\n";
+		}
+	}
 }
 
 int main(int argc,char *argv[])
@@ -50,8 +76,9 @@ int main(int argc,char *argv[])
 	RealType wend = 0;
 	RealType wstep = 0;
 	RealType delta = 0;
+	bool oneByOne = false;
 	while ((opt = getopt(argc, argv,
-		"f:l:b:e:s:d:")) != -1) {
+		"f:l:b:e:s:d:1")) != -1) {
 		switch (opt) {
 		case 'f':
 			file = optarg;
@@ -71,6 +98,9 @@ int main(int argc,char *argv[])
 		case 'd':
 			delta = atof(optarg);
 			break;
+		case '1':
+			oneByOne = true;
+			break;
 		default:
 			usage(argv[0]);
 			return 1;
@@ -84,11 +114,8 @@ int main(int argc,char *argv[])
 
 	IoSimple::In io(file);
 	ContinuedFractionCollectionType cfCollection(io,level);
-	ContinuedFractionCollectionType::PlotDataType v;
-	cfCollection.plot(v,wbegin,wend,wstep,delta);
-	for (size_t x=0;x<v.size();x++) {
-		std::cout<<v[x].first<<" "<<std::real(v[x].second);
-		std::cout<<" "<<std::imag(v[x].second)<<"\n";
-	}
+	PlotParamsType params(wbegin,wend,wstep,delta);
+	if (!oneByOne) plotAll(cfCollection,params);
+	else plotOneByOne(cfCollection,params);
 }
 
