@@ -110,7 +110,7 @@ namespace Dmrg {
 			io.rewind();
 			this->concatenation = SUM;
 			io.readline(type,"DynamicDmrgType=");
-			io.readline(type,"DynamicDmrgAdvanceEach=");
+			io.readline(advanceEach,"DynamicDmrgAdvanceEach=");
 		  }
 		size_t type;
 		size_t advanceEach;

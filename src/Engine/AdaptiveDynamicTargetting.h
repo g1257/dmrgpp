@@ -210,7 +210,7 @@ namespace Dmrg {
 		size_t size() const
 		{
 			if (allStages(DISABLED)) return 0;
-			return (lastLanczosVector_==1) ? 2 : targetVectors_.size();
+			return lastLanczosVector_+1;
 		}
 		
 
@@ -259,11 +259,17 @@ namespace Dmrg {
 			if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 
 			Eg_ = Eg;
-			wftAllDynVectorsExceptZero();
-			if (dynCounter_==0 || (dynCounter_%tstStruct_.advanceEach) == 0)
-				calcDynVectors(phiNew,direction);
+			if (!allStages(CONVERGING)) {
+				targetVectors_[0] = phiNew;
+				return;
+			}
 
-			if (allStages(CONVERGING)) dynCounter_++;
+			wftAllDynVectors();
+
+			if (lastLanczosVector_<2 || (dynCounter_%tstStruct_.advanceEach) == 0)
+				calcDynVectors();
+
+			if (lastLanczosVector_==2) dynCounter_++;
 		}
 		
 
@@ -271,8 +277,9 @@ namespace Dmrg {
 		{
 			waveFunctionTransformation_.setInitialVector(v,psi_,lrs_);
 			if (!allStages(CONVERGING)) return;
-			std::vector<VectorWithOffsetType> vv(targetVectors_.size());
-			for (size_t i=0;i<targetVectors_.size();i++) {
+			size_t n = lastLanczosVector_+1;
+			std::vector<VectorWithOffsetType> vv(n);
+			for (size_t i=0;i<n;i++) {
 				waveFunctionTransformation_.setInitialVector(vv[i],
 						targetVectors_[i],lrs_);
 				if (std::norm(vv[i])<1e-6) continue;
@@ -305,8 +312,14 @@ namespace Dmrg {
 			typename IoType::In io(f);
 
 			DynamicSerializerType dynS(io,IoType::In::LAST_INSTANCE);
+
 			for (size_t i=0;i<targetVectors_.size();i++)
 				targetVectors_[i] = dynS.vector(i);
+
+			lastLanczosVector_ = targetVectors_.size()-1;
+
+			//! WARNING: USE OF MAGIC BELOW:
+			dynCounter_ = 13; // FIXME: MAYBE SAVE AND LOAD ACTUAL NUMBER HERE
 
 			psi_.load(io,"PSI");
 		}
@@ -399,9 +412,9 @@ namespace Dmrg {
 			}
 		}
 
-		void wftAllDynVectorsExceptZero()
+		void wftAllDynVectors()
 		{
-			for (size_t i=1;i<targetVectors_.size();i++)
+			for (size_t i=0;i<=lastLanczosVector_;i++)
 				wftOneDynVector(i);
 		}
 
@@ -465,24 +478,22 @@ namespace Dmrg {
 			return "undefined";
 		}
 		
-		void calcDynVectors(
-				const VectorWithOffsetType& phi,
-				size_t systemOrEnviron)
+		void calcDynVectors()
 		{
-			for (size_t i=0;i<phi.sectors();i++) {
+			for (size_t i=0;i<targetVectors_[0].sectors();i++) {
 				VectorType sv;
-				size_t i0 = phi.sector(i);
-				phi.extract(sv,i0);
-				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
+				size_t i0 = targetVectors_[0].sector(i);
+				targetVectors_[0].extract(sv,i0);
+				size_t p = lrs_.super().findPartitionNumber(targetVectors_[0].offset(i0));
 				if (i==0) {
 					size_t xLast = (lastLanczosVector_==0) ? 1 : 2;
-					targetVectors_[xLast] = phi;
+					targetVectors_[xLast] = targetVectors_[0];
 				}
 				setLanczosVectors(i0,sv,p);
 			}
 			setWeights();
-			weightForContinuedFraction_ = phi*phi;
-			//weightForContinuedFraction_ = 1.0/weightForContinuedFraction_;
+			if (lastLanczosVector_==1)
+				weightForContinuedFraction_ = targetVectors_[0]*targetVectors_[0];
 		}
 
 		void setLanczosVectors(
@@ -512,18 +523,17 @@ namespace Dmrg {
 			}
 			lanczosSolver.oneStepDecomposition(x,y,a,b);
 			ab_.push(a,b);
-			lastLanczosVector_++;
+			if (lastLanczosVector_<2) lastLanczosVector_++;
 			if(lastLanczosVector_==1) {
 				// f0 is wft'd, do nothing
 				targetVectors_[1].setDataInSector(y,i0);
 				return;
 			}
-			if(lastLanczosVector_==2) {
-				//f0 is wft'd, do nothing
-				//f1 is wft'd, do nothing
-				targetVectors_[2].setDataInSector(y,i0);
-				return;
-			}
+
+			//f0 is wft'd, do nothing
+			//f1 is wft'd, do nothing
+			targetVectors_[2].setDataInSector(y,i0);
+
 			for (size_t i=0;i<targetVectors_.size()-1;i++)
 				targetVectors_[i] = targetVectors_[i+1];
 
@@ -599,9 +609,6 @@ namespace Dmrg {
 		RealType Eg_;
 		RealType weightForContinuedFraction_;
 		TridiagonalMatrixType ab_;
-		//typename IoType::Out io_;
-		
-
 	}; // class DynamicTargetting
 	
 	template<
