@@ -137,6 +137,12 @@ namespace PsimagLite {
 			}
 		}
 
+		void push(const FieldType& a,const FieldType& b)
+		{
+			a_.push_back(a);
+			b_.push_back(b);
+		}
+
 		size_t size() const { return a_.size(); }
 
 	private:

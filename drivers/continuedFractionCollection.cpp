@@ -37,7 +37,7 @@ typedef ContinuedFractionType::PlotParamsType PlotParamsType;
 
 void usage(const char *progName)
 {
-	std::cerr<<"Usage: "<<progName<<" -f file -l level -b omega1";
+	std::cerr<<"Usage: "<<progName<<" -f file  -b omega1";
 	std::cerr<<" -e omega2 -s omegaStep -d delta\n";
 	std::cerr<<"Conditions: omega1<omega2 omegaStep>0 delta>0\n";
 }
@@ -71,20 +71,16 @@ int main(int argc,char *argv[])
 {
 	int opt = 0;
 	std::string file="";
-	int level = IoSimple::In::LAST_INSTANCE;
 	RealType wbegin = 0;
 	RealType wend = 0;
 	RealType wstep = 0;
 	RealType delta = 0;
 	bool oneByOne = false;
 	while ((opt = getopt(argc, argv,
-		"f:l:b:e:s:d:1")) != -1) {
+		"f:b:e:s:d:1")) != -1) {
 		switch (opt) {
 		case 'f':
 			file = optarg;
-			break;
-		case 'l':
-			level = atoi(optarg);
 			break;
 		case 'b':
 			wbegin = atof(optarg);
@@ -113,7 +109,7 @@ int main(int argc,char *argv[])
 	}
 
 	IoSimple::In io(file);
-	ContinuedFractionCollectionType cfCollection(io,level);
+	ContinuedFractionCollectionType cfCollection(io);
 	PlotParamsType params(wbegin,wend,wstep,delta);
 	if (!oneByOne) plotAll(cfCollection,params);
 	else plotOneByOne(cfCollection,params);

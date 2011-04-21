@@ -48,8 +48,10 @@ int main(int argc,char *argv[])
 
 	ContinuedFractionCollectionType cfCollection;
 
+	std::string s = "#Avector";
 	for (int x = 1;x<argc;x++) {
 		IoSimple::In io(argv[x]);
+		io.advance(s,IoSimple::In::LAST_INSTANCE);
 		ContinuedFractionType cf(io);
 		cfCollection.push(cf);
 	}

@@ -344,6 +344,13 @@ namespace PsimagLite {
 							counter++;
 						}
 					}
+					if (level==LAST_INSTANCE && tempSaved!="NOTFOUND") {
+						fin_.close();
+						fin_.open(filename_.c_str());
+						if (counter>1) advance(s,counter-2);
+						return std::pair<std::string,size_t>(tempSaved,counter);
+					}
+					
 					//std::cerr<<"count="<<c<<"\n";
 					if (!found && tempSaved=="NOTFOUND") {
 						if (!beQuiet) {
@@ -355,7 +362,7 @@ namespace PsimagLite {
 					//std::cerr<<"------------\n";
 					return std::pair<std::string,size_t>(tempSaved,counter);
 				}
-
+				
 				size_t count(const std::string& s)
 				{
 					size_t i = 0;
