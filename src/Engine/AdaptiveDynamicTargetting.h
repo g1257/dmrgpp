@@ -158,7 +158,7 @@ namespace Dmrg {
 		 	progress_("DynamicTargetting",0),
 		 	applyOpLocal_(lrs),
 		 	gsWeight_(1.0),
-		 	targetVectors_(3)
+		 	targetVectors_(2)
 
 		{
 			if (!wft.isEnabled()) throw std::runtime_error(" DynamicTargetting "
@@ -209,7 +209,7 @@ namespace Dmrg {
 
 		size_t size() const
 		{
-			if (allStages(DISABLED)) return 0;
+			if (!allStages(CONVERGING)) return 0;
 			return lastLanczosVector_+1;
 		}
 		
@@ -230,8 +230,8 @@ namespace Dmrg {
 			size_t numberOfSites = lrs_.super().block().size();
 			if (site>1 && site<numberOfSites-2) return;
 			// //corner case
-			size_t x = (site==1) ? 0 : numberOfSites-1;
-			evolve(Eg,direction,x,loopNumber);
+			//size_t x = (site==1) ? 0 : numberOfSites-1;
+			//evolve(Eg,direction,x,loopNumber);
 		}
 
 		void evolve(RealType Eg,size_t direction,size_t site,
@@ -266,10 +266,7 @@ namespace Dmrg {
 
 			wftAllDynVectors();
 
-			if (lastLanczosVector_<2 || (dynCounter_%tstStruct_.advanceEach) == 0)
-				calcDynVectors();
-
-			if (lastLanczosVector_==2) dynCounter_++;
+			calcDynVectors(site);
 		}
 		
 
@@ -293,6 +290,7 @@ namespace Dmrg {
 		template<typename IoOutputType>
 		void save(const std::vector<size_t>& block,IoOutputType& io) const
 		{
+			if (ab_.size()<2) return;
 			if (block.size()!=1) throw std::runtime_error(
 					"DynamicTargetting only supports blocks of size 1\n");
 			size_t type = tstStruct_.type;
@@ -478,7 +476,7 @@ namespace Dmrg {
 			return "undefined";
 		}
 		
-		void calcDynVectors()
+		void calcDynVectors(size_t site)
 		{
 			for (size_t i=0;i<targetVectors_[0].sectors();i++) {
 				VectorType sv;
@@ -486,10 +484,10 @@ namespace Dmrg {
 				targetVectors_[0].extract(sv,i0);
 				size_t p = lrs_.super().findPartitionNumber(targetVectors_[0].offset(i0));
 				if (i==0) {
-					size_t xLast = (lastLanczosVector_==0) ? 1 : 2;
-					targetVectors_[xLast] = targetVectors_[0];
+					if (lastLanczosVector_==0)
+						targetVectors_[1] = targetVectors_[0];
 				}
-				setLanczosVectors(i0,sv,p);
+				setLanczosVectors(i0,sv,p,site);
 			}
 			setWeights();
 			if (lastLanczosVector_==1)
@@ -499,8 +497,10 @@ namespace Dmrg {
 		void setLanczosVectors(
 				size_t i0,
 				const VectorType& sv,
-				size_t p)
+				size_t p,
+				size_t site)
 		{
+			//static int firstCall = 1;
 			typename ModelType::ModelHelperType modelHelper(
 					p,lrs_,model_.orbitals());
 			typedef typename LanczosSolverType::LanczosMatrixType
@@ -519,25 +519,36 @@ namespace Dmrg {
 			if(lastLanczosVector_>0) {
 				targetVectors_[1].extract(y,i0);
 				targetVectors_[0].extract(x,i0);
-				x *= -ab_.b(lastLanczosVector_-1);
 			}
+			if (lastLanczosVector_==0) normalize(y);
 			lanczosSolver.oneStepDecomposition(x,y,a,b);
-			ab_.push(a,b);
+			std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
+			bPrev_ = b;
+
+
 			if (lastLanczosVector_<2) lastLanczosVector_++;
-			if(lastLanczosVector_==1) {
-				// f0 is wft'd, do nothing
-				targetVectors_[1].setDataInSector(y,i0);
-				return;
-			}
 
 			//f0 is wft'd, do nothing
 			//f1 is wft'd, do nothing
+			//if (firstCall) {
+				targetVectors_[0].setDataInSector(x,i0);
+				targetVectors_[1].setDataInSector(y,i0);
+			//	firstCall = 0;
+			//	return;
+			//}
+
+			dynCounter_++;
+			return;
+			if ((dynCounter_%tstStruct_.advanceEach) != 0) return;
+			VectorType z1;
+
+			targetVectors_[1].extract(z1,i0);
+			targetVectors_[0].setDataInSector(z1,i0);
+			targetVectors_[1].setDataInSector(x,i0);
+
 			targetVectors_[2].setDataInSector(y,i0);
 
-			for (size_t i=0;i<targetVectors_.size()-1;i++)
-				targetVectors_[i] = targetVectors_[i+1];
-
-			targetVectors_[2].setDataInSector(y,i0);
+			ab_.push(a,b);
 		}
 
 		void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
@@ -572,8 +583,8 @@ namespace Dmrg {
 //				}
 				sum += weight_[r];
 			}
-			for (size_t r=0;r<weight_.size();r++) weight_[r] *= 0.5/sum;
 			gsWeight_ = (lastLanczosVector_==1) ? 0.5 : 0.0;
+			for (size_t r=0;r<weight_.size();r++) weight_[r] *= (1-gsWeight_)/sum;
 		}
 
 		RealType dynWeightOf(VectorType& v,const VectorType& w) const
@@ -593,6 +604,13 @@ namespace Dmrg {
 				targetVectors_[i].resize(lrs_.super().size());
 		}
 		
+		void normalize(VectorType& v) const
+		{
+			RealType x = PsimagLite::norm(v);
+			if (fabs(x)<1e-6) return;
+			v /= x;
+		}
+
 		std::vector<size_t> stage_;
 		VectorWithOffsetType psi_;
 		const LeftRightSuperType& lrs_;
@@ -609,6 +627,7 @@ namespace Dmrg {
 		RealType Eg_;
 		RealType weightForContinuedFraction_;
 		TridiagonalMatrixType ab_;
+		RealType bPrev_;
 	}; // class DynamicTargetting
 	
 	template<
