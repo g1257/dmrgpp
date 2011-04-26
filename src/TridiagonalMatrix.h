@@ -132,8 +132,7 @@ namespace PsimagLite {
 
 			for (size_t i=0;i<a_.size();i++) {
 				m(i,i) = a_[i];
-				if (i+1<a_.size()) m(i,i+1) = b_[i];
-				if (i>0) m(i,i-1) = b_[i];
+				if (i>0) m(i,i-1) = m(i-1,i) = b_[i-1];
 			}
 		}
 
