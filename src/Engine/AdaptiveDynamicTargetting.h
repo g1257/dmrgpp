@@ -230,9 +230,9 @@ namespace Dmrg {
 			evolve(Eg,direction,site,loopNumber);
 			size_t numberOfSites = lrs_.super().block().size();
 			if (site>1 && site<numberOfSites-2) return;
-			// //corner case
-			//size_t x = (site==1) ? 0 : numberOfSites-1;
-			//evolve(Eg,direction,x,loopNumber);
+			//corner case
+			size_t x = (site==1) ? 0 : numberOfSites-1;
+			evolve(Eg,direction,x,loopNumber);
 		}
 
 		void evolve(RealType Eg,size_t direction,size_t site,
@@ -265,7 +265,8 @@ namespace Dmrg {
 				return;
 			}
 
-			wftAllDynVectors();
+			size_t numberOfSites = lrs_.super().block().size();
+			if (site>0 && site<numberOfSites-1) wftAllDynVectors();
 
 			if (!done_) calcDynVectors(site);
 		}
@@ -510,7 +511,6 @@ namespace Dmrg {
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 			size_t iter= ProgramGlobals::LanczosSteps;
 
-
 			//srand48(3243447);
 			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_);
 			RealType a=0,b=0;
@@ -522,10 +522,8 @@ namespace Dmrg {
 			}
 			if (lastLanczosVector_==0) normalize(y);
 			lanczosSolver.oneStepDecomposition(x,y,a,b);
-			if (done_) {
-				std::cerr<<"AB=done\n";
-			} else {
-				std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
+			if (!done_) {
+				//std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
 			}
 
 			if (lastLanczosVector_<2) lastLanczosVector_++;
@@ -534,33 +532,21 @@ namespace Dmrg {
 			//f1 is wft'd, do nothing
 			//if (firstCall) {
 			RealType norm1 = PsimagLite::norm(x);
-			if (norm1>1e-6) {
-				targetVectors_[0].setDataInSector(x,i0);
-				targetVectors_[1].setDataInSector(y,i0);
-				dynCounter_++;
+			if (norm1<1e-6) {
+				//if ((dynCounter_%tstStruct_.advanceEach) != 0)
+					ab_.push(a,b);
+				h.matrixVectorProduct(x,y);
+				a = x*y;
+				//std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
+				ab_.push(a,b);
+				done_=true;
 				return;
 			}
-
-			h.matrixVectorProduct(x,y);
-			a = x*y;
-			std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
-			done_=true;
-
-			//	firstCall = 0;
-			//	return;
-			//}
-
-
-			return;
-			if ((dynCounter_%tstStruct_.advanceEach) != 0) return;
-			VectorType z1;
-
-			targetVectors_[1].extract(z1,i0);
-			targetVectors_[0].setDataInSector(z1,i0);
-			targetVectors_[1].setDataInSector(x,i0);
-
-			targetVectors_[2].setDataInSector(y,i0);
-
+			dynCounter_++;
+			if (lastLanczosVector_>1 && (dynCounter_%tstStruct_.advanceEach) != 0) return;
+			std::cerr<<"AB=---------------------------\n";
+			targetVectors_[0].setDataInSector(x,i0);
+			targetVectors_[1].setDataInSector(y,i0);
 			ab_.push(a,b);
 		}
 
