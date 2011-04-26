@@ -158,7 +158,8 @@ namespace Dmrg {
 		 	progress_("DynamicTargetting",0),
 		 	applyOpLocal_(lrs),
 		 	gsWeight_(1.0),
-		 	targetVectors_(2)
+		 	targetVectors_(2),
+		 	done_(false)
 
 		{
 			if (!wft.isEnabled()) throw std::runtime_error(" DynamicTargetting "
@@ -210,7 +211,7 @@ namespace Dmrg {
 		size_t size() const
 		{
 			if (!allStages(CONVERGING)) return 0;
-			return lastLanczosVector_+1;
+			return lastLanczosVector_;
 		}
 		
 
@@ -266,7 +267,7 @@ namespace Dmrg {
 
 			wftAllDynVectors();
 
-			calcDynVectors(site);
+			if (!done_) calcDynVectors(site);
 		}
 		
 
@@ -274,7 +275,7 @@ namespace Dmrg {
 		{
 			waveFunctionTransformation_.setInitialVector(v,psi_,lrs_);
 			if (!allStages(CONVERGING)) return;
-			size_t n = lastLanczosVector_+1;
+			size_t n = lastLanczosVector_;
 			std::vector<VectorWithOffsetType> vv(n);
 			for (size_t i=0;i<n;i++) {
 				waveFunctionTransformation_.setInitialVector(vv[i],
@@ -413,7 +414,7 @@ namespace Dmrg {
 		void wftAllDynVectors()
 		{
 			for (size_t i=0;i<=lastLanczosVector_;i++)
-				wftOneDynVector(i);
+				if (i<2) wftOneDynVector(i);
 		}
 
 		void wftOneDynVector(size_t i)
@@ -500,7 +501,6 @@ namespace Dmrg {
 				size_t p,
 				size_t site)
 		{
-			//static int firstCall = 1;
 			typename ModelType::ModelHelperType modelHelper(
 					p,lrs_,model_.orbitals());
 			typedef typename LanczosSolverType::LanczosMatrixType
@@ -522,22 +522,35 @@ namespace Dmrg {
 			}
 			if (lastLanczosVector_==0) normalize(y);
 			lanczosSolver.oneStepDecomposition(x,y,a,b);
-			std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
-			bPrev_ = b;
-
+			if (done_) {
+				std::cerr<<"AB=done\n";
+			} else {
+				std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
+			}
 
 			if (lastLanczosVector_<2) lastLanczosVector_++;
 
 			//f0 is wft'd, do nothing
 			//f1 is wft'd, do nothing
 			//if (firstCall) {
+			RealType norm1 = PsimagLite::norm(x);
+			if (norm1>1e-6) {
 				targetVectors_[0].setDataInSector(x,i0);
 				targetVectors_[1].setDataInSector(y,i0);
+				dynCounter_++;
+				return;
+			}
+
+			h.matrixVectorProduct(x,y);
+			a = x*y;
+			std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
+			done_=true;
+
 			//	firstCall = 0;
 			//	return;
 			//}
 
-			dynCounter_++;
+
 			return;
 			if ((dynCounter_%tstStruct_.advanceEach) != 0) return;
 			VectorType z1;
@@ -624,10 +637,10 @@ namespace Dmrg {
 		RealType gsWeight_;
 		std::vector<VectorWithOffsetType> targetVectors_;
 		std::vector<RealType> weight_;
+		bool done_;
 		RealType Eg_;
 		RealType weightForContinuedFraction_;
 		TridiagonalMatrixType ab_;
-		RealType bPrev_;
 	}; // class DynamicTargetting
 	
 	template<
