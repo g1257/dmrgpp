@@ -155,7 +155,7 @@ namespace Dmrg {
 		 	waveFunctionTransformation_(wft),
 		 	lastLanczosVector_(0),
 		 	dynCounter_(0),
-		 	progress_("DynamicTargetting",0),
+		 	progress_("AdaptiveDynamicTargetting",0),
 		 	applyOpLocal_(lrs),
 		 	gsWeight_(1.0),
 		 	targetVectors_(2),
@@ -396,9 +396,9 @@ namespace Dmrg {
 				msg<<"I'm calling the WFT now";
 				progress_.printline(msg,std::cout);
 
-				//if (tstStruct_.aOperators.size()==1)
-				//	guessPhiSectors(phiNew,i,systemOrEnviron);
-				//else
+//				if (tstStruct_.aOperators.size()==1)
+//					guessPhiSectors(phiNew,i,systemOrEnviron);
+//				else
 					phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
@@ -544,13 +544,13 @@ namespace Dmrg {
 			}
 			dynCounter_++;
 			if (lastLanczosVector_>1 && (dynCounter_%tstStruct_.advanceEach) != 0) return;
-			std::cerr<<"AB=---------------------------\n";
+			//std::cerr<<"AB=---------------------------\n";
 			targetVectors_[0].setDataInSector(x,i0);
 			targetVectors_[1].setDataInSector(y,i0);
 			ab_.push(a,b);
 		}
 
-		void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
+		void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron) const
 		{
 			FermionSign fs(lrs_.left(),tstStruct_.electrons);
 			if (allStages(CONVERGING)) {

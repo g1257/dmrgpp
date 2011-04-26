@@ -372,7 +372,7 @@ namespace Dmrg {
 			
 			while(true) {
 				
-				std::ostringstream msg;
+
 				if (size_t(stepCurrent_)>=sitesIndices_.size()) throw std::runtime_error("stepCurrent_ too large!\n");
 				if (direction==EXPAND_SYSTEM) {
 					lrs_.growLeftBlock(model_,pS,sitesIndices_[stepCurrent_]);
@@ -384,11 +384,12 @@ namespace Dmrg {
 				
 				lrs_.printSizes("finite",std::cout);
 				if (verbose_) {
+					std::ostringstream msg;
 					msg<<" stackS="<<checkpoint_.stackSize(CheckpointType::SYSTEM);
 					msg<<" stackE="<<checkpoint_.stackSize(CheckpointType::ENVIRON)<< " step="<<stepCurrent_;
 					msg<<" loopIndex="<<loopIndex<<" length="<<stepLength<<" StepFinal="<<stepFinal;
+					progress_.printline(msg,std::cout);
 				}
-				progress_.printline(msg,std::cout);
 				
 				updateQuantumSector(lrs_.sites());
 				

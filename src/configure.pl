@@ -179,8 +179,6 @@ sub createMakefile
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
 	my $compiler = compilerName();
 	my $headerFiles = join(' ', glob("Engine/*.h Models/*/*.h Geometries/*.h"));
-	my @litProgFiles = glob("Engine/*.w Models/*/*.w Geometries/*.w");
-	my $litProgTargets = getLitProgTargets(\@litProgFiles);
 	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 print FOUT<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Modify configure.pl instead
@@ -215,7 +213,6 @@ lanczos: \$(HEADERSH)
 clean:
 	rm -f core* \$(EXENAME) *.o *.ii *.tt
 
-$litProgTargets
 ######## End of Makefile ########
 
 EOF
@@ -223,25 +220,6 @@ EOF
 	print STDERR "File Makefile has been written\n";
 }
 
-sub getLitProgTargets
-{
-	my ($array)=@_;
-	my $x = "";
-	my $litProgTool = "nuweb.pl -v -l  -s  -d ";
-	foreach my $f (@$array) {
-		my $fh = $f;
-		$fh =~ s/\.w$/\.h/;
-		$x = $x."$fh: $f\n";
-		my $dir = $f;
-		$dir =~ s/\/[^\/]+$/\//;
-		my $fnd = $f;
-		$fnd =~ s/$dir//;
-		my $dirChange = computeBackwardMovements($dir);
-		$x = $x."\t cd $dir; $dirChange$litProgTool $fnd\n";
-		$x = $x."\n";
-	}
-	return $x;
-}
 
 sub computeBackwardMovements
 {
