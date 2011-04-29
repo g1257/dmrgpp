@@ -235,32 +235,14 @@ namespace Dmrg {
 			evolve(Eg,direction,x,loopNumber);
 		}
 
+		// FIXME: MAKE PRIVATE:
 		void evolve(RealType Eg,size_t direction,size_t site,
-				size_t loopNumber)
+									size_t loopNumber)
 		{
-			size_t count =0;
-			VectorWithOffsetType phiOld = psi_;
-			VectorWithOffsetType phiNew;
-			VectorWithOffsetType vectorSum;
-
-			size_t max = tstStruct_.sites.size();
-
-			if (noStageIs(DISABLED)) max = 1;
-
-			// Loop over each operator that needs to be applied
-			// in turn to the g.s.
-			for (size_t i=0;i<max;i++) {
-				count += evolve(i,phiNew,phiOld,Eg,direction,site,loopNumber,max-1);
-				if (tstStruct_.concatenation==PRODUCT) {
-					phiOld = phiNew;
-				} else {
-					vectorSum += phiNew;
-				}
-			}
-			if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
-
 			Eg_ = Eg;
 			if (!allStages(CONVERGING)) {
+				VectorWithOffsetType phiNew;
+				getPhi(phiNew,Eg,direction,site,loopNumber);
 				targetVectors_[0] = phiNew;
 				return;
 			}
@@ -271,6 +253,32 @@ namespace Dmrg {
 			if (!done_) calcDynVectors(site);
 		}
 		
+		// FIXME: MAKE PRIVATE:
+		void getPhi(VectorWithOffsetType& phiNew,RealType Eg,size_t direction,size_t site,
+				size_t loopNumber)
+		{
+			size_t count =0;
+			VectorWithOffsetType phiOld = psi_;
+
+			VectorWithOffsetType vectorSum;
+
+			size_t max = tstStruct_.sites.size();
+			if (allStages(CONVERGING)) max = 1;
+
+			// Loop over each operator that needs to be applied
+			// in turn to the g.s.
+			for (size_t i=0;i<max;i++) {
+				//std::cerr<<"XYZ 0 i="<<i<<" site="<<site<<"\n";
+				count += evolve(i,phiNew,phiOld,Eg,direction,site,loopNumber,max-1);
+				if (tstStruct_.concatenation==PRODUCT) {
+					phiOld = phiNew;
+				} else {
+					vectorSum += phiNew;
+				}
+			}
+			if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
+		}
+
 
 		void initialGuess(VectorWithOffsetType& v) const
 		{
@@ -341,12 +349,13 @@ namespace Dmrg {
 			
 			if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return 0;
 			
-			
+			//std::cerr<<"XYZ A i="<<i<<" site="<<site<<" lastI="<<lastI<<"\n";
 			if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return 0;
-			
-			
+			//std::cerr<<"XYZ B i="<<i<<" site="<<site<<" lastI="<<lastI<<"\n";
+			//std::cerr<<"XYZ stage="<<stage_[0]<<" "<<stage_[1]<<" site="<<site<<"\n";
 			if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
 			else stage_[i]=CONVERGING;
+			//std::cerr<<"XYZ AFTER stage="<<stage_[0]<<" "<<stage_[1]<<" site="<<site<<"\n";
 			if (stage_[i] == OPERATOR) checkOrder(i);
 			
 			
