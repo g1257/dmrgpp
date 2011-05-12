@@ -158,19 +158,6 @@ sub askQuestions
 		$_=" $lapack ";
 	}
 	$lapack = $_;
-	
-	#print "Will the targetting involve real or complex vectors?\n";
-	#print "(Note: Only TimeStepTargetting involves complex vectors.)\n";
-	#print "Available: Real Complex\n";
-	#print "Default is: Real (press ENTER): ";
-	#$_=<STDIN>;
-	#chomp;
-	#if ($_ eq "" or $_ eq "\n") {
-	#	$_="Real";
-	#}
-	#$targetting = $_;
-	
-	
 }
 
 
@@ -178,7 +165,6 @@ sub createMakefile
 {
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
 	my $compiler = compilerName();
-	my $headerFiles = join(' ', glob("Engine/*.h Models/*/*.h Geometries/*.h"));
 	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 print FOUT<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Modify configure.pl instead
@@ -196,23 +182,34 @@ if ($mpi) {
 	print FOUT "CXX = $compiler -pg -O2 -DNDEBUG\n";
 }
 print FOUT<<EOF;
+EXENAME = dmrg
 all: \$(EXENAME)
-HEADERSH = $headerFiles
 
-all: dmrg
+dmrg:  dmrg.o
+	\$(CXX) -o dmrg dmrg.o \$(LDFLAGS)  
 
-dmrg:  \$(HEADERSH) 
-	\$(CXX) -o dmrg  \$(CPPFLAGS)  dmrg.cpp \$(LDFLAGS)  
+# dependencies brought about by Makefile.dep
+dmrg.o:
+	\$(CXX) \$(CPPFLAGS) -c dmrg.cpp
 
-observe:  \$(HEADERSH)
-	\$(CXX) -o observe \$(CPPFLAGS) observe.cpp \$(LDFLAGS)
+Makefile.dep: dmrg.cpp
+	\$(CXX) \$(CPPFLAGS) -MM dmrg.cpp  > Makefile.dep
 
-lanczos: \$(HEADERSH)
-	\$(CXX) -o lanczos \$(CPPFLAGS) lanczos.cpp \$(LDFLAGS)
+observe:  observe.o
+	\$(CXX) -o observe observe.o \$(LDFLAGS)
+
+# dependencies brought about by MakefileObserver.dep
+observe.o:
+	\$(CXX) \$(CPPFLAGS) -c observe.cpp
+
+MakefileObserver.dep: observe.cpp
+	\$(CXX) \$(CPPFLAGS) -MM dmrg.cpp  > MakefileObserver.dep
 
 clean:
-	rm -f core* \$(EXENAME) *.o *.ii *.tt
+	rm -f core* \$(EXENAME) *.o
 
+include Makefile.dep
+include MakefileObserver.dep
 ######## End of Makefile ########
 
 EOF
