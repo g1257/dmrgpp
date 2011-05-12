@@ -211,7 +211,7 @@ namespace Dmrg {
 				A.makeDiagonal(model_.hilbertSize(),1.0);
 				std::pair<size_t,size_t> zeroZero(0,0);
 				OperatorType opIdentity(A,1,zeroZero,1,su2Related1);
-
+				observe_.setBrackets("time","time");
 				FieldType superDensity = observe_.template
 						onePoint<ApplyOperatorType>(0,opIdentity);
 				std::cout<<"SuperDensity(Weight of the timeVector)="<<

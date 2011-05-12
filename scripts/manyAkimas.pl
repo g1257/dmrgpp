@@ -3,15 +3,19 @@
 use strict;
 
 #dmrgpp52.o165
-my @files=@ARGV;
+
+my $whatState = shift;
+my $whatObservable = shift;
+my $n;
+
+my @files = @ARGV;
 buildFilenames() if (!defined($files[0]));
 
-my $firstSite = 0;
-my $n = 6;
-my $whatState = "time";
-my $whatObservable = "nd";
-
 foreach my $file (@files) {
+	my @allSites = getAllSites($file);
+	@allSites = sort @allSites;
+	my $firstSite = $allSites[0];
+	$n = $allSites[$#allSites] - $firstSite + 1;
 	for (my $site=$firstSite;$site<$n;$site++) {
 		my $fout = $file;
 		$fout =~ s/\..*$//;
@@ -37,5 +41,22 @@ sub buildFilenames
 	@files = split;
 	close(PIPE);
 
+}
+
+sub getAllSites
+{
+	my ($file) = @_;
+	open(FILE,$file) or die "Cannot open $file: $!\n";
+	my $counter = 0;
+	my @a;
+	while(<FILE>) {
+		next unless (/^\d+/);
+		my @temp = split;
+		$a[$counter++]=$temp[0];
+	}
+	close(FILE);
+	#print STDERR "@a\n";
+	#die "Testing\n";
+	return @a;
 }
 

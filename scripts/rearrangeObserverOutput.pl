@@ -17,16 +17,18 @@ sub printSuper
 	 my ($file)=@_;
 	 open(FILE,$file) or die "Cannot open file $file: $!\n";
 	 my $found = 0;
+	 my $saved = "NOT_FOUND";
 	 while(<FILE>) {
 	 	if (/superdensity/i) {
-			print "###\n";
-			print;
-			$found  = 1;
-			last;
+			$saved = $_;
+			$found = 1;
 		}
 	}
 	close(FILE);
 	($found) or die "$0: Cannot find superdensity in file $file\n";
+
+	print "###\n";
+	print $saved;
 }
 
 sub rearrange
