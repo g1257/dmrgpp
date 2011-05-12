@@ -71,7 +71,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef DENSITY_MATRIX_LOCAL_H
 #define DENSITY_MATRIX_LOCAL_H
-
+#include "ProgressIndicator.h"
+#include "TypeToString.h"
 #include "BlockMatrix.h"
 #include "DensityMatrixBase.h"
 
@@ -90,7 +91,11 @@ namespace Dmrg {
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef BlockMatrix<DensityMatrixElementType,PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
+		typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
+
 		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
+
+		static int const parallelRank_ = 0; // FIXME <-- ADD PARALLELISM
 
 	public:
 		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
@@ -101,9 +106,11 @@ namespace Dmrg {
 			const DmrgBasisWithOperatorsType& pBasisSummed,
 			const DmrgBasisType& pSE,
 			size_t direction,bool debug=false,bool verbose=false) 
-
-		: data_(pBasis.size() ,pBasis.partition()-1),
-				debug_(debug),verbose_(verbose)
+		:
+			progress_("DensityMatrixLocal",parallelRank_),
+			data_(pBasis.size(),
+			pBasis.partition()-1),
+			debug_(debug),verbose_(verbose)
 		{
 		}
 
@@ -134,7 +141,12 @@ namespace Dmrg {
 				const DmrgBasisWithOperatorsType& pBasisSummed,
 				DmrgBasisType const &pSE,
 				int direction)
-		{	
+		{
+			{
+				std::ostringstream msg;
+				msg<<"Init partition for all targets";
+				progress_.printline(msg,std::cout);
+			}
 			//loop over all partitions:
 			for (size_t m=0;m<pBasis.partition()-1;m++) {
 				// size of this partition
@@ -148,16 +160,23 @@ namespace Dmrg {
 				
 				// if we are to target the ground state do it now:
 				if (target.includeGroundStage())
-					initPartition(matrixBlock,pBasis,m,target.gs(),pBasisSummed,pSE,direction,w);
+					initPartition(matrixBlock,pBasis,m,target.gs(),
+							pBasisSummed,pSE,direction,w);
 				
 				// target all other states if any:
 				for (size_t i=0;i<target.size();i++) {
 					w = target.weight(i)/target.normSquared(i);
-					initPartition(matrixBlock,pBasis,m,target(i),pBasisSummed,pSE,direction,w);
+					initPartition(matrixBlock,pBasis,m,target(i),
+							pBasisSummed,pSE,direction,w);
 				}
 				
 				// set this matrix block into data_
 				data_.setBlock(m,pBasis.partition(m),matrixBlock);
+			}
+			{
+				std::ostringstream msg;
+				msg<<"Done with init partition";
+				progress_.printline(msg,std::cout);
 			}
 		}
 
@@ -172,6 +191,7 @@ namespace Dmrg {
     					DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_>& dm);
 
 	private:
+		ProgressIndicatorType progress_;
 		BlockMatrixType data_;
 		bool debug_,verbose_;
 
@@ -181,7 +201,7 @@ namespace Dmrg {
 				const TargetVectorType& v,
 				DmrgBasisWithOperatorsType const &pBasisSummed,
 				DmrgBasisType const &pSE,
-    				size_t direction,
+    			size_t direction,
 				RealType weight)
 		{
 			if (direction!=EXPAND_SYSTEM) 

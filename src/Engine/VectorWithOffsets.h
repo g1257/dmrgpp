@@ -243,7 +243,30 @@ namespace Dmrg {
 					else return zero_;
 				}*/
 				
-				return findValue(i);
+				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+					size_t j = nonzeroSectors_[jj];
+					if (i<offsets_[j] || i>=offsets_[j+1]) continue;
+					return data_[j][i-offsets_[j]];
+				}
+				return zero_;
+
+//				size_t x = nonzeroSectors_.size()/2;
+//				size_t j = 0;
+//				while(true) {
+//					j = nonzeroSectors_[x];
+//					if (i<offsets_[j]) {
+//						if (x==0) return zero_;
+//						x--;
+//						continue;
+//					}
+//					if (i>=offsets_[j+1]) {
+//						x++;
+//						if (x==nonzeroSectors_.size()) return zero_;
+//						continue;
+//					}
+//					break;
+//				}
+//				return data_[j][i-offsets_[j]];
 			}
 			
 			FieldType& operator[](size_t i) //__attribute__((always_inline))
@@ -398,39 +421,8 @@ namespace Dmrg {
 					if (fabs(std::real(v[i]))>eps || fabs(std::imag(v[i]))>eps) return false;
 				return true; 
 			}
-			
-			/*const FieldType& findValue(size_t i) const
-			{
-				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-					size_t j = nonzeroSectors_[jj];
-					if (i<offsets_[j] || i>=offsets_[j+1]) continue;
-					return data_[j][i-offsets_[j]];
-				}
-				return zero_;
-			}*/
 
-			const FieldType& findValue(size_t i) const
-			{
-				size_t x = nonzeroSectors_.size()/2;
-				size_t j = 0;
-				while(true) {
-					j = nonzeroSectors_[x];
-					if (i<offsets_[j]) {
-						if (x==0) return zero_;
-						x--;
-						continue;
-					}
-					if (i>=offsets_[j+1]) {
-						x++;
-						if (x==nonzeroSectors_.size()) return zero_;
-						continue;
-					}
-					break;
-				}
-				return data_[j][i-offsets_[j]];
 
-			}
-			
 			PsimagLite::ProgressIndicator progress_;
 			size_t size_;
 			std::vector<VectorType> data_;
