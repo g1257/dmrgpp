@@ -75,7 +75,7 @@ Diff $result $oracle > $diff
 [PostProcessingTimeEvolution]
 Let $input = $inputsDir input$testNum.inp
 Let $result = $srcDir rawOutput$testNum.txt
-Let $oracle = $oraclesDir rawOutput$testNum.txt
+Let $oracle = $oraclesDir postProcessingTimeEvolution$testNum.txt
 Let $diff = $resultsDir rawOutput$testNum.diff
 Let $options = time
 CallOnce dmrg

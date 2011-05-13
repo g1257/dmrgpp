@@ -1,5 +1,4 @@
 dmrg
 energy
-observables
 PostProcessingTimeEvolution
 
