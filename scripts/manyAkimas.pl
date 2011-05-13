@@ -1,11 +1,14 @@
 #!/usr/bin/perl -w
 
 use strict;
-
-#dmrgpp52.o165
+use GetTimeObs;
+use AkimaSumBatch;
 
 my $whatState = shift;
 my $whatObservable = shift;
+my $start = shift;
+my $end = shift;
+my $points = shift;
 my $n;
 
 my @files = @ARGV;
@@ -21,7 +24,10 @@ foreach my $file (@files) {
 		$fout =~ s/\..*$//;
 		$fout = $fout.".${whatState}-${whatObservable}".$site;
 		die "$0: input and output files are the same\n" if ($fout eq $file);
-		system("perl getTimeObs.pl $site $file $whatState $whatObservable> $fout");
+		my $fh;
+		open($fh,"> $fout") or die "Cannot open file $fout for writing: $!\n";
+		GetTimeObs::main($fh,$site,$file,$whatState,$whatObservable);
+		close($fh);
 	}
 }
 
@@ -31,7 +37,10 @@ foreach my $file (@files) {
 	my $fout = $fin."t";
 	die "$0: input and output files are the same\n" if ($fout eq $file);
 	my $x = $n;
-	system("perl akimaSumBatch.pl $fin $x \"\" > $fout");
+	my $fh;
+	open($fh,"> $fout") or die "Cannot open file $fout for writing: $!\n";
+	AkimaSumBatch::main($fh,$start,$end,$points,$fin,$x,"");
+	close($fh);
 }
 
 sub buildFilenames

@@ -20,6 +20,9 @@ sub printSuper
 	 my $saved = "NOT_FOUND";
 	 while(<FILE>) {
 	 	if (/superdensity/i) {
+			my $newSuperDensity = $_;
+			last if (!($saved eq "NOT_FOUND") and 
+				diffBetweenSuperDensities($newSuperDensity,$saved)<1e-5);
 			$saved = $_;
 			$found = 1;
 		}
@@ -29,6 +32,24 @@ sub printSuper
 
 	print "###\n";
 	print $saved;
+}
+
+sub diffBetweenSuperDensities
+{
+	my ($t1,$t2)=@_;
+	my $t1N = getNumericSuperDensity($t1);
+	my $t2N = getNumericSuperDensity($t2);
+	return abs($t2N - $t1N);
+}
+
+#SuperDensity(Weight of the timeVector)=(1.23456,0)
+sub getNumericSuperDensity
+{
+	my ($t) = @_;
+	my $sLabel = "SuperDensity(Weight of the timeVector)=(";
+	$t=~s/\Q$sLabel//;
+	$t=~s/,.*$//;
+	return $t;
 }
 
 sub rearrange
