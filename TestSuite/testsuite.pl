@@ -395,7 +395,7 @@ sub saveHashTable
 sub testSuite
 {
 	my $tempNum = $testNum;
-	$tempNum -= 100 if($testNum >= 100);
+	#$tempNum -= 100 if($testNum >= 100);
 	my $procFile = $inputsDir."processing$tempNum.txt";
 	my $procLib = $inputsDir."processingLibrary.txt";
 	
@@ -408,7 +408,7 @@ sub testSuite
 			saveHashTable();
 			print "*******END OF TEST ".$testNum."*******\n";
 		} else {
-			die "$!";
+			die "Could not validate $procFile: $!";
 		}
 	} else {
 		die "$!";
