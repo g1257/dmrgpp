@@ -240,9 +240,9 @@ namespace Dmrg {
 									size_t loopNumber)
 		{
 			Eg_ = Eg;
+			VectorWithOffsetType phiNew;
+			if (ab_.size()==0) getPhi(phiNew,Eg,direction,site,loopNumber);
 			if (!allStages(CONVERGING)) {
-				VectorWithOffsetType phiNew;
-				getPhi(phiNew,Eg,direction,site,loopNumber);
 				targetVectors_[0] = phiNew;
 				return;
 			}
@@ -250,7 +250,7 @@ namespace Dmrg {
 			size_t numberOfSites = lrs_.super().block().size();
 			if (site>0 && site<numberOfSites-1) wftAllDynVectors();
 
-			if (!done_) calcDynVectors(site);
+			if (!done_) calcDynVectors(site,phiNew);
 		}
 		
 		// FIXME: MAKE PRIVATE:
@@ -487,7 +487,7 @@ namespace Dmrg {
 			return "undefined";
 		}
 		
-		void calcDynVectors(size_t site)
+		void calcDynVectors(size_t site,const VectorWithOffsetType& phiNew)
 		{
 			for (size_t i=0;i<targetVectors_[0].sectors();i++) {
 				VectorType sv;
@@ -498,7 +498,7 @@ namespace Dmrg {
 					if (lastLanczosVector_==0)
 						targetVectors_[1] = targetVectors_[0];
 				}
-				setLanczosVectors(i0,sv,p,site);
+				setLanczosVectors(i0,sv,p,site,phiNew);
 			}
 			setWeights();
 			if (lastLanczosVector_==1)
@@ -509,7 +509,8 @@ namespace Dmrg {
 				size_t i0,
 				const VectorType& sv,
 				size_t p,
-				size_t site)
+				size_t site,
+				const VectorWithOffsetType& phiNew)
 		{
 			typename ModelType::ModelHelperType modelHelper(
 					p,lrs_,model_.orbitals());
@@ -556,6 +557,20 @@ namespace Dmrg {
 			//std::cerr<<"AB=---------------------------\n";
 			targetVectors_[0].setDataInSector(x,i0);
 			targetVectors_[1].setDataInSector(y,i0);
+			if ((dynCounter_%tstStruct_.advanceEach) != 0) return;
+			if (ab_.size()>0) {
+				ab_.push(a,b);
+				return;
+			}
+			// first push:
+			VectorType xx(sv.size(),0.0);
+			VectorType yy;
+			phiNew.extract(yy,i0);
+			normalize(yy);
+			RealType a1=0,b1=0;
+			lanczosSolver.oneStepDecomposition(xx,yy,a1,b1);
+			ab_.push(a1,b1);
+			if (tstStruct_.advanceEach<=1) return;
 			ab_.push(a,b);
 		}
 
