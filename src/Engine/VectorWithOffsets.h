@@ -277,7 +277,9 @@ namespace Dmrg {
 						return data_[j][i-offsets_[j]];
 					}
 				}
-				throw std::runtime_error("VectorWithOffsets can't build itself dynamically yet (sorry!)\n");
+				std::cerr<<"VectorWithOffsets can't build itself dynamically yet (sorry!)\n";
+				return data_[0][0];
+				//throw std::runtime_error("VectorWithOffsets can't build itself dynamically yet (sorry!)\n");
 			}
 			
 			/*ThisType& operator= (const ThisType& f)
