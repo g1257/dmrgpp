@@ -8,7 +8,7 @@
 //! A class to interpolate using akima spline
 template<typename VectorType>
 class AkimaSpline {
-	typedef typename VectorType::ValueType RealType;
+	typedef typename VectorType::value_type RealType;
 	
 	struct AkimaStruct {
 		RealType x0,x1,a0,a1,a2,a3;

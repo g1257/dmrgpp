@@ -141,19 +141,30 @@ namespace PsimagLite {
 		template<typename S>
 		CrsMatrix(const CrsMatrix<S>& a)
 		{
+			colind_=a.colind_;
+			rowptr_=a.rowptr_;
+			values_=a.values_;
+			size_ = a.size_;
+			/*
 			resize(a.getSize(),a.nonZero());
 			for (int i=0;i<colind_.size();i++) colind_[i]=a.getCol(i);
 			for (int i=0;i<rowptr_.size();i++) rowptr_[i]=a.getRowPtr(i);
 			for (int i=0;i<values_.size();i++) values_[i]=a.getValue(i);
+			*/
 		}
 
 		template<typename S>
 		CrsMatrix(const CrsMatrix<std::complex<S> >& a)
 		{
-			resize(a.getSize(),a.nonZero());
+			colind_=a.colind_;
+			rowptr_=a.rowptr_;
+			values_=a.values_;
+			size_ = a.size_;
+			/*resize(a.getSize(),a.nonZero());
 			for (int i=0;i<colind_.size();i++) colind_[i]=a.getCol(i);
 			for (int i=0;i<rowptr_.size();i++) rowptr_[i]=a.getRowPtr(i);
 			for (int i=0;i<values_.size();i++) values_[i]=real(a.getValue(i));
+			*/
 		}
 
 		CrsMatrix(const Matrix<T>& a)
