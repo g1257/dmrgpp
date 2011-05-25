@@ -110,12 +110,15 @@ namespace Dmrg {
 			}
 			if (sopt == 0 && finiteLoop[i].saveOption ==1) {
 				sopt = 1;
+				// relaxing this requirement:
 				if (size_t(x) != 1 && size_t(x)!=totalSites-2) {
-					s = "Error for finite loop number "
+					s = "WARNING: EXPERIMENTAL FEATURE HIT: for finite loop number "
 						+ ttos(i) + "\n";
 					s += "Saving finite loops must start at the left or";
 					s += " right end of the lattice\n";
-					throw std::runtime_error(s.c_str());
+					s += "You will have to use sweeps=" + ttos(x) + 
+						" when running the observer code\n";
+					std::cerr<<s;
 				}
 			}
 			// naive location:

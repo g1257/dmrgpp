@@ -16,7 +16,7 @@ buildFilenames() if (!defined($files[0]));
 
 foreach my $file (@files) {
 	my @allSites = getAllSites($file);
-	@allSites = sort @allSites;
+	@allSites = sort {$a <=> $b} @allSites;
 	my $firstSite = $allSites[0];
 	$n = $allSites[$#allSites] - $firstSite + 1;
 	for (my $site=$firstSite;$site<$n;$site++) {

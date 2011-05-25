@@ -504,16 +504,27 @@ typedef PsimagLite::IoSimple::In IoInputType;
 
 template<typename ConcurrencyType,typename VectorWithOffsetType,typename ModelType,typename SparseMatrixType,
 typename OperatorType,typename TargettingType,typename GeometryType>
-bool observeOneFullSweep(IoInputType& io,
-	const GeometryType& geometry,const ModelType& model,const std::string& obsOptions,
-		bool hasTimeEvolution,ConcurrencyType& concurrency)
+bool observeOneFullSweep(
+	IoInputType& io,
+	const GeometryType& geometry,
+	const ModelType& model,
+	const std::string& obsOptions,
+	bool hasTimeEvolution,
+	ConcurrencyType& concurrency)
 {
 	bool verbose = false;
-	size_t n=geometry.numberOfSites();
 	typedef typename SparseMatrixType::value_type FieldType;
 	typedef Observer<FieldType,VectorWithOffsetType,ModelType,IoInputType> 
 		ObserverType;
 	typedef ObservableLibrary<ObserverType,TargettingType> ObservableLibraryType;
+	size_t n  = geometry.numberOfSites();
+	std::string sSweeps = "sweeps=";
+	std::string::size_type begin = obsOptions.find(sSweeps);
+	if (begin != std::string::npos) {
+		std::string sTmp = obsOptions.substr(begin+sSweeps.length(),std::string::npos);
+		//std::cout<<"sTmp="<<sTmp<<"\\n";
+		n = atoi(sTmp.c_str());
+	}
 	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,concurrency,verbose);
 	
 	bool ot = false;
@@ -592,9 +603,14 @@ EOF
 		template<typename> class> class TargettingTemplate,
 	typename MySparseMatrix
 >
-void mainLoop(ParametersModelType& mp,GeometryType& geometry,const std::string& targetting,
-		ConcurrencyType& concurrency, IoInputType& io,const std::string& datafile,
-		const std::string& obsOptions)
+void mainLoop(
+				ParametersModelType& mp,
+				GeometryType& geometry,
+				const std::string& targetting,
+				ConcurrencyType& concurrency,
+				IoInputType& io,
+				const std::string& datafile,
+				const std::string& obsOptions)
 {
 	typedef ReflectionSymmetryEmpty<RealType,MySparseMatrix> ReflectionSymmetryType;
 	typedef Operator<RealType,MySparseMatrix> OperatorType;
@@ -625,7 +641,6 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,const std::string& 
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 	TargettingParamsType tsp(io,model);
 	
-	//size_t n=geometry.numberOfSites();
 	bool moreData = true;
 	IoInputType dataIo(datafile);
 	bool hasTimeEvolution = (targetting == "TimeStepTargetting") ? true : false;

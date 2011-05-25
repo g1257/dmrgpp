@@ -606,7 +606,7 @@ namespace Dmrg {
 //				}
 				sum += weight_[r];
 			}
-			gsWeight_ = 0.5;
+			gsWeight_ = 0.2;
 			for (size_t r=0;r<weight_.size();r++) weight_[r] *= (1-gsWeight_)/sum;
 		}
 
