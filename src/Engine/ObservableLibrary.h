@@ -114,9 +114,12 @@ namespace Dmrg {
 		  concurrency_(concurrency),
 		  observe_(io,numberOfSites-2,hasTimeEvolution,model,
 				  concurrency,verbose),
-				  matrixNup_(model_.getOperator("nup")),
-				 matrixNdown_(model_.getOperator("ndown")),szsz_(0,0)
+				 szsz_(0,0)
 		{
+			if (hasTimeEvolution) {
+				fullMatrixToCrsMatrix(matrixNup_,model_.getOperator("nup"));
+				fullMatrixToCrsMatrix(matrixNdown_,model_.getOperator("ndown"));
+			}
 		}
 
 		void measure(const std::string& label,size_t rows,size_t cols)
