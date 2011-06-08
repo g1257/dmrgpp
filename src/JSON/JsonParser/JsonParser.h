@@ -91,7 +91,7 @@ namespace JsonParser {
       while (isWhiteSpace(nextClass)) { 
 	
 	if (inputStream.eof()) {
-	  nextChar = C_EOF; // <-- changed by G.A.
+	  nextChar = EOF;
 	  nextClass = C_EOF;
 	  return result;
 	}
@@ -99,7 +99,7 @@ namespace JsonParser {
 	nextChar = inputStream.get();
 
 	if (nextChar == static_cast<wchar_t>(WEOF)) {
-	  nextChar = C_EOF; //<-- changed by G.A.
+	  nextChar = EOF;
 	  nextClass = C_EOF;
 	  return result;
 	}

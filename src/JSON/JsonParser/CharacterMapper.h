@@ -14,7 +14,7 @@
 
 #include <wchar.h>
 #include <string>
-
+#include <stdexcept>
 namespace JsonParser {
 
   class CharacterMapper {

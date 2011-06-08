@@ -17,6 +17,7 @@
 #include <map>
 #include <vector>
 #include "CharacterMapper.h"
+#include "MatrixLike.h"
 
 namespace JsonParser {
   
@@ -103,7 +104,7 @@ namespace JsonParser {
 	  
 	  FieldType& value(mat(datarow,datacol));
 	  consume(value);
-	  //	  std::cout << "mat(" << datarow << "," << datacol << ")= " << value << "\n";
+          //std::cout << "mat(" << datarow << "," << datacol << ")= " << value << "\n";
 	  datacol++;
 	  consume(L',');
 
@@ -111,6 +112,8 @@ namespace JsonParser {
 	datarow++;
 	consume(L',');
       }
+      //      std::cout << "consume done\n";
+      //      psimag::MatrixLike::printList(mat,std::cout);
     }
     
     //======================================================================

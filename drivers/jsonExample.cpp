@@ -9,7 +9,7 @@
  *
  */
 
-#include "JsonParser.h"
+#include "JsonReader.h"
 #include "DefaultContext.h"
 #include <wchar.h>
 #include <iostream>
@@ -23,16 +23,24 @@ int main(int argc,char *argv[]) {
   }
 
   std::string    fileName(argv[1]);
-  std::wifstream file;
+/*  std::wifstream file;
   
-  file.open(fileName.c_str());
+  file.open(fileName.c_str());*/
   
-  JsonParser::JsonParser<JsonParser::DefaultContext> parser;
-  parser.filename = fileName;		
-  while(parser.parseChar(file));
+//   JsonParser::JsonParser<JsonParser::DefaultContext> parser;
+//   parser.filename = fileName;		
+//   while(parser.parseChar(file));
+	dca::JsonReader reader(fileName);
+	int totalBins =0;
+	totalBins <= reader["programSpecific"]["DCA"]["control"]["totalBins"];
+	std::wcout <<" totalBins = "<<totalBins<<"\n";
+
+	int numPointInBath = 0;
+	numPointInBath <= reader.searchFor("numPointsInBath");
+	std::wcout <<" numPointsInBath = "<<numPointInBath<<"\n";
   
-  std::wcout << parser.ctx;
-  std::wcout <<"\n";  
+  //std::wcout << parser.ctx;
+
   return 0;
 }
 

@@ -436,6 +436,12 @@ namespace JsonParser {
 
     //======================================================================
 
+//     operator bool()         {  bool        result <= *this; return result;  }
+//     operator int()          {  int         result <= *this; return result;  }
+//     operator double()       {  double      result <= *this; return result;  }
+//     operator float()        {  double      result <= *this; return static_cast<float>(result);  }
+//     operator std::string()  {  std::string result <= *this; return result;  }
+
   };
 
   template<typename T> class TYPE       { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_UNKNOWN;  } };
