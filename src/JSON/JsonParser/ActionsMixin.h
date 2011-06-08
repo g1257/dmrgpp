@@ -2,7 +2,7 @@
 
 /** \ingroup JsonParser */
 /*@{*/
-
+// Author: Michael S. Summers (ORNL)
 /*! \file ActionsMixin.h  
  *
  *  

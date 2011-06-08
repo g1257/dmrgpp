@@ -5,6 +5,7 @@
 
 /*! \file ControlParameters.h
   \brief Contains the parameters relating to the control of algorithms
+\author Michael S. Summers
 */
 
 #ifndef DCA_JSON_READER_HEADER_H

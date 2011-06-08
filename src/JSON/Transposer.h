@@ -1,5 +1,5 @@
 //-*-C++-*-
-
+// Author: Michael S. Summers (ORNL)
 #ifndef PSIMAG_DCA_Transposer_H
 #define PSIMAG_DCA_Transposer_H
 

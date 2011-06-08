@@ -1,5 +1,6 @@
 //-*-C++-*-
-
+// Author: Michael S. Summers (ORNL)
+//
 #ifndef PSIMAG_MatrixLike_H
 #define PSIMAG_MatrixLike_H
 

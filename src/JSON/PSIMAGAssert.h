@@ -1,5 +1,6 @@
 //-*-C++-*-
-
+// Author: Michael S. Summers (ORNL)
+//
 #ifndef PSIMAG_Assert_H
 #define PSIMAG_Assert_H
 

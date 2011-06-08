@@ -4,6 +4,7 @@
 /*@{*/
 
 /*! \file JSN_Writer.h
+Author: Michael S. Summers
 
 */
 

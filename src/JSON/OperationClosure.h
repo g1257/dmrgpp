@@ -1,5 +1,6 @@
 //-*- mode: C++; -*-
-
+// Author: Michael S. Summers (ORNL)
+//
 /** \ingroup PSIMAG */
 /*@{*/
 
