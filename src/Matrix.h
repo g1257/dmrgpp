@@ -203,6 +203,31 @@ namespace PsimagLite {
 
 	}
 
+	void diag(Matrix<std::complex<float> > &m,std::vector<float> &eigs,char option)
+	{
+		char jobz=option;
+		char uplo='U';
+		int n=m.n_row();
+		int lda=m.n_col();
+		std::vector<std::complex<float> > work(3);
+		std::vector<float> rwork(3*n);
+		int info,lwork= -1;
+
+		eigs.resize(n);
+
+		// query:
+		cheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
+		lwork = int(real(work[0]))+1;
+		work.resize(lwork+1);
+		// real work:
+		cheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
+		if (info!=0) {
+			std::cerr<<"info="<<info<<"\n";
+			throw std::runtime_error("diag: cheev: failed with info!=0.\n");
+		}
+
+	}
+
 	template<typename T>
 	bool isHermitian(Matrix<T> const &A,bool verbose=false)
 	{

@@ -139,7 +139,7 @@ namespace PsimagLite {
 	}
 
 	template<typename X,typename RandomType>
-	void randomizeVector(std::vector<X>& v,const X& a,const X& b,const RandomType& r)
+	void randomizeVector(std::vector<typename RandomType::value_type>& v,const X& a,const X& b,const RandomType& r)
 	{
 		for (size_t i=0;i<v.size();i++) v[i] = a + b*r.random();
 	}

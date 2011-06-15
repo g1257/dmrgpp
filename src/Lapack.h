@@ -24,6 +24,8 @@ Please see full open source license included in file LICENSE.
 
 extern "C" void   zheev_(char *,char *,int *,std::complex<double> *, int *, double *,
         std::complex<double> *,int *, double *, int *);
+extern "C" void   cheev_(char *,char *,int *,std::complex<float> *, int *, float *,
+        std::complex<float> *,int *, float *, int *);
 extern "C" void dsyev_(char *,char *,int *,double *,int *, double *,double *,int *,int *);
 
 #endif
