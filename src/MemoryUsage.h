@@ -74,100 +74,86 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup PsimagLite */
 /*@{*/
 
-/*! \file Rusage.h
+/*! \file MemoryUsage.h
  *
  * getrusage system call
  */
   
-#ifndef RUSAGE_H_H
-#define RUSAGE_H_H
-#include <sys/time.h>
-#include <sys/resource.h>
+#ifndef MEMORY_USAGE_H
+#define MEMORY_USAGE_H
 #include <iostream>
+#include <fstream>
+#include <string>
 
 namespace PsimagLite {
-	class Rusage {
+	class MemoryUsage {
+		static const char *MY_SELF_FILE;
+		static const size_t MY_MAX_LINE = 40240;
 	public:
-		enum {USER_TIME,SYSTEM_TIME};
-		typedef std::pair<size_t,size_t> PairType;
-
-		//  who can be either RUSAGE_SELF or RUSAGE_CHILDREN
-		Rusage(int who = RUSAGE_SELF) : who_(who)
+		MemoryUsage() : data_("")
 		{
-			std::cerr<<"WARNING: Rusage class is deprecated, use MemoryUsage instead\n";
-			getrusage(who,&rusage_);
+			update();
 		}
 		
 		void update()
 		{
-			getrusage(who_,&rusage_);
+			std::ifstream ifp(MY_SELF_FILE);
+			char tmp[MY_MAX_LINE];
+			data_ = "";
+			while (!ifp.eof()) {
+				ifp.getline(tmp,MY_MAX_LINE);
+				data_ += std::string(tmp);
+			}
+			ifp.close();
 		}
-
-		/* user time used or system time used */
-		std::pair<size_t,size_t> time(size_t userOrSystem = USER_TIME) const
+		
+		long vmSize(bool needsUpdate = true)
 		{
-			if (userOrSystem == USER_TIME)
-				return PairType(
-			                        rusage_.ru_utime.tv_sec,
-			                        rusage_.ru_utime.tv_usec);
-			return PairType(
-			                rusage_.ru_stime.tv_sec,
-			                rusage_.ru_stime.tv_usec);
+			if (needsUpdate) update();
+			return findEntry("VmSize:");
 		}
 
-		/* maximum resident set size */
-		long maxSet() const { return rusage_.ru_maxrss; }
-		
-		/* integral shared memory size */
-		long sharedMemory() const { return rusage_.ru_ixrss; }
-		
-		/* integral unshared data size */
-		long unsharedData() const { return rusage_.ru_idrss; }
-
-		/* integral unshared stack size */
-		long unsharedStack() const { return rusage_.ru_isrss; }
-
-		long memory()
+		long vmPeak(bool needsUpdate = true)
 		{
-			update();
-			return sharedMemory() + unsharedData() + unsharedStack();
+			if (needsUpdate) update();
+			return findEntry("VmPeak:");
 		}
-
-		/* page reclaims */
-		long pageReclaims() const { return rusage_.ru_minflt; }
-
-		/* page faults */
-		long pageFaults() const { return rusage_.ru_majflt; }
-
-		/* swaps */
-		long swaps() const { return rusage_.ru_nswap; }
-
-		/* block input operations */
-		long blockInputOps() const { return rusage_.ru_inblock; }
-
-		/* block output operations */
-		long blockOutputOps() const { return rusage_.ru_oublock; }
-
-		/* messages sent */
-		long messagesSent() const { return rusage_.ru_msgsnd; }
-
-		/* messages received */
-		long messagesReceived() const { return rusage_.ru_msgrcv; }
-
-		/* signals received */
-		long signalsReceived() const { return rusage_.ru_nsignals; }
-
-		/* voluntary context switches */
-		long voluntaryContextSwitches() const { return rusage_.ru_nvcsw; }
 		
-		/* involuntary context switches */
-		long involuntaryContextSwitches() const { return rusage_.ru_nivcsw; }
-
 	private:
-		int who_;
-		struct rusage rusage_;
-	}; // class Rusage
+		long findEntry(const std::string& label)
+		{
+			size_t x = data_.find(label);
+			if (x==std::string::npos) {
+				std::string s = "MemoryUsage::findInString(...) failed for label=" + label + "\n";
+				throw std::runtime_error(s.c_str());
+			}
+			size_t y = data_.find(" ",x);
+			if (y==std::string::npos) {
+				std::string s = "MemoryUsage::findInString(...) no value for label=" + label + "\n";
+				throw std::runtime_error(s.c_str());
+			}
+			std::string buffer = "";
+			for (size_t i=y;i<data_.length();i++) {
+				char c = data_[i];
+				if (c==' ') continue;
+				if (c=='.') {
+					buffer += data_[i];
+					continue;
+				}
+				if (c>=48 && c<58) {
+					buffer += data_[i];
+					continue;
+				}
+				break;
+			}
+			return atol(buffer.c_str());
+		}
+
+		std::string data_;
+	}; // class MemoryUsage
+
+	const char *MemoryUsage::MY_SELF_FILE = "/proc/self/status";
 } // namespace PsimagLite 
 
 /*@}*/	
-#endif // RUSAGE_H_H
+#endif // MEMORY_USAGE_H
