@@ -91,140 +91,138 @@ namespace Dmrg {
 
 	template<typename PairType_>
 	class JmPairs {
-		public:
-			typedef PairType_ PairType;
-			typedef PairType value_type;
-			
-			PairType operator[](size_t alpha) const 
-			{
-				return jmPairs_[indices_[alpha]];
-			}
+	public:
+		typedef PairType_ PairType;
+		typedef PairType value_type;
 
-			JmPairs<PairType>& operator=(const std::vector<PairType>& jmpairs)
-			{
-				jmPairs_.clear();
-				indices_.clear();
-				for (size_t i=0;i<jmpairs.size();i++) {
-					int x = PsimagLite::isInVector(jmPairs_,jmpairs[i]);
-					if (x<0) {
-						jmPairs_.push_back(jmpairs[i]);
-						x=jmPairs_.size()-1;
-					}
-					indices_.push_back(x);
-				}
-				return *this;
-			}
-			
-			//! indices_[alpha] = jm
-			void push(const PairType& jm,size_t alpha)
-			{
-				int x = PsimagLite::isInVector(jmPairs_,jm);
+		PairType operator[](size_t alpha) const
+		{
+			return jmPairs_[indices_[alpha]];
+		}
 
+		JmPairs<PairType>& operator=(const std::vector<PairType>& jmpairs)
+		{
+			jmPairs_.clear();
+			indices_.clear();
+			for (size_t i=0;i<jmpairs.size();i++) {
+				int x = PsimagLite::isInVector(jmPairs_,jmpairs[i]);
 				if (x<0) {
-					jmPairs_.push_back(jm);
+					jmPairs_.push_back(jmpairs[i]);
 					x=jmPairs_.size()-1;
 				}
-
 				indices_.push_back(x);
 			}
+			return *this;
+		}
 
-			void clear()
-			{
-				jmPairs_.clear();
-				indices_.clear();
+		//! indices_[alpha] = jm
+		void push(const PairType& jm,size_t alpha)
+		{
+			int x = PsimagLite::isInVector(jmPairs_,jm);
+
+			if (x<0) {
+				jmPairs_.push_back(jm);
+				x=jmPairs_.size()-1;
 			}
 
-			void reorder(const std::vector<size_t>& permutation)
-			{
-				utils::reorder(indices_,permutation);
-			}
+			indices_.push_back(x);
+		}
 
-			void truncate(const std::vector<size_t>& removedIndices)
-			{
-				utils::truncateVector(indices_,removedIndices);
-				std::vector<size_t> unusedPairs;
-				findUnusedJmPairs(unusedPairs);
-				removeUnusedPairs(unusedPairs);
-			}
+		void clear()
+		{
+			jmPairs_.clear();
+			indices_.clear();
+		}
 
-			template<typename Op>
-			void maxFirst(size_t& maxvalue)
-			{
-				Op f;
-				for (size_t i=0;i<jmPairs_.size();i++) {
-					if (f(jmPairs_[i].first,maxvalue)) {
-						maxvalue=jmPairs_[i].first;
-					}
+		void reorder(const std::vector<size_t>& permutation)
+		{
+			utils::reorder(indices_,permutation);
+		}
+
+		void truncate(const std::vector<size_t>& removedIndices)
+		{
+			utils::truncateVector(indices_,removedIndices);
+			std::vector<size_t> unusedPairs;
+			findUnusedJmPairs(unusedPairs);
+			removeUnusedPairs(unusedPairs);
+		}
+
+		template<typename Op>
+		void maxFirst(size_t& maxvalue)
+		{
+			Op f;
+			for (size_t i=0;i<jmPairs_.size();i++) {
+				if (f(jmPairs_[i].first,maxvalue)) {
+					maxvalue=jmPairs_[i].first;
 				}
 			}
+		}
 
-			size_t size() const { return indices_.size(); }
+		size_t size() const { return indices_.size(); }
 
-			void resize(size_t dummy) { }; // does nothing, safely
+		void resize(size_t dummy) { }; // does nothing, safely
 
-			template<typename IoOutputter>
-			void save(IoOutputter& io) const
-			{
-				io.printVector(jmPairs_,"#su2JmPairs");		
-				io.printVector(indices_,"#su2JmIndices");		
+		template<typename IoOutputter>
+		void save(IoOutputter& io) const
+		{
+			io.printVector(jmPairs_,"#su2JmPairs");
+			io.printVector(indices_,"#su2JmIndices");
+		}
+
+		template<typename IoInputter>
+		void load(IoInputter& io)
+		{
+			io.read(jmPairs_,"#su2JmPairs");
+			io.read(indices_,"#su2JmIndices");
+		}
+
+	private:
+		std::vector<PairType> jmPairs_;
+		std::vector<size_t> indices_;
+
+		void findUnusedJmPairs(std::vector<size_t>& unusedPairs)
+		{
+			for (size_t i=0;i<jmPairs_.size();i++)
+				if (isUnusedPair(i)) unusedPairs.push_back(i);
+		}
+
+		void removeUnusedPairs(const std::vector<size_t>& unusedPairs)
+		{
+			size_t counter=0;
+			std::vector<size_t> neworder(jmPairs_.size());
+			std::vector<PairType> tmpVector(jmPairs_.size()-unusedPairs.size());
+
+			for (size_t i=0;i<jmPairs_.size();i++) {
+				if (PsimagLite::isInVector(unusedPairs,i)>=0) continue;
+				tmpVector[counter]=jmPairs_[i];
+				neworder[i]=counter;
+				counter++;
 			}
+			jmPairs_=tmpVector;
+			std::vector<size_t> tmpVector2(indices_.size());
+			for (size_t i=0;i<indices_.size();i++)
+				tmpVector2[i]=neworder[indices_[i]];
+			indices_=tmpVector2;
+		}
 
-			template<typename IoInputter>
-			void load(IoInputter& io) 
-			{
-				io.read(jmPairs_,"#su2JmPairs");
-				io.read(indices_,"#su2JmIndices");	
-			}
-
-		private:
-			std::vector<PairType> jmPairs_;
-			std::vector<size_t> indices_;
-
-			void findUnusedJmPairs(std::vector<size_t>& unusedPairs)
-			{
-				for (size_t i=0;i<jmPairs_.size();i++) 
-					if (isUnusedPair(i)) unusedPairs.push_back(i);
-				
-			}
-
-			void removeUnusedPairs(const std::vector<size_t>& unusedPairs)
-			{
-				size_t counter=0;
-				std::vector<size_t> neworder(jmPairs_.size());
-				std::vector<PairType> tmpVector(jmPairs_.size()-unusedPairs.size());
-				
-				for (size_t i=0;i<jmPairs_.size();i++) {
-					if (PsimagLite::isInVector(unusedPairs,i)>=0) continue;
-					tmpVector[counter]=jmPairs_[i];
-					neworder[i]=counter;
-					counter++;
-				}
-				jmPairs_=tmpVector;
-				std::vector<size_t> tmpVector2(indices_.size());
-				for (size_t i=0;i<indices_.size();i++) 
-					tmpVector2[i]=neworder[indices_[i]];
-				indices_=tmpVector2;
-			}
-
-			bool isUnusedPair(size_t ind)
-			{
-				for (size_t i=0;i<indices_.size();i++) 
-					if (indices_[i]==ind) return false;
-				return true;
-			}
+		bool isUnusedPair(size_t ind)
+		{
+			for (size_t i=0;i<indices_.size();i++)
+				if (indices_[i]==ind) return false;
+			return true;
+		}
 	}; // JmPairs
 
 	template<typename PairType>
 	std::ostream& operator<<(std::ostream& os,JmPairs<PairType> jmPairs)
 	{
-		for (size_t i=0;i<jmPairs.size();i++) 
+		for (size_t i=0;i<jmPairs.size();i++)
 			os<<"jmPair["<<i<<"]="<<jmPairs[i]<<"\n";
 		return os;
 	}
 
 	std::istream& operator>>(std::istream& is,std::pair<size_t,size_t>& pair)
 	{
-		
 		is>>pair.first;
 		is>>pair.second;
 		return is;

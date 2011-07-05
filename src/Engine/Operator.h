@@ -105,37 +105,41 @@ namespace Dmrg {
 		is>>x.offset;
 		return is;
 	}
-	
+
 	inline std::ostream& operator<<(std::ostream& os,const Su2Related& x)
 	{
 		os<<x.offset<<"\n";
 		return os;
 	}
-	
+
 	//! This is a structure, don't add member functions here!
-	template<typename RealType_,typename SparseMatrixType_> 
+	template<typename RealType_,typename SparseMatrixType_>
 	struct Operator {
-			typedef RealType_ RealType;
-			typedef SparseMatrixType_ SparseMatrixType;
-			typedef std::pair<size_t,size_t> PairType;
-			typedef Su2Related Su2RelatedType;
-			Operator() {}
-			
-			Operator(const SparseMatrixType& data1,int fermionSign1,const PairType& jm1,RealType angularFactor1,
-				 const Su2RelatedType& su2Related1) 
-				: data(data1),fermionSign(fermionSign1),jm(jm1),angularFactor(angularFactor1),su2Related(su2Related1) {}
-			
-			SparseMatrixType data;
-			int fermionSign; // does this operator commute or anticommute with others of the same class on different sites
-			PairType  jm; // angular momentum of this operator	
-			RealType angularFactor;
-			
-			Su2RelatedType su2Related;
+		typedef RealType_ RealType;
+		typedef SparseMatrixType_ SparseMatrixType;
+		typedef std::pair<size_t,size_t> PairType;
+		typedef Su2Related Su2RelatedType;
+		Operator() {}
+
+		Operator(const SparseMatrixType& data1,
+		         int fermionSign1,
+		         const PairType& jm1,
+		         RealType angularFactor1,
+		         const Su2RelatedType& su2Related1)
+		: data(data1),fermionSign(fermionSign1),jm(jm1),angularFactor(angularFactor1),su2Related(su2Related1)
+		{}
+
+		SparseMatrixType data;
+		int fermionSign; // does this operator commute or anticommute with others of the same class on different sites
+		PairType  jm; // angular momentum of this operator	
+		RealType angularFactor;
+
+		Su2RelatedType su2Related;
 	};
 
 	template<typename RealType_,typename SparseMatrixType>
 	void fillOperator(std::vector<SparseMatrixType*>& data,
-		 std::vector<Operator<RealType_,SparseMatrixType> >& op)
+	                  std::vector<Operator<RealType_,SparseMatrixType> >& op)
 	{
 		for (size_t i=0;i<data.size();i++) {
 			data[i] = &(op[i].data);
@@ -143,9 +147,9 @@ namespace Dmrg {
 	}
 
 	template<typename RealType_,typename SparseMatrixType,typename ConcurrencyType>
-        void gather(std::vector<Operator<RealType_,SparseMatrixType> >& op, ConcurrencyType& concurrency)
-        {
-                std::vector<SparseMatrixType* > data(op.size());
+	void gather(std::vector<Operator<RealType_,SparseMatrixType> >& op, ConcurrencyType& concurrency)
+	{
+		std::vector<SparseMatrixType* > data(op.size());
 		std::vector<int*> fermionSign(op.size());
 		std::vector<typename Operator<RealType_,SparseMatrixType>::PairType*> jm(op.size());
 		std::vector<RealType_*> angularFactor(op.size());
@@ -154,22 +158,22 @@ namespace Dmrg {
 		fillOperator(data,op);
 		concurrency.gather(data);
 	}
-	
-	template<typename RealType_,typename SparseMatrixType,typename ConcurrencyType>
-        void broadcast(std::vector<Operator<RealType_,SparseMatrixType> >& op, ConcurrencyType& concurrency)
-        {
-                std::vector<SparseMatrixType* > data(op.size());
-                std::vector<int*> fermionSign(op.size());
-                std::vector<typename Operator<RealType_,SparseMatrixType>::PairType*> jm(op.size());
-		std::vector<RealType_*> angularFactor(op.size());
-                std::vector<typename Operator<RealType_,SparseMatrixType>::Su2RelatedType*> su2Related(op.size());
 
-                fillOperator(data,op);
+	template<typename RealType_,typename SparseMatrixType,typename ConcurrencyType>
+	void broadcast(std::vector<Operator<RealType_,SparseMatrixType> >& op, ConcurrencyType& concurrency)
+	{
+		std::vector<SparseMatrixType* > data(op.size());
+		std::vector<int*> fermionSign(op.size());
+		std::vector<typename Operator<RealType_,SparseMatrixType>::PairType*> jm(op.size());
+		std::vector<RealType_*> angularFactor(op.size());
+		std::vector<typename Operator<RealType_,SparseMatrixType>::Su2RelatedType*> su2Related(op.size());
+
+		fillOperator(data,op);
 
 		concurrency.broadcast(data);
-        }
+	}
 
-	template<typename RealType,typename SparseMatrixType> 
+	template<typename RealType,typename SparseMatrixType>
 	std::istream& operator>>(std::istream& is,Operator<RealType,SparseMatrixType>& op)
 	{
 		is>>op.data;
@@ -179,7 +183,8 @@ namespace Dmrg {
 		is>>op.su2Related;
 		return is;
 	}
-	template<typename RealType,typename SparseMatrixType> 
+
+	template<typename RealType,typename SparseMatrixType>
 	std::ostream& operator<<(std::ostream& os,const Operator<RealType,SparseMatrixType>& op)
 	{
 		os<<op.data;
@@ -193,3 +198,4 @@ namespace Dmrg {
 
 /*@}*/
 #endif
+

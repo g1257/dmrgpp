@@ -89,18 +89,16 @@ namespace Dmrg {
 	//! (See corresponding section in paper)
 	template<typename RealType_,typename SparseMatrixType>
 	class	Basis {
-		
 		typedef  Basis<RealType_,SparseMatrixType> ThisType;
 		typedef BasisImplementation<RealType_,SparseMatrixType> BasisImplementationType;
- 		
 	public:
 		typedef  typename BasisImplementationType::FactorsType FactorsType;
 		typedef RealType_ RealType;
-		
+
 		//! Structure that contains information about the basis 
 		//! see BasisData.h for more info
 		typedef typename BasisImplementationType::BasisDataType BasisDataType;
-		
+
 		//! A vector of sites
 		typedef typename BasisImplementationType::BlockType BlockType;
 
@@ -112,14 +110,14 @@ namespace Dmrg {
 
 		//! Constructor, s=name of this basis 
 		Basis(const std::string& s) : basisImplementation_(s) {  }
-		
+
 		//! Loads this basis from memory or disk
 		template<typename IoInputter>
-		Basis(IoInputter& io,const std::string& ss,size_t counter=0,bool bogus = false) 
-			: basisImplementation_(io,ss,counter,bogus)
+		Basis(IoInputter& io,const std::string& ss,size_t counter=0,bool bogus = false)
+		: basisImplementation_(io,ss,counter,bogus)
 		{
 		}
-		
+
 		//! Loads this basis from memory or disk
 		template<typename IoInputter>
 		void load(IoInputter& io)
@@ -127,7 +125,6 @@ namespace Dmrg {
 			basisImplementation_.load(io);
 		}
 
-		
 		//! Returns the name of this basis
 		const std::string& name() const { return  basisImplementation_.name(); }
 
@@ -144,21 +141,21 @@ namespace Dmrg {
 		}
 
 		//! returns the effective quantum number of basis state i
-		int qn(int i,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const 
-		{ 
-			return basisImplementation_.qn(i,beforeOrAfterTransform); 
+		int qn(int i,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
+		{
+			return basisImplementation_.qn(i,beforeOrAfterTransform);
 		}
 
 		//! Returns the partition that corresponds to quantum number qn
-		int partitionFromQn(size_t qn,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const 
+		int partitionFromQn(size_t qn,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
-			return basisImplementation_.partitionFromQn(qn,beforeOrAfterTransform); 
+			return basisImplementation_.partitionFromQn(qn,beforeOrAfterTransform);
 		}
 
 		//! returns the start of basis partition i (see paper)
-		size_t partition(size_t i,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const 
-		{ 
-			return basisImplementation_.partition(i,beforeOrAfterTransform); 
+		size_t partition(size_t i,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
+		{
+			return basisImplementation_.partition(i,beforeOrAfterTransform);
 		}
 
 		//! returns number of partitions for this basis (see paper)
@@ -168,7 +165,7 @@ namespace Dmrg {
 		size_t permutation(size_t i) const { return  basisImplementation_.permutation(i); }
 
 		//! Return the permutation vector
-		const std::vector<size_t>& permutationVector() const 
+		const std::vector<size_t>& permutationVector() const
 		{
 			return  basisImplementation_.permutationVector();
 		}
@@ -198,7 +195,7 @@ namespace Dmrg {
 		static std::vector<size_t> decodeQuantumNumber(int q)
 		{
 			return BasisImplementationType::decodeQuantumNumber(q);
-		}	
+		}
 
 		//! Encodes (flavor,jvalue,density) into a unique number and returns it
 		static size_t pseudoQuantumNumber(const std::vector<size_t>& targets)
@@ -211,7 +208,7 @@ namespace Dmrg {
 		{
 			return basisImplementation_.pseudoEffectiveNumber(i);
 		}
-		
+
 		//! Given the information in the structure bdt, calculates the quantum numbers in q
 		static void findQuantumNumbers(std::vector<size_t>& q,const BasisDataType& bdt)
 		{
@@ -221,15 +218,18 @@ namespace Dmrg {
 		//! removes the indices contained in removedIndices and
 		//! transforms this basis by transform 
 		template<typename BlockMatrixType,typename SolverParametersType>
-		RealType changeBasis(typename BlockMatrixType::BuildingBlockType& ftransform,BlockMatrixType &transform,
-				 std::vector<RealType>& eigs,size_t kept,const SolverParametersType& solverParams)
+		RealType changeBasis(typename BlockMatrixType::BuildingBlockType& ftransform,
+		                     BlockMatrixType &transform,
+		                     std::vector<RealType>& eigs,
+		                     size_t kept,
+		                     const SolverParametersType& solverParams)
 		{
 			return basisImplementation_.changeBasis(ftransform,transform,eigs,kept,solverParams);
 		}
 
 		//! Finds a partition of the basis given the effecitve quantum numbers
 		void findPartition() { return basisImplementation_.findPartition(); }
-		
+
 		//! Returns the factors that mix this basis 
 		//! If not using SU(2) this is trivial
 		const FactorsType& getFactors() const { return basisImplementation_.getFactors(); }
@@ -258,7 +258,7 @@ namespace Dmrg {
 		}
 
 		//! Returns the vector of electrons for this basis
-		const std::vector<size_t>& electronsVector(size_t beforeOrAfterTransform=AFTER_TRANSFORM) const 
+		const std::vector<size_t>& electronsVector(size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
 			return basisImplementation_.electronsVector(beforeOrAfterTransform);
 		}
@@ -274,38 +274,38 @@ namespace Dmrg {
 
 		//! Tells this basis to use SU(2) symmetry or not
 		static void useSu2Symmetry(bool tf) {  BasisImplementationType::useSu2Symmetry(tf); }
-		
+
 		//! Returns true if this basis has been DMRG transformed, or false if it hasn't
 		bool dmrgTransformed() const { return basisImplementation_.dmrgTransformed(); }
-		
+
 		//! Returns the reduced (by the Wigner Eckart theorem) index corresponding to state i of this basis
-		size_t reducedIndex(size_t i) const 
-		{ 
-			return basisImplementation_.reducedIndex(i); 
+		size_t reducedIndex(size_t i) const
+		{
+			return basisImplementation_.reducedIndex(i);
 		}
 
 		//! Returns the size of this basis when reduced (by the Wigner-Eckart theorem)
-		size_t reducedSize() const 
-		{ 
-			return basisImplementation_.reducedSize(); 
+		size_t reducedSize() const
+		{
+			return basisImplementation_.reducedSize();
 		}
 
 		//! Returns the i-th distinct j value for this basis
-		size_t jVals(size_t i) const 
-		{ 
-			return basisImplementation_.jVals(i); 
+		size_t jVals(size_t i) const
+		{
+			return basisImplementation_.jVals(i);
 		}
 
 		//! Returns the number of distinct j values for this basis
-		size_t jVals() const 
-		{ 
-			return basisImplementation_.jVals(); 
+		size_t jVals() const
+		{
+			return basisImplementation_.jVals();
 		}
 
 		//! Returns the maximum j value in this basis
-		size_t jMax() const 
-		{ 
-			return basisImplementation_.jMax(); 
+		size_t jMax() const
+		{
+			return basisImplementation_.jMax();
 		}
 
 		//! saves this basis to disk
@@ -351,3 +351,4 @@ namespace Dmrg {
 
 /*@}*/
 #endif
+
