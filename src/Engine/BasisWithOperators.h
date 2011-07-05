@@ -87,16 +87,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Basis.h"
 
 namespace Dmrg {
-
-
 	//! A class to represent a Dmrg Basis and encapsulate certain operations related to this basis, such as
 	//! outer product, truncation, storage of Hamiltonian and creation operators.  
 	template<typename OperatorsType_,typename ConcurrencyType_>
-		class	BasisWithOperators : public  OperatorsType_::BasisType {
-
-		
+	class	BasisWithOperators : public  OperatorsType_::BasisType {
 	public:
-
 		typedef OperatorsType_ OperatorsType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::OperatorType OperatorType;
@@ -107,14 +102,15 @@ namespace Dmrg {
 		typedef typename BasisType::BasisDataType BasisDataType;
 		typedef typename BasisType::FactorsType FactorsType;
 
-
 		enum {GROW_RIGHT,GROW_LEFT};
-		
+
 		BasisWithOperators(const std::string& s) :BasisType(s),operators_(this) {}
-		
+
 		template<typename IoInputter>
-		BasisWithOperators(IoInputter& io,const std::string& ss,size_t counter=0)
-				: BasisType(io,ss,counter),operators_(io,0,this)
+		BasisWithOperators(IoInputter& io,
+		                   const std::string& ss,
+		                   size_t counter=0)
+		: BasisType(io,ss,counter),operators_(io,0,this)
 		{
 		}
 
@@ -139,16 +135,14 @@ namespace Dmrg {
 			// reorder the basis
 			parent.setToProduct(basis2,basis3);
 
-			std::vector<double> fermionicSigns;			
+			std::vector<double> fermionicSigns;
 			size_t x = basis2.numberOfOperators()+basis3.numberOfOperators();
-			
+
 			if (this->useSu2Symmetry()) setMomentumOfOperators(basis2);
 			operators_.setToProduct(basis2,basis3,x,this);
 			ApplyFactors<FactorsType> apply(this->getFactors(),this->useSu2Symmetry());
 			int savedSign = 0;
-			
 			for (size_t i=0;i<this->numberOfOperators();i++) {
-				
 				if (i<basis2.numberOfOperators()) {
 					if (!this->useSu2Symmetry()) {
 						const OperatorType& myOp =  basis2.getOperatorByIndex(i);
@@ -156,7 +150,6 @@ namespace Dmrg {
 							fillFermionicSigns(fermionicSigns,basis2.electronsVector(),myOp.fermionSign);
 							savedSign = myOp.fermionSign;
 						}
-					
 						operators_.externalProduct(i,myOp,basis3.size(),fermionicSigns,true,apply);
 					} else {
 						operators_.externalProductReduced(i,basis2,basis3,true,basis2.getReducedOperatorByIndex(i));
@@ -169,11 +162,10 @@ namespace Dmrg {
 							fillFermionicSigns(fermionicSigns,basis2.electronsVector(),myOp.fermionSign);
 							savedSign = myOp.fermionSign;
 						}
-					
 						operators_.externalProduct(i,myOp,basis2.size(),fermionicSigns,false,apply);
 					} else {
 						operators_.externalProductReduced(i,basis2,basis3,false,
-							basis3.getReducedOperatorByIndex(i-basis2.numberOfOperators()));
+						   basis3.getReducedOperatorByIndex(i-basis2.numberOfOperators()));
 					}
 				}
 			}
@@ -188,19 +180,18 @@ namespace Dmrg {
 		//! transform this basis by transform 
 		//! note: basis change must conserve total number of electrons and all quantum numbers
 		template<typename RealType,typename BlockMatrixType,typename SolverParametersType>
-		RealType changeBasis(
-				typename BlockMatrixType::BuildingBlockType& ftransform,
-    				BlockMatrixType  &transform,
-				 std::vector<RealType>& eigs,
-				size_t kept,const SolverParametersType& solverParams,
-				ConcurrencyType &concurrency)
+		RealType changeBasis(typename BlockMatrixType::BuildingBlockType& ftransform,
+		                     BlockMatrixType  &transform,
+		                     std::vector<RealType>& eigs,
+		                     size_t kept,const SolverParametersType& solverParams,
+		                     ConcurrencyType &concurrency)
 		{
 
 			BasisType &parent = *this;
 			RealType error = parent.changeBasis(ftransform,transform,eigs,kept,solverParams);
 
 			operators_.changeBasis(ftransform,this,concurrency);
-			
+
 			return error;
 		}
 
@@ -224,27 +215,27 @@ namespace Dmrg {
 			operators_.getOperatorByIndex(i);
 		}
 
-		const OperatorType& getOperatorByIndex(int i) const 
+		const OperatorType& getOperatorByIndex(int i) const
 		{
 			return operators_.getOperatorByIndex(i);
 		}
 
-		const OperatorType& getReducedOperatorByIndex(int i) const 
+		const OperatorType& getReducedOperatorByIndex(int i) const
 		{
 			return operators_.getReducedOperatorByIndex(i);
 		}
 
-		const OperatorType& getReducedOperatorByIndex(char modifier,int i) const 
+		const OperatorType& getReducedOperatorByIndex(char modifier,int i) const
 		{
 			return operators_.getReducedOperatorByIndex(modifier,i);
 		}
 
-		const OperatorType& getOperator(int i,int sigma) const 
+		const OperatorType& getOperator(int i,int sigma) const
 		{
 			return operators_.getOperator(i,sigma);
 		}
 
-		const OperatorType& getOperator(const std::string& s,int i) const 
+		const OperatorType& getOperator(const std::string& s,int i) const
 		{
 			return operators_.getOperator(s,i);
 		}
@@ -255,11 +246,11 @@ namespace Dmrg {
 		{
 			return 	OperatorsType::numberOfOperatorsPerSite();
 		}
-		
-		int fermionicSign(size_t i,int fsign) const 
-		{ 
+
+		int fermionicSign(size_t i,int fsign) const
+		{
 			const BasisType &parent = *this;
-			return parent.fermionicSign(i,fsign); 
+			return parent.fermionicSign(i,fsign);
 		}
 
 		template<typename IoOutputter>
@@ -283,8 +274,8 @@ namespace Dmrg {
 		void fillFermionicSigns(std::vector<SomeType>& fermionicSigns,const std::vector<size_t>& electrons,int f)
 		{
 			fermionicSigns.resize(electrons.size());
-			for (size_t i=0;i<fermionicSigns.size();i++) 
-			fermionicSigns[i]= (electrons[i]%2==0) ? 1.0 : static_cast<double>(f);
+			for (size_t i=0;i<fermionicSigns.size();i++)
+				fermionicSigns[i]= (electrons[i]%2==0) ? 1.0 : static_cast<double>(f);
 		}
 
 		void setMomentumOfOperators(const ThisType& basis)
@@ -292,17 +283,17 @@ namespace Dmrg {
 			std::vector<size_t> momentum;
 			for (size_t i=0;i<basis.numberOfOperators();i++) {
 				int x = PsimagLite::isInVector(
-						momentum,basis.getReducedOperatorByIndex(i).jm.first);
-				if (x<0) momentum.push_back(
-						basis.getReducedOperatorByIndex(i).jm.first);
+				     momentum,basis.getReducedOperatorByIndex(i).jm.first);
+				if (x<0)
+					momentum.push_back(basis.getReducedOperatorByIndex(i).jm.first);
 			}
 			operators_.setMomentumOfOperators(momentum);
 		}
 	}; // class BasisWithOperators
-	
+
 	template<typename OperatorsType,typename ConcurrencyType>
 	std::ostream& operator<<(std::ostream& os,
-			const BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
+	                         const BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
 	{
 		throw std::runtime_error("Unimplemented <<");
 		return os;
@@ -310,15 +301,13 @@ namespace Dmrg {
 
 	template<typename OperatorsType,typename ConcurrencyType>
 	std::istream& operator>>(std::istream& is,
-			BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
+	                         BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
 	{
 		throw std::runtime_error("Unimplemented >>");
 		return is;
 	}
-
-
-
 } // namespace Dmrg
 
 /*@}*/
 #endif
+
