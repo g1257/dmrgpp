@@ -90,165 +90,164 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	template<typename FieldType>
 	class VectorWithOffsets {
-			typedef VectorWithOffsets<FieldType> ThisType;
-			static FieldType const zero_;
-		public:
-			typedef FieldType value_type;
-			typedef std::pair<size_t,size_t> PairType;
-			typedef std::vector<FieldType> VectorType;
+		typedef VectorWithOffsets<FieldType> ThisType;
+		static FieldType const zero_;
+	public:
+		typedef FieldType value_type;
+		typedef std::pair<size_t,size_t> PairType;
+		typedef std::vector<FieldType> VectorType;
 			
-			VectorWithOffsets() : progress_("VectorWithOffsets",0),size_(0) { }
+		VectorWithOffsets() : progress_("VectorWithOffsets",0),size_(0) { }
 			
-			template<typename SomeBasisType>
-			VectorWithOffsets(const std::vector<size_t>& weights,
-					 const SomeBasisType& someBasis)
-				: 
-				progress_("VectorWithOffsets",0),
-				size_(someBasis.size()),
-				data_(weights.size()),
-				offsets_(weights.size()+1)
-			{
-				for (size_t i=0;i<weights.size();i++) {
-					data_[i].resize(weights[i]);
-					offsets_[i] = someBasis.partition(i);
-					if (weights[i]>0) {
-						nonzeroSectors_.push_back(i);
-						//firstSector_ = i;
-					}
+		template<typename SomeBasisType>
+		VectorWithOffsets(const std::vector<size_t>& weights,
+		                  const SomeBasisType& someBasis)
+		: progress_("VectorWithOffsets",0),
+		  size_(someBasis.size()),
+		  data_(weights.size()),
+		  offsets_(weights.size()+1)
+		{
+			for (size_t i=0;i<weights.size();i++) {
+				data_[i].resize(weights[i]);
+				offsets_[i] = someBasis.partition(i);
+				if (weights[i]>0) {
+					nonzeroSectors_.push_back(i);
+					//firstSector_ = i;
 				}
-				offsets_[weights.size()]=size_;
 			}
-			
-			void resize(size_t x)
-			{
-				size_ = x;
-				data_.clear();
-				offsets_.clear();
-				nonzeroSectors_.clear();
-			}
-			
-			template<typename SomeBasisType>
-			void set(const std::vector<VectorType>& v,//const std::vector<size_t>& weights,
-				 const SomeBasisType& someBasis)
-			{
-				size_ = someBasis.size();
-				nonzeroSectors_.clear();
-				data_.resize(v.size());
-				offsets_.resize(v.size()+1);
-				for (size_t i=0;i<v.size();i++) {
-					data_[i] = v[i];
-					offsets_[i] = someBasis.partition(i);
-					if (v[i].size()>0) {
-						nonzeroSectors_.push_back(i);
-						//firstSector_ = i;
-					}
-					//if (v[i].size()!=0 && weights[i]==0) throw std::runtime_error("VectorWithOffsets::"
-					//			"set(...)\n");
+			offsets_[weights.size()]=size_;
+		}
+		
+		void resize(size_t x)
+		{
+			size_ = x;
+			data_.clear();
+			offsets_.clear();
+			nonzeroSectors_.clear();
+		}
+		
+		template<typename SomeBasisType>
+		void set(const std::vector<VectorType>& v,//const std::vector<size_t>& weights,
+		         const SomeBasisType& someBasis)
+		{
+			size_ = someBasis.size();
+			nonzeroSectors_.clear();
+			data_.resize(v.size());
+			offsets_.resize(v.size()+1);
+			for (size_t i=0;i<v.size();i++) {
+				data_[i] = v[i];
+				offsets_[i] = someBasis.partition(i);
+				if (v[i].size()>0) {
+					nonzeroSectors_.push_back(i);
+					//firstSector_ = i;
 				}
-				offsets_[v.size()]=size_;
+				//if (v[i].size()!=0 && weights[i]==0) throw std::runtime_error("VectorWithOffsets::"
+				//			"set(...)\n");
 			}
-			
-			template<typename SomeBasisType>
-			void populateSectors(const SomeBasisType& someBasis)
-			{
-				size_t np = someBasis.partition()-1;
-				size_ = someBasis.size();
-				nonzeroSectors_.clear();
-				data_.resize(np);
-				offsets_.resize(np+1);
-				for (size_t i=0;i<np;i++) {
-					offsets_[i] = someBasis.partition(i);
-					size_t total = someBasis.partition(i+1)-offsets_[i];
-					VectorType tmpV(total,0);
-					data_[i] = tmpV;
+			offsets_[v.size()]=size_;
+		}
+		
+		template<typename SomeBasisType>
+		void populateSectors(const SomeBasisType& someBasis)
+		{
+			size_t np = someBasis.partition()-1;
+			size_ = someBasis.size();
+			nonzeroSectors_.clear();
+			data_.resize(np);
+			offsets_.resize(np+1);
+			for (size_t i=0;i<np;i++) {
+				offsets_[i] = someBasis.partition(i);
+				size_t total = someBasis.partition(i+1)-offsets_[i];
+				VectorType tmpV(total,0);
+				data_[i] = tmpV;
+				nonzeroSectors_.push_back(i);
+			}
+			offsets_[np]=size_;
+			std::ostringstream msg;
+			msg<<"Populated "<<np<<" sectors";
+			progress_.printline(msg,std::cout);
+		}
+		
+		void collapseSectors()
+		{
+			size_t np = data_.size();
+			nonzeroSectors_.clear();
+			for (size_t i=0;i<np;i++) {
+				if (isZero(data_[i])) {
+					data_[i].resize(0);
+				} else {
 					nonzeroSectors_.push_back(i);
 				}
-				offsets_[np]=size_;
-				std::ostringstream msg;
-				msg<<"Populated "<<np<<" sectors";
-				progress_.printline(msg,std::cout);
 			}
+			std::ostringstream msg;
+			msg<<"Collapsed. Non-zero sectors now are "<<nonzeroSectors_.size();
+			progress_.printline(msg,std::cout);
+		}
+		
+		void setDataInSector(const VectorType& v,size_t i0)
+		{
+			data_[i0] = v;
+		}
+
+		size_t sectors() const { return nonzeroSectors_.size(); }
+
+		size_t sector(size_t i) const { return nonzeroSectors_[i]; }
+
+		template<typename SomeBasisType>
+		void fromFull(const VectorType& v,const SomeBasisType& someBasis)
+		{
+			size_ = someBasis.size();
 			
-			void collapseSectors()
-			{
-				size_t np = data_.size();
-				nonzeroSectors_.clear();
-				for (size_t i=0;i<np;i++) {
-					if (isZero(data_[i])) {
-						data_[i].resize(0);
-					} else {
-						nonzeroSectors_.push_back(i);
-					}
-				}
-				std::ostringstream msg;
-				msg<<"Collapsed. Non-zero sectors now are "<<nonzeroSectors_.size();
-				progress_.printline(msg,std::cout);
+			offsets_.resize(someBasis.partition());
+			for (size_t i=0;i<someBasis.partition();i++)
+				offsets_[i] = someBasis.partition(i);
+			if (offsets_[offsets_.size()-1]!=size_) throw std::runtime_error
+				("TST::fromFull(...): internal error\n");
+			
+			data_.resize(someBasis.partition()-1);
+			
+			nonzeroSectors_.clear();
+			findPartitions(nonzeroSectors_,v,someBasis);
+			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+				size_t j = nonzeroSectors_[jj];
+				//firstSector_ = j;
+				size_t offset = offsets_[j];
+				size_t total = offsets_[j+1]-offset;
+				data_[j].resize(total);
+				for (size_t i=0;i<total;i++) data_[j][i] = v[i+offset];
 			}
-			
-			void setDataInSector(const VectorType& v,size_t i0)
-			{
-				data_[i0] = v;
-			}
-			
-			size_t sectors() const { return nonzeroSectors_.size(); }
-			
-			size_t sector(size_t i) const { return nonzeroSectors_[i]; }
-			
-			template<typename SomeBasisType>
-			void fromFull(const VectorType& v,const SomeBasisType& someBasis)
-			{
-				size_ = someBasis.size();
+		}
+
+		void extract(VectorType& v,size_t i) const
+		{
+			v=data_[i];
+		}
+		
+		size_t size() const { return size_; }
+		
+		size_t effectiveSize(size_t i) const { return data_[i].size(); }
+		 
+		size_t offset(size_t i) const { return offsets_[i]; }
+		
+		const FieldType& fastAccess(size_t i,size_t j) const 
+		{
+			return data_[i][j];
+		}
 				
-				offsets_.resize(someBasis.partition());
-				for (size_t i=0;i<someBasis.partition();i++)
-					offsets_[i] = someBasis.partition(i);
-				if (offsets_[offsets_.size()-1]!=size_) throw std::runtime_error
-					("TST::fromFull(...): internal error\n");
-				
-				data_.resize(someBasis.partition()-1);
-				
-				nonzeroSectors_.clear();
-				findPartitions(nonzeroSectors_,v,someBasis);
-				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-					size_t j = nonzeroSectors_[jj];
-					//firstSector_ = j;
-					size_t offset = offsets_[j];
-					size_t total = offsets_[j+1]-offset;
-					data_[j].resize(total);
-					for (size_t i=0;i<total;i++) data_[j][i] = v[i+offset];
-				}
+		const FieldType& operator[](size_t i) const //__attribute__((always_inline))
+		{
+			/*if (nonzeroSectors_.size()==1) {
+				if (i>=offsets_[firstSector_] && i<offsets_[firstSector_+1])
+					return data_[firstSector_][i-offsets_[firstSector_]];
+				else return zero_;
+			}*/
+			
+			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+				size_t j = nonzeroSectors_[jj];
+				if (i<offsets_[j] || i>=offsets_[j+1]) continue;
+				return data_[j][i-offsets_[j]];
 			}
-			
-			void extract(VectorType& v,size_t i) const
-			{
-				v=data_[i];
-			}
-			
-			size_t size() const { return size_; }
-			
-			size_t effectiveSize(size_t i) const { return data_[i].size(); }
-			 
-			size_t offset(size_t i) const { return offsets_[i]; }
-			
-			const FieldType& fastAccess(size_t i,size_t j) const 
-			{
-				return data_[i][j];
-			}
-					
-			const FieldType& operator[](size_t i) const //__attribute__((always_inline))
-			{
-				/*if (nonzeroSectors_.size()==1) {
-					if (i>=offsets_[firstSector_] && i<offsets_[firstSector_+1])
-						return data_[firstSector_][i-offsets_[firstSector_]];
-					else return zero_;
-				}*/
-				
-				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-					size_t j = nonzeroSectors_[jj];
-					if (i<offsets_[j] || i>=offsets_[j+1]) continue;
-					return data_[j][i-offsets_[j]];
-				}
-				return zero_;
+			return zero_;
 
 //				size_t x = nonzeroSectors_.size()/2;
 //				size_t j = 0;
@@ -267,171 +266,170 @@ namespace Dmrg {
 //					break;
 //				}
 //				return data_[j][i-offsets_[j]];
-			}
-			
-			FieldType& operator[](size_t i) //__attribute__((always_inline))
-			{
-				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-					size_t j = nonzeroSectors_[jj];
-					if (i>=offsets_[j] && i<offsets_[j+1]) {
-						return data_[j][i-offsets_[j]];
-					}
-				}
-				std::cerr<<"VectorWithOffsets can't build itself dynamically yet (sorry!)\n";
-				return data_[0][0];
-				//throw std::runtime_error("VectorWithOffsets can't build itself dynamically yet (sorry!)\n");
-			}
-			
-			/*ThisType& operator= (const ThisType& f)
-			{
-				size_=f.size_;
-				data_=f.data_;
-				offsets_=f.offsets_;
-				nonzeroSectors_=f.nonzeroSectors_;
-				return *this;
-			}*/
-			
-			template<typename SparseVectorType>
-			void toSparse(SparseVectorType& sv) const
-			{
-				sv.resize(size_);
-				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-					size_t j =  nonzeroSectors_[jj];
-					for (size_t i=0;i<data_[j].size();i++)
-						sv[i+offsets_[j]] = data_[j][i];
-				}
-			}
-
-			template<typename IoOutputter>
-			void save(IoOutputter& io,const std::string& label) const
-			{
-				io.printline(label);
-				std::string s="#size="+ttos(size_);
-				io.printline(s);
-				io.printVector(offsets_,"#offsets");
-				s = "#nonzero="+ttos(nonzeroSectors_.size());
-				io.printline(s);
-				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-					size_t j =  nonzeroSectors_[jj];
-					s="#sector="+ttos(j);
-					io.printline(s);
-					io.printVector(data_[j],s);
-				}
-			}
-			
-			template<typename IoInputter>
-			void load(IoInputter& io,const std::string& label,size_t counter=0)
-			{
-				io.advance(label,counter);
-				int x = 0;
-				io.readline(x,"#size=");
-				if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): size<0\n");
-				size_ = x;
-				io.read(offsets_,"#offsets");
-				data_.resize(offsets_.size());
-				io.readline(x,"#nonzero=");
-				if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): nonzerosectors<0\n");
-				nonzeroSectors_.resize(x);
-				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-					io.readline(x,"#sector=");
-					if (x<0) 
-						throw std::runtime_error("VectorWithOffsets::load(...): sector<0\n");
-					if (size_t(x)>=data_.size()) 
-						throw std::runtime_error("VectorWithOffsets::load(...): sector too big\n");
-					nonzeroSectors_[jj] = x;
-					io.read(data_[x],"#sector=");
-				}
-			}
-			
-			VectorWithOffsets<FieldType> operator+=(const VectorWithOffsets<FieldType>& v)
-			{
-				if (nonzeroSectors_.size()==0) {
-					size_ = v.size_;
-					data_ = v.data_;
-					offsets_ = v.offsets_;
-					nonzeroSectors_ = v.nonzeroSectors_;
-					return *this;
-				}
-				for (size_t ii=0;ii<nonzeroSectors_.size();ii++) {
-					size_t i = nonzeroSectors_[ii];
-					data_[i] += v.data_[i];
-				}
-				return *this;
-			}
-			
-			template<typename FieldType2>
-			friend FieldType2 std::norm(const Dmrg::VectorWithOffsets<FieldType2>& v);
-	
-			template<typename FieldType2>
-			friend FieldType2 std::norm(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
-			
-			template<typename FieldType2>
-			friend std::complex<FieldType2> multiply(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v1,
-				  const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v2);
-
-			template<typename FieldType2>
-			friend FieldType2 multiply(const Dmrg::VectorWithOffsets<FieldType2>& v1,
-					const Dmrg::VectorWithOffsets<FieldType2>& v2);
-
-			template<typename FieldType2>
-			friend void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
-			
-			template<typename FieldType3,typename FieldType2>
-			friend VectorWithOffsets<FieldType2> operator*(const FieldType3& value,const VectorWithOffsets<FieldType2>& v);
+		}
 		
-		private:
-			template<typename SomeBasisType>
-			void findPartitions(std::vector<size_t>& p,const VectorType& v,const SomeBasisType& someBasis)
-			{
-				bool found = false;
-				p.clear();
-				for (size_t i=0;i<someBasis.partition()-1;i++) {
-					if (nonZeroPartition(v,someBasis,i)) {
-						if (found) {
-//							std::ostringstream msg;
-//							msg<<"More than one partition found";
-//							progress_.printline(msg,std::cout);
-							//throw std::runtime_error("quiting\n");
-						}
-						found = true;
-						p.push_back(i);
-					}
+		FieldType& operator[](size_t i) //__attribute__((always_inline))
+		{
+			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+				size_t j = nonzeroSectors_[jj];
+				if (i>=offsets_[j] && i<offsets_[j+1]) {
+					return data_[j][i-offsets_[j]];
 				}
-				if (!found) {
-					std::ostringstream msg;
-					msg<<"No partition found";
-					progress_.printline(msg,std::cout);
-					//p.push_back(0);
-				}
-
 			}
-			
-			template<typename SomeBasisType>
-			bool nonZeroPartition(const VectorType& v,const SomeBasisType& someBasis,size_t i)
-			{
-				typename VectorType::value_type zero = 0;
-				for (size_t j=someBasis.partition(i);j<someBasis.partition(i+1);j++) {
-					if (v[j]!=zero) return true;
-				}
-				return false;
-			}
-			
-			bool isZero(const VectorType& v) const
-			{
-				double eps = 1e-5;
-				for (size_t i=0;i<v.size();i++)
-					if (fabs(std::real(v[i]))>eps || fabs(std::imag(v[i]))>eps) return false;
-				return true; 
-			}
+			std::cerr<<"VectorWithOffsets can't build itself dynamically yet (sorry!)\n";
+			return data_[0][0];
+			//throw std::runtime_error("VectorWithOffsets can't build itself dynamically yet (sorry!)\n");
+		}
+		
+		/*ThisType& operator= (const ThisType& f)
+		{
+			size_=f.size_;
+			data_=f.data_;
+			offsets_=f.offsets_;
+			nonzeroSectors_=f.nonzeroSectors_;
+			return *this;
+		}*/
 
+		template<typename SparseVectorType>
+		void toSparse(SparseVectorType& sv) const
+		{
+			sv.resize(size_);
+			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+				size_t j =  nonzeroSectors_[jj];
+				for (size_t i=0;i<data_[j].size();i++)
+					sv[i+offsets_[j]] = data_[j][i];
+			}
+		}
 
-			PsimagLite::ProgressIndicator progress_;
-			size_t size_;
-			std::vector<VectorType> data_;
-			std::vector<size_t> offsets_;
-			std::vector<size_t> nonzeroSectors_;
-	}; // class VectorWithOffset
+		template<typename IoOutputter>
+		void save(IoOutputter& io,const std::string& label) const
+		{
+			io.printline(label);
+			std::string s="#size="+ttos(size_);
+			io.printline(s);
+			io.printVector(offsets_,"#offsets");
+			s = "#nonzero="+ttos(nonzeroSectors_.size());
+			io.printline(s);
+			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+				size_t j =  nonzeroSectors_[jj];
+				s="#sector="+ttos(j);
+				io.printline(s);
+				io.printVector(data_[j],s);
+			}
+		}
+		
+		template<typename IoInputter>
+		void load(IoInputter& io,const std::string& label,size_t counter=0)
+		{
+			io.advance(label,counter);
+			int x = 0;
+			io.readline(x,"#size=");
+			if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): size<0\n");
+			size_ = x;
+			io.read(offsets_,"#offsets");
+			data_.resize(offsets_.size());
+			io.readline(x,"#nonzero=");
+			if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): nonzerosectors<0\n");
+			nonzeroSectors_.resize(x);
+			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+				io.readline(x,"#sector=");
+				if (x<0) 
+					throw std::runtime_error("VectorWithOffsets::load(...): sector<0\n");
+				if (size_t(x)>=data_.size()) 
+					throw std::runtime_error("VectorWithOffsets::load(...): sector too big\n");
+				nonzeroSectors_[jj] = x;
+				io.read(data_[x],"#sector=");
+			}
+		}
+		
+		VectorWithOffsets<FieldType> operator+=(const VectorWithOffsets<FieldType>& v)
+		{
+			if (nonzeroSectors_.size()==0) {
+				size_ = v.size_;
+				data_ = v.data_;
+				offsets_ = v.offsets_;
+				nonzeroSectors_ = v.nonzeroSectors_;
+				return *this;
+			}
+			for (size_t ii=0;ii<nonzeroSectors_.size();ii++) {
+				size_t i = nonzeroSectors_[ii];
+				data_[i] += v.data_[i];
+			}
+			return *this;
+		}
+		
+		template<typename FieldType2>
+		friend FieldType2 std::norm(const Dmrg::VectorWithOffsets<FieldType2>& v);
+
+		template<typename FieldType2>
+		friend FieldType2 std::norm(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
+		
+		template<typename FieldType2>
+		friend std::complex<FieldType2> multiply(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v1,
+		                                         const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v2);
+
+		template<typename FieldType2>
+		friend FieldType2 multiply(const Dmrg::VectorWithOffsets<FieldType2>& v1,
+		                           const Dmrg::VectorWithOffsets<FieldType2>& v2);
+
+		template<typename FieldType2>
+		friend void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
+		
+		template<typename FieldType3,typename FieldType2>
+		friend VectorWithOffsets<FieldType2> operator*(const FieldType3& value,const VectorWithOffsets<FieldType2>& v);
 	
+	private:
+		template<typename SomeBasisType>
+		void findPartitions(std::vector<size_t>& p,const VectorType& v,const SomeBasisType& someBasis)
+		{
+			bool found = false;
+			p.clear();
+			for (size_t i=0;i<someBasis.partition()-1;i++) {
+				if (nonZeroPartition(v,someBasis,i)) {
+					if (found) {
+//						std::ostringstream msg;
+//						msg<<"More than one partition found";
+//						progress_.printline(msg,std::cout);
+						//throw std::runtime_error("quiting\n");
+					}
+					found = true;
+					p.push_back(i);
+				}
+			}
+			if (!found) {
+				std::ostringstream msg;
+				msg<<"No partition found";
+				progress_.printline(msg,std::cout);
+				//p.push_back(0);
+			}
+
+		}
+		
+		template<typename SomeBasisType>
+		bool nonZeroPartition(const VectorType& v,const SomeBasisType& someBasis,size_t i)
+		{
+			typename VectorType::value_type zero = 0;
+			for (size_t j=someBasis.partition(i);j<someBasis.partition(i+1);j++) {
+				if (v[j]!=zero) return true;
+			}
+			return false;
+		}
+		
+		bool isZero(const VectorType& v) const
+		{
+			double eps = 1e-5;
+			for (size_t i=0;i<v.size();i++)
+				if (fabs(std::real(v[i]))>eps || fabs(std::imag(v[i]))>eps) return false;
+			return true; 
+		}
+
+		PsimagLite::ProgressIndicator progress_;
+		size_t size_;
+		std::vector<VectorType> data_;
+		std::vector<size_t> offsets_;
+		std::vector<size_t> nonzeroSectors_;
+	}; // class VectorWithOffset
+
 // 	template<typename FieldType>
 // 	std::ostream& operator<<(std::ostream& os,const VectorWithOffsets<FieldType>& s)
 // 	{
@@ -441,7 +439,6 @@ namespace Dmrg {
 // 		os<<nonzeroSectors_;
 // 		return os;
 // 	}
-	
 } // namespace Dmrg
 
 namespace std {
@@ -466,6 +463,7 @@ namespace std {
 		}
 		return sum;
 	}
+
 }
 
 namespace Dmrg {
@@ -481,14 +479,15 @@ namespace Dmrg {
 		} 
 		//std::cerr<<"norm="<<norma<<"\n";
 		if (fabs(norma)<eps) throw std::runtime_error("Too small!\n");
-		for (size_t i=0;i<v.data_.size();i++) for (size_t j=0;j<v.data_[i].size();j++) 
+		for (size_t i=0;i<v.data_.size();i++)
+			for (size_t j=0;j<v.data_[i].size();j++) 
 				v.data_[i][j] /= norma;
 		
 	}
 	
 	template<typename FieldType>
 	inline std::complex<FieldType> multiply(const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v1,
-				  const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v2)
+	                                        const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v2)
 	{
 		std::complex<FieldType> sum=0;
 		for (size_t ii=0;ii<v1.nonzeroSectors_.size();ii++) {
@@ -500,7 +499,7 @@ namespace Dmrg {
 	
 	template<typename FieldType>
 	inline FieldType multiply(const Dmrg::VectorWithOffsets<FieldType>& v1,
-			const Dmrg::VectorWithOffsets<FieldType>& v2)
+	                          const Dmrg::VectorWithOffsets<FieldType>& v2)
 	{
 		FieldType sum=0;
 		for (size_t ii=0;ii<v1.nonzeroSectors_.size();ii++) {
@@ -512,9 +511,8 @@ namespace Dmrg {
 
 	//! Isn't this function equal to the prev.? need to check FIXME
 	template<typename FieldType>
-	inline std::complex<FieldType> operator*(
-				const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v1,
-				const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v2)
+	inline std::complex<FieldType> operator*(const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v1,
+	                                         const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v2)
 	{
 		std::complex<FieldType> sum = 0;
 		for (size_t ii=0;ii<v1.sectors();ii++) {
@@ -531,23 +529,22 @@ namespace Dmrg {
 	}
 	
 	template<typename FieldType>
-	inline FieldType operator*(
-				const Dmrg::VectorWithOffsets<FieldType>& v1,
-				const Dmrg::VectorWithOffsets<FieldType>& v2)
-		{
-			FieldType sum = 0;
-			for (size_t ii=0;ii<v1.sectors();ii++) {
-				size_t i = v1.sector(ii);
-				for (size_t jj=0;jj<v1.sectors();jj++) {
-					size_t j = v2.sector(jj);
-					if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
-					size_t offset = v1.offset(i);
-					for (size_t k=0;k<v1.effectiveSize(i);k++)
-						sum+= v1[k+offset] * std::conj(v2[k+offset]);
-				}
+	inline FieldType operator*(const Dmrg::VectorWithOffsets<FieldType>& v1,
+	                           const Dmrg::VectorWithOffsets<FieldType>& v2)
+	{
+		FieldType sum = 0;
+		for (size_t ii=0;ii<v1.sectors();ii++) {
+			size_t i = v1.sector(ii);
+			for (size_t jj=0;jj<v1.sectors();jj++) {
+				size_t j = v2.sector(jj);
+				if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+				size_t offset = v1.offset(i);
+				for (size_t k=0;k<v1.effectiveSize(i);k++)
+					sum+= v1[k+offset] * std::conj(v2[k+offset]);
 			}
-			return sum;
 		}
+		return sum;
+	}
 
 	template<typename FieldType,typename FieldType2>
 	inline VectorWithOffsets<FieldType2> operator*(const FieldType& value,const VectorWithOffsets<FieldType2>& v)

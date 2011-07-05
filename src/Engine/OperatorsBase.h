@@ -89,20 +89,19 @@ namespace Dmrg {
 	//! This class must be inherited
 	template<typename OperatorType_,typename BasisType_>
 	class OperatorsBase {
-	public:	
+	public:
 		typedef BasisType_ BasisType;
 		typedef OperatorType_ OperatorType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
-		OperatorsBase(const BasisType* thisBasis,size_t dof,size_t nOrbitals) :
-			operatorsImpl_(thisBasis,dof,nOrbitals),
-					progress_("Operators",0) 
+		OperatorsBase(const BasisType* thisBasis,size_t dof,size_t nOrbitals)
+		: operatorsImpl_(thisBasis,dof,nOrbitals),progress_("Operators",0)
 		{ }
-					
+
 		template<typename IoInputter>
 		OperatorsBase(IoInputter& io,size_t level,const BasisType* thisBasis,
-			      size_t dof,size_t orbitals) 
-			: operatorsImpl_(io,level,thisBasis,dof,orbitals),progress_("Operators",0) 
+		              size_t dof,size_t orbitals)
+		: operatorsImpl_(io,level,thisBasis,dof,orbitals),progress_("Operators",0)
 		{
 		}
 
@@ -117,17 +116,17 @@ namespace Dmrg {
 			operatorsImpl_.setOperators(ops);
 		}
 
-		const OperatorType& getOperatorByIndex(int i) const 
+		const OperatorType& getOperatorByIndex(int i) const
 		{
-			return operatorsImpl_.getOperatorByIndex(i);			
+			return operatorsImpl_.getOperatorByIndex(i);
 		}
 
-		const OperatorType& getReducedOperatorByIndex(int i) const 
+		const OperatorType& getReducedOperatorByIndex(int i) const
 		{
 			return operatorsImpl_.getReducedOperatorByIndex(i);
 		}
 
-		const OperatorType& getReducedOperatorByIndex(char modifier,int i) const 
+		const OperatorType& getReducedOperatorByIndex(char modifier,int i) const
 		{
 			return operatorsImpl_.getReducedOperatorByIndex(modifier,i);
 		}
@@ -140,8 +139,9 @@ namespace Dmrg {
 		size_t numberOfOperators() const { return operatorsImpl_.size(); }
 
 		template<typename TransformElementType,typename ConcurrencyType>
-		void changeBasis(PsimagLite::Matrix<TransformElementType> const &ftransform,const BasisType* thisBasis,
-					ConcurrencyType &concurrency)
+		void changeBasis(PsimagLite::Matrix<TransformElementType> const &ftransform,
+		                 const BasisType* thisBasis,
+		                 ConcurrencyType &concurrency)
 		{
 			return operatorsImpl_.changeBasis(ftransform,thisBasis,concurrency);
 			std::ostringstream msg;
@@ -182,23 +182,21 @@ namespace Dmrg {
 		}
 
 		template<typename ApplyFactorsType>
-		void externalProduct(
-				size_t i,
-				const OperatorType& m,
-    				int x,
-				const std::vector<double>& fermionicSigns,
-    				bool option,
-				ApplyFactorsType& apply)
+		void externalProduct(size_t i,
+		                     const OperatorType& m,
+		                     int x,
+		                     const std::vector<double>& fermionicSigns,
+		                     bool option,
+		                     ApplyFactorsType& apply)
 		{
 			operatorsImpl_.externalProduct(i,m,x,fermionicSigns,option,apply);
 		}
 
-		void externalProductReduced(
-				size_t i,
-    				const BasisType& basis2,
-				const BasisType& basis3,
-				bool option,
-				const OperatorType& A)
+		void externalProductReduced(size_t i,
+		                            const BasisType& basis2,
+		                            const BasisType& basis3,
+		                            bool option,
+		                            const OperatorType& A)
 		{
 			operatorsImpl_.externalProductReduced(i,basis2,basis3,option,A);
 		}
@@ -209,17 +207,19 @@ namespace Dmrg {
 			operatorsImpl_.outerProductHamiltonian(h2,h3,apply);
 		}
 
-		void outerProductHamiltonianReduced(const BasisType& basis2,const BasisType& basis3,
-				const SparseMatrixType& h2,const SparseMatrixType& h3)
+		void outerProductHamiltonianReduced(const BasisType& basis2,
+		                                    const BasisType& basis3,
+		                                    const SparseMatrixType& h2,
+		                                    const SparseMatrixType& h3)
 		{
 			operatorsImpl_.outerProductHamiltonianReduced(basis2,basis3,h2,h3);
 		}
 
 		void setHamiltonian(SparseMatrixType const &h) { operatorsImpl_.setHamiltonian(h); }
 
-		const SparseMatrixType& hamiltonian() const { return operatorsImpl_.hamiltonian(); }	
+		const SparseMatrixType& hamiltonian() const { return operatorsImpl_.hamiltonian(); }
 
-		const SparseMatrixType& reducedHamiltonian() const { return operatorsImpl_.reducedHamiltonian(); }	
+		const SparseMatrixType& reducedHamiltonian() const { return operatorsImpl_.reducedHamiltonian(); }
 
 		const std::vector<size_t>& electrons() const {return operatorsImpl_.electrons(); }
 
@@ -239,3 +239,4 @@ namespace Dmrg {
 
 /*@}*/
 #endif
+
