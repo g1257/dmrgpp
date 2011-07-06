@@ -1,5 +1,13 @@
 #!/usr/bin/perl  -w
 use strict;
+use Getopt::Long;
+
+my ($file,$noerrors,$nowarn,$fix)=("YOU MUST SPECIFY -file filename",0,0,0);
+defined($file) or die "$0: Needs one argument: the filename\n";
+GetOptions ("ne" => \$noerrors,    # do not display errors
+	"nw"   => \$nowarn,      # do not display warnings
+	"fix"  => \$fix,
+	"file=s"=>\$file);  # fix in place
 
 my $indentLevel = 0;
 my $line = 0;
@@ -10,28 +18,61 @@ my $nextLineMustBeEmpty = 0;
 my @mystack;
 my $sizeOfTabs = 4;
 my $comment = 0;
-while(<STDIN>) {
+my @tooLongLines;
+
+my $fout = "tmp.txt";
+open(FILE,$file) or die "Cannot open file $file: $!\n";
+open(FOUT,">$fout") or die "Cannot open file $fout for writing: $!\n";
+my $lforEcho = "";
+
+while(<FILE>) {
+	$lforEcho = $_;
 	chomp;
 	$line++;
 	# ignore comments
 	my $cmt = "";
-	$cmt = $1 if (s/([\t ]*\/\/.*$)//);
-	$cmt .= $1 if s/([\t ]*\/\*.+\*\/[\t ]*)//;
+	if (s/([\t ]*\/\/.*$)//) {
+		$cmt = $1;
+		$consecutiveEmptyLine = 0;
+	}
+	if (s/([\t ]*\/\*.+\*\/[\t ]*)//) {
+		$cmt .= $1;
+		$consecutiveEmptyLine = 0;
+	}
 	$comment = 1 if (/\/\*/);
 	if (/\*\//) {
 		$comment = 0;
 		$cmt .= $1 if s/(^.*\*\/)//;
 		$consecutiveEmptyLine = 0;
 	}
-	next if ($comment);
+	if ($comment) {
+		print  FOUT $lforEcho;
+		next;
+	}
 	my $r = $_;
 	$r =~ s/[\t ]//g;
 	if (length($r)==0) {
 		# empty line:
-		(length($_)==0) or print "ERROR: Empty line $line has whitespace\n";
+		if (length($_)>0) {
+			print "ERROR: Empty line $line has whitespace\n" unless ($noerrors);
+			
+			my $cpy = $lforEcho;
+			$lforEcho = "";
+			while ($cpy =~ s/(\/\*.+\*\/)//) {
+				$lforEcho .= $1;
+			}
+			$cpy =~ s/^[\t ]*(\/\/.*$)/$1/;
+			$lforEcho .= $cpy;
+			$cpy =~s/[\t ]//g;
+			chomp($cpy);
+			if (length($cpy)==0) {
+				$lforEcho ="\n";
+			}
+		}
 		($consecutiveEmptyLine==0 or length($cmt)>0) or die "FATAL: Two consecutive empty lines at $line\n";
 		$consecutiveEmptyLine++ if (length($cmt)==0);
 		$nextLineMustBeEmpty = 0;
+		print FOUT $lforEcho;
 		next;
 	} 
 	if ($nextLineMustBeEmpty!=0) {
@@ -43,17 +84,25 @@ while(<STDIN>) {
 	
 	#check ending space
 	if (/[\t ]+$/) {
-		print "ERROR: Ending whitespace in line $line\n";
+		$lforEcho =~ s/[\t ]+$//;
+		print "ERROR: Ending whitespace in line $line\n" unless ($noerrors);
 	}
 	
 	# space after ( or before )
-	if (/\( [a-zA-Z0-9]/ || /[a-zA-Z0-9] \)/) {
-		print "ERROR: Space after ( or before ) in line $line goes against rule -nprs and/or -npcs\n";
+	if (/\( ([a-zA-Z0-9])/ || /([a-zA-Z0-9]) \)/) {
+		$lforEcho =~s/\( ([a-zA-Z0-9])/\($1/;
+		$lforEcho =~s/([a-zA-Z0-9]) \)/$1\)/;
+		print "ERROR: Space after ( or before ) in line $line goes against rule -nprs and/or -npcs\n" unless ($noerrors);
 	}
+
 	# space after if for or while
 	if (/if\(/ || /for\(/ or /while\(/) {
-		print "ERROR: Lack of space after if/for/while in line $line goes against rule -sai -saf -saw\n";
+		$lforEcho =~s/if\(/if \(/;
+		$lforEcho =~s/for\(/for \(/;
+		$lforEcho =~s/while\(/while \(/;
+		print "ERROR: Lack of space after if/for/while in line $line goes against rule -sai -saf -saw\n" unless ($noerrors);
 	}
+	
 	# line length
 	$r = $_;
 	$r =~ s/\t//g;
@@ -61,7 +110,7 @@ while(<STDIN>) {
 	$r = $_;
 	$r =~ s/[^\t]//g;
 	$ll += length($r) * $sizeOfTabs;
-	($ll<=80) or print STDERR "WARNING: Line $line has length $ll (using tabsize=$sizeOfTabs)\n";
+	($ll<=80) or push @tooLongLines,($line,$ll);
 	# check indentation level
 	my $o = $_;
 	if ($closeAfterNext>0) {
@@ -116,16 +165,39 @@ while(<STDIN>) {
 	my $w = $_;
 	$w =~ /(^[ \t]*)(.*$)/;	
 	checkTrailingWhite($1,$tmpLevel);
+	print FOUT $lforEcho;
 }
+close(FILE);
 
-($consecutiveEmptyLine==1) or die "FATAL: No empty line at end of file\n";
+if ($consecutiveEmptyLine!=1) {
+	print "ERROR: No empty line at end of file\n" unless ($noerrors);
+	print FOUT "\n";
+}
+close(FOUT);
+
+printWarnings() unless ($nowarn);
+
+sub printWarnings
+{
+	my $c = 0;
+	print "LINE\tLENGTH (tabsize=$sizeOfTabs)\n";
+	foreach (@tooLongLines) {
+		if ($c%2==0) {
+			print "$_ ";
+		} else {
+			print "$_\n";
+		}
+		$c++;
+	}
+}
 
 sub checkTrailingWhite
 {
 	my ($w,$inLevel) = @_;
 	# space before tabs is an error:
 	if ($w =~ / \t/) {
-		print "ERROR: Space before tab found in line $line\n";
+		$lforEcho =~ s/(^ +)\t/\t/;
+		print "ERROR: Space before tab found in line $line\n" unless ($noerrors);
 	}
 	my $tbs = $w;
 	$tbs =~ s/[^\t]//g;
