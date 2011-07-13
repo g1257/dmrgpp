@@ -74,85 +74,45 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ConjugateGradient.h
+/*! \file CorrectionVectorFunction.h
  *
- *  impl. of the conjugate gradient method
+ *  This is an implementation of PRB 60, 225, Eq. (24)
  * 
  */
-#ifndef CONJ_GRAD_H
-#define CONJ_GRAD_H
-
-#include "Matrix.h"
-#include "Vector.h"
+#ifndef CORRECTION_V_FUNCTION_H
+#define CORRECTION_V_FUNCTION_H
+#include "ConjugateGradient.h"
 
 namespace Dmrg {
-
-	template<typename RealType,typename MatrixType>
-	class	ConjugateGradient {
+	template<typename RealType,typename MatrixType,typename InfoType>
+	class	CorrectionVectorFunction {
+		typedef ConjugateGradient<RealType,MatrixType> ConjugateGradientType;
 		typedef typename MatrixType::value_type FieldType;
 		typedef std::vector<FieldType> VectorType;
-	public:
-		ConjugateGradient(size_t max=1000,const RealType& eps = 1e-6)
-		: max_(max), eps_(eps) {}
 
-		//! A and b, the result x, and also the initial solution x0
-		void operator()(std::vector<VectorType>& x,
-		                  const MatrixType& A,
-		                  const std::vector<FieldType>& b)
+	public:
+		CorrectionVectorFunction(const MatrixType& m,const InfoType& info)
+		: m_(m),info_(info),cg_()
 		{
-			VectorType v = multiply(A,x[0]);
-			std::vector<VectorType> r,p;
-			r.push_back(b);
-			p.push_back(b);
-			for (size_t i=0;i<r[0].size();i++) {
-				r[0][i] = b[i] - v[i];
-				p[0][i] = r[0][i];
-			}
-			size_t k = 0;
-			std::vector<FieldType> alpha,beta;
-			while(k<max_) {
-				FieldType val = scalarProduct(r[k],r[k])/
-				           scalarProduct(p[k],multiply(A,p[k]));
-				alpha.push_back(val);
-				v = x[k] + alpha[k] * p[k];
-				x.push_back(v);
-				v = r[k] - alpha[k] *multiply(A,p[k]);
-				r.push_back(v);
-				if (norm(r[k+1])<eps_) break;
-				val = scalarProduct(r[k+1],r[k+1])/scalarProduct(r[k],r[k]);
-				beta.push_back(val);
-				v = r[k+1] - beta[k]*p[k];
-				p.push_back(v);
-				k++;
-			}
+		}
+
+		void getXi(VectorType& result) const
+		{
+			std::vector<VectorType>& x;
+			VectorType x0(result.size(),0);
+			x.push_back(x0); // initial ansatz
+			cg_(m_,x);
+			size_t k = x.size();
+			result = x[k-1];
 		}
 
 	private:
-
-		FieldType scalarProduct(const VectorType& v1,const VectorType& v2)
-		{
-			FieldType sum = 0;
-			for (size_t i=0;i<v1.size();i++) sum += std::conj(v1[i])*v2[i];
-			return sum;
-		}
-
-		VectorType multiply(const MatrixType& A,const VectorType& v)
-		{
-			VectorType y(A.n_row());
-			for (size_t i=0;i<A.n_row();i++) {
-				y[i] = 0;
-				for (size_t j=0;j<A.n_col();j++)
-					y[i] += A(i,j) * v[j];
-			}
-			return y;
-		}
-
-		size_t max_;
-		RealType eps_;
-	}; // class ConjugateGradient
-
+		ConjugateGradientType cg_;
+		const MatrixType& m_;
+		const InfoType& info_;
+	}; // class CorrectionVectorFunction
 } // namespace Dmrg
 
 /*@}*/
-#endif // CONJ_GRAD_H
+#endif // CORRECTION_V_FUNCTION_H
 
