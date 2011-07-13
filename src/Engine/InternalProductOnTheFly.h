@@ -92,6 +92,7 @@ namespace Dmrg {
 	class InternalProductOnTheFly {
 	public:	
 		typedef T HamiltonianElementType;
+		typedef T value_type;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::RealType RealType;
 

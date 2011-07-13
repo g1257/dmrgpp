@@ -96,20 +96,20 @@ namespace Dmrg {
 		{
 		}
 
-		void getXi(VectorType& result) const
+		void getXi(VectorType& result,const VectorType& sv) const
 		{
-			std::vector<VectorType>& x;
+			std::vector<VectorType> x;
 			VectorType x0(result.size(),0);
 			x.push_back(x0); // initial ansatz
-			cg_(m_,x);
+			cg_(x,m_,sv);
 			size_t k = x.size();
 			result = x[k-1];
 		}
 
 	private:
-		ConjugateGradientType cg_;
 		const MatrixType& m_;
 		const InfoType& info_;
+		ConjugateGradientType cg_;
 	}; // class CorrectionVectorFunction
 } // namespace Dmrg
 

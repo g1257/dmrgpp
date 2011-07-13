@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BLAS.h"
 #include "ApplyOperatorLocal.h"
 #include "DynamicSerializer.h"
-#include "DynamicDmrgParams.h"
+#include "CorrectionVectorParams.h"
 #include "VectorWithOffsets.h"
 #include "ContinuedFraction.h"
 #include "CorrectionVectorFunction.h"
@@ -117,7 +117,7 @@ namespace Dmrg {
 		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
-		typedef DynamicDmrgParams<ModelType> TargettingParamsType;
+		typedef CorrectionVectorParams<ModelType> TargettingParamsType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
@@ -472,10 +472,11 @@ namespace Dmrg {
 			typename ModelType::ModelHelperType modelHelper(
 					p,lrs_,model_.orbitals());
 			LanczosMatrixType h(&model_,&modelHelper);
-			CorrectionVectorFunctionType cvft(h,sv,tstStruct_);
-			cvft.getXi(xi);
+			CorrectionVectorFunctionType cvft(h,tstStruct_);
+			cvft.getXi(xi,sv);
 			// make sure xr is zero
-			h.multiply(xr,xi);
+			for (size_t i=0;i<xr.size();i++) xr[i] = 0;
+			h.matrixVectorProduct(xr,xi);
 			xr -= tstStruct_.omega*xi;
 			xr /= tstStruct_.eta;
 		}
