@@ -35,6 +35,10 @@ sub main
 	while(<FILE>) {
 		next if (/^VectorWithOffsets/);
 		last if (/^#/);
+		if (/SuperDensity.*=\(([^,]+),/) {
+			$sd = $1;
+			next;
+		}
 		my @temp=split;
 		last unless $temp[0]=~/^(\d+\.?\d*|\.\d+)$/;  # match valid number
 		if ($temp[0]==$site) {

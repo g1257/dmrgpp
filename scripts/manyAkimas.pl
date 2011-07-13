@@ -18,7 +18,7 @@ foreach my $file (@files) {
 	my @allSites = getAllSites($file);
 	@allSites = sort {$a <=> $b} @allSites;
 	my $firstSite = $allSites[0];
-	$n = $allSites[$#allSites] - $firstSite + 1;
+	$n = $allSites[$#allSites]  + 1;
 	for (my $site=$firstSite;$site<$n;$site++) {
 		my $fout = $file;
 		$fout =~ s/\..*$//;

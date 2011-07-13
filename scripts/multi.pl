@@ -104,13 +104,10 @@ sub unDollarize
 		"Cannot open $outFile for writing: $!\n"; 
 	while(<FILE>) {
 		my $line = $_;
-		if (/([\$\@])([a-zA-Z_]+)/) {
+		while (s/([\$\@])([a-zA-Z_]+)//) {
 			my $indicator = $1;
 			my $var=$2;
-			if (isInVector(\@ignoreVars,$var)) {
-				print FOUT "$line";
-				next;
-			}
+			next if (isInVector(\@ignoreVars,$var));
 			
 			my @tmp=eval("$indicator$var");
 			defined($tmp[0]) or die "Undefined for $var\n";

@@ -6,7 +6,7 @@ my ($file)=@ARGV;
 
 my ($label1,$label2) = ("nupNdown","nUp+nDown"); 
 
-printSuper($file);
+#printSuper($file);
 
 rearrange($file,$label1);
 
@@ -89,7 +89,10 @@ sub doOneBlock
 
 	while(<FILE>) {
 		last if (/^#/);
-		next if (/superdensity/i);
+		if (/superdensity/i) {
+			print;
+			next;
+		}
 		next if (/^Not found #FERMIONICSIGN in file/);
 		next if (/^Ignore prev. error/);
 		print if ($needsPrinting);
