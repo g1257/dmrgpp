@@ -161,8 +161,8 @@ namespace Dmrg {
 		 	waveFunctionTransformation_(wft),
 		 	progress_("CorrectionVectorTargetting",0),
 		 	applyOpLocal_(lrs),
-		 	gsWeight_(1.0)
-
+		 	gsWeight_(1.0),
+		 	targetVectors_(3)
 		{
 			if (!wft.isEnabled()) throw std::runtime_error(" CorrectionVectorTargetting "
 					"needs an enabled wft\n");
@@ -445,6 +445,9 @@ namespace Dmrg {
 				const VectorWithOffsetType& phi,
 				size_t systemOrEnviron)
 		{
+			for (size_t i=0;i<targetVectors_.size();i++)
+				targetVectors_[i] = phi;
+
 			for (size_t i=0;i<phi.sectors();i++) {
 				VectorType sv;
 				size_t i0 = phi.sector(i);
@@ -459,9 +462,32 @@ namespace Dmrg {
 				targetVectors_[1].setDataInSector(xi,i0);
 				//set xr
 				targetVectors_[2].setDataInSector(xr,i0);
+				DenseMatrixType V;
+				getLanczosVectors(V,sv,p);
 			}
 			setWeights();
 			weightForContinuedFraction_ = phi*phi;
+		}
+
+		void getLanczosVectors(
+				DenseMatrixType& V,
+				const VectorType& sv,
+				size_t p)
+		{
+			typename ModelType::ModelHelperType modelHelper(
+					p,lrs_,model_.orbitals());
+			typedef typename LanczosSolverType::LanczosMatrixType
+					LanczosMatrixType;
+			LanczosMatrixType h(&model_,&modelHelper);
+
+			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
+			size_t iter= ProgramGlobals::LanczosSteps;
+
+			//srand48(3243447);
+			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_);
+
+			lanczosSolver.tridiagonalDecomposition(sv,ab_,V);
+			//calcIntensity(Eg,sv,V,ab);
 		}
 
 		void computeXiAndXr(VectorType& xi,

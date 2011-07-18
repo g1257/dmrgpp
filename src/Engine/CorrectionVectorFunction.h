@@ -86,13 +86,37 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	template<typename RealType,typename MatrixType,typename InfoType>
 	class	CorrectionVectorFunction {
-		typedef ConjugateGradient<RealType,MatrixType> ConjugateGradientType;
+
 		typedef typename MatrixType::value_type FieldType;
 		typedef std::vector<FieldType> VectorType;
 
+		class InternalMatrix {
+		public:
+			typedef FieldType value_type ;
+			InternalMatrix(const MatrixType& m,const InfoType& info)
+			: m_(m),info_(info) {}
+
+			size_t rank() const { return m_.rank(); }
+
+			void matrixVectorProduct(VectorType& x,const VectorType& y) const
+			{
+				RealType eta = info_.eta;
+				RealType omega = info_.omega;
+				VectorType xTmp(x.size(),0);
+				m_.matrixVectorProduct(xTmp,y); // xTmp = Hy
+				VectorType x2(x.size(),0);
+				m_.matrixVectorProduct(x2,x); // x2 = H^2 y
+				x = x2 -2 *omega * xTmp + (omega*omega + eta*eta)*y;
+				x /= (-eta);
+			}
+		private:
+			const MatrixType& m_;
+			const InfoType& info_;
+		};
+		typedef ConjugateGradient<RealType,InternalMatrix> ConjugateGradientType;
 	public:
 		CorrectionVectorFunction(const MatrixType& m,const InfoType& info)
-		: m_(m),info_(info),cg_()
+		: im_(m,info),cg_()
 		{
 		}
 
@@ -101,14 +125,13 @@ namespace Dmrg {
 			std::vector<VectorType> x;
 			VectorType x0(result.size(),0);
 			x.push_back(x0); // initial ansatz
-			cg_(x,m_,sv);
+			cg_(x,im_,sv);
 			size_t k = x.size();
 			result = x[k-1];
 		}
 
 	private:
-		const MatrixType& m_;
-		const InfoType& info_;
+		InternalMatrix im_;
 		ConjugateGradientType cg_;
 	}; // class CorrectionVectorFunction
 } // namespace Dmrg
