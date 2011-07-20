@@ -186,9 +186,12 @@ all: \$(EXENAME)
 dmrg:  dmrg.o
 	\$(CXX) -o dmrg dmrg.o \$(LDFLAGS)  
 
+correctionVectorMulti: correctionVectorMulti.o
+	\$(CXX) -o correctionVectorMulti correctionVectorMulti.o \$(LDFLAGS)
+
 # dependencies brought about by Makefile.dep
-dmrg.o:
-	\$(CXX) \$(CPPFLAGS) -c dmrg.cpp
+%.o: %.cpp
+	\$(CXX) \$(CPPFLAGS) -c \$< 
 
 Makefile.dep: dmrg.cpp
 	\$(CXX) \$(CPPFLAGS) -MM dmrg.cpp  > Makefile.dep
