@@ -248,9 +248,9 @@ namespace dca {
 
   //======================================================================
   
-  template<typename T>
-  psimag::Matrix<T>& operator <= 
-  (psimag::Matrix<T>& lhs, 
+  template<typename T,template<typename> class MatrixTemplate>
+  MatrixTemplate<T>& operator <= 
+  (MatrixTemplate<T>& lhs, 
    const JsonParser::Whatever& w) {
     
     if (w.type == JsonParser::Whatever::WHATEVER_MAP) {
@@ -283,7 +283,7 @@ namespace dca {
 
     if (w.type == JsonParser::Whatever::WHATEVER_MAT) {
       
-      psimag::Matrix<T>& mat(lhs);
+      MatrixTemplate<T>& mat(lhs);
 
       std::ostringstream msg;
       msg << "Whatever.loadMatrix(" << mat.n_row() << "," << mat.n_col()  << ")\n";
@@ -301,13 +301,13 @@ namespace dca {
       
       file.seekg(w.startPos);
 
-      JsonParser::MatrixParser<psimag::Matrix<T> > mParser(file,w.endPos,mat);
+      JsonParser::MatrixParser<MatrixTemplate<T> > mParser(file,w.endPos,mat);
 
       return lhs;
     }
 
     if (w.type == JsonParser::Whatever::WHATEVER_VECTOR) {
-      if (lhs.size() == 0) {
+      if (lhs.n_row() == 0 || lhs.n_col()==0 ) {
 	size_t rows =  w.whateverVector.size();
 	size_t cols =  w.whateverVector[0].size();
 	lhs.resize(rows,cols);

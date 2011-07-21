@@ -477,6 +477,18 @@ namespace JsonParser {
     }
     }
   }
+
+  size_t& operator <=(size_t& lhs, const Whatever& w) {
+	  int x = 0;
+	  x <= w;
+	  if (x<0) {
+		  std::ostringstream msg;
+		  msg << "Expecting size_t got negative int: "<<x<<"\n";
+		  throw std::logic_error(msg.str());
+	  }
+	  lhs = x;
+	  return lhs;
+  }
   
   template<typename T>
   std::complex<T>& operator <= (std::complex<T>& lhs, const Whatever& w) {
