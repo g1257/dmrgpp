@@ -98,6 +98,9 @@ namespace PsimagLite {
 		std::string name() const { return "serial"; }
 		
 		template<typename DataType>
+		void reduce(DataType& v) {}
+		
+		template<typename DataType>
 		void gather(DataType &v) { }
 		
 		template<typename DataType>
