@@ -454,6 +454,11 @@ namespace PsimagLite {
 
 				~In() { fin_.close(); }
 
+				const char* filename() const 
+				{
+					return filename_.c_str();
+				}
+
 				template<typename X>
 				friend void operator>>(In& io,X& t);
 				
@@ -474,7 +479,16 @@ namespace PsimagLite {
 	{
 		io.fin_>>t;
 	}
+
+
 } // namespace PsimagLite 
 
+namespace Spf {
+
+	class IoSimpleIn : public PsimagLite::IoSimple::In {
+	public:
+		IoSimpleIn(const char* fn) : PsimagLite::IoSimple::In(std::string(fn)) { } 
+	};
+}
 /*@}*/	
 #endif
