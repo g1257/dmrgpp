@@ -20,19 +20,19 @@ Please see full open source license included in file LICENSE.
 #ifndef RANDOM48_H
 #define RANDOM48_H
 #include <cstdlib>
-
+#include <iostream>
 namespace PsimagLite {
 	template<typename T>
 	class  Random48 {
 	public:
 		typedef long int LongType;
 		typedef T value_type; // legacy name
-		static void seed(LongType seed)
+		void seed(LongType seed)
 		{
 			srand48(seed);
 		}
 
-		static T random()
+		T random()
 		{
 			return static_cast<T>(drand48());
 		}

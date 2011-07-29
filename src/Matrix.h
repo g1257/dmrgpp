@@ -95,6 +95,14 @@ namespace PsimagLite {
 				data_[i] += other.data_[i];
 			return *this;
 		}
+		
+		Matrix<T>& operator -= (const Matrix<T>& other)
+		{
+		  // domain checking ??? 
+		  for(size_t i=0;i<ncol_*nrow_;i++) 
+		    data_[i] -= other.data_[i];
+		  return *this;
+		}
 
 	private:
 		size_t nrow_,ncol_;

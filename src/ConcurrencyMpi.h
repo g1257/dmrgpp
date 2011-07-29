@@ -177,7 +177,21 @@ namespace PsimagLite {
 		{
 			step_=0;
 		}
-
+		
+		void reduce(std::vector<double>& v)
+		{
+			std::vector<double> w(v.size());
+			
+			int x = MPI_Reduce(&(v[0]),&(w[0]),v.size(),
+			                     MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+			if (x!=MPI_SUCCESS) {
+				std::string s = "ConcurrencyMpi: reduce(...) failed\n";
+				throw std::runtime_error(s.c_str());
+			}
+			
+			if (rank_==0) v = w;
+		}
+			
 		void gather(std::vector<std::vector<std::complex<double> > > &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
 		{
 			int i,x;
