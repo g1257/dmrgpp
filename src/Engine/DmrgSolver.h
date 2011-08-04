@@ -290,17 +290,9 @@ namespace Dmrg {
 				lrs_.setToProduct(quantumSector_);
 				
 				diagonalization_(psi,INFINITE,X[step]);
-
-				progress_.print("Truncating basis now...\n",std::cout);
-				
-//				ns=pSprime_.size();
-//				ne=pEprime_.size();
 				
 				truncate_(pS,psi,parameters_.keptStatesInfinite,EXPAND_SYSTEM);
 				truncate_(pE,psi,parameters_.keptStatesInfinite,EXPAND_ENVIRON);
-// 				TransformType transform;
-// 				changeAndTruncateBasis(pS,psi,transform,parameters_.keptStatesInfinite,EXPAND_SYSTEM);
-// 				changeAndTruncateBasis(pE,psi,transform,parameters_.keptStatesInfinite,EXPAND_ENVIRON);
 				
 				checkpoint_.push(pS,pE);
 			}

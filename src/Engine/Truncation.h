@@ -117,7 +117,12 @@ namespace Dmrg {
 		  progress_("Truncation",0),
 		  keptStates_(0),
 		  error_(0.0)
-		{}
+		{
+			if (parameters_.tolerance<0) return;
+			std::ostringstream msg;
+			msg<<"has tolerance= "<<parameters_.tolerance;
+			progress_.printline(msg,std::cout);
+		}
 
 		void operator()(BasisWithOperatorsType& pS,
 		                BasisWithOperatorsType& pE,
@@ -183,34 +188,55 @@ namespace Dmrg {
 			dmS.diag(eigs,'V',concurrency_);
 			dmS.check2(direction);
 			
+			updateKeptStates(eigs);
+			
 			if (verbose_ && concurrency_.root())
 				std::cerr<<"Done with density-matrix diag.\n";
 			
 			//! transform basis: dmS^\dagger * operator matrix * dms
-				rSprime = pBasis;
-				if (verbose_ && concurrency_.root())
-					std::cerr<<"About to changeBasis...\n";
+			rSprime = pBasis;
+			if (verbose_ && concurrency_.root())
+				std::cerr<<"About to changeBasis...\n";
 
-				error_ = rSprime.changeBasis(ftransform_,
-				                                     dmS(),
-				                                     eigs,
-				                                     keptStates_,
-				                                     parameters_,
-				                                     concurrency_);
-				if (direction == EXPAND_SYSTEM) {
-					LeftRightSuperType lrs(rSprime,
-					                       (BasisWithOperatorsType&) pBasisSummed,
-					                       (BasisType&)lrs_.super());
-					waveFunctionTransformation_.push(ftransform_,direction,lrs);
-				} else {
-					LeftRightSuperType lrs((BasisWithOperatorsType&) pBasisSummed,
-					                       rSprime,
-					                       (BasisType&)lrs_.super());
-					waveFunctionTransformation_.push(ftransform_,direction,lrs);
+			error_ = rSprime.changeBasis(ftransform_,
+			                                        dmS(),
+			                                        eigs,
+			                                        keptStates_,
+			                                        parameters_,
+			                                        concurrency_);
+			if (direction == EXPAND_SYSTEM) {
+				LeftRightSuperType lrs(rSprime,
+										(BasisWithOperatorsType&) pBasisSummed,
+										(BasisType&)lrs_.super());
+				waveFunctionTransformation_.push(ftransform_,direction,lrs);
+			} else {
+				LeftRightSuperType lrs((BasisWithOperatorsType&) pBasisSummed,
+										rSprime,
+										(BasisType&)lrs_.super());
+				waveFunctionTransformation_.push(ftransform_,direction,lrs);
+			}
+			std::ostringstream msg;
+			msg<<"new size of basis="<<rSprime.size();
+			progress_.printline(msg,std::cout);
+		}
+		
+		void updateKeptStates(const std::vector<RealType>& eigs)
+		{
+			if (parameters_.tolerance<0) return;
+			size_t min = parameters_.keptStatesInfinite;
+			size_t total = min;
+			for (size_t i=min;i<eigs.size();i++) {
+				if (fabs(eigs[i])<parameters_.tolerance) {
+					total = i;
+					break;
 				}
-				std::ostringstream msg;
-				msg<<"new size of basis="<<rSprime.size();
-				progress_.printline(msg,std::cout);
+			}
+			if (total>=keptStates_ || total<min)  return;
+			std::ostringstream msg;
+			msg<<"Updating kept states to "<<total<<" from "<<keptStates_;
+			progress_.printline(msg,std::cout);
+			
+			keptStates_ = total;
 		}
 		
 		const LeftRightSuperType& lrs_;

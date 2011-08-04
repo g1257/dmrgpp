@@ -179,11 +179,14 @@ if ($mpi) {
 } else {
 	print FOUT "CXX = $compiler -pg -O3 -DNDEBUG\n";
 	print FOUT "#Comment out line below for debugging: \n";
-	print FOUT "CXX = $compiler -g3 -DNDEBUG\n";
+	print FOUT "#CXX = $compiler -g3 -DNDEBUG\n";
 }
 print FOUT<<EOF;
 EXENAME = dmrg
 all: \$(EXENAME)
+
+dmrg.cpp: configure.pl
+	perl configure.pl
 
 dmrg:  dmrg.o
 	\$(CXX) -o dmrg dmrg.o \$(LDFLAGS)  
@@ -450,10 +453,10 @@ sub getLicense
 	}
 	my $l="";
 	while(<THISFILE>) {
+		last if (/END LICENSE BLOCK/);
 		chomp;
 		s/\"/\\\"/g;
 		$l = "$l\"$_\\n\"\n";
-		last if (/END LICENSE BLOCK/);
 	}
 	close(THISFILE);
 	return $l;

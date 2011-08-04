@@ -190,6 +190,7 @@ namespace Dmrg {
 		std::string version;
 		std::string options; // reserved for future use
 		std::vector<FieldType> targetQuantumNumbers;
+		FieldType tolerance;
 		DmrgCheckPoint checkpoint;
 		size_t nthreads;
 		
@@ -202,8 +203,10 @@ namespace Dmrg {
 			io.readline(filename,"OutputFile=");
 			io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
 			io.read(finiteLoop,"FiniteLoops");
-			if (options.find("hasQuantumNumbers")!=std::string::npos) 
-				io.read(targetQuantumNumbers,"TargetQuantumNumbers");
+			io.read(targetQuantumNumbers,"TargetQuantumNumbers");
+			tolerance = -1.0;
+			if (options.find("hasTolerance")!=std::string::npos)
+				io.readline(tolerance,"TruncationTolerance=");
 			if (options.find("checkpoint")!=std::string::npos)
 				io.readline(checkpoint.filename,"CheckpointFilename=");
 			nthreads=1; // provide a default value
@@ -216,7 +219,8 @@ namespace Dmrg {
 
 	//! print dmrg parameters
 	template<typename FieldType>
-	std::ostream &operator<<(std::ostream &os,ParametersDmrgSolver<FieldType> const &parameters)
+	std::ostream &operator<<(std::ostream &os,
+	                         ParametersDmrgSolver<FieldType> const &parameters)
 	{
 		os<<"#This is DMRG++\n";
 		os<<"parameters.version="<<parameters.version<<"\n";
@@ -226,14 +230,13 @@ namespace Dmrg {
 		os<<"finiteLoop\n";
 		os<<parameters.finiteLoop;
 		//utils::vectorPrint(parameters.finiteLoop,"finiteLoop",os);
-		if (parameters.options.find("hasQuantumNumbers")!=std::string::npos) {
-			os<<"parameters.targetQuantumNumbers=";
-			for (size_t i=0;i<parameters.targetQuantumNumbers.size();i++) os<<parameters.targetQuantumNumbers[i]<<" ";
-			os<<"\n";
-		} else {
-			os<<"parameters.targetQuantumNumbers=search\n";
-		}
-
+		
+		os<<"parameters.targetQuantumNumbers=";
+		for (size_t i=0;i<parameters.targetQuantumNumbers.size();i++)
+			os<<parameters.targetQuantumNumbers[i]<<" ";
+		os<<"\n";
+		if (parameters.options.find("hasTolerance")!=std::string::npos)
+			os<<"parameters.tolerance="<<parameters.tolerance<<"\n";
 		os<<"parameters.nthreads="<<parameters.nthreads<<"\n";
 		return os;
 	}
