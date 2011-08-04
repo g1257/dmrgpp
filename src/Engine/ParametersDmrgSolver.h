@@ -203,6 +203,11 @@ namespace Dmrg {
 			io.readline(filename,"OutputFile=");
 			io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
 			io.read(finiteLoop,"FiniteLoops");
+			if (options.find("hasQuantumNumbers")!=std::string::npos) {
+				std::string s = "*** WARNING: hasQuantumNumbers ";
+				s += "option is obsolete in input file\n";
+				std::cerr<<s;
+			}
 			io.read(targetQuantumNumbers,"TargetQuantumNumbers");
 			tolerance = -1.0;
 			if (options.find("hasTolerance")!=std::string::npos)
@@ -212,7 +217,6 @@ namespace Dmrg {
 			nthreads=1; // provide a default value
 			if (options.find("hasThreads")!=std::string::npos)
 				io.readline(nthreads,"Threads=");
-			
 		} 
 
 	};

@@ -350,7 +350,11 @@ int main(int argc,char *argv[])
 {
 	//! setup distributed parallelization
 	MyConcurrency concurrency(argc,argv);
-	
+
+	// print license
+	std::string license = $license;
+	if (concurrency.root()) std::cerr<<license;
+
 	//Setup the Geometry
 	typedef PsimagLite::IoSimple::In IoInputType;
 	IoInputType io(argv[1]);
@@ -359,10 +363,6 @@ int main(int argc,char *argv[])
 	//! Read the parameters for this run
 	ParametersModelType mp(io);
 	ParametersDmrgSolver<MatrixElementType> dmrgSolverParams(io);
-
-	// print license
-	std::string license = $license;
-	if (concurrency.root()) std::cerr<<license;
 
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;
