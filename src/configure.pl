@@ -175,9 +175,11 @@ LDFLAGS =    $lapack  $gslLibs $pthreadsLib
 CPPFLAGS = -Werror -Wall  -IEngine $modelLocation -IGeometries -I$PsimagLite
 EOF
 if ($mpi) {
-	print FOUT "CXX = mpicxx -O2 -DNDEBUG \n";
+	print FOUT "CXX = mpicxx -O3 -DNDEBUG \n";
 } else {
-	print FOUT "CXX = $compiler -pg -O2 -DNDEBUG\n";
+	print FOUT "CXX = $compiler -pg -O3 -DNDEBUG\n";
+	print FOUT "#Comment out line below for debugging: \n";
+	print FOUT "CXX = $compiler -g3 -DNDEBUG\n";
 }
 print FOUT<<EOF;
 EXENAME = dmrg

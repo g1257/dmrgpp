@@ -261,7 +261,7 @@ namespace Dmrg {
 		//		}
 				return;
 			}
-			Eg_ = Eg;
+			if (!noStageIs(DISABLED)) Eg_ = Eg;
 			calcDynVectors(phiNew,direction);
 
 			//cocoon(direction,block); // in-situ
@@ -282,6 +282,9 @@ namespace Dmrg {
 				VectorWithOffsetType w= weight_[i]*vv[i];
 				v += w;
 			}
+			if (fabs(gsWeight_)<1e-6) return;
+			VectorWithOffsetType w= gsWeight_*psi_;
+			v += w;
 		}
 		
 		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
