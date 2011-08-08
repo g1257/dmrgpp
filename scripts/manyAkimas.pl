@@ -19,6 +19,7 @@ foreach my $file (@files) {
 	@allSites = sort {$a <=> $b} @allSites;
 	my $firstSite = $allSites[0];
 	$n = $allSites[$#allSites]  + 1;
+	print STDERR "Lowest site =  $firstSite , largest site = $n\n";
 	for (my $site=$firstSite;$site<$n;$site++) {
 		my $fout = $file;
 		$fout =~ s/\..*$//;

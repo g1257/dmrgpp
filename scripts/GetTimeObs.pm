@@ -36,7 +36,7 @@ sub main
 		next if (/^VectorWithOffsets/);
 		last if (/^#/);
 		if (/SuperDensity.*=\(([^,]+),/) {
-			$sd = $1;
+			$sd = $1 unless ($whatState eq "gs");
 			next;
 		}
 		my @temp=split;
