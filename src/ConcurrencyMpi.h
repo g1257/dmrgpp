@@ -185,11 +185,37 @@ namespace PsimagLite {
 			int x = MPI_Reduce(&(v[0]),&(w[0]),v.size(),
 			                     MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
 			if (x!=MPI_SUCCESS) {
-				std::string s = "ConcurrencyMpi: reduce(...) failed\n";
+				std::string s = "ConcurrencyMpi: reduce(Vector) failed\n";
 				throw std::runtime_error(s.c_str());
 			}
 			
 			if (rank_==0) v = w;
+		}
+
+		void reduce(std::vector<std::complex<double> >& v)
+		{
+			std::vector<std::complex<double> > w(v.size());
+			
+			int x = MPI_Reduce(&(v[0]),&(w[0]),2*v.size(),
+			                     MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+			if (x!=MPI_SUCCESS) {
+				std::string s = "ConcurrencyMpi: reduce(Vector) failed\n";
+				throw std::runtime_error(s.c_str());
+			}
+			
+			if (rank_==0) v = w;
+		}
+
+		void reduce(PsimagLite::Matrix<double>& m)
+		{
+			PsimagLite::Matrix<double> w(m.n_row(),m.n_col());
+			int n = m.n_row()*m.n_col();
+			int x = MPI_Reduce(&(m(0,0)),&(w(0,0)),n,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+			if (x!=MPI_SUCCESS) {
+				std::string s = "ConcurrencyMpi: reduce(Matrix) failed\n";
+				throw std::runtime_error(s.c_str());
+			}
+			if (rank_==0) m = w;
 		}
 			
 		void gather(std::vector<std::vector<std::complex<double> > > &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
