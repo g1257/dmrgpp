@@ -94,8 +94,9 @@ namespace PsimagLite {
 		{
 			prefix_ = caller_ + ": ";
 		}
-		
-		void printline(std::string &s,std::ostream& os) const
+	
+		template<typename SomeOutputType>	
+		void printline(std::string &s,SomeOutputType& os) const
 		{
 			if (rank_!=0) return;
 			os<<prefix_<<s<<"\n";
@@ -107,7 +108,7 @@ namespace PsimagLite {
 			os<<prefix_<<s.str()<<"\n";
 			s.seekp(std::ios_base::beg);
 		}
-		
+
 		void print(const std::string& something,std::ostream& os) const
 		{
 			if (rank_!=0) return;
