@@ -96,7 +96,7 @@ namespace PsimagLite {
 		}
 	
 		template<typename SomeOutputType>	
-		void printline(std::string &s,SomeOutputType& os) const
+		void printline(const std::string &s,SomeOutputType& os) const
 		{
 			if (rank_!=0) return;
 			os<<prefix_<<s<<"\n";

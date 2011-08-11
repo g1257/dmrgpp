@@ -471,6 +471,7 @@ namespace PsimagLite {
 	template<typename T>
 	IoSimple::Out& operator<<(IoSimple::Out& io,T& t)
 	{
+		if (io.rank_!=0) return io;
 		(*(io.fout_))<<t;
 		return io;
 	}
