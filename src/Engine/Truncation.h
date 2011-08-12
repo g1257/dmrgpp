@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_TRUNCATION_H
 
 #include "DensityMatrix.h"
+#include "Sort.h"
 
 namespace Dmrg {
 	
@@ -219,26 +220,74 @@ namespace Dmrg {
 			msg<<"new size of basis="<<rSprime.size();
 			progress_.printline(msg,std::cout);
 		}
-		
-		void updateKeptStates(const std::vector<RealType>& eigs)
+
+		void updateKeptStates(const std::vector<RealType>& eigs2)
 		{
-			if (parameters_.tolerance<0) return;
-			size_t min = parameters_.keptStatesInfinite;
-			size_t total = min;
-			for (size_t i=min;i<eigs.size();i++) {
-				if (fabs(eigs[i])<parameters_.tolerance) {
-					total = i;
+// 			std::cerr<<eigs;
+// 			std::cerr<<"-----------------\n";
+			std::vector<RealType> eigs = eigs2;
+			std::vector<size_t> perm(eigs.size());
+			Sort<std::vector<RealType> > sort;
+			sort.sort(eigs,perm);
+			
+			size_t newKeptStates = computeKeptStates(eigs);
+			size_t statesToRemove = 0;
+			if (eigs.size()>=newKeptStates)
+				statesToRemove = eigs.size()-newKeptStates;
+			RealType discWeight = sumUpTo(eigs,statesToRemove);
+			
+			std::ostringstream msg;
+			if (newKeptStates != keptStates_) {
+				// we report that the "m" value has been changed and...
+				msg<<"Reducing kept states to "<<newKeptStates<<" from "<<keptStates_;
+				// ... we change it:
+				keptStates_ = newKeptStates;
+			} else {
+				// we report that the "m" value remains the same
+				msg<<"Not changing kept states="<<keptStates_;
+			}
+			progress_.printline(msg,std::cout);
+			// we report the discarded weight
+			msg<<"Discarded weight (Truncation error): "<< discWeight ; 
+			progress_.printline(msg,std::cout);
+			
+		}
+
+		// eigenvalues are ordered in increasing order
+		size_t computeKeptStates(const std::vector<RealType>& eigs) const
+		{
+			if (parameters_.tolerance<0) return keptStates_;
+			
+			size_t maxToRemove = eigs.size()-parameters_.keptStatesInfinite;
+			size_t total = keptStates_;
+			RealType discWeight=0.0;
+			// maybe we should use int instead of size_t here!!!
+			for (size_t i=0;i<maxToRemove;i++) {
+				// calculate the discarded weight if we keep i states.
+				discWeight += fabs(eigs[i]); 
+				// if the discarded weight
+				// gets larger than the tolerance, we break the loop.
+				if (discWeight>parameters_.tolerance) { 
+					total = eigs.size() - i;
+					discWeight -= fabs(eigs[i]);
 					break;
 				}
 			}
-			if (total>=keptStates_ || total<min)  return;
-			std::ostringstream msg;
-			msg<<"Updating kept states to "<<total<<" from "<<keptStates_;
-			progress_.printline(msg,std::cout);
-			
-			keptStates_ = total;
+			// if total is too small or too big we keep it unchanged
+			if (total>=keptStates_ || total<parameters_.keptStatesInfinite)
+				return keptStates_ ; 
+
+			return total;
 		}
-		
+
+		RealType sumUpTo(const std::vector<RealType>& eigs,size_t x) const
+		{
+			RealType discWeight = 0;
+			for (size_t i=0;i<x;i++)
+				discWeight += fabs(eigs[i]); 
+			return discWeight;
+		}
+
 		const LeftRightSuperType& lrs_;
 		WaveFunctionTransfType& waveFunctionTransformation_;
 		ConcurrencyType& concurrency_;
