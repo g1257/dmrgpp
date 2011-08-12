@@ -235,7 +235,7 @@ namespace Dmrg {
 			if (eigs.size()>=newKeptStates)
 				statesToRemove = eigs.size()-newKeptStates;
 			RealType discWeight = sumUpTo(eigs,statesToRemove);
-			
+			std::cerr<<"newKeptstates="<<newKeptStates<<"\n";
 			std::ostringstream msg;
 			if (newKeptStates != keptStates_) {
 				// we report that the "m" value has been changed and...
@@ -257,12 +257,15 @@ namespace Dmrg {
 		size_t computeKeptStates(const std::vector<RealType>& eigs) const
 		{
 			if (parameters_.tolerance<0) return keptStates_;
-			
-			size_t maxToRemove = eigs.size()-parameters_.keptStatesInfinite;
-			size_t total = keptStates_;
-			RealType discWeight=0.0;
+			int start = eigs.size() - keptStates_;
+			if (start<0) start = 0;
+			int maxToRemove = eigs.size()-parameters_.keptStatesInfinite;
+			if (maxToRemove<0) maxToRemove = 0;
+			size_t total = parameters_.keptStatesInfinite;
+			RealType discWeight=sumUpTo(eigs,start);
 			// maybe we should use int instead of size_t here!!!
-			for (size_t i=0;i<maxToRemove;i++) {
+			
+			for (int i=start;i<maxToRemove;i++) {
 				// calculate the discarded weight if we keep i states.
 				discWeight += fabs(eigs[i]); 
 				// if the discarded weight
@@ -273,6 +276,7 @@ namespace Dmrg {
 					break;
 				}
 			}
+
 			// if total is too small or too big we keep it unchanged
 			if (total>=keptStates_ || total<parameters_.keptStatesInfinite)
 				return keptStates_ ; 
