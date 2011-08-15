@@ -163,9 +163,14 @@ namespace PsimagLite {
 			
 			if (step_<0 || total_==0) throw std::runtime_error("ConcurrencySerial::loop() loopCreate() must be called before.\n"); 
 			 //i = rank_ + step_*nprocs_;
+			if (size_t(step_)>=myIndices_.size())  {
+				step_ = -1;
+				return false;
+			}
+
 			i=myIndices_[step_];
 			
-			if (i>=total_ || step_>=int(myIndices_.size())) {
+			if (i>=total_ ) {
 				step_= -1; 
 				return false;
 			}
