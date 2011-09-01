@@ -24,12 +24,43 @@ my $fout = "tmp.txt";
 open(FILE,$file) or die "Cannot open file $file: $!\n";
 open(FOUT,">$fout") or die "Cannot open file $fout for writing: $!\n";
 my $lforEcho = "";
+my $appendNext = 0;
 my $parensBalance = 0;
 
 while(<FILE>) {
-	$lforEcho = $_;
+	if ($appendNext) {
+		$lforEcho .= $_;
+	} else {
+		$lforEcho = $_;
+	}
+
+	if (/\\$/) {
+		$appendNext = 1;
+		$line++;
+		next;
+	} else {
+		$appendNext = 0;
+	}
+
 	chomp;
 	$line++;
+
+	if ($lforEcho=~/^[\t ]+\#/) {
+		die "FATAL: Line $.: preprocessor directives must start at line 0\n";
+	}
+
+	if ($lforEcho=~/^\#/) {
+		print FOUT $lforEcho;
+		$consecutiveEmptyLine = 0;
+		next;
+	}
+	if (/^[\t]+DO_IF_DEBUG/) {
+		print STDERR "Warning: Ignoring line $.\n" unless ($nowarn);
+		print FOUT $lforEcho;
+		$consecutiveEmptyLine = 0;
+		next;
+	}
+
 	# ignore comments
 	my $cmt = "";
 	if (s/([\t ]*\/\/.*$)//) {
@@ -48,13 +79,6 @@ while(<FILE>) {
 	}
 	if ($comment) {
 		print  FOUT $lforEcho;
-		next;
-	}
-	if (/^[\t ]+\#/) {
-		die "FATAL: Line $.: preprocessor directives must start at line 0\n";
-	}
-	if (/^\#/) {
-		print FOUT $lforEcho;
 		next;
 	}
 
@@ -150,20 +174,14 @@ while(<FILE>) {
 	$parensClosed = length($parensClosed);
 	$parensBalance += ($parensOpen - $parensClosed);
 
-	my $label = "function";
-	$label = "class" if (/[^a-zA-Z]class[^a-zA-Z]/);
-	$label = "if" if (/[^a-zA-Z]if[^a-zA-Z]/);
-	$label = "for" if (/[^a-zA-Z]for[^a-zA-Z]/);
-	$label = "foreach" if (/[^a-zA-Z]foreach[^a-zA-Z]/);
-	$label = "else" if (/[^a-zA-Z]else[^a-zA-Z]/);
+	my $label = getLabel($_);
 	if ($co==0 and !$hasSemicolonAtTheEnd) {
 		if ($label eq "if" or $label eq "for" or $label eq "else" or $label eq "foreach") {
 			$parensBalance = $parensOpen - $parensClosed;
 			if ($parensBalance==0) {
 				$co = 1;
 				$closeAfterNext++;
-			}
-			
+			}	
 		}
 	}
 	push @mystack, $label if ($co==1);
@@ -237,4 +255,18 @@ sub checkTrailingWhite
 	$tbs =~ s/[^\t]//g;
 	my $ctbs = length($tbs);
 	($ctbs==$inLevel) or die "FATAL: Indentation level $inLevel tabs $ctbs, for line $line\n";
+}
+
+sub getLabel
+{
+	my ($t)=@_;
+	my $tt = $t;
+	$tt =~ s/\".+\"//;
+	my $label = "function";
+	$label = "class" if ($tt=~/[^a-zA-Z]class[^a-zA-Z]/);
+	$label = "if" if ($tt=~/[^a-zA-Z]if[^a-zA-Z]/);
+	$label = "for" if ($tt=~/[^a-zA-Z]for[^a-zA-Z]/);
+	$label = "foreach" if ($tt=~/[^a-zA-Z]foreach[^a-zA-Z]/);
+	$label = "else" if ($tt=~/[^a-zA-Z]else[^a-zA-Z]/);
+	return $label;
 }
