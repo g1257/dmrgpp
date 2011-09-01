@@ -24,6 +24,7 @@ my $fout = "tmp.txt";
 open(FILE,$file) or die "Cannot open file $file: $!\n";
 open(FOUT,">$fout") or die "Cannot open file $fout for writing: $!\n";
 my $lforEcho = "";
+my $parensBalance = 0;
 
 while(<FILE>) {
 	$lforEcho = $_;
@@ -49,6 +50,14 @@ while(<FILE>) {
 		print  FOUT $lforEcho;
 		next;
 	}
+	if (/^[\t ]+\#/) {
+		die "FATAL: Line $.: preprocessor directives must start at line 0\n";
+	}
+	if (/^\#/) {
+		print FOUT $lforEcho;
+		next;
+	}
+
 	my $r = $_;
 	$r =~ s/[\t ]//g;
 	if (length($r)==0) {
@@ -95,12 +104,13 @@ while(<FILE>) {
 		print "ERROR: Space after ( or before ) in line $line goes against rule -nprs and/or -npcs\n" unless ($noerrors);
 	}
 
-	# space after if for or while
-	if (/if\(/ || /for\(/ or /while\(/) {
+	# space after if for or while or foreach 
+	if (/if\(/ or /for\(/ or /while\(/ or /foreach\(/) {
 		$lforEcho =~s/if\(/if \(/;
 		$lforEcho =~s/for\(/for \(/;
 		$lforEcho =~s/while\(/while \(/;
-		print "ERROR: Lack of space after if/for/while in line $line goes against rule -sai -saf -saw\n" unless ($noerrors);
+		$lforEcho =~s/foreach\(/foreach \(/;
+		print "ERROR: Lack of space after if/for/foreach/while in line $line goes against rule -sai -saf -saw\n" unless ($noerrors);
 	}
 	
 	# line length
@@ -130,15 +140,30 @@ while(<FILE>) {
 	if (/\;[\t ]*$/) {
 		$hasSemicolonAtTheEnd = 1;
 	}
+
+	my $parensOpen = $_;
+	$parensOpen =~ s/[^\(]//g;
+	$parensOpen = length($parensOpen);
+
+	my $parensClosed = $_;
+	$parensClosed =~ s/[^\)]//g;
+	$parensClosed = length($parensClosed);
+	$parensBalance += ($parensOpen - $parensClosed);
+
 	my $label = "function";
 	$label = "class" if (/[^a-zA-Z]class[^a-zA-Z]/);
 	$label = "if" if (/[^a-zA-Z]if[^a-zA-Z]/);
 	$label = "for" if (/[^a-zA-Z]for[^a-zA-Z]/);
+	$label = "foreach" if (/[^a-zA-Z]foreach[^a-zA-Z]/);
 	$label = "else" if (/[^a-zA-Z]else[^a-zA-Z]/);
 	if ($co==0 and !$hasSemicolonAtTheEnd) {
-		if ($label eq "if" or $label eq "for" or $label eq "else") {
-			$co = 1;
-			$closeAfterNext++;
+		if ($label eq "if" or $label eq "for" or $label eq "else" or $label eq "foreach") {
+			$parensBalance = $parensOpen - $parensClosed;
+			if ($parensBalance==0) {
+				$co = 1;
+				$closeAfterNext++;
+			}
+			
 		}
 	}
 	push @mystack, $label if ($co==1);
@@ -152,8 +177,10 @@ while(<FILE>) {
 	}
 	my $tmpLevel = $indentLevel;
 	$indentLevel += ($co-$cc);
+	print STDERR "Line $.: tmplevel= $tmpLevel indentLevel= $indentLevel balance=$parensBalance co=$co cc=$cc\n";
 	$tmpLevel = $indentLevel if ($co<$cc and !$braceAtTheEnd);
 	$tmpLevel-- if ($tmpLevel>0 and $label eq "else" and $co>0);
+	
 	#print "$_ ** $line ** $indentLevel \n"  if ($co<$cc and !$braceAtTheEnd);
 	$braceAtTheEnd = 0;
 	
@@ -176,6 +203,13 @@ if ($consecutiveEmptyLine!=1) {
 close(FOUT);
 
 printWarnings() unless ($nowarn);
+
+if ($fix) {
+	print STDERR "$0: Copying $file into $file.bak\n";
+	system("cp $file $file.bak");
+	print STDERR "$0: Copying $fout into $file\n";
+	system("cp $fout $file");
+}
 
 sub printWarnings
 {
