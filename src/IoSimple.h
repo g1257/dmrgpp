@@ -202,7 +202,7 @@ namespace PsimagLite {
 			int rank() { return rank_; }
 
 			template<typename X>
-			friend Out& operator<<(Out& io,X& t);
+			friend Out& operator<<(Out& io,const X& t);
 
 		private:
 			int rank_;
@@ -469,7 +469,7 @@ namespace PsimagLite {
 	}; //class IoSimple
 
 	template<typename T>
-	IoSimple::Out& operator<<(IoSimple::Out& io,T& t)
+	IoSimple::Out& operator<<(IoSimple::Out& io,const T& t)
 	{
 		if (io.rank_!=0) return io;
 		(*(io.fout_))<<t;

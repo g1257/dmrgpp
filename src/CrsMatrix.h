@@ -302,11 +302,11 @@ namespace PsimagLite {
 			rowptr_[rank]=rank;
 		}
 
-		int getRowPtr(int i) const { return rowptr_[i]; }
+		const int& getRowPtr(int i) const { return rowptr_[i]; }
 
-		int getCol(int i) const { return colind_[i]; }
+		const int& getCol(int i) const { return colind_[i]; }
 
-		T getValue(int i) const { return values_[i]; }
+		const T& getValue(int i) const { return values_[i]; }
 
 		/*bool operator==(const CrsMatrix<T>& B) const
 		{
@@ -358,6 +358,7 @@ namespace PsimagLite {
 	std::ostream &operator<<(std::ostream &os,const CrsMatrix<T> &m)
 	{
 		size_t n=m.rank();
+		if (n==0) return os;
 		os<<n<<"\n";
 		for (size_t i=0;i<n+1;i++) os<<m.rowptr_[i]<<" ";
 		os<<"\n";

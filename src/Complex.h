@@ -32,6 +32,11 @@ namespace std {
 	{
 		return fabs(t);
 	}
+
+	std::complex<double> operator*(int x,const std::complex<double>& y)
+	{
+		return std::complex<double>(real(y)*x,real(y)*x);
+	}
 }
 
 #endif // PSICOMPLEX_H_
