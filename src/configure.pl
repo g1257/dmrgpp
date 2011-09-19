@@ -188,14 +188,14 @@ all: \$(EXENAME)
 dmrg.cpp: configure.pl
 	perl configure.pl
 
-dmrg:  dmrg.o
+dmrg:  dmrg.o 
 	\$(CXX) -o dmrg dmrg.o \$(LDFLAGS)  
 
 correctionVectorMulti: correctionVectorMulti.o
 	\$(CXX) -o correctionVectorMulti correctionVectorMulti.o \$(LDFLAGS)
 
 # dependencies brought about by Makefile.dep
-%.o: %.cpp
+%.o: %.cpp Makefile
 	\$(CXX) \$(CPPFLAGS) -c \$< 
 
 Makefile.dep: dmrg.cpp

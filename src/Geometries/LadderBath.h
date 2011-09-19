@@ -167,6 +167,11 @@ namespace Dmrg {
 			{
 				return "ladderbath";
 			}
+			
+			size_t maxConnections() const
+			{
+				return clusterSize_+1;
+			}
 
 		private:
 

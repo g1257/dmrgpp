@@ -97,6 +97,7 @@ namespace Dmrg {
 			enum {CHAIN,LADDER,LADDERX,LADDERBATH};
 			GeometryFactory() : dirs_(0), // move to object.dirs()
 						n_(0),
+						maxConnections_(0),
 						chain_(0),
 						ladder_(0),
 						ladderx_(0),
@@ -108,6 +109,7 @@ namespace Dmrg {
 			{
 				dirs_=g.dirs_; // move to object.dirs()
 				n_=g.n_;
+				maxConnections_=g.maxConnections_;
 				chain_=g.chain_;
 				ladder_=g.ladder_;
 				ladderx_=g.ladderx_;
@@ -119,6 +121,7 @@ namespace Dmrg {
 			{
 				dirs_=g.dirs_; // move to object.dirs()
 				n_=g.n_;
+				maxConnections_=g.maxConnections_;
 				chain_=g.chain_;
 				ladder_=g.ladder_;
 				ladderx_=g.ladderx_;
@@ -157,16 +160,19 @@ namespace Dmrg {
 				switch (n_) {
 				case CHAIN:
 					dirs_ = 1;
+					maxConnections_=1;
 					chain_ = new Chain(linSize);
 					break;
 				case LADDER:
 					dirs_ = 2;
+					maxConnections_=4;
 					io.readline(x,"LadderLeg=");
 					if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
 					ladder_ = new Ladder(linSize,x);
 					break;
 				case LADDERX:
 					dirs_ = 4;
+					maxConnections_=4;
 					io.readline(x,"LadderLeg=");
 					if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
 					ladderx_ = new LadderX(linSize,x);
@@ -178,11 +184,11 @@ namespace Dmrg {
 					io.readline(tmp,"BathSitesPerSite=");
 					if (tmp<0) throw std::runtime_error("BathSitesPerSite<0 is an error\n");
 					ladderbath_ = new LadderBath(linSize,x,tmp);
+					maxConnections_ = ladderbath_->maxConnections();
 					break;
 				default:
 					throw std::runtime_error("Unknown geometry\n");
 				}
-
 			}
 
 			size_t dirs() const { return dirs_; } // <-- move elsewhere FIXME
@@ -292,6 +298,8 @@ namespace Dmrg {
 				}
 				throw std::runtime_error("Unknown geometry\n");
 			}
+			
+			size_t maxConnections() const { return maxConnections_; }
 
 		private:
 
@@ -310,6 +318,7 @@ namespace Dmrg {
 			// AND COPY CONTRUCTORS
 			size_t dirs_; // move to object.dirs()
 			size_t n_;
+			size_t maxConnections_;
 			Chain* chain_;
 			Ladder* ladder_;
 			LadderX* ladderx_;

@@ -184,13 +184,14 @@ namespace Dmrg {
 		                     BlockMatrixType  &transform,
 		                     std::vector<RealType>& eigs,
 		                     size_t kept,const SolverParametersType& solverParams,
-		                     ConcurrencyType &concurrency)
+		                     ConcurrencyType &concurrency,
+		                     const std::pair<size_t,size_t>& startEnd)
 		{
 
 			BasisType &parent = *this;
 			RealType error = parent.changeBasis(ftransform,transform,eigs,kept,solverParams);
 
-			operators_.changeBasis(ftransform,this,concurrency);
+			operators_.changeBasis(ftransform,this,concurrency,startEnd);
 
 			return error;
 		}
@@ -202,7 +203,10 @@ namespace Dmrg {
 
 		SparseMatrixType reducedHamiltonian() const { return operators_.reducedHamiltonian(); }
 
-		void setVarious(BlockType const &block,SparseMatrixType const &h,BasisDataType const &qm,const std::vector<OperatorType>& ops)
+		void setVarious(BlockType const &block,
+		                SparseMatrixType const &h,
+		                BasisDataType const &qm,
+		                const std::vector<OperatorType>& ops)
 		{
 			set(block);
 			this->setSymmetryRelated(qm);

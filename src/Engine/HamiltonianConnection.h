@@ -109,8 +109,11 @@ namespace Dmrg {
 			{
 			}
 			
-			bool compute(size_t i, size_t j,SparseMatrixType* matrixBlock,
-     					LinkProductStructType* lps=0) const
+			bool compute(size_t i,
+			             size_t j,
+			             SparseMatrixType* matrixBlock,
+     		             LinkProductStructType* lps,
+     		             size_t& total) const
 			{
 				
 				bool flag=false;
@@ -122,6 +125,8 @@ namespace Dmrg {
 				
 				if (type==ProgramGlobals::SYSTEM_SYSTEM || 
 					type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
+				
+				SparseMatrixType mBlock;
 				
 				for (size_t term=0;term<geometry_.terms();term++) {
 					for (size_t dofs=0;dofs<LinkProductType::dofs(term);dofs++) {
@@ -135,16 +140,16 @@ namespace Dmrg {
 						// if .. else here is inefficient FIXME
 						//std::cerr<<"Adding "<<i<<" "<<j<<" term"<<term<<" dofs="<<dofs<<" value="<<tmp<<"\n";
 						if (lps!=0) {
-							lps->isaved.push_back(i);
-							lps->jsaved.push_back(j);
+							lps->isaved[total]=i;
+							lps->jsaved[total]=j;
 							//lps->dof1saved.push_back(dof1);
 							//lps->dof2saved.push_back(dof2);
-							lps->typesaved.push_back(type);
-							lps->tmpsaved.push_back(tmp);
-							lps->termsaved.push_back(term);
-							lps->dofssaved.push_back(dofs);
+							lps->typesaved[total]=type;
+							lps->tmpsaved[total]=tmp;
+							lps->termsaved[total]=term;
+							lps->dofssaved[total]=dofs;
+							total++;
 						} else {
-							SparseMatrixType mBlock;
 							calcBond(mBlock,i,j,type,tmp,term,dofs);
 							*matrixBlock += mBlock;
 						}

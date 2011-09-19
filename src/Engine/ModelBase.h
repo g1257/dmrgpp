@@ -149,6 +149,11 @@ namespace Dmrg {
 					sumBlock(matrix,matrixBlock,offset);
 				}
 			}
+			
+			size_t maxConnections() const
+			{
+				return modelCommon_.maxConnections();
+			}
 
 			//! Let H_m be the Hamiltonian connection between basis2 and basis3 in the orderof basis1 for block m 
 			//! Then this function does x+= H_m *y

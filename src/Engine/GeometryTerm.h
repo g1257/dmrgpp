@@ -182,6 +182,11 @@ namespace Dmrg {
 			{
 				return geometryFactory_.label();
 			}
+			
+			size_t maxConnections() const
+			{
+				return geometryFactory_.maxConnections();
+			}
 
 			template<typename RealType_>	
 			friend std::ostream& operator<<(std::ostream& os,const GeometryTerm<RealType_>& gt);

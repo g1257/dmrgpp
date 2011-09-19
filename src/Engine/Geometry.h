@@ -165,6 +165,11 @@ namespace Dmrg {
 				E.push_back(linSize_-1);
 			}
 			
+			size_t maxConnections(size_t termId = 0) const
+			{
+				return terms_[termId].maxConnections();
+			}
+			
 			template<typename RealType_>
 			friend std::ostream& operator<<(std::ostream& os,const Geometry<RealType_>& g);
 

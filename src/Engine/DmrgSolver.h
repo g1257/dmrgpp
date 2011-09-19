@@ -168,9 +168,9 @@ namespace Dmrg {
 				checkpoint_(parameters_,concurrency.rank()),
 				waveFunctionTransformation_(parameters_,model_.hilbertSize()),
 				diagonalization_(parameters,model,concurrency,verbose_,
-					useReflection_,io_,quantumSector_,waveFunctionTransformation_),
+				  useReflection_,io_,quantumSector_,waveFunctionTransformation_),
 				truncate_(lrs_,waveFunctionTransformation_,concurrency_,
-					parameters_,verbose_)
+				  parameters_,model_.maxConnections(),verbose_)
 		{
 			io_.print(parameters_);
 			io_.print(targetStruct_);

@@ -140,6 +140,11 @@ namespace Dmrg {
 				matrixBlock = vsm;
 				matrix += matrixBlock;
 			}
+			
+			size_t maxConnections() const
+			{
+				return dmrgGeometry_.maxConnections();
+			}
 
 			//! Let H_m be the Hamiltonian connection between basis2 and basis3 in the orderof basis1 for block m 
 			//! Then this function does x+= H_m *y
@@ -150,17 +155,19 @@ namespace Dmrg {
 			{
 				size_t n=modelHelper.leftRightSuper().super().block().size();
 
-				SparseMatrixType matrix;
-
-				LinkProductStructType lps;
+				//SparseMatrixType matrix;
+				size_t maxSize = maxConnections() * 4 * 16;
+				maxSize *= maxSize;
+				
+				static LinkProductStructType lps(maxSize);
 				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper,&lps,&x,&y);
 				
+				size_t total = 0;
 				for (size_t i=0;i<n;i++) {
 					for (size_t j=0;j<n;j++) {
-						hc.compute(i,j,0,&lps);
+						hc.compute(i,j,0,&lps,total);
 					}
 				}
-				size_t total = lps.isaved.size();
 
 				SharedMemoryType pthreads;
 				pthreads.loopCreate(total,hc);
@@ -217,10 +224,11 @@ namespace Dmrg {
 						LinkProductType> SomeHamiltonianConnectionType;
 				SomeHamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
 
+				size_t total = 0;
 				for (size_t i=0;i<n;i++) {
 					for (size_t j=0;j<n;j++) {
 						SparseMatrixType matrixBlock(matrixRank,matrixRank);
-						if (!hc.compute(i,j,&matrixBlock)) continue;
+						if (!hc.compute(i,j,&matrixBlock,0,total)) continue;
 						VerySparseMatrixType vsm(matrixBlock);
 						matrix2+=vsm;
 					}

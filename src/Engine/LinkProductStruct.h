@@ -86,6 +86,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	template<typename FieldType>
 	struct LinkProductStruct {
+		LinkProductStruct(size_t maxSize)
+		: isaved(maxSize),jsaved(maxSize),typesaved(maxSize),
+		  tmpsaved(maxSize),dofssaved(maxSize),termsaved(maxSize) {}
 		std::vector<size_t> isaved,jsaved; //,dof1saved,dof2saved;
 		std::vector<int> typesaved;
 		std::vector<FieldType> tmpsaved;

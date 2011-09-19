@@ -263,7 +263,7 @@ namespace Dmrg {
 			return electronsOld_;
 		}
 
-		int fermionicSign(size_t i,int f) const { return ((electrons_[i]%2)==0) ? 1 : f; }
+		int fermionicSign(size_t i,int f) const { return (electrons_[i]&1) ? f : 1; }
 
 		PairType jmValue(size_t i) const 
 		{

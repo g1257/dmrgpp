@@ -88,6 +88,7 @@ namespace Dmrg {
 	//! 
 	template<typename OperatorType,typename DmrgBasisType>
 	class OperatorsImplementation {
+		static const bool EXCLUDE = false;
 	public:	
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
@@ -153,8 +154,10 @@ namespace Dmrg {
 		}
 
 		template<typename TransformElementType,typename ConcurrencyType>
-		void changeBasis(PsimagLite::Matrix<TransformElementType> const &ftransform,const DmrgBasisType* thisBasis,
-					ConcurrencyType &concurrency)
+		void changeBasis(PsimagLite::Matrix<TransformElementType> const &ftransform,
+		                 const DmrgBasisType* thisBasis,
+		                 ConcurrencyType &concurrency,
+		                 const std::pair<size_t,size_t>& startEnd)
 		{
 			size_t total = size();
 			size_t k;
@@ -164,8 +167,8 @@ namespace Dmrg {
 			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
 			size_t dof = total / thisBasis->block().size();	
 			while(concurrency.loop(k)) {
-				if (isExcluded(k,thisBasis,dof)) {
-					operators_[k].data.resize(ftransform.n_col(),ftransform.n_col());
+				if (isExcluded(k,thisBasis,dof,startEnd)) {
+					operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
 					continue;
 				}
 				if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform);
@@ -184,9 +187,14 @@ namespace Dmrg {
 			reducedOpImpl_.changeBasisHamiltonian();
 		}
 		
-		bool isExcluded(size_t k,const DmrgBasisType* thisBasis,size_t dof)
+		bool isExcluded(size_t k,
+		               const DmrgBasisType* thisBasis,
+		               size_t dof,
+		               const std::pair<size_t,size_t>& startEnd)
 		{
-			return false; // disabled for now
+			if (!EXCLUDE) return false; // <-- this is the safest answer
+			if (k<startEnd.first || k>=startEnd.second) return true;
+			return false;
 		}
 
 		void changeBasis(SparseMatrixType &v,PsimagLite::Matrix<typename SparseMatrixType::value_type> const &ftransform)

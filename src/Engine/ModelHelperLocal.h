@@ -259,24 +259,33 @@ namespace Dmrg {
 				// row i of the ordered product basis
 				//utils::getCoordinates(alpha,beta,modelHelper.basis1().permutation(i+offset),ns);
 				int alpha=alpha_[i];
-				int beta=beta_[i];		
-				for (int k=A.getRowPtr(alpha);k<A.getRowPtr(alpha+1);k++) {
+				int beta=beta_[i];
+				SparseElementType& xSubI = x[i];
+				int startkk = B.getRowPtr(beta);
+				int endkk = B.getRowPtr(beta+1);
+				int startk = A.getRowPtr(alpha);
+				int endk = A.getRowPtr(alpha+1);
+				/* fermion signs note:
+				 *   here the environ is applied first and has to "cross"
+				 *   the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
+				 */
+				SparseElementType fsValue = (link.fermionOrBoson == ProgramGlobals::FERMION) ?
+					lrs_.left().fermionicSign(alpha,int(fermionSign))*link.value : link.value;
+				
+				for (int k=startk;k<endk;k++) {
 					int alphaPrime = A.getCol(k);
-					for (int kk=B.getRowPtr(beta);kk<B.getRowPtr(beta+1);kk++) {
+					SparseElementType tmp2 = A.getValue(k) *fsValue;	
+					const std::vector<int>& bufferTmp = buffer_[alphaPrime];
+
+					for (int kk=startkk;kk<endkk;kk++) {
 						int betaPrime= B.getCol(kk);
-						int j = buffer_[alphaPrime][betaPrime];
+						int j = bufferTmp[betaPrime];
 						if (j<0) continue;
 						
-						/* fermion signs note:
-						   here the environ is applied first and has to "cross"
-						   the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
-						 */
-						SparseElementType tmp = A.getValue(k) * B.getValue(kk)*link.value;
-						
-						if (link.fermionOrBoson == ProgramGlobals::FERMION)
-							tmp *= lrs_.left().fermionicSign(alpha,int(fermionSign));
+						SparseElementType tmp = tmp2 * B.getValue(kk);
+						xSubI += tmp * y[j];
 						//if (tmp==static_cast<MatrixElementType>(0.0)) continue;
-						reflection_.elementMultiplication(tmp , x,y,i,j);
+						//reflection_.elementMultiplication(tmp , x,y,i,j);
 						//matrixBlock.pushCol(j-offset);
 						//matrixBlock.pushValue(tmp);
 					}

@@ -141,12 +141,14 @@ namespace Dmrg {
 		template<typename TransformElementType,typename ConcurrencyType>
 		void changeBasis(PsimagLite::Matrix<TransformElementType> const &ftransform,
 		                 const BasisType* thisBasis,
-		                 ConcurrencyType &concurrency)
+		                 ConcurrencyType &concurrency,
+		                 const std::pair<size_t,size_t>& startEnd)
 		{
-			return operatorsImpl_.changeBasis(ftransform,thisBasis,concurrency);
-			std::ostringstream msg;
+			return operatorsImpl_.changeBasis(ftransform,thisBasis,concurrency,
+			                                       startEnd);
+/*			std::ostringstream msg;
 			msg<<"Done with changeBasis";
-			progress_.printline(msg,std::cerr);
+			progress_.printline(msg,std::cerr);*/
 		}
 
 		template<typename TransformElementType>
