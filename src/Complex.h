@@ -35,7 +35,7 @@ namespace std {
 
 	std::complex<double> operator*(int x,const std::complex<double>& y)
 	{
-		return std::complex<double>(real(y)*x,real(y)*x);
+		return std::complex<double>(real(y)*x,imag(y)*x);
 	}
 }
 
