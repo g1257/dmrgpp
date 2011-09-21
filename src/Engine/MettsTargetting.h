@@ -148,20 +148,32 @@ namespace Dmrg {
 				
 				RealType tau =mettsStruct_.tau;
 				RealType sum = 0;
-				RealType factor = 1.0;
 				size_t n = betas_.size();
-				for (size_t i=0;i<n;i++) {
-					betas_[i] = i*tau/(n-1);
-					weight_[i] = factor/(n+4);
+				size_t gsWeight_= 0;
+				RealType factor = (1.0 - gsWeight)/(n+2);
+				size_t n2 = (n-1)/3;
+				if ((n-1)%3 !=0) throw std::runtime_error("MettsTargetting:"
+					"betaSteps must be of the form 3*integer + 1\n");
+				size_t n1 = 2*n2;
+				
+				for (size_t i=0;i<=n1;i++) {
+					betas_[i] = (n1-i)*tau/(n-1);
+					weight_[i] = factor;
 					sum += weight_[i];
 				}
+				for (size_t i=1;i<=n2;i++) {
+					betas_[i+n1] = i*tau/(n-1);
+					weight_[i+n1] = factor;
+					sum += weight_[i+n1];
+				}
+				
 				sum -= weight_[0];
 				sum -= weight_[n-1];
-				weight_[0] = weight_[n-1] = 2*factor/(n+4);
+				weight_[0] = weight_[n-1] = 2*factor;
 				sum += weight_[n-1];
 				sum += weight_[0];
 				
-				gsWeight_=1.0-sum;
+				
 				sum += gsWeight_;
 				//for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
 				if (fabs(sum-1.0)>1e-5)
@@ -217,15 +229,21 @@ namespace Dmrg {
 				return lrs_;
 			}
 
-			void evolve(RealType Eg,
-			            size_t direction,
-			            const BlockType& block,
-			            size_t loopNumber)
+			void evolve(RealType Eg,size_t direction,const BlockType& block,
+						size_t loopNumber)
 			{
-
-				calcTimeVectors(Eg,pureVectors_,direction);
-
+				size_t max = 1;
+				
+				// Loop over each operator that needs to be applied 
+				// in turn to the g.s.
+				for (size_t i=0;i<max;i++) {
+					evolve(Eg,direction,block,loopNumber);
+				}
+				
+				calcTimeVectors(Eg,direction);
+				
 				cocoon(direction,block); // in-situ
+				
 			}
 
 			
@@ -284,6 +302,66 @@ namespace Dmrg {
 
 		private:
 			
+			void evolve(RealType Eg,
+			            size_t direction,
+			            const BlockType& block,
+			            size_t loopNumber)
+			{
+				static size_t  timesWithoutAdvancement=0;
+				
+				if (direction==INFINITE) {
+					getNewPures();
+					return;
+				}
+				
+				if (block.size()!=1) throw 
+					std::runtime_error("MettsTargetting::evolve(...):"
+					" blocks of size != 1 are unsupported (sorry)\n");
+				size_t site = block[0];
+				
+				stage_=WFT_NOADVANCE;
+				
+				if (timesWithoutAdvancement >= mettsStruct_.advanceEach) {
+					stage_ = WFT_ADVANCE;
+					currentBeta_ += mettsStruct_.tau;
+					timesWithoutAdvancement=0;
+				} else {
+					if (i==stage_==WFT_NOADVANCE) timesWithoutAdvancement++;
+				}
+				
+				std::ostringstream msg2;
+				msg2<<"Steps without advance: "<<timesWithoutAdvancement;
+				if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
+				
+				std::ostringstream msg;
+				msg<<"Evolving, stage="<<getStage(i)<<" loopNumber="<<loopNumber;
+				msg<<" Eg="<<Eg;
+				progress_.printline(msg,std::cout);
+			}
+
+			void computePhi(size_t systemOrEnviron)
+			{
+				size_t indexAdvance = betas_.size()-1;
+				size_t indexNoAdvance = 0;
+				if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
+					size_t advance = indexNoAdvance;
+					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
+					std::ostringstream msg;
+					msg<<"I'm calling the WFT now";
+					progress_.printline(msg,std::cout);
+					
+					guessPhiSectors(phiNew,i,systemOrEnviron);
+					
+					// OK, now that we got the partition number right, let's wft:
+					waveFunctionTransformation_
+					.setInitialVector(phiNew,targetVectors_[advance],lrs_);
+					phiNew.collapseSectors(); 
+				} else {
+					throw std::runtime_error("It's 5 am, do you know what line "
+					" your code is exec-ing?\n");
+				}
+			}
+
 			void getNewPures()
 			{
 				const MatrixType& transformSystem = wft_.transform(SYSTEM);
@@ -298,7 +376,7 @@ namespace Dmrg {
 						   lrs_.right(),transformEnviron);
 				pureVectors_.first = newVector;
 			}
-			
+
 			void getNewPure(VectorType& newVector,
 			                VectorType& oldVector,
 			                size_t alphaFixed,
@@ -378,52 +456,12 @@ namespace Dmrg {
 				return "undefined";
 			}
 
-
-			void computePhi(size_t i,VectorWithOffsetType& phiNew,
-					const VectorWithOffsetType& phiOld,size_t systemOrEnviron)
+			void calcTimeVectors(RealType Eg,
+			                     const VectorWithOffsetType& phi,
+			                     size_t systemOrEnviron)
 			{
-				size_t indexAdvance = betas_.size()-1;
-				size_t indexNoAdvance = 0;
-				if (stage_[i]==OPERATOR) {
-					std::ostringstream msg;
-					msg<<"I'm applying a local operator now";
-					progress_.printline(msg,std::cout);
-					FermionSign fs(lrs_.left(),mettsStruct_.electrons);
-					applyOpLocal_(phiNew,phiOld,mettsStruct_.aOperators[i],fs,systemOrEnviron);
-					RealType norma = norm(phiNew);
-					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
-					//std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
-
-
-				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
-					size_t advance = indexNoAdvance;
-					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
-					std::ostringstream msg;
-					msg<<"I'm calling the WFT now";
-					progress_.printline(msg,std::cout);
-					
-					if (mettsStruct_.aOperators.size()==1) guessPhiSectors(phiNew,i,systemOrEnviron);
-					else phiNew.populateSectors(lrs_.super());
-					
-					// OK, now that we got the partition number right, let's wft:
-					wft_.setInitialVector(phiNew,targetVectors_[advance],
-							lrs_); // generalize for su(2)
-					phiNew.collapseSectors();
-					
-				} else {
-					throw std::runtime_error("It's 5 am, do you know what line "
-						" your code is exec-ing?\n");
-				}
-			}		
-
-
-			void calcTimeVectors(
-						RealType Eg,
-      						const VectorWithOffsetType& phi,
-						size_t systemOrEnviron)
-			{
-				std::vector<ComplexMatrixType> V(phi.sectors());
-				std::vector<ComplexMatrixType> T(phi.sectors());
+				std::vector<MatrixType> V(phi.sectors());
+				std::vector<MatrixType> T(phi.sectors());
 				
 				std::vector<size_t> steps(phi.sectors());
 				
@@ -437,96 +475,95 @@ namespace Dmrg {
 				calcTargetVectors(phi,T,V,Eg,eigs,steps,systemOrEnviron);
 			}
 
-			void calcTargetVectors(
-						const VectorWithOffsetType& phi,
-						const std::vector<ComplexMatrixType>& T,
-						const std::vector<ComplexMatrixType>& V,
-						RealType Eg,
-      						const std::vector<VectorType>& eigs,
-	    					std::vector<size_t> steps,
-					      	size_t systemOrEnviron)
+			void calcTargetVectors(const VectorWithOffsetType& phi,
+			                       const std::vector<MatrixType>& T,
+			                       const std::vector<MatrixType>& V,
+			                       RealType Eg,
+			                       const std::vector<VectorType>& eigs,
+		                           std::vector<size_t> steps,
+			                       size_t systemOrEnviron)
 			{
 				targetVectors_[0] = phi;
 				for (size_t i=1;i<betas_.size();i++) {
 					// Only time differences here (i.e. betas_[i] not betas_[i]+currentBeta_)
-					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,betas_[i],steps);
+					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,i,steps);
 					//normalize(targetVectors_[i]);
 				}
 			}
 
-			void calcTargetVector(
-						VectorWithOffsetType& v,
-      						const VectorWithOffsetType& phi,
-						const std::vector<ComplexMatrixType>& T,
-						const std::vector<ComplexMatrixType>& V,
-						RealType Eg,
-      						const std::vector<VectorType>& eigs,
-	    					RealType t,
-						std::vector<size_t> steps)
+			void calcTargetVector(VectorWithOffsetType& v,
+      		                      const VectorWithOffsetType& phi,
+			                      const std::vector<MatrixType>& T,
+			                      const std::vector<MatrixType>& V,
+			                      RealType Eg,
+      		                      const std::vector<VectorType>& eigs,
+	    	                      size_t timeIndex,
+			                      std::vector<size_t> steps)
 			{
 				v = phi;
 				for (size_t ii=0;ii<phi.sectors();ii++) {
 					size_t i0 = phi.sector(ii);
-					ComplexVectorType r;
-					calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],t,steps[ii],i0);
+					VectorType r;
+					calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],timeIndex,steps[ii],i0);
 					v.setDataInSector(r,i0);
 				}
 			}
 
-			void calcTargetVector(
-						ComplexVectorType& r,
-      						const VectorWithOffsetType& phi,
-						const ComplexMatrixType& T,
-						const ComplexMatrixType& V,
-						RealType Eg,
-      						const VectorType& eigs,
-	    					RealType t,
-	  					size_t steps,
-						size_t i0)
+			void calcTargetVector(VectorType& r,
+      		                      const VectorWithOffsetType& phi,
+			                      const MatrixType& T,
+			                      const MatrixType& V,
+			                      RealType Eg,
+      		                      const VectorType& eigs,
+	    	                      size_t timeIndex,
+	  		                      size_t steps,
+			                      size_t i0)
 			{
 				size_t n2 = steps;
 				size_t n = V.n_row();
-				if (T.n_col()!=T.n_row()) throw std::runtime_error("T is not square\n");
-				if (V.n_col()!=T.n_col()) throw std::runtime_error("V is not nxn2\n");
+				if (T.n_col()!=T.n_row())
+					throw std::runtime_error("T is not square\n");
+				if (V.n_col()!=T.n_col())
+					throw std::runtime_error("V is not nxn2\n");
 				// for (size_t j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
-				ComplexType zone = 1.0;
-				ComplexType zzero = 0.0;
+				RealType rone = 1.0;
+				RealType rzero = 0.0;
 				
-				ComplexVectorType tmp(n2);
+				VectorType tmp(n2);
 				r.resize(n2);
-				calcR(r,T,V,phi,Eg,eigs,t,steps,i0);
-				psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0,0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1 );
+				calcR(r,T,V,phi,Eg,eigs,timeIndex,steps,i0);
+				psimag::BLAS::GEMV('N', n2, n2, rone, &(T(0,0)), n2, &(r[0]), 1, rzero, &(tmp[0]), 1 );
 				r.resize(n);
-				psimag::BLAS::GEMV('N', n,  n2, zone, &(V(0,0)), n, &(tmp[0]),1, zzero, &(r[0]),   1 );
+				psimag::BLAS::GEMV('N', n,  n2, rone, &(V(0,0)), n, &(tmp[0]),1, rzero, &(r[0]),   1 );
 			}
 
-			void calcR(
-				ComplexVectorType& r,
-    				const ComplexMatrixType& T,
-				const ComplexMatrixType& V,
-    				const VectorWithOffsetType& phi,
-    				RealType Eg,
-				const VectorType& eigs,
-    				RealType t,
-				size_t n2,
-				size_t i0)
+			void calcR(VectorType& r,
+    		           const MatrixType& T,
+			           const MatrixType& V,
+    		           const VectorWithOffsetType& phi,
+    		           RealType Eg,
+		               const VectorType& eigs,
+    		           size_t timeIndex,
+			           size_t n2,
+			           size_t i0)
 			{
 				for (size_t k=0;k<n2;k++) {
-					ComplexType sum = 0.0;
+					RealType sum = 0.0;
 					for (size_t kprime=0;kprime<n2;kprime++) {
-						ComplexType tmpV = calcVTimesPhi(kprime,V,phi,i0);
+						RealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
 						sum += conj(T(kprime,k))*tmpV;
 					}
-					RealType tmp = (eigs[k]-Eg)*t;
-					ComplexType c(cos(tmp),sin(tmp));
-					r[k] = c * sum;
+					RealType tmp = (eigs[k]-Eg)*betas_[timeIndex];
+					r[k] = c * exp(tmp);
 				}
 			}
 
-			ComplexType calcVTimesPhi(size_t kprime,const ComplexMatrixType& V,const VectorWithOffsetType& phi,
-						 size_t i0)
+			RealType calcVTimesPhi(size_t kprime,
+			                      const MatrixType& V,
+			                      const VectorWithOffsetType& phi,
+			                      size_t i0)
 			{
-				ComplexType ret = 0;
+				RealType ret = 0;
 				size_t total = phi.effectiveSize(i0);
 				
 				for (size_t j=0;j<total;j++)
@@ -534,11 +571,10 @@ namespace Dmrg {
 				return ret;
 			}
 
-			void triDiag(
-					const VectorWithOffsetType& phi,
-					std::vector<ComplexMatrixType>& T,
-	 				std::vector<ComplexMatrixType>& V,
-					std::vector<size_t>& steps)
+			void triDiag(const VectorWithOffsetType& phi,
+			             std::vector<MatrixType>& T,
+	 		             std::vector<MatrixType>& V,
+			             std::vector<size_t>& steps)
 			{
 				for (size_t ii=0;ii<phi.sectors();ii++) {
 					size_t i = phi.sector(ii);
@@ -546,7 +582,10 @@ namespace Dmrg {
 				}
 			}
 
-			size_t triDiag(const VectorWithOffsetType& phi,ComplexMatrixType& T,ComplexMatrixType& V,size_t i0)
+			size_t triDiag(const VectorWithOffsetType& phi,
+			               MatrixType& T,
+			               MatrixType& V,
+			               size_t i0)
 			{
 				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
 				typename ModelType::ModelHelperType modelHelper(p,lrs_,model_.orbitals());
@@ -573,7 +612,7 @@ namespace Dmrg {
 			}
 
 			//! This check is invalid if there are more than one sector
-			void check1(const ComplexMatrixType& V,const TargetVectorType& phi2)
+			void check1(const MatrixType& V,const TargetVectorType& phi2)
 			{
 				if (V.n_col()>V.n_row()) throw std::runtime_error("cols > rows\n");
 				TargetVectorType r(V.n_col());

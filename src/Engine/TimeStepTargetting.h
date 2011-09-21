@@ -445,28 +445,26 @@ namespace Dmrg {
 					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
 					//std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 
-
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
 					size_t advance = indexNoAdvance;
 					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
 					std::ostringstream msg;
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
-					
+
 					if (tstStruct_.aOperators.size()==1) guessPhiSectors(phiNew,i,systemOrEnviron);
 					else phiNew.populateSectors(lrs_.super());
-					
+
 					// OK, now that we got the partition number right, let's wft:
 					waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[advance],
 							lrs_); // generalize for su(2)
 					phiNew.collapseSectors();
-					
+
 				} else {
 					throw std::runtime_error("It's 5 am, do you know what line "
 						" your code is exec-ing?\n");
 				}
-			}		
-
+			}
 
 			void calcTimeVectors(
 						RealType Eg,
