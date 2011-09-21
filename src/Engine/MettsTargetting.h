@@ -135,7 +135,7 @@ namespace Dmrg {
 			  lrs_(lrs),
 			  model_(model),
 			  mettsStruct_(mettsStruct),
-			  waveFunctionTransformation_(wft),
+			  wft_(wft),
 			  progress_("MettsTargetting",0),
 			  currentBeta_(0),
 			  betas_(mettsStruct_.betaSteps),
@@ -222,40 +222,10 @@ namespace Dmrg {
 			            const BlockType& block,
 			            size_t loopNumber)
 			{
-				size_t count =0;
-				VectorWithOffsetType phiOld = psi_;
-				VectorWithOffsetType phiNew;
-				VectorWithOffsetType vectorSum;
-				size_t max = mettsStruct_.sites.size();
-				
-				if (noStageIs(DISABLED)) max = 1;
-				
-				// Loop over each operator that needs to be applied 
-				// in turn to the g.s.
-				for (size_t i=0;i<max;i++) {
-					count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber,max-1);
-					if (mettsStruct_.concatenation==PRODUCT) {
-						phiOld = phiNew;
-					} else {
-						vectorSum += phiNew;
-					}
-				}
-				if (mettsStruct_.concatenation==SUM) phiNew = vectorSum;
-				
-				if (count==0) {
-					// always print to keep observer driver in sync
-//					if (needsPrinting) {
-//						zeroOutVectors();
-//						printVectors(block);
-//					}
-//					return;
-				}
-				
-				calcTimeVectors(Eg,phiNew,direction);
-				
+
+				calcTimeVectors(Eg,pureVectors_,direction);
+
 				cocoon(direction,block); // in-situ
-				
-				//if (needsPrinting) printVectors(block); // for post-processing
 			}
 
 			
@@ -272,8 +242,7 @@ namespace Dmrg {
 // 
 // 				psi_.load(io,"PSI");
 			}
-			
-			
+
 			void print(std::ostream& os) const
 			{
 				os<<"MettsWeightsTimeVectors=";
@@ -282,71 +251,21 @@ namespace Dmrg {
 				os<<"\n";
 				os<<"MettsWeightGroundState="<<gsWeight_<<"\n";
 			}
-			
-
-			size_t evolve(size_t i,
-			              VectorWithOffsetType& phiNew,
-			              const VectorWithOffsetType& phiOld,
-			              RealType Eg,
-			              size_t direction,
-			              const BlockType& block,
-			              size_t loopNumber,
-			              size_t lastI)
-			{
-				static size_t  timesWithoutAdvancement=0;
-
-				if (mettsStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return 0;
-
-				if (block.size()!=1) throw 
-					std::runtime_error("MettsTargetting::evolve(...):"
-							" blocks of size != 1 are unsupported (sorry)\n");
-				size_t site = block[0];
-
-				if (site != mettsStruct_.sites[i] && stage_[i]==DISABLED) return 0;
-
-				if (site == mettsStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
-				else stage_[i]=WFT_NOADVANCE;
-				if (stage_[i] == OPERATOR) checkOrder(i);
-
-				if (timesWithoutAdvancement >= mettsStruct_.advanceEach) {
-					stage_[i] = WFT_ADVANCE;
-					if (i==lastI) {
-						currentBeta_ += mettsStruct_.tau;
-						timesWithoutAdvancement=0;
-					}
-				} else {
-					if (i==lastI && stage_[i]==WFT_NOADVANCE) 
-						timesWithoutAdvancement++;
-				}
-
-				std::ostringstream msg2;
-				msg2<<"Steps without advance: "<<timesWithoutAdvancement;
-				if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
-				
-				std::ostringstream msg;
-				msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
-				msg<<" Eg="<<Eg;
-				progress_.printline(msg,std::cout);
-				
-				// phi = A|psi>
-				computePhi(i,phiNew,phiOld,direction);
-				
-				return 1;
-			}
 
 			void initialGuess(VectorWithOffsetType& v) const
 			{
-				waveFunctionTransformation_.setInitialVector(v,psi_,lrs_);
-				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
-				if (!b) return;
-				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
-				for (size_t i=0;i<targetVectors_.size();i++) {
-					waveFunctionTransformation_.setInitialVector(vv[i],
-						targetVectors_[i],lrs_);
-					if (norm(vv[i])<1e-6) continue;
-					VectorWithOffsetType w= weight_[i]*vv[i];
-					v += w;
-				}
+				throw std::runtime_error("Metts: initial guess: Needs work\n");
+// 				wft_.setInitialVector(v,psi_,lrs_);
+// 				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
+// 				if (!b) return;
+// 				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
+// 				for (size_t i=0;i<targetVectors_.size();i++) {
+// 					wft_.setInitialVector(vv[i],
+// 						targetVectors_[i],lrs_);
+// 					if (norm(vv[i])<1e-6) continue;
+// 					VectorWithOffsetType w= weight_[i]*vv[i];
+// 					v += w;
+// 				}
 			}
 
 
@@ -364,6 +283,39 @@ namespace Dmrg {
 			}
 
 		private:
+			
+			void getNewPures()
+			{
+				const MatrixType& transformSystem = wft_.transform(SYSTEM);
+				VectorType newVector(transformSystem.n_row());
+				getNewPure(newVector,pureVectors_.first,alphaFixed,
+						   lrs_.left(),transformSystem);
+				pureVectors_.first = newVector;
+				
+				const MatrixType& transformEnviron = wft_.transform(ENVIRON);
+				newVector.resize(transformEnviron.n_row());
+				getNewPure(newVector,pureVectors_.second,betaFixed,
+						   lrs_.right(),transformEnviron);
+				pureVectors_.first = newVector;
+			}
+			
+			void getNewPure(VectorType& newVector,
+			                VectorType& oldVector,
+			                size_t alphaFixed,
+			                const BasisWithOperatorsType& basis,
+			                const MatrixType& transform)
+			{
+				size_t ns = oldVector.size();
+				for (size_t gamma=0;gamma<transform.n_row();gamma++) {
+					newVector[gamma] = 0;
+					for (size_t alpha=0;alpha<ns;alpha++) {
+						size_t gammaPrime = basis.permutationInverse
+						                            (alpha + alphaFixed*ns);
+						newVector[gamma] += transform(gamma,gammaPrime) * 
+						                               oldVector[alpha];
+					}
+				}
+			}
 			
 			// in situ computation:
 			void cocoon(size_t direction,const BlockType& block) const
@@ -454,7 +406,7 @@ namespace Dmrg {
 					else phiNew.populateSectors(lrs_.super());
 					
 					// OK, now that we got the partition number right, let's wft:
-					waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[advance],
+					wft_.setInitialVector(phiNew,targetVectors_[advance],
 							lrs_); // generalize for su(2)
 					phiNew.collapseSectors();
 					
@@ -710,7 +662,7 @@ namespace Dmrg {
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
 			const TargettingParamsType& mettsStruct_;
-			const WaveFunctionTransfType& waveFunctionTransformation_;
+			const WaveFunctionTransfType& wft_;
 			PsimagLite::ProgressIndicator progress_;
 			RealType currentBeta_;
 			std::vector<RealType> betas_,weight_;
