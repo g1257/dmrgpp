@@ -204,7 +204,7 @@ namespace Dmrg {
 				ret(s,t) += O1(s,t)+O2(s,t);
 			return ret;
 		}
-			
+
 		FieldType calcDiagonalCorrelation(
 					size_t i,
 					const MatrixType& O1,

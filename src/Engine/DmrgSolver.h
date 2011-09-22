@@ -107,10 +107,10 @@ namespace Dmrg {
   			template<typename> class> class TargettingTemplate,
 	 	template<typename> class VectorWithOffsetTemplate>
 	class DmrgSolver {
-			
+
 		typedef typename ModelType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
-		
+
 	public:
 		typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelType::MyBasis MyBasis;
@@ -128,13 +128,13 @@ namespace Dmrg {
 		typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 		typedef ParametersDmrgSolver<RealType> ParametersType;
 		typedef Diagonalization<ParametersType,TargettingType,InternalProductTemplate> DiagonalizationType;
-		
+
 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
-		
+
 		typedef Truncation<LeftRightSuperType,ParametersType,TargettingType>
 		        TruncationType;
-		
+
 		typedef typename TruncationType::TransformType TransformType;
 
 		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType,
@@ -147,7 +147,7 @@ namespace Dmrg {
 		enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
-		
+
 		DmrgSolver(
 				ParametersDmrgSolver<RealType> const &parameters,
 				ModelType const &model,
@@ -214,7 +214,6 @@ namespace Dmrg {
 			//waveFunctionTransformation_.init();
 			//if (parameters_.options.find("nowft")!=std::string::npos) waveFunctionTransformation_.disable();
 
-			
 			TargettingType psi(lrs_,model_,targetStruct_,waveFunctionTransformation_);
 			io_.print(psi);
 
@@ -237,7 +236,7 @@ namespace Dmrg {
 			}
 
 			finiteDmrgLoops(S,E,pS,pE,psi);
-			
+
 			std::ostringstream msg2;
 			msg2<<"Turning off the engine.";
 			progress_.printline(msg2,std::cout);
@@ -270,9 +269,8 @@ namespace Dmrg {
 				MyBasisWithOperators &pE,
 				TargettingType& psi)
 		{
-//			int ns,ne;
 			checkpoint_.push(pS,pE);
-			
+
 			for (size_t step=0;step<X.size();step++) {
 				std::ostringstream msg;
 				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
@@ -372,9 +370,9 @@ namespace Dmrg {
 			int stepFinal = stepCurrent_+stepLength;
 			
 			while(true) {
-				
+				if (size_t(stepCurrent_)>=sitesIndices_.size())
+					throw std::runtime_error("stepCurrent_ too large!\n");
 
-				if (size_t(stepCurrent_)>=sitesIndices_.size()) throw std::runtime_error("stepCurrent_ too large!\n");
 				if (direction==EXPAND_SYSTEM) {
 					lrs_.growLeftBlock(model_,pS,sitesIndices_[stepCurrent_]);
 					lrs_.right(checkpoint_.shrink(CheckpointType::ENVIRON));
@@ -382,7 +380,7 @@ namespace Dmrg {
 					lrs_.growRightBlock(model_,pE,sitesIndices_[stepCurrent_]);
 					lrs_.left(checkpoint_.shrink(CheckpointType::SYSTEM));
 				}
-				
+
 				lrs_.printSizes("finite",std::cout);
 				if (verbose_) {
 					std::ostringstream msg;
@@ -391,16 +389,16 @@ namespace Dmrg {
 					msg<<" loopIndex="<<loopIndex<<" length="<<stepLength<<" StepFinal="<<stepFinal;
 					progress_.printline(msg,std::cout);
 				}
-				
+
 				updateQuantumSector(lrs_.sites());
-				
+
 				lrs_.setToProduct(quantumSector_);
-				
+
 				bool needsPrinting = (saveOption==SAVE_TO_DISK);
 				gsEnergy =diagonalization_(target,direction,sitesIndices_[stepCurrent_],loopIndex,needsPrinting);
-				
+
 				changeTruncateAndSerialize(pS,pE,target,keptStates,direction,saveOption);
-				
+
 				if (finalStep(stepLength,stepFinal)) break;
 				if (stepCurrent_<0) throw std::runtime_error("DmrgSolver::finiteStep() currentStep_ is negative\n");
 				
@@ -430,7 +428,7 @@ namespace Dmrg {
 			std::ostringstream msg2;
 			msg2<<"#Error="<<truncate_.error();
 			io_.printline(msg2);
-			
+
 			if (direction==EXPAND_SYSTEM) {
 				checkpoint_.push(pS,CheckpointType::SYSTEM);
 			} else {

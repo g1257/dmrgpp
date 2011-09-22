@@ -262,7 +262,6 @@ namespace Dmrg {
 				//if (needsPrinting) printVectors(block); // for post-processing
 			}
 
-			
 			void load(const std::string& f)
 			{
 				for (size_t i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
@@ -275,8 +274,7 @@ namespace Dmrg {
 
 				psi_.load(io,"PSI");
 			}
-			
-			
+
 			void print(std::ostream& os) const
 			{
 				os<<"TSTWeightsTimeVectors=";
@@ -285,7 +283,6 @@ namespace Dmrg {
 				os<<"\n";
 				os<<"TSTWeightGroundState="<<gsWeight_<<"\n";
 			}
-			
 
 			size_t evolve(
 					size_t i,

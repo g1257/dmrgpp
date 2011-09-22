@@ -143,7 +143,7 @@ namespace Dmrg {
 				
 			}
 		}
-		
+
 		//! Truncate basis
 		void operator()(BasisWithOperatorsType &rSprime,
 						const TargettingType& target,
@@ -169,11 +169,11 @@ namespace Dmrg {
 									   direction,startEnd);
 			}
 		}
-		
+
 		const TransformType& transform() const { return ftransform_; }
 		
 		const RealType& error() const { return error_; }
-		
+
 	private:
 
 		//! Truncate basis 

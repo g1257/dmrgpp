@@ -151,29 +151,19 @@ namespace Dmrg {
 				size_t n = betas_.size();
 				size_t gsWeight_= 0;
 				RealType factor = (1.0 - gsWeight)/(n+2);
-				size_t n2 = (n-1)/3;
-				if ((n-1)%3 !=0) throw std::runtime_error("MettsTargetting:"
-					"betaSteps must be of the form 3*integer + 1\n");
-				size_t n1 = 2*n2;
 				
-				for (size_t i=0;i<=n1;i++) {
-					betas_[i] = (n1-i)*tau/(n-1);
+				for (size_t i=0;i<n;i++) {
+					betas_[i] = i*tau/(n-1);
 					weight_[i] = factor;
 					sum += weight_[i];
 				}
-				for (size_t i=1;i<=n2;i++) {
-					betas_[i+n1] = i*tau/(n-1);
-					weight_[i+n1] = factor;
-					sum += weight_[i+n1];
-				}
-				
+
 				sum -= weight_[0];
 				sum -= weight_[n-1];
 				weight_[0] = weight_[n-1] = 2*factor;
 				sum += weight_[n-1];
 				sum += weight_[0];
-				
-				
+
 				sum += gsWeight_;
 				//for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
 				if (fabs(sum-1.0)>1e-5)
@@ -232,21 +222,18 @@ namespace Dmrg {
 			void evolve(RealType Eg,size_t direction,const BlockType& block,
 						size_t loopNumber)
 			{
-				size_t max = 1;
-				
-				// Loop over each operator that needs to be applied 
-				// in turn to the g.s.
-				for (size_t i=0;i<max;i++) {
-					evolve(Eg,direction,block,loopNumber);
+
+				// Advance or wft each target vector
+				for (size_t i=0;i<targetVectors_.size();i++) {
+					VectorWithOffsetType phiNew = psi_;
+					evolve(phiNew,targetVectors_[i],Eg,direction,block,loopNumber);
 				}
 				
 				calcTimeVectors(Eg,direction);
 				
 				cocoon(direction,block); // in-situ
-				
 			}
 
-			
 			void load(const std::string& f)
 			{
 				throw std::runtime_error("Metts: load() unimplemented\n");
@@ -286,7 +273,6 @@ namespace Dmrg {
 // 				}
 			}
 
-
 			template<typename IoOutputType>
 			void save(const std::vector<size_t>& block,IoOutputType& io) const
 			{
@@ -301,8 +287,10 @@ namespace Dmrg {
 			}
 
 		private:
-			
-			void evolve(RealType Eg,
+
+			void evolve(VectorWithOffsetType& phiNew,
+						size_t indexOld,
+				        RealType Eg,
 			            size_t direction,
 			            const BlockType& block,
 			            size_t loopNumber)
@@ -313,14 +301,13 @@ namespace Dmrg {
 					getNewPures();
 					return;
 				}
-				
 				if (block.size()!=1) throw 
 					std::runtime_error("MettsTargetting::evolve(...):"
 					" blocks of size != 1 are unsupported (sorry)\n");
 				size_t site = block[0];
-				
+
 				stage_=WFT_NOADVANCE;
-				
+
 				if (timesWithoutAdvancement >= mettsStruct_.advanceEach) {
 					stage_ = WFT_ADVANCE;
 					currentBeta_ += mettsStruct_.tau;
@@ -328,33 +315,37 @@ namespace Dmrg {
 				} else {
 					if (i==stage_==WFT_NOADVANCE) timesWithoutAdvancement++;
 				}
-				
+
 				std::ostringstream msg2;
 				msg2<<"Steps without advance: "<<timesWithoutAdvancement;
 				if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
 				
 				std::ostringstream msg;
-				msg<<"Evolving, stage="<<getStage(i)<<" loopNumber="<<loopNumber;
+				msg<<"Evolving, stage="<<getStage()<<" loopNumber="<<loopNumber;
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
+				advanceOrWft(phiNew,indexOld,direction);
 			}
 
-			void computePhi(size_t systemOrEnviron)
+			void advanceOrWft(VectorWithOffsetType& phiNew,
+			                  size_t indexOld,
+			                  size_t systemOrEnviron)
 			{
 				size_t indexAdvance = betas_.size()-1;
 				size_t indexNoAdvance = 0;
-				if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
-					size_t advance = indexNoAdvance;
-					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
+				if (stage_== WFT_ADVANCE) 
+					throw std::runtime_error("Advance unimplemented for Metts\n");
+				if (stage_== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
+// 					size_t advance = indexNoAdvance;
+// 					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
 					std::ostringstream msg;
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 					
-					guessPhiSectors(phiNew,i,systemOrEnviron);
+					phiNew = psi_; // same sectors as g.s.
 					
 					// OK, now that we got the partition number right, let's wft:
-					waveFunctionTransformation_
-					.setInitialVector(phiNew,targetVectors_[advance],lrs_);
+					wft_.setInitialVector(phiNew,targetVectors_[indexOld],lrs_);
 					phiNew.collapseSectors(); 
 				} else {
 					throw std::runtime_error("It's 5 am, do you know what line "
@@ -365,16 +356,27 @@ namespace Dmrg {
 			void getNewPures()
 			{
 				const MatrixType& transformSystem = wft_.transform(SYSTEM);
-				VectorType newVector(transformSystem.n_row());
-				getNewPure(newVector,pureVectors_.first,alphaFixed,
+				VectorType newVector1(transformSystem.n_row());
+				getNewPure(newVector1,pureVectors_.first,alphaFixed,
 						   lrs_.left(),transformSystem);
-				pureVectors_.first = newVector;
-				
+
 				const MatrixType& transformEnviron = wft_.transform(ENVIRON);
-				newVector.resize(transformEnviron.n_row());
-				getNewPure(newVector,pureVectors_.second,betaFixed,
+				VectorType newVector2(transformEnviron.n_row());
+				getNewPure(newVector2,pureVectors_.second,betaFixed,
 						   lrs_.right(),transformEnviron);
-				pureVectors_.first = newVector;
+			}
+
+			void getFullVector()
+			{
+				int offset = lrs_.super().partition(m);
+				int total = lrs_.super().partition(m+1) - offset;
+
+				PackIndicesType pack(ns);
+				for (size_t i=0;i<total;i++) {
+					size_t alpha,beta;
+					pack.unpack(alpha,beta,lrs_.super().permutation(i+offset));
+					v[i] = pureVectors_.first[alpha] * pureVectors_.second[beta];
+				}
 			}
 
 			void getNewPure(VectorType& newVector,
@@ -394,7 +396,32 @@ namespace Dmrg {
 					}
 				}
 			}
-			
+
+			void collapseVector(VectorType& w,
+			                    const VectorType& v,
+			                    size_t alphaFixed,
+			                    size_t betaFixed)
+			{
+				int offset = lrs_.super().partition(m);
+				int total = lrs_.super().partition(m+1) - offset;
+
+				size_t nk = hilbertSizePerSite;
+				PackIndicesType packSuper(ns);
+				PackIndicesType packLeft(ns/nk);
+				PackIndicesType packRight(nk);
+				for (size_t i=0;i<total;i++) {
+					w[i] = 0;
+					size_t alpha,beta;
+					packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
+					size_t alpha0,alpha1;
+					packLeft.unpack(alpha0,alpha1,alpha);
+					size_t beta0,beta1;
+					packRight.unpack(beta0,beta1,beta);
+					if (alpha1!=alphaFixed || beta0 != betaFixed) continue;
+					w[i] = v[i];
+				}
+			}
+
 			// in situ computation:
 			void cocoon(size_t direction,const BlockType& block) const
 			{
@@ -628,21 +655,21 @@ namespace Dmrg {
 				}
 			}
 
-			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
-			{
-				FermionSign fs(lrs_.left(),mettsStruct_.electrons);
-				if (allStages(WFT_NOADVANCE)) {
-					VectorWithOffsetType tmpVector = psi_;
-					for (size_t j=0;j<mettsStruct_.aOperators.size();j++) {
-						applyOpLocal_(phi,tmpVector,mettsStruct_.aOperators[j],fs,
-							systemOrEnviron);
-						tmpVector = phi;
-					}
-					return;
-				}
-				applyOpLocal_(phi,psi_,mettsStruct_.aOperators[i],fs,
-								systemOrEnviron);
-			}
+// 			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
+// 			{
+// 				FermionSign fs(lrs_.left(),mettsStruct_.electrons);
+// 				if (allStages(WFT_NOADVANCE)) {
+// 					VectorWithOffsetType tmpVector = psi_;
+// 					for (size_t j=0;j<mettsStruct_.aOperators.size();j++) {
+// 						applyOpLocal_(phi,tmpVector,mettsStruct_.aOperators[j],fs,
+// 							systemOrEnviron);
+// 						tmpVector = phi;
+// 					}
+// 					return;
+// 				}
+// 				applyOpLocal_(phi,psi_,mettsStruct_.aOperators[i],fs,
+// 								systemOrEnviron);
+// 			}
 
 			void zeroOutVectors()
 			{
