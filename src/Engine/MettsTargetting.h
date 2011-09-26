@@ -77,6 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ApplyOperatorLocal.h"
 #include "MettsSerializer.h"
 #include "MettsParams.h"
+#include "PackIndices.h"
 
 namespace Dmrg {
 	template<
@@ -88,13 +89,16 @@ namespace Dmrg {
     			typename IoType_,
        			template<typename> class VectorWithOffsetTemplate>
 	class MettsTargetting  {
+			typedef std::pair<size_t,size_t> PairType;
+			typedef PsimagLite::PackIndices PackIndicesType;
+			static size_t const SYSTEM=0, ENVIRON=1;
 
 		public:
 			typedef ModelType_ ModelType;
 			typedef ConcurrencyType_ ConcurrencyType;
 			typedef IoType_ IoType;
 			typedef typename ModelType::RealType RealType;
-			typedef InternalProductTemplate<ComplexType,ModelType>
+			typedef InternalProductTemplate<RealType,ModelType>
 			   InternalProductType;
 			typedef typename ModelType::OperatorsType OperatorsType;
 			typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -118,7 +122,7 @@ namespace Dmrg {
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef MettsSerializer<RealType,VectorWithOffsetType> MettsSerializerType;
 
-			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
+			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
@@ -138,32 +142,26 @@ namespace Dmrg {
 			  wft_(wft),
 			  progress_("MettsTargetting",0),
 			  currentBeta_(0),
-			  betas_(mettsStruct_.betaSteps),
-			  weight_(mettsStruct_.betaSteps),
-			  targetVectors_(mettsStruct_.betaSteps),
 			  applyOpLocal_(lrs)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" MettsTargetting "
 							"needs an enabled wft\n");
 				
-				RealType tau =mettsStruct_.tau;
-				RealType sum = 0;
-				size_t n = betas_.size();
-				size_t gsWeight_= 0;
-				RealType factor = (1.0 - gsWeight)/(n+2);
+				RealType tau =mettsStruct_.tau/(mettsStruct_.betaSteps-1);
+				size_t n1 = size_t(mettsStruct_.betaSteps/2);
+				if (mettsStruct_.betaSteps & 1) n1++;
+				size_t n = mettsStruct_.betaSteps + n1;
 				
-				for (size_t i=0;i<n;i++) {
-					betas_[i] = i*tau/(n-1);
-					weight_[i] = factor;
-					sum += weight_[i];
-				}
-
-				sum -= weight_[0];
-				sum -= weight_[n-1];
-				weight_[0] = weight_[n-1] = 2*factor;
-				sum += weight_[n-1];
-				sum += weight_[0];
-
+				betas_.resize(n);
+				weight_.resize(n);
+				targetVectors_.resize(n);
+				
+				size_t gsWeight_= 0;
+				RealType factor = (1.0 - gsWeight)/(n+4);
+				RealType sum = setOneInterval(factor,PairType(0,n1),tau*0.5);
+				sum += setOneInterval(factor,PairType(n1,n),tau);
+				
+				
 				sum += gsWeight_;
 				//for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
 				if (fabs(sum-1.0)>1e-5)
@@ -185,7 +183,7 @@ namespace Dmrg {
 
 			RealType normSquared(size_t i) const
 			{
-				// call to mult will conjugate one of the vector
+				// call to mult will conjugate one of the vectors
 				return real(multiply(targetVectors_[i],targetVectors_[i])); 
 			}
 
@@ -222,14 +220,20 @@ namespace Dmrg {
 			void evolve(RealType Eg,size_t direction,const BlockType& block,
 						size_t loopNumber)
 			{
-
-				// Advance or wft each target vector
-				for (size_t i=0;i<targetVectors_.size();i++) {
-					VectorWithOffsetType phiNew = psi_;
-					evolve(phiNew,targetVectors_[i],Eg,direction,block,loopNumber);
+				size_t n = targetVectors_.size();
+				size_t n1 = n/2;
+				// Advance or wft each target vector for beta/2
+				for (size_t i=0;i<n1;i++) {
+					evolve(i,0,Eg,direction,block,loopNumber);
 				}
 				
-				calcTimeVectors(Eg,direction);
+				// Advance or wft each target vector for beta
+				for (size_t i=n1;i<n;i++) {
+					evolve(i,n1,Eg,direction,block,loopNumber);
+				}
+				
+				calcTimeVectors(0,n1,Eg,direction);
+				calcTimeVectors(n1,n,Eg,direction);
 				
 				cocoon(direction,block); // in-situ
 			}
@@ -288,8 +292,8 @@ namespace Dmrg {
 
 		private:
 
-			void evolve(VectorWithOffsetType& phiNew,
-						size_t indexOld,
+			void evolve(size_t index,
+						size_t start,
 				        RealType Eg,
 			            size_t direction,
 			            const BlockType& block,
@@ -298,7 +302,7 @@ namespace Dmrg {
 				static size_t  timesWithoutAdvancement=0;
 				
 				if (direction==INFINITE) {
-					getNewPures();
+					getNewPures(index,start);
 					return;
 				}
 				if (block.size()!=1) throw 
@@ -313,7 +317,7 @@ namespace Dmrg {
 					currentBeta_ += mettsStruct_.tau;
 					timesWithoutAdvancement=0;
 				} else {
-					if (i==stage_==WFT_NOADVANCE) timesWithoutAdvancement++;
+					if (stage_==WFT_NOADVANCE) timesWithoutAdvancement++;
 				}
 
 				std::ostringstream msg2;
@@ -324,37 +328,39 @@ namespace Dmrg {
 				msg<<"Evolving, stage="<<getStage()<<" loopNumber="<<loopNumber;
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
-				advanceOrWft(phiNew,indexOld,direction);
+				advanceOrWft(index,start,direction);
 			}
 
-			void advanceOrWft(VectorWithOffsetType& phiNew,
-			                  size_t indexOld,
+			void advanceOrWft(size_t index,
+			                  size_t start,
 			                  size_t systemOrEnviron)
 			{
-				size_t indexAdvance = betas_.size()-1;
+				size_t indexAdvance = betas_.size()-1; // FIXME 
 				size_t indexNoAdvance = 0;
 				if (stage_== WFT_ADVANCE) 
 					throw std::runtime_error("Advance unimplemented for Metts\n");
-				if (stage_== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
+				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE) {
 // 					size_t advance = indexNoAdvance;
 // 					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
 					std::ostringstream msg;
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 					
-					phiNew = psi_; // same sectors as g.s.
+					VectorWithOffsetType phiNew = psi_; // same sectors as g.s.
 					
 					// OK, now that we got the partition number right, let's wft:
-					wft_.setInitialVector(phiNew,targetVectors_[indexOld],lrs_);
+					wft_.setInitialVector(phiNew,targetVectors_[index],lrs_);
 					phiNew.collapseSectors(); 
+					targetVectors_[index] = phiNew;
 				} else {
 					throw std::runtime_error("It's 5 am, do you know what line "
 					" your code is exec-ing?\n");
 				}
 			}
 
-			void getNewPures()
+			void getNewPures(size_t index,size_t start)
 			{
+				if (index>0 || start>0) return;
 				const MatrixType& transformSystem = wft_.transform(SYSTEM);
 				VectorType newVector1(transformSystem.n_row());
 				getNewPure(newVector1,pureVectors_.first,alphaFixed,
@@ -366,12 +372,12 @@ namespace Dmrg {
 						   lrs_.right(),transformEnviron);
 			}
 
-			void getFullVector()
+			void getFullVector(std::vector<RealType>& v,size_t m)
 			{
 				int offset = lrs_.super().partition(m);
 				int total = lrs_.super().partition(m+1) - offset;
 
-				PackIndicesType pack(ns);
+				PackIndicesType pack(lrs_.left().size());
 				for (size_t i=0;i<total;i++) {
 					size_t alpha,beta;
 					pack.unpack(alpha,beta,lrs_.super().permutation(i+offset));
@@ -397,7 +403,8 @@ namespace Dmrg {
 				}
 			}
 
-			void collapseVector(VectorType& w,
+			void collapseVector(size_t m,
+			                    VectorType& w,
 			                    const VectorType& v,
 			                    size_t alphaFixed,
 			                    size_t betaFixed)
@@ -470,9 +477,9 @@ namespace Dmrg {
 					case DISABLED:
 						return "Disabled";
 						break;
-					case OPERATOR:
-						return "Applying operator for the first time";
-						break; 
+// 					case OPERATOR:
+// 						return "Applying operator for the first time";
+// 						break; 
 					case WFT_ADVANCE:
 						return "WFT with time stepping";
 						break;
@@ -483,10 +490,11 @@ namespace Dmrg {
 				return "undefined";
 			}
 
-			void calcTimeVectors(RealType Eg,
-			                     const VectorWithOffsetType& phi,
+			void calcTimeVectors(const PairType& startEnd,
+			                     RealType Eg,
 			                     size_t systemOrEnviron)
 			{
+				const VectorWithOffsetType& phi = targetVectors_[startEnd.first];
 				std::vector<MatrixType> V(phi.sectors());
 				std::vector<MatrixType> T(phi.sectors());
 				
@@ -499,10 +507,10 @@ namespace Dmrg {
 				for (size_t ii=0;ii<phi.sectors();ii++) 
 					PsimagLite::diag(T[ii],eigs[ii],'V');
 				
-				calcTargetVectors(phi,T,V,Eg,eigs,steps,systemOrEnviron);
+				calcTargetVectors(startEnd,T,V,Eg,eigs,steps,systemOrEnviron);
 			}
 
-			void calcTargetVectors(const VectorWithOffsetType& phi,
+			void calcTargetVectors(const PairType& startEnd,
 			                       const std::vector<MatrixType>& T,
 			                       const std::vector<MatrixType>& V,
 			                       RealType Eg,
@@ -510,10 +518,10 @@ namespace Dmrg {
 		                           std::vector<size_t> steps,
 			                       size_t systemOrEnviron)
 			{
-				targetVectors_[0] = phi;
-				for (size_t i=1;i<betas_.size();i++) {
+				for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
 					// Only time differences here (i.e. betas_[i] not betas_[i]+currentBeta_)
-					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,i,steps);
+					calcTargetVector(targetVectors_[i],
+					        targetVectors_[startEnd.first],T,V,Eg,eigs,i,steps);
 					//normalize(targetVectors_[i]);
 				}
 			}
@@ -637,6 +645,25 @@ namespace Dmrg {
 				//check1(V,phi2);
 				return lanczosSolver.steps();
 			}
+			
+			RealType setOneInterval(const RealType& factor,
+			                        const PairType& startEnd,
+			                        const RealType& tau)
+			{
+				RealType sum = 0;
+				for (size_t i=startEnd.first;i<startEnd.second;i++) {
+					betas_[i] = (i-startEnd.first)*tau;
+					weight_[i] = factor;
+					sum += weight_[i];
+				}
+				
+				sum -= weight_[startEnd.first];
+				sum -= weight_[startEnd.second-1];
+				weight_[startEnd.first] = weight_[startEnd.second-1] = 2*factor;
+				sum += weight_[startEnd.second-1];
+				sum += weight_[startEnd.first];
+				return sum;
+			}
 
 			//! This check is invalid if there are more than one sector
 			void check1(const MatrixType& V,const TargetVectorType& phi2)
@@ -736,7 +763,7 @@ namespace Dmrg {
 			RealType gsWeight_;
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
-
+			std::pair<VectorType,VectorType> pureVectors_;
 	};     //class MettsTargetting
 
 	template<
