@@ -91,7 +91,6 @@ namespace Dmrg {
 	class MettsTargetting  {
 			typedef std::pair<size_t,size_t> PairType;
 			typedef PsimagLite::PackIndices PackIndicesType;
-			static size_t const SYSTEM=0, ENVIRON=1;
 
 		public:
 			typedef ModelType_ ModelType;
@@ -135,7 +134,7 @@ namespace Dmrg {
 	 		                const ModelType& model,
 			                const TargettingParamsType& mettsStruct,
 			                const WaveFunctionTransfType& wft)
-			: stage_(mettsStruct.sites.size(),DISABLED),
+			: stage_(DISABLED),
 			  lrs_(lrs),
 			  model_(model),
 			  mettsStruct_(mettsStruct),
@@ -147,17 +146,17 @@ namespace Dmrg {
 				if (!wft.isEnabled()) throw std::runtime_error(" MettsTargetting "
 							"needs an enabled wft\n");
 				
-				RealType tau =mettsStruct_.tau/(mettsStruct_.betaSteps-1);
-				size_t n1 = size_t(mettsStruct_.betaSteps/2);
-				if (mettsStruct_.betaSteps & 1) n1++;
-				size_t n = mettsStruct_.betaSteps + n1;
+				RealType tau =mettsStruct_.tau/(mettsStruct_.timeSteps-1);
+				size_t n1 = size_t(mettsStruct_.timeSteps/2);
+				if (mettsStruct_.timeSteps & 1) n1++;
+				size_t n = mettsStruct_.timeSteps + n1;
 				
 				betas_.resize(n);
 				weight_.resize(n);
 				targetVectors_.resize(n);
 				
 				size_t gsWeight_= 0;
-				RealType factor = (1.0 - gsWeight)/(n+4);
+				RealType factor = (1.0 - gsWeight_)/(n+4);
 				RealType sum = setOneInterval(factor,PairType(0,n1),tau*0.5);
 				sum += setOneInterval(factor,PairType(n1,n),tau);
 				
@@ -184,7 +183,7 @@ namespace Dmrg {
 			RealType normSquared(size_t i) const
 			{
 				// call to mult will conjugate one of the vectors
-				return real(multiply(targetVectors_[i],targetVectors_[i])); 
+				return multiply(targetVectors_[i],targetVectors_[i]); 
 			}
 
 			template<typename SomeBasisType>
@@ -220,8 +219,9 @@ namespace Dmrg {
 			void evolve(RealType Eg,size_t direction,const BlockType& block,
 						size_t loopNumber)
 			{
-				size_t n = targetVectors_.size();
-				size_t n1 = n/2;
+				size_t n1 = size_t(mettsStruct_.timeSteps/2);
+				if (mettsStruct_.timeSteps & 1) n1++;
+				size_t n = mettsStruct_.timeSteps + n1;
 				// Advance or wft each target vector for beta/2
 				for (size_t i=0;i<n1;i++) {
 					evolve(i,0,Eg,direction,block,loopNumber);
@@ -232,8 +232,8 @@ namespace Dmrg {
 					evolve(i,n1,Eg,direction,block,loopNumber);
 				}
 				
-				calcTimeVectors(0,n1,Eg,direction);
-				calcTimeVectors(n1,n,Eg,direction);
+				calcTimeVectors(PairType(0,n1),Eg,direction);
+				calcTimeVectors(PairType(n1,n),Eg,direction);
 				
 				cocoon(direction,block); // in-situ
 			}
@@ -308,7 +308,7 @@ namespace Dmrg {
 				if (block.size()!=1) throw 
 					std::runtime_error("MettsTargetting::evolve(...):"
 					" blocks of size != 1 are unsupported (sorry)\n");
-				size_t site = block[0];
+// 				size_t site = block[0];
 
 				stage_=WFT_NOADVANCE;
 
@@ -335,8 +335,8 @@ namespace Dmrg {
 			                  size_t start,
 			                  size_t systemOrEnviron)
 			{
-				size_t indexAdvance = betas_.size()-1; // FIXME 
-				size_t indexNoAdvance = 0;
+// 				size_t indexAdvance = betas_.size()-1; // FIXME 
+// 				size_t indexNoAdvance = 0;
 				if (stage_== WFT_ADVANCE) 
 					throw std::runtime_error("Advance unimplemented for Metts\n");
 				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE) {
@@ -361,12 +361,14 @@ namespace Dmrg {
 			void getNewPures(size_t index,size_t start)
 			{
 				if (index>0 || start>0) return;
-				const MatrixType& transformSystem = wft_.transform(SYSTEM);
+				const MatrixType& transformSystem = 
+				                         wft_.transform(ProgramGlobals::SYSTEM);
 				VectorType newVector1(transformSystem.n_row());
 				getNewPure(newVector1,pureVectors_.first,alphaFixed,
 						   lrs_.left(),transformSystem);
 
-				const MatrixType& transformEnviron = wft_.transform(ENVIRON);
+				const MatrixType& transformEnviron = 
+				                        wft_.transform(ProgramGlobals::ENVIRON);
 				VectorType newVector2(transformEnviron.n_row());
 				getNewPure(newVector2,pureVectors_.second,betaFixed,
 						   lrs_.right(),transformEnviron);
@@ -412,7 +414,8 @@ namespace Dmrg {
 				int offset = lrs_.super().partition(m);
 				int total = lrs_.super().partition(m+1) - offset;
 
-				size_t nk = hilbertSizePerSite;
+				size_t nk = model_.hilbertSize();
+				size_t ns = lrs_.left().size();
 				PackIndicesType packSuper(ns);
 				PackIndicesType packLeft(ns/nk);
 				PackIndicesType packRight(nk);
@@ -447,7 +450,7 @@ namespace Dmrg {
 			{
 				if (i==0) return;
 				for (size_t j=0;j<i;j++) {
-					if (stage_[j] == DISABLED) {
+					if (stage_ == DISABLED) {
 						std::string s ="TST:: Seeing tst site "+ttos(mettsStruct_.sites[i]);
 						s =s + " before having seen";
 						s = s + " site "+ttos(j);
@@ -459,21 +462,20 @@ namespace Dmrg {
 
 			bool allStages(size_t x) const
 			{
-				for (size_t i=0;i<stage_.size();i++)
-					if (stage_[i]!=x) return false;
+				if (stage_!=x) return false;
 				return true;
 			}
 
 			bool noStageIs(size_t x) const
 			{
-				for (size_t i=0;i<stage_.size();i++)
-					if (stage_[i]==x) return false;
+				//for (size_t i=0;i<stage_.size();i++)
+				if (stage_==x) return false;
 				return true;
 			}
 
-			std::string getStage(size_t i) const
+			std::string getStage() const
 			{
-				switch (stage_[i]) {
+				switch (stage_) {
 					case DISABLED:
 						return "Disabled";
 						break;
@@ -586,10 +588,10 @@ namespace Dmrg {
 					RealType sum = 0.0;
 					for (size_t kprime=0;kprime<n2;kprime++) {
 						RealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
-						sum += conj(T(kprime,k))*tmpV;
+						sum += std::conj(T(kprime,k))*tmpV;
 					}
 					RealType tmp = (eigs[k]-Eg)*betas_[timeIndex];
-					r[k] = c * exp(tmp);
+					r[k] = sum * exp(tmp);
 				}
 			}
 
@@ -602,7 +604,7 @@ namespace Dmrg {
 				size_t total = phi.effectiveSize(i0);
 				
 				for (size_t j=0;j<total;j++)
-					ret += conj(V(j,kprime))*phi.fastAccess(i0,j);
+					ret += std::conj(V(j,kprime))*phi.fastAccess(i0,j);
 				return ret;
 			}
 
@@ -722,35 +724,36 @@ namespace Dmrg {
 				 	const std::string& label,
 					size_t site) const
 			{
-				VectorWithOffsetType dest;
-				OperatorType A = mettsStruct_.aOperators[0];
-				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
-				PsimagLite::CrsMatrix<ComplexType> tmpCt;
-				transposeConjugate(tmpCt,tmpC);
-				multiply(A.data,tmpCt,tmpC);
-				A.fermionSign = 1;
-				//A.data = tmpC;
-				FermionSign fs(lrs_.left(),mettsStruct_.electrons);
-				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
-
-				ComplexType sum = 0;
-				for (size_t ii=0;ii<dest.sectors();ii++) {
-					size_t i = dest.sector(ii);
-					size_t offset1 = dest.offset(i);
-					for (size_t jj=0;jj<src2.sectors();jj++) {
-						size_t j = src2.sector(jj);
-						size_t offset2 = src2.offset(j);
-						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
-						for (size_t k=0;k<dest.effectiveSize(i);k++) 
-							sum+= dest[k+offset1] * conj(src2[k+offset2]);
-					}
-				}
-				std::cerr<<site<<" "<<sum<<" "<<" "<<currentBeta_;
-				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
+				throw std::runtime_error("Metts: test(...): not implemented\n");
+// 				VectorWithOffsetType dest;
+// 				OperatorType A = mettsStruct_.aOperators[0];
+// 				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
+// 				PsimagLite::CrsMatrix<ComplexType> tmpCt;
+// 				transposeConjugate(tmpCt,tmpC);
+// 				multiply(A.data,tmpCt,tmpC);
+// 				A.fermionSign = 1;
+// 				//A.data = tmpC;
+// 				FermionSign fs(lrs_.left(),mettsStruct_.electrons);
+// 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
+// 
+// 				ComplexType sum = 0;
+// 				for (size_t ii=0;ii<dest.sectors();ii++) {
+// 					size_t i = dest.sector(ii);
+// 					size_t offset1 = dest.offset(i);
+// 					for (size_t jj=0;jj<src2.sectors();jj++) {
+// 						size_t j = src2.sector(jj);
+// 						size_t offset2 = src2.offset(j);
+// 						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+// 						for (size_t k=0;k<dest.effectiveSize(i);k++) 
+// 							sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
+// 					}
+// 				}
+// 				std::cerr<<site<<" "<<sum<<" "<<" "<<currentBeta_;
+// 				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
 			}
 
 
-			std::vector<size_t> stage_;
+			size_t stage_;
 			VectorWithOffsetType psi_;
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;

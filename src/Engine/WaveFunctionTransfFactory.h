@@ -323,8 +323,12 @@ namespace Dmrg {
 			progress_.printline(msg,std::cout);
 		}
 
-//		void disable() { isEnabled_=false; }
-//
+		const PsimagLite::Matrix<SparseElementType>& transform(size_t what) const
+		{
+			return (what==ProgramGlobals::SYSTEM) ? 
+			                           dmrgWaveStruct_.ws : dmrgWaveStruct_.we;
+		}
+
 		bool isEnabled() const { return isEnabled_; }
 		
 	private:

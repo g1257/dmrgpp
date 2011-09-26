@@ -91,6 +91,7 @@ namespace Dmrg {
 		static double const LanczosTolerance; // tolerance of the Lanczos Algorithm
 		enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
 		enum {SYSTEM_SYSTEM,SYSTEM_ENVIRON,ENVIRON_SYSTEM,ENVIRON_ENVIRON};
+		enum {SYSTEM,ENVIRON};
 		enum {FERMION,BOSON};
 	}; // ProgramGlobals
 	

@@ -375,17 +375,17 @@ namespace Dmrg {
 
 				if (direction==EXPAND_SYSTEM) {
 					lrs_.growLeftBlock(model_,pS,sitesIndices_[stepCurrent_]);
-					lrs_.right(checkpoint_.shrink(CheckpointType::ENVIRON));
+					lrs_.right(checkpoint_.shrink(ProgramGlobals::ENVIRON));
 				} else {
 					lrs_.growRightBlock(model_,pE,sitesIndices_[stepCurrent_]);
-					lrs_.left(checkpoint_.shrink(CheckpointType::SYSTEM));
+					lrs_.left(checkpoint_.shrink(ProgramGlobals::SYSTEM));
 				}
 
 				lrs_.printSizes("finite",std::cout);
 				if (verbose_) {
 					std::ostringstream msg;
-					msg<<" stackS="<<checkpoint_.stackSize(CheckpointType::SYSTEM);
-					msg<<" stackE="<<checkpoint_.stackSize(CheckpointType::ENVIRON)<< " step="<<stepCurrent_;
+					msg<<" stackS="<<checkpoint_.stackSize(ProgramGlobals::SYSTEM);
+					msg<<" stackE="<<checkpoint_.stackSize(ProgramGlobals::ENVIRON)<< " step="<<stepCurrent_;
 					msg<<" loopIndex="<<loopIndex<<" length="<<stepLength<<" StepFinal="<<stepFinal;
 					progress_.printline(msg,std::cout);
 				}
@@ -430,9 +430,9 @@ namespace Dmrg {
 			io_.printline(msg2);
 
 			if (direction==EXPAND_SYSTEM) {
-				checkpoint_.push(pS,CheckpointType::SYSTEM);
+				checkpoint_.push(pS,ProgramGlobals::SYSTEM);
 			} else {
-				checkpoint_.push(pE,CheckpointType::ENVIRON);
+				checkpoint_.push(pE,ProgramGlobals::ENVIRON);
 			}
 			if (saveOption==SAVE_TO_DISK)
 				serialize(fsS,fsE,target,truncate_.transform(),direction);

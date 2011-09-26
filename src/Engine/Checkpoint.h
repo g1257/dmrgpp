@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stack>
 #include "DiskStack.h"
 #include "ProgressIndicator.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -97,8 +98,6 @@ namespace Dmrg {
 		typedef typename TargettingType::IoType IoType;
 		typedef std::stack<BasisWithOperatorsType> MemoryStackType;
 		typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
-
-		enum {SYSTEM,ENVIRON};
 
 		const std::string SYSTEM_STACK_STRING;
 		const std::string ENVIRON_STACK_STRING;
@@ -161,13 +160,13 @@ namespace Dmrg {
 
 		void push(const BasisWithOperatorsType &pSorE,size_t what)
 		{
-			if (what==ENVIRON) envStack_.push(pSorE);
+			if (what==ProgramGlobals::ENVIRON) envStack_.push(pSorE);
 			else systemStack_.push(pSorE);
 		}
 
 		BasisWithOperatorsType shrink(size_t what)
 		{
-			if (what==ENVIRON) return shrink(envStack_);
+			if (what==ProgramGlobals::ENVIRON) return shrink(envStack_);
 			else return shrink(systemStack_);
 		}
 
@@ -175,7 +174,7 @@ namespace Dmrg {
 
 		size_t stackSize(size_t what) const
 		{
-			if (what==ENVIRON) return envStack_.size();
+			if (what==ProgramGlobals::ENVIRON) return envStack_.size();
 			return systemStack_.size();
 		}
 
