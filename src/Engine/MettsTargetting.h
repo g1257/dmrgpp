@@ -219,27 +219,33 @@ namespace Dmrg {
 
 			void evolve(RealType Eg,
 			            size_t direction,
-			            const BlockType* block1,
-			            const BlockType* block2,
+			            const BlockType& block1,
+			            const BlockType& block2,
 			            size_t loopNumber)
 			{
+				if (block1.size()!=1) throw 
+					std::runtime_error("MettsTargetting::evolve(...):"
+					" blocks of size != 1 are unsupported (sorry)\n");
 				size_t n1 = size_t(mettsStruct_.timeSteps/2);
 				if (mettsStruct_.timeSteps & 1) n1++;
 				size_t n = mettsStruct_.timeSteps + n1;
 				// Advance or wft each target vector for beta/2
+				
+				PairType sites(block1[0],block2[0]);
+					
 				for (size_t i=0;i<n1;i++) {
-					evolve(i,0,Eg,direction,*block1,loopNumber);
+					evolve(i,0,Eg,direction,sites,loopNumber);
 				}
 				
 				// Advance or wft each target vector for beta
 				for (size_t i=n1;i<n;i++) {
-					evolve(i,n1,Eg,direction,*block1,loopNumber);
+					evolve(i,n1,Eg,direction,sites,loopNumber);
 				}
 				
 				calcTimeVectors(PairType(0,n1),Eg,direction);
 				calcTimeVectors(PairType(n1,n),Eg,direction);
 				
-				if (direction!=INFINITE) cocoon(direction,*block1); // in-situ
+				if (direction!=INFINITE) cocoon(direction,sites); // in-situ
 			}
 
 			void load(const std::string& f)
@@ -302,21 +308,15 @@ namespace Dmrg {
 						size_t start,
 				        RealType Eg,
 			            size_t direction,
-			            const BlockType& block,
+			            std::pair<size_t,size_t> sites,
 			            size_t loopNumber)
 			{
 				static size_t  timesWithoutAdvancement=0;
-				
-				if (block.size()!=1) throw 
-					std::runtime_error("MettsTargetting::evolve(...):"
-					" blocks of size != 1 are unsupported (sorry)\n");
-				size_t site = block[0];
-					
+
 				if (direction==INFINITE) {
-					if (index==0 && start==0) getNewPures(site);
+					if (index==0 && start==0) getNewPures(sites);
 					return;
 				}
-				
 
 				stage_=WFT_NOADVANCE;
 
@@ -353,9 +353,9 @@ namespace Dmrg {
 					std::ostringstream msg;
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
-					
+
 					VectorWithOffsetType phiNew = psi_; // same sectors as g.s.
-					
+
 					// OK, now that we got the partition number right, let's wft:
 					wft_.setInitialVector(phiNew,targetVectors_[index],lrs_);
 					phiNew.collapseSectors(); 
@@ -366,11 +366,11 @@ namespace Dmrg {
 				}
 			}
 
-			void getNewPures(size_t site)
+			void getNewPures(const PairType& sites)
 			{
 				size_t alphaFixed = 0;
 				size_t betaFixed = 0;
-				std::cerr<<"GETNEWPURES site="<<site<<"\n";
+				std::cerr<<"GETNEWPURES site="<<sites<<"\n";
 				const MatrixType& transformSystem = 
 				                         wft_.transform(ProgramGlobals::SYSTEM);
 				VectorType newVector1(transformSystem.n_row());
@@ -443,15 +443,14 @@ namespace Dmrg {
 			}
 
 			// in situ computation:
-			void cocoon(size_t direction,const BlockType& block) const
+			void cocoon(size_t direction,const PairType& sites) const
 			{
-				size_t site = block[0];
 				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
-				test(psi_,psi_,direction,"<PSI|A|PSI>",site);
+				test(psi_,psi_,direction,"<PSI|A|PSI>",sites);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
-					test(targetVectors_[j],targetVectors_[j],direction,s,site);
+					test(targetVectors_[j],targetVectors_[j],direction,s,sites);
 				}
 				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
 			}
@@ -727,12 +726,11 @@ namespace Dmrg {
 //				io_.printline(s);
 //			}
 
-			void test(	
-					const VectorWithOffsetType& src1,
-					const VectorWithOffsetType& src2,
-					size_t systemOrEnviron,
-				 	const std::string& label,
-					size_t site) const
+			void test(const VectorWithOffsetType& src1,
+			          const VectorWithOffsetType& src2,
+			          size_t systemOrEnviron,
+			          const std::string& label,
+			          const PairType& sites) const
 			{
 				throw std::runtime_error("Metts: test(...): not implemented\n");
 // 				VectorWithOffsetType dest;

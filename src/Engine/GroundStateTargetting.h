@@ -183,8 +183,8 @@ namespace Dmrg {
 			
 			void evolve(RealType Eg,
 			            size_t direction,
-			            const BlockType* block1,
-			            const BlockType* block2,
+			            const BlockType& block1,
+			            const BlockType& block2,
 			            size_t loopNumber)
 			{
 				// Nothing to see here

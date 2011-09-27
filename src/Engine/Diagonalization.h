@@ -142,7 +142,7 @@ namespace Dmrg {
 			size_t loopIndex = 0;
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false);
 			//  targetting: 
-			target.evolve(gsEnergy,direction,&blockLeft,&blockRight,loopIndex);
+			target.evolve(gsEnergy,direction,blockLeft,blockRight,loopIndex);
 			waveFunctionTransformation_.triggerOff(target.leftRightSuper()); //,m);
 			return gsEnergy;
 		}
@@ -158,7 +158,7 @@ namespace Dmrg {
 
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false);
 			//  targetting: 
-			target.evolve(gsEnergy,direction,&block,0,loopIndex);
+			target.evolve(gsEnergy,direction,block,block,loopIndex);
 			waveFunctionTransformation_.triggerOff(target.leftRightSuper()); //,m);
 			return gsEnergy;
 		}
