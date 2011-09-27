@@ -36,10 +36,12 @@ namespace PsimagLite {
 			
 		}
 
-		T random()
+		T random() // deprecated!!! use operator() instead
 		{
 			return static_cast<T>(drand48());
 		}
+
+		T operator()() { return static_cast<T>(drand48()); }
 	}; // Random48
 } // namespace PsimagLite
 
