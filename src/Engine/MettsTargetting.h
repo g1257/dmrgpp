@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MettsSerializer.h"
 #include "MettsParams.h"
 #include "PackIndices.h"
+#include "MettsStochastics.h"
 
 namespace Dmrg {
 	template<
@@ -120,7 +121,8 @@ namespace Dmrg {
 			typedef BlockMatrix<RealType,MatrixType> BlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef MettsSerializer<RealType,VectorWithOffsetType> MettsSerializerType;
-
+			typedef MettsStochastics<RealType> MettsStochasticsType;
+			
 			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -142,7 +144,8 @@ namespace Dmrg {
 			  progress_("MettsTargetting",0),
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
-			  hilbertSizePerSite_(model_.hilbertSize())
+			  hilbertSizePerSite_(model_.hilbertSize()),
+			  mettsStochastics_(hilbertSizePerSite_)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" MettsTargetting "
 							"needs an enabled wft\n");
@@ -225,7 +228,7 @@ namespace Dmrg {
 			{
 				if (block1.size()!=1) throw 
 					std::runtime_error("MettsTargetting::evolve(...):"
-					" blocks of size != 1 are unsupported (sorry)\n");
+				              " blocks of size != 1 are unsupported (sorry)\n");
 				size_t n1 = size_t(mettsStruct_.timeSteps/2);
 				if (mettsStruct_.timeSteps & 1) n1++;
 				size_t n = mettsStruct_.timeSteps + n1;
@@ -368,8 +371,8 @@ namespace Dmrg {
 
 			void getNewPures(const PairType& sites)
 			{
-				size_t alphaFixed = 0;
-				size_t betaFixed = 0;
+				size_t alphaFixed = mettsStochastics_.chooseRandomState();
+				size_t betaFixed = mettsStochastics_.chooseRandomState();
 				std::cerr<<"GETNEWPURES site="<<sites<<"\n";
 				const MatrixType& transformSystem = 
 				                         wft_.transform(ProgramGlobals::SYSTEM);
@@ -775,6 +778,7 @@ namespace Dmrg {
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
 			size_t hilbertSizePerSite_;
+			MettsStochasticsType mettsStochastics_;
 			std::pair<VectorType,VectorType> pureVectors_;
 	};     //class MettsTargetting
 
