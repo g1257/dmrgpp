@@ -287,7 +287,7 @@ namespace Dmrg {
 				
 				lrs_.setToProduct(quantumSector_);
 				
-				diagonalization_(psi,INFINITE,X[step]);
+				diagonalization_(psi,INFINITE,X[step],Y[step]);
 				
 				truncate_(pS,psi,parameters_.keptStatesInfinite,EXPAND_SYSTEM);
 				truncate_(pE,psi,parameters_.keptStatesInfinite,EXPAND_ENVIRON);

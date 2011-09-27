@@ -83,25 +83,24 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef METTS_PARAMS_H
 #define METTS_PARAMS_H
 
-#include "TargetParamsCommon.h"
+// #include "TargetParamsCommon.h"
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
 	template<typename ModelType>
-	class MettsParams : public TargetParamsCommon<ModelType> {
+	class MettsParams {
 		public:
-			typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
+// 			typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
 			typedef typename ModelType::RealType RealType;
 
-			static size_t const PRODUCT = TargetParamsCommonType::PRODUCT;
+			//static size_t const PRODUCT = TargetParamsCommonType::PRODUCT;
 
 			template<typename IoInputter>
 			MettsParams(IoInputter& io,const ModelType& model)
-				: TargetParamsCommonType(io,model),tau(0),timeSteps(0),
-				  advanceEach(0)
+				: tau(0),timeSteps(0),advanceEach(0)
 			{
 				io.rewind();
-				this->concatenation = PRODUCT;
+				//this->concatenation = PRODUCT;
 				io.readline(tau,"TSPTau=");
 				io.readline(timeSteps,"TSPTimeSteps=");
 				io.readline(advanceEach,"TSPAdvanceEach=");
@@ -120,8 +119,8 @@ namespace Dmrg {
 		os<<"#TargetParams.tau="<<t.tau<<"\n";
 		os<<"#TargetParams.timeSteps="<<t.timeSteps<<"\n";
 		os<<"#TargetParams.advanceEach="<<t.advanceEach<<"\n";
-		const typename MettsParams<ModelType>::TargetParamsCommonType& tp = t;
-		os<<tp;
+		//const typename MettsParams<ModelType>::TargetParamsCommonType& tp = t;
+		//os<<tp;
 		return os;
 	}
 } // namespace Dmrg 

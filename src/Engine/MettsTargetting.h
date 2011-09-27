@@ -141,7 +141,8 @@ namespace Dmrg {
 			  wft_(wft),
 			  progress_("MettsTargetting",0),
 			  currentBeta_(0),
-			  applyOpLocal_(lrs)
+			  applyOpLocal_(lrs),
+			  hilbertSizePerSite_(model_.hilbertSize())
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" MettsTargetting "
 							"needs an enabled wft\n");
@@ -216,26 +217,29 @@ namespace Dmrg {
 				return lrs_;
 			}
 
-			void evolve(RealType Eg,size_t direction,const BlockType& block,
-						size_t loopNumber)
+			void evolve(RealType Eg,
+			            size_t direction,
+			            const BlockType* block1,
+			            const BlockType* block2,
+			            size_t loopNumber)
 			{
 				size_t n1 = size_t(mettsStruct_.timeSteps/2);
 				if (mettsStruct_.timeSteps & 1) n1++;
 				size_t n = mettsStruct_.timeSteps + n1;
 				// Advance or wft each target vector for beta/2
 				for (size_t i=0;i<n1;i++) {
-					evolve(i,0,Eg,direction,block,loopNumber);
+					evolve(i,0,Eg,direction,*block1,loopNumber);
 				}
 				
 				// Advance or wft each target vector for beta
 				for (size_t i=n1;i<n;i++) {
-					evolve(i,n1,Eg,direction,block,loopNumber);
+					evolve(i,n1,Eg,direction,*block1,loopNumber);
 				}
 				
 				calcTimeVectors(PairType(0,n1),Eg,direction);
 				calcTimeVectors(PairType(n1,n),Eg,direction);
 				
-				cocoon(direction,block); // in-situ
+				if (direction!=INFINITE) cocoon(direction,*block1); // in-situ
 			}
 
 			void load(const std::string& f)
@@ -263,8 +267,10 @@ namespace Dmrg {
 
 			void initialGuess(VectorWithOffsetType& v) const
 			{
-				throw std::runtime_error("Metts: initial guess: Needs work\n");
-// 				wft_.setInitialVector(v,psi_,lrs_);
+				std::ostringstream msg;
+				msg<<"WARNING: initial guess: Needs work";
+				progress_.printline(msg,std::cout);
+ 				wft_.setInitialVector(v,psi_,lrs_);
 // 				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
 // 				if (!b) return;
 // 				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
@@ -280,10 +286,10 @@ namespace Dmrg {
 			template<typename IoOutputType>
 			void save(const std::vector<size_t>& block,IoOutputType& io) const
 			{
-				std::cerr<<"METTS: WARNING: save(...) unimplemented\n";
-// 				std::ostringstream msg;
+				std::ostringstream msg;
+				msg<<"WARNING: save(...) unimplemented";
 // 				msg<<"Saving state...";
-// 				progress_.printline(msg,std::cout);
+ 				progress_.printline(msg,std::cout);
 // 
 // 				TimeSerializerType ts(currentBeta_,block[0],targetVectors_);
 // 				ts.save(io);
@@ -301,14 +307,16 @@ namespace Dmrg {
 			{
 				static size_t  timesWithoutAdvancement=0;
 				
-				if (direction==INFINITE) {
-					getNewPures(index,start);
-					return;
-				}
 				if (block.size()!=1) throw 
 					std::runtime_error("MettsTargetting::evolve(...):"
 					" blocks of size != 1 are unsupported (sorry)\n");
-// 				size_t site = block[0];
+				size_t site = block[0];
+					
+				if (direction==INFINITE) {
+					if (index==0 && start==0) getNewPures(site);
+					return;
+				}
+				
 
 				stage_=WFT_NOADVANCE;
 
@@ -358,9 +366,11 @@ namespace Dmrg {
 				}
 			}
 
-			void getNewPures(size_t index,size_t start)
+			void getNewPures(size_t site)
 			{
-				if (index>0 || start>0) return;
+				size_t alphaFixed = 0;
+				size_t betaFixed = 0;
+				std::cerr<<"GETNEWPURES site="<<site<<"\n";
 				const MatrixType& transformSystem = 
 				                         wft_.transform(ProgramGlobals::SYSTEM);
 				VectorType newVector1(transformSystem.n_row());
@@ -414,7 +424,7 @@ namespace Dmrg {
 				int offset = lrs_.super().partition(m);
 				int total = lrs_.super().partition(m+1) - offset;
 
-				size_t nk = model_.hilbertSize();
+				size_t nk = hilbertSizePerSite_;
 				size_t ns = lrs_.left().size();
 				PackIndicesType packSuper(ns);
 				PackIndicesType packLeft(ns/nk);
@@ -766,6 +776,7 @@ namespace Dmrg {
 			RealType gsWeight_;
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
+			size_t hilbertSizePerSite_;
 			std::pair<VectorType,VectorType> pureVectors_;
 	};     //class MettsTargetting
 

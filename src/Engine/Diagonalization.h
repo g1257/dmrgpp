@@ -111,33 +111,64 @@ namespace Dmrg {
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::LeftRightSuperType
 						LeftRightSuperType;
+
 		Diagonalization(const ParametersType& parameters,
-				const ModelType& model,
-    				ConcurrencyType& concurrency,
-				const bool& verbose,
-    				const bool& useReflection,
-				IoOutType& io,
-    				const size_t& quantumSector,
-    				WaveFunctionTransfType& waveFunctionTransformation)
-			:
-			parameters_(parameters),
-			model_(model),
-			concurrency_(concurrency),
-			verbose_(verbose),
-			useReflection_(useReflection),
-			io_(io),
-			progress_("Diag.",0),
-			quantumSector_(quantumSector),
-			waveFunctionTransformation_(waveFunctionTransformation),
-			oldEnergy_(0)
+                        const ModelType& model,
+                        ConcurrencyType& concurrency,
+                        const bool& verbose,
+                        const bool& useReflection,
+                        IoOutType& io,
+                        const size_t& quantumSector,
+                       WaveFunctionTransfType& waveFunctionTransformation)
+		: parameters_(parameters),
+		  model_(model),
+		  concurrency_(concurrency),
+		  verbose_(verbose),
+		  useReflection_(useReflection),
+		  io_(io),
+		  progress_("Diag.",0),
+		  quantumSector_(quantumSector),
+		  waveFunctionTransformation_(waveFunctionTransformation),
+		  oldEnergy_(0)
 		{}
+
+		RealType operator()(TargettingType& target,
+		                    size_t direction,
+		                    const BlockType& blockLeft,
+		                    const BlockType& blockRight)
+		{
+			if (direction!=WaveFunctionTransfType::INFINITE) throw std::runtime_error(
+				"Diagonalization::operator(): expecting INFINITE direction\n");
+			size_t loopIndex = 0;
+			RealType gsEnergy = internalMain_(target,direction,loopIndex,false);
+			//  targetting: 
+			target.evolve(gsEnergy,direction,&blockLeft,&blockRight,loopIndex);
+			waveFunctionTransformation_.triggerOff(target.leftRightSuper()); //,m);
+			return gsEnergy;
+		}
+
+		RealType operator()(TargettingType& target,
+		                    size_t direction,
+		                    const BlockType& block,
+		                    size_t loopIndex,
+		                    bool needsPrinting)
+		{
+			if (direction==WaveFunctionTransfType::INFINITE) throw std::runtime_error(
+				"Diagonalization::operator(): not expecting INFINITE direction\n");
+
+			RealType gsEnergy = internalMain_(target,direction,loopIndex,false);
+			//  targetting: 
+			target.evolve(gsEnergy,direction,&block,0,loopIndex);
+			waveFunctionTransformation_.triggerOff(target.leftRightSuper()); //,m);
+			return gsEnergy;
+		}
+
+	private:
 		
-		RealType operator()(
-				TargettingType& target,
-				size_t direction,
-				const BlockType& block,
-				size_t loopIndex=0,
-				bool needsPrinting = false)
+		RealType internalMain_(TargettingType& target,
+		                       size_t direction,
+		                       size_t loopIndex,
+		                       bool needsPrinting)
 		{
 			const LeftRightSuperType& lrs= target.leftRightSuper();
 
@@ -250,14 +281,9 @@ namespace Dmrg {
 				io_.printline(msg);
 				oldEnergy_=gsEnergy;
 			}
-			
-			// time step targetting: 
-			target.evolve(gsEnergy,direction,block,loopIndex);
-			waveFunctionTransformation_.triggerOff(lrs); //,m);
 			return gsEnergy;
 		}
 
- private:
 		//! Diagonalise the i-th block of the matrix, return its eigenvectors in tmpVec and its eigenvalues in energyTmp
 		template<typename SomeVectorType>
 		void diagonaliseOneBlock(

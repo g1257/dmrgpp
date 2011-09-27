@@ -191,7 +191,11 @@ namespace Dmrg {
 				return targetVectors_[i];
 			}
 			
-			void evolve(RealType Eg,size_t direction,const BlockType& block,size_t loopNumber)
+			void evolve(RealType Eg,
+			            size_t direction,
+			            const BlockType* block1,
+			            const BlockType* block2,
+			            size_t loopNumber)
 			{
 				if (direction==INFINITE) return;
 				stage_ = ENABLED;
@@ -201,7 +205,7 @@ namespace Dmrg {
 				SparseMatrixType hmatrix;
 				BasisDataType q;
 
-				model_.setNaturalBasis(creationMatrix,hmatrix,q,block);
+				model_.setNaturalBasis(creationMatrix,hmatrix,q,*block1);
 				std::vector<size_t> electronsOneSite(q.electronsUp.size());
 				for (size_t i=0;i<electronsOneSite.size();i++)
 					electronsOneSite[i] = q.electronsUp[i] + q.electronsDown[i];

@@ -214,13 +214,16 @@ namespace Dmrg {
 			return targetVectors_[i];
 		}
 		
-		void evolve(RealType Eg,size_t direction,const BlockType& block,
-					size_t loopNumber)
+		void evolve(RealType Eg,
+		            size_t direction,
+		            const BlockType* block1,
+		            const BlockType* block2,
+		            size_t loopNumber)
 		{
-			if (block.size()!=1) throw
-					std::runtime_error("CorrectionVectorTargetting::evolve(...):"
-							" blocks of size != 1 are unsupported (sorry)\n");
-			size_t site = block[0];
+			if (block1->size()!=1) throw
+				std::runtime_error("CorrectionVectorTargetting::evolve(...):"
+			                  " blocks of size != 1 are unsupported (sorry)\n");
+			size_t site = (*block1)[0];
 			evolve(Eg,direction,site,loopNumber);
 			size_t numberOfSites = lrs_.super().block().size();
 			if (site>1 && site<numberOfSites-2) return;

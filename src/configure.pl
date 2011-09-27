@@ -368,7 +368,7 @@ int main(int argc,char *argv[])
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;
 	std::string targetting="GroundStateTargetting";
-	char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
+	const char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
                      "CorrectionVectorTargetting","CorrectionTargetting","MettsTargetting"};
 	size_t totalTargets = 6;
 	for (size_t i = 0;i<totalTargets;++i)
@@ -717,7 +717,7 @@ int main(int argc,char *argv[])
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;
 	std::string targetting="GroundStateTargetting";
-	char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
+	const char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
                      "CorrectionVectorTargetting","CorrectionTargetting","MettsTargetting"};
 	size_t totalTargets = 6;
 	for (size_t i = 0;i<totalTargets;++i)

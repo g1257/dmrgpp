@@ -237,7 +237,7 @@ namespace Dmrg {
 			if (eigs.size()>=newKeptStates)
 				statesToRemove = eigs.size()-newKeptStates;
 			RealType discWeight = sumUpTo(eigs,statesToRemove);
-			std::cerr<<"newKeptstates="<<newKeptStates<<"\n";
+// 			std::cerr<<"newKeptstates="<<newKeptStates<<"\n";
 			std::ostringstream msg;
 			if (newKeptStates != keptStates_) {
 				// we report that the "m" value has been changed and...

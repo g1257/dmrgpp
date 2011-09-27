@@ -223,8 +223,11 @@ namespace Dmrg {
 				return lrs_;
 			}
 
-			void evolve(RealType Eg,size_t direction,const BlockType& block,
-				size_t loopNumber)
+			void evolve(RealType Eg,
+			            size_t direction,
+			            const BlockType* block1,
+			            const BlockType* block2,
+			            size_t loopNumber)
 			{
 				size_t count =0;
 				VectorWithOffsetType phiOld = psi_;
@@ -237,7 +240,7 @@ namespace Dmrg {
 				// Loop over each operator that needs to be applied 
 				// in turn to the g.s.
 				for (size_t i=0;i<max;i++) {
-					count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber,max-1);
+					count += evolve(i,phiNew,phiOld,Eg,direction,*block1,loopNumber,max-1);
 					if (tstStruct_.concatenation==PRODUCT) {
 						phiOld = phiNew;
 					} else {
@@ -246,20 +249,9 @@ namespace Dmrg {
 				}
 				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 				
-				if (count==0) {
-					// always print to keep observer driver in sync
-//					if (needsPrinting) {
-//						zeroOutVectors();
-//						printVectors(block);
-//					}
-//					return;
-				}
-				
 				calcTimeVectors(Eg,phiNew,direction);
 				
-				cocoon(direction,block); // in-situ
-				
-				//if (needsPrinting) printVectors(block); // for post-processing
+				cocoon(direction,*block1); // in-situ
 			}
 
 			void load(const std::string& f)
