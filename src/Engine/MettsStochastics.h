@@ -76,8 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file MettsStochastics.h
  *
- *  An abstract class to represent the strongly-correlated-electron models that 
- *  can be used with the DmrgSolver
+ *  Stochastics (random choices) needed for the METTS algorithm 
  *
  */
  
@@ -99,7 +98,7 @@ namespace Dmrg {
 		{
 			return size_t(random48_()*hilbertSizePerSite_);
 		}
-		
+
 	private:
 		size_t hilbertSizePerSite_;
 		PsimagLite::Random48<RealType> random48_;

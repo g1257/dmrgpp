@@ -145,7 +145,8 @@ namespace Dmrg {
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
 			  hilbertSizePerSite_(model_.hilbertSize()),
-			  mettsStochastics_(hilbertSizePerSite_)
+			  mettsStochastics_(hilbertSizePerSite_),
+			  timesWithoutAdvancement_(0)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" MettsTargetting "
 							"needs an enabled wft\n");
@@ -175,13 +176,13 @@ namespace Dmrg {
 			RealType weight(size_t i) const
 			{
 				if (allStages(DISABLED)) 
-					throw std::runtime_error("Metts: What are you doing here?\n");
+					return 0.5;
 				return weight_[i];
 			}
 
 			RealType gsWeight() const
 			{
-				return (allStages(DISABLED)) ?  1.0 : gsWeight_;
+				return (allStages(DISABLED)) ?  0.5 : gsWeight_;
 			}
 
 			RealType normSquared(size_t i) const
@@ -207,7 +208,7 @@ namespace Dmrg {
 
 			size_t size() const
 			{
-				return (allStages(DISABLED)) ? 0 : targetVectors_.size();
+				return (allStages(DISABLED)) ? 1 : targetVectors_.size();
 			}
 
 			const VectorWithOffsetType& operator()(size_t i) const
@@ -229,13 +230,17 @@ namespace Dmrg {
 				if (block1.size()!=1) throw 
 					std::runtime_error("MettsTargetting::evolve(...):"
 				              " blocks of size != 1 are unsupported (sorry)\n");
+				
+				PairType sites(block1[0],block2[0]);
+				if (direction==INFINITE) {
+					getNewPures(sites);
+					return;
+				}
 				size_t n1 = size_t(mettsStruct_.timeSteps/2);
 				if (mettsStruct_.timeSteps & 1) n1++;
 				size_t n = mettsStruct_.timeSteps + n1;
+
 				// Advance or wft each target vector for beta/2
-				
-				PairType sites(block1[0],block2[0]);
-					
 				for (size_t i=0;i<n1;i++) {
 					evolve(i,0,Eg,direction,sites,loopNumber);
 				}
@@ -248,7 +253,7 @@ namespace Dmrg {
 				calcTimeVectors(PairType(0,n1),Eg,direction);
 				calcTimeVectors(PairType(n1,n),Eg,direction);
 				
-				if (direction!=INFINITE) cocoon(direction,sites); // in-situ
+				cocoon(direction,sites); // in-situ
 			}
 
 			void load(const std::string& f)
@@ -314,38 +319,39 @@ namespace Dmrg {
 			            std::pair<size_t,size_t> sites,
 			            size_t loopNumber)
 			{
-				static size_t  timesWithoutAdvancement=0;
+				if (index==0 && start==0) advanceCounterAndComputeStage();
 
-				if (direction==INFINITE) {
-					if (index==0 && start==0) getNewPures(sites);
-					return;
-				}
-
-				stage_=WFT_NOADVANCE;
-
-				if (timesWithoutAdvancement >= mettsStruct_.advanceEach) {
-					stage_ = WFT_ADVANCE;
-					currentBeta_ += mettsStruct_.tau;
-					timesWithoutAdvancement=0;
-				} else {
-					if (stage_==WFT_NOADVANCE) timesWithoutAdvancement++;
-				}
-
-				std::ostringstream msg2;
-				msg2<<"Steps without advance: "<<timesWithoutAdvancement;
-				if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
-				
 				std::ostringstream msg;
 				msg<<"Evolving, stage="<<getStage()<<" loopNumber="<<loopNumber;
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
 				advanceOrWft(index,start,direction);
 			}
+			
+			void advanceCounterAndComputeStage()
+			{
+				stage_=WFT_NOADVANCE;
+
+				if (timesWithoutAdvancement_ >= mettsStruct_.advanceEach) {
+					stage_ = WFT_ADVANCE;
+					currentBeta_ += mettsStruct_.tau;
+					timesWithoutAdvancement_=0;
+				} else {
+					if (stage_==WFT_NOADVANCE) timesWithoutAdvancement_++;
+				}
+
+				std::ostringstream msg2;
+				msg2<<"Steps without advance: "<<timesWithoutAdvancement_;
+				if (timesWithoutAdvancement_>0)
+					progress_.printline(msg2,std::cout);
+			}
 
 			void advanceOrWft(size_t index,
 			                  size_t start,
 			                  size_t systemOrEnviron)
 			{
+				if (targetVectors_[index].size()==0) return;
+
 // 				size_t indexAdvance = betas_.size()-1; // FIXME 
 // 				size_t indexNoAdvance = 0;
 				if (stage_== WFT_ADVANCE) 
@@ -377,14 +383,15 @@ namespace Dmrg {
 				const MatrixType& transformSystem = 
 				                         wft_.transform(ProgramGlobals::SYSTEM);
 				VectorType newVector1(transformSystem.n_row());
-				getNewPure(newVector1,pureVectors_.first,alphaFixed,
-						   lrs_.left(),transformSystem);
+				getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
+				           alphaFixed,lrs_.left(),transformSystem);
 
 				const MatrixType& transformEnviron = 
 				                        wft_.transform(ProgramGlobals::ENVIRON);
 				VectorType newVector2(transformEnviron.n_row());
-				getNewPure(newVector2,pureVectors_.second,betaFixed,
-						   lrs_.right(),transformEnviron);
+				getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
+						   betaFixed,lrs_.right(),transformEnviron);
+				setFromInfinite(targetVectors_[0]);
 			}
 
 			void getFullVector(std::vector<RealType>& v,size_t m)
@@ -393,7 +400,8 @@ namespace Dmrg {
 				int total = lrs_.super().partition(m+1) - offset;
 
 				PackIndicesType pack(lrs_.left().size());
-				for (size_t i=0;i<total;i++) {
+				v.resize(total);
+				for (int i=0;i<total;i++) {
 					size_t alpha,beta;
 					pack.unpack(alpha,beta,lrs_.super().permutation(i+offset));
 					v[i] = pureVectors_.first[alpha] * pureVectors_.second[beta];
@@ -402,19 +410,45 @@ namespace Dmrg {
 
 			void getNewPure(VectorType& newVector,
 			                VectorType& oldVector,
+			                size_t direction,
 			                size_t alphaFixed,
 			                const BasisWithOperatorsType& basis,
 			                const MatrixType& transform)
 			{
+				if (oldVector.size()==0) setInitialPure(oldVector);
+				
 				size_t ns = oldVector.size();
 				for (size_t gamma=0;gamma<transform.n_row();gamma++) {
 					newVector[gamma] = 0;
 					for (size_t alpha=0;alpha<ns;alpha++) {
-						size_t gammaPrime = basis.permutationInverse
-						                            (alpha + alphaFixed*ns);
+						size_t gammaPrime = (direction==ProgramGlobals::SYSTEM) ? 
+						    basis.permutationInverse(alpha + alphaFixed*ns) :
+						    basis.permutationInverse(alphaFixed + alpha*ns);
 						newVector[gamma] += transform(gamma,gammaPrime) * 
 						                               oldVector[alpha];
 					}
+				}
+			}
+			
+			void setInitialPure(VectorType& oldVector)
+			{
+				size_t alphaFixed = mettsStochastics_.chooseRandomState();
+				oldVector.resize(hilbertSizePerSite_);
+				for (size_t i=0;i<oldVector.size();i++) {
+					oldVector[i] = (i==alphaFixed) ? 1 : 0;
+				}
+			}
+			
+			void setFromInfinite(VectorWithOffsetType& phi)
+			{
+				phi = psi_;
+				if (phi.sectors()!=1)
+					throw std::runtime_error("MEttsTargetting::setFromInfinite(...): expected only one sector for g.s.\n");
+				for (size_t ii=0;ii<phi.sectors();ii++) {
+					size_t i0 = phi.sector(ii);
+					VectorType v;
+					getFullVector(v,i0);
+					phi.setDataInSector(v,i0);
 				}
 			}
 
@@ -508,7 +542,10 @@ namespace Dmrg {
 			                     RealType Eg,
 			                     size_t systemOrEnviron)
 			{
+				
 				const VectorWithOffsetType& phi = targetVectors_[startEnd.first];
+				if (phi.size()==0) setFromInfinite(targetVectors_[startEnd.first]);
+				
 				std::vector<MatrixType> V(phi.sectors());
 				std::vector<MatrixType> T(phi.sectors());
 				
@@ -779,6 +816,7 @@ namespace Dmrg {
 			ApplyOperatorType applyOpLocal_;
 			size_t hilbertSizePerSite_;
 			MettsStochasticsType mettsStochastics_;
+			size_t timesWithoutAdvancement_;
 			std::pair<VectorType,VectorType> pureVectors_;
 	};     //class MettsTargetting
 

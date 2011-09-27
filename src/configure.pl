@@ -164,6 +164,9 @@ sub createMakefile
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
 	my $compiler = compilerName();
 	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
+	my $usePthreadsOrNot = " ";
+	$usePthreadsOrNot = " -DUSE_PTHREADS " if ($pthreads);
+
 print FOUT<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Modify configure.pl instead
 # This Makefile was written by configure.pl
@@ -172,7 +175,7 @@ print FOUT<<EOF;
 # MPI: $mpi
 
 LDFLAGS =    $lapack  $gslLibs $pthreadsLib
-CPPFLAGS = -Werror -Wall  -IEngine $modelLocation -IGeometries -I$PsimagLite
+CPPFLAGS = -Werror -Wall  -IEngine $modelLocation -IGeometries -I$PsimagLite $usePthreadsOrNot
 EOF
 if ($mpi) {
 	print FOUT "CXX = mpicxx -O3 -DNDEBUG \n";
@@ -242,7 +245,6 @@ sub createDriver
 	my $license=getLicense();
 	my $concurrencyName = getConcurrencyName();
 	my $parametersName = getParametersName();
-	my $pthreadsName = getPthreadsName();
 	my $modelName = getModelName();
 	my $operatorsName = getOperatorsName();
 	
@@ -260,7 +262,13 @@ print FOUT<<EOF;
 #include "$modelName.h"
 #include "$operatorsName.h"
 #include "Geometry.h"
-#include "$pthreadsName.h"
+#ifdef USE_PTHREADS
+#include "Pthreads.h"
+#define PTHREADS_NAME Pthreads
+#else
+#include "NoPthreads.h"
+#define PTHREADS_NAME NoPthreads
+#endif
 #include "ReflectionSymmetryEmpty.h"
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
@@ -321,7 +329,7 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,MyConcurrency> ModelHelperType;
-	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::$pthreadsName> ModelType;
+	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
 	
 	typedef DmrgSolver<
 			InternalProductTemplate,
@@ -478,7 +486,6 @@ sub createObserverDriver
 	my $license=getLicense();
 	my $concurrencyName = getConcurrencyName();
 	my $parametersName = getParametersName();
-	my $pthreadsName = getPthreadsName();
 	my $modelName = getModelName();
 	my $operatorsName = getOperatorsName();
 	#my $chooseRealOrComplexForObservables = "typedef RealType FieldType;\n";
@@ -502,7 +509,13 @@ print OBSOUT<<EOF;
 #include "Geometry.h" 
 #include "CrsMatrix.h"
 #include "ReflectionSymmetryEmpty.h"
-#include "$pthreadsName.h" 
+#ifdef USE_PTHREADS
+##include "Pthreads.h"
+##define PTHREADS_NAME Pthreads
+##else
+##include "NoPthreads.h"
+##define PTHREADS_NAME NoPthreads
+##endif 
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
 #include "InternalProductOnTheFly.h"
@@ -647,7 +660,7 @@ void mainLoop(
 	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
-	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::$pthreadsName> ModelType;
+	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
 	
 	typedef DmrgSolver<
                         InternalProductTemplate,
@@ -817,17 +830,6 @@ sub getParametersName
 		$parametersName = "ParametersTjOneOrbital";
 	}
 	return $parametersName;
-}
-
-sub getPthreadsName
-{
-	my $pthreadsName = "UNKNOWN";
-	if ($pthreads) {
-		$pthreadsName = "Pthreads";
-	} else {
-		$pthreadsName = "NoPthreads";
-	}
-	return $pthreadsName;
 }
 
 sub getConcurrencyName()
