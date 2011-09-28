@@ -150,8 +150,8 @@ namespace Dmrg {
 				BasisDataType &q,Block const &block) const
 		{
 			HilbertBasisType natBasis;
-
-			setNaturalBasis(natBasis,block.size());
+			std::vector<size_t> quantumNumbs;
+			setNaturalBasis(natBasis,quantumNumbs,block.size());
 
 			setOperatorMatrices(creationMatrix,block);
 
@@ -167,8 +167,8 @@ namespace Dmrg {
 		{
 			std::vector<typename HilbertSpaceHubbardType::HilbertState> natBasis;
 			SparseMatrixType tmpMatrix;
-
-			setNaturalBasis(natBasis,block.size());
+			std::vector<size_t> quantumNumbs;
+			setNaturalBasis(natBasis,quantumNumbs,block.size());
 
 			//! Set the operators c^\daggger_{i\sigma} in the natural basis
 			creationMatrix.clear();
@@ -219,13 +219,13 @@ namespace Dmrg {
 				crsMatrixToFullMatrix(tmp,creationMatrix[spin].data);
 				return tmp;
 			} else if (what=="nup") {
-                                PsimagLite::Matrix<SparseElementType> cup = getOperator("c",0,0);
-                                PsimagLite::Matrix<SparseElementType> nup = multiplyTransposeConjugate(cup,cup);
-                                return nup;
-                        } else if (what=="ndown") {
-                                PsimagLite::Matrix<SparseElementType> cdown = getOperator("c",0,1);
-                                PsimagLite::Matrix<SparseElementType> ndown = multiplyTransposeConjugate(cdown,cdown);
-                                return ndown;
+				PsimagLite::Matrix<SparseElementType> cup = getOperator("c",0,0);
+				PsimagLite::Matrix<SparseElementType> nup = multiplyTransposeConjugate(cup,cup);
+				return nup;
+			} else if (what=="ndown") {
+				PsimagLite::Matrix<SparseElementType> cdown = getOperator("c",0,1);
+				PsimagLite::Matrix<SparseElementType> ndown = multiplyTransposeConjugate(cdown,cdown);
+				return ndown;
 			}
 			std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
@@ -246,7 +246,7 @@ namespace Dmrg {
 
 		//! find all states in the natural basis for a block of n sites
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-		void setNaturalBasis(HilbertBasisType  &basis,int n) const
+		void setNaturalBasis(HilbertBasisType  &basis,std::vector<size_t>& q,int n) const
 		{
 			HilbertState a=0;
 			int sitesTimesDof=n*DEGREES_OF_FREEDOM;
@@ -256,7 +256,6 @@ namespace Dmrg {
 			for (a=0;a<total;a++) basisTmp.push_back(a);
 
 			// reorder the natural basis (needed for MULTIPLE BANDS)
-			std::vector<size_t> q;
 			findQuantumNumbers(q,basisTmp,n);
 			std::vector<size_t> iperm(q.size());
 
@@ -360,16 +359,16 @@ namespace Dmrg {
 
 		//! find quantum numbers for each state of this basis, 
 		//! considered symmetries for this model are: n_up and n_down
-		void findQuantumNumbers(std::vector<int> &q,std::vector<typename HilbertSpaceHubbardType::HilbertState>  const &basis) const
-		{
-			int nup,ndown;
-			q.clear();
-			for (size_t i=0;i<basis.size();i++) {
-				nup = HilbertSpaceHubbardType::getNofDigits(basis[i],0);
-				ndown = HilbertSpaceHubbardType::getNofDigits(basis[i],1);
-				q.push_back(nup +maxNumberOfSites*ndown);
-			}
-		}
+// 		void findQuantumNumbers(std::vector<int> &q,std::vector<typename HilbertSpaceHubbardType::HilbertState>  const &basis) const
+// 		{
+// 			int nup,ndown;
+// 			q.clear();
+// 			for (size_t i=0;i<basis.size();i++) {
+// 				nup = HilbertSpaceHubbardType::getNofDigits(basis[i],0);
+// 				ndown = HilbertSpaceHubbardType::getNofDigits(basis[i],1);
+// 				q.push_back(nup +maxNumberOfSites*ndown);
+// 			}
+// 		}
 
 		void findQuantumNumbers(std::vector<size_t>& q,const HilbertBasisType  &basis,int n) const
 		{

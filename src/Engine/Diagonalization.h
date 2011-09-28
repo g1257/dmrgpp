@@ -362,8 +362,6 @@ namespace Dmrg {
 	 	const ParametersType& parameters_;
 		const ModelType& model_;
 		ConcurrencyType& concurrency_;
-		//const TargettingStructureType& targetStruct_;
-		//DiagonalizationType diagonalization_;
 		const bool& verbose_;
 		const bool& useReflection_;
 		IoOutType& io_;

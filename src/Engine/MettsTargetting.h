@@ -90,7 +90,6 @@ namespace Dmrg {
     			typename IoType_,
        			template<typename> class VectorWithOffsetTemplate>
 	class MettsTargetting  {
-			typedef std::pair<size_t,size_t> PairType;
 			typedef PsimagLite::PackIndices PackIndicesType;
 
 		public:
@@ -121,7 +120,8 @@ namespace Dmrg {
 			typedef BlockMatrix<RealType,MatrixType> BlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef MettsSerializer<RealType,VectorWithOffsetType> MettsSerializerType;
-			typedef MettsStochastics<RealType> MettsStochasticsType;
+			typedef MettsStochastics<ModelType> MettsStochasticsType;
+			typedef typename MettsStochasticsType::PairType PairType;
 			
 			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -145,7 +145,7 @@ namespace Dmrg {
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
 			  hilbertSizePerSite_(model_.hilbertSize()),
-			  mettsStochastics_(hilbertSizePerSite_),
+			  mettsStochastics_(model,0),
 			  timesWithoutAdvancement_(0)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" MettsTargetting "
@@ -227,9 +227,8 @@ namespace Dmrg {
 			            const BlockType& block2,
 			            size_t loopNumber)
 			{
-				if (block1.size()!=1) throw 
-					std::runtime_error("MettsTargetting::evolve(...):"
-				              " blocks of size != 1 are unsupported (sorry)\n");
+				if (block1.size()!=1) throw std::runtime_error(
+					"MettsTargetting::evolve(...): blocks of size != 1 are unsupported (sorry)\n");
 				
 				PairType sites(block1[0],block2[0]);
 				if (direction==INFINITE) {
@@ -377,20 +376,25 @@ namespace Dmrg {
 
 			void getNewPures(const PairType& sites)
 			{
-				size_t alphaFixed = mettsStochastics_.chooseRandomState();
-				size_t betaFixed = mettsStochastics_.chooseRandomState();
+				size_t m = psi_.sector(0);
+				size_t qn = lrs_.super().qn(m,BasisType::BEFORE_TRANSFORM);
+				
+				mettsStochastics_.update(qn,sites);
+				
+				size_t alphaFixed = mettsStochastics_.chooseRandomState(sites.first);
+				size_t betaFixed = mettsStochastics_.chooseRandomState(sites.second);
 				std::cerr<<"GETNEWPURES site="<<sites<<"\n";
 				const MatrixType& transformSystem = 
 				                         wft_.transform(ProgramGlobals::SYSTEM);
 				VectorType newVector1(transformSystem.n_row());
 				getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
-				           alphaFixed,lrs_.left(),transformSystem);
+				           alphaFixed,lrs_.left(),transformSystem,sites.first);
 
 				const MatrixType& transformEnviron = 
 				                        wft_.transform(ProgramGlobals::ENVIRON);
 				VectorType newVector2(transformEnviron.n_row());
 				getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
-						   betaFixed,lrs_.right(),transformEnviron);
+						   betaFixed,lrs_.right(),transformEnviron,sites.second);
 				setFromInfinite(targetVectors_[0]);
 			}
 
@@ -413,9 +417,10 @@ namespace Dmrg {
 			                size_t direction,
 			                size_t alphaFixed,
 			                const BasisWithOperatorsType& basis,
-			                const MatrixType& transform)
+			                const MatrixType& transform,
+			                size_t site)
 			{
-				if (oldVector.size()==0) setInitialPure(oldVector);
+				if (oldVector.size()==0) setInitialPure(oldVector,site);
 				
 				size_t ns = oldVector.size();
 				for (size_t gamma=0;gamma<transform.n_row();gamma++) {
@@ -430,9 +435,9 @@ namespace Dmrg {
 				}
 			}
 			
-			void setInitialPure(VectorType& oldVector)
+			void setInitialPure(VectorType& oldVector,size_t site)
 			{
-				size_t alphaFixed = mettsStochastics_.chooseRandomState();
+				size_t alphaFixed = mettsStochastics_.chooseRandomState(site);
 				oldVector.resize(hilbertSizePerSite_);
 				for (size_t i=0;i<oldVector.size();i++) {
 					oldVector[i] = (i==alphaFixed) ? 1 : 0;

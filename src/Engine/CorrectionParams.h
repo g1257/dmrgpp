@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CORRECTION_PARAMS_H
 #define CORRECTION_PARAMS_H
 
+#include <vector>
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
@@ -96,7 +97,8 @@ namespace Dmrg {
 			io.rewind();
 			io.readline(a,"CorrectionA=");
 			typename ModelType::HilbertBasisType basis;
-			model.setNaturalBasis(basis,1);
+			std::vector<size_t> q;
+			model.setNaturalBasis(basis,q,1);
 			model.findElectrons(electrons,basis);
 		}
 		RealType a;

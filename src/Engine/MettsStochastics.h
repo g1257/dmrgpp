@@ -83,26 +83,77 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef METTS_STOCHASTICS_H
 #define METTS_STOCHASTICS_H
 #include <iostream>
-
+#include <vector>
 #include "Random48.h"
 
 namespace Dmrg {
-	template<typename RealType>
+	template<typename ModelType>
 	class MettsStochastics  {
 	public:
-		MettsStochastics(size_t hilbertSizePerSite)
-		: hilbertSizePerSite_(hilbertSizePerSite), random48_(34328811)
-		{}
-		
-		size_t chooseRandomState()
+		typedef std::pair<size_t,size_t> PairType;
+		typedef typename ModelType::RealType RealType;
+
+		MettsStochastics(const ModelType& model,size_t totalSites)
+		: model_(model), random48_(34328811),pureStates_(totalSites),addedSites_(0)
 		{
-			return size_t(random48_()*hilbertSizePerSite_);
+			size_t addedBlockSize = 1;
+			model_.setNaturalBasis(basisOfOneSite_,quantumNumbsOneSite_,addedBlockSize);
+			
+			for (size_t i=0;i<pureStates_.size();i++) 
+				pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
+		}
+
+		size_t chooseRandomState(size_t i) const
+		{
+			return basisOfOneSite_[pureStates_[i]];
+		}
+		
+		void update(size_t qn,const PairType& sites)
+		{
+			addedSites_.push_back(sites.first);
+			addedSites_.push_back(sites.second);
+			
+			// fix target quantum number
+			size_t symm = getSymmetry();
+			
+			while(symm!=qn) {
+				raiseOrLowerSymm(sites.first,(symm<qn));
+				symm = getSymmetry();
+				if (symm==qn) break;
+				raiseOrLowerSymm(sites.second,(symm<qn));
+				symm = getSymmetry();
+			}
 		}
 
 	private:
-		size_t hilbertSizePerSite_;
+		// assumes states in basisOfOneSite_ are ordered in increasing
+		// symmetry
+		void raiseOrLowerSymm(size_t site,bool raiseSymm)
+		{
+			if (raiseSymm && pureStates_[site]<basisOfOneSite_.size()-1) {
+				pureStates_[site]++;
+				return;
+			}
+			if (pureStates_[site]>0) pureStates_[site]--;
+		}
+		
+		// assumes local symmetry througout
+		size_t getSymmetry() const
+		{
+			size_t sum = 0;
+			for (size_t i=0;i<addedSites_.size();i++) {
+				sum += quantumNumbsOneSite_[pureStates_[addedSites_[i]]];
+			}
+			return sum;
+		}
+		
+		const ModelType& model_;
 		PsimagLite::Random48<RealType> random48_;
-	};     //class MettsStochastics
+		std::vector<size_t> pureStates_;
+		std::vector<size_t> addedSites_;
+		std::vector<size_t> quantumNumbsOneSite_;
+		typename ModelType::HilbertBasisType basisOfOneSite_;
+	};  //class MettsStochastics
 } // namespace Dmrg
 /*@}*/
 #endif //METTS_STOCHASTICS_H

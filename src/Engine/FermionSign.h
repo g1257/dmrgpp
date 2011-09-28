@@ -80,7 +80,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef FEMION_SIGN_H
 #define FEMION_SIGN_H
-
+#include <vector>
+#include <stdexcept>
 #include "PackIndices.h"
 
 namespace Dmrg {

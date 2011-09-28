@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef TARGET_PARAMS_COMMON_H
 #define TARGET_PARAMS_COMMON_H
-
+#include <vector>
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
@@ -110,7 +110,8 @@ namespace Dmrg {
 				data_.resize(sites.size());
 				aOperators.resize(sites.size());
 				typename ModelType::HilbertBasisType basis;
-				model_.setNaturalBasis(basis,1);
+				std::vector<size_t> quantumNumbs;
+				model_.setNaturalBasis(basis,quantumNumbs,1);
 				model_.findElectrons(electrons,basis);
 			
 				for (size_t i=0;i<sites.size();i++) {

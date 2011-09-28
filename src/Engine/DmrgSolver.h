@@ -438,12 +438,11 @@ namespace Dmrg {
 				serialize(fsS,fsE,target,truncate_.transform(),direction);
 		}
 
-		void serialize(
-				const FermionSignType& fsS,
-				const FermionSignType& fsE,
-				const TargettingType& target,
-				const TransformType& transform,
-				size_t direction)
+		void serialize(const FermionSignType& fsS,
+		               const FermionSignType& fsE,
+		               const TargettingType& target,
+		               const TransformType& transform,
+		               size_t direction)
 		{
 			DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
 			ds.save(io_);

@@ -138,8 +138,10 @@ namespace Dmrg {
 
 		static size_t pseudoQuantumNumber(const std::vector<size_t>& targets)
 		{
-			if (useSu2Symmetry_) return HamiltonianSymmetrySu2Type::pseudoQuantumNumber(targets);
-			else return HamiltonianSymmetryLocalType::pseudoQuantumNumber(targets);
+			if (useSu2Symmetry_)
+				return HamiltonianSymmetrySu2Type::pseudoQuantumNumber(targets);
+			else
+				return HamiltonianSymmetryLocalType::pseudoQuantumNumber(targets);
 		}
 
 		size_t pseudoEffectiveNumber(size_t i) const
