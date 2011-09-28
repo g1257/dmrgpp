@@ -264,6 +264,8 @@ namespace Dmrg {
 			basis.clear();
 			for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
 		}
+		
+		const DmrgGeometryType& geometry() const { return dmrgGeometry_; }
 
 	private:
 		const ParametersModelHubbard<RealType>&  modelParameters_;

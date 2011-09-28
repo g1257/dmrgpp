@@ -93,8 +93,10 @@ namespace Dmrg {
 		typedef std::pair<size_t,size_t> PairType;
 		typedef typename ModelType::RealType RealType;
 
-		MettsStochastics(const ModelType& model,size_t totalSites)
-		: model_(model), random48_(34328811),pureStates_(totalSites),addedSites_(0)
+		MettsStochastics(const ModelType& model)
+		: model_(model), random48_(34328811),
+		  pureStates_(model_.geometry().numberOfSites()),
+		  addedSites_(0)
 		{
 			size_t addedBlockSize = 1;
 			model_.setNaturalBasis(basisOfOneSite_,quantumNumbsOneSite_,addedBlockSize);

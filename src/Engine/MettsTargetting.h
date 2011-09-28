@@ -145,7 +145,7 @@ namespace Dmrg {
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
 			  hilbertSizePerSite_(model_.hilbertSize()),
-			  mettsStochastics_(model,0),
+			  mettsStochastics_(model),
 			  timesWithoutAdvancement_(0)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" MettsTargetting "
@@ -160,7 +160,7 @@ namespace Dmrg {
 				weight_.resize(n);
 				targetVectors_.resize(n);
 				
-				size_t gsWeight_= 0;
+				gsWeight_= 0;
 				RealType factor = (1.0 - gsWeight_)/(n+4);
 				RealType sum = setOneInterval(factor,PairType(0,n1),tau*0.5);
 				sum += setOneInterval(factor,PairType(n1,n),tau);
@@ -377,7 +377,15 @@ namespace Dmrg {
 			void getNewPures(const PairType& sites)
 			{
 				size_t m = psi_.sector(0);
-				size_t qn = lrs_.super().qn(m,BasisType::BEFORE_TRANSFORM);
+				
+				// N.B.: it's really BEFORE_TRANSFORM but because the
+				// evolve hook is called from diagonalization which happens
+				// well before the transform it doesn't
+				// matter. Actually, it matters because using
+				// BEFORE_TRANSFORM would return quantumNumbersOld
+				// which aren't set before the changeOfBasis
+				
+				size_t qn = lrs_.super().qn(lrs_.super().partition(m));
 				
 				mettsStochastics_.update(qn,sites);
 				
@@ -389,12 +397,14 @@ namespace Dmrg {
 				VectorType newVector1(transformSystem.n_row());
 				getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
 				           alphaFixed,lrs_.left(),transformSystem,sites.first);
-
+				pureVectors_.first = newVector1;
+				
 				const MatrixType& transformEnviron = 
 				                        wft_.transform(ProgramGlobals::ENVIRON);
 				VectorType newVector2(transformEnviron.n_row());
 				getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
 						   betaFixed,lrs_.right(),transformEnviron,sites.second);
+				pureVectors_.second = newVector2;
 				setFromInfinite(targetVectors_[0]);
 			}
 
@@ -421,14 +431,21 @@ namespace Dmrg {
 			                size_t site)
 			{
 				if (oldVector.size()==0) setInitialPure(oldVector,site);
-				
 				size_t ns = oldVector.size();
-				for (size_t gamma=0;gamma<transform.n_row();gamma++) {
+				size_t transformNrow =  (transform.n_row()==0) ? (ns*ns) : 
+				                                           transform.n_row();
+				newVector.resize(transformNrow);
+				for (size_t gamma=0;gamma<transformNrow;gamma++) {
 					newVector[gamma] = 0;
 					for (size_t alpha=0;alpha<ns;alpha++) {
 						size_t gammaPrime = (direction==ProgramGlobals::SYSTEM) ? 
 						    basis.permutationInverse(alpha + alphaFixed*ns) :
 						    basis.permutationInverse(alphaFixed + alpha*ns);
+						if (transform.n_row()==0) {
+							if (gamma == gammaPrime) 
+								newVector[gamma] += oldVector[alpha];
+							continue;
+						}
 						newVector[gamma] += transform(gamma,gammaPrime) * 
 						                               oldVector[alpha];
 					}

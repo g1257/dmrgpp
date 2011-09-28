@@ -93,7 +93,7 @@ namespace Dmrg {
 		typedef std::pair<size_t,size_t> PairType;
 		typedef std::vector<FieldType> VectorType;
 
-		VectorWithOffset()  : size_(0),offset_(0) { }
+		VectorWithOffset()  : size_(0),offset_(0),m_(0) { }
 
 		template<typename SomeBasisType>
 		VectorWithOffset(const std::vector<size_t>& weights,
@@ -109,6 +109,7 @@ namespace Dmrg {
 						  " Maybe you should be using VectorWithOffsets instead?\n");
 					data_.resize(weights[i]);
 					offset_ = someBasis.partition(i);
+					m_ = i;
 					found = true;
 				}
 			}
@@ -119,10 +120,11 @@ namespace Dmrg {
 			size_ = x;
 			data_.clear();
 			offset_=0;
+			m_=0;
 		}
 
 		template<typename SomeBasisType>
-		void set(const std::vector<VectorType>& v,//const std::vector<size_t>& weights,
+		void set(const std::vector<VectorType>& v,
 		         const SomeBasisType& someBasis)
 		{
 			bool found = false;
@@ -134,15 +136,28 @@ namespace Dmrg {
 						" Maybe you should be using VectorWithOffsets instead?\n");
 					data_ = v[i];
 					offset_ = someBasis.partition(i);
+					m_ = i;
 					found = true;
 				}
 			}
 			if (!found) throw std::runtime_error("Set failed\n");
 		}
+		
+		template<typename SomeBasisType>
+		size_t fromFull(const VectorType& v,const SomeBasisType& someBasis)
+		{
+			m_ = findPartition(v,someBasis);
+			offset_ = someBasis.partition(m_);
+			size_t total = someBasis.partition(m_+1) - offset_;
+			size_ = v.size();
+			data_.resize(total);
+			for (size_t i=0;i<total;i++) data_[i] = v[i+offset_];
+			return m_;
+		}
 
 		size_t sectors() const { return 1; }
 
-		size_t sector(size_t dummy) const { return 0; } // return value is bogus and should not be used
+		size_t sector(size_t dummy) const { return m_; }
 
 		size_t offset(size_t dummy) const { return offset_; }
 
@@ -151,18 +166,6 @@ namespace Dmrg {
 		void setDataInSector(const VectorType& v,size_t dummy)
 		{
 			throw std::runtime_error("You shouldn' be here!!\n");
-		}
-
-		template<typename SomeBasisType>
-		size_t fromFull(const VectorType& v,const SomeBasisType& someBasis)
-		{
-			size_t p = findPartition(v,someBasis);
-			offset_ = someBasis.partition(p);
-			size_t total = someBasis.partition(p+1) - offset_;
-			size_ = v.size();
-			data_.resize(total);
-			for (size_t i=0;i<total;i++) data_[i] = v[i+offset_];
-			return p;
 		}
 
 		void extract(VectorType& v, size_t dummy = 0) const
@@ -186,6 +189,8 @@ namespace Dmrg {
 			io.printline(s);
 			s="#offset="+ttos(offset_);
 			io.printline(s);
+			s="#m="+ttos(m_);
+			io.printline(s);
 			io.printVector(data_,"#data");
 		}
 
@@ -200,6 +205,9 @@ namespace Dmrg {
 			io.readline(x,"#offset=");
 			if (x<0) throw std::runtime_error("VectorWithOffset::load(...): offset<0\n");
 			offset_ = x;
+			io.readline(x,"#m=");
+			if (x<0) throw std::runtime_error("VectorWithOffset::load(...): m<0\n");
+			m_ = x;
 			io.read(data_,"#data");
 		}
 
@@ -218,7 +226,8 @@ namespace Dmrg {
 
 		FieldType& operator[](size_t i)
 		{
-			if (i<offset_ || i>= (offset_+data_.size())) throw std::runtime_error("VectorWithOffset\n");
+			if (i<offset_ || i>= (offset_+data_.size()))
+				throw std::runtime_error("VectorWithOffset\n");
 			return data_[i-offset_];
 		}
 
@@ -261,6 +270,7 @@ namespace Dmrg {
 		size_t size_;
 		VectorType data_;
 		size_t offset_;
+		size_t m_; // partition 
 	}; // class VectorWithOffset
 
 	template<typename FieldType>

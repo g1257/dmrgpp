@@ -216,7 +216,7 @@ namespace Dmrg {
 			}
 			return modelFeAs_.getOperator(what,orbital,spin);
 		}
-		
+
 		//! find all states in the natural basis for a block of n sites
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 		void setNaturalBasis(std::vector<HilbertState>  &basis,
@@ -232,7 +232,6 @@ namespace Dmrg {
 		{
 			modelFeAs_.findElectrons(electrons,basis);
 		}
-		
 
 	private:
 
