@@ -149,7 +149,8 @@ namespace Dmrg {
 		: helper_(helper),verbose_(verbose)
 		{
 			typename ModelType::HilbertBasisType basis;
-			model.setNaturalBasis(basis,1);
+			std::vector<size_t> quantumNumbs;
+			model.setNaturalBasis(basis,quantumNumbs,1);
 			model.findElectrons(oneSiteElectrons_,basis);
 		}
 		

@@ -510,12 +510,12 @@ print OBSOUT<<EOF;
 #include "CrsMatrix.h"
 #include "ReflectionSymmetryEmpty.h"
 #ifdef USE_PTHREADS
-##include "Pthreads.h"
-##define PTHREADS_NAME Pthreads
-##else
-##include "NoPthreads.h"
-##define PTHREADS_NAME NoPthreads
-##endif 
+#include "Pthreads.h"
+#define PTHREADS_NAME Pthreads
+#else
+#include "NoPthreads.h"
+#define PTHREADS_NAME NoPthreads
+#endif 
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
 #include "InternalProductOnTheFly.h"

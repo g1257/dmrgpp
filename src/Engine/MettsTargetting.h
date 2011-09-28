@@ -406,6 +406,8 @@ namespace Dmrg {
 						   betaFixed,lrs_.right(),transformEnviron,sites.second);
 				pureVectors_.second = newVector2;
 				setFromInfinite(targetVectors_[0]);
+				if (std::norm(targetVectors_[0])==0)
+					throw std::runtime_error("getNewPures: internal\n");
 			}
 
 			void getFullVector(std::vector<RealType>& v,size_t m)
