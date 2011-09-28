@@ -117,10 +117,8 @@ namespace Dmrg {
 		typedef HilbertSpaceHubbard<WordType> HilbertSpaceType;
 		typedef typename HilbertSpaceType::HilbertState HilbertStateType;
 		typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType> LinkProductType;
-		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType,SharedMemoryTemplate>
-				ModelBaseType;
-		
-		
+		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,
+		                  LinkProductType,SharedMemoryTemplate> ModelBaseType;
 
 		static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
 		static const int DEGREES_OF_FREEDOM=2; // spin up and down
@@ -135,9 +133,12 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		ModelHeisenberg(ParametersModelHeisenberg<RealType> const &mp,GeometryType const &geometry) 
-			: ModelBaseType(geometry),modelParameters_(mp), geometry_(geometry), 
-			spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
-					reinterpretX_(maxNumberOfSites),reinterpretY_(maxNumberOfSites)
+		: ModelBaseType(geometry),
+		  modelParameters_(mp),
+		  geometry_(geometry), 
+		  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
+		  reinterpretX_(maxNumberOfSites),
+		  reinterpretY_(maxNumberOfSites)
 		{
 		}
 
@@ -145,19 +146,19 @@ namespace Dmrg {
 
 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
 
-		size_t hilbertSize() const { return 3; } 
+		size_t hilbertSize() const { return 2; } 
 
 		//! find  operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(
-				std::vector<OperatorType> &operatorMatrices,
-    				SparseMatrixType &hamiltonian,
-				BasisDataType &q,
-    				Block const &block) const
+		void setNaturalBasis(std::vector<OperatorType> &operatorMatrices,
+    	                     SparseMatrixType &hamiltonian,
+		                     BasisDataType &q,
+    	                     Block const &block) const
 		{
 			std::vector<HilbertStateType> natBasis;
 			
-			setNaturalBasis(natBasis,block.size());
+			std::vector<size_t> qvector;
+			setNaturalBasis(natBasis,qvector,block.size());
 			
 			setOperatorMatrices(operatorMatrices,block);
 			
@@ -171,8 +172,9 @@ namespace Dmrg {
 		{
 			std::vector<HilbertStateType> natBasis;
 			SparseMatrixType tmpMatrix;
-
-			setNaturalBasis(natBasis,block.size());
+			
+			std::vector<size_t> qvector;
+			setNaturalBasis(natBasis,qvector,block.size());
 
 			operatorMatrices.clear();
 			for (size_t i=0;i<block.size();i++) {
@@ -225,17 +227,23 @@ namespace Dmrg {
 		}
 		
 		//! find all states in the natural basis for a block of n sites
-		void setNaturalBasis(std::vector<HilbertStateType>  &basis,int n) const
+		void setNaturalBasis(std::vector<HilbertStateType>  &basis,
+		                     std::vector<size_t>& q,
+		                     int n) const
 		{
-			if (n!=1) throw std::runtime_error("setNaturalBasis: implemented only for blocks of size=1\n");
-			basis.push_back(0);
+			if (n!=1) throw std::runtime_error(
+				"setNaturalBasis: implemented only for blocks of size=1\n");
+			
 			basis.push_back(1);
 			basis.push_back(2);
+			BasisDataType qq;
+			setSymmetryRelated(qq,basis,n);
+			MyBasis::findQuantumNumbers(q,qq);
 		}
 		
 		//! Dummy since this model has no fermion sign
 		void findElectrons(std::vector<size_t>& electrons,
-				   std::vector<HilbertStateType>& basis) const
+		                   std::vector<HilbertStateType>& basis) const
 		{
 			electrons.resize(basis.size());
 			for (size_t i=0;i<electrons.size();i++) electrons[i] = 0;
@@ -281,9 +289,6 @@ namespace Dmrg {
 			for (size_t ii=0;ii<natBasis.size();ii++) {
 				bra=ket=natBasis[ii];
 				switch (HilbertSpaceType::get(ket,i)) {
-					case 0:
-						cm(ii,ii)=0;
-						break;
 					case 1:
 						cm(ii,ii)=0.5;
 						break;

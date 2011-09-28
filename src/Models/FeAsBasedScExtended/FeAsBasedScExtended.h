@@ -219,9 +219,11 @@ namespace Dmrg {
 		
 		//! find all states in the natural basis for a block of n sites
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-		void setNaturalBasis(std::vector<HilbertState>  &basis,int n) const
+		void setNaturalBasis(std::vector<HilbertState>  &basis,
+		                     std::vector<size_t>& q,
+		                     int n) const
 		{
-			modelFeAs_.setNaturalBasis(basis,n);
+			modelFeAs_.setNaturalBasis(basis,q,n);
 		}
 		
 		void findElectrons(
