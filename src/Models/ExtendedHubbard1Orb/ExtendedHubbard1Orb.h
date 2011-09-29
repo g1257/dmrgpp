@@ -124,8 +124,9 @@ namespace Dmrg {
 
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,SparseMatrixType &hamiltonian,
-				BasisDataType &q,Block const &block) const
+		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
+		                     SparseMatrixType &hamiltonian,
+		                     BasisDataType &q,Block const &block) const
 		{
 			
 			modelHubbard_.setNaturalBasis(creationMatrix,hamiltonian,q,block);
@@ -171,9 +172,11 @@ namespace Dmrg {
 
 		//! find all states in the natural basis for a block of n sites
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-		void setNaturalBasis(HilbertBasisType  &basis,int n) const
+		void setNaturalBasis(HilbertBasisType  &basis,
+		                     std::vector<size_t>& q,
+		                     int n) const
 		{
-			modelHubbard_.setNaturalBasis(basis,n);
+			modelHubbard_.setNaturalBasis(basis,q,n);
 		}
 		
 		void print(std::ostream& os) const
@@ -222,8 +225,8 @@ namespace Dmrg {
 		{
 			assert(block.size()==1);
 			std::vector<typename HilbertSpaceHubbardType::HilbertState> natBasis;
-
-			modelHubbard_.setNaturalBasis(natBasis,block.size());
+			std::vector<size_t> q;
+			modelHubbard_.setNaturalBasis(natBasis,q,block.size());
 			
 			SparseMatrixType tmpMatrix = findOperatorMatrices(0,natBasis);
 			RealType angularFactor= 1;

@@ -95,7 +95,7 @@ namespace Dmrg {
 
 		MettsStochastics(const ModelType& model)
 		: model_(model), random48_(34328811),
-		  pureStates_(model_.geometry().numberOfSites()),
+		  pureStates_(0),//model_.geometry().numberOfSites()),
 		  addedSites_(0)
 		{
 			size_t addedBlockSize = 1;
