@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MettsStochastics.h"
 
 namespace Dmrg {
+	
 	template<
 			template<typename,typename,typename> class LanczosSolverTemplate,
    			template<typename,typename> class InternalProductTemplate,
@@ -91,7 +92,15 @@ namespace Dmrg {
        			template<typename> class VectorWithOffsetTemplate>
 	class MettsTargetting  {
 			typedef PsimagLite::PackIndices PackIndicesType;
-
+			
+			struct MettsPrev {
+				MettsPrev() : ns(0),fixed(0),permutationInverse(0) { }
+				
+				size_t ns;
+				size_t fixed;
+				std::vector<size_t> permutationInverse;
+			};
+			
 		public:
 			typedef ModelType_ ModelType;
 			typedef ConcurrencyType_ ConcurrencyType;
@@ -127,6 +136,7 @@ namespace Dmrg {
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
+			const static size_t SYSTEM = ProgramGlobals::SYSTEM;
 
 			static size_t const PRODUCT = TargettingParamsType::PRODUCT;
 			static size_t const SUM = TargettingParamsType::SUM;
@@ -146,7 +156,9 @@ namespace Dmrg {
 			  applyOpLocal_(lrs),
 			  hilbertSizePerSite_(model_.hilbertSize()),
 			  mettsStochastics_(model),
-			  timesWithoutAdvancement_(0)
+			  timesWithoutAdvancement_(0),
+			  systemPrev_(),
+			  environPrev_()
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" MettsTargetting "
 							"needs an enabled wft\n");
@@ -167,17 +179,13 @@ namespace Dmrg {
 				
 				
 				sum += gsWeight_;
-				//for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
 				if (fabs(sum-1.0)>1e-5)
 					throw std::runtime_error("Weights don't amount to one\n");
-				//printHeader();
 			}
 
 			RealType weight(size_t i) const
 			{
-				if (allStages(DISABLED)) 
-					return 0.5;
-				return weight_[i];
+				return (allStages(DISABLED)) ? 0.5 : weight_[i];
 			}
 
 			RealType gsWeight() const
@@ -199,7 +207,7 @@ namespace Dmrg {
 			}
 
 			const RealType& operator[](size_t i) const { return psi_[i]; }
-			
+
 			RealType& operator[](size_t i) { return psi_[i]; }
 
 			const VectorWithOffsetType& gs() const { return psi_; }
@@ -243,12 +251,12 @@ namespace Dmrg {
 				for (size_t i=0;i<n1;i++) {
 					evolve(i,0,Eg,direction,sites,loopNumber);
 				}
-				
+
 				// Advance or wft each target vector for beta
 				for (size_t i=n1;i<n;i++) {
 					evolve(i,n1,Eg,direction,sites,loopNumber);
 				}
-				
+
 				calcTimeVectors(PairType(0,n1),Eg,direction);
 				calcTimeVectors(PairType(n1,n),Eg,direction);
 				
@@ -376,15 +384,9 @@ namespace Dmrg {
 
 			void getNewPures(const PairType& sites)
 			{
+				// only way of getting the quantum number where there
+				// g.s. (and therefore the pure) resides
 				size_t m = psi_.sector(0);
-				
-				// N.B.: it's really BEFORE_TRANSFORM but because the
-				// evolve hook is called from diagonalization which happens
-				// well before the transform it doesn't
-				// matter. Actually, it matters because using
-				// BEFORE_TRANSFORM would return quantumNumbersOld
-				// which aren't set before the changeOfBasis
-				
 				size_t qn = lrs_.super().qn(lrs_.super().partition(m));
 				
 				mettsStochastics_.update(qn,sites);
@@ -397,6 +399,7 @@ namespace Dmrg {
 				VectorType newVector1(transformSystem.n_row());
 				getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
 				           alphaFixed,lrs_.left(),transformSystem,sites.first);
+				systemPrev_.ns = pureVectors_.first.size();
 				pureVectors_.first = newVector1;
 				
 				const MatrixType& transformEnviron = 
@@ -404,10 +407,16 @@ namespace Dmrg {
 				VectorType newVector2(transformEnviron.n_row());
 				getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
 						   betaFixed,lrs_.right(),transformEnviron,sites.second);
+				environPrev_.ns = pureVectors_.second.size();
 				pureVectors_.second = newVector2;
 				setFromInfinite(targetVectors_[0]);
 				if (std::norm(targetVectors_[0])==0)
 					throw std::runtime_error("getNewPures: internal\n");
+
+				systemPrev_.fixed = alphaFixed;
+				systemPrev_.permutationInverse = lrs_.left().permutationInverse();
+				environPrev_.fixed = betaFixed;
+				environPrev_.permutationInverse = lrs_.right().permutationInverse();
 			}
 
 			void getFullVector(std::vector<RealType>& v,size_t m)
@@ -432,31 +441,67 @@ namespace Dmrg {
 			                const MatrixType& transform,
 			                size_t site)
 			{
+				
 				if (oldVector.size()==0) setInitialPure(oldVector,site);
-				size_t ns = oldVector.size();
-				size_t transformNrow =  (transform.n_row()==0) ? (ns*ns) : 
-				                                           transform.n_row();
-				newVector.resize(transformNrow);
-				for (size_t gamma=0;gamma<transformNrow;gamma++) {
+				VectorType tmpVector;
+				if (transform.n_row()==0) {
+					tmpVector = oldVector;
+				} else {
+					delayedTransform(tmpVector,oldVector,direction,transform);
+				}
+				size_t ns = tmpVector.size();
+				size_t ne = model_.hilbertSize();
+				size_t newSize =  (transform.n_row()==0) ? (ns*ns) : 
+				                        transform.n_row() * model_.hilbertSize();
+				newVector.resize(newSize);
+				
+				for (size_t gamma=0;gamma<newVector.size();gamma++) {
 					newVector[gamma] = 0;
 					for (size_t alpha=0;alpha<ns;alpha++) {
 						size_t gammaPrime = (direction==ProgramGlobals::SYSTEM) ? 
 						    basis.permutationInverse(alpha + alphaFixed*ns) :
-						    basis.permutationInverse(alphaFixed + alpha*ns);
-						if (transform.n_row()==0) {
-							if (gamma == gammaPrime) 
-								newVector[gamma] += oldVector[alpha];
-							continue;
-						}
+						    basis.permutationInverse(alphaFixed + alpha*ne);
+						
+						if (gamma == gammaPrime) 
+							newVector[gamma] += tmpVector[alpha];
+					}
+				}
+			}
+			
+			void delayedTransform(VectorType& newVector,
+			                      VectorType& oldVector,
+			                      size_t direction,
+			                     const MatrixType& transform)
+			{
+				if (oldVector.size()!=transform.n_row())
+					throw std::runtime_error("MettsTargetting: getNewPure(...)\n");
+
+				size_t ne = model_.hilbertSize();
+				size_t nsPrev = (direction==SYSTEM) ? systemPrev_.ns : environPrev_.ns;
+				const std::vector<size_t>& permutationInverse = (direction==SYSTEM)
+				? systemPrev_.permutationInverse : environPrev_.permutationInverse;
+				                
+				newVector.resize(oldVector.size());
+				for (size_t gamma=0;gamma<newVector.size();gamma++) {
+					newVector[gamma] = 0;
+					for (size_t alpha=0;alpha<nsPrev;alpha++) {
+						size_t noPermIndex =  (direction==SYSTEM) 
+						                   ? alpha + systemPrev_.fixed*nsPrev 
+						                   : environPrev_.fixed + alpha*ne;
+						
+						size_t gammaPrime = permutationInverse[noPermIndex];
+						
+						assert(gammaPrime<transform.n_col());
 						newVector[gamma] += transform(gamma,gammaPrime) * 
-						                               oldVector[alpha];
+						                      oldVector[gammaPrime];
 					}
 				}
 			}
 			
 			void setInitialPure(VectorType& oldVector,size_t site)
 			{
-				size_t alphaFixed = mettsStochastics_.chooseRandomState(site);
+				size_t sitePlusOrMinus = (site==1) ? 0 : site+1;
+				size_t alphaFixed = mettsStochastics_.chooseRandomState(sitePlusOrMinus);
 				oldVector.resize(hilbertSizePerSite_);
 				for (size_t i=0;i<oldVector.size();i++) {
 					oldVector[i] = (i==alphaFixed) ? 1 : 0;
@@ -841,6 +886,8 @@ namespace Dmrg {
 			size_t hilbertSizePerSite_;
 			MettsStochasticsType mettsStochastics_;
 			size_t timesWithoutAdvancement_;
+			MettsPrev systemPrev_;
+			MettsPrev environPrev_;
 			std::pair<VectorType,VectorType> pureVectors_;
 	};     //class MettsTargetting
 

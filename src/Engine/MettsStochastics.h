@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define METTS_STOCHASTICS_H
 #include <iostream>
 #include <vector>
+#include "ProgressIndicator.h"
 #include "Random48.h"
 
 namespace Dmrg {
@@ -94,15 +95,13 @@ namespace Dmrg {
 		typedef typename ModelType::RealType RealType;
 
 		MettsStochastics(const ModelType& model)
-		: model_(model), random48_(34328811),
-		  pureStates_(0),//model_.geometry().numberOfSites()),
+		: model_(model),
+		  progress_("MettsStochastics",0),
+		  random48_(34328811),
 		  addedSites_(0)
 		{
 			size_t addedBlockSize = 1;
 			model_.setNaturalBasis(basisOfOneSite_,quantumNumbsOneSite_,addedBlockSize);
-			
-			for (size_t i=0;i<pureStates_.size();i++) 
-				pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
 		}
 
 		size_t chooseRandomState(size_t i) const
@@ -112,6 +111,15 @@ namespace Dmrg {
 		
 		void update(size_t qn,const PairType& sites)
 		{
+			if (addedSites_.size()==0) {
+				if (sites.first!=1)
+					throw std::runtime_error("MettsStochastics::update(...): internal\n");
+				pureStates_.resize(sites.second+2);
+				for (size_t i=0;i<pureStates_.size();i++) 
+					pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
+				addedSites_.push_back(sites.first-1);
+				addedSites_.push_back(sites.second+1);
+			}
 			addedSites_.push_back(sites.first);
 			addedSites_.push_back(sites.second);
 			
@@ -125,6 +133,12 @@ namespace Dmrg {
 				raiseOrLowerSymm(sites.second,(symm<qn));
 				symm = getSymmetry();
 			}
+			std::ostringstream msg;
+			msg<<"targetQn="<<qn<<" sites="<<addedSites_.size()<<" Pure=";
+			for (size_t i=0;i<pureStates_.size();i++)
+				msg<<pureStates_[i]<<" ";
+			msg<<"\n";
+			std::cout<<msg.str();
 		}
 
 	private:
@@ -150,6 +164,7 @@ namespace Dmrg {
 		}
 		
 		const ModelType& model_;
+		PsimagLite::ProgressIndicator progress_;
 		PsimagLite::Random48<RealType> random48_;
 		std::vector<size_t> pureStates_;
 		std::vector<size_t> addedSites_;
