@@ -94,9 +94,9 @@ namespace Dmrg {
 			typedef PsimagLite::PackIndices PackIndicesType;
 			
 			struct MettsPrev {
-				MettsPrev() : ns(0),fixed(0),permutationInverse(0) { }
+				MettsPrev() : fixed(0),permutationInverse(0) { }
 				
-				size_t ns;
+// 				size_t ns;
 				size_t fixed;
 				std::vector<size_t> permutationInverse;
 			};
@@ -243,6 +243,7 @@ namespace Dmrg {
 					getNewPures(sites);
 					return;
 				}
+				
 				size_t n1 = size_t(mettsStruct_.timeSteps/2);
 				if (mettsStruct_.timeSteps & 1) n1++;
 				size_t n = mettsStruct_.timeSteps + n1;
@@ -399,7 +400,7 @@ namespace Dmrg {
 				VectorType newVector1(transformSystem.n_row());
 				getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
 				           alphaFixed,lrs_.left(),transformSystem,sites.first);
-				systemPrev_.ns = pureVectors_.first.size();
+// 				systemPrev_.ns = pureVectors_.first.size();
 				pureVectors_.first = newVector1;
 				
 				const MatrixType& transformEnviron = 
@@ -407,7 +408,7 @@ namespace Dmrg {
 				VectorType newVector2(transformEnviron.n_row());
 				getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
 						   betaFixed,lrs_.right(),transformEnviron,sites.second);
-				environPrev_.ns = pureVectors_.second.size();
+// 				environPrev_.ns = pureVectors_.second.size();
 				pureVectors_.second = newVector2;
 				setFromInfinite(targetVectors_[0]);
 				if (std::norm(targetVectors_[0])==0)
@@ -451,10 +452,10 @@ namespace Dmrg {
 				}
 				size_t ns = tmpVector.size();
 				size_t ne = model_.hilbertSize();
-				size_t newSize =  (transform.n_row()==0) ? (ns*ns) : 
-				                        transform.n_row() * model_.hilbertSize();
+				size_t newSize =  (transform.n_col()==0) ? (ns*ns) : 
+				                        transform.n_col() * model_.hilbertSize();
 				newVector.resize(newSize);
-				
+				std::cerr<<"NEW SIZE OF PURE= "<<newSize<<"\n";
 				for (size_t gamma=0;gamma<newVector.size();gamma++) {
 					newVector[gamma] = 0;
 					for (size_t alpha=0;alpha<ns;alpha++) {
@@ -477,11 +478,12 @@ namespace Dmrg {
 					throw std::runtime_error("MettsTargetting: getNewPure(...)\n");
 
 				size_t ne = model_.hilbertSize();
-				size_t nsPrev = (direction==SYSTEM) ? systemPrev_.ns : environPrev_.ns;
+				
 				const std::vector<size_t>& permutationInverse = (direction==SYSTEM)
 				? systemPrev_.permutationInverse : environPrev_.permutationInverse;
-				                
-				newVector.resize(oldVector.size());
+				size_t nsPrev = permutationInverse.size()/ne;
+				
+				newVector.resize(transform.n_col());
 				for (size_t gamma=0;gamma<newVector.size();gamma++) {
 					newVector[gamma] = 0;
 					for (size_t alpha=0;alpha<nsPrev;alpha++) {
@@ -491,8 +493,8 @@ namespace Dmrg {
 						
 						size_t gammaPrime = permutationInverse[noPermIndex];
 						
-						assert(gammaPrime<transform.n_col());
-						newVector[gamma] += transform(gamma,gammaPrime) * 
+						assert(gammaPrime<transform.n_row());
+						newVector[gamma] += transform(gammaPrime,gamma) * 
 						                      oldVector[gammaPrime];
 					}
 				}
