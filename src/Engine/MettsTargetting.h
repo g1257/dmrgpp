@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MettsParams.h"
 #include "PackIndices.h"
 #include "MettsStochastics.h"
+#include <cassert>
 
 namespace Dmrg {
 	
@@ -95,8 +96,6 @@ namespace Dmrg {
 			
 			struct MettsPrev {
 				MettsPrev() : fixed(0),permutationInverse(0) { }
-				
-// 				size_t ns;
 				size_t fixed;
 				std::vector<size_t> permutationInverse;
 			};
@@ -172,15 +171,14 @@ namespace Dmrg {
 				weight_.resize(n);
 				targetVectors_.resize(n);
 				
-				gsWeight_= 0;
+				gsWeight_= 0.2;
 				RealType factor = (1.0 - gsWeight_)/(n+4);
 				RealType sum = setOneInterval(factor,PairType(0,n1),tau*0.5);
 				sum += setOneInterval(factor,PairType(n1,n),tau);
 				
 				
 				sum += gsWeight_;
-				if (fabs(sum-1.0)>1e-5)
-					throw std::runtime_error("Weights don't amount to one\n");
+				assert(fabs(sum-1.0)<1e-5);
 			}
 
 			RealType weight(size_t i) const
@@ -235,9 +233,8 @@ namespace Dmrg {
 			            const BlockType& block2,
 			            size_t loopNumber)
 			{
-				if (block1.size()!=1) throw std::runtime_error(
-					"MettsTargetting::evolve(...): blocks of size != 1 are unsupported (sorry)\n");
-				
+				assert(block1.size()==1);
+
 				PairType sites(block1[0],block2[0]);
 				size_t n1 = size_t(mettsStruct_.timeSteps/2);
 				if (mettsStruct_.timeSteps & 1) n1++;
@@ -245,8 +242,7 @@ namespace Dmrg {
 					getNewPures(sites,n1);
 					return;
 				}
-				
-				
+
 				size_t n = mettsStruct_.timeSteps + n1;
 
 				// Advance or wft each target vector for beta/2
@@ -413,8 +409,7 @@ namespace Dmrg {
 				pureVectors_.second = newVector2;
  				setFromInfinite(targetVectors_[0]);
  				setFromInfinite(targetVectors_[n1]);
- 				if (std::norm(targetVectors_[0])<1e-6 || std::norm(targetVectors_[n1])<1e-6)
- 					throw std::runtime_error("getNewPures: internal\n");
+ 				assert(std::norm(targetVectors_[0])>1e-6 && std::norm(targetVectors_[n1])>1e-6);
 
 				systemPrev_.fixed = alphaFixed;
 				systemPrev_.permutationInverse = lrs_.left().permutationInverse();
@@ -476,8 +471,7 @@ namespace Dmrg {
 			                      size_t direction,
 			                     const MatrixType& transform)
 			{
-				if (oldVector.size()!=transform.n_row())
-					throw std::runtime_error("MettsTargetting: getNewPure(...)\n");
+				assert(oldVector.size()==transform.n_row());
 
 				size_t ne = model_.hilbertSize();
 				
@@ -515,20 +509,37 @@ namespace Dmrg {
 			void setFromInfinite(VectorWithOffsetType& phi) const
 			{
 				phi = psi_;
-				if (phi.sectors()!=1)
-					throw std::runtime_error("MEttsTargetting::setFromInfinite(...): expected only one sector for g.s.\n");
+				assert(phi.sectors()==1);
+
 				for (size_t ii=0;ii<phi.sectors();ii++) {
 					size_t i0 = phi.sector(ii);
 					VectorType v;
 					getFullVector(v,i0);
 					phi.setDataInSector(v,i0);
 				}
-				if (std::norm(phi)<1e-6) throw std::runtime_error("setFromInfinite: norm is zero\n");
+				assert(std::norm(phi)>1e-6);
 			}
+			
+			void collapseVector(VectorWithOffsetType& dest,
+			                    const VectorWithOffsetType& src,
+			                    size_t alphaFixed,
+			                    size_t betaFixed)
+			{
+				assert(src.sectors()==1);
 
-			void collapseVector(size_t m,
-			                    VectorType& w,
+				for (size_t ii=0;ii<src.sectors();ii++) {
+					size_t i0 = src.sector(ii);
+					VectorType vdest,vsrc;
+					src.extract(vsrc,i0);
+					collapseVector(vdest,vsrc,i0);
+					dest.setDataInSector(vdest,i0);
+				}
+				assert(std::norm(dest)>1e-6);
+			}
+			
+			void collapseVector(VectorType& w,
 			                    const VectorType& v,
+			                    size_t m,
 			                    size_t alphaFixed,
 			                    size_t betaFixed)
 			{
@@ -683,11 +694,9 @@ namespace Dmrg {
 			{
 				size_t n2 = steps;
 				size_t n = V.n_row();
-				if (T.n_col()!=T.n_row())
-					throw std::runtime_error("T is not square\n");
-				if (V.n_col()!=T.n_col())
-					throw std::runtime_error("V is not nxn2\n");
-				// for (size_t j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
+				assert(T.n_col()==T.n_row());
+				assert(V.n_col()==T.n_col());
+
 				RealType rone = 1.0;
 				RealType rzero = 0.0;
 				
@@ -767,8 +776,7 @@ namespace Dmrg {
 				/* std::ostringstream msg;
 				msg<<"Calling tridiagonalDecomposition...\n";
 				progress_.printline(msg,std::cerr);*/
-				if (PsimagLite::norm(phi2)<1e-8) throw std::runtime_error(
-				 "MettsTargetting: zero norm before lanczos\n");
+				assert(PsimagLite::norm(phi2)>1e-8);
 				lanczosSolver.tridiagonalDecomposition(phi2,ab,V);
 				ab.buildDenseMatrix(T);
 				//check1(V,phi2);
@@ -797,7 +805,7 @@ namespace Dmrg {
 			//! This check is invalid if there are more than one sector
 			void check1(const MatrixType& V,const TargetVectorType& phi2)
 			{
-				if (V.n_col()>V.n_row()) throw std::runtime_error("cols > rows\n");
+				assert(V.n_col()<=V.n_row());
 				TargetVectorType r(V.n_col());
 				for (size_t k=0;k<V.n_col();k++) {
 					r[k] = 0.0;
@@ -850,32 +858,31 @@ namespace Dmrg {
 			          const std::string& label,
 			          const PairType& sites) const
 			{
-				throw std::runtime_error("Metts: test(...): not implemented\n");
-// 				VectorWithOffsetType dest;
-// 				OperatorType A = mettsStruct_.aOperators[0];
-// 				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
-// 				PsimagLite::CrsMatrix<ComplexType> tmpCt;
-// 				transposeConjugate(tmpCt,tmpC);
-// 				multiply(A.data,tmpCt,tmpC);
-// 				A.fermionSign = 1;
-// 				//A.data = tmpC;
-// 				FermionSign fs(lrs_.left(),mettsStruct_.electrons);
-// 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
-// 
-// 				ComplexType sum = 0;
-// 				for (size_t ii=0;ii<dest.sectors();ii++) {
-// 					size_t i = dest.sector(ii);
-// 					size_t offset1 = dest.offset(i);
-// 					for (size_t jj=0;jj<src2.sectors();jj++) {
-// 						size_t j = src2.sector(jj);
-// 						size_t offset2 = src2.offset(j);
-// 						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
-// 						for (size_t k=0;k<dest.effectiveSize(i);k++) 
-// 							sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
-// 					}
-// 				}
-// 				std::cerr<<site<<" "<<sum<<" "<<" "<<currentBeta_;
-// 				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
+				VectorWithOffsetType dest;
+				OperatorType A;
+				PsimagLite::CrsMatrix<RealType> tmpC(model_.getOperator("c",0,0));
+				PsimagLite::CrsMatrix<RealType> tmpCt;
+				transposeConjugate(tmpCt,tmpC);
+				multiply(A.data,tmpCt,tmpC);
+				A.fermionSign = 1;
+				//A.data = tmpC;
+				FermionSign fs(lrs_.left(),mettsStruct_.electrons);
+				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
+
+				RealType sum = 0;
+				for (size_t ii=0;ii<dest.sectors();ii++) {
+					size_t i = dest.sector(ii);
+					size_t offset1 = dest.offset(i);
+					for (size_t jj=0;jj<src2.sectors();jj++) {
+						size_t j = src2.sector(jj);
+						size_t offset2 = src2.offset(j);
+						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+						for (size_t k=0;k<dest.effectiveSize(i);k++) 
+							sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
+					}
+				}
+				std::cerr<<sites.first<<" "<<sum<<" "<<" "<<currentBeta_;
+				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
 			}
 
 

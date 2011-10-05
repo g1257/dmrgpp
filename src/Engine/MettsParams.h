@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef METTS_PARAMS_H
 #define METTS_PARAMS_H
 
-// #include "TargetParamsCommon.h"
+#include<vector>
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
@@ -104,11 +104,17 @@ namespace Dmrg {
 				io.readline(tau,"TSPTau=");
 				io.readline(timeSteps,"TSPTimeSteps=");
 				io.readline(advanceEach,"TSPAdvanceEach=");
+				
+				typename ModelType::HilbertBasisType basis;
+				std::vector<size_t> quantumNumbs;
+				model.setNaturalBasis(basis,quantumNumbs,1);
+				model.findElectrons(electrons,basis);
 			}
 			
 			RealType tau;
 			size_t timeSteps;
 			size_t advanceEach;
+			std::vector<size_t> electrons;
 	}; // class MettsParams
 	
 	template<typename ModelType>
