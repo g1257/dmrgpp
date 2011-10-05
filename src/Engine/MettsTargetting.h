@@ -239,13 +239,14 @@ namespace Dmrg {
 					"MettsTargetting::evolve(...): blocks of size != 1 are unsupported (sorry)\n");
 				
 				PairType sites(block1[0],block2[0]);
+				size_t n1 = size_t(mettsStruct_.timeSteps/2);
+				if (mettsStruct_.timeSteps & 1) n1++;
 				if (direction==INFINITE) {
-					getNewPures(sites);
+					getNewPures(sites,n1);
 					return;
 				}
 				
-				size_t n1 = size_t(mettsStruct_.timeSteps/2);
-				if (mettsStruct_.timeSteps & 1) n1++;
+				
 				size_t n = mettsStruct_.timeSteps + n1;
 
 				// Advance or wft each target vector for beta/2
@@ -383,7 +384,7 @@ namespace Dmrg {
 				}
 			}
 
-			void getNewPures(const PairType& sites)
+			void getNewPures(const PairType& sites,size_t n1)
 			{
 				// only way of getting the quantum number where there
 				// g.s. (and therefore the pure) resides
@@ -410,9 +411,10 @@ namespace Dmrg {
 						   betaFixed,lrs_.right(),transformEnviron,sites.second);
 // 				environPrev_.ns = pureVectors_.second.size();
 				pureVectors_.second = newVector2;
-				setFromInfinite(targetVectors_[0]);
-				if (std::norm(targetVectors_[0])==0)
-					throw std::runtime_error("getNewPures: internal\n");
+ 				setFromInfinite(targetVectors_[0]);
+ 				setFromInfinite(targetVectors_[n1]);
+ 				if (std::norm(targetVectors_[0])<1e-6 || std::norm(targetVectors_[n1])<1e-6)
+ 					throw std::runtime_error("getNewPures: internal\n");
 
 				systemPrev_.fixed = alphaFixed;
 				systemPrev_.permutationInverse = lrs_.left().permutationInverse();
@@ -420,7 +422,7 @@ namespace Dmrg {
 				environPrev_.permutationInverse = lrs_.right().permutationInverse();
 			}
 
-			void getFullVector(std::vector<RealType>& v,size_t m)
+			void getFullVector(std::vector<RealType>& v,size_t m) const
 			{
 				int offset = lrs_.super().partition(m);
 				int total = lrs_.super().partition(m+1) - offset;
@@ -510,7 +512,7 @@ namespace Dmrg {
 				}
 			}
 			
-			void setFromInfinite(VectorWithOffsetType& phi)
+			void setFromInfinite(VectorWithOffsetType& phi) const
 			{
 				phi = psi_;
 				if (phi.sectors()!=1)
@@ -521,6 +523,7 @@ namespace Dmrg {
 					getFullVector(v,i0);
 					phi.setDataInSector(v,i0);
 				}
+				if (std::norm(phi)<1e-6) throw std::runtime_error("setFromInfinite: norm is zero\n");
 			}
 
 			void collapseVector(size_t m,
@@ -615,7 +618,9 @@ namespace Dmrg {
 			{
 				
 				const VectorWithOffsetType& phi = targetVectors_[startEnd.first];
-				if (phi.size()==0) setFromInfinite(targetVectors_[startEnd.first]);
+				std::cerr<<"TIME VECTOR START = "<<startEnd.first<<" norm=";
+				std::cerr<<std::norm(phi)<<"\n";
+				if (std::norm(phi)<1e-6) setFromInfinite(targetVectors_[startEnd.first]);
 				
 				std::vector<MatrixType> V(phi.sectors());
 				std::vector<MatrixType> T(phi.sectors());
@@ -762,6 +767,8 @@ namespace Dmrg {
 				/* std::ostringstream msg;
 				msg<<"Calling tridiagonalDecomposition...\n";
 				progress_.printline(msg,std::cerr);*/
+				if (PsimagLite::norm(phi2)<1e-8) throw std::runtime_error(
+				 "MettsTargetting: zero norm before lanczos\n");
 				lanczosSolver.tridiagonalDecomposition(phi2,ab,V);
 				ab.buildDenseMatrix(T);
 				//check1(V,phi2);
