@@ -180,7 +180,7 @@ EOF
 if ($mpi) {
 	print FOUT "CXX = mpicxx -O3 -DNDEBUG \n";
 } else {
-	print FOUT "CXX = $compiler -pg -O3 -DNDEBUG\n";
+	print FOUT "CXX = $compiler  -O3 -DNDEBUG\n";
 	print FOUT "#Comment out line below for debugging: \n";
 	print FOUT "#CXX = $compiler -g3 -DNDEBUG\n";
 }

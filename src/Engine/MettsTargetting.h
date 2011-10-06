@@ -77,12 +77,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ApplyOperatorLocal.h"
 #include "MettsSerializer.h"
 #include "MettsParams.h"
-#include "PackIndices.h"
 #include "MettsStochastics.h"
 #include <cassert>
+#include "MettsCollapse.h"
 
 namespace Dmrg {
-	
 	template<
 			template<typename,typename,typename> class LanczosSolverTemplate,
    			template<typename,typename> class InternalProductTemplate,
@@ -92,14 +91,14 @@ namespace Dmrg {
     			typename IoType_,
        			template<typename> class VectorWithOffsetTemplate>
 	class MettsTargetting  {
-			typedef PsimagLite::PackIndices PackIndicesType;
+			
 			
 			struct MettsPrev {
 				MettsPrev() : fixed(0),permutationInverse(0) { }
 				size_t fixed;
 				std::vector<size_t> permutationInverse;
 			};
-			
+
 		public:
 			typedef ModelType_ ModelType;
 			typedef ConcurrencyType_ ConcurrencyType;
@@ -130,6 +129,8 @@ namespace Dmrg {
 			typedef MettsSerializer<RealType,VectorWithOffsetType> MettsSerializerType;
 			typedef MettsStochastics<ModelType> MettsStochasticsType;
 			typedef typename MettsStochasticsType::PairType PairType;
+			typedef MettsCollapse<VectorWithOffsetType,MettsStochasticsType> MettsCollapseType;
+			typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
 			
 			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -155,6 +156,7 @@ namespace Dmrg {
 			  applyOpLocal_(lrs),
 			  hilbertSizePerSite_(model_.hilbertSize()),
 			  mettsStochastics_(model),
+			  mettsCollapse_(mettsStochastics_,lrs_),
 			  timesWithoutAdvancement_(0),
 			  systemPrev_(),
 			  environPrev_()
@@ -168,14 +170,15 @@ namespace Dmrg {
 				size_t n = mettsStruct_.timeSteps + n1;
 				
 				betas_.resize(n);
-				weight_.resize(n);
-				targetVectors_.resize(n);
+				weight_.resize(n+1);
+				targetVectors_.resize(n+1);
 				
 				gsWeight_= 0.2;
-				RealType factor = (1.0 - gsWeight_)/(n+4);
+				RealType factor = (1.0 - gsWeight_)/(n+6);
 				RealType sum = setOneInterval(factor,PairType(0,n1),tau*0.5);
 				sum += setOneInterval(factor,PairType(n1,n),tau);
-				
+				weight_[n] = 2*factor;
+				sum += weight_[n];
 				
 				sum += gsWeight_;
 				assert(fabs(sum-1.0)<1e-5);
@@ -238,6 +241,8 @@ namespace Dmrg {
 				PairType sites(block1[0],block2[0]);
 				size_t n1 = size_t(mettsStruct_.timeSteps/2);
 				if (mettsStruct_.timeSteps & 1) n1++;
+				updateStochastics(sites);
+
 				if (direction==INFINITE) {
 					getNewPures(sites,n1);
 					return;
@@ -254,11 +259,19 @@ namespace Dmrg {
 				for (size_t i=n1;i<n;i++) {
 					evolve(i,n1,Eg,direction,sites,loopNumber);
 				}
+				
+				// Advance or wft  collapsed vector
+				evolve(n,n,Eg,direction,sites,loopNumber);
 
+				// compute imag. time evolution:
 				calcTimeVectors(PairType(0,n1),Eg,direction);
 				calcTimeVectors(PairType(n1,n),Eg,direction);
 				
-				cocoon(direction,sites); // in-situ
+				// compute collapsed vector
+				mettsCollapse_(targetVectors_[n],targetVectors_[n1-1],sites);
+				  
+				// in-situ measurement
+				cocoon(direction,sites); 
 			}
 
 			void load(const std::string& f)
@@ -332,7 +345,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				advanceOrWft(index,start,direction);
 			}
-			
+
 			void advanceCounterAndComputeStage()
 			{
 				stage_=WFT_NOADVANCE;
@@ -356,7 +369,7 @@ namespace Dmrg {
 			                  size_t systemOrEnviron)
 			{
 				if (targetVectors_[index].size()==0) return;
-
+				assert(std::norm(targetVectors_[index])>1e-6);
 // 				size_t indexAdvance = betas_.size()-1; // FIXME 
 // 				size_t indexNoAdvance = 0;
 				if (stage_== WFT_ADVANCE) 
@@ -372,7 +385,8 @@ namespace Dmrg {
 
 					// OK, now that we got the partition number right, let's wft:
 					wft_.setInitialVector(phiNew,targetVectors_[index],lrs_);
-					phiNew.collapseSectors(); 
+					phiNew.collapseSectors();
+					assert(std::norm(phiNew)>1e-6);
 					targetVectors_[index] = phiNew;
 				} else {
 					throw std::runtime_error("It's 5 am, do you know what line "
@@ -380,7 +394,7 @@ namespace Dmrg {
 				}
 			}
 
-			void getNewPures(const PairType& sites,size_t n1)
+			void updateStochastics(const PairType& sites)
 			{
 				// only way of getting the quantum number where there
 				// g.s. (and therefore the pure) resides
@@ -388,7 +402,10 @@ namespace Dmrg {
 				size_t qn = lrs_.super().qn(lrs_.super().partition(m));
 				
 				mettsStochastics_.update(qn,sites);
-				
+			}
+
+			void getNewPures(const PairType& sites,size_t n1)
+			{
 				size_t alphaFixed = mettsStochastics_.chooseRandomState(sites.first);
 				size_t betaFixed = mettsStochastics_.chooseRandomState(sites.second);
 				std::cerr<<"GETNEWPURES site="<<sites<<"\n";
@@ -465,7 +482,7 @@ namespace Dmrg {
 					}
 				}
 			}
-			
+
 			void delayedTransform(VectorType& newVector,
 			                      VectorType& oldVector,
 			                      size_t direction,
@@ -495,7 +512,7 @@ namespace Dmrg {
 					}
 				}
 			}
-			
+
 			void setInitialPure(VectorType& oldVector,size_t site)
 			{
 				size_t sitePlusOrMinus = (site==1) ? 0 : site+1;
@@ -505,7 +522,7 @@ namespace Dmrg {
 					oldVector[i] = (i==alphaFixed) ? 1 : 0;
 				}
 			}
-			
+
 			void setFromInfinite(VectorWithOffsetType& phi) const
 			{
 				phi = psi_;
@@ -518,50 +535,6 @@ namespace Dmrg {
 					phi.setDataInSector(v,i0);
 				}
 				assert(std::norm(phi)>1e-6);
-			}
-			
-			void collapseVector(VectorWithOffsetType& dest,
-			                    const VectorWithOffsetType& src,
-			                    size_t alphaFixed,
-			                    size_t betaFixed)
-			{
-				assert(src.sectors()==1);
-
-				for (size_t ii=0;ii<src.sectors();ii++) {
-					size_t i0 = src.sector(ii);
-					VectorType vdest,vsrc;
-					src.extract(vsrc,i0);
-					collapseVector(vdest,vsrc,i0);
-					dest.setDataInSector(vdest,i0);
-				}
-				assert(std::norm(dest)>1e-6);
-			}
-			
-			void collapseVector(VectorType& w,
-			                    const VectorType& v,
-			                    size_t m,
-			                    size_t alphaFixed,
-			                    size_t betaFixed)
-			{
-				int offset = lrs_.super().partition(m);
-				int total = lrs_.super().partition(m+1) - offset;
-
-				size_t nk = hilbertSizePerSite_;
-				size_t ns = lrs_.left().size();
-				PackIndicesType packSuper(ns);
-				PackIndicesType packLeft(ns/nk);
-				PackIndicesType packRight(nk);
-				for (size_t i=0;i<total;i++) {
-					w[i] = 0;
-					size_t alpha,beta;
-					packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
-					size_t alpha0,alpha1;
-					packLeft.unpack(alpha0,alpha1,alpha);
-					size_t beta0,beta1;
-					packRight.unpack(beta0,beta1,beta);
-					if (alpha1!=alphaFixed || beta0 != betaFixed) continue;
-					w[i] = v[i];
-				}
 			}
 
 			// in situ computation:
@@ -782,7 +755,7 @@ namespace Dmrg {
 				//check1(V,phi2);
 				return lanczosSolver.steps();
 			}
-			
+
 			RealType setOneInterval(const RealType& factor,
 			                        const PairType& startEnd,
 			                        const RealType& tau)
@@ -885,7 +858,6 @@ namespace Dmrg {
 				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
 			}
 
-
 			size_t stage_;
 			VectorWithOffsetType psi_;
 			const LeftRightSuperType& lrs_;
@@ -901,6 +873,7 @@ namespace Dmrg {
 			ApplyOperatorType applyOpLocal_;
 			size_t hilbertSizePerSite_;
 			MettsStochasticsType mettsStochastics_;
+			MettsCollapseType mettsCollapse_;
 			size_t timesWithoutAdvancement_;
 			MettsPrev systemPrev_;
 			MettsPrev environPrev_;

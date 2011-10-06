@@ -93,7 +93,8 @@ namespace Dmrg {
 	public:
 		typedef std::pair<size_t,size_t> PairType;
 		typedef typename ModelType::RealType RealType;
-
+		typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
+		
 		MettsStochastics(const ModelType& model)
 		: model_(model),
 		  progress_("MettsStochastics",0),
@@ -103,26 +104,39 @@ namespace Dmrg {
 			size_t addedBlockSize = 1;
 			model_.setNaturalBasis(basisOfOneSite_,quantumNumbsOneSite_,addedBlockSize);
 		}
+		
+		size_t hilbertSizePerSite() const { return model_.hilbertSize(); }
 
-		size_t chooseRandomState(size_t i) const
+		size_t chooseRandomState(size_t i) const // infinite
 		{
 			return basisOfOneSite_[pureStates_[i]];
 		}
-		
+
 		void update(size_t qn,const PairType& sites)
 		{
 			if (addedSites_.size()==0) {
 				if (sites.first!=1)
-					throw std::runtime_error("MettsStochastics::update(...): internal\n");
+					throw std::runtime_error("MettsStochastics::update(...): must start from 0\n");
 				pureStates_.resize(sites.second+2);
 				for (size_t i=0;i<pureStates_.size();i++) 
 					pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
 				addedSites_.push_back(sites.first-1);
 				addedSites_.push_back(sites.second+1);
 			}
-			addedSites_.push_back(sites.first);
-			addedSites_.push_back(sites.second);
+			bool isFirst = (std::find(addedSites_.begin(),addedSites_.end(),sites.first)!=addedSites_.end());
+// 			bool isSecond = (std::find(addedSites_.begin(),addedSites_.end(),sites.second)!=addedSites_.end());
+// 			
+// 			// both in or both out:
+// 			assert((isFirst & isSecond) || (!isFirst & !isSecond));
 			
+			if (!isFirst) {
+				addedSites_.push_back(sites.first);
+				addedSites_.push_back(sites.second);
+			} else {
+				pureStates_[sites.first] = size_t(random48_()*basisOfOneSite_.size());
+				pureStates_[sites.second] = size_t(random48_()*basisOfOneSite_.size());
+			}
+
 			// fix target quantum number
 			size_t symm = getSymmetry();
 			
