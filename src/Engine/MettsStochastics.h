@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include "ProgressIndicator.h"
 #include "Random48.h"
+#include <algorithm>
 
 namespace Dmrg {
 	template<typename ModelType>
@@ -123,19 +124,15 @@ namespace Dmrg {
 				addedSites_.push_back(sites.first-1);
 				addedSites_.push_back(sites.second+1);
 			}
-			bool isFirst = (std::find(addedSites_.begin(),addedSites_.end(),sites.first)!=addedSites_.end());
-// 			bool isSecond = (std::find(addedSites_.begin(),addedSites_.end(),sites.second)!=addedSites_.end());
-// 			
-// 			// both in or both out:
-// 			assert((isFirst & isSecond) || (!isFirst & !isSecond));
-			
-			if (!isFirst) {
-				addedSites_.push_back(sites.first);
-				addedSites_.push_back(sites.second);
-			} else {
-				pureStates_[sites.first] = size_t(random48_()*basisOfOneSite_.size());
-				pureStates_[sites.second] = size_t(random48_()*basisOfOneSite_.size());
+			if (std::find(addedSites_.begin(),addedSites_.end(),
+			                     sites.first) != addedSites_.end()) {
+				addedSites_.clear();
+				for (size_t i=0;i<pureStates_.size();i++) 
+					pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
 			}
+
+			addedSites_.push_back(sites.first);
+			if (sites.first!=sites.second) addedSites_.push_back(sites.second);
 
 			// fix target quantum number
 			size_t symm = getSymmetry();
@@ -143,6 +140,7 @@ namespace Dmrg {
 			while(symm!=qn) {
 				raiseOrLowerSymm(sites.first,(symm<qn));
 				symm = getSymmetry();
+				if (sites.second==sites.first) continue;
 				if (symm==qn) break;
 				raiseOrLowerSymm(sites.second,(symm<qn));
 				symm = getSymmetry();

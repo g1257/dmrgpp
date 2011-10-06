@@ -86,6 +86,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include "ProgressIndicator.h"
 #include "PackIndices.h"
+#include "Matrix.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 	template<typename VectorWithOffsetType,typename MettsStochasticsType>
@@ -93,58 +95,66 @@ namespace Dmrg {
 		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef typename MettsStochasticsType::PairType PairType;
 		typedef typename MettsStochasticsType::LeftRightSuperType LeftRightSuperType;
-		
+		typedef typename MettsStochasticsType::RealType RealType;
+		typedef PsimagLite::Matrix<RealType> MatrixType;
+		enum {EXPAND_ENVIRON=ProgramGlobals::EXPAND_ENVIRON,
+		      EXPAND_SYSTEM=ProgramGlobals::EXPAND_SYSTEM};
 	public:
 		typedef PsimagLite::PackIndices PackIndicesType;
-		
+
 		MettsCollapse(const MettsStochasticsType& mettsStochastics,
 		              const LeftRightSuperType& lrs)
-		: mettsStochastics_(mettsStochastics),lrs_(lrs)
+		: mettsStochastics_(mettsStochastics),
+		  lrs_(lrs),
+		  hilbertSize_(mettsStochastics.hilbertSizePerSite())
 		{}
 
 		void operator()(VectorWithOffsetType& dest2,
 		                const VectorWithOffsetType& src2,
-		                const PairType& sites)
+		                size_t direction,
+		                size_t site)
 		{
 			if (dest2.size()==0) {
 				dest2 =  src2;
 			}
-			VectorWithOffsetType dest = src2;
-			size_t alphaFixed = mettsStochastics_.chooseRandomState(sites.first);
-			size_t betaFixed = mettsStochastics_.chooseRandomState(sites.second);
-			collapseVector(dest,dest2,alphaFixed,betaFixed);
+			MatrixType p(hilbertSize_,hilbertSize_);
+			probability(p,dest2);
+
+			VectorWithOffsetType dest;
+			size_t indexFixed = mettsStochastics_.chooseRandomState(site);
+			collapseVector(dest,dest2,direction,indexFixed);
 			assert(std::norm(dest)>1e-6);
 			dest2 = dest;
 		}
 
 	private:
 		void collapseVector(VectorWithOffsetType& dest,
-							const VectorWithOffsetType& src,
-							size_t alphaFixed,
-							size_t betaFixed)
+		                    const VectorWithOffsetType& src,
+		                    size_t direction,
+		                    size_t indexFixed) const
 		{
 			assert(src.sectors()==1);
-			
+			dest = src;
 			for (size_t ii=0;ii<src.sectors();ii++) {
 				size_t i0 = src.sector(ii);
 				VectorType vdest,vsrc;
 				src.extract(vsrc,i0);
-				collapseVector(vdest,vsrc,i0,alphaFixed,betaFixed);
+				collapseVector(vdest,vsrc,direction,i0,indexFixed);
 				dest.setDataInSector(vdest,i0);
 			}
 			assert(std::norm(dest)>1e-6);
 		}
 
 		void collapseVector(VectorType& w,
-							const VectorType& v,
-							size_t m,
-							size_t alphaFixed,
-							size_t betaFixed)
+		                    const VectorType& v,
+		                    size_t direction,
+		                    size_t m,
+		                    size_t indexFixed) const
 		{
 			int offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
 			
-			size_t nk = mettsStochastics_.hilbertSizePerSite();
+			size_t nk = hilbertSize_;
 			size_t ns = lrs_.left().size();
 			PackIndicesType packSuper(ns);
 			PackIndicesType packLeft(ns/nk);
@@ -158,13 +168,34 @@ namespace Dmrg {
 				packLeft.unpack(alpha0,alpha1,alpha);
 				size_t beta0,beta1;
 				packRight.unpack(beta0,beta1,beta);
-				if (alpha1!=alphaFixed || beta0 != betaFixed) continue;
+				if (direction==EXPAND_SYSTEM && alpha1!=indexFixed) continue;
+				if (direction==EXPAND_ENVIRON && beta0 != indexFixed) continue;
 				w[i] = v[i];
+			}
+		}
+
+		void probability(MatrixType& p,const VectorWithOffsetType& src) const
+		{
+			RealType sum = 0;
+			for(size_t alpha=0;alpha<hilbertSize_;alpha++) {
+				for (size_t beta=0;beta<hilbertSize_;beta++) {
+					VectorWithOffsetType dest;
+					collapseVector(dest,src,alpha,beta);
+					RealType x = std::norm(dest);
+					sum += x*x;
+					p(alpha,beta) = x*x;
+				}
+			}
+			for(size_t alpha=0;alpha<hilbertSize_;alpha++) {
+				for (size_t beta=0;beta<hilbertSize_;beta++) {
+					p(alpha,beta) /= sum;
+				}
 			}
 		}
 
 		const MettsStochasticsType& mettsStochastics_;
 		const LeftRightSuperType& lrs_;
+		size_t hilbertSize_;
 	};  //class MettsCollapse
 } // namespace Dmrg
 /*@}*/

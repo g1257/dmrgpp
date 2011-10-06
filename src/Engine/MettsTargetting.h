@@ -268,7 +268,7 @@ namespace Dmrg {
 				calcTimeVectors(PairType(n1,n),Eg,direction);
 				
 				// compute collapsed vector
-				mettsCollapse_(targetVectors_[n],targetVectors_[n1-1],sites);
+				mettsCollapse_(targetVectors_[n],targetVectors_[n1-1],sites.first,direction);
 				  
 				// in-situ measurement
 				cocoon(direction,sites); 
