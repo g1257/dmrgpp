@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define METTS_COLLAPSE_H
 #include <iostream>
 #include <vector>
+#include <cassert>
 #include "ProgressIndicator.h"
 #include "PackIndices.h"
 #include "Matrix.h"
@@ -117,11 +118,11 @@ namespace Dmrg {
 			if (dest2.size()==0) {
 				dest2 =  src2;
 			}
-			MatrixType p(hilbertSize_,hilbertSize_);
-			probability(p,dest2);
+			std::vector<RealType> p(hilbertSize_,0);
+			probability(p,dest2,direction);
 
 			VectorWithOffsetType dest;
-			size_t indexFixed = mettsStochastics_.chooseRandomState(site);
+			size_t indexFixed = mettsStochastics_.chooseRandomState(p);
 			collapseVector(dest,dest2,direction,indexFixed);
 			assert(std::norm(dest)>1e-6);
 			dest2 = dest;
@@ -174,23 +175,19 @@ namespace Dmrg {
 			}
 		}
 
-		void probability(MatrixType& p,const VectorWithOffsetType& src) const
+		void probability(std::vector<RealType>& p,
+		                 const VectorWithOffsetType& src,
+						 size_t direction) const
 		{
 			RealType sum = 0;
 			for(size_t alpha=0;alpha<hilbertSize_;alpha++) {
-				for (size_t beta=0;beta<hilbertSize_;beta++) {
-					VectorWithOffsetType dest;
-					collapseVector(dest,src,alpha,beta);
-					RealType x = std::norm(dest);
-					sum += x*x;
-					p(alpha,beta) = x*x;
-				}
+				VectorWithOffsetType dest;
+				collapseVector(dest,src,direction,alpha);
+				RealType x = std::norm(dest);
+				sum += x*x;
+				p[alpha] = x*x;
 			}
-			for(size_t alpha=0;alpha<hilbertSize_;alpha++) {
-				for (size_t beta=0;beta<hilbertSize_;beta++) {
-					p(alpha,beta) /= sum;
-				}
-			}
+			for(size_t alpha=0;alpha<p.size();alpha++) p[alpha] /= sum;
 		}
 
 		const MettsStochasticsType& mettsStochastics_;

@@ -855,7 +855,8 @@ namespace Dmrg {
 					}
 				}
 				std::cerr<<sites.first<<" "<<sum<<" "<<" "<<currentBeta_;
-				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
+				std::cerr<<" "<<label<<" "<<std::norm(src1)<<" ";
+				std::cerr<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
 			}
 
 			size_t stage_;

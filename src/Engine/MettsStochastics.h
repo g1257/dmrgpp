@@ -110,11 +110,27 @@ namespace Dmrg {
 		
 		size_t hilbertSizePerSite() const { return model_.hilbertSize(); }
 
-		size_t chooseRandomState(size_t i) const // infinite
+		size_t chooseRandomState(size_t i) const
 		{
 			return basisOfOneSite_[pureStates_[i]];
 		}
-
+		
+		size_t chooseRandomState(const std::vector<RealType>& probs) const
+		{
+			RealType r = random48_();
+			RealType s1 = 0;
+			RealType s2 = 0;
+			for (size_t i=0;i<probs.size();++i) {
+				s2 = s1 + probs[i];
+				if (s1<r && r<=s2) return basisOfOneSite_[i];
+				s1 = s2;
+			}
+			std::string s(__FILE__);
+			s += std::string(" ") + ttos(__LINE__) + " " + __FUNCTION__ +
+			     " Probabilities don't amount to 1\n";
+			throw std::runtime_error(s.c_str());
+		}
+		
 		void update(size_t qn,const PairType& sites)
 		{
 			if (addedSites_.size()==0) {
