@@ -84,9 +84,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define METTS_STOCHASTICS_H
 #include <iostream>
 #include <vector>
+#include <stdexcept>
 #include "ProgressIndicator.h"
 #include "Random48.h"
 #include <algorithm>
+#include "TypeToString.h"
 
 namespace Dmrg {
 	template<typename ModelType>
@@ -124,20 +126,58 @@ namespace Dmrg {
 				addedSites_.push_back(sites.first-1);
 				addedSites_.push_back(sites.second+1);
 			}
+
+			if (sites.first!=sites.second) {
+				addedSites_.push_back(sites.first);
+				addedSites_.push_back(sites.second);
+				qnVsSize_.resize(addedSites_.size()+1,0);
+				qnVsSize_[addedSites_.size()]=qn;
+				getStochasticsUpToThisPoint(qn,sites);
+				return; // INFINITE
+			} 
+			
+			//FINITE
 			if (std::find(addedSites_.begin(),addedSites_.end(),
-			                     sites.first) != addedSites_.end()) {
+				sites.first) != addedSites_.end()) {
+				getStochasticsForLattice();
 				addedSites_.clear();
-				for (size_t i=0;i<pureStates_.size();i++) 
-					pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
 			}
-
 			addedSites_.push_back(sites.first);
-			if (sites.first!=sites.second) addedSites_.push_back(sites.second);
+		}
 
+	private:
+		
+		void getStochasticsForLattice()
+		{
+			for (size_t i=0;i<pureStates_.size();i++) 
+				pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
+			size_t sys = addedSites_.size()/2;
+			size_t env = sys;
+			addedSites_.clear();
+			addedSites_.push_back(0);
+			addedSites_.push_back(2*env-1);
+			for (size_t i=1;i<sys;i++) {
+				addedSites_.push_back(i);
+				addedSites_.push_back(2*env-i-1);
+				PairType sites(i,2*env-i-1);
+				getStochasticsUpToThisPoint(qnVsSize_[addedSites_.size()],sites);
+			}
+		}
+
+		void getStochasticsUpToThisPoint(size_t qn,const PairType& sites)
+		{
 			// fix target quantum number
 			size_t symm = getSymmetry();
-			
+			size_t counter = 0;
 			while(symm!=qn) {
+				counter++;
+				if (counter>1e6) {
+					std::string s(__FILE__);
+					s += std::string(" ") + ttos(__LINE__) + std::string(" ") + 
+					std::string(__FUNCTION__);
+					s += std::string(" too many iterations\n");
+					throw std::runtime_error(s.c_str());
+				}
 				raiseOrLowerSymm(sites.first,(symm<qn));
 				symm = getSymmetry();
 				if (sites.second==sites.first) continue;
@@ -150,10 +190,9 @@ namespace Dmrg {
 			for (size_t i=0;i<pureStates_.size();i++)
 				msg<<pureStates_[i]<<" ";
 			msg<<"\n";
-			std::cout<<msg.str();
+			std::cout<<msg.str();	
 		}
 
-	private:
 		// assumes states in basisOfOneSite_ are ordered in increasing
 		// symmetry
 		void raiseOrLowerSymm(size_t site,bool raiseSymm)
@@ -164,7 +203,7 @@ namespace Dmrg {
 			}
 			if (pureStates_[site]>0) pureStates_[site]--;
 		}
-		
+
 		// assumes local symmetry througout
 		size_t getSymmetry() const
 		{
@@ -174,7 +213,7 @@ namespace Dmrg {
 			}
 			return sum;
 		}
-		
+
 		const ModelType& model_;
 		PsimagLite::ProgressIndicator progress_;
 		PsimagLite::Random48<RealType> random48_;
@@ -182,6 +221,7 @@ namespace Dmrg {
 		std::vector<size_t> addedSites_;
 		std::vector<size_t> quantumNumbsOneSite_;
 		typename ModelType::HilbertBasisType basisOfOneSite_;
+		std::vector<size_t> qnVsSize_;
 	};  //class MettsStochastics
 } // namespace Dmrg
 /*@}*/
