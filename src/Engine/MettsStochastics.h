@@ -101,7 +101,7 @@ namespace Dmrg {
 		MettsStochastics(const ModelType& model)
 		: model_(model),
 		  progress_("MettsStochastics",0),
-		  random48_(34328811),
+		  random48_(7752834),
 		  addedSites_(0)
 		{
 			size_t addedBlockSize = 1;

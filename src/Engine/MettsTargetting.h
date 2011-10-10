@@ -173,7 +173,7 @@ namespace Dmrg {
 				weight_.resize(n+1);
 				targetVectors_.resize(n+1);
 				
-				gsWeight_= 0.2;
+				gsWeight_= 0.01;
 				RealType factor = (1.0 - gsWeight_)/(n+6);
 				RealType sum = setOneInterval(factor,PairType(0,n1),tau*0.5);
 				sum += setOneInterval(factor,PairType(n1,n),tau);
@@ -186,12 +186,12 @@ namespace Dmrg {
 
 			RealType weight(size_t i) const
 			{
-				return (allStages(DISABLED)) ? 0.5 : weight_[i];
+				return weight_[i]; //(allStages(DISABLED)) ? 0.5 : weight_[i];
 			}
 
 			RealType gsWeight() const
 			{
-				return (allStages(DISABLED)) ?  0.5 : gsWeight_;
+				return gsWeight_; //(allStages(DISABLED)) ?  0.5 : gsWeight_;
 			}
 
 			RealType normSquared(size_t i) const
@@ -213,7 +213,7 @@ namespace Dmrg {
 
 			const VectorWithOffsetType& gs() const { return psi_; }
 
-			bool includeGroundStage() const {return true; }
+			bool includeGroundStage() const {return (fabs(gsWeight_)>1e-6); }
 
 			size_t size() const
 			{
@@ -259,7 +259,7 @@ namespace Dmrg {
 				for (size_t i=n1;i<n;i++) {
 					evolve(i,n1,Eg,direction,sites,loopNumber);
 				}
-				
+
 				// Advance or wft  collapsed vector
 				evolve(n,n,Eg,direction,sites,loopNumber);
 
@@ -456,7 +456,6 @@ namespace Dmrg {
 			                const MatrixType& transform,
 			                size_t site)
 			{
-				
 				if (oldVector.size()==0) setInitialPure(oldVector,site);
 				VectorType tmpVector;
 				if (transform.n_row()==0) {
@@ -854,9 +853,10 @@ namespace Dmrg {
 							sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
 					}
 				}
+				RealType nor = std::norm(src1);
 				std::cerr<<sites.first<<" "<<sum<<" "<<" "<<currentBeta_;
-				std::cerr<<" "<<label<<" "<<std::norm(src1)<<" ";
-				std::cerr<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
+				std::cerr<<" "<<label<<" "<<nor<<" "<<std::norm(src2);
+				std::cerr<<" "<<std::norm(dest)<<"    "<<sum/(nor*nor)<<"\n";
 			}
 
 			size_t stage_;
