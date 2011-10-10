@@ -112,15 +112,18 @@ namespace Dmrg {
 
 		void operator()(VectorWithOffsetType& dest2,
 		                const VectorWithOffsetType& src2,
-		                size_t direction,
-		                size_t site)
+		                size_t site,
+		                size_t direction)
 		{
 			if (dest2.size()==0) {
 				dest2 =  src2;
 			}
 			std::vector<RealType> p(hilbertSize_,0);
 			probability(p,dest2,direction);
-
+			RealType sum = 0;
+			for (size_t i=0;i<p.size();i++)
+				sum += p[i];
+			assert(fabs(sum-1.0)<1e-6);
 			VectorWithOffsetType dest;
 			size_t indexFixed = mettsStochastics_.chooseRandomState(p);
 			collapseVector(dest,dest2,direction,indexFixed);

@@ -158,28 +158,29 @@ namespace Dmrg {
 			  mettsStochastics_(model),
 			  mettsCollapse_(mettsStochastics_,lrs_),
 			  timesWithoutAdvancement_(0),
+			  prevDirection_(INFINITE),
 			  systemPrev_(),
 			  environPrev_()
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" MettsTargetting "
 							"needs an enabled wft\n");
-				
+
 				RealType tau =mettsStruct_.tau/(mettsStruct_.timeSteps-1);
 				size_t n1 = size_t(mettsStruct_.timeSteps/2);
 				if (mettsStruct_.timeSteps & 1) n1++;
 				size_t n = mettsStruct_.timeSteps + n1;
-				
+
 				betas_.resize(n);
 				weight_.resize(n+1);
 				targetVectors_.resize(n+1);
-				
+
 				gsWeight_= 0.01;
 				RealType factor = (1.0 - gsWeight_)/(n+6);
 				RealType sum = setOneInterval(factor,PairType(0,n1),tau*0.5);
 				sum += setOneInterval(factor,PairType(n1,n),tau);
 				weight_[n] = 2*factor;
 				sum += weight_[n];
-				
+
 				sum += gsWeight_;
 				assert(fabs(sum-1.0)<1e-5);
 			}
@@ -252,24 +253,28 @@ namespace Dmrg {
 
 				// Advance or wft each target vector for beta/2
 				for (size_t i=0;i<n1;i++) {
-					evolve(i,0,Eg,direction,sites,loopNumber);
+					evolve(i,0,n1-1,Eg,direction,sites,loopNumber);
 				}
 
 				// Advance or wft each target vector for beta
 				for (size_t i=n1;i<n;i++) {
-					evolve(i,n1,Eg,direction,sites,loopNumber);
+					evolve(i,n1,n-1,Eg,direction,sites,loopNumber);
 				}
 
 				// Advance or wft  collapsed vector
-				evolve(n,n,Eg,direction,sites,loopNumber);
+				evolve(n,n,n1-1,Eg,direction,sites,loopNumber);
 
 				// compute imag. time evolution:
 				calcTimeVectors(PairType(0,n1),Eg,direction);
 				calcTimeVectors(PairType(n1,n),Eg,direction);
 				
 				// compute collapsed vector
-				mettsCollapse_(targetVectors_[n],targetVectors_[n1-1],sites.first,direction);
-				  
+				mettsCollapse_(targetVectors_[n],targetVectors_[0],sites.first,direction);
+
+				if (direction!=prevDirection_) {
+					targetVectors_[0]=targetVectors_[n];
+				}
+				prevDirection_ = direction;
 				// in-situ measurement
 				cocoon(direction,sites); 
 			}
@@ -331,8 +336,9 @@ namespace Dmrg {
 		private:
 
 			void evolve(size_t index,
-						size_t start,
-				        RealType Eg,
+			            size_t start,
+			            size_t indexAdvance,
+			            RealType Eg,
 			            size_t direction,
 			            std::pair<size_t,size_t> sites,
 			            size_t loopNumber)
@@ -343,7 +349,7 @@ namespace Dmrg {
 				msg<<"Evolving, stage="<<getStage()<<" loopNumber="<<loopNumber;
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
-				advanceOrWft(index,start,direction);
+				advanceOrWft(index,indexAdvance,direction);
 			}
 
 			void advanceCounterAndComputeStage()
@@ -365,18 +371,17 @@ namespace Dmrg {
 			}
 
 			void advanceOrWft(size_t index,
-			                  size_t start,
+							  size_t indexAdvance,
 			                  size_t systemOrEnviron)
 			{
 				if (targetVectors_[index].size()==0) return;
 				assert(std::norm(targetVectors_[index])>1e-6);
 // 				size_t indexAdvance = betas_.size()-1; // FIXME 
 // 				size_t indexNoAdvance = 0;
-				if (stage_== WFT_ADVANCE) 
-					throw std::runtime_error("Advance unimplemented for Metts\n");
+				
 				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE) {
-// 					size_t advance = indexNoAdvance;
-// 					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
+					size_t advance = index;
+					if (stage_ == WFT_ADVANCE) advance = indexAdvance;
 					std::ostringstream msg;
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
@@ -384,7 +389,7 @@ namespace Dmrg {
 					VectorWithOffsetType phiNew = psi_; // same sectors as g.s.
 
 					// OK, now that we got the partition number right, let's wft:
-					wft_.setInitialVector(phiNew,targetVectors_[index],lrs_);
+					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_);
 					phiNew.collapseSectors();
 					assert(std::norm(phiNew)>1e-6);
 					targetVectors_[index] = phiNew;
@@ -876,6 +881,7 @@ namespace Dmrg {
 			MettsStochasticsType mettsStochastics_;
 			MettsCollapseType mettsCollapse_;
 			size_t timesWithoutAdvancement_;
+			size_t prevDirection_;
 			MettsPrev systemPrev_;
 			MettsPrev environPrev_;
 			std::pair<VectorType,VectorType> pureVectors_;
