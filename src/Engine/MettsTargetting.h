@@ -265,28 +265,21 @@ namespace Dmrg {
 					evolve(i,0,n1-1,Eg,direction,sites,loopNumber);
 				}
 
-				// Advance or wft each target vector for beta
-// 				for (size_t i=n1;i<n;i++) {
-// 					evolve(i,n1,n-1,Eg,direction,sites,loopNumber);
-// 				}
-
 				// Advance or wft  collapsed vector
 				evolve(n1,n1,n1-1,Eg,direction,sites,loopNumber);
 
 				// compute imag. time evolution:
 				calcTimeVectors(PairType(0,n1),Eg,direction);
-				
-				// compute collapsed vector
-				mettsCollapse_(targetVectors_[n1],targetVectors_[0],sites.first,direction);
 
-				if (direction!=prevDirection_) {
-					RealType x = std::norm(targetVectors_[n1]);
-					std::ostringstream msg;
-					msg<<"Changing direction, setting collapsed with norm="<<x;
-					progress_.printline(msg,std::cout);
-					targetVectors_[0]= targetVectors_[n1];
+				// collapse
+				bool hasCollapsed = mettsCollapse_(targetVectors_[n1],
+				                       targetVectors_[0],sites.first,direction);
+				
+				if (hasCollapsed) {
+					std::string s = "  COLLAPSEHERE  ";
+					test(targetVectors_[n1],targetVectors_[n1],direction,s,sites);
 				}
-				prevDirection_ = direction;
+
 				// in-situ measurement
 				cocoon(direction,sites); 
 			}

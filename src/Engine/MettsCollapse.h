@@ -107,13 +107,41 @@ namespace Dmrg {
 		              const LeftRightSuperType& lrs)
 		: mettsStochastics_(mettsStochastics),
 		  lrs_(lrs),
-		  hilbertSize_(mettsStochastics.hilbertSizePerSite())
+		  hilbertSize_(mettsStochastics.hilbertSizePerSite()),
+		  progress_("MettsCollapse",0),
+		  prevDirection_(ProgramGlobals::INFINITE)
 		{}
 
-		void operator()(VectorWithOffsetType& dest2,
-		                const VectorWithOffsetType& src2,
+		bool operator()(VectorWithOffsetType& c,
+		                VectorWithOffsetType& eToTheBetaH,
 		                size_t site,
 		                size_t direction)
+		{
+			const VectorWithOffsetType& src =(c.size()==0) ? eToTheBetaH : c;
+			
+			internalAction(c,src,site,direction);
+			sitesSeen_.push_back(site);
+			
+			if (direction==prevDirection_) return false;
+			prevDirection_ = direction;
+			
+			bool allSitesSeen = checkSites(site);
+			if (!allSitesSeen) return false;
+			
+			sitesSeen_.clear();
+			RealType x = std::norm(c);
+			std::ostringstream msg;
+			msg<<"Changing direction, setting collapsed with norm="<<x;
+			progress_.printline(msg,std::cout);
+			eToTheBetaH = c;
+			return true;
+		}
+
+	private:
+		void internalAction(VectorWithOffsetType& dest2,
+		                    const VectorWithOffsetType& src2,
+		                    size_t site,
+		                    size_t direction)
 		{
 			if (dest2.size()==0) {
 				dest2 =  src2;
@@ -132,7 +160,6 @@ namespace Dmrg {
 			dest2 = (1.0/x) * dest;
 		}
 
-	private:
 		void collapseVector(VectorWithOffsetType& dest,
 		                    const VectorWithOffsetType& src,
 		                    size_t direction,
@@ -195,9 +222,21 @@ namespace Dmrg {
 			for(size_t alpha=0;alpha<p.size();alpha++) p[alpha] /= sum;
 		}
 
+		bool checkSites(size_t site) const
+		{
+			for (size_t i=1;i<site+1;i++) {
+				bool seen = (std::find(sitesSeen_.begin(),sitesSeen_.end(),i) != sitesSeen_.end());
+				if (!seen) return false;
+			}
+			return true;
+		}
+
 		const MettsStochasticsType& mettsStochastics_;
 		const LeftRightSuperType& lrs_;
 		size_t hilbertSize_;
+		PsimagLite::ProgressIndicator progress_;
+		size_t prevDirection_;
+		std::vector<size_t> sitesSeen_;
 	};  //class MettsCollapse
 } // namespace Dmrg
 /*@}*/
