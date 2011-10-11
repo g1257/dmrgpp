@@ -151,7 +151,7 @@ namespace Dmrg {
 			  model_(model),
 			  mettsStruct_(mettsStruct),
 			  wft_(wft),
-			  progress_("MettsTargetting",0),
+			  progress_("MettsTargetting(AlphaStage)",0),
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
 			  hilbertSizePerSite_(model_.hilbertSize()),
@@ -166,18 +166,16 @@ namespace Dmrg {
 							"needs an enabled wft\n");
 
 				RealType tau =mettsStruct_.tau/(mettsStruct_.timeSteps-1);
-				size_t n1 = size_t(mettsStruct_.timeSteps/2);
-				if (mettsStruct_.timeSteps & 1) n1++;
-				size_t n = mettsStruct_.timeSteps + n1;
+				size_t n1 = mettsStruct_.timeSteps;
+				size_t n = mettsStruct_.timeSteps + 1;
 
-				betas_.resize(n);
-				weight_.resize(n+1);
-				targetVectors_.resize(n+1);
+				betas_.resize(n1);
+				weight_.resize(n);
+				targetVectors_.resize(n);
 
 				gsWeight_= 0.01;
-				RealType factor = (1.0 - gsWeight_)/(n+6);
-				RealType sum = setOneInterval(factor,PairType(0,n1),tau*0.5);
-				sum += setOneInterval(factor,PairType(n1,n),tau);
+				RealType factor = (1.0 - gsWeight_)/(n1+4);
+				RealType sum = setOneInterval(factor,PairType(0,n1),tau);
 				weight_[n] = 2*factor;
 				sum += weight_[n];
 
@@ -240,8 +238,8 @@ namespace Dmrg {
 				assert(block1.size()==1);
 
 				PairType sites(block1[0],block2[0]);
-				size_t n1 = size_t(mettsStruct_.timeSteps/2);
-				if (mettsStruct_.timeSteps & 1) n1++;
+				size_t n1 = mettsStruct_.timeSteps;
+				
 				updateStochastics(sites);
 
 				if (direction==INFINITE) {
@@ -249,30 +247,31 @@ namespace Dmrg {
 					return;
 				}
 
-				size_t n = mettsStruct_.timeSteps + n1;
-
 				// Advance or wft each target vector for beta/2
 				for (size_t i=0;i<n1;i++) {
 					evolve(i,0,n1-1,Eg,direction,sites,loopNumber);
 				}
 
 				// Advance or wft each target vector for beta
-				for (size_t i=n1;i<n;i++) {
-					evolve(i,n1,n-1,Eg,direction,sites,loopNumber);
-				}
+// 				for (size_t i=n1;i<n;i++) {
+// 					evolve(i,n1,n-1,Eg,direction,sites,loopNumber);
+// 				}
 
 				// Advance or wft  collapsed vector
-				evolve(n,n,n1-1,Eg,direction,sites,loopNumber);
+				evolve(n1,n1,n1-1,Eg,direction,sites,loopNumber);
 
 				// compute imag. time evolution:
 				calcTimeVectors(PairType(0,n1),Eg,direction);
-				calcTimeVectors(PairType(n1,n),Eg,direction);
 				
 				// compute collapsed vector
-				mettsCollapse_(targetVectors_[n],targetVectors_[0],sites.first,direction);
+				mettsCollapse_(targetVectors_[n1],targetVectors_[0],sites.first,direction);
 
 				if (direction!=prevDirection_) {
-					targetVectors_[0]=targetVectors_[n];
+					RealType x = std::norm(targetVectors_[n1]);
+					std::ostringstream msg;
+					msg<<"Changing direction, setting collapsed with norm="<<x;
+					progress_.printline(msg,std::cout);
+					targetVectors_[0]= targetVectors_[n1];
 				}
 				prevDirection_ = direction;
 				// in-situ measurement
@@ -413,7 +412,11 @@ namespace Dmrg {
 			{
 				size_t alphaFixed = mettsStochastics_.chooseRandomState(sites.first);
 				size_t betaFixed = mettsStochastics_.chooseRandomState(sites.second);
-				std::cerr<<"GETNEWPURES site="<<sites<<"\n";
+
+				std::ostringstream msg;
+				msg<<"New pures for site"<<sites;
+				progress_.printline(msg,std::cerr);
+
 				const MatrixType& transformSystem = 
 				                         wft_.transform(ProgramGlobals::SYSTEM);
 				VectorType newVector1(transformSystem.n_row());
@@ -430,8 +433,8 @@ namespace Dmrg {
 // 				environPrev_.ns = pureVectors_.second.size();
 				pureVectors_.second = newVector2;
  				setFromInfinite(targetVectors_[0]);
- 				setFromInfinite(targetVectors_[n1]);
- 				assert(std::norm(targetVectors_[0])>1e-6 && std::norm(targetVectors_[n1])>1e-6);
+ 				
+ 				assert(std::norm(targetVectors_[0])>1e-6);
 
 				systemPrev_.fixed = alphaFixed;
 				systemPrev_.permutationInverse = lrs_.left().permutationInverse();
@@ -473,7 +476,11 @@ namespace Dmrg {
 				size_t newSize =  (transform.n_col()==0) ? (ns*ns) : 
 				                        transform.n_col() * model_.hilbertSize();
 				newVector.resize(newSize);
-				std::cerr<<"NEW SIZE OF PURE= "<<newSize<<"\n";
+
+				std::ostringstream msg;
+				msg<<"New size of pure is "<<newSize;
+				progress_.printline(msg,std::cerr);
+
 				for (size_t gamma=0;gamma<newVector.size();gamma++) {
 					newVector[gamma] = 0;
 					for (size_t alpha=0;alpha<ns;alpha++) {
@@ -604,19 +611,20 @@ namespace Dmrg {
 			                     RealType Eg,
 			                     size_t systemOrEnviron)
 			{
-				
 				const VectorWithOffsetType& phi = targetVectors_[startEnd.first];
-				std::cerr<<"TIME VECTOR START = "<<startEnd.first<<" norm=";
-				std::cerr<<std::norm(phi)<<"\n";
+				std::ostringstream msg;
+				msg<<" vector number "<<startEnd.first<<" has norm ";
+				msg<<std::norm(phi);
+				progress_.printline(msg,std::cout);
 				if (std::norm(phi)<1e-6) setFromInfinite(targetVectors_[startEnd.first]);
-				
+
 				std::vector<MatrixType> V(phi.sectors());
 				std::vector<MatrixType> T(phi.sectors());
-				
+
 				std::vector<size_t> steps(phi.sectors());
-				
+
 				triDiag(phi,T,V,steps);
-				
+
 				std::vector<std::vector<RealType> > eigs(phi.sectors());
 						
 				for (size_t ii=0;ii<phi.sectors();ii++) 
@@ -634,10 +642,11 @@ namespace Dmrg {
 			                       size_t systemOrEnviron)
 			{
 				for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
+					VectorWithOffsetType v;
 					// Only time differences here (i.e. betas_[i] not betas_[i]+currentBeta_)
-					calcTargetVector(targetVectors_[i],
-					        targetVectors_[startEnd.first],T,V,Eg,eigs,i,steps);
-					//normalize(targetVectors_[i]);
+					calcTargetVector(v,targetVectors_[startEnd.first],T,V,Eg,eigs,i,steps);
+					RealType x = 1.0/std::norm(v);
+					targetVectors_[i]= x* v;
 				}
 			}
 
@@ -646,7 +655,7 @@ namespace Dmrg {
 			                      const std::vector<MatrixType>& T,
 			                      const std::vector<MatrixType>& V,
 			                      RealType Eg,
-      		                      const std::vector<VectorType>& eigs,
+			                      const std::vector<VectorType>& eigs,
 	    	                      size_t timeIndex,
 			                      std::vector<size_t> steps)
 			{
@@ -664,9 +673,9 @@ namespace Dmrg {
 			                      const MatrixType& T,
 			                      const MatrixType& V,
 			                      RealType Eg,
-      		                      const VectorType& eigs,
-	    	                      size_t timeIndex,
-	  		                      size_t steps,
+			                      const VectorType& eigs,
+			                      size_t timeIndex,
+			                      size_t steps,
 			                      size_t i0)
 			{
 				size_t n2 = steps;

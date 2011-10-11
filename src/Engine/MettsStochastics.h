@@ -205,8 +205,7 @@ namespace Dmrg {
 			msg<<"targetQn="<<qn<<" sites="<<addedSites_.size()<<" Pure=";
 			for (size_t i=0;i<pureStates_.size();i++)
 				msg<<pureStates_[i]<<" ";
-			msg<<"\n";
-			std::cout<<msg.str();	
+			progress_.printline(msg,std::cout);
 		}
 
 		// assumes states in basisOfOneSite_ are ordered in increasing

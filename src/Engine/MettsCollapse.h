@@ -127,8 +127,9 @@ namespace Dmrg {
 			VectorWithOffsetType dest;
 			size_t indexFixed = mettsStochastics_.chooseRandomState(p);
 			collapseVector(dest,dest2,direction,indexFixed);
-			assert(std::norm(dest)>1e-6);
-			dest2 = dest;
+			RealType x = std::norm(dest);
+			assert(x>1e-6);
+			dest2 = (1.0/x) * dest;
 		}
 
 	private:
@@ -146,7 +147,7 @@ namespace Dmrg {
 				collapseVector(vdest,vsrc,direction,i0,indexFixed);
 				dest.setDataInSector(vdest,i0);
 			}
-			assert(std::norm(dest)>1e-6);
+			//assert(std::norm(dest)>1e-6);
 		}
 
 		void collapseVector(VectorType& w,
@@ -190,6 +191,7 @@ namespace Dmrg {
 				sum += x*x;
 				p[alpha] = x*x;
 			}
+			assert(fabs(sum)>1e-6);
 			for(size_t alpha=0;alpha<p.size();alpha++) p[alpha] /= sum;
 		}
 
