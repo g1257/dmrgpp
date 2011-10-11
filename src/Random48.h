@@ -41,7 +41,7 @@ namespace PsimagLite {
 			return static_cast<T>(drand48());
 		}
 
-		T operator()() { return static_cast<T>(drand48()); }
+		T operator()() const { return static_cast<T>(drand48()); }
 	}; // Random48
 } // namespace PsimagLite
 
