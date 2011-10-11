@@ -132,20 +132,20 @@ namespace Dmrg {
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
-			
-			CorrectionTargetting(
-	  				const LeftRightSuperType& lrs,
- 					const ModelType& model,
-					const TargettingParamsType& correctionStruct,
-     				const WaveFunctionTransfType& wft) // wft is ignored here
-				: lrs_(lrs),
-				  model_(model),
-				  correctionStruct_(correctionStruct),
-				  waveFunctionTransformation_(wft),
-				  progress_("CorrectionTargetting",0),
-				  stage_(DISABLED),
-				  targetVectors_(1),
-				  applyOpLocal_(lrs)
+
+			CorrectionTargetting(const LeftRightSuperType& lrs,
+ 			                     const ModelType& model,
+			                     const TargettingParamsType& correctionStruct,
+     		                     const WaveFunctionTransfType& wft, // wft is ignored here
+			                     const size_t& quantumSector) // quantumSector ignored here
+			: lrs_(lrs),
+			  model_(model),
+			  correctionStruct_(correctionStruct),
+			  waveFunctionTransformation_(wft),
+			  progress_("CorrectionTargetting",0),
+			  stage_(DISABLED),
+			  targetVectors_(1),
+			  applyOpLocal_(lrs)
 			{
 			}
 			

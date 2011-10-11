@@ -166,10 +166,10 @@ namespace Dmrg {
 				quantumSector_(0),
 				stepCurrent_(0),
 				checkpoint_(parameters_,concurrency.rank()),
-				waveFunctionTransformation_(parameters_,model_.hilbertSize()),
+				wft_(parameters_,model_.hilbertSize()),
 				diagonalization_(parameters,model,concurrency,verbose_,
-				  useReflection_,io_,quantumSector_,waveFunctionTransformation_),
-				truncate_(lrs_,waveFunctionTransformation_,concurrency_,
+				  useReflection_,io_,quantumSector_,wft_),
+				truncate_(lrs_,wft_,concurrency_,
 				  parameters_,model_.maxConnections(),verbose_)
 		{
 			io_.print(parameters_);
@@ -211,10 +211,10 @@ namespace Dmrg {
 				sitesIndices_.push_back(X[i]);
 			for (size_t i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
 
-			//waveFunctionTransformation_.init();
-			//if (parameters_.options.find("nowft")!=std::string::npos) waveFunctionTransformation_.disable();
+			//wft_.init();
+			//if (parameters_.options.find("nowft")!=std::string::npos) wft_.disable();
 
-			TargettingType psi(lrs_,model_,targetStruct_,waveFunctionTransformation_);
+			TargettingType psi(lrs_,model_,targetStruct_,wft_,quantumSector_);
 			io_.print(psi);
 
 			MyBasisWithOperators pS("pS");
@@ -255,7 +255,7 @@ namespace Dmrg {
 		size_t quantumSector_;
 		int stepCurrent_;
 		CheckpointType checkpoint_;
-		WaveFunctionTransfType waveFunctionTransformation_;
+		WaveFunctionTransfType wft_;
 		std::vector<BlockType> sitesIndices_;
 		DiagonalizationType diagonalization_;
 		TruncationType truncate_;
@@ -365,7 +365,7 @@ namespace Dmrg {
 			size_t direction=EXPAND_SYSTEM;
 			if (stepLength<0) direction=EXPAND_ENVIRON;
 
-			waveFunctionTransformation_.setStage(direction);
+			wft_.setStage(direction);
 
 			int stepFinal = stepCurrent_+stepLength;
 			

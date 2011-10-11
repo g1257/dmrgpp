@@ -130,14 +130,14 @@ namespace Dmrg {
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
 			
-			GroundStateTargetting(
-	  				const LeftRightSuperType& lrs,
- 					const ModelType& model,
-					const TargettingParamsType& t,
-     				const WaveFunctionTransfType& wft) // wft is ignored here
-				: lrs_(lrs),
-				       waveFunctionTransformation_(wft),
-				       progress_("GroundStateTargetting",0)
+			GroundStateTargetting(const LeftRightSuperType& lrs,
+			                      const ModelType& model,
+			                      const TargettingParamsType& t,
+			                      const WaveFunctionTransfType& wft,  // wft is ignored here
+			                      const size_t& quantumSector) // quantumSector is ignored here
+			: lrs_(lrs),
+			  waveFunctionTransformation_(wft),
+			  progress_("GroundStateTargetting",0)
 			{
 			}
 			

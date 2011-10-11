@@ -145,12 +145,14 @@ namespace Dmrg {
 			MettsTargetting(const LeftRightSuperType& lrs,
 	 		                const ModelType& model,
 			                const TargettingParamsType& mettsStruct,
-			                const WaveFunctionTransfType& wft)
+			                const WaveFunctionTransfType& wft,
+			                const size_t& quantumSector)
 			: stage_(DISABLED),
 			  lrs_(lrs),
 			  model_(model),
 			  mettsStruct_(mettsStruct),
 			  wft_(wft),
+			  quantumSector_(quantumSector),
 			  progress_("MettsTargetting(AlphaStage)",0),
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
@@ -173,7 +175,7 @@ namespace Dmrg {
 				weight_.resize(n);
 				targetVectors_.resize(n);
 
-				gsWeight_= 0.01;
+				gsWeight_= 0.0;
 				RealType factor = (1.0 - gsWeight_)/(n1+4);
 				RealType sum = setOneInterval(factor,PairType(0,n1),tau);
 				weight_[n] = 2*factor;
@@ -203,14 +205,25 @@ namespace Dmrg {
 			void setGs(const std::vector<TargetVectorType>& v,
 				   const SomeBasisType& someBasis)
 			{
-				psi_.set(v,someBasis);
+				//psi_.set(v,someBasis);
 			}
 
-			const RealType& operator[](size_t i) const { return psi_[i]; }
+			const RealType& operator[](size_t i) const
+			{
+				std::string s("MettsTargetting: invalid const operator[]\n");
+				throw std::runtime_error(s.c_str());
+			}
 
-			RealType& operator[](size_t i) { return psi_[i]; }
+			RealType& operator[](size_t i)
+			{
+				std::string s("MettsTargetting: invalid operator[]\n");
+				throw std::runtime_error(s.c_str());
+			}
 
-			const VectorWithOffsetType& gs() const { return psi_; }
+			const VectorWithOffsetType& gs() const 
+			{
+				return targetVectors_[0];
+			}
 
 			bool includeGroundStage() const {return (fabs(gsWeight_)>1e-6); }
 
@@ -303,10 +316,13 @@ namespace Dmrg {
 
 			void initialGuess(VectorWithOffsetType& v) const
 			{
-				std::ostringstream msg;
-				msg<<"WARNING: initial guess: Needs work";
-				progress_.printline(msg,std::cout);
- 				wft_.setInitialVector(v,psi_,lrs_);
+				std::string s("MettsTargetting: Invalid call to initialGuess\n");
+				throw std::runtime_error(s.c_str());
+// 				std::ostringstream msg;
+// 				msg<<"WARNING: initial guess: Needs work";
+// 				progress_.printline(msg,std::cout);
+//  				wft_.setInitialVector(v,psi_,lrs_);
+				
 // 				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
 // 				if (!b) return;
 // 				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
@@ -385,11 +401,12 @@ namespace Dmrg {
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 
-					VectorWithOffsetType phiNew = psi_; // same sectors as g.s.
-
+					VectorWithOffsetType phiNew; // same sectors as g.s.
+					//phiNew.populateSectors(lrs_.super());
+					populateCorrectSector(phiNew);
 					// OK, now that we got the partition number right, let's wft:
 					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_);
-					phiNew.collapseSectors();
+					//phiNew.collapseSectors();
 					assert(std::norm(phiNew)>1e-6);
 					targetVectors_[index] = phiNew;
 				} else {
@@ -400,14 +417,26 @@ namespace Dmrg {
 
 			void updateStochastics(const PairType& sites)
 			{
-				// only way of getting the quantum number where there
-				// g.s. (and therefore the pure) resides
-				size_t m = psi_.sector(0);
+				// only way of getting the quantum number where the
+				//  the pure resides
+				size_t m = getPartition();
 				size_t qn = lrs_.super().qn(lrs_.super().partition(m));
 				
 				mettsStochastics_.update(qn,sites);
 			}
 
+			size_t getPartition() const
+			{
+				size_t total = lrs_.super().partition()-1;
+				for (size_t i=0;i<total;i++) {
+					// Do only one sector unless doing su(2) with j>0, then do all m's
+					if (lrs_.super().pseudoEffectiveNumber(
+						lrs_.super().partition(i))==quantumSector_ )
+						return i;
+				}
+				throw std::runtime_error("MettsTargetting: getPartition()\n");
+			}
+	
 			void getNewPures(const PairType& sites,size_t n1)
 			{
 				size_t alphaFixed = mettsStochastics_.chooseRandomState(sites.first);
@@ -534,17 +563,32 @@ namespace Dmrg {
 				}
 			}
 
+			void populateCorrectSector(VectorWithOffsetType& phi) const
+			{
+				size_t total = lrs_.super().partition()-1;
+				size_t m = getPartition();
+				std::vector<VectorType> vv;
+				for (size_t i=0;i<total;i++) {
+					size_t bs = lrs_.super().partition(i+1)-lrs_.super().partition(i);
+					if (i!=m) bs=0;
+					VectorType vone(bs);
+					vv.push_back(vone);
+				}
+				
+				phi.set(vv,lrs_.super());
+				assert(phi.sectors()==1);
+			}
+
 			void setFromInfinite(VectorWithOffsetType& phi) const
 			{
-				phi = psi_;
-				assert(phi.sectors()==1);
-
+				populateCorrectSector(phi);
 				for (size_t ii=0;ii<phi.sectors();ii++) {
 					size_t i0 = phi.sector(ii);
 					VectorType v;
 					getFullVector(v,i0);
 					phi.setDataInSector(v,i0);
 				}
+				
 				assert(std::norm(phi)>1e-6);
 			}
 
@@ -552,7 +596,7 @@ namespace Dmrg {
 			void cocoon(size_t direction,const PairType& sites) const
 			{
 				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
-				test(psi_,psi_,direction,"<PSI|A|PSI>",sites);
+				//test(psi_,psi_,direction,"<PSI|A|PSI>",sites);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
@@ -762,7 +806,9 @@ namespace Dmrg {
 				/* std::ostringstream msg;
 				msg<<"Calling tridiagonalDecomposition...\n";
 				progress_.printline(msg,std::cerr);*/
-				assert(PsimagLite::norm(phi2)>1e-8);
+				RealType x = PsimagLite::norm(phi2);
+				assert(x>1e-6);
+				std::cerr<<"norm of phi2="<<x<<"\n";
 				lanczosSolver.tridiagonalDecomposition(phi2,ab,V);
 				ab.buildDenseMatrix(T);
 				//check1(V,phi2);
@@ -874,11 +920,12 @@ namespace Dmrg {
 			}
 
 			size_t stage_;
-			VectorWithOffsetType psi_;
+			//VectorWithOffsetType psi_;
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
 			const TargettingParamsType& mettsStruct_;
 			const WaveFunctionTransfType& wft_;
+			const size_t& quantumSector_;
 			PsimagLite::ProgressIndicator progress_;
 			RealType currentBeta_;
 			std::vector<RealType> betas_,weight_;

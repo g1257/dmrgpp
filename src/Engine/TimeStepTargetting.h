@@ -131,20 +131,22 @@ namespace Dmrg {
 			static size_t const SUM = TargettingParamsType::SUM;
 			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
 
-			TimeStepTargetting(
-	  				const LeftRightSuperType& lrs,
-	 				const ModelType& model,
-					const TargettingParamsType& tstStruct,
-					const WaveFunctionTransfType& wft)
-
-				: stage_(tstStruct.sites.size(),DISABLED),lrs_(lrs),
-					model_(model),tstStruct_(tstStruct),waveFunctionTransformation_(wft),
-					progress_("TimeStepTargetting",0),currentTime_(0),
-					times_(tstStruct_.timeSteps),weight_(tstStruct_.timeSteps),
-					targetVectors_(tstStruct_.timeSteps),
-					//io_(tstStruct_.filename,parallelRank_),
-					applyOpLocal_(lrs)
-
+			TimeStepTargetting(const LeftRightSuperType& lrs,
+	 		                   const ModelType& model,
+			                   const TargettingParamsType& tstStruct,
+			                   const WaveFunctionTransfType& wft,
+			                   const size_t& quantumSector) // quantumSector is ignored here
+			: stage_(tstStruct.sites.size(),DISABLED),
+			  lrs_(lrs),
+			  model_(model),
+			  tstStruct_(tstStruct),
+			  waveFunctionTransformation_(wft),
+			  progress_("TimeStepTargetting",0),
+			  currentTime_(0),
+			  times_(tstStruct_.timeSteps),
+			  weight_(tstStruct_.timeSteps),
+			  targetVectors_(tstStruct_.timeSteps),
+			  applyOpLocal_(lrs)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" TimeStepTargetting "
 							"needs an enabled wft\n");

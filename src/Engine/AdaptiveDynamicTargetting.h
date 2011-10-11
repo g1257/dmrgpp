@@ -140,27 +140,24 @@ namespace Dmrg {
 		static size_t const SUM = TargettingParamsType::SUM;
 
 		static const size_t parallelRank_ = 0; // DYNT needs to support concurrency FIXME
-		
-		
-		AdaptiveDynamicTargetting(
-				const LeftRightSuperType& lrs,
-				const ModelType& model,
-				const TargettingParamsType& tstStruct,
-				const WaveFunctionTransfType& wft)
-		:	
-		 	stage_(tstStruct.sites.size(),DISABLED),
-		 	lrs_(lrs),
-		 	model_(model),
-		 	tstStruct_(tstStruct),
-		 	waveFunctionTransformation_(wft),
-		 	lastLanczosVector_(0),
-		 	dynCounter_(0),
-		 	progress_("AdaptiveDynamicTargetting",0),
-		 	applyOpLocal_(lrs),
-		 	gsWeight_(1.0),
-		 	targetVectors_(2),
-		 	done_(false)
 
+		AdaptiveDynamicTargetting(const LeftRightSuperType& lrs,
+		                          const ModelType& model,
+		                          const TargettingParamsType& tstStruct,
+		                          const WaveFunctionTransfType& wft,
+		                          const size_t& quantumSector) // quantumSector ignored here
+		: stage_(tstStruct.sites.size(),DISABLED),
+		  lrs_(lrs),
+		  model_(model),
+		  tstStruct_(tstStruct),
+		  waveFunctionTransformation_(wft),
+		  lastLanczosVector_(0),
+		  dynCounter_(0),
+		  progress_("AdaptiveDynamicTargetting",0),
+		  applyOpLocal_(lrs),
+		  gsWeight_(1.0),
+		  targetVectors_(2),
+		  done_(false)
 		{
 			if (!wft.isEnabled()) throw std::runtime_error(" DynamicTargetting "
 					"needs an enabled wft\n");

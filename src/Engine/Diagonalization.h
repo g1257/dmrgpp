@@ -171,6 +171,10 @@ namespace Dmrg {
 		                       bool needsPrinting)
 		{
 			const LeftRightSuperType& lrs= target.leftRightSuper();
+			waveFunctionTransformation_.triggerOn(lrs);
+
+			RealType gsEnergy = 0;
+			if (!target.includeGroundStage()) return gsEnergy;
 
 			bool onlyWft = ((parameters_.finiteLoop[loopIndex].
 					saveOption & 2)>0) ? true : false;
@@ -182,7 +186,7 @@ namespace Dmrg {
 			TargetVectorType tmpVec;
 			std::vector<TargetVectorType> vecSaved;
 			std::vector<RealType> energySaved;
-			RealType gsEnergy;
+			
 			size_t total = lrs.super().partition()-1;
 
 			energySaved.resize(total);
@@ -215,7 +219,6 @@ namespace Dmrg {
 					VectorWithOffsetType;
 			VectorWithOffsetType initialVector(weights,lrs.super());
 			
-			waveFunctionTransformation_.triggerOn(lrs);
 			target.initialGuess(initialVector);
 			
 

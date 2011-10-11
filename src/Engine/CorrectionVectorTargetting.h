@@ -148,21 +148,20 @@ namespace Dmrg {
 
 		static const size_t parallelRank_ = 0; // DYNT needs to support concurrency FIXME
 
-		CorrectionVectorTargetting(
-				const LeftRightSuperType& lrs,
-				const ModelType& model,
-				const TargettingParamsType& tstStruct,
-				const WaveFunctionTransfType& wft)
-		:	
-		 	stage_(tstStruct.sites.size(),DISABLED),
-		 	lrs_(lrs),
-		 	model_(model),
-		 	tstStruct_(tstStruct),
-		 	waveFunctionTransformation_(wft),
-		 	progress_("CorrectionVectorTargetting",0),
-		 	applyOpLocal_(lrs),
-		 	gsWeight_(1.0),
-		 	targetVectors_(3)
+		CorrectionVectorTargetting(const LeftRightSuperType& lrs,
+		                           const ModelType& model,
+		                           const TargettingParamsType& tstStruct,
+		                           const WaveFunctionTransfType& wft,
+		                           const size_t& quantumSector) // quantumSector ignored here
+		: stage_(tstStruct.sites.size(),DISABLED),
+		 lrs_(lrs),
+		 model_(model),
+		 tstStruct_(tstStruct),
+		 waveFunctionTransformation_(wft),
+		 progress_("CorrectionVectorTargetting",0),
+		 applyOpLocal_(lrs),
+		 gsWeight_(1.0),
+		 targetVectors_(3)
 		{
 			if (!wft.isEnabled()) throw std::runtime_error(" CorrectionVectorTargetting "
 					"needs an enabled wft\n");
