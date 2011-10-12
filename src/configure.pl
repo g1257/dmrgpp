@@ -782,7 +782,7 @@ int main(int argc,char *argv[])
 	}
 	if (targetting=="MettsTargetting") { // experimental, do not use
 		mainLoop<ParametersModelType,GeometryType,MyConcurrency,IoInputType,$modelName,
-			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,MettsTargetting,
+			ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,MettsTargetting,
 			MySparseMatrixReal>
 			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
 		return 0;

@@ -91,9 +91,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "IoSimple.h"
 
 namespace Dmrg {
-	
-
-
 	template<typename LeftRightSuperType,typename VectorWithOffsetType>
 	class WaveFunctionTransfFactory {
 		typedef PsimagLite::IoSimple IoType;

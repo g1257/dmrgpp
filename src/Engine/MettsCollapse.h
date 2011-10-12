@@ -118,16 +118,16 @@ namespace Dmrg {
 		                size_t direction)
 		{
 			const VectorWithOffsetType& src =(c.size()==0) ? eToTheBetaH : c;
-			
+
 			internalAction(c,src,site,direction);
 			sitesSeen_.push_back(site);
 			
 			if (direction==prevDirection_) return false;
 			prevDirection_ = direction;
-			
+
 			bool allSitesSeen = checkSites(site);
 			if (!allSitesSeen) return false;
-			
+
 			sitesSeen_.clear();
 			RealType x = std::norm(c);
 			std::ostringstream msg;
@@ -208,7 +208,7 @@ namespace Dmrg {
 
 		void probability(std::vector<RealType>& p,
 		                 const VectorWithOffsetType& src,
-						 size_t direction) const
+		                 size_t direction) const
 		{
 			RealType sum = 0;
 			for(size_t alpha=0;alpha<hilbertSize_;alpha++) {
