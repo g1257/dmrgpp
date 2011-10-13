@@ -40,23 +40,18 @@ namespace PsimagLite {
 	public:
 		typedef long int LongType;
 		typedef T value_type; // legacy name
-		RandomForTests(LongType seed = 127773,size_t rank = 0,size_t nprocs = 1)
-		: seed_(seed),next_(1)
+		RandomForTests() //LongType seed = 127773,size_t rank = 0,size_t nprocs = 1)
+		: next_(1)
 		{
-			if (rank==0 && nprocs==1) return;
-			
-			std::string s("RandomForTests::ctor(...) doesn't support concurrency\n");
-			throw std::runtime_error(s.c_str());			
 		}
 
 		T operator()()
 		{
-			next_ = 16807 * (next_ % seed_) - 2836 * (next_ / seed_);
+			next_ = 16807 * (next_ % 127773) - 2836 * (next_ / 127773);
 			if (next_ <= 0) next_ += 2147483647;
 			return static_cast<T>(next_) / 2147483647.0;
 		}
 	private:
-		LongType seed_;
 		int next_;
 	}; // RandomForTests
 } // namespace PsimagLite
