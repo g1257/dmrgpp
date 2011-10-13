@@ -144,15 +144,21 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeBasisType>
-		size_t fromFull(const VectorType& v,const SomeBasisType& someBasis)
+		void fromFull(const VectorType& v,const SomeBasisType& someBasis)
 		{
-			m_ = findPartition(v,someBasis);
-			offset_ = someBasis.partition(m_);
-			size_t total = someBasis.partition(m_+1) - offset_;
-			size_ = v.size();
-			data_.resize(total);
-			for (size_t i=0;i<total;i++) data_[i] = v[i+offset_];
-			return m_;
+			size_ = someBasis.size();
+			try {
+				m_ = findPartition(v,someBasis);
+				offset_ = someBasis.partition(m_);
+				size_t total = someBasis.partition(m_+1) - offset_;
+				data_.resize(total);
+				for (size_t i=0;i<total;i++) data_[i] = v[i+offset_];
+			} catch (std::exception& e) {
+				std::cerr<<e.what();
+				m_=0;
+				offset_=0;
+				data_.resize(0);
+			}
 		}
 
 		size_t sectors() const { return 1; }
