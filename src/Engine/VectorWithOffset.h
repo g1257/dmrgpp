@@ -165,7 +165,7 @@ namespace Dmrg {
 
 		void setDataInSector(const VectorType& v,size_t dummy)
 		{
-			throw std::runtime_error("You shouldn' be here!!\n");
+			data_=v;
 		}
 
 		void extract(VectorType& v, size_t dummy = 0) const
@@ -226,9 +226,14 @@ namespace Dmrg {
 
 		FieldType& operator[](size_t i)
 		{
-			if (i<offset_ || i>= (offset_+data_.size()))
-				throw std::runtime_error("VectorWithOffset\n");
+// 			if (i<offset_ || i>= (offset_+data_.size()))
+// 				throw std::runtime_error("VectorWithOffset\n");
 			return data_[i-offset_];
+		}
+		
+		const FieldType& fastAccess(size_t i,size_t j) const 
+		{
+			return data_[j];
 		}
 
 		template<typename FieldType2>
@@ -236,6 +241,13 @@ namespace Dmrg {
 
 		template<typename FieldType2>
 		friend FieldType2 std::norm(const Dmrg::VectorWithOffset<std::complex<FieldType2> >& v);
+
+		template<typename FieldType3,typename FieldType2>
+		friend VectorWithOffset<FieldType2> operator*(const FieldType3& value,const VectorWithOffset<FieldType2>& v);
+		
+		template<typename FieldType2>
+		friend FieldType2 multiply(const VectorWithOffset<FieldType2>& v1,
+		                                         const VectorWithOffset<FieldType2>& v2);
 
 	private:
 		template<typename SomeBasisType>
@@ -278,6 +290,21 @@ namespace Dmrg {
 	{
 		s.print(os,"VectorWithOffset");
 		return os;
+	}
+	
+	template<typename FieldType,typename FieldType2>
+	inline VectorWithOffset<FieldType2> operator*(const FieldType& value,const VectorWithOffset<FieldType2>& v)
+	{
+		VectorWithOffset<FieldType2> w = v;
+		w.data_ *= value;
+		return w;
+	}
+	
+	template<typename FieldType>
+	inline FieldType multiply(const VectorWithOffset<FieldType>& v1,
+	                                        const VectorWithOffset<FieldType>& v2)
+	{
+		return v1.data_*v2.data_; // call to * will conj()
 	}
 
 } // namespace Dmrg

@@ -120,7 +120,8 @@ namespace Dmrg {
 		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 
 	public:
-			typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
+
+		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 		typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;

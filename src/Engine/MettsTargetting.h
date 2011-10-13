@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MettsStochastics.h"
 #include <cassert>
 #include "MettsCollapse.h"
+#include "VectorWithOffset.h"
 
 namespace Dmrg {
 	template<

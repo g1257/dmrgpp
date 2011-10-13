@@ -182,7 +182,7 @@ if ($mpi) {
 } else {
 	print FOUT "CXX = $compiler  -O3 -DNDEBUG\n";
 	print FOUT "#Comment out line below for debugging: \n";
-	print FOUT "#CXX = $compiler -g3 -DNDEBUG\n";
+	print FOUT "#CXX = $compiler -g3 \n";
 }
 print FOUT<<EOF;
 EXENAME = dmrg
@@ -443,7 +443,7 @@ int main(int argc,char *argv[])
 	if (targetting=="MettsTargetting") {
 		mainLoop<ParametersModelType,GeometryType,ParametersDmrgSolver<MatrixElementType>,MyConcurrency,
 			IoInputType,
-			$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,MettsTargetting,
+			$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,MettsTargetting,
 			MySparseMatrixReal>
 			(mp,geometry,dmrgSolverParams,concurrency,io,targetting);
 			return 0;
