@@ -124,8 +124,8 @@ namespace PsimagLite {
 	*/
 	template<class T>
 	class CrsMatrix {
-    	public:
-    		typedef T MatrixElementType;
+    public:
+    	typedef T MatrixElementType;
 		typedef T value_type;
 		
 		CrsMatrix() { } 
@@ -263,7 +263,7 @@ namespace PsimagLite {
 		T operator()(int i,int j) const 
 		{
 			for (int k=rowptr_[i];k<rowptr_[i+1];k++) if (colind_[k]==j) return values_[k];
-			return static_cast<T>(0.0);	
+			return static_cast<T>(0.0);
 		}
 
 		int nonZero() const { return colind_.size(); }		
@@ -788,11 +788,13 @@ namespace PsimagLite {
 	}
 
 	template<typename T>
-	bool isHermitian(const CrsMatrix<T>& A)
+	bool isHermitian(const CrsMatrix<T>& A,bool doThrow=false)
 	{
 		for (size_t i=0;i<A.rank();i++) {
 			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-				if (std::norm(A.getValue(k)-std::conj(A(A.getCol(k),i)))>1e-6) return false;
+				if (std::norm(A.getValue(k)-std::conj(A(A.getCol(k),i)))<1e-6) continue;
+				if (!doThrow) return false;
+				throw std::runtime_error("No Hermitian\n");
 			}
 		}
 		return true;
