@@ -1,0 +1,65 @@
+// BEGIN LICENSE BLOCK
+/*
+Copyright (c) 2009 , UT-Battelle, LLC
+All rights reserved
+
+[PsimagLite, Version 1.0.0]
+
+*********************************************************
+THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. 
+
+Please see full open source license included in file LICENSE.
+*********************************************************
+
+*/
+// END LICENSE BLOCK
+
+/** \ingroup PsimagLite */
+/*@{*/
+
+/*! \file RandomForTests.h
+ * 
+ *  THIS RNG IS FOR TESTS, DO NOT USE FOR PRODUCTION, IT'S NOT RANDOM ENOUGH!!
+ *
+ */
+
+#ifndef RANDOM_FOR_TESTS_H
+#define RANDOM_FOR_TESTS_H
+#include <cstdlib>
+#include <iostream>
+#include <string>
+#include <stdexcept>
+
+namespace PsimagLite {
+	template<typename T>
+	class  RandomForTests {
+	public:
+		typedef long int LongType;
+		typedef T value_type; // legacy name
+		RandomForTests(LongType seed = 127773,size_t rank = 0,size_t nprocs = 1)
+		: seed_(seed),next_(1)
+		{
+			if (rank==0 && nprocs==1) return;
+			
+			std::string s("RandomForTests::ctor(...) doesn't support concurrency\n");
+			throw std::runtime_error(s.c_str());			
+		}
+
+		T operator()()
+		{
+			next_ = 16807 * (next_ % seed_) - 2836 * (next_ / seed_);
+			if (next_ <= 0) next_ += 2147483647;
+			return static_cast<T>(next_) / 2147483647.0;
+		}
+	private:
+		LongType seed_;
+		int next_;
+	}; // RandomForTests
+} // namespace PsimagLite
+
+/*@}*/
+#endif // RANDOM_FOR_TESTS_H
