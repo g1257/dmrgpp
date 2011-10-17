@@ -97,11 +97,13 @@ namespace Dmrg {
 		typedef std::pair<size_t,size_t> PairType;
 		typedef typename ModelType::RealType RealType;
 		typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
-		
-		MettsStochastics(const ModelType& model)
+		typedef typename PsimagLite::Random48<RealType> RngType;
+		typedef typename RngType::LongType LongType;
+
+		MettsStochastics(const ModelType& model,const LongType& seed)
 		: model_(model),
 		  progress_("MettsStochastics",0),
-		  random48_(7752834),
+		  random48_(seed),
 		  addedSites_(0)
 		{
 			size_t addedBlockSize = 1;
@@ -231,7 +233,7 @@ namespace Dmrg {
 
 		const ModelType& model_;
 		PsimagLite::ProgressIndicator progress_;
-		PsimagLite::Random48<RealType> random48_;
+		RngType random48_;
 		std::vector<size_t> pureStates_;
 		std::vector<size_t> addedSites_;
 		std::vector<size_t> quantumNumbsOneSite_;

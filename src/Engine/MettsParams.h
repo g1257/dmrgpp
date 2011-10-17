@@ -104,6 +104,7 @@ namespace Dmrg {
 				io.readline(tau,"TSPTau=");
 				io.readline(timeSteps,"TSPTimeSteps=");
 				io.readline(advanceEach,"TSPAdvanceEach=");
+				io.readline(rngSeed,"TSPRngSeed=");
 				
 				typename ModelType::HilbertBasisType basis;
 				std::vector<size_t> quantumNumbs;
@@ -114,6 +115,7 @@ namespace Dmrg {
 			RealType tau;
 			size_t timeSteps;
 			size_t advanceEach;
+			int long long rngSeed;
 			std::vector<size_t> electrons;
 	}; // class MettsParams
 	

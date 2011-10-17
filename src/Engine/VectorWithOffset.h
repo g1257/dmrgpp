@@ -338,4 +338,3 @@ namespace std {
 }
 /*@}*/
 #endif
-

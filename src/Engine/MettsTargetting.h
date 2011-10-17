@@ -158,7 +158,7 @@ namespace Dmrg {
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
 			  hilbertSizePerSite_(model_.hilbertSize()),
-			  mettsStochastics_(model),
+			  mettsStochastics_(model,mettsStruct.rngSeed),
 			  mettsCollapse_(mettsStochastics_,lrs_),
 			  timesWithoutAdvancement_(0),
 			  prevDirection_(INFINITE),
