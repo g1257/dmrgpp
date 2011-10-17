@@ -206,8 +206,7 @@ namespace Dmrg {
 				}
 				for (size_t i=0;i<currentSites.size();i++) {
 					size_t thisSite = currentSites[i];
-					if (i>0 && std::find(currentSites.begin(),currentSites.begin()+i-1,thisSite)!=currentSites.end())
-						break;
+					if (i==1 && currentSites[0]==currentSites[1]) break;
 					raiseOrLowerSymm(thisSite,(symm<qn));
 					symm = getSymmetry();
 					if (symm==qn) break;
@@ -230,10 +229,12 @@ namespace Dmrg {
 		// symmetry
 		void raiseOrLowerSymm(size_t site,bool raiseSymm)
 		{
-			if (raiseSymm && pureStates_[site]<basisOfOneSite_.size()-1) {
-				pureStates_[site]++;
+			if (raiseSymm) {
+				if (pureStates_[site]<basisOfOneSite_.size()-1)
+					pureStates_[site]++;
 				return;
 			}
+			
 			if (pureStates_[site]>0) pureStates_[site]--;
 		}
 
