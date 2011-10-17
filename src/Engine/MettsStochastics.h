@@ -135,6 +135,10 @@ namespace Dmrg {
 		
 		void update(size_t qn,const PairType& sites)
 		{
+			std::vector<size_t> currentSites;
+			currentSites.push_back(sites.first);
+			currentSites.push_back(sites.second);
+
 			if (addedSites_.size()==0) {
 				if (sites.first!=1)
 					throw std::runtime_error("MettsStochastics::update(...): must start from 0\n");
@@ -143,6 +147,8 @@ namespace Dmrg {
 					pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
 				addedSites_.push_back(sites.first-1);
 				addedSites_.push_back(sites.second+1);
+				currentSites.push_back(sites.first-1);
+				currentSites.push_back(sites.second+1);
 			}
 
 			if (sites.first!=sites.second) {
@@ -150,7 +156,7 @@ namespace Dmrg {
 				addedSites_.push_back(sites.second);
 				qnVsSize_.resize(addedSites_.size()+1,0);
 				qnVsSize_[addedSites_.size()]=qn;
-				getStochasticsUpToThisPoint(qn,sites);
+				getStochasticsUpToThisPoint(qn,currentSites);
 				return; // INFINITE
 			} 
 			
@@ -177,12 +183,14 @@ namespace Dmrg {
 			for (size_t i=1;i<sys;i++) {
 				addedSites_.push_back(i);
 				addedSites_.push_back(2*env-i-1);
-				PairType sites(i,2*env-i-1);
+				std::vector<size_t> sites;
+				sites.push_back(i);
+				sites.push_back(2*env-i-1);
 				getStochasticsUpToThisPoint(qnVsSize_[addedSites_.size()],sites);
 			}
 		}
 
-		void getStochasticsUpToThisPoint(size_t qn,const PairType& sites)
+		void getStochasticsUpToThisPoint(size_t qn,const std::vector<size_t>& currentSites)
 		{
 			// fix target quantum number
 			size_t symm = getSymmetry();
@@ -196,12 +204,20 @@ namespace Dmrg {
 					s += std::string(" too many iterations\n");
 					throw std::runtime_error(s.c_str());
 				}
-				raiseOrLowerSymm(sites.first,(symm<qn));
-				symm = getSymmetry();
-				if (sites.second==sites.first) continue;
-				if (symm==qn) break;
-				raiseOrLowerSymm(sites.second,(symm<qn));
-				symm = getSymmetry();
+				for (size_t i=0;i<currentSites.size();i++) {
+					size_t thisSite = currentSites[i];
+					if (i>0 && std::find(currentSites.begin(),currentSites.begin()+i-1,thisSite)!=currentSites.end())
+						break;
+					raiseOrLowerSymm(thisSite,(symm<qn));
+					symm = getSymmetry();
+					if (symm==qn) break;
+				}
+// 				raiseOrLowerSymm(sites.first,(symm<qn));
+// 				symm = getSymmetry();
+// 				if (sites.second==sites.first) continue;
+// 				if (symm==qn) break;
+// 				raiseOrLowerSymm(sites.second,(symm<qn));
+// 				symm = getSymmetry();
 			}
 			std::ostringstream msg;
 			msg<<"targetQn="<<qn<<" sites="<<addedSites_.size()<<" Pure=";
