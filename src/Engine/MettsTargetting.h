@@ -391,12 +391,15 @@ namespace Dmrg {
 				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE) {
 					size_t advance = index;
 					if (stage_ == WFT_ADVANCE) advance = indexAdvance;
+					// don't advance the collapsed vector because we'll recompute
+					if (index==weight_.size()-1) advance=index;
 					std::ostringstream msg;
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 
 					VectorWithOffsetType phiNew; // same sectors as g.s.
 					//phiNew.populateSectors(lrs_.super());
+					assert(std::norm(targetVectors_[advance])>1e-6);
 					populateCorrectSector(phiNew);
 					// OK, now that we got the partition number right, let's wft:
 					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_);
