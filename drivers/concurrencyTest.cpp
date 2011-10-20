@@ -47,11 +47,13 @@ int main(int argc,char *argv[])
 	
 	size_t loop1Total = atoi(argv[1]);
 	size_t ySize = atoi(argv[2]);
-	CommType comm1 = concurrency.newCommFromSegments(ySize);
+	std::pair<CommType,CommType> comm = concurrency.newCommFromSegments(ySize);
 	
-	concurrency.loopCreate(loop1Total,comm1);
+	concurrency.loopCreate(loop1Total,comm.first);
 	size_t i = 0;
 	while(concurrency.loop(i)) {
-		std::cout<<"i="<<i<<" comm1.rank="<<concurrency.rank(comm1)<<"\n";
+		std::cout<<"i="<<i<<" comm1.rank="<<concurrency.rank(comm.first);
+		std::cout<<" comm2.rank="<<concurrency.rank(comm.second)<<" world.rank="<<concurrency.rank()<<"\n";
 	}
 }
+

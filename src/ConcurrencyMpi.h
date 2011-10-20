@@ -92,6 +92,7 @@ namespace PsimagLite {
 	public:
 
 		typedef MPI_Comm CommType;
+		typedef std::pair<CommType,CommType> CommPairType;
 
 		ConcurrencyMpi(int argc, char *argv[]) : step_(-1),total_(0)
 		{
@@ -127,37 +128,30 @@ namespace PsimagLite {
 			return false;
 		}
 		
-		CommType newCommFromSegments(size_t x,CommType mpiComm=MPI_COMM_WORLD)
+		CommPairType newCommFromSegments(size_t numberOfSegments,CommType mpiComm=MPI_COMM_WORLD)
 		{
 			size_t procs = nprocs(mpiComm);
-			if (procs%x !=0) {
+			if (procs%numberOfSegments !=0) {
 				std::string s("Segment size must be a divisor of nprocs ");
 				s += std::string("__FUNCTION__") + __FILE__+" : " + ttos(__LINE__);
 				throw std::runtime_error(s.c_str());
 			}
 			/* Extract the original group handle */ 
-			MPI_Group origGroup, newGroup;
+			MPI_Group origGroup;
 			MPI_Comm_group(mpiComm, &origGroup); 
 			
 			/* Divide tasks into procs/x distinct groups based upon rank */ 
+			size_t segmentSize = size_t(procs/numberOfSegments);
 			size_t r = rank(mpiComm);
-			size_t segments = size_t(procs/x);
-			std::vector<std::vector<int> > ranks;
-			size_t thisSegment = 0;
-			for (size_t i=0;i<segments;i++) {
-				std::vector<int> tmp;
-				size_t start = i*x;
-				size_t end = (i+1)*x;
-				if (r>=start && r<end) thisSegment = i;
-				for (size_t j=start;j<end;j++) tmp.push_back(j);
-				ranks.push_back(tmp);
-			}
-			MPI_Group_incl(origGroup,x,&(ranks[thisSegment][0]),&newGroup);
-			CommType* newComm = new CommType;
-			garbage_.push_back(newComm);
-			MPI_Comm_create(MPI_COMM_WORLD, newGroup, newComm);
-			return *newComm;
+			std::vector<int> rv;
+
+			getSegmentsDirect(rv,numberOfSegments,segmentSize,r);
+			CommType comm1 = getCommFromSegments(origGroup,rv);
 			
+			getSegmentsAdjuct(rv,numberOfSegments,segmentSize,r);
+			CommType comm2 =getCommFromSegments(origGroup,rv);
+
+			return CommPairType(comm1,comm2);
 		}
 
 		void loopCreate(size_t total,std::vector<size_t> const &weights,CommType mpiComm=MPI_COMM_WORLD)
@@ -183,7 +177,7 @@ namespace PsimagLite {
 			}
 			// set myIndices_
 			myIndices_=indicesOfThisProc_[r1];
-			MPI_Barrier(mpiComm);
+			//MPI_Barrier(mpiComm);
 		}
 
 		void loopCreate(size_t total,CommType mpiComm=MPI_COMM_WORLD)
@@ -495,6 +489,48 @@ namespace PsimagLite {
 				}
 			}
 			return ret;
+		}
+
+		void getSegmentsDirect(std::vector<int>& rv,size_t numberOfSegments,size_t segmentSize,size_t r)
+		{
+			std::vector<std::vector<int> > ranks;
+			size_t thisSegment = 0;
+			for (size_t i=0;i<segmentSize;i++) {
+				std::vector<int> tmp(numberOfSegments);
+				for (size_t j=0;j<numberOfSegments;j++) {
+					tmp[j] = j*segmentSize+i;
+					if (r==size_t(tmp[j])) thisSegment=i;
+				}
+				ranks.push_back(tmp);
+			}
+			rv = ranks[thisSegment];
+		}
+
+		void getSegmentsAdjuct(std::vector<int>& rv,size_t numberOfSegments,size_t segmentSize,size_t r)
+		{
+			
+			std::vector<std::vector<int> > ranks;
+			size_t thisSegment = 0;
+			for (size_t i=0;i<numberOfSegments;i++) {
+				std::vector<int> tmp;
+				size_t start = i*segmentSize;
+				size_t end = (i+1)*segmentSize;
+				if (r>=start && r<end) thisSegment = i;
+				for (size_t j=start;j<end;j++) tmp.push_back(j);
+				ranks.push_back(tmp);
+			}
+			rv = ranks[thisSegment];
+		}
+
+		CommType getCommFromSegments(MPI_Group origGroup,std::vector<int>& rv)
+		{
+			MPI_Group newGroup;
+			int status = MPI_Group_incl(origGroup,rv.size(),&(rv[0]),&newGroup);
+			if (status!=MPI_SUCCESS) throw std::runtime_error("getCommFromSegments\n");
+			CommType* newComm = new CommType;
+			garbage_.push_back(newComm);
+			MPI_Comm_create(MPI_COMM_WORLD, newGroup, newComm);
+			return *newComm;
 		}
 	}; // class ConcurrencyMpi
 

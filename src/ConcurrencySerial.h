@@ -90,6 +90,7 @@ namespace PsimagLite {
 	public:
 
 		typedef int CommType;
+		typedef std::pair<CommType,CommType> CommPairType;
 
 		ConcurrencySerial(int argc,char *argv[]) : step_(-1),total_(0)
 		{}
@@ -109,9 +110,9 @@ namespace PsimagLite {
 		template<typename DataType>
 		void broadcast(DataType &v) { }
 
-		CommType newCommFromSegments(size_t x,CommType mpiComm=0)
+		CommPairType newCommFromSegments(size_t x,CommType mpiComm=0)
 		{
-			return 1;
+			return CommPairType(0,0);
 		}
 
 		void loopCreate(size_t total,CommType dummy= -1)
