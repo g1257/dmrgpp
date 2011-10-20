@@ -88,31 +88,39 @@ namespace PsimagLite {
 	template<typename FieldType>
 	class ConcurrencySerial : public Concurrency<FieldType> {
 	public:
-		
-		ConcurrencySerial(int argc,char *argv[]) { step_= -1; total_=0;}
-		
+
+		typedef int CommType;
+
+		ConcurrencySerial(int argc,char *argv[]) : step_(-1),total_(0)
+		{}
+
 		int nprocs() { return 1;}
-		
+
 		int rank() { return 0; }
 
 		std::string name() const { return "serial"; }
-		
+
 		template<typename DataType>
 		void reduce(DataType& v) {}
-		
+
 		template<typename DataType>
 		void gather(DataType &v) { }
-		
+
 		template<typename DataType>
 		void broadcast(DataType &v) { }
 
-		void loopCreate(size_t total,int dummy= -1)
+		MPI_Comm newCommFromSegments(size_t x,CommType mpiComm=0)
+		{
+			return 1;
+		}
+
+		void loopCreate(size_t total,CommType dummy= -1)
 		{
 			total_ = total;
 			step_=0;
 		}
 
-		void loopCreate(size_t total,std::vector<size_t> const &weights,int dummy= -1)
+		void loopCreate(size_t total,const std::vector<size_t>& weights,CommType dummy= -1)
 		{
 			total_ = total;
 			step_=0;
@@ -120,7 +128,8 @@ namespace PsimagLite {
 
 		bool loop(size_t &i)
 		{
-			if (step_<0 || total_<=0) throw std::runtime_error("ConcurrencySerial::loop() loopCreate() must be called before.\n");
+			if (step_<0 || total_<=0) 
+				throw std::runtime_error("ConcurrencySerial::loop() loopCreate() must be called before.\n");
 			i = step_;
 			step_++;
 			if (i>=total_) {

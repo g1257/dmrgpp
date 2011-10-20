@@ -77,6 +77,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file ConcurrencyMpi.h
  *
  * Implements the Concurrency.h interface for MPI parallelization mode
+ * Implements the Concurrency.h interface for MPI parallelization mode,
+ * supports load-balancing
  */
 #ifndef CONCURRENCY_MPI_HEADER_H
 #define CONCURRENCY_MPI_HEADER_H
@@ -84,10 +86,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 
 namespace PsimagLite {
-	//! Implements the Concurrency.h interface for MPI parallelization mode, supports load-balancing
 	template<typename FieldType>
 	class ConcurrencyMpi : public Concurrency<FieldType> {
 	public:
+
+		typedef MPI_Comm CommType;
+
 		ConcurrencyMpi(int argc, char *argv[])
 		{
 			MPI_Init(&argc,&argv);
@@ -105,14 +109,14 @@ namespace PsimagLite {
 			MPI_Finalize();
 		}
 
-		int nprocs(MPI_Comm mpiComm=MPI_COMM_WORLD) 
+		int nprocs(CommType mpiComm=MPI_COMM_WORLD) 
 		{ 
 			int tmp;
 			MPI_Comm_size(mpiComm,&tmp);
 			return tmp;
 		}
 
-		int rank(MPI_Comm mpiComm=MPI_COMM_WORLD) 
+		int rank(CommType mpiComm=MPI_COMM_WORLD) 
 		{
 			int tmp;
 			MPI_Comm_rank(mpiComm,&tmp);
@@ -124,8 +128,37 @@ namespace PsimagLite {
 			if (rank_==0) return true;
 			return false;
 		}
+		
+		CommType newCommFromSegments(size_t x,CommType mpiComm=MPI_COMM_WORLD)
+		{
+			size_t procs = nprocs(mpiComm);
+			if (procs%x !=0) {
+				std::string s("Segment size must be a divisor of nprocs ");
+				s += std::string("__FUNCTION__") + __FILE___+" : " + ttos(__LINE__);
+				throw std::runtime_error(s.c_str());
+			}
+			/* Extract the original group handle */ 
+			MPI_Group origGroup, newGroup;
+			MPI_Comm_group(mpiComm, &origGroup); 
+			
+			/* Divide tasks into procs/x distinct groups based upon rank */ 
+			int rank = rank(mpiComm);
+			size_t segments = size_t(procs/x);
+			std::vector<std::vector<int> > ranks;
+			size_t thisSegment = 0;
+			for (size_t i=0;i<segments;i++) {
+				std::vector<int> tmp;
+				size_t start = i*x;
+				size_t end = (i+1)*x;
+				if (rank>=start && rank<end) thisSegment = i;
+				for (size_t j=start;j<end;j++) tmp.push_back(j);
+				ranks.push_back(tmp);
+			}
+			MPI_Group_incl(origGroup,x,&(ranks[thisSegment][0]),&newGroup);
+			
+		}
 
-		void loopCreate(size_t total,std::vector<size_t> const &weights,MPI_Comm mpiComm=MPI_COMM_WORLD)
+		void loopCreate(size_t total,std::vector<size_t> const &weights,CommType mpiComm=MPI_COMM_WORLD)
 		{
 			nprocs_=nprocs(mpiComm);
 			rank_=rank(mpiComm);
@@ -151,7 +184,7 @@ namespace PsimagLite {
 			MPI_Barrier(mpiComm);
 		}
 
-		void loopCreate(size_t total,MPI_Comm mpiComm=MPI_COMM_WORLD)
+		void loopCreate(size_t total,CommType mpiComm=MPI_COMM_WORLD)
 		{
 			std::vector<size_t> weights(total,1);
 			loopCreate(total,weights,mpiComm);
@@ -182,7 +215,7 @@ namespace PsimagLite {
 		{
 			step_=0;
 		}
-		
+
 		void reduce(std::vector<double>& v)
 		{
 			std::vector<double> w(v.size());
@@ -223,7 +256,7 @@ namespace PsimagLite {
 			if (rank_==0) m = w;
 		}
 			
-		void gather(std::vector<std::vector<std::complex<double> > > &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
+		void gather(std::vector<std::vector<std::complex<double> > > &v,CommType mpiComm=MPI_COMM_WORLD) 
 		{
 			int i,x;
 			std::vector<std::complex<double> > tmpVec;
@@ -265,7 +298,7 @@ namespace PsimagLite {
 			step_= -1;
 		}
 
-		void gather(std::vector<std::vector<double> > &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
+		void gather(std::vector<std::vector<double> > &v,CommType mpiComm=MPI_COMM_WORLD) 
 		{
 			int x;
 			size_t i;
@@ -306,9 +339,9 @@ namespace PsimagLite {
 			}
 			step_= -1;
 		}
-		
+
 		template<typename T>
-		void gather(std::vector<T> &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
+		void gather(std::vector<T> &v,CommType mpiComm=MPI_COMM_WORLD) 
 		{
 			size_t i;
 
@@ -340,9 +373,9 @@ namespace PsimagLite {
 			}
 			step_= -1;
 		}
-		
+
 		template<typename T>
-		void gather(std::vector<PsimagLite::Matrix<T> > &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
+		void gather(std::vector<PsimagLite::Matrix<T> > &v,CommType mpiComm=MPI_COMM_WORLD) 
 		{
 			size_t i;
 
@@ -383,10 +416,9 @@ namespace PsimagLite {
 			}
 			step_= -1;
 		}
-		
-		
+
 		template<typename T>
-		void gather(std::vector<T*> &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
+		void gather(std::vector<T*> &v,CommType mpiComm=MPI_COMM_WORLD) 
 		{
 			size_t i;
 
@@ -420,24 +452,24 @@ namespace PsimagLite {
 		}
 
 		template<typename T>
-		void broadcast(std::vector<std::vector<T> > &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
+		void broadcast(std::vector<std::vector<T> > &v,CommType mpiComm=MPI_COMM_WORLD) 
 		{ 
 			for (size_t i=0;i<v.size();i++) MpiBroadcast(&(v[i]),0);
 		}
 
 		template<typename DataType>
-		void broadcast(std::vector<DataType> &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
+		void broadcast(std::vector<DataType> &v,CommType mpiComm=MPI_COMM_WORLD) 
 		{ 
 			for (size_t i=0;i<v.size();i++) MpiBroadcast(&(v[i]),0);
 		}
 		
 		template<typename DataType>
-		void broadcast(std::vector<DataType*> &v,MPI_Comm mpiComm=MPI_COMM_WORLD) 
+		void broadcast(std::vector<DataType*> &v,CommType mpiComm=MPI_COMM_WORLD) 
 		{ 
 			for (size_t i=0;i<v.size();i++) MpiBroadcast(v[i],0);
 		}
 
-		void barrier(MPI_Comm mpiComm=MPI_COMM_WORLD)
+		void barrier(CommType mpiComm=MPI_COMM_WORLD)
 		{
 			MPI_Barrier(mpiComm);
 		
@@ -452,17 +484,17 @@ namespace PsimagLite {
 		std::vector<std::vector<int> > indicesOfThisProc_; // given rank and step it maps the index
 		bool assigned_;
 
-		void MpiGather(std::vector<double> &vrec,double vsend,int iproc,MPI_Comm mpiComm)
+		void MpiGather(std::vector<double> &vrec,double vsend,int iproc,CommType mpiComm)
 		{
 			MPI_Gather(&vsend,1,MPI_DOUBLE,&(vrec[0]),1,MPI_DOUBLE,iproc,mpiComm);
 		}
 
-		void MpiGather(std::vector<FieldType> &vrec,FieldType &vsend,int iproc,MPI_Comm mpiComm)
+		void MpiGather(std::vector<FieldType> &vrec,FieldType &vsend,int iproc,CommType mpiComm)
 		{
 			MPI_Gather(&vsend,2,MPI_DOUBLE,&(vrec[0]),2,MPI_DOUBLE,iproc,mpiComm);
 		}
 
-		void MpiGather(std::vector<std::vector<FieldType> > &vrec,std::vector<FieldType> &vsend,int iproc,MPI_Comm mpiComm)
+		void MpiGather(std::vector<std::vector<FieldType> > &vrec,std::vector<FieldType> &vsend,int iproc,CommType mpiComm)
 		{
 			int x = vsend.size();
 			MPI_Gather(&(vsend[0]),2*x,MPI_DOUBLE,&(vrec[0][0]),2*x,MPI_DOUBLE,iproc,mpiComm);
