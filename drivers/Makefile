@@ -1,5 +1,5 @@
 
-LDFLAGS =       -lm  -lpthread -lblas -llapack
+LDFLAGS =       -lm  -lpthread 
 CPPFLAGS = -Werror -Wall -I../src -I../src/JSON -I../src/JSON/JsonParser
 CXX = g++ -g3 -DNDEBUG
 all: $(EXENAME)

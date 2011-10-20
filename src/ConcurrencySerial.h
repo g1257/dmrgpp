@@ -94,9 +94,9 @@ namespace PsimagLite {
 		ConcurrencySerial(int argc,char *argv[]) : step_(-1),total_(0)
 		{}
 
-		int nprocs() { return 1;}
+		int nprocs(CommType comm1=0) { return 1;}
 
-		int rank() { return 0; }
+		int rank(CommType comm1=0) { return 0; }
 
 		std::string name() const { return "serial"; }
 
@@ -109,7 +109,7 @@ namespace PsimagLite {
 		template<typename DataType>
 		void broadcast(DataType &v) { }
 
-		MPI_Comm newCommFromSegments(size_t x,CommType mpiComm=0)
+		CommType newCommFromSegments(size_t x,CommType mpiComm=0)
 		{
 			return 1;
 		}

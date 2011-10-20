@@ -24,23 +24,33 @@ Please see full open source license included in file LICENSE.
 #include <cstdlib>
 #include "Vector.h"
 
-typedef double FieldType;
+typedef double RealType;
 #ifdef USE_MPI
 #include "ConcurrencyMpi.h"
-typedef ConcurrencyMpi<FieldType> ConcurrencyType;
+typedef PsimagLite::ConcurrencyMpi<RealType> ConcurrencyType;
 #else
 #include "ConcurrencySerial.h"
-typedef ConcurrencySerial<FieldType> ConcurrencyType;
+typedef PsimagLite::ConcurrencySerial<RealType> ConcurrencyType;
 #endif
 
 
 int main(int argc,char *argv[])
 {
+	if (argc<3) {
+		std::string s(argv[0]);
+		s += ": Needs loopTotal and segmentSize as args\n";
+		throw std::runtime_error(s.c_str());
+	}
+	typedef ConcurrencyType::CommType CommType;
 	ConcurrencyType concurrency(argc,argv);
 	
-	CommType comm1 = concurrency.newCommFromSegments(ySize);
+	
 	size_t loop1Total = atoi(argv[1]);
+	size_t ySize = atoi(argv[2]);
+	CommType comm1 = concurrency.newCommFromSegments(ySize);
+	
 	concurrency.loopCreate(loop1Total,comm1);
+	size_t i = 0;
 	while(concurrency.loop(i)) {
 		std::cout<<"i="<<i<<" comm1.rank="<<concurrency.rank(comm1)<<"\n";
 	}

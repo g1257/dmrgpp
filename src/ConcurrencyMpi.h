@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CONCURRENCY_MPI_HEADER_H
 #include "ConcurrencyMpiFunctions.h"
 #include "Concurrency.h"
+#include "TypeToString.h"
 
 namespace PsimagLite {
 	template<typename FieldType>
@@ -92,14 +93,9 @@ namespace PsimagLite {
 
 		typedef MPI_Comm CommType;
 
-		ConcurrencyMpi(int argc, char *argv[])
+		ConcurrencyMpi(int argc, char *argv[]) : step_(-1),total_(0)
 		{
 			MPI_Init(&argc,&argv);
-			step_= -1;
-			total_=0;
-			rank_ = rank();
-			nprocs_=nprocs();
-			
 		}
 
 		std::string name() const { return "mpi"; }
@@ -107,6 +103,8 @@ namespace PsimagLite {
 		~ConcurrencyMpi()
 		{
 			MPI_Finalize();
+			for (size_t i=0;i<garbage_.size();i++)
+				delete garbage_[i];
 		}
 
 		int nprocs(CommType mpiComm=MPI_COMM_WORLD) 
@@ -125,7 +123,7 @@ namespace PsimagLite {
 
 		bool root() 
 		{
-			if (rank_==0) return true;
+			if (rank()==0) return true;
 			return false;
 		}
 		
@@ -134,7 +132,7 @@ namespace PsimagLite {
 			size_t procs = nprocs(mpiComm);
 			if (procs%x !=0) {
 				std::string s("Segment size must be a divisor of nprocs ");
-				s += std::string("__FUNCTION__") + __FILE___+" : " + ttos(__LINE__);
+				s += std::string("__FUNCTION__") + __FILE__+" : " + ttos(__LINE__);
 				throw std::runtime_error(s.c_str());
 			}
 			/* Extract the original group handle */ 
@@ -142,7 +140,7 @@ namespace PsimagLite {
 			MPI_Comm_group(mpiComm, &origGroup); 
 			
 			/* Divide tasks into procs/x distinct groups based upon rank */ 
-			int rank = rank(mpiComm);
+			size_t r = rank(mpiComm);
 			size_t segments = size_t(procs/x);
 			std::vector<std::vector<int> > ranks;
 			size_t thisSegment = 0;
@@ -150,37 +148,41 @@ namespace PsimagLite {
 				std::vector<int> tmp;
 				size_t start = i*x;
 				size_t end = (i+1)*x;
-				if (rank>=start && rank<end) thisSegment = i;
+				if (r>=start && r<end) thisSegment = i;
 				for (size_t j=start;j<end;j++) tmp.push_back(j);
 				ranks.push_back(tmp);
 			}
 			MPI_Group_incl(origGroup,x,&(ranks[thisSegment][0]),&newGroup);
+			CommType* newComm = new CommType;
+			garbage_.push_back(newComm);
+			MPI_Comm_create(MPI_COMM_WORLD, newGroup, newComm);
+			return *newComm;
 			
 		}
 
 		void loopCreate(size_t total,std::vector<size_t> const &weights,CommType mpiComm=MPI_COMM_WORLD)
 		{
-			nprocs_=nprocs(mpiComm);
-			rank_=rank(mpiComm);
+			int nprocs1=nprocs(mpiComm);
+			int r1=rank(mpiComm);
 			total_ = total;
 			step_=0;
 
 			// distribute the load among the processors
-			std::vector<int> loads(nprocs_,0);
-			indicesOfThisProc_.resize(nprocs_);
+			std::vector<int> loads(nprocs1,0);
+			indicesOfThisProc_.resize(nprocs1);
 			int r;
 
-			for (r=0;r<nprocs_;r++) indicesOfThisProc_[r].clear();
+			for (r=0;r<nprocs1;r++) indicesOfThisProc_[r].clear();
 
 			assigned_=false;
 			for (size_t i=0;i<total_;i++) {
 				r = findLowestLoad(loads);
 				indicesOfThisProc_[r].push_back(i);
 				loads[r] += weights[i];
-				if (r==rank_) assigned_=true;
+				if (r==r1) assigned_=true;
 			}
 			// set myIndices_
-			myIndices_=indicesOfThisProc_[rank_];
+			myIndices_=indicesOfThisProc_[r1];
 			MPI_Barrier(mpiComm);
 		}
 
@@ -195,7 +197,6 @@ namespace PsimagLite {
 			if (!assigned_) return false;
 			
 			if (step_<0 || total_==0) throw std::runtime_error("ConcurrencySerial::loop() loopCreate() must be called before.\n"); 
-			 //i = rank_ + step_*nprocs_;
 			if (size_t(step_)>=myIndices_.size())  {
 				step_ = -1;
 				return false;
@@ -227,7 +228,7 @@ namespace PsimagLite {
 				throw std::runtime_error(s.c_str());
 			}
 			
-			if (rank_==0) v = w;
+			if (rank()==0) v = w;
 		}
 
 		void reduce(std::vector<std::complex<double> >& v)
@@ -241,7 +242,7 @@ namespace PsimagLite {
 				throw std::runtime_error(s.c_str());
 			}
 			
-			if (rank_==0) v = w;
+			if (rank()==0) v = w;
 		}
 
 		void reduce(PsimagLite::Matrix<double>& m)
@@ -253,7 +254,7 @@ namespace PsimagLite {
 				std::string s = "ConcurrencyMpi: reduce(Matrix) failed\n";
 				throw std::runtime_error(s.c_str());
 			}
-			if (rank_==0) m = w;
+			if (rank()==0) m = w;
 		}
 			
 		void gather(std::vector<std::vector<std::complex<double> > > &v,CommType mpiComm=MPI_COMM_WORLD) 
@@ -269,22 +270,19 @@ namespace PsimagLite {
 				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myindices.size="<<myIndices_.size()<<" line="<<__LINE__<<"\n";
 				throw std::runtime_error("ConcurrencyMpi::gather() loopCreate() must be called before.\n"); 
 			}
-			if (rank_>0) {
+			if (rank()>0) {
 				for (step_=0;step_<myIndices_.size();step_++) {
-					//i = rank_ + step_*nprocs_;
 					i=myIndices_[step_];
 					if (i>=total_) break;
-					//std::cerr<<"sent rank="<<rank_<<" step="<<step_<<" tag="<<i<<"\n";
 					x=v[i].size();
 					MPI_Send(&x,1,MPI_INTEGER,0,i,mpiComm);
-					//std::cerr<<"sent rank="<<rank_<<" step="<<step_<<" tag="<<tag<<"\n";
 					MPI_Send(&(v[i][0]),2*x,MPI_DOUBLE,0,i,mpiComm);
 				
 				}
 			} else {
-				for (int r=1;r<nprocs_;r++) {
+				int nprocs1 = nprocs();
+				for (int r=1;r<nprocs1;r++) {
 					for (step_=0;step_<indicesOfThisProc_[r].size();step_++) {
-						//i = r + step_*nprocs_;
 						i = indicesOfThisProc_[r][step_];
 						if (i>=total_) continue;
 						
@@ -311,22 +309,17 @@ namespace PsimagLite {
 				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myindices.size="<<myIndices_.size()<<" line="<<__LINE__<<"\n";
 				throw std::runtime_error("ConcurrencyMpi::gather() loopCreate() must be called before.\n"); 
 			}
-			if (rank_>0) {
+			if (rank()>0) {
 				for (step_=0;step_<int(myIndices_.size());step_++) {
-					//i = rank_ + step_*nprocs_;
 					i=myIndices_[step_];
 					if (i>=total_) break;
-					//std::cerr<<"sent rank="<<rank_<<" step="<<step_<<" tag="<<i<<"\n";
 					x=v[i].size();
 					MPI_Send(&x,1,MPI_INTEGER,0,i,mpiComm);
-					//std::cerr<<"sent rank="<<rank_<<" step="<<step_<<" tag="<<tag<<"\n";
 					MPI_Send(&(v[i][0]),x,MPI_DOUBLE,0,i,mpiComm);
 				}
 			} else {
-				//std::cerr<<"rank_="<<rank_<<"nprocs="<<nprocs_<<"mpirun="<<mpirun<<"\n";
-				for (int r=1;r<nprocs_;r++) {
+				for (int r=1;r<nprocs();r++) {
 					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
-						//i = r + step_*nprocs_;
 						i=indicesOfThisProc_[r][step_];
 						if (i>=total_) continue;
 						
@@ -352,20 +345,17 @@ namespace PsimagLite {
 				throw std::runtime_error("ConcurrencyMpi::broadcast() loopCreate() must be called before.\n"); 
 			}
 
-			if (rank_>0) {
+			if (rank()>0) {
 				for (step_=0;step_<int(myIndices_.size());step_++) {
-					//i = rank_ + step_*nprocs_;
 					i=myIndices_[step_];
 					if (i>=total_) break;
-					MpiSend(&(v[i]),rank_,i);
+					MpiSend(&(v[i]),rank(),i);
 				
 				}
 			} else {
-				//std::cerr<<"rank_="<<rank_<<"nprocs="<<nprocs_<<"mpirun="<<mpirun<<"\n";
-				for (int r=1;r<nprocs_;r++) {
+				for (int r=1;r<nprocs();r++) {
 					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
 						i=indicesOfThisProc_[r][step_];
-						//i = r + step_*nprocs_;
 						if (i>=total_) continue;
 						MpiRecv(&(v[i]),r,i);
 					}
@@ -385,25 +375,22 @@ namespace PsimagLite {
 				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myIndices_.size()="<<myIndices_.size()<<"\n";
 				throw std::runtime_error("ConcurrencyMpi::broadcast() loopCreate() must be called before.\n"); 
 			}
-
-			if (rank_>0) {
+			int r1 = rank();
+			if (r1>0) {
 				for (step_=0;step_<int(myIndices_.size());step_++) {
-					//i = rank_ + step_*nprocs_;
 					i=myIndices_[step_];
 					if (i>=total_) break;
 					int nrow = v[i].n_row();
 					int ncol = v[i].n_col();
-					MpiSend(&nrow,rank_,i);
-					MpiSend(&ncol,rank_,i);
-					MpiSend(&(v[i]),rank_,i);
+					MpiSend(&nrow,r1,i);
+					MpiSend(&ncol,r1,i);
+					MpiSend(&(v[i]),r1,i);
 				
 				}
 			} else {
-				//std::cerr<<"rank_="<<rank_<<"nprocs="<<nprocs_<<"mpirun="<<mpirun<<"\n";
-				for (int r=1;r<nprocs_;r++) {
+				for (int r=1;r<nprocs();r++) {
 					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
 						i=indicesOfThisProc_[r][step_];
-						//i = r + step_*nprocs_;
 						if (i>=total_) continue;
 						int nrow,ncol;
 						MpiRecv(&nrow,r,i);
@@ -429,20 +416,18 @@ namespace PsimagLite {
 				throw std::runtime_error("ConcurrencyMpi::broadcast() loopCreate() must be called before.\n"); 
 			}
 
-			if (rank_>0) {
+			int r1 = rank();
+			if (r1>0) {
 				for (step_=0;step_<int(myIndices_.size());step_++) {
-					//i = rank_ + step_*nprocs_;
 					i=myIndices_[step_];
 					if (i>=total_) break;
-					MpiSend(v[i],rank_,i);
+					MpiSend(v[i],r1,i);
 				
 				}
 			} else {
-				//std::cerr<<"rank_="<<rank_<<"nprocs="<<nprocs_<<"mpirun="<<mpirun<<"\n";
-				for (int r=1;r<nprocs_;r++) {
+				for (int r=1;r<nprocs();r++) {
 					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
 						i=indicesOfThisProc_[r][step_];
-						//i = r + step_*nprocs_;
 						if (i>=total_) continue;
 						MpiRecv(v[i],r,i);
 					}
@@ -476,9 +461,8 @@ namespace PsimagLite {
 		}
 
 	private:
-		int nprocs_; // total number of processors
+		std::vector<CommType*> garbage_;
 		std::vector<int> myIndices_; // indices assigned to this processor
-		int rank_; // rank of this processor
 		int step_; // step within this processor
 		size_t total_; // total number of indices
 		std::vector<std::vector<int> > indicesOfThisProc_; // given rank and step it maps the index
