@@ -84,6 +84,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include "ConcurrencySerial.h" // for the default Loop
 
+/** How to use the Loop class:
+ * 
+ * #include "Loop.h"
+ * #ifndef USE_MPI
+ * #include "ConcurrencySerial.h"
+ * typedef ConcurrencySerial<> ConcurrencyType;
+ * #else
+ * #include "ConcurrencyMpi.h"
+ * typedef ConcurrencyMpi < double > ConcurrencyType;
+ * #endif
+ * int main(int argc,char *argv[])
+ * {
+ *   ConcurrencyType concurrencry(argc,argv);
+ *   PsimagLite::Loop < ConcurrencyType > loop(concurrency,total);
+ *   size_t i = 0;
+ *   do {
+ *     sum += i;
+ *   } while (loop.next(i));
+ * }
+ */
+
 namespace PsimagLite {
 
 	template<typename ConcurrencyType>
@@ -122,24 +143,22 @@ namespace PsimagLite {
 			init(weights,mpiComm);
 		}
 
-		bool next(size_t &i)
+		void next()
 		{
-			if (!assigned_) return false;
-			
-			if (step_>=myIndices_.size())  {
-				step_ = 0;
-				return false;
-			}
-
-			i=myIndices_[step_];
-
-			if (i>=total_ ) {
-				step_= 0; 
-				return false;
-			}
 			step_++;
-			return true;
 		}
+		
+		bool end() const
+		{
+			return (!assigned_ || step_>=myIndices_.size() || myIndices_[step_]>=total_ );
+		}
+
+// 		bool hasNext() const 
+// 		{
+// 			return (assigned_ && step_<myIndices_.size() && myIndices_[step_]<total_ );
+// 		}
+		
+		size_t index() const { return myIndices_[step_]; }
 
 	private:
 
@@ -197,7 +216,7 @@ namespace PsimagLite {
 
 	public:
 
-		typedef typename ConcurrencyType::CommType CommType;
+		typedef ConcurrencyType::CommType CommType;
 		Loop(ConcurrencyType& concurrency,
 		     size_t total,
 		     std::vector<size_t> const &weights,
@@ -211,17 +230,16 @@ namespace PsimagLite {
 		: total_(total),step_(0)
 		{}
 
-		bool next(size_t &i)
-		{
-			i=step_;
-			
-			if (i>=total_ ) {
-				step_= 0; 
-				return false;
-			}
+		void next()
+		{	
 			step_++;
-			return true;
 		}
+		
+		bool end() const { return step_>=total_; }
+
+// 		bool hasNext() const { return step_ <total_; }
+		
+		size_t index() const { return step_; }
 
 	private:
 		size_t total_; // total number of indices total_(total),
