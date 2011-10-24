@@ -84,20 +84,31 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 
 namespace PsimagLite {
+	
+	class CommSerial {
+
+	public:
+
+		static const int COMM_WORLD = 0;
+	};
+
 	//! Implements the Concurrency.h interface in the Serial case
-	template<typename FieldType>
+	template<typename FieldType=CommSerial>
 	class ConcurrencySerial : public Concurrency<FieldType> {
+
 	public:
 
 		typedef int CommType;
 		typedef std::pair<CommType,CommType> CommPairType;
 
+		static const CommType COMM_WORLD = 0;
+		
 		ConcurrencySerial(int argc,char *argv[]) : step_(-1),total_(0)
 		{}
 
-		int nprocs(CommType comm1=0) { return 1;}
+		int nprocs(CommType comm1=COMM_WORLD) { return 1;}
 
-		int rank(CommType comm1=0) { return 0; }
+		int rank(CommType comm1=COMM_WORLD) { return 0; }
 
 		std::string name() const { return "serial"; }
 
@@ -114,33 +125,6 @@ namespace PsimagLite {
 		{
 			return CommPairType(0,0);
 		}
-
-		void loopCreate(size_t total,CommType dummy= -1)
-		{
-			total_ = total;
-			step_=0;
-		}
-
-		void loopCreate(size_t total,const std::vector<size_t>& weights,CommType dummy= -1)
-		{
-			total_ = total;
-			step_=0;
-		}
-
-		bool loop(size_t &i)
-		{
-			if (step_<0 || total_<=0) 
-				throw std::runtime_error("ConcurrencySerial::loop() loopCreate() must be called before.\n");
-			i = step_;
-			step_++;
-			if (i>=total_) {
-				step_= -1;
-				return false;
-			}
-			return true;
-		}
-
-		void loopReset() { step_=0; }
 
 		bool root() { return true; }
 

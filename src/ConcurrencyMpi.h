@@ -89,10 +89,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 	template<typename FieldType>
 	class ConcurrencyMpi : public Concurrency<FieldType> {
+
 	public:
 
 		typedef MPI_Comm CommType;
 		typedef std::pair<CommType,CommType> CommPairType;
+
+		static const CommType  COMM_WORLD;
 
 		ConcurrencyMpi(int argc, char *argv[]) : step_(-1),total_(0)
 		{
@@ -108,14 +111,14 @@ namespace PsimagLite {
 				delete garbage_[i];
 		}
 
-		int nprocs(CommType mpiComm=MPI_COMM_WORLD) 
+		int nprocs(CommType mpiComm=COMM_WORLD) 
 		{ 
 			int tmp;
 			MPI_Comm_size(mpiComm,&tmp);
 			return tmp;
 		}
 
-		int rank(CommType mpiComm=MPI_COMM_WORLD) 
+		int rank(CommType mpiComm=COMM_WORLD) 
 		{
 			int tmp;
 			MPI_Comm_rank(mpiComm,&tmp);
@@ -128,7 +131,7 @@ namespace PsimagLite {
 			return false;
 		}
 		
-		CommPairType newCommFromSegments(size_t numberOfSegments,CommType mpiComm=MPI_COMM_WORLD)
+		CommPairType newCommFromSegments(size_t numberOfSegments,CommType mpiComm=COMM_WORLD)
 		{
 			size_t procs = nprocs(mpiComm);
 			if (procs%numberOfSegments !=0) {
@@ -154,69 +157,12 @@ namespace PsimagLite {
 			return CommPairType(comm1,comm2);
 		}
 
-		void loopCreate(size_t total,std::vector<size_t> const &weights,CommType mpiComm=MPI_COMM_WORLD)
-		{
-			int nprocs1=nprocs(mpiComm);
-			int r1=rank(mpiComm);
-			total_ = total;
-			step_=0;
-
-			// distribute the load among the processors
-			std::vector<int> loads(nprocs1,0);
-			indicesOfThisProc_.resize(nprocs1);
-			int r;
-
-			for (r=0;r<nprocs1;r++) indicesOfThisProc_[r].clear();
-
-			assigned_=false;
-			for (size_t i=0;i<total_;i++) {
-				r = findLowestLoad(loads);
-				indicesOfThisProc_[r].push_back(i);
-				loads[r] += weights[i];
-				if (r==r1) assigned_=true;
-			}
-			// set myIndices_
-			myIndices_=indicesOfThisProc_[r1];
-			//MPI_Barrier(mpiComm);
-		}
-
-		void loopCreate(size_t total,CommType mpiComm=MPI_COMM_WORLD)
-		{
-			std::vector<size_t> weights(total,1);
-			loopCreate(total,weights,mpiComm);
-		}
-
-		bool loop(size_t &i)
-		{
-			if (!assigned_) return false;
-			
-			if (step_<0 || total_==0) throw std::runtime_error("ConcurrencySerial::loop() loopCreate() must be called before.\n"); 
-			if (size_t(step_)>=myIndices_.size())  {
-				step_ = -1;
-				return false;
-			}
-
-			i=myIndices_[step_];
-			
-			if (i>=total_ ) {
-				step_= -1; 
-				return false;
-			}
-			step_++;
-			return true;
-		}
-
-		void loopReset()
-		{
-			step_=0;
-		}
-
 		void reduce(std::vector<double>& v)
 		{
 			std::vector<double> w(v.size());
 			
 			int x = MPI_Reduce(&(v[0]),&(w[0]),v.size(),
-			                     MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+			                     MPI_DOUBLE,MPI_SUM,0,COMM_WORLD);
 			if (x!=MPI_SUCCESS) {
 				std::string s = "ConcurrencyMpi: reduce(Vector) failed\n";
 				throw std::runtime_error(s.c_str());
@@ -230,7 +176,7 @@ namespace PsimagLite {
 			std::vector<std::complex<double> > w(v.size());
 			
 			int x = MPI_Reduce(&(v[0]),&(w[0]),2*v.size(),
-			                     MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+			                     MPI_DOUBLE,MPI_SUM,0,COMM_WORLD);
 			if (x!=MPI_SUCCESS) {
 				std::string s = "ConcurrencyMpi: reduce(Vector) failed\n";
 				throw std::runtime_error(s.c_str());
@@ -243,7 +189,7 @@ namespace PsimagLite {
 		{
 			PsimagLite::Matrix<double> w(m.n_row(),m.n_col());
 			int n = m.n_row()*m.n_col();
-			int x = MPI_Reduce(&(m(0,0)),&(w(0,0)),n,MPI_DOUBLE,MPI_SUM,0,MPI_COMM_WORLD);
+			int x = MPI_Reduce(&(m(0,0)),&(w(0,0)),n,MPI_DOUBLE,MPI_SUM,0,COMM_WORLD);
 			if (x!=MPI_SUCCESS) {
 				std::string s = "ConcurrencyMpi: reduce(Matrix) failed\n";
 				throw std::runtime_error(s.c_str());
@@ -251,7 +197,7 @@ namespace PsimagLite {
 			if (rank()==0) m = w;
 		}
 			
-		void gather(std::vector<std::vector<std::complex<double> > > &v,CommType mpiComm=MPI_COMM_WORLD) 
+		void gather(std::vector<std::vector<std::complex<double> > > &v,CommType mpiComm=COMM_WORLD) 
 		{
 			int i,x;
 			std::vector<std::complex<double> > tmpVec;
@@ -290,7 +236,7 @@ namespace PsimagLite {
 			step_= -1;
 		}
 
-		void gather(std::vector<std::vector<double> > &v,CommType mpiComm=MPI_COMM_WORLD) 
+		void gather(std::vector<std::vector<double> > &v,CommType mpiComm=COMM_WORLD) 
 		{
 			int x;
 			size_t i;
@@ -328,7 +274,7 @@ namespace PsimagLite {
 		}
 
 		template<typename T>
-		void gather(std::vector<T> &v,CommType mpiComm=MPI_COMM_WORLD) 
+		void gather(std::vector<T> &v,CommType mpiComm=COMM_WORLD) 
 		{
 			size_t i;
 
@@ -359,7 +305,7 @@ namespace PsimagLite {
 		}
 
 		template<typename T>
-		void gather(std::vector<PsimagLite::Matrix<T> > &v,CommType mpiComm=MPI_COMM_WORLD) 
+		void gather(std::vector<PsimagLite::Matrix<T> > &v,CommType mpiComm=COMM_WORLD) 
 		{
 			size_t i;
 
@@ -399,7 +345,7 @@ namespace PsimagLite {
 		}
 
 		template<typename T>
-		void gather(std::vector<T*> &v,CommType mpiComm=MPI_COMM_WORLD) 
+		void gather(std::vector<T*> &v,CommType mpiComm=COMM_WORLD) 
 		{
 			size_t i;
 
@@ -431,24 +377,24 @@ namespace PsimagLite {
 		}
 
 		template<typename T>
-		void broadcast(std::vector<std::vector<T> > &v,CommType mpiComm=MPI_COMM_WORLD) 
+		void broadcast(std::vector<std::vector<T> > &v,CommType mpiComm=COMM_WORLD) 
 		{ 
 			for (size_t i=0;i<v.size();i++) MpiBroadcast(&(v[i]),0);
 		}
 
 		template<typename DataType>
-		void broadcast(std::vector<DataType> &v,CommType mpiComm=MPI_COMM_WORLD) 
+		void broadcast(std::vector<DataType> &v,CommType mpiComm=COMM_WORLD) 
 		{ 
 			for (size_t i=0;i<v.size();i++) MpiBroadcast(&(v[i]),0);
 		}
 		
 		template<typename DataType>
-		void broadcast(std::vector<DataType*> &v,CommType mpiComm=MPI_COMM_WORLD) 
+		void broadcast(std::vector<DataType*> &v,CommType mpiComm=COMM_WORLD) 
 		{ 
 			for (size_t i=0;i<v.size();i++) MpiBroadcast(v[i],0);
 		}
 
-		void barrier(CommType mpiComm=MPI_COMM_WORLD)
+		void barrier(CommType mpiComm=COMM_WORLD)
 		{
 			MPI_Barrier(mpiComm);
 		
@@ -456,11 +402,6 @@ namespace PsimagLite {
 
 	private:
 		std::vector<CommType*> garbage_;
-		std::vector<int> myIndices_; // indices assigned to this processor
-		int step_; // step within this processor
-		size_t total_; // total number of indices
-		std::vector<std::vector<int> > indicesOfThisProc_; // given rank and step it maps the index
-		bool assigned_;
 
 		void MpiGather(std::vector<double> &vrec,double vsend,int iproc,CommType mpiComm)
 		{
@@ -476,19 +417,6 @@ namespace PsimagLite {
 		{
 			int x = vsend.size();
 			MPI_Gather(&(vsend[0]),2*x,MPI_DOUBLE,&(vrec[0][0]),2*x,MPI_DOUBLE,iproc,mpiComm);
-		}
-
-		int findLowestLoad(std::vector<int> const &loads)
-		{
-			int x= 1000000;
-			int ret=0;
-			for (size_t i=0;i<loads.size();i++) {
-				if (loads[i]<x) {
-					x=loads[i];
-					ret =i;
-				}
-			}
-			return ret;
 		}
 
 		void getSegmentsDirect(std::vector<int>& rv,size_t numberOfSegments,size_t segmentSize,size_t r)
@@ -529,11 +457,15 @@ namespace PsimagLite {
 			if (status!=MPI_SUCCESS) throw std::runtime_error("getCommFromSegments\n");
 			CommType* newComm = new CommType;
 			garbage_.push_back(newComm);
-			MPI_Comm_create(MPI_COMM_WORLD, newGroup, newComm);
+			MPI_Comm_create(COMM_WORLD, newGroup, newComm);
 			return *newComm;
 		}
 	}; // class ConcurrencyMpi
 
+	template<typename FieldType>
+	const ConcurrencyMpi<FieldType>::CommType
+	ConcurrencyMpi<FieldType>::COMM_WORLD = MPI_COMM_WORLD;
+	
 } // namespace Dmrg
 
 /*@}*/

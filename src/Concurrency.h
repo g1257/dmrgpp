@@ -96,16 +96,6 @@ namespace PsimagLite {
 		//! Returns the total number of processors 
 		int nprocs(int dummy= -1) { return 1; }
 		
-		//! Creates a parallel loop of size total over the available number of processors
-		void loopCreate(int total,int dummy= -1);
-		
-		//! Increases variable i in the parallel loop created with the above function
-		//! Returns false if loop must not exit
-		//! Returns true  if loop must exit
-		bool loop(int &i);
-		
-		void loopReset();
-		
 		//! Returns true if this is the root processor or false otherwise
 		bool root();
 		
