@@ -98,11 +98,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  * {
  *   ConcurrencyType concurrencry(argc,argv);
  *   PsimagLite::Loop < ConcurrencyType > loop(concurrency,total);
- *   size_t i = 0;
- *   do {
- *     sum += i;
- *   } while (loop.next(i));
- * }
+ *   while (!loop.end()) {
+ *     sum += loop.index();
+ *     loop.next();
+ *   } 
+ * 
+ *  for (;!loop.end();loop.next()) {
+ *         // do something with loop.index()
+ *  }
+ *
+ * 
  */
 
 namespace PsimagLite {
@@ -151,6 +156,11 @@ namespace PsimagLite {
 		bool end() const
 		{
 			return (!assigned_ || step_>=myIndices_.size() || myIndices_[step_]>=total_ );
+		}
+
+		void startAt(size_t i)
+		{
+			step_ = i;
 		}
 
 // 		bool hasNext() const 
@@ -236,6 +246,11 @@ namespace PsimagLite {
 		}
 		
 		bool end() const { return step_>=total_; }
+
+		void startAt(size_t i)
+		{
+			step_ = i;
+		}
 
 // 		bool hasNext() const { return step_ <total_; }
 		
