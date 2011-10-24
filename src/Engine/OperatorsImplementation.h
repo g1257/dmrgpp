@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define OPERATOR_IMPL_H
 
 #include "ReducedOperators.h"
+#include "Loop.h"
 
 namespace Dmrg {
 	//! 
@@ -164,15 +165,15 @@ namespace Dmrg {
 			size_t dof = total / thisBasis->block().size();
 			
 			PsimagLite::Loop<ConcurrencyType> loop(concurrency,total);
-			size_t k = 0;
-			do {
+			for (;!loop.end();loop.next()) {
+				size_t k = loop.index();
 				if (isExcluded(k,thisBasis,dof,startEnd)) {
 					operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
 					continue;
 				}
 				if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform);
 				reducedOpImpl_.changeBasis(k);
-			} while (loop.next(k));
+			}
 
 			if (!useSu2Symmetry_) {
 				gather(operators_,concurrency);

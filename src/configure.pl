@@ -72,7 +72,7 @@ sub askQuestions
 	if ($platform=~/Darwin/i) {
 		$lapack = " -framework Accelerate ";
 	} else { # I'll assume it's linux
-		$lapack = " -llapack -lblas"; 
+		$lapack = " /usr/lib64/liblapack.so.3 /usr/lib64/libblas.so.3"; 
 	}
 
 	print "Where is your PsimagLite distribution?\n";
