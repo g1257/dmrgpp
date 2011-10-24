@@ -109,14 +109,14 @@ namespace Dmrg {
 			size_t addedBlockSize = 1;
 			model_.setNaturalBasis(basisOfOneSite_,quantumNumbsOneSite_,addedBlockSize);
 		}
-		
+
 		size_t hilbertSizePerSite() const { return model_.hilbertSize(); }
 
 		size_t chooseRandomState(size_t i) const
 		{
 			return basisOfOneSite_[pureStates_[i]];
 		}
-		
+
 		size_t chooseRandomState(const std::vector<RealType>& probs) const
 		{
 			RealType r = random48_();
@@ -132,7 +132,7 @@ namespace Dmrg {
 			     " Probabilities don't amount to 1\n";
 			throw std::runtime_error(s.c_str());
 		}
-		
+
 		void update(size_t qn,const PairType& sites)
 		{
 			std::vector<size_t> currentSites;
@@ -159,11 +159,12 @@ namespace Dmrg {
 				getStochasticsUpToThisPoint(qn,currentSites);
 				return; // INFINITE
 			} 
-			
-			//FINITE
+
+			//FINITE: all this is bogus because we're not using
+			// pureStates_ anymore in the finite phase
 			if (std::find(addedSites_.begin(),addedSites_.end(),
 				sites.first) != addedSites_.end()) {
-				getStochasticsForLattice();
+				//getStochasticsForLattice();
 				addedSites_.clear();
 			}
 			addedSites_.push_back(sites.first);
@@ -171,24 +172,24 @@ namespace Dmrg {
 
 	private:
 		
-		void getStochasticsForLattice()
-		{
-			for (size_t i=0;i<pureStates_.size();i++) 
-				pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
-			size_t sys = addedSites_.size()/2;
-			size_t env = sys;
-			addedSites_.clear();
-			addedSites_.push_back(0);
-			addedSites_.push_back(2*env-1);
-			for (size_t i=1;i<sys;i++) {
-				addedSites_.push_back(i);
-				addedSites_.push_back(2*env-i-1);
-				std::vector<size_t> sites;
-				sites.push_back(i);
-				sites.push_back(2*env-i-1);
-				getStochasticsUpToThisPoint(qnVsSize_[addedSites_.size()],sites);
-			}
-		}
+// 		void getStochasticsForLattice()
+// 		{
+// 			for (size_t i=0;i<pureStates_.size();i++) 
+// 				pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
+// 			size_t sys = addedSites_.size()/2;
+// 			size_t env = sys;
+// 			addedSites_.clear();
+// 			addedSites_.push_back(0);
+// 			addedSites_.push_back(2*env-1);
+// 			for (size_t i=1;i<sys;i++) {
+// 				addedSites_.push_back(i);
+// 				addedSites_.push_back(2*env-i-1);
+// 				std::vector<size_t> sites;
+// 				sites.push_back(i);
+// 				sites.push_back(2*env-i-1);
+// 				getStochasticsUpToThisPoint(qnVsSize_[addedSites_.size()],sites);
+// 			}
+// 		}
 
 		void getStochasticsUpToThisPoint(size_t qn,const std::vector<size_t>& currentSites)
 		{

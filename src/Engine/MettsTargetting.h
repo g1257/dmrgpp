@@ -179,8 +179,8 @@ namespace Dmrg {
 				gsWeight_= 0.0;
 				RealType factor = (1.0 - gsWeight_)/(n1+4);
 				RealType sum = setOneInterval(factor,PairType(0,n1),tau);
-				weight_[n] = 2*factor;
-				sum += weight_[n];
+				weight_[n-1] = 2*factor;
+				sum += weight_[n-1];
 
 				sum += gsWeight_;
 				assert(fabs(sum-1.0)<1e-5);
@@ -387,7 +387,7 @@ namespace Dmrg {
 				assert(std::norm(targetVectors_[index])>1e-6);
 // 				size_t indexAdvance = betas_.size()-1; // FIXME 
 // 				size_t indexNoAdvance = 0;
-				
+
 				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE) {
 					size_t advance = index;
 					if (stage_ == WFT_ADVANCE) advance = indexAdvance;
@@ -433,7 +433,7 @@ namespace Dmrg {
 				}
 				throw std::runtime_error("MettsTargetting: getPartition()\n");
 			}
-	
+
 			void getNewPures(const PairType& sites,size_t n1)
 			{
 				size_t alphaFixed = mettsStochastics_.chooseRandomState(sites.first);
@@ -450,7 +450,7 @@ namespace Dmrg {
 				           alphaFixed,lrs_.left(),transformSystem,sites.first);
 // 				systemPrev_.ns = pureVectors_.first.size();
 				pureVectors_.first = newVector1;
-				
+
 				const MatrixType& transformEnviron = 
 				                        wft_.transform(ProgramGlobals::ENVIRON);
 				VectorType newVector2(transformEnviron.n_row());
@@ -459,8 +459,8 @@ namespace Dmrg {
 // 				environPrev_.ns = pureVectors_.second.size();
 				pureVectors_.second = newVector2;
  				setFromInfinite(targetVectors_[0]);
- 				
- 				assert(std::norm(targetVectors_[0])>1e-6);
+
+				assert(std::norm(targetVectors_[0])>1e-6);
 
 				systemPrev_.fixed = alphaFixed;
 				systemPrev_.permutationInverse = lrs_.left().permutationInverse();
@@ -692,7 +692,7 @@ namespace Dmrg {
 			}
 
 			void calcTargetVector(VectorWithOffsetType& v,
-      		                      const VectorWithOffsetType& phi,
+			                      const VectorWithOffsetType& phi,
 			                      const std::vector<MatrixType>& T,
 			                      const std::vector<MatrixType>& V,
 			                      RealType Eg,

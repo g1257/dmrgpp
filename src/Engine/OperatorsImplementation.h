@@ -159,21 +159,20 @@ namespace Dmrg {
 		                 ConcurrencyType &concurrency,
 		                 const std::pair<size_t,size_t>& startEnd)
 		{
-			size_t total = size();
-			size_t k;
-
-			concurrency.loopCreate(total);
-
 			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
-			size_t dof = total / thisBasis->block().size();	
-			while(concurrency.loop(k)) {
+			size_t total = size();
+			size_t dof = total / thisBasis->block().size();
+			
+			PsimagLite::Loop<ConcurrencyType> loop(concurrency,total);
+			size_t k = 0;
+			do {
 				if (isExcluded(k,thisBasis,dof,startEnd)) {
 					operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
 					continue;
 				}
 				if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform);
 				reducedOpImpl_.changeBasis(k);
-			}
+			} while (loop.next(k));
 
 			if (!useSu2Symmetry_) {
 				gather(operators_,concurrency);

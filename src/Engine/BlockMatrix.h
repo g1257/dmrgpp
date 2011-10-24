@@ -83,7 +83,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define BLOCKMATRIX_HEADER_H
 #include <vector>
 #include <iostream>
-#include "Matrix.h" // in psimag
+#include "Matrix.h" // in PsimagLite
+#include "Loop.h" // in psimaglite
 
 namespace Dmrg {
 
@@ -92,10 +93,11 @@ namespace Dmrg {
 	//
 	template<class T,class MatrixInBlockTemplate>
 	class BlockMatrix {
-	
+
 	public:
+
 		typedef MatrixInBlockTemplate BuildingBlockType;
-		
+
 		BlockMatrix(int rank,int blocks) : rank_(rank),offsets_(blocks+1),data_(blocks) 
 		{
 			offsets_[blocks]=rank;
@@ -263,35 +265,40 @@ namespace Dmrg {
 
 
 	//! Parallel version of the diagonalization of a block diagonal matrix
-	template<typename S,typename Field,typename ConcurrencyTemplate>
-	void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,std::vector<Field> &eigs,char option,ConcurrencyTemplate &concurrency)
+	template<typename S,typename Field,typename SomeConcurrencyType>
+	void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,
+	                 std::vector<Field> &eigs,
+	                 char option,
+	                 SomeConcurrencyType &concurrency)
 	{
 		std::vector<Field> eigsTmp;
 		std::vector<std::vector<Field> > eigsForGather;
 		std::vector<size_t> weights(C.blocks());
 		
 		eigsForGather.resize(C.blocks());
-		size_t m;
-		for (m=0;m<C.blocks();m++) {
+
+		for (size_t m=0;m<C.blocks();m++) {
 			eigsForGather[m].resize(C.offsets(m+1)-C.offsets(m));
 			weights[m] =  C.offsets(m+1)-C.offsets(m);
 		}
-		
+
 		eigs.resize(C.rank());
-		
-		concurrency.loopCreate(C.blocks(),weights);
-		
-		while(concurrency.loop(m)) {
+
+		PsimagLite::Loop<SomeConcurrencyType> loop(concurrency,C.blocks(),weights);
+		size_t m = 0;
+		do {
 			PsimagLite::diag(C.data_[m],eigsTmp,option);
 			enforcePhase(C.data_[m]);
-			for (int j=C.offsets(m);j< C.offsets(m+1);j++) eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
-		}
+			for (int j=C.offsets(m);j< C.offsets(m+1);j++) 
+				eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
+		} while (loop.next(m));
 		
 		concurrency.gather(C.data_);
 		concurrency.gather(eigsForGather);
 		
 		for (m=0;m<C.blocks();m++) {
-			for (int j=C.offsets(m);j< C.offsets(m+1);j++) eigs[j]=eigsForGather[m][j-C.offsets(m)];
+			for (int j=C.offsets(m);j< C.offsets(m+1);j++) 
+				eigs[j]=eigsForGather[m][j-C.offsets(m)];
 		}
 
 		concurrency.broadcast(eigs);
