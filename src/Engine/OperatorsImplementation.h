@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define OPERATOR_IMPL_H
 
 #include "ReducedOperators.h"
-#include "Loop.h"
+#include "Range.h"
 
 namespace Dmrg {
 	//! 
@@ -164,9 +164,9 @@ namespace Dmrg {
 			size_t total = size();
 			size_t dof = total / thisBasis->block().size();
 			
-			PsimagLite::Loop<ConcurrencyType> loop(concurrency,total);
-			for (;!loop.end();loop.next()) {
-				size_t k = loop.index();
+			PsimagLite::Range<ConcurrencyType> range(0,total,concurrency);
+			for (;!range.end();range.next()) {
+				size_t k = range.index();
 				if (isExcluded(k,thisBasis,dof,startEnd)) {
 					operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
 					continue;

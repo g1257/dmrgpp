@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h" // for operator*
 #include "VectorWithOffset.h" // for operator*
 #include "Profiling.h"
-#include "Loop.h"
+#include "Range.h"
 
 namespace Dmrg {
 	
@@ -138,9 +138,9 @@ namespace Dmrg {
 			for (size_t i=0;i<rows;i++) {
 				std::vector<FieldType> v(cols);
 				//ProfilingType profile("correlations loop i=" + ttos(i));
-				PsimagLite::Loop<ConcurrencyType> loop(concurrency_,cols);
-				for (loop.startAt(i);!loop.end();loop.next()) {
-					size_t j = loop.index();
+				PsimagLite::Range<ConcurrencyType> range(i,cols,concurrency_);
+				for (;!range.end();range.next()) {
+					size_t j = range.index();
 					v[j]  = calcCorrelation(i,j,O1,O2,fermionicSign);
 					if (verbose_) {
 						std::cerr<<"Result for i="<<i;

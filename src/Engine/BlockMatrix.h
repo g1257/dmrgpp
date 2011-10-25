@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <iostream>
 #include "Matrix.h" // in PsimagLite
-#include "Loop.h"
+#include "Range.h"
 
 namespace Dmrg {
 
@@ -284,10 +284,10 @@ namespace Dmrg {
 
 		eigs.resize(C.rank());
 
-		PsimagLite::Loop<SomeConcurrencyType> loop(concurrency,C.blocks(),weights);
+		PsimagLite::Range<SomeConcurrencyType> range(0,C.blocks(),concurrency,weights);
 
-		for (;!loop.end();loop.next()) {
-			size_t m=loop.index();
+		for (;!range.end();range.next()) {
+			size_t m=range.index();
 			PsimagLite::diag(C.data_[m],eigsTmp,option);
 			enforcePhase(C.data_[m]);
 			for (int j=C.offsets(m);j< C.offsets(m+1);j++) 
