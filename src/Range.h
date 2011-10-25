@@ -74,19 +74,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup PsimagLite */
 /*@{*/
 
-/*! \file Loop.h
+/*! \file Range.h
  *
- * A loop class that can be parallelized
+ * A range class that can be parallelized
  */
-#ifndef LOOP_HEADER_H
-#define LOOP_HEADER_H
+#ifndef RANGE_HEADER_H
+#define RANGE_HEADER_H
 #include <stdexcept>
 #include <vector>
-#include "ConcurrencySerial.h" // for the default Loop
+#include "ConcurrencySerial.h" // for the default Range
 
-/** How to use the Loop class:
+/** How to use the Range class:
  * 
- * #include "Loop.h"
+ * #include "Range.h"
  * #ifndef USE_MPI
  * #include "ConcurrencySerial.h"
  * typedef ConcurrencySerial<> ConcurrencyType;
@@ -97,14 +97,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  * int main(int argc,char *argv[])
  * {
  *   ConcurrencyType concurrencry(argc,argv);
- *   PsimagLite::Loop < ConcurrencyType > loop(concurrency,total);
- *   while (!loop.end()) {
- *     sum += loop.index();
- *     loop.next();
+ *   PsimagLite::Range < ConcurrencyType > range(0,total,concurrency);
+ *   while (!range.end()) {
+ *     sum += range.index();
+ *     range.next();
  *   } 
  * 
- *  for (;!loop.end();loop.next()) {
- *         // do something with loop.index()
+ *  PsimagLite::Range < ConcurrencyType > range2(0,total,concurrency);
+ *  for (;!range2.end();range2.next()) {
+ *         // do something with range2.index()
  *  }
  *
  * 
@@ -113,20 +114,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 
 	template<typename ConcurrencyType>
-	class Loop {
+	class Range {
 
 	public:
 
 		typedef typename ConcurrencyType::CommType CommType;
 		static const CommType COMM_WORLD;
 
-		Loop(ConcurrencyType& concurrency,
+		Range(size_t start,
 		     size_t total,
+		     ConcurrencyType& concurrency,
 		     const std::vector<size_t>& weights,
 		     CommType mpiComm=COMM_WORLD)
 		: concurrency_(concurrency),
+		  step_(start),
 		  total_(total),
-		  step_(0),
 		  nprocs_(concurrency.nprocs(mpiComm)),
 		  indicesOfThisProc_(nprocs_),
 		  assigned_(false)
@@ -134,12 +136,13 @@ namespace PsimagLite {
 			init(weights,mpiComm);
 		}
 
-		Loop(ConcurrencyType& concurrency,
-		                size_t total,
-		                CommType mpiComm=COMM_WORLD)
+		Range(size_t start,
+		     size_t total,
+		     ConcurrencyType& concurrency,           
+		     CommType mpiComm=COMM_WORLD)
 		: concurrency_(concurrency),
+		  step_(start),
 		  total_(total),
-		  step_(0),
 		  nprocs_(concurrency.nprocs(mpiComm)),
 		  indicesOfThisProc_(nprocs_),
 		  assigned_(false)
@@ -152,15 +155,10 @@ namespace PsimagLite {
 		{
 			step_++;
 		}
-		
+
 		bool end() const
 		{
 			return (!assigned_ || step_>=myIndices_.size() || myIndices_[step_]>=total_ );
-		}
-
-		void startAt(size_t i)
-		{
-			step_ = i;
 		}
 
 // 		bool hasNext() const 
@@ -173,8 +171,8 @@ namespace PsimagLite {
 	private:
 
 		ConcurrencyType& concurrency_;
-		size_t total_; // total number of indices total_(total),
 		size_t step_; // step within this processor
+		size_t total_; // total number of indices total_(total),
 		size_t nprocs_;
 		std::vector<std::vector<size_t> > indicesOfThisProc_; // given rank and step it maps the index
 		bool assigned_;
@@ -210,34 +208,34 @@ namespace PsimagLite {
 			}
 			return ret;
 		}
-		
-	}; // class Loop
+	}; // class Range
 
 	template<typename ConcurrencyType>
-	const typename Loop<ConcurrencyType>::CommType 
-	Loop<ConcurrencyType>::COMM_WORLD = ConcurrencyType::COMM_WORLD;
+	const typename Range<ConcurrencyType>::CommType 
+	Range<ConcurrencyType>::COMM_WORLD = ConcurrencyType::COMM_WORLD;
 
 
 	//! Specialization for performance reasons
 	template<>
-	class Loop<ConcurrencySerial<> > {
+	class Range<ConcurrencySerial<> > {
 	
 		typedef ConcurrencySerial<> ConcurrencyType;
 
 	public:
 
 		typedef ConcurrencyType::CommType CommType;
-		Loop(ConcurrencyType& concurrency,
+		
+		Range(size_t start,
 		     size_t total,
-		     std::vector<size_t> const &weights,
-		     CommType mpiComm=0)
-		: total_(total),step_(0)
+		     ConcurrencyType& concurrency,
+		     const std::vector<size_t>& weights,
+		     CommType mpiComm=0) : step_(start),total_(total)
 		{}
 		
-		Loop(ConcurrencyType& concurrency,
+		Range(size_t start,
 		     size_t total,
-		     CommType mpiComm=0)
-		: total_(total),step_(0)
+		     ConcurrencyType& concurrency,           
+		     CommType mpiComm=0) : step_(start),total_(total)
 		{}
 
 		void next()
@@ -247,20 +245,15 @@ namespace PsimagLite {
 		
 		bool end() const { return step_>=total_; }
 
-		void startAt(size_t i)
-		{
-			step_ = i;
-		}
-
 // 		bool hasNext() const { return step_ <total_; }
 		
 		size_t index() const { return step_; }
 
 	private:
-		size_t total_; // total number of indices total_(total),
 		size_t step_; // step within this processor
-	}; // class Loop
+		size_t total_; // total number of indices
+	}; // class Range
 } // namespace Dmrg
 
 /*@}*/	
-#endif // LOOP_HEADER_H
+#endif // RANGE_HEADER_H
