@@ -77,6 +77,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file Range.h
  *
  * A range class that can be parallelized
+ * 
+ * Features:
+ * Simple interface
+ * Load balancing
+ * Specialization for serial to avoid performance loss
+ * 
+ * Future:
+ * Support for pthreads and GPUs
+ * 
  */
 #ifndef RANGE_HEADER_H
 #define RANGE_HEADER_H
@@ -107,7 +116,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  for (;!range2.end();range2.next()) {
  *         // do something with range2.index()
  *  }
- *
+ *}
+ * 
+ * See an example of use under drivers/range.cpp
  * 
  */
 
