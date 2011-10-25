@@ -93,32 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include "ConcurrencySerial.h" // for the default Range
 
-/** How to use the Range class:
- * 
- * #include "Range.h"
- * #ifndef USE_MPI
- * #include "ConcurrencySerial.h"
- * typedef ConcurrencySerial<> ConcurrencyType;
- * #else
- * #include "ConcurrencyMpi.h"
- * typedef ConcurrencyMpi < double > ConcurrencyType;
- * #endif
- * int main(int argc,char *argv[])
- * {
- *   ConcurrencyType concurrencry(argc,argv);
- *   PsimagLite::Range < ConcurrencyType > range(0,total,concurrency);
- *   while (!range.end()) {
- *     sum += range.index();
- *     range.next();
- *   } 
- * 
- *  PsimagLite::Range < ConcurrencyType > range2(0,total,concurrency);
- *  for (;!range2.end();range2.next()) {
- *         // do something with range2.index()
- *  }
- *}
- * 
- * See an example of use under drivers/range.cpp
+/** How to use the Range class: See drivers/range.cpp
  * 
  */
 
@@ -141,8 +116,7 @@ namespace PsimagLite {
 		  step_(start),
 		  total_(total),
 		  nprocs_(concurrency.nprocs(mpiComm)),
-		  indicesOfThisProc_(nprocs_),
-		  assigned_(false)
+		  indicesOfThisProc_(nprocs_)
 		{
 			init(weights,mpiComm);
 		}
@@ -155,8 +129,7 @@ namespace PsimagLite {
 		  step_(start),
 		  total_(total),
 		  nprocs_(concurrency.nprocs(mpiComm)),
-		  indicesOfThisProc_(nprocs_),
-		  assigned_(false)
+		  indicesOfThisProc_(nprocs_)
 		{
 			std::vector<size_t> weights(total,1);
 			init(weights,mpiComm);
@@ -169,7 +142,7 @@ namespace PsimagLite {
 
 		bool end() const
 		{
-			return (!assigned_ || step_>=myIndices_.size() || myIndices_[step_]>=total_ );
+			return (step_>=myIndices_.size() || myIndices_[step_]>=total_ );
 		}
 
 // 		bool hasNext() const 
@@ -186,12 +159,10 @@ namespace PsimagLite {
 		size_t total_; // total number of indices total_(total),
 		size_t nprocs_;
 		std::vector<std::vector<size_t> > indicesOfThisProc_; // given rank and step it maps the index
-		bool assigned_;
 		std::vector<size_t> myIndices_; // indices assigned to this processor
 
 		void init(const std::vector<size_t>& weights,CommType mpiComm)
 		{
-			size_t r1=concurrency_.rank(mpiComm);
 			
 			// distribute the load among the processors
 			std::vector<size_t> loads(nprocs_,0);
@@ -200,11 +171,10 @@ namespace PsimagLite {
 				size_t r = findLowestLoad(loads);
 				indicesOfThisProc_[r].push_back(i);
 				loads[r] += weights[i];
-				if (r==r1) assigned_=true;
 			}
 			// set myIndices_
+			size_t r1=concurrency_.rank(mpiComm);
 			myIndices_=indicesOfThisProc_[r1];
-			//MPI_Barrier(mpiComm);
 		}
 
 		size_t findLowestLoad(std::vector<size_t> const &loads) const

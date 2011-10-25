@@ -99,9 +99,9 @@ namespace PsimagLite {
 		//! Returns true if this is the root processor or false otherwise
 		bool root();
 		
-		//! The root processor gathers data from each  processor
-		template<typename DataType>
-		void gather(DataType &v) { }
+// 		//! The root processor gathers data from each  processor
+// 		template<typename DataType>
+// 		void gather(DataType &v) { }
 		
 		//! The root processor broadcasts data to all processors
 		template<typename DataType>

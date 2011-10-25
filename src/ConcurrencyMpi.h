@@ -97,7 +97,7 @@ namespace PsimagLite {
 
 		static const CommType  COMM_WORLD;
 
-		ConcurrencyMpi(int argc, char *argv[]) : step_(-1),total_(0)
+		ConcurrencyMpi(int argc, char *argv[])
 		{
 			MPI_Init(&argc,&argv);
 		}
@@ -157,6 +157,17 @@ namespace PsimagLite {
 			return CommPairType(comm1,comm2);
 		}
 
+		void reduce(double& v)
+		{
+			double w = 0;
+			int x = MPI_Reduce(&v,&w,1,MPI_DOUBLE,MPI_SUM,0,COMM_WORLD);
+			if (x!=MPI_SUCCESS) {
+				std::string s = "ConcurrencyMpi: reduce(Vector) failed\n";
+				throw std::runtime_error(s.c_str());
+			}
+			if (rank()==0) v = w;
+		}
+
 		void reduce(std::vector<double>& v)
 		{
 			std::vector<double> w(v.size());
@@ -196,185 +207,194 @@ namespace PsimagLite {
 			}
 			if (rank()==0) m = w;
 		}
-			
-		void gather(std::vector<std::vector<std::complex<double> > > &v,CommType mpiComm=COMM_WORLD) 
+		
+		void gather(std::vector<PsimagLite::Matrix<double> > &v,CommType mpiComm=COMM_WORLD)
 		{
-			int i,x;
-			std::vector<std::complex<double> > tmpVec;
-			MPI_Status status;
-			int tag=999;
-
-			if (!assigned_) return;
-
-			if (total_>v.size()  || myIndices_.size()<=0) { 
-				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myindices.size="<<myIndices_.size()<<" line="<<__LINE__<<"\n";
-				throw std::runtime_error("ConcurrencyMpi::gather() loopCreate() must be called before.\n"); 
-			}
-			if (rank()>0) {
-				for (step_=0;step_<myIndices_.size();step_++) {
-					i=myIndices_[step_];
-					if (i>=total_) break;
-					x=v[i].size();
-					MPI_Send(&x,1,MPI_INTEGER,0,i,mpiComm);
-					MPI_Send(&(v[i][0]),2*x,MPI_DOUBLE,0,i,mpiComm);
-				
-				}
-			} else {
-				int nprocs1 = nprocs();
-				for (int r=1;r<nprocs1;r++) {
-					for (step_=0;step_<indicesOfThisProc_[r].size();step_++) {
-						i = indicesOfThisProc_[r][step_];
-						if (i>=total_) continue;
-						
-						MPI_Recv(&x,1,MPI_INTEGER,r,i,mpiComm,&status);
-						tmpVec.resize(x);
-						MPI_Recv(&(tmpVec[0]),2*x,MPI_DOUBLE,r,i,mpiComm,&status);
-						v[i]=tmpVec;
-					}
-				}
-			}
-			step_= -1;
+			std::string s = "You hit an unimplemented function.\n";
+			s += "Contribute to PsimagLite development and make a difference!\n";
+			s += "Implement this function!\n";
+			s += ttos(__FUNCTION__) + __FILE__ + " : " + ttos(__LINE__) + "\n"; 
+			throw std::runtime_error(s.c_str());
 		}
 
-		void gather(std::vector<std::vector<double> > &v,CommType mpiComm=COMM_WORLD) 
-		{
-			int x;
-			size_t i;
-			std::vector<double> tmpVec;
-			MPI_Status status;
-
-			if (!assigned_) return;
-
-			if (total_>v.size() ||  myIndices_.size()<=0) { 
-				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myindices.size="<<myIndices_.size()<<" line="<<__LINE__<<"\n";
-				throw std::runtime_error("ConcurrencyMpi::gather() loopCreate() must be called before.\n"); 
-			}
-			if (rank()>0) {
-				for (step_=0;step_<int(myIndices_.size());step_++) {
-					i=myIndices_[step_];
-					if (i>=total_) break;
-					x=v[i].size();
-					MPI_Send(&x,1,MPI_INTEGER,0,i,mpiComm);
-					MPI_Send(&(v[i][0]),x,MPI_DOUBLE,0,i,mpiComm);
-				}
-			} else {
-				for (int r=1;r<nprocs();r++) {
-					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
-						i=indicesOfThisProc_[r][step_];
-						if (i>=total_) continue;
-						
-						MPI_Recv(&x,1,MPI_INTEGER,r,i,mpiComm,&status);
-						tmpVec.resize(x);
-						MPI_Recv(&(tmpVec[0]),x,MPI_DOUBLE,r,i,mpiComm,&status);
-						v[i]=tmpVec;
-					}
-				}
-			}
-			step_= -1;
-		}
-
-		template<typename T>
-		void gather(std::vector<T> &v,CommType mpiComm=COMM_WORLD) 
-		{
-			size_t i;
-
-			if (!assigned_) return;
-
-			if (total_>v.size() ||  myIndices_.size()<=0) { 
-				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myIndices_.size()="<<myIndices_.size()<<"\n";
-				throw std::runtime_error("ConcurrencyMpi::broadcast() loopCreate() must be called before.\n"); 
-			}
-
-			if (rank()>0) {
-				for (step_=0;step_<int(myIndices_.size());step_++) {
-					i=myIndices_[step_];
-					if (i>=total_) break;
-					MpiSend(&(v[i]),rank(),i);
-				
-				}
-			} else {
-				for (int r=1;r<nprocs();r++) {
-					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
-						i=indicesOfThisProc_[r][step_];
-						if (i>=total_) continue;
-						MpiRecv(&(v[i]),r,i);
-					}
-				}
-			}
-			step_= -1;
-		}
-
-		template<typename T>
-		void gather(std::vector<PsimagLite::Matrix<T> > &v,CommType mpiComm=COMM_WORLD) 
-		{
-			size_t i;
-
-			if (!assigned_) return;
-
-			if (total_>v.size() ||  myIndices_.size()<=0) { 
-				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myIndices_.size()="<<myIndices_.size()<<"\n";
-				throw std::runtime_error("ConcurrencyMpi::broadcast() loopCreate() must be called before.\n"); 
-			}
-			int r1 = rank();
-			if (r1>0) {
-				for (step_=0;step_<int(myIndices_.size());step_++) {
-					i=myIndices_[step_];
-					if (i>=total_) break;
-					int nrow = v[i].n_row();
-					int ncol = v[i].n_col();
-					MpiSend(&nrow,r1,i);
-					MpiSend(&ncol,r1,i);
-					MpiSend(&(v[i]),r1,i);
-				
-				}
-			} else {
-				for (int r=1;r<nprocs();r++) {
-					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
-						i=indicesOfThisProc_[r][step_];
-						if (i>=total_) continue;
-						int nrow,ncol;
-						MpiRecv(&nrow,r,i);
-						MpiRecv(&ncol,r,i);
-						//std::cerr<<"r="<<r<<" nrow="<<nrow<<" ncol="<<ncol<<" i="<<i<<"\n";
-						v[i].resize(nrow,ncol);
-						MpiRecv(&(v[i]),r,i);
-					}
-				}
-			}
-			step_= -1;
-		}
-
-		template<typename T>
-		void gather(std::vector<T*> &v,CommType mpiComm=COMM_WORLD) 
-		{
-			size_t i;
-
-			if (!assigned_) return;
-
-			if (total_>v.size() ||  myIndices_.size()<=0) { 
-				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myIndices_.size()="<<myIndices_.size()<<"\n";
-				throw std::runtime_error("ConcurrencyMpi::broadcast() loopCreate() must be called before.\n"); 
-			}
-
-			int r1 = rank();
-			if (r1>0) {
-				for (step_=0;step_<int(myIndices_.size());step_++) {
-					i=myIndices_[step_];
-					if (i>=total_) break;
-					MpiSend(v[i],r1,i);
-				
-				}
-			} else {
-				for (int r=1;r<nprocs();r++) {
-					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
-						i=indicesOfThisProc_[r][step_];
-						if (i>=total_) continue;
-						MpiRecv(v[i],r,i);
-					}
-				}
-			}
-			step_= -1;
-		}
+// 		void gather(std::vector<std::vector<std::complex<double> > > &v,CommType mpiComm=COMM_WORLD) 
+// 		{
+// 			int i,x;
+// 			std::vector<std::complex<double> > tmpVec;
+// 			MPI_Status status;
+// 			int tag=999;
+// 
+// 			if (!assigned_) return;
+// 
+// 			if (total_>v.size()  || myIndices_.size()<=0) { 
+// 				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myindices.size="<<myIndices_.size()<<" line="<<__LINE__<<"\n";
+// 				throw std::runtime_error("ConcurrencyMpi::gather() loopCreate() must be called before.\n"); 
+// 			}
+// 			if (rank()>0) {
+// 				for (step_=0;step_<myIndices_.size();step_++) {
+// 					i=myIndices_[step_];
+// 					if (i>=total_) break;
+// 					x=v[i].size();
+// 					MPI_Send(&x,1,MPI_INTEGER,0,i,mpiComm);
+// 					MPI_Send(&(v[i][0]),2*x,MPI_DOUBLE,0,i,mpiComm);
+// 				
+// 				}
+// 			} else {
+// 				int nprocs1 = nprocs();
+// 				for (int r=1;r<nprocs1;r++) {
+// 					for (step_=0;step_<indicesOfThisProc_[r].size();step_++) {
+// 						i = indicesOfThisProc_[r][step_];
+// 						if (i>=total_) continue;
+// 						
+// 						MPI_Recv(&x,1,MPI_INTEGER,r,i,mpiComm,&status);
+// 						tmpVec.resize(x);
+// 						MPI_Recv(&(tmpVec[0]),2*x,MPI_DOUBLE,r,i,mpiComm,&status);
+// 						v[i]=tmpVec;
+// 					}
+// 				}
+// 			}
+// 			step_= -1;
+// 		}
+// 
+// 		void gather(std::vector<std::vector<double> > &v,CommType mpiComm=COMM_WORLD) 
+// 		{
+// 			int x;
+// 			size_t i;
+// 			std::vector<double> tmpVec;
+// 			MPI_Status status;
+// 
+// 			if (!assigned_) return;
+// 
+// 			if (total_>v.size() ||  myIndices_.size()<=0) { 
+// 				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myindices.size="<<myIndices_.size()<<" line="<<__LINE__<<"\n";
+// 				throw std::runtime_error("ConcurrencyMpi::gather() loopCreate() must be called before.\n"); 
+// 			}
+// 			if (rank()>0) {
+// 				for (step_=0;step_<int(myIndices_.size());step_++) {
+// 					i=myIndices_[step_];
+// 					if (i>=total_) break;
+// 					x=v[i].size();
+// 					MPI_Send(&x,1,MPI_INTEGER,0,i,mpiComm);
+// 					MPI_Send(&(v[i][0]),x,MPI_DOUBLE,0,i,mpiComm);
+// 				}
+// 			} else {
+// 				for (int r=1;r<nprocs();r++) {
+// 					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
+// 						i=indicesOfThisProc_[r][step_];
+// 						if (i>=total_) continue;
+// 						
+// 						MPI_Recv(&x,1,MPI_INTEGER,r,i,mpiComm,&status);
+// 						tmpVec.resize(x);
+// 						MPI_Recv(&(tmpVec[0]),x,MPI_DOUBLE,r,i,mpiComm,&status);
+// 						v[i]=tmpVec;
+// 					}
+// 				}
+// 			}
+// 			step_= -1;
+// 		}
+// 
+// 		template<typename T>
+// 		void gather(std::vector<T> &v,CommType mpiComm=COMM_WORLD) 
+// 		{
+// 			size_t i;
+// 
+// 			if (!assigned_) return;
+// 
+// 			if (total_>v.size() ||  myIndices_.size()<=0) { 
+// 				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myIndices_.size()="<<myIndices_.size()<<"\n";
+// 				throw std::runtime_error("ConcurrencyMpi::broadcast() loopCreate() must be called before.\n"); 
+// 			}
+// 
+// 			if (rank()>0) {
+// 				for (step_=0;step_<int(myIndices_.size());step_++) {
+// 					i=myIndices_[step_];
+// 					if (i>=total_) break;
+// 					MpiSend(&(v[i]),rank(),i);
+// 				
+// 				}
+// 			} else {
+// 				for (int r=1;r<nprocs();r++) {
+// 					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
+// 						i=indicesOfThisProc_[r][step_];
+// 						if (i>=total_) continue;
+// 						MpiRecv(&(v[i]),r,i);
+// 					}
+// 				}
+// 			}
+// 			step_= -1;
+// 		}
+// 
+// 		template<typename T>
+// 		void gather(std::vector<PsimagLite::Matrix<T> > &v,CommType mpiComm=COMM_WORLD) 
+// 		{
+// 			size_t i;
+// 
+// 			if (!assigned_) return;
+// 
+// 			if (total_>v.size() ||  myIndices_.size()<=0) { 
+// 				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myIndices_.size()="<<myIndices_.size()<<"\n";
+// 				throw std::runtime_error("ConcurrencyMpi::broadcast() loopCreate() must be called before.\n"); 
+// 			}
+// 			int r1 = rank();
+// 			if (r1>0) {
+// 				for (step_=0;step_<int(myIndices_.size());step_++) {
+// 					i=myIndices_[step_];
+// 					if (i>=total_) break;
+// 					int nrow = v[i].n_row();
+// 					int ncol = v[i].n_col();
+// 					MpiSend(&nrow,r1,i);
+// 					MpiSend(&ncol,r1,i);
+// 					MpiSend(&(v[i]),r1,i);
+// 				
+// 				}
+// 			} else {
+// 				for (int r=1;r<nprocs();r++) {
+// 					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
+// 						i=indicesOfThisProc_[r][step_];
+// 						if (i>=total_) continue;
+// 						int nrow,ncol;
+// 						MpiRecv(&nrow,r,i);
+// 						MpiRecv(&ncol,r,i);
+// 						//std::cerr<<"r="<<r<<" nrow="<<nrow<<" ncol="<<ncol<<" i="<<i<<"\n";
+// 						v[i].resize(nrow,ncol);
+// 						MpiRecv(&(v[i]),r,i);
+// 					}
+// 				}
+// 			}
+// 			step_= -1;
+// 		}
+// 
+// 		template<typename T>
+// 		void gather(std::vector<T*> &v,CommType mpiComm=COMM_WORLD) 
+// 		{
+// 			size_t i;
+// 
+// 			if (!assigned_) return;
+// 
+// 			if (total_>v.size() ||  myIndices_.size()<=0) { 
+// 				std::cerr<<"total_="<<total_<<" v.size()="<<v.size()<<" myIndices_.size()="<<myIndices_.size()<<"\n";
+// 				throw std::runtime_error("ConcurrencyMpi::broadcast() loopCreate() must be called before.\n"); 
+// 			}
+// 
+// 			int r1 = rank();
+// 			if (r1>0) {
+// 				for (step_=0;step_<int(myIndices_.size());step_++) {
+// 					i=myIndices_[step_];
+// 					if (i>=total_) break;
+// 					MpiSend(v[i],r1,i);
+// 				
+// 				}
+// 			} else {
+// 				for (int r=1;r<nprocs();r++) {
+// 					for (step_=0;step_<int(indicesOfThisProc_[r].size());step_++) {
+// 						i=indicesOfThisProc_[r][step_];
+// 						if (i>=total_) continue;
+// 						MpiRecv(v[i],r,i);
+// 					}
+// 				}
+// 			}
+// 			step_= -1;
+// 		}
 
 		template<typename T>
 		void broadcast(std::vector<std::vector<T> > &v,CommType mpiComm=COMM_WORLD) 
@@ -463,7 +483,7 @@ namespace PsimagLite {
 	}; // class ConcurrencyMpi
 
 	template<typename FieldType>
-	const ConcurrencyMpi<FieldType>::CommType
+	const typename ConcurrencyMpi<FieldType>::CommType
 	ConcurrencyMpi<FieldType>::COMM_WORLD = MPI_COMM_WORLD;
 	
 } // namespace Dmrg

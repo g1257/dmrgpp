@@ -1,3 +1,27 @@
+/** How to compile and run this driver
+ * 
+ * Serial version:
+ * 
+ * g++ -g3 -DNDEBUG  -Werror -Wall -I../src -I../src/JSON \
+ * -I../src/JSON/JsonParser -lm  -lpthread   range.cpp   -o range \
+ * /usr/lib64/libblas.so.3 /usr/lib64/liblapack.so.3
+ * 
+ * And run it with:
+ * 
+ * ./range
+ * 
+ * Parallel version:
+ * 
+ * mpicxx -DUSE_MPI -g3 -DNDEBUG  -Werror -Wall -I../src -I../src/JSON \
+ * -I../src/JSON/JsonParser -lm  -lpthread   range.cpp   -o range \
+ * /usr/lib64/libblas.so.3 /usr/lib64/liblapack.so.3
+ * 
+ * And run it with:
+ * 
+ * your batch system script
+ *
+ */
+
 #include "Range.h"
 #include <iostream>
 
@@ -22,7 +46,8 @@ int main(int argc,char *argv[])
 		sum += range.index();
 		range.next();
 	}
-	std::cout<<"sum="<<sum<<"\n";
+	concurrency.reduce(sum);
+	if (concurrency.root()) std::cout<<"sum="<<sum<<"\n";
 
 	PsimagLite::Range < ConcurrencyType > range2(0,total,concurrency);
 	for (;!range2.end();range2.next()) {
