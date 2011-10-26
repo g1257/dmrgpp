@@ -1,29 +1,80 @@
+
+PsimagLite is free software (see file LICENSE) 
+
+Please cite PsimagLite if you base any scientific 
+publication on this software. Citation should read:
+G. Alvarez, (2011), PsimagLite (version 1.0.0) 
+[computer software], Oak Ridge National Laboratory.
+
+-------------------------------------------------------------------------------
 PsimagLite contains utilities for use in codes for the simulation of strongly correlated electrons.
 It is inspired in T.S.'s Psimag software (but PsimagLite is not a fork of Psimag).
 The amount of functionality included in PsimagLite will be exactly this (subject to change):
 
+The reason for PsimagLite is to share code among different applications.
+Applications that depend on PsimagLite are:
+SpinPhononFermion, DMRG++, Lanczos++, and FreeFermions,  GpusDoneRight.
+-----------------------------------------------------------------------------
+
 ModuleName	Description
-[Misc]	PSIMAGAssert.h
-[LinearAlgebra]	Includes BLAS/LAPACK wrappers, Matrix.h and a new Vector.h class.
-[Json] 	Json support (taken from M.S.'s new implementation which doesn't depend on anything at all)
-[Xml] 	Xml support (M.S.'s Tag*.h files) I will include but not maintain this.
-[Io]	Brandnew and fresh input output support
-[Concurrency]	Concurrency classes taken from DCA++ (gbranch)
-[SystemInfo]	Basic time/date capability, os, hostname, compiler info
-[Profiling]	Profiling through constructor/destructor paradigm as done by M.S in DCA++
-[RandomNumberGenerator]	Will include a good rng and a bad one/easy one for testing
-[Interpolation] Akima splines
+[DenseLinearAlgebra]
+BLAS // wrapper
+Lapack <-- Temporary class, do not use, use LAPACK instead
+LAPACK // wrapper
+Matrix /// a matrix class
 
-The reason for PsimagLite is to share code among SpinPhononFermion, DCA++ and DMRG++, Lanczos++, and FreeFermions. 
+[SparseLinearAlgebra]
+CrsMatrix
+TridiagonalMatrix
+SparseRow <-- experimental, do not use
 
-PsimagLite is free software (see file LICENSE) 
+[JSON] 
+JSON directory.
+Json support (taken from M.S.'s new implementation which doesn't depend on anything at all)
 
-PsimagLite and DMRG++
-Users now need to download PsimagLite before compiling DMRG++.
-Note that PsimagLite is just a series of classes and needs no compilation (unless you want to use the drivers)
-Developers should notice that common code will migrate from DMRG++ into PsimagLite.
+[Io] Input output support
+IoSimple
 
-PsimagLite and SpinPhononFermion
-Same as DMRG++ above, except that PsimagLite is still not a requirement for SpinPhononFermion.
+[Concurrency] To write the same code for serial and MPI (and in
+the future pthreads and GPUs)
+Concurrency
+ConcurrencyMpi
+ConcurrencySerial
+Pthreads
+NoPthreads
+PackIndices
+Range
 
+[SystemInfo] Basic time/date capability, os, hostname, compiler info
+HostInfo
+MemoryUsage
+Rusage // Rusage class is deprecated, use MemoryUsage instead
+Profiling // Profiling through constructor/destructor paradigm as done by M.S in DCA++
+It should be called actually scope
+ProgressIndicator
+Tokenizer
+TypeToString
+LineMarker
+
+[Math]
+LinearPrediction
+Minimizer
+PlotParams
+Sort
+Random48
+RandomForTests
+AkimaSpline
+GslWrapper
+Fermi
+AlmostEqual
+BitManip
+ContinuedFractionCollection
+ContinuedFraction
+
+[STL extensions] These add operations to std classes and put those
+extensions in the std namespace, no new classes here!
+Complex
+Vector
+Stack
+-------------------------------------------------------------------------------
 
