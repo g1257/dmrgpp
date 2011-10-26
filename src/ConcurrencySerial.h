@@ -84,17 +84,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 
 namespace PsimagLite {
-	
-	class CommSerial {
-
-	public:
-
-		static const int COMM_WORLD = 0;
-	};
-
 	//! Implements the Concurrency.h interface in the Serial case
-	template<typename FieldType=CommSerial>
-	class ConcurrencySerial : public Concurrency<FieldType> {
+	template<typename BogusType=int>
+	class ConcurrencySerial : public Concurrency<BogusType> {
 
 	public:
 
@@ -116,10 +108,10 @@ namespace PsimagLite {
 		void reduce(DataType& v,CommType mpiComm=COMM_WORLD) {}
 
 		template<typename DataType>
-		void gather(DataType &v) { }
+		void gather(DataType &v,CommType mpiComm=COMM_WORLD) { }
 
 		template<typename DataType>
-		void broadcast(DataType &v) { }
+		void broadcast(DataType &v,CommType mpiComm=COMM_WORLD) { }
 
 		CommPairType newCommFromSegments(size_t x,CommType mpiComm=0)
 		{
