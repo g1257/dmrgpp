@@ -79,12 +79,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  * A range class that can be parallelized
  * 
  * Features:
- * Simple interface
- * Load balancing
- * Specialization for serial to avoid performance loss
+ * 
+ * --> Simple interface
+ * 
+ * --> Load balancing
+ * 
+ * --> Specialization for serial to avoid performance loss
  * 
  * Future:
- * Support for pthreads and GPUs
+ * 
+ * --> Support for pthreads and GPUs
  * 
  */
 #ifndef RANGE_HEADER_H
@@ -149,7 +153,7 @@ namespace PsimagLite {
 // 		{
 // 			return (assigned_ && step_<myIndices_.size() && myIndices_[step_]<total_ );
 // 		}
-		
+
 		size_t index() const { return myIndices_[step_]; }
 
 	private:
@@ -163,7 +167,6 @@ namespace PsimagLite {
 
 		void init(const std::vector<size_t>& weights,CommType mpiComm)
 		{
-			
 			// distribute the load among the processors
 			std::vector<size_t> loads(nprocs_,0);
 			
@@ -199,20 +202,20 @@ namespace PsimagLite {
 	//! Specialization for performance reasons
 	template<>
 	class Range<ConcurrencySerial<> > {
-	
+
 		typedef ConcurrencySerial<> ConcurrencyType;
 
 	public:
 
 		typedef ConcurrencyType::CommType CommType;
-		
+
 		Range(size_t start,
 		     size_t total,
 		     ConcurrencyType& concurrency,
 		     const std::vector<size_t>& weights,
 		     CommType mpiComm=0) : step_(start),total_(total)
 		{}
-		
+
 		Range(size_t start,
 		     size_t total,
 		     ConcurrencyType& concurrency,           
@@ -220,17 +223,18 @@ namespace PsimagLite {
 		{}
 
 		void next()
-		{	
+		{
 			step_++;
 		}
-		
+
 		bool end() const { return step_>=total_; }
 
 // 		bool hasNext() const { return step_ <total_; }
-		
+
 		size_t index() const { return step_; }
 
 	private:
+
 		size_t step_; // step within this processor
 		size_t total_; // total number of indices
 	}; // class Range

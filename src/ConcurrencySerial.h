@@ -102,7 +102,7 @@ namespace PsimagLite {
 		typedef std::pair<CommType,CommType> CommPairType;
 
 		static const CommType COMM_WORLD = 0;
-		
+
 		ConcurrencySerial(int argc,char *argv[]) : step_(-1),total_(0)
 		{}
 
@@ -113,7 +113,7 @@ namespace PsimagLite {
 		std::string name() const { return "serial"; }
 
 		template<typename DataType>
-		void reduce(DataType& v) {}
+		void reduce(DataType& v,CommType mpiComm=COMM_WORLD) {}
 
 		template<typename DataType>
 		void gather(DataType &v) { }
@@ -126,11 +126,12 @@ namespace PsimagLite {
 			return CommPairType(0,0);
 		}
 
-		bool root() { return true; }
+		bool root(CommType commm1=COMM_WORLD) { return true; }
 
 		void barrier() { }
 
 	private:
+
 		int step_;
 		size_t total_;
 	}; // Class ConcurrencySerial

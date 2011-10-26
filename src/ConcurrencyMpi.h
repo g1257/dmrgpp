@@ -125,9 +125,9 @@ namespace PsimagLite {
 			return tmp; 
 		}
 
-		bool root() 
+		bool root(CommType mpiComm=COMM_WORLD) 
 		{
-			if (rank()==0) return true;
+			if (rank(mpiComm)==0) return true;
 			return false;
 		}
 		
@@ -168,18 +168,18 @@ namespace PsimagLite {
 			if (rank()==0) v = w;
 		}
 
-		void reduce(std::vector<double>& v)
+		void reduce(std::vector<double>& v,CommType mpiComm=COMM_WORLD)
 		{
 			std::vector<double> w(v.size());
 			
 			int x = MPI_Reduce(&(v[0]),&(w[0]),v.size(),
-			                     MPI_DOUBLE,MPI_SUM,0,COMM_WORLD);
+			                     MPI_DOUBLE,MPI_SUM,0,mpiComm);
 			if (x!=MPI_SUCCESS) {
 				std::string s = "ConcurrencyMpi: reduce(Vector) failed\n";
 				throw std::runtime_error(s.c_str());
 			}
 			
-			if (rank()==0) v = w;
+			if (root(mpiComm)) v = w;
 		}
 
 		void reduce(std::vector<std::complex<double> >& v)
