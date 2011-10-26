@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef CONCURRENCY_MPI_HEADER_H
 #define CONCURRENCY_MPI_HEADER_H
-// #include "ConcurrencyMpiFunctions.h"
+#include <mpi.h>
 #include "Concurrency.h"
 #include "TypeToString.h"
 
