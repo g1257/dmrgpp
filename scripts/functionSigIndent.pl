@@ -8,18 +8,16 @@ my $multiLineComment = 0;
 my $buffer="";
 my $pristineBuffer="";
 
-my @keywords=("for","if","while");
+my @keywords=("for","if","while","struct","class","namespace");
 my $GlobalSizeOfTab = 2;
 my $GlobalMaxLine = 80;
 
 while(<STDIN>) {
 
 	my $savedLine = $_;
-	if (/^[\t ]*\/\//) {
-		print $savedLine;
-		next;
-	}
+	
 	s/\/\*.*\*\///;
+	s/\/\/.*$//;
 	$multiLineComment = 1 if (/^[\t ]*\/\*/);
 	
 	if ($multiLineComment) {
@@ -28,11 +26,10 @@ while(<STDIN>) {
 		next;
 	}
 
-	chomp;
-
 	# Empty lines:
 	my $line = $_;
 	$line=~s/[ \t]+//;
+	$line=~s/\n//;
 	$pristineBuffer .= $savedLine;
 	if ($line eq "") {
 		print $pristineBuffer;
@@ -41,7 +38,7 @@ while(<STDIN>) {
 	}
 
 	# Buffer
-	$buffer .= " ".$_;
+	$buffer .= $_;
 
 	if (/\{/) {
 		my $needsPrinting = procBuffer($buffer);
@@ -64,21 +61,20 @@ $pristineBuffer="";
 sub procBuffer
 {
 	my ($t)=@_;
-	return 1 if ($t=~/[ \t]+namespace /);
-	return 1 if ($t=~/[ \t]+class /);
+	return 1 if ($t=~/\#define /);
 	return 1 if ($t=~/\#include /);
 	# Find first parens
 	my $first="";
 	my $second="";
-	if ($t=~/(^[^\(]+)\(([^\)]*)\)/) {
+	if ($t=~/(^[^\(]+)\(([^\)]*)\)(.*$)/) {
 		$first = $1;
 		$second = $2;
 	}
-	die "$0: Wrong signature at line $. for $t\n" if ($first eq "");
+	return 1 if ($first eq "");
 
 	
 	my %func;
-	$func{"post-qualifier"} = getPostQualifier($t);
+	$func{"post-qualifier"} = $3;
 
 	getFirstPart(\%func,$first);
 	my $name = $func{"name"};
@@ -86,8 +82,7 @@ sub procBuffer
 
 	printFunc(\%func);
 
-	my @funcArgs;
-	getArgs(\@funcArgs,$second);
+	my @funcArgs=getArgs($second);
 	for (my $i=0;$i<=$#funcArgs;$i++) {
 		print STDERR " ~ $funcArgs[$i] ";
 	}
@@ -102,8 +97,8 @@ sub procBuffer
 sub getFirstPart
 {
 	my ($f,$first)=@_;
+	$$f{"level"}=getLevel($first);
 	$_=$first;
-	$$f{"level"}=getLevel($_);
 	my @temp=split;
 	my $n = $#temp+1;
 	if ($n==1) { # It's a constructor or destructor
@@ -129,8 +124,9 @@ sub getFirstPart
 	# $n>2 --> qualified function
 	$$f{"pre-qualifier"} = "";
 	for (my $i=0;$i<$n-2;$i++) {
-		$$f{"pre-qualifier"} .= $temp[$i];
+		$$f{"pre-qualifier"} .= $temp[$i]." ";
 	}
+	$$f{"pre-qualifier"}=~s/[\t ]+$//;
 	$$f{"type"}=$temp[$n-2];
 	$$f{"name"}=$temp[$n-1];
 }
@@ -149,19 +145,68 @@ sub getPostQualifier
 sub getLevel
 {
 	my ($t)=@_;
-	return scalar(@{[$t =~ /(\t)/g]});
+	$_=$t;
+	if ($t=~/\n/) {
+		my @temp=split/\n/;
+		$_=$temp[$#temp];
+	}
+	#print STDERR "HERE $_\n";
+	my $counter=0;
+	while(s/^\t//) {
+		#print STDERR "*".$1."*\n";
+		$counter++;
+	}
+	
+	return $counter;
 }
 
 sub getArgs
 {
-	my ($fa,$t)=@_;
+	my ($t)=@_;
 	return if ($t eq "");
 	$_ = $t;
-	@$fa=split/,/;
-	my $n = scalar(@$fa);
+	my @fa=split/,/;
+	my $n = $#fa+1;
 	for (my $i=0;$i<$n;$i++) {
-		$fa->[$i]=~s/^[\t ]+//;
+		$fa[$i]=~s/^[\t ]+//;
+		$fa[$i]=~s/[\t ]+$//;
+		$fa[$i]=~s/[\n\r]//g;
 	}
+	return glueArgs(\@fa);
+}
+
+sub glueArgs
+{
+	my ($fa)=@_;
+	my @ret;
+	my $buffer="";
+	my $openFlag=0;
+	my $n = scalar(@$fa);
+	my $counter=0;
+	for (my $i=0;$i<$n;$i++) {
+		$buffer .= "," unless ($buffer eq "");
+		$buffer .= $fa->[$i];
+		$openFlag += countChars($fa->[$i],"<");
+		$openFlag -= countChars($fa->[$i],">");
+		if ($openFlag==0) {
+			$ret[$counter++]=$buffer;
+			$buffer="";
+		}
+	}
+# 	$ret[$counter++]=$buffer;
+# 	$buffer="";
+	return @ret;
+}
+
+sub countChars
+{
+	my ($t,$c)=@_;
+	$_=$t;
+	my $counter=0;
+	while(s/\Q$c//) {
+		$counter++;
+	}
+	return $counter;
 }
 
 sub isInVector
@@ -218,7 +263,9 @@ sub rewriteSig
      #                            arg2,
      #                            ...) [post-qualifier]
      #{
+	
 	my $level = $$f{"level"};
+	$$f{"pre-qualifier"} = templatedFunction($$f{"pre-qualifier"},$level);
 	printChars($level,"\t");
 	$_ = $$f{"pre-qualifier"};
 	print "$_ " unless ($_ eq "");
@@ -226,6 +273,7 @@ sub rewriteSig
 	$_ = $$f{"type"};
 	print "$_ " unless ($_ eq "");
 	$count += length($_);
+	$count-- if ($_ eq "");
 	$_ = $$f{"name"}."(";
 	print "$_" unless ($_ eq "");
 	$count += length($_);
@@ -233,23 +281,43 @@ sub rewriteSig
 	# print arguments, not that we have at least 2 arg.
 	my $n = scalar(@$fa);
 	($n>1) or die "rewriteSig should not have been called, n=$n\n";
+
 	#first arg.
 	$_=$fa->[0].",\n";
 	print "$_";
 	for (my $i=1;$i<$n-1;$i++) {
 		printChars($level,"\t");
 		printChars($count," ");
-		$_=$fa->[$i].",";
-		print "$_ ";
+		$_=$fa->[$i].",\n";
+		s/^[ \t]+//;
+		print "$_";
 	}
+
 	# last arg
 	printChars($level,"\t");
 	printChars($count," ");
 	$_=$fa->[$n-1];
-	print "$_".") ".$$f{"post-qualifier"}."\n";
+	s/^[ \t]+//;
+	print "$_".")";
+	$_ = $$f{"post-qualifier"};
+	s/^[ \t]+//;
+	s/[\r\n]//g;
+	print " $_" unless ($_ eq "");
+	print "\n";
 	printChars($level,"\t");
 	print "{\n";
 	
+}
+
+sub templatedFunction
+{
+	my ($t,$level)=@_;
+
+	return $t unless ($t=~/[\t ]*template[ \<]/);
+	return $t unless ($t=~/([^>]+\>)(.*$)/);
+	printChars($level,"\t");
+	print "$1\n";
+	return $2;
 }
 
 sub printChars
