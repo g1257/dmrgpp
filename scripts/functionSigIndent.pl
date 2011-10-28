@@ -11,6 +11,7 @@ my $pristineBuffer="";
 my @keywords=("for","if","while","struct","class","namespace");
 my $GlobalSizeOfTab = 2;
 my $GlobalMaxLine = 80;
+my @GlobalCvQualifiers=("const","virtual","volatile","static");
 
 while(<STDIN>) {
 
@@ -66,7 +67,7 @@ sub procBuffer
 	# Find first parens
 	my $first="";
 	my $second="";
-	if ($t=~/(^[^\(]+)\(([^\)]*)\)(.*$)/) {
+	if ($t=~/(^[^\(]+)\(([^\)]*)\)/) {
 		$first = $1;
 		$second = $2;
 	}
@@ -74,7 +75,7 @@ sub procBuffer
 
 	
 	my %func;
-	$func{"post-qualifier"} = $3;
+	$func{"post-qualifier"} = getPostQualifier($t);
 
 	getFirstPart(\%func,$first);
 	my $name = $func{"name"};
@@ -98,6 +99,7 @@ sub getFirstPart
 {
 	my ($f,$first)=@_;
 	$$f{"level"}=getLevel($first);
+	$first=~s/\n/\@ /g;
 	$_=$first;
 	my @temp=split;
 	my $n = $#temp+1;
@@ -122,22 +124,24 @@ sub getFirstPart
 	}
 
 	# $n>2 --> qualified function
-	$$f{"pre-qualifier"} = "";
-	for (my $i=0;$i<$n-2;$i++) {
-		$$f{"pre-qualifier"} .= $temp[$i]." ";
-	}
-	$$f{"pre-qualifier"}=~s/[\t ]+$//;
-	$$f{"type"}=$temp[$n-2];
+	$_=$first;
+	s/[^ \t]+[\t ]*$//; # kill name
+	s/[^ \t]+[\t ]*$//; #kill type
+	s/^[\t ]*//;
+	s/[\t ]*$//;
+	$$f{"pre-qualifier"} = $_;
 	$$f{"name"}=$temp[$n-1];
+	$$f{"type"}=$temp[$n-2];
 }
 
 sub getPostQualifier
 {
 	my ($t)=@_;
 	my $ret = "";
-	if ($t=~/\)([^\{\)]*)\{[\t ]*$/) {
+	$t=~s/\n/\@/g;
+	if ($t=~/\)(.*$)/) {
 		$ret = $1;
-		$ret =~ s/[ \t]//g;
+		$ret =~ s/[ \t]+$//g;
 	}
 	return $ret;
 }
@@ -185,7 +189,10 @@ sub glueArgs
 	my $counter=0;
 	for (my $i=0;$i<$n;$i++) {
 		$buffer .= "," unless ($buffer eq "");
-		$buffer .= $fa->[$i];
+		$_ = $fa->[$i];
+		s/^[\t ]*//;
+		s/[\t ]*$//;
+		$buffer .= $_;
 		$openFlag += countChars($fa->[$i],"<");
 		$openFlag -= countChars($fa->[$i],">");
 		if ($openFlag==0) {
@@ -298,26 +305,69 @@ sub rewriteSig
 	printChars($count," ");
 	$_=$fa->[$n-1];
 	s/^[ \t]+//;
+	s/[ \t]*$//;
 	print "$_".")";
-	$_ = $$f{"post-qualifier"};
-	s/^[ \t]+//;
-	s/[\r\n]//g;
-	print " $_" unless ($_ eq "");
-	print "\n";
-	printChars($level,"\t");
-	print "{\n";
+	printPostQualifier($$f{"post-qualifier"},$level);
+	#s/^[ \t]+//;
+	#s/[\r\n]//g;
+	#print " $_" unless ($_ eq "");
+	#print "\n";
+	#printChars($level,"\t");
+	#print "{\n";
 	
+}
+
+sub printPostQualifier
+{
+	my ($pq,$level)=@_;
+
+	return if ($pq eq "");
+
+	if (!($pq=~/\@/)) {
+		$pq=~s/[\t ]*$//;
+		print "$pq\n";
+		return;
+	}
+
+	$_=$pq;
+	my @temp = split/\@/;
+	$_=shift @temp;
+	print  "$_\n";
+	foreach (@temp) {
+		#printChars($level,"\t");
+		s/[\t ]*$//;
+		print "$_\n"
+	}
 }
 
 sub templatedFunction
 {
 	my ($t,$level)=@_;
-
+	
 	return $t unless ($t=~/[\t ]*template[ \<]/);
-	return $t unless ($t=~/([^>]+\>)(.*$)/);
+	my ($templ,$cvq)=getCvQualifiers($t);
 	printChars($level,"\t");
-	print "$1\n";
-	return $2;
+	print "$templ\n";
+	return $cvq;
+}
+
+sub getCvQualifiers
+{
+	my ($t)=@_;
+	my ($templ,$cvq)=($t,"");
+	$_=$t;
+	while(s/([^ \t]+)[\t ]*$//) {
+		if (isInVector(\@GlobalCvQualifiers,$1)) {
+			$cvq=$1." ";
+			$templ=$_;
+		} else {
+			last;
+		}
+	}
+	$cvq=~s/[\t ]*$//;
+	$templ=~s/\@/\n/g;
+	$templ=~s/[\n \t]*$//;
+	return ($templ,$cvq);
 }
 
 sub printChars
