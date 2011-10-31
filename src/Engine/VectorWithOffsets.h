@@ -245,7 +245,8 @@ namespace Dmrg {
 				
 		const FieldType& operator[](size_t i) const //__attribute__((always_inline))
 		{
-			size_t j = index2Sector_[i];
+			int j = index2Sector_[i];
+			if (j<0) return zero_;
 			return data_[j][i-offsets_[j]];
 			/*if (nonzeroSectors_.size()==1) {
 				if (i>=offsets_[firstSector_] && i<offsets_[firstSector_+1])
@@ -287,7 +288,8 @@ namespace Dmrg {
 // 					return data_[j][i-offsets_[j]];
 // 				}
 // 			}
-			size_t j = index2Sector_[i];
+			int j = index2Sector_[i];
+			if (j<0) return zero_;
 			return data_[j][i-offsets_[j]];
 			std::cerr<<"VectorWithOffsets can't build itself dynamically yet (sorry!)\n";
 			return data_[0][0];
@@ -399,6 +401,7 @@ namespace Dmrg {
 		{
 			if (index2Sector_.size()!=size_) index2Sector_.resize(size_);
 			for (size_t i=0;i<size_;i++) {
+				index2Sector_[i] = -1;
 				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
 					size_t j = nonzeroSectors_[jj];
 					if (i<offsets_[j] || i>=offsets_[j+1]) continue;
@@ -453,7 +456,7 @@ namespace Dmrg {
 
 		PsimagLite::ProgressIndicator progress_;
 		size_t size_;
-		std::vector<size_t> index2Sector_;
+		std::vector<int> index2Sector_;
 		std::vector<VectorType> data_;
 		std::vector<size_t> offsets_;
 		std::vector<size_t> nonzeroSectors_;
