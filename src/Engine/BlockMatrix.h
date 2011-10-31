@@ -102,7 +102,7 @@ namespace Dmrg {
 		{
 			offsets_[blocks]=rank;
 		}
-		//! operator+= 
+
 		void operator+=(BlockMatrix<T,MatrixInBlockTemplate> const &m)
 		{
 			BlockMatrix<T,MatrixInBlockTemplate> c;
@@ -110,7 +110,7 @@ namespace Dmrg {
 			else operatorPlus(c,m,*this);
 			*this = c;
 		}
-		
+
 		//! Sets all blocks of size 1 and value value
 		void makeDiagonal(int n,T const &value)
 		{
@@ -127,7 +127,7 @@ namespace Dmrg {
 			}
 			offsets_.push_back(n);
 		}
-		
+
 		//! Set block to the zero matrix, 
 		void setToZero(int n)
 		{
@@ -263,7 +263,6 @@ namespace Dmrg {
 			enforcePhase(&(vpointer[i*a.n_row()]),a.n_row());
 	}
 
-
 	//! Parallel version of the diagonalization of a block diagonal matrix
 	template<typename S,typename Field,typename SomeConcurrencyType>
 	void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,
@@ -274,7 +273,7 @@ namespace Dmrg {
 		std::vector<Field> eigsTmp;
 		std::vector<std::vector<Field> > eigsForGather;
 		std::vector<size_t> weights(C.blocks());
-		
+
 		eigsForGather.resize(C.blocks());
 
 		for (size_t m=0;m<C.blocks();m++) {
@@ -296,7 +295,7 @@ namespace Dmrg {
 
 		concurrency.gather(C.data_);
 		concurrency.gather(eigsForGather);
-		
+
 		for (size_t m=0;m<C.blocks();m++) {
 			for (int j=C.offsets(m);j< C.offsets(m+1);j++) 
 				eigs[j]=eigsForGather[m][j-C.offsets(m)];

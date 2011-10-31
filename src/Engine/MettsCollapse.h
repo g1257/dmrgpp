@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  Stochastics (random choices) needed for the METTS algorithm 
  *
  */
- 
+
 #ifndef METTS_COLLAPSE_H
 #define METTS_COLLAPSE_H
 #include <iostream>
@@ -93,6 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	template<typename VectorWithOffsetType,typename MettsStochasticsType>
 	class MettsCollapse  {
+
 		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef typename MettsStochasticsType::PairType PairType;
 		typedef typename MettsStochasticsType::LeftRightSuperType LeftRightSuperType;
@@ -100,7 +101,9 @@ namespace Dmrg {
 		typedef PsimagLite::Matrix<RealType> MatrixType;
 		enum {EXPAND_ENVIRON=ProgramGlobals::EXPAND_ENVIRON,
 		      EXPAND_SYSTEM=ProgramGlobals::EXPAND_SYSTEM};
+
 	public:
+
 		typedef PsimagLite::PackIndices PackIndicesType;
 
 		MettsCollapse(const MettsStochasticsType& mettsStochastics,
@@ -138,6 +141,7 @@ namespace Dmrg {
 		}
 
 	private:
+
 		void internalAction(VectorWithOffsetType& dest2,
 		                    const VectorWithOffsetType& src2,
 		                    size_t site,

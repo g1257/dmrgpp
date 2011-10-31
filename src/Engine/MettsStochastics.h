@@ -171,7 +171,7 @@ namespace Dmrg {
 		}
 
 	private:
-		
+
 // 		void getStochasticsForLattice()
 // 		{
 // 			for (size_t i=0;i<pureStates_.size();i++) 
@@ -191,7 +191,8 @@ namespace Dmrg {
 // 			}
 // 		}
 
-		void getStochasticsUpToThisPoint(size_t qn,const std::vector<size_t>& currentSites)
+		void getStochasticsUpToThisPoint(size_t qn,
+		                                 const std::vector<size_t>& currentSites) 
 		{
 			// fix target quantum number
 			size_t symm = getSymmetry();

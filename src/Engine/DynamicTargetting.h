@@ -397,7 +397,7 @@ namespace Dmrg {
 				waveFunctionTransformation_.setInitialVector(
 						phiNew,targetVectors_[0],lrs_); // generalize for su(2)
 				phiNew.collapseSectors();
-				
+
 			} else {
 				throw std::runtime_error("It's 5 am, do you know what line "
 					" your code is exec-ing?\n");

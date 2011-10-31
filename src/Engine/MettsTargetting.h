@@ -92,8 +92,7 @@ namespace Dmrg {
     			typename IoType_,
        			template<typename> class VectorWithOffsetTemplate>
 	class MettsTargetting  {
-			
-			
+
 			struct MettsPrev {
 				MettsPrev() : fixed(0),permutationInverse(0) { }
 				size_t fixed;

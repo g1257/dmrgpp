@@ -97,13 +97,16 @@ namespace Dmrg {
 		typedef std::pair<size_t,size_t> PairType;
 		typedef std::vector<FieldType> VectorType;
 			
-		VectorWithOffsets() : progress_("VectorWithOffsets",0),size_(0) { }
+		VectorWithOffsets() 
+		: progress_("VectorWithOffsets",0),size_(0),index2Sector_(0)
+		{ }
 			
 		template<typename SomeBasisType>
 		VectorWithOffsets(const std::vector<size_t>& weights,
 		                  const SomeBasisType& someBasis)
 		: progress_("VectorWithOffsets",0),
 		  size_(someBasis.size()),
+		  index2Sector_(size_),
 		  data_(weights.size()),
 		  offsets_(weights.size()+1)
 		{
@@ -116,11 +119,13 @@ namespace Dmrg {
 				}
 			}
 			offsets_[weights.size()]=size_;
+			setIndex2Sector();
 		}
 		
 		void resize(size_t x)
 		{
 			size_ = x;
+			index2Sector_.resize(x);
 			data_.clear();
 			offsets_.clear();
 			nonzeroSectors_.clear();
@@ -145,6 +150,7 @@ namespace Dmrg {
 				//			"set(...)\n");
 			}
 			offsets_[v.size()]=size_;
+			setIndex2Sector();
 		}
 		
 		template<typename SomeBasisType>
@@ -163,6 +169,7 @@ namespace Dmrg {
 				nonzeroSectors_.push_back(i);
 			}
 			offsets_[np]=size_;
+			setIndex2Sector();
 			std::ostringstream msg;
 			msg<<"Populated "<<np<<" sectors";
 			progress_.printline(msg,std::cout);
@@ -179,6 +186,7 @@ namespace Dmrg {
 					nonzeroSectors_.push_back(i);
 				}
 			}
+			setIndex2Sector();
 			std::ostringstream msg;
 			msg<<"Collapsed. Non-zero sectors now are "<<nonzeroSectors_.size();
 			progress_.printline(msg,std::cout);
@@ -216,6 +224,7 @@ namespace Dmrg {
 				data_[j].resize(total);
 				for (size_t i=0;i<total;i++) data_[j][i] = v[i+offset];
 			}
+			setIndex2Sector();
 		}
 
 		void extract(VectorType& v,size_t i) const
@@ -236,18 +245,20 @@ namespace Dmrg {
 				
 		const FieldType& operator[](size_t i) const //__attribute__((always_inline))
 		{
+			size_t j = index2Sector_[i];
+			return data_[j][i-offsets_[j]];
 			/*if (nonzeroSectors_.size()==1) {
 				if (i>=offsets_[firstSector_] && i<offsets_[firstSector_+1])
 					return data_[firstSector_][i-offsets_[firstSector_]];
 				else return zero_;
 			}*/
 			
-			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-				size_t j = nonzeroSectors_[jj];
-				if (i<offsets_[j] || i>=offsets_[j+1]) continue;
-				return data_[j][i-offsets_[j]];
-			}
-			return zero_;
+// 			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+// 				size_t j = nonzeroSectors_[jj];
+// 				if (i<offsets_[j] || i>=offsets_[j+1]) continue;
+// 				return data_[j][i-offsets_[j]];
+// 			}
+// 			return zero_;
 
 //				size_t x = nonzeroSectors_.size()/2;
 //				size_t j = 0;
@@ -270,12 +281,14 @@ namespace Dmrg {
 		
 		FieldType& operator[](size_t i) //__attribute__((always_inline))
 		{
-			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-				size_t j = nonzeroSectors_[jj];
-				if (i>=offsets_[j] && i<offsets_[j+1]) {
-					return data_[j][i-offsets_[j]];
-				}
-			}
+// 			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+// 				size_t j = nonzeroSectors_[jj];
+// 				if (i>=offsets_[j] && i<offsets_[j+1]) {
+// 					return data_[j][i-offsets_[j]];
+// 				}
+// 			}
+			size_t j = index2Sector_[i];
+			return data_[j][i-offsets_[j]];
 			std::cerr<<"VectorWithOffsets can't build itself dynamically yet (sorry!)\n";
 			return data_[0][0];
 			//throw std::runtime_error("VectorWithOffsets can't build itself dynamically yet (sorry!)\n");
@@ -340,6 +353,7 @@ namespace Dmrg {
 				nonzeroSectors_[jj] = x;
 				io.read(data_[x],"#sector=");
 			}
+			setIndex2Sector();
 		}
 		
 		VectorWithOffsets<FieldType> operator+=(const VectorWithOffsets<FieldType>& v)
@@ -355,6 +369,7 @@ namespace Dmrg {
 				size_t i = nonzeroSectors_[ii];
 				data_[i] += v.data_[i];
 			}
+			setIndex2Sector();
 			return *this;
 		}
 		
@@ -379,6 +394,19 @@ namespace Dmrg {
 		friend VectorWithOffsets<FieldType2> operator*(const FieldType3& value,const VectorWithOffsets<FieldType2>& v);
 	
 	private:
+		
+		void setIndex2Sector()
+		{
+			if (index2Sector_.size()!=size_) index2Sector_.resize(size_);
+			for (size_t i=0;i<size_;i++) {
+				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+					size_t j = nonzeroSectors_[jj];
+					if (i<offsets_[j] || i>=offsets_[j+1]) continue;
+					index2Sector_[i] = j;
+				}
+			}
+		}
+
 		template<typename SomeBasisType>
 		void findPartitions(std::vector<size_t>& p,const VectorType& v,const SomeBasisType& someBasis)
 		{
@@ -425,6 +453,7 @@ namespace Dmrg {
 
 		PsimagLite::ProgressIndicator progress_;
 		size_t size_;
+		std::vector<size_t> index2Sector_;
 		std::vector<VectorType> data_;
 		std::vector<size_t> offsets_;
 		std::vector<size_t> nonzeroSectors_;
