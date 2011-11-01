@@ -121,7 +121,7 @@ namespace Dmrg {
 			offsets_[weights.size()]=size_;
 			setIndex2Sector();
 		}
-		
+
 		void resize(size_t x)
 		{
 			size_ = x;
@@ -130,7 +130,7 @@ namespace Dmrg {
 			offsets_.clear();
 			nonzeroSectors_.clear();
 		}
-		
+
 		template<typename SomeBasisType>
 		void set(const std::vector<VectorType>& v,//const std::vector<size_t>& weights,
 		         const SomeBasisType& someBasis)
@@ -152,7 +152,7 @@ namespace Dmrg {
 			offsets_[v.size()]=size_;
 			setIndex2Sector();
 		}
-		
+
 		template<typename SomeBasisType>
 		void populateSectors(const SomeBasisType& someBasis)
 		{
@@ -174,7 +174,7 @@ namespace Dmrg {
 			msg<<"Populated "<<np<<" sectors";
 			progress_.printline(msg,std::cout);
 		}
-		
+
 		void collapseSectors()
 		{
 			size_t np = data_.size();
@@ -191,7 +191,7 @@ namespace Dmrg {
 			msg<<"Collapsed. Non-zero sectors now are "<<nonzeroSectors_.size();
 			progress_.printline(msg,std::cout);
 		}
-		
+
 		void setDataInSector(const VectorType& v,size_t i0)
 		{
 			data_[i0] = v;
@@ -289,10 +289,11 @@ namespace Dmrg {
 // 				}
 // 			}
 			int j = index2Sector_[i];
-			if (j<0) return zero_;
+			if (j<0) {
+				std::cerr<<"VectorWithOffsets can't build itself dynamically yet (sorry!)\n";
+				return data_[0][0];
+			}
 			return data_[j][i-offsets_[j]];
-			std::cerr<<"VectorWithOffsets can't build itself dynamically yet (sorry!)\n";
-			return data_[0][0];
 			//throw std::runtime_error("VectorWithOffsets can't build itself dynamically yet (sorry!)\n");
 		}
 		

@@ -322,7 +322,9 @@ namespace Dmrg {
 			for (int k=wsT.getRowPtr(ip);k<wsT.getRowPtr(ip+1);k++) {
 				//SparseElementType sum2=0;
 				size_t alpha = wsT.getCol(k);
-				for (int k2=we.getRowPtr(beta);k2<we.getRowPtr(beta+1);k2++) {
+				size_t begink = we.getRowPtr(beta);
+				size_t endk = we.getRowPtr(beta+1);
+				for (size_t k2=begink;k2<endk;++k2) {
 					size_t j = we.getCol(k2);
 					size_t x = dmrgWaveStruct_.lrs.super().permutationInverse(alpha+j*nalpha);
 					sum += wsT.getValue(k)*we.getValue(k2)*psiSrc[x];
