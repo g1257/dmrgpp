@@ -108,6 +108,9 @@ namespace PsimagLite {
 		void reduce(DataType& v,CommType mpiComm=COMM_WORLD) {}
 
 		template<typename DataType>
+		void allReduce(DataType& v,CommType mpiComm=COMM_WORLD) {}
+
+		template<typename DataType>
 		void gather(DataType &v,CommType mpiComm=COMM_WORLD) { }
 
 		template<typename DataType>

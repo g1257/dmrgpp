@@ -195,6 +195,14 @@ namespace PsimagLite {
 			checkError(x,"MPI_Reduce");
 			if (rank(mpiComm)==0) m = w;
 		}
+
+		void allReduce(std::vector<double>& v,CommType mpiComm=COMM_WORLD)
+		{
+			std::vector<double> w(v.size(),0);
+			int x = MPI_Allreduce(&(v[0]),&(w[0]),v.size(),MPI_DOUBLE,MPI_SUM,mpiComm);
+			checkError(x,"MPI_Allreduce");
+			v = w;
+		}
 		
 		void gather(std::vector<PsimagLite::Matrix<double> > &v,CommType mpiComm=COMM_WORLD)
 		{
@@ -229,6 +237,18 @@ namespace PsimagLite {
 			int x = MPI_Bcast(&val,1, MPI_INTEGER,0,mpiComm); 
 			checkError(x,"MPI_Bcast");
 			b = (val==1) ? true : false;
+		}
+
+		void broadcast(std::vector<double>& v,CommType mpiComm=COMM_WORLD)
+		{
+			int x = MPI_Bcast(&(v[0]),v.size(), MPI_DOUBLE,0,mpiComm);
+			checkError(x,"MPI_Bcast");
+		}
+
+		void broadcast(double& v,CommType mpiComm=COMM_WORLD)
+		{
+			int x = MPI_Bcast(&v,1, MPI_DOUBLE,0,mpiComm);
+			checkError(x,"MPI_Bcast");
 		}
 
 		void barrier(CommType mpiComm=COMM_WORLD)
