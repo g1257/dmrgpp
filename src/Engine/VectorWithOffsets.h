@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define VECTOR_WITH_OFFSETS_H
 #include "Complex.h"
 #include "ProgressIndicator.h"
+#include <cassert>
 
 // FIXME: a more generic solution is needed instead of tying the non-zero structure to basis
 namespace Dmrg {
@@ -209,8 +210,7 @@ namespace Dmrg {
 			offsets_.resize(someBasis.partition());
 			for (size_t i=0;i<someBasis.partition();i++)
 				offsets_[i] = someBasis.partition(i);
-			if (offsets_[offsets_.size()-1]!=size_) throw std::runtime_error
-				("TST::fromFull(...): internal error\n");
+			assert(offsets_[offsets_.size()-1]==size_);
 			
 			data_.resize(someBasis.partition()-1);
 			
@@ -245,6 +245,7 @@ namespace Dmrg {
 				
 		const FieldType& operator[](size_t i) const //__attribute__((always_inline))
 		{
+			assert(i<index2Sector_.size());
 			int j = index2Sector_[i];
 			if (j<0) return zero_;
 			return data_[j][i-offsets_[j]];
@@ -366,6 +367,7 @@ namespace Dmrg {
 				data_ = v.data_;
 				offsets_ = v.offsets_;
 				nonzeroSectors_ = v.nonzeroSectors_;
+				setIndex2Sector();
 				return *this;
 			}
 			for (size_t ii=0;ii<nonzeroSectors_.size();ii++) {
@@ -401,6 +403,7 @@ namespace Dmrg {
 		void setIndex2Sector()
 		{
 			if (index2Sector_.size()!=size_) index2Sector_.resize(size_);
+			//assert(size_>0);
 			for (size_t i=0;i<size_;i++) {
 				index2Sector_[i] = -1;
 				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {

@@ -163,7 +163,7 @@ namespace Dmrg {
 
 		RealType weight(size_t i) const
 		{
-			assert(!allStages(DISABLED));
+			assert(!commonTargetting_.allStages(DISABLED,stage_));
 			return weight_[i];
 		}
 
