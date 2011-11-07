@@ -154,7 +154,7 @@ namespace Dmrg {
 		                    bool needsPrinting)
 		{
 			if (direction==WaveFunctionTransfType::INFINITE) throw std::runtime_error(
-				"Diagonalization::operator(): not expecting INFINITE direction\n");
+			     "Diagonalization::operator(): not expecting INFINITE direction\n");
 
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false);
 			//  targetting: 
@@ -164,7 +164,7 @@ namespace Dmrg {
 		}
 
 	private:
-		
+
 		RealType internalMain_(TargettingType& target,
 		                       size_t direction,
 		                       size_t loopIndex,

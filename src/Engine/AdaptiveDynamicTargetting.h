@@ -189,7 +189,6 @@ namespace Dmrg {
 		{
 			psi_.set(v,someBasis);
 		}
-		
 
 		const RealType& operator[](size_t i) const { return psi_[i]; }
 					
@@ -203,7 +202,6 @@ namespace Dmrg {
 		{
 			return (gsWeight_==0) ?  false : true;
 		}
-		
 
 		size_t size() const
 		{
@@ -223,9 +221,7 @@ namespace Dmrg {
 		            const BlockType& block2,
 		            size_t loopNumber)
 		{
-			if (block1.size()!=1) throw
-					std::runtime_error("DynamicTargetting::evolve(...):"
-							" blocks of size != 1 are unsupported (sorry)\n");
+			assert(block1.size()==1);
 			size_t site = block1[0];
 			evolve(Eg,direction,site,loopNumber);
 			size_t numberOfSites = lrs_.super().block().size();
@@ -331,10 +327,8 @@ namespace Dmrg {
 
 			psi_.load(io,"PSI");
 		}
-		
-		
+
 	private:
-		
 
 		size_t evolve(
 				size_t i,
@@ -345,10 +339,9 @@ namespace Dmrg {
 				size_t site,
 				size_t loopNumber,
 				size_t lastI)
-		{
-			
+		{	
 			if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return 0;
-			
+
 			//std::cerr<<"XYZ A i="<<i<<" site="<<site<<" lastI="<<lastI<<"\n";
 			if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return 0;
 			//std::cerr<<"XYZ B i="<<i<<" site="<<site<<" lastI="<<lastI<<"\n";
@@ -357,19 +350,17 @@ namespace Dmrg {
 			else stage_[i]=CONVERGING;
 			//std::cerr<<"XYZ AFTER stage="<<stage_[0]<<" "<<stage_[1]<<" site="<<site<<"\n";
 			if (stage_[i] == OPERATOR) checkOrder(i);
-			
-			
+
 			std::ostringstream msg;
 			msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
 			msg<<" Eg="<<Eg;
 			progress_.printline(msg,std::cout);
-							
+
 			// phi = A|psi>
 			computePhi(i,site,phiNew,phiOld,direction);
-			
+
 			return 1;
 		}
-		
 
 		void computePhi(
 				size_t i,

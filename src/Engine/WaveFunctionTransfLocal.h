@@ -244,7 +244,7 @@ namespace Dmrg {
 
 			return sum;
 		}
-		
+
 		template<typename SomeVectorType>
 		void transformVector2(
 				SomeVectorType& psiDest,
@@ -256,7 +256,6 @@ namespace Dmrg {
 				transformVector2(psiDest,psiSrc,lrs,i0);
 			}
 		}
-		
 
 		template<typename SomeVectorType>
 		void transformVector2(

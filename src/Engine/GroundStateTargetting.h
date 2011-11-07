@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  targets the ground state
  *
  */
- 
+
 #ifndef GS_TARGETTING_H
 #define GS_TARGETTING_H
 #include <iostream>
@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 
 namespace Dmrg {
-	
+
 	template<
 			template<typename,typename,typename> class LanczosSolverTemplate,
   			template<typename,typename> class InternalProductTemplate,
@@ -140,47 +140,47 @@ namespace Dmrg {
 			  progress_("GroundStateTargetting",0)
 			{
 			}
-			
+
 			RealType normSquared(size_t i) const
 			{
 				throw std::runtime_error("GST: What are you doing here?\n");
 			}
-			
+
 			RealType weight(size_t i) const
 			{
 				throw std::runtime_error("GST: What are you doing here?\n");
 				return 0;
 			}
-			
+
 			RealType gsWeight() const
 			{
 				return 1;
 			}
-			
+
 			template<typename SomeBasisType>
 			void setGs(const std::vector<VectorType>& v,//const std::vector<size_t>& weights,
 				   const SomeBasisType& someBasis)
 			{
 				psi_.set(v,someBasis);
 			}
-			
+
 			const VectorWithOffsetType& gs() const 
 			{
 				return psi_;
 			}
-					
+
 			bool includeGroundStage() const {return true; }
-			
+
 			size_t size() const 
 			{
 				return 0;
 			}
-			
+
 			const VectorWithOffsetType& operator()(size_t i) const
 			{
 				throw std::runtime_error("GroundStateTargetting::operator()(...)\n");
 			}
-			
+
 			void evolve(RealType Eg,
 			            size_t direction,
 			            const BlockType& block1,
@@ -189,7 +189,7 @@ namespace Dmrg {
 			{
 				// Nothing to see here
 			}
-			
+
 			const LeftRightSuperType& leftRightSuper() const
 			{
 				return lrs_;
@@ -201,7 +201,7 @@ namespace Dmrg {
 				if (psi_.size()>0 && std::norm(psi_)<eps) throw std::runtime_error("psi's norm is zero\n");
 				waveFunctionTransformation_.setInitialVector(initialVector,psi_,lrs_);
 			}
-			
+
 			template<typename IoOutputType>
 			void save(const std::vector<size_t>& block,IoOutputType& io) const
 			{
