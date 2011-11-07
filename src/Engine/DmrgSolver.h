@@ -122,7 +122,7 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename ModelType::ModelHelperType::ConcurrencyType
 				ConcurrencyType;
-		typedef TargettingTemplate<LanczosSolver,InternalProductTemplate,WaveFunctionTransfFactory,
+		typedef TargettingTemplate<PsimagLite::LanczosSolver,InternalProductTemplate,WaveFunctionTransfFactory,
   				ModelType,ConcurrencyType,IoType,VectorWithOffsetTemplate> TargettingType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef typename TargettingType::TargettingParamsType TargettingParamsType;

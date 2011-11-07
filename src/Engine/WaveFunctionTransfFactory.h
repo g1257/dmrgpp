@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "WaveFunctionTransfSu2.h"
 #include "DmrgWaveStruct.h"
 #include "IoSimple.h"
+#include "Random48.h"
 
 namespace Dmrg {
 	template<typename LeftRightSuperType,typename VectorWithOffsetType>
@@ -129,7 +130,8 @@ namespace Dmrg {
 		  filenameIn_(parameters.checkpoint.filename),
 		  filenameOut_(parameters.filename),
 		  WFT_STRING("Wft"),
-		  wftImpl_(0)
+		  wftImpl_(0),
+		  rng_(3433117)
 		{
 			if (!isEnabled_) return;
 			if (parameters.options.find("checkpoint")!=std::string::npos)
@@ -261,9 +263,9 @@ namespace Dmrg {
 			typename SomeVectorType::value_type tmp;
    			RealType atmp=0;
 			for (size_t i=offset;i<final;i++) {
-				utils::myRandomT(tmp);
+				myRandomT(tmp);
 				y[i]=tmp;
-				atmp += utils::myProductT(y[i],y[i]);
+				atmp += std::real(y[i]*std::conj(y[i]));
 			}
 			atmp = 1.0 / sqrt (atmp);
 			for (size_t i=offset;i<final;i++) y[i] *= atmp;
@@ -330,6 +332,16 @@ namespace Dmrg {
 		
 	private:
 		
+		void myRandomT(std::complex<RealType> &value) const
+		{
+			value = std::complex<RealType>(rng_() - 0.5, rng_() - 0.5);
+		}
+
+		void myRandomT(RealType &value) const
+		{
+			value = rng_() - 0.5;
+		}
+
 		void beforeWft(const LeftRightSuperType& lrs)
 		{
 			if (stage_==EXPAND_ENVIRON) {
@@ -470,6 +482,7 @@ namespace Dmrg {
 		DmrgWaveStructType dmrgWaveStruct_;
 		std::stack<PsimagLite::Matrix<SparseElementType> > wsStack_,weStack_;
 		WaveFunctionTransfBaseType* wftImpl_;
+		PsimagLite::Random48<RealType> rng_;
 	}; // class WaveFunctionTransformation
 } // namespace Dmrg
 

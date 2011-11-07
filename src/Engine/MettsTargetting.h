@@ -793,7 +793,8 @@ namespace Dmrg {
 				size_t iter= ProgramGlobals::LanczosSteps;
 
 				//srand48(3243447);
-				LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,parallelRank_);
+				LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,parallelRank_,
+				      ProgramGlobals::LanczosTolerance,ProgramGlobals::MaxLanczosSteps);
 				
 				TridiagonalMatrixType ab;
 				size_t total = phi.effectiveSize(i0);

@@ -411,8 +411,9 @@ namespace Dmrg {
 			size_t iter= ProgramGlobals::LanczosSteps;
 			
 			//srand48(3243447);
-			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_);
-			
+			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_,
+			      ProgramGlobals::LanczosTolerance,ProgramGlobals::MaxLanczosSteps);
+
 			lanczosSolver.tridiagonalDecomposition(sv,ab_,V);
 			//calcIntensity(Eg,sv,V,ab);
 		}

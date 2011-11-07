@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "VectorWithOffset.h" // includes the std::norm functions
 #include "VectorWithOffsets.h" // includes the std::norm functions
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 	
@@ -331,8 +332,7 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		void diagonaliseOneBlock(
-			int i,
+		void diagonaliseOneBlock(int i,
      		SomeVectorType &tmpVec,
 	  		double &energyTmp,
 			typename ModelType::ModelHelperType& modelHelper,
@@ -345,10 +345,13 @@ namespace Dmrg {
 			int n = modelHelper.size();
 			if (verbose_) std::cerr<<"Lanczos: About to do block number="<<i<<" of size="<<n<<"\n";
 			typedef InternalProductTemplate<typename SomeVectorType::value_type,ModelType> MyInternalProduct;
-			typedef LanczosSolver<RealType,MyInternalProduct,SomeVectorType> LanczosSolverType;
+			typedef PsimagLite::LanczosSolver<RealType,MyInternalProduct,SomeVectorType> LanczosSolverType;
 			typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			
-			LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,concurrency_.rank(),parameters_.options);
+			LanczosSolverType lanczosSolver(
+			     lanczosHelper,iter,eps,concurrency_.rank(),
+			     ProgramGlobals::LanczosTolerance,
+			     ProgramGlobals::MaxLanczosSteps,parameters_.options);
 
 			tmpVec.resize(lanczosHelper.rank());
 			if (lanczosHelper.rank()==0) {
