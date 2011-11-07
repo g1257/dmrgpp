@@ -85,11 +85,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "ApplyOperatorLocal.h"
-#include "DynamicSerializer.h"
 #include "CorrectionVectorParams.h"
 #include "VectorWithOffsets.h"
 #include "ContinuedFraction.h"
 #include "CorrectionVectorFunction.h"
+#include "CommonTargetting.h"
 
 namespace Dmrg {
 	
@@ -138,7 +138,9 @@ namespace Dmrg {
 		                                  LanczosMatrixType,
 		                                  TargettingParamsType>
 		         CorrectionVectorFunctionType;
-		
+		typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
+				 CommonTargettingType;
+				 
 		enum {DISABLED,OPERATOR,CONVERGING};
 		enum {	EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 				EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -157,11 +159,12 @@ namespace Dmrg {
 		 lrs_(lrs),
 		 model_(model),
 		 tstStruct_(tstStruct),
-		 waveFunctionTransformation_(wft),
+		 wft_(wft),
 		 progress_("CorrectionVectorTargetting",0),
 		 applyOpLocal_(lrs),
 		 gsWeight_(1.0),
-		 targetVectors_(3)
+		 targetVectors_(3),
+		 commonTargetting_(lrs,model,tstStruct,targetVectors_)
 		{
 			if (!wft.isEnabled()) throw std::runtime_error(" CorrectionVectorTargetting "
 					"needs an enabled wft\n");
@@ -169,22 +172,19 @@ namespace Dmrg {
 
 		RealType weight(size_t i) const
 		{
-			if (allStages(DISABLED)) throw std::runtime_error(
-					"DynTarget: What are you doing here?\n");
+			assert(commonTargetting_.allStages(DISABLED,stage_));
 			return weight_[i];
-			//return 1.0;
 		}
 
 		RealType gsWeight() const
 		{
-			if (allStages(DISABLED)) return 1.0;
+			if (commonTargetting_.allStages(DISABLED,stage_)) return 1.0;
 			return gsWeight_;
 		}
 		
 		RealType normSquared(size_t i) const
 		{
-			// call to mult will conjugate one of the vector
-			return std::real(multiply(targetVectors_[i],targetVectors_[i]));
+			return commonTargetting_.normSquared(i);
 		}
 		
 		template<typename SomeBasisType>
@@ -194,9 +194,9 @@ namespace Dmrg {
 			psi_.set(v,someBasis);
 		}
 		
-		const RealType& operator[](size_t i) const { return psi_[i]; }
+// 		const RealType& operator[](size_t i) const { return psi_[i]; }
 					
-		RealType& operator[](size_t i) { return psi_[i]; }
+// 		RealType& operator[](size_t i) { return psi_[i]; }
 		
 		const VectorWithOffsetType& gs() const { return psi_; }
 		
@@ -204,7 +204,7 @@ namespace Dmrg {
 		
 		size_t size() const
 		{
-			if (allStages(DISABLED)) return 0;
+			if (commonTargetting_.allStages(DISABLED,stage_)) return 0;
 			return targetVectors_.size();
 		}
 		
@@ -241,7 +241,7 @@ namespace Dmrg {
 
 			size_t max = tstStruct_.sites.size();
 
-			if (noStageIs(DISABLED)) max = 1;
+			if (commonTargetting_.noStageIs(DISABLED,stage_)) max = 1;
 
 			// Loop over each operator that needs to be applied
 			// in turn to the g.s.
@@ -255,15 +255,9 @@ namespace Dmrg {
 			}
 			if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 
-			if (count==0) {
-		//		// always print to keep observer driver in sync
-		//		if (needsPrinting) {
-		//			zeroOutVectors();
-		//			printVectors(block);
-		//		}
-				return;
-			}
-			if (!noStageIs(DISABLED)) Eg_ = Eg;
+			if (count==0) return;
+
+			if (!commonTargetting_.noStageIs(DISABLED,stage_)) Eg_ = Eg;
 			calcDynVectors(phiNew,direction);
 
 			//cocoon(direction,block); // in-situ
@@ -274,19 +268,7 @@ namespace Dmrg {
 
 		void initialGuess(VectorWithOffsetType& v) const
 		{
-			waveFunctionTransformation_.setInitialVector(v,psi_,lrs_);
-			if (!allStages(CONVERGING)) return;
-			std::vector<VectorWithOffsetType> vv(targetVectors_.size());
-			for (size_t i=0;i<targetVectors_.size();i++) {
-				waveFunctionTransformation_.setInitialVector(vv[i],
-						targetVectors_[i],lrs_);
-				if (std::norm(vv[i])<1e-6) continue;
-				VectorWithOffsetType w= weight_[i]*vv[i];
-				v += w;
-			}
-			if (fabs(gsWeight_)<1e-6) return;
-			VectorWithOffsetType w= gsWeight_*psi_;
-			v += w;
+			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_);
 		}
 		
 		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -301,8 +283,7 @@ namespace Dmrg {
 			int s2 = (type>1) ? -1 : 1;
 			ContinuedFractionType cf(ab_,Eg_,s2*weightForContinuedFraction_,
 				s);
-			DynamicSerializerType dynS(cf,block[0],targetVectors_);
-			dynS.save(io);
+			commonTargetting_.save(block,io,cf);
 			psi_.save(io,"PSI");
 		}
 
@@ -312,9 +293,7 @@ namespace Dmrg {
 
 			typename IoType::In io(f);
 
-			DynamicSerializerType dynS(io,IoType::In::LAST_INSTANCE);
-			for (size_t i=0;i<targetVectors_.size();i++)
-				targetVectors_[i] = dynS.vector(i);
+			commonTargetting_.load(io);
 
 			psi_.load(io,"PSI");
 		}
@@ -337,10 +316,11 @@ namespace Dmrg {
 			
 			if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
 			else stage_[i]=CONVERGING;
-			if (stage_[i] == OPERATOR) checkOrder(i);
+			if (stage_[i] == OPERATOR) commonTargetting_.checkOrder(i,stage_);
 			
 			std::ostringstream msg;
-			msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
+			msg<<"Evolving, stage="<<commonTargetting_.getStage(i,stage_);
+			msg<<" site="<<site<<" loopNumber="<<loopNumber;
 			msg<<" Eg="<<Eg;
 			progress_.printline(msg,std::cout);
 							
@@ -390,7 +370,7 @@ namespace Dmrg {
 					phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
-				waveFunctionTransformation_.setInitialVector(
+				wft_.setInitialVector(
 						phiNew,targetVectors_[0],lrs_); // generalize for su(2)
 				phiNew.collapseSectors();
 				
@@ -400,52 +380,6 @@ namespace Dmrg {
 			}
 		}
 
-		void checkOrder(size_t i) const
-		{
-			if (i==0) return;
-			for (size_t j=0;j<i;j++) {
-				if (stage_[j] == DISABLED) {
-					std::string s ="TST:: Seeing dynamic site "+ttos(tstStruct_.sites[i]);
-					s =s + " before having seen";
-					s = s + " site "+ttos(j);
-					s = s +". Please order your dynamic sites in order of appearance.\n";
-					throw std::runtime_error(s);
-				}
-			}
-		}
-
-		bool allStages(size_t x) const
-		{
-			for (size_t i=0;i<stage_.size();i++)
-				if (stage_[i]!=x) return false;
-			return true;
-		}
-		
-
-		bool noStageIs(size_t x) const
-		{
-			for (size_t i=0;i<stage_.size();i++)
-				if (stage_[i]==x) return false;
-			return true;
-		}
-		
-
-		std::string getStage(size_t i) const
-		{
-			switch (stage_[i]) {
-			case DISABLED:
-				return "Disabled";
-				break;
-			case OPERATOR:
-				return "Applying operator for the first time";
-				break;
-			case CONVERGING:
-				return "Converging DDMRG";
-				break;
-			}
-			return "undefined";
-		}
-		
 		void calcDynVectors(
 				const VectorWithOffsetType& phi,
 				size_t systemOrEnviron)
@@ -558,35 +492,17 @@ namespace Dmrg {
 			return sum;
 		}
 
-		void zeroOutVectors()
-		{
-			for (size_t i=0;i<targetVectors_.size();i++)
-				targetVectors_[i].resize(lrs_.super().size());
-		}
-		
-
-		//void printHeader()
-		//{
-		//	io_.print(tstStruct_);
-		//	std::string label = "omega";
-		//	std::string s = "Omega=" + ttos(currentOmega_);
-		//	io_.printline(s);
-		//	label = "weights";
-		//	io_.printVector(weight_,label);
-		//	s = "GsWeight="+ttos(gsWeight_);
-		//	io_.printline(s);
-		//}
-		
 		std::vector<size_t> stage_;
 		VectorWithOffsetType psi_;
 		const LeftRightSuperType& lrs_;
 		const ModelType& model_;
 		const TargettingParamsType& tstStruct_;
-		const WaveFunctionTransfType& waveFunctionTransformation_;
+		const WaveFunctionTransfType& wft_;
 		PsimagLite::ProgressIndicator progress_;
 		ApplyOperatorType applyOpLocal_;
 		RealType gsWeight_;
 		std::vector<VectorWithOffsetType> targetVectors_;
+		CommonTargettingType commonTargetting_;
 		std::vector<RealType> weight_;
 		TridiagonalMatrixType ab_;
 		RealType Eg_;

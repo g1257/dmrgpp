@@ -333,7 +333,8 @@ namespace Dmrg {
 			if (stage_[i] == OPERATOR) commonTargetting_.checkOrder(i,stage_);
 
 			std::ostringstream msg;
-			msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
+			msg<<"Evolving, stage="<<commonTargetting_.getStage(i,stage_);
+			msg<<" site="<<site<<" loopNumber="<<loopNumber;
 			msg<<" Eg="<<Eg;
 			progress_.printline(msg,std::cout);
 
@@ -406,28 +407,12 @@ namespace Dmrg {
 
 			// OK, now that we got the partition number right, let's wft:
 
-			wft_.setInitialVector(result,targetVectors_[i],
-					lrs_); // generalize for su(2)
+			// FIXME generalize for su(2)
+			wft_.setInitialVector(result,targetVectors_[i],lrs_);
 			result.collapseSectors();
 			targetVectors_[i] = result;
 		}
 
-		std::string getStage(size_t i) const
-		{
-			switch (stage_[i]) {
-			case DISABLED:
-				return "Disabled";
-				break;
-			case OPERATOR:
-				return "Applying operator for the first time";
-				break;
-			case CONVERGING:
-				return "Converging DDMRG";
-				break;
-			}
-			return "undefined";
-		}
-		
 		void calcDynVectors(size_t site,const VectorWithOffsetType& phiNew)
 		{
 			for (size_t i=0;i<targetVectors_[0].sectors();i++) {
@@ -515,21 +500,21 @@ namespace Dmrg {
 			ab_.push(a,b);
 		}
 
-		void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron) const
-		{
-			FermionSign fs(lrs_.left(),tstStruct_.electrons);
-			if (allStages(CONVERGING)) {
-				VectorWithOffsetType tmpVector = psi_;
-				for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
-					applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],fs,
-							systemOrEnviron);
-					tmpVector = phi;
-				}
-				return;
-			}
-			applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,
-					systemOrEnviron);
-		}
+// 		void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron) const
+// 		{
+// 			FermionSign fs(lrs_.left(),tstStruct_.electrons);
+// 			if (allStages(CONVERGING)) {
+// 				VectorWithOffsetType tmpVector = psi_;
+// 				for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
+// 					applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],fs,
+// 							systemOrEnviron);
+// 					tmpVector = phi;
+// 				}
+// 				return;
+// 			}
+// 			applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,
+// 					systemOrEnviron);
+// 		}
 		
 		void setWeights()
 		{

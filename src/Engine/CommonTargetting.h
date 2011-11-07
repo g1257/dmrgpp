@@ -188,23 +188,22 @@ namespace Dmrg {
 			return true;
 		}
 
-// 		std::string getStage(size_t i) const
-// 		{
-// 			switch (stage_[i]) {
-// 			case DISABLED:
-// 				return "Disabled";
-// 				break;
-// 			case OPERATOR:
-// 				return "Applying operator for the first time";
-// 				break;
-// 			case CONVERGING:
-// 				return "Converging DDMRG";
-// 				break;
-// 			}
-// 			return "undefined";
-// 		}
+		std::string getStage(size_t i,const std::vector<size_t>& stage) const
+		{
+			switch (stage[i]) {
+			case DISABLED:
+				return "Disabled";
+				break;
+			case OPERATOR:
+				return "Applying operator for the first time";
+				break;
+			case CONVERGING:
+				return "Converging DDMRG";
+				break;
+			}
+			return "undefined";
+		}
 
-		
 		void initialGuess(VectorWithOffsetType& v,
 		                  const WaveFunctionTransfType& wft,
 		                  const VectorWithOffsetType& psi,
@@ -239,38 +238,7 @@ namespace Dmrg {
 // 			              systemOrEnviron);
 // 		}
 
-		void setWeights(std::vector<RealType>& weights,
-		                RealType& gsWeight)
-		{
-			RealType sum  = 0;
-			weights.resize(targetVectors_.size());
-			for (size_t r=0;r<weights.size();r++) {
-				weights[r] =0;
-				for (size_t i=0;i<targetVectors_[0].sectors();i++) {
-					VectorType v,w;
-					size_t i0 = targetVectors_[0].sector(i);
-					targetVectors_[0].extract(v,i0);
-					targetVectors_[r].extract(w,i0);
-					weights[r] += dynWeightOf(v,w);
-				}
-				sum += weights[r];
-			}
-			for (size_t r=0;r<weights.size();r++) weights[r] *= 0.5/sum;
-			gsWeight = 0.5;
-
-		}
-
 	private:
-
-		RealType dynWeightOf(VectorType& v,const VectorType& w) const
-		{
-			RealType sum = 0;
-			for (size_t i=0;i<v.size();i++) {
-				RealType tmp = std::real(v[i]*w[i]);
-				sum += tmp*tmp;
-			}
-			return sum;
-		}
 
 // 		void zeroOutVectors()
 // 		{

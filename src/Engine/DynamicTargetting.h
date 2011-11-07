@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "ApplyOperatorLocal.h"
-#include "DynamicSerializer.h"
+// #include "DynamicSerializer.h"
 #include "DynamicDmrgParams.h"
 #include "VectorWithOffsets.h"
 #include "CommonTargetting.h"
@@ -132,8 +132,8 @@ namespace Dmrg {
 		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
 		ContinuedFractionType;
 		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
-		typedef DynamicSerializer<RealType,VectorWithOffsetType,ContinuedFractionType>
-		DynamicSerializerType;
+// 		typedef DynamicSerializer<RealType,VectorWithOffsetType,ContinuedFractionType>
+// 		DynamicSerializerType;
 		typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
 		        CommonTargettingType;
 
@@ -318,7 +318,8 @@ namespace Dmrg {
 			if (stage_[i] == OPERATOR) commonTargetting_.checkOrder(i,stage_);
 
 			std::ostringstream msg;
-			msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
+			msg<<"Evolving, stage="<<commonTargetting_.getStage(i,stage_);
+			msg<<" site="<<site<<" loopNumber="<<loopNumber;
 			msg<<" Eg="<<Eg;
 			progress_.printline(msg,std::cout);
 
@@ -372,22 +373,6 @@ namespace Dmrg {
 			}
 		}
 
-		std::string getStage(size_t i) const
-		{
-			switch (stage_[i]) {
-			case DISABLED:
-				return "Disabled";
-				break;
-			case OPERATOR:
-				return "Applying operator for the first time";
-				break;
-			case CONVERGING:
-				return "Converging DDMRG";
-				break;
-			}
-			return "undefined";
-		}
-		
 		void calcLanczosVectors(RealType& gsWeight,
 		                        std::vector<RealType>& weights,
 		                        const VectorWithOffsetType& phi,
@@ -405,16 +390,16 @@ namespace Dmrg {
 					for (size_t j=0;j<targetVectors_.size();j++)
 						targetVectors_[j] = phi;
 				}
-				setLanczosVectors(V,i0);
+				setVectors(V,i0);
 			}
-			
-			commonTargetting_.setWeights(weights,gsWeight);
+
+			setWeights();
 			weightForContinuedFraction_ = phi*phi;
 		}
 
 		void getLanczosVectors(DenseMatrixType& V,
-							   const VectorType& sv,
-						 size_t p)
+		                       const VectorType& sv,
+		                       size_t p)
 		{
 			typename ModelType::ModelHelperType modelHelper(
 				p,lrs_,model_.orbitals());
@@ -432,14 +417,44 @@ namespace Dmrg {
 			//calcIntensity(Eg,sv,V,ab);
 		}
 
-		void setLanczosVectors(const DenseMatrixType& V,
-							   size_t i0)
+		void setVectors(const DenseMatrixType& V,
+		                size_t i0)
 		{
 			for (size_t i=0;i<targetVectors_.size();i++) {
 				VectorType tmp(V.n_row());
 				for (size_t j=0;j<tmp.size();j++) tmp[j] = V(j,i);
 				targetVectors_[i].setDataInSector(tmp,i0);
 			}
+		}
+
+		void setWeights()
+		{
+			RealType sum  = 0;
+			weight_.resize(targetVectors_.size());
+			for (size_t r=0;r<weight_.size();r++) {
+				weight_[r] =0;
+				for (size_t i=0;i<targetVectors_[0].sectors();i++) {
+					VectorType v,w;
+					size_t i0 = targetVectors_[0].sector(i);
+					targetVectors_[0].extract(v,i0);
+					targetVectors_[r].extract(w,i0);
+					weight_[r] += dynWeightOf(v,w);
+				}
+				sum += weight_[r];
+			}
+			for (size_t r=0;r<weight_.size();r++) weight_[r] *= 0.5/sum;
+			gsWeight_ = 0.5;
+			
+		}
+
+		RealType dynWeightOf(VectorType& v,const VectorType& w) const
+		{
+			RealType sum = 0;
+			for (size_t i=0;i<v.size();i++) {
+				RealType tmp = std::real(v[i]*w[i]);
+				sum += tmp*tmp;
+			}
+			return sum;
 		}
 
 		std::vector<size_t> stage_;
