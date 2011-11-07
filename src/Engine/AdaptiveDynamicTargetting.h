@@ -129,9 +129,11 @@ namespace Dmrg {
 		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
 		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
 			ContinuedFractionType;
-		typedef DynamicSerializer<RealType,VectorWithOffsetType,
-				ContinuedFractionType> DynamicSerializerType;
-		
+// 		typedef DynamicSerializer<RealType,VectorWithOffsetType,
+// 				ContinuedFractionType> DynamicSerializerType;
+		typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
+		        CommonTargettingType;
+				
 		enum {DISABLED,OPERATOR,CONVERGING};
 		enum {	EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 				EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -150,13 +152,14 @@ namespace Dmrg {
 		  lrs_(lrs),
 		  model_(model),
 		  tstStruct_(tstStruct),
-		  waveFunctionTransformation_(wft),
+		  wft_(wft),
 		  lastLanczosVector_(0),
 		  dynCounter_(0),
 		  progress_("AdaptiveDynamicTargetting",0),
 		  applyOpLocal_(lrs),
 		  gsWeight_(1.0),
 		  targetVectors_(2),
+		  commonTargetting_(lrs,model,tstStruct,targetVectors_),
 		  done_(false)
 		{
 			if (!wft.isEnabled()) throw std::runtime_error(" DynamicTargetting "
@@ -165,22 +168,19 @@ namespace Dmrg {
 
 		RealType weight(size_t i) const
 		{
-			if (allStages(DISABLED)) throw std::runtime_error(
-					"DynTarget: What are you doing here?\n");
+			assert(commonTargetting_.allStages(DISABLED,stage_));
 			return weight_[i];
 			//return 1.0;
 		}
 
 		RealType gsWeight() const
 		{
-			//if (allStages(DISABLED)) return 1.0;
 			return gsWeight_;
 		}
 		
 		RealType normSquared(size_t i) const
 		{
-			// call to mult will conjugate one of the vector
-			return std::real(multiply(targetVectors_[i],targetVectors_[i]));
+			return commonTargetting_.normSquared(i);
 		}
 		
 		template<typename SomeBasisType>
@@ -190,13 +190,11 @@ namespace Dmrg {
 			psi_.set(v,someBasis);
 		}
 
-		const RealType& operator[](size_t i) const { return psi_[i]; }
+// 		const RealType& operator[](size_t i) const { return psi_[i]; }
 					
 		RealType& operator[](size_t i) { return psi_[i]; }
-		
 
 		const VectorWithOffsetType& gs() const { return psi_; }
-		
 
 		bool includeGroundStage() const
 		{
@@ -205,10 +203,9 @@ namespace Dmrg {
 
 		size_t size() const
 		{
-			if (!allStages(CONVERGING)) return 0;
+			if (!commonTargetting_.allStages(CONVERGING,stage_)) return 0;
 			return lastLanczosVector_;
 		}
-		
 
 		const VectorWithOffsetType& operator()(size_t i) const
 		{
@@ -231,36 +228,75 @@ namespace Dmrg {
 			evolve(Eg,direction,x,loopNumber);
 		}
 
-		// FIXME: MAKE PRIVATE:
+		void initialGuess(VectorWithOffsetType& v) const
+		{
+			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_);
+		}
+		
+		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
+
+		template<typename IoOutputType>
+		void save(const std::vector<size_t>& block,IoOutputType& io) const
+		{
+			assert(block.size()==1);
+			size_t type = tstStruct_.type;
+			int s = (type&1) ? -1 : 1;
+			int s2 = (type>1) ? -1 : 1;
+			
+			if (ab_.size()<2) return;
+			ContinuedFractionType cf(ab_,Eg_,s2*weightForContinuedFraction_,s);
+			
+			commonTargetting_.save(block,io,cf);
+
+			psi_.save(io,"PSI");
+		}
+
+		void load(const std::string& f)
+		{
+			for (size_t i=0;i<stage_.size();i++) stage_[i] = CONVERGING;
+
+			typename IoType::In io(f);
+
+			commonTargetting_.load(io);
+
+			lastLanczosVector_ = targetVectors_.size()-1;
+
+			//! WARNING: USE OF MAGIC BELOW:
+			dynCounter_ = 13; // FIXME: MAYBE SAVE AND LOAD ACTUAL NUMBER HERE
+
+			psi_.load(io,"PSI");
+		}
+
+	private:
+
 		void evolve(RealType Eg,size_t direction,size_t site,
-									size_t loopNumber)
+					size_t loopNumber)
 		{
 			Eg_ = Eg;
 			VectorWithOffsetType phiNew;
 			if (ab_.size()==0) getPhi(phiNew,Eg,direction,site,loopNumber);
-			if (!allStages(CONVERGING)) {
+			if (!commonTargetting_.allStages(CONVERGING,stage_)) {
 				targetVectors_[0] = phiNew;
 				return;
 			}
-
+			
 			size_t numberOfSites = lrs_.super().block().size();
 			if (site>0 && site<numberOfSites-1) wftAllDynVectors();
-
+			
 			if (!done_) calcDynVectors(site,phiNew);
 		}
-		
-		// FIXME: MAKE PRIVATE:
+
 		void getPhi(VectorWithOffsetType& phiNew,RealType Eg,size_t direction,size_t site,
-				size_t loopNumber)
+					size_t loopNumber)
 		{
 			size_t count =0;
 			VectorWithOffsetType phiOld = psi_;
-
+			
 			VectorWithOffsetType vectorSum;
-
+			
 			size_t max = tstStruct_.sites.size();
-			if (allStages(CONVERGING)) max = 1;
-
+			if (commonTargetting_.allStages(CONVERGING,stage_)) max = 1;
+			
 			// Loop over each operator that needs to be applied
 			// in turn to the g.s.
 			for (size_t i=0;i<max;i++) {
@@ -274,61 +310,6 @@ namespace Dmrg {
 			}
 			if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 		}
-
-
-		void initialGuess(VectorWithOffsetType& v) const
-		{
-			waveFunctionTransformation_.setInitialVector(v,psi_,lrs_);
-			if (!allStages(CONVERGING)) return;
-			size_t n = lastLanczosVector_;
-			std::vector<VectorWithOffsetType> vv(n);
-			for (size_t i=0;i<n;i++) {
-				waveFunctionTransformation_.setInitialVector(vv[i],
-						targetVectors_[i],lrs_);
-				if (std::norm(vv[i])<1e-6) continue;
-				VectorWithOffsetType w= weight_[i]*vv[i];
-				v += w;
-			}
-		}
-		
-		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
-
-		template<typename IoOutputType>
-		void save(const std::vector<size_t>& block,IoOutputType& io) const
-		{
-			if (ab_.size()<2) return;
-			if (block.size()!=1) throw std::runtime_error(
-					"DynamicTargetting only supports blocks of size 1\n");
-			size_t type = tstStruct_.type;
-			int s = (type&1) ? -1 : 1;
-			int s2 = (type>1) ? -1 : 1;
-			ContinuedFractionType cf(ab_,Eg_,s2*weightForContinuedFraction_,
-				s);
-			DynamicSerializerType dynS(cf,block[0],targetVectors_);
-			dynS.save(io);
-			psi_.save(io,"PSI");
-		}
-
-		void load(const std::string& f)
-		{
-			for (size_t i=0;i<stage_.size();i++) stage_[i] = CONVERGING;
-
-			typename IoType::In io(f);
-
-			DynamicSerializerType dynS(io,IoType::In::LAST_INSTANCE);
-
-			for (size_t i=0;i<targetVectors_.size();i++)
-				targetVectors_[i] = dynS.vector(i);
-
-			lastLanczosVector_ = targetVectors_.size()-1;
-
-			//! WARNING: USE OF MAGIC BELOW:
-			dynCounter_ = 13; // FIXME: MAYBE SAVE AND LOAD ACTUAL NUMBER HERE
-
-			psi_.load(io,"PSI");
-		}
-
-	private:
 
 		size_t evolve(
 				size_t i,
@@ -349,7 +330,7 @@ namespace Dmrg {
 			if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
 			else stage_[i]=CONVERGING;
 			//std::cerr<<"XYZ AFTER stage="<<stage_[0]<<" "<<stage_[1]<<" site="<<site<<"\n";
-			if (stage_[i] == OPERATOR) checkOrder(i);
+			if (stage_[i] == OPERATOR) commonTargetting_.checkOrder(i,stage_);
 
 			std::ostringstream msg;
 			msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
@@ -402,7 +383,7 @@ namespace Dmrg {
 					phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
-				waveFunctionTransformation_.setInitialVector(
+				wft_.setInitialVector(
 						phiNew,targetVectors_[0],lrs_); // generalize for su(2)
 				phiNew.collapseSectors();
 				
@@ -425,42 +406,11 @@ namespace Dmrg {
 
 			// OK, now that we got the partition number right, let's wft:
 
-			waveFunctionTransformation_.setInitialVector(result,targetVectors_[i],
+			wft_.setInitialVector(result,targetVectors_[i],
 					lrs_); // generalize for su(2)
 			result.collapseSectors();
 			targetVectors_[i] = result;
 		}
-
-		void checkOrder(size_t i) const
-		{
-			if (i==0) return;
-			for (size_t j=0;j<i;j++) {
-				if (stage_[j] == DISABLED) {
-					std::string s ="TST:: Seeing dynamic site "+ttos(tstStruct_.sites[i]);
-					s =s + " before having seen";
-					s = s + " site "+ttos(j);
-					s = s +". Please order your dynamic sites in order of appearance.\n";
-					throw std::runtime_error(s);
-				}
-			}
-		}
-		
-
-		bool allStages(size_t x) const
-		{
-			for (size_t i=0;i<stage_.size();i++)
-				if (stage_[i]!=x) return false;
-			return true;
-		}
-		
-
-		bool noStageIs(size_t x) const
-		{
-			for (size_t i=0;i<stage_.size();i++)
-				if (stage_[i]==x) return false;
-			return true;
-		}
-		
 
 		std::string getStage(size_t i) const
 		{
@@ -522,7 +472,7 @@ namespace Dmrg {
 				targetVectors_[0].extract(x,i0);
 			}
 			if (lastLanczosVector_==0) normalize(y);
-			lanczosSolver.oneStepDecomposition(x,y,a,b);
+				lanczosSolver.oneStepDecomposition(x,y,a,b);
 			if (!done_) {
 				//std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
 			}
@@ -535,7 +485,7 @@ namespace Dmrg {
 			RealType norm1 = PsimagLite::norm(x);
 			if (norm1<1e-6) {
 				//if ((dynCounter_%tstStruct_.advanceEach) != 0)
-					ab_.push(a,b);
+				ab_.push(a,b);
 				h.matrixVectorProduct(x,y);
 				a = x*y;
 				//std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
@@ -612,12 +562,6 @@ namespace Dmrg {
 			return sum;
 		}
 
-		void zeroOutVectors()
-		{
-			for (size_t i=0;i<targetVectors_.size();i++)
-				targetVectors_[i].resize(lrs_.super().size());
-		}
-		
 		void normalize(VectorType& v) const
 		{
 			RealType x = PsimagLite::norm(v);
@@ -630,13 +574,14 @@ namespace Dmrg {
 		const LeftRightSuperType& lrs_;
 		const ModelType& model_;
 		const TargettingParamsType& tstStruct_;
-		const WaveFunctionTransfType& waveFunctionTransformation_;
+		const WaveFunctionTransfType& wft_;
 		size_t lastLanczosVector_;
 		size_t dynCounter_;
 		PsimagLite::ProgressIndicator progress_;
 		ApplyOperatorType applyOpLocal_;
 		RealType gsWeight_;
 		std::vector<VectorWithOffsetType> targetVectors_;
+		CommonTargettingType commonTargetting_;
 		std::vector<RealType> weight_;
 		bool done_;
 		RealType Eg_;

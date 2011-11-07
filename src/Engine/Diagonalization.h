@@ -128,7 +128,7 @@ namespace Dmrg {
 		  io_(io),
 		  progress_("Diag.",0),
 		  quantumSector_(quantumSector),
-		  waveFunctionTransformation_(waveFunctionTransformation),
+		  wft_(waveFunctionTransformation),
 		  oldEnergy_(0)
 		{}
 
@@ -143,7 +143,7 @@ namespace Dmrg {
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false);
 			//  targetting: 
 			target.evolve(gsEnergy,direction,blockLeft,blockRight,loopIndex);
-			waveFunctionTransformation_.triggerOff(target.leftRightSuper()); //,m);
+			wft_.triggerOff(target.leftRightSuper()); //,m);
 			return gsEnergy;
 		}
 
@@ -159,7 +159,7 @@ namespace Dmrg {
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false);
 			//  targetting: 
 			target.evolve(gsEnergy,direction,block,block,loopIndex);
-			waveFunctionTransformation_.triggerOff(target.leftRightSuper()); //,m);
+			wft_.triggerOff(target.leftRightSuper()); //,m);
 			return gsEnergy;
 		}
 
@@ -171,7 +171,7 @@ namespace Dmrg {
 		                       bool needsPrinting)
 		{
 			const LeftRightSuperType& lrs= target.leftRightSuper();
-			waveFunctionTransformation_.triggerOn(lrs);
+			wft_.triggerOn(lrs);
 
 			RealType gsEnergy = 0;
 			if (!target.includeGroundStage()) return gsEnergy;
@@ -370,7 +370,7 @@ namespace Dmrg {
 		IoOutType& io_;
 		PsimagLite::ProgressIndicator progress_;
 		const size_t& quantumSector_; // this needs to be a reference since DmrgSolver will change it
-		WaveFunctionTransfType& waveFunctionTransformation_;
+		WaveFunctionTransfType& wft_;
 		double oldEnergy_;
 	}; // class Diagonalization
 } // namespace Dmrg 

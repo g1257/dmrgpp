@@ -145,11 +145,8 @@ namespace Dmrg {
 		template<typename IoOutputType>
 		void save(const std::vector<size_t>& block,
 		          IoOutputType& io,
-		          const RealType& Eg,
-		          const RealType& s2,
-		          const RealType& s) const
+		          const ContinuedFractionType& cf) const
 		{
-			ContinuedFractionType cf(ab_,Eg,s2*weightForContinuedFraction_,s);
 			DynamicSerializerType dynS(cf,block[0],targetVectors_);
 			dynS.save(io);
 		}
@@ -162,33 +159,6 @@ namespace Dmrg {
 				targetVectors_[i] = dynS.vector(i);
 			
 		}
-// 		template<typename IoOutputType>
-// 		void save(const std::vector<size_t>& block,
-// 		          IoOutputType& io) const
-// 		{
-// 			assert(block.size()==1);
-// 
-// 			size_t type = tstStruct_.type;
-// 			int s = (type&1) ? -1 : 1;
-// 			int s2 = (type>1) ? -1 : 1;
-// 			ContinuedFractionType cf(ab_,Eg_,s2*weightForContinuedFraction_,s);
-// 			DynamicSerializerType dynS(cf,block[0],targetVectors_);
-// 			dynS.save(io);
-// 			psi_.save(io,"PSI");
-// 		}
-
-// 		void load(const std::string& f)
-// 		{
-// 			for (size_t i=0;i<stage_.size();i++) stage_[i] = CONVERGING;
-// 
-// 			typename IoType::In io(f);
-// 
-// 			DynamicSerializerType dynS(io,IoType::In::LAST_INSTANCE);
-// 			for (size_t i=0;i<targetVectors_.size();i++)
-// 				targetVectors_[i] = dynS.vector(i);
-// 
-// 			psi_.load(io,"PSI");
-// 		}
 
 		void checkOrder(size_t i,const std::vector<size_t>& stage) const
 		{
@@ -234,60 +204,23 @@ namespace Dmrg {
 // 			return "undefined";
 // 		}
 
-		void calcLanczosVectors(RealType& gsWeight,
-		                        std::vector<RealType>& weights,
-		                        const VectorWithOffsetType& phi,
-		                        size_t systemOrEnviron)
+		
+		void initialGuess(VectorWithOffsetType& v,
+		                  const WaveFunctionTransfType& wft,
+		                  const VectorWithOffsetType& psi,
+		                  const std::vector<size_t>& stage,
+		                  const std::vector<RealType>& weights) const
 		{
-			for (size_t i=0;i<phi.sectors();i++) {
-				VectorType sv;
-				size_t i0 = phi.sector(i);
-				phi.extract(sv,i0);
-				DenseMatrixType V;
-				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
-				getLanczosVectors(V,sv,p);
-				if (i==0) {
-					targetVectors_.resize(V.n_col());
-					for (size_t j=0;j<targetVectors_.size();j++)
-						targetVectors_[j] = phi;
-				}
-				setLanczosVectors(V,i0);
-			}
-			setWeights(weights,gsWeight);
-			weightForContinuedFraction_ = phi*phi;
-			//weightForContinuedFraction_ = 1.0/weightForContinuedFraction_;
-		}
-
-		void getLanczosVectors(DenseMatrixType& V,
-		                       const VectorType& sv,
-		                       size_t p)
-		{
-			typename ModelType::ModelHelperType modelHelper(
-			                p,lrs_,model_.orbitals());
-			typedef typename LanczosSolverType::LanczosMatrixType
-			                LanczosMatrixType;
-			LanczosMatrixType h(&model_,&modelHelper);
-
-			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
-			size_t iter= ProgramGlobals::LanczosSteps;
-
-			//srand48(3243447);
-			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_);
-
-			lanczosSolver.tridiagonalDecomposition(sv,ab_,V);
-			//calcIntensity(Eg,sv,V,ab);
-		}
-
-		void setLanczosVectors(const DenseMatrixType& V,
-		                       size_t i0)
-		{
+			wft.setInitialVector(v,psi,lrs_);
+			if (!allStages(CONVERGING,stage)) return;
+			std::vector<VectorWithOffsetType> vv(targetVectors_.size());
 			for (size_t i=0;i<targetVectors_.size();i++) {
-				VectorType tmp(V.n_row());
-				for (size_t j=0;j<tmp.size();j++) tmp[j] = V(j,i);
-				targetVectors_[i].setDataInSector(tmp,i0);
+				wft.setInitialVector(vv[i],targetVectors_[i],lrs_);
+				if (std::norm(vv[i])<1e-6) continue;
+				VectorWithOffsetType w= weights[i]*vv[i];
+				v += w;
 			}
 		}
-
 // 		void guessPhiSectors(VectorWithOffsetType& phi,
 // 		                     size_t i,
 // 		                     size_t systemOrEnviron)
@@ -306,7 +239,8 @@ namespace Dmrg {
 // 			              systemOrEnviron);
 // 		}
 
-		void setWeights(std::vector<RealType>& weights,RealType& gsWeight)
+		void setWeights(std::vector<RealType>& weights,
+		                RealType& gsWeight)
 		{
 			RealType sum  = 0;
 			weights.resize(targetVectors_.size());
@@ -326,6 +260,8 @@ namespace Dmrg {
 
 		}
 
+	private:
+
 		RealType dynWeightOf(VectorType& v,const VectorType& w) const
 		{
 			RealType sum = 0;
@@ -336,11 +272,11 @@ namespace Dmrg {
 			return sum;
 		}
 
-		void zeroOutVectors()
-		{
-			for (size_t i=0;i<targetVectors_.size();i++)
-				targetVectors_[i].resize(lrs_.super().size());
-		}
+// 		void zeroOutVectors()
+// 		{
+// 			for (size_t i=0;i<targetVectors_.size();i++)
+// 				targetVectors_[i].resize(lrs_.super().size());
+// 		}
 
 // 		std::vector<size_t> stage_;
 // 		VectorWithOffsetType psi_;
@@ -354,11 +290,6 @@ namespace Dmrg {
 // 		RealType gsWeight_;
 // 		std::vector<VectorWithOffsetType> targetVectors_;
 // 		std::vector<RealType> weight_;
- 		TridiagonalMatrixType ab_;
-// 		RealType Eg_;
-		RealType weightForContinuedFraction_;
-		//typename IoType::Out io_;
-
 	}; // class CommonTargetting
 
 	template<typename ModelType,

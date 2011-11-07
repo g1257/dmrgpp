@@ -128,6 +128,12 @@ namespace Dmrg {
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		
 		typedef LanczosSolverTemplate<RealType,InternalProductType,VectorType> LanczosSolverType;
+		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
+		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
+		ContinuedFractionType;
+		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
+		typedef DynamicSerializer<RealType,VectorWithOffsetType,ContinuedFractionType>
+		DynamicSerializerType;
 		typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
 		        CommonTargettingType;
 
@@ -151,7 +157,7 @@ namespace Dmrg {
 		  lrs_(lrs),
 		  model_(model),
 		  tstStruct_(tstStruct),
-		  waveFunctionTransformation_(wft),
+		  wft_(wft),
 		  progress_("DynamicTargetting",0),
 		  applyOpLocal_(lrs),
 		  gsWeight_(1.0),
@@ -185,7 +191,7 @@ namespace Dmrg {
 			return commonTargetting_.normSquared(i);
 		}
 
-		const RealType& operator[](size_t i) const { return psi_[i]; }
+// 		const RealType& operator[](size_t i) const { return psi_[i]; }
 
 		RealType& operator[](size_t i) { return psi_[i]; }
 
@@ -250,7 +256,7 @@ namespace Dmrg {
 			if (count==0) return;
 
 			Eg_ = Eg;
-			commonTargetting_.calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
+			calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
 
 			//cocoon(direction,block); // in-situ
 
@@ -259,16 +265,7 @@ namespace Dmrg {
 
 		void initialGuess(VectorWithOffsetType& v) const
 		{
-			waveFunctionTransformation_.setInitialVector(v,psi_,lrs_);
-			if (!commonTargetting_.allStages(CONVERGING,stage_)) return;
-			std::vector<VectorWithOffsetType> vv(targetVectors_.size());
-			for (size_t i=0;i<targetVectors_.size();i++) {
-				waveFunctionTransformation_.setInitialVector(vv[i],
-				           targetVectors_[i],lrs_);
-				if (std::norm(vv[i])<1e-6) continue;
-				VectorWithOffsetType w= weight_[i]*vv[i];
-				v += w;
-			}
+			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_);
 		}
 
 		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -282,7 +279,10 @@ namespace Dmrg {
 			size_t type = tstStruct_.type;
 			int s = (type&1) ? -1 : 1;
 			int s2 = (type>1) ? -1 : 1;
-			commonTargetting_.save(block,io,Eg_,s2,s);
+			
+			if (ab_.size()<2) return;
+			ContinuedFractionType cf(ab_,Eg_,s2*weightForContinuedFraction_,s);
+			commonTargetting_.save(block,io,cf);
 			
 			psi_.save(io,"PSI");
 		}
@@ -363,7 +363,7 @@ namespace Dmrg {
 				phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
-				waveFunctionTransformation_.setInitialVector(
+				wft_.setInitialVector(
 				          phiNew,targetVectors_[0],lrs_); // generalize for su(2)
 				phiNew.collapseSectors();
 
@@ -387,20 +387,76 @@ namespace Dmrg {
 			}
 			return "undefined";
 		}
+		
+		void calcLanczosVectors(RealType& gsWeight,
+		                        std::vector<RealType>& weights,
+		                        const VectorWithOffsetType& phi,
+		                        size_t systemOrEnviron)
+		{
+			for (size_t i=0;i<phi.sectors();i++) {
+				VectorType sv;
+				size_t i0 = phi.sector(i);
+				phi.extract(sv,i0);
+				DenseMatrixType V;
+				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
+				getLanczosVectors(V,sv,p);
+				if (i==0) {
+					targetVectors_.resize(V.n_col());
+					for (size_t j=0;j<targetVectors_.size();j++)
+						targetVectors_[j] = phi;
+				}
+				setLanczosVectors(V,i0);
+			}
+			
+			commonTargetting_.setWeights(weights,gsWeight);
+			weightForContinuedFraction_ = phi*phi;
+		}
+
+		void getLanczosVectors(DenseMatrixType& V,
+							   const VectorType& sv,
+						 size_t p)
+		{
+			typename ModelType::ModelHelperType modelHelper(
+				p,lrs_,model_.orbitals());
+			typedef typename LanczosSolverType::LanczosMatrixType
+			LanczosMatrixType;
+			LanczosMatrixType h(&model_,&modelHelper);
+			
+			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
+			size_t iter= ProgramGlobals::LanczosSteps;
+			
+			//srand48(3243447);
+			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_);
+			
+			lanczosSolver.tridiagonalDecomposition(sv,ab_,V);
+			//calcIntensity(Eg,sv,V,ab);
+		}
+
+		void setLanczosVectors(const DenseMatrixType& V,
+							   size_t i0)
+		{
+			for (size_t i=0;i<targetVectors_.size();i++) {
+				VectorType tmp(V.n_row());
+				for (size_t j=0;j<tmp.size();j++) tmp[j] = V(j,i);
+				targetVectors_[i].setDataInSector(tmp,i0);
+			}
+		}
 
 		std::vector<size_t> stage_;
 		VectorWithOffsetType psi_;
 		const LeftRightSuperType& lrs_;
 		const ModelType& model_;
 		const TargettingParamsType& tstStruct_;
-		const WaveFunctionTransfType& waveFunctionTransformation_;
+		const WaveFunctionTransfType& wft_;
 		PsimagLite::ProgressIndicator progress_;
 		ApplyOperatorType applyOpLocal_;
 		RealType gsWeight_;
 		std::vector<VectorWithOffsetType> targetVectors_;
 		CommonTargettingType commonTargetting_;
 		std::vector<RealType> weight_;
+		TridiagonalMatrixType ab_;
 		RealType Eg_;
+		RealType weightForContinuedFraction_;
 		//typename IoType::Out io_;
 
 	}; // class DynamicTargetting
