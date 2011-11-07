@@ -203,7 +203,7 @@ while(<FILE>) {
 	$braceAtTheEnd = 0;
 	
 	#check for public or private:
-	if (/public\:/ || /private\:/ || /protected\:/) {
+	if (/public\:/ || /private\:/ || /protected\:/ || /case [^\:]+\:/) {
 		$tmpLevel-- if ($tmpLevel>0);
 	}
 	# check trailing whitespace
@@ -268,5 +268,7 @@ sub getLabel
 	$label = "for" if ($tt=~/[^a-zA-Z]for[^a-zA-Z]/);
 	$label = "foreach" if ($tt=~/[^a-zA-Z]foreach[^a-zA-Z]/);
 	$label = "else" if ($tt=~/[^a-zA-Z]else[^a-zA-Z]/);
+	$label = "enum" if ($tt=~/[^a-zA-Z]enum[^a-zA-Z]/);
+	$label = "switch" if ($tt=~/[^a-zA-Z]switch[^a-zA-Z]/);
 	return $label;
 }

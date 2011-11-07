@@ -285,7 +285,7 @@ sub rewriteSig
 	print "$_" unless ($_ eq "");
 	$count += length($_);
 	$count++;
-	# print arguments, not that we have at least 2 arg.
+	# print arguments, note that we have at least 2 arg.
 	my $n = scalar(@$fa);
 	($n>1) or die "rewriteSig should not have been called, n=$n\n";
 
