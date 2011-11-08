@@ -113,7 +113,9 @@ namespace PsimagLite {
 		  mat_(mat),
 		  steps_(params.steps),
 		  mode_(WITH_INFO),
-		  rng_(343311)
+		  rng_(343311),
+		  a_((params.eMax-params.eMin)/(2-1e-3)),
+		  b_((params.eMax+params.eMin)/2)
 		{
 			setMode(params.options);
 			std::ostringstream msg;
@@ -159,7 +161,7 @@ namespace PsimagLite {
 				ab.a(j) = 2*btmp-ab.b(0);
 			}
 		}
-		
+
 		//! atmp = < phi_n | phi_n>
 		//! btmp = < phi_n | phi_{n+1}>
 		void oneStepDecomposition(VectorType& x,
@@ -170,6 +172,10 @@ namespace PsimagLite {
 		{
 			VectorType z(x.size(),0.0);
 			mat_.matrixVectorProduct (z, y); // z+= Hy
+			// scale matrix:
+			z -= b_*y;
+			z *= (1/a_);
+
 			RealType val = (isFirst) ? 1.0 : 2.0;
 			
 			atmp = 0.0;
@@ -232,6 +238,8 @@ namespace PsimagLite {
 		size_t steps_;
 		size_t mode_;
 		PsimagLite::Random48<RealType> rng_;
+		//! Scaling factors for the Chebyshev expansion
+		RealType a_,b_;
 	}; // class ChebyshevSolver
 } // namespace PsimagLite
 
