@@ -806,7 +806,7 @@ namespace Dmrg {
 				RealType x = PsimagLite::norm(phi2);
 				assert(x>1e-6);
 				std::cerr<<"norm of phi2="<<x<<"\n";
-				lanczosSolver.tridiagonalDecomposition(phi2,ab,V);
+				lanczosSolver.decomposition(phi2,ab,V);
 				ab.buildDenseMatrix(T);
 				//check1(V,phi2);
 				return lanczosSolver.steps();

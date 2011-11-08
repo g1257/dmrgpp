@@ -414,7 +414,7 @@ namespace Dmrg {
 			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_,
 			      ProgramGlobals::LanczosTolerance,ProgramGlobals::MaxLanczosSteps);
 
-			lanczosSolver.tridiagonalDecomposition(sv,ab_,V);
+			lanczosSolver.decomposition(sv,ab_,V);
 			//calcIntensity(Eg,sv,V,ab);
 		}
 

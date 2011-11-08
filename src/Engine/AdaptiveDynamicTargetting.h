@@ -458,8 +458,11 @@ namespace Dmrg {
 				targetVectors_[1].extract(y,i0);
 				targetVectors_[0].extract(x,i0);
 			}
+			
 			if (lastLanczosVector_==0) normalize(y);
-				lanczosSolver.oneStepDecomposition(x,y,a,b);
+			
+			lanczosSolver.oneStepDecomposition(x,y,a,b,lastLanczosVector_==0);
+			
 			if (!done_) {
 				//std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
 			}
@@ -496,7 +499,7 @@ namespace Dmrg {
 			phiNew.extract(yy,i0);
 			normalize(yy);
 			RealType a1=0,b1=0;
-			lanczosSolver.oneStepDecomposition(xx,yy,a1,b1);
+			lanczosSolver.oneStepDecomposition(xx,yy,a1,b1,lastLanczosVector_==0);
 			ab_.push(a1,b1);
 			if (tstStruct_.advanceEach<=1) return;
 			ab_.push(a,b);
