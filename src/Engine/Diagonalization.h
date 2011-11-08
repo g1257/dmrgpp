@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h" // includes the std::norm functions
 #include "ProgramGlobals.h"
 #include "LanczosSolver.h"
+#include "ParametersForSolver.h"
 
 namespace Dmrg {
 	
@@ -342,14 +343,14 @@ namespace Dmrg {
 			if (reflectionSector>=0) modelHelper.setReflectionSymmetry(reflectionSector);
 			int n = modelHelper.size();
 			if (verbose_) std::cerr<<"Lanczos: About to do block number="<<i<<" of size="<<n<<"\n";
+
 			typedef InternalProductTemplate<typename SomeVectorType::value_type,ModelType> MyInternalProduct;
-			typedef PsimagLite::LanczosSolver<RealType,MyInternalProduct,SomeVectorType> LanczosSolverType;
+			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
+			typedef PsimagLite::LanczosSolver<ParametersForSolverType,MyInternalProduct,SomeVectorType> LanczosSolverType;
 			typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			
-			LanczosSolverType lanczosSolver(
-			     lanczosHelper,iter,eps,concurrency_.rank(),
-			     ProgramGlobals::LanczosTolerance,
-			     ProgramGlobals::MaxLanczosSteps,parameters_.options);
+			ParametersForSolverType params(iter,eps,ProgramGlobals::MaxLanczosSteps,parameters_.options,0,0);
+			LanczosSolverType lanczosSolver(lanczosHelper,params);
 
 			tmpVec.resize(lanczosHelper.rank());
 			if (lanczosHelper.rank()==0) {

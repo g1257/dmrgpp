@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeSerializer.h"
 #include "TimeStepParams.h"
 #include "ProgramGlobals.h"
+#include "ParametersForSolver.h"
 
 namespace Dmrg {
 	template<
@@ -107,7 +108,8 @@ namespace Dmrg {
 			//typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
 			typedef std::vector<ComplexType> ComplexVectorType;
 			//typedef std::VectorWithOffset<ComplexType> VectorWithOffsetType;
-			typedef LanczosSolverTemplate<RealType,InternalProductType,ComplexVectorType> LanczosSolverType;
+			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
+			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,ComplexVectorType> LanczosSolverType;
 			typedef std::vector<RealType> VectorType;
 			//typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
@@ -597,10 +599,8 @@ namespace Dmrg {
 				RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 				size_t iter= ProgramGlobals::LanczosSteps;
 
-				//srand48(3243447);
-				LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,
-				     parallelRank_,ProgramGlobals::LanczosTolerance,
-					 ProgramGlobals::MaxLanczosSteps);
+				ParametersForSolverType params(iter,eps,ProgramGlobals::MaxLanczosSteps,"",0,0);
+				LanczosSolverType lanczosSolver(lanczosHelper,params);
 				
 				TridiagonalMatrixType ab;
 				size_t total = phi.effectiveSize(i0);

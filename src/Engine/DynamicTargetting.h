@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "ApplyOperatorLocal.h"
-// #include "DynamicSerializer.h"
+#include "ParametersForSolver.h"
 #include "DynamicDmrgParams.h"
 #include "VectorWithOffsets.h"
 #include "CommonTargetting.h"
@@ -126,8 +126,8 @@ namespace Dmrg {
 		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
-		
-		typedef LanczosSolverTemplate<RealType,InternalProductType,VectorType> LanczosSolverType;
+		typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
+		typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
 		ContinuedFractionType;
@@ -410,9 +410,8 @@ namespace Dmrg {
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 			size_t iter= ProgramGlobals::LanczosSteps;
 			
-			//srand48(3243447);
-			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_,
-			      ProgramGlobals::LanczosTolerance,ProgramGlobals::MaxLanczosSteps);
+			ParametersForSolverType params(iter,eps,ProgramGlobals::MaxLanczosSteps,"",0,0);
+			LanczosSolverType lanczosSolver(h,params);
 
 			lanczosSolver.decomposition(sv,ab_,V);
 			//calcIntensity(Eg,sv,V,ab);

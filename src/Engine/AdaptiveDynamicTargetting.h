@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "AdaptiveDynamicParams.h"
 #include "VectorWithOffsets.h"
 #include "ContinuedFraction.h"
+#include "ParametersForSolver.h"
 
 namespace Dmrg {
 	
@@ -120,7 +121,8 @@ namespace Dmrg {
 		typedef typename BasisType::BlockType BlockType;
 		typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
-		typedef LanczosSolverTemplate<RealType,InternalProductType,VectorType> LanczosSolverType;
+		typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
+		typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 		typedef VectorType TargetVectorType;
 		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
@@ -447,9 +449,8 @@ namespace Dmrg {
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 			size_t iter= ProgramGlobals::LanczosSteps;
 
-			//srand48(3243447);
-			LanczosSolverType lanczosSolver(h,iter,eps,parallelRank_,
-			         ProgramGlobals::LanczosTolerance,ProgramGlobals::MaxLanczosSteps);
+			ParametersForSolverType params(iter,eps,ProgramGlobals::MaxLanczosSteps,"",0,0);
+			LanczosSolverType lanczosSolver(h,params);
 
 			RealType a=0,b=0;
 			VectorType x(sv.size(),0.0);
