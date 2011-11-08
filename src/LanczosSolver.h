@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LANCZOSSOLVER_HEADER_H
 #include "ProgressIndicator.h"
 #include "TridiagonalMatrix.h"
+#include <cassert>
 #include "Vector.h"
 #include "Matrix.h"
 #include "Random48.h"
@@ -172,7 +173,7 @@ namespace PsimagLite {
 			
 			TridiagonalMatrixType ab;
 			DenseMatrixType lanczosVectors; 
-			tridiagonalDecomposition(y,ab,lanczosVectors);
+			decomposition(y,ab,lanczosVectors);
 			std::vector<RealType> c(steps_);
 			try {
 				ground(gsEnergy,steps_, ab, c);
@@ -203,11 +204,10 @@ namespace PsimagLite {
 			
 		}
 
-		void tridiagonalDecomposition(
-				const VectorType& initVector,
-    				TridiagonalMatrixType& ab,
-				DenseMatrixType& lanczosVectors)
-		{ /*
+		void decomposition(const VectorType& initVector,
+    	                   TridiagonalMatrixType& ab,
+		                   DenseMatrixType& lanczosVectors)
+		{ /**
 			*     In each step of the Lanczos algorithm the values of a[]
 			*     and b[] are computed.
 			*     then a tridiagonal matrix T[j] is formed from the matrix
@@ -221,12 +221,7 @@ namespace PsimagLite {
 			*/
 			size_t& max_nstep = steps_;
 			
-			if (initVector.size()!=mat_.rank()) {
-				std::cerr<<"tridiagonalDecomposition: initVector.size="<<initVector.size();
-				std::cerr<<" but mat.size="<<mat_.rank()<<std::endl;
-				std::cerr<<"Throwing at this point: "<<__FILE__<<" "<<__LINE__<<std::endl;
-				throw std::runtime_error("LanczosSolver::tridiagonalDecomposition(): throwing\n");
-			}
+			assert(initVector.size()==mat_.rank());
 			
 			VectorType x(mat_.rank());
 			VectorType z(mat_.rank());
@@ -252,12 +247,11 @@ namespace PsimagLite {
 			for (; j < max_nstep; j++) {
 				for (size_t i = 0; i < mat_.rank(); i++) 
 					lanczosVectors(i,j) = y[i];
-			
+
 				RealType btmp = 0;
-				oneStepDecomposition(x,y,atmp,btmp);
+				oneStepDecomposition(x,y,atmp,btmp,j==0);
 				ab.a(j) = atmp;
 				ab.b(j) = btmp;
-
 
 				RealType enew = 0;
 				if (eps_>0) {
@@ -276,19 +270,14 @@ namespace PsimagLite {
 //					"LanczosSolver::tridiag(): Unsupported\n");
 				if (eps_>=tolerance_) return;
 			}
-			
-			/*std::cerr<<"Trying lanczosVectors with max_nstep="<<max_nstep<<"\n";
-			RealType eps = 1e-4;
-			if (!isUnitary(transposeConjugate(lanczosVectors),eps)) std::cerr<<"Oops: transpose(lanczosVectors)\n";
-			else std::cerr<<"Passed lanczosVectors\n";*/
-			
 		}
 		
 		void oneStepDecomposition(
 				VectorType& x,
 				VectorType& y,
 				RealType& atmp,
-				RealType& btmp) const
+				RealType& btmp,
+				bool isFirst) const
 		{
 			mat_.matrixVectorProduct (x, y); // x+= Hy
 
