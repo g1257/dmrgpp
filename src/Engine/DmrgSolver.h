@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "HostInfo.h"
 #include "ParametersDmrgSolver.h"
-#include "LanczosSolver.h"
 #include "Diagonalization.h"
 #include "ProgressIndicator.h"
 #include "DmrgSerializer.h"
@@ -95,19 +94,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 	//!  A class to represent a generic solver for the Dmrg method
-	template<
-		template<typename,typename> class InternalProductTemplate,
-		template<typename,typename,typename> class ModelHelperTemplate,
-		class ModelType,
-		class IoType,
-  		template<template<typename,typename,typename> class,
-  			template<typename,typename> class,
-  			template<typename,typename> class,
-  			typename,typename,typename,
-  			template<typename> class> class TargettingTemplate,
-	 	template<typename> class VectorWithOffsetTemplate>
+	template<template<typename,typename> class InternalProductTemplate,typename TargettingType>
 	class DmrgSolver {
 
+		typedef typename TargettingType::ModelType ModelType;
+		typedef typename TargettingType::IoType IoType;
+		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename ModelType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 
@@ -122,14 +114,14 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename ModelType::ModelHelperType::ConcurrencyType
 				ConcurrencyType;
-		typedef TargettingTemplate<PsimagLite::LanczosSolver,InternalProductTemplate,WaveFunctionTransfFactory,
-  				ModelType,ConcurrencyType,IoType,VectorWithOffsetTemplate> TargettingType;
+// 		/*typedef TargettingTemplate<PsimagLite::LanczosSolver,InternalProductTemplate,WaveFunctionTransfFactory,
+//   				ModelType,ConcurrencyType,IoType,VectorWithOffsetTemplate> TargettingType;*/
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 		typedef ParametersDmrgSolver<RealType> ParametersType;
 		typedef Diagonalization<ParametersType,TargettingType,InternalProductTemplate> DiagonalizationType;
 
-		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
+// 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 
 		typedef Truncation<LeftRightSuperType,ParametersType,TargettingType>

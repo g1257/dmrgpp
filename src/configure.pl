@@ -330,21 +330,21 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,MyConcurrency> ModelHelperType;
 	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
-	
-	typedef DmrgSolver<
-			InternalProductTemplate,
-			ModelHelperTemplate,
-			ModelType,
-			MyIo,
-			TargettingTemplate,
-			VectorWithOffsetTemplate
-		> SolverType;
+	typedef TargettingTemplate<PsimagLite::LanczosSolver,
+	                           InternalProductTemplate,
+	                           WaveFunctionTransfFactory,
+	                           ModelType,
+	                           MyConcurrency,
+	                           MyIo,
+	                           VectorWithOffsetTemplate
+	                          > TargettingType;
+
+	typedef DmrgSolver<InternalProductTemplate,TargettingType> SolverType;
 	
 	//! Setup the Model
 	ModelType model(mp,geometry);
 
 	//! Read TimeEvolution if applicable:
-	typedef typename SolverType::TargettingType TargettingType;
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 	TargettingParamsType tsp(io,model);
 
@@ -661,23 +661,22 @@ void mainLoop(
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
 	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
+	typedef TargettingTemplate<PsimagLite::LanczosSolver,
+	                           InternalProductTemplate,
+	                           WaveFunctionTransfFactory,
+	                           ModelType,
+	                           MyConcurrency,
+				   IoInputType,
+	                           VectorWithOffsetTemplate
+	                          > TargettingType;
+
+	typedef DmrgSolver<InternalProductTemplate,TargettingType> SolverType;
 	
-	typedef DmrgSolver<
-                        InternalProductTemplate,
-			ModelHelperTemplate,
-                        ModelType,
-                        PsimagLite::IoSimple,
-                        TargettingTemplate,
-                        VectorWithOffsetTemplate
-                > SolverType; // only used for types
-	
-	typedef typename SolverType::TargettingType TargettingType;
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	
 	ModelType model(mp,geometry);
 
 	 //! Read TimeEvolution if applicable:
-	typedef typename SolverType::TargettingType TargettingType;
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 	TargettingParamsType tsp(io,model);
 	

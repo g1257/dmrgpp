@@ -84,25 +84,24 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // includes the std::norm functions
 #include "VectorWithOffsets.h" // includes the std::norm functions
 #include "ProgramGlobals.h"
+#include "LanczosSolver.h"
 
 namespace Dmrg {
 	
-	template<
-		typename ParametersType,
-  		typename TargettingType,
-    		template<typename,typename> class InternalProductTemplate
-    		>
+	template<typename ParametersType,
+	         typename TargettingType,
+	         template<typename,typename> class InternalProductTemplate
+    >
 	class Diagonalization {
- public:
+
+	public:
 	 
-	 	typedef typename TargettingType::WaveFunctionTransfType
-	 			WaveFunctionTransfType;
+	 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 		typedef typename TargettingType::ModelType ModelType;
 		typedef typename TargettingType::ConcurrencyType ConcurrencyType;
 		typedef typename TargettingType::IoType IoType;
 		typedef typename TargettingType::BasisType BasisType;
-		typedef typename TargettingType::BasisWithOperatorsType
-				BasisWithOperatorsType;
+		typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef typename TargettingType::BlockType BlockType;
 		typedef typename TargettingType::TargetVectorType TargetVectorType;
 		typedef typename TargettingType::RealType RealType;
@@ -110,8 +109,7 @@ namespace Dmrg {
 		typedef typename ModelType::OperatorsType OperatorsType;
 		typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
-		typedef typename ModelHelperType::LeftRightSuperType
-						LeftRightSuperType;
+		typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 
 		Diagonalization(const ParametersType& parameters,
                         const ModelType& model,
@@ -206,7 +204,7 @@ namespace Dmrg {
 				}
 
 				weights[i]=bs;
-				
+
 				// Do only one sector unless doing su(2) with j>0, then do all m's
 				if (lrs.super().pseudoEffectiveNumber(
 						lrs.super().partition(i))!=quantumSector_ )
@@ -250,7 +248,7 @@ namespace Dmrg {
 				}
 				energySaved[i]=gsEnergy;
 			}
-				
+
 			// calc gs energy
 			if (verbose_ && concurrency_.root()) std::cerr<<"About to calc gs energy\n";
 			gsEnergy=1e6;
