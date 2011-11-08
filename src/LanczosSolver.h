@@ -97,33 +97,27 @@ namespace PsimagLite {
 	//! 	matrixVectorProduct(std::vector<RealType>& x,const std::vector<RealType>& const y) 
 	//!    	   member function that implements the operation x += Hy
 
-	template<typename RealType,typename MatrixType,typename VectorType>
+	template<typename SolverParametersType,typename MatrixType,typename VectorType>
 	class LanczosSolver {
 		
 	public:
+		typedef typename SolverParametersType::RealType RealType;
 		typedef MatrixType LanczosMatrixType;
 		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 		typedef Matrix<VectorElementType> DenseMatrixType;
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
-		LanczosSolver(MatrixType const &mat,
-		              size_t& max_nstep,
-		              const RealType& eps,
-		              size_t rank,
-		              const RealType& tolerance,
-		              size_t maxSteps,
-		              const std::string& options="")
-		: progress_("LanczosSolver",rank),
+		LanczosSolver(MatrixType const &mat,const SolverParametersType& params)
+		: progress_("LanczosSolver",0),
 		  mat_(mat),
-		  steps_(max_nstep),
-		  eps_(eps),
+		  steps_(params.steps),
+		  eps_(params.tolerance),
 		  mode_(WITH_INFO),
-		  tolerance_(tolerance),
-		  maxSteps_(maxSteps),
+		  stepsForEnergyConvergence_(params.stepsForEnergyConvergence),
 		  rng_(343311)
 		{
-			setMode(options);
+			setMode(params.options);
 			std::ostringstream msg;
 			msg<<"Constructing... mat.rank="<<mat_.rank()<<" steps="<<steps_<<" eps="<<eps_;
 			progress_.printline(msg,std::cout);
@@ -268,7 +262,7 @@ namespace PsimagLite {
 				ab.resize(max_nstep);
 //				throw std::runtime_error(
 //					"LanczosSolver::tridiag(): Unsupported\n");
-				if (eps_>=tolerance_) return;
+// 				if (eps_>=tolerance_) return;
 			}
 		}
 		
@@ -328,7 +322,7 @@ namespace PsimagLite {
 			int i, k, l, m;
 			RealType c, dd, f, g, h, p, r, *d, *e, *v = 0, *vki;
 			int long intCounter=0;
-			int long maxCounter=maxSteps_;
+			int long maxCounter=stepsForEnergyConvergence_;
   
 			if (gs.size()>0) {
 				v  = new RealType[n*n];
@@ -492,8 +486,7 @@ namespace PsimagLite {
 		size_t steps_;
 		RealType eps_;
 		size_t mode_;
-		RealType tolerance_;
-		size_t maxSteps_;
+		size_t stepsForEnergyConvergence_;
 		PsimagLite::Random48<RealType> rng_;
 	}; // class LanczosSolver
 } // namespace PsimagLite

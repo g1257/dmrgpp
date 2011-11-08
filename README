@@ -7,16 +7,15 @@ G. Alvarez, (2011), PsimagLite (version 1.0.0)
 [computer software], Oak Ridge National Laboratory.
 
 -------------------------------------------------------------------------------
-PsimagLite contains utilities for use in codes for the simulation of strongly correlated electrons.
-It is inspired in T.S.'s Psimag software (but PsimagLite is not a fork of Psimag).
-The amount of functionality included in PsimagLite will be exactly this (subject to change):
+PsimagLite is a collection of C++ classes that are common to 
+ codes for the simulation of strongly correlated electrons.
+PsimagLite is inspired in T.S.'s Psimag software (but PsimagLite is not a fork of Psimag).
 
 The reason for PsimagLite is to share code among different applications.
 Applications that depend on PsimagLite are:
-SpinPhononFermion, DMRG++, Lanczos++, and FreeFermions,  GpusDoneRight.
+SpinPhononFermion, DMRG++, Lanczos++, FreeFermions, and GpusDoneRight.
 -----------------------------------------------------------------------------
 
-ModuleName	Description
 [DenseLinearAlgebra]
 BLAS // wrapper
 Lapack <-- Temporary class, do not use, use LAPACK instead
@@ -26,6 +25,8 @@ Matrix /// a matrix class
 [SparseLinearAlgebra]
 CrsMatrix
 TridiagonalMatrix
+LanczosSolver
+ChebyshevSolver <-- experimental, not ready!
 SparseRow <-- experimental, do not use
 
 [JSON] 

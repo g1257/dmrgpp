@@ -97,35 +97,27 @@ namespace PsimagLite {
 	//! 	matrixVectorProduct(std::vector<RealType>& x,const std::vector<RealType>& const y) 
 	//!    	   member function that implements the operation x += Hy
 
-	template<typename RealType,typename MatrixType,typename VectorType>
+	template<typename SolverParametersType,typename MatrixType,typename VectorType>
 	class ChebyshevSolver {
 		
 	public:
+		typedef typename SolverParametersType::RealType RealType;
 		typedef MatrixType LanczosMatrixType;
 		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 		typedef Matrix<VectorElementType> DenseMatrixType;
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
-		ChebyshevSolver(MatrixType const &mat,
-		              size_t& max_nstep,
-		              const RealType& eps,
-		              size_t rank,
-		              const RealType& tolerance,
-		              size_t maxSteps,
-		              const std::string& options="")
-		: progress_("ChebyshevSolver",rank),
+		ChebyshevSolver(MatrixType const &mat,const SolverParametersType& params)
+		: progress_("ChebyshevSolver",0),
 		  mat_(mat),
-		  steps_(max_nstep),
-		  eps_(eps),
+		  steps_(params.steps),
 		  mode_(WITH_INFO),
-		  tolerance_(tolerance),
-		  maxSteps_(maxSteps),
 		  rng_(343311)
 		{
-			setMode(options);
+			setMode(params.options);
 			std::ostringstream msg;
-			msg<<"Constructing... mat.rank="<<mat_.rank()<<" steps="<<steps_<<" eps="<<eps_;
+			msg<<"Constructing... mat.rank="<<mat_.rank()<<" steps="<<steps_;
 			progress_.printline(msg,std::cout);
 		}
 
@@ -148,13 +140,15 @@ namespace PsimagLite {
 
 		//! ab.a contains the even moments
 		//! ab.b contains the odd moments
-		void tridiagonalDecomposition(const VectorType& initVector,
-    	                              TridiagonalMatrixType& ab,
-		                              DenseMatrixType& lanczosVectors)
+		void decomposition(const VectorType& initVector,
+    	                   TridiagonalMatrixType& ab,
+		                   DenseMatrixType& lanczosVectors)
 		{
 			VectorType x(initVector.size(),0.0);
 			VectorType y = initVector;
 
+			lanczosVectors.resize(y.size(),steps_);
+			ab.resize(steps_,0);
 			for (size_t j=0; j < steps_; j++) {
 				for (size_t i = 0; i < mat_.rank(); i++)
 					lanczosVectors(i,j) = y[i];
@@ -196,11 +190,11 @@ namespace PsimagLite {
 		size_t steps() const {return steps_; }
 
 	private:
-		
+
 		void unimplemented(const std::string& s) const
 		{
 			std::string s2("Hmmm...this ain't looking good...");
-			s2 += __FILE__ + " " + ttos(__LINE__) + " ";
+			s2 += std::string(__FILE__) + " " + ttos(__LINE__) + " ";
 			s2 += s;
 			throw std::runtime_error(s);
 		}
@@ -236,10 +230,7 @@ namespace PsimagLite {
 		ProgressIndicator progress_;
 		MatrixType const& mat_;
 		size_t steps_;
-		RealType eps_;
 		size_t mode_;
-		RealType tolerance_;
-		size_t maxSteps_;
 		PsimagLite::Random48<RealType> rng_;
 	}; // class ChebyshevSolver
 } // namespace PsimagLite
