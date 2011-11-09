@@ -17,7 +17,7 @@ Please see full open source license included in file LICENSE.
 *********************************************************
 
 */
-/** \ingroup DMRG */
+/** \ingroup PsimagLite */
 /*@{*/
 
 /*! \file ContinuedFraction.h
@@ -48,13 +48,15 @@ namespace PsimagLite {
 		typedef std::vector<std::pair<RealType,ComplexType> > PlotDataType;
 		typedef PlotParams<RealType> PlotParamsType;
 
-		ContinuedFraction(
-				const TridiagonalMatrixType& ab,
-				const RealType& Eg,
-				RealType weight,
-			        int isign)
-			: progress_("ContinuedFraction",0),ab_(ab),
-			Eg_(Eg),weight_(weight),isign_(isign)
+		ContinuedFraction(const TridiagonalMatrixType& ab,
+		                  const RealType& Eg,
+		                  RealType weight,
+		                  int isign)
+		: progress_("ContinuedFraction",0),
+		  ab_(ab),
+		  Eg_(Eg),
+		  weight_(weight),
+		  isign_(isign)
 		{
 			diagonalize();
 		}
@@ -73,7 +75,7 @@ namespace PsimagLite {
 			io.read(intensity_,"#CFIntensities");
 			diagonalize();
 		}
-		
+
 		template<typename IoOutputType>
 		void save(IoOutputType& io) const
 		{
@@ -106,9 +108,7 @@ namespace PsimagLite {
 			diagonalize();
 		}
 
-		void plot(
-				PlotDataType& result,
-				const PlotParamsType& params) const
+		void plot(PlotDataType& result,const PlotParamsType& params) const
 		{
 			size_t counter = 0;
 			size_t n = size_t((params.omega2 - params.omega1)/params.deltaOmega); 
@@ -124,8 +124,8 @@ namespace PsimagLite {
 		} 
 
 		//! Cases: 
-		//! (1) <phi0|A (z+(E0-e_k))^{-1}|A^\dagger|phi0> and
-		//! (2) <phi0|A^\dagger (z-(E0-e_k))^{-1}|A|phi0>
+		//! (1) < phi0|A (z+(E0-e_k))^{-1}|A^\dagger|phi0> and
+		//! (2) < phi0|A^\dagger (z-(E0-e_k))^{-1}|A|phi0>
 		//! (There are actually 4 cases for the off-diagonal gf because
 		//! A has two cases:
 		//! (1) A = c_i + c_j and

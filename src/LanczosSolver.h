@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Matrix.h"
 #include "Random48.h"
+#include "ContinuedFraction.h"
 
 namespace PsimagLite {
 
@@ -106,6 +107,9 @@ namespace PsimagLite {
 		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 		typedef Matrix<VectorElementType> DenseMatrixType;
+		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
+		                    PostProcType;
+		
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
 		LanczosSolver(MatrixType const &mat,const SolverParametersType& params)
@@ -195,7 +199,16 @@ namespace PsimagLite {
 				}
 			}
 			if (mode_ & WITH_INFO) info(gsEnergy,initialVector,std::cerr);
-			
+		}
+		
+		void buildDenseMatrix(DenseMatrixType& T,const TridiagonalMatrixType& ab) const
+		{
+			ab.buildDenseMatrix(T);
+		}
+
+		void push(TridiagonalMatrixType& ab,const RealType& a,const RealType& b) const
+		{
+			ab.push(a,b);
 		}
 
 		void decomposition(const VectorType& initVector,

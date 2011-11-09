@@ -25,6 +25,12 @@ namespace psimag {
  */
 namespace BLAS {
 
+//===============================================================
+// MISSING STUFF (BY G.A.)
+// ==============================================================
+extern "C" double ddot_(int* ,double *,int* ,double* ,int* );
+
+
 // ============================================================================
 // = Level 3 BLAS             GEMM
 // ============================================================================
@@ -378,6 +384,13 @@ extern "C" void sscal_(int*,const float*,float*,int*);
 extern "C" void dscal_(int*,const double*,double*,int*);
 extern "C" void cscal_(int*,const std::complex<float>*,std::complex<float>*,int*);
 extern "C" void zscal_(int*,const std::complex<double>*,std::complex<double>*,int*);
+
+
+// ============================================================================
+inline double DOT(int n,double* dx,int incx,double* dy,int incy)
+{
+	return ddot_(&n,dx,&incx,dy,&incy);
+}
 
 // ============================================================================
 inline void GEMM(char c1,char c2,int sX,int sY,int sZ,const float &a,

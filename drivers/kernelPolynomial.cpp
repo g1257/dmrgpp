@@ -67,13 +67,7 @@ int main(int argc,char *argv[])
 
 	PsimagLite::IoSimple::In io(file);
 	
-	// need to get momentsEven, momentsOdd, a, and b
-	size_t n = momentsEven.size();
-	std::vector<RealType> moments(2*n);
-	for (size_t i=0;i<n;i++) {
-		moments[2*i] = momentsEven[i];
-		moments[2*i+1] = momentsOdd[i];
-	}
+	
 	
 	typedef PsimagLite::KernelPolynomial<RealType> KernelPolynomialType;
 	KernelPolynomialType kernelPolynomial(moments,a,b);

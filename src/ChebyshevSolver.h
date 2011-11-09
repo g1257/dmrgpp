@@ -88,24 +88,34 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "Random48.h"
 #include "TypeToString.h"
+#include "ChebyshevSerializer.h"
 
 namespace PsimagLite {
 
-	//! MatrixType must have the following interface:
-	//! 	RealType type to indicate the matrix type
-	//! 	rank() member function to indicate the rank of the matrix
-	//! 	matrixVectorProduct(std::vector<RealType>& x,const std::vector<RealType>& const y) 
-	//!    	   member function that implements the operation x += Hy
-
+	/** MatrixType must have the following interface:
+	 * RealType type to indicate the matrix type
+	 * rank() member function to indicate the rank of the matrix
+	 * matrixVectorProduct(std::vector< RealType>& x,const 
+	 *        std::vector< RealType>& const y) 
+	 *    member function that implements the operation x += Hy
+	 * 
+	 * SolverParametersType is just a structure with a few things
+	 * like eMax, eMin, the spectrum bounds (needed to scale the Hamiltonian)
+	 * steps, the number of moments to compute, you can use 
+	 * ParametersForSolver class, if you want.
+	 * 
+	 */
 	template<typename SolverParametersType,typename MatrixType,typename VectorType>
 	class ChebyshevSolver {
-		
+
 	public:
 		typedef typename SolverParametersType::RealType RealType;
 		typedef MatrixType LanczosMatrixType;
-		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
+		typedef std::vector<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 		typedef Matrix<VectorElementType> DenseMatrixType;
+		typedef ChebyshevSerializer<RealType,TridiagonalMatrixType> PostProcType;
+
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
 		ChebyshevSolver(MatrixType const &mat,const SolverParametersType& params)
@@ -139,6 +149,17 @@ namespace PsimagLite {
 			}
 			unimplemented("computeGroundState");
 		}
+		
+		void buildDenseMatrix(DenseMatrixType& T,const TridiagonalMatrixType& ab) const
+		{
+			unimplemented("buildDenseMatrix");
+		}
+
+		void push(TridiagonalMatrixType& ab,const RealType& a,const RealType& b) const
+		{
+			ab.push_back(a);
+			ab.push_back(b);
+		}
 
 		//! ab.a contains the even moments
 		//! ab.b contains the odd moments
@@ -150,15 +171,15 @@ namespace PsimagLite {
 			VectorType y = initVector;
 
 			lanczosVectors.resize(y.size(),steps_);
-			ab.resize(steps_,0);
+			ab.resize(2*steps_,0);
 			for (size_t j=0; j < steps_; j++) {
 				for (size_t i = 0; i < mat_.rank(); i++)
 					lanczosVectors(i,j) = y[i];
 				RealType atmp = 0;
 				RealType btmp = 0;
 				oneStepDecomposition(x,y,atmp,btmp,j==0);
-				ab.a(j) = 2*atmp-ab.a(0);
-				ab.a(j) = 2*btmp-ab.b(0);
+				ab[2*j] = 2*atmp-ab[0];
+				ab[2*j+1] = 2*btmp-ab[1];
 			}
 		}
 
@@ -177,7 +198,7 @@ namespace PsimagLite {
 			z *= (1/a_);
 
 			RealType val = (isFirst) ? 1.0 : 2.0;
-			
+
 			atmp = 0.0;
 			for (size_t i = 0; i < mat_.rank(); i++) 
 				atmp += std::real(y[i]*std::conj(y[i]));
@@ -187,7 +208,7 @@ namespace PsimagLite {
 				x[i] = y[i];
 				y[i] = tmp;
 			}
-			
+
 			btmp = 0.0;
 			for (size_t i = 0; i < mat_.rank(); i++)
 				btmp += std::real(y[i]*std::conj(x[i]));
@@ -215,9 +236,9 @@ namespace PsimagLite {
 		{
 			RealType norma=norm(x);
 			size_t& iter = steps_;
-			
+
 			if (norma<1e-5 || norma>100) throw std::runtime_error("Norm\n");
-			
+
 			std::ostringstream msg;
 			msg.precision(8);
 			msg<<"Found Energy="<<energyTmp<<" after "<<iter;
