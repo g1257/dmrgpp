@@ -38,6 +38,7 @@ Please see full open source license included in file LICENSE.
 #include "ProgressIndicator.h"
 #include "Random48.h"
 #include <stdexcept>
+#include "ParametersForSolver.h"
 
 // #include "PlotParams.h"
 
@@ -47,26 +48,25 @@ namespace PsimagLite {
     	typename VectorType_>
 	class ChebyshevSerializer  {
 	public:
+
 		typedef VectorType_ VectorType;
 		typedef typename std::complex<RealType> ComplexType;
 		typedef typename VectorType::value_type FieldType;
 		typedef Matrix<FieldType> MatrixType;
 		typedef std::vector<std::pair<RealType,ComplexType> > PlotDataType;
 		typedef PlotParams<RealType> PlotParamsType;
+		typedef ParametersForSolver<RealType> ParametersType;
 
 		//! ab.a contains the even moments
 		//! ab.b contains the odd moments
 		//! weight contains < phi|A^\dagger A |phi>
 		//! isign can be omitted
-		ChebyshevSerializer(const VectorType& ab,
-		                    RealType Eg,
-		                    RealType weight = 0,
-		                    int isign = 0)
+		ChebyshevSerializer(const VectorType& ab,const ParametersType& params)
 		: progress_("ChebyshevSerializer",0),
-		  moments_(ab)
-// 		  Eg_(Eg),
-// 		  weight_(weight),
-// 		  isign_(isign)
+		  moments_(ab),
+		  Eg_(params.Eg),
+		  oneOverA_((2-1e-3)/(params.eMax-params.eMin)),
+		  b_((params.eMax+params.eMin)/2)
 		{
 			//gatherEvenAndOdd(ab);
 		}
@@ -79,38 +79,43 @@ namespace PsimagLite {
 		ChebyshevSerializer(IoInputType& io)
 		: progress_("ChebyshevSerializer",0)
 		{
-// 			io.readline(weight_,"#CFWeight=");
-// 			io.readline(Eg_,"#CFEnergy=");
-// 			io.readline(isign_,"#CFIsign=");
-// 			io.read(eigs_,"#CFEigs");
-// 			io.read(intensity_,"#CFIntensities");
+ 			io.readline(Eg_,"#ChebyshevEnergy=");
+			io.readline(oneOverA_,"#ChebyshevOneOverA=");
+			io.readline(b_,"#ChebyshevB");
 			io.read(moments_,"#ChebyshevMoments");
 		}
 
 		template<typename IoOutputType>
 		void save(IoOutputType& io) const
 		{
-			std::string s("#ChebyshevMoments");
-			io.printVector(moments_,s);
+			std::string s("#ChebyshevEnergy=");
+			s += ttos(Eg_);
+			io.printline(s);
+			s = "#ChebyshevOneOverA=" + ttos(oneOverA_);
+			io.printline(s);
+			s = "#ChebyshevB=" + ttos(b_);
+			io.printline(s);
+
+			io.printVector(moments_,"#ChebyshevMoments");
 		}
 
-		void set(const VectorType& ab,
-		         RealType Eg,
-		         RealType weight = 0,
-		         int isign = 0)
-		{
-			moments_=ab;
-			//gatherEvenAndOdd(ab);
-		}
+// 		void set(const VectorType& ab,
+// 		         RealType Eg,
+// 		         RealType weight = 0,
+// 		         int isign = 0)
+// 		{
+// 			moments_=ab;
+// 			//gatherEvenAndOdd(ab);
+// 		}
 
 		void plot(PlotDataType& result,const PlotParamsType& params) const
 		{
 			std::vector<RealType> gn(moments_.size());
 			initKernelJackson(gn,moments_.size());
-			
+
 			std::vector<RealType> gnmun(gn.size());
 			computeGnMuN(gnmun,gn);
-			
+
 			size_t counter = 0;
 			size_t n = size_t((params.omega2 - params.omega1)/params.deltaOmega); 
 			if (result.size()==0) result.resize(n);
@@ -119,7 +124,7 @@ namespace PsimagLite {
 				RealType den = sqrt(1.0 - x*x);
 				std::pair<RealType,RealType> p(omega,calcF(x,gnmun)/den);
 				result[counter++] = p;
-				
+
 				if (counter>=result.size()) break;
 				//std::cout<<omega<<" "<<real(res)<<" "<<imag(res)<<"\n";
 			}
@@ -175,8 +180,8 @@ namespace PsimagLite {
 
 		ProgressIndicator progress_;
 		std::vector<RealType> moments_;
+		RealType Eg_;
 		RealType oneOverA_,b_;
-// 		RealType Eg_;
 	}; // class ChebyshevSerializer
 } // namespace PsimagLite 
 /*@}*/

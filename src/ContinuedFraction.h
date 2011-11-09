@@ -34,6 +34,7 @@ Please see full open source license included in file LICENSE.
 #include "ProgressIndicator.h"
 #include "Random48.h"
 #include "PlotParams.h"
+#include "ParametersForSolver.h"
 
 namespace PsimagLite {
 	template<
@@ -41,22 +42,21 @@ namespace PsimagLite {
     	typename TridiagonalMatrixType_>
 	class ContinuedFraction  {
 	public:
+
 		typedef TridiagonalMatrixType_ TridiagonalMatrixType;
 		typedef typename std::complex<RealType> ComplexType;
 		typedef typename TridiagonalMatrixType::value_type FieldType;
 		typedef Matrix<FieldType> MatrixType;
 		typedef std::vector<std::pair<RealType,ComplexType> > PlotDataType;
 		typedef PlotParams<RealType> PlotParamsType;
+		typedef ParametersForSolver<RealType> ParametersType;
 
-		ContinuedFraction(const TridiagonalMatrixType& ab,
-		                  const RealType& Eg,
-		                  RealType weight,
-		                  int isign)
+		ContinuedFraction(const TridiagonalMatrixType& ab,const ParametersType& params)
 		: progress_("ContinuedFraction",0),
 		  ab_(ab),
-		  Eg_(Eg),
-		  weight_(weight),
-		  isign_(isign)
+		  Eg_(params.Eg),
+		  weight_(params.weight),
+		  isign_(params.isign)
 		{
 			diagonalize();
 		}
@@ -141,6 +141,8 @@ namespace PsimagLite {
 
 			return sum*weight_;
 		}
+
+		size_t size() const { return ab_.size(); }
 
 	private:
 

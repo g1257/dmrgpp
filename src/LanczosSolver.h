@@ -109,7 +109,7 @@ namespace PsimagLite {
 		typedef Matrix<VectorElementType> DenseMatrixType;
 		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
 		                    PostProcType;
-		
+
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
 		LanczosSolver(MatrixType const &mat,const SolverParametersType& params)
