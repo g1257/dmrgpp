@@ -129,11 +129,8 @@ namespace Dmrg {
 		typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 		typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
-		ContinuedFractionType;
 		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
-// 		typedef DynamicSerializer<RealType,VectorWithOffsetType,ContinuedFractionType>
-// 		DynamicSerializerType;
+		typedef typename LanczosSolverType::PostProcType PostProcType;
 		typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
 		        CommonTargettingType;
 
@@ -281,7 +278,7 @@ namespace Dmrg {
 			int s2 = (type>1) ? -1 : 1;
 			
 			if (ab_.size()<2) return;
-			ContinuedFractionType cf(ab_,Eg_,s2*weightForContinuedFraction_,s);
+			PostProcType cf(ab_,Eg_,s2*weightForContinuedFraction_,s);
 			commonTargetting_.save(block,io,cf);
 			
 			psi_.save(io,"PSI");
@@ -410,7 +407,7 @@ namespace Dmrg {
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 			size_t iter= ProgramGlobals::LanczosSteps;
 			
-			ParametersForSolverType params(iter,eps,ProgramGlobals::MaxLanczosSteps,"",0,0);
+			ParametersForSolverType params(iter,eps,ProgramGlobals::MaxLanczosSteps,"",-20.1,20.1);
 			LanczosSolverType lanczosSolver(h,params);
 
 			lanczosSolver.decomposition(sv,ab_,V);

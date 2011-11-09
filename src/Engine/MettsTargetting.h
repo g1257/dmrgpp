@@ -808,7 +808,7 @@ namespace Dmrg {
 				assert(x>1e-6);
 				std::cerr<<"norm of phi2="<<x<<"\n";
 				lanczosSolver.decomposition(phi2,ab,V);
-				ab.buildDenseMatrix(T);
+				lanczosSolver.buildDenseMatrix(T,ab);
 				//check1(V,phi2);
 				return lanczosSolver.steps();
 			}

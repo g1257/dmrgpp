@@ -88,12 +88,12 @@ namespace Dmrg {
 	template<
 		typename RealType,
 		typename VectorType,
-		typename ContinuedFractionType>
+		typename PostProcType>
 	class DynamicSerializer {
 	public:
 
 		DynamicSerializer(
-				const ContinuedFractionType& cf,
+				const PostProcType& cf,
 				size_t site,
 				const std::vector<VectorType>& targetVectors)
 		: cf_(cf),
@@ -154,7 +154,7 @@ namespace Dmrg {
 		}
 
 	private:
-		const ContinuedFractionType& cf_;
+		const PostProcType& cf_;
 		size_t site_;
 		std::vector<VectorType> targetVectors_;
 	}; // class TimeSerializer

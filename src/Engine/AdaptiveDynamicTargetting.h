@@ -88,7 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DynamicSerializer.h"
 #include "AdaptiveDynamicParams.h"
 #include "VectorWithOffsets.h"
-#include "ContinuedFraction.h"
 #include "ParametersForSolver.h"
 
 namespace Dmrg {
@@ -129,8 +128,7 @@ namespace Dmrg {
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
-		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
-			ContinuedFractionType;
+		typedef typename LanczosSolverType::PostProcType PostProcType;
 // 		typedef DynamicSerializer<RealType,VectorWithOffsetType,
 // 				ContinuedFractionType> DynamicSerializerType;
 		typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
@@ -246,7 +244,7 @@ namespace Dmrg {
 			int s2 = (type>1) ? -1 : 1;
 			
 			if (ab_.size()<2) return;
-			ContinuedFractionType cf(ab_,Eg_,s2*weightForContinuedFraction_,s);
+			PostProcType cf(ab_,Eg_,s2*weightForContinuedFraction_,s);
 			
 			commonTargetting_.save(block,io,cf);
 
@@ -476,11 +474,11 @@ namespace Dmrg {
 			RealType norm1 = PsimagLite::norm(x);
 			if (norm1<1e-6) {
 				//if ((dynCounter_%tstStruct_.advanceEach) != 0)
-				ab_.push(a,b);
+				lanczosSolver.push(ab_,a,b);
 				h.matrixVectorProduct(x,y);
 				a = x*y;
 				//std::cerr<<"site="<<site<<" AB="<<a<<" "<<b<<"\n";
-				ab_.push(a,b);
+				lanczosSolver.push(ab_,a,b);
 				done_=true;
 				return;
 			}
@@ -491,7 +489,7 @@ namespace Dmrg {
 			targetVectors_[1].setDataInSector(y,i0);
 			if ((dynCounter_%tstStruct_.advanceEach) != 0) return;
 			if (ab_.size()>0) {
-				ab_.push(a,b);
+				lanczosSolver.push(ab_,a,b);
 				return;
 			}
 			// first push:
@@ -501,9 +499,9 @@ namespace Dmrg {
 			normalize(yy);
 			RealType a1=0,b1=0;
 			lanczosSolver.oneStepDecomposition(xx,yy,a1,b1,lastLanczosVector_==0);
-			ab_.push(a1,b1);
+			lanczosSolver.push(ab_,a1,b1);
 			if (tstStruct_.advanceEach<=1) return;
-			ab_.push(a,b);
+			lanczosSolver.push(ab_,a,b);
 		}
 
 // 		void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron) const

@@ -87,7 +87,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ApplyOperatorLocal.h"
 #include "CorrectionVectorParams.h"
 #include "VectorWithOffsets.h"
-#include "ContinuedFraction.h"
 #include "CorrectionVectorFunction.h"
 #include "CommonTargetting.h"
 #include "ParametersForSolver.h"
@@ -130,10 +129,8 @@ namespace Dmrg {
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
-		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
-			ContinuedFractionType;
-		typedef DynamicSerializer<RealType,VectorWithOffsetType,
-				ContinuedFractionType> DynamicSerializerType;
+		typedef typename LanczosSolverType::PostProcType PostProcType;
+		typedef DynamicSerializer<RealType,VectorWithOffsetType,PostProcType> DynamicSerializerType;
 		typedef typename LanczosSolverType::LanczosMatrixType
 		                                      LanczosMatrixType;
 		typedef CorrectionVectorFunction<RealType,
@@ -283,7 +280,7 @@ namespace Dmrg {
 			size_t type = tstStruct_.type;
 			int s = (type&1) ? -1 : 1;
 			int s2 = (type>1) ? -1 : 1;
-			ContinuedFractionType cf(ab_,Eg_,s2*weightForContinuedFraction_,
+			PostProcType cf(ab_,Eg_,s2*weightForContinuedFraction_,
 				s);
 			commonTargetting_.save(block,io,cf);
 			psi_.save(io,"PSI");

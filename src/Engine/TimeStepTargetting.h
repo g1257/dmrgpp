@@ -610,7 +610,7 @@ namespace Dmrg {
 				msg<<"Calling tridiagonalDecomposition...\n";
 				progress_.printline(msg,std::cerr);*/
 				lanczosSolver.decomposition(phi2,ab,V);
-				ab.buildDenseMatrix(T);
+				lanczosSolver.buildDenseMatrix(T,ab);
 				//check1(V,phi2);
 				return lanczosSolver.steps();
 			}

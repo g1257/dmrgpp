@@ -106,11 +106,10 @@ namespace Dmrg {
 		typedef typename ModelHelperType::LeftRightSuperType
 		                                  LeftRightSuperType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
-		                    ContinuedFractionType;
+		typedef typename LanczosSolverType::PostProcType PostProcType;
 		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
-		typedef DynamicSerializer<RealType,VectorWithOffsetType,ContinuedFractionType>
+		typedef DynamicSerializer<RealType,VectorWithOffsetType,PostProcType>
 		        DynamicSerializerType;
 
 		enum {DISABLED,OPERATOR,CONVERGING};
@@ -145,7 +144,7 @@ namespace Dmrg {
 		template<typename IoOutputType>
 		void save(const std::vector<size_t>& block,
 		          IoOutputType& io,
-		          const ContinuedFractionType& cf) const
+		          const PostProcType& cf) const
 		{
 			DynamicSerializerType dynS(cf,block[0],targetVectors_);
 			dynS.save(io);
