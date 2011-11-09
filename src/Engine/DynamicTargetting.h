@@ -128,9 +128,9 @@ namespace Dmrg {
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 		typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
-		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
 		typedef typename LanczosSolverType::PostProcType PostProcType;
+		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
 		        CommonTargettingType;
 
@@ -162,6 +162,12 @@ namespace Dmrg {
 		{
 			if (!wft.isEnabled())
 				throw std::runtime_error(" DynamicTargetting needs an enabled wft\n");
+			paramsForSolver_.steps = ProgramGlobals::LanczosSteps;
+			paramsForSolver_.tolerance = 0.01*ProgramGlobals::LanczosTolerance;
+			paramsForSolver_.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
+			paramsForSolver_.options= "";
+			paramsForSolver_.eMin = -20.1;
+			paramsForSolver_.eMax = 20.1;
 		}
 
 		RealType weight(size_t i) const
@@ -278,7 +284,13 @@ namespace Dmrg {
 			int s2 = (type>1) ? -1 : 1;
 			
 			if (ab_.size()<2) return;
-			PostProcType cf(ab_,Eg_,s2*weightForContinuedFraction_,s);
+			typename PostProcType::ParametersType params;
+			params.Eg = Eg_;
+			params.weight = s2*weightForContinuedFraction_;
+			params.isign = s;
+			params.eMax = paramsForSolver_.eMax;
+			params.eMin = paramsForSolver_.eMin;
+			PostProcType cf(ab_,params);
 			commonTargetting_.save(block,io,cf);
 			
 			psi_.save(io,"PSI");
@@ -398,17 +410,10 @@ namespace Dmrg {
 		                       const VectorType& sv,
 		                       size_t p)
 		{
-			typename ModelType::ModelHelperType modelHelper(
-				p,lrs_,model_.orbitals());
-			typedef typename LanczosSolverType::LanczosMatrixType
-			LanczosMatrixType;
-			LanczosMatrixType h(&model_,&modelHelper);
-			
-			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
-			size_t iter= ProgramGlobals::LanczosSteps;
-			
-			ParametersForSolverType params(iter,eps,ProgramGlobals::MaxLanczosSteps,"",-20.1,20.1);
-			LanczosSolverType lanczosSolver(h,params);
+			typename ModelType::ModelHelperType modelHelper(p,lrs_,model_.orbitals());
+			typename LanczosSolverType::LanczosMatrixType h(&model_,&modelHelper);
+
+			LanczosSolverType lanczosSolver(h,paramsForSolver_);
 
 			lanczosSolver.decomposition(sv,ab_,V);
 			//calcIntensity(Eg,sv,V,ab);
@@ -465,6 +470,7 @@ namespace Dmrg {
 		RealType gsWeight_;
 		std::vector<VectorWithOffsetType> targetVectors_;
 		CommonTargettingType commonTargetting_;
+		ParametersForSolverType paramsForSolver_;
 		std::vector<RealType> weight_;
 		TridiagonalMatrixType ab_;
 		RealType Eg_;

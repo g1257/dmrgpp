@@ -244,7 +244,11 @@ namespace Dmrg {
 			int s2 = (type>1) ? -1 : 1;
 			
 			if (ab_.size()<2) return;
-			PostProcType cf(ab_,Eg_,s2*weightForContinuedFraction_,s);
+			typename PostProcType::ParametersType params;
+			params.Eg = Eg_;
+			params.weight = s2*weightForContinuedFraction_;
+			params.isign = s;
+			PostProcType cf(ab_,params);
 			
 			commonTargetting_.save(block,io,cf);
 
@@ -447,7 +451,11 @@ namespace Dmrg {
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 			size_t iter= ProgramGlobals::LanczosSteps;
 
-			ParametersForSolverType params(iter,eps,ProgramGlobals::MaxLanczosSteps,"",0,0);
+			ParametersForSolverType params;
+			params.steps = iter;
+			params.tolerance = eps;
+			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
+
 			LanczosSolverType lanczosSolver(h,params);
 
 			RealType a=0,b=0;

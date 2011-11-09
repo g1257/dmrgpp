@@ -349,7 +349,12 @@ namespace Dmrg {
 			typedef PsimagLite::LanczosSolver<ParametersForSolverType,MyInternalProduct,SomeVectorType> LanczosSolverType;
 			typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			
-			ParametersForSolverType params(iter,eps,ProgramGlobals::MaxLanczosSteps,parameters_.options,0,0);
+			ParametersForSolverType params;
+			params.steps = iter;
+			params.tolerance = eps;
+			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
+			params.options= parameters_.options;
+
 			LanczosSolverType lanczosSolver(lanczosHelper,params);
 
 			tmpVec.resize(lanczosHelper.rank());

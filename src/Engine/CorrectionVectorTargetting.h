@@ -280,8 +280,13 @@ namespace Dmrg {
 			size_t type = tstStruct_.type;
 			int s = (type&1) ? -1 : 1;
 			int s2 = (type>1) ? -1 : 1;
-			PostProcType cf(ab_,Eg_,s2*weightForContinuedFraction_,
-				s);
+
+			typename PostProcType::ParametersType params;
+			params.Eg = Eg_;
+			params.weight = s2*weightForContinuedFraction_;
+			params.isign = s;
+			PostProcType cf(ab_,params);
+
 			commonTargetting_.save(block,io,cf);
 			psi_.save(io,"PSI");
 		}
@@ -421,7 +426,11 @@ namespace Dmrg {
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
 			size_t iter= ProgramGlobals::LanczosSteps;
 
-			ParametersForSolverType params(iter,eps,ProgramGlobals::MaxLanczosSteps,"",0,0);
+			ParametersForSolverType params;
+			params.steps = iter;
+			params.tolerance = eps;
+			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
+			
 			LanczosSolverType lanczosSolver(h,params);
 
 			lanczosSolver.decomposition(sv,ab_,V);
