@@ -33,14 +33,13 @@ Please see full open source license included in file LICENSE.
 #ifndef CHEBYSHEV_SERIALIZER_H
 #define CHEBYSHEV_SERIALIZER_H
 #include <iostream>
-#include "Complex.h"
 #include "TypeToString.h"
 #include "ProgressIndicator.h"
 #include "Random48.h"
 #include <stdexcept>
 #include "ParametersForSolver.h"
-
-// #include "PlotParams.h"
+#include "PlotParams.h"
+#include "ChebyshevFunction.h"
 
 namespace PsimagLite {
 	template<
@@ -50,10 +49,9 @@ namespace PsimagLite {
 	public:
 
 		typedef VectorType_ VectorType;
-		typedef typename std::complex<RealType> ComplexType;
 		typedef typename VectorType::value_type FieldType;
 		typedef Matrix<FieldType> MatrixType;
-		typedef std::vector<std::pair<RealType,ComplexType> > PlotDataType;
+		typedef std::vector<std::pair<RealType,RealType> > PlotDataType;
 		typedef PlotParams<RealType> PlotParamsType;
 		typedef ParametersForSolver<RealType> ParametersType;
 
@@ -111,7 +109,7 @@ namespace PsimagLite {
 		void plot(PlotDataType& result,const PlotParamsType& params) const
 		{
 			std::vector<RealType> gn(moments_.size());
-			initKernelJackson(gn,moments_.size());
+			initKernelJackson(gn);
 
 			std::vector<RealType> gnmun(gn.size());
 			computeGnMuN(gnmun,gn);
@@ -120,7 +118,7 @@ namespace PsimagLite {
 			size_t n = size_t((params.omega2 - params.omega1)/params.deltaOmega); 
 			if (result.size()==0) result.resize(n);
 			for (RealType omega = params.omega1;omega <params.omega2;omega+=params.deltaOmega) {
-				RealType x = (omega-b_)*oneOverA_;
+				RealType x = (omega+Eg_-b_)*oneOverA_;
 				RealType den = sqrt(1.0 - x*x);
 				std::pair<RealType,RealType> p(omega,calcF(x,gnmun)/den);
 				result[counter++] = p;
@@ -137,7 +135,7 @@ namespace PsimagLite {
 		//! A has two cases:
 		//! (1) A = c_i + c_j and
 		//! (2) A = c_i - c_j
-		ComplexType iOfOmega(const ComplexType& z,RealType offset,int isign) const
+		RealType iOfOmega(const RealType& z,RealType offset,int isign) const
 
 		{
 			throw std::runtime_error("iOfOmega: unimplemented\n");
@@ -182,6 +180,7 @@ namespace PsimagLite {
 		std::vector<RealType> moments_;
 		RealType Eg_;
 		RealType oneOverA_,b_;
+		ChebyshevFunction<RealType> chebyshev_;
 	}; // class ChebyshevSerializer
 } // namespace PsimagLite 
 /*@}*/

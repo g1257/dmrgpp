@@ -7,6 +7,13 @@ HEADERSH = ../src/AkimaSpline.h ../src/Vector.h ../src/SampleCRSMatrix.h ../src/
 
 all: testCRSMatrix minimizer
 
+# dependencies brought about by Makefile.dep
+%.o: %.cpp Makefile
+	$(CXX) $(CPPFLAGS) -c $< 
+
+Makefile.dep: dmrg.cpp
+	$(CXX) $(CPPFLAGS) -MM dmrg.cpp  > Makefile.dep
+
 testCRSMatrix: $(HEADERSH) testCRSMatrix.cpp
 	$(CXX) -o testCRSMatrix -I../src testCRSMatrix.cpp
 

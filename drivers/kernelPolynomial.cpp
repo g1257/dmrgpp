@@ -22,7 +22,8 @@ Please see full open source license included in file LICENSE.
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
-#include "KernelPolynomial.h"
+#include <unistd.h>
+#include "ChebyshevSerializer.h"
 #include "IoSimple.h"
 
 void usage(const char *progName)
@@ -36,11 +37,13 @@ int main(int argc,char *argv[])
 {
 	int opt = 0;
 	std::string file="";
+	typedef double RealType;
+	typedef std::vector<RealType> VectorType;
+
 	RealType wbegin = 0;
 	RealType wend = 0;
 	RealType wstep = 0;
-	while ((opt = getopt(argc, argv,
-		"f:b:e:s")) != -1) {
+	while ((opt = getopt(argc, argv,"f:b:e:s:")) != -1) {
 		switch (opt) {
 		case 'f':
 			file = optarg;
@@ -66,20 +69,14 @@ int main(int argc,char *argv[])
 	}
 
 	PsimagLite::IoSimple::In io(file);
-	
-	
-	
-	typedef PsimagLite::KernelPolynomial<RealType> KernelPolynomialType;
-	KernelPolynomialType kernelPolynomial(moments,a,b);
-	
-	std::vector<RealType> v;
-	kernelPolynomial.jackson(v,wbegin,wend,wstep);
-	
-	RealType omega = wbegin;
-	size_t i = 0;
-	while(omega<wend) {
-		std::cout<<omega<<" "<<v[i++];
-		omega += wstep;
-	}
+
+	typedef PsimagLite::ChebyshevSerializer<RealType,VectorType> ChebyshevSerializerType;
+	ChebyshevSerializerType chebyshevSerializer(io);
+		
+	ChebyshevSerializerType::PlotParamsType params(wbegin,wend,wstep,0.0);
+	ChebyshevSerializerType::PlotDataType v;
+	chebyshevSerializer.plot(v,params);
+	for (size_t x=0;x<v.size();x++)
+		std::cout<<v[x].first<<" "<<v[x].second<<"\n";
 }
 
