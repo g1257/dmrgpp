@@ -139,10 +139,9 @@ namespace PsimagLite {
 			unimplemented("computeGroundState");
 		}
 
-		void computeGroundState(
-    				RealType &gsEnergy,
-				VectorType &z,
-	    			const VectorType& initialVector)
+		void computeGroundState(RealType &gsEnergy,
+		                        VectorType &z,
+	                            const VectorType& initialVector)
 		{
 			if (mode_ & DEBUG) {
 				computeGroundStateTest(gsEnergy,z,initialVector);
@@ -150,7 +149,7 @@ namespace PsimagLite {
 			}
 			unimplemented("computeGroundState");
 		}
-		
+
 		void buildDenseMatrix(DenseMatrixType& T,const TridiagonalMatrixType& ab) const
 		{
 			unimplemented("buildDenseMatrix");
@@ -187,10 +186,10 @@ namespace PsimagLite {
 		//! atmp = < phi_n | phi_n>
 		//! btmp = < phi_n | phi_{n+1}>
 		void oneStepDecomposition(VectorType& x,
-				VectorType& y,
-				RealType& atmp,
-				RealType& btmp,
-				bool isFirst) const
+		                          VectorType& y,
+		                          RealType& atmp,
+		                          RealType& btmp,
+		                          bool isFirst) const
 		{
 			VectorType z(x.size(),0.0);
 			mat_.matrixVectorProduct (z, y); // z+= Hy
@@ -229,8 +228,11 @@ namespace PsimagLite {
 
 		void setMode(const std::string& options)
 		{
-			if (options.find("lanczosdebug")!=std::string::npos) mode_ |=  DEBUG;
-			if (options.find("lanczosAllowsZero")!=std::string::npos) mode_ |= ALLOWS_ZERO;
+			if (options.find("lanczosdebug")!=std::string::npos)
+				mode_ |=  DEBUG;
+
+			if (options.find("lanczosAllowsZero")!=std::string::npos)
+				mode_ |= ALLOWS_ZERO;
 		}
 
 		void info(RealType energyTmp,const VectorType& x,std::ostream& os)
@@ -248,8 +250,8 @@ namespace PsimagLite {
 
 		//! only for debugging:
 		void computeGroundStateTest(RealType &gsEnergy,
-				VectorType& z,
-				const VectorType& initialVector)
+		                            VectorType& z,
+		                            const VectorType& initialVector)
 		{
 			unimplemented("computeGroundStateTest");
 		}
@@ -261,29 +263,29 @@ namespace PsimagLite {
 			{}
 
 			size_t rank() const { return matx_.rank(); }
-			
+
 			void matrixVectorProduct (VectorType &x,const VectorType &y) const
 			{
 				for (size_t i=0;i<y_.size();i++) y_[i] = -y[i];
 				matx_.matrixVectorProduct(x,y_);
 			}
-		
+
 		private:
 			const MatrixType& matx_;
 			mutable VectorType y_;
 		}; // class InternalMatrix
-		
+
 		void computeAandB()
 		{
 			std::ostringstream msg;
 			msg<<"Asking LanczosSolver to compute spectrum bounds...";
 			progress_.printline(msg,std::cout);
-			
+
 			SolverParametersType params;
 			params.steps = 200;
 			params.tolerance = 1e-10;
 			params.stepsForEnergyConvergence=10000;
-		
+
 			InternalMatrix mat2(mat_);
 			RealType eMax = 0;
 			LanczosSolver<SolverParametersType,InternalMatrix,VectorType> 
@@ -297,7 +299,7 @@ namespace PsimagLite {
 			                                         lanczosSolver(mat_,params);
 			RealType eMin = 0;
 			lanczosSolver.computeGroundState(eMin,z);
-			
+
 			eMax = -eMax;
 			eMax *= 2;
 			eMin *= 2;
@@ -306,7 +308,7 @@ namespace PsimagLite {
 			assert(eMax-eMin>1e-2);
 
 			params_.oneOverA=(2-1e-3)/(eMax-eMin);
-			params_.b=(eMax-eMin)/2;
+			params_.b=(eMax+eMin)/2;
 			
 			std::ostringstream msg2;
 			msg2<<"Spectrum bounds computed, eMax="<<eMax<<" eMin="<<eMin;
@@ -321,6 +323,5 @@ namespace PsimagLite {
 		//! Scaling factors for the Chebyshev expansion
 	}; // class ChebyshevSolver
 } // namespace PsimagLite
-
 /*@}*/
-#endif
+#endif //CHEBYSHEV_SOLVER_H_

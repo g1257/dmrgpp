@@ -43,7 +43,12 @@ int main(int argc,char *argv[])
 	RealType wbegin = 0;
 	RealType wend = 0;
 	RealType wstep = 0;
-	while ((opt = getopt(argc, argv,"f:b:e:s:")) != -1) {
+	typedef PsimagLite::ChebyshevSerializer<RealType,VectorType> ChebyshevSerializerType;
+	typedef  ChebyshevSerializerType::KernelParametersType KernelParametersType;
+	size_t type = KernelParametersType::JACKSON;
+	RealType lambda = 0.0;
+	bool makeZero = false;
+	while ((opt = getopt(argc, argv,"f:b:e:s:l:z")) != -1) {
 		switch (opt) {
 		case 'f':
 			file = optarg;
@@ -56,6 +61,13 @@ int main(int argc,char *argv[])
 			break;
 		case 's':
 			wstep = atof(optarg);
+			break;
+		case 'l':
+			type = KernelParametersType::LORENTZ;
+			lambda = atof(optarg);
+			break;
+		case 'z':
+			makeZero = true;
 			break;
 		default:
 			usage(argv[0]);
@@ -75,8 +87,12 @@ int main(int argc,char *argv[])
 		
 	ChebyshevSerializerType::PlotParamsType params(wbegin,wend,wstep,0.0);
 	ChebyshevSerializerType::PlotDataType v;
-	chebyshevSerializer.plot(v,params);
-	for (size_t x=0;x<v.size();x++)
-		std::cout<<v[x].first<<" "<<v[x].second<<"\n";
+	KernelParametersType kernelParams(type,lambda);
+	chebyshevSerializer.plot(v,params,kernelParams);
+	for (size_t x=0;x<v.size();x++) {
+		RealType tmp = v[x].second;
+		if (tmp<0 && makeZero) tmp = 0;
+		std::cout<<v[x].first<<" "<<tmp<<"\n";
+	}
 }
 

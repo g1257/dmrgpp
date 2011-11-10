@@ -40,8 +40,23 @@ Please see full open source license included in file LICENSE.
 #include "ParametersForSolver.h"
 #include "PlotParams.h"
 #include "ChebyshevFunction.h"
+#include <cassert>
 
 namespace PsimagLite {
+	
+	template<typename RealType>
+	struct KernelPolynomialParameters {
+
+		enum {JACKSON,LORENTZ};
+
+		KernelPolynomialParameters(size_t type1,const RealType& lambda1)
+		: type(type1),lambda(lambda1)
+		{}
+
+		size_t type;
+		RealType lambda;
+	}; // struct KernelPolynomialParameters
+	
 	template<
 		typename RealType,
     	typename VectorType_>
@@ -54,6 +69,7 @@ namespace PsimagLite {
 		typedef std::vector<std::pair<RealType,RealType> > PlotDataType;
 		typedef PlotParams<RealType> PlotParamsType;
 		typedef ParametersForSolver<RealType> ParametersType;
+		typedef KernelPolynomialParameters<RealType> KernelParametersType;
 
 		ChebyshevSerializer(const VectorType& ab,const ParametersType& params)
 		: progress_("ChebyshevSerializer",0),
@@ -98,10 +114,12 @@ namespace PsimagLite {
 // 			//gatherEvenAndOdd(ab);
 // 		}
 
-		void plot(PlotDataType& result,const PlotParamsType& params) const
+		void plot(PlotDataType& result,
+		          const PlotParamsType& params,
+		          const KernelParametersType& kernelParams) const
 		{
 			std::vector<RealType> gn(moments_.size());
-			initKernelJackson(gn);
+			initKernel(gn,kernelParams);
 
 			std::vector<RealType> gnmun(gn.size());
 			computeGnMuN(gnmun,gn);
@@ -146,6 +164,21 @@ namespace PsimagLite {
 		{
 			for (size_t i=0;i<gnmn.size();i++) gnmn[i] = moments_[i] * gn[i];
 		}
+		
+		void initKernel(std::vector<RealType>& gn,
+		                const KernelParametersType& kernelParams) const
+		{
+			switch (kernelParams.type) {
+			case KernelParametersType::JACKSON:
+				initKernelJackson(gn);
+				break;
+			case KernelParametersType::LORENTZ:
+				initKernelLorentz(gn,kernelParams.lambda);
+				break;
+			default:
+				assert(false);
+			}
+		}
 
 		void initKernelJackson(std::vector<RealType>& gn) const
 		{
@@ -157,6 +190,15 @@ namespace PsimagLite {
 			}
 		}
 
+		void initKernelLorentz(std::vector<RealType>& gn,
+		                       const RealType& lambda) const
+		{
+			RealType nreal = gn.size();
+			RealType sinhlambda = sinh(lambda);
+			for (size_t i=0;i<gn.size();i++) {
+				gn[i] = sinh(lambda*(1-i/nreal))/sinhlambda;
+			}
+		}
 		ProgressIndicator progress_;
 		std::vector<RealType> moments_;
 		ParametersType params_;
