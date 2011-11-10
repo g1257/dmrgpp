@@ -58,6 +58,17 @@ namespace PsimagLite {
 				for (size_t j=0;j<ncol_;j++) 
 					data_[i+j*nrow_] = m(i,j);
 		}
+		
+		template<typename SomeMatrixType>
+		Matrix(const SomeMatrixType& m)
+		{
+			nrow_=m.rank();
+			ncol_=m.rank();
+			data_.resize(nrow_*ncol_);
+			for (size_t i=0;i<nrow_;i++)
+				for (size_t j=0;j<ncol_;j++) 
+					data_[i+j*nrow_] = m(i,j);
+		}
 
 		// default assigment operator is fine
 

@@ -127,6 +127,7 @@ namespace PsimagLite {
 		  mode_(WITH_INFO),
 		  rng_(343311)
 		{
+			params.steps=400;
 			setMode(params.options);
 			computeAandB();
 			std::ostringstream msg;
@@ -269,6 +270,11 @@ namespace PsimagLite {
 				for (size_t i=0;i<y_.size();i++) y_[i] = -y[i];
 				matx_.matrixVectorProduct(x,y_);
 			}
+			
+			VectorElementType operator()(size_t i,size_t j) const
+			{
+				return matx_(i,j);
+			}
 
 		private:
 			const MatrixType& matx_;
@@ -277,37 +283,39 @@ namespace PsimagLite {
 
 		void computeAandB()
 		{
-			std::ostringstream msg;
-			msg<<"Asking LanczosSolver to compute spectrum bounds...";
-			progress_.printline(msg,std::cout);
-
-			SolverParametersType params;
-			params.steps = 200;
-			params.tolerance = 1e-10;
-			params.stepsForEnergyConvergence=10000;
-
-			InternalMatrix mat2(mat_);
+// 			std::ostringstream msg;
+// 			msg<<"Asking LanczosSolver to compute spectrum bounds...";
+// 			progress_.printline(msg,std::cout);
+// 
+// 			SolverParametersType params;
+// 			params.steps = 200;
+// 			params.tolerance = 1e-10;
+// 			params.stepsForEnergyConvergence=10000;
+// 
+// 			InternalMatrix mat2(mat_);
 			RealType eMax = 0;
-			LanczosSolver<SolverParametersType,InternalMatrix,VectorType> 
-			                                         lanczosSolver2(mat2,params);
-
-			VectorType z2(mat_.rank(),0);
-			lanczosSolver2.computeGroundState(eMax,z2);
-			
-			VectorType z(mat_.rank(),0);
-			LanczosSolver<SolverParametersType,MatrixType,VectorType> 
-			                                         lanczosSolver(mat_,params);
+// 			LanczosSolver<SolverParametersType,InternalMatrix,VectorType> 
+// 			                                         lanczosSolver2(mat2,params);
+// 
+// 			VectorType z2(mat_.rank(),0);
+// 			lanczosSolver2.computeGroundState(eMax,z2);
+// 			
+// 			VectorType z(mat_.rank(),0);
+// 			LanczosSolver<SolverParametersType,MatrixType,VectorType> 
+// 			                                         lanczosSolver(mat_,params);
 			RealType eMin = 0;
-			lanczosSolver.computeGroundState(eMin,z);
-
-			eMax = -eMax;
-			eMax *= 2;
-			eMin *= 2;
+// 			lanczosSolver.computeGroundState(eMin,z);
+// 
+// 			eMax = -eMax;
+// 				
+// 			eMax *= 1.5;
+// 			eMin *= 1.5;
 			eMax = 20.1;
 			eMin = -20.1;
+// 			eMax = -eMin;
 			assert(eMax-eMin>1e-2);
 
-			params_.oneOverA=(2-1e-3)/(eMax-eMin);
+			params_.oneOverA=2.0/(eMax-eMin);
 			params_.b=(eMax+eMin)/2;
 			
 			std::ostringstream msg2;

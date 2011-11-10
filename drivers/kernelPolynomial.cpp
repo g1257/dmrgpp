@@ -48,7 +48,7 @@ int main(int argc,char *argv[])
 	size_t type = KernelParametersType::JACKSON;
 	RealType lambda = 0.0;
 	bool makeZero = false;
-	while ((opt = getopt(argc, argv,"f:b:e:s:l:z")) != -1) {
+	while ((opt = getopt(argc, argv,"f:b:e:s:l:zd")) != -1) {
 		switch (opt) {
 		case 'f':
 			file = optarg;
@@ -65,6 +65,9 @@ int main(int argc,char *argv[])
 		case 'l':
 			type = KernelParametersType::LORENTZ;
 			lambda = atof(optarg);
+			break;
+		case 'd':
+			type = KernelParametersType::DIRICHLET;
 			break;
 		case 'z':
 			makeZero = true;
@@ -83,6 +86,9 @@ int main(int argc,char *argv[])
 	PsimagLite::IoSimple::In io(file);
 
 	typedef PsimagLite::ChebyshevSerializer<RealType,VectorType> ChebyshevSerializerType;
+	
+	io.advance(ChebyshevSerializerType::stringMarker(),PsimagLite::IoSimple::In::LAST_INSTANCE);
+
 	ChebyshevSerializerType chebyshevSerializer(io);
 		
 	ChebyshevSerializerType::PlotParamsType params(wbegin,wend,wstep,0.0);

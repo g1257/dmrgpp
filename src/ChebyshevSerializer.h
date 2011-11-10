@@ -47,7 +47,7 @@ namespace PsimagLite {
 	template<typename RealType>
 	struct KernelPolynomialParameters {
 
-		enum {JACKSON,LORENTZ};
+		enum {JACKSON,LORENTZ,DIRICHLET};
 
 		KernelPolynomialParameters(size_t type1,const RealType& lambda1)
 		: type(type1),lambda(lambda1)
@@ -57,10 +57,11 @@ namespace PsimagLite {
 		RealType lambda;
 	}; // struct KernelPolynomialParameters
 	
-	template<
-		typename RealType,
-    	typename VectorType_>
+	template<typename RealType,typename VectorType_>
 	class ChebyshevSerializer  {
+
+		static const std::string stringMarker_;
+
 	public:
 
 		typedef VectorType_ VectorType;
@@ -94,7 +95,9 @@ namespace PsimagLite {
 		template<typename IoOutputType>
 		void save(IoOutputType& io) const
 		{
-			std::string s("#ChebyshevEnergy=");
+			std::string s(stringMarker_);
+			io.printline(s);
+			s = "#ChebyshevEnergy=";
 			s += ttos(params_.Eg);
 			io.printline(s);
 			s = "#ChebyshevOneOverA=" + ttos(params_.oneOverA);
@@ -104,6 +107,9 @@ namespace PsimagLite {
 
 			io.printVector(moments_,"#ChebyshevMoments");
 		}
+		
+		static const std::string& stringMarker() { return stringMarker_; }
+		
 
 // 		void set(const VectorType& ab,
 // 		         RealType Eg,
@@ -118,7 +124,7 @@ namespace PsimagLite {
 		          const PlotParamsType& params,
 		          const KernelParametersType& kernelParams) const
 		{
-			std::vector<RealType> gn(moments_.size());
+			std::vector<RealType> gn(moments_.size(),1.0);
 			initKernel(gn,kernelParams);
 
 			std::vector<RealType> gnmun(gn.size());
@@ -128,9 +134,12 @@ namespace PsimagLite {
 			size_t n = size_t((params.omega2 - params.omega1)/params.deltaOmega); 
 			if (result.size()==0) result.resize(n);
 			for (RealType omega = params.omega1;omega <params.omega2;omega+=params.deltaOmega) {
-				RealType x = (omega+params_.Eg-params_.b)*params_.oneOverA;
-				RealType den = sqrt(1.0 - x*x);
-				std::pair<RealType,RealType> p(omega,calcF(x,gnmun)/den);
+				RealType offset = params_.Eg;
+				RealType x = (omega+offset-params_.b)*params_.oneOverA;
+				
+				RealType den = (x>1.0 || x<-1.0) ? 0.0 : sqrt(1.0 - x*x);
+				RealType tmp = (fabs(den)>1e-6) ? calcF(x,gnmun)/den : 0.0;
+				std::pair<RealType,RealType> p(omega,tmp);
 				result[counter++] = p;
 
 				if (counter>=result.size()) break;
@@ -175,6 +184,8 @@ namespace PsimagLite {
 			case KernelParametersType::LORENTZ:
 				initKernelLorentz(gn,kernelParams.lambda);
 				break;
+			case KernelParametersType::DIRICHLET:
+				break;
 			default:
 				assert(false);
 			}
@@ -204,6 +215,10 @@ namespace PsimagLite {
 		ParametersType params_;
 		ChebyshevFunction<RealType> chebyshev_;
 	}; // class ChebyshevSerializer
+	
+	template<typename RealType,typename VectorType>
+	const std::string ChebyshevSerializer<RealType,VectorType>::stringMarker_ =
+	                                               "#ChebyshevSerializerMarker";
 } // namespace PsimagLite 
 /*@}*/
 #endif  //CHEBYSHEV_SERIALIZER_H
