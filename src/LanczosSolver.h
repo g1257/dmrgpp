@@ -131,7 +131,7 @@ namespace PsimagLite {
 		{
 			size_t n =mat_.rank();
 			RealType atmp=0.0;
-			std::vector<RealType> y(n);
+			VectorType y(n);
 
 			for (size_t i=0;i<n;i++) {
 				y[i]=rng_()-0.5;
@@ -146,20 +146,17 @@ namespace PsimagLite {
 			computeGroundState(gsEnergy,z,y);
 		}
 
-		void computeGroundState(
-    				RealType &gsEnergy,
-				VectorType &z,
-	    			const VectorType& initialVector)
+		void computeGroundState(RealType &gsEnergy,
+		                        VectorType &z,
+	                            const VectorType& initialVector)
 		{
 			if (mode_ & DEBUG) {
 				computeGroundStateTest(gsEnergy,z,initialVector);
 				return;
 			}
-			
+
 			size_t n=mat_.rank();
 			VectorType y(n);
-			
-			//RealType tmp;
 
 			RealType atmp=0.0;
 			for (size_t i=0;i<n;i++) {
@@ -168,7 +165,7 @@ namespace PsimagLite {
 			}
 			atmp = 1.0 / sqrt (atmp);
 			for (size_t i = 0; i < mat_.rank(); i++) y[i] *= atmp;
-			
+
 			TridiagonalMatrixType ab;
 			DenseMatrixType lanczosVectors; 
 			decomposition(y,ab,lanczosVectors);

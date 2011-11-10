@@ -26,6 +26,9 @@ Please see full open source license included in file LICENSE.
  * This is a structure, don't add members functions (except ctor)
  *
  */
+#ifndef PLOT_PARAMS_H
+#define PLOT_PARAMS_H
+
 namespace PsimagLite {
 template<typename RealType>
 struct PlotParams {
@@ -37,8 +40,7 @@ struct PlotParams {
 	RealType delta;
 };
 
-#ifndef PLOT_PARAMS_H
-#define PLOT_PARAMS_H
+
 
 } // namespace PsimagLite 
 /*@}*/

@@ -99,27 +99,14 @@ namespace PsimagLite {
 
 		ParametersForSolver() 
 		: steps(0),tolerance(0),stepsForEnergyConvergence(0),
-		  options(""),eMax(0),eMin(0),Eg(0),weight(0),isign(0)
+		  options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0)
 		{} 
-// 		size_t steps1,
-// 		                    const RealType& tolerance1,
-// 		                    size_t stepsForEnergyConvergence1,
-// 		                    const std::string& options1,
-// 		                    const RealType& eMax1,
-// 		                    const RealType& eMin1)
-// 		: steps(steps1),
-// 		  tolerance(tolerance1),
-// 		  stepsForEnergyConvergence(stepsForEnergyConvergence1),
-// 		  options(options1),
-// 		  eMax(eMax1),
-// 		  eMin(eMin1)
-// 		{}
-// 		
+
 		size_t steps;
 		RealType tolerance;
 		size_t stepsForEnergyConvergence;
 		std::string options;
-		RealType eMax,eMin;
+		RealType oneOverA,b;
 		RealType Eg;
 		RealType weight;
 		int isign;

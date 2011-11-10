@@ -55,19 +55,11 @@ namespace PsimagLite {
 		typedef PlotParams<RealType> PlotParamsType;
 		typedef ParametersForSolver<RealType> ParametersType;
 
-		//! ab.a contains the even moments
-		//! ab.b contains the odd moments
-		//! weight contains < phi|A^\dagger A |phi>
-		//! isign can be omitted
 		ChebyshevSerializer(const VectorType& ab,const ParametersType& params)
 		: progress_("ChebyshevSerializer",0),
 		  moments_(ab),
-		  Eg_(params.Eg),
-		  oneOverA_((2-1e-3)/(params.eMax-params.eMin)),
-		  b_((params.eMax+params.eMin)/2)
-		{
-			//gatherEvenAndOdd(ab);
-		}
+		  params_(params)
+		{}
 
 // 		ChebyshevSerializer() 
 // 		: progress_("ChebyshevSerializer",0), ab_(),Eg_(0),weight_(0),isign_(1)
@@ -77,9 +69,9 @@ namespace PsimagLite {
 		ChebyshevSerializer(IoInputType& io)
 		: progress_("ChebyshevSerializer",0)
 		{
- 			io.readline(Eg_,"#ChebyshevEnergy=");
-			io.readline(oneOverA_,"#ChebyshevOneOverA=");
-			io.readline(b_,"#ChebyshevB");
+ 			io.readline(params_.Eg,"#ChebyshevEnergy=");
+			io.readline(params_.oneOverA,"#ChebyshevOneOverA=");
+			io.readline(params_.b,"#ChebyshevB");
 			io.read(moments_,"#ChebyshevMoments");
 		}
 
@@ -87,11 +79,11 @@ namespace PsimagLite {
 		void save(IoOutputType& io) const
 		{
 			std::string s("#ChebyshevEnergy=");
-			s += ttos(Eg_);
+			s += ttos(params_.Eg);
 			io.printline(s);
-			s = "#ChebyshevOneOverA=" + ttos(oneOverA_);
+			s = "#ChebyshevOneOverA=" + ttos(params_.oneOverA);
 			io.printline(s);
-			s = "#ChebyshevB=" + ttos(b_);
+			s = "#ChebyshevB=" + ttos(params_.b);
 			io.printline(s);
 
 			io.printVector(moments_,"#ChebyshevMoments");
@@ -118,7 +110,7 @@ namespace PsimagLite {
 			size_t n = size_t((params.omega2 - params.omega1)/params.deltaOmega); 
 			if (result.size()==0) result.resize(n);
 			for (RealType omega = params.omega1;omega <params.omega2;omega+=params.deltaOmega) {
-				RealType x = (omega+Eg_-b_)*oneOverA_;
+				RealType x = (omega+params_.Eg-params_.b)*params_.oneOverA;
 				RealType den = sqrt(1.0 - x*x);
 				std::pair<RealType,RealType> p(omega,calcF(x,gnmun)/den);
 				result[counter++] = p;
@@ -142,18 +134,7 @@ namespace PsimagLite {
 		}
 
 	private:
-		
-// 		void gatherEvenAndOdd(const VectorType& ab)
-// 		{
-// 			// need to get momentsEven, momentsOdd, a, and b
-// 			size_t n = ab.size();
-// 			std::vector<RealType> moments(2*n);
-// 			for (size_t i=0;i<n;i++) {
-// 				moments[2*i] = ab.a(i);
-// 				moments[2*i+1] = ab.b(i);
-// 			}
-// 		}
-		
+
 		RealType calcF(const RealType& x,const std::vector<RealType>& gnmn) const
 		{
 			RealType sum = 0.5*gnmn[0];
@@ -178,8 +159,7 @@ namespace PsimagLite {
 
 		ProgressIndicator progress_;
 		std::vector<RealType> moments_;
-		RealType Eg_;
-		RealType oneOverA_,b_;
+		ParametersType params_;
 		ChebyshevFunction<RealType> chebyshev_;
 	}; // class ChebyshevSerializer
 } // namespace PsimagLite 
