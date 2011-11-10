@@ -165,9 +165,6 @@ namespace Dmrg {
 			paramsForSolver_.steps = ProgramGlobals::LanczosSteps;
 			paramsForSolver_.tolerance = 0.01*ProgramGlobals::LanczosTolerance;
 			paramsForSolver_.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
-			paramsForSolver_.options= "";
-			paramsForSolver_.eMin = -20.1;
-			paramsForSolver_.eMax = 20.1;
 		}
 
 		RealType weight(size_t i) const
@@ -196,7 +193,7 @@ namespace Dmrg {
 
 // 		const RealType& operator[](size_t i) const { return psi_[i]; }
 
-		RealType& operator[](size_t i) { return psi_[i]; }
+// 		RealType& operator[](size_t i) { return psi_[i]; }
 
 		const VectorWithOffsetType& gs() const { return psi_; }
 
@@ -284,12 +281,11 @@ namespace Dmrg {
 			int s2 = (type>1) ? -1 : 1;
 			
 			if (ab_.size()<2) return;
-			typename PostProcType::ParametersType params;
+			typename PostProcType::ParametersType params = paramsForSolver_;
 			params.Eg = Eg_;
 			params.weight = s2*weightForContinuedFraction_;
 			params.isign = s;
-			params.eMax = paramsForSolver_.eMax;
-			params.eMin = paramsForSolver_.eMin;
+
 			PostProcType cf(ab_,params);
 			commonTargetting_.save(block,io,cf);
 			

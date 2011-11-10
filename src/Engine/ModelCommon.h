@@ -184,20 +184,20 @@ namespace Dmrg {
 				//! contribution to Hamiltonian from current system
 				modelHelper.calcHamiltonianPart(matrixBlock,true);
 				matrix = matrixBlock;
-				PsimagLite::Matrix<SparseElementType> fm;
-				crsMatrixToFullMatrix(fm,matrix);
-				std::vector<RealType> e(matrix.rank());
-				printNonZero(fm,std::cerr);
-				PsimagLite::diag(fm,e,'N');
-				std::cerr<<"eSystem[0]="<<e[0]<<"\n";
+// 				PsimagLite::Matrix<SparseElementType> fm;
+// 				crsMatrixToFullMatrix(fm,matrix);
+// 				std::vector<RealType> e(matrix.rank());
+// 				printNonZero(fm,std::cerr);
+// 				PsimagLite::diag(fm,e,'N');
+// 				std::cerr<<"eSystem[0]="<<e[0]<<"\n";
 	
 				//! contribution to Hamiltonian from current envirnoment
 				modelHelper.calcHamiltonianPart(matrixBlock,false);
 				matrix += matrixBlock;
-				crsMatrixToFullMatrix(fm,matrixBlock);
-				printNonZero(fm,std::cerr);
-				PsimagLite::diag(fm,e,'N');
-				std::cerr<<"eEnv[0]="<<e[0]<<"\n";
+// 				crsMatrixToFullMatrix(fm,matrixBlock);
+// 				printNonZero(fm,std::cerr);
+// 				PsimagLite::diag(fm,e,'N');
+// 				std::cerr<<"eEnv[0]="<<e[0]<<"\n";
 				matrixBlock.clear();
 	
 				VerySparseMatrixType vsm(matrix);

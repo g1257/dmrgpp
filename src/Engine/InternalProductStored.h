@@ -92,6 +92,7 @@ namespace Dmrg {
 	class InternalProductStored {
 	public:	
 		typedef T HamiltonianElementType;
+		typedef HamiltonianElementType value_type; 
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelHelperType::RealType RealType;
@@ -114,6 +115,12 @@ namespace Dmrg {
 		{
 			 matrixStored_.matrixVectorProduct(x,y);
 		}
+		
+		HamiltonianElementType operator()(size_t i,size_t j) const
+		{
+			return matrixStored_(i,j);
+		}
+		
 
 	private:
 		ModelType const *model_;
