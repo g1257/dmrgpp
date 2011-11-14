@@ -49,11 +49,12 @@ namespace PsimagLite {
 
 		enum {JACKSON,LORENTZ,DIRICHLET};
 
-		KernelPolynomialParameters(size_t type1,const RealType& lambda1)
-		: type(type1),lambda(lambda1)
+		KernelPolynomialParameters(size_t type1,size_t cutoff1,const RealType& lambda1)
+		: type(type1),cutoff(cutoff1),lambda(lambda1)
 		{}
 
 		size_t type;
+		size_t cutoff;
 		RealType lambda;
 	}; // struct KernelPolynomialParameters
 	
@@ -124,7 +125,9 @@ namespace PsimagLite {
 		          const PlotParamsType& params,
 		          const KernelParametersType& kernelParams) const
 		{
-			std::vector<RealType> gn(moments_.size(),1.0);
+			size_t cutoff = kernelParams.cutoff;
+			if (cutoff==0 || moments_.size()<cutoff) cutoff = moments_.size();
+			std::vector<RealType> gn(cutoff,1.0);
 			initKernel(gn,kernelParams);
 
 			std::vector<RealType> gnmun(gn.size());
@@ -133,8 +136,9 @@ namespace PsimagLite {
 			size_t counter = 0;
 			size_t n = size_t((params.omega2 - params.omega1)/params.deltaOmega); 
 			if (result.size()==0) result.resize(n);
+			RealType offset = params_.Eg;
+			std::cerr<<"gn[0]="<<gn[0]<<" gn[5]="<<gn[5]<<"\n";
 			for (RealType omega = params.omega1;omega <params.omega2;omega+=params.deltaOmega) {
-				RealType offset = params_.Eg;
 				RealType x = (omega+offset-params_.b)*params_.oneOverA;
 				
 				RealType den = (x>1.0 || x<-1.0) ? 0.0 : sqrt(1.0 - x*x);

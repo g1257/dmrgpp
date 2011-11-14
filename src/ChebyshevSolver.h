@@ -283,35 +283,35 @@ namespace PsimagLite {
 
 		void computeAandB()
 		{
-// 			std::ostringstream msg;
-// 			msg<<"Asking LanczosSolver to compute spectrum bounds...";
-// 			progress_.printline(msg,std::cout);
-// 
-// 			SolverParametersType params;
-// 			params.steps = 200;
-// 			params.tolerance = 1e-10;
-// 			params.stepsForEnergyConvergence=10000;
-// 
-// 			InternalMatrix mat2(mat_);
+			std::ostringstream msg;
+			msg<<"Asking LanczosSolver to compute spectrum bounds...";
+			progress_.printline(msg,std::cout);
+
+			SolverParametersType params;
+			params.steps = 200;
+			params.tolerance = 1e-10;
+			params.stepsForEnergyConvergence=10000;
+
+			InternalMatrix mat2(mat_);
 			RealType eMax = 0;
-// 			LanczosSolver<SolverParametersType,InternalMatrix,VectorType> 
-// 			                                         lanczosSolver2(mat2,params);
-// 
-// 			VectorType z2(mat_.rank(),0);
-// 			lanczosSolver2.computeGroundState(eMax,z2);
-// 			
-// 			VectorType z(mat_.rank(),0);
-// 			LanczosSolver<SolverParametersType,MatrixType,VectorType> 
-// 			                                         lanczosSolver(mat_,params);
+			LanczosSolver<SolverParametersType,InternalMatrix,VectorType> 
+			                                         lanczosSolver2(mat2,params);
+
+			VectorType z2(mat_.rank(),0);
+			lanczosSolver2.computeGroundState(eMax,z2);
+			
+			VectorType z(mat_.rank(),0);
+			LanczosSolver<SolverParametersType,MatrixType,VectorType> 
+			                                         lanczosSolver(mat_,params);
 			RealType eMin = 0;
-// 			lanczosSolver.computeGroundState(eMin,z);
-// 
-// 			eMax = -eMax;
-// 				
-// 			eMax *= 1.5;
-// 			eMin *= 1.5;
-			eMax = 20.1;
-			eMin = -20.1;
+			lanczosSolver.computeGroundState(eMin,z);
+
+			eMax = -eMax;
+				
+			eMax *= 3;
+			eMin *= 3;
+// 			eMax = 20.1;
+// 			eMin = -20.1;
 // 			eMax = -eMin;
 			assert(eMax-eMin>1e-2);
 

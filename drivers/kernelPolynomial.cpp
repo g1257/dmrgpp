@@ -48,7 +48,8 @@ int main(int argc,char *argv[])
 	size_t type = KernelParametersType::JACKSON;
 	RealType lambda = 0.0;
 	bool makeZero = false;
-	while ((opt = getopt(argc, argv,"f:b:e:s:l:zd")) != -1) {
+	size_t cutoff = 0;
+	while ((opt = getopt(argc, argv,"f:b:e:s:c:l:zd")) != -1) {
 		switch (opt) {
 		case 'f':
 			file = optarg;
@@ -61,6 +62,9 @@ int main(int argc,char *argv[])
 			break;
 		case 's':
 			wstep = atof(optarg);
+			break;
+		case 'c':
+			cutoff =atoi(optarg);
 			break;
 		case 'l':
 			type = KernelParametersType::LORENTZ;
@@ -93,7 +97,7 @@ int main(int argc,char *argv[])
 		
 	ChebyshevSerializerType::PlotParamsType params(wbegin,wend,wstep,0.0);
 	ChebyshevSerializerType::PlotDataType v;
-	KernelParametersType kernelParams(type,lambda);
+	KernelParametersType kernelParams(type,cutoff,lambda);
 	chebyshevSerializer.plot(v,params,kernelParams);
 	for (size_t x=0;x<v.size();x++) {
 		RealType tmp = v[x].second;
