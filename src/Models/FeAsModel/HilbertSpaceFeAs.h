@@ -104,7 +104,7 @@ namespace Dmrg {
 		enum {SPIN_UP=0,SPIN_DOWN=1};
 		
 		//! For state "a" set electron on site "j" to value "value"
-		static void set(Word &a,size_t j,size_t value) 
+		/* static void set(Word &a,size_t j,size_t value) 
 		{
 			
 			size_t k=NUMBER_OF_STATES*j;
@@ -115,7 +115,7 @@ namespace Dmrg {
 			mask=(value<<k);
 			
 			a= (b | mask);
-		}
+		}*/
 
 		
 		// Get electronic state on site "j" in binary number "a"
