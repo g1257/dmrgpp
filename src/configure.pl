@@ -254,6 +254,9 @@ print FOUT<<EOF;
  * DMRG++ ($brand) by G.A.*/
 #include "CrsMatrix.h"
 #include "LanczosSolver.h"
+#ifdef USE_CHEBYSHEV
+#include "ChebyshevSolver.h"
+#endif
 #include "BlockMatrix.h"
 #include "DmrgSolver.h"
 #include "IoSimple.h"
@@ -330,7 +333,12 @@ void mainLoop(ParametersModelType& mp,GeometryType& geometry,ParametersSolverTyp
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,MyConcurrency> ModelHelperType;
 	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
-	typedef TargettingTemplate<PsimagLite::LanczosSolver,
+	typedef TargettingTemplate<PsimagLite::
+#ifdef USE_CHEBYSHEV
+	ChebyshevSolver,
+#else
+	LanczosSolver,
+#endif
 	                           InternalProductTemplate,
 	                           WaveFunctionTransfFactory,
 	                           ModelType,

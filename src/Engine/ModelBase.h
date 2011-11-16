@@ -172,7 +172,7 @@ namespace Dmrg {
 
 			//! print model or model parameters
 			void print(std::ostream& os) const;
-			
+
 			//! Return H, the hamiltonian of the FeAs model for basis1 and partition m consisting of the external product
 			//! of basis2 \otimes basis3
 			//! Note: Used only for debugging purposes

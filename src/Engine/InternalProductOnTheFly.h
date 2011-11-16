@@ -85,12 +85,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-	template<
-		typename T, 
-		typename ModelType
-		>
+	template<typename T,typename ModelType>
 	class InternalProductOnTheFly {
-	public:	
+	public:
 		typedef T HamiltonianElementType;
 		typedef T value_type;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -104,7 +101,7 @@ namespace Dmrg {
 		}
 
 		size_t rank() const { return modelHelper_->size(); }
-		
+
 		template<typename SomeVectorType>
 		void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
 		{

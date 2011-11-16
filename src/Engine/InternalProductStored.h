@@ -97,7 +97,7 @@ namespace Dmrg {
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelHelperType::RealType RealType;
 		//typedef typename SparseMatrixType::value_type SparseElementType;
-		
+
 		InternalProductStored(ModelType const *model,ModelHelperType const *modelHelper) 
 		{
 			model_ = model;
@@ -115,12 +115,11 @@ namespace Dmrg {
 		{
 			 matrixStored_.matrixVectorProduct(x,y);
 		}
-		
+
 		HamiltonianElementType operator()(size_t i,size_t j) const
 		{
 			return matrixStored_(i,j);
 		}
-		
 
 	private:
 		ModelType const *model_;

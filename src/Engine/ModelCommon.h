@@ -206,7 +206,6 @@ namespace Dmrg {
 				matrix = vsm;
 			}
 
-
 		private:
 
 			//! Add Hamiltonian connection between basis2 and basis3 in
