@@ -94,16 +94,15 @@ namespace Dmrg {
 		typedef OperatorType_ OperatorType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
-		OperatorsBase(const BasisType* thisBasis,size_t dof)
-		: operatorsImpl_(thisBasis,dof),progress_("Operators",0)
-		{ }
+		OperatorsBase(const BasisType* thisBasis)
+		: operatorsImpl_(thisBasis),progress_("Operators",0)
+		{}
 
 		template<typename IoInputter>
 		OperatorsBase(IoInputter& io,
 		              size_t level,
-		              const BasisType* thisBasis,
-		              size_t dof)
-		: operatorsImpl_(io,level,thisBasis,dof),progress_("Operators",0)
+		              const BasisType* thisBasis)
+		: operatorsImpl_(io,level,thisBasis),progress_("Operators",0)
 		{}
 
 		template<typename IoInputter>
@@ -127,9 +126,9 @@ namespace Dmrg {
 			return operatorsImpl_.getReducedOperatorByIndex(i);
 		}
 
-		const OperatorType& getReducedOperatorByIndex(char modifier,int i) const
+		const OperatorType& getReducedOperatorByIndex(char modifier,int i,size_t dof) const
 		{
-			return operatorsImpl_.getReducedOperatorByIndex(modifier,i);
+			return operatorsImpl_.getReducedOperatorByIndex(modifier,i,dof);
 		}
 
 		void getOperatorByIndex(std::string& s,int i) const

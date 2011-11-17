@@ -94,12 +94,12 @@ namespace Dmrg {
 		static int const DEGREES_OF_FREEDOM=2*NUMBER_OF_ORBITALS;
 		
 		OperatorsFeAs(const DmrgBasisType* thisBasis) :
-			OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,DEGREES_OF_FREEDOM) 
+			OperatorsBase<OperatorType,DmrgBasisType>(thisBasis) 
 		{}
 
 		template<typename IoInputter>
-		OperatorsFeAs(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
-			OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,DEGREES_OF_FREEDOM) 
+		OperatorsFeAs(IoInputter& io,size_t level,const DmrgBasisType* thisBasis)
+		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis) 
 		{}
 
 		const OperatorType& getOperator(int i,int sigma) const 

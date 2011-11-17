@@ -94,12 +94,12 @@ namespace Dmrg {
 		static int const NUMBER_OF_ORBITALS=1;
 		
 		OpsExtendedHubbard1Orb(const DmrgBasisType* thisBasis) 
-		: OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_)
+		: OperatorsBase<OperatorType,DmrgBasisType>(thisBasis)
 		{}
 
 		template<typename IoInputter>
 		OpsExtendedHubbard1Orb(IoInputter& io,size_t level,const DmrgBasisType* thisBasis)
-		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_)
+		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis)
 		{ }
 
 		const OperatorType& getOperator(int i,int sigma) const 

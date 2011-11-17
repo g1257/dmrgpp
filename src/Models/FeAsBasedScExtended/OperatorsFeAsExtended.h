@@ -88,19 +88,19 @@ namespace Dmrg {
 	//! For this model the operators are c^_{i\sigma} 
 	template<typename OperatorType,typename DmrgBasisType>
 	class OperatorsFeAsExtended : public OperatorsBase<OperatorType,DmrgBasisType> {
-	public:	
+	public:
 		static int const NUMBER_OF_ORBITALS=2;
 		static int const DEGREES_OF_FREEDOM=2*NUMBER_OF_ORBITALS;
-		
+
 		OperatorsFeAsExtended(const DmrgBasisType* thisBasis) 
-		: OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,DEGREES_OF_FREEDOM)
+		: OperatorsBase<OperatorType,DmrgBasisType>(thisBasis)
 		{}
 
 		template<typename IoInputter>
 		OperatorsFeAsExtended(IoInputter& io,
 		                      size_t level,
 		                      const DmrgBasisType* thisBasis)
-		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,DEGREES_OF_FREEDOM)
+		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis)
 		{}
 
 		const OperatorType& getOperator(int i,int sigma) const 

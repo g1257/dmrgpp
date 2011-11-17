@@ -184,14 +184,13 @@ namespace Dmrg {
 			
 		private:
 			//! Adds a connector between system and environment
-			size_t calcBond(
-				SparseMatrixType &matrixBlock,
-    				size_t i,
-				size_t j,
-    				size_t type,
-				const SparseElementType& valuec,
-				size_t term,
-    				size_t dofs) const
+			size_t calcBond(SparseMatrixType &matrixBlock,
+    		                size_t i,
+			                size_t j,
+    		                size_t type,
+			                const SparseElementType& valuec,
+			                size_t term,
+    		                size_t dofs) const
 			{
 				int offset = modelHelper_.leftRightSuper().left().block().size();
 				PairType ops;
@@ -269,8 +268,6 @@ namespace Dmrg {
 					modelHelper_.fastOpProdInter(x,y,A,B,link);
 						
 				}
-				
-				
 			}
 			const LinkProductStructType& lps_;
 			std::vector<SparseElementType>& x_;

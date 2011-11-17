@@ -1,6 +1,6 @@
 // BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2011, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -90,13 +90,13 @@ namespace Dmrg {
 	class OperatorsImmm : public OperatorsBase<OperatorType,DmrgBasisType> {
 	public:
 		
-		OperatorsImmm(const DmrgBasisType* thisBasis) :
-			OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,DEGREES_OF_FREEDOM,NUMBER_OF_ORBITALS) 
+		OperatorsImmm(const DmrgBasisType* thisBasis)
+		: OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,DEGREES_OF_FREEDOM) 
 		{}
 
 		template<typename IoInputter>
-		OperatorsImmm(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
-			OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,DEGREES_OF_FREEDOM,NUMBER_OF_ORBITALS) 
+		OperatorsImmm(IoInputter& io,size_t level,const DmrgBasisType* thisBasis)
+		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,DEGREES_OF_FREEDOM) 
 		{}
 
 		const OperatorType& getOperator(int i,int sigma) const 
@@ -104,16 +104,14 @@ namespace Dmrg {
 			int k = sigma+i*DEGREES_OF_FREEDOM;
 			return this->getOperatorByIndex(k);
 		}
-		
+
 		//! 4 operators per site: c^dagger_{a up} c^dagger_{b up}
 		//! 			: c^dagger_{a down} c^dagger_{b down}
 		static size_t numberOfOperatorsPerSite()
 		{
 			return DEGREES_OF_FREEDOM;
 		}
-
 	}; //class OperatorsImmm
-	
 } // namespace Dmrg
 
 /*@}*/

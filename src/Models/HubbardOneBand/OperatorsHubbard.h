@@ -88,30 +88,31 @@ namespace Dmrg {
 	//! For this model the operators are c^_{i\sigma} 
 	template<typename OperatorType,typename DmrgBasisType>
 	class OperatorsHubbard : public OperatorsBase<OperatorType,DmrgBasisType> {
-		
-		static int const _dof_=2;
-	public:	
+
+		static const size_t _dof_ = 2;
+
+	public:
 		static int const NUMBER_OF_ORBITALS=1;
 		
-		OperatorsHubbard(const DmrgBasisType* thisBasis) : OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_) { }
-		
+		OperatorsHubbard(const DmrgBasisType* thisBasis)
+		: OperatorsBase<OperatorType,DmrgBasisType>(thisBasis)
+		{}
+
 		template<typename IoInputter>
-		OperatorsHubbard(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
-				OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_) { }
+		OperatorsHubbard(IoInputter& io,size_t level,const DmrgBasisType* thisBasis)
+		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis) { }
 		
 		const OperatorType& getOperator(int i,int sigma) const 
 		{ 
 			int k = sigma+i*_dof_;
 			return this->getOperatorByIndex(k);
 		}
-		
+
 		//! Two operators per site here: c^\dagger_up and c^\dagger_down
 		static size_t numberOfOperatorsPerSite()
 		{
 			return 2;
 		}
-	
-
 	}; //class OperatorsHubbard
 	
 } // namespace Dmrg

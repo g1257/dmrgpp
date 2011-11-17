@@ -229,9 +229,9 @@ namespace Dmrg {
 			return operators_.getReducedOperatorByIndex(i);
 		}
 
-		const OperatorType& getReducedOperatorByIndex(char modifier,int i) const
+		const OperatorType& getReducedOperatorByIndex(char modifier,int i,size_t dof) const
 		{
-			return operators_.getReducedOperatorByIndex(modifier,i);
+			return operators_.getReducedOperatorByIndex(modifier,i,dof);
 		}
 
 		const OperatorType& getOperator(int i,int sigma) const

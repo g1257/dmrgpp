@@ -96,13 +96,14 @@ namespace Dmrg {
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
 		OperatorsHeisenberg(const DmrgBasisType* thisBasis) : 
-				OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_) 
+				OperatorsBase<OperatorType,DmrgBasisType>(thisBasis) 
 		{}
 
 		template<typename IoInputter>
-		OperatorsHeisenberg(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
-				OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_) { }
-		
+		OperatorsHeisenberg(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) 
+		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis)
+		{ }
+
 		const OperatorType& getOperator(const std::string& label,int i) const 
 		{ 
 			if (label=="splus") return this->getOperatorByIndex(i*2); // Si^+
@@ -119,4 +120,4 @@ namespace Dmrg {
 } // namespace Dmrg
 
 /*@}*/
-#endif
+#endif //OPERATORS_HEISENBERG_H

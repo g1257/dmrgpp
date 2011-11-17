@@ -93,19 +93,17 @@ namespace Dmrg {
 	public:	
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
-		OperatorsImplementation(const DmrgBasisType* thisBasis,
-		                        size_t dof)
+		OperatorsImplementation(const DmrgBasisType* thisBasis)
 		: useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
-		  reducedOpImpl_(thisBasis,dof) 
+		  reducedOpImpl_(thisBasis) 
 		{}
 		
 		template<typename IoInputter>
 		OperatorsImplementation(IoInputter& io,
 		                        size_t level,
-		                        const DmrgBasisType* thisBasis,
-		                        size_t dof) 
+		                        const DmrgBasisType* thisBasis) 
 		: useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
-		  reducedOpImpl_(io,level,thisBasis,dof) 
+		  reducedOpImpl_(io,level,thisBasis) 
 		{
 			if (!useSu2Symmetry_)
 				io.read(operators_,"#OPERATORS");
@@ -144,10 +142,10 @@ namespace Dmrg {
 			return reducedOpImpl_.getReducedOperatorByIndex(i);
 		}
 
-		const OperatorType& getReducedOperatorByIndex(char modifier,int i) const 
+		const OperatorType& getReducedOperatorByIndex(char modifier,int i,size_t dof) const 
 		{
 			if (!useSu2Symmetry_) throw std::runtime_error("EERRRRRRRRRRRRRRRORRRRRRRRRRRR\n");
-			return reducedOpImpl_.getReducedOperatorByIndex(modifier,i);		
+			return reducedOpImpl_.getReducedOperatorByIndex(modifier,i,dof);		
 		}
 
 		size_t size() const 

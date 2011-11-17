@@ -117,22 +117,14 @@ namespace Dmrg {
 				const LeftRightSuperType& lrs,
 				size_t nOrbitals,
 				bool useReflection=false)
-		:
-			m_(m),
-			lrs_(lrs),
-			reflection_(useReflection),
-			numberOfOperators_(lrs_.left().numberOfOperatorsPerSite()),
-			nOrbitals_(nOrbitals),	
-			su2reduced_(m,lrs,nOrbitals)
+		: m_(m),
+		  lrs_(lrs),
+		  reflection_(useReflection),
+		  numberOfOperators_(lrs_.left().numberOfOperatorsPerSite()),
+		  su2reduced_(m,lrs,nOrbitals)
 		{}
 
 		static bool isSu2() { return true; }
-
-//		const BasisType& basis1() const { return basis1_; }
-//
-//		const BasisWithOperatorsType& basis2() const  { return basis2_; }
-//
-//		const BasisWithOperatorsType& basis3() const  { return basis3_; }
 
 		int size() const
 		{
@@ -149,8 +141,9 @@ namespace Dmrg {
 		const SparseMatrixType& getReducedOperator(char modifier,size_t i,size_t sigma,size_t type) const
 		{
 			size_t i0 = i*numberOfOperators_ + sigma;
-			if (type==System) return lrs_.left().getReducedOperatorByIndex(modifier,i0).data;
-			return lrs_.right().getReducedOperatorByIndex(modifier,i0).data;
+			size_t dof = numberOfOperators_;
+			if (type==System) return lrs_.left().getReducedOperatorByIndex(modifier,i0,dof).data;
+			return lrs_.right().getReducedOperatorByIndex(modifier,i0,dof).data;
 		}
 
 		//! //! Does matrixBlock= (AB), A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
@@ -471,7 +464,7 @@ namespace Dmrg {
 		int m_;
 		const LeftRightSuperType&  lrs_;
 		ReflectionSymmetryType reflection_;
-		size_t numberOfOperators_,nOrbitals_;
+		size_t numberOfOperators_;
 		Su2Reduced<LeftRightSuperType,ReflectionSymmetryType_,ConcurrencyType_>
 				su2reduced_;
 	};

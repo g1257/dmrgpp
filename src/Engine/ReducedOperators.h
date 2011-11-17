@@ -97,19 +97,17 @@ namespace Dmrg {
 		typedef Su2SymmetryGlobals<RealType> Su2SymmetryGlobalsType;
 
 	public:
-		ReducedOperators(const DmrgBasisType* thisBasis,size_t dof)
+		ReducedOperators(const DmrgBasisType* thisBasis)
 		: thisBasis_(thisBasis),
 		  useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
-		  dof_(dof),
 		  cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
 		{
 		}
 
 		template<typename IoInputter>
-		ReducedOperators(IoInputter& io,size_t level,const DmrgBasisType* thisBasis,size_t dof)
+		ReducedOperators(IoInputter& io,size_t level,const DmrgBasisType* thisBasis)
 		: thisBasis_(thisBasis),
 		  useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
-		  dof_(dof),
 		  cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
 		{
 			if (!useSu2Symmetry_) return;
@@ -128,13 +126,13 @@ namespace Dmrg {
 			return reducedOperators_[i];
 		}
 
-		const OperatorType& getReducedOperatorByIndex(char modifier,int i) const
+		const OperatorType& getReducedOperatorByIndex(char modifier,int i,size_t dof) const
 		{
-			size_t s = size_t(i/dof_);
-			size_t tmp = i%dof_;
-			size_t offset = reducedOperators_[s*dof_].su2Related.offset;
+			size_t s = size_t(i/dof);
+			size_t tmp = i%dof;
+			size_t offset = reducedOperators_[s*dof].su2Related.offset;
 			size_t g = tmp%offset;
-			size_t i0 = s*dof_+g;
+			size_t i0 = s*dof+g;
 
 			if (modifier=='N') return getReducedOperatorByIndex(i0);
 			else return getReducedOperatorByIndex(i0+offset);
@@ -357,7 +355,6 @@ namespace Dmrg {
 	private:
 		const DmrgBasisType* thisBasis_;
 		bool useSu2Symmetry_;
-		size_t dof_;
 		ClebschGordanType* cgObject_;
 		std::vector<size_t> momentumOfOperators_;
 		std::vector<size_t> basisrinverse_;
