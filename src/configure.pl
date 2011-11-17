@@ -212,7 +212,7 @@ observe.o:
 	\$(CXX) \$(CPPFLAGS) -c observe.cpp
 
 MakefileObserver.dep: observe.cpp
-	\$(CXX) \$(CPPFLAGS) -MM dmrg.cpp  > MakefileObserver.dep
+	\$(CXX) \$(CPPFLAGS) -MM observe.cpp  > MakefileObserver.dep
 
 clean:
 	rm -f core* \$(EXENAME) *.o
@@ -299,7 +299,7 @@ typedef PsimagLite::$concurrencyName<MatrixElementType> ConcurrencyType;
 typedef $parametersName<MatrixElementType> ParametersModelType;
 typedef Geometry<MatrixElementType> GeometryType;;
 typedef PsimagLite::IoSimple IoType;
-typedef typename IoType::In IoInputType;
+typedef IoType::In IoInputType;
 typedef ParametersDmrgSolver<MatrixElementType> ParametersDmrgSolverType;
 
 
@@ -307,7 +307,7 @@ template<typename ModelType,
          template<typename,typename> class InternalProductTemplate,
          typename TargettingType,
          typename MySparseMatrix>
-void mainLoop2(ParametersModelType& mp,
+void mainLoop3(ParametersModelType& mp,
               GeometryType& geometry,
               ParametersDmrgSolverType& dmrgSolverParams,
               ConcurrencyType& concurrency,
@@ -329,9 +329,56 @@ void mainLoop2(ParametersModelType& mp,
 	dmrgSolver.main(geometry);
 }
 
-template<template<typename,typename,typename,template<typename> class> class ModelTemplate,
-         template<typename,typename,typename> class ModelHelperTemplate,
+template<template<typename,typename,typename> class ModelHelperTemplate,
          template<typename,typename> class InternalProductTemplate,
+         template<typename> class VectorWithOffsetTemplate,
+         template<template<typename,typename,typename> class,
+                  template<typename,typename> class,
+                  template<typename,typename> class,
+                  typename,typename,typename,
+                  template<typename> class> class TargettingTemplate,
+         typename MySparseMatrix>
+void mainLoop2(ParametersModelType& mp,
+              GeometryType& geometry,
+              ParametersDmrgSolverType& dmrgSolverParams,
+              ConcurrencyType& concurrency,
+              IoInputType& io)
+{
+	typedef ReflectionSymmetryEmpty<MatrixElementType,MySparseMatrix> ReflectionSymmetryType;
+	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
+	typedef Basis<MatrixElementType,MySparseMatrix> BasisType;
+	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
+	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
+	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
+	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
+	typedef $modelName<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
+	
+	if (dmrgSolverParams.options.find("ChebyshevSolver")!=std::string::npos) {
+			typedef TargettingTemplate<PsimagLite::ChebyshevSolver,
+			                           InternalProductTemplate,
+			                           WaveFunctionTransfFactory,
+			                           ModelType,
+			                           ConcurrencyType,
+			                           IoType,
+			                           VectorWithOffsetTemplate
+			                           > TargettingType;
+			mainLoop3<ModelType,InternalProductTemplate,TargettingType,MySparseMatrix>
+			(mp,geometry,dmrgSolverParams,concurrency,io);
+	} else {
+		typedef TargettingTemplate<PsimagLite::LanczosSolver,
+			                           InternalProductTemplate,
+			                           WaveFunctionTransfFactory,
+			                           ModelType,
+			                           ConcurrencyType,
+			                           IoType,
+			                           VectorWithOffsetTemplate
+			                           > TargettingType;
+			mainLoop3<ModelType,InternalProductTemplate,TargettingType,MySparseMatrix>
+			(mp,geometry,dmrgSolverParams,concurrency,io);
+	}
+}
+
+template<template<typename,typename,typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
                   template<typename,typename> class,
@@ -345,37 +392,18 @@ void mainLoop(ParametersModelType& mp,
               ConcurrencyType& concurrency,
               IoInputType& io)
 {
-	typedef ReflectionSymmetryEmpty<MatrixElementType,MySparseMatrix> ReflectionSymmetryType;
-	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
-	typedef Basis<MatrixElementType,MySparseMatrix> BasisType;
-	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
-	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
-	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
-	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
-	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
-	
-	if (dmrgSolverParams.options.find("ChebyshevSolver")!=std::string::npos) {
-			typedef TargettingTemplate<PsimagLite::ChebyshevSolver,
-			                           InternalProductTemplate,
-			                           WaveFunctionTransfFactory,
-			                           ModelType,
-			                           ConcurrencyType,
-			                           IoType,
-			                           VectorWithOffsetTemplate
-			                           > TargettingType;
-			mainLoop2<ModelType,InternalProductTemplate,TargettingType,MySparseMatrix>
-			(mp,geometry,dmrgSolverParams,concurrency,io);
+	if (dmrgSolverParams.options.find("InternalProductStored")!=std::string::npos) {
+		mainLoop2<ModelHelperTemplate,
+		         InternalProductStored,
+		         VectorWithOffsetTemplate,
+		         TargettingTemplate,
+		         MySparseMatrix>(mp,geometry,dmrgSolverParams,concurrency,io);
 	} else {
-		typedef TargettingTemplate<PsimagLite::LanczosSolver,
-			                           InternalProductTemplate,
-			                           WaveFunctionTransfFactory,
-			                           ModelType,
-			                           ConcurrencyType,
-			                           IoType,
-			                           VectorWithOffsetTemplate
-			                           > TargettingType;
-			mainLoop2<ModelType,InternalProductTemplate,TargettingType,MySparseMatrix>
-			(mp,geometry,dmrgSolverParams,concurrency,io);
+ 		mainLoop2<ModelHelperTemplate,
+		         InternalProductOnTheFly,
+		         VectorWithOffsetTemplate,
+		         TargettingTemplate,
+		         MySparseMatrix>(mp,geometry,dmrgSolverParams,concurrency,io);
 	}
 }
 
@@ -409,45 +437,45 @@ int main(int argc,char *argv[])
  		" supports only GroundStateTargetting for now (sorry!)\\n");
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
-			mainLoop<$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffsets,GroundStateTargetting,
+			mainLoop<ModelHelperSu2,VectorWithOffsets,GroundStateTargetting,
 				MySparseMatrixReal>(mp,geometry,dmrgSolverParams,concurrency,io);
 		} else {
-			mainLoop<$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
+			mainLoop<ModelHelperSu2,VectorWithOffset,GroundStateTargetting,
 				MySparseMatrixReal>(mp,geometry,dmrgSolverParams,concurrency,io);
 		}
 		return 0;
 	}
 	if (targetting=="TimeStepTargetting") { 
-		mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,TimeStepTargetting,
+		mainLoop<ModelHelperLocal,VectorWithOffsets,TimeStepTargetting,
 			MySparseMatrixComplex>(mp,geometry,dmrgSolverParams,concurrency,io);
 			return 0;
 	}
 	if (targetting=="DynamicTargetting") {
-		mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,DynamicTargetting,
+		mainLoop<ModelHelperLocal,VectorWithOffsets,DynamicTargetting,
 			MySparseMatrixReal>(mp,geometry,dmrgSolverParams,concurrency,io);
 			return 0;
 	}
 	if (targetting=="AdaptiveDynamicTargetting") {
-		mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,AdaptiveDynamicTargetting,
+		mainLoop<ModelHelperLocal,VectorWithOffsets,AdaptiveDynamicTargetting,
 			MySparseMatrixReal>(mp,geometry,dmrgSolverParams,concurrency,io);
 			return 0;
 	}
 	if (targetting=="CorrectionVectorTargetting") {
-		mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,CorrectionVectorTargetting,
+		mainLoop<ModelHelperLocal,VectorWithOffsets,CorrectionVectorTargetting,
 			MySparseMatrixReal>(mp,geometry,dmrgSolverParams,concurrency,io);
 			return 0;
 	}
 	if (targetting=="CorrectionTargetting") {
-		mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,CorrectionTargetting,
+		mainLoop<ModelHelperLocal,VectorWithOffsets,CorrectionTargetting,
 			MySparseMatrixReal>(mp,geometry,dmrgSolverParams,concurrency,io);
 			return 0;
 	}
 	if (targetting=="MettsTargetting") {
-		mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,MettsTargetting,
+		mainLoop<ModelHelperLocal,VectorWithOffset,MettsTargetting,
 			MySparseMatrixReal>(mp,geometry,dmrgSolverParams,concurrency,io);
 			return 0;
 	}
-	mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
+	mainLoop<ModelHelperLocal,VectorWithOffset,GroundStateTargetting,
 		MySparseMatrixReal>(mp,geometry,dmrgSolverParams,concurrency,io);
 }
 
@@ -456,8 +484,6 @@ EOF
 	print STDERR "File dmrg.cpp has been written\n";
 
 }
-
-
 
 sub getLicense
 {
@@ -484,10 +510,6 @@ sub createObserverDriver
 	my $parametersName = getParametersName();
 	my $modelName = getModelName();
 	my $operatorsName = getOperatorsName();
-	#my $chooseRealOrComplexForObservables = "typedef RealType FieldType;\n";
-	#if ($targetting=~/complex/i) {
-	#	$chooseRealOrComplexForObservables = "typedef ComplexType FieldType;\n";
-	#}
 
 	system("cp observe.cpp observe.bak") if (-e "observe.cpp");	
 	open(OBSOUT,">$observerDriver") or die "Cannot open file $observerDriver for writing: $!\n";
@@ -623,17 +645,14 @@ EOF
 	return observerLib.endOfData();
 }
 
-	template<template<typename,typename,typename,template<typename> class> class ModelTemplate,
-	         template<typename,typename,typename> class ModelHelperTemplate,
-	         template<typename,typename> class InternalProductTemplate,
-	         template<typename> class VectorWithOffsetTemplate,
-	         template<template<typename,typename,typename> class,
-	                  template<typename,typename> class,
-	                  template<typename,typename> class,
-	                  typename,typename,typename,
-	         template<typename> class> class TargettingTemplate,
-	         typename MySparseMatrix
->
+template<template<typename,typename,typename> class ModelHelperTemplate,
+         template<typename> class VectorWithOffsetTemplate,
+         template<template<typename,typename,typename> class,
+                  template<typename,typename> class,
+                  template<typename,typename> class,
+                  typename,typename,typename,
+         template<typename> class> class TargettingTemplate,
+         typename MySparseMatrix>
 void mainLoop(ParametersModelType& mp,
               GeometryType& geometry,
               const std::string& targetting,
@@ -650,17 +669,16 @@ void mainLoop(ParametersModelType& mp,
 	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
-	typedef ModelTemplate<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
+	typedef $modelName<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
 	typedef TargettingTemplate<PsimagLite::LanczosSolver,
-	                           InternalProductTemplate,
+	                           InternalProductOnTheFly,
 	                           WaveFunctionTransfFactory,
 	                           ModelType,
 	                           ConcurrencyType,
-				   IoInputType,
-	                           VectorWithOffsetTemplate
-	                          > TargettingType;
+	                           IoInputType,
+	                           VectorWithOffsetTemplate> TargettingType;
 
-	typedef DmrgSolver<InternalProductTemplate,TargettingType> SolverType;
+	typedef DmrgSolver<InternalProductOnTheFly,TargettingType> SolverType;
 	
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	
@@ -727,49 +745,41 @@ int main(int argc,char *argv[])
 	
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
-			mainLoop<$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffsets,GroundStateTargetting,
-				MySparseMatrixReal>
-				(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+			mainLoop<ModelHelperSu2,VectorWithOffsets,GroundStateTargetting,MySparseMatrixReal>
+			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
 		} else {
-			mainLoop<$modelName,ModelHelperSu2,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
-				MySparseMatrixReal>
-				(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+			mainLoop<ModelHelperSu2,VectorWithOffset,GroundStateTargetting,MySparseMatrixReal>
+			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
 		}
 		return 0;
 	}
 	if (targetting=="TimeStepTargetting") { 
-		mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,TimeStepTargetting,
-			MySparseMatrixComplex>
-			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+		mainLoop<ModelHelperLocal,VectorWithOffsets,TimeStepTargetting,MySparseMatrixComplex>
+		(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
 		return 0;
 	}
 	if (targetting=="DynamicTargetting") {
-		mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,DynamicTargetting,
-			MySparseMatrixReal>
-			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+		mainLoop<ModelHelperLocal,VectorWithOffsets,DynamicTargetting,MySparseMatrixReal>
+		(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
 		return 0;
 	}
 	if (targetting=="AdaptiveDynamicTargetting") {
-		mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,AdaptiveDynamicTargetting,
-			MySparseMatrixReal>
-			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+		mainLoop<ModelHelperLocal,VectorWithOffsets,AdaptiveDynamicTargetting,MySparseMatrixReal>
+		(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
 		return 0;
 	}
 	if (targetting=="CorrectionTargetting") {
-		mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffsets,CorrectionTargetting,
-			MySparseMatrixReal>
-			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+		mainLoop<ModelHelperLocal,VectorWithOffsets,CorrectionTargetting,MySparseMatrixReal>
+		(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
 		return 0;
 	}
 	if (targetting=="MettsTargetting") { // experimental, do not use
-		mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,MettsTargetting,
-			MySparseMatrixReal>
-			(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+		mainLoop<ModelHelperLocal,VectorWithOffset,MettsTargetting,MySparseMatrixReal>
+		(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
 		return 0;
 	}
-	mainLoop<$modelName,ModelHelperLocal,InternalProductOnTheFly,VectorWithOffset,GroundStateTargetting,
-		MySparseMatrixReal>
-		(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
+	mainLoop<ModelHelperLocal,VectorWithOffset,GroundStateTargetting,MySparseMatrixReal>
+	(mp,geometry,targetting,concurrency,io,dmrgSolverParams.filename,options);
 } // main
 
 EOF

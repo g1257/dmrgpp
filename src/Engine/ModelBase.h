@@ -136,7 +136,7 @@ namespace Dmrg {
 				SparseMatrixType &matrix,
 				const LeftRightSuperType& lrs,
 				size_t nOrbitals) const
-			{	
+			{
 				int bs,offset;
 				SparseMatrixType matrixBlock;
 
