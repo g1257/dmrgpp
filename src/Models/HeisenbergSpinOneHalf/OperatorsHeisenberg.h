@@ -89,20 +89,19 @@ namespace Dmrg {
 	//! For this model the operators are Si^+ and Si^z 
 	template<typename OperatorType,typename DmrgBasisType>
 	class OperatorsHeisenberg : public OperatorsBase<OperatorType,DmrgBasisType> {
-	public:	
-	
+	public:
 		static int const NUMBER_OF_ORBITALS=1;
 		static int const _dof_=2;
 		//static int fermionSign()  { return 1; } // S+, Sz commute on different sites
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-		
+
 		OperatorsHeisenberg(const DmrgBasisType* thisBasis) : 
-				OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_,NUMBER_OF_ORBITALS) 
+				OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_) 
 		{}
-		
+
 		template<typename IoInputter>
 		OperatorsHeisenberg(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
-				OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_,NUMBER_OF_ORBITALS) { }
+				OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_) { }
 		
 		const OperatorType& getOperator(const std::string& label,int i) const 
 		{ 
@@ -110,19 +109,13 @@ namespace Dmrg {
 			if (label=="sz") return this->getOperatorByIndex(i*2+1); // Si^z
 			throw std::runtime_error("OperatorsHeisenberg: getOperator incorrect label\n");
 		}
-		
+
 		//! Two operators per site here S+ and S^z
 		static size_t numberOfOperatorsPerSite()
 		{
 			return 2;
 		}
-	
-		
-			
 	}; //class OperatorsHeisenberg
-	
-	
-
 } // namespace Dmrg
 
 /*@}*/

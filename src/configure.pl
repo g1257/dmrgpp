@@ -129,7 +129,7 @@ sub askQuestions
 	$modelFullName="FeAsBasedScExtended" if ($model=~/feasbasedscextended/i);
 	$modelFullName="ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
 	
-	$modelLocation="";
+	$modelLocation="-IModels/$model";
 	$modelLocation=" -IModels/HubbardOneBand" if ($model=~/hubbard/i);
 	$modelLocation.=" -IModels/HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i or $model=~/feasbasedscextended/i); 
 	$modelLocation.=" -IModels/FeAsModel" if ($model=~/febasedsc/i || $model=~/feasbasedscextended/i);
@@ -294,7 +294,6 @@ typedef  PsimagLite::CrsMatrix<MatrixElementType> MySparseMatrixReal;
 
 using namespace Dmrg;
 
-typedef double Field;
 typedef PsimagLite::$concurrencyName<MatrixElementType> ConcurrencyType;
 typedef $parametersName<MatrixElementType> ParametersModelType;
 typedef Geometry<MatrixElementType> GeometryType;;
@@ -806,7 +805,7 @@ sub isAMac
 
 sub getParametersName
 {
-	my $parametersName="UNKNOWN";
+	my $parametersName="Parameters$model";
 	if ($model=~/hubbard/i) {
 		$parametersName = "ParametersModelHubbard";
 	} elsif ($model=~/heisenberg/i) {
@@ -835,7 +834,7 @@ sub getConcurrencyName()
 
 sub getModelName()
 {
-	my $modelName = "UNKNOWN";
+	my $modelName = $model;
 
 	if ($model=~/heisenberg/i) {
 		$modelName="ModelHeisenberg";
@@ -855,7 +854,7 @@ sub getModelName()
 
 sub getOperatorsName()
 {
-	my $operatorsName = "UNKNOWN";
+	my $operatorsName = "Operators$model";
 
 	if ($model=~/extendedhubbard1orb/i) {
 		$operatorsName = "OpsExtendedHubbard1Orb";

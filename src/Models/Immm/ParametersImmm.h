@@ -74,47 +74,53 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file OperatorsHubbard.h
+/*! \file ParametersImmm.h
  *
- *  
+ *  Contains the parameters for the Immm model and function to read them from a JSON file
  *
  */
-#ifndef OPERATORS_HUBBARD_H
-#define OPERATORS_HUBBARD_H
-
-#include "OperatorsBase.h"
+#ifndef PARAMETERS_IMMM_H
+#define PARAMETERS_IMMM_H
 
 namespace Dmrg {
-	//! For this model the operators are c^_{i\sigma} 
-	template<typename OperatorType,typename DmrgBasisType>
-	class OperatorsHubbard : public OperatorsBase<OperatorType,DmrgBasisType> {
+	template<typename Field>
+	struct ParametersImmm {
+		// no connections here please!!
+		// connections are handled by the geometry
 		
-		static int const _dof_=2;
-	public:	
-		static int const NUMBER_OF_ORBITALS=1;
-		
-		OperatorsHubbard(const DmrgBasisType* thisBasis) : OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_) { }
-		
-		template<typename IoInputter>
-		OperatorsHubbard(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
-				OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_) { }
-		
-		const OperatorType& getOperator(int i,int sigma) const 
-		{ 
-			int k = sigma+i*_dof_;
-			return this->getOperatorByIndex(k);
-		}
-		
-		//! Two operators per site here: c^\dagger_up and c^\dagger_down
-		static size_t numberOfOperatorsPerSite()
+		template<typename IoInputType>
+		ParametersImmm(IoInputType& io) 
 		{
-			return 2;
+	
+			io.read(hubbardU,"hubbardU");
+			io.read(potentialV,"potentialV");
+			//io.readline(density,"density=");
 		}
+		
+		// Hubbard U values (one for each site)
+		std::vector<Field> hubbardU; 
+		// Onsite potential values, one for each site
+		std::vector<Field> potentialV;
+		// target number of electrons  in the system
+		int nOfElectrons;
+		// target density
+		//Field density;
+	};
 	
-
-	}; //class OperatorsHubbard
-	
+	//! Function that prints model parameters to stream os
+	template<typename FieldType>
+	std::ostream& operator<<(std::ostream &os,const ParametersImmm<FieldType>& parameters)
+	{
+		//os<<"parameters.density="<<parameters.density<<"\n";
+		os<<"hubbardU\n";
+		os<<parameters.hubbardU;
+		//utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
+		os<<"potentialV\n";
+		os<<parameters.potentialV;
+		//utils::vectorPrint(parameters.potentialV,"potentialV",os);
+		return os;
+	}
 } // namespace Dmrg
 
 /*@}*/
-#endif
+#endif // PARAMETERS_IMMM_H

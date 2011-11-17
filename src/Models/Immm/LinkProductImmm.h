@@ -74,47 +74,91 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file OperatorsHubbard.h
+/*! \file LinkProductImmm.h
  *
- *  
+ *  A class to represent product of operators that form a link or bond for this model
  *
  */
-#ifndef OPERATORS_HUBBARD_H
-#define OPERATORS_HUBBARD_H
-
-#include "OperatorsBase.h"
+#ifndef LINK_PRODUCT_IMMM_H
+#define LINK_PRODUCT_IMMM_H
 
 namespace Dmrg {
-	//! For this model the operators are c^_{i\sigma} 
-	template<typename OperatorType,typename DmrgBasisType>
-	class OperatorsHubbard : public OperatorsBase<OperatorType,DmrgBasisType> {
-		
-		static int const _dof_=2;
-	public:	
-		static int const NUMBER_OF_ORBITALS=1;
-		
-		OperatorsHubbard(const DmrgBasisType* thisBasis) : OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_) { }
-		
-		template<typename IoInputter>
-		OperatorsHubbard(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
-				OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_) { }
-		
-		const OperatorType& getOperator(int i,int sigma) const 
-		{ 
-			int k = sigma+i*_dof_;
-			return this->getOperatorByIndex(k);
-		}
-		
-		//! Two operators per site here: c^\dagger_up and c^\dagger_down
-		static size_t numberOfOperatorsPerSite()
-		{
-			return 2;
-		}
 	
+	template<typename ModelHelperType>
+	class LinkProductImmm {
+			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+			typedef typename SparseMatrixType::value_type SparseElementType;
+			typedef std::pair<size_t,size_t> PairType;
+			
+		public:
+			typedef typename ModelHelperType::RealType RealType;
+			
+			//! There are 4 different orbitals
+			//! and 2 spins. Spin is diagonal so we end up with 8 possiblities
+			//! a up a up, a up b up, b up a up, b up, b up,
+			//! and similarly for spin down.
+			static size_t dofs(size_t term)
+			{ 
+				throw std::runtime_error("Need to think this long enough!!\n");
+				//return 8;
+			}
+			
+			// has only dependence on orbital
+			static PairType connectorDofs(size_t term,size_t dofs)
+			{
+				throw std::runtime_error("Need to think this long enough!!\n");
+// 				size_t spin = dofs/4;
+// 				size_t xtmp = (spin==0) ? 0 : 4;
+// 				xtmp = dofs - xtmp;
+// 				size_t orb1 = xtmp/2;
+// 				size_t orb2 = (xtmp & 1);
+// 				return PairType(orb1,orb2); // has only dependence on orbital
+			}
+			
+			static void setLinkData(
+					size_t term,
+					size_t dofs,
+     					bool isSu2,
+					size_t& fermionOrBoson,
+					PairType& ops,
+     					std::pair<char,char>& mods,
+					size_t& angularMomentum,
+     					RealType& angularFactor,
+					size_t& category)
+			{
+				throw std::runtime_error("Need to think this long enough!!\n");
+// 				fermionOrBoson = ProgramGlobals::FERMION;
+// 				size_t spin = getSpin(dofs);
+// 				ops = operatorDofs(dofs);
+// 				angularFactor = 1;
+// 				if (spin==1) angularFactor = -1;
+// 				angularMomentum = 1;
+// 				category = spin;
+			}
+			
+			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2)
+			{
+			}
 
-	}; //class OperatorsHubbard
-	
+		private:
+			// spin is diagonal
+// 			static std::pair<size_t,size_t> operatorDofs(size_t dofs)
+// 			{
+// 				size_t spin = dofs/4;
+// 				size_t xtmp = (spin==0) ? 0 : 4;
+// 				xtmp = dofs - xtmp;
+// 				size_t orb1 = xtmp/2;
+// 				size_t orb2 = (xtmp & 1);
+// 				size_t op1 = orb1 + spin*2;
+// 				size_t op2 = orb2 + spin*2;
+// 				return std::pair<size_t,size_t>(op1,op2);
+// 			}
+// 			
+// 			static size_t getSpin(size_t dofs)
+// 			{
+// 				return dofs/4;
+// 			}
+	}; // class LinkProductImmm
 } // namespace Dmrg
-
 /*@}*/
-#endif
+#endif // LINK_PRODUCT_IMMM_H

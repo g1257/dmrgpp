@@ -94,28 +94,26 @@ namespace Dmrg {
 		static int const NUMBER_OF_ORBITALS=1;
 		
 		OpsExtendedHubbard1Orb(const DmrgBasisType* thisBasis) 
-		: OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_,NUMBER_OF_ORBITALS)
+		: OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_)
 		{}
-		
+
 		template<typename IoInputter>
-		OpsExtendedHubbard1Orb(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
-				OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_,NUMBER_OF_ORBITALS) { }
-		
+		OpsExtendedHubbard1Orb(IoInputter& io,size_t level,const DmrgBasisType* thisBasis)
+		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_)
+		{ }
+
 		const OperatorType& getOperator(int i,int sigma) const 
 		{ 
 			int k = sigma+i*_dof_;
 			return this->getOperatorByIndex(k);
 		}
-		
+
 		//! Two operators per site here: c^\dagger_up and c^\dagger_down
 		static size_t numberOfOperatorsPerSite()
 		{
 			return 3;
 		}
-	
-
 	}; //class OpsExtendedHubbard1Orb
-	
 } // namespace Dmrg
 
 /*@}*/

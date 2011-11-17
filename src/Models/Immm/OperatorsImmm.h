@@ -74,47 +74,47 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file OperatorsHubbard.h
+/*! \file OperatorsImmm.h
  *
- *  
+ *
  *
  */
-#ifndef OPERATORS_HUBBARD_H
-#define OPERATORS_HUBBARD_H
+#ifndef OPERATORS_IMMM_H
+#define OPERATORS_IMMM_H
 
 #include "OperatorsBase.h"
 
 namespace Dmrg {
 	//! For this model the operators are c^_{i\sigma} 
 	template<typename OperatorType,typename DmrgBasisType>
-	class OperatorsHubbard : public OperatorsBase<OperatorType,DmrgBasisType> {
+	class OperatorsImmm : public OperatorsBase<OperatorType,DmrgBasisType> {
+	public:
 		
-		static int const _dof_=2;
-	public:	
-		static int const NUMBER_OF_ORBITALS=1;
-		
-		OperatorsHubbard(const DmrgBasisType* thisBasis) : OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,_dof_) { }
-		
+		OperatorsImmm(const DmrgBasisType* thisBasis) :
+			OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,DEGREES_OF_FREEDOM,NUMBER_OF_ORBITALS) 
+		{}
+
 		template<typename IoInputter>
-		OperatorsHubbard(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
-				OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,_dof_) { }
-		
+		OperatorsImmm(IoInputter& io,size_t level,const DmrgBasisType* thisBasis) : 
+			OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,DEGREES_OF_FREEDOM,NUMBER_OF_ORBITALS) 
+		{}
+
 		const OperatorType& getOperator(int i,int sigma) const 
 		{ 
-			int k = sigma+i*_dof_;
+			int k = sigma+i*DEGREES_OF_FREEDOM;
 			return this->getOperatorByIndex(k);
 		}
 		
-		//! Two operators per site here: c^\dagger_up and c^\dagger_down
+		//! 4 operators per site: c^dagger_{a up} c^dagger_{b up}
+		//! 			: c^dagger_{a down} c^dagger_{b down}
 		static size_t numberOfOperatorsPerSite()
 		{
-			return 2;
+			return DEGREES_OF_FREEDOM;
 		}
-	
 
-	}; //class OperatorsHubbard
+	}; //class OperatorsImmm
 	
 } // namespace Dmrg
 
 /*@}*/
-#endif
+#endif // OPERATORS_IMMM_H

@@ -94,16 +94,18 @@ namespace Dmrg {
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
 		OperatorsImplementation(const DmrgBasisType* thisBasis,
-				       size_t dof,size_t nOrbitals) :
-			useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),reducedOpImpl_(thisBasis,dof,nOrbitals) 
-		{
-		}
+		                        size_t dof)
+		: useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
+		  reducedOpImpl_(thisBasis,dof) 
+		{}
 		
 		template<typename IoInputter>
-		OperatorsImplementation(IoInputter& io,size_t level,const DmrgBasisType* thisBasis,
-					size_t dof,size_t orbitals) 
-			: useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
-			  reducedOpImpl_(io,level,thisBasis,dof,orbitals) 
+		OperatorsImplementation(IoInputter& io,
+		                        size_t level,
+		                        const DmrgBasisType* thisBasis,
+		                        size_t dof) 
+		: useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
+		  reducedOpImpl_(io,level,thisBasis,dof) 
 		{
 			if (!useSu2Symmetry_)
 				io.read(operators_,"#OPERATORS");
@@ -162,12 +164,11 @@ namespace Dmrg {
 		{
 			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
 			size_t total = size();
-			size_t dof = total / thisBasis->block().size();
 			
 			PsimagLite::Range<ConcurrencyType> range(0,total,concurrency);
 			for (;!range.end();range.next()) {
 				size_t k = range.index();
-				if (isExcluded(k,thisBasis,dof,startEnd)) {
+				if (isExcluded(k,thisBasis,startEnd)) {
 					operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
 					continue;
 				}
@@ -189,7 +190,6 @@ namespace Dmrg {
 		
 		bool isExcluded(size_t k,
 		               const DmrgBasisType* thisBasis,
-		               size_t dof,
 		               const std::pair<size_t,size_t>& startEnd)
 		{
 			if (!EXCLUDE) return false; // <-- this is the safest answer

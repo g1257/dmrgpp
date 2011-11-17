@@ -97,17 +97,19 @@ namespace Dmrg {
 		typedef Su2SymmetryGlobals<RealType> Su2SymmetryGlobalsType;
 
 	public:
-		ReducedOperators(const DmrgBasisType* thisBasis,size_t dof,size_t orbitals)
-		: thisBasis_(thisBasis),useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
-		  dof_(dof),nOrbitals_(orbitals),
+		ReducedOperators(const DmrgBasisType* thisBasis,size_t dof)
+		: thisBasis_(thisBasis),
+		  useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
+		  dof_(dof),
 		  cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
 		{
 		}
 
 		template<typename IoInputter>
-		ReducedOperators(IoInputter& io,size_t level,const DmrgBasisType* thisBasis,size_t dof,size_t orbitals)
-		: thisBasis_(thisBasis),useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
-		  dof_(dof),nOrbitals_(orbitals),
+		ReducedOperators(IoInputter& io,size_t level,const DmrgBasisType* thisBasis,size_t dof)
+		: thisBasis_(thisBasis),
+		  useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
+		  dof_(dof),
 		  cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
 		{
 			if (!useSu2Symmetry_) return;
@@ -356,7 +358,6 @@ namespace Dmrg {
 		const DmrgBasisType* thisBasis_;
 		bool useSu2Symmetry_;
 		size_t dof_;
-		size_t nOrbitals_;
 		ClebschGordanType* cgObject_;
 		std::vector<size_t> momentumOfOperators_;
 		std::vector<size_t> basisrinverse_;

@@ -92,18 +92,15 @@ namespace Dmrg {
 		static int const NUMBER_OF_ORBITALS=2;
 		static int const DEGREES_OF_FREEDOM=2*NUMBER_OF_ORBITALS;
 		
-		OperatorsFeAsExtended(const DmrgBasisType* thisBasis) :
-			OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,
-					DEGREES_OF_FREEDOM,NUMBER_OF_ORBITALS)
+		OperatorsFeAsExtended(const DmrgBasisType* thisBasis) 
+		: OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,DEGREES_OF_FREEDOM)
 		{}
 
 		template<typename IoInputter>
-		OperatorsFeAsExtended(
-				IoInputter& io,
-				size_t level,
-				const DmrgBasisType* thisBasis)
-		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,
-			thisBasis,DEGREES_OF_FREEDOM,NUMBER_OF_ORBITALS)
+		OperatorsFeAsExtended(IoInputter& io,
+		                      size_t level,
+		                      const DmrgBasisType* thisBasis)
+		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,DEGREES_OF_FREEDOM)
 		{}
 
 		const OperatorType& getOperator(int i,int sigma) const 
@@ -111,7 +108,7 @@ namespace Dmrg {
 			int k = sigma+i*DEGREES_OF_FREEDOM;
 			return this->getOperatorByIndex(k);
 		}
-		
+
 		//! 4 operators per site: c^dagger_{a up} c^dagger_{b up}
 		//! 			: c^dagger_{a down} c^dagger_{b down}
 		//! Plus 2 more:
@@ -121,9 +118,7 @@ namespace Dmrg {
 		{
 			return DEGREES_OF_FREEDOM + 2;
 		}
-
 	}; //class OperatorsFeAsExtended
-	
 } // namespace Dmrg
 
 /*@}*/
