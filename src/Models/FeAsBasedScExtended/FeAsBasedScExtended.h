@@ -134,7 +134,7 @@ namespace Dmrg {
 
 		size_t orbitals() const { return modelFeAs_.orbitals(); }
 
-		size_t hilbertSize(size_t site) const { return modelFeAs_.hilbertSize(); }
+		size_t hilbertSize(size_t site) const { return modelFeAs_.hilbertSize(site); }
 
 		void print(std::ostream& os) const { modelFeAs_.print(os); }
 
@@ -221,9 +221,9 @@ namespace Dmrg {
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 		void setNaturalBasis(std::vector<HilbertState>  &basis,
 		                     std::vector<size_t>& q,
-		                     int n) const
+		                     const std::vector<size_t>& block) const
 		{
-			modelFeAs_.setNaturalBasis(basis,q,n);
+			modelFeAs_.setNaturalBasis(basis,q,block);
 		}
 		
 		void findElectrons(

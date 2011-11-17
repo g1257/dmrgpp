@@ -151,7 +151,7 @@ namespace Dmrg {
 		{
 			std::vector<HilbertState> natBasis;
 			std::vector<size_t> qvector;
-			setNaturalBasis(natBasis,qvector,block.size());			
+			setNaturalBasis(natBasis,qvector,block);			
 
 			setOperatorMatrices(creationMatrix,block);
 
@@ -171,7 +171,7 @@ namespace Dmrg {
 			std::vector<HilbertState> natBasis;
 			SparseMatrixType tmpMatrix;
 			std::vector<size_t> qvector;
-			setNaturalBasis(natBasis,qvector,block.size());
+			setNaturalBasis(natBasis,qvector,block);
 
 			//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 			creationMatrix.clear();
@@ -250,17 +250,18 @@ namespace Dmrg {
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 		void setNaturalBasis(std::vector<HilbertState>  &basis,
 		                     std::vector<size_t>& q,
-		                     int n) const
+		                     const std::vector<size_t>& block) const
 		{
+			assert(block.size()==1);
 			HilbertState a=0;
-			int sitesTimesDof=n*DEGREES_OF_FREEDOM;
+			int sitesTimesDof=DEGREES_OF_FREEDOM;
 			HilbertState total = (1<<sitesTimesDof);
 
 			std::vector<HilbertState>  basisTmp;
 			for (a=0;a<total;a++) basisTmp.push_back(a);
 
 			// reorder the natural basis (needed for MULTIPLE BANDS)
-			findQuantumNumbers(q,basisTmp,n);
+			findQuantumNumbers(q,basisTmp,block.size());
 			std::vector<size_t> iperm(q.size());
 			Sort<std::vector<size_t> > sort;
 			sort.sort(q,iperm);

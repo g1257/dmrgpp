@@ -158,7 +158,7 @@ namespace Dmrg {
 			std::vector<HilbertStateType> natBasis;
 			
 			std::vector<size_t> qvector;
-			setNaturalBasis(natBasis,qvector,block.size());
+			setNaturalBasis(natBasis,qvector,block);
 			
 			setOperatorMatrices(operatorMatrices,block);
 			
@@ -174,7 +174,7 @@ namespace Dmrg {
 			SparseMatrixType tmpMatrix;
 			
 			std::vector<size_t> qvector;
-			setNaturalBasis(natBasis,qvector,block.size());
+			setNaturalBasis(natBasis,qvector,block);
 
 			operatorMatrices.clear();
 			for (size_t i=0;i<block.size();i++) {
@@ -229,15 +229,14 @@ namespace Dmrg {
 		//! find all states in the natural basis for a block of n sites
 		void setNaturalBasis(std::vector<HilbertStateType>  &basis,
 		                     std::vector<size_t>& q,
-		                     int n) const
+		                     const std::vector<size_t>& block) const
 		{
-			if (n!=1) throw std::runtime_error(
-				"setNaturalBasis: implemented only for blocks of size=1\n");
+			assert(block.size()==1);
 			
 			basis.push_back(1);
 			basis.push_back(2);
 			BasisDataType qq;
-			setSymmetryRelated(qq,basis,n);
+			setSymmetryRelated(qq,basis,block.size());
 			MyBasis::findQuantumNumbers(q,qq);
 		}
 		
