@@ -96,13 +96,13 @@ namespace Dmrg {
 		{
 			io.rewind();
 			io.readline(a,"CorrectionA=");
-			typename ModelType::HilbertBasisType basis;
-			std::vector<size_t> q;
-			model.setNaturalBasis(basis,q,1);
-			model.findElectrons(electrons,basis);
+// 			typename ModelType::HilbertBasisType basis;
+// 			std::vector<size_t> q;
+// 			model.setNaturalBasis(basis,q,1);
+// 			model.findElectrons(electrons,basis);
 		}
 		RealType a;
-		std::vector<size_t> electrons;
+// 		std::vector<size_t> electrons;
 	}; // class CorrectionParams
 	
 	template<typename ModelType>

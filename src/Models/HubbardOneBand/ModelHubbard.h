@@ -152,7 +152,7 @@ namespace Dmrg {
 		{
 			HilbertBasisType natBasis;
 			std::vector<size_t> quantumNumbs;
-			setNaturalBasis(natBasis,quantumNumbs,block.size());
+			setNaturalBasis(natBasis,quantumNumbs,block);
 
 			setOperatorMatrices(creationMatrix,block);
 
@@ -169,7 +169,7 @@ namespace Dmrg {
 			std::vector<typename HilbertSpaceHubbardType::HilbertState> natBasis;
 			SparseMatrixType tmpMatrix;
 			std::vector<size_t> quantumNumbs;
-			setNaturalBasis(natBasis,quantumNumbs,block.size());
+			setNaturalBasis(natBasis,quantumNumbs,block);
 
 			//! Set the operators c^\daggger_{i\sigma} in the natural basis
 			creationMatrix.clear();
@@ -245,19 +245,22 @@ namespace Dmrg {
 			}
 		}
 
-		//! find all states in the natural basis for a block of n sites
-		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-		void setNaturalBasis(HilbertBasisType  &basis,std::vector<size_t>& q,int n) const
+// 		//! find all states in the natural basis for a block of n sites
+// 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+		void setNaturalBasis(HilbertBasisType  &basis,
+		                     std::vector<size_t>& q,
+		                     const std::vector<size_t>& block) const
 		{
+			assert(block.size()==1);
 			HilbertState a=0;
-			int sitesTimesDof=n*DEGREES_OF_FREEDOM;
+			int sitesTimesDof=DEGREES_OF_FREEDOM;
 			HilbertState total = (1<<sitesTimesDof);
 
 			HilbertBasisType  basisTmp;
 			for (a=0;a<total;a++) basisTmp.push_back(a);
 
 			// reorder the natural basis (needed for MULTIPLE BANDS)
-			findQuantumNumbers(q,basisTmp,n);
+			findQuantumNumbers(q,basisTmp,1);
 			std::vector<size_t> iperm(q.size());
 
 			Sort<std::vector<size_t> > sort;

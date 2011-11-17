@@ -99,8 +99,7 @@ namespace Dmrg {
 
 			template<typename IoInputter>
 			TargetParamsCommon(IoInputter& io,const ModelType& model)
-				: sites(0),startingLoops(0),concatenation(PRODUCT),
-				  model_(model)
+			: sites(0),startingLoops(0),concatenation(PRODUCT),model_(model)
 			{
 
 				//io.readline(filename,"TSPFilename="); // filename
@@ -109,10 +108,10 @@ namespace Dmrg {
 			
 				data_.resize(sites.size());
 				aOperators.resize(sites.size());
-				typename ModelType::HilbertBasisType basis;
-				std::vector<size_t> quantumNumbs;
-				model_.setNaturalBasis(basis,quantumNumbs,1);
-				model_.findElectrons(electrons,basis);
+// 				typename ModelType::HilbertBasisType basis;
+// 				std::vector<size_t> quantumNumbs;
+// 				model_.setNaturalBasis(basis,quantumNumbs,1);
+// 				model_.findElectrons(electrons,basis);
 			
 				for (size_t i=0;i<sites.size();i++) {
 					std::string s;
@@ -151,7 +150,7 @@ namespace Dmrg {
 			std::vector<size_t> startingLoops;
 			size_t concatenation;
 			std::vector<OperatorType> aOperators;
-			std::vector<size_t> electrons;
+// 			std::vector<size_t> electrons;
 			//! Concatenation specifies what to do with
 			//! operators at different sites, add them or multiply them
 		
@@ -183,8 +182,8 @@ namespace Dmrg {
 			os<<"#TargetParams.operator "<<i<<"\n";
 			os<<t.aOperators[i];
 		}
-		os<<"#TargetParams.electrons\n";
-		os<<t.electrons;
+// 		os<<"#TargetParams.electrons\n";
+// 		os<<t.electrons;
 		os<<"#TargetParams.site="<<t.sites;
 		os<<"#TargetParams.startingLoop="<<t.startingLoops<<"\n";
 		//os<<"#TargetParams.filename="<<t.filename<<"\n";

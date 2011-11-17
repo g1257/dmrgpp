@@ -148,10 +148,10 @@ namespace Dmrg {
 				bool verbose = false)
 		: helper_(helper),verbose_(verbose)
 		{
-			typename ModelType::HilbertBasisType basis;
-			std::vector<size_t> quantumNumbs;
-			model.setNaturalBasis(basis,quantumNumbs,1);
-			model.findElectrons(oneSiteElectrons_,basis);
+// 			typename ModelType::HilbertBasisType basis;
+// 			std::vector<size_t> quantumNumbs;
+// 			model.setNaturalBasis(basis,quantumNumbs,1);
+// 			model.findElectrons(oneSiteElectrons_,basis);
 		}
 		
 		size_t numberOfSites() const
@@ -331,8 +331,8 @@ namespace Dmrg {
 				std::cerr<<"!="<<eprime<<"\n";
 				throw std::runtime_error("problem in dmrgMultiply\n");
 			}
-			if (nj>oneSiteElectrons_.size())
-				throw std::runtime_error("Problem in dmrgMultiplyEnviron\n");
+// 			if (nj>oneSiteElectrons_.size())
+// 				throw std::runtime_error("Problem in dmrgMultiplyEnviron\n");
 
 //			const std::vector<size_t>&  ve = helper_.leftRightSuper().right().
 //					electronsVector(BasisType::BEFORE_TRANSFORM);
@@ -391,9 +391,9 @@ namespace Dmrg {
 		{
 			size_t n =helper_.leftRightSuper().right().size();
 
-			if (growOption==GROW_LEFT &&
-					n/O.n_row()>oneSiteElectrons_.size())
-				throw std::runtime_error("Problem in fluffUpEnviron\n");
+// 			if (growOption==GROW_LEFT &&
+// 					n/O.n_row()>oneSiteElectrons_.size())
+// 				throw std::runtime_error("Problem in fluffUpEnviron\n");
 
 			MatrixType ret(n,n);
 			for (size_t e=0;e<n;e++) {
@@ -756,7 +756,7 @@ namespace Dmrg {
 
 		ObserverHelperType& helper_; //<-- NB: We are not the owner
 		bool verbose_;
-		std::vector<size_t> oneSiteElectrons_;
+// 		std::vector<size_t> oneSiteElectrons_;
 	};  //class CorrelationsSkeleton
 } // namespace Dmrg
 

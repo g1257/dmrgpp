@@ -324,8 +324,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				
 				// phi = A|psi>
-				size_t nk = model_.hilbertSize(block[0]);
-				computePhi(i,phiNew,phiOld,direction,nk);
+				computePhi(i,phiNew,phiOld,direction,block[0]);
 				
 				return 1;
 			}
@@ -421,17 +420,28 @@ namespace Dmrg {
 				return "undefined";
 			}
 
+			void findElectronsOfOneSite(std::vector<size_t>& electrons,size_t site) const
+			{
+				std::vector<size_t> block(1,site);
+				typename ModelType::HilbertBasisType basis;
+				std::vector<size_t> quantumNumbs;
+				model_.setNaturalBasis(basis,quantumNumbs,block);
+				model_.findElectrons(electrons,basis);
+			}
 
 			void computePhi(size_t i,VectorWithOffsetType& phiNew,
-					const VectorWithOffsetType& phiOld,size_t systemOrEnviron,size_t nk)
+					const VectorWithOffsetType& phiOld,size_t systemOrEnviron,size_t site)
 			{
+				size_t nk = model_.hilbertSize(site);
 				size_t indexAdvance = times_.size()-1;
 				size_t indexNoAdvance = 0;
 				if (stage_[i]==OPERATOR) {
 					std::ostringstream msg;
 					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
-					FermionSign fs(lrs_.left(),tstStruct_.electrons);
+					std::vector<size_t> electrons;
+					findElectronsOfOneSite(electrons,site);
+					FermionSign fs(lrs_.left(),electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
 					RealType norma = norm(phiNew);
 					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
@@ -444,7 +454,7 @@ namespace Dmrg {
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 
-					if (tstStruct_.aOperators.size()==1) guessPhiSectors(phiNew,i,systemOrEnviron);
+					if (tstStruct_.aOperators.size()==1) guessPhiSectors(phiNew,i,systemOrEnviron,site);
 					else phiNew.populateSectors(lrs_.super());
 
 					// OK, now that we got the partition number right, let's wft:
@@ -634,9 +644,11 @@ namespace Dmrg {
 				}
 			}
 
-			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
+			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron,size_t site)
 			{
-				FermionSign fs(lrs_.left(),tstStruct_.electrons);
+				std::vector<size_t> electrons;
+				findElectronsOfOneSite(electrons,site);
+				FermionSign fs(lrs_.left(),electrons);
 				if (allStages(WFT_NOADVANCE)) {
 					VectorWithOffsetType tmpVector = psi_;
 					for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
@@ -682,7 +694,9 @@ namespace Dmrg {
 				multiply(A.data,tmpCt,tmpC);
 				A.fermionSign = 1;
 				//A.data = tmpC;
-				FermionSign fs(lrs_.left(),tstStruct_.electrons);
+				std::vector<size_t> electrons;
+				findElectronsOfOneSite(electrons,site);
+				FermionSign fs(lrs_.left(),electrons);
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
 				ComplexType sum = 0;

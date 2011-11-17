@@ -106,17 +106,17 @@ namespace Dmrg {
 				io.readline(advanceEach,"TSPAdvanceEach=");
 				io.readline(rngSeed,"TSPRngSeed=");
 				
-				typename ModelType::HilbertBasisType basis;
-				std::vector<size_t> quantumNumbs;
-				model.setNaturalBasis(basis,quantumNumbs,1);
-				model.findElectrons(electrons,basis);
+// 				typename ModelType::HilbertBasisType basis;
+// 				std::vector<size_t> quantumNumbs;
+// 				model.setNaturalBasis(basis,quantumNumbs,1);
+// 				model.findElectrons(electrons,basis);
 			}
 			
 			RealType tau;
 			size_t timeSteps;
 			size_t advanceEach;
 			int long long rngSeed;
-			std::vector<size_t> electrons;
+// 			std::vector<size_t> electrons;
 	}; // class MettsParams
 	
 	template<typename ModelType>

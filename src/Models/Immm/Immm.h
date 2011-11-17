@@ -257,14 +257,15 @@ namespace Dmrg {
 		}
 
 		void findElectrons(std::vector<size_t>& electrons,
-		                   const std::vector<HilbertState>& basis) const
+		                   const std::vector<HilbertState>& basis,
+		                   size_t site) const
 		{
 			electrons.resize(basis.size());
 			for (size_t i=0;i<basis.size();i++) {
 				// nup
-				size_t nup = hilbertSpace_.electronsWithGivenSpin(basis[i],HilbertSpaceImmmType::SPIN_UP);
+				size_t nup = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_UP);
 				// ndown
-				size_t ndown = hilbertSpace_.electronsWithGivenSpin(basis[i],HilbertSpaceImmmType::SPIN_DOWN);
+				size_t ndown = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_DOWN);
 				electrons[i] = nup + ndown;
 			}
 		}

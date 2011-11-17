@@ -238,6 +238,15 @@ namespace Dmrg {
 // 			              systemOrEnviron);
 // 		}
 
+		void findElectronsOfOneSite(std::vector<size_t>& electrons,size_t site) const
+		{
+			std::vector<size_t> block(1,site);
+			typename ModelType::HilbertBasisType basis;
+			std::vector<size_t> quantumNumbs;
+			model_.setNaturalBasis(basis,quantumNumbs,block);
+			model_.findElectrons(electrons,basis);
+		}
+
 	private:
 
 // 		void zeroOutVectors()

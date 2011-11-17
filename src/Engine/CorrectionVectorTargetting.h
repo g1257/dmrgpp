@@ -350,7 +350,9 @@ namespace Dmrg {
 				std::ostringstream msg;
 				msg<<"I'm applying a local operator now";
 				progress_.printline(msg,std::cout);
-				FermionSign fs(lrs_.left(),tstStruct_.electrons);
+				std::vector<size_t> electrons;
+				commonTargetting_.findElectronsOfOneSite(electrons,site);
+				FermionSign fs(lrs_.left(),electrons);
 				applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],
 						fs,systemOrEnviron,corner);
 				RealType norma = std::norm(phiNew);

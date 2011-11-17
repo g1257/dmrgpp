@@ -120,8 +120,7 @@ namespace Dmrg {
 		                size_t direction)
 		{
 			const VectorWithOffsetType& src =(c.size()==0) ? eToTheBetaH : c;
-			size_t nk = mettsStochastics_.hilbertSize(site);
-			internalAction(c,src,nk,direction);
+			internalAction(c,src,site,direction);
 			sitesSeen_.push_back(site);
 			
 			if (direction==prevDirection_) return false;
@@ -143,9 +142,10 @@ namespace Dmrg {
 
 		void internalAction(VectorWithOffsetType& dest2,
 		                    const VectorWithOffsetType& src2,
-		                    size_t nk,
+		                    size_t site,
 		                    size_t direction)
 		{
+			size_t nk = mettsStochastics_.hilbertSize(site);
 			if (dest2.size()==0) {
 				dest2 =  src2;
 			}
@@ -156,7 +156,7 @@ namespace Dmrg {
 				sum += p[i];
 			assert(fabs(sum-1.0)<1e-6);
 			VectorWithOffsetType dest;
-			size_t indexFixed = mettsStochastics_.chooseRandomState(p);
+			size_t indexFixed = mettsStochastics_.chooseRandomState(p,site);
 			collapseVector(dest,dest2,direction,indexFixed,nk);
 			RealType x = std::norm(dest);
 			assert(x>1e-6);

@@ -877,16 +877,14 @@ namespace Dmrg {
 					targetVectors_[i].resize(lrs_.super().size());
 			}
 
-//			void printHeader()
-//			{
-//				io_.print(mettsStruct_);
-//				std::string label = "times";
-//				io_.printVector(betas_,label);
-//				label = "weights";
-//				io_.printVector(weight_,label);
-//				std::string s = "GsWeight="+ttos(gsWeight_);
-//				io_.printline(s);
-//			}
+			void findElectronsOfOneSite(std::vector<size_t>& electrons,size_t site) const
+			{
+				std::vector<size_t> block(1,site);
+				typename ModelType::HilbertBasisType basis;
+				std::vector<size_t> quantumNumbs;
+				model_.setNaturalBasis(basis,quantumNumbs,block);
+				model_.findElectrons(electrons,basis);
+			}
 
 			void test(const VectorWithOffsetType& src1,
 			          const VectorWithOffsetType& src2,
@@ -902,7 +900,12 @@ namespace Dmrg {
 				multiply(A.data,tmpCt,tmpC);
 				A.fermionSign = 1;
 				//A.data = tmpC;
-				FermionSign fs(lrs_.left(),mettsStruct_.electrons);
+				typename ModelType::HilbertBasisType basis;
+				std::vector<size_t> quantumNumbs;
+				assert(sites.first==sites.second);
+				std::vector<size_t> electrons;
+				findElectronsOfOneSite(electrons,sites.first);
+				FermionSign fs(lrs_.left(),electrons);
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
 				RealType sum = 0;

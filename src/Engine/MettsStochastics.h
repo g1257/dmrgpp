@@ -99,32 +99,37 @@ namespace Dmrg {
 		typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 		typedef typename PsimagLite::Random48<RealType> RngType;
 		typedef typename RngType::LongType LongType;
+		typedef typename ModelType::HilbertBasisType HilbertBasisType;
 
 		MettsStochastics(const ModelType& model,const LongType& seed)
 		: model_(model),
 		  progress_("MettsStochastics",0),
 		  random48_(seed),
 		  addedSites_(0)
-		{
-			size_t addedBlockSize = 1;
-			model_.setNaturalBasis(basisOfOneSite_,quantumNumbsOneSite_,addedBlockSize);
-		}
+		{}
 
 		size_t hilbertSize(size_t site) const { return model_.hilbertSize(site); }
 
-		size_t chooseRandomState(size_t i) const
+		size_t chooseRandomState(size_t site) const
 		{
-			return basisOfOneSite_[pureStates_[i]];
+			std::vector<size_t> quantumNumbsOneSite;
+			HilbertBasisType basisOfOneSite;
+			basisForOneSite(quantumNumbsOneSite,basisOfOneSite,site);
+			return basisOfOneSite[pureStates_[site]];
 		}
 
-		size_t chooseRandomState(const std::vector<RealType>& probs) const
+		size_t chooseRandomState(const std::vector<RealType>& probs,size_t site) const
 		{
+			std::vector<size_t> quantumNumbsOneSite;
+			HilbertBasisType basisOfOneSite;
+			basisForOneSite(quantumNumbsOneSite,basisOfOneSite,site);
+			
 			RealType r = random48_();
 			RealType s1 = 0;
 			RealType s2 = 0;
 			for (size_t i=0;i<probs.size();++i) {
 				s2 = s1 + probs[i];
-				if (s1<r && r<=s2) return basisOfOneSite_[i];
+				if (s1<r && r<=s2) return basisOfOneSite[i];
 				s1 = s2;
 			}
 			std::string s(__FILE__);
@@ -143,8 +148,9 @@ namespace Dmrg {
 				if (sites.first!=1)
 					throw std::runtime_error("MettsStochastics::update(...): must start from 0\n");
 				pureStates_.resize(sites.second+2);
-				for (size_t i=0;i<pureStates_.size();i++) 
-					pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
+				for (size_t i=0;i<pureStates_.size();i++)
+					pureStates_[i] = size_t(random48_()*model_.hilbertSize(i));
+
 				addedSites_.push_back(sites.first-1);
 				addedSites_.push_back(sites.second+1);
 				currentSites.push_back(sites.first-1);
@@ -172,6 +178,11 @@ namespace Dmrg {
 
 	private:
 
+		void basisForOneSite(std::vector<size_t>& quantumNumbsOneSite,HilbertBasisType& basisOfOneSite,size_t site) const
+		{
+			std::vector<size_t> block(1,site);
+			model_.setNaturalBasis(basisOfOneSite,quantumNumbsOneSite,block);
+		}
 // 		void getStochasticsForLattice()
 // 		{
 // 			for (size_t i=0;i<pureStates_.size();i++) 
@@ -232,7 +243,7 @@ namespace Dmrg {
 		void raiseOrLowerSymm(size_t site,bool raiseSymm)
 		{
 			if (raiseSymm) {
-				if (pureStates_[site]<basisOfOneSite_.size()-1)
+				if (pureStates_[site]<model_.hilbertSize(site)-1)
 					pureStates_[site]++;
 				return;
 			}
@@ -243,9 +254,13 @@ namespace Dmrg {
 		// assumes local symmetry througout
 		size_t getSymmetry() const
 		{
+			std::vector<size_t> quantumNumbsOneSite;
+			HilbertBasisType basisOfOneSite;
+			
 			size_t sum = 0;
 			for (size_t i=0;i<addedSites_.size();i++) {
-				sum += quantumNumbsOneSite_[pureStates_[addedSites_[i]]];
+				basisForOneSite(quantumNumbsOneSite,basisOfOneSite,addedSites_[i]);
+				sum += quantumNumbsOneSite[pureStates_[addedSites_[i]]];
 			}
 			return sum;
 		}
@@ -255,8 +270,8 @@ namespace Dmrg {
 		RngType random48_;
 		std::vector<size_t> pureStates_;
 		std::vector<size_t> addedSites_;
-		std::vector<size_t> quantumNumbsOneSite_;
-		typename ModelType::HilbertBasisType basisOfOneSite_;
+// 		std::vector<size_t> quantumNumbsOneSite_;
+// 		typename ModelType::HilbertBasisType basisOfOneSite_;
 		std::vector<size_t> qnVsSize_;
 	};  //class MettsStochastics
 } // namespace Dmrg
