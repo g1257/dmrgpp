@@ -91,25 +91,26 @@ namespace Dmrg {
 	public:
 		
 		OperatorsImmm(const DmrgBasisType* thisBasis)
-		: OperatorsBase<OperatorType,DmrgBasisType>(thisBasis,DEGREES_OF_FREEDOM) 
+		: OperatorsBase<OperatorType,DmrgBasisType>(thisBasis) 
 		{}
 
 		template<typename IoInputter>
 		OperatorsImmm(IoInputter& io,size_t level,const DmrgBasisType* thisBasis)
-		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis,DEGREES_OF_FREEDOM) 
+		: OperatorsBase<OperatorType,DmrgBasisType>(io,level,thisBasis) 
 		{}
 
 		const OperatorType& getOperator(int i,int sigma) const 
-		{ 
-			int k = sigma+i*DEGREES_OF_FREEDOM;
-			return this->getOperatorByIndex(k);
+		{
+			throw std::runtime_error("Depends on the site\n");
+// 			int k = sigma+i*DEGREES_OF_FREEDOM;
+// 			return this->getOperatorByIndex(k);
 		}
 
 		//! 4 operators per site: c^dagger_{a up} c^dagger_{b up}
 		//! 			: c^dagger_{a down} c^dagger_{b down}
 		static size_t numberOfOperatorsPerSite()
 		{
-			return DEGREES_OF_FREEDOM;
+			throw std::runtime_error("Depends on the site\n");
 		}
 	}; //class OperatorsImmm
 } // namespace Dmrg

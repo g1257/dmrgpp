@@ -112,7 +112,7 @@ namespace Dmrg {
 		{}
 
 		// Get electronic state on site "j" in binary number "a"
-		Word get(Word const &a,size_t j)
+		Word get(Word const &a,size_t j) const
 		{
 			size_t k=degreesOfFreedomUpTo(j);
 			size_t ones = (1<<(degreesOfFreedom_[j]))-1;
@@ -125,7 +125,7 @@ namespace Dmrg {
 		}
 
 		// Create electron with internal dof  "sigma" on site "j" in binary number "a"
-		void create(Word &a,size_t j,size_t sigma)
+		void create(Word &a,size_t j,size_t sigma) const
 		{
 			size_t k=degreesOfFreedomUpTo(j);
 			Word mask=(1<<(k+sigma));
@@ -133,7 +133,7 @@ namespace Dmrg {
 		}
 		
 		// Is there an electron with internal dof  "sigma" on site "i" in binary number "ket"?
-		bool isNonZero(Word const &ket,size_t i,size_t sigma)
+		bool isNonZero(Word const &ket,size_t i,size_t sigma) const
 		{
 			
 			Word tmp=get(ket,i);
@@ -144,7 +144,7 @@ namespace Dmrg {
 		}
 		
 		//! returns the number of electrons of internal dof "value" in binary number "data"
-		int getNofDigits(const Word& data,size_t value)
+		int getNofDigits(const Word& data,size_t value) const
 		{
 			int ret=0;
 			Word data2=data;
@@ -162,7 +162,7 @@ namespace Dmrg {
 		}
 		
 		//! Number of electrons with spin spin (sums over bands)
-		int electronsWithGivenSpin(Word const &data,size_t spin)
+		int electronsWithGivenSpin(Word const &data,size_t spin) const
 		{
 			throw std::runtime_error("electronsWithGivenSpin needs site\n");
 			size_t i = 0;
@@ -179,7 +179,7 @@ namespace Dmrg {
 		}
 
 		//! Number of electrons at given site (sum over all bands)
-		int electronsAtGivenSite(const Word& data,size_t site)
+		int electronsAtGivenSite(const Word& data,size_t site) const
 		{
 			size_t sum=0;
 			
@@ -192,7 +192,7 @@ namespace Dmrg {
 
 		//! Number of electrons with dof sector between i and j excluding i and j in binary number "ket"
 		//!  intended for when i<j
-		 int calcNofElectrons(const Word& ket,size_t i,size_t j,size_t sector)
+		 int calcNofElectrons(const Word& ket,size_t i,size_t j,size_t sector) const
 		{
 			size_t ii=i+1;
 			if (ii>=j) return 0;
@@ -201,14 +201,14 @@ namespace Dmrg {
 				size_t k = degreesOfFreedomUpTo(site);
 				size_t dof = degreesOfFreedom_[site];
 				for (size_t sigma=0;sigma<dof;sigma++)
-					m |= (1<<k+sigma);
+					m |= (1<<(k+sigma));
 			}
 			m &= ket;
 			return getNofDigits(m,sector);
 		} 
 
 		//! Number of electrons with dof sector on site i in binary number "ket"
-		int calcNofElectrons(Word const &ket,size_t i,size_t sector)
+		int calcNofElectrons(Word const &ket,size_t i,size_t sector) const
 		{
 			Word m=0;
 			

@@ -110,6 +110,7 @@ namespace Dmrg {
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
+		typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 		typedef typename HilbertSpaceImmmType::HilbertState HilbertState;
 		
 		typedef typename ModelHelperType::BlockType Block;
@@ -119,6 +120,7 @@ namespace Dmrg {
 		static const int FERMION_SIGN = -1;
 		static const int SPIN_UP=HilbertSpaceImmmType::SPIN_UP;
 		static const int SPIN_DOWN=HilbertSpaceImmmType::SPIN_DOWN;
+		static const int NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
 	public:
 		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
@@ -187,7 +189,7 @@ namespace Dmrg {
 
 			//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 			creationMatrix.clear();
-			size_t dof = degreesOfFreedomForThisSite(block[0]);
+			size_t dof = degreesOfFreedom_[block[0]];
 
 			for (size_t sigma=0;sigma<dof;sigma++) {
 				findOperatorMatrices(tmpMatrix,block[0],sigma,natBasis);
@@ -198,31 +200,30 @@ namespace Dmrg {
 			}
 		}
 
-		PsimagLite::Matrix<SparseElementType> getOperator(const std::string& what,size_t orbital=0,size_t spin=0) const
+		MatrixType getOperator(const std::string& what,size_t orbital=0,size_t spin=0) const
 		{
 			throw std::runtime_error("Need site\n");
 			Block block;
 			block.resize(1);
 			block[0]=0;
-			size_t norb = orbitalsForThisSite(block[0]);
+			size_t norb = degreesOfFreedom_[block[0]]/HilbertSpaceImmmType::NUMBER_OF_SPINS;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 
 			if (what=="+" or what=="i") {
-				return cDaggerIupCiDown(block[0]);
+				return cDaggerCi(block,SPIN_UP,SPIN_DOWN);
 			}
 			if (what=="-") {
-				PsimagLite::Matrix<SparseElementType> tmp = cDaggerIupCiDown(block[0]);
-				return transposeConjugate(tmp);
+				return cDaggerCi(block,SPIN_DOWN,SPIN_UP);
 			}
 			if (what=="z") {
-				return nup(block[0])-ndown(block[1]);
+				return nUpOrDown(block,SPIN_UP)-nUpOrDown(block,SPIN_DOWN);
 			}
 			if (what=="n") {
-				return nup(block[0])+ndown(block[1]);
+				return nUpOrDown(block,SPIN_UP)+nUpOrDown(block,SPIN_DOWN);
 			} 
 			if (what=="c") {
-				PsimagLite::Matrix<SparseElementType> tmp;
+				MatrixType tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[index2Op_[block[0]] + orbital + spin*norb].data);
 				return tmp;
 			}
@@ -320,15 +321,15 @@ namespace Dmrg {
 		{
 			HilbertState bra,ket;
 			size_t n = natBasis.size();
-			PsimagLite::Matrix<SparseElementType> cm(n,n);
+			MatrixType cm(n,n);
 
 			for (size_t ii=0;ii<n;ii++) {
 				bra=ket=natBasis[ii];
 				
-				if (HilbertSpaceImmmType::isNonZero(ket,site,sigma)) {
+				if (hilbertSpace_.isNonZero(ket,site,sigma)) {
 					
 				} else {
-					HilbertSpaceImmmType::create(bra,site,sigma);
+					hilbertSpace_.create(bra,site,sigma);
 					int jj = PsimagLite::isInVector(natBasis,bra);
 					assert(jj>=0);
 					assert(ii!=size_t(jj));
@@ -547,7 +548,7 @@ namespace Dmrg {
 		void diagTest(const SparseMatrixType& fullm,const std::string& str) const
 		{
 			if (fullm.rank()!=256) return;
-			PsimagLite::Matrix<SparseElementType> fullm2;
+			MatrixType fullm2;
 			crsMatrixToFullMatrix(fullm2,fullm);
 			std::vector<SparseElementType> eigs(fullm2.n_row());
 			PsimagLite::diag(fullm2,eigs,'V');
@@ -561,7 +562,7 @@ namespace Dmrg {
 		void buildDofs(size_t copperEach)
 		{
 			size_t counter = 5;
-			for (size_t i=0;i<geometry_.numberOfSite();i++) {
+			for (size_t i=0;i<geometry_.numberOfSites();i++) {
 				if (counter%copperEach) degreesOfFreedom_[i]=2;
 				else degreesOfFreedom_[i]=4;
 				counter++;
@@ -578,10 +579,31 @@ namespace Dmrg {
 		void buildIndex2Op()
 		{
 			size_t counter = 0;
-			for (size_t i=0;i<geometry_.numberOfSite();i++) {
+			for (size_t i=0;i<geometry_.numberOfSites();i++) {
 				index2Op_[i] = counter;
 				counter += degreesOfFreedom_[i];
 			}
+		}
+		
+		MatrixType cDaggerCi(const std::vector<size_t>& block,
+		                            size_t spin1,
+		                            size_t spin2) const
+		{
+			assert(block.size()==1);
+			size_t site = block[0];
+			MatrixType tmp;
+			size_t norb = degreesOfFreedom_[site]/NUMBER_OF_SPINS;
+			std::vector<OperatorType> creationMatrix;
+			setOperatorMatrices(creationMatrix,block);
+			for (size_t orb=0;orb<norb;orb++)
+				tmp += multiplyTc(creationMatrix[orb+SPIN_UP*norb].data,
+				                  creationMatrix[orb+SPIN_DOWN*norb].data);
+			return tmp;
+		}
+		
+		MatrixType nUpOrDown(const std::vector<size_t>& block,size_t spin) const
+		{
+			return cDaggerCi(block,spin,spin);
 		}
 	};     //class Immm
 
