@@ -207,13 +207,14 @@ namespace Dmrg {
 		                  const WaveFunctionTransfType& wft,
 		                  const VectorWithOffsetType& psi,
 		                  const std::vector<size_t>& stage,
-		                  const std::vector<RealType>& weights) const
+		                  const std::vector<RealType>& weights,
+		                  size_t nk) const
 		{
-			wft.setInitialVector(v,psi,lrs_);
+			wft.setInitialVector(v,psi,lrs_,nk);
 			if (!allStages(CONVERGING,stage)) return;
 			std::vector<VectorWithOffsetType> vv(targetVectors_.size());
 			for (size_t i=0;i<targetVectors_.size();i++) {
-				wft.setInitialVector(vv[i],targetVectors_[i],lrs_);
+				wft.setInitialVector(vv[i],targetVectors_[i],lrs_,nk);
 				if (std::norm(vv[i])<1e-6) continue;
 				VectorWithOffsetType w= weights[i]*vv[i];
 				v += w;

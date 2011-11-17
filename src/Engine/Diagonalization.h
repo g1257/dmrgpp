@@ -140,7 +140,8 @@ namespace Dmrg {
 			if (direction!=WaveFunctionTransfType::INFINITE) throw std::runtime_error(
 				"Diagonalization::operator(): expecting INFINITE direction\n");
 			size_t loopIndex = 0;
-			RealType gsEnergy = internalMain_(target,direction,loopIndex,false);
+			size_t nk = 0; // bogus
+			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,nk);
 			//  targetting: 
 			target.evolve(gsEnergy,direction,blockLeft,blockRight,loopIndex);
 			wft_.triggerOff(target.leftRightSuper()); //,m);
@@ -153,10 +154,11 @@ namespace Dmrg {
 		                    size_t loopIndex,
 		                    bool needsPrinting)
 		{
-			if (direction==WaveFunctionTransfType::INFINITE) throw std::runtime_error(
-			     "Diagonalization::operator(): not expecting INFINITE direction\n");
+			assert(direction!=WaveFunctionTransfType::INFINITE);
+			assert(block.size()==1);
 
-			RealType gsEnergy = internalMain_(target,direction,loopIndex,false);
+			size_t nk = model_.hilbertSize(block[0]);
+			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,nk);
 			//  targetting: 
 			target.evolve(gsEnergy,direction,block,block,loopIndex);
 			wft_.triggerOff(target.leftRightSuper()); //,m);
@@ -168,7 +170,9 @@ namespace Dmrg {
 		RealType internalMain_(TargettingType& target,
 		                       size_t direction,
 		                       size_t loopIndex,
-		                       bool needsPrinting)
+		                       bool needsPrinting,
+		                       size_t nk)
+
 		{
 			const LeftRightSuperType& lrs= target.leftRightSuper();
 			wft_.triggerOn(lrs);
@@ -219,7 +223,7 @@ namespace Dmrg {
 					VectorWithOffsetType;
 			VectorWithOffsetType initialVector(weights,lrs.super());
 			
-			target.initialGuess(initialVector);
+			target.initialGuess(initialVector,nk);
 			
 
 			for (size_t i=0;i<total;i++) {

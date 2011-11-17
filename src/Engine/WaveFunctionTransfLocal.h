@@ -113,14 +113,11 @@ namespace Dmrg {
 		static const size_t EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
 		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 		
-		WaveFunctionTransfLocal(
-				const size_t& hilbertSpaceOneSite,
-				const size_t& stage,
-				const bool& firstCall,
-				const size_t& counter,
-				const DmrgWaveStructType& dmrgWaveStruct)
-		: hilbertSpaceOneSite_(hilbertSpaceOneSite),
-		  stage_(stage),
+		WaveFunctionTransfLocal(const size_t& stage,
+		                        const bool& firstCall,
+		                        const size_t& counter,
+		                        const DmrgWaveStructType& dmrgWaveStruct)
+		: stage_(stage),
 		  firstCall_(firstCall),
 		  counter_(counter),
 		  dmrgWaveStruct_(dmrgWaveStruct),
@@ -130,48 +127,53 @@ namespace Dmrg {
 			msg<<"Constructing...";
 			progress_.printline(msg,std::cout);
 		}
-		
-		virtual void transformVector(
-						VectorWithOffsetType& psiDest,
-						const VectorWithOffsetType& psiSrc,
-						const LeftRightSuperType& lrs) const
+
+		virtual void transformVector(VectorWithOffsetType& psiDest,
+		                             const VectorWithOffsetType& psiSrc,
+		                             const LeftRightSuperType& lrs,
+		                             size_t nk) const
+
 		{
-			//std::cerr<<"counter="<<counter_<<"direction = "<<stage_<<"\n";
 			if (stage_==EXPAND_ENVIRON) {
-				if (firstCall_) throw std::runtime_error(
-					"WFT: This corner case is unimplmemented yet (sorry!)\n");
-				else if (counter_==0) transformVector1bounce(psiDest,psiSrc,lrs);
-				else transformVector1(psiDest,psiSrc,lrs);
+				if (firstCall_) {
+					std::string s = "WFT: This corner case is unimplmemented yet (sorry!)\n";
+					throw std::runtime_error(s.c_str());
+				} else if (counter_==0) {
+					transformVector1bounce(psiDest,psiSrc,lrs,nk);
+				} else {
+					transformVector1(psiDest,psiSrc,lrs,nk);
+				}
 			}
 			if (stage_==EXPAND_SYSTEM) {
-				if (firstCall_) transformVector2FromInfinite(psiDest,psiSrc,lrs);
- 				else if (counter_==0) transformVector2bounce(psiDest,psiSrc,lrs);
-				else transformVector2(psiDest,psiSrc,lrs);
+				if (firstCall_)
+					transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
+ 				else if (counter_==0) 
+					transformVector2bounce(psiDest,psiSrc,lrs,nk);
+				else transformVector2(psiDest,psiSrc,lrs,nk);
 			}
 		}
 
 	private:
 		
 		template<typename SomeVectorType>
-		void transformVector1(
-				SomeVectorType& psiDest,
-				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs) const
+		void transformVector1(SomeVectorType& psiDest,
+		                      const SomeVectorType& psiSrc,
+		                      const LeftRightSuperType& lrs,
+							  size_t nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
-				transformVector1(psiDest,psiSrc,lrs,i0);
+				transformVector1(psiDest,psiSrc,lrs,i0,nk);
 			}
 		}
-		
+
 		template<typename SomeVectorType>
-		void transformVector1(
-				SomeVectorType& psiDest,
-				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs,
-				size_t i0) const
+		void transformVector1(SomeVectorType& psiDest,
+		                      const SomeVectorType& psiSrc,
+		                      const LeftRightSuperType& lrs,
+		                      size_t i0,
+		                      size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = lrs.super().permutationInverse().size()/
 					lrs.right().permutationInverse().size();
 			size_t njp = lrs.right().permutationInverse().size()/nk;
@@ -207,7 +209,7 @@ namespace Dmrg {
 				size_t ip,beta,kp,jp;
 				pack1.unpack(ip,beta,(size_t)lrs.super().permutation(x));
 				pack2.unpack(kp,jp,(size_t)lrs.right().permutation(beta));
-				psiDest[x]=createAux1b(psiSrc,ip,kp,jp,ws,weT);
+				psiDest[x]=createAux1b(psiSrc,ip,kp,jp,ws,weT,nk);
 			}
 		}
 
@@ -218,9 +220,9 @@ namespace Dmrg {
 				size_t kp,
 				size_t jp,
 				const SparseMatrixType& ws,
-				const SparseMatrixType& weT) const
+				const SparseMatrixType& weT,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t ni=dmrgWaveStruct_.ws.n_col();
 
 			//int m = dmrgWaveStruct_.m;
@@ -249,11 +251,12 @@ namespace Dmrg {
 		void transformVector2(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs) const
+				const LeftRightSuperType& lrs,
+				size_t nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
-				transformVector2(psiDest,psiSrc,lrs,i0);
+				transformVector2(psiDest,psiSrc,lrs,i0,nk);
 			}
 		}
 
@@ -261,9 +264,9 @@ namespace Dmrg {
 		void transformVector2(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs,size_t i0) const
+				const LeftRightSuperType& lrs,size_t i0,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = lrs.left().permutationInverse().size()/nk;
 			size_t nalpha = lrs.left().permutationInverse().size();
 			//printDmrgWave();
@@ -297,7 +300,7 @@ namespace Dmrg {
 				size_t ip,alpha,kp,jp;
 				pack1.unpack(alpha,jp,(size_t)lrs.super().permutation(x));
 				pack2.unpack(ip,kp,(size_t)lrs.left().permutation(alpha));
-				psiDest[x]=createAux2b(psiSrc,ip,kp,jp,wsT,we);
+				psiDest[x]=createAux2b(psiSrc,ip,kp,jp,wsT,we,nk);
 			}
 			
 		}
@@ -309,9 +312,9 @@ namespace Dmrg {
 				size_t kp,
 				size_t jp,
 				const SparseMatrixType& wsT,
-				const SparseMatrixType& we) const
+				const SparseMatrixType& we,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			
 			size_t beta = dmrgWaveStruct_.lrs.right().permutationInverse(kp+jp*nk);
@@ -337,11 +340,12 @@ namespace Dmrg {
 		void transformVector2FromInfinite(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs) const
+				const LeftRightSuperType& lrs,
+				size_t nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
-				transformVector2FromInfinite(psiDest,psiSrc,lrs,i0);
+				transformVector2FromInfinite(psiDest,psiSrc,lrs,i0,nk);
 			}
 		}
 		
@@ -351,9 +355,9 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				size_t i0) const
+				size_t i0,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = lrs.left().permutationInverse().size()/nk;
 			size_t nalpha = lrs.left().permutationInverse().size();
 			
@@ -394,7 +398,7 @@ namespace Dmrg {
 				pack2.unpack(is,jpl,(size_t)lrs.left().permutation(isn));
 				//size_t jk,je;
 				//utils::getCoordinates(jk,je,(size_t)lrs.right().permutation(jen),npk);
-				psiDest[x]=createAux2bFromInfinite(psiSrc,is,jpl,jen,wsT,we);
+				psiDest[x]=createAux2bFromInfinite(psiSrc,is,jpl,jen,wsT,we,nk);
 			}
 			
 		}
@@ -408,9 +412,9 @@ namespace Dmrg {
 				size_t jpl,
 				size_t jen,
 				const SparseMatrixType& wsT,
-				const SparseMatrixType& we) const
+				const SparseMatrixType& we,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			SparseElementType sum=0;
 			
@@ -434,11 +438,12 @@ namespace Dmrg {
 		void transformVector1bounce(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs) const
+				const LeftRightSuperType& lrs,
+				size_t nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
-				transformVector1bounce(psiDest,psiSrc,lrs,i0);
+				transformVector1bounce(psiDest,psiSrc,lrs,i0,nk);
 			}
 		}
 		
@@ -447,9 +452,9 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				size_t i0) const
+				size_t i0,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = lrs.super().permutationInverse().size()/lrs.right().permutationInverse().size();
 			//size_t njp = lrs.right().permutationInverse().size()/nk;
 			//printDmrgWave();
@@ -490,11 +495,12 @@ namespace Dmrg {
 		void transformVector2bounce(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs) const
+				const LeftRightSuperType& lrs,
+				size_t nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
-				transformVector2bounce(psiDest,psiSrc,lrs,i0);
+				transformVector2bounce(psiDest,psiSrc,lrs,i0,nk);
 			}
 		}
 		
@@ -504,9 +510,9 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				size_t i0) const
+				size_t i0,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = lrs.left().permutationInverse().size()/nk;
 			size_t nalpha = lrs.left().permutationInverse().size();
 			//printDmrgWave();
@@ -539,7 +545,6 @@ namespace Dmrg {
 			
 		}
 
-		const size_t& hilbertSpaceOneSite_;
 		const size_t& stage_;
 		const bool& firstCall_;
 		const size_t& counter_;

@@ -76,7 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file Immm.h
  *
- *  An implementation of a Hubbard model for Fe-based superconductors to use with the DmrgSolver
+ *  DOC TBW FIXME
  *
  */
 #ifndef IMMM_HEADER_H
@@ -149,9 +149,9 @@ namespace Dmrg {
 			throw "Oops orbitals changes from site to site\n";
 		}
 
-		size_t hilbertSize() const
+		size_t hilbertSize(size_t site) const
 		{
-			throw "Oops hilbertSize changes from site to site\n";
+			return (1<<degreesOfFreedom_[site]);
 		} 
 
 		void print(std::ostream& os) const { operator<<(os,modelParameters_); }

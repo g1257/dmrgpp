@@ -98,7 +98,8 @@ namespace Dmrg {
 		virtual void transformVector(
 				VectorWithOffsetType& psiDest,
 				const VectorWithOffsetType& psiSrc,
-				const LeftRightSuperType& lrs) const=0;
+				const LeftRightSuperType& lrs,
+				size_t nk) const = 0;
 
 		virtual ~WaveFunctionTransfBase() {}
 

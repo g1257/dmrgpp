@@ -265,9 +265,9 @@ namespace Dmrg {
 		}
 		
 
-		void initialGuess(VectorWithOffsetType& v) const
+		void initialGuess(VectorWithOffsetType& v,size_t nk) const
 		{
-			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_);
+			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,nk);
 		}
 		
 		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -374,8 +374,8 @@ namespace Dmrg {
 					phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
-				wft_.setInitialVector(
-						phiNew,targetVectors_[0],lrs_); // generalize for su(2)
+				size_t nk = model_.hilbertSize(site);
+				wft_.setInitialVector(phiNew,targetVectors_[0],lrs_,nk);
 				phiNew.collapseSectors();
 				
 			} else {

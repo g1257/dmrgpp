@@ -110,7 +110,6 @@ namespace Dmrg {
 		              const LeftRightSuperType& lrs)
 		: mettsStochastics_(mettsStochastics),
 		  lrs_(lrs),
-		  hilbertSize_(mettsStochastics.hilbertSizePerSite()),
 		  progress_("MettsCollapse",0),
 		  prevDirection_(ProgramGlobals::INFINITE)
 		{}
@@ -121,8 +120,8 @@ namespace Dmrg {
 		                size_t direction)
 		{
 			const VectorWithOffsetType& src =(c.size()==0) ? eToTheBetaH : c;
-
-			internalAction(c,src,site,direction);
+			size_t nk = mettsStochastics_.hilbertSize(site);
+			internalAction(c,src,nk,direction);
 			sitesSeen_.push_back(site);
 			
 			if (direction==prevDirection_) return false;
@@ -144,21 +143,21 @@ namespace Dmrg {
 
 		void internalAction(VectorWithOffsetType& dest2,
 		                    const VectorWithOffsetType& src2,
-		                    size_t site,
+		                    size_t nk,
 		                    size_t direction)
 		{
 			if (dest2.size()==0) {
 				dest2 =  src2;
 			}
-			std::vector<RealType> p(hilbertSize_,0);
-			probability(p,dest2,direction);
+			std::vector<RealType> p(nk,0);
+			probability(p,dest2,direction,nk);
 			RealType sum = 0;
 			for (size_t i=0;i<p.size();i++)
 				sum += p[i];
 			assert(fabs(sum-1.0)<1e-6);
 			VectorWithOffsetType dest;
 			size_t indexFixed = mettsStochastics_.chooseRandomState(p);
-			collapseVector(dest,dest2,direction,indexFixed);
+			collapseVector(dest,dest2,direction,indexFixed,nk);
 			RealType x = std::norm(dest);
 			assert(x>1e-6);
 			dest2 = (1.0/x) * dest;
@@ -167,7 +166,8 @@ namespace Dmrg {
 		void collapseVector(VectorWithOffsetType& dest,
 		                    const VectorWithOffsetType& src,
 		                    size_t direction,
-		                    size_t indexFixed) const
+		                    size_t indexFixed,
+		                    size_t nk) const
 		{
 			assert(src.sectors()==1);
 			dest = src;
@@ -175,7 +175,7 @@ namespace Dmrg {
 				size_t i0 = src.sector(ii);
 				VectorType vdest,vsrc;
 				src.extract(vsrc,i0);
-				collapseVector(vdest,vsrc,direction,i0,indexFixed);
+				collapseVector(vdest,vsrc,direction,i0,indexFixed,nk);
 				dest.setDataInSector(vdest,i0);
 			}
 			//assert(std::norm(dest)>1e-6);
@@ -185,12 +185,12 @@ namespace Dmrg {
 		                    const VectorType& v,
 		                    size_t direction,
 		                    size_t m,
-		                    size_t indexFixed) const
+		                    size_t indexFixed,
+		                    size_t nk) const
 		{
 			int offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
-			
-			size_t nk = hilbertSize_;
+
 			size_t ns = lrs_.left().size();
 			PackIndicesType packSuper(ns);
 			PackIndicesType packLeft(ns/nk);
@@ -212,12 +212,13 @@ namespace Dmrg {
 
 		void probability(std::vector<RealType>& p,
 		                 const VectorWithOffsetType& src,
-		                 size_t direction) const
+		                 size_t direction,
+		                 size_t nk) const
 		{
 			RealType sum = 0;
-			for(size_t alpha=0;alpha<hilbertSize_;alpha++) {
+			for(size_t alpha=0;alpha<nk;alpha++) {
 				VectorWithOffsetType dest;
-				collapseVector(dest,src,direction,alpha);
+				collapseVector(dest,src,direction,alpha,nk);
 				RealType x = std::norm(dest);
 				sum += x*x;
 				p[alpha] = x*x;
@@ -237,7 +238,6 @@ namespace Dmrg {
 
 		const MettsStochasticsType& mettsStochastics_;
 		const LeftRightSuperType& lrs_;
-		size_t hilbertSize_;
 		PsimagLite::ProgressIndicator progress_;
 		size_t prevDirection_;
 		std::vector<size_t> sitesSeen_;

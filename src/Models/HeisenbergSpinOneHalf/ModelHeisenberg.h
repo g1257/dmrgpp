@@ -146,7 +146,7 @@ namespace Dmrg {
 
 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
 
-		size_t hilbertSize() const { return 2; } 
+		size_t hilbertSize(size_t site) const { return 2; } 
 
 		//! find  operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis

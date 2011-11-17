@@ -120,28 +120,25 @@ namespace Dmrg {
 		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 		
 		template<typename SomeParametersType>
-		WaveFunctionTransfFactory(SomeParametersType& parameters,size_t nk)
-		: hilbertSpaceOneSite_(nk),
-		  isEnabled_(!(parameters.options.find("nowft")!=std::string::npos)),
+		WaveFunctionTransfFactory(SomeParametersType& params)
+		: isEnabled_(!(params.options.find("nowft")!=std::string::npos)),
 		  stage_(INFINITE),
 		  counter_(0),
 		  firstCall_(true),
 		  progress_("WaveFunctionTransf",0),
-		  filenameIn_(parameters.checkpoint.filename),
-		  filenameOut_(parameters.filename),
+		  filenameIn_(params.checkpoint.filename),
+		  filenameOut_(params.filename),
 		  WFT_STRING("Wft"),
 		  wftImpl_(0),
 		  rng_(3433117)
 		{
 			if (!isEnabled_) return;
-			if (parameters.options.find("checkpoint")!=std::string::npos)
+			if (params.options.find("checkpoint")!=std::string::npos)
 				load();
 			if (BasisType::useSu2Symmetry()) {
-				wftImpl_=new WaveFunctionTransfSu2Type(hilbertSpaceOneSite_,
-						stage_,firstCall_,counter_,dmrgWaveStruct_);
+				wftImpl_=new WaveFunctionTransfSu2Type(stage_,firstCall_,counter_,dmrgWaveStruct_);
 			} else {
-				wftImpl_=new WaveFunctionTransfLocalType(hilbertSpaceOneSite_,
-						stage_,firstCall_,counter_,dmrgWaveStruct_);
+				wftImpl_=new WaveFunctionTransfLocalType(stage_,firstCall_,counter_,dmrgWaveStruct_);
 			}
 		}
 
@@ -191,7 +188,8 @@ namespace Dmrg {
 		void setInitialVector(	
 					SomeVectorType& dest,
 					const SomeVectorType2& src,
-					const LeftRightSuperType& lrs) const
+					const LeftRightSuperType& lrs,
+					size_t nk) const
 		{
 			bool allow=false;
 			switch (stage_) {
@@ -211,7 +209,8 @@ namespace Dmrg {
 				RealType eps = 1e-6;
 				if (std::norm(src)<eps)
 					throw std::runtime_error("src's norm is zero\n");
-				createVector(dest,src,lrs);
+				assert(nk>0);
+				createVector(dest,src,lrs,nk);
 			} else {
 				createRandomVector(dest);
 			}
@@ -408,14 +407,11 @@ namespace Dmrg {
 		void createVector(
 				VectorWithOffsetType& psiDest,
 				const VectorWithOffsetType& psiSrc,
-				const LeftRightSuperType& lrs) const
+				const LeftRightSuperType& lrs,
+				size_t nk) const
 		{
-			//try {
-				wftImpl_->transformVector(psiDest,psiSrc,lrs);
-			//} catch (std::exception& e) {
-			//	printDmrgWave();
-			//	throw e;
-			//}
+			wftImpl_->transformVector(psiDest,psiSrc,lrs,nk);
+
 			std::ostringstream msg;
 			msg<<"Transformation completed";
 			progress_.printline(msg,std::cout);
@@ -471,7 +467,6 @@ namespace Dmrg {
 			io.readMatrix(weStack_,"weStack");
 		}
 
-		size_t hilbertSpaceOneSite_;
 		bool isEnabled_;
 		size_t stage_;
 		size_t counter_;

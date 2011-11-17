@@ -228,9 +228,9 @@ namespace Dmrg {
 			evolve(Eg,direction,x,loopNumber);
 		}
 
-		void initialGuess(VectorWithOffsetType& v) const
+		void initialGuess(VectorWithOffsetType& v,size_t nk) const
 		{
-			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_);
+			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,nk);
 		}
 		
 		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -273,8 +273,7 @@ namespace Dmrg {
 
 	private:
 
-		void evolve(RealType Eg,size_t direction,size_t site,
-					size_t loopNumber)
+		void evolve(RealType Eg,size_t direction,size_t site,size_t loopNumber)
 		{
 			Eg_ = Eg;
 			VectorWithOffsetType phiNew;
@@ -285,7 +284,7 @@ namespace Dmrg {
 			}
 			
 			size_t numberOfSites = lrs_.super().block().size();
-			if (site>0 && site<numberOfSites-1) wftAllDynVectors();
+			if (site>0 && site<numberOfSites-1) wftAllDynVectors(site);
 			
 			if (!done_) calcDynVectors(site,phiNew);
 		}
@@ -388,8 +387,8 @@ namespace Dmrg {
 					phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
-				wft_.setInitialVector(
-						phiNew,targetVectors_[0],lrs_); // generalize for su(2)
+				size_t nk = model_.hilbertSize(site);
+				wft_.setInitialVector(phiNew,targetVectors_[0],lrs_,nk);
 				phiNew.collapseSectors();
 				
 			} else {
@@ -398,13 +397,14 @@ namespace Dmrg {
 			}
 		}
 
-		void wftAllDynVectors()
+		void wftAllDynVectors(size_t site)
 		{
+			size_t nk = model_.hilbertSize(site);
 			for (size_t i=0;i<=lastLanczosVector_;i++)
-				if (i<2) wftOneDynVector(i);
+				if (i<2) wftOneDynVector(i,nk);
 		}
 
-		void wftOneDynVector(size_t i)
+		void wftOneDynVector(size_t i,size_t nk)
 		{
 			VectorWithOffsetType result;
 			result.populateSectors(lrs_.super());
@@ -412,7 +412,7 @@ namespace Dmrg {
 			// OK, now that we got the partition number right, let's wft:
 
 			// FIXME generalize for su(2)
-			wft_.setInitialVector(result,targetVectors_[i],lrs_);
+			wft_.setInitialVector(result,targetVectors_[i],lrs_,nk);
 			result.collapseSectors();
 			targetVectors_[i] = result;
 		}

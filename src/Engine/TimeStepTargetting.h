@@ -294,9 +294,7 @@ namespace Dmrg {
 
 				if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return 0;
 
-				if (block.size()!=1) throw 
-					std::runtime_error("TimeStepTargetting::evolve(...):"
-							" blocks of size != 1 are unsupported (sorry)\n");
+				assert(block.size()==1);
 				size_t site = block[0];
 
 				if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return 0;
@@ -326,20 +324,21 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				
 				// phi = A|psi>
-				computePhi(i,phiNew,phiOld,direction);
+				size_t nk = model_.hilbertSize(block[0]);
+				computePhi(i,phiNew,phiOld,direction,nk);
 				
 				return 1;
 			}
 
-			void initialGuess(VectorWithOffsetType& v) const
+			void initialGuess(VectorWithOffsetType& v,size_t nk) const
 			{
-				waveFunctionTransformation_.setInitialVector(v,psi_,lrs_);
+				waveFunctionTransformation_.setInitialVector(v,psi_,lrs_,nk);
 				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
 				if (!b) return;
 				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
 				for (size_t i=0;i<targetVectors_.size();i++) {
-					waveFunctionTransformation_.setInitialVector(vv[i],
-						targetVectors_[i],lrs_);
+					waveFunctionTransformation_.setInitialVector
+					(vv[i],targetVectors_[i],lrs_,nk);
 					if (norm(vv[i])<1e-6) continue;
 					VectorWithOffsetType w= weight_[i]*vv[i];
 					v += w;
@@ -424,7 +423,7 @@ namespace Dmrg {
 
 
 			void computePhi(size_t i,VectorWithOffsetType& phiNew,
-					const VectorWithOffsetType& phiOld,size_t systemOrEnviron)
+					const VectorWithOffsetType& phiOld,size_t systemOrEnviron,size_t nk)
 			{
 				size_t indexAdvance = times_.size()-1;
 				size_t indexNoAdvance = 0;
@@ -450,7 +449,7 @@ namespace Dmrg {
 
 					// OK, now that we got the partition number right, let's wft:
 					waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[advance],
-							lrs_); // generalize for su(2)
+							lrs_,nk); // generalize for su(2)
 					phiNew.collapseSectors();
 
 				} else {

@@ -116,13 +116,11 @@ namespace Dmrg {
 		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 
 		WaveFunctionTransfSu2(
-				const size_t& hilbertSpaceOneSite,
 				const size_t& stage,
 				const bool& firstCall,
 				const size_t& counter,
 				const DmrgWaveStructType& dmrgWaveStruct)
-		: hilbertSpaceOneSite_(hilbertSpaceOneSite),
-		  stage_(stage),
+		: stage_(stage),
 		  firstCall_(firstCall),
 		  counter_(counter),
 		  dmrgWaveStruct_(dmrgWaveStruct),
@@ -133,12 +131,13 @@ namespace Dmrg {
 		virtual void transformVector(
 						VectorWithOffsetType& psiDest,
 						const VectorWithOffsetType& psiSrc,
-						const LeftRightSuperType& lrs) const
+						const LeftRightSuperType& lrs,
+						size_t nk) const
 		{
 			if (stage_==EXPAND_ENVIRON)
-				transformVector1Su2(psiDest,psiSrc,lrs);
+				transformVector1Su2(psiDest,psiSrc,lrs,nk);
 			if (stage_==EXPAND_SYSTEM)
-				transformVector2Su2(psiDest,psiSrc,lrs);
+				transformVector2Su2(psiDest,psiSrc,lrs,nk);
 		}
 
 	private:
@@ -147,9 +146,9 @@ namespace Dmrg {
 		void transformVector1Su2(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs) const
+				const LeftRightSuperType& lrs,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = lrs.super().getFactors().rank()/lrs.right().getFactors().rank();
 			size_t njp = lrs.right().getFactors().rank()/nk;
 
@@ -176,7 +175,7 @@ namespace Dmrg {
 				size_t i = psiDest.sector(ii);
 				size_t start = psiDest.offset(i);
 				size_t final = psiDest.effectiveSize(i)+start;
-				transformVector1Su2(psiDest,psiSrc,lrs,start,final);
+				transformVector1Su2(psiDest,psiSrc,lrs,start,final,nk);
 			}
 		}
 		
@@ -186,12 +185,12 @@ namespace Dmrg {
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
 				size_t start,
-				size_t final) const
+				size_t final,
+				size_t nk) const
 		{
 			const FactorsType& factorsSE = lrs.super().getFactors();
 			const FactorsType& factorsSEOld = dmrgWaveStruct_.lrs.super().getFactors();
 			const FactorsType& factorsE = lrs.right().getFactors();
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = lrs.super().getFactors().rank()/lrs.right().getFactors().rank();
 			
 			FactorsType factorsInverseSE,
@@ -214,7 +213,7 @@ namespace Dmrg {
 					for (int k2I = factorsInverseE.getRowPtr(beta);k2I < factorsInverseE.getRowPtr(beta+1);k2I++) {
 						size_t kp,jp;
 						pack2.unpack(kp,jp,(size_t)factorsInverseE.getCol(k2I));
-						psiDest[x] += createVectorAux1bSu2(psiSrc,ip,kp,jp,factorsSEOld,ws,weT)*
+						psiDest[x] += createVectorAux1bSu2(psiSrc,ip,kp,jp,factorsSEOld,ws,weT,nk)*
 								factorsInverseSE.getValue(kI)*factorsInverseE.getValue(k2I);
 					}
 				}
@@ -229,9 +228,9 @@ namespace Dmrg {
 				size_t jp,
 				const FactorsType& factorsSE,
 				const SparseMatrixType& ws,
-				const SparseMatrixType& weT) const
+				const SparseMatrixType& weT,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t ni=dmrgWaveStruct_.ws.n_col();
 			const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
 			SparseElementType sum=0;
@@ -260,9 +259,9 @@ namespace Dmrg {
 		void transformVector2Su2(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs) const
+				const LeftRightSuperType& lrs,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = lrs.left().getFactors().rank()/nk;
 			
 			if (dmrgWaveStruct_.ws.n_row()!=dmrgWaveStruct_.lrs.left().permutationInverse().size()) throw std::runtime_error("Error!!");
@@ -290,7 +289,7 @@ namespace Dmrg {
 				size_t i = psiDest.sector(ii);
 				size_t start = psiDest.offset(i);
 				size_t final = psiDest.effectiveSize(i)+start;
-				transformVector2Su2(psiDest,psiSrc,lrs,start,final);
+				transformVector2Su2(psiDest,psiSrc,lrs,start,final,nk);
 			}
 		}
 		
@@ -300,9 +299,9 @@ namespace Dmrg {
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
 				size_t start,
-				size_t final) const
+				size_t final,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nip = lrs.left().getFactors().rank()/nk;
 			size_t nalpha = lrs.left().getFactors().rank();
 			
@@ -330,7 +329,7 @@ namespace Dmrg {
 					for (int k2I=factorsInverseS.getRowPtr(alphax);k2I<factorsInverseS.getRowPtr(alphax+1);k2I++) {
 						size_t ip,kp;
 						pack2.unpack(ip,kp,(size_t)factorsInverseS.getCol(k2I));
-						psiDest[x] += fastAux2bSu2(psiSrc,ip,kp,jp,wsT,we)* //factorsInverseSEOld)*
+						psiDest[x] += fastAux2bSu2(psiSrc,ip,kp,jp,wsT,we,nk)* //factorsInverseSEOld)*
 								factorsInverseSE.getValue(kI)*factorsInverseS.getValue(k2I);
 					}
 				}
@@ -344,9 +343,9 @@ namespace Dmrg {
 				size_t kp,
 				size_t jp,
 				const SparseMatrixType& wsT,
-				const SparseMatrixType& we) const
+				const SparseMatrixType& we,
+				size_t nk) const
 		{
-			size_t nk = hilbertSpaceOneSite_;
 			size_t nalpha=dmrgWaveStruct_.lrs.left().getFactors().rank();
 			SparseElementType sum=0;
 			const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
@@ -373,7 +372,6 @@ namespace Dmrg {
 			return sum;
 		}
 
-		const size_t& hilbertSpaceOneSite_;
 		const size_t& stage_;
 		const bool& firstCall_;
 		const size_t& counter_;

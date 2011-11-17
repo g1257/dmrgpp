@@ -110,7 +110,7 @@ namespace Dmrg {
 			model_.setNaturalBasis(basisOfOneSite_,quantumNumbsOneSite_,addedBlockSize);
 		}
 
-		size_t hilbertSizePerSite() const { return model_.hilbertSize(); }
+		size_t hilbertSize(size_t site) const { return model_.hilbertSize(site); }
 
 		size_t chooseRandomState(size_t i) const
 		{

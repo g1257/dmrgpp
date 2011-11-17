@@ -140,29 +140,28 @@ namespace Dmrg {
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
 
-		DmrgSolver(
-				ParametersDmrgSolver<RealType> const &parameters,
-				ModelType const &model,
-				ConcurrencyType &concurrency,
-			  	TargettingParamsType& targetStruct) :
-				parameters_(parameters),
-				model_(model),
-				concurrency_(concurrency),
-				targetStruct_(targetStruct),
-				verbose_(false),
-				useReflection_(false),
-				lrs_("pSprime","pEprime","pSE"),
-				io_(parameters_.filename,concurrency.rank()),
-				ioIn_(parameters_.filename),
-				progress_("DmrgSolver",concurrency.rank()),
-				quantumSector_(0),
-				stepCurrent_(0),
-				checkpoint_(parameters_,concurrency.rank()),
-				wft_(parameters_,model_.hilbertSize()),
-				diagonalization_(parameters,model,concurrency,verbose_,
-				  useReflection_,io_,quantumSector_,wft_),
-				truncate_(lrs_,wft_,concurrency_,
-				  parameters_,model_.maxConnections(),verbose_)
+		DmrgSolver(ParametersDmrgSolver<RealType> const &parameters,
+		           ModelType const &model,
+		           ConcurrencyType &concurrency,
+		           TargettingParamsType& targetStruct)
+		: parameters_(parameters),
+		  model_(model),
+		  concurrency_(concurrency),
+		  targetStruct_(targetStruct),
+		  verbose_(false),
+		  useReflection_(false),
+		  lrs_("pSprime","pEprime","pSE"),
+		  io_(parameters_.filename,concurrency.rank()),
+		  ioIn_(parameters_.filename),
+		  progress_("DmrgSolver",concurrency.rank()),
+		  quantumSector_(0),
+		  stepCurrent_(0),
+		  checkpoint_(parameters_,concurrency.rank()),
+		  wft_(parameters_),
+		  diagonalization_(parameters,model,concurrency,verbose_,
+		                   useReflection_,io_,quantumSector_,wft_),
+		  truncate_(lrs_,wft_,concurrency_,
+		            parameters_,model_.maxConnections(),verbose_)
 		{
 			io_.print(parameters_);
 			io_.print(targetStruct_);

@@ -134,7 +134,7 @@ namespace Dmrg {
 
 		size_t orbitals() const { return modelFeAs_.orbitals(); }
 
-		size_t hilbertSize() const { return modelFeAs_.hilbertSize(); }
+		size_t hilbertSize(size_t site) const { return modelFeAs_.hilbertSize(); }
 
 		void print(std::ostream& os) const { modelFeAs_.print(os); }
 

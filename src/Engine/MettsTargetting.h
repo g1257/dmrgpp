@@ -158,7 +158,6 @@ namespace Dmrg {
 			  progress_("MettsTargetting(AlphaStage)",0),
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
-			  hilbertSizePerSite_(model_.hilbertSize()),
 			  mettsStochastics_(model,mettsStruct.rngSeed),
 			  mettsCollapse_(mettsStochastics_,lrs_),
 			  timesWithoutAdvancement_(0),
@@ -309,7 +308,7 @@ namespace Dmrg {
 				os<<"MettsWeightGroundState="<<gsWeight_<<"\n";
 			}
 
-			void initialGuess(VectorWithOffsetType& v) const
+			void initialGuess(VectorWithOffsetType& v,size_t nk) const
 			{
 				std::string s("MettsTargetting: Invalid call to initialGuess\n");
 				throw std::runtime_error(s.c_str());
@@ -359,7 +358,9 @@ namespace Dmrg {
 				msg<<"Evolving, stage="<<getStage()<<" loopNumber="<<loopNumber;
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
-				advanceOrWft(index,indexAdvance,direction);
+				assert(sites.first==sites.second);
+				size_t nk = model_.hilbertSize(sites.first);
+				advanceOrWft(index,indexAdvance,direction,nk);
 			}
 
 			void advanceCounterAndComputeStage()
@@ -382,7 +383,8 @@ namespace Dmrg {
 
 			void advanceOrWft(size_t index,
 							  size_t indexAdvance,
-			                  size_t systemOrEnviron)
+			                  size_t systemOrEnviron,
+							  size_t nk)
 			{
 				if (targetVectors_[index].size()==0) return;
 				assert(std::norm(targetVectors_[index])>1e-6);
@@ -403,13 +405,12 @@ namespace Dmrg {
 					assert(std::norm(targetVectors_[advance])>1e-6);
 					populateCorrectSector(phiNew);
 					// OK, now that we got the partition number right, let's wft:
-					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_);
+					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_,nk);
 					//phiNew.collapseSectors();
 					assert(std::norm(phiNew)>1e-6);
 					targetVectors_[index] = phiNew;
 				} else {
-					throw std::runtime_error("It's 5 am, do you know what line "
-					" your code is exec-ing?\n");
+					assert(false);
 				}
 			}
 
@@ -496,12 +497,12 @@ namespace Dmrg {
 				if (transform.n_row()==0) {
 					tmpVector = oldVector;
 				} else {
-					delayedTransform(tmpVector,oldVector,direction,transform);
+					delayedTransform(tmpVector,oldVector,direction,transform,site);
 				}
 				size_t ns = tmpVector.size();
-				size_t ne = model_.hilbertSize();
+				size_t ne = model_.hilbertSize(site);
 				size_t newSize =  (transform.n_col()==0) ? (ns*ns) : 
-				                        transform.n_col() * model_.hilbertSize();
+				                        transform.n_col() * ne;
 				newVector.resize(newSize);
 
 				std::ostringstream msg;
@@ -524,11 +525,12 @@ namespace Dmrg {
 			void delayedTransform(VectorType& newVector,
 			                      VectorType& oldVector,
 			                      size_t direction,
-			                     const MatrixType& transform)
+			                      const MatrixType& transform,
+			                      size_t site)
 			{
 				assert(oldVector.size()==transform.n_row());
 
-				size_t ne = model_.hilbertSize();
+				size_t ne = model_.hilbertSize(site);
 				
 				const std::vector<size_t>& permutationInverse = (direction==SYSTEM)
 				? systemPrev_.permutationInverse : environPrev_.permutationInverse;
@@ -555,7 +557,7 @@ namespace Dmrg {
 			{
 				size_t sitePlusOrMinus = (site==1) ? 0 : site+1;
 				size_t alphaFixed = mettsStochastics_.chooseRandomState(sitePlusOrMinus);
-				oldVector.resize(hilbertSizePerSite_);
+				oldVector.resize(model_.hilbertSize(site));
 				for (size_t i=0;i<oldVector.size();i++) {
 					oldVector[i] = (i==alphaFixed) ? 1 : 0;
 				}
@@ -935,7 +937,6 @@ namespace Dmrg {
 			RealType gsWeight_;
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
-			size_t hilbertSizePerSite_;
 			MettsStochasticsType mettsStochastics_;
 			MettsCollapseType mettsCollapse_;
 			size_t timesWithoutAdvancement_;
