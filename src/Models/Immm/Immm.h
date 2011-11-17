@@ -386,9 +386,9 @@ namespace Dmrg {
 				jmSaved = jmpair;
 
 				// nup
-				electronsUp[i] = hilbertSpace_.electronsWithGivenSpin(basis[i],HilbertSpaceImmmType::SPIN_UP);
+				electronsUp[i] = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_UP);
 				// ndown
-				electronsDown[i] = hilbertSpace_.electronsWithGivenSpin(basis[i],HilbertSpaceImmmType::SPIN_DOWN);
+				electronsDown[i] = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_DOWN);
 			}
 			q.jmValues=jmvalues;
 			q.flavors = flavors;

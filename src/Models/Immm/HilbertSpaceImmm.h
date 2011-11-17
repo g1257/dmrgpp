@@ -162,7 +162,7 @@ namespace Dmrg {
 		}
 		
 		//! Number of electrons with spin spin (sums over bands)
-		int electronsWithGivenSpin(Word const &data,size_t spin) const
+		int electronsWithGivenSpin(Word const &data,size_t site,size_t spin) const
 		{
 			throw std::runtime_error("electronsWithGivenSpin needs site\n");
 			size_t i = 0;

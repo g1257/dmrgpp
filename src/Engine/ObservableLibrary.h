@@ -211,7 +211,7 @@ namespace Dmrg {
 			Su2RelatedType su2Related1;
 
 			if (label=="superDensity") {
-				A.makeDiagonal(model_.hilbertSize(),1.0);
+				A.makeDiagonal(model_.hilbertSize(observe_.site()),1.0);
 				std::pair<size_t,size_t> zeroZero(0,0);
 				OperatorType opIdentity(A,1,zeroZero,1,su2Related1);
 				observe_.setBrackets("time","time");
