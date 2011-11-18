@@ -87,15 +87,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  */
 
-namespace Dmrg { 	
-	template<typename LeftRightSuperType_,
-		typename ReflectionSymmetryType_,
-		typename ConcurrencyType_>
+namespace Dmrg {
+	template<typename LeftRightSuperType_,typename ReflectionSymmetryType_,typename ConcurrencyType_>
 	class ModelHelperLocal {
 
 		typedef PsimagLite::PackIndices PackIndicesType;
 
-	public:	
+	public:
 		typedef LeftRightSuperType_ LeftRightSuperType;
 		typedef typename LeftRightSuperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
@@ -106,29 +104,24 @@ namespace Dmrg {
 		typedef typename OperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef typename BasisType::RealType RealType;
-		typedef typename LeftRightSuperType::BasisWithOperatorsType
-				BasisWithOperatorsType;
+		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 		//typedef RightLeftLocal<BasisType,BasisWithOperatorsType,SparseMatrixType> RightLeftLocalType;
 		typedef Link<SparseElementType,RealType> LinkType;
-		
+
 		static const size_t System=0,Environ=1;
-		
-		ModelHelperLocal(
-				size_t m,
-				const LeftRightSuperType& lrs,
-				size_t orbitals,
-				bool useReflection=false)
-		:
-			m_(m),
-			lrs_(lrs),
-			buffer_(lrs_.left().size()),
-			basis2tc_(lrs_.left().numberOfOperators()),
-			basis3tc_(lrs_.right().numberOfOperators()),
-			alpha_(lrs_.super().size()),
-			beta_(lrs_.super().size()),
-			reflection_(useReflection),
-			numberOfOperators_(lrs_.left().numberOfOperatorsPerSite())
-			//,rightLeftLocal_(m,basis1,basis2,basis3,orbitals,useReflection)
+
+		ModelHelperLocal(size_t m,
+		                 const LeftRightSuperType& lrs,
+		                 bool useReflection=false)
+		: m_(m),
+		  lrs_(lrs),
+		  buffer_(lrs_.left().size()),
+		  basis2tc_(lrs_.left().numberOfOperators()),
+		  basis3tc_(lrs_.right().numberOfOperators()),
+		  alpha_(lrs_.super().size()),
+		  beta_(lrs_.super().size()),
+		  reflection_(useReflection),
+		  numberOfOperators_(lrs_.left().numberOfOperatorsPerSite())
 		{
 			createBuffer();
 			createTcOperators(basis2tc_,lrs_.left());
@@ -146,11 +139,10 @@ namespace Dmrg {
 //
 //		const BasisWithOperatorsType& basis3() const  { return basis3_; }
 
-		const SparseMatrixType& getReducedOperator(
-				char modifier,
-				size_t i,
-				size_t sigma,
-				size_t type) const
+		const SparseMatrixType& getReducedOperator(char modifier,
+		                                          size_t i,
+		                                          size_t sigma,
+		                                          size_t type) const
 		{
 			size_t ii = i*numberOfOperators_+sigma;
 			if (modifier=='N') {
@@ -175,23 +167,22 @@ namespace Dmrg {
 		//! Does matrixBlock= (AB), A belongs to pSprime and B
 		// belongs to pEprime or viceversa (inter)
 		void fastOpProdInter(SparseMatrixType const &A,
-				SparseMatrixType const &B,
-				SparseMatrixType &matrixBlock,
-				const LinkType& link,
-				bool flipped = false) const
+		                     SparseMatrixType const &B,
+		                     SparseMatrixType &matrixBlock,
+		                     const LinkType& link,
+		                     bool flipped = false) const
 		{
 			//int const SystemEnviron=1,EnvironSystem=2;
-			RealType fermionSign =
-					(link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
-			
+			RealType fermionSign =(link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
+
 			//! work only on partition m
 			if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
 				LinkType link2 = link;
 				link2.value *= fermionSign;
-				link2.type = ProgramGlobals::SYSTEM_ENVIRON; 
+				link2.type = ProgramGlobals::SYSTEM_ENVIRON;
 				fastOpProdInter(B,A,matrixBlock,link2,true);
 				return;
-			}		
+			}
 
 			int m = m_;
 			int offset = lrs_.super().partition(m);
@@ -204,8 +195,8 @@ namespace Dmrg {
 				// row i of the ordered product basis
 				matrixBlock.setRow(i,counter);
 				int alpha=alpha_[i];
-				int beta=beta_[i];		
-							
+				int beta=beta_[i];
+
 				for (int k=A.getRowPtr(alpha);k<A.getRowPtr(alpha+1);k++) {
 					int alphaPrime = A.getCol(k);
 					for (int kk=B.getRowPtr(beta);kk<B.getRowPtr(beta+1);kk++) {
@@ -217,26 +208,26 @@ namespace Dmrg {
 						   the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
 						  */
 						SparseElementType tmp = A.getValue(k) * B.getValue(kk)*link.value;
-						if (link.fermionOrBoson == ProgramGlobals::FERMION) 
+						if (link.fermionOrBoson == ProgramGlobals::FERMION)
 							tmp *= lrs_.left().fermionicSign(alpha,int(fermionSign));
 						//if (tmp==static_cast<MatrixElementType>(0.0)) continue;
 						matrixBlock.pushCol(j);
 						matrixBlock.pushValue(tmp);
 						counter++;
 					}
-				}				
-			} 
-			matrixBlock.setRow(i,counter);	
+				}
+			}
+			matrixBlock.setRow(i,counter);
 		}
-		
+
 		//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
 		//! Has been changed to accomodate for reflection symmetry
-		void fastOpProdInter(	std::vector<SparseElementType>  &x,
-					std::vector<SparseElementType>  const &y,
-					SparseMatrixType const &A,
-					SparseMatrixType const &B,
-					const LinkType& link,
-				    	bool flipped = false) const
+		void fastOpProdInter(std::vector<SparseElementType>  &x,
+		                     std::vector<SparseElementType>  const &y,
+		                     SparseMatrixType const &A,
+		                     SparseMatrixType const &B,
+		                     const LinkType& link,
+		                     bool flipped = false) const
 		{
 			//int const SystemEnviron=1,EnvironSystem=2;
 			RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
@@ -244,11 +235,11 @@ namespace Dmrg {
 			if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
 				LinkType link2 = link;
 				link2.value *= fermionSign;
-				link2.type = ProgramGlobals::SYSTEM_ENVIRON; 
+				link2.type = ProgramGlobals::SYSTEM_ENVIRON;
 				fastOpProdInter(x,y,B,A,link2,true);
 				return;
 			}
-			
+
 			//! work only on partition m
 			int m = m_;
 			int offset = lrs_.super().partition(m);
@@ -269,19 +260,18 @@ namespace Dmrg {
 				 *   here the environ is applied first and has to "cross"
 				 *   the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
 				 */
-				SparseElementType fsValue = (link.fermionOrBoson == ProgramGlobals::FERMION) ?
-					lrs_.left().fermionicSign(alpha,int(fermionSign))*link.value : link.value;
-				
+				SparseElementType fsValue = (link.fermionOrBoson == ProgramGlobals::FERMION) ? lrs_.left().fermionicSign(alpha,int(fermionSign))*link.value : link.value;
+
 				for (int k=startk;k<endk;k++) {
 					int alphaPrime = A.getCol(k);
-					SparseElementType tmp2 = A.getValue(k) *fsValue;	
+					SparseElementType tmp2 = A.getValue(k) *fsValue;
 					const std::vector<int>& bufferTmp = buffer_[alphaPrime];
 
 					for (int kk=startkk;kk<endkk;kk++) {
 						int betaPrime= B.getCol(kk);
 						int j = bufferTmp[betaPrime];
 						if (j<0) continue;
-						
+
 						SparseElementType tmp = tmp2 * B.getValue(kk);
 						xSubI += tmp * y[j];
 						//if (tmp==static_cast<MatrixElementType>(0.0)) continue;
@@ -298,8 +288,9 @@ namespace Dmrg {
 		//! Then, this function does x += H_m * y
 		//! This is a performance critical function
 		//! Has been changed to accomodate for reflection symmetry
-		void hamiltonianLeftProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y) const 
-		{ 
+		void hamiltonianLeftProduct(std::vector<SparseElementType> &x,
+		                            std::vector<SparseElementType> const &y) const
+		{
 			int m = m_;
 			int offset = lrs_.super().partition(m);
 			int i,k,alphaPrime;
@@ -329,8 +320,9 @@ namespace Dmrg {
 		//! Let H_m be  the m-th block (in the ordering of basis1) of H
 		//! Then, this function does x += H_m * y
 		//! This is a performance critical function
-		void hamiltonianRightProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y) const 
-		{ 
+		void hamiltonianRightProduct(std::vector<SparseElementType> &x,
+		                             std::vector<SparseElementType> const &y) const
+		{
 			int m = m_;
 			int offset = lrs_.super().partition(m);
 			int i,k;
@@ -346,7 +338,7 @@ namespace Dmrg {
 
 				// row i of the ordered product basis
 				for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
-					
+
 					//betaPrimeNs  = hamiltonian.getCol(k) *ns;
 					//j = basis1_.permutationInverse(alpha + betaPrimeNs)-offset;
 					//if (j<0 || j>=bs) continue;
@@ -361,8 +353,9 @@ namespace Dmrg {
 		//! if option==false let  H_{alpha,beta; alpha',beta'} = basis2.hamiltonian_{beta,beta'} \delta_{alpha,alpha'}
 		//! returns the m-th block (in the ordering of basis1) of H
 		//! Note: USed only for debugging
-		void calcHamiltonianPart(SparseMatrixType &matrixBlock,bool option) const 
-		{ 
+		void calcHamiltonianPart(SparseMatrixType &matrixBlock,
+		                         bool option) const
+		{
 			int m  = m_;
 			size_t offset = lrs_.super().partition(m);
 			int k,alphaPrime=0,betaPrime=0;
@@ -381,7 +374,7 @@ namespace Dmrg {
 			crsMatrixToFullMatrix(fullm,hamiltonian);
 			//printNonZero(fullm,std::cerr);
 			matrixBlock.resize(bs);
-			
+
 			int counter=0;
 			PackIndicesType pack(ns);
 			for (size_t i=offset;i<lrs_.super().partition(m+1);i++) {
@@ -395,12 +388,12 @@ namespace Dmrg {
 				} else {
 					alphaPrime=alpha;
 					r=beta;
-				}	
-				if (r>=hamiltonian.rank()) 
+				}
+				if (r>=hamiltonian.rank())
 					throw std::runtime_error("DrmgModelHelper::calcHamiltonianPart(): internal error\n");
 				// row i of the ordered product basis
 				for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
-					
+
 					if (option) alphaPrime = hamiltonian.getCol(k);
 					else 	    betaPrime  = hamiltonian.getCol(k);
 					size_t j = lrs_.super().permutationInverse(alphaPrime + betaPrime * ns);
@@ -414,10 +407,12 @@ namespace Dmrg {
 			matrixBlock.setRow(lrs_.super().partition(m+1)-offset,counter);
 		}
 
-		void getReflectedEigs(
-				RealType& energyTmp,std::vector<SparseElementType>& tmpVec,
-				RealType energyTmp1,const std::vector<SparseElementType>& tmpVec1,
-				RealType energyTmp2,const std::vector<SparseElementType>& tmpVec2) const
+		void getReflectedEigs(RealType& energyTmp,
+		                      std::vector<SparseElementType>& tmpVec,
+		                      RealType energyTmp1,
+		                      const std::vector<SparseElementType>& tmpVec1,
+		                      RealType energyTmp2,
+		                      const std::vector<SparseElementType>& tmpVec2) const
 		{
 			reflection_.getReflectedEigs(energyTmp,tmpVec,energyTmp1,tmpVec1,energyTmp2,tmpVec2);
 		}
@@ -451,14 +446,14 @@ namespace Dmrg {
 		ReflectionSymmetryType reflection_;
 		size_t numberOfOperators_;
 		//RightLeftLocalType rightLeftLocal_;
-		
+
 		const SparseMatrixType& getTcOperator(int i,size_t type) const
 		{
 			if (type==System) return basis2tc_[i];
 			return basis3tc_[i];
 		}
-		
-		void createBuffer() 
+
+		void createBuffer()
 		{
 			size_t ns=lrs_.left().size();
 			size_t ne=lrs_.right().size();
@@ -467,21 +462,19 @@ namespace Dmrg {
 
 			std::vector<int>  tmpBuffer(ne);
 			for (size_t alphaPrime=0;alphaPrime<ns;alphaPrime++) {
-				for (size_t betaPrime=0;betaPrime<ne;betaPrime++) {	
-					tmpBuffer[betaPrime] =lrs_.super().
-							permutationInverse(alphaPrime + betaPrime*ns) -
-								offset;
-					if (tmpBuffer[betaPrime]>=total) tmpBuffer[betaPrime]= -1 ;
+				for (size_t betaPrime=0;betaPrime<ne;betaPrime++) {
+					tmpBuffer[betaPrime] =lrs_.super().permutationInverse(alphaPrime + betaPrime*ns) -offset;
+					if (tmpBuffer[betaPrime]>=total) tmpBuffer[betaPrime]= -1;
 				}
 				buffer_[alphaPrime]=tmpBuffer;
 			}
 		}
 
 		void createTcOperators(std::vector<SparseMatrixType>& basistc,
-				const BasisWithOperatorsType& basis)
+		                       const BasisWithOperatorsType& basis)
 		{
 			for (size_t i=0;i<basistc.size();i++)
-				transposeConjugate( basistc[i],basis.getOperatorByIndex(i).data);
+				transposeConjugate(basistc[i],basis.getOperatorByIndex(i).data);
 		}
 
 		void createAlphaAndBeta()
@@ -493,8 +486,7 @@ namespace Dmrg {
 			PackIndicesType pack(ns);
 			for (int i=0;i<total;i++) {
 				// row i of the ordered product basis
-				pack.unpack(alpha_[i],beta_[i],
-						lrs_.super().permutation(i+offset));
+				pack.unpack(alpha_[i],beta_[i],lrs_.super().permutation(i+offset));
 			}
 		}
 	}; // class ModelHelperLocal

@@ -277,7 +277,7 @@ namespace Dmrg {
 				} else {
 					lrs = new  ThisType(Xbasis,pS,*leftOrRightL);
 				}
-				model.addHamiltonianConnection(matrix,*lrs,model.orbitals());
+				model.addHamiltonianConnection(matrix,*lrs);
 				delete lrs;
 				leftOrRight.setHamiltonian(matrix);
 			}

@@ -112,16 +112,12 @@ namespace Dmrg {
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef Link<SparseElementType,RealType> LinkType;
 		
-		ModelHelperSu2(
-				int m,
-				const LeftRightSuperType& lrs,
-				size_t nOrbitals,
-				bool useReflection=false)
+		ModelHelperSu2(int m,const LeftRightSuperType& lrs,bool useReflection=false)
 		: m_(m),
 		  lrs_(lrs),
 		  reflection_(useReflection),
 		  numberOfOperators_(lrs_.left().numberOfOperatorsPerSite()),
-		  su2reduced_(m,lrs,nOrbitals)
+		  su2reduced_(m,lrs)
 		{}
 
 		static bool isSu2() { return true; }

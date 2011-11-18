@@ -115,7 +115,7 @@ namespace Dmrg {
 		: ModelBaseType(dmrgGeometry),modelParameters_(mp), dmrgGeometry_(dmrgGeometry),modelHubbard_(mp,dmrgGeometry)
 		{}
 
-		size_t orbitals() const { return modelHubbard_.orbitals(); }
+// 		size_t orbitals() const { return modelHubbard_.orbitals(); }
 
 		size_t hilbertSize(size_t site) const
 		{

@@ -144,7 +144,7 @@ namespace Dmrg {
 
 		void print(std::ostream& os) const { os<<modelParameters_; }
 
-		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
+// 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
 
 		size_t hilbertSize(size_t site) const { return 2; } 
 

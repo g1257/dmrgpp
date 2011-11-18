@@ -132,10 +132,7 @@ namespace Dmrg {
 				modelCommon_.matrixVectorProduct(x,y,modelHelper);
 			}
 
-			void addHamiltonianConnection(
-				SparseMatrixType &matrix,
-				const LeftRightSuperType& lrs,
-				size_t nOrbitals) const
+			void addHamiltonianConnection(SparseMatrixType &matrix,const LeftRightSuperType& lrs) const
 			{
 				int bs,offset;
 				SparseMatrixType matrixBlock;
@@ -144,7 +141,7 @@ namespace Dmrg {
 					offset =lrs.super().partition(m);
 					bs = lrs.super().partition(m+1)-offset;
 					matrixBlock.makeDiagonal(bs);
-					ModelHelperType modelHelper(m,lrs,nOrbitals);
+					ModelHelperType modelHelper(m,lrs);
 					modelCommon_.addHamiltonianConnection(matrixBlock,modelHelper);
 					sumBlock(matrix,matrixBlock,offset);
 				}

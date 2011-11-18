@@ -164,15 +164,13 @@ namespace Dmrg {
 		//! Number of electrons with spin spin (sums over bands)
 		int electronsWithGivenSpin(Word const &data,size_t site,size_t spin) const
 		{
-			throw std::runtime_error("electronsWithGivenSpin needs site\n");
-			size_t i = 0;
-			size_t sum=0;
-			size_t norb = degreesOfFreedom_[i]/NUMBER_OF_SPINS;
+			
+			size_t norb = degreesOfFreedom_[site]/NUMBER_OF_SPINS;
 			size_t beginX=spin*norb;
 			size_t endX=beginX + norb;
-			
-			for (size_t x=beginX;x<endX;x++)
-				sum += getNofDigits(data,x);
+			size_t sum=0;
+
+			for (size_t x=beginX;x<endX;x++) sum += getNofDigits(data,x);
 			
 			return sum;	
 			
@@ -184,7 +182,7 @@ namespace Dmrg {
 			size_t sum=0;
 			
 			for (size_t sector=0;sector<degreesOfFreedom_[site];sector++)
-				sum += calcNofElectrons(data,site,sector);
+				sum += calcNofElectrons(data,0,sector);
 			
 			return sum;	
 			

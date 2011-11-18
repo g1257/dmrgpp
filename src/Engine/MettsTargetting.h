@@ -789,7 +789,7 @@ namespace Dmrg {
 			               size_t i0)
 			{
 				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
-				typename ModelType::ModelHelperType modelHelper(p,lrs_,model_.orbitals());
+				typename ModelType::ModelHelperType modelHelper(p,lrs_);
 				 		//,useReflection_);
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			

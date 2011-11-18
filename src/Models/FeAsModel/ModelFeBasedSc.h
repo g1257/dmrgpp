@@ -138,7 +138,7 @@ namespace Dmrg {
 			setPauliMatrix();
 		}
 
-		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
+// 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
 
 		size_t hilbertSize(size_t site) const { return (size_t)pow(2,NUMBER_OF_ORBITALS*2); } 
 

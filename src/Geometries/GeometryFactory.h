@@ -88,22 +88,24 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Ladder.h"
 #include "LadderX.h"
 #include "LadderBath.h"
+#include "KTwoNiFFour.h"
 
 namespace Dmrg {
 	
 	class GeometryFactory {
 			static size_t refCounter_;
 		public:
-			enum {CHAIN,LADDER,LADDERX,LADDERBATH};
-			GeometryFactory() : dirs_(0), // move to object.dirs()
-						n_(0),
-						maxConnections_(0),
-						chain_(0),
-						ladder_(0),
-						ladderx_(0),
-						ladderbath_(0)
-			{
-			}
+			enum {CHAIN,LADDER,LADDERX,LADDERBATH,KTWONIFFOUR};
+			GeometryFactory() 
+			: dirs_(0), // move to object.dirs()
+			  n_(0),
+			  maxConnections_(0),
+			  chain_(0),
+			  ladder_(0),
+			  ladderx_(0),
+			  ladderbath_(0),
+			  ktwoniffour_(0)
+			{}
 
 			GeometryFactory(const GeometryFactory& g)
 			{
@@ -114,6 +116,7 @@ namespace Dmrg {
 				ladder_=g.ladder_;
 				ladderx_=g.ladderx_;
 				ladderbath_=g.ladderbath_;
+				ktwoniffour_=g.ktwoniffour_;
 				refCounter_++;
 			}
 
@@ -126,6 +129,7 @@ namespace Dmrg {
 				ladder_=g.ladder_;
 				ladderx_=g.ladderx_;
 				ladderbath_=g.ladderbath_;
+				ktwoniffour_=g.ktwoniffour_;
 				refCounter_++;
 				return *this;
 			}
@@ -148,6 +152,9 @@ namespace Dmrg {
 					break;
 				case LADDERBATH:
 					if (ladderbath_) delete ladderbath_;
+					break;
+				case KTWONIFFOUR:
+					if (ktwoniffour_) delete ktwoniffour_;
 					break;
 				}
 			}
@@ -186,6 +193,10 @@ namespace Dmrg {
 					ladderbath_ = new LadderBath(linSize,x,tmp);
 					maxConnections_ = ladderbath_->maxConnections();
 					break;
+				case KTWONIFFOUR:
+					dirs_ = 4;
+					ktwoniffour_ = new KTwoNiFFour(linSize);
+					break;
 				default:
 					throw std::runtime_error("Unknown geometry\n");
 				}
@@ -204,10 +215,11 @@ namespace Dmrg {
 					return ladderx_->handle(i,j);
 				case LADDERBATH:
 					return ladderbath_->handle(i,j);
+				case KTWONIFFOUR:
+					return ktwoniffour_->handle(i,j);
 				}
 				throw std::runtime_error("Unknown geometry\n");
 			}
-
 
 			size_t getVectorSize(size_t dirId) const
 			{
@@ -220,6 +232,8 @@ namespace Dmrg {
 					return ladderx_->getVectorSize(dirId);
 				case LADDERBATH:
 					return ladderbath_->getVectorSize(dirId);
+				case KTWONIFFOUR:
+					return ktwoniffour_->getVectorSize(dirId);
 				}
 				throw std::runtime_error("Unknown geometry\n");
 			}
@@ -235,6 +249,8 @@ namespace Dmrg {
 					return ladderx_->connected(i1,i2);
 				case LADDERBATH:
 					return ladderbath_->connected(i1,i2);
+				case KTWONIFFOUR:
+					return ktwoniffour_->connected(i1,i2);
 				}
 				throw std::runtime_error("Unknown geometry\n");
 			}
@@ -250,6 +266,8 @@ namespace Dmrg {
 					return ladderx_->calcDir(i1,i2);
 				case LADDERBATH:
 					return ladderbath_->calcDir(i1,i2);
+				case KTWONIFFOUR:
+					return ktwoniffour_->calcDir(i1,i2);
 				}
 				throw std::runtime_error("Unknown geometry\n");
 			}
@@ -265,6 +283,8 @@ namespace Dmrg {
 					return ladderx_->fringe(i,smax,emin);
 				case LADDERBATH:
 					return ladderbath_->fringe(i,smax,emin);
+				case KTWONIFFOUR:
+					return ktwoniffour_->fringe(i,smax,emin);
 				}
 				throw std::runtime_error("Unknown geometry\n");
 			}
@@ -280,6 +300,8 @@ namespace Dmrg {
 					return ladderx_->getSubstituteSite(smax,emin,siteNew2);
 				case LADDERBATH:
 					return ladderbath_->getSubstituteSite(smax,emin,siteNew2);
+				case KTWONIFFOUR:
+					return ktwoniffour_->getSubstituteSite(smax,emin,siteNew2);
 				}
 				throw std::runtime_error("Unknown geometry\n");
 			}
@@ -295,6 +317,8 @@ namespace Dmrg {
 					return ladderx_->label();
 				case LADDERBATH:
 					return ladderbath_->label();
+				case KTWONIFFOUR:
+					return ktwoniffour_->label();
 				}
 				throw std::runtime_error("Unknown geometry\n");
 			}
@@ -310,6 +334,7 @@ namespace Dmrg {
 				else if (s=="ladder") x=LADDER;
 				else if (s=="ladderx") x=LADDERX;
 				else if (s=="bathedcluster") x=LADDERBATH;
+				else if (s=="ktwoniffour") x = KTWONIFFOUR;
 				else throw std::runtime_error("unknown geometry\n");
 				return x;
 			}
@@ -323,6 +348,7 @@ namespace Dmrg {
 			Ladder* ladder_;
 			LadderX* ladderx_;
 			LadderBath* ladderbath_;
+			KTwoNiFFour* ktwoniffour_;
 	}; // class GeometryFactory
 
 	size_t GeometryFactory::refCounter_=0;

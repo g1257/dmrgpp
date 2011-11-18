@@ -419,8 +419,7 @@ namespace Dmrg {
 				const VectorType& sv,
 				size_t p)
 		{
-			typename ModelType::ModelHelperType modelHelper(
-					p,lrs_,model_.orbitals());
+			typename ModelType::ModelHelperType modelHelper(p,lrs_);
 			typedef typename LanczosSolverType::LanczosMatrixType
 					LanczosMatrixType;
 			LanczosMatrixType h(&model_,&modelHelper);
@@ -444,8 +443,7 @@ namespace Dmrg {
 		                      const VectorType& sv,
 		                      size_t p)
 		{
-			typename ModelType::ModelHelperType modelHelper(
-					p,lrs_,model_.orbitals());
+			typename ModelType::ModelHelperType modelHelper(p,lrs_);
 			LanczosMatrixType h(&model_,&modelHelper);
 			CorrectionVectorFunctionType cvft(h,tstStruct_);
 			cvft.getXi(xi,sv);

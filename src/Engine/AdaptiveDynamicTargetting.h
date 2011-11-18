@@ -444,10 +444,8 @@ namespace Dmrg {
 				size_t site,
 				const VectorWithOffsetType& phiNew)
 		{
-			typename ModelType::ModelHelperType modelHelper(
-					p,lrs_,model_.orbitals());
-			typedef typename LanczosSolverType::LanczosMatrixType
-					LanczosMatrixType;
+			typename ModelType::ModelHelperType modelHelper(p,lrs_);
+			typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 			LanczosMatrixType h(&model_,&modelHelper);
 
 			RealType eps= 0.01*ProgramGlobals::LanczosTolerance;

@@ -144,11 +144,6 @@ namespace Dmrg {
 			buildIndex2Op();
 		}
 
-		size_t orbitals() const
-		{
-			throw "Oops orbitals changes from site to site\n";
-		}
-
 		size_t hilbertSize(size_t site) const
 		{
 			return (1<<degreesOfFreedom_[site]);
@@ -328,10 +323,10 @@ namespace Dmrg {
 			for (size_t ii=0;ii<n;ii++) {
 				bra=ket=natBasis[ii];
 				
-				if (hilbertSpace_.isNonZero(ket,site,sigma)) {
+				if (hilbertSpace_.isNonZero(ket,0,sigma)) {
 					
 				} else {
-					hilbertSpace_.create(bra,site,sigma);
+					hilbertSpace_.create(bra,0,sigma);
 					int jj = PsimagLite::isInVector(natBasis,bra);
 					assert(jj>=0);
 					assert(ii!=size_t(jj));
@@ -377,12 +372,12 @@ namespace Dmrg {
 
 				jmvalues.push_back(jmpair);
 
-				size_t na = hilbertSpace_.calcNofElectrons(basis[i],0,0) +
-						hilbertSpace_.calcNofElectrons(basis[i],0,0+2);
-				size_t nb = hilbertSpace_.calcNofElectrons(basis[i],0,1) +
-						hilbertSpace_.calcNofElectrons(basis[i],0,1+2);
+// 				size_t na = hilbertSpace_.calcNofElectrons(basis[i],0,0) +
+// 						hilbertSpace_.calcNofElectrons(basis[i],0,0+2);
+// 				size_t nb = hilbertSpace_.calcNofElectrons(basis[i],0,1) +
+// 						hilbertSpace_.calcNofElectrons(basis[i],0,1+2);
 
-				size_t flavor = na  + 3*nb;
+				size_t flavor = 0; // na  + 3*nb;
 
 				flavors.push_back(flavor);
 				jmSaved = jmpair;
@@ -565,7 +560,7 @@ namespace Dmrg {
 		{
 			size_t counter = 5;
 			for (size_t i=0;i<geometry_.numberOfSites();i++) {
-				if (counter%copperEach) degreesOfFreedom_[i]=2;
+				if (counter%copperEach==0) degreesOfFreedom_[i]=2;
 				else degreesOfFreedom_[i]=4;
 				counter++;
 			}

@@ -408,7 +408,7 @@ namespace Dmrg {
 		                       const VectorType& sv,
 		                       size_t p)
 		{
-			typename ModelType::ModelHelperType modelHelper(p,lrs_,model_.orbitals());
+			typename ModelType::ModelHelperType modelHelper(p,lrs_);
 			typename LanczosSolverType::LanczosMatrixType h(&model_,&modelHelper);
 
 			LanczosSolverType lanczosSolver(h,paramsForSolver_);

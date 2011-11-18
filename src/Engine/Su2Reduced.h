@@ -108,12 +108,10 @@ namespace Dmrg {
 	public:
 		Su2Reduced(int m,
 		           const LeftRightSuperType& lrs,
-		           size_t nOrbitals,
 		           bool useReflection=false)
 		:m_(m),
 		 lrs_(lrs),
-		 nOrbitals_(nOrbitals),
-		cgObject_(Su2SymmetryGlobalsType::clebschGordanObject)
+		 cgObject_(Su2SymmetryGlobalsType::clebschGordanObject)
 		{
 			std::vector<PairType> jsEffective;
 			std::vector<size_t> jvalues;
@@ -445,7 +443,6 @@ namespace Dmrg {
 
 		size_t m_;
 		const LeftRightSuperType& lrs_;
-		size_t nOrbitals_;
 		std::vector<PsimagLite::Matrix<SparseElementType> > lfactor_;
 		PsimagLite::Matrix<SparseElementType> lfactorHamiltonian_;
 		SparseMatrixType hamiltonian2_,hamiltonian3_;

@@ -305,8 +305,7 @@ namespace Dmrg {
 			std::vector<RealType> tmpVec1,tmpVec2;
 			//srand48(7123443);
 			
-			typename ModelType::ModelHelperType
-				modelHelper(i,lrs,model_.orbitals(),useReflection_);
+			typename ModelType::ModelHelperType modelHelper(i,lrs,useReflection_);
 
 			if (parameters_.options.find("debugmatrix")!=std::string::npos) {
 				SparseMatrixType fullm;
