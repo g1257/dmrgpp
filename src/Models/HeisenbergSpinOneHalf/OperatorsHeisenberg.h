@@ -110,12 +110,12 @@ namespace Dmrg {
 			if (label=="sz") return this->getOperatorByIndex(i*2+1); // Si^z
 			throw std::runtime_error("OperatorsHeisenberg: getOperator incorrect label\n");
 		}
-
+/*
 		//! Two operators per site here S+ and S^z
 		static size_t numberOfOperatorsPerSite()
 		{
 			return 2;
-		}
+		}*/
 	}; //class OperatorsHeisenberg
 } // namespace Dmrg
 

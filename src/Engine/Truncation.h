@@ -152,21 +152,21 @@ namespace Dmrg {
 		{
 			keptStates_ = keptStates;
 			//size_t opPerSite = lrs_.left().numberOfOperatorsPerSite();
-			size_t mostRecent = lrs_.left().numberOfOperatorsPerSite() * maxConnections_;
+// 			size_t mostRecent = lrs_.left().numberOfOperatorsPerSite() * maxConnections_;
 			if (direction==EXPAND_SYSTEM) {
-				size_t numOfOp = lrs_.left().numberOfOperators();
-				std::pair<size_t,size_t> startEnd(0,numOfOp);
-				if (startEnd.second>mostRecent) // && numOfOp>4*opPerSite)
-					startEnd.first = startEnd.second - mostRecent;
+// 				size_t numOfOp = lrs_.left().numberOfOperators();
+// 				std::pair<size_t,size_t> startEnd(0,numOfOp);
+// 				if (startEnd.second>mostRecent) // && numOfOp>4*opPerSite)
+// 					startEnd.first = startEnd.second - mostRecent;
 				changeAndTruncateBasis(rSprime,target,lrs_.left(),lrs_.right(),
-									   direction,startEnd);
+									   direction); //startEnd);
 			} else {
-				size_t numOfOp = lrs_.right().numberOfOperators();
-				std::pair<size_t,size_t> startEnd(0,numOfOp);
-				if (startEnd.second>mostRecent) // && numOfOp>4*opPerSite)
-					startEnd.second = mostRecent;
+// 				size_t numOfOp = lrs_.right().numberOfOperators();
+// 				std::pair<size_t,size_t> startEnd(0,numOfOp);
+// 				if (startEnd.second>mostRecent) // && numOfOp>4*opPerSite)
+// 					startEnd.second = mostRecent;
 				changeAndTruncateBasis(rSprime,target,lrs_.right(),lrs_.left(),
-									   direction,startEnd);
+									   direction); //startEnd);
 			}
 		}
 
@@ -181,8 +181,8 @@ namespace Dmrg {
 		                            const TargettingType& target,
 		                            BasisWithOperatorsType const &pBasis,
 		                            BasisWithOperatorsType const &pBasisSummed,
-		                            size_t direction,
-		                            const std::pair<size_t,size_t>& startEnd)
+		                            size_t direction)
+// 		                            const std::pair<size_t,size_t>& startEnd)
 		{
 			DensityMatrixType dmS(target,pBasis,pBasisSummed,lrs_.super(),direction);
 			dmS.check(direction);
@@ -206,7 +206,7 @@ namespace Dmrg {
 				std::cerr<<"About to changeBasis...\n";
 
 			error_ = rSprime.changeBasis(ftransform_,dmS(),eigs,keptStates_,
-			                             parameters_,concurrency_,startEnd);
+			                             parameters_,concurrency_); //startEnd);
 			if (direction == EXPAND_SYSTEM) {
 				LeftRightSuperType lrs(rSprime,
 										(BasisWithOperatorsType&) pBasisSummed,

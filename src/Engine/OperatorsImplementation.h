@@ -84,12 +84,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ReducedOperators.h"
 #include "Range.h"
+#include <cassert>
 
 namespace Dmrg {
-	//! 
+
 	template<typename OperatorType,typename DmrgBasisType>
 	class OperatorsImplementation {
+
+		typedef std::pair<size_t,size_t> PairType;
+
 		static const bool EXCLUDE = false;
+
 	public:	
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
@@ -105,9 +110,7 @@ namespace Dmrg {
 		: useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
 		  reducedOpImpl_(io,level,thisBasis) 
 		{
-			if (!useSu2Symmetry_)
-				io.read(operators_,"#OPERATORS");
-			//else reducedOpImpl_.load(io,level);
+			if (!useSu2Symmetry_) io.read(operators_,"#OPERATORS");
 
 			io.readMatrix(hamiltonian_,"#HAMILTONIAN");
 			reducedOpImpl_.setHamiltonian(hamiltonian_);
@@ -129,23 +132,32 @@ namespace Dmrg {
 			if (!useSu2Symmetry_) operators_=ops;
 			else reducedOpImpl_.setOperators(ops);
 		}
+		
+		PairType getOperatorIndices(size_t i,size_t sigma) const
+		{
+			
+			size_t sum = 0;
+			for (size_t j=0;j<i;j++)
+				sum += operators_[j].data.rank();
+			return PairType(sum + sigma,operators_[i].data.rank());
+		}
 
 		const OperatorType& getOperatorByIndex(int i) const 
 		{
-			if (useSu2Symmetry_) throw std::runtime_error("EERRRRRRRRRRRRRRRORRRRRRRRRRRR\n");
+			assert(useSu2Symmetry_);
 			return operators_[i];
 		}
 
 		const OperatorType& getReducedOperatorByIndex(int i) const 
 		{
-			if (!useSu2Symmetry_) throw std::runtime_error("EERRRRRRRRRRRRRRRORRRRRRRRRRRR\n");
+			assert(useSu2Symmetry_);
 			return reducedOpImpl_.getReducedOperatorByIndex(i);
 		}
 
-		const OperatorType& getReducedOperatorByIndex(char modifier,int i,size_t dof) const 
+		const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const 
 		{
-			if (!useSu2Symmetry_) throw std::runtime_error("EERRRRRRRRRRRRRRRORRRRRRRRRRRR\n");
-			return reducedOpImpl_.getReducedOperatorByIndex(modifier,i,dof);		
+			assert(useSu2Symmetry_);
+			return reducedOpImpl_.getReducedOperatorByIndex(modifier,p);
 		}
 
 		size_t size() const 
@@ -157,8 +169,8 @@ namespace Dmrg {
 		template<typename TransformElementType,typename ConcurrencyType>
 		void changeBasis(PsimagLite::Matrix<TransformElementType> const &ftransform,
 		                 const DmrgBasisType* thisBasis,
-		                 ConcurrencyType &concurrency,
-		                 const std::pair<size_t,size_t>& startEnd)
+		                 ConcurrencyType &concurrency)
+// 		                 const std::pair<size_t,size_t>& startEnd)
 		{
 			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
 			size_t total = size();
@@ -166,7 +178,7 @@ namespace Dmrg {
 			PsimagLite::Range<ConcurrencyType> range(0,total,concurrency);
 			for (;!range.end();range.next()) {
 				size_t k = range.index();
-				if (isExcluded(k,thisBasis,startEnd)) {
+				if (isExcluded(k,thisBasis)) {
 					operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
 					continue;
 				}
@@ -187,11 +199,11 @@ namespace Dmrg {
 		}
 		
 		bool isExcluded(size_t k,
-		               const DmrgBasisType* thisBasis,
-		               const std::pair<size_t,size_t>& startEnd)
+		               const DmrgBasisType* thisBasis)
+// 		               const std::pair<size_t,size_t>& startEnd)
 		{
 			if (!EXCLUDE) return false; // <-- this is the safest answer
-			if (k<startEnd.first || k>=startEnd.second) return true;
+// 			if (k<startEnd.first || k>=startEnd.second) return true;
 			return false;
 		}
 

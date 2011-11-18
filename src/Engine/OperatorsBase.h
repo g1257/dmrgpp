@@ -89,7 +89,11 @@ namespace Dmrg {
 	//! This class must be inherited
 	template<typename OperatorType_,typename BasisType_>
 	class OperatorsBase {
+		
+		typedef std::pair<size_t,size_t> PairType;
+		
 	public:
+		
 		typedef BasisType_ BasisType;
 		typedef OperatorType_ OperatorType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
@@ -115,6 +119,16 @@ namespace Dmrg {
 		{
 			operatorsImpl_.setOperators(ops);
 		}
+		
+		PairType getOperatorIndices(size_t i,size_t sigma) const
+		{
+			return operatorsImpl_.getOperatorIndices(i,sigma);
+		}
+		
+		const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
+		{
+			return operatorsImpl_.getReducedOperatorByIndex(modifier,p);
+		}
 
 		const OperatorType& getOperatorByIndex(int i) const
 		{
@@ -126,26 +140,21 @@ namespace Dmrg {
 			return operatorsImpl_.getReducedOperatorByIndex(i);
 		}
 
-		const OperatorType& getReducedOperatorByIndex(char modifier,int i,size_t dof) const
-		{
-			return operatorsImpl_.getReducedOperatorByIndex(modifier,i,dof);
-		}
-
-		void getOperatorByIndex(std::string& s,int i) const
-		{
-			operatorsImpl_.getOperatorByIndex(i);
-		}
+// 		void getOperatorByIndex(std::string& s,int i) const
+// 		{
+// 			operatorsImpl_.getOperatorByIndex(i);
+// 		}
 
 		size_t numberOfOperators() const { return operatorsImpl_.size(); }
 
 		template<typename TransformElementType,typename ConcurrencyType>
 		void changeBasis(PsimagLite::Matrix<TransformElementType> const &ftransform,
 		                 const BasisType* thisBasis,
-		                 ConcurrencyType &concurrency,
-		                 const std::pair<size_t,size_t>& startEnd)
+		                 ConcurrencyType &concurrency)
+// 		                 const std::pair<size_t,size_t>& startEnd)
 		{
-			return operatorsImpl_.changeBasis(ftransform,thisBasis,concurrency,
-			                                       startEnd);
+			return operatorsImpl_.changeBasis(ftransform,thisBasis,concurrency);
+// 			                                       startEnd);
 /*			std::ostringstream msg;
 			msg<<"Done with changeBasis";
 			progress_.printline(msg,std::cerr);*/
@@ -234,6 +243,7 @@ namespace Dmrg {
 		}
 
 	private:
+
 		OperatorsImplementation<OperatorType,BasisType> operatorsImpl_;
 		PsimagLite::ProgressIndicator progress_;
 	}; //class OperatorsBase 

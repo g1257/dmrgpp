@@ -107,13 +107,13 @@ namespace Dmrg {
 			int k = sigma+i*DEGREES_OF_FREEDOM;
 			return this->getOperatorByIndex(k);
 		}
-
+/*
 		//! 4 operators per site: c^dagger_{a up} c^dagger_{b up}
 		//! 			: c^dagger_{a down} c^dagger_{b down}
 		static size_t numberOfOperatorsPerSite()
 		{
 			return DEGREES_OF_FREEDOM;
-		}
+		}*/
 
 	}; //class OperatorsFeAs
 	

@@ -91,7 +91,11 @@ namespace Dmrg {
 	//! outer product, truncation, storage of Hamiltonian and creation operators.  
 	template<typename OperatorsType_,typename ConcurrencyType_>
 	class	BasisWithOperators : public  OperatorsType_::BasisType {
+
+		typedef std::pair<size_t,size_t> PairType;
+
 	public:
+
 		typedef OperatorsType_ OperatorsType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::OperatorType OperatorType;
@@ -111,8 +115,7 @@ namespace Dmrg {
 		                   const std::string& ss,
 		                   size_t counter=0)
 		: BasisType(io,ss,counter),operators_(io,0,this)
-		{
-		}
+		{}
 
 		template<typename IoInputter>
 		void load(IoInputter& io)
@@ -184,14 +187,14 @@ namespace Dmrg {
 		                     BlockMatrixType  &transform,
 		                     std::vector<RealType>& eigs,
 		                     size_t kept,const SolverParametersType& solverParams,
-		                     ConcurrencyType &concurrency,
-		                     const std::pair<size_t,size_t>& startEnd)
+		                     ConcurrencyType &concurrency)
+// 		                     const std::pair<size_t,size_t>& startEnd)
 		{
 
 			BasisType &parent = *this;
 			RealType error = parent.changeBasis(ftransform,transform,eigs,kept,solverParams);
 
-			operators_.changeBasis(ftransform,this,concurrency,startEnd);
+			operators_.changeBasis(ftransform,this,concurrency); //startEnd);
 
 			return error;
 		}
@@ -214,10 +217,10 @@ namespace Dmrg {
 			operators_.setOperators(ops);
 		}
 
-		void getOperatorByIndex(std::string& s,int i) const
-		{
-			operators_.getOperatorByIndex(i);
-		}
+// 		void getOperatorByIndex(std::string& s,int i) const
+// 		{
+// 			operators_.getOperatorByIndex(i);
+// 		}
 
 		const OperatorType& getOperatorByIndex(int i) const
 		{
@@ -229,27 +232,32 @@ namespace Dmrg {
 			return operators_.getReducedOperatorByIndex(i);
 		}
 
-		const OperatorType& getReducedOperatorByIndex(char modifier,int i,size_t dof) const
+		PairType getOperatorIndices(size_t i,size_t sigma) const
 		{
-			return operators_.getReducedOperatorByIndex(modifier,i,dof);
+			return operators_.getOperatorIndices(i,sigma);
 		}
+		
+		const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
+		{
+			return operators_.getReducedOperatorByIndex(modifier,p);
+		}
+// 
+// 		const OperatorType& getOperator(int i,int sigma) const
+// 		{
+// 			return operators_.getOperator(i,sigma);
+// 		}
 
-		const OperatorType& getOperator(int i,int sigma) const
-		{
-			return operators_.getOperator(i,sigma);
-		}
-
-		const OperatorType& getOperator(const std::string& s,int i) const
-		{
-			return operators_.getOperator(s,i);
-		}
+// 		const OperatorType& getOperator(const std::string& s,int i) const
+// 		{
+// 			return operators_.getOperator(s,i);
+// 		}
 
 		size_t numberOfOperators() const { return operators_.numberOfOperators(); }
 
-		static size_t numberOfOperatorsPerSite()
-		{
-			return 	OperatorsType::numberOfOperatorsPerSite();
-		}
+// 		static size_t numberOfOperatorsPerSite()
+// 		{
+// 			return 	OperatorsType::numberOfOperatorsPerSite();
+// 		}
 
 		int fermionicSign(size_t i,int fsign) const
 		{

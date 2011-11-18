@@ -108,11 +108,11 @@ namespace Dmrg {
 			return this->getOperatorByIndex(k);
 		}
 
-		//! Two operators per site here: c^\dagger_up and c^\dagger_down
-		static size_t numberOfOperatorsPerSite()
-		{
-			return 2;
-		}
+// 		//! Two operators per site here: c^\dagger_up and c^\dagger_down
+// 		static size_t numberOfOperatorsPerSite()
+// 		{
+// 			return 2;
+// 		}
 	}; //class OperatorsHubbard
 	
 } // namespace Dmrg

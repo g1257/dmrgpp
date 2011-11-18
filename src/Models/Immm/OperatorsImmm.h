@@ -106,12 +106,6 @@ namespace Dmrg {
 // 			return this->getOperatorByIndex(k);
 		}
 
-		//! 4 operators per site: c^dagger_{a up} c^dagger_{b up}
-		//! 			: c^dagger_{a down} c^dagger_{b down}
-		static size_t numberOfOperatorsPerSite()
-		{
-			throw std::runtime_error("Depends on the site\n");
-		}
 	}; //class OperatorsImmm
 } // namespace Dmrg
 

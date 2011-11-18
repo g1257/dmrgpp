@@ -126,13 +126,13 @@ namespace Dmrg {
 			return reducedOperators_[i];
 		}
 
-		const OperatorType& getReducedOperatorByIndex(char modifier,int i,size_t dof) const
+		const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
 		{
-			size_t s = size_t(i/dof);
-			size_t tmp = i%dof;
-			size_t offset = reducedOperators_[s*dof].su2Related.offset;
+			size_t s = size_t(p.first/p.second);
+			size_t tmp = p.first%p.second;
+			size_t offset = reducedOperators_[s*p.second].su2Related.offset;
 			size_t g = tmp%offset;
-			size_t i0 = s*dof+g;
+			size_t i0 = s*p.second+g;
 
 			if (modifier=='N') return getReducedOperatorByIndex(i0);
 			else return getReducedOperatorByIndex(i0+offset);

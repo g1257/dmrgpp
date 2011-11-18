@@ -92,6 +92,7 @@ namespace Dmrg {
 	class ModelHelperLocal {
 
 		typedef PsimagLite::PackIndices PackIndicesType;
+		typedef std::pair<size_t,size_t> PairType;
 
 	public:
 		typedef LeftRightSuperType_ LeftRightSuperType;
@@ -120,8 +121,8 @@ namespace Dmrg {
 		  basis3tc_(lrs_.right().numberOfOperators()),
 		  alpha_(lrs_.super().size()),
 		  beta_(lrs_.super().size()),
-		  reflection_(useReflection),
-		  numberOfOperators_(lrs_.left().numberOfOperatorsPerSite())
+		  reflection_(useReflection)
+// 		  numberOfOperators_(lrs_.left().numberOfOperatorsPerSite())
 		{
 			createBuffer();
 			createTcOperators(basis2tc_,lrs_.left());
@@ -144,12 +145,17 @@ namespace Dmrg {
 		                                          size_t sigma,
 		                                          size_t type) const
 		{
-			size_t ii = i*numberOfOperators_+sigma;
+// 			size_t ii = i*numberOfOperators_+sigma;
 			if (modifier=='N') {
-				if (type==System) return lrs_.left().getOperatorByIndex(ii).data;
-				return lrs_.right().getOperatorByIndex(ii).data;
+				if (type==System) {
+					PairType ii =lrs_.left().getOperatorIndices(i,sigma); 
+					return lrs_.left().getOperatorByIndex(ii.first).data;
+				} else {
+					PairType ii =lrs_.right().getOperatorIndices(i,sigma);
+					return lrs_.right().getOperatorByIndex(ii.first).data;
+				}
 			}
-			return getTcOperator(ii,type);
+			return getTcOperator(i,sigma,type);
 		}
 
 		int size() const
@@ -444,13 +450,17 @@ namespace Dmrg {
 		std::vector<SparseMatrixType> basis2tc_,basis3tc_;
 		std::vector<size_t> alpha_,beta_;
 		ReflectionSymmetryType reflection_;
-		size_t numberOfOperators_;
+// 		size_t numberOfOperators_;
 		//RightLeftLocalType rightLeftLocal_;
 
-		const SparseMatrixType& getTcOperator(int i,size_t type) const
+		const SparseMatrixType& getTcOperator(int i,size_t sigma,size_t type) const
 		{
-			if (type==System) return basis2tc_[i];
-			return basis3tc_[i];
+			if (type==System) {
+				PairType ii =lrs_.left().getOperatorIndices(i,sigma);
+				return basis2tc_[ii.first];
+			}
+			PairType ii =lrs_.right().getOperatorIndices(i,sigma);
+			return basis3tc_[ii.first];
 		}
 
 		void createBuffer()

@@ -95,20 +95,16 @@ namespace Dmrg {
 			typedef typename ModelHelperType::LinkType LinkType;
 			typedef std::pair<size_t,size_t> PairType;
 			
-			HamiltonianConnection(
-				const GeometryType& geometry,
-				const ModelHelperType& modelHelper,
-				const LinkProductStructType* lps = 0,
-				std::vector<SparseElementType>* x = 0,
-				const std::vector<SparseElementType>* y = 0)
+			HamiltonianConnection(const GeometryType& geometry,const ModelHelperType& modelHelper,const LinkProductStructType* lps = 0,
+			std::vector<SparseElementType>* x = 0,
+			const std::vector<SparseElementType>* y = 0)
 			: lps_(*lps),x_(*x),y_(*y),geometry_(geometry),modelHelper_(modelHelper),
-				systemBlock_(modelHelper.leftRightSuper().left().block()),
-				envBlock_(modelHelper.leftRightSuper().right().block()),
-				smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
-				emin_(*std::min_element(envBlock_.begin(),envBlock_.end()))
-			{
-			}
-			
+			  systemBlock_(modelHelper.leftRightSuper().left().block()),
+			  envBlock_(modelHelper.leftRightSuper().right().block()),
+			  smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
+			  emin_(*std::min_element(envBlock_.begin(),envBlock_.end()))
+			{}
+
 			bool compute(size_t i,
 			             size_t j,
 			             SparseMatrixType* matrixBlock,
@@ -230,9 +226,7 @@ namespace Dmrg {
 			}
 
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
-			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
-						size_t i,size_t j,size_t type,
-				const SparseElementType  &valuec,size_t term,size_t dofs)  const
+			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,size_t i,size_t j,size_t type,const SparseElementType  &valuec,size_t term,size_t dofs)  const
 			{
 				int offset =modelHelper_.leftRightSuper().left().block().size();
 				std::pair<size_t,size_t> ops;
@@ -269,6 +263,7 @@ namespace Dmrg {
 						
 				}
 			}
+
 			const LinkProductStructType& lps_;
 			std::vector<SparseElementType>& x_;
 			const std::vector<SparseElementType>& y_;

@@ -94,8 +94,11 @@ namespace Dmrg {
 		typename ReflectionSymmetryType_,
 		typename ConcurrencyType_>
 	class ModelHelperSu2  {
+		
 		typedef std::pair<size_t,size_t> PairType;
-	public:	
+		
+	public:
+		
 		static const size_t System=0,Environ=1;
 		typedef LeftRightSuperType_ LeftRightSuperType;
 		typedef typename LeftRightSuperType::BasisWithOperatorsType
@@ -116,7 +119,7 @@ namespace Dmrg {
 		: m_(m),
 		  lrs_(lrs),
 		  reflection_(useReflection),
-		  numberOfOperators_(lrs_.left().numberOfOperatorsPerSite()),
+// 		  numberOfOperators_(lrs_.left().numberOfOperatorsPerSite()),
 		  su2reduced_(m,lrs)
 		{}
 
@@ -136,10 +139,14 @@ namespace Dmrg {
 	
 		const SparseMatrixType& getReducedOperator(char modifier,size_t i,size_t sigma,size_t type) const
 		{
-			size_t i0 = i*numberOfOperators_ + sigma;
-			size_t dof = numberOfOperators_;
-			if (type==System) return lrs_.left().getReducedOperatorByIndex(modifier,i0,dof).data;
-			return lrs_.right().getReducedOperatorByIndex(modifier,i0,dof).data;
+// 			size_t i0 = i*numberOfOperators_ + sigma;
+// 			size_t dof = numberOfOperators_;
+			if (type==System) {
+				PairType ii =lrs_.left().getOperatorIndices(i,sigma); 
+				return lrs_.left().getReducedOperatorByIndex(modifier,ii).data;
+			}
+			PairType ii =lrs_.right().getOperatorIndices(i,sigma); 
+			return lrs_.right().getReducedOperatorByIndex(modifier,ii).data;
 		}
 
 		//! //! Does matrixBlock= (AB), A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
@@ -460,7 +467,7 @@ namespace Dmrg {
 		int m_;
 		const LeftRightSuperType&  lrs_;
 		ReflectionSymmetryType reflection_;
-		size_t numberOfOperators_;
+// 		size_t numberOfOperators_;
 		Su2Reduced<LeftRightSuperType,ReflectionSymmetryType_,ConcurrencyType_>
 				su2reduced_;
 	};

@@ -109,15 +109,15 @@ namespace Dmrg {
 			return this->getOperatorByIndex(k);
 		}
 
-		//! 4 operators per site: c^dagger_{a up} c^dagger_{b up}
-		//! 			: c^dagger_{a down} c^dagger_{b down}
-		//! Plus 2 more:
-		//! Splus and
-		//! Sz
-		static size_t numberOfOperatorsPerSite()
-		{
-			return DEGREES_OF_FREEDOM + 2;
-		}
+// 		//! 4 operators per site: c^dagger_{a up} c^dagger_{b up}
+// 		//! 			: c^dagger_{a down} c^dagger_{b down}
+// 		//! Plus 2 more:
+// 		//! Splus and
+// 		//! Sz
+// 		static size_t numberOfOperatorsPerSite()
+// 		{
+// 			return DEGREES_OF_FREEDOM + 2;
+// 		}
 	}; //class OperatorsFeAsExtended
 } // namespace Dmrg
 
