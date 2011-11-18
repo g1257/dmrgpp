@@ -100,7 +100,6 @@ namespace Dmrg {
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 		typedef LinkProdExtendedHubbard1Orb<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
@@ -109,6 +108,7 @@ namespace Dmrg {
 		typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
+		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 
 		ExtendedHubbard1Orb(ParametersModelHubbard<RealType> const &mp,
 		                    DmrgGeometryType const &dmrgGeometry)
@@ -172,7 +172,7 @@ namespace Dmrg {
 		                   std::vector<HilbertState>& basis,
 		                   size_t site) const
 		{
-			modelHubbard_.findElectrons(electrons,basis);
+			modelHubbard_.findElectrons(electrons,basis,site);
 		}
 
 		//! find all states in the natural basis for a block of n sites
