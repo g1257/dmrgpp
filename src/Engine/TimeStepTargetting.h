@@ -426,7 +426,7 @@ namespace Dmrg {
 				typename ModelType::HilbertBasisType basis;
 				std::vector<size_t> quantumNumbs;
 				model_.setNaturalBasis(basis,quantumNumbs,block);
-				model_.findElectrons(electrons,basis);
+				model_.findElectrons(electrons,basis,site);
 			}
 
 			void computePhi(size_t i,VectorWithOffsetType& phiNew,

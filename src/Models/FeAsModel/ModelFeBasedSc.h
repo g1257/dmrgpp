@@ -269,7 +269,9 @@ namespace Dmrg {
 			for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
 		}
 		
-		void findElectrons(std::vector<size_t>& electrons,const std::vector<HilbertState>  &basis) const
+		void findElectrons(std::vector<size_t>& electrons,
+		                   const std::vector<HilbertState>& basis,
+		                   size_t site) const
 		{
 			electrons.resize(basis.size());
 			for (size_t i=0;i<basis.size();i++) {

@@ -242,7 +242,8 @@ namespace Dmrg {
 		
 		//! Dummy since this model has no fermion sign
 		void findElectrons(std::vector<size_t>& electrons,
-		                   std::vector<HilbertStateType>& basis) const
+		                   std::vector<HilbertStateType>& basis,
+		                   size_t site) const
 		{
 			electrons.resize(basis.size());
 			for (size_t i=0;i<electrons.size();i++) electrons[i] = 0;

@@ -226,9 +226,7 @@ namespace Dmrg {
 			modelFeAs_.setNaturalBasis(basis,q,block);
 		}
 		
-		void findElectrons(
-				std::vector<size_t>& electrons,
-				const std::vector<HilbertState>  &basis) const
+		void findElectrons(std::vector<size_t>& electrons,const std::vector<HilbertState>  &basis,size_t site) const
 		{
 			modelFeAs_.findElectrons(electrons,basis);
 		}

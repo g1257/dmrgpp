@@ -234,7 +234,8 @@ namespace Dmrg {
 		
 		//! find total number of electrons for each state in the basis
 		void findElectrons(std::vector<size_t> &electrons,
-				   std::vector<typename HilbertSpaceHubbardType::HilbertState>  const &basis) const
+		                   const std::vector<HilbertState>& basis,
+		                   size_t site) const
 		{
 			int nup,ndown;
 			electrons.clear();

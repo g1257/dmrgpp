@@ -163,16 +163,6 @@ namespace Dmrg {
 				return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
 			}
 
-			//! find  operator matrices for in the natural basis and quantum numbers
-			void setNaturalBasis(std::vector<SparseMatrixType> &operatorMatrices,SparseMatrixType &hamiltonian,
-					     std::vector<int> &q,std::vector<size_t> &electrons,Block const &block) const;
-			
-			//! set operator matrices for sites in block
-			void setOperatorMatrices(std::vector<SparseMatrixType> &operatorMatrix,Block const &block) const;
-
-			//! print model or model parameters
-			void print(std::ostream& os) const;
-
 			//! Return H, the hamiltonian of the FeAs model for basis1 and partition m consisting of the external product
 			//! of basis2 \otimes basis3
 			//! Note: Used only for debugging purposes
