@@ -132,19 +132,10 @@ namespace Dmrg {
 			if (!useSu2Symmetry_) operators_=ops;
 			else reducedOpImpl_.setOperators(ops);
 		}
-		
-		PairType getOperatorIndices(size_t i,size_t sigma) const
-		{
-			
-			size_t sum = 0;
-			for (size_t j=0;j<i;j++)
-				sum += operators_[j].data.rank();
-			return PairType(sum + sigma,operators_[i].data.rank());
-		}
 
 		const OperatorType& getOperatorByIndex(int i) const 
 		{
-			assert(useSu2Symmetry_);
+			assert(!useSu2Symmetry_);
 			return operators_[i];
 		}
 

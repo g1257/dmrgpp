@@ -120,11 +120,6 @@ namespace Dmrg {
 			operatorsImpl_.setOperators(ops);
 		}
 		
-		PairType getOperatorIndices(size_t i,size_t sigma) const
-		{
-			return operatorsImpl_.getOperatorIndices(i,sigma);
-		}
-		
 		const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
 		{
 			return operatorsImpl_.getReducedOperatorByIndex(modifier,p);

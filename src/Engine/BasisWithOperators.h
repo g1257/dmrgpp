@@ -115,13 +115,16 @@ namespace Dmrg {
 		                   const std::string& ss,
 		                   size_t counter=0)
 		: BasisType(io,ss,counter),operators_(io,0,this)
-		{}
+		{
+			io.read(operatorsPerSite_,"#OPERATORSPERSITE");
+		}
 
 		template<typename IoInputter>
 		void load(IoInputter& io)
 		{
 			BasisType::load(io); // parent loads
 			operators_.load(io);
+			io.read(operatorsPerSite_,"#OPERATORSPERSITE");
 		}
 
 		//! set this basis to the outer product of   basis2 and basis3 or basis3 and basis2  depending on dir
@@ -178,6 +181,14 @@ namespace Dmrg {
 			operators_.outerProductHamiltonianReduced(basis2,basis3,basis2.reducedHamiltonian(),basis3.reducedHamiltonian());
 			//! re-order operators and hamiltonian 
 			operators_.reorder(this->permutationVector());
+			
+			size_t offset1 = basis2.operatorsPerSite_.size();
+			operatorsPerSite_.resize(offset1+basis3.operatorsPerSite_.size());
+			for (size_t i=0;i<offset1;i++)
+				operatorsPerSite_[i] =  basis2.operatorsPerSite_[i];
+			
+			for (size_t i=0;i<basis3.operatorsPerSite_.size();i++)
+				operatorsPerSite_[i+offset1] =  basis3.operatorsPerSite_[i];
 		}
 
 		//! transform this basis by transform 
@@ -215,12 +226,22 @@ namespace Dmrg {
 			this->setSymmetryRelated(qm);
 			setHamiltonian(h);
 			operators_.setOperators(ops);
+			operatorsPerSite_.push_back(ops.size());
 		}
 
 // 		void getOperatorByIndex(std::string& s,int i) const
 // 		{
 // 			operators_.getOperatorByIndex(i);
 // 		}
+
+		PairType getOperatorIndices(size_t i,size_t sigma) const
+		{
+			size_t sum = 0;
+			for (size_t j=0;j<i;j++)
+				sum += operatorsPerSite_[j];
+
+			return PairType(sum + sigma,operatorsPerSite_[i]);
+		}
 
 		const OperatorType& getOperatorByIndex(int i) const
 		{
@@ -230,11 +251,6 @@ namespace Dmrg {
 		const OperatorType& getReducedOperatorByIndex(int i) const
 		{
 			return operators_.getReducedOperatorByIndex(i);
-		}
-
-		PairType getOperatorIndices(size_t i,size_t sigma) const
-		{
-			return operators_.getOperatorIndices(i,sigma);
 		}
 		
 		const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
@@ -270,6 +286,7 @@ namespace Dmrg {
 		{
 			BasisType::save(io,s); // parent saves
 			operators_.save(io,s);
+			io.printVector(operatorsPerSite_,"#OPERATORSPERSITE");
 		}
 
 		template<typename IoOutputter>
@@ -277,10 +294,12 @@ namespace Dmrg {
 		{
 			BasisType::save(io); // parent saves
 			operators_.save(io,this->name());
+			io.printVector(operatorsPerSite_,"#OPERATORSPERSITE");
 		}
 
 	private:
 		OperatorsType operators_;
+		std::vector<size_t> operatorsPerSite_;
 
 		template<typename SomeType>
 		void fillFermionicSigns(std::vector<SomeType>& fermionicSigns,const std::vector<size_t>& electrons,int f)

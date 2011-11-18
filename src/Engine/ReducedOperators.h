@@ -186,7 +186,6 @@ namespace Dmrg {
 		void setMomentumOfOperators(const std::vector<size_t>& momentum)
 		{
 			momentumOfOperators_=momentum;
-
 		}
 
 		void setHamiltonian(const SparseMatrixType& hamiltonian)
