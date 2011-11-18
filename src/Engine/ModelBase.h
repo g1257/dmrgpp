@@ -97,88 +97,95 @@ namespace Dmrg {
   	typename LinkProductType,
 	template<typename> class SharedMemoryTemplate>
 	class ModelBase  {
-		public:
-			typedef typename ModelHelperType::OperatorsType OperatorsType;
-			typedef typename ModelHelperType::BlockType Block;
-			typedef typename ModelHelperType::RealType RealType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef typename ModelHelperType::ReflectionSymmetryType
-					ReflectionSymmetryType;
-			typedef typename ModelHelperType::ConcurrencyType
-					ConcurrencyType;
-			typedef typename ModelHelperType::BasisType MyBasis;
-			typedef typename ModelHelperType::BasisWithOperatorsType
-					BasisWithOperatorsType;
-			typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,
-   					LinkProductType,SharedMemoryTemplate> ModelCommonType;
-			typedef DmrgGeometryType GeometryType;
-			typedef typename ModelCommonType::SharedMemoryType SharedMemoryType;
-			typedef typename ModelHelperType::LeftRightSuperType
-					LeftRightSuperType;
+	public:
+		typedef typename ModelHelperType::OperatorsType OperatorsType;
+		typedef typename ModelHelperType::BlockType Block;
+		typedef typename ModelHelperType::RealType RealType;
+		typedef typename SparseMatrixType::value_type SparseElementType;
+		typedef typename ModelHelperType::ReflectionSymmetryType
+				ReflectionSymmetryType;
+		typedef typename ModelHelperType::ConcurrencyType
+				ConcurrencyType;
+		typedef typename ModelHelperType::BasisType MyBasis;
+		typedef typename ModelHelperType::BasisWithOperatorsType
+				BasisWithOperatorsType;
+		typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,
+				LinkProductType,SharedMemoryTemplate> ModelCommonType;
+		typedef DmrgGeometryType GeometryType;
+		typedef typename ModelCommonType::SharedMemoryType SharedMemoryType;
+		typedef typename ModelHelperType::LeftRightSuperType
+				LeftRightSuperType;
 
-			ModelBase(const DmrgGeometryType& dmrgGeometry) :
-					modelCommon_(dmrgGeometry)
-			{
-				Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
-				MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
+		ModelBase(const DmrgGeometryType& dmrgGeometry) :
+				modelCommon_(dmrgGeometry)
+		{
+			Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
+			MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
+		}
+
+		//! Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
+		//! of basis2 \otimes basis3
+		//! This function does x += H*y
+		template<typename SomeVectorType>
+		void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y,ModelHelperType const &modelHelper) const
+		{
+			modelCommon_.matrixVectorProduct(x,y,modelHelper);
+		}
+
+		void addHamiltonianConnection(SparseMatrixType &matrix,const LeftRightSuperType& lrs) const
+		{
+			int bs,offset;
+			SparseMatrixType matrixBlock;
+
+			for (size_t m=0;m<lrs.super().partition()-1;m++) {
+				offset =lrs.super().partition(m);
+				bs = lrs.super().partition(m+1)-offset;
+				matrixBlock.makeDiagonal(bs);
+				ModelHelperType modelHelper(m,lrs);
+				modelCommon_.addHamiltonianConnection(matrixBlock,modelHelper);
+				sumBlock(matrix,matrixBlock,offset);
 			}
+		}
+		
+		size_t maxConnections() const
+		{
+			return modelCommon_.maxConnections();
+		}
 
-			//! Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
-			//! of basis2 \otimes basis3
-			//! This function does x += H*y
-			template<typename SomeVectorType>
-			void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y,ModelHelperType const &modelHelper) const
-			{
-				modelCommon_.matrixVectorProduct(x,y,modelHelper);
-			}
+		//! Let H_m be the Hamiltonian connection between basis2 and basis3 in the orderof basis1 for block m 
+		//! Then this function does x+= H_m *y
+		void hamiltonianConnectionProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
+			ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
+		}
 
-			void addHamiltonianConnection(SparseMatrixType &matrix,const LeftRightSuperType& lrs) const
-			{
-				int bs,offset;
-				SparseMatrixType matrixBlock;
+		//! Return H, the hamiltonian of the FeAs model for basis1 and partition m consisting of the external product
+		//! of basis2 \otimes basis3
+		//! Note: Used only for debugging purposes
+		void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const
+		{
+			modelCommon_.fullHamiltonian(matrix,modelHelper);
+		}
 
-				for (size_t m=0;m<lrs.super().partition()-1;m++) {
-					offset =lrs.super().partition(m);
-					bs = lrs.super().partition(m+1)-offset;
-					matrixBlock.makeDiagonal(bs);
-					ModelHelperType modelHelper(m,lrs);
-					modelCommon_.addHamiltonianConnection(matrixBlock,modelHelper);
-					sumBlock(matrix,matrixBlock,offset);
-				}
-			}
-			
-			size_t maxConnections() const
-			{
-				return modelCommon_.maxConnections();
-			}
+	protected:
 
-			//! Let H_m be the Hamiltonian connection between basis2 and basis3 in the orderof basis1 for block m 
-			//! Then this function does x+= H_m *y
-			void hamiltonianConnectionProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
-				ModelHelperType const &modelHelper) const
-			{
-				return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
-			}
+		const LinkProductType& linkProduct() const
+		{
+			return modelCommon_.linkProduct();
+		}
 
-			//! Return H, the hamiltonian of the FeAs model for basis1 and partition m consisting of the external product
-			//! of basis2 \otimes basis3
-			//! Note: Used only for debugging purposes
-			void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const
-			{
-				modelCommon_.fullHamiltonian(matrix,modelHelper);
-			}
+	private:
 
-		private:
+		//! Add Hamiltonian connection between basis2 and basis3 in the orderof basis1 for symmetry block m
+		void addHamiltonianConnection(
+				VerySparseMatrix<SparseElementType>& matrix,
+				const ModelHelperType& modelHelper) const
+		{
+			modelCommon_.addHamiltonianConnection(matrix,modelHelper);
+		}
 
-			//! Add Hamiltonian connection between basis2 and basis3 in the orderof basis1 for symmetry block m
-			void addHamiltonianConnection(
-					VerySparseMatrix<SparseElementType>& matrix,
-					const ModelHelperType& modelHelper) const
-			{
-				modelCommon_.addHamiltonianConnection(matrix,modelHelper);
-			}
-
-			ModelCommonType modelCommon_;
+		ModelCommonType modelCommon_;
 	};     //class ModelBase
 } // namespace Dmrg
 /*@}*/

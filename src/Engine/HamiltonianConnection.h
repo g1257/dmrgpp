@@ -95,10 +95,13 @@ namespace Dmrg {
 			typedef typename ModelHelperType::LinkType LinkType;
 			typedef std::pair<size_t,size_t> PairType;
 			
-			HamiltonianConnection(const GeometryType& geometry,const ModelHelperType& modelHelper,const LinkProductStructType* lps = 0,
+			HamiltonianConnection(const GeometryType& geometry,const ModelHelperType& modelHelper,const LinkProductType& linkProduct,const LinkProductStructType* lps = 0,
 			std::vector<SparseElementType>* x = 0,
 			const std::vector<SparseElementType>* y = 0)
-			: lps_(*lps),x_(*x),y_(*y),geometry_(geometry),modelHelper_(modelHelper),
+			: geometry_(geometry),
+			  modelHelper_(modelHelper),
+			  linkProduct_(linkProduct),
+			  lps_(*lps),x_(*x),y_(*y),
 			  systemBlock_(modelHelper.leftRightSuper().left().block()),
 			  envBlock_(modelHelper.leftRightSuper().right().block()),
 			  smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
@@ -115,6 +118,7 @@ namespace Dmrg {
 				bool flag=false;
 				size_t ind = modelHelper_.leftRightSuper().super().block()[i];
 				size_t jnd = modelHelper_.leftRightSuper().super().block()[j];
+				linkProduct_.updateSites(ind,jnd);
 				//throw std::runtime_error("system block is not correct here, think finite algorithm!!!\n"); 
 				if (!geometry_.connected(smax_,emin_,ind,jnd)) return flag;
 				size_t type = geometry_.connectionKind(smax_,ind,jnd);
@@ -125,10 +129,9 @@ namespace Dmrg {
 				SparseMatrixType mBlock;
 				
 				for (size_t term=0;term<geometry_.terms();term++) {
-					for (size_t dofs=0;dofs<LinkProductType::dofs(term);dofs++) {
-						std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs);
-						SparseElementType tmp = geometry_(smax_,emin_,
-								ind,edofs.first,jnd,edofs.second,term);
+					for (size_t dofs=0;dofs<linkProduct_.dofs(term);dofs++) {
+						std::pair<size_t,size_t> edofs = linkProduct_.connectorDofs(term,dofs);
+						SparseElementType tmp = geometry_(smax_,emin_,ind,edofs.first,jnd,edofs.second,term);
 				
 						if (tmp==0.0) continue;
 						
@@ -153,7 +156,7 @@ namespace Dmrg {
 				}
 				return flag;
 			}
-			
+
 			void thread_function_(size_t threadNum,size_t blockSize,pthread_mutex_t* myMutex)
 			{
 				std::vector<SparseElementType> xtemp(x_.size(),0);
@@ -177,7 +180,6 @@ namespace Dmrg {
 				if (myMutex) pthread_mutex_unlock( myMutex );
 			}
 
-			
 		private:
 			//! Adds a connector between system and environment
 			size_t calcBond(SparseMatrixType &matrixBlock,
@@ -195,11 +197,9 @@ namespace Dmrg {
 				RealType angularFactor=0;
 				bool isSu2 = modelHelper_.isSu2();
 				SparseElementType value = valuec;
-				LinkProductType::valueModifier(value,term,dofs,isSu2);
-				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,
-						ops,mods,angularMomentum,angularFactor,category);
-				LinkType link(i,j,type, value,dofs,
-					      fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
+				linkProduct_.valueModifier(value,term,dofs,isSu2);
+				linkProduct_.setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
+				LinkType link(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				if (link.type==ProgramGlobals::SYSTEM_ENVIRON) {
 						
 					const SparseMatrixType& A=
@@ -234,10 +234,10 @@ namespace Dmrg {
 				size_t fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
 				RealType angularFactor=0;
 				bool isSu2 = modelHelper_.isSu2();
-				LinkProductType::setLinkData(term,dofs,isSu2,
+				linkProduct_.setLinkData(term,dofs,isSu2,
 						fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				SparseElementType value = valuec;
-				LinkProductType::valueModifier(value,term,dofs,isSu2);
+				linkProduct_.valueModifier(value,term,dofs,isSu2);
 				LinkType link(i,j,type, value,dofs,
 					      fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
@@ -264,11 +264,12 @@ namespace Dmrg {
 				}
 			}
 
+			const GeometryType& geometry_;
+			const ModelHelperType& modelHelper_;
+			const LinkProductType& linkProduct_;
 			const LinkProductStructType& lps_;
 			std::vector<SparseElementType>& x_;
 			const std::vector<SparseElementType>& y_;
-			const GeometryType& geometry_;
-			const ModelHelperType& modelHelper_;
 			const typename GeometryType::BlockType& systemBlock_;
 			const typename GeometryType::BlockType& envBlock_;
 			size_t smax_,emin_;

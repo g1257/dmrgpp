@@ -89,75 +89,108 @@ namespace Dmrg {
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			typedef std::pair<size_t,size_t> PairType;
-			
+
 		public:
+
 			typedef typename ModelHelperType::RealType RealType;
+
+			LinkProductImmm(size_t linSize)
+			: linSize_(linSize),degreesOfFreedom_(linSize)
+			{
+				size_t cooperEach = 4;
+				buildDofs(cooperEach);
+			}
+			
+			size_t dOf(size_t i) const { return degreesOfFreedom_[i]; }
+
+			void updateSites(size_t actualSite1,size_t actualSite2) const
+			{
+				actualSite1_=actualSite1;
+				actualSite2_=actualSite2;
+			}
 			
 			//! There are 4 different orbitals
 			//! and 2 spins. Spin is diagonal so we end up with 8 possiblities
 			//! a up a up, a up b up, b up a up, b up, b up,
 			//! and similarly for spin down.
-			static size_t dofs(size_t term)
+			size_t dofs(size_t term) const
 			{ 
-				throw std::runtime_error("Need to think this long enough!!\n");
-				//return 8;
+				//! Need to think this more, this isn't optimal
+				//! because dofs(term) varies from site to site
+				return 8;
 			}
-			
+
 			// has only dependence on orbital
-			static PairType connectorDofs(size_t term,size_t dofs)
+			PairType connectorDofs(size_t term,size_t dofs) const
 			{
-				throw std::runtime_error("Need to think this long enough!!\n");
-// 				size_t spin = dofs/4;
-// 				size_t xtmp = (spin==0) ? 0 : 4;
-// 				xtmp = dofs - xtmp;
-// 				size_t orb1 = xtmp/2;
-// 				size_t orb2 = (xtmp & 1);
-// 				return PairType(orb1,orb2); // has only dependence on orbital
+				//! Need to think this more
+				//! This depends on the site
+				size_t spin = dofs/4;
+				size_t xtmp = (spin==0) ? 0 : 4;
+				xtmp = dofs - xtmp;
+				size_t orb1 = xtmp/2;
+				size_t orb2 = (xtmp & 1);
+				return PairType(orb1,orb2); // has only dependence on orbital
 			}
-			
-			static void setLinkData(
-					size_t term,
-					size_t dofs,
-     					bool isSu2,
-					size_t& fermionOrBoson,
-					PairType& ops,
+
+			void setLinkData(size_t term,size_t dofs,bool isSu2,size_t& fermionOrBoson,PairType& ops,
      					std::pair<char,char>& mods,
 					size_t& angularMomentum,
      					RealType& angularFactor,
-					size_t& category)
+					size_t& category) const
 			{
-				throw std::runtime_error("Need to think this long enough!!\n");
-// 				fermionOrBoson = ProgramGlobals::FERMION;
-// 				size_t spin = getSpin(dofs);
-// 				ops = operatorDofs(dofs);
-// 				angularFactor = 1;
-// 				if (spin==1) angularFactor = -1;
-// 				angularMomentum = 1;
-// 				category = spin;
+				//!FIXME: Depends on site!!!!
+				fermionOrBoson = ProgramGlobals::FERMION;
+				size_t spin = getSpin(dofs);
+				ops = operatorDofs(dofs);
+				angularFactor = 1;
+				if (spin==1) angularFactor = -1;
+				angularMomentum = 1;
+				category = spin;
 			}
 			
-			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2)
-			{
-			}
+			void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2) const
+			{}
 
 		private:
+
 			// spin is diagonal
-// 			static std::pair<size_t,size_t> operatorDofs(size_t dofs)
-// 			{
-// 				size_t spin = dofs/4;
-// 				size_t xtmp = (spin==0) ? 0 : 4;
-// 				xtmp = dofs - xtmp;
-// 				size_t orb1 = xtmp/2;
-// 				size_t orb2 = (xtmp & 1);
-// 				size_t op1 = orb1 + spin*2;
-// 				size_t op2 = orb2 + spin*2;
-// 				return std::pair<size_t,size_t>(op1,op2);
-// 			}
-// 			
-// 			static size_t getSpin(size_t dofs)
-// 			{
-// 				return dofs/4;
-// 			}
+			std::pair<size_t,size_t> operatorDofs(size_t dofs) const
+			{
+				//!FIXME: Depends on site!!!!
+				size_t spin = dofs/4;
+				size_t xtmp = (spin==0) ? 0 : 4;
+				xtmp = dofs - xtmp;
+				size_t orb1 = xtmp/2;
+				size_t orb2 = (xtmp & 1);
+				size_t op1 = orb1 + spin*2;
+				size_t op2 = orb2 + spin*2;
+				return std::pair<size_t,size_t>(op1,op2);
+			}
+			
+			size_t getSpin(size_t dofs) const
+			{
+				//!FIXME: Depends on site!!!!
+				return dofs/4;
+			}
+			
+			//! If there's only spin  at site i degreesOfFreedom_[i]=2
+			//! If there's spin an norb orbitals then degreesOfFreedom_[i]=2*norb
+			//! etc.
+			void buildDofs(size_t copperEach)
+			{
+				size_t counter = 5;
+				for (size_t i=0;i<degreesOfFreedom_.size();i++) {
+					if (counter%copperEach==0) degreesOfFreedom_[i]=2;
+					else degreesOfFreedom_[i]=4;
+					counter++;
+				}
+			}
+
+			size_t linSize_;
+			std::vector<size_t> degreesOfFreedom_;
+			mutable size_t actualSite1_;
+			mutable size_t actualSite2_;
 	}; // class LinkProductImmm
 } // namespace Dmrg
 /*@}*/

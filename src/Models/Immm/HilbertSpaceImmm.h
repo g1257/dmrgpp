@@ -97,7 +97,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 	//! A class to operate on n-ary numbers (base n)
-	template<typename Word>
+	template<typename Word,typename LinkProductType>
 	class HilbertSpaceImmm {
 
 	public:
@@ -107,15 +107,17 @@ namespace Dmrg {
 		static const size_t NUMBER_OF_SPINS = 2;
 		enum {SPIN_UP=0,SPIN_DOWN=1};
 
-		HilbertSpaceImmm(const std::vector<size_t>& degreesOfFreedom)
-		: degreesOfFreedom_(degreesOfFreedom)
+		HilbertSpaceImmm(const LinkProductType& linkProduct)
+		: linkProduct_(linkProduct)
 		{}
 
+		size_t dOf(size_t i) const { return linkProduct_.dOf(i); }
+		
 		// Get electronic state on site "j" in binary number "a"
 		Word get(Word const &a,size_t j) const
 		{
 			size_t k=degreesOfFreedomUpTo(j);
-			size_t ones = (1<<(degreesOfFreedom_[j]))-1;
+			size_t ones = (1<<(dOf(j)))-1;
 			Word mask=(ones<<k);
 
 			mask &= a;
@@ -153,7 +155,7 @@ namespace Dmrg {
 
 			do {
 				size_t k=degreesOfFreedomUpTo(i);
-				dof = degreesOfFreedom_[i];
+				dof = dOf(i);
 				if ( (data & (1<<(k+value))) ) ret++;
 				i++;
 			} while (data2>>=dof);
@@ -165,7 +167,7 @@ namespace Dmrg {
 		int electronsWithGivenSpin(Word const &data,size_t site,size_t spin) const
 		{
 			
-			size_t norb = degreesOfFreedom_[site]/NUMBER_OF_SPINS;
+			size_t norb = dOf(site)/NUMBER_OF_SPINS;
 			size_t beginX=spin*norb;
 			size_t endX=beginX + norb;
 			size_t sum=0;
@@ -181,7 +183,7 @@ namespace Dmrg {
 		{
 			size_t sum=0;
 			
-			for (size_t sector=0;sector<degreesOfFreedom_[site];sector++)
+			for (size_t sector=0;sector<dOf(site);sector++)
 				sum += calcNofElectrons(data,0,sector);
 			
 			return sum;	
@@ -197,7 +199,7 @@ namespace Dmrg {
 			Word m=0;
 			for (size_t site = ii;site<j;site++) {
 				size_t k = degreesOfFreedomUpTo(site);
-				size_t dof = degreesOfFreedom_[site];
+				size_t dof = dOf(site);
 				for (size_t sigma=0;sigma<dof;sigma++)
 					m |= (1<<(k+sigma));
 			}
@@ -211,7 +213,7 @@ namespace Dmrg {
 			Word m=0;
 			
 			size_t k = degreesOfFreedomUpTo(i);
-			size_t dof = degreesOfFreedom_[i];
+			size_t dof = dOf(i);
 			for (size_t sigma=0;sigma<dof;sigma++) m |= (1<<(k+sigma));
 			
 			m &= ket;
@@ -223,11 +225,11 @@ namespace Dmrg {
 		size_t degreesOfFreedomUpTo(size_t j) const
 		{
 			size_t k=0;
-			for (size_t kk=0;kk<j;kk++) k += degreesOfFreedom_[kk];
+			for (size_t kk=0;kk<j;kk++) k += dOf(kk);
 			return k;
 		}
-		
-		const std::vector<size_t>& degreesOfFreedom_;
+
+		const LinkProductType& linkProduct_;
 	}; // class HilbertSpaceImmm
 } // namespace Dmrg
 

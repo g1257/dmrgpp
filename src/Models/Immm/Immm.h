@@ -102,51 +102,47 @@ namespace Dmrg {
  	LinkProductImmm<ModelHelperType_>,SharedMemoryTemplate> {
 		
 		typedef unsigned int long long WordType;
-		typedef  HilbertSpaceImmm<WordType> HilbertSpaceImmmType;
 
-	public:	
+	public:
 		typedef ModelHelperType_ ModelHelperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef PsimagLite::Matrix<SparseElementType> MatrixType;
-		typedef typename HilbertSpaceImmmType::HilbertState HilbertState;
-		
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
-		
+		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
+		typedef LinkProductImmm<ModelHelperType> LinkProductType;
+		typedef  HilbertSpaceImmm<WordType,LinkProductType> HilbertSpaceImmmType;
+		typedef typename HilbertSpaceImmmType::HilbertState HilbertState;
+		typedef std::vector<HilbertState> HilbertBasisType;
+		typedef   ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
+		typedef	 typename ModelBaseType::MyBasis MyBasis;
+		typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+		typedef typename MyBasis::BasisDataType BasisDataType;
+
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;
 		static const int SPIN_UP=HilbertSpaceImmmType::SPIN_UP;
 		static const int SPIN_DOWN=HilbertSpaceImmmType::SPIN_DOWN;
 		static const int NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
-	public:
-		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
-		typedef std::vector<HilbertState> HilbertBasisType;
-		typedef LinkProductImmm<ModelHelperType> LinkProductType;
-		typedef   ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
-		typedef	 typename ModelBaseType::MyBasis MyBasis;
-		typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-		typedef typename MyBasis::BasisDataType BasisDataType;
-
 		Immm(ParametersImmm<RealType> const &mp,GeometryType const &geometry) 
 		: ModelBaseType(geometry),
 		  modelParameters_(mp),
 		  geometry_(geometry),
-		  degreesOfFreedom_(geometry_.numberOfSites()),
 		  index2Op_(geometry_.numberOfSites()),
-		  hilbertSpace_(degreesOfFreedom_)
+		  hilbertSpace_(this->linkProduct())
 		{
-			size_t cooperEach = 4;
-			buildDofs(cooperEach);
 			buildIndex2Op();
 		}
+		
+		size_t dOf(size_t site) const { return this->linkProduct().dOf(site); }
 
 		size_t hilbertSize(size_t site) const
 		{
-			return (1<<degreesOfFreedom_[site]);
+			return (1<<dOf(site));
 		} 
 
 		void print(std::ostream& os) const { operator<<(os,modelParameters_); }
@@ -184,7 +180,7 @@ namespace Dmrg {
 
 			//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 			creationMatrix.clear();
-			size_t dof = degreesOfFreedom_[block[0]];
+			size_t dof = dOf(block[0]);
 
 			for (size_t sigma=0;sigma<dof;sigma++) {
 				findOperatorMatrices(tmpMatrix,block[0],sigma,natBasis);
@@ -201,7 +197,7 @@ namespace Dmrg {
 			Block block;
 			block.resize(1);
 			block[0]=0;
-			size_t norb = degreesOfFreedom_[block[0]]/HilbertSpaceImmmType::NUMBER_OF_SPINS;
+			size_t norb = dOf(block[0])/HilbertSpaceImmmType::NUMBER_OF_SPINS;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 
@@ -236,7 +232,7 @@ namespace Dmrg {
 		                     const std::vector<size_t>& block) const
 		{
 			assert(block.size()==1);
-			size_t dof =  degreesOfFreedom_[block[0]];
+			size_t dof =  dOf(block[0]);
 			HilbertState total = (1<<dof);
 
 			std::vector<HilbertState>  basisTmp;
@@ -270,7 +266,6 @@ namespace Dmrg {
 
 		const ParametersImmm<RealType>&  modelParameters_;
 		GeometryType const &geometry_;
-		std::vector<size_t> degreesOfFreedom_;
 		std::vector<size_t> index2Op_;
 		HilbertSpaceImmmType hilbertSpace_;
 
@@ -279,7 +274,7 @@ namespace Dmrg {
 		RealType sign(HilbertState const &ket, size_t site,size_t sigma) const
 		{
 			int value=0;
-			size_t dof = degreesOfFreedom_[site];
+			size_t dof = dOf(site);
 			for (size_t alpha=0;alpha<dof;alpha++) 
 				value += hilbertSpace_.calcNofElectrons(ket,0,site,alpha);
 			// add electron on site 0 if needed
@@ -552,20 +547,7 @@ namespace Dmrg {
 			std::cout<<str<<" diagTest size="<<fullm.rank()<<" eigs[0]="<<eigs[0]<<"\n";
 			std::cout<<fullm;
 		}
-		
-		//! If there's only spin  at site i degreesOfFreedom_[i]=2
-		//! If there's spin an norb orbitals then degreesOfFreedom_[i]=2*norb
-		//! etc.
-		void buildDofs(size_t copperEach)
-		{
-			size_t counter = 5;
-			for (size_t i=0;i<geometry_.numberOfSites();i++) {
-				if (counter%copperEach==0) degreesOfFreedom_[i]=2;
-				else degreesOfFreedom_[i]=4;
-				counter++;
-			}
-		}
-		
+
 		//! This is a mapping from site to the start of the operators for 
 		//! that site. Note that there are more than one operator per site,
 		//! and the number of operators per site varies.
@@ -578,7 +560,7 @@ namespace Dmrg {
 			size_t counter = 0;
 			for (size_t i=0;i<geometry_.numberOfSites();i++) {
 				index2Op_[i] = counter;
-				counter += degreesOfFreedom_[i];
+				counter += dOf(i);
 			}
 		}
 		
@@ -589,7 +571,7 @@ namespace Dmrg {
 			assert(block.size()==1);
 			size_t site = block[0];
 			MatrixType tmp;
-			size_t norb = degreesOfFreedom_[site]/NUMBER_OF_SPINS;
+			size_t norb = dOf(site)/NUMBER_OF_SPINS;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 			for (size_t orb=0;orb<norb;orb++)

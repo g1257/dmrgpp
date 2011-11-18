@@ -105,8 +105,8 @@ namespace Dmrg {
 			typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 			typedef SharedMemoryTemplate<HamiltonianConnectionType> SharedMemoryType;
 			
-			ModelCommon(const DmrgGeometryType& dmrgGeometry)
-			: dmrgGeometry_(dmrgGeometry)
+			ModelCommon(const DmrgGeometryType& geometry)
+			: dmrgGeometry_(geometry),linkProduct_(geometry.numberOfSites())
 			{
 			}
 
@@ -160,7 +160,7 @@ namespace Dmrg {
 				maxSize *= maxSize;
 				
 				static LinkProductStructType lps(maxSize);
-				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper,&lps,&x,&y);
+				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper,linkProduct_,&lps,&x,&y);
 				
 				size_t total = 0;
 				for (size_t i=0;i<n;i++) {
@@ -171,9 +171,8 @@ namespace Dmrg {
 
 				SharedMemoryType pthreads;
 				pthreads.loopCreate(total,hc);
-
 			}
-			
+
 			//! Return H, the hamiltonian of the model for basis1 and partition m consisting of the external product
 			//! of basis2 \otimes basis3
 			//! Note: Used only for debugging purposes
@@ -205,6 +204,8 @@ namespace Dmrg {
 	
 				matrix = vsm;
 			}
+			
+			const LinkProductType& linkProduct() const { return linkProduct_; }
 
 		private:
 
@@ -221,7 +222,7 @@ namespace Dmrg {
 						DmrgGeometryType,
 						SomeModelHelperType,
 						LinkProductType> SomeHamiltonianConnectionType;
-				SomeHamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
+				SomeHamiltonianConnectionType hc(dmrgGeometry_,modelHelper,linkProduct_);
 
 				size_t total = 0;
 				for (size_t i=0;i<n;i++) {
@@ -236,7 +237,7 @@ namespace Dmrg {
 			}
 
 			const DmrgGeometryType& dmrgGeometry_;
-			
+			LinkProductType linkProduct_;
 	};     //class ModelCommon
 } // namespace Dmrg
 /*@}*/
