@@ -94,6 +94,7 @@ namespace Dmrg {
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			typedef typename ModelHelperType::RealType RealType;
 
+			template<typename SomeStructType>
 			static void setLinkData(
 					size_t term,
 					size_t dofs,
@@ -103,7 +104,8 @@ namespace Dmrg {
 					std::pair<char,char>& mods,
 					size_t& angularMomentum,
      					RealType& angularFactor,
-					size_t& category)
+					size_t& category,
+					const SomeStructType& additional)
 			{
 				fermionOrBoson = ProgramGlobals::BOSON;
 				ops = operatorDofs(dofs,isSu2);
@@ -126,8 +128,9 @@ namespace Dmrg {
 						break;
 				}
 			}
-			
-			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2)
+
+			template<typename SomeStructType>
+			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2,const SomeStructType& additional)
 			{
 				if (isSu2) value = -value;
 				if (dofs<2) value *= 0.5;
@@ -138,11 +141,13 @@ namespace Dmrg {
 			//! Splus Sminus and
 			//! Sminus Splus and
 			//! Sz Sz
-			static size_t dofs(size_t term) { return 3; }
-			
-			static PairType connectorDofs(size_t term,size_t dofs)
+			template<typename SomeStructType>
+			static size_t dofs(size_t term,const SomeStructType& additional) { return 3; }
+
+			template<typename SomeStructType>
+			static PairType connectorDofs(size_t term,size_t dofs,const SomeStructType& additional)
 			{
-				return std::pair<size_t,size_t>(0,0); // no orbital and no anisotropy
+				return PairType(0,0); // no orbital and no anisotropy
 			}
 
 		private:

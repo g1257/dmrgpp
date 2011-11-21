@@ -228,7 +228,7 @@ namespace Dmrg {
 		
 		void findElectrons(std::vector<size_t>& electrons,const std::vector<HilbertState>  &basis,size_t site) const
 		{
-			modelFeAs_.findElectrons(electrons,basis);
+			modelFeAs_.findElectrons(electrons,basis,site);
 		}
 
 	private:

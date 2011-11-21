@@ -97,10 +97,15 @@ namespace Dmrg {
 			//! and 2 spins. Spin is diagonal so we end up with 8 possiblities
 			//! a up a up, a up b up, b up a up, b up, b up,
 			//! and similarly for spin down.
-			static size_t dofs(size_t term) { return 8; }
+			template<typename SomeStructType>
+			static size_t dofs(size_t term,const SomeStructType& additional)
+			{
+				return 8;
+			}
 			
 			// has only dependence on orbital
-			static PairType connectorDofs(size_t term,size_t dofs)
+			template<typename SomeStructType>
+			static PairType connectorDofs(size_t term,size_t dofs,const SomeStructType& additional)
 			{
 				size_t spin = dofs/4;
 				size_t xtmp = (spin==0) ? 0 : 4;
@@ -109,7 +114,8 @@ namespace Dmrg {
 				size_t orb2 = (xtmp & 1);
 				return PairType(orb1,orb2); // has only dependence on orbital
 			}
-			
+
+			template<typename SomeStructType>
 			static void setLinkData(
 					size_t term,
 					size_t dofs,
@@ -119,7 +125,7 @@ namespace Dmrg {
      					std::pair<char,char>& mods,
 					size_t& angularMomentum,
      					RealType& angularFactor,
-					size_t& category)
+					size_t& category,const SomeStructType& additional)
 			{
 				fermionOrBoson = ProgramGlobals::FERMION;
 				size_t spin = getSpin(dofs);
@@ -130,9 +136,11 @@ namespace Dmrg {
 				category = spin;
 			}
 			
-			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2)
+			template<typename SomeStructType>
+			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2,const SomeStructType& additional)
 			{
 			}
+
 		private:
 			// spin is diagonal
 			static std::pair<size_t,size_t> operatorDofs(size_t dofs)

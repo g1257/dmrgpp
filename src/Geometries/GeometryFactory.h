@@ -341,7 +341,7 @@ namespace Dmrg {
 				fillAdditionalData(additionalData,ind,jnd);
 				break;
 			default:
-				throw std::runtime_error("fillAdditionalData??\n");
+				return;
 			}
 		}
 

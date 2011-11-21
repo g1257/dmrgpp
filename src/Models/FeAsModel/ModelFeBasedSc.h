@@ -505,8 +505,11 @@ namespace Dmrg {
 				//! hopping part
 				for (size_t j=0;j<n;j++) {
 					for (size_t term=0;term<geometry_.terms();term++) {
-						for (size_t dofs=0;dofs<LinkProductType::dofs(term);dofs++) {
-							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs);
+						typename GeometryType::AdditionalDataType additional;
+						geometry_.fillAdditionalData(additional,term,block[i],block[j]);
+						size_t dofsTotal = LinkProductType::dofs(term,additional);
+						for (size_t dofs=0;dofs<dofsTotal;dofs++) {
+							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs,additional);
 							RealType tmp = geometry_(block[i],edofs.first,block[j],edofs.second,term);
 						
 							if (i==j || tmp==0.0) continue;
