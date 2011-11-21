@@ -100,13 +100,12 @@ namespace Dmrg {
 			typedef typename ModelHelperType::RealType RealType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			typedef VerySparseMatrix<SparseElementType> VerySparseMatrixType;
-			typedef HamiltonianConnection<DmrgGeometryType,ModelHelperType,
-					LinkProductType> HamiltonianConnectionType;
+			typedef HamiltonianConnection<DmrgGeometryType,ModelHelperType,LinkProductType> HamiltonianConnectionType;
 			typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 			typedef SharedMemoryTemplate<HamiltonianConnectionType> SharedMemoryType;
 			
 			ModelCommon(const DmrgGeometryType& geometry)
-			: dmrgGeometry_(geometry),linkProduct_(geometry.numberOfSites())
+			: dmrgGeometry_(geometry)
 			{
 			}
 
@@ -160,7 +159,7 @@ namespace Dmrg {
 				maxSize *= maxSize;
 				
 				static LinkProductStructType lps(maxSize);
-				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper,linkProduct_,&lps,&x,&y);
+				HamiltonianConnectionType hc(dmrgGeometry_,modelHelper,&lps,&x,&y);
 				
 				size_t total = 0;
 				for (size_t i=0;i<n;i++) {
@@ -204,8 +203,6 @@ namespace Dmrg {
 	
 				matrix = vsm;
 			}
-			
-			const LinkProductType& linkProduct() const { return linkProduct_; }
 
 		private:
 
@@ -222,7 +219,7 @@ namespace Dmrg {
 						DmrgGeometryType,
 						SomeModelHelperType,
 						LinkProductType> SomeHamiltonianConnectionType;
-				SomeHamiltonianConnectionType hc(dmrgGeometry_,modelHelper,linkProduct_);
+				SomeHamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
 
 				size_t total = 0;
 				for (size_t i=0;i<n;i++) {
@@ -237,7 +234,6 @@ namespace Dmrg {
 			}
 
 			const DmrgGeometryType& dmrgGeometry_;
-			LinkProductType linkProduct_;
 	};     //class ModelCommon
 } // namespace Dmrg
 /*@}*/

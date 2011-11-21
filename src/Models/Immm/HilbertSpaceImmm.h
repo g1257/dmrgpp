@@ -97,7 +97,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 	//! A class to operate on n-ary numbers (base n)
-	template<typename Word,typename LinkProductType>
+	template<typename Word>
 	class HilbertSpaceImmm {
 
 	public:
@@ -107,11 +107,11 @@ namespace Dmrg {
 		static const size_t NUMBER_OF_SPINS = 2;
 		enum {SPIN_UP=0,SPIN_DOWN=1};
 
-		HilbertSpaceImmm(const LinkProductType& linkProduct)
-		: linkProduct_(linkProduct)
+		HilbertSpaceImmm(const std::vector<size_t>& degreesOfFreedom)
+		: degreesOfFreedom_(degreesOfFreedom)
 		{}
 
-		size_t dOf(size_t i) const { return linkProduct_.dOf(i); }
+		size_t dOf(size_t i) const { return degreesOfFreedom_[i]; }
 		
 		// Get electronic state on site "j" in binary number "a"
 		Word get(Word const &a,size_t j) const
@@ -229,7 +229,7 @@ namespace Dmrg {
 			return k;
 		}
 
-		const LinkProductType& linkProduct_;
+		const std::vector<size_t>& degreesOfFreedom_;
 	}; // class HilbertSpaceImmm
 } // namespace Dmrg
 

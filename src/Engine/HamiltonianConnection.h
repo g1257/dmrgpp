@@ -94,13 +94,13 @@ namespace Dmrg {
 			typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 			typedef typename ModelHelperType::LinkType LinkType;
 			typedef std::pair<size_t,size_t> PairType;
-			
-			HamiltonianConnection(const GeometryType& geometry,const ModelHelperType& modelHelper,const LinkProductType& linkProduct,const LinkProductStructType* lps = 0,
+			typedef typename GeometryType::AdditionalDataType AdditionalDataType;
+
+			HamiltonianConnection(const GeometryType& geometry,const ModelHelperType& modelHelper,const LinkProductStructType* lps = 0,
 			std::vector<SparseElementType>* x = 0,
 			const std::vector<SparseElementType>* y = 0)
 			: geometry_(geometry),
 			  modelHelper_(modelHelper),
-			  linkProduct_(linkProduct),
 			  lps_(*lps),x_(*x),y_(*y),
 			  systemBlock_(modelHelper.leftRightSuper().left().block()),
 			  envBlock_(modelHelper.leftRightSuper().right().block()),
@@ -118,19 +118,20 @@ namespace Dmrg {
 				bool flag=false;
 				size_t ind = modelHelper_.leftRightSuper().super().block()[i];
 				size_t jnd = modelHelper_.leftRightSuper().super().block()[j];
-				linkProduct_.updateSites(ind,jnd);
-				//throw std::runtime_error("system block is not correct here, think finite algorithm!!!\n"); 
+
 				if (!geometry_.connected(smax_,emin_,ind,jnd)) return flag;
 				size_t type = geometry_.connectionKind(smax_,ind,jnd);
-				
+
 				if (type==ProgramGlobals::SYSTEM_SYSTEM || 
 					type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
-				
+
 				SparseMatrixType mBlock;
-				
+
 				for (size_t term=0;term<geometry_.terms();term++) {
-					for (size_t dofs=0;dofs<linkProduct_.dofs(term);dofs++) {
-						std::pair<size_t,size_t> edofs = linkProduct_.connectorDofs(term,dofs);
+					geometry_.fillAdditionalData(additionalData_,term,ind,jnd);
+					size_t dofsTotal = LinkProductType::dofs(term,additionalData_);
+					for (size_t dofs=0;dofs<dofsTotal;dofs++) {
+						std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs,additionalData_);
 						SparseElementType tmp = geometry_(smax_,emin_,ind,edofs.first,jnd,edofs.second,term);
 				
 						if (tmp==0.0) continue;
@@ -197,8 +198,8 @@ namespace Dmrg {
 				RealType angularFactor=0;
 				bool isSu2 = modelHelper_.isSu2();
 				SparseElementType value = valuec;
-				linkProduct_.valueModifier(value,term,dofs,isSu2);
-				linkProduct_.setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
+				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData_);
+				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData_);
 				LinkType link(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				if (link.type==ProgramGlobals::SYSTEM_ENVIRON) {
 						
@@ -226,7 +227,7 @@ namespace Dmrg {
 			}
 
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
-			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,size_t i,size_t j,size_t type,const SparseElementType  &valuec,size_t term,size_t dofs)  const
+			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,size_t i,size_t j,size_t type,const SparseElementType  &valuec,size_t term,size_t dofs) const
 			{
 				int offset =modelHelper_.leftRightSuper().left().block().size();
 				std::pair<size_t,size_t> ops;
@@ -234,10 +235,10 @@ namespace Dmrg {
 				size_t fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
 				RealType angularFactor=0;
 				bool isSu2 = modelHelper_.isSu2();
-				linkProduct_.setLinkData(term,dofs,isSu2,
-						fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
+				LinkProductType::setLinkData(term,dofs,isSu2,
+						fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData_);
 				SparseElementType value = valuec;
-				linkProduct_.valueModifier(value,term,dofs,isSu2);
+				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData_);
 				LinkType link(i,j,type, value,dofs,
 					      fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
@@ -266,13 +267,13 @@ namespace Dmrg {
 
 			const GeometryType& geometry_;
 			const ModelHelperType& modelHelper_;
-			const LinkProductType& linkProduct_;
 			const LinkProductStructType& lps_;
 			std::vector<SparseElementType>& x_;
 			const std::vector<SparseElementType>& y_;
 			const typename GeometryType::BlockType& systemBlock_;
 			const typename GeometryType::BlockType& envBlock_;
 			size_t smax_,emin_;
+			mutable AdditionalDataType additionalData_;
 	}; // class HamiltonianConnection
 } // namespace Dmrg 
 

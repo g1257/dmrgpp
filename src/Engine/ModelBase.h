@@ -109,8 +109,7 @@ namespace Dmrg {
 		typedef typename ModelHelperType::BasisType MyBasis;
 		typedef typename ModelHelperType::BasisWithOperatorsType
 				BasisWithOperatorsType;
-		typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,
-				LinkProductType,SharedMemoryTemplate> ModelCommonType;
+		typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelCommonType;
 		typedef DmrgGeometryType GeometryType;
 		typedef typename ModelCommonType::SharedMemoryType SharedMemoryType;
 		typedef typename ModelHelperType::LeftRightSuperType
@@ -166,13 +165,6 @@ namespace Dmrg {
 		void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const
 		{
 			modelCommon_.fullHamiltonian(matrix,modelHelper);
-		}
-
-	protected:
-
-		const LinkProductType& linkProduct() const
-		{
-			return modelCommon_.linkProduct();
 		}
 
 	private:

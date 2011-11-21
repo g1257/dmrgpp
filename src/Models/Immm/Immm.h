@@ -114,7 +114,7 @@ namespace Dmrg {
 		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef LinkProductImmm<ModelHelperType> LinkProductType;
-		typedef  HilbertSpaceImmm<WordType,LinkProductType> HilbertSpaceImmmType;
+		typedef  HilbertSpaceImmm<WordType> HilbertSpaceImmmType;
 		typedef typename HilbertSpaceImmmType::HilbertState HilbertState;
 		typedef std::vector<HilbertState> HilbertBasisType;
 		typedef   ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
@@ -132,13 +132,16 @@ namespace Dmrg {
 		: ModelBaseType(geometry),
 		  modelParameters_(mp),
 		  geometry_(geometry),
+		  degreesOfFreedom_(geometry_.numberOfSites()),
 		  index2Op_(geometry_.numberOfSites()),
-		  hilbertSpace_(this->linkProduct())
+		  hilbertSpace_(degreesOfFreedom_)
 		{
+			size_t cooperEach = 4;
+			buildDofs(cooperEach);
 			buildIndex2Op();
 		}
 		
-		size_t dOf(size_t site) const { return this->linkProduct().dOf(site); }
+		size_t dOf(size_t site) const { return degreesOfFreedom_[site]; }
 
 		size_t hilbertSize(size_t site) const
 		{
@@ -264,10 +267,6 @@ namespace Dmrg {
 
 	private:
 
-		const ParametersImmm<RealType>&  modelParameters_;
-		GeometryType const &geometry_;
-		std::vector<size_t> index2Op_;
-		HilbertSpaceImmmType hilbertSpace_;
 
 		//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS 
@@ -584,6 +583,25 @@ namespace Dmrg {
 		{
 			return cDaggerCi(block,spin,spin);
 		}
+
+		//! If there's only spin  at site i degreesOfFreedom_[i]=2
+		//! If there's spin an norb orbitals then degreesOfFreedom_[i]=2*norb
+		//! etc.
+		void buildDofs(size_t copperEach)
+		{
+			size_t counter = 5;
+			for (size_t i=0;i<degreesOfFreedom_.size();i++) {
+				if (counter%copperEach==0) degreesOfFreedom_[i]=2;
+				else degreesOfFreedom_[i]=4;
+				counter++;
+			}
+		}
+
+		const ParametersImmm<RealType>&  modelParameters_;
+		GeometryType const &geometry_;
+		std::vector<size_t> degreesOfFreedom_;
+		std::vector<size_t> index2Op_;
+		HilbertSpaceImmmType hilbertSpace_;
 	};     //class Immm
 
 	template<typename ModelHelperType,

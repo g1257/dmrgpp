@@ -93,262 +93,282 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	
 	class GeometryFactory {
-			static size_t refCounter_;
-		public:
-			enum {CHAIN,LADDER,LADDERX,LADDERBATH,KTWONIFFOUR};
-			GeometryFactory() 
-			: dirs_(0), // move to object.dirs()
-			  n_(0),
-			  maxConnections_(0),
-			  chain_(0),
-			  ladder_(0),
-			  ladderx_(0),
-			  ladderbath_(0),
-			  ktwoniffour_(0)
-			{}
+		
+		typedef std::pair<size_t,size_t> PairType;
 
-			GeometryFactory(const GeometryFactory& g)
-			{
-				dirs_=g.dirs_; // move to object.dirs()
-				n_=g.n_;
-				maxConnections_=g.maxConnections_;
-				chain_=g.chain_;
-				ladder_=g.ladder_;
-				ladderx_=g.ladderx_;
-				ladderbath_=g.ladderbath_;
-				ktwoniffour_=g.ktwoniffour_;
-				refCounter_++;
+		static size_t refCounter_;
+
+	public:
+
+		typedef KTwoNiFFour::AdditionalData AdditionalDataType;
+
+		enum {CHAIN,LADDER,LADDERX,LADDERBATH,KTWONIFFOUR};
+
+
+		GeometryFactory() 
+		: dirs_(0), // move to object.dirs()
+		  n_(0),
+		  maxConnections_(0),
+		  chain_(0),
+		  ladder_(0),
+		  ladderx_(0),
+		  ladderbath_(0),
+		  ktwoniffour_(0)
+		{}
+
+		GeometryFactory(const GeometryFactory& g)
+		{
+			dirs_=g.dirs_; // move to object.dirs()
+			n_=g.n_;
+			maxConnections_=g.maxConnections_;
+			chain_=g.chain_;
+			ladder_=g.ladder_;
+			ladderx_=g.ladderx_;
+			ladderbath_=g.ladderbath_;
+			ktwoniffour_=g.ktwoniffour_;
+			refCounter_++;
+		}
+
+		GeometryFactory& operator=(const GeometryFactory& g)
+		{
+			dirs_=g.dirs_; // move to object.dirs()
+			n_=g.n_;
+			maxConnections_=g.maxConnections_;
+			chain_=g.chain_;
+			ladder_=g.ladder_;
+			ladderx_=g.ladderx_;
+			ladderbath_=g.ladderbath_;
+			ktwoniffour_=g.ktwoniffour_;
+			refCounter_++;
+			return *this;
+		}
+
+		~GeometryFactory()
+		{
+			if (refCounter_>0) {
+				refCounter_--;
+				return;
 			}
-
-			GeometryFactory& operator=(const GeometryFactory& g)
-			{
-				dirs_=g.dirs_; // move to object.dirs()
-				n_=g.n_;
-				maxConnections_=g.maxConnections_;
-				chain_=g.chain_;
-				ladder_=g.ladder_;
-				ladderx_=g.ladderx_;
-				ladderbath_=g.ladderbath_;
-				ktwoniffour_=g.ktwoniffour_;
-				refCounter_++;
-				return *this;
+			switch(n_) {
+			case CHAIN:
+				if (chain_) delete chain_;
+				break;
+			case LADDER:
+				if (ladder_) delete ladder_;
+				break;
+			case LADDERX:
+				if (ladderx_) delete ladderx_;
+				break;
+			case LADDERBATH:
+				if (ladderbath_) delete ladderbath_;
+				break;
+			case KTWONIFFOUR:
+				if (ktwoniffour_) delete ktwoniffour_;
+				break;
 			}
+		}
 
-			~GeometryFactory()
-			{
-				if (refCounter_>0) {
-					refCounter_--;
-					return;
-				}
-				switch(n_) {
-				case CHAIN:
-					if (chain_) delete chain_;
-					break;
-				case LADDER:
-					if (ladder_) delete ladder_;
-					break;
-				case LADDERX:
-					if (ladderx_) delete ladderx_;
-					break;
-				case LADDERBATH:
-					if (ladderbath_) delete ladderbath_;
-					break;
-				case KTWONIFFOUR:
-					if (ktwoniffour_) delete ktwoniffour_;
-					break;
-				}
-			}
-
-			template<typename IoType>
-			void init(IoType& io,const std::string& s,size_t linSize)
-			{
-				n_=getGeometry(s);
-				int x=0,tmp=0;
-				switch (n_) {
-				case CHAIN:
-					dirs_ = 1;
-					maxConnections_=1;
-					chain_ = new Chain(linSize);
-					break;
-				case LADDER:
-					dirs_ = 2;
-					maxConnections_=4;
-					io.readline(x,"LadderLeg=");
-					if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
-					ladder_ = new Ladder(linSize,x);
-					break;
-				case LADDERX:
-					dirs_ = 4;
-					maxConnections_=4;
-					io.readline(x,"LadderLeg=");
-					if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
-					ladderx_ = new LadderX(linSize,x);
-					break;
-				case LADDERBATH:
-					dirs_ = 3; // X,Y, and BATH
-					io.readline(x,"LadderLeg=");
-					if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
-					io.readline(tmp,"BathSitesPerSite=");
-					if (tmp<0) throw std::runtime_error("BathSitesPerSite<0 is an error\n");
-					ladderbath_ = new LadderBath(linSize,x,tmp);
-					maxConnections_ = ladderbath_->maxConnections();
-					break;
-				case KTWONIFFOUR:
-					dirs_ = 4;
-					ktwoniffour_ = new KTwoNiFFour(linSize);
-					break;
-				default:
-					throw std::runtime_error("Unknown geometry\n");
-				}
-			}
-
-			size_t dirs() const { return dirs_; } // <-- move elsewhere FIXME
-
-			size_t handle(size_t i,size_t j) const
-			{
-				switch (n_) {
-				case CHAIN:
-					return chain_->handle(i,j);
-				case LADDER:
-					return ladder_->handle(i,j);
-				case LADDERX:
-					return ladderx_->handle(i,j);
-				case LADDERBATH:
-					return ladderbath_->handle(i,j);
-				case KTWONIFFOUR:
-					return ktwoniffour_->handle(i,j);
-				}
+		template<typename IoType>
+		void init(IoType& io,const std::string& s,size_t linSize)
+		{
+			n_=getGeometry(s);
+			int x=0,tmp=0;
+			switch (n_) {
+			case CHAIN:
+				dirs_ = 1;
+				maxConnections_=1;
+				chain_ = new Chain(linSize);
+				break;
+			case LADDER:
+				dirs_ = 2;
+				maxConnections_=4;
+				io.readline(x,"LadderLeg=");
+				if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
+				ladder_ = new Ladder(linSize,x);
+				break;
+			case LADDERX:
+				dirs_ = 4;
+				maxConnections_=4;
+				io.readline(x,"LadderLeg=");
+				if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
+				ladderx_ = new LadderX(linSize,x);
+				break;
+			case LADDERBATH:
+				dirs_ = 3; // X,Y, and BATH
+				io.readline(x,"LadderLeg=");
+				if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
+				io.readline(tmp,"BathSitesPerSite=");
+				if (tmp<0) throw std::runtime_error("BathSitesPerSite<0 is an error\n");
+				ladderbath_ = new LadderBath(linSize,x,tmp);
+				maxConnections_ = ladderbath_->maxConnections();
+				break;
+			case KTWONIFFOUR:
+				dirs_ = 4;
+				ktwoniffour_ = new KTwoNiFFour(linSize);
+				break;
+			default:
 				throw std::runtime_error("Unknown geometry\n");
 			}
+		}
 
-			size_t getVectorSize(size_t dirId) const
-			{
-				switch (n_) {
-				case CHAIN:
-					return chain_->getVectorSize(dirId);
-				case LADDER:
-					return ladder_->getVectorSize(dirId);
-				case LADDERX:
-					return ladderx_->getVectorSize(dirId);
-				case LADDERBATH:
-					return ladderbath_->getVectorSize(dirId);
-				case KTWONIFFOUR:
-					return ktwoniffour_->getVectorSize(dirId);
-				}
-				throw std::runtime_error("Unknown geometry\n");
+		size_t dirs() const { return dirs_; } // <-- move elsewhere FIXME
+
+		size_t handle(size_t i,size_t j) const
+		{
+			switch (n_) {
+			case CHAIN:
+				return chain_->handle(i,j);
+			case LADDER:
+				return ladder_->handle(i,j);
+			case LADDERX:
+				return ladderx_->handle(i,j);
+			case LADDERBATH:
+				return ladderbath_->handle(i,j);
+			case KTWONIFFOUR:
+				return ktwoniffour_->handle(i,j);
 			}
+			throw std::runtime_error("Unknown geometry\n");
+		}
 
-			bool connected(size_t i1,size_t i2) const
-			{
-				switch(n_) {
-				case CHAIN:
-					return chain_->connected(i1,i2);
-				case LADDER:
-					return ladder_->connected(i1,i2);
-				case LADDERX:
-					return ladderx_->connected(i1,i2);
-				case LADDERBATH:
-					return ladderbath_->connected(i1,i2);
-				case KTWONIFFOUR:
-					return ktwoniffour_->connected(i1,i2);
-				}
-				throw std::runtime_error("Unknown geometry\n");
+		size_t getVectorSize(size_t dirId) const
+		{
+			switch (n_) {
+			case CHAIN:
+				return chain_->getVectorSize(dirId);
+			case LADDER:
+				return ladder_->getVectorSize(dirId);
+			case LADDERX:
+				return ladderx_->getVectorSize(dirId);
+			case LADDERBATH:
+				return ladderbath_->getVectorSize(dirId);
+			case KTWONIFFOUR:
+				return ktwoniffour_->getVectorSize(dirId);
 			}
+			throw std::runtime_error("Unknown geometry\n");
+		}
 
-			size_t calcDir(size_t i1,size_t i2) const
-			{
-				switch (n_) {
-				case CHAIN:
-					return chain_->calcDir(i1,i2);
-				case LADDER:
-					return ladder_->calcDir(i1,i2);
-				case LADDERX:
-					return ladderx_->calcDir(i1,i2);
-				case LADDERBATH:
-					return ladderbath_->calcDir(i1,i2);
-				case KTWONIFFOUR:
-					return ktwoniffour_->calcDir(i1,i2);
-				}
-				throw std::runtime_error("Unknown geometry\n");
+		bool connected(size_t i1,size_t i2) const
+		{
+			switch(n_) {
+			case CHAIN:
+				return chain_->connected(i1,i2);
+			case LADDER:
+				return ladder_->connected(i1,i2);
+			case LADDERX:
+				return ladderx_->connected(i1,i2);
+			case LADDERBATH:
+				return ladderbath_->connected(i1,i2);
+			case KTWONIFFOUR:
+				return ktwoniffour_->connected(i1,i2);
 			}
+			throw std::runtime_error("Unknown geometry\n");
+		}
 
-			bool fringe(size_t i,size_t smax,size_t emin) const
-			{
-				switch(n_) {
-				case CHAIN:
-					return chain_->fringe(i,smax,emin);
-				case LADDER:
-					return ladder_->fringe(i,smax,emin);
-				case LADDERX:
-					return ladderx_->fringe(i,smax,emin);
-				case LADDERBATH:
-					return ladderbath_->fringe(i,smax,emin);
-				case KTWONIFFOUR:
-					return ktwoniffour_->fringe(i,smax,emin);
-				}
-				throw std::runtime_error("Unknown geometry\n");
+		size_t calcDir(size_t i1,size_t i2) const
+		{
+			switch (n_) {
+			case CHAIN:
+				return chain_->calcDir(i1,i2);
+			case LADDER:
+				return ladder_->calcDir(i1,i2);
+			case LADDERX:
+				return ladderx_->calcDir(i1,i2);
+			case LADDERBATH:
+				return ladderbath_->calcDir(i1,i2);
+			case KTWONIFFOUR:
+				return ktwoniffour_->calcDir(i1,i2);
 			}
+			throw std::runtime_error("Unknown geometry\n");
+		}
 
-			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
-			{
-				switch(n_) {
-				case CHAIN:
-					return chain_->getSubstituteSite(smax,emin,siteNew2);
-				case LADDER:
-					return ladder_->getSubstituteSite(smax,emin,siteNew2);
-				case LADDERX:
-					return ladderx_->getSubstituteSite(smax,emin,siteNew2);
-				case LADDERBATH:
-					return ladderbath_->getSubstituteSite(smax,emin,siteNew2);
-				case KTWONIFFOUR:
-					return ktwoniffour_->getSubstituteSite(smax,emin,siteNew2);
-				}
-				throw std::runtime_error("Unknown geometry\n");
+		bool fringe(size_t i,size_t smax,size_t emin) const
+		{
+			switch(n_) {
+			case CHAIN:
+				return chain_->fringe(i,smax,emin);
+			case LADDER:
+				return ladder_->fringe(i,smax,emin);
+			case LADDERX:
+				return ladderx_->fringe(i,smax,emin);
+			case LADDERBATH:
+				return ladderbath_->fringe(i,smax,emin);
+			case KTWONIFFOUR:
+				return ktwoniffour_->fringe(i,smax,emin);
 			}
+			throw std::runtime_error("Unknown geometry\n");
+		}
 
-			std::string label() const
-			{
-				switch(n_) {
-				case CHAIN:
-					return chain_->label();
-				case LADDER:
-					return ladder_->label();
-				case LADDERX:
-					return ladderx_->label();
-				case LADDERBATH:
-					return ladderbath_->label();
-				case KTWONIFFOUR:
-					return ktwoniffour_->label();
-				}
-				throw std::runtime_error("Unknown geometry\n");
+		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+		{
+			switch(n_) {
+			case CHAIN:
+				return chain_->getSubstituteSite(smax,emin,siteNew2);
+			case LADDER:
+				return ladder_->getSubstituteSite(smax,emin,siteNew2);
+			case LADDERX:
+				return ladderx_->getSubstituteSite(smax,emin,siteNew2);
+			case LADDERBATH:
+				return ladderbath_->getSubstituteSite(smax,emin,siteNew2);
+			case KTWONIFFOUR:
+				return ktwoniffour_->getSubstituteSite(smax,emin,siteNew2);
 			}
-			
-			size_t maxConnections() const { return maxConnections_; }
+			throw std::runtime_error("Unknown geometry\n");
+		}
 
-		private:
-
-			size_t getGeometry(const std::string& s) const
-			{
-				size_t x = 0;
-				if (s=="chain") x=CHAIN;
-				else if (s=="ladder") x=LADDER;
-				else if (s=="ladderx") x=LADDERX;
-				else if (s=="bathedcluster") x=LADDERBATH;
-				else if (s=="ktwoniffour") x = KTWONIFFOUR;
-				else throw std::runtime_error("unknown geometry\n");
-				return x;
+		std::string label() const
+		{
+			switch(n_) {
+			case CHAIN:
+				return chain_->label();
+			case LADDER:
+				return ladder_->label();
+			case LADDERX:
+				return ladderx_->label();
+			case LADDERBATH:
+				return ladderbath_->label();
+			case KTWONIFFOUR:
+				return ktwoniffour_->label();
 			}
+			throw std::runtime_error("Unknown geometry\n");
+		}
+		
+		size_t maxConnections() const { return maxConnections_; }
 
-			// ATTENTION: THIS CLASS HAS CUSTOM ASSIGNMENT OPERATOR
-			// AND COPY CONTRUCTORS
-			size_t dirs_; // move to object.dirs()
-			size_t n_;
-			size_t maxConnections_;
-			Chain* chain_;
-			Ladder* ladder_;
-			LadderX* ladderx_;
-			LadderBath* ladderbath_;
-			KTwoNiFFour* ktwoniffour_;
+		void fillAdditionalData(AdditionalDataType& additionalData,size_t ind,size_t jnd) const
+		{
+			switch(n_) {
+			case KTWONIFFOUR:
+				fillAdditionalData(additionalData,ind,jnd);
+				break;
+			default:
+				throw std::runtime_error("fillAdditionalData??\n");
+			}
+		}
+
+	private:
+
+		size_t getGeometry(const std::string& s) const
+		{
+			size_t x = 0;
+			if (s=="chain") x=CHAIN;
+			else if (s=="ladder") x=LADDER;
+			else if (s=="ladderx") x=LADDERX;
+			else if (s=="bathedcluster") x=LADDERBATH;
+			else if (s=="ktwoniffour") x = KTWONIFFOUR;
+			else throw std::runtime_error("unknown geometry\n");
+			return x;
+		}
+
+		// ATTENTION: THIS CLASS HAS CUSTOM ASSIGNMENT OPERATOR
+		// AND COPY CONTRUCTORS
+		size_t dirs_; // move to object.dirs()
+		size_t n_;
+		size_t maxConnections_;
+		Chain* chain_;
+		Ladder* ladder_;
+		LadderX* ladderx_;
+		LadderBath* ladderbath_;
+		KTwoNiFFour* ktwoniffour_;
 	}; // class GeometryFactory
 
 	size_t GeometryFactory::refCounter_=0;

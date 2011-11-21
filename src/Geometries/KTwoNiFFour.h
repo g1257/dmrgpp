@@ -86,124 +86,139 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	
 	class KTwoNiFFour  {
-			typedef std::pair<int,int> PairType;
-			enum {TYPE_O,TYPE_C};
-			enum {SUBTYPE_X,SUBTYPE_Y};
-			enum {DIR_X,DIR_Y,DIR_XPY,DIR_XMY};
 
-		public:
+		typedef std::pair<int,int> PairType;
 
-			KTwoNiFFour(size_t linSize) 
-			: linSize_(linSize)
-			{}
+		enum {TYPE_O,TYPE_C};
+		enum {SUBTYPE_X,SUBTYPE_Y};
+		enum {DIR_X,DIR_Y,DIR_XPY,DIR_XMY};
 
-			size_t getVectorSize(size_t dirId) const
-			{
-				throw std::runtime_error("getVectorSize????\n");
-			}
+	public:
 
-			bool connected(size_t i1,size_t i2) const
-			{
-				if (i1==i2) return false;
-				PairType type1 = findTypeOfSite(i1);
-				PairType type2 = findTypeOfSite(i2);
-				//! 4 possibilities
-				//! c-c
-				if (type1.first == type2.first && type1.first == TYPE_C) return false;
-				//! o-o
-				if (type1.first == type2.first && type1.first == TYPE_O) {
-					if (type1.second==type2.second) return false;
-					size_t newi1 = (type1.second==SUBTYPE_X) ? i1 : i2;
-					size_t newi2 = (type1.second==SUBTYPE_X) ? i2 : i1;
-					if (newi1>newi2) {
-						assert(newi1>=4);
-						if (newi1-2==newi2 || newi1-3==newi2) return true;
-						return false;
-					}
-					if (newi2-1==newi1) return true;
-					if (newi2>=2 && newi2-2==newi1) return true;
+		struct AdditionalData {
+			size_t type1;
+			size_t type2;
+			size_t TYPE_C;
+		};
+
+		KTwoNiFFour(size_t linSize) 
+		: linSize_(linSize)
+		{}
+
+		size_t getVectorSize(size_t dirId) const
+		{
+			throw std::runtime_error("getVectorSize????\n");
+		}
+
+		bool connected(size_t i1,size_t i2) const
+		{
+			if (i1==i2) return false;
+			PairType type1 = findTypeOfSite(i1);
+			PairType type2 = findTypeOfSite(i2);
+			//! 4 possibilities
+			//! c-c
+			if (type1.first == type2.first && type1.first == TYPE_C) return false;
+			//! o-o
+			if (type1.first == type2.first && type1.first == TYPE_O) {
+				if (type1.second==type2.second) return false;
+				size_t newi1 = (type1.second==SUBTYPE_X) ? i1 : i2;
+				size_t newi2 = (type1.second==SUBTYPE_X) ? i2 : i1;
+				if (newi1>newi2) {
+					assert(newi1>=4);
+					if (newi1-2==newi2 || newi1-3==newi2) return true;
 					return false;
 				}
-				//! o-c or c-o
-				size_t newi1 = (type1.first==TYPE_O) ? i1 : i2;
-				size_t newi2 = (type1.first==TYPE_O) ? i2 : i1;
-				assert(newi2>=3);
-				if (newi2-1==newi1 || newi2-2==newi1 || newi2-3==newi1 || newi2+1==newi1)
-					return true;
+				if (newi2-1==newi1) return true;
+				if (newi2>=2 && newi2-2==newi1) return true;
 				return false;
 			}
+			//! o-c or c-o
+			size_t newi1 = (type1.first==TYPE_O) ? i1 : i2;
+			size_t newi2 = (type1.first==TYPE_O) ? i2 : i1;
+			assert(newi2>=3);
+			if (newi2-1==newi1 || newi2-2==newi1 || newi2-3==newi1 || newi2+1==newi1)
+				return true;
+			return false;
+		}
 
-			// assumes i1 and i2 are connected
-			size_t calcDir(size_t i1,size_t i2) const
-			{
-				PairType type1 = findTypeOfSite(i1);
-				PairType type2 = findTypeOfSite(i2);
-				//! o-o
-				if (type1.first == type2.first && type1.first == TYPE_O) {
-					assert(type1.second!=type2.second);
-					size_t newi1 = (type1.second==SUBTYPE_X) ? i1 : i2;
-					size_t newi2 = (type1.second==SUBTYPE_X) ? i2 : i1;
-					if (newi1>newi2) {
-						assert(newi1>=4);
-						size_t distance = newi1-newi2;
-						if (distance==2) return DIR_XPY; 
-						assert(distance==3);
-						return DIR_XMY;
-					}
-					size_t distance = newi2-newi1;
-					if (distance==1)  return DIR_XPY; 
-					assert(distance==2);
+		// assumes i1 and i2 are connected
+		size_t calcDir(size_t i1,size_t i2) const
+		{
+			PairType type1 = findTypeOfSite(i1);
+			PairType type2 = findTypeOfSite(i2);
+			//! o-o
+			if (type1.first == type2.first && type1.first == TYPE_O) {
+				assert(type1.second!=type2.second);
+				size_t newi1 = (type1.second==SUBTYPE_X) ? i1 : i2;
+				size_t newi2 = (type1.second==SUBTYPE_X) ? i2 : i1;
+				if (newi1>newi2) {
+					assert(newi1>=4);
+					size_t distance = newi1-newi2;
+					if (distance==2) return DIR_XPY; 
+					assert(distance==3);
 					return DIR_XMY;
 				}
-				//! o-c or c-o
-				size_t newi1 = (type1.first==TYPE_O) ? i1 : i2;
-				type1 = findTypeOfSite(newi1);
-				return (type1.second==SUBTYPE_X) ? DIR_X : DIR_Y;
+				size_t distance = newi2-newi1;
+				if (distance==1)  return DIR_XPY; 
+				assert(distance==2);
+				return DIR_XMY;
 			}
+			//! o-c or c-o
+			size_t newi1 = (type1.first==TYPE_O) ? i1 : i2;
+			type1 = findTypeOfSite(newi1);
+			return (type1.second==SUBTYPE_X) ? DIR_X : DIR_Y;
+		}
 
-			bool fringe(size_t i,size_t smax,size_t emin) const
-			{
-				throw std::runtime_error("fringe????\n");
-			}
+		bool fringe(size_t i,size_t smax,size_t emin) const
+		{
+			throw std::runtime_error("fringe????\n");
+		}
 
-			// assumes i1 and i2 are connected
-			size_t handle(size_t i1,size_t i2) const
-			{
-				throw std::runtime_error("handle????\n");
-			}
+		// assumes i1 and i2 are connected
+		size_t handle(size_t i1,size_t i2) const
+		{
+			throw std::runtime_error("handle????\n");
+		}
 
-			// siteNew2 is fringe in the environment
-			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
-			{
-				throw std::runtime_error("getSubstituteSite????\n");
-			}
+		// siteNew2 is fringe in the environment
+		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+		{
+			throw std::runtime_error("getSubstituteSite????\n");
+		}
 
-			std::string label() const
-			{
-				return "KTwoNiFFour";
-			}
+		std::string label() const
+		{
+			return "KTwoNiFFour";
+		}
+		
+		size_t maxConnections() const
+		{
+			throw std::runtime_error("maxConnections????\n");
+		}
+		
+		void fillAdditionalData(AdditionalData& additionalData,size_t ind,size_t jnd) const
+		{
+			additionalData.type1 = findTypeOfSite(ind).first;
+			additionalData.type2 = findTypeOfSite(jnd).first;
+			additionalData.TYPE_C = TYPE_C;
+		}
+
+	private:
+
+		//! Given as a pair, first number is the type,
+		//! If first number == TYPE_C then second number is bogus
+		//! If first number == TYPE_O then second number is the subtype
+		PairType findTypeOfSite(size_t site) const
+		{
+			size_t sitePlusOne = site + 1;
+			size_t r = sitePlusOne%4;
+			if (r==0) return PairType(TYPE_C,0);
 			
-			size_t maxConnections() const
-			{
-				throw std::runtime_error("maxConnections????\n");
-			}
-
-		private:
-
-			//! Given as a pair, first number is the type,
-			//! If first number == TYPE_C then second number is bogus
-			//! If first number == TYPE_O then second number is the subtype
-			PairType findTypeOfSite(size_t site) const
-			{
-				size_t sitePlusOne = site + 1;
-				size_t r = sitePlusOne%4;
-				if (r==0) return PairType(TYPE_C,0);
-				
-				if (r==1) return PairType(TYPE_O,SUBTYPE_X);
-				return PairType(TYPE_O,SUBTYPE_Y);
-			}
-			
-			size_t linSize_;
+			if (r==1) return PairType(TYPE_O,SUBTYPE_X);
+			return PairType(TYPE_O,SUBTYPE_Y);
+		}
+		
+		size_t linSize_;
 	}; // class KTwoNiFFour
 } // namespace Dmrg 
 

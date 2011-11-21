@@ -94,6 +94,8 @@ namespace Dmrg {
 			typedef GeometryDirection<RealType,GeometryFactory> GeometryDirectionType;
 		public:
 			
+			typedef typename GeometryFactory::AdditionalDataType AdditionalDataType;
+			
 			template<typename IoInputter>
 			GeometryTerm(IoInputter& io,size_t termId,size_t linSize,bool debug=false) :
 				linSize_(linSize)
@@ -186,6 +188,11 @@ namespace Dmrg {
 			size_t maxConnections() const
 			{
 				return geometryFactory_.maxConnections();
+			}
+			
+			void fillAdditionalData(AdditionalDataType& additionalData,size_t ind,size_t jnd) const
+			{
+				geometryFactory_.fillAdditionalData(additionalData,ind,jnd);
 			}
 
 			template<typename RealType_>	

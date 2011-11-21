@@ -90,6 +90,7 @@ namespace Dmrg {
 		public:
 			typedef GeometryTerm<RealType> GeometryTermType;
 			typedef std::vector<size_t> BlockType;
+			typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
 
 			template<typename IoInputter>
 			Geometry(IoInputter& io,bool debug=false)
@@ -170,6 +171,11 @@ namespace Dmrg {
 				return terms_[termId].maxConnections();
 			}
 			
+			void fillAdditionalData(AdditionalDataType& additionalData,size_t term,size_t ind,size_t jnd) const
+			{
+				terms_[term].fillAdditionalData(additionalData,ind,jnd);
+			}
+
 			template<typename RealType_>
 			friend std::ostream& operator<<(std::ostream& os,const Geometry<RealType_>& g);
 
