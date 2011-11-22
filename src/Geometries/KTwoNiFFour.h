@@ -177,7 +177,7 @@ namespace Dmrg {
 		// assumes i1 and i2 are connected
 		size_t handle(size_t i1,size_t i2) const
 		{
-			return calcDir(i1,i2);
+			assert(false);
 		}
 
 		// siteNew2 is fringe in the environment

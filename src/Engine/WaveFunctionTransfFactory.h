@@ -155,7 +155,7 @@ namespace Dmrg {
 			stage_=stage;
 			counter_=0;
 		}
-		
+
 		void triggerOn(const LeftRightSuperType& lrs)
 		{
 			bool allow=false;
@@ -182,7 +182,7 @@ namespace Dmrg {
 			msg<<"Window open, ready to transform vectors";
 			progress_.printline(msg,std::cout);
 		}
-		
+
 		// FIXME: change name to transformVector
 		template<typename SomeVectorType,typename SomeVectorType2>
 		void setInitialVector(	
@@ -204,7 +204,7 @@ namespace Dmrg {
 			}
 			// FIXME: Must check the below change when using SU(2)!!
 			//if (m<0) allow = false; // isEnabled_=false;
-			
+
 			if (isEnabled_ && allow) {
 				RealType eps = 1e-6;
 				if (std::norm(src)<eps)
@@ -215,7 +215,7 @@ namespace Dmrg {
 				createRandomVector(dest);
 			}
 		}
-		
+
 		void triggerOff(const LeftRightSuperType& lrs)
 		{
 			bool allow=false;

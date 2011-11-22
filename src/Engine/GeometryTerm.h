@@ -124,9 +124,10 @@ namespace Dmrg {
 
 				for (size_t i1=0;i1<linSize;i1++) {
 					for (size_t i2=0;i2<linSize;i2++) {
-						size_t h= (geometryFactory_.connected(i1,i2)) ? geometryFactory_.handle(i1,i2) : 0;
-						size_t nrow = directions_[h].nRow();
-						size_t ncol = directions_[h].nCol();
+						if (!geometryFactory_.connected(i1,i2)) continue;
+						size_t dir = geometryFactory_.calcDir(i1,i2);
+						size_t nrow = directions_[dir].nRow();
+						size_t ncol = directions_[dir].nCol();
 						geometryFactory_.flipRowOrColumn(nrow,ncol,i1,i2);
 						for (size_t edof1=0;edof1<nrow;edof1++)
 							for (size_t edof2=0;edof2<ncol;edof2++)
@@ -229,10 +230,12 @@ namespace Dmrg {
 				size_t ret = 0;
 				for (size_t i1=0;i1<linSize_;i1++) {
 					for (size_t i2=0;i2<linSize_;i2++) {
-						size_t h= (geometryFactory_.connected(i1,i2)) ? geometryFactory_.handle(i1,i2) : 0;
-						size_t nrow = directions_[h].nRow();
+						if (!geometryFactory_.connected(i1,i2)) continue;
+						
+						size_t dir =  geometryFactory_.calcDir(i1,i2);
+						size_t nrow = directions_[dir].nRow();
 						if (ret<=nrow) ret = nrow;
-						size_t ncol = directions_[h].nCol();
+						size_t ncol = directions_[dir].nCol();
 						if (ret<=ncol) ret = ncol;
 					}
 				}
