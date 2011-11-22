@@ -89,9 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
-	
-	
-	//!
+
 	template<typename RealType,typename SparseMatrixType>
 	class BasisImplementation {
 		typedef BasisImplementation<RealType,SparseMatrixType> ThisType;
@@ -103,14 +101,14 @@ namespace Dmrg {
 		typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
 		typedef  BasisData<PairType> BasisDataType;
 		typedef std::vector<size_t> BlockType;
-		
+
 		enum {BEFORE_TRANSFORM,AFTER_TRANSFORM};
-		
+
 		BasisImplementation(const std::string& s) : dmrgTransformed_(false), name_(s), progress_(s,0) 
 		{
 			symmLocal_.createDummyFactors(1,1);
 		}
-		
+
 		// use this if you know the name
 		template<typename IoInputter>
 		BasisImplementation(IoInputter& io,const std::string& ss,size_t counter=0,bool bogus = false)
@@ -170,7 +168,7 @@ namespace Dmrg {
 				quantumNumbers = &quantumNumbersOld_;
 				partition = &partitionOld_;
 			}
-			
+
 			for (size_t i=0;i<partition->size();i++) {
 				size_t state = (*partition)[i];
 				if ((*quantumNumbers)[state]==qn) return i;
@@ -194,7 +192,7 @@ namespace Dmrg {
 			if (useSu2Symmetry_) HamiltonianSymmetrySu2Type::findQuantumNumbers(qn,basisData);
 			else HamiltonianSymmetryLocalType::findQuantumNumbers(qn,basisData);
 		}
-		
+
 		size_t findPartitionNumber(size_t i) const
 		{
 			for (size_t j=0;j<partition_.size()-1;j++) 
@@ -274,8 +272,7 @@ namespace Dmrg {
 		}
 
 		template<typename BlockMatrixType,typename SolverParametersType>
-		RealType changeBasis(typename BlockMatrixType::BuildingBlockType &ftransform,BlockMatrixType& transform,
-				      std::vector<RealType>& eigs,size_t kept,const SolverParametersType& solverParams)
+		RealType changeBasis(typename BlockMatrixType::BuildingBlockType &ftransform,BlockMatrixType& transform, std::vector<RealType>& eigs,size_t kept,const SolverParametersType& solverParams)
 			{
 			/* if (!isUnitary(transform)) {
 				std::cerr<<"------------------------------------\n";
@@ -286,7 +283,7 @@ namespace Dmrg {
 			quantumNumbersOld_ = quantumNumbers_;
 			partitionOld_ = partition_;
 			dmrgTransformed_=true;
-			
+
 			blockMatrixToFullMatrix(ftransform,transform);
 
 			std::vector<size_t> removedIndices;
@@ -314,7 +311,7 @@ namespace Dmrg {
 				progress_.printline(msg2,std::cerr);
 				truncate(removedIndices);
 			}
-			
+
 			// N.B.: false below means that we don't truncate the permutation vectors
 			//	because they're needed for the WFT
 			findPermutationAndPartition(false);
@@ -372,31 +369,31 @@ namespace Dmrg {
 		// reduced:
 		size_t reducedIndex(size_t i) const 
 		{ 
-			if (!useSu2Symmetry_) std::cerr<<"########EEEEEEEEERRRRRRRRRRRRRORRRRRRRRRRRR\n";
+			assert(useSu2Symmetry_);
 			return symmSu2_.reducedIndex(i); 
 		}
 
 		size_t reducedSize() const 
 		{ 
-			if (!useSu2Symmetry_) throw std::runtime_error("########EEEEEEEEERRRRRRRRRRRRRORRRRRRRRRRRR\n");
+			assert(useSu2Symmetry_);
 			return symmSu2_.reducedSize(); 
 		}
 
 		size_t jVals(size_t i) const 
 		{ 
-			if (!useSu2Symmetry_)throw std::runtime_error("########EEEEEEEEERRRRRRRRRRRRRORRRRRRRRRRRR\n");
+			assert(useSu2Symmetry_);
 			return symmSu2_.jVals(i); 
 		}
 
 		size_t jVals() const 
 		{ 
-			if (!useSu2Symmetry_) throw std::runtime_error("########EEEEEEEEERRRRRRRRRRRRRORRRRRRRRRRRR\n");
+			assert(useSu2Symmetry_);
 			return symmSu2_.jVals(); 
 		}
 
 		size_t jMax() const 
 		{ 
-			//if (!useSu2Symmetry_) throw std::runtime_error("########EEEEEEEEERRRRRRRRRRRRRORRRRRRRRRRRR\n");
+			//assert(useSu2Symmetry_);
 			return symmSu2_.jMax(); 
 		}
 		
@@ -439,7 +436,7 @@ namespace Dmrg {
 		HamiltonianSymmetryLocalType symmLocal_;
 		HamiltonianSymmetrySu2Type symmSu2_;
 		BlockType block_;
-		
+
 		template<typename IoInputter>
 		void loadInternal(IoInputter& io) 
 		{
@@ -512,9 +509,9 @@ namespace Dmrg {
 					sort.sort(quantumNumbers_,permutationVector_);
 				}
 			}
-			
+
 			findPartition();
-			
+
 			if (changePermutation) {
 				permInverse_.resize(permutationVector_.size());
 				for (size_t i=0;i<permInverse_.size();i++) 

@@ -204,6 +204,7 @@ namespace Dmrg {
 				break;
 			case KTWONIFFOUR:
 				dirs_ = 4;
+				maxConnections_ = ktwoniffour_->maxConnections();
 				ktwoniffour_ = new KTwoNiFFour(linSize);
 				break;
 			default:
@@ -228,6 +229,16 @@ namespace Dmrg {
 				return ktwoniffour_->handle(i,j);
 			}
 			throw std::runtime_error("Unknown geometry\n");
+		}
+
+		void flipRowOrColumn(size_t& nrow,size_t& ncol,size_t i,size_t j) const
+		{
+			switch (n_) {
+			case KTWONIFFOUR:
+				ktwoniffour_->flipRowOrColumn(nrow,ncol,i,j);
+			default:
+				return;
+			}
 		}
 
 		size_t getVectorSize(size_t dirId) const
@@ -338,7 +349,7 @@ namespace Dmrg {
 		{
 			switch(n_) {
 			case KTWONIFFOUR:
-				fillAdditionalData(additionalData,ind,jnd);
+				ktwoniffour_->fillAdditionalData(additionalData,ind,jnd);
 				break;
 			default:
 				return;

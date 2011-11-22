@@ -87,10 +87,12 @@ namespace Dmrg {
 	
 	template<typename RealType,typename GeometryFactoryType>
 	class GeometryDirection {
-			typedef PsimagLite::Matrix<RealType> MatrixType;
-			enum {NUMBERS,MATRICES};
+
+		typedef PsimagLite::Matrix<RealType> MatrixType;
 
 		public:
+
+			enum {NUMBERS,MATRICES};
 
 			template<typename IoInputter>
 			GeometryDirection(IoInputter& io,size_t dirId,size_t edof,
@@ -99,21 +101,19 @@ namespace Dmrg {
 			: dirId_(dirId),geometryFactory_(&geometryFactory)
 			{
 				size_t n = getVectorSize(options);
-				//std::cerr<<"vectorsize="<<n<<"\n";
-				if (edof==1) {
+				dataType_ = edof;
+				if (edof==NUMBERS) {
 					io.read(dataNumbers_,"Connectors");
-					dataType_ = NUMBERS;
 					if (dataNumbers_.size()!=n)
-						throw std::runtime_error("GeometryDirection Numbers\n");
+					 throw std::runtime_error("GeometryDirection Numbers\n");
 				} else {
 					for (size_t i=0;i<n;i++) {
 						MatrixType m;
 						io.readMatrix(m,"Connectors");
-						if (m.n_row()!=edof || m.n_col()!=edof)
-							throw std::runtime_error("GeometryDirection\n");
+// 						if (m.n_row()!=edof || m.n_col()!=edof)
+// 							throw std::runtime_error("GeometryDirection\n");
 						dataMatrices_.push_back(m);
 					}
-					dataType_ = MATRICES;
 				}
 			}
 
@@ -131,18 +131,25 @@ namespace Dmrg {
 				return dataMatrices_[h](edof1,edof2);
 			}
 
+			size_t nRow() const
+			{
+				return (dataType_==NUMBERS) ? 1 : dataMatrices_[0].n_row();
+			}
+			
+			size_t nCol() const
+			{
+				return (dataType_==NUMBERS) ? 1 : dataMatrices_[0].n_col();
+			}
+			
 			size_t size() const
 			{
-				if (dataType_==NUMBERS) return dataNumbers_.size();
-				return dataMatrices_.size();
+				return (dataType_==NUMBERS) ? dataNumbers_.size() : dataMatrices_.size();
 			}
 
 			bool constantValues() const
 			{
-				if (size()==1) return true;
-				return false;
+				return (size()==1) ? true : false;
 			}
-
 
 			template<typename RealType_,typename GeometryFactoryType_>
 			friend std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType_,GeometryFactoryType_>& gd);

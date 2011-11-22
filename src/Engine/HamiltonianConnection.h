@@ -114,7 +114,6 @@ namespace Dmrg {
      		             LinkProductStructType* lps,
      		             size_t& total) const
 			{
-				
 				bool flag=false;
 				size_t ind = modelHelper_.leftRightSuper().super().block()[i];
 				size_t jnd = modelHelper_.leftRightSuper().super().block()[j];
@@ -182,6 +181,7 @@ namespace Dmrg {
 			}
 
 		private:
+
 			//! Adds a connector between system and environment
 			size_t calcBond(SparseMatrixType &matrixBlock,
     		                size_t i,
@@ -212,7 +212,7 @@ namespace Dmrg {
 					modelHelper_.fastOpProdInter(A,B,matrixBlock,link);
 				} else {
 // 						
-					if (link.type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"EEEEEEEEEEEERRRRRRRRRRRRRRROR\n";
+					assert(link.type==ProgramGlobals::ENVIRON_SYSTEM);
 					const SparseMatrixType& A=
 						modelHelper_.getReducedOperator(link.mods.first,link.site1-offset,
 							link.ops.first,ModelHelperType::Environ);
@@ -252,7 +252,7 @@ namespace Dmrg {
 					modelHelper_.fastOpProdInter(x,y,A,B,link);
 						
 				} else {		
-					if (type!=ProgramGlobals::ENVIRON_SYSTEM) std::cerr<<"EEEEEEEEEEEERRRRRRRRRRRRRRROR\n";
+					assert(type==ProgramGlobals::ENVIRON_SYSTEM);
 						//A=modelHelper.basis3().getOperator(i-offset,sigma);
 					const SparseMatrixType& A=modelHelper_.getReducedOperator(mods.first,i-offset,
 							link.ops.first,ModelHelperType::Environ);

@@ -117,7 +117,7 @@ namespace Dmrg {
 
 			size_t getFlavor(size_t i) const
 			{
-				return 0; // meaningless	
+				return 0; // meaningless
 			}
 
 			//! find quantum numbers for each state of this basis, 

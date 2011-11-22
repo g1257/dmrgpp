@@ -85,10 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-	template<
-		typename T,
-		typename ModelType
-		>
+	template<typename T,typename ModelType>
 	class InternalProductStored {
 	public:	
 		typedef T HamiltonianElementType;
@@ -130,4 +127,3 @@ namespace Dmrg {
 
 /*@}*/
 #endif
-

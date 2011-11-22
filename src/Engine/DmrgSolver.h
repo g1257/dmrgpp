@@ -129,8 +129,7 @@ namespace Dmrg {
 
 		typedef typename TruncationType::TransformType TransformType;
 
-		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType,
-				TransformType> DmrgSerializerType;
+		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType,TransformType> DmrgSerializerType;
 		typedef typename ModelType::GeometryType GeometryType;
 		typedef Checkpoint<ParametersType,TargettingType> CheckpointType;
 		typedef typename DmrgSerializerType::FermionSignType FermionSignType;
@@ -217,10 +216,10 @@ namespace Dmrg {
 				std::vector<OperatorType> creationMatrix;
 				SparseMatrixType hmatrix;
 				BasisDataType q;
-				
+
 				model_.setNaturalBasis(creationMatrix,hmatrix,q,E);
 				pE.setVarious(E,hmatrix,q,creationMatrix);
-			
+
 				model_.setNaturalBasis(creationMatrix,hmatrix,q,S);
 				pS.setVarious(S,hmatrix,q,creationMatrix);
 				infiniteDmrgLoop(S,X,Y,E,pS,pE,psi);
@@ -266,23 +265,22 @@ namespace Dmrg {
 				std::ostringstream msg;
 				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
 				progress_.printline(msg,std::cout);
-				
+
 				lrs_.growLeftBlock(model_,pS,X[step]); // grow system
 				lrs_.growRightBlock(model_,pE,Y[step]); // grow environment
-					
-				
+
 				progress_.print("Growth done.\n",std::cout);
 				lrs_.printSizes("Infinite",std::cout);
-				
+
 				updateQuantumSector(lrs_.sites());
-				
+
 				lrs_.setToProduct(quantumSector_);
-				
+
 				diagonalization_(psi,INFINITE,X[step],Y[step]);
-				
+
 				truncate_(pS,psi,parameters_.keptStatesInfinite,EXPAND_SYSTEM);
 				truncate_(pE,psi,parameters_.keptStatesInfinite,EXPAND_ENVIRON);
-				
+
 				checkpoint_.push(pS,pE);
 			}
 			progress_.print("Infinite dmrg loop has been done!\n",std::cout);

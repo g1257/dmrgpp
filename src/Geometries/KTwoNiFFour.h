@@ -171,19 +171,28 @@ namespace Dmrg {
 
 		bool fringe(size_t i,size_t smax,size_t emin) const
 		{
-			throw std::runtime_error("fringe????\n");
+			return (i==smax || i==emin);
 		}
 
 		// assumes i1 and i2 are connected
 		size_t handle(size_t i1,size_t i2) const
 		{
-			throw std::runtime_error("handle????\n");
+			return calcDir(i1,i2);
 		}
 
 		// siteNew2 is fringe in the environment
 		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
 		{
-			throw std::runtime_error("getSubstituteSite????\n");
+			size_t type2 = findTypeOfSite(siteNew2).first;
+			size_t i = smax+1;
+			size_t type1 = findTypeOfSite(i).first;
+			while(type1!=type2) {
+				i++;
+				if (i>=linSize_)
+					throw std::runtime_error("getSubstituteSite failed\n");
+				type1 = findTypeOfSite(i).first;
+			}
+			return i;
 		}
 
 		std::string label() const
@@ -193,9 +202,40 @@ namespace Dmrg {
 		
 		size_t maxConnections() const
 		{
-			throw std::runtime_error("maxConnections????\n");
+			return 6;
 		}
 		
+		void flipRowOrColumn(size_t& nrow,size_t& ncol,size_t i,size_t j) const
+		{
+			size_t type1 = findTypeOfSite(i).first;
+			size_t type2 = findTypeOfSite(j).first;
+			if (type1==type2 && type1==TYPE_C) {
+				nrow = ncol = 1;
+				return;
+			}
+			if (type1==type2 && type1==TYPE_O) {
+				assert(nrow==2 && nrow==2);
+				return;
+			}
+			if (type1==TYPE_C) {
+				if (nrow==1) {
+					assert(ncol==2);
+					return;
+				}
+				assert(ncol==1);
+				nrow=1;
+				ncol=2;
+				return;
+			}
+			if (nrow==2) {
+				assert(ncol==1);
+				return;
+			}
+			assert(ncol==2);
+			nrow=2;
+			ncol=1;
+		}
+
 		void fillAdditionalData(AdditionalData& additionalData,size_t ind,size_t jnd) const
 		{
 			additionalData.type1 = findTypeOfSite(ind).first;

@@ -261,7 +261,7 @@ namespace Dmrg {
 				if (weights[i]==0) continue;
 				if (energySaved[i]<gsEnergy) gsEnergy=energySaved[i];
 			}
-			
+
 			if (verbose_ && concurrency_.root()) std::cerr<<"About to calc gs vector\n";
 			//target.reset();
 			counter=0;
@@ -277,7 +277,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				counter++;
 			}
-			
+
 			target.setGs(vecSaved,lrs.super());
 
 			if (concurrency_.root()) {
@@ -304,17 +304,17 @@ namespace Dmrg {
 			int iter=ProgramGlobals::LanczosSteps;
 			std::vector<RealType> tmpVec1,tmpVec2;
 			//srand48(7123443);
-			
+
 			typename ModelType::ModelHelperType modelHelper(i,lrs,useReflection_);
 
 			if (parameters_.options.find("debugmatrix")!=std::string::npos) {
 				SparseMatrixType fullm;
-				
+
 				model_.fullHamiltonian(fullm,modelHelper);
-				
+
 				if (!isHermitian(fullm))
 					throw std::runtime_error("Not hermitian matrix block\n");
-				
+
 				PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 				crsMatrixToFullMatrix(fullm2,fullm);
 				if (PsimagLite::isZero(fullm2)) std::cerr<<"Matrix is zero\n";
@@ -323,8 +323,8 @@ namespace Dmrg {
 				PsimagLite::diag(fullm2,eigs,'V');
 				std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
 				if (parameters_.options.find("test")!=std::string::npos)
-					throw std::logic_error(
-							"Exiting due to option test in the input file\n");
+					throw std::logic_error
+					         ("Exiting due to option test in the input file\n");
 			}
 			std::ostringstream msg;
 			msg<<"I will now diagonalize a matrix of size="<<modelHelper.size();

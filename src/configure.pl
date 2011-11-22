@@ -114,7 +114,7 @@ sub askQuestions
 	
 	print "What model do you want to compile?\n";
 	print "Available: Hubbard, Heisenberg or FeBasedSc or FeAsBasedScExtended ";
-	print " or TjOneOrbital or ExtendedHubbard1Orbital\n";
+	print " or ExtendedHubbard1Orbital\n";
 	print "Default is: Hubbard (press ENTER): ";
 	$_=<STDIN>;
 	chomp;

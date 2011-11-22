@@ -98,13 +98,13 @@ namespace Dmrg {
 			
 			template<typename IoInputter>
 			GeometryTerm(IoInputter& io,size_t termId,size_t linSize,bool debug=false) :
-				linSize_(linSize)
+				linSize_(linSize),maxEdof_(0)
 			{
 				int x;
 				io.readline(x,"DegreesOfFreedom=");
 				if (x<=0) throw std::runtime_error("DegreesOfFreedom<=0 is an error\n");
 				//std::cerr<<"DegreesOfFreedom "<<x<<"\n";
-				edof_ = x;
+				size_t edof = (x==1) ? GeometryDirectionType::NUMBERS : GeometryDirectionType::MATRICES;
 				std::string s;
 				io.readline(s,"GeometryKind=");
 				//std::cerr<<"GeometryKind "<<s<<"\n";
@@ -116,17 +116,24 @@ namespace Dmrg {
 				geometryFactory_.init(io,s,linSize);
 
 				for (size_t i=0;i<geometryFactory_.dirs();i++) {
-					directions_.push_back(GeometryDirectionType(io,i,edof_,gOptions,geometryFactory_));
+					directions_.push_back(GeometryDirectionType(io,i,edof,gOptions,geometryFactory_));
 				}
-				
-				cachedValues_.resize(linSize*linSize*edof_*edof_);
 
-				for (size_t i1=0;i1<linSize;i1++)
-					for (size_t i2=0;i2<linSize;i2++)
-						for (size_t edof1=0;edof1<edof_;edof1++)
-							for (size_t edof2=0;edof2<edof_;edof2++)
+				maxEdof_ = findMaxEdof();
+				cachedValues_.resize(linSize*linSize*maxEdof_*maxEdof_);
+
+				for (size_t i1=0;i1<linSize;i1++) {
+					for (size_t i2=0;i2<linSize;i2++) {
+						size_t h= (geometryFactory_.connected(i1,i2)) ? geometryFactory_.handle(i1,i2) : 0;
+						size_t nrow = directions_[h].nRow();
+						size_t ncol = directions_[h].nCol();
+						geometryFactory_.flipRowOrColumn(nrow,ncol,i1,i2);
+						for (size_t edof1=0;edof1<nrow;edof1++)
+							for (size_t edof2=0;edof2<ncol;edof2++)
 								cachedValues_[pack(i1,edof1,i2,edof2)]=
 									calcValue(i1,edof1,i2,edof2);
+					}
+				}
 				if (debug) {
 					std::cerr<<"Cached values:\n";
 					std::cerr<<cachedValues_;
@@ -184,12 +191,12 @@ namespace Dmrg {
 			{
 				return geometryFactory_.label();
 			}
-			
+
 			size_t maxConnections() const
 			{
 				return geometryFactory_.maxConnections();
 			}
-			
+
 			void fillAdditionalData(AdditionalDataType& additionalData,size_t ind,size_t jnd) const
 			{
 				geometryFactory_.fillAdditionalData(additionalData,ind,jnd);
@@ -214,11 +221,26 @@ namespace Dmrg {
 			
 			size_t pack(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
-				return edof1+i1*edof_+(edof2+i2*edof_)*linSize_*edof_;
+				return edof1+i1*maxEdof_+(edof2+i2*maxEdof_)*linSize_*maxEdof_;
+			}
+			
+			size_t findMaxEdof() const
+			{
+				size_t ret = 0;
+				for (size_t i1=0;i1<linSize_;i1++) {
+					for (size_t i2=0;i2<linSize_;i2++) {
+						size_t h= (geometryFactory_.connected(i1,i2)) ? geometryFactory_.handle(i1,i2) : 0;
+						size_t nrow = directions_[h].nRow();
+						if (ret<=nrow) ret = nrow;
+						size_t ncol = directions_[h].nCol();
+						if (ret<=ncol) ret = ncol;
+					}
+				}
+				return ret;
 			}
 
 			size_t linSize_;
-			size_t edof_;
+			size_t maxEdof_;
 			GeometryFactory geometryFactory_;
 			std::vector<GeometryDirectionType> directions_;
 			std::vector<RealType> cachedValues_;
