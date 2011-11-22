@@ -183,9 +183,9 @@ namespace Dmrg {
 
 			//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 			creationMatrix.clear();
-			size_t dof = dOf(block[0]);
 
-			for (size_t sigma=0;sigma<dof;sigma++) {
+			for (size_t sigma=0;sigma<dOf(0);sigma++) {
+				if (!isAllowedThisDof(1<<sigma,block[0])) continue;
 				findOperatorMatrices(tmpMatrix,block[0],sigma,natBasis);
 				typename OperatorType::Su2RelatedType su2related;
 					
@@ -235,11 +235,14 @@ namespace Dmrg {
 		                     const std::vector<size_t>& block) const
 		{
 			assert(block.size()==1);
-			size_t dof =  dOf(block[0]);
+			size_t dof =  dOf(0);
 			HilbertState total = (1<<dof);
 
 			std::vector<HilbertState>  basisTmp;
-			for (HilbertState a=0;a<total;a++) basisTmp.push_back(a);
+			for (HilbertState a=0;a<total;a++) {
+				if (!isAllowedThisDof(a,block[0])) continue;
+				basisTmp.push_back(a);
+			}
 
 			// reorder the natural basis (needed for MULTIPLE BANDS)
 			findQuantumNumbers(q,basisTmp,block[0]);
@@ -247,8 +250,8 @@ namespace Dmrg {
 			Sort<std::vector<size_t> > sort;
 			sort.sort(q,iperm);
 			basis.clear();
-			for (HilbertState a=0;a<total;a++)
-				basis.push_back(basisTmp[iperm[a]]);
+			for (size_t i=0;i<iperm.size();i++) 
+				basis.push_back(basisTmp[iperm[i]]);
 		}
 
 		void findElectrons(std::vector<size_t>& electrons,
@@ -273,9 +276,10 @@ namespace Dmrg {
 		RealType sign(HilbertState const &ket, size_t site,size_t sigma) const
 		{
 			int value=0;
-			size_t dof = dOf(site);
+			size_t dof = dOf(0);
 			for (size_t alpha=0;alpha<dof;alpha++) 
 				value += hilbertSpace_.calcNofElectrons(ket,0,site,alpha);
+
 			// add electron on site 0 if needed
 			if (site>0) value += hilbertSpace_.electronsAtGivenSite(ket,0);
 
@@ -595,6 +599,13 @@ namespace Dmrg {
 				else degreesOfFreedom_[i]=4;
 				counter++;
 			}
+		}
+		
+		bool isAllowedThisDof(size_t alpha,size_t site) const
+		{
+			size_t norb1 = dOf(site)/NUMBER_OF_SPINS;
+			if (norb1>1) return true;
+			return ((alpha & 10)==0) ? true : false;
 		}
 
 		const ParametersImmm<RealType>&  modelParameters_;

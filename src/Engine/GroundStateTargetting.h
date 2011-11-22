@@ -197,8 +197,8 @@ namespace Dmrg {
 
 			void initialGuess(VectorWithOffsetType& initialVector,size_t nk) const
 			{
-				RealType eps = 1e-6;
-				if (psi_.size()>0 && std::norm(psi_)<eps) throw std::runtime_error("psi's norm is zero\n");
+				//RealType eps = 1e-6;
+				//if (psi_.size()>0 && std::norm(psi_)<eps) throw std::runtime_error("psi's norm is zero\n");
 				waveFunctionTransformation_.setInitialVector(initialVector,psi_,lrs_,nk);
 			}
 

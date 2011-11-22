@@ -183,9 +183,9 @@ namespace Dmrg {
 			bool onlyWft = ((parameters_.finiteLoop[loopIndex].
 					saveOption & 2)>0) ? true : false;
 			
-			std::ostringstream msg;
-			msg<<"Setting up Hamiltonian basis of size="<<lrs.super().size();
-			progress_.printline(msg,std::cout);
+			std::ostringstream msg0;
+			msg0<<"Setting up Hamiltonian basis of size="<<lrs.super().size();
+			progress_.printline(msg0,std::cout);
 		
 			TargetVectorType tmpVec;
 			std::vector<TargetVectorType> vecSaved;
@@ -270,11 +270,16 @@ namespace Dmrg {
 
 				size_t j = lrs.super().qn(lrs.super().partition(i));
 				std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
+				std::ostringstream msg;
 				msg<<"Found targetted symmetry sector in partition "<<i;
 				msg<<" of size="<<vecSaved[i].size();
-				msg<<" with qns=";
-				for (size_t k=0;k<qns.size();k++) msg<<qns[k]<<" ";
 				progress_.printline(msg,std::cout);
+
+				std::ostringstream msg2;
+				msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[i]);
+				msg2<<" and quantum numbers are ";
+				for (size_t k=0;k<qns.size();k++) msg2<<qns[k]<<" ";
+				progress_.printline(msg2,std::cout);
 				counter++;
 			}
 

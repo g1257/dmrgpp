@@ -111,13 +111,13 @@ namespace Dmrg {
 		: degreesOfFreedom_(degreesOfFreedom)
 		{}
 
-		size_t dOf(size_t i) const { return degreesOfFreedom_[i]; }
+		size_t dOf() const { return degreesOfFreedom_[0]; }
 		
 		// Get electronic state on site "j" in binary number "a"
 		Word get(Word const &a,size_t j) const
 		{
 			size_t k=degreesOfFreedomUpTo(j);
-			size_t ones = (1<<(dOf(j)))-1;
+			size_t ones = (1<<(dOf()))-1;
 			Word mask=(ones<<k);
 
 			mask &= a;
@@ -155,7 +155,7 @@ namespace Dmrg {
 
 			do {
 				size_t k=degreesOfFreedomUpTo(i);
-				dof = dOf(i);
+				dof = dOf();
 				if ( (data & (1<<(k+value))) ) ret++;
 				i++;
 			} while (data2>>=dof);
@@ -167,7 +167,7 @@ namespace Dmrg {
 		int electronsWithGivenSpin(Word const &data,size_t site,size_t spin) const
 		{
 			
-			size_t norb = dOf(site)/NUMBER_OF_SPINS;
+			size_t norb = dOf()/NUMBER_OF_SPINS;
 			size_t beginX=spin*norb;
 			size_t endX=beginX + norb;
 			size_t sum=0;
@@ -183,7 +183,7 @@ namespace Dmrg {
 		{
 			size_t sum=0;
 			
-			for (size_t sector=0;sector<dOf(site);sector++)
+			for (size_t sector=0;sector<dOf();sector++)
 				sum += calcNofElectrons(data,0,sector);
 			
 			return sum;	
@@ -199,7 +199,7 @@ namespace Dmrg {
 			Word m=0;
 			for (size_t site = ii;site<j;site++) {
 				size_t k = degreesOfFreedomUpTo(site);
-				size_t dof = dOf(site);
+				size_t dof = dOf();
 				for (size_t sigma=0;sigma<dof;sigma++)
 					m |= (1<<(k+sigma));
 			}
@@ -213,7 +213,7 @@ namespace Dmrg {
 			Word m=0;
 			
 			size_t k = degreesOfFreedomUpTo(i);
-			size_t dof = dOf(i);
+			size_t dof = dOf();
 			for (size_t sigma=0;sigma<dof;sigma++) m |= (1<<(k+sigma));
 			
 			m &= ket;
@@ -224,9 +224,10 @@ namespace Dmrg {
 
 		size_t degreesOfFreedomUpTo(size_t j) const
 		{
-			size_t k=0;
+			return dOf()*j;
+/*			size_t k=0;
 			for (size_t kk=0;kk<j;kk++) k += dOf(kk);
-			return k;
+			return k;*/
 		}
 
 		const std::vector<size_t>& degreesOfFreedom_;
