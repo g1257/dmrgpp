@@ -328,7 +328,7 @@ namespace Dmrg {
 					int jj = PsimagLite::isInVector(natBasis,bra);
 					assert(jj>=0);
 					assert(ii!=size_t(jj));
-					cm(ii,jj) =sign(ket,site,sigma);
+					cm(ii,jj) =sign(ket,0,sigma);
 				}
 			}
 			// here reinterpret for SU(2) if needed
