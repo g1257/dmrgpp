@@ -102,6 +102,7 @@ namespace Dmrg {
 			std::cerr<<"size="<<modelHelper->size()<<"\n";
 			matrixStored_.clear();
 			model->fullHamiltonian(matrixStored_,*modelHelper);
+			assert(isHermitian(matrixStored_,true));
 			std::cout<<"fullHamiltonian has rank="<<matrixStored_.rank()<<" nonzeros="<<matrixStored_.nonZero()<<"\n";
 		}
 

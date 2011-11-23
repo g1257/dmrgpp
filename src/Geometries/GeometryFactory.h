@@ -214,31 +214,21 @@ namespace Dmrg {
 
 		size_t dirs() const { return dirs_; } // <-- move elsewhere FIXME
 
-		size_t handle(size_t i,size_t j) const
+		size_t handle(size_t i,size_t j,bool constantValues) const
 		{
 			switch (n_) {
 			case CHAIN:
-				return chain_->handle(i,j);
+				return chain_->handle(i,j,constantValues);
 			case LADDER:
-				return ladder_->handle(i,j);
+				return ladder_->handle(i,j,constantValues);
 			case LADDERX:
-				return ladderx_->handle(i,j);
+				return ladderx_->handle(i,j,constantValues);
 			case LADDERBATH:
-				return ladderbath_->handle(i,j);
+				return ladderbath_->handle(i,j,constantValues);
 			case KTWONIFFOUR:
-				return ktwoniffour_->handle(i,j);
+				return ktwoniffour_->handle(i,j,constantValues);
 			}
 			throw std::runtime_error("Unknown geometry\n");
-		}
-
-		void flipRowOrColumn(size_t& nrow,size_t& ncol,size_t i,size_t j) const
-		{
-			switch (n_) {
-			case KTWONIFFOUR:
-				ktwoniffour_->flipRowOrColumn(nrow,ncol,i,j);
-			default:
-				return;
-			}
 		}
 
 		size_t getVectorSize(size_t dirId) const
@@ -353,6 +343,26 @@ namespace Dmrg {
 				break;
 			default:
 				return;
+			}
+		}
+
+		int index(size_t i1,size_t edof1,size_t edofTotal) const
+		{
+			switch(n_) {
+			case KTWONIFFOUR:
+				return ktwoniffour_->index(i1,edof1);
+			default:
+				return edof1+i1*edofTotal;
+			}
+		}
+		
+		size_t matrixRank(size_t linSize,size_t maxEdof)
+		{
+			switch(n_) {
+			case KTWONIFFOUR:
+				return ktwoniffour_->matrixRank();
+			default:
+				return linSize*linSize*maxEdof*maxEdof;
 			}
 		}
 

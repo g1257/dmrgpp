@@ -92,8 +92,9 @@ namespace Dmrg {
 			{
 			}
 
-			size_t handle(size_t i,size_t j) const
+			size_t handle(size_t i,size_t j,bool constantValues) const
 			{
+				if (constantValues) return 0;
 				return (i<j) ? i : j;
 			}
 

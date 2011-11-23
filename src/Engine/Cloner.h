@@ -97,9 +97,8 @@ namespace Dmrg {
 		       const std::string& outRoot,
 		       const std::string& ext)
 		: infile_(infile),outRoot_(outRoot),ext_(ext)
-		{
-		}
-		
+		{}
+
 		void push(const LineChangerType& lineChanger) 
 		{
 			lineChanger_.push_back(lineChanger);

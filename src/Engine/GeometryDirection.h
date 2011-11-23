@@ -80,8 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef GEOMETRY_DIR_H
 #define GEOMETRY_DIR_H
-
-
+#include <cassert>
 
 namespace Dmrg {
 	
@@ -117,18 +116,28 @@ namespace Dmrg {
 				}
 			}
 
-			const RealType& operator()(size_t i,size_t j) const
-			{
-				if (dataType_==NUMBERS) return dataNumbers_[0];
-				return dataMatrices_[0](i,j);
-			}
+// 			const RealType& operator()(size_t i,size_t j) const
+// 			{
+// 				if (dataType_==NUMBERS) return dataNumbers_[0];
+// 				return dataMatrices_[0](i,j);
+// 			}
 
 			const RealType& operator()(size_t i,size_t edof1,size_t j,size_t edof2) const
 			{
+				size_t h = geometryFactory_->handle(i,j,constantValues());
+				if (dataType_==NUMBERS) {
+					assert(dataNumbers_.size()>h);
+					return dataNumbers_[h];
+				}
+				assert(dataMatrices_.size()>h);
 				
-				size_t h = geometryFactory_->handle(i,j);
-				if (dataType_==NUMBERS) return dataNumbers_[h];
-				return dataMatrices_[h](edof1,edof2);
+				bool b = (dataMatrices_[h].n_row()>edof1 &&
+				          dataMatrices_[h].n_col()>edof2);
+				
+				assert(b ||  (dataMatrices_[h].n_row()>edof2 &&
+				              dataMatrices_[h].n_col()>edof1));
+
+				return (b) ? dataMatrices_[h](edof1,edof2) : dataMatrices_[h](edof2,edof1);
 			}
 
 			size_t nRow() const

@@ -317,7 +317,7 @@ namespace Dmrg {
 
 				model_.fullHamiltonian(fullm,modelHelper);
 
-				if (!isHermitian(fullm))
+				if (!isHermitian(fullm,true))
 					throw std::runtime_error("Not hermitian matrix block\n");
 
 				PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;

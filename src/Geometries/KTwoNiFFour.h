@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 
 namespace Dmrg {
-	
+
 	class KTwoNiFFour  {
 
 		typedef std::pair<int,int> PairType;
@@ -107,7 +107,8 @@ namespace Dmrg {
 
 		size_t getVectorSize(size_t dirId) const
 		{
-			throw std::runtime_error("getVectorSize????\n");
+			assert(false);
+			throw std::runtime_error("getVectorSize: unimplemented\n");
 		}
 
 		bool connected(size_t i1,size_t i2) const
@@ -175,9 +176,14 @@ namespace Dmrg {
 		}
 
 		// assumes i1 and i2 are connected
-		size_t handle(size_t i1,size_t i2) const
+		size_t handle(size_t i1,size_t i2,bool constantValues) const
 		{
-			assert(false);
+			assert(constantValues);
+			if (!constantValues)
+				throw std::runtime_error("KTwoNiFFour: only Constant values allowed\n");
+
+			return 0;
+
 		}
 
 		// siteNew2 is fringe in the environment
@@ -199,41 +205,10 @@ namespace Dmrg {
 		{
 			return "KTwoNiFFour";
 		}
-		
+
 		size_t maxConnections() const
 		{
 			return 6;
-		}
-		
-		void flipRowOrColumn(size_t& nrow,size_t& ncol,size_t i,size_t j) const
-		{
-			size_t type1 = findTypeOfSite(i).first;
-			size_t type2 = findTypeOfSite(j).first;
-			if (type1==type2 && type1==TYPE_C) {
-				nrow = ncol = 1;
-				return;
-			}
-			if (type1==type2 && type1==TYPE_O) {
-				assert(nrow==2 && nrow==2);
-				return;
-			}
-			if (type1==TYPE_C) {
-				if (nrow==1) {
-					assert(ncol==2);
-					return;
-				}
-				assert(ncol==1);
-				nrow=1;
-				ncol=2;
-				return;
-			}
-			if (nrow==2) {
-				assert(ncol==1);
-				return;
-			}
-			assert(ncol==2);
-			nrow=2;
-			ncol=1;
 		}
 
 		void fillAdditionalData(AdditionalData& additionalData,size_t ind,size_t jnd) const
@@ -241,6 +216,30 @@ namespace Dmrg {
 			additionalData.type1 = findTypeOfSite(ind).first;
 			additionalData.type2 = findTypeOfSite(jnd).first;
 			additionalData.TYPE_C = TYPE_C;
+		}
+
+		size_t matrixRank() const
+		{
+			size_t sites = linSize_;
+			size_t no = 0;
+			size_t nc = 0;
+			for (size_t i=0;i<sites;i++) {
+				size_t type1 = findTypeOfSite(i).first;
+				if (type1==TYPE_C) nc++;
+				else no++;
+			}
+			return 2*no+nc;
+		}
+		
+		int index(size_t i,size_t orb) const
+		{
+			size_t type1 = findTypeOfSite(i).first;
+			if (type1==TYPE_C && orb>0) return -1;
+			if (type1==TYPE_C || orb==0) return i;
+			size_t sites = linSize_;
+			size_t tmp = (i+1)/4;
+			assert(sites+i>=tmp);
+			return sites+i-tmp;
 		}
 
 	private:

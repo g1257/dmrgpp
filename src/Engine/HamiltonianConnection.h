@@ -166,11 +166,12 @@ namespace Dmrg {
 					if (ix>=lps_.isaved.size()) break;
 					size_t i=lps_.isaved[ix];
 					size_t j=lps_.jsaved[ix];
-					//size_t dof1=lps_.dof1saved[ix];
-					//size_t dof2=lps_.dof2saved[ix];
 					size_t type=lps_.typesaved[ix];
 					size_t term = lps_.termsaved[ix];
 					size_t dofs = lps_.dofssaved[ix];
+					size_t ind = modelHelper_.leftRightSuper().super().block()[i];
+					size_t jnd = modelHelper_.leftRightSuper().super().block()[j];
+					geometry_.fillAdditionalData(additionalData_,term,ind,jnd);
 					SparseElementType tmp=lps_.tmpsaved[ix];
 					linkProduct(xtemp,y_,i,j,type,tmp,term,dofs);
 					

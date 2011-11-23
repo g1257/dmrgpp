@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "GeometryDirection.h"
 #include "GeometryFactory.h"
+#include <cassert>
 
 namespace Dmrg {
 	
@@ -119,22 +120,9 @@ namespace Dmrg {
 					directions_.push_back(GeometryDirectionType(io,i,edof,gOptions,geometryFactory_));
 				}
 
-				maxEdof_ = findMaxEdof();
-				cachedValues_.resize(linSize*linSize*maxEdof_*maxEdof_);
+				findMaxEdof();
+				cacheValues();
 
-				for (size_t i1=0;i1<linSize;i1++) {
-					for (size_t i2=0;i2<linSize;i2++) {
-						if (!geometryFactory_.connected(i1,i2)) continue;
-						size_t dir = geometryFactory_.calcDir(i1,i2);
-						size_t nrow = directions_[dir].nRow();
-						size_t ncol = directions_[dir].nCol();
-						geometryFactory_.flipRowOrColumn(nrow,ncol,i1,i2);
-						for (size_t edof1=0;edof1<nrow;edof1++)
-							for (size_t edof2=0;edof2<ncol;edof2++)
-								cachedValues_[pack(i1,edof1,i2,edof2)]=
-									calcValue(i1,edof1,i2,edof2);
-					}
-				}
 				if (debug) {
 					std::cerr<<"Cached values:\n";
 					std::cerr<<cachedValues_;
@@ -144,15 +132,15 @@ namespace Dmrg {
 			
 			const RealType& operator()(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
-				size_t p = pack(i1,edof1,i2,edof2);
-				return cachedValues_[p];
+				int k1 = geometryFactory_.index(i1,edof1,maxEdof_);
+				int k2 = geometryFactory_.index(i2,edof2,maxEdof_);
+				assert(k1>=0 && k2>=0);
+				return cachedValues_(k1,k2);
 			}
-			
-			//assumes 1<smax+1 < emin
-			const RealType& operator()(size_t smax,size_t emin,
-				size_t i1,size_t edof1,size_t i2,size_t edof2) const
-			{
 
+			//assumes 1<smax+1 < emin
+			const RealType& operator()(size_t smax,size_t emin,size_t i1,size_t edof1,size_t i2,size_t edof2) const
+			{
 				bool bothFringe = (geometryFactory_.fringe(i1,smax,emin) && geometryFactory_.fringe(i2,smax,emin));
 				size_t siteNew1 = i1;
 				size_t siteNew2 = i2;
@@ -167,9 +155,7 @@ namespace Dmrg {
 					}
 					siteNew2 = geometryFactory_.getSubstituteSite(smax,emin,siteNew2);
 				}
-				
-				size_t p = pack(siteNew1,edofNew1,siteNew2,edofNew2);
-				return cachedValues_[p];
+				return operator()(siteNew1,edofNew1,siteNew2,edofNew2);
 			}
 			
 			bool connected(size_t smax,size_t emin,size_t i1,size_t i2) const
@@ -206,47 +192,53 @@ namespace Dmrg {
 			template<typename RealType_>	
 			friend std::ostream& operator<<(std::ostream& os,const GeometryTerm<RealType_>& gt);
 	
-		private:	
-			
+		private:
+
+			void cacheValues()
+			{
+				size_t matrixRank = geometryFactory_.matrixRank(linSize_,maxEdof_);
+				cachedValues_.resize(matrixRank,matrixRank);
+
+				for (size_t i1=0;i1<linSize_;i1++) {
+					for (size_t i2=0;i2<linSize_;i2++) {
+						if (!geometryFactory_.connected(i1,i2)) continue;
+						for (size_t edof1=0;edof1<maxEdof_;edof1++) {
+							int k1 = geometryFactory_.index(i1,edof1,maxEdof_);
+							if (k1<0) continue;
+							for (size_t edof2=0;edof2<maxEdof_;edof2++) {
+								int k2 = geometryFactory_.index(i2,edof2,maxEdof_);
+								if (k2<0) continue;
+								cachedValues_(k1,k2)=calcValue(i1,edof1,i2,edof2);
+							}
+						}
+					}
+				}
+			}
+
+			void findMaxEdof()
+			{
+				maxEdof_ = 0;
+				for (size_t dir=0;dir<directions_.size();dir++) {
+						maxEdof_ = directions_[dir].nRow();
+						if (maxEdof_< directions_[dir].nCol())
+							maxEdof_ = directions_[dir].nCol();
+				}
+			}
+
 			RealType calcValue(size_t i1,size_t edof1,size_t i2,size_t edof2) const
 			{
 				if (!geometryFactory_.connected(i1,i2)) return 0.0;
 
 				size_t dir = geometryFactory_.calcDir(i1,i2);
-				if (directions_[dir].constantValues()) {
-					return directions_[dir](edof1,edof2);
-				}
-				
+				assert(dir<directions_.size());
 				return directions_[dir](i1,edof1,i2,edof2);
-			}
-			
-			size_t pack(size_t i1,size_t edof1,size_t i2,size_t edof2) const
-			{
-				return edof1+i1*maxEdof_+(edof2+i2*maxEdof_)*linSize_*maxEdof_;
-			}
-			
-			size_t findMaxEdof() const
-			{
-				size_t ret = 0;
-				for (size_t i1=0;i1<linSize_;i1++) {
-					for (size_t i2=0;i2<linSize_;i2++) {
-						if (!geometryFactory_.connected(i1,i2)) continue;
-						
-						size_t dir =  geometryFactory_.calcDir(i1,i2);
-						size_t nrow = directions_[dir].nRow();
-						if (ret<=nrow) ret = nrow;
-						size_t ncol = directions_[dir].nCol();
-						if (ret<=ncol) ret = ncol;
-					}
-				}
-				return ret;
 			}
 
 			size_t linSize_;
 			size_t maxEdof_;
 			GeometryFactory geometryFactory_;
 			std::vector<GeometryDirectionType> directions_;
-			std::vector<RealType> cachedValues_;
+			PsimagLite::Matrix<RealType> cachedValues_;
 	}; // class GeometryTerm
 
 	template<typename RealType>

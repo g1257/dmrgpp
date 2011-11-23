@@ -127,7 +127,7 @@ namespace Dmrg {
 				//! TYPE_C and TYPE_O:
 				size_t spin = dofs/2;
 				size_t xtmp = (spin==0) ? 0 : 2;
-				return (type1==additionalData.TYPE_C) ? PairType(spin,dofs-xtmp) : PairType(dofs-xtmp,spin);
+				return (type1==additionalData.TYPE_C) ? PairType(0,dofs-xtmp) : PairType(dofs-xtmp,0);
 			}
 
 			template<typename AdditionalDataType>
@@ -171,6 +171,7 @@ namespace Dmrg {
 					size_t orb2 = (xtmp & 1);
 					size_t op1 = orb1 + spin*2;
 					size_t op2 = orb2 + spin*2;
+					assert(op1<4 && op2<4);
 					return std::pair<size_t,size_t>(op1,op2);
 				}
 				//! TYPE_C and TYPE_O:
@@ -179,6 +180,7 @@ namespace Dmrg {
 				xtmp = dofs - xtmp;
 				size_t op1 = spin;
 				size_t op2 = xtmp + spin*2;
+				assert(op1<4 && op2<4);
 				return (type1==additionalData.TYPE_C) ? PairType(op1,op2) : PairType(op2,op1);
 			}
 
