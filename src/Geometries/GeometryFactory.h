@@ -149,7 +149,7 @@ namespace Dmrg {
 				refCounter_--;
 				return;
 			}
-			switch(n_) {
+			switch (n_) {
 			case CHAIN:
 				if (chain_) delete chain_;
 				break;
@@ -204,8 +204,15 @@ namespace Dmrg {
 				break;
 			case KTWONIFFOUR:
 				dirs_ = 4;
+				x = 1;
+				try {
+					io.readline(x,"SignChange=");
+				} catch (std::exception& e) {
+					io.rewind();
+				}
+
 				maxConnections_ = ktwoniffour_->maxConnections();
-				ktwoniffour_ = new KTwoNiFFour(linSize);
+				ktwoniffour_ = new KTwoNiFFour(linSize,x);
 				break;
 			default:
 				throw std::runtime_error("Unknown geometry\n");
@@ -214,19 +221,19 @@ namespace Dmrg {
 
 		size_t dirs() const { return dirs_; } // <-- move elsewhere FIXME
 
-		size_t handle(size_t i,size_t j,bool constantValues) const
+		size_t handle(size_t i,size_t j) const
 		{
 			switch (n_) {
 			case CHAIN:
-				return chain_->handle(i,j,constantValues);
+				return chain_->handle(i,j);
 			case LADDER:
-				return ladder_->handle(i,j,constantValues);
+				return ladder_->handle(i,j);
 			case LADDERX:
-				return ladderx_->handle(i,j,constantValues);
+				return ladderx_->handle(i,j);
 			case LADDERBATH:
-				return ladderbath_->handle(i,j,constantValues);
+				return ladderbath_->handle(i,j);
 			case KTWONIFFOUR:
-				return ktwoniffour_->handle(i,j,constantValues);
+				return ktwoniffour_->handle(i,j);
 			}
 			throw std::runtime_error("Unknown geometry\n");
 		}
@@ -250,7 +257,7 @@ namespace Dmrg {
 
 		bool connected(size_t i1,size_t i2) const
 		{
-			switch(n_) {
+			switch (n_) {
 			case CHAIN:
 				return chain_->connected(i1,i2);
 			case LADDER:
@@ -284,7 +291,7 @@ namespace Dmrg {
 
 		bool fringe(size_t i,size_t smax,size_t emin) const
 		{
-			switch(n_) {
+			switch (n_) {
 			case CHAIN:
 				return chain_->fringe(i,smax,emin);
 			case LADDER:
@@ -301,7 +308,7 @@ namespace Dmrg {
 
 		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
 		{
-			switch(n_) {
+			switch (n_) {
 			case CHAIN:
 				return chain_->getSubstituteSite(smax,emin,siteNew2);
 			case LADDER:
@@ -318,7 +325,7 @@ namespace Dmrg {
 
 		std::string label() const
 		{
-			switch(n_) {
+			switch (n_) {
 			case CHAIN:
 				return chain_->label();
 			case LADDER:
@@ -337,7 +344,7 @@ namespace Dmrg {
 
 		void fillAdditionalData(AdditionalDataType& additionalData,size_t ind,size_t jnd) const
 		{
-			switch(n_) {
+			switch (n_) {
 			case KTWONIFFOUR:
 				ktwoniffour_->fillAdditionalData(additionalData,ind,jnd);
 				break;
@@ -348,21 +355,31 @@ namespace Dmrg {
 
 		int index(size_t i1,size_t edof1,size_t edofTotal) const
 		{
-			switch(n_) {
+			switch (n_) {
 			case KTWONIFFOUR:
 				return ktwoniffour_->index(i1,edof1);
 			default:
 				return edof1+i1*edofTotal;
 			}
 		}
-		
-		size_t matrixRank(size_t linSize,size_t maxEdof)
+
+		size_t matrixRank(size_t linSize,size_t maxEdof) const
 		{
-			switch(n_) {
+			switch (n_) {
 			case KTWONIFFOUR:
 				return ktwoniffour_->matrixRank();
 			default:
 				return linSize*linSize*maxEdof*maxEdof;
+			}
+		}
+
+		int signChange(size_t i1, size_t i2) const
+		{
+			switch (n_) {
+			case KTWONIFFOUR:
+				return ktwoniffour_->signChange(i1,i2);
+			default:
+				return 1;
 			}
 		}
 

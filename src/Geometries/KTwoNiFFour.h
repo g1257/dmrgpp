@@ -101,9 +101,11 @@ namespace Dmrg {
 			size_t TYPE_C;
 		};
 
-		KTwoNiFFour(size_t linSize) 
-		: linSize_(linSize)
-		{}
+		KTwoNiFFour(size_t linSize,int signChange) 
+		: linSize_(linSize),signChange_(signChange)
+		{
+			std::cerr<<"SIGN CHANGE="<<signChange<<"\n";
+		}
 
 		size_t getVectorSize(size_t dirId) const
 		{
@@ -172,33 +174,44 @@ namespace Dmrg {
 
 		bool fringe(size_t i,size_t smax,size_t emin) const
 		{
-			return (i==smax || i==emin);
+			size_t r = smax%4;
+			switch (r) {
+			case 0:
+				return fringe0(i,smax,emin);
+			case 1:
+				return fringe1(i,smax,emin);
+			case 2:
+				return fringe2(i,smax,emin);
+			case 3:
+				return fringe3(i,smax,emin);
+			}
+			assert(false);
+			return false;
 		}
 
 		// assumes i1 and i2 are connected
-		size_t handle(size_t i1,size_t i2,bool constantValues) const
+		size_t handle(size_t i1,size_t i2) const
 		{
-			assert(constantValues);
-			if (!constantValues)
-				throw std::runtime_error("KTwoNiFFour: only Constant values allowed\n");
-
+			assert(false);
 			return 0;
-
 		}
 
 		// siteNew2 is fringe in the environment
 		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
 		{
-			size_t type2 = findTypeOfSite(siteNew2).first;
-			size_t i = smax+1;
-			size_t type1 = findTypeOfSite(i).first;
-			while(type1!=type2) {
-				i++;
-				if (i>=linSize_)
-					throw std::runtime_error("getSubstituteSite failed\n");
-				type1 = findTypeOfSite(i).first;
+			size_t r = smax%4;
+			switch (r) {
+			case 0:
+				return subs0(smax,emin,siteNew2);
+			case 1:
+				return subs1(smax,emin,siteNew2);
+			case 2:
+				return subs2(smax,emin,siteNew2);
+			case 3:
+				return subs3(smax,emin,siteNew2);
 			}
-			return i;
+			assert(false);
+			return 0;
 		}
 
 		std::string label() const
@@ -241,6 +254,12 @@ namespace Dmrg {
 			assert(sites+i>=tmp);
 			return sites+i-tmp;
 		}
+		
+		int signChange(size_t i1,size_t i2) const
+		{
+			if (isInverted(i1) || isInverted(i2)) return signChange_;
+			return 1;
+		}
 
 	private:
 
@@ -257,7 +276,62 @@ namespace Dmrg {
 			return PairType(TYPE_O,SUBTYPE_Y);
 		}
 		
+		bool isInverted(size_t i) const
+		{
+			size_t j = i+4;
+			return ((j%8)==0);
+		}
+		
+		bool fringe0(size_t i,size_t smax,size_t emin) const
+		{
+			return (i==smax || i==emin);
+		}
+		
+		size_t subs0(size_t smax,size_t emin,size_t i) const
+		{
+			return smax+3;
+		}
+
+		bool fringe1(size_t i,size_t smax,size_t emin) const
+		{
+			bool b1 = (i==smax || i==smax-1);
+			bool b2 = (i==emin || i==emin+1 || i==emin+2);
+			return (b1 || b2);
+		}
+		
+		size_t subs1(size_t smax,size_t emin,size_t i) const
+		{
+			if (i==emin) return smax+3;
+			if (i==emin+1) return smax+2;
+			if (i==emin+2) return smax+4;
+			assert(false);
+			return 0;
+		}
+		
+		bool fringe2(size_t i,size_t smax,size_t emin) const
+		{
+			return (i==smax-2 || i==emin+2);
+		}
+		
+		size_t subs2(size_t smax,size_t emin,size_t i) const
+		{
+			assert(i==emin+2);
+			return smax+1;
+		}
+
+		bool fringe3(size_t i,size_t smax,size_t emin) const
+		{
+			return (i==emin || i==smax || i==smax-1 || i==smax-2);
+		}
+		
+		size_t subs3(size_t smax,size_t emin,size_t i) const
+		{
+			assert(i==emin);
+			return smax+1;
+		}
+
 		size_t linSize_;
+		int signChange_;
 	}; // class KTwoNiFFour
 } // namespace Dmrg 
 

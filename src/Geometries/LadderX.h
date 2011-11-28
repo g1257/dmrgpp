@@ -139,10 +139,8 @@ namespace Dmrg {
 			}
 
 			// assumes i1 and i2 are connected
-			size_t handle(size_t i1,size_t i2,bool constantValues) const
+			size_t handle(size_t i1,size_t i2) const
 			{
-				if (constantValues) return 0;
-
 				size_t dir = calcDir(i1,i2);
 				size_t imin = (i1<i2) ? i1 : i2;
 				switch(dir) {

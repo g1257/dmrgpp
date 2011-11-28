@@ -136,8 +136,7 @@ namespace Dmrg {
 			: ModelBaseType(dmrgGeometry),modelParameters_(mp), dmrgGeometry_(dmrgGeometry),offset_(offset),
 					    spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 					   reinterpretX_(maxNumberOfSites),reinterpretY_(maxNumberOfSites)
-		{
-		}
+		{}
 
 		void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
@@ -147,8 +146,7 @@ namespace Dmrg {
 
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,SparseMatrixType &hamiltonian,
-				BasisDataType &q,Block const &block) const
+		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,SparseMatrixType &hamiltonian,BasisDataType &q,Block const &block) const
 		{
 			HilbertBasisType natBasis;
 			std::vector<size_t> quantumNumbs;

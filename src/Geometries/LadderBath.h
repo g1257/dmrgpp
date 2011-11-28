@@ -141,10 +141,8 @@ namespace Dmrg {
 			}
 
 			// assumes i1 and i2 are connected
-			size_t handle(size_t i1,size_t i2,bool constantValues) const
+			size_t handle(size_t i1,size_t i2) const
 			{
-				if (constantValues) return 0;
-
 				PairType c1 = getClusterSite(i1);
 				PairType c2 = getClusterSite(i2);
 				// two possibilities
@@ -227,7 +225,7 @@ namespace Dmrg {
 			size_t handleInCluster(size_t i1,size_t i2) const
 			{
 				ladderize(i1,i2);
-				return ladder_.handle(i1,i2,false);
+				return ladder_.handle(i1,i2);
 			}
 
 			void ladderize(size_t& i1,size_t& i2) const

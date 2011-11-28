@@ -100,7 +100,7 @@ namespace Dmrg {
   		template<typename> class SharedMemoryTemplate>
 	class Immm : public ModelBase<ModelHelperType_,SparseMatrixType,GeometryType,
  	LinkProductImmm<ModelHelperType_>,SharedMemoryTemplate> {
-		
+
 		typedef unsigned int long long WordType;
 
 	public:
@@ -140,7 +140,7 @@ namespace Dmrg {
 			buildDofs(cooperEach);
 			buildIndex2Op();
 		}
-		
+
 		size_t dOf(size_t site) const { return degreesOfFreedom_[site]; }
 
 		size_t hilbertSize(size_t site) const
@@ -269,7 +269,6 @@ namespace Dmrg {
 		}
 
 	private:
-
 
 		//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS 
@@ -582,7 +581,7 @@ namespace Dmrg {
 				                  creationMatrix[orb+SPIN_DOWN*norb].data);
 			return tmp;
 		}
-		
+
 		MatrixType nUpOrDown(const std::vector<size_t>& block,size_t spin) const
 		{
 			return cDaggerCi(block,spin,spin);
@@ -600,7 +599,7 @@ namespace Dmrg {
 				counter++;
 			}
 		}
-		
+
 		bool isAllowedThisDof(size_t alpha,size_t site) const
 		{
 			size_t norb1 = dOf(site)/NUMBER_OF_SPINS;

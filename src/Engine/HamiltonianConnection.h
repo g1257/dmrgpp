@@ -212,7 +212,6 @@ namespace Dmrg {
 							link.ops.second,ModelHelperType::Environ);
 					modelHelper_.fastOpProdInter(A,B,matrixBlock,link);
 				} else {
-// 						
 					assert(link.type==ProgramGlobals::ENVIRON_SYSTEM);
 					const SparseMatrixType& A=
 						modelHelper_.getReducedOperator(link.mods.first,link.site1-offset,
@@ -222,9 +221,7 @@ namespace Dmrg {
 							link.ops.second,ModelHelperType::System);
 					modelHelper_.fastOpProdInter(A,B,matrixBlock,link);
 				}
-				
 				return matrixBlock.nonZero();
-				
 			}
 
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 

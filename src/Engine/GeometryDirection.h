@@ -122,9 +122,10 @@ namespace Dmrg {
 // 				return dataMatrices_[0](i,j);
 // 			}
 
-			const RealType& operator()(size_t i,size_t edof1,size_t j,size_t edof2) const
+			RealType operator()(size_t i,size_t edof1,size_t j,size_t edof2) const
 			{
-				size_t h = geometryFactory_->handle(i,j,constantValues());
+				size_t h = (constantValues()) ? 0 : geometryFactory_->handle(i,j);
+				
 				if (dataType_==NUMBERS) {
 					assert(dataNumbers_.size()>h);
 					return dataNumbers_[h];
@@ -137,7 +138,9 @@ namespace Dmrg {
 				assert(b ||  (dataMatrices_[h].n_row()>edof2 &&
 				              dataMatrices_[h].n_col()>edof1));
 
-				return (b) ? dataMatrices_[h](edof1,edof2) : dataMatrices_[h](edof2,edof1);
+				RealType tmp = (b) ? dataMatrices_[h](edof1,edof2) : dataMatrices_[h](edof2,edof1);
+				int signChange = geometryFactory_->signChange(i,j);
+				return tmp * signChange;
 			}
 
 			size_t nRow() const

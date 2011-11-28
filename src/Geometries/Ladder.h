@@ -86,94 +86,93 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	
 	class Ladder  {
-		public:
-			enum {DIRECTION_X,DIRECTION_Y};
+	public:
+		enum {DIRECTION_X,DIRECTION_Y};
 
-			Ladder(size_t linSize,size_t leg) : linSize_(linSize),leg_(leg)
-			{
+		Ladder(size_t linSize,size_t leg) : linSize_(linSize),leg_(leg)
+		{
+		}
+
+		size_t getVectorSize(size_t dirId) const
+		{
+			if (dirId==DIRECTION_X) return linSize_-leg_;
+			else if (dirId==DIRECTION_Y) return linSize_ - linSize_/leg_;
+
+			throw std::runtime_error("Unknown direction\n");
+
+		}
+
+		bool connected(size_t i1,size_t i2) const
+		{
+			if (i1==i2) return false;
+			size_t c1 = i1/leg_;
+			size_t c2 = i2/leg_;
+			size_t r1 = i1%leg_;
+			size_t r2 = i2%leg_;
+			if (c1==c2) return utils::neighbors(r1,r2);
+			if (r1==r2) return utils::neighbors(c1,c2);
+			return false;
+		}
+
+		size_t calcDir(size_t i1,size_t i2) const
+		{
+			if (!connected(i1,i2)) throw std::runtime_error("Calcdir\n");
+			if (sameColumn(i1,i2)) return DIRECTION_Y;
+			return DIRECTION_X;
+		}
+
+		bool fringe(size_t i,size_t smax,size_t emin) const
+		{
+			bool a = (i<emin && i>=smax-1);
+			bool b = (i>smax && i<=emin+1);
+			return (a || b);
+
+		}
+
+		size_t handle(size_t i1,size_t i2) const
+		{
+			size_t dir = calcDir(i1,i2);
+			size_t imin = (i1<i2) ? i1 : i2;
+			switch(dir) {
+			case DIRECTION_X:
+				return imin;
+			case DIRECTION_Y:
+				return imin-imin/leg_;
 			}
+			throw std::runtime_error("hanlde: Unknown direction\n");
+		}
 
-			size_t getVectorSize(size_t dirId) const
-			{
-				if (dirId==DIRECTION_X) return linSize_-leg_;
-				else if (dirId==DIRECTION_Y) return linSize_ - linSize_/leg_;
+		// siteNew2 is fringe in the environment
+		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+		{
+			return smax+siteNew2-emin+1;
+		}
 
-				throw std::runtime_error("Unknown direction\n");
+		bool sameColumn(size_t i1,size_t i2) const
+		{
+			size_t c1 = i1/leg_;
+			size_t c2 = i2/leg_;
+			if (c1 == c2) return true;
+			return false;
+		}
 
-			}
+		bool sameRow(size_t i1,size_t i2) const
+		{
+			size_t c1 = i1%leg_;
+			size_t c2 = i2%leg_;
+			if (c1 == c2) return true;
+			return false;
+		}
 
-			bool connected(size_t i1,size_t i2) const
-			{
-				if (i1==i2) return false;
-				size_t c1 = i1/leg_;
-				size_t c2 = i2/leg_;
-				size_t r1 = i1%leg_;
-				size_t r2 = i2%leg_;
-				if (c1==c2) return utils::neighbors(r1,r2);
-				if (r1==r2) return utils::neighbors(c1,c2);
-				return false;
-			}
+		std::string label() const
+		{
+			return "ladder";
+		}
 
-			size_t calcDir(size_t i1,size_t i2) const
-			{
-				if (!connected(i1,i2)) throw std::runtime_error("Calcdir\n");
-				if (sameColumn(i1,i2)) return DIRECTION_Y;
-				return DIRECTION_X;
-			}
+	private:
 
-			bool fringe(size_t i,size_t smax,size_t emin) const
-			{
-				bool a = (i<emin && i>=smax-1);
-				bool b = (i>smax && i<=emin+1);
-				return (a || b);
-
-			}
-
-			size_t handle(size_t i1,size_t i2,bool constantValues) const
-			{
-				if (constantValues) return 0;
-				size_t dir = calcDir(i1,i2);
-				size_t imin = (i1<i2) ? i1 : i2;
-				switch(dir) {
-				case DIRECTION_X:
-					return imin;
-				case DIRECTION_Y:
-					return imin-imin/leg_;
-				}
-				throw std::runtime_error("hanlde: Unknown direction\n");
-			}
-
-			// siteNew2 is fringe in the environment
-			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
-			{
-				return smax+siteNew2-emin+1;
-			}
-
-			bool sameColumn(size_t i1,size_t i2) const
-			{
-				size_t c1 = i1/leg_;
-				size_t c2 = i2/leg_;
-				if (c1 == c2) return true;
-				return false;
-			}
-
-			bool sameRow(size_t i1,size_t i2) const
-			{
-				size_t c1 = i1%leg_;
-				size_t c2 = i2%leg_;
-				if (c1 == c2) return true;
-				return false;
-			}
-
-			std::string label() const
-			{
-				return "ladder";
-			}
-
-		private:
-
-			size_t linSize_;
-			size_t leg_;
+		size_t linSize_;
+		size_t leg_;
 	}; // class Ladder
 } // namespace Dmrg 
 
