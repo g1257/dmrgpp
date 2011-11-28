@@ -50,39 +50,32 @@ but it is hopelessly inadequate for showing their absence." -- Edsger Dijkstra
 use strict;
 use warnings;
 use Getopt::Long;
-use Cwd 'abs_path';
+use TestSuiteGlobals;
+use TestSuiteHooks;
 
 #Global variables and command line options
-my ($testDir, $srcDir);
-my $PATH = $testDir = $srcDir = abs_path($0);
-chomp(my $filename = `basename $0`);
-$testDir =~ s/$filename$//;
-$srcDir =~ s/TestSuite.*/src\//;
-my $oraclesDir = $testDir."oracles/";	
-my $resultsDir = $testDir."results/";
-my $inputsDir = $testDir."inputs/";
-my %dmrgHash = ();
-my %observeHash = ();
 
 
 #Get command line options
+TestSuiteGlobals::init();
+my $oraclesDir = $TestSuiteGlobals::testDir."oracles/";	
+my $resultsDir = $TestSuiteGlobals::testDir."results/";
 my $all = 0;
-my $testNum;
 my $lastTest;
-die $! if(!GetOptions("n=i" => \$testNum, "l=i" => \$lastTest, "all" => \$all));
+die $! if(!GetOptions("n=i" => \$TestSuiteGlobals::testNum, "l=i" => \$lastTest, "all" => \$all));
 
-$testNum = selectTest() if (!defined($testNum));
+$TestSuiteGlobals::testNum = selectTest() if (!defined($TestSuiteGlobals::testNum));
 
 if (!$all) {
-	testSuite($testNum);
+	testSuite($TestSuiteGlobals::testNum);
 	exit(0);
 }
 
-if($testNum < 0) {
-	$testNum = -$testNum;
+if($TestSuiteGlobals::testNum < 0) {
+	$TestSuiteGlobals::testNum = -$TestSuiteGlobals::testNum;
 }
 
-runAllTests($testNum,$lastTest);
+runAllTests($TestSuiteGlobals::testNum,$lastTest);
 
 #Displays available tests until user selects a valid one
 sub selectTest
@@ -101,7 +94,7 @@ sub selectTest
 sub getAvailableTests
 {
 	my $available = "";
-	my $descriptionFile = $inputsDir."descriptions.txt";
+	my $descriptionFile = $TestSuiteGlobals::inputsDir."descriptions.txt";
 	
 	open(FILE,$descriptionFile) || die "Opening $descriptionFile: $!";	
 	while(<FILE>) {
@@ -130,8 +123,8 @@ sub testSuite
 {
 	my ($testNum)=@_;
 	#$tempNum -= 100 if($testNum >= 100);
-	my $procFile = $inputsDir."processing$testNum.txt";
-	my $procLib = $inputsDir."processingLibrary.txt";
+	my $procFile = $TestSuiteGlobals::inputsDir."processing$testNum.txt";
+	my $procLib = $TestSuiteGlobals::inputsDir."processingLibrary.txt";
 	
 	if(-r $procLib) {
 		if(-r "$procFile") {
@@ -230,7 +223,7 @@ sub processing
 		}
 	}
 	
-	die "No analysis was found for Test $testNum.\n" if(!keys %procHash);
+	die "No analysis was found for Test $TestSuiteGlobals::testNum.\n" if(!keys %procHash);
 	
 	#The following section of code resolves dependencies among the different analysis in the
 	#processing file for the current test
@@ -254,7 +247,7 @@ sub processing
 				@depKeys = grep{s/$keyword|\s+//g} @dependencies;
 				foreach my $a(@depKeys) {
 					if(!defined($procCount{$a})) {
-						die "Unresolved dependency for analysis [$analysis]: inactive analysis [$a]. Verify the processing file for Test $testNum or processing library.\n";
+						die "Unresolved dependency for analysis [$analysis]: inactive analysis [$a]. Verify the processing file for Test $TestSuiteGlobals::testNum or processing library.\n";
 					} elsif($procCount{$a} eq 0) {
 						$depFlag = 1;
 					}
@@ -289,11 +282,14 @@ sub keyValueParser
 	my @commands;
 	my %varHash;
 	#Only variables found in @varArray can be used in the processing library for substitution purposes
+	my $srcDir = $TestSuiteGlobals::srcDir;
+	my $testNum = $TestSuiteGlobals::testNum;
+	my $inputsDir = $TestSuiteGlobals::inputsDir;
 	my @varArray = ("\$executable", "\$srcDir", "\$inputsDir", "\$resultsDir", "\$oraclesDir", "\$testNum");
 	#Variables in @nonSubsArray will not be resolved during the parsing, instead
 	#they are resolved prior to executing the command
 	my @nonSubsArray = ("\$executable");
-	
+
 	foreach (@varArray) {
 		my $tmp = "\\$_";
 		if(grep {/$tmp/} @nonSubsArray) {
@@ -352,6 +348,12 @@ sub commandsInterpreter
 		$arg =~ s/^\s*(\w+)\s*//;
 		eval("hook$tmpFunc[0](\$analysis,\$arg);");
 		if($@) {
+			eval("TestSuiteHooks::hook$tmpFunc[0](\$analysis,\$arg);");
+		}
+		if($@) {
+			eval("TestSuiteGlobals::hook$tmpFunc[0](\$analysis,\$arg);");
+		}
+		if($@) {
 			my $subr = (caller(0))[3];
 			die "$subr: $@";
 		}
@@ -367,7 +369,9 @@ sub hookExecute
 	$arg =~ s/(\()/$1"/g;
 	$arg =~ s/(\s*)(,)(\s*)/"$2"/g;
 	$arg =~ s/(\))/"$1/g;
+	$arg = "TestSuiteHooks::$arg";
 
+	print "About to eval $arg;\n";
 	eval("$arg;");
 	if($@) {
 		my $subr = (caller(0))[3];
@@ -377,225 +381,4 @@ sub hookExecute
 #	print "[$analysis]:Execute command was successful.\n" if($verbose);
 }
 
-#Custom routine that creates the dmrg executable, if necessary, and runs it
-sub runDmrg
-{
-	my ($inputFile,$raw) = @_;
 
-	die "Missing input file: $!" unless (-r "$inputFile");
-	
-	my ($specFile, $specKey) = getSpecFileAndKey();
-	my $executable = $srcDir."dmrg-".$specKey;
-
-	createExecutable($specFile,$specKey,"dmrg") unless (-x "$executable");
-
-	my $arg = "$executable $inputFile &> $raw";
-# 	grep {s/&//} $arg if($verbose);
-	
-	print "Running dmrg test...\n";
-	my $err = chdir($srcDir);
-	die "Changing directory to $srcDir: $!" if(!$err);
-	$err = system($arg);
-	die "Running test using $executable with $inputFile: $!" if($err);
-	$err = chdir($testDir);
-	die "Changing directory to $testDir: $!" if(!$err);
-	print "Completion of dmrg test.\n";
-}
-
-#Custom routine that creates the observe executable, if necessary, and runs it
-sub runObserve
-{
-	my ($inputFile, $raw,$obsOptions) = @_;
-	$obsOptions = "ccnnszsz" if (!defined($obsOptions));
-	my ($specFile, $specKey) = getSpecFileAndKey();
-	my $executable = $srcDir."observe-".$specKey;
-	
-	createExecutable($specFile,$specKey,"observe") unless (-x "$executable");
-	
-	my $arg = "$executable $inputFile $obsOptions &> $raw";
-# 	grep {s/&//} $arg if($verbose);
-	#die "******-> $arg\n";	
-	print "Running observe test...\n";
-	my $err = chdir($srcDir);
-	die "Changing directory to $srcDir: $!" if(!$err);
-	$err = system($arg);
-	die "Running test using $executable with $inputFile: $!" if($err);
-	$err = chdir($testDir);
-	die "Changing directory to $testDir: $!" if(!$err);
-	print "Completion of observe test.\n";
-}
-
-#Configures the current test, either manually or automatically (model spec file), and creates the executable
-sub createExecutable
-{
-	my ($specFile,$refKey, $execType) = @_;
-	my $configFile = "configure.pl";
-	my $arg1 = "./$configFile < $specFile &> /dev/null";
-	my $arg2 = "make $execType -f Makefile &> /dev/null";
-
-# 	grep {s/>.*//} $arg1 if($verbose);
-# 	grep {s/>.*//} $arg2 if($verbose);
-	
-	my $err = chdir($srcDir);
-	die "Changing directory to $srcDir: $!" if(!$err);
-	print "Configuring $execType in Test $testNum...\n";
-	$err = system($arg1);
-	die "Configuration error using $configFile with $specFile: $!" if($err);
-	print "Creating $execType executable for Test $testNum...\n";
-	$err = system($arg2);
-	die "Make command for $execType: $!" if($err);
-
-	my $executable= $execType."-".$refKey;
-	$err = rename($execType, $executable);
-	die "Renaming $execType to $executable: $!" if(!$err);
-	
-	$err = chdir($testDir);
-	die "Changing directory to $testDir: $!" if(!$err);
-	
-	print "\u$execType executable was succesfully created.\n";
-
-}
-
-#Retrieves model spec file of current test and returns the file with its hash key
-sub getSpecFileAndKey
-{
-	my $specFile = $inputsDir."model$testNum.spec";
-	
-	my $specKey = substr(`md5sum $specFile`,0,8);
-	$specKey .= substr(`git rev-parse HEAD`,0,4);
-	
-	return $specFile, $specKey;
-}
-
-#Retrieves the data for the Operators C, N, and Sz from the observe run
-sub extractOperator
-{
-	my ($opName, $raw,$out) = @_;
-	my $line;
-	my $op;
-	
-	open(INFILE,"<$raw") || die "Opening $raw: $!";
-		while($line = <INFILE>) {
-			if($line =~ /^Operator$opName/) {
-				$op = $line;
-				$line = <INFILE>;
-				$op = $op.$line;
-				my @temp1 = split(/ /,$line);
-
-				for(my $i = 0; $i < $temp1[0]; $i++) {
-					$line = <INFILE>;
-					$op = $op.$line;
-				}
-			}
-		}
-	close(INFILE) || die "Closing $raw: $!";
-	
-	open (OUTFILE, ">$out") || die "Opening $out: $!";
-	#die "Here <----------- $opName $raw\n";
-	print OUTFILE $op;
-	close (OUTFILE) || die "Closing $out: $!";
-#	print "Operator$opName extraction was successful.\n" if($verbose);
-}
-
-#Searches for differences between the data in the operators oracles with the recently computed operators
-sub smartDiff
-{
-	my ($opName, $raw, $oracle, $output) = @_;
-	my @rowsRaw;
-	my @rowsOracle;
-	my @elemRaw;
-	my @elemOracle;
-	my %mapPos;
-	
-	open (FILE, "<$raw") || die "Opening $raw: $!";
-	while(my $line = <FILE>) {
-		next if($line !~ /^\d/);
-		chomp($line);
-		push @rowsRaw, $line;
-	}
-	close (FILE) || die "Closing $raw: $!";
-	
-	open (FILE, "<$oracle") || die "Opening $oracle: $!";
-	while(my $line = <FILE>) {
-		next if($line !~ /^\d/);
-		chomp($line);
-		push @rowsOracle, $line;
-	}
-	close (FILE) || die "Closing $oracle: $!";
-	
-	my @dimsRaw = split(' ', $rowsRaw[0]);
-	my @dimsOracle = split(' ', $rowsOracle[0]);
-	
-	die "Unbalanced dimensions, Operator$opName matrix: $!" if($dimsRaw[0]  != $dimsOracle[0] || $dimsRaw[1] != $dimsOracle[1]);
-	shift(@rowsRaw);
-	shift(@rowsOracle);
-	
-	for(my $i = 0; $i < $dimsRaw[0]; $i++) {
-		@elemRaw = split(' ', $rowsRaw[$i]);
-		@elemOracle = split(' ', $rowsOracle[$i]);
-		
-		for(my $j = 0; $j < $dimsRaw[1]; $j ++) {
-			if($elemRaw[$j] ne $elemOracle[$j]) {
-				$mapPos{"($i,$j)"} = "$elemRaw[$j], $elemOracle[$j]";
-			}
-		}
-	}
-	
-	open (FILE, ">$output") || die "Opening $output: $!";
-	if(scalar keys %mapPos) {
-		print FILE "(Row,Col)   Raw    Oracle\n";
-		print FILE "--------    ---    ------\n";
-		foreach my $key (sort keys %mapPos) {
-			print FILE "$key : $mapPos{$key}\n";
-		}
-	}
-	close (FILE) || die "Closing $output: $!";
-		
-#	print "Smart diff for Operator$opName was successful.\n" if($verbose);
-}
-
-#Hook routine for the 'gprof' command
-sub hookGprof
-{
-	my ($analysis, $arg) = @_;
-	
-	my $err = chdir($srcDir);
-	die "Changing directory to $srcDir: $!" if(!$err);
-	eval("system(\"gprof $arg\") == 0 || die;");
-	if($@) {
-		my $subr = (caller(0))[3];
-		die "$subr: $@";
-	}
-	$err = chdir($testDir);
-	die "Changing directory to $testDir: $!" if(!$err);
-	
-#	print "[$analysis]:Gprof command was successful.\n" if($verbose);
-}
-
-#Hook routine for the 'diff' command
-sub hookDiff
-{
-	my ($analysis, $arg) = @_;
-	
-	eval("system(\"diff $arg\");");
-	if($@) {
-		my $subr = (caller(0))[3];
-		die "$subr: $@";
-	}
-
-#	print "[$analysis]:Diff command was successful.\n" if($verbose);
-}
-
-#Hook routine for the 'grep' command
-sub hookGrep
-{
-	my ($analysis, $arg) = @_;
-	
-	eval("system(\"grep $arg\") == 0 || die;");
-	if($@) {
-		my $subr = (caller(0))[3];
-		die "$subr: $@";
-	}
-	
-#	print "[$analysis]:Grep command was successful.\n" if($verbose);
-}
