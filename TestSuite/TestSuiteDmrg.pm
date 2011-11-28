@@ -49,7 +49,7 @@ but it is hopelessly inadequate for showing their absence." -- Edsger Dijkstra
 use strict;
 use TestSuiteGlobals;
 
-package TestSuiteHooks;
+package TestSuiteDmrg;
 
 #Custom routine that creates the dmrg executable, if necessary, and runs it
 sub runDmrg

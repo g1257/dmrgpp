@@ -51,15 +51,19 @@ use strict;
 use warnings;
 use Getopt::Long;
 use TestSuiteGlobals;
-use TestSuiteHooks;
+
+#CHANGE ONLY HERE:
+use TestSuiteDmrg;
+*TestSuiteHooks:: = *TestSuiteDmrg::;
+#END OF CHANGE BLOCK
+
 
 #Global variables and command line options
-
-
-#Get command line options
 TestSuiteGlobals::init();
 my $oraclesDir = $TestSuiteGlobals::testDir."oracles/";	
 my $resultsDir = $TestSuiteGlobals::testDir."results/";
+
+#Get command line options
 my $all = 0;
 my $lastTest;
 die $! if(!GetOptions("n=i" => \$TestSuiteGlobals::testNum, "l=i" => \$lastTest, "all" => \$all));
@@ -371,7 +375,7 @@ sub hookExecute
 	$arg =~ s/(\))/"$1/g;
 	$arg = "TestSuiteHooks::$arg";
 
-	print "About to eval $arg;\n";
+#	print "About to eval $arg;\n";
 	eval("$arg;");
 	if($@) {
 		my $subr = (caller(0))[3];
