@@ -68,9 +68,9 @@ my $all = 0;
 my $lastTest;
 die $! if(!GetOptions("n=i" => \$TestSuiteGlobals::testNum, "l=i" => \$lastTest, "all" => \$all));
 
-$TestSuiteGlobals::testNum = selectTest() if (!defined($TestSuiteGlobals::testNum));
 
 if (!$all) {
+	$TestSuiteGlobals::testNum = selectTest() if (!defined($TestSuiteGlobals::testNum));
 	testSuite($TestSuiteGlobals::testNum);
 	exit(0);
 }
@@ -165,8 +165,8 @@ sub runAllTests
 		next if ($testsList[$i] eq "");
 		next if ($testsList[$i]<$start);
 		next if(grep {$_ eq $testsList[$i]}@nonFunctionalTests);
-		my $testNum = $testsList[$i];
-		testSuite($testNum);
+		$TestSuiteGlobals::testNum = $testsList[$i];
+		testSuite($TestSuiteGlobals::testNum);
 		last if($testsList[$i] == $lastTest);
 	}
 }
