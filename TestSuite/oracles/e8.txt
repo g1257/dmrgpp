@@ -48,8 +48,8 @@
 #Energy=-19.675898
 #Energy=-19.675902
 #Energy=-19.675902
-#Energy=-19.675901
-#Energy=-19.675901
+#Energy=-19.675902
+#Energy=-19.675902
 #Energy=-19.675902
 #Energy=-19.675902
 #Energy=-19.675898

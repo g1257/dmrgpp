@@ -4,11 +4,11 @@
 #Energy=-12.053348
 #Energy=-14.592457
 #Energy=-17.133537
-#Energy=-19.675883
+#Energy=-19.675882
 #Energy=-19.675881
 #Energy=-19.675881
 #Energy=-19.675882
-#Energy=-19.675884
+#Energy=-19.675883
 #Energy=-19.675884
 #Energy=-19.675884
 #Energy=-19.675884
