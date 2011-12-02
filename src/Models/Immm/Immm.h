@@ -405,139 +405,30 @@ namespace Dmrg {
 			SparseMatrixType tmpMatrix,tmpMatrix2;
 
 			hmatrix.makeDiagonal(cm[0].data.rank());
+			
+			// on-site potential:
+			size_t site = block[0];
+			SparseElementType tmp = modelParameters_.potentialV[site];
+			for (size_t dof=0;dof<dOf(site);dof++) {
+				SparseMatrixType tmpMatrix = tmp * n(cm[dof].data);
+				hmatrix += tmpMatrix;
+			}
+			// on-site U only for Cu sites, for now:
+			if (dOf(site)!=2) return;
+			tmp = modelParameters_.hubbardU[site];
+			hmatrix +=  tmp * n(cm[0].data) * n(cm[1].data);
 			//addInteraction(hmatrix,cm,block);
 		}
 
-// 		void addInteraction(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i) const
-// 		{
-// 			addInteractionU1(hmatrix,cm,i);
-// 			addInteractionU2(hmatrix,cm,i);
-// 			addInteractionJ1(hmatrix,cm,i);
-// 			addInteractionJ2(hmatrix,cm,i);
-// 		}
-// 
-// 		//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
-// 		void addInteractionU1(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i) const
-// 		{
-// 			int dof=DEGREES_OF_FREEDOM;
-// 			SparseMatrixType tmpMatrix,tmpMatrix2;
-// 
-// 			for (size_t alpha=0;alpha<size_t(NUMBER_OF_ORBITALS);alpha++) {
-// 				SparseMatrixType m1=cm[alpha+SPIN_UP*NUMBER_OF_ORBITALS+i*dof].data;
-// 				SparseMatrixType m2=cm[alpha+SPIN_DOWN*NUMBER_OF_ORBITALS+i*dof].data;
-// 
-// 				multiply(tmpMatrix,n(m1),n(m2));
-// 				multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[0]); // this is U
-// 				hmatrix += tmpMatrix2;
-// 			}
-// 		}
-// 
-// 		//! Term is U[1] n_{i BAND0 } n_{i BAND1}
-// 		void addInteractionU2(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i) const
-// 		{
-// 			size_t orbital0=0,orbital1=1;
-// 			SparseMatrixType tmpMatrix,tmpMatrix2;
-// 
-// 			multiply(tmpMatrix, nSummedOverSpin(cm,i,orbital0),nSummedOverSpin(cm,i,orbital1));
-// 			multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[1]);// this is U'-J/2
-// 			hmatrix += tmpMatrix2;
-// 		}
-// 
-// 		//! Term is U[2] S_{i BAND0 } S_{i BAND1}
-// 		void addInteractionJ1(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i) const
-// 		{
-// 			size_t orbital0=0,orbital1=1;
-// 			SparseMatrixType tmpMatrix2,tmpMatrix;
-// 			RealType val=0;
-// 			RealType val2=2.0;
-// 			RealType val3=4.0;
-// 
-// 			multiply(tmpMatrix, spinOperator(cm,i,orbital0,0),spinOperator(cm,i,orbital1,1));
-// 			val = modelParameters_.hubbardU[2]/val2;
-// 			multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
-// 			hmatrix += tmpMatrix2;
-// 
-// 			multiply(tmpMatrix, spinOperator(cm,i,orbital0,1),spinOperator(cm,i,orbital1,0));
-// 			val = modelParameters_.hubbardU[2]/val2;
-// 			multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
-// 			hmatrix += tmpMatrix2;
-// 
-// 			multiply(tmpMatrix, spinOperator(cm,i,orbital0,2),spinOperator(cm,i,orbital1,2));
-// 			val = modelParameters_.hubbardU[2]/val3;
-// 			multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
-// 			hmatrix += tmpMatrix2;
-// 			return;
-// 		}
-// 
-// 		//! Term is U[3] \sum_{\alpha}\bar{n}_{i\alpha UP} \bar{n}_{i\alpha DOWN} 
-// 		//! where \bar{n}_{i\alpha \spin} = c^\dagger_{i\alpha\spin} c_{i\bar{\alpha}\bar{spin}}
-// 		void addInteractionJ2(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i) const
-// 		{
-// 			SparseMatrixType tmpMatrix,tmpMatrix2;
-// 
-// 			for (size_t alpha=0;alpha<size_t(NUMBER_OF_ORBITALS);alpha++) {
-// 				multiply(tmpMatrix,nBar(cm,i,alpha,SPIN_UP),nBar(cm,i,alpha,SPIN_DOWN));
-// 				multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[3]); // this is -J
-// 				hmatrix += tmpMatrix2;
-// 			}
-// 		}
-// 
-// 		SparseMatrixType n(const SparseMatrixType& c) const
-// 		{
-// 			SparseMatrixType tmpMatrix;
-// 			SparseMatrixType cdagger;
-// 			transposeConjugate(cdagger,c);
-// 			multiply(tmpMatrix,c,cdagger);
-// 
-// 			return tmpMatrix;
-// 		}
-// 
-// 		SparseMatrixType nBar(const std::vector<OperatorType>& cm,size_t i,size_t orbital,size_t spin) const
-// 		{
-// 			SparseMatrixType tmpMatrix,cdagger=cm[orbital+spin*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data;
-// 			SparseMatrixType cbar;
-// 			transposeConjugate(cbar,cm[1-orbital+(1-spin)*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
-// 			multiply(tmpMatrix,cdagger,cbar);
-// 			return tmpMatrix;
-// 		}
-// 
-// 		SparseMatrixType nSummedOverSpin(const std::vector<OperatorType>& cm,size_t i,size_t orbital) const
-// 		{
-// 			SparseMatrixType tmpMatrix = n(cm[orbital+SPIN_UP*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
-// 			tmpMatrix += n(cm[orbital+SPIN_DOWN*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
-// 			return tmpMatrix;
-// 		}
-// 
-// 		SparseMatrixType spinOperator(const std::vector<OperatorType>& cm,size_t i,size_t orbital,size_t component) const
-// 		{
-// 			switch (component) {
-// 				case 0: // S^+
-// 					return spinOperatorAux(cm,i,orbital,SPIN_UP,SPIN_DOWN);
-// 					break;
-// 				case 1: // S^-
-// 					return spinOperatorAux(cm,i,orbital,SPIN_DOWN,SPIN_UP);
-// 					break;
-// 			}
-// 			SparseMatrixType tmpMatrix=spinOperatorAux(cm,i,orbital,SPIN_UP,SPIN_UP);
-// 			SparseMatrixType tmpMatrix2=spinOperatorAux(cm,i,orbital,SPIN_DOWN,SPIN_DOWN);
-// 			SparseMatrixType tmpMatrix3;
-// 			multiplyScalar(tmpMatrix3,tmpMatrix2,-1.0);
-// 			tmpMatrix += tmpMatrix3;
-// 			return tmpMatrix;
-// 		}
-// 
-// 		SparseMatrixType spinOperatorAux(const std::vector<OperatorType>& cm,size_t i,size_t orbital,size_t spin1,size_t spin2) const
-// 		{
-// 			SparseMatrixType result,temp;
-// 			transposeConjugate(temp,cm[orbital+spin2*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
-// 			multiply(
-// 				result, // =
-// 				cm[orbital+spin1*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data, // times
-// 				temp
-// 			);
-// 					
-// 			return result;
-// 		}
+		SparseMatrixType n(const SparseMatrixType& c) const
+		{
+			SparseMatrixType tmpMatrix;
+			SparseMatrixType cdagger;
+			transposeConjugate(cdagger,c);
+			multiply(tmpMatrix,c,cdagger);
+
+			return tmpMatrix;
+		}
 
 		void diagTest(const SparseMatrixType& fullm,const std::string& str) const
 		{
