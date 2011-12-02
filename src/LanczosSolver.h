@@ -95,7 +95,8 @@ namespace PsimagLite {
 	//! MatrixType must have the following interface:
 	//! 	RealType type to indicate the matrix type
 	//! 	rank() member function to indicate the rank of the matrix
-	//! 	matrixVectorProduct(std::vector<RealType>& x,const std::vector<RealType>& const y) 
+	//! 	matrixVectorProduct(std::vector< RealType>& x,const 
+	//!     std::vector< RealType>& const y) 
 	//!    	   member function that implements the operation x += Hy
 
 	template<typename SolverParametersType,typename MatrixType,typename VectorType>

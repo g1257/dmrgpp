@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BLAS.h" 
 #include "Matrix.h" 
 #include "Complex.h"
+#include <cassert>
 
 namespace PsimagLite {
 
@@ -302,7 +303,7 @@ namespace PsimagLite {
 			rowptr_[rank]=rank;
 		}
 
-		const int& getRowPtr(int i) const { return rowptr_[i]; }
+		const int& getRowPtr(size_t i) const { assert(i<rowptr_.size()); return rowptr_[i]; }
 
 		const int& getCol(int i) const { return colind_[i]; }
 
@@ -793,8 +794,8 @@ namespace PsimagLite {
 		for (size_t i=0;i<A.rank();i++) {
 			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 				if (std::norm(A.getValue(k)-std::conj(A(A.getCol(k),i)))<1e-6) continue;
-				if (!doThrow) return false;
-				throw std::runtime_error("No Hermitian\n");
+				assert(false);
+				return false;
 			}
 		}
 		return true;
@@ -876,6 +877,22 @@ namespace PsimagLite {
 		Matrix<T> cc;
 		crsMatrixToFullMatrix(cc,c);
 		return cc;
+	}
+
+	template<typename T1,typename T2>
+	CrsMatrix<T2> operator*(T1& t1,const CrsMatrix<T2>& a)
+	{
+		CrsMatrix<T2> b;
+		multiplyScalar(b,a,t1);
+		return b;
+	}
+
+	template<typename T1,typename T2>
+	CrsMatrix<T1> operator*(const CrsMatrix<T1>& a,const CrsMatrix<T2>& b)
+	{
+		CrsMatrix<T2> c;
+		multiply(c,a,b);
+		return c;
 	}
 		
 } // namespace PsimagLite 

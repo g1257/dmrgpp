@@ -39,9 +39,6 @@ struct PlotParams {
 	RealType deltaOmega;
 	RealType delta;
 };
-
-
-
 } // namespace PsimagLite 
 /*@}*/
 #endif  //PLOT_PARAMS_H
