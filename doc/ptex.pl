@@ -9,6 +9,7 @@ perl ptex.pl < source.ptex > destination.tex
 =cut
 
 my $ptexStartKeyword = "!PTEX-START";
+my $ptexInterfaceKeyword = "!PTEX-START-INTERFACE";
 my $ptexEndKeyword = "!PTEX-END";
 my $ptexThisClassKeyword="!PTEX_THISCLASS";
 my $ptexRefKeyword="!PTEX_REF";
@@ -19,6 +20,7 @@ my %GlobalRefs=();
 my $GlobalPtexOpen=0;
 my $GlobalLabel="";
 my $GlobalBuffer="";
+my $GlobalIsInterface;
 
 loadMacros(0);
 loadMacros(1);
@@ -29,14 +31,39 @@ replaceMacros();
 sub replaceMacros
 {
 	while(<STDIN>) {
+		
+		next if (/\\newcommand\{\\ptex/);
+
 		if (/\\ptexPaste\{([^\}]+)\}/) {
-			die "Undefined macro for label $1\n" if (!defined($GlobalMacros{$1}));
+			my $x = $GlobalMacros{$1};
+			die "Undefined macro for label $1, line $.\n" if (!defined($x));
+			my %xx = %$x;
+			my $data = $xx{"data"};
+			die "Undefined macro for label $1\n" if (!defined($data));
+			s/\\ptexPaste\{([^\}]+)\}/$data/;
 		}
-		s/\\ptexPaste\{([^\}]+)\}/$GlobalMacros{$1}/;
+
 		if (/\\ptexLabel\{([^\}]+)\}/) {
 			die "Undefined ref for label $1\n" if (!defined($GlobalRefs{$1}));
+			s/\\ptexLabel\{([^\}]+)\}/$GlobalRefs{$1}/g;
+			print;
 		}
-		s/\\ptexLabel\{([^\}]+)\}/$GlobalRefs{$1}/g;
+		
+		
+		if (/\\ptexInterface\{([^\}]+)\}/) {
+			printInterface($1);
+			next;
+		}
+
+		if (/\\ptexReadFileVerbatim\{([^\}]+)\}/) {
+			readFileVerbatim($1);
+			next;
+		}
+
+		if (/\\ptexReadFile\{([^\}]+)\}/) {
+			readFile($1);
+			next;
+		}
 		next if (/\!PTEX\-/);
 		print;
 	}
@@ -72,6 +99,7 @@ sub procThisFile
 	$GlobalPtexOpen=0;
 	$GlobalLabel="";
 	$GlobalBuffer="";
+	$GlobalIsInterface = 0;
 	open(FILE,$file) or die "Cannot open file $file: $!\n";
 	while(<FILE>) {
 		procThisLine($_,$file,$passNumber);
@@ -103,7 +131,13 @@ sub procThisLine
 		$line=~s/$ptexThisClassKeyword/$class/g;
 		if ($line=~/$ptexEndKeyword/) {
 			$GlobalPtexOpen=0;
-			$GlobalMacros{"$GlobalLabel"}=$GlobalBuffer;
+			my %x = (
+				data => $GlobalBuffer,
+				file => $file,
+				line => $line,
+				isInterface => $GlobalIsInterface
+			);
+			$GlobalMacros{"$GlobalLabel"}= \%x;
 # 			print STDERR "Macro found for $GlobalLabel\n";
 			$GlobalBuffer="";
 			return;
@@ -119,6 +153,16 @@ sub procThisLine
 		die "Empty level on line $.\n" if ($GlobalLabel eq "");
 		$GlobalPtexOpen=1;
 		$GlobalBuffer="";
+		$GlobalIsInterface=0;
+	}
+	if ($line=~/$ptexInterfaceKeyword +(.*$)/) {
+		$GlobalLabel = $1;
+# 		print STDERR "GL=$1\n";
+		$GlobalLabel=~s/ //g;
+		die "Empty level on line $.\n" if ($GlobalLabel eq "");
+		$GlobalPtexOpen=1;
+		$GlobalBuffer="";
+		$GlobalIsInterface=1;
 	}
 }
 
@@ -130,4 +174,40 @@ sub removeTrailingDirs
 	}
 	$x=~s/\.h$//;
 	return $x;
+}
+
+sub printInterface
+{
+	my ($thisClass)=@_;
+	foreach (keys %GlobalMacros) {
+		my $x = $GlobalMacros{$_};
+		my %xx = %$x;
+		
+		my $if = $xx{"isInterface"};
+# print STDERR $xx{"file"}." "."$_ $if\n";
+		next if (!$if);
+		my $class = removeTrailingDirs($xx{"file"});
+		next unless ($class eq $thisClass);
+		print $xx{"data"};
+		print "\n";
+	}
+}
+
+sub readFileVerbatim
+{
+	my ($f)=@_;
+	print "\\begin{verbatim}\n";
+	readFile($f);
+	print "\\end{verbatim}\n";
+}
+
+sub readFile
+{
+	my ($f)=@_;
+	open(OTHERFILE,$f) or die "Cannot open file $f: $!\n";
+	while(<OTHERFILE>) {
+		print;
+	}
+	close(OTHERFILE);
+	
 }

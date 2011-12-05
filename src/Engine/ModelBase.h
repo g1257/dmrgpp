@@ -89,8 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Su2SymmetryGlobals.h"
 
 namespace Dmrg {
-	//! Interface to models for the dmrg solver.
-	//! Implement this interface for every new model you wish to write.
+	
 	/** !PTEX-START ModelInterface 
 	A sample SCE model, the one-band Hubbard model,
 	\[
@@ -102,8 +101,9 @@ namespace Dmrg {
 	$\sum_{ij}J_{ij}\vec{S}_i\cdot\vec{S}_j$.
 	These models  inherit from the abstract class \cppClass{!PTEX_THISCLASS}. 
 	To implement other SCE models one has to implement the functions prototyped 
-	in thIS abstract class. The interface (functions in \cppClass{!PTEX_THISCLASS}) 
-	are documented in place; here I briefly describe some of them.
+	in this abstract class. Note that there are default implementations for
+	some of these functions; they delegate to the \cppClass{ModelCommon} class.
+	Interface (functions in \cppClass{!PTEX_THISCLASS}) are the following.
 	!PTEX-END */
 	template<typename ModelHelperType,
 	typename SparseMatrixType,
@@ -139,8 +139,9 @@ namespace Dmrg {
 		//! Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
 		//! of basis2 \otimes basis3
 		//! This function does x += H*y
-		/** !PTEX-START matrixVectorProduct
-		The \cppFunction{matrixVectorProduct} function needs to implement the operation $x+=Hy$. 
+		/** !PTEX-START-INTERFACE matrixVectorProduct
+		The \cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$. This function
+		has a default implementation.
 		!PTEX-END */
 		template<typename SomeVectorType>
 		void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y,ModelHelperType const &modelHelper) const
@@ -148,15 +149,14 @@ namespace Dmrg {
 			modelCommon_.matrixVectorProduct(x,y,modelHelper);
 		}
 
-		/** !PTEX-START addHamiltonianConnection
+		/** !PTEX-START-INTERFACE addHamiltonianConnection
 		The function \cppFunction{addHamiltonianConnection} implements
 		the Hamiltonian connection (e.g. tight-binding links in the case of the Hubbard Model
 		or products $S_i\cdot S_j$ in the case of the Heisenberg model) between 
 		two basis, $basis2$ and $basis3$, in the order of the outer product,
 		$basis1={\rm SymmetryOrdering}(basis2\otimes basis3)$. This was 
-		explained before in Section~\ref{subsec:dmrgBasisWithOperators}, 
-		and the examples shown by \cppClass{ModelHubbard} and 
-		\cppClass{ModelHeisenberg} will be helpful in the implementation of other models. 
+		explained before in Section~\ref{subsec:dmrgBasisWithOperators}.
+		This function has a default implementation.
 		!PTEX-END */
 		void addHamiltonianConnection(SparseMatrixType &matrix,const LeftRightSuperType& lrs) const
 		{
@@ -172,37 +172,31 @@ namespace Dmrg {
 				sumBlock(matrix,matrixBlock,offset);
 			}
 		}
-		
+
 		size_t maxConnections() const
 		{
 			return modelCommon_.maxConnections();
 		}
-
-		//! Let H_m be the Hamiltonian connection between basis2 and basis3 in the orderof basis1 for block m 
-		//! Then this function does x+= H_m *y
+		
+		/** !PTEX-START-INTERFACE hamiltonianConnectionProduct
+		Let $H_m$ be the Hamiltonian connection between basis2 and basis3 in 
+		the orderof basis1 for block $m$. Then this function does $x+= H_m *y$
+		!PTEX-END */
 		void hamiltonianConnectionProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
 			ModelHelperType const &modelHelper) const
 		{
 			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
 		}
 
-		//! Return H, the hamiltonian of the FeAs model for basis1 and partition m consisting of the external product
-		//! of basis2 \otimes basis3
-		//! Note: Used only for debugging purposes
+		/** !PTEX-START-INTERFACE fullHamiltonian
+		Returns H, the hamiltonian of the FeAs model for basis1 and partition 
+		$m$ consisting of the external product of basis2$\otimes$basis3
+		Note: Used only for debugging purposes
+		!PTEX-END */
 		void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const
 		{
 			modelCommon_.fullHamiltonian(matrix,modelHelper);
 		}
-		
-		/** !PTEX-START setNaturalBasis
-		Function \cppFunction{setNaturalBasis} sets certain aspects of the 
-		``natural basis'' (usually the real-space basis) on a given block.
-		The operator matrices (e.g., $c^\dagger_{i\sigma}$ for the Hubbard 
-		model or $S_i^+$ and $S_i^z$ for the Heisenberg model) need to be set 
-		there, as well as the Hamiltonian and the effective quantum number for
-		each state of this natural basis. To implement the algorithm for a 
-		fixed density, the number of electrons for each state is also needed .
-		!PTEX-END */
 
 	private:
 

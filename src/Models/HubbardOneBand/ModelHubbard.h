@@ -138,13 +138,20 @@ namespace Dmrg {
 					   reinterpretX_(maxNumberOfSites),reinterpretY_(maxNumberOfSites)
 		{}
 
-		void print(std::ostream& os) const { operator<<(os,modelParameters_); }
-
-// 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
-
+		/*!PTEX-START-INTERFACE hilbertSize
+		\cppFunction{hilbertSize} returns the size of the one-site Hilbert space.
+		!PTEX-END */
 		size_t hilbertSize(size_t site) const { return (size_t)pow(2,2*NUMBER_OF_ORBITALS); }
 
-		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
+		/*!PTEX-START setNaturalBasis
+		Function \cppFunction{setNaturalBasis} sets certain aspects of the 
+		``natural basis'' (usually the real-space basis) on a given block.
+		The operator matrices (e.g., $c^\dagger_{i\sigma}$ for the Hubbard 
+		model or $S_i^+$ and $S_i^z$ for the Heisenberg model) need to be set 
+		there, as well as the Hamiltonian and the effective quantum number for
+		each state of this natural basis. To implement the algorithm for a 
+		fixed density, the number of electrons for each state is also needed.
+		!PTEX-END */
 		//! for each state in the basis
 		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,SparseMatrixType &hamiltonian,BasisDataType &q,Block const &block) const
 		{
@@ -161,7 +168,11 @@ namespace Dmrg {
 			calcHamiltonian(hamiltonian,creationMatrix,block);
 		}
 
-		//! set creation matrices for sites in block
+		/*!PTEX-START-INTERFACE setOperatorMatrices
+		 Sets local operators needed to construct the Hamiltonian.
+		 For example, for the Hubbard model these operators are the 
+		 creation operators for sites in block
+		 !PTEX-END */
 		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,Block const &block) const
 		{
 			std::vector<typename HilbertSpaceHubbardType::HilbertState> natBasis;
@@ -190,7 +201,10 @@ namespace Dmrg {
 				}
 			}
 		}
-
+		
+		/*!PTEX-START-INTERFACE getOperatorModelHubbard
+		Returns the operator in the unmangled (natural) basis of one-site
+		!PTEX-END */
 		PsimagLite::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const
 		{
 			Block block;
@@ -230,7 +244,9 @@ namespace Dmrg {
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 		}
 		
-		//! find total number of electrons for each state in the basis
+		/*!PTEX-START-INTERFACE findElectronsModelHubbard
+		Sets electrons to the total number of electrons for each state in the basis
+		!PTEX-END */
 		void findElectrons(std::vector<size_t> &electrons,
 		                   const std::vector<HilbertState>& basis,
 		                   size_t site) const
@@ -244,8 +260,6 @@ namespace Dmrg {
 			}
 		}
 
-// 		//! find all states in the natural basis for a block of n sites
-// 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 		void setNaturalBasis(HilbertBasisType  &basis,
 		                     std::vector<size_t>& q,
 		                     const std::vector<size_t>& block) const
@@ -268,15 +282,21 @@ namespace Dmrg {
 			for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
 		}
 		
+		/*!PTEX-START-INTERFACE geometryModelHubbard
+		Retruns a const reference to the geometry object
+		!PTEX-END */
 		const DmrgGeometryType& geometry() const { return dmrgGeometry_; }
 
 	private:
+
 		const ParametersModelHubbard<RealType>&  modelParameters_;
 		const DmrgGeometryType &dmrgGeometry_;
 		size_t offset_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 		size_t reinterpretX_,reinterpretY_;
+
+		void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
 		//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 		RealType sign(typename HilbertSpaceHubbardType::HilbertState const &ket, int i,int sigma) const
