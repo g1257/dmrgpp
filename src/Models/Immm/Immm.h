@@ -350,7 +350,6 @@ namespace Dmrg {
 		                        const std::vector<HilbertState>& basis,
 		                        size_t site) const
 		{
-
 			// find j,m and flavors (do it by hand since we assume n==1)
 			// note: we use 2j instead of j
 			// note: we use m+j instead of m

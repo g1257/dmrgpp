@@ -176,7 +176,6 @@ namespace Dmrg {
 
 	private:
 
-		//! Truncate basis 
 		void changeAndTruncateBasis(BasisWithOperatorsType &rSprime,
 		                            const TargettingType& target,
 		                            BasisWithOperatorsType const &pBasis,
@@ -184,6 +183,20 @@ namespace Dmrg {
 		                            size_t direction)
 // 		                            const std::pair<size_t,size_t>& startEnd)
 		{
+			/** !PTEX-START Truncation
+			Let us define the density matrices for system:
+			\begin{equation}
+			(\hat{\rho}_S)_{\alpha,\alpha'} = \sum_{\beta\in\mathcal{V}(E')}\psi_{\alpha',\beta}^*\psi_{\alpha,\beta}
+			\label{eq:rhoSystem}
+			\end{equation}
+			in $\mathcal{V}(S')$,
+			and environment:
+			\begin{equation}
+			(\hat{\rho}_E )_{\beta,\beta'}= \sum_{\alpha\in \mathcal{V}(S')}\psi_{\alpha,\beta'}^*\psi_{\alpha,\beta}
+			\label{eq:rhoEnviron}
+			\end{equation}
+			in $\mathcal{V}(E')$.
+			!PTEX-END */
 			DensityMatrixType dmS(target,pBasis,pBasisSummed,lrs_.super(),direction);
 			dmS.check(direction);
 			
@@ -192,6 +205,15 @@ namespace Dmrg {
 				std::cerr<<dmS.rank()<<"\n";
 			}
 			std::vector<RealType> eigs;
+			/** !PTEX-START DiagOfDensityMatrix
+			We then diagonalize $\hat{\rho}_S$, and obtain its eigenvalues and eigenvectors, 
+			$w^S_{\alpha,\alpha'}$ in $\mathcal{V}(S')$ ordered in decreasing eigenvalue order.
+			We change basis for the operator $H^{S'}$ (and other operators as necessary), as follows:
+			\begin{equation}
+			(H^{S' {\rm new\,\,basis}})_{\alpha,\alpha'}=(w^S)^{-1}_{\alpha,\gamma} (H^{ S'})_{\gamma,\gamma'}w^S_{\gamma',\alpha'}.
+			\label{eq:transformation}
+			\end{equation}
+			!PTEX-END */
 			dmS.diag(eigs,'V',concurrency_);
 			dmS.check2(direction);
 			
@@ -255,7 +277,19 @@ namespace Dmrg {
 			
 		}
 
-		// eigenvalues are ordered in increasing order
+		/** !PTEX-START RemovalOfStates
+		Let $m_S$ (here given by \verb!keptStates_! be a fixed number that 
+		corresponds to the number of states in $\mathcal{V}(S')$ that we want to keep. 
+		Consider the first $m_S$ eigenvectors $w^S$, 
+		 and let us call the Hilbert space spanned by them, $\mathcal{V}_R(S')$, 
+		 the DMRG-reduced Hilbert space on 
+		block $S'$. If $m_S\ge\#\mathcal{V}(S')$ then we keep all eigenvectors 
+		and there is effectively no truncation.
+		We truncate the matrices $(H^{S' {\rm new\,\,basis}})$ (and other operators as necessary)
+		such that they now act on this truncated Hilbert space, $\mathcal{V}_R(S')$.
+		We proceed in the same manner for the environment.
+		!PTEX-END */
+		//! eigenvalues are ordered in increasing order
 		size_t computeKeptStates(const std::vector<RealType>& eigs) const
 		{
 			if (parameters_.tolerance<0) return keptStates_;

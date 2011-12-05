@@ -235,82 +235,11 @@ There are three kinds of parameters in the input file:
 The Model parameters vary from model to model.
 The DMRG Solver parameters are discussed below.
 
-		\inputItem{Options}
-		A comma-separated list of strings. At least one of the following strings must be provided:
-		\inputSubItem{none}  Use this when no options are given, since the list of strings must be non-null.
-		Note that ``none'' does not disable other options.\\
-		\inputSubItem{hasQuantumNumbers} If this option is given, the program will read the line ``QNS'' 
-		described below and act accordingly. It is recommended that you set this option.  \\
-		\inputSubItem{wft}  Use the Wave Function Transformation speed-up, which is disabled by default.\\
-		\inputSubItem{useSu2Symmetry} Use the SU(2) symmetry for the model, and interpret quantum numbers in 
-		the line ``QNS'' appropriately. The option ``hasQuantumNumbers'' must be set for this to work.\\
-		\inputSubItem{nofiniteloops}  Don't do finite loops, even if provided under ``FiniteLoops'' below.\\
-		%
-		\inputItem{version}  A mandatory string that is read and ignored. Usually contains the result
-		of doing ``git rev-parse HEAD''.\\
-		\inputItem{outputfile}  The output file. This file will be created if non-existent, and if it
-		exits it will be truncated.\\
-		\inputItem{InfiniteLoopKeptStates}  ``m'' value for the infinite algorithm.\\
-		\inputItem{FiniteLoops} A series of space-separated numbers. More than one space is allowed.
-		The first number is the number of finite algorithm ``movements'', followed by series
-		of three numbers for each ``movement''. Of the three numbers, the first
-		is the number of sites to go forward if positive or backward if negative.
-		The second number is the ``m'' for this ``movement' and the last number is either 0 or 1,
-		0 will not save state data to disk and 1 will save all data to be able to calculate observables.
-		The first ``movement'' starts from where the infinite loop left off, at the middle of the lattice.\\
-		\inputItem{QNS}  A space-separated list of numbers. More than one space is allowed.
-		The first number is the number of numbers to follow, these numbers being the density of quantum
-		numbers for each conserved quantum number to be used.
-		In a simpler way, usually this is 3 followed by $n_\uparrow n_\downarrow 0$  if not using
-		SU(2) symmetry, where  $n_\uparrow$, and $n_\downarrow$ are the densities of up and down
-		electrons respectively. If there is SU(2) symmetry then this is 3 followed by $n_\uparrow n_\downarrow j$,
-		where $n_\uparrow$, and $n_\downarrow$ are the densities of up and down
-		electrons respectively, and $j$ is twice the angular momentum divided by the number of sites.
-
+\pasteRaw{InputParamsSolver}
 
 \subsection{Finite Loops}
 
-		\subsubsection{Enabling finite loops}
-		\begin{itemize}
-		\item
-		{\bf options line:} \verb=nofiniteloops=: Don't do finite loops, even if provided under {\bf FiniteLoops} below.
-		\item {\bf InfiniteLoopKeptStates} $m$ value for the infinite algorithm.
-		\item {\bf FiniteLoops} A series of space-separated numbers. More than one space is allowed. The first
-		number is the number of finite algorithm ``movements,'' followed by series of three numbers for
-		each ``movement''. Of the three numbers, the first is the number of sites to go forward if positive
-		or backward if negative. The second number is the $m$ for this movement and the last number
-		is either 0 or 1, 0 will not save state data to disk and 1 will save all data to be able to calculate
-		observables. The first movement starts from where the infinite loop left off, at the middle of the
-		lattice.
-		\end{itemize}
-
-		\subsubsection{Example of a Finite loops line in the input file}
-		\begin{verbatim}
-		FiniteLoops 4 7 200 0 -7 200 0 7 200 1 7 200 1
-		\end{verbatim}
-		The number 4 implies 4 finite loops. The first fine loop is ``7 200 0'', meaning
-		go forward 7 steps, use $m=200$ for this finite sweep, and 0: do not store transformation in disk.
-		The next is ``-7 200 0'', which goes backwards 7 sites, etc.
-		Remember that the finite loops start at the middle of the lattice, where the infinite loop left off.
-		ADD FIGURE SHOWING WHAT THIS DOES.
-
-		\subsubsection{Caveats and Troubleshooting}
-		\begin{itemize}
-		\item If \verb=nofiniteloops= is an option in the options line of the input file then
-		the {\bf FiniteLoops} line in the input file is ignored, and no finite loops are done. 
-		In this case, DMRG++ stops when the infinite algorithm has finished.
-
-		\item The syntax of the {\bf Finiteoops} line is not checked against errors. 
-		\item Make sure the first number is the number of triplets that follow. 
-		\item Make sure
-		you don't fall off the lattice, by going forward or backwards too much.
-		Remember that at least one site must remain for the ``system'' part of the lattice.
-		So on a 16 site chain, when you start the finite loops you're at the middle, you
-		can go forward at most 7 sites, and backwards at most 7 sites.
-		\item Future work will provide user-friendly errors when these mistakes are made.
-		For now \emph{caveat user!}
-		\end{itemize}
-
+\pasteRaw{InputFiniteLoops}
 
 \section{Main Driver}
 The high level program is this
@@ -342,88 +271,16 @@ A {\it real-space-based Hilbert space} can also be thought of as the external pr
 We will consider general Hamiltonians   that
  act on Hilbert spaces $\mathcal{V}$, as previously defined.
 
-		I shall give a procedural description of the DMRG method in the following.
-		We start with an initial block $S$ (the initial system) and $E$ (the initial environment). 
-		Consider two sets of blocks $X$ and $Y$. 
-		We will be adding blocks from $X$ to $S$, one at a time, and from $Y$ to $E$, one at a time. 
-		Again, note that $X$ and $Y$ are sets of blocks whereas $S$ and $E$ are blocks. This is shown schematically in Fig.~\ref{fig:sxye}.
-		All sites in $S$, $X$, $Y$ and $E$ are numbered as shown in the figure.
-		\begin{figure}
-		\centering{
-		\includegraphics[width=8cm]{dmrg_sxye}}
-		\caption{Labeling of blocks for the DMRG procedure. Blocks from  vector of blocks X are added one at a time to block $S$ to form 
-		the system and blocks from  vector of blocks
-		Y are added one at a time to E to form the environment. Blocks are vectors of integers. The integers (numbers at the top of the figure)
-		label all sites in a fixed and unique way.\label{fig:sxye}}
-		\end{figure}
-
-			Now we start a loop for the DMRG ``infinite'' algorithm
-		 	by setting $step=0$ and $\mathcal{V}_R(S)\equiv\mathcal{V}(S)$ and $\mathcal{V}_R(E)\equiv\mathcal{V}(E)$.
-
-				The system is grown by adding the sites in $X_{step}$ to it, and let
-				$S'=S\cup X_{step}$, i.e. the $step$-th block of $X$ to $S$ is added to form the block $S'$; likewise, let $E'=E\cup Y_{step}$. 
-				Let us form the following product Hilbert spaces:
-				$\mathcal{V}(S')=\mathcal{V}_R(S)\otimes \mathcal{V}(X_{step})$ and 
-				$\mathcal{V}(E')=\mathcal{V}_R(E)\otimes \mathcal{V}(Y_{step})$ and their union $\mathcal{V}(S')\otimes\mathcal{V}(E')$ which is disjoint.
-
-				Consider $\hat{H}_{S'\cup E'}$, the Hamiltonian operator, acting on $\mathcal{V}(S')\otimes\mathcal{V}(E')$.
-				Using Lanczos\ref{sec:lanczos},
-				we  diagonalize $\hat{H}_{S'\cup E'}$ to obtain its lowest eigenvector:
-				\begin{equation}
-				|\psi\rangle = \sum_{\alpha\in \mathcal{V}(S'), \beta\in\mathcal{V}(E')}\psi_{\alpha,\beta}|\alpha\rangle\otimes|\beta\rangle,
-				\label{eq:psi}
-				\end{equation}
-				where $\{|\alpha\rangle\}$ is a basis of $\mathcal{V}(S')$ and $\{|\beta\rangle\}$ is a basis of $\mathcal{V}(E')$.
-
-			Let us define the density matrices for system:
-			\begin{equation}
-			(\hat{\rho}_S)_{\alpha,\alpha'} = \sum_{\beta\in\mathcal{V}(E')}\psi_{\alpha',\beta}^*\psi_{\alpha,\beta}
-			\label{eq:rhoSystem}
-			\end{equation}
-			in $\mathcal{V}(S')$,
-			and environment:
-			\begin{equation}
-			(\hat{\rho}_E )_{\beta,\beta'}= \sum_{\alpha\in \mathcal{V}(S')}\psi_{\alpha,\beta'}^*\psi_{\alpha,\beta}
-			\label{eq:rhoEnviron}
-			\end{equation}
-			in $\mathcal{V}(E')$.
-
-			We then diagonalize $\hat{\rho}_S$, and obtain its eigenvalues and eigenvectors, 
-			$w^S_{\alpha,\alpha'}$ in $\mathcal{V}(S')$ ordered in decreasing eigenvalue order.
-			We change basis for the operator $H^{S'}$ (and other operators as necessary), as follows:
-			\begin{equation}
-			(H^{S' {\rm new\,\,basis}})_{\alpha,\alpha'}=(w^S)^{-1}_{\alpha,\gamma} (H^{ S'})_{\gamma,\gamma'}w^S_{\gamma',\alpha'}.
-			\label{eq:transformation}
-			\end{equation}
-
-				We proceed in the same way for the environment,  diagonalize $\hat{\rho}_E$ to obtain ordered
-				eigenvectors $w^E$, and define $(H^{ E' {\rm new\,\,basis}})_{\alpha,\alpha'}$.
-
-		Let $m_S$ (here given by \verb!keptStates_! be a fixed number that 
-		corresponds to the number of states in $\mathcal{V}(S')$ that we want to keep. 
-		Consider the first $m_S$ eigenvectors $w^S$, 
-		 and let us call the Hilbert space spanned by them, $\mathcal{V}_R(S')$, 
-		 the DMRG-reduced Hilbert space on 
-		block $S'$. If $m_S\ge\#\mathcal{V}(S')$ then we keep all eigenvectors 
-		and there is effectively no truncation.
-		We truncate the matrices $(H^{S' {\rm new\,\,basis}})$ (and other operators as necessary)
-		such that they now act on this truncated Hilbert space, $\mathcal{V}_R(S')$.
-		We proceed in the same manner for the environment.
-
-				Now we set $S\leftarrow S'$, $\mathcal{V}_R(S)\leftarrow\mathcal{V}_R(S')$, 
-				$H_{S'}\leftarrow H_{S}$,
-				and similarly for the environment, increase step by one,
-				and continue with the growth phase of the algorithm.
-
-		In the infinite algorithm, the  number of sites in the
-		system and environment grows as more steps are performed.
-		After this infinite algorithm, a finite algorithm is applied where the 
-		environment is shrunk at the expense of the system, and the system is grown
-		at the expense of the environment. During the finite algorithm 
-		(\todo{Section to be written}) phase the total number of sites remains 
-		constant allowing for a formulation
-		of DMRG as a variational method in a basis of matrix product states.
-
+\pasteRaw{DMRGAlgorithmDescription}
+\pasteRaw{infiniteDmrgLoop}
+\pasteRaw{growRightAndLeft}
+\pasteRaw{diagonalization}
+\pasteRaw{Truncation}
+\pasteRaw{DiagOfDensityMatrix}
+\pasteRaw{TruncationOfEnviron}
+\pasteRaw{RemovalOfStates}
+\pasteRaw{LoopClose}
+\pasteRaw{FiniteAlgorithm}
 
 The advantage of the DMRG algorithm is that the truncation procedure described above keeps the error bounded and small.
 Assume $m_S=m_E=m$.
@@ -742,38 +599,10 @@ the resulting states of this outer product need to be reordered so that effectiv
 
 \section{Model Interface}\label{subsec:models}
 \subsection{Abstract Interface}
-	A sample SCE model, the one-band Hubbard model,
-	\[
-	\sum_{i,j,\sigma}t_{ij}c^\dagger_{i\sigma} c_{j\sigma}
-	+\sum_i U_i n_{i\uparrow}n_{i\downarrow} + \sum_{i,\sigma}V_i n_{i\sigma},
-	\]
-	is implemented in class \cppClass{ModelHubbardOneBand}. 
-	A sample \cppClass{HeisenbergSpinOneHalf} is also included for the Heisenberg model 
-	$\sum_{ij}J_{ij}\vec{S}_i\cdot\vec{S}_j$.
-	These models  inherit from the abstract class \cppClass{../src/Engine/ModelBase}. 
-	To implement other SCE models one has to implement the functions prototyped 
-	in thIS abstract class. The interface (functions in \cppClass{../src/Engine/ModelBase}) 
-	are documented in place; here I briefly describe some of them.
-
-		The \cppFunction{matrixVectorProduct} function needs to implement the operation $x+=Hy$. 
-
-		The function \cppFunction{addHamiltonianConnection} implements
-		the Hamiltonian connection (e.g. tight-binding links in the case of the Hubbard Model
-		or products $S_i\cdot S_j$ in the case of the Heisenberg model) between 
-		two basis, $basis2$ and $basis3$, in the order of the outer product,
-		$basis1={\rm SymmetryOrdering}(basis2\otimes basis3)$. This was 
-		explained before in Section~\ref{subsec:dmrgBasisWithOperators}, 
-		and the examples shown by \cppClass{ModelHubbard} and 
-		\cppClass{ModelHeisenberg} will be helpful in the implementation of other models. 
-
-		Function \cppFunction{setNaturalBasis} sets certain aspects of the 
-		``natural basis'' (usually the real-space basis) on a given block.
-		The operator matrices (e.g., $c^\dagger_{i\sigma}$ for the Hubbard 
-		model or $S_i^+$ and $S_i^z$ for the Heisenberg model) need to be set 
-		there, as well as the Hamiltonian and the effective quantum number for
-		each state of this natural basis. To implement the algorithm for a 
-		fixed density, the number of electrons for each state is also needed .
-
+\pasteRaw{ModelInterface}
+\pasteRaw{matrixVectorProduct}
+\pasteRaw{addHamiltonianConnection}
+\pasteRaw{setNaturalBasis}
 
 \subsection{Heisenberg Model}
 \subsection{One-Orbital Hubbard Model}
