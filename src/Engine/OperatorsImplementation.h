@@ -88,6 +88,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
+	/** !PTEX-START OperatorsImpl
+	The \cppClass{!PTEX_THISCLASS} class stores the local operators for this basis.
+	Only the local operators corresponding to the most recently added sites 
+	will be meaningful. Indeed, if we  apply transformation $W$ (possibly 
+	truncating the basis, see Eq.~(\ref{eq:transformation})) then
+	\begin{equation}
+	(W^\dagger A W)  (W^\dagger BW) \neq W^\dagger  (AB)  W,  
+	\end{equation}
+	since $WW^\dagger\neq 1$ because the DMRG truncation does not assure us 
+	that $W^\dagger$ will be the right inverse of $W$ (but $W^\dagger W=1$ 
+	always holds). Because of this reason we cannot construct the Hamiltonian 
+	simply from transformed local operators, even if we store them for all sites,
+	but we need to store also the Hamiltonian in the most recently transformed 
+	basis. The fact that \cppClass{!PTEX_THISCLASS} stores local operators in 
+	the most recently transformed basis for \emph{all sites} does not increase 
+	memory usage too much, and simplifies the writing of code for complicated
+	geometries or connections, because all local opeators are availabel at all
+	times. Each SCE model class is responsible for determining whether a 
+	transformed operator can be used (or not because of the reason limitation above).
+	!PTEX-END */
 	template<typename OperatorType,typename DmrgBasisType>
 	class OperatorsImplementation {
 
@@ -224,6 +244,30 @@ namespace Dmrg {
 			reducedOpImpl_.setMomentumOfOperators(momentum);
 		}
 
+		/** !PTEX-START externalProduct
+		I will know explain how the full outer product between two operators 
+		is implemented. If local operator $A$ lives in Hilbert space 
+		$\mathcal{A}$ and local operator $B$ lives in Hilbert space 
+		$\mathcal{B}$, then $C=AB$ lives in Hilbert space 
+		$\mathcal{C}=\mathcal{A}\otimes\mathcal{B}$. Let $\alpha_1$ and 
+		$\alpha_2$ represent states of $\mathcal{A}$, and let $\beta_1$ and 
+		$\beta_2$ represent states of   $\mathcal{B}$. Then, in the product 
+		basis, $C_{\alpha_1,\beta_1;\alpha_2,\beta_2}=A_{\alpha_1,\alpha_2}
+		B_{\beta_1,\beta_2}$. Additionally,  $\mathcal{C}$ is reordered 
+		such that each state of this outer product basis is labeled in 
+		increasing effective quantum number (see 
+		Section~\ref{sec:dmrgbasis}). In the previous example, if the Hilbert 
+		spaces  $\mathcal{A}$ and $\mathcal{B}$ had sizes $a$ and $b$, 
+		respectively, then their outer product would have size $ab$. 
+		When we add sites to the system (or the environment) the memory 
+		usage remains bounded by the truncation, and it is usually not a 
+		problem to store full product matrices, as long as we do it in a 
+		sparse way (DMRG++ uses compressed row storage). In short, local 
+		operators are always stored in the most recently transformed basis 
+		for \emph{all sites} and, if applicable, \emph{all values} of the 
+		internal degree of freedom $\sigma$. See !PTEX_REF{setToProductOps}
+		and !PTEX_REF{HERE}.
+		!PTEX-END */
 		template<typename ApplyFactorsType>
 		void externalProduct(size_t i,const OperatorType& m,int x,const std::vector<double>& fermionicSigns,
 				     bool option,ApplyFactorsType& apply)

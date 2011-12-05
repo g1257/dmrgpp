@@ -90,6 +90,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
+	/**!PTEX-START BasisIntro
+	All that the reader needs to remember for now is that \cppClass{!PTEX_THISCLASS}
+	(and also class \cppClass{Basis} its interface class) is a C++ class that represents 
+	in a light way a basis for a Hilbert Space. To explain the rest of the 
+	capability handled by the \cppClass{Basis} class, I need to explain 
+	how symmetries are treated in the program, and how the Hilbert space basis is partitioned.
+	This is explained in the following.
+	!PTEX-END */
 	template<typename RealType,typename SparseMatrixType>
 	class BasisImplementation {
 		typedef BasisImplementation<RealType,SparseMatrixType> ThisType;
@@ -217,6 +225,23 @@ namespace Dmrg {
 				quantumNumbers_.clear();
 				electrons_.clear();
 				
+				/** !PTEX-START setToProduct
+				The quantum numbers of the original (untransformed) real-space basis
+				are set by the model class (to be described in Section~\ref{subsec:models}), 
+				whereas the quantum numbers of outer products are handled
+				by the class \cppClass{Basis} and \cppClass{!PTEX_THISCLASS},
+				see !PTEX_REF{HERE}. This can be done because if $|a\rangle$ 
+				has quantum number $q_a$ and $|b\rangle$ has quantum number 
+				$q_b$, then $|a\rangle\otimes|b\rangle$ has quantum number 
+				$q_a+q_b$.  \cppClass{!PTEX_THISCLASS} knows how quantum 
+				numbers change when we change the basis: they 
+				do not change since the DMRG transformation 
+				preserves quantum numbers; and  \cppClass{!PTEX_THISCLASS} also
+				knows what happens to quantum numbers when we truncate the basis:
+				quantum numbers of discarded states are discarded.
+				In this way, symmetries are implemented efficiently, 
+				with minimal dependencies and in a model-independent way. 
+				!PTEX-END */
 				for (size_t j=0;j<ne;j++) for (size_t i=0;i<ns;i++) {
 					quantumNumbers_.push_back(su2Symmetry2.quantumNumbers_[i]+su2Symmetry3.quantumNumbers_[j]);
 					electrons_.push_back(su2Symmetry2.getNe(i)+su2Symmetry3.getNe(j));
@@ -421,20 +446,72 @@ namespace Dmrg {
 		friend std::ostream& operator<<(std::ostream& os,const BasisImplementation<RealType2,SparseMatrixType2>& x);
 
 	private:
+
 		bool dmrgTransformed_;
 		std::string name_;
 		PsimagLite::ProgressIndicator progress_;
 		static bool useSu2Symmetry_;
+
+		/**!PTEX-START BasisIntro2
+		Symmetries will allow the solver to block the Hamiltonian matrix in blocks, using less memory, speeding up
+		the computation and allowing the code to parallelize matrix blocks related by symmetry. 
+		Let us assume that our particular model has $N_s$ symmetries labeled by $0\le \alpha < N_s$. 
+		Therefore, each element $k$  of the basis has $N_s$ associated ``good'' quantum numbers 
+		 $\tilde{q}_{k,\alpha}$. These quantum numbers can refer to practically anything, 
+		 for example, to number of particles with a given spin or orbital or to the $z$ component of the spin. 
+		We do not need to know the details to block the matrix. We know, however, that these numbers are
+		finite, and let $Q$ be an integer such that $\tilde{q}_{k,\alpha}< Q$ $\forall k,\alpha$. 
+		We can then combine all these quantum numbers into a single one, 
+		like this: $q_k = \sum_\alpha \tilde{q}_{k,\alpha} Q^\alpha$, 
+		and this mapping is bijective. In essence, we combined all ``good'' 
+		quantum numbers into a single one and from now on we 
+		will consider that we have only one Hamiltonian symmetry called the 
+		``effective'' symmetry, and only one corresponding number $q_k$, the 
+		``effective'' quantum number. These numbers are stored in the  member 
+		{\it quantumNumbers} of C++ class \cppClass{!PTEX_THISCLASS}.
+		(Note that if one has 100 sites or less,\footnote{This is probably a 
+		maximum for systems of correlated electrons such as the Hubbard model 
+		or the t-J model.} then the number $Q$ defined above is probably of the 
+		order of hundreds for usual symmetries, making this implementation very practical for
+		systems of correlated electrons.)
+		!PTEX-END */
 		std::vector<size_t> quantumNumbers_;
 		std::vector<size_t> quantumNumbersOld_;
 		std::vector<size_t> electrons_;
 		std::vector<size_t> electronsOld_;
+
+		/** !PTEX-START BasisIntro4
+		What remains to be done is to find a partition of the basis which 
+		labels where the quantum number changes. Let us say that the 
+		quantum numbers of the reordered basis states are
+		\[
+		\{3,3,3,3,8,8,9,9,9,15,\cdots\}.
+		\]
+		Then we define a vector named ``partition'', such that partition[0]=0, 
+		partition[1]=4, because the quantum number changes in the 4th position
+		(from 3 to 8), and then partition[2]=6, because the quantum number
+		changes again (from 8 to 9) in the 6th position, etc. 
+		Now we know that our Hamiltonian matrix will be composed first of a 
+		block of 4x4, then of a block of 2x2, etc.
+		!PTEX-END */
 		std::vector<size_t> partition_;
 		std::vector<size_t> partitionOld_;
+		
+		/** !PTEX-START BasisIntro3 
+		We then reorder our basis such that its elements are given in 
+		increasing $q$ number. There will be a permutation vector associated 
+		with this reordering, that will be stored in the member 
+		\verb!permutationVector! of class \cppClass{!PTEX_THISCLASS}. 
+		For ease of coding we also store its inverse in \verb!permInverse!.
+		!PTEX-END */
 		std::vector<size_t> permutationVector_;
 		std::vector<size_t> permInverse_;
 		HamiltonianSymmetryLocalType symmLocal_;
 		HamiltonianSymmetrySu2Type symmSu2_;
+		/** !PTEX-START BasisBlock
+		The variable block\_ of a \cppClass{DmrgBasis} object indicates over 
+		which sites the basis represented by this object is being built.
+		!PTEX-END */
 		BlockType block_;
 
 		template<typename IoInputter>

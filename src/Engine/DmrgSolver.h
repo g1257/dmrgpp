@@ -300,6 +300,7 @@ namespace Dmrg {
 
 				updateQuantumSector(lrs_.sites());
 
+				/*!PTEX_LABEL{setToProductSolver} */
 				lrs_.setToProduct(quantumSector_);
 
 				/** !PTEX-START diagonalization 

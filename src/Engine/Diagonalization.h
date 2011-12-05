@@ -132,6 +132,7 @@ namespace Dmrg {
 		  oldEnergy_(0)
 		{}
 
+		//!PTEX_LABEL{Diagonalization}
 		RealType operator()(TargettingType& target,
 		                    size_t direction,
 		                    const BlockType& blockLeft,
@@ -296,7 +297,9 @@ namespace Dmrg {
 			return gsEnergy;
 		}
 
-		//! Diagonalise the i-th block of the matrix, return its eigenvectors in tmpVec and its eigenvalues in energyTmp
+		/** Diagonalise the i-th block of the matrix, return its eigenvectors 
+		    in tmpVec and its eigenvalues in energyTmp
+		!PTEX_LABEL{diagonaliseOneBlock} */
 		template<typename SomeVectorType>
 		void diagonaliseOneBlock(
 					int i,

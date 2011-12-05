@@ -115,8 +115,7 @@ namespace Dmrg {
 		template<typename IoInputter>
 		Basis(IoInputter& io,const std::string& ss,size_t counter=0,bool bogus = false)
 		: basisImplementation_(io,ss,counter,bogus)
-		{
-		}
+		{}
 
 		//! Loads this basis from memory or disk
 		template<typename IoInputter>

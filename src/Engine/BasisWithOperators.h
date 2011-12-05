@@ -77,9 +77,36 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file BasisWithOperators.h
  *
  *  A class to represent a Hilbert Space for a strongly correlated electron model
- *  Derives from DmrgBasis 
- *
- */
+ *  Derives from Basis
+ * 
+ * !PTEX-START BasisWithOperators
+ C++ class \cppClass{Basis} (and \cppClass{BasisImplementation}) implement only 
+ certain functionality associated with a Hilbert space basis, as mentioned in 
+ the previous section. However, more capabilities related to a Hilbert space basis are needed.
+
+ C++ class \cppClass{!PTEX_THISCLASS} inherits from \cppClass{Basis}, and contains 
+ certain local operators for the basis in question, as well as the Hamiltonian matrix.
+ The operators that need to be considered here are operators necessary to compute 
+ the Hamiltonian across the system and environment, and to compute observables. 
+ Therefore, the specific operators vary from model to model.
+ For example, for the Hubbard model, we consider $c_{i\sigma}$ operators, 
+ that destroy an electron with spin $\sigma$ on site $i$.
+ For the Heisenberg model, we consider operators $S^+_i$ and $S^z_i$ for each site $i$. 
+ In each case these operators are calculated by the model class (see Section~\ref{subsec:models}) 
+ on the ``natural'' basis,  and added to the basis in question with a call to 
+ \cppFunction{setOperators()}.  
+ These local operators are stored as sparse matrices to save memory, 
+ although the matrix type is templated and could be anything.
+ For details on the implementation of these operators, see \cppClass{OperatorsBase},
+ its common implementation \cppClass{OperatorsImplementation}, and the two examples provided
+ \cppClass{OperatorsHubbard} and \cppClass{OperatorsHeisenberg} for the Hubbard 
+ and Heisenberg models, respectively.
+ Additionally, \cppClass{!PTEX_THISCLASS} has a number of member functions to 
+ handle operations that the DMRG method performs on 
+ local operators in a Hilbert space basis. These include functions to create 
+ an outer product of two given Hilbert spaces, to transform a basis, to truncate a basis, etc. 
+ !PTEX-END*/
+
 #ifndef BASISWITHOPERATORS_HEADER_H
 #define BASISWITHOPERATORS_HEADER_H
 
@@ -87,8 +114,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Basis.h"
 
 namespace Dmrg {
-	//! A class to represent a Dmrg Basis and encapsulate certain operations related to this basis, such as
-	//! outer product, truncation, storage of Hamiltonian and creation operators.  
+
 	template<typename OperatorsType_,typename ConcurrencyType_>
 	class	BasisWithOperators : public  OperatorsType_::BasisType {
 
@@ -135,6 +161,7 @@ namespace Dmrg {
 		}
 
 		//! set this basis to the outer product of   basis2 and basis3 
+		//!PTEX_LABEL{setToProductOps}
 		void setToProduct(const ThisType& basis2,const ThisType& basis3)
 		{
 			BasisType &parent = *this;
@@ -148,6 +175,7 @@ namespace Dmrg {
 			operators_.setToProduct(basis2,basis3,x,this);
 			ApplyFactors<FactorsType> apply(this->getFactors(),this->useSu2Symmetry());
 			int savedSign = 0;
+
 			for (size_t i=0;i<this->numberOfOperators();i++) {
 				if (i<basis2.numberOfOperators()) {
 					if (!this->useSu2Symmetry()) {

@@ -12,10 +12,12 @@
 \usepackage{listings}
 \usepackage{graphicx}
 \usepackage{fancyvrb}
+\usepackage{fancyhdr}
 \usepackage{hyperref}
 
-\usepackage{draftwatermark}
-
+%\usepackage{draftwatermark}
+\cfoot{This manual is a work in progress.}
+\lhead{}
 \newcommand{\cppFile}[1]{\texttt{#1}}
 \newcommand{\inputItem}[1]{\noindent\texttt{\bf #1} ---}
 \newcommand{\inputSubItem}[1]{\indent\texttt{\it #1} --}
@@ -27,9 +29,11 @@
 \newcommand{\cppFunction}[1]{{\tt #1}}
 % for the cover page:
 \newcommand{\HRule}{\noindent\rule{\linewidth}{1.5pt}}
-\newcommand{\pasteRaw}[1]{\fbox{\textcolor{red}{PLEASE RUN ptex.pl on this .ptex source to obtain the correct test for tag #1}}}
+\newcommand{\ptexPaste}[1]{\fbox{\textcolor{red}{PLEASE RUN ptex.pl on this .ptex source to obtain the correct test for tag #1}}}
+\newcommand{\ptexLabel}[1]{\fbox{\textcolor{red}{PLEASE RUN ptex.pl on this .ptex source to obtain the correct test for tag #1}}}
 \hyphenation{Wave-Function-Transformation}
 \lstset{language=c++,basicstyle=\footnotesize\ttfamily,keywordstyle=\color{blue}\bfseries,frame=shadowbox}
+\pagestyle{fancy}
 \begin{document}
 
 \begin{titlepage}
@@ -235,11 +239,11 @@ There are three kinds of parameters in the input file:
 The Model parameters vary from model to model.
 The DMRG Solver parameters are discussed below.
 
-\pasteRaw{InputParamsSolver}
+\ptexPaste{InputParamsSolver}
 
 \subsection{Finite Loops}
 
-\pasteRaw{InputFiniteLoops}
+\ptexPaste{InputFiniteLoops}
 
 \section{Main Driver}
 The high level program is this
@@ -271,16 +275,16 @@ A {\it real-space-based Hilbert space} can also be thought of as the external pr
 We will consider general Hamiltonians   that
  act on Hilbert spaces $\mathcal{V}$, as previously defined.
 
-\pasteRaw{DMRGAlgorithmDescription}
-\pasteRaw{infiniteDmrgLoop}
-\pasteRaw{growRightAndLeft}
-\pasteRaw{diagonalization}
-\pasteRaw{Truncation}
-\pasteRaw{DiagOfDensityMatrix}
-\pasteRaw{TruncationOfEnviron}
-\pasteRaw{RemovalOfStates}
-\pasteRaw{LoopClose}
-\pasteRaw{FiniteAlgorithm}
+\ptexPaste{DMRGAlgorithmDescription}
+\ptexPaste{infiniteDmrgLoop}
+\ptexPaste{growRightAndLeft}
+\ptexPaste{diagonalization}
+\ptexPaste{Truncation}
+\ptexPaste{DiagOfDensityMatrix}
+\ptexPaste{TruncationOfEnviron}
+\ptexPaste{RemovalOfStates}
+\ptexPaste{LoopClose}
+\ptexPaste{FiniteAlgorithm}
 
 The advantage of the DMRG algorithm is that the truncation procedure described above keeps the error bounded and small.
 Assume $m_S=m_E=m$.
@@ -350,22 +354,17 @@ and is sketched in Fig.~\ref{fig:infiniteloop}.
 \begin{lstlisting}
 for (step=0;step<X.size();step++) {
   // grow system (a)		
-  grow(pSprime,pS,X[step],model,GROW_RIGHT);
+  lrs_.growLeftBlock(model_,pS,X[step]);
   // grow environment (b)
-  grow(pEprime,pE,Y[step],model,GROW_LEFT; 
+  lrs_.growRightBlock(model_,pE,Y[step]); 
   // product of system and environment (c)   
-  pSE.setToProduct(pSprime,pEprime); 				
+  lrs_.setToProduct(quantumSector_);
   
-  diagonalize(psi,pSprime,pEprime,pSE,
-       model); // (d)			
-  ns=pSprime.size();
-  ne=pEprime.size();
-  changeAndTruncateBasis(pS,psi,pSprime,ns,ne,
-    pSE,0); // (e)
-  changeAndTruncateBasis(pE,psi,pEprime,ns,ne,
-    pSE,1); // (f)
-    
-  systemStack.push(pS); //(g)		
+  diagonalization_(psi,INFINITE,X[step],Y[step]); (d)
+  truncate_(pS,psi,parameters_.keptStatesInfinite,EXPAND_SYSTEM); (e)
+  truncate_(pE,psi,parameters_.keptStatesInfinite,EXPAND_ENVIRON); (f)
+  
+  checkpoint_.push(pS,pE); //(g)
 }
 \end{lstlisting}
 \caption{\label{fig:infiniteloop}Implementation of the ``infinite'' DMRG loop for a general SCE model
@@ -375,13 +374,13 @@ for (step=0;step<X.size();step++) {
 In Fig.~\ref{fig:infiniteloop}(a) the system pS is grown by adding the sites contained in block X[step]. Note that X is a vector of blocks to 
 be added one at a time\footnote{So X is a vector of vector of integers, and 
 X[step] is a vector of integers.}.  The block X[step] (usually just a single site)
-is  added \emph{to the right of} pS, hence the GROW\_RIGHT flag.  The result is stored in pSprime.
+is  added \emph{to the right of} pS.  The result is stored in \verb!lrs_.left()!.
 Similarly is done in Fig.~\ref{fig:infiniteloop}(b) for the environment: the block Y[step]  (usually just a single site) is added to the environment
- given in pE and stored in pEprime. 
+ given in pE and stored in \verb!lrs_.right()!. 
 This time the addition is
 done \emph{to the left of} pE, since pE is the environment.
-In Fig.~\ref{fig:infiniteloop}(c) the outer product of pSprime (the new system) and pEprime (the new environment) is made and stored in pSE. 
-The actual task is delegated to the \cppClass{DmrgBasis} class (see Section~\ref{sec:dmrgbasis}).
+In Fig.~\ref{fig:infiniteloop}(c) the outer product of \verb!lrs_.left()! (the new system) and \verb!lrs_.right()! (the new environment) is made and stored in pSE. 
+The actual task is delegated to the \cppClass{Basis} class (see Section~\ref{sec:dmrgbasis}).
 In Fig.~\ref{fig:infiniteloop}(d) the diagonalization of the Hamiltonian for block pSE is performed, 
 and the ground state vector is computed and stored in psi, following Eq.~(\ref{eq:psi}). %
 %The object called concurrency is used to handle parallelization over matrix blocks related to symmetries present in the model (see section). 
@@ -417,139 +416,33 @@ There will also be at this point another 50 sites that constitute the environmen
 Now, from the beginning each of these 100 sites is given a fixed number from 0 to 99. 
 Therefore, sites are always labeled in a fixed way and 
 their labels are always known (see Fig.~\ref{fig:sxye}).
-The variable block\_ of a \cppClass{DmrgBasis} object indicates over which sites the basis represented by this object is being built.
-%All that the reader needs to remember for now is that \cppClass{DmrgBasis} is a C++ class that represents in a very light way a basis for a Hilbert Space.
-To explain the rest of the capability handled by the \cppClass{DmrgBasis} class, I need to explain how symmetries are treated in the program,
-and how the Hilbert space basis is partitioned.
-This is explained in the following.
+\ptexPaste{BasisBlock}
 
-Symmetries will allow the solver to block the Hamiltonian matrix in blocks, using less memory, speeding up
- the computation and allowing the code to parallelize matrix blocks related by symmetry. 
- Let us assume that our particular model has $N_s$ symmetries labeled by $0\le \alpha<N_s$. 
-Therefore, each element $k$ 
- of the basis has $N_s$ associated ``good'' quantum numbers 
- $\tilde{q}_{k,\alpha}$.
-These quantum numbers can refer to practically anything, e.g., to number of particles with a given spin or
-orbital or to the $z$ component of the spin. 
-We do not need to know the details to block the matrix. However, we know that these numbers are
-finite, and let $Q$ be an integer such that $\tilde{q}_{k,\alpha}<Q$ $\forall k,\alpha$. 
-We can then combine all these quantum numbers into
-a single one, like this: $q_k = \sum_\alpha \tilde{q}_{k,\alpha} Q^\alpha$, 
-and this mapping is bijective. In essence, we combined all ``good'' quantum numbers into a single one and from now on we 
-will consider that we have only one Hamiltonian symmetry called the ``effective'' symmetry, and 
-only one corresponding number $q_k$, the ``effective'' quantum number.
-These numbers are stored in the  member  {\it quantumNumbers} of C++ class \cppClass{DmrgBasisImplementation}.
-(Note that if one has 
-100 sites or less,\footnote{This is probably a maximum for systems of correlated electrons such as the Hubbard model or the t-J model.} 
-then the number $Q$ defined above is probably of the order of hundreds for usual symmetries, making this implementation very practical for
-systems of correlated electrons.)
+\ptexPaste{BasisIntro}
 
-We then reorder our basis such that
-its elements are given in increasing $q$ number. There will be a permutation vector associated with this reordering, that will be stored 
-in the member {\it permutationVector} of class \cppClass{DmrgBasisImplementation}. 
-%For ease of coding we also store its inverse in permInverse.
-%We are almost done now. 
+\ptexPaste{BasisIntro2}
 
-What remains to be done is to find a partition of the basis which labels where the quantum number changes. 
-Let us say that the quantum numbers of the reordered basis states are
-\[
-\{3,3,3,3,8,8,9,9,9,15,\cdots\}.
-\]
-Then we define a vector named ``partition'', such that partition[0]=0, partition[1]=4, because the quantum number 
-changes in the 4th position
- (from 3 to 8), and
-then partition[2]=6, because the quantum number changes again (from 8 to 9) in the 6th position, etc. 
-Now we know that our Hamiltonian matrix will be composed first of a block of
-4x4, then of a block of 2x2, etc.
+\ptexPaste{BasisIntro3}
+
+\ptexPaste{BasisIntro4}
 
 \subsection{Local Symmetries}
-The quantum numbers of the original (untransformed) real-space basis
- are set by the model class (to be described in Section~\ref{subsec:models}), whereas the quantum numbers of outer products are handled
-by the class \cppClass{DmrgBasis}. This can be done because if $|a\rangle$ 
-has quantum number $q_a$ and $|b\rangle$ has quantum number $q_b$, then
-$|a\rangle\otimes|b\rangle$ has quantum number $q_a+q_b$.  \cppClass{DmrgBasis} also knows how quantum numbers change when we change the basis: they 
-do not change since the DMRG transformation 
-preserves quantum numbers; and  \cppClass{DmrgBasis} also
-knows what happens to quantum numbers when we truncate the basis: quantum numbers of discarded states are discarded.
-In this way, symmetries are implemented efficiently, with minimal dependencies and in a model-independent way. 
+\ptexPaste{setToProduct}
 
 \subsection{SU(2) Symmetry}
 
 \section{Hilbert Space Basis II: DmrgBasisWithOperators}
 \subsection{Outer Product of Operators}\label{subsec:dmrgBasisWithOperators}
-C++ class \cppClass{DmrgBasis} implements only certain functionality associated with a Hilbert space basis, as mentioned in 
-the previous section. However, more capabilities related to a Hilbert space basis are needed.
-
-C++ class \cppClass{DmrgBasisWithOperators} inherits from DmrgBasis, and contains 
-certain local operators
- for the basis in question, as well as the Hamiltonian matrix.
-The operators that need to be considered here are operators necessary to compute 
-the Hamiltonian across the system and environment, and to compute observables. 
-Therefore, the specific operators vary from model to model.
-For example, for the Hubbard model, we consider $c_{i\sigma}$ operators, that destroy an electron with spin $\sigma$ on site $i$.
-For the Heisenberg model, we consider operators $S^+_i$ and $S^z_i$ for each site $i$. 
-In each case these operators are calculated by the model class (see Section~\ref{subsec:models}) 
-on the ``natural'' basis,  and added to the basis in question with a call to 
-\cppFunction{setOperators()}.  
-These local operators are stored as sparse matrices to save memory, although the matrix type is templated and could be anything.
-For details on the implementation of these operators, see \cppClass{OperatorsBase} and the two examples provided
-\cppClass{OperatorsHubbard} and \cppClass{OperatorsHeisenberg} for the Hubbard and Heisenberg models, respectively.
-Additionally, DmrgBasisWithOperators has a number of member functions to handle operations that the DMRG method performs on 
-local operators in a Hilbert space basis. 
-These include functions to create an outer product of two given Hilbert spaces, to transform a basis, to truncate a basis, etc.
+\ptexPaste{BasisWithOperators}
 
 Let us now go back to the ``infinite'' DMRG loop and discuss in more detail Fig.~\ref{fig:infiniteloop}(a) ((b) is similar)), i.e., 
-the  function grow(), which is
- found  in \cppClass{DmrgSolver}. 
-Local operators are set for the basis in question with a call to 
-\cppClass{DmrgBasisWithOperators}'s member function \cppFunction{setOperators()}.  
- When adding sites to the system or environment the program does a full outer product, i.e., it increases the size of 
-all local operators. 
-This is performed by the call to 
-\begin{verbatim}
-setToProduct(pSprime,pS,Xbasis,dir,option)}
-\end{verbatim}
-in the grow function, which actually calls
-\begin{verbatim}
-pSprime.setToProduct(pS,xBasis,dir)
-\end{verbatim}
-This function also recalculates the Hamiltonian in the outer product of (i) the previous system basis $pS$, and (ii) the basis $Xbasis$ corresponding to the
- site(s) that is (are) being added.
-To do this, the Hamiltonian connection between the  two parts needs to be calculated and added, and this is done in the call to 
-\cppFunction{addHamiltonianConnection}, found
- in the  function grow(). Finally, the resulting dmrgBasis object for the outer product, pSprime, is set to contain this full Hamiltonian with the call
-to  \cppFunction{pSprime.setHamiltonian(matrix)}. 
+the  function grow().
 
-I will know explain how the full outer product between two operators is implemented. 
-If local operator $A$ lives in Hilbert space $\mathcal{A}$ and local operator $B$ lives in Hilbert space $\mathcal{B}$, then 
-$C=AB$ lives in Hilbert space $\mathcal{C}=\mathcal{A}\otimes\mathcal{B}$.
-Let $\alpha_1$ and $\alpha_2$ represent states of $\mathcal{A}$, and let $\beta_1$ and $\beta_2$
-represent states of   $\mathcal{B}$. Then, in the product basis,
-$C_{\alpha_1,\beta_1;\alpha_2,\beta_2}=A_{\alpha_1,\alpha_2}B_{\beta_1,\beta_2}$.
-Additionally,  $\mathcal{C}$ is reordered such that each state of this outer product basis is labeled in increasing effective quantum number (see 
-Section~\ref{sec:dmrgbasis}).
- In the previous example, if
-the Hilbert spaces  $\mathcal{A}$ and $\mathcal{B}$ had sizes $a$ and $b$, respectively, then their outer product would have size $ab$. 
-When we add sites to the system (or the environment) the memory usage remains bounded by the truncation, and it is usually not a problem to store
-full product matrices, as long as we do it in a sparse way (DMRG++ uses compressed row storage). 
-In short, local operators are always stored in the most recently transformed basis 
-for \emph{all sites} and, if applicable, \emph{all values}  of the internal degree of freedom $\sigma$. 
+\ptexPaste{grow}
 
-This simplifies the implementation, but it must be remembered that only the 
-local operators corresponding to the most recently added sites will be meaningful.
-Indeed, if we  apply transformation $W$ (possibly truncating the basis, see Eq.~(\ref{eq:transformation})) then
-\begin{equation}
-(W^\dagger A W)  (W^\dagger BW) \neq W^\dagger  (AB)  W,  
-\end{equation}
-since $WW^\dagger\neq 1$ because the DMRG truncation does not assure us that $W^\dagger$ will be the right inverse of $W$ 
-(but $W^\dagger W=1$ always holds). Because of this reason we cannot construct the Hamiltonian simply from
-transformed local operators, even if we store them for all sites, but we need to store also the Hamiltonian in the most recently transformed 
-basis\footnote{Other observables do not suffer from this problem, because they need only be computed during the finite algorithm
-phase, when $WW^\dagger= 1$ holds within truncation error.}.
-The fact that \cppClass{DmrgBasisWithOperators} stores local operators in the most recently transformed basis 
-  for \emph{all sites} does not increase memory usage too much, and
-simplifies the writing of code for complicated geometries or connections. The SCE model class is responsible for 
-determining whether a transformed operator can be used (or not because of the reason mentioned above).
+\ptexPaste{externalProduct}
+
+\ptexPaste{OperatorsImpl}
 
 Let us now examine in more detail Fig.~\ref{fig:infiniteloop}(c), where 
 we form the outer product of the current system and current environment, and calculate its Hamiltonian.
@@ -558,16 +451,16 @@ to resize the matrices for all local operators.
 Storing matrices in this case (even in a sparse way and even considering that there is truncation) would be too much of
 a penalty for performance. Therefore, in this latter case we do the outer product on-the-fly only, without storing any matrices. 
 In Fig.~\ref{fig:infiniteloop}(c)  pSE contains the outer product
-of system and environment, but pSE is only a \cppClass{DmrgBasis} object, not a \cppClass{DmrgBasisWithOperators} object, i.e., it does not
-contain operators. 
+of system and environment, but pSE is only a \cppClass{Basis} object, not a \cppClass{BasisWithOperators} object, i.e., it does not
+contain operators. In the code see \ptexLabel{setToProductSolver}, and \ptexLabel{setToProductLrs}. 
 
 We now consider Fig.~\ref{fig:infiniteloop}(d), where the diagonalization of the  system's plus environment's Hamiltonian is performed.
-Since pSE, being only a \cppClass{DmrgBasis} object, does not contain all the information related to the outer product of system and environment 
+Since \verb!lrs_.super()!, being only a \cppClass{Basis} object, does not contain all the information related to the outer product of system and environment 
 (as we saw, this would be prohibitively expensive), we need to pass the system's basis (pSprime) and the environment's basis (pEprime) to
-the diagonalization function (\cppFunction{diagonalize()} in \cppClass{DmrgSolver}) in order to be able to form the outer product on-the-fly.
-There,  since pSE does provide information about effective symmetry blocking, we block the Hamiltonian matrix using effective symmetry,
-and call  \cppFunction{diagonaliseOneBlock()} in \cppClass{DmrgSolver} for each symmetry block. Only those matrix blocks
-that contain the desired or targeted number of electrons will be considered.
+the diagonalization functor \cppFunction{diagonalization\_()}, see \ptexLabel{Diagonalization}, in order to be able to form the outer product on-the-fly.
+There,  since \verb!lrs_.super()! does provide information about effective symmetry blocking, we block the Hamiltonian matrix using effective symmetry,
+and call  \cppFunction{diagonaliseOneBlock()}, see  \ptexLabel{diagonaliseOneBlock}, for each symmetry block. Only those matrix blocks
+that contain the desired or targeted number of electrons (or other local symmetry) will be considered.
 
 \subsection{Lanczos Solver}
 To diagonalize Hamiltonian $H$ we use the Lanczos method\cite{re:lanczos50,re:pettifor85}, although this is also templated. 
@@ -599,10 +492,10 @@ the resulting states of this outer product need to be reordered so that effectiv
 
 \section{Model Interface}\label{subsec:models}
 \subsection{Abstract Interface}
-\pasteRaw{ModelInterface}
-\pasteRaw{matrixVectorProduct}
-\pasteRaw{addHamiltonianConnection}
-\pasteRaw{setNaturalBasis}
+\ptexPaste{ModelInterface}
+\ptexPaste{matrixVectorProduct}
+\ptexPaste{addHamiltonianConnection}
+\ptexPaste{setNaturalBasis}
 
 \subsection{Heisenberg Model}
 \subsection{One-Orbital Hubbard Model}
@@ -758,7 +651,7 @@ THIS SECTION NEEDS MORE WORK. IN PARTICULAR HOW TO SETUP THE INPUT FILE TO BE AB
 
 \section*{LICENSE}
 \begin{Verbatim}
-Copyright © 2008 , UT-Battelle, LLC
+Copyright (c) 2008 , UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
