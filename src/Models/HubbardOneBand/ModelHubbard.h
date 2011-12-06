@@ -101,12 +101,15 @@ namespace Dmrg {
 	template<typename> class SharedMemoryTemplate>
 	class ModelHubbard : public ModelBase<ModelHelperType_,SparseMatrixType,DmrgGeometryType,
 		LinkProductHubbardOneBand<ModelHelperType_>,SharedMemoryTemplate> {
+
 	public:
+
 		typedef ModelHelperType_ ModelHelperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
+
 	private:
 
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
@@ -289,6 +292,13 @@ namespace Dmrg {
 		\cppFunction{!PTEX_THISFUNCTION} retruns a const reference to the geometry object
 		!PTEX-END */
 		const DmrgGeometryType& geometry() const { return dmrgGeometry_; }
+
+		template<typename ModelHelperType1,
+		typename SparseMatrixType1,
+		typename DmrgGeometryType1,
+		template<typename> class SharedMemoryTemplate1>
+		friend std::ostream& operator<<(std::ostream& os,
+		const ModelHubbard<ModelHelperType1,SparseMatrixType1,DmrgGeometryType1,SharedMemoryTemplate1>& m);
 
 	private:
 
@@ -546,7 +556,7 @@ namespace Dmrg {
 	template<typename> class SharedMemoryTemplate>
 	std::ostream &operator<<(std::ostream &os,const ModelHubbard<ModelHelperType,SparseMatrixType,DmrgGeometryType,SharedMemoryTemplate>& model)
 	{
-		model.print(os);
+		os<<model.modelParameters_;
 		return os;
 	}
 } // namespace Dmrg

@@ -175,7 +175,7 @@ print FOUT<<EOF;
 # MPI: $mpi
 
 LDFLAGS =    $lapack  $gslLibs $pthreadsLib
-CPPFLAGS = -Werror -Wall  -IEngine $modelLocation -IGeometries -I$PsimagLite $usePthreadsOrNot
+CPPFLAGS = -Werror -Wall  -IEngine $modelLocation  -I$PsimagLite -I$PsimagLite/Geometry $usePthreadsOrNot
 EOF
 if ($mpi) {
 	print FOUT "CXX = mpicxx -O3 -DNDEBUG \n";
@@ -296,7 +296,7 @@ using namespace Dmrg;
 
 typedef PsimagLite::$concurrencyName<MatrixElementType> ConcurrencyType;
 typedef $parametersName<MatrixElementType> ParametersModelType;
-typedef Geometry<MatrixElementType> GeometryType;;
+typedef PsimagLite::Geometry<MatrixElementType,ProgramGlobals> GeometryType;;
 typedef PsimagLite::IoSimple IoType;
 typedef IoType::In IoInputType;
 typedef ParametersDmrgSolver<MatrixElementType> ParametersDmrgSolverType;
@@ -555,7 +555,7 @@ typedef std::complex<RealType> ComplexType;
 
 typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
-typedef Geometry<RealType> GeometryType;
+typedef  PsimagLite::Geometry<RealType,ProgramGlobals> GeometryType;
 typedef  $parametersName<RealType> ParametersModelType; 
 typedef PsimagLite::$concurrencyName<RealType> ConcurrencyType;
 typedef PsimagLite::IoSimple::In IoInputType;
