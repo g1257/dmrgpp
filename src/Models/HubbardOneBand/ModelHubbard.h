@@ -139,12 +139,12 @@ namespace Dmrg {
 		{}
 
 		/*!PTEX-START-INTERFACE hilbertSize
-		\cppFunction{hilbertSize} returns the size of the one-site Hilbert space.
+		\cppFunction{!PTEX_THISFUNCTION} returns the size of the one-site Hilbert space.
 		!PTEX-END */
 		size_t hilbertSize(size_t site) const { return (size_t)pow(2,2*NUMBER_OF_ORBITALS); }
 
 		/*!PTEX-START setNaturalBasis
-		Function \cppFunction{setNaturalBasis} sets certain aspects of the 
+		Function \cppFunction{!PTEX_THISFUNCTION} sets certain aspects of the 
 		``natural basis'' (usually the real-space basis) on a given block.
 		The operator matrices (e.g., $c^\dagger_{i\sigma}$ for the Hubbard 
 		model or $S_i^+$ and $S_i^z$ for the Heisenberg model) need to be set 
@@ -169,7 +169,8 @@ namespace Dmrg {
 		}
 
 		/*!PTEX-START-INTERFACE setOperatorMatrices
-		 Sets local operators needed to construct the Hamiltonian.
+		 \cppFunction{!PTEX_THISFUNCTION} sets local operators needed to 
+		 construct the Hamiltonian.
 		 For example, for the Hubbard model these operators are the 
 		 creation operators for sites in block
 		 !PTEX-END */
@@ -203,7 +204,8 @@ namespace Dmrg {
 		}
 		
 		/*!PTEX-START-INTERFACE getOperatorModelHubbard
-		Returns the operator in the unmangled (natural) basis of one-site
+		\cppFunction{!PTEX_THISFUNCTION} returns the operator in the 
+		unmangled (natural) basis of one-site
 		!PTEX-END */
 		PsimagLite::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const
 		{
@@ -245,7 +247,8 @@ namespace Dmrg {
 		}
 		
 		/*!PTEX-START-INTERFACE findElectronsModelHubbard
-		Sets electrons to the total number of electrons for each state in the basis
+		\cppFunction{!PTEX_THISFUNCTION} Sets electrons to the total number of 
+		electrons for each state in the basis
 		!PTEX-END */
 		void findElectrons(std::vector<size_t> &electrons,
 		                   const std::vector<HilbertState>& basis,
@@ -283,7 +286,7 @@ namespace Dmrg {
 		}
 		
 		/*!PTEX-START-INTERFACE geometryModelHubbard
-		Retruns a const reference to the geometry object
+		\cppFunction{!PTEX_THISFUNCTION} retruns a const reference to the geometry object
 		!PTEX-END */
 		const DmrgGeometryType& geometry() const { return dmrgGeometry_; }
 
