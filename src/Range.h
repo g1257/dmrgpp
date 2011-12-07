@@ -115,12 +115,14 @@ namespace PsimagLite {
 		     size_t total,
 		     ConcurrencyType& concurrency,
 		     const std::vector<size_t>& weights,
-		     CommType mpiComm=COMM_WORLD)
+		     CommType mpiComm=COMM_WORLD,
+		     bool isStrict=false)
 		: concurrency_(concurrency),
 		  step_(start),
 		  total_(total),
 		  nprocs_(concurrency.nprocs(mpiComm)),
-		  indicesOfThisProc_(nprocs_)
+		  indicesOfThisProc_(nprocs_),
+		  isStrict_(isStrict)
 		{
 			init(weights,mpiComm);
 		}
@@ -128,12 +130,14 @@ namespace PsimagLite {
 		Range(size_t start,
 		     size_t total,
 		     ConcurrencyType& concurrency,           
-		     CommType mpiComm=COMM_WORLD)
+		     CommType mpiComm=COMM_WORLD,
+		     bool isStrict=false)
 		: concurrency_(concurrency),
 		  step_(start),
 		  total_(total),
 		  nprocs_(concurrency.nprocs(mpiComm)),
-		  indicesOfThisProc_(nprocs_)
+		  indicesOfThisProc_(nprocs_),
+		  isStrict_(isStrict)
 		{
 			std::vector<size_t> weights(total,1);
 			init(weights,mpiComm);
@@ -163,11 +167,12 @@ namespace PsimagLite {
 		size_t total_; // total number of indices total_(total),
 		size_t nprocs_;
 		std::vector<std::vector<size_t> > indicesOfThisProc_; // given rank and step it maps the index
+		bool isStrict_; // does nproc need to divide total?
 		std::vector<size_t> myIndices_; // indices assigned to this processor
 
 		void init(const std::vector<size_t>& weights,CommType mpiComm)
 		{ 
-			if (total_%nprocs_!=0)
+			if (isStrict_ && total_%nprocs_!=0)
 				throw std::runtime_error("Nprocs must divide total for this range\n");
 
 			// distribute the load among the processors
