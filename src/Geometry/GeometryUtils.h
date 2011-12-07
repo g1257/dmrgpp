@@ -3,7 +3,7 @@
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.4.0]
+[PsimagLite, Version 1.0.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -71,50 +71,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 */
 // END LICENSE BLOCK
-/** \ingroup DMRG */
+/** \ingroup PsimagLite */
 /*@{*/
 
-/*! \file GeometryInterface.h
+/*! \file GeometryUtils.h
  *
- *  These are the functions that every geometry needs to implement
  */
-#ifndef GEOMETRY_INTERFACE_H
-#define GEOMETRY_INTERFACE_H
+#ifndef GEOMETRY_UTILS_H
+#define GEOMETRY_UTILS_H
 
+#include "GeometryDirection.h"
+#include "GeometryFactory.h"
+#include <cassert>
 
-namespace Dmrg {
+namespace PsimagLite {
 	
-	class GeometryInterface  {
-		protected:
-			// you might need an enum of the directions here
-
-			// for the pair of sites i,j, returns the handle (see explanation FIXME)
-			size_t handle(size_t i,size_t j) const;
-
-			// Returns the number of handles for this direction
-			size_t getVectorSize(size_t dirId) const;
-
-			// Returns true if i1 and i2 are connected by this geometry
-			// Returns false otherwise
-			bool connected(size_t i1,size_t i2) const;
-
-			// Returns the direction under which i1 and i2 are connected
-			// If i1 and i2 are not connected it is an error for the client code
-			// to call this function, so you may assume i1 and i2 are connected or
-			// you may check and throw if they aren't
-			size_t calcDir(size_t i1,size_t i2) const;
-
-			// FIXME: explanation needed
-			bool fringe(size_t i,size_t smax,size_t emin) const;
-
-			// FIXME: explanation needed
-			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const;
-
-			// return the name or label for this geometry
-			std::string label() const;
-	}; // class GeometryInterface
-} // namespace Dmrg 
-
+	namespace GeometryUtils {
+		bool neighbors(size_t i1,size_t i2)
+		{
+			return (i1-i2==1 || i2-i1==1);
+		}
+	} // namespace GeometryUtils
+} // namespace PsimagLite
 /*@}*/
-#endif // GEOMETRY_INTERFACE_H
-
+#endif // GEOMETRY_UTILS_H

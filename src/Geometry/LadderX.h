@@ -114,9 +114,9 @@ namespace PsimagLite {
 				size_t c2 = i2/leg_;
 				size_t r1 = i1%leg_;
 				size_t r2 = i2%leg_;
-				if (c1==c2) return utils::neighbors(r1,r2);
-				if (r1==r2) return utils::neighbors(c1,c2);
-				return (utils::neighbors(r1,r2) && utils::neighbors(c1,c2));
+				if (c1==c2) return GeometryUtils::neighbors(r1,r2);
+				if (r1==r2) return GeometryUtils::neighbors(c1,c2);
+				return (GeometryUtils::neighbors(r1,r2) && GeometryUtils::neighbors(c1,c2));
 			}
 
 			// assumes i1 and i2 are connected

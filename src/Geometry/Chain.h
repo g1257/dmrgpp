@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef CHAIN_H
 #define CHAIN_H
-// #include "Utils.h"
+#include "GeometryUtils.h"
 
 namespace PsimagLite {
 	
@@ -107,7 +107,7 @@ namespace PsimagLite {
 			bool connected(size_t i1,size_t i2) const
 			{
 				if (i1==i2) return false;
-				return utils::neighbors(i1,i2);
+				return GeometryUtils::neighbors(i1,i2);
 			}
 
 			// assumes i1 and i2 are connected

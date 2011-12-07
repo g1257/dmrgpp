@@ -166,7 +166,10 @@ namespace PsimagLite {
 		std::vector<size_t> myIndices_; // indices assigned to this processor
 
 		void init(const std::vector<size_t>& weights,CommType mpiComm)
-		{
+		{ 
+			if (total_%nprocs_!=0)
+				throw std::runtime_error("Nprocs must divide total for this range\n");
+
 			// distribute the load among the processors
 			std::vector<size_t> loads(nprocs_,0);
 			
