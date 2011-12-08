@@ -549,11 +549,10 @@ namespace PsimagLite {
 	{
 		ret = s;
 		for (size_t ii=0;ii<s.values_.size();ii++) {
-			if (v==static_cast<S>(0.0)) ret.values_[ii]=static_cast<S>(0.0);
-			else ret.values_[ii] *= v;
+			ret.values_[ii] *= v;
 		}
 	}
-	
+
 	//! C = A*B,  all matrices are CRS matrices
 	//! idea is from http://web.maths.unsw.edu.au/~farid/Papers/Hons/node23.html
 	template<typename S,typename S2>
@@ -880,7 +879,7 @@ namespace PsimagLite {
 	}
 
 	template<typename T1,typename T2>
-	CrsMatrix<T2> operator*(T1& t1,const CrsMatrix<T2>& a)
+	CrsMatrix<T2> operator*(const T1& t1,const CrsMatrix<T2>& a)
 	{
 		CrsMatrix<T2> b;
 		multiplyScalar(b,a,t1);
