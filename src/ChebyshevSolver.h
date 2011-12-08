@@ -109,23 +109,29 @@ namespace PsimagLite {
 	template<typename SolverParametersType,typename MatrixType,typename VectorType>
 	class ChebyshevSolver {
 
-	public:
 		typedef typename SolverParametersType::RealType RealType;
+		typedef LanczosVectors<RealType,MatrixType,VectorType> LanczosVectorsType;
+
+	public:
+
 		typedef MatrixType LanczosMatrixType;
 		typedef std::vector<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
-		typedef Matrix<VectorElementType> DenseMatrixType;
+// 		typedef Matrix<VectorElementType> DenseMatrixType;
 		typedef ChebyshevSerializer<RealType,TridiagonalMatrixType> PostProcType;
 		typedef PsimagLite::Random48<RealType> RngType;
 
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
-		ChebyshevSolver(MatrixType const &mat,SolverParametersType& params)
+		ChebyshevSolver(MatrixType const &mat,
+		                SolverParametersType& params,
+		                Matrix<VectorElementType>* storageForLanczosVectors=0)
 		: progress_("ChebyshevSolver",0),
 		  mat_(mat),
 		  params_(params),
 		  mode_(WITH_INFO),
-		  rng_(343311)
+		  rng_(343311),
+		  lanczosVectors_(mat,params.lotaMemory,storageForLanczosVectors)
 		{
 			params.steps=400;
 			setMode(params.options);
@@ -151,7 +157,7 @@ namespace PsimagLite {
 			unimplemented("computeGroundState");
 		}
 
-		void buildDenseMatrix(DenseMatrixType& T,const TridiagonalMatrixType& ab) const
+		void buildDenseMatrix( Matrix<VectorElementType>& T,const TridiagonalMatrixType& ab) const
 		{
 			unimplemented("buildDenseMatrix");
 		}
@@ -165,17 +171,16 @@ namespace PsimagLite {
 		//! ab.a contains the even moments
 		//! ab.b contains the odd moments
 		void decomposition(const VectorType& initVector,
-    	                   TridiagonalMatrixType& ab,
-		                   DenseMatrixType& lanczosVectors)
+    	                   TridiagonalMatrixType& ab)
 		{
 			VectorType x(initVector.size(),0.0);
 			VectorType y = initVector;
 
-			lanczosVectors.resize(y.size(),params_.steps);
+			lanczosVectors_.reset(y.size(),params_.steps);
 			ab.resize(2*params_.steps,0);
-			for (size_t j=0; j < lanczosVectors.n_col(); j++) {
+			for (size_t j=0; j < lanczosVectors_.n_col(); j++) {
 				for (size_t i = 0; i < mat_.rank(); i++)
-					lanczosVectors(i,j) = y[i];
+					lanczosVectors_(i,j) = y[i];
 				RealType atmp = 0;
 				RealType btmp = 0;
 				oneStepDecomposition(x,y,atmp,btmp,j==0);
@@ -328,6 +333,7 @@ namespace PsimagLite {
 		SolverParametersType& params_;
 		size_t mode_;
 		RngType rng_;
+		LanczosVectorsType lanczosVectors_;
 		//! Scaling factors for the Chebyshev expansion
 	}; // class ChebyshevSolver
 } // namespace PsimagLite

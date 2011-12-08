@@ -99,7 +99,7 @@ namespace PsimagLite {
 
 		ParametersForSolver() 
 		: steps(0),tolerance(0),stepsForEnergyConvergence(0),
-		  options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0)
+		  options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(true)
 		{} 
 
 		size_t steps;
@@ -110,6 +110,7 @@ namespace PsimagLite {
 		RealType Eg;
 		RealType weight;
 		int isign;
+		bool lotaMemory;
 
 	}; // class ParametersForSolver
 } // namespace PsimagLite

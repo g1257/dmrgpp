@@ -92,6 +92,7 @@ namespace PsimagLite {
 	public:
 		typedef typename CrsMatrixType::value_type ValueType;
 		typedef std::vector<size_t> ColumnsType;
+		typedef std::vector<ValueType> VectorType;
 
 		void add(size_t col,ValueType value)
 		{
@@ -99,6 +100,13 @@ namespace PsimagLite {
 			values_.push_back(value);
 		}
 
+		ValueType matrixVectorProduct(const VectorType& y) const
+		{
+			ValueType sum = 0;
+			for (size_t i=0;i<cols_.size();i++)
+				sum += values_[i]*y[cols_[i]];
+			return sum;
+		}
 //		void clear()
 //		{
 //			cols_.clear();

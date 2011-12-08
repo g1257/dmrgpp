@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef LANCZOSSOLVER_HEADER_H
 #define LANCZOSSOLVER_HEADER_H
+#include "LanczosVectors.h"
 #include "ProgressIndicator.h"
 #include "TridiagonalMatrix.h"
 #include <cassert>
@@ -101,27 +102,35 @@ namespace PsimagLite {
 
 	template<typename SolverParametersType,typename MatrixType,typename VectorType>
 	class LanczosSolver {
-		
-	public:
+
 		typedef typename SolverParametersType::RealType RealType;
+		typedef LanczosVectors<RealType,MatrixType,VectorType> LanczosVectorsType;
+
+	public:
+
+		
 		typedef MatrixType LanczosMatrixType;
-		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
+		typedef typename LanczosVectorsType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
-		typedef Matrix<VectorElementType> DenseMatrixType;
+// 		typedef Matrix<VectorElementType> DenseMatrixType;
 		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
 		                    PostProcType;
 
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
-		LanczosSolver(MatrixType const &mat,const SolverParametersType& params)
+		LanczosSolver(MatrixType const &mat,
+		              const SolverParametersType& params,
+		              Matrix<VectorElementType>* storageForLanczosVectors=0)
 		: progress_("LanczosSolver",0),
 		  mat_(mat),
 		  steps_(params.steps),
 		  eps_(params.tolerance),
 		  mode_(WITH_INFO),
 		  stepsForEnergyConvergence_(params.stepsForEnergyConvergence),
-		  rng_(343311)
+		  rng_(343311),
+		  lanczosVectors_(mat_,params.lotaMemory,storageForLanczosVectors)
 		{
+			assert(storageForLanczosVectors || !params.lotaMemory);
 			setMode(params.options);
 			std::ostringstream msg;
 			msg<<"Constructing... mat.rank="<<mat_.rank()<<" steps="<<steps_<<" eps="<<eps_;
@@ -168,8 +177,8 @@ namespace PsimagLite {
 			for (size_t i = 0; i < mat_.rank(); i++) y[i] *= atmp;
 
 			TridiagonalMatrixType ab;
-			DenseMatrixType lanczosVectors; 
-			decomposition(y,ab,lanczosVectors);
+
+			decomposition(y,ab);
 			std::vector<RealType> c(steps_);
 			try {
 				ground(gsEnergy,steps_, ab, c);
@@ -178,27 +187,11 @@ namespace PsimagLite {
 				throw e;
 			}
 
-			for (size_t i = 0; i < mat_.rank(); i++) z[i]=0;
-
-			for (size_t j = 0; j < steps_; j++) {
- 				//mat_.matrixVectorProduct (x, y);
- 				//atmp = ab.a(j);
-				//RealType btmp = ab.b(j);
-				RealType ctmp = c[j];
- 				for (size_t i = 0; i < mat_.rank(); i++) {
-					z[i] += ctmp * lanczosVectors(i,j);
-					
-					//x[i] -= atmp * y[i];
-					//VectorElementType tmp = lanczosVectors(i,j);
-					//if (fabs(x[i] - lanczosVectors(i,j))>1e-6) throw std::runtime_error("Different\n");
-					//VectorElementType tmp = y[i];
-					//y[i] = tmp / btmp;
-					//x[i] = -btmp * tmp;
-				}
-			}
+			lanczosVectors_.hookForZ(z,c);
 			if (mode_ & WITH_INFO) info(gsEnergy,initialVector,std::cerr);
 		}
-		
+
+		template<typename DenseMatrixType>
 		void buildDenseMatrix(DenseMatrixType& T,const TridiagonalMatrixType& ab) const
 		{
 			ab.buildDenseMatrix(T);
@@ -210,8 +203,7 @@ namespace PsimagLite {
 		}
 
 		void decomposition(const VectorType& initVector,
-    	                   TridiagonalMatrixType& ab,
-		                   DenseMatrixType& lanczosVectors)
+    	                   TridiagonalMatrixType& ab)
 		{ /**
 			*     In each step of the Lanczos algorithm the values of a[]
 			*     and b[] are computed.
@@ -229,29 +221,29 @@ namespace PsimagLite {
 			assert(initVector.size()==mat_.rank());
 			
 			VectorType x(mat_.rank());
-			VectorType z(mat_.rank());
 			VectorType y = initVector;
 			RealType atmp = 0;
 			for (size_t i = 0; i < mat_.rank(); i++) {
-				z[i] = x[i] = 0;
+				x[i] = 0;
 				atmp += std::real(y[i]*std::conj(y[i]));
  			}
 
 			for (size_t i = 0; i < y.size(); i++) y[i] /= sqrt(atmp);
 
 			if (max_nstep > mat_.rank()) max_nstep = mat_.rank();
-			lanczosVectors.resize(mat_.rank(),max_nstep);
+			lanczosVectors_.resize(mat_.rank(),max_nstep);
 			ab.resize(max_nstep,0);
 			
-			if (mode_ & ALLOWS_ZERO && isHyZero(y,ab,lanczosVectors)) return;
+			if (mode_ & ALLOWS_ZERO && lanczosVectors_.isHyZero(y,ab)) return;
 
 			RealType eold = 100.;
 			bool exitFlag=false;
 			size_t j = 0;
-			std::vector<RealType> nullVector;
+			
+			std::vector<RealType> nullVector(lanczosVectors_.nullSize());
 			for (; j < max_nstep; j++) {
 				for (size_t i = 0; i < mat_.rank(); i++) 
-					lanczosVectors(i,j) = y[i];
+					lanczosVectors_(i,j) = y[i];
 
 				RealType btmp = 0;
 				oneStepDecomposition(x,y,atmp,btmp,j==0);
@@ -264,12 +256,15 @@ namespace PsimagLite {
 					if (fabs (enew - eold) < eps_) exitFlag=true;
 					if (exitFlag && j>=4) break;
 				}
-
+				
+				if (!lanczosVectors_.lotaMemory())
+					lanczosVectors_.hookForZ(y,nullVector[j]);
+		
 				eold = enew;
   			}
 			if (j < max_nstep) {
 				max_nstep = j + 1;
-				lanczosVectors.reset(mat_.rank(),max_nstep);
+				lanczosVectors_.reset(mat_.rank(),max_nstep);
 				ab.resize(max_nstep);
 //				throw std::runtime_error(
 //					"LanczosSolver::tridiag(): Unsupported\n");
@@ -428,7 +423,7 @@ namespace PsimagLite {
 				const VectorType& initialVector)
 		{
 			size_t n =mat_.rank();
-			DenseMatrixType a(n,n);
+			PsimagLite::Matrix<VectorElementType> a(n,n);
 			for (size_t i=0;i<n;i++) {
 				VectorType x(n);
 				getColumn(mat_,x,i);
@@ -464,34 +459,6 @@ namespace PsimagLite {
 			throw std::runtime_error("testing lanczos solver\n");
 		}
 
-		// provides a gracious way to exit if Ay == 0 (we assume that then A=0)
-		bool isHyZero(const VectorType& y,
-				TridiagonalMatrixType& ab,
-			DenseMatrixType& lanczosVectors) const
-		{
-			std::ostringstream msg;
-			msg<<"Testing whether matrix is zero...";
-			progress_.printline(msg,std::cout);
-
-			VectorType x(mat_.rank());
-
-			for (size_t i = 0; i < x.size(); i++) x[i] = 0.0;
-
-			mat_.matrixVectorProduct (x, y); // x+= Hy
-
-			for (size_t i = 0; i < x.size(); i++)
-				if (std::real(x[i]*std::conj(x[i]))!=0) return false;
-
-			for (size_t j=0; j < lanczosVectors.n_col(); j++) {
-				for (size_t i = 0; i < mat_.rank(); i++) {
-						lanczosVectors(i,j) = (i==j) ? 0.0 : 1.1;
-				}
-				ab.a(j) = 0.0;
-				ab.b(j) = 0.0;
-			}
-			return true;
-		}
-
 		ProgressIndicator progress_;
 		MatrixType const& mat_;
 		size_t steps_;
@@ -499,6 +466,7 @@ namespace PsimagLite {
 		size_t mode_;
 		size_t stepsForEnergyConvergence_;
 		PsimagLite::Random48<RealType> rng_;
+		LanczosVectorsType lanczosVectors_;
 	}; // class LanczosSolver
 } // namespace PsimagLite
 
