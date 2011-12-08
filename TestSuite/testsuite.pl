@@ -75,6 +75,8 @@ if (!$all) {
 	exit(0);
 }
 
+$TestSuiteGlobals::testNum = 0 if (!defined($TestSuiteGlobals::testNum));
+
 if($TestSuiteGlobals::testNum < 0) {
 	$TestSuiteGlobals::testNum = -$TestSuiteGlobals::testNum;
 }
@@ -356,6 +358,9 @@ sub commandsInterpreter
 		}
 		if($@) {
 			eval("TestSuiteGlobals::hook$tmpFunc[0](\$analysis,\$arg);");
+		}
+		if ($@) {
+			eval("hook$tmpFunc[0](\$analysis,\$arg);");
 		}
 		if($@) {
 			my $subr = (caller(0))[3];

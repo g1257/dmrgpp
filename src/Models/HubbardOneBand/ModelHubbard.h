@@ -293,13 +293,17 @@ namespace Dmrg {
 		!PTEX-END */
 		const DmrgGeometryType& geometry() const { return dmrgGeometry_; }
 
-		template<typename ModelHelperType1,
+		void print(std::ostream& os) const
+		{
+			os<<modelParameters_;
+		}
+		/*template<typename ModelHelperType1,
 		typename SparseMatrixType1,
 		typename DmrgGeometryType1,
 		template<typename> class SharedMemoryTemplate1>
 		friend std::ostream& operator<<(std::ostream& os,
 		const ModelHubbard<ModelHelperType1,SparseMatrixType1,DmrgGeometryType1,SharedMemoryTemplate1>& m);
-
+*/
 	private:
 
 		const ParametersModelHubbard<RealType>&  modelParameters_;
@@ -308,8 +312,6 @@ namespace Dmrg {
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 		size_t reinterpretX_,reinterpretY_;
-
-		void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
 		//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 		RealType sign(typename HilbertSpaceHubbardType::HilbertState const &ket, int i,int sigma) const
@@ -554,9 +556,9 @@ namespace Dmrg {
 	typename SparseMatrixType,
 	typename DmrgGeometryType,
 	template<typename> class SharedMemoryTemplate>
-	std::ostream &operator<<(std::ostream &os,const ModelHubbard<ModelHelperType,SparseMatrixType,DmrgGeometryType,SharedMemoryTemplate>& model)
+	std::ostream& operator<<(std::ostream& os,const ModelHubbard<ModelHelperType,SparseMatrixType,DmrgGeometryType,SharedMemoryTemplate>& model)
 	{
-		os<<model.modelParameters_;
+		model.print(os);
 		return os;
 	}
 } // namespace Dmrg

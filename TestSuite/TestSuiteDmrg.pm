@@ -117,7 +117,7 @@ sub createExecutable
 	die "Configuration error using $configFile with $specFile: $!" if($err);
 	print "Creating $execType executable for Test $TestSuiteGlobals::testNum...\n";
 	$err = system($arg2);
-	die "Make command for $execType: $!" if($err);
+	die "Make command for $execType: $arg2\n" if($err);
 
 	my $executable= $execType."-".$refKey;
 	$err = rename($execType, $executable);
