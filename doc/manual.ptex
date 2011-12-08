@@ -309,29 +309,29 @@ their labels are always known (see Fig.~\ref{fig:sxye}).
 
 \ptexPaste{Dmrg::BasisImplementation}
 
-\ptexPaste{BasisIntro2}
+\ptexPaste{Dmrg::BasisImplementation,quantumNumbers_}
 
-\ptexPaste{BasisIntro3}
+\ptexPaste{Dmrg::BasisImplementation,permutationVector_}
 
-\ptexPaste{BasisIntro4}
+\ptexPaste{Dmrg::BasisImplementation,partition_}
 
 \subsection{Local Symmetries}
-\ptexPaste{setToProduct}
+\ptexPaste{Dmrg::BasisImplementation,setToProduct()}
 
 \subsection{SU(2) Symmetry}
 
 \section{Hilbert Space Basis II: DmrgBasisWithOperators}
 \subsection{Outer Product of Operators}\label{subsec:dmrgBasisWithOperators}
-\ptexPaste{BasisWithOperators}
+\ptexPaste{Dmrg::BasisWithOperators}
 
 Let us now go back to the ``infinite'' DMRG loop and discuss in more detail Fig.~\ref{fig:infiniteloop}(a) ((b) is similar)), i.e., 
-the  function grow().
+the function grow().
 
-\ptexPaste{grow}
+\ptexPaste{Dmrg::LeftRightSuper,grow()}
 
-\ptexPaste{externalProduct}
+\ptexPaste{Dmrg::OperatorsImplementation,externalProduct}
 
-\ptexPaste{OperatorsImpl}
+\ptexPaste{Dmrg::OperatorsImplementation}
 
 Let us now examine in more detail Fig.~\ref{fig:infiniteloop}(c), where 
 we form the outer product of the current system and current environment, and calculate its Hamiltonian.
@@ -381,9 +381,9 @@ the resulting states of this outer product need to be reordered so that effectiv
 
 \section{Model Interface}\label{subsec:models}
 \subsection{Abstract Interface}
-\ptexPaste{ModelInterface}
-\ptexInterface{ModelBase}
-\ptexInterface{ModelHubbard}
+\ptexPaste{Dmrg::ModelBase}
+% \ptexInterface{ModelBase}
+% \ptexInterface{ModelHubbard}
 
 \subsection{Heisenberg Model}
 \subsection{One-Orbital Hubbard Model}

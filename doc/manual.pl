@@ -23,7 +23,7 @@ while(<STDIN>) {
 		findClass($ptr,$temp[0],\$foundHash);
 		(UNIVERSAL::isa( $foundHash, "HASH" )) 
 			or die "$0: Not found class $x at line $.\n";
-		print STDERR "$#temp \n";
+# 		print STDERR "$#temp \n";
 		if ($#temp>=1) {
 			my $nameOfKind = $temp[1];
 			

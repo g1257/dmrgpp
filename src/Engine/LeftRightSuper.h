@@ -252,24 +252,24 @@ namespace Dmrg {
 			}
 
 			//! add block X to basis pS and put the result in left_:
-			/** !PTEX-START grow
+			/**
 			The function grow is located in !PTEX_REF{HERE}.
 			Local operators are set for the basis in question with a call to 
-			\cppClass{BasisWithOperators}'s member function \cppFunction{setOperators()}.  
+			\\cppClass{BasisWithOperators}'s member function \\cppFunction{setOperators()}.  
 			When adding sites to the system or environment the program does a 
 			full outer product, i.e., it increases the size of all local operators. 
-			This is performed by the call to \verb!setToProduct(pSprime,pS,Xbasis,dir,option)!
-			in the grow function, which actually calls \verb!pSprime.setToProduct(pS,xBasis,dir)!
+			This is performed by the call to \\verb!setToProduct(pSprime,pS,Xbasis,dir,option)!
+			in the grow function, which actually calls \\verb!pSprime.setToProduct(pS,xBasis,dir)!
 			This function also recalculates the Hamiltonian in the outer product 
 			of (i) the previous system basis $pS$, and (ii) the basis $Xbasis$ 
 			corresponding to the site(s) that is (are) being added.
 			To do this, the Hamiltonian connection between the two parts 
 			needs to be calculated and added, and this is done in the call to 
-			\cppFunction{addHamiltonianConnection}, see !PTEX_REF{295}. 
+			\\cppFunction{addHamiltonianConnection}, see !PTEX_REF{295}. 
 			Finally, the resulting dmrgBasis object for the outer product, 
 			pSprime, is set to contain this full Hamiltonian with the call
-			to  \cppFunction{pSprime.setHamiltonian(matrix)}. 
-			!PTEX-END */
+			to  \\cppFunction{pSprime.setHamiltonian(matrix)}. 
+			*/
 			template<typename SomeModelType>
 			void grow(
 					BasisWithOperatorsType& leftOrRight,
