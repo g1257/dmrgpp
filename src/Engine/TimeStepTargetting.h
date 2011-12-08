@@ -612,7 +612,7 @@ namespace Dmrg {
 				params.tolerance = eps;
 				params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 
-				LanczosSolverType lanczosSolver(lanczosHelper,params);
+				LanczosSolverType lanczosSolver(lanczosHelper,params,&V);
 				
 				TridiagonalMatrixType ab;
 				size_t total = phi.effectiveSize(i0);
@@ -621,7 +621,7 @@ namespace Dmrg {
 				/* std::ostringstream msg;
 				msg<<"Calling tridiagonalDecomposition...\n";
 				progress_.printline(msg,std::cerr);*/
-				lanczosSolver.decomposition(phi2,ab,V);
+				lanczosSolver.decomposition(phi2,ab);
 				lanczosSolver.buildDenseMatrix(T,ab);
 				//check1(V,phi2);
 				return lanczosSolver.steps();

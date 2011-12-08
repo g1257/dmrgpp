@@ -88,10 +88,6 @@ namespace std {
 
 //! Utility functions that are still needed
 namespace utils {
-	bool neighbors(size_t i1,size_t i2)
-	{
-		return (i1-i2==1 || i2-i1==1);
-	}
 	
 	template<typename SomeType>
 	void reorder(std::vector<SomeType> &v,std::vector<size_t> const &permutation)

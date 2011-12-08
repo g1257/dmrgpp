@@ -128,7 +128,7 @@ namespace Dmrg {
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
+		typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 		typedef typename LanczosSolverType::PostProcType PostProcType;
 		typedef DynamicSerializer<RealType,VectorWithOffsetType,PostProcType> DynamicSerializerType;
 		typedef typename LanczosSolverType::LanczosMatrixType
@@ -432,9 +432,9 @@ namespace Dmrg {
 			params.tolerance = eps;
 			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 			
-			LanczosSolverType lanczosSolver(h,params);
+			LanczosSolverType lanczosSolver(h,params,&V);
 
-			lanczosSolver.decomposition(sv,ab_,V);
+			lanczosSolver.decomposition(sv,ab_);
 			//calcIntensity(Eg,sv,V,ab);
 		}
 

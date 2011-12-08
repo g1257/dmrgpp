@@ -128,7 +128,7 @@ namespace Dmrg {
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 		typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
-		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
+		typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 		typedef typename LanczosSolverType::PostProcType PostProcType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
@@ -411,9 +411,9 @@ namespace Dmrg {
 			typename ModelType::ModelHelperType modelHelper(p,lrs_);
 			typename LanczosSolverType::LanczosMatrixType h(&model_,&modelHelper);
 
-			LanczosSolverType lanczosSolver(h,paramsForSolver_);
+			LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);
 
-			lanczosSolver.decomposition(sv,ab_,V);
+			lanczosSolver.decomposition(sv,ab_);
 			//calcIntensity(Eg,sv,V,ab);
 		}
 

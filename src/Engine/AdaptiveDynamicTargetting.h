@@ -127,7 +127,7 @@ namespace Dmrg {
 		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-		typedef typename LanczosSolverType::DenseMatrixType DenseMatrixType;
+		typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 		typedef typename LanczosSolverType::PostProcType PostProcType;
 // 		typedef DynamicSerializer<RealType,VectorWithOffsetType,
 // 				ContinuedFractionType> DynamicSerializerType;

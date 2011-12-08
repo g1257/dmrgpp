@@ -801,7 +801,7 @@ namespace Dmrg {
 				params.tolerance = eps;
 				params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 
-				LanczosSolverType lanczosSolver(lanczosHelper,params);
+				LanczosSolverType lanczosSolver(lanczosHelper,params,&V);
 
 				TridiagonalMatrixType ab;
 				size_t total = phi.effectiveSize(i0);
@@ -813,7 +813,7 @@ namespace Dmrg {
 				RealType x = PsimagLite::norm(phi2);
 				assert(x>1e-6);
 				std::cerr<<"norm of phi2="<<x<<"\n";
-				lanczosSolver.decomposition(phi2,ab,V);
+				lanczosSolver.decomposition(phi2,ab);
 				lanczosSolver.buildDenseMatrix(T,ab);
 				//check1(V,phi2);
 				return lanczosSolver.steps();
