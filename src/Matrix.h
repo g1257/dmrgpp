@@ -97,7 +97,7 @@ namespace PsimagLite {
 		{
 			nrow_=nrow; ncol_=ncol;
 			data_.resize(nrow*ncol);
-			for (size_t i=0;i<data_.size();i++) data_[i] = 0;
+			//for (size_t i=0;i<data_.size();i++) data_[i] = 0;
 		}
 		
 		Matrix<T>& operator += (const Matrix<T>& other)
