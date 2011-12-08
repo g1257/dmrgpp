@@ -250,8 +250,7 @@ namespace Dmrg {
 		DiagonalizationType diagonalization_;
 		TruncationType truncate_;
 		
-		/** !PTEX-START DMRGAlgorithmDescription
-		I shall give a procedural description of the DMRG method in the following.
+		/** I shall give a procedural description of the DMRG method in the following.
 		We start with an initial block $S$ (the initial system) and $E$ (the initial environment). 
 		Consider two sets of blocks $X$ and $Y$. 
 		We will be adding blocks from $X$ to $S$, one at a time, and from $Y$ to $E$, one at a time. 
@@ -265,7 +264,32 @@ namespace Dmrg {
 		Y are added one at a time to E to form the environment. Blocks are vectors of integers. The integers (numbers at the top of the figure)
 		label all sites in a fixed and unique way.\label{fig:sxye}}
 		\end{figure}
-		/!PTEX-END */
+		
+		Now we start a loop for the DMRG ``infinite'' algorithm
+		 by setting $step=0$ and $\mathcal{V}_R(S)\equiv\mathcal{V}(S)$ and $\mathcal{V}_R(E)\equiv\mathcal{V}(E)$.
+
+		The system is grown by adding the sites in $X_{step}$ to it, and let
+		$S'=S\cup X_{step}$, i.e. the $step$-th block of $X$ to $S$ is added to form the block $S'$; likewise, let $E'=E\cup Y_{step}$. 
+		Let us form the following product Hilbert spaces:
+		$\mathcal{V}(S')=\mathcal{V}_R(S)\otimes \mathcal{V}(X_{step})$ and 
+		$\mathcal{V}(E')=\mathcal{V}_R(E)\otimes \mathcal{V}(Y_{step})$ and their union $\mathcal{V}(S')\otimes\mathcal{V}(E')$ which is disjoint.
+		
+		Consider $\hat{H}_{S'\cup E'}$, the Hamiltonian operator, acting on $\mathcal{V}(S')\otimes\mathcal{V}(E')$.
+		Using Lanczos\ref{sec:lanczos},
+		we  diagonalize $\hat{H}_{S'\cup E'}$ to obtain its lowest eigenvector:
+		\begin{equation}
+		|\psi\rangle = \sum_{\alpha\in \mathcal{V}(S'), \beta\in\mathcal{V}(E')}\psi_{\alpha,\beta}|\alpha\rangle\otimes|\beta\rangle,
+		\label{eq:psi}
+		\end{equation}
+		where $\{|\alpha\rangle\}$ is a basis of $\mathcal{V}(S')$ and $\{|\beta\rangle\}$ is a basis of $\mathcal{V}(E')$.
+		
+		We proceed in the same way for the environment,  diagonalize $\hat{\rho}_E$ to obtain ordered
+		eigenvectors $w^E$, and define $(H^{ E' {\rm new\,\,basis}})_{\alpha,\alpha'}$.
+		Now we set $S\leftarrow S'$, $\mathcal{V}_R(S)\leftarrow\mathcal{V}_R(S')$, 
+		$H_{S'}\leftarrow H_{S}$,
+		and similarly for the environment, increase step by one,
+		and continue with the growth phase of the algorithm.
+		*/
 		void infiniteDmrgLoop(
 				BlockType const &S,
 				std::vector<BlockType> const &X,
@@ -276,22 +300,13 @@ namespace Dmrg {
 				TargettingType& psi)
 		{
 			checkpoint_.push(pS,pE);
-			/** !PTEX-START infiniteDmrgLoop
-			Now we start a loop for the DMRG ``infinite'' algorithm
-		 	by setting $step=0$ and $\mathcal{V}_R(S)\equiv\mathcal{V}(S)$ and $\mathcal{V}_R(E)\equiv\mathcal{V}(E)$.
-		 	!PTEX-END */
+			
 			for (size_t step=0;step<X.size();step++) {
 				std::ostringstream msg;
 				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
 				progress_.printline(msg,std::cout);
 
-				/** !PTEX-START growRightAndLeft 
-				The system is grown by adding the sites in $X_{step}$ to it, and let
-				$S'=S\cup X_{step}$, i.e. the $step$-th block of $X$ to $S$ is added to form the block $S'$; likewise, let $E'=E\cup Y_{step}$. 
-				Let us form the following product Hilbert spaces:
-				$\mathcal{V}(S')=\mathcal{V}_R(S)\otimes \mathcal{V}(X_{step})$ and 
-				$\mathcal{V}(E')=\mathcal{V}_R(E)\otimes \mathcal{V}(Y_{step})$ and their union $\mathcal{V}(S')\otimes\mathcal{V}(E')$ which is disjoint.
-				!PTEX-END */
+				
 				lrs_.growLeftBlock(model_,pS,X[step]); // grow system
 				lrs_.growRightBlock(model_,pE,Y[step]); // grow environment
 
@@ -300,49 +315,29 @@ namespace Dmrg {
 
 				updateQuantumSector(lrs_.sites());
 
-				/*!PTEX_LABEL{setToProductSolver} */
 				lrs_.setToProduct(quantumSector_);
 
-				/** !PTEX-START diagonalization 
-				Consider $\hat{H}_{S'\cup E'}$, the Hamiltonian operator, acting on $\mathcal{V}(S')\otimes\mathcal{V}(E')$.
-				Using Lanczos\ref{sec:lanczos},
-				we  diagonalize $\hat{H}_{S'\cup E'}$ to obtain its lowest eigenvector:
-				\begin{equation}
-				|\psi\rangle = \sum_{\alpha\in \mathcal{V}(S'), \beta\in\mathcal{V}(E')}\psi_{\alpha,\beta}|\alpha\rangle\otimes|\beta\rangle,
-				\label{eq:psi}
-				\end{equation}
-				where $\{|\alpha\rangle\}$ is a basis of $\mathcal{V}(S')$ and $\{|\beta\rangle\}$ is a basis of $\mathcal{V}(E')$.
-				!PTEX-END */
 				diagonalization_(psi,INFINITE,X[step],Y[step]);
 
 				truncate_(pS,psi,parameters_.keptStatesInfinite,EXPAND_SYSTEM);
-				/** !PTEX-START TruncationOfEnviron
-				We proceed in the same way for the environment,  diagonalize $\hat{\rho}_E$ to obtain ordered
-				eigenvectors $w^E$, and define $(H^{ E' {\rm new\,\,basis}})_{\alpha,\alpha'}$.
-				!PTEX-END */
+				
 				truncate_(pE,psi,parameters_.keptStatesInfinite,EXPAND_ENVIRON);
 
-				/** !PTEX-START LoopClose
-				Now we set $S\leftarrow S'$, $\mathcal{V}_R(S)\leftarrow\mathcal{V}_R(S')$, 
-				$H_{S'}\leftarrow H_{S}$,
-				and similarly for the environment, increase step by one,
-				and continue with the growth phase of the algorithm.
-				!PTEX-END */
 				checkpoint_.push(pS,pE);
 			}
 			progress_.print("Infinite dmrg loop has been done!\n",std::cout);
 		}
 
-		/** !PTEX-START FiniteAlgorithm 
+		/** 
 		In the infinite algorithm, the  number of sites in the
 		system and environment grows as more steps are performed.
 		After this infinite algorithm, a finite algorithm is applied where the 
 		environment is shrunk at the expense of the system, and the system is grown
 		at the expense of the environment. During the finite algorithm 
-		(\todo{Section to be written}) phase the total number of sites remains 
+		(\\todo{Section to be written}) phase the total number of sites remains 
 		constant allowing for a formulation
 		of DMRG as a variational method in a basis of matrix product states.
-		!PTEX-END */
+		*/
 		void finiteDmrgLoops(
 					BlockType const &S,
      					BlockType const &E,

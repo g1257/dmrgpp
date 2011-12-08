@@ -87,47 +87,46 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 
 namespace Dmrg {
-	/** !PTEX-START InputFiniteLoops
-	\subsubsection{Enabling finite loops}
-	\begin{itemize}
-	\item
-	{\bf options line:} \verb=nofiniteloops=: Don't do finite loops, even if provided under {\bf FiniteLoops} below.
-	\item {\bf InfiniteLoopKeptStates} $m$ value for the infinite algorithm.
-	\item {\bf FiniteLoops} A series of space-separated numbers. More than one space is allowed. The first
+	/** 
+	\\subsubsection{Enabling finite loops}
+	\\begin{itemize}
+	\\item
+	{\\bf options line:} \\verb=nofiniteloops=: Don't do finite loops, even if provided under {\\bf FiniteLoops} below.
+	\\item {\\bf InfiniteLoopKeptStates} $m$ value for the infinite algorithm.
+	\\item {\\bf FiniteLoops} A series of space-separated numbers. More than one space is allowed. The first
 	number is the number of finite algorithm ``movements,'' followed by series of three numbers for
 	each ``movement''. Of the three numbers, the first is the number of sites to go forward if positive
 	or backward if negative. The second number is the $m$ for this movement and the last number
 	is either 0 or 1, 0 will not save state data to disk and 1 will save all data to be able to calculate
 	observables. The first movement starts from where the infinite loop left off, at the middle of the
 	lattice.
-	\end{itemize}
+	\\end{itemize}
 
-	\subsubsection{Example of a Finite loops line in the input file}
-	\begin{verbatim}
+	\\subsubsection{Example of a Finite loops line in the input file}
+	\\begin{verbatim}
 	FiniteLoops 4 7 200 0 -7 200 0 7 200 1 7 200 1
-	\end{verbatim}
+	\\end{verbatim}
 	The number 4 implies 4 finite loops. The first fine loop is ``7 200 0'', meaning
 	go forward 7 steps, use $m=200$ for this finite sweep, and 0: do not store transformation in disk.
 	The next is ``-7 200 0'', which goes backwards 7 sites, etc.
 	Remember that the finite loops start at the middle of the lattice, where the infinite loop left off.
-	\todo{ADD FIGURE SHOWING WHAT THIS DOES.}
+	\\todo{ADD FIGURE SHOWING WHAT THIS DOES.}
 
-	\subsubsection{Caveats and Troubleshooting}
-	\begin{itemize}
-	\item If \verb=nofiniteloops= is an option in the options line of the input file then
-	the {\bf FiniteLoops} line in the input file is ignored, and no finite loops are done. 
+	\\subsubsection{Caveats and Troubleshooting}
+	\\begin{itemize}
+	\\item If \\verb=nofiniteloops= is an option in the options line of the input file then
+	the {\\bf FiniteLoops} line in the input file is ignored, and no finite loops are done. 
 	In this case, DMRG++ stops when the infinite algorithm has finished.
 
-	\item Make sure the first number is the number of triplets that follow. 
-	\item Make sure
+	\\item Make sure the first number is the number of triplets that follow. 
+	\\item Make sure
 	you don't fall off the lattice, by going forward or backwards too much.
 	Remember that at least one site must remain for the ``system'' part of the lattice.
 	So on a 16 site chain, when you start the finite loops you're at the middle, you
 	can go forward at most 7 sites, and backwards at most 7 sites.
 	\item There is some checking done to the finite loops input, see !PTEX_REF{139}, 
 	but you might find that it's not comprehensive.
-	\end{itemize}
-	!PTEX-END */
+	\\end{itemize} */
 	struct FiniteLoop {
 		int stepLength; // how much to go right (+) or left (-)
 		size_t keptStates; // kept states
@@ -225,39 +224,44 @@ namespace Dmrg {
 
 	//! Structure that contains the Dmrg parameters
 	/**
-	!PTEX-START InputParamsSolver
-	\inputItem{Options}
+	\\inputItem{Options}
 	A comma-separated list of strings. At least one of the following strings must be provided:
-	\inputSubItem{none}  Use this when no options are given, since the list of strings must be non-null.
-	Note that ``none'' does not disable other options.\\
-	\inputSubItem{hasQuantumNumbers} If this option is given, the program will read the line ``QNS'' 
-	described below and act accordingly. It is recommended that you set this option.  \\
-	\inputSubItem{wft}  Use the Wave Function Transformation speed-up, which is disabled by default.\\
-	\inputSubItem{useSu2Symmetry} Use the SU(2) symmetry for the model, and interpret quantum numbers in 
-	the line ``QNS'' appropriately. The option ``hasQuantumNumbers'' must be set for this to work.\\
-	\inputSubItem{nofiniteloops}  Don't do finite loops, even if provided under ``FiniteLoops'' below.\\
-	%
-	\inputItem{version}  A mandatory string that is read and ignored. Usually contains the result
-	of doing ``git rev-parse HEAD''.\\
-	\inputItem{outputfile}  The output file. This file will be created if non-existent, and if it
-	exits it will be truncated.\\
-	\inputItem{InfiniteLoopKeptStates}  ``m'' value for the infinite algorithm.\\
-	\inputItem{FiniteLoops} A series of space-separated numbers. More than one space is allowed.
+	\\inputSubItem{none}  Use this when no options are given, since the list of strings must be non-null.
+	Note that ``none'' does not disable other options.
+
+	\\inputSubItem{hasQuantumNumbers} If this option is given, the program will read the line ``QNS'' 
+	described below and act accordingly. It is recommended that you set this option.  \\\\\n
+	\\inputSubItem{wft}  Use the Wave Function Transformation speed-up, which is disabled by default.
+
+	\\inputSubItem{useSu2Symmetry} Use the SU(2) symmetry for the model, and interpret quantum numbers in 
+	the line ``QNS'' appropriately. The option ``hasQuantumNumbers'' must be set for this to work.
+
+	\\inputSubItem{nofiniteloops}  Don't do finite loops, even if provided under ``FiniteLoops'' below.
+
+	\\inputItem{version}  A mandatory string that is read and ignored. Usually contains the result
+	of doing ``git rev-parse HEAD''.
+
+	\\inputItem{outputfile}  The output file. This file will be created if non-existent, and if it
+	exits it will be truncated.
+
+	\\inputItem{InfiniteLoopKeptStates}  ``m'' value for the infinite algorithm.
+
+	\\inputItem{FiniteLoops} A series of space-separated numbers. More than one space is allowed.
 	The first number is the number of finite algorithm ``movements'', followed by series
 	of three numbers for each ``movement''. Of the three numbers, the first
 	is the number of sites to go forward if positive or backward if negative.
 	The second number is the ``m'' for this ``movement' and the last number is either 0 or 1,
 	0 will not save state data to disk and 1 will save all data to be able to calculate observables.
-	The first ``movement'' starts from where the infinite loop left off, at the middle of the lattice.\\
-	\inputItem{QNS}  A space-separated list of numbers. More than one space is allowed.
+	The first ``movement'' starts from where the infinite loop left off, at the middle of the lattice.
+	\\inputItem{QNS}  A space-separated list of numbers. More than one space is allowed.
 	The first number is the number of numbers to follow, these numbers being the density of quantum
 	numbers for each conserved quantum number to be used.
-	In a simpler way, usually this is 3 followed by $n_\uparrow n_\downarrow 0$  if not using
-	SU(2) symmetry, where  $n_\uparrow$, and $n_\downarrow$ are the densities of up and down
-	electrons respectively. If there is SU(2) symmetry then this is 3 followed by $n_\uparrow n_\downarrow j$,
-	where $n_\uparrow$, and $n_\downarrow$ are the densities of up and down
+	In a simpler way, usually this is 3 followed by $n_\\uparrow n_\\downarrow 0$  if not using
+	SU(2) symmetry, where  $n_\\uparrow$, and $n_\\downarrow$ are the densities of up and down
+	electrons respectively. If there is SU(2) symmetry then this is 3 followed by $n_\uparrow n_\\downarrow j$,
+	where $n_\\uparrow$, and $n_\\downarrow$ are the densities of up and down
 	electrons respectively, and $j$ is twice the angular momentum divided by the number of sites.
-	!PTEX-END */
+	*/
 	template<typename FieldType>
 	struct ParametersDmrgSolver {
 		std::string filename;

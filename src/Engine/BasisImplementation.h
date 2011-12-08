@@ -90,14 +90,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	/**!PTEX-START BasisIntro
+	/**!
 	All that the reader needs to remember for now is that \cppClass{!PTEX_THISCLASS}
 	(and also class \cppClass{Basis} its interface class) is a C++ class that represents 
 	in a light way a basis for a Hilbert Space. To explain the rest of the 
 	capability handled by the \cppClass{Basis} class, I need to explain 
 	how symmetries are treated in the program, and how the Hilbert space basis is partitioned.
 	This is explained in the following.
-	!PTEX-END */
+	*/
 	template<typename RealType,typename SparseMatrixType>
 	class BasisImplementation {
 		typedef BasisImplementation<RealType,SparseMatrixType> ThisType;
@@ -508,10 +508,10 @@ namespace Dmrg {
 		std::vector<size_t> permInverse_;
 		HamiltonianSymmetryLocalType symmLocal_;
 		HamiltonianSymmetrySu2Type symmSu2_;
-		/** !PTEX-START BasisBlock
+		/** 
 		The variable block\_ of a \cppClass{DmrgBasis} object indicates over 
 		which sites the basis represented by this object is being built.
-		!PTEX-END */
+		*/
 		BlockType block_;
 
 		template<typename IoInputter>

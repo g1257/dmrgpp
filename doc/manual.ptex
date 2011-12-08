@@ -136,11 +136,11 @@ There are three kinds of parameters in the input file:
 The Model parameters vary from model to model.
 The DMRG Solver parameters are discussed below.
 
-\ptexPaste{InputParamsSolver}
+\ptexPaste{Dmrg::ParametersDmrgSolver}
 
 \subsection{Finite Loops}
 
-\ptexPaste{InputFiniteLoops}
+\ptexPaste{Dmrg::FiniteLoop}
 
 \section{Main Driver}
 The high level program is this
@@ -172,16 +172,8 @@ A {\it real-space-based Hilbert space} can also be thought of as the external pr
 We will consider general Hamiltonians   that
  act on Hilbert spaces $\mathcal{V}$, as previously defined.
 
-\ptexPaste{DMRGAlgorithmDescription}
-\ptexPaste{infiniteDmrgLoop}
-\ptexPaste{growRightAndLeft}
-\ptexPaste{diagonalization}
-\ptexPaste{Truncation}
-\ptexPaste{DiagOfDensityMatrix}
-\ptexPaste{TruncationOfEnviron}
-\ptexPaste{RemovalOfStates}
-\ptexPaste{LoopClose}
-\ptexPaste{FiniteAlgorithm}
+\ptexPaste{Dmrg::DmrgSolver,infiniteDmrgLoop()}
+\ptexPaste{Dmrg::DmrgSolver,finiteDmrgLoops()}
 
 The advantage of the DMRG algorithm is that the truncation procedure described above keeps the error bounded and small.
 Assume $m_S=m_E=m$.
@@ -313,9 +305,9 @@ There will also be at this point another 50 sites that constitute the environmen
 Now, from the beginning each of these 100 sites is given a fixed number from 0 to 99. 
 Therefore, sites are always labeled in a fixed way and 
 their labels are always known (see Fig.~\ref{fig:sxye}).
-\ptexPaste{BasisBlock}
+\ptexPaste{Dmrg::BasisImplementation,block_}
 
-\ptexPaste{BasisIntro}
+\ptexPaste{Dmrg::BasisImplementation}
 
 \ptexPaste{BasisIntro2}
 
