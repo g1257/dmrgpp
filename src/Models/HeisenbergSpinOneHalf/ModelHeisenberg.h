@@ -331,12 +331,12 @@ namespace Dmrg {
 							SparseMatrixType tJ, tI;
 							transposeConjugate(tJ,sPlusOperatorJ);
 							transposeConjugate(tI,sPlusOperatorI);
-							hmatrix += 0.5*tmp*(sPlusOperatorI*tJ);
-							hmatrix += 0.5*tmp*(tI*sPlusOperatorJ);
+							hmatrix += (0.5*tmp)*(sPlusOperatorI*tJ);
+							hmatrix += (0.5*tmp)*(tI*sPlusOperatorJ);
 		
 							// S^z_i S^z_j
 							SparseMatrixType szOperatorJ=cm[j+n].data; //S^z_j
-							hmatrix += tmp*szOperatorI*szOperatorJ;
+							hmatrix += tmp*(szOperatorI*szOperatorJ);
 						}
 					}
 				}
@@ -427,21 +427,21 @@ namespace Dmrg {
 		return os;
 	}
 
-	template<typename SparseMatrixType>
-	SparseMatrixType operator*(const SparseMatrixType& a,const SparseMatrixType& b)
-	{
-		SparseMatrixType temp;
-		multiply(temp,a,b);
-		return temp;
-	}
-
-	template<typename RealTypeType,typename SparseMatrixType>
-	SparseMatrixType operator*(const RealTypeType& a,const SparseMatrixType& b)
-	{
-		SparseMatrixType temp;
-		multiplyScalar(temp,b,static_cast<typename SparseMatrixType::value_type>(a));
-		return temp;
-	}
+// 	template<typename SparseMatrixType>
+// 	SparseMatrixType operator*(const SparseMatrixType& a,const SparseMatrixType& b)
+// 	{
+// 		SparseMatrixType temp;
+// 		multiply(temp,a,b);
+// 		return temp;
+// 	}
+// 
+// 	template<typename RealTypeType,typename SparseMatrixType>
+// 	SparseMatrixType operator*(const RealTypeType& a,const SparseMatrixType& b)
+// 	{
+// 		SparseMatrixType temp;
+// 		multiplyScalar(temp,b,static_cast<typename SparseMatrixType::value_type>(a));
+// 		return temp;
+// 	}
 } // namespace Dmrg
 /*@}*/
 #endif //DMRG_MODEL_HEISENBERG_HEADER_H
