@@ -265,8 +265,8 @@ namespace Dmrg {
 		sparse way (DMRG++ uses compressed row storage). In short, local 
 		operators are always stored in the most recently transformed basis 
 		for \\emph{all sites} and, if applicable, \\emph{all values} of the 
-		internal degree of freedom $\\sigma$. See !PTEX_REF{setToProductOps}
-		and !PTEX_REF{HERE}.
+		internal degree of freedom $\\sigma$. See !PTEX\\_REF{setToProductOps}
+		and !PTEX\\_REF{HERE}.
 		*/
 		template<typename ApplyFactorsType>
 		void externalProduct(size_t i,const OperatorType& m,int x,const std::vector<double>& fermionicSigns,

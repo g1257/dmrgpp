@@ -1,5 +1,5 @@
-%% File README
- 	
+/** \file README
+ *	
 \subsection{Licensing}
 The full software license for DMRG++ version 2.0.0 
 can be found in
@@ -101,5 +101,6 @@ for MPI code: (actual command will vary according to MPI Installation):
 \begin{Verbatim}
 mpirun ./dmrg input.inp
 \end{Verbatim}
+*/
 
  	

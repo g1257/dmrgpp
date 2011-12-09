@@ -18,12 +18,14 @@ while(<STDIN>) {
 		my $x = $1;
 		my @temp=split/,/,$x;
 		die "$0: Syntax error for \\ptexPaste line $.\n" if ($#temp<0);
-		my $ptr = $startPtr->{"classes"};
 		$foundHash=\$x;
-		findClass($ptr,$temp[0],\$foundHash);
-		(UNIVERSAL::isa( $foundHash, "HASH" )) 
-			or die "$0: Not found class $x at line $.\n";
-# 		print STDERR "$#temp \n";
+		my $ptr = $startPtr->{"classes"};
+		if ($temp[0]=~s/(^!)//) {
+			$ptr = $startPtr->{"files"};
+		}
+		findClassOrFile($ptr,$temp[0],\$foundHash);
+		(UNIVERSAL::isa( $foundHash, "HASH" )) or die "$0: Not found file or class $x at line $.\n";
+
 		if ($#temp>=1) {
 			my $nameOfKind = $temp[1];
 			
@@ -31,20 +33,31 @@ while(<STDIN>) {
 			if ($nameOfKind=~s/\(\)$//) {
 				$kind="function";
 			}
+			
 			findKind($foundHash,$nameOfKind,\$foundHash,$kind);
 			(UNIVERSAL::isa( $foundHash, "HASH" ))
 				or die "$0: Not found function $x\n";
 		}
+		$x = $temp[0];
 		my $substitution = getDetailed($foundHash);
+		$substitution =~ s/!PTEX_THISCLASS/$x/g;
 		s/\\ptexPaste\{([^\}]+)\}/$substitution/;
+	}
+	if (/\\ptexReadFile\{([^\}]+)\}/) {
+		readFile($1);
+		next;
 	}
 	print;
 }
 
-sub getBrief
+sub readFile
 {
-	my ($ptr)=@_;
-	return $ptr->{"brief"};
+	my ($file)=@_;
+	open(FILE,$file) or die "Cannot open $file: $!\n";
+	while(<FILE>) {
+		print;
+	}
+	close(FILE);
 }
 
 sub getDetailed
@@ -78,11 +91,11 @@ sub printHash
 	}
 }
 
-sub findClass
+sub findClassOrFile
 {
-	my ($ptr,$thisClass,$foundHash)=@_;
+	my ($ptr,$thisClassOrFile,$foundHash)=@_;
 	for my $item (@$ptr) {
-		if ($item->{"name"} eq $thisClass) {
+		if ($item->{"name"} eq $thisClassOrFile) {
 			$$foundHash = $item;
 			return;
 		}
@@ -112,7 +125,8 @@ sub findKind
 			$lastName = $x;
 		}
 		
-		if ($lastName eq $thisFunc and $lastKind eq $kind) {
+		if ($lastName eq $thisFunc) {
+			next if (defined($kind) and !($lastKind eq $kind));
 			$$foundHash = $ptr;
 # 			print STDERR "Found for hash $$foundHash\n";
 			return;
@@ -136,34 +150,3 @@ sub findKindA
 	}
 }
 
-# sub procHash
-# {
-# 	my ($ptr)=@_;
-# 	for my $item (keys %$ptr) {
-# 		print "key=$item\n";
-# 		my $x = $ptr->{$item};
-# 		if (UNIVERSAL::isa( $x, "HASH" )) {
-# 			procHash($x);
-# 		} elsif (UNIVERSAL::isa( $x, "ARRAY" )) {
-# 			procArray($x);
-# 		} else {
-# 			#print "value=$x\n";
-# 		}
-# 	}
-# }
-# 
-# sub procArray
-# {
-# 	my ($ptr)=@_;
-# 	for my $item (@$ptr) {
-# 		#print "$item\n";
-# 		my $x = $item;
-# 		if (UNIVERSAL::isa( $x, "HASH" )) {
-# 			procHash($x);
-# 		} elsif (UNIVERSAL::isa( $x, "ARRAY" )) {
-# 			procArray($x);
-# 		} else {
-# 			#print "value=$x\n";
-# 		}
-# 	}
-# }

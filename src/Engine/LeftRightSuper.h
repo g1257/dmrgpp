@@ -253,7 +253,7 @@ namespace Dmrg {
 
 			//! add block X to basis pS and put the result in left_:
 			/**
-			The function grow is located in !PTEX_REF{HERE}.
+			The function grow is located in !PTEX\\_REF{HERE}.
 			Local operators are set for the basis in question with a call to 
 			\\cppClass{BasisWithOperators}'s member function \\cppFunction{setOperators()}.  
 			When adding sites to the system or environment the program does a 
@@ -265,7 +265,7 @@ namespace Dmrg {
 			corresponding to the site(s) that is (are) being added.
 			To do this, the Hamiltonian connection between the two parts 
 			needs to be calculated and added, and this is done in the call to 
-			\\cppFunction{addHamiltonianConnection}, see !PTEX_REF{295}. 
+			\\cppFunction{addHamiltonianConnection}, see !PTEX\\_REF{295}. 
 			Finally, the resulting dmrgBasis object for the outer product, 
 			pSprime, is set to contain this full Hamiltonian with the call
 			to  \\cppFunction{pSprime.setHamiltonian(matrix)}. 

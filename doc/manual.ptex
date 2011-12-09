@@ -125,7 +125,7 @@ All rights reserved
 \pagebreak
 
 \section{Introduction}
-\ptexReadFile{../README}
+\ptexPaste{!README}
 
 \section{User's Guide}
 \subsection{Input File} \label{sec:inputfile}
@@ -341,14 +341,14 @@ Storing matrices in this case (even in a sparse way and even considering that th
 a penalty for performance. Therefore, in this latter case we do the outer product on-the-fly only, without storing any matrices. 
 In Fig.~\ref{fig:infiniteloop}(c)  pSE contains the outer product
 of system and environment, but pSE is only a \cppClass{Basis} object, not a \cppClass{BasisWithOperators} object, i.e., it does not
-contain operators. In the code see \ptexLabel{setToProductSolver}, and \ptexLabel{setToProductLrs}. 
+contain operators. In the code see \cppFunction{setToProductSolver}, and \cppFunction{setToProductLrs}. 
 
 We now consider Fig.~\ref{fig:infiniteloop}(d), where the diagonalization of the  system's plus environment's Hamiltonian is performed.
 Since \verb!lrs_.super()!, being only a \cppClass{Basis} object, does not contain all the information related to the outer product of system and environment 
 (as we saw, this would be prohibitively expensive), we need to pass the system's basis (pSprime) and the environment's basis (pEprime) to
-the diagonalization functor \cppFunction{diagonalization\_()}, see \ptexLabel{Diagonalization}, in order to be able to form the outer product on-the-fly.
+the diagonalization functor \cppFunction{diagonalization\_()}, see \cppFunction{Diagonalization}, in order to be able to form the outer product on-the-fly.
 There,  since \verb!lrs_.super()! does provide information about effective symmetry blocking, we block the Hamiltonian matrix using effective symmetry,
-and call  \cppFunction{diagonaliseOneBlock()}, see  \ptexLabel{diagonaliseOneBlock}, for each symmetry block. Only those matrix blocks
+and call  \cppFunction{diagonaliseOneBlock()}, see  \cppFunction{diagonaliseOneBlock}, for each symmetry block. Only those matrix blocks
 that contain the desired or targeted number of electrons (or other local symmetry) will be considered.
 
 \subsection{Lanczos Solver}
@@ -538,6 +538,7 @@ THIS SECTION NEEDS MORE WORK. IN PARTICULAR HOW TO SETUP THE INPUT FILE TO BE AB
 \subsection{Observables Driver}
 
 \section*{LICENSE}
-\ptexReadFileVerbatim{../src/LICENSE}
-
+\begin{Verbatim}
+\ptexReadFile{../src/LICENSE}
+\end{Verbatim}
 \end{document}

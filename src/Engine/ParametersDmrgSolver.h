@@ -124,7 +124,7 @@ namespace Dmrg {
 	Remember that at least one site must remain for the ``system'' part of the lattice.
 	So on a 16 site chain, when you start the finite loops you're at the middle, you
 	can go forward at most 7 sites, and backwards at most 7 sites.
-	\item There is some checking done to the finite loops input, see !PTEX_REF{139}, 
+	\item There is some checking done to the finite loops input, see !PTEX\\_REF{139}, 
 	but you might find that it's not comprehensive.
 	\\end{itemize} */
 	struct FiniteLoop {
@@ -258,7 +258,7 @@ namespace Dmrg {
 	numbers for each conserved quantum number to be used.
 	In a simpler way, usually this is 3 followed by $n_\\uparrow n_\\downarrow 0$  if not using
 	SU(2) symmetry, where  $n_\\uparrow$, and $n_\\downarrow$ are the densities of up and down
-	electrons respectively. If there is SU(2) symmetry then this is 3 followed by $n_\uparrow n_\\downarrow j$,
+	electrons respectively. If there is SU(2) symmetry then this is 3 followed by $n_\\uparrow n_\\downarrow j$,
 	where $n_\\uparrow$, and $n_\\downarrow$ are the densities of up and down
 	electrons respectively, and $j$ is twice the angular momentum divided by the number of sites.
 	*/

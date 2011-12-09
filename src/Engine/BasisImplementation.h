@@ -214,8 +214,8 @@ namespace Dmrg {
 		The quantum numbers of the original (untransformed) real-space basis
 		are set by the model class (to be described in Section~\\ref{subsec:models}), 
 		whereas the quantum numbers of outer products are handled
-		by the class \\cppClass{Basis} and \\cppClass{!PTEX_THISCLASS},
-		see !PTEX_REF{HERE}. This can be done because if $|a\\rangle$ 
+		by the class \\cppClass{Basis} and \\cppClass{BasisImplementation},
+		function \cppFunction{setToProduct}. This can be done because if $|a\\rangle$ 
 		has quantum number $q_a$ and $|b\\rangle$ has quantum number 
 		$q_b$, then $|a\\rangle\\otimes|b\\rangle$ has quantum number 
 		$q_a+q_b$.  \\cppClass{!PTEX_THISCLASS} knows how quantum 

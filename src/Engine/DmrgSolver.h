@@ -254,39 +254,39 @@ namespace Dmrg {
 		We start with an initial block $S$ (the initial system) and $E$ (the initial environment). 
 		Consider two sets of blocks $X$ and $Y$. 
 		We will be adding blocks from $X$ to $S$, one at a time, and from $Y$ to $E$, one at a time. 
-		Again, note that $X$ and $Y$ are sets of blocks whereas $S$ and $E$ are blocks. This is shown schematically in Fig.~\ref{fig:sxye}.
+		Again, note that $X$ and $Y$ are sets of blocks whereas $S$ and $E$ are blocks. This is shown schematically in Fig.~\\ref{fig:sxye}.
 		All sites in $S$, $X$, $Y$ and $E$ are numbered as shown in the figure.
-		\begin{figure}
-		\centering{
-		\includegraphics[width=8cm]{dmrg_sxye}}
-		\caption{Labeling of blocks for the DMRG procedure. Blocks from  vector of blocks X are added one at a time to block $S$ to form 
+		\\begin{figure}
+		\\centering{
+		\\includegraphics[width=8cm]{dmrg_sxye}}
+		\\caption{Labeling of blocks for the DMRG procedure. Blocks from  vector of blocks X are added one at a time to block $S$ to form 
 		the system and blocks from  vector of blocks
 		Y are added one at a time to E to form the environment. Blocks are vectors of integers. The integers (numbers at the top of the figure)
-		label all sites in a fixed and unique way.\label{fig:sxye}}
-		\end{figure}
+		label all sites in a fixed and unique way.\\label{fig:sxye}}
+		\\end{figure}
 		
 		Now we start a loop for the DMRG ``infinite'' algorithm
-		 by setting $step=0$ and $\mathcal{V}_R(S)\equiv\mathcal{V}(S)$ and $\mathcal{V}_R(E)\equiv\mathcal{V}(E)$.
+		 by setting $step=0$ and $\\mathcal{V}_R(S)\\equiv\\mathcal{V}(S)$ and $\\mathcal{V}_R(E)\\equiv\\mathcal{V}(E)$.
 
 		The system is grown by adding the sites in $X_{step}$ to it, and let
-		$S'=S\cup X_{step}$, i.e. the $step$-th block of $X$ to $S$ is added to form the block $S'$; likewise, let $E'=E\cup Y_{step}$. 
+		$S'=S\\cup X_{step}$, i.e. the $step$-th block of $X$ to $S$ is added to form the block $S'$; likewise, let $E'=E\\cup Y_{step}$. 
 		Let us form the following product Hilbert spaces:
-		$\mathcal{V}(S')=\mathcal{V}_R(S)\otimes \mathcal{V}(X_{step})$ and 
-		$\mathcal{V}(E')=\mathcal{V}_R(E)\otimes \mathcal{V}(Y_{step})$ and their union $\mathcal{V}(S')\otimes\mathcal{V}(E')$ which is disjoint.
+		$\\mathcal{V}(S')=\\mathcal{V}_R(S)\\otimes \\mathcal{V}(X_{step})$ and 
+		$\\mathcal{V}(E')=\\mathcal{V}_R(E)\\otimes \\mathcal{V}(Y_{step})$ and their union $\\mathcal{V}(S')\\otimes\\mathcal{V}(E')$ which is disjoint.
 		
-		Consider $\hat{H}_{S'\cup E'}$, the Hamiltonian operator, acting on $\mathcal{V}(S')\otimes\mathcal{V}(E')$.
-		Using Lanczos\ref{sec:lanczos},
-		we  diagonalize $\hat{H}_{S'\cup E'}$ to obtain its lowest eigenvector:
-		\begin{equation}
-		|\psi\rangle = \sum_{\alpha\in \mathcal{V}(S'), \beta\in\mathcal{V}(E')}\psi_{\alpha,\beta}|\alpha\rangle\otimes|\beta\rangle,
-		\label{eq:psi}
-		\end{equation}
-		where $\{|\alpha\rangle\}$ is a basis of $\mathcal{V}(S')$ and $\{|\beta\rangle\}$ is a basis of $\mathcal{V}(E')$.
+		Consider $\\hat{H}_{S'\\cup E'}$, the Hamiltonian operator, acting on $\\mathcal{V}(S')\\otimes\\mathcal{V}(E')$.
+		Using Lanczos\\ref{sec:lanczos},
+		we  diagonalize $\\hat{H}_{S'\\cup E'}$ to obtain its lowest eigenvector:
+		\\begin{equation}
+		|\\psi\\rangle = \\sum_{\\alpha\\in \\mathcal{V}(S'), \\beta\\in\\mathcal{V}(E')}\\psi_{\\alpha,\\beta}|\\alpha\\rangle\\otimes|\\beta\\rangle,
+		\\label{eq:psi}
+		\\end{equation}
+		where $\\{|\\alpha\\rangle\\}$ is a basis of $\\mathcal{V}(S')$ and $\\{|\\beta\\rangle\\}$ is a basis of $\\mathcal{V}(E')$.
 		
-		We proceed in the same way for the environment,  diagonalize $\hat{\rho}_E$ to obtain ordered
-		eigenvectors $w^E$, and define $(H^{ E' {\rm new\,\,basis}})_{\alpha,\alpha'}$.
-		Now we set $S\leftarrow S'$, $\mathcal{V}_R(S)\leftarrow\mathcal{V}_R(S')$, 
-		$H_{S'}\leftarrow H_{S}$,
+		We proceed in the same way for the environment,  diagonalize $\\hat{\\rho}_E$ to obtain ordered
+		eigenvectors $w^E$, and define $(H^{ E' {\\rm new\\,\\,basis}})_{\\alpha,\\alpha'}$.
+		Now we set $S\\leftarrow S'$, $\\mathcal{V}_R(S)\\leftarrow\\mathcal{V}_R(S')$, 
+		$H_{S'}\\leftarrow H_{S}$,
 		and similarly for the environment, increase step by one,
 		and continue with the growth phase of the algorithm.
 		*/
