@@ -541,4 +541,6 @@ THIS SECTION NEEDS MORE WORK. IN PARTICULAR HOW TO SETUP THE INPUT FILE TO BE AB
 \begin{Verbatim}
 \ptexReadFile{../src/LICENSE}
 \end{Verbatim}
+\bibliographystyle{plain}
+\bibliography{thesis}
 \end{document}
