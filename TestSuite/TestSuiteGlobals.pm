@@ -63,9 +63,10 @@ $TestSuiteGlobals::testDir=`pwd`;
 chomp($TestSuiteGlobals::testDir);
 $TestSuiteGlobals::testDir.="/";
 $TestSuiteGlobals::srcDir=$TestSuiteGlobals::testDir."../src/";
+$TestSuiteGlobals::srcDir=$TestSuiteGlobals::testDir."../" unless (-r $TestSuiteGlobals::testDir."../src/");
 $TestSuiteGlobals::inputsDir = $TestSuiteGlobals::testDir."inputs/";
-$TestSuiteGlobals::oraclesDir = $TestSuiteGlobals::TestSuiteGlobals::testDir."oracles/";	
-$TestSuiteGlobals::resultsDir = $TestSuiteGlobals::TestSuiteGlobals::testDir."results/";
+$TestSuiteGlobals::oraclesDir = $TestSuiteGlobals::testDir."oracles/";	
+$TestSuiteGlobals::resultsDir = $TestSuiteGlobals::testDir."results/";
 
 print "$TestSuiteGlobals::inputsDir\n";
 }
