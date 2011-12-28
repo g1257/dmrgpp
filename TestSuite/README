@@ -1,0 +1,3 @@
+
+perl -I ../../PsimagLite/TestSuite/ ./testsuite.pl -n 10
+
