@@ -25,6 +25,7 @@ Please see full open source license included in file LICENSE.
 #include <iostream>
 #include "Lapack.h"
 #include "Complex.h"
+#include <cassert>
 
 namespace PsimagLite {
 	template<typename T>
@@ -83,6 +84,7 @@ namespace PsimagLite {
 
 		T& operator()(size_t i,size_t j)
 		{
+			assert(i+j*nrow_<data_.size());
 			return data_[i+j*nrow_];
 		}
 

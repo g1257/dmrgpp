@@ -35,11 +35,10 @@ Please see full open source license included in file LICENSE.
 #include "Random48.h"
 #include "PlotParams.h"
 #include "ParametersForSolver.h"
+#include "IoSimple.h"
 
 namespace PsimagLite {
-	template<
-		typename RealType,
-    	typename TridiagonalMatrixType_>
+	template<typename RealType,typename TridiagonalMatrixType_>
 	class ContinuedFraction  {
 	public:
 
@@ -64,8 +63,7 @@ namespace PsimagLite {
 		ContinuedFraction() : progress_("ContinuedFraction",0),
 			ab_(),Eg_(0),weight_(0),isign_(1) { }
 
-		template<typename IoInputType>
-		ContinuedFraction(IoInputType& io)
+		ContinuedFraction(IoSimple::In& io)
 		: progress_("ContinuedFraction",0),ab_(io)
 		{
 			io.readline(weight_,"#CFWeight=");

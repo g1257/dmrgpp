@@ -26,18 +26,20 @@ class Sort {
 			const std::vector<PairType>& x_;
 	};
 
-	
-	void sort(ContainerType& x,std::vector<size_t>& iperm)
+	void sort(ContainerType& x,std::vector<size_t>& iperm,size_t smallSize=0)
 	{
-		if (x.size()==0) return;
+		size_t n = x.size();
+		if (n==0) return;
+		// FIXME: DON'T USE smallSize, just say n=iperm.size()
+		if (smallSize!=0) n = smallSize;
 		PairType onep(x[0],0);
-		std::vector<PairType> p(x.size(),onep);
-		for (size_t i=0;i<x.size();i++) {
+		std::vector<PairType> p(n,onep);
+		for (size_t i=0;i<n;i++) {
 			p[i].first = x[i];
 			p[i].second = i;
 		}
 		std::sort(p.begin(),p.end(),Compare(p));
-		for (size_t i=0;i<x.size();i++) {
+		for (size_t i=0;i<n;i++) {
 			x[i] = p[i].first;
 			iperm[i] = p[i].second;
 		}
