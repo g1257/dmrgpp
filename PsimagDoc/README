@@ -1,5 +1,6 @@
 Introducing PsimagDoc
 
+PsimagLite v1.0
 Copyright (c) 2011, UT-Battelle, LLC
 All rights reserved
 
@@ -36,7 +37,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 Synopsis:
 Creates a .tex document from a .ptex document
 
-perl psimagdoc.pl document.ptex > document.tex
+perl psimagdoc.pl < document.ptex > document.tex
 
 Description:
 A .ptex document is a valid .tex document with certain TeX commands like
@@ -55,14 +56,15 @@ you obtain a doc/manual.pdf document when you run make in your DMRG++ distributi
 
 Available Commands:
 \ptexPaste{class,function}
-please use Doxygen's rules to specify classes and functions. For examples see
-doc/manual.ptex  in your DMRG++ distribution.
+please use Doxygen's rules to specify classes and functions. For examples, see
+doc/manual.ptex in your DMRG++ distribution.
 
 \ptexReadFile{filename}
 Dumps the unprocessed file into the document. 
 
 Legacy: PsimagDoc replaces pTeX.pl, and my previous tool multiweb which was based on nuweb.
-Documentation in files will slowly be transformed into Doxygen, and processed with PsimagDoc.
+Documentation in files will---slowly---be transformed into Doxygen, 
+so that it can be processed with PsimagDoc.
 
 See also:
 Doxygen's perlmod documentation,
