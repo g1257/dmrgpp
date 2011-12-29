@@ -186,7 +186,7 @@ if ($mpi) {
 }
 print FOUT<<EOF;
 EXENAME = dmrg
-all: \$(EXENAME)
+all: \$(EXENAME) doc
 
 dmrg.cpp: configure.pl
 	perl configure.pl
@@ -206,6 +206,9 @@ Makefile.dep: dmrg.cpp
 
 observe:  observe.o
 	\$(CXX) -o observe observe.o \$(LDFLAGS)
+
+doc:
+	cd ../doc; make
 
 # dependencies brought about by MakefileObserver.dep
 observe.o:

@@ -1,4 +1,4 @@
-CPPFLAGS = -IEngine -IModels/Heisenberg -IModels/HeisenbergSpinOneHalf  -I../../PsimagLite/src -I../../PsimagLite/src/Geometry
+CPPFLAGS = -IEngine -IModels/Heisenberg -IModels/HeisenbergSpinOneHalf  -IModels/HubbardOneBand -IModels/FeAsModel -IModels/FeasBasedScExtended -I../../PsimagLite/src -I../../PsimagLite/src/Geometry
 CXX = g++ 
 
 all: manual.pdf
@@ -8,7 +8,7 @@ all: manual.pdf
 	cd ../; doxygen
 
 manual.tex: manual.ptex ../perlmod/DoxyDocs.pm
-	perl -I../perlmod manual.pl < manual.ptex > manual.tex
+	perl -I../perlmod ../../PsimagLite/PsimagDoc/psimagdoc.pl < manual.ptex > manual.tex
 
 manual.pdf: manual.tex
 	pdflatex manual.tex
