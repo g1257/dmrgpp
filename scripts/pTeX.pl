@@ -24,6 +24,8 @@ my $GlobalLabel="";
 my $GlobalBuffer="";
 my $GlobalIsInterface;
 
+print STDERR "$0: This script is deprecated, please use PsimagDoc found also in this repository\n";
+
 loadMacros(0);
 loadMacros(1);
 

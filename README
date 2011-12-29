@@ -26,8 +26,10 @@ Matrix /// a matrix class
 CrsMatrix
 TridiagonalMatrix
 LanczosSolver
-ChebyshevSolver <-- experimental, not ready!
-SparseRow <-- experimental, do not use
+LanczosVectors
+ChebyshevSolver 
+SparseRow       <-- slower, consumes less memory
+SparseRowCached <-- faster, consumes more memory 
 
 [JSON] 
 JSON directory.
@@ -35,6 +37,7 @@ Json support (taken from M.S.'s new implementation which doesn't depend on anyth
 
 [Io] Input output support
 IoSimple
+ChebyshevSerializer
 
 [Concurrency] To write the same code for serial and MPI (and in
 the future pthreads and GPUs)
@@ -71,11 +74,15 @@ AlmostEqual
 BitManip
 ContinuedFractionCollection
 ContinuedFraction
+ChebyshevFunction
 
 [STL extensions] These add operations to std classes and put those
 extensions in the std namespace, no new classes here!
 Complex
 Vector
 Stack
+
+[TestSuite]
+
 -------------------------------------------------------------------------------
 
