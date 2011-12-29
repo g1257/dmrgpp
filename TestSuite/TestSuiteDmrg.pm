@@ -56,7 +56,8 @@ sub runDmrg
 {
 	my ($inputFile,$raw) = @_;
 
-	die "Missing input file: $!" unless (-r "$inputFile");
+	#print STDERR "raw=$raw\n";
+	die "Missing input file $inputFile: $!\n" unless (-r "$inputFile");
 	
 	my ($specFile, $specKey) = TestSuiteGlobals::getSpecFileAndKey();
 	my $executable = $TestSuiteGlobals::srcDir."dmrg-".$specKey;
