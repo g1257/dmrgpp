@@ -67,6 +67,7 @@ $TestSuiteGlobals::srcDir=$TestSuiteGlobals::testDir."../" unless (-r $TestSuite
 $TestSuiteGlobals::inputsDir = $TestSuiteGlobals::testDir."inputs/";
 $TestSuiteGlobals::oraclesDir = $TestSuiteGlobals::testDir."oracles/";	
 $TestSuiteGlobals::resultsDir = $TestSuiteGlobals::testDir."results/";
+system("mkdir $TestSuiteGlobals::resultsDir") unless (-r "$TestSuiteGlobals::resultsDir");
 
 print "$TestSuiteGlobals::inputsDir\n";
 }
@@ -118,7 +119,8 @@ sub hookGprof
 sub hookDiff
 {
 	my ($analysis, $arg) = @_;
-	
+
+	print STDERR "Diff args are *$arg*\n";
 	eval("system(\"diff $arg\");");
 	if($@) {
 		my $subr = (caller(0))[3];
@@ -361,6 +363,8 @@ sub keyValueParser
 	my $srcDir = $TestSuiteGlobals::srcDir;
 	my $testNum = $TestSuiteGlobals::testNum;
 	my $inputsDir = $TestSuiteGlobals::inputsDir;
+	my $oraclesDir= $TestSuiteGlobals::oraclesDir;
+	my $resultsDir = $TestSuiteGlobals::resultsDir;
 	my @varArray = ("\$executable", "\$srcDir", "\$inputsDir", "\$resultsDir", "\$oraclesDir", "\$testNum");
 	#Variables in @nonSubsArray will not be resolved during the parsing, instead
 	#they are resolved prior to executing the command
@@ -374,6 +378,8 @@ sub keyValueParser
 			$varHash{$_} = eval($_);
 		}
 	}
+
+	#print "RESULTSDIR=$resultsDir ORACLESDIR=$oraclesDir\n";
 	
 	if(@tmpKV = grep {/^$keyword/} @{$opsRef}) {
 		@{$opsRef} = grep {!/^$keyword/} @{$opsRef};
@@ -387,13 +393,14 @@ sub keyValueParser
 	foreach my $comm (@{$opsRef}) {
 		if(@tmpKV) {
 			grep {s/(\$\w+)/$tmpHash{$1}/g} $comm;
-			grep {s/(\$\w+)(\s+)([^<>])/$varHash{$1}$3/g} $comm;
+			#grep {s/(\$\w+)(\s+)([^<>])/$varHash{$1}$3/g} $comm;
 			grep {s/(\$\w+)/$varHash{$1}/g} $comm;
 		}
 		
 		push @commands, $comm;
+		print STDERR "COMM $comm\n";
 	}
-	
+
 	return @commands;
 }
 
@@ -450,7 +457,7 @@ sub hookExecute
 	$arg =~ s/(\))/"$1/g;
 	$arg = "TestSuiteHooks::$arg";
 
-#	print "About to eval $arg;\n";
+	#print "About to eval $arg;\n";
 	eval("$arg;");
 	if($@) {
 		my $subr = (caller(0))[3];
