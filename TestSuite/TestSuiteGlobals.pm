@@ -69,7 +69,7 @@ $TestSuiteGlobals::oraclesDir = $TestSuiteGlobals::testDir."oracles/";
 $TestSuiteGlobals::resultsDir = $TestSuiteGlobals::testDir."results/";
 system("mkdir $TestSuiteGlobals::resultsDir") unless (-r "$TestSuiteGlobals::resultsDir");
 
-print "$TestSuiteGlobals::inputsDir\n";
+#print STDERR "$TestSuiteGlobals::inputsDir\n";
 }
 
 sub doMain
@@ -120,7 +120,7 @@ sub hookDiff
 {
 	my ($analysis, $arg) = @_;
 
-	print STDERR "Diff args are *$arg*\n";
+	#print STDERR "Diff args are *$arg*\n";
 	eval("system(\"diff $arg\");");
 	if($@) {
 		my $subr = (caller(0))[3];
@@ -398,7 +398,7 @@ sub keyValueParser
 		}
 		
 		push @commands, $comm;
-		print STDERR "COMM $comm\n";
+		#print STDERR "COMM $comm\n";
 	}
 
 	return @commands;

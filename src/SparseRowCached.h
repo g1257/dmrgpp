@@ -116,11 +116,12 @@ namespace PsimagLite {
 			counter_++;
 		}
 
-		ValueType matrixVectorProduct(const VectorType& y) const
+		ValueType matrixVectorProduct(const VectorType& y)
 		{
 			ValueType sum = 0;
 			for (size_t i=0;i<counter_;i++)
 				sum += values_[i]*y[cols_[i]];
+			counter_=0;
 			return sum;
 		}
 //		void clear()
