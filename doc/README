@@ -1,0 +1,14 @@
+
+QUESTIONS ABOUT DMRG++ DOCUMENTATION:
+
+Where's manual.tex now?
+When one runs make under dmrgpp/src it should be created automatically.
+If not, one needs to run make in this directory, that is, in dmrgpp/doc.
+
+What does one needs in order to generate manual.tex?
+PsimagDoc, which is included in PsimagLite.
+
+What is PsimagDoc?
+See PsimagDoc/README in the PsimagLite distribution.
+
+
