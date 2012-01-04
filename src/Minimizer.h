@@ -75,6 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+// FIXME: DON'T CALL OR INCLUDE GSL directly, use GslWrapper class
 extern "C" {
 #include <gsl/gsl_multimin.h>
 }
@@ -124,13 +125,10 @@ namespace PsimagLite {
 		{
 		}
 		
-		
 		~Minimizer()
 		{
 			gsl_multimin_fminimizer_free (gslS_);
 		}
-		
-		
 
 		int simplex(VectorType& minVector,RealType delta=1e-3,RealType tolerance=1e-3)
 		{
@@ -171,17 +169,13 @@ namespace PsimagLite {
 			return -1;
 		}
 		
-		
 	private:
-		
 
 		void found(VectorType& minVector,gsl_vector* x,size_t iter)
 		{
 			for (size_t i=0;i<minVector.size();i++)
 				minVector[i] = gsl_vector_get(x,i);
 		}
-		
-		
 		
 		FunctionType& function_;
 		size_t maxIter_;

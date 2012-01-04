@@ -87,13 +87,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <fstream>
 #include "Matrix.h"
+#include <cstdlib>
+#include <map>
 
 namespace PsimagLite {
 	//! IoSimple class handles Input/Output (IO) for the Dmrg++ program 
 	class IoSimple {
+
 	public:
+
 		class Out {
+
 		public:
+
 			Out()  : rank_(0),fout_(0) {}
 
 			Out(std::ostream& os) : rank_(0), filename_("OSTREAM")
@@ -205,266 +211,318 @@ namespace PsimagLite {
 			friend Out& operator<<(Out& io,const X& t);
 
 		private:
+
 			int rank_;
 			std::string filename_;
 			std::ofstream* fout_;
 		};
 
 		class In {
-			public:
-				static const int LAST_INSTANCE=-1;
-				typedef int long long LongIntegerType;
-				typedef unsigned int long long LongSizeType;
 
-				In() { }
+		public:
 
-				In(std::string const &fn) : filename_(fn), fin_(fn.c_str())
-				{
-					if (!fin_ || !fin_.good() || fin_.bad()) {
-						std::string s = "IoSimple::ctor(...): Can't open file "
-								+filename_+"\n";
-						throw std::runtime_error(s.c_str());
-					}
+			static const int LAST_INSTANCE=-1;
+			typedef int long long LongIntegerType;
+			typedef unsigned int long long LongSizeType;
+
+			In() { }
+
+			In(std::string const &fn) : filename_(fn), fin_(fn.c_str())
+			{
+				if (!fin_ || !fin_.good() || fin_.bad()) {
+					std::string s = "IoSimple::ctor(...): Can't open file "
+							+filename_+"\n";
+					throw std::runtime_error(s.c_str());
 				}
+			}
 
-				void open(std::string const &fn)
-				{
-					filename_=fn;
-					fin_.open(fn.c_str());
-					if (!fin_ || !fin_.good() || fin_.bad()) {
-						std::string s = "IoSimpleIn::open(...) failed for file "
-								+ filename_ + "\n";
-						throw std::runtime_error(s.c_str());
-					}
+			void open(std::string const &fn)
+			{
+				filename_=fn;
+				fin_.open(fn.c_str());
+				if (!fin_ || !fin_.good() || fin_.bad()) {
+					std::string s = "IoSimpleIn::open(...) failed for file "
+							+ filename_ + "\n";
+					throw std::runtime_error(s.c_str());
 				}
+			}
 
-				void close() 
-				{
-					filename_="FILE_IS_CLOSED"; 
-					fin_.close(); 
-				}
+			void close() 
+			{
+				filename_="FILE_IS_CLOSED"; 
+				fin_.close(); 
+			}
 
-				template<typename X>
-				size_t readline(
-						X &x,
-						const std::string &s,
-						LongIntegerType level=0)
-				{
-					std::string temp;
-					bool found=false;
-					bool foundOnce =false;
-					LongSizeType counter=0;
-					while(!fin_.eof()) {
-						fin_>>temp;
-						if (fin_.eof()) break;
-						if (temp.substr(0,s.size())==s) {
-							foundOnce =true;
-							std::istringstream temp2(temp.substr(s.size(),
-									temp.size()));
-							temp2 >> x;
-							if (level>=0 && counter==LongSizeType(level)) {
-								found=true;
-								break;
-							}
-							counter++;
+			template<typename X>
+			size_t readline(X &x,const std::string &s,LongIntegerType level=0)
+			{
+				std::string temp;
+				bool found=false;
+				bool foundOnce =false;
+				LongSizeType counter=0;
+				while(!fin_.eof()) {
+					fin_>>temp;
+					if (fin_.eof()) break;
+					if (temp.substr(0,s.size())==s) {
+						foundOnce =true;
+						std::istringstream temp2(temp.substr(s.size(),
+								temp.size()));
+						temp2 >> x;
+						if (level>=0 && counter==LongSizeType(level)) {
+							found=true;
+							break;
 						}
+						counter++;
 					}
-					if (!foundOnce || (!found && level!=LAST_INSTANCE)) {
-						std::string emessage =
-							"IoSimple::In::readline(): Not found "+s+
-							" in file "+filename_;
-						throw std::runtime_error(s);
-					}
-
-					if (level==LAST_INSTANCE) {
-						fin_.close();
-						fin_.open(filename_.c_str());
-						readline(x,s,counter-1);
-					}	
-					return counter;
-					
+				}
+				if (!foundOnce || (!found && level!=LAST_INSTANCE)) {
+					std::string emessage =
+						"IoSimple::In::readline(): Not found "+s+
+						" in file "+filename_;
+					throw std::runtime_error(s);
 				}
 
-				template<typename X>
-				std::pair<std::string,size_t> read(
-						X &x,
-						std::string const &s,
-						LongIntegerType level=0)
-				{
-					std::pair<std::string,size_t> sc = advance(s,level);
-					int xsize;
-					fin_>>xsize;
-					x.resize(xsize);
-					for (int i=0;i<xsize;i++) {
-						typename X::value_type tmp;
-						fin_>>tmp;
-						x[i]=tmp;
-					}
-					return sc;
-				}
+				if (level==LAST_INSTANCE) {
+					fin_.close();
+					fin_.open(filename_.c_str());
+					readline(x,s,counter-1);
+				}	
+				return counter;
 				
-				template<typename X>
-				std::pair<std::string,size_t> readKnownSize(
-						X &x,
-						std::string const &s,
-						LongIntegerType level=0)
-				{
-					std::pair<std::string,size_t> sc = advance(s,level);
-					
-					for (size_t i=0;i<x.size();i++) {
-						typename X::value_type tmp;
-						fin_>>tmp;
-						x[i]=tmp;
-					}
-					return sc;
-				}
+			}
 
-				std::pair<std::string,size_t> advance(
-						std::string const &s,
-						LongIntegerType level=0,
-						bool beQuiet=false)
-				{
-					std::string temp="NOTFOUND";
-					std::string tempSaved="NOTFOUND";
-					LongSizeType counter=0;
-					bool found=false;
-					//size_t c = 0;
-					while(!fin_.eof()) {
-						fin_>>temp;
-						//c++;
-						//std::cerr<<"Line="<<temp<<" target="<<s<<"\n";
-						if (fin_.eof() || !fin_.good() || fin_.bad()) break;
-						
-						if (temp.substr(0,s.size())==s) {
-							tempSaved = temp;
-							if (level>=0 && counter==LongSizeType(level)) {
-								found=true;
-								break;
-							}
-							counter++;
-						}
+			template<typename X>
+			std::pair<std::string,size_t> read(X &x,
+			                                   std::string const &s,
+			                                   LongIntegerType level=0)
+			{
+				std::pair<std::string,size_t> sc = advance(s,level);
+				int xsize;
+				fin_>>xsize;
+				x.resize(xsize);
+				for (int i=0;i<xsize;i++) {
+					typename X::value_type tmp;
+					fin_>>tmp;
+					x[i]=tmp;
+				}
+				return sc;
+			}
+
+			//! Assumes something of the form 
+			//! label[key]=value
+			template<typename X>
+			void read(std::map<std::string,X> &x,
+			          std::string const &s,
+			          LongIntegerType level=0)
+			{
+				size_t counter=0;
+				while(true) {
+					try {
+						std::pair<std::string,size_t> sc = advance(s,level);
+						// sc.first contains the full string and also value
+						std::string key;
+						X val=0;
+						getKey(key,val,sc.first);
+				
+						x[key]=val;
+						counter++;
+					} catch (std::exception& e) {
+						break;
 					}
-					if (level==LAST_INSTANCE && tempSaved!="NOTFOUND") {
-						fin_.close();
-						fin_.open(filename_.c_str());
-						if (counter>1) advance(s,counter-2);
-						return std::pair<std::string,size_t>(tempSaved,counter);
-					}
+				}
+				rewind();
+				if (counter==0) {
+					std::string s (__FILE__);
+					s += " No " + s + " found in the input file or ";
+					s += " could not parse it\n";
+					throw std::runtime_error(s.c_str());
+				}
+			}
+			
+			template<typename X>
+			std::pair<std::string,size_t> readKnownSize(X &x,
+			                                            std::string const &s,
+			                                            LongIntegerType level=0)
+			{
+				std::pair<std::string,size_t> sc = advance(s,level);
+				
+				for (size_t i=0;i<x.size();i++) {
+					typename X::value_type tmp;
+					fin_>>tmp;
+					x[i]=tmp;
+				}
+				return sc;
+			}
+
+			std::pair<std::string,size_t> advance(std::string const &s,
+			                                      LongIntegerType level=0,
+			                                      bool beQuiet=false)
+			{
+				std::string temp="NOTFOUND";
+				std::string tempSaved="NOTFOUND";
+				LongSizeType counter=0;
+				bool found=false;
+				//size_t c = 0;
+				while(!fin_.eof()) {
+					fin_>>temp;
+					//c++;
+					//std::cerr<<"Line="<<temp<<" target="<<s<<"\n";
+					if (fin_.eof() || !fin_.good() || fin_.bad()) break;
 					
-					//std::cerr<<"count="<<c<<"\n";
-					if (!found && tempSaved=="NOTFOUND") {
-						if (!beQuiet) {
-							std::cerr<<"Not found "<<s<<" in file "<<filename_;
-							std::cerr<<" level="<<level<<" counter="<<counter<<"\n";
+					if (temp.substr(0,s.size())==s) {
+						tempSaved = temp;
+						if (level>=0 && counter==LongSizeType(level)) {
+							found=true;
+							break;
 						}
-						throw std::runtime_error("IoSimple::In::read()\n");
+						counter++;
 					}
-					//std::cerr<<"------------\n";
+				}
+				if (level==LAST_INSTANCE && tempSaved!="NOTFOUND") {
+					fin_.close();
+					fin_.open(filename_.c_str());
+					if (counter>1) advance(s,counter-2);
 					return std::pair<std::string,size_t>(tempSaved,counter);
 				}
 				
-				size_t count(const std::string& s)
-				{
-					size_t i = 0;
-					while(i<1000) {
-						try {
-							advance(s,0,true);
-							i++;
-						} catch (std::exception& e) {
-							rewind();
-							return i;
-						}
+				//std::cerr<<"count="<<c<<"\n";
+				if (!found && tempSaved=="NOTFOUND") {
+					if (!beQuiet) {
+						std::cerr<<"Not found "<<s<<" in file "<<filename_;
+						std::cerr<<" level="<<level<<" counter="<<counter<<"\n";
 					}
-					std::string ss = "IoSimple::count(...): too many "
-						+s+" in file "+filename_+"\n";
-					throw std::runtime_error(s.c_str());
-					
+					throw std::runtime_error("IoSimple::In::read()\n");
 				}
-
-				template<typename T>
-				void read(
-						std::vector<std::pair<T,T> > &x,
-						std::string const &s,
-						LongIntegerType level=0)
-				{
-					advance(s,level);
-					int xsize;
-					fin_>>xsize;
-					x.resize(xsize);
-					T tmp1,tmp2;
-					for (int i=0;i<xsize;i++) {
-						fin_>>tmp1;
-						fin_>>tmp2;
-						x[i]=std::pair<T,T>(tmp1,tmp2);
+				//std::cerr<<"------------\n";
+				return std::pair<std::string,size_t>(tempSaved,counter);
+			}
+			
+			size_t count(const std::string& s)
+			{
+				size_t i = 0;
+				while(i<1000) {
+					try {
+						advance(s,0,true);
+						i++;
+					} catch (std::exception& e) {
+						rewind();
+						return i;
 					}
 				}
-
-				template<typename X,template<typename> class SomeType>
-				void readSparseVector(
-						SomeType<X> &x,
-						std::string const &s,
-						LongIntegerType level=0)
-				{
-					advance(s,level);
-					int xsize;
-					fin_>>xsize;
-					x.resize(xsize);
-					fin_>>xsize;
-					for (int i=0;i<xsize;i++) {
-						int index;
-						X value;
-						fin_>>index;
-						fin_>>value;
-						x[index]=value;
-					}
-					
-				}
-
-				template<typename X>
-				void readMatrix(
-						X &mat,
-						std::string const &s,
-						LongIntegerType level= 0)
-				{
-					advance(s,level);
-					fin_>>mat;
-				}
-
-				template<
-					typename FieldType,
-					template <typename> class SparseMatrixTemplate,
-    				template<typename,template<typename> class>
-				class X>
-				void readMatrix(
-						X<FieldType,SparseMatrixTemplate>& op,
-						const std::string& s,
-						LongIntegerType level=0)
-				{
-					advance(s,level);
-					fin_>>op.data;
-					fin_>>op.fermionSign;
-					fin_>>op.j;
-				}
-
-				void rewind()
-				{
-					fin_.clear(); // forget we hit the end of file
-					fin_.seekg(0, std::ios::beg); // move to the start of the file
-				}
-
-				~In() { fin_.close(); }
-
-				const char* filename() const 
-				{
-					return filename_.c_str();
-				}
-
-				template<typename X>
-				friend void operator>>(In& io,X& t);
+				std::string ss = "IoSimple::count(...): too many "
+					+s+" in file "+filename_+"\n";
+				throw std::runtime_error(s.c_str());
 				
-			private:
-				std::string filename_;
-				std::ifstream 	fin_;
+			}
+
+			template<typename T>
+			void read(std::vector<std::pair<T,T> > &x,
+			          std::string const &s,
+			          LongIntegerType level=0)
+			{
+				advance(s,level);
+				int xsize;
+				fin_>>xsize;
+				x.resize(xsize);
+				T tmp1,tmp2;
+				for (int i=0;i<xsize;i++) {
+					fin_>>tmp1;
+					fin_>>tmp2;
+					x[i]=std::pair<T,T>(tmp1,tmp2);
+				}
+			}
+
+			template<typename X,template<typename> class SomeType>
+			void readSparseVector(SomeType<X> &x,
+			                      std::string const &s,
+			                      LongIntegerType level=0)
+			{
+				advance(s,level);
+				int xsize;
+				fin_>>xsize;
+				x.resize(xsize);
+				fin_>>xsize;
+				for (int i=0;i<xsize;i++) {
+					int index;
+					X value;
+					fin_>>index;
+					fin_>>value;
+					x[index]=value;
+				}
+				
+			}
+
+			template<typename X>
+			void readMatrix(X &mat,
+			                std::string const &s,
+			                LongIntegerType level= 0)
+			{
+				advance(s,level);
+				fin_>>mat;
+			}
+
+			template<
+				typename FieldType,
+				template <typename> class SparseMatrixTemplate,
+				template<typename,template<typename> class>
+			class X>
+			void readMatrix(X<FieldType,SparseMatrixTemplate>& op,
+			                const std::string& s,
+			                LongIntegerType level=0)
+			{
+				advance(s,level);
+				fin_>>op.data;
+				fin_>>op.fermionSign;
+				fin_>>op.j;
+			}
+
+			void rewind()
+			{
+				fin_.clear(); // forget we hit the end of file
+				fin_.seekg(0, std::ios::beg); // move to the start of the file
+			}
+
+			~In() { fin_.close(); }
+
+			const char* filename() const 
+			{
+				return filename_.c_str();
+			}
+
+			template<typename X>
+			friend void operator>>(In& io,X& t);
+			
+		private:
+			
+			//! full contains label[key]=value
+			template<typename X>
+			void getKey(std::string& key,X& x,const std::string& full)
+			{
+				size_t i=0;
+				for (;i<full.length();i++) {
+					if (full[i]=='[') break;
+				}
+				key = "";
+				size_t j=i+1;
+				for (;j<full.length();j++) {
+					if (full[j]==']') break;
+					key += full[j];
+				}
+				j++;
+				if (full[j++]!='=') {
+					std::string s(__FILE__);
+					s += "Something failed while parsing line " + full;
+					s += " of input file\n";
+					throw std::runtime_error(s.c_str());
+				}
+				std::string val="";
+				for (size_t k=j;k<full.length();k++)
+					val += full[k];
+				x = atof(val.c_str());
+			}
+
+			std::string filename_;
+			std::ifstream 	fin_;
 		};
 	}; //class IoSimple
 
@@ -482,8 +540,17 @@ namespace PsimagLite {
 		io.fin_>>t;
 	}
 
+	template<typename T1,typename T2>
+	void printMap(std::ostream& os, const std::map<T1,T2>& x,const std::string& label)
+	{
+		typedef typename std::map<T1,T2>::const_iterator MapIteratorType;
+		for (MapIteratorType it = x.begin();it!=x.end();++it) {
+			os<<label<<"["<<it->first<<"]="<<it->second<<"\n";
+		}
+	}
 
 } // namespace PsimagLite 
+
 
 namespace Spf {
 
