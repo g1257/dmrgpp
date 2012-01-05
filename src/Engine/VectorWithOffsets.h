@@ -520,7 +520,7 @@ namespace Dmrg {
 				v.data_[i][j] /= norma;
 		
 	}
-	
+
 	template<typename FieldType>
 	inline std::complex<FieldType> multiply(const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v1,
 	                                        const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v2)
@@ -532,7 +532,7 @@ namespace Dmrg {
 		}
 		return sum;
 	}
-	
+
 	template<typename FieldType>
 	inline FieldType multiply(const Dmrg::VectorWithOffsets<FieldType>& v1,
 	                          const Dmrg::VectorWithOffsets<FieldType>& v2)
@@ -563,7 +563,7 @@ namespace Dmrg {
 		}
 		return sum;
 	}
-	
+
 	template<typename FieldType>
 	inline FieldType operator*(const Dmrg::VectorWithOffsets<FieldType>& v1,
 	                           const Dmrg::VectorWithOffsets<FieldType>& v2)

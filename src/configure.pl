@@ -186,7 +186,7 @@ if ($mpi) {
 }
 print FOUT<<EOF;
 EXENAME = dmrg
-all: \$(EXENAME) doc
+all: \$(EXENAME) 
 
 dmrg.cpp: configure.pl
 	perl configure.pl

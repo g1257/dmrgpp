@@ -101,7 +101,7 @@ namespace Dmrg {
 				  advanceEach(0)
 			{
 				io.rewind();
-				this->concatenation = PRODUCT;
+				
 				io.readline(tau,"TSPTau=");
 				io.readline(timeSteps,"TSPTimeSteps=");
 				io.readline(advanceEach,"TSPAdvanceEach=");
@@ -110,6 +110,7 @@ namespace Dmrg {
 			RealType tau;
 			size_t timeSteps;
 			size_t advanceEach;
+			
 	}; // class TimeStepParams
 	
 	template<typename ModelType>

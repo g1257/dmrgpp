@@ -658,8 +658,7 @@ namespace Dmrg {
 					}
 					return;
 				}
-				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,
-								systemOrEnviron);
+				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,systemOrEnviron);
 			}
 
 			void zeroOutVectors()

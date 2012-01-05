@@ -81,6 +81,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGET_PARAMS_COMMON_H
 #define TARGET_PARAMS_COMMON_H
 #include <vector>
+#include <stdexcept>
+#include <iostream>
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
@@ -105,7 +107,27 @@ namespace Dmrg {
 				//io.readline(filename,"TSPFilename="); // filename
 				io.read(sites,"TSPSites");
 				io.read(startingLoops,"TSPLoops");
-			
+				std::string productOrSum="product";
+				try {
+					io.readline(productOrSum,"TSPProductOrSum=");
+				} catch (std::exception& e) {
+					std::string s(" *** WARNING: Not providing TSPProductOrSum"); 
+					s += " in the input line is deprecated. Assuming PRODUCT. ";
+					s += "Please make sure that's correct.\n";
+					std::cerr<<s;
+					io.rewind();
+				}
+
+				if (productOrSum=="product") {
+					this->concatenation = PRODUCT;
+				} else if (productOrSum=="sum") {
+					this->concatenation = SUM;
+				} else {
+					std::string s(__FILE__);
+					s += " : Unknown concatentation " + productOrSum + "\n";
+					throw std::runtime_error(s.c_str());
+				}
+
 				data_.resize(sites.size());
 				aOperators.resize(sites.size());
 // 				typename ModelType::HilbertBasisType basis;
