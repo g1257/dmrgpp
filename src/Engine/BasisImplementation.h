@@ -122,8 +122,8 @@ namespace Dmrg {
 		BasisImplementation(IoInputter& io,const std::string& ss,size_t counter=0,bool bogus = false)
 				: dmrgTransformed_(false), name_(ss), progress_(ss,0) 
 		{
-			io.advance("#NAME="+ss,counter);
-			loadInternal(io);
+                        io.advance("#NAME="+ss,counter);
+                        loadInternal(io);
 		}
 
 		// use this if you don't know the name

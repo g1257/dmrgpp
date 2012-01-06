@@ -375,7 +375,7 @@ namespace Dmrg {
 				hamiltonian = lrs_.right().hamiltonian();
 				//ns = 
 			}
-			std::cerr<<__FILE__<<":"<<__LINE__<<":\n";
+//			std::cerr<<__FILE__<<":"<<__LINE__<<":\n";
 			PsimagLite::Matrix<SparseElementType> fullm;
 			crsMatrixToFullMatrix(fullm,hamiltonian);
 			//printNonZero(fullm,std::cerr);

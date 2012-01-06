@@ -157,13 +157,13 @@ namespace Dmrg {
 				return flag;
 			}
 
-			void thread_function_(size_t threadNum,size_t blockSize,pthread_mutex_t* myMutex)
+			void thread_function_(size_t threadNum,size_t blockSize,size_t total,pthread_mutex_t* myMutex)
 			{
 				std::vector<SparseElementType> xtemp(x_.size(),0);
 				//for (size_t i=0;i<xtemp.size();i++) xtemp[i]=0;
 				for (size_t p=0;p<blockSize;p++) {
 					size_t ix = threadNum * blockSize + p;
-					if (ix>=lps_.isaved.size()) break;
+					if (ix>=total) break;
 					size_t i=lps_.isaved[ix];
 					size_t j=lps_.jsaved[ix];
 					size_t type=lps_.typesaved[ix];

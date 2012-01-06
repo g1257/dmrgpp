@@ -278,6 +278,7 @@ print FOUT<<EOF;
 #include "ModelHelperSu2.h"
 #include "InternalProductOnTheFly.h"
 #include "InternalProductStored.h"
+#include "InternalProductCached.h"
 #include "GroundStateTargetting.h"
 #include "TimeStepTargetting.h"
 #include "DynamicTargetting.h"
@@ -400,7 +401,13 @@ void mainLoop(ParametersModelType& mp,
 		         VectorWithOffsetTemplate,
 		         TargettingTemplate,
 		         MySparseMatrix>(mp,geometry,dmrgSolverParams,concurrency,io);
-	} else {
+	} else if (dmrgSolverParams.options.find("InternalProductCached")!=std::string::npos) {
+		mainLoop2<ModelHelperTemplate,
+		          InternalProductCached,
+		          VectorWithOffsetTemplate,
+		          TargettingTemplate,
+		          MySparseMatrix>(mp,geometry,dmrgSolverParams,concurrency,io);
+	} else {  
  		mainLoop2<ModelHelperTemplate,
 		         InternalProductOnTheFly,
 		         VectorWithOffsetTemplate,
