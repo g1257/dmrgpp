@@ -201,11 +201,11 @@ namespace Dmrg {
 			}
 		}
 		
-		PsimagLite::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,size_t site,size_t dof) const
 		{
 			Block block;
 			block.resize(1);
-			block[0]=0;
+			block[0]=site;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 

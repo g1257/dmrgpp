@@ -194,12 +194,11 @@ namespace Dmrg {
 			}
 		}
 
-		MatrixType getOperator(const std::string& what,size_t orbital=0,size_t spin=0) const
+		MatrixType naturalOperator(const std::string& what,size_t site,size_t dof) const
 		{
-			throw std::runtime_error("Need site\n");
 			Block block;
 			block.resize(1);
-			block[0]=0;
+			block[0]=site;
 			size_t norb = dOf(block[0])/HilbertSpaceImmmType::NUMBER_OF_SPINS;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);

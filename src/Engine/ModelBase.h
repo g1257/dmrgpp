@@ -85,7 +85,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_MODEL_BASE
 #include <iostream>
 
-#include "ModelCommon.h"
+#include "VerySparseMatrix.h"
+#include "IoSimple.h"
+#include "HamiltonianConnection.h"
 #include "Su2SymmetryGlobals.h"
 
 namespace Dmrg {
@@ -111,11 +113,16 @@ namespace Dmrg {
   	typename LinkProductType,
 	template<typename> class SharedMemoryTemplate>
 	class ModelBase  {
+
+		typedef typename SparseMatrixType::value_type SparseElementType;
+		typedef VerySparseMatrix<SparseElementType> VerySparseMatrixType;
+
 	public:
+
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHelperType::RealType RealType;
-		typedef typename SparseMatrixType::value_type SparseElementType;
+//		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename ModelHelperType::ReflectionSymmetryType
 				ReflectionSymmetryType;
 		typedef typename ModelHelperType::ConcurrencyType
@@ -123,14 +130,16 @@ namespace Dmrg {
 		typedef typename ModelHelperType::BasisType MyBasis;
 		typedef typename ModelHelperType::BasisWithOperatorsType
 				BasisWithOperatorsType;
-		typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelCommonType;
+//		typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelCommonType;
 		typedef DmrgGeometryType GeometryType;
-		typedef typename ModelCommonType::SharedMemoryType SharedMemoryType;
+		typedef HamiltonianConnection<DmrgGeometryType,ModelHelperType,LinkProductType> HamiltonianConnectionType;
+		typedef SharedMemoryTemplate<HamiltonianConnectionType> SharedMemoryType;
+		typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 		typedef typename ModelHelperType::LeftRightSuperType
 				LeftRightSuperType;
 
-		ModelBase(const DmrgGeometryType& dmrgGeometry) :
-				modelCommon_(dmrgGeometry)
+		ModelBase(const DmrgGeometryType& geometry)
+		: dmrgGeometry_(geometry)
 		{
 			Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 			MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
@@ -146,7 +155,12 @@ namespace Dmrg {
 		template<typename SomeVectorType>
 		void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y,ModelHelperType const &modelHelper) const
 		{
-			modelCommon_.matrixVectorProduct(x,y,modelHelper);
+			//! contribution to Hamiltonian from current system
+			modelHelper.hamiltonianLeftProduct(x,y);
+			//! contribution to Hamiltonian from current envirnoment
+			modelHelper.hamiltonianRightProduct(x,y);
+			//! contribution to Hamiltonian from connection system-environment
+			hamiltonianConnectionProduct(x,y,modelHelper);
 		}
 
 		/** !PTEX-START-INTERFACE addHamiltonianConnection
@@ -168,14 +182,21 @@ namespace Dmrg {
 				bs = lrs.super().partition(m+1)-offset;
 				matrixBlock.makeDiagonal(bs);
 				ModelHelperType modelHelper(m,lrs);
-				modelCommon_.addHamiltonianConnection(matrixBlock,modelHelper);
+
+				size_t n = matrix.rank();
+				VerySparseMatrixType vsm(n);
+				addHamiltonianConnection(vsm,modelHelper);
+				SparseMatrixType matrixBlock;
+				matrixBlock = vsm;
+				matrix += matrixBlock;
+
 				sumBlock(matrix,matrixBlock,offset);
 			}
 		}
 
 		size_t maxConnections() const
 		{
-			return modelCommon_.maxConnections();
+			return dmrgGeometry_.maxConnections();
 		}
 		
 		/** !PTEX-START-INTERFACE hamiltonianConnectionProduct
@@ -185,7 +206,24 @@ namespace Dmrg {
 		void hamiltonianConnectionProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
 			ModelHelperType const &modelHelper) const
 		{
-			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
+			size_t n=modelHelper.leftRightSuper().super().block().size();
+
+			//SparseMatrixType matrix;
+			size_t maxSize = maxConnections() * 4 * 16;
+			maxSize *= maxSize;
+
+			static LinkProductStructType lps(maxSize);
+			HamiltonianConnectionType hc(dmrgGeometry_,modelHelper,&lps,&x,&y);
+
+			size_t total = 0;
+			for (size_t i=0;i<n;i++) {
+				for (size_t j=0;j<n;j++) {
+					hc.compute(i,j,0,&lps,total);
+				}
+			}
+
+			SharedMemoryType pthreads;
+			pthreads.loopCreate(total,hc);
 		}
 
 		/** !PTEX-START-INTERFACE fullHamiltonian
@@ -195,20 +233,52 @@ namespace Dmrg {
 		!PTEX-END */
 		void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const
 		{
-			modelCommon_.fullHamiltonian(matrix,modelHelper);
+			SparseMatrixType matrixBlock;
+
+			//! contribution to Hamiltonian from current system
+			modelHelper.calcHamiltonianPart(matrixBlock,true);
+			matrix = matrixBlock;
+
+			//! contribution to Hamiltonian from current envirnoment
+			modelHelper.calcHamiltonianPart(matrixBlock,false);
+			matrix += matrixBlock;
+
+			matrixBlock.clear();
+
+			VerySparseMatrixType vsm(matrix);
+			addHamiltonianConnection(vsm,modelHelper);
+
+			matrix = vsm;
 		}
 
 	private:
 
 		//! Add Hamiltonian connection between basis2 and basis3 in the orderof basis1 for symmetry block m
-		void addHamiltonianConnection(
-				VerySparseMatrix<SparseElementType>& matrix,
-				const ModelHelperType& modelHelper) const
+		void addHamiltonianConnection(VerySparseMatrix<SparseElementType>& matrix,
+					      const ModelHelperType& modelHelper) const
 		{
-			modelCommon_.addHamiltonianConnection(matrix,modelHelper);
+			size_t n=modelHelper.leftRightSuper().sites();
+			size_t matrixRank = matrix.rank();
+			VerySparseMatrixType matrix2(matrixRank);
+			typedef HamiltonianConnection<
+					DmrgGeometryType,
+					ModelHelperType,
+					LinkProductType> SomeHamiltonianConnectionType;
+			SomeHamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
+
+			size_t total = 0;
+			for (size_t i=0;i<n;i++) {
+				for (size_t j=0;j<n;j++) {
+					SparseMatrixType matrixBlock(matrixRank,matrixRank);
+					if (!hc.compute(i,j,&matrixBlock,0,total)) continue;
+					VerySparseMatrixType vsm(matrixBlock);
+					matrix2+=vsm;
+				}
+			}
+			matrix += matrix2;
 		}
 
-		ModelCommonType modelCommon_;
+		const DmrgGeometryType& dmrgGeometry_;
 	};     //class ModelBase
 } // namespace Dmrg
 /*@}*/

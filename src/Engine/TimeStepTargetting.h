@@ -687,10 +687,11 @@ namespace Dmrg {
 			{
 				VectorWithOffsetType dest;
 				OperatorType A = tstStruct_.aOperators[0];
-				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.getOperator("c",0,0));
-				PsimagLite::CrsMatrix<ComplexType> tmpCt;
-				transposeConjugate(tmpCt,tmpC);
-				multiply(A.data,tmpCt,tmpC);
+				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.naturalOperator("nup",site,0));
+				//PsimagLite::CrsMatrix<ComplexType> tmpCt;
+				//transposeConjugate(tmpCt,tmpC);
+				//multiply(A.data,tmpCt,tmpC);
+				A.data = tmpC;
 				A.fermionSign = 1;
 				//A.data = tmpC;
 				std::vector<size_t> electrons;

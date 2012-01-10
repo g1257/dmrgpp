@@ -894,10 +894,11 @@ namespace Dmrg {
 			{
 				VectorWithOffsetType dest;
 				OperatorType A;
-				PsimagLite::CrsMatrix<RealType> tmpC(model_.getOperator("c",0,0));
-				PsimagLite::CrsMatrix<RealType> tmpCt;
-				transposeConjugate(tmpCt,tmpC);
-				multiply(A.data,tmpCt,tmpC);
+				PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("nup",sites.first,0));
+				A.data = tmpC;
+//				PsimagLite::CrsMatrix<RealType> tmpCt;
+//				transposeConjugate(tmpCt,tmpC);
+//				multiply(A.data,tmpCt,tmpC);
 				A.fermionSign = 1;
 				//A.data = tmpC;
 				typename ModelType::HilbertBasisType basis;

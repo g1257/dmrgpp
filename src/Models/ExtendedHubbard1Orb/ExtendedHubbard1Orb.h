@@ -148,22 +148,22 @@ namespace Dmrg {
 			setNi(creationMatrix,block);
 		}
 
-		PsimagLite::Matrix<SparseElementType> getOperator(const std::string& what,
-		                                                  size_t gamma=0,
-		                                                  size_t spin=0) const
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,
+								      size_t site,
+								      size_t dof) const
 		{
 			Block block;
 			block.resize(1);
-			block[0]=0;
+			block[0]=site;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 
 			if (what=="n") {
 				PsimagLite::Matrix<SparseElementType> tmp;
-				crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
+				crsMatrixToFullMatrix(tmp,creationMatrix[2+site*3].data);
 				return tmp;
 			} else {
-				return modelHubbard_.getOperator(what,gamma,spin);
+				return modelHubbard_.naturalOperator(what,site,dof);
 			}
 		}
 

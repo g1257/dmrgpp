@@ -181,28 +181,27 @@ namespace Dmrg {
 			setSz(creationMatrix,block);
 		}
 
-		PsimagLite::Matrix<SparseElementType> getOperator(
-				const std::string& what,
-				size_t orbital=0,
-				size_t spin=0) const
+		PsimagLite::Matrix<SparseElementType> natural(const std::string& what,
+							      size_t site,
+							      size_t dof) const
 		{
 			BlockType block;
 			block.resize(1);
-			block[0]=0;
+			block[0]=site;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 
 			if (what=="z") {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				size_t x = 2*NUMBER_OF_ORBITALS+1;
-				crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
+				crsMatrixToFullMatrix(tmp,creationMatrix[x+6*site].data);
 				return tmp;
 			}
 
 			if (what=="+") {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				size_t x = 2*NUMBER_OF_ORBITALS;
-				crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
+				crsMatrixToFullMatrix(tmp,creationMatrix[x+6*site].data);
 				return tmp;
 			}
 
@@ -210,11 +209,11 @@ namespace Dmrg {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				size_t x = 2*NUMBER_OF_ORBITALS;
 				SparseMatrixType tmp2;
-				transposeConjugate(tmp2,creationMatrix[x].data);
+				transposeConjugate(tmp2,creationMatrix[x+6*site].data);
 				crsMatrixToFullMatrix(tmp,tmp2);
 				return tmp;
 			}
-			return modelFeAs_.getOperator(what,orbital,spin);
+			return modelFeAs_.naturalOperator(what,site,dof);
 		}
 
 		//! find all states in the natural basis for a block of n sites

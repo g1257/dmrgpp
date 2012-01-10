@@ -236,10 +236,18 @@ namespace Dmrg {
 		template<typename SomeModelType>
 		FieldType fourPointDelta(size_t i,size_t j,const std::vector<size_t>& gammas,const SomeModelType& model)
 		{
-			const MatrixType& opC0 = model.getOperator("c",gammas[0],0); // C_{gamma0,up}
-			const MatrixType& opC1 = model.getOperator("c",gammas[1],1); // C_{gamma1,down}
-			const MatrixType& opC2 = model.getOperator("c",gammas[2],1); // C_{gamma2,down}
-			const MatrixType& opC3 = model.getOperator("c",gammas[3],0); // C_{gamma3,up}
+			size_t hs = model.hilbertSize(0);
+			size_t nx = 0;
+			while(hs) {
+				hs>>=1;
+				nx++;
+			}
+			nx /= 2;
+			size_t site = 0;
+			const MatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx); // C_{gamma0,up}
+			const MatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx); // C_{gamma1,down}
+			const MatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx); // C_{gamma2,down}
+			const MatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx); // C_{gamma3,up}
 
 			//if (i+1>=n-1 || j+1>=n-1) return 0;
 			return fourpoint_(

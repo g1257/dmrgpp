@@ -117,8 +117,10 @@ namespace Dmrg {
 				 szsz_(0,0)
 		{
 			if (hasTimeEvolution) {
-				fullMatrixToCrsMatrix(matrixNup_,model_.getOperator("nup"));
-				fullMatrixToCrsMatrix(matrixNdown_,model_.getOperator("ndown"));
+				size_t site = 0;
+				// FIXME: No support for site varying operators
+				fullMatrixToCrsMatrix(matrixNup_,model_.naturalOperator("nup",site,0));
+				fullMatrixToCrsMatrix(matrixNdown_,model_.naturalOperator("ndown",site,0));
 			}
 		}
 
@@ -128,16 +130,16 @@ namespace Dmrg {
 			// since the DmrgSerializer doens't have sites yet
 			// as opposed to the TimeSerializer
 			if (hasTimeEvolution_) printSites();
-
+			size_t site = 0; // FIXME: No support for site varying operators
 			if (label=="cc") {
-				MatrixType opC = model_.getOperator("c",0,0); // c_{0,0} spin up
+				MatrixType opC = model_.naturalOperator("c",site,0); // c_{0,0} spin up
 				MatrixType opCtranspose = transposeConjugate(opC);
 				measureOne("OperatorC",opC,opCtranspose,-1,rows,cols);
 			} else if (label=="nn") {
-				MatrixType opN = model_.getOperator("n");
+				MatrixType opN = model_.naturalOperator("n",site,0);
 				measureOne("OperatorN",opN,opN,1,rows,cols);
 			} else if (label=="szsz") {
-				MatrixType Sz = model_.getOperator("z");
+				MatrixType Sz = model_.naturalOperator("z",site,0);
 				szsz_ = observe_.correlations(Sz,Sz,1,rows,cols);
 				if (concurrency_.root()) {
 					std::cout<<"OperatorSz:\n";
@@ -145,7 +147,7 @@ namespace Dmrg {
 				}
 			} else if (label=="s+s-") {
 				// Si^+ Sj^-
-				const MatrixType& sPlus = model_.getOperator("+");
+				const MatrixType& sPlus = model_.naturalOperator("+",site,0);
 				MatrixType sPlusT = transposeConjugate(sPlus);
 				sPlusSminus_ = observe_.correlations(sPlus,sPlusT,1,rows,cols);
 				if (concurrency_.root()) {
@@ -154,7 +156,7 @@ namespace Dmrg {
 					}
 			} else if (label=="s-s+") {
 				// Si^- Sj^+
-				const MatrixType& sMinus = model_.getOperator("-");
+				const MatrixType& sMinus = model_.naturalOperator("-",site,0);
 				MatrixType sMinusT = transposeConjugate(sMinus);
 				sMinusSplus_= observe_.correlations(sMinus,sMinusT,1,rows,cols);
 				if (concurrency_.root()) {
@@ -179,7 +181,7 @@ namespace Dmrg {
 				}
 			} else if (label=="dd") {
 
-				const MatrixType& oDelta = model_.getOperator("d");
+				const MatrixType& oDelta = model_.naturalOperator("d",site,0);
 				MatrixType oDeltaT;
 				transposeConjugate(oDeltaT,oDelta);
 				measureOne("TWO-POINT DELTA-DELTA^DAGGER",oDelta,oDeltaT,1,

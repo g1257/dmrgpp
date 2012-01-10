@@ -117,8 +117,9 @@ namespace Dmrg {
 		static const int DEGREES_OF_FREEDOM=2;
 		static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
 
-		typedef unsigned int long long WordType;
+		enum {SPIN_UP, SPIN_DOWN};
 
+		typedef unsigned int long long WordType;
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 
@@ -210,38 +211,39 @@ namespace Dmrg {
 		\cppFunction{!PTEX_THISFUNCTION} returns the operator in the 
 		unmangled (natural) basis of one-site
 		!PTEX-END */
-		PsimagLite::Matrix<SparseElementType> getOperator(const std::string& what,size_t gamma=0,size_t spin=0) const
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,size_t site,size_t dof) const
 		{
 			Block block;
 			block.resize(1);
-			block[0]=0;
+			block[0]=site;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
-
+			size_t iup = SPIN_UP + site*DEGREES_OF_FREEDOM;
+			size_t idown = SPIN_DOWN + site*DEGREES_OF_FREEDOM;
 			if (what=="+" or what=="i") {
-				PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[0].data,creationMatrix[1].data);
+				PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[iup].data,creationMatrix[idown].data);
 				return tmp;
 			} else if (what=="-") {
-				PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[1].data,creationMatrix[0].data);
+				PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[idown].data,creationMatrix[iup].data);
 				return tmp;
 			} else if (what=="z") {
-				PsimagLite::Matrix<SparseElementType> tmp =multiplyTc(creationMatrix[0].data,creationMatrix[0].data);
-				PsimagLite::Matrix<SparseElementType> tmp2 =multiplyTc(creationMatrix[1].data,creationMatrix[1].data);
+				PsimagLite::Matrix<SparseElementType> tmp =multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data);
+				PsimagLite::Matrix<SparseElementType> tmp2 =multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
 				return tmp-tmp2;
 			} else if (what=="n") {
-				PsimagLite::Matrix<SparseElementType> tmp =  multiplyTc(creationMatrix[0].data,creationMatrix[0].data)
-						+ multiplyTc(creationMatrix[1].data,creationMatrix[1].data);
+				PsimagLite::Matrix<SparseElementType> tmp =  multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data)
+						+ multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
 				return tmp;
 			} else if (what=="c") {
 				PsimagLite::Matrix<SparseElementType> tmp;
-				crsMatrixToFullMatrix(tmp,creationMatrix[spin].data);
+				crsMatrixToFullMatrix(tmp,creationMatrix[dof + site*DEGREES_OF_FREEDOM].data);
 				return tmp;
 			} else if (what=="nup") {
-				PsimagLite::Matrix<SparseElementType> cup = getOperator("c",0,0);
+				PsimagLite::Matrix<SparseElementType> cup = naturalOperator("c",site,SPIN_UP);
 				PsimagLite::Matrix<SparseElementType> nup = multiplyTransposeConjugate(cup,cup);
 				return nup;
 			} else if (what=="ndown") {
-				PsimagLite::Matrix<SparseElementType> cdown = getOperator("c",0,1);
+				PsimagLite::Matrix<SparseElementType> cdown = naturalOperator("c",site,SPIN_DOWN);
 				PsimagLite::Matrix<SparseElementType> ndown = multiplyTransposeConjugate(cdown,cdown);
 				return ndown;
 			}
