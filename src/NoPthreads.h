@@ -108,7 +108,7 @@ namespace PsimagLite {
 			void loopCreate(size_t total,PthreadFunctionHolderType& pfh)
 			{
 				for (size_t i=0;i<total;i++) 
-					pfh.thread_function_(i,1,0);
+					pfh.thread_function_(i,1,total,0);
 			}
 	}; // NoPthreads
 } // namespace Dmrg

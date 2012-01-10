@@ -91,6 +91,7 @@ struct PthreadFunctionStruct {
 	PthreadFunctionHolderType* pfh;
 	int threadNum;	
 	size_t blockSize;
+	size_t total;
 	pthread_mutex_t* mutex;
 };
 
@@ -101,7 +102,7 @@ void *thread_function_wrapper(void *dummyPtr)
 
 	PthreadFunctionHolderType *pfh = pfs->pfh;
 
-	pfh->thread_function_(pfs->threadNum,pfs->blockSize,pfs->mutex);
+	pfh->thread_function_(pfs->threadNum,pfs->blockSize,pfs->total,pfs->mutex);
 
 	return 0;
 }
@@ -120,11 +121,12 @@ namespace PsimagLite {
 				PthreadFunctionStruct<PthreadFunctionHolderType> pfs[nthreads_];
 				pthread_mutex_init(&(mutex_), NULL);
 				pthread_t thread_id[nthreads_];
-
+//				std::cerr<<"Pthreads: total="<<total<<"\n";
 				for (size_t j=0; j <nthreads_; j++) {
 					int ret=0;
 					pfs[j].threadNum = j;
 					pfs[j].pfh = &pfh;
+					pfs[j].total = total;
 					pfs[j].blockSize = total/nthreads_;
 					if (total%nthreads_!=0) pfs[j].blockSize++;
 					pfs[j].mutex = &mutex_;

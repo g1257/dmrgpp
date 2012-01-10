@@ -86,6 +86,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 
 namespace PsimagLite {
+
+	/** Do not use Rusage directly. In particular, for memory usage
+	 *  use MemoryUsage
+	 */
 	class Rusage {
 	public:
 		enum {USER_TIME,SYSTEM_TIME};
@@ -94,7 +98,6 @@ namespace PsimagLite {
 		//  who can be either RUSAGE_SELF or RUSAGE_CHILDREN
 		Rusage(int who = RUSAGE_SELF) : who_(who)
 		{
-			std::cerr<<"WARNING: Rusage class is deprecated, use MemoryUsage instead\n";
 			getrusage(who,&rusage_);
 		}
 		
