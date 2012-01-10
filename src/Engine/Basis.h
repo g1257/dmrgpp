@@ -81,8 +81,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef BASIS_HEADER_H
 #define BASIS_HEADER_H
-
-#include "BasisImplementation.h"
+#include "Utils.h"
+#include "Sort.h" // in PsimagLite
+#include "HamiltonianSymmetryLocal.h"
+#include "HamiltonianSymmetrySu2.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 	//! A class to represent in a light way a Dmrg basis (used only to implement symmetries).
@@ -90,235 +93,397 @@ namespace Dmrg {
 	template<typename RealType_,typename SparseMatrixType>
 	class	Basis {
 		typedef  Basis<RealType_,SparseMatrixType> ThisType;
-		typedef BasisImplementation<RealType_,SparseMatrixType> BasisImplementationType;
+		typedef HamiltonianSymmetryLocal<RealType_,SparseMatrixType>  HamiltonianSymmetryLocalType;
+		typedef HamiltonianSymmetrySu2<RealType_,SparseMatrixType>  HamiltonianSymmetrySu2Type;
+
 	public:
-		typedef  typename BasisImplementationType::FactorsType FactorsType;
+		typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
+		typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
+		typedef  BasisData<PairType> BasisDataType;
+		typedef std::vector<size_t> BlockType;
+
+		enum {BEFORE_TRANSFORM,AFTER_TRANSFORM};
+
 		typedef RealType_ RealType;
 
-		//! Structure that contains information about the basis 
-		//! see BasisData.h for more info
-		typedef typename BasisImplementationType::BasisDataType BasisDataType;
-
-		//! A vector of sites
-		typedef typename BasisImplementationType::BlockType BlockType;
-
-		//! Constant used by the WaveFunctionTransformation
-		static size_t const BEFORE_TRANSFORM =  BasisImplementationType::BEFORE_TRANSFORM;
-
-		//! Contant used by the WaveFunctionTransformation
-		static size_t const AFTER_TRANSFORM =  BasisImplementationType::AFTER_TRANSFORM;
-
 		//! Constructor, s=name of this basis 
-		Basis(const std::string& s) : basisImplementation_(s) {  }
+		Basis(const std::string& s) : dmrgTransformed_(false), name_(s), progress_(s,0)
+		{
+			symmLocal_.createDummyFactors(1,1);
+		}
 
 		//! Loads this basis from memory or disk
 		template<typename IoInputter>
 		Basis(IoInputter& io,const std::string& ss,size_t counter=0,bool bogus = false)
-		: basisImplementation_(io,ss,counter,bogus)
-		{}
+		: dmrgTransformed_(false), name_(ss), progress_(ss,0)
+		{
+			io.advance("#NAME="+ss,counter);
+			loadInternal(io);
+		}
 
 		//! Loads this basis from memory or disk
 		template<typename IoInputter>
 		void load(IoInputter& io)
 		{
-			basisImplementation_.load(io);
+			std::string nn="#NAME=";
+			std::pair<std::string,size_t> sc = io.advance(nn);
+			name_ = sc.first.substr(nn.size(),sc.first.size());
+			loadInternal(io);
 		}
 
 		//! Returns the name of this basis
-		const std::string& name() const { return  basisImplementation_.name(); }
+		const std::string& name() const { return name_; }
 
 		//! Sets the block of sites for this basis
-		void set(BlockType const &B) { basisImplementation_.set(B); }
+		void set(BlockType const &B) { block_ = B; }
 
 		//! Sets symmetry information for this basis, see BasisData.h for more
-		void setSymmetryRelated(BasisDataType const &q) { basisImplementation_.setSymmetryRelated(q); }
-
-		//! sets this basis to the outer product of basis2 basis3
-		void setToProduct(ThisType const &basis2,ThisType const &basis3,int q =  -1)
+		void setSymmetryRelated(const BasisDataType& basisData)
 		{
-			basisImplementation_.setToProduct(basis2.basisImplementation_,basis3.basisImplementation_,q);
+			if (useSu2Symmetry_) symmSu2_.set(basisData);
+			electrons_.resize(basisData.electronsUp.size());
+			for (size_t i=0;i<basisData.electronsUp.size();i++)
+				electrons_[i]=basisData.electronsUp[i]+basisData.electronsDown[i];
+			findQuantumNumbers(quantumNumbers_,basisData);
+			findPermutationAndPartition();
+			electronsOld_=electrons_;
+		}
+
+
+		/**
+		The quantum numbers of the original (untransformed) real-space basis
+		are set by the model class (to be described in Section~\\ref{subsec:models}),
+		whereas the quantum numbers of outer products are handled
+		by the class \\cppClass{Basis} and \\cppClass{BasisImplementation},
+		function \cppFunction{setToProduct}. This can be done because if $|a\\rangle$
+		has quantum number $q_a$ and $|b\\rangle$ has quantum number
+		$q_b$, then $|a\\rangle\\otimes|b\\rangle$ has quantum number
+		$q_a+q_b$.  \\cppClass{!PTEX_THISCLASS} knows how quantum
+		numbers change when we change the basis: they
+		do not change since the DMRG transformation
+		preserves quantum numbers; and  \\cppClass{!PTEX_THISCLASS} also
+		knows what happens to quantum numbers when we truncate the basis:
+		quantum numbers of discarded states are discarded.
+		In this way, symmetries are implemented efficiently,
+		with minimal dependencies and in a model-independent way.
+		*/
+		void setToProduct(const ThisType& su2Symmetry2,const ThisType& su2Symmetry3,int pseudoQn = -1)
+		{
+			block_.clear();
+			utils::blockUnion(block_,su2Symmetry2.block_,su2Symmetry3.block_); //! B= pS.block Union X
+
+			if (useSu2Symmetry_) {
+				symmSu2_.setToProduct(su2Symmetry2.symmSu2_,su2Symmetry3.symmSu2_,pseudoQn,
+						su2Symmetry2.electrons_,su2Symmetry3.electrons_,electrons_,quantumNumbers_);
+			} else {
+				size_t ns = su2Symmetry2.size();
+				size_t ne = su2Symmetry3.size();
+
+				quantumNumbers_.clear();
+				electrons_.clear();
+
+				for (size_t j=0;j<ne;j++) for (size_t i=0;i<ns;i++) {
+					quantumNumbers_.push_back(su2Symmetry2.quantumNumbers_[i]+su2Symmetry3.quantumNumbers_[j]);
+					electrons_.push_back(su2Symmetry2.electrons(i)+su2Symmetry3.electrons(j));
+				}
+
+				symmLocal_.createDummyFactors(ns,ne);
+			}
+			// order quantum numbers of combined basis:
+			findPermutationAndPartition();
+
+			reorder();
+			electronsOld_ = electrons_;
 		}
 
 		//! returns the effective quantum number of basis state i
 		int qn(int i,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
-			return basisImplementation_.qn(i,beforeOrAfterTransform);
+			if (beforeOrAfterTransform==AFTER_TRANSFORM)
+				return quantumNumbers_[i];
+			return quantumNumbersOld_[i];
 		}
 
 		//! Returns the partition that corresponds to quantum number qn
 		int partitionFromQn(size_t qn,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
-			return basisImplementation_.partitionFromQn(qn,beforeOrAfterTransform);
+			const std::vector<size_t> *quantumNumbers, *partition;
+
+			if (beforeOrAfterTransform==AFTER_TRANSFORM) {
+				quantumNumbers = &quantumNumbers_;
+				partition = &partition_;
+			} else {
+				quantumNumbers = &quantumNumbersOld_;
+				partition = &partitionOld_;
+			}
+
+			for (size_t i=0;i<partition->size();i++) {
+				size_t state = (*partition)[i];
+				if ((*quantumNumbers)[state]==qn) return i;
+			}
+			return -1;
 		}
 
 		//! returns the start of basis partition i (see paper)
 		size_t partition(size_t i,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
-			return basisImplementation_.partition(i,beforeOrAfterTransform);
+			if (beforeOrAfterTransform==AFTER_TRANSFORM)
+				return partition_[i];
+			return partitionOld_[i];
 		}
 
 		//! returns number of partitions for this basis (see paper)
-		size_t partition() const { return basisImplementation_.partition(); }
+		size_t partition() const { return partition_.size(); }
 
 		//! returns the permutation of i 
-		size_t permutation(size_t i) const { return  basisImplementation_.permutation(i); }
+		size_t permutation(size_t i) const { return  permutationVector_[i]; }
 
 		//! Return the permutation vector
 		const std::vector<size_t>& permutationVector() const
 		{
-			return  basisImplementation_.permutationVector();
+			return  permutationVector_;
 		}
 
 		//! returns the inverse permutation of i 
-		int permutationInverse(int i) const { return basisImplementation_.permutationInverse(i); }
+		int permutationInverse(int i) const { return permInverse_[i]; }
 
 		//! returns the inverse permutation vector
-		const std::vector<size_t>& permutationInverse() const { return basisImplementation_.permutationInverse(); }
+		const std::vector<size_t>& permutationInverse() const { return permInverse_; }
 
 		//! returns the block of sites over which this basis is built
-		const BlockType& block() const { return basisImplementation_.block(); }
+		const BlockType& block() const { return block_; }
 
 		//! returns the size of this basis
-		size_t size() const { return basisImplementation_.size(); }
+		size_t size() const { return quantumNumbers_.size(); }
 
 		//! finds the partition that contains basis state i
-		size_t findPartitionNumber(size_t i) const { return basisImplementation_.findPartitionNumber(i); }
+		size_t findPartitionNumber(size_t i) const
+		{
+			for (size_t j=0;j<partition_.size()-1;j++)
+				if (i>=partition_[j] && i<partition_[j+1]) return j;
+			throw std::runtime_error("BasisImplementation:: No partition found for this state\n");
+		}
 
 		//! Encodes the quantum numbers into a single unique size_t and returns it
 		static size_t encodeQuantumNumber(const std::vector<size_t>& quantumNumbers)
 		{
-			return BasisImplementationType::encodeQuantumNumber(quantumNumbers);
+			if (useSu2Symmetry_) return HamiltonianSymmetrySu2Type::encodeQuantumNumber(quantumNumbers);
+			else return HamiltonianSymmetryLocalType::encodeQuantumNumber(quantumNumbers);
 		}
 
 		//! Inverse for encodeQuantumNumber
 		static std::vector<size_t> decodeQuantumNumber(int q)
 		{
-			return BasisImplementationType::decodeQuantumNumber(q);
+			if (useSu2Symmetry_) return HamiltonianSymmetrySu2Type::decodeQuantumNumber(q);
+			else return HamiltonianSymmetryLocalType::decodeQuantumNumber(q);
 		}
 
 		//! Encodes (flavor,jvalue,density) into a unique number and returns it
 		static size_t pseudoQuantumNumber(const std::vector<size_t>& targets)
 		{
-			return BasisImplementationType::pseudoQuantumNumber(targets);
+			if (useSu2Symmetry_)
+				return HamiltonianSymmetrySu2Type::pseudoQuantumNumber(targets);
+			else
+				return HamiltonianSymmetryLocalType::pseudoQuantumNumber(targets);
 		}
 
 		//! Inverse of pseudoQuantumNumber
 		size_t pseudoEffectiveNumber(size_t i) const
 		{
-			return basisImplementation_.pseudoEffectiveNumber(i);
+			if (useSu2Symmetry_) return symmSu2_.pseudoEffectiveNumber(electrons_[i],symmSu2_.jmValue(i).first);
+			else return quantumNumbers_[i];
 		}
 
 		//! Given the information in the structure bdt, calculates the quantum numbers in q
-		static void findQuantumNumbers(std::vector<size_t>& q,const BasisDataType& bdt)
+		static void findQuantumNumbers(std::vector<size_t>& qn,const BasisDataType& basisData)
 		{
-			BasisImplementationType::findQuantumNumbers(q,bdt);
+			if (useSu2Symmetry_) HamiltonianSymmetrySu2Type::findQuantumNumbers(qn,basisData);
+			else HamiltonianSymmetryLocalType::findQuantumNumbers(qn,basisData);
 		}
 
 		//! removes the indices contained in removedIndices and
 		//! transforms this basis by transform 
 		template<typename BlockMatrixType,typename SolverParametersType>
-		RealType changeBasis(typename BlockMatrixType::BuildingBlockType& ftransform,
-		                     BlockMatrixType &transform,
-		                     std::vector<RealType>& eigs,
-		                     size_t kept,
-		                     const SolverParametersType& solverParams)
-		{
-			return basisImplementation_.changeBasis(ftransform,transform,eigs,kept,solverParams);
+		RealType changeBasis(typename BlockMatrixType::BuildingBlockType &ftransform,BlockMatrixType& transform, std::vector<RealType>& eigs,size_t kept,const SolverParametersType& solverParams)
+			{
+			/* if (!isUnitary(transform)) {
+				std::cerr<<"------------------------------------\n";
+				operator<<(transform,std::cerr);
+				throw std::runtime_error("BasisWithOperators::changeBasis(): transform is not unitary.\n");
+
+			}*/
+			quantumNumbersOld_ = quantumNumbers_;
+			partitionOld_ = partition_;
+			dmrgTransformed_=true;
+
+			blockMatrixToFullMatrix(ftransform,transform);
+
+			std::vector<size_t> removedIndices;
+			if (useSu2Symmetry_) symmSu2_.calcRemovedIndices(removedIndices,eigs,kept,solverParams);
+			else symmLocal_.calcRemovedIndices(removedIndices,eigs,kept,solverParams);
+
+			if (removedIndices.size()>0) {
+				std::vector<size_t> perm(removedIndices.size());
+				Sort<std::vector<size_t> > sort;
+				sort.sort(removedIndices,perm);
+				std::ostringstream msg;
+				msg<<"Truncating transform...";
+				utils::truncate(ftransform,removedIndices,false);
+				progress_.printline(msg,std::cerr);
+				/*if (!isUnitary(ftransform)) { // only used for debugging
+					//std::cerr<<"------------------------------------\n";
+					//operator<<(transform,std::cerr);
+					std::cerr<<"------------------------------------\n";
+					std::cerr<<ftransform;
+					throw std::runtime_error("BasisWithOperators::changeBasis(): transform is not unitary.\n");
+
+				}*/
+				std::ostringstream msg2;
+				msg2<<"Truncating indices...";
+				progress_.printline(msg2,std::cerr);
+				truncate(removedIndices);
+			}
+
+			// N.B.: false below means that we don't truncate the permutation vectors
+			//	because they're needed for the WFT
+			findPermutationAndPartition(false);
+			std::ostringstream msg;
+			msg<<"Done with changeBasis";
+			progress_.printline(msg,std::cerr);
+			return calcError(eigs,removedIndices);
 		}
 
 		//! Finds a partition of the basis given the effecitve quantum numbers
-		void findPartition() { return basisImplementation_.findPartition(); }
+		//! Find a partition of the basis given the effecitve quantum numbers
+		//! (see section about Symmetries in paper)
+		void findPartition()
+		{
+			size_t qtmp = quantumNumbers_[0]+1;
+			partition_.clear();
+			for (size_t i=0;i<size();i++) {
+				if (quantumNumbers_[i]!=qtmp) {
+					partition_.push_back(i);
+					qtmp = quantumNumbers_[i];
+				}
+			}
+			partition_.push_back(size());
+		}
 
 		//! Returns the factors that mix this basis 
 		//! If not using SU(2) this is trivial
-		const FactorsType& getFactors() const { return basisImplementation_.getFactors(); }
-
-		//! returns the number of electrons for state i of this basis
-		size_t electrons(size_t i) const { return basisImplementation_.getNe(i); }
-
-		//! returns the flavor of state i of this basis 
-		size_t getFlavor(size_t i) const { return basisImplementation_.getFlavor(i); }
-
-		//! Given the double triplet (f1f2,ne1ne2,j1j2) returns a unique size_t
-		size_t flavor2Index(size_t f1,size_t f2,size_t ne1,size_t ne2,size_t j1,size_t j2) const
+		const FactorsType& getFactors() const
 		{
-			return basisImplementation_.flavor2Index(f1,f2,ne1,ne2,j1,j2);
+			if (useSu2Symmetry_) return symmSu2_.getFactors();
+			else return symmLocal_.getFactors();
 		}
 
-		//! 
-		void flavor2Index(std::map<size_t,size_t>& mm,const std::pair<size_t,size_t>& jm) const
+		//! returns the number of electrons for state i of this basis
+		size_t electrons(size_t i) const { return electrons_[i];  }
+
+		//! returns the flavor of state i of this basis 
+		size_t getFlavor(size_t i) const
 		{
-			basisImplementation_.flavor2Index(mm,jm);
+			if (useSu2Symmetry_) return symmSu2_.getFlavor(i);
+			else return  symmLocal_.getFlavor(i);
+		}
+
+		size_t flavor2Index(size_t f1,size_t f2,size_t ne1,size_t ne2,size_t j1,size_t j2) const
+		{
+			assert(useSu2Symmetry_);
+			return symmSu2_.flavor2Index(f1,f2,ne1,ne2,j1,j2);
+		}
+
+		void flavor2Index(std::map<size_t,size_t>& mm,const PairType& jm) const
+		{
+			assert(useSu2Symmetry_);
+			symmSu2_.flavor2Index(mm,jm);
 		}
 
 		const std::vector<size_t>& flavorsOld() const
 		{
-			return basisImplementation_.flavorsOld();
+			assert(useSu2Symmetry_);
+			return symmSu2_.flavorsOld();
 		}
 
 		//! Returns the vector of electrons for this basis
 		const std::vector<size_t>& electronsVector(size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
-			return basisImplementation_.electronsVector(beforeOrAfterTransform);
+			if (beforeOrAfterTransform == AFTER_TRANSFORM) return electrons_;
+			return electronsOld_;
 		}
 
 		//! Returns the fermionic sign for state i
-		int fermionicSign(size_t i,int f) const { return basisImplementation_.fermionicSign(i,f); }
+		int fermionicSign(size_t i,int f) const { return (electrons_[i]&1) ? f : 1; }
 
 		//! Returns the (j,m) for state i of this basis
-		typename BasisImplementationType::PairType jmValue(size_t i) const { return basisImplementation_.jmValue(i); }
+		PairType jmValue(size_t i) const
+		{
+			if (!useSu2Symmetry_) return PairType(0,0);
+			return symmSu2_.jmValue(i);
+		}
 
 		//! Returns true if using SU(2) symmetry or false otherwise
-		static bool useSu2Symmetry() { return BasisImplementationType::useSu2Symmetry(); }
+		static bool useSu2Symmetry()  { return useSu2Symmetry_; }
 
 		//! Tells this basis to use SU(2) symmetry or not
-		static void useSu2Symmetry(bool tf) {  BasisImplementationType::useSu2Symmetry(tf); }
+		static void useSu2Symmetry(bool flag)  { useSu2Symmetry_=flag; }
 
 		//! Returns true if this basis has been DMRG transformed, or false if it hasn't
-		bool dmrgTransformed() const { return basisImplementation_.dmrgTransformed(); }
+		bool dmrgTransformed() const { return dmrgTransformed_; }
 
 		//! Returns the reduced (by the Wigner Eckart theorem) index corresponding to state i of this basis
 		size_t reducedIndex(size_t i) const
 		{
-			return basisImplementation_.reducedIndex(i);
+			assert(useSu2Symmetry_);
+			return symmSu2_.reducedIndex(i);
 		}
 
 		//! Returns the size of this basis when reduced (by the Wigner-Eckart theorem)
 		size_t reducedSize() const
 		{
-			return basisImplementation_.reducedSize();
+			assert(useSu2Symmetry_);
+			return symmSu2_.reducedSize();
 		}
 
 		//! Returns the i-th distinct j value for this basis
 		size_t jVals(size_t i) const
 		{
-			return basisImplementation_.jVals(i);
+			assert(useSu2Symmetry_);
+			return symmSu2_.jVals(i);
 		}
 
 		//! Returns the number of distinct j values for this basis
 		size_t jVals() const
 		{
-			return basisImplementation_.jVals();
+			assert(useSu2Symmetry_);
+			return symmSu2_.jVals();
 		}
 
 		//! Returns the maximum j value in this basis
 		size_t jMax() const
 		{
-			return basisImplementation_.jMax();
+			//assert(useSu2Symmetry_);
+			return symmSu2_.jMax();
 		}
 
 		//! saves this basis to disk
 		template<typename IoOutputter>
-		void save(IoOutputter& io,const std::string& s) const
+		void save(IoOutputter& io,const std::string& ss) const
 		{
-			basisImplementation_.save(io,s);
+			io.printline("#NAME="+ss);
+			saveInternal(io);
 		}
 
 		//! saves this basis to disk
 		template<typename IoOutputter>
 		void save(IoOutputter& io) const
 		{
-			basisImplementation_.save(io);
+			//std::ostringstream msg;
+			//msg<<"Now saving to disk";
+			//progress_.printline(msg,std::cerr);
+			io.printline("#NAME="+name_);
+			saveInternal(io);
+
 		}
 
 		//! The operator<< is a friend
@@ -329,22 +494,184 @@ namespace Dmrg {
 		friend std::istream& operator>>(std::istream& is,Basis<RealType2,SparseMatrixType2>& x);
 
 	private:
-		BasisImplementationType basisImplementation_;
+		bool dmrgTransformed_;
+		std::string name_;
+		PsimagLite::ProgressIndicator progress_;
+		static bool useSu2Symmetry_;
+
+		/**
+		Symmetries will allow the solver to block the Hamiltonian matrix in blocks, using less memory, speeding up
+		the computation and allowing the code to parallelize matrix blocks related by symmetry.
+		Let us assume that our particular model has $N_s$ symmetries labeled by $0\\le \\alpha < N_s$.
+		Therefore, each element $k$  of the basis has $N_s$ associated ``good'' quantum numbers
+		 $\\tilde{q}_{k,\\alpha}$. These quantum numbers can refer to practically anything,
+		 for example, to number of particles with a given spin or orbital or to the $z$ component of the spin.
+		We do not need to know the details to block the matrix. We know, however, that these numbers are
+		finite, and let $Q$ be an integer such that $\\tilde{q}_{k,\\alpha}< Q$ $\\forall k,\\alpha$.
+		We can then combine all these quantum numbers into a single one,
+		like this: $q_k = \\sum_\\alpha \\tilde{q}_{k,\\alpha} Q^\\alpha$,
+		and this mapping is bijective. In essence, we combined all ``good''
+		quantum numbers into a single one and from now on we
+		will consider that we have only one Hamiltonian symmetry called the
+		``effective'' symmetry, and only one corresponding number $q_k$, the
+		``effective'' quantum number. These numbers are stored in the  member
+		{\\it quantumNumbers} of C++ class \\cppClass{!PTEX_THISCLASS}.
+		(Note that if one has 100 sites or less,\\footnote{This is probably a
+		maximum for systems of correlated electrons such as the Hubbard model
+		or the t-J model.} then the number $Q$ defined above is probably of the
+		order of hundreds for usual symmetries, making this implementation very practical for
+		systems of correlated electrons.)
+		*/
+		std::vector<size_t> quantumNumbers_;
+		std::vector<size_t> quantumNumbersOld_;
+		std::vector<size_t> electrons_;
+		std::vector<size_t> electronsOld_;
+
+		/**
+		What remains to be done is to find a partition of the basis which
+		labels where the quantum number changes. Let us say that the
+		quantum numbers of the reordered basis states are
+		\\[
+		\\{3,3,3,3,8,8,9,9,9,15,\\cdots\\}.
+		\\]
+		Then we define a vector named ``partition'', such that partition[0]=0,
+		partition[1]=4, because the quantum number changes in the 4th position
+		(from 3 to 8), and then partition[2]=6, because the quantum number
+		changes again (from 8 to 9) in the 6th position, etc.
+		Now we know that our Hamiltonian matrix will be composed first of a
+		block of 4x4, then of a block of 2x2, etc.
+		*/
+		std::vector<size_t> partition_;
+		std::vector<size_t> partitionOld_;
+
+		/**
+		We then reorder our basis such that its elements are given in
+		increasing $q$ number. There will be a permutation vector associated
+		with this reordering, that will be stored in the member
+		\\verb!permutationVector! of class \\cppClass{!PTEX_THISCLASS}.
+		For ease of coding we also store its inverse in \\verb!permInverse!.
+		*/
+		std::vector<size_t> permutationVector_;
+		std::vector<size_t> permInverse_;
+		HamiltonianSymmetryLocalType symmLocal_;
+		HamiltonianSymmetrySu2Type symmSu2_;
+		/**
+		The variable block\_ of a \cppClass{DmrgBasis} object indicates over
+		which sites the basis represented by this object is being built.
+		*/
+		BlockType block_;
+
+		template<typename IoInputter>
+		void loadInternal(IoInputter& io)
+		{
+			int x=0;
+			useSu2Symmetry_=false;
+			io.readline(x,"#useSu2Symmetry=");
+			if (x>0) useSu2Symmetry_=true;
+			io.read(block_,"#BLOCK");
+			io.read(quantumNumbers_,"#QN");
+			io.read(electrons_,"#ELECTRONS");
+			io.read(electronsOld_,"#0OLDELECTRONS");
+			io.read(partition_,"#PARTITION");
+			io.read(permInverse_,"#PERMUTATIONINVERSE");
+			permutationVector_.resize(permInverse_.size());
+			for (size_t i=0;i<permInverse_.size();i++) permutationVector_[permInverse_[i]]=i;
+			dmrgTransformed_=false;
+			if (useSu2Symmetry_)
+				symmSu2_.load(io);
+			else
+				symmLocal_.load(io);
+		}
+
+		template<typename IoOutputter>
+		void saveInternal(IoOutputter& io) const
+		{
+			std::string s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
+			io.printline(s);
+			io.printVector(block_,"#BLOCK");
+			io.printVector(quantumNumbers_,"#QN");
+			io.printVector(electrons_,"#ELECTRONS");
+			io.printVector(electronsOld_,"#0OLDELECTRONS");
+			io.printVector(partition_,"#PARTITION");
+			io.printVector(permInverse_,"#PERMUTATIONINVERSE");
+
+			if (useSu2Symmetry_) symmSu2_.save(io);
+			else symmLocal_.save(io);
+		}
+
+		RealType calcError(std::vector<RealType> const &eigs,std::vector<size_t> const &removedIndices)
+		{
+			RealType sum=static_cast<RealType>(0.0);
+			for (size_t i=0;i<eigs.size();i++)
+				if (PsimagLite::isInVector(removedIndices,i)<0) sum+=eigs[i];
+			return 1.0-sum;
+		}
+
+		void truncate(std::vector<size_t> const &removedIndices)
+		{
+			utils::truncateVector(quantumNumbers_,removedIndices);
+			utils::truncateVector(electrons_,removedIndices);
+			if (useSu2Symmetry_) symmSu2_.truncate(removedIndices,electrons_);
+		}
+
+		void reorder()
+		{
+			utils::reorder(electrons_,permutationVector_);
+			if (useSu2Symmetry_) symmSu2_.reorder(permutationVector_);
+		}
+
+		void findPermutationAndPartition(bool changePermutation=true)
+		{
+			if (changePermutation) {
+				permutationVector_.resize(size());
+				if (useSu2Symmetry_) 	{
+					//symmSu2_.orderFlavors(permutationVector_,partition_);
+					for (size_t i=0;i<permutationVector_.size();i++)
+						permutationVector_[i]=i;
+				} else 	{
+					Sort<std::vector<size_t> > sort;
+					sort.sort(quantumNumbers_,permutationVector_);
+				}
+			}
+
+			findPartition();
+
+			if (changePermutation) {
+				permInverse_.resize(permutationVector_.size());
+				for (size_t i=0;i<permInverse_.size();i++)
+					permInverse_[permutationVector_[i]]=i;
+
+			}
+		}
 	}; // class Basis
 
 	template<typename RealType,typename SparseMatrixType>
 	std::ostream& operator<<(std::ostream& os,const Basis<RealType,SparseMatrixType>& x)
 	{
-		os<<x.basisImplementation_;
+		os<<"dmrgTransformed="<<x.dmrgTransformed_<<"\n";
+		os<<"name="<<x.name_<<"\n";
+		os<<"quantumNumbers\n";
+		os<<x.quantumNumbers_;
+		os<<"electrons\n";
+		os<<x.electrons_;
+		os<<"partition\n";
+		os<<x.partition_;
+		os<<"permutation\n";
+		os<<x.permutationVector_;
+		os<<"block\n";
+		os<<x.block_;
 		return os;
 	}
 
 	template<typename RealType,typename SparseMatrixType>
 	std::istream& operator>>(std::istream& is,Basis<RealType,SparseMatrixType>& x)
 	{
-		is>>x.basisImplementation_;
+		throw std::runtime_error("Unimplemented >>");
 		return is;
 	}
+
+	template<typename RealType,typename SparseMatrixType>
+	bool Basis<RealType,SparseMatrixType>::useSu2Symmetry_=false;
 
 } // namespace Dmrg
 
