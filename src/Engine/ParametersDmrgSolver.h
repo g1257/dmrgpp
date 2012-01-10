@@ -112,6 +112,19 @@ namespace Dmrg {
 	Remember that the finite loops start at the middle of the lattice, where the infinite loop left off.
 	\\todo{ADD FIGURE SHOWING WHAT THIS DOES.}
 
+	\\subsubsection{The third number in the triplet}
+	The save option is a bitwise option where the
+	first bit means  ``save or don't save,'' and the second bit
+	``compute the g.s. or WFT it.''
+	So there are 4 combinations (as of today):
+
+	\\begin{tabular}{ll}
+	0 & Don't save, compute the g.~s.\\\\
+	1 & Save, compute the g.~s.\\\\
+	2 & Don't save, WFT the g.~s.\\\\
+	3 & Save, WFT the g.~s.\\\\
+	\\end{tabular}
+
 	\\subsubsection{Caveats and Troubleshooting}
 	\\begin{itemize}
 	\\item If \\verb=nofiniteloops= is an option in the options line of the input file then
@@ -143,22 +156,21 @@ namespace Dmrg {
 		int prevDeltaSign = 1;
 		size_t sopt = 0; // have we started saving yet?
 		for (size_t i=0;i<finiteLoop.size();i++)  {
-			if (sopt == 1 && finiteLoop[i].saveOption ==0) {
+			size_t thisSaveOption = (finiteLoop[i].saveOption & 1);
+			if (sopt == 1 && thisSaveOption ==0) {
 				s = "Error for finite loop number " + ttos(i) + "\n";
 				s += "Once you say 1 on a finite loop, then all";
 				s += " finite loops that follow must have 1.";
 				throw std::runtime_error(s.c_str());
 			}
-			if (sopt == 0 && finiteLoop[i].saveOption ==1) {
+			if (sopt == 0 && thisSaveOption ==1) {
 				sopt = 1;
 				// relaxing this requirement:
 				if (size_t(x) != 1 && size_t(x)!=totalSites-2) {
-					s = "WARNING: EXPERIMENTAL FEATURE HIT: for finite loop number "
+					s = "WARNING: EXPERIMENTAL: for finite loop number "
 						+ ttos(i) + "\n";
 					s += "Saving finite loops must start at the left or";
 					s += " right end of the lattice\n";
-					s += "You will have to use sweeps=" + ttos(x) + 
-						" when running the observer code\n";
 					std::cerr<<s;
 				}
 			}

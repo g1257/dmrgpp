@@ -1,9 +1,10 @@
-CPPFLAGS = -IEngine -IModels/Heisenberg -IModels/HeisenbergSpinOneHalf  -IModels/HubbardOneBand -IModels/FeAsModel -IModels/FeasBasedScExtended -I../../PsimagLite/src -I../../PsimagLite/src/Geometry
+CPPFLAGS = -I../src/Engine -I../src/Models/Heisenberg -I../src/Models/HeisenbergSpinOneHalf  -I../src/Models/HubbardOneBand -I../src/Models/FeAsModel \
+	   -I../src/Models/FeasBasedScExtended -I../../PsimagLite/src -I../../PsimagLite/src/Geometry
 CXX = g++ 
 
 all: manual.pdf
 
-../perlmod/DoxyDocs.pm: ../src/dmrg.o
+../perlmod/DoxyDocs.pm:  ../src/dmrg.o 
 	cd ../src; $(CXX) $(CPPFLAGS) -MM dmrg.cpp  > Makefile.dep
 	cd ../; doxygen
 

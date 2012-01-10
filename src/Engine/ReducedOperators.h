@@ -663,8 +663,8 @@ namespace Dmrg {
 		                   int fermionSign)
 		{
 			size_t n = B.n_row();
-			size_t angularMomentum = 0;
-			if (ki>=0) angularMomentum = momentumOfOperators_[ki];
+			//size_t angularMomentum = 0;
+			//if (ki>=0) angularMomentum = momentumOfOperators_[ki];
 			const std::vector<std::vector<size_t> >* fastBasis = &fastBasisLeft_;
 			if (!order) fastBasis = &fastBasisRight_;
 			for (size_t i0=0;i0<fastBasis->size();i0++) {
