@@ -202,7 +202,9 @@ namespace Dmrg {
 			size_t norb = dOf(block[0])/HilbertSpaceImmmType::NUMBER_OF_SPINS;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
-
+			size_t orbitals = dOf(site)/2;
+			size_t orbital = dof % orbitals;
+			size_t spin = dof / orbitals;
 			if (what=="+" or what=="i") {
 				return cDaggerCi(block,SPIN_UP,SPIN_DOWN);
 			}

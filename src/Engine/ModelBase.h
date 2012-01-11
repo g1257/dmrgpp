@@ -92,7 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	/** !PTEX-START ModelInterface 
+	/**
 	A sample SCE model, the one-band Hubbard model,
 	\[
 	\sum_{i,j,\sigma}t_{ij}c^\dagger_{i\sigma} c_{j\sigma}
@@ -106,7 +106,7 @@ namespace Dmrg {
 	in this abstract class. Note that there are default implementations for
 	some of these functions; they delegate to the \cppClass{ModelCommon} class.
 	Interface (functions in \cppClass{!PTEX_THISCLASS}) are the following.
-	!PTEX-END */
+	*/
 	template<typename ModelHelperType,
 	typename SparseMatrixType,
  	typename DmrgGeometryType,
@@ -145,13 +145,12 @@ namespace Dmrg {
 			MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
 		}
 
-		//! Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
-		//! of basis2 \otimes basis3
-		//! This function does x += H*y
-		/** !PTEX-START-INTERFACE matrixVectorProduct
-		The \cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$. This function
-		has a default implementation.
-		!PTEX-END */
+		/** Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
+		 * of basis2 \otimes basis3
+		 * This function does x += H*y
+		 * The \\cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$. This function
+		 * has a default implementation.
+		 */
 		template<typename SomeVectorType>
 		void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y,ModelHelperType const &modelHelper) const
 		{
@@ -163,15 +162,15 @@ namespace Dmrg {
 			hamiltonianConnectionProduct(x,y,modelHelper);
 		}
 
-		/** !PTEX-START-INTERFACE addHamiltonianConnection
+		/**
 		The function \cppFunction{addHamiltonianConnection} implements
 		the Hamiltonian connection (e.g. tight-binding links in the case of the Hubbard Model
 		or products $S_i\cdot S_j$ in the case of the Heisenberg model) between 
 		two basis, $basis2$ and $basis3$, in the order of the outer product,
-		$basis1={\rm SymmetryOrdering}(basis2\otimes basis3)$. This was 
-		explained before in Section~\ref{subsec:dmrgBasisWithOperators}.
+		$basis1={\\rm SymmetryOrdering}(basis2\otimes basis3)$. This was
+		explained before in Section~\\ref{subsec:dmrgBasisWithOperators}.
 		This function has a default implementation.
-		!PTEX-END */
+		*/
 		void addHamiltonianConnection(SparseMatrixType &matrix,const LeftRightSuperType& lrs) const
 		{
 			int bs,offset;
@@ -183,12 +182,12 @@ namespace Dmrg {
 				matrixBlock.makeDiagonal(bs);
 				ModelHelperType modelHelper(m,lrs);
 
-				size_t n = matrix.rank();
+				size_t n = matrixBlock.rank();
 				VerySparseMatrixType vsm(n);
 				addHamiltonianConnection(vsm,modelHelper);
-				SparseMatrixType matrixBlock;
-				matrixBlock = vsm;
-				matrix += matrixBlock;
+				SparseMatrixType matrixBlock2;
+				matrixBlock2 = vsm;
+				matrixBlock += matrixBlock2;
 
 				sumBlock(matrix,matrixBlock,offset);
 			}
@@ -199,10 +198,10 @@ namespace Dmrg {
 			return dmrgGeometry_.maxConnections();
 		}
 		
-		/** !PTEX-START-INTERFACE hamiltonianConnectionProduct
+		/**
 		Let $H_m$ be the Hamiltonian connection between basis2 and basis3 in 
 		the orderof basis1 for block $m$. Then this function does $x+= H_m *y$
-		!PTEX-END */
+		*/
 		void hamiltonianConnectionProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
 			ModelHelperType const &modelHelper) const
 		{
@@ -226,11 +225,11 @@ namespace Dmrg {
 			pthreads.loopCreate(total,hc);
 		}
 
-		/** !PTEX-START-INTERFACE fullHamiltonian
+		/**
 		Returns H, the hamiltonian of the FeAs model for basis1 and partition 
-		$m$ consisting of the external product of basis2$\otimes$basis3
+		$m$ consisting of the external product of basis2$\\otimes$basis3
 		Note: Used only for debugging purposes
-		!PTEX-END */
+		*/
 		void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const
 		{
 			SparseMatrixType matrixBlock;

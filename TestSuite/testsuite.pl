@@ -50,6 +50,7 @@ but it is hopelessly inadequate for showing their absence." -- Edsger Dijkstra
 use strict;
 use warnings;
 
+use lib "../../PsimagLite/TestSuite";
 use TestSuiteGlobals;
 
 #CHANGE ONLY HERE:
