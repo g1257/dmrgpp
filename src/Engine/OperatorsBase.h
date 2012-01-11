@@ -82,16 +82,38 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef OPERATORS_BASE_H
 #define OPERATORS_BASE_H
 
-#include "OperatorsImplementation.h"
+#include "ReducedOperators.h"
+#include "Range.h"
+#include <cassert>
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
-	//! This class must be inherited
+/**
+The \\cppClass{!PTEX_THISCLASS} class stores the local operators for this basis.
+Only the local operators corresponding to the most recently added sites
+will be meaningful. Indeed, if we  apply transformation $W$ (possibly
+truncating the basis, see Eq.~(\\ref{eq:transformation})) then
+\\begin{equation}
+(W^\\dagger A W)  (W^\\dagger BW) \\neq W^\\dagger  (AB)  W,
+\\end{equation}
+since $WW^\\dagger\\neq 1$ because the DMRG truncation does not assure us
+that $W^\\dagger$ will be the right inverse of $W$ (but $W^\\dagger W=1$
+always holds). Because of this reason we cannot construct the Hamiltonian
+simply from transformed local operators, even if we store them for all sites,
+but we need to store also the Hamiltonian in the most recently transformed
+basis. The fact that \\cppClass{!PTEX_THISCLASS} stores local operators in
+the most recently transformed basis for \\emph{all sites} does not increase
+memory usage too much, and simplifies the writing of code for complicated
+geometries or connections, because all local opeators are availabel at all
+times. Each SCE model class is responsible for determining whether a
+transformed operator can be used (or not because of the reason limitation above).
+*/
 	template<typename OperatorType_,typename BasisType_>
 	class OperatorsBase {
 		
 		typedef std::pair<size_t,size_t> PairType;
-		
+		static const bool EXCLUDE = false;
+
 	public:
 		
 		typedef BasisType_ BasisType;
@@ -99,40 +121,58 @@ namespace Dmrg {
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
 		OperatorsBase(const BasisType* thisBasis)
-		: operatorsImpl_(thisBasis),progress_("Operators",0)
+		: useSu2Symmetry_(BasisType::useSu2Symmetry()),
+		  reducedOpImpl_(thisBasis),
+		  progress_("Operators",0)
 		{}
 
 		template<typename IoInputter>
 		OperatorsBase(IoInputter& io,
 		              size_t level,
 		              const BasisType* thisBasis)
-		: operatorsImpl_(io,level,thisBasis),progress_("Operators",0)
-		{}
+		: useSu2Symmetry_(BasisType::useSu2Symmetry()),
+		  reducedOpImpl_(io,level,thisBasis),
+		  progress_("Operators",0)
+		{
+			if (!useSu2Symmetry_) io.read(operators_,"#OPERATORS");
+
+			io.readMatrix(hamiltonian_,"#HAMILTONIAN");
+			reducedOpImpl_.setHamiltonian(hamiltonian_);
+		}
 
 		template<typename IoInputter>
 		void load(IoInputter& io)
 		{
-			operatorsImpl_.load(io);
+			if (!useSu2Symmetry_)
+				io.read(operators_,"#OPERATORS");
+			else reducedOpImpl_.load(io);
+
+			io.readMatrix(hamiltonian_,"#HAMILTONIAN");
+			reducedOpImpl_.setHamiltonian(hamiltonian_);
 		}
 
 		void setOperators(const std::vector<OperatorType>& ops)
 		{
-			operatorsImpl_.setOperators(ops);
+			if (!useSu2Symmetry_) operators_=ops;
+			else reducedOpImpl_.setOperators(ops);
 		}
 		
 		const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
 		{
-			return operatorsImpl_.getReducedOperatorByIndex(modifier,p);
+			assert(useSu2Symmetry_);
+			return reducedOpImpl_.getReducedOperatorByIndex(modifier,p);
 		}
 
 		const OperatorType& getOperatorByIndex(int i) const
 		{
-			return operatorsImpl_.getOperatorByIndex(i);
+			assert(!useSu2Symmetry_);
+			return operators_[i];
 		}
 
 		const OperatorType& getReducedOperatorByIndex(int i) const
 		{
-			return operatorsImpl_.getReducedOperatorByIndex(i);
+			assert(useSu2Symmetry_);
+			return reducedOpImpl_.getReducedOperatorByIndex(i);
 		}
 
 // 		void getOperatorByIndex(std::string& s,int i) const
@@ -140,7 +180,11 @@ namespace Dmrg {
 // 			operatorsImpl_.getOperatorByIndex(i);
 // 		}
 
-		size_t numberOfOperators() const { return operatorsImpl_.size(); }
+		size_t numberOfOperators() const
+		{
+			if (useSu2Symmetry_) return reducedOpImpl_.size();
+			return operators_.size();
+		}
 
 		template<typename TransformElementType,typename ConcurrencyType>
 		void changeBasis(PsimagLite::Matrix<TransformElementType> const &ftransform,
@@ -148,45 +192,89 @@ namespace Dmrg {
 		                 ConcurrencyType &concurrency)
 // 		                 const std::pair<size_t,size_t>& startEnd)
 		{
-			return operatorsImpl_.changeBasis(ftransform,thisBasis,concurrency);
-// 			                                       startEnd);
-/*			std::ostringstream msg;
-			msg<<"Done with changeBasis";
-			progress_.printline(msg,std::cerr);*/
+			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
+			size_t total = numberOfOperators();
+
+			PsimagLite::Range<ConcurrencyType> range(0,total,concurrency);
+			for (;!range.end();range.next()) {
+				size_t k = range.index();
+				if (isExcluded(k,thisBasis)) {
+					operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
+					continue;
+				}
+				if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform);
+				reducedOpImpl_.changeBasis(k);
+			}
+
+			if (!useSu2Symmetry_) {
+				gather(operators_,concurrency);
+				broadcast(operators_,concurrency);
+			} else {
+				reducedOpImpl_.gather(concurrency);
+				reducedOpImpl_.broadcast(concurrency);
+			}
+
+			changeBasis(hamiltonian_,ftransform);
+			reducedOpImpl_.changeBasisHamiltonian();
 		}
 
 		template<typename TransformElementType>
 		void changeBasis(SparseMatrixType &v,PsimagLite::Matrix<TransformElementType> const &ftransform)
 		{
-			operatorsImpl_.changeBasis(v,ftransform);
+			fullMatrixToCrsMatrix(v,transformFullFast(v,ftransform));
 		}
 
 		void reorder(const std::vector<size_t>& permutation)
 		{
-			operatorsImpl_.reorder(permutation);
+			for (size_t k=0;k<numberOfOperators();k++) {
+				if (!useSu2Symmetry_) reorder(operators_[k].data,permutation);
+				reducedOpImpl_.reorder(k,permutation);
+			}
+			reorder(hamiltonian_,permutation);
+			reducedOpImpl_.reorderHamiltonian(permutation);
 		}
 
-		void reorder(SparseMatrixType &v,const std::vector<size_t>& permutation)
-		{
-			operatorsImpl_.reorder(v,permutation);
-		}
-
-		template<typename Field>
-		void reorder(std::vector<Field> &data,const std::vector<size_t>& permutation)
-		{
-			operatorsImpl_.reorder(data,permutation);
-		}
+//		template<typename Field>
+//		void reorder(std::vector<Field> &data,const std::vector<size_t>& permutation)
+//		{
+//			operatorsImpl_.reorder(data,permutation);
+//		}
 
 		void setMomentumOfOperators(const std::vector<size_t>& momentum)
 		{
-			operatorsImpl_.setMomentumOfOperators(momentum);
+			reducedOpImpl_.setMomentumOfOperators(momentum);
 		}
 
 		void setToProduct(const BasisType& basis2,const BasisType& basis3,size_t x,const BasisType* thisBasis)
 		{
-			operatorsImpl_.setToProduct(basis2,basis3,x,thisBasis);
+			if (!useSu2Symmetry_) operators_.resize(x);
+			reducedOpImpl_.setToProduct(basis2,basis3,x,thisBasis);
 		}
 
+		/**
+		I will know explain how the full outer product between two operators
+		is implemented. If local operator $A$ lives in Hilbert space
+		$\\mathcal{A}$ and local operator $B$ lives in Hilbert space
+		$\\mathcal{B}$, then $C=AB$ lives in Hilbert space
+		$\\mathcal{C}=\\mathcal{A}\\otimes\\mathcal{B}$. Let $\\alpha_1$ and
+		$\\alpha_2$ represent states of $\\mathcal{A}$, and let $\\beta_1$ and
+		$\\beta_2$ represent states of   $\\mathcal{B}$. Then, in the product
+		basis, $C_{\\alpha_1,\\beta_1;\\alpha_2,\\beta_2}=A_{\\alpha_1,\\alpha_2}
+		B_{\\beta_1,\\beta_2}$. Additionally,  $\\mathcal{C}$ is reordered
+		such that each state of this outer product basis is labeled in
+		increasing effective quantum number (see
+		Section~\\ref{sec:dmrgbasis}). In the previous example, if the Hilbert
+		spaces  $\\mathcal{A}$ and $\\mathcal{B}$ had sizes $a$ and $b$,
+		respectively, then their outer product would have size $ab$.
+		When we add sites to the system (or the environment) the memory
+		usage remains bounded by the truncation, and it is usually not a
+		problem to store full product matrices, as long as we do it in a
+		sparse way (DMRG++ uses compressed row storage). In short, local
+		operators are always stored in the most recently transformed basis
+		for \\emph{all sites} and, if applicable, \\emph{all values} of the
+		internal degree of freedom $\\sigma$. See !PTEX\\_REF{setToProductOps}
+		and !PTEX\\_REF{HERE}.
+		*/
 		template<typename ApplyFactorsType>
 		void externalProduct(size_t i,
 		                     const OperatorType& m,
@@ -195,7 +283,13 @@ namespace Dmrg {
 		                     bool option,
 		                     ApplyFactorsType& apply)
 		{
-			operatorsImpl_.externalProduct(i,m,x,fermionicSigns,option,apply);
+			if (useSu2Symmetry_) std::cerr<<"#######EEEEEEEEERRRRRRRRRRRRRROOOOOOOOOOORRRRRRRRRR\n";
+			PsimagLite::externalProduct(operators_[i].data,m.data,x,fermionicSigns,option);
+			// don't forget to set fermion sign and j:
+			operators_[i].fermionSign=m.fermionSign;
+			operators_[i].jm=m.jm;
+			operators_[i].angularFactor=m.angularFactor;
+			apply(operators_[i].data);
 		}
 
 		void externalProductReduced(size_t i,
@@ -204,13 +298,21 @@ namespace Dmrg {
 		                            bool option,
 		                            const OperatorType& A)
 		{
-			operatorsImpl_.externalProductReduced(i,basis2,basis3,option,A);
+			reducedOpImpl_.externalProduct(i,basis2,basis3,option,A);
 		}
 
 		template<typename ApplyFactorsType>
 		void outerProductHamiltonian(const SparseMatrixType& h2,const SparseMatrixType& h3,ApplyFactorsType& apply)
 		{
-			operatorsImpl_.outerProductHamiltonian(h2,h3,apply);
+			SparseMatrixType tmpMatrix;
+			std::vector<double> ones(h2.rank(),1.0);
+			PsimagLite::externalProduct(hamiltonian_,h2,h3.rank(),ones,true);
+
+			PsimagLite::externalProduct(tmpMatrix,h3,h2.rank(),ones,false);
+
+			hamiltonian_ += tmpMatrix;
+
+			apply(hamiltonian_);
 		}
 
 		void outerProductHamiltonianReduced(const BasisType& basis2,
@@ -218,28 +320,65 @@ namespace Dmrg {
 		                                    const SparseMatrixType& h2,
 		                                    const SparseMatrixType& h3)
 		{
-			operatorsImpl_.outerProductHamiltonianReduced(basis2,basis3,h2,h3);
+			reducedOpImpl_.outerProductHamiltonian(basis2,basis3,h2,h3);
 		}
 
-		void setHamiltonian(SparseMatrixType const &h) { operatorsImpl_.setHamiltonian(h); }
+		void setHamiltonian(SparseMatrixType const &h)
+		{
+			hamiltonian_=h;
+			reducedOpImpl_.setHamiltonian(h);
+		}
 
-		const SparseMatrixType& hamiltonian() const { return operatorsImpl_.hamiltonian(); }
+		const SparseMatrixType& hamiltonian() const { return hamiltonian_; }
 
-		const SparseMatrixType& reducedHamiltonian() const { return operatorsImpl_.reducedHamiltonian(); }
+		const SparseMatrixType& reducedHamiltonian() const
+		{
+			return reducedOpImpl_.hamiltonian();
+		}
 
-		const std::vector<size_t>& electrons() const {return operatorsImpl_.electrons(); }
+		//const std::vector<size_t>& electrons() const {return operatorsImpl_.electrons(); }
 
-		void print(int i= -1) const { operatorsImpl_.print(i); }
+		void print(int ind= -1) const
+		{
+			if (!useSu2Symmetry_) {
+				if (ind<0) for (size_t i=0;i<operators_.size();i++) std::cerr<<operators_[i];
+				else std::cerr<<operators_[ind];
+			} else {
+				reducedOpImpl_.print(ind);
+			}
+		}
 
 		template<typename IoOutputter>
 		void save(IoOutputter& io,const std::string& s) const
 		{
-			operatorsImpl_.save(io,s);
+			if (!useSu2Symmetry_) io.printVector(operators_,"#OPERATORS");
+			else reducedOpImpl_.save(io,s);
+			io.printMatrix(hamiltonian_,"#HAMILTONIAN");
 		}
 
 	private:
 
-		OperatorsImplementation<OperatorType,BasisType> operatorsImpl_;
+		void reorder(SparseMatrixType &v,const std::vector<size_t>& permutation)
+		{
+			SparseMatrixType matrixTmp;
+
+			permute(matrixTmp,v,permutation);
+			permuteInverse(v,matrixTmp,permutation);
+		}
+
+		bool isExcluded(size_t k,
+			       const BasisType* thisBasis)
+// 		               const std::pair<size_t,size_t>& startEnd)
+		{
+			if (!EXCLUDE) return false; // <-- this is the safest answer
+// 			if (k<startEnd.first || k>=startEnd.second) return true;
+			return false;
+		}
+
+		bool useSu2Symmetry_;
+		ReducedOperators<OperatorType,BasisType> reducedOpImpl_;
+		std::vector<OperatorType> operators_;
+		SparseMatrixType hamiltonian_;
 		PsimagLite::ProgressIndicator progress_;
 	}; //class OperatorsBase 
 } // namespace Dmrg

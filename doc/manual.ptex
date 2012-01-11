@@ -305,18 +305,18 @@ There will also be at this point another 50 sites that constitute the environmen
 Now, from the beginning each of these 100 sites is given a fixed number from 0 to 99. 
 Therefore, sites are always labeled in a fixed way and 
 their labels are always known (see Fig.~\ref{fig:sxye}).
-\ptexPaste{Dmrg::BasisImplementation,block_}
+\ptexPaste{Dmrg::Basis,block_}
 
-\ptexPaste{Dmrg::BasisImplementation}
+\ptexPaste{Dmrg::Basis}
 
-\ptexPaste{Dmrg::BasisImplementation,quantumNumbers_}
+\ptexPaste{Dmrg::Basis,quantumNumbers_}
 
-\ptexPaste{Dmrg::BasisImplementation,permutationVector_}
+\ptexPaste{Dmrg::Basis,permutationVector_}
 
-\ptexPaste{Dmrg::BasisImplementation,partition_}
+\ptexPaste{Dmrg::Basis,partition_}
 
 \subsection{Local Symmetries}
-\ptexPaste{Dmrg::BasisImplementation,setToProduct()}
+\ptexPaste{Dmrg::Basis,setToProduct()}
 
 \subsection{SU(2) Symmetry}
 
@@ -329,9 +329,9 @@ the function grow().
 
 \ptexPaste{Dmrg::LeftRightSuper,grow()}
 
-\ptexPaste{Dmrg::OperatorsImplementation,externalProduct}
+\ptexPaste{Dmrg::OperatorsBase,externalProduct}
 
-\ptexPaste{Dmrg::OperatorsImplementation}
+\ptexPaste{Dmrg::OperatorsBase}
 
 Let us now examine in more detail Fig.~\ref{fig:infiniteloop}(c), where 
 we form the outer product of the current system and current environment, and calculate its Hamiltonian.
