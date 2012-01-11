@@ -678,16 +678,15 @@ namespace Dmrg {
 //				io_.printline(s);
 //			}
 
-			void test(	
-					const VectorWithOffsetType& src1,
-					const VectorWithOffsetType& src2,
-					size_t systemOrEnviron,
-				 	const std::string& label,
-					size_t site) const
+			void test(const VectorWithOffsetType& src1,
+				  const VectorWithOffsetType& src2,
+				  size_t systemOrEnviron,
+				  const std::string& label,
+				  size_t site) const
 			{
 				VectorWithOffsetType dest;
 				OperatorType A = tstStruct_.aOperators[0];
-				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.naturalOperator("nup",site,0));
+				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.naturalOperator("nup",0,0));
 				//PsimagLite::CrsMatrix<ComplexType> tmpCt;
 				//transposeConjugate(tmpCt,tmpC);
 				//multiply(A.data,tmpCt,tmpC);

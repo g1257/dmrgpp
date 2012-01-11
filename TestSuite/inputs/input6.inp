@@ -13,7 +13,7 @@ SolverOptions=hasQuantumNumbers,nowft,useSu2Symmetry,
 Version=87130fef45b3531ba1469a90d0ec76325e133e1a
 OutputFile=data6.txt
 InfiniteLoopKeptStates=226
-FiniteLoops 4 29 226 0 -29 226 0 -29 226 9 29 226 0
+FiniteLoops 4 29 226 0 -29 226 0 -29 226 0 29 226 0
 TargetQuantumNumbers 3 0.5 0.5 0.166667
 
    

@@ -118,6 +118,8 @@ namespace Dmrg {
 					io.rewind();
 				}
 
+				//! Concatenation specifies what to do with
+				//! operators at different sites, add them or multiply them
 				if (productOrSum=="product") {
 					this->concatenation = PRODUCT;
 				} else if (productOrSum=="sum") {
@@ -166,21 +168,16 @@ namespace Dmrg {
 				}
 			}
 			
-			// I know, there is public data here FIXME!!
-			//std::string filename;
 			std::vector<size_t> sites;
 			std::vector<size_t> startingLoops;
 			size_t concatenation;
 			std::vector<OperatorType> aOperators;
-// 			std::vector<size_t> electrons;
-			//! Concatenation specifies what to do with
-			//! operators at different sites, add them or multiply them
 		
 		private:
 
 			void setCookedData(size_t i,const std::string& s,const std::vector<size_t>& v)
 			{
-				data_[i]=model_.getOperator(s,v[0],v[1]);
+				data_[i]=model_.naturalOperator(s,v[0],v[1]);
 			}
 			
 			void setRawData(size_t i,const MatrixType& m)
