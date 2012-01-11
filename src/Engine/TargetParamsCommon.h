@@ -139,13 +139,10 @@ namespace Dmrg {
 					std::string s;
 					io.readline(s,"TSPOperator=");
 					if (s == "cooked") {
-						std::string s1 = "Cooked operators no longer supported in input.\n";
-						s1 += "Please enter a RAW MATRIX\n";
-						throw std::runtime_error(s1.c_str());
-						//io.readline(s,"COOKED_OPERATOR=");
-						//std::vector<size_t> v;
-						//io.read(v,"COOKED_EXTRA");
-						//setCookedData(i,s,v);
+						io.readline(s,"COOKED_OPERATOR=");
+						std::vector<size_t> v;
+						io.read(v,"COOKED_EXTRA");
+						setCookedData(i,s,v);
 					} else {
 						PsimagLite::Matrix<ComplexOrReal> m;
 						io.readMatrix(m,"RAW_MATRIX");
@@ -180,10 +177,11 @@ namespace Dmrg {
 			//! operators at different sites, add them or multiply them
 		
 		private:
-//			void setCookedData(size_t i,const std::string& s,const std::vector<size_t>& v)
-//			{
-//				data_[i]=model_.getOperator(s,v[0],v[1]);
-//			}
+
+			void setCookedData(size_t i,const std::string& s,const std::vector<size_t>& v)
+			{
+				data_[i]=model_.getOperator(s,v[0],v[1]);
+			}
 			
 			void setRawData(size_t i,const MatrixType& m)
 			{
