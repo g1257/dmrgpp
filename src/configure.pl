@@ -595,12 +595,12 @@ bool observeOneFullSweep(
 	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,concurrency,verbose);
 	
 	bool ot = false;
-	if (obsOptions.find("ot") || obsOptions.find("time")) ot = true;
+	if (obsOptions.find("ot")!=std::string::npos || obsOptions.find("time")!=std::string::npos) ot = true;
 	if (hasTimeEvolution && ot) {
 		observerLib.measureTime("superDensity");
 		observerLib.measureTime("nupNdown");
 		observerLib.measureTime("nup+ndown");
-		if (obsOptions.find("sz")) observerLib.measureTime("sz");
+		if (obsOptions.find("sz")!=std::string::npos) observerLib.measureTime("sz");
 	}
 
 	if (hasTimeEvolution) observerLib.setBrackets("time","time");
