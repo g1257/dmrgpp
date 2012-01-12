@@ -228,6 +228,10 @@ namespace Dmrg {
 				A = matrixNup_;
 				A += matrixNdown_;
 				measureTimeObsOne(A,"nup+ndown");
+			} else if (label=="sz") {
+				A = matrixNup_;
+				A += (-1)*matrixNdown_;
+				measureTimeObsOne(A,"sz");
 			} else {
 				std::string s = "Unknown label: " + label + "\n";
 					throw std::runtime_error(s.c_str());

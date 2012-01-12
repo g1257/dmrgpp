@@ -600,6 +600,7 @@ bool observeOneFullSweep(
 		observerLib.measureTime("superDensity");
 		observerLib.measureTime("nupNdown");
 		observerLib.measureTime("nup+ndown");
+		if (obsOptions.find("sz")) observerLib.measureTime("sz");
 	}
 
 	if (hasTimeEvolution) observerLib.setBrackets("time","time");
