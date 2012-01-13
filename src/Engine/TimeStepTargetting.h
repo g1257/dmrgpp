@@ -365,13 +365,32 @@ namespace Dmrg {
 			void cocoon(size_t direction,const BlockType& block) const
 			{
 				size_t site = block[0];
+				OperatorType A = tstStruct_.aOperators[0];
+				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.naturalOperator("nup",0,0));
+				//PsimagLite::CrsMatrix<ComplexType> tmpCt;
+				//transposeConjugate(tmpCt,tmpC);
+				//multiply(A.data,tmpCt,tmpC);
+				A.data = tmpC;
+				A.fermionSign = 1;
+				//A.data = tmpC;
 				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
-				test(psi_,psi_,direction,"<PSI|A|PSI>",site);
+				test(psi_,psi_,direction,"<PSI|A|PSI>",site,A);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
-					test(targetVectors_[j],targetVectors_[j],direction,s,site);
+					test(targetVectors_[j],targetVectors_[j],direction,s,site,A);
 				}
+
+				// tests for time dependent Hamiltonians:
+				size_t jj = targetVectors_.size() - 1;
+				std::string s("<PSI");
+				s += "|P"+ttos(jj)+">";
+				OperatorType Identity = tstStruct_.aOperators[0];
+				PsimagLite::CrsMatrix<ComplexType> identity2(tmpC.rank(),tmpC.rank());
+				identity2.makeDiagonal(identity2.rank(),1.0);
+				Identity.data = identity2;
+				Identity.fermionSign = 1;
+				test(psi_,targetVectors_[jj],direction,s,site,Identity);
 				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
 			}
 
@@ -684,20 +703,13 @@ namespace Dmrg {
 				  const VectorWithOffsetType& src2,
 				  size_t systemOrEnviron,
 				  const std::string& label,
-				  size_t site) const
+				  size_t site,
+				  const OperatorType& A) const
 			{
-				VectorWithOffsetType dest;
-				OperatorType A = tstStruct_.aOperators[0];
-				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.naturalOperator("nup",0,0));
-				//PsimagLite::CrsMatrix<ComplexType> tmpCt;
-				//transposeConjugate(tmpCt,tmpC);
-				//multiply(A.data,tmpCt,tmpC);
-				A.data = tmpC;
-				A.fermionSign = 1;
-				//A.data = tmpC;
 				std::vector<size_t> electrons;
 				findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
+				VectorWithOffsetType dest;
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
 				ComplexType sum = 0;

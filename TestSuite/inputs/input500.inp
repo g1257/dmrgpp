@@ -1,0 +1,40 @@
+TotalNumberOfSites=16 
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+
+hubbardU	16 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+potentialV	 32 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+                1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+TimeVaryingPotential=1
+SolverOptions=wft,TimeStepTargetting
+Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
+OutputFile=data500.txt
+InfiniteLoopKeptStates=150 
+FiniteLoops 9  7 200 0 -7 200 1 -7 200 1 7 200 1
+		7 200 1 -7 200 1 -7 200 1 7 200 1
+		7 200 1
+TargetQuantumNumbers 2 0.5 0.5
+
+TSPTau=0.1
+TSPTimeSteps=5
+TSPAdvanceEach=4
+TSPSites 1 9
+TSPLoops 1 0
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+1.0    0.0    0.0   0.0
+0.0    1.0     0.0    0.0
+0.0    0.0    1.0   0.0 
+0.0    0.0    0.0   1.0 
+FERMIONSIGN=1
+JMVALUES 0 0
+AngularFactor=1
+
+
+
+   
