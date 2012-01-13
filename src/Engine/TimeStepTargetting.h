@@ -293,6 +293,7 @@ namespace Dmrg {
 				     	size_t lastI)
 			{
 				static size_t  timesWithoutAdvancement=0;
+				static bool firstSeeLeftCorner = false;
 
 				if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return 0;
 
@@ -309,15 +310,18 @@ namespace Dmrg {
 					stage_[i] = WFT_ADVANCE;
 					if (i==lastI) {
 						currentTime_ += tstStruct_.tau;
-						timesWithoutAdvancement=0;
+						timesWithoutAdvancement=1;
 					}
 				} else {
-					if (i==lastI && stage_[i]==WFT_NOADVANCE) 
+					if (i==lastI && stage_[i]==WFT_NOADVANCE && firstSeeLeftCorner)
 						timesWithoutAdvancement++;
 				}
 
+				if (!firstSeeLeftCorner && i==lastI && stage_[i]==WFT_NOADVANCE && site==1)
+					firstSeeLeftCorner=true;
+
 				std::ostringstream msg2;
-				msg2<<"Steps without advance: "<<timesWithoutAdvancement;
+				msg2<<"Steps without advance: "<<timesWithoutAdvancement<<" site="<<site<<" currenTime="<<currentTime_;
 				if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
 				
 				std::ostringstream msg;
@@ -345,7 +349,6 @@ namespace Dmrg {
 					v += w;
 				}
 			}
-
 
 			template<typename IoOutputType>
 			void save(const std::vector<size_t>& block,IoOutputType& io) const
