@@ -98,7 +98,7 @@ namespace Dmrg {
 			typename ConcurrencyType_,
    			typename IoType_,
       			template<typename> class VectorWithOffsetTemplate>
-	class GroundStateTargetting  {
+	class GroundStateTargetting {
 		public:
 			typedef ModelType_ ModelType;
 			typedef ConcurrencyType_ ConcurrencyType;
@@ -226,6 +226,8 @@ namespace Dmrg {
 						"GST::load(...): site cannot be negative\n");
 				psi_.load(io,"PSI");
 			}
+
+			RealType time() const { return 0; }
 
 		private:
 			VectorWithOffsetType psi_;

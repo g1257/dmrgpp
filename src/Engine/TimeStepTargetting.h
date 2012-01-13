@@ -211,6 +211,8 @@ namespace Dmrg {
 
 			bool includeGroundStage() const {return true; }
 
+			const RealType& time() const {return currentTime_; }
+
 			size_t size() const
 			{
 				if (allStages(DISABLED)) return 0;
@@ -526,13 +528,13 @@ namespace Dmrg {
 
 			void calcTargetVector(
 						ComplexVectorType& r,
-      						const VectorWithOffsetType& phi,
+						const VectorWithOffsetType& phi,
 						const ComplexMatrixType& T,
 						const ComplexMatrixType& V,
 						RealType Eg,
-      						const VectorType& eigs,
-	    					RealType t,
-	  					size_t steps,
+						const VectorType& eigs,
+						RealType t,
+						size_t steps,
 						size_t i0)
 			{
 				size_t n2 = steps;
@@ -542,7 +544,7 @@ namespace Dmrg {
 				// for (size_t j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
 				ComplexType zone = 1.0;
 				ComplexType zzero = 0.0;
-				
+
 				ComplexVectorType tmp(n2);
 				r.resize(n2);
 				calcR(r,T,V,phi,Eg,eigs,t,steps,i0);
@@ -553,12 +555,12 @@ namespace Dmrg {
 
 			void calcR(
 				ComplexVectorType& r,
-    				const ComplexMatrixType& T,
+				const ComplexMatrixType& T,
 				const ComplexMatrixType& V,
-    				const VectorWithOffsetType& phi,
-    				RealType Eg,
+				const VectorWithOffsetType& phi,
+				RealType Eg,
 				const VectorType& eigs,
-    				RealType t,
+				RealType t,
 				size_t n2,
 				size_t i0)
 			{
@@ -579,7 +581,7 @@ namespace Dmrg {
 			{
 				ComplexType ret = 0;
 				size_t total = phi.effectiveSize(i0);
-				
+
 				for (size_t j=0;j<total;j++)
 					ret += conj(V(j,kprime))*phi.fastAccess(i0,j);
 				return ret;

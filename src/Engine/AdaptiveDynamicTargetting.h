@@ -271,6 +271,8 @@ namespace Dmrg {
 			psi_.load(io,"PSI");
 		}
 
+		RealType time() const { return 0; }
+
 	private:
 
 		void evolve(RealType Eg,size_t direction,size_t site,size_t loopNumber)

@@ -217,10 +217,11 @@ namespace Dmrg {
 				SparseMatrixType hmatrix;
 				BasisDataType q;
 
-				model_.setNaturalBasis(creationMatrix,hmatrix,q,E);
+				RealType time = 0;
+				model_.setNaturalBasis(creationMatrix,hmatrix,q,E,time);
 				pE.setVarious(E,hmatrix,q,creationMatrix);
 
-				model_.setNaturalBasis(creationMatrix,hmatrix,q,S);
+				model_.setNaturalBasis(creationMatrix,hmatrix,q,S,time);
 				pS.setVarious(S,hmatrix,q,creationMatrix);
 				infiniteDmrgLoop(S,X,Y,E,pS,pE,psi);
 			}
@@ -300,15 +301,15 @@ namespace Dmrg {
 				TargettingType& psi)
 		{
 			checkpoint_.push(pS,pE);
-			
+			RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
 			for (size_t step=0;step<X.size();step++) {
 				std::ostringstream msg;
 				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
 				progress_.printline(msg,std::cout);
 
 				
-				lrs_.growLeftBlock(model_,pS,X[step]); // grow system
-				lrs_.growRightBlock(model_,pE,Y[step]); // grow environment
+				lrs_.growLeftBlock(model_,pS,X[step],time); // grow system
+				lrs_.growRightBlock(model_,pE,Y[step],time); // grow environment
 
 				progress_.print("Growth done.\n",std::cout);
 				lrs_.printSizes("Infinite",std::cout);
@@ -414,11 +415,12 @@ namespace Dmrg {
 				if (size_t(stepCurrent_)>=sitesIndices_.size())
 					throw std::runtime_error("stepCurrent_ too large!\n");
 
+				RealType time = target.time();
 				if (direction==EXPAND_SYSTEM) {
-					lrs_.growLeftBlock(model_,pS,sitesIndices_[stepCurrent_]);
+					lrs_.growLeftBlock(model_,pS,sitesIndices_[stepCurrent_],time);
 					lrs_.right(checkpoint_.shrink(ProgramGlobals::ENVIRON));
 				} else {
-					lrs_.growRightBlock(model_,pE,sitesIndices_[stepCurrent_]);
+					lrs_.growRightBlock(model_,pE,sitesIndices_[stepCurrent_],time);
 					lrs_.left(checkpoint_.shrink(ProgramGlobals::SYSTEM));
 				}
 

@@ -342,6 +342,8 @@ namespace Dmrg {
 // 				psi_.save(io,"PSI");
 			}
 
+			RealType time() const { return 0; }
+
 		private:
 
 			void evolve(size_t index,

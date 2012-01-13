@@ -89,6 +89,7 @@ namespace Dmrg {
 	template<typename BasisWithOperatorsType_,typename SuperBlockType>
 	class LeftRightSuper {
 		public:
+			typedef typename SuperBlockType::RealType RealType;
 			typedef BasisWithOperatorsType_ BasisWithOperatorsType;
 			typedef typename BasisWithOperatorsType::BasisType BasisType;
 			typedef typename BasisType::BasisDataType BasisDataType;
@@ -165,21 +166,21 @@ namespace Dmrg {
 			}
 
 			template<typename SomeModelType>
-			void growLeftBlock(
-					const SomeModelType& model,
-					BasisWithOperatorsType &pS,
-					BlockType const &X)
+			void growLeftBlock(const SomeModelType& model,
+					   BasisWithOperatorsType &pS,
+					   BlockType const &X,
+					   RealType time)
 			{
-				grow(*left_,model,pS,X,GROW_TO_THE_RIGHT);
+				grow(*left_,model,pS,X,GROW_TO_THE_RIGHT,time);
 			}
 
 			template<typename SomeModelType>
-			void growRightBlock(
-					const SomeModelType& model,
-					BasisWithOperatorsType &pE,
-					BlockType const &X)
+			void growRightBlock(const SomeModelType& model,
+					    BasisWithOperatorsType &pE,
+					    BlockType const &X,
+					    RealType time)
 			{
-				grow(*right_,model,pE,X,GROW_TO_THE_LEFT);
+				grow(*right_,model,pE,X,GROW_TO_THE_LEFT,time);
 			}
 
 			void printSizes(const std::string& label,std::ostream& os) const
@@ -271,17 +272,17 @@ namespace Dmrg {
 			to  \\cppFunction{pSprime.setHamiltonian(matrix)}. 
 			*/
 			template<typename SomeModelType>
-			void grow(
-					BasisWithOperatorsType& leftOrRight,
-					const SomeModelType& model,
-					BasisWithOperatorsType &pS,
-					BlockType const &X,
-					size_t dir)
+			void grow(BasisWithOperatorsType& leftOrRight,
+			          const SomeModelType& model,
+			          BasisWithOperatorsType &pS,
+			          BlockType const &X,
+			          size_t dir,
+				  RealType time)
 			{
 				SparseMatrixType hmatrix;
 				BasisDataType q;
 				std::vector<OperatorType> creationMatrix;
-				model.setNaturalBasis(creationMatrix,hmatrix,q,X);
+				model.setNaturalBasis(creationMatrix,hmatrix,q,X,time);
 				BasisWithOperatorsType Xbasis("Xbasis");
 
 				Xbasis.setVarious(X,hmatrix,q,creationMatrix);

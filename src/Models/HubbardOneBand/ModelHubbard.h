@@ -157,7 +157,11 @@ namespace Dmrg {
 		fixed density, the number of electrons for each state is also needed.
 		!PTEX-END */
 		//! for each state in the basis
-		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,SparseMatrixType &hamiltonian,BasisDataType &q,Block const &block) const
+		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
+				     SparseMatrixType &hamiltonian,
+				     BasisDataType &q,
+				     Block const &block,
+				     RealType time) const
 		{
 			HilbertBasisType natBasis;
 			std::vector<size_t> quantumNumbs;
@@ -169,7 +173,7 @@ namespace Dmrg {
 			setSymmetryRelated(q,natBasis,block.size());
 
 			//! set hamiltonian
-			calcHamiltonian(hamiltonian,creationMatrix,block);
+			calcHamiltonian(hamiltonian,creationMatrix,block,time);
 		}
 
 		/*!PTEX-START-INTERFACE setOperatorMatrices
@@ -493,7 +497,10 @@ namespace Dmrg {
 		}
 
 		//! Full hamiltonian from creation matrices cm
-		void calcHamiltonian(SparseMatrixType &hmatrix,std::vector<OperatorType> const &cm,Block const &block) const
+		void calcHamiltonian(SparseMatrixType &hmatrix,
+				     std::vector<OperatorType> const &cm,
+				     Block const &block,
+				     RealType time) const
 		{
 			size_t n=block.size();
 			//int type,sigma;

@@ -190,6 +190,8 @@ namespace Dmrg {
 			{
 				return targetVectors_[i];
 			}
+
+			RealType time() const { return 0; }
 			
 			void evolve(RealType Eg,
 			            size_t direction,
@@ -205,7 +207,8 @@ namespace Dmrg {
 				SparseMatrixType hmatrix;
 				BasisDataType q;
 
-				model_.setNaturalBasis(creationMatrix,hmatrix,q,block1);
+				RealType time = 0;
+				model_.setNaturalBasis(creationMatrix,hmatrix,q,block1,time);
 				std::vector<size_t> electronsOneSite(q.electronsUp.size());
 				for (size_t i=0;i<electronsOneSite.size();i++)
 					electronsOneSite[i] = q.electronsUp[i] + q.electronsDown[i];

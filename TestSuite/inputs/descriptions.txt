@@ -50,6 +50,7 @@ Tests *with* SU(2) symmetry:
 200) Time Evolution
 201) Restart of 200, tests checkpointing with time vectors
 340) A test of the Fe-based Superconductors extended model
+410) Postprocessing of time evolution for Hubbard model
 600) Test on 6-site chain with U=10, standard Hubbard model. 
 	Tests the density and double occupation of a time vector,
 	defined as exp(iHt) h d |gs>, where h a holon and d a doublon.
