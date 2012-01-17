@@ -90,9 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg { 	
 	
-	template<typename LeftRightSuperType_,
-		typename ReflectionSymmetryType_,
-		typename ConcurrencyType_>
+	template<typename LeftRightSuperType_,typename ConcurrencyType_>
 	class ModelHelperSu2  {
 		
 		typedef std::pair<size_t,size_t> PairType;
@@ -106,7 +104,7 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-		typedef ReflectionSymmetryType_ ReflectionSymmetryType;
+//		typedef ReflectionSymmetryType_ ReflectionSymmetryType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
@@ -115,10 +113,10 @@ namespace Dmrg {
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef Link<SparseElementType,RealType> LinkType;
 		
-		ModelHelperSu2(int m,const LeftRightSuperType& lrs,bool useReflection=false)
+		ModelHelperSu2(int m,const LeftRightSuperType& lrs)
 		: m_(m),
 		  lrs_(lrs),
-		  reflection_(useReflection),
+//		  reflection_(useReflection),
 // 		  numberOfOperators_(lrs_.left().numberOfOperatorsPerSite()),
 		  su2reduced_(m,lrs)
 		{}
@@ -128,7 +126,7 @@ namespace Dmrg {
 		int size() const
 		{
 			int tmp = lrs_.super().partition(m_+1)-lrs_.super().partition(m_);
-			return reflection_.size(tmp);
+			return tmp; //reflection_.size(tmp);
 		}
 
 		int quantumNumber() const
@@ -433,28 +431,28 @@ namespace Dmrg {
 			else calcHamiltonianPartRight(matrixBlock);
 		}
 
-		void getReflectedEigs(
-				RealType& energyTmp,std::vector<SparseElementType>& tmpVec,
-				RealType energyTmp1,const std::vector<SparseElementType>& tmpVec1,
-				RealType energyTmp2,const std::vector<SparseElementType>& tmpVec2) const
-		{
-			reflection_.getReflectedEigs(energyTmp,tmpVec,energyTmp1,tmpVec1,energyTmp2,tmpVec2);
-		}
+//		void getReflectedEigs(
+//				RealType& energyTmp,std::vector<SparseElementType>& tmpVec,
+//				RealType energyTmp1,const std::vector<SparseElementType>& tmpVec1,
+//				RealType energyTmp2,const std::vector<SparseElementType>& tmpVec2) const
+//		{
+//			reflection_.getReflectedEigs(energyTmp,tmpVec,energyTmp1,tmpVec1,energyTmp2,tmpVec2);
+//		}
 
-		void setReflectionSymmetry(size_t reflectionSector)
-		{
-			reflection_.setReflectionSymmetry(reflectionSector);
-		}
+//		void setReflectionSymmetry(size_t reflectionSector)
+//		{
+//			reflection_.setReflectionSymmetry(reflectionSector);
+//		}
 
-		void printFullMatrix(const SparseMatrixType& matrix) const
-                {
-                        reflection_.printFullMatrix(matrix);
-                }
+//		void printFullMatrix(const SparseMatrixType& matrix) const
+//                {
+//                        reflection_.printFullMatrix(matrix);
+//                }
 
-		void printFullMatrixMathematica(const SparseMatrixType& matrix) const
-                {
-                        reflection_.printFullMatrixMathematica(matrix);
-                }	
+//		void printFullMatrixMathematica(const SparseMatrixType& matrix) const
+//                {
+//                        reflection_.printFullMatrixMathematica(matrix);
+//                }
 
 		size_t m() const {return m_;}
 
@@ -466,10 +464,9 @@ namespace Dmrg {
 	private:
 		int m_;
 		const LeftRightSuperType&  lrs_;
-		ReflectionSymmetryType reflection_;
+//		ReflectionSymmetryType reflection_;
 // 		size_t numberOfOperators_;
-		Su2Reduced<LeftRightSuperType,ReflectionSymmetryType_,ConcurrencyType_>
-				su2reduced_;
+		Su2Reduced<LeftRightSuperType,ConcurrencyType_> su2reduced_;
 	};
 } // namespace Dmrg
 /*@}*/

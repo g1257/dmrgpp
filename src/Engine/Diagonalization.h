@@ -116,7 +116,7 @@ namespace Dmrg {
                         const ModelType& model,
                         ConcurrencyType& concurrency,
                         const bool& verbose,
-                        const bool& useReflection,
+//                        const bool& useReflection,
                         IoOutType& io,
                         const size_t& quantumSector,
                        WaveFunctionTransfType& waveFunctionTransformation)
@@ -124,7 +124,7 @@ namespace Dmrg {
 		  model_(model),
 		  concurrency_(concurrency),
 		  verbose_(verbose),
-		  useReflection_(useReflection),
+//		  useReflection_(useReflection),
 		  io_(io),
 		  progress_("Diag.",0),
 		  quantumSector_(quantumSector),
@@ -313,7 +313,7 @@ namespace Dmrg {
 			std::vector<RealType> tmpVec1,tmpVec2;
 			//srand48(7123443);
 
-			typename ModelType::ModelHelperType modelHelper(i,lrs,useReflection_);
+			typename ModelType::ModelHelperType modelHelper(i,lrs); //,useReflection_);
 
 			if (parameters_.options.find("debugmatrix")!=std::string::npos) {
 				SparseMatrixType fullm;
@@ -343,15 +343,15 @@ namespace Dmrg {
 		
 		template<typename SomeVectorType>
 		void diagonaliseOneBlock(int i,
-     		SomeVectorType &tmpVec,
-	  		double &energyTmp,
-			typename ModelType::ModelHelperType& modelHelper,
-     		const SomeVectorType& initialVector,
-			size_t iter,
-     		RealType eps,
-       		int reflectionSector= -1)
+					 SomeVectorType &tmpVec,
+					 double &energyTmp,
+					 typename ModelType::ModelHelperType& modelHelper,
+					 const SomeVectorType& initialVector,
+					 size_t iter,
+					 RealType eps)
+//       		int reflectionSector= -1)
 		{
-			if (reflectionSector>=0) modelHelper.setReflectionSymmetry(reflectionSector);
+			//if (reflectionSector>=0) modelHelper.setReflectionSymmetry(reflectionSector);
 			int n = modelHelper.size();
 			if (verbose_) std::cerr<<"Lanczos: About to do block number="<<i<<" of size="<<n<<"\n";
 
@@ -384,7 +384,7 @@ namespace Dmrg {
 		const ModelType& model_;
 		ConcurrencyType& concurrency_;
 		const bool& verbose_;
-		const bool& useReflection_;
+		//const bool& useReflection_;
 		IoOutType& io_;
 		PsimagLite::ProgressIndicator progress_;
 		const size_t& quantumSector_; // this needs to be a reference since DmrgSolver will change it

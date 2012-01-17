@@ -111,7 +111,7 @@ namespace Dmrg {
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 		typedef typename ModelHelperType::BlockType Block;
-		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
+//		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef LinkProductImmm<ModelHelperType> LinkProductType;
 		typedef  HilbertSpaceImmm<WordType> HilbertSpaceImmmType;
@@ -155,7 +155,8 @@ namespace Dmrg {
 		void setNaturalBasis(std::vector<OperatorType>& creationMatrix,
 		                     SparseMatrixType& hamiltonian,
 		                     BasisDataType& q,
-		                     const Block& block)  const
+				     const Block& block,
+				     size_t time)  const
 		{
 			assert(block.size()==1);
 			std::vector<HilbertState> natBasis;

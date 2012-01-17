@@ -86,9 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  */
 namespace Dmrg {
-	template<typename LeftRightSuperType,
-	         typename ReflectionSymmetryType,
-	         typename ConcurrencyType>
+	template<typename LeftRightSuperType,typename ConcurrencyType>
 	class Su2Reduced {
 		typedef typename LeftRightSuperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::SparseMatrixType SparseMatrixType;

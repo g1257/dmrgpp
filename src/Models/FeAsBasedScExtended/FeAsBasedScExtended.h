@@ -141,15 +141,15 @@ namespace Dmrg {
 		//! find creation operator matrices for (i,sigma) in the natural basis,
 		//! find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(
-				std::vector<OperatorType> &creationMatrix,
-				SparseMatrixType &hamiltonian,
-				BasisDataType &q,
-				BlockType const &block)  const
+		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
+				     SparseMatrixType &hamiltonian,
+				     BasisDataType &q,
+				     BlockType const &block,
+				     size_t time)  const
 		{
 			blockIsSize1OrThrow(block);
 
-			modelFeAs_.setNaturalBasis(creationMatrix,hamiltonian,q,block);
+			modelFeAs_.setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
 
 			// add S^+_i to creationMatrix
 			setSplus(creationMatrix,block);
@@ -181,9 +181,9 @@ namespace Dmrg {
 			setSz(creationMatrix,block);
 		}
 
-		PsimagLite::Matrix<SparseElementType> natural(const std::string& what,
-							      size_t site,
-							      size_t dof) const
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,
+								      size_t site,
+								      size_t dof) const
 		{
 			BlockType block;
 			block.resize(1);

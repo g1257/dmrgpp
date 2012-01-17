@@ -273,7 +273,6 @@ print FOUT<<EOF;
 #include "NoPthreads.h"
 #define PTHREADS_NAME NoPthreads
 #endif
-#include "ReflectionSymmetryEmpty.h"
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
 #include "InternalProductOnTheFly.h"
@@ -332,7 +331,7 @@ void mainLoop3(ParametersModelType& mp,
 	dmrgSolver.main(geometry);
 }
 
-template<template<typename,typename,typename> class ModelHelperTemplate,
+template<template<typename,typename> class ModelHelperTemplate,
          template<typename,typename> class InternalProductTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
@@ -347,13 +346,12 @@ void mainLoop2(ParametersModelType& mp,
               ConcurrencyType& concurrency,
               IoInputType& io)
 {
-	typedef ReflectionSymmetryEmpty<MatrixElementType,MySparseMatrix> ReflectionSymmetryType;
 	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
 	typedef Basis<MatrixElementType,MySparseMatrix> BasisType;
 	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
 	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
-	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
+	typedef ModelHelperTemplate<LeftRightSuperType,ConcurrencyType> ModelHelperType;
 	typedef $modelName<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
 	
 	if (dmrgSolverParams.options.find("ChebyshevSolver")!=std::string::npos) {
@@ -381,7 +379,7 @@ void mainLoop2(ParametersModelType& mp,
 	}
 }
 
-template<template<typename,typename,typename> class ModelHelperTemplate,
+template<template<typename,typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
                   template<typename,typename> class,
@@ -535,7 +533,6 @@ print OBSOUT<<EOF;
 #include "$concurrencyName.h" 
 #include "Geometry.h" 
 #include "CrsMatrix.h"
-#include "ReflectionSymmetryEmpty.h"
 #ifdef USE_PTHREADS
 #include "Pthreads.h"
 #define PTHREADS_NAME Pthreads
@@ -655,7 +652,7 @@ EOF
 	return observerLib.endOfData();
 }
 
-template<template<typename,typename,typename> class ModelHelperTemplate,
+template<template<typename,typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
                   template<typename,typename> class,
@@ -671,14 +668,13 @@ void mainLoop(ParametersModelType& mp,
               const std::string& datafile,
               const std::string& obsOptions)
 {
-	typedef ReflectionSymmetryEmpty<RealType,MySparseMatrix> ReflectionSymmetryType;
 	typedef Operator<RealType,MySparseMatrix> OperatorType;
 	typedef Basis<RealType,MySparseMatrix> BasisType;
 	typedef $operatorsName<OperatorType,BasisType> OperatorsType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
-	typedef ModelHelperTemplate<LeftRightSuperType,ReflectionSymmetryType,ConcurrencyType> ModelHelperType;
+	typedef ModelHelperTemplate<LeftRightSuperType,ConcurrencyType> ModelHelperType;
 	typedef $modelName<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
 	typedef TargettingTemplate<PsimagLite::LanczosSolver,
 	                           InternalProductOnTheFly,

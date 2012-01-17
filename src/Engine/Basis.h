@@ -92,9 +92,11 @@ namespace Dmrg {
 	//! (See corresponding section in paper)
 	template<typename RealType_,typename SparseMatrixType>
 	class	Basis {
+
 		typedef  Basis<RealType_,SparseMatrixType> ThisType;
 		typedef HamiltonianSymmetryLocal<RealType_,SparseMatrixType>  HamiltonianSymmetryLocalType;
 		typedef HamiltonianSymmetrySu2<RealType_,SparseMatrixType>  HamiltonianSymmetrySu2Type;
+//		typedef Reflection ReflectionSymmetryType;
 
 	public:
 		typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
@@ -107,7 +109,8 @@ namespace Dmrg {
 		typedef RealType_ RealType;
 
 		//! Constructor, s=name of this basis 
-		Basis(const std::string& s) : dmrgTransformed_(false), name_(s), progress_(s,0)
+		Basis(const std::string& s)
+		: dmrgTransformed_(false), name_(s), progress_(s,0)
 		{
 			symmLocal_.createDummyFactors(1,1);
 		}
@@ -494,10 +497,6 @@ namespace Dmrg {
 		friend std::istream& operator>>(std::istream& is,Basis<RealType2,SparseMatrixType2>& x);
 
 	private:
-		bool dmrgTransformed_;
-		std::string name_;
-		PsimagLite::ProgressIndicator progress_;
-		static bool useSu2Symmetry_;
 
 		/**
 		Symmetries will allow the solver to block the Hamiltonian matrix in blocks, using less memory, speeding up
@@ -643,6 +642,13 @@ namespace Dmrg {
 
 			}
 		}
+
+		bool dmrgTransformed_;
+		std::string name_;
+		PsimagLite::ProgressIndicator progress_;
+//		ReflectionSymmetryType reflection_;
+		static bool useSu2Symmetry_;
+
 	}; // class Basis
 
 	template<typename RealType,typename SparseMatrixType>

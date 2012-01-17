@@ -112,7 +112,7 @@ namespace Dmrg {
 		typedef typename HilbertSpaceFeAsType::HilbertState HilbertState;
 		
 		typedef typename ModelHelperType::BlockType Block;
-		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
+//		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 		
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;
@@ -146,8 +146,11 @@ namespace Dmrg {
 
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,SparseMatrixType &hamiltonian,
-				BasisDataType &q,Block const &block)  const
+		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
+				     SparseMatrixType &hamiltonian,
+				     BasisDataType &q,
+				     Block const &block,
+				     size_t time)  const
 		{
 			std::vector<HilbertState> natBasis;
 			std::vector<size_t> qvector;

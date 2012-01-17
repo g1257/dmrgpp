@@ -121,7 +121,7 @@ namespace Dmrg {
 
 		typedef unsigned int long long WordType;
 		typedef typename ModelHelperType::BlockType Block;
-		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
+//		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 
 	public:
 

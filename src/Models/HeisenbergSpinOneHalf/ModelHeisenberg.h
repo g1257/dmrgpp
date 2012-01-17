@@ -112,7 +112,7 @@ namespace Dmrg {
 	private:
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
+//		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 		typedef unsigned int long long WordType;
 		typedef HilbertSpaceHubbard<WordType> HilbertSpaceType;
 		typedef typename HilbertSpaceType::HilbertState HilbertStateType;
@@ -151,9 +151,10 @@ namespace Dmrg {
 		//! find  operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
 		void setNaturalBasis(std::vector<OperatorType> &operatorMatrices,
-    	                     SparseMatrixType &hamiltonian,
+				     SparseMatrixType &hamiltonian,
 		                     BasisDataType &q,
-    	                     Block const &block) const
+				     Block const &block,
+				     size_t time) const
 		{
 			std::vector<HilbertStateType> natBasis;
 			

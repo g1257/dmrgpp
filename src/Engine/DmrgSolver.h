@@ -148,7 +148,7 @@ namespace Dmrg {
 		  concurrency_(concurrency),
 		  targetStruct_(targetStruct),
 		  verbose_(false),
-		  useReflection_(false),
+//		  useReflection_(false),
 		  lrs_("pSprime","pEprime","pSE"),
 		  io_(parameters_.filename,concurrency.rank()),
 		  ioIn_(parameters_.filename),
@@ -158,7 +158,8 @@ namespace Dmrg {
 		  checkpoint_(parameters_,concurrency.rank()),
 		  wft_(parameters_),
 		  diagonalization_(parameters,model,concurrency,verbose_,
-		                   useReflection_,io_,quantumSector_,wft_),
+				   //useReflection_,
+				   io_,quantumSector_,wft_),
 		  truncate_(lrs_,wft_,concurrency_,
 		            parameters_,model_.maxConnections(),verbose_)
 		{

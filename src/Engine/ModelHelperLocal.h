@@ -88,7 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 
 namespace Dmrg {
-	template<typename LeftRightSuperType_,typename ReflectionSymmetryType_,typename ConcurrencyType_>
+	template<typename LeftRightSuperType_,typename ConcurrencyType_>
 	class ModelHelperLocal {
 
 		typedef PsimagLite::PackIndices PackIndicesType;
@@ -100,7 +100,6 @@ namespace Dmrg {
 		typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename OperatorsType::OperatorType OperatorType;
-		typedef ReflectionSymmetryType_ ReflectionSymmetryType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
@@ -120,8 +119,8 @@ namespace Dmrg {
 		  basis2tc_(lrs_.left().numberOfOperators()),
 		  basis3tc_(lrs_.right().numberOfOperators()),
 		  alpha_(lrs_.super().size()),
-		  beta_(lrs_.super().size()),
-		  reflection_(useReflection)
+		  beta_(lrs_.super().size())
+//		  reflection_(useReflection)
 // 		  numberOfOperators_(lrs_.left().numberOfOperatorsPerSite())
 		{
 			createBuffer();
@@ -161,7 +160,7 @@ namespace Dmrg {
 		int size() const
 		{
 			int tmp = lrs_.super().partition(m_+1)-lrs_.super().partition(m_);
-			return reflection_.size(tmp);
+			return tmp; //reflection_.size(tmp);
 		}
 
 		int quantumNumber() const
@@ -252,7 +251,7 @@ namespace Dmrg {
 			int total = lrs_.super().partition(m+1) - offset;
 
 			for (int i=0;i<total;i++) {
-				if (reflection_.outsideReflectionBounds(i)) continue;
+				//if (reflection_.outsideReflectionBounds(i)) continue;
 				// row i of the ordered product basis
 				//utils::getCoordinates(alpha,beta,modelHelper.basis1().permutation(i+offset),ns);
 				int alpha=alpha_[i];
@@ -306,7 +305,7 @@ namespace Dmrg {
 
 			PackIndicesType pack(ns);
 			for (i=0;i<bs;i++) {
-				if (reflection_.outsideReflectionBounds(i)) continue;
+				//if (reflection_.outsideReflectionBounds(i)) continue;
 				size_t r,beta;
 				pack.unpack(r,beta,lrs_.super().permutation(i+offset));
 
@@ -317,7 +316,8 @@ namespace Dmrg {
 					//if (j<0 || j>=bs) continue;
 					int j = buffer_[alphaPrime][beta];
 					if (j<0) continue;
-					reflection_.elementMultiplication(hamiltonian.getValue(k), x,y,i,j);
+					x[i]+= hamiltonian.getValue(k)*y[j];
+					//reflection_.elementMultiplication(hamiltonian.getValue(k), x,y,i,j);
 				}
 			}
 		}
@@ -338,7 +338,7 @@ namespace Dmrg {
 
 			PackIndicesType pack(ns);
 			for (i=0;i<bs;i++) {
-				if (reflection_.outsideReflectionBounds(i)) continue;
+//				if (reflection_.outsideReflectionBounds(i)) continue;
 				size_t alpha,r;
 				pack.unpack(alpha,r,lrs_.super().permutation(i+offset));
 
@@ -350,7 +350,8 @@ namespace Dmrg {
 					//if (j<0 || j>=bs) continue;
 					int j = buffer_[alpha][hamiltonian.getCol(k)];
 					if (j<0) continue;
-					reflection_.elementMultiplication(hamiltonian.getValue(k) , x,y,i,j);
+					x[i]+= hamiltonian.getValue(k)*y[j];
+//					reflection_.elementMultiplication(hamiltonian.getValue(k) , x,y,i,j);
 				}
 			}
 		}
@@ -413,30 +414,30 @@ namespace Dmrg {
 			matrixBlock.setRow(lrs_.super().partition(m+1)-offset,counter);
 		}
 
-		void getReflectedEigs(RealType& energyTmp,
-		                      std::vector<SparseElementType>& tmpVec,
-		                      RealType energyTmp1,
-		                      const std::vector<SparseElementType>& tmpVec1,
-		                      RealType energyTmp2,
-		                      const std::vector<SparseElementType>& tmpVec2) const
-		{
-			reflection_.getReflectedEigs(energyTmp,tmpVec,energyTmp1,tmpVec1,energyTmp2,tmpVec2);
-		}
+//		void getReflectedEigs(RealType& energyTmp,
+//		                      std::vector<SparseElementType>& tmpVec,
+//		                      RealType energyTmp1,
+//		                      const std::vector<SparseElementType>& tmpVec1,
+//		                      RealType energyTmp2,
+//		                      const std::vector<SparseElementType>& tmpVec2) const
+//		{
+//			reflection_.getReflectedEigs(energyTmp,tmpVec,energyTmp1,tmpVec1,energyTmp2,tmpVec2);
+//		}
 
-		void setReflectionSymmetry(size_t reflectionSector)
-		{
-			reflection_.setReflectionSymmetry(reflectionSector);
-		}
+//		void setReflectionSymmetry(size_t reflectionSector)
+//		{
+//			reflection_.setReflectionSymmetry(reflectionSector);
+//		}
 
-		void printFullMatrix(const SparseMatrixType& matrix) const
-		{
-			reflection_.printFullMatrix(matrix);
-		}
+//		void printFullMatrix(const SparseMatrixType& matrix) const
+//		{
+//			reflection_.printFullMatrix(matrix);
+//		}
 
-		void printFullMatrixMathematica(const SparseMatrixType& matrix) const
-		{
-			reflection_.printFullMatrixMathematica(matrix);
-		}
+//		void printFullMatrixMathematica(const SparseMatrixType& matrix) const
+//		{
+//			reflection_.printFullMatrixMathematica(matrix);
+//		}
 
 		const LeftRightSuperType& leftRightSuper() const
 		{
@@ -449,7 +450,7 @@ namespace Dmrg {
 		std::vector<std::vector<int> > buffer_;
 		std::vector<SparseMatrixType> basis2tc_,basis3tc_;
 		std::vector<size_t> alpha_,beta_;
-		ReflectionSymmetryType reflection_;
+//		ReflectionSymmetryType reflection_;
 // 		size_t numberOfOperators_;
 		//RightLeftLocalType rightLeftLocal_;
 
