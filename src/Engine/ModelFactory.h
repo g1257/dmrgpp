@@ -134,20 +134,30 @@ namespace Dmrg {
 		{
 
 			std::string name = params.model;
-			if (name=="Hubbard") {
-				ParametersModelHubbard<RealType> mp(io);
-				modelHubbard_ = new ModelHubbardType(mp,geometry);
+			if (name=="HubbardOneBand") {
+				modelHubbard_ = new ModelHubbardType(io,geometry);
 				ModelHubbardType::SharedMemoryType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND;
-			} else if (name=="Heisenberg") {
-				ParametersModelHeisenberg<RealType> mp(io);
-				modelHeisenberg_ = new ModelHeisenbergType(mp,geometry);
+			} else if (name=="HeisenbergSpinOneHalf") {
+				modelHeisenberg_ = new ModelHeisenbergType(io,geometry);
 				ModelHeisenbergType::SharedMemoryType::setThreads(params.nthreads);
 				model_=HEISENBERG_SPIN_ONEHALF;
 			} else {
 				std::string s(__FILE__);
 				s += " Unknown model " + name + "\n";
 				throw std::runtime_error(s.c_str());
+			}
+		}
+
+		~ModelFactory()
+		{
+			switch (model_) {
+			case HUBBARD_ONE_BAND:
+				delete modelHubbard_;
+				break;
+			case HEISENBERG_SPIN_ONEHALF:
+				delete modelHeisenberg_;
+				break;
 			}
 		}
 

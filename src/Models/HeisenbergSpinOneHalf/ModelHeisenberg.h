@@ -132,9 +132,9 @@ namespace Dmrg {
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
-		ModelHeisenberg(ParametersModelHeisenberg<RealType> const &mp,GeometryType const &geometry) 
+		ModelHeisenberg(PsimagLite::IoSimple::In& io,GeometryType const &geometry)
 		: ModelBaseType(geometry),
-		  modelParameters_(mp),
+		  modelParameters_(io),
 		  geometry_(geometry), 
 		  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 		  reinterpretX_(maxNumberOfSites),

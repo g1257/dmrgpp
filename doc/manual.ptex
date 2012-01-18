@@ -216,7 +216,7 @@ The user of the program
 will not need to change these core classes to add functionality. Instead, new models and geometries can be added by creating implementations
 for \cppClass{DmrgModelBase} and \cppClass{DmrgGeometryBase}, and those public interfaces will be explained next.
 
-But for now I end this section by briefly describing the ``driver'' program  for a Hubbard model on a 1D chain (see file main.cpp).
+But for now I end this section by briefly describing the ``driver'' program  for a Hubbard model on a 1D chain (see file \verb!dmrg.cpp!).
 There, \cppClass{DmrgSolver} is instantiated with \cppClass{DmrgModelHubbard}, since in this case one wishes to perform the calculation for the Hubbard model.
 In turn, \cppClass{DmrgModelHubbard}  is instantiated with  \cppClass{DmrgGeometryOneD} since now one wishes to perform the calculation on a 1D chain.
 

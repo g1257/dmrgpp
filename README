@@ -79,7 +79,7 @@ To Build DMRG++:
 \begin{verbatim}
 cd src
 perl configure.pl
-(please answer questions regarding model, etc)
+(please answer questions regarding depedencies and libraries)
 make
 \end{verbatim}
 
@@ -90,11 +90,6 @@ To Run DMRG++:
 Sample input files can be found under \verb!TestSuite/inputs/!.
 
 The files created by \cppFile{configure.pl} are the following:
-
-\cppFile{main.cpp}
-\cppFile{configure.pl} will create the file \cppFile{main.cpp}
-which contains the entry point (function int main()) for DMRG++,
-according to the answers to questions given.
 
 \cppFile{Makefile}:
 \cppFile{configure.pl} will create the file \cppFile{Makefile}
@@ -109,21 +104,5 @@ is usually a wrapper script around g++ to take care of linking with MPI librarie
 and to include MPI headers. Depending on your MPI installation you might need to
 change the name of this script.
 
-\cppFile{observe.cpp}
-Source driver for the post-processing of results.
-
-\cppFile{input.inp}:
-\cppFile{configure.pl} will create the file \cppFile{input.inp}
-according to the answers to questions given.
-The input file (see TestSuite/inputs for samples, and \S\ref{sec:inputfile} for format documentation) 
-can be used as input to run the DMRG++ program, in the following way:
-for serial code:
-\begin{Verbatim}
-./dmrg input.inp
-\end{Verbatim}
-for MPI code: (actual command will vary according to MPI Installation):
-\begin{Verbatim}
-mpirun ./dmrg input.inp
-\end{Verbatim}
 
  	

@@ -135,11 +135,11 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef std::vector<HilbertState> HilbertBasisType;
 		
-		ModelHubbard(ParametersModelHubbard<RealType> const &mp,
+		ModelHubbard(PsimagLite::IoSimple::In& io,
 			     DmrgGeometryType const &dmrgGeometry,
 			     size_t offset = DEGREES_OF_FREEDOM)
 		: ModelBaseType(dmrgGeometry),
-		  modelParameters_(mp),
+		  modelParameters_(io),
 		  dmrgGeometry_(dmrgGeometry),
 		  offset_(offset),
 		  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
@@ -300,7 +300,7 @@ namespace Dmrg {
 
 	private:
 
-		const ParametersModelHubbard<RealType>&  modelParameters_;
+		ParametersModelHubbard<RealType>  modelParameters_;
 		const DmrgGeometryType &dmrgGeometry_;
 		size_t offset_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;

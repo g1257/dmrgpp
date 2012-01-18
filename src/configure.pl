@@ -112,40 +112,40 @@ sub askQuestions
 		$pthreads=1	if ($_=~/^y/i);
 	}
 	
-	print "What model do you want to compile?\n";
-	print "Available: Hubbard, Heisenberg or FeBasedSc or FeAsBasedScExtended ";
-	print " or ExtendedHubbard1Orbital\n";
-	print "Default is: Hubbard (press ENTER): ";
-	$_=<STDIN>;
-	chomp;
-	if ($_ eq "" or $_ eq "\n") {
-		$_="hubbard";
-	}
-	$model=$_;
-	$modelFullName="HubbardOneBand";
-	$modelFullName="HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i); 
-	$modelFullName="FeAsModel" if ($model=~/febasedsc/i);
-	$modelFullName="TjOneOrbital" if ($model=~/tjoneorbital/i);
-	$modelFullName="FeAsBasedScExtended" if ($model=~/feasbasedscextended/i);
-	$modelFullName="ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
+	#print "What model do you want to compile?\n";
+	#print "Available: Hubbard, Heisenberg or FeBasedSc or FeAsBasedScExtended ";
+	#print " or ExtendedHubbard1Orbital\n";
+	#print "Default is: Hubbard (press ENTER): ";
+	#$_=<STDIN>;
+	#chomp;
+	#if ($_ eq "" or $_ eq "\n") {
+	#	$_="hubbard";
+	#}
+	#$model=$_;
+	#$modelFullName="HubbardOneBand";
+	#$modelFullName="HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i); 
+	#$modelFullName="FeAsModel" if ($model=~/febasedsc/i);
+	#$modelFullName="TjOneOrbital" if ($model=~/tjoneorbital/i);
+	#$modelFullName="FeAsBasedScExtended" if ($model=~/feasbasedscextended/i);
+	#$modelFullName="ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
 	
-	$modelLocation="-IModels/$model";
-	$modelLocation=" -IModels/HubbardOneBand" if ($model=~/hubbard/i);
-	$modelLocation.=" -IModels/HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i or $model=~/feasbasedscextended/i); 
-	$modelLocation.=" -IModels/FeAsModel" if ($model=~/febasedsc/i || $model=~/feasbasedscextended/i);
-	$modelLocation.=" -IModels/FeAsBasedScExtended" if ($model=~/feasbasedscextended/i);
-	$modelLocation=" -IModels/TjOneOrbital" if ($model=~/tjoneorbital/i);
-	$modelLocation.=" -IModels/ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
+	#$modelLocation="-IModels/$model";
+	#$modelLocation=" -IModels/HubbardOneBand" if ($model=~/hubbard/i);
+	#$modelLocation.=" -IModels/HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i or $model=~/feasbasedscextended/i); 
+	#$modelLocation.=" -IModels/FeAsModel" if ($model=~/febasedsc/i || $model=~/feasbasedscextended/i);
+	#$modelLocation.=" -IModels/FeAsBasedScExtended" if ($model=~/feasbasedscextended/i);
+	#$modelLocation=" -IModels/TjOneOrbital" if ($model=~/tjoneorbital/i);
+	#$modelLocation.=" -IModels/ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
 	
-	if ($model=~/hubbard/i or $model=~/febasedsc/i or $model=~/tjoneorbital/i
-		or $model=~/extendedhubbard1orb/i or $model=~/feasbasedscextended/i) {
-		$connectors="hoppings";
-	} elsif ($model=~/heisenberg/i) {
-		$connectors="jvalues";
-	}
+	#if ($model=~/hubbard/i or $model=~/febasedsc/i or $model=~/tjoneorbital/i
+	#	or $model=~/extendedhubbard1orb/i or $model=~/feasbasedscextended/i) {
+	#	$connectors="hoppings";
+	#} elsif ($model=~/heisenberg/i) {
+	#	$connectors="jvalues";
+	#}
 	
-	$connectors2="jvalues" if ($model=~/tjoneorbital/i or $model=~/feasbasedscextended/i);
-	$connectors2="ninjConnectors" if ($model=~/extendedhubbard1orb/i);
+	#$connectors2="jvalues" if ($model=~/tjoneorbital/i or $model=~/feasbasedscextended/i);
+	#$connectors2="ninjConnectors" if ($model=~/extendedhubbard1orb/i);
 	
 	print "Please enter the linker flags, LDFLAGS\n";
 	print "Available: Any\n";
