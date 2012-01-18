@@ -108,7 +108,7 @@ namespace Dmrg {
 		typedef typename ModelType::MyBasis MyBasis;
 		typedef typename MyBasis::RealType RealType;
 		typedef typename MyBasis::BlockType BlockType;
-		typedef typename ModelType::MyBasisWithOperators MyBasisWithOperators;
+		typedef typename ModelType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename ModelType::ModelHelperType::LeftRightSuperType
 				LeftRightSuperType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
@@ -171,7 +171,6 @@ namespace Dmrg {
 			if (parameters_.options.find("verbose")!=std::string::npos) verbose_=true;
 			if (parameters_.options.find("useReflection")!=std::string::npos)
 				useReflection_=true;
-			ModelType::SharedMemoryType::setThreads(parameters_.nthreads);
 		}
 
 		~DmrgSolver()

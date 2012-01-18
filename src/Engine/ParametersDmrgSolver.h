@@ -236,6 +236,9 @@ namespace Dmrg {
 
 	//! Structure that contains the Dmrg parameters
 	/**
+	\\inputItem{Model}
+	A string indicating the model, be it HubbardOneBand HeisenbergSpinOneHalf, etc.
+
 	\\inputItem{Options}
 	A comma-separated list of strings. At least one of the following strings must be provided:
 	\\inputSubItem{none}  Use this when no options are given, since the list of strings must be non-null.
@@ -276,21 +279,23 @@ namespace Dmrg {
 	*/
 	template<typename FieldType>
 	struct ParametersDmrgSolver {
+
 		std::string filename;
 		size_t keptStatesInfinite;
 		std::vector<FiniteLoop> finiteLoop;
 		std::string version;
 		std::string options;
+		std::string model;
 		std::vector<FieldType> targetQuantumNumbers;
 		FieldType tolerance;
 		DmrgCheckPoint checkpoint;
 		size_t nthreads;
 		
 		//! Read Dmrg parameters from inp file
-		template<typename IoInputType>
-		ParametersDmrgSolver(IoInputType& io) 
+		ParametersDmrgSolver(PsimagLite::IoSimple::In& io)
 		{
-			io.readline(options,"SolverOptions="); 
+			io.readline(model,"Model=");
+			io.readline(options,"SolverOptions=");
 			io.readline(version,"Version=");
 			io.readline(filename,"OutputFile=");
 			io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
@@ -320,6 +325,7 @@ namespace Dmrg {
 	{
 		os<<"#This is DMRG++\n";
 		os<<"parameters.version="<<parameters.version<<"\n";
+		os<<"parameters.model="<<parameters.model<<"\n";
 		os<<"parameters.filename="<<parameters.filename<<"\n";
 		os<<"parameters.options="<<parameters.options<<"\n";
 		os<<"parameters.keptStatesInfinite="<<parameters.keptStatesInfinite<<"\n";

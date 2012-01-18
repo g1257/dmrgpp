@@ -51,9 +51,9 @@ askQuestions();
 
 createMakefile();
 
-createDriver();
+#createDriver();
 
-createObserverDriver();
+#createObserverDriver();
 
 
 sub welcome
@@ -187,9 +187,6 @@ if ($mpi) {
 print FOUT<<EOF;
 EXENAME = dmrg
 all: \$(EXENAME) 
-
-dmrg.cpp: configure.pl
-	perl configure.pl
 
 dmrg:  dmrg.o 
 	\$(CXX) -o dmrg dmrg.o \$(LDFLAGS)  

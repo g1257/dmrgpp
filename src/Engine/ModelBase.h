@@ -136,6 +136,8 @@ namespace Dmrg {
 		typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 		typedef typename ModelHelperType::LeftRightSuperType
 				LeftRightSuperType;
+		typedef typename OperatorsType::OperatorType OperatorType;
+		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		ModelBase(const DmrgGeometryType& geometry)
 		: dmrgGeometry_(geometry)
@@ -144,14 +146,47 @@ namespace Dmrg {
 			MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
 		}
 
+//		virtual size_t hilbertSize(size_t site) const=0;
+
+//		virtual void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
+//					     SparseMatrixType &hamiltonian,
+//					     BasisDataType &q,
+//					     Block const &block,
+//					     RealType time) const=0;
+
+//		virtual void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,
+//						 Block const &block) const=0;
+
+//		virtual PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,
+//									      size_t site,
+//									      size_t dof) const=0;
+//		virtual void findElectrons(std::vector<size_t> &electrons,
+//					   const std::vector<size_t>& basis,
+//					   size_t site) const=0;
+
+//		virtual void setNaturalBasis(std::vector<size_t> & basis,
+//					     std::vector<size_t>& q,
+//					     const std::vector<size_t>& block) const=0;
+
+//		virtual void print(std::ostream& os) const=0;
+
 		/** Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
 		 * of basis2 \otimes basis3
 		 * This function does x += H*y
 		 * The \\cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$. This function
 		 * has a default implementation.
 		 */
-		template<typename SomeVectorType>
-		void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y,ModelHelperType const &modelHelper) const
+		void matrixVectorProduct(std::vector<RealType> &x,std::vector<RealType> const &y,ModelHelperType const &modelHelper) const
+		{
+			//! contribution to Hamiltonian from current system
+			modelHelper.hamiltonianLeftProduct(x,y);
+			//! contribution to Hamiltonian from current envirnoment
+			modelHelper.hamiltonianRightProduct(x,y);
+			//! contribution to Hamiltonian from connection system-environment
+			hamiltonianConnectionProduct(x,y,modelHelper);
+		}
+
+		void matrixVectorProduct(std::vector<std::complex<RealType> > &x,std::vector<std::complex<RealType> > const &y,ModelHelperType const &modelHelper) const
 		{
 			//! contribution to Hamiltonian from current system
 			modelHelper.hamiltonianLeftProduct(x,y);

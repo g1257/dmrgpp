@@ -120,7 +120,7 @@ namespace Dmrg {
 		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,
 		                  LinkProductType,SharedMemoryTemplate> ModelBaseType;
 
-		static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
+		static const int NUMBER_OF_ORBITALS=1;
 		static const int DEGREES_OF_FREEDOM=2; // spin up and down
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;
 
@@ -243,7 +243,7 @@ namespace Dmrg {
 		
 		//! Dummy since this model has no fermion sign
 		void findElectrons(std::vector<size_t>& electrons,
-		                   std::vector<HilbertStateType>& basis,
+				   const HilbertBasisType& basis,
 		                   size_t site) const
 		{
 			electrons.resize(basis.size());
