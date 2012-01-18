@@ -127,10 +127,11 @@ namespace Dmrg {
 		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
 		                     SparseMatrixType &hamiltonian,
 		                     BasisDataType &q,
-		                     Block const &block) const
+				     Block const &block,
+				     size_t time) const
 		{
 
-			modelHubbard_.setNaturalBasis(creationMatrix,hamiltonian,q,block);
+			modelHubbard_.setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
 
 			// add ni to creationMatrix
 			setNi(creationMatrix,block);
