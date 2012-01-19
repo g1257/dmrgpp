@@ -133,7 +133,8 @@ namespace PsimagLite {
 // 			assert(storageForLanczosVectors || !params.lotaMemory);
 			setMode(params.options);
 			std::ostringstream msg;
-			msg<<"Constructing... mat.rank="<<mat_.rank()<<" steps="<<steps_<<" eps="<<eps_;
+			msg<<"Constructing... mat.rank="<<mat_.rank();
+			msg<<" steps="<<steps_<<" eps="<<eps_;
 			progress_.printline(msg,std::cout);
 		}
 

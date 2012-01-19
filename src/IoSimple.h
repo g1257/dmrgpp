@@ -316,9 +316,10 @@ namespace PsimagLite {
 			          LongIntegerType level=0)
 			{
 				size_t counter=0;
+				bool beQuiet = true;
 				while(true) {
 					try {
-						std::pair<std::string,size_t> sc = advance(s,level);
+						std::pair<std::string,size_t> sc = advance(s,level,beQuiet);
 						// sc.first contains the full string and also value
 						std::string key;
 						X val=0;

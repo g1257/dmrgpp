@@ -168,6 +168,11 @@ namespace PsimagLite {
 		{
 			return "ladder";
 		}
+		
+		size_t findReflection(size_t site) const
+		{
+			throw std::runtime_error("findReflection: unimplemented (sorry)\n");
+		}
 
 	private:
 

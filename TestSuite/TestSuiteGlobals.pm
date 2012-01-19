@@ -83,8 +83,10 @@ sub doMain
 
 	if (!$all) {
 		$TestSuiteGlobals::testNum = selectTest() if (!defined($TestSuiteGlobals::testNum));
-		testSuite($TestSuiteGlobals::testNum);
-		exit(0);
+		if ($TestSuiteGlobals::testNum>=0) {
+			testSuite($TestSuiteGlobals::testNum);
+			exit(0);
+		}
 	}
 
 	$TestSuiteGlobals::testNum = 0 if (!defined($TestSuiteGlobals::testNum));

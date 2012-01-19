@@ -342,6 +342,23 @@ namespace PsimagLite {
 		
 		size_t maxConnections() const { return maxConnections_; }
 
+		size_t findReflection(size_t site) const
+		{
+			switch (n_) {
+			case CHAIN:
+				return chain_->findReflection(site);
+			case LADDER:
+				return ladder_->findReflection(site);
+			case LADDERX:
+				return ladderx_->findReflection(site);
+			case LADDERBATH:
+				return ladderbath_->findReflection(site);
+			case KTWONIFFOUR:
+				return ktwoniffour_->findReflection(site);
+			}
+			throw std::runtime_error("Unknown geometry\n");
+		}
+
 		void fillAdditionalData(AdditionalDataType& additionalData,size_t ind,size_t jnd) const
 		{
 			switch (n_) {

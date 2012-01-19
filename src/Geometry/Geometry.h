@@ -85,9 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 	
-	template<typename RealType,typename ProgramGlobalsType>
+	template<typename RealType_,typename ProgramGlobalsType>
 	class Geometry {
 		public:
+			typedef  RealType_ RealType;
 			typedef GeometryTerm<RealType> GeometryTermType;
 			typedef std::vector<size_t> BlockType;
 			typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
@@ -176,8 +177,13 @@ namespace PsimagLite {
 				terms_[term].fillAdditionalData(additionalData,ind,jnd);
 			}
 
-			template<typename RealType_,typename PgType>
-			friend std::ostream& operator<<(std::ostream& os,const Geometry<RealType_,PgType>& g);
+			size_t findReflection(size_t site,size_t termId) const
+			{
+				return terms_[termId].findReflection(site);
+			}
+
+			template<typename RealType2,typename PgType>
+			friend std::ostream& operator<<(std::ostream& os,const Geometry<RealType2,PgType>& g);
 
 		private:
 			size_t linSize_;

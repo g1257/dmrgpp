@@ -189,6 +189,11 @@ namespace PsimagLite {
 				geometryFactory_.fillAdditionalData(additionalData,ind,jnd);
 			}
 
+			size_t findReflection(size_t site) const
+			{
+				return geometryFactory_.findReflection(site);
+			}
+
 			template<typename RealType_>	
 			friend std::ostream& operator<<(std::ostream& os,const GeometryTerm<RealType_>& gt);
 	

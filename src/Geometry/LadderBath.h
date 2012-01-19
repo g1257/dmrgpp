@@ -172,6 +172,11 @@ namespace PsimagLite {
 			{
 				return clusterSize_+1;
 			}
+			
+			size_t findReflection(size_t site) const
+			{
+				throw std::runtime_error("findReflection: unimplemented (sorry)\n");
+			}
 
 		private:
 

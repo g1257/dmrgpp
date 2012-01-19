@@ -223,6 +223,11 @@ namespace PsimagLite {
 		{
 			return 6;
 		}
+		
+		size_t findReflection(size_t site) const
+		{
+			throw std::runtime_error("findReflection: unimplemented (sorry)\n");
+		}
 
 		void fillAdditionalData(AdditionalData& additionalData,size_t ind,size_t jnd) const
 		{

@@ -132,6 +132,11 @@ namespace PsimagLite {
 			{
 				return "chain";
 			}
+			
+			size_t findReflection(size_t site) const
+			{
+				return linSize_ - site -1;
+			}
 
 		private:
 
