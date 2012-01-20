@@ -85,6 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ModelHubbard.h"
 #include "ModelHeisenberg.h"
+#include "ExtendedHubbard1Orb.h"
+#include "ModelFeBasedSc.h"
+#include "FeAsBasedScExtended.h"
+#include "Immm.h"
 
 namespace Dmrg {
 	
@@ -102,9 +106,18 @@ namespace Dmrg {
 				     SharedMemoryTemplate> ModelHubbardType;
 		typedef ModelHeisenberg<ModelHelperType_,SparseMatrixType,GeometryType_,
 					SharedMemoryTemplate> ModelHeisenbergType;
+		typedef ExtendedHubbard1Orb<ModelHelperType_,SparseMatrixType,GeometryType_,
+					    SharedMemoryTemplate> ModelHubbardExtType;
+		typedef ModelFeBasedSc<ModelHelperType_,SparseMatrixType,GeometryType_,
+				       SharedMemoryTemplate> FeBasedScType;
+		typedef FeAsBasedScExtended<ModelHelperType_,SparseMatrixType,GeometryType_,
+					    SharedMemoryTemplate> FeBasedScExtType;
+		typedef Immm<ModelHelperType_,SparseMatrixType,GeometryType_,
+			     SharedMemoryTemplate> ImmmType;
 		// end models
 
-		enum {HUBBARD_ONE_BAND,HEISENBERG_SPIN_ONEHALF};
+		enum {HUBBARD_ONE_BAND,HEISENBERG_SPIN_ONEHALF,
+		      HUBBARD_ONE_BAND_EXT,FEAS,FEAS_EXT,IMMM};
 
 	public:
 
@@ -129,8 +142,13 @@ namespace Dmrg {
 		template<typename SomeParametersType>
 		ModelFactory(const SomeParametersType& params,PsimagLite::IoSimple::In& io,const GeometryType& geometry)
 		: geometry_(geometry),
+		  hilbertSize_(geometry.numberOfSites()),
 		  modelHubbard_(0),
-		  modelHeisenberg_(0)
+		  modelHeisenberg_(0),
+		  modelHubbardExt_(0),
+		  modelFeAs_(0),
+		  modelFeAsExt_(0),
+		  modelImmm_(0)
 		{
 
 			std::string name = params.model;
@@ -142,6 +160,22 @@ namespace Dmrg {
 				modelHeisenberg_ = new ModelHeisenbergType(io,geometry);
 				ModelHeisenbergType::SharedMemoryType::setThreads(params.nthreads);
 				model_=HEISENBERG_SPIN_ONEHALF;
+			} else if (name=="HubbardOneBandExtended") {
+				modelHubbardExt_ = new ModelHubbardExtType(io,geometry);
+				ModelHubbardExtType::SharedMemoryType::setThreads(params.nthreads);
+				model_=HUBBARD_ONE_BAND_EXT;
+			} else  if (name=="FeAsBasedSc") {
+				modelFeAs_ = new FeBasedScType(io,geometry);
+				FeBasedScType::SharedMemoryType::setThreads(params.nthreads);
+				model_=FEAS;
+			} else if (name=="FeAsBasedScExtended") {
+				modelFeAsExt_ = new FeBasedScExtType(io,geometry);
+				FeBasedScExtType::SharedMemoryType::setThreads(params.nthreads);
+				model_=FEAS_EXT;
+			} else if (name=="Immm") {
+				modelImmm_ = new ImmmType(io,geometry);
+				ImmmType::SharedMemoryType::setThreads(params.nthreads);
+				model_=IMMM;
 			} else {
 				std::string s(__FILE__);
 				s += " Unknown model " + name + "\n";
@@ -158,19 +192,19 @@ namespace Dmrg {
 			case HEISENBERG_SPIN_ONEHALF:
 				delete modelHeisenberg_;
 				break;
+			case HUBBARD_ONE_BAND_EXT:
+				delete modelHubbardExt_;
+				break;
+			case FEAS:
+				delete modelFeAs_;
+				break;
+			case FEAS_EXT:
+				delete modelFeAsExt_;
+				break;
+			case IMMM:
+				delete modelImmm_;
+				break;
 			}
-		}
-
-		size_t hilbertSize(size_t site) const
-		{
-			switch (model_) {
-			case HUBBARD_ONE_BAND:
-				return modelHubbard_->hilbertSize(site);
-			case HEISENBERG_SPIN_ONEHALF:
-				return modelHeisenberg_->hilbertSize(site);
-			}
-			assert(false);
-			return 0;
 		}
 
 		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
@@ -184,17 +218,14 @@ namespace Dmrg {
 				return modelHubbard_->setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
 			case HEISENBERG_SPIN_ONEHALF:
 				return modelHeisenberg_->setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
-			}
-		}
-
-		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,
-					 Block const &block)
-		{
-			switch(model_) {
-			case HUBBARD_ONE_BAND:
-				return modelHubbard_->setOperatorMatrices(creationMatrix,block);
-			case HEISENBERG_SPIN_ONEHALF:
-				return modelHeisenberg_->setOperatorMatrices(creationMatrix,block);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
+			case FEAS:
+				return modelFeAs_->setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
+			case FEAS_EXT:
+				return modelFeAsExt_->setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
+			case IMMM:
+				return modelImmm_->setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
 			}
 		}
 
@@ -207,6 +238,14 @@ namespace Dmrg {
 				return modelHubbard_->naturalOperator(what,site,dof);
 			case HEISENBERG_SPIN_ONEHALF:
 				return modelHeisenberg_->naturalOperator(what,site,dof);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->naturalOperator(what,site,dof);
+			case FEAS:
+				return modelFeAs_->naturalOperator(what,site,dof);
+			case FEAS_EXT:
+				return modelFeAsExt_->naturalOperator(what,site,dof);
+			case IMMM:
+				return modelImmm_->naturalOperator(what,site,dof);
 			}
 			std::cerr<<__FILE__<<" Unknown model "<<model_<<"\n";
 			throw std::runtime_error("naturalOperator\n");
@@ -221,18 +260,14 @@ namespace Dmrg {
 				return modelHubbard_->findElectrons(electrons,basis,site);
 			case HEISENBERG_SPIN_ONEHALF:
 				return modelHeisenberg_->findElectrons(electrons,basis,site);
-			}
-		}
-
-		void setNaturalBasis(HilbertBasisType& basis,
-				     std::vector<size_t>& q,
-				     const std::vector<size_t>& block) const
-		{
-			switch(model_) {
-			case HUBBARD_ONE_BAND:
-				return modelHubbard_->setNaturalBasis(basis,q,block);
-			case HEISENBERG_SPIN_ONEHALF:
-				return modelHeisenberg_->setNaturalBasis(basis,q,block);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->findElectrons(electrons,basis,site);
+			case FEAS:
+				return modelFeAs_->findElectrons(electrons,basis,site);
+			case FEAS_EXT:
+				return modelFeAsExt_->findElectrons(electrons,basis,site);
+			case IMMM:
+				return modelImmm_->findElectrons(electrons,basis,site);
 			}
 		}
 
@@ -243,6 +278,14 @@ namespace Dmrg {
 				return modelHubbard_->print(os);
 			case HEISENBERG_SPIN_ONEHALF:
 				return modelHeisenberg_->print(os);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->print(os);
+			case FEAS:
+				return modelFeAs_->print(os);
+			case FEAS_EXT:
+				return modelFeAsExt_->print(os);
+			case IMMM:
+				return modelImmm_->print(os);
 			}
 		}
 
@@ -256,6 +299,14 @@ namespace Dmrg {
 				return modelHubbard_->matrixVectorProduct(x,y,modelHelper);
 			case HEISENBERG_SPIN_ONEHALF:
 				return modelHeisenberg_->matrixVectorProduct(x,y,modelHelper);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->matrixVectorProduct(x,y,modelHelper);
+			case FEAS:
+				return modelFeAs_->matrixVectorProduct(x,y,modelHelper);
+			case FEAS_EXT:
+				return modelFeAsExt_->matrixVectorProduct(x,y,modelHelper);
+			case IMMM:
+				return modelImmm_->matrixVectorProduct(x,y,modelHelper);
 			}
 		}
 
@@ -278,6 +329,14 @@ namespace Dmrg {
 				return modelHubbard_->hamiltonianConnectionProduct(x,y,modelHelper);
 			case HEISENBERG_SPIN_ONEHALF:
 				return modelHeisenberg_->hamiltonianConnectionProduct(x,y,modelHelper);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->hamiltonianConnectionProduct(x,y,modelHelper);
+			case FEAS:
+				return modelFeAs_->hamiltonianConnectionProduct(x,y,modelHelper);
+			case FEAS_EXT:
+				return modelFeAsExt_->hamiltonianConnectionProduct(x,y,modelHelper);
+			case IMMM:
+				return modelImmm_->hamiltonianConnectionProduct(x,y,modelHelper);
 			}
 		}
 
@@ -288,7 +347,49 @@ namespace Dmrg {
 				return modelHubbard_->fullHamiltonian(matrix,modelHelper);
 			case HEISENBERG_SPIN_ONEHALF:
 				return modelHeisenberg_->fullHamiltonian(matrix,modelHelper);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->fullHamiltonian(matrix,modelHelper);
+			case FEAS:
+				return modelFeAs_->fullHamiltonian(matrix,modelHelper);
+			case FEAS_EXT:
+				return modelFeAsExt_->fullHamiltonian(matrix,modelHelper);
+			case IMMM:
+				return modelImmm_->fullHamiltonian(matrix,modelHelper);
 			}
+		}
+
+		size_t hilbertSize(size_t site) const
+		{
+			return hilbertSize_[site];
+		}
+
+		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,
+					 Block const &block)
+		{
+			assert(block.size()==1);
+			return creationMatrix[block[0]];
+//			switch(model_) {
+//			case HUBBARD_ONE_BAND:
+//				return modelHubbard_->setOperatorMatrices(creationMatrix,block);
+//			case HEISENBERG_SPIN_ONEHALF:
+//				return modelHeisenberg_->setOperatorMatrices(creationMatrix,block);
+//			}
+		}
+
+		void setNaturalBasis(HilbertBasisType& basis,
+				     std::vector<size_t>& q,
+				     const std::vector<size_t>& block) const
+		{
+//			switch(model_) {
+//			case HUBBARD_ONE_BAND:
+//				return modelHubbard_->setNaturalBasis(basis,q,block);
+//			case HEISENBERG_SPIN_ONEHALF:
+//				return modelHeisenberg_->setNaturalBasis(basis,q,block);
+//			}
+			assert(block.size()==1);
+			size_t index=block[0];
+			basis=basis_[index];
+			q=q_[index];
 		}
 
 		size_t maxConnections() const
@@ -298,9 +399,26 @@ namespace Dmrg {
 
 	private:
 
+		template<typename SomeModelType>
+		void init(SomeModelType& model)
+		{
+			for (size_t i=0;i<hilbertSize_.size();i++) {
+				hilbertSize_[i] = model.hilbertSize(i);
+			}
+		}
+
 		const GeometryType& geometry_;
+		std::vector<size_t> hilbertSize_;
+
+		// models start
 		ModelHubbardType* modelHubbard_;
 		ModelHeisenbergType* modelHeisenberg_;
+		ModelHubbardExtType* modelHubbardExt_;
+		FeBasedScType* modelFeAs_ ;
+		FeBasedScExtType* modelFeAsExt_;
+		ImmmType* modelImmm_;
+		// models end
+
 		size_t model_;
 	};     //class ModelFactory
 

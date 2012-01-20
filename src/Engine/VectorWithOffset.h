@@ -93,6 +93,8 @@ namespace Dmrg {
 		typedef std::pair<size_t,size_t> PairType;
 		typedef std::vector<FieldType> VectorType;
 
+		static const FieldType zero_;
+
 		VectorWithOffset()  : size_(0),offset_(0),m_(0) { }
 
 		template<typename SomeBasisType>
@@ -223,10 +225,10 @@ namespace Dmrg {
 
 		size_t offset() const { return offset_; }
 
-		FieldType operator[](size_t i) const
+		 const FieldType& operator[](size_t i) const
 		{
-			FieldType zero=0;
-			if (i<offset_ || i>= (offset_+data_.size())) return zero;
+			if (i<offset_ || i>= (offset_+data_.size())) return zero_;
+			//assert(i>=offset_ && i<offset_+data_.size());
 			return data_[i-offset_];
 		}
 
@@ -290,6 +292,9 @@ namespace Dmrg {
 		size_t offset_;
 		size_t m_; // partition 
 	}; // class VectorWithOffset
+
+	template<typename FieldType>
+	const FieldType VectorWithOffset<FieldType>::zero_=0;
 
 	template<typename FieldType>
 	std::ostream& operator<<(std::ostream& os,const VectorWithOffset<FieldType>& s)

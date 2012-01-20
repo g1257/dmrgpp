@@ -9,7 +9,8 @@ Connectors 1 1.0
 hubbardU	16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 potentialV	32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 		0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-SolverOptions=hasQuantumNumbers,wft,noSu2,,hasThreads
+Model=HubbardOneBand
+SolverOptions=wft,hasThreads
 Version=aec8964f7a782d87d587c27276acd41760808139
 OutputFile=data3.txt
 InfiniteLoopKeptStates=100
