@@ -2,8 +2,6 @@
 
 n
 n
-Heisenberg
-
 
 
 

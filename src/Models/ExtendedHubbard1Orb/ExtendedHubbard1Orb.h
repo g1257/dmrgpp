@@ -110,9 +110,9 @@ namespace Dmrg {
 		typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
 		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 
-		ExtendedHubbard1Orb(ParametersModelHubbard<RealType> const &mp,
+		ExtendedHubbard1Orb(PsimagLite::IoSimple::In& io,
 		                    DmrgGeometryType const &dmrgGeometry)
-		: ModelBaseType(dmrgGeometry),modelParameters_(mp), dmrgGeometry_(dmrgGeometry),modelHubbard_(mp,dmrgGeometry)
+		: ModelBaseType(dmrgGeometry),modelParameters_(io), dmrgGeometry_(dmrgGeometry),modelHubbard_(io,dmrgGeometry)
 		{}
 
 // 		size_t orbitals() const { return modelHubbard_.orbitals(); }
@@ -127,10 +127,11 @@ namespace Dmrg {
 		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
 		                     SparseMatrixType &hamiltonian,
 		                     BasisDataType &q,
-		                     Block const &block) const
+				     Block const &block,
+				     RealType time) const
 		{
 
-			modelHubbard_.setNaturalBasis(creationMatrix,hamiltonian,q,block);
+			modelHubbard_.setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
 
 			// add ni to creationMatrix
 			setNi(creationMatrix,block);
@@ -169,7 +170,7 @@ namespace Dmrg {
 
 		//! find total number of electrons for each state in the basis
 		void findElectrons(std::vector<size_t> &electrons,
-		                   std::vector<HilbertState>& basis,
+				   const std::vector<HilbertState>& basis,
 		                   size_t site) const
 		{
 			modelHubbard_.findElectrons(electrons,basis,site);

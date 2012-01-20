@@ -77,6 +77,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file ModelFactory.h
  *
  * From a string, chooses the model
+ * Note: Due to BaseModel needing the LinkProductType it is
+ *       currently not possible to use virtual inheritance
+ *       to dispatch the calls.
+ *       The workaround in this class has been to due a manual
+ *       dispatch, which is kind of error prone.
+ *       To mitigate the problem, some things have been cached.
  *
  */
  
@@ -143,6 +149,8 @@ namespace Dmrg {
 		ModelFactory(const SomeParametersType& params,PsimagLite::IoSimple::In& io,const GeometryType& geometry)
 		: geometry_(geometry),
 		  hilbertSize_(geometry.numberOfSites()),
+		  q_(hilbertSize_.size()),
+		  basis_(q_.size()),
 		  modelHubbard_(0),
 		  modelHeisenberg_(0),
 		  modelHubbardExt_(0),
@@ -403,12 +411,16 @@ namespace Dmrg {
 		void init(SomeModelType& model)
 		{
 			for (size_t i=0;i<hilbertSize_.size();i++) {
+				std::vector<size_t> block(1,i);
 				hilbertSize_[i] = model.hilbertSize(i);
+				model.setNaturalBasis(basis_[i],q_[i],block);
 			}
 		}
 
 		const GeometryType& geometry_;
 		std::vector<size_t> hilbertSize_;
+		std::vector<std::vector<size_t> > q_;
+		std::vector<HilbertBasisType> basis_;
 
 		// models start
 		ModelHubbardType* modelHubbard_;
