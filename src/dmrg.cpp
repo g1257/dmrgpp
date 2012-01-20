@@ -16,6 +16,8 @@ const std::string license=
 "*********************************************************\n"
 "\n";
 
+typedef double MatrixElementType;
+
 #include "CrsMatrix.h"
 #include "LanczosSolver.h"
 #include "ChebyshevSolver.h"
@@ -23,7 +25,13 @@ const std::string license=
 #include "DmrgSolver.h"
 #include "IoSimple.h"
 #include "Operator.h"
+#ifndef USE_MPI
 #include "ConcurrencySerial.h"
+typedef PsimagLite::ConcurrencySerial<MatrixElementType> ConcurrencyType;
+#else
+#include "ConcurrencyMpi.h"
+typedef PsimagLite::ConcurrencyMpi<MatrixElementType> ConcurrencyType;
+#endif
 #include "ModelFactory.h"
 #include "OperatorsBase.h"
 #include "Geometry.h"
@@ -51,14 +59,12 @@ const std::string license=
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
 
-typedef double MatrixElementType;
 typedef std::complex<MatrixElementType> ComplexType;
 typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<MatrixElementType> MySparseMatrixReal;
 
 using namespace Dmrg;
 
-typedef PsimagLite::ConcurrencySerial<MatrixElementType> ConcurrencyType;
 typedef PsimagLite::Geometry<MatrixElementType,ProgramGlobals> GeometryType;;
 typedef PsimagLite::IoSimple IoType;
 typedef IoType::In IoInputType;

@@ -147,7 +147,8 @@ namespace Dmrg {
 
 		template<typename SomeParametersType>
 		ModelFactory(const SomeParametersType& params,PsimagLite::IoSimple::In& io,const GeometryType& geometry)
-		: geometry_(geometry),
+		: name_(params.model),
+		  geometry_(geometry),
 		  hilbertSize_(geometry.numberOfSites()),
 		  q_(hilbertSize_.size()),
 		  basis_(q_.size()),
@@ -158,41 +159,39 @@ namespace Dmrg {
 		  modelFeAsExt_(0),
 		  modelImmm_(0)
 		{
-
-			std::string name = params.model;
-			if (name=="HubbardOneBand") {
+			if (name_=="HubbardOneBand") {
 				modelHubbard_ = new ModelHubbardType(io,geometry);
 				ModelHubbardType::SharedMemoryType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND;
 				init(modelHubbard_);
-			} else if (name=="HeisenbergSpinOneHalf") {
+			} else if (name_=="HeisenbergSpinOneHalf") {
 				modelHeisenberg_ = new ModelHeisenbergType(io,geometry);
 				ModelHeisenbergType::SharedMemoryType::setThreads(params.nthreads);
 				model_=HEISENBERG_SPIN_ONEHALF;
 				init(modelHeisenberg_);
-			} else if (name=="HubbardOneBandExtended") {
+			} else if (name_=="HubbardOneBandExtended") {
 				modelHubbardExt_ = new ModelHubbardExtType(io,geometry);
 				ModelHubbardExtType::SharedMemoryType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND_EXT;
 				init(modelHubbardExt_);
-			} else  if (name=="FeAsBasedSc") {
+			} else  if (name_=="FeAsBasedSc") {
 				modelFeAs_ = new FeBasedScType(io,geometry);
 				FeBasedScType::SharedMemoryType::setThreads(params.nthreads);
 				model_=FEAS;
 				init(modelFeAs_);
-			} else if (name=="FeAsBasedScExtended") {
+			} else if (name_=="FeAsBasedScExtended") {
 				modelFeAsExt_ = new FeBasedScExtType(io,geometry);
 				FeBasedScExtType::SharedMemoryType::setThreads(params.nthreads);
 				model_=FEAS_EXT;
 				init(modelFeAsExt_);
-			} else if (name=="Immm") {
+			} else if (name_=="Immm") {
 				modelImmm_ = new ImmmType(io,geometry);
 				ImmmType::SharedMemoryType::setThreads(params.nthreads);
 				model_=IMMM;
 				init(modelImmm_);
 			} else {
 				std::string s(__FILE__);
-				s += " Unknown model " + name + "\n";
+				s += " Unknown model " + name_ + "\n";
 				throw std::runtime_error(s.c_str());
 			}
 		}
@@ -411,6 +410,11 @@ namespace Dmrg {
 			return geometry_.maxConnections();
 		}
 
+		const std::string& name() const
+		{
+			return name_;
+		}
+
 	private:
 
 		template<typename SomeModelType>
@@ -423,6 +427,7 @@ namespace Dmrg {
 			}
 		}
 
+		const std::string& name_;
 		const GeometryType& geometry_;
 		std::vector<size_t> hilbertSize_;
 		std::vector<std::vector<size_t> > q_;
