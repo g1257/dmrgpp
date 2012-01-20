@@ -4,8 +4,8 @@ DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
 Connectors 1 0.5
-
-SolverOptions=hasQuantumNumbers,nowft,noSu2,,hasThreads
+Model=HeisenbergSpinOneHalf
+SolverOptions=nowft,noSu2,,hasThreads
 Version=e953d056acae438cabd88c58df0d92133368d52e
 OutputFile=data22.txt
 InfiniteLoopKeptStates=100

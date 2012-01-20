@@ -155,8 +155,8 @@ namespace Dmrg {
 		void setNaturalBasis(std::vector<OperatorType>& creationMatrix,
 		                     SparseMatrixType& hamiltonian,
 		                     BasisDataType& q,
-				     const Block& block,
-				     size_t time)  const
+				             const Block& block,
+				             const RealType& time)  const
 		{
 			assert(block.size()==1);
 			std::vector<HilbertState> natBasis;

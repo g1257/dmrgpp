@@ -145,7 +145,7 @@ namespace Dmrg {
 				     SparseMatrixType &hamiltonian,
 				     BasisDataType &q,
 				     BlockType const &block,
-				     size_t time)  const
+				     const RealType& time)  const
 		{
 			blockIsSize1OrThrow(block);
 

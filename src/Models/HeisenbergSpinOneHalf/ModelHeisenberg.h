@@ -154,7 +154,7 @@ namespace Dmrg {
 				     SparseMatrixType &hamiltonian,
 		                     BasisDataType &q,
 				     Block const &block,
-				     size_t time) const
+				     const RealType& time) const
 		{
 			std::vector<HilbertStateType> natBasis;
 			

@@ -164,26 +164,32 @@ namespace Dmrg {
 				modelHubbard_ = new ModelHubbardType(io,geometry);
 				ModelHubbardType::SharedMemoryType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND;
+				init(modelHubbard_);
 			} else if (name=="HeisenbergSpinOneHalf") {
 				modelHeisenberg_ = new ModelHeisenbergType(io,geometry);
 				ModelHeisenbergType::SharedMemoryType::setThreads(params.nthreads);
 				model_=HEISENBERG_SPIN_ONEHALF;
+				init(modelHeisenberg_);
 			} else if (name=="HubbardOneBandExtended") {
 				modelHubbardExt_ = new ModelHubbardExtType(io,geometry);
 				ModelHubbardExtType::SharedMemoryType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND_EXT;
+				init(modelHubbardExt_);
 			} else  if (name=="FeAsBasedSc") {
 				modelFeAs_ = new FeBasedScType(io,geometry);
 				FeBasedScType::SharedMemoryType::setThreads(params.nthreads);
 				model_=FEAS;
+				init(modelFeAs_);
 			} else if (name=="FeAsBasedScExtended") {
 				modelFeAsExt_ = new FeBasedScExtType(io,geometry);
 				FeBasedScExtType::SharedMemoryType::setThreads(params.nthreads);
 				model_=FEAS_EXT;
+				init(modelFeAsExt_);
 			} else if (name=="Immm") {
 				modelImmm_ = new ImmmType(io,geometry);
 				ImmmType::SharedMemoryType::setThreads(params.nthreads);
 				model_=IMMM;
+				init(modelImmm_);
 			} else {
 				std::string s(__FILE__);
 				s += " Unknown model " + name + "\n";
@@ -218,8 +224,8 @@ namespace Dmrg {
 		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
 				     SparseMatrixType &hamiltonian,
 				     BasisDataType& q,
-				     Block const &block,
-				     RealType time) const
+				     const std::vector<size_t>& block,
+				     const RealType& time) const
 		{
 			switch (model_) {
 			case HUBBARD_ONE_BAND:
@@ -408,12 +414,12 @@ namespace Dmrg {
 	private:
 
 		template<typename SomeModelType>
-		void init(SomeModelType& model)
+		void init(SomeModelType* model)
 		{
 			for (size_t i=0;i<hilbertSize_.size();i++) {
 				std::vector<size_t> block(1,i);
-				hilbertSize_[i] = model.hilbertSize(i);
-				model.setNaturalBasis(basis_[i],q_[i],block);
+				hilbertSize_[i] = model->hilbertSize(i);
+				model->setNaturalBasis(basis_[i],q_[i],block);
 			}
 		}
 

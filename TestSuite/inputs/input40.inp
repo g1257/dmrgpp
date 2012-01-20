@@ -18,7 +18,8 @@ Connectors 2 2
 -0.079 +0.20828
 hubbardU	8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 potentialV	8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-SolverOptions=hasQuantumNumbers,nowft,useSu2Symmetry,
+Model=FeAs
+SolverOptions=nowft,useSu2Symmetry
 Version=61289987cdd32b8485213ac0415baf4e9cd16432
 OutputFile=data40.txt
 InfiniteLoopKeptStates=60
