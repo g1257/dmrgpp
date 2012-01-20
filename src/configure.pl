@@ -51,9 +51,9 @@ askQuestions();
 
 createMakefile();
 
-createDriver();
+#createDriver();
 
-createObserverDriver();
+#createObserverDriver();
 
 
 sub welcome
@@ -112,40 +112,40 @@ sub askQuestions
 		$pthreads=1	if ($_=~/^y/i);
 	}
 	
-	print "What model do you want to compile?\n";
-	print "Available: Hubbard, Heisenberg or FeBasedSc or FeAsBasedScExtended ";
-	print " or ExtendedHubbard1Orbital\n";
-	print "Default is: Hubbard (press ENTER): ";
-	$_=<STDIN>;
-	chomp;
-	if ($_ eq "" or $_ eq "\n") {
-		$_="hubbard";
-	}
-	$model=$_;
-	$modelFullName="HubbardOneBand";
-	$modelFullName="HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i); 
-	$modelFullName="FeAsModel" if ($model=~/febasedsc/i);
-	$modelFullName="TjOneOrbital" if ($model=~/tjoneorbital/i);
-	$modelFullName="FeAsBasedScExtended" if ($model=~/feasbasedscextended/i);
-	$modelFullName="ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
+	#print "What model do you want to compile?\n";
+	#print "Available: Hubbard, Heisenberg or FeBasedSc or FeAsBasedScExtended ";
+	#print " or ExtendedHubbard1Orbital\n";
+	#print "Default is: Hubbard (press ENTER): ";
+	#$_=<STDIN>;
+	#chomp;
+	#if ($_ eq "" or $_ eq "\n") {
+	#	$_="hubbard";
+	#}
+	#$model=$_;
+	#$modelFullName="HubbardOneBand";
+	#$modelFullName="HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i); 
+	#$modelFullName="FeAsModel" if ($model=~/febasedsc/i);
+	#$modelFullName="TjOneOrbital" if ($model=~/tjoneorbital/i);
+	#$modelFullName="FeAsBasedScExtended" if ($model=~/feasbasedscextended/i);
+	#$modelFullName="ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
 	
-	$modelLocation="-IModels/$model";
-	$modelLocation=" -IModels/HubbardOneBand" if ($model=~/hubbard/i);
-	$modelLocation.=" -IModels/HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i or $model=~/feasbasedscextended/i); 
-	$modelLocation.=" -IModels/FeAsModel" if ($model=~/febasedsc/i || $model=~/feasbasedscextended/i);
-	$modelLocation.=" -IModels/FeAsBasedScExtended" if ($model=~/feasbasedscextended/i);
-	$modelLocation=" -IModels/TjOneOrbital" if ($model=~/tjoneorbital/i);
-	$modelLocation.=" -IModels/ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
+	#$modelLocation="-IModels/$model";
+	#$modelLocation=" -IModels/HubbardOneBand" if ($model=~/hubbard/i);
+	#$modelLocation.=" -IModels/HeisenbergSpinOneHalf" if ($model=~/Heisenberg/i or $model=~/feasbasedscextended/i); 
+	#$modelLocation.=" -IModels/FeAsModel" if ($model=~/febasedsc/i || $model=~/feasbasedscextended/i);
+	#$modelLocation.=" -IModels/FeAsBasedScExtended" if ($model=~/feasbasedscextended/i);
+	#$modelLocation=" -IModels/TjOneOrbital" if ($model=~/tjoneorbital/i);
+	#$modelLocation.=" -IModels/ExtendedHubbard1Orb" if ($model=~/extendedhubbard1orb/i);
 	
-	if ($model=~/hubbard/i or $model=~/febasedsc/i or $model=~/tjoneorbital/i
-		or $model=~/extendedhubbard1orb/i or $model=~/feasbasedscextended/i) {
-		$connectors="hoppings";
-	} elsif ($model=~/heisenberg/i) {
-		$connectors="jvalues";
-	}
+	#if ($model=~/hubbard/i or $model=~/febasedsc/i or $model=~/tjoneorbital/i
+	#	or $model=~/extendedhubbard1orb/i or $model=~/feasbasedscextended/i) {
+	#	$connectors="hoppings";
+	#} elsif ($model=~/heisenberg/i) {
+	#	$connectors="jvalues";
+	#}
 	
-	$connectors2="jvalues" if ($model=~/tjoneorbital/i or $model=~/feasbasedscextended/i);
-	$connectors2="ninjConnectors" if ($model=~/extendedhubbard1orb/i);
+	#$connectors2="jvalues" if ($model=~/tjoneorbital/i or $model=~/feasbasedscextended/i);
+	#$connectors2="ninjConnectors" if ($model=~/extendedhubbard1orb/i);
 	
 	print "Please enter the linker flags, LDFLAGS\n";
 	print "Available: Any\n";
@@ -175,7 +175,7 @@ print FOUT<<EOF;
 # MPI: $mpi
 
 LDFLAGS =    $lapack  $gslLibs $pthreadsLib
-CPPFLAGS = -Werror -Wall  -IEngine $modelLocation  -I$PsimagLite -I$PsimagLite/Geometry $usePthreadsOrNot
+CPPFLAGS = -Werror -Wall  -IEngine -IModels/HubbardOneBand -IModels/HeisenbergSpinOneHalf -IModels/ExtendedHubbard1Orb  -IModels/FeAsModel -IModels/FeAsBasedScExtended -IModels/Immm  -I$PsimagLite -I$PsimagLite/Geometry $usePthreadsOrNot
 EOF
 if ($mpi) {
 	print FOUT "CXX = mpicxx -O3 -DNDEBUG \n";
@@ -187,9 +187,6 @@ if ($mpi) {
 print FOUT<<EOF;
 EXENAME = dmrg
 all: \$(EXENAME) 
-
-dmrg.cpp: configure.pl
-	perl configure.pl
 
 dmrg:  dmrg.o 
 	\$(CXX) -o dmrg dmrg.o \$(LDFLAGS)  
@@ -601,53 +598,50 @@ bool observeOneFullSweep(
 	}
 
 	if (hasTimeEvolution) observerLib.setBrackets("time","time");
-
-	// Two-particle observables below
-	size_t rows = n; // could be n/2 if there's enough symmetry
 EOF
 	if  ($modelName=~/heisenberg/i) {
 	} else {
 print OBSOUT<<EOF; 
 
 	if (obsOptions.find("cc")!=std::string::npos) {
-		observerLib.measure("cc",rows,n);
+		observerLib.measure("cc",n/2,n);
 	}
 	
 	if (obsOptions.find("nn")!=std::string::npos) {
-		observerLib.measure("nn",rows,n);
+		observerLib.measure("nn",n/2,n);
 	}
 EOF
 	}
 print OBSOUT<<EOF;
 	if (obsOptions.find("szsz")!=std::string::npos) {
-		observerLib.measure("szsz",rows,n);
+		observerLib.measure("szsz",n/2,n);
 	}
 EOF
 	if  ($modelName=~/febasedsc/i or $modelName=~/feasbasedscextended/i) {
 print print OBSOUT<<EOF;
 	if (obsOptions.find("dd")!=std::string::npos && 
 			geometry.label(0).find("ladder")==std::string::npos) {
-		observerLib.measure("dd",rows,n);
+		observerLib.measure("dd",n/2,n);
 	}
 	
 
 	// FOUR-POINT DELTA-DELTA^DAGGER:
 	if (obsOptions.find("dd4")!=std::string::npos &&
 		geometry.label(0).find("ladder")!=std::string::npos) {
-		observerLib.measure("dd4",rows,n);
+		observerLib.measure("dd4",n/2,n);
 	} // if dd4
 EOF
 	}
 	if  ($modelName=~/heisenberg/i) {
 	print print OBSOUT<<EOF;
 		if (obsOptions.find("s+s-")!=std::string::npos) {
-			observerLib.measure("s+s-",rows,n);
+			observerLib.measure("s+s-",n/2,n);
 		}
 		if (obsOptions.find("s-s+")!=std::string::npos) {
-			observerLib.measure("s-s+",rows,n);
+			observerLib.measure("s-s+",n/2,n);
 		}
 		if (obsOptions.find("ss")!=std::string::npos) {
-			observerLib.measure("ss",rows,n);
+			observerLib.measure("ss",n/2,n);
 		}
 EOF
 	}

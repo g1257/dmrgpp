@@ -10,7 +10,8 @@ ConnectorsY 1 1.0
 hubbardU	8 0 0 0 0 0 0 0 0 
 potentialV     16 0 0 0 0 0 0 0 0 
 		  0 0 0 0 0 0 0 0
-SolverOptions=hasQuantumNumbers,wft,TimeStepTargetting
+Model=HubbardOneBand
+SolverOptions=wft,TimeStepTargetting
 Version=264e71039cc5a47c6f1f375f2f9baaffd94e94fa
 OutputFile=data17.txt
 InfiniteLoopKeptStates=256

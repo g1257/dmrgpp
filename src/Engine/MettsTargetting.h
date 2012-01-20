@@ -140,8 +140,8 @@ namespace Dmrg {
 			INFINITE=WaveFunctionTransfType::INFINITE};
 			const static size_t SYSTEM = ProgramGlobals::SYSTEM;
 
-			static size_t const PRODUCT = TargettingParamsType::PRODUCT;
-			static size_t const SUM = TargettingParamsType::SUM;
+			// static size_t const PRODUCT = TargettingParamsType::PRODUCT;
+			// static size_t const SUM = TargettingParamsType::SUM;
 			static const size_t parallelRank_ = 0; // Metts needs to support concurrency FIXME
 
 			MettsTargetting(const LeftRightSuperType& lrs,

@@ -116,8 +116,8 @@ namespace Dmrg {
 		
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;
-		static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
-		static const size_t DEGREES_OF_FREEDOM=OperatorsType::DEGREES_OF_FREEDOM;
+		static const int NUMBER_OF_ORBITALS=2;
+		static const size_t DEGREES_OF_FREEDOM=2*NUMBER_OF_ORBITALS;
 		static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
 		static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
 
@@ -150,7 +150,7 @@ namespace Dmrg {
 				     SparseMatrixType &hamiltonian,
 				     BasisDataType &q,
 				     Block const &block,
-				     size_t time)  const
+				     const RealType& time)  const
 		{
 			std::vector<HilbertState> natBasis;
 			std::vector<size_t> qvector;

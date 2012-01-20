@@ -1,9 +1,7 @@
 
 
 n
-n
-Heisenberg
-
+y
 
 
 

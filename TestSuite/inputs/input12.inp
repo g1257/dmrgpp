@@ -16,7 +16,8 @@ hubbardU	12 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 0.0 0.0 0.0 0.0 
 potentialV 24 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
               0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
-SolverOptions=hasQuantumNumbers,wft,nosu2,,hasThreads,GroundStateTargetting
+Model=HubbardOneBand
+SolverOptions=wft,nosu2,,hasThreads,GroundStateTargetting
 Version=6b9dc12805519cb864e80fa0957129a010711116
 OutputFile=data12.txt
 InfiniteLoopKeptStates=150

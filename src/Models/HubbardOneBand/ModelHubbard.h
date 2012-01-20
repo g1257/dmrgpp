@@ -115,7 +115,7 @@ namespace Dmrg {
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;
 		static const int DEGREES_OF_FREEDOM=2;
-		static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
+		static const int NUMBER_OF_ORBITALS=1;
 
 		enum {SPIN_UP, SPIN_DOWN};
 
@@ -135,33 +135,36 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef std::vector<HilbertState> HilbertBasisType;
 		
-		ModelHubbard(ParametersModelHubbard<RealType> const &mp,DmrgGeometryType const &dmrgGeometry,
-			    size_t offset = DEGREES_OF_FREEDOM) 
-			: ModelBaseType(dmrgGeometry),modelParameters_(mp), dmrgGeometry_(dmrgGeometry),offset_(offset),
-					    spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
-					   reinterpretX_(maxNumberOfSites),reinterpretY_(maxNumberOfSites)
+		ModelHubbard(PsimagLite::IoSimple::In& io,
+			     DmrgGeometryType const &dmrgGeometry,
+			     size_t offset = DEGREES_OF_FREEDOM)
+		: ModelBaseType(dmrgGeometry),
+		  modelParameters_(io),
+		  dmrgGeometry_(dmrgGeometry),
+		  offset_(offset),
+		  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
+		  reinterpretX_(maxNumberOfSites),
+		  reinterpretY_(maxNumberOfSites)
 		{}
 
-		/*!PTEX-START-INTERFACE hilbertSize
-		\cppFunction{!PTEX_THISFUNCTION} returns the size of the one-site Hilbert space.
-		!PTEX-END */
-		size_t hilbertSize(size_t site) const { return (size_t)pow(2,2*NUMBER_OF_ORBITALS); }
+		/** \cppFunction{!PTEX_THISFUNCTION} returns the size of the one-site Hilbert space. */
+		size_t hilbertSize(size_t site) const
+		{
+			return (size_t)pow(2,2*NUMBER_OF_ORBITALS);
+		}
 
-		/*!PTEX-START setNaturalBasis
-		Function \cppFunction{!PTEX_THISFUNCTION} sets certain aspects of the 
+		/** Function \cppFunction{!PTEX_THISFUNCTION} sets certain aspects of the
 		``natural basis'' (usually the real-space basis) on a given block.
 		The operator matrices (e.g., $c^\dagger_{i\sigma}$ for the Hubbard 
 		model or $S_i^+$ and $S_i^z$ for the Heisenberg model) need to be set 
 		there, as well as the Hamiltonian and the effective quantum number for
 		each state of this natural basis. To implement the algorithm for a 
-		fixed density, the number of electrons for each state is also needed.
-		!PTEX-END */
-		//! for each state in the basis
+		fixed density, the number of electrons for each state is also needed.*/
 		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
-				     SparseMatrixType &hamiltonian,
-				     BasisDataType &q,
-				     Block const &block,
-				     RealType time) const
+					     SparseMatrixType &hamiltonian,
+					     BasisDataType &q,
+					     Block const &block,
+					     RealType time) const
 		{
 			HilbertBasisType natBasis;
 			std::vector<size_t> quantumNumbs;
@@ -176,13 +179,12 @@ namespace Dmrg {
 			calcHamiltonian(hamiltonian,creationMatrix,block,time);
 		}
 
-		/*!PTEX-START-INTERFACE setOperatorMatrices
-		 \cppFunction{!PTEX_THISFUNCTION} sets local operators needed to 
+		/** \cppFunction{!PTEX_THISFUNCTION} sets local operators needed to
 		 construct the Hamiltonian.
 		 For example, for the Hubbard model these operators are the 
-		 creation operators for sites in block
-		 !PTEX-END */
-		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,Block const &block) const
+		 creation operators for sites in block */
+		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,
+						 Block const &block) const
 		{
 			std::vector<typename HilbertSpaceHubbardType::HilbertState> natBasis;
 			SparseMatrixType tmpMatrix;
@@ -211,11 +213,10 @@ namespace Dmrg {
 			}
 		}
 		
-		/*!PTEX-START-INTERFACE getOperatorModelHubbard
-		\cppFunction{!PTEX_THISFUNCTION} returns the operator in the 
-		unmangled (natural) basis of one-site
-		!PTEX-END */
-		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,size_t site,size_t dof) const
+		/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the unmangled (natural) basis of one-site */
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,
+									      size_t site,
+									      size_t dof) const
 		{
 			Block block;
 			block.resize(1);
@@ -255,13 +256,11 @@ namespace Dmrg {
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 		}
 		
-		/*!PTEX-START-INTERFACE findElectronsModelHubbard
-		\cppFunction{!PTEX_THISFUNCTION} Sets electrons to the total number of 
-		electrons for each state in the basis
-		!PTEX-END */
+		/** \cppFunction{!PTEX_THISFUNCTION} Sets electrons to the total number of
+		electrons for each state in the basis*/
 		void findElectrons(std::vector<size_t> &electrons,
-		                   const std::vector<HilbertState>& basis,
-		                   size_t site) const
+					   const std::vector<HilbertState>& basis,
+					   size_t site) const
 		{
 			int nup,ndown;
 			electrons.clear();
@@ -273,8 +272,8 @@ namespace Dmrg {
 		}
 
 		void setNaturalBasis(HilbertBasisType  &basis,
-		                     std::vector<size_t>& q,
-		                     const std::vector<size_t>& block) const
+				     std::vector<size_t>& q,
+				     const std::vector<size_t>& block) const
 		{
 			assert(block.size()==1);
 			HilbertState a=0;
@@ -293,26 +292,15 @@ namespace Dmrg {
 			basis.clear();
 			for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
 		}
-		
-		/*!PTEX-START-INTERFACE geometryModelHubbard
-		\cppFunction{!PTEX_THISFUNCTION} retruns a const reference to the geometry object
-		!PTEX-END */
-		const DmrgGeometryType& geometry() const { return dmrgGeometry_; }
 
 		void print(std::ostream& os) const
 		{
 			os<<modelParameters_;
 		}
-		/*template<typename ModelHelperType1,
-		typename SparseMatrixType1,
-		typename DmrgGeometryType1,
-		template<typename> class SharedMemoryTemplate1>
-		friend std::ostream& operator<<(std::ostream& os,
-		const ModelHubbard<ModelHelperType1,SparseMatrixType1,DmrgGeometryType1,SharedMemoryTemplate1>& m);
-*/
+
 	private:
 
-		const ParametersModelHubbard<RealType>&  modelParameters_;
+		ParametersModelHubbard<RealType>  modelParameters_;
 		const DmrgGeometryType &dmrgGeometry_;
 		size_t offset_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;

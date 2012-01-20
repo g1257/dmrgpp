@@ -120,7 +120,7 @@ namespace Dmrg {
 		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,
 		                  LinkProductType,SharedMemoryTemplate> ModelBaseType;
 
-		static const int NUMBER_OF_ORBITALS=OperatorsType::NUMBER_OF_ORBITALS;
+		static const int NUMBER_OF_ORBITALS=1;
 		static const int DEGREES_OF_FREEDOM=2; // spin up and down
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;
 
@@ -132,9 +132,9 @@ namespace Dmrg {
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
-		ModelHeisenberg(ParametersModelHeisenberg<RealType> const &mp,GeometryType const &geometry) 
+		ModelHeisenberg(PsimagLite::IoSimple::In& io,GeometryType const &geometry)
 		: ModelBaseType(geometry),
-		  modelParameters_(mp),
+		  modelParameters_(io),
 		  geometry_(geometry), 
 		  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 		  reinterpretX_(maxNumberOfSites),
@@ -154,7 +154,7 @@ namespace Dmrg {
 				     SparseMatrixType &hamiltonian,
 		                     BasisDataType &q,
 				     Block const &block,
-				     size_t time) const
+				     const RealType& time) const
 		{
 			std::vector<HilbertStateType> natBasis;
 			
@@ -243,7 +243,7 @@ namespace Dmrg {
 		
 		//! Dummy since this model has no fermion sign
 		void findElectrons(std::vector<size_t>& electrons,
-		                   std::vector<HilbertStateType>& basis,
+				   const HilbertBasisType& basis,
 		                   size_t site) const
 		{
 			electrons.resize(basis.size());
