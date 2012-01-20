@@ -606,8 +606,9 @@ namespace PsimagLite {
 	void multiply(std::vector<S>& v2, const CrsMatrix<S>& m, const std::vector<S>& v1)
 	{
 		int i,j,n=m.rank();
+		v2.resize(n);
 		for (i=0;i<n;i++) {
-			v2[i] =0;
+			v2[i]=0;
 			for (j=m.getRowPtr(i);j<m.getRowPtr(i+1);j++) {
 				v2[i] += m.getValue(j)*v1[m.getCol(j)];
 			}

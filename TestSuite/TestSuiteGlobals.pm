@@ -226,7 +226,7 @@ sub runAllTests
 	my ($start,$lastTest) = @_;
 	#All test numbers declared in @nonFunctionalTests will be skipped and not ran
 	#test102 features wft+su2 which is currently broken
-	my @nonFunctionalTests = (41,42,60,102,104,105,106,107,108,109,110,111,124,125,141,142,160);
+	#my @nonFunctionalTests = (); #41,42,60,102,104,105,106,107,108,109,110,111,124,125,141,142,160);
 	my @testsList = split(/ /,getAvailableTests());
 	
 	if(defined($lastTest)) {
@@ -240,11 +240,24 @@ sub runAllTests
 	for (my $i=0;$i<=$#testsList;$i++) {
 		next if ($testsList[$i] eq "");
 		next if ($testsList[$i]<$start);
-		next if(grep {$_ eq $testsList[$i]}@nonFunctionalTests);
+		my $specFile =  $TestSuiteGlobals::inputsDir."model$TestSuiteGlobals::testNum.spec";
+		next  if (nonFunctionalTest($specFile));
+		#next if(grep {$_ eq $testsList[$i]}@nonFunctionalTests);
 		$TestSuiteGlobals::testNum = $testsList[$i];
 		testSuite($TestSuiteGlobals::testNum);
 		last if($testsList[$i] == $lastTest);
 	}
+}
+
+sub nonFunctionalTest
+{
+	my ($specFile)=@_;
+	open(FILESPEC,$specFile) or return 1;
+	$_=<FILESPEC>;
+	close(FILESPEC);
+	chomp;
+	return 1 if (/DISABLED/);
+	return 0;
 }
 
 #Reads all analyses described in the processing file for a specific test
