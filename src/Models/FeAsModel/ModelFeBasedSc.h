@@ -131,8 +131,8 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		static size_t const REINTERPRET  = 1;
-		ModelFeBasedSc(ParametersModelFeAs<RealType> const &mp,GeometryType const &geometry) 
-			: ModelBaseType(geometry),reinterpretX_(6),reinterpretY_(9),modelParameters_(mp), geometry_(geometry),
+		ModelFeBasedSc(PsimagLite::IoSimple::In& io,GeometryType const &geometry) 
+			: ModelBaseType(geometry),reinterpretX_(6),reinterpretY_(9),modelParameters_(io), geometry_(geometry),
 					   spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 		{
 			setPauliMatrix();
@@ -291,7 +291,7 @@ namespace Dmrg {
 
 	private:
 		HilbertState reinterpretX_,reinterpretY_;
-		const ParametersModelFeAs<RealType>&  modelParameters_;
+		ParametersModelFeAs<RealType>  modelParameters_;
 		GeometryType const &geometry_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;

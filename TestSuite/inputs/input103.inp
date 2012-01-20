@@ -12,8 +12,8 @@ potentialV	64 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 		0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 		0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
                 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-density=1.0
-SolverOptions=hasQuantumNumbers,wft,noSu2,,hasThreads
+Model=HubbardOneBand
+SolverOptions=wft,noSu2,,hasThreads
 Version=aec8964f7a782d87d587c27276acd41760808139
 OutputFile=data103.txt
 InfiniteLoopKeptStates=100

@@ -191,7 +191,7 @@ namespace Dmrg {
 		}
 
 	private:
-		const ParametersModelHubbard<RealType>&  modelParameters_;
+		ParametersModelHubbard<RealType>  modelParameters_;
 		const DmrgGeometryType &dmrgGeometry_;
 		ModelHubbardType modelHubbard_;
 

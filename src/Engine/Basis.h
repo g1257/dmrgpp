@@ -307,14 +307,11 @@ namespace Dmrg {
 		//! removes the indices contained in removedIndices and
 		//! transforms this basis by transform 
 		template<typename BlockMatrixType,typename SolverParametersType>
-		RealType changeBasis(typename BlockMatrixType::BuildingBlockType &ftransform,BlockMatrixType& transform, std::vector<RealType>& eigs,size_t kept,const SolverParametersType& solverParams)
-			{
-			/* if (!isUnitary(transform)) {
-				std::cerr<<"------------------------------------\n";
-				operator<<(transform,std::cerr);
-				throw std::runtime_error("BasisWithOperators::changeBasis(): transform is not unitary.\n");
-
-			}*/
+		RealType changeBasis(typename BlockMatrixType::BuildingBlockType &ftransform,
+				     BlockMatrixType& transform, std::vector<RealType>& eigs,
+				     size_t kept,
+				     const SolverParametersType& solverParams)
+		{
 			quantumNumbersOld_ = quantumNumbers_;
 			partitionOld_ = partition_;
 			dmrgTransformed_=true;
@@ -333,14 +330,7 @@ namespace Dmrg {
 				msg<<"Truncating transform...";
 				utils::truncate(ftransform,removedIndices,false);
 				progress_.printline(msg,std::cerr);
-				/*if (!isUnitary(ftransform)) { // only used for debugging
-					//std::cerr<<"------------------------------------\n";
-					//operator<<(transform,std::cerr);
-					std::cerr<<"------------------------------------\n";
-					std::cerr<<ftransform;
-					throw std::runtime_error("BasisWithOperators::changeBasis(): transform is not unitary.\n");
 
-				}*/
 				std::ostringstream msg2;
 				msg2<<"Truncating indices...";
 				progress_.printline(msg2,std::cerr);

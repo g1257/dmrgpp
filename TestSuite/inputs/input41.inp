@@ -13,7 +13,7 @@ hoppings 2 2
 -0.079 +0.20828
 hubbardU	4 1.0 -1.5 -2.0 -1.0
 potentialV	4 0.0 0.0 0.0 0.0
-Model=FeAs
+Model=FeAsBasedSc
 options hasQuantumNumbers,nowft,useSu2Symmetry,
 version 61289987cdd32b8485213ac0415baf4e9cd16432
 outputfile		data41.txt

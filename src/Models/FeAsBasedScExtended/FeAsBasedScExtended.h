@@ -126,10 +126,9 @@ namespace Dmrg {
 		static const size_t SPIN_DOWN =
 						ModelFeAsType::SPIN_DOWN;
 
-		FeAsBasedScExtended(ParametersModelFeAs<RealType> const &mp,
-				GeometryType const &geometry)
-			: ModelBaseType(geometry),modelParameters_(mp), geometry_(geometry),
-			  modelFeAs_(mp,geometry)
+		FeAsBasedScExtended(PsimagLite::IoSimple::In& io,GeometryType const &geometry)
+			: ModelBaseType(geometry),modelParameters_(io), geometry_(geometry),
+			  modelFeAs_(io,geometry)
 		{}
 
 		size_t orbitals() const { return modelFeAs_.orbitals(); }
@@ -318,7 +317,7 @@ namespace Dmrg {
 					"or is unimplemented otherwise\n");
 		}
 
-		const ParametersModelFeAs<RealType>&  modelParameters_;
+		ParametersModelFeAs<RealType>  modelParameters_;
 		GeometryType const &geometry_;
 		ModelFeAsType modelFeAs_;
 	};     //class FeAsBasedScExtended

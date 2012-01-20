@@ -100,8 +100,8 @@ namespace Dmrg {
 				io.readline(x,"TimeVaryingPotential=");
 				if (x>0) timeVaryingPotential=true;
 			} catch (std::exception& e) {
-				io.rewind();
 			}
+			io.rewind();
 
 		}
 		

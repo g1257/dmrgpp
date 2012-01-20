@@ -45,10 +45,10 @@ Tests *with* SU(2) symmetry:
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
 100) same as 0 but without su(2) symmetry
 101) same as 1 but without su(2) symmetry
-102) same as 2 but without su(2) symmetry
+#102) same as 2 but without su(2) symmetry <-- DISABLED DUE TO BUG (SEE GITHUBISSUES)
 103) same as 3 but without su(2) symmetry
 200) Time Evolution
-201) Restart of 200, tests checkpointing with time vectors
+#201) Restart of 200, tests checkpointing with time vectors <-- NEEDS FIXING
 340) A test of the Fe-based Superconductors extended model
 410) Postprocessing of time evolution for Hubbard model
 600) Test on 6-site chain with U=10, standard Hubbard model. 

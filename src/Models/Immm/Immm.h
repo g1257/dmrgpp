@@ -128,9 +128,9 @@ namespace Dmrg {
 		static const int SPIN_DOWN=HilbertSpaceImmmType::SPIN_DOWN;
 		static const int NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
-		Immm(ParametersImmm<RealType> const &mp,GeometryType const &geometry) 
+		Immm(PsimagLite::IoSimple::In& io,GeometryType const &geometry) 
 		: ModelBaseType(geometry),
-		  modelParameters_(mp),
+		  modelParameters_(io),
 		  geometry_(geometry),
 		  degreesOfFreedom_(geometry_.numberOfSites()),
 		  index2Op_(geometry_.numberOfSites()),
@@ -499,7 +499,7 @@ namespace Dmrg {
 			return ((alpha & 10)==0) ? true : false;
 		}
 
-		const ParametersImmm<RealType>&  modelParameters_;
+		ParametersImmm<RealType>  modelParameters_;
 		GeometryType const &geometry_;
 		std::vector<size_t> degreesOfFreedom_;
 		std::vector<size_t> index2Op_;

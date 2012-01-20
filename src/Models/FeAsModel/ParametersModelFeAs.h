@@ -95,6 +95,7 @@ namespace Dmrg {
 	
 			io.read(hubbardU,"hubbardU");
 			io.read(potentialV,"potentialV");
+			io.rewind();
 			//io.readline(density,"density=");
 		}
 		
