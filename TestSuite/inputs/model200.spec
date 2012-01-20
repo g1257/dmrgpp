@@ -2,6 +2,5 @@
 
 n
 n
-Hubbard
 
 

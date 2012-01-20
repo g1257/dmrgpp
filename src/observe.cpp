@@ -100,43 +100,44 @@ bool observeOneFullSweep(
 	if (hasTimeEvolution) observerLib.setBrackets("time","time");
 
 	const std::string& s = model.name();
+	size_t rows = n; // could be n/2 if there's enough symmetry
 
 	if (s.find("heisenberg")==std::string::npos) {
 		if (obsOptions.find("cc")!=std::string::npos) {
-			observerLib.measure("cc",n/2,n);
+			observerLib.measure("cc",rows,n);
 		}
 
 		if (obsOptions.find("nn")!=std::string::npos) {
-			observerLib.measure("nn",n/2,n);
+			observerLib.measure("nn",rows,n);
 		}
 	}
 	if (obsOptions.find("szsz")!=std::string::npos) {
-		observerLib.measure("szsz",n/2,n);
+		observerLib.measure("szsz",rows,n);
 	}
 
 	if (s.find("febasedsc")!=std::string::npos ||
 	    s.find("feasbasedscextended")!=std::string::npos) {
 		if (obsOptions.find("dd")!=std::string::npos &&
 		    geometry.label(0).find("ladder")!=std::string::npos) {
-			observerLib.measure("dd",n/2,n);
+			observerLib.measure("dd",rows,n);
 		}
 
 		// FOUR-POINT DELTA-DELTA^DAGGER:
 		if (obsOptions.find("dd4")!=std::string::npos &&
 		    geometry.label(0).find("ladder")!=std::string::npos) {
-			observerLib.measure("dd4",n/2,n);
+			observerLib.measure("dd4",rows,n);
 		} // if dd4
 	}
 
 	if (s.find("heisenberg")!=std::string::npos) {
 		if (obsOptions.find("s+s-")!=std::string::npos) {
-			observerLib.measure("s+s-",n/2,n);
+			observerLib.measure("s+s-",rows,n);
 		}
 		if (obsOptions.find("s-s+")!=std::string::npos) {
-			observerLib.measure("s-s+",n/2,n);
+			observerLib.measure("s-s+",rows,n);
 		}
 		if (obsOptions.find("ss")!=std::string::npos) {
-			observerLib.measure("ss",n/2,n);
+			observerLib.measure("ss",rows,n);
 		}
 
 	}

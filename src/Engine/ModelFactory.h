@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  * Note: Due to BaseModel needing the LinkProductType it is
  *       currently not possible to use virtual inheritance
  *       to dispatch the calls.
- *       The workaround in this class has been to due a manual
+ *       The workaround in this class has been to do a manual
  *       dispatch, which is kind of error prone.
  *       To mitigate the problem, some things have been cached.
  *
@@ -330,6 +330,14 @@ namespace Dmrg {
 				return modelHubbard_->addHamiltonianConnection(matrix,lrs);
 			case HEISENBERG_SPIN_ONEHALF:
 				return modelHeisenberg_->addHamiltonianConnection(matrix,lrs);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->addHamiltonianConnection(matrix,lrs);
+			case FEAS:
+				return modelFeAs_->addHamiltonianConnection(matrix,lrs);
+			case FEAS_EXT:
+				return modelFeAsExt_->addHamiltonianConnection(matrix,lrs);
+			case IMMM:
+				return modelImmm_->addHamiltonianConnection(matrix,lrs);
 			}
 		}
 		
@@ -381,24 +389,12 @@ namespace Dmrg {
 		{
 			assert(block.size()==1);
 			return creationMatrix[block[0]];
-//			switch(model_) {
-//			case HUBBARD_ONE_BAND:
-//				return modelHubbard_->setOperatorMatrices(creationMatrix,block);
-//			case HEISENBERG_SPIN_ONEHALF:
-//				return modelHeisenberg_->setOperatorMatrices(creationMatrix,block);
-//			}
 		}
 
 		void setNaturalBasis(HilbertBasisType& basis,
 				     std::vector<size_t>& q,
 				     const std::vector<size_t>& block) const
 		{
-//			switch(model_) {
-//			case HUBBARD_ONE_BAND:
-//				return modelHubbard_->setNaturalBasis(basis,q,block);
-//			case HEISENBERG_SPIN_ONEHALF:
-//				return modelHeisenberg_->setNaturalBasis(basis,q,block);
-//			}
 			assert(block.size()==1);
 			size_t index=block[0];
 			basis=basis_[index];
@@ -432,7 +428,6 @@ namespace Dmrg {
 		std::vector<size_t> hilbertSize_;
 		std::vector<std::vector<size_t> > q_;
 		std::vector<HilbertBasisType> basis_;
-
 		// models start
 		ModelHubbardType* modelHubbard_;
 		ModelHeisenbergType* modelHeisenberg_;
@@ -441,8 +436,8 @@ namespace Dmrg {
 		FeBasedScExtType* modelFeAsExt_;
 		ImmmType* modelImmm_;
 		// models end
-
 		size_t model_;
+
 	};     //class ModelFactory
 
 	template<typename ModelHelperType,

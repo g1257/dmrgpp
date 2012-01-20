@@ -191,7 +191,12 @@ sub smartDiff
 	my @dimsRaw = split(' ', $rowsRaw[0]);
 	my @dimsOracle = split(' ', $rowsOracle[0]);
 	
-	die "Unbalanced dimensions, Operator$opName matrix: $!" if($dimsRaw[0]  != $dimsOracle[0] || $dimsRaw[1] != $dimsOracle[1]);
+	if($dimsRaw[0]  != $dimsOracle[0] || $dimsRaw[1] != $dimsOracle[1]) {
+		print STDERR "$0: smartDiff: Unbalanced dimensions, Operator$opName matrix.";
+		print STDERR " SmartDiff will be omitted\n";
+		return;
+	}
+
 	shift(@rowsRaw);
 	shift(@rowsOracle);
 	
