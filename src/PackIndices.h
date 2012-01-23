@@ -98,6 +98,12 @@ namespace PsimagLite {
 			y = q.quot;
 			x = q.rem;
 		}
+
+		size_t pack(size_t x0,size_t x1,const std::vector<size_t>& permutationInverse) const
+		{
+			return permutationInverse[x0+n_*x1];
+		}
+
 	private:
 		size_t n_;
 	}; // class PackIndices
