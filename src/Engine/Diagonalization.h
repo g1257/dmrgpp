@@ -129,7 +129,7 @@ namespace Dmrg {
 		  progress_("Diag.",0),
 		  quantumSector_(quantumSector),
 		  wft_(waveFunctionTransformation),
-		  reflectionOperator_(lrs,model_.hilbertSize(0)),
+		  reflectionOperator_(lrs,model_.hilbertSize(0),parameters_.useReflectionSymmetry),
 		  oldEnergy_(0)
 		{}
 
@@ -143,6 +143,9 @@ namespace Dmrg {
 				"Diagonalization::operator(): expecting INFINITE direction\n");
 			size_t loopIndex = 0;
 			size_t nk = 0; // bogus
+			std::vector<size_t> sectors;
+			targetedSymmetrySectors(sectors,target.leftRightSuper());
+			reflectionOperator_.check(sectors);
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,nk);
 			//  targetting: 
 			target.evolve(gsEnergy,direction,blockLeft,blockRight,loopIndex);
@@ -167,6 +170,8 @@ namespace Dmrg {
 			return gsEnergy;
 		}
 
+	private:
+
 		void targetedSymmetrySectors(std::vector<size_t>& mVector,const LeftRightSuperType& lrs) const
 		{
 			size_t total = lrs.super().partition()-1;
@@ -177,8 +182,6 @@ namespace Dmrg {
 				mVector.push_back(i);
 			}
 		}
-
-	private:
 
 		RealType internalMain_(TargettingType& target,
 		                       size_t direction,
@@ -367,10 +370,12 @@ namespace Dmrg {
 			int n = modelHelper.size();
 			if (verbose_) std::cerr<<"Lanczos: About to do block number="<<i<<" of size="<<n<<"\n";
 
+			ReflectionSymmetryType *rs = 0;
+			if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
 			typedef InternalProductTemplate<typename SomeVectorType::value_type,ModelType> MyInternalProduct;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 			typedef PsimagLite::LanczosSolver<ParametersForSolverType,MyInternalProduct,SomeVectorType> LanczosSolverType;
-			typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
+			typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper,rs);
 			
 			ParametersForSolverType params;
 			params.steps = iter;
@@ -388,8 +393,25 @@ namespace Dmrg {
 			/*std::ostringstream msg;
 			msg<<"Calling computeGroundState...\n";
 			progress_.printline(msg,std::cerr);
-			*/	
-			lanczosSolver.computeGroundState(energyTmp,tmpVec,initialVector);
+			*/
+			if (!reflectionOperator_.isEnabled()) {
+				lanczosSolver.computeGroundState(energyTmp,tmpVec,initialVector);
+				return;
+			}
+			SomeVectorType initialVector1,initialVector2;
+			reflectionOperator_.setInitState(initialVector,initialVector1,initialVector2);
+			lanczosSolver.computeGroundState(energyTmp,tmpVec,initialVector1);
+
+
+			RealType gsEnergy1 = energyTmp;
+			SomeVectorType gsVector1 = tmpVec;
+
+			lanczosHelper.reflectionSector(1);
+			SomeVectorType gsVector2(lanczosHelper.rank());
+			RealType gsEnergy2 = 0;
+			lanczosSolver.computeGroundState(gsEnergy2,gsVector2,initialVector2);
+
+			energyTmp=reflectionOperator_.setGroundState(tmpVec,gsEnergy1,gsVector1,gsEnergy2,gsVector2);
 		}
 
 	 	const ParametersType& parameters_;

@@ -46,7 +46,7 @@ typedef PsimagLite::ConcurrencyMpi<MatrixElementType> ConcurrencyType;
 #include "ModelHelperSu2.h"
 #include "InternalProductOnTheFly.h"
 #include "InternalProductStored.h"
-#include "InternalProductCached.h"
+//#include "InternalProductCached.h"
 #include "GroundStateTargetting.h"
 #include "TimeStepTargetting.h"
 #include "DynamicTargetting.h"
@@ -162,13 +162,15 @@ void mainLoop(GeometryType& geometry,
 		         VectorWithOffsetTemplate,
 		         TargettingTemplate,
 		         MySparseMatrix>(geometry,dmrgSolverParams,concurrency,io);
-	} else if (dmrgSolverParams.options.find("InternalProductCached")!=std::string::npos) {
+	}
+	/*else if (dmrgSolverParams.options.find("InternalProductCached")!=std::string::npos) {
 		mainLoop2<ModelHelperTemplate,
 		          InternalProductCached,
 		          VectorWithOffsetTemplate,
 		          TargettingTemplate,
 		          MySparseMatrix>(geometry,dmrgSolverParams,concurrency,io);
-	} else {
+	} */
+	else {
  		mainLoop2<ModelHelperTemplate,
 		         InternalProductOnTheFly,
 		         VectorWithOffsetTemplate,

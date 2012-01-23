@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
@@ -290,6 +289,7 @@ namespace Dmrg {
 		FieldType tolerance;
 		DmrgCheckPoint checkpoint;
 		size_t nthreads;
+		int useReflectionSymmetry;
 		
 		//! Read Dmrg parameters from inp file
 		ParametersDmrgSolver(PsimagLite::IoSimple::In& io)
@@ -314,6 +314,11 @@ namespace Dmrg {
 			nthreads=1; // provide a default value
 			if (options.find("hasThreads")!=std::string::npos)
 				io.readline(nthreads,"Threads=");
+			useReflectionSymmetry=0;
+			try {
+				io.readline(useReflectionSymmetry,"UseReflectionSymmetry=");
+			} catch (std::exception& e) {}
+			io.rewind();
 		} 
 
 	};
@@ -340,6 +345,7 @@ namespace Dmrg {
 		if (parameters.options.find("hasTolerance")!=std::string::npos)
 			os<<"parameters.tolerance="<<parameters.tolerance<<"\n";
 		os<<"parameters.nthreads="<<parameters.nthreads<<"\n";
+		os<<"parameters.useReflectionSymmetry="<<parameters.useReflectionSymmetry<<"\n";
 		return os;
 	}
 } // namespace Dmrg

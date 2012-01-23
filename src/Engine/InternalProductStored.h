@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
@@ -110,7 +109,7 @@ namespace Dmrg {
 				matrixStored_[0].clear();
 				model->fullHamiltonian(matrixStored_[0],*modelHelper);
 				assert(isHermitian(matrixStored_[0],true));
-				msg<<"fullHamiltonian has rank="<<matrixStored_[0].rank()<<" nonzeros="<<matrixStored_[0].nonZero()<<"\n";
+				msg<<"fullHamiltonian has rank="<<matrixStored_[0].rank()<<" nonzeros="<<matrixStored_[0].nonZero();
 				progress_.printline(msg,std::cout);
 				return;
 			}

@@ -316,8 +316,6 @@ namespace Dmrg {
 				updateQuantumSector(lrs_.sites());
 
 				lrs_.setToProduct(quantumSector_);
-				std::vector<size_t> sectors;
-				diagonalization_.targetedSymmetrySectors(sectors,lrs_);
 
 				diagonalization_(psi,INFINITE,X[step],Y[step]);
 

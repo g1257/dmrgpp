@@ -126,15 +126,21 @@ class ReflectionOperator {
 	typedef typename LeftRightSuperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef ReflectionItem ItemType;
+	typedef std::vector<ComplexOrRealType> VectorType;
 
 public:
 
-	ReflectionOperator(const LeftRightSuperType& lrs,size_t n0)
-	: lrs_(lrs),n0_(n0),progress_("ReflectionOperator",0),plusSector_(0)
+	ReflectionOperator(const LeftRightSuperType& lrs,size_t n0,bool isEnabled)
+	: lrs_(lrs),
+	  n0_(n0),
+	  progress_("ReflectionOperator",0),
+	  plusSector_(0),
+	  isEnabled_(isEnabled)
 	{}
 
 	void check(const std::vector<size_t>& sectors)
 	{
+		if (!isEnabled_) return;
 		assert(sectors.size()==1);
 		size_t m = sectors[0];
 		size_t offset = lrs_.super().partition(m);
@@ -175,6 +181,8 @@ public:
 		       SparseMatrixType& matrixB,
 		       const SparseMatrixType& matrix) const
 	 {
+		assert(isEnabled_);
+
 		 SparseMatrixType rT;
 		 transposeConjugate(rT,transform_);
 
@@ -187,7 +195,53 @@ public:
 		 split(matrixA,matrixB,matrix2);
 	 }
 
+	template<typename SomeVectorType>
+	void setInitState(const SomeVectorType& initVector,
+			  SomeVectorType& initVector1,
+			  SomeVectorType& initVector2) const
+	{
+		assert(isEnabled_);
+		size_t minusSector = initVector.size()-plusSector_;
+		initVector1.resize(plusSector_);
+		initVector2.resize(minusSector);
+		for (size_t i=0;i<initVector.size();i++) {
+			if (i<plusSector_) initVector1[i]=initVector[i];
+			else  initVector2[i-plusSector_]=initVector[i];
+		}
+
+	}
+
+	RealType setGroundState(VectorType& gs,
+				const RealType& gsEnergy1,
+				const VectorType& gsVector1,
+				const RealType& gsEnergy2,
+				const VectorType& gsVector2) const
+	{
+		assert(isEnabled_);
+		size_t rank = gsVector1.size() + gsVector2.size();
+		if (gsEnergy1<=gsEnergy2) {
+			setGs(gs,gsVector1,rank,0);
+			return gsEnergy1;
+		}
+		setGs(gs,gsVector2,rank,gsVector1.size());
+		return gsEnergy2;
+	}
+
+	bool isEnabled() const { return isEnabled_; }
+
 private:
+
+	void setGs(VectorType& gs,const VectorType& v,size_t rank,size_t offset) const
+	{
+		VectorType gstmp(rank,0);
+
+		for (size_t i=0;i<v.size();i++) {
+			gstmp[i+offset]=v[i];
+		}
+		SparseMatrixType rT;
+		transposeConjugate(rT,transform_);
+		multiply(gs,rT,gstmp);
+	}
 
 	void computeTransform()
 	{
@@ -362,6 +416,7 @@ private:
 	size_t n0_; // hilbert size of one site
 	PsimagLite::ProgressIndicator progress_;
 	size_t plusSector_;
+	bool isEnabled_;
 	SparseMatrixType s_;
 	SparseMatrixType transform_;
 }; // class ReflectionOperator
