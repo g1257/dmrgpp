@@ -96,7 +96,7 @@ void mainLoop3(GeometryType& geometry,
 }
 
 template<template<typename,typename> class ModelHelperTemplate,
-         template<typename,typename> class InternalProductTemplate,
+	 template<typename,typename> class InternalProductTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
                   template<typename,typename> class,
@@ -168,7 +168,7 @@ void mainLoop(GeometryType& geometry,
 		          VectorWithOffsetTemplate,
 		          TargettingTemplate,
 		          MySparseMatrix>(geometry,dmrgSolverParams,concurrency,io);
-	} else {  
+	} else {
  		mainLoop2<ModelHelperTemplate,
 		         InternalProductOnTheFly,
 		         VectorWithOffsetTemplate,

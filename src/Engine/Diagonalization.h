@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -111,12 +110,13 @@ namespace Dmrg {
 		typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 
 		Diagonalization(const ParametersType& parameters,
                         const ModelType& model,
                         ConcurrencyType& concurrency,
                         const bool& verbose,
-//                        const bool& useReflection,
+			const LeftRightSuperType& lrs,
                         IoOutType& io,
                         const size_t& quantumSector,
                        WaveFunctionTransfType& waveFunctionTransformation)
@@ -129,6 +129,7 @@ namespace Dmrg {
 		  progress_("Diag.",0),
 		  quantumSector_(quantumSector),
 		  wft_(waveFunctionTransformation),
+		  reflectionOperator_(lrs,model_.hilbertSize(0)),
 		  oldEnergy_(0)
 		{}
 
@@ -164,6 +165,17 @@ namespace Dmrg {
 			target.evolve(gsEnergy,direction,block,block,loopIndex);
 			wft_.triggerOff(target.leftRightSuper()); //,m);
 			return gsEnergy;
+		}
+
+		void targetedSymmetrySectors(std::vector<size_t>& mVector,const LeftRightSuperType& lrs) const
+		{
+			size_t total = lrs.super().partition()-1;
+			for (size_t i=0;i<total;i++) {
+				//size_t bs = lrs.super().partition(i+1)-lrs.super().partition(i);
+				if (lrs.super().pseudoEffectiveNumber(lrs.super().partition(i))!=quantumSector_ )
+					continue;
+				mVector.push_back(i);
+			}
 		}
 
 	private:
@@ -389,6 +401,7 @@ namespace Dmrg {
 		PsimagLite::ProgressIndicator progress_;
 		const size_t& quantumSector_; // this needs to be a reference since DmrgSolver will change it
 		WaveFunctionTransfType& wft_;
+		ReflectionSymmetryType reflectionOperator_;
 		double oldEnergy_;
 	}; // class Diagonalization
 } // namespace Dmrg 

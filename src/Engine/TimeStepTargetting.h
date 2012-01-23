@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	template<template<typename,typename,typename> class LanczosSolverTemplate,
-	         template<typename,typename> class InternalProductTemplate,
+		 template<typename,typename> class InternalProductTemplate,
 	         template<typename,typename> class WaveFunctionTransfTemplate,
 	         typename ModelType_,
 	         typename ConcurrencyType_,

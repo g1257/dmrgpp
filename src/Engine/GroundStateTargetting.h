@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
@@ -92,7 +91,7 @@ namespace Dmrg {
 
 	template<
 			template<typename,typename,typename> class LanczosSolverTemplate,
-  			template<typename,typename> class InternalProductTemplate,
+			template<typename,typename> class InternalProductTemplate,
      			template<typename,typename> class WaveFunctionTransfTemplate,
      			typename ModelType_,
 			typename ConcurrencyType_,

@@ -28,17 +28,8 @@ my $mpi=0;
 my $platform="linux";
 my $lapack="-llapack";
 my $PsimagLite="../../PsimagLite/src";
-my $connectors;
-my $connectorValue=1.0;
-my $hubbardUvalue=1.0;
-my $potentialVvalue=0.0;
-my ($infiniteKeptStates,$finiteLoops,$hasLoops);
-my ($model,$linSize,$modelLocation,$modelFullName);
-my ($geometryArgs);
-my ($electrons,$momentumJ,$su2Symmetry);
 my ($pthreads,$pthreadsLib)=(0,"");
 my $brand= "v2.0";
-my ($connectorsArgs,$connectorsArgs2,$dof,$connectors2,$connectorValue2);
 
 my $gslLibs = " -lgsl  -lgslcblas ";
 $gslLibs =" " if ($hasGsl=~/n/i);
@@ -148,7 +139,7 @@ if ($mpi) {
 } else {
 	print FOUT "CXX = $compiler  -O3 -DNDEBUG\n";
 	print FOUT "#Comment out line below for debugging (COMMENT ALSO THE strip commands): \n";
-	print FOUT "#CXX = $compiler -g3 \n";
+	print FOUT "#CXX = $compiler -g3 #ALSO COMMENT OUT strip command below\n";
 }
 print FOUT<<EOF;
 EXENAME = dmrg

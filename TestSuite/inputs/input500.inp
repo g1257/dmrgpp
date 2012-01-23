@@ -9,6 +9,7 @@ hubbardU	16 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 potentialV	 32 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
                 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
 TimeVaryingPotential=1
+Model=HubbardOneBand
 SolverOptions=wft,TimeStepTargetting
 Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
 OutputFile=data500.txt

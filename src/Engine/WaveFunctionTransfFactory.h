@@ -323,8 +323,7 @@ namespace Dmrg {
 
 		const PsimagLite::Matrix<SparseElementType>& transform(size_t what) const
 		{
-			return (what==ProgramGlobals::SYSTEM) ? 
-			                           dmrgWaveStruct_.ws : dmrgWaveStruct_.we;
+			return (what==ProgramGlobals::SYSTEM) ? dmrgWaveStruct_.ws : dmrgWaveStruct_.we;
 		}
 
 		bool isEnabled() const { return isEnabled_; }

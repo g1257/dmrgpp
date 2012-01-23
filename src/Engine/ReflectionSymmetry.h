@@ -147,34 +147,7 @@ namespace Dmrg {
 
 	private:
 
-		void calcReflectionOpSystem()
-		{
-			for (ArrangementsType i(levels,sizes);!i.end();i.next()) {
-				for (ArrangementsType iprime(levels,sizes);!i.end();i.next()) {
-					for (ArrangementsType mu(levels,n0);!i.end();i.next()) {
-						size_t firstMu = mu[0];
-						size_t lastI = i[levels-1];
-						size_t lastIprime = iprime[levels-1];
-						size_t lastMu = mu[levels-1];
-						size_t p = permutationInverse[levels-1](lastI,lastMu);
-						size_t pprime = permutationInverse[levels-1](lastIprime,firstMu);
-						s_(p,pprime) += calcReflectionOpSystem(i,iprime,mu);
-					}
-				}
-			}
-		}
 
-		void calcReflectionOpSystem(const ArrangementsType& i,
-					    const ArrangementsType& iprime,
-					    const ArrangementsType& mu)
-		{
-			for (size_t x=0;x<i.size();x++) {
-				p = permutationInverse[x](i[x-1],mu[x]);
-				tmp *= w[x](p,i[x]);
-				pprime = permutationInverse[levels-x-1](iprime[x-1],mu[levels-x-1]);
-				tmp *= w[x](pprime,iprime[x]);
-			}
-		}
 
 		void setGs(VectorType& gs,const VectorType& v,size_t rank,size_t offset)
 		{

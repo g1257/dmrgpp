@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -158,8 +157,7 @@ namespace Dmrg {
 		  checkpoint_(parameters_,concurrency.rank()),
 		  wft_(parameters_),
 		  diagonalization_(parameters,model,concurrency,verbose_,
-				   //useReflection_,
-				   io_,quantumSector_,wft_),
+				   lrs_,io_,quantumSector_,wft_),
 		  truncate_(lrs_,wft_,concurrency_,
 		            parameters_,model_.maxConnections(),verbose_)
 		{
@@ -301,6 +299,7 @@ namespace Dmrg {
 				TargettingType& psi)
 		{
 			checkpoint_.push(pS,pE);
+
 			RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
 			for (size_t step=0;step<X.size();step++) {
 				std::ostringstream msg;
@@ -317,6 +316,8 @@ namespace Dmrg {
 				updateQuantumSector(lrs_.sites());
 
 				lrs_.setToProduct(quantumSector_);
+				std::vector<size_t> sectors;
+				diagonalization_.targetedSymmetrySectors(sectors,lrs_);
 
 				diagonalization_(psi,INFINITE,X[step],Y[step]);
 

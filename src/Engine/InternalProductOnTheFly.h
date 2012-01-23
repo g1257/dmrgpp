@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -92,8 +91,11 @@ namespace Dmrg {
 		typedef T value_type;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::RealType RealType;
+		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 
-		InternalProductOnTheFly(ModelType const *model,ModelHelperType const *modelHelper) 
+		InternalProductOnTheFly(ModelType const *model,
+					ModelHelperType const *modelHelper,
+					ReflectionSymmetryType* rs=0)
 		{
 			model_ = model;
 			modelHelper_=modelHelper;
@@ -107,6 +109,10 @@ namespace Dmrg {
 		{
 			 model_->matrixVectorProduct(x,y,*modelHelper_);
 		}
+
+		size_t reflectionSector() const { return 0; }
+
+		void reflectionSector(size_t p) {  }
 
 	private:
 		ModelType const *model_;

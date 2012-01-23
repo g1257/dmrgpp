@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define InternalProductStored_HEADER_H
 
 #include <vector>
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 	template<typename T,typename ModelType>
@@ -93,36 +94,56 @@ namespace Dmrg {
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelHelperType::RealType RealType;
+		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 		//typedef typename SparseMatrixType::value_type SparseElementType;
 
-		InternalProductStored(ModelType const *model,ModelHelperType const *modelHelper) 
+		InternalProductStored(ModelType const *model,
+				      ModelHelperType const *modelHelper,
+				      const ReflectionSymmetryType* rs=0)
+		: matrixStored_(2),pointer_(0),progress_("InternalProductStored",0)
 		{
 			model_ = model;
 			modelHelper_=modelHelper;
-			std::cerr<<"size="<<modelHelper->size()<<"\n";
-			matrixStored_.clear();
-			model->fullHamiltonian(matrixStored_,*modelHelper);
-			assert(isHermitian(matrixStored_,true));
-			std::cout<<"fullHamiltonian has rank="<<matrixStored_.rank()<<" nonzeros="<<matrixStored_.nonZero()<<"\n";
+			std::ostringstream msg;
+
+			if (!rs) {
+				matrixStored_[0].clear();
+				model->fullHamiltonian(matrixStored_[0],*modelHelper);
+				assert(isHermitian(matrixStored_[0],true));
+				msg<<"fullHamiltonian has rank="<<matrixStored_[0].rank()<<" nonzeros="<<matrixStored_[0].nonZero()<<"\n";
+				progress_.printline(msg,std::cout);
+				return;
+			}
+			SparseMatrixType matrix2;
+			model->fullHamiltonian(matrix2,*modelHelper);
+			rs->transform(matrixStored_[0],matrixStored_[1],matrix2);
+//			msg<<"fullHamiltonian with rank="<<matrixStored_[0].rank()<<" has reflection\n";
+//			progress_.printline(msg,std::cout);
 		}
 
-		size_t rank() const { return matrixStored_.rank(); }
+		size_t rank() const { return matrixStored_[pointer_].rank(); }
 
 		template<typename SomeVectorType>
 		void matrixVectorProduct(SomeVectorType &x, SomeVectorType const &y) const
 		{
-			 matrixStored_.matrixVectorProduct(x,y);
+			 matrixStored_[pointer_].matrixVectorProduct(x,y);
 		}
 
 		HamiltonianElementType operator()(size_t i,size_t j) const
 		{
-			return matrixStored_(i,j);
+			return matrixStored_[pointer_](i,j);
 		}
+
+		size_t reflectionSector() const { return pointer_; }
+
+		void reflectionSector(size_t p) { pointer_=p; }
 
 	private:
 		ModelType const *model_;
 		ModelHelperType const *modelHelper_;
-		SparseMatrixType matrixStored_;
+		std::vector<SparseMatrixType> matrixStored_;
+		size_t pointer_;
+		PsimagLite::ProgressIndicator progress_;
 	}; // class InternalProductStored
 } // namespace Dmrg
 
