@@ -136,52 +136,26 @@ public:
 	  n0_(n0),
 	  progress_("ReflectionOperator",0),
 	  plusSector_(0),
-	  isEnabled_(isEnabled)
-	{}
+	  isEnabled_(isEnabled),
+	  reflected_(n0_)
+	{
+		for (size_t i=0;i<reflected_.size();i++)
+			reflected_[i]=i;
+	}
 
 	void check(const std::vector<size_t>& sectors)
 	{
 		if (!isEnabled_) return;
-		assert(sectors.size()==1);
-		size_t m = sectors[0];
-		size_t offset = lrs_.super().partition(m);
-		size_t total = lrs_.super().partition(m+1)-offset;
-		size_t ns = lrs_.left().size();
-		PackIndicesType pack1(ns);
-		PackIndicesType pack2(ns/n0_);
-		PackIndicesType pack3(n0_);
-		size_t counter = 0;
-		RealType sign = 1.0;
-		s_.resize(total);
-		for (size_t i=0;i<total;i++) {
-			s_.setRow(i,counter);
-			size_t x=0,y=0;
-			pack1.unpack(x,y,lrs_.super().permutation(i+offset));
-
-			size_t x0=0,x1=0;
-			pack2.unpack(x0,x1,lrs_.left().permutation(x));
-
-			size_t y0=0,y1=0;
-			pack3.unpack(y0,y1,lrs_.right().permutation(y));
-			std::cerr<<"i="<<i<<" state="<<x0<<" "<<x1<<" "<<y0<<" "<<y1<<"\n";
-			size_t xprime = pack2.pack(y1,y0,lrs_.left().permutationInverse());
-			size_t yprime = pack3.pack(x1,x0,lrs_.right().permutationInverse());
-			size_t iprime = pack1.pack(xprime,yprime,lrs_.super().permutationInverse());
-			size_t signCounter=0;
-			if (x0==3) signCounter++;
-			if (x1==3) signCounter++;
-			if (y0==3) signCounter++;
-			if (y1==3) signCounter++;
-			sign = 1;
-			if (signCounter&1) sign=-1;
-			assert(iprime>=offset && iprime<total+offset);
-			s_.pushCol(iprime-offset);
-			s_.pushValue(sign);
-			counter++;
-		}
-		s_.setRow(total,counter);
-		//print();
-		computeTransform();
+		setS();
+		updateReflected();
+		PsimagLite::CrsMatrix<RealType> sSector;
+		extractCurrentSector(sSector,sectors);
+		std::vector<ItemType> items;
+		computeItems(items,sSector);
+		std::vector<ItemType> items2;
+		makeUnique(items2,items);
+		assert(items2.size()==sSector.rank());
+		setTransform(items2);
 	}
 
 	void transform(SparseMatrixType& matrixA,
@@ -240,6 +214,115 @@ public:
 
 private:
 
+	void setS()
+	{
+		size_t total = lrs_.super().size();
+		size_t ns = lrs_.left().size();
+		PackIndicesType pack1(ns);
+		PackIndicesType pack2(ns/n0_);
+		PackIndicesType pack3(n0_);
+		size_t counter = 0;
+		RealType sign = 1.0;
+		PsimagLite::CrsMatrix<RealType> snew(total,total);
+		for (size_t i=0;i<total;i++) {
+			snew.setRow(i,counter);
+			size_t x=0,y=0;
+			pack1.unpack(x,y,lrs_.super().permutation(i));
+
+			size_t x0=0,x1=0;
+			pack2.unpack(x0,x1,lrs_.left().permutation(x));
+
+			size_t y0=0,y1=0;
+			pack3.unpack(y0,y1,lrs_.right().permutation(y));
+			//std::cerr<<"i="<<i<<" state="<<x0<<" "<<x1<<" "<<y0<<" "<<y1<<"\n";
+			size_t x0r = reflected_[x0];
+			size_t y1r = reflected_[y1];
+			size_t xprime = pack2.pack(y1r,y0,lrs_.left().permutationInverse());
+			size_t yprime = pack3.pack(x1,x0r,lrs_.right().permutationInverse());
+			size_t iprime = pack1.pack(xprime,yprime,lrs_.super().permutationInverse());
+			//			size_t signCounter=0;
+			//			if (x0==3) signCounter++;
+			//			if (x1==3) signCounter++;
+			//			if (y0==3) signCounter++;
+			//			if (y1==3) signCounter++;
+			//			sign = 1;
+			//			if (signCounter&1) sign=-1;
+
+			snew.pushCol(iprime);
+			snew.pushValue(sign);
+			counter++;
+		}
+		snew.setRow(total,counter);
+		s_=snew;
+	}
+
+	void extractCurrentSector(PsimagLite::CrsMatrix<RealType>& sSector,
+				  const std::vector<size_t>& sectors) const
+	{
+		assert(sectors.size()==1);
+		size_t m = sectors[0];
+		size_t offset = lrs_.super().partition(m);
+		size_t total = lrs_.super().partition(m+1)-offset;
+		sSector.resize(total);
+		size_t counter = 0;
+		for (size_t i=0;i<total;i++) {
+			sSector.setRow(i,counter);
+			for (int k=s_.getRowPtr(i+offset);k<s_.getRowPtr(i+offset+1);k++) {
+				size_t col = s_.getCol(k);
+				RealType val = s_.getValue(k);
+				assert(col>=offset && col<total+offset);
+				sSector.pushCol(col-offset);
+				sSector.pushValue(val);
+				counter++;
+			}
+		}
+		sSector.setRow(total,counter);
+	}
+
+	void updateReflected()
+	{
+		// for each x0 find the reflected of
+		// x0 0 0 x0
+		// decompose into
+		// x0' 0 0 x0'
+		// then x0'=reflected(x0)
+		size_t ns = lrs_.left().size();
+		PackIndicesType pack1(ns);
+		PackIndicesType pack2(ns/n0_);
+		PackIndicesType pack3(n0_);
+		reflected_.resize(ns);
+		for (size_t x0=0;x0<ns;x0++) {
+			//size_t x = pack2.pack(x0,0,lrs_.left().permutationInverse());
+			//size_t y = pack3.pack(0,x0,lrs_.right().permutationInverse());
+			size_t i = pack1.pack(x0,x0,lrs_.super().permutationInverse());
+			for (int k=s_.getRowPtr(i);k<s_.getRowPtr(i+1);k++) {
+				size_t col = s_.getCol(k);
+				RealType val = s_.getValue(k);
+				assert(!isAlmostZero(val));
+				size_t xprime=0,yprime=0;
+				pack1.unpack(xprime,yprime,lrs_.super().permutation(col));
+
+				//size_t x0prime=0,x1prime=0;
+				//pack2.unpack(x0prime,x1prime,lrs_.left().permutation(xprime));
+				assert(xprime==yprime);
+				reflected_[x0]=xprime;
+			}
+		}
+	}
+
+//	size_t findReflected(size_t x) const
+//	{
+//		if (s_.rank()==0) return x;
+//		for (size_t i=0;i<s_.rank();i++) {
+//			for (int k=s_.getRowPtr(i);k<s_.getRowPtr(i+1);k++) {
+//				size_t col = s_.getCol(k);
+//				if (col==x) return i;
+//			}
+//		}
+//		std::string s(__FILE__);
+//		s += " findReflected\n";
+//		throw std::runtime_error(s.c_str());
+//	}
 
 	void setGs(VectorType& gs,const VectorType& v,size_t rank,size_t offset) const
 	{
@@ -253,15 +336,15 @@ private:
 		multiply(gs,rT,gstmp);
 	}
 
-	void computeTransform()
+	void computeItems(std::vector<ItemType>& items,
+			  PsimagLite::CrsMatrix<RealType>& sSector)
 	{
-		std::vector<ItemType> items;
 		ItemType item(0);
-		for (size_t i=0;i<s_.rank();i++) {
-			for (int k=s_.getRowPtr(i);k<s_.getRowPtr(i+1);k++) {
-				size_t col = s_.getCol(k);
-				if (isAlmostZero(s_.getValue(k))) continue;
-				item.sign = s_.getValue(k);
+		for (size_t i=0;i<sSector.rank();i++) {
+			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
+				size_t col = sSector.getCol(k);
+				if (isAlmostZero(sSector.getValue(k))) continue;
+				item.sign = sSector.getValue(k);
 				if (col==i) {
 					item.type = ItemType::DIAGONAL;
 					item.i=item.j=i;
@@ -280,14 +363,11 @@ private:
 				items.push_back(item);
 			}
 		}
-		setTransform(items);
 	}
 
-	void setTransform(const std::vector<ItemType>& buffer2)
+	void setTransform(const std::vector<ItemType>& buffer)
 	{
-		std::vector<ItemType> buffer;
-		makeUnique(buffer,buffer2);
-		transform_.resize(s_.rank());
+		transform_.resize(buffer.size());
 		assert(buffer.size()==transform_.rank());
 		size_t counter = 0;
 		RealType oneOverSqrt2 = 1.0/sqrt(2.0);
@@ -432,6 +512,7 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	size_t plusSector_;
 	bool isEnabled_;
+	std::vector<size_t> reflected_;
 	PsimagLite::CrsMatrix<RealType> s_;
 	SparseMatrixType transform_;
 }; // class ReflectionOperator
