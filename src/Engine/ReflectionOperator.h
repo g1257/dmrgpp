@@ -97,14 +97,15 @@ public:
 	enum { DIAGONAL,PLUS,MINUS};
 
 	ReflectionItem(size_t ii)
-		: i(ii),j(ii),type(DIAGONAL)
+	: i(ii),j(ii),type(DIAGONAL),sign(1)
 	{}
 
-	ReflectionItem(size_t ii,size_t jj,size_t type1)
-		: i(ii),j(jj),type(type1)
+	ReflectionItem(size_t ii,size_t jj,size_t type1,size_t sign1)
+	: i(ii),j(jj),type(type1),sign(sign1)
 	{}
 
 	size_t i,j,type;
+	int sign;
 
 }; // class ReflectionItem
 
@@ -150,7 +151,7 @@ public:
 		PackIndicesType pack2(ns/n0_);
 		PackIndicesType pack3(n0_);
 		size_t counter = 0;
-		ComplexOrRealType one = 1.0;
+		RealType sign = 1.0;
 		s_.resize(total);
 		for (size_t i=0;i<total;i++) {
 			s_.setRow(i,counter);
@@ -162,14 +163,20 @@ public:
 
 			size_t y0=0,y1=0;
 			pack3.unpack(y0,y1,lrs_.right().permutation(y));
-
-			size_t xprime = pack2.pack(x0,y0,lrs_.left().permutationInverse());
-			size_t yprime = pack3.pack(x1,y1,lrs_.right().permutationInverse());
+			std::cerr<<"i="<<i<<" state="<<x0<<" "<<x1<<" "<<y0<<" "<<y1<<"\n";
+			size_t xprime = pack2.pack(y1,y0,lrs_.left().permutationInverse());
+			size_t yprime = pack3.pack(x1,x0,lrs_.right().permutationInverse());
 			size_t iprime = pack1.pack(xprime,yprime,lrs_.super().permutationInverse());
-
+			size_t signCounter=0;
+			if (x0==3) signCounter++;
+			if (x1==3) signCounter++;
+			if (y0==3) signCounter++;
+			if (y1==3) signCounter++;
+			sign = 1;
+			if (signCounter&1) sign=-1;
 			assert(iprime>=offset && iprime<total+offset);
 			s_.pushCol(iprime-offset);
-			s_.pushValue(one);
+			s_.pushValue(sign);
 			counter++;
 		}
 		s_.setRow(total,counter);
@@ -183,16 +190,18 @@ public:
 	 {
 		assert(isEnabled_);
 
-		 SparseMatrixType rT;
-		 transposeConjugate(rT,transform_);
+		SparseMatrixType rT;
+		transposeConjugate(rT,transform_);
 
-		 SparseMatrixType tmp;
-		 multiply(tmp,matrix,rT);
-
-		 SparseMatrixType matrix2;
-		 multiply(matrix2,transform_,tmp);
-
-		 split(matrixA,matrixB,matrix2);
+		SparseMatrixType tmp;
+		multiply(tmp,matrix,rT);
+		printFullMatrix(rT,"ConjTranform");
+		SparseMatrixType matrix2;
+		printFullMatrix(matrix,"OriginalHam");
+		multiply(matrix2,transform_,tmp);
+		printFullMatrix(transform_,"transform");
+		printFullMatrix(matrix2,"FinalHam");
+		split(matrixA,matrixB,matrix2);
 	 }
 
 	template<typename SomeVectorType>
@@ -231,6 +240,7 @@ public:
 
 private:
 
+
 	void setGs(VectorType& gs,const VectorType& v,size_t rank,size_t offset) const
 	{
 		VectorType gstmp(rank,0);
@@ -250,6 +260,8 @@ private:
 		for (size_t i=0;i<s_.rank();i++) {
 			for (int k=s_.getRowPtr(i);k<s_.getRowPtr(i+1);k++) {
 				size_t col = s_.getCol(k);
+				if (isAlmostZero(s_.getValue(k))) continue;
+				item.sign = s_.getValue(k);
 				if (col==i) {
 					item.type = ItemType::DIAGONAL;
 					item.i=item.j=i;
@@ -279,11 +291,11 @@ private:
 		assert(buffer.size()==transform_.rank());
 		size_t counter = 0;
 		RealType oneOverSqrt2 = 1.0/sqrt(2.0);
-		RealType sign = 1.0;
 		size_t row = 0;
 		for (size_t i=0;i<buffer.size();i++) {
 			if (buffer[i].type==ItemType::MINUS) continue;
 			transform_.setRow(row++,counter);
+			int sign = buffer[i].sign;
 			switch(buffer[i].type) {
 			case ItemType::DIAGONAL:
 				transform_.pushCol(buffer[i].i);
@@ -295,7 +307,7 @@ private:
 				transform_.pushValue(oneOverSqrt2);
 				counter++;
 				transform_.pushCol(buffer[i].j);
-				transform_.pushValue(oneOverSqrt2);
+				transform_.pushValue(sign*oneOverSqrt2);
 				counter++;
 				break;
 			}
@@ -303,9 +315,11 @@ private:
 
 		for (size_t i=0;i<buffer.size();i++) {
 			if (buffer[i].type!=ItemType::MINUS) continue;
+			int sign = buffer[i].sign;
+
 			transform_.setRow(row++,counter);
 			transform_.pushCol(buffer[i].i);
-			transform_.pushValue(oneOverSqrt2*sign);
+			transform_.pushValue(oneOverSqrt2);
 			counter++;
 			transform_.pushCol(buffer[i].j);
 			transform_.pushValue(-oneOverSqrt2*sign);
@@ -342,12 +356,13 @@ private:
 		plusSector_ = zeros + pluses;
 	}
 
-	void print()
+	void printFullMatrix(const SparseMatrixType& s,const std::string& name) const
 	{
-		PsimagLite::Matrix<ComplexOrRealType> fullm(s_.rank(),s_.rank());
-		crsMatrixToFullMatrix(fullm,s_);
-		std::cout<<"-------------------\n";
-		std::cout<<fullm;
+		PsimagLite::Matrix<ComplexOrRealType> fullm(s.rank(),s.rank());
+		crsMatrixToFullMatrix(fullm,s);
+		std::cout<<"--------->   "<<name<<" <----------\n";
+		symbolicPrint(std::cout,fullm);
+		//std::cout<<fullm;
 
 	}
 
@@ -417,7 +432,7 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	size_t plusSector_;
 	bool isEnabled_;
-	SparseMatrixType s_;
+	PsimagLite::CrsMatrix<RealType> s_;
 	SparseMatrixType transform_;
 }; // class ReflectionOperator
 
