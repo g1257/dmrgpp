@@ -69,7 +69,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
@@ -90,24 +90,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename RealType>
-class ReflectionItem {
-
-public:
-
-	enum { DIAGONAL,PLUS,MINUS};
-
-	size_t i,type;
-	std::vector<RealType> j;
-	RealType value;
-}; // class ReflectionItem
-
+// FIXME: MOVE ELSEWHERE:
 template<typename RealType>
 bool isAlmostZero(const RealType& x)
 {
 	return (fabs(x)<1e-6);
 }
 
+// FIXME: MOVE ELSEWHERE:
 template<typename RealType>
 bool isAlmostZero(const std::complex<RealType>& x)
 {
@@ -115,65 +105,120 @@ bool isAlmostZero(const std::complex<RealType>& x)
 }
 
 template<typename RealType>
-int getUniqueIndex(const std::vector<RealType>& v)
-{
-	size_t j=0;
-	bool seenBefore = false;
-	for (size_t i=0;i<v.size();i++) {
-		if (isAlmostZero(v[i])) continue;
-		if (seenBefore) return -1;
-		seenBefore=true;
-		j=i;
+class ReflectionItem {
+
+public:
+
+	enum { DIAGONAL,PLUS,MINUS};
+
+	ReflectionItem(size_t i)
+	: type_(DIAGONAL),i_(i),vec_(0),value_(0)
+	{}
+
+	ReflectionItem(size_t type1,size_t i,const std::vector<RealType>& v)
+	: type_(type1),i_(i),vec_(v)
+	{}
+
+	size_t type() const { return type_; }
+
+	void postFix()
+	{
+		if (type_==DIAGONAL) return;
+		setVector();
+		int x = getUniqueIndex();
+		if (x>=0 && size_t(x)==i_) type_ = DIAGONAL;
 	}
-	if (!seenBefore) return -1;
-	return j;
-}
 
-template<typename RealType>
-void setVector(ReflectionItem<RealType>& item)
-{
-	typedef ReflectionItem<RealType> ReflectionItemType;
-
-	RealType plusOrMinus = (item.type==ReflectionItemType::PLUS) ? 1 : -1;
-	item.j[item.i]+=plusOrMinus;
-	RealType norm = PsimagLite::norm(item.j);
-	assert(norm>1e-6);
-	item.j/=norm;
-}
-
-template<typename RealType>
-bool equalV(const std::vector<RealType>& v1,const std::vector<RealType>& v2)
-{
-	for (size_t i=0;i<v1.size();i++) {
-		RealType x = v1[i]-v2[i];
-		if (!isAlmostZero(x)) return false;
-	}
-	return true;
-}
-
-template<typename RealType>
-bool equalOrMinusEqual(const std::vector<RealType>& v1,const std::vector<RealType>& v2)
-{
-	std::vector<RealType> v3=(-1.0)*v2;
-	return (equalV(v1,v2) || equalV(v1,v3));
-}
-
-template<typename RealType>
-bool operator==(const ReflectionItem<RealType>& item1,const ReflectionItem<RealType>& item2)
-{
-	typedef ReflectionItem<RealType> ReflectionItemType;
-
-	if (item1.type>item2.type) return (item2==item1);
-
-	if (item1.type==ReflectionItemType::DIAGONAL) {
-		if (item2.type==ReflectionItemType::DIAGONAL) {
-			return (item1.i==item2.i);
+	template<typename SomeSparseMatrix>
+	void setTransformPlus(SomeSparseMatrix& transform,size_t& counter) const
+	{
+		assert(type_!=MINUS);
+		switch(type_) {
+		case DIAGONAL:
+			transform.pushCol(i_);
+			transform.pushValue(1.0);
+			counter++;
+			break;
+		case PLUS:
+			for (size_t k=0;k<vec_.size();k++) {
+				RealType val =vec_[k];
+				if (isAlmostZero(val)) continue;
+				transform.pushCol(k);
+				transform.pushValue(val);
+				counter++;
+			}
+			break;
 		}
-		return false;
 	}
 
-	return equalOrMinusEqual(item2.j,item2.j);
-}
+	template<typename SomeSparseMatrix>
+	void setTransformMinus(SomeSparseMatrix& transform,size_t& counter) const
+	{
+		assert(type_==MINUS);
+		for (size_t k=0;k<vec_.size();k++) {
+			RealType val = vec_[k];
+			if (isAlmostZero(val)) continue;
+			transform.pushCol(k);
+			transform.pushValue(val);
+			counter++;
+		}
+	}
+
+	bool operator==(const ReflectionItem<RealType>& item2) const
+	{
+		if (type_>item2.type_) return (item2==*this);
+
+		if (type_==DIAGONAL) {
+			if (item2.type_==DIAGONAL) {
+				return (i_==item2.i_);
+			}
+			return false;
+		}
+
+		std::vector<RealType> v3=(-1.0)*vec_;
+		return (equalV(vec_,item2.vec_) || equalV(v3,item2.vec_));
+	}
+
+private:
+
+	bool equalV(const std::vector<RealType>& v1,const std::vector<RealType>& v2) const
+	{
+		for (size_t i=0;i<v1.size();i++) {
+			RealType x = v1[i]-v2[i];
+			if (!isAlmostZero(x)) return false;
+		}
+		return true;
+	}
+
+	int getUniqueIndex() const
+	{
+		assert(type_!=DIAGONAL);
+		size_t j=0;
+		bool seenBefore = false;
+		for (size_t i=0;i<vec_.size();i++) {
+			if (isAlmostZero(vec_[i])) continue;
+			if (seenBefore) return -1;
+			seenBefore=true;
+			j=i;
+		}
+		if (!seenBefore) return -1;
+		return j;
+	}
+
+	void setVector()
+	{
+		RealType plusOrMinus = (type_==PLUS) ? 1 : -1;
+		vec_[i_]+=plusOrMinus;
+		RealType norm = PsimagLite::norm(vec_);
+		assert(norm>1e-6);
+		vec_/=norm;
+	}
+
+	size_t type_,i_;
+	std::vector<RealType> vec_;
+	RealType value_;
+}; // class ReflectionItem
+
 
 template<typename LeftRightSuperType>
 class ReflectionOperator {
@@ -419,7 +464,8 @@ private:
 	void computeItems(std::vector<ItemType>& items,
 			  PsimagLite::CrsMatrix<RealType>& sSector)
 	{
-		ItemType item;
+		printFullMatrix(sSector,"sSector");
+
 		for (size_t i=0;i<sSector.rank();i++) {
 			std::vector<RealType> v(sSector.rank(),0);
 			int equalCounter=0;
@@ -431,23 +477,17 @@ private:
 				else equalCounter--;
 			}
 			if (equalCounter==1) {
-				item.type=ItemType::DIAGONAL;
-				item.i=i;
-				item.value=v[i];
+				ItemType item(i); //v[i]);
 				items.push_back(item);
 				continue;
 			}
 
 			// add plus
-			item.type = ItemType::PLUS;
-			item.i = i;
-			item.j = v;
+			ItemType item(ItemType::PLUS,i,v);
 			items.push_back(item);
 			// add minus
-			item.type = ItemType::MINUS;
-			item.i = i;
-			item.j = v;
-			items.push_back(item);
+			ItemType item2(ItemType::MINUS,i,v);
+			items.push_back(item2);
 		}
 	}
 
@@ -459,35 +499,15 @@ private:
 		size_t row = 0;
 
 		for (size_t i=0;i<buffer.size();i++) {
-			if (buffer[i].type==ItemType::MINUS) continue;
+			if (buffer[i].type()==ItemType::MINUS) continue;
 			transform_.setRow(row++,counter);
-			switch(buffer[i].type) {
-			case ItemType::DIAGONAL:
-				transform_.pushCol(buffer[i].i);
-				transform_.pushValue(1);
-				counter++;
-				break;
-			case ItemType::PLUS:
-				for (size_t k=0;k<buffer[i].j.size();k++) {
-					RealType val = buffer[i].j[k];
-					if (isAlmostZero(val)) continue;
-					transform_.pushCol(k);
-					transform_.pushValue(val);
-					counter++;
-				}
-				break;
-			}
+			buffer[i].setTransformPlus(transform_,counter);
 		}
 
 		for (size_t i=0;i<buffer.size();i++) {
-			if (buffer[i].type!=ItemType::MINUS) continue;
-			for (size_t k=0;k<buffer[i].j.size();k++) {
-				RealType val = buffer[i].j[k];
-				if (isAlmostZero(val)) continue;
-				transform_.pushCol(k);
-				transform_.pushValue(val);
-				counter++;
-			}
+			if (buffer[i].type()!=ItemType::MINUS) continue;
+			transform_.setRow(row++,counter);
+			buffer[i].setTransformMinus(transform_,counter);
 		}
 		transform_.setRow(transform_.rank(),counter);
 	}
@@ -498,13 +518,7 @@ private:
 		size_t pluses=0;
 		size_t minuses=0;
 		for (size_t i=0;i<src.size();i++) {
-			if (src[i].type==ItemType::DIAGONAL) continue;
-			int x = getUniqueIndex(src[i].j);
-			if (x>=0) {
-				src[i].type = ItemType::DIAGONAL;
-				continue;
-			}
-			setVector(src[i]);
+			src[i].postFix();
 		}
 
 		for (size_t i=0;i<src.size();i++) {
@@ -518,9 +532,9 @@ private:
 //					x = PsimagLite::isInVector(dest,item2);
 //					if (x>=0) continue;
 //				}
-			if (item.type==ItemType::DIAGONAL) zeros++;
-			if (item.type==ItemType::PLUS) pluses++;
-			if (item.type==ItemType::MINUS) minuses++;
+			if (item.type()==ItemType::DIAGONAL) zeros++;
+			if (item.type()==ItemType::PLUS) pluses++;
+			if (item.type()==ItemType::MINUS) minuses++;
 
 			dest.push_back(item);
 		}
@@ -530,7 +544,8 @@ private:
 		plusSector_ = zeros + pluses;
 	}
 
-	void printFullMatrix(const SparseMatrixType& s,const std::string& name) const
+	template<typename SomeFieldType>
+	void printFullMatrix(const PsimagLite::CrsMatrix<SomeFieldType>& s,const std::string& name) const
 	{
 		PsimagLite::Matrix<ComplexOrRealType> fullm(s.rank(),s.rank());
 		crsMatrixToFullMatrix(fullm,s);
