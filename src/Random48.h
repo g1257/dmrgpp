@@ -32,7 +32,8 @@ namespace PsimagLite {
 			srand48(seed);
 			std::vector<LongType> vOfSeeds(nprocs);
 			for (size_t i=0;i<vOfSeeds.size();i++) vOfSeeds[i] = LongType(10000*random());
-			srand48(vOfSeeds[rank]);
+			seed_=vOfSeeds[rank];
+			srand48(seed_);
 			
 		}
 
@@ -42,6 +43,14 @@ namespace PsimagLite {
 		}
 
 		T operator()() const { return static_cast<T>(drand48()); }
+
+		LongType seed() const { return seed_; }
+
+		void seed(const LongType& seed) { seed_ = seed; }
+
+	private:
+	
+		LongType seed_;
 	}; // Random48
 } // namespace PsimagLite
 

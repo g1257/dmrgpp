@@ -135,6 +135,42 @@ namespace PsimagLite {
 		return os;
 	}
 
+	template<typename T>
+	void symbolicPrint(std::ostream& os,const Matrix<T>& A)
+	{
+		size_t i,j;
+		os<<A.n_row()<<" "<<A.n_col()<<"\n";
+		std::vector<T> values;
+		std::string characters("ABCDEFGHIJKLM");
+		std::string s = "symbolicPrint: Not enough characters\n";
+		
+		for (i=0;i<A.n_row();i++) {
+			for (j=0;j<A.n_col();j++) {
+				size_t k=0;
+				const T& val = A(i,j);
+				if (std::norm(val)<1e-6) {
+					os<<0<<" ";
+					continue;
+				}
+				for (;k<values.size();k++)
+					if (std::norm(values[k]-val)<1e-6) break;
+				if (k==values.size()) {
+					k = values.size();
+					values.push_back(val);
+					if (values.size()>characters.length())
+						throw std::runtime_error(s.c_str());
+				}
+				os<<characters[k]<<" ";
+			}
+			os<<"\n";
+		}
+		os<<"---------------------------\n";
+		for (size_t i=0;i<values.size();i++) {
+			os<<characters[i]<<"="<<values[i]<<" ";
+		}
+		os<<"\n";
+	}
+
 	template <class T>
 	std::istream& operator >> (std::istream& is, Matrix<T>& A)
 	{
