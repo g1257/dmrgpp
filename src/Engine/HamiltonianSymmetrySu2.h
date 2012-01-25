@@ -359,14 +359,6 @@ namespace Dmrg {
 			size_t jVals() const { return jvals_.size(); }
 
 		private:
-			JmPairsType jmValues_;
-			std::vector<size_t> flavors_,flavorsOld_;
-			size_t flavorsMax_,electronsMax_,jMax_;
-			FactorsType factors_;
-			std::vector<JmSubspaceType> jmSubspaces_;
-			// reduced:
-			std::vector<size_t> statesReduced_;
-			std::vector<size_t> jvals_;
 
 			template<typename JmSubspaceType>
 			size_t  setFlavors(std::vector<size_t>& quantumNumbers,JmSubspaceType& jmSubspace,size_t offset)
@@ -572,7 +564,7 @@ namespace Dmrg {
 				for (size_t i=0;i<target;i++) {
 					if (removedIndices.size()>=target) break;
 					if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
-                    removedIndices.push_back(perm[i]);
+						removedIndices.push_back(perm[i]);
 
 					for (size_t j=0;j<eigs.size();j++) {
 
@@ -609,6 +601,15 @@ namespace Dmrg {
 					if (x<0) jvals_.push_back(jm1.first);
 				}
 			}
+
+			JmPairsType jmValues_;
+			std::vector<size_t> flavors_,flavorsOld_;
+			size_t flavorsMax_,electronsMax_,jMax_;
+			FactorsType factors_;
+			std::vector<JmSubspaceType> jmSubspaces_;
+			// reduced:
+			std::vector<size_t> statesReduced_;
+			std::vector<size_t> jvals_;
 	}; //class HamiltonianSymmetrySu2
 } // namespace Dmrg
 

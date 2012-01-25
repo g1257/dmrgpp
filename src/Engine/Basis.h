@@ -487,68 +487,6 @@ namespace Dmrg {
 
 	private:
 
-		/**
-		Symmetries will allow the solver to block the Hamiltonian matrix in blocks, using less memory, speeding up
-		the computation and allowing the code to parallelize matrix blocks related by symmetry.
-		Let us assume that our particular model has $N_s$ symmetries labeled by $0\\le \\alpha < N_s$.
-		Therefore, each element $k$  of the basis has $N_s$ associated ``good'' quantum numbers
-		 $\\tilde{q}_{k,\\alpha}$. These quantum numbers can refer to practically anything,
-		 for example, to number of particles with a given spin or orbital or to the $z$ component of the spin.
-		We do not need to know the details to block the matrix. We know, however, that these numbers are
-		finite, and let $Q$ be an integer such that $\\tilde{q}_{k,\\alpha}< Q$ $\\forall k,\\alpha$.
-		We can then combine all these quantum numbers into a single one,
-		like this: $q_k = \\sum_\\alpha \\tilde{q}_{k,\\alpha} Q^\\alpha$,
-		and this mapping is bijective. In essence, we combined all ``good''
-		quantum numbers into a single one and from now on we
-		will consider that we have only one Hamiltonian symmetry called the
-		``effective'' symmetry, and only one corresponding number $q_k$, the
-		``effective'' quantum number. These numbers are stored in the  member
-		{\\it quantumNumbers} of C++ class \\cppClass{!PTEX_THISCLASS}.
-		(Note that if one has 100 sites or less,\\footnote{This is probably a
-		maximum for systems of correlated electrons such as the Hubbard model
-		or the t-J model.} then the number $Q$ defined above is probably of the
-		order of hundreds for usual symmetries, making this implementation very practical for
-		systems of correlated electrons.)
-		*/
-		std::vector<size_t> quantumNumbers_;
-		std::vector<size_t> quantumNumbersOld_;
-		std::vector<size_t> electrons_;
-		std::vector<size_t> electronsOld_;
-
-		/**
-		What remains to be done is to find a partition of the basis which
-		labels where the quantum number changes. Let us say that the
-		quantum numbers of the reordered basis states are
-		\\[
-		\\{3,3,3,3,8,8,9,9,9,15,\\cdots\\}.
-		\\]
-		Then we define a vector named ``partition'', such that partition[0]=0,
-		partition[1]=4, because the quantum number changes in the 4th position
-		(from 3 to 8), and then partition[2]=6, because the quantum number
-		changes again (from 8 to 9) in the 6th position, etc.
-		Now we know that our Hamiltonian matrix will be composed first of a
-		block of 4x4, then of a block of 2x2, etc.
-		*/
-		std::vector<size_t> partition_;
-		std::vector<size_t> partitionOld_;
-
-		/**
-		We then reorder our basis such that its elements are given in
-		increasing $q$ number. There will be a permutation vector associated
-		with this reordering, that will be stored in the member
-		\\verb!permutationVector! of class \\cppClass{!PTEX_THISCLASS}.
-		For ease of coding we also store its inverse in \\verb!permInverse!.
-		*/
-		std::vector<size_t> permutationVector_;
-		std::vector<size_t> permInverse_;
-		HamiltonianSymmetryLocalType symmLocal_;
-		HamiltonianSymmetrySu2Type symmSu2_;
-		/**
-		The variable block\_ of a \cppClass{DmrgBasis} object indicates over
-		which sites the basis represented by this object is being built.
-		*/
-		BlockType block_;
-
 		template<typename IoInputter>
 		void loadInternal(IoInputter& io)
 		{
@@ -632,6 +570,67 @@ namespace Dmrg {
 			}
 		}
 
+		/**
+		Symmetries will allow the solver to block the Hamiltonian matrix in blocks, using less memory, speeding up
+		the computation and allowing the code to parallelize matrix blocks related by symmetry.
+		Let us assume that our particular model has $N_s$ symmetries labeled by $0\\le \\alpha < N_s$.
+		Therefore, each element $k$  of the basis has $N_s$ associated ``good'' quantum numbers
+		 $\\tilde{q}_{k,\\alpha}$. These quantum numbers can refer to practically anything,
+		 for example, to number of particles with a given spin or orbital or to the $z$ component of the spin.
+		We do not need to know the details to block the matrix. We know, however, that these numbers are
+		finite, and let $Q$ be an integer such that $\\tilde{q}_{k,\\alpha}< Q$ $\\forall k,\\alpha$.
+		We can then combine all these quantum numbers into a single one,
+		like this: $q_k = \\sum_\\alpha \\tilde{q}_{k,\\alpha} Q^\\alpha$,
+		and this mapping is bijective. In essence, we combined all ``good''
+		quantum numbers into a single one and from now on we
+		will consider that we have only one Hamiltonian symmetry called the
+		``effective'' symmetry, and only one corresponding number $q_k$, the
+		``effective'' quantum number. These numbers are stored in the  member
+		{\\it quantumNumbers} of C++ class \\cppClass{!PTEX_THISCLASS}.
+		(Note that if one has 100 sites or less,\\footnote{This is probably a
+		maximum for systems of correlated electrons such as the Hubbard model
+		or the t-J model.} then the number $Q$ defined above is probably of the
+		order of hundreds for usual symmetries, making this implementation very practical for
+		systems of correlated electrons.)
+		*/
+		std::vector<size_t> quantumNumbers_;
+		std::vector<size_t> quantumNumbersOld_;
+		std::vector<size_t> electrons_;
+		std::vector<size_t> electronsOld_;
+
+		/**
+		What remains to be done is to find a partition of the basis which
+		labels where the quantum number changes. Let us say that the
+		quantum numbers of the reordered basis states are
+		\\[
+		\\{3,3,3,3,8,8,9,9,9,15,\\cdots\\}.
+		\\]
+		Then we define a vector named ``partition'', such that partition[0]=0,
+		partition[1]=4, because the quantum number changes in the 4th position
+		(from 3 to 8), and then partition[2]=6, because the quantum number
+		changes again (from 8 to 9) in the 6th position, etc.
+		Now we know that our Hamiltonian matrix will be composed first of a
+		block of 4x4, then of a block of 2x2, etc.
+		*/
+		std::vector<size_t> partition_;
+		std::vector<size_t> partitionOld_;
+
+		/**
+		We then reorder our basis such that its elements are given in
+		increasing $q$ number. There will be a permutation vector associated
+		with this reordering, that will be stored in the member
+		\\verb!permutationVector! of class \\cppClass{!PTEX_THISCLASS}.
+		For ease of coding we also store its inverse in \\verb!permInverse!.
+		*/
+		std::vector<size_t> permutationVector_;
+		std::vector<size_t> permInverse_;
+		HamiltonianSymmetryLocalType symmLocal_;
+		HamiltonianSymmetrySu2Type symmSu2_;
+		/**
+		The variable block\_ of a \cppClass{DmrgBasis} object indicates over
+		which sites the basis represented by this object is being built.
+		*/
+		BlockType block_;
 		bool dmrgTransformed_;
 		std::string name_;
 		PsimagLite::ProgressIndicator progress_;

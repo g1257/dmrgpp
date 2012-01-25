@@ -90,32 +90,89 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
+template<typename RealType>
 class ReflectionItem {
 
 public:
 
 	enum { DIAGONAL,PLUS,MINUS};
 
-	ReflectionItem(size_t ii)
-	: i(ii),j(ii),type(DIAGONAL),sign(1)
-	{}
-
-	ReflectionItem(size_t ii,size_t jj,size_t type1,size_t sign1)
-	: i(ii),j(jj),type(type1),sign(sign1)
-	{}
-
-	size_t i,j,type;
-	int sign;
-
+	size_t i,type;
+	std::vector<RealType> j;
+	RealType value;
 }; // class ReflectionItem
 
-bool operator==(const ReflectionItem& item1,const ReflectionItem& item2)
+template<typename RealType>
+bool isAlmostZero(const RealType& x)
 {
-	if (item1.type!=item2.type) return false;
+	return (fabs(x)<1e-6);
+}
 
-	if (item1.i==item2.j && item1.j==item2.i) return true;
+template<typename RealType>
+bool isAlmostZero(const std::complex<RealType>& x)
+{
+	return (fabs(real(x)*real(x)+imag(x)*imag(x))<1e-6);
+}
 
-	return (item1.i==item2.i && item1.j==item2.j);
+template<typename RealType>
+int getUniqueIndex(const std::vector<RealType>& v)
+{
+	size_t j=0;
+	bool seenBefore = false;
+	for (size_t i=0;i<v.size();i++) {
+		if (isAlmostZero(v[i])) continue;
+		if (seenBefore) return -1;
+		seenBefore=true;
+		j=i;
+	}
+	if (!seenBefore) return -1;
+	return j;
+}
+
+template<typename RealType>
+void setVector(ReflectionItem<RealType>& item)
+{
+	typedef ReflectionItem<RealType> ReflectionItemType;
+
+	RealType plusOrMinus = (item.type==ReflectionItemType::PLUS) ? 1 : -1;
+	item.j[item.i]+=plusOrMinus;
+	RealType norm = PsimagLite::norm(item.j);
+	assert(norm>1e-6);
+	item.j/=norm;
+}
+
+template<typename RealType>
+bool equalV(const std::vector<RealType>& v1,const std::vector<RealType>& v2)
+{
+	for (size_t i=0;i<v1.size();i++) {
+		RealType x = v1[i]-v2[i];
+		if (!isAlmostZero(x)) return false;
+	}
+	return true;
+}
+
+template<typename RealType>
+bool equalOrMinusEqual(const std::vector<RealType>& v1,const std::vector<RealType>& v2)
+{
+	std::vector<RealType> v3=(-1.0)*v2;
+	return (equalV(v1,v2) || equalV(v1,v3));
+}
+
+template<typename RealType>
+bool operator==(const ReflectionItem<RealType>& item1,const ReflectionItem<RealType>& item2)
+{
+	typedef ReflectionItem<RealType> ReflectionItemType;
+
+	if (item1.type>item2.type) return (item2==item1);
+
+	if (item1.type==ReflectionItemType::DIAGONAL) {
+		if (item2.type==ReflectionItemType::DIAGONAL) {
+			return (item1.i==item2.i);
+		}
+		return false;
+	}
+
+	return equalOrMinusEqual(item2.j,item2.j);
 }
 
 template<typename LeftRightSuperType>
@@ -126,7 +183,7 @@ class ReflectionOperator {
 			SparseMatrixType;
 	typedef typename LeftRightSuperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef ReflectionItem ItemType;
+	typedef ReflectionItem<RealType> ItemType;
 	typedef std::vector<ComplexOrRealType> VectorType;
 
 public:
@@ -137,25 +194,37 @@ public:
 	  progress_("ReflectionOperator",0),
 	  plusSector_(0),
 	  isEnabled_(isEnabled),
-	  reflected_(n0_)
+	  reflected_(n0_,n0_)
 	{
-		for (size_t i=0;i<reflected_.size();i++)
-			reflected_[i]=i;
+		size_t counter=0;
+		for (size_t i=0;i<reflected_.rank();i++) {
+			reflected_.setRow(i,counter);
+			reflected_.pushCol(i);
+			reflected_.pushValue(1);
+			counter++;
+		}
+		reflected_.setRow(reflected_.rank(),counter);
 	}
 
 	void check(const std::vector<size_t>& sectors)
 	{
 		if (!isEnabled_) return;
-		setS();
-		updateReflected();
+		PsimagLite::CrsMatrix<RealType> sSuper;
+		setS(sSuper);
+		updateReflected(sSuper);
 		PsimagLite::CrsMatrix<RealType> sSector;
-		extractCurrentSector(sSector,sectors);
+		extractCurrentSector(sSector,sSuper,sectors);
 		std::vector<ItemType> items;
 		computeItems(items,sSector);
 		std::vector<ItemType> items2;
 		makeUnique(items2,items);
 		assert(items2.size()==sSector.rank());
 		setTransform(items2);
+	}
+
+	void changeBasis(const PsimagLite::Matrix<ComplexOrRealType>& transform)
+	{
+		assert(false);
 	}
 
 	void transform(SparseMatrixType& matrixA,
@@ -214,7 +283,7 @@ public:
 
 private:
 
-	void setS()
+	void setS(PsimagLite::CrsMatrix<RealType>& snew)
 	{
 		size_t total = lrs_.super().size();
 		size_t ns = lrs_.left().size();
@@ -223,7 +292,7 @@ private:
 		PackIndicesType pack3(n0_);
 		size_t counter = 0;
 		RealType sign = 1.0;
-		PsimagLite::CrsMatrix<RealType> snew(total,total);
+		snew.resize(total);
 		for (size_t i=0;i<total;i++) {
 			snew.setRow(i,counter);
 			size_t x=0,y=0;
@@ -234,12 +303,16 @@ private:
 
 			size_t y0=0,y1=0;
 			pack3.unpack(y0,y1,lrs_.right().permutation(y));
-			//std::cerr<<"i="<<i<<" state="<<x0<<" "<<x1<<" "<<y0<<" "<<y1<<"\n";
-			size_t x0r = reflected_[x0];
-			size_t y1r = reflected_[y1];
-			size_t xprime = pack2.pack(y1r,y0,lrs_.left().permutationInverse());
-			size_t yprime = pack3.pack(x1,x0r,lrs_.right().permutationInverse());
-			size_t iprime = pack1.pack(xprime,yprime,lrs_.super().permutationInverse());
+
+			for (int k1=reflected_.getRowPtr(x0);k1<reflected_.getRowPtr(x0+1);k1++) {
+				size_t x0r = reflected_.getCol(k1);
+				RealType val1 = reflected_.getValue(k1);
+				for (int k2=reflected_.getRowPtr(y1);k2<reflected_.getRowPtr(y1+1);k2++) {
+					size_t y1r = reflected_.getCol(k2);
+					RealType val2 = reflected_.getValue(k2);
+					size_t xprime = pack2.pack(y1r,y0,lrs_.left().permutationInverse());
+					size_t yprime = pack3.pack(x1,x0r,lrs_.right().permutationInverse());
+					size_t iprime = pack1.pack(xprime,yprime,lrs_.super().permutationInverse());
 			//			size_t signCounter=0;
 			//			if (x0==3) signCounter++;
 			//			if (x1==3) signCounter++;
@@ -248,15 +321,17 @@ private:
 			//			sign = 1;
 			//			if (signCounter&1) sign=-1;
 
-			snew.pushCol(iprime);
-			snew.pushValue(sign);
-			counter++;
+					snew.pushCol(iprime);
+					snew.pushValue(sign*val1*val2);
+					counter++;
+				}
+			}
 		}
 		snew.setRow(total,counter);
-		s_=snew;
 	}
 
 	void extractCurrentSector(PsimagLite::CrsMatrix<RealType>& sSector,
+				  const PsimagLite::CrsMatrix<RealType>& sSuper,
 				  const std::vector<size_t>& sectors) const
 	{
 		assert(sectors.size()==1);
@@ -267,9 +342,9 @@ private:
 		size_t counter = 0;
 		for (size_t i=0;i<total;i++) {
 			sSector.setRow(i,counter);
-			for (int k=s_.getRowPtr(i+offset);k<s_.getRowPtr(i+offset+1);k++) {
-				size_t col = s_.getCol(k);
-				RealType val = s_.getValue(k);
+			for (int k=sSuper.getRowPtr(i+offset);k<sSuper.getRowPtr(i+offset+1);k++) {
+				size_t col = sSuper.getCol(k);
+				RealType val = sSuper.getValue(k);
 				assert(col>=offset && col<total+offset);
 				sSector.pushCol(col-offset);
 				sSector.pushValue(val);
@@ -279,7 +354,7 @@ private:
 		sSector.setRow(total,counter);
 	}
 
-	void updateReflected()
+	void updateReflected(const PsimagLite::CrsMatrix<RealType>& sSuper)
 	{
 		// for each x0 find the reflected of
 		// x0 0 0 x0
@@ -288,26 +363,31 @@ private:
 		// then x0'=reflected(x0)
 		size_t ns = lrs_.left().size();
 		PackIndicesType pack1(ns);
-		PackIndicesType pack2(ns/n0_);
-		PackIndicesType pack3(n0_);
+//		PackIndicesType pack2(ns/n0_);
+//		PackIndicesType pack3(n0_);
 		reflected_.resize(ns);
+		size_t counter = 0;
 		for (size_t x0=0;x0<ns;x0++) {
+			reflected_.setRow(x0,counter);
 			//size_t x = pack2.pack(x0,0,lrs_.left().permutationInverse());
 			//size_t y = pack3.pack(0,x0,lrs_.right().permutationInverse());
 			size_t i = pack1.pack(x0,x0,lrs_.super().permutationInverse());
-			for (int k=s_.getRowPtr(i);k<s_.getRowPtr(i+1);k++) {
-				size_t col = s_.getCol(k);
-				RealType val = s_.getValue(k);
+			for (int k=sSuper.getRowPtr(i);k<sSuper.getRowPtr(i+1);k++) {
+				size_t col = sSuper.getCol(k);
+				RealType val = sSuper.getValue(k);
 				assert(!isAlmostZero(val));
 				size_t xprime=0,yprime=0;
 				pack1.unpack(xprime,yprime,lrs_.super().permutation(col));
 
 				//size_t x0prime=0,x1prime=0;
 				//pack2.unpack(x0prime,x1prime,lrs_.left().permutation(xprime));
-				assert(xprime==yprime);
-				reflected_[x0]=xprime;
+
+				reflected_.pushCol(xprime);
+				reflected_.pushValue(val);
+				counter++;
 			}
 		}
+		reflected_.setRow(ns,counter);
 	}
 
 //	size_t findReflected(size_t x) const
@@ -339,29 +419,35 @@ private:
 	void computeItems(std::vector<ItemType>& items,
 			  PsimagLite::CrsMatrix<RealType>& sSector)
 	{
-		ItemType item(0);
+		ItemType item;
 		for (size_t i=0;i<sSector.rank();i++) {
+			std::vector<RealType> v(sSector.rank(),0);
+			int equalCounter=0;
 			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
 				size_t col = sSector.getCol(k);
 				if (isAlmostZero(sSector.getValue(k))) continue;
-				item.sign = sSector.getValue(k);
-				if (col==i) {
-					item.type = ItemType::DIAGONAL;
-					item.i=item.j=i;
-					items.push_back(item);
-					continue;
-				}
-				// add plus
-				item.type = ItemType::PLUS;
-				item.i = i;
-				item.j = col;
-				items.push_back(item);
-				// add minus
-				item.type = ItemType::MINUS;
-				item.i = i;
-				item.j = col;
-				items.push_back(item);
+				v[col] =  sSector.getValue(k);
+				if (col==i) equalCounter++;
+				else equalCounter--;
 			}
+			if (equalCounter==1) {
+				item.type=ItemType::DIAGONAL;
+				item.i=i;
+				item.value=v[i];
+				items.push_back(item);
+				continue;
+			}
+
+			// add plus
+			item.type = ItemType::PLUS;
+			item.i = i;
+			item.j = v;
+			items.push_back(item);
+			// add minus
+			item.type = ItemType::MINUS;
+			item.i = i;
+			item.j = v;
+			items.push_back(item);
 		}
 	}
 
@@ -370,12 +456,11 @@ private:
 		transform_.resize(buffer.size());
 		assert(buffer.size()==transform_.rank());
 		size_t counter = 0;
-		RealType oneOverSqrt2 = 1.0/sqrt(2.0);
 		size_t row = 0;
+
 		for (size_t i=0;i<buffer.size();i++) {
 			if (buffer[i].type==ItemType::MINUS) continue;
 			transform_.setRow(row++,counter);
-			int sign = buffer[i].sign;
 			switch(buffer[i].type) {
 			case ItemType::DIAGONAL:
 				transform_.pushCol(buffer[i].i);
@@ -383,36 +468,45 @@ private:
 				counter++;
 				break;
 			case ItemType::PLUS:
-				transform_.pushCol(buffer[i].i);
-				transform_.pushValue(oneOverSqrt2);
-				counter++;
-				transform_.pushCol(buffer[i].j);
-				transform_.pushValue(sign*oneOverSqrt2);
-				counter++;
+				for (size_t k=0;k<buffer[i].j.size();k++) {
+					RealType val = buffer[i].j[k];
+					if (isAlmostZero(val)) continue;
+					transform_.pushCol(k);
+					transform_.pushValue(val);
+					counter++;
+				}
 				break;
 			}
 		}
 
 		for (size_t i=0;i<buffer.size();i++) {
 			if (buffer[i].type!=ItemType::MINUS) continue;
-			int sign = buffer[i].sign;
-
-			transform_.setRow(row++,counter);
-			transform_.pushCol(buffer[i].i);
-			transform_.pushValue(oneOverSqrt2);
-			counter++;
-			transform_.pushCol(buffer[i].j);
-			transform_.pushValue(-oneOverSqrt2*sign);
-			counter++;
+			for (size_t k=0;k<buffer[i].j.size();k++) {
+				RealType val = buffer[i].j[k];
+				if (isAlmostZero(val)) continue;
+				transform_.pushCol(k);
+				transform_.pushValue(val);
+				counter++;
+			}
 		}
 		transform_.setRow(transform_.rank(),counter);
 	}
 
-	void makeUnique(std::vector<ItemType>& dest,const std::vector<ItemType>& src)
+	void makeUnique(std::vector<ItemType>& dest,std::vector<ItemType>& src)
 	{
 		size_t zeros=0;
 		size_t pluses=0;
 		size_t minuses=0;
+		for (size_t i=0;i<src.size();i++) {
+			if (src[i].type==ItemType::DIAGONAL) continue;
+			int x = getUniqueIndex(src[i].j);
+			if (x>=0) {
+				src[i].type = ItemType::DIAGONAL;
+				continue;
+			}
+			setVector(src[i]);
+		}
+
 		for (size_t i=0;i<src.size();i++) {
 			ItemType item = src[i];
 			int x =  PsimagLite::isInVector(dest,item);
@@ -444,16 +538,6 @@ private:
 		symbolicPrint(std::cout,fullm);
 		//std::cout<<fullm;
 
-	}
-
-	bool isAlmostZero(const RealType& x) const
-	{
-		return (fabs(x)<1e-6);
-	}
-
-	bool isAlmostZero(const std::complex<RealType>& x) const
-	{
-		return (fabs(real(x)*real(x)+imag(x)*imag(x))<1e-6);
 	}
 
 	void split(SparseMatrixType& matrixA,SparseMatrixType& matrixB,const SparseMatrixType& matrix) const
@@ -512,8 +596,7 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	size_t plusSector_;
 	bool isEnabled_;
-	std::vector<size_t> reflected_;
-	PsimagLite::CrsMatrix<RealType> s_;
+	PsimagLite::CrsMatrix<RealType> reflected_;
 	SparseMatrixType transform_;
 }; // class ReflectionOperator
 
