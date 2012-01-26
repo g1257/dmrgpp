@@ -145,6 +145,7 @@ public:
 
 	void changeBasis(const PsimagLite::Matrix<ComplexOrRealType>& transform,size_t direction)
 	{
+		if (!isEnabled_) return;
 		SparseMatrixType newreflected;
 		if (direction==expandSys_) {
 			changeBasis(newreflected,reflectedLeft_,transform);
