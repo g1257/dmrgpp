@@ -75,10 +75,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file ReflectionOperator
  *
- *  Problems
- *  - Getting transform from stacked transform at wft
- *  - Getting bases for sys and env from stacks at checkpoint
- *  - non-existant permutations
+ *  Critical problems:
+ *
+ *  - getting a l.i. set in an efficient way
+ *  - support for fermionic reflections
+ *
+ *  Low priority work that needs to be done:
+ *
+ *  - support for bases that change from site to site
  *
  */
 #ifndef REFLECTION_OPERATOR_H
@@ -87,9 +91,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "Matrix.h"
 #include "ProgressIndicator.h"
-#include "ReflectionItem.h"
+//#include "ReflectionItem.h"
 
 namespace Dmrg {
+
+// FIXME: MOVE ELSEWHERE:
+template<typename RealType>
+bool isAlmostZero(const RealType& x)
+{
+	return (fabs(x)<1e-6);
+}
+
+// FIXME: MOVE ELSEWHERE:
+template<typename RealType>
+bool isAlmostZero(const std::complex<RealType>& x)
+{
+	return (fabs(real(x)*real(x)+imag(x)*imag(x))<1e-6);
+}
 
 template<typename LeftRightSuperType>
 class ReflectionOperator {
@@ -99,7 +117,7 @@ class ReflectionOperator {
 			SparseMatrixType;
 	typedef typename LeftRightSuperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef ReflectionItem<RealType,ComplexOrRealType> ItemType;
+//	typedef ReflectionItem<RealType,ComplexOrRealType> ItemType;
 	typedef std::vector<ComplexOrRealType> VectorType;
 
 public:
@@ -133,14 +151,14 @@ public:
 		updateReflected(sSuper);
 		SparseMatrixType sSector;
 		extractCurrentSector(sSector,sSuper,sectors);
-		std::vector<ItemType> items;
-		computeItems(items,sSector);
-		std::vector<ItemType> items2;
-		makeUnique(items2,items);
-		std::cout<<"ITEMS2-------------\n";
-		std::cout<<items2;
-		assert(items2.size()==sSector.rank());
-		setTransform(items2);
+		//std::vector<ItemType> items;
+		computeItems(sSector);
+		//std::vector<ItemType> items2;
+		//makeUnique(items2,items);
+		//std::cout<<"ITEMS2-------------\n";
+		//std::cout<<items2;
+		//assert(items2.size()==sSector.rank());
+		//setTransform(items2);
 	}
 
 	void changeBasis(const PsimagLite::Matrix<ComplexOrRealType>& transform,size_t direction)
@@ -386,10 +404,11 @@ private:
 		multiply(gs,rT,gstmp);
 	}
 
-	void computeItems(std::vector<ItemType>& items,
-			  SparseMatrixType& sSector)
+	void computeItems(const SparseMatrixType& sSector)
 	{
 		printFullMatrix(sSector,"sSector");
+		PsimagLite::Matrix<ComplexOrRealType> s(sSector.rank(),sSector.rank());
+		size_t total = 0;
 
 		for (size_t i=0;i<sSector.rank();i++) {
 			std::vector<ComplexOrRealType> v(sSector.rank(),0);
@@ -401,73 +420,84 @@ private:
 				if (col==i) equalCounter++;
 				else equalCounter--;
 			}
-			if (equalCounter==1) {
-				ItemType item(i); //v[i]);
-				items.push_back(item);
-				continue;
+			v[i] += 1.0;
+			addV(total,s,v);
+		}
+		for (size_t i=0;i<sSector.rank();i++) {
+			std::vector<ComplexOrRealType> v(sSector.rank(),0);
+			int equalCounter=0;
+			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
+				size_t col = sSector.getCol(k);
+				if (isAlmostZero(sSector.getValue(k))) continue;
+				v[col] =  sSector.getValue(k);
+				if (col==i) equalCounter++;
+				else equalCounter--;
 			}
-
-			// add plus
-			ItemType item(ItemType::PLUS,i,v);
-			items.push_back(item);
-			// add minus
-			ItemType item2(ItemType::MINUS,i,v);
-			items.push_back(item2);
+			v[i] -= 1.0;
+			addV(total,s,v);
 		}
+		assert(total==s.n_row());
+		fullMatrixToCrsMatrix(transform_,s);
 	}
 
-	void setTransform(const std::vector<ItemType>& buffer)
+	void addV(size_t& total,PsimagLite::Matrix<ComplexOrRealType>& s,std::vector<ComplexOrRealType> v)
 	{
-		transform_.resize(buffer.size());
-		assert(buffer.size()==transform_.rank());
-		size_t counter = 0;
-		size_t row = 0;
+		PsimagLite::LAPACK::GETRF(m,n,&s(0,0),lda,ipiv,info);
 
-		for (size_t i=0;i<buffer.size();i++) {
-			if (buffer[i].type()==ItemType::MINUS) continue;
-			transform_.setRow(row++,counter);
-			buffer[i].setTransformPlus(transform_,counter);
-		}
-
-		for (size_t i=0;i<buffer.size();i++) {
-			if (buffer[i].type()!=ItemType::MINUS) continue;
-			transform_.setRow(row++,counter);
-			buffer[i].setTransformMinus(transform_,counter);
-		}
-		transform_.setRow(transform_.rank(),counter);
 	}
 
-	void makeUnique(std::vector<ItemType>& dest,std::vector<ItemType>& src)
-	{
-		size_t zeros=0;
-		size_t pluses=0;
-		size_t minuses=0;
-		for (size_t i=0;i<src.size();i++) {
-			src[i].postFix();
-		}
+//	void setTransform(const std::vector<ItemType>& buffer)
+//	{
+//		transform_.resize(buffer.size());
+//		assert(buffer.size()==transform_.rank());
+//		size_t counter = 0;
+//		size_t row = 0;
 
-		for (size_t i=0;i<src.size();i++) {
-			ItemType item = src[i];
-			int x =  PsimagLite::isInVector(dest,item);
-			if (x>=0) continue;
-//				if (item.type ==ItemType::PLUS) {
-//					size_t i = item.i;
-//					size_t j = item.j;
-//					ItemType item2(j,i,ItemType::PLUS);
-//					x = PsimagLite::isInVector(dest,item2);
-//					if (x>=0) continue;
-//				}
-			if (item.type()==ItemType::DIAGONAL) zeros++;
-			if (item.type()==ItemType::PLUS) pluses++;
-			if (item.type()==ItemType::MINUS) minuses++;
+//		for (size_t i=0;i<buffer.size();i++) {
+//			if (buffer[i].type()==ItemType::MINUS) continue;
+//			transform_.setRow(row++,counter);
+//			buffer[i].setTransformPlus(transform_,counter);
+//		}
 
-			dest.push_back(item);
-		}
-		std::ostringstream msg;
-		msg<<pluses<<" +, "<<minuses<<" -, "<<zeros<<" zeros.";
-		progress_.printline(msg,std::cout);
-		plusSector_ = zeros + pluses;
-	}
+//		for (size_t i=0;i<buffer.size();i++) {
+//			if (buffer[i].type()!=ItemType::MINUS) continue;
+//			transform_.setRow(row++,counter);
+//			buffer[i].setTransformMinus(transform_,counter);
+//		}
+//		transform_.setRow(transform_.rank(),counter);
+//	}
+
+//	void makeUnique(std::vector<ItemType>& dest,std::vector<ItemType>& src)
+//	{
+//		size_t zeros=0;
+//		size_t pluses=0;
+//		size_t minuses=0;
+//		for (size_t i=0;i<src.size();i++) {
+//			src[i].postFix();
+//		}
+
+//		for (size_t i=0;i<src.size();i++) {
+//			ItemType item = src[i];
+//			int x =  PsimagLite::isInVector(dest,item);
+//			if (x>=0) continue;
+////				if (item.type ==ItemType::PLUS) {
+////					size_t i = item.i;
+////					size_t j = item.j;
+////					ItemType item2(j,i,ItemType::PLUS);
+////					x = PsimagLite::isInVector(dest,item2);
+////					if (x>=0) continue;
+////				}
+//			if (item.type()==ItemType::DIAGONAL) zeros++;
+//			if (item.type()==ItemType::PLUS) pluses++;
+//			if (item.type()==ItemType::MINUS) minuses++;
+
+//			dest.push_back(item);
+//		}
+//		std::ostringstream msg;
+//		msg<<pluses<<" +, "<<minuses<<" -, "<<zeros<<" zeros.";
+//		progress_.printline(msg,std::cout);
+//		plusSector_ = zeros + pluses;
+//	}
 
 	void printFullMatrix(const SparseMatrixType& s,const std::string& name) const
 	{
