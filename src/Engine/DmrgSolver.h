@@ -132,6 +132,7 @@ namespace Dmrg {
 		typedef typename ModelType::GeometryType GeometryType;
 		typedef Checkpoint<ParametersType,TargettingType> CheckpointType;
 		typedef typename DmrgSerializerType::FermionSignType FermionSignType;
+		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 
 		enum {SAVE_TO_DISK=1,DO_NOT_SAVE=0};
 		enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -156,10 +157,11 @@ namespace Dmrg {
 		  stepCurrent_(0),
 		  checkpoint_(parameters_,concurrency.rank()),
 		  wft_(parameters_),
+		  reflectionOperator_(lrs_,model_.hilbertSize(0),parameters_.useReflectionSymmetry,EXPAND_SYSTEM),
 		  diagonalization_(parameters,model,concurrency,verbose_,
-				   lrs_,io_,quantumSector_,wft_),
-		  truncate_(lrs_,wft_,concurrency_,
-		            parameters_,model_.maxConnections(),verbose_)
+				   reflectionOperator_,io_,quantumSector_,wft_),
+		  truncate_(reflectionOperator_,wft_,concurrency_,parameters_,
+			    model_.maxConnections(),verbose_)
 		{
 			io_.print(parameters_);
 			io_.print(targetStruct_);
@@ -246,6 +248,7 @@ namespace Dmrg {
 		CheckpointType checkpoint_;
 		WaveFunctionTransfType wft_;
 		std::vector<BlockType> sitesIndices_;
+		ReflectionSymmetryType reflectionOperator_;
 		DiagonalizationType diagonalization_;
 		TruncationType truncate_;
 		

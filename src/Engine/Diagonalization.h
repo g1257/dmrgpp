@@ -116,7 +116,7 @@ namespace Dmrg {
                         const ModelType& model,
                         ConcurrencyType& concurrency,
                         const bool& verbose,
-			const LeftRightSuperType& lrs,
+			ReflectionSymmetryType& reflectionOperator,
                         IoOutType& io,
                         const size_t& quantumSector,
                        WaveFunctionTransfType& waveFunctionTransformation)
@@ -124,12 +124,11 @@ namespace Dmrg {
 		  model_(model),
 		  concurrency_(concurrency),
 		  verbose_(verbose),
-//		  useReflection_(useReflection),
+		  reflectionOperator_(reflectionOperator),
 		  io_(io),
 		  progress_("Diag.",0),
 		  quantumSector_(quantumSector),
 		  wft_(waveFunctionTransformation),
-		  reflectionOperator_(lrs,model_.hilbertSize(0),parameters_.useReflectionSymmetry),
 		  oldEnergy_(0)
 		{}
 
@@ -418,12 +417,11 @@ namespace Dmrg {
 		const ModelType& model_;
 		ConcurrencyType& concurrency_;
 		const bool& verbose_;
-		//const bool& useReflection_;
+		ReflectionSymmetryType& reflectionOperator_;
 		IoOutType& io_;
 		PsimagLite::ProgressIndicator progress_;
 		const size_t& quantumSector_; // this needs to be a reference since DmrgSolver will change it
 		WaveFunctionTransfType& wft_;
-		ReflectionSymmetryType reflectionOperator_;
 		double oldEnergy_;
 	}; // class Diagonalization
 } // namespace Dmrg 

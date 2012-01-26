@@ -97,7 +97,9 @@ namespace Dmrg {
 		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 		typedef typename TargettingType::ConcurrencyType ConcurrencyType;
 		typedef DensityMatrix<RealType,BasisType,BasisWithOperatorsType,TargettingType> DensityMatrixType;
-		
+		typedef typename TargettingType::ModelType ModelType;
+		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
+
 		enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM};
 		
@@ -105,13 +107,14 @@ namespace Dmrg {
 
 		typedef typename DensityMatrixType::BuildingBlockType TransformType;
 
-		Truncation(LeftRightSuperType& lrs,
+		Truncation(ReflectionSymmetryType& reflectionOperator,
 		           WaveFunctionTransfType& waveFunctionTransformation,
 		           ConcurrencyType& concurrency,
 		           const ParametersType& parameters,
 		           size_t maxConnections,
 		           bool verbose)
-		: lrs_(lrs),
+		: reflectionOperator_(reflectionOperator),
+		  lrs_(reflectionOperator_.leftRightSuper()),
 		  waveFunctionTransformation_(waveFunctionTransformation),
 		  concurrency_(concurrency),
 		  parameters_(parameters),
@@ -229,6 +232,8 @@ namespace Dmrg {
 
 			error_ = rSprime.changeBasis(ftransform_,dmS(),eigs,keptStates_,
 			                             parameters_,concurrency_); //startEnd);
+			reflectionOperator_.changeBasis(ftransform_,direction);
+
 			if (direction == EXPAND_SYSTEM) {
 				LeftRightSuperType lrs(rSprime,
 										(BasisWithOperatorsType&) pBasisSummed,
@@ -328,6 +333,7 @@ namespace Dmrg {
 			return discWeight;
 		}
 
+		ReflectionSymmetryType& reflectionOperator_;
 		const LeftRightSuperType& lrs_;
 		WaveFunctionTransfType& waveFunctionTransformation_;
 		ConcurrencyType& concurrency_;
