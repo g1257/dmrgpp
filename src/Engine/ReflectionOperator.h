@@ -91,23 +91,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "Matrix.h"
 #include "ProgressIndicator.h"
-//#include "ReflectionItem.h"
+#include "LinearlyIndependentSet.h"
 
 namespace Dmrg {
-
-// FIXME: MOVE ELSEWHERE:
-template<typename RealType>
-bool isAlmostZero(const RealType& x)
-{
-	return (fabs(x)<1e-6);
-}
-
-// FIXME: MOVE ELSEWHERE:
-template<typename RealType>
-bool isAlmostZero(const std::complex<RealType>& x)
-{
-	return (fabs(real(x)*real(x)+imag(x)*imag(x))<1e-6);
-}
 
 template<typename LeftRightSuperType>
 class ReflectionOperator {
@@ -407,8 +393,7 @@ private:
 	void computeItems(const SparseMatrixType& sSector)
 	{
 		printFullMatrix(sSector,"sSector");
-		PsimagLite::Matrix<ComplexOrRealType> s(sSector.rank(),sSector.rank());
-		size_t total = 0;
+		LinearlyIndependentSet<RealType,VectorType> lis(sSector.rank());
 
 		for (size_t i=0;i<sSector.rank();i++) {
 			std::vector<ComplexOrRealType> v(sSector.rank(),0);
@@ -421,8 +406,9 @@ private:
 				else equalCounter--;
 			}
 			v[i] += 1.0;
-			addV(total,s,v);
+			lis.push(v);
 		}
+		plusSector_=lis.size();
 		for (size_t i=0;i<sSector.rank();i++) {
 			std::vector<ComplexOrRealType> v(sSector.rank(),0);
 			int equalCounter=0;
@@ -434,16 +420,14 @@ private:
 				else equalCounter--;
 			}
 			v[i] -= 1.0;
-			addV(total,s,v);
+			lis.push(v);
 		}
-		assert(total==s.n_row());
-		fullMatrixToCrsMatrix(transform_,s);
-	}
-
-	void addV(size_t& total,PsimagLite::Matrix<ComplexOrRealType>& s,std::vector<ComplexOrRealType> v)
-	{
-		PsimagLite::LAPACK::GETRF(m,n,&s(0,0),lda,ipiv,info);
-
+		size_t minuses = lis.size()-plusSector_;
+		std::ostringstream msg;
+		msg<<plusSector_<<" +, "<<minuses<<" -.";
+		progress_.printline(msg,std::cout);
+		assert(lis.size()==sSector.rank());
+		lis.fill(transform_);
 	}
 
 //	void setTransform(const std::vector<ItemType>& buffer)
@@ -504,7 +488,12 @@ private:
 		PsimagLite::Matrix<ComplexOrRealType> fullm(s.rank(),s.rank());
 		crsMatrixToFullMatrix(fullm,s);
 		std::cout<<"--------->   "<<name<<" <----------\n";
-		symbolicPrint(std::cout,fullm);
+		try {
+			symbolicPrint(std::cout,fullm);
+		} catch (std::exception& e) {
+			std::cout<<fullm;
+		}
+
 		//std::cout<<fullm;
 
 	}
