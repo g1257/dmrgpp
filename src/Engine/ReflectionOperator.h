@@ -116,7 +116,8 @@ public:
 	  isEnabled_(isEnabled),
 	  expandSys_(expandSys),
 	  reflectedLeft_(n0_,n0_),
-	  reflectedRight_(n0_,n0_)
+	  reflectedRight_(n0_,n0_),
+	  seMap_(n0_)
 	{
 		size_t counter=0;
 		for (size_t i=0;i<reflectedLeft_.rank();i++) {
@@ -125,6 +126,8 @@ public:
 			reflectedLeft_.pushValue(1);
 			counter++;
 		}
+		for (size_t i=0;i<seMap_.size();i++) seMap_[i] = i;
+
 		reflectedLeft_.setRow(reflectedLeft_.rank(),counter);
 		reflectedRight_=reflectedLeft_;
 	}
@@ -172,7 +175,9 @@ public:
 
 		SparseMatrixType tmp;
 		multiply(tmp,matrix,rT);
-		printFullMatrix(rT,"ConjTranform");
+		SparseMatrixType tmp3;
+		multiply(tmp3,transform_,rT);
+		printFullMatrix(tmp3,"RR^\\dagger");
 		SparseMatrixType matrix2;
 		printFullMatrix(matrix,"OriginalHam");
 		multiply(matrix2,transform_,tmp);
@@ -229,11 +234,13 @@ private:
 			newreflected.setRow(x,counter);
 
 			for (size_t xprime=0;xprime<transform.n_row();xprime++) {
-				ComplexOrRealType wl1 = transform(xprime,x);
+				ComplexOrRealType wl1 =  transform(xprime,x);
+//				ComplexOrRealType wl1 =  transform(x,xprime);
 				for (int k=reflected.getRowPtr(xprime);k<reflected.getRowPtr(xprime+1);k++) {
 					size_t xsecond = reflected.getCol(k);
 					ComplexOrRealType r = reflected.getValue(k);
 					for (size_t xthird=0;xthird<transform.n_col();xthird++) {
+//						ComplexOrRealType val = wl1 * r * transform(xthird,xsecond);
 						ComplexOrRealType val = wl1 * r * transform(xsecond,xthird);
 						if (isAlmostZero(val)) continue;
 						newreflected.pushCol(xthird);
@@ -246,7 +253,7 @@ private:
 		newreflected.setRow(reflected.rank(),counter);
 	}
 
-	void setS(SparseMatrixType& snew)
+	void setS(SparseMatrixType& snew) const
 	{
 		size_t total = lrs_.super().size();
 		size_t ns = lrs_.left().size();
@@ -256,6 +263,13 @@ private:
 		size_t counter = 0;
 		RealType sign = 1.0;
 		snew.resize(total);
+		const SparseMatrixType& aMatrix = reflectedLeft_;
+		const SparseMatrixType& bMatrix = reflectedRight_;
+
+		std::vector<size_t> seMap2(seMap_.size());
+		for (size_t i=0;i<seMap2.size();i++)
+			seMap2[seMap_[i]]=i;
+
 		for (size_t i=0;i<total;i++) {
 			snew.setRow(i,counter);
 			size_t x=0,y=0;
@@ -267,12 +281,12 @@ private:
 			size_t y0=0,y1=0;
 			pack3.unpack(y0,y1,lrs_.right().permutation(y));
 
-			for (int k1=reflectedLeft_.getRowPtr(x0);k1<reflectedLeft_.getRowPtr(x0+1);k1++) {
-				size_t x0r = reflectedLeft_.getCol(k1);
-				ComplexOrRealType val1 = reflectedLeft_.getValue(k1);
-				for (int k2=reflectedRight_.getRowPtr(y1);k2<reflectedRight_.getRowPtr(y1+1);k2++) {
-					size_t y1r = reflectedRight_.getCol(k2);
-					ComplexOrRealType val2 = reflectedRight_.getValue(k2);
+			for (int k1=aMatrix.getRowPtr(x0);k1<aMatrix.getRowPtr(x0+1);k1++) {
+				size_t x0r = seMap_[aMatrix.getCol(k1)];
+				ComplexOrRealType val1 = aMatrix.getValue(k1);
+				for (int k2=bMatrix.getRowPtr(y1);k2<bMatrix.getRowPtr(y1+1);k2++) {
+					size_t y1r = seMap2[bMatrix.getCol(k2)];
+					ComplexOrRealType val2 = bMatrix.getValue(k2);
 					size_t xprime = pack2.pack(y1r,y0,lrs_.left().permutationInverse());
 					size_t yprime = pack3.pack(x1,x0r,lrs_.right().permutationInverse());
 					size_t iprime = pack1.pack(xprime,yprime,lrs_.super().permutationInverse());
@@ -303,7 +317,6 @@ private:
 		size_t total = lrs_.super().partition(m+1)-offset;
 		sSector.resize(total);
 		size_t counter = 0;
-		//bool needsPrinting = true;
 		for (size_t i=0;i<total;i++) {
 			sSector.setRow(i,counter);
 			for (int k=sSuper.getRowPtr(i+offset);k<sSuper.getRowPtr(i+offset+1);k++) {
@@ -311,13 +324,6 @@ private:
 				ComplexOrRealType val = sSuper.getValue(k);
 				bool b = (col>=offset && col<total+offset);
 				assert(b);
-//				if (!b) {
-//					if (needsPrinting) {
-//						std::cerr<<"WARNING: extractCurrentSector: reflected_ not following symmetries!!\n";
-//						needsPrinting = false;
-//					}
-//					continue;
-//				}
 				sSector.pushCol(col-offset);
 				sSector.pushValue(val);
 				counter++;
@@ -340,6 +346,7 @@ private:
 		reflectedLeft_.resize(ns);
 		reflectedRight_.resize(ne);
 		size_t counter = 0;
+		seMap_.resize(ns);
 		for (size_t x0=0;x0<ns;x0++) {
 			reflectedLeft_.setRow(x0,counter);
 			reflectedRight_.setRow(x0,counter);
@@ -350,7 +357,7 @@ private:
 				if (isAlmostZero(val)) continue;
 				size_t xprime=0,yprime=0;
 				pack1.unpack(xprime,yprime,lrs_.super().permutation(col));
-
+				seMap_[xprime] = yprime;
 
 				reflectedLeft_.pushCol(xprime);
 				reflectedLeft_.pushValue(val);
@@ -363,20 +370,6 @@ private:
 		reflectedLeft_.setRow(ns,counter);
 		reflectedRight_.setRow(ns,counter);
 	}
-
-//	size_t findReflected(size_t x) const
-//	{
-//		if (s_.rank()==0) return x;
-//		for (size_t i=0;i<s_.rank();i++) {
-//			for (int k=s_.getRowPtr(i);k<s_.getRowPtr(i+1);k++) {
-//				size_t col = s_.getCol(k);
-//				if (col==x) return i;
-//			}
-//		}
-//		std::string s(__FILE__);
-//		s += " findReflected\n";
-//		throw std::runtime_error(s.c_str());
-//	}
 
 	void setGs(VectorType& gs,const VectorType& v,size_t rank,size_t offset) const
 	{
@@ -397,13 +390,10 @@ private:
 
 		for (size_t i=0;i<sSector.rank();i++) {
 			std::vector<ComplexOrRealType> v(sSector.rank(),0);
-			int equalCounter=0;
 			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
 				size_t col = sSector.getCol(k);
 				if (isAlmostZero(sSector.getValue(k))) continue;
 				v[col] =  sSector.getValue(k);
-				if (col==i) equalCounter++;
-				else equalCounter--;
 			}
 			v[i] += 1.0;
 			lis.push(v);
@@ -411,13 +401,10 @@ private:
 		plusSector_=lis.size();
 		for (size_t i=0;i<sSector.rank();i++) {
 			std::vector<ComplexOrRealType> v(sSector.rank(),0);
-			int equalCounter=0;
 			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
 				size_t col = sSector.getCol(k);
 				if (isAlmostZero(sSector.getValue(k))) continue;
 				v[col] =  sSector.getValue(k);
-				if (col==i) equalCounter++;
-				else equalCounter--;
 			}
 			v[i] -= 1.0;
 			lis.push(v);
@@ -429,59 +416,6 @@ private:
 		assert(lis.size()==sSector.rank());
 		lis.fill(transform_);
 	}
-
-//	void setTransform(const std::vector<ItemType>& buffer)
-//	{
-//		transform_.resize(buffer.size());
-//		assert(buffer.size()==transform_.rank());
-//		size_t counter = 0;
-//		size_t row = 0;
-
-//		for (size_t i=0;i<buffer.size();i++) {
-//			if (buffer[i].type()==ItemType::MINUS) continue;
-//			transform_.setRow(row++,counter);
-//			buffer[i].setTransformPlus(transform_,counter);
-//		}
-
-//		for (size_t i=0;i<buffer.size();i++) {
-//			if (buffer[i].type()!=ItemType::MINUS) continue;
-//			transform_.setRow(row++,counter);
-//			buffer[i].setTransformMinus(transform_,counter);
-//		}
-//		transform_.setRow(transform_.rank(),counter);
-//	}
-
-//	void makeUnique(std::vector<ItemType>& dest,std::vector<ItemType>& src)
-//	{
-//		size_t zeros=0;
-//		size_t pluses=0;
-//		size_t minuses=0;
-//		for (size_t i=0;i<src.size();i++) {
-//			src[i].postFix();
-//		}
-
-//		for (size_t i=0;i<src.size();i++) {
-//			ItemType item = src[i];
-//			int x =  PsimagLite::isInVector(dest,item);
-//			if (x>=0) continue;
-////				if (item.type ==ItemType::PLUS) {
-////					size_t i = item.i;
-////					size_t j = item.j;
-////					ItemType item2(j,i,ItemType::PLUS);
-////					x = PsimagLite::isInVector(dest,item2);
-////					if (x>=0) continue;
-////				}
-//			if (item.type()==ItemType::DIAGONAL) zeros++;
-//			if (item.type()==ItemType::PLUS) pluses++;
-//			if (item.type()==ItemType::MINUS) minuses++;
-
-//			dest.push_back(item);
-//		}
-//		std::ostringstream msg;
-//		msg<<pluses<<" +, "<<minuses<<" -, "<<zeros<<" zeros.";
-//		progress_.printline(msg,std::cout);
-//		plusSector_ = zeros + pluses;
-//	}
 
 	void printFullMatrix(const SparseMatrixType& s,const std::string& name) const
 	{
@@ -556,6 +490,7 @@ private:
 	bool isEnabled_;
 	size_t expandSys_;
 	SparseMatrixType reflectedLeft_,reflectedRight_;
+	std::vector<size_t> seMap_;
 	SparseMatrixType transform_;
 }; // class ReflectionOperator
 
