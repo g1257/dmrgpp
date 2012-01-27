@@ -136,37 +136,70 @@ namespace PsimagLite {
 	}
 
 	template<typename T>
+	void mathematicaPrint(std::ostream& os,const Matrix<T>& A)
+	{
+		os<<"m:={";
+		for (size_t i=0;i<A.n_row();i++) {
+			os<<"{";
+			for (size_t j=0;j<A.n_col();j++) {
+				os<<A(i,j);
+				if (j+1<A.n_col()) os<<",";
+			}
+			os<<"},\n";
+		}
+		os<<"}\n";
+	}
+
+	template<typename T>
 	void symbolicPrint(std::ostream& os,const Matrix<T>& A)
 	{
 		size_t i,j;
 		os<<A.n_row()<<" "<<A.n_col()<<"\n";
 		std::vector<T> values;
-		std::string characters("ABCDEFGHIJKLM");
 		std::string s = "symbolicPrint: Not enough characters\n";
-		
+		size_t maxCharacters = 25;	
 		for (i=0;i<A.n_row();i++) {
 			for (j=0;j<A.n_col();j++) {
-				size_t k=0;
+
 				const T& val = A(i,j);
 				if (std::norm(val)<1e-6) {
-					os<<0<<" ";
+					os<<" 0 ";
 					continue;
 				}
+
+				size_t k=0;
 				for (;k<values.size();k++)
 					if (std::norm(values[k]-val)<1e-6) break;
-				if (k==values.size()) {
-					k = values.size();
-					values.push_back(val);
-					if (values.size()>characters.length())
-						throw std::runtime_error(s.c_str());
+				bool b1 = (k==values.size());
+
+				size_t k2 = 0;
+				for (;k2<values.size();k2++)
+					if (std::norm(values[k2]+val)<1e-6) break;
+
+				bool b2 = (k2==values.size());
+
+				if (b1) {
+					if (b2) {
+						values.push_back(val);
+						if (values.size()>maxCharacters)
+							throw std::runtime_error(s.c_str());
+						char chark = k + 65;
+						os<<" "<<chark<<" ";
+					} else {
+						char chark = k2 + 65;
+						os<<"-"<<chark<<" ";
+					}
+				} else {
+					char chark = k + 65;
+					os<<" "<<chark<<" ";
 				}
-				os<<characters[k]<<" ";
 			}
 			os<<"\n";
 		}
 		os<<"---------------------------\n";
 		for (size_t i=0;i<values.size();i++) {
-			os<<characters[i]<<"="<<values[i]<<" ";
+			char chari = i + 65;
+			os<<chari<<"="<<values[i]<<" ";
 		}
 		os<<"\n";
 	}

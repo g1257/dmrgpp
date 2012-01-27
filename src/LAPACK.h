@@ -32,6 +32,10 @@ namespace LAPACK {
   //MSS
   extern "C" int  dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO);
 
+  extern "C" int  zgetrf_(int* M, int* N, std::complex<double>* A, int* LDA, int* IPIV, int* INFO);
+
+  extern "C" int  zgetri_(int* N, std::complex<double>* A, int* LDA, int* IPIV,  std::complex<double>* WORK, int* LWORK, int* INFO);
+
   extern "C" int  dgetri_(int* N, double* A, int* LDA, int* IPIV,  double* WORK, int* LWORK, int* INFO);
 
 // ============================================================================
@@ -52,12 +56,20 @@ namespace LAPACK {
     zgesv_(&ma,&mb,a,&lda,pivot,b,&ldb,&info);
   }
 
-  inline void DGETRF(int ma, int na, double* a, int lda, int* pivot, int& info) {
+  inline void GETRF(int ma, int na, double* a, int lda, int* pivot, int& info) {
     dgetrf_(&ma,&na,a,&lda,pivot,&info);
   }
+
+  inline void GETRF(int ma,int na,std::complex<double>* a,int lda,int* pivot,int& info) {
+	  zgetrf_(&ma,&na,a,&lda,pivot,&info);
+  }
   
-  inline void DGETRI(int na, double* a, int lda, int* pivot, double* work, int lwork, int& info) {
+  inline void GETRI(int na, double* a, int lda, int* pivot, double* work, int lwork, int& info) {
     dgetri_(&na,a,&lda,pivot,work,&lwork,&info);
+  }
+
+  inline void GETRI(int na, std::complex<double>* a, int lda, int* pivot, std::complex<double>* work, int lwork, int& info) {
+    zgetri_(&na,a,&lda,pivot,work,&lwork,&info);
   }
   
 }      /* namespace LAPACK */
