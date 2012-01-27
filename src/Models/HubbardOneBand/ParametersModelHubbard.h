@@ -94,15 +94,16 @@ namespace Dmrg {
 	
 			io.read(hubbardU,"hubbardU");
 			io.read(potentialV,"potentialV");
-			timeVaryingPotential = false;
 			try {
-				int x = 0;
-				io.readline(x,"TimeVaryingPotential=");
-				if (x>0) timeVaryingPotential=true;
+				io.read(potentialT,"PotentialT");
 			} catch (std::exception& e) {
 			}
 			io.rewind();
-
+			omega=0;
+			try {
+				io.readline(omega,"omega=");
+			} catch (std::exception& e) {
+			}
 		}
 		
 		// Do not include here connection parameters
@@ -111,7 +112,11 @@ namespace Dmrg {
 		std::vector<Field> hubbardU; 
 		// Onsite potential values, one for each site
 		std::vector<Field> potentialV;
-		bool timeVaryingPotential;
+
+		// for time-dependent H:
+		std::vector<Field> potentialT;
+		Field omega;
+
 		// target number of electrons  in the system
 		int nOfElectrons;
 		// target density
@@ -148,7 +153,12 @@ namespace Dmrg {
 //		utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
 		os<<"potentialV\n";
 		os<<parameters.potentialV;
-		os<<"timeVaryingPotential="<<parameters.timeVaryingPotential<<"\n";
+		if (parameters.potentialT.size()==0) return os;
+
+		// time-dependent stuff
+		os<<"potentialT\n";
+		os<<parameters.potentialT;
+		os<<"omega="<<parameters.omega<<"\n";
 		return os;
 	}
 } // namespace Dmrg

@@ -536,23 +536,30 @@ namespace Dmrg {
 				hmatrix += tmpMatrix2;
 
 				// V_iup term
-				tmp = modelParameters_.potentialV[block[i]+0*linSize]; //computeOnsitePotential(type,block[i],0,smax,emin);
-				if (modelParameters_.timeVaryingPotential) tmp *= timeDependentPotential(time);
+				tmp = modelParameters_.potentialV[block[i]+0*linSize];
 				multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
 				hmatrix += tmpMatrix;
 
 				// V_idown term
-				tmp = modelParameters_.potentialV[block[i]+1*linSize]; //computeOnsitePotential(type,block[i],1,smax,emin);
-				if (modelParameters_.timeVaryingPotential) tmp *= timeDependentPotential(time);
+				tmp = modelParameters_.potentialV[block[i]+1*linSize];
+				multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
+				hmatrix += tmpMatrix;
+
+
+				if (modelParameters_.potentialT.size()==0) return;
+
+				// VT_iup term
+				tmp = modelParameters_.potentialT[block[i]];
+				tmp *= cos(time*modelParameters_.omega);
+				multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
+				hmatrix += tmpMatrix;
+
+				// VT_idown term
+				tmp = modelParameters_.potentialT[block[i]];
+				tmp *= cos(time*modelParameters_.omega);
 				multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
 				hmatrix += tmpMatrix;
 			}
-		}
-
-		RealType timeDependentPotential(RealType time) const
-		{
-			while (time>=2*M_PI) time-=2*M_PI;
-			return cos(time);
 		}
 	};	//class ModelHubbard
 

@@ -218,18 +218,20 @@ public:
 
 private:
 
-	void checkTransform(SparseMatrixType& sSector)
+	void checkTransform(const SparseMatrixType& sSector)
 	{
 		SparseMatrixType rT;
 		invert(rT,transform_);
 		SparseMatrixType tmp3;
 		multiply(tmp3,transform_,rT);
-		printFullMatrix(tmp3,"RR^\\dagger");
+		printFullMatrix(sSector,"Ssector");
+
+		printFullMatrix(rT,"Transform");
 
 		SparseMatrixType tmp4;
 		multiply(tmp3,sSector,rT);
 		multiply(tmp4,transform_,tmp3);
-		printFullMatrix(tmp3,"R S R^\\dagger");
+		printFullMatrix(tmp4,"R S R^\\dagger");
 	}
 
 	void invert(SparseMatrixType& dest,const SparseMatrixType& src) const
@@ -355,8 +357,8 @@ private:
 			for (int k=sSuper.getRowPtr(i+offset);k<sSuper.getRowPtr(i+offset+1);k++) {
 				size_t col = sSuper.getCol(k);
 				ComplexOrRealType val = sSuper.getValue(k);
-				bool b = (col>=offset && col<total+offset);
-				assert(b);
+
+				assert(col>=offset && col<total+offset);
 				sSector.pushCol(col-offset);
 				sSector.pushValue(val);
 				counter++;
@@ -456,7 +458,7 @@ private:
 		crsMatrixToFullMatrix(fullm,s);
 		std::cout<<"--------->   "<<name<<" <----------\n";
 		try {
-			symbolicPrint(std::cout,fullm);
+			mathematicaPrint(std::cout,fullm); //symbolicPrint(std::cout,fullm);
 		} catch (std::exception& e) {
 			std::cout<<fullm;
 		}
