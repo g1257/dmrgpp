@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "ProgressIndicator.h"
 #include "LinearlyIndependentSet.h"
+#include "LAPACK.h"
 
 namespace Dmrg {
 
@@ -140,14 +141,8 @@ public:
 		updateReflected(sSuper);
 		SparseMatrixType sSector;
 		extractCurrentSector(sSector,sSuper,sectors);
-		//std::vector<ItemType> items;
 		computeItems(sSector);
-		//std::vector<ItemType> items2;
-		//makeUnique(items2,items);
-		//std::cout<<"ITEMS2-------------\n";
-		//std::cout<<items2;
-		//assert(items2.size()==sSector.rank());
-		//setTransform(items2);
+		checkTransform(sSector);
 	}
 
 	void changeBasis(const PsimagLite::Matrix<ComplexOrRealType>& transform,size_t direction)
@@ -171,13 +166,12 @@ public:
 		assert(isEnabled_);
 
 		SparseMatrixType rT;
-		transposeConjugate(rT,transform_);
+		invert(rT,transform_);
+//		transposeConjugate(rT,transform_);
 
 		SparseMatrixType tmp;
 		multiply(tmp,matrix,rT);
-		SparseMatrixType tmp3;
-		multiply(tmp3,transform_,rT);
-		printFullMatrix(tmp3,"RR^\\dagger");
+
 		SparseMatrixType matrix2;
 		printFullMatrix(matrix,"OriginalHam");
 		multiply(matrix2,transform_,tmp);
@@ -223,6 +217,45 @@ public:
 	bool isEnabled() const { return isEnabled_; }
 
 private:
+
+	void checkTransform(SparseMatrixType& sSector)
+	{
+		SparseMatrixType rT;
+		invert(rT,transform_);
+		SparseMatrixType tmp3;
+		multiply(tmp3,transform_,rT);
+		printFullMatrix(tmp3,"RR^\\dagger");
+
+		SparseMatrixType tmp4;
+		multiply(tmp3,sSector,rT);
+		multiply(tmp4,transform_,tmp3);
+		printFullMatrix(tmp3,"R S R^\\dagger");
+	}
+
+	void invert(SparseMatrixType& dest,const SparseMatrixType& src) const
+	{
+		PsimagLite::Matrix<ComplexOrRealType> fullM;
+		crsMatrixToFullMatrix(fullM,src);
+		int m = fullM.n_row();
+		int n = m;
+		int lda = m;
+		int info = 0;
+		std::vector<int> ipiv(m);
+		psimag::LAPACK::GETRF(m,n,&fullM(0,0),lda,&(ipiv[0]),info);
+		assert(info==0);
+		n = fullM.n_row();
+		lda = m;
+		// query:
+		int lwork = -1;
+		std::vector<ComplexOrRealType> work(3);
+		psimag::LAPACK::GETRI(n,&fullM(0,0),lda,&(ipiv[0]),&(work[0]),lwork,info);
+		lwork = std::real(work[0]);
+		// actual work:
+		work.resize(lwork+5);
+		psimag::LAPACK::GETRI(n,&fullM(0,0),lda,&(ipiv[0]),&(work[0]),lwork,info);
+		assert(info==0);
+		fullMatrixToCrsMatrix(dest,fullM);
+	}
 
 	void changeBasis(SparseMatrixType& newreflected,const SparseMatrixType& reflected,const PsimagLite::Matrix<ComplexOrRealType>& transform)
 	{
