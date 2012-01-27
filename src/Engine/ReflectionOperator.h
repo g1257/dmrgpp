@@ -305,6 +305,10 @@ private:
 		for (size_t i=0;i<seMap2.size();i++)
 			seMap2[seMap_[i]]=i;
 
+		std::vector<int> ptr(total,-1);
+		std::vector<size_t> index(total,0);
+		std::vector<ComplexOrRealType> temp(total,0);
+
 		for (size_t i=0;i<total;i++) {
 			snew.setRow(i,counter);
 			size_t x=0,y=0;
@@ -316,12 +320,13 @@ private:
 			size_t y0=0,y1=0;
 			pack3.unpack(y0,y1,lrs_.right().permutation(y));
 
+			size_t itemp = 0;
 			for (int k1=aMatrix.getRowPtr(x0);k1<aMatrix.getRowPtr(x0+1);k1++) {
 				size_t x0r = seMap_[aMatrix.getCol(k1)];
 				ComplexOrRealType val1 = aMatrix.getValue(k1);
 				for (int k2=bMatrix.getRowPtr(y1);k2<bMatrix.getRowPtr(y1+1);k2++) {
 					size_t y1r = seMap2[bMatrix.getCol(k2)];
-					ComplexOrRealType val2 = bMatrix.getValue(k2);
+					ComplexOrRealType val2 = sign*val1*bMatrix.getValue(k2);
 					size_t xprime = pack2.pack(y1r,y0,lrs_.left().permutationInverse());
 					size_t yprime = pack3.pack(x1,x0r,lrs_.right().permutationInverse());
 					size_t iprime = pack1.pack(xprime,yprime,lrs_.super().permutationInverse());
@@ -333,13 +338,27 @@ private:
 			//			sign = 1;
 			//			if (signCounter&1) sign=-1;
 
-					snew.pushCol(iprime);
-					snew.pushValue(sign*val1*val2);
-					counter++;
+					if (ptr[iprime]<0) {
+						ptr[iprime] = itemp;
+						temp[ptr[iprime]] = val2;
+						index[ptr[iprime]] = iprime;
+						itemp++;
+					} else {
+						temp[ptr[iprime]] += val2;
+					}
 				}
 			}
+			for (size_t s=0;s<itemp;s++) {
+				snew.pushCol(index[s]);
+				snew.pushValue(temp[s]);
+				ptr[index[s]] = -1;
+			}
+			counter += itemp;
 		}
 		snew.setRow(total,counter);
+		SparseMatrixType tmp;
+		multiply(tmp,snew,snew);
+		assert(isTheIdentity(tmp));
 	}
 
 	void extractCurrentSector(SparseMatrixType& sSector,
@@ -365,6 +384,25 @@ private:
 			}
 		}
 		sSector.setRow(total,counter);
+
+		SparseMatrixType tmp;
+		multiply(tmp,sSector,sSector);
+		assert(isTheIdentity(tmp));
+		printFullMatrix(tmp,"ShouldBeI");
+
+		PsimagLite::Matrix<ComplexOrRealType> m1;
+		crsMatrixToFullMatrix(m1,sSector);
+		PsimagLite::Matrix<ComplexOrRealType> m2(m1.n_row(),m1.n_col());
+		for (size_t i=0;i<m1.n_row();i++) {
+			for (size_t j=0;j<m1.n_col();j++) {
+				m2(i,j) = 0;
+				for (size_t k=0;k<m1.n_col();k++) {
+					 m2(i,j) += m1(i,k) * m1(k,j);
+				}
+			}
+		}
+		std::cout<<"Should be I:\n";
+		std::cout<<m2<<"\n";
 	}
 
 	void updateReflected(const SparseMatrixType& sSuper)
@@ -458,12 +496,13 @@ private:
 		crsMatrixToFullMatrix(fullm,s);
 		std::cout<<"--------->   "<<name<<" <----------\n";
 		try {
-			mathematicaPrint(std::cout,fullm); //symbolicPrint(std::cout,fullm);
+//			mathematicaPrint(std::cout,fullm);
+//			symbolicPrint(std::cout,fullm);
 		} catch (std::exception& e) {
 			std::cout<<fullm;
 		}
 
-		//std::cout<<fullm;
+		std::cout<<fullm;
 
 	}
 
