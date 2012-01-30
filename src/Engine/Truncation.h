@@ -217,22 +217,26 @@ namespace Dmrg {
 			\label{eq:transformation}
 			\end{equation}
 			!PTEX-END */
-			dmS.diag(eigs,'V',concurrency_);
-			dmS.check2(direction);
-			
-			updateKeptStates(eigs);
-			
-			if (verbose_ && concurrency_.root())
-				std::cerr<<"Done with density-matrix diag.\n";
-			
+			bool entangle = (parameters_.options.find("noentangle")==std::string::npos);
+
+			if (entangle) {
+				dmS.diag(eigs,'V',concurrency_);
+				dmS.check2(direction);
+
+				updateKeptStates(eigs);
+			}
+
 			//! transform basis: dmS^\dagger * operator matrix * dms
 			rSprime = pBasis;
-			if (verbose_ && concurrency_.root())
-				std::cerr<<"About to changeBasis...\n";
 
-			error_ = rSprime.changeBasis(ftransform_,dmS(),eigs,keptStates_,
+			if (entangle) {
+				error_ = rSprime.changeBasis(ftransform_,dmS(),eigs,keptStates_,
 			                             parameters_,concurrency_); //startEnd);
-			reflectionOperator_.changeBasis(ftransform_,direction);
+				reflectionOperator_.changeBasis(ftransform_,direction);
+				std::ostringstream msg2;
+				msg2<<"done with entanglement\n";
+				progress_.printline(msg2,std::cout);
+			}
 
 			if (direction == EXPAND_SYSTEM) {
 				LeftRightSuperType lrs(rSprime,
