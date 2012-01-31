@@ -324,6 +324,23 @@ namespace PsimagLite {
 			values_=values;
 			size_=rowptr.size()-1;
 		}
+
+		void checkValidity() const
+		{
+#ifndef NDEBUG
+			size_t n = size_;
+			assert(n+1==rowptr_.size());
+			assert(size_>0);
+			for (size_t i=0;i<n;i++) {
+				std::vector<size_t> p(n,0);
+				for (int k=rowptr_[i];k<rowptr_[i+1];k++) {
+					size_t col = colind_[k];
+					assert(p[col]==0);
+					p[col] = 1;
+				}
+			}
+#endif
+		}
 		
 		template<typename S>
 		friend std::ostream &operator<<(std::ostream &os,const CrsMatrix<S> &m);
@@ -560,8 +577,8 @@ namespace PsimagLite {
 	{
 		int j,k,s,mlast,itemp,jbk;
 		size_t n = A.rank();
-		std::vector<int> ptr(n),index(n);
-		std::vector<S> temp(n);
+		std::vector<int> ptr(n,-1),index(n,0);
+		std::vector<S> temp(n,0);
 		S tmp;
 
 		if (n!=B.rank()) throw std::runtime_error("multiply: matrices must have the same rank.\n");
@@ -570,7 +587,7 @@ namespace PsimagLite {
 		
 		// mlast pointer to the last place we updated in the C vector 
 		mlast = 0;
-		for (size_t l=0;l<n;l++) ptr[l] = -1;
+		// for (size_t l=0;l<n;l++) ptr[l] = -1;
 		// over the rows of A
 		for (size_t i=0;i<n;i++) {
 			C.setRow(i,mlast);
@@ -834,38 +851,26 @@ namespace PsimagLite {
 		return true;
 	}
 	
-// 	template<class T>
-// 	void difference(const CrsMatrix<T>& A,const CrsMatrix<T>& B)
-// 	{
-// 		std::cerr<<"rowptr differences:\n";
-// 		utils::difference(A.rowptr_,B.rowptr_);
-// 		
-// 		std::cerr<<"colind differences:\n";
-// 		utils::difference(A.colind_,B.colind_);
-// 		
-// 		std::cerr<<"values differences:\n";
-// 		utils::difference(A.values_,B.values_);
-// 	}
-	
 	template<class T>
-	bool isTheIdentity(const CrsMatrix<T>& A) 
+	bool isTheIdentity(const CrsMatrix<T>& A,double eps=1e-6) 
 	{
-		T eps = 1e-6;
-		size_t n = A.getSize();
+		size_t n = A.rank();
 		for (size_t i=0;i<n;i++) {
-			if (fabs(A(i,i)-1.0)>eps) {
-				std::cerr<<"Diagonal is "<<A(i,i)<<" at i="<<i<<"\n";
-				return false; 
-			}
-			for (size_t j=0;j<n;j++) {
-				if (i!=j && fabs(A(i,j))>eps) {
-					std::cerr<<"A("<<i<<","<<j<<")="<<A(i,j)<<"\n";
+			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+				size_t col = A.getCol(k);
+				const T& val = A.getValue(k);
+				if (col==i && std::norm(val-1.0)>eps) {
+					std::cerr<<"Diagonal is "<<val<<" at i="<<i<<"\n";
+					return false;
+				}
+				if (col!=i && std::norm(val)>eps) {
+					std::cerr<<"A("<<i<<","<<col<<")="<<val<<"\n";
 					return false;
 				}
 			}
 		}
 		return true;
-	}	
+	}		
 
 	template<typename T>
 	Matrix<T> multiplyTc(const CrsMatrix<T>& a,const CrsMatrix<T>& b)

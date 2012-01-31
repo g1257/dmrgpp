@@ -145,7 +145,8 @@ namespace PsimagLite {
 				os<<A(i,j);
 				if (j+1<A.n_col()) os<<",";
 			}
-			os<<"},\n";
+			os<<"}";
+			if (i+1<A.n_row()) os<<",\n";
 		}
 		os<<"}\n";
 	}
