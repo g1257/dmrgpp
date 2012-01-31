@@ -148,11 +148,16 @@ public:
 	{
 		if (!isEnabled_) return;
 		SparseMatrixType newreflected;
+		static PsimagLite::Matrix<ComplexOrRealType> cachedTransform;
 		if (direction==expandSys_) {
-			changeBasis(newreflected,reflectedLeft_,transform);
-			reflectedLeft_ = newreflected;
+//			changeBasis(newreflected,reflectedLeft_,transform);
+//			reflectedLeft_ = newreflected;
+			cachedTransform = transform;
 		} else {
-			changeBasis(newreflected,reflectedRight_,transform);
+			changeBasis(newreflected,reflectedLeft_,cachedTransform,transform);
+			reflectedLeft_ = newreflected;
+
+			changeBasis(newreflected,reflectedRight_,transform,cachedTransform);
 			reflectedRight_ = newreflected;
 		}
 //		SparseMatrixType one1;
@@ -172,17 +177,16 @@ public:
 		assert(isEnabled_);
 
 		SparseMatrixType rT;
-//		invert(rT,transform_);
 		transposeConjugate(rT,transform_);
 
 		SparseMatrixType tmp;
 		multiply(tmp,matrix,rT);
 
 		SparseMatrixType matrix2;
-		printFullMatrix(matrix,"OriginalHam");
+//		printFullMatrix(matrix,"OriginalHam");
 		multiply(matrix2,transform_,tmp);
-		printFullMatrix(transform_,"transform");
-		printFullMatrix(matrix2,"FinalHam");
+//		printFullMatrix(transform_,"transform");
+//		printFullMatrix(matrix2,"FinalHam");
 		split(matrixA,matrixB,matrix2);
 	 }
 
@@ -230,20 +234,23 @@ private:
 		SparseMatrixType tmp3;
 		multiply(tmp3,transform_,rT);
 
-		printFullMatrix(rT,"Transform");
+//		printFullMatrix(rT,"Transform");
 
 		SparseMatrixType tmp4;
 		multiply(tmp3,sSector,rT);
 		multiply(tmp4,transform_,tmp3);
-		printFullMatrix(tmp4,"R S R^\\dagger");
+//		printFullMatrix(tmp4,"R S R^\\dagger");
 	}
 
-	void changeBasis(SparseMatrixType& newreflected,const SparseMatrixType& reflected,const PsimagLite::Matrix<ComplexOrRealType>& transform)
+	void changeBasis(SparseMatrixType& newreflected,
+			 const SparseMatrixType& reflected,
+			 const PsimagLite::Matrix<ComplexOrRealType>& transform1,
+			 const PsimagLite::Matrix<ComplexOrRealType>& transform2)
 	{
 		newreflected.resize(reflected.rank());
 		size_t counter = 0;
-		assert(reflected.rank()==transform.n_row());
-		assert(reflected.rank()==transform.n_row());
+		assert(reflected.rank()==transform1.n_row());
+		assert(reflected.rank()==transform2.n_row());
 
 		size_t total = reflected.rank();
 		std::vector<int> ptr(total,-1);
@@ -254,15 +261,15 @@ private:
 			newreflected.setRow(x,counter);
 
 			size_t itemp = 0;
-			for (size_t xprime=0;xprime<transform.n_row();xprime++) {
-				ComplexOrRealType wl1 =  transform(xprime,x);
+			for (size_t xprime=0;xprime<transform1.n_row();xprime++) {
+				ComplexOrRealType wl1 =  transform1(xprime,x);
 //				ComplexOrRealType wl1 =  transform(x,xprime);
 				for (int k=reflected.getRowPtr(xprime);k<reflected.getRowPtr(xprime+1);k++) {
 					size_t xsecond = reflected.getCol(k);
 					ComplexOrRealType r = reflected.getValue(k);
-					for (size_t xthird=0;xthird<transform.n_col();xthird++) {
+					for (size_t xthird=0;xthird<transform2.n_col();xthird++) {
 //						ComplexOrRealType val = wl1 * r * transform(xthird,xsecond);
-						ComplexOrRealType val = wl1 * r * transform(xsecond,xthird);
+						ComplexOrRealType val = wl1 * r * transform2(xsecond,xthird);
 						if (isAlmostZero(val)) continue;
 						if (ptr[xthird]<0) {
 							ptr[xthird] = itemp;
@@ -357,12 +364,12 @@ private:
 		sSector.setRow(total,counter);
 		sSector.checkValidity();
 
-		printFullMatrix(sSector,"sSector");
+		//printFullMatrix(sSector,"sSector");
 
 		SparseMatrixType tmp;
 		multiply(tmp,sSector,sSector);
-		printFullMatrix(tmp,"sSector*sSector");
-		assert(isTheIdentity(tmp));
+		//printFullMatrix(tmp,"sSector*sSector");
+		assert(isTheIdentity(tmp,1e-5));
 	}
 
 	void updateReflected()
@@ -380,7 +387,7 @@ private:
 			for (int k=reflectedLeft_.getRowPtr(x0);k<reflectedLeft_.getRowPtr(x0+1);k++) {
 				size_t x0r = reflectedLeft_.getCol(k);
 				size_t col = pack3.pack(x1,x0r,lrs_.right().permutationInverse());
-				ComplexOrRealType val = reflectedLeft_.getValue(x0);
+				ComplexOrRealType val = reflectedLeft_.getValue(k);
 				if (isAlmostZero(val)) continue;
 				reflectedLeft.pushCol(col);
 				reflectedLeft.pushValue(val);
@@ -399,7 +406,7 @@ private:
 			pack3.unpack(x0,x1,lrs_.right().permutation(x));
 			for (int k=reflectedRight_.getRowPtr(x1);k<reflectedRight_.getRowPtr(x1+1);k++) {
 				size_t x1r = reflectedRight_.getCol(k);
-				ComplexOrRealType val = reflectedRight_.getValue(x0);
+				ComplexOrRealType val = reflectedRight_.getValue(k);
 				if (isAlmostZero(val)) continue;
 				size_t col = pack2.pack(x1r,x0,lrs_.left().permutationInverse());
 				reflectedRight.pushCol(col);
@@ -426,7 +433,7 @@ private:
 
 	void computeItems(const SparseMatrixType& sSector)
 	{
-		printFullMatrix(sSector,"sSector");
+//		printFullMatrix(sSector,"sSector");
 		LinearlyIndependentSet<RealType,VectorType> lis(sSector.rank());
 
 		for (size_t i=0;i<sSector.rank();i++) {

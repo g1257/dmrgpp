@@ -234,7 +234,7 @@ namespace Dmrg {
 			                             parameters_,concurrency_); //startEnd);
 				reflectionOperator_.changeBasis(ftransform_,direction);
 				std::ostringstream msg2;
-				msg2<<"done with entanglement\n";
+				msg2<<"done with entanglement";
 				progress_.printline(msg2,std::cout);
 			}
 

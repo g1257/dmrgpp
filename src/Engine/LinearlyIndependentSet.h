@@ -122,7 +122,7 @@ public:
 
 		if (vecs_.size()==0) {
 			vecs_.push_back(v2);
-			printVector(v2,"ADDING: ");
+			//printVector(v2,"ADDING: ");
 			e_.push_back(v2);
 			return;
 		}
@@ -141,7 +141,7 @@ public:
 
 		vecs_.push_back(v2);
 		e_.push_back(u);
-		printVector(v2,"ADDING: ");
+		//printVector(v2,"ADDING: ");
 	}
 
 	size_t size() const { return vecs_.size(); }
