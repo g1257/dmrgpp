@@ -117,8 +117,7 @@ public:
 	  isEnabled_(isEnabled),
 	  expandSys_(expandSys),
 	  reflectedLeft_(n0_,n0_),
-	  reflectedRight_(n0_,n0_),
-	  seMap_(n0_)
+	  reflectedRight_(n0_,n0_)
 	{
 		size_t counter=0;
 		for (size_t i=0;i<reflectedLeft_.rank();i++) {
@@ -127,7 +126,6 @@ public:
 			reflectedLeft_.pushValue(1);
 			counter++;
 		}
-		for (size_t i=0;i<seMap_.size();i++) seMap_[i] = i;
 
 		reflectedLeft_.setRow(reflectedLeft_.rank(),counter);
 		reflectedRight_=reflectedLeft_;
@@ -149,14 +147,14 @@ public:
 	void changeBasis(const PsimagLite::Matrix<ComplexOrRealType>& transform,size_t direction)
 	{
 		if (!isEnabled_) return;
-//		SparseMatrixType newreflected;
-//		if (direction==expandSys_) {
-//			changeBasis(newreflected,reflectedLeft_,transform);
-//			reflectedLeft_ = newreflected;
-//		} else {
-//			changeBasis(newreflected,reflectedRight_,transform);
-//			reflectedRight_ = newreflected;
-//		}
+		SparseMatrixType newreflected;
+		if (direction==expandSys_) {
+			changeBasis(newreflected,reflectedLeft_,transform);
+			reflectedLeft_ = newreflected;
+		} else {
+			changeBasis(newreflected,reflectedRight_,transform);
+			reflectedRight_ = newreflected;
+		}
 //		SparseMatrixType one1;
 //		multiply(one1,reflectedLeft_,reflectedLeft_);
 //		printFullMatrix(one1,"Should be I for ReflectedLeft:");
@@ -228,11 +226,9 @@ private:
 	void checkTransform(const SparseMatrixType& sSector)
 	{
 		SparseMatrixType rT;
-//		invert(rT,transform_);
 		transposeConjugate(rT,transform_);
 		SparseMatrixType tmp3;
 		multiply(tmp3,transform_,rT);
-		printFullMatrix(sSector,"Ssector");
 
 		printFullMatrix(rT,"Transform");
 
@@ -307,6 +303,10 @@ private:
 		PackIndicesType pack1(ns);
 		assert(reflectedLeft_.rank()==ns/n0_);
 		assert(reflectedRight_.rank()==ns/n0_);
+		std::vector<int> ptr(total,-1);
+		std::vector<size_t> index(total,0);
+		std::vector<ComplexOrRealType> temp(total,0);
+
 		for (size_t i=0;i<total;i++) {
 			sSector.setRow(i,counter);
 			size_t x = 0, y = 0;
@@ -318,8 +318,13 @@ private:
 			size_t y0=0,y1=0;
 			pack3.unpack(y0,y1,lrs_.right().permutation(y));
 
+			size_t itemp = 0;
+
 			for (int k=reflectedLeft_.getRowPtr(x0);k<reflectedLeft_.getRowPtr(x0+1);k++) {
+				ComplexOrRealType val1 = reflectedLeft_.getValue(k);
 				for (int k2=reflectedRight_.getRowPtr(y1);k2<reflectedRight_.getRowPtr(y1+1);k2++) {
+					ComplexOrRealType val2 = val1 * reflectedRight_.getValue(k2);
+					if (isAlmostZero(val2)) continue;
 					size_t x0prime = reflectedLeft_.getCol(k);
 					size_t xprime = pack3.pack(x1,x0prime,lrs_.right().permutationInverse());
 
@@ -328,14 +333,36 @@ private:
 
 					size_t iprime = pack1.pack(yprime,xprime,lrs_.super().permutationInverse());
 					assert(iprime>=offset && iprime<offset+total);
-					sSector.pushCol(iprime-offset);
-					sSector.pushValue(1.0);
-					counter++;
+					size_t col = iprime - offset;
+					if (ptr[col]<0) {
+						ptr[col] = itemp;
+						temp[ptr[col]] = val2;
+						index[ptr[col]] = col;
+						itemp++;
+					} else {
+						temp[ptr[col]] += val2;
+					}
+//					sSector.pushCol(iprime-offset);
+//					sSector.pushValue(val2);
+//					counter++;
 				}
 			}
+			for (size_t s=0;s<itemp;s++) {
+				sSector.pushCol(index[s]);
+				sSector.pushValue(temp[s]);
+				ptr[index[s]] = -1;
+			}
+			counter += itemp;
 		}
 		sSector.setRow(total,counter);
 		sSector.checkValidity();
+
+		printFullMatrix(sSector,"sSector");
+
+		SparseMatrixType tmp;
+		multiply(tmp,sSector,sSector);
+		printFullMatrix(tmp,"sSector*sSector");
+		assert(isTheIdentity(tmp));
 	}
 
 	void updateReflected()
@@ -345,24 +372,23 @@ private:
 		PackIndicesType pack3(n0_);
 		SparseMatrixType reflectedLeft(ns,ns);
 
-
-		seMap_.resize(ns);
-		for (size_t i=0;i<seMap_.size();i++) seMap_[i] = i;
-
 		size_t counter = 0;
 		for (size_t x=0;x<ns;x++) {
 			reflectedLeft.setRow(x,counter);
 			size_t x0 = 0, x1=0;
 			pack2.unpack(x0,x1,lrs_.left().permutation(x));
 			for (int k=reflectedLeft_.getRowPtr(x0);k<reflectedLeft_.getRowPtr(x0+1);k++) {
-				size_t x0r = reflectedLeft_.getCol(x0);
+				size_t x0r = reflectedLeft_.getCol(k);
 				size_t col = pack3.pack(x1,x0r,lrs_.right().permutationInverse());
+				ComplexOrRealType val = reflectedLeft_.getValue(x0);
+				if (isAlmostZero(val)) continue;
 				reflectedLeft.pushCol(col);
-				reflectedLeft.pushValue(1);
+				reflectedLeft.pushValue(val);
 				counter++;
 			}
 		}
 		reflectedLeft.setRow(ns,counter);
+		reflectedLeft.checkValidity();
 		reflectedLeft_ = reflectedLeft;
 
 		SparseMatrixType reflectedRight(ns,ns);
@@ -372,14 +398,17 @@ private:
 			reflectedRight.setRow(x,counter);
 			pack3.unpack(x0,x1,lrs_.right().permutation(x));
 			for (int k=reflectedRight_.getRowPtr(x1);k<reflectedRight_.getRowPtr(x1+1);k++) {
-				size_t x1r = reflectedRight_.getCol(x1);
+				size_t x1r = reflectedRight_.getCol(k);
+				ComplexOrRealType val = reflectedRight_.getValue(x0);
+				if (isAlmostZero(val)) continue;
 				size_t col = pack2.pack(x1r,x0,lrs_.left().permutationInverse());
 				reflectedRight.pushCol(col);
-				reflectedRight.pushValue(1);
+				reflectedRight.pushValue(val);
 				counter++;
 			}
 		}
 		reflectedRight.setRow(ns,counter);
+		reflectedRight.checkValidity();
 		reflectedRight_ = reflectedRight;
 	}
 
@@ -503,7 +532,6 @@ private:
 	bool isEnabled_;
 	size_t expandSys_;
 	SparseMatrixType reflectedLeft_,reflectedRight_;
-	std::vector<size_t> seMap_;
 	SparseMatrixType transform_;
 }; // class ReflectionOperator
 
