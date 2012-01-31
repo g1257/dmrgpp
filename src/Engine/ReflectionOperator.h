@@ -343,35 +343,44 @@ private:
 		size_t ns = lrs_.left().size();
 		PackIndicesType pack2(ns/n0_);
 		PackIndicesType pack3(n0_);
-		reflectedLeft_.resize(ns);
-		reflectedRight_.resize(ns);
+		SparseMatrixType reflectedLeft(ns,ns);
+
 
 		seMap_.resize(ns);
 		for (size_t i=0;i<seMap_.size();i++) seMap_[i] = i;
 
 		size_t counter = 0;
 		for (size_t x=0;x<ns;x++) {
-			reflectedLeft_.setRow(x,counter);
+			reflectedLeft.setRow(x,counter);
 			size_t x0 = 0, x1=0;
 			pack2.unpack(x0,x1,lrs_.left().permutation(x));
-			size_t col = pack3.pack(x1,x0,lrs_.right().permutationInverse());
-			reflectedLeft_.pushCol(col);
-			reflectedLeft_.pushValue(1);
-			counter++;
+			for (int k=reflectedLeft_.getRowPtr(x0);k<reflectedLeft_.getRowPtr(x0+1);k++) {
+				size_t x0r = reflectedLeft_.getCol(x0);
+				size_t col = pack3.pack(x1,x0r,lrs_.right().permutationInverse());
+				reflectedLeft.pushCol(col);
+				reflectedLeft.pushValue(1);
+				counter++;
+			}
 		}
-		reflectedLeft_.setRow(ns,counter);
+		reflectedLeft.setRow(ns,counter);
+		reflectedLeft_ = reflectedLeft;
 
+		SparseMatrixType reflectedRight(ns,ns);
 		counter=0;
 		for (size_t x=0;x<ns;x++) {
 			size_t x0 = 0, x1=0;
-			reflectedRight_.setRow(x,counter);
+			reflectedRight.setRow(x,counter);
 			pack3.unpack(x0,x1,lrs_.right().permutation(x));
-			size_t col = pack2.pack(x1,x0,lrs_.left().permutationInverse());
-			reflectedRight_.pushCol(col);
-			reflectedRight_.pushValue(1);
-			counter++;
+			for (int k=reflectedRight_.getRowPtr(x1);k<reflectedRight_.getRowPtr(x1+1);k++) {
+				size_t x1r = reflectedRight_.getCol(x1);
+				size_t col = pack2.pack(x1r,x0,lrs_.left().permutationInverse());
+				reflectedRight.pushCol(col);
+				reflectedRight.pushValue(1);
+				counter++;
+			}
 		}
-		reflectedRight_.setRow(ns,counter);
+		reflectedRight.setRow(ns,counter);
+		reflectedRight_ = reflectedRight;
 	}
 
 	void setGs(VectorType& gs,const VectorType& v,size_t rank,size_t offset) const
