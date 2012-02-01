@@ -104,7 +104,6 @@ class ReflectionOperator {
 			SparseMatrixType;
 	typedef typename LeftRightSuperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-//	typedef ReflectionItem<RealType,ComplexOrRealType> ItemType;
 	typedef std::vector<ComplexOrRealType> VectorType;
 
 public:
@@ -256,6 +255,8 @@ private:
 		std::vector<int> ptr(total,-1);
 		std::vector<size_t> index(total,0);
 		std::vector<ComplexOrRealType> temp(total,0);
+		std::cerr<<"transform1="<<transform1.n_row()<<"x"<<transform1.n_col()<<"\n";
+		std::cerr<<"transform2="<<transform2.n_row()<<"x"<<transform2.n_col()<<"\n";
 
 		for (size_t x=0;x<total;x++) {
 			newreflected.setRow(x,counter);
@@ -267,7 +268,7 @@ private:
 				for (int k=reflected.getRowPtr(xprime);k<reflected.getRowPtr(xprime+1);k++) {
 					size_t xsecond = reflected.getCol(k);
 					ComplexOrRealType r = reflected.getValue(k);
-					for (size_t xthird=0;xthird<transform2.n_col();xthird++) {
+					for (size_t xthird=0;xthird<transform2.n_row();xthird++) {
 //						ComplexOrRealType val = wl1 * r * transform(xthird,xsecond);
 						ComplexOrRealType val = wl1 * r * transform2(xsecond,xthird);
 						if (isAlmostZero(val)) continue;
@@ -434,35 +435,44 @@ private:
 	void computeItems(const SparseMatrixType& sSector)
 	{
 //		printFullMatrix(sSector,"sSector");
-		LinearlyIndependentSet<RealType,VectorType> lis(sSector.rank());
+		typedef SparseVector<typename VectorType::value_type> SparseVectorType;
+		LinearlyIndependentSet<RealType,SparseMatrixType> lis(sSector.rank());
 
+		std::vector<SparseVectorType> v(sSector.rank(),sSector.rank());
 		for (size_t i=0;i<sSector.rank();i++) {
-			std::vector<ComplexOrRealType> v(sSector.rank(),0);
+//			std::vector<ComplexOrRealType> v(sSector.rank(),0);
+			//SparseVectorType v(sSector.rank());
 			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
 				size_t col = sSector.getCol(k);
 				if (isAlmostZero(sSector.getValue(k))) continue;
-				v[col] =  sSector.getValue(k);
+				v[i].add(col,sSector.getValue(k));
 			}
-			v[i] += 1.0;
-			lis.push(v);
+//			v[i] += 1.0;
+			v[i].add(i,1.0);
+			lis.push(v[i]);
 		}
 		plusSector_=lis.size();
+
+		lis.clear();
+		std::vector<SparseVectorType> v2(sSector.rank(),sSector.rank());
 		for (size_t i=0;i<sSector.rank();i++) {
-			std::vector<ComplexOrRealType> v(sSector.rank(),0);
+//			std::vector<ComplexOrRealType> v(sSector.rank(),0);
+			//SparseVectorType v(sSector.rank());
 			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
 				size_t col = sSector.getCol(k);
 				if (isAlmostZero(sSector.getValue(k))) continue;
-				v[col] =  sSector.getValue(k);
+				v2[i].add(col,sSector.getValue(k));
 			}
-			v[i] -= 1.0;
-			lis.push(v);
+//			v[i] -= 1.0;
+			v2[i].add(i,-1.0);
+			lis.push(v2[i]);
 		}
-		size_t minuses = lis.size()-plusSector_;
+		size_t minuses = lis.size(); //-plusSector_;
 		std::ostringstream msg;
 		msg<<plusSector_<<" +, "<<minuses<<" -.";
 		progress_.printline(msg,std::cout);
-		assert(lis.size()==sSector.rank());
-		lis.fill(transform_);
+		assert(minuses+plusSector_==sSector.rank());
+		transform_ = lis.transform();
 	}
 
 	void printFullMatrix(const SparseMatrixType& s,const std::string& name) const
@@ -496,7 +506,7 @@ private:
 					counter++;
 					continue;
 				}
-				if (!isAlmostZero(val)) {
+				if (!isAlmostZero(val,1e-5)) {
 					std::string s(__FILE__);
 					s += " Hamiltonian has no reflection symmetry.";
 					throw std::runtime_error(s.c_str());
@@ -520,7 +530,7 @@ private:
 					counter++;
 					continue;
 				}
-				if (!isAlmostZero(val)) {
+				if (!isAlmostZero(val,1e-5)) {
 					std::string s(__FILE__);
 					s += " Hamiltonian has no reflection symmetry.";
 					throw std::runtime_error(s.c_str());

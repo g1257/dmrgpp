@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <algorithm>
 #include "Vector.h" // in PsimagLite
+#include "Sort.h"
 
 namespace Dmrg {
 	template<typename FieldType>
@@ -94,7 +95,8 @@ namespace Dmrg {
 			typedef FieldType value_type;
 			typedef std::pair<size_t,size_t> PairType;
 			
-			SparseVector(const std::vector<FieldType>& v) : size_(v.size())
+			SparseVector(const std::vector<FieldType>& v)
+			: size_(v.size()),isSorted_(false)
 			{
 				FieldType zerovalue=static_cast<FieldType>(0);
 				for (size_t i=0;i<v.size();i++) {
@@ -114,9 +116,9 @@ namespace Dmrg {
 				}
 			}
 
-			SparseVector() {}
+//			SparseVector() {}
 			
-			SparseVector(size_t n) : size_(n) { }
+			SparseVector(size_t n) : size_(n),isSorted_(false) { }
 			
 			/*void normalize()
 			{
@@ -131,31 +133,32 @@ namespace Dmrg {
 				size_=x;
 			}
 
-			FieldType& operator[](size_t index)
-			{
-				int i=PsimagLite::isInVector(indices_,index);
-				if (i<0) i=add(index,0);
-				return values_[i];	
-			}
+//			FieldType& operator[](size_t index)
+//			{
+//				int i=PsimagLite::isInVector(indices_,index);
+//				if (i<0) i=add(index,0);
+//				return values_[i];
+//			}
 			
-			//FIXME: disable due to performance reasons
-			FieldType operator[](size_t index) const
-			{
-				int i=PsimagLite::isInVector(indices_,index);
-				if (i<0) {
-					//std::cerr<<"index="<<index<<"\n";
-					//utils::vectorPrint(indices_,"indices",std::cerr);
-					//throw std::runtime_error("SparseVector::operator[](): index out of range.\n");
-					return 0;
-				}
-				return values_[i];	
-			}
+//			//FIXME: disable due to performance reasons
+//			FieldType operator[](size_t index) const
+//			{
+//				int i=PsimagLite::isInVector(indices_,index);
+//				if (i<0) {
+//					//std::cerr<<"index="<<index<<"\n";
+//					//utils::vectorPrint(indices_,"indices",std::cerr);
+//					//throw std::runtime_error("SparseVector::operator[](): index out of range.\n");
+//					return 0;
+//				}
+//				return values_[i];
+//			}
 
 			//! adds an index (maybe the indices should be sorted at some point)
 			size_t add(int index,const FieldType& value)
 			{
 				indices_.push_back(index);
 				values_.push_back(value);
+				isSorted_ = false;
 				return values_.size()-1;
 			}
 
@@ -163,12 +166,13 @@ namespace Dmrg {
 
 			void print(std::ostream& os,const std::string& label) const
 			{
-				os<<label<<"\n";
-				os<<size_<<"\n";
-				os<<indices_.size()<<"\n";
+				os<<label<<", ";
+				os<<size_<<", ";
+				os<<indices_.size()<<", ";
 				for (size_t i=0;i<indices_.size();i++) {
-					os<<indices_[i]<<" "<<values_[i]<<"\n";
+					os<<indices_[i]<<" "<<values_[i]<<",";
 				}
+				os<<"\n";
 			}
 
 			size_t indices() const { return indices_.size(); }
@@ -235,9 +239,99 @@ namespace Dmrg {
 						"vector extends more than one partition\n");
 				return ret;
 			}
+
+			template<typename T>
+			SparseVector<FieldType> operator*=(const T& val)
+			{
+				 for (size_t i=0;i<values_.size();i++) values_[i] *= val;
+				 return *this;
+			}
+
+			SparseVector<FieldType> operator-=(const SparseVector<FieldType>& v)
+			{
+				 for (size_t i=0;i<v.values_.size();i++) {
+					 values_.push_back(-v.values_[i]);
+					 indices_.push_back(v.indices_[i]);
+				 }
+				 isSorted_ = false;
+				 return *this;
+			}
+
+			bool operator==(const SparseVector<FieldType>& v) const
+			{
+				assert(isSorted_);
+				assert(v.isSorted_);
+				for (size_t i=0;i<v.values_.size();i++) {
+					if (indices_[i]!=v.indices_[i]) return false;
+					FieldType val = values_[i] - v.values_[i];
+					if (!isAlmostZero(val,1e-8)) return false;
+				}
+				return true;
+			}
+
+			// FIXME : needs performance
+			FieldType scalarProduct(const SparseVector<FieldType>& v) const
+			{
+				assert(isSorted_);
+				FieldType sum = 0;
+				size_t i = 0, j = 0, index = 0;
+
+				for (;i<indices_.size();i++) {
+					index = indices_[i];
+					for (;j<v.indices_.size();j++) {
+						if (v.indices_[j]<index) continue;
+						if (v.indices_[j]>index) break;
+						if (v.indices_[j]==index) sum += values_[i] * v.values_[j];
+					}
+					if (j>0) j--;
+				}
+
+				return sum;
+			}
+
+			void sort()
+			{
+				if (indices_.size()<2 || isSorted_) return;
+
+				Sort<std::vector<size_t> > sort;
+				std::vector<size_t> iperm(indices_.size());
+				sort.sort(indices_,iperm);
+				std::vector<FieldType> values(iperm.size());
+				for (size_t i=0;i<values_.size();i++) values[i] = values_[iperm[i]];
+				values_.clear();
+				FieldType sum = values[0];
+				size_t prevIndex = indices_[0];
+				std::vector<size_t> indices;
+
+				for (size_t i=1;i<indices_.size();i++) {
+
+					if (indices_[i]!=prevIndex) {
+						if (std::norm(sum)>1e-8) {
+							values_.push_back(sum);
+							indices.push_back(prevIndex);
+						}
+						sum = values[i];
+						prevIndex = indices_[i];
+					} else {
+						sum += values[i];
+					}
+				}
+				if (std::norm(sum)>1e-12) {
+					values_.push_back(sum);
+					indices.push_back(prevIndex);
+				}
+				indices_=indices;
+				isSorted_ = true;
+
+			}
+
+			template<typename T,typename T2>
+			friend SparseVector<T2> operator*(const T& val,const SparseVector<T2>& sv);
 			
 		private:
 			
+
+
 			PairType findFirstLast() const
 			{
 				return PairType(*(std::min_element(indices_.begin(),indices_.end() ) ),
@@ -247,6 +341,7 @@ namespace Dmrg {
 			std::vector<FieldType> values_;
 			std::vector<size_t> indices_;
 			size_t size_;
+			bool isSorted_;
 	}; // class SparseVector
 	
 	template<typename FieldType>
@@ -255,15 +350,33 @@ namespace Dmrg {
 		s.print(os,"SparseVector");
 		return os;
 	}
-	
+
+	template<typename T,typename T2>
+	SparseVector<T2> operator*(const T& val,const SparseVector<T2>& sv)
+	{
+		 SparseVector<T2> res = sv;
+		 for (size_t i=0;i<res.values_.size();i++) res.values_[i] *= val;
+		 return res;
+	}
+
+	template<typename T>
+	T operator*(const SparseVector<T>& v1,const SparseVector<T>& v2)
+	{
+		SparseVector<T> v1c = v1;
+		SparseVector<T> v2c = v2;
+		v1c.sort();
+		v2c.sort();
+
+		return v1c.scalarProduct(v2c);
+	}
 } // namespace Dmrg
 
-namespace std {
+namespace PsimagLite {
 	template<typename FieldType>
 	inline FieldType norm(const Dmrg::SparseVector<FieldType>& v)
 	{
 		FieldType sum=0;
-		for (size_t i=0;i<v.indices();i++) sum += conj(v.value(i))*v.value(i);
+		for (size_t i=0;i<v.indices();i++) sum += std::conj(v.value(i))*v.value(i);
 		return sqrt(sum);
 	}
 	
@@ -271,9 +384,10 @@ namespace std {
 	inline FieldType norm(const Dmrg::SparseVector<std::complex<FieldType> >& v)
 	{
 		std::complex<FieldType> sum=0;
-		for (size_t i=0;i<v.indices();i++) sum += conj(v.value(i))*v.value(i);
+		for (size_t i=0;i<v.indices();i++) sum += std::conj(v.value(i))*v.value(i);
 		return real(sqrt(sum));
 	}
+
 }
 /*@}*/
 #endif

@@ -83,90 +83,138 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "Matrix.h"
 #include "ProgressIndicator.h"
-#include "Vector.h"
+//#include "Vector.h"
+#include "SparseVector.h"
 
 namespace Dmrg {
 
 // FIXME: MOVE ELSEWHERE:
 template<typename RealType>
-bool isAlmostZero(const RealType& x)
+bool isAlmostZero(const RealType& x,double eps = 1e-16)
 {
-	return (fabs(x)<1e-6);
+	return (fabs(x)<eps);
 }
 
 // FIXME: MOVE ELSEWHERE:
 template<typename RealType>
-bool isAlmostZero(const std::complex<RealType>& x)
+bool isAlmostZero(const std::complex<RealType>& x,double eps = 1e-16)
 {
-	return (fabs(real(x)*real(x)+imag(x)*imag(x))<1e-6);
+	return (fabs(real(x)*real(x)+imag(x)*imag(x))<eps);
 }
 
-template<typename RealType,typename VectorType>
+template<typename RealType,typename SparseMatrixType>
 class LinearlyIndependentSet {
 
-	typedef typename VectorType::value_type ComplexOrRealType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef SparseVector<ComplexOrRealType> SparseVectorType;
 
 public:
 
 	LinearlyIndependentSet(size_t rank)
-		: rank_(rank)
+	: transform_(rank,rank),counter_(0),row_(0)
 	{}
 
-	void push(const VectorType& v)
+	~LinearlyIndependentSet()
 	{
-		RealType norma = PsimagLite::norm(v);
-		if (isAlmostZero(norma)) return;
+		deallocate();
+	}
 
-		VectorType v2;
-		v2 = (1.0/norma)*v;
+	void pushNew(SparseVectorType& v2)
+	{
+		v2.sort();
+		RealType norma = PsimagLite::norm(v2);
+		if (isAlmostZero(norma,1e-8)) return;
 
-		if (vecs_.size()==0) {
-			vecs_.push_back(v2);
-			//printVector(v2,"ADDING: ");
-			e_.push_back(v2);
+		v2 *= (1.0/norma);
+
+		for (size_t i=0;i<e_.size();i++) {
+			const SparseVectorType& v3 = *e_[i];
+			if (v3 == v2) return;
+			v2 *= (-1);
+			if (v3 == v2) return;
+		}
+		e_.push_back(&v2);
+		fill(v2);
+	}
+
+	void push(SparseVectorType& v2)
+	{
+		v2.sort();
+		RealType norma = PsimagLite::norm(v2);
+		if (isAlmostZero(norma,1e-8)) return;
+
+		v2 *= (1.0/norma);
+
+		if (e_.size()==0) {
+//			vecs_.push_back(&v2);
+			SparseVectorType* u = new SparseVectorType(v2);
+			e_.push_back(u);
+			fill(v2);
 			return;
 		}
 
-		VectorType u = v2;
-		for (size_t i=0;i<vecs_.size();i++) {
-			u -= (e_[i]*v2)*e_[i];
+		SparseVectorType* u = new SparseVectorType(v2);
+		ComplexOrRealType x = (v2*v2);
+		for (size_t i=0;i<e_.size();i++) {
+			SparseVectorType tmp = ((*e_[i])*v2)*(*e_[i]);
+			x -= (tmp*v2);
+			(*u) -= tmp;
 		}
-
-		ComplexOrRealType x = (u*v2);
 
 		if (std::norm(x)<1e-6) return;
 
-		norma = PsimagLite::norm(u);
-		u /= norma;
+		u->sort();
+		norma = PsimagLite::norm(*u);
+		(*u) *= (1.0/norma);
 
-		vecs_.push_back(v2);
+//		vecs_.push_back(&v2);
 		e_.push_back(u);
 		//printVector(v2,"ADDING: ");
+		fill(v2);
 	}
 
-	size_t size() const { return vecs_.size(); }
-
-	template<typename SomeSparseMatrixType>
-	void fill(SomeSparseMatrixType& s)
+	void clear()
 	{
-		s.resize(vecs_.size());
-		size_t counter=0;
-		for (size_t i=0;i<vecs_.size();i++) {
-			s.setRow(i,counter);
-			for (size_t j=0;j<vecs_[i].size();j++) {
-				ComplexOrRealType val = vecs_[i][j];
-				if (isAlmostZero(val)) continue;
-				s.pushCol(j);
-				s.pushValue(val);
-				counter++;
-			}
-		}
-		s.setRow(s.rank(),counter);
+		deallocate();
+	}
+
+	size_t size() const { return e_.size(); }
+
+	const SparseMatrixType& transform()
+	{
+		return transform_;
 	}
 
 private:
 
-	void printVector(const VectorType& v,const std::string& label) const
+
+	void fill(SparseVectorType& vref)
+	{
+		std::cerr<<__FILE__<<" push vecs.size="<<e_.size()<<"\n";
+		//std::cerr<<vref<<"\n";
+		size_t i = row_;
+		assert(row_<transform_.rank());
+		transform_.setRow(i,counter_);
+		for (size_t k=0;k<vref.indices();k++) {
+			size_t j = vref.index(k);
+			ComplexOrRealType val = vref.value(k); //vecs_[i][j];
+			if (isAlmostZero(val,1e-8)) continue;
+			transform_.pushCol(j);
+			transform_.pushValue(val);
+			counter_++;
+		}
+		row_++;
+		transform_.setRow(transform_.rank(),counter_);
+	}
+
+	void deallocate()
+	{
+		for (size_t i=0;i<e_.size();i++)
+			delete e_[i];
+		e_.clear();
+	}
+
+	void printVector(const SparseVectorType& v,const std::string& label) const
 	{
 		std::cout<<label;
 		for (size_t i=0;i<v.size();i++)
@@ -174,9 +222,11 @@ private:
 		std::cout<<"\n";
 	}
 
-	size_t rank_;
-	std::vector<VectorType> vecs_;
-	std::vector<VectorType> e_;
+	SparseMatrixType transform_;
+	size_t counter_;
+	size_t row_;
+//	std::vector<SparseVectorType*> vecs_;
+	std::vector<SparseVectorType*> e_;
 
 }; // class LinearlyIndependentSet
 
