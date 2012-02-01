@@ -119,13 +119,13 @@ public:
 		deallocate();
 	}
 
-	void pushNew(SparseVectorType& v2)
+	void push(SparseVectorType& v2)
 	{
 
 		RealType norma = PsimagLite::norm(v2);
 		if (isAlmostZero(norma,1e-8)) return;
 
-		v2 *= (1.0/norma);
+		v2 *= (-1.0/norma);
 
 		v2.correct();
 
@@ -139,7 +139,7 @@ public:
 		fill(v2);
 	}
 
-	void push(SparseVectorType& v2)
+	void pushOld(SparseVectorType& v2)
 	{
 		v2.sort1();
 		RealType norma = PsimagLite::norm(v2);
@@ -231,7 +231,7 @@ private:
 	size_t counter_;
 	size_t row_;
 //	std::vector<SparseVectorType*> vecs_;
-	std::vector<SparseVectorType> e_;
+	std::vector<SparseVectorType*> e_;
 
 }; // class LinearlyIndependentSet
 
