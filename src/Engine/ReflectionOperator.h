@@ -222,6 +222,8 @@ public:
 
 	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
 
+	void setEnabled(bool x) { isEnabled_ = x; }
+
 	bool isEnabled() const { return isEnabled_; }
 
 private:
@@ -442,13 +444,18 @@ private:
 		for (size_t i=0;i<sSector.rank();i++) {
 //			std::vector<ComplexOrRealType> v(sSector.rank(),0);
 			//SparseVectorType v(sSector.rank());
+			bool hasDiagonal = false;
 			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
 				size_t col = sSector.getCol(k);
 				if (isAlmostZero(sSector.getValue(k))) continue;
-				v[i].add(col,sSector.getValue(k));
+				if (i==col) {
+					v[i].add(col,sSector.getValue(k)+1.0);
+					hasDiagonal = true;
+				} else {
+					v[i].add(col,sSector.getValue(k));
+				}
 			}
-//			v[i] += 1.0;
-			v[i].add(i,1.0);
+			if (!hasDiagonal) v[i].add(i,1.0);
 			lis.push(v[i]);
 		}
 		plusSector_=lis.size();
@@ -458,13 +465,18 @@ private:
 		for (size_t i=0;i<sSector.rank();i++) {
 //			std::vector<ComplexOrRealType> v(sSector.rank(),0);
 			//SparseVectorType v(sSector.rank());
+			bool hasDiagonal = false;
 			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
 				size_t col = sSector.getCol(k);
 				if (isAlmostZero(sSector.getValue(k))) continue;
-				v2[i].add(col,sSector.getValue(k));
+				if (i==col) {
+					v2[i].add(col,sSector.getValue(k)-1.0);
+					hasDiagonal = true;
+				} else {
+					v2[i].add(col,sSector.getValue(k));
+				}
 			}
-//			v[i] -= 1.0;
-			v2[i].add(i,-1.0);
+			if (!hasDiagonal) v2[i].add(i,-1.0);
 			lis.push(v2[i]);
 		}
 		size_t minuses = lis.size(); //-plusSector_;

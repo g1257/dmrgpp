@@ -98,24 +98,25 @@ namespace Dmrg {
 
 		InternalProductStored(ModelType const *model,
 				      ModelHelperType const *modelHelper,
-				      const ReflectionSymmetryType* rs=0)
+				      ReflectionSymmetryType* rs=0)
 		: matrixStored_(2),pointer_(0),progress_("InternalProductStored",0)
 		{
 			model_ = model;
 			modelHelper_=modelHelper;
-			std::ostringstream msg;
 
 			if (!rs) {
-				matrixStored_[0].clear();
-				model->fullHamiltonian(matrixStored_[0],*modelHelper);
-				assert(isHermitian(matrixStored_[0],true));
-				msg<<"fullHamiltonian has rank="<<matrixStored_[0].rank()<<" nonzeros="<<matrixStored_[0].nonZero();
-				progress_.printline(msg,std::cout);
+				noReflection(rs);
 				return;
 			}
 			SparseMatrixType matrix2;
 			model->fullHamiltonian(matrix2,*modelHelper);
-			rs->transform(matrixStored_[0],matrixStored_[1],matrix2);
+			try {
+				rs->transform(matrixStored_[0],matrixStored_[1],matrix2);
+			} catch (std::exception& e) {
+				std::cerr<<"WARNING: "<<e.what()<<"\n";
+				noReflection(rs);
+			}
+
 //			msg<<"fullHamiltonian with rank="<<matrixStored_[0].rank()<<" has reflection\n";
 //			progress_.printline(msg,std::cout);
 		}
@@ -138,6 +139,18 @@ namespace Dmrg {
 		void reflectionSector(size_t p) { pointer_=p; }
 
 	private:
+
+		void noReflection(ReflectionSymmetryType* rs)
+		{
+			matrixStored_[0].clear();
+			model_->fullHamiltonian(matrixStored_[0],*modelHelper_);
+			assert(isHermitian(matrixStored_[0],true));
+			std::ostringstream msg;
+			msg<<"fullHamiltonian has rank="<<matrixStored_[0].rank()<<" nonzeros="<<matrixStored_[0].nonZero();
+			progress_.printline(msg,std::cout);
+			if (rs) rs->setEnabled(false);
+		}
+
 		ModelType const *model_;
 		ModelHelperType const *modelHelper_;
 		std::vector<SparseMatrixType> matrixStored_;

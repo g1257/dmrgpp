@@ -119,13 +119,15 @@ public:
 		deallocate();
 	}
 
-	void pushNew(SparseVectorType& v2)
+	void push(SparseVectorType& v2)
 	{
-		v2.sort();
+
 		RealType norma = PsimagLite::norm(v2);
 		if (isAlmostZero(norma,1e-8)) return;
 
 		v2 *= (1.0/norma);
+
+		v2.correct();
 
 		for (size_t i=0;i<e_.size();i++) {
 			const SparseVectorType& v3 = *e_[i];
@@ -137,7 +139,7 @@ public:
 		fill(v2);
 	}
 
-	void push(SparseVectorType& v2)
+	void pushOld(SparseVectorType& v2)
 	{
 		v2.sort();
 		RealType norma = PsimagLite::norm(v2);
@@ -154,10 +156,11 @@ public:
 		}
 
 		SparseVectorType* u = new SparseVectorType(v2);
-		ComplexOrRealType x = (v2*v2);
+		ComplexOrRealType x = 1.0; //(v2*v2);
 		for (size_t i=0;i<e_.size();i++) {
-			SparseVectorType tmp = ((*e_[i])*v2)*(*e_[i]);
-			x -= (tmp*v2);
+			ComplexOrRealType tmpval = (*e_[i])*v2;
+			SparseVectorType tmp = tmpval*(*e_[i]);
+			x -= tmpval*tmpval;
 			(*u) -= tmp;
 		}
 
@@ -190,8 +193,10 @@ private:
 
 	void fill(SparseVectorType& vref)
 	{
+#ifndef NDEBUG
 		std::cerr<<__FILE__<<" push vecs.size="<<e_.size()<<"\n";
-		//std::cerr<<vref<<"\n";
+		std::cerr<<vref;
+#endif
 		size_t i = row_;
 		assert(row_<transform_.rank());
 		transform_.setRow(i,counter_);
@@ -209,8 +214,8 @@ private:
 
 	void deallocate()
 	{
-		for (size_t i=0;i<e_.size();i++)
-			delete e_[i];
+//		for (size_t i=0;i<e_.size();i++)
+//			delete e_[i];
 		e_.clear();
 	}
 

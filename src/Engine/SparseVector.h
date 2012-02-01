@@ -154,7 +154,7 @@ namespace Dmrg {
 //			}
 
 			//! adds an index (maybe the indices should be sorted at some point)
-			size_t add(int index,const FieldType& value)
+			size_t add(size_t index,const FieldType& value)
 			{
 				indices_.push_back(index);
 				values_.push_back(value);
@@ -261,10 +261,24 @@ namespace Dmrg {
 			{
 				assert(isSorted_);
 				assert(v.isSorted_);
-				for (size_t i=0;i<v.values_.size();i++) {
-					if (indices_[i]!=v.indices_[i]) return false;
-					FieldType val = values_[i] - v.values_[i];
-					if (!isAlmostZero(val,1e-8)) return false;
+				size_t i = 0, j = 0;
+				while(i<v.values_.size() && j<values_.size()) {
+					if (isAlmostZero(v.values_[i],1e-6)) {
+						i++;
+						continue;
+					}
+					if (isAlmostZero(values_[j],1e-6)) {
+						j++;
+						continue;
+					}
+					if (indices_[j]==v.indices_[i]) {
+						FieldType val = values_[j] - v.values_[i];
+						if (!isAlmostZero(val,1e-6)) return false;
+					} else {
+						return false;
+					}
+					i++;
+					j++;
 				}
 				return true;
 			}
@@ -289,15 +303,47 @@ namespace Dmrg {
 				return sum;
 			}
 
+			void correct()
+			{
+				sort1();
+				FieldType val0 = 1.0/sqrt(2.0);
+				std::vector<FieldType> values;
+				std::vector<size_t> indices;
+				for (size_t i=0;i<indices_.size();i++) {
+					FieldType val = values_[i];
+					if (isAlmostZero(val,1e-4)) continue;
+					if (isAlmostZero(val-1.0,1e-8)) {
+						indices.push_back(indices_[i]);
+						values.push_back(1.0);
+						continue;
+					}
+					if (isAlmostZero(val+1.0,1e-8)) {
+						indices.push_back(indices_[i]);
+						values.push_back(-1.0);
+						continue;
+					}
+					if (isAlmostZero(val-val0,1e-2)) {
+						indices.push_back(indices_[i]);
+						values.push_back(val0);
+						continue;
+					}
+					if (isAlmostZero(val+val0,1e-2)) {
+						indices.push_back(indices_[i]);
+						values.push_back(-val0);
+						continue;
+					}
+					assert(false);
+				}
+				values_=values;
+				indices_=indices;
+			}
+
 			void sort()
 			{
 				if (indices_.size()<2 || isSorted_) return;
-
-				Sort<std::vector<size_t> > sort;
-				std::vector<size_t> iperm(indices_.size());
-				sort.sort(indices_,iperm);
-				std::vector<FieldType> values(iperm.size());
-				for (size_t i=0;i<values_.size();i++) values[i] = values_[iperm[i]];
+				throw std::runtime_error("SparseVector:sort(): this lane is closed\n");
+				std::vector<FieldType> values(indices_.size());
+				sort1(values);
 				values_.clear();
 				FieldType sum = values[0];
 				size_t prevIndex = indices_[0];
@@ -316,7 +362,7 @@ namespace Dmrg {
 						sum += values[i];
 					}
 				}
-				if (std::norm(sum)>1e-12) {
+				if (std::norm(sum)>1e-8) {
 					values_.push_back(sum);
 					indices.push_back(prevIndex);
 				}
@@ -330,7 +376,19 @@ namespace Dmrg {
 			
 		private:
 			
+			void sort1()
+			{
+				if (indices_.size()<2) isSorted_=true;
+				if (isSorted_) return;
+				Sort<std::vector<size_t> > sort;
+				std::vector<size_t> iperm(indices_.size());
+				std::vector<FieldType> values(indices_.size());
+				sort.sort(indices_,iperm);
 
+				for (size_t i=0;i<values_.size();i++) values[i] = values_[iperm[i]];
+				values_=values;
+				isSorted_ = true;
+			}
 
 			PairType findFirstLast() const
 			{
@@ -360,14 +418,9 @@ namespace Dmrg {
 	}
 
 	template<typename T>
-	T operator*(const SparseVector<T>& v1,const SparseVector<T>& v2)
+	inline T operator*(SparseVector<T>& v1,SparseVector<T>& v2)
 	{
-		SparseVector<T> v1c = v1;
-		SparseVector<T> v2c = v2;
-		v1c.sort();
-		v2c.sort();
-
-		return v1c.scalarProduct(v2c);
+		return v1.scalarProduct(v2);
 	}
 } // namespace Dmrg
 
