@@ -153,10 +153,11 @@ public:
 //			reflectedLeft_ = newreflected;
 			cachedTransform = transform;
 		} else {
-			changeBasis(newreflected,reflectedLeft_,cachedTransform,transform);
+			bool check = true;
+			changeBasis(newreflected,reflectedLeft_,cachedTransform,transform,!check);
 			reflectedLeft_ = newreflected;
 
-			changeBasis(newreflected,reflectedRight_,transform,cachedTransform);
+			changeBasis(newreflected,reflectedRight_,transform,cachedTransform,check);
 			reflectedRight_ = newreflected;
 		}
 //		SparseMatrixType one1;
@@ -246,11 +247,13 @@ private:
 	void changeBasis(SparseMatrixType& newreflected,
 			 const SparseMatrixType& reflected,
 			 const PsimagLite::Matrix<ComplexOrRealType>& transform1,
-			 const PsimagLite::Matrix<ComplexOrRealType>& transform2)
+			 const PsimagLite::Matrix<ComplexOrRealType>& transform2,
+			 bool check)
 	{
 		newreflected.resize(reflected.rank());
 		size_t counter = 0;
 		assert(reflected.rank()==transform1.n_row());
+		assert(reflected.rank()==transform2.n_col());
 		assert(reflected.rank()==transform2.n_row());
 
 		size_t total = reflected.rank();
@@ -265,22 +268,22 @@ private:
 
 			size_t itemp = 0;
 			for (size_t xprime=0;xprime<transform1.n_row();xprime++) {
-				ComplexOrRealType wl1 =  transform1(xprime,x);
+				ComplexOrRealType wl1 = std::conj(transform1(xprime,x));
 //				ComplexOrRealType wl1 =  transform(x,xprime);
 				for (int k=reflected.getRowPtr(xprime);k<reflected.getRowPtr(xprime+1);k++) {
 					size_t xsecond = reflected.getCol(k);
 					ComplexOrRealType r = reflected.getValue(k);
-					for (size_t xthird=0;xthird<transform2.n_row();xthird++) {
+					for (size_t xthird=0;xthird<transform2.n_col();xthird++) {
 //						ComplexOrRealType val = wl1 * r * transform(xthird,xsecond);
 						ComplexOrRealType val = wl1 * r * transform2(xsecond,xthird);
-						if (isAlmostZero(val)) continue;
 						if (ptr[xthird]<0) {
 							ptr[xthird] = itemp;
 							temp[ptr[xthird]] = val;
 							index[ptr[xthird]] = xthird;
 							itemp++;
 						} else {
-							temp[ptr[xthird]] += val;
+							temp[ptr[xthird]]= temp[ptr[xthird]]+val;
+
 						}
 //						newreflected.pushCol(xthird);
 //						newreflected.pushValue(val);
@@ -288,15 +291,38 @@ private:
 					}
 				}
 			}
+
+			std::vector<ComplexOrRealType> myvals;
 			for (size_t s=0;s<itemp;s++) {
+				if (isAlmostZero(temp[s],1e-5)) {
+					ptr[index[s]] = -1;
+					temp[s]=0;
+					continue;
+				}
 				newreflected.pushCol(index[s]);
 				newreflected.pushValue(temp[s]);
+				myvals.push_back(temp[s]);
 				ptr[index[s]] = -1;
+				temp[s]=0;
+
 			}
-			counter += itemp;
+			counter += myvals.size();
+
+			assert(!check || checkValues(myvals.size(),myvals));
 		}
 		newreflected.setRow(reflected.rank(),counter);
 		newreflected.checkValidity();
+	}
+
+	bool checkValues(size_t total,const std::vector<ComplexOrRealType>& values)
+	{
+		if (total!=1) return false;
+		bool b1 =  isAlmostZero(values[0]-1.0,1e-5);
+		bool b2 =  isAlmostZero(values[0]+1.0,1e-5);
+//		if (total==1) return true;
+//		bool b1 = isAlmostZero(values[0]+values[1],1e-5);
+//		bool b2 = isAlmostZero(values[0]-values[1],1e-5);
+		return (b1 || b2);
 	}
 
 	void setSsector(SparseMatrixType& sSector,const std::vector<size_t>& sectors) const
@@ -391,7 +417,7 @@ private:
 				size_t x0r = reflectedLeft_.getCol(k);
 				size_t col = pack3.pack(x1,x0r,lrs_.right().permutationInverse());
 				ComplexOrRealType val = reflectedLeft_.getValue(k);
-				if (isAlmostZero(val)) continue;
+				//if (isAlmostZero(val)) continue;
 				reflectedLeft.pushCol(col);
 				reflectedLeft.pushValue(val);
 				counter++;
@@ -410,7 +436,7 @@ private:
 			for (int k=reflectedRight_.getRowPtr(x1);k<reflectedRight_.getRowPtr(x1+1);k++) {
 				size_t x1r = reflectedRight_.getCol(k);
 				ComplexOrRealType val = reflectedRight_.getValue(k);
-				if (isAlmostZero(val)) continue;
+				//if (isAlmostZero(val)) continue;
 				size_t col = pack2.pack(x1r,x0,lrs_.left().permutationInverse());
 				reflectedRight.pushCol(col);
 				reflectedRight.pushValue(val);
@@ -447,13 +473,14 @@ private:
 			bool hasDiagonal = false;
 			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
 				size_t col = sSector.getCol(k);
-				if (isAlmostZero(sSector.getValue(k))) continue;
+				if (isAlmostZero(sSector.getValue(k),1e-5)) continue;
 				if (i==col) {
 					v[i].add(col,sSector.getValue(k)+1.0);
 					hasDiagonal = true;
 				} else {
 					v[i].add(col,sSector.getValue(k));
 				}
+				//std::cerr<<"k="<<k<<" col="<<col<<" val="<<sSector.getValue(k)<<"\n";
 			}
 			if (!hasDiagonal) v[i].add(i,1.0);
 			lis.push(v[i]);
@@ -468,7 +495,7 @@ private:
 			bool hasDiagonal = false;
 			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
 				size_t col = sSector.getCol(k);
-				if (isAlmostZero(sSector.getValue(k))) continue;
+				if (isAlmostZero(sSector.getValue(k),1e-5)) continue;
 				if (i==col) {
 					v2[i].add(col,sSector.getValue(k)-1.0);
 					hasDiagonal = true;
