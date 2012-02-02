@@ -303,40 +303,40 @@ namespace Dmrg {
 				return sum;
 			}
 
-			void correct()
-			{
-				sort1();
-				FieldType val0 = 1.0/sqrt(2.0);
-				std::vector<FieldType> values;
-				std::vector<size_t> indices;
-				for (size_t i=0;i<indices_.size();i++) {
-					FieldType val = values_[i];
-					if (isAlmostZero(val,1e-1)) continue;
-					if (isAlmostZero(val-1.0,1e-1)) {
-						indices.push_back(indices_[i]);
-						values.push_back(1.0);
-						continue;
-					}
-					if (isAlmostZero(val+1.0,1e-1)) {
-						indices.push_back(indices_[i]);
-						values.push_back(-1.0);
-						continue;
-					}
-					if (isAlmostZero(val-val0,1e-1)) {
-						indices.push_back(indices_[i]);
-						values.push_back(val0);
-						continue;
-					}
-					if (isAlmostZero(val+val0,1e-1)) {
-						indices.push_back(indices_[i]);
-						values.push_back(-val0);
-						continue;
-					}
-					assert(false);
-				}
-				values_=values;
-				indices_=indices;
-			}
+//			void correct()
+//			{
+//				sort1();
+//				FieldType val0 = 1.0/sqrt(2.0);
+//				std::vector<FieldType> values;
+//				std::vector<size_t> indices;
+//				for (size_t i=0;i<indices_.size();i++) {
+//					FieldType val = values_[i];
+//					if (isAlmostZero(val,1e-1)) continue;
+//					if (isAlmostZero(val-1.0,1e-1)) {
+//						indices.push_back(indices_[i]);
+//						values.push_back(1.0);
+//						continue;
+//					}
+//					if (isAlmostZero(val+1.0,1e-1)) {
+//						indices.push_back(indices_[i]);
+//						values.push_back(-1.0);
+//						continue;
+//					}
+//					if (isAlmostZero(val-val0,1e-1)) {
+//						indices.push_back(indices_[i]);
+//						values.push_back(val0);
+//						continue;
+//					}
+//					if (isAlmostZero(val+val0,1e-1)) {
+//						indices.push_back(indices_[i]);
+//						values.push_back(-val0);
+//						continue;
+//					}
+//					assert(false);
+//				}
+//				values_=values;
+//				indices_=indices;
+//			}
 
 			void sort1()
 			{

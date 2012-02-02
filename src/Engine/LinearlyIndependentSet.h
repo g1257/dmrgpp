@@ -119,7 +119,7 @@ public:
 		deallocate();
 	}
 
-	void push(SparseVectorType& v2)
+	void pushNew(SparseVectorType& v2)
 	{
 
 		RealType norma = PsimagLite::norm(v2);
@@ -134,6 +134,23 @@ public:
 			if (v3 == v2) return;
 			v2 *= (-1);
 			if (v3 == v2) return;
+		}
+		e_.push_back(&v2);
+		fill(v2);
+	}
+
+	void push(SparseVectorType& v2)
+	{
+		RealType norma = PsimagLite::norm(v2);
+		if (isAlmostZero(norma,1e-8)) return;
+
+		v2 *= (1.0/norma);
+		v2.sort1();
+
+		for (size_t i=0;i<e_.size();i++) {
+			SparseVectorType& v3 = *e_[i];
+			ComplexOrRealType x = (v2*v3);
+			if (!isAlmostZero(x,1e-6)) return;
 		}
 		e_.push_back(&v2);
 		fill(v2);

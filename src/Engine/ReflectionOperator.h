@@ -294,7 +294,7 @@ private:
 
 			std::vector<ComplexOrRealType> myvals;
 			for (size_t s=0;s<itemp;s++) {
-				if (isAlmostZero(temp[s],1e-5)) {
+				if (isAlmostZero(temp[s])) {
 					ptr[index[s]] = -1;
 					temp[s]=0;
 					continue;
@@ -308,7 +308,7 @@ private:
 			}
 			counter += myvals.size();
 
-			assert(!check || checkValues(myvals.size(),myvals));
+			//assert(!check || checkValues(myvals.size(),myvals));
 		}
 		newreflected.setRow(reflected.rank(),counter);
 		newreflected.checkValidity();
