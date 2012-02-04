@@ -93,6 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "LinearlyIndependentSet.h"
 #include "LAPACK.h"
+#include "Sort.h"
 
 namespace Dmrg {
 
@@ -105,6 +106,10 @@ class ReflectionOperator {
 	typedef typename LeftRightSuperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef std::vector<ComplexOrRealType> VectorType;
+	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
+	typedef LinearlyIndependentSet<RealType,SparseMatrixType>  LinearlyIndependentSetType;
+
+	enum {AVAILABLE,NOT_AVAILABLE,COLOR};
 
 public:
 
@@ -153,11 +158,10 @@ public:
 //			reflectedLeft_ = newreflected;
 			cachedTransform = transform;
 		} else {
-			bool check = true;
-			changeBasis(newreflected,reflectedLeft_,cachedTransform,transform,!check);
+			changeBasis(newreflected,reflectedLeft_,cachedTransform,transform);
 			reflectedLeft_ = newreflected;
 
-			changeBasis(newreflected,reflectedRight_,transform,cachedTransform,check);
+			changeBasis(newreflected,reflectedRight_,transform,cachedTransform);
 			reflectedRight_ = newreflected;
 		}
 //		SparseMatrixType one1;
@@ -223,8 +227,6 @@ public:
 
 	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
 
-	void setEnabled(bool x) { isEnabled_ = x; }
-
 	bool isEnabled() const { return isEnabled_; }
 
 private:
@@ -247,13 +249,11 @@ private:
 	void changeBasis(SparseMatrixType& newreflected,
 			 const SparseMatrixType& reflected,
 			 const PsimagLite::Matrix<ComplexOrRealType>& transform1,
-			 const PsimagLite::Matrix<ComplexOrRealType>& transform2,
-			 bool check)
+			 const PsimagLite::Matrix<ComplexOrRealType>& transform2)
 	{
 		newreflected.resize(reflected.rank());
 		size_t counter = 0;
 		assert(reflected.rank()==transform1.n_row());
-		assert(reflected.rank()==transform2.n_col());
 		assert(reflected.rank()==transform2.n_row());
 
 		size_t total = reflected.rank();
@@ -268,22 +268,22 @@ private:
 
 			size_t itemp = 0;
 			for (size_t xprime=0;xprime<transform1.n_row();xprime++) {
-				ComplexOrRealType wl1 = std::conj(transform1(xprime,x));
+				ComplexOrRealType wl1 =  transform1(xprime,x);
 //				ComplexOrRealType wl1 =  transform(x,xprime);
 				for (int k=reflected.getRowPtr(xprime);k<reflected.getRowPtr(xprime+1);k++) {
 					size_t xsecond = reflected.getCol(k);
 					ComplexOrRealType r = reflected.getValue(k);
-					for (size_t xthird=0;xthird<transform2.n_col();xthird++) {
+					for (size_t xthird=0;xthird<transform2.n_row();xthird++) {
 //						ComplexOrRealType val = wl1 * r * transform(xthird,xsecond);
 						ComplexOrRealType val = wl1 * r * transform2(xsecond,xthird);
+						//if (isAlmostZero(val)) continue;
 						if (ptr[xthird]<0) {
 							ptr[xthird] = itemp;
 							temp[ptr[xthird]] = val;
 							index[ptr[xthird]] = xthird;
 							itemp++;
 						} else {
-							temp[ptr[xthird]]= temp[ptr[xthird]]+val;
-
+							temp[ptr[xthird]] += val;
 						}
 //						newreflected.pushCol(xthird);
 //						newreflected.pushValue(val);
@@ -291,38 +291,15 @@ private:
 					}
 				}
 			}
-
-			std::vector<ComplexOrRealType> myvals;
 			for (size_t s=0;s<itemp;s++) {
-				if (isAlmostZero(temp[s])) {
-					ptr[index[s]] = -1;
-					temp[s]=0;
-					continue;
-				}
 				newreflected.pushCol(index[s]);
 				newreflected.pushValue(temp[s]);
-				myvals.push_back(temp[s]);
 				ptr[index[s]] = -1;
-				temp[s]=0;
-
 			}
-			counter += myvals.size();
-
-			//assert(!check || checkValues(myvals.size(),myvals));
+			counter += itemp;
 		}
 		newreflected.setRow(reflected.rank(),counter);
 		newreflected.checkValidity();
-	}
-
-	bool checkValues(size_t total,const std::vector<ComplexOrRealType>& values)
-	{
-		if (total!=1) return false;
-		bool b1 =  isAlmostZero(values[0]-1.0,1e-5);
-		bool b2 =  isAlmostZero(values[0]+1.0,1e-5);
-//		if (total==1) return true;
-//		bool b1 = isAlmostZero(values[0]+values[1],1e-5);
-//		bool b2 = isAlmostZero(values[0]-values[1],1e-5);
-		return (b1 || b2);
 	}
 
 	void setSsector(SparseMatrixType& sSector,const std::vector<size_t>& sectors) const
@@ -387,18 +364,31 @@ private:
 				sSector.pushCol(index[s]);
 				sSector.pushValue(temp[s]);
 				ptr[index[s]] = -1;
+				counter++;
 			}
-			counter += itemp;
 		}
 		sSector.setRow(total,counter);
 		sSector.checkValidity();
 
-		//printFullMatrix(sSector,"sSector");
+//		printSparseMatrix(sSector,"sSector",1e-3);
 
 		SparseMatrixType tmp;
 		multiply(tmp,sSector,sSector);
 		//printFullMatrix(tmp,"sSector*sSector");
-		assert(isTheIdentity(tmp,1e-5));
+		assert(isTheIdentity(tmp,1e-12));
+	}
+
+
+	void printSparseMatrix(SparseMatrixType& s1,const std::string& label,const RealType& eps) const
+	{
+		std::cout<<label<<"\n";
+		for (size_t i=0;i<s1.rank();i++) {
+			for (int k=s1.getRowPtr(i);k<s1.getRowPtr(i+1);k++) {
+				ComplexOrRealType val = s1.getValue(k);
+				if (isAlmostZero(val,eps)) continue;
+				std::cout<<(i+1)<<" "<<(1+s1.getCol(k))<<" "<<val<<"\n";
+			}
+		}
 	}
 
 	void updateReflected()
@@ -462,57 +452,323 @@ private:
 
 	void computeItems(const SparseMatrixType& sSector)
 	{
-//		printFullMatrix(sSector,"sSector");
-		typedef SparseVector<typename VectorType::value_type> SparseVectorType;
-		LinearlyIndependentSet<RealType,SparseMatrixType> lis(sSector.rank());
+		std::vector<size_t> ipIsolated,ipConnected;
+		findIsolated(ipIsolated,ipConnected,sSector);
 
-		std::vector<SparseVectorType> v(sSector.rank(),sSector.rank());
-		for (size_t i=0;i<sSector.rank();i++) {
-//			std::vector<ComplexOrRealType> v(sSector.rank(),0);
-			//SparseVectorType v(sSector.rank());
-			bool hasDiagonal = false;
-			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
-				size_t col = sSector.getCol(k);
-				if (isAlmostZero(sSector.getValue(k),1e-5)) continue;
-				if (i==col) {
-					v[i].add(col,sSector.getValue(k)+1.0);
-					hasDiagonal = true;
-				} else {
-					v[i].add(col,sSector.getValue(k));
-				}
-				//std::cerr<<"k="<<k<<" col="<<col<<" val="<<sSector.getValue(k)<<"\n";
-			}
-			if (!hasDiagonal) v[i].add(i,1.0);
-			lis.push(v[i]);
-		}
-		plusSector_=lis.size();
+		std::cerr<<"Isolated nodes="<<ipIsolated.size()<<"\n";
+		std::cerr<<"Connected nodes="<<ipConnected.size()<<"\n";
 
-		lis.clear();
-		std::vector<SparseVectorType> v2(sSector.rank(),sSector.rank());
-		for (size_t i=0;i<sSector.rank();i++) {
-//			std::vector<ComplexOrRealType> v(sSector.rank(),0);
-			//SparseVectorType v(sSector.rank());
-			bool hasDiagonal = false;
-			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
-				size_t col = sSector.getCol(k);
-				if (isAlmostZero(sSector.getValue(k),1e-5)) continue;
-				if (i==col) {
-					v2[i].add(col,sSector.getValue(k)-1.0);
-					hasDiagonal = true;
-				} else {
-					v2[i].add(col,sSector.getValue(k));
-				}
-			}
-			if (!hasDiagonal) v2[i].add(i,-1.0);
-			lis.push(v2[i]);
+		LinearlyIndependentSetType lis(sSector.rank());
+
+		std::vector<size_t> ilabel(ipConnected.size(),AVAILABLE);
+		size_t firstColor = 2;
+		SparseMatrixType A;
+		generateAmatrix(A,ipConnected,sSector);
+		size_t ncolor = gencolorLabel(ilabel,A,firstColor);
+
+		gencolorCheck(ilabel,ncolor);
+
+		std::vector<size_t> iperm;
+		gencolorPerm(iperm,ilabel,firstColor,ncolor);
+
+		for (size_t i=0;i<iperm.size();i++) {
+			size_t ind = ipConnected[iperm[i]];
+			ipIsolated.push_back(ind);
 		}
-		size_t minuses = lis.size(); //-plusSector_;
+		// FIXME THERE IS NO NEED TO SORT HERE
+		std::vector<size_t> iperm2(ipIsolated.size());
+		Sort<std::vector<size_t> > sort;
+		sort.sort(ipIsolated,iperm2);
+		for (size_t i=0;i<ipIsolated.size();i++)
+			lis.fill(ipIsolated[i],sSector,1.0);
+
+		plusSector_ = lis.size();
+
+		std::vector<size_t> xminus;
+		for (size_t i=0;i<iperm.size();i++) {
+			size_t ind = ipConnected[iperm[i]];
+			xminus.push_back(ind);
+		}
+
+		iperm2.resize(xminus.size());
+		sort.sort(xminus,iperm2);
+		for (size_t i=0;i<xminus.size();i++)
+			lis.fill(xminus[i],sSector,-1.0);
+
+		size_t minuses = lis.size()-plusSector_;
+
 		std::ostringstream msg;
 		msg<<plusSector_<<" +, "<<minuses<<" -.";
 		progress_.printline(msg,std::cout);
 		assert(minuses+plusSector_==sSector.rank());
 		transform_ = lis.transform();
+//		printFullMatrix(transform_,"transform");
 	}
+
+	void generateAmatrix(SparseMatrixType& A,
+			     const std::vector<size_t>& ipConnected,
+			     const SparseMatrixType& sSector) const
+	{
+		A.resize(ipConnected.size());
+		size_t counter=0;
+		std::vector<int> ipConnectedInverse(sSector.rank(),-1);
+		for (size_t i=0;i<ipConnected.size();i++)
+			ipConnectedInverse[ipConnected[i]]=i;
+
+		for (size_t i=0;i<ipConnected.size();i++) {
+			A.setRow(i,counter);
+			size_t ii = ipConnected[i];
+			for (int k=sSector.getRowPtr(ii);k<sSector.getRowPtr(ii+1);k++) {
+				ComplexOrRealType val = sSector.getValue(k);
+				int col = ipConnectedInverse[sSector.getCol(k)];
+				if (col<0) continue;
+				A.pushCol(col);
+				A.pushValue(val);
+				counter++;
+			}
+		}
+		A.setRow(A.rank(),counter);
+		A.checkValidity();
+	}
+
+	void findIsolated(std::vector<size_t>& ipIsolated,
+			  std::vector<size_t>& ipConnected,
+			  const SparseMatrixType& sSector) const
+	{
+		for (size_t i=0;i<sSector.rank();i++) {
+			size_t nz = 0;
+			bool hasDiagonal = false;
+			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
+				ComplexOrRealType val = sSector.getValue(k);
+				size_t col = sSector.getCol(k);
+				if (i==col) {
+					val = val + 1.0;
+					hasDiagonal=true;
+				}
+				if (isAlmostZero(val,1e-4)) continue;
+				nz++;
+			}
+			if (!hasDiagonal) nz++;
+			if (nz==1) ipIsolated.push_back(i);
+			else ipConnected.push_back(i);
+		}
+	}
+
+	size_t gencolorLabel(std::vector<size_t>& ilabel,
+			     const SparseMatrixType& A,
+			     size_t firstColor) const
+	{
+		size_t ncolor = firstColor-1;
+		std::vector<size_t> ilist;
+		RealType eps = 1e-3;
+
+		//while (any( ilabel == unlabeled))
+		for (size_t ii=0;ii<ilabel.size();ii++) {
+			if (ilabel[ii]!=AVAILABLE) continue;
+			ncolor++;
+			size_t icolor = ncolor;
+			ilist.clear();
+			findWithLabel(ilist,ilabel,AVAILABLE);
+			size_t ifound = 0;
+			for (size_t i=0;i<ilist.size();i++) {
+//				if (ifound >= maxsize) break;
+
+				size_t ni = ilist[i];
+				if (ilabel[ni] == AVAILABLE) {
+					ilabel[ni] = icolor;
+					ifound++;
+					// --------------
+					// mark neighbors
+					// --------------
+					std::vector<size_t> jlist;
+					findConnected(jlist,ni,A,eps);
+					//					jlist = find( A(ni,:) );
+					for (size_t j=0;j<jlist.size();j++) {
+						size_t nj = jlist[j];
+						if (ilabel[nj] == AVAILABLE) {
+							ilabel[nj] = NOT_AVAILABLE;
+						}
+					}
+				}
+			}
+			ilist.clear();
+			findWithLabel(ilist,ilabel,NOT_AVAILABLE);
+			//			ilist = find( ilabel == isseen);
+			for (size_t jj=0;jj<ilist.size();jj++) {
+				ilabel[ilist[jj]] = AVAILABLE;
+			}
+			//			if (ilist.size() >= 1) {
+			//			   ilabel(ilist) = unlabeled;
+			//			}
+		}
+		return ncolor;
+	}
+
+	void findConnected(std::vector<size_t>& jlist,
+			   size_t ni,
+			   const SparseMatrixType& A,
+			   const RealType& eps) const
+	{
+		bool hasDiagonal = false;
+		for (int k=A.getRowPtr(ni);k<A.getRowPtr(ni+1);k++) {
+			ComplexOrRealType val = A.getValue(k);
+			size_t col = A.getCol(k);
+			if (ni==col) {
+				hasDiagonal=true;
+				val += 1.0;
+			}
+			if (isAlmostZero(val,eps)) continue;
+			jlist.push_back(col);
+		}
+		if (!hasDiagonal) jlist.push_back(ni);
+	}
+
+	void gencolorCheck(const std::vector<size_t>& ilabel,size_t ncolor) const
+	{
+		// ------------
+		// double check
+		// ------------
+		std::vector<size_t> ilist;
+		findWithLabel(ilist,ilabel,ncolor);
+//		isok = max( ilabel == ncolor);
+		size_t isok = *std::max(ilist.begin(),ilist.end());
+		if (isok==0) {
+			std::string s = "ncolor " + ttos(ncolor) + " max(ilabel) " + ttos(isok) + "\n";
+			//throw std::runtime_error(s.c_str());
+		}
+	}
+
+	void findWithLabel(std::vector<size_t>& ilist,
+			   const std::vector<size_t>& ilabel,
+			   size_t icolor) const
+	{
+		for (size_t i=0;i<ilabel.size();i++)
+			if (ilabel[i]==icolor) ilist.push_back(i);
+	}
+
+	void gencolorPerm(std::vector<size_t>& iperm,
+			  const std::vector<size_t>& ilabel,
+			  size_t firstColor,
+			  size_t ncolor) const
+	{
+		// find size:
+		std::vector<size_t> ilist;
+		size_t ip = 0;
+		for (size_t icolor=firstColor;icolor<ncolor;icolor++) {
+			ilist.clear();
+			findWithLabel(ilist,ilabel,icolor);
+			ip += ilist.size();
+		}
+		//		 --------------------
+		//		 generate permutation
+		//		 --------------------
+
+		iperm.resize(ip);
+		ip = 0;
+		for (size_t icolor=firstColor;icolor<ncolor;icolor++) {
+			//			ilist = find( ilabel == icolor);
+			ilist.clear();
+			findWithLabel(ilist,ilabel,icolor);
+			size_t nc = ilist.size();
+			//			nc = length(ilist);
+			for (size_t j=ip;j<ip+nc;j++) iperm[j]=ilist[j-ip];
+
+			// omitting check
+			ip += nc;
+		}
+
+		//		% ----------------
+		//		% print statistics
+		//		% ----------------
+		std::cout<<"ncolor="<<ncolor<<"\n";
+		for (size_t icolor=firstColor;icolor<ncolor;icolor++) {
+			ilist.clear();
+			findWithLabel(ilist,ilabel,icolor);
+			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
+		}
+
+	}
+
+	void classify(std::vector<size_t>& p,const SparseMatrixType& sSector,const RealType& eps) const
+	{
+		for (size_t i=0;i<sSector.rank();i++) {
+			if (p[i]==AVAILABLE) p[i]=COLOR;
+			if (p[i]==NOT_AVAILABLE) continue;
+			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
+				ComplexOrRealType val = sSector.getValue(k);
+				size_t col = sSector.getCol(k);
+				if (i==col) continue; //val -= sector;
+				if (isAlmostZero(val,eps)) continue;
+				p[col]=NOT_AVAILABLE;
+			}
+		}
+	}
+
+//	size_t computeOneSector(LinearlyIndependentSetType& lis,
+//				const SparseMatrixType& sSector,
+//				RealType sector)
+//	{
+//		std::vector<size_t> p(sSector.rank(),AVAILABLE);
+//		classify(p,sSector,1e-1);
+
+//		std::vector<SparseVectorType> v(sSector.rank(),sSector.rank());
+
+//		size_t r = 0;
+//		for (size_t i=0;i<sSector.rank();i++) {
+//			assert(p[i]==NOT_AVAILABLE || p[i]==COLOR);
+//			if (sector<0) {
+//				for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
+//					size_t col = sSector.getCol(k);
+//					if (isAlmostZero(sSector.getValue(k),1e-8)) continue;
+//					if (i==col) {
+//						p[i]=NOT_AVAILABLE;
+//						break;
+//					}
+//				}
+//			}
+//			if (p[i]!=COLOR) continue;
+//			r++;
+//		}
+//		std::cerr<<"sector="<<sector<<" SIZE="<<r<<"\n";
+//		r = 0;
+
+//		for (size_t i=0;i<sSector.rank();i++) {
+//			if (p[i]!=COLOR) continue;
+//			bool hasDiagonal = false;
+//			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
+//				size_t col = sSector.getCol(k);
+//				//if (isAlmostZero(sSector.getValue(k))) continue;
+//				if (i==col) {
+//					v[r].add(col,sSector.getValue(k)+sector);
+//					hasDiagonal = true;
+//				} else {
+//					v[r].add(col,sSector.getValue(k));
+//				}
+//			}
+//			if (!hasDiagonal) {
+//				v[r].add(i,sector);
+//			}
+//			r++;
+//		}
+//		size_t rnew = 0;
+//		for (size_t i=0;i<r;i++) {
+//			v[i].sort();
+//			RealType norma = PsimagLite::norm(v[i]);
+//			if (isAlmostZero(norma)) continue;
+
+//			v[i] *= (1.0/norma);
+
+//			lis.fill(v[i]);
+//			v[i].clear();
+//			rnew++;
+//		}
+
+//		assert(r==rnew);
+//		lis.clear();
+
+
+//		return lis.size();
+//	}
 
 	void printFullMatrix(const SparseMatrixType& s,const std::string& name) const
 	{

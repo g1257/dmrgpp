@@ -90,14 +90,14 @@ namespace Dmrg {
 
 // FIXME: MOVE ELSEWHERE:
 template<typename RealType>
-bool isAlmostZero(const RealType& x,double eps = 1e-16)
+bool isAlmostZero(const RealType& x,double eps = 1e-20)
 {
 	return (fabs(x)<eps);
 }
 
 // FIXME: MOVE ELSEWHERE:
 template<typename RealType>
-bool isAlmostZero(const std::complex<RealType>& x,double eps = 1e-16)
+bool isAlmostZero(const std::complex<RealType>& x,double eps = 1e-20)
 {
 	return (fabs(real(x)*real(x)+imag(x)*imag(x))<eps);
 }
@@ -121,13 +121,11 @@ public:
 
 	void pushNew(SparseVectorType& v2)
 	{
-
+		v2.sort();
 		RealType norma = PsimagLite::norm(v2);
 		if (isAlmostZero(norma,1e-8)) return;
 
-		v2 *= (-1.0/norma);
-
-		v2.correct();
+		v2 *= (1.0/norma);
 
 		for (size_t i=0;i<e_.size();i++) {
 			const SparseVectorType& v3 = *e_[i];
@@ -141,51 +139,35 @@ public:
 
 	void push(SparseVectorType& v2)
 	{
+		v2.sort();
 		RealType norma = PsimagLite::norm(v2);
-		if (isAlmostZero(norma,1e-8)) return;
-
-		v2 *= (1.0/norma);
-		v2.sort1();
-
-		for (size_t i=0;i<e_.size();i++) {
-			SparseVectorType& v3 = *e_[i];
-			ComplexOrRealType x = (v2*v3);
-			if (!isAlmostZero(x,1e-6)) return;
-		}
-		e_.push_back(&v2);
-		fill(v2);
-	}
-
-	void pushOld(SparseVectorType& v2)
-	{
-		v2.sort1();
-		RealType norma = PsimagLite::norm(v2);
-		if (isAlmostZero(norma,1e-8)) return;
+		if (isAlmostZero(norma,1e-5)) return;
 
 		v2 *= (1.0/norma);
 
 		if (e_.size()==0) {
 //			vecs_.push_back(&v2);
-			//SparseVectorType* u = new SparseVectorType(v2);
-			e_.push_back(v2);
+			SparseVectorType* u = new SparseVectorType(v2);
+			e_.push_back(u);
 			fill(v2);
 			return;
 		}
 
-		SparseVectorType u = v2; //new SparseVectorType(v2);
-		ComplexOrRealType x = 1.0; //(v2*v2);
+		SparseVectorType* u = new SparseVectorType(v2);
+		ComplexOrRealType x = 1;
 		for (size_t i=0;i<e_.size();i++) {
-			ComplexOrRealType tmpval = (e_[i])*v2;
-			SparseVectorType tmp = tmpval*(e_[i]);
-			x -= tmpval*tmpval;
-			(u) -= tmp;
+			ComplexOrRealType xtmp = (*e_[i]*v2);
+			SparseVectorType tmp = xtmp*(*e_[i]);
+			x -= xtmp*xtmp;
+			(*u) -= tmp;
 		}
 
-		if (std::norm(x)<1e-6) return;
+		u->sort();
 
-		u.sort1();
-		norma = PsimagLite::norm(u);
-		(u) *= (1.0/norma);
+		if (std::norm(x)<1e-5) return;
+
+		norma = PsimagLite::norm(*u);
+		(*u) *= (1.0/norma);
 
 //		vecs_.push_back(&v2);
 		e_.push_back(u);
@@ -198,29 +180,53 @@ public:
 		deallocate();
 	}
 
-	size_t size() const { return e_.size(); }
+	size_t size() const { return row_; }
 
 	const SparseMatrixType& transform()
 	{
 		return transform_;
 	}
 
-private:
+	void fill(size_t i,const SparseMatrixType& sSector,const RealType& sector)
+	{
+		SparseVectorType v(transform_.rank());
+		bool hasDiagonal = false;
+		for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
+			size_t col = sSector.getCol(k);
+			//if (isAlmostZero(sSector.getValue(k))) continue;
+			if (i==col) {
+				v.add(col,sSector.getValue(k)+sector);
+				hasDiagonal = true;
+			} else {
+				v.add(col,sSector.getValue(k));
+			}
+		}
+		if (!hasDiagonal) {
+			v.add(i,sector);
+		}
 
+		v.sort();
+		RealType norma = PsimagLite::norm(v);
+		assert(!isAlmostZero(norma));
+
+		v *= (1.0/norma);
+
+		fill(v);
+	}
+
+private:
 
 	void fill(SparseVectorType& vref)
 	{
-		std::cerr<<__FILE__<<" push vecs.size="<<e_.size()<<"\n";
-#ifndef NDEBUG
-		std::cerr<<vref;
-#endif
+		//std::cerr<<__FILE__<<" push vecs.size="<<e_.size()<<" row="<<row_<<"\n";
+		//std::cerr<<vref<<"\n";
 		size_t i = row_;
 		assert(row_<transform_.rank());
 		transform_.setRow(i,counter_);
 		for (size_t k=0;k<vref.indices();k++) {
 			size_t j = vref.index(k);
 			ComplexOrRealType val = vref.value(k); //vecs_[i][j];
-			if (isAlmostZero(val,1e-8)) continue;
+//			if (isAlmostZero(val)) continue;
 			transform_.pushCol(j);
 			transform_.pushValue(val);
 			counter_++;
@@ -231,8 +237,8 @@ private:
 
 	void deallocate()
 	{
-//		for (size_t i=0;i<e_.size();i++)
-//			delete e_[i];
+		for (size_t i=0;i<e_.size();i++)
+			delete e_[i];
 		e_.clear();
 	}
 

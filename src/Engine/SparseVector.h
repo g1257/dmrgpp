@@ -154,7 +154,7 @@ namespace Dmrg {
 //			}
 
 			//! adds an index (maybe the indices should be sorted at some point)
-			size_t add(size_t index,const FieldType& value)
+			size_t add(int index,const FieldType& value)
 			{
 				indices_.push_back(index);
 				values_.push_back(value);
@@ -261,24 +261,10 @@ namespace Dmrg {
 			{
 				assert(isSorted_);
 				assert(v.isSorted_);
-				size_t i = 0, j = 0;
-				while(i<v.values_.size() && j<values_.size()) {
-					if (isAlmostZero(v.values_[i],1e-3)) {
-						i++;
-						continue;
-					}
-					if (isAlmostZero(values_[j],1e-3)) {
-						j++;
-						continue;
-					}
-					if (indices_[j]==v.indices_[i]) {
-						FieldType val = values_[j] - v.values_[i];
-						if (!isAlmostZero(val,1e-6)) return false;
-					} else {
-						return false;
-					}
-					i++;
-					j++;
+				for (size_t i=0;i<v.values_.size();i++) {
+					if (indices_[i]!=v.indices_[i]) return false;
+					FieldType val = values_[i] - v.values_[i];
+					if (!isAlmostZero(val,1e-8)) return false;
 				}
 				return true;
 			}
@@ -286,7 +272,8 @@ namespace Dmrg {
 			// FIXME : needs performance
 			FieldType scalarProduct(const SparseVector<FieldType>& v) const
 			{
-				assert(isSorted_);
+				assert(indices_.size()==1 || isSorted_);
+				assert(v.indices_.size()==1 || v.isSorted_);
 				FieldType sum = 0;
 				size_t i = 0, j = 0, index = 0;
 
@@ -303,92 +290,66 @@ namespace Dmrg {
 				return sum;
 			}
 
-//			void correct()
-//			{
-//				sort1();
-//				FieldType val0 = 1.0/sqrt(2.0);
-//				std::vector<FieldType> values;
-//				std::vector<size_t> indices;
-//				for (size_t i=0;i<indices_.size();i++) {
-//					FieldType val = values_[i];
-//					if (isAlmostZero(val,1e-1)) continue;
-//					if (isAlmostZero(val-1.0,1e-1)) {
-//						indices.push_back(indices_[i]);
-//						values.push_back(1.0);
-//						continue;
-//					}
-//					if (isAlmostZero(val+1.0,1e-1)) {
-//						indices.push_back(indices_[i]);
-//						values.push_back(-1.0);
-//						continue;
-//					}
-//					if (isAlmostZero(val-val0,1e-1)) {
-//						indices.push_back(indices_[i]);
-//						values.push_back(val0);
-//						continue;
-//					}
-//					if (isAlmostZero(val+val0,1e-1)) {
-//						indices.push_back(indices_[i]);
-//						values.push_back(-val0);
-//						continue;
-//					}
-//					assert(false);
-//				}
-//				values_=values;
-//				indices_=indices;
-//			}
-
-			void sort1()
+			bool isOne()
 			{
-				if (indices_.size()<2) isSorted_=true;
-				if (isSorted_) return;
-				Sort<std::vector<size_t> > sort;
-				std::vector<size_t> iperm(indices_.size());
-				std::vector<FieldType> values(indices_.size());
-				sort.sort(indices_,iperm);
-
-				for (size_t i=0;i<values_.size();i++) values[i] = values_[iperm[i]];
-				values_=values;
-				isSorted_ = true;
+				size_t x = 0;
+				for (size_t i=0;i<indices_.size();i++) {
+					if (isAlmostZero(values_[i],1e-4)) continue;
+					x++;
+					if (x>1) return false;
+				}
+				return true;
 			}
 
-//			void sort()
-//			{
-//				if (indices_.size()<2 || isSorted_) return;
-//				throw std::runtime_error("SparseVector:sort(): this lane is closed\n");
-//				std::vector<FieldType> values(indices_.size());
-//				sort1(values);
-//				values_.clear();
-//				FieldType sum = values[0];
-//				size_t prevIndex = indices_[0];
-//				std::vector<size_t> indices;
+			void sort()
+			{
+				if (indices_.size()<2 || isSorted_) return;
 
-//				for (size_t i=1;i<indices_.size();i++) {
+				Sort<std::vector<size_t> > sort;
+				std::vector<size_t> iperm(indices_.size());
+				sort.sort(indices_,iperm);
+				std::vector<FieldType> values(iperm.size());
+				for (size_t i=0;i<values_.size();i++) values[i] = values_[iperm[i]];
+				values_.clear();
+				FieldType sum = values[0];
+				size_t prevIndex = indices_[0];
+				std::vector<size_t> indices;
 
-//					if (indices_[i]!=prevIndex) {
-//						if (std::norm(sum)>1e-8) {
-//							values_.push_back(sum);
-//							indices.push_back(prevIndex);
-//						}
-//						sum = values[i];
-//						prevIndex = indices_[i];
-//					} else {
-//						sum += values[i];
-//					}
-//				}
-//				if (std::norm(sum)>1e-8) {
-//					values_.push_back(sum);
-//					indices.push_back(prevIndex);
-//				}
-//				indices_=indices;
-//				isSorted_ = true;
+				for (size_t i=1;i<indices_.size();i++) {
 
-//			}
+					if (indices_[i]!=prevIndex) {
+						if (std::norm(sum)>1e-16) {
+							values_.push_back(sum);
+							indices.push_back(prevIndex);
+						}
+						sum = values[i];
+						prevIndex = indices_[i];
+					} else {
+						sum += values[i];
+					}
+				}
+				if (std::norm(sum)>1e-16) {
+					values_.push_back(sum);
+					indices.push_back(prevIndex);
+				}
+				indices_=indices;
+				isSorted_ = true;
+
+			}
+
+			void clear()
+			{
+				values_.clear();
+				indices_.clear();
+				isSorted_=false;
+			}
 
 			template<typename T,typename T2>
 			friend SparseVector<T2> operator*(const T& val,const SparseVector<T2>& sv);
 			
 		private:
+			
+
 
 			PairType findFirstLast() const
 			{
@@ -418,8 +379,13 @@ namespace Dmrg {
 	}
 
 	template<typename T>
-	inline T operator*(SparseVector<T>& v1,SparseVector<T>& v2)
+	T operator*(const SparseVector<T>& v1,const SparseVector<T>& v2)
 	{
+//		SparseVector<T> v1c = v1;
+//		SparseVector<T> v2c = v2;
+//		v1c.sort();
+//		v2c.sort();
+
 		return v1.scalarProduct(v2);
 	}
 } // namespace Dmrg
