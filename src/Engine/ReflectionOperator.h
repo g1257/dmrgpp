@@ -466,43 +466,103 @@ private:
 		generateAmatrix(A,ipConnected,sSector);
 		size_t ncolor = gencolorLabel(ilabel,A,firstColor);
 
-		gencolorCheck(ilabel,ncolor);
-
-		std::vector<size_t> iperm;
-		gencolorPerm(iperm,ilabel,firstColor,ncolor);
-
-		for (size_t i=0;i<iperm.size();i++) {
-			size_t ind = ipConnected[iperm[i]];
-			ipIsolated.push_back(ind);
+		//		% print statistics
+		//		% ----------------
+		std::cout<<"ncolor="<<ncolor<<"\n";
+		for (size_t icolor=firstColor;icolor<=ncolor;icolor++) {
+			std::vector<size_t> ilist;
+			findWithLabel(ilist,ilabel,icolor);
+			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
 		}
-		// FIXME THERE IS NO NEED TO SORT HERE
-		std::vector<size_t> iperm2(ipIsolated.size());
-		Sort<std::vector<size_t> > sort;
-		sort.sort(ipIsolated,iperm2);
-		for (size_t i=0;i<ipIsolated.size();i++)
-			lis.fill(ipIsolated[i],sSector,1.0);
 
+//		assert(ncolor-firstColor==1);
+
+		gencolorCheck(ilabel,ncolor);
+		std::vector<size_t> added,added2;
+		for (size_t i=0;i<ipIsolated.size();i++) {
+			size_t ind = ipIsolated[i];
+			lis.fill(ind,sSector,1.0);
+			added.push_back(ind);
+		}
+		std::vector<size_t> iperm(ipConnected.size());
+
+		RealType sector = 1.0;
+
+		size_t ip = 0;
+		size_t icolor = firstColor;
+		std::vector<size_t> ilist;
+		findWithLabel(ilist,ilabel,icolor);
+		size_t nc = ilist.size();
+		for (size_t j=ip;j<ip+nc;j++) {
+			iperm[j]=ilist[j-ip];
+			size_t ind = ipConnected[iperm[j]];
+			lis.fill(ind,sSector,sector);
+		//	added2.push_back(ind);
+			added.push_back(ind);
+		}
+
+
+//		for (size_t i=0;i<notadded.size();i++)
+//			list.fill(notadded[i],sSector,sector,doTest);
 		plusSector_ = lis.size();
 
-		std::vector<size_t> xminus;
-		for (size_t i=0;i<iperm.size();i++) {
-			size_t ind = ipConnected[iperm[i]];
-			xminus.push_back(ind);
+		sector = -sector;
+		for (size_t j=ip;j<ip+nc;j++) {
+			lis.fill(ipConnected[iperm[j]],sSector,sector);
 		}
-
-		iperm2.resize(xminus.size());
-		sort.sort(xminus,iperm2);
-		for (size_t i=0;i<xminus.size();i++)
-			lis.fill(xminus[i],sSector,-1.0);
+//		for (size_t i=last;i<sSector.rank();i++) {
+//			lis.fill(i,sSector,sector,doTest);
+//		}
 
 		size_t minuses = lis.size()-plusSector_;
 
+		size_t extraSize = sSector.rank() - (minuses+plusSector_);
+
+		addExtra(added,sSector,extraSize);
 		std::ostringstream msg;
 		msg<<plusSector_<<" +, "<<minuses<<" -.";
 		progress_.printline(msg,std::cout);
 		assert(minuses+plusSector_==sSector.rank());
 		transform_ = lis.transform();
 //		printFullMatrix(transform_,"transform");
+	}
+
+	void addExtra(std::vector<size_t>& added,
+		      const SparseMatrixType& sSector,
+		      size_t extraSize) const
+	{
+		Sort<std::vector<size_t> > sort;
+		std::vector<size_t> iperm2(added.size());
+		sort.sort(added,iperm2);
+
+		size_t r = 0;
+		std::vector<size_t> notadded;
+		for (size_t i=0;i<added.size();i++) {
+			while(r<added[i]) {
+				notadded.push_back(r);
+				r++;
+			}
+			r = added[i] + 1;
+			if (r>=sSector.rank()) break;
+		}
+//		PsimagLite::Matrix<ComplexOrRealType> m(extraSize,extraSize);
+		std::vector<size_t> extra;
+		for (size_t ii=0;ii<notadded.size();ii++) {
+			size_t i = notadded[ii];
+			bool flag = false;
+			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
+				ComplexOrRealType val = sSector.getValue(k);
+				if (!isAlmostZero(val,1e-5)) {
+					flag=true;
+					break;
+				}
+			}
+
+			if (flag) continue;
+			extra.push_back(i);
+			if (extra.size()==extraSize) break;
+		}
+		std::cerr<<"extraSize="<<extraSize<<"\n";
 	}
 
 	void generateAmatrix(SparseMatrixType& A,
@@ -646,63 +706,53 @@ private:
 			if (ilabel[i]==icolor) ilist.push_back(i);
 	}
 
-	void gencolorPerm(std::vector<size_t>& iperm,
-			  const std::vector<size_t>& ilabel,
-			  size_t firstColor,
-			  size_t ncolor) const
-	{
-		// find size:
-		std::vector<size_t> ilist;
-		size_t ip = 0;
-		for (size_t icolor=firstColor;icolor<ncolor;icolor++) {
-			ilist.clear();
-			findWithLabel(ilist,ilabel,icolor);
-			ip += ilist.size();
-		}
-		//		 --------------------
-		//		 generate permutation
-		//		 --------------------
+//	void gencolorPerm(std::vector<size_t>& iperm,
+//			  const std::vector<size_t>& ilabel,
+//			  size_t firstColor,
+//			  size_t ncolor) const
+//	{
+//		// find size:
+//		std::vector<size_t> ilist;
+//		size_t ip = 0;
 
-		iperm.resize(ip);
-		ip = 0;
-		for (size_t icolor=firstColor;icolor<ncolor;icolor++) {
-			//			ilist = find( ilabel == icolor);
-			ilist.clear();
-			findWithLabel(ilist,ilabel,icolor);
-			size_t nc = ilist.size();
-			//			nc = length(ilist);
-			for (size_t j=ip;j<ip+nc;j++) iperm[j]=ilist[j-ip];
+//		for (size_t icolor=firstColor;icolor<=ncolor;icolor++) {
+//			//			ilist = find( ilabel == icolor);
+//			ilist.clear();
+//			findWithLabel(ilist,ilabel,icolor);
+//			size_t nc = ilist.size();
+//			//			nc = length(ilist);
+//			for (size_t j=ip;j<ip+nc;j++) iperm[j]=ilist[j-ip];
 
-			// omitting check
-			ip += nc;
-		}
+//			// omitting check
+//			ip += nc;
+//		}
 
-		//		% ----------------
-		//		% print statistics
-		//		% ----------------
-		std::cout<<"ncolor="<<ncolor<<"\n";
-		for (size_t icolor=firstColor;icolor<ncolor;icolor++) {
-			ilist.clear();
-			findWithLabel(ilist,ilabel,icolor);
-			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
-		}
+//		//		% ----------------
+//		//		% print statistics
+//		//		% ----------------
+//		std::cout<<"ncolor="<<ncolor<<"\n";
+//		for (size_t icolor=firstColor;icolor<ncolor;icolor++) {
+//			ilist.clear();
+//			findWithLabel(ilist,ilabel,icolor);
+//			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
+//		}
 
-	}
+//	}
 
-	void classify(std::vector<size_t>& p,const SparseMatrixType& sSector,const RealType& eps) const
-	{
-		for (size_t i=0;i<sSector.rank();i++) {
-			if (p[i]==AVAILABLE) p[i]=COLOR;
-			if (p[i]==NOT_AVAILABLE) continue;
-			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
-				ComplexOrRealType val = sSector.getValue(k);
-				size_t col = sSector.getCol(k);
-				if (i==col) continue; //val -= sector;
-				if (isAlmostZero(val,eps)) continue;
-				p[col]=NOT_AVAILABLE;
-			}
-		}
-	}
+//	void classify(std::vector<size_t>& p,const SparseMatrixType& sSector,const RealType& eps) const
+//	{
+//		for (size_t i=0;i<sSector.rank();i++) {
+//			if (p[i]==AVAILABLE) p[i]=COLOR;
+//			if (p[i]==NOT_AVAILABLE) continue;
+//			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
+//				ComplexOrRealType val = sSector.getValue(k);
+//				size_t col = sSector.getCol(k);
+//				if (i==col) continue; //val -= sector;
+//				if (isAlmostZero(val,eps)) continue;
+//				p[col]=NOT_AVAILABLE;
+//			}
+//		}
+//	}
 
 //	size_t computeOneSector(LinearlyIndependentSetType& lis,
 //				const SparseMatrixType& sSector,
