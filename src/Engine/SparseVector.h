@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <utility>
 #include <iostream>
 #include <algorithm>
+#include <cassert>
 #include "Vector.h" // in PsimagLite
 #include "Sort.h"
 
