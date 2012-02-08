@@ -184,7 +184,7 @@ private:
 		for (size_t i=0;i<R1.rank();i++) {
 			R1.setRow(i,counter);
 			R1.pushCol(i);
-			ComplexOrRealType val = 1 + sector*dr[ipPosOrNeg[i]];
+			ComplexOrRealType val = 1.0 + sector*dr[ipPosOrNeg[i]];
 			RealType val2 = std::norm(val);
 			R1.pushValue(sqrt(2*val2));
 			counter++;
@@ -199,17 +199,17 @@ private:
 			  size_t lessOrGreater)
 	{
 		for (size_t i=0;i<perm.size();i++) {
-			if (lessOrGreaterCondition(dd[perm[i]],lessOrGreater))
+			if (lessOrGreaterCondition(std::real(dd[perm[i]]),lessOrGreater))
 				x.push_back(perm[i]);
 		}
 	}
 
-	bool lessOrGreaterCondition(const ComplexOrRealType& a,size_t lessOrGreater) const
+	bool lessOrGreaterCondition(const RealType& a,size_t lessOrGreater) const
 	{
 		if (lessOrGreater==GREATER_THAN_ZERO) {
-			return (a>0);
+			return (a>0.0);
 		} else {
-			return (a<0);
+			return (a<0.0);
 		}
 	}
 
@@ -253,17 +253,73 @@ private:
 		setT1w(T1w,ipPosOrNeg,w,sector);
 		std::vector<ComplexOrRealType> r;
 		linearSolverTriangular(r,R1,T1w);
-		ComplexOrRealType rkk2 = scalarProduct(w,w) - scalarProduct(r,r);
-		if (rkk2>tol) {
+		ComplexOrRealType rkk2 =w*w - r*r; // note: operator* will conjugate if needed
+		if (std::norm(rkk2)>tol) {
 			// accept this column
 			if (idebug_) {
 				std::cerr<<__FILE__<<" "<<__LINE__<<" sector="<<sector;
 				std::cerr<<" i="<<i<<" j="<<j<<" #pos="<<(ipPosOrNeg.size()-1)<<"\n";
 			}
-			grow(R1,r,sqrt(rkk2));
+			growOneRowAndOneColumn(R1,r,sqrt(rkk2));
 			ipPosOrNeg.push_back(j);
 		}
 		return false;
+	}
+
+	void growOneRowAndOneColumn(SparseMatrixType& R1,
+				    const std::vector<ComplexOrRealType>& r,
+				    const ComplexOrRealType& addedValue) const
+	{
+		size_t n = R1.rank();
+		SparseMatrixType R1new(n+1,n+1);
+		size_t counter = 0;
+		for (size_t i=0;i<n;i++) {
+			R1new.setRow(i,counter);
+			for (int k = R1.getRowPtr(i);k<R1.getRowPtr(i+1);k++) {
+				R1new.pushCol(R1.getCol(k));
+				R1new.pushValue(R1.getValue(k));
+				counter++;
+			}
+			// add extra column
+			R1new.pushCol(n);
+			R1new.pushValue(r[i]);
+			counter++;
+		}
+		// add extra row and value
+		R1new.setRow(n,counter);
+		R1new.pushCol(n);
+		R1new.pushValue(addedValue);
+		counter++;
+		R1new.setRow(n+1,counter);
+		R1new.checkValidity();
+		R1 = R1new;
+
+	}
+
+	/**
+	   Let R1t = transpose(R1), solve   L * r = rhs
+	*/
+	void linearSolverTriangular(std::vector<ComplexOrRealType>& r,
+				    const SparseMatrixType& R1,
+				    const std::vector<ComplexOrRealType>& rhs) const
+	{
+		SparseMatrixType R1t;
+		transposeConjugate(R1t,R1);
+
+		for(size_t irow=0; irow < R1t.rank(); irow++) {
+			ComplexOrRealType dsum = 0.0;
+			ComplexOrRealType diag = 0.0;
+			for(int k=R1t.getRowPtr(irow); k < R1t.getRowPtr(irow+1); k++) {
+				size_t j = R1t.getCol(k);
+				ComplexOrRealType lij = R1t.getValue(k);
+				if (j==irow) { // treat diagonal different
+					diag = lij; // save diagonal in diag
+					continue; // and don't sum it
+				}
+				dsum += lij * r[j];
+			};
+			r[irow] = (rhs[irow] - dsum) / diag; //<<<< you might store the inverse if you wish to avoid costly divisions
+		};
 	}
 
 	void setT1w(std::vector<ComplexOrRealType>& T1w,
@@ -275,7 +331,7 @@ private:
 			size_t i = ipPosOrNeg[ii];
 			for (int k = reflection_.getRowPtr(i);k<reflection_.getRowPtr(i+1);k++) {
 				size_t col = reflection_.getCol(k);
-				ComplexOrRealType val = reflection_.getVal(k);
+				ComplexOrRealType val = reflection_.getValue(k);
 				if (col==i) val += sector;
 				val *= sector;
 				T1w[col] += val*w[i];
@@ -290,7 +346,7 @@ private:
 			for (int k = reflection_.getRowPtr(i);k<reflection_.getRowPtr(i+1);k++) {
 				size_t col = reflection_.getCol(k);
 				if (col==j) {
-					val = reflection_.getVal(k);
+					val = reflection_.getValue(k);
 					break;
 				}
 			}
