@@ -91,11 +91,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "Matrix.h"
 #include "ProgressIndicator.h"
-#include "LinearlyIndependentSet.h"
 #include "LAPACK.h"
 #include "Sort.h"
+#include "SparseVector.h"
 
 namespace Dmrg {
+
+// FIXME: MOVE ELSEWHERE:
+template<typename RealType>
+bool isAlmostZero(const RealType& x,double eps = 1e-20)
+{
+	return (fabs(x)<eps);
+}
+
+// FIXME: MOVE ELSEWHERE:
+template<typename RealType>
+bool isAlmostZero(const std::complex<RealType>& x,double eps = 1e-20)
+{
+	return (fabs(real(x)*real(x)+imag(x)*imag(x))<eps);
+}
 
 template<typename RealType,typename SparseMatrixType>
 class ReflectionColor {
@@ -104,7 +118,6 @@ class ReflectionColor {
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef std::vector<ComplexOrRealType> VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
-	typedef LinearlyIndependentSet<RealType,SparseMatrixType>  LinearlyIndependentSetType;
 
 	enum {AVAILABLE,NOT_AVAILABLE,COLOR};
 
@@ -139,15 +152,9 @@ public:
 		findWithLabel(ipcolor_,ilabel_,firstColor);
 	}
 
-//	const std::vector<size_t>& iperm() const { return iperm_; }
-
-//	const std::vector<size_t>& ilabel() const { return ilabel_; }
-
 	const std::vector<size_t>& ipcolor() const { return ipcolor_; }
 
 	const std::vector<size_t>& isolated() const { return ipIsolated_; }
-
-//	const std::vector<size_t>& connected() const { return ipConnected_; }
 
 private:
 
@@ -296,6 +303,7 @@ private:
 		// find size:
 		std::vector<size_t> ilist;
 		size_t ip = 0;
+		iperm_.resize(reflection_.rank());
 
 		for (size_t icolor=firstColor;icolor<=ncolor;icolor++) {
 			//			ilist = find( ilabel == icolor);

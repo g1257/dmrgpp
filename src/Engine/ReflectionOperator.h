@@ -91,10 +91,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "Matrix.h"
 #include "ProgressIndicator.h"
-#include "LinearlyIndependentSet.h"
 #include "LAPACK.h"
 #include "Sort.h"
-#include "ReflectionBasis.h"
+#include "ReflectionTransform.h"
 
 namespace Dmrg {
 
@@ -108,8 +107,7 @@ class ReflectionOperator {
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef std::vector<ComplexOrRealType> VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
-	typedef LinearlyIndependentSet<RealType,SparseMatrixType>  LinearlyIndependentSetType;
-	typedef ReflectionBasis<RealType,SparseMatrixType> ReflectionBasisType;
+	typedef ReflectionTransform<RealType,SparseMatrixType> ReflectionTransformType;
 
 	enum {AVAILABLE,NOT_AVAILABLE,COLOR};
 
@@ -123,7 +121,8 @@ public:
 	  isEnabled_(isEnabled),
 	  expandSys_(expandSys),
 	  reflectedLeft_(n0_,n0_),
-	  reflectedRight_(n0_,n0_)
+	  reflectedRight_(n0_,n0_),
+	  reflectionTransform_()
 	{
 		size_t counter=0;
 		for (size_t i=0;i<reflectedLeft_.rank();i++) {
@@ -137,7 +136,7 @@ public:
 		reflectedRight_=reflectedLeft_;
 	}
 
-	void check(const std::vector<size_t>& sectors)
+	void update(const std::vector<size_t>& sectors)
 	{
 		if (!isEnabled_) return;
 //		SparseMatrixType sSuper;
@@ -146,9 +145,7 @@ public:
 		setSsector(sSector,sectors);
 		updateReflected();
 //		extractCurrentSector(sSector,sSuper,sectors);
-		ReflectionBasisType reflectionBasis(sSector);
-		transform_=reflectionBasis.transform();
-		checkTransform(sSector);
+		reflectionTransform_.update(sSector);
 	}
 
 	void changeBasis(const PsimagLite::Matrix<ComplexOrRealType>& transform,size_t direction)
@@ -183,17 +180,8 @@ public:
 	 {
 		assert(isEnabled_);
 
-		SparseMatrixType rT;
-		transposeConjugate(rT,transform_);
-
-		SparseMatrixType tmp;
-		multiply(tmp,matrix,rT);
-
 		SparseMatrixType matrix2;
-//		printFullMatrix(matrix,"OriginalHam");
-		multiply(matrix2,transform_,tmp);
-//		printFullMatrix(transform_,"transform");
-//		printFullMatrix(matrix2,"FinalHam");
+		reflectionTransform_.transform(matrixA,matrixB,matrix);
 		split(matrixA,matrixB,matrix2);
 	 }
 
@@ -221,10 +209,10 @@ public:
 		assert(isEnabled_);
 		size_t rank = gsVector1.size() + gsVector2.size();
 		if (gsEnergy1<=gsEnergy2) {
-			setGs(gs,gsVector1,rank,0);
+			reflectionTransform_.setGs(gs,gsVector1,rank,0);
 			return gsEnergy1;
 		}
-		setGs(gs,gsVector2,rank,gsVector1.size());
+		reflectionTransform_.setGs(gs,gsVector2,rank,gsVector1.size());
 		return gsEnergy2;
 	}
 
@@ -234,20 +222,20 @@ public:
 
 private:
 
-	void checkTransform(const SparseMatrixType& sSector)
-	{
-		SparseMatrixType rT;
-		transposeConjugate(rT,transform_);
-		SparseMatrixType tmp3;
-		multiply(tmp3,transform_,rT);
+//	void checkTransform(const SparseMatrixType& sSector)
+//	{
+//		SparseMatrixType rT;
+//		transposeConjugate(rT,transform_);
+//		SparseMatrixType tmp3;
+//		multiply(tmp3,transform_,rT);
 
-//		printFullMatrix(rT,"Transform");
+////		printFullMatrix(rT,"Transform");
 
-		SparseMatrixType tmp4;
-		multiply(tmp3,sSector,rT);
-		multiply(tmp4,transform_,tmp3);
-//		printFullMatrix(tmp4,"R S R^\\dagger");
-	}
+//		SparseMatrixType tmp4;
+//		multiply(tmp3,sSector,rT);
+//		multiply(tmp4,transform_,tmp3);
+////		printFullMatrix(tmp4,"R S R^\\dagger");
+//	}
 
 	void changeBasis(SparseMatrixType& newreflected,
 			 const SparseMatrixType& reflected,
@@ -441,18 +429,6 @@ private:
 		reflectedRight_ = reflectedRight;
 	}
 
-	void setGs(VectorType& gs,const VectorType& v,size_t rank,size_t offset) const
-	{
-		VectorType gstmp(rank,0);
-
-		for (size_t i=0;i<v.size();i++) {
-			gstmp[i+offset]=v[i];
-		}
-		SparseMatrixType rT;
-		transposeConjugate(rT,transform_);
-		multiply(gs,rT,gstmp);
-	}
-
 	void printFullMatrix(const SparseMatrixType& s,const std::string& name) const
 	{
 		PsimagLite::Matrix<ComplexOrRealType> fullm(s.rank(),s.rank());
@@ -527,7 +503,7 @@ private:
 	bool isEnabled_;
 	size_t expandSys_;
 	SparseMatrixType reflectedLeft_,reflectedRight_;
-	SparseMatrixType transform_;
+	ReflectionTransformType reflectionTransform_;
 }; // class ReflectionOperator
 
 } // namespace Dmrg 

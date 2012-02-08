@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "Matrix.h"
 #include "ProgressIndicator.h"
-#include "LinearlyIndependentSet.h"
 #include "LAPACK.h"
 #include "Sort.h"
 #include "ReflectionColor.h"
@@ -98,7 +97,6 @@ class ReflectionBasis {
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef std::vector<ComplexOrRealType> VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
-	typedef LinearlyIndependentSet<RealType,SparseMatrixType>  LinearlyIndependentSetType;
 
 	enum {AVAILABLE,NOT_AVAILABLE,COLOR};
 	enum {GREATER_THAN_ZERO,LESS_THAN_ZERO};
@@ -106,7 +104,7 @@ class ReflectionBasis {
 public:
 
 	ReflectionBasis(const SparseMatrixType& reflection)
-	: reflection_(reflection),idebug_(true)
+	: progress_("ReflectionBasis",0),reflection_(reflection),idebug_(true)
 	{
 		ReflectionColorOrDomType colorOrDom(reflection_);
 
@@ -119,7 +117,11 @@ public:
 		std::vector<size_t> ip(iavail.size());
 		permute(iavail,ip);
 
-		choleskyFactor(iavail);
+		SparseMatrixType R1,Rm;
+		choleskyFactor(R1,Rm,iavail);
+
+		computeTransform(Q1_,R1,1.0);
+		computeTransform(Qm_,Rm,-1.0);
 	}
 
 	const SparseMatrixType& transform() const
@@ -130,6 +132,39 @@ public:
 	}
 
 private:
+
+	void computeTransform(SparseMatrixType& Q1,const SparseMatrixType& R1, const RealType& sector)
+	{
+		SparseMatrixType R1Inverse;
+		inverseTriangular(R1Inverse,R1);
+		SparseMatrixType T1;
+
+		buildT1(T1,sector);
+		multiply(Q1,T1,R1Inverse);
+	}
+
+	void buildT1(SparseMatrixType& T1, const RealType& sector) const
+	{
+		const std::vector<size_t>& ipPosOrNeg = (sector>0) ? ipPos_ : ipNeg_;
+		T1.resize(reflection_.rank());
+		size_t counter = 0;
+		for (size_t i=0;i<reflection_.rank();i++) {
+			T1.setRow(i,counter);
+			for (int k = reflection_.getRowPtr(i);k<reflection_.getRowPtr(i+1);k++) {
+				size_t col = reflection_.getCol(k);
+				ComplexOrRealType val = reflection_.getValue(k);
+				if (col==i) {
+					val += sector;
+				}
+				val *= sector;
+				T1.pushCol(ipPosOrNeg[col]);
+				T1.pushValue(val);
+				counter++;
+			}
+		}
+		T1.setRow(T1.rank(),counter);
+		T1.checkValidity();
+	}
 
 	void prepareAvailable(std::vector<size_t>& iavail,
 			      const std::vector<size_t>& ipcolor,
@@ -179,7 +214,7 @@ private:
 	{
 		const std::vector<size_t>& ipPosOrNeg = (sector>0) ? ipPos_ : ipNeg_;
 
-		R1.resize(reflection_.rank());
+		R1.resize(ipPosOrNeg.size());
 		size_t counter = 0;
 		for (size_t i=0;i<R1.rank();i++) {
 			R1.setRow(i,counter);
@@ -218,14 +253,19 @@ private:
 		for (size_t i=0;i<iavail.size();i++) iavail[i] = iavail[ip[i]];
 	}
 
-	void choleskyFactor(const std::vector<size_t>& iavail)
+	void choleskyFactor(SparseMatrixType& R1,
+			    SparseMatrixType& Rm,
+			    const std::vector<size_t>& iavail)
 	{
 		std::vector<ComplexOrRealType> dr(reflection_.rank());
-		SparseMatrixType R1,Rm;
 
 		setDiagonal(dr,reflection_);
 		setDiagonal(R1,dr,1.0);
 		setDiagonal(Rm,dr,-1.0);
+
+		std::ostringstream msg2;
+		msg2<<"needs extra churn, iavail="<<iavail.size();
+		progress_.printline(msg2,std::cout);
 
 		for (size_t i=0;i<iavail.size();i++) {
 //			size_t ilast = i;
@@ -233,9 +273,9 @@ private:
 			if (doneOneSector(i,j,R1,1.0)) break;
 			if (doneOneSector(i,j,Rm,-1.0)) break;
 		}
-//		std::ostringstream msg;
-//		msg<<plureflection__<<" +, "<<minuses<<" -.";
-//		progress_.printline(msg,std::cout);
+		std::ostringstream msg;
+		msg<<"R1.rank="<<R1.rank()<<" Rm.rank="<<Rm.rank();
+		progress_.printline(msg,std::cout);
 	}
 
 	bool doneOneSector(size_t i,size_t j,SparseMatrixType& R1,const RealType& sector)
@@ -252,7 +292,9 @@ private:
 		std::vector<size_t>& ipPosOrNeg = (sector>0) ? ipPos_ : ipNeg_;
 		setT1w(T1w,ipPosOrNeg,w,sector);
 		std::vector<ComplexOrRealType> r;
-		linearSolverTriangular(r,R1,T1w);
+		SparseMatrixType R1t;
+		transposeConjugate(R1t,R1);
+		linearSolverTriangular(r,R1t,T1w);
 		ComplexOrRealType rkk2 =w*w - r*r; // note: operator* will conjugate if needed
 		if (std::norm(rkk2)>tol) {
 			// accept this column
@@ -264,6 +306,29 @@ private:
 			ipPosOrNeg.push_back(j);
 		}
 		return false;
+	}
+
+	//! Invert triangular matrix R into Rinverse
+	void inverseTriangular(SparseMatrixType& R1Inverse,const SparseMatrixType& R1) const
+	{
+		std::vector<ComplexOrRealType> r(R1.rank());
+		SparseMatrixType tmpMatrix(r.size(),r.size());
+		size_t counter=0;
+		for (size_t i=0;i<R1.rank();i++) {
+			tmpMatrix.setRow(i,counter);
+			std::vector<ComplexOrRealType> rhs(R1.rank(),0);
+			rhs[i]=1;
+			linearSolverTriangular(r,R1,rhs);
+			for (size_t i=0;i<r.size();i++) {
+				if (isAlmostZero(r[i])) continue;
+				tmpMatrix.pushCol(i);
+				tmpMatrix.pushValue(r[i]);
+				counter++;
+			}
+		}
+		tmpMatrix.setRow(R1.rank(),counter);
+		tmpMatrix.checkValidity();
+		transposeConjugate(R1Inverse,tmpMatrix);
 	}
 
 	void growOneRowAndOneColumn(SparseMatrixType& R1,
@@ -293,18 +358,15 @@ private:
 		R1new.setRow(n+1,counter);
 		R1new.checkValidity();
 		R1 = R1new;
-
 	}
 
 	/**
 	   Let R1t = transpose(R1), solve   L * r = rhs
 	*/
 	void linearSolverTriangular(std::vector<ComplexOrRealType>& r,
-				    const SparseMatrixType& R1,
+				    const SparseMatrixType& R1t,
 				    const std::vector<ComplexOrRealType>& rhs) const
 	{
-		SparseMatrixType R1t;
-		transposeConjugate(R1t,R1);
 
 		for(size_t irow=0; irow < R1t.rank(); irow++) {
 			ComplexOrRealType dsum = 0.0;
@@ -379,9 +441,11 @@ private:
 		}
 	}
 
+	PsimagLite::ProgressIndicator progress_;
 	const SparseMatrixType& reflection_;
 	bool idebug_;
 	std::vector<size_t> ipPos_,ipNeg_;
+	SparseMatrixType Q1_,Qm_;
 
 }; // class ReflectionBasis
 

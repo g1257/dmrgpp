@@ -144,7 +144,7 @@ namespace Dmrg {
 			size_t nk = 0; // bogus
 			std::vector<size_t> sectors;
 			targetedSymmetrySectors(sectors,target.leftRightSuper());
-			reflectionOperator_.check(sectors);
+			reflectionOperator_.update(sectors);
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,nk);
 			//  targetting: 
 			target.evolve(gsEnergy,direction,blockLeft,blockRight,loopIndex);
