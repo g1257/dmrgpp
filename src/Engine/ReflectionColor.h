@@ -97,13 +97,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType>
+template<typename RealType,typename SparseMatrixType>
 class ReflectionColor {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef typename LeftRightSuperType::SparseMatrixType
-			SparseMatrixType;
-	typedef typename LeftRightSuperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef std::vector<ComplexOrRealType> VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
@@ -113,100 +110,62 @@ class ReflectionColor {
 
 public:
 
-
-	ReflectionColor(const SparseMatrixType& sSector)
+	ReflectionColor(const SparseMatrixType& reflection)
+	: reflection_(reflection)
 	{
-		std::vector<size_t> ipIsolated,ipConnected;
-		findIsolated(ipIsolated,ipConnected,sSector);
+		findIsolated();
 
-		std::cerr<<"Isolated nodes="<<ipIsolated.size()<<"\n";
-		std::cerr<<"Connected nodes="<<ipConnected.size()<<"\n";
+		std::cerr<<"Isolated nodes="<<ipIsolated_.size()<<"\n";
+		std::cerr<<"Connected nodes="<<ipConnected_.size()<<"\n";
 
-		std::vector<size_t> ilabel(ipConnected.size(),AVAILABLE);
 		size_t firstColor = 2;
 		SparseMatrixType A;
-		generateAmatrix(A,ipConnected,sSector);
-		size_t ncolor = gencolorLabel(ilabel,A,firstColor);
+		generateAmatrix(A,ipConnected_);
+		size_t ncolor = gencolorLabel(A,firstColor);
 
 		//		% print statistics
 		//		% ----------------
 		std::cout<<"ncolor="<<ncolor<<"\n";
 		for (size_t icolor=firstColor;icolor<=ncolor;icolor++) {
 			std::vector<size_t> ilist;
-			findWithLabel(ilist,ilabel,icolor);
+			findWithLabel(ilist,ilabel_,icolor);
 			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
 		}
 
-//		assert(ncolor-firstColor==1);
+		gencolorCheck(ilabel_,ncolor);
 
-		gencolorCheck(ilabel,ncolor);
-		std::vector<size_t> added,added2;
-		for (size_t i=0;i<ipIsolated.size();i++) {
-			size_t ind = ipIsolated[i];
-			lis.fill(ind,sSector,1.0);
-			added.push_back(ind);
-		}
-		std::vector<size_t> iperm(ipConnected.size());
+		gencolorPerm(ilabel_,firstColor,ncolor);
 
-		RealType sector = 1.0;
-
-		size_t ip = 0;
-		size_t icolor = firstColor;
-		std::vector<size_t> ilist;
-		findWithLabel(ilist,ilabel,icolor);
-		size_t nc = ilist.size();
-		for (size_t j=ip;j<ip+nc;j++) {
-			iperm[j]=ilist[j-ip];
-			size_t ind = ipConnected[iperm[j]];
-			lis.fill(ind,sSector,sector);
-		//	added2.push_back(ind);
-			added.push_back(ind);
-		}
-
-
-//		for (size_t i=0;i<notadded.size();i++)
-//			list.fill(notadded[i],sSector,sector,doTest);
-		plusSector_ = lis.size();
-
-		sector = -sector;
-		for (size_t j=ip;j<ip+nc;j++) {
-			lis.fill(ipConnected[iperm[j]],sSector,sector);
-		}
-//		for (size_t i=last;i<sSector.rank();i++) {
-//			lis.fill(i,sSector,sector,doTest);
-//		}
-
-		size_t minuses = lis.size()-plusSector_;
-
-		size_t extraSize = sSector.rank() - (minuses+plusSector_);
-
-		addExtra(added,sSector,extraSize);
-		std::ostringstream msg;
-		msg<<plusSector_<<" +, "<<minuses<<" -.";
-		progress_.printline(msg,std::cout);
-		assert(minuses+plusSector_==sSector.rank());
-		transform_ = lis.transform();
-//		printFullMatrix(transform_,"transform");
+		findWithLabel(ipcolor_,ilabel_,firstColor);
 	}
+
+//	const std::vector<size_t>& iperm() const { return iperm_; }
+
+//	const std::vector<size_t>& ilabel() const { return ilabel_; }
+
+	const std::vector<size_t>& ipcolor() const { return ipcolor_; }
+
+	const std::vector<size_t>& isolated() const { return ipIsolated_; }
+
+//	const std::vector<size_t>& connected() const { return ipConnected_; }
 
 private:
 
-	void generateAmatrix(SparseMatrixType& A,
-			     const std::vector<size_t>& ipConnected,
-			     const SparseMatrixType& sSector) const
+
+	void generateAmatrix(SparseMatrixType& A,const std::vector<size_t>& ipConnected) const
 	{
 		A.resize(ipConnected.size());
 		size_t counter=0;
-		std::vector<int> ipConnectedInverse(sSector.rank(),-1);
+		std::vector<int> ipConnectedInverse(reflection_.rank(),-1);
 		for (size_t i=0;i<ipConnected.size();i++)
 			ipConnectedInverse[ipConnected[i]]=i;
 
 		for (size_t i=0;i<ipConnected.size();i++) {
 			A.setRow(i,counter);
 			size_t ii = ipConnected[i];
-			for (int k=sSector.getRowPtr(ii);k<sSector.getRowPtr(ii+1);k++) {
-				ComplexOrRealType val = sSector.getValue(k);
-				int col = ipConnectedInverse[sSector.getCol(k)];
+			for (int k=reflection_.getRowPtr(ii);k<reflection_.getRowPtr(ii+1);k++) {
+				ComplexOrRealType val = reflection_.getValue(k);
+				int col = ipConnectedInverse[reflection_.getCol(k)];
 				if (col<0) continue;
 				A.pushCol(col);
 				A.pushValue(val);
@@ -217,16 +176,14 @@ private:
 		A.checkValidity();
 	}
 
-	void findIsolated(std::vector<size_t>& ipIsolated,
-			  std::vector<size_t>& ipConnected,
-			  const SparseMatrixType& sSector) const
+	void findIsolated()
 	{
-		for (size_t i=0;i<sSector.rank();i++) {
+		for (size_t i=0;i<reflection_.rank();i++) {
 			size_t nz = 0;
 			bool hasDiagonal = false;
-			for (int k=sSector.getRowPtr(i);k<sSector.getRowPtr(i+1);k++) {
-				ComplexOrRealType val = sSector.getValue(k);
-				size_t col = sSector.getCol(k);
+			for (int k=reflection_.getRowPtr(i);k<reflection_.getRowPtr(i+1);k++) {
+				ComplexOrRealType val = reflection_.getValue(k);
+				size_t col = reflection_.getCol(k);
 				if (i==col) {
 					val = val + 1.0;
 					hasDiagonal=true;
@@ -235,33 +192,33 @@ private:
 				nz++;
 			}
 			if (!hasDiagonal) nz++;
-			if (nz==1) ipIsolated.push_back(i);
-			else ipConnected.push_back(i);
+			if (nz==1) ipIsolated_.push_back(i);
+			else ipConnected_.push_back(i);
 		}
 	}
 
-	size_t gencolorLabel(std::vector<size_t>& ilabel,
-			     const SparseMatrixType& A,
-			     size_t firstColor) const
+	size_t gencolorLabel(const SparseMatrixType& A,size_t firstColor)
 	{
+		ilabel_.assign(ipConnected_.size(),AVAILABLE);
+
 		size_t ncolor = firstColor-1;
 		std::vector<size_t> ilist;
 		RealType eps = 1e-3;
 
 		//while (any( ilabel == unlabeled))
-		for (size_t ii=0;ii<ilabel.size();ii++) {
-			if (ilabel[ii]!=AVAILABLE) continue;
+		for (size_t ii=0;ii<ilabel_.size();ii++) {
+			if (ilabel_[ii]!=AVAILABLE) continue;
 			ncolor++;
 			size_t icolor = ncolor;
 			ilist.clear();
-			findWithLabel(ilist,ilabel,AVAILABLE);
+			findWithLabel(ilist,ilabel_,AVAILABLE);
 			size_t ifound = 0;
 			for (size_t i=0;i<ilist.size();i++) {
 //				if (ifound >= maxsize) break;
 
 				size_t ni = ilist[i];
-				if (ilabel[ni] == AVAILABLE) {
-					ilabel[ni] = icolor;
+				if (ilabel_[ni] == AVAILABLE) {
+					ilabel_[ni] = icolor;
 					ifound++;
 					// --------------
 					// mark neighbors
@@ -271,17 +228,17 @@ private:
 					//					jlist = find( A(ni,:) );
 					for (size_t j=0;j<jlist.size();j++) {
 						size_t nj = jlist[j];
-						if (ilabel[nj] == AVAILABLE) {
-							ilabel[nj] = NOT_AVAILABLE;
+						if (ilabel_[nj] == AVAILABLE) {
+							ilabel_[nj] = NOT_AVAILABLE;
 						}
 					}
 				}
 			}
 			ilist.clear();
-			findWithLabel(ilist,ilabel,NOT_AVAILABLE);
+			findWithLabel(ilist,ilabel_,NOT_AVAILABLE);
 			//			ilist = find( ilabel == isseen);
 			for (size_t jj=0;jj<ilist.size();jj++) {
-				ilabel[ilist[jj]] = AVAILABLE;
+				ilabel_[ilist[jj]] = AVAILABLE;
 			}
 			//			if (ilist.size() >= 1) {
 			//			   ilabel(ilist) = unlabeled;
@@ -332,10 +289,9 @@ private:
 			if (ilabel[i]==icolor) ilist.push_back(i);
 	}
 
-	void gencolorPerm(std::vector<size_t>& iperm,
-			  const std::vector<size_t>& ilabel,
+	void gencolorPerm(const std::vector<size_t>& ilabel,
 			  size_t firstColor,
-			  size_t ncolor) const
+			  size_t ncolor)
 	{
 		// find size:
 		std::vector<size_t> ilist;
@@ -347,7 +303,7 @@ private:
 			findWithLabel(ilist,ilabel,icolor);
 			size_t nc = ilist.size();
 			//			nc = length(ilist);
-			for (size_t j=ip;j<ip+nc;j++) iperm[j]=ilist[j-ip];
+			for (size_t j=ip;j<ip+nc;j++) iperm_[j]=ilist[j-ip];
 
 			// omitting check
 			ip += nc;
@@ -365,7 +321,11 @@ private:
 
 	}
 
-
+	const SparseMatrixType& reflection_;
+	std::vector<size_t> ipIsolated_,ipConnected_;
+	std::vector<size_t> ilabel_;
+	std::vector<size_t> iperm_;
+	std::vector<size_t> ipcolor_;
 }; // class ReflectionColor
 
 } // namespace Dmrg 
