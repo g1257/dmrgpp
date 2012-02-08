@@ -77,8 +77,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  *
  */
-#ifndef REFLECTION_TRANSFORM_H
-#define REFLECTION_TRANSFORM_H
+#ifndef reflectionTRANSFORM_H
+#define reflectionTRANSFORM_H
 
 #include "PackIndices.h" // in PsimagLite
 #include "Matrix.h"
@@ -103,6 +103,9 @@ public:
 	{
 		ReflectionBasisType reflectionBasis(sSector);
 
+		computeTransform(Q1_,reflectionBasis,1.0);
+		computeTransform(Qm_,reflectionBasis,-1.0);
+
 	}
 
 	void transform(SparseMatrixType& dest1,
@@ -125,6 +128,60 @@ public:
 	}
 
 private:
+
+	void computeTransform(SparseMatrixType& Q1,
+			      const ReflectionBasisType& reflectionBasis,
+			      const RealType& sector)
+	{
+		const SparseMatrixType& R1 = reflectionBasis.R(sector);
+		SparseMatrixType R1Inverse;
+		reflectionBasis.inverseTriangular(R1Inverse,R1);
+		SparseMatrixType T1;
+
+		buildT1(T1,reflectionBasis,sector);
+		multiply(Q1,T1,R1Inverse);
+	}
+
+	void buildT1(SparseMatrixType& T1,
+		     const ReflectionBasisType& reflectionBasis,
+		     const RealType& sector) const
+	{
+		const std::vector<size_t>& ipPosOrNeg = reflectionBasis.ipPosOrNeg(sector);
+		const SparseMatrixType& reflection = reflectionBasis.reflection();
+		T1.resize(reflection.rank());
+		size_t counter = 0;
+		for (size_t i=0;i<reflection.rank();i++) {
+			T1.setRow(i,counter);
+			for (int k = reflection.getRowPtr(i);k<reflection.getRowPtr(i+1);k++) {
+				size_t col = reflection.getCol(k);
+				ComplexOrRealType val = reflection.getValue(k);
+				if (col==i) {
+					val += sector;
+				}
+				val *= sector;
+				T1.pushCol(ipPosOrNeg[col]);
+				T1.pushValue(val);
+				counter++;
+			}
+		}
+		T1.setRow(T1.rank(),counter);
+		T1.checkValidity();
+	}
+
+	//	void checkTransform(const SparseMatrixType& sSector)
+	//	{
+	//		SparseMatrixType rT;
+	//		transposeConjugate(rT,transform_);
+	//		SparseMatrixType tmp3;
+	//		multiply(tmp3,transform_,rT);
+
+	////		printFullMatrix(rT,"Transform");
+
+	//		SparseMatrixType tmp4;
+	//		multiply(tmp3,sSector,rT);
+	//		multiply(tmp4,transform_,tmp3);
+	////		printFullMatrix(tmp4,"R S R^\\dagger");
+	//	}
 
 //	void split(SparseMatrixType& matrixA,SparseMatrixType& matrixB,const SparseMatrixType& matrix) const
 //	{
@@ -175,9 +232,11 @@ private:
 //		matrixB.setRow(minusSector,counter);
 //	}
 
+	SparseMatrixType Q1_,Qm_;
+
 }; // class ReflectionTransform
 
 } // namespace Dmrg 
 
 /*@}*/
-#endif // REFLECTION_TRANSFORM_H
+#endif // reflectionTRANSFORM_H

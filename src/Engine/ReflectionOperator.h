@@ -179,10 +179,7 @@ public:
 		       const SparseMatrixType& matrix) const
 	 {
 		assert(isEnabled_);
-
-		SparseMatrixType matrix2;
 		reflectionTransform_.transform(matrixA,matrixB,matrix);
-		split(matrixA,matrixB,matrix2);
 	 }
 
 	template<typename SomeVectorType>
@@ -221,21 +218,6 @@ public:
 	bool isEnabled() const { return isEnabled_; }
 
 private:
-
-//	void checkTransform(const SparseMatrixType& sSector)
-//	{
-//		SparseMatrixType rT;
-//		transposeConjugate(rT,transform_);
-//		SparseMatrixType tmp3;
-//		multiply(tmp3,transform_,rT);
-
-////		printFullMatrix(rT,"Transform");
-
-//		SparseMatrixType tmp4;
-//		multiply(tmp3,sSector,rT);
-//		multiply(tmp4,transform_,tmp3);
-////		printFullMatrix(tmp4,"R S R^\\dagger");
-//	}
 
 	void changeBasis(SparseMatrixType& newreflected,
 			 const SparseMatrixType& reflected,
@@ -444,57 +426,6 @@ private:
 		std::cout<<fullm;
 
 	}
-
-	void split(SparseMatrixType& matrixA,SparseMatrixType& matrixB,const SparseMatrixType& matrix) const
-	{
-		size_t counter = 0;
-		matrixA.resize(plusSector_);
-		for (size_t i=0;i<plusSector_;i++) {
-			matrixA.setRow(i,counter);
-			for (int k=matrix.getRowPtr(i);k<matrix.getRowPtr(i+1);k++) {
-				size_t col = matrix.getCol(k);
-				ComplexOrRealType val = matrix.getValue(k);
-				if (col<plusSector_) {
-					matrixA.pushCol(col);
-					matrixA.pushValue(val);
-					counter++;
-					continue;
-				}
-				if (!isAlmostZero(val,1e-5)) {
-					std::string s(__FILE__);
-					s += " Hamiltonian has no reflection symmetry.";
-					throw std::runtime_error(s.c_str());
-				}
-			}
-		}
-		matrixA.setRow(plusSector_,counter);
-
-		size_t rank = matrix.rank();
-		size_t minusSector=rank-plusSector_;
-		matrixB.resize(minusSector);
-		counter=0;
-		for (size_t i=plusSector_;i<rank;i++) {
-			matrixB.setRow(i-plusSector_,counter);
-			for (int k=matrix.getRowPtr(i);k<matrix.getRowPtr(i+1);k++) {
-				size_t col = matrix.getCol(k);
-				ComplexOrRealType val = matrix.getValue(k);
-				if (col>=plusSector_) {
-					matrixB.pushCol(col-plusSector_);
-					matrixB.pushValue(val);
-					counter++;
-					continue;
-				}
-				if (!isAlmostZero(val,1e-5)) {
-					std::string s(__FILE__);
-					s += " Hamiltonian has no reflection symmetry.";
-					throw std::runtime_error(s.c_str());
-				}
-			}
-		}
-		matrixB.setRow(minusSector,counter);
-	}
-
-	//SparseMatrixType& operator()() const { return s_; }
 
 	const LeftRightSuperType& lrs_;
 	size_t n0_; // hilbert size of one site

@@ -117,54 +117,45 @@ public:
 		std::vector<size_t> ip(iavail.size());
 		permute(iavail,ip);
 
-		SparseMatrixType R1,Rm;
-		choleskyFactor(R1,Rm,iavail);
-
-		computeTransform(Q1_,R1,1.0);
-		computeTransform(Qm_,Rm,-1.0);
+		choleskyFactor(iavail);
 	}
 
-	const SparseMatrixType& transform() const
+	const SparseMatrixType& R(const RealType& sector) const
 	{
-		std::string s(__FILE__);
-		s += " tranform() unimplemented\n";
-		throw std::runtime_error(s.c_str());
+		return (sector>0) ? R1_ : Rm_;
 	}
 
-private:
-
-	void computeTransform(SparseMatrixType& Q1,const SparseMatrixType& R1, const RealType& sector)
+	const std::vector<size_t>& ipPosOrNeg(const RealType& sector) const
 	{
-		SparseMatrixType R1Inverse;
-		inverseTriangular(R1Inverse,R1);
-		SparseMatrixType T1;
-
-		buildT1(T1,sector);
-		multiply(Q1,T1,R1Inverse);
+		return (sector>0) ? ipPos_ : ipNeg_;
 	}
 
-	void buildT1(SparseMatrixType& T1, const RealType& sector) const
+	//! Invert triangular matrix R into Rinverse
+	void inverseTriangular(SparseMatrixType& R1Inverse,const SparseMatrixType& R1) const
 	{
-		const std::vector<size_t>& ipPosOrNeg = (sector>0) ? ipPos_ : ipNeg_;
-		T1.resize(reflection_.rank());
-		size_t counter = 0;
-		for (size_t i=0;i<reflection_.rank();i++) {
-			T1.setRow(i,counter);
-			for (int k = reflection_.getRowPtr(i);k<reflection_.getRowPtr(i+1);k++) {
-				size_t col = reflection_.getCol(k);
-				ComplexOrRealType val = reflection_.getValue(k);
-				if (col==i) {
-					val += sector;
-				}
-				val *= sector;
-				T1.pushCol(ipPosOrNeg[col]);
-				T1.pushValue(val);
+		std::vector<ComplexOrRealType> r(R1.rank());
+		SparseMatrixType tmpMatrix(r.size(),r.size());
+		size_t counter=0;
+		for (size_t i=0;i<R1.rank();i++) {
+			tmpMatrix.setRow(i,counter);
+			std::vector<ComplexOrRealType> rhs(R1.rank(),0);
+			rhs[i]=1;
+			linearSolverTriangular(r,R1,rhs);
+			for (size_t i=0;i<r.size();i++) {
+				if (isAlmostZero(r[i])) continue;
+				tmpMatrix.pushCol(i);
+				tmpMatrix.pushValue(r[i]);
 				counter++;
 			}
 		}
-		T1.setRow(T1.rank(),counter);
-		T1.checkValidity();
+		tmpMatrix.setRow(R1.rank(),counter);
+		tmpMatrix.checkValidity();
+		transposeConjugate(R1Inverse,tmpMatrix);
 	}
+
+	const SparseMatrixType reflection() const { return reflection_; }
+
+private:
 
 	void prepareAvailable(std::vector<size_t>& iavail,
 			      const std::vector<size_t>& ipcolor,
@@ -253,15 +244,13 @@ private:
 		for (size_t i=0;i<iavail.size();i++) iavail[i] = iavail[ip[i]];
 	}
 
-	void choleskyFactor(SparseMatrixType& R1,
-			    SparseMatrixType& Rm,
-			    const std::vector<size_t>& iavail)
+	void choleskyFactor( const std::vector<size_t>& iavail)
 	{
 		std::vector<ComplexOrRealType> dr(reflection_.rank());
 
 		setDiagonal(dr,reflection_);
-		setDiagonal(R1,dr,1.0);
-		setDiagonal(Rm,dr,-1.0);
+		setDiagonal(R1_,dr,1.0);
+		setDiagonal(Rm_,dr,-1.0);
 
 		std::ostringstream msg2;
 		msg2<<"needs extra churn, iavail="<<iavail.size();
@@ -270,11 +259,11 @@ private:
 		for (size_t i=0;i<iavail.size();i++) {
 //			size_t ilast = i;
 			size_t j = iavail[i];
-			if (doneOneSector(i,j,R1,1.0)) break;
-			if (doneOneSector(i,j,Rm,-1.0)) break;
+			if (doneOneSector(i,j,R1_,1.0)) break;
+			if (doneOneSector(i,j,Rm_,-1.0)) break;
 		}
 		std::ostringstream msg;
-		msg<<"R1.rank="<<R1.rank()<<" Rm.rank="<<Rm.rank();
+		msg<<"R1.rank="<<R1_.rank()<<" Rm.rank="<<Rm_.rank();
 		progress_.printline(msg,std::cout);
 	}
 
@@ -306,29 +295,6 @@ private:
 			ipPosOrNeg.push_back(j);
 		}
 		return false;
-	}
-
-	//! Invert triangular matrix R into Rinverse
-	void inverseTriangular(SparseMatrixType& R1Inverse,const SparseMatrixType& R1) const
-	{
-		std::vector<ComplexOrRealType> r(R1.rank());
-		SparseMatrixType tmpMatrix(r.size(),r.size());
-		size_t counter=0;
-		for (size_t i=0;i<R1.rank();i++) {
-			tmpMatrix.setRow(i,counter);
-			std::vector<ComplexOrRealType> rhs(R1.rank(),0);
-			rhs[i]=1;
-			linearSolverTriangular(r,R1,rhs);
-			for (size_t i=0;i<r.size();i++) {
-				if (isAlmostZero(r[i])) continue;
-				tmpMatrix.pushCol(i);
-				tmpMatrix.pushValue(r[i]);
-				counter++;
-			}
-		}
-		tmpMatrix.setRow(R1.rank(),counter);
-		tmpMatrix.checkValidity();
-		transposeConjugate(R1Inverse,tmpMatrix);
 	}
 
 	void growOneRowAndOneColumn(SparseMatrixType& R1,
@@ -445,7 +411,7 @@ private:
 	const SparseMatrixType& reflection_;
 	bool idebug_;
 	std::vector<size_t> ipPos_,ipNeg_;
-	SparseMatrixType Q1_,Qm_;
+	SparseMatrixType R1_,Rm_;
 
 }; // class ReflectionBasis
 
