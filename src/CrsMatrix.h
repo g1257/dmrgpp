@@ -570,10 +570,27 @@ namespace PsimagLite {
 		}
 	}
 
+	template<typename T>
+	void printFullMatrix(const CrsMatrix<T>& s,const std::string& name,bool how=0)
+	{
+		PsimagLite::Matrix<T> fullm(s.rank(),s.rank());
+		crsMatrixToFullMatrix(fullm,s);
+		std::cout<<"--------->   "<<name<<" rank="<<s.rank()<<" <----------\n";
+		try {
+			if (how==1) mathematicaPrint(std::cout,fullm);
+			if (how==2) symbolicPrint(std::cout,fullm);
+		} catch (std::exception& e) {
+			if (how==0) std::cout<<fullm;
+		}
+
+		std::cout<<fullm;
+
+	}
+
 	//! C = A*B,  all matrices are CRS matrices
 	//! idea is from http://web.maths.unsw.edu.au/~farid/Papers/Hons/node23.html
 	template<typename S,typename S2>
-	void multiply(CrsMatrix<S> &C,CrsMatrix<S> const &A,CrsMatrix<S2> const &B)
+	void multiply(CrsMatrix<S> &C,CrsMatrix<S> const &A,CrsMatrix<S2> const &B,bool strict=true)
 	{
 		int j,k,s,mlast,itemp,jbk;
 		size_t n = A.rank();
@@ -581,7 +598,7 @@ namespace PsimagLite {
 		std::vector<S> temp(n,0);
 		S tmp;
 
-		if (n!=B.rank()) throw std::runtime_error("multiply: matrices must have the same rank.\n");
+		assert(!strict || n==B.rank());
 		
 		C.resize(n);
 		
@@ -848,6 +865,18 @@ namespace PsimagLite {
 	{
 		size_t n = A.getSize();
 		for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++) if (i!=j && fabs(A(i,j))>1e-6) return false;	
+		return true;
+	}
+
+	template<class T>
+	bool isZero(const CrsMatrix<T>& A,double eps = 1e-6)
+	{
+		for (size_t i=0;i<A.rank();i++) {
+			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+				double x = std::real(std::norm(A.getValue(k)));
+				if (x>eps) return false;
+			}
+		}
 		return true;
 	}
 	
