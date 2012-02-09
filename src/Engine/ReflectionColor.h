@@ -126,6 +126,7 @@ public:
 	ReflectionColor(const SparseMatrixType& reflection)
 	: reflection_(reflection)
 	{
+//		printFullMatrix(reflection,"reflection");
 		findIsolated();
 
 		std::cerr<<"Isolated nodes="<<ipIsolated_.size()<<"\n";
@@ -145,7 +146,7 @@ public:
 			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
 		}
 
-		gencolorCheck(ilabel_,ncolor);
+		//gencolorCheck(ilabel_,ncolor);
 
 		gencolorPerm(ilabel_,firstColor,ncolor);
 

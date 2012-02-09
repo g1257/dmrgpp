@@ -117,7 +117,6 @@ public:
 	: lrs_(lrs),
 	  n0_(n0),
 	  progress_("ReflectionOperator",0),
-	  plusSector_(0),
 	  isEnabled_(isEnabled),
 	  expandSys_(expandSys),
 	  reflectedLeft_(n0_,n0_),
@@ -188,13 +187,7 @@ public:
 			  SomeVectorType& initVector2) const
 	{
 		assert(isEnabled_);
-		size_t minusSector = initVector.size()-plusSector_;
-		initVector1.resize(plusSector_);
-		initVector2.resize(minusSector);
-		for (size_t i=0;i<initVector.size();i++) {
-			if (i<plusSector_) initVector1[i]=initVector[i];
-			else  initVector2[i-plusSector_]=initVector[i];
-		}
+		return reflectionTransform_.setInitState(initVector,initVector1,initVector2);
 	}
 
 	RealType setGroundState(VectorType& gs,
@@ -204,12 +197,11 @@ public:
 				const VectorType& gsVector2) const
 	{
 		assert(isEnabled_);
-		size_t rank = gsVector1.size() + gsVector2.size();
 		if (gsEnergy1<=gsEnergy2) {
-			reflectionTransform_.setGs(gs,gsVector1,rank,0);
+			reflectionTransform_.setGs(gs,gsVector1,1.0);
 			return gsEnergy1;
 		}
-		reflectionTransform_.setGs(gs,gsVector2,rank,gsVector1.size());
+		reflectionTransform_.setGs(gs,gsVector2,-1.0);
 		return gsEnergy2;
 	}
 
@@ -411,26 +403,9 @@ private:
 		reflectedRight_ = reflectedRight;
 	}
 
-	void printFullMatrix(const SparseMatrixType& s,const std::string& name) const
-	{
-		PsimagLite::Matrix<ComplexOrRealType> fullm(s.rank(),s.rank());
-		crsMatrixToFullMatrix(fullm,s);
-		std::cout<<"--------->   "<<name<<" <----------\n";
-		try {
-//			mathematicaPrint(std::cout,fullm);
-//			symbolicPrint(std::cout,fullm);
-		} catch (std::exception& e) {
-			std::cout<<fullm;
-		}
-
-		std::cout<<fullm;
-
-	}
-
 	const LeftRightSuperType& lrs_;
 	size_t n0_; // hilbert size of one site
 	PsimagLite::ProgressIndicator progress_;
-	size_t plusSector_;
 	bool isEnabled_;
 	size_t expandSys_;
 	SparseMatrixType reflectedLeft_,reflectedRight_;

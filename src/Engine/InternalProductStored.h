@@ -103,12 +103,13 @@ namespace Dmrg {
 		{
 			model_ = model;
 			modelHelper_=modelHelper;
-			std::ostringstream msg;
+
 
 			if (!rs) {
 				matrixStored_[0].clear();
 				model->fullHamiltonian(matrixStored_[0],*modelHelper);
 				assert(isHermitian(matrixStored_[0],true));
+				std::ostringstream msg;
 				msg<<"fullHamiltonian has rank="<<matrixStored_[0].rank()<<" nonzeros="<<matrixStored_[0].nonZero();
 				progress_.printline(msg,std::cout);
 				return;
@@ -116,8 +117,9 @@ namespace Dmrg {
 			SparseMatrixType matrix2;
 			model->fullHamiltonian(matrix2,*modelHelper);
 			rs->transform(matrixStored_[0],matrixStored_[1],matrix2);
-//			msg<<"fullHamiltonian with rank="<<matrixStored_[0].rank()<<" has reflection\n";
-//			progress_.printline(msg,std::cout);
+			std::ostringstream msg;
+			msg<<" sector="<<matrixStored_[0].rank()<<" and sector="<<matrixStored_[1].rank();
+			progress_.printline(msg,std::cout);
 		}
 
 		size_t rank() const { return matrixStored_[pointer_].rank(); }

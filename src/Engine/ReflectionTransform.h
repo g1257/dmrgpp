@@ -102,32 +102,94 @@ public:
 	void update(const SparseMatrixType& sSector)
 	{
 		ReflectionBasisType reflectionBasis(sSector);
-
+		plusSector_ = reflectionBasis.R(1.0).rank();
 		computeTransform(Q1_,reflectionBasis,1.0);
 		computeTransform(Qm_,reflectionBasis,-1.0);
+//		printFullMatrix(Q1_,"Q1");
+//		printFullMatrix(Qm_,"Qm");
+
 
 	}
 
 	void transform(SparseMatrixType& dest1,
-		       SparseMatrixType& dest2,
-		       const SparseMatrixType& src) const
+		       SparseMatrixType& destm,
+		       const SparseMatrixType& H) const
 	{
+		SparseMatrixType HQ1,HQm;
+		multiply(HQ1,H,Q1_);
 
+		multiply(HQm,H,Qm_);
+//		printFullMatrix(HQm,"HQm");
+//		printFullMatrix(HQ1,"HQ1");
+
+		SparseMatrixType Q1t,Qmt;
+		transposeConjugate(Q1t,Q1_);
+		transposeConjugate(Qmt,Qm_);
+		multiply(dest1,Q1t,HQ1);
+		reshape(dest1,plusSector_);
+		multiply(destm,Qmt,HQm);
+		reshape(destm,H.rank()-plusSector_);
+//		printFullMatrix(dest1,"dest1");
+//		printFullMatrix(destm,"destm");
+
+#ifndef NDEBUG
+		checkTransform(Qmt,HQ1);
+		checkTransform(Q1t,HQm);
+#endif
 	}
 
-	void setGs(VectorType& gs,const VectorType& v,size_t rank,size_t offset) const
+	void setGs(VectorType& gs,const VectorType& v,const RealType& sector) const
 	{
-		VectorType gstmp(rank,0);
+		const SparseMatrixType& Q = (sector>0) ? Q1_ : Qm_;
+		multiply(gs,Q,v);
+		RealType norma = PsimagLite::norm(gs);
+		gs /= norma;
+	}
 
-		for (size_t i=0;i<v.size();i++) {
-			gstmp[i+offset]=v[i];
+	template<typename SomeVectorType>
+	void setInitState(const SomeVectorType& initVector,
+			  SomeVectorType& initVector1,
+			  SomeVectorType& initVector2) const
+	{
+		size_t minusSector = initVector.size()-plusSector_;
+		initVector1.resize(plusSector_);
+		initVector2.resize(minusSector);
+		for (size_t i=0;i<initVector.size();i++) {
+			if (i<plusSector_) initVector1[i]=initVector[i];
+			else  initVector2[i-plusSector_]=initVector[i];
 		}
-		SparseMatrixType rT;
-		//transposeConjugate(rT,transform_);
-		multiply(gs,rT,gstmp);
 	}
 
 private:
+
+	void reshape(SparseMatrixType& A,size_t n2) const
+	{
+		SparseMatrixType B(n2,n2);
+		size_t counter = 0;
+		for (size_t i=0;i<n2;i++) {
+			B.setRow(i,counter);
+			for (int k = A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+				size_t col = A.getCol(k);
+				if (col>=n2) continue;
+				B.pushCol(col);
+				B.pushValue(A.getValue(k));
+				counter++;
+			}
+		}
+		B.setRow(n2,counter);
+		B.checkValidity();
+		A = B;
+	}
+
+	void checkTransform(const SparseMatrixType& A,const SparseMatrixType& B) const
+	{
+		SparseMatrixType C;
+		multiply(C,A,B);
+//		printFullMatrix(A,"MatrixA");
+//		printFullMatrix(B,"MatrixB");
+//		printFullMatrix(C,"MatrixC");
+		assert(isZero(C));
+	}
 
 	void computeTransform(SparseMatrixType& Q1,
 			      const ReflectionBasisType& reflectionBasis,
@@ -136,36 +198,67 @@ private:
 		const SparseMatrixType& R1 = reflectionBasis.R(sector);
 		SparseMatrixType R1Inverse;
 		reflectionBasis.inverseTriangular(R1Inverse,R1);
+//		printFullMatrix(R1Inverse,"R1Inverse");
 		SparseMatrixType T1;
 
 		buildT1(T1,reflectionBasis,sector);
-		multiply(Q1,T1,R1Inverse);
+		bool strict = false; // matrices below have different ranks!!
+		multiply(Q1,T1,R1Inverse,strict);
 	}
 
-	void buildT1(SparseMatrixType& T1,
+	void buildT1(SparseMatrixType& T1final,
 		     const ReflectionBasisType& reflectionBasis,
 		     const RealType& sector) const
 	{
 		const std::vector<size_t>& ipPosOrNeg = reflectionBasis.ipPosOrNeg(sector);
 		const SparseMatrixType& reflection = reflectionBasis.reflection();
-		T1.resize(reflection.rank());
+		size_t n = reflection.rank();
+
+		SparseMatrixType T1(n,n);
 		size_t counter = 0;
-		for (size_t i=0;i<reflection.rank();i++) {
+		for (size_t i=0;i<n;i++) {
 			T1.setRow(i,counter);
+			bool hasDiagonal = false;
 			for (int k = reflection.getRowPtr(i);k<reflection.getRowPtr(i+1);k++) {
 				size_t col = reflection.getCol(k);
 				ComplexOrRealType val = reflection.getValue(k);
 				if (col==i) {
 					val += sector;
+					hasDiagonal=true;
 				}
 				val *= sector;
-				T1.pushCol(ipPosOrNeg[col]);
+				T1.pushCol(col);
 				T1.pushValue(val);
 				counter++;
 			}
+			if (!hasDiagonal) {
+				T1.pushCol(i);
+				T1.pushValue(1.0);
+				counter++;
+			}
 		}
-		T1.setRow(T1.rank(),counter);
+		T1.setRow(n,counter);
 		T1.checkValidity();
+
+		// permute columns now:
+		std::vector<int> inversePermutation(n,-1);
+		for (size_t i=0;i<ipPosOrNeg.size();i++)
+			inversePermutation[ipPosOrNeg[i]]=i;
+
+		T1final.resize(n);
+		counter=0;
+		for (size_t i=0;i<n;i++) {
+			T1final.setRow(i,counter);
+			for (int k = T1.getRowPtr(i);k<T1.getRowPtr(i+1);k++) {
+				int col = inversePermutation[T1.getCol(k)];
+				if (col<0) continue;
+				T1final.pushCol(col);
+				T1final.pushValue(T1.getValue(k));
+				counter++;
+			}
+		}
+		T1final.setRow(n,counter);
+		T1final.checkValidity();
 	}
 
 	//	void checkTransform(const SparseMatrixType& sSector)
@@ -232,6 +325,7 @@ private:
 //		matrixB.setRow(minusSector,counter);
 //	}
 
+	size_t plusSector_;
 	SparseMatrixType Q1_,Qm_;
 
 }; // class ReflectionTransform

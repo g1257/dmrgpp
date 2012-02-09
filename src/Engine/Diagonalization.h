@@ -384,7 +384,6 @@ namespace Dmrg {
 
 			LanczosSolverType lanczosSolver(lanczosHelper,params);
 
-			tmpVec.resize(lanczosHelper.rank());
 			if (lanczosHelper.rank()==0) {
 				energyTmp=10000;
 				return;
@@ -394,11 +393,13 @@ namespace Dmrg {
 			progress_.printline(msg,std::cerr);
 			*/
 			if (!reflectionOperator_.isEnabled()) {
+				tmpVec.resize(lanczosHelper.rank());
 				lanczosSolver.computeGroundState(energyTmp,tmpVec,initialVector);
 				return;
 			}
 			SomeVectorType initialVector1,initialVector2;
 			reflectionOperator_.setInitState(initialVector,initialVector1,initialVector2);
+			tmpVec.resize(initialVector1.size());
 			lanczosSolver.computeGroundState(energyTmp,tmpVec,initialVector1);
 
 
@@ -406,7 +407,7 @@ namespace Dmrg {
 			SomeVectorType gsVector1 = tmpVec;
 
 			lanczosHelper.reflectionSector(1);
-			SomeVectorType gsVector2(lanczosHelper.rank());
+			SomeVectorType gsVector2(initialVector2.size());
 			RealType gsEnergy2 = 0;
 			lanczosSolver.computeGroundState(gsEnergy2,gsVector2,initialVector2);
 

@@ -118,6 +118,18 @@ public:
 		permute(iavail,ip);
 
 		choleskyFactor(iavail);
+//		std::cout<<"ipPos ";
+//		for (size_t i=0;i<ipPos_.size();i++)
+//			std::cout<<ipPos_[i]<<" ";
+//		std::cout<<"\n";
+
+//		std::cout<<"ipNeg ";
+//		for (size_t i=0;i<ipNeg_.size();i++)
+//			std::cout<<ipNeg_[i]<<" ";
+//		std::cout<<"\n";
+
+//		printFullMatrix(R1_,"R1_");
+//		printFullMatrix(Rm_,"Rm_");
 	}
 
 	const SparseMatrixType& R(const RealType& sector) const
@@ -151,6 +163,10 @@ public:
 		tmpMatrix.setRow(R1.rank(),counter);
 		tmpMatrix.checkValidity();
 		transposeConjugate(R1Inverse,tmpMatrix);
+		// check
+		SparseMatrixType tmpMatrix2;
+		multiply(tmpMatrix2,R1,R1Inverse);
+		assert(isTheIdentity(tmpMatrix2));
 	}
 
 	const SparseMatrixType reflection() const { return reflection_; }
