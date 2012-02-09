@@ -99,16 +99,19 @@ class ReflectionTransform {
 
 public:
 
+	ReflectionTransform(bool idebug)
+	: idebug_(idebug)
+	{}
+
 	void update(const SparseMatrixType& sSector)
 	{
 		ReflectionBasisType reflectionBasis(sSector);
 		plusSector_ = reflectionBasis.R(1.0).rank();
 		computeTransform(Q1_,reflectionBasis,1.0);
 		computeTransform(Qm_,reflectionBasis,-1.0);
-//		printFullMatrix(Q1_,"Q1");
-//		printFullMatrix(Qm_,"Qm");
-
-
+		if (!idebug_) return;
+		printFullMatrix(Q1_,"Q1");
+		printFullMatrix(Qm_,"Qm");
 	}
 
 	void transform(SparseMatrixType& dest1,
@@ -119,18 +122,37 @@ public:
 		multiply(HQ1,H,Q1_);
 
 		multiply(HQm,H,Qm_);
-//		printFullMatrix(HQm,"HQm");
-//		printFullMatrix(HQ1,"HQ1");
+		if (idebug_) {
+			printFullMatrix(HQm,"HQm");
+			printFullMatrix(HQ1,"HQ1");
+		}
 
 		SparseMatrixType Q1t,Qmt;
 		transposeConjugate(Q1t,Q1_);
 		transposeConjugate(Qmt,Qm_);
+
+		RealType norm1 = getNorm(Q1t,Q1_);
+		RealType normm = getNorm(Qmt,Qm_);
+
+
 		multiply(dest1,Q1t,HQ1);
 		reshape(dest1,plusSector_);
+		dest1 *= (1.0/norm1);
+		assert(isHermitian(dest1));
+
+		size_t minusSector = H.rank()-plusSector_;
+
 		multiply(destm,Qmt,HQm);
-		reshape(destm,H.rank()-plusSector_);
-//		printFullMatrix(dest1,"dest1");
-//		printFullMatrix(destm,"destm");
+		reshape(destm,minusSector);
+		destm *= (1.0/normm);
+		assert(isHermitian(destm));
+
+		if (idebug_) {
+			std::cerr<<"norm1="<<norm1<<" normm="<<normm<<"\n";
+			std::cerr<<"plusSector="<<plusSector_<<" minusSector="<<minusSector<<"\n";
+			printFullMatrix(dest1,"dest1");
+			printFullMatrix(destm,"destm");
+		}
 
 #ifndef NDEBUG
 		checkTransform(Qmt,HQ1);
@@ -162,6 +184,22 @@ public:
 
 private:
 
+	RealType getNorm(const SparseMatrixType& A,const SparseMatrixType& B) const
+	{
+		SparseMatrixType C;
+		multiply(C,A,B);
+		for (size_t i=0;i<C.rank();i++) {
+			for (int k=C.getRowPtr(i);k<C.getRowPtr(i+1);k++) {
+				size_t col = C.getCol(k);
+				if (col==i) {
+					return std::real(C.getValue(k));
+				}
+			}
+		}
+		assert(false);
+		return 0;
+	}
+
 	void reshape(SparseMatrixType& A,size_t n2) const
 	{
 		SparseMatrixType B(n2,n2);
@@ -170,12 +208,24 @@ private:
 			B.setRow(i,counter);
 			for (int k = A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 				size_t col = A.getCol(k);
-				if (col>=n2) continue;
+				ComplexOrRealType val = A.getValue(k);
+				if (col>=n2) {
+					assert(isAlmostZero(val,1e-5));
+					continue;
+				}
 				B.pushCol(col);
-				B.pushValue(A.getValue(k));
+				B.pushValue(val);
 				counter++;
 			}
 		}
+#ifndef NDEBUG
+		for (size_t i=n2;i<A.rank();i++) {
+			for (int k = A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+				ComplexOrRealType val = A.getValue(k);
+				assert(isAlmostZero(val,1e-5));
+			}
+		}
+#endif
 		B.setRow(n2,counter);
 		B.checkValidity();
 		A = B;
@@ -197,7 +247,7 @@ private:
 	{
 		const SparseMatrixType& R1 = reflectionBasis.R(sector);
 		SparseMatrixType R1Inverse;
-		reflectionBasis.inverseTriangular(R1Inverse,R1);
+		reflectionBasis.inverseTriangular(R1Inverse,R1,sector);
 //		printFullMatrix(R1Inverse,"R1Inverse");
 		SparseMatrixType T1;
 
@@ -227,6 +277,7 @@ private:
 					hasDiagonal=true;
 				}
 				val *= sector;
+				if (isAlmostZero(val,1e-10)) continue;
 				T1.pushCol(col);
 				T1.pushValue(val);
 				counter++;
@@ -252,8 +303,11 @@ private:
 			for (int k = T1.getRowPtr(i);k<T1.getRowPtr(i+1);k++) {
 				int col = inversePermutation[T1.getCol(k)];
 				if (col<0) continue;
+				ComplexOrRealType val = T1.getValue(k);
+				if (isAlmostZero(val,1e-10)) continue;
+				assert(size_t(col)<ipPosOrNeg.size());
 				T1final.pushCol(col);
-				T1final.pushValue(T1.getValue(k));
+				T1final.pushValue(val);
 				counter++;
 			}
 		}
@@ -261,70 +315,7 @@ private:
 		T1final.checkValidity();
 	}
 
-	//	void checkTransform(const SparseMatrixType& sSector)
-	//	{
-	//		SparseMatrixType rT;
-	//		transposeConjugate(rT,transform_);
-	//		SparseMatrixType tmp3;
-	//		multiply(tmp3,transform_,rT);
-
-	////		printFullMatrix(rT,"Transform");
-
-	//		SparseMatrixType tmp4;
-	//		multiply(tmp3,sSector,rT);
-	//		multiply(tmp4,transform_,tmp3);
-	////		printFullMatrix(tmp4,"R S R^\\dagger");
-	//	}
-
-//	void split(SparseMatrixType& matrixA,SparseMatrixType& matrixB,const SparseMatrixType& matrix) const
-//	{
-//		size_t counter = 0;
-//		matrixA.resize(plusSector_);
-//		for (size_t i=0;i<plusSector_;i++) {
-//			matrixA.setRow(i,counter);
-//			for (int k=matrix.getRowPtr(i);k<matrix.getRowPtr(i+1);k++) {
-//				size_t col = matrix.getCol(k);
-//				ComplexOrRealType val = matrix.getValue(k);
-//				if (col<plusSector_) {
-//					matrixA.pushCol(col);
-//					matrixA.pushValue(val);
-//					counter++;
-//					continue;
-//				}
-//				if (!isAlmostZero(val,1e-5)) {
-//					std::string s(__FILE__);
-//					s += " Hamiltonian has no reflection symmetry.";
-//					throw std::runtime_error(s.c_str());
-//				}
-//			}
-//		}
-//		matrixA.setRow(plusSector_,counter);
-
-//		size_t rank = matrix.rank();
-//		size_t minusSector=rank-plusSector_;
-//		matrixB.resize(minusSector);
-//		counter=0;
-//		for (size_t i=plusSector_;i<rank;i++) {
-//			matrixB.setRow(i-plusSector_,counter);
-//			for (int k=matrix.getRowPtr(i);k<matrix.getRowPtr(i+1);k++) {
-//				size_t col = matrix.getCol(k);
-//				ComplexOrRealType val = matrix.getValue(k);
-//				if (col>=plusSector_) {
-//					matrixB.pushCol(col-plusSector_);
-//					matrixB.pushValue(val);
-//					counter++;
-//					continue;
-//				}
-//				if (!isAlmostZero(val,1e-5)) {
-//					std::string s(__FILE__);
-//					s += " Hamiltonian has no reflection symmetry.";
-//					throw std::runtime_error(s.c_str());
-//				}
-//			}
-//		}
-//		matrixB.setRow(minusSector,counter);
-//	}
-
+	bool idebug_;
 	size_t plusSector_;
 	SparseMatrixType Q1_,Qm_;
 

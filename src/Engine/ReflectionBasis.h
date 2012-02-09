@@ -118,18 +118,19 @@ public:
 		permute(iavail,ip);
 
 		choleskyFactor(iavail);
-//		std::cout<<"ipPos ";
-//		for (size_t i=0;i<ipPos_.size();i++)
-//			std::cout<<ipPos_[i]<<" ";
-//		std::cout<<"\n";
+		if (!idebug_) return;
+		std::cout<<"ipPos ";
+		for (size_t i=0;i<ipPos_.size();i++)
+			std::cout<<ipPos_[i]<<" ";
+		std::cout<<"\n";
 
-//		std::cout<<"ipNeg ";
-//		for (size_t i=0;i<ipNeg_.size();i++)
-//			std::cout<<ipNeg_[i]<<" ";
-//		std::cout<<"\n";
+		std::cout<<"ipNeg ";
+		for (size_t i=0;i<ipNeg_.size();i++)
+			std::cout<<ipNeg_[i]<<" ";
+		std::cout<<"\n";
 
-//		printFullMatrix(R1_,"R1_");
-//		printFullMatrix(Rm_,"Rm_");
+		printFullMatrix(R1_,"R1_");
+		printFullMatrix(Rm_,"Rm_");
 	}
 
 	const SparseMatrixType& R(const RealType& sector) const
@@ -143,18 +144,25 @@ public:
 	}
 
 	//! Invert triangular matrix R into Rinverse
-	void inverseTriangular(SparseMatrixType& R1Inverse,const SparseMatrixType& R1) const
+	//! Hack due to not having rectangular CRS implemented
+	void inverseTriangular(SparseMatrixType& R1Inverse,
+			       const SparseMatrixType& R1,
+			       const RealType& sector) const
 	{
-		std::vector<ComplexOrRealType> r(R1.rank());
+		SparseMatrixType R1t;
+		transposeConjugate(R1t,R1);
+		std::vector<ComplexOrRealType> r(R1t.rank());
 		SparseMatrixType tmpMatrix(r.size(),r.size());
 		size_t counter=0;
-		for (size_t i=0;i<R1.rank();i++) {
+		size_t upto = (sector>0) ? ipPos_.size() : ipNeg_.size();
+		for (size_t i=0;i<R1t.rank();i++) {
 			tmpMatrix.setRow(i,counter);
-			std::vector<ComplexOrRealType> rhs(R1.rank(),0);
+			std::vector<ComplexOrRealType> rhs(R1t.rank(),0);
 			rhs[i]=1;
-			linearSolverTriangular(r,R1,rhs);
+			linearSolverTriangular(r,R1t,rhs);
 			for (size_t i=0;i<r.size();i++) {
-				if (isAlmostZero(r[i])) continue;
+				if (isAlmostZero(r[i],1e-10)) continue;
+				assert(i<upto);
 				tmpMatrix.pushCol(i);
 				tmpMatrix.pushValue(r[i]);
 				counter++;
@@ -163,10 +171,17 @@ public:
 		tmpMatrix.setRow(R1.rank(),counter);
 		tmpMatrix.checkValidity();
 		transposeConjugate(R1Inverse,tmpMatrix);
+#ifndef NDEBUG
 		// check
 		SparseMatrixType tmpMatrix2;
 		multiply(tmpMatrix2,R1,R1Inverse);
-		assert(isTheIdentity(tmpMatrix2));
+		bool b = isTheIdentity(tmpMatrix2);
+		if (b) return;
+		printFullMatrix(R1,"R1");
+		printFullMatrix(R1Inverse,"R1Inverse");
+		printFullMatrix(tmpMatrix2,"tmpMatrix2");
+		assert(b);
+#endif
 	}
 
 	const SparseMatrixType reflection() const { return reflection_; }
@@ -225,10 +240,13 @@ private:
 		size_t counter = 0;
 		for (size_t i=0;i<R1.rank();i++) {
 			R1.setRow(i,counter);
-			R1.pushCol(i);
+
 			ComplexOrRealType val = 1.0 + sector*dr[ipPosOrNeg[i]];
-			RealType val2 = std::norm(val);
-			R1.pushValue(sqrt(2*val2));
+			RealType val2 = sqrt(2.0*std::norm(val));
+			if (isAlmostZero(val2,1e-10)) continue;
+
+			R1.pushValue(val2);
+			R1.pushCol(i);
 			counter++;
 		}
 		R1.setRow(R1.rank(),counter);
@@ -288,7 +306,7 @@ private:
 		bool done = (ipPos_.size()+ipNeg_.size() >= reflection_.rank());
 		if (done) return true;
 
-		RealType tol = 1;
+		RealType tol = 1e-5;
 
 		// try to add vector to (sector) space, where sector= + or -
 		std::vector<ComplexOrRealType> w;
@@ -296,7 +314,7 @@ private:
 		std::vector<ComplexOrRealType> T1w(w.size(),0);
 		std::vector<size_t>& ipPosOrNeg = (sector>0) ? ipPos_ : ipNeg_;
 		setT1w(T1w,ipPosOrNeg,w,sector);
-		std::vector<ComplexOrRealType> r;
+		std::vector<ComplexOrRealType> r(R1.rank());
 		SparseMatrixType R1t;
 		transposeConjugate(R1t,R1);
 		linearSolverTriangular(r,R1t,T1w);
@@ -307,7 +325,7 @@ private:
 				std::cerr<<__FILE__<<" "<<__LINE__<<" sector="<<sector;
 				std::cerr<<" i="<<i<<" j="<<j<<" #pos="<<(ipPosOrNeg.size()-1)<<"\n";
 			}
-			growOneRowAndOneColumn(R1,r,sqrt(rkk2));
+			growOneRowAndOneColumn(R1,r,sqrt(rkk2),sector);
 			ipPosOrNeg.push_back(j);
 		}
 		return false;
@@ -315,8 +333,10 @@ private:
 
 	void growOneRowAndOneColumn(SparseMatrixType& R1,
 				    const std::vector<ComplexOrRealType>& r,
-				    const ComplexOrRealType& addedValue) const
+				    const ComplexOrRealType& addedValue,
+				    const RealType& sector) const
 	{
+		size_t n2 = (sector>0) ? ipPos_.size() : ipNeg_.size();
 		size_t n = R1.rank();
 		SparseMatrixType R1new(n+1,n+1);
 		size_t counter = 0;
@@ -328,13 +348,14 @@ private:
 				counter++;
 			}
 			// add extra column
-			R1new.pushCol(n);
+			if (isAlmostZero(r[i],1e-10)) continue;
+			R1new.pushCol(n2);
 			R1new.pushValue(r[i]);
 			counter++;
 		}
 		// add extra row and value
 		R1new.setRow(n,counter);
-		R1new.pushCol(n);
+		R1new.pushCol(n2);
 		R1new.pushValue(addedValue);
 		counter++;
 		R1new.setRow(n+1,counter);
