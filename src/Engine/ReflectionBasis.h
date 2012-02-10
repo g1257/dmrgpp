@@ -119,6 +119,8 @@ public:
 
 		choleskyFactor(iavail);
 		if (!idebug_) return;
+
+		printFullMatrix(reflection,"reflection");
 		std::cout<<"ipPos ";
 		for (size_t i=0;i<ipPos_.size();i++)
 			std::cout<<ipPos_[i]<<" ";
@@ -330,6 +332,8 @@ private:
 		}
 		return false;
 	}
+
+
 
 	void growOneRowAndOneColumn(SparseMatrixType& R1,
 				    const std::vector<ComplexOrRealType>& r,

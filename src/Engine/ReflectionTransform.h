@@ -109,6 +109,9 @@ public:
 		plusSector_ = reflectionBasis.R(1.0).rank();
 		computeTransform(Q1_,reflectionBasis,1.0);
 		computeTransform(Qm_,reflectionBasis,-1.0);
+		SparseMatrixType Q;
+		computeFullQ(Q,Q1_,Qm_);
+		split(Q);
 		if (!idebug_) return;
 		printFullMatrix(Q1_,"Q1");
 		printFullMatrix(Qm_,"Qm");
@@ -123,6 +126,7 @@ public:
 
 		multiply(HQm,H,Qm_);
 		if (idebug_) {
+			printFullMatrix(H,"OriginalHamiltonian");
 			printFullMatrix(HQm,"HQm");
 			printFullMatrix(HQ1,"HQ1");
 		}
@@ -248,12 +252,88 @@ private:
 		const SparseMatrixType& R1 = reflectionBasis.R(sector);
 		SparseMatrixType R1Inverse;
 		reflectionBasis.inverseTriangular(R1Inverse,R1,sector);
-//		printFullMatrix(R1Inverse,"R1Inverse");
+
 		SparseMatrixType T1;
 
 		buildT1(T1,reflectionBasis,sector);
 		bool strict = false; // matrices below have different ranks!!
 		multiply(Q1,T1,R1Inverse,strict);
+		if (!idebug_) return;
+		printFullMatrix(R1Inverse,"R1Inverse");
+		printFullMatrix(T1,"T1");
+	}
+
+	void computeFullQ(SparseMatrixType& Q,
+			  const SparseMatrixType& Q1,
+			  const SparseMatrixType& Qm) const
+	{
+		size_t n = Q1.rank();
+		std::vector<ComplexOrRealType> sum(n,0.0);
+		size_t counter = 0;
+		Q.resize(n);
+		for (size_t i=0;i<n;i++) {
+			Q.setRow(i,counter);
+			// add Q1
+			for (int k = Q1.getRowPtr(i);k<Q1.getRowPtr(i+1);k++) {
+				ComplexOrRealType val =  Q1.getValue(k);
+				Q.pushValue(val);
+				Q.pushCol(Q1.getCol(k));
+				sum[i] += std::conj(val)*val;
+				counter++;
+			}
+			// add Qm
+			for (int k = Qm.getRowPtr(i);k<Qm.getRowPtr(i+1);k++) {
+				ComplexOrRealType val =  Qm.getValue(k);
+				Q.pushValue(val);
+				Q.pushCol(Qm.getCol(k)+plusSector_);
+				sum[i] += std::conj(val)*val;
+				counter++;
+			}
+		}
+		Q.setRow(Q.rank(),counter);
+		// normalize
+		for (size_t i=0;i<n;i++) {
+			if (isAlmostZero(sum[i],1e-10)) continue;
+			sum[i] = 1.0/sqrt(sum[i]);
+			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
+				Q.setValues(k,Q.getValue(k)*sum[i]);
+			}
+		}
+		Q.checkValidity();
+		if (!idebug_) return;
+		printFullMatrix(Q,"Q");
+	}
+
+	void split(const SparseMatrixType& Q)
+	{
+		size_t n = Q.rank();
+		Q1_.resize(n);
+		size_t counter = 0;
+		for (size_t i=0;i<n;i++) {
+			Q1_.setRow(i,counter);
+			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
+				size_t col = Q.getCol(k);
+				if (col>=plusSector_) continue;
+				Q1_.pushCol(col);
+				Q1_.pushValue(Q.getValue(k));
+				counter++;
+			}
+		}
+		Q1_.setRow(Q1_.rank(),counter);
+
+		counter = 0;
+		Qm_.resize(n);
+		for (size_t i=0;i<n;i++) {
+			Qm_.setRow(i,counter);
+			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
+				size_t col = Q.getCol(k);
+				if (col<plusSector_) continue;
+				Qm_.pushCol(col-plusSector_);
+				Qm_.pushValue(Q.getValue(k));
+				counter++;
+			}
+		}
+		Qm_.setRow(Qm_.rank(),counter);
 	}
 
 	void buildT1(SparseMatrixType& T1final,
@@ -287,6 +367,7 @@ private:
 				T1.pushValue(1.0);
 				counter++;
 			}
+
 		}
 		T1.setRow(n,counter);
 		T1.checkValidity();
@@ -298,6 +379,7 @@ private:
 
 		T1final.resize(n);
 		counter=0;
+		std::vector<ComplexOrRealType> sum(n,0.0);
 		for (size_t i=0;i<n;i++) {
 			T1final.setRow(i,counter);
 			for (int k = T1.getRowPtr(i);k<T1.getRowPtr(i+1);k++) {
@@ -308,11 +390,22 @@ private:
 				assert(size_t(col)<ipPosOrNeg.size());
 				T1final.pushCol(col);
 				T1final.pushValue(val);
+				sum[i] += std::conj(val)*val;
 				counter++;
 			}
 		}
 		T1final.setRow(n,counter);
 		T1final.checkValidity();
+
+		// normalize T1
+//		for (size_t i=0;i<n;i++) {
+//			if (isAlmostZero(sum[i],1e-12)) continue;
+//			sum[i] = 1.0/sqrt(sum[i]);
+
+//			for (int k = T1final.getRowPtr(i);k<T1final.getRowPtr(i+1);k++)
+//				T1final.setValues(k,T1final.getValue(k) * sum[i]);
+
+//		}
 	}
 
 	bool idebug_;

@@ -111,8 +111,8 @@ namespace Dmrg {
 			bool compute(size_t i,
 			             size_t j,
 			             SparseMatrixType* matrixBlock,
-     		             LinkProductStructType* lps,
-     		             size_t& total) const
+				     LinkProductStructType* lps,
+				     size_t& total) const
 			{
 				bool flag=false;
 				size_t ind = modelHelper_.leftRightSuper().super().block()[i];
@@ -225,7 +225,14 @@ namespace Dmrg {
 			}
 
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
-			void linkProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,size_t i,size_t j,size_t type,const SparseElementType  &valuec,size_t term,size_t dofs) const
+			void linkProduct(std::vector<SparseElementType> &x,
+					 std::vector<SparseElementType> const &y,
+					 size_t i,
+					 size_t j,
+					 size_t type,
+					 const SparseElementType &valuec,
+					 size_t term,
+					 size_t dofs) const
 			{
 				int offset =modelHelper_.leftRightSuper().left().block().size();
 				std::pair<size_t,size_t> ops;
