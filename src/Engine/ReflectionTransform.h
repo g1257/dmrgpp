@@ -105,7 +105,7 @@ public:
 
 	void update(const SparseMatrixType& sSector)
 	{
-		ReflectionBasisType reflectionBasis(sSector);
+		ReflectionBasisType reflectionBasis(sSector,idebug_);
 		plusSector_ = reflectionBasis.R(1.0).rank();
 		computeTransform(Q1_,reflectionBasis,1.0);
 		computeTransform(Qm_,reflectionBasis,-1.0);
@@ -239,10 +239,12 @@ private:
 	{
 		SparseMatrixType C;
 		multiply(C,A,B);
-//		printFullMatrix(A,"MatrixA");
-//		printFullMatrix(B,"MatrixB");
-//		printFullMatrix(C,"MatrixC");
-		assert(isZero(C));
+		bool b = isZero(C,1e-5);
+		if (b) return;
+		printFullMatrix(A,"MatrixA");
+		printFullMatrix(B,"MatrixB");
+		printFullMatrix(C,"MatrixC");
+		assert(b);
 	}
 
 	void computeTransform(SparseMatrixType& Q1,
@@ -271,18 +273,23 @@ private:
 		std::vector<ComplexOrRealType> sum(n,0.0);
 		size_t counter = 0;
 		Q.resize(n);
+		size_t minusSector = n - plusSector_;
 		for (size_t i=0;i<n;i++) {
 			Q.setRow(i,counter);
 			// add Q1
 			for (int k = Q1.getRowPtr(i);k<Q1.getRowPtr(i+1);k++) {
+				size_t col = Q1.getCol(k);
+				if (col>=plusSector_) continue;
 				ComplexOrRealType val =  Q1.getValue(k);
 				Q.pushValue(val);
-				Q.pushCol(Q1.getCol(k));
+				Q.pushCol(col);
 				sum[i] += std::conj(val)*val;
 				counter++;
 			}
 			// add Qm
 			for (int k = Qm.getRowPtr(i);k<Qm.getRowPtr(i+1);k++) {
+				size_t col = Qm.getCol(k);
+				if (col>=minusSector) continue;
 				ComplexOrRealType val =  Qm.getValue(k);
 				Q.pushValue(val);
 				Q.pushCol(Qm.getCol(k)+plusSector_);

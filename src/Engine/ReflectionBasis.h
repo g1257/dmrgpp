@@ -103,8 +103,8 @@ class ReflectionBasis {
 
 public:
 
-	ReflectionBasis(const SparseMatrixType& reflection)
-	: progress_("ReflectionBasis",0),reflection_(reflection),idebug_(true)
+	ReflectionBasis(const SparseMatrixType& reflection,bool idebug)
+	: progress_("ReflectionBasis",0),reflection_(reflection),idebug_(idebug)
 	{
 		ReflectionColorOrDomType colorOrDom(reflection_);
 
@@ -156,7 +156,6 @@ public:
 		std::vector<ComplexOrRealType> r(R1t.rank());
 		SparseMatrixType tmpMatrix(r.size(),r.size());
 		size_t counter=0;
-		size_t upto = (sector>0) ? ipPos_.size() : ipNeg_.size();
 		for (size_t i=0;i<R1t.rank();i++) {
 			tmpMatrix.setRow(i,counter);
 			std::vector<ComplexOrRealType> rhs(R1t.rank(),0);
@@ -164,7 +163,7 @@ public:
 			linearSolverTriangular(r,R1t,rhs);
 			for (size_t i=0;i<r.size();i++) {
 				if (isAlmostZero(r[i],1e-10)) continue;
-				assert(i<upto);
+				assert(i<((sector>0) ? ipPos_.size() : ipNeg_.size()));
 				tmpMatrix.pushCol(i);
 				tmpMatrix.pushValue(r[i]);
 				counter++;
@@ -292,18 +291,20 @@ private:
 		msg2<<"needs extra churn, iavail="<<iavail.size();
 		progress_.printline(msg2,std::cout);
 
+		SparseMatrixType reflectionT;
+		transposeConjugate(reflectionT,reflection_);
 		for (size_t i=0;i<iavail.size();i++) {
 //			size_t ilast = i;
 			size_t j = iavail[i];
-			if (doneOneSector(i,j,R1_,1.0)) break;
-			if (doneOneSector(i,j,Rm_,-1.0)) break;
+			if (doneOneSector(i,j,R1_,1.0,reflectionT)) break;
+			if (doneOneSector(i,j,Rm_,-1.0,reflectionT)) break;
 		}
 		std::ostringstream msg;
 		msg<<"R1.rank="<<R1_.rank()<<" Rm.rank="<<Rm_.rank();
 		progress_.printline(msg,std::cout);
 	}
 
-	bool doneOneSector(size_t i,size_t j,SparseMatrixType& R1,const RealType& sector)
+	bool doneOneSector(size_t i,size_t j,SparseMatrixType& R1,const RealType& sector,const SparseMatrixType& reflectionT)
 	{
 		bool done = (ipPos_.size()+ipNeg_.size() >= reflection_.rank());
 		if (done) return true;
@@ -311,11 +312,11 @@ private:
 		RealType tol = 1e-5;
 
 		// try to add vector to (sector) space, where sector= + or -
-		std::vector<ComplexOrRealType> w;
-		setColumn(w,sector,j);
-		std::vector<ComplexOrRealType> T1w(w.size(),0);
+		std::vector<ComplexOrRealType> w(reflection_.rank(),0.0);
+		setColumn(w,sector,j,reflectionT);
+		std::vector<ComplexOrRealType> T1w(R1.rank(),0);
 		std::vector<size_t>& ipPosOrNeg = (sector>0) ? ipPos_ : ipNeg_;
-		setT1w(T1w,ipPosOrNeg,w,sector);
+		setT1w(T1w,ipPosOrNeg,w,sector,reflectionT);
 		std::vector<ComplexOrRealType> r(R1.rank());
 		SparseMatrixType R1t;
 		transposeConjugate(R1t,R1);
@@ -391,7 +392,7 @@ private:
 		};
 	}
 
-	void setT1w(std::vector<ComplexOrRealType>& T1w,
+	void setT1wOld(std::vector<ComplexOrRealType>& T1w,
 		    const std::vector<size_t>& ipPosOrNeg,
 		    const std::vector<ComplexOrRealType>& w,
 		    const RealType& sector) const
@@ -401,27 +402,44 @@ private:
 			for (int k = reflection_.getRowPtr(i);k<reflection_.getRowPtr(i+1);k++) {
 				size_t col = reflection_.getCol(k);
 				ComplexOrRealType val = reflection_.getValue(k);
-				if (col==i) val += sector;
+				//if (col==i) val += sector;
 				val *= sector;
-				T1w[col] += val*w[i];
+				T1w[col] += val*w[ii];
 			}
+			T1w[i] += w[i];
 		}
 	}
 
-	void setColumn(std::vector<ComplexOrRealType>& w,const RealType& sector,size_t j) const
+	void setT1w(std::vector<ComplexOrRealType>& T1w,
+		     const std::vector<size_t>& ipPosOrNeg,
+		     const std::vector<ComplexOrRealType>& w,
+		     const RealType& sector,
+		    const SparseMatrixType& reflectionT) const
 	{
-		for (size_t i=0;i<reflection_.rank();i++) {
-			ComplexOrRealType val = 0;
-			for (int k = reflection_.getRowPtr(i);k<reflection_.getRowPtr(i+1);k++) {
-				size_t col = reflection_.getCol(k);
-				if (col==j) {
-					val = reflection_.getValue(k);
-					break;
-				}
+		size_t n = reflectionT.rank();
+		std::vector<int> inverseP(n,-1);
+		for (size_t ii=0;ii<ipPosOrNeg.size();ii++)
+			inverseP[ipPosOrNeg[ii]]=ii;
+
+		for (size_t col=0;col<T1w.size();col++) {
+			ComplexOrRealType sum = 0.0;
+			for (int k = reflectionT.getRowPtr(col);k<reflectionT.getRowPtr(col+1);k++) {
+				int x = inverseP[reflectionT.getCol(k)];
+				if (x<0) continue;
+				sum += reflectionT.getValue(k)*w[x];
 			}
-			if (j==i) val += sector;
-			val *= sector;
-			w.push_back(val);
+			T1w[col] = w[col] + sector * sum;
+		}
+
+	}
+
+	void setColumn(std::vector<ComplexOrRealType>& w,const RealType& sector,size_t j,const SparseMatrixType& reflectionT) const
+	{
+		for (int k = reflectionT.getRowPtr(j);k<reflectionT.getRowPtr(j+1);k++) {
+			size_t col = reflectionT.getCol(k);
+			w[col] = reflection_.getValue(k);
+			if (col==j) w[col]+=sector;
+			w[col] *= sector;
 		}
 	}
 

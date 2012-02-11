@@ -336,11 +336,12 @@ private:
 		sSector.checkValidity();
 
 //		printSparseMatrix(sSector,"sSector",1e-3);
-
+#ifndef NDEBUG
 		SparseMatrixType tmp;
 		multiply(tmp,sSector,sSector);
 		//printFullMatrix(tmp,"sSector*sSector");
 		assert(isTheIdentity(tmp,1e-12));
+#endif
 	}
 
 
