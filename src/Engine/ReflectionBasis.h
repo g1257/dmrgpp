@@ -106,7 +106,7 @@ public:
 	ReflectionBasis(const SparseMatrixType& reflection,bool idebug)
 	: progress_("ReflectionBasis",0),reflection_(reflection),idebug_(idebug)
 	{
-		ReflectionColorOrDomType colorOrDom(reflection_);
+		ReflectionColorOrDomType colorOrDom(reflection_,idebug);
 
 		setIsolated(colorOrDom.isolated());
 		addColor(colorOrDom.ipcolor());
@@ -211,7 +211,7 @@ private:
 	void setIsolated(const std::vector<size_t>& ipIsolated)
 	{
 		if (ipIsolated.size()==0) return;
-		std::vector<ComplexOrRealType> dd;
+		std::vector<ComplexOrRealType> dd(reflection_.rank());
 		setDiagonal(dd,reflection_);
 		findPermuted(ipPos_,dd,ipIsolated,GREATER_THAN_ZERO);
 		findPermuted(ipNeg_,dd,ipIsolated,LESS_THAN_ZERO);
@@ -227,7 +227,7 @@ private:
 					break;
 				}
 			}
-			dd.push_back(val);
+			dd[i]=val;
 		}
 	}
 
@@ -309,13 +309,13 @@ private:
 		bool done = (ipPos_.size()+ipNeg_.size() >= reflection_.rank());
 		if (done) return true;
 
-		RealType tol = 1e-5;
+		RealType tol = 1;
 
 		// try to add vector to (sector) space, where sector= + or -
 		std::vector<ComplexOrRealType> w(reflection_.rank(),0.0);
 		setColumn(w,sector,j,reflectionT);
-		std::vector<ComplexOrRealType> T1w(R1.rank(),0);
 		std::vector<size_t>& ipPosOrNeg = (sector>0) ? ipPos_ : ipNeg_;
+		std::vector<ComplexOrRealType> T1w(ipPosOrNeg.size(),0);
 		setT1w(T1w,ipPosOrNeg,w,sector,reflectionT);
 		std::vector<ComplexOrRealType> r(R1.rank());
 		SparseMatrixType R1t;
@@ -388,27 +388,54 @@ private:
 				}
 				dsum += lij * r[j];
 			};
+			assert(!isAlmostZero(diag,1e-12));
 			r[irow] = (rhs[irow] - dsum) / diag; //<<<< you might store the inverse if you wish to avoid costly divisions
 		};
 	}
 
-	void setT1wOld(std::vector<ComplexOrRealType>& T1w,
-		    const std::vector<size_t>& ipPosOrNeg,
-		    const std::vector<ComplexOrRealType>& w,
-		    const RealType& sector) const
-	{
-		for (size_t ii=0;ii<ipPosOrNeg.size();ii++) {
-			size_t i = ipPosOrNeg[ii];
-			for (int k = reflection_.getRowPtr(i);k<reflection_.getRowPtr(i+1);k++) {
-				size_t col = reflection_.getCol(k);
-				ComplexOrRealType val = reflection_.getValue(k);
-				//if (col==i) val += sector;
-				val *= sector;
-				T1w[col] += val*w[ii];
-			}
-			T1w[i] += w[i];
-		}
-	}
+//	void setT1w(std::vector<ComplexOrRealType>& T1w,
+//		    const std::vector<size_t>& ipPosOrNeg,
+//		    size_t j,
+//		    const RealType& sector) const
+//	{
+//		size_t counter = 0;
+//		T1w.resize()
+//		for (size_t i=0;i<T1.rank();i++) {
+//			T1w.setRank(i,counter);
+//			for (int k = T1.getRowPtr(i);k<T1.getRowPtr(i+1);k++) {
+//				size_t col = T1.getCol(k);
+//				T1w.pushCol(col);
+//				T1w.pushValue(T1.getValue(k));
+//				counter++;
+//			}
+//			if (isAlmostZero(w[i],1e-12)) continue;
+//			T1w.pushCol(n);
+//			T1w.pushValue(w[i]);
+//			counter++;
+//		}
+//		T1w.setCounter(T1w.rank(),counter);
+//	}
+
+//	void setT1w(std::vector<ComplexOrRealType>& T1w,
+//		    const std::vector<size_t>& ipPosOrNeg,
+//		    const std::vector<ComplexOrRealType>& w,
+//		    const RealType& sector) const
+//	{
+//		for (size_t ii=0;ii<ipPosOrNeg.size();ii++) {
+//			size_t i = ipPosOrNeg[ii];
+//			if (isAlmostZero(w[ii],1e-12)) continue;
+//			for (int k = reflection_.getRowPtr(i);k<reflection_.getRowPtr(i+1);k++) {
+//				ComplexOrRealType val = reflection_.getValue(k);
+//				if (isAlmostZero(val,1e-6)) continue;
+//				size_t col = reflection_.getCol(k);
+//				if (col>=T1w.size()) throw std::runtime_error("setT1w\n");
+//				//if (col==i) val += sector;
+//				val *= sector;
+//				T1w[col] += val*w[ii];
+//			}
+//			T1w[i] += w[ii];
+//		}
+//	}
 
 	void setT1w(std::vector<ComplexOrRealType>& T1w,
 		     const std::vector<size_t>& ipPosOrNeg,
@@ -418,12 +445,16 @@ private:
 	{
 		size_t n = reflectionT.rank();
 		std::vector<int> inverseP(n,-1);
-		for (size_t ii=0;ii<ipPosOrNeg.size();ii++)
+		for (size_t ii=0;ii<ipPosOrNeg.size();ii++) {
+			if (isAlmostZero(w[ii],1e-14)) continue;
 			inverseP[ipPosOrNeg[ii]]=ii;
+		}
 
 		for (size_t col=0;col<T1w.size();col++) {
 			ComplexOrRealType sum = 0.0;
-			for (int k = reflectionT.getRowPtr(col);k<reflectionT.getRowPtr(col+1);k++) {
+			size_t start = reflectionT.getRowPtr(col);
+			size_t end   = reflectionT.getRowPtr(col+1);
+			for (size_t k = start;k < end;k++) {
 				int x = inverseP[reflectionT.getCol(k)];
 				if (x<0) continue;
 				sum += reflectionT.getValue(k)*w[x];

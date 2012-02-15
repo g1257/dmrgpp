@@ -111,7 +111,7 @@ public:
 		computeTransform(Qm_,reflectionBasis,-1.0);
 		SparseMatrixType Q;
 		computeFullQ(Q,Q1_,Qm_);
-		split(Q);
+//		split(Q);
 		if (!idebug_) return;
 		printFullMatrix(Q1_,"Q1");
 		printFullMatrix(Qm_,"Qm");
@@ -161,7 +161,35 @@ public:
 #ifndef NDEBUG
 		checkTransform(Qmt,HQ1);
 		checkTransform(Q1t,HQm);
+		SparseMatrixType A;
+		multiply(A,Q1t,Q1_);
+		bool b = isThePartialIdentity(A,plusSector_);
+		if (!b) {
+			printFullMatrix(A,"A");
+			assert(b);
+		}
+
+		multiply(A,Qmt,Qm_);
+		b = isThePartialIdentity(A,A.rank()-plusSector_);
+		if (!b) {
+			printFullMatrix(A,"A");
+			assert(b);
+		}
 #endif
+	}
+
+	bool isThePartialIdentity(const SparseMatrixType& A,size_t partialSize,const RealType& eps = 1e-6) const
+	{
+		for (size_t i=0;i<partialSize;i++) {
+			for (int k = A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+				size_t col = A.getCol(k);
+				if (col>=partialSize) continue;
+				ComplexOrRealType val = A.getValue(k);
+				if (i==col && !isAlmostZero(val-1.0,1e-6)) return false;
+				if (i!=col && !isAlmostZero(val,1e-6)) return false;
+			}
+		}
+		return true;
 	}
 
 	void setGs(VectorType& gs,const VectorType& v,const RealType& sector) const
@@ -299,14 +327,25 @@ private:
 		}
 		Q.setRow(Q.rank(),counter);
 		// normalize
-		for (size_t i=0;i<n;i++) {
-			if (isAlmostZero(sum[i],1e-10)) continue;
-			sum[i] = 1.0/sqrt(sum[i]);
-			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
-				Q.setValues(k,Q.getValue(k)*sum[i]);
-			}
-		}
+//		for (size_t i=0;i<n;i++) {
+//			if (isAlmostZero(sum[i],1e-10)) continue;
+//			sum[i] = 1.0/sqrt(sum[i]);
+//			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
+//				Q.setValues(k,Q.getValue(k)*sum[i]);
+//			}
+//		}
 		Q.checkValidity();
+#ifndef NDEBUG
+		SparseMatrixType Qt;
+		transposeConjugate(Qt,Q);
+		SparseMatrixType A;
+		multiply(A,Qt,Q);
+		if (!isTheIdentity(A)) {
+			printFullMatrix(Q,"Q");
+			printFullMatrix(A,"A");
+			assert(false);
+		}
+#endif
 		if (!idebug_) return;
 		printFullMatrix(Q,"Q");
 	}

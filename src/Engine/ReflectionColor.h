@@ -123,14 +123,15 @@ class ReflectionColor {
 
 public:
 
-	ReflectionColor(const SparseMatrixType& reflection)
-	: reflection_(reflection)
+	ReflectionColor(const SparseMatrixType& reflection,bool idebug)
+	: reflection_(reflection),idebug_(idebug)
 	{
 //		printFullMatrix(reflection,"reflection");
 		findIsolated();
 
-		std::cerr<<"Isolated nodes="<<ipIsolated_.size()<<"\n";
-		std::cerr<<"Connected nodes="<<ipConnected_.size()<<"\n";
+		printInfo();
+//		std::cerr<<"Isolated nodes="<<ipIsolated_.size()<<"\n";
+//		std::cerr<<"Connected nodes="<<ipConnected_.size()<<"\n";
 
 		size_t firstColor = 2;
 		SparseMatrixType A;
@@ -159,6 +160,17 @@ public:
 
 private:
 
+	void printInfo() const
+	{
+		if (!idebug_) return;
+		std::cout<<"ipIsolated ";
+		for (size_t i=0;i<ipIsolated_.size();i++)
+			std::cout<<ipIsolated_[i]<<" ";
+		std::cout<<"\n";
+		for (size_t i=0;i<ipConnected_.size();i++)
+			std::cout<<ipConnected_[i]<<" ";
+		std::cout<<"\n";
+	}
 
 	void generateAmatrix(SparseMatrixType& A,const std::vector<size_t>& ipConnected) const
 	{
@@ -331,6 +343,7 @@ private:
 	}
 
 	const SparseMatrixType& reflection_;
+	bool idebug_;
 	std::vector<size_t> ipIsolated_,ipConnected_;
 	std::vector<size_t> ilabel_;
 	std::vector<size_t> iperm_;

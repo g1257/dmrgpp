@@ -121,7 +121,7 @@ public:
 	  expandSys_(expandSys),
 	  reflectedLeft_(n0_,n0_),
 	  reflectedRight_(n0_,n0_),
-	  reflectionTransform_(false)
+	  reflectionTransform_(true)
 	{
 		size_t counter=0;
 		for (size_t i=0;i<reflectedLeft_.rank();i++) {
