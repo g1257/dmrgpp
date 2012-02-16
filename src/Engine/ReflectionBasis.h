@@ -309,7 +309,7 @@ private:
 		bool done = (ipPos_.size()+ipNeg_.size() >= reflection_.rank());
 		if (done) return true;
 
-		RealType tol = 1;
+		RealType tol = 1e-8;
 
 		// try to add vector to (sector) space, where sector= + or -
 		std::vector<ComplexOrRealType> w(reflection_.rank(),0.0);

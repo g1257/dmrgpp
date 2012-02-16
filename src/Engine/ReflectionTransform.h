@@ -109,8 +109,8 @@ public:
 		plusSector_ = reflectionBasis.R(1.0).rank();
 		computeTransform(Q1_,reflectionBasis,1.0);
 		computeTransform(Qm_,reflectionBasis,-1.0);
-		SparseMatrixType Q;
-		computeFullQ(Q,Q1_,Qm_);
+//		SparseMatrixType Q;
+		//computeFullQ(Q,Q1_,Qm_);
 //		split(Q);
 		if (!idebug_) return;
 		printFullMatrix(Q1_,"Q1");
@@ -163,14 +163,14 @@ public:
 		checkTransform(Q1t,HQm);
 		SparseMatrixType A;
 		multiply(A,Q1t,Q1_);
-		bool b = isThePartialIdentity(A,plusSector_);
+		bool b = isThePartialIdentity(A,plusSector_,1e-5);
 		if (!b) {
 			printFullMatrix(A,"A");
 			assert(b);
 		}
 
 		multiply(A,Qmt,Qm_);
-		b = isThePartialIdentity(A,A.rank()-plusSector_);
+		b = isThePartialIdentity(A,A.rank()-plusSector_,1e-5);
 		if (!b) {
 			printFullMatrix(A,"A");
 			assert(b);
@@ -185,8 +185,8 @@ public:
 				size_t col = A.getCol(k);
 				if (col>=partialSize) continue;
 				ComplexOrRealType val = A.getValue(k);
-				if (i==col && !isAlmostZero(val-1.0,1e-6)) return false;
-				if (i!=col && !isAlmostZero(val,1e-6)) return false;
+				if (i==col && !isAlmostZero(val-1.0,eps)) return false;
+				if (i!=col && !isAlmostZero(val,eps)) return false;
 			}
 		}
 		return true;
@@ -340,7 +340,7 @@ private:
 		transposeConjugate(Qt,Q);
 		SparseMatrixType A;
 		multiply(A,Qt,Q);
-		if (!isTheIdentity(A)) {
+		if (!isTheIdentity(A,1e-5)) {
 			printFullMatrix(Q,"Q");
 			printFullMatrix(A,"A");
 			assert(false);

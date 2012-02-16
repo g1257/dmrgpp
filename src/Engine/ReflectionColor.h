@@ -134,9 +134,11 @@ public:
 //		std::cerr<<"Connected nodes="<<ipConnected_.size()<<"\n";
 
 		size_t firstColor = 2;
-		SparseMatrixType A;
-		generateAmatrix(A,ipConnected_);
-		size_t ncolor = gencolorLabel(A,firstColor);
+		//SparseMatrixType A;
+		//generateAmatrix(A,ipConnected_);
+		size_t ncolor = gencolorLabel(reflection,firstColor);
+
+//		for (size_t i=0ilabel(ip_isolated) = 0;
 
 		//		% print statistics
 		//		% ----------------
@@ -149,9 +151,13 @@ public:
 
 		//gencolorCheck(ilabel_,ncolor);
 
-		gencolorPerm(ilabel_,firstColor,ncolor);
+		//gencolorPerm(ilabel_,firstColor,ncolor);
 
-		findWithLabel(ipcolor_,ilabel_,firstColor);
+		for (size_t i=0;i<ipIsolated_.size();i++)
+			ilabel_[ipIsolated_[i]]=AVAILABLE;
+
+		for (size_t i=0;i<ilabel_.size();i++)
+			if (ilabel_[i]==firstColor) ipcolor_.push_back(i);
 	}
 
 	const std::vector<size_t>& ipcolor() const { return ipcolor_; }
@@ -219,7 +225,7 @@ private:
 
 	size_t gencolorLabel(const SparseMatrixType& A,size_t firstColor)
 	{
-		ilabel_.assign(ipConnected_.size(),AVAILABLE);
+		ilabel_.assign(A.rank(),AVAILABLE);
 
 		size_t ncolor = firstColor-1;
 		std::vector<size_t> ilist;
@@ -309,44 +315,45 @@ private:
 			if (ilabel[i]==icolor) ilist.push_back(i);
 	}
 
-	void gencolorPerm(const std::vector<size_t>& ilabel,
-			  size_t firstColor,
-			  size_t ncolor)
-	{
-		// find size:
-		std::vector<size_t> ilist;
-		size_t ip = 0;
-		iperm_.resize(reflection_.rank());
+//	void gencolorPerm(const std::vector<size_t>& ilabel,
+//			  size_t firstColor,
+//			  size_t ncolor)
+//	{
+//		// find size:
+//		std::vector<size_t> ilist;
+//		size_t ip = 0;
+//		iperm_.resize(reflection_.rank());
 
-		for (size_t icolor=firstColor;icolor<=ncolor;icolor++) {
-			//			ilist = find( ilabel == icolor);
-			ilist.clear();
-			findWithLabel(ilist,ilabel,icolor);
-			size_t nc = ilist.size();
-			//			nc = length(ilist);
-			for (size_t j=ip;j<ip+nc;j++) iperm_[j]=ilist[j-ip];
+//		for (size_t icolor=firstColor;icolor<=ncolor;icolor++) {
+//			//			ilist = find( ilabel == icolor);
+//			ilist.clear();
+//			findWithLabel(ilist,ilabel,icolor);
+//			size_t nc = ilist.size();
+//			//			nc = length(ilist);
+//			for (size_t j=ip;j<ip+nc;j++) iperm_[j]=ilist[j-ip];
 
-			// omitting check
-			ip += nc;
-		}
+//			// omitting check
+//			ip += nc;
+//		}
+//		if (!idebug_) return;
 
-		//		% ----------------
-		//		% print statistics
-		//		% ----------------
-		std::cout<<"ncolor="<<ncolor<<"\n";
-		for (size_t icolor=firstColor;icolor<ncolor;icolor++) {
-			ilist.clear();
-			findWithLabel(ilist,ilabel,icolor);
-			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
-		}
+//		//		% ----------------
+//		//		% print statistics
+//		//		% ----------------
+//		std::cout<<"ncolor="<<ncolor<<"\n";
+//		for (size_t icolor=firstColor;icolor<ncolor;icolor++) {
+//			ilist.clear();
+//			findWithLabel(ilist,ilabel,icolor);
+//			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
+//		}
 
-	}
+//	}
 
 	const SparseMatrixType& reflection_;
 	bool idebug_;
 	std::vector<size_t> ipIsolated_,ipConnected_;
 	std::vector<size_t> ilabel_;
-	std::vector<size_t> iperm_;
+//	std::vector<size_t> iperm_;
 	std::vector<size_t> ipcolor_;
 }; // class ReflectionColor
 
