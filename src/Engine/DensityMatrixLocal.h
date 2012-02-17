@@ -135,6 +135,7 @@ namespace Dmrg {
 		{
 			diagonalise<DensityMatrixElementType,RealType,ConcurrencyType>(data_,eigs,jobz,concurrency);
 		}
+
 		virtual void init(
 				const TargettingType& target,
 				DmrgBasisWithOperatorsType const &pBasis,

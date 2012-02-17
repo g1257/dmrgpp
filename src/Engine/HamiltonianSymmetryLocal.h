@@ -138,7 +138,7 @@ namespace Dmrg {
 
 			template<typename SolverParametersType>
 			void calcRemovedIndices(std::vector<size_t>& removedIndices,std::vector<RealType>& eigs,size_t kept,
-					const SolverParametersType& solverParams)
+					const SolverParametersType& solverParams) const
 			{
 				if (eigs.size()<=kept) return;
 				// we sort the eigenvalues

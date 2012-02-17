@@ -322,20 +322,20 @@ namespace Dmrg {
 			if (useSu2Symmetry_) symmSu2_.calcRemovedIndices(removedIndices,eigs,kept,solverParams);
 			else symmLocal_.calcRemovedIndices(removedIndices,eigs,kept,solverParams);
 
-			if (removedIndices.size()>0) {
-				std::vector<size_t> perm(removedIndices.size());
-				Sort<std::vector<size_t> > sort;
-				sort.sort(removedIndices,perm);
-				std::ostringstream msg;
-				msg<<"Truncating transform...";
-				utils::truncate(ftransform,removedIndices,false);
-				progress_.printline(msg,std::cerr);
+			if (removedIndices.size()==0) return 0;
 
-				std::ostringstream msg2;
-				msg2<<"Truncating indices...";
-				progress_.printline(msg2,std::cerr);
-				truncate(removedIndices);
-			}
+			std::vector<size_t> perm(removedIndices.size());
+			Sort<std::vector<size_t> > sort;
+			sort.sort(removedIndices,perm);
+			std::ostringstream msg0;
+			msg0<<"Truncating transform...";
+			utils::truncate(ftransform,removedIndices,false);
+			progress_.printline(msg0,std::cerr);
+
+			std::ostringstream msg2;
+			msg2<<"Truncating indices...";
+			progress_.printline(msg2,std::cerr);
+			truncate(removedIndices);
 
 			// N.B.: false below means that we don't truncate the permutation vectors
 			//	because they're needed for the WFT
@@ -526,7 +526,7 @@ namespace Dmrg {
 			else symmLocal_.save(io);
 		}
 
-		RealType calcError(std::vector<RealType> const &eigs,std::vector<size_t> const &removedIndices)
+		RealType calcError(std::vector<RealType> const &eigs,std::vector<size_t> const &removedIndices) const
 		{
 			RealType sum=static_cast<RealType>(0.0);
 			for (size_t i=0;i<eigs.size();i++)
