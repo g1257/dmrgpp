@@ -142,12 +142,7 @@ public:
 
 		//		% print statistics
 		//		% ----------------
-		std::cout<<"ncolor="<<ncolor<<"\n";
-		for (size_t icolor=firstColor;icolor<=ncolor;icolor++) {
-			std::vector<size_t> ilist;
-			findWithLabel(ilist,ilabel_,icolor);
-			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
-		}
+		printInfo2(ncolor,firstColor);
 
 		//gencolorCheck(ilabel_,ncolor);
 
@@ -176,6 +171,17 @@ private:
 		for (size_t i=0;i<ipConnected_.size();i++)
 			std::cout<<ipConnected_[i]<<" ";
 		std::cout<<"\n";
+	}
+
+	void printInfo2(size_t ncolor,size_t firstColor) const
+	{
+		if (!idebug_) return;
+		std::cout<<"ncolor="<<ncolor<<"\n";
+		for (size_t icolor=firstColor;icolor<=ncolor;icolor++) {
+			std::vector<size_t> ilist;
+			findWithLabel(ilist,ilabel_,icolor);
+			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
+		}
 	}
 
 	void generateAmatrix(SparseMatrixType& A,const std::vector<size_t>& ipConnected) const

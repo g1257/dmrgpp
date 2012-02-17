@@ -307,7 +307,8 @@ namespace Dmrg {
 		//! transforms this basis by transform 
 		template<typename BlockMatrixType,typename SolverParametersType>
 		RealType changeBasis(typename BlockMatrixType::BuildingBlockType &ftransform,
-				     BlockMatrixType& transform, std::vector<RealType>& eigs,
+				     const BlockMatrixType& transform,
+				     std::vector<RealType>& eigs,
 				     size_t kept,
 				     const SolverParametersType& solverParams)
 		{
