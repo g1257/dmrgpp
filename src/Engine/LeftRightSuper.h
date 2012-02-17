@@ -273,8 +273,8 @@ namespace Dmrg {
 			template<typename SomeModelType>
 			void grow(BasisWithOperatorsType& leftOrRight,
 			          const SomeModelType& model,
-			          BasisWithOperatorsType &pS,
-			          BlockType const &X,
+				  BasisWithOperatorsType &pS,
+				  const BlockType& X,
 			          size_t dir,
 				  RealType time)
 			{

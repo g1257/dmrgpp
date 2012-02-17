@@ -304,13 +304,30 @@ namespace Dmrg {
 		}
 
 		//! removes the indices contained in removedIndices and
-		//! transforms this basis by transform 
-		template<typename BlockMatrixType,typename SolverParametersType>
-		RealType changeBasis(typename BlockMatrixType::BuildingBlockType &ftransform,
-				     const BlockMatrixType& transform,
-				     std::vector<RealType>& eigs,
-				     size_t kept,
-				     const SolverParametersType& solverParams)
+		//! transforms this basis by transform
+		//! eigs cannot be const because su(2) needs to sort them due to being obtained in blocks
+		template<typename SolverParametersType>
+		void changeBasis(std::vector<size_t>& removedIndices,
+				 std::vector<RealType>& eigs,
+				 size_t kept,
+				 const SolverParametersType& solverParams)
+		{
+			removedIndices.clear();
+			if (useSu2Symmetry_) symmSu2_.calcRemovedIndices(removedIndices,eigs,kept,solverParams);
+			else symmLocal_.calcRemovedIndices(removedIndices,eigs,kept,solverParams);
+
+			if (removedIndices.size()==0) return;
+
+			std::vector<size_t> perm(removedIndices.size());
+			Sort<std::vector<size_t> > sort;
+			sort.sort(removedIndices,perm);
+		}
+
+		template<typename BlockMatrixType>
+		RealType truncateBasis(typename BlockMatrixType::BuildingBlockType &ftransform,
+				       const BlockMatrixType& transform,
+				       const std::vector<RealType>& eigs,
+				       const std::vector<size_t>& removedIndices)
 		{
 			quantumNumbersOld_ = quantumNumbers_;
 			partitionOld_ = partition_;
@@ -318,15 +335,8 @@ namespace Dmrg {
 
 			blockMatrixToFullMatrix(ftransform,transform);
 
-			std::vector<size_t> removedIndices;
-			if (useSu2Symmetry_) symmSu2_.calcRemovedIndices(removedIndices,eigs,kept,solverParams);
-			else symmLocal_.calcRemovedIndices(removedIndices,eigs,kept,solverParams);
-
 			if (removedIndices.size()==0) return 0;
 
-			std::vector<size_t> perm(removedIndices.size());
-			Sort<std::vector<size_t> > sort;
-			sort.sort(removedIndices,perm);
 			std::ostringstream msg0;
 			msg0<<"Truncating transform...";
 			utils::truncate(ftransform,removedIndices,false);

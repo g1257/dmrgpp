@@ -148,7 +148,6 @@ namespace Dmrg {
 		  concurrency_(concurrency),
 		  targetStruct_(targetStruct),
 		  verbose_(false),
-//		  useReflection_(false),
 		  lrs_("pSprime","pEprime","pSE"),
 		  io_(parameters_.filename,concurrency.rank()),
 		  ioIn_(parameters_.filename),
@@ -169,8 +168,6 @@ namespace Dmrg {
 			std::string s =hostInfo.getTimeDate();
 			io_.print(s);
 			if (parameters_.options.find("verbose")!=std::string::npos) verbose_=true;
-			if (parameters_.options.find("useReflection")!=std::string::npos)
-				useReflection_=true;
 		}
 
 		~DmrgSolver()
@@ -238,7 +235,7 @@ namespace Dmrg {
 		const ModelType& model_;
 		ConcurrencyType& concurrency_;
 		const TargettingParamsType& targetStruct_;
-		bool verbose_,useReflection_;
+		bool verbose_;
 		LeftRightSuperType lrs_;
 		typename IoType::Out io_;
 		typename IoType::In ioIn_;
@@ -322,9 +319,11 @@ namespace Dmrg {
 
 				diagonalization_(psi,INFINITE,X[step],Y[step]);
 
-				truncate_(pS,psi,parameters_.keptStatesInfinite,EXPAND_SYSTEM);
+				truncate_.changeBasis(psi,parameters_.keptStatesInfinite,EXPAND_SYSTEM);
 				
-				truncate_(pE,psi,parameters_.keptStatesInfinite,EXPAND_ENVIRON);
+				truncate_.changeBasis(psi,parameters_.keptStatesInfinite,EXPAND_ENVIRON);
+
+				truncate_.truncateBasis(pS,pE);
 
 				checkpoint_.push(pS,pE);
 			}
@@ -349,7 +348,6 @@ namespace Dmrg {
 	  				//int l,
        					TargettingType& psi)
 		{
-			useReflection_=false; // disable reflection symmetry for finite loop if it was enabled:
 			if (parameters_.options.find("nofiniteloops")!=std::string::npos) return;
 			if (parameters_.finiteLoop.size()==0)
 				throw std::runtime_error("finiteDmrgLoops(...): there are no finite loops! (and nofiniteloops is not set)\n");

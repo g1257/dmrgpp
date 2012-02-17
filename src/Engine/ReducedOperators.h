@@ -235,7 +235,7 @@ namespace Dmrg {
 			if (!useSu2Symmetry_) return;
 			size_t nr=thisBasis->reducedSize();
 			size_t nold = thisBasis_->reducedSize();
-			ftransform_.resize(nold,nr);
+			ftransform_.reset(nold,nr);
 
 			for (size_t i=0;i<nold;i++) {
 				size_t ii =thisBasis_->reducedIndex(i); // old

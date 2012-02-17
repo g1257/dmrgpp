@@ -106,6 +106,7 @@ namespace Dmrg {
 	public:
 
 		typedef typename DensityMatrixType::BuildingBlockType TransformType;
+		typedef typename DensityMatrixType::BlockMatrixType BlockMatrixType;
 
 		Truncation(ReflectionSymmetryType& reflectionOperator,
 		           WaveFunctionTransfType& waveFunctionTransformation,
@@ -122,7 +123,11 @@ namespace Dmrg {
 		  verbose_(verbose),
 		  progress_("Truncation",0),
 		  keptStates_(0),
-		  error_(0.0)
+		  error_(0.0),
+		  sTransform_(0,0),
+		  eTransform_(0,0),
+		  rSprime_("rSprime"),
+		  rEprime_("rEprime")
 		{
 			if (parameters_.tolerance<0) return;
 			std::ostringstream msg;
@@ -136,56 +141,31 @@ namespace Dmrg {
 		                size_t keptStates,
 		                size_t direction)
 		{
-// 			TransformType transform;
 			if (direction==EXPAND_SYSTEM) {
 				progress_.print("for Environment\n",std::cout);
-				this->operator()(pS,target,keptStates,direction);
+				changeBasis(target,keptStates,direction);
+				truncateBasisSystem(lrs_.right());
+				pS = rSprime_;
 			} else {
 				progress_.print("for System\n",std::cout);
-				this->operator()(pE,target,keptStates,direction);
-				
+				changeBasis(target,keptStates,direction);
+				truncateBasisEnviron(lrs_.left());
+				pE = rEprime_;
 			}
 		}
 
-		//! Truncate basis
-		void operator()(BasisWithOperatorsType &rSprime,
-						const TargettingType& target,
-				  size_t keptStates,
-				  size_t direction) 
+		const TransformType& transform() const
 		{
-			keptStates_ = keptStates;
-			//size_t opPerSite = lrs_.left().numberOfOperatorsPerSite();
-// 			size_t mostRecent = lrs_.left().numberOfOperatorsPerSite() * maxConnections_;
-			if (direction==EXPAND_SYSTEM) {
-// 				size_t numOfOp = lrs_.left().numberOfOperators();
-// 				std::pair<size_t,size_t> startEnd(0,numOfOp);
-// 				if (startEnd.second>mostRecent) // && numOfOp>4*opPerSite)
-// 					startEnd.first = startEnd.second - mostRecent;
-				changeAndTruncateBasis(rSprime,target,lrs_.left(),lrs_.right(),
-									   direction); //startEnd);
-			} else {
-// 				size_t numOfOp = lrs_.right().numberOfOperators();
-// 				std::pair<size_t,size_t> startEnd(0,numOfOp);
-// 				if (startEnd.second>mostRecent) // && numOfOp>4*opPerSite)
-// 					startEnd.second = mostRecent;
-				changeAndTruncateBasis(rSprime,target,lrs_.right(),lrs_.left(),
-									   direction); //startEnd);
-			}
+			return ftransform_;
 		}
-
-		const TransformType& transform() const { return ftransform_; }
 		
 		const RealType& error() const { return error_; }
 
-	private:
-
-		void changeAndTruncateBasis(BasisWithOperatorsType &rSprime,
-		                            const TargettingType& target,
-		                            BasisWithOperatorsType const &pBasis,
-		                            BasisWithOperatorsType const &pBasisSummed,
-		                            size_t direction)
-// 		                            const std::pair<size_t,size_t>& startEnd)
+		void changeBasis(const TargettingType& target,
+				 size_t keptStates,
+				 size_t direction)
 		{
+			keptStates_= keptStates;
 			/** !PTEX-START Truncation
 			Let us define the density matrices for system:
 			\begin{equation}
@@ -200,6 +180,12 @@ namespace Dmrg {
 			\end{equation}
 			in $\mathcal{V}(E')$.
 			!PTEX-END */
+
+			const BasisWithOperatorsType& pBasis = (direction==EXPAND_SYSTEM) ?
+						lrs_.left() : lrs_.right();
+			const BasisWithOperatorsType& pBasisSummed = (direction==EXPAND_SYSTEM) ?
+						lrs_.right() : lrs_.left();
+
 			DensityMatrixType dmS(target,pBasis,pBasisSummed,lrs_.super(),direction);
 			dmS.check(direction);
 			
@@ -207,7 +193,7 @@ namespace Dmrg {
 				std::cerr<<"Trying to diagonalize density-matrix with size=";
 				std::cerr<<dmS.rank()<<"\n";
 			}
-			std::vector<RealType> eigs;
+
 			/** !PTEX-START DiagOfDensityMatrix
 			We then diagonalize $\hat{\rho}_S$, and obtain its eigenvalues and eigenvectors, 
 			$w^S_{\alpha,\alpha'}$ in $\mathcal{V}(S')$ ordered in decreasing eigenvalue order.
@@ -217,42 +203,68 @@ namespace Dmrg {
 			\label{eq:transformation}
 			\end{equation}
 			!PTEX-END */
-			bool entangle = (parameters_.options.find("noentangle")==std::string::npos);
 
-			if (entangle) {
-				dmS.diag(eigs,'V',concurrency_);
-				dmS.check2(direction);
+			dmS.diag(eigs_,'V',concurrency_);
+			dmS.check2(direction);
+			updateKeptStates(eigs_);
 
-				updateKeptStates(eigs);
-			}
 
 			//! transform basis: dmS^\dagger * operator matrix * dms
-			rSprime = pBasis;
-
-			if (entangle) {
-				error_ = rSprime.changeBasis(ftransform_,dmS(),eigs,keptStates_,
-			                             parameters_,concurrency_); //startEnd);
-				reflectionOperator_.changeBasis(ftransform_,direction);
-				std::ostringstream msg2;
-				msg2<<"done with entanglement";
-				progress_.printline(msg2,std::cout);
-			}
-
-			if (direction == EXPAND_SYSTEM) {
-				LeftRightSuperType lrs(rSprime,
-										(BasisWithOperatorsType&) pBasisSummed,
-										(BasisType&)lrs_.super());
-				waveFunctionTransformation_.push(ftransform_,direction,lrs);
+			if (direction==EXPAND_SYSTEM) {
+				sTransform_ = dmS();
+				rSprime_ = lrs_.left();
+				rSprime_.changeBasis(removedIndicesS_,eigs_,keptStates_,parameters_);
+				reflectionOperator_.changeBasis(sTransform_,direction);
 			} else {
-				LeftRightSuperType lrs((BasisWithOperatorsType&) pBasisSummed,
-										rSprime,
-										(BasisType&)lrs_.super());
-				waveFunctionTransformation_.push(ftransform_,direction,lrs);
+				eTransform_ = dmS();
+				rEprime_ = lrs_.right();
+				rEprime_.changeBasis(removedIndicesE_,eigs_,keptStates_,parameters_);
+				reflectionOperator_.changeBasis(eTransform_,direction);
 			}
+
+			std::ostringstream msg2;
+			msg2<<"done with entanglement";
+			progress_.printline(msg2,std::cout);
+
+		}
+
+		void truncateBasis(BasisWithOperatorsType& sBasis,
+				   BasisWithOperatorsType& eBasis)
+		{
+			reflectionOperator_.updateKeptStates(keptStates_);
+			truncateBasisSystem(eBasis);
+			truncateBasisEnviron(sBasis);
+			sBasis = rSprime_;
+			eBasis = rEprime_;
+		}
+
+	private:
+
+		void truncateBasisSystem(const BasisWithOperatorsType& eBasis)
+		{
 			std::ostringstream msg;
-			msg<<"new size of basis="<<rSprime.size();
+			error_ = rSprime_.truncateBasis(ftransform_,sTransform_,eigs_,removedIndicesS_,concurrency_);
+			LeftRightSuperType lrs(rSprime_,(BasisWithOperatorsType&) eBasis,
+					       (BasisType&)lrs_.super());
+			waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrs);
+
+			msg<<"new size of basis="<<rSprime_.size();
 			progress_.printline(msg,std::cout);
 		}
+
+		void truncateBasisEnviron(const BasisWithOperatorsType& sBasis)
+		{
+
+			std::ostringstream msg;
+			TransformType ftransform;
+			error_ = rEprime_.truncateBasis(ftransform_,eTransform_,eigs_,removedIndicesE_,concurrency_);
+			LeftRightSuperType lrs((BasisWithOperatorsType&) sBasis,
+					       rEprime_,(BasisType&)lrs_.super());
+			waveFunctionTransformation_.push(ftransform_,EXPAND_ENVIRON,lrs);
+			msg<<"new size of basis="<<rEprime_.size();
+			progress_.printline(msg,std::cout);
+		}
+
 
 		void updateKeptStates(const std::vector<RealType>& eigs2)
 		{
@@ -348,6 +360,11 @@ namespace Dmrg {
 		size_t keptStates_;
 		RealType error_;
 		TransformType ftransform_;
+		BlockMatrixType sTransform_,eTransform_;
+		std::vector<RealType> eigs_;
+		std::vector<size_t> removedIndicesS_,removedIndicesE_;
+		BasisWithOperatorsType rSprime_,rEprime_;
+
 	}; // class Truncation
 	
 } // namespace

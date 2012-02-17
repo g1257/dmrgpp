@@ -89,7 +89,7 @@ namespace Dmrg {
 		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
-		typedef BlockMatrix<DensityMatrixElementType,PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
+
 		typedef typename DmrgBasisType::FactorsType FactorsType;
 		typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 
@@ -98,6 +98,8 @@ namespace Dmrg {
 		static int const parallelRank_ = 0; // FIXME <-- ADD PARALLELISM
 
 	public:
+
+		typedef BlockMatrix<DensityMatrixElementType,PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 
 		DensityMatrixLocal(

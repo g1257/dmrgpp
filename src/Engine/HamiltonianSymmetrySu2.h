@@ -203,10 +203,7 @@ namespace Dmrg {
 				findAllowedJm(symm1,symm2,electrons1,electrons2,pseudoQn);;
 				createFactors(ns,ne);
 				setFlavors(quantumNumbers);
-				if (quantumNumbers.size()!=(ns*ne)) {
-					std::cerr<<"ns="<<ns<<" ne="<<ne<<" but quantumNumbers.size="<<quantumNumbers.size()<<"\n";
-					throw std::runtime_error("Wrong number of quantum numbers\n");
-				}
+				assert(quantumNumbers.size()==(ns*ne));
 			
 				jMax_=0;
 				jmValues_.maxFirst<std::greater<size_t> >(jMax_);
@@ -245,10 +242,12 @@ namespace Dmrg {
 			size_t jMax() const { return jMax_; }
 
 			template<typename SolverParametersType>
-			void calcRemovedIndices(std::vector<size_t>& removedIndices,std::vector<RealType>& eigs,size_t kept,
-					const SolverParametersType& solverParams)
+			void calcRemovedIndices(std::vector<size_t>& removedIndices,
+						std::vector<RealType>& eigs,
+						size_t kept,
+						const SolverParametersType& solverParams) const
 			{
-				normalizeFlavors();
+//				normalizeFlavors();
 
 				// we sort the eigenvalues
 				// note: eigenvalues are not ordered because DensityMatrix is diagonalized in blocks
@@ -516,8 +515,10 @@ namespace Dmrg {
 				}
 			}
 
-			void inclusiveRemoval(std::vector<size_t>& removedIndices,const std::vector<size_t>& perm,
-					      const std::vector<RealType>& eigs,size_t target)
+			void inclusiveRemoval(std::vector<size_t>& removedIndices,
+					      const std::vector<size_t>& perm,
+					      const std::vector<RealType>& eigs,
+					      size_t target) const
 			{
 				std::vector<size_t> permInverse(perm.size());
 				for (size_t i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
@@ -555,8 +556,10 @@ namespace Dmrg {
 				}
 			}
 
-			void exclusiveRemoval(std::vector<size_t>& removedIndices,const std::vector<size_t>& perm,
-					      const std::vector<RealType>& eigs,size_t target)
+			void exclusiveRemoval(std::vector<size_t>& removedIndices,
+					      const std::vector<size_t>& perm,
+					      const std::vector<RealType>& eigs,
+					      size_t target) const
 			{
 				std::vector<size_t> permInverse(perm.size());
 				for (size_t i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;

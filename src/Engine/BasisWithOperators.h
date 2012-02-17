@@ -218,17 +218,15 @@ namespace Dmrg {
 
 		//! transform this basis by transform 
 		//! note: basis change must conserve total number of electrons and all quantum numbers
-		template<typename RealType,typename BlockMatrixType,typename SolverParametersType>
-		RealType changeBasis(typename BlockMatrixType::BuildingBlockType& ftransform,
-		                     BlockMatrixType  &transform,
-		                     std::vector<RealType>& eigs,
-		                     size_t kept,const SolverParametersType& solverParams,
-		                     ConcurrencyType &concurrency)
-// 		                     const std::pair<size_t,size_t>& startEnd)
+		template<typename RealType,typename BlockMatrixType>
+		RealType truncateBasis(typename BlockMatrixType::BuildingBlockType& ftransform,
+				       const BlockMatrixType& transform,
+				       const std::vector<RealType>& eigs,
+				       const std::vector<size_t>& removedIndices,
+				       ConcurrencyType& concurrency)
 		{
-
 			BasisType &parent = *this;
-			RealType error = parent.changeBasis(ftransform,transform,eigs,kept,solverParams);
+			RealType error = parent.truncateBasis(ftransform,transform,eigs,removedIndices);
 
 			operators_.changeBasis(ftransform,this,concurrency); //startEnd);
 

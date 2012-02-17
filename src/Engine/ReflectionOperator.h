@@ -168,6 +168,14 @@ public:
 		}
 	}
 
+	void updateKeptStates(size_t keptStates)
+	{
+		if (!isEnabled_) return;
+		std::ostringstream msg;
+		msg<<"updateKeptStates: DOING NOTHING";
+		progress_.printline(msg,std::cout);
+	}
+
 	void transform(SparseMatrixType& matrixA,
 		       SparseMatrixType& matrixB,
 		       const SparseMatrixType& matrix) const

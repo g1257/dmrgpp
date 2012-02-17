@@ -94,8 +94,6 @@ namespace Dmrg {
 			SparseMatrixType;
 		typedef typename TargettingType::TargetVectorType::value_type
 			DensityMatrixElementType;
-		typedef BlockMatrix<DensityMatrixElementType,
-			PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
 		typedef DensityMatrixLocal<RealType,DmrgBasisType,
 			DmrgBasisWithOperatorsType, TargettingType>
@@ -108,6 +106,9 @@ namespace Dmrg {
 			DensityMatrixBaseType;
 
 	public:
+
+		typedef BlockMatrix<DensityMatrixElementType,
+			PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename BlockMatrixType::BuildingBlockType
 			BuildingBlockType;
 
