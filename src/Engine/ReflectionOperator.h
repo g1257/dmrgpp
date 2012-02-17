@@ -147,28 +147,30 @@ public:
 		reflectionTransform_.update(sSector);
 	}
 
-	void changeBasis(const PsimagLite::Matrix<ComplexOrRealType>& transform,
-			 size_t direction)
-	{
-		if (!isEnabled_) return;
-		SparseMatrixType newreflected;
-		static PsimagLite::Matrix<ComplexOrRealType> cachedTransform;
-		if (direction==expandSys_) {
-//			changeBasis(newreflected,reflectedLeft_,transform);
+//	void changeBasis(const PsimagLite::Matrix<ComplexOrRealType>& transform,
+//			 size_t direction)
+//	{
+//		if (!isEnabled_) return;
+//		SparseMatrixType newreflected;
+//		static PsimagLite::Matrix<ComplexOrRealType> cachedTransform;
+//		if (direction==expandSys_) {
+////			changeBasis(newreflected,reflectedLeft_,transform);
+////			reflectedLeft_ = newreflected;
+//			cachedTransform = transform;
+//		} else {
+//			changeBasis(newreflected,reflectedLeft_,cachedTransform,transform);
+////			normalize(newreflected);
 //			reflectedLeft_ = newreflected;
-			cachedTransform = transform;
-		} else {
-			changeBasis(newreflected,reflectedLeft_,cachedTransform,transform);
-//			normalize(newreflected);
-			reflectedLeft_ = newreflected;
 
-			changeBasis(newreflected,reflectedRight_,transform,cachedTransform);
-//			normalize(newreflected);
-			reflectedRight_ = newreflected;
-		}
-	}
+//			changeBasis(newreflected,reflectedRight_,transform,cachedTransform);
+////			normalize(newreflected);
+//			reflectedRight_ = newreflected;
+//		}
+//	}
 
-	void updateKeptStates(size_t keptStates)
+	void updateKeptStates(size_t& keptStates,
+			      const PsimagLite::Matrix<ComplexOrRealType>& transform1,
+			      const PsimagLite::Matrix<ComplexOrRealType>& transform2)
 	{
 		if (!isEnabled_) return;
 		std::ostringstream msg;
@@ -211,6 +213,21 @@ public:
 	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
 
 	bool isEnabled() const { return isEnabled_; }
+
+	void changeBasis(const PsimagLite::Matrix<ComplexOrRealType>& transform1,
+			 const PsimagLite::Matrix<ComplexOrRealType>& transform2)
+	{
+		if (!isEnabled_) return;
+
+		SparseMatrixType newreflected;
+
+		changeBasis(newreflected,reflectedLeft_,transform1,transform2);
+		reflectedLeft_ = newreflected;
+
+		changeBasis(newreflected,reflectedRight_,transform2,transform1);
+		reflectedRight_ = newreflected;
+
+	}
 
 private:
 
