@@ -319,11 +319,7 @@ namespace Dmrg {
 
 				diagonalization_(psi,INFINITE,X[step],Y[step]);
 
-				truncate_.changeBasis(psi,parameters_.keptStatesInfinite,EXPAND_SYSTEM);
-				
-				truncate_.changeBasis(psi,parameters_.keptStatesInfinite,EXPAND_ENVIRON);
-
-				truncate_.truncateBasis(pS,pE);
+				truncate_.changeBasis(pS,pE,psi,parameters_.keptStatesInfinite);
 
 				checkpoint_.push(pS,pE);
 			}

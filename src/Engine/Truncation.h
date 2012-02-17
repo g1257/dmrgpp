@@ -102,11 +102,22 @@ namespace Dmrg {
 
 		enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM};
-		
+
 	public:
 
 		typedef typename DensityMatrixType::BuildingBlockType TransformType;
 		typedef typename DensityMatrixType::BlockMatrixType BlockMatrixType;
+
+		struct TruncationCache {
+			TruncationCache()
+			: transform(0,0),
+			  bprime("bprime")
+			{}
+			BlockMatrixType transform;
+			std::vector<RealType> eigs;
+			std::vector<size_t> removedIndices;
+			BasisWithOperatorsType bprime;
+		}; // TruncationCache
 
 		Truncation(ReflectionSymmetryType& reflectionOperator,
 		           WaveFunctionTransfType& waveFunctionTransformation,
@@ -122,12 +133,7 @@ namespace Dmrg {
 		  maxConnections_(maxConnections),
 		  verbose_(verbose),
 		  progress_("Truncation",0),
-		  keptStates_(0),
-		  error_(0.0),
-		  sTransform_(0,0),
-		  eTransform_(0,0),
-		  rSprime_("rSprime"),
-		  rEprime_("rEprime")
+		  error_(0.0)
 		{
 			if (parameters_.tolerance<0) return;
 			std::ostringstream msg;
@@ -145,12 +151,12 @@ namespace Dmrg {
 				progress_.print("for Environment\n",std::cout);
 				changeBasis(target,keptStates,direction);
 				truncateBasisSystem(lrs_.right());
-				pS = rSprime_;
+				pS = leftCache_.bprime;
 			} else {
 				progress_.print("for System\n",std::cout);
 				changeBasis(target,keptStates,direction);
 				truncateBasisEnviron(lrs_.left());
-				pE = rEprime_;
+				pE = rightCache_.bprime;
 			}
 		}
 
@@ -161,11 +167,27 @@ namespace Dmrg {
 		
 		const RealType& error() const { return error_; }
 
+		void changeBasis(BasisWithOperatorsType& sBasis,
+				 BasisWithOperatorsType& eBasis,
+				 const TargettingType& target,
+				 size_t keptStates)
+		{
+			changeBasis(target,keptStates,EXPAND_SYSTEM);
+			changeBasis(target,keptStates,EXPAND_ENVIRON);
+
+			reflectionOperator_.updateKeptStates(keptStates);
+			truncateBasisSystem(eBasis);
+			truncateBasisEnviron(sBasis);
+			sBasis = leftCache_.bprime;
+			eBasis = rightCache_.bprime;
+		}
+
+	private:
+
 		void changeBasis(const TargettingType& target,
 				 size_t keptStates,
 				 size_t direction)
 		{
-			keptStates_= keptStates;
 			/** !PTEX-START Truncation
 			Let us define the density matrices for system:
 			\begin{equation}
@@ -204,23 +226,18 @@ namespace Dmrg {
 			\end{equation}
 			!PTEX-END */
 
-			dmS.diag(eigs_,'V',concurrency_);
+			TruncationCache& cache = (direction==EXPAND_SYSTEM) ? leftCache_ : rightCache_;
+
+			dmS.diag(cache.eigs,'V',concurrency_);
 			dmS.check2(direction);
-			updateKeptStates(eigs_);
+			updateKeptStates(keptStates,cache.eigs);
 
 
 			//! transform basis: dmS^\dagger * operator matrix * dms
-			if (direction==EXPAND_SYSTEM) {
-				sTransform_ = dmS();
-				rSprime_ = lrs_.left();
-				rSprime_.changeBasis(removedIndicesS_,eigs_,keptStates_,parameters_);
-				reflectionOperator_.changeBasis(sTransform_,direction);
-			} else {
-				eTransform_ = dmS();
-				rEprime_ = lrs_.right();
-				rEprime_.changeBasis(removedIndicesE_,eigs_,keptStates_,parameters_);
-				reflectionOperator_.changeBasis(eTransform_,direction);
-			}
+			cache.transform = dmS();
+			cache.bprime = pBasis;
+			cache.bprime.changeBasis(cache.removedIndices,cache.eigs,keptStates,parameters_);
+			reflectionOperator_.changeBasis(cache.transform,direction);
 
 			std::ostringstream msg2;
 			msg2<<"done with entanglement";
@@ -228,27 +245,19 @@ namespace Dmrg {
 
 		}
 
-		void truncateBasis(BasisWithOperatorsType& sBasis,
-				   BasisWithOperatorsType& eBasis)
-		{
-			reflectionOperator_.updateKeptStates(keptStates_);
-			truncateBasisSystem(eBasis);
-			truncateBasisEnviron(sBasis);
-			sBasis = rSprime_;
-			eBasis = rEprime_;
-		}
-
-	private:
-
 		void truncateBasisSystem(const BasisWithOperatorsType& eBasis)
 		{
+
 			std::ostringstream msg;
-			error_ = rSprime_.truncateBasis(ftransform_,sTransform_,eigs_,removedIndicesS_,concurrency_);
-			LeftRightSuperType lrs(rSprime_,(BasisWithOperatorsType&) eBasis,
+			TruncationCache& cache = leftCache_;
+
+			error_ = cache.bprime.truncateBasis(ftransform_,cache.transform,
+							    cache.eigs,cache.removedIndices,concurrency_);
+			LeftRightSuperType lrs(cache.bprime,(BasisWithOperatorsType&) eBasis,
 					       (BasisType&)lrs_.super());
 			waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrs);
 
-			msg<<"new size of basis="<<rSprime_.size();
+			msg<<"new size of basis="<<cache.bprime.size();
 			progress_.printline(msg,std::cout);
 		}
 
@@ -256,17 +265,19 @@ namespace Dmrg {
 		{
 
 			std::ostringstream msg;
-			TransformType ftransform;
-			error_ = rEprime_.truncateBasis(ftransform_,eTransform_,eigs_,removedIndicesE_,concurrency_);
+			TruncationCache& cache = rightCache_;
+
+			error_ = cache.bprime.truncateBasis(ftransform_,cache.transform,
+							    cache.eigs,cache.removedIndices,concurrency_);
 			LeftRightSuperType lrs((BasisWithOperatorsType&) sBasis,
-					       rEprime_,(BasisType&)lrs_.super());
+					       cache.bprime,(BasisType&)lrs_.super());
 			waveFunctionTransformation_.push(ftransform_,EXPAND_ENVIRON,lrs);
-			msg<<"new size of basis="<<rEprime_.size();
+			msg<<"new size of basis="<<cache.bprime.size();
 			progress_.printline(msg,std::cout);
 		}
 
 
-		void updateKeptStates(const std::vector<RealType>& eigs2)
+		void updateKeptStates(size_t& keptStates,const std::vector<RealType>& eigs2)
 		{
 // 			std::cerr<<eigs;
 // 			std::cerr<<"-----------------\n";
@@ -275,21 +286,21 @@ namespace Dmrg {
 			Sort<std::vector<RealType> > sort;
 			sort.sort(eigs,perm);
 			
-			size_t newKeptStates = computeKeptStates(eigs);
+			size_t newKeptStates = computeKeptStates(keptStates,eigs);
 			size_t statesToRemove = 0;
 			if (eigs.size()>=newKeptStates)
 				statesToRemove = eigs.size()-newKeptStates;
 			RealType discWeight = sumUpTo(eigs,statesToRemove);
 // 			std::cerr<<"newKeptstates="<<newKeptStates<<"\n";
 			std::ostringstream msg;
-			if (newKeptStates != keptStates_) {
+			if (newKeptStates != keptStates) {
 				// we report that the "m" value has been changed and...
-				msg<<"Reducing kept states to "<<newKeptStates<<" from "<<keptStates_;
+				msg<<"Reducing kept states to "<<newKeptStates<<" from "<<keptStates;
 				// ... we change it:
-				keptStates_ = newKeptStates;
+				keptStates = newKeptStates;
 			} else {
 				// we report that the "m" value remains the same
-				msg<<"Not changing kept states="<<keptStates_;
+				msg<<"Not changing kept states="<<keptStates;
 			}
 			progress_.printline(msg,std::cout);
 			// we report the discarded weight
@@ -311,10 +322,10 @@ namespace Dmrg {
 		We proceed in the same manner for the environment.
 		!PTEX-END */
 		//! eigenvalues are ordered in increasing order
-		size_t computeKeptStates(const std::vector<RealType>& eigs) const
+		size_t computeKeptStates(size_t& keptStates,const std::vector<RealType>& eigs) const
 		{
-			if (parameters_.tolerance<0) return keptStates_;
-			int start = eigs.size() - keptStates_;
+			if (parameters_.tolerance<0) return keptStates;
+			int start = eigs.size() - keptStates;
 			if (start<0) start = 0;
 			int maxToRemove = eigs.size()-parameters_.keptStatesInfinite;
 			if (maxToRemove<0) maxToRemove = 0;
@@ -335,8 +346,8 @@ namespace Dmrg {
 			}
 
 			// if total is too small or too big we keep it unchanged
-			if (total>=keptStates_ || total<parameters_.keptStatesInfinite)
-				return keptStates_ ; 
+			if (total>=keptStates || total<parameters_.keptStatesInfinite)
+				return keptStates;
 
 			return total;
 		}
@@ -357,13 +368,9 @@ namespace Dmrg {
 		size_t maxConnections_;
 		bool verbose_;
 		ProgressIndicatorType progress_;
-		size_t keptStates_;
 		RealType error_;
 		TransformType ftransform_;
-		BlockMatrixType sTransform_,eTransform_;
-		std::vector<RealType> eigs_;
-		std::vector<size_t> removedIndicesS_,removedIndicesE_;
-		BasisWithOperatorsType rSprime_,rEprime_;
+		TruncationCache leftCache_,rightCache_;
 
 	}; // class Truncation
 	

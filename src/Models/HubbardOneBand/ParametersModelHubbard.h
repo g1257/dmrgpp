@@ -98,12 +98,13 @@ namespace Dmrg {
 				io.read(potentialT,"PotentialT");
 			} catch (std::exception& e) {
 			}
-			io.rewind();
 			omega=0;
 			try {
 				io.readline(omega,"omega=");
 			} catch (std::exception& e) {
 			}
+
+			io.rewind();
 		}
 		
 		// Do not include here connection parameters
