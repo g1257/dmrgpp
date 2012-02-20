@@ -571,7 +571,7 @@ namespace PsimagLite {
 	}
 
 	template<typename T>
-	void printFullMatrix(const CrsMatrix<T>& s,const std::string& name,bool how=0)
+	void printFullMatrix(const CrsMatrix<T>& s,const std::string& name,size_t how=0,double eps = 1e-20)
 	{
 		PsimagLite::Matrix<T> fullm(s.rank(),s.rank());
 		crsMatrixToFullMatrix(fullm,s);
@@ -580,10 +580,10 @@ namespace PsimagLite {
 			if (how==1) mathematicaPrint(std::cout,fullm);
 			if (how==2) symbolicPrint(std::cout,fullm);
 		} catch (std::exception& e) {
-			if (how==0) std::cout<<fullm;
+
 		}
 
-		std::cout<<fullm;
+		if (how==0) fullm.print(std::cout,eps);
 
 	}
 
@@ -592,7 +592,7 @@ namespace PsimagLite {
 	template<typename S,typename S2>
 	void multiply(CrsMatrix<S> &C,CrsMatrix<S> const &A,CrsMatrix<S2> const &B,bool strict=true)
 	{
-		int j,k,s,mlast,itemp,jbk;
+		int j,s,mlast,itemp,jbk;
 		size_t n = A.rank();
 		std::vector<int> ptr(n,-1),index(n,0);
 		std::vector<S> temp(n,0);
@@ -611,16 +611,18 @@ namespace PsimagLite {
 			// start calculations for row 
 			itemp = 0;
 			for(j = A.getRowPtr(i);j< A.getRowPtr(i+1);j++) { 
-				for (k = B.getRowPtr(A.getCol(j)); k< B.getRowPtr(A.getCol(j)+1);k++) {
+				size_t istart = B.getRowPtr(A.getCol(j));
+				size_t iend = B.getRowPtr(A.getCol(j)+1);
+				for (size_t k = istart; k< iend;k++) {
 					jbk=B.getCol(k);
 					tmp = A.getValue(j)*B.getValue(k);
-					if( ptr[jbk]== -1) {
+					if( ptr[jbk]<0) {
 						ptr[jbk] = itemp;
 						temp[ptr[jbk]] = tmp ;
 						index[ptr[jbk]] = jbk;
 						itemp++;
 					} else  {
-						temp[ptr[jbk]]= temp[ptr[jbk]]+tmp;
+						temp[ptr[jbk]]+= tmp;
 			   		}
 				}
 			}
@@ -874,7 +876,10 @@ namespace PsimagLite {
 		for (size_t i=0;i<A.rank();i++) {
 			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 				double x = std::real(std::norm(A.getValue(k)));
-				if (x>eps) return false;
+				if (x>eps) {
+					std::cerr<<"A("<<i<<","<<A.getCol(k)<<")="<<A.getValue(k)<<"\n";
+					return false;
+				}
 			}
 		}
 		return true;

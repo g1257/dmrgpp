@@ -118,6 +118,19 @@ namespace PsimagLite {
 		  return *this;
 		}
 
+		void print(std::ostream& os,const double& eps)
+		{
+			 os<<nrow_<<" "<<ncol_<<"\n";
+			 for (size_t i=0;i<nrow_;i++) {
+				 for (size_t j=0;j<ncol_;j++) {
+					 T val = data_[i+j*nrow_];
+					 if (std::norm(val)<eps) val=0.0;
+					 os<<val<<" ";
+				 }
+				 os<<"\n";
+			 }
+		}
+
 	private:
 		size_t nrow_,ncol_;
 		std::vector<T> data_;
