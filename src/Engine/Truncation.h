@@ -175,12 +175,13 @@ namespace Dmrg {
 			changeBasis(target,keptStates,EXPAND_SYSTEM);
 			changeBasis(target,keptStates,EXPAND_ENVIRON);
 
-
 			reflectionOperator_.updateKeptStates(keptStates,leftCache_.transform,rightCache_.transform);
+
 			truncateBasisSystem(eBasis);
+			TransformType transform1 = ftransform_;
 			truncateBasisEnviron(sBasis);
 
-			reflectionOperator_.changeBasis(leftCache_.transform,rightCache_.transform);
+			reflectionOperator_.changeBasis(transform1,ftransform_);
 			sBasis = leftCache_.bprime;
 			eBasis = rightCache_.bprime;
 		}
@@ -260,6 +261,7 @@ namespace Dmrg {
 			waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrs);
 
 			msg<<"new size of basis="<<cache.bprime.size();
+			assert(ftransform_.n_col()==cache.bprime.size());
 			progress_.printline(msg,std::cout);
 		}
 

@@ -11,7 +11,7 @@ hubbardU	16 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0
 potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 			0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=HubbardOneBand
-SolverOptions=none
+SolverOptions=none,wft
 Version=264e71039cc5a47c6f1f375f2f9baaffd94e94fa
 OutputFile=data100.txt
 InfiniteLoopKeptStates=100

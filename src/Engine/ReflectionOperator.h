@@ -173,9 +173,45 @@ public:
 			      const PsimagLite::Matrix<ComplexOrRealType>& transform2)
 	{
 		if (!isEnabled_) return;
+		if (keptStates>=transform1.n_col()) return;
 		std::ostringstream msg;
-		msg<<"updateKeptStates: DOING NOTHING";
+		msg<<"updateKeptStates";
 		progress_.printline(msg,std::cout);
+
+		SparseMatrixType newreflectedLeft;
+
+		changeBasis(newreflectedLeft,reflectedLeft_,transform1,transform2);
+//		changeBasis(newreflectedRight,reflectedRight_,transform2,transform1);
+
+		for (size_t i=0;i<keptStates;i++) {
+			for (int k=newreflectedLeft.getRowPtr(i);k<newreflectedLeft.getRowPtr(i+1);k++) {
+				ComplexOrRealType val = newreflectedLeft.getValue(k);
+				if (isAlmostZero(val,1e-8)) continue;
+				size_t col = newreflectedLeft.getCol(k);
+				if (col>=keptStates) {
+					std::cerr<<"Should remove also "<<col<<"\n";
+				}
+			}
+		}
+
+		RealType eps = 1e-6;
+		printFullMatrix(newreflectedLeft,"newreflectedLeft",0,eps);
+
+		SparseMatrixType newreflectedRight;
+		changeBasis(newreflectedRight,reflectedRight_,transform2,transform1);
+
+		for (size_t i=0;i<keptStates;i++) {
+			for (int k=newreflectedRight.getRowPtr(i);k<newreflectedRight.getRowPtr(i+1);k++) {
+				ComplexOrRealType val = newreflectedRight.getValue(k);
+				if (isAlmostZero(val,1e-8)) continue;
+				size_t col = newreflectedRight.getCol(k);
+				if (col>=keptStates) {
+					std::cerr<<"Should remove also "<<col<<"\n";
+				}
+			}
+		}
+		printFullMatrix(newreflectedLeft,"newreflectedRight",0,eps);
+
 	}
 
 	void transform(SparseMatrixType& matrixA,
@@ -262,8 +298,8 @@ private:
 		std::vector<int> ptr(total,-1);
 		std::vector<size_t> index(total,0);
 		std::vector<ComplexOrRealType> temp(total,0);
-		//std::cerr<<"transform1="<<transform1.n_row()<<"x"<<transform1.n_col()<<"\n";
-		//std::cerr<<"transform2="<<transform2.n_row()<<"x"<<transform2.n_col()<<"\n";
+		std::cerr<<"transform1="<<transform1.n_row()<<"x"<<transform1.n_col()<<"\n";
+		std::cerr<<"transform2="<<transform2.n_row()<<"x"<<transform2.n_col()<<"\n";
 
 		size_t counter = 0;
 		for (size_t x=0;x<total;x++) {
@@ -399,11 +435,16 @@ private:
 //					counter++;
 				}
 			}
+			ComplexOrRealType val = 0.0;
 			for (size_t s=0;s<itemp;s++) {
 				sSector.pushCol(index[s]);
 				sSector.pushValue(temp[s]);
+				val += std::conj(temp[s])*temp[s];
 				ptr[index[s]] = -1;
 				counter++;
+			}
+			if (isAlmostZero(val,1e-8)) {
+				std::cerr<<"i="<<i<<" x0="<<x0<<" x1="<<x1<<" y0="<<y0<<" y1="<<y1<<"\n";
 			}
 		}
 		sSector.setRow(total,counter);

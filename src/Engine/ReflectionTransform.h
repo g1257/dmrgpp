@@ -159,22 +159,22 @@ public:
 		}
 
 #ifndef NDEBUG
-		checkTransform(Qmt,HQ1);
-		checkTransform(Q1t,HQm);
-		SparseMatrixType A;
-		multiply(A,Q1t,Q1_);
-		bool b = isThePartialIdentity(A,plusSector_,1e-5);
-		if (!b) {
-			printFullMatrix(A,"A");
-			assert(b);
-		}
+//		checkTransform(Qmt,HQ1);
+//		checkTransform(Q1t,HQm);
+//		SparseMatrixType A;
+//		multiply(A,Q1t,Q1_);
+//		bool b = isThePartialIdentity(A,plusSector_,1e-5);
+//		if (!b) {
+//			printFullMatrix(A,"A");
+//			assert(b);
+//		}
 
-		multiply(A,Qmt,Qm_);
-		b = isThePartialIdentity(A,A.rank()-plusSector_,1e-5);
-		if (!b) {
-			printFullMatrix(A,"A");
-			assert(b);
-		}
+//		multiply(A,Qmt,Qm_);
+//		b = isThePartialIdentity(A,A.rank()-plusSector_,1e-5);
+//		if (!b) {
+//			printFullMatrix(A,"A");
+//			assert(b);
+//		}
 #endif
 	}
 
