@@ -118,7 +118,7 @@ namespace PsimagLite {
 		  return *this;
 		}
 
-		void print(std::ostream& os,const double& eps)
+		void print(std::ostream& os,const double& eps) const
 		{
 			 os<<nrow_<<" "<<ncol_<<"\n";
 			 for (size_t i=0;i<nrow_;i++) {

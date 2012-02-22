@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "Random48.h"
 #include "ContinuedFraction.h"
+#include "LanczosOrDavidsonBase.h"
 
 namespace PsimagLite {
 
@@ -101,7 +102,7 @@ namespace PsimagLite {
 	//!    	   member function that implements the operation x += Hy
 
 	template<typename SolverParametersType,typename MatrixType,typename VectorType>
-	class LanczosSolver {
+	class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> {
 
 		typedef typename SolverParametersType::RealType RealType;
 		typedef LanczosVectors<RealType,MatrixType,VectorType> LanczosVectorsType;
