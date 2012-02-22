@@ -175,7 +175,7 @@ namespace Dmrg {
 			changeBasis(target,keptStates,EXPAND_SYSTEM);
 			changeBasis(target,keptStates,EXPAND_ENVIRON);
 
-			reflectionOperator_.updateKeptStates(keptStates,leftCache_.transform,rightCache_.transform);
+			reflectionOperator_.updateKeptStates(keptStates,leftCache_,rightCache_);
 
 			truncateBasisSystem(eBasis);
 			TransformType transform1 = ftransform_;
@@ -242,6 +242,12 @@ namespace Dmrg {
 			cache.bprime = pBasis;
 			cache.bprime.changeBasis(cache.removedIndices,cache.eigs,keptStates,parameters_);
 
+//			if (cache.removedIndices.size()>0) {
+//				std::cerr<<"REMVD_INDICES=";
+//				for (size_t i=0;i<cache.removedIndices.size();i++)
+//					std::cerr<<cache.removedIndices[i]<<" ";
+//				std::cerr<<"\n";
+//			}
 			std::ostringstream msg2;
 			msg2<<"done with entanglement";
 			progress_.printline(msg2,std::cout);

@@ -129,18 +129,18 @@ bool observeOneFullSweep(
 		} // if dd4
 	}
 
-	if (s.find("heisenberg")!=std::string::npos) {
-		if (obsOptions.find("s+s-")!=std::string::npos) {
-			observerLib.measure("s+s-",rows,n);
-		}
-		if (obsOptions.find("s-s+")!=std::string::npos) {
-			observerLib.measure("s-s+",rows,n);
-		}
-		if (obsOptions.find("ss")!=std::string::npos) {
-			observerLib.measure("ss",rows,n);
-		}
-
+	//if (s.find("heisenberg")!=std::string::npos) {
+	if (obsOptions.find("s+s-")!=std::string::npos) {
+		observerLib.measure("s+s-",rows,n);
 	}
+	if (obsOptions.find("s-s+")!=std::string::npos) {
+		observerLib.measure("s-s+",rows,n);
+	}
+	if (obsOptions.find("ss")!=std::string::npos) {
+		observerLib.measure("ss",rows,n);
+	}
+
+	//}
 	return observerLib.endOfData();
 }
 

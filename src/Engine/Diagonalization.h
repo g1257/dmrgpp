@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h" // includes the std::norm functions
 #include "ProgramGlobals.h"
 #include "LanczosSolver.h"
+#include "DavidsonSolver.h"
 #include "ParametersForSolver.h"
 
 namespace Dmrg {
@@ -373,8 +374,8 @@ namespace Dmrg {
 			if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
 			typedef InternalProductTemplate<typename SomeVectorType::value_type,ModelType> MyInternalProduct;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-			typedef PsimagLite::LanczosSolver<ParametersForSolverType,MyInternalProduct,SomeVectorType> LanczosSolverType;
-			typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper,rs);
+			typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,MyInternalProduct,SomeVectorType> LanczosOrDavidsonBaseType;
+			typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(&model_,&modelHelper,rs);
 
 			ParametersForSolverType params;
 			params.steps = iter;
@@ -382,7 +383,15 @@ namespace Dmrg {
 			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 			params.options= parameters_.options;
 
-			LanczosSolverType lanczosSolver(lanczosHelper,params);
+			LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
+
+			bool useDavidson = (parameters_.options.find("useDavidson")!=std::string::npos);
+			if (useDavidson) {
+				lanczosOrDavidson = new PsimagLite::DavidsonSolver<ParametersForSolverType,MyInternalProduct,SomeVectorType>(lanczosHelper,params);
+			} else {
+				lanczosOrDavidson = new PsimagLite::LanczosSolver<ParametersForSolverType,MyInternalProduct,SomeVectorType>(lanczosHelper,params);
+			}
+
 
 			if (lanczosHelper.rank()==0) {
 				energyTmp=10000;
@@ -394,13 +403,13 @@ namespace Dmrg {
 			*/
 			if (!reflectionOperator_.isEnabled()) {
 				tmpVec.resize(lanczosHelper.rank());
-				lanczosSolver.computeGroundState(energyTmp,tmpVec,initialVector);
+				lanczosOrDavidson->computeGroundState(energyTmp,tmpVec,initialVector);
 				return;
 			}
 			SomeVectorType initialVector1,initialVector2;
 			reflectionOperator_.setInitState(initialVector,initialVector1,initialVector2);
 			tmpVec.resize(initialVector1.size());
-			lanczosSolver.computeGroundState(energyTmp,tmpVec,initialVector1);
+			lanczosOrDavidson->computeGroundState(energyTmp,tmpVec,initialVector1);
 
 
 			RealType gsEnergy1 = energyTmp;
@@ -409,9 +418,11 @@ namespace Dmrg {
 			lanczosHelper.reflectionSector(1);
 			SomeVectorType gsVector2(initialVector2.size());
 			RealType gsEnergy2 = 0;
-			lanczosSolver.computeGroundState(gsEnergy2,gsVector2,initialVector2);
+			lanczosOrDavidson->computeGroundState(gsEnergy2,gsVector2,initialVector2);
 
 			energyTmp=reflectionOperator_.setGroundState(tmpVec,gsEnergy1,gsVector1,gsEnergy2,gsVector2);
+
+			if (lanczosOrDavidson) delete lanczosOrDavidson;
 		}
 
 	 	const ParametersType& parameters_;

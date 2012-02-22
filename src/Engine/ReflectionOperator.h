@@ -147,70 +147,22 @@ public:
 		reflectionTransform_.update(sSector);
 	}
 
-//	void changeBasis(const PsimagLite::Matrix<ComplexOrRealType>& transform,
-//			 size_t direction)
-//	{
-//		if (!isEnabled_) return;
-//		SparseMatrixType newreflected;
-//		static PsimagLite::Matrix<ComplexOrRealType> cachedTransform;
-//		if (direction==expandSys_) {
-////			changeBasis(newreflected,reflectedLeft_,transform);
-////			reflectedLeft_ = newreflected;
-//			cachedTransform = transform;
-//		} else {
-//			changeBasis(newreflected,reflectedLeft_,cachedTransform,transform);
-////			normalize(newreflected);
-//			reflectedLeft_ = newreflected;
-
-//			changeBasis(newreflected,reflectedRight_,transform,cachedTransform);
-////			normalize(newreflected);
-//			reflectedRight_ = newreflected;
-//		}
-//	}
-
+	template<typename SomeStructType>
 	void updateKeptStates(size_t& keptStates,
-			      const PsimagLite::Matrix<ComplexOrRealType>& transform1,
-			      const PsimagLite::Matrix<ComplexOrRealType>& transform2)
+			      const SomeStructType& cacheLeft,
+			      const SomeStructType& cacheRight)
 	{
+		const PsimagLite::Matrix<ComplexOrRealType>& transform1 = cacheLeft.transform;
+		const PsimagLite::Matrix<ComplexOrRealType>& transform2 = cacheRight.transform;
+
 		if (!isEnabled_) return;
 		if (keptStates>=transform1.n_col()) return;
 		std::ostringstream msg;
 		msg<<"updateKeptStates";
 		progress_.printline(msg,std::cout);
 
-		SparseMatrixType newreflectedLeft;
-
-		changeBasis(newreflectedLeft,reflectedLeft_,transform1,transform2);
-//		changeBasis(newreflectedRight,reflectedRight_,transform2,transform1);
-
-		for (size_t i=0;i<keptStates;i++) {
-			for (int k=newreflectedLeft.getRowPtr(i);k<newreflectedLeft.getRowPtr(i+1);k++) {
-				ComplexOrRealType val = newreflectedLeft.getValue(k);
-				if (isAlmostZero(val,1e-8)) continue;
-				size_t col = newreflectedLeft.getCol(k);
-				if (col>=keptStates) {
-					std::cerr<<"Should remove also "<<col<<"\n";
-				}
-			}
-		}
-
-		RealType eps = 1e-6;
-		printFullMatrix(newreflectedLeft,"newreflectedLeft",0,eps);
-
-		SparseMatrixType newreflectedRight;
-		changeBasis(newreflectedRight,reflectedRight_,transform2,transform1);
-
-		for (size_t i=0;i<keptStates;i++) {
-			for (int k=newreflectedRight.getRowPtr(i);k<newreflectedRight.getRowPtr(i+1);k++) {
-				ComplexOrRealType val = newreflectedRight.getValue(k);
-				if (isAlmostZero(val,1e-8)) continue;
-				size_t col = newreflectedRight.getCol(k);
-				if (col>=keptStates) {
-					std::cerr<<"Should remove also "<<col<<"\n";
-				}
-			}
-		}
-		printFullMatrix(newreflectedLeft,"newreflectedRight",0,eps);
+		check(cacheLeft.removedIndices,reflectedLeft_,transform1,transform2);
+		check(cacheRight.removedIndices,reflectedRight_,transform2,transform1);
 
 	}
 
@@ -258,32 +210,96 @@ public:
 		SparseMatrixType newreflected;
 
 		changeBasis(newreflected,reflectedLeft_,transform1,transform2);
+//		if (newreflected.rank()!=reflectedLeft_.rank()) {
+//			printFullMatrix(newreflected,"newreflectedLeft",0,1e-6);
+//			transform1.print(std::cerr,1e-6);
+//			transform2.print(std::cerr,1e-6);
+//		}
 		reflectedLeft_ = newreflected;
+		normalize(reflectedLeft_);
 
 		changeBasis(newreflected,reflectedRight_,transform2,transform1);
 		reflectedRight_ = newreflected;
-
+		normalize(reflectedRight_);
 	}
 
 private:
 
-//	void normalize(SparseMatrixType& A) const
-//	{
-//		size_t n = A.rank();
-//		std::vector<ComplexOrRealType> sum(n,0.0);
-//		for (size_t i=0;i<n;i++) {
-//			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-//				ComplexOrRealType val = A.getValue(k);
-//				sum[i] += std::conj(val)*val;
-//			}
-//		}
+	void check(const std::vector<size_t>& removedIndices,
+		   const SparseMatrixType& reflected,
+		   const PsimagLite::Matrix<ComplexOrRealType>& transform1,
+		   const PsimagLite::Matrix<ComplexOrRealType>& transform2)
+	{
 
-//		for (size_t i=0;i<n;i++) {
-//			ComplexOrRealType x = 1.0/sqrt(sum[i]);
-//			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++)
-//				A.setValues(k,A.getValue(k)*x);
-//		}
-//	}
+		SparseMatrixType newreflected;
+
+		changeBasis(newreflected,reflected,transform1,transform2);
+
+//		RealType eps = 1e-6;
+//		printFullMatrix(newreflected,"newreflected",0,eps);
+
+
+		std::vector<size_t> x;
+		for (size_t ii=0;ii<removedIndices.size();ii++) {
+			size_t i = removedIndices[ii];
+			for (int k=newreflected.getRowPtr(i);k<newreflected.getRowPtr(i+1);k++) {
+				ComplexOrRealType val = newreflected.getValue(k);
+				if (isAlmostZero(val,1e-8)) continue;
+				size_t col = newreflected.getCol(k);
+				x.push_back(col);
+			}
+		}
+		Sort<std::vector<size_t> > sort;
+		std::vector<size_t> iperm(x.size());
+		sort.sort(x,iperm);
+
+		std::vector<size_t> diffs;
+		getDifferences(diffs,x,removedIndices);
+//		for (size_t i=0;i<diffs.size();i++)
+//			std::cerr<<"diffs["<<i<<"]="<<diffs[i]<<"\n";
+
+//		for (size_t i=0;i<x.size();i++)
+//			std::cerr<<"x["<<i<<"]="<<x[i]<<"\n";
+
+//		for (size_t i=0;i<removedIndices.size();i++)
+//			std::cerr<<"removed["<<i<<"]="<<removedIndices[i]<<"\n";
+
+	}
+
+	void getDifferences(std::vector<size_t>& diffs,
+			    const std::vector<size_t>& x1,
+			    const std::vector<size_t>& x2) const
+	{
+		std::vector<size_t>::const_iterator it2 = x2.begin();
+		for (size_t i=0;i<x1.size();i++) {
+			std::vector<size_t>::const_iterator it = find(it2,x2.end(),x1[i]);
+			if (it == x2.end()) {
+				diffs.push_back(x1[i]);
+				continue;
+			}
+			it2 = it+1;
+		}
+	}
+
+	void normalize(SparseMatrixType& A) const
+	{
+		size_t n = A.rank();
+		std::vector<ComplexOrRealType> sum(n,0.0);
+		for (size_t i=0;i<n;i++) {
+			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+				ComplexOrRealType val = A.getValue(k);
+				sum[i] += std::conj(val)*val;
+			}
+		}
+
+		for (size_t i=0;i<n;i++) {
+			//assert(isAlmostZero(sum[i]-1.0,1e-6));
+			assert(!isAlmostZero(sum[i],1e-6));
+			ComplexOrRealType x = 1.0/sqrt(sum[i]);
+			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++)
+				A.setValues(k,A.getValue(k)*x);
+		}
+	}
 
 	void changeBasis(SparseMatrixType& newreflected,
 			 const SparseMatrixType& reflected,
@@ -324,9 +340,6 @@ private:
 						} else {
 							temp[ptr[xthird]] += val;
 						}
-//						newreflected.pushCol(xthird);
-//						newreflected.pushValue(val);
-//						counter++;
 					}
 				}
 			}
@@ -340,42 +353,6 @@ private:
 		newreflected.setRow(newreflected.rank(),counter);
 		newreflected.checkValidity();
 	}
-
-//	void removeAlso()
-//	{
-//		size_t ns = lrs_.left().size();
-//		PackIndicesType pack2(ns/n0_);
-//		PackIndicesType pack3(n0_);
-//		PackIndicesType pack1(ns);
-//		for (size_t i=0;i<n;i++) {
-//			size_t x = 0, y = 0;
-//			pack1.unpack(x,y,lrs_.super().permutation(i));
-
-//			size_t x0=0,x1=0;
-//			pack2.unpack(x0,x1,lrs_.left().permutation(x));
-
-//			size_t y0=0,y1=0;
-//			pack3.unpack(y0,y1,lrs_.right().permutation(y));
-//			for (int k=reflectedLeft_.getRowPtr(x0);k<reflectedLeft_.getRowPtr(x0+1);k++) {
-//				ComplexOrRealType val1 = reflectedLeft_.getValue(k);
-//				for (int k2=reflectedRight_.getRowPtr(y1);k2<reflectedRight_.getRowPtr(y1+1);k2++) {
-//					ComplexOrRealType val2 = val1 * reflectedRight_.getValue(k2);
-//					if (isAlmostZero(val2)) continue;
-//					size_t x0prime = reflectedLeft_.getCol(k);
-//					size_t xprime = pack3.pack(x1,x0prime,lrs_.right().permutationInverse());
-
-//					size_t y1prime = reflectedRight_.getCol(k2);
-//					size_t yprime = pack2.pack(y1prime,y0,lrs_.left().permutationInverse());
-
-//					size_t iprime = pack1.pack(yprime,xprime,lrs_.super().permutationInverse());
-
-//					if (iprime>=n) {
-//						std::cerr<<"Remove also:"<<iprime<<"\n";
-//					}
-//				}
-//			}
-//		}
-//	}
 
 	void setSsector(SparseMatrixType& sSector,const std::vector<size_t>& sectors) const
 	{
@@ -430,9 +407,6 @@ private:
 					} else {
 						temp[ptr[col]] += val2;
 					}
-//					sSector.pushCol(iprime-offset);
-//					sSector.pushValue(val2);
-//					counter++;
 				}
 			}
 			ComplexOrRealType val = 0.0;
@@ -473,7 +447,7 @@ private:
 				ComplexOrRealType val = sSector.getValue(k);
 				sum += std::conj(val)*val;
 			}
-			if (isAlmostZero(sum,1e-6)) {
+			if (isAlmostZero(sum,1e-4)) {
 				flag=true;
 				if (verbose) std::cerr<<"zero row="<<i<<"\n";
 			}
@@ -498,40 +472,40 @@ private:
 		      const SparseMatrixType& reflected,
 		      size_t keptstates)
 	{
-		size_t n = reflected.rank();
-		if (keptstates >= n) {
+//		size_t n = reflected.rank();
+//		if (keptstates >= n) {
 			reflectedFinal = reflected;
 			return;
-		}
+//		}
 
-		reflectedFinal.resize(keptstates);
-		size_t counterl = 0;
+//		reflectedFinal.resize(keptstates);
+//		size_t counterl = 0;
 
-		std::vector<ComplexOrRealType> sum(keptstates,0.0);
-		for (size_t i=0;i<keptstates;i++) {
-			reflectedFinal.setRow(i,counterl);
-			for (int k = reflected.getRowPtr(i); k < reflected.getRowPtr(i+1);k++) {
-				size_t col = reflected.getCol(k);
-				if (col>=keptstates) continue;
-				ComplexOrRealType val = reflected.getValue(k);
-				reflectedFinal.pushCol(col);
-				reflectedFinal.pushValue(val);
-				counterl++;
-				sum[i] += std::conj(val) * val;
-			}
+//		std::vector<ComplexOrRealType> sum(keptstates,0.0);
+//		for (size_t i=0;i<keptstates;i++) {
+//			reflectedFinal.setRow(i,counterl);
+//			for (int k = reflected.getRowPtr(i); k < reflected.getRowPtr(i+1);k++) {
+//				size_t col = reflected.getCol(k);
+//				if (col>=keptstates) continue;
+//				ComplexOrRealType val = reflected.getValue(k);
+//				reflectedFinal.pushCol(col);
+//				reflectedFinal.pushValue(val);
+//				counterl++;
+//				sum[i] += std::conj(val) * val;
+//			}
 
-		}
-		reflectedFinal.setRow(reflectedFinal.rank(),counterl);
-		reflectedFinal.checkValidity();
+//		}
+//		reflectedFinal.setRow(reflectedFinal.rank(),counterl);
+//		reflectedFinal.checkValidity();
 
-		// normalize
-		for (size_t i=0;i<reflectedFinal.rank();i++) {
-			assert(!isAlmostZero(sum[i],1e-8));
-			ComplexOrRealType x = 1.0/sqrt(sum[i]);
-			for (int k = reflectedFinal.getRowPtr(i); k < reflectedFinal.getRowPtr(i+1);k++)
-				reflectedFinal.setValues(k,reflectedFinal.getValue(k)*x);
-		}
-		reflectedFinal.checkValidity();
+//		// normalize
+//		for (size_t i=0;i<reflectedFinal.rank();i++) {
+//			assert(!isAlmostZero(sum[i],1e-8));
+//			ComplexOrRealType x = 1.0/sqrt(sum[i]);
+//			for (int k = reflectedFinal.getRowPtr(i); k < reflectedFinal.getRowPtr(i+1);k++)
+//				reflectedFinal.setValues(k,reflectedFinal.getValue(k)*x);
+//		}
+//		reflectedFinal.checkValidity();
 	}
 
 	void updateReflected()
