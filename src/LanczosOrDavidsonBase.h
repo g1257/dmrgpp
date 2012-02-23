@@ -104,6 +104,9 @@ namespace PsimagLite {
 						VectorType &z,
 						const VectorType& initialVector)=0;
 
+		// To avoid compiler warnings
+		virtual ~LanczosOrDavidsonBase() { }
+
 	}; // class LanczosOrDavidsonBase
 } // namespace PsimagLite
 

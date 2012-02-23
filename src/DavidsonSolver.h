@@ -118,7 +118,7 @@ public:
 		progress_.printline(msg,std::cout);
 	}
 
-	void computeGroundState(RealType& gsEnergy,VectorType& z)
+	virtual void computeGroundState(RealType& gsEnergy,VectorType& z)
 	{
 		size_t n =mat_.rank();
 		RealType atmp=0.0;
@@ -137,7 +137,7 @@ public:
 		computeGroundState(gsEnergy,z,y);
 	}
 
-	void computeGroundState(RealType &gsEnergy,
+	virtual void computeGroundState(RealType &gsEnergy,
 				VectorType &z,
 				const VectorType& initialVector)
 	{

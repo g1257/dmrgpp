@@ -37,7 +37,7 @@ namespace PsimagLite {
 			
 		}
 
-		T random() // deprecated!!! use operator() instead
+		T random() const // deprecated!!! use operator() instead
 		{
 			return static_cast<T>(drand48());
 		}
