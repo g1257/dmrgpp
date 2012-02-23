@@ -245,15 +245,19 @@ namespace Dmrg {
 				
 				// Loop over each operator that needs to be applied 
 				// in turn to the g.s.
+				size_t count = 0;
 				for (size_t i=0;i<max;i++) {
-					size_t didSomething = evolve(i,phiNew,phiOld,Eg,direction,block1,loopNumber,max-1);
+					if (!evolve(i,phiNew,phiOld,Eg,direction,block1,loopNumber,max-1))
+						continue;
 					if (tstStruct_.concatenation==PRODUCT) {
 						phiOld = phiNew;
 					} else {
-						if (didSomething) vectorSum += phiNew;
+						vectorSum += phiNew;
 					}
-					std::cerr<<"site="<<block1[0]<<" norm of vectorSum="<<std::norm(vectorSum)<<" new="<<std::norm(phiNew)<<" old="<<std::norm(phiOld)<<"\n";
+					//if (didSomething) count++;
+					//std::cerr<<"site="<<block1[0]<<" norm of vectorSum="<<std::norm(vectorSum)<<" new="<<std::norm(phiNew)<<" old="<<std::norm(phiOld)<<"\n";
 				}
+				//std::cerr<<"site="<<block1[0]<<" COUNT="<<count<<"\n";
 				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 				
 				calcTimeVectors(Eg,phiNew,direction);
@@ -283,7 +287,7 @@ namespace Dmrg {
 				os<<"TSTWeightGroundState="<<gsWeight_<<"\n";
 			}
 
-			size_t evolve(
+			bool evolve(
 					size_t i,
 					VectorWithOffsetType& phiNew,
 					const VectorWithOffsetType& phiOld,
@@ -296,12 +300,14 @@ namespace Dmrg {
 				static size_t  timesWithoutAdvancement=0;
 				static bool firstSeeLeftCorner = false;
 
-				if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return 0;
+				if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return false;
 
 				assert(block.size()==1);
 				size_t site = block[0];
 
-				if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return 0;
+				if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return false;
+
+				if (site != tstStruct_.sites[i] && stage_[i]!=DISABLED && i>0) return false;
 
 				if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
 				else stage_[i]=WFT_NOADVANCE;
@@ -333,7 +339,7 @@ namespace Dmrg {
 				// phi = A|psi>
 				computePhi(i,phiNew,phiOld,direction,block[0]);
 				
-				return 1;
+				return true;
 			}
 
 			void initialGuess(VectorWithOffsetType& v,size_t nk) const
@@ -405,7 +411,7 @@ namespace Dmrg {
 					if (stage_[j] == DISABLED) {
 						std::string s ="TST:: Seeing tst site "+ttos(tstStruct_.sites[i]);
 						s =s + " before having seen";
-						s = s + " site "+ttos(j);
+						s = s + " site "+ttos(tstStruct_.sites[j]);
 						s = s +". Please order your tst sites in order of appearance.\n";
 						throw std::runtime_error(s);
 					}
