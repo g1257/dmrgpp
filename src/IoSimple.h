@@ -294,9 +294,10 @@ namespace PsimagLite {
 			template<typename X>
 			std::pair<std::string,size_t> read(X &x,
 			                                   std::string const &s,
-			                                   LongIntegerType level=0)
+			                                   LongIntegerType level=0,
+							   bool beQuiet = false)
 			{
-				std::pair<std::string,size_t> sc = advance(s,level);
+				std::pair<std::string,size_t> sc = advance(s,level,beQuiet);
 				int xsize;
 				fin_>>xsize;
 				x.resize(xsize);
