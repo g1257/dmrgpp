@@ -200,7 +200,7 @@ void mainLoop(GeometryType& geometry,
 			break;
 		}
 
-		if (!hasTimeEvolution) break;
+		//if (!hasTimeEvolution) break;
 	}
 }
 
