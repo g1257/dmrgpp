@@ -235,7 +235,7 @@ namespace Dmrg {
 			            const BlockType& block2,
 			            size_t loopNumber)
 			{
-				size_t count =0;
+
 				VectorWithOffsetType phiOld = psi_;
 				VectorWithOffsetType phiNew;
 				VectorWithOffsetType vectorSum;
@@ -246,12 +246,13 @@ namespace Dmrg {
 				// Loop over each operator that needs to be applied 
 				// in turn to the g.s.
 				for (size_t i=0;i<max;i++) {
-					count += evolve(i,phiNew,phiOld,Eg,direction,block1,loopNumber,max-1);
+					size_t didSomething = evolve(i,phiNew,phiOld,Eg,direction,block1,loopNumber,max-1);
 					if (tstStruct_.concatenation==PRODUCT) {
 						phiOld = phiNew;
 					} else {
-						vectorSum += phiNew;
+						if (didSomething) vectorSum += phiNew;
 					}
+					std::cerr<<"site="<<block1[0]<<" norm of vectorSum="<<std::norm(vectorSum)<<" new="<<std::norm(phiNew)<<" old="<<std::norm(phiOld)<<"\n";
 				}
 				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 				
@@ -512,6 +513,7 @@ namespace Dmrg {
 				calcTargetVectors(phi,T,V,Eg,eigs,steps,systemOrEnviron);
 			}
 
+			//! Do not normalize states here, it leads to wrong results (!)
 			void calcTargetVectors(
 						const VectorWithOffsetType& phi,
 						const std::vector<ComplexMatrixType>& T,
@@ -522,10 +524,11 @@ namespace Dmrg {
 					      	size_t systemOrEnviron)
 			{
 				targetVectors_[0] = phi;
+//				normalize(targetVectors_[0]);
 				for (size_t i=1;i<times_.size();i++) {
 					// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
 					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
-					//normalize(targetVectors_[i]);
+//					normalize(targetVectors_[i]);
 				}
 			}
 

@@ -94,8 +94,10 @@ namespace Dmrg {
 	
 			io.read(hubbardU,"hubbardU");
 			io.read(potentialV,"potentialV");
+			size_t level = 0;
+			bool beQuiet = true;
 			try {
-				io.read(potentialT,"PotentialT");
+				io.read(potentialT,"PotentialT",level,beQuiet);
 			} catch (std::exception& e) {
 			}
 			omega=0;

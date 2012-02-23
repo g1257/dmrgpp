@@ -359,7 +359,7 @@ namespace Dmrg {
 			}
 			setIndex2Sector();
 		}
-		
+
 		VectorWithOffsets<FieldType> operator+=(const VectorWithOffsets<FieldType>& v)
 		{
 			if (nonzeroSectors_.size()==0) {
@@ -508,17 +508,17 @@ namespace Dmrg {
 	{
 		FieldType norma = std::norm(v);
 		FieldType eps = 1e-5;
-		if (fabs(norma-1.0)<eps) {
-			//std::cerr<<"VectorWithOffsets::normalize():";
-			//std::cerr<<"norm is already one, nothing to do\n";
-			return;
-		} 
-		//std::cerr<<"norm="<<norma<<"\n";
-		if (fabs(norma)<eps) throw std::runtime_error("Too small!\n");
+
+		if (fabs(norma-1.0)<eps) return;
+
+		std::string s(__FILE__);
+		s += " " + ttos(__LINE__);
+		std::cerr<<s<<" norm= "<<norma<<"\n";
+		assert(fabs(norma)>eps);
+
 		for (size_t i=0;i<v.data_.size();i++)
 			for (size_t j=0;j<v.data_[i].size();j++) 
 				v.data_[i][j] /= norma;
-		
 	}
 
 	template<typename FieldType>

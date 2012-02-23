@@ -14,7 +14,7 @@ hoppings 2 2
 hubbardU	4 0.0 0.0 0.0 0.0
 potentialV	4 0.0 0.0 0.0 0.0
 density 1.0
-options hasQuantumNumbers,wft,noSu2
+options wft,noSu2
 version 61289987cdd32b8485213ac0415baf4e9cd16432
 outputfile		data142.txt
 InfiniteLoopKeptStates	 60

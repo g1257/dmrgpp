@@ -208,6 +208,11 @@ namespace Dmrg {
 					OperatorType myOp(tmpMatrix,-1,typename OperatorType::PairType(1,1-sigma),asign,su2related);
 					
 					creationMatrix.push_back(myOp);
+//					PsimagLite::Matrix<SparseElementType> fullMatrix;
+//					crsMatrixToFullMatrix(fullMatrix,tmpMatrix);
+//					std::cout<<"OPERATOR C\n";
+//					std::cout<<fullMatrix;
+//					std::cout<<"----------------------\n";
 				}
 			}
 		}
