@@ -245,7 +245,6 @@ namespace Dmrg {
 				
 				// Loop over each operator that needs to be applied 
 				// in turn to the g.s.
-				size_t count = 0;
 				for (size_t i=0;i<max;i++) {
 					if (!evolve(i,phiNew,phiOld,Eg,direction,block1,loopNumber,max-1))
 						continue;
