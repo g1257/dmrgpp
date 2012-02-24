@@ -262,6 +262,7 @@ namespace Dmrg {
 				calcTimeVectors(Eg,phiNew,direction);
 				
 				cocoon(direction,block1); // in-situ
+				printEnergies(); // in-situ
 			}
 
 			void load(const std::string& f)
@@ -369,7 +370,40 @@ namespace Dmrg {
 			}
 
 		private:
-			
+
+			void printEnergies() const
+			{
+				for (size_t i=0;i<targetVectors_.size();i++)
+					printEnergies(targetVectors_[i],i);
+			}
+
+			void printEnergies(const VectorWithOffsetType& phi,size_t whatTarget) const
+			{
+				for (size_t ii=0;ii<phi.sectors();ii++) {
+					size_t i = phi.sector(ii);
+					printEnergies(phi,whatTarget,i);
+				}
+			}
+
+			void printEnergies(const VectorWithOffsetType& phi,size_t whatTarget, size_t i0) const
+			{
+				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
+				typename ModelType::ModelHelperType modelHelper(p,lrs_);
+						//,useReflection_);
+				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
+
+
+				size_t total = phi.effectiveSize(i0);
+				TargetVectorType phi2(total);
+				phi.extract(phi2,i0);
+				TargetVectorType x(total);
+				lanczosHelper.matrixVectorProduct(x,phi2);
+				std::ostringstream msg;
+				msg<<"Hamiltonian average at time="<<currentTime_<<" for target="<<whatTarget;
+				msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<(phi2*x);
+				progress_.printline(msg,std::cout);
+			}
+
 			// in situ computation:
 			void cocoon(size_t direction,const BlockType& block) const
 			{
