@@ -254,19 +254,31 @@ namespace Dmrg {
 
 		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,int fermionSign)
 		{
-			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
-			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
-
-			return bracketRightCorner_(A,B,fermionSign,src1,src2);
+			try {
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
+				return bracketRightCorner_(A,B,fermionSign,src1,src2);
+			}  catch (std::exception& e) {
+				std::cerr<<"CAUGHT: "<<e.what();
+				std::cerr<<"WARNING: CorrelationsSkeleton::bracketRightCorner(...):";
+				std::cerr<<" No data seen yet\n";
+				return 0;
+			}
 		}
 
 		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,
 				const MatrixType& C,int fermionSign)
 		{
-			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
-			const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
-
-			return bracketRightCorner_(A,B,C,fermionSign,src1,src2);
+			try {
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
+				return bracketRightCorner_(A,B,C,fermionSign,src1,src2);
+			} catch (std::exception& e) {
+				std::cerr<<"CAUGHT: "<<e.what();
+				std::cerr<<"WARNING: CorrelationsSkeleton::bracketRightCornerABC(...):";
+				std::cerr<<" No data seen yet\n";                                                               
+				return 0;                                                                                                                       
+			}
 		}
 
 	private:

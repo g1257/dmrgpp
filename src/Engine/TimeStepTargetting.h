@@ -287,15 +287,14 @@ namespace Dmrg {
 				os<<"TSTWeightGroundState="<<gsWeight_<<"\n";
 			}
 
-			bool evolve(
-					size_t i,
-					VectorWithOffsetType& phiNew,
-					const VectorWithOffsetType& phiOld,
-					RealType Eg,
-					size_t direction,
-					const BlockType& block,
-					size_t loopNumber,
-				     	size_t lastI)
+			bool evolve(size_t i,
+				    VectorWithOffsetType& phiNew,
+				    const VectorWithOffsetType& phiOld,
+				    RealType Eg,
+				    size_t direction,
+				    const BlockType& block,
+				    size_t loopNumber,
+				    size_t lastI)
 			{
 				static size_t  timesWithoutAdvancement=0;
 				static bool firstSeeLeftCorner = false;
@@ -364,7 +363,10 @@ namespace Dmrg {
 				msg<<"Saving state...";
 				progress_.printline(msg,std::cout);
 
-				TimeSerializerType ts(currentTime_,block[0],targetVectors_);
+				size_t marker = 0;
+				if (noStageIs(DISABLED)) marker = 1;
+
+				TimeSerializerType ts(currentTime_,block[0],targetVectors_,marker);
 				ts.save(io);
 				psi_.save(io,"PSI");
 			}
@@ -416,6 +418,8 @@ namespace Dmrg {
 				A.data = tmpC;
 				A.fermionSign = 1;
 				//A.data = tmpC;
+				if (noStageIs(DISABLED)) std::cerr<<"ALL OPERATORS HAVE BEEN APPLIED\n";
+				else std::cerr<<"NOT ALL OPERATORS APPLIED YET\n";
 				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
 				test(psi_,psi_,direction,"<PSI|A|PSI>",site,A);
 				

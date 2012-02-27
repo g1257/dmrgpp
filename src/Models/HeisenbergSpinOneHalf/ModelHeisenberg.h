@@ -283,12 +283,12 @@ namespace Dmrg {
 		//! Find S^z_i in the natural basis natBasis
 		SparseMatrixType findSzMatrices(int i,std::vector<HilbertStateType> const &natBasis) const
 		{
-			HilbertStateType bra,ket;
+			HilbertStateType ket;
 			int n = natBasis.size();
 			PsimagLite::Matrix<SparseElementType> cm(n,n);
 
 			for (size_t ii=0;ii<natBasis.size();ii++) {
-				bra=ket=natBasis[ii];
+				ket=natBasis[ii];
 				switch (HilbertSpaceType::get(ket,i)) {
 					case 1:
 						cm(ii,ii)=0.5;

@@ -306,7 +306,6 @@ namespace Dmrg {
 				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
 				progress_.printline(msg,std::cout);
 
-				
 				lrs_.growLeftBlock(model_,pS,X[step],time); // grow system
 				lrs_.growRightBlock(model_,pE,Y[step],time); // grow environment
 
@@ -335,14 +334,12 @@ namespace Dmrg {
 		(\\todo{Section to be written}) phase the total number of sites remains 
 		constant allowing for a formulation
 		of DMRG as a variational method in a basis of matrix product states.
-		*/
-		void finiteDmrgLoops(
-					BlockType const &S,
-     					BlockType const &E,
-					MyBasisWithOperators &pS,
-     					MyBasisWithOperators &pE,
-	  				//int l,
-       					TargettingType& psi)
+  */
+		void finiteDmrgLoops(BlockType const &S,
+				     BlockType const &E,
+				     MyBasisWithOperators &pS,
+				     MyBasisWithOperators &pE,
+				     TargettingType& psi)
 		{
 			if (parameters_.options.find("nofiniteloops")!=std::string::npos) return;
 			if (parameters_.finiteLoop.size()==0)

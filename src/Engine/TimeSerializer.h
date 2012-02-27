@@ -94,13 +94,14 @@ namespace Dmrg {
 			// to build an array of these
 			TimeSerializer() { }
 			
-			TimeSerializer(
-				RealType currentTime,
-				size_t site,
-				const std::vector<VectorType>& targetVectors)
+			TimeSerializer(RealType currentTime,
+				       size_t site,
+				       const std::vector<VectorType>& targetVectors,
+				       size_t marker)
 			: currentTime_(currentTime),
 			  site_(site),
-			  targetVectors_(targetVectors)
+			  targetVectors_(targetVectors),
+			  marker_(marker)
 			{}
 			
 			TimeSerializer(typename PsimagLite::IoSimple::In& io,size_t lastInstance = 0)
@@ -126,6 +127,10 @@ namespace Dmrg {
 					s = "targetVector"+ttos(i);
 					targetVectors_[i].load(io,s);
 				}
+				s = "#MARKER=";
+				io.readline(xi,s);
+				if (xi<0) throw std::runtime_error("TimeSerializer:: marker must be positive\n");
+				marker_=xi;
 			}
 			
 			size_t size(size_t i=0) const
@@ -145,6 +150,10 @@ namespace Dmrg {
 				return targetVectors_[i];
 			}
 			
+			size_t marker() const
+			{
+				return marker_;
+			}
 			
 			template<typename IoOutputter>
 			void save(IoOutputter& io) const
@@ -159,12 +168,15 @@ namespace Dmrg {
 					std::string label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
 					targetVectors_[i].save(io,label);
 				}
+				s="#MARKER="+ttos(marker_);
+				io.printline(s);
 			}
 
 		private:
 			RealType currentTime_;
 			size_t site_;
 			std::vector<VectorType> targetVectors_;
+			size_t marker_;
 	}; // class TimeSerializer
 } // namespace Dmrg 
 

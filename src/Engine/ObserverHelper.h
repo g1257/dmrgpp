@@ -217,6 +217,11 @@ namespace Dmrg {
 			return dSerializerV_.size(); //-1;
 		}
 
+		size_t marker() const
+		{
+			return timeSerializerV_[currentPos_].marker();
+		}
+
 		const VectorWithOffsetType&
 			getVectorFromBracketId(size_t leftOrRight) const
 		{

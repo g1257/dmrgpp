@@ -79,13 +79,13 @@ bool observeOneFullSweep(
 		ObserverType;
 	typedef ObservableLibrary<ObserverType,TargettingType> ObservableLibraryType;
 	size_t n  = geometry.numberOfSites();
-	std::string sSweeps = "sweeps=";
-	std::string::size_type begin = obsOptions.find(sSweeps);
-	if (begin != std::string::npos) {
-		std::string sTmp = obsOptions.substr(begin+sSweeps.length(),std::string::npos);
+	//std::string sSweeps = "sweeps=";
+	//std::string::size_type begin = obsOptions.find(sSweeps);
+	//if (begin != std::string::npos) {
+	//	std::string sTmp = obsOptions.substr(begin+sSweeps.length(),std::string::npos);
 		//std::cout<<"sTmp="<<sTmp<<"\n";
-		n = atoi(sTmp.c_str());
-	}
+	//	n = atoi(sTmp.c_str());
+	//}
 	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,concurrency,verbose);
 	
 	bool ot = false;

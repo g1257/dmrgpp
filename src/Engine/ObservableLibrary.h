@@ -270,7 +270,7 @@ namespace Dmrg {
 			const std::string& label)
 		{
 			Su2RelatedType su2Related1;
-
+			printMarker();
 			std::cout<<"#Using Matrix A:\n";
 			for (size_t i=0;i<A.rank();i++) {
 				for (size_t j=0;j<A.rank();j++)
@@ -310,6 +310,7 @@ namespace Dmrg {
 
 		void printSites()
 		{
+			printMarker();
 			std::cout<<"#Sites=";
 			observe_.setPointer(0);
 			if (observe_.site()==1) std::cout<<"0 ";
@@ -326,6 +327,22 @@ namespace Dmrg {
 			}
 
 			std::cout<<"\n";
+		}
+
+		void printMarker()
+		{
+			if (!hasTimeEvolution_) return;
+			size_t marker = observe_.marker();
+			std::string s = "INVALID MARKER";
+			switch (marker) {
+			case 0:
+				s=" NOT ALL OPERATORS APPLIED YET";
+				break;
+			case 1:
+				s=" ALL OPERATORS HAVE BEEN APPLIED";
+			}
+
+			std::cout<<s<<"\n";
 		}
 
 		size_t numberOfSites_;

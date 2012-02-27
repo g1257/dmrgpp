@@ -150,6 +150,8 @@ namespace Dmrg {
 
 		size_t site() const { return helper_.site(); }
 
+		size_t marker() const { return helper_.marker(); }
+
 		void setPointer(size_t x) { helper_.setPointer(x); }
 
 		bool endOfData() const { return helper_.endOfData(); }
