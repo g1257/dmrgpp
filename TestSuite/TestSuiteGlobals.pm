@@ -233,19 +233,24 @@ sub runAllTests
 		die "<Error>: Invalid tests range [$start,$lastTest].\n" if($lastTest < $start);
 		print "Preparing to run all tests from Test $start to Test $lastTest.\n";
 	} else {
-		print "Preparing to run all tests starting from Test $start...\n";
 		$lastTest = $testsList[$#testsList];
+
+		print "Preparing to run all tests starting from Test $start to $lastTest ".($#testsList)."\n";
 	}
 	
 	for (my $i=0;$i<=$#testsList;$i++) {
-		next if ($testsList[$i] eq "");
-		next if ($testsList[$i]<$start);
-		my $specFile =  $TestSuiteGlobals::inputsDir."model$TestSuiteGlobals::testNum.spec";
+		my $tn = $testsList[$i];
+		next if ($tn eq "");
+		next if ($tn<$start);
+
+		my $specFile =  $TestSuiteGlobals::inputsDir."model$tn.spec";
 		next  if (nonFunctionalTest($specFile));
+
+		#print "$tn\n";
 		#next if(grep {$_ eq $testsList[$i]}@nonFunctionalTests);
-		$TestSuiteGlobals::testNum = $testsList[$i];
+		$TestSuiteGlobals::testNum = $tn;
 		testSuite($TestSuiteGlobals::testNum);
-		last if($testsList[$i] == $lastTest);
+		last if($tn == $lastTest);
 	}
 }
 
