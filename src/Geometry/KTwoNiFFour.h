@@ -96,6 +96,8 @@ namespace PsimagLite {
 	public:
 
 		struct AdditionalData {
+			AdditionalData() : type1(0),type2(0),TYPE_C(KTwoNiFFour::TYPE_C) {}
+
 			size_t type1;
 			size_t type2;
 			size_t TYPE_C;
