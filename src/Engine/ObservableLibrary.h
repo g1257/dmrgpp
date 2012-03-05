@@ -296,12 +296,13 @@ namespace Dmrg {
 					// do the corner case
 					// for g.s. use this one:
 					observe_.setBrackets("gs","gs");
+					bool doCorner = true;
 					FieldType tmp1 = observe_.template
-							onePoint<ApplyOperatorType>(i0,opA,true);
+							onePoint<ApplyOperatorType>(i0,opA,doCorner);
 					// for time vector use this one:
 					observe_.setBrackets("time","time");
 					FieldType tmp2 = observe_.template
-							onePoint<ApplyOperatorType>(i0,opA,true);
+							onePoint<ApplyOperatorType>(i0,opA,doCorner);
 					std::cout<<x<<" "<<tmp1<<" "<<tmp2;
 					std::cout<<" "<<observe_.time()<<"\n";
 				}

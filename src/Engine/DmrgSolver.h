@@ -156,7 +156,7 @@ namespace Dmrg {
 		  stepCurrent_(0),
 		  checkpoint_(parameters_,concurrency.rank()),
 		  wft_(parameters_),
-		  reflectionOperator_(lrs_,model_.hilbertSize(0),parameters_.useReflectionSymmetry,EXPAND_SYSTEM),
+		  reflectionOperator_(lrs_,concurrency,model_.hilbertSize(0),parameters_.useReflectionSymmetry,EXPAND_SYSTEM),
 		  diagonalization_(parameters,model,concurrency,verbose_,
 				   reflectionOperator_,io_,quantumSector_,wft_),
 		  truncate_(reflectionOperator_,wft_,concurrency_,parameters_,

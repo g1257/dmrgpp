@@ -107,8 +107,7 @@ namespace Dmrg {
 
 		//! FIXME: we need to make a fast version for when we're just
 		//! figuring out where the (non-zero) partition is
-		void operator()(
-				VectorWithOffsetType& dest,
+		void operator()(VectorWithOffsetType& dest,
 				const VectorWithOffsetType& src,
 				const OperatorType& A,
 				const FermionSign& fermionSign,
@@ -123,12 +122,11 @@ namespace Dmrg {
 		}
 
 	private:
-		void applyLocalOpSystem(
-				VectorWithOffsetType& dest,
-				const VectorWithOffsetType& src,
-				const OperatorType& A,
-				const FermionSign& fermionSign,
-				size_t whichPartOfTheLattice = MIDDLE) const
+		void applyLocalOpSystem(VectorWithOffsetType& dest,
+					const VectorWithOffsetType& src,
+					const OperatorType& A,
+					const FermionSign& fermionSign,
+					size_t whichPartOfTheLattice = MIDDLE) const
 		{
 			TargetVectorType dest2(lrs_.super().size());
 
@@ -151,12 +149,11 @@ namespace Dmrg {
 			dest.fromFull(dest2,lrs_.super());
 		}
 
-		void applyLocalOpSystem(
-				TargetVectorType& dest2,
-				const VectorWithOffsetType& src,
-				const OperatorType& A,
-				const FermionSign& fermionSign,
-				size_t i0) const
+		void applyLocalOpSystem(TargetVectorType& dest2,
+					const VectorWithOffsetType& src,
+					const OperatorType& A,
+					const FermionSign& fermionSign,
+					size_t i0) const
 		{
 			size_t offset = src.offset(i0);
 			size_t final = offset + src.effectiveSize(i0);
@@ -190,11 +187,10 @@ namespace Dmrg {
 
 		}
 
-		void applyLocalOpEnviron(
-				VectorWithOffsetType& dest,
-				const VectorWithOffsetType& src,
-				const OperatorType& A,
-				size_t whichPartOfTheLattice = MIDDLE) const
+		void applyLocalOpEnviron(VectorWithOffsetType& dest,
+					 const VectorWithOffsetType& src,
+					 const OperatorType& A,
+					 size_t whichPartOfTheLattice = MIDDLE) const
 		{
 			TargetVectorType dest2(lrs_.super().size());
 
@@ -217,11 +213,10 @@ namespace Dmrg {
 			dest.fromFull(dest2,lrs_.super());
 		}
 
-		void applyLocalOpEnviron(
-				TargetVectorType& dest2,
-				const VectorWithOffsetType& src,
-				const OperatorType& A,
-				size_t i0) const
+		void applyLocalOpEnviron(TargetVectorType& dest2,
+					 const VectorWithOffsetType& src,
+					 const OperatorType& A,
+					 size_t i0) const
 		{
 			size_t offset = src.offset(i0);
 			size_t final = offset + src.effectiveSize(i0);
@@ -246,11 +241,10 @@ namespace Dmrg {
 			}
 		}
 
-		void applyLocalOpLeftCorner(
-				TargetVectorType& dest2,
-				const VectorWithOffsetType& src,
-				const OperatorType& A,
-				size_t i0) const
+		void applyLocalOpLeftCorner(TargetVectorType& dest2,
+					    const VectorWithOffsetType& src,
+					    const OperatorType& A,
+					    size_t i0) const
 		{
 			size_t offset = src.offset(i0);
 			size_t final = offset + src.effectiveSize(i0);
@@ -270,11 +264,10 @@ namespace Dmrg {
 			}
 		}
 
-		void applyLocalOpRightCorner(
-				TargetVectorType& dest2,
-				const VectorWithOffsetType& src,
-				const OperatorType& A,
-				size_t i0) const
+		void applyLocalOpRightCorner(TargetVectorType& dest2,
+					     const VectorWithOffsetType& src,
+					     const OperatorType& A,
+					     size_t i0) const
 		{
 			size_t offset = src.offset(i0);
 			size_t final = offset + src.effectiveSize(i0);
@@ -302,11 +295,10 @@ namespace Dmrg {
 		}
 
 		// entry point for corner cases. These are all when expanding ths system
-		void applyLocalOpCorner(
-				VectorWithOffsetType& dest,
-				const VectorWithOffsetType& src,
-				const OperatorType& A,
-				const FermionSign& fermionSign) const
+		void applyLocalOpCorner(VectorWithOffsetType& dest,
+					const VectorWithOffsetType& src,
+					const OperatorType& A,
+					const FermionSign& fermionSign) const
 		{
 			if (lrs_.right().size() == A.data.rank()) { // right corner
 				applyLocalOpSystem(dest,src,A,fermionSign,RIGHT_CORNER);

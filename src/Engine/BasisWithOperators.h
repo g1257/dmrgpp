@@ -117,8 +117,10 @@ namespace Dmrg {
 
 		typedef std::pair<size_t,size_t> PairType;
 
+
 	public:
 
+		typedef typename OperatorsType_::BasisType::RealType RealType;
 		typedef OperatorsType_ OperatorsType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::OperatorType OperatorType;
@@ -216,9 +218,18 @@ namespace Dmrg {
 				operatorsPerSite_[i+offset1] =  basis3.operatorsPerSite_[i];
 		}
 
+//		template<typename SolverParametersType>
+//		void changeBasis(std::vector<size_t>& removedIndices,
+//				 std::vector<RealType>& eigs,
+//				 size_t kept,
+//				 const SolverParametersType& solverParams)
+//		{
+//			this->changeBasis(removedIndices,eigs,kept,solverParams);
+//		}
+
 		//! transform this basis by transform 
 		//! note: basis change must conserve total number of electrons and all quantum numbers
-		template<typename RealType,typename BlockMatrixType>
+		template<typename BlockMatrixType>
 		RealType truncateBasis(typename BlockMatrixType::BuildingBlockType& ftransform,
 				       const BlockMatrixType& transform,
 				       const std::vector<RealType>& eigs,
@@ -228,9 +239,15 @@ namespace Dmrg {
 			BasisType &parent = *this;
 			RealType error = parent.truncateBasis(ftransform,transform,eigs,removedIndices);
 
-			operators_.changeBasis(ftransform,this,concurrency); //startEnd);
+			changeBasisDirect(ftransform,concurrency);
 
 			return error;
+		}
+
+		template<typename SomeMatrixType>
+		void changeBasisDirect(const SomeMatrixType& ftransform, ConcurrencyType& concurrency)
+		{
+			operators_.changeBasis(ftransform,this,concurrency); //startEnd);
 		}
 
 		void setHamiltonian(SparseMatrixType const &h) { operators_.setHamiltonian(h); }

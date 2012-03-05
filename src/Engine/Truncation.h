@@ -184,6 +184,7 @@ namespace Dmrg {
 			reflectionOperator_.changeBasis(transform1,ftransform_);
 			sBasis = leftCache_.bprime;
 			eBasis = rightCache_.bprime;
+			reflectionOperator_.diagBasis();
 		}
 
 	private:
@@ -260,7 +261,7 @@ namespace Dmrg {
 			std::ostringstream msg;
 			TruncationCache& cache = leftCache_;
 
-			error_ = cache.bprime.truncateBasis(ftransform_,cache.transform,
+			cache.bprime.truncateBasis(ftransform_,cache.transform,
 							    cache.eigs,cache.removedIndices,concurrency_);
 			LeftRightSuperType lrs(cache.bprime,(BasisWithOperatorsType&) eBasis,
 					       (BasisType&)lrs_.super());
@@ -277,7 +278,7 @@ namespace Dmrg {
 			std::ostringstream msg;
 			TruncationCache& cache = rightCache_;
 
-			error_ = cache.bprime.truncateBasis(ftransform_,cache.transform,
+			cache.bprime.truncateBasis(ftransform_,cache.transform,
 							    cache.eigs,cache.removedIndices,concurrency_);
 			LeftRightSuperType lrs((BasisWithOperatorsType&) sBasis,
 					       cache.bprime,(BasisType&)lrs_.super());
@@ -312,6 +313,7 @@ namespace Dmrg {
 				// we report that the "m" value remains the same
 				msg<<"Not changing kept states="<<keptStates;
 			}
+			error_ = discWeight;
 			progress_.printline(msg,std::cout);
 			// we report the discarded weight
 			msg<<"Discarded weight (Truncation error): "<< discWeight ; 

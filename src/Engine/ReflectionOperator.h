@@ -97,7 +97,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType>
+template<typename LeftRightSuperType,typename ConcurrencyType>
 class ReflectionOperator {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
@@ -113,8 +113,13 @@ class ReflectionOperator {
 
 public:
 
-	ReflectionOperator(const LeftRightSuperType& lrs,size_t n0,bool isEnabled,size_t expandSys)
+	ReflectionOperator(LeftRightSuperType& lrs,
+			   ConcurrencyType& concurrency,
+			   size_t n0,
+			   bool isEnabled,
+			   size_t expandSys)
 	: lrs_(lrs),
+	  concurrency_(concurrency),
 	  n0_(n0),
 	  progress_("ReflectionOperator",0),
 	  isEnabled_(isEnabled),
@@ -216,14 +221,87 @@ public:
 //			transform2.print(std::cerr,1e-6);
 //		}
 		reflectedLeft_ = newreflected;
-		normalize(reflectedLeft_);
+		//normalize(reflectedLeft_);
 
 		changeBasis(newreflected,reflectedRight_,transform2,transform1);
 		reflectedRight_ = newreflected;
-		normalize(reflectedRight_);
+		//normalize(reflectedRight_);
+
+//		diagBasis();
+	}
+
+	void diagBasis()
+	{
+//		SparseMatrixType sSector;
+//		setSsector(sSector);
+//		reflectionTransform_.update(sSector);
+
+//		const SparseMatrixType& Q1 = reflectionTransform_.getTransform(0);
+//		const SparseMatrixType& Qm = reflectionTransform_.getTransform(1);
+
+//		SparseMatrixType transf;
+//		transformPartialLeft(transf,Q1,Qm);
+//		PsimagLite::Matrix<ComplexOrRealType> fullm;
+//		crsMatrixToFullMatrix(fullm,transf);
+//		lrs_.leftNonConst().changeBasisDirect(fullm,concurrency_);
+
+//		transformPartialRight(transf,Q1,Qm);
+//		crsMatrixToFullMatrix(fullm,transf);
+//		lrs_.rightNonConst().changeBasisDirect(fullm,concurrency_);
+
 	}
 
 private:
+
+//	void transformPartialLeft(SparseMatrixType& tr,const SparseMatrixType& Q1,const SparseMatrix& Qm) const
+//	{
+
+//		size_t ns = lrs_.left().size();
+//		PackIndicesType pack2(ns/n0_);
+//		PackIndicesType pack3(n0_);
+//		PackIndicesType pack1(ns);
+//		assert(reflectedLeft_.rank()==ns/n0_);
+//		assert(reflectedRight_.rank()==ns/n0_);
+//		std::vector<int> ptr(total,-1);
+//		std::vector<size_t> index(total,0);
+//		std::vector<ComplexOrRealType> temp(total,0);
+
+//		size_t counter = 0;
+//		for (size_t i=0;i<total;i++) {
+//			size_t x = 0, y = 0;
+//			pack1.unpack(x,y,lrs_.super().permutation(i));
+//			tr.setRow(x,counter);
+//			for (int k=Q1.getRowPtr(i);k<Q1.getRowPtr(i+1);k++) {
+//				size_t col = Q1.getCol(k);
+//				pack1.unpack(xprime,yprime,lrs_.super().permutation(i));
+
+
+//	}
+
+//	void transformPartial(SparseMatrixType& s1,const PsimagLite::Matrix<ComplexOrRealType>& fullm)
+//	{
+//		SparseMatrixType m1(fullm);
+//		SparseMatrixType m1Conj;
+//		transposeConjugate(m1Conj,m1);
+//		SparseMatrixType tmp = s1*m1Conj;
+//		s1 = m1*tmp;
+//		s1.checkValidity();
+//	}
+
+//	void transformPartial(SparseMatrixType& s1,const std::vector<RealType>& eigs)
+//	{
+//		size_t n = s1.rank();
+//		s1.resize(n);
+//		size_t counter = 0;
+//		for (size_t i=0;i<n;i++) {
+//			s1.setRow(i,counter);
+//			s1.pushCol(i);
+//			s1.pushValue(eigs[i]);
+//			counter++;
+//		}
+//		s1.setRow(n,counter);
+//		s1.checkValidity();
+//	}
 
 	void check(const std::vector<size_t>& removedIndices,
 		   const SparseMatrixType& reflected,
@@ -255,14 +333,14 @@ private:
 
 		std::vector<size_t> diffs;
 		getDifferences(diffs,x,removedIndices);
-//		for (size_t i=0;i<diffs.size();i++)
-//			std::cerr<<"diffs["<<i<<"]="<<diffs[i]<<"\n";
+		for (size_t i=0;i<diffs.size();i++)
+			std::cerr<<"diffs["<<i<<"]="<<diffs[i]<<"\n";
 
-//		for (size_t i=0;i<x.size();i++)
-//			std::cerr<<"x["<<i<<"]="<<x[i]<<"\n";
+		for (size_t i=0;i<x.size();i++)
+			std::cerr<<"x["<<i<<"]="<<x[i]<<"\n";
 
-//		for (size_t i=0;i<removedIndices.size();i++)
-//			std::cerr<<"removed["<<i<<"]="<<removedIndices[i]<<"\n";
+		for (size_t i=0;i<removedIndices.size();i++)
+			std::cerr<<"removed["<<i<<"]="<<removedIndices[i]<<"\n";
 
 	}
 
@@ -360,6 +438,12 @@ private:
 		size_t m = sectors[0];
 		size_t offset = lrs_.super().partition(m);
 		size_t total = lrs_.super().partition(m+1)-offset;
+		setSsector(sSector,total,offset);
+	}
+
+	void setSsector(SparseMatrixType& sSector,size_t total=0,size_t offset=0) const
+	{
+		if (total==0) total=lrs_.super().size();
 		sSector.resize(total);
 		size_t counter = 0;
 		size_t ns = lrs_.left().size();
@@ -428,7 +512,7 @@ private:
 #ifndef NDEBUG
 		SparseMatrixType tmp;
 		multiply(tmp,sSector,sSector);
-		bool b = isTheIdentity(tmp,1e-6);
+		bool b = isTheIdentity(tmp,1e-5);
 		if (b) return;
 		hasZeroRows(sSector,true);
 		printFullMatrix(sSector,"sSector");
@@ -555,7 +639,8 @@ private:
 		reflectedRight_ = reflectedRight;
 	}
 
-	const LeftRightSuperType& lrs_;
+	LeftRightSuperType& lrs_;
+	ConcurrencyType& concurrency_;
 	size_t n0_; // hilbert size of one site
 	PsimagLite::ProgressIndicator progress_;
 	bool isEnabled_;

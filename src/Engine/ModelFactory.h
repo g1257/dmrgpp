@@ -143,7 +143,7 @@ namespace Dmrg {
 //		typedef SharedMemoryTemplate<HamiltonianConnectionType> SharedMemoryType;
 //		typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 		typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-		typedef ReflectionOperator<LeftRightSuperType> ReflectionSymmetryType;
+		typedef ReflectionOperator<LeftRightSuperType,ConcurrencyType> ReflectionSymmetryType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 

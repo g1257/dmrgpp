@@ -211,9 +211,14 @@ namespace Dmrg {
 				right_->save(io);
 			}
 
-			const BasisWithOperatorsType& left() const { return *left_; }
+			const BasisWithOperatorsType& left()  const { return *left_; }
 
 			const BasisWithOperatorsType& right() const { return *right_; }
+
+			BasisWithOperatorsType& leftNonConst()  { return *left_; }
+
+			BasisWithOperatorsType& rightNonConst() { return *right_; }
+
 
 			const SuperBlockType& super() const { return *super_; }
 
