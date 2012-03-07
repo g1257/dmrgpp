@@ -24,6 +24,7 @@ Please see full open source license included in file LICENSE.
 #include <stdexcept>
 #include <iostream>
 #include "Lapack.h"
+#include "LAPACK.h"
 #include "Complex.h"
 #include <cassert>
 
@@ -165,6 +166,24 @@ namespace PsimagLite {
 	}
 
 	template<typename T>
+	void inverse(Matrix<T>& m)
+	{
+		int n = m.n_row();
+		int info = 0;
+		std::vector<int> ipiv(n,0);
+		psimag::LAPACK::zgetrf_(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
+		int lwork = -1;
+		std::vector<T> work(2);
+		psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+		lwork = std::real(work[0]);
+		work.resize(lwork+2);
+		psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+		std::string s = "zgetri_ failed\n";
+		if (info!=0) throw std::runtime_error(s.c_str());
+
+	}
+
+	template<typename T>
 	void symbolicPrint(std::ostream& os,const Matrix<T>& A)
 	{
 		size_t i,j;
@@ -252,6 +271,81 @@ namespace PsimagLite {
 		return c;
 	}
 	
+
+	template<typename T>
+	Matrix<T> operator*(const Matrix<T>& a,const Matrix<T>& b)
+	{
+		assert(a.n_col()==b.n_row());
+		Matrix<T> c(a.n_row(),b.n_col());
+		 for (size_t i=0;i<a.n_row();i++) {
+			 for (size_t j=0;j<b.n_col();j++) {
+				 T sum = 0.0;
+				 for (size_t k=0;k<a.n_col();k++) {
+					 sum += a(i,k) * b(k,j);
+				 }
+				 c(i,j) = sum;
+			 }
+		 }
+		 return c;
+	}
+
+	template<typename T>
+	std::vector<T> operator*(const Matrix<T>& a,const std::vector<T>& b)
+	{
+		assert(a.n_col()==b.size());
+		std::vector<T> v(a.n_row());
+		for (size_t i=0;i<a.n_row();i++) {
+			T sum = 0;
+			for (size_t j=0;j<b.size();j++) sum += a(i,j)*b[j];
+			v[i] = sum;
+		}
+		return v;
+	}
+
+	template<typename T>
+	Matrix<T> operator*(const T& val,const Matrix<T>& a)
+	{
+		Matrix<T> b(a.n_row(),a.n_col());
+		for (size_t i=0;i<a.n_row();i++)
+			for (size_t j=0;j<b.n_col();j++)
+				b(i,j) = val*a(i,j);
+		return b;
+	}
+
+	template<typename T>
+	void exp(Matrix<T>& m)
+	{
+		size_t n = m.n_row();
+//		Matrix<T> res(n,n);
+//		for (size_t i=0;i<n;i++) res(i,i)=1;
+//		res += m;
+//		Matrix<T> tmp = m;
+//		T val = 1;
+
+//		for (size_t x=2;x<max;x++) {
+//			val /= x;
+//			tmp = (tmp*m);
+//			res += val*tmp;
+//		}
+//		m = res;
+
+		std::vector<double> eigs(n);
+		diag(m,eigs,'V');
+		Matrix<T> expm(n,n);
+		for (size_t i=0;i<n;i++) {
+			for (size_t j=0;j<n;j++) {
+				T sum = 0;
+				for (size_t k=0;k<n;k++) {
+					double alpha = eigs[k];
+					T tmp = T(cos(alpha),sin(alpha));
+					sum+= std::conj(m(i,k))*m(j,k)*tmp;
+				}
+				expm(i,j) = sum;
+			}
+		}
+		m = expm;
+
+	}
 
 	void diag(Matrix<double> &m,std::vector<double> &eigs,char option)
 	{
