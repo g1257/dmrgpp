@@ -16,7 +16,7 @@ Connectors 2 2
 Connectors 2 2
 +0.20828 -0.079
 -0.079 +0.20828
-hubbardU	8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+hubbardU	4 0.0 0.0 0.0 0.0 
 potentialV	8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=FeAsBasedSc
 SolverOptions=nowft,useSu2Symmetry

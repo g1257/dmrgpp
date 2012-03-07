@@ -24,7 +24,7 @@ Connectors 1 0.1
 Connectors 1 0.1
 Connectors 1 0.02
 Connectors 1 0.02 
-hubbardU	8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+hubbardU	4 0.0 0.0 0.0 0.0 
 potentialV	8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=FeAsBasedScExtended
 SolverOptions=wft

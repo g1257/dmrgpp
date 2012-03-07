@@ -77,7 +77,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  *  Critical problems:
  *
- *  - getting a l.i. set in an efficient way
  *  - support for fermionic reflections
  *
  *  Low priority work that needs to be done:
@@ -174,10 +173,10 @@ public:
 	void transform(SparseMatrixType& matrixA,
 		       SparseMatrixType& matrixB,
 		       const SparseMatrixType& matrix) const
-	 {
+	{
 		assert(isEnabled_);
 		reflectionTransform_.transform(matrixA,matrixB,matrix);
-	 }
+	}
 
 	template<typename SomeVectorType>
 	void setInitState(const SomeVectorType& initVector,
