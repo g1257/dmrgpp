@@ -398,6 +398,10 @@ namespace Dmrg {
 		template<typename FieldType3,typename FieldType2>
 		friend VectorWithOffsets<FieldType2> operator*(const FieldType3& value,const VectorWithOffsets<FieldType2>& v);
 	
+		template<typename FieldType2>
+		friend VectorWithOffsets<FieldType2> operator+(const VectorWithOffsets<FieldType2>& v1,
+							       const VectorWithOffsets<FieldType2>& v2);
+
 	private:
 		
 		void setIndex2Sector()
@@ -593,6 +597,23 @@ namespace Dmrg {
 		}
 		return w;
 	}
+
+	template<typename FieldType>
+	VectorWithOffsets<FieldType> operator+(const VectorWithOffsets<FieldType>& v1,
+					       const VectorWithOffsets<FieldType>& v2)
+	{
+		std::string s = "VectorWithOffsets + VectorWithOffsets failed\n";
+		if (v1.nonzeroSectors_!=v2.nonzeroSectors_) throw std::runtime_error(s.c_str());
+		for (size_t ii=0;ii<v1.nonzeroSectors_.size();ii++) {
+			size_t i = v1.nonzeroSectors_[ii];
+			if (v1.data_[i].size()!=v2.data_[i].size())
+				throw std::runtime_error(s.c_str());
+		}
+		VectorWithOffsets<FieldType> w = v1;
+		w += v2;
+		return w;
+	}
+
 
 	template<typename FieldType>
 	const FieldType VectorWithOffsets<FieldType>::zero_ = 0;

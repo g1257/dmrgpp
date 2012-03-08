@@ -299,6 +299,7 @@ namespace Dmrg {
 				static size_t  timesWithoutAdvancement=0;
 				static bool firstSeeLeftCorner = false;
 
+				if (direction==INFINITE) E0_ = Eg;
 				if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return false;
 
 				assert(block.size()==1);
@@ -536,10 +537,37 @@ namespace Dmrg {
 				}
 			}
 
-			void calcTimeVectors(
-						RealType Eg,
-      						const VectorWithOffsetType& phi,
-						size_t systemOrEnviron)
+			void calcTimeVectors(RealType Eg,
+					      const VectorWithOffsetType& phi,
+					      size_t systemOrEnviron)
+			{
+				if (times_.size()!=4) {
+					throw std::runtime_error("RK valid only with 4 steps\n");
+				}
+
+				RealType val = tstStruct_.tau * (Eg-E0_);
+				std::cerr<<"VAAAAAAAAAAALLLLLLLLLLLLLLLLLL="<<val<<" Eg======"<<Eg;
+				std::cerr<<"      E0="<<E0_<<"\n";
+				VectorWithOffsetType k1 = val * phi;
+				VectorWithOffsetType k2 = val * (phi + 0.5*k1);
+				VectorWithOffsetType k3 = val * (phi + 0.5*k2);
+				VectorWithOffsetType k4 = val * (phi + k3);
+
+				targetVectors_[0] = phi;
+
+				val = 1.0/162.;
+				targetVectors_[1] = phi + val * (31*k1 + 14*k2 + 14*k3 + (-5.)*k4);
+
+				val = 1.0/81.;
+				targetVectors_[2] = phi + val * (16*k1 + 20*k2 + 20*k3 + (-2.)*k4);
+
+				val = 1.0/6.0;
+				targetVectors_[3] = val * (k1 + 2*k2 + 2*k3 + k4);
+			}
+
+			void calcTimeVectorsExp(RealType Eg,
+					     const VectorWithOffsetType& phi,
+					     size_t systemOrEnviron)
 			{
 				std::vector<ComplexMatrixType> V(phi.sectors());
 				std::vector<ComplexMatrixType> T(phi.sectors());
@@ -549,7 +577,7 @@ namespace Dmrg {
 				triDiag(phi,T,V,steps);
 				
 				std::vector<std::vector<RealType> > eigs(phi.sectors());
-						
+
 				for (size_t ii=0;ii<phi.sectors();ii++) 
 					PsimagLite::diag(T[ii],eigs[ii],'V');
 				
@@ -557,14 +585,13 @@ namespace Dmrg {
 			}
 
 			//! Do not normalize states here, it leads to wrong results (!)
-			void calcTargetVectors(
-						const VectorWithOffsetType& phi,
-						const std::vector<ComplexMatrixType>& T,
-						const std::vector<ComplexMatrixType>& V,
-						RealType Eg,
-      						const std::vector<VectorType>& eigs,
-	    					std::vector<size_t> steps,
-					      	size_t systemOrEnviron)
+			void calcTargetVectors(const VectorWithOffsetType& phi,
+					       const std::vector<ComplexMatrixType>& T,
+					       const std::vector<ComplexMatrixType>& V,
+					       RealType Eg,
+					       const std::vector<VectorType>& eigs,
+					       std::vector<size_t> steps,
+					       size_t systemOrEnviron)
 			{
 				targetVectors_[0] = phi;
 //				normalize(targetVectors_[0]);
@@ -577,12 +604,12 @@ namespace Dmrg {
 
 			void calcTargetVector(
 						VectorWithOffsetType& v,
-      						const VectorWithOffsetType& phi,
+						const VectorWithOffsetType& phi,
 						const std::vector<ComplexMatrixType>& T,
 						const std::vector<ComplexMatrixType>& V,
 						RealType Eg,
-      						const std::vector<VectorType>& eigs,
-	    					RealType t,
+						const std::vector<VectorType>& eigs,
+						RealType t,
 						std::vector<size_t> steps)
 			{
 				v = phi;
@@ -791,6 +818,7 @@ namespace Dmrg {
 			RealType gsWeight_;
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
+			RealType E0_;
 
 	};     //class TimeStepTargetting
 
