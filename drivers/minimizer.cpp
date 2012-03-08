@@ -1,6 +1,12 @@
 
 #include "Minimizer.h"
-#include "Square.h"
+//#include "Square.h"
+
+template<typename T>
+T square(const T& t1)
+{
+	return t1*t1;
+}
 
 template<typename T>
 std::ostream& operator<<(std::ostream& os,const std::vector<T>& v)

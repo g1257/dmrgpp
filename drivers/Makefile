@@ -5,7 +5,7 @@ CXX = g++ -g3 -DNDEBUG
 all: $(EXENAME)
 HEADERSH = ../src/AkimaSpline.h ../src/Vector.h ../src/SampleCRSMatrix.h ../src/Minimizer.h
 
-all: testCRSMatrix minimizer
+all: sparseSolverTest testCRSMatrix minimizer
 
 # dependencies brought about by Makefile.dep
 %.o: %.cpp Makefile
@@ -23,6 +23,9 @@ minimizer: $(HEADERSH) minimizer.o
 minimizer.o: $(HEADERSH) minimizer.cpp
 	$(CXX) -c -I../src minimizer.cpp
 
+sparseSolverTest: sparseSolverTest.o
+	 $(CXX) -o sparseSolverTest sparseSolverTest.o $(LDFLAGS)
+
 ../src/SampleCRSMatrix.h: ../src/SampleCRSMatrix.w
 	cd ../src/; ~/software/nuweb/nuweb -v -l  -s  -d  SampleCRSMatrix.w
 
@@ -31,6 +34,13 @@ minimizer.o: $(HEADERSH) minimizer.cpp
 	
 clean:
 	rm -f core* $(EXENAME) *.o *.ii *.tt
+
+# dependencies brought about by Makefile.dep
+ %.o: %.cpp Makefile
+	$(CXX) $(CPPFLAGS) -c $< 
+
+Makefile.dep: sparseSolverTest.cpp 
+	$(CXX) $(CPPFLAGS) -MM sparseSolverTest.cpp  > Makefile.dep
 
 
 ######## End of Makefile ########
