@@ -206,9 +206,13 @@ namespace Dmrg {
 			//if (m<0) allow = false; // isEnabled_=false;
 
 			if (isEnabled_ && allow) {
-				RealType eps = 1e-6;
-				if (std::norm(src)<eps)
-					throw std::runtime_error("src's norm is zero\n");
+#ifndef NDEBUG
+				RealType eps = 1e-12;
+				RealType x =std::norm(src);
+				bool b = (x<eps);
+				if (b) std::cerr<<"norm="<<x<<"\n";
+				assert(!b);
+#endif
 				assert(nk>0);
 				createVector(dest,src,lrs,nk);
 			} else {

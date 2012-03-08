@@ -541,6 +541,10 @@ namespace Dmrg {
 					      const VectorWithOffsetType& phi,
 					      size_t systemOrEnviron)
 			{
+
+				RealType norma = std::norm(phi);
+				if (norma<1e-10) return;
+
 				if (times_.size()!=4) {
 					throw std::runtime_error("RK valid only with 4 steps\n");
 				}
@@ -563,6 +567,19 @@ namespace Dmrg {
 
 				val = 1.0/6.0;
 				targetVectors_[3] = val * (k1 + 2*k2 + 2*k3 + k4);
+				norma = std::norm(targetVectors_[3]);
+				if (norma<1e-10) targetVectors_[3] = targetVectors_[2];
+
+				checkNorms();
+			}
+
+			void checkNorms()
+			{
+				for (size_t i=0;i<targetVectors_.size();i++) {
+					RealType norma = std::norm(targetVectors_[i]);
+					std::cerr<<"norma["<<i<<"]="<<norma;
+					assert(norma>1e-10);
+				}
 			}
 
 			void calcTimeVectorsExp(RealType Eg,
