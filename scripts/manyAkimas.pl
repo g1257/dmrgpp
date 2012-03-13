@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use lib '/home/gz1/programs/github/dmrgpp/scripts';
 use GetTimeObs;
 use AkimaSumBatch;
 

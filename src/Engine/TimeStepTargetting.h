@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeStepParams.h"
 #include "ProgramGlobals.h"
 #include "ParametersForSolver.h"
+#include "RungeKutta.h"
 
 namespace Dmrg {
 	template<template<typename,typename,typename> class LanczosSolverTemplate,
@@ -541,6 +542,25 @@ namespace Dmrg {
 					      const VectorWithOffsetType& phi,
 					      size_t systemOrEnviron)
 			{
+				std::string s (__FILE__);
+				s += " Unknown algorithm\n";
+				switch (tstStruct_.algorithm) {
+				case TargettingParamsType::KRYLOV:
+					return calcTimeVectorsKrylov(Eg,phi,systemOrEnviron);
+				case TargettingParamsType::RUNGE_KUTTA:
+					return calcTimeVectorsRungeKutta(Eg,phi,systemOrEnviron);
+				default:
+					throw std::runtime_error(s.c_str());
+				}
+			}
+
+			void calcTimeVectorsRungeKutta(RealType Eg,
+						       const VectorWithOffsetType& phi,
+						       size_t systemOrEnviron)
+			{
+				std::ostringstream msg;
+				msg<<"EXPERIMENTAL: using RungeKutta";
+				progress_.printline(msg,std::cout);
 
 				RealType norma = std::norm(phi);
 				if (norma<1e-10) return;
@@ -549,42 +569,84 @@ namespace Dmrg {
 					throw std::runtime_error("RK valid only with 4 steps\n");
 				}
 
-				RealType val = tstStruct_.tau * (Eg-E0_);
-				std::cerr<<"VAAAAAAAAAAALLLLLLLLLLLLLLLLLL="<<val<<" Eg======"<<Eg;
-				std::cerr<<"      E0="<<E0_<<"\n";
-				VectorWithOffsetType k1 = val * phi;
-				VectorWithOffsetType k2 = val * (phi + 0.5*k1);
-				VectorWithOffsetType k3 = val * (phi + 0.5*k2);
-				VectorWithOffsetType k4 = val * (phi + k3);
+				// set non-zero sectors
+				for (size_t i=0;i<times_.size();i++) targetVectors_[i] = phi;
 
-				targetVectors_[0] = phi;
+				for (size_t ii=0;ii<phi.sectors();ii++) {
+					size_t i = phi.sector(ii);
+					calcTimeVectors(Eg,phi,systemOrEnviron,i);
+				}
+			}
 
-				val = 1.0/162.;
-				targetVectors_[1] = phi + val * (31*k1 + 14*k2 + 14*k3 + (-5.)*k4);
+			class FunctionForRungeKutta {
 
-				val = 1.0/81.;
-				targetVectors_[2] = phi + val * (16*k1 + 20*k2 + 20*k3 + (-2.)*k4);
+			public:
 
-				val = 1.0/6.0;
-				targetVectors_[3] = val * (k1 + 2*k2 + 2*k3 + k4);
-				norma = std::norm(targetVectors_[3]);
-				if (norma<1e-10) targetVectors_[3] = targetVectors_[2];
+				FunctionForRungeKutta(const LeftRightSuperType& lrs,
+						      const ModelType& model,
+						RealType Eg,
+						      const VectorWithOffsetType& phi,
+						      size_t i0)
+					: p_(lrs.super().findPartitionNumber(phi.offset(i0))),
+					   modelHelper_(p_,lrs),
+					  lanczosHelper_(&model,&modelHelper_)
+				{
+				}
+
+				TargetVectorType operator()(const RealType& t,const TargetVectorType& y) const
+				{
+					TargetVectorType x(y.size());
+					lanczosHelper_.matrixVectorProduct(x,y);
+					ComplexType icomplex(0,1);
+					return -icomplex * x;
+				}
+
+			private:
+
+				size_t p_;
+				typename ModelType::ModelHelperType modelHelper_;
+				typename LanczosSolverType::LanczosMatrixType lanczosHelper_;
+			}; // FunctionForRungeKutta
+
+			void calcTimeVectors(RealType Eg,
+					     const VectorWithOffsetType& phi,
+					     size_t systemOrEnviron,
+					     size_t i0)
+			{
+				size_t total = phi.effectiveSize(i0);
+				TargetVectorType phi0(total);
+				phi.extract(phi0,i0);
+
+				FunctionForRungeKutta f(lrs_,model_,Eg,phi,i0);
+
+				PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType> rungeKutta(f,tstStruct_.tau/3.0);
+
+				std::vector<TargetVectorType> result;
+				rungeKutta.solve(result,0.0,times_.size(),phi0);
+
+				for (size_t i=0;i<times_.size();i++) {
+					targetVectors_[i].setDataInSector(result[i],i0);
+				}
 
 				checkNorms();
 			}
 
 			void checkNorms()
 			{
+				std::ostringstream msg;
+				msg<<"EXPERIMENTAL: Runge Kutta ";
+				progress_.printline(msg,std::cout);
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					RealType norma = std::norm(targetVectors_[i]);
-					std::cerr<<"norma["<<i<<"]="<<norma;
+					msg<<" norma["<<i<<"]="<<norma;
 					assert(norma>1e-10);
 				}
+				progress_.printline(msg,std::cout);
 			}
 
-			void calcTimeVectorsExp(RealType Eg,
-					     const VectorWithOffsetType& phi,
-					     size_t systemOrEnviron)
+			void calcTimeVectorsKrylov(RealType Eg,
+						   const VectorWithOffsetType& phi,
+						   size_t systemOrEnviron)
 			{
 				std::vector<ComplexMatrixType> V(phi.sectors());
 				std::vector<ComplexMatrixType> T(phi.sectors());
@@ -682,7 +744,7 @@ namespace Dmrg {
 						ComplexType tmpV = calcVTimesPhi(kprime,V,phi,i0);
 						sum += conj(T(kprime,k))*tmpV;
 					}
-					RealType tmp = (eigs[k]-Eg)*t;
+					RealType tmp = (eigs[k]-E0_)*t;
 					ComplexType c(cos(tmp),sin(tmp));
 					r[k] = c * sum;
 				}
@@ -818,7 +880,8 @@ namespace Dmrg {
 					}
 				}
 				std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_;
-				std::cerr<<" "<<label<<std::norm(src1)<<" "<<std::norm(src2)<<" "<<std::norm(dest)<<"\n";
+				std::cerr<<" "<<label<<" "<<std::norm(src1)<<" "<<std::norm(src2);
+				std::cerr<<" "<<std::norm(dest)<<"\n";
 			}
 
 

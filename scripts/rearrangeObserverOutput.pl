@@ -6,7 +6,7 @@ my ($file)=@ARGV;
 
 my ($label1,$label2) = ("nupNdown","nUp+nDown"); 
 
-#printSuper($file);
+printSuper($file);
 
 rearrange($file,$label1);
 

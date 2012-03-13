@@ -89,28 +89,44 @@ namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
 	template<typename ModelType>
 	class TimeStepParams : public TargetParamsCommon<ModelType> {
-		public:
-			typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
-			typedef typename ModelType::RealType RealType;
 
-			static size_t const PRODUCT = TargetParamsCommonType::PRODUCT;
+	public:
 
-			template<typename IoInputter>
-			TimeStepParams(IoInputter& io,const ModelType& model)
-				: TargetParamsCommonType(io,model),tau(0),timeSteps(0),
-				  advanceEach(0)
-			{
-				io.rewind();
-				
-				io.readline(tau,"TSPTau=");
-				io.readline(timeSteps,"TSPTimeSteps=");
-				io.readline(advanceEach,"TSPAdvanceEach=");
+		enum {KRYLOV,RUNGE_KUTTA};
+
+		typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
+		typedef typename ModelType::RealType RealType;
+
+		static size_t const PRODUCT = TargetParamsCommonType::PRODUCT;
+
+		template<typename IoInputter>
+		TimeStepParams(IoInputter& io,const ModelType& model)
+			: TargetParamsCommonType(io,model),tau(0),timeSteps(0),
+			  advanceEach(0)
+		{
+			io.rewind();
+
+			io.readline(tau,"TSPTau=");
+			io.readline(timeSteps,"TSPTimeSteps=");
+			io.readline(advanceEach,"TSPAdvanceEach=");
+			std::string s="";
+			algorithm = KRYLOV;
+			try {
+				io.readline(s,"TSPAlgorithm=");
+				if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta")
+					algorithm = RUNGE_KUTTA;
+			} catch (std::exception& e) {
+				std::cerr<<"WARNING: Omission of TSPAlgorithm is deprecated. ";
+				std::cerr<<"Assuming KRYLOV, make sure it's correct\n";
 			}
-			
-			RealType tau;
-			size_t timeSteps;
-			size_t advanceEach;
-			
+			io.rewind();
+		}
+
+		RealType tau;
+		size_t timeSteps;
+		size_t advanceEach;
+		size_t algorithm;
+
 	}; // class TimeStepParams
 	
 	template<typename ModelType>
