@@ -4,6 +4,7 @@ All rights reserved
 
 [PsimagLite, Version 1.0.0]
 [by G.A., Oak Ridge National Laboratory]
+[by K.A.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
 
@@ -75,7 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file RungeKutta.h
  *
- * contributed by K.A.A
+ * authored by K.A.A
  *
  * DOC HERE FIXME
  *
@@ -85,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <cassert>
 #include "Complex.h"
+#include "Vector.h"
 
 namespace PsimagLite {
 
@@ -92,21 +94,30 @@ template<typename RealType,
          typename FunctionType,
 	 typename ArrayType = Vector<RealType> >
 class RungeKutta {
+
+	typedef typename ArrayType::value_type ComplexOrRealType;
+	typedef std::vector<ComplexOrRealType> VectorType;
+
 public:
+
 	RungeKutta(const FunctionType& f, const RealType& h)
-	: f_(f),h_(h)
+	: f_(f),h_(h),verbose_(false)
 	{ }
 
-	void solve(RealType t0, RealType t, const ArrayType& y0)
+	void solve(std::vector<VectorType>& result, RealType t0, RealType t, const ArrayType& y0) const
 	{
 		size_t N = static_cast<size_t> (std::real((t - t0)/h_));
+		solve(result,t0,N,y0);
+	}
+
+	void solve(std::vector<VectorType>& result,RealType t0, size_t N, const ArrayType& y0) const
+	{
 		ArrayType k1(y0), k2(y0), k3(y0), k4(y0);
 		RealType w1 = 1, w2 = 2, w3 = 2, w4 = 1, wtotInverse = 1.0/6.0;
 
 		RealType ti = t0;
 		ArrayType yi = y0;
-		std::cout << std::real(ti) << " " << std::real(yi(0,0)) << " ";
-		std::cout << std::real(yi(1,1)) << " " << std::real(yi(2,2))<< '\n';
+
 		for(size_t i = 0; i < N; i++) {
 			k1 = h_ * f_(ti, yi);
 			k2 = h_ * f_(ti + h_*0.5, yi + k1*0.5);
@@ -114,8 +125,9 @@ public:
 			k4 = h_ * f_(ti + h_, yi + k3);
 
 			std::cout << std::real(ti) << " ";
-			for (size_t j=0;j<yi.n_row();j++) std::cout<< std::real(yi(j,j)) << " ";
-			std::cout << '\n';
+			VectorType myresult(findSizeOf(yi));
+			for (size_t j=0;j<myresult.size();j++) myresult[j] = findValueOf(yi,j);
+			result.push_back(myresult);
 			ti += h_;
 			yi += (w1*k1 + w2*k2 + w3*k3 + w4*k4) * wtotInverse;
 
@@ -123,8 +135,24 @@ public:
 	}
 
 private:
-	FunctionType f_;
+
+	ComplexOrRealType findValueOf(const VectorType& yi,size_t j) const
+	{
+		return std::real(yi[j]);
+	}
+
+	ComplexOrRealType findValueOf(const PsimagLite::Matrix<ComplexOrRealType>& yi,size_t j) const
+	{
+		return std::real(yi(j,j));
+	}
+
+	size_t findSizeOf(const VectorType& yi) const { return yi.size(); }
+
+	size_t findSizeOf(const PsimagLite::Matrix<ComplexOrRealType>& yi) const { return yi.n_row(); }
+
+	const FunctionType& f_;
 	RealType h_;
+	bool verbose_;
 }; // class RungeKutta
 
 } // namespace Dmrg

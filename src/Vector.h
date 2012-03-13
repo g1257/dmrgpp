@@ -43,6 +43,12 @@ namespace std {
 		return v3;
 	}
 
+	template<typename T1,typename T2>
+	inline std::vector<T2> operator*(const std::vector<T2>& v2,const T1& v1)
+	{
+		return v1*v2;
+	}
+
 	template<class X>
 	std::ostream &operator<<(std::ostream &s,std::vector<X> const &v)
 	{

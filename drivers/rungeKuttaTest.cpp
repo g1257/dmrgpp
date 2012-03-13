@@ -7,7 +7,7 @@
 #include "RungeKutta.h"
 #include "IoSimple.h"
 
-// contributed by K.A.A
+// authored by K.A.A
 
 template<typename RealType,typename VectorType,typename MatrixType>
 class GammaCiCj {
@@ -38,7 +38,7 @@ public:
 	}
 
 	MatrixType operator() (const RealType& t,
-			       const MatrixType& y)
+			       const MatrixType& y) const
 	{
 		ComplexOrRealType c(0., -1.);
 		MatrixType tmp = y * T_;
@@ -50,6 +50,7 @@ public:
 	}
 
 private:
+
     const MatrixType& T_;
     const VectorType& V_;
     const VectorType& W_;
@@ -137,5 +138,13 @@ int main(int argc, char* argv[])
 	IoInType io2(file2);
 	io2.readMatrix(y0,"MatrixCiCj");
 
-	rk.solve(wbegin,wend, y0);
+	std::vector<VectorType> result;
+	rk.solve(result,wbegin,wend, y0);
+	for (size_t i=0;i<result.size();i++) {
+		RealType time = wend + wstep*i;
+		std::cout<<time<<" ";
+		for (size_t j=0;j<result[i].size();j++)
+			std::cout<<result[i][j]<<" ";
+		std::cout<<"\n";
+	}
 }
