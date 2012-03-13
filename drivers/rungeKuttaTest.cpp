@@ -7,6 +7,8 @@
 #include "RungeKutta.h"
 #include "IoSimple.h"
 
+// contributed by K.A.A
+
 template<typename RealType,typename VectorType,typename MatrixType>
 class GammaCiCj {
 
@@ -41,7 +43,9 @@ public:
 		ComplexOrRealType c(0., -1.);
 		MatrixType tmp = y * T_;
 		tmp -= T_ * y;
-		tmp += mV_*y + mW_*cos(omega_*t)*y;
+		for (size_t i=0;i<tmp.n_row();i++)
+			for (size_t j=0;j<tmp.n_col();j++)
+				tmp(i,j) += mV_(i,j)*y(i,j) + mW_(i,j)*cos(omega_*t)*y(i,j);
 		return c*tmp;
 	}
 
@@ -117,7 +121,7 @@ int main(int argc, char* argv[])
 
 	VectorType V;
 	io.read(V,"potentialV");
-	assert(V.size()==N);
+	if (V.size()>N) V.resize(N);
 
 	VectorType W;
 	io.read(W,"PotentialT");

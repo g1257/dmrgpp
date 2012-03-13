@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2011, UT-Battelle, LLC
+Copyright (c) 2012, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -75,6 +75,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file RungeKutta.h
  *
+ * contributed by K.A.A
+ *
  * DOC HERE FIXME
  *
  */
@@ -111,8 +113,9 @@ public:
 			k3 = h_ * f_(ti + h_*0.5, yi + k2*0.5);
 			k4 = h_ * f_(ti + h_, yi + k3);
 
-			std::cout << std::real(ti) << " " << std::real(yi(0,0)) << " ";
-			std::cout << std::real(yi(1,1)) << " " << std::real(yi(2,2))<< '\n';
+			std::cout << std::real(ti) << " ";
+			for (size_t j=0;j<yi.n_row();j++) std::cout<< std::real(yi(j,j)) << " ";
+			std::cout << '\n';
 			ti += h_;
 			yi += (w1*k1 + w2*k2 + w3*k3 + w4*k4) * wtotInverse;
 
