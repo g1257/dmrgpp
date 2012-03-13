@@ -1,7 +1,7 @@
 
 LDFLAGS =       -lm  -lpthread -lblas -llapack
 CPPFLAGS = -Werror -Wall -I../src -I../src/JSON -I../src/JSON/JsonParser
-CXX = g++ -g3 -DNDEBUG
+CXX = g++ -g3 
 all: $(EXENAME)
 HEADERSH = ../src/AkimaSpline.h ../src/Vector.h ../src/SampleCRSMatrix.h ../src/Minimizer.h
 

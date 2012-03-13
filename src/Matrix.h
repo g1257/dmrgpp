@@ -302,14 +302,20 @@ namespace PsimagLite {
 		return v;
 	}
 
-	template<typename T>
-	Matrix<T> operator*(const T& val,const Matrix<T>& a)
+	template<typename T1,typename T2>
+	Matrix<T2> operator*(const T1& val,const Matrix<T2>& a)
 	{
-		Matrix<T> b(a.n_row(),a.n_col());
+		Matrix<T2> b(a.n_row(),a.n_col());
 		for (size_t i=0;i<a.n_row();i++)
 			for (size_t j=0;j<b.n_col();j++)
 				b(i,j) = val*a(i,j);
 		return b;
+	}
+
+	template<typename T1,typename T2>
+	Matrix<T2> operator*(const Matrix<T2>& a,const T1& val)
+	{
+		return val*a;
 	}
 
 	template<typename T>
