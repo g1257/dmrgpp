@@ -420,9 +420,10 @@ namespace Dmrg {
 				A.data = tmpC;
 				A.fermionSign = 1;
 				//A.data = tmpC;
+
+				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
 				if (noStageIs(DISABLED)) std::cerr<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 				else std::cerr<<"NOT ALL OPERATORS APPLIED YET\n";
-				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
 				test(psi_,psi_,direction,"<PSI|A|PSI>",site,A);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
@@ -513,9 +514,6 @@ namespace Dmrg {
 					findElectronsOfOneSite(electrons,site);
 					FermionSign fs(lrs_.left(),electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
-					RealType norma = norm(phiNew);
-					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
-					//std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
 					size_t advance = indexNoAdvance;
@@ -536,6 +534,9 @@ namespace Dmrg {
 					throw std::runtime_error("It's 5 am, do you know what line "
 						" your code is exec-ing?\n");
 				}
+				RealType norma = norm(phiNew);
+				if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
+				std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 			}
 
 			void calcTimeVectors(RealType Eg,
@@ -560,10 +561,11 @@ namespace Dmrg {
 			{
 				std::ostringstream msg;
 				msg<<"EXPERIMENTAL: using RungeKutta";
-				progress_.printline(msg,std::cout);
 
 				RealType norma = std::norm(phi);
 				if (norma<1e-10) return;
+				msg<<" Norm of phi= "<<norma;
+				progress_.printline(msg,std::cout);
 
 				if (times_.size()!=4) {
 					throw std::runtime_error("RK valid only with 4 steps\n");
@@ -576,6 +578,7 @@ namespace Dmrg {
 					size_t i = phi.sector(ii);
 					calcTimeVectors(Eg,phi,systemOrEnviron,i);
 				}
+				checkNorms();
 			}
 
 			class FunctionForRungeKutta {
@@ -584,7 +587,7 @@ namespace Dmrg {
 
 				FunctionForRungeKutta(const LeftRightSuperType& lrs,
 						      const ModelType& model,
-						RealType Eg,
+						      RealType Eg,
 						      const VectorWithOffsetType& phi,
 						      size_t i0)
 					: p_(lrs.super().findPartitionNumber(phi.offset(i0))),
@@ -616,19 +619,19 @@ namespace Dmrg {
 				size_t total = phi.effectiveSize(i0);
 				TargetVectorType phi0(total);
 				phi.extract(phi0,i0);
-
+//				std::cerr<<"norma of phi0="<<PsimagLite::norm(phi0)<<"\n";
 				FunctionForRungeKutta f(lrs_,model_,Eg,phi,i0);
 
 				PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType> rungeKutta(f,tstStruct_.tau/3.0);
 
 				std::vector<TargetVectorType> result;
 				rungeKutta.solve(result,0.0,times_.size(),phi0);
+				assert(result.size()==times_.size());
 
 				for (size_t i=0;i<times_.size();i++) {
+//					std::cerr<<"norma of result["<<i<<"]="<<PsimagLite::norm(result[i])<<"\n";
 					targetVectors_[i].setDataInSector(result[i],i0);
 				}
-
-				checkNorms();
 			}
 
 			void checkNorms()
