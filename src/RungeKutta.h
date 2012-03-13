@@ -70,7 +70,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -124,13 +123,12 @@ public:
 			k3 = h_ * f_(ti + h_*0.5, yi + k2*0.5);
 			k4 = h_ * f_(ti + h_, yi + k3);
 
-			std::cout << std::real(ti) << " ";
 			VectorType myresult(findSizeOf(yi));
 			for (size_t j=0;j<myresult.size();j++) myresult[j] = findValueOf(yi,j);
 			result.push_back(myresult);
 			ti += h_;
 			yi += (w1*k1 + w2*k2 + w3*k3 + w4*k4) * wtotInverse;
-
+			checkNorm(yi,y0);
 		}
 	}
 
@@ -138,17 +136,30 @@ private:
 
 	ComplexOrRealType findValueOf(const VectorType& yi,size_t j) const
 	{
-		return std::real(yi[j]);
+		return yi[j];
 	}
 
 	ComplexOrRealType findValueOf(const PsimagLite::Matrix<ComplexOrRealType>& yi,size_t j) const
 	{
-		return std::real(yi(j,j));
+		return yi(j,j);
 	}
 
 	size_t findSizeOf(const VectorType& yi) const { return yi.size(); }
 
 	size_t findSizeOf(const PsimagLite::Matrix<ComplexOrRealType>& yi) const { return yi.n_row(); }
+
+	void checkNorm(const PsimagLite::Matrix<ComplexOrRealType>& yi,
+		       const PsimagLite::Matrix<ComplexOrRealType>& y0)const
+	{}
+
+	void checkNorm(const VectorType& yi,const VectorType& y0) const
+	{
+		std::string s(__FILE__);
+		s+= " Norma not preserved\n";
+		RealType norma = PsimagLite::norm(yi);
+		RealType originalNorm = PsimagLite::norm(y0);
+		if (fabs(norma-originalNorm)>1e-4) throw std::runtime_error(s.c_str());
+	}
 
 	const FunctionType& f_;
 	RealType h_;

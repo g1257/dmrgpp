@@ -42,7 +42,9 @@ public:
 	{
 		ComplexOrRealType c(0., -1.);
 		MatrixType tmp = y * T_;
-		tmp -= T_ * y;
+		MatrixType yTranspose;
+		transposeConjugate(yTranspose,y);
+		tmp -= T_ * yTranspose;
 		for (size_t i=0;i<tmp.n_row();i++)
 			for (size_t j=0;j<tmp.n_col();j++)
 				tmp(i,j) += mV_(i,j)*y(i,j) + mW_(i,j)*cos(omega_*t)*y(i,j);
@@ -137,14 +139,20 @@ int main(int argc, char* argv[])
 	MatrixType y0;
 	IoInType io2(file2);
 	io2.readMatrix(y0,"MatrixCiCj");
+	for (size_t i=0;i<y0.n_row();i++) {
+		for (size_t j=0;j<y0.n_col();j++) {
+			if (i==j) y0(i,j) = 1.-y0(i,j);
+			else y0(i,j) = -y0(i,j);
+		}
+	}
 
 	std::vector<VectorType> result;
 	rk.solve(result,wbegin,wend, y0);
 	for (size_t i=0;i<result.size();i++) {
-		RealType time = wend + wstep*i;
+		RealType time = wbegin + wstep*i;
 		std::cout<<time<<" ";
 		for (size_t j=0;j<result[i].size();j++)
-			std::cout<<result[i][j]<<" ";
+			std::cout<<std::real(result[i][j])<<" ";
 		std::cout<<"\n";
 	}
 }

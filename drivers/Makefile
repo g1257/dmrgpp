@@ -5,14 +5,11 @@ CXX = g++ -g3
 all: $(EXENAME)
 HEADERSH = ../src/AkimaSpline.h ../src/Vector.h ../src/SampleCRSMatrix.h ../src/Minimizer.h
 
-all: sparseSolverTest testCRSMatrix minimizer
+all: sparseSolverTest testCRSMatrix minimizer rungeKuttaTest
 
 # dependencies brought about by Makefile.dep
 %.o: %.cpp Makefile
 	$(CXX) $(CPPFLAGS) -c $< 
-
-Makefile.dep: dmrg.cpp
-	$(CXX) $(CPPFLAGS) -MM dmrg.cpp  > Makefile.dep
 
 testCRSMatrix: $(HEADERSH) testCRSMatrix.cpp
 	$(CXX) -o testCRSMatrix -I../src testCRSMatrix.cpp
