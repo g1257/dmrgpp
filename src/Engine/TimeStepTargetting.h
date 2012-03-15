@@ -71,6 +71,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef TIMESTEPTARGETTING_H
 #define TIMESTEPTARGETTING_H
+
 #include <iostream>
 #include "ProgressIndicator.h"
 #include "BLAS.h"
@@ -156,8 +157,8 @@ namespace Dmrg {
 				
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
-				RealType factor = 1.0;
 				size_t n = times_.size();
+				RealType factor = (n+4.0)/static_cast<RealType>(n+2.0);
 				for (size_t i=0;i<n;i++) {
 					times_[i] = i*tau/(n-1);
 					weight_[i] = factor/(n+4);
@@ -536,7 +537,7 @@ namespace Dmrg {
 				}
 				RealType norma = norm(phiNew);
 				if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
-				std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
+//				std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 			}
 
 			void calcTimeVectors(RealType Eg,
@@ -567,10 +568,6 @@ namespace Dmrg {
 				msg<<" Norm of phi= "<<norma;
 				progress_.printline(msg,std::cout);
 
-				if (times_.size()!=4) {
-					throw std::runtime_error("RK valid only with 4 steps\n");
-				}
-
 				// set non-zero sectors
 				for (size_t i=0;i<times_.size();i++) targetVectors_[i] = phi;
 
@@ -585,13 +582,15 @@ namespace Dmrg {
 
 			public:
 
-				FunctionForRungeKutta(const LeftRightSuperType& lrs,
+				FunctionForRungeKutta(const RealType& E0,
+						      const LeftRightSuperType& lrs,
 						      const ModelType& model,
 						      RealType Eg,
 						      const VectorWithOffsetType& phi,
 						      size_t i0)
-					: p_(lrs.super().findPartitionNumber(phi.offset(i0))),
-					   modelHelper_(p_,lrs),
+					: E0_(E0),
+					  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
+					  modelHelper_(p_,lrs),
 					  lanczosHelper_(&model,&modelHelper_)
 				{
 				}
@@ -600,12 +599,14 @@ namespace Dmrg {
 				{
 					TargetVectorType x(y.size());
 					lanczosHelper_.matrixVectorProduct(x,y);
+					for (size_t i=0;i<x.size();i++) x[i] -= E0_*y[i];
 					ComplexType icomplex(0,1);
 					return -icomplex * x;
 				}
 
 			private:
 
+				RealType E0_;
 				size_t p_;
 				typename ModelType::ModelHelperType modelHelper_;
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper_;
@@ -620,9 +621,10 @@ namespace Dmrg {
 				TargetVectorType phi0(total);
 				phi.extract(phi0,i0);
 //				std::cerr<<"norma of phi0="<<PsimagLite::norm(phi0)<<"\n";
-				FunctionForRungeKutta f(lrs_,model_,Eg,phi,i0);
+				FunctionForRungeKutta f(E0_,lrs_,model_,Eg,phi,i0);
 
-				PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType> rungeKutta(f,tstStruct_.tau/3.0);
+				RealType epsForRK = tstStruct_.tau/(times_.size()-1.0);
+				PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType> rungeKutta(f,epsForRK);
 
 				std::vector<TargetVectorType> result;
 				rungeKutta.solve(result,0.0,times_.size(),phi0);
@@ -638,7 +640,6 @@ namespace Dmrg {
 			{
 				std::ostringstream msg;
 				msg<<"EXPERIMENTAL: Runge Kutta ";
-				progress_.printline(msg,std::cout);
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					RealType norma = std::norm(targetVectors_[i]);
 					msg<<" norma["<<i<<"]="<<norma;
@@ -886,7 +887,6 @@ namespace Dmrg {
 				std::cerr<<" "<<label<<" "<<std::norm(src1)<<" "<<std::norm(src2);
 				std::cerr<<" "<<std::norm(dest)<<"\n";
 			}
-
 
 			std::vector<size_t> stage_;
 			VectorWithOffsetType psi_;
