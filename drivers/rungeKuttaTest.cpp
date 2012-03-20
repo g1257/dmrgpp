@@ -29,8 +29,8 @@ public:
 	{
 		assert(V_.size() == W_.size());
 
-		for(size_t i = 0; i < mV_.n_row(); i++) {
-			for(size_t j = 0; j < mV_.n_col(); j++) {
+		for (size_t i = 0; i < mV_.n_row(); i++) {
+			for (size_t j = 0; j < mV_.n_col(); j++) {
 				mV_(i,j) = V_[j] - V_[i];
 				mW_(i,j) = W_[j] - W_[i];
 			}
@@ -141,10 +141,13 @@ int main(int argc, char* argv[])
 	io2.readMatrix(y0,"MatrixCiCj");
 	for (size_t i=0;i<y0.n_row();i++) {
 		for (size_t j=0;j<y0.n_col();j++) {
-			if (i==j) y0(i,j) = 1.-y0(i,j);
-			else y0(i,j) = -y0(i,j);
+			//if (i==j) y0(i,j) = 1.-y0(i,j);
+			if (i!=j) y0(i,j) = -y0(i,j);
 		}
 	}
+	for (size_t i=0;i<y0.n_row();i++)
+		for (size_t j=0;j<i;j++)
+			y0(i,j) = y0(j,i);
 
 	std::vector<VectorType> result;
 	rk.solve(result,wbegin,wend, y0);

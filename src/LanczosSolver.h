@@ -291,7 +291,18 @@ namespace PsimagLite {
 				x[i] -= atmp * y[i];
 				btmp += std::real(x[i]*std::conj(x[i]));
 			}
+
 			btmp = sqrt (btmp);
+
+			if (fabs(btmp)<1e-10) {
+				for (size_t i = 0; i < mat_.rank(); i++) {
+					VectorElementType tmp = y[i];
+					y[i] = x[i];
+					x[i] = -btmp * tmp;
+				}
+				return;
+			}
+
 
 			for (size_t i = 0; i < mat_.rank(); i++) {
 				//lanczosVectors(i,j) = y[i];
