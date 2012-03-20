@@ -150,7 +150,8 @@ namespace Dmrg {
 			  times_(tstStruct_.timeSteps),
 			  weight_(tstStruct_.timeSteps),
 			  targetVectors_(tstStruct_.timeSteps),
-			  applyOpLocal_(lrs)
+			  applyOpLocal_(lrs),
+			  E0_(0)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error(" TimeStepTargetting "
 							"needs an enabled wft\n");
@@ -158,23 +159,24 @@ namespace Dmrg {
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
 				size_t n = times_.size();
-				RealType factor = (n+4.0)/static_cast<RealType>(n+2.0);
+				RealType factor = 1.0/n;
 				for (size_t i=0;i<n;i++) {
 					times_[i] = i*tau/(n-1);
-					weight_[i] = factor/(n+4);
+					weight_[i] = factor;
 					sum += weight_[i];
 				}
 				sum -= weight_[0];
 				sum -= weight_[n-1];
-				weight_[0] = weight_[n-1] = 2*factor/(n+4);
+				weight_[0] = weight_[n-1] = factor;
 				sum += weight_[n-1];
 				sum += weight_[0];
 				
 				gsWeight_=1.0-sum;
 				sum += gsWeight_;
 				//for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
-				if (fabs(sum-1.0)>1e-5) throw std::runtime_error("Weights don't amount to one\n");
+				assert(fabs(sum-1.0)<1e-5);
 				//printHeader();
+				if (stage_.size()==0) stage_.push_back(DISABLED);
 			}
 
 			RealType weight(size_t i) const
@@ -206,7 +208,7 @@ namespace Dmrg {
 			}
 
 			const ComplexType& operator[](size_t i) const { return psi_[i]; }
-			
+
 			ComplexType& operator[](size_t i) { return psi_[i]; }
 
 			const VectorWithOffsetType& gs() const { return psi_; }
@@ -242,9 +244,12 @@ namespace Dmrg {
 				VectorWithOffsetType phiNew;
 				VectorWithOffsetType vectorSum;
 				size_t max = tstStruct_.sites.size();
-				
+				size_t maxSaved = max;
+
 				if (noStageIs(DISABLED)) max = 1;
 				
+				if (max==0) max=1;
+
 				// Loop over each operator that needs to be applied 
 				// in turn to the g.s.
 				for (size_t i=0;i<max;i++) {
@@ -260,7 +265,7 @@ namespace Dmrg {
 				}
 				//std::cerr<<"site="<<block1[0]<<" COUNT="<<count<<"\n";
 				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
-				
+				if (maxSaved==0) phiNew = phiOld;
 				calcTimeVectors(Eg,phiNew,direction);
 				
 				cocoon(direction,block1); // in-situ
@@ -301,18 +306,26 @@ namespace Dmrg {
 				static size_t  timesWithoutAdvancement=0;
 				static bool firstSeeLeftCorner = false;
 
-				if (direction==INFINITE) E0_ = Eg;
-				if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return false;
+				if (direction==INFINITE) {
+					E0_ = Eg;
+					return false;
+				}
+				if (tstStruct_.startingLoops.size()>0 && tstStruct_.startingLoops[i]>loopNumber)
+					return false;
 
 				assert(block.size()==1);
 				size_t site = block[0];
 
-				if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return false;
+				if (tstStruct_.sites.size()>0 && site != tstStruct_.sites[i] && stage_[i]==DISABLED)
+					return false;
 
-				if (site != tstStruct_.sites[i] && stage_[i]!=DISABLED && i>0) return false;
+				if (tstStruct_.sites.size()>0 && site != tstStruct_.sites[i] && stage_[i]!=DISABLED && i>0)
+					return false;
 
-				if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
-				else stage_[i]=WFT_NOADVANCE;
+				if (tstStruct_.sites.size()>0 && site == tstStruct_.sites[i] && stage_[i]==DISABLED)
+					stage_[i]=OPERATOR;
+				else
+					stage_[i]=WFT_NOADVANCE;
 				if (stage_[i] == OPERATOR) checkOrder(i);
 
 				if (timesWithoutAdvancement >= tstStruct_.advanceEach) {
@@ -347,6 +360,7 @@ namespace Dmrg {
 			void initialGuess(VectorWithOffsetType& v,size_t nk) const
 			{
 				waveFunctionTransformation_.setInitialVector(v,psi_,lrs_,nk);
+				if (tstStruct_.sites.size()==0) return;
 				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
 				if (!b) return;
 				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
@@ -413,11 +427,16 @@ namespace Dmrg {
 			void cocoon(size_t direction,const BlockType& block) const
 			{
 				size_t site = block[0];
-				OperatorType A = tstStruct_.aOperators[0];
 				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.naturalOperator("nup",0,0));
 				//PsimagLite::CrsMatrix<ComplexType> tmpCt;
 				//transposeConjugate(tmpCt,tmpC);
 				//multiply(A.data,tmpCt,tmpC);
+				int fermionSign1 = 1;
+				const std::pair<size_t,size_t> jm1(0,0);
+				RealType angularFactor1 = 1.0;
+				typename OperatorType::Su2RelatedType su2Related1;
+				OperatorType A(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
+
 				A.data = tmpC;
 				A.fermionSign = 1;
 				//A.data = tmpC;
@@ -436,7 +455,7 @@ namespace Dmrg {
 				size_t jj = targetVectors_.size() - 1;
 				std::string s("<PSI");
 				s += "|P"+ttos(jj)+">";
-				OperatorType Identity = tstStruct_.aOperators[0];
+				OperatorType Identity = A;
 				PsimagLite::CrsMatrix<ComplexType> identity2(tmpC.rank(),tmpC.rank());
 				identity2.makeDiagonal(identity2.rank(),1.0);
 				Identity.data = identity2;
@@ -447,7 +466,7 @@ namespace Dmrg {
 
 			void checkOrder(size_t i) const
 			{
-				if (i==0) return;
+				if (i==0 || tstStruct_.sites.size()==0) return;
 				for (size_t j=0;j<i;j++) {
 					if (stage_[j] == DISABLED) {
 						std::string s ="TST:: Seeing tst site "+ttos(tstStruct_.sites[i]);
@@ -639,7 +658,7 @@ namespace Dmrg {
 			void checkNorms()
 			{
 				std::ostringstream msg;
-				msg<<"EXPERIMENTAL: Runge Kutta ";
+				msg<<"Checking norms: ";
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					RealType norma = std::norm(targetVectors_[i]);
 					msg<<" norma["<<i<<"]="<<norma;
@@ -665,6 +684,8 @@ namespace Dmrg {
 					PsimagLite::diag(T[ii],eigs[ii],'V');
 				
 				calcTargetVectors(phi,T,V,Eg,eigs,steps,systemOrEnviron);
+
+				//checkNorms();
 			}
 
 			//! Do not normalize states here, it leads to wrong results (!)
@@ -810,7 +831,7 @@ namespace Dmrg {
 			//! This check is invalid if there are more than one sector
 			void check1(const ComplexMatrixType& V,const TargetVectorType& phi2)
 			{
-				if (V.n_col()>V.n_row()) throw std::runtime_error("cols > rows\n");
+				assert(V.n_col()<=V.n_row());
 				TargetVectorType r(V.n_col());
 				for (size_t k=0;k<V.n_col();k++) {
 					r[k] = 0.0;

@@ -97,7 +97,8 @@ namespace Dmrg {
 		
 	public:
 		
-		static const size_t System=0,Environ=1;
+		enum { System=0,Environ=1 };
+
 		typedef LeftRightSuperType_ LeftRightSuperType;
 		typedef typename LeftRightSuperType::BasisWithOperatorsType
 				BasisWithOperatorsType;

@@ -185,12 +185,12 @@ namespace Dmrg {
 
 			//! Adds a connector between system and environment
 			size_t calcBond(SparseMatrixType &matrixBlock,
-    		                size_t i,
+					size_t i,
 			                size_t j,
-    		                size_t type,
+					size_t type,
 			                const SparseElementType& valuec,
 			                size_t term,
-    		                size_t dofs) const
+					size_t dofs) const
 			{
 				int offset = modelHelper_.leftRightSuper().left().block().size();
 				PairType ops;
@@ -202,25 +202,15 @@ namespace Dmrg {
 				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData_);
 				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData_);
 				LinkType link(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
-				if (link.type==ProgramGlobals::SYSTEM_ENVIRON) {
-						
-					const SparseMatrixType& A=
-						modelHelper_.getReducedOperator(link.mods.first,link.site1,
-							link.ops.first,ModelHelperType::System);
-					const SparseMatrixType& B=
-						modelHelper_.getReducedOperator(link.mods.second,link.site2-offset,
-							link.ops.second,ModelHelperType::Environ);
-					modelHelper_.fastOpProdInter(A,B,matrixBlock,link);
-				} else {
-					assert(link.type==ProgramGlobals::ENVIRON_SYSTEM);
-					const SparseMatrixType& A=
-						modelHelper_.getReducedOperator(link.mods.first,link.site1-offset,
-							link.ops.first,ModelHelperType::Environ);
-					const SparseMatrixType& B=
-						modelHelper_.getReducedOperator(link.mods.second,link.site2,
-							link.ops.second,ModelHelperType::System);
-					modelHelper_.fastOpProdInter(A,B,matrixBlock,link);
-				}
+				size_t sysOrEnv = (link.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
+				size_t envOrSys = (link.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::Environ : ModelHelperType::System;
+				size_t site1Corrected =(link.type==ProgramGlobals::SYSTEM_ENVIRON) ? link.site1 : link.site1-offset;
+				size_t site2Corrected =(link.type==ProgramGlobals::SYSTEM_ENVIRON) ? link.site2-offset : link.site2;
+
+				const SparseMatrixType& A = modelHelper_.getReducedOperator(link.mods.first,site1Corrected,link.ops.first,sysOrEnv);
+				const SparseMatrixType& B = modelHelper_.getReducedOperator(link.mods.second,site2Corrected,link.ops.second,envOrSys);
+				modelHelper_.fastOpProdInter(A,B,matrixBlock,link);
+
 				return matrixBlock.nonZero();
 			}
 

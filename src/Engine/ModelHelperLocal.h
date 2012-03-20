@@ -108,7 +108,7 @@ namespace Dmrg {
 		//typedef RightLeftLocal<BasisType,BasisWithOperatorsType,SparseMatrixType> RightLeftLocalType;
 		typedef Link<SparseElementType,RealType> LinkType;
 
-		static const size_t System=0,Environ=1;
+		enum { System=0,Environ=1 };
 
 		ModelHelperLocal(size_t m,
 		                 const LeftRightSuperType& lrs,
