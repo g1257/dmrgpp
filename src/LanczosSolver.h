@@ -294,6 +294,14 @@ namespace PsimagLite {
 
 			btmp = sqrt (btmp);
 
+//			if (fabs(btmp)<1e-10) {
+//				std::string s(__FILE__);
+//				s += " oneStepDecomposition: Ay=<y|A|y>y at line " + ttos(__LINE__) + "\n";
+//				s += "PsimagLite AI is not sofisticated enough to handle this, maybe because\n";
+//				s += "PsimagLite's author NI is not good enough... OK, that's all I have to say\n";
+//				s += "I'm throwing, and there might not be any catchers\n";
+//				throw std::runtime_error(s.c_str());
+//			}
 			if (fabs(btmp)<1e-10) {
 				for (size_t i = 0; i < mat_.rank(); i++) {
 					VectorElementType tmp = y[i];
@@ -302,7 +310,6 @@ namespace PsimagLite {
 				}
 				return;
 			}
-
 
 			for (size_t i = 0; i < mat_.rank(); i++) {
 				//lanczosVectors(i,j) = y[i];
