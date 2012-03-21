@@ -248,15 +248,20 @@ namespace Dmrg {
 				
 				// Loop over each operator that needs to be applied 
 				// in turn to the g.s.
+
 				for (size_t i=0;i<max;i++) {
-					if (!evolve(i,phiNew,phiOld,Eg,direction,block1,loopNumber,max-1))
+					bool wasAnOperatorApplied = false;
+					if (!evolve(i,phiNew,phiOld,Eg,direction,block1,loopNumber,max-1,wasAnOperatorApplied)) {
 						continue;
+					}
 					if (tstStruct_.concatenation==PRODUCT) {
 						phiOld = phiNew;
 					} else {
-						vectorSum += phiNew;
+						if (wasAnOperatorApplied) vectorSum += phiNew;
+						else vectorSum = phiNew;
 					}
 				}
+
 				//std::cerr<<"site="<<block1[0]<<" COUNT="<<count<<"\n";
 				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 
@@ -295,10 +300,12 @@ namespace Dmrg {
 				    size_t direction,
 				    const BlockType& block,
 				    size_t loopNumber,
-				    size_t lastI)
+				    size_t lastI,
+				    bool& wasAnOperatorApplied)
 			{
 				static size_t  timesWithoutAdvancement=0;
 				static bool firstSeeLeftCorner = false;
+				wasAnOperatorApplied = false;
 
 				if (direction==INFINITE) {
 					E0_ = Eg;
@@ -316,10 +323,12 @@ namespace Dmrg {
 				if (site != tstStruct_.sites[i] && stage_[i]!=DISABLED && i>0)
 					return false;
 
-				if (site == tstStruct_.sites[i] && stage_[i]==DISABLED)
+				if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) {
 					stage_[i]=OPERATOR;
-				else
+					wasAnOperatorApplied=true;
+				} else {
 					stage_[i]=WFT_NOADVANCE;
+				}
 				if (stage_[i] == OPERATOR) checkOrder(i);
 
 				if (timesWithoutAdvancement >= tstStruct_.advanceEach) {
@@ -527,7 +536,7 @@ namespace Dmrg {
 					findElectronsOfOneSite(electrons,site);
 					FermionSign fs(lrs_.left(),electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
-					//std::cerr<<"APPLYING OPERATOR --> NORM of phiNew="<<norm(phiNew)<<" NORM of phiOld="<<norm(phiOld)<<" when i="<<i<<"\n";
+//					std::cerr<<"APPLYING OPERATOR --> NORM of phiNew="<<norm(phiNew)<<" NORM of phiOld="<<norm(phiOld)<<" when i="<<i<<"\n";
 
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
 					size_t advance = indexNoAdvance;
@@ -543,7 +552,7 @@ namespace Dmrg {
 					waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[advance],
 							lrs_,nk); // generalize for su(2)
 					phiNew.collapseSectors();
-					//std::cerr<<"WFT --> NORM of phiNew="<<norm(phiNew)<<" NORM of tv="<<norm(targetVectors_[advance])<<" when i="<<i<<"\n";
+//					std::cerr<<"WFT --> NORM of phiNew="<<norm(phiNew)<<" NORM of tv="<<norm(targetVectors_[advance])<<" when i="<<i<<" advance="<<advance<<"\n";
 
 				} else {
 					throw std::runtime_error("It's 5 am, do you know what line "
