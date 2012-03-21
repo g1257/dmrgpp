@@ -101,7 +101,11 @@ namespace Dmrg {
 
 			template<typename IoInputter>
 			TargetParamsCommon(IoInputter& io,const ModelType& model)
-			: sites(0),startingLoops(0),concatenation(PRODUCT),model_(model)
+			: sites(0),
+			  startingLoops(0),
+			  concatenation(PRODUCT),
+			   noOperator(false),
+			  model_(model)
 			{
 
 				//io.readline(filename,"TSPFilename="); // filename
@@ -166,14 +170,22 @@ namespace Dmrg {
 					OperatorType myOp(data,fermiSign, jmValues,angularFactor,su2Related);
 					aOperators[i] = myOp;
 				}
+				noOperator = isNoOperator();
 			}
 			
 			std::vector<size_t> sites;
 			std::vector<size_t> startingLoops;
 			size_t concatenation;
 			std::vector<OperatorType> aOperators;
+			bool noOperator;
 		
 		private:
+
+			bool isNoOperator() const
+			{
+				if (data_.size()!=1) return false;
+				return (isTheIdentity(data_[0]));
+			}
 
 			void setCookedData(size_t i,const std::string& s,const std::vector<size_t>& v)
 			{

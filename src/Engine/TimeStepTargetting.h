@@ -153,9 +153,11 @@ namespace Dmrg {
 			  applyOpLocal_(lrs),
 			  E0_(0)
 			{
-				if (!wft.isEnabled()) throw std::runtime_error(" TimeStepTargetting "
-							"needs an enabled wft\n");
-				
+				if (!wft.isEnabled()) throw std::runtime_error
+				       (" TimeStepTargetting needs an enabled wft\n");
+				if (tstStruct_.sites.size()==0) throw std::runtime_error
+				       (" TimeStepTargetting needs at least one TSPSite\n");
+
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
 				size_t n = times_.size();
@@ -173,10 +175,7 @@ namespace Dmrg {
 				
 				gsWeight_=1.0-sum;
 				sum += gsWeight_;
-				//for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
 				assert(fabs(sum-1.0)<1e-5);
-				//printHeader();
-				if (stage_.size()==0) stage_.push_back(DISABLED);
 			}
 
 			RealType weight(size_t i) const
@@ -244,12 +243,9 @@ namespace Dmrg {
 				VectorWithOffsetType phiNew;
 				VectorWithOffsetType vectorSum;
 				size_t max = tstStruct_.sites.size();
-				size_t maxSaved = max;
 
 				if (noStageIs(DISABLED)) max = 1;
 				
-				if (max==0) max=1;
-
 				// Loop over each operator that needs to be applied 
 				// in turn to the g.s.
 				for (size_t i=0;i<max;i++) {
@@ -260,12 +256,10 @@ namespace Dmrg {
 					} else {
 						vectorSum += phiNew;
 					}
-					//if (didSomething) count++;
-					//std::cerr<<"site="<<block1[0]<<" norm of vectorSum="<<std::norm(vectorSum)<<" new="<<std::norm(phiNew)<<" old="<<std::norm(phiOld)<<"\n";
 				}
 				//std::cerr<<"site="<<block1[0]<<" COUNT="<<count<<"\n";
 				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
-				if (maxSaved==0) phiNew = phiOld;
+
 				calcTimeVectors(Eg,phiNew,direction);
 				
 				cocoon(direction,block1); // in-situ
@@ -316,13 +310,13 @@ namespace Dmrg {
 				assert(block.size()==1);
 				size_t site = block[0];
 
-				if (tstStruct_.sites.size()>0 && site != tstStruct_.sites[i] && stage_[i]==DISABLED)
+				if (site != tstStruct_.sites[i] && stage_[i]==DISABLED)
 					return false;
 
-				if (tstStruct_.sites.size()>0 && site != tstStruct_.sites[i] && stage_[i]!=DISABLED && i>0)
+				if (site != tstStruct_.sites[i] && stage_[i]!=DISABLED && i>0)
 					return false;
 
-				if (tstStruct_.sites.size()>0 && site == tstStruct_.sites[i] && stage_[i]==DISABLED)
+				if (site == tstStruct_.sites[i] && stage_[i]==DISABLED)
 					stage_[i]=OPERATOR;
 				else
 					stage_[i]=WFT_NOADVANCE;
@@ -360,7 +354,6 @@ namespace Dmrg {
 			void initialGuess(VectorWithOffsetType& v,size_t nk) const
 			{
 				waveFunctionTransformation_.setInitialVector(v,psi_,lrs_,nk);
-				if (tstStruct_.sites.size()==0) return;
 				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
 				if (!b) return;
 				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
@@ -534,6 +527,7 @@ namespace Dmrg {
 					findElectronsOfOneSite(electrons,site);
 					FermionSign fs(lrs_.left(),electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
+					//std::cerr<<"APPLYING OPERATOR --> NORM of phiNew="<<norm(phiNew)<<" NORM of phiOld="<<norm(phiOld)<<" when i="<<i<<"\n";
 
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
 					size_t advance = indexNoAdvance;
@@ -549,6 +543,7 @@ namespace Dmrg {
 					waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[advance],
 							lrs_,nk); // generalize for su(2)
 					phiNew.collapseSectors();
+					//std::cerr<<"WFT --> NORM of phiNew="<<norm(phiNew)<<" NORM of tv="<<norm(targetVectors_[advance])<<" when i="<<i<<"\n";
 
 				} else {
 					throw std::runtime_error("It's 5 am, do you know what line "
@@ -556,7 +551,7 @@ namespace Dmrg {
 				}
 				RealType norma = norm(phiNew);
 				if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
-//				std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
+
 			}
 
 			void calcTimeVectors(RealType Eg,
@@ -671,6 +666,12 @@ namespace Dmrg {
 						   const VectorWithOffsetType& phi,
 						   size_t systemOrEnviron)
 			{
+				if (currentTime_==0 && tstStruct_.noOperator) {
+					for (size_t i=0;i<times_.size();i++)
+						targetVectors_[i]=phi;
+					return;
+				}
+
 				std::vector<ComplexMatrixType> V(phi.sectors());
 				std::vector<ComplexMatrixType> T(phi.sectors());
 				
@@ -687,6 +688,43 @@ namespace Dmrg {
 
 				//checkNorms();
 			}
+
+//			void calcTimeVectorsKrylov0(RealType Eg,
+//						   const VectorWithOffsetType& phi,
+//						   size_t systemOrEnviron)
+//			{
+//				for (size_t i=1;i<times_.size();i++) {
+//					calcTargetVector0(targetVectors_[i],phi,Eg,times_[i]);
+//				}
+//			}
+
+//			void calcTargetVector0(VectorWithOffsetType& v,
+//						const VectorWithOffsetType& phi,
+//						RealType Eg,
+//						RealType t)
+//			{
+//				v = phi;
+//				for (size_t ii=0;ii<phi.sectors();ii++) {
+//					size_t i0 = phi.sector(ii);
+//					ComplexVectorType r;
+//					calcTargetVector0(r,phi,Eg,t,i0);
+//					v.setDataInSector(r,i0);
+//				}
+//			}
+
+//			void calcTargetVector0(ComplexVectorType& r,
+//			                       const VectorWithOffsetType& phi,
+//			                       RealType Eg,
+//			                       RealType t,
+//			                       size_t i0)
+//			{
+//				for (size_t i=0;i<total;i++) {
+
+//					ComplexType c(cos(tmp),-sin(tmp));
+//					r[i] = c * phi.fastAccess(i0,i);
+//				}
+//			}
+
 
 			//! Do not normalize states here, it leads to wrong results (!)
 			void calcTargetVectors(const VectorWithOffsetType& phi,
@@ -721,6 +759,7 @@ namespace Dmrg {
 					size_t i0 = phi.sector(ii);
 					ComplexVectorType r;
 					calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],t,steps[ii],i0);
+					//std::cerr<<"TARGET FOR t="<<t<<" "<<PsimagLite::norm(r)<<" "<<norm(phi)<<"\n";
 					v.setDataInSector(r,i0);
 				}
 			}
@@ -744,24 +783,27 @@ namespace Dmrg {
 				ComplexType zone = 1.0;
 				ComplexType zzero = 0.0;
 
+				//check1(phi,i0);
+				//check2(T,V,phi,n2,i0);
 				ComplexVectorType tmp(n2);
 				r.resize(n2);
 				calcR(r,T,V,phi,Eg,eigs,t,steps,i0);
+//				std::cerr<<"TARGET FOR t="<<t<<" after calcR norm="<<PsimagLite::norm(r)<<"\n";
 				psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0,0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1 );
+//				std::cerr<<"TARGET FOR t="<<t<<" after S^\\dagger norm="<<PsimagLite::norm(tmp)<<"\n";
 				r.resize(n);
 				psimag::BLAS::GEMV('N', n,  n2, zone, &(V(0,0)), n, &(tmp[0]),1, zzero, &(r[0]),   1 );
 			}
 
-			void calcR(
-				ComplexVectorType& r,
-				const ComplexMatrixType& T,
-				const ComplexMatrixType& V,
-				const VectorWithOffsetType& phi,
-				RealType Eg,
-				const VectorType& eigs,
-				RealType t,
-				size_t n2,
-				size_t i0)
+			void calcR(ComplexVectorType& r,
+				   const ComplexMatrixType& T,
+				   const ComplexMatrixType& V,
+				   const VectorWithOffsetType& phi,
+				   RealType Eg,
+				   const VectorType& eigs,
+				   RealType t,
+				   size_t n2,
+				   size_t i0)
 			{
 				for (size_t k=0;k<n2;k++) {
 					ComplexType sum = 0.0;
@@ -770,13 +812,13 @@ namespace Dmrg {
 						sum += conj(T(kprime,k))*tmpV;
 					}
 					RealType tmp = (eigs[k]-E0_)*t;
-					ComplexType c(cos(tmp),sin(tmp));
+					ComplexType c(cos(tmp),-sin(tmp));
 					r[k] = c * sum;
 				}
 			}
 
 			ComplexType calcVTimesPhi(size_t kprime,const ComplexMatrixType& V,const VectorWithOffsetType& phi,
-						 size_t i0)
+						 size_t i0) const
 			{
 				ComplexType ret = 0;
 				size_t total = phi.effectiveSize(i0);
@@ -784,6 +826,52 @@ namespace Dmrg {
 				for (size_t j=0;j<total;j++)
 					ret += conj(V(j,kprime))*phi.fastAccess(i0,j);
 				return ret;
+			}
+
+			void check1(const VectorWithOffsetType& phi,size_t i0) const
+			{
+				ComplexType ret = 0;
+				size_t total = phi.effectiveSize(i0);
+
+				for (size_t j=0;j<total;j++)
+					ret += std::conj(phi.fastAccess(i0,j))*phi.fastAccess(i0,j);
+				std::cerr<<"check1, norm  of phi="<<ret<<"\n";
+
+			}
+
+			void check2(const ComplexMatrixType& T,
+				    const ComplexMatrixType& V,
+				    const VectorWithOffsetType& phi,
+				    size_t n2,
+				    size_t i0) const
+			{
+				check3(V);
+
+				ComplexVectorType r(n2);
+
+				for (size_t k=0;k<n2;k++) {
+					ComplexType sum = 0.0;
+					for (size_t kprime=0;kprime<n2;kprime++) {
+						if (kprime!=k) continue;
+						ComplexType tmpV = calcVTimesPhi(kprime,V,phi,i0);
+//						sum += conj(T(kprime,k))*tmpV;
+						sum += tmpV;
+					}
+					r[k] = sum;
+				}
+				std::cerr<<"check2, norm  of  V . phi="<<PsimagLite::norm(r)<<"\n";
+
+			}
+
+			void check3(const ComplexMatrixType& V) const
+			{
+				for (size_t i=0;i<V.n_col();i++) {
+					ComplexType sum = 0;
+					for (size_t j=0;j<V.n_row();j++) {
+						sum += std::conj(V(j,i)) * V(j,0);
+					}
+					std::cerr<<"V["<<i<<"] * V[0] = "<<sum<<"\n";
+				}
 			}
 
 			void triDiag(
