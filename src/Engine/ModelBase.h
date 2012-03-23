@@ -258,7 +258,7 @@ namespace Dmrg {
 //			SharedMemoryType pthreads;
 			ParallelConnectionsType parallelConnections;
 			parallelConnections.loopCreate(total,hc,concurrency_);
-			hc.sync(parallelConnections);
+			hc.sync(parallelConnections,concurrency_);
 		}
 
 		/**

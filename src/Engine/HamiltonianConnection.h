@@ -181,10 +181,10 @@ namespace Dmrg {
 				if (myMutex) pthread_mutex_unlock( myMutex );
 			}
 
-			template<typename SomeConcurrencyType>
-			void sync(SomeConcurrencyType& conc)
+			template<typename SomeConcurrencyType,typename SomeOtherConcurrencyType>
+			void sync(SomeConcurrencyType& conc,SomeOtherConcurrencyType& conc2)
 			{
-				conc.reduce(x_);
+				conc.reduce(x_,conc2);
 			}
 
 		private:
