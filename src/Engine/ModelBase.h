@@ -111,7 +111,7 @@ namespace Dmrg {
 	typename SparseMatrixType,
  	typename DmrgGeometryType,
   	typename LinkProductType,
-	template<typename> class SharedMemoryTemplate>
+	template<typename> class ParallelConnectionsTemplate>
 	class ModelBase  {
 
 		typedef typename SparseMatrixType::value_type SparseElementType;
@@ -132,15 +132,15 @@ namespace Dmrg {
 //		typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelCommonType;
 		typedef DmrgGeometryType GeometryType;
 		typedef HamiltonianConnection<DmrgGeometryType,ModelHelperType,LinkProductType> HamiltonianConnectionType;
-		typedef SharedMemoryTemplate<HamiltonianConnectionType> SharedMemoryType;
+		typedef ParallelConnectionsTemplate<HamiltonianConnectionType> ParallelConnectionsType;
 		typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 		typedef typename ModelHelperType::LeftRightSuperType
 				LeftRightSuperType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
-		ModelBase(const DmrgGeometryType& geometry)
-		: dmrgGeometry_(geometry)
+		ModelBase(const DmrgGeometryType& geometry,ConcurrencyType& concurrency)
+		: dmrgGeometry_(geometry),concurrency_(concurrency)
 		{
 			Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 			MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
@@ -255,8 +255,10 @@ namespace Dmrg {
 				}
 			}
 
-			SharedMemoryType pthreads;
-			pthreads.loopCreate(total,hc);
+//			SharedMemoryType pthreads;
+			ParallelConnectionsType parallelConnections;
+			parallelConnections.loopCreate(total,hc,concurrency_);
+			hc.sync(parallelConnections);
 		}
 
 		/**
@@ -312,6 +314,7 @@ namespace Dmrg {
 		}
 
 		const DmrgGeometryType& dmrgGeometry_;
+		ConcurrencyType& concurrency_;
 	};     //class ModelBase
 } // namespace Dmrg
 /*@}*/

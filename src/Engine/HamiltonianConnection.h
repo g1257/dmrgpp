@@ -181,6 +181,12 @@ namespace Dmrg {
 				if (myMutex) pthread_mutex_unlock( myMutex );
 			}
 
+			template<typename SomeConcurrencyType>
+			void sync(SomeConcurrencyType& conc)
+			{
+				conc.reduce(x_);
+			}
+
 		private:
 
 			//! Adds a connector between system and environment

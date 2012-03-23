@@ -39,9 +39,14 @@ typedef PsimagLite::ConcurrencyMpi<MatrixElementType> ConcurrencyType;
 #include "Pthreads.h"
 #define PTHREADS_NAME PsimagLite::Pthreads
 #else
+#ifdef USE_THREADS_WITH_MPI
+#include "ThreadsWithMpi.h"
+#define PTHREADS_NAME PsimagLite::ThreadsWithMpi
+#else
 #include "NoPthreads.h"
 #define PTHREADS_NAME PsimagLite::NoPthreads
-#endif
+#endif  // #ifdef USE_THREADS_WITH_MPI
+#endif // #ifdef USE_PTHREADS
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
 #include "InternalProductOnTheFly.h"
@@ -81,7 +86,7 @@ void mainLoop3(GeometryType& geometry,
 {
 
 	//! Setup the Model
-	ModelFactoryType model(dmrgSolverParams,io,geometry);
+	ModelFactoryType model(dmrgSolverParams,io,geometry,concurrency);
 
 	//! Read TimeEvolution if applicable:
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;

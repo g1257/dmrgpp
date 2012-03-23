@@ -136,8 +136,9 @@ namespace Dmrg {
 		
 		ModelHubbard(PsimagLite::IoSimple::In& io,
 			     DmrgGeometryType const &dmrgGeometry,
+			     ConcurrencyType& concurrency,
 			     size_t offset = DEGREES_OF_FREEDOM)
-		: ModelBaseType(dmrgGeometry),
+		: ModelBaseType(dmrgGeometry,concurrency),
 		  modelParameters_(io),
 		  dmrgGeometry_(dmrgGeometry),
 		  offset_(offset),

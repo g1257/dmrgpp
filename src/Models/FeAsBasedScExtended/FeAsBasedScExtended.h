@@ -91,7 +91,7 @@ namespace Dmrg {
 		typename ModelHelperType_,
 		typename SparseMatrixType,
 		typename GeometryType,
-  		template<typename> class SharedMemoryTemplate>
+		template<typename> class SharedMemoryTemplate>
 	class FeAsBasedScExtended : public ModelBase<
 			ModelHelperType_,SparseMatrixType,GeometryType,
 			LinkProductFeAsExtended<ModelHelperType_>,
@@ -126,9 +126,9 @@ namespace Dmrg {
 		static const size_t SPIN_DOWN =
 						ModelFeAsType::SPIN_DOWN;
 
-		FeAsBasedScExtended(PsimagLite::IoSimple::In& io,GeometryType const &geometry)
-			: ModelBaseType(geometry),modelParameters_(io), geometry_(geometry),
-			  modelFeAs_(io,geometry)
+		FeAsBasedScExtended(PsimagLite::IoSimple::In& io,GeometryType const &geometry,ConcurrencyType& concurrency)
+			: ModelBaseType(geometry,concurrency),modelParameters_(io), geometry_(geometry),
+			  modelFeAs_(io,geometry,concurrency)
 		{}
 
 		size_t orbitals() const { return modelFeAs_.orbitals(); }
@@ -326,13 +326,13 @@ namespace Dmrg {
 		typename ModelHelperType,
 		typename SparseMatrixType,
 		typename GeometryType,
-  		template<typename> class SharedMemoryTemplate
+		template<typename> class SharedMemoryTemplate
 		>
 	std::ostream &operator<<(std::ostream &os,const FeAsBasedScExtended<
 		ModelHelperType,
 		SparseMatrixType,
 		GeometryType,
-  		SharedMemoryTemplate
+		SharedMemoryTemplate
 		>& model)
 	{
 		model.print(os);

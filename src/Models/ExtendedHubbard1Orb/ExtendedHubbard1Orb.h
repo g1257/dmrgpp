@@ -111,8 +111,12 @@ namespace Dmrg {
 		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 
 		ExtendedHubbard1Orb(PsimagLite::IoSimple::In& io,
-		                    DmrgGeometryType const &dmrgGeometry)
-		: ModelBaseType(dmrgGeometry),modelParameters_(io), dmrgGeometry_(dmrgGeometry),modelHubbard_(io,dmrgGeometry)
+				    DmrgGeometryType const &dmrgGeometry,
+				    ConcurrencyType& concurrency)
+		: ModelBaseType(dmrgGeometry,concurrency),
+		  modelParameters_(io),
+		  dmrgGeometry_(dmrgGeometry),
+		  modelHubbard_(io,dmrgGeometry,concurrency)
 		{}
 
 // 		size_t orbitals() const { return modelHubbard_.orbitals(); }

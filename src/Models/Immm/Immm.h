@@ -128,8 +128,8 @@ namespace Dmrg {
 		static const int SPIN_DOWN=HilbertSpaceImmmType::SPIN_DOWN;
 		static const int NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
-		Immm(PsimagLite::IoSimple::In& io,GeometryType const &geometry) 
-		: ModelBaseType(geometry),
+		Immm(PsimagLite::IoSimple::In& io,GeometryType const &geometry,ConcurrencyType& concurrency)
+		: ModelBaseType(geometry,concurrency),
 		  modelParameters_(io),
 		  geometry_(geometry),
 		  degreesOfFreedom_(geometry_.numberOfSites()),

@@ -140,7 +140,7 @@ namespace Dmrg {
 		typedef typename ModelHelperType::BasisType MyBasis;
 		typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 //		typedef HamiltonianConnection<GeometryType,ModelHelperType,LinkProductType> HamiltonianConnectionType;
-//		typedef SharedMemoryTemplate<HamiltonianConnectionType> SharedMemoryType;
+//		typedef SharedMemoryTemplate<HamiltonianConnectionType> ParallelConnectionsType;
 //		typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 		typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 		typedef ReflectionOperator<LeftRightSuperType,ConcurrencyType> ReflectionSymmetryType;
@@ -148,7 +148,10 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		template<typename SomeParametersType>
-		ModelFactory(const SomeParametersType& params,PsimagLite::IoSimple::In& io,const GeometryType& geometry)
+		ModelFactory(const SomeParametersType& params,
+			     PsimagLite::IoSimple::In& io,
+			     const GeometryType& geometry,
+			     ConcurrencyType& concurrency)
 		: name_(params.model),
 		  geometry_(geometry),
 		  hilbertSize_(geometry.numberOfSites()),
@@ -162,33 +165,33 @@ namespace Dmrg {
 		  modelImmm_(0)
 		{
 			if (name_=="HubbardOneBand") {
-				modelHubbard_ = new ModelHubbardType(io,geometry);
-				ModelHubbardType::SharedMemoryType::setThreads(params.nthreads);
+				modelHubbard_ = new ModelHubbardType(io,geometry,concurrency);
+				ModelHubbardType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND;
 				init(modelHubbard_);
 			} else if (name_=="HeisenbergSpinOneHalf") {
-				modelHeisenberg_ = new ModelHeisenbergType(io,geometry);
-				ModelHeisenbergType::SharedMemoryType::setThreads(params.nthreads);
+				modelHeisenberg_ = new ModelHeisenbergType(io,geometry,concurrency);
+				ModelHeisenbergType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HEISENBERG_SPIN_ONEHALF;
 				init(modelHeisenberg_);
 			} else if (name_=="HubbardOneBandExtended") {
-				modelHubbardExt_ = new ModelHubbardExtType(io,geometry);
-				ModelHubbardExtType::SharedMemoryType::setThreads(params.nthreads);
+				modelHubbardExt_ = new ModelHubbardExtType(io,geometry,concurrency);
+				ModelHubbardExtType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND_EXT;
 				init(modelHubbardExt_);
 			} else  if (name_=="FeAsBasedSc") {
-				modelFeAs_ = new FeBasedScType(io,geometry);
-				FeBasedScType::SharedMemoryType::setThreads(params.nthreads);
+				modelFeAs_ = new FeBasedScType(io,geometry,concurrency);
+				FeBasedScType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=FEAS;
 				init(modelFeAs_);
 			} else if (name_=="FeAsBasedScExtended") {
-				modelFeAsExt_ = new FeBasedScExtType(io,geometry);
-				FeBasedScExtType::SharedMemoryType::setThreads(params.nthreads);
+				modelFeAsExt_ = new FeBasedScExtType(io,geometry,concurrency);
+				FeBasedScExtType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=FEAS_EXT;
 				init(modelFeAsExt_);
 			} else if (name_=="Immm") {
-				modelImmm_ = new ImmmType(io,geometry);
-				ImmmType::SharedMemoryType::setThreads(params.nthreads);
+				modelImmm_ = new ImmmType(io,geometry,concurrency);
+				ImmmType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=IMMM;
 				init(modelImmm_);
 			} else {
