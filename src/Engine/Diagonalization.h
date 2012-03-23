@@ -240,7 +240,6 @@ namespace Dmrg {
 			VectorWithOffsetType initialVector(weights,lrs.super());
 			
 			target.initialGuess(initialVector,nk);
-			
 
 			for (size_t i=0;i<total;i++) {
 				if (weights[i]==0) continue;
@@ -260,6 +259,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				TargetVectorType initialVectorBySector(weights[i]);
 				initialVector.extract(initialVectorBySector,i);
+				assert(PsimagLite::norm(initialVectorBySector)>1e-6);
 				if (onlyWft) {
 					vecSaved[i]=initialVectorBySector;
 					gsEnergy = oldEnergy_;
@@ -316,12 +316,11 @@ namespace Dmrg {
 		    in tmpVec and its eigenvalues in energyTmp
 		!PTEX_LABEL{diagonaliseOneBlock} */
 		template<typename SomeVectorType>
-		void diagonaliseOneBlock(
-					int i,
-					SomeVectorType &tmpVec,
-     				double &energyTmp,
-					const LeftRightSuperType& lrs,
-					const SomeVectorType& initialVector)
+		void diagonaliseOneBlock(int i,
+					 SomeVectorType &tmpVec,
+					 double &energyTmp,
+					 const LeftRightSuperType& lrs,
+					 const SomeVectorType& initialVector)
 		{
 			RealType eps=ProgramGlobals::LanczosTolerance;
 			int iter=ProgramGlobals::LanczosSteps;

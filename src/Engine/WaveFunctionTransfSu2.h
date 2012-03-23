@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h" // so that std::norm() becomes visible here
 #include "VectorWithOffset.h" // so that std::norm() becomes visible here
 #include "WaveFunctionTransfBase.h"
+#include "Random48.h"
 
 namespace Dmrg {
 	
@@ -128,11 +129,10 @@ namespace Dmrg {
 		{}
 
 		
-		virtual void transformVector(
-						VectorWithOffsetType& psiDest,
-						const VectorWithOffsetType& psiSrc,
-						const LeftRightSuperType& lrs,
-						size_t nk) const
+		virtual void transformVector(VectorWithOffsetType& psiDest,
+					     const VectorWithOffsetType& psiSrc,
+					     const LeftRightSuperType& lrs,
+					     size_t nk) const
 		{
 			if (stage_==EXPAND_ENVIRON)
 				transformVector1Su2(psiDest,psiSrc,lrs,nk);
@@ -143,33 +143,12 @@ namespace Dmrg {
 	private:
 		
 		template<typename SomeVectorType>
-		void transformVector1Su2(
-				SomeVectorType& psiDest,
-				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs,
-				size_t nk) const
+		void transformVector1Su2(SomeVectorType& psiDest,
+					 const SomeVectorType& psiSrc,
+					 const LeftRightSuperType& lrs,
+					 size_t nk) const
 		{
-			size_t nip = lrs.super().getFactors().rank()/lrs.right().getFactors().rank();
-			size_t njp = lrs.right().getFactors().rank()/nk;
-
-			if ((size_t)dmrgWaveStruct_.lrs.left().getFactors().rank()!=dmrgWaveStruct_.ws.n_row()) {
-
-				throw std::runtime_error("transformVector1Su2(): getFactors.size()!=dmrgWaveStruct_.ws.n_row()\n");
-			}
-			if (njp!=dmrgWaveStruct_.we.n_col()) {
-
-				std::cerr<<"nip="<<nip<<" njp="<<njp<<" nk="<<nk;
-				std::cerr<<" dmrgWaveStruct_.we.n_col()="<<dmrgWaveStruct_.we.n_col()<<"\n";
-				throw std::runtime_error("WaveFunctionTransformation::transformVector1Su2():"
-						"njp!=dmrgWaveStruct_.we.n_col()\n");
-			}
-			if ((size_t)dmrgWaveStruct_.lrs.super().getFactors().rank()!=psiSrc.size()) {
-
-				std::cerr<<"getFactors.size="<<dmrgWaveStruct_.lrs.super().permutationInverse().size();
-				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
-				throw std::runtime_error("WaveFunctionTransformation::transformVector1Su2():"
-						" dmrgWaveStruct_.getFactors.size()!=dmrgWaveStruct_.psi.size()\n");
-			}
+			assert((size_t)dmrgWaveStruct_.lrs.super().getFactors().rank()==psiSrc.size());
 
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i = psiDest.sector(ii);
@@ -180,24 +159,21 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector1Su2(
-				SomeVectorType& psiDest,
-				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs,
-				size_t start,
-				size_t final,
-				size_t nk) const
+		void transformVector1Su2(SomeVectorType& psiDest,
+					 const SomeVectorType& psiSrc,
+					 const LeftRightSuperType& lrs,
+					 size_t start,
+					 size_t final,
+					 size_t nk) const
 		{
 			const FactorsType& factorsSE = lrs.super().getFactors();
 			const FactorsType& factorsSEOld = dmrgWaveStruct_.lrs.super().getFactors();
 			const FactorsType& factorsE = lrs.right().getFactors();
 			size_t nip = lrs.super().getFactors().rank()/lrs.right().getFactors().rank();
 			
-			FactorsType factorsInverseSE,
-   				//factorsInverseSEOld,
-   				factorsInverseE;
+			FactorsType factorsInverseSE,factorsInverseE;
 			transposeConjugate(factorsInverseSE,factorsSE);
-			//transposeConjugate(factorsInverseSEOld,factorsSEOld);
+
 			transposeConjugate(factorsInverseE,factorsE);
 			
 			SparseMatrixType ws(dmrgWaveStruct_.ws),we(dmrgWaveStruct_.we),weT;
@@ -221,15 +197,14 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		SparseElementType createVectorAux1bSu2(
-				const SomeVectorType& psiSrc,
-				size_t ip,
-				size_t kp,
-				size_t jp,
-				const FactorsType& factorsSE,
-				const SparseMatrixType& ws,
-				const SparseMatrixType& weT,
-				size_t nk) const
+		SparseElementType createVectorAux1bSu2(const SomeVectorType& psiSrc,
+						       size_t ip,
+						       size_t kp,
+						       size_t jp,
+						       const FactorsType& factorsSE,
+						       const SparseMatrixType& ws,
+						       const SparseMatrixType& weT,
+						       size_t nk) const
 		{
 			size_t ni=dmrgWaveStruct_.ws.n_col();
 			const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
@@ -256,34 +231,12 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector2Su2(
-				SomeVectorType& psiDest,
-				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs,
-				size_t nk) const
+		void transformVector2Su2(SomeVectorType& psiDest,
+					 const SomeVectorType& psiSrc,
+					 const LeftRightSuperType& lrs,
+					 size_t nk) const
 		{
-			size_t nip = lrs.left().getFactors().rank()/nk;
-			
-			if (dmrgWaveStruct_.ws.n_row()!=dmrgWaveStruct_.lrs.left().permutationInverse().size()) throw std::runtime_error("Error!!");
-			if (dmrgWaveStruct_.we.n_col()!=dmrgWaveStruct_.lrs.right().size()) throw std::runtime_error("Error\n");
-
-			if ((size_t)dmrgWaveStruct_.lrs.right().getFactors().rank()!=dmrgWaveStruct_.we.n_row()) {
-
-				throw std::runtime_error("transformVector2Su2():"
-						"PpermutationInverse.size()!=dmrgWaveStruct_.we.n_row()\n");
-			}
-			if (nip!=dmrgWaveStruct_.ws.n_col()) {
-
-				throw std::runtime_error("WaveFunctionTransformation::transformVector2Su2():"
-						"nip!=dmrgWaveStruct_.ws.n_row()\n");
-			}
-			if (dmrgWaveStruct_.lrs.super().permutationInverse().size()!=psiSrc.size()) {
-
-				std::cerr<<"SEpermutationInverse.size="<<dmrgWaveStruct_.lrs.super().permutationInverse().size();
-				std::cerr<<" psiSrc.size="<<psiSrc.size()<<"\n";
-				throw std::runtime_error("WaveFunctionTransformation::transformVector2Su2():"
-						" dmrgWaveStruct_.SEpermutationInverse.size()!=dmrgWaveStruct_.psi.size()\n");
-			}
+			assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
 
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i = psiDest.sector(ii);
@@ -294,64 +247,81 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		void transformVector2Su2(
-				SomeVectorType& psiDest,
-				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs,
-				size_t start,
-				size_t final,
-				size_t nk) const
+		void transformVector2Su2(SomeVectorType& psiDest,
+					 const SomeVectorType& psiSrc,
+					 const LeftRightSuperType& lrs,
+					 size_t start,
+					 size_t final,
+					 size_t nk) const
 		{
 			size_t nip = lrs.left().getFactors().rank()/nk;
 			size_t nalpha = lrs.left().getFactors().rank();
 			
 			const FactorsType& factorsSE = lrs.super().getFactors();
-			//const SparseMatrixType& factorsSEOld = dmrgWaveStruct_.lrs.super().getFactors();
+
 			const FactorsType& factorsS = lrs.left().getFactors();
-			FactorsType factorsInverseSE,
-   				//factorsInverseSEOld,
-   					factorsInverseS;
+			FactorsType factorsInverseSE,factorsInverseS;
 			transposeConjugate(factorsInverseSE,factorsSE);
-			//transposeConjugate(factorsInverseSEOld,factorsSEOld);
+
 			transposeConjugate(factorsInverseS,factorsS);
 			SparseMatrixType ws(dmrgWaveStruct_.ws),we(dmrgWaveStruct_.we),wsT;
 			transposeConjugate(wsT,ws);
-			
+			if (dmrgWaveStruct_.lrs.left().getFactors().rank()==0) {
+				wsT.makeDiagonal(nk,1.0);
+			}
 			PackIndicesType pack1(nalpha);
 			PackIndicesType pack2(nip);
 			for (size_t x=start;x<final;x++) {
 				psiDest[x] = 0;
-				size_t xx = x; // lrs.super().permutationInverse(x);
+				size_t xx = x;
 				for (int kI=factorsInverseSE.getRowPtr(xx);kI<factorsInverseSE.getRowPtr(xx+1);kI++) {
 					size_t alpha,jp;
 					pack1.unpack(alpha,jp,(size_t)factorsInverseSE.getCol(kI));
-					size_t alphax =  alpha; //lrs.left().permutationInverse(alpha);
+					size_t alphax =  alpha;
 					for (int k2I=factorsInverseS.getRowPtr(alphax);k2I<factorsInverseS.getRowPtr(alphax+1);k2I++) {
 						size_t ip,kp;
 						pack2.unpack(ip,kp,(size_t)factorsInverseS.getCol(k2I));
-						psiDest[x] += fastAux2bSu2(psiSrc,ip,kp,jp,wsT,we,nk)* //factorsInverseSEOld)*
+						psiDest[x] += fastAux2bSu2(psiSrc,ip,kp,jp,wsT,we,nk)*
 								factorsInverseSE.getValue(kI)*factorsInverseS.getValue(k2I);
 					}
 				}
 			}
+			RealType x = std::norm(psiDest);
+			if (fabs(x)>1e-6) return;
+//			assert(false);
+			std::ostringstream msg1,msg2,msg3;
+			msg1<<"WARNING: WFT forced to stop, this is a know issue with SU(2).";
+			progress_.printline(msg1,std::cout);
+			msg2<<"WARNING: If you are targeting anything other the ground state results will be wrong";
+			progress_.printline(msg2,std::cout);
+			// hack to make su(2) work with the wft
+			// Note that this will ``drop'' vectors on the floor
+			// and will cause not trivial targeting  (like tst, dynamic, correction vector) to fail
+			PsimagLite::Random48<RealType> random(34343);
+			for (size_t x=start;x<final;x++) {
+				psiDest[x] = random();
+			}
+			msg3<<"WARNING: I have dropped your vector on the floor!";
+			progress_.printline(msg3,std::cout);
 		}
 		
 		template<typename SomeVectorType>
-		SparseElementType fastAux2bSu2(
-				const SomeVectorType& psiSrc,
-				size_t ip,
-				size_t kp,
-				size_t jp,
-				const SparseMatrixType& wsT,
-				const SparseMatrixType& we,
-				size_t nk) const
+		SparseElementType fastAux2bSu2(const SomeVectorType& psiSrc,
+					       size_t ip,
+					       size_t kp,
+					       size_t jp,
+					       const SparseMatrixType& wsT,
+					       const SparseMatrixType& we,
+					       size_t nk) const
 		{
-			size_t nalpha=dmrgWaveStruct_.lrs.left().getFactors().rank();
+			size_t nalpha=wsT.rank(); //dmrgWaveStruct_.lrs.left().getFactors().rank();
+			assert(nalpha>0);
 			SparseElementType sum=0;
 			const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
 			const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
 			
 			size_t kpjp = kp+jp*nk;
+			assert(kpjp<dmrgWaveStruct_.lrs.right().permutationInverse().size());
 			size_t kpjpx = dmrgWaveStruct_.lrs.right().permutationInverse(kpjp);
 			
 			for (int k2I=factorsE.getRowPtr(kpjpx);k2I<factorsE.getRowPtr(kpjpx+1);k2I++) {

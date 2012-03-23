@@ -312,8 +312,10 @@ namespace Dmrg {
 			if (options.find("checkpoint")!=std::string::npos)
 				io.readline(checkpoint.filename,"CheckpointFilename=");
 			nthreads=1; // provide a default value
-			if (options.find("hasThreads")!=std::string::npos)
+			try {
 				io.readline(nthreads,"Threads=");
+			} catch (std::exception& e) {}
+			io.rewind();
 			useReflectionSymmetry=0;
 			try {
 				io.readline(useReflectionSymmetry,"UseReflectionSymmetry=");

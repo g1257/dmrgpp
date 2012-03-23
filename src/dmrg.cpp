@@ -195,6 +195,18 @@ int main(int argc,char *argv[])
 	ParametersDmrgSolver<MatrixElementType> dmrgSolverParams(io);
 	io.rewind();
 
+	if (dmrgSolverParams.options.find("hasThreads")!=std::string::npos) {
+#ifdef USE_PTHREADS
+		std::cerr<<"*** WARNING: hasThreads isn't needed anymore, this is not harmful but it can be removed\n";
+#else
+		std::string message1(__FILE__);
+		message1 += " FATAL: You are requesting threads but you did not compile with USE_PTHREADS enabled\n";
+		message1 += " Either remove hasThreads from the input file (you won't have threads though) or\n";
+		message1 += " add -DUSE_PTHREADS to the CPP_FLAGS in your Makefile and recompile\n";
+		throw std::runtime_error(message1.c_str());
+#endif
+	}
+
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;
 	std::string targetting="GroundStateTargetting";

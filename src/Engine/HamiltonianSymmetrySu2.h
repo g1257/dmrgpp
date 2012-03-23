@@ -109,7 +109,18 @@ namespace Dmrg {
 			typedef PsimagLite::CrsMatrix<RealType> FactorsType;
 			
 			static size_t const MAX = ProgramGlobals::MaxNumberOfSites;
-			
+
+			HamiltonianSymmetrySu2()
+			: flavors_(0),
+			  flavorsOld_(0),
+			  flavorsMax_(0),
+			  electronsMax_(0),
+			  jMax_(0),
+			  factors_(0,0),
+			  statesReduced_(0),
+			  jvals_(0)
+			{}
+
 			PairType jmValue(size_t i) const { return jmValues_[i]; }
 
 			void set(const BasisDataType& basisData)
