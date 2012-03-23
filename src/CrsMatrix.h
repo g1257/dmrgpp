@@ -305,9 +305,9 @@ namespace PsimagLite {
 
 		const int& getRowPtr(size_t i) const { assert(i<rowptr_.size()); return rowptr_[i]; }
 
-		const int& getCol(int i) const { return colind_[i]; }
+		const int& getCol(size_t i) const { assert(i<colind_.size()); return colind_[i]; }
 
-		const T& getValue(int i) const { return values_[i]; }
+		const T& getValue(size_t i) const { assert(i<values_.size()); return values_[i]; }
 
 		/*bool operator==(const CrsMatrix<T>& B) const
 		{

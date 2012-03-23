@@ -100,17 +100,22 @@ void pthread_mutex_unlock(int myMutex)
 {
 }
 namespace PsimagLite {
-	template<typename PthreadFunctionHolderType>
-	class NoPthreads : public Concurrency<typename PthreadFunctionHolderType::RealType> {
-		public:
-			static void setThreads(size_t dummy) { } // dummy
+template<typename PthreadFunctionHolderType>
+class NoPthreads : public Concurrency<typename PthreadFunctionHolderType::RealType> {
+public:
+	static void setThreads(size_t dummy) { } // dummy
 	
-			void loopCreate(size_t total,PthreadFunctionHolderType& pfh)
-			{
-				for (size_t i=0;i<total;i++) 
-					pfh.thread_function_(i,1,total,0);
-			}
-	}; // NoPthreads
+	template<typename SomeConcurrencyType>
+	void loopCreate(size_t total,PthreadFunctionHolderType& pfh,SomeConcurrencyType& conc)
+	{
+		for (size_t i=0;i<total;i++)
+			pfh.thread_function_(i,1,total,0);
+	}
+
+	template<typename T,typename SomeConcurrencyType>
+	void reduce(T& x,SomeConcurrencyType& conc) {}
+
+}; // NoPthreads
 } // namespace Dmrg
 /*@}*/
 #endif

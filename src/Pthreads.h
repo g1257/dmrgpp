@@ -108,46 +108,50 @@ void *thread_function_wrapper(void *dummyPtr)
 }
 
 namespace PsimagLite {
-	template<typename PthreadFunctionHolderType>
-	class Pthreads : public PsimagLite::Concurrency<typename PthreadFunctionHolderType::RealType> {
-		public:
-			Pthreads() 
-			{}
+template<typename PthreadFunctionHolderType>
+class Pthreads : public PsimagLite::Concurrency<typename PthreadFunctionHolderType::RealType> {
+public:
+	Pthreads()
+	{}
 
-			static void setThreads(size_t nthreads) {nthreads_=nthreads; }
+	static void setThreads(size_t nthreads) {nthreads_=nthreads; }
 
-			void loopCreate(size_t total,PthreadFunctionHolderType& pfh)
-			{
-				PthreadFunctionStruct<PthreadFunctionHolderType> pfs[nthreads_];
-				pthread_mutex_init(&(mutex_), NULL);
-				pthread_t thread_id[nthreads_];
-//				std::cerr<<"Pthreads: total="<<total<<"\n";
-				for (size_t j=0; j <nthreads_; j++) {
-					int ret=0;
-					pfs[j].threadNum = j;
-					pfs[j].pfh = &pfh;
-					pfs[j].total = total;
-					pfs[j].blockSize = total/nthreads_;
-					if (total%nthreads_!=0) pfs[j].blockSize++;
-					pfs[j].mutex = &mutex_;
-					if ((ret=pthread_create( 
-					     &thread_id[j], NULL, thread_function_wrapper<PthreadFunctionHolderType>, &pfs[j] ))) 
-						std::cerr<<"Thread creation failed: "<<ret<<"\n";
-				}
+	template<typename SomeConcurrencyType>
+	void loopCreate(size_t total,PthreadFunctionHolderType& pfh,SomeConcurrencyType& conc)
+	{
+		PthreadFunctionStruct<PthreadFunctionHolderType> pfs[nthreads_];
+		pthread_mutex_init(&(mutex_), NULL);
+		pthread_t thread_id[nthreads_];
+		//				std::cerr<<"Pthreads: total="<<total<<"\n";
+		for (size_t j=0; j <nthreads_; j++) {
+			int ret=0;
+			pfs[j].threadNum = j;
+			pfs[j].pfh = &pfh;
+			pfs[j].total = total;
+			pfs[j].blockSize = total/nthreads_;
+			if (total%nthreads_!=0) pfs[j].blockSize++;
+			pfs[j].mutex = &mutex_;
+			if ((ret=pthread_create(
+				     &thread_id[j], NULL, thread_function_wrapper<PthreadFunctionHolderType>, &pfs[j] )))
+				std::cerr<<"Thread creation failed: "<<ret<<"\n";
+		}
 
-				for (size_t j=0; j <nthreads_; j++) pthread_join( thread_id[j], NULL);
+		for (size_t j=0; j <nthreads_; j++) pthread_join( thread_id[j], NULL);
 
-				pthread_mutex_destroy(&mutex_);
-			}
+		pthread_mutex_destroy(&mutex_);
+	}
 
-		private:
-			static size_t nthreads_;
-			pthread_mutex_t mutex_;
-			
-	}; // Pthreads class
+	template<typename T,typename SomeConcurrencyType>
+	void reduce(T& x,SomeConcurrencyType& conc) {}
 
-	template<typename PthreadFunctionHolderType>
-	size_t Pthreads<PthreadFunctionHolderType>::nthreads_=1;
+private:
+	static size_t nthreads_;
+	pthread_mutex_t mutex_;
+
+}; // Pthreads class
+
+template<typename PthreadFunctionHolderType>
+size_t Pthreads<PthreadFunctionHolderType>::nthreads_=1;
 } // namespace Dmrg
 
 /*@}*/
