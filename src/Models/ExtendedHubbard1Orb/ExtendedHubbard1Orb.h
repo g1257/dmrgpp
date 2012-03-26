@@ -96,6 +96,7 @@ namespace Dmrg {
 
 		typedef ModelHubbard<ModelHelperType_,SparseMatrixType,DmrgGeometryType,SharedMemoryTemplate> ModelHubbardType;
 		typedef ModelHelperType_ ModelHelperType;
+		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;

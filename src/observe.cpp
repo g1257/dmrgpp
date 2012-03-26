@@ -179,7 +179,7 @@ void mainLoop(GeometryType& geometry,
 	
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	
-	ModelType model(params,io,geometry);
+	ModelType model(params,io,geometry,concurrency);
 
 	 //! Read TimeEvolution if applicable:
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;

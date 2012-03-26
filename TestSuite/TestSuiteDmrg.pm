@@ -94,7 +94,7 @@ sub runObserve
 	my $err = chdir($TestSuiteGlobals::srcDir);
 	die "Changing directory to $TestSuiteGlobals::srcDir: $!" if(!$err);
 	$err = system($arg);
-	die "Running test using $executable with $inputFile: $!" if($err);
+	#die "Running test using $executable with $inputFile: $!" if($err);
 	$err = chdir($TestSuiteGlobals::testDir);
 	die "Changing directory to $TestSuiteGlobals::testDir: $!" if(!$err);
 	print "Completion of observe test.\n";
