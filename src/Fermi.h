@@ -81,14 +81,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
   
 #ifndef FERMI_H_
 #define FERMI_H_
+#include <cmath>
+
 namespace PsimagLite {
 	template<typename FieldType>
 	FieldType fermi(const FieldType& x)
 	{
 		if (x>50) return 0;
 		if (x<-50) return 1;
-		if (x<0) return 1.0/(1.0+exp(x));
-		return exp(-x)/(1.0+exp(-x));
+		if (x<0) return 1.0/(1.0+std::exp(x));
+		return std::exp(-x)/(1.0+std::exp(-x));
 		
 	}
 	

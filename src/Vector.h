@@ -36,6 +36,18 @@ namespace std {
 	}
 
 	template<typename T1,typename T2>
+	inline std::vector<T2> operator*(const std::vector<std::vector<T1> >& v1,const std::vector<T2>& v2)
+	{
+		std::vector<T2> v3(v2.size());
+		for (size_t i=0;i<v3.size();i++) {
+			v3[i] = 0;
+			for (size_t j=0;i<v2.size();j++)
+				v3[i] += v1[i][j] * v2[j];
+		}
+		return v3;
+	}
+
+	template<typename T1,typename T2>
 	inline std::vector<T2> operator*(const T1& v1,const std::vector<T2>& v2)
 	{
 		std::vector<T2> v3(v2.size());
@@ -47,6 +59,23 @@ namespace std {
 	inline std::vector<T2> operator*(const std::vector<T2>& v2,const T1& v1)
 	{
 		return v1*v2;
+	}
+
+	template<typename T>
+	std::vector<T> conj(std::vector<T>& v)
+	{
+		std::vector<T> w(v.size());
+		for (size_t i=0;i<v.size();i++) w[i]=std::conj(v[i]);
+		return w;
+	}
+
+	template<typename T>
+	T scalarProduct(const std::vector<T>& v1, const std::vector<T>& v2)
+	{
+		T result = 0.0;
+		for(size_t i=0; i < v2.size(); i++)
+			result += std::conj(v1[i]) * v2[i];
+		return result;
 	}
 
 	template<class X>

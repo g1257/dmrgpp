@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009-2011, UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -190,7 +188,7 @@ namespace PsimagLite {
 			}
 
 			lanczosVectors_.hookForZ(z,c);
-			if (mode_ & WITH_INFO) info(gsEnergy,initialVector,std::cerr);
+			if (mode_ & WITH_INFO) info(gsEnergy,initialVector,std::cout);
 		}
 
 		template<typename DenseMatrixType>
