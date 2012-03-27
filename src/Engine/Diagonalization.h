@@ -394,6 +394,7 @@ namespace Dmrg {
 
 			if (lanczosHelper.rank()==0) {
 				energyTmp=10000;
+				if (lanczosOrDavidson) delete lanczosOrDavidson;
 				return;
 			}
 			/*std::ostringstream msg;
@@ -403,6 +404,7 @@ namespace Dmrg {
 			if (!reflectionOperator_.isEnabled()) {
 				tmpVec.resize(lanczosHelper.rank());
 				lanczosOrDavidson->computeGroundState(energyTmp,tmpVec,initialVector);
+				if (lanczosOrDavidson) delete lanczosOrDavidson;
 				return;
 			}
 			SomeVectorType initialVector1,initialVector2;
