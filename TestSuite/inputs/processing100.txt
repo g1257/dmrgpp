@@ -1,5 +1,4 @@
 energy
-gprof
 #observables
 #C
 #N

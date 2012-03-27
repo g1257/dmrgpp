@@ -95,7 +95,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ModelFeBasedSc.h"
 #include "FeAsBasedScExtended.h"
 #include "Immm.h"
-#include "ReflectionOperator.h"
+#include "ReflectionOperatorEmpty.h"
 
 namespace Dmrg {
 	
@@ -143,7 +143,7 @@ namespace Dmrg {
 //		typedef SharedMemoryTemplate<HamiltonianConnectionType> ParallelConnectionsType;
 //		typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 		typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-		typedef ReflectionOperator<LeftRightSuperType,ConcurrencyType> ReflectionSymmetryType;
+		typedef ReflectionOperatorEmpty<LeftRightSuperType,ConcurrencyType> ReflectionSymmetryType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
