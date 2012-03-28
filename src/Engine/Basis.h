@@ -324,7 +324,7 @@ namespace Dmrg {
 		}
 
 		template<typename BlockMatrixType>
-		RealType truncateBasis(typename BlockMatrixType::BuildingBlockType &ftransform,
+		RealType truncateBasis(SparseMatrixType& ftransform,
 				       const BlockMatrixType& transform,
 				       const std::vector<RealType>& eigs,
 				       const std::vector<size_t>& removedIndices)
@@ -333,7 +333,7 @@ namespace Dmrg {
 			partitionOld_ = partition_;
 			dmrgTransformed_=true;
 
-			blockMatrixToFullMatrix(ftransform,transform);
+			blockMatrixToSparseMatrix(ftransform,transform);
 
 			if (removedIndices.size()==0) return 0;
 

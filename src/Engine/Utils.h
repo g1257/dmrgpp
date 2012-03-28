@@ -178,6 +178,55 @@ namespace utils {
 		}
 	}
 
+	template<class T>
+	void truncate(PsimagLite::CrsMatrix<T> &A,std::vector<size_t> const &removed,bool rowOption)
+	{
+		if (rowOption) { // unimplemented
+			assert(false);
+			throw std::runtime_error("truncate: rowoption must not be set\n");
+		}
+
+		size_t x=removed.size();
+		if (x==0) return;
+
+		size_t nrow = A.rank();
+
+		size_t n = nrow;
+
+		assert(n>x);
+
+		std::vector<int> remap(n);
+
+		//! find remapping
+		size_t j=0;
+		for (size_t i=0;i<n;i++) {
+			remap[i] = -1;
+			if (PsimagLite::isInVector(removed,i)>=0) continue;
+			remap[i]=j;
+			j++;
+		}
+		assert(j==n-x);
+
+		//! truncate
+		PsimagLite::CrsMatrix<T> B(nrow,nrow); //ncol-x);
+		size_t counter = 0;
+		for (size_t i=0;i<nrow;i++) {
+			B.setRow(i,counter);
+			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+				j = A.getCol(k);
+				if (remap[j]<0) continue;
+				B.pushCol(remap[j]);
+				B.pushValue(A.getValue(k));
+				counter++;
+				//B(i,remap[j])=A(i,j);
+			}
+		}
+		B.setRow(nrow,counter);
+		B.checkValidity();
+		A=B;
+
+	}
+
 	
 } //namespace utils
 /*@}*/

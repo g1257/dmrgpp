@@ -186,10 +186,11 @@ transformed operator can be used (or not because of the reason limitation above)
 			return operators_.size();
 		}
 
-		template<typename TransformElementType,typename ConcurrencyType>
-		void changeBasis(PsimagLite::Matrix<TransformElementType> const &ftransform,
+		template<typename ConcurrencyType>
+		void changeBasis(const SparseMatrixType& ftransform,
 		                 const BasisType* thisBasis,
-		                 ConcurrencyType &concurrency)
+				 ConcurrencyType &concurrency,
+				 size_t newSize)
 // 		                 const std::pair<size_t,size_t>& startEnd)
 		{
 			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
@@ -202,7 +203,7 @@ transformed operator can be used (or not because of the reason limitation above)
 					operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
 					continue;
 				}
-				if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform);
+				if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform,newSize);
 				reducedOpImpl_.changeBasis(k);
 			}
 
@@ -214,14 +215,16 @@ transformed operator can be used (or not because of the reason limitation above)
 				reducedOpImpl_.broadcast(concurrency);
 			}
 
-			changeBasis(hamiltonian_,ftransform);
+			changeBasis(hamiltonian_,ftransform,newSize);
 			reducedOpImpl_.changeBasisHamiltonian();
 		}
 
-		template<typename TransformElementType>
-		void changeBasis(SparseMatrixType &v,PsimagLite::Matrix<TransformElementType> const &ftransform)
+		void changeBasis(SparseMatrixType &v,const SparseMatrixType& ftransform,size_t newSize)
 		{
-			fullMatrixToCrsMatrix(v,transformFullFast(v,ftransform));
+			SparseMatrixType transformConj;
+			transposeConjugate(transformConj,ftransform,newSize);
+			SparseMatrixType tmp = v*ftransform;
+			multiply(v,transformConj,tmp,false);
 		}
 
 		void reorder(const std::vector<size_t>& permutation)

@@ -327,6 +327,27 @@ namespace Dmrg {
 		for (j=0;j<n;j++) for (i=0;i<n;i++) fm(i,j)=B(i,j);
 	}
 
+	template<class S>
+	void blockMatrixToSparseMatrix(PsimagLite::CrsMatrix<S> &fm,BlockMatrix<S,PsimagLite::Matrix<S> > const &B)
+	{
+		size_t n = B.rank();
+		fm.resize(n);
+		size_t counter=0;
+		for (size_t i=0;i<n;i++) {
+			fm.setRow(i,counter);
+			for (size_t j=0;j<n;j++) {
+				S val = B(i,j);
+				if (std::norm(val)<1e-10) continue;
+				fm.pushValue(val);
+				fm.pushCol(j);
+				counter++;
+			}
+		}
+		fm.setRow(n,counter);
+		fm.checkValidity();
+	}
+
+
 } // namespace Dmrg
 /*@}*/	
 

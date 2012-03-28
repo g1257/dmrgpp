@@ -109,9 +109,13 @@ public:
 	{
 		PsimagLite::Range<SomeConcurrencyType> range(0,total,concurrency);
 
+		size_t np = concurrency.nprocs();
+		size_t blockSize = total/np; 
+		if (total%np!=0) blockSize++;
+
 		for (;!range.end();range.next())  {
 			size_t i = range.index();
-			pfh.thread_function_(i,1,total,0);
+			pfh.thread_function_(i,blocksize,total,0);
 		}
 	}
 

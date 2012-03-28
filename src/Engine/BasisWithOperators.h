@@ -230,7 +230,7 @@ namespace Dmrg {
 		//! transform this basis by transform 
 		//! note: basis change must conserve total number of electrons and all quantum numbers
 		template<typename BlockMatrixType>
-		RealType truncateBasis(typename BlockMatrixType::BuildingBlockType& ftransform,
+		RealType truncateBasis(SparseMatrixType& ftransform,
 				       const BlockMatrixType& transform,
 				       const std::vector<RealType>& eigs,
 				       const std::vector<size_t>& removedIndices,
@@ -238,16 +238,15 @@ namespace Dmrg {
 		{
 			BasisType &parent = *this;
 			RealType error = parent.truncateBasis(ftransform,transform,eigs,removedIndices);
-
-			changeBasisDirect(ftransform,concurrency);
+			size_t newSize = transform.rank() - removedIndices.size();
+			changeBasisDirect(ftransform,concurrency,newSize);
 
 			return error;
 		}
 
-		template<typename SomeMatrixType>
-		void changeBasisDirect(const SomeMatrixType& ftransform, ConcurrencyType& concurrency)
+		void changeBasisDirect(const SparseMatrixType& ftransform, ConcurrencyType& concurrency,size_t newSize)
 		{
-			operators_.changeBasis(ftransform,this,concurrency); //startEnd);
+			operators_.changeBasis(ftransform,this,concurrency,newSize); //startEnd);
 		}
 
 		void setHamiltonian(SparseMatrixType const &h) { operators_.setHamiltonian(h); }

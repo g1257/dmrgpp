@@ -105,7 +105,7 @@ namespace Dmrg {
 
 	public:
 
-		typedef typename DensityMatrixType::BuildingBlockType TransformType;
+		typedef typename LeftRightSuperType::SparseMatrixType TransformType;
 		typedef typename DensityMatrixType::BlockMatrixType BlockMatrixType;
 
 		struct TruncationCache {
@@ -178,10 +178,10 @@ namespace Dmrg {
 			reflectionOperator_.updateKeptStates(keptStates,leftCache_,rightCache_);
 
 			truncateBasisSystem(eBasis);
-			TransformType transform1 = ftransform_;
+//			TransformType transform1 = ftransform_;
 			truncateBasisEnviron(sBasis);
 
-			reflectionOperator_.changeBasis(transform1,ftransform_);
+//			reflectionOperator_.changeBasis(transform1,ftransform_);
 			sBasis = leftCache_.bprime;
 			eBasis = rightCache_.bprime;
 			reflectionOperator_.diagBasis();
@@ -268,7 +268,7 @@ namespace Dmrg {
 			waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrs);
 
 			msg<<"new size of basis="<<cache.bprime.size();
-			assert(ftransform_.n_col()==cache.bprime.size());
+//			assert(ftransform_.n_col()==cache.bprime.size());
 			progress_.printline(msg,std::cout);
 		}
 

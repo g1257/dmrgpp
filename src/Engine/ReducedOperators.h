@@ -230,9 +230,10 @@ namespace Dmrg {
 			calcFastBasis(fastBasisRight_,basis2,basis3,false,thisBasis_->reducedSize());
 		}
 
-		void prepareTransform(const DenseMatrixType& ftransform,const DmrgBasisType* thisBasis)
+		void prepareTransform(const SparseMatrixType& ftransform,const DmrgBasisType* thisBasis)
 		{
 			if (!useSu2Symmetry_) return;
+			assert(false);
 			size_t nr=thisBasis->reducedSize();
 			size_t nold = thisBasis_->reducedSize();
 			ftransform_.reset(nold,nr);
