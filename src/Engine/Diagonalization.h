@@ -203,7 +203,6 @@ namespace Dmrg {
 			msg0<<"Setting up Hamiltonian basis of size="<<lrs.super().size();
 			progress_.printline(msg0,std::cout);
 		
-			TargetVectorType tmpVec;
 			std::vector<TargetVectorType> vecSaved;
 			std::vector<RealType> energySaved;
 			
@@ -264,8 +263,7 @@ namespace Dmrg {
 					vecSaved[i]=initialVectorBySector;
 					gsEnergy = oldEnergy_;
 				} else {
-					diagonaliseOneBlock(i,tmpVec,gsEnergy,lrs,initialVectorBySector);
-					vecSaved[i] = tmpVec;
+					diagonaliseOneBlock(i,vecSaved[i],gsEnergy,lrs,initialVectorBySector);
 				}
 				energySaved[i]=gsEnergy;
 			}
@@ -381,6 +379,7 @@ namespace Dmrg {
 			params.tolerance = eps;
 			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 			params.options= parameters_.options;
+			params.lotaMemory=!(parameters_.options.find("DoNotSaveLanczosVectors")!=std::string::npos);
 
 			LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
 
