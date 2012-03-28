@@ -64,8 +64,8 @@ namespace PsimagLite {
 		template<typename SomeMatrixType>
 		Matrix(const SomeMatrixType& m)
 		{
-			nrow_=m.rank();
-			ncol_=m.rank();
+			nrow_=m.row();
+			ncol_=m.col();
 			data_.resize(nrow_*ncol_);
 			for (size_t i=0;i<nrow_;i++)
 				for (size_t j=0;j<ncol_;j++) 
