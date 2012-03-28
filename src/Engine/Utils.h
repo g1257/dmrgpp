@@ -189,7 +189,7 @@ namespace utils {
 		size_t x=removed.size();
 		if (x==0) return;
 
-		size_t nrow = A.rank();
+		size_t nrow = A.row();
 
 		size_t n = nrow;
 
@@ -208,7 +208,7 @@ namespace utils {
 		assert(j==n-x);
 
 		//! truncate
-		PsimagLite::CrsMatrix<T> B(nrow,nrow); //ncol-x);
+		PsimagLite::CrsMatrix<T> B(nrow,nrow-x);
 		size_t counter = 0;
 		for (size_t i=0;i<nrow;i++) {
 			B.setRow(i,counter);

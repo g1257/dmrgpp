@@ -552,7 +552,7 @@ namespace Dmrg {
 
 					pack.unpack(r,eta,helper_.leftRightSuper().super().
 							permutation(t));
-					if (eta>=Acrs.rank()) throw std::runtime_error("Error\n");
+					if (eta>=Acrs.row()) throw std::runtime_error("Error\n");
 					size_t nx0 = helper_.leftRightSuper().left().electrons(BasisType::AFTER_TRANSFORM);
 					RealType sign = (nx0 & 1) ? fermionicSign : 1;
 					for (int k=Acrs.getRowPtr(eta);k<Acrs.getRowPtr(eta+1);k++) {
@@ -592,13 +592,13 @@ namespace Dmrg {
 			SparseMatrixType Acrs(A);
 			SparseMatrixType Bcrs(B);
 			FieldType sum=0;
-			size_t ni = helper_.leftRightSuper().left().size()/Bcrs.rank(); // = Acrs.rank()
+			size_t ni = helper_.leftRightSuper().left().size()/Bcrs.row(); // = Acrs.rank()
 
 			// some sanity checks:
 			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper().super().size())
 				throw std::runtime_error("Observe::brRghtCrnrSystem_(...): "
 						"vec.size!=SE.size\n");
-			if (ni!=Acrs.rank())
+			if (ni!=Acrs.row())
 				throw std::runtime_error("Observe::brRghtCrnrSystem_(...): "
 						"ni!=Acrs.rank\n");
 
@@ -653,13 +653,13 @@ namespace Dmrg {
 			SparseMatrixType Acrs(A);
 			SparseMatrixType Bcrs(B);
 			FieldType sum=0;
-			size_t ni = Bcrs.rank();
+			size_t ni = Bcrs.row();
 
 			// some sanity checks:
 			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper().super().size())
 				throw std::runtime_error("Observe::brLftCrnrEnviron_(...): "
 						"vec.size!=SE.size\n");
-			if (helper_.leftRightSuper().right().size()/Bcrs.rank()!=Acrs.rank())
+			if (helper_.leftRightSuper().right().size()/Bcrs.row()!=Acrs.row())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): "
 						"helper_.leftRightSuper().right().size()/Bcrs.rank()!=Acrs.rank\n");
 
@@ -720,14 +720,14 @@ namespace Dmrg {
 			SparseMatrixType A2crs(A2);
 			SparseMatrixType Bcrs(B);
 			FieldType sum=0;
-			size_t ni = helper_.leftRightSuper().left().size()/Bcrs.rank(); // = Acrs.rank()
+			size_t ni = helper_.leftRightSuper().left().size()/Bcrs.row(); // = Acrs.rank()
 
 			// some sanity checks:
 			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper().super().size())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): vec.size!=SE.size\n");
-			if (ni!=A1crs.rank())
+			if (ni!=A1crs.row())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): ni!=A1crs.rank\n");
-			if (Bcrs.rank()!=A2crs.rank())
+			if (Bcrs.row()!=A2crs.row())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): Bcrs.rank!=A2crs.rank\n");
 
 			// ok, we're ready for the main course:

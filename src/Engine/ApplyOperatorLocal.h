@@ -159,7 +159,7 @@ namespace Dmrg {
 			size_t final = offset + src.effectiveSize(i0);
 			//size_t counter=0;
 			size_t ns = lrs_.left().permutationVector().size();
-			size_t nx = ns/A.data.rank();
+			size_t nx = ns/A.data.row();
 			if (src.size()!=lrs_.super().permutationVector().size())
 				throw std::runtime_error("applyLocalOpSystem SE\n");
 
@@ -222,7 +222,7 @@ namespace Dmrg {
 			size_t final = offset + src.effectiveSize(i0);
 
 			size_t ns = lrs_.left().size();
-			size_t nx = A.data.rank();
+			size_t nx = A.data.row();
 			PackIndicesType pack1(ns);
 			PackIndicesType pack2(nx);
 
@@ -300,7 +300,7 @@ namespace Dmrg {
 					const OperatorType& A,
 					const FermionSign& fermionSign) const
 		{
-			if (lrs_.right().size() == A.data.rank()) { // right corner
+			if (lrs_.right().size() == A.data.row()) { // right corner
 				applyLocalOpSystem(dest,src,A,fermionSign,RIGHT_CORNER);
 				return;
 			}

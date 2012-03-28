@@ -458,8 +458,8 @@ namespace Dmrg {
 				std::string s("<PSI");
 				s += "|P"+ttos(jj)+">";
 				OperatorType Identity = A;
-				PsimagLite::CrsMatrix<ComplexType> identity2(tmpC.rank(),tmpC.rank());
-				identity2.makeDiagonal(identity2.rank(),1.0);
+				PsimagLite::CrsMatrix<ComplexType> identity2(tmpC.row(),tmpC.col());
+				identity2.makeDiagonal(identity2.row(),1.0);
 				Identity.data = identity2;
 				Identity.fermionSign = 1;
 				test(psi_,targetVectors_[jj],direction,s,site,Identity);

@@ -187,7 +187,8 @@ namespace Dmrg {
 	private:
 		void createReducedHamiltonian(SparseMatrixType& hamReduced,const BasisWithOperatorsType& basis)
 		{
-			hamReduced.resize(basis.numberOfOperators());
+			size_t xx = basis.numberOfOperators();
+			hamReduced.resize(xx,xx);
 			std::vector<size_t> basisrinverse(basis.size());
 			for (size_t i=0;i<basis.size();i++) {
 				size_t f = basis.getFlavor(i);
@@ -224,7 +225,7 @@ namespace Dmrg {
 		                       const BasisWithOperatorsType& basis,
 		                       size_t counter)
 		{
-			size_t n=opSrc.rank();
+			size_t n=opSrc.row();
 			opDest=transposeConjugate(opSrc);
 			for (size_t i=0;i<n;i++) {
 				PairType jm = basis.jmValue(basis.reducedIndex(i));
@@ -261,7 +262,7 @@ namespace Dmrg {
 		                           const BasisWithOperatorsType& basis,
 		                           const std::vector<size_t>& basisrInverse)
 		{
-			for (size_t i=0;i<opSrc.data.rank();i++) {
+			for (size_t i=0;i<opSrc.data.row();i++) {
 				PairType jm = basis.jmValue(i);
 				for (int l=opSrc.data.getRowPtr(i);l<opSrc.data.getRowPtr(i+1);l++) {
 					size_t iprime = opSrc.data.getCol(l);

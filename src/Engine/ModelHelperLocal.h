@@ -193,7 +193,7 @@ namespace Dmrg {
 			int offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
 			int counter=0;
-			matrixBlock.resize(total);
+			matrixBlock.resize(total,total);
 
 			int i;
 			for (i=0;i<total;i++) {
@@ -380,7 +380,7 @@ namespace Dmrg {
 			PsimagLite::Matrix<SparseElementType> fullm;
 			crsMatrixToFullMatrix(fullm,hamiltonian);
 			//printNonZero(fullm,std::cerr);
-			matrixBlock.resize(bs);
+			matrixBlock.resize(bs,bs);
 
 			int counter=0;
 			PackIndicesType pack(ns);
@@ -396,7 +396,7 @@ namespace Dmrg {
 					alphaPrime=alpha;
 					r=beta;
 				}
-				if (r>=hamiltonian.rank())
+				if (r>=hamiltonian.row())
 					throw std::runtime_error("DrmgModelHelper::calcHamiltonianPart(): internal error\n");
 				// row i of the ordered product basis
 				for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {

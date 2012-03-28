@@ -178,12 +178,12 @@ namespace Dmrg {
 					lrs.right().permutationInverse().size();
 			size_t njp = lrs.right().permutationInverse().size()/nk;
 			//printDmrgWave();
-			if (dmrgWaveStruct_.lrs.left().permutationInverse().size()!=dmrgWaveStruct_.ws.n_row()) {
+			if (dmrgWaveStruct_.lrs.left().permutationInverse().size()!=dmrgWaveStruct_.ws.row()) {
 				throw std::runtime_error("transformVector1():"
 						"SpermutationInverse.size()!=dmrgWaveStruct_.ws.n_row()\n");
 			}
-			if (njp!=dmrgWaveStruct_.we.n_col()) {
-				std::cerr<<"nip="<<nip<<" njp="<<njp<<" nk="<<nk<<" dmrgWaveStruct_.we.n_col()="<<dmrgWaveStruct_.we.n_col()<<"\n";
+			if (njp!=dmrgWaveStruct_.we.col()) {
+				std::cerr<<"nip="<<nip<<" njp="<<njp<<" nk="<<nk<<" dmrgWaveStruct_.we.n_col()="<<dmrgWaveStruct_.we.col()<<"\n";
 				throw std::runtime_error("WaveFunctionTransformation::transformVector1():"
 						"njp!=dmrgWaveStruct_.we.n_col()\n");
 			}
@@ -223,7 +223,7 @@ namespace Dmrg {
 				const SparseMatrixType& weT,
 				size_t nk) const
 		{
-			size_t ni=dmrgWaveStruct_.ws.n_col();
+			size_t ni=dmrgWaveStruct_.ws.col();
 
 			//int m = dmrgWaveStruct_.m;
 			//size_t final = dmrgWaveStruct_.lrs.super().partition(m+1);
@@ -270,11 +270,11 @@ namespace Dmrg {
 			size_t nip = lrs.left().permutationInverse().size()/nk;
 			size_t nalpha = lrs.left().permutationInverse().size();
 			//printDmrgWave();
-			if (dmrgWaveStruct_.lrs.right().permutationInverse().size()!=dmrgWaveStruct_.we.n_row()) {
+			if (dmrgWaveStruct_.lrs.right().permutationInverse().size()!=dmrgWaveStruct_.we.row()) {
 				throw std::runtime_error("transformVector2():"
 						"PpermutationInverse.size()!=dmrgWaveStruct_.we.n_row()\n");
 			}
-			if (nip!=dmrgWaveStruct_.ws.n_col()) {
+			if (nip!=dmrgWaveStruct_.ws.col()) {
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
 						"nip!=dmrgWaveStruct_.ws.n_row()\n");
 			}
@@ -370,7 +370,7 @@ namespace Dmrg {
 				throw std::runtime_error("transformVector2():"
 						"PpermutationInverse.size()!=dmrgWaveStruct_.we.n_row()\n");
 			}*/
-			if (nip!=dmrgWaveStruct_.ws.n_col()) {
+			if (nip!=dmrgWaveStruct_.ws.col()) {
 				throw std::runtime_error("WaveFunctionTransformation::transformVector2():"
 						"nip!=dmrgWaveStruct_.ws.n_row()\n");
 			}

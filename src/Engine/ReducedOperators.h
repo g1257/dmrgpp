@@ -234,18 +234,19 @@ namespace Dmrg {
 		{
 			if (!useSu2Symmetry_) return;
 			assert(false);
-			size_t nr=thisBasis->reducedSize();
-			size_t nold = thisBasis_->reducedSize();
-			ftransform_.reset(nold,nr);
+			throw std::runtime_error("fixme!\n");
+//			size_t nr=thisBasis->reducedSize();
+//			size_t nold = thisBasis_->reducedSize();
+//			ftransform_.resize(nold,nr);
 
-			for (size_t i=0;i<nold;i++) {
-				size_t ii =thisBasis_->reducedIndex(i); // old
-				for (size_t j=0;j<nr;j++) {
-					size_t jj = thisBasis->reducedIndex(j); //new 
-					ftransform_(i,j)=ftransform(ii,jj);
-				}
-			}
-			thisBasis_ = thisBasis;
+//			for (size_t i=0;i<nold;i++) {
+//				size_t ii =thisBasis_->reducedIndex(i); // old
+//				for (size_t j=0;j<nr;j++) {
+//					size_t jj = thisBasis->reducedIndex(j); //new
+//					ftransform_(i,j)=ftransform(ii,jj);
+//				}
+//			}
+//			thisBasis_ = thisBasis;
 		}
 
 		void changeBasis(size_t k)
@@ -366,7 +367,7 @@ namespace Dmrg {
 		PsimagLite::Matrix<int> reducedMapping_;
 		std::vector<std::vector<size_t> > fastBasisLeft_,fastBasisRight_;
 		PsimagLite::Matrix<size_t> flavorIndexCached_;
-		DenseMatrixType ftransform_;
+		SparseMatrixType ftransform_;
 
 		SparseElementType lfactor(int ki,bool order,size_t j1,size_t j2,size_t j1prime,size_t jProd,size_t jProdPrime) const
 		{
@@ -446,9 +447,9 @@ namespace Dmrg {
 
 		void createReducedConj(size_t k1 ,SparseMatrixType& opDest,const SparseMatrixType& opSrc)
 		{
-			size_t n=opSrc.rank();
+//			size_t n=opSrc.rank();
 			transposeConjugate(opDest,opSrc);
-			for (size_t i=0;i<n;i++) {
+			for (size_t i=0;i<opSrc.row();i++) {
 				PairType jm = thisBasis_->jmValue(thisBasis_->reducedIndex(i));
 				for (int k=opDest.getRowPtr(i);k<opDest.getRowPtr(i+1);k++) {
 					size_t j=opDest.getCol(k);
@@ -475,7 +476,7 @@ namespace Dmrg {
 
 		void createReducedOperator(DenseMatrixType& opDest1,const OperatorType& opSrc)
 		{
-			for (size_t i=0;i<opSrc.data.rank();i++) {
+			for (size_t i=0;i<opSrc.data.row();i++) {
 				PairType jm = thisBasis_->jmValue(i);
 				for (int l=opSrc.data.getRowPtr(i);l<opSrc.data.getRowPtr(i+1);l++) {
 					size_t iprime = opSrc.data.getCol(l);
@@ -489,8 +490,13 @@ namespace Dmrg {
 
 		void changeBasis(SparseMatrixType &v)
 		{
-			SparseMatrixType tmpMatrix=transformFullFast(v,ftransform_);
-			v= tmpMatrix;
+//			SparseMatrixType tmpMatrix=transformFullFast(v,ftransform_);
+//			v= tmpMatrix;
+
+			SparseMatrixType transformConj;
+			transposeConjugate(transformConj,ftransform_);
+			SparseMatrixType tmp = v*ftransform_;
+			multiply(v,transformConj,tmp);
 		}
 
 		void buildLfactor(std::vector<SparseElementType>& lfactor,

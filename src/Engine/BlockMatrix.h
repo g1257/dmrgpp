@@ -331,7 +331,7 @@ namespace Dmrg {
 	void blockMatrixToSparseMatrix(PsimagLite::CrsMatrix<S> &fm,BlockMatrix<S,PsimagLite::Matrix<S> > const &B)
 	{
 		size_t n = B.rank();
-		fm.resize(n);
+		fm.resize(n,n);
 		size_t counter=0;
 		for (size_t i=0;i<n;i++) {
 			fm.setRow(i,counter);

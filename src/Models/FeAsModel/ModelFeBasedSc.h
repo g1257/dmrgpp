@@ -508,7 +508,7 @@ namespace Dmrg {
 			size_t n=block.size();
 			SparseMatrixType tmpMatrix,tmpMatrix2;
 
-			hmatrix.makeDiagonal(cm[0].data.rank());
+			hmatrix.makeDiagonal(cm[0].data.row());
 			
 			for (size_t i=0;i<n;i++) {
 				//! hopping part

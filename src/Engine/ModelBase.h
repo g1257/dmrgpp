@@ -216,8 +216,7 @@ namespace Dmrg {
 				matrixBlock.makeDiagonal(bs);
 				ModelHelperType modelHelper(m,lrs);
 
-				size_t n = matrixBlock.rank();
-				VerySparseMatrixType vsm(n);
+				VerySparseMatrixType vsm(matrixBlock.row());
 				addHamiltonianConnection(vsm,modelHelper);
 				SparseMatrixType matrixBlock2;
 				matrixBlock2 = vsm;

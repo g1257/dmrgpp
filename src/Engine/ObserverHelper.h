@@ -110,8 +110,7 @@ namespace Dmrg {
 			TimeSerializerType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType,
-				MatrixType> DmrgSerializerType;
+		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
 		typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 		
 		enum {GS_VECTOR,TIME_VECTOR};

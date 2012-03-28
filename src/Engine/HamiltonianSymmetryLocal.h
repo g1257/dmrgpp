@@ -187,7 +187,7 @@ namespace Dmrg {
 			void save(IoOutputter& io) const
 			{
 				// don't print factors since they're the identity anywaysfactors_
-				std::string tmp = ttos(factors_.rank());
+				std::string tmp = ttos(factors_.row());
 				std::string s="#FACTORSSIZE="+tmp;
 				io.printline(s);
 			}

@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -94,8 +92,8 @@ struct DmrgWaveStruct {
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 
-	PsimagLite::Matrix<SparseElementType> ws;
-	PsimagLite::Matrix<SparseElementType> we;
+	SparseMatrixType ws;
+	SparseMatrixType we;
 	LeftRightSuperType lrs;
 
 	DmrgWaveStruct() : lrs("pSE","pSprime","pEprime") { }

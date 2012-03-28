@@ -309,9 +309,9 @@ namespace Dmrg {
 		void calcHamiltonian(SparseMatrixType &hmatrix,std::vector<OperatorType> const &cm,Block const &block) const
 		{
 			size_t n=block.size();
-			SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
+			//SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
 
-			hmatrix.makeDiagonal(cm[0].data.rank());
+			hmatrix.makeDiagonal(cm[0].data.row());
 			
 			//! exchange
 			for (size_t i=0;i<n;i++) {

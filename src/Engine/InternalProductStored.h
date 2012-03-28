@@ -110,7 +110,7 @@ namespace Dmrg {
 				model->fullHamiltonian(matrixStored_[0],*modelHelper);
 				assert(isHermitian(matrixStored_[0],true));
 				std::ostringstream msg;
-				msg<<"fullHamiltonian has rank="<<matrixStored_[0].rank()<<" nonzeros="<<matrixStored_[0].nonZero();
+				msg<<"fullHamiltonian has rank="<<matrixStored_[0].row()<<" nonzeros="<<matrixStored_[0].nonZero();
 				progress_.printline(msg,std::cout);
 				return;
 			}
@@ -118,11 +118,11 @@ namespace Dmrg {
 			model->fullHamiltonian(matrix2,*modelHelper);
 			rs->transform(matrixStored_[0],matrixStored_[1],matrix2);
 			std::ostringstream msg;
-			msg<<" sector="<<matrixStored_[0].rank()<<" and sector="<<matrixStored_[1].rank();
+			msg<<" sector="<<matrixStored_[0].row()<<" and sector="<<matrixStored_[1].row();
 			progress_.printline(msg,std::cout);
 		}
 
-		size_t rank() const { return matrixStored_[pointer_].rank(); }
+		size_t rank() const { return matrixStored_[pointer_].row(); }
 
 		template<typename SomeVectorType>
 		void matrixVectorProduct(SomeVectorType &x, SomeVectorType const &y) const

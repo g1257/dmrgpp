@@ -274,11 +274,9 @@ namespace Dmrg {
 
 		}
 
-		template<typename SomeMatrixType>
-		void push(
-			const SomeMatrixType& transform,
-			size_t direction,
-			LeftRightSuperType& lrs)
+		void push(const SparseMatrixType& transform,
+			  size_t direction,
+			  LeftRightSuperType& lrs)
 		{
 			if (!isEnabled_) return;
 			
@@ -324,7 +322,7 @@ namespace Dmrg {
 			progress_.printline(msg,std::cout);
 		}
 
-		const PsimagLite::Matrix<SparseElementType>& transform(size_t what) const
+		const SparseMatrixType& transform(size_t what) const
 		{
 			return (what==ProgramGlobals::SYSTEM) ? dmrgWaveStruct_.ws : dmrgWaveStruct_.we;
 		}
@@ -477,7 +475,7 @@ namespace Dmrg {
 		std::string filenameIn_,filenameOut_;
 		const std::string WFT_STRING;
 		DmrgWaveStructType dmrgWaveStruct_;
-		std::stack<PsimagLite::Matrix<SparseElementType> > wsStack_,weStack_;
+		std::stack<SparseMatrixType> wsStack_,weStack_;
 		WaveFunctionTransfBaseType* wftImpl_;
 		PsimagLite::Random48<RealType> rng_;
 	}; // class WaveFunctionTransformation

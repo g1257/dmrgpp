@@ -189,8 +189,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		template<typename ConcurrencyType>
 		void changeBasis(const SparseMatrixType& ftransform,
 		                 const BasisType* thisBasis,
-				 ConcurrencyType &concurrency,
-				 size_t newSize)
+				 ConcurrencyType &concurrency)
 // 		                 const std::pair<size_t,size_t>& startEnd)
 		{
 			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
@@ -203,7 +202,7 @@ transformed operator can be used (or not because of the reason limitation above)
 					operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
 					continue;
 				}
-				if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform,newSize);
+				if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform);
 				reducedOpImpl_.changeBasis(k);
 			}
 
@@ -215,16 +214,16 @@ transformed operator can be used (or not because of the reason limitation above)
 				reducedOpImpl_.broadcast(concurrency);
 			}
 
-			changeBasis(hamiltonian_,ftransform,newSize);
+			changeBasis(hamiltonian_,ftransform);
 			reducedOpImpl_.changeBasisHamiltonian();
 		}
 
-		void changeBasis(SparseMatrixType &v,const SparseMatrixType& ftransform,size_t newSize)
+		void changeBasis(SparseMatrixType &v,const SparseMatrixType& ftransform)
 		{
 			SparseMatrixType transformConj;
-			transposeConjugate(transformConj,ftransform,newSize);
+			transposeConjugate(transformConj,ftransform);
 			SparseMatrixType tmp = v*ftransform;
-			multiply(v,transformConj,tmp,false);
+			multiply(v,transformConj,tmp);
 		}
 
 		void reorder(const std::vector<size_t>& permutation)
@@ -308,10 +307,11 @@ transformed operator can be used (or not because of the reason limitation above)
 		void outerProductHamiltonian(const SparseMatrixType& h2,const SparseMatrixType& h3,ApplyFactorsType& apply)
 		{
 			SparseMatrixType tmpMatrix;
-			std::vector<double> ones(h2.rank(),1.0);
-			PsimagLite::externalProduct(hamiltonian_,h2,h3.rank(),ones,true);
+			assert(h2.row()==h2.col());
+			std::vector<double> ones(h2.row(),1.0);
+			PsimagLite::externalProduct(hamiltonian_,h2,h3.row(),ones,true);
 
-			PsimagLite::externalProduct(tmpMatrix,h3,h2.rank(),ones,false);
+			PsimagLite::externalProduct(tmpMatrix,h3,h2.row(),ones,false);
 
 			hamiltonian_ += tmpMatrix;
 

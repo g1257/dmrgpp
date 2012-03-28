@@ -499,7 +499,7 @@ namespace Dmrg {
 			//int type,sigma;
 			SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
 			
-			hmatrix.makeDiagonal(cm[0].data.rank());
+			hmatrix.makeDiagonal(cm[0].data.row());
 			size_t linSize = dmrgGeometry_.numberOfSites();
 			assert(block.size()==1);
 			

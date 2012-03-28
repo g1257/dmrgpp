@@ -123,12 +123,9 @@ namespace Dmrg {
 // 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 
-		typedef Truncation<LeftRightSuperType,ParametersType,TargettingType>
-		        TruncationType;
+		typedef Truncation<LeftRightSuperType,ParametersType,TargettingType> TruncationType;
 
-		typedef typename TruncationType::TransformType TransformType;
-
-		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType,TransformType> DmrgSerializerType;
+		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
 		typedef typename ModelType::GeometryType GeometryType;
 		typedef Checkpoint<ParametersType,TargettingType> CheckpointType;
 		typedef typename DmrgSerializerType::FermionSignType FermionSignType;
@@ -477,7 +474,7 @@ namespace Dmrg {
 		void serialize(const FermionSignType& fsS,
 		               const FermionSignType& fsE,
 		               const TargettingType& target,
-		               const TransformType& transform,
+			       const SparseMatrixType& transform,
 		               size_t direction)
 		{
 			DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);

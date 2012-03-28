@@ -403,9 +403,9 @@ namespace Dmrg {
 		void calcHamiltonian(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,Block const &block) const
 		{
 			assert(block.size()==1);
-			SparseMatrixType tmpMatrix,tmpMatrix2;
+//			SparseMatrixType tmpMatrix,tmpMatrix2;
 
-			hmatrix.makeDiagonal(cm[0].data.rank());
+			hmatrix.makeDiagonal(cm[0].data.row());
 			
 			// on-site potential:
 			size_t site = block[0];

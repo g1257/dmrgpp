@@ -272,8 +272,8 @@ namespace Dmrg {
 			Su2RelatedType su2Related1;
 			printMarker();
 			std::cout<<"#Using Matrix A:\n";
-			for (size_t i=0;i<A.rank();i++) {
-				for (size_t j=0;j<A.rank();j++)
+			for (size_t i=0;i<A.row();i++) {
+				for (size_t j=0;j<A.col();j++)
 					std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
 				std::cout<<"\n";
 			}

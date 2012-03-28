@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -86,135 +86,133 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "FermionSign.h"
 
 namespace Dmrg {
-	//! Move also checkpointing from DmrgSolver to here (FIXME)
-	template<
-		typename LeftRightSuperType,
-		typename VectorType,
-		typename MatrixType>
-	class DmrgSerializer {
-			typedef DmrgSerializer<LeftRightSuperType,
-						VectorType,MatrixType> ThisType;
+//! Move also checkpointing from DmrgSolver to here (FIXME)
+template<typename LeftRightSuperType,typename VectorType>
+class DmrgSerializer {
 
-		public:
-			typedef typename LeftRightSuperType::BasisWithOperatorsType
-					BasisWithOperatorsType;
-			typedef typename BasisWithOperatorsType::BasisType
-					BasisType;
-			typedef FermionSign FermionSignType;
-			typedef typename BasisType::RealType RealType;
+	typedef DmrgSerializer<LeftRightSuperType,VectorType> ThisType;
+	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
-			DmrgSerializer(
-				const FermionSignType& fS,
-				const FermionSignType& fE,
-				const LeftRightSuperType& lrs,
-				const VectorType& wf,
-				const MatrixType& transform,
-				size_t direction)
-			: fS_(fS),
-			  fE_(fE),
-			  lrs_(lrs),
-			  wavefunction_(wf),
-			  transform_(transform),
-			  direction_(direction)
-			{}
-			
-			
-			DmrgSerializer(typename PsimagLite::IoSimple::In& io,bool bogus = false) 
-			: fS_(io,bogus),
-			  fE_(io,bogus),
-			  lrs_(io)
-			{
-				if (bogus) return;
-				std::string s = "#WAVEFUNCTION_sites=";
-				wavefunction_.load(io,s);
-				s = "#TRANSFORM_sites=";
-				io.readMatrix(transform_,s);
-				s = "#DIRECTION=";
-				int x = 0;
-				io.readline(x,s);
-				if (x<0) throw std::runtime_error(
+public:
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef FermionSign FermionSignType;
+	typedef typename BasisType::RealType RealType;
+
+	DmrgSerializer(const FermionSignType& fS,
+		       const FermionSignType& fE,
+		       const LeftRightSuperType& lrs,
+		       const VectorType& wf,
+		       const SparseMatrixType& transform,
+		       size_t direction)
+		: fS_(fS),
+		  fE_(fE),
+		  lrs_(lrs),
+		  wavefunction_(wf),
+		  transform_(transform),
+		  direction_(direction)
+	{}
+
+
+	DmrgSerializer(typename PsimagLite::IoSimple::In& io,bool bogus = false)
+		: fS_(io,bogus),
+		  fE_(io,bogus),
+		  lrs_(io)
+	{
+		if (bogus) return;
+		std::string s = "#WAVEFUNCTION_sites=";
+		wavefunction_.load(io,s);
+		s = "#TRANSFORM_sites=";
+		io.readMatrix(transform_,s);
+		s = "#DIRECTION=";
+		int x = 0;
+		io.readline(x,s);
+		if (x<0) throw std::runtime_error(
 					"DmrgSerializer:: direction must be non-negative\n");
-				direction_ = x;
-			}
-			
-			// Save to disk everything needed to compute any observable (OBSOLETE!!)
-			template<typename IoOutputter>
-			void save(IoOutputter& io) const
-			{
-				fS_.save(io);
-				fE_.save(io);
-				lrs_.save(io);
-	
-				// save wavefunction
-				std::string label = "#WAVEFUNCTION_sites=";
-				for (size_t i=0;i<lrs_.super().block().size();i++) {
-					label += ttos(lrs_.super().block()[i])+",";
-				}
-				//SparseVector<typename TargettingType::TargetVectorType::value_type> psiSparse(target.gs());
-				wavefunction_.save(io,label);
-			
-				label = "#TRANSFORM_sites=";
-				for (size_t i=0;i<lrs_.left().block().size();i++) {
-					label += ttos(lrs_.left().block()[i])+",";
-				}
-				io.printMatrix(transform_,label);
-				std::string s = "#DIRECTION="+ttos(direction_);
-				io.printline(s);
-			}
-			
-			const FermionSignType& fermionicSignLeft() const
-			{
-				return fS_;
-			}
+		direction_ = x;
+	}
 
-			const FermionSignType& fermionicSignRight() const
-			{
-				return fE_;
-			}
-			
-			const LeftRightSuperType& leftRightSuper() const
-			{
-				return lrs_;
-			}
+	// Save to disk everything needed to compute any observable (OBSOLETE!!)
+	template<typename IoOutputter>
+	void save(IoOutputter& io) const
+	{
+		fS_.save(io);
+		fE_.save(io);
+		lrs_.save(io);
 
-			const VectorType& wavefunction() const { return wavefunction_; }
-			
-			size_t columns() const { return transform_.n_col(); }
-			
-			size_t rows() const { return transform_.n_row(); }
-			
-			size_t direction() const { return direction_; }
-			
-			void transform(MatrixType& ret,const MatrixType& O) const
-			{
-				//typedef typename MatrixType::value_type FieldType;
-				int nBig = O.n_row();
-				int nSmall = transform_.n_col();
-				MatrixType fmTmp(nSmall,nBig);
-				typename MatrixType::value_type alpha=1.0,beta=0.0;
-				if (ret.n_row()!=size_t(nSmall) || ret.n_col()!=
-						size_t(nSmall)) ret.reset(nSmall,nSmall);
-				psimag::BLAS::GEMM('N','N',nBig,nSmall,nBig,alpha,
-						&(O(0,0)),nBig,&(transform_(0,0)),nBig,beta,
-						&(fmTmp(0,0)),nBig);
-				
-				psimag::BLAS::GEMM('C','N',nSmall,nSmall,nBig,alpha,
-						&(transform_(0,0)),nBig,&(fmTmp(0,0)),nBig,beta,
-						&(ret(0,0)),nSmall);
-			}
+		// save wavefunction
+		std::string label = "#WAVEFUNCTION_sites=";
+		for (size_t i=0;i<lrs_.super().block().size();i++) {
+			label += ttos(lrs_.super().block()[i])+",";
+		}
+		//SparseVector<typename TargettingType::TargetVectorType::value_type> psiSparse(target.gs());
+		wavefunction_.save(io,label);
 
-		private:
-			// Disallowing copy and assignment here:
-			DmrgSerializer(const ThisType& ds);
-			ThisType& operator=(const ThisType& ds);
-			
+		label = "#TRANSFORM_sites=";
+		for (size_t i=0;i<lrs_.left().block().size();i++) {
+			label += ttos(lrs_.left().block()[i])+",";
+		}
+		io.printMatrix(transform_,label);
+		std::string s = "#DIRECTION="+ttos(direction_);
+		io.printline(s);
+	}
 
-			FermionSignType fS_,fE_;
-			LeftRightSuperType lrs_;
-			VectorType wavefunction_;
-			MatrixType transform_;
-			size_t direction_;
-	}; // class DmrgSerializer
+	const FermionSignType& fermionicSignLeft() const
+	{
+		return fS_;
+	}
+
+	const FermionSignType& fermionicSignRight() const
+	{
+		return fE_;
+	}
+
+	const LeftRightSuperType& leftRightSuper() const
+	{
+		return lrs_;
+	}
+
+	const VectorType& wavefunction() const { return wavefunction_; }
+
+	size_t columns() const { return transform_.col(); }
+
+	size_t rows() const { return transform_.row(); }
+
+	size_t direction() const { return direction_; }
+
+	void transform(MatrixType& ret,const MatrixType& O) const
+	{
+		//typedef typename MatrixType::value_type FieldType;
+		MatrixType transform(transform_);
+		int nBig = O.n_row();
+		int nSmall = transform.n_col();
+		MatrixType fmTmp(nSmall,nBig);
+		typename MatrixType::value_type alpha=1.0,beta=0.0;
+		if (ret.n_row()!=size_t(nSmall) || ret.n_col()!=
+				size_t(nSmall)) ret.reset(nSmall,nSmall);
+		psimag::BLAS::GEMM('N','N',nBig,nSmall,nBig,alpha,
+				   &(O(0,0)),nBig,&(transform(0,0)),nBig,beta,
+				   &(fmTmp(0,0)),nBig);
+
+		psimag::BLAS::GEMM('C','N',nSmall,nSmall,nBig,alpha,
+				   &(transform(0,0)),nBig,&(fmTmp(0,0)),nBig,beta,
+				   &(ret(0,0)),nSmall);
+	}
+
+private:
+	// Disallowing copy and assignment here:
+	DmrgSerializer(const ThisType& ds);
+	ThisType& operator=(const ThisType& ds);
+
+
+	FermionSignType fS_,fE_;
+	LeftRightSuperType lrs_;
+	VectorType wavefunction_;
+	SparseMatrixType transform_;
+	size_t direction_;
+}; // class DmrgSerializer
 } // namespace Dmrg 
 
 /*@}*/

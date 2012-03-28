@@ -148,7 +148,7 @@ namespace Dmrg {
 					 const LeftRightSuperType& lrs,
 					 size_t nk) const
 		{
-			assert((size_t)dmrgWaveStruct_.lrs.super().getFactors().rank()==psiSrc.size());
+			assert((size_t)dmrgWaveStruct_.lrs.super().getFactors().row()==psiSrc.size());
 
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i = psiDest.sector(ii);
@@ -169,7 +169,7 @@ namespace Dmrg {
 			const FactorsType& factorsSE = lrs.super().getFactors();
 			const FactorsType& factorsSEOld = dmrgWaveStruct_.lrs.super().getFactors();
 			const FactorsType& factorsE = lrs.right().getFactors();
-			size_t nip = lrs.super().getFactors().rank()/lrs.right().getFactors().rank();
+			size_t nip = lrs.super().getFactors().row()/lrs.right().getFactors().row();
 			
 			FactorsType factorsInverseSE,factorsInverseE;
 			transposeConjugate(factorsInverseSE,factorsSE);
@@ -206,7 +206,7 @@ namespace Dmrg {
 						       const SparseMatrixType& weT,
 						       size_t nk) const
 		{
-			size_t ni=dmrgWaveStruct_.ws.n_col();
+			size_t ni=dmrgWaveStruct_.ws.col();
 			const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
 			SparseElementType sum=0;
 			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/nk;
@@ -254,8 +254,8 @@ namespace Dmrg {
 					 size_t final,
 					 size_t nk) const
 		{
-			size_t nip = lrs.left().getFactors().rank()/nk;
-			size_t nalpha = lrs.left().getFactors().rank();
+			size_t nip = lrs.left().getFactors().row()/nk;
+			size_t nalpha = lrs.left().getFactors().row();
 			
 			const FactorsType& factorsSE = lrs.super().getFactors();
 
@@ -266,7 +266,7 @@ namespace Dmrg {
 			transposeConjugate(factorsInverseS,factorsS);
 			SparseMatrixType ws(dmrgWaveStruct_.ws),we(dmrgWaveStruct_.we),wsT;
 			transposeConjugate(wsT,ws);
-			if (dmrgWaveStruct_.lrs.left().getFactors().rank()==0) {
+			if (dmrgWaveStruct_.lrs.left().getFactors().row()==0) {
 				wsT.makeDiagonal(nk,1.0);
 			}
 			PackIndicesType pack1(nalpha);
@@ -314,7 +314,7 @@ namespace Dmrg {
 					       const SparseMatrixType& we,
 					       size_t nk) const
 		{
-			size_t nalpha=wsT.rank(); //dmrgWaveStruct_.lrs.left().getFactors().rank();
+			size_t nalpha=wsT.row(); //dmrgWaveStruct_.lrs.left().getFactors().rank();
 			assert(nalpha>0);
 			SparseElementType sum=0;
 			const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();

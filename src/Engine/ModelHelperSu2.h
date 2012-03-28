@@ -171,12 +171,12 @@ namespace Dmrg {
 			int offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
 
-			matrixBlock.resize(total);
+			matrixBlock.resize(total,total);
 
 			size_t counter=0;
 			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 				int ix = su2reduced_.flavorMapping(i)-offset;
-				if (ix<0 || ix>=int(matrixBlock.rank())) continue;
+				if (ix<0 || ix>=int(matrixBlock.row())) continue;
 				matrixBlock.setRow(ix,counter);
 				
 				size_t i1=su2reduced_.reducedEffective(i).first;
@@ -205,7 +205,7 @@ namespace Dmrg {
 						lfactor *= link.angularFactor;
 
 						int jx = su2reduced_.flavorMapping(i1prime,i2prime)-offset;
-						if (jx<0 || jx >= int(matrixBlock.rank()) ) continue;
+						if (jx<0 || jx >= int(matrixBlock.row()) ) continue;
 
 						matrixBlock.pushCol(jx);
 						matrixBlock.pushValue(fsign*link.value*lfactor*A.getValue(k1)*B.getValue(k2));
@@ -213,7 +213,7 @@ namespace Dmrg {
 					}
 				}
 			}
-			matrixBlock.setRow(matrixBlock.rank(),counter);
+			matrixBlock.setRow(matrixBlock.row(),counter);
 		}
 
 		//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
@@ -356,12 +356,12 @@ namespace Dmrg {
 			int bs = lrs_.super().partition(m+1)-offset;
 			const SparseMatrixType& A = su2reduced_.hamiltonianLeft();
 			
-			matrixBlock.resize(bs);
+			matrixBlock.resize(bs,bs);
 			size_t counter=0;
 			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 				int ix = su2reduced_.flavorMapping(i)-offset;
 				matrixBlock.setRow(ix,counter);
-				if (ix<0 || ix>=int(matrixBlock.rank())) continue;
+				if (ix<0 || ix>=int(matrixBlock.row())) continue;
 
 				size_t i1=su2reduced_.reducedEffective(i).first;
 				size_t i2=su2reduced_.reducedEffective(i).second;
@@ -375,7 +375,7 @@ namespace Dmrg {
 					if (lfactor==static_cast<SparseElementType>(0)) continue;
 						
 					int jx = su2reduced_.flavorMapping(i1prime,i2)-offset;
-					if (jx<0 || jx >= int(matrixBlock.rank()) ) continue;
+					if (jx<0 || jx >= int(matrixBlock.row()) ) continue;
 
 					matrixBlock.pushCol(jx);
 					matrixBlock.pushValue( A.getValue(k1));
@@ -394,12 +394,12 @@ namespace Dmrg {
 			int bs = lrs_.super().partition(m+1)-offset;
 			const SparseMatrixType& B = su2reduced_.hamiltonianRight();
 
-			matrixBlock.resize(bs);
+			matrixBlock.resize(bs,bs);
 			size_t counter=0;
 			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 				int ix = su2reduced_.flavorMapping(i)-offset;
 				matrixBlock.setRow(ix,counter);
-				if (ix<0 || ix>=int(matrixBlock.rank())) continue;
+				if (ix<0 || ix>=int(matrixBlock.row())) continue;
 
 				size_t i1=su2reduced_.reducedEffective(i).first;
 				size_t i2=su2reduced_.reducedEffective(i).second;
@@ -412,7 +412,7 @@ namespace Dmrg {
 					if (lfactor==static_cast<SparseElementType>(0)) continue;
 
 					int jx = su2reduced_.flavorMapping(i1,i2prime)-offset;
-					if (jx<0 || jx >= int(matrixBlock.rank()) ) continue;
+					if (jx<0 || jx >= int(matrixBlock.row()) ) continue;
 
 					matrixBlock.pushCol(jx);
 					matrixBlock.pushValue(B.getValue(k2));

@@ -97,7 +97,8 @@ namespace Dmrg {
 		template<typename CrsMatrixType>
 		VerySparseMatrix(const CrsMatrixType& crs)
 		{
-			rank_=crs.rank();
+			assert(crs.row()==crs.col());
+			rank_=crs.row();
 			sorted_=true;
 			for (size_t i=0;i<rank_;i++) {
 				for (int k=crs.getRowPtr(i);k<crs.getRowPtr(i+1);k++) { 

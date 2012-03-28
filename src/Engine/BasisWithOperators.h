@@ -238,15 +238,15 @@ namespace Dmrg {
 		{
 			BasisType &parent = *this;
 			RealType error = parent.truncateBasis(ftransform,transform,eigs,removedIndices);
-			size_t newSize = transform.rank() - removedIndices.size();
-			changeBasisDirect(ftransform,concurrency,newSize);
+
+			changeBasisDirect(ftransform,concurrency);
 
 			return error;
 		}
 
-		void changeBasisDirect(const SparseMatrixType& ftransform, ConcurrencyType& concurrency,size_t newSize)
+		void changeBasisDirect(const SparseMatrixType& ftransform, ConcurrencyType& concurrency)
 		{
-			operators_.changeBasis(ftransform,this,concurrency,newSize); //startEnd);
+			operators_.changeBasis(ftransform,this,concurrency); //startEnd);
 		}
 
 		void setHamiltonian(SparseMatrixType const &h) { operators_.setHamiltonian(h); }
