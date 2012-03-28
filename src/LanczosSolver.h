@@ -157,8 +157,8 @@ namespace PsimagLite {
 		}
 
 		virtual void computeGroundState(RealType &gsEnergy,
-		                        VectorType &z,
-	                            const VectorType& initialVector)
+						VectorType &z,
+						const VectorType& initialVector)
 		{
 			if (mode_ & DEBUG) {
 				computeGroundStateTest(gsEnergy,z,initialVector);
@@ -187,7 +187,7 @@ namespace PsimagLite {
 				throw e;
 			}
 
-			lanczosVectors_.hookForZ(z,c);
+			lanczosVectors_.hookForZ(z,c,ab);
 			if (mode_ & WITH_INFO) info(gsEnergy,initialVector,std::cout);
 		}
 
@@ -203,7 +203,7 @@ namespace PsimagLite {
 		}
 
 		void decomposition(const VectorType& initVector,
-    	                   TridiagonalMatrixType& ab)
+				   TridiagonalMatrixType& ab)
 		{ /**
 			*     In each step of the Lanczos algorithm the values of a[]
 			*     and b[] are computed.
@@ -239,8 +239,8 @@ namespace PsimagLite {
 			RealType eold = 100.;
 			bool exitFlag=false;
 			size_t j = 0;
-			
-			std::vector<RealType> nullVector(lanczosVectors_.nullSize());
+			lanczosVectors_.saveInitialVector(y);
+			std::vector<RealType> nullVector(0);
 			for (; j < max_nstep; j++) {
 				for (size_t i = 0; i < mat_.rank(); i++) 
 					lanczosVectors_(i,j) = y[i];
@@ -256,12 +256,11 @@ namespace PsimagLite {
 					if (fabs (enew - eold) < eps_) exitFlag=true;
 					if (exitFlag && j>=4) break;
 				}
-				
-				if (!lanczosVectors_.lotaMemory())
-					lanczosVectors_.hookForZ(y,nullVector[j]);
 		
 				eold = enew;
   			}
+
+
 			if (j < max_nstep) {
 				max_nstep = j + 1;
 				lanczosVectors_.reset(mat_.rank(),max_nstep);
@@ -271,7 +270,7 @@ namespace PsimagLite {
 // 				if (eps_>=tolerance_) return;
 			}
 		}
-		
+
 		void oneStepDecomposition(
 				VectorType& x,
 				VectorType& y,
@@ -279,42 +278,7 @@ namespace PsimagLite {
 				RealType& btmp,
 				bool isFirst) const
 		{
-			mat_.matrixVectorProduct (x, y); // x+= Hy
-
-			atmp = 0.0;
-			for (size_t i = 0; i < mat_.rank(); i++)
-				atmp += std::real(y[i]*std::conj(x[i]));
-			btmp = 0.0;
-			for (size_t i = 0; i < mat_.rank(); i++) {
-				x[i] -= atmp * y[i];
-				btmp += std::real(x[i]*std::conj(x[i]));
-			}
-
-			btmp = sqrt (btmp);
-
-//			if (fabs(btmp)<1e-10) {
-//				std::string s(__FILE__);
-//				s += " oneStepDecomposition: Ay=<y|A|y>y at line " + ttos(__LINE__) + "\n";
-//				s += "PsimagLite AI is not sofisticated enough to handle this, maybe because\n";
-//				s += "PsimagLite's author NI is not good enough... OK, that's all I have to say\n";
-//				s += "I'm throwing, and there might not be any catchers\n";
-//				throw std::runtime_error(s.c_str());
-//			}
-			if (fabs(btmp)<1e-10) {
-				for (size_t i = 0; i < mat_.rank(); i++) {
-					VectorElementType tmp = y[i];
-					y[i] = x[i];
-					x[i] = -btmp * tmp;
-				}
-				return;
-			}
-
-			for (size_t i = 0; i < mat_.rank(); i++) {
-				//lanczosVectors(i,j) = y[i];
-				VectorElementType tmp = y[i];
-				y[i] = x[i] / btmp;
-				x[i] = -btmp * tmp;
-			}
+			lanczosVectors_.oneStepDecomposition(x,y,atmp,btmp);
 		}
 
 		size_t steps() const {return steps_; }

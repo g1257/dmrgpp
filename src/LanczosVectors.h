@@ -95,6 +95,7 @@ namespace PsimagLite {
 	class LanczosVectors {
 
 		typedef LanczosVectors<RealType,MatrixType,VectorType> ThisType;
+		typedef typename VectorType::value_type ComplexOrRealType;
 
 	public:
 
@@ -113,7 +114,8 @@ namespace PsimagLite {
 		  mat_(mat),
 		  lotaMemory_(lotaMemory),
 		  dummy_(0),
-		  needsDelete_(false)
+		  needsDelete_(false),
+		  ysaved_(0)
 		{
 			if (storage) {
 				data_ = storage;
@@ -128,16 +130,8 @@ namespace PsimagLite {
 			if (needsDelete_) delete data_;
 		}
 
-		size_t nullSize() const
-		{
-			return (lotaMemory_) ? 0 : steps_;
-		}
-
 		void resize(size_t matrixRank,size_t steps)
 		{
-			z_.clear();
-			z_.resize(matrixRank);
-			for (size_t i=0;i<z_.size();i++) z_[i] = 0; 
 			steps_= steps;
 			if (!lotaMemory_) return;
 			data_->reset(matrixRank,steps);
@@ -167,37 +161,38 @@ namespace PsimagLite {
 
 		bool lotaMemory() const { return lotaMemory_; }
 		
-		void hookForZ(const VectorType& y,
-		              const RealType& ctmp)
+		void saveInitialVector(const VectorType& y)
 		{
-			if (lotaMemory_) return;
-			for (size_t i = 0; i < y.size(); i++) z_[i] += ctmp * y[i];
+			ysaved_ = y;
 		}
-		
-		void hookForZ(VectorType& z,const std::vector<RealType>& c)
+
+		void hookForZ(VectorType& z,
+			      const std::vector<RealType>& c,
+			      const TridiagonalMatrixType& ab)
 		{
 			if (!lotaMemory_) {
-				z=z_;
+				VectorType x(z.size(),0.0);
+				VectorType y = ysaved_;
+				for (size_t i = 0; i < z.size(); i++)
+					z[i] = 0.0;
+				RealType atmp = 0.0;
+				for (size_t j=0; j < c.size(); j++) {
+					RealType ctmp = c[j];
+					for (size_t i = 0; i < y.size(); i++)
+						z[i] += ctmp * y[i];
+					RealType btmp = 0;
+					oneStepDecomposition(x,y,atmp,btmp);
+				}
 				return;
 			}
 
 			for (size_t j = 0; j < data_->n_col(); j++) {
- 				//mat_.matrixVectorProduct (x, y);
- 				//atmp = ab.a(j);
-				//RealType btmp = ab.b(j);
 				RealType ctmp = c[j];
  				for (size_t i = 0; i < data_->n_row(); i++) {
-					z_[i] += ctmp * data_->operator()(i,j);
-					
-					//x[i] -= atmp * y[i];
-					//VectorElementType tmp = lanczosVectors(i,j);
-					//if (fabs(x[i] - lanczosVectors(i,j))>1e-6) throw std::runtime_error("Different\n");
-					//VectorElementType tmp = y[i];
-					//y[i] = tmp / btmp;
-					//x[i] = -btmp * tmp;
+					z[i] += ctmp * data_->operator()(i,j);
 				}
 			}
-			z=z_;
+
 		}
 
 		// provides a gracious way to exit if Ay == 0 (we assume that then A=0)
@@ -229,6 +224,49 @@ namespace PsimagLite {
 			return true;
 		}
 
+		void oneStepDecomposition(VectorType& x,
+					  VectorType& y,
+					  RealType& atmp,
+					  RealType& btmp) const
+		{
+			mat_.matrixVectorProduct (x, y); // x+= Hy
+
+			atmp = 0.0;
+			for (size_t i = 0; i < mat_.rank(); i++)
+				atmp += std::real(y[i]*std::conj(x[i]));
+			btmp = 0.0;
+			for (size_t i = 0; i < mat_.rank(); i++) {
+				x[i] -= atmp * y[i];
+				btmp += std::real(x[i]*std::conj(x[i]));
+			}
+
+			btmp = sqrt (btmp);
+
+//			if (fabs(btmp)<1e-10) {
+//				std::string s(__FILE__);
+//				s += " oneStepDecomposition: Ay=<y|A|y>y at line " + ttos(__LINE__) + "\n";
+//				s += "PsimagLite AI is not sofisticated enough to handle this, maybe because\n";
+//				s += "PsimagLite's author NI is not good enough... OK, that's all I have to say\n";
+//				s += "I'm throwing, and there might not be any catchers\n";
+//				throw std::runtime_error(s.c_str());
+//			}
+			if (fabs(btmp)<1e-10) {
+				for (size_t i = 0; i < mat_.rank(); i++) {
+					VectorElementType tmp = y[i];
+					y[i] = x[i];
+					x[i] = -btmp * tmp;
+				}
+				return;
+			}
+
+			for (size_t i = 0; i < mat_.rank(); i++) {
+				//lanczosVectors(i,j) = y[i];
+				VectorElementType tmp = y[i];
+				y[i] = x[i] / btmp;
+				x[i] = -btmp * tmp;
+			}
+		}
+
 	private:
 		
 		//! copy ctor and assigment operator are invalid
@@ -241,8 +279,8 @@ namespace PsimagLite {
 		bool lotaMemory_;
 		VectorElementType dummy_;
 		bool needsDelete_;
-		VectorType z_;
 		size_t steps_;
+		VectorType ysaved_;
 		DenseMatrixType* data_;
 	}; // class LanczosVectors
 } // namespace PsimagLite

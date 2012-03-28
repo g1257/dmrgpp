@@ -55,7 +55,7 @@ typedef DavidsonSolver<SolverParameters,SparseMatrixType,VectorType> DavidsonSol
 
 void usage(const char *progName)
 {
-	std::cerr<<"Usage: "<<progName<<" -n rank [-d ] [-c max_columns] [-m max_value] [-r seed]\n";
+	std::cerr<<"Usage: "<<progName<<" -n rank [-x] [-d ] [-c max_columns] [-m max_value] [-r seed]\n";
 	exit(1);
 }
 
@@ -67,9 +67,10 @@ int main(int argc,char *argv[])
 	RealType maxValue = 0;
 	size_t maxCol = 0;
 	size_t seed = 0;
+	bool lotaMemory = true;
 
 	while ((opt = getopt(argc, argv,
-		"n:c:m:r:d")) != -1) {
+		"n:c:m:r:dx")) != -1) {
 		switch (opt) {
 		case 'd':
 			useDavidson=true;
@@ -86,6 +87,9 @@ int main(int argc,char *argv[])
 		case 'r':
 			seed = atoi(optarg);
 			break;
+		case 'x':
+			lotaMemory=false;
+			break;
 		default:
 			usage(argv[0]);
 			return 1;
@@ -101,18 +105,23 @@ int main(int argc,char *argv[])
 	// create a random matrix:
 	Random48<RealType> random(seed);
 	SparseMatrixType sparse(n,n);
+	std::vector<bool> seenThisColumn(n);
 	size_t counter = 0;
 	for (size_t i=0;i<n;i++) {
 		sparse.setRow(i,counter);
 		// random vector:
 		size_t x = 1+size_t(random()*maxCol);
+		for (size_t j=0;j<seenThisColumn.size();j++) seenThisColumn[j]=false;
 		for (size_t j=0;j<x;j++) {
-			ComplexOrRealType val = random()*maxValue;
-			sparse.pushValue(val);
 			size_t col = size_t(random()*n);
+			if (seenThisColumn[col]) continue;
+			seenThisColumn[col]=true;
+			ComplexOrRealType val = random()*maxValue;
+		
+			sparse.pushValue(val);
 			sparse.pushCol(col);
+			counter++;
 		}
-		counter += x;
 	}
 	sparse.setRow(n,counter);
 	sparse.checkValidity();
@@ -120,9 +129,12 @@ int main(int argc,char *argv[])
 	SparseMatrixType sparse2;
 	transposeConjugate(sparse2,sparse);
 	sparse += sparse2;
+	sparse.checkValidity();
+	assert(isHermitian(sparse));
 
 	// sparse solver setup
 	SolverParameters params;
+	params.lotaMemory=lotaMemory;
 	LanczosSolverType lanczosSolver(sparse,params);
 	DavidsonSolverType davisonSolver(sparse,params);
 	SparseSolverType* solver = 0;
