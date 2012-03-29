@@ -233,20 +233,31 @@ namespace Dmrg {
 		void prepareTransform(const SparseMatrixType& ftransform,const DmrgBasisType* thisBasis)
 		{
 			if (!useSu2Symmetry_) return;
-			assert(false);
-			throw std::runtime_error("fixme!\n");
-//			size_t nr=thisBasis->reducedSize();
-//			size_t nold = thisBasis_->reducedSize();
-//			ftransform_.resize(nold,nr);
 
-//			for (size_t i=0;i<nold;i++) {
-//				size_t ii =thisBasis_->reducedIndex(i); // old
-//				for (size_t j=0;j<nr;j++) {
-//					size_t jj = thisBasis->reducedIndex(j); //new
-//					ftransform_(i,j)=ftransform(ii,jj);
-//				}
-//			}
-//			thisBasis_ = thisBasis;
+			size_t nr=thisBasis->reducedSize();
+			size_t nold = thisBasis_->reducedSize();
+
+			PsimagLite::Matrix<SparseElementType> fm(nold,nr);
+
+			std::vector<int> inverseP(ftransform.col(),-1);
+			for (size_t j=0;j<nr;j++) {
+				size_t jj = thisBasis->reducedIndex(j); //new
+				assert(jj<inverseP.size());
+				inverseP[jj] =  j;
+			}
+			for (size_t i=0;i<nold;i++) {
+				size_t ii =thisBasis_->reducedIndex(i); // old
+				for (int k = ftransform.getRowPtr(ii);k<ftransform.getRowPtr(ii+1);k++) {
+					size_t jj = ftransform.getCol(k);
+					assert(jj<inverseP.size());
+					int j = inverseP[jj];
+					if (j<0) continue;
+					fm(i,j)=ftransform.getValue(k);
+				}
+			}
+			thisBasis_ = thisBasis;
+			fullMatrixToCrsMatrix(ftransform_,fm);
+
 		}
 
 		void changeBasis(size_t k)
