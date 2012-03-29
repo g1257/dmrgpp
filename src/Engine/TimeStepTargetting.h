@@ -161,15 +161,15 @@ namespace Dmrg {
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
 				size_t n = times_.size();
-				RealType factor = 1.0/n;
+				RealType factor = 1.0;
 				for (size_t i=0;i<n;i++) {
 					times_[i] = i*tau/(n-1);
-					weight_[i] = factor;
+					weight_[i] = factor/(n+4);
 					sum += weight_[i];
 				}
 				sum -= weight_[0];
 				sum -= weight_[n-1];
-				weight_[0] = weight_[n-1] = factor;
+				weight_[0] = weight_[n-1] = 2*factor/(n+4);
 				sum += weight_[n-1];
 				sum += weight_[0];
 				
