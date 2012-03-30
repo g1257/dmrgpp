@@ -76,7 +76,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file MemoryUsage.h
  *
- * getrusage system call
  */
   
 #ifndef MEMORY_USAGE_H
@@ -103,51 +102,34 @@ namespace PsimagLite {
 			while (!ifp.eof()) {
 				ifp.getline(tmp,MY_MAX_LINE);
 				data_ += std::string(tmp);
+				data_ += std::string("\n");
 			}
 			ifp.close();
 		}
 		
-		long vmSize(bool needsUpdate = true)
-		{
-			if (needsUpdate) update();
-			return findEntry("VmSize:");
-		}
-
-		long vmPeak(bool needsUpdate = true)
-		{
-			if (needsUpdate) update();
-			return findEntry("VmPeak:");
-		}
-		
-	private:
-		long findEntry(const std::string& label)
+		std::string findEntry(const std::string& label)
 		{
 			size_t x = data_.find(label);
 			if (x==std::string::npos) {
-				std::string s = "MemoryUsage::findInString(...) failed for label=" + label + "\n";
-				throw std::runtime_error(s.c_str());
+				return "NOT_FOUND";
 			}
-			size_t y = data_.find(" ",x);
-			if (y==std::string::npos) {
-				std::string s = "MemoryUsage::findInString(...) no value for label=" + label + "\n";
-				throw std::runtime_error(s.c_str());
+			x += label.length();
+			size_t y = data_.find("\n",x);
+			size_t len = y-x;
+			if (y==std::string::npos) len = data_.length()-x;
+			std::string s2 = data_.substr(x,len);
+			x = 0;
+			for (size_t i=0;i<s2.length();i++) {
+				x++;
+				if (s2.at(i)==' ' || s2.at(i)=='\t') continue;
+				else break;
 			}
-			std::string buffer = "";
-			for (size_t i=y;i<data_.length();i++) {
-				char c = data_[i];
-				if (c==' ') continue;
-				if (c=='.') {
-					buffer += data_[i];
-					continue;
-				}
-				if (c>=48 && c<58) {
-					buffer += data_[i];
-					continue;
-				}
-				break;
-			}
-			return atol(buffer.c_str());
+			if (x>0) x--;
+			len = s2.length()-x;
+			return s2.substr(x,len);
 		}
+
+	private:
 
 		std::string data_;
 	}; // class MemoryUsage

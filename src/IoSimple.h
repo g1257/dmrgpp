@@ -334,10 +334,10 @@ namespace PsimagLite {
 				}
 				rewind();
 				if (counter==0) {
-					std::string s (__FILE__);
-					s += " No " + s + " found in the input file or ";
-					s += " could not parse it\n";
-					throw std::runtime_error(s.c_str());
+					std::string s2 (__FILE__);
+					s2 += " No " + s + " found in the input file or ";
+					s2 += " could not parse it\n";
+					throw std::runtime_error(s2.c_str());
 				}
 			}
 			
