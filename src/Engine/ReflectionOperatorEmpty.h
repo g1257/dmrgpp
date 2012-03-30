@@ -114,12 +114,12 @@ public:
 	{
 	}
 
-	template<typename SomeStructType>
-	void updateKeptStates(size_t& keptStates,
-			      const SomeStructType& cacheLeft,
-			      const SomeStructType& cacheRight)
-	{
-	}
+//	template<typename SomeStructType>
+//	void updateKeptStates(size_t& keptStates,
+//			      const SomeStructType& cacheLeft,
+//			      const SomeStructType& cacheRight)
+//	{
+//	}
 
 	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
 
@@ -130,9 +130,9 @@ public:
 	{
 	}
 
-	void diagBasis()
-	{
-	}
+//	void diagBasis()
+//	{
+//	}
 
 	template<typename SomeVectorType>
 	void setInitState(const SomeVectorType& initVector,

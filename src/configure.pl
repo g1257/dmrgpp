@@ -174,7 +174,7 @@ MakefileObserver.dep: observe.cpp
 	\$(CXX) \$(CPPFLAGS) -MM observe.cpp  > MakefileObserver.dep
 
 clean:
-	rm -f core* \$(EXENAME) *.o
+	rm -f core* \$(EXENAME) *.o *.dep
 
 include Makefile.dep
 include MakefileObserver.dep

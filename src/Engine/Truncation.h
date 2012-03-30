@@ -175,7 +175,7 @@ namespace Dmrg {
 			changeBasis(target,keptStates,EXPAND_SYSTEM);
 			changeBasis(target,keptStates,EXPAND_ENVIRON);
 
-			reflectionOperator_.updateKeptStates(keptStates,leftCache_,rightCache_);
+			//reflectionOperator_.updateKeptStates(keptStates,leftCache_,rightCache_);
 
 			truncateBasisSystem(eBasis);
 //			TransformType transform1 = ftransform_;
@@ -184,7 +184,7 @@ namespace Dmrg {
 //			reflectionOperator_.changeBasis(transform1,ftransform_);
 			sBasis = leftCache_.bprime;
 			eBasis = rightCache_.bprime;
-			reflectionOperator_.diagBasis();
+			//reflectionOperator_.diagBasis();
 		}
 
 	private:

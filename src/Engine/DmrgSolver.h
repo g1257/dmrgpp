@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Checkpoint.h"
 #include "WaveFunctionTransfFactory.h"
 #include "Truncation.h"
+#include "MemoryUsage.h"
 
 namespace Dmrg {
 
@@ -318,6 +319,8 @@ namespace Dmrg {
 				truncate_.changeBasis(pS,pE,psi,parameters_.keptStatesInfinite);
 
 				checkpoint_.push(pS,pE);
+
+				printMemoryUsage();
 			}
 			progress_.print("Infinite dmrg loop has been done!\n",std::cout);
 		}
@@ -433,7 +436,10 @@ namespace Dmrg {
 				changeTruncateAndSerialize(pS,pE,target,keptStates,direction,saveOption);
 
 				if (finalStep(stepLength,stepFinal)) break;
-				if (stepCurrent_<0) throw std::runtime_error("DmrgSolver::finiteStep() currentStep_ is negative\n");
+				if (stepCurrent_<0) throw std::runtime_error
+						    ("DmrgSolver::finiteStep() currentStep_ is negative\n");
+
+				printMemoryUsage();
 				
 			}
 			if (direction==EXPAND_SYSTEM) {
@@ -527,6 +533,16 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 			}
 			quantumSector_=MyBasis::pseudoQuantumNumber(targetQuantumNumbers);
+		}
+
+		void printMemoryUsage() const
+		{
+			PsimagLite::MemoryUsage musage;
+			std::string vmPeak = musage.findEntry("VmPeak:");
+			std::string vmSize = musage.findEntry("VmSize:");
+			std::ostringstream msg;
+			msg<<" current virtual memory is "<<vmSize<<" maximum virtual memory "<<vmPeak;
+			progress_.printline(msg,std::cout);
 		}
 
 	}; //class DmrgSolver
