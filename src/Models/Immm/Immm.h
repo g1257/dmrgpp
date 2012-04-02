@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009-2011, UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -91,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LinkProductImmm.h"
 #include "ProgramGlobals.h"
 #include <cassert>
+#include "InputValidator.h"
 
 namespace Dmrg {
 	template<
@@ -128,7 +127,7 @@ namespace Dmrg {
 		static const int SPIN_DOWN=HilbertSpaceImmmType::SPIN_DOWN;
 		static const int NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
-		Immm(PsimagLite::IoSimple::In& io,GeometryType const &geometry,ConcurrencyType& concurrency)
+		Immm(PsimagLite::InputValidator& io,GeometryType const &geometry,ConcurrencyType& concurrency)
 		: ModelBaseType(geometry,concurrency),
 		  modelParameters_(io),
 		  geometry_(geometry),

@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "TypeToString.h"
 #include "Vector.h"
+#include "InputValidator.h"
 
 namespace Dmrg {
 	/** 
@@ -142,7 +143,10 @@ namespace Dmrg {
 	struct FiniteLoop {
 		int stepLength; // how much to go right (+) or left (-)
 		size_t keptStates; // kept states
-		int saveOption; // to save or not to save	
+		int saveOption; // to save or not to save
+		FiniteLoop(int sl,int ks,int so)
+			: stepLength(sl),keptStates(ks),saveOption(so)
+		{}
 	};
 
 	//!PTEX_LABEL{139}
@@ -292,14 +296,20 @@ namespace Dmrg {
 		int useReflectionSymmetry;
 		
 		//! Read Dmrg parameters from inp file
-		ParametersDmrgSolver(PsimagLite::IoSimple::In& io)
+		ParametersDmrgSolver(PsimagLite::InputValidator& io)
 		{
 			io.readline(model,"Model=");
 			io.readline(options,"SolverOptions=");
 			io.readline(version,"Version=");
 			io.readline(filename,"OutputFile=");
 			io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
-			io.read(finiteLoop,"FiniteLoops");
+			std::vector<FieldType> tmpVec;
+			io.read(tmpVec,"FiniteLoops");
+			for (size_t i=0;i<tmpVec.size();i+=3) {
+				FiniteLoop fl(tmpVec[i],tmpVec[i+1],tmpVec[i+2]);
+				finiteLoop.push_back(fl);
+			}
+			//io.read(finiteLoop,"FiniteLoops");
 			if (options.find("hasQuantumNumbers")!=std::string::npos) {
 				std::string s = "*** WARNING: hasQuantumNumbers ";
 				s += "option is obsolete in input file\n";
@@ -315,12 +325,12 @@ namespace Dmrg {
 			try {
 				io.readline(nthreads,"Threads=");
 			} catch (std::exception& e) {}
-			io.rewind();
+			//io.rewind();
 			useReflectionSymmetry=0;
 			try {
 				io.readline(useReflectionSymmetry,"UseReflectionSymmetry=");
 			} catch (std::exception& e) {}
-			io.rewind();
+			//io.rewind();
 		} 
 
 	};

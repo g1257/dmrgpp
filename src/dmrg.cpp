@@ -72,8 +72,7 @@ typedef  PsimagLite::CrsMatrix<MatrixElementType> MySparseMatrixReal;
 using namespace Dmrg;
 
 typedef PsimagLite::Geometry<MatrixElementType,ProgramGlobals> GeometryType;;
-typedef PsimagLite::IoSimple IoType;
-typedef IoType::In IoInputType;
+typedef PsimagLite::InputValidator IoInputType;
 typedef ParametersDmrgSolver<MatrixElementType> ParametersDmrgSolverType;
 
 template<typename ModelFactoryType,
@@ -130,7 +129,7 @@ void mainLoop2(GeometryType& geometry,
 					   WaveFunctionTransfFactory,
 					   ModelFactoryType,
 					   ConcurrencyType,
-					   IoType,
+					   PsimagLite::IoSimple,
 					   VectorWithOffsetTemplate
 					   > TargettingType;
 		mainLoop3<ModelFactoryType, InternalProductTemplate,TargettingType,MySparseMatrix>
@@ -141,7 +140,7 @@ void mainLoop2(GeometryType& geometry,
 					   WaveFunctionTransfFactory,
 					   ModelFactoryType,
 					   ConcurrencyType,
-					   IoType,
+					   PsimagLite::IoSimple,
 					   VectorWithOffsetTemplate
 					   > TargettingType;
 		mainLoop3<ModelFactoryType,InternalProductTemplate,TargettingType,MySparseMatrix>
@@ -214,14 +213,14 @@ int main(int argc,char *argv[])
 	if (concurrency.root()) std::cerr<<license;
 
 	//Setup the Geometry
-	PsimagLite::InputValidator inputValidator(filename);
-	inputValidator.check();
-	IoInputType io(filename);
+	PsimagLite::InputValidator io(filename);
+
+	//IoInputType io(filename);
 	GeometryType geometry(io);
 	
 
 	ParametersDmrgSolver<MatrixElementType> dmrgSolverParams(io);
-	io.rewind();
+	//io.rewind();
 
 	if (dmrgSolverParams.options.find("hasThreads")!=std::string::npos) {
 #ifdef USE_PTHREADS

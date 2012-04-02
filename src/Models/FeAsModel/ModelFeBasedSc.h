@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -90,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include "LinkProductFeAs.h"
 #include "ProgramGlobals.h"
+#include "InputValidator.h"
 
 namespace Dmrg {
 	template<
@@ -131,7 +130,7 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		static size_t const REINTERPRET  = 1;
-		ModelFeBasedSc(PsimagLite::IoSimple::In& io,GeometryType const &geometry,ConcurrencyType& concurrency)
+		ModelFeBasedSc(PsimagLite::InputValidator& io,GeometryType const &geometry,ConcurrencyType& concurrency)
 			: ModelBaseType(geometry,concurrency),
 			  reinterpretX_(6),
 			  reinterpretY_(9),

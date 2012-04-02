@@ -94,7 +94,7 @@ namespace Dmrg {
 		template<typename IoInputter>
 		CorrectionParams(IoInputter& io,const ModelType& model)
 		{
-			io.rewind();
+//			io.rewind();
 			io.readline(a,"CorrectionA=");
 // 			typename ModelType::HilbertBasisType basis;
 // 			std::vector<size_t> q;

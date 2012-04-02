@@ -96,6 +96,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "FeAsBasedScExtended.h"
 #include "Immm.h"
 #include "ReflectionOperatorEmpty.h"
+#include "InputValidator.h"
 
 namespace Dmrg {
 	
@@ -149,7 +150,7 @@ namespace Dmrg {
 
 		template<typename SomeParametersType>
 		ModelFactory(const SomeParametersType& params,
-			     PsimagLite::IoSimple::In& io,
+			     PsimagLite::InputValidator& io,
 			     const GeometryType& geometry,
 			     ConcurrencyType& concurrency)
 		: name_(params.model),

@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include <vector>
 #include <cstdlib>
+#include "Matrix.h"
 
 namespace PsimagLite {
 
@@ -94,7 +95,7 @@ class InputValidator {
 	
 	enum {WHITESPACE,ENDOFLINE,EQUALSIGN,ALPHA_CHAR,NUMERIC_CHAR};
 	
-	enum {IN_LABEL,IN_VALUE_UNDEFINED,IN_VALUE_OR_LABEL,IN_VALUE_TEXT,IN_VALUE_NUMERIC};
+	enum {IN_LABEL,IN_VALUE_OR_LABEL,IN_VALUE_TEXT,IN_VALUE_NUMERIC};
 	
 public:
 	
@@ -106,7 +107,7 @@ public:
 	  numericVector_(0),
 	  lastLabel_(""),
 	  MagicLabel_("FiniteLoops"),
-	  verbose_(false)
+	  verbose_(true)
 	{
 		std::ifstream fin(file.c_str());
 		if (!fin || !fin.good() || fin.bad()) {
@@ -121,8 +122,132 @@ public:
 			data_ += c;
 		}
 		fin.close();
+		check();
+		printMap(mapStrStr_,"StrStr");
+		printMap(mapStrVec_,"StrVec");
+
+	}
+
+	void readline(std::string& str,const std::string& label)
+	{
+		std::string label2 = label2label(label);
+		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+		str= mapStrStr_[label2];
+	}
+
+	void readline(double& str,const std::string& label)
+	{
+		std::string label2 = label2label(label);
+		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+		str= atof(mapStrStr_[label2].c_str());
+	}
+
+	void readline(long long int& str,const std::string& label)
+	{
+		std::string label2 = label2label(label);
+		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+		str= atoi(mapStrStr_[label2].c_str());
+	}
+
+	void readline(size_t& val,const std::string& label)
+	{
+		std::string label2 = label2label(label);
+		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+		val= atoi(mapStrStr_[label2].c_str());
+	}
+
+	void readline(int& val,const std::string& label)
+	{
+		std::string label2 = label2label(label);
+		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+		val= atoi(mapStrStr_[label2].c_str());
+	}
+
+	void read(long unsigned int& val,const std::string& label)
+	{
+		std::string label2 = label2label(label);
+		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+		val= atoi(mapStrStr_[label2].c_str());
+	}
+
+	template<typename T>
+	void read(std::vector<T>& val,const std::string& label)
+	{
+		std::string label2 = label2label(label);
+		if (mapStrVec_.find(label2)==mapStrVec_.end()) throw std::runtime_error("InputValidator");
+		size_t len = mapStrVec_[label2].size();
+		val.resize(len-1);
+		for (size_t i=0;i<len-1;i++) {
+			val[i]=mapStrVec_[label2][i+1];
+		}
+	}
+
+	template<typename T>
+	void readKnownSize(std::vector<T>& val,const std::string& label)
+	{
+		std::string label2 = label2label(label);
+		if (mapStrVec_.find(label2)==mapStrVec_.end()) throw std::runtime_error("InputValidator");
+		size_t len = mapStrVec_[label2].size();
+		val.resize(len);
+		for (size_t i=0;i<len;i++) {
+			val[i]=mapStrVec_[label2][i+1];
+		}
+	}
+
+	template<typename T>
+	void readMatrix(PsimagLite::Matrix<T>& m,const std::string& label)
+	{
+		std::string label2 = label2label(label);
+		if (mapStrVec_.find(label2)==mapStrVec_.end()) throw std::runtime_error("InputValidator");
+		std::vector<double>& v = mapStrVec_[label2];
+		if (v.size()<2 || v[0]<=0 || v[1]<=0) {
+			std::string s(__FILE__);
+			s += " readMatrix: \n";
+			throw std::runtime_error(s.c_str());
+		}
+		m.resize(v[0],v[1]);
+		if (v.size()<2+v[0]*v[1]) {
+			std::string s(__FILE__);
+			s += " readMatrix: \n";
+			throw std::runtime_error(s.c_str());
+		}
+		size_t k = 2;
+		for (size_t i=0;i<m.n_row();i++)
+			for (size_t j=0;j<m.n_row();j++)
+				m(i,j) = v[k++];
 	}
 	
+//	template<typename T>
+//	void read(std::vector<T>& val,const std::string& label)
+//	{
+//		std::string label2 = label2label(label);
+//		val= mapStrVec_[label2];
+//	}
+
+private:
+
+	template<typename T1,typename T2>
+	void printMap(std::map<T1,T2>& mp,const std::string& label)
+	{
+		std::cout<<label<<"\n";
+		typename  std::map<T1,T2>::iterator it;
+		for (it=mp.begin();it!=mp.end();++it) {
+			std::cout<<it->first<<" "<<it->second<<"\n";
+		}
+	}
+
+	std::string label2label(const std::string& label)
+	{
+		size_t len = label.length();
+		if (len==0) {
+			std::string s(__FILE__);
+			s += " readline: label cannot be null\n";
+			throw std::runtime_error(s.c_str());
+		}
+		if (label.at(len-1)=='=') len--;
+		return label.substr(0,len);
+	}
+
 	void check()
 	{
 		std::string buffer="";
@@ -146,10 +271,7 @@ public:
 				buffer="";
 				break;
 			default:
-				if (stage_==IN_VALUE_UNDEFINED) {
-					if (type==ALPHA_CHAR) stage_=IN_VALUE_TEXT;
-					else stage_=IN_VALUE_NUMERIC;
-				} else if (stage_==IN_VALUE_OR_LABEL) {
+				if (stage_==IN_VALUE_OR_LABEL) {
 					if (type==ALPHA_CHAR) {
 						checkNumbers();
 						numericVector_.clear();
@@ -160,12 +282,10 @@ public:
 				}
 				buffer += data_.at(i);
 				break;
-			}	
+			}
 		}
 		if (numericVector_.size()>0) checkNumbers();
 	}
-	
-private:
 	
 	void saveBuffer(const std::string& buffer,size_t whatchar)
 	{
@@ -174,9 +294,9 @@ private:
 		case IN_LABEL:
 			if (verbose_) std::cout<<"Read label="<<buffer<<"\n";
 			lastLabel_=buffer;
-			stage_=IN_VALUE_UNDEFINED;
+			if (whatchar==EQUALSIGN) stage_=IN_VALUE_TEXT;
+			else stage_=IN_VALUE_NUMERIC;
 			break;
-		case IN_VALUE_UNDEFINED:
 		case IN_VALUE_OR_LABEL:
 			std::cerr<<"Line="<<line_<<"\n";
 			s += "Error while buffer=" + buffer;
@@ -184,6 +304,7 @@ private:
 			break;
 		case IN_VALUE_TEXT:
 			if (verbose_) std::cout<<"Read text value="<<buffer<<"\n";
+			mapStrStr_[lastLabel_] = buffer;
 			stage_=IN_LABEL;
 			break;
 		case IN_VALUE_NUMERIC:
@@ -204,9 +325,14 @@ private:
 		return ALPHA_CHAR;
 	}
 	
-	void checkNumbers() const
+	void checkNumbers()
 	{
-		if (numericVector_.size()==1) return;
+		if (numericVector_.size()==1) {
+			std::string s(__FILE__);
+			s += " use equal sign instead of space on line "+ttos(line_) + "\n";
+			throw std::runtime_error(s.c_str());
+			return;
+		}
 		std::string s(__FILE__);
 		if (numericVector_.size()==0) {
 			std::cerr<<"Line="<<line_<<"\n";
@@ -214,7 +340,10 @@ private:
 		}
 		size_t adjExpected = numericVector_[0];
 		if (lastLabel_==MagicLabel_) adjExpected *= 3;
-		if (numericVector_.size()==adjExpected+1) return;
+		if (numericVector_.size()==adjExpected+1) {
+			mapStrVec_[lastLabel_]=numericVector_;
+			return;
+		}
 		std::cout<<" Number of numbers to follow expected ";
 		std::cout<<(numericVector_.size()-1)<<" got "<<adjExpected<<"\n";
 		std::cerr<<"Line="<<line_<<"\n";
@@ -229,6 +358,8 @@ private:
 	std::string lastLabel_;
 	const std::string MagicLabel_;
 	bool verbose_;
+	std::map<std::string,std::string> mapStrStr_;
+	std::map<std::string,std::vector<double> > mapStrVec_;
 }; //InputValidator
 } // namespace PsimagLite
 

@@ -119,7 +119,7 @@ namespace Dmrg {
 					s += " in the input line is deprecated. Assuming PRODUCT. ";
 					s += "Please make sure that's correct.\n";
 					std::cerr<<s;
-					io.rewind();
+//					io.rewind();
 				}
 
 				//! Concatenation specifies what to do with

@@ -104,7 +104,7 @@ namespace Dmrg {
 			: TargetParamsCommonType(io,model),tau(0),timeSteps(0),
 			  advanceEach(0)
 		{
-			io.rewind();
+//			io.rewind();
 
 			io.readline(tau,"TSPTau=");
 			io.readline(timeSteps,"TSPTimeSteps=");
@@ -119,7 +119,7 @@ namespace Dmrg {
 				std::cerr<<"WARNING: Omission of TSPAlgorithm is deprecated. ";
 				std::cerr<<"Assuming KRYLOV, make sure it's correct\n";
 			}
-			io.rewind();
+//			io.rewind();
 		}
 
 		RealType tau;

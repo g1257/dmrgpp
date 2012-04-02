@@ -99,7 +99,7 @@ namespace Dmrg {
 			MettsParams(IoInputter& io,const ModelType& model)
 				: tau(0),timeSteps(0),advanceEach(0)
 			{
-				io.rewind();
+//				io.rewind();
 				//this->concatenation = PRODUCT;
 				io.readline(tau,"TSPTau=");
 				io.readline(timeSteps,"TSPTimeSteps=");

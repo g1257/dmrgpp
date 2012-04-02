@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -85,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define FEAS_BASED_SC_EX
 #include "ModelFeBasedSc.h"
 #include "LinkProductFeAsExtended.h"
+#include "InputValidator.h"
 
 namespace Dmrg {
 	template<
@@ -126,7 +125,7 @@ namespace Dmrg {
 		static const size_t SPIN_DOWN =
 						ModelFeAsType::SPIN_DOWN;
 
-		FeAsBasedScExtended(PsimagLite::IoSimple::In& io,GeometryType const &geometry,ConcurrencyType& concurrency)
+		FeAsBasedScExtended(PsimagLite::InputValidator& io,GeometryType const &geometry,ConcurrencyType& concurrency)
 			: ModelBaseType(geometry,concurrency),modelParameters_(io), geometry_(geometry),
 			  modelFeAs_(io,geometry,concurrency)
 		{}

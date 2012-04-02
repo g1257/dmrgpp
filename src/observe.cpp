@@ -156,7 +156,7 @@ template<template<typename,typename> class ModelHelperTemplate,
 void mainLoop(GeometryType& geometry,
               const std::string& targetting,
               ConcurrencyType& concurrency,
-	      IoInputType& io,
+	      PsimagLite::InputValidator& io,
 	      const DmrgSolverParametersType& params,
               const std::string& obsOptions)
 {
@@ -245,15 +245,14 @@ int main(int argc,char *argv[])
 	}
 
 	//Setup the Geometry
-	PsimagLite::InputValidator inputValidator(filename);
-	inputValidator.check();
-	IoInputType io(filename);
+	PsimagLite::InputValidator io(filename);
+//	IoInputType io(filename);
 	GeometryType geometry(io);
 
 	//! Read the parameters for this run
 	//ParametersModelType mp(io);
 	DmrgSolverParametersType dmrgSolverParams(io);
-	io.rewind();
+//	io.rewind();
 
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;
