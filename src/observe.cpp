@@ -53,6 +53,7 @@ typedef PsimagLite::ConcurrencyMpi<RealType> ConcurrencyType;
 #include "MettsTargetting.h" // experimental
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
+#include "InputValidator.h"
 
 using namespace Dmrg;
 
@@ -204,6 +205,11 @@ void mainLoop(GeometryType& geometry,
 	}
 }
 
+void usage(const char* name)
+{
+	std::cerr<<"USAGE is "<<name<<" -f filename [-o options]\n";
+}
+
 int main(int argc,char *argv[])
 {
 	using namespace Dmrg;
@@ -211,16 +217,37 @@ int main(int argc,char *argv[])
 	ConcurrencyType concurrency(argc,argv);
 	
 	if (argc<2) {
-		std::string s = "The observer driver takes at least one  argumentw: \n";
-		s = s + "(i) the name of the input file";
-		s = s+ " and, optionally, (ii) a comma-separated list of options of what to compute\n";
-		throw std::runtime_error(s);
+		std::cerr<<"At least one argument needed\n";
+		return 1;
 	}
+	std::string filename="";
 	std::string options = "";
-	if (argc>2) options = argv[2];
-	
+	if (argv[1][0]!='-') {
+		std::cerr<<"WARNING: This use of the command line is deprecated.\n";
+		usage(argv[0]);
+		filename=argv[1];
+		if (argc>2) options = argv[2];
+	} else {
+		int opt = 0;
+		while ((opt = getopt(argc, argv,"f:o:")) != -1) {
+			switch (opt) {
+			case 'f':
+				filename = optarg;
+				break;
+			case 'o':
+				options = optarg;
+				break;
+			default:
+				usage(argv[0]);
+				break;
+			}
+		}
+	}
+
 	//Setup the Geometry
-	IoInputType io(argv[1]);
+	PsimagLite::InputValidator inputValidator(filename);
+	inputValidator.check();
+	IoInputType io(filename);
 	GeometryType geometry(io);
 
 	//! Read the parameters for this run
