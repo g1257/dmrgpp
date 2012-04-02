@@ -97,6 +97,7 @@ namespace PsimagLite {
 		void update()
 		{
 			std::ifstream ifp(MY_SELF_FILE);
+			if (!ifp || !ifp.good() || ifp.bad()) return;
 			char tmp[MY_MAX_LINE];
 			data_ = "";
 			while (!ifp.eof()) {

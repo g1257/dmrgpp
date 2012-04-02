@@ -208,7 +208,7 @@ namespace PsimagLite {
 				try {
 					io.readline(x,"SignChange=");
 				} catch (std::exception& e) {
-					io.rewind();
+					//io.rewind();
 				}
 
 				maxConnections_ = ktwoniffour_->maxConnections();
