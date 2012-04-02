@@ -63,6 +63,7 @@ typedef PsimagLite::ConcurrencyMpi<MatrixElementType> ConcurrencyType;
 #include "VectorWithOffsets.h"
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
+#include "InputValidator.h"
 
 typedef std::complex<MatrixElementType> ComplexType;
 typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
@@ -167,15 +168,7 @@ void mainLoop(GeometryType& geometry,
 		         VectorWithOffsetTemplate,
 		         TargettingTemplate,
 		         MySparseMatrix>(geometry,dmrgSolverParams,concurrency,io);
-	}
-	/*else if (dmrgSolverParams.options.find("InternalProductCached")!=std::string::npos) {
-		mainLoop2<ModelHelperTemplate,
-		          InternalProductCached,
-		          VectorWithOffsetTemplate,
-		          TargettingTemplate,
-		          MySparseMatrix>(geometry,dmrgSolverParams,concurrency,io);
-	} */
-	else {
+	} else {
  		mainLoop2<ModelHelperTemplate,
 		         InternalProductOnTheFly,
 		         VectorWithOffsetTemplate,
@@ -184,8 +177,36 @@ void mainLoop(GeometryType& geometry,
 	}
 }
 
+void usage(const char* name)
+{
+	std::cerr<<"USAGE is "<<name<<" -f filename\n";
+}
+
 int main(int argc,char *argv[])
 {
+	if (argc<2) {
+		std::cerr<<"At least one argument needed\n";
+		return 1;
+	}
+	std::string filename="";
+	if (argc==2) {
+		std::cerr<<"WARNING: This use of the command line is deprecated.\n";
+		usage(argv[0]);
+		filename=argv[1];
+	} else {
+		int opt = 0;
+		while ((opt = getopt(argc, argv,"f:")) != -1) {
+			switch (opt) {
+			case 'f':
+				filename = optarg;
+				break;
+			default:
+				usage(argv[0]);
+				break;
+			}
+		}
+	}
+
 	//! setup distributed parallelization
 	ConcurrencyType concurrency(argc,argv);
 
@@ -193,7 +214,9 @@ int main(int argc,char *argv[])
 	if (concurrency.root()) std::cerr<<license;
 
 	//Setup the Geometry
-	IoInputType io(argv[1]);
+	PsimagLite::InputValidator inputValidator(filename);
+	inputValidator.check();
+	IoInputType io(filename);
 	GeometryType geometry(io);
 	
 
