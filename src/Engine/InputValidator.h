@@ -108,11 +108,12 @@ public:
 	  numericVector_(0),
 	  lastLabel_(""),
 	  MagicLabel_("FiniteLoops"),
-	  labelsWithKnownSize_(2),
+	  labelsWithKnownSize_(3),
 	  verbose_(true)
 	{
 		labelsWithKnownSize_[0] = "JMVALUES";
 		labelsWithKnownSize_[1] = "RAW_MATRIX";
+		labelsWithKnownSize_[2] = "Connectors";
 
 		std::ifstream fin(file.c_str());
 		if (!fin || !fin.good() || fin.bad()) {
@@ -136,7 +137,7 @@ public:
 	void readline(std::string& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
 
 		val= it->second.c_str();
@@ -147,7 +148,7 @@ public:
 	void readline(double& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
 
 		val= atof(it->second.c_str());
@@ -158,7 +159,7 @@ public:
 	void readline(long long int& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
 
 		val= atoi(it->second.c_str());
@@ -169,7 +170,7 @@ public:
 	void readline(size_t& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
 
 		val= atoi(it->second.c_str());
@@ -180,7 +181,7 @@ public:
 	void readline(int& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
 
 		val= atoi(it->second.c_str());
@@ -192,7 +193,7 @@ public:
 	{
 		std::string label2 = label2label(label);
 
-		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
 
 
@@ -206,7 +207,7 @@ public:
 	{
 		std::string label2 = label2label(label);
 
-		typename std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+		std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 		if (it==mapStrVec_.end()) throw std::runtime_error("InputValidator");
 
 		size_t len =  it->second.size();
@@ -222,7 +223,7 @@ public:
 	{
 		std::string label2 = label2label(label);
 
-		typename std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+		std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 		if (it==mapStrVec_.end()) throw std::runtime_error("InputValidator");
 
 		size_t len =  it->second.size();
@@ -238,7 +239,7 @@ public:
 	{
 		std::string label2 = label2label(label);
 
-		typename std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+		std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 		if (it==mapStrVec_.end()) throw std::runtime_error("InputValidator");
 
 

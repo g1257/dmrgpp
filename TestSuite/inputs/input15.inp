@@ -5,9 +5,9 @@ GeometryKind=bathedcluster
 GeometryOptions=none
 LadderLeg=2
 BathSitesPerSite=1
-ConnectorsX 2 1.0 1.0
-ConnectorsY 2 0.8 0.8
-ConnectorsBath 4 0.3 0.3 0.3 0.3
+Connectors 2 1.0 1.0
+Connectors 2 0.8 0.8
+Connectors 4 0.3 0.3 0.3 0.3
 
 hubbardU	8 0 0 0 0 0 0 0 0 
 potentialV     16 0 0 0 0 0 0 0 0 
