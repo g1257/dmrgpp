@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <cstdlib>
 #include "Matrix.h"
+#include "Utils.h"
 
 namespace PsimagLite {
 
@@ -107,8 +108,12 @@ public:
 	  numericVector_(0),
 	  lastLabel_(""),
 	  MagicLabel_("FiniteLoops"),
+	  labelsWithKnownSize_(2),
 	  verbose_(true)
 	{
+		labelsWithKnownSize_[0] = "JMVALUES";
+		labelsWithKnownSize_[1] = "RAW_MATRIX";
+
 		std::ifstream fin(file.c_str());
 		if (!fin || !fin.good() || fin.bad()) {
 			std::string s(__FILE__);
@@ -128,85 +133,125 @@ public:
 
 	}
 
-	void readline(std::string& str,const std::string& label)
+	void readline(std::string& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
-		str= mapStrStr_[label2];
+		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+
+		val= it->second.c_str();
+
+		cleanLabelsIfNeeded(label2,mapStrStr_,it);
 	}
 
-	void readline(double& str,const std::string& label)
+	void readline(double& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
-		str= atof(mapStrStr_[label2].c_str());
+		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+
+		val= atof(it->second.c_str());
+
+		cleanLabelsIfNeeded(label2,mapStrStr_,it);
 	}
 
-	void readline(long long int& str,const std::string& label)
+	void readline(long long int& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
-		str= atoi(mapStrStr_[label2].c_str());
+		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+
+		val= atoi(it->second.c_str());
+
+		cleanLabelsIfNeeded(label2,mapStrStr_,it);
 	}
 
 	void readline(size_t& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
-		val= atoi(mapStrStr_[label2].c_str());
+		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+
+		val= atoi(it->second.c_str());
+
+		cleanLabelsIfNeeded(label2,mapStrStr_,it);
 	}
 
 	void readline(int& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
-		val= atoi(mapStrStr_[label2].c_str());
+		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+
+		val= atoi(it->second.c_str());
+
+		cleanLabelsIfNeeded(label2,mapStrStr_,it);
 	}
 
 	void read(long unsigned int& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		if (mapStrStr_.find(label2)==mapStrStr_.end()) throw std::runtime_error("InputValidator");
-		val= atoi(mapStrStr_[label2].c_str());
+
+		typename std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+		if (it==mapStrStr_.end()) throw std::runtime_error("InputValidator");
+
+
+		val= atoi(it->second.c_str());
+
+		cleanLabelsIfNeeded(label2,mapStrStr_,it);
 	}
 
 	template<typename T>
 	void read(std::vector<T>& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		if (mapStrVec_.find(label2)==mapStrVec_.end()) throw std::runtime_error("InputValidator");
-		size_t len = mapStrVec_[label2].size();
+
+		typename std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+		if (it==mapStrVec_.end()) throw std::runtime_error("InputValidator");
+
+		size_t len =  it->second.size();
 		val.resize(len-1);
 		for (size_t i=0;i<len-1;i++) {
-			val[i]=mapStrVec_[label2][i+1];
+			val[i]=static_cast<T>(it->second[i+1]);
 		}
+		cleanLabelsIfNeeded(label2,mapStrVec_,it);
 	}
 
 	template<typename T>
 	void readKnownSize(std::vector<T>& val,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		if (mapStrVec_.find(label2)==mapStrVec_.end()) throw std::runtime_error("InputValidator");
-		size_t len = mapStrVec_[label2].size();
+
+		typename std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+		if (it==mapStrVec_.end()) throw std::runtime_error("InputValidator");
+
+		size_t len =  it->second.size();
 		val.resize(len);
 		for (size_t i=0;i<len;i++) {
-			val[i]=mapStrVec_[label2][i+1];
+			val[i]=static_cast<T>(it->second[i+1]);
 		}
+		cleanLabelsIfNeeded(label2,mapStrVec_,it);
 	}
 
 	template<typename T>
 	void readMatrix(PsimagLite::Matrix<T>& m,const std::string& label)
 	{
 		std::string label2 = label2label(label);
-		if (mapStrVec_.find(label2)==mapStrVec_.end()) throw std::runtime_error("InputValidator");
-		std::vector<double>& v = mapStrVec_[label2];
+
+		typename std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+		if (it==mapStrVec_.end()) throw std::runtime_error("InputValidator");
+
+
+		std::vector<double>& v = it->second;
 		if (v.size()<2 || v[0]<=0 || v[1]<=0) {
 			std::string s(__FILE__);
 			s += " readMatrix: \n";
 			throw std::runtime_error(s.c_str());
 		}
-		m.resize(v[0],v[1]);
-		if (v.size()<2+v[0]*v[1]) {
+		size_t nrow = size_t(v[0]);
+		size_t ncol = size_t(v[1]);
+		m.resize(nrow,ncol);
+		if (v.size()<2+nrow*ncol) {
 			std::string s(__FILE__);
 			s += " readMatrix: \n";
 			throw std::runtime_error(s.c_str());
@@ -215,16 +260,18 @@ public:
 		for (size_t i=0;i<m.n_row();i++)
 			for (size_t j=0;j<m.n_row();j++)
 				m(i,j) = v[k++];
+
+		cleanLabelsIfNeeded(label2,mapStrVec_,it);
 	}
-	
-//	template<typename T>
-//	void read(std::vector<T>& val,const std::string& label)
-//	{
-//		std::string label2 = label2label(label);
-//		val= mapStrVec_[label2];
-//	}
 
 private:
+
+	template<typename SomeMapType>
+	void cleanLabelsIfNeeded(const std::string& label,SomeMapType& mymap,typename SomeMapType::iterator& it)
+	{
+		std::vector<std::string>::iterator it2 = find(labelsForRemoval_.begin(),labelsForRemoval_.end(),label);
+		if (it2!=labelsForRemoval_.end()) mymap.erase(it);
+	}
 
 	template<typename T1,typename T2>
 	void printMap(std::map<T1,T2>& mp,const std::string& label)
@@ -290,6 +337,7 @@ private:
 	void saveBuffer(const std::string& buffer,size_t whatchar)
 	{
 		std::string s(__FILE__);
+		std::string adjLabel="";
 		switch(stage_) {
 		case IN_LABEL:
 			if (verbose_) std::cout<<"Read label="<<buffer<<"\n";
@@ -304,7 +352,8 @@ private:
 			break;
 		case IN_VALUE_TEXT:
 			if (verbose_) std::cout<<"Read text value="<<buffer<<"\n";
-			mapStrStr_[lastLabel_] = buffer;
+			adjLabel = adjLabelForDuplicates(lastLabel_,mapStrStr_);
+			mapStrStr_[adjLabel] = buffer;
 			stage_=IN_LABEL;
 			break;
 		case IN_VALUE_NUMERIC:
@@ -338,17 +387,68 @@ private:
 			std::cerr<<"Line="<<line_<<"\n";
 			throw std::runtime_error(s.c_str());
 		}
-		size_t adjExpected = numericVector_[0];
+		size_t adjExpected = size_t(numericVector_[0]);
 		if (lastLabel_==MagicLabel_) adjExpected *= 3;
+
+		int x = PsimagLite::isInVector(labelsWithKnownSize_,lastLabel_);
+		if (x>=0) adjExpected = numericVector_.size()-1;
 		if (numericVector_.size()==adjExpected+1) {
-			mapStrVec_[lastLabel_]=numericVector_;
+			std::string adjLabel=adjLabelForDuplicates(lastLabel_,mapStrVec_);
+			mapStrVec_[adjLabel]=numericVector_;
 			return;
 		}
+			
 		std::cout<<" Number of numbers to follow expected ";
 		std::cout<<(numericVector_.size()-1)<<" got "<<adjExpected<<"\n";
 		std::cerr<<"Line="<<line_<<"\n";
 		throw std::runtime_error(s.c_str());
-		
+	}
+
+	template<typename SomeMapType>
+	std::string adjLabelForDuplicates(const std::string& label,SomeMapType& mymap)
+	{
+		std::string rootLabel = findRootLabel(label);
+		int x = findLastOccurrence(rootLabel,mymap);
+		if (x<0) return label;
+		labelsForRemoval_.push_back(rootLabel);
+		x++;
+		std::string newlabel = rootLabel + "@" + ttos(x);
+		if (verbose_) std::cerr<<"NEWLABEL=*"<<newlabel<<"*\n";
+		return newlabel;
+	}
+
+	template<typename SomeMapType>
+	int findLastOccurrence(const std::string& root1,SomeMapType& mymap)
+	{
+		int x = -1;
+		for (typename SomeMapType::iterator it=mymap.begin();it!=mymap.end();++it) {
+			std::string root2 = findRootLabel(it->first);
+			if (root1==root2) x++;
+		}
+		return x;
+	}
+
+	std::string findRootLabel(const std::string& label) const
+	{
+		std::string buffer="";
+		size_t len = label.length();
+		for (size_t i=0;i<len;i++) {
+			if (label.at(i)=='@') break;
+			buffer += label.at(i);
+		}
+		return buffer;
+	}
+
+	template<typename SomeMapType>
+	typename SomeMapType::iterator findFirstValueForLabel(const std::string& label,SomeMapType& mymap)
+	{
+		for (typename SomeMapType::iterator it=mymap.begin();it!=mymap.end();++it) {
+			std::string root2 = findRootLabel(it->first);
+			if (label==root2) {
+				return it;
+			}
+		}
+		return mymap.end();
 	}
 	
 	std::string file_,data_;
@@ -357,9 +457,11 @@ private:
 	std::vector<double> numericVector_;
 	std::string lastLabel_;
 	const std::string MagicLabel_;
+	std::vector<std::string> labelsWithKnownSize_;
 	bool verbose_;
 	std::map<std::string,std::string> mapStrStr_;
 	std::map<std::string,std::vector<double> > mapStrVec_;
+	std::vector<std::string> labelsForRemoval_;
 }; //InputValidator
 } // namespace PsimagLite
 

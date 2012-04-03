@@ -306,7 +306,9 @@ namespace Dmrg {
 			std::vector<FieldType> tmpVec;
 			io.read(tmpVec,"FiniteLoops");
 			for (size_t i=0;i<tmpVec.size();i+=3) {
-				FiniteLoop fl(tmpVec[i],tmpVec[i+1],tmpVec[i+2]);
+				std::vector<int> xTmp(3);
+				for (size_t j=0;j<xTmp.size();j++) xTmp[j]=int(tmpVec[i+j]);
+				FiniteLoop fl(xTmp[0],xTmp[1],xTmp[2]);
 				finiteLoop.push_back(fl);
 			}
 			//io.read(finiteLoop,"FiniteLoops");
