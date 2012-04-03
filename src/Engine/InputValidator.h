@@ -208,13 +208,13 @@ public:
 	{
 		std::string label2 = label2label(label);
 
-		std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+		std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 		if (it==mapStrVec_.end()) throw std::runtime_error("InputValidator");
 
 		size_t len =  it->second.size();
 		val.resize(len-1);
 		for (size_t i=0;i<len-1;i++) {
-			val[i]=static_cast<T>(it->second[i+1]);
+			val[i]=static_cast<T>(atof(it->second[i+1].c_str()));
 		}
 		cleanLabelsIfNeeded(label2,mapStrVec_,it);
 	}
@@ -224,36 +224,33 @@ public:
 	{
 		std::string label2 = label2label(label);
 
-		std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+		std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 		if (it==mapStrVec_.end()) throw std::runtime_error("InputValidator");
 
 		size_t len =  it->second.size();
 		val.resize(len);
 		for (size_t i=0;i<len;i++) {
-			val[i]=static_cast<T>(it->second[i+1]);
+			val[i]=static_cast<T>(atof(it->second[i+1].c_str()));
 		}
 		cleanLabelsIfNeeded(label2,mapStrVec_,it);
 	}
 
-	template<typename T>
-	void readMatrix(PsimagLite::Matrix<T>& m,const std::string& label)
+	void readMatrix(PsimagLite::Matrix<double>& m,const std::string& label)
 	{
 		std::string label2 = label2label(label);
 
-		std::map<std::string,std::vector<double> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+		std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 		if (it==mapStrVec_.end()) throw std::runtime_error("InputValidator");
 
-
-		std::vector<double>& v = it->second;
-		if (v.size()<2 || v[0]<=0 || v[1]<=0) {
+		if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
 			std::string s(__FILE__);
 			s += " readMatrix: \n";
 			throw std::runtime_error(s.c_str());
 		}
-		size_t nrow = size_t(v[0]);
-		size_t ncol = size_t(v[1]);
+		size_t nrow = size_t( atoi(it->second[0].c_str()));
+		size_t ncol = size_t( atoi(it->second[1].c_str()));
 		m.resize(nrow,ncol);
-		if (v.size()<2+nrow*ncol) {
+		if (it->second.size()<2+nrow*ncol) {
 			std::string s(__FILE__);
 			s += " readMatrix: \n";
 			throw std::runtime_error(s.c_str());
@@ -261,10 +258,41 @@ public:
 		size_t k = 2;
 		for (size_t i=0;i<m.n_row();i++)
 			for (size_t j=0;j<m.n_row();j++)
-				m(i,j) = v[k++];
+				m(i,j) = atof(it->second[k++].c_str());
 
 		cleanLabelsIfNeeded(label2,mapStrVec_,it);
 	}
+
+	void readMatrix(PsimagLite::Matrix<std::complex<double> >& m,const std::string& label)
+	{
+		std::string label2 = label2label(label);
+
+		std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+		if (it==mapStrVec_.end()) throw std::runtime_error("InputValidator");
+
+		if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
+			std::string s(__FILE__);
+			s += " readMatrix: \n";
+			throw std::runtime_error(s.c_str());
+		}
+		size_t nrow = size_t( atoi(it->second[0].c_str()));
+		size_t ncol = size_t( atoi(it->second[1].c_str()));
+		m.resize(nrow,ncol);
+		if (it->second.size()<2+nrow*ncol) {
+			std::string s(__FILE__);
+			s += " readMatrix: \n";
+			throw std::runtime_error(s.c_str());
+		}
+		size_t k = 2;
+		for (size_t i=0;i<m.n_row();i++) {
+			for (size_t j=0;j<m.n_row();j++) {
+				std::istringstream is(it->second[k++]);
+				is >> m(i,j);
+			}
+		}
+		cleanLabelsIfNeeded(label2,mapStrVec_,it);
+	}
+
 
 private:
 
@@ -360,7 +388,7 @@ private:
 			break;
 		case IN_VALUE_NUMERIC:
 			if (verbose_) std::cout<<"Read numeric value="<<buffer<<"\n";
-			numericVector_.push_back(atof(buffer.c_str()));
+			numericVector_.push_back(buffer);
 			stage_=IN_VALUE_OR_LABEL;
 			break;
 		}
@@ -373,6 +401,7 @@ private:
 		if (c=='=') return EQUALSIGN;
 		if (c>=48 && c<=58) return NUMERIC_CHAR;
 		if (c=='.' || c=='+' || c=='-') return NUMERIC_CHAR;
+		if (c=='(' || c==')' || c==',') return NUMERIC_CHAR;
 		return ALPHA_CHAR;
 	}
 	
@@ -389,7 +418,7 @@ private:
 			std::cerr<<"Line="<<line_<<"\n";
 			throw std::runtime_error(s.c_str());
 		}
-		size_t adjExpected = size_t(numericVector_[0]);
+		size_t adjExpected = atoi(numericVector_[0].c_str());
 		if (lastLabel_==MagicLabel_) adjExpected *= 3;
 
 		int x = PsimagLite::isInVector(labelsWithKnownSize_,lastLabel_);
@@ -456,13 +485,13 @@ private:
 	std::string file_,data_;
 	size_t line_;
 	size_t stage_;
-	std::vector<double> numericVector_;
+	std::vector<std::string> numericVector_;
 	std::string lastLabel_;
 	const std::string MagicLabel_;
 	std::vector<std::string> labelsWithKnownSize_;
 	bool verbose_;
 	std::map<std::string,std::string> mapStrStr_;
-	std::map<std::string,std::vector<double> > mapStrVec_;
+	std::map<std::string,std::vector<std::string> > mapStrVec_;
 	std::vector<std::string> labelsForRemoval_;
 }; //InputValidator
 } // namespace PsimagLite
