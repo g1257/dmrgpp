@@ -109,7 +109,7 @@ public:
 	  lastLabel_(""),
 	  MagicLabel_("FiniteLoops"),
 	  labelsWithKnownSize_(3),
-	  verbose_(true)
+	  verbose_(false)
 	{
 		labelsWithKnownSize_[0] = "JMVALUES";
 		labelsWithKnownSize_[1] = "RAW_MATRIX";
@@ -129,9 +129,10 @@ public:
 		}
 		fin.close();
 		check();
-		printMap(mapStrStr_,"StrStr");
-		printMap(mapStrVec_,"StrVec");
-
+		if (verbose_) {
+			printMap(mapStrStr_,"StrStr");
+			printMap(mapStrVec_,"StrVec");
+		}
 	}
 
 	void readline(std::string& val,const std::string& label)
@@ -379,7 +380,7 @@ private:
 	{
 		if (numericVector_.size()==1) {
 			std::string s(__FILE__);
-			s += " use equal sign instead of space on line "+ttos(line_) + "\n";
+			s += " use equal sign instead of space in line "+ttos(line_) + "\n";
 			throw std::runtime_error(s.c_str());
 			return;
 		}
@@ -399,7 +400,7 @@ private:
 			return;
 		}
 			
-		std::cout<<" Number of numbers to follow expected ";
+		std::cout<<" Number of numbers to follow is wrong, expected ";
 		std::cout<<(numericVector_.size()-1)<<" got "<<adjExpected<<"\n";
 		std::cerr<<"Line="<<line_<<"\n";
 		throw std::runtime_error(s.c_str());
