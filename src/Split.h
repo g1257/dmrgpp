@@ -94,7 +94,7 @@ void split(std::vector<T>& v,const char* s1,char sep)
 {
 	std::string buffer = "";
 	std::string s(s1);
-	T tmp = 0;
+	T tmp;
 	for (size_t i=0;i<s.length();i++) {
 		if (s[i]==sep) {
 			if (buffer=="") continue;
