@@ -65,6 +65,14 @@ typedef  PsimagLite::Geometry<RealType,ProgramGlobals> GeometryType;
 typedef PsimagLite::IoSimple::In IoInputType;
 typedef ParametersDmrgSolver<RealType> DmrgSolverParametersType;
 
+size_t dofsFromModelName(const std::string& modelName)
+{
+	if (modelName.find("FeAsBasedSc")!=std::string::npos) return 4;
+	if (modelName.find("FeAsBasedScExtended")!=std::string::npos) return 4;
+	if (modelName.find("HubbardOneBand")!=std::string::npos) return 2;
+	return 0;
+}
+
 template<typename VectorWithOffsetType,typename ModelType,typename SparseMatrixType,typename OperatorType,typename TargettingType>
 bool observeOneFullSweep(
 	IoInputType& io,
@@ -100,10 +108,15 @@ bool observeOneFullSweep(
 
 	if (hasTimeEvolution) observerLib.setBrackets("time","time");
 
-	const std::string& s = model.name();
+	const std::string& modelName = model.name();
 	size_t rows = n; // could be n/2 if there's enough symmetry
 
-	if (s.find("heisenberg")==std::string::npos) {
+	size_t numberOfDofs = dofsFromModelName(modelName);
+	if (!hasTimeEvolution && obsOptions.find("onepoint")!=std::string::npos) {
+		observerLib.measureTheOnePoints(numberOfDofs);
+	}
+
+	if (modelName.find("Heisenberg")==std::string::npos) {
 		if (obsOptions.find("cc")!=std::string::npos) {
 			observerLib.measure("cc",rows,n);
 		}
@@ -116,8 +129,8 @@ bool observeOneFullSweep(
 		observerLib.measure("szsz",rows,n);
 	}
 
-	if (s.find("febasedsc")!=std::string::npos ||
-	    s.find("feasbasedscextended")!=std::string::npos) {
+	if (modelName.find("FeAsBasedSc")!=std::string::npos ||
+	    modelName.find("FeAsBasedScExtended")!=std::string::npos) {
 		if (obsOptions.find("dd")!=std::string::npos &&
 		    geometry.label(0).find("ladder")!=std::string::npos) {
 			observerLib.measure("dd",rows,n);

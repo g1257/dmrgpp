@@ -104,7 +104,7 @@ public:
 	: file_(file),
 	  data_(""),
 	  line_(0),
-	  stage_(IN_LABEL),
+	  state_(IN_LABEL),
 	  numericVector_(0),
 	  lastLabel_(""),
 	  MagicLabel_("FiniteLoops"),
@@ -348,13 +348,13 @@ private:
 				buffer="";
 				break;
 			default:
-				if (stage_==IN_VALUE_OR_LABEL) {
+				if (state_==IN_VALUE_OR_LABEL) {
 					if (type==ALPHA_CHAR) {
 						checkNumbers();
 						numericVector_.clear();
-						stage_=IN_LABEL;
+						state_=IN_LABEL;
 					} else {
-						stage_=IN_VALUE_NUMERIC;
+						state_=IN_VALUE_NUMERIC;
 					}
 				}
 				buffer += data_.at(i);
@@ -368,12 +368,12 @@ private:
 	{
 		std::string s(__FILE__);
 		std::string adjLabel="";
-		switch(stage_) {
+		switch(state_) {
 		case IN_LABEL:
 			if (verbose_) std::cout<<"Read label="<<buffer<<"\n";
 			lastLabel_=buffer;
-			if (whatchar==EQUALSIGN) stage_=IN_VALUE_TEXT;
-			else stage_=IN_VALUE_NUMERIC;
+			if (whatchar==EQUALSIGN) state_=IN_VALUE_TEXT;
+			else state_=IN_VALUE_NUMERIC;
 			break;
 		case IN_VALUE_OR_LABEL:
 			std::cerr<<"Line="<<line_<<"\n";
@@ -384,12 +384,12 @@ private:
 			if (verbose_) std::cout<<"Read text value="<<buffer<<"\n";
 			adjLabel = adjLabelForDuplicates(lastLabel_,mapStrStr_);
 			mapStrStr_[adjLabel] = buffer;
-			stage_=IN_LABEL;
+			state_=IN_LABEL;
 			break;
 		case IN_VALUE_NUMERIC:
 			if (verbose_) std::cout<<"Read numeric value="<<buffer<<"\n";
 			numericVector_.push_back(buffer);
-			stage_=IN_VALUE_OR_LABEL;
+			state_=IN_VALUE_OR_LABEL;
 			break;
 		}
 	}
@@ -484,7 +484,7 @@ private:
 	
 	std::string file_,data_;
 	size_t line_;
-	size_t stage_;
+	size_t state_;
 	std::vector<std::string> numericVector_;
 	std::string lastLabel_;
 	const std::string MagicLabel_;

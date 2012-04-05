@@ -223,15 +223,15 @@ namespace Dmrg {
 						superDensity<<"\n";
 			} else if (label=="nupNdown") {
 				multiply(A,matrixNup_,matrixNdown_);
-				measureTimeObsOne(A,"nupNdown");
+				measureOnePoint(A,"nupNdown");
 			} else if (label=="nup+ndown") {
 				A = matrixNup_;
 				A += matrixNdown_;
-				measureTimeObsOne(A,"nup+ndown");
+				measureOnePoint(A,"nup+ndown");
 			} else if (label=="sz") {
 				A = matrixNup_;
 				A += (-1)*matrixNdown_;
-				measureTimeObsOne(A,"sz");
+				measureOnePoint(A,"sz");
 			} else {
 				std::string s = "Unknown label: " + label + "\n";
 					throw std::runtime_error(s.c_str());
@@ -245,10 +245,28 @@ namespace Dmrg {
 
 		bool endOfData() const { return observe_.endOfData(); }
 
+		void measureTheOnePoints(size_t numberOfDofs)
+		{
+			size_t site = 0; // FIXME : account for Hilbert spaces changing with site
+			for (size_t dof=0;dof<numberOfDofs;dof++) {
+				for (size_t dof2=dof;dof2<numberOfDofs;dof2++) {
+					MatrixType opCup = model_.naturalOperator("c",site,dof);
+					MatrixType opCdown = model_.naturalOperator("c",site,dof2);
+					MatrixType opCupTranspose;
+					transposeConjugate(opCupTranspose,opCup);
+					MatrixType Afull = opCupTranspose * opCdown;
+					SparseMatrixType A(Afull);
+					std::string str("c^\\dagger(dof=");
+					str += ttos(dof) + ") c(dof=" + ttos(dof2) + ")";
+					measureOnePoint(A,str);
+				}
+			}
+
+		}
+
 	private:
 
-		void measureOne(
-			const std::string& label,
+		void measureOne(const std::string& label,
 			const PsimagLite::Matrix<FieldType>& op1,
 			const PsimagLite::Matrix<FieldType>& op2,
 			int fermionSign,
@@ -265,9 +283,7 @@ namespace Dmrg {
 			}
 		}
 
-		void measureTimeObsOne(
-			const SparseMatrixType& A,
-			const std::string& label)
+		void measureOnePoint(const SparseMatrixType& A,const std::string& label)
 		{
 			Su2RelatedType su2Related1;
 			printMarker();
@@ -278,18 +294,24 @@ namespace Dmrg {
 				std::cout<<"\n";
 			}
 			OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-			std::cout<<"site "<<label<<"(gs) "<<label<<"(timevector) time\n";
+			std::cout<<"site "<<label<<"(gs) "<<label;
+			if (hasTimeEvolution_) std::cout<<"(timevector) time";
+			std::cout<<"\n";
 			for (size_t i0 = 0;i0<observe_.size();i0++) {
 				// for g.s. use this one:
 				observe_.setBrackets("gs","gs");
 				FieldType tmp1 = observe_.template
 						onePoint<ApplyOperatorType>(i0,opA);
-				// for time vector use this one:
-				observe_.setBrackets("time","time");
-				FieldType tmp2 = observe_.template
-						onePoint<ApplyOperatorType>(i0,opA);
 				std::cout<<observe_.site()<<" "<<tmp1;
-				std::cout<<" "<<tmp2<<" "<<observe_.time()<<"\n";
+
+				if (hasTimeEvolution_) { // for time vector use this one:
+					observe_.setBrackets("time","time");
+					FieldType tmp2 = observe_.template
+							 onePoint<ApplyOperatorType>(i0,opA);
+
+					std::cout<<" "<<tmp2<<" "<<observe_.time();
+				}
+				std::cout<<"\n";
 				// also calculate next or prev. site:
 				if (observe_.isAtCorner(numberOfSites_)) {
 					size_t x = (observe_.site()==1) ? 0 : numberOfSites_-1;
@@ -299,12 +321,15 @@ namespace Dmrg {
 					bool doCorner = true;
 					FieldType tmp1 = observe_.template
 							onePoint<ApplyOperatorType>(i0,opA,doCorner);
-					// for time vector use this one:
-					observe_.setBrackets("time","time");
-					FieldType tmp2 = observe_.template
-							onePoint<ApplyOperatorType>(i0,opA,doCorner);
-					std::cout<<x<<" "<<tmp1<<" "<<tmp2;
-					std::cout<<" "<<observe_.time()<<"\n";
+					std::cout<<x<<" "<<tmp1;
+
+					if (hasTimeEvolution_) {// for time vector use this one:
+						observe_.setBrackets("time","time");
+						FieldType tmp2 = observe_.template
+								 onePoint<ApplyOperatorType>(i0,opA,doCorner);
+						std::cout<<" "<<tmp2<<" "<<observe_.time();
+					}
+					std::cout<<"\n";
 				}
 			}
 		}

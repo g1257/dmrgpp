@@ -208,7 +208,8 @@ namespace Dmrg {
 		//! This applies more generally (ie. not only to time)
 		size_t site() const
 		{
-			return timeSerializerV_[currentPos_].site();
+			return  (timeSerializerV_.size()==0) ? dSerializerV_[currentPos_]->site()
+							     : timeSerializerV_[currentPos_].site();
 		}
 		
 		size_t size() const

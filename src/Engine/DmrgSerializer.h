@@ -182,6 +182,14 @@ public:
 
 	size_t direction() const { return direction_; }
 
+	// experimental!!
+	size_t site() const
+	{
+		size_t last = lrs_.left().block().size();
+		assert(last>0);
+		return lrs_.left().block()[last-1];
+	}
+
 	void transform(MatrixType& ret,const MatrixType& O) const
 	{
 		//typedef typename MatrixType::value_type FieldType;
