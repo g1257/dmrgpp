@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERSMODELFEAS_H
 #define PARAMETERSMODELFEAS_H
+#include <stdexcept>
 
 namespace Dmrg {
 	//! FeAs Model Parameters
@@ -90,13 +91,19 @@ namespace Dmrg {
 		// connections are handled by the geometry
 		
 		template<typename IoInputType>
-		ParametersModelFeAs(IoInputType& io) 
+		ParametersModelFeAs(IoInputType& io)
+		: magneticField(0)
 		{
 	
 			io.read(hubbardU,"hubbardU");
 			io.read(potentialV,"potentialV");
-//			io.rewind();
-			//io.readline(density,"density=");
+			try {
+				io.read(magneticField,"MagneticField");
+			} catch (std::exception& e) {
+
+			}
+			if (magneticField.size()!=0 && magneticField.size()!=3)
+				throw std::runtime_error("Magnetic Field: if present must be of size 3\n");
 		}
 		
 		// Hubbard U values (one for each site)
@@ -104,6 +111,7 @@ namespace Dmrg {
 		// Onsite potential values, one for each site
 		std::vector<Field> potentialV;
 		// target number of electrons  in the system
+		std::vector<Field> magneticField;
 		int nOfElectrons;
 		// target density
 		//Field density;
@@ -113,13 +121,14 @@ namespace Dmrg {
 	template<typename FieldType>
 	std::ostream& operator<<(std::ostream &os,const ParametersModelFeAs<FieldType>& parameters)
 	{
-		//os<<"parameters.density="<<parameters.density<<"\n";
 		os<<"hubbardU\n";
 		os<<parameters.hubbardU;
-		//utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
 		os<<"potentialV\n";
 		os<<parameters.potentialV;
-		//utils::vectorPrint(parameters.potentialV,"potentialV",os);
+		if (parameters.magneticField.size()>0) {
+			os<<"MagneticField\n";
+			os<<parameters.magneticField;
+		}
 		return os;
 	}
 } // namespace Dmrg

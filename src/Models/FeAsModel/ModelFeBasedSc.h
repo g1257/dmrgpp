@@ -547,6 +547,7 @@ namespace Dmrg {
 			addInteractionU2(hmatrix,cm,i);
 			addInteractionJ1(hmatrix,cm,i);
 			addInteractionJ2(hmatrix,cm,i);
+			addMagneticField(hmatrix,cm,i);
 		}
 
 		//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
@@ -613,6 +614,38 @@ namespace Dmrg {
 				multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[3]); // this is -J
 				hmatrix += tmpMatrix2;
 			}
+		}
+
+		void addMagneticField(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i) const
+		{
+			if (modelParameters_.magneticField.size()<3) return;
+			for (int orb=0;orb<NUMBER_OF_ORBITALS;orb++)
+				addMagneticField(hmatrix,cm,i,orb);
+		}
+
+		void addMagneticField(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i,size_t orbital) const
+		{
+			SparseMatrixType cup = cm[orbital+SPIN_UP*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data;
+			SparseMatrixType cupTranspose;
+			transposeConjugate(cupTranspose,cup);
+			SparseMatrixType cdown = cm[orbital+SPIN_DOWN*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data;
+			SparseMatrixType A = cupTranspose * cdown;
+			SparseMatrixType Atranspose;
+			transposeConjugate(Atranspose,A);
+			SparseMatrixType tmp = A;
+			tmp += Atranspose;
+			hmatrix += modelParameters_.magneticField[0] * tmp;
+
+			tmp = A;
+			tmp += (-1.0)*Atranspose;
+			hmatrix += modelParameters_.magneticField[1] * tmp;
+			SparseMatrixType nup = n(cup);
+			SparseMatrixType ndown = n(cdown);
+
+			tmp = nup;
+			tmp += (-1.0)*ndown;
+			hmatrix += modelParameters_.magneticField[2] * tmp;
+
 		}
 
 		SparseMatrixType n(const SparseMatrixType& c) const

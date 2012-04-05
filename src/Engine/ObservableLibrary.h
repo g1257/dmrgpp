@@ -294,8 +294,8 @@ namespace Dmrg {
 				std::cout<<"\n";
 			}
 			OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-			std::cout<<"site "<<label<<"(gs) "<<label;
-			if (hasTimeEvolution_) std::cout<<"(timevector) time";
+			std::cout<<"site "<<label<<"(gs) ";
+			if (hasTimeEvolution_) std::cout<<label<<"(timevector) time";
 			std::cout<<"\n";
 			for (size_t i0 = 0;i0<observe_.size();i0++) {
 				// for g.s. use this one:
