@@ -632,17 +632,15 @@ namespace Dmrg {
 			SparseMatrixType A = cupTranspose * cdown;
 			SparseMatrixType Atranspose;
 			transposeConjugate(Atranspose,A);
-			SparseMatrixType tmp = A;
-			tmp += Atranspose;
-			hmatrix += modelParameters_.magneticField[0] * tmp;
 
-			tmp = A;
-			tmp += (-1.0)*Atranspose;
-			hmatrix += modelParameters_.magneticField[1] * tmp;
+			hmatrix += modelParameters_.magneticField[0] * A;
+
+			hmatrix += modelParameters_.magneticField[1] * Atranspose;
+
 			SparseMatrixType nup = n(cup);
 			SparseMatrixType ndown = n(cdown);
 
-			tmp = nup;
+			SparseMatrixType tmp = nup;
 			tmp += (-1.0)*ndown;
 			hmatrix += modelParameters_.magneticField[2] * tmp;
 
