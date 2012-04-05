@@ -618,7 +618,8 @@ namespace Dmrg {
 
 		void addMagneticField(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i) const
 		{
-			if (modelParameters_.magneticField.size()<3) return;
+			if (modelParameters_.magneticField.n_row()<3) return;
+			assert(i<modelParameters_.magneticField.n_col());
 			for (int orb=0;orb<NUMBER_OF_ORBITALS;orb++)
 				addMagneticField(hmatrix,cm,i,orb);
 		}
@@ -633,16 +634,16 @@ namespace Dmrg {
 			SparseMatrixType Atranspose;
 			transposeConjugate(Atranspose,A);
 
-			hmatrix += modelParameters_.magneticField[0] * A;
+			hmatrix += modelParameters_.magneticField(0,i) * A;
 
-			hmatrix += modelParameters_.magneticField[1] * Atranspose;
+			hmatrix += modelParameters_.magneticField(1,i) * Atranspose;
 
 			SparseMatrixType nup = n(cup);
 			SparseMatrixType ndown = n(cdown);
 
 			SparseMatrixType tmp = nup;
 			tmp += (-1.0)*ndown;
-			hmatrix += modelParameters_.magneticField[2] * tmp;
+			hmatrix += modelParameters_.magneticField(2,i) * tmp;
 
 		}
 

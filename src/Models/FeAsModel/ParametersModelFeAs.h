@@ -82,6 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PARAMETERSMODELFEAS_H
 #define PARAMETERSMODELFEAS_H
 #include <stdexcept>
+#include <vector>
+#include "Matrix.h"
 
 namespace Dmrg {
 	//! FeAs Model Parameters
@@ -92,18 +94,20 @@ namespace Dmrg {
 		
 		template<typename IoInputType>
 		ParametersModelFeAs(IoInputType& io)
-		: magneticField(0)
+		: magneticField(0,0)
 		{
 	
 			io.read(hubbardU,"hubbardU");
 			io.read(potentialV,"potentialV");
 			try {
-				io.read(magneticField,"MagneticField");
+				io.readMatrix(magneticField,"MagneticField");
 			} catch (std::exception& e) {
 
 			}
-			if (magneticField.size()!=0 && magneticField.size()!=3)
-				throw std::runtime_error("Magnetic Field: if present must be of size 3\n");
+			if (magneticField.n_row()!=0 && magneticField.n_row()!=3)
+				throw std::runtime_error("Magnetic Field: if present must have 3 rows\n");
+			if (magneticField.n_row()!=0 && magneticField.n_col()!=potentialV.size())
+				throw std::runtime_error("Magnetic Field: Expecting as many columns are there are sites\n");
 		}
 		
 		// Hubbard U values (one for each site)
@@ -111,7 +115,7 @@ namespace Dmrg {
 		// Onsite potential values, one for each site
 		std::vector<Field> potentialV;
 		// target number of electrons  in the system
-		std::vector<Field> magneticField;
+		PsimagLite::Matrix<Field> magneticField;
 		int nOfElectrons;
 		// target density
 		//Field density;
@@ -125,7 +129,7 @@ namespace Dmrg {
 		os<<parameters.hubbardU;
 		os<<"potentialV\n";
 		os<<parameters.potentialV;
-		if (parameters.magneticField.size()>0) {
+		if (parameters.magneticField.n_row()>0) {
 			os<<"MagneticField\n";
 			os<<parameters.magneticField;
 		}

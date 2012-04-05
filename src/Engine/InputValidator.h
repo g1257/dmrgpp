@@ -108,12 +108,13 @@ public:
 	  numericVector_(0),
 	  lastLabel_(""),
 	  MagicLabel_("FiniteLoops"),
-	  labelsWithKnownSize_(3),
+	  labelsWithKnownSize_(4),
 	  verbose_(false)
 	{
 		labelsWithKnownSize_[0] = "JMVALUES";
 		labelsWithKnownSize_[1] = "RAW_MATRIX";
 		labelsWithKnownSize_[2] = "Connectors";
+		labelsWithKnownSize_[3] = "MagneticField";
 
 		std::ifstream fin(file.c_str());
 		if (!fin || !fin.good() || fin.bad()) {
