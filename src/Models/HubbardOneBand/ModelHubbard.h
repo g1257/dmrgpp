@@ -334,7 +334,7 @@ namespace Dmrg {
 		}
 
 		//! Compute correct value of Hubbard U parameter for  site ind
-		RealType computeHubbardUValue(int type,int ind,int smax,int emin) const 
+		/* RealType computeHubbardUValue(int type,int ind,int smax,int emin) const 
 		{
 			//! There are two cases:
 			//! 1. (ind,jnd) in SUX --> use input hoppings
@@ -351,7 +351,7 @@ namespace Dmrg {
 					break;
 			}
 			return x;
-		}
+		}*/
 
 		//! Compute correct value of onsite potential  for  site ind and internal degree of freedom sigma
 		RealType computeOnsitePotential(int type,int ind,int sigma,int smax,int emin) const 

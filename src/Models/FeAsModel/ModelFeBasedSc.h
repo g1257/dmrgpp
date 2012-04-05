@@ -538,6 +538,7 @@ namespace Dmrg {
 					}
 				}
 				addInteraction(hmatrix,cm,i);
+				addMagneticField(hmatrix,cm,i,block[i]);
 			}
 		}
 
@@ -547,7 +548,6 @@ namespace Dmrg {
 			addInteractionU2(hmatrix,cm,i);
 			addInteractionJ1(hmatrix,cm,i);
 			addInteractionJ2(hmatrix,cm,i);
-			addMagneticField(hmatrix,cm,i);
 		}
 
 		//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
@@ -616,15 +616,15 @@ namespace Dmrg {
 			}
 		}
 
-		void addMagneticField(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i) const
+		void addMagneticField(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i,size_t actualIndexOfSite) const
 		{
 			if (modelParameters_.magneticField.n_row()<3) return;
-			assert(i<modelParameters_.magneticField.n_col());
+			assert(actualIndexOfSite<modelParameters_.magneticField.n_col());
 			for (int orb=0;orb<NUMBER_OF_ORBITALS;orb++)
-				addMagneticField(hmatrix,cm,i,orb);
+				addMagneticField(hmatrix,cm,i,actualIndexOfSite,orb);
 		}
 
-		void addMagneticField(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i,size_t orbital) const
+		void addMagneticField(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i,size_t actualIndexOfSite,size_t orbital) const
 		{
 			SparseMatrixType cup = cm[orbital+SPIN_UP*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data;
 			SparseMatrixType cupTranspose;
@@ -634,16 +634,16 @@ namespace Dmrg {
 			SparseMatrixType Atranspose;
 			transposeConjugate(Atranspose,A);
 
-			hmatrix += modelParameters_.magneticField(0,i) * A;
+			hmatrix += modelParameters_.magneticField(0,actualIndexOfSite) * A;
 
-			hmatrix += modelParameters_.magneticField(1,i) * Atranspose;
+			hmatrix += modelParameters_.magneticField(1,actualIndexOfSite) * Atranspose;
 
 			SparseMatrixType nup = n(cup);
 			SparseMatrixType ndown = n(cdown);
 
 			SparseMatrixType tmp = nup;
 			tmp += (-1.0)*ndown;
-			hmatrix += modelParameters_.magneticField(2,i) * tmp;
+			hmatrix += modelParameters_.magneticField(2,actualIndexOfSite) * tmp;
 
 		}
 
