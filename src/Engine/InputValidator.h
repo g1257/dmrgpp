@@ -258,7 +258,7 @@ public:
 		}
 		size_t k = 2;
 		for (size_t i=0;i<m.n_row();i++)
-			for (size_t j=0;j<m.n_row();j++)
+			for (size_t j=0;j<m.n_col();j++)
 				m(i,j) = atof(it->second[k++].c_str());
 
 		cleanLabelsIfNeeded(label2,mapStrVec_,it);
