@@ -103,7 +103,7 @@ namespace PsimagLite {
 			//for (size_t i=0;i<data_.size();i++) data_[i] = 0;
 		}
 		
-		Matrix<T>& operator += (const Matrix<T>& other)
+		Matrix<T>& operator+=(const Matrix<T>& other)
 		{
 			// domain checking ??? 
 			for(size_t i=0;i<ncol_*nrow_;i++) 
@@ -111,7 +111,7 @@ namespace PsimagLite {
 			return *this;
 		}
 		
-		Matrix<T>& operator -= (const Matrix<T>& other)
+		Matrix<T>& operator-=(const Matrix<T>& other)
 		{
 		  // domain checking ??? 
 		  for(size_t i=0;i<ncol_*nrow_;i++) 

@@ -141,9 +141,20 @@ namespace PsimagLite {
 			return counter;
 		}
 
+		ValueType finalize(const VectorType& y)
+		{
+			assert(cols_.size()==values_.size());
+			if (cols_.size()==0) return 0;
+
+			ValueType sum = 0.0;
+			for (size_t i=0;i<cols_.size();i++)
+				sum += values_[i] * y[cols_[i]];
+			return sum;
+		}
+
 	private:
 		ColumnsType cols_;
-		std::vector<ValueType> values_;
+		VectorType values_;
 			
 	}; // class SparseRow
 
