@@ -170,13 +170,12 @@ namespace Dmrg {
 				pack1.unpack(x,y,lrs_.super().permutation(i));
 				//if (y>=basisE_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem E\n");
 				size_t x0=0,x1=0;
-				if (x>=lrs_.left().permutationVector().size())
-					throw std::runtime_error("applyLocalOpSystem S\n");
+				assert(x<lrs_.left().permutationVector().size());
 				pack2.unpack(x0,x1,lrs_.left().permutation(x));
 				/*int nx0 = basisS_.electrons(x)-electrons[x1];
 					if (nx0<0) throw std::runtime_error("TimeStepTargetting::applyLocalOpSystem(...)\n");
 				 */
-				RealType sign = fermionSign(x,A.fermionSign);
+				RealType sign = 1.0; //fermionSign(x,A.fermionSign);
 				for (int k=A.data.getRowPtr(x1);k<A.data.getRowPtr(x1+1);k++) {
 					size_t x1prime = A.data.getCol(k);
 					size_t xprime = lrs_.left().permutationInverse(x0+x1prime*nx);

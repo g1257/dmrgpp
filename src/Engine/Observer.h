@@ -193,8 +193,7 @@ namespace Dmrg {
 		}
 
 		template<typename SomeModelType>
-		void fourPointDeltas(
-				std::vector<FieldType>& fpd,
+		void fourPointDeltas(std::vector<FieldType>& fpd,
 				size_t n,
 				const std::vector<size_t>& gammas,
 				const SomeModelType& model)
@@ -216,13 +215,11 @@ namespace Dmrg {
 		}
 
 		template<typename ApplyOperatorType>
-		FieldType onePoint(
-				size_t site,
-				const typename ApplyOperatorType::OperatorType& A,
-				bool corner = false)
+		FieldType onePoint(size_t site,
+				   const typename ApplyOperatorType::OperatorType& A,
+				   bool corner = false)
 		{
-			return onepoint_.template operator()<ApplyOperatorType>
-				(site,A,corner);
+			return onepoint_.template operator()<ApplyOperatorType>(site,A,corner);
 		}
 
 	private:

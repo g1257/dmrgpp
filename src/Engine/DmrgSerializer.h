@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BLAS.h"
 #include "IoSimple.h"
 #include "FermionSign.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 //! Move also checkpointing from DmrgSolver to here (FIXME)
@@ -185,9 +186,8 @@ public:
 	// experimental!!
 	size_t site() const
 	{
-		size_t last = lrs_.left().block().size();
-		assert(last>0);
-		return lrs_.left().block()[last-1];
+		if (direction_==ProgramGlobals::EXPAND_SYSTEM) return lrs_.right().block()[0]-1;
+		else return lrs_.right().block()[0];
 	}
 
 	void transform(MatrixType& ret,const MatrixType& O) const
@@ -210,6 +210,7 @@ public:
 	}
 
 private:
+
 	// Disallowing copy and assignment here:
 	DmrgSerializer(const ThisType& ds);
 	ThisType& operator=(const ThisType& ds);

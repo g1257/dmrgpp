@@ -222,8 +222,7 @@ namespace Dmrg {
 			return timeSerializerV_[currentPos_].marker();
 		}
 
-		const VectorWithOffsetType&
-			getVectorFromBracketId(size_t leftOrRight) const
+		const VectorWithOffsetType& getVectorFromBracketId(size_t leftOrRight) const
 		{
 			if (bracket(leftOrRight)==GS_VECTOR) {
 				return wavefunction();

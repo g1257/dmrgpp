@@ -125,6 +125,7 @@ namespace Dmrg {
 
 		int operator()(size_t i,int f) const
 		{
+			assert(i<signs_.size());
 			return (signs_[i]) ? f : 1;
 		}
 

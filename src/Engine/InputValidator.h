@@ -213,6 +213,7 @@ public:
 		if (it==mapStrVec_.end()) throw std::runtime_error("InputValidator");
 
 		size_t len =  it->second.size();
+		assert(len>1);
 		val.resize(len-1);
 		for (size_t i=0;i<len-1;i++) {
 			val[i]=static_cast<T>(atof(it->second[i+1].c_str()));
