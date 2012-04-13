@@ -260,6 +260,7 @@ namespace PsimagLite {
 				bool found=false;
 				bool foundOnce =false;
 				LongSizeType counter=0;
+				if (fin_.bad() || !fin_.good()) throw std::runtime_error("Readline\n");
 				while(!fin_.eof()) {
 					fin_>>temp;
 					if (fin_.eof()) break;
