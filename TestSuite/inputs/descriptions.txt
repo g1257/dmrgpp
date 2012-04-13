@@ -55,4 +55,6 @@ Tests *with* SU(2) symmetry:
 	Tests the density and double occupation of a time vector,
 	defined as exp(iHt) h d |gs>, where h a holon and d a doublon.
 	This test was checked against Suzuki-Trotter with an independent code.
+1000) Tests time evolution with 3 operators, which is more than the holon-doublon case, and
+hence non-trivial.
 #TAGEND DO NOT REMOVE THIS TAG

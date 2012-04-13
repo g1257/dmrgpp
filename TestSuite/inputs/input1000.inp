@@ -9,8 +9,8 @@ hubbardU	8  0  0  0  0  0  0  0  0
 potentialV	 16  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 
 SolverOptions=wft,TimeStepTargetting
 Version=1219aeb832f7990323cca0baa17ad7b87b731ea6
-OutputFile=data400.txt
-InfiniteLoopKeptStates= 256
+OutputFile=data1000.txt
+InfiniteLoopKeptStates=256
 FiniteLoops 101 3 256 0 -3 256 1 -3 256 1 3 256 1
                 3 256 1 -3 256 1 -3 256 1 3 256 1
                 3 256 1 -3 256 1 -3 256 1 3 256 1

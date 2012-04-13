@@ -1,0 +1,49 @@
+\" To see this file do less dmrg.8 or man -l dmrg.8
+.TH dmrg 8  "May 1, 2012" "version 2.6" "DMRG++"
+.SH NAME
+dmrg \- The main DMRG++ driver
+.SH SYNOPSIS
+.B ./dmrg 
+[\-b] [\-\-threads=n] [\-\-wft=yes|no] [\-\-no\-finite\-loops] [\--logfile=logfile] [\-v] [\-h] [\-f input-file]
+.SH DESCRIPTION
+If no -f input-file is given, DMRG++ prints the version details and exits.
+Else it uses the input-file as input for the main driver. 
+Command line options override input file options, which
+in turn override defaults.
+.SH OPTIONS
+.TP
+.B \-b
+Run in the background. Requires the \-\-logfile option.
+.TP
+.B \-f input-file
+Use input-file as the input for the main driver. If input-file is \- then read standard input.
+.TP
+.B \-h
+Print this message and exit.
+.TP
+.B \-\-logfile=logfile
+Do not print progress to the terminal. Close standard output and error and redirect both to logfile.
+.TP
+.B \-\-no-finite-loops
+Do not perform finite loops, that is, exit after the infinite algorithm has finished.
+.TP
+.B \-\-threads=n
+Use n pthreads. It is an error to specify this option unless the code was compiled with pthread support. 
+.TP
+.B \-v
+Turn on verbose mode.
+.TP
+.B \-\-wft=yes|no
+Perform or do not perform the wave-function transformation for guessing the ground state.
+.TP
+
+.SH AUTHOR
+G.A.
+.TP
+.SH BUGS
+.TP
+.SH LIMITATIONS
+.TP
+.SH SEE ALSO
+configure.pl, testsuite.pl, oracleCreator.pl, processingLibrary.txt
+
