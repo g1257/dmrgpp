@@ -261,15 +261,14 @@ int main(int argc,char *argv[])
 
 	//Setup the Geometry
 	std::vector<LabelWithKnownSizeType> labelsWithKnownSize;
-	std::vector<LabelWithKnownSizeType::ValueType> vec(2,LabelWithKnownSizeType::ValueType(2,0));
+	std::vector<LabelWithKnownSizeType::ValueType> vec;
 	labelsWithKnownSize.push_back(LabelWithKnownSizeType("JMVALUES",vec));
-	vec.resize(0);
-	labelsWithKnownSize.push_back(LabelWithKnownSizeType("RAWMATRIX",vec));
+	labelsWithKnownSize.push_back(LabelWithKnownSizeType("RAW_MATRIX",vec));
 	labelsWithKnownSize.push_back(LabelWithKnownSizeType("Connectors",vec));
-	vec.resize(2);
-	vec[0] =LabelWithKnownSizeType::ValueType(3,0);
-	vec[1] =LabelWithKnownSizeType::ValueType(0,1);
 	labelsWithKnownSize.push_back(LabelWithKnownSizeType( "MagneticField",vec));
+	vec.resize(1);
+	vec[0] = LabelWithKnownSizeType::ValueType(0,3);
+	labelsWithKnownSize.push_back(LabelWithKnownSizeType( "FiniteLoops",vec));
 	PsimagLite::InputValidator io(filename,labelsWithKnownSize);
 //	IoInputType io(filename);
 	GeometryType geometry(io);

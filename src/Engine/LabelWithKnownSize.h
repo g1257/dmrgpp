@@ -102,35 +102,36 @@ namespace PsimagLite {
 
 		std::string name() const { return name_; }
 
-		void check(const std::vector<std::string>& vec,size_t linSize,size_t line) const
+		void check(const std::vector<std::string>& vec,size_t line) const
 		{
 			if (expectedSizes_.size()==0) return;
 
 			std::string s(__FILE__);
+			s += " Input eror at line " + ttos(line) + "\n";
 			if (expectedSizes_.size()==1) {
-				size_t n = getSize(linSize,0);
-				if (n==vec.size()-1 && size_t(atoi(vec[0].c_str()))==n) return;
+				if (vec.size()==0) throw std::runtime_error(s.c_str());
+				size_t n = getSize(atoi(vec[0].c_str()),0);
+				if (n==vec.size()-1) return;
 				std::cout<<" Number of numbers to follow is wrong, expected\n";
-				std::cerr<<"Line="<<line<<"\n";
 				throw std::runtime_error(s.c_str());
 			}
 			if (expectedSizes_.size()==2) {
-				size_t row = getSize(linSize,0);
-				size_t col = getSize(linSize,1);
+				if (vec.size()<2) throw std::runtime_error(s.c_str());
+				size_t row = getSize(atoi(vec[0].c_str()),0);
+				size_t col = getSize(atoi(vec[1].c_str()),1);
 				size_t n = row*col;
 
 				if (n==vec.size()-2 && size_t(atoi(vec[0].c_str()))==row && size_t(atoi(vec[1].c_str()))==col) return;
 				std::cout<<" Number of numbers to follow is wrong, expected\n";
-				std::cerr<<"Line="<<line<<"\n";
 				throw std::runtime_error(s.c_str());
 			}
 		}
 
 	private:
 
-		size_t getSize(size_t linSize,size_t index) const
+		size_t getSize(size_t n,size_t index) const
 		{
-			return expectedSizes_[index].first + linSize*expectedSizes_[index].second;
+			return expectedSizes_[index].first + n*expectedSizes_[index].second;
 		}
 
 		std::string name_;

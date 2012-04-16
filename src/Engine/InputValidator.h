@@ -108,7 +108,7 @@ public:
 	  state_(IN_LABEL),
 	  numericVector_(0),
 	  lastLabel_(""),
-	  MagicLabel_("FiniteLoops"),
+//	  MagicLabel_("FiniteLoops"),
 	  labelsWithKnownSize_(labelsWithKnownSize),
 	  verbose_(false)
 	{
@@ -291,7 +291,6 @@ public:
 		cleanLabelsIfNeeded(label2,mapStrVec_,it);
 	}
 
-
 private:
 
 	template<typename SomeMapType>
@@ -417,7 +416,7 @@ private:
 			throw std::runtime_error(s.c_str());
 		}
 		size_t adjExpected = atoi(numericVector_[0].c_str());
-		if (lastLabel_==MagicLabel_) adjExpected *= 3;
+//		if (lastLabel_==MagicLabel_) adjExpected *= 3;
 
 		int x = -1;
 		for (size_t i=0;i<labelsWithKnownSize_.size();i++) {
@@ -426,9 +425,8 @@ private:
 				break;
 			}
 		}
-		size_t linSize = 0;
-		read(linSize,"TotalNumberOfSites=");
-		if (x>=0) labelsWithKnownSize_[x].check(numericVector_,linSize,line_);
+
+		if (x>=0) labelsWithKnownSize_[x].check(numericVector_,line_);
 		else if (numericVector_.size()!=adjExpected+1) {
 			std::cout<<" Number of numbers to follow is wrong, expected ";
 			std::cout<<(numericVector_.size()-1)<<" got "<<adjExpected<<"\n";
@@ -492,7 +490,7 @@ private:
 	size_t state_;
 	std::vector<std::string> numericVector_;
 	std::string lastLabel_;
-	const std::string MagicLabel_;
+//	const std::string MagicLabel_;
 	std::vector<LabelWithKnownSize> labelsWithKnownSize_;
 	bool verbose_;
 	std::map<std::string,std::string> mapStrStr_;
