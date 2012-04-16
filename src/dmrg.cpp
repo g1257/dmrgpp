@@ -64,10 +64,12 @@ typedef PsimagLite::ConcurrencyMpi<MatrixElementType> ConcurrencyType;
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
 #include "InputValidator.h"
+#include "LabelWithKnownSize.h"
 
 typedef std::complex<MatrixElementType> ComplexType;
 typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<MatrixElementType> MySparseMatrixReal;
+typedef PsimagLite::LabelWithKnownSize LabelWithKnownSizeType;
 
 using namespace Dmrg;
 
@@ -213,7 +215,17 @@ int main(int argc,char *argv[])
 	if (concurrency.root()) std::cerr<<license;
 
 	//Setup the Geometry
-	PsimagLite::InputValidator io(filename);
+	std::vector<LabelWithKnownSizeType> labelsWithKnownSize;
+	std::vector<LabelWithKnownSizeType::ValueType> vec(2,LabelWithKnownSizeType::ValueType(2,0));
+	labelsWithKnownSize.push_back(LabelWithKnownSizeType("JMVALUES",vec));
+	vec.resize(0);
+	labelsWithKnownSize.push_back(LabelWithKnownSizeType("RAWMATRIX",vec));
+	labelsWithKnownSize.push_back(LabelWithKnownSizeType("Connectors",vec));
+	vec.resize(2);
+	vec[0] =LabelWithKnownSizeType::ValueType(3,0);
+	vec[1] =LabelWithKnownSizeType::ValueType(0,1);
+	labelsWithKnownSize.push_back(LabelWithKnownSizeType( "MagneticField",vec));
+	PsimagLite::InputValidator io(filename,labelsWithKnownSize);
 
 	//IoInputType io(filename);
 	GeometryType geometry(io);

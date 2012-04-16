@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cstdlib>
 #include "Matrix.h"
 #include "Utils.h"
+#include "LabelWithKnownSize.h"
 
 namespace PsimagLite {
 
@@ -100,7 +101,7 @@ class InputValidator {
 	
 public:
 	
-	InputValidator(const std::string& file)
+	InputValidator(const std::string& file,std::vector<LabelWithKnownSize>& labelsWithKnownSize)
 	: file_(file),
 	  data_(""),
 	  line_(0),
@@ -108,14 +109,9 @@ public:
 	  numericVector_(0),
 	  lastLabel_(""),
 	  MagicLabel_("FiniteLoops"),
-	  labelsWithKnownSize_(4),
+	  labelsWithKnownSize_(labelsWithKnownSize),
 	  verbose_(false)
 	{
-		labelsWithKnownSize_[0] = "JMVALUES";
-		labelsWithKnownSize_[1] = "RAW_MATRIX";
-		labelsWithKnownSize_[2] = "Connectors";
-		labelsWithKnownSize_[3] = "MagneticField";
-
 		std::ifstream fin(file.c_str());
 		if (!fin || !fin.good() || fin.bad()) {
 			std::string s(__FILE__);
@@ -423,18 +419,25 @@ private:
 		size_t adjExpected = atoi(numericVector_[0].c_str());
 		if (lastLabel_==MagicLabel_) adjExpected *= 3;
 
-		int x = PsimagLite::isInVector(labelsWithKnownSize_,lastLabel_);
-		if (x>=0) adjExpected = numericVector_.size()-1;
-		if (numericVector_.size()==adjExpected+1) {
-			std::string adjLabel=adjLabelForDuplicates(lastLabel_,mapStrVec_);
-			mapStrVec_[adjLabel]=numericVector_;
-			return;
+		int x = -1;
+		for (size_t i=0;i<labelsWithKnownSize_.size();i++) {
+			if (labelsWithKnownSize_[i].name()==lastLabel_) {
+				x = i;
+				break;
+			}
 		}
-			
-		std::cout<<" Number of numbers to follow is wrong, expected ";
-		std::cout<<(numericVector_.size()-1)<<" got "<<adjExpected<<"\n";
-		std::cerr<<"Line="<<line_<<"\n";
-		throw std::runtime_error(s.c_str());
+		size_t linSize = 0;
+		read(linSize,"TotalNumberOfSites=");
+		if (x>=0) labelsWithKnownSize_[x].check(numericVector_,linSize,line_);
+		else if (numericVector_.size()!=adjExpected+1) {
+			std::cout<<" Number of numbers to follow is wrong, expected ";
+			std::cout<<(numericVector_.size()-1)<<" got "<<adjExpected<<"\n";
+			std::cerr<<"Line="<<line_<<"\n";
+			throw std::runtime_error(s.c_str());
+		}
+		std::string adjLabel=adjLabelForDuplicates(lastLabel_,mapStrVec_);
+		mapStrVec_[adjLabel]=numericVector_;
+
 	}
 
 	template<typename SomeMapType>
@@ -490,7 +493,7 @@ private:
 	std::vector<std::string> numericVector_;
 	std::string lastLabel_;
 	const std::string MagicLabel_;
-	std::vector<std::string> labelsWithKnownSize_;
+	std::vector<LabelWithKnownSize> labelsWithKnownSize_;
 	bool verbose_;
 	std::map<std::string,std::string> mapStrStr_;
 	std::map<std::string,std::vector<std::string> > mapStrVec_;

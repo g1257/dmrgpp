@@ -379,7 +379,7 @@ namespace Dmrg {
 			params.tolerance = eps;
 			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 			params.options= parameters_.options;
-			params.lotaMemory=!(parameters_.options.find("DoNotSaveLanczosVectors")!=std::string::npos);
+			params.lotaMemory=false; //!(parameters_.options.find("DoNotSaveLanczosVectors")!=std::string::npos);
 
 			LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
 
