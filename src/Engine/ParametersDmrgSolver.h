@@ -293,7 +293,8 @@ namespace Dmrg {
 		DmrgCheckPoint checkpoint;
 		size_t nthreads;
 		int useReflectionSymmetry;
-		
+		std::string fileForDensityMatrixEigs;
+
 		//! Read Dmrg parameters from inp file
 		ParametersDmrgSolver(InputValidatorType& io)
 		{
@@ -331,7 +332,11 @@ namespace Dmrg {
 			try {
 				io.readline(useReflectionSymmetry,"UseReflectionSymmetry=");
 			} catch (std::exception& e) {}
-			//io.rewind();
+			fileForDensityMatrixEigs="";
+			try {
+				io.readline(fileForDensityMatrixEigs,"FileForDensityMatrixEigs=");
+			} catch (std::exception& e) {}
+
 		} 
 
 	};
@@ -359,6 +364,8 @@ namespace Dmrg {
 			os<<"parameters.tolerance="<<parameters.tolerance<<"\n";
 		os<<"parameters.nthreads="<<parameters.nthreads<<"\n";
 		os<<"parameters.useReflectionSymmetry="<<parameters.useReflectionSymmetry<<"\n";
+		if (parameters.fileForDensityMatrixEigs!="")
+			os<<"parameters.fileForDensityMatrixEigs="<<parameters.fileForDensityMatrixEigs<<"\n";
 		return os;
 	}
 } // namespace Dmrg

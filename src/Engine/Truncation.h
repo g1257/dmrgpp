@@ -290,8 +290,7 @@ namespace Dmrg {
 
 		void updateKeptStates(size_t& keptStates,const std::vector<RealType>& eigs2)
 		{
-// 			std::cerr<<eigs;
-// 			std::cerr<<"-----------------\n";
+			dumpEigs(eigs2);
 			std::vector<RealType> eigs = eigs2;
 			std::vector<size_t> perm(eigs.size());
 			Sort<std::vector<RealType> > sort;
@@ -370,6 +369,20 @@ namespace Dmrg {
 			for (size_t i=0;i<x;i++)
 				discWeight += fabs(eigs[i]); 
 			return discWeight;
+		}
+
+		void dumpEigs(const std::vector<RealType>& eigs) const
+		{
+			static size_t counter = 0;
+			if (parameters_.fileForDensityMatrixEigs=="") return;
+			std::string file(parameters_.fileForDensityMatrixEigs);
+			file += ttos(counter);
+			size_t parallelRank = 0;
+			PsimagLite::IoSimple::Out io(file,parallelRank);
+			io<<eigs;
+			counter++;
+// 			std::cerr<<eigs;
+// 			std::cerr<<"-----------------\n";
 		}
 
 		ReflectionSymmetryType& reflectionOperator_;
