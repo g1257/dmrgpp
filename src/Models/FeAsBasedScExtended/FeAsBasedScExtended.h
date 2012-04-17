@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define FEAS_BASED_SC_EX
 #include "ModelFeBasedSc.h"
 #include "LinkProductFeAsExtended.h"
-#include "InputValidator.h"
 
 namespace Dmrg {
 	template<
@@ -117,15 +116,14 @@ namespace Dmrg {
 				MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename MyBasis::BlockType BlockType;
+		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 		static const size_t NUMBER_OF_ORBITALS =
 				ModelFeAsType::NUMBER_OF_ORBITALS;
-		static const size_t SPIN_UP =
-						ModelFeAsType::SPIN_UP;
-		static const size_t SPIN_DOWN =
-						ModelFeAsType::SPIN_DOWN;
+		static const size_t SPIN_UP = ModelFeAsType::SPIN_UP;
+		static const size_t SPIN_DOWN = ModelFeAsType::SPIN_DOWN;
 
-		FeAsBasedScExtended(PsimagLite::InputValidator& io,GeometryType const &geometry,ConcurrencyType& concurrency)
+		FeAsBasedScExtended(InputValidatorType& io,GeometryType const &geometry,ConcurrencyType& concurrency)
 			: ModelBaseType(geometry,concurrency),modelParameters_(io), geometry_(geometry),
 			  modelFeAs_(io,geometry,concurrency)
 		{}

@@ -63,19 +63,16 @@ typedef PsimagLite::ConcurrencyMpi<MatrixElementType> ConcurrencyType;
 #include "VectorWithOffsets.h"
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
-#include "InputValidator.h"
-#include "LabelWithKnownSize.h"
 
 typedef std::complex<MatrixElementType> ComplexType;
 typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<MatrixElementType> MySparseMatrixReal;
-typedef PsimagLite::LabelWithKnownSize LabelWithKnownSizeType;
 
 using namespace Dmrg;
 
-typedef PsimagLite::Geometry<MatrixElementType,ProgramGlobals> GeometryType;;
-typedef PsimagLite::InputValidator IoInputType;
-typedef ParametersDmrgSolver<MatrixElementType> ParametersDmrgSolverType;
+typedef PsimagLite::Geometry<MatrixElementType,ProgramGlobals> GeometryType;
+typedef PsimagLite::InputValidator<InputCheck> InputValidatorType;
+typedef ParametersDmrgSolver<MatrixElementType,InputValidatorType> ParametersDmrgSolverType;
 
 template<typename ModelFactoryType,
 	 template<typename,typename> class InternalProductTemplate,
@@ -84,9 +81,8 @@ template<typename ModelFactoryType,
 void mainLoop3(GeometryType& geometry,
               ParametersDmrgSolverType& dmrgSolverParams,
               ConcurrencyType& concurrency,
-              IoInputType& io)
+	      InputValidatorType& io)
 {
-
 	//! Setup the Model
 	ModelFactoryType model(dmrgSolverParams,io,geometry,concurrency);
 
@@ -114,7 +110,7 @@ template<template<typename,typename> class ModelHelperTemplate,
 void mainLoop2(GeometryType& geometry,
               ParametersDmrgSolverType& dmrgSolverParams,
               ConcurrencyType& concurrency,
-              IoInputType& io)
+	      InputValidatorType& io)
 {
 	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
 	typedef Basis<MatrixElementType,MySparseMatrix> BasisType;
@@ -161,7 +157,7 @@ template<template<typename,typename> class ModelHelperTemplate,
 void mainLoop(GeometryType& geometry,
               ParametersDmrgSolverType& dmrgSolverParams,
               ConcurrencyType& concurrency,
-              IoInputType& io)
+	      InputValidatorType& io)
 {
 	if (dmrgSolverParams.options.find("InternalProductStored")!=std::string::npos) {
 		mainLoop2<ModelHelperTemplate,
@@ -215,22 +211,13 @@ int main(int argc,char *argv[])
 	if (concurrency.root()) std::cerr<<license;
 
 	//Setup the Geometry
-	std::vector<LabelWithKnownSizeType> labelsWithKnownSize;
-	std::vector<LabelWithKnownSizeType::ValueType> vec;
-	labelsWithKnownSize.push_back(LabelWithKnownSizeType("JMVALUES",vec));
-	labelsWithKnownSize.push_back(LabelWithKnownSizeType("RAW_MATRIX",vec));
-	labelsWithKnownSize.push_back(LabelWithKnownSizeType("Connectors",vec));
-	labelsWithKnownSize.push_back(LabelWithKnownSizeType( "MagneticField",vec));
-	vec.resize(1);
-	vec[0] = LabelWithKnownSizeType::ValueType(0,3);
-	labelsWithKnownSize.push_back(LabelWithKnownSizeType( "FiniteLoops",vec));
-	PsimagLite::InputValidator io(filename,labelsWithKnownSize);
+	InputCheck inputCheck;
+	InputValidatorType io(filename,inputCheck);
 
 	//IoInputType io(filename);
 	GeometryType geometry(io);
-	
 
-	ParametersDmrgSolver<MatrixElementType> dmrgSolverParams(io);
+	ParametersDmrgSolver<MatrixElementType,InputValidatorType> dmrgSolverParams(io);
 	//io.rewind();
 
 	if (dmrgSolverParams.options.find("hasThreads")!=std::string::npos) {

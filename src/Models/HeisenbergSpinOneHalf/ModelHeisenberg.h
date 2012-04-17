@@ -91,7 +91,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "ProgramGlobals.h"
-#include "InputValidator.h"
 
 namespace Dmrg {	
 	
@@ -118,6 +117,7 @@ namespace Dmrg {
 		typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,
 		                  LinkProductType,SharedMemoryTemplate> ModelBaseType;
+		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 		static const int NUMBER_OF_ORBITALS=1;
 		static const int DEGREES_OF_FREEDOM=2; // spin up and down
@@ -131,7 +131,7 @@ namespace Dmrg {
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
-		ModelHeisenberg(PsimagLite::InputValidator& io,GeometryType const &geometry,ConcurrencyType& concurrency)
+		ModelHeisenberg(InputValidatorType& io,GeometryType const &geometry,ConcurrencyType& concurrency)
 		: ModelBaseType(geometry,concurrency),
 		  modelParameters_(io),
 		  geometry_(geometry), 

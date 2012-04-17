@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "TypeToString.h"
 #include "Vector.h"
-#include "InputValidator.h"
 
 namespace Dmrg {
 	/** 
@@ -280,7 +279,7 @@ namespace Dmrg {
 	where $n_\\uparrow$, and $n_\\downarrow$ are the densities of up and down
 	electrons respectively, and $j$ is twice the angular momentum divided by the number of sites.
 	*/
-	template<typename FieldType>
+	template<typename FieldType,typename InputValidatorType>
 	struct ParametersDmrgSolver {
 
 		std::string filename;
@@ -296,7 +295,7 @@ namespace Dmrg {
 		int useReflectionSymmetry;
 		
 		//! Read Dmrg parameters from inp file
-		ParametersDmrgSolver(PsimagLite::InputValidator& io)
+		ParametersDmrgSolver(InputValidatorType& io)
 		{
 			io.readline(model,"Model=");
 			io.readline(options,"SolverOptions=");
@@ -338,9 +337,9 @@ namespace Dmrg {
 	};
 
 	//! print dmrg parameters
-	template<typename FieldType>
+	template<typename FieldType,typename InputValidatorType>
 	std::ostream &operator<<(std::ostream &os,
-	                         ParametersDmrgSolver<FieldType> const &parameters)
+				 ParametersDmrgSolver<FieldType,InputValidatorType> const &parameters)
 	{
 		os<<"#This is DMRG++\n";
 		os<<"parameters.version="<<parameters.version<<"\n";

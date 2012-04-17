@@ -89,10 +89,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cstdlib>
 #include "Matrix.h"
 #include "Utils.h"
-#include "LabelWithKnownSize.h"
 
 namespace PsimagLite {
 
+template<typename InputCheckType>
 class InputValidator {
 	
 	enum {WHITESPACE,ENDOFLINE,EQUALSIGN,ALPHA_CHAR,NUMERIC_CHAR};
@@ -101,7 +101,7 @@ class InputValidator {
 	
 public:
 	
-	InputValidator(const std::string& file,std::vector<LabelWithKnownSize>& labelsWithKnownSize)
+	InputValidator(const std::string& file,const InputCheckType& inputCheck)
 	: file_(file),
 	  data_(""),
 	  line_(0),
@@ -109,7 +109,7 @@ public:
 	  numericVector_(0),
 	  lastLabel_(""),
 //	  MagicLabel_("FiniteLoops"),
-	  labelsWithKnownSize_(labelsWithKnownSize),
+	  inputCheck_(inputCheck),
 	  verbose_(false)
 	{
 		std::ifstream fin(file.c_str());
@@ -418,16 +418,7 @@ private:
 		size_t adjExpected = atoi(numericVector_[0].c_str());
 //		if (lastLabel_==MagicLabel_) adjExpected *= 3;
 
-		int x = -1;
-		for (size_t i=0;i<labelsWithKnownSize_.size();i++) {
-			if (labelsWithKnownSize_[i].name()==lastLabel_) {
-				x = i;
-				break;
-			}
-		}
-
-		if (x>=0) labelsWithKnownSize_[x].check(numericVector_,line_);
-		else if (numericVector_.size()!=adjExpected+1) {
+		if (!inputCheck_.check(lastLabel_,numericVector_,line_) && numericVector_.size()!=adjExpected+1) {
 			std::cout<<" Number of numbers to follow is wrong, expected ";
 			std::cout<<(numericVector_.size()-1)<<" got "<<adjExpected<<"\n";
 			std::cerr<<"Line="<<line_<<"\n";
@@ -491,7 +482,7 @@ private:
 	std::vector<std::string> numericVector_;
 	std::string lastLabel_;
 //	const std::string MagicLabel_;
-	std::vector<LabelWithKnownSize> labelsWithKnownSize_;
+	InputCheckType inputCheck_;
 	bool verbose_;
 	std::map<std::string,std::string> mapStrStr_;
 	std::map<std::string,std::vector<std::string> > mapStrVec_;

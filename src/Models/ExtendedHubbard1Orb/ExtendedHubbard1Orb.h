@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define EXTENDED_HUBBARD_1ORB_H
 #include "ModelHubbard.h"
 #include "LinkProdExtendedHubbard1Orb.h"
-#include "InputValidator.h"
 
 namespace Dmrg {
 	//! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
@@ -111,8 +110,9 @@ namespace Dmrg {
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
 		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
+		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
-		ExtendedHubbard1Orb(PsimagLite::InputValidator& io,
+		ExtendedHubbard1Orb(InputValidatorType& io,
 				    DmrgGeometryType const &dmrgGeometry,
 				    ConcurrencyType& concurrency)
 		: ModelBaseType(dmrgGeometry,concurrency),

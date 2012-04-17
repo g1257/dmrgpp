@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -72,73 +72,58 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LabelWithKnownSize.h
+/*! \file InputCheck.h
  *
- *  LabelWithKnownSizeing
+ *  InputChecking functions
+ *  this class also owns the stacks since they 
+ *  are so related to InputChecking
  */
-#ifndef LABEL_WITH_KNOWN_SIZE_H
-#define LABEL_WITH_KNOWN_SIZE_H
-
-#include <string>
+#ifndef INPUT_CHECK_H
+#define INPUT_CHECK_H
 #include <vector>
-#include <utility>
+#include <string>
+#include <stdexcept>
 
-namespace PsimagLite {
+namespace Dmrg {
 
-
-	class LabelWithKnownSize {
-
-		typedef std::pair<size_t,size_t> PairType;
+	class InputCheck {
 
 	public:
 
-		typedef PairType ValueType;
-
-		LabelWithKnownSize(const std::string& name,std::vector<PairType>& expectedSizes)
-			: name_(name),expectedSizes_(expectedSizes)
+		bool check(const std::string& label,const std::vector<std::string>& vec,size_t line) const
 		{
-			assert(expectedSizes_.size()<3);
-		}
-
-		std::string name() const { return name_; }
-
-		void check(const std::vector<std::string>& vec,size_t line) const
-		{
-			if (expectedSizes_.size()==0) return;
-
-			std::string s(__FILE__);
-			s += " Input eror at line " + ttos(line) + "\n";
-			if (expectedSizes_.size()==1) {
-				if (vec.size()==0) throw std::runtime_error(s.c_str());
-				size_t n = getSize(atoi(vec[0].c_str()),0);
-				if (n==vec.size()-1) return;
-				std::cout<<" Number of numbers to follow is wrong, expected\n";
-				throw std::runtime_error(s.c_str());
-			}
-			if (expectedSizes_.size()==2) {
-				if (vec.size()<2) throw std::runtime_error(s.c_str());
-				size_t row = getSize(atoi(vec[0].c_str()),0);
-				size_t col = getSize(atoi(vec[1].c_str()),1);
+			if (label=="JMVALUES") {
+				if (vec.size()!=2) return error1("JMVALUES",line);
+				return true;
+			} else if (label=="RAW_MATRIX") {
+				size_t row = atoi(vec[0].c_str());
+				size_t col = atoi(vec[1].c_str());
 				size_t n = row*col;
-
-				if (n==vec.size()-2 && size_t(atoi(vec[0].c_str()))==row && size_t(atoi(vec[1].c_str()))==col) return;
-				std::cout<<" Number of numbers to follow is wrong, expected\n";
-				throw std::runtime_error(s.c_str());
+				if (vec.size()!=n+2) return error1("RAW_MATRIX",line);
+				return true;
+			} else if (label=="Connectors") {
+				return true;
+			} else if (label=="MagneticField") {
+				return true;
+			} else if (label=="FiniteLoops") {
+				size_t n = atoi(vec[0].c_str());
+				if (vec.size()!=3*n+1)  return error1("FiniteLoops",line);
+				return true;
 			}
+			return false;
 		}
 
 	private:
 
-		size_t getSize(size_t n,size_t index) const
+		bool error1(const std::string& message,size_t line) const
 		{
-			return expectedSizes_[index].first + n*expectedSizes_[index].second;
+			std::string s(__FILE__);
+			s += " : Input error for label " + message + " near line " + ttos(line) + "\n";
+			throw std::runtime_error(s.c_str());
+
 		}
 
-		std::string name_;
-		std::vector<PairType> expectedSizes_;
-
-
-	}; // class LabelWithKnownSize
+	}; // class InputCheck
 } // namespace Dmrg 
 
 /*@}*/

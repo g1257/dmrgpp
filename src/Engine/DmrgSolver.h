@@ -118,7 +118,8 @@ namespace Dmrg {
 //   				ModelType,ConcurrencyType,IoType,VectorWithOffsetTemplate> TargettingType;*/
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef typename TargettingType::TargettingParamsType TargettingParamsType;
-		typedef ParametersDmrgSolver<RealType> ParametersType;
+		typedef typename ModelType::InputValidatorType InputValidatorType;
+		typedef ParametersDmrgSolver<RealType,InputValidatorType> ParametersType;
 		typedef Diagonalization<ParametersType,TargettingType,InternalProductTemplate> DiagonalizationType;
 
 // 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
@@ -137,7 +138,7 @@ namespace Dmrg {
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
 
-		DmrgSolver(ParametersDmrgSolver<RealType> const &parameters,
+		DmrgSolver(ParametersDmrgSolver<RealType,InputValidatorType> const &parameters,
 		           ModelType const &model,
 		           ConcurrencyType &concurrency,
 		           TargettingParamsType& targetStruct)
@@ -229,7 +230,7 @@ namespace Dmrg {
 		}
 
 	private:
-		ParametersDmrgSolver<RealType> parameters_;
+		ParametersDmrgSolver<RealType,InputValidatorType> parameters_;
 		const ModelType& model_;
 		ConcurrencyType& concurrency_;
 		const TargettingParamsType& targetStruct_;

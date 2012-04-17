@@ -91,7 +91,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
 #include "ProgramGlobals.h"
-#include "InputValidator.h"
 
 namespace Dmrg {
 	//! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
@@ -121,7 +120,6 @@ namespace Dmrg {
 
 		typedef unsigned int long long WordType;
 		typedef typename ModelHelperType::BlockType Block;
-//		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 
 	public:
 
@@ -130,12 +128,13 @@ namespace Dmrg {
 		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 		typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
+		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef std::vector<HilbertState> HilbertBasisType;
 		
-		ModelHubbard(PsimagLite::InputValidator& io,
+		ModelHubbard(InputValidatorType& io,
 			     DmrgGeometryType const &dmrgGeometry,
 			     ConcurrencyType& concurrency,
 			     size_t offset = DEGREES_OF_FREEDOM)

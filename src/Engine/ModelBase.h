@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -89,6 +87,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "IoSimple.h"
 #include "HamiltonianConnection.h"
 #include "Su2SymmetryGlobals.h"
+#include "InputValidator.h"
+#include "InputCheck.h"
 
 namespace Dmrg {
 	
@@ -119,6 +119,7 @@ namespace Dmrg {
 
 	public:
 
+		typedef PsimagLite::InputValidator<InputCheck> InputValidatorType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHelperType::RealType RealType;
@@ -129,7 +130,6 @@ namespace Dmrg {
 		typedef typename ModelHelperType::BasisType MyBasis;
 		typedef typename ModelHelperType::BasisWithOperatorsType
 				BasisWithOperatorsType;
-//		typedef ModelCommon<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelCommonType;
 		typedef DmrgGeometryType GeometryType;
 		typedef HamiltonianConnection<DmrgGeometryType,ModelHelperType,LinkProductType> HamiltonianConnectionType;
 		typedef ParallelConnectionsTemplate<HamiltonianConnectionType> ParallelConnectionsType;
@@ -145,30 +145,6 @@ namespace Dmrg {
 			Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 			MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
 		}
-
-//		virtual size_t hilbertSize(size_t site) const=0;
-
-//		virtual void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
-//					     SparseMatrixType &hamiltonian,
-//					     BasisDataType &q,
-//					     Block const &block,
-//					     RealType time) const=0;
-
-//		virtual void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,
-//						 Block const &block) const=0;
-
-//		virtual PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,
-//									      size_t site,
-//									      size_t dof) const=0;
-//		virtual void findElectrons(std::vector<size_t> &electrons,
-//					   const std::vector<size_t>& basis,
-//					   size_t site) const=0;
-
-//		virtual void setNaturalBasis(std::vector<size_t> & basis,
-//					     std::vector<size_t>& q,
-//					     const std::vector<size_t>& block) const=0;
-
-//		virtual void print(std::ostream& os) const=0;
 
 		/** Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
 		 * of basis2 \otimes basis3

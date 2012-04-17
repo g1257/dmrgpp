@@ -96,7 +96,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "FeAsBasedScExtended.h"
 #include "Immm.h"
 #include "ReflectionOperatorEmpty.h"
-#include "InputValidator.h"
 
 namespace Dmrg {
 	
@@ -135,14 +134,11 @@ namespace Dmrg {
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHelperType::RealType RealType;
-
+		typedef typename ModelHubbardType::InputValidatorType InputValidatorType;
 		typedef typename ModelHelperType::ConcurrencyType
 				ConcurrencyType;
 		typedef typename ModelHelperType::BasisType MyBasis;
 		typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-//		typedef HamiltonianConnection<GeometryType,ModelHelperType,LinkProductType> HamiltonianConnectionType;
-//		typedef SharedMemoryTemplate<HamiltonianConnectionType> ParallelConnectionsType;
-//		typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 		typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 		typedef ReflectionOperatorEmpty<LeftRightSuperType,ConcurrencyType> ReflectionSymmetryType;
 		typedef typename OperatorsType::OperatorType OperatorType;
@@ -150,7 +146,7 @@ namespace Dmrg {
 
 		template<typename SomeParametersType>
 		ModelFactory(const SomeParametersType& params,
-			     PsimagLite::InputValidator& io,
+			     InputValidatorType& io,
 			     const GeometryType& geometry,
 			     ConcurrencyType& concurrency)
 		: name_(params.model),

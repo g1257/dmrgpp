@@ -89,7 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LinkProductImmm.h"
 #include "ProgramGlobals.h"
 #include <cassert>
-#include "InputValidator.h"
 
 namespace Dmrg {
 	template<
@@ -120,6 +119,7 @@ namespace Dmrg {
 		typedef	 typename ModelBaseType::MyBasis MyBasis;
 		typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
+		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;
@@ -127,7 +127,7 @@ namespace Dmrg {
 		static const int SPIN_DOWN=HilbertSpaceImmmType::SPIN_DOWN;
 		static const int NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
-		Immm(PsimagLite::InputValidator& io,GeometryType const &geometry,ConcurrencyType& concurrency)
+		Immm(InputValidatorType& io,GeometryType const &geometry,ConcurrencyType& concurrency)
 		: ModelBaseType(geometry,concurrency),
 		  modelParameters_(io),
 		  geometry_(geometry),

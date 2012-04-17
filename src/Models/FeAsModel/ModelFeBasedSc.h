@@ -88,7 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include "LinkProductFeAs.h"
 #include "ProgramGlobals.h"
-#include "InputValidator.h"
 
 namespace Dmrg {
 	template<
@@ -128,9 +127,10 @@ namespace Dmrg {
 		typedef	 typename ModelBaseType::MyBasis MyBasis;
 		typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
+		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 		static size_t const REINTERPRET  = 1;
-		ModelFeBasedSc(PsimagLite::InputValidator& io,GeometryType const &geometry,ConcurrencyType& concurrency)
+		ModelFeBasedSc(InputValidatorType& io,GeometryType const &geometry,ConcurrencyType& concurrency)
 			: ModelBaseType(geometry,concurrency),
 			  reinterpretX_(6),
 			  reinterpretY_(9),

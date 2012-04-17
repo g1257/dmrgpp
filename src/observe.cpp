@@ -54,7 +54,6 @@ typedef PsimagLite::ConcurrencyMpi<RealType> ConcurrencyType;
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
 #include "InputValidator.h"
-#include "LabelWithKnownSize.h"
 
 using namespace Dmrg;
 
@@ -64,8 +63,8 @@ typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
 typedef  PsimagLite::Geometry<RealType,ProgramGlobals> GeometryType;
 typedef PsimagLite::IoSimple::In IoInputType;
-typedef ParametersDmrgSolver<RealType> DmrgSolverParametersType;
-typedef PsimagLite::LabelWithKnownSize LabelWithKnownSizeType;
+typedef PsimagLite::InputValidator<InputCheck> InputValidatorType;
+typedef ParametersDmrgSolver<RealType,InputValidatorType> DmrgSolverParametersType;
 
 size_t dofsFromModelName(const std::string& modelName)
 {
@@ -171,7 +170,7 @@ template<template<typename,typename> class ModelHelperTemplate,
 void mainLoop(GeometryType& geometry,
               const std::string& targetting,
               ConcurrencyType& concurrency,
-	      PsimagLite::InputValidator& io,
+	      InputValidatorType& io,
 	      const DmrgSolverParametersType& params,
               const std::string& obsOptions)
 {
@@ -260,16 +259,8 @@ int main(int argc,char *argv[])
 	}
 
 	//Setup the Geometry
-	std::vector<LabelWithKnownSizeType> labelsWithKnownSize;
-	std::vector<LabelWithKnownSizeType::ValueType> vec;
-	labelsWithKnownSize.push_back(LabelWithKnownSizeType("JMVALUES",vec));
-	labelsWithKnownSize.push_back(LabelWithKnownSizeType("RAW_MATRIX",vec));
-	labelsWithKnownSize.push_back(LabelWithKnownSizeType("Connectors",vec));
-	labelsWithKnownSize.push_back(LabelWithKnownSizeType( "MagneticField",vec));
-	vec.resize(1);
-	vec[0] = LabelWithKnownSizeType::ValueType(0,3);
-	labelsWithKnownSize.push_back(LabelWithKnownSizeType( "FiniteLoops",vec));
-	PsimagLite::InputValidator io(filename,labelsWithKnownSize);
+	InputCheck inputCheck;
+	InputValidatorType io(filename,inputCheck);
 //	IoInputType io(filename);
 	GeometryType geometry(io);
 
