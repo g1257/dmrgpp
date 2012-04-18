@@ -175,7 +175,7 @@ namespace Dmrg {
 				/*int nx0 = basisS_.electrons(x)-electrons[x1];
 					if (nx0<0) throw std::runtime_error("TimeStepTargetting::applyLocalOpSystem(...)\n");
 				 */
-				RealType sign = 1.0; //fermionSign(x,A.fermionSign);
+				RealType sign = fermionSign(x0,A.fermionSign);
 				for (int k=A.data.getRowPtr(x1);k<A.data.getRowPtr(x1+1);k++) {
 					size_t x1prime = A.data.getCol(k);
 					size_t xprime = lrs_.left().permutationInverse(x0+x1prime*nx);

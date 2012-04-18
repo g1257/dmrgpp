@@ -290,12 +290,12 @@ namespace Dmrg {
 
 		void updateKeptStates(size_t& keptStates,const std::vector<RealType>& eigs2)
 		{
-			dumpEigs(eigs2);
 			std::vector<RealType> eigs = eigs2;
 			std::vector<size_t> perm(eigs.size());
 			Sort<std::vector<RealType> > sort;
 			sort.sort(eigs,perm);
-			
+			dumpEigs(eigs);
+
 			size_t newKeptStates = computeKeptStates(keptStates,eigs);
 			size_t statesToRemove = 0;
 			if (eigs.size()>=newKeptStates)

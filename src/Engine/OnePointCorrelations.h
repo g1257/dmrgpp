@@ -145,6 +145,7 @@ namespace Dmrg {
 			
 			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper());
 			VectorWithOffsetType dest;
+//			assert(helper_.fermionicSignLeft().size()==helper_.leftRightSuper().left().size());
 			applyOpLocal1(dest,src1,A,helper_.fermionicSignLeft(),
 					helper_.direction(),corner);
 				

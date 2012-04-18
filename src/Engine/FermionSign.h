@@ -104,14 +104,14 @@ namespace Dmrg {
 			const std::vector<size_t>& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
 			if (basisElectrons.size()!=basis.permutationInverse().size()) throw std::runtime_error("Problem\n");
 			size_t nx = basisElectrons.size()/electrons.size();
-			std::vector<size_t> el(basisElectrons.size());
+			std::vector<size_t> el(nx);
 			PackIndicesType pack(nx);
 			for (size_t x=0;x<basisElectrons.size();x++) {
 				size_t x0,x1;
 				pack.unpack(x0,x1,basis.permutation(x));
 				int nx0 = basisElectrons[x]-electrons[x1];
 				if (nx0<0) throw std::runtime_error("FermionSign::ctor(...)\n");
-				el[x] = nx0;
+				el[x0] = nx0;
 			}
 			init(el);
 		  }
@@ -134,6 +134,8 @@ namespace Dmrg {
 		{
 			io.printVector(signs_,"#FERMIONICSIGN");
 		}
+
+		size_t size() const { return signs_.size(); }
 
 	private:
 
