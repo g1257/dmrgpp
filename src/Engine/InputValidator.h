@@ -92,6 +92,46 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
+class MyCompare {
+
+	enum {FIRST,SECOND};
+
+	typedef std::pair<std::string,size_t> PairType;
+
+public:
+	bool operator()(const std::string& x1,const std::string& x2)
+	{
+		PairType p1 = mysplit(x1);
+		PairType p2 = mysplit(x2);
+//		std::cerr<<"x1="<<x1<<" p1.first"<<p1.first<<" p1.second="<<p1.second<<"\n";
+//		std::cerr<<"x2="<<x2<<" p2.first"<<p2.first<<" p2.second="<<p2.second<<"\n";
+		if (p1.second==0 && p2.second==0)
+			return (x1<x2);
+		if (p1.second==0) return true;
+		if (p2.second==0) return false;
+		if (p1.first!=p2.first) return (x1<x2);
+		return (p1.second<p2.second);
+	}
+private:
+
+	PairType mysplit(const std::string& x) const
+	{
+		size_t mode=FIRST;
+		std::string xfirst = "";
+		std::string xsecond = "";
+		for (size_t i=0;i<x.length();i++) {
+			if (x[i]=='@') {
+				mode=SECOND;
+				continue;
+			}
+			if (mode==FIRST) xfirst += x[i];
+			else xsecond += x[i];
+		}
+		if (xsecond=="") return PairType(xfirst,0);
+		return PairType(xfirst,atoi(xsecond.c_str()));
+	}
+};
+
 template<typename InputCheckType>
 class InputValidator {
 	
@@ -99,6 +139,8 @@ class InputValidator {
 	
 	enum {IN_LABEL,IN_VALUE_OR_LABEL,IN_VALUE_TEXT,IN_VALUE_NUMERIC};
 	
+	typedef MyCompare MyCompareType;
+
 public:
 	
 	InputValidator(const std::string& file,const InputCheckType& inputCheck)
@@ -126,10 +168,15 @@ public:
 		}
 		fin.close();
 		check();
+
 		if (verbose_) {
+			std::cout<<"START\n";
 			printMap(mapStrStr_,"StrStr");
+			std::cout<<"END\nSTART\n";
 			printMap(mapStrVec_,"StrVec");
+			std::cout<<"END\n";
 		}
+
 	}
 
 	void readline(std::string& val,const std::string& label)
@@ -300,8 +347,8 @@ private:
 		if (it2!=labelsForRemoval_.end()) mymap.erase(it);
 	}
 
-	template<typename T1,typename T2>
-	void printMap(std::map<T1,T2>& mp,const std::string& label)
+	template<typename T1,typename T2,typename T3>
+	void printMap(std::map<T1,T2,T3>& mp,const std::string& label)
 	{
 		std::cout<<label<<"\n";
 		typename  std::map<T1,T2>::iterator it;
@@ -484,8 +531,8 @@ private:
 //	const std::string MagicLabel_;
 	InputCheckType inputCheck_;
 	bool verbose_;
-	std::map<std::string,std::string> mapStrStr_;
-	std::map<std::string,std::vector<std::string> > mapStrVec_;
+	std::map<std::string,std::string,MyCompareType> mapStrStr_;
+	std::map<std::string,std::vector<std::string>,MyCompareType> mapStrVec_;
 	std::vector<std::string> labelsForRemoval_;
 }; //InputValidator
 } // namespace PsimagLite

@@ -98,8 +98,7 @@ namespace Dmrg {
 
 		template<typename SomeBasisType>
 		FermionSign(const SomeBasisType& basis,const std::vector<size_t>& electrons)
-		: signs_(basis.size())
-		  {
+		{
 
 			const std::vector<size_t>& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
 			if (basisElectrons.size()!=basis.permutationInverse().size()) throw std::runtime_error("Problem\n");
@@ -110,7 +109,7 @@ namespace Dmrg {
 				size_t x0,x1;
 				pack.unpack(x0,x1,basis.permutation(x));
 				int nx0 = basisElectrons[x]-electrons[x1];
-				if (nx0<0) throw std::runtime_error("FermionSign::ctor(...)\n");
+				assert(nx0>=0 && x0<el.size());
 				el[x0] = nx0;
 			}
 			init(el);
@@ -141,6 +140,7 @@ namespace Dmrg {
 
 		void init(const std::vector<size_t>& electrons)
 		{
+			signs_.resize(electrons.size());
 			for (size_t i=0;i<signs_.size();i++)
 				signs_[i] = (electrons[i] & 1);
 		}
