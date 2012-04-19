@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "Split.h"
 
 namespace PsimagLite {
 	class MemoryUsage {
