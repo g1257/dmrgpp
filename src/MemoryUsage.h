@@ -86,17 +86,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 	class MemoryUsage {
-		static const char *MY_SELF_FILE;
 		static const size_t MY_MAX_LINE = 40240;
 	public:
-		MemoryUsage() : data_("")
+		MemoryUsage(const std::string& myself="") : data_(""),myself_(myself)
 		{
+			if (myself_=="") myself_="/proc/self/status";
 			update();
 		}
 		
 		void update()
 		{
-			std::ifstream ifp(MY_SELF_FILE);
+			std::ifstream ifp(myself_.c_str());
 			if (!ifp || !ifp.good() || ifp.bad()) return;
 			char tmp[MY_MAX_LINE];
 			data_ = "";
@@ -130,12 +130,22 @@ namespace PsimagLite {
 			return s2.substr(x,len);
 		}
 
+		double time()
+		{
+			update();
+			std::vector<std::string> v;
+			split(v,data_.c_str(),' ');
+			if (v.size()<15) return 0;
+			double xuser =  atof(v[13].c_str());
+			double xsys = atof(v[14].c_str());
+			return xuser + xsys;
+		}
+
 	private:
 
-		std::string data_;
+		std::string data_,myself_;
 	}; // class MemoryUsage
 
-	const char *MemoryUsage::MY_SELF_FILE = "/proc/self/status";
 } // namespace PsimagLite 
 
 /*@}*/	

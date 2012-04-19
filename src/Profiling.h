@@ -24,7 +24,7 @@ Please see full open source license included in file LICENSE.
 
 #include <string>
 #include <iostream>
-#include "Rusage.h"
+#include "MemoryUsage.h"
 
 namespace PsimagLite {
 
@@ -37,33 +37,53 @@ namespace PsimagLite {
 
 	class  Profiling {
 
-		typedef std::pair<size_t,size_t> PairType;
+		//typedef std::pair<size_t,size_t> PairType;
 
-		double diff(const PairType& p1,const PairType& p2) const
+		double diff(double x1,double x2) const //const PairType& p1,const PairType& p2) const
 		{
-			size_t sec = p1.first -p2.first;
-			size_t usec = p1.second - p2.second;
-			return double(sec) + double(usec)/1000000.0; 
+			return x1 - x2;
+			// size_t sec = p1.first -p2.first;
+			// size_t usec = p1.second - p2.second;
+			// return double(sec) + double(usec)/1000000.0; 
 		}
 
 		public:
 			Profiling(const std::string& s,std::ostream& os = std::cout) 
-			: message_(s),start_(rusage_.time()),os_(os)
+			: message_(s),
+			  memoryUsage_("/proc/self/stat"),
+			  start_(memoryUsage_.time()),
+			  isDead_(false),
+			  os_(os)
 			{
 				os_<<"Profiling: Starting clock for "<<s<<"\n";
 			}
 
 			~Profiling()
 			{
-				PairType end = rusage_.time();
+				killIt();
+			}
+
+			void end()
+			{
+				killIt();
+			}
+
+		private:
+
+			void killIt()
+			{
+				if (isDead_) return;
+				double end = memoryUsage_.time();
 				double elapsed = diff(end,start_);
 				os_<<"Profiling: Stoping clock for "<<message_<<" elapsed="<<elapsed<<"\n";
 				std::cout<<" start="<<start_<<" end="<<end<<"\n";
+				isDead_ = true;
 			}
-		private:
-			Rusage rusage_;
+
 			std::string message_;
-			PairType start_;	
+			MemoryUsage memoryUsage_;
+			double start_;
+			bool isDead_;
 			std::ostream& os_;
 	}; // Profiling
 } // PsimagLite
