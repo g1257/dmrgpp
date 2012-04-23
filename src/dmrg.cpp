@@ -51,6 +51,7 @@ typedef PsimagLite::ConcurrencyMpi<MatrixElementType> ConcurrencyType;
 #include "ModelHelperSu2.h"
 #include "InternalProductOnTheFly.h"
 #include "InternalProductStored.h"
+#include "InternalProductKron.h"
 //#include "InternalProductCached.h"
 #include "GroundStateTargetting.h"
 #include "TimeStepTargetting.h"
@@ -166,6 +167,12 @@ void mainLoop(GeometryType& geometry,
 		         VectorWithOffsetTemplate,
 		         TargettingTemplate,
 		         MySparseMatrix>(geometry,dmrgSolverParams,concurrency,io);
+	} else if (dmrgSolverParams.options.find("InternalProductKron")!=std::string::npos) {
+		mainLoop2<ModelHelperTemplate,
+			 InternalProductKron,
+			 VectorWithOffsetTemplate,
+			 TargettingTemplate,
+			 MySparseMatrix>(geometry,dmrgSolverParams,concurrency,io);
 	} else {
  		mainLoop2<ModelHelperTemplate,
 		         InternalProductOnTheFly,

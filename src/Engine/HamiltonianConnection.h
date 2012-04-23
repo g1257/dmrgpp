@@ -160,19 +160,13 @@ namespace Dmrg {
 			void thread_function_(size_t threadNum,size_t blockSize,size_t total,pthread_mutex_t* myMutex)
 			{
 				std::vector<SparseElementType> xtemp(x_.size(),0);
-				//for (size_t i=0;i<xtemp.size();i++) xtemp[i]=0;
+				size_t i =0, j = 0, type = 0,term = 0, dofs =0;
+				SparseElementType tmp = 0.0;
 				for (size_t p=0;p<blockSize;p++) {
 					size_t ix = threadNum * blockSize + p;
 					if (ix>=total) break;
-					size_t i=lps_.isaved[ix];
-					size_t j=lps_.jsaved[ix];
-					size_t type=lps_.typesaved[ix];
-					size_t term = lps_.termsaved[ix];
-					size_t dofs = lps_.dofssaved[ix];
-					size_t ind = modelHelper_.leftRightSuper().super().block()[i];
-					size_t jnd = modelHelper_.leftRightSuper().super().block()[j];
-					geometry_.fillAdditionalData(additionalData_,term,ind,jnd);
-					SparseElementType tmp=lps_.tmpsaved[ix];
+					prepare(ix,i,j,type,tmp,term,dofs);
+
 					linkProduct(xtemp,y_,i,j,type,tmp,term,dofs);
 					
 				}
@@ -180,6 +174,49 @@ namespace Dmrg {
 				for (size_t i=0;i<x_.size();i++) x_[i]+=xtemp[i];
 				if (myMutex) pthread_mutex_unlock( myMutex );
 			}
+
+			void prepare(size_t ix,size_t& i,size_t& j,size_t& type,SparseElementType& tmp,size_t& term,size_t& dofs) const
+			{
+				i=lps_.isaved[ix];
+				j=lps_.jsaved[ix];
+				type=lps_.typesaved[ix];
+				term = lps_.termsaved[ix];
+				dofs = lps_.dofssaved[ix];
+				tmp=lps_.tmpsaved[ix];
+				size_t ind = modelHelper_.leftRightSuper().super().block()[i];
+				size_t jnd = modelHelper_.leftRightSuper().super().block()[j];
+				geometry_.fillAdditionalData(additionalData_,term,ind,jnd);
+			}
+
+			void getKron(SparseMatrixType const* A,
+				     SparseMatrixType const* B,
+				     LinkType *link2,
+				     size_t i,
+				     size_t j,
+				     size_t type,
+				     const SparseElementType& valuec,
+				     size_t term,
+				     size_t dofs) const
+			{
+				int offset = modelHelper_.leftRightSuper().left().block().size();
+				PairType ops;
+				std::pair<char,char> mods('N','C');
+				size_t fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
+				RealType angularFactor=0;
+				bool isSu2 = modelHelper_.isSu2();
+				SparseElementType value = valuec;
+				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData_);
+				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData_);
+				link2 = new LinkType(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
+				size_t sysOrEnv = (link2->type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
+				size_t envOrSys = (link2->type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::Environ : ModelHelperType::System;
+				size_t site1Corrected =(link2->type==ProgramGlobals::SYSTEM_ENVIRON) ? link2->site1 : link2->site1-offset;
+				size_t site2Corrected =(link2->type==ProgramGlobals::SYSTEM_ENVIRON) ? link2->site2-offset : link2->site2;
+
+				A = &modelHelper_.getReducedOperator(link2->mods.first,site1Corrected,link2->ops.first,sysOrEnv);
+				B = &modelHelper_.getReducedOperator(link2->mods.second,site2Corrected,link2->ops.second,envOrSys);
+			}
+
 
 			template<typename SomeConcurrencyType,typename SomeOtherConcurrencyType>
 			void sync(SomeConcurrencyType& conc,SomeOtherConcurrencyType& conc2)
@@ -198,24 +235,12 @@ namespace Dmrg {
 			                size_t term,
 					size_t dofs) const
 			{
-				int offset = modelHelper_.leftRightSuper().left().block().size();
-				PairType ops;
-				std::pair<char,char> mods('N','C');
-				size_t fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
-				RealType angularFactor=0;
-				bool isSu2 = modelHelper_.isSu2();
-				SparseElementType value = valuec;
-				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData_);
-				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData_);
-				LinkType link(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
-				size_t sysOrEnv = (link.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
-				size_t envOrSys = (link.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::Environ : ModelHelperType::System;
-				size_t site1Corrected =(link.type==ProgramGlobals::SYSTEM_ENVIRON) ? link.site1 : link.site1-offset;
-				size_t site2Corrected =(link.type==ProgramGlobals::SYSTEM_ENVIRON) ? link.site2-offset : link.site2;
-
-				const SparseMatrixType& A = modelHelper_.getReducedOperator(link.mods.first,site1Corrected,link.ops.first,sysOrEnv);
-				const SparseMatrixType& B = modelHelper_.getReducedOperator(link.mods.second,site2Corrected,link.ops.second,envOrSys);
-				modelHelper_.fastOpProdInter(A,B,matrixBlock,link);
+				SparseMatrixType* A = 0;
+				SparseMatrixType* B = 0;
+				LinkType *link2 = 0;
+				getKron(A,B,link2,i,j,type,valuec,term,dofs);
+				modelHelper_.fastOpProdInter(*A,*B,matrixBlock,*link2);
+				if (link2) delete link2;
 
 				return matrixBlock.nonZero();
 			}

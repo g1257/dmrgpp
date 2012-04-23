@@ -143,6 +143,8 @@ namespace Dmrg {
 		typedef ReflectionOperatorEmpty<LeftRightSuperType,ConcurrencyType> ReflectionSymmetryType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
+		typedef typename ModelHubbardType::HamiltonianConnectionType HamiltonianConnectionType;
+		typedef typename ModelHubbardType::LinkProductStructType LinkProductStructType;
 
 		template<typename SomeParametersType>
 		ModelFactory(const SomeParametersType& params,
@@ -221,6 +223,8 @@ namespace Dmrg {
 				break;
 			}
 		}
+
+		const GeometryType& geometry() const { return geometry_; }
 
 		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
 				     SparseMatrixType &hamiltonian,
