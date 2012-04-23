@@ -110,7 +110,7 @@ public:
 
 		for (size_t i=0;i<groupLeft.size()-1;i++) {
 			size_t istart = groupLeft(i);
-			assert(istart<lrs.lrs.left().size());
+			assert(istart<lrs.left().size());
 //			size_t iend = groupLeft(i+1)-1;
 			for (size_t j=0;j<groupRight.size()-1;j++) {
 				size_t jstart = groupRight(j);

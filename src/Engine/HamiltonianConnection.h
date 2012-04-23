@@ -188,15 +188,14 @@ namespace Dmrg {
 				geometry_.fillAdditionalData(additionalData_,term,ind,jnd);
 			}
 
-			void getKron(SparseMatrixType const* A,
-				     SparseMatrixType const* B,
-				     LinkType *link2,
-				     size_t i,
-				     size_t j,
-				     size_t type,
-				     const SparseElementType& valuec,
-				     size_t term,
-				     size_t dofs) const
+			LinkType getKron(const SparseMatrixType** A,
+					 const SparseMatrixType** B,
+					 size_t i,
+					 size_t j,
+					 size_t type,
+					 const SparseElementType& valuec,
+					 size_t term,
+					 size_t dofs) const
 			{
 				int offset = modelHelper_.leftRightSuper().left().block().size();
 				PairType ops;
@@ -207,14 +206,15 @@ namespace Dmrg {
 				SparseElementType value = valuec;
 				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData_);
 				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData_);
-				link2 = new LinkType(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
-				size_t sysOrEnv = (link2->type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
-				size_t envOrSys = (link2->type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::Environ : ModelHelperType::System;
-				size_t site1Corrected =(link2->type==ProgramGlobals::SYSTEM_ENVIRON) ? link2->site1 : link2->site1-offset;
-				size_t site2Corrected =(link2->type==ProgramGlobals::SYSTEM_ENVIRON) ? link2->site2-offset : link2->site2;
+				LinkType link2(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
+				size_t sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
+				size_t envOrSys = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::Environ : ModelHelperType::System;
+				size_t site1Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site1 : link2.site1-offset;
+				size_t site2Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site2-offset : link2.site2;
 
-				A = &modelHelper_.getReducedOperator(link2->mods.first,site1Corrected,link2->ops.first,sysOrEnv);
-				B = &modelHelper_.getReducedOperator(link2->mods.second,site2Corrected,link2->ops.second,envOrSys);
+				*A = &modelHelper_.getReducedOperator(link2.mods.first,site1Corrected,link2.ops.first,sysOrEnv);
+				*B = &modelHelper_.getReducedOperator(link2.mods.second,site2Corrected,link2.ops.second,envOrSys);
+				return link2;
 			}
 
 
@@ -235,12 +235,10 @@ namespace Dmrg {
 			                size_t term,
 					size_t dofs) const
 			{
-				SparseMatrixType* A = 0;
-				SparseMatrixType* B = 0;
-				LinkType *link2 = 0;
-				getKron(A,B,link2,i,j,type,valuec,term,dofs);
-				modelHelper_.fastOpProdInter(*A,*B,matrixBlock,*link2);
-				if (link2) delete link2;
+				SparseMatrixType const* A = 0;
+				SparseMatrixType const* B = 0;
+				LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs);
+				modelHelper_.fastOpProdInter(*A,*B,matrixBlock,link2);
 
 				return matrixBlock.nonZero();
 			}

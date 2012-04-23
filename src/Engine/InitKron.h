@@ -104,7 +104,6 @@ public:
 	InitKron(const ModelType& model,const ModelHelperType& modelHelper)
 	: model_(model),
 	  modelHelper_(modelHelper),
-//	  qvalStruct_(modelHelper_.leftRightSuper()),
 	  gengroupLeft_(modelHelper_.leftRightSuper().left()),
 	  gengroupRight_(modelHelper_.leftRightSuper().right()),
 	  ijpatches_(modelHelper_.leftRightSuper(),modelHelper_.quantumNumber()),
@@ -208,8 +207,7 @@ private:
 
 			SparseMatrixType const* A = 0;
 			SparseMatrixType const* B = 0;
-			LinkType *link2 = 0;
-			hc.getKron(A,B,link2,i,j,type,tmp,term,dofs);
+			hc.getKron(&A,&B,i,j,type,tmp,term,dofs);
 
 			ArrayOfMatStructType* x1 = new ArrayOfMatStructType(*A,gengroupLeft_);
 			xc_.push_back(x1);
