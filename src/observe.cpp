@@ -54,6 +54,7 @@ typedef PsimagLite::ConcurrencyMpi<RealType> ConcurrencyType;
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
 #include "InputValidator.h"
+#include "Provenance.h"
 
 using namespace Dmrg;
 
@@ -230,6 +231,13 @@ int main(int argc,char *argv[])
 	
 	ConcurrencyType concurrency(argc,argv);
 	
+	// print license
+	if (concurrency.root()) {
+		std::cerr<<license;
+		Provenance provenance;
+		std::cout<<provenance;
+	}
+
 	if (argc<2) {
 		std::cerr<<"At least one argument needed\n";
 		return 1;
@@ -261,13 +269,12 @@ int main(int argc,char *argv[])
 	//Setup the Geometry
 	InputCheck inputCheck;
 	InputValidatorType io(filename,inputCheck);
-//	IoInputType io(filename);
 	GeometryType geometry(io);
 
 	//! Read the parameters for this run
 	//ParametersModelType mp(io);
 	DmrgSolverParametersType dmrgSolverParams(io);
-//	io.rewind();
+
 
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;

@@ -118,6 +118,7 @@ sub askQuestions
 
 sub createMakefile
 {
+	unlink("Engine/Version.h");
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
 	my $compiler = compilerName();
 	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
@@ -145,7 +146,7 @@ print FOUT<<EOF;
 EXENAME = dmrg
 all: \$(EXENAME) 
 
-dmrg:  dmrg.o 
+dmrg:  dmrg.o
 	\$(CXX) -o dmrg dmrg.o \$(LDFLAGS)  
 	strip dmrg
 
@@ -153,28 +154,31 @@ correctionVectorMulti: correctionVectorMulti.o
 	\$(CXX) -o correctionVectorMulti correctionVectorMulti.o \$(LDFLAGS)
 
 # dependencies brought about by Makefile.dep
-%.o: %.cpp Makefile
+%.o: %.cpp Makefile Engine/Version.h
 	\$(CXX) \$(CPPFLAGS) -c \$< 
 
-Makefile.dep: dmrg.cpp
+Makefile.dep: Engine/Version.h dmrg.cpp
 	\$(CXX) \$(CPPFLAGS) -MM dmrg.cpp  > Makefile.dep
 
 observe:  observe.o
 	\$(CXX) -o observe observe.o \$(LDFLAGS)
 	strip observe
 
+Engine/Version.h: gitrev
+	./gitrev > Engine/Version.h	
+
 doc:
 	cd ../doc; make
 
 # dependencies brought about by MakefileObserver.dep
-observe.o:
+observe.o: Engine/Version.h
 	\$(CXX) \$(CPPFLAGS) -c observe.cpp
 
-MakefileObserver.dep: observe.cpp
+MakefileObserver.dep: Engine/Version.h observe.cpp
 	\$(CXX) \$(CPPFLAGS) -MM observe.cpp  > MakefileObserver.dep
 
 clean:
-	rm -f core* \$(EXENAME) *.o *.dep
+	rm -f core* \$(EXENAME) *.o *.dep Engine/Version.h gitrev
 
 include Makefile.dep
 include MakefileObserver.dep

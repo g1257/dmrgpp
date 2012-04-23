@@ -63,6 +63,7 @@ typedef PsimagLite::ConcurrencyMpi<MatrixElementType> ConcurrencyType;
 #include "VectorWithOffsets.h"
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
+#include "Provenance.h"
 
 typedef std::complex<MatrixElementType> ComplexType;
 typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
@@ -208,7 +209,11 @@ int main(int argc,char *argv[])
 	ConcurrencyType concurrency(argc,argv);
 
 	// print license
-	if (concurrency.root()) std::cerr<<license;
+	if (concurrency.root()) {
+		std::cerr<<license;
+		Provenance provenance;
+		std::cout<<provenance;
+	}
 
 	//Setup the Geometry
 	InputCheck inputCheck;
