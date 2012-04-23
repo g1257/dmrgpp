@@ -12,7 +12,7 @@ public:
 std::ostream& operator<<(std::ostream& os,const Provenance &prov)
 {
 	os<<"DMRG++: revision: "<<dmrgppRevision<<"\n";
-	os<<"DMRG++: revision: "<<dmrgppDiff<<"\n";
+	os<<"DMRG++: diff: "<<dmrgppDiff<<"\n";
 	os<<"PsimagLite: revision: "<<psimagLiteRevision<<"\n";
 	os<<"PsimagLite: diff: "<<psimagLiteDiff<<"\n";
 	return os;

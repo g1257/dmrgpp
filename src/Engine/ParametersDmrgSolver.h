@@ -167,13 +167,12 @@ namespace Dmrg {
 			}
 			if (sopt == 0 && thisSaveOption ==1) {
 				sopt = 1;
-				// relaxing this requirement:
 				if (size_t(x) != 1 && size_t(x)!=totalSites-2) {
-					s = "WARNING: EXPERIMENTAL: for finite loop number "
+					s = __FILE__ + std::string(": FATAL: for finite loop number ")
 						+ ttos(i) + "\n";
 					s += "Saving finite loops must start at the left or";
 					s += " right end of the lattice\n";
-					std::cerr<<s;
+					throw std::runtime_error(s.c_str());
 				}
 			}
 			// naive location:
