@@ -33,6 +33,7 @@ Please see full open source license included in file LICENSE.
 #include <fstream>
 #include <string>
 #include <cstdlib>
+#include <unistd.h>
 
 namespace PsimagLite {
 
@@ -42,17 +43,22 @@ class GitRevision {
 
 public:
 	
-	GitRevision()
-	: tempFile_("version.txt"),gitCommand_("git")
+	GitRevision(const std::string& dir,const std::string& prefix)
+	: prefix_(prefix),tempFile_("version.txt"),gitCommand_("git")
 	{
+		std::string currentPath = getCurrentPath();
+		chdir(dir.c_str());
 		backupTemporaryFile();
 		id_ = getId();
 		diff_ = hasDiff();
+		chdir(currentPath.c_str());
 	}
 
 	const std::string& id() const { return id_; }
 	
 	std::string diff() const { return diff_; }
+
+	std::string prefix() const { return prefix_; }
 
 private:
 
@@ -68,6 +74,7 @@ private:
 	std::string getId()
 	{
 		std::string cmd = gitCommand_ +   "  rev-parse HEAD > " + tempFile_ + " 2>/dev/null ";
+		//std::cerr<<"Command is "<<cmd<<"\n";
 		system(cmd.c_str());
 		std::string revision = "unknown";
 		std::ifstream fin(tempFile_.c_str());
@@ -81,6 +88,7 @@ private:
 
 	std::string hasDiff()
 	{
+		if (id_ == "unknown") return "unknown";
 		std::string cmd = gitCommand_ + "  diff --shortstat > " + tempFile_ + " 2>/dev/null ";
 		system(cmd.c_str());
 		std::ifstream fin(tempFile_.c_str());
@@ -96,6 +104,17 @@ private:
 		return sdiff;
 	}
 
+	std::string getCurrentPath() const
+	{
+		size_t bufsize = 4096;
+		char* buf = new char[bufsize];
+		getcwd(buf,bufsize);
+		std::string result(buf);
+		delete [] buf;
+		return result;
+	}
+
+	std::string prefix_;
 	std::string tempFile_;
 	std::string gitCommand_;
 	std::string id_;
@@ -105,8 +124,9 @@ private:
 
 std::ostream& operator<<(std::ostream& os,const GitRevision& gitRev)
 {
-	os<<"#revision="<<gitRev.id()<<"\n";
-	os<<"#HasDiff="<<gitRev.diff()<<"\n";
+	os<<"const static char *"<<gitRev.prefix()<<"Revision=\""<<gitRev.id()<<"\";\n";
+	os<<"const static char *"<<gitRev.prefix()<<"Diff=\""<<gitRev.diff()<<"\";\n";
+	return os;
 }
 
 //int main(int argc,char *argv[])
