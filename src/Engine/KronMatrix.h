@@ -100,6 +100,7 @@ public:
 	KronMatrix(const InitKronType& initKron,const std::string& options)
 	: initKron_(initKron),options_(options)
 	{
+		std::cout<<"KronMatrix: preparation done for size="<<initKron.size()<<"\n";
 	}
 
 	void matrixVectorProduct(std::vector<ComplexOrRealType>& vout,
@@ -133,7 +134,7 @@ public:
 			div_t divresult = div(perm[r+offset],nl);
 			size_t i = divresult.rem;
 			size_t j = divresult.quot;
-			vout[r] = W(i,j);
+			vout[r] += W(i,j);
 		}
 	}
 
@@ -210,6 +211,7 @@ private:
 		for (size_t outPatch=0;outPatch<npatches;outPatch++) {
 			for (size_t inPatch=0;inPatch<npatches;inPatch++) {
 				for (size_t ic=0;ic<nC;ic++) {
+					const ComplexOrRealType& val = initKron_.value(ic);
 					const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 					const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
 
@@ -240,7 +242,7 @@ private:
 							for (size_t mr2=0;mr2<tmp2.row();mr2++) {
 								for (int k4=tmp2.getRowPtr(mr2);k4<tmp2.getRowPtr(mr2+1);k4++) {
 									size_t col4 = tmp2.getCol(k4)+jp1;
-									W(mr+ip1,col4) += tmp1.getValue(k3) * tmp2.getValue(k4) * V(col3,mr2+j1);
+									W(mr+ip1,col4) += tmp1.getValue(k3) * tmp2.getValue(k4) * V(col3,mr2+j1) * val;
 								}
 							}
 						}

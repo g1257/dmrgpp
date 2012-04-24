@@ -91,8 +91,7 @@ namespace Dmrg {
 	
 	template<typename ParametersType,
 	         typename TargettingType,
-	         template<typename,typename> class InternalProductTemplate
-    >
+		 template<typename,typename> class InternalProductTemplate>
 	class Diagonalization {
 
 	public:

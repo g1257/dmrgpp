@@ -127,7 +127,7 @@ public:
 					for (size_t k = start;k<end;k++) {
 						int col = sparse.getCol(k)-j1;
 						if (col<0) continue;
-						if (size_t(col)>=j2-j1) break; // ASSUMES COLUMNS ARE SORTED
+						if (size_t(col)>=j2-j1) continue; // ARE COLUMNS SORTED?
 						p[col] += sparse.getValue(k);
 						mark[col] = true;
 						if (size_t(col)<minCol) minCol = col;

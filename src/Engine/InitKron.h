@@ -98,7 +98,6 @@ public:
 	typedef typename GenIjPatchType::GenGroupType GenGroupType;
 	typedef ArrayOfMatStruct<SparseMatrixType,GenGroupType> ArrayOfMatStructType;
 	typedef typename ModelHelperType::LinkType LinkType;
-	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 	typedef typename ModelType::LinkProductStructType LinkProductStructType;
 
 	InitKron(const ModelType& model,const ModelHelperType& modelHelper)
@@ -182,41 +181,37 @@ public:
 		return gengroupRight_;
 	}
 
+	const ComplexOrRealType& value(size_t i) const
+	{
+		assert(values_.size()>i);
+		return values_[i];
+	}
+
 private:
 
 	void convertXcYcArrays()
 	{
-		size_t n=modelHelper_.leftRightSuper().super().block().size();
-		size_t maxSize = model_.maxConnections() * 4 * 16;
-		maxSize *= maxSize;
+		LinkProductStructType* lps = 0;
+		size_t total = model_.getLinkProductStruct(lps,modelHelper_);
 
-		static LinkProductStructType lps(maxSize);
-		std::vector<ComplexOrRealType> x,y; // bogus
-		HamiltonianConnectionType hc(model_.geometry(),modelHelper_,&lps,&x,&y);
-		size_t total = 0;
-		for (size_t i=0;i<n;i++) {
-			for (size_t j=0;j<n;j++) {
-				hc.compute(i,j,0,&lps,total);
-			}
-		}
-
-		size_t i =0, j = 0, type = 0,term = 0, dofs =0;
 		ComplexOrRealType tmp = 0.0;
 		for (size_t ix=0;ix<total;ix++) {
-			hc.prepare(ix,i,j,type,tmp,term,dofs);
-
 			SparseMatrixType const* A = 0;
 			SparseMatrixType const* B = 0;
-			hc.getKron(&A,&B,i,j,type,tmp,term,dofs);
 
+			model_.getConnection(&A,&B,tmp,ix,*lps,modelHelper_);
+			values_.push_back(tmp);
+			assert(std::norm(tmp-1.0)<1e-6);
 			ArrayOfMatStructType* x1 = new ArrayOfMatStructType(*A,gengroupLeft_);
 			xc_.push_back(x1);
 
-			SparseMatrixType tmpMatrix;
-			transposeConjugate(tmpMatrix,*B);
-			ArrayOfMatStructType* y1 = new ArrayOfMatStructType(tmpMatrix,gengroupRight_);
+			//SparseMatrixType tmpMatrix;
+			//transposeConjugate(tmpMatrix,*B);
+			ArrayOfMatStructType* y1 = new ArrayOfMatStructType(*B,gengroupRight_);
 			yc_.push_back(y1);
 		}
+
+		if (lps) delete lps;
 	}
 
 
@@ -233,6 +228,7 @@ private:
 	ArrayOfMatStructType* aRt_; // <-- we own it also, it's newed and deleted here
 	std::vector<ArrayOfMatStructType*> xc_;
 	std::vector<ArrayOfMatStructType*> yc_;
+	std::vector<ComplexOrRealType> values_;
 
 }; //class InitKron
 } // namespace PsimagLite

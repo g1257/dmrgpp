@@ -163,7 +163,7 @@ bool observeOneFullSweep(
 template<template<typename,typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
-                  template<typename,typename> class,
+		  template<typename,typename> class,
                   template<typename,typename> class,
                   typename,typename,typename,
          template<typename> class> class TargettingTemplate,

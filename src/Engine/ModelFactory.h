@@ -143,8 +143,9 @@ namespace Dmrg {
 		typedef ReflectionOperatorEmpty<LeftRightSuperType,ConcurrencyType> ReflectionSymmetryType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
-		typedef typename ModelHubbardType::HamiltonianConnectionType HamiltonianConnectionType;
 		typedef typename ModelHubbardType::LinkProductStructType LinkProductStructType;
+		typedef typename ModelHelperType::LinkType LinkType;
+		typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
 
 		template<typename SomeParametersType>
 		ModelFactory(const SomeParametersType& params,
@@ -417,7 +418,91 @@ namespace Dmrg {
 			return name_;
 		}
 
+		size_t getLinkProductStruct(LinkProductStructType* lps,const ModelHelperType& modelHelper) const
+		{
+			switch(model_) {
+			case HUBBARD_ONE_BAND:
+				return getLinkProductStruct2<ModelHubbardType>(lps,modelHelper);
+			case HEISENBERG_SPIN_ONEHALF:
+				return getLinkProductStruct2<ModelHeisenbergType>(lps,modelHelper);
+			case HUBBARD_ONE_BAND_EXT:
+				return getLinkProductStruct2<ModelHubbardExtType>(lps,modelHelper);
+			case FEAS:
+				return getLinkProductStruct2<FeBasedScType>(lps,modelHelper);
+			case FEAS_EXT:
+				return getLinkProductStruct2<FeBasedScExtType>(lps,modelHelper);
+			case IMMM:
+				return getLinkProductStruct2<ModelHubbardType>(lps,modelHelper);
+			}
+			return 0;
+		}
+
+		void getConnection(const SparseMatrixType** A,
+				   const SparseMatrixType** B,
+				   ComplexOrRealType& value,
+				   size_t ix,
+				   const LinkProductStructType& lps,
+				   const ModelHelperType& modelHelper) const
+		{
+			switch(model_) {
+			case HUBBARD_ONE_BAND:
+				return getConnection2<ModelHubbardType>(A,B,value,ix,lps,modelHelper);
+			case HEISENBERG_SPIN_ONEHALF:
+				return getConnection2<ModelHeisenbergType>(A,B,value,ix,lps,modelHelper);
+			case HUBBARD_ONE_BAND_EXT:
+				return getConnection2<ModelHubbardExtType>(A,B,value,ix,lps,modelHelper);
+			case FEAS:
+				return getConnection2<FeBasedScType>(A,B,value,ix,lps,modelHelper);
+			case FEAS_EXT:
+				return getConnection2<FeBasedScExtType>(A,B,value,ix,lps,modelHelper);
+			case IMMM:
+				return getConnection2<ModelHubbardType>(A,B,value,ix,lps,modelHelper);
+			}
+		}
+
+
 	private:
+
+		template<typename SomeModelType>
+		void getConnection2(const SparseMatrixType** A,
+				    const SparseMatrixType** B,
+				    ComplexOrRealType& value,
+				    size_t ix,
+				    const LinkProductStructType& lps,
+				    const ModelHelperType& modelHelper) const
+		{
+			typedef typename SomeModelType::HamiltonianConnectionType HamiltonianConnectionType;
+			std::vector<ComplexOrRealType> x,y; // bogus
+			HamiltonianConnectionType hc(geometry_,modelHelper,&lps,&x,&y);
+			size_t i =0, j = 0, type = 0,term = 0, dofs =0;
+			ComplexOrRealType tmp = 0.0;
+			hc.prepare(ix,i,j,type,tmp,term,dofs);
+			LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs);
+			value = link2.value;
+		}
+
+		template<typename SomeModelType>
+		size_t getLinkProductStruct2(LinkProductStructType* lps,const ModelHelperType& modelHelper) const
+		{
+			size_t n=modelHelper.leftRightSuper().super().block().size();
+			size_t maxSize = maxConnections() * 4 * 16;
+			maxSize *= maxSize;
+
+			lps = new LinkProductStructType(maxSize);
+
+			std::vector<ComplexOrRealType> x,y; // bogus
+
+			typedef typename SomeModelType::HamiltonianConnectionType HamiltonianConnectionType;
+			HamiltonianConnectionType hc(geometry_,modelHelper,lps,&x,&y);
+			size_t total = 0;
+			for (size_t i=0;i<n;i++) {
+				for (size_t j=0;j<n;j++) {
+					hc.compute(i,j,0,lps,total);
+				}
+			}
+			return total;
+		}
+
 
 		template<typename SomeModelType>
 		void init(SomeModelType* model)

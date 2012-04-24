@@ -105,8 +105,8 @@ public:
 			istart_.push_back(i+1);
 		}
 		istart_.push_back(qvals.size());
-		std::cout<<"#ISTART!!!!!\n";
-		std::cout<<istart_;
+		//std::cout<<"#ISTART!!!!!\n";
+		//std::cout<<istart_;
 	}
 
 	const size_t& operator()(size_t i) const
