@@ -418,7 +418,7 @@ namespace Dmrg {
 			return name_;
 		}
 
-		size_t getLinkProductStruct(LinkProductStructType* lps,const ModelHelperType& modelHelper) const
+		size_t getLinkProductStruct(LinkProductStructType** lps,const ModelHelperType& modelHelper) const
 		{
 			switch(model_) {
 			case HUBBARD_ONE_BAND:
@@ -437,36 +437,35 @@ namespace Dmrg {
 			return 0;
 		}
 
-		void getConnection(const SparseMatrixType** A,
+		LinkType getConnection(const SparseMatrixType** A,
 				   const SparseMatrixType** B,
-				   ComplexOrRealType& value,
 				   size_t ix,
 				   const LinkProductStructType& lps,
 				   const ModelHelperType& modelHelper) const
 		{
 			switch(model_) {
 			case HUBBARD_ONE_BAND:
-				return getConnection2<ModelHubbardType>(A,B,value,ix,lps,modelHelper);
+				return getConnection2<ModelHubbardType>(A,B,ix,lps,modelHelper);
 			case HEISENBERG_SPIN_ONEHALF:
-				return getConnection2<ModelHeisenbergType>(A,B,value,ix,lps,modelHelper);
+				return getConnection2<ModelHeisenbergType>(A,B,ix,lps,modelHelper);
 			case HUBBARD_ONE_BAND_EXT:
-				return getConnection2<ModelHubbardExtType>(A,B,value,ix,lps,modelHelper);
+				return getConnection2<ModelHubbardExtType>(A,B,ix,lps,modelHelper);
 			case FEAS:
-				return getConnection2<FeBasedScType>(A,B,value,ix,lps,modelHelper);
+				return getConnection2<FeBasedScType>(A,B,ix,lps,modelHelper);
 			case FEAS_EXT:
-				return getConnection2<FeBasedScExtType>(A,B,value,ix,lps,modelHelper);
+				return getConnection2<FeBasedScExtType>(A,B,ix,lps,modelHelper);
 			case IMMM:
-				return getConnection2<ModelHubbardType>(A,B,value,ix,lps,modelHelper);
+				return getConnection2<ModelHubbardType>(A,B,ix,lps,modelHelper);
 			}
+			throw std::runtime_error("getConnection(...) failed\n");
 		}
 
 
 	private:
 
 		template<typename SomeModelType>
-		void getConnection2(const SparseMatrixType** A,
+		LinkType getConnection2(const SparseMatrixType** A,
 				    const SparseMatrixType** B,
-				    ComplexOrRealType& value,
 				    size_t ix,
 				    const LinkProductStructType& lps,
 				    const ModelHelperType& modelHelper) const
@@ -478,26 +477,26 @@ namespace Dmrg {
 			ComplexOrRealType tmp = 0.0;
 			hc.prepare(ix,i,j,type,tmp,term,dofs);
 			LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs);
-			value = link2.value;
+			return link2;
 		}
 
 		template<typename SomeModelType>
-		size_t getLinkProductStruct2(LinkProductStructType* lps,const ModelHelperType& modelHelper) const
+		size_t getLinkProductStruct2(LinkProductStructType** lps,const ModelHelperType& modelHelper) const
 		{
 			size_t n=modelHelper.leftRightSuper().super().block().size();
 			size_t maxSize = maxConnections() * 4 * 16;
 			maxSize *= maxSize;
 
-			lps = new LinkProductStructType(maxSize);
+			*lps = new LinkProductStructType(maxSize);
 
 			std::vector<ComplexOrRealType> x,y; // bogus
 
 			typedef typename SomeModelType::HamiltonianConnectionType HamiltonianConnectionType;
-			HamiltonianConnectionType hc(geometry_,modelHelper,lps,&x,&y);
+			HamiltonianConnectionType hc(geometry_,modelHelper,*lps,&x,&y);
 			size_t total = 0;
 			for (size_t i=0;i<n;i++) {
 				for (size_t j=0;j<n;j++) {
-					hc.compute(i,j,0,lps,total);
+					hc.compute(i,j,0,*lps,total);
 				}
 			}
 			return total;

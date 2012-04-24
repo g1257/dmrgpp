@@ -118,6 +118,8 @@ public:
 		aRt_ = new ArrayOfMatStructType(arTranspose,gengroupRight_);
 
 		convertXcYcArrays();
+		printFullMatrix(modelHelper_.leftRightSuper().left().hamiltonian(),"LEFT HAM");
+		printFullMatrix(modelHelper_.leftRightSuper().right().hamiltonian(),"RIGHT HAM");
 	}
 
 	~InitKron()
@@ -192,26 +194,39 @@ private:
 	void convertXcYcArrays()
 	{
 		LinkProductStructType* lps = 0;
-		size_t total = model_.getLinkProductStruct(lps,modelHelper_);
+		size_t total = model_.getLinkProductStruct(&lps,modelHelper_);
 
-		ComplexOrRealType tmp = 0.0;
 		for (size_t ix=0;ix<total;ix++) {
 			SparseMatrixType const* A = 0;
 			SparseMatrixType const* B = 0;
 
-			model_.getConnection(&A,&B,tmp,ix,*lps,modelHelper_);
-			values_.push_back(tmp);
-			assert(std::norm(tmp-1.0)<1e-6);
-			ArrayOfMatStructType* x1 = new ArrayOfMatStructType(*A,gengroupLeft_);
-			xc_.push_back(x1);
-
-			//SparseMatrixType tmpMatrix;
-			//transposeConjugate(tmpMatrix,*B);
-			ArrayOfMatStructType* y1 = new ArrayOfMatStructType(*B,gengroupRight_);
-			yc_.push_back(y1);
+			LinkType link2 = model_.getConnection(&A,&B,ix,*lps,modelHelper_);
+			assert(link2.fermionOrBoson==ProgramGlobals::BOSON);
+			if (link2.type==ProgramGlobals::ENVIRON_SYSTEM)  {
+				LinkType link3 = link2;
+				//link3.value *= fermionSign;
+				link3.type = ProgramGlobals::SYSTEM_ENVIRON;
+				addOneConnection(*B,*A,link3);
+				continue;
+			}
+			addOneConnection(*A,*B,link2);
 		}
+		std::cerr<<"Toooooootttttttttaaaaaaaaaaaaaallllllll="<<total<<"\n";
 
 		if (lps) delete lps;
+	}
+
+	void addOneConnection(const SparseMatrixType& A,const SparseMatrixType& B,const LinkType& link2)
+	{
+		values_.push_back(link2.value);
+//			assert(std::norm(tmp-0.5)<1e-6);
+		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(A,gengroupLeft_);
+		xc_.push_back(x1);
+
+		//SparseMatrixType tmpMatrix;
+		//transposeConjugate(tmpMatrix,*B);
+		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,gengroupRight_);
+		yc_.push_back(y1);
 	}
 
 

@@ -230,6 +230,10 @@ namespace Dmrg {
 				}
 			}
 
+//			std::cerr<<"TOOOOOOOOOTALLLLLLLLLLLLLL="<<total<<"\n";
+//			printFullMatrix(modelHelper.leftRightSuper().left().hamiltonian(),"LEFT HAM");
+//			printFullMatrix(modelHelper.leftRightSuper().right().hamiltonian(),"RIGHT HAM");
+
 //			SharedMemoryType pthreads;
 			ParallelConnectionsType parallelConnections;
 			parallelConnections.loopCreate(total,hc,concurrency_);
