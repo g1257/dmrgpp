@@ -144,9 +144,9 @@ if ($mpi) {
 }
 print FOUT<<EOF;
 EXENAME = dmrg
-all: \$(EXENAME) 
+all: \$(EXENAME)
 
-dmrg:  dmrg.o
+dmrg:  dmrg.o gitrev
 	\$(CXX) -o dmrg dmrg.o \$(LDFLAGS)  
 	strip dmrg
 
@@ -154,7 +154,7 @@ correctionVectorMulti: correctionVectorMulti.o
 	\$(CXX) -o correctionVectorMulti correctionVectorMulti.o \$(LDFLAGS)
 
 # dependencies brought about by Makefile.dep
-%.o: %.cpp Makefile Engine/Version.h
+%.o: %.cpp Makefile gitrev Engine/Version.h
 	\$(CXX) \$(CPPFLAGS) -c \$< 
 
 Makefile.dep: Engine/Version.h dmrg.cpp
@@ -166,6 +166,12 @@ observe:  observe.o
 
 Engine/Version.h: gitrev
 	./gitrev > Engine/Version.h	
+
+gitrev: gitrev.o
+	\$(CXX) -o gitrev gitrev.o \$(LDFLAGS)
+
+gitrev.o:
+	\$(CXX) \$(CPPFLAGS) -c \$<
 
 doc:
 	cd ../doc; make
