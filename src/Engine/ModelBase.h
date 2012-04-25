@@ -155,9 +155,9 @@ namespace Dmrg {
 		void matrixVectorProduct(std::vector<RealType> &x,std::vector<RealType> const &y,ModelHelperType const &modelHelper) const
 		{
 			//! contribution to Hamiltonian from current system
-			modelHelper.hamiltonianLeftProduct(x,y);
+//			modelHelper.hamiltonianLeftProduct(x,y);
 			//! contribution to Hamiltonian from current envirnoment
-			modelHelper.hamiltonianRightProduct(x,y);
+//			modelHelper.hamiltonianRightProduct(x,y);
 			//! contribution to Hamiltonian from connection system-environment
 			hamiltonianConnectionProduct(x,y,modelHelper);
 		}

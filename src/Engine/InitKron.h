@@ -118,8 +118,8 @@ public:
 		aRt_ = new ArrayOfMatStructType(arTranspose,gengroupRight_);
 
 		convertXcYcArrays();
-		printFullMatrix(modelHelper_.leftRightSuper().left().hamiltonian(),"LEFT HAM");
-		printFullMatrix(modelHelper_.leftRightSuper().right().hamiltonian(),"RIGHT HAM");
+//		printFullMatrix(modelHelper_.leftRightSuper().left().hamiltonian(),"LEFT HAM");
+//		printFullMatrix(modelHelper_.leftRightSuper().right().hamiltonian(),"RIGHT HAM");
 	}
 
 	~InitKron()
@@ -211,7 +211,7 @@ private:
 			}
 			addOneConnection(*A,*B,link2);
 		}
-		std::cerr<<"Toooooootttttttttaaaaaaaaaaaaaallllllll="<<total<<"\n";
+//		std::cerr<<"Toooooootttttttttaaaaaaaaaaaaaallllllll="<<total<<"\n";
 
 		if (lps) delete lps;
 	}
@@ -223,9 +223,9 @@ private:
 		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(A,gengroupLeft_);
 		xc_.push_back(x1);
 
-		//SparseMatrixType tmpMatrix;
-		//transposeConjugate(tmpMatrix,*B);
-		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,gengroupRight_);
+		SparseMatrixType tmpMatrix;
+		transposeConjugate(tmpMatrix,B);
+		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(tmpMatrix,gengroupRight_);
 		yc_.push_back(y1);
 	}
 

@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009,-2012 UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -82,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define HAMILTONIAN_CONNECTION_H
 
 #include "LinkProductStruct.h"
+#include "CrsMatrix.h"
 
 namespace Dmrg {
 	
@@ -214,6 +213,9 @@ namespace Dmrg {
 
 				*A = &modelHelper_.getReducedOperator(link2.mods.first,site1Corrected,link2.ops.first,sysOrEnv);
 				*B = &modelHelper_.getReducedOperator(link2.mods.second,site2Corrected,link2.ops.second,envOrSys);
+//				printFullMatrix(**A,"A");
+//				printFullMatrix(**B,"B");
+//				std::cout<<"link2.value="<<link2.value<<"i="<<i<<" j="<<j<<" type="<<type<<" valuec="<<valuec<<" term="<<term<<" dofs="<<dofs<<"\n";
 				return link2;
 			}
 
@@ -253,40 +255,10 @@ namespace Dmrg {
 					 size_t term,
 					 size_t dofs) const
 			{
-				int offset =modelHelper_.leftRightSuper().left().block().size();
-				std::pair<size_t,size_t> ops;
-				std::pair<char,char> mods('N','C');
-				size_t fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
-				RealType angularFactor=0;
-				bool isSu2 = modelHelper_.isSu2();
-				LinkProductType::setLinkData(term,dofs,isSu2,
-						fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData_);
-				SparseElementType value = valuec;
-				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData_);
-				LinkType link(i,j,type, value,dofs,
-					      fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
-				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
-					
-					//A=modelHelper.basis2().getOperator(i,sigma);
-					const SparseMatrixType& A=modelHelper_.getReducedOperator(mods.first,i,
-							link.ops.first,ModelHelperType::System);
-					//B=modelHelper.getTcOperator(dof_*(j-offset)+sigma2,ModelHelperType::Environ);
-					const SparseMatrixType& B=modelHelper_.getReducedOperator(mods.second,j-offset,
-							link.ops.second,ModelHelperType::Environ);
-					modelHelper_.fastOpProdInter(x,y,A,B,link);
-						
-				} else {		
-					assert(type==ProgramGlobals::ENVIRON_SYSTEM);
-						//A=modelHelper.basis3().getOperator(i-offset,sigma);
-					const SparseMatrixType& A=modelHelper_.getReducedOperator(mods.first,i-offset,
-							link.ops.first,ModelHelperType::Environ);
-						
-						//B=modelHelper.getTcOperator(j*dof_+sigma2,ModelHelperType::System);
-					const SparseMatrixType& B=modelHelper_.getReducedOperator(mods.second,j,
-							link.ops.second,ModelHelperType::System);
-					modelHelper_.fastOpProdInter(x,y,A,B,link);
-						
-				}
+				SparseMatrixType const* A = 0;
+				SparseMatrixType const* B = 0;
+				LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs);
+				modelHelper_.fastOpProdInter(x,y,*A,*B,link2);
 			}
 
 			const GeometryType& geometry_;

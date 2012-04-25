@@ -108,7 +108,7 @@ public:
 //		std::cerr<<"groupLeft.size="<<groupLeft.size()<<"\n";
 //		std::cerr<<"groupRight.size="<<groupRight.size()<<"\n";
 
-		std::cerr<<"TARGET QUANTUM NUMBER="<<target<<"\n";
+//		std::cerr<<"TARGET QUANTUM NUMBER="<<target<<"\n";
 		for (size_t i=0;i<groupLeft.size()-1;i++) {
 			size_t istart = groupLeft(i);
 			assert(istart<lrs.left().size());
