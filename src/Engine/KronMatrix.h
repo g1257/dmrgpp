@@ -238,9 +238,9 @@ private:
 					const SparseMatrixType& tmp2 =  yiStruct(j,jp);
 
 					size_t colsize = j2 -j1;
-					for (size_t mr2=0;mr2<colsize;mr2++)
-						for (size_t mr=0;mr<tmp1.row();mr++)
-							intermediate(mr,mr2)=0.0;
+//					for (size_t mr2=0;mr2<colsize;mr2++)
+//						for (size_t mr=0;mr<tmp1.row();mr++)
+//							intermediate(mr,mr2)=0.0;
 
 					for (size_t mr=0;mr<tmp1.row();mr++) {
 						for (int k3=tmp1.getRowPtr(mr);k3<tmp1.getRowPtr(mr+1);k3++) {
@@ -256,10 +256,12 @@ private:
 						for (size_t mr2=0;mr2<colsize;mr2++) {
 							size_t start = tmp2.getRowPtr(mr2);
 							size_t end = tmp2.getRowPtr(mr2+1);
+							ComplexOrRealType& valtmp = intermediate(mr,mr2);
 							for (size_t k4=start;k4<end;k4++) {
 								size_t col4 = tmp2.getCol(k4)+jp1;
-								W(mr+ip1,col4) += intermediate(mr,mr2) * tmp2.getValue(k4) ;
+								W(mr+ip1,col4) += valtmp * tmp2.getValue(k4) ;
 							}
+							valtmp = 0.0;
 						}
 					}
 				}
