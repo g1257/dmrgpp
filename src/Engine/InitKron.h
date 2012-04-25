@@ -201,7 +201,7 @@ private:
 			SparseMatrixType const* B = 0;
 
 			LinkType link2 = model_.getConnection(&A,&B,ix,*lps,modelHelper_);
-			assert(link2.fermionOrBoson==ProgramGlobals::BOSON);
+//			assert(link2.fermionOrBoson==ProgramGlobals::BOSON);
 			if (link2.type==ProgramGlobals::ENVIRON_SYSTEM)  {
 				LinkType link3 = link2;
 				//link3.value *= fermionSign;

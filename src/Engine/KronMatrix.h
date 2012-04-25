@@ -207,6 +207,7 @@ private:
 		size_t nC = initKron_.connections();
 		const GenGroupType& istartLeft = initKron_.istartLeft();
 		const GenGroupType& istartRight = initKron_.istartRight();
+		MatrixType intermediate(W.n_row(),W.n_col());
 
 		for (size_t outPatch=0;outPatch<npatches;outPatch++) {
 			for (size_t inPatch=0;inPatch<npatches;inPatch++) {
@@ -225,7 +226,7 @@ private:
 //					size_t i2 = istartLeft(i+1);
 
 					size_t j1 = istartRight(j);
-//					size_t j2 = istartLeft(j+1);
+					size_t j2 = istartRight(j+1);
 
 					size_t ip1 = istartLeft(ip);
 //					size_t ip2 = istartLeft(ip+1);
@@ -236,16 +237,28 @@ private:
 					const SparseMatrixType& tmp1 =  xiStruct(ip,i);
 					const SparseMatrixType& tmp2 =  yiStruct(j,jp);
 
+					size_t colsize = j2 -j1;
+					for (size_t mr2=0;mr2<colsize;mr2++)
+						for (size_t mr=0;mr<tmp1.row();mr++)
+							intermediate(mr,mr2)=0.0;
+
 					for (size_t mr=0;mr<tmp1.row();mr++) {
 						for (int k3=tmp1.getRowPtr(mr);k3<tmp1.getRowPtr(mr+1);k3++) {
 							size_t col3 = tmp1.getCol(k3)+i1;
 							ComplexOrRealType valtmp = val * tmp1.getValue(k3);
-							for (size_t mr2=0;mr2<tmp2.row();mr2++) {
-								ComplexOrRealType valtmp2 = valtmp * V(col3,mr2+j1);
-								for (int k4=tmp2.getRowPtr(mr2);k4<tmp2.getRowPtr(mr2+1);k4++) {
-									size_t col4 = tmp2.getCol(k4)+jp1;
-									W(mr+ip1,col4) += valtmp2 * tmp2.getValue(k4) ;
-								}
+							for (size_t mr2=j1;mr2<j2;mr2++) {
+								intermediate(mr,mr2-j1) += valtmp * V(col3,mr2);
+							}
+						}
+					}
+
+					for (size_t mr=0;mr<tmp1.row();mr++) {
+						for (size_t mr2=0;mr2<colsize;mr2++) {
+							size_t start = tmp2.getRowPtr(mr2);
+							size_t end = tmp2.getRowPtr(mr2+1);
+							for (size_t k4=start;k4<end;k4++) {
+								size_t col4 = tmp2.getCol(k4)+jp1;
+								W(mr+ip1,col4) += intermediate(mr,mr2) * tmp2.getValue(k4) ;
 							}
 						}
 					}
