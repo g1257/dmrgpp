@@ -348,7 +348,7 @@ namespace Dmrg {
 	{
 		os<<"#This is DMRG++\n";
 		Provenance provenance;
-		std::cout<<provenance;
+		os<<provenance;
 		os<<"parameters.version="<<parameters.version<<"\n";
 		os<<"parameters.model="<<parameters.model<<"\n";
 		os<<"parameters.filename="<<parameters.filename<<"\n";

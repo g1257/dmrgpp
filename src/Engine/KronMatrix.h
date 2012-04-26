@@ -182,7 +182,7 @@ private:
 			size_t j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
 
 			size_t i1 = istartLeft(i);
-			size_t i2 = istartLeft(i+1);
+//			size_t i2 = istartLeft(i+1);
 
 			size_t j1 = istartRight(j);
 			size_t j2 = istartRight(j+1);
@@ -193,7 +193,7 @@ private:
 				for (size_t mr=0;mr<tmp.row();mr++) {
 					for (int kk=tmp.getRowPtr(mr);kk<tmp.getRowPtr(mr+1);kk++) {
 						size_t col = tmp.getCol(kk) + i1;
-						if (col>=i2) continue;
+//						if (col>=i2) continue;
 						W(mr+i1,jj) += tmp.getValue(kk) *  V(col, jj);
 					}
 				}
