@@ -11,9 +11,10 @@ int main(int argc,char* argv[])
 	registerOpts.push_back("fast");
 	registerOpts.push_back("verbose");
 	registerOpts.push_back("hasthreads");
-	PsimagLite::OptionsWriteable optWriteable(registerOpts);
+	PsimagLite::Options::Writeable optWriteable(registerOpts);
 	
 	std::string myoptions(argv[1]);
-	PsimagLite::OptionsWriteable::OptionsReadable optsReadable(optWriteable,myoptions);
+	PsimagLite::Options::Readable optsReadable(optWriteable,myoptions);
+	std::cout<<"fast="<<optsReadable.isSet("fast")<<"\n";
 }
 
