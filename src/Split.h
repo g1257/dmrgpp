@@ -80,7 +80,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define SPLIT_HEADER_H
 #include <stdexcept>
 #include <vector>
-
+#include <string>
+#include <sstream>
 
 
 /*

@@ -427,8 +427,8 @@ namespace PsimagLite {
 				}
 				if (counter>0) std::cerr<<"\n";
 			}*/
-			//std::cerr<<a;
-			printNonZero(a,std::cerr);
+			std::cerr<<a;
+			//printNonZero(a,std::cerr);
 			std::cerr<<"----------------\n";
 
 			std::vector<RealType> eigs(a.n_row());
