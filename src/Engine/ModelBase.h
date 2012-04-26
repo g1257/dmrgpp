@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "IoSimple.h"
 #include "HamiltonianConnection.h"
 #include "Su2SymmetryGlobals.h"
-#include "InputValidator.h"
+#include "InputNg.h"
 #include "InputCheck.h"
 
 namespace Dmrg {
@@ -119,7 +119,7 @@ namespace Dmrg {
 
 	public:
 
-		typedef PsimagLite::InputValidator<InputCheck> InputValidatorType;
+		typedef PsimagLite::InputNg<InputCheck>::Readable InputValidatorType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHelperType::RealType RealType;

@@ -73,8 +73,8 @@ typedef  PsimagLite::CrsMatrix<MatrixElementType> MySparseMatrixReal;
 using namespace Dmrg;
 
 typedef PsimagLite::Geometry<MatrixElementType,ProgramGlobals> GeometryType;
-typedef PsimagLite::InputValidator<InputCheck> InputValidatorType;
-typedef ParametersDmrgSolver<MatrixElementType,InputValidatorType> ParametersDmrgSolverType;
+typedef PsimagLite::InputNg<InputCheck> InputNgType;
+typedef ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> ParametersDmrgSolverType;
 
 template<typename ModelFactoryType,
 	 template<typename,typename> class InternalProductTemplate,
@@ -83,7 +83,7 @@ template<typename ModelFactoryType,
 void mainLoop3(GeometryType& geometry,
               ParametersDmrgSolverType& dmrgSolverParams,
               ConcurrencyType& concurrency,
-	      InputValidatorType& io)
+	      InputNgType::Readable& io)
 {
 	//! Setup the Model
 	ModelFactoryType model(dmrgSolverParams,io,geometry,concurrency);
@@ -112,7 +112,7 @@ template<template<typename,typename> class ModelHelperTemplate,
 void mainLoop2(GeometryType& geometry,
               ParametersDmrgSolverType& dmrgSolverParams,
               ConcurrencyType& concurrency,
-	      InputValidatorType& io)
+	      InputNgType::Readable& io)
 {
 	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
 	typedef Basis<MatrixElementType,MySparseMatrix> BasisType;
@@ -159,7 +159,7 @@ template<template<typename,typename> class ModelHelperTemplate,
 void mainLoop(GeometryType& geometry,
               ParametersDmrgSolverType& dmrgSolverParams,
               ConcurrencyType& concurrency,
-	      InputValidatorType& io)
+	      InputNgType::Readable& io)
 {
 	if (dmrgSolverParams.options.find("InternalProductStored")!=std::string::npos) {
 		mainLoop2<ModelHelperTemplate,
@@ -224,12 +224,13 @@ int main(int argc,char *argv[])
 
 	//Setup the Geometry
 	InputCheck inputCheck;
-	InputValidatorType io(filename,inputCheck);
+	InputNgType::Writeable ioWriteable(filename,inputCheck);
+	InputNgType::Readable io(ioWriteable);
 
 	//IoInputType io(filename);
 	GeometryType geometry(io);
 
-	ParametersDmrgSolver<MatrixElementType,InputValidatorType> dmrgSolverParams(io);
+	ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> dmrgSolverParams(io);
 	//io.rewind();
 
 	if (dmrgSolverParams.options.find("hasThreads")!=std::string::npos) {

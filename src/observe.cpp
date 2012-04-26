@@ -53,7 +53,7 @@ typedef PsimagLite::ConcurrencyMpi<RealType> ConcurrencyType;
 #include "MettsTargetting.h" // experimental
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
-#include "InputValidator.h"
+#include "InputNg.h"
 #include "Provenance.h"
 
 using namespace Dmrg;
@@ -64,8 +64,8 @@ typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
 typedef  PsimagLite::Geometry<RealType,ProgramGlobals> GeometryType;
 typedef PsimagLite::IoSimple::In IoInputType;
-typedef PsimagLite::InputValidator<InputCheck> InputValidatorType;
-typedef ParametersDmrgSolver<RealType,InputValidatorType> DmrgSolverParametersType;
+typedef PsimagLite::InputNg<InputCheck> InputNgType;
+typedef ParametersDmrgSolver<RealType,InputNgType::Readable> DmrgSolverParametersType;
 
 size_t dofsFromModelName(const std::string& modelName)
 {
@@ -171,7 +171,7 @@ template<template<typename,typename> class ModelHelperTemplate,
 void mainLoop(GeometryType& geometry,
               const std::string& targetting,
               ConcurrencyType& concurrency,
-	      InputValidatorType& io,
+	      InputNgType::Readable& io,
 	      const DmrgSolverParametersType& params,
               const std::string& obsOptions)
 {
@@ -268,7 +268,8 @@ int main(int argc,char *argv[])
 
 	//Setup the Geometry
 	InputCheck inputCheck;
-	InputValidatorType io(filename,inputCheck);
+	InputNgType::Writeable ioWriteable(filename,inputCheck);
+	InputNgType::Readable io(ioWriteable);
 	GeometryType geometry(io);
 
 	//! Read the parameters for this run

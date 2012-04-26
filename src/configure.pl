@@ -34,6 +34,8 @@ my $brand= "v2.0";
 my $gslLibs = " -lgsl  -lgslcblas ";
 $gslLibs =" " if ($hasGsl=~/n/i);
 
+system("make clean");
+
 guessPlatform();
 
 welcome();
@@ -171,7 +173,7 @@ gitrev: gitrev.o
 	\$(CXX) -o gitrev gitrev.o \$(LDFLAGS)
 
 gitrev.o:
-	\$(CXX) \$(CPPFLAGS) -c \$<
+	\$(CXX) \$(CPPFLAGS) -c gitrev.cpp 
 
 doc:
 	cd ../doc; make
