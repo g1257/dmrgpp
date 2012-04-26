@@ -100,7 +100,7 @@ namespace Dmrg {
 		InternalProductKron(ModelType const *model,
 					ModelHelperType const *modelHelper,
 					ReflectionSymmetryType* rs=0)
-		: initKron_(*model,*modelHelper),kronMatrix_(initKron_,"")
+		: initKron_(*model,*modelHelper),kronMatrix_(initKron_)
 		{
 		}
 

@@ -97,9 +97,10 @@ class KronMatrix {
 
 public:
 
-	KronMatrix(const InitKronType& initKron,const std::string& options)
-	: initKron_(initKron),options_(options)
+	KronMatrix(const InitKronType& initKron)
+	: initKron_(initKron)
 	{
+		std::cout<<"KronMatrix: EXPERIMENTAL FEATURE\n";
 		std::cout<<"KronMatrix: preparation done for size="<<initKron.size()<<"\n";
 	}
 
@@ -126,9 +127,9 @@ public:
 
 		MatrixType W(nl,nr);
 
-		if (options_.find("noright")==std::string::npos) computeRight(W,V);
-		if (options_.find("noleft")==std::string::npos) computeLeft(W,V);
-		if (options_.find("noconnections")==std::string::npos) computeConnections(W,V);
+		computeRight(W,V);
+		computeLeft(W,V);
+		computeConnections(W,V);
 
 		for (size_t r=0;r<vout.size();r++) {
 			div_t divresult = div(perm[r+offset],nl);
@@ -263,7 +264,6 @@ private:
 	}
 
 	const InitKronType& initKron_;
-	std::string options_;
 }; //class KronMatrix
 
 } // namespace PsimagLite

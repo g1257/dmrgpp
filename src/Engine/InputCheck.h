@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include "Options.h"
 
 namespace Dmrg {
 
@@ -111,6 +112,14 @@ namespace Dmrg {
 				return true;
 			}
 			return false;
+		}
+
+		void check(const std::string& label,const std::string& val,size_t line) const
+		{
+			if (label!="SolverOptions") return;
+			std::vector<std::string> registerOpts;
+			PsimagLite::Options::Writeable optWriteable(registerOpts,PsimagLite::Options::Writeable::DISABLED);
+			PsimagLite::Options::Readable optsReadable(optWriteable,val);
 		}
 
 	private:
