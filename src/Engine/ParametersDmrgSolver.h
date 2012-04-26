@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "TypeToString.h"
 #include "Vector.h"
+#include "Provenance.h"
 
 namespace Dmrg {
 	/** 
@@ -346,6 +347,8 @@ namespace Dmrg {
 				 ParametersDmrgSolver<FieldType,InputValidatorType> const &parameters)
 	{
 		os<<"#This is DMRG++\n";
+		Provenance provenance;
+		std::cout<<provenance;
 		os<<"parameters.version="<<parameters.version<<"\n";
 		os<<"parameters.model="<<parameters.model<<"\n";
 		os<<"parameters.filename="<<parameters.filename<<"\n";

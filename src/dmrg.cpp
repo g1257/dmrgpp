@@ -222,12 +222,10 @@ int main(int argc,char *argv[])
 		std::cout<<provenance;
 	}
 
-	//Setup the Geometry
 	InputCheck inputCheck;
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
 	InputNgType::Readable io(ioWriteable);
 
-	//IoInputType io(filename);
 	GeometryType geometry(io);
 
 	ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> dmrgSolverParams(io);

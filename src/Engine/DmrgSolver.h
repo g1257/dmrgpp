@@ -542,7 +542,8 @@ namespace Dmrg {
 			std::string vmPeak = musage.findEntry("VmPeak:");
 			std::string vmSize = musage.findEntry("VmSize:");
 			std::ostringstream msg;
-			msg<<" current virtual memory is "<<vmSize<<" maximum virtual memory "<<vmPeak;
+			msg<<" Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
+			msg<<"\nAmount  of  time scheduled (user plus system)  "<<musage.time();
 			progress_.printline(msg,std::cout);
 		}
 

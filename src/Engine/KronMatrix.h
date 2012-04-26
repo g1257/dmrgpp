@@ -100,7 +100,6 @@ public:
 	KronMatrix(const InitKronType& initKron)
 	: initKron_(initKron)
 	{
-		std::cout<<"KronMatrix: EXPERIMENTAL FEATURE\n";
 		std::cout<<"KronMatrix: preparation done for size="<<initKron.size()<<"\n";
 	}
 
@@ -183,7 +182,7 @@ private:
 			size_t j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
 
 			size_t i1 = istartLeft(i);
-//			size_t i2 = istartLeft(i+1);
+			size_t i2 = istartLeft(i+1);
 
 			size_t j1 = istartRight(j);
 			size_t j2 = istartRight(j+1);
@@ -194,7 +193,7 @@ private:
 				for (size_t mr=0;mr<tmp.row();mr++) {
 					for (int kk=tmp.getRowPtr(mr);kk<tmp.getRowPtr(mr+1);kk++) {
 						size_t col = tmp.getCol(kk) + i1;
-//						if (col>=i2) continue;
+						if (col>=i2) continue;
 						W(mr+i1,jj) += tmp.getValue(kk) *  V(col, jj);
 					}
 				}
@@ -247,15 +246,22 @@ private:
 						for (int k3=tmp1.getRowPtr(mr);k3<tmp1.getRowPtr(mr+1);k3++) {
 							size_t col3 = tmp1.getCol(k3)+i1;
 							ComplexOrRealType valtmp = val * tmp1.getValue(k3);
-							for (size_t mr2=0;mr2<colsize;mr2++) {
-								size_t start = tmp2.getRowPtr(mr2);
-								size_t end = tmp2.getRowPtr(mr2+1);
-								ComplexOrRealType valtmp2 = valtmp * V(col3,mr2+j1);
-								for (size_t k4=start;k4<end;k4++) {
-									size_t col4 = tmp2.getCol(k4)+jp1;
-									W(mr+ip1,col4) += valtmp2 * tmp2.getValue(k4) ;
-								}
+							for (size_t mr2=j1;mr2<j2;mr2++) {
+								intermediate(mr,mr2-j1) += valtmp * V(col3,mr2);
 							}
+						}
+					}
+
+					for (size_t mr=0;mr<tmp1.row();mr++) {
+						for (size_t mr2=0;mr2<colsize;mr2++) {
+							size_t start = tmp2.getRowPtr(mr2);
+							size_t end = tmp2.getRowPtr(mr2+1);
+							ComplexOrRealType& valtmp = intermediate(mr,mr2);
+							for (size_t k4=start;k4<end;k4++) {
+								size_t col4 = tmp2.getCol(k4)+jp1;
+								W(mr+ip1,col4) += valtmp * tmp2.getValue(k4) ;
+							}
+							valtmp = 0.0;
 						}
 					}
 				}
@@ -264,6 +270,7 @@ private:
 	}
 
 	const InitKronType& initKron_;
+
 }; //class KronMatrix
 
 } // namespace PsimagLite
