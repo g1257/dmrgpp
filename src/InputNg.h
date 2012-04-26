@@ -92,48 +92,47 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-class MyCompare {
-
-	enum {FIRST,SECOND};
-
-	typedef std::pair<std::string,size_t> PairType;
-
-public:
-	bool operator()(const std::string& x1,const std::string& x2)
-	{
-		PairType p1 = mysplit(x1);
-		PairType p2 = mysplit(x2);
-		if (p1.second==0 && p2.second==0)
-			return (x1<x2);
-		if (p1.second==0) return true;
-		if (p2.second==0) return false;
-		if (p1.first!=p2.first) return (x1<x2);
-		return (p1.second<p2.second);
-	}
-private:
-
-	PairType mysplit(const std::string& x) const
-	{
-		size_t mode=FIRST;
-		std::string xfirst = "";
-		std::string xsecond = "";
-		for (size_t i=0;i<x.length();i++) {
-			if (x[i]=='@') {
-				mode=SECOND;
-				continue;
-			}
-			if (mode==FIRST) xfirst += x[i];
-			else xsecond += x[i];
-		}
-		if (xsecond=="") return PairType(xfirst,0);
-		return PairType(xfirst,atoi(xsecond.c_str()));
-	}
-};
-
 template<typename InputCheckType>
 class InputNg {
 	
 
+	class MyCompare {
+
+		enum {FIRST,SECOND};
+
+		typedef std::pair<std::string,size_t> PairType;
+
+	public:
+		bool operator()(const std::string& x1,const std::string& x2)
+		{
+			PairType p1 = mysplit(x1);
+			PairType p2 = mysplit(x2);
+			if (p1.second==0 && p2.second==0)
+				return (x1<x2);
+			if (p1.second==0) return true;
+			if (p2.second==0) return false;
+			if (p1.first!=p2.first) return (x1<x2);
+			return (p1.second<p2.second);
+		}
+	private:
+
+		PairType mysplit(const std::string& x) const
+		{
+			size_t mode=FIRST;
+			std::string xfirst = "";
+			std::string xsecond = "";
+			for (size_t i=0;i<x.length();i++) {
+				if (x[i]=='@') {
+					mode=SECOND;
+					continue;
+				}
+				if (mode==FIRST) xfirst += x[i];
+				else xsecond += x[i];
+			}
+			if (xsecond=="") return PairType(xfirst,0);
+			return PairType(xfirst,atoi(xsecond.c_str()));
+		}
+	};
 	
 	typedef MyCompare MyCompareType;
 
@@ -182,6 +181,15 @@ public:
 				std::cout<<"END\n";
 			}
 
+		}
+
+		void set(MapStrStrType& mapStrStr,
+			MapStrVecType& mapStrVec,
+			std::vector<std::string>& labelsForRemoval) const
+		{
+			mapStrStr=mapStrStr_;
+			mapStrVec=mapStrVec_,
+			labelsForRemoval=labelsForRemoval_;
 		}
 
 	private:
@@ -246,6 +254,7 @@ public:
 				adjLabel = adjLabelForDuplicates(lastLabel_,mapStrStr_);
 				mapStrStr_[adjLabel] = buffer;
 				state_=IN_LABEL;
+				inputCheck_.check(adjLabel,buffer,line_);
 				break;
 			case IN_VALUE_NUMERIC:
 				if (verbose_) std::cout<<"Read numeric value="<<buffer<<"\n";
@@ -316,29 +325,6 @@ public:
 			return x;
 		}
 
-		std::string findRootLabel(const std::string& label) const
-		{
-			std::string buffer="";
-			size_t len = label.length();
-			for (size_t i=0;i<len;i++) {
-				if (label.at(i)=='@') break;
-				buffer += label.at(i);
-			}
-			return buffer;
-		}
-
-		template<typename SomeMapType>
-		typename SomeMapType::iterator findFirstValueForLabel(const std::string& label,SomeMapType& mymap)
-		{
-			for (typename SomeMapType::iterator it=mymap.begin();it!=mymap.end();++it) {
-				std::string root2 = findRootLabel(it->first);
-				if (label==root2) {
-					return it;
-				}
-			}
-			return mymap.end();
-		}
-
 		template<typename T1,typename T2,typename T3>
 		void printMap(std::map<T1,T2,T3>& mp,const std::string& label)
 		{
@@ -365,13 +351,10 @@ public:
 
 	public:
 
-		Readable(const MapStrStrType& mapStrStr,
-			 const MapStrVecType& mapStrVec,
-			 const std::vector<std::string>& labelsForRemoval)
-			: mapStrStr_(mapStrStr),
-			  mapStrVec_(mapStrVec),
-			  labelsForRemoval_(labelsForRemoval)
-		{}
+		Readable(const Writeable& inputWriteable)
+		{
+			inputWriteable.set(mapStrStr_,mapStrVec_,labelsForRemoval_);
+		}
 
 		void readline(std::string& val,const std::string& label)
 		{
@@ -554,10 +537,33 @@ public:
 			return label.substr(0,len);
 		}
 
+		template<typename SomeMapType>
+		typename SomeMapType::iterator findFirstValueForLabel(const std::string& label,SomeMapType& mymap)
+		{
+			for (typename SomeMapType::iterator it=mymap.begin();it!=mymap.end();++it) {
+				std::string root2 = findRootLabel(it->first);
+				if (label==root2) {
+					return it;
+				}
+			}
+			return mymap.end();
+		}
+
 		std::map<std::string,std::string,MyCompareType> mapStrStr_;
 		std::map<std::string,std::vector<std::string>,MyCompareType> mapStrVec_;
 		std::vector<std::string> labelsForRemoval_;
 	}; // class Readable
+
+	static std::string findRootLabel(const std::string& label)
+	{
+		std::string buffer="";
+		size_t len = label.length();
+		for (size_t i=0;i<len;i++) {
+			if (label.at(i)=='@') break;
+			buffer += label.at(i);
+		}
+		return buffer;
+	}
 
 
 }; //InputNg

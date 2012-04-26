@@ -96,25 +96,30 @@ public:
 
 	public:
 
-		Writeable(std::vector<std::string>& registeredOptions)
-		: registeredOptions_(registeredOptions)
+		enum {DISABLED,PERMISSIVE,STRICT};
+	
+		Writeable(std::vector<std::string>& registeredOptions,size_t mode)
+		: registeredOptions_(registeredOptions),mode_(mode)
 		{}
 
 		void set(std::vector<std::string>& optsThatAreSet,const std::string& opts)
 		{
+			if (mode_==DISABLED) return;
 			split(optsThatAreSet,opts.c_str(),',');
 			for (size_t i=0;i<optsThatAreSet.size();i++) {
 				bool b = (find(registeredOptions_.begin(),registeredOptions_.end(),optsThatAreSet[i])==registeredOptions_.end());
-				if (b) {
-					std::string s(__FILE__);
-					s += ": Unknown option " + optsThatAreSet[i] + "\n";
-					throw std::runtime_error(s.c_str());
-				}
+				if (!b) continue;
+				
+				std::string s(__FILE__);
+				s += ": Unknown option " + optsThatAreSet[i] + "\n";
+				if (mode_==PERMISSIVE) std::cout<<" *** WARNING **: "<<s;
+				if (mode_==STRICT) throw std::runtime_error(s.c_str());
 			}
 		}
 
 	private:
 		std::vector<std::string> registeredOptions_;
+		size_t mode_;
 	}; // class Writeable
 
 	class Readable {
