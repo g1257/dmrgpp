@@ -123,8 +123,6 @@ namespace Dmrg {
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHelperType::RealType RealType;
-//		typedef typename SparseMatrixType::value_type SparseElementType;
-//		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 		typedef typename ModelHelperType::ConcurrencyType
 				ConcurrencyType;
 		typedef typename ModelHelperType::BasisType MyBasis;

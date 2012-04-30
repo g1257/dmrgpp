@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define KRON_MATRIX_HEADER_H
 
 #include "Matrix.h"
+#include "KronConnections.h"
 
 namespace Dmrg {
 
@@ -94,13 +95,14 @@ class KronMatrix {
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename InitKronType::GenGroupType GenGroupType;
+	typedef typename InitKronType::ModelHelperType::ConcurrencyType ConcurrencyType;
 
 public:
 
 	KronMatrix(const InitKronType& initKron)
 	: initKron_(initKron)
 	{
-		std::cout<<"KronMatrix: preparation done for size="<<initKron.size()<<"\n";
+		std::cout<<"KronMatrix: EXPERIMENTAL: preparation done for size="<<initKron.size()<<"\n";
 	}
 
 	void matrixVectorProduct(std::vector<ComplexOrRealType>& vout,
@@ -201,72 +203,17 @@ private:
 		}
 	}
 
+	// ATTENTION: MPI is not supported, only pthreads
 	void computeConnections(MatrixType& W,const MatrixType& V) const
 	{
+		typedef KronConnections<InitKronType> KronConnectionsType;
+		KronConnectionsType kc(initKron_,W,V);
+		typedef typename InitKronType::template ParallelConnectionsInner<KronConnectionsType> ParallelConnectionsInnerType;
+		typedef typename ParallelConnectionsInnerType::Type ParallelConnectionsInnerTypeType;
+		ParallelConnectionsInnerTypeType parallelConnections;
 		size_t npatches = initKron_.patch();
-		size_t nC = initKron_.connections();
-		const GenGroupType& istartLeft = initKron_.istartLeft();
-		const GenGroupType& istartRight = initKron_.istartRight();
-		MatrixType intermediate(W.n_row(),W.n_col());
-
-		for (size_t outPatch=0;outPatch<npatches;outPatch++) {
-			for (size_t inPatch=0;inPatch<npatches;inPatch++) {
-				for (size_t ic=0;ic<nC;ic++) {
-					const ComplexOrRealType& val = initKron_.value(ic);
-					const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
-					const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
-
-					size_t i = initKron_.patch(GenIjPatchType::LEFT,inPatch);
-					size_t j = initKron_.patch(GenIjPatchType::RIGHT,inPatch);
-
-					size_t ip = initKron_.patch(GenIjPatchType::LEFT,outPatch);
-					size_t jp = initKron_.patch(GenIjPatchType::RIGHT,outPatch);
-
-					size_t i1 = istartLeft(i);
-//					size_t i2 = istartLeft(i+1);
-
-					size_t j1 = istartRight(j);
-					size_t j2 = istartRight(j+1);
-
-					size_t ip1 = istartLeft(ip);
-//					size_t ip2 = istartLeft(ip+1);
-
-					size_t jp1 = istartRight(jp);
-//					size_t jp2 = istartLeft(jp+1);
-
-					const SparseMatrixType& tmp1 =  xiStruct(ip,i);
-					const SparseMatrixType& tmp2 =  yiStruct(j,jp);
-
-					size_t colsize = j2 -j1;
-//					for (size_t mr2=0;mr2<colsize;mr2++)
-//						for (size_t mr=0;mr<tmp1.row();mr++)
-//							intermediate(mr,mr2)=0.0;
-
-					for (size_t mr=0;mr<tmp1.row();mr++) {
-						for (int k3=tmp1.getRowPtr(mr);k3<tmp1.getRowPtr(mr+1);k3++) {
-							size_t col3 = tmp1.getCol(k3)+i1;
-							ComplexOrRealType valtmp = val * tmp1.getValue(k3);
-							for (size_t mr2=j1;mr2<j2;mr2++) {
-								intermediate(mr,mr2-j1) += valtmp * V(col3,mr2);
-							}
-						}
-					}
-
-					for (size_t mr=0;mr<tmp1.row();mr++) {
-						for (size_t mr2=0;mr2<colsize;mr2++) {
-							size_t start = tmp2.getRowPtr(mr2);
-							size_t end = tmp2.getRowPtr(mr2+1);
-							ComplexOrRealType& valtmp = intermediate(mr,mr2);
-							for (size_t k4=start;k4<end;k4++) {
-								size_t col4 = tmp2.getCol(k4)+jp1;
-								W(mr+ip1,col4) += valtmp * tmp2.getValue(k4) ;
-							}
-							valtmp = 0.0;
-						}
-					}
-				}
-			}
-		}
+		parallelConnections.loopCreate(npatches,kc,initKron_.concurrency());
+		//hc.sync(parallelConnections,concurrency_);
 	}
 
 	const InitKronType& initKron_;

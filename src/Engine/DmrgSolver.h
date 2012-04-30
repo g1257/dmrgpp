@@ -542,9 +542,11 @@ namespace Dmrg {
 			std::string vmPeak = musage.findEntry("VmPeak:");
 			std::string vmSize = musage.findEntry("VmSize:");
 			std::ostringstream msg;
-			msg<<" Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
-			msg<<"\nAmount  of time scheduled (user plus system): "<<musage.time()<<" clock ticks";
+			msg<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
 			progress_.printline(msg,std::cout);
+			std::ostringstream msg2;
+			msg2<<"Amount of time scheduled (user plus system): "<<musage.time()<<" clock ticks";
+			progress_.printline(msg2,std::cout);
 		}
 
 	}; //class DmrgSolver

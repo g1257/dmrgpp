@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -146,6 +144,14 @@ namespace Dmrg {
 		typedef typename ModelHubbardType::LinkProductStructType LinkProductStructType;
 		typedef typename ModelHelperType::LinkType LinkType;
 		typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
+		typedef typename ModelHubbardType::ParallelConnectionsType ParallelConnectionsType;
+
+		// export ParallelTemplate
+		template<typename T2>
+		class ParallelConnectionsInner {
+		public:
+			typedef SharedMemoryTemplate<T2> Type;
+		};
 
 		template<typename SomeParametersType>
 		ModelFactory(const SomeParametersType& params,
@@ -154,6 +160,7 @@ namespace Dmrg {
 			     ConcurrencyType& concurrency)
 		: name_(params.model),
 		  geometry_(geometry),
+		  concurrency_(concurrency),
 		  hilbertSize_(geometry.numberOfSites()),
 		  q_(hilbertSize_.size()),
 		  basis_(q_.size()),
@@ -224,6 +231,8 @@ namespace Dmrg {
 				break;
 			}
 		}
+
+		const ConcurrencyType& concurrency() const { return concurrency_; }
 
 		const GeometryType& geometry() const { return geometry_; }
 
@@ -515,6 +524,7 @@ namespace Dmrg {
 
 		const std::string& name_;
 		const GeometryType& geometry_;
+		ConcurrencyType& concurrency_;
 		std::vector<size_t> hilbertSize_;
 		std::vector<std::vector<size_t> > q_;
 		std::vector<HilbertBasisType> basis_;

@@ -86,11 +86,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ModelType,typename ModelHelperType>
+template<typename ModelType,typename ModelHelperType_>
 class InitKron {
 
 public:
 
+	typedef ModelHelperType_ ModelHelperType;
+	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -99,6 +101,14 @@ public:
 	typedef ArrayOfMatStruct<SparseMatrixType,GenGroupType> ArrayOfMatStructType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef typename ModelType::LinkProductStructType LinkProductStructType;
+
+	// export ParallelTemplate
+	template<typename T2>
+	class ParallelConnectionsInner {
+	public:
+		typedef typename ModelType::template ParallelConnectionsInner<T2> InnerType;
+		typedef typename InnerType::Type Type;
+	};
 
 	InitKron(const ModelType& model,const ModelHelperType& modelHelper)
 	: model_(model),
@@ -130,6 +140,8 @@ public:
 		for (size_t ic=0;ic<yc_.size();ic++) delete yc_[ic];
 
 	}
+
+	const ConcurrencyType& concurrency() const { return model_.concurrency(); }
 
 	const ArrayOfMatStructType& xc(size_t ic) const
 	{
