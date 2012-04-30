@@ -223,6 +223,23 @@ namespace PsimagLite {
 			throw std::runtime_error(s.c_str());
 		}
 
+		void gather(std::vector<std::complex<double> >& v,CommType mpiComm=COMM_WORLD)
+		{
+			std::vector<std::complex<double> > w(v.size(),0);
+			int x = MPI_Gather(&(v[0]),2*v.size(), MPI_DOUBLE,&(w[0]),2*w.size(),MPI_DOUBLE,0,mpiComm);
+			checkError(x,"MPI_Gather");
+			v = w;
+		}
+
+		void gather(std::vector<double>& v,CommType mpiComm=COMM_WORLD)
+		{
+			std::vector<double> w(v.size(),0);
+			int x = MPI_Gather(&(v[0]),v.size(), MPI_DOUBLE,&(w[0]),w.size(),MPI_DOUBLE,0,mpiComm);
+			checkError(x,"MPI_Gather");
+			v = w;
+		}
+
+
 // 		template<typename T>
 // 		void broadcast(std::vector<std::vector<T> > &v,CommType mpiComm=COMM_WORLD) 
 // 		{ 

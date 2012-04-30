@@ -122,7 +122,7 @@ public:
 		PthreadFunctionStruct<PthreadFunctionHolderType> pfs[nthreads_];
 		pthread_mutex_init(&(mutex_), NULL);
 		pthread_t thread_id[nthreads_];
-		//				std::cerr<<"Pthreads: total="<<total<<"\n";
+//		std::cerr<<"Pthreads: total="<<total<<" threads="<<nthreads_<<"\n";
 		for (size_t j=0; j <nthreads_; j++) {
 			int ret=0;
 			pfs[j].threadNum = j;
