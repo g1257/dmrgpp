@@ -147,7 +147,7 @@ namespace Dmrg {
 						std::cerr<<" and j="<<j<<" is "<<v[j]<<"\n";
 					}
 				}
-				concurrency_.gather(v);
+				concurrency_.reduce(v);
 				for (size_t j=i;j<v.size();j++) w(i,j) = v[j];
 			}
 
