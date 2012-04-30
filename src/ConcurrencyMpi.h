@@ -213,6 +213,16 @@ namespace PsimagLite {
 			throw std::runtime_error(s.c_str());
 		}
 
+		template<typename T>
+		void gather(std::vector<T>& v,CommType mpiComm=COMM_WORLD)
+		{
+			std::string s = "You hit an unimplemented function.\n";
+			s += "Contribute to PsimagLite development and make a difference!\n";
+			s += "Implement this function!\n";
+			s += ttos(__FUNCTION__) + __FILE__ + " : " + ttos(__LINE__) + "\n";
+			throw std::runtime_error(s.c_str());
+		}
+
 // 		template<typename T>
 // 		void broadcast(std::vector<std::vector<T> > &v,CommType mpiComm=COMM_WORLD) 
 // 		{ 
