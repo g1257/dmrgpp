@@ -211,6 +211,7 @@ private:
 		typedef typename InitKronType::template ParallelConnectionsInner<KronConnectionsType> ParallelConnectionsInnerType;
 		typedef typename ParallelConnectionsInnerType::Type ParallelConnectionsInnerTypeType;
 		ParallelConnectionsInnerTypeType parallelConnections;
+		parallelConnections.setThreads(initKron_.numberOfThreads());
 		size_t npatches = initKron_.patch();
 		parallelConnections.loopCreate(npatches,kc,initKron_.concurrency());
 		//hc.sync(parallelConnections,concurrency_);

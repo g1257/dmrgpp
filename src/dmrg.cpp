@@ -121,7 +121,7 @@ void mainLoop2(GeometryType& geometry,
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType,ConcurrencyType> ModelHelperType;
 	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,
-			     PTHREADS_NAME> ModelFactoryType;
+			     PTHREADS_NAME,ParametersDmrgSolverType> ModelFactoryType;
 
 	if (dmrgSolverParams.options.find("ChebyshevSolver")!=std::string::npos) {
 		typedef TargettingTemplate<PsimagLite::ChebyshevSolver,

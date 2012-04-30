@@ -110,7 +110,7 @@ bool observeOneFullSweep(
 
 	if (hasTimeEvolution) observerLib.setBrackets("time","time");
 
-	const std::string& modelName = model.name();
+	const std::string& modelName = model.params().model;
 	size_t rows = n; // could be n/2 if there's enough symmetry
 
 	size_t numberOfDofs = dofsFromModelName(modelName);
@@ -182,7 +182,7 @@ void mainLoop(GeometryType& geometry,
 	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType,ConcurrencyType> ModelHelperType;
-	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME> ModelType;
+	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME,DmrgSolverParametersType> ModelType;
 	typedef TargettingTemplate<PsimagLite::LanczosSolver,
 	                           InternalProductOnTheFly,
 	                           WaveFunctionTransfFactory,

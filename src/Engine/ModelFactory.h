@@ -100,7 +100,8 @@ namespace Dmrg {
 	template<typename ModelHelperType_,
 	typename SparseMatrixType,
 	typename GeometryType_,
-	template<typename> class SharedMemoryTemplate>
+	template<typename> class SharedMemoryTemplate,
+	typename ParametersType>
 	class ModelFactory  {
 
 		typedef typename SparseMatrixType::value_type SparseElementType;
@@ -153,12 +154,11 @@ namespace Dmrg {
 			typedef SharedMemoryTemplate<T2> Type;
 		};
 
-		template<typename SomeParametersType>
-		ModelFactory(const SomeParametersType& params,
+		ModelFactory(const ParametersType& params,
 			     InputValidatorType& io,
 			     const GeometryType& geometry,
 			     ConcurrencyType& concurrency)
-		: name_(params.model),
+		: params_(params),
 		  geometry_(geometry),
 		  concurrency_(concurrency),
 		  hilbertSize_(geometry.numberOfSites()),
@@ -171,39 +171,40 @@ namespace Dmrg {
 		  modelFeAsExt_(0),
 		  modelImmm_(0)
 		{
-			if (name_=="HubbardOneBand") {
+			std::string name = params.model;
+			if (name=="HubbardOneBand") {
 				modelHubbard_ = new ModelHubbardType(io,geometry,concurrency);
 				ModelHubbardType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND;
 				init(modelHubbard_);
-			} else if (name_=="HeisenbergSpinOneHalf") {
+			} else if (name=="HeisenbergSpinOneHalf") {
 				modelHeisenberg_ = new ModelHeisenbergType(io,geometry,concurrency);
 				ModelHeisenbergType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HEISENBERG_SPIN_ONEHALF;
 				init(modelHeisenberg_);
-			} else if (name_=="HubbardOneBandExtended") {
+			} else if (name=="HubbardOneBandExtended") {
 				modelHubbardExt_ = new ModelHubbardExtType(io,geometry,concurrency);
 				ModelHubbardExtType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND_EXT;
 				init(modelHubbardExt_);
-			} else  if (name_=="FeAsBasedSc") {
+			} else  if (name=="FeAsBasedSc") {
 				modelFeAs_ = new FeBasedScType(io,geometry,concurrency);
 				FeBasedScType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=FEAS;
 				init(modelFeAs_);
-			} else if (name_=="FeAsBasedScExtended") {
+			} else if (name=="FeAsBasedScExtended") {
 				modelFeAsExt_ = new FeBasedScExtType(io,geometry,concurrency);
 				FeBasedScExtType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=FEAS_EXT;
 				init(modelFeAsExt_);
-			} else if (name_=="Immm") {
+			} else if (name=="Immm") {
 				modelImmm_ = new ImmmType(io,geometry,concurrency);
 				ImmmType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=IMMM;
 				init(modelImmm_);
 			} else {
 				std::string s(__FILE__);
-				s += " Unknown model " + name_ + "\n";
+				s += " Unknown model " + name + "\n";
 				throw std::runtime_error(s.c_str());
 			}
 		}
@@ -235,6 +236,8 @@ namespace Dmrg {
 		const ConcurrencyType& concurrency() const { return concurrency_; }
 
 		const GeometryType& geometry() const { return geometry_; }
+
+		const ParametersType& params() const { return params_; }
 
 		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
 				     SparseMatrixType &hamiltonian,
@@ -417,15 +420,15 @@ namespace Dmrg {
 			q=q_[index];
 		}
 
-		size_t maxConnections() const
-		{
-			return geometry_.maxConnections();
-		}
+//		size_t maxConnections() const
+//		{
+//			return geometry_.maxConnections();
+//		}
 
-		const std::string& name() const
-		{
-			return name_;
-		}
+//		const std::string& name() const
+//		{
+//			return params_.model;
+//		}
 
 		size_t getLinkProductStruct(LinkProductStructType** lps,const ModelHelperType& modelHelper) const
 		{
@@ -493,7 +496,7 @@ namespace Dmrg {
 		size_t getLinkProductStruct2(LinkProductStructType** lps,const ModelHelperType& modelHelper) const
 		{
 			size_t n=modelHelper.leftRightSuper().super().block().size();
-			size_t maxSize = maxConnections() * 4 * 16;
+			size_t maxSize = geometry_.maxConnections() * 4 * 16;
 			maxSize *= maxSize;
 
 			*lps = new LinkProductStructType(maxSize);
@@ -522,7 +525,7 @@ namespace Dmrg {
 			}
 		}
 
-		const std::string& name_;
+		const ParametersType& params_;	
 		const GeometryType& geometry_;
 		ConcurrencyType& concurrency_;
 		std::vector<size_t> hilbertSize_;
@@ -543,9 +546,10 @@ namespace Dmrg {
 	template<typename ModelHelperType,
 		 typename SparseMatrixType,
 		 typename GeometryType,
-		 template<typename> class SharedMemoryTemplate>
+		 template<typename> class SharedMemoryTemplate,
+		 typename ParametersType>
 	std::ostream& operator<<(std::ostream& os,const ModelFactory<ModelHelperType,
-				 SparseMatrixType,GeometryType,SharedMemoryTemplate>& mf)
+				 SparseMatrixType,GeometryType,SharedMemoryTemplate,ParametersType>& mf)
 	{
 		mf.print(os);
 		return os;

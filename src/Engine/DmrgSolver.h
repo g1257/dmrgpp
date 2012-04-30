@@ -159,7 +159,7 @@ namespace Dmrg {
 		  diagonalization_(parameters,model,concurrency,verbose_,
 				   reflectionOperator_,io_,quantumSector_,wft_),
 		  truncate_(reflectionOperator_,wft_,concurrency_,parameters_,
-			    model_.maxConnections(),verbose_)
+			    model_.geometry().maxConnections(),verbose_)
 		{
 			io_.print(parameters_);
 			io_.print(targetStruct_);

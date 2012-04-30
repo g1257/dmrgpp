@@ -112,6 +112,7 @@ public:
 		const GenGroupType& istartRight = initKron_.istartRight();
 		MatrixType intermediate(W_.n_row(),W_.n_col());
 
+//		std::cerr<<"threadNum="<<threadNum<<" blockSize="<<blockSize<<" total="<<total<<"\n";
 		for (size_t p=0;p<blockSize;p++) {
 			size_t outPatch = threadNum * blockSize + p;
 			if (outPatch>=total) break;
