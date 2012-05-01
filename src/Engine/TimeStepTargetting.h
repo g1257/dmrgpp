@@ -437,32 +437,25 @@ namespace Dmrg {
 				const std::pair<size_t,size_t> jm1(0,0);
 				RealType angularFactor1 = 1.0;
 				typename OperatorType::Su2RelatedType su2Related1;
-				OperatorType A(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
+				OperatorType nup(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
 
-				A.data = tmpC;
-				A.fermionSign = 1;
+				nup.data = tmpC;
+				nup.fermionSign = 1;
 				//A.data = tmpC;
 
 				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
 				if (noStageIs(DISABLED)) std::cerr<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 				else std::cerr<<"NOT ALL OPERATORS APPLIED YET\n";
-				test(psi_,psi_,direction,"<PSI|A|PSI>",site,A);
-				
-				for (size_t j=0;j<targetVectors_.size();j++) {
-					std::string s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
-					test(targetVectors_[j],targetVectors_[j],direction,s,site,A);
-				}
+				test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
+				std::string s = "<P0|nup|P0>";
+				test(targetVectors_[0],targetVectors_[0],direction,s,site,nup);
 
-				// tests for time dependent Hamiltonians:
-				size_t jj = targetVectors_.size() - 1;
-				std::string s("<PSI");
-				s += "|P"+ttos(jj)+">";
-				OperatorType Identity = A;
-				PsimagLite::CrsMatrix<ComplexType> identity2(tmpC.row(),tmpC.col());
-				identity2.makeDiagonal(identity2.row(),1.0);
-				Identity.data = identity2;
-				Identity.fermionSign = 1;
-				test(psi_,targetVectors_[jj],direction,s,site,Identity);
+				PsimagLite::CrsMatrix<ComplexType> tmpC2(model_.naturalOperator("ndown",0,0));
+				OperatorType ndown(tmpC2,fermionSign1,jm1,angularFactor1,su2Related1);
+				test(psi_,psi_,direction,"<PSI|ndown|PSI>",site,ndown);
+				s = "<P0|ndown|P0>";
+				test(targetVectors_[0],targetVectors_[0],direction,s,site,ndown);
+
 				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
 			}
 
@@ -1002,8 +995,7 @@ namespace Dmrg {
 					}
 				}
 				std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_;
-				std::cerr<<" "<<label<<" "<<std::norm(src1)<<" "<<std::norm(src2);
-				std::cerr<<" "<<std::norm(dest)<<"\n";
+				std::cerr<<" "<<label<<" "<<(src1*src2)<<"\n";
 			}
 
 			std::vector<size_t> stage_;
