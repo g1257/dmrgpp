@@ -118,7 +118,23 @@ namespace Dmrg {
 		{
 			if (label!="SolverOptions") return;
 			std::vector<std::string> registerOpts;
-			PsimagLite::Options::Writeable optWriteable(registerOpts,PsimagLite::Options::Writeable::DISABLED);
+
+			registerOpts.push_back("checkpoint");
+			registerOpts.push_back("debugmatrix");
+			registerOpts.push_back("test");
+			registerOpts.push_back("useDavidson");
+			registerOpts.push_back("verbose");
+			registerOpts.push_back("nofiniteloops");
+			registerOpts.push_back("nowft");
+			registerOpts.push_back("inflate");
+			registerOpts.push_back("none");
+			registerOpts.push_back("hasTolerance"); // FIXME: REMOVE THIS OPTION, NOT NEEDED
+			registerOpts.push_back("ChebyshevSolver");
+			registerOpts.push_back("InternalProductStored");
+			registerOpts.push_back("InternalProductKron");
+			registerOpts.push_back("useSu2Symmetry");
+
+			PsimagLite::Options::Writeable optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
 			PsimagLite::Options::Readable optsReadable(optWriteable,val);
 		}
 
