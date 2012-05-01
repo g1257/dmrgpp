@@ -189,27 +189,23 @@ void usage(const char* name)
 
 int main(int argc,char *argv[])
 {
-	if (argc<2) {
-		std::cerr<<"At least one argument needed\n";
-		return 1;
-	}
 	std::string filename="";
-	if (argc==2) {
-		std::cerr<<"WARNING: This use of the command line is deprecated.\n";
-		usage(argv[0]);
-		filename=argv[1];
-	} else {
-		int opt = 0;
-		while ((opt = getopt(argc, argv,"f:")) != -1) {
-			switch (opt) {
-			case 'f':
-				filename = optarg;
-				break;
-			default:
-				usage(argv[0]);
-				break;
-			}
+	int opt = 0;
+	while ((opt = getopt(argc, argv,"f:")) != -1) {
+		switch (opt) {
+		case 'f':
+			filename = optarg;
+			break;
+		default:
+			usage(argv[0]);
+			return 1;
 		}
+	}
+
+	// sanity checks here
+	if (filename=="") {
+		usage(argv[0]);
+		return 1;
 	}
 
 	//! setup distributed parallelization

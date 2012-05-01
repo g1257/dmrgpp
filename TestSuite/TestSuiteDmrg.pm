@@ -64,7 +64,7 @@ sub runDmrg
 
 	createExecutable($specFile,$specKey,"dmrg") unless (-x "$executable");
 
-	my $arg = "$executable $inputFile &> $raw";
+	my $arg = "$executable -f $inputFile &> $raw";
 # 	grep {s/&//} $arg if($verbose);
 	
 	print "Running dmrg test...\n";
@@ -87,7 +87,7 @@ sub runObserve
 	
 	createExecutable($specFile,$specKey,"observe") unless (-x "$executable");
 	
-	my $arg = "$executable $inputFile $obsOptions &> $raw";
+	my $arg = "$executable -f $inputFile -o $obsOptions &> $raw";
 # 	grep {s/&//} $arg if($verbose);
 	#die "******-> $arg\n";	
 	print "Running observe test...\n";
