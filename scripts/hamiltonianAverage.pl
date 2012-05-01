@@ -23,7 +23,7 @@ while(<STDIN>) {
 	}
 }
 
-foreach my $key (keys %val) {
+foreach my $key (sort {$a <=> $b} keys %val) {
 	print "$key $val{$key}\n";
 }
 
