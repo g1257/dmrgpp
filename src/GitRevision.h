@@ -44,14 +44,14 @@ class GitRevision {
 public:
 	
 	GitRevision(const std::string& dir,const std::string& prefix)
-	: prefix_(prefix),tempFile_("version.txt"),gitCommand_("git")
+	: prefix_(prefix),tempFile_("version.txt"),gitCommand_("git"),ret_(0),retp_(0)
 	{
 		std::string currentPath = getCurrentPath();
-		chdir(dir.c_str());
+		ret_ = chdir(dir.c_str());
 		backupTemporaryFile();
 		id_ = getId();
 		diff_ = hasDiff();
-		chdir(currentPath.c_str());
+		ret_ = chdir(currentPath.c_str());
 	}
 
 	const std::string& id() const { return id_; }
@@ -75,7 +75,7 @@ private:
 	{
 		std::string cmd = gitCommand_ +   "  rev-parse HEAD > " + tempFile_ + " 2>/dev/null ";
 		//std::cerr<<"Command is "<<cmd<<"\n";
-		system(cmd.c_str());
+		ret_ = system(cmd.c_str());
 		std::string revision = "unknown";
 		std::ifstream fin(tempFile_.c_str());
 		if (!fin || fin.bad()) return revision;
@@ -90,7 +90,7 @@ private:
 	{
 		if (id_ == "unknown") return "unknown";
 		std::string cmd = gitCommand_ + "  diff --shortstat > " + tempFile_ + " 2>/dev/null ";
-		system(cmd.c_str());
+		ret_ = system(cmd.c_str());
 		std::ifstream fin(tempFile_.c_str());
 		if (!fin || fin.bad()) return "unknown";
 		char* diff = new char[MAX_LINE];
@@ -104,11 +104,12 @@ private:
 		return sdiff;
 	}
 
-	std::string getCurrentPath() const
+	std::string getCurrentPath()
 	{
 		size_t bufsize = 4096;
 		char* buf = new char[bufsize];
-		getcwd(buf,bufsize);
+		retp_ = getcwd(buf,bufsize);
+
 		std::string result(buf);
 		delete [] buf;
 		return result;
@@ -117,6 +118,8 @@ private:
 	std::string prefix_;
 	std::string tempFile_;
 	std::string gitCommand_;
+	int ret_;
+	char *retp_;
 	std::string id_;
 	std::string diff_;
 
