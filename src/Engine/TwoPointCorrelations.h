@@ -135,21 +135,23 @@ namespace Dmrg {
 
 			initCache(O1,rows,cols,fermionicSign);
 
-			for (size_t i=0;i<rows;i++) {
-				std::vector<FieldType> v(cols);
-				//ProfilingType profile("correlations loop i=" + ttos(i));
-				PsimagLite::Range<ConcurrencyType> range(i,cols,concurrency_);
-				for (;!range.end();range.next()) {
-					size_t j = range.index();
-					v[j]  = calcCorrelation(i,j,O1,O2,fermionicSign);
-					if (verbose_) {
-						std::cerr<<"Result for i="<<i;
-						std::cerr<<" and j="<<j<<" is "<<v[j]<<"\n";
-					}
+			PsimagLite::Range<ConcurrencyType> range(0,rows*cols,concurrency_);
+
+			for (;!range.end();range.next()) {
+				size_t ij = range.index();
+				size_t i = ij % rows;
+				size_t j = size_t(ij/rows);
+
+				if (i>j) continue;
+				w(i,j) = calcCorrelation(i,j,O1,O2,fermionicSign);
+
+				if (verbose_) {
+					std::cerr<<"Result for i="<<i;
+					std::cerr<<" and j="<<j<<"  rank="<<concurrency_.rank()<<"\n";
 				}
-				concurrency_.reduce(v);
-				for (size_t j=i;j<v.size();j++) w(i,j) = v[j];
 			}
+
+			concurrency_.reduce(w);
 
 			return w;
 		}
