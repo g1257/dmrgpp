@@ -67,7 +67,7 @@ private:
 		std::ifstream fin(tempFile_.c_str());
 		if (!fin) return;
 		std::string cmd1 = "cp " + tempFile_ + "   " + tempFile_ + ".bak";
-		system(cmd1.c_str());
+		ret_ = system(cmd1.c_str());
 		fin.close();
 	}
 
