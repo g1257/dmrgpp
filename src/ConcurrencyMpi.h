@@ -196,6 +196,15 @@ namespace PsimagLite {
 			if (rank(mpiComm)==0) m = w;
 		}
 
+		void reduce(PsimagLite::Matrix<std::complex<double> >& m,CommType mpiComm=COMM_WORLD)
+		{
+			PsimagLite::Matrix<std::complex<double> > w(m.n_row(),m.n_col());
+			int n = 2*m.n_row()*m.n_col();
+			int x = MPI_Reduce(&(m(0,0)),&(w(0,0)),n,MPI_DOUBLE,MPI_SUM,0,mpiComm);
+			checkError(x,"MPI_Reduce");
+			if (rank(mpiComm)==0) m = w;
+		}
+
 		void allReduce(std::vector<double>& v,CommType mpiComm=COMM_WORLD)
 		{
 			std::vector<double> w(v.size(),0);
@@ -213,20 +222,10 @@ namespace PsimagLite {
 			throw std::runtime_error(s.c_str());
 		}
 
-		template<typename T>
-		void gather(std::vector<T>& v,CommType mpiComm=COMM_WORLD)
-		{
-			std::string s = "You hit an unimplemented function.\n";
-			s += "Contribute to PsimagLite development and make a difference!\n";
-			s += "Implement this function!\n";
-			s += ttos(__FUNCTION__) + __FILE__ + " : " + ttos(__LINE__) + "\n";
-			throw std::runtime_error(s.c_str());
-		}
-
 		void gather(std::vector<std::complex<double> >& v,CommType mpiComm=COMM_WORLD)
 		{
 			std::vector<std::complex<double> > w(v.size(),0);
-			int x = MPI_Gather(&(v[0]),2*v.size(), MPI_DOUBLE,&(w[0]),2*w.size(),MPI_DOUBLE,0,mpiComm);
+			int x = MPI_Gather(&(v[0]),2*v.size(), MPI_DOUBLE,&(w[0]),2*w.size(),MPI_DOUBLE,0,mpiComm); 
 			checkError(x,"MPI_Gather");
 			v = w;
 		}
@@ -234,6 +233,9 @@ namespace PsimagLite {
 		void gather(std::vector<double>& v,CommType mpiComm=COMM_WORLD)
 		{
 			std::vector<double> w(v.size(),0);
+			assert(v.size()>0);
+			assert(w.size()>0);
+			assert(v.size()==w.size());
 			int x = MPI_Gather(&(v[0]),v.size(), MPI_DOUBLE,&(w[0]),w.size(),MPI_DOUBLE,0,mpiComm);
 			checkError(x,"MPI_Gather");
 			v = w;
