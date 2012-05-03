@@ -1,4 +1,4 @@
-\subsection{Licensing}
+<h2>Licensing</h2>
 The full software license for DMRG++ version 2.0.0 
 can be found in
 file LICENSE in the root directory of the code.
@@ -6,8 +6,8 @@ DMRG++ is a free and open source implementation of the
 DMRG algorithm. You are welcomed to use it and publish data 
 obtained with DMRG++. If you do, please cite this
 work (see next subsection).
-\begin{Verbatim}
-DISCLAIMER
+
+<h2>DISCLAIMER</h2>
 
 THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
@@ -31,11 +31,10 @@ STATES DEPARTMENT OF ENERGY, NOR THE COPYRIGHT OWNER, NOR
 ANY OF THEIR EMPLOYEES, REPRESENTS THAT THE USE OF ANY
 INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
 DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
-\end{Verbatim}
 
-\subsection{How To Cite This Work}\label{subsec:citeme}
 
-\begin{Verbatim}
+<h2>How To Cite This Work</h2>
+
 @article{re:alvarez09,
 author="G. Alvarez",
 title="The density matrix renormalization group for strongly correlated electron
@@ -52,13 +51,12 @@ re:webDmrgPlusPlus,
 Author = {G. Alvarez},
 Title = {DMRG++ Website},
 Publisher = {\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
-\end{Verbatim}
 
-\section{Building and Running DMRG++}
-\subsection{Required Software}
-\begin{enumerate}
-\item (required) GNU C++
-\item (required) The LAPACK library.
+<h2>Building and Running DMRG++</h2>
+<h3>Required Software</h3>
+<ol>
+<li> GNU C++ </li>
+<li> (required) The LAPACK library.
 This library is available for most platforms.
 The configure.pl script will ask for the LDFLAGS variable 
 to pass to the compiler/linker. If the linux platform was
@@ -66,27 +64,24 @@ chosen the default/suggested LDFLAGS will include -llapack.
 If the osx platform was chosen the default/suggested LDFLAGS will
 include  -framework Accelerate.
 For other platforms the appropriate linker flags must be given.
-More information on LAPACK is here: \url{http://netlib.org/lapack/}
-\item (required) PsimagLite. This is here \url{https://github.com/g1257/PsimagLite/}.
+More information on LAPACK is here: \url{http://netlib.org/lapack/}</li>
+<li> (required) PsimagLite. This is here \url{https://github.com/g1257/PsimagLite/}.
 You can do \verb=git clone https://github.com/g1257/PsimagLite.git= in a separate directory
-outside of the DMRG++ distribution. \verb=configure.pl= will ask you where you put it.
-\item (optional) make or gmake (only needed to use the Makefile)
-\item (optional) perl (only needed to run the configure.pl script)
-\end{enumerate}
+outside of the DMRG++ distribution. \verb=configure.pl= will ask you where you put it.</li>
+<li>(optional) make or gmake (only needed to use the Makefile)</li>
+<li>(optional) perl (only needed to run the configure.pl script)</li>
+</ul>
 
-\subsection{Quick Start}
+<h2>Quick Start</h2>
 To Build DMRG++:
-\begin{verbatim}
 cd src
 perl configure.pl
 (please answer questions regarding depedencies and libraries)
 make
-\end{verbatim}
+
 
 To Run DMRG++:
-\begin{verbatim}
-./dmrg input.inp
-\end{verbatim}
+./dmrg -f input.inp
 Sample input files can be found under \verb!TestSuite/inputs/!.
 
 The files created by \cppFile{configure.pl} are the following:

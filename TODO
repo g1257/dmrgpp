@@ -23,11 +23,7 @@ json format for input?
 
 DensityMatrixSu2 needs optimization
 
-TestSuite: need to eliminate hashtable.txt usage
-
-observer need full spin correlations S_i S_j, where S is the full spin
-
-DDMRG needs debugging,--> actually it needs rewriting :-( <-- now under testing
+DynamicDMRG needs debugging,--> actually it needs rewriting :-( <-- now under testing
 
 FourPoint needs optimization/parallelization
 
@@ -40,4 +36,6 @@ cannot go backwards from infinite loop when WFT is in use
 
 basis.eq(...) could be uninitialized due to quantumNumbersOld_
 being uninitialized. Also true for other private data of BasisImplementation, need to fix
+
+IoSimple needs to be completely replaced by InputNg (issue 5 on github)
 
