@@ -1,4 +1,5 @@
-<h2>Licensing</h2>
+=pod
+=head2 Licensing
 The full software license for DMRG++ version 2.0.0 
 can be found in
 file LICENSE in the root directory of the code.
@@ -7,7 +8,7 @@ DMRG algorithm. You are welcomed to use it and publish data
 obtained with DMRG++. If you do, please cite this
 work (see next subsection).
 
-<h2>DISCLAIMER</h2>
+=head2 DISCLAIMER
 
 THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
@@ -33,7 +34,7 @@ INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
 DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
-<h2>How To Cite This Work</h2>
+=head2 How To Cite This Work
 
 @article{re:alvarez09,
 author="G. Alvarez",
@@ -52,11 +53,11 @@ Author = {G. Alvarez},
 Title = {DMRG++ Website},
 Publisher = {\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
 
-<h2>Building and Running DMRG++</h2>
-<h3>Required Software</h3>
-<ol>
-<li> GNU C++ </li>
-<li> (required) The LAPACK library.
+=head2 Building and Running DMRG++
+=head3 Required Software
+=over 4
+=item GNU C++ 
+=item (required) The LAPACK library.
 This library is available for most platforms.
 The configure.pl script will ask for the LDFLAGS variable 
 to pass to the compiler/linker. If the linux platform was
@@ -64,15 +65,15 @@ chosen the default/suggested LDFLAGS will include -llapack.
 If the osx platform was chosen the default/suggested LDFLAGS will
 include  -framework Accelerate.
 For other platforms the appropriate linker flags must be given.
-More information on LAPACK is here: \url{http://netlib.org/lapack/}</li>
-<li> (required) PsimagLite. This is here \url{https://github.com/g1257/PsimagLite/}.
+More information on LAPACK is here: \url{http://netlib.org/lapack/}
+=item (required) PsimagLite. This is here \url{https://github.com/g1257/PsimagLite/}.
 You can do \verb=git clone https://github.com/g1257/PsimagLite.git= in a separate directory
-outside of the DMRG++ distribution. \verb=configure.pl= will ask you where you put it.</li>
-<li>(optional) make or gmake (only needed to use the Makefile)</li>
-<li>(optional) perl (only needed to run the configure.pl script)</li>
-</ul>
+outside of the DMRG++ distribution. \verb=configure.pl= will ask you where you put it.
+=item (optional) make or gmake (only needed to use the Makefile)
+=item (optional) perl (only needed to run the configure.pl script)
+=back
 
-<h2>Quick Start</h2>
+=head2 Quick Start
 To Build DMRG++:
 cd src
 perl configure.pl
@@ -99,5 +100,5 @@ is usually a wrapper script around g++ to take care of linking with MPI librarie
 and to include MPI headers. Depending on your MPI installation you might need to
 change the name of this script.
 
-
+=cut
  	
