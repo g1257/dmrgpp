@@ -145,10 +145,12 @@ int main(int argc, char* argv[])
 			if (i!=j) y0(i,j) = -y0(i,j);
 		}
 	}
+	/*
 	for (size_t i=0;i<y0.n_row();i++)
 		for (size_t j=0;j<i;j++)
 			y0(i,j) = y0(j,i);
 
+	*/
 	std::vector<VectorType> result;
 	rk.solve(result,wbegin,wend, y0);
 	for (size_t i=0;i<result.size();i++) {

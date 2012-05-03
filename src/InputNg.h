@@ -360,7 +360,7 @@ public:
 		{
 			std::string label2 = label2label(label);
 			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throw std::runtime_error("InputNg");
+			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= it->second.c_str();
 
@@ -371,7 +371,7 @@ public:
 		{
 			std::string label2 = label2label(label);
 			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throw std::runtime_error("InputNg");
+			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atof(it->second.c_str());
 
@@ -382,7 +382,7 @@ public:
 		{
 			std::string label2 = label2label(label);
 			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throw std::runtime_error("InputNg");
+			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atoi(it->second.c_str());
 
@@ -393,7 +393,7 @@ public:
 		{
 			std::string label2 = label2label(label);
 			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throw std::runtime_error("InputNg");
+			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atoi(it->second.c_str());
 
@@ -404,7 +404,7 @@ public:
 		{
 			std::string label2 = label2label(label);
 			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throw std::runtime_error("InputNg");
+			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atoi(it->second.c_str());
 
@@ -416,7 +416,7 @@ public:
 			std::string label2 = label2label(label);
 
 			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throw std::runtime_error("InputNg");
+			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 
 			val= atoi(it->second.c_str());
@@ -430,7 +430,7 @@ public:
 			std::string label2 = label2label(label);
 
 			std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
-			if (it==mapStrVec_.end()) throw std::runtime_error("InputNg");
+			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			size_t len =  it->second.size();
 			assert(len>1);
@@ -447,7 +447,7 @@ public:
 			std::string label2 = label2label(label);
 
 			std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
-			if (it==mapStrVec_.end()) throw std::runtime_error("InputNg");
+			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			size_t len =  it->second.size();
 			val.resize(len);
@@ -462,7 +462,7 @@ public:
 			std::string label2 = label2label(label);
 
 			std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
-			if (it==mapStrVec_.end()) throw std::runtime_error("InputNg");
+			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
 				std::string s(__FILE__);
@@ -490,7 +490,7 @@ public:
 			std::string label2 = label2label(label);
 
 			std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
-			if (it==mapStrVec_.end()) throw std::runtime_error("InputNg");
+			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
 				std::string s(__FILE__);
@@ -547,6 +547,17 @@ public:
 				}
 			}
 			return mymap.end();
+		}
+
+		void throwWithMessage(const std::string& label,const std::string& label2="")
+		{
+			std::string s("Message issued by: ");
+			s += std::string(__FILE__) + "\n";
+			s += "ATTENTION: ERROR MESSAGE, PLEASE READ: ";
+			s += " The (probably) mandatory label: " + label;
+			if (label2.length()>0 && label2!=label) s += " (a.k.a. " + label2 +")";
+			s += " was not found in the input file.\n";
+			throw std::runtime_error(s.c_str());
 		}
 
 		std::map<std::string,std::string,MyCompareType> mapStrStr_;
