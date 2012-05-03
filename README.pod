@@ -1,104 +1,113 @@
 =pod
+
 =head2 Licensing
-The full software license for DMRG++ version 2.0.0 
-can be found in
-file LICENSE in the root directory of the code.
-DMRG++ is a free and open source implementation of the 
-DMRG algorithm. You are welcomed to use it and publish data 
-obtained with DMRG++. If you do, please cite this
-work (see next subsection).
+
+ The full software license for DMRG++ version 2.0.0 
+ can be found in file LICENSE in the root directory of the code.
+ DMRG++ is a free and open source implementation of the 
+ DMRG algorithm. You are welcomed to use it and publish data 
+ obtained with DMRG++. If you do, please cite this
+ work (see next subsection).
 
 =head2 DISCLAIMER
 
-THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
-CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-COPYRIGHT OWNER, CONTRIBUTORS, UNITED STATES GOVERNMENT,
-OR THE UNITED STATES DEPARTMENT OF ENERGY BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGE.
+ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
+ CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+ WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+ PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER, CONTRIBUTORS, UNITED STATES GOVERNMENT,
+ OR THE UNITED STATES DEPARTMENT OF ENERGY BE LIABLE FOR
+ ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+ DAMAGE.
 
-NEITHER THE UNITED STATES GOVERNMENT, NOR THE UNITED
-STATES DEPARTMENT OF ENERGY, NOR THE COPYRIGHT OWNER, NOR
-ANY OF THEIR EMPLOYEES, REPRESENTS THAT THE USE OF ANY
-INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
-DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
-
+ NEITHER THE UNITED STATES GOVERNMENT, NOR THE UNITED
+ STATES DEPARTMENT OF ENERGY, NOR THE COPYRIGHT OWNER, NOR
+ ANY OF THEIR EMPLOYEES, REPRESENTS THAT THE USE OF ANY
+ INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
+ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 =head2 How To Cite This Work
 
-@article{re:alvarez09,
-author="G. Alvarez",
-title="The density matrix renormalization group for strongly correlated electron
-systems: A generic implementation",
-journal="Computer Physics Communications",
-volume="180",
-pages="1572",
-year="2009"}
-\end{Verbatim}
-And also:
-\begin{Verbatim}
-@article{
-re:webDmrgPlusPlus,
-Author = {G. Alvarez},
-Title = {DMRG++ Website},
-Publisher = {\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
+ author="G. Alvarez",
+ title="The density matrix renormalization group for strongly correlated electron
+ systems: A generic implementation",
+ journal="Computer Physics Communications",
+ volume="180",
+ pages="1572",
+ year="2009"}
+ 
+ And also:
+ @article{
+ re:webDmrgPlusPlus,
+ Author = {G. Alvarez},
+ Title = {DMRG++ Website},
+ Publisher = {\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
 
 =head2 Building and Running DMRG++
+
 =head3 Required Software
+
 =over 4
+
 =item GNU C++ 
-=item (required) The LAPACK library.
-This library is available for most platforms.
-The configure.pl script will ask for the LDFLAGS variable 
-to pass to the compiler/linker. If the linux platform was
-chosen the default/suggested LDFLAGS will include -llapack.
-If the osx platform was chosen the default/suggested LDFLAGS will
-include  -framework Accelerate.
-For other platforms the appropriate linker flags must be given.
-More information on LAPACK is here: \url{http://netlib.org/lapack/}
-=item (required) PsimagLite. This is here \url{https://github.com/g1257/PsimagLite/}.
-You can do \verb=git clone https://github.com/g1257/PsimagLite.git= in a separate directory
-outside of the DMRG++ distribution. \verb=configure.pl= will ask you where you put it.
+
+=item (required) The LAPACK library. 
+
+ The configure.pl script will ask for the LDFLAGS variable 
+ to pass to the compiler/linker. If the linux platform was
+ chosen the default/suggested LDFLAGS will include -llapack.
+ If the osx platform was chosen the default/suggested LDFLAGS will
+ include  -framework Accelerate.
+ For other platforms the appropriate linker flags must be given.
+ More information on LAPACK is here: \url{http://netlib.org/lapack/}
+
+=item (required) PsimagLite.
+
+ This is here \url{https://github.com/g1257/PsimagLite/}.
+ You can do \verb=git clone https://github.com/g1257/PsimagLite.git= in a separate directory
+ outside of the DMRG++ distribution. \verb=configure.pl= will ask you where you put it.
+
 =item (optional) make or gmake (only needed to use the Makefile)
+
 =item (optional) perl (only needed to run the configure.pl script)
+
 =back
 
 =head2 Quick Start
-To Build DMRG++:
-cd src
-perl configure.pl
-(please answer questions regarding depedencies and libraries)
-make
+
+ To Build DMRG++:
+ cd src
+ perl configure.pl
+ (please answer questions regarding depedencies and libraries)
+ make
 
 
-To Run DMRG++:
-./dmrg -f input.inp
-Sample input files can be found under \verb!TestSuite/inputs/!.
+ To Run DMRG++:
+ ./dmrg -f input.inp
+ Sample input files can be found under \verb!TestSuite/inputs/!.
 
-The files created by \cppFile{configure.pl} are the following:
+ The files created by \cppFile{configure.pl} are the following:
 
-\cppFile{Makefile}:
-\cppFile{configure.pl} will create the file \cppFile{Makefile}
-according to the answers to questions given. 
-In the Makefile, LDFLAGS must contain the linker flags to 
-link with the LAPACK library. Defaults provided 
+ Makefile:
+ configure.pl will create the file Makefile
+ according to the answers to questions given. 
+ In the Makefile, LDFLAGS must contain the linker flags to 
+ link with the LAPACK library. Defaults provided 
  automatically by configure.pl should work in most cases.
-If MPI is not selected (serial code) then the compiler will be chosen to be g++.
-Other compilers may work but only the GNU C++ compiler, g++, was tested.
-If MPI is selected then the compiler will be chosen to be mpicxx, which 
-is usually a wrapper script around g++ to take care of linking with MPI libraries 
-and to include MPI headers. Depending on your MPI installation you might need to
-change the name of this script.
+ If MPI is not selected (serial code) then the compiler will be chosen to be g++.
+ Other compilers may work but only the GNU C++ compiler, g++, was tested.
+ If MPI is selected then the compiler will be chosen to be mpicxx, which 
+ is usually a wrapper script around g++ to take care of linking with MPI libraries 
+ and to include MPI headers. Depending on your MPI installation you might need to
+ change the name of this script.
 
 =cut
  	
