@@ -9,7 +9,7 @@ hubbardU	6     10 10 10 10 10 10
 potentialV     12 -5 -5 -5 -5 -5 -5
                   -5 -5 -5 -5 -5 -5
 Model=HubbardOneBand	  
-SolverOptions=wft,nosu2,TimeStepTargetting
+SolverOptions=TimeStepTargetting
 Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
 OutputFile=data18.txt
 InfiniteLoopKeptStates=200 
@@ -74,8 +74,10 @@ TSPFilename=tst18.txt
 TSPTau=0.1
 TSPTimeSteps=5
 TSPAdvanceEach=4
+TSPAlgorithm=Krylov
 TSPSites 2  3 2
 TSPLoops 2 0 0
+TSPProductOrSum=product
 
 TSPOperator=raw 
 RAW_MATRIX 

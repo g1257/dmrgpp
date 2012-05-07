@@ -7,7 +7,7 @@ Connectors 1 1.0
 Model=HubbardOneBand
 hubbardU	8  0  0  0  0  0  0  0  0
 potentialV	 16  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 
-SolverOptions=wft,TimeStepTargetting
+SolverOptions=TimeStepTargetting
 Version=1219aeb832f7990323cca0baa17ad7b87b731ea6
 OutputFile=data1000.txt
 InfiniteLoopKeptStates=256
@@ -43,6 +43,7 @@ TargetQuantumNumbers 2 0.5 0.5
 TSPTau=0.1
 TSPTimeSteps=5
 TSPAdvanceEach=6
+TSPAlgorithm=Krylov
 TSPSites 3  4  5  3
 TSPLoops 3  0  0  0
 TSPProductOrSum=sum

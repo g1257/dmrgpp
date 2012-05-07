@@ -11,8 +11,8 @@ hubbardU	16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
 	0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=HubbardOneBand
-SolverOptions=wft,noSu2,hasThreads,
-Version=18846b60983586e6185bd2d797e7d639cc92ce0e
+SolverOptions=none
+Version=53725d9b8f22615ccccc782082f4cd6f51a4e374
 OutputFile=data2.txt
 InfiniteLoopKeptStates=100
 FiniteLoops 6  7 100 0 -7 100 0 -7 100 0  7 100 1 7 100 1 -2 100 1

@@ -12,7 +12,7 @@ potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=HubbardOneBand
 SolverOptions=nowft,useSu2Symmetry
-Version=356c507fd063201fd29fe86afaa269d0cad94162
+Version=53725d9b8f22615ccccc782082f4cd6f51a4e374
 OutputFile=data1.txt
 InfiniteLoopKeptStates=60
 FiniteLoops 4  7 100 0 -7 100 0 -7 100 0 7 100 0 

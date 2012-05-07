@@ -115,11 +115,11 @@ namespace Dmrg {
 				try {
 					io.readline(productOrSum,"TSPProductOrSum=");
 				} catch (std::exception& e) {
-					std::string s(" *** WARNING: Not providing TSPProductOrSum"); 
-					s += " in the input line is deprecated. Assuming PRODUCT. ";
-					s += "Please make sure that's correct.\n";
-					std::cerr<<s;
-//					io.rewind();
+					std::string s(__FILE__);
+					s += "\n FATAL: Must provide TSPProductOrSum=.\n"); 
+					s += "Please add TSPProductOrSum=product or TSPProductOrSum=sum  ";
+					s += "immediately below the TSPLoops= line in the input file\n";
+					throw std::runtime_error(s.c_str());
 				}
 
 				//! Concatenation specifies what to do with

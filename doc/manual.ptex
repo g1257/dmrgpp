@@ -125,7 +125,7 @@ All rights reserved
 \pagebreak
 
 \section{Introduction}
-\ptexReadFile{../README}
+\ptexReadFile{../README.tex}
 
 \section{User's Guide}
 \subsection{Input File} \label{sec:inputfile}

@@ -10,7 +10,7 @@ Connectors 59 0.118
 		0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
 	      0.118
 Model=HeisenbergSpinOneHalf
-SolverOptions=nowft,noSu2,hasThreads
+SolverOptions=none
 Version=aec8964f7a782d87d587c27276acd41760808139
 OutputFile=data26.txt
 InfiniteLoopKeptStates=100

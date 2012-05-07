@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -116,10 +114,12 @@ namespace Dmrg {
 				if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta")
 					algorithm = RUNGE_KUTTA;
 			} catch (std::exception& e) {
-				std::cerr<<"WARNING: Omission of TSPAlgorithm is deprecated. ";
-				std::cerr<<"Assuming KRYLOV, make sure it's correct\n";
+				std::string s(__FILE__);
+				s += "\n FATAL: TSPAlgorithm not found in input file.\n";
+				s += "Please add either TSPAlgorithm=Krylov or TSPAlgorithm=RungeKutta";
+				s += " just below the TSPAdvanceEach= line in the input file.\n";
+				throw std::runtime_error(s.c_str());
 			}
-//			io.rewind();
 		}
 
 		RealType tau;
@@ -137,6 +137,7 @@ namespace Dmrg {
 		os<<"#TargetParams.tau="<<t.tau<<"\n";
 		os<<"#TargetParams.timeSteps="<<t.timeSteps<<"\n";
 		os<<"#TargetParams.advanceEach="<<t.advanceEach<<"\n";
+		os<<"#TargetParams.algorithm="<<t.algorithm<<"\n";
 		const typename TimeStepParams<ModelType>::TargetParamsCommonType& tp = t;
 		os<<tp;
 		return os;

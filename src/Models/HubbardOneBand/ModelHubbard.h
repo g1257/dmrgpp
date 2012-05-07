@@ -332,26 +332,6 @@ namespace Dmrg {
 			return FERMION_SIGN;
 		}
 
-		//! Compute correct value of Hubbard U parameter for  site ind
-		/* RealType computeHubbardUValue(int type,int ind,int smax,int emin) const 
-		{
-			//! There are two cases:
-			//! 1. (ind,jnd) in SUX --> use input hoppings
-			//! 2. (ind,jnd) in YUE --> use reflected hoppings
-
-			RealType x=0;
-			switch (type) {
-				case ProgramGlobals::ENVIRON_ENVIRON:
-					x=modelParameters_.hubbardU[dmrgGeometry_.findReflection(ind)];
-					break;
-
-				case ProgramGlobals::SYSTEM_SYSTEM:
-					x=modelParameters_.hubbardU[ind];
-					break;
-			}
-			return x;
-		}*/
-
 		//! Compute correct value of onsite potential  for  site ind and internal degree of freedom sigma
 		RealType computeOnsitePotential(int type,int ind,int sigma,int smax,int emin) const 
 		{
@@ -395,19 +375,6 @@ namespace Dmrg {
 			SparseMatrixType creationMatrix(cm);
 			return creationMatrix;
 		}
-
-		//! find quantum numbers for each state of this basis, 
-		//! considered symmetries for this model are: n_up and n_down
-// 		void findQuantumNumbers(std::vector<int> &q,std::vector<typename HilbertSpaceHubbardType::HilbertState>  const &basis) const
-// 		{
-// 			int nup,ndown;
-// 			q.clear();
-// 			for (size_t i=0;i<basis.size();i++) {
-// 				nup = HilbertSpaceHubbardType::getNofDigits(basis[i],0);
-// 				ndown = HilbertSpaceHubbardType::getNofDigits(basis[i],1);
-// 				q.push_back(nup +maxNumberOfSites*ndown);
-// 			}
-// 		}
 
 		void findQuantumNumbers(std::vector<size_t>& q,const HilbertBasisType  &basis,int n) const
 		{
