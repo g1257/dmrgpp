@@ -37,14 +37,14 @@ public:
 		}
 	}
 
-	MatrixType operator() (const RealType& t,
-			       const MatrixType& y) const
+	MatrixType operator()(const RealType& t,
+			      const MatrixType& y) const
 	{
 		ComplexOrRealType c(0., -1.);
-		MatrixType tmp = y * T_;
-		MatrixType yTranspose;
-		transposeConjugate(yTranspose,y);
-		tmp -= T_ * yTranspose;
+		MatrixType tmp = (-1.0)*(T_* y);
+		//MatrixType yTranspose;
+		//transposeConjugate(yTranspose,y);
+		tmp += y * T_;
 		for (size_t i=0;i<tmp.n_row();i++)
 			for (size_t j=0;j<tmp.n_col();j++)
 				tmp(i,j) += mV_(i,j)*y(i,j) + mW_(i,j)*cos(omega_*t)*y(i,j);
@@ -139,18 +139,7 @@ int main(int argc, char* argv[])
 	MatrixType y0;
 	IoInType io2(file2);
 	io2.readMatrix(y0,"MatrixCiCj");
-	for (size_t i=0;i<y0.n_row();i++) {
-		for (size_t j=0;j<y0.n_col();j++) {
-			//if (i==j) y0(i,j) = 1.-y0(i,j);
-			if (i!=j) y0(i,j) = -y0(i,j);
-		}
-	}
-	/*
-	for (size_t i=0;i<y0.n_row();i++)
-		for (size_t j=0;j<i;j++)
-			y0(i,j) = y0(j,i);
 
-	*/
 	std::vector<VectorType> result;
 	rk.solve(result,wbegin,wend, y0);
 	for (size_t i=0;i<result.size();i++) {

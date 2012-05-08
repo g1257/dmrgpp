@@ -44,6 +44,7 @@ while(<STDIN>) {
 		s/\\ptexPaste\{([^\}]+)\}/$substitution/;
 	}
 	if (/\\ptexReadFile\{([^\}]+)\}/) {
+		print STDERR "Reading $1\n";
 		readFile($1);
 		next;
 	}
