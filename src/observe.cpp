@@ -228,15 +228,6 @@ void usage(const char* name)
 int main(int argc,char *argv[])
 {
 	using namespace Dmrg;
-	
-	ConcurrencyType concurrency(argc,argv);
-	
-	// print license
-	if (concurrency.root()) {
-		std::cerr<<license;
-		Provenance provenance;
-		std::cout<<provenance;
-	}
 
 	std::string filename="";
 	std::string options = "";
@@ -259,6 +250,15 @@ int main(int argc,char *argv[])
 	if (filename=="") {
 		usage(argv[0]);
 		return 1;
+	}
+
+	ConcurrencyType concurrency(argc,argv);
+	
+	// print license
+	if (concurrency.root()) {
+		std::cerr<<license;
+		Provenance provenance;
+		std::cout<<provenance;
 	}
 
 	//Setup the Geometry

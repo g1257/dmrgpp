@@ -8,13 +8,13 @@ Connectors 1 1.0
 hubbardU	8  0 0 0 0 0 0 0 0
 potentialV  16      0 0 0 0 0 0 0 0   0 0 0 0 0 0 0 0 
                 
-PotentialT  8    0.0 -0.77 -0.91 -0.144         -0.144 -0.91 -0.77 0.0
-omega=0.8
+PotentialT  8    0.0 -1.77 -0.91 2.144       0.45 2.05 -1.67  0.0      
+omega=0.4
 
 Model=HubbardOneBand
 SolverOptions=TimeStepTargetting
 Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
-OutputFile=data500.txt
+OutputFile=data501.txt
 InfiniteLoopKeptStates=200 
 FiniteLoops 192
 

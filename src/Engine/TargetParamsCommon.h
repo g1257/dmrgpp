@@ -116,7 +116,7 @@ namespace Dmrg {
 					io.readline(productOrSum,"TSPProductOrSum=");
 				} catch (std::exception& e) {
 					std::string s(__FILE__);
-					s += "\n FATAL: Must provide TSPProductOrSum=.\n"); 
+					s += "\n FATAL: Must provide TSPProductOrSum=.\n"; 
 					s += "Please add TSPProductOrSum=product or TSPProductOrSum=sum  ";
 					s += "immediately below the TSPLoops= line in the input file\n";
 					throw std::runtime_error(s.c_str());

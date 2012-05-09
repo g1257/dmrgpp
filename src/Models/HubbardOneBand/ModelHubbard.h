@@ -532,6 +532,7 @@ namespace Dmrg {
 				tmp *= cos(time*modelParameters_.omega);
 				multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
 				hmatrix += tmpMatrix;
+				std::cerr<<"SIIIIIIIITTTTTTTTTEEEEEEEEEEEEEE="<<block[i]<<" POTENTIALTTTTTTTTTTT="<<modelParameters_.potentialT[block[i]]<<"\n";
 			}
 		}
 	};	//class ModelHubbard
