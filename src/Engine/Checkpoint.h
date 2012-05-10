@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -95,6 +93,7 @@ namespace Dmrg {
 	public:
 		typedef typename TargettingType::RealType  RealType;
 		typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
+		typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 		typedef typename TargettingType::IoType IoType;
 		typedef std::stack<BasisWithOperatorsType> MemoryStackType;
 		typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
@@ -164,10 +163,10 @@ namespace Dmrg {
 			else systemStack_.push(pSorE);
 		}
 
-		BasisWithOperatorsType shrink(size_t what)
+		BasisWithOperatorsType shrink(size_t what,const TargettingType& target)
 		{
-			if (what==ProgramGlobals::ENVIRON) return shrink(envStack_);
-			else return shrink(systemStack_);
+			if (what==ProgramGlobals::ENVIRON) return shrink(envStack_,target);
+			else return shrink(systemStack_,target);
 		}
 
 		bool operator()() const { return enabled_; }
@@ -179,17 +178,15 @@ namespace Dmrg {
 		}
 
 	private:
-		const ParametersType& parameters_;
-		bool enabled_;
-		MemoryStackType systemStack_,envStack_; // <--we're the owner
-		DiskStackType systemDisk_,envDisk_;
-		PsimagLite::ProgressIndicator progress_;
 
 		//! shrink  (we don't really shrink, we just undo the growth)
-		BasisWithOperatorsType shrink(MemoryStackType& thisStack)
+		BasisWithOperatorsType shrink(MemoryStackType& thisStack,const TargettingType& target)
 		{
 			thisStack.pop();
-			return thisStack.top();
+			BasisWithOperatorsType& basisWithOps =  thisStack.top();
+			// only updates the extreme sites:
+			target.updateOnSiteForTimeDep(basisWithOps);
+			return basisWithOps;
 		}
 
 		void loadStacksDiskToMemory()
@@ -234,6 +231,12 @@ namespace Dmrg {
 			//throw std::runtime_error("testing\n");
 			return dir + s1 + suf;
 		}
+
+		const ParametersType& parameters_;
+		bool enabled_;
+		MemoryStackType systemStack_,envStack_; // <--we're the owner
+		DiskStackType systemDisk_,envDisk_;
+		PsimagLite::ProgressIndicator progress_;
 	}; // class Checkpoint
 } // namespace Dmrg 
 

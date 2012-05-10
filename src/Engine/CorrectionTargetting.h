@@ -266,6 +266,11 @@ namespace Dmrg {
 				os<<"CorrectionWeightCorrection="<<correctionStruct_.a<<"\n";
 			}
 
+			void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
+			{
+				// nothing to do here
+			}
+
 		private:
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;

@@ -343,6 +343,11 @@ namespace Dmrg {
 
 			RealType time() const { return 0; }
 
+			void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
+			{
+				// nothing to do here
+			}
+
 		private:
 
 			void evolve(size_t index,
@@ -446,8 +451,7 @@ namespace Dmrg {
 				msg<<"New pures for site"<<sites;
 				progress_.printline(msg,std::cerr);
 
-				const MatrixType& transformSystem = 
-				                         wft_.transform(ProgramGlobals::SYSTEM);
+				const MatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
 				VectorType newVector1(transformSystem.n_row());
 				getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
 				           alphaFixed,lrs_.left(),transformSystem,sites.first);
@@ -895,7 +899,8 @@ namespace Dmrg {
 			{
 				VectorWithOffsetType dest;
 				OperatorType A;
-				PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("nup",sites.first,0));
+				size_t site = 0; // sites.first; <-- site-dependent Hilbert space not supported by METTS
+				PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("nup",site,0));
 				A.data = tmpC;
 //				PsimagLite::CrsMatrix<RealType> tmpCt;
 //				transposeConjugate(tmpCt,tmpC);

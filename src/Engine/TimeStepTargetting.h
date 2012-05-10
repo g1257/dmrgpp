@@ -125,6 +125,8 @@ namespace Dmrg {
 			typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+			typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+			typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
 
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -388,6 +390,19 @@ namespace Dmrg {
 				TimeSerializerType ts(currentTime_,block[0],targetVectors_,marker);
 				ts.save(io);
 				psi_.save(io,"PSI");
+			}
+
+			void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
+			{
+
+				BlockType X = basisWithOps.block();
+				if (X.size()!=1) return;
+				assert(X[0]==0 || X[0]==lrs_.super().block().size()-1);
+				std::vector<OperatorType> creationMatrix;
+				SparseMatrixType hmatrix;
+				BasisDataType q;
+				model_.setNaturalBasis(creationMatrix,hmatrix,q,X,currentTime_);
+				basisWithOps.setVarious(X,hmatrix,q,creationMatrix);
 			}
 
 		private:

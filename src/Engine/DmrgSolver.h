@@ -412,10 +412,10 @@ namespace Dmrg {
 				RealType time = target.time();
 				if (direction==EXPAND_SYSTEM) {
 					lrs_.growLeftBlock(model_,pS,sitesIndices_[stepCurrent_],time);
-					lrs_.right(checkpoint_.shrink(ProgramGlobals::ENVIRON));
+					lrs_.right(checkpoint_.shrink(ProgramGlobals::ENVIRON,target));
 				} else {
 					lrs_.growRightBlock(model_,pE,sitesIndices_[stepCurrent_],time);
-					lrs_.left(checkpoint_.shrink(ProgramGlobals::SYSTEM));
+					lrs_.left(checkpoint_.shrink(ProgramGlobals::SYSTEM,target));
 				}
 
 				lrs_.printSizes("finite",std::cout);
@@ -437,8 +437,7 @@ namespace Dmrg {
 				changeTruncateAndSerialize(pS,pE,target,keptStates,direction,saveOption);
 
 				if (finalStep(stepLength,stepFinal)) break;
-				if (stepCurrent_<0) throw std::runtime_error
-						    ("DmrgSolver::finiteStep() currentStep_ is negative\n");
+				if (stepCurrent_<0) throw std::runtime_error("DmrgSolver::finiteStep() currentStep_ is negative\n");
 
 				printMemoryUsage();
 				

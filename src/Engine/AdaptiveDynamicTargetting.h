@@ -273,6 +273,11 @@ namespace Dmrg {
 
 		RealType time() const { return 0; }
 
+		void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
+		{
+			// nothing to do here
+		}
+
 	private:
 
 		void evolve(RealType Eg,size_t direction,size_t site,size_t loopNumber)

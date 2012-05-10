@@ -246,6 +246,7 @@ namespace Dmrg {
 				return tmp;
 			} else if (what=="c") {
 				PsimagLite::Matrix<SparseElementType> tmp;
+				assert(dof + site*DEGREES_OF_FREEDOM<creationMatrix.size());
 				crsMatrixToFullMatrix(tmp,creationMatrix[dof + site*DEGREES_OF_FREEDOM].data);
 				return tmp;
 			} else if (what=="nup") {
@@ -532,7 +533,6 @@ namespace Dmrg {
 				tmp *= cos(time*modelParameters_.omega);
 				multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
 				hmatrix += tmpMatrix;
-				std::cerr<<"SIIIIIIIITTTTTTTTTEEEEEEEEEEEEEE="<<block[i]<<" POTENTIALTTTTTTTTTTT="<<modelParameters_.potentialT[block[i]]<<"\n";
 			}
 		}
 	};	//class ModelHubbard
