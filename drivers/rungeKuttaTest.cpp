@@ -139,6 +139,12 @@ int main(int argc, char* argv[])
 	MatrixType y0;
 	IoInType io2(file2);
 	io2.readMatrix(y0,"MatrixCiCj");
+	for (size_t i=0;i<y0.n_row();i++) {
+		for (size_t j=0;j<y0.n_col();j++) {
+			if (i==j) y0(i,j) = 1.-y0(i,j);
+			//if (i!=j) y0(i,j) = -y0(i,j);
+		}
+	}
 
 	std::vector<VectorType> result;
 	rk.solve(result,wbegin,wend, y0);

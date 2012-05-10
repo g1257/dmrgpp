@@ -129,7 +129,7 @@ namespace PsimagLite {
     	typedef T MatrixElementType;
 		typedef T value_type;
 		
-		CrsMatrix() { } 
+		CrsMatrix() : nrow_(0),ncol_(0) { } 
 
 		~CrsMatrix() {  }
 
