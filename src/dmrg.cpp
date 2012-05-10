@@ -286,7 +286,7 @@ int main(int argc,char *argv[])
 			return 0;
 	}
 	if (targetting=="MettsTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffset,MettsTargetting,
+		mainLoop<ModelHelperLocal,VectorWithOffsets,MettsTargetting,
 			MySparseMatrixReal>(geometry,dmrgSolverParams,concurrency,io);
 			return 0;
 	}

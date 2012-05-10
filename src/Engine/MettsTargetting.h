@@ -348,6 +348,29 @@ namespace Dmrg {
 				// nothing to do here
 			}
 
+//			void truncate(BasisWithOperatorsType& pS,BasisWithOperatorsType& pE)
+//			{
+//				const MatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
+//				VectorType newVector1 = pureVectors_.first;
+//				pureVectors_.first =  newVector1 * transformSystem ;
+
+//				const MatrixType& transformEnviron =
+//						wft_.transform(ProgramGlobals::ENVIRON);
+//				VectorType newVector2 = pureVectors_.second;
+//				pureVectors_.second = newVector2 * transformEnviron;
+
+//				BasisType super("super");
+//				super.setToProduct(pS,pE);
+//				LeftRightSuperType lrs(pS,pE,super);
+//				setFromInfinite(targetVectors_[0],lrs);
+
+//				assert(std::norm(targetVectors_[0])>1e-6);
+
+//				std::ostringstream msg;
+//				msg<<"Truncating, targetVectors_[0].size="<<targetVectors_[0].size();
+//				progress_.printline(msg,std::cerr);
+//			}
+
 		private:
 
 			void evolve(size_t index,
@@ -366,7 +389,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				assert(sites.first==sites.second);
 				size_t nk = model_.hilbertSize(sites.first);
-				advanceOrWft(index,indexAdvance,direction,nk);
+				advanceOrWft(index,indexAdvance,direction,nk,sites);
 			}
 
 			void advanceCounterAndComputeStage()
@@ -388,9 +411,10 @@ namespace Dmrg {
 			}
 
 			void advanceOrWft(size_t index,
-							  size_t indexAdvance,
+					  size_t indexAdvance,
 			                  size_t systemOrEnviron,
-							  size_t nk)
+					  size_t nk,
+					  std::pair<size_t,size_t> sites)
 			{
 				if (targetVectors_[index].size()==0) return;
 				assert(std::norm(targetVectors_[index])>1e-6);
@@ -409,12 +433,16 @@ namespace Dmrg {
 					VectorWithOffsetType phiNew; // same sectors as g.s.
 					//phiNew.populateSectors(lrs_.super());
 					assert(std::norm(targetVectors_[advance])>1e-6);
-					populateCorrectSector(phiNew);
+
+					examineTarget(targetVectors_[advance],advance);
+					//populateCorrectSector(phiNew,lrs_);
+					phiNew.populateSectors(lrs_.super());
 					// OK, now that we got the partition number right, let's wft:
 					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_,nk);
-					//phiNew.collapseSectors();
+					phiNew.collapseSectors();
 					assert(std::norm(phiNew)>1e-6);
 					targetVectors_[index] = phiNew;
+					examineTarget(targetVectors_[index],index);
 				} else {
 					assert(false);
 				}
@@ -452,7 +480,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cerr);
 
 				const MatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
-				VectorType newVector1(transformSystem.n_row());
+				VectorType newVector1(transformSystem.n_row(),0);
 				getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
 				           alphaFixed,lrs_.left(),transformSystem,sites.first);
 // 				systemPrev_.ns = pureVectors_.first.size();
@@ -460,12 +488,12 @@ namespace Dmrg {
 
 				const MatrixType& transformEnviron = 
 				                        wft_.transform(ProgramGlobals::ENVIRON);
-				VectorType newVector2(transformEnviron.n_row());
+				VectorType newVector2(transformEnviron.n_row(),0);
 				getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
 						   betaFixed,lrs_.right(),transformEnviron,sites.second);
 // 				environPrev_.ns = pureVectors_.second.size();
 				pureVectors_.second = newVector2;
- 				setFromInfinite(targetVectors_[0]);
+				setFromInfinite(targetVectors_[0],lrs_);
 
 				assert(std::norm(targetVectors_[0])>1e-6);
 
@@ -475,16 +503,16 @@ namespace Dmrg {
 				environPrev_.permutationInverse = lrs_.right().permutationInverse();
 			}
 
-			void getFullVector(std::vector<RealType>& v,size_t m) const
+			void getFullVector(std::vector<RealType>& v,size_t m,const LeftRightSuperType& lrs) const
 			{
-				int offset = lrs_.super().partition(m);
-				int total = lrs_.super().partition(m+1) - offset;
+				int offset = lrs.super().partition(m);
+				int total = lrs.super().partition(m+1) - offset;
 
-				PackIndicesType pack(lrs_.left().size());
+				PackIndicesType pack(lrs.left().size());
 				v.resize(total);
 				for (int i=0;i<total;i++) {
 					size_t alpha,beta;
-					pack.unpack(alpha,beta,lrs_.super().permutation(i+offset));
+					pack.unpack(alpha,beta,lrs.super().permutation(i+offset));
 					v[i] = pureVectors_.first[alpha] * pureVectors_.second[beta];
 				}
 			}
@@ -505,25 +533,21 @@ namespace Dmrg {
 					delayedTransform(tmpVector,oldVector,direction,transform,site);
 				}
 				size_t ns = tmpVector.size();
-				size_t ne = model_.hilbertSize(site);
+				size_t nk = model_.hilbertSize(site);
 				size_t newSize =  (transform.n_col()==0) ? (ns*ns) : 
-				                        transform.n_col() * ne;
+							transform.n_col() * nk;
 				newVector.resize(newSize);
+				for (size_t alpha=0;alpha<newVector.size();alpha++) newVector[alpha] = 0;
 
 				std::ostringstream msg;
 				msg<<"New size of pure is "<<newSize;
 				progress_.printline(msg,std::cerr);
 
-				for (size_t gamma=0;gamma<newVector.size();gamma++) {
-					newVector[gamma] = 0;
-					for (size_t alpha=0;alpha<ns;alpha++) {
-						size_t gammaPrime = (direction==ProgramGlobals::SYSTEM) ? 
-						    basis.permutationInverse(alpha + alphaFixed*ns) :
-						    basis.permutationInverse(alphaFixed + alpha*ne);
-						
-						if (gamma == gammaPrime) 
-							newVector[gamma] += tmpVector[alpha];
-					}
+				for (size_t alpha=0;alpha<ns;alpha++) {
+					size_t gamma = (direction==ProgramGlobals::SYSTEM) ?
+					    basis.permutationInverse(alpha + alphaFixed*ns) :
+					    basis.permutationInverse(alphaFixed + alpha*nk);
+					newVector[gamma] = tmpVector[alpha];
 				}
 			}
 
@@ -535,27 +559,28 @@ namespace Dmrg {
 			{
 				assert(oldVector.size()==transform.n_row());
 
-				size_t ne = model_.hilbertSize(site);
+				//size_t ne = model_.hilbertSize(site);
 				
-				const std::vector<size_t>& permutationInverse = (direction==SYSTEM)
-				? systemPrev_.permutationInverse : environPrev_.permutationInverse;
-				size_t nsPrev = permutationInverse.size()/ne;
+				//const std::vector<size_t>& permutationInverse = (direction==SYSTEM)
+				//? systemPrev_.permutationInverse : environPrev_.permutationInverse;
+				//size_t nsPrev = permutationInverse.size()/ne;
 				
-				newVector.resize(transform.n_col());
-				for (size_t gamma=0;gamma<newVector.size();gamma++) {
-					newVector[gamma] = 0;
-					for (size_t alpha=0;alpha<nsPrev;alpha++) {
-						size_t noPermIndex =  (direction==SYSTEM) 
-						                   ? alpha + systemPrev_.fixed*nsPrev 
-						                   : environPrev_.fixed + alpha*ne;
+				//newVector.resize(transform.n_col());
+				newVector = oldVector * transform;
+//				for (size_t gamma=0;gamma<newVector.size();gamma++) {
+//					newVector[gamma] = 0;
+//					for (size_t alpha=0;alpha<nsPrev;alpha++) {
+//						size_t noPermIndex =  (direction==SYSTEM)
+//						                   ? alpha + systemPrev_.fixed*nsPrev
+//						                   : environPrev_.fixed + alpha*ne;
 						
-						size_t gammaPrime = permutationInverse[noPermIndex];
+//						size_t gammaPrime = permutationInverse[noPermIndex];
 						
-						assert(gammaPrime<transform.n_row());
-						newVector[gamma] += transform(gammaPrime,gamma) * 
-						                      oldVector[gammaPrime];
-					}
-				}
+//						assert(gammaPrime<transform.n_row());
+//						newVector[gamma] += transform(gammaPrime,gamma) *
+//						                      oldVector[gammaPrime];
+//					}
+//				}
 			}
 
 			void setInitialPure(VectorType& oldVector,size_t site)
@@ -568,32 +593,34 @@ namespace Dmrg {
 				}
 			}
 
-			void populateCorrectSector(VectorWithOffsetType& phi) const
-			{
-				size_t total = lrs_.super().partition()-1;
-				size_t m = getPartition();
-				std::vector<VectorType> vv;
-				for (size_t i=0;i<total;i++) {
-					size_t bs = lrs_.super().partition(i+1)-lrs_.super().partition(i);
-					if (i!=m) bs=0;
-					VectorType vone(bs);
-					vv.push_back(vone);
-				}
+//			void populateCorrectSector(VectorWithOffsetType& phi,const LeftRightSuperType& lrs) const
+//			{
+//				size_t total = lrs.super().partition()-1;
+//				size_t m = getPartition();
+//				std::vector<VectorType> vv;
+//				for (size_t i=0;i<total;i++) {
+//					size_t bs = lrs.super().partition(i+1)-lrs.super().partition(i);
+//					if (i!=m) bs=0;
+//					VectorType vone(bs);
+//					vv.push_back(vone);
+//				}
 				
-				phi.set(vv,lrs_.super());
-				assert(phi.sectors()==1);
-			}
+//				phi.set(vv,lrs.super());
+//				assert(phi.sectors()==1);
+//			}
 
-			void setFromInfinite(VectorWithOffsetType& phi) const
+			void setFromInfinite(VectorWithOffsetType& phi,const LeftRightSuperType& lrs) const
 			{
-				populateCorrectSector(phi);
+				//populateCorrectSector(phi,lrs);
+				phi.populateSectors(lrs.super());
+				std::cerr<<"NUUUUUUMBBBBBBBERRRRRRRRR OF SEEEEECTTTTTTTTORRRRRRRRS="<<phi.sectors()<<"\n";
 				for (size_t ii=0;ii<phi.sectors();ii++) {
 					size_t i0 = phi.sector(ii);
 					VectorType v;
-					getFullVector(v,i0);
+					getFullVector(v,i0,lrs);
 					phi.setDataInSector(v,i0);
 				}
-				
+				phi.collapseSectors();
 				assert(std::norm(phi)>1e-6);
 			}
 
@@ -665,7 +692,7 @@ namespace Dmrg {
 				msg<<" vector number "<<startEnd.first<<" has norm ";
 				msg<<std::norm(phi);
 				progress_.printline(msg,std::cout);
-				if (std::norm(phi)<1e-6) setFromInfinite(targetVectors_[startEnd.first]);
+				if (std::norm(phi)<1e-6) setFromInfinite(targetVectors_[startEnd.first],lrs_);
 
 				std::vector<MatrixType> V(phi.sectors());
 				std::vector<MatrixType> T(phi.sectors());
@@ -687,7 +714,7 @@ namespace Dmrg {
 			                       const std::vector<MatrixType>& V,
 			                       RealType Eg,
 			                       const std::vector<VectorType>& eigs,
-		                           std::vector<size_t> steps,
+					       std::vector<size_t> steps,
 			                       size_t systemOrEnviron)
 			{
 				for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
@@ -876,6 +903,19 @@ namespace Dmrg {
 // 								systemOrEnviron);
 // 			}
 
+			void examineTarget(const VectorWithOffsetType& phi,size_t index) const
+			{
+				std::cerr<<"HEEEEEEEREEEEEEEE index="<<index<<" sectors="<<phi.sectors()<<"\n";
+				for (size_t ii=0;ii<phi.sectors();ii++) {
+					size_t i = phi.sector(ii);
+					VectorType phi2;
+					phi.extract(phi2,i);
+					std::cerr<<"NOOOOOOORMMMMMMMM of "<<i<<" is "<<PsimagLite::norm(phi2)<<" index="<<index;
+					size_t qn = lrs_.super().qn(i);
+					std::cerr<<" QN="<<qn<<"\n";
+				}
+			}
+
 			void zeroOutVectors()
 			{
 				for (size_t i=0;i<targetVectors_.size();i++) 
@@ -909,7 +949,7 @@ namespace Dmrg {
 				//A.data = tmpC;
 				typename ModelType::HilbertBasisType basis;
 				std::vector<size_t> quantumNumbs;
-				assert(sites.first==sites.second);
+//				assert(sites.first==sites.second);
 				std::vector<size_t> electrons;
 				findElectronsOfOneSite(electrons,sites.first);
 				FermionSign fs(lrs_.left(),electrons);

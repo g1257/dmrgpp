@@ -454,8 +454,12 @@ namespace Dmrg {
 			}
 		}
 
-		void changeTruncateAndSerialize(MyBasisWithOperators& pS,MyBasisWithOperators& pE,
-			    const TargettingType& target,size_t keptStates,size_t direction,size_t saveOption)
+		void changeTruncateAndSerialize(MyBasisWithOperators& pS,
+						MyBasisWithOperators& pE,
+						const TargettingType& target,
+						size_t keptStates,
+						size_t direction,
+						size_t saveOption)
 		{
 			const std::vector<size_t>& eS = pS.electronsVector();
 			FermionSignType fsS(eS);

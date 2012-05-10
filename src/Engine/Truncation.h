@@ -143,7 +143,7 @@ namespace Dmrg {
 
 		void operator()(BasisWithOperatorsType& pS,
 		                BasisWithOperatorsType& pE,
-		                const TargettingType& target,
+				const TargettingType& target,
 		                size_t keptStates,
 		                size_t direction)
 		{

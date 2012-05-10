@@ -192,10 +192,6 @@ namespace Dmrg {
 			psi_.set(v,someBasis);
 		}
 		
-// 		const RealType& operator[](size_t i) const { return psi_[i]; }
-					
-// 		RealType& operator[](size_t i) { return psi_[i]; }
-		
 		const VectorWithOffsetType& gs() const { return psi_; }
 		
 		bool includeGroundStage() const {return true; }
