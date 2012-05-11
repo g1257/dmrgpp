@@ -400,10 +400,8 @@ namespace Dmrg {
 				//utils::getCoordinates(jk,je,(size_t)lrs.right().permutation(jen),npk);
 				psiDest[x]=createAux2bFromInfinite(psiSrc,is,jpl,jen,wsT,we,nk);
 			}
-			
 		}
-		
-		
+
 		// FIXME: INCOMING jen needs to be 4 times as big!!
 		template<typename SomeVectorType>
 		SparseElementType createAux2bFromInfinite(
@@ -423,11 +421,11 @@ namespace Dmrg {
 				size_t ip = wsT.getCol(k);
 				SparseElementType sum2 = 0;
 				//for (int k2=we.getRowPtr(jen);k2<we.getRowPtr(jen+1);k2++) {
-					size_t jpr = jen; //we.getCol(k2);
-					size_t jp = dmrgWaveStruct_.lrs.right().permutationInverse(jpl + jpr*nk);
-					size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
-					sum2 += wsT.getValue(k)*psiSrc[y]; //*we.getValue(k2);
-					
+				size_t jpr = jen; //we.getCol(k2);
+				size_t jp = dmrgWaveStruct_.lrs.right().permutationInverse(jpl + jpr*nk);
+				size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
+				sum2 += wsT.getValue(k)*psiSrc[y]; //*we.getValue(k2);
+
 				//}
 				sum += sum2;
 			}

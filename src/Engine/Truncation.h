@@ -110,13 +110,11 @@ namespace Dmrg {
 
 		struct TruncationCache {
 			TruncationCache()
-			: transform(0,0),
-			  bprime("bprime")
+			: transform(0,0)
 			{}
 			BlockMatrixType transform;
 			std::vector<RealType> eigs;
 			std::vector<size_t> removedIndices;
-			BasisWithOperatorsType bprime;
 		}; // TruncationCache
 
 		Truncation(ReflectionSymmetryType& reflectionOperator,
@@ -149,14 +147,12 @@ namespace Dmrg {
 		{
 			if (direction==EXPAND_SYSTEM) {
 				progress_.print("for Environment\n",std::cout);
-				changeBasis(target,keptStates,direction);
-				truncateBasisSystem(lrs_.right());
-				pS = leftCache_.bprime;
+				changeBasis(pS,target,keptStates,direction);
+				truncateBasisSystem(pS,lrs_.right());
 			} else {
 				progress_.print("for System\n",std::cout);
-				changeBasis(target,keptStates,direction);
-				truncateBasisEnviron(lrs_.left());
-				pE = rightCache_.bprime;
+				changeBasis(pE,target,keptStates,direction);
+				truncateBasisEnviron(pE,lrs_.left());
 			}
 		}
 
@@ -172,24 +168,18 @@ namespace Dmrg {
 				 const TargettingType& target,
 				 size_t keptStates)
 		{
-			changeBasis(target,keptStates,EXPAND_SYSTEM);
-			changeBasis(target,keptStates,EXPAND_ENVIRON);
+			changeBasis(sBasis,target,keptStates,EXPAND_SYSTEM);
+			changeBasis(eBasis,target,keptStates,EXPAND_ENVIRON);
 
-			//reflectionOperator_.updateKeptStates(keptStates,leftCache_,rightCache_);
+			truncateBasisSystem(sBasis,lrs_.right());
+			truncateBasisEnviron(eBasis,lrs_.left());
 
-			truncateBasisSystem(eBasis);
-//			TransformType transform1 = ftransform_;
-			truncateBasisEnviron(sBasis);
-
-//			reflectionOperator_.changeBasis(transform1,ftransform_);
-			sBasis = leftCache_.bprime;
-			eBasis = rightCache_.bprime;
-			//reflectionOperator_.diagBasis();
 		}
 
 	private:
 
-		void changeBasis(const TargettingType& target,
+		void changeBasis(BasisWithOperatorsType& rSprime,
+				 const TargettingType& target,
 				 size_t keptStates,
 				 size_t direction)
 		{
@@ -240,8 +230,8 @@ namespace Dmrg {
 
 			//! transform basis: dmS^\dagger * operator matrix * dms
 			cache.transform = dmS();
-			cache.bprime = pBasis;
-			cache.bprime.changeBasis(cache.removedIndices,cache.eigs,keptStates,parameters_);
+			rSprime = pBasis;
+			rSprime.changeBasis(cache.removedIndices,cache.eigs,keptStates,parameters_);
 
 //			if (cache.removedIndices.size()>0) {
 //				std::cerr<<"REMVD_INDICES=";
@@ -255,35 +245,35 @@ namespace Dmrg {
 
 		}
 
-		void truncateBasisSystem(const BasisWithOperatorsType& eBasis)
+		void truncateBasisSystem(BasisWithOperatorsType& rSprime,const BasisWithOperatorsType& eBasis)
 		{
 
 			std::ostringstream msg;
 			TruncationCache& cache = leftCache_;
 
-			cache.bprime.truncateBasis(ftransform_,cache.transform,
+			rSprime.truncateBasis(ftransform_,cache.transform,
 							    cache.eigs,cache.removedIndices,concurrency_);
-			LeftRightSuperType lrs(cache.bprime,(BasisWithOperatorsType&) eBasis,
+			LeftRightSuperType lrs(rSprime,(BasisWithOperatorsType&) eBasis,
 					       (BasisType&)lrs_.super());
 			waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrs);
 
-			msg<<"new size of basis="<<cache.bprime.size();
+			msg<<"new size of basis="<<rSprime.size();
 //			assert(ftransform_.n_col()==cache.bprime.size());
 			progress_.printline(msg,std::cout);
 		}
 
-		void truncateBasisEnviron(const BasisWithOperatorsType& sBasis)
+		void truncateBasisEnviron(BasisWithOperatorsType& rEprime,const BasisWithOperatorsType& sBasis)
 		{
 
 			std::ostringstream msg;
 			TruncationCache& cache = rightCache_;
 
-			cache.bprime.truncateBasis(ftransform_,cache.transform,
+			rEprime.truncateBasis(ftransform_,cache.transform,
 							    cache.eigs,cache.removedIndices,concurrency_);
 			LeftRightSuperType lrs((BasisWithOperatorsType&) sBasis,
-					       cache.bprime,(BasisType&)lrs_.super());
+					       rEprime,(BasisType&)lrs_.super());
 			waveFunctionTransformation_.push(ftransform_,EXPAND_ENVIRON,lrs);
-			msg<<"new size of basis="<<cache.bprime.size();
+			msg<<"new size of basis="<<rEprime.size();
 			progress_.printline(msg,std::cout);
 		}
 

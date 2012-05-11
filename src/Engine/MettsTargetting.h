@@ -442,7 +442,7 @@ namespace Dmrg {
 					phiNew.collapseSectors();
 					assert(std::norm(phiNew)>1e-6);
 					targetVectors_[index] = phiNew;
-					examineTarget(targetVectors_[index],index);
+					//examineTarget(targetVectors_[index],index);
 				} else {
 					assert(false);
 				}
@@ -494,7 +494,7 @@ namespace Dmrg {
 // 				environPrev_.ns = pureVectors_.second.size();
 				pureVectors_.second = newVector2;
 				setFromInfinite(targetVectors_[0],lrs_);
-
+				//examineTarget(targetVectors_[0],0);
 				assert(std::norm(targetVectors_[0])>1e-6);
 
 				systemPrev_.fixed = alphaFixed;
@@ -537,18 +537,28 @@ namespace Dmrg {
 				size_t newSize =  (transform.n_col()==0) ? (ns*ns) : 
 							transform.n_col() * nk;
 				newVector.resize(newSize);
-				for (size_t alpha=0;alpha<newVector.size();alpha++) newVector[alpha] = 0;
+				//for (size_t alpha=0;alpha<newVector.size();alpha++) newVector[alpha] = 0;
 
-				std::ostringstream msg;
-				msg<<"New size of pure is "<<newSize;
-				progress_.printline(msg,std::cerr);
+//				for (size_t alpha=0;alpha<ns;alpha++) {
+//					size_t gamma = (direction==ProgramGlobals::SYSTEM) ?
+//					    basis.permutationInverse(alpha + alphaFixed*ns) :
+//					    basis.permutationInverse(alphaFixed + alpha*nk);
+//					newVector[gamma] = tmpVector[alpha];
+//				}
+				for (size_t gamma=0;gamma<newVector.size();gamma++) {
+					newVector[gamma] = 0;
+					for (size_t alpha=0;alpha<ns;alpha++) {
+						size_t gammaPrime = (direction==ProgramGlobals::SYSTEM) ?
+									basis.permutationInverse(alpha + alphaFixed*ns) :
+									basis.permutationInverse(alphaFixed + alpha*nk);
 
-				for (size_t alpha=0;alpha<ns;alpha++) {
-					size_t gamma = (direction==ProgramGlobals::SYSTEM) ?
-					    basis.permutationInverse(alpha + alphaFixed*ns) :
-					    basis.permutationInverse(alphaFixed + alpha*nk);
-					newVector[gamma] = tmpVector[alpha];
+						if (gamma == gammaPrime)
+							newVector[gamma] += tmpVector[alpha];
+					}
 				}
+				std::ostringstream msg;
+				msg<<"New size of pure is "<<newSize<<" norm="<<PsimagLite::norm(newVector);
+				progress_.printline(msg,std::cerr);
 			}
 
 			void delayedTransform(VectorType& newVector,
@@ -559,28 +569,28 @@ namespace Dmrg {
 			{
 				assert(oldVector.size()==transform.n_row());
 
-				//size_t ne = model_.hilbertSize(site);
+				size_t ne = model_.hilbertSize(site);
 				
-				//const std::vector<size_t>& permutationInverse = (direction==SYSTEM)
-				//? systemPrev_.permutationInverse : environPrev_.permutationInverse;
-				//size_t nsPrev = permutationInverse.size()/ne;
+				const std::vector<size_t>& permutationInverse = (direction==SYSTEM)
+				? systemPrev_.permutationInverse : environPrev_.permutationInverse;
+				size_t nsPrev = permutationInverse.size()/ne;
 				
-				//newVector.resize(transform.n_col());
-				newVector = oldVector * transform;
-//				for (size_t gamma=0;gamma<newVector.size();gamma++) {
-//					newVector[gamma] = 0;
-//					for (size_t alpha=0;alpha<nsPrev;alpha++) {
-//						size_t noPermIndex =  (direction==SYSTEM)
-//						                   ? alpha + systemPrev_.fixed*nsPrev
-//						                   : environPrev_.fixed + alpha*ne;
+				newVector.resize(transform.n_col());
+				//newVector = oldVector * transform;
+				for (size_t gamma=0;gamma<newVector.size();gamma++) {
+					newVector[gamma] = 0;
+					for (size_t alpha=0;alpha<nsPrev;alpha++) {
+						size_t noPermIndex =  (direction==SYSTEM)
+								   ? alpha + systemPrev_.fixed*nsPrev
+								   : environPrev_.fixed + alpha*ne;
 						
-//						size_t gammaPrime = permutationInverse[noPermIndex];
+						size_t gammaPrime = permutationInverse[noPermIndex];
 						
-//						assert(gammaPrime<transform.n_row());
-//						newVector[gamma] += transform(gammaPrime,gamma) *
-//						                      oldVector[gammaPrime];
-//					}
-//				}
+						assert(gammaPrime<transform.n_row());
+						newVector[gamma] += transform(gammaPrime,gamma) *
+								      oldVector[gammaPrime];
+					}
+				}
 			}
 
 			void setInitialPure(VectorType& oldVector,size_t site)
@@ -905,14 +915,16 @@ namespace Dmrg {
 
 			void examineTarget(const VectorWithOffsetType& phi,size_t index) const
 			{
-				std::cerr<<"HEEEEEEEREEEEEEEE index="<<index<<" sectors="<<phi.sectors()<<"\n";
+				std::cerr<<"HEEEEEEEREEEEEEEE size="<<phi.size()<<" index="<<index<<" sectors="<<phi.sectors()<<"\n";
 				for (size_t ii=0;ii<phi.sectors();ii++) {
 					size_t i = phi.sector(ii);
 					VectorType phi2;
 					phi.extract(phi2,i);
 					std::cerr<<"NOOOOOOORMMMMMMMM of "<<i<<" is "<<PsimagLite::norm(phi2)<<" index="<<index;
-					size_t qn = lrs_.super().qn(i);
-					std::cerr<<" QN="<<qn<<"\n";
+					size_t qn = lrs_.super().qn(phi.offset(i));
+					std::cerr<<" sectorSize="<<phi2.size()<<" QN="<<qn<<"\n";
+					PsimagLite::IoSimple::Out io("test1.txt",0);
+					io.printVector(phi2,"phi2");
 				}
 			}
 
