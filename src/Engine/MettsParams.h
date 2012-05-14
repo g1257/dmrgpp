@@ -104,6 +104,7 @@ namespace Dmrg {
 				io.readline(tau,"TSPTau=");
 				io.readline(timeSteps,"TSPTimeSteps=");
 				io.readline(advanceEach,"TSPAdvanceEach=");
+				io.readline(beta,"Beta=");
 				io.readline(rngSeed,"TSPRngSeed=");
 				
 // 				typename ModelType::HilbertBasisType basis;
@@ -116,6 +117,7 @@ namespace Dmrg {
 			size_t timeSteps;
 			size_t advanceEach;
 			int long long rngSeed;
+			RealType beta;
 // 			std::vector<size_t> electrons;
 	}; // class MettsParams
 	
@@ -127,6 +129,8 @@ namespace Dmrg {
 		os<<"#TargetParams.tau="<<t.tau<<"\n";
 		os<<"#TargetParams.timeSteps="<<t.timeSteps<<"\n";
 		os<<"#TargetParams.advanceEach="<<t.advanceEach<<"\n";
+		os<<"#TargetParams.beta="<<t.beta<<"\n";
+		os<<"#TargetParams.TSPRngSeed="<<t.rngSeed<<"\n";
 		//const typename MettsParams<ModelType>::TargetParamsCommonType& tp = t;
 		//os<<tp;
 		return os;

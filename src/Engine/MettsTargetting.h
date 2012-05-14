@@ -396,7 +396,7 @@ namespace Dmrg {
 			{
 				stage_=WFT_NOADVANCE;
 
-				if (timesWithoutAdvancement_ >= mettsStruct_.advanceEach) {
+				if (timesWithoutAdvancement_ >= mettsStruct_.advanceEach && currentBeta_<mettsStruct_.beta) {
 					stage_ = WFT_ADVANCE;
 					currentBeta_ += mettsStruct_.tau;
 					timesWithoutAdvancement_=0;
@@ -434,12 +434,12 @@ namespace Dmrg {
 					//phiNew.populateSectors(lrs_.super());
 					assert(std::norm(targetVectors_[advance])>1e-6);
 
-					examineTarget(targetVectors_[advance],advance);
-					//populateCorrectSector(phiNew,lrs_);
-					phiNew.populateSectors(lrs_.super());
+//					examineTarget(targetVectors_[advance],advance);
+					populateCorrectSector(phiNew,lrs_);
+					//phiNew.populateSectors(lrs_.super());
 					// OK, now that we got the partition number right, let's wft:
 					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_,nk);
-					phiNew.collapseSectors();
+					//phiNew.collapseSectors();
 					assert(std::norm(phiNew)>1e-6);
 					targetVectors_[index] = phiNew;
 					//examineTarget(targetVectors_[index],index);
@@ -603,34 +603,34 @@ namespace Dmrg {
 				}
 			}
 
-//			void populateCorrectSector(VectorWithOffsetType& phi,const LeftRightSuperType& lrs) const
-//			{
-//				size_t total = lrs.super().partition()-1;
-//				size_t m = getPartition();
-//				std::vector<VectorType> vv;
-//				for (size_t i=0;i<total;i++) {
-//					size_t bs = lrs.super().partition(i+1)-lrs.super().partition(i);
-//					if (i!=m) bs=0;
-//					VectorType vone(bs);
-//					vv.push_back(vone);
-//				}
+			void populateCorrectSector(VectorWithOffsetType& phi,const LeftRightSuperType& lrs) const
+			{
+				size_t total = lrs.super().partition()-1;
+				size_t m = getPartition();
+				std::vector<VectorType> vv;
+				for (size_t i=0;i<total;i++) {
+					size_t bs = lrs.super().partition(i+1)-lrs.super().partition(i);
+					if (i!=m) bs=0;
+					VectorType vone(bs);
+					vv.push_back(vone);
+				}
 				
-//				phi.set(vv,lrs.super());
-//				assert(phi.sectors()==1);
-//			}
+				phi.set(vv,lrs.super());
+				assert(phi.sectors()==1);
+			}
 
 			void setFromInfinite(VectorWithOffsetType& phi,const LeftRightSuperType& lrs) const
 			{
-				//populateCorrectSector(phi,lrs);
-				phi.populateSectors(lrs.super());
-				std::cerr<<"NUUUUUUMBBBBBBBERRRRRRRRR OF SEEEEECTTTTTTTTORRRRRRRRS="<<phi.sectors()<<"\n";
+				populateCorrectSector(phi,lrs);
+				//phi.populateSectors(lrs.super());
+				//std::cerr<<"NUUUUUUMBBBBBBBERRRRRRRRR OF SEEEEECTTTTTTTTORRRRRRRRS="<<phi.sectors()<<"\n";
 				for (size_t ii=0;ii<phi.sectors();ii++) {
 					size_t i0 = phi.sector(ii);
 					VectorType v;
 					getFullVector(v,i0,lrs);
 					phi.setDataInSector(v,i0);
 				}
-				phi.collapseSectors();
+				//phi.collapseSectors();
 				assert(std::norm(phi)>1e-6);
 			}
 
