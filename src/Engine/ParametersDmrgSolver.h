@@ -289,6 +289,7 @@ namespace Dmrg {
 		std::string options;
 		std::string model;
 		std::vector<FieldType> targetQuantumNumbers;
+		size_t electronsUp,electronsDown;
 		FieldType tolerance;
 		DmrgCheckPoint checkpoint;
 		size_t nthreads;
@@ -317,7 +318,37 @@ namespace Dmrg {
 				s += "option is obsolete in input file\n";
 				std::cerr<<s;
 			}
-			io.read(targetQuantumNumbers,"TargetQuantumNumbers");
+			try {
+				io.read(targetQuantumNumbers,"TargetQuantumNumbers");
+			} catch (std::exception& e) {}
+
+			bool hasElectrons = false;
+			try {
+				io.readline(electronsUp,"TargetElectronsUp");
+				io.readline(electronsDown,"TargetElectronsDown");
+				hasElectrons = true;
+			} catch (std::exception& e) {}
+
+			if (hasElectrons && targetQuantumNumbers.size()>0) {
+				std::string s (__FILE__);
+				s += "\nFATAL: Specifying both TargetElectronsUp/Down and TargetQuantumNumbers is an error.";
+				s += "\nSpecify one or the other only.\n";
+				throw std::runtime_error(s.c_str());
+			}
+
+			if (!hasElectrons && targetQuantumNumbers.size()==0) {
+				std::string s (__FILE__);
+				s += "\nFATAL: Either TargetElectronsUp/Down or TargetQuantumNumbers must be specified.\n";
+				throw std::runtime_error(s.c_str());
+			}
+
+			if (options.find("useSu2Symmetry")!=std::string::npos && hasElectrons) {
+				std::string s (__FILE__);
+				s += "\nFATAL: TargetElectronsUp/Down cannot be specified while using SU(2) symmetry\n";
+				s += "\nTargetQuantumNumbers must be specified instead.\n";
+				throw std::runtime_error(s.c_str());
+			}
+
 			tolerance = -1.0;
 			if (options.find("hasTolerance")!=std::string::npos)
 				io.readline(tolerance,"TruncationTolerance=");
@@ -358,10 +389,15 @@ namespace Dmrg {
 		os<<parameters.finiteLoop;
 		//utils::vectorPrint(parameters.finiteLoop,"finiteLoop",os);
 		
-		os<<"parameters.targetQuantumNumbers=";
-		for (size_t i=0;i<parameters.targetQuantumNumbers.size();i++)
-			os<<parameters.targetQuantumNumbers[i]<<" ";
-		os<<"\n";
+		if (parameters.targetQuantumNumbers.size()>0) {
+			os<<"parameters.targetQuantumNumbers=";
+			for (size_t i=0;i<parameters.targetQuantumNumbers.size();i++)
+				os<<parameters.targetQuantumNumbers[i]<<" ";
+			os<<"\n";
+		} else {
+			os<<"parameters.electronsUp="<<parameters.electronsUp<<"\n";
+			os<<"parameters.electronsDown="<<parameters.electronsDown<<"\n";
+		}
 		if (parameters.options.find("hasTolerance")!=std::string::npos)
 			os<<"parameters.tolerance="<<parameters.tolerance<<"\n";
 		os<<"parameters.nthreads="<<parameters.nthreads<<"\n";

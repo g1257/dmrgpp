@@ -311,7 +311,7 @@ namespace Dmrg {
 				progress_.print("Growth done.\n",std::cout);
 				lrs_.printSizes("Infinite",std::cout);
 
-				updateQuantumSector(lrs_.sites());
+				updateQuantumSector(lrs_.sites(),INFINITE);
 
 				lrs_.setToProduct(quantumSector_);
 
@@ -427,7 +427,7 @@ namespace Dmrg {
 					progress_.printline(msg,std::cout);
 				}
 
-				updateQuantumSector(lrs_.sites());
+				updateQuantumSector(lrs_.sites(),direction);
 
 				lrs_.setToProduct(quantumSector_);
 
@@ -488,6 +488,7 @@ namespace Dmrg {
 		               size_t direction)
 		{
 			DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
+
 			ds.save(io_);
 
 			target.save(sitesIndices_[stepCurrent_],io_);
@@ -519,7 +520,17 @@ namespace Dmrg {
 			return "EXPAND_SYSTEM";
 		}
 
-		void updateQuantumSector(size_t sites)
+		void updateQuantumSector(size_t sites,size_t direction)
+		{
+			if (parameters_.targetQuantumNumbers.size()>0) {
+				updateQuantumSectorT(sites,direction);
+			} else {
+				updateQuantumSectorUd(sites,direction);
+			}
+
+		}
+
+		void updateQuantumSectorT(size_t sites,size_t direction)
 		{
 			std::vector<size_t> targetQuantumNumbers(parameters_.targetQuantumNumbers.size());
 			for (size_t ii=0;ii<targetQuantumNumbers.size();ii++) 
@@ -531,11 +542,35 @@ namespace Dmrg {
 				} else {
 					if (targetQuantumNumbers[2]%2==0) targetQuantumNumbers[2]++;
 				}
-				std::ostringstream msg;
-				msg<<"Updating targets to "<<targetQuantumNumbers[0]<<" "<<	targetQuantumNumbers[1];
-				msg<<" "<<targetQuantumNumbers[2];
-				progress_.printline(msg,std::cout);
 			}
+			setQuantumSector(targetQuantumNumbers,direction);
+		}
+
+		void updateQuantumSectorUd(size_t sites,size_t direction)
+		{
+			assert(!MyBasis::useSu2Symmetry());
+			std::vector<size_t> targetQuantumNumbers(2);
+
+			if (direction==INFINITE) {
+				size_t totalSites = model_.geometry().numberOfSites();
+				targetQuantumNumbers[0]=round(parameters_.electronsUp*sites/totalSites);
+				targetQuantumNumbers[1]=round(parameters_.electronsDown*sites/totalSites);
+			} else {
+				targetQuantumNumbers[0]=parameters_.electronsUp;
+				targetQuantumNumbers[1]=parameters_.electronsDown;
+			}
+
+			setQuantumSector(targetQuantumNumbers,direction);
+		}
+
+		void setQuantumSector(const std::vector<size_t>& targetQuantumNumbers,size_t direction)
+		{
+			std::ostringstream msg;
+			msg<<"Integer target quantum numbers are: ";
+			for (size_t ii=0;ii<targetQuantumNumbers.size();ii++)
+				msg<<targetQuantumNumbers[ii]<<" ";
+			progress_.printline(msg,std::cout);
+			if (direction==INFINITE) io_.printVector(targetQuantumNumbers,"TargetedQuantumNumbers");
 			quantumSector_=MyBasis::pseudoQuantumNumber(targetQuantumNumbers);
 		}
 
