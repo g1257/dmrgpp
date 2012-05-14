@@ -312,7 +312,7 @@ namespace Dmrg {
 				FiniteLoop fl(xTmp[0],xTmp[1],xTmp[2]);
 				finiteLoop.push_back(fl);
 			}
-			//io.read(finiteLoop,"FiniteLoops");
+
 			if (options.find("hasQuantumNumbers")!=std::string::npos) {
 				std::string s = "*** WARNING: hasQuantumNumbers ";
 				s += "option is obsolete in input file\n";
@@ -350,15 +350,21 @@ namespace Dmrg {
 			}
 
 			tolerance = -1.0;
-			if (options.find("hasTolerance")!=std::string::npos)
-				io.readline(tolerance,"TruncationTolerance=");
+			io.readline(tolerance,"TruncationTolerance=");
+
 			if (options.find("checkpoint")!=std::string::npos)
 				io.readline(checkpoint.filename,"CheckpointFilename=");
 			nthreads=1; // provide a default value
 			try {
 				io.readline(nthreads,"Threads=");
 			} catch (std::exception& e) {}
-			//io.rewind();
+
+			if (nthreads==0) {
+				std::string s (__FILE__);
+				s += "\nFATAL: nthreads cannot be zero\n";
+				throw std::runtime_error(s.c_str());
+			}
+
 			useReflectionSymmetry=0;
 			try {
 				io.readline(useReflectionSymmetry,"UseReflectionSymmetry=");
@@ -387,7 +393,6 @@ namespace Dmrg {
 		os<<"parameters.keptStatesInfinite="<<parameters.keptStatesInfinite<<"\n";
 		os<<"finiteLoop\n";
 		os<<parameters.finiteLoop;
-		//utils::vectorPrint(parameters.finiteLoop,"finiteLoop",os);
 		
 		if (parameters.targetQuantumNumbers.size()>0) {
 			os<<"parameters.targetQuantumNumbers=";
@@ -398,7 +403,7 @@ namespace Dmrg {
 			os<<"parameters.electronsUp="<<parameters.electronsUp<<"\n";
 			os<<"parameters.electronsDown="<<parameters.electronsDown<<"\n";
 		}
-		if (parameters.options.find("hasTolerance")!=std::string::npos)
+		if (parameters.tolerance>0)
 			os<<"parameters.tolerance="<<parameters.tolerance<<"\n";
 		os<<"parameters.nthreads="<<parameters.nthreads<<"\n";
 		os<<"parameters.useReflectionSymmetry="<<parameters.useReflectionSymmetry<<"\n";

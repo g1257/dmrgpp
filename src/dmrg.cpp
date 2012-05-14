@@ -182,13 +182,9 @@ void mainLoop(GeometryType& geometry,
 	}
 }
 
-void usage(const char* name)
-{
-	std::cerr<<"USAGE is "<<name<<" -f filename\n";
-}
-
 int main(int argc,char *argv[])
 {
+	InputCheck inputCheck;
 	std::string filename="";
 	int opt = 0;
 	while ((opt = getopt(argc, argv,"f:")) != -1) {
@@ -197,14 +193,14 @@ int main(int argc,char *argv[])
 			filename = optarg;
 			break;
 		default:
-			usage(argv[0]);
+			inputCheck.usage(argv[0]);
 			return 1;
 		}
 	}
 
 	// sanity checks here
 	if (filename=="") {
-		usage(argv[0]);
+		inputCheck.usage(argv[0]);
 		return 1;
 	}
 
@@ -218,26 +214,16 @@ int main(int argc,char *argv[])
 		std::cout<<provenance;
 	}
 
-	InputCheck inputCheck;
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
 	InputNgType::Readable io(ioWriteable);
 
 	GeometryType geometry(io);
 
 	ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> dmrgSolverParams(io);
-	//io.rewind();
 
-	if (dmrgSolverParams.options.find("hasThreads")!=std::string::npos) {
-#ifdef USE_PTHREADS
-		std::cerr<<"*** WARNING: hasThreads isn't needed anymore, this is not harmful but it can be removed\n";
-#else
-		std::string message1(__FILE__);
-		message1 += " FATAL: You are requesting threads but you did not compile with USE_PTHREADS enabled\n";
-		message1 += " Either remove hasThreads from the input file (you won't have threads though) or\n";
-		message1 += " add -DUSE_PTHREADS to the CPP_FLAGS in your Makefile and recompile\n";
-		throw std::runtime_error(message1.c_str());
+#ifndef USE_PTHREADS
+	inputCheck.checkForThreads(dmrgSolverParams.nthreads);
 #endif
-	}
 
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;

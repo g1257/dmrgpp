@@ -128,7 +128,6 @@ namespace Dmrg {
 			registerOpts.push_back("nowft");
 			registerOpts.push_back("inflate");
 			registerOpts.push_back("none");
-			registerOpts.push_back("hasTolerance"); // FIXME: REMOVE THIS OPTION, NOT NEEDED
 			registerOpts.push_back("ChebyshevSolver");
 			registerOpts.push_back("InternalProductStored");
 			registerOpts.push_back("InternalProductKron");
@@ -142,6 +141,22 @@ namespace Dmrg {
 
 			PsimagLite::Options::Writeable optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
 			PsimagLite::Options::Readable optsReadable(optWriteable,val);
+		}
+
+		void checkForThreads(size_t nthreads) const
+		{
+			if (nthreads==1) return;
+
+			std::string message1(__FILE__);
+			message1 += " FATAL: You are requesting nthreads>0 but you did not compile with USE_PTHREADS enabled\n";
+			message1 += " Either set Threads=1 in the input file (you won't have threads though) or\n";
+			message1 += " add -DUSE_PTHREADS to the CPP_FLAGS in your Makefile and recompile\n";
+			throw std::runtime_error(message1.c_str());
+		}
+
+		void usage(const char* name) const
+		{
+			std::cerr<<"USAGE is "<<name<<" -f filename\n";
 		}
 
 	private:

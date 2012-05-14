@@ -534,7 +534,7 @@ namespace Dmrg {
 		{
 			std::vector<size_t> targetQuantumNumbers(parameters_.targetQuantumNumbers.size());
 			for (size_t ii=0;ii<targetQuantumNumbers.size();ii++) 
-				targetQuantumNumbers[ii]=round(parameters_.targetQuantumNumbers[ii]*sites);
+				targetQuantumNumbers[ii]=size_t(round(parameters_.targetQuantumNumbers[ii]*sites));
 			if (MyBasis::useSu2Symmetry()) {
 				size_t ne = targetQuantumNumbers[0]+targetQuantumNumbers[1];
 				if (ne%2==0) {
@@ -553,8 +553,8 @@ namespace Dmrg {
 
 			if (direction==INFINITE) {
 				size_t totalSites = model_.geometry().numberOfSites();
-				targetQuantumNumbers[0]=round(parameters_.electronsUp*sites/totalSites);
-				targetQuantumNumbers[1]=round(parameters_.electronsDown*sites/totalSites);
+				targetQuantumNumbers[0]=size_t(round(parameters_.electronsUp*sites/totalSites));
+				targetQuantumNumbers[1]=size_t(round(parameters_.electronsDown*sites/totalSites));
 			} else {
 				targetQuantumNumbers[0]=parameters_.electronsUp;
 				targetQuantumNumbers[1]=parameters_.electronsDown;
