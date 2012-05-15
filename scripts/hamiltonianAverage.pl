@@ -8,6 +8,10 @@ my %seenTime;
 my $time = 0;
 
 while(<STDIN>) {
+	last if (/^ALL OPERATORS/);
+}
+
+while(<STDIN>) {
 	if (/Hamiltonian average at time=([^ ]+) for target=0 sector=[^ ]+ \<phi\(t\)\|H\|phi\(t\)\>=\(([^,]+),[^\)]+\) +\<phi\(t\)\|phi\(t\)\>=\(([^,]+),/) {
 		$time = $1;
 		if ($seenTime{$time}) {
@@ -30,8 +34,9 @@ while(<STDIN>) {
 	}
 }
 
+print "#Time\t<H>\tSuperdensity\tQuotient\n";
 foreach my $key (sort {$a <=> $b} keys %val) {
 	my $quot = $val{$key}/$superd{$key};
-	print "$key $val{$key} $superd{$key} $quot\n";
+	print "$key\t$val{$key}\t$superd{$key}\t$quot\n";
 }
 
