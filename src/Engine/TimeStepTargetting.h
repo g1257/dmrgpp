@@ -436,7 +436,7 @@ namespace Dmrg {
 				lanczosHelper.matrixVectorProduct(x,phi2);
 				std::ostringstream msg;
 				msg<<"Hamiltonian average at time="<<currentTime_<<" for target="<<whatTarget;
-				msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<(phi2*x);
+				msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<(phi2*x)<<" <phi(t)|phi(t)>="<<(phi2*phi2);
 				progress_.printline(msg,std::cout);
 			}
 

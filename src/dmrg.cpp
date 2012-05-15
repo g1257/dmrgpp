@@ -187,20 +187,22 @@ int main(int argc,char *argv[])
 	InputCheck inputCheck;
 	std::string filename="";
 	int opt = 0;
+	std::string strUsage(argv[0]);
+	strUsage += " -f filename";
 	while ((opt = getopt(argc, argv,"f:")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
 			break;
 		default:
-			inputCheck.usage(argv[0]);
+			inputCheck.usageMain(strUsage);
 			return 1;
 		}
 	}
 
 	// sanity checks here
 	if (filename=="") {
-		inputCheck.usage(argv[0]);
+		inputCheck.usageMain(strUsage);
 		return 1;
 	}
 

@@ -350,7 +350,9 @@ namespace Dmrg {
 			}
 
 			tolerance = -1.0;
-			io.readline(tolerance,"TruncationTolerance=");
+			try {
+				io.readline(tolerance,"TruncationTolerance=");
+			} catch (std::exception& e) {}
 
 			if (options.find("checkpoint")!=std::string::npos)
 				io.readline(checkpoint.filename,"CheckpointFilename=");

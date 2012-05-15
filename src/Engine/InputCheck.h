@@ -89,7 +89,16 @@ namespace Dmrg {
 
 	class InputCheck {
 
+		typedef PsimagLite::Options::Readable OptionsReadableType;
+
 	public:
+
+		InputCheck() : optsReadable_(0) {}
+
+		~InputCheck()
+		{
+			if (optsReadable_!=0) delete optsReadable_;
+		}
 
 		bool check(const std::string& label,const std::vector<std::string>& vec,size_t line) const
 		{
@@ -114,7 +123,7 @@ namespace Dmrg {
 			return false;
 		}
 
-		void check(const std::string& label,const std::string& val,size_t line) const
+		void check(const std::string& label,const std::string& val,size_t line)
 		{
 			if (label!="SolverOptions") return;
 			std::vector<std::string> registerOpts;
@@ -140,7 +149,12 @@ namespace Dmrg {
 			registerOpts.push_back("MettsTargetting");
 
 			PsimagLite::Options::Writeable optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
-			PsimagLite::Options::Readable optsReadable(optWriteable,val);
+			optsReadable_ = new  OptionsReadableType(optWriteable,val);
+		}
+
+		bool isSet(const std::string& thisOption) const
+		{
+			return optsReadable_->isSet(thisOption);
 		}
 
 		void checkForThreads(size_t nthreads) const
@@ -154,9 +168,9 @@ namespace Dmrg {
 			throw std::runtime_error(message1.c_str());
 		}
 
-		void usage(const char* name) const
+		void usageMain(const std::string& name) const
 		{
-			std::cerr<<"USAGE is "<<name<<" -f filename\n";
+			std::cerr<<"USAGE is "<<name<<"\n";
 		}
 
 	private:
@@ -168,6 +182,8 @@ namespace Dmrg {
 			throw std::runtime_error(s.c_str());
 
 		}
+
+		OptionsReadableType* optsReadable_;
 
 	}; // class InputCheck
 } // namespace Dmrg 
