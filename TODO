@@ -39,3 +39,10 @@ being uninitialized. Also true for other private data of BasisImplementation, ne
 
 IoSimple needs to be completely replaced by InputNg (issue 5 on github)
 
+Route all options.find("whatever")!=std::string::npos through the inputCheck
+Problem is not everyone has inputCheck, it'd need to be connected by the ParametersDmrgSolver object.
+
+Add guard code for singletons.
+ 
+
+

@@ -458,9 +458,9 @@ namespace Dmrg {
 				nup.fermionSign = 1;
 				//A.data = tmpC;
 
-				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
-				if (noStageIs(DISABLED)) std::cerr<<"ALL OPERATORS HAVE BEEN APPLIED\n";
-				else std::cerr<<"NOT ALL OPERATORS APPLIED YET\n";
+				std::cout<<"-------------&*&*&* In-situ measurements start\n";
+				if (noStageIs(DISABLED)) std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
+				else std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
 				test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
 				std::string s = "<P0|nup|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,nup);
@@ -471,7 +471,7 @@ namespace Dmrg {
 				s = "<P0|ndown|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,ndown);
 
-				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
+				std::cout<<"-------------&*&*&* In-situ measurements end\n";
 			}
 
 			void checkOrder(size_t i) const
@@ -1009,8 +1009,8 @@ namespace Dmrg {
 							sum+= dest[k+offset1] * conj(src2[k+offset2]);
 					}
 				}
-				std::cerr<<site<<" "<<sum<<" "<<" "<<currentTime_;
-				std::cerr<<" "<<label<<" "<<(src1*src2)<<"\n";
+				std::cout<<site<<" "<<sum<<" "<<" "<<currentTime_;
+				std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 			}
 
 			std::vector<size_t> stage_;
