@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -164,7 +162,7 @@ namespace Dmrg {
 				qnVsSize_[addedSites_.size()]=qn;
 				getStochasticsUpToThisPoint(qn,currentSites);
 				return; // INFINITE
-			} 
+			}
 
 			//FINITE: all this is bogus because we're not using
 			// pureStates_ anymore in the finite phase
@@ -175,6 +173,18 @@ namespace Dmrg {
 			}
 			addedSites_.push_back(sites.first);
 		}
+
+		void setCollapseBasis(std::vector<RealType>& collapseBasisWeights,size_t site) const
+		{
+			size_t nk = model_.hilbertSize(site);
+			for (size_t alpha=0;alpha<nk;alpha++) {
+				RealType randomNumber = random48_();
+				collapseBasisWeights[alpha] = randomNumber;
+			}
+			RealType norm1  = 1.0/PsimagLite::norm(collapseBasisWeights);
+			collapseBasisWeights *= norm1;
+		}
+
 
 	private:
 

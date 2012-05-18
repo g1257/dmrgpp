@@ -781,12 +781,12 @@ namespace Dmrg {
 			}
 
 			void calcR(VectorType& r,
-    		           const MatrixType& T,
+				   const MatrixType& T,
 			           const MatrixType& V,
-    		           const VectorWithOffsetType& phi,
-    		           RealType Eg,
-		               const VectorType& eigs,
-    		           size_t timeIndex,
+				   const VectorWithOffsetType& phi,
+				   RealType Eg,
+				   const VectorType& eigs,
+				   size_t timeIndex,
 			           size_t n2,
 			           size_t i0)
 			{

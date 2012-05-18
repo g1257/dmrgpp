@@ -99,6 +99,7 @@ namespace Dmrg {
 		typedef PsimagLite::Matrix<RealType> MatrixType;
 		enum {EXPAND_ENVIRON=ProgramGlobals::EXPAND_ENVIRON,
 		      EXPAND_SYSTEM=ProgramGlobals::EXPAND_SYSTEM};
+		static const bool COLLAPSE_INTO_RANDOM_BASIS = false;
 
 	public:
 
@@ -117,6 +118,7 @@ namespace Dmrg {
 		                size_t site,
 		                size_t direction)
 		{
+			setCollapseBasis(site);
 			const VectorWithOffsetType& src =(c.size()==0) ? eToTheBetaH : c;
 			internalAction(c,src,site,direction);
 			sitesSeen_.push_back(site);
@@ -202,9 +204,12 @@ namespace Dmrg {
 				packLeft.unpack(alpha0,alpha1,alpha);
 				size_t beta0,beta1;
 				packRight.unpack(beta0,beta1,beta);
-				if (direction==EXPAND_SYSTEM && alpha1!=indexFixed) continue;
-				if (direction==EXPAND_ENVIRON && beta0 != indexFixed) continue;
-				w[i] = v[i];
+				RealType myweight = (direction==EXPAND_SYSTEM) ?
+							basisForCollpase_(indexFixed,alpha1) :
+							basisForCollpase_(indexFixed,beta0);
+				//if (direction==EXPAND_SYSTEM && alpha1!=indexFixed) continue;
+				//if (direction==EXPAND_ENVIRON && beta0 != indexFixed) continue;
+				w[i] = v[i] * myweight;
 			}
 		}
 
@@ -214,7 +219,7 @@ namespace Dmrg {
 		                 size_t nk) const
 		{
 			RealType sum = 0;
-			for(size_t alpha=0;alpha<nk;alpha++) {
+			for (size_t alpha=0;alpha<nk;alpha++) {
 				VectorWithOffsetType dest;
 				collapseVector(dest,src,direction,alpha,nk);
 				RealType x = std::norm(dest);
@@ -223,6 +228,25 @@ namespace Dmrg {
 			}
 			assert(fabs(sum)>1e-6);
 			for(size_t alpha=0;alpha<p.size();alpha++) p[alpha] /= sum;
+		}
+
+		void setCollapseBasis(size_t site)
+		{
+			size_t nk = mettsStochastics_.hilbertSize(site);
+
+			basisForCollpase_.resize(nk,nk);
+			if (COLLAPSE_INTO_RANDOM_BASIS) {
+				std::vector<RealType> tmp(nk);
+				mettsStochastics_.setCollapseBasis(tmp,site);
+				for (size_t i=0;i<basisForCollpase_.n_row();i++)
+					for (size_t j=0;j<tmp.size();j++)
+						basisForCollpase_(i,j) = tmp[j];
+				return;
+			}
+			for (size_t i=0;i<basisForCollpase_.n_row();i++)
+				for (size_t j=0;j<basisForCollpase_.n_col();j++)
+					basisForCollpase_(i,j) = (i==j) ? 1.0 : 0.0;
+
 		}
 
 		bool checkSites(size_t site) const
@@ -239,6 +263,7 @@ namespace Dmrg {
 		PsimagLite::ProgressIndicator progress_;
 		size_t prevDirection_;
 		std::vector<size_t> sitesSeen_;
+		PsimagLite::Matrix<RealType> basisForCollpase_;
 	};  //class MettsCollapse
 } // namespace Dmrg
 /*@}*/
