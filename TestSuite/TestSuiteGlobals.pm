@@ -140,7 +140,7 @@ sub hookGrep
 	eval("system(\"grep $arg\") == 0 || die;");
 	if($@) {
 		my $subr = (caller(0))[3];
-		die "$subr: $@";
+		die "$subr: $@ argument=$arg";
 	}
 	
 #	print "[$analysis]:Grep command was successful.\n" if($verbose);

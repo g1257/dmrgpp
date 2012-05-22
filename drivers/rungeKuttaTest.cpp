@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 	std::string file = "";
 	RealType wbegin=0.;
 	RealType wend=10.;
-	RealType wstep=0.02;
+	RealType wstep=0.01;
 	std::string file2 = "";
 
 	while ((opt = getopt(argc, argv,"f:i:b:e:s:")) != -1) {
@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 	io2.readMatrix(y0,"MatrixCiCj");
 	for (size_t i=0;i<y0.n_row();i++) {
 		for (size_t j=0;j<y0.n_col();j++) {
-			if (i==j) y0(i,j) = 1.-y0(i,j);
+			//if (i==j) y0(i,j) = 1.-y0(i,j);
 			//if (i!=j) y0(i,j) = -y0(i,j);
 		}
 	}

@@ -111,21 +111,21 @@ namespace PsimagLite {
 				delete garbage_[i];
 		}
 
-		int nprocs(CommType mpiComm=COMM_WORLD) 
+		int nprocs(CommType mpiComm=COMM_WORLD) const
 		{ 
 			int tmp;
 			MPI_Comm_size(mpiComm,&tmp);
 			return tmp;
 		}
 
-		int rank(CommType mpiComm=COMM_WORLD) 
+		int rank(CommType mpiComm=COMM_WORLD) const
 		{
 			int tmp;
 			MPI_Comm_rank(mpiComm,&tmp);
 			return tmp; 
 		}
 
-		bool root(CommType mpiComm=COMM_WORLD) 
+		bool root(CommType mpiComm=COMM_WORLD) const
 		{
 			if (rank(mpiComm)==0) return true;
 			return false;
@@ -157,7 +157,7 @@ namespace PsimagLite {
 			return CommPairType(comm1,comm2);
 		}
 
-		void reduce(double& v,CommType mpiComm=COMM_WORLD)
+		void reduce(double& v,CommType mpiComm=COMM_WORLD) const
 		{
 			double w = 0;
 			int x = MPI_Reduce(&v,&w,1,MPI_DOUBLE,MPI_SUM,0,mpiComm);
@@ -165,7 +165,7 @@ namespace PsimagLite {
 			if (rank(mpiComm)==0) v = w;
 		}
 
-		void reduce(std::vector<double>& v,CommType mpiComm=COMM_WORLD)
+		void reduce(std::vector<double>& v,CommType mpiComm=COMM_WORLD) const
 		{
 			std::vector<double> w(v.size());
 			
@@ -176,7 +176,7 @@ namespace PsimagLite {
 			if (root(mpiComm)) v = w;
 		}
 
-		void reduce(std::vector<std::complex<double> >& v,CommType mpiComm=COMM_WORLD)
+		void reduce(std::vector<std::complex<double> >& v,CommType mpiComm=COMM_WORLD) const
 		{
 			std::vector<std::complex<double> > w(v.size());
 			
@@ -187,7 +187,7 @@ namespace PsimagLite {
 			if (rank(mpiComm)==0) v = w;
 		}
 
-		void reduce(PsimagLite::Matrix<double>& m,CommType mpiComm=COMM_WORLD)
+		void reduce(PsimagLite::Matrix<double>& m,CommType mpiComm=COMM_WORLD) const
 		{
 			PsimagLite::Matrix<double> w(m.n_row(),m.n_col());
 			int n = m.n_row()*m.n_col();
@@ -196,7 +196,7 @@ namespace PsimagLite {
 			if (rank(mpiComm)==0) m = w;
 		}
 
-		void reduce(PsimagLite::Matrix<std::complex<double> >& m,CommType mpiComm=COMM_WORLD)
+		void reduce(PsimagLite::Matrix<std::complex<double> >& m,CommType mpiComm=COMM_WORLD) const
 		{
 			PsimagLite::Matrix<std::complex<double> > w(m.n_row(),m.n_col());
 			int n = 2*m.n_row()*m.n_col();
@@ -205,7 +205,7 @@ namespace PsimagLite {
 			if (rank(mpiComm)==0) m = w;
 		}
 
-		void allReduce(std::vector<double>& v,CommType mpiComm=COMM_WORLD)
+		void allReduce(std::vector<double>& v,CommType mpiComm=COMM_WORLD) const
 		{
 			std::vector<double> w(v.size(),0);
 			int x = MPI_Allreduce(&(v[0]),&(w[0]),v.size(),MPI_DOUBLE,MPI_SUM,mpiComm);
@@ -213,6 +213,26 @@ namespace PsimagLite {
 			v = w;
 		}
 		
+		void allReduce(PsimagLite::Matrix<double>& m,CommType mpiComm=COMM_WORLD) const
+		{
+			PsimagLite::Matrix<double> w(m.n_row(),m.n_col());
+			int n = m.n_row()*m.n_col();
+			int x = MPI_Allreduce(&(m(0,0)),&(w(0,0)),n,MPI_DOUBLE,MPI_SUM,mpiComm);
+			checkError(x,"MPI_Allreduce");
+			//if (rank(mpiComm)==0) std::cout<<__FUNCTION__<<" has been called\n";
+			m = w;
+		}
+
+		void allReduce(PsimagLite::Matrix<std::complex<double> >& m,CommType mpiComm=COMM_WORLD) const
+		{
+			PsimagLite::Matrix<std::complex<double> > w(m.n_row(),m.n_col());
+			int n = 2*m.n_row()*m.n_col();
+			int x = MPI_Allreduce(&(m(0,0)),&(w(0,0)),n,MPI_DOUBLE,MPI_SUM,mpiComm);
+			checkError(x,"MPI_Reduce");
+			//if (rank(mpiComm)==0) std::cout<<__FUNCTION__<<" has been called\n";
+			m = w;
+		}
+
 		void gather(std::vector<PsimagLite::Matrix<double> > &v,CommType mpiComm=COMM_WORLD)
 		{
 			std::string s = "You hit an unimplemented function.\n";
@@ -288,7 +308,7 @@ namespace PsimagLite {
 	private:
 		std::vector<CommType*> garbage_;
 
-		void checkError(int x,const std::string& s)
+		void checkError(int x,const std::string& s) const
 		{
 			if (x!=MPI_SUCCESS) {
 				std::string s2("ConcurrencyMpi::");

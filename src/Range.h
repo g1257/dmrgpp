@@ -113,7 +113,7 @@ namespace PsimagLite {
 
 		Range(size_t start,
 		     size_t total,
-		     ConcurrencyType& concurrency,
+		     const ConcurrencyType& concurrency,
 		     const std::vector<size_t>& weights,
 		     CommType mpiComm=COMM_WORLD,
 		     bool isStrict=false)
@@ -129,7 +129,7 @@ namespace PsimagLite {
 
 		Range(size_t start,
 		     size_t total,
-		     ConcurrencyType& concurrency,           
+		     const ConcurrencyType& concurrency,           
 		     CommType mpiComm=COMM_WORLD,
 		     bool isStrict=false)
 		: concurrency_(concurrency),
@@ -162,7 +162,7 @@ namespace PsimagLite {
 
 	private:
 
-		ConcurrencyType& concurrency_;
+		const ConcurrencyType& concurrency_;
 		size_t step_; // step within this processor
 		size_t total_; // total number of indices total_(total),
 		size_t nprocs_;

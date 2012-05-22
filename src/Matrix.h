@@ -302,6 +302,19 @@ namespace PsimagLite {
 		return v;
 	}
 
+	template<typename T>
+	std::vector<T> operator*(const std::vector<T>& b,const Matrix<T>& a)
+	{
+		assert(a.n_row()==b.size());
+		std::vector<T> v(a.n_col());
+		for (size_t i=0;i<a.n_col();i++) {
+			T sum = 0;
+			for (size_t j=0;j<b.size();j++) sum += b[j] * a(j,i);
+			v[i] = sum;
+		}
+		return v;
+	}
+
 	template<typename T1,typename T2>
 	Matrix<T2> operator*(const T1& val,const Matrix<T2>& a)
 	{

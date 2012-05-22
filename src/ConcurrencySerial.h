@@ -98,9 +98,9 @@ namespace PsimagLite {
 		ConcurrencySerial(int argc,char *argv[]) : step_(-1),total_(0)
 		{}
 
-		int nprocs(CommType comm1=COMM_WORLD) { return 1;}
+		int nprocs(CommType comm1=COMM_WORLD) const { return 1;}
 
-		int rank(CommType comm1=COMM_WORLD) { return 0; }
+		int rank(CommType comm1=COMM_WORLD) const { return 0; }
 
 		std::string name() const { return "serial"; }
 
@@ -108,7 +108,7 @@ namespace PsimagLite {
 		void reduce(DataType& v,CommType mpiComm=COMM_WORLD) {}
 
 		template<typename DataType>
-		void allReduce(DataType& v,CommType mpiComm=COMM_WORLD) {}
+		void allReduce(DataType& v,CommType mpiComm=COMM_WORLD) const {}
 
 		template<typename DataType>
 		void gather(DataType &v,CommType mpiComm=COMM_WORLD) { }
