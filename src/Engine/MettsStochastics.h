@@ -116,12 +116,14 @@ namespace Dmrg {
 			return basisOfOneSite[pureStates_[site]];
 		}
 
+		// recommendation for understanding this
+		// think of this first as having basisOfOneSite[i] = i
 		size_t chooseRandomState(const std::vector<RealType>& probs,size_t site) const
 		{
 			std::vector<size_t> quantumNumbsOneSite;
 			HilbertBasisType basisOfOneSite;
 			basisForOneSite(quantumNumbsOneSite,basisOfOneSite,site);
-			
+
 			RealType r = random48_();
 			RealType s1 = 0;
 			RealType s2 = 0;

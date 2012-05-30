@@ -157,17 +157,18 @@ namespace Dmrg {
 			assert(fabs(sum-1.0)<1e-6);
 			VectorWithOffsetType dest;
 			size_t indexFixed = mettsStochastics_.chooseRandomState(p,site);
+			 // m1 == indexFixed in FIXME write paper reference here
 			collapseVector(dest,dest2,direction,indexFixed,nk);
 			RealType x = std::norm(dest);
 			assert(x>1e-6);
 			dest2 = (1.0/x) * dest;
 		}
 
-		void collapseVector(VectorWithOffsetType& dest,
-		                    const VectorWithOffsetType& src,
+		void collapseVector(VectorWithOffsetType& dest, // <<---- CPS
+				    const VectorWithOffsetType& src, // <--- MPS
 		                    size_t direction,
-		                    size_t indexFixed,
-		                    size_t nk) const
+				    size_t indexFixed, // <--- m1
+				    size_t nk) const   // <-- size of the Hilbert sp. of one site
 		{
 			assert(src.sectors()==1);
 			dest = src;
@@ -181,12 +182,12 @@ namespace Dmrg {
 			//assert(std::norm(dest)>1e-6);
 		}
 
-		void collapseVector(VectorType& w,
-		                    const VectorType& v,
+		void collapseVector(VectorType& w, // <<---- CPS
+				    const VectorType& v, // <--- MPS
 		                    size_t direction,
-		                    size_t m,
-		                    size_t indexFixed,
-		                    size_t nk) const
+				    size_t m, // <-- non-zero sector
+				    size_t indexFixed, // <--- m1
+				    size_t nk) const // <-- size of the Hilbert sp. of one site
 		{
 			int offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
@@ -204,6 +205,7 @@ namespace Dmrg {
 				packLeft.unpack(alpha0,alpha1,alpha);
 				size_t beta0,beta1;
 				packRight.unpack(beta0,beta1,beta);
+				// basisForCollpase_(i,j) = \delta_{i,j}, i.e. the identity matrix
 				RealType myweight = (direction==EXPAND_SYSTEM) ?
 							basisForCollpase_(indexFixed,alpha1) :
 							basisForCollpase_(indexFixed,beta0);
@@ -213,10 +215,11 @@ namespace Dmrg {
 			}
 		}
 
+		// p[m] = norm2 of the collapsed_m
 		void probability(std::vector<RealType>& p,
 		                 const VectorWithOffsetType& src,
 		                 size_t direction,
-		                 size_t nk) const
+				 size_t nk) const // <-- size of the Hilbert sp. of one site
 		{
 			RealType sum = 0;
 			for (size_t alpha=0;alpha<nk;alpha++) {

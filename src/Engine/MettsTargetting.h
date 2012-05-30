@@ -272,8 +272,7 @@ namespace Dmrg {
 				calcTimeVectors(PairType(0,n1),Eg,direction);
 
 				// collapse
-				bool hasCollapsed = mettsCollapse_(targetVectors_[n1],
-				                       targetVectors_[0],sites.first,direction);
+				bool hasCollapsed = mettsCollapse_(targetVectors_[n1],targetVectors_[0],sites.first,direction);
 				
 				if (hasCollapsed) {
 					std::string s = "  COLLAPSEHERE  ";
