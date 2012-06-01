@@ -113,7 +113,9 @@ namespace Dmrg {
 		  progress_("MettsCollapse",0),
 		  prevDirection_(ProgramGlobals::INFINITE),
 		  collapseBasis_(mettsStochastics_.hilbertSize(0),mettsStochastics_.hilbertSize(0))
-		{}
+		{
+			setCollapseBasis();
+		}
 
 		bool operator()(VectorWithOffsetType& c,
 		                VectorWithOffsetType& eToTheBetaH,
@@ -190,8 +192,9 @@ namespace Dmrg {
 				    size_t indexFixed, // <--- m1
 				    size_t nk) const // <-- size of the Hilbert sp. of one site
 		{
-			if (direction==EXPAND_SYSTEM) collapseVectorLeft(w,v,m,indexFixed,nk);
-			else collapseVectorRight(w,v,m,indexFixed,nk);
+			if (direction==EXPAND_SYSTEM)  collapseVectorLeft(w,v,m,indexFixed,nk);
+			else  collapseVectorRight(w,v,m,indexFixed,nk);
+//			assert(fabs(PsimagLite::norm(w))>1e-6);
 		}
 
 		void collapseVectorLeft(VectorType& w, // <<---- CPS
@@ -200,7 +203,7 @@ namespace Dmrg {
 					size_t indexFixed, // <--- m1
 					size_t nk) const // <-- size of the Hilbert sp. of one site
 		{
-			int offset = lrs_.super().partition(m);
+			size_t offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
 
 			size_t ns = lrs_.left().size();
@@ -213,13 +216,14 @@ namespace Dmrg {
 				packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
 
 				size_t alpha0,alpha1;
-				packLeft.unpack(alpha0,alpha1,alpha);
+				packLeft.unpack(alpha0,alpha1,lrs_.left().permutation(alpha));
 
 				RealType sum = 0;
 				for (size_t alpha1Prime=0;alpha1Prime<nk;alpha1Prime++) {
 					size_t alphaPrime = packLeft.pack(alpha0,alpha1Prime,lrs_.left().permutationInverse());
 					size_t iprime = packSuper.pack(alphaPrime,beta,lrs_.super().permutationInverse());
-					sum += v[iprime]*collapseBasis_(alpha1Prime,indexFixed);
+					if (iprime<offset || iprime>=offset+total) continue;
+					sum += v[iprime-offset]*collapseBasis_(alpha1Prime,indexFixed);
 				}
 				w[i] = sum * collapseBasis_(alpha1,indexFixed);
 			}
@@ -231,7 +235,7 @@ namespace Dmrg {
 					size_t indexFixed, // <--- m1
 					size_t nk) const // <-- size of the Hilbert sp. of one site
 		{
-			int offset = lrs_.super().partition(m);
+			size_t offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
 
 			size_t ns = lrs_.left().size();
@@ -244,16 +248,17 @@ namespace Dmrg {
 				packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
 
 				size_t beta0,beta1;
-				packRight.unpack(beta0,beta1,beta);
+				packRight.unpack(beta0,beta1,lrs_.right().permutation(beta));
 
 				RealType sum = 0;
 				for (size_t beta0Prime=0;beta0Prime<nk;beta0Prime++) {
 					size_t betaPrime =  packRight.pack(beta0Prime,beta1,lrs_.right().permutationInverse());
 					size_t iprime = packSuper.pack(alpha,betaPrime,lrs_.super().permutationInverse());
-					sum += v[iprime]*collapseBasis_(beta0Prime,indexFixed);
+					if (iprime<offset || iprime>=offset+total) continue;
+					sum += v[iprime-offset]*collapseBasis_(beta0Prime,indexFixed);
 				}
 
-				w[i] = sum * collapseBasis_(beta0,indexFixed);
+				w[i] = v[i] * collapseBasis_(beta0,indexFixed);
 			}
 		}
 
@@ -284,20 +289,21 @@ namespace Dmrg {
 			return true;
 		}
 
-		void setCollapseBasis(size_t nk)
+		void setCollapseBasis()
 		{
-			if (nk!=4) {
+			size_t nk = collapseBasis_.n_row();
+//			if (nk!=4) {
 				for (size_t i=0;i<nk;i++)
 					for (size_t j=0;j<nk;j++)
 						collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
 				return;
-			}
-			collapseBasis_(0,0) = collapseBasis_(3,3) = 0;
-			PsimagLite::Random48<RealType> rng(21455343);
-			RealType phi = 2*M_PI*rng();
-			collapseBasis_(1,1) = collapseBasis_(2,2) = cos(phi);
-			collapseBasis_(2,1) = sin(phi);
-			collapseBasis_(1,2) = -collapseBasis_(2,1);
+//			}
+//			collapseBasis_(0,0) = collapseBasis_(3,3) = 1.0;
+//			PsimagLite::Random48<RealType> rng(21455343);
+//			RealType phi = 0; //2*M_PI*rng();
+//			collapseBasis_(1,1) = collapseBasis_(2,2) = cos(phi);
+//			collapseBasis_(2,1) = sin(phi);
+//			collapseBasis_(1,2) = -collapseBasis_(2,1);
 		}
 
 		const MettsStochasticsType& mettsStochastics_;
