@@ -258,7 +258,7 @@ namespace Dmrg {
 					sum += v[iprime-offset]*collapseBasis_(beta0Prime,indexFixed);
 				}
 
-				w[i] = v[i] * collapseBasis_(beta0,indexFixed);
+				w[i] = sum * collapseBasis_(beta0,indexFixed);
 			}
 		}
 
@@ -292,18 +292,18 @@ namespace Dmrg {
 		void setCollapseBasis()
 		{
 			size_t nk = collapseBasis_.n_row();
-//			if (nk!=4) {
+			if (nk!=4) {
 				for (size_t i=0;i<nk;i++)
 					for (size_t j=0;j<nk;j++)
 						collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
 				return;
-//			}
-//			collapseBasis_(0,0) = collapseBasis_(3,3) = 1.0;
-//			PsimagLite::Random48<RealType> rng(21455343);
-//			RealType phi = 0; //2*M_PI*rng();
-//			collapseBasis_(1,1) = collapseBasis_(2,2) = cos(phi);
-//			collapseBasis_(2,1) = sin(phi);
-//			collapseBasis_(1,2) = -collapseBasis_(2,1);
+			}
+			collapseBasis_(0,0) = collapseBasis_(3,3) = 1.0;
+			PsimagLite::Random48<RealType> rng(21455343);
+			RealType phi = 2*M_PI*rng();
+			collapseBasis_(1,1) = collapseBasis_(2,2) = cos(phi);
+			collapseBasis_(2,1) = sin(phi);
+			collapseBasis_(1,2) = -collapseBasis_(2,1);
 		}
 
 		const MettsStochasticsType& mettsStochastics_;
