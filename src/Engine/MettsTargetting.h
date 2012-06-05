@@ -274,13 +274,19 @@ namespace Dmrg {
 				// collapse
 				bool hasCollapsed = mettsCollapse_(targetVectors_[n1],targetVectors_[0],sites.first,direction);
 				
+				cocoon(direction,sites);
+
 				if (hasCollapsed) {
 					std::string s = "  COLLAPSEHERE  ";
 					test(targetVectors_[n1],targetVectors_[n1],direction,s,sites);
+					// in-situ measurement
+					if (currentBeta_>=mettsStruct_.beta) {
+						currentBeta_=0;
+						targetVectors_[0] = targetVectors_[n1];
+					}
 				}
 
-				// in-situ measurement
-				cocoon(direction,sites); 
+
 			}
 
 			void load(const std::string& f)

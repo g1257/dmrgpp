@@ -313,6 +313,42 @@ namespace Dmrg {
 				finiteLoop.push_back(fl);
 			}
 
+			size_t repeat = 0;
+			try {
+				io.read(repeat,"RepeatFiniteLoopsTimes=");
+			}  catch (std::exception& e) {}
+
+			size_t fromFl = 0;
+			try {
+				io.read(fromFl,"RepeatFiniteLoopsFrom=");
+			}  catch (std::exception& e) {}
+
+			size_t upToFl = finiteLoop.size()-1;
+			try {
+				io.read(upToFl,"RepeatFiniteLoopsTo=");
+			}  catch (std::exception& e) {}
+
+			if (upToFl>=finiteLoop.size()) {
+				std::string s (__FILE__);
+				s += "\nFATAL: RepeatFiniteLoopsTo=" + ttos(upToFl) + " is larger than current finite loops\n";
+				s += "\nMaximum is " + ttos(finiteLoop.size())+ "\n";
+				throw std::runtime_error(s.c_str());
+			}
+			if (fromFl>upToFl) {
+				std::string s (__FILE__);
+				s += "\nFATAL: RepeatFiniteLoopsFrom=" + ttos(fromFl) + " is larger than RepeatFiniteLoopsTo\n";
+				s += "\nMaximum is " + ttos(upToFl)+ "\n";
+				throw std::runtime_error(s.c_str());
+			}
+			upToFl++;
+
+			for (size_t i=0;i<repeat;i++) {
+				for (size_t j=fromFl;j<upToFl;j++) {
+					FiniteLoop fl = finiteLoop[j];
+					finiteLoop.push_back(fl);
+				}
+			}
+
 			if (options.find("hasQuantumNumbers")!=std::string::npos) {
 				std::string s = "*** WARNING: hasQuantumNumbers ";
 				s += "option is obsolete in input file\n";
