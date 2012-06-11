@@ -314,6 +314,7 @@ namespace Dmrg {
 			}
 
 			size_t repeat = 0;
+
 			try {
 				io.read(repeat,"RepeatFiniteLoopsTimes=");
 			}  catch (std::exception& e) {}

@@ -158,7 +158,7 @@ namespace Dmrg {
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
 			  mettsStochastics_(model,mettsStruct.rngSeed),
-			  mettsCollapse_(mettsStochastics_,lrs_),
+			  mettsCollapse_(mettsStochastics_,lrs_,mettsStruct.rngSeed),
 			  timesWithoutAdvancement_(0),
 			  prevDirection_(INFINITE),
 			  systemPrev_(),

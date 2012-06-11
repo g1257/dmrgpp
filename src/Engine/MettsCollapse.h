@@ -107,12 +107,14 @@ namespace Dmrg {
 		typedef PsimagLite::PackIndices PackIndicesType;
 
 		MettsCollapse(const MettsStochasticsType& mettsStochastics,
-		              const LeftRightSuperType& lrs)
+			      const LeftRightSuperType& lrs,
+			      size_t seed)
 		: mettsStochastics_(mettsStochastics),
 		  lrs_(lrs),
 		  progress_("MettsCollapse",0),
 		  prevDirection_(ProgramGlobals::INFINITE),
-		  collapseBasis_(mettsStochastics_.hilbertSize(0),mettsStochastics_.hilbertSize(0))
+		  collapseBasis_(mettsStochastics_.hilbertSize(0),mettsStochastics_.hilbertSize(0)),
+		  rng_(seed)
 		{
 			setCollapseBasis();
 		}
@@ -161,7 +163,7 @@ namespace Dmrg {
 			VectorWithOffsetType dest;
 			size_t indexFixed = mettsStochastics_.chooseRandomState(p,site);
 			 // m1 == indexFixed in FIXME write paper reference here
-			collapseVector(dest,dest2,direction,indexFixed,nk);
+			collapseVector(dest,dest2,direction,indexFixed,nk,true);
 			RealType x = std::norm(dest);
 			assert(x>1e-6);
 			dest2 = (1.0/x) * dest;
@@ -171,7 +173,8 @@ namespace Dmrg {
 				    const VectorWithOffsetType& src, // <--- MPS
 		                    size_t direction,
 				    size_t indexFixed, // <--- m1
-				    size_t nk) const   // <-- size of the Hilbert sp. of one site
+				    size_t nk,  // <-- size of the Hilbert sp. of one site
+				    bool option = false) const
 		{
 			assert(src.sectors()==1);
 			dest = src;
@@ -179,7 +182,7 @@ namespace Dmrg {
 				size_t i0 = src.sector(ii);
 				VectorType vdest,vsrc;
 				src.extract(vsrc,i0);
-				collapseVector(vdest,vsrc,direction,i0,indexFixed,nk);
+				collapseVector(vdest,vsrc,direction,i0,indexFixed,nk,option);
 				dest.setDataInSector(vdest,i0);
 			}
 			//assert(std::norm(dest)>1e-6);
@@ -190,11 +193,26 @@ namespace Dmrg {
 				    size_t direction,
 				    size_t m, // <-- non-zero sector
 				    size_t indexFixed, // <--- m1
-				    size_t nk) const // <-- size of the Hilbert sp. of one site
+				    size_t nk,// <-- size of the Hilbert sp. of one site
+				    bool option) const
 		{
 			if (direction==EXPAND_SYSTEM)  collapseVectorLeft(w,v,m,indexFixed,nk);
 			else  collapseVectorRight(w,v,m,indexFixed,nk);
+			//if (option && direction!=prevDirection_) compare1(w,v);
 //			assert(fabs(PsimagLite::norm(w))>1e-6);
+		}
+
+		void compare1(const VectorType& v1,const VectorType& v2) const
+		{
+			assert(v1.size()==v2.size());
+			size_t count = 0;
+			for (size_t i=0;i<v1.size();i++) {
+				for (size_t j=0;j<v2.size();j++) {
+					if (fabs(v1[i]-v2[i])>1e-3) count++;
+				}
+			}
+			RealType fraction = static_cast<RealType>(count)/v1.size();
+			std::cout<<__FILE__<<" "<<__LINE__<<" count="<<fraction<<"%\n";
 		}
 
 		void collapseVectorLeft(VectorType& w, // <<---- CPS
@@ -292,18 +310,87 @@ namespace Dmrg {
 		void setCollapseBasis()
 		{
 			size_t nk = collapseBasis_.n_row();
-			if (nk!=4) {
-				for (size_t i=0;i<nk;i++)
-					for (size_t j=0;j<nk;j++)
-						collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
-				return;
-			}
-			collapseBasis_(0,0) = collapseBasis_(3,3) = 1.0;
-			PsimagLite::Random48<RealType> rng(21455343);
-			RealType phi = 2*M_PI*rng();
-			collapseBasis_(1,1) = collapseBasis_(2,2) = cos(phi);
-			collapseBasis_(2,1) = sin(phi);
-			collapseBasis_(1,2) = -collapseBasis_(2,1);
+
+			for (size_t i=0;i<nk;i++)
+				for (size_t j=0;j<nk;j++)
+					collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
+			if (nk!=4) return;
+
+			rotation4d(collapseBasis_);
+
+//			collapseBasis_(0,0) = collapseBasis_(3,3) = 1.0;
+
+//			RealType phi = 2*M_PI*rng_();
+//			//RealType phi = (rng()>0.5) ? M_PI*0.5 : M_PI*0.25;
+//			collapseBasis_(1,1) = collapseBasis_(2,2) = cos(phi);
+//			collapseBasis_(2,1) = sin(phi);
+//			collapseBasis_(1,2) = -collapseBasis_(2,1);
+
+//			//return;
+
+//			phi = 2*M_PI*rng_();
+//			collapseBasis_(0,0) = collapseBasis_(3,3) = cos(phi);
+//			collapseBasis_(3,0) = sin(phi);
+//			collapseBasis_(0,3) = -collapseBasis_(3,0);
+		}
+
+		void rotation4d(MatrixType& m) const
+		{
+			assert(m.n_row()==4 && m.n_col()==4);
+			std::vector<RealType> params(m.n_row());
+			RealType phi = 2*M_PI*rng_();
+			params[0]=cos(phi)/sqrt(2.0);
+			params[1]=sin(phi)/sqrt(2.0);
+
+			phi = 2*M_PI*rng_();
+			params[1]=cos(phi)/sqrt(2.0);
+			params[2]=sin(phi)/sqrt(2.0);
+			MatrixType aux1(m.n_row(),m.n_col());
+			phi = 2*M_PI*rng_();
+			rotation4dAux(aux1,params,1.0);
+
+			params[0]=cos(phi)/sqrt(2.0);
+			params[1]=sin(phi)/sqrt(2.0);
+			phi = 2*M_PI*rng_();
+			params[1]=cos(phi)/sqrt(2.0);
+			params[2]=sin(phi)/sqrt(2.0);
+			MatrixType aux2(m.n_row(),m.n_col());
+			rotation4dAux(aux2,params,-1.0);
+
+			MatrixType aux3(m.n_row(),m.n_col());
+			phi = 2*M_PI*rng_();
+			params[0]=cos(phi)/sqrt(2.0);
+			params[2]=sin(phi)/sqrt(2.0);
+			phi = 2*M_PI*rng_();
+			params[1]=cos(phi)/sqrt(2.0);
+			params[3]=sin(phi)/sqrt(2.0);
+			rotation4dAux(aux3,params,1.0);
+
+			MatrixType aux4(m.n_row(),m.n_col());
+			phi = 2*M_PI*rng_();
+			params[0]=cos(phi)/sqrt(2.0);
+			params[2]=sin(phi)/sqrt(2.0);
+			phi = 2*M_PI*rng_();
+			params[1]=cos(phi)/sqrt(2.0);
+			params[3]=sin(phi)/sqrt(2.0);
+			rotation4dAux(aux4,params,-1.0);
+
+			m = (aux1 * aux2)*(aux3*aux4);
+		}
+
+		void rotation4dAux(MatrixType& m,const std::vector<RealType>& params,RealType sign) const
+		{
+			assert(m.n_row()==4 && m.n_col()==4);
+			for (size_t i=0;i<m.n_row();i++) m(i,i) = params[0];
+			m(0,1)=params[1];
+			m(0,2)=params[2];
+			m(0,3)=params[3];
+			m(1,2)=params[4]*sign;
+			m(1,3)= -params[2]*sign;
+			m(2,3)= params[1]*sign;
+			for (size_t i=0;i<m.n_row();i++)
+				for (size_t j=i+1;j<m.n_row();j++)
+					m(j,i) = -m(i,j);
 		}
 
 		const MettsStochasticsType& mettsStochastics_;
@@ -312,6 +399,7 @@ namespace Dmrg {
 		size_t prevDirection_;
 		MatrixType collapseBasis_;
 		std::vector<size_t> sitesSeen_;
+		PsimagLite::Random48<RealType> rng_;
 	};  //class MettsCollapse
 } // namespace Dmrg
 /*@}*/
