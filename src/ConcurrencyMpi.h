@@ -212,6 +212,14 @@ namespace PsimagLite {
 			checkError(x,"MPI_Allreduce");
 			v = w;
 		}
+
+		void allReduce(std::vector<std::complex<double> >& v,CommType mpiComm=COMM_WORLD) const
+		{
+			std::vector<std::complex<double> > w(v.size(),0);
+			int x = MPI_Allreduce(&(v[0]),&(w[0]),2*v.size(),MPI_DOUBLE,MPI_SUM,mpiComm);
+			checkError(x,"MPI_Allreduce");
+			v = w;
+		}
 		
 		void allReduce(PsimagLite::Matrix<double>& m,CommType mpiComm=COMM_WORLD) const
 		{

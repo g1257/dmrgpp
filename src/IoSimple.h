@@ -207,6 +207,12 @@ namespace PsimagLite {
 
 			int rank() { return rank_; }
 
+			void flush()
+			{
+				if (rank_!=0 || !fout_) return;
+				fout_->flush();
+			}
+
 			template<typename X>
 			friend Out& operator<<(Out& io,const X& t);
 

@@ -103,8 +103,11 @@ namespace PsimagLite {
 				dataType_ = edof;
 				if (edof==NUMBERS) {
 					io.read(dataNumbers_,"Connectors");
-					if (dataNumbers_.size()!=n)
-					 throw std::runtime_error("GeometryDirection Numbers\n");
+					if (dataNumbers_.size()!=n) {
+						std::string s(__FILE__);
+						s += " " + ttos(dataNumbers_.size()) + " != " + ttos(n) + "\n";
+					 	throw std::runtime_error(s.c_str());
+					}
 				} else {
 					for (size_t i=0;i<n;i++) {
 						MatrixType m;

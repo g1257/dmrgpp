@@ -141,6 +141,10 @@ public:
 		pthread_mutex_destroy(&mutex_);
 	}
 
+	std::string name() const { return "phtreads"; }
+
+	size_t threads() const { return nthreads_; }
+
 	template<typename T,typename SomeConcurrencyType>
 	void reduce(T& x,SomeConcurrencyType& conc) {}
 
