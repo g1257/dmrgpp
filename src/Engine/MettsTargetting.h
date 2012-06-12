@@ -266,7 +266,7 @@ namespace Dmrg {
 				}
 
 				// Advance or wft  collapsed vector
-				evolve(n1,n1,n1-1,Eg,direction,sites,loopNumber);
+				//evolve(n1,n1,n1-1,Eg,direction,sites,loopNumber);
 
 				// compute imag. time evolution:
 				calcTimeVectors(PairType(0,n1),Eg,direction);
