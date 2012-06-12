@@ -300,12 +300,19 @@ namespace Dmrg {
 			for (size_t i0 = 0;i0<observe_.size();i0++) {
 				// for g.s. use this one:
 				observe_.setBrackets("gs","gs");
+				observe_.setPointer(i0);
+
+				onePointHookForZero(i0,opA,"gs");
+
 				FieldType tmp1 = observe_.template
 						onePoint<ApplyOperatorType>(i0,opA);
 				std::cout<<observe_.site()<<" "<<tmp1;
 
 				if (hasTimeEvolution_) { // for time vector use this one:
 					observe_.setBrackets("time","time");
+
+					onePointHookForZero(i0,opA,"time");
+
 					FieldType tmp2 = observe_.template
 							 onePoint<ApplyOperatorType>(i0,opA);
 
@@ -332,6 +339,16 @@ namespace Dmrg {
 					std::cout<<"\n";
 				}
 			}
+		}
+
+		void onePointHookForZero(size_t i0,const OperatorType& opA,const std::string& gsOrTime)
+		{
+			if (observe_.site()!=1 || observe_.isAtCorner(numberOfSites_)) return;
+			assert(observe_.site()==1);
+			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(i0,opA);
+			std::cout<<0<<" "<<tmp1;
+			if (hasTimeEvolution_ && gsOrTime=="time") std::cout<<"\n";
+			if (!hasTimeEvolution_) std::cout<<"\n";
 		}
 
 		void printSites()

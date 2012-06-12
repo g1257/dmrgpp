@@ -162,7 +162,7 @@ namespace Dmrg {
 		{
 			bool es = (helper_.direction() == ProgramGlobals::EXPAND_SYSTEM);
 			if (es && helper_.site() ==  numberOfSites-2) return true;
-			if ((!es) && helper_.site()==1) return true;
+			if (!es && helper_.site() == 1) return true;
 			return false;
 		}
 
@@ -220,6 +220,14 @@ namespace Dmrg {
 				   bool corner = false)
 		{
 			return onepoint_.template operator()<ApplyOperatorType>(site,A,corner);
+		}
+
+		template<typename ApplyOperatorType>
+		FieldType onePointHookForZero(size_t site,
+				   const typename ApplyOperatorType::OperatorType& A,
+				   bool corner = false)
+		{
+			return onepoint_.template hookForZero<ApplyOperatorType>(site,A,corner);
 		}
 
 	private:

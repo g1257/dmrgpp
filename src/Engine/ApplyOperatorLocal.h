@@ -121,6 +121,65 @@ namespace Dmrg {
 			applyLocalOpCorner(dest,src,A,fermionSign);
 		}
 
+		//! FIXME: we need to make a fast version for when we're just
+		//! figuring out where the (non-zero) partition is
+		void hookForZero(VectorWithOffsetType& dest,
+				 const VectorWithOffsetType& src,
+				 const OperatorType& A,
+				 const FermionSign& fermionSign,
+				 size_t systemOrEnviron,bool corner = false) const
+		{
+			assert(systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM);
+
+			TargetVectorType dest2(lrs_.super().size());
+
+			for (size_t i=0;i<dest2.size();i++) dest2[i] = 0;
+
+			for (size_t ii=0;ii<src.sectors();ii++) {
+				size_t i = src.sector(ii);
+				hookForZeroSystem(dest2,src,A,fermionSign,i);
+			}
+
+			dest.fromFull(dest2,lrs_.super());
+		}
+
+
+		void hookForZeroSystem(TargetVectorType& dest2,
+					const VectorWithOffsetType& src,
+					const OperatorType& A,
+					const FermionSign& fermionSign,
+					size_t i0) const
+		{
+			size_t offset = src.offset(i0);
+			size_t final = offset + src.effectiveSize(i0);
+			//size_t counter=0;
+			size_t ns = lrs_.left().permutationVector().size();
+			size_t nx = ns/A.data.row();
+			if (src.size()!=lrs_.super().permutationVector().size())
+				throw std::runtime_error("applyLocalOpSystem SE\n");
+
+			PackIndicesType pack1(ns);
+			PackIndicesType pack2(nx);
+			for (size_t i=offset;i<final;i++) {
+				size_t x=0,y=0;
+				pack1.unpack(x,y,lrs_.super().permutation(i));
+				//if (y>=basisE_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem E\n");
+				size_t x0=0,x1=0;
+				assert(x<lrs_.left().permutationVector().size());
+				pack2.unpack(x0,x1,lrs_.left().permutation(x));
+				/*int nx0 = basisS_.electrons(x)-electrons[x1];
+					if (nx0<0) throw std::runtime_error("TimeStepTargetting::applyLocalOpSystem(...)\n");
+				 */
+				RealType sign = 1.0; //fermionSign(x0,A.fermionSign);
+				for (int k=A.data.getRowPtr(x0);k<A.data.getRowPtr(x0+1);k++) {
+					size_t x0prime = A.data.getCol(k);
+					size_t xprime = lrs_.left().permutationInverse(x0prime+x1*nx);
+					size_t j = lrs_.super().permutationInverse(xprime+y*ns);
+					dest2[j] += src[i]*A.data.getValue(k)*sign;
+				}
+			}
+		}
+
 	private:
 		void applyLocalOpSystem(VectorWithOffsetType& dest,
 					const VectorWithOffsetType& src,

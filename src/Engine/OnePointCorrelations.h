@@ -113,10 +113,9 @@ namespace Dmrg {
 		{}
 
 		template<typename ApplyOperatorType>
-		FieldType operator()(
-				size_t site,
-				const typename ApplyOperatorType::OperatorType& A,
-				bool corner = false)
+		FieldType operator()(size_t site,
+			const typename ApplyOperatorType::OperatorType& A,
+			bool corner = false)
 		{
 			size_t pnter=site;
 			helper_.setPointer(pnter);
@@ -132,15 +131,33 @@ namespace Dmrg {
 			}
 		}
 
+		template<typename ApplyOperatorType>
+		FieldType hookForZero(size_t site,
+				      const typename ApplyOperatorType::OperatorType& A,
+				      bool corner = false)
+		{
+			size_t pnter=site;
+			helper_.setPointer(pnter);
+			try {
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
+
+				return onePointInternalHookForZero<ApplyOperatorType>(site,A,src1,src2,corner);
+			} catch (std::exception& e) {
+				std::cerr<<"CAUGHT: "<<e.what();
+				std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
+				return 0;
+			}
+		}
+
 	private:
 
 		template<typename ApplyOperatorType>
-		FieldType onePointInternal(
-				size_t site,
-				const typename ApplyOperatorType::OperatorType& A,
-				const VectorWithOffsetType& src1,
-				const VectorWithOffsetType& src2,
-				bool corner = false)
+		FieldType onePointInternal(size_t site,
+					   const typename ApplyOperatorType::OperatorType& A,
+					   const VectorWithOffsetType& src1,
+					   const VectorWithOffsetType& src2,
+					   bool corner = false)
 		{
 			
 			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper());
@@ -159,6 +176,35 @@ namespace Dmrg {
 					if (i!=j) continue;
 					size_t offset = v1.offset(i);
 					for (size_t k=0;k<v1.effectiveSize(i);k++) 
+						sum+= v1[k+offset] * std::conj(v2[k+offset]);
+				}
+			}
+			return sum;
+		}
+
+		template<typename ApplyOperatorType>
+		FieldType onePointInternalHookForZero(size_t site,
+						      const typename ApplyOperatorType::OperatorType& A,
+						      const VectorWithOffsetType& src1,
+						      const VectorWithOffsetType& src2,
+						      bool corner = false)
+		{
+
+			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper());
+			VectorWithOffsetType dest;
+//			assert(helper_.fermionicSignLeft().size()==helper_.leftRightSuper().left().size());
+			applyOpLocal1.hookForZero(dest,src1,A,helper_.fermionicSignLeft(),helper_.direction(),corner);
+
+			FieldType sum = static_cast<FieldType>(0.0);
+			const VectorWithOffsetType& v1 = dest;
+			const VectorWithOffsetType& v2 = src2;
+			for (size_t ii=0;ii<v1.sectors();ii++) {
+				size_t i = v1.sector(ii);
+				for (size_t jj=0;jj<v1.sectors();jj++) {
+					size_t j = v2.sector(jj);
+					if (i!=j) continue;
+					size_t offset = v1.offset(i);
+					for (size_t k=0;k<v1.effectiveSize(i);k++)
 						sum+= v1[k+offset] * std::conj(v2[k+offset]);
 				}
 			}
