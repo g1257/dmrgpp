@@ -261,7 +261,6 @@ namespace Dmrg {
 					measureOnePoint(A,str);
 				}
 			}
-
 		}
 
 	private:

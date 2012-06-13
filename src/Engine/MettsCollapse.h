@@ -124,8 +124,8 @@ namespace Dmrg {
 		                size_t site,
 		                size_t direction)
 		{
-
-			internalAction(c,eToTheBetaH,site,direction);
+			const VectorWithOffsetType& src =(c.size()==0) ? eToTheBetaH : c;
+			internalAction(c,src,site,direction);
 			sitesSeen_.push_back(site);
 			
 			if (direction==prevDirection_) return false;
@@ -146,17 +146,16 @@ namespace Dmrg {
 	private:
 
 		void internalAction(VectorWithOffsetType& dest2,
-				    const VectorWithOffsetType& eToTheBetaH,
+		                    const VectorWithOffsetType& src2,
 		                    size_t site,
 		                    size_t direction)
 		{
 			size_t nk = mettsStochastics_.hilbertSize(site);
-			const VectorWithOffsetType& src2 =(dest2.size()==0) ? eToTheBetaH : dest2;
 			if (dest2.size()==0) {
 				dest2 =  src2;
 			}
 			std::vector<RealType> p(nk,0);
-			probability(p,eToTheBetaH,direction,nk);
+			probability(p,dest2,direction,nk);
 			RealType sum = 0;
 			for (size_t i=0;i<p.size();i++)
 				sum += p[i];
@@ -164,7 +163,7 @@ namespace Dmrg {
 			VectorWithOffsetType dest;
 			size_t indexFixed = mettsStochastics_.chooseRandomState(p,site);
 			 // m1 == indexFixed in FIXME write paper reference here
-			collapseVector(dest,eToTheBetaH,direction,indexFixed,nk,true);
+			collapseVector(dest,dest2,direction,indexFixed,nk,true);
 			RealType x = std::norm(dest);
 			assert(x>1e-6);
 			dest2 = (1.0/x) * dest;
@@ -317,15 +316,15 @@ namespace Dmrg {
 					collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
 			if (nk!=4) return;
 
-			rotation4d(collapseBasis_);
+//			rotation4d(collapseBasis_);
 
-//			collapseBasis_(0,0) = collapseBasis_(3,3) = 1.0;
+			collapseBasis_(0,0) = collapseBasis_(3,3) = 1.0;
 
-//			RealType phi = 2*M_PI*rng_();
-//			//RealType phi = (rng()>0.5) ? M_PI*0.5 : M_PI*0.25;
-//			collapseBasis_(1,1) = collapseBasis_(2,2) = cos(phi);
-//			collapseBasis_(2,1) = sin(phi);
-//			collapseBasis_(1,2) = -collapseBasis_(2,1);
+			RealType phi = 2*M_PI*rng_();
+			//RealType phi = (rng()>0.5) ? M_PI*0.5 : M_PI*0.25;
+			collapseBasis_(1,1) = collapseBasis_(2,2) = cos(phi);
+			collapseBasis_(2,1) = sin(phi);
+			collapseBasis_(1,2) = -collapseBasis_(2,1);
 
 //			//return;
 
