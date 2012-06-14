@@ -1,0 +1,121 @@
+HOW TO CONSTRUCT A NEW GEOMETRY:
+
+(1) Understand the definition of geometry in DMRG++
+
+(2) Write a class to contain your new geometry. 
+
+(3) Implement the Geometry API.
+
+(4) Hook up your geometry.
+
+In detail now:
+
+(1) Understand the definition of geometry in DMRG++
+
+Start with N sites. N must be even. Label them from 0 to N-1.
+Connect them with solid lines as you like to form a connected or disconnected graph. 
+This is your geometry. Give it a name.
+
+Definition: Connected sites: Sites i and j are connected in your geometry if you drew a line connecting
+them. No site shall ever be connected to itself.
+
+Definition: Absolute system: These are the lowest numbered N/2 sites.
+
+Definition: Absolute environ: These are the highest numbered N/2 sites.
+
+Definition: Absolute system fringe: All sites i in the absolute system such that there exists j in the 
+absolute environ with i and j connected.
+
+Definition: Absolute environ fringe: All sites i in the absolute environ such that there exists j in the 
+absolute system with i and j connected.
+
+Definition: Absolute fringe: The union of the absolute system fringe and absolute environ fringe.
+
+Definition: System relative to smax: All sites less than and including smax.
+
+Definition: Environ relative to emin: All sites greater than and including emin.
+
+Definition: System fringe relative to smax: All sites i in the system relative to smax such that there exists j in the 
+ environ relative to smax+1 with i and j connected.
+
+Definition: Environ fringe relative to emin: All sites i in the environ relative to emin such that there exists j in the 
+ system relative to emin-1 with i and j connected.
+
+Definition: Direction: (abstract concept): 
+Given the set of all connections (i,j) you can classify them according to "direction."
+To the first class of connections give it the direction 0, to the second class give it the direction 1, etc.
+
+For usual geometries you might want to associate direction with the usual direction given by assuming that there are
+axes underlying your geometry. For example, one direction for chains, two directions for ladders, etc.
+
+But you are allowed to choose the trivial category: all connections have direction 0.
+
+Definition: Substitute site: (abstract concept): 
+Because in DMRG the lattice is ``grown'' from smaller pieces (during the infinite loop), it is possible
+to specify connections where none exist. For example, if you have a 100 site chain, and DMRG is putting it together
+2 sites a time, and there are currently these sites:
+0 -- 1 -- 2       97 --- 98 --- 99
+then this gives disjoint lattices because there is no connection between sites 2 and 97.
+
+DMRG++ geometries allow you to specify a substitute for site 97 (and, in general, for all the relative environ fringe)
+for the purposes of connecting it (or them) to site 2 (and, in general, for all the relative system fringe).
+Note that this depends on the stage of the infinite algorithm, specified by smax (in this case 2) and emin (in this case 97).
+In this case it would be sensible to define:
+getSubstituteSite(smax=2,emin=97,97) = 3.
+So that 2 and 97 connect.
+
+In general, you can specify any function, or, if you prefer to ignore this capability, then you can specify the
+identity function. 
+
+Enumeration of Connections: Handles.
+If you have only one direction, then enumerate all your connections starting from 0 to Nc-1, where Nc is the number of connections.
+For example, on a chain with 4 sites, there are 3 connections: (0,1), (1,2), (2,3), which can be labeled as 0, 1, 2.
+For a chain then, handle(i,j) = min(i,j) is a valid enumeration of connections.
+
+If you have more than one direccion, follow this process for every direction. So, you'll have connection 0, direction 0; connection 1,
+direction 0; connection 2, direction 0; etc. Then you'll have connection 0, direction 1; connection 1, direction 1, etc.   
+Again, this enumeration is on a direction by direction basis.
+
+(2)  Write a class to contain your new geometry. 
+Follow the example in Chain.h
+
+(3)  Implement the API as follows:
+
+// Returns the number of connections in direction dirId
+size_t getVectorSize(size_t dirId) const;
+
+// Are sites i1 and i2 connected? If yes, returns true, else returns false.
+bool connected(size_t i1,size_t i2) const;
+
+// Assuming that i1 and i2 are connected, returns the direction along
+// which they are connected.
+size_t calcDir(size_t i1,size_t i2) const;
+
+// Assume that the largest site of the system is smax, and
+// that the smallest site of the environ is emin,
+// Returns true if site i is in the relative fringe, else returns false.
+bool fringe(size_t i,size_t smax,size_t emin) const;
+
+// Assume that the largest site of the system is smax, and
+// that the smallest site of the environ is emin,
+// Assume that site i is in the relative environ fringe.
+// This function returns the substitute site for site i.
+size_t getSubstituteSite(size_t smax,size_t emin,size_t i) const;
+
+// Returns the name of this geometry
+std::string label() const;
+
+// Assume i and j are connected sites.
+// This function returns the connection number on a direction by direction basis. 
+size_t handle(size_t i,size_t j) const;
+
+// Returns the reflection of any site site of the lattice, considering a
+// vertical reflection axis at the middle of the lattice.
+// THIS FUNCTION IS DEPRECATED. YOUR GEOMETRY DOES NOT NEED TO BE REFLECTION SYMMETRIC
+size_t findReflection(size_t site) const;
+
+
+(4) Hook up your geometry.
+
+Instantiate an object of your new geometry as a private
+member of GeometryFactory.h. Add hooks following the Chain or Ladder example there.
