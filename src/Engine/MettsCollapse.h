@@ -120,7 +120,7 @@ namespace Dmrg {
 		}
 
 		bool operator()(VectorWithOffsetType& c,
-		                VectorWithOffsetType& eToTheBetaH,
+				const VectorWithOffsetType& eToTheBetaH,
 		                size_t site,
 		                size_t direction)
 		{
@@ -135,11 +135,7 @@ namespace Dmrg {
 			if (!allSitesSeen) return false;
 
 			sitesSeen_.clear();
-			RealType x = std::norm(c);
-			std::ostringstream msg;
-			msg<<"Changing direction, setting collapsed with norm="<<x;
-			progress_.printline(msg,std::cout);
-			eToTheBetaH = c;
+
 			return true;
 		}
 

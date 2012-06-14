@@ -282,7 +282,12 @@ namespace Dmrg {
 					// in-situ measurement
 					if (currentBeta_>=mettsStruct_.beta) {
 						currentBeta_=0;
+						std::ostringstream msg;
+						RealType x = std::norm(targetVectors_[n1]);
+						msg<<"Changing direction, setting collapsed with norm="<<x;
+						progress_.printline(msg,std::cout);
 						targetVectors_[0] = targetVectors_[n1];
+						//targetVectors_[0] = targetVectors_[n1];
 					}
 				}
 
@@ -802,7 +807,7 @@ namespace Dmrg {
 						sum += std::conj(T(kprime,k))*tmpV;
 					}
 					RealType tmp = (eigs[k]-Eg)*betas_[timeIndex];
-					r[k] = sum * exp(tmp);
+					r[k] = sum * exp(-tmp);
 				}
 			}
 
