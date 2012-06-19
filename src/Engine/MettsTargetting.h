@@ -133,7 +133,7 @@ namespace Dmrg {
 			typedef MettsCollapse<VectorWithOffsetType,MettsStochasticsType> MettsCollapseType;
 			typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
 			
-			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE};
+			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
@@ -229,7 +229,10 @@ namespace Dmrg {
 
 			size_t size() const
 			{
-				return (allStages(DISABLED)) ? 1 : targetVectors_.size();
+				if (allStages(DISABLED)) return 1;
+				size_t n = targetVectors_.size();
+				if (targetVectors_[n-1].size()==0) n--;
+				return n;
 			}
 
 			const VectorWithOffsetType& operator()(size_t i) const
@@ -265,33 +268,28 @@ namespace Dmrg {
 					evolve(i,0,n1-1,Eg,direction,sites,loopNumber);
 				}
 
-				// Advance or wft  collapsed vector
-				evolve(n1,n1,n1-1,Eg,direction,sites,loopNumber);
-
 				// compute imag. time evolution:
 				calcTimeVectors(PairType(0,n1),Eg,direction);
 
-				// collapse
-				bool hasCollapsed = mettsCollapse_(targetVectors_[n1],targetVectors_[0],sites.first,direction);
-				
+				// Advance or wft  collapsed vector
+				if (targetVectors_[n1].size()>0)
+					evolve(n1,n1,n1-1,Eg,direction,sites,loopNumber);
+
+				for (size_t i=0;i<targetVectors_.size();i++)
+					assert(targetVectors_[i].size()==0 || targetVectors_[i].size()==lrs_.super().permutationVector().size());
+
 				cocoon(direction,sites);
 
+				if (stage_!=COLLAPSE) return;
+
+				// collapse
+				bool hasCollapsed = mettsCollapse_(targetVectors_[n1],targetVectors_[n1-1],sites.first,direction);
+
 				if (hasCollapsed) {
+					//throw std::runtime_error("collapsed testing\n");
 					std::string s = "  COLLAPSEHERE  ";
 					test(targetVectors_[n1],targetVectors_[n1],direction,s,sites);
-					// in-situ measurement
-					if (currentBeta_>=mettsStruct_.beta) {
-						currentBeta_=0;
-						std::ostringstream msg;
-						RealType x = std::norm(targetVectors_[n1]);
-						msg<<"Changing direction, setting collapsed with norm="<<x;
-						progress_.printline(msg,std::cout);
-						targetVectors_[0] = targetVectors_[n1];
-						//targetVectors_[0] = targetVectors_[n1];
-					}
 				}
-
-
 			}
 
 			void load(const std::string& f)
@@ -358,29 +356,6 @@ namespace Dmrg {
 				// nothing to do here
 			}
 
-//			void truncate(BasisWithOperatorsType& pS,BasisWithOperatorsType& pE)
-//			{
-//				const MatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
-//				VectorType newVector1 = pureVectors_.first;
-//				pureVectors_.first =  newVector1 * transformSystem ;
-
-//				const MatrixType& transformEnviron =
-//						wft_.transform(ProgramGlobals::ENVIRON);
-//				VectorType newVector2 = pureVectors_.second;
-//				pureVectors_.second = newVector2 * transformEnviron;
-
-//				BasisType super("super");
-//				super.setToProduct(pS,pE);
-//				LeftRightSuperType lrs(pS,pE,super);
-//				setFromInfinite(targetVectors_[0],lrs);
-
-//				assert(std::norm(targetVectors_[0])>1e-6);
-
-//				std::ostringstream msg;
-//				msg<<"Truncating, targetVectors_[0].size="<<targetVectors_[0].size();
-//				progress_.printline(msg,std::cerr);
-//			}
-
 		private:
 
 			void evolve(size_t index,
@@ -404,16 +379,47 @@ namespace Dmrg {
 
 			void advanceCounterAndComputeStage()
 			{
-				stage_=WFT_NOADVANCE;
+				if (stage_!=COLLAPSE) stage_=WFT_NOADVANCE;
 
-				if (timesWithoutAdvancement_ >= mettsStruct_.advanceEach && currentBeta_<mettsStruct_.beta) {
+				if (timesWithoutAdvancement_ < mettsStruct_.advanceEach) {
+					timesWithoutAdvancement_++;
+					printAdvancement();
+					return;
+				}
+
+				if (stage_!=COLLAPSE && currentBeta_<mettsStruct_.beta) {
 					stage_ = WFT_ADVANCE;
 					currentBeta_ += mettsStruct_.tau;
 					timesWithoutAdvancement_=0;
-				} else {
-					if (stage_==WFT_NOADVANCE) timesWithoutAdvancement_++;
+					printAdvancement();
+					return;
 				}
 
+				if (stage_!=COLLAPSE && currentBeta_>=mettsStruct_.beta) {
+					stage_ = COLLAPSE;
+					timesWithoutAdvancement_=0;
+					printAdvancement();
+					return;
+				}
+
+				if (stage_==COLLAPSE) {
+					stage_ = WFT_NOADVANCE;
+					timesWithoutAdvancement_=0;
+					currentBeta_ = 0;
+					std::ostringstream msg;
+					size_t n1 = mettsStruct_.timeSteps;
+					RealType x = std::norm(targetVectors_[n1]);
+					msg<<"Changing direction, setting collapsed with norm="<<x;
+					progress_.printline(msg,std::cout);
+					targetVectors_[0] = targetVectors_[n1];
+					printAdvancement();
+					return;
+				}
+
+			}
+
+			void printAdvancement() const
+			{
 				std::ostringstream msg2;
 				msg2<<"Steps without advance: "<<timesWithoutAdvancement_;
 				if (timesWithoutAdvancement_>0)
@@ -431,7 +437,7 @@ namespace Dmrg {
 // 				size_t indexAdvance = betas_.size()-1; // FIXME 
 // 				size_t indexNoAdvance = 0;
 
-				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE) {
+				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE || stage_==COLLAPSE) {
 					size_t advance = index;
 					if (stage_ == WFT_ADVANCE) advance = indexAdvance;
 					// don't advance the collapsed vector because we'll recompute
@@ -690,9 +696,9 @@ namespace Dmrg {
 					case DISABLED:
 						return "Disabled";
 						break;
-// 					case OPERATOR:
-// 						return "Applying operator for the first time";
-// 						break; 
+					case COLLAPSE:
+						return "Collapsing";
+						break;
 					case WFT_ADVANCE:
 						return "WFT with time stepping";
 						break;

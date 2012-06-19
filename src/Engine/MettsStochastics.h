@@ -124,6 +124,11 @@ namespace Dmrg {
 			HilbertBasisType basisOfOneSite;
 			basisForOneSite(quantumNumbsOneSite,basisOfOneSite,site);
 
+			std::cerr<<"basisOfOneSite ";
+			for (size_t i=0;i<basisOfOneSite.size();i++)
+				std::cerr<<basisOfOneSite[i]<<" ";
+			std::cerr<<"\n";
+
 			RealType r = random48_();
 			RealType s1 = 0;
 			RealType s2 = 0;

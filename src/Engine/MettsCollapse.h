@@ -124,8 +124,8 @@ namespace Dmrg {
 		                size_t site,
 		                size_t direction)
 		{
-			const VectorWithOffsetType& src =(c.size()==0) ? eToTheBetaH : c;
-			internalAction(c,src,site,direction);
+
+			internalAction(c,eToTheBetaH,site,direction);
 			sitesSeen_.push_back(site);
 			
 			if (direction==prevDirection_) return false;
@@ -150,19 +150,26 @@ namespace Dmrg {
 			if (dest2.size()==0) {
 				dest2 =  src2;
 			}
+
 			std::vector<RealType> p(nk,0);
 			probability(p,dest2,direction,nk);
 			RealType sum = 0;
 			for (size_t i=0;i<p.size();i++)
 				sum += p[i];
 			assert(fabs(sum-1.0)<1e-6);
+
 			VectorWithOffsetType dest;
 			size_t indexFixed = mettsStochastics_.chooseRandomState(p,site);
+			std::cerr<<"SITE="<<site<<" PROBS=";
+			for (size_t i=0;i<p.size();i++) std::cerr<<p[i]<<" ";
+			std::cerr<<" CHOSEN="<<indexFixed<<"\n";
 			 // m1 == indexFixed in FIXME write paper reference here
+
 			collapseVector(dest,dest2,direction,indexFixed,nk,true);
 			RealType x = std::norm(dest);
 			assert(x>1e-6);
 			dest2 = (1.0/x) * dest;
+			assert(dest2.size()==src2.size());
 		}
 
 		void collapseVector(VectorWithOffsetType& dest, // <<---- CPS
@@ -310,7 +317,8 @@ namespace Dmrg {
 			for (size_t i=0;i<nk;i++)
 				for (size_t j=0;j<nk;j++)
 					collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
-			if (nk!=4) return;
+//			if (nk!=4)
+				return;
 
 //			rotation4d(collapseBasis_);
 
