@@ -4,7 +4,6 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-#include <limits>
 
 template<typename ContainerType>
 class Sort {
@@ -20,35 +19,11 @@ class Sort {
 
 			bool operator()(const PairType& x1,const PairType& x2)
 			{
-				if (isInteger(x1.first) && isInteger(x2.first))
-					return operatorParensInt(x1,x2);
-				
-				FieldType epsilon = static_cast<FieldType>(1e-99);
-				return (x1.first-x2.first<epsilon); //std::numeric_limits<double>::epsilon());
+				if (x1.first<x2.first) return true;
+				return false;
 			}
 		private:
 			const std::vector<PairType>& x_;
-
-			bool operatorParensInt(const PairType& x1,const PairType& x2)
-			{
-				return (x1.first<x2.first);
-			}
-
-			bool isInteger(const double& t)
-			{
-				return false;
-			}
-
-			bool isInteger(const int& t)
-			{
-				return true;
-			}
-
-			bool isInteger(const size_t& t)
-			{
-				return true;
-			} 
-
 	};
 
 	void sort(ContainerType& x,std::vector<size_t>& iperm,size_t smallSize=0)
