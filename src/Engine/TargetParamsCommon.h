@@ -153,6 +153,7 @@ namespace Dmrg {
 						PsimagLite::Matrix<ComplexOrReal> m;
 						io.readMatrix(m,"RAW_MATRIX");
 						setRawData(i,m);
+						checkNotZeroMatrix(i,m);
 					}
 					int fermiSign=0;
 					io.readline(fermiSign,"FERMIONSIGN=");
@@ -180,6 +181,20 @@ namespace Dmrg {
 			bool noOperator;
 		
 		private:
+
+			void checkNotZeroMatrix(size_t i,const PsimagLite::Matrix<ComplexOrReal>& m)
+			{
+				RealType norma = norm2(m);
+				RealType eps = 1e-6;
+				if (norma>eps) return;
+
+				std::string s(__FILE__);
+				s += " : " + ttos(__LINE__) + "\n";
+				s += "RAW_MATRIX or COOKED_OPERATOR number " + ttos(i);
+				s += " is less than " + ttos(eps) + "\n";
+				throw std::runtime_error(s.c_str());
+			}
+
 
 			bool isNoOperator() const
 			{
