@@ -182,7 +182,7 @@ namespace Dmrg {
 		
 		private:
 
-			void checkNotZeroMatrix(size_t i,const PsimagLite::Matrix<ComplexOrReal>& m)
+			void checkNotZeroMatrix(size_t i,const PsimagLite::Matrix<ComplexOrReal>& m) const
 			{
 				RealType norma = norm2(m);
 				RealType eps = 1e-6;

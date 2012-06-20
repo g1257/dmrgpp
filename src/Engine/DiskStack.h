@@ -107,7 +107,7 @@ namespace Dmrg {
 					throw std::runtime_error("DiskStack::load(...)\n");
 				}
 				ioIn_.readline(rank_,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
-				ioIn_.readline(total_,"#STACKMETATOTAL=");
+				//ioIn_.readline(total_,"#STACKMETATOTAL="); <-- KEEP TOTAL=0, THIS IS A NEW FILE!!
 				//ioIn_.readline(debug_,"#STACKMETADEBUG=");
 				ioIn_.advance("#STACKMETASTACK");
 				ioIn_>>stack_;

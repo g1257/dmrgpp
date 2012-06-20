@@ -105,7 +105,7 @@ namespace Dmrg {
 			SYSTEM_STACK_STRING("SystemStack"),
 			ENVIRON_STACK_STRING("EnvironStack"),
 			parameters_(parameters),
-			enabled_(parameters_.options.find("checkpoint")!=std::string::npos),
+			enabled_(parameters_.options.find("checkpoint")!=std::string::npos || parameters_.options.find("restart")!=std::string::npos),
 			systemDisk_(SYSTEM_STACK_STRING+parameters_.checkpoint.filename , SYSTEM_STACK_STRING+parameters_.filename,enabled_,rank),
 			envDisk_(ENVIRON_STACK_STRING+parameters_.checkpoint.filename , ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank),
 			progress_("Checkpoint",rank)

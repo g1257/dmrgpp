@@ -132,7 +132,7 @@ namespace Dmrg {
 		  rng_(3433117)
 		{
 			if (!isEnabled_) return;
-			if (params.options.find("checkpoint")!=std::string::npos)
+			if (params.options.find("checkpoint")!=std::string::npos || params.options.find("restart")!=std::string::npos)
 				load();
 			if (BasisType::useSu2Symmetry()) {
 				wftImpl_=new WaveFunctionTransfSu2Type(stage_,firstCall_,counter_,dmrgWaveStruct_);

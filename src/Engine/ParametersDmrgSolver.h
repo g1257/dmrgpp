@@ -393,6 +393,9 @@ namespace Dmrg {
 
 			if (options.find("checkpoint")!=std::string::npos)
 				io.readline(checkpoint.filename,"CheckpointFilename=");
+			else if (options.find("restart")!=std::string::npos)
+				io.readline(checkpoint.filename,"RestartFilename=");
+
 			nthreads=1; // provide a default value
 			try {
 				io.readline(nthreads,"Threads=");
@@ -446,6 +449,8 @@ namespace Dmrg {
 			os<<"parameters.tolerance="<<parameters.tolerance<<"\n";
 		os<<"parameters.nthreads="<<parameters.nthreads<<"\n";
 		os<<"parameters.useReflectionSymmetry="<<parameters.useReflectionSymmetry<<"\n";
+		if (parameters.checkpoint.filename!="")
+			os<<"parameters.restartFilename="<<parameters.checkpoint.filename<<"\n";
 		if (parameters.fileForDensityMatrixEigs!="")
 			os<<"parameters.fileForDensityMatrixEigs="<<parameters.fileForDensityMatrixEigs<<"\n";
 		return os;
