@@ -525,6 +525,25 @@ namespace PsimagLite {
 		return true;
 	}
 
+	template<typename T>
+	T norm2(const PsimagLite::Matrix<T>& m)
+	{
+		T sum = 0;
+		for (size_t i=0;i<m.n_row();i++)
+			for (size_t j=0;j<m.n_row();j++)
+				sum += m(i,j) * m(i,j);
+		return sum;
+	}
+
+	template<typename T>
+	T norm2(const PsimagLite::Matrix<std::complex<T> >& m)
+	{
+		T sum = 0;
+		for (size_t i=0;i<m.n_row();i++)
+			for (size_t j=0;j<m.n_row();j++)
+				sum += std::real(std::conj(m(i,j)) * m(i,j));
+		return sum;
+	}
 	
 	template<typename T>
 	Matrix<T> multiplyTransposeConjugate(

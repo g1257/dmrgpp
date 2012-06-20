@@ -245,7 +245,10 @@ namespace PsimagLite {
 		{
 			RealType norma=norm(x);
 
-			if (norma<1e-5 || norma>100) throw std::runtime_error("Norm\n");
+			if (norma<1e-5 || norma>100) {
+				std::cerr<<"norma="<<norma<<"\n";
+				//throw std::runtime_error("Norm\n");
+			}
 
 			std::ostringstream msg;
 			msg.precision(8);
