@@ -397,6 +397,8 @@ namespace Dmrg {
 
 				if (stage_!=COLLAPSE && currentBeta_>=mettsStruct_.beta) {
 					stage_ = COLLAPSE;
+					size_t n1 = mettsStruct_.timeSteps;
+					targetVectors_[n1].resize(0);
 					timesWithoutAdvancement_=0;
 					printAdvancement();
 					return;
