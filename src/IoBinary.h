@@ -75,7 +75,97 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file IoBinary.h
  *
- *  This class handles Input/Output in a simple way 
+ *  This class handles Input/Output in binary
+
+Objectives:
+
+* Support search (with labels)
+
+* Robust, that is, consistency checks.
+
+* Fast
+
+* As small file size as possible.
+
+------------------------ SPECIFICATION	 -------------------------------
+
+The binary file is composed of records. Each record is composed of:
+
+(1) label
+(2) checksum
+(3) total record size
+(4) type (*)
+(5) size (*)
+(6) payload (*)
+
+Parts marked with (*) are optional.
+
+(1) label
+Size of this part: variable
+1.1 the 5 characters LABEL ( 5 bytes)
+1.2 the size of the actual label (sizeof(size_t), usually 8 bytes)
+1.3 the label (variable size)
+
+(2) checksum including (3), (4), (5) and (6).
+Size of this part: 1 byte if we use, let's say, CRC-8
+Rationale: This is for consistency check.
+
+(3) total record size including (4), (5) and (6).
+Size of this part = sizeof(size_t) usually 8 bytes.
+Rationale: This is for consistency check.
+
+(4) type
+Size of this part: 1 byte
+4.1 The 4 lower bits describe the native type, for example,
+int, size_t, double, float, char *, ..., we have space here for 16 possibilities
+4.2 The 4 higher bits describe composite structures, for example,
+vector, matrix, etc. We might reserve the last bit to indicate complex.
+
+(5) The size of the payload
+Size of this part: sizeof(size_t), usually 8 bytes
+
+(6) The actual payload.
+Size of this part: variable
+
+----------------------------END OF SPECIFICATION -----------------------------------
+
+Example 1: print the label "Hello, World!"
+5 bytes: 4c 41 42 45 4c <-- The word LABEL
+8 bytes: 00 00 00 00 00 00 00 0E  --> the number 14
+12 bytes: 48 65 6c 6c 6f 20 57 6f 72 6c 64 21 <--- The phrase Hello World!
+1 byte: ??  <-- checksum
+8 bytes  00 00 00 00 00 00 00 00  <-- size of the record
+There's no (4), (5), (6).
+
+Total size = 34 bytes
+If it were written in ascii = 12 bytes.
+
+
+Example 2: print the number 12 with label "TotalSites"
+5 bytes: 4c 41 42 45 4c <-- The word LABEL
+8 bytes: 00 00 00 00 00 00 00 0A  --> the number 10
+10 bytes: 54 6f 74 61 6c 53 69 74 65 73 <-- The word TotalSites
+1 byte: ??  <-- checksum
+8 bytes: 09 <-- size of the record
+1 byte: 01 <--- type==integer
+8 bytes: 00 00 00 00 00 00 00 0C <-- the number 12 (payload)
+
+Total size = 41 bytes
+If it were written in ascii = 12 bytes.
+
+
+Example 3: print the vector of 6 doubles 0.3 0.55 0.786  -0.59 9.33 -1.0 with label "Energies"
+5 bytes: 4c 41 42 45 4c <-- The word LABEL
+8 bytes: 00 00 00 00 00 00 00 08  --> the number 8
+8 bytes: 45 6e 65 72 67 69 65 73 <-- The word Energies
+1 byte: ?? <-- checksum
+8 bytes: 09 <-- size of the record
+1 byte: 13 <--- type==19, which would mean double and vector
+48 bytes:  ... <-- the numbers making up the vector (payload)
+
+Total Size = 74 bytes.
+If it were written in ascii = 43 bytes.
+----------------------------------------------------------------------
  */
   
 #ifndef IO_BINARY_H
