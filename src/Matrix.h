@@ -132,6 +132,22 @@ namespace PsimagLite {
 			 }
 		}
 
+		void print(int fd) const
+		{
+			write(fd,(const void*)&ncol_,sizeof(ncol_));
+			write(fd,(const void*)&nrow_,sizeof(nrow_));
+			write(fd,(const void*)&(data_[0]),sizeof(T)*nrow_*ncol_);
+
+		}
+
+		void read(int fd)
+		{
+			::read(fd,&ncol_,sizeof(ncol_));
+			::read(fd,&nrow_,sizeof(nrow_));
+			data_.resize(nrow_*ncol_);
+			::read(fd,&(data_[0]),sizeof(T)*nrow_*ncol_);
+		}
+
 	private:
 		size_t nrow_,ncol_;
 		std::vector<T> data_;
