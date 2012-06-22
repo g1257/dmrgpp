@@ -530,7 +530,7 @@ namespace PsimagLite {
 	{
 		T sum = 0;
 		for (size_t i=0;i<m.n_row();i++)
-			for (size_t j=0;j<m.n_row();j++)
+			for (size_t j=0;j<m.n_col();j++)
 				sum += m(i,j) * m(i,j);
 		return sum;
 	}
@@ -540,7 +540,7 @@ namespace PsimagLite {
 	{
 		T sum = 0;
 		for (size_t i=0;i<m.n_row();i++)
-			for (size_t j=0;j<m.n_row();j++)
+			for (size_t j=0;j<m.n_col();j++)
 				sum += std::real(std::conj(m(i,j)) * m(i,j));
 		return sum;
 	}
