@@ -174,7 +174,8 @@ If it were written in ascii = 43 bytes.
 #include <iostream>
 #include <string>
 #include <vector>
-#include <stack>
+#include "Stack.h"
+#include <utility>
 #include "Matrix.h"
 #include "TypeToString.h"
 #include <cstdlib>
@@ -187,6 +188,7 @@ namespace PsimagLite {
 	class IoBinary {
 
 		typedef unsigned char TypeType;
+		typedef std::pair<size_t,size_t> PairType;
 
 		enum {TYPE_INT=1,TYPE_SIZE_T=2,TYPE_FLOAT=3,TYPE_DOUBLE=4};
 
@@ -286,6 +288,7 @@ namespace PsimagLite {
 				write(fout_, (const void *)ptr,length*sizeof(dummy));
 			}
 
+			//! Specialization for bool (FIXME: std::vector<bool> is evil, remove it!)
 			void printVector(const std::vector<bool>& x,std::string const &label)
 			{
 				if (!ENABLED) return;
@@ -300,10 +303,11 @@ namespace PsimagLite {
 				bool dummy;
 				TypeType type = TYPE_VECTOR | charTypeOf(dummy);
 				write(fout_,(const void *)&type,sizeof(type));
-				size_t length = x.size();
+				std::vector<char> xx(x.size());
+				convertFromBool(xx,x);
+				size_t length = xx.size();
 				write(fout_,(const void *)&length,sizeof(length));
-
-				throw std::runtime_error("Bool not supported yet\n");
+				write(fout_,(const void *)&(xx[0]),length);
 			}
 
 			template<class T>
@@ -366,8 +370,7 @@ namespace PsimagLite {
 				SomeType dummy;
 				TypeType type = TYPE_MATRIX | charTypeOf(dummy);
 				write(fout_,(const void *)&type,sizeof(type));
-
-				throw std::runtime_error("Stack not supported\n");
+				std::print(fout_,mat);
 			}
 
 			int rank() { return rank_; }
@@ -456,17 +459,17 @@ namespace PsimagLite {
 				std::pair<std::string,size_t> sc = advance(s,level,false);
 				//std::cerr<<"FOUND--------->\n";
 				char check = 0;
-				::read(fin_,&check,1);
 				size_t total = 0;
-				::read(fin_,&total,sizeof(total));
+				PairType type;
+				readCheckTotalAndType(check,total,type);
+
 				if (total!=1) {
 					std::string str(__FILE__);
 					str += ttos(__FILE__) + "\n";
 					str += "Expecting a single item\n";
 					throw std::runtime_error(str.c_str());
 				}
-				size_t type = 0;
-				::read(fin_,&type,1);
+
 				::read(fin_,&x,sizeof(x));
 				return sc.second;
 				
@@ -481,13 +484,10 @@ namespace PsimagLite {
 				std::pair<std::string,size_t> sc = advance(s,level,beQuiet);
 				//std::cerr<<"FOUND--------->\n";
 				char check = 0;
-				::read(fin_,&check,1);
 				size_t total = 0;
-				::read(fin_,&total,sizeof(total));
-				size_t type = 0;
-				::read(fin_,&type,1);
-				type >>= 4;
-				if (type == TYPE_VECTOR) {
+				PairType type;
+				readCheckTotalAndType(check,total,type);
+				if (type.second == TYPE_VECTOR) {
 					readVector(x);
 					return sc;
 				}
@@ -657,12 +657,10 @@ namespace PsimagLite {
 				advance(s,level);
 				std::cerr<<"FOUND--------->\n";
 				char check = 0;
-				::read(fin_,&check,1);
 				size_t total = 0;
-				::read(fin_,&total,sizeof(total));
-				size_t type = 0;
-				::read(fin_,&type,1);
-				if (type & TYPE_MATRIX) {
+				PairType type;
+				readCheckTotalAndType(check,total,type);
+				if (type.second == TYPE_MATRIX) {
 					readMatrix(mat,s);
 					return;
 				}
@@ -699,13 +697,10 @@ namespace PsimagLite {
 
 //			template<typename X>
 //			friend void operator>>(In& io,X& t);
-			
-		private:
 
 			std::string readNextLabel()
 			{
 				std::string magicLabel = "LABEL";
-				std::string buf = "";
 				char c = 0;
 				size_t j= 0;
 				while (true) {
@@ -714,7 +709,8 @@ namespace PsimagLite {
 						std::string s(__FILE__);
 						s += " " + ttos(__LINE__);
 						s += "\nCannot read next label\n";
-						throw std::runtime_error(s.c_str());
+						return "NOTFOUND";
+						//throw std::runtime_error(s.c_str());
 					}
 					if (c==magicLabel[j]) {
 						j++;
@@ -753,6 +749,38 @@ namespace PsimagLite {
 				return ret;
 
 			}
+
+			void readCheckTotalAndType(char& check,size_t& total,PairType& type)
+			{
+				check = 0;
+				::read(fin_,&check,1);
+				total = 0;
+				::read(fin_,&total,sizeof(total));
+				type.first = 0;
+				::read(fin_,&type.first,1);
+				type.second = type.first;
+				type.second >>= 4;
+				type.first &= 15;
+			}
+
+			static std::string nameOfType(const PairType& type)
+			{
+				std::string type1 = "UNKNOWN";
+				if (type.first==TYPE_INT) type1 = "INT";
+				else if (type.first==TYPE_SIZE_T) type1="SIZE_T";
+				else if (type.first==TYPE_FLOAT) type1="FLOAT";
+				else if (type.first==TYPE_DOUBLE) type1="DOUBLE";
+
+				std::string type2 = "";
+				if (type.second==TYPE_VECTOR) type2="VECTOR";
+				if (type.second==TYPE_MATRIX) type2="MATRIX";
+				if (type.second==TYPE_PAIR) type2="PAIR";
+				if (type.second==TYPE_UNKNOWN) type2="UNKNOWN";
+
+				return type1 + " " + type2;
+			}
+
+		private:
 
 			template<typename X>
 			void readVector(std::vector<X>& x)
@@ -829,6 +857,11 @@ namespace PsimagLite {
 		{
 			T dummy2;
 			return TYPE_PAIR | charTypeOf(dummy2);
+		}
+
+		static void convertFromBool(std::vector<char>& xx,const std::vector<bool>& x)
+		{
+			for (size_t i=0;i<xx.size();i++) xx[i] = (x[i]) ? 48 : 49;
 		}
 
 	}; //class IoBinary

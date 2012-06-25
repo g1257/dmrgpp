@@ -165,6 +165,7 @@ namespace PsimagLite {
 				(*fout_)<<s.str()<<"\n";
 				s.flush();
 				s.seekp(std::ios_base::beg);
+				binaryOut_.print(s.str());
 			}
 
 

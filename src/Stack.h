@@ -108,6 +108,19 @@ namespace std {
 		}
 		return is;
 	}
+
+	template<typename FieldType>
+	void print(int fd, const std::stack<FieldType>& st)
+	{
+		stack<FieldType> st2 = st;
+		size_t tmp = st2.size();
+		::write(fd,&tmp,sizeof(tmp));
+		while(!st2.empty()) {
+			FieldType x = st2.top();
+			x.print(fd);
+			st2.pop();
+		}
+	}
 } // namespace std 
 
 /*@}*/	
