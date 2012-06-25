@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -270,7 +268,6 @@ namespace PsimagLite {
 				for (int j = rowptr_[i]; j < rowptr_[i + 1]; j++)
 					x[i] += values_[j] * y[colind_[j]];
 		}
-		
 
 		size_t row() const { return nrow_; }
 
@@ -302,6 +299,15 @@ namespace PsimagLite {
 		const int& getCol(size_t i) const { assert(i<colind_.size()); return colind_[i]; }
 
 		const T& getValue(size_t i) const { assert(i<values_.size()); return values_[i]; }
+
+		void print(int fd) const
+		{
+			::write(fd,(const void *)&nrow_,sizeof(nrow_));
+			::write(fd,(const void *)&ncol_,sizeof(ncol_));
+			::write(fd,(const void *)&(rowptr_[0]),sizeof(int)*rowptr_.size());
+			::write(fd,(const void *)&(colind_[0]),sizeof(int)*colind_.size());
+			::write(fd,(const void *)&(values_[0]),sizeof(T)*values_.size());
+		}
 
 		/*bool operator==(const CrsMatrix<T>& B) const
 		{

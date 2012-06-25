@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include <vector>
 #include <cstdlib>
+#include <map>
 #include "Matrix.h"
 //#include "Utils.h"
 

@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include <cstdlib>
 #include <map>
+#include "IoBinary.h"
 
 namespace PsimagLite {
 	//! IoSimple class handles Input/Output (IO) for the Dmrg++ program 
@@ -107,7 +108,8 @@ namespace PsimagLite {
 				fout_=(std::ofstream *)&os;
 			}
 
-			Out(const std::string& fn,int rank) : rank_(rank),filename_(fn),fout_(0)
+			Out(const std::string& fn,int rank)
+			: rank_(rank),filename_(fn),fout_(0),binaryOut_(fn + ".bin",rank)
 			{
 				if (rank_!=0) return;
 				if (!fout_) fout_=new std::ofstream;
@@ -138,6 +140,7 @@ namespace PsimagLite {
 				fout_->open(fn.c_str(),mode);
 				if (!(*fout_) || !fout_->good())
 					throw std::runtime_error("Out: error while opening file!\n");
+				binaryOut_.open(fn+".bin",mode,rank);
 			}
 
 			void close()
@@ -146,12 +149,14 @@ namespace PsimagLite {
 					throw std::runtime_error("close: not possible\n");
 				filename_="FILE_IS_CLOSED";
 				fout_->close();
+				binaryOut_.close();
 			}
 
 			void printline(const std::string &s)
 			{
 				if (rank_!=0) return;
 				(*fout_)<<s<<"\n";
+				binaryOut_.print(s);
 			}
 
 			void printline(std::ostringstream &s)
@@ -171,6 +176,7 @@ namespace PsimagLite {
 				(*fout_)<<label<<"\n";
 				(*fout_)<<x.size()<<"\n";
 				for (size_t i=0;i<x.size();i++) (*fout_)<<x[i]<<"\n";
+				binaryOut_.printVector(x,label);
 			}
 
 			template<class T>
@@ -194,6 +200,7 @@ namespace PsimagLite {
 				if (rank_!=0) return;
 				(*fout_)<<s<<"\n";
 				(*fout_)<<mat;
+				binaryOut_.printMatrix(mat,s);
 			}
 
 			template<typename X>
@@ -202,7 +209,7 @@ namespace PsimagLite {
 				if (rank_!=0) return;
 				(*fout_)<<s<<"\n";
 				(*fout_)<<mat;
-
+				binaryOut_.printMatrix(mat,s);
 			}
 
 			int rank() { return rank_; }
@@ -221,6 +228,7 @@ namespace PsimagLite {
 			int rank_;
 			std::string filename_;
 			std::ofstream* fout_;
+			IoBinary::Out binaryOut_;
 		};
 
 		class In {

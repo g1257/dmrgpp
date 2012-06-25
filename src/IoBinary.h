@@ -174,6 +174,7 @@ If it were written in ascii = 43 bytes.
 #include <iostream>
 #include <string>
 #include <vector>
+#include <stack>
 #include "Matrix.h"
 #include "TypeToString.h"
 #include <cstdlib>
@@ -189,7 +190,13 @@ namespace PsimagLite {
 
 		enum {TYPE_INT=1,TYPE_SIZE_T=2,TYPE_FLOAT=3,TYPE_DOUBLE=4};
 
-		enum {TYPE_VECTOR = 16,TYPE_MATRIX = 32};
+		enum {TYPE_VECTOR = 16,TYPE_MATRIX = 32, TYPE_PAIR = 48, TYPE_UNKNOWN = 64};
+
+#ifdef HAVE_BINARY_IO
+		static const size_t ENABLED=1;
+#else
+		static const size_t ENABLED=0;
+#endif
 
 	public:
 
@@ -197,12 +204,13 @@ namespace PsimagLite {
 
 		public:
 
-			Out()  : rank_(0),fout_(0) {}
+			Out()  : rank_(0),fout_(-1) {}
 
 			Out(const std::string& fn,int rank) : rank_(rank),filename_(fn),fout_(-1)
 			{
+				if (!ENABLED) return;
 				if (rank_!=0) return;
-				fout_=open(fn.c_str(),O_WRONLY | O_CREAT | O_NOCTTY | O_TRUNC, S_IRUSR | S_IWUSR);
+				fout_ = ::open(fn.c_str(),O_WRONLY | O_CREAT | O_NOCTTY | O_TRUNC, S_IRUSR | S_IWUSR);
 				if (fout_<0) {
 					std::string s(__FILE__);
 					s += " " + ttos(__LINE__) + "\n";
@@ -213,28 +221,32 @@ namespace PsimagLite {
 
 			~Out()
 			{
+				if (!ENABLED) return;
 				if (rank_!=0) return;
 				if (fout_<0) return;
 				::close(fout_);
 			}
 
-//			void open(std::string const &fn,
-//				  std::ios_base::openmode mode,
-//				  int rank)
-//			{
-//				rank_=rank;
-//				if (rank_!=0) return;
-//				if (filename_=="OSTREAM")
-//					throw std::runtime_error("open: not possible\n");
-//				filename_=fn;
-//				if (!fout_) fout_=new std::ofstream;
-//				fout_->open(fn.c_str(),mode);
-//				if (!(*fout_) || !fout_->good())
-//					throw std::runtime_error("Out: error while opening file!\n");
-//			}
+			void open(std::string const &fn,std::ios_base::openmode mode,int rank)
+			{
+				if (!ENABLED) return;
+				rank_=rank;
+				if (rank_!=0) return;
+				if (filename_=="OSTREAM")
+					throw std::runtime_error("open: not possible\n");
+				filename_=fn;
+				//if (!fout_) fout_=new std::ofstream;
+				int flags = 0;
+				if (mode==std::ios_base::trunc) flags = O_WRONLY | O_CREAT | O_NOCTTY | O_TRUNC;
+				else if (mode==std::ios_base::app) flags = O_WRONLY | O_APPEND;
+				fout_ = ::open(fn.c_str(),flags, S_IRUSR | S_IWUSR);
+				if (fout_<0)
+					throw std::runtime_error("Out: error while opening file!\n");
+			}
 
 			void close()
 			{
+				if (!ENABLED) return;
 				if (fout_<0)
 					throw std::runtime_error("close: not possible\n");
 				filename_="FILE_IS_CLOSED";
@@ -255,6 +267,7 @@ namespace PsimagLite {
 			template<typename X>
 			void printVector(X const &x,std::string const &label)
 			{
+				if (!ENABLED) return;
 				if (rank_!=0) return;
 				printLabel(label);
 
@@ -269,19 +282,49 @@ namespace PsimagLite {
 				size_t length = x.size();
 				write(fout_,(const void *)&length,sizeof(length));
 
-				write(fout_, (const void *)&(x[0]),length*sizeof(dummy));
+				const typename X::value_type* const ptr = &(x[0]);
+				write(fout_, (const void *)ptr,length*sizeof(dummy));
 			}
 
-//			template<class T>
-//			void print(const T&  something)
-//			{
-//				if (rank_!=0) return;
-//				makeSureFileIsOpen();
-//				fout_<<something;
-//			}
+			void printVector(const std::vector<bool>& x,std::string const &label)
+			{
+				if (!ENABLED) return;
+				if (rank_!=0) return;
+				printLabel(label);
+
+				char check = 0;
+				write(fout_, (const void *)&check,1);
+				size_t total = 0;
+				write(fout_, (const void *)&total,sizeof(total));
+
+				bool dummy;
+				TypeType type = TYPE_VECTOR | charTypeOf(dummy);
+				write(fout_,(const void *)&type,sizeof(type));
+				size_t length = x.size();
+				write(fout_,(const void *)&length,sizeof(length));
+
+				throw std::runtime_error("Bool not supported yet\n");
+			}
+
+			template<class T>
+			void print(const std::string& s,const T&  something)
+			{
+				if (!ENABLED) return;
+				if (rank_!=0) return;
+				makeSureFileIsOpen();
+				printLabel(s);
+				char check = 0;
+				write(fout_, (const void *)&check,1);
+				size_t total = 1;
+				write(fout_, (const void *)&total,sizeof(total));
+				TypeType type = charTypeOf(something);
+				write(fout_,(const void *)&type,sizeof(type));
+				write(fout_,(const void*)&something,sizeof(something));
+			}
 
 			void print(const std::string& s)
 			{
+				if (!ENABLED) return;
 				printLabel(s);
 				char check = 0;
 				write(fout_, (const void *)&check,1);
@@ -289,9 +332,10 @@ namespace PsimagLite {
 				write(fout_, (const void *)&total,sizeof(total));
 			}
 
-			template<typename X>
-			void printMatrix(Matrix<X> const &mat,std::string const &s)
+			template<typename SomeMatrixType>
+			void printMatrix(const SomeMatrixType& mat,std::string const &s)
 			{
+				if (!ENABLED) return;
 				if (rank_!=0) return;
 				printLabel(s);
 
@@ -300,11 +344,30 @@ namespace PsimagLite {
 				size_t total = 0;
 				write(fout_, (const void *)&total,sizeof(total));
 
-				X dummy;
+				typename SomeMatrixType::value_type dummy;
 				TypeType type = TYPE_MATRIX | charTypeOf(dummy);
 				write(fout_,(const void *)&type,sizeof(type));
 
 				mat.print(fout_);
+			}
+
+			template<typename SomeType>
+			void printMatrix(const std::stack<SomeType>& mat,std::string const &s)
+			{
+				if (!ENABLED) return;
+				if (rank_!=0) return;
+				printLabel(s);
+
+				char check = 0;
+				write(fout_, (const void *)&check,1);
+				size_t total = 0;
+				write(fout_, (const void *)&total,sizeof(total));
+
+				SomeType dummy;
+				TypeType type = TYPE_MATRIX | charTypeOf(dummy);
+				write(fout_,(const void *)&type,sizeof(type));
+
+				throw std::runtime_error("Stack not supported\n");
 			}
 
 			int rank() { return rank_; }
@@ -350,6 +413,9 @@ namespace PsimagLite {
 			typedef int long long LongIntegerType;
 			typedef unsigned int long long LongSizeType;
 
+			In() : filename_(""),fin_(-1),memoryPool_(0)
+			{}
+
 			In(std::string const &fn) : filename_(fn), fin_(-1),memoryPool_(0)
 			{
 				fin_= ::open(fn.c_str(),O_RDONLY);
@@ -384,45 +450,27 @@ namespace PsimagLite {
 				::close(fin_);
 			}
 
-//			template<typename X>
-//			size_t readline(X &x,const std::string &s,LongIntegerType level=0)
-//			{
-//				makeSureFileIsOpen();
-//				std::string temp;
-//				bool found=false;
-//				bool foundOnce =false;
-//				LongSizeType counter=0;
-
-//				while(!fin_.eof()) {
-//					fin_>>temp;
-//					if (fin_.eof()) break;
-//					if (temp.substr(0,s.size())==s) {
-//						foundOnce =true;
-//						std::istringstream temp2(temp.substr(s.size(),
-//								temp.size()));
-//						temp2 >> x;
-//						if (level>=0 && counter==LongSizeType(level)) {
-//							found=true;
-//							break;
-//						}
-//						counter++;
-//					}
-//				}
-//				if (!foundOnce || (!found && level!=LAST_INSTANCE)) {
-//					std::string emessage =
-//						"IoBinary::In::readline(): Not found "+s+
-//						" in file "+filename_;
-//					throw std::runtime_error(s);
-//				}
-
-//				if (level==LAST_INSTANCE) {
-//					fin_.close();
-//					fin_.open(filename_.c_str());
-//					readline(x,s,counter-1);
-//				}
-//				return counter;
+			template<typename X>
+			size_t readline(X &x,const std::string &s,LongIntegerType level=0)
+			{
+				std::pair<std::string,size_t> sc = advance(s,level,false);
+				//std::cerr<<"FOUND--------->\n";
+				char check = 0;
+				::read(fin_,&check,1);
+				size_t total = 0;
+				::read(fin_,&total,sizeof(total));
+				if (total!=1) {
+					std::string str(__FILE__);
+					str += ttos(__FILE__) + "\n";
+					str += "Expecting a single item\n";
+					throw std::runtime_error(str.c_str());
+				}
+				size_t type = 0;
+				::read(fin_,&type,1);
+				::read(fin_,&x,sizeof(x));
+				return sc.second;
 				
-//			}
+			}
 
 			template<typename X>
 			std::pair<std::string,size_t> read(X &x,
@@ -431,14 +479,15 @@ namespace PsimagLite {
 							   bool beQuiet = false)
 			{
 				std::pair<std::string,size_t> sc = advance(s,level,beQuiet);
-				std::cerr<<"FOUND--------->\n";
+				//std::cerr<<"FOUND--------->\n";
 				char check = 0;
 				::read(fin_,&check,1);
 				size_t total = 0;
 				::read(fin_,&total,sizeof(total));
 				size_t type = 0;
 				::read(fin_,&type,1);
-				if (type & TYPE_VECTOR) {
+				type >>= 4;
+				if (type == TYPE_VECTOR) {
 					readVector(x);
 					return sc;
 				}
@@ -492,6 +541,17 @@ namespace PsimagLite {
 //				}
 //				return sc;
 //			}
+
+			size_t count(const std::string& s)
+			{
+				size_t counter = 0;
+				while(true) {
+					std::string temp = readNextLabel();
+					if (temp=="NOTFOUND") break;
+					counter++;
+				}
+				return counter;
+			}
 
 			std::pair<std::string,size_t> advance(std::string const &s,
 							      LongIntegerType level=0,
@@ -603,7 +663,7 @@ namespace PsimagLite {
 				size_t type = 0;
 				::read(fin_,&type,1);
 				if (type & TYPE_MATRIX) {
-					readMatrix(mat);
+					readMatrix(mat,s);
 					return;
 				}
 
@@ -703,7 +763,7 @@ namespace PsimagLite {
 				std::cerr<<"xsize="<<xsize<<"\n";
 				x.resize(xsize);
 
-				X tmp=0;
+				X tmp;
 				for (size_t i=0;i<xsize;i++) {
 					int l = ::read(fin_,&tmp,sizeof(tmp));
 					if (l!=sizeof(tmp)) throw std::runtime_error("Mmm!\n");
@@ -754,12 +814,22 @@ namespace PsimagLite {
 		{
 			std::string s(__FILE__);
 			s += " " + ttos(__LINE__) + "\nNo known type\n";
-			throw std::runtime_error(s.c_str());
+			std::cerr<<"ATTENTION!!!! "<<s;
+			return TYPE_UNKNOWN;
 		}
 
-		static size_t charTypeOf(const double &dummy) { return TYPE_DOUBLE; }
+		static size_t charTypeOf(const double& dummy) { return TYPE_DOUBLE; }
 
-		static size_t charTypeOf(const float &dummy) { return TYPE_FLOAT; }
+		static size_t charTypeOf(const float& dummy) { return TYPE_FLOAT; }
+
+		static size_t charTypeOf(const size_t& dummy) { return TYPE_SIZE_T; }
+
+		template<typename T>
+		static size_t charTypeOf(const std::pair<T,T>& dummy)
+		{
+			T dummy2;
+			return TYPE_PAIR | charTypeOf(dummy2);
+		}
 
 	}; //class IoBinary
 
@@ -767,14 +837,14 @@ namespace PsimagLite {
 //	IoBinary::Out& operator<<(IoBinary::Out& io,const T& t)
 //	{
 //		if (io.rank_!=0) return io;
-//		(*(io.fout_))<<t;
+//		io.print(t);
 //		return io;
 //	}
 
 //	template<typename T>
 //	void operator>>(IoBinary::In& io,T& t)
 //	{
-//		io.fin_>>t;
+//		io.read(t);
 //	}
 
 //	template<typename T1,typename T2>
