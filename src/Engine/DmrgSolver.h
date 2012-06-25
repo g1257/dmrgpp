@@ -161,8 +161,8 @@ namespace Dmrg {
 		  truncate_(reflectionOperator_,wft_,concurrency_,parameters_,
 			    model_.geometry().maxConnections(),verbose_)
 		{
-			io_.print(parameters_);
-			io_.print(targetStruct_);
+			io_.print("PARAMETERS",parameters_);
+			io_.print("TARGETSTRUCT",targetStruct_);
 			PsimagLite::HostInfo hostInfo;
 			std::string s =hostInfo.getTimeDate();
 			io_.print(s);
@@ -178,7 +178,7 @@ namespace Dmrg {
 
 		void main(const GeometryType& geometry)
 		{
-			io_.print(geometry);
+			io_.print("GEOMETRY",geometry);
 			if (checkpoint_())
 				std::cerr<<"WARNING: Will not check finite loops for consistency while checkpoint is in use\n";
 			 else 
@@ -189,7 +189,7 @@ namespace Dmrg {
 			msg<<"Turning the engine on";
 			progress_.printline(msg,std::cout);
 
-			io_.print(model_);
+			io_.print("MODEL",model_);
 			BlockType S,E;
 			std::vector<BlockType> X,Y;
 			geometry.split(S,X,Y,E);
@@ -201,7 +201,7 @@ namespace Dmrg {
 			//if (parameters_.options.find("nowft")!=std::string::npos) wft_.disable();
 
 			TargettingType psi(lrs_,model_,targetStruct_,wft_,quantumSector_);
-			io_.print(psi);
+			io_.print("PSI",psi);
 
 			MyBasisWithOperators pS("pS");
 			MyBasisWithOperators pE("pE");
