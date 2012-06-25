@@ -128,10 +128,10 @@ namespace Dmrg {
 		{
 			cf_.save(io);
 
-			std::string s = "#DCENTRALSITE=" + ttos(site_);
-			io.printline(s);
-			s = "#DNUMBEROFVECTORS="+ttos(targetVectors_.size());
-			io.printline(s);
+			io.print("#DCENTRALSITE=",site_);
+
+			io.print("#DNUMBEROFVECTORS=",targetVectors_.size());
+
 			for (size_t i=0;i<targetVectors_.size();i++) {
 				std::string label = "targetVector"+ttos(i);
 				targetVectors_[i].save(io,label);

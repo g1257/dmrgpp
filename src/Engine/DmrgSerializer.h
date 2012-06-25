@@ -154,8 +154,7 @@ public:
 			label += ttos(lrs_.left().block()[i])+",";
 		}
 		io.printMatrix(transform_,label);
-		std::string s = "#DIRECTION="+ttos(direction_);
-		io.printline(s);
+		io.print("#DIRECTION=",direction_);
 	}
 
 	const FermionSignType& fermionicSignLeft() const

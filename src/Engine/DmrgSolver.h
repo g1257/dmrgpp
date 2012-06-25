@@ -449,8 +449,7 @@ namespace Dmrg {
 				pS = lrs_.left();
 			}
 			if (saveOption==SAVE_TO_DISK) {
-				std::string s="#WAVEFUNCTION_ENERGY="+ttos(gsEnergy);
-				io_.printline(s);
+				io_.print("#WAVEFUNCTION_ENERGY=",gsEnergy);
 			}
 		}
 

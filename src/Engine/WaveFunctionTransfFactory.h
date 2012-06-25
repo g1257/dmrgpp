@@ -439,13 +439,13 @@ namespace Dmrg {
 					"WFT::save(...) called but wft is disabled\n");
 
 			typename IoType::Out io(WFT_STRING + filenameOut_,0);
-			std::string s="isEnabled="+ttos(isEnabled_);
-			io.printline(s);
-			s="stage="+ttos(stage_);
-			io.printline(s);
-			s="counter="+ttos(counter_);
-			io.printline(s);
-			io.printline("dmrgWaveStruct");
+			io.print("isEnabled=",isEnabled_);
+
+			io.print("stage=",stage_);
+
+			io.print("counter=",counter_);
+
+			io.print("dmrgWaveStruct");
 			dmrgWaveStruct_.save(io);
 			io.printMatrix(wsStack_,"wsStack");
 			io.printMatrix(weStack_,"weStack");

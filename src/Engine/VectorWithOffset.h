@@ -190,13 +190,10 @@ namespace Dmrg {
 		template<typename IoOutputter>
 		void save(IoOutputter& io,const std::string& label) const
 		{
-			io.printline(label);
-			std::string s="#size="+ttos(size_);
-			io.printline(s);
-			s="#offset="+ttos(offset_);
-			io.printline(s);
-			s="#m="+ttos(m_);
-			io.printline(s);
+			io.print(label);
+			io.print("#size=",size_);
+			io.print("#offset=",offset_);
+			io.print("#m=",m_);
 			io.printVector(data_,"#data");
 		}
 
