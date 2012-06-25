@@ -152,12 +152,12 @@ namespace PsimagLite {
 				binaryOut_.close();
 			}
 
-			void printline(const std::string &s)
-			{
-				if (rank_!=0) return;
-				(*fout_)<<s<<"\n";
-				binaryOut_.print(s);
-			}
+//			void printline(const std::string &s)
+//			{
+//				if (rank_!=0) return;
+//				(*fout_)<<s<<"\n";
+//				binaryOut_.print(s);
+//			}
 
 			void printline(std::ostringstream &s)
 			{
@@ -167,8 +167,6 @@ namespace PsimagLite {
 				s.seekp(std::ios_base::beg);
 				binaryOut_.print(s.str());
 			}
-
-
 
 			template<typename X>
 			void printVector(X const &x,std::string const &label)
@@ -181,18 +179,24 @@ namespace PsimagLite {
 			}
 
 			template<class T>
-			void print(const T&  something)
+			void print(const std::string& label,const T&  something)
 			{
 				if (rank_!=0) return;
 				if (!(*fout_) || !fout_->good())
 					throw std::runtime_error("Out: file not open!\n");
-				(*fout_)<<something;
+				(*fout_)<<label;
+				(*fout_)<<something<<"\n";
+				binaryOut_.print(label,something);
 			}
 
 			void print(const std::string& something)
 			{
 				if (rank_!=0) return;
 				(*fout_)<<something;
+				size_t last = something.length();
+				if (last>0) last--;
+				if (something[last]!='\n') (*fout_)<<"\n";
+				binaryOut_.print(something);
 			}
 
 			template<typename X>

@@ -79,14 +79,11 @@ namespace PsimagLite {
 		{
 			ab_.save(io);
 
-			std::string s = "#CFWeight=" + typeToString(weight_);
-			io.printline(s);
+			io.print("#CFWeight=",weight_);
 
-			s = "#CFEnergy=" + typeToString(Eg_);
-			io.printline(s);
+			io.print("#CFEnergy=",Eg_);
 
-			s="#CFIsign=" + typeToString(isign_);
-			io.printline(s);
+			io.print("#CFIsign=" ,isign_);
 
 			io.printVector(eigs_,"#CFEigs");
 			io.printVector(intensity_,"#CFIntensities");

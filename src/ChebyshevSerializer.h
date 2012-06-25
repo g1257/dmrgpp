@@ -97,14 +97,10 @@ namespace PsimagLite {
 		void save(IoOutputType& io) const
 		{
 			std::string s(stringMarker_);
-			io.printline(s);
-			s = "#ChebyshevEnergy=";
-			s += ttos(params_.Eg);
-			io.printline(s);
-			s = "#ChebyshevOneOverA=" + ttos(params_.oneOverA);
-			io.printline(s);
-			s = "#ChebyshevB=" + ttos(params_.b);
-			io.printline(s);
+			io.print(s);
+			io.print("#ChebyshevEnergy=",params_.Eg);
+			io.print("#ChebyshevOneOverA=",params_.oneOverA);
+			io.print("#ChebyshevB=",params_.b);
 
 			io.printVector(moments_,"#ChebyshevMoments");
 		}
