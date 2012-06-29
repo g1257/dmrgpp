@@ -172,11 +172,7 @@ namespace Dmrg {
 			//if (m<0) allow = false; // isEnabled_=false;
 			
 			if (!isEnabled_ || !allow) return;
-			//try {
-				beforeWft(lrs);
-			//} catch (std::exception& e) {
-			//	doNextOne_=false;
-			//}
+			beforeWft(lrs);
 			std::ostringstream msg;
 			msg<<"Window open, ready to transform vectors";
 			progress_.printline(msg,std::cout);
@@ -237,7 +233,6 @@ namespace Dmrg {
 			
 			if (!isEnabled_ || !allow) return;
 			afterWft(lrs);
-			//doNextOne_=true;
 			std::ostringstream msg;
 			msg<<"Window closed, no more transformations, please";
 			progress_.printline(msg,std::cout);
@@ -288,35 +283,23 @@ namespace Dmrg {
 					} else {
 						weStack_.push(transform);
 						dmrgWaveStruct_.we=transform;
-						//std::cerr<<"CHANGED dmrgWaveStruct_.we to transform\n";
-						//std::cerr<<"PUSHING "<<transform.n_row()<<"x"<<transform.n_col()<<"\n";
 					}
 					break;
 				case EXPAND_ENVIRON:
 					if (direction!=EXPAND_ENVIRON) throw std::logic_error("EXPAND_ENVIRON but option==0\n");
 					dmrgWaveStruct_.we=transform;
 					dmrgWaveStruct_.ws=transform;
-					//vectorConvert(dmrgWaveStruct_.psi,psi);
 					weStack_.push(transform);
-					//std::cerr<<"PUSHING (POPPING) We "<<weStack_.size()<<"\n";
 					break;
 				case EXPAND_SYSTEM:
 					if (direction!=EXPAND_SYSTEM) throw std::logic_error("EXPAND_SYSTEM but option==1\n");
 					dmrgWaveStruct_.ws=transform;
 					dmrgWaveStruct_.we=transform;
-					//vectorConvert(dmrgWaveStruct_.psi,psi);
 					wsStack_.push(transform);
 					break;
 			}
 
 			dmrgWaveStruct_.lrs=lrs;
-//			if (direction==EXPAND_SYSTEM) { // transforming the system
-//				dmrgWaveStruct_.pEprime=pBasisSummed;
-//				dmrgWaveStruct_.pSprime=pBasis;
-//			} else {
-//				dmrgWaveStruct_.pSprime=pBasisSummed;
-//				dmrgWaveStruct_.pEprime=pBasis;
-//			}
 			std::ostringstream msg;
 			msg<<"OK, pushing option="<<direction<<" and stage="<<stage_;
 			progress_.printline(msg,std::cout);
@@ -348,7 +331,6 @@ namespace Dmrg {
 					dmrgWaveStruct_.ws=wsStack_.top();
 					wsStack_.pop();
 				} else {
-					//std::cerr<<"PUSHING STACK ERROR S\n";
 					throw std::runtime_error("System Stack is empty\n");
 				}
 			}
@@ -357,50 +339,20 @@ namespace Dmrg {
 				if (weStack_.size()>=1) { 
 					dmrgWaveStruct_.we=weStack_.top();
 					weStack_.pop();
-					//std::cerr<<"CHANGED We taken from stack\n";
 				} else {
-					//std::cerr<<"PUSHING STACK ERROR E\n";
 					throw std::runtime_error("Environ Stack is empty\n");
 				}
 			}
-			//std::cerr<<"PUSHING (POPPING) STACKSIZE="<<weStack_.size()<<" ";
-			//std::cerr<<pSprime.block().size()<<"+"<<pEprime.block().size()<<"\n";
 			if (counter_==0 && stage_==EXPAND_SYSTEM) {
-// 				dmrgWaveStruct_.pEprime=pEprime;
-// 				dmrgWaveStruct_.pSE=pSE;
-// 				dmrgWaveStruct_.pSprime=pSprime;
-// 				dmrgWaveStruct_.m=m;
-// 				counter_++;
-				//throw std::runtime_error("WFT::beforeWft(): Can't apply WFT\n");
-				//return;
 				if (weStack_.size()>=1) { 
 					dmrgWaveStruct_.we=weStack_.top();
-					//weStack_.pop();
-					//std::cerr<<"CHANGED-COUNTER0 We taken from stack\n";
-				} else {
-//					std::cerr<<"PUSHING-COUNTER0 STACK ERROR E\n";
-//					throw std::runtime_error("Environ Stack is empty\n");
-				}
+				} 
 			}
 			
 			if (counter_==0 && stage_==EXPAND_ENVIRON) {
-				//matrixIdentity(dmrgWaveStruct_.we,hilbertSpaceOneSite_);
-				//matrixIdentity(dmrgWaveStruct_.ws,dmrgWaveStruct_.ws.n_row());
-// 				dmrgWaveStruct_.pEprime=pEprime;
-// 				dmrgWaveStruct_.pSE=pSE;
-// 				dmrgWaveStruct_.pSprime=pSprime;
-// 				dmrgWaveStruct_.m=m;
-// 				counter_++;
-				//throw std::runtime_error("WFT::beforeWft(): Can't apply WFT\n");
-				//return;
 				if (wsStack_.size()>=1) {
 					dmrgWaveStruct_.ws=wsStack_.top();
-					//weStack_.pop();
-					//std::cerr<<"CHANGED-COUNTER0 We taken from stack\n";
-				} else {
-//					std::cerr<<"PUSHING-COUNTER0 STACK ERROR E\n";
-//					throw std::runtime_error("System Stack is empty\n");
-				}
+				} 
 			}
 		}
 		

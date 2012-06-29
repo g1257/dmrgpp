@@ -6,8 +6,8 @@
  can be found in file LICENSE in the root directory of the code.
  DMRG++ is a free and open source implementation of the 
  DMRG algorithm. You are welcomed to use it and publish data 
- obtained with DMRG++. If you do, please cite this
- work (see next subsection).
+ obtained with DMRG++. If you do, 
+ B<please cite this work> (see next subsection).
 
 =head2 DISCLAIMER
 
@@ -43,6 +43,13 @@
  volume="180",
  pages="1572",
  year="2009"}
+
+ author="G. Alvarez",
+ title="Implementation of the SU(2) Hamiltonian symmetry for the DMRG algorithm",
+ journal="Computer Physics Communications",
+ volume="183",
+ pages="2226",
+ year="2012"}
  
  And also:
  @article{

@@ -75,8 +75,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file InputCheck.h
  *
  *  InputChecking functions
- *  this class also owns the stacks since they 
- *  are so related to InputChecking
  */
 #ifndef INPUT_CHECK_H
 #define INPUT_CHECK_H

@@ -76,7 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file OperatorsBase.h
  *
- *  
+ *  Documentation needed FIXME 
  *
  */
 #ifndef OPERATORS_BASE_H
@@ -175,11 +175,6 @@ transformed operator can be used (or not because of the reason limitation above)
 			return reducedOpImpl_.getReducedOperatorByIndex(i);
 		}
 
-// 		void getOperatorByIndex(std::string& s,int i) const
-// 		{
-// 			operatorsImpl_.getOperatorByIndex(i);
-// 		}
-
 		size_t numberOfOperators() const
 		{
 			if (useSu2Symmetry_) return reducedOpImpl_.size();
@@ -236,12 +231,6 @@ transformed operator can be used (or not because of the reason limitation above)
 			reducedOpImpl_.reorderHamiltonian(permutation);
 		}
 
-//		template<typename Field>
-//		void reorder(std::vector<Field> &data,const std::vector<size_t>& permutation)
-//		{
-//			operatorsImpl_.reorder(data,permutation);
-//		}
-
 		void setMomentumOfOperators(const std::vector<size_t>& momentum)
 		{
 			reducedOpImpl_.setMomentumOfOperators(momentum);
@@ -285,7 +274,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		                     bool option,
 		                     ApplyFactorsType& apply)
 		{
-			if (useSu2Symmetry_) std::cerr<<"#######EEEEEEEEERRRRRRRRRRRRRROOOOOOOOOOORRRRRRRRRR\n";
+			assert(!useSu2Symmetry_);
 			PsimagLite::externalProduct(operators_[i].data,m.data,x,fermionicSigns,option);
 			// don't forget to set fermion sign and j:
 			operators_[i].fermionSign=m.fermionSign;

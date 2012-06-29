@@ -143,12 +143,9 @@ namespace Dmrg {
 			skeleton_.growDirectly(O1g,O1m,i1,fermionicSign,ns);
 			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);
 			
-			//std::cerr<<"Result="<<bracket(O2g)<<"\n";
 			
-			//ns++;
 			helper_.setPointer(ns);
-			//size_t trunc = helper_.transform().n_col();
-			MatrixType O2gt; //(trunc,trunc);
+			MatrixType O2gt; 
 			helper_.transform(O2gt,O2g);
 			if (verbose_) {
 				std::cerr<<"O2gt\n";
@@ -184,8 +181,7 @@ namespace Dmrg {
 			helper_.setPointer(ns);
 
 
-			//trunc = helper_.transform().n_col();
-			MatrixType O3gt; //(trunc,trunc);
+			MatrixType O3gt; 
 			helper_.transform(O3gt,O3g);
 			if (verbose_) {
 				std::cerr<<"O3gt\n";
@@ -217,47 +213,16 @@ namespace Dmrg {
 			if (nt<0) nt=0;
 			
 			for (size_t s=nt;s<ns;s++) {
-				// set appropriate privates which are:
-				// SpermutationInverse_(s) and transform_(s)
-				/*io_.rewind();
-				calcSpermutation(s);
-				//std::cerr<<"*****************======="<<transform_.n_row()<<"\n";
-				io_.readMatrix(transform_,"#TRANSFORM_sites",s);*/
 				helper_.setPointer(s);
-				//std::cerr<<"%%%%%%%%%%%%%%%%%======="<<transform_.n_row()<<"\n";
 				int growOption = GROW_RIGHT;
-				//if (i==1 && s==0) growOption = GROW_LEFT;// <-- not needed since nt>0
 				
-				/*io_.rewind();
-				io_.read(electrons_,"#ELECTRONS_sites=",s);*/
-				//skeleton_.createSigns(signs,fermionicSign);
 				MatrixType Onew(helper_.columns(),helper_.columns());
-				//skeleton_.fluffUp(Onew,Odest,signs,growOption);
 				skeleton_.fluffUp(Onew,Odest,fermionicSign,growOption);
 				Odest = Onew;
 				
 			}
 		}
 				
-// 		void getCombined(MatrixType& ret,MatrixType& O1,MatrixType& O2,MatrixType& O3)
-// 		{
-// 			int nBig = O1.n_row();
-// 			int nSmall = nBig;
-// 			MatrixType fmTmp(nSmall,nBig);
-// 			FieldType alpha=1.0,beta=0.0;
-// 			ret.resize(nSmall,nSmall);
-// 			
-// 			if (isZero(O2)) throw std::runtime_error("O2 is zero\n");
-// 			psimag::BLAS::GEMM('N','N',nBig,nSmall,nBig,alpha,
-// 					   &(O1(0,0)),nBig,&(O2(0,0)),nBig,beta,&(fmTmp(0,0)),nBig);
-// 			if (isZero(fmTmp)) throw std::runtime_error("fmTmp is zero\n");
-// 			psimag::BLAS::GEMM('N','N',nSmall,nSmall,nBig,alpha,
-// 					   &(fmTmp(0,0)),nBig,&(O3(0,0)),nBig,beta,&(ret(0,0)),nSmall);
-// 			if (isZero(O3)) throw std::runtime_error("O3 is zero\n");
-// 			if (isZero(ret)) throw std::runtime_error("ret is zero\n");
-// 			
-// 		}
-		
 		ObserverHelperType& helper_; // <-- NB: not the owner
 		CorrelationsSkeletonType& skeleton_; // <-- NB: not the owner
 		bool verbose_;

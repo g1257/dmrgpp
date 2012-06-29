@@ -105,7 +105,6 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-//		typedef ReflectionSymmetryType_ ReflectionSymmetryType;
 		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
@@ -117,8 +116,6 @@ namespace Dmrg {
 		ModelHelperSu2(int m,const LeftRightSuperType& lrs)
 		: m_(m),
 		  lrs_(lrs),
-//		  reflection_(useReflection),
-// 		  numberOfOperators_(lrs_.left().numberOfOperatorsPerSite()),
 		  su2reduced_(m,lrs)
 		{}
 
@@ -138,8 +135,6 @@ namespace Dmrg {
 	
 		const SparseMatrixType& getReducedOperator(char modifier,size_t i,size_t sigma,size_t type) const
 		{
-// 			size_t i0 = i*numberOfOperators_ + sigma;
-// 			size_t dof = numberOfOperators_;
 			if (type==System) {
 				PairType ii =lrs_.left().getOperatorIndices(i,sigma); 
 				return lrs_.left().getReducedOperatorByIndex(modifier,ii).data;
@@ -432,29 +427,6 @@ namespace Dmrg {
 			else calcHamiltonianPartRight(matrixBlock);
 		}
 
-//		void getReflectedEigs(
-//				RealType& energyTmp,std::vector<SparseElementType>& tmpVec,
-//				RealType energyTmp1,const std::vector<SparseElementType>& tmpVec1,
-//				RealType energyTmp2,const std::vector<SparseElementType>& tmpVec2) const
-//		{
-//			reflection_.getReflectedEigs(energyTmp,tmpVec,energyTmp1,tmpVec1,energyTmp2,tmpVec2);
-//		}
-
-//		void setReflectionSymmetry(size_t reflectionSector)
-//		{
-//			reflection_.setReflectionSymmetry(reflectionSector);
-//		}
-
-//		void printFullMatrix(const SparseMatrixType& matrix) const
-//                {
-//                        reflection_.printFullMatrix(matrix);
-//                }
-
-//		void printFullMatrixMathematica(const SparseMatrixType& matrix) const
-//                {
-//                        reflection_.printFullMatrixMathematica(matrix);
-//                }
-
 		size_t m() const {return m_;}
 
 		const LeftRightSuperType& leftRightSuper() const
@@ -465,8 +437,6 @@ namespace Dmrg {
 	private:
 		int m_;
 		const LeftRightSuperType&  lrs_;
-//		ReflectionSymmetryType reflection_;
-// 		size_t numberOfOperators_;
 		Su2Reduced<LeftRightSuperType,ConcurrencyType_> su2reduced_;
 	};
 } // namespace Dmrg

@@ -1,4 +1,3 @@
-
 /*
 Copyright (c) 2009-2011, UT-Battelle, LLC
 All rights reserved
@@ -68,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -233,12 +231,6 @@ namespace Dmrg {
 			rSprime = pBasis;
 			rSprime.changeBasis(cache.removedIndices,cache.eigs,keptStates,parameters_);
 
-//			if (cache.removedIndices.size()>0) {
-//				std::cerr<<"REMVD_INDICES=";
-//				for (size_t i=0;i<cache.removedIndices.size();i++)
-//					std::cerr<<cache.removedIndices[i]<<" ";
-//				std::cerr<<"\n";
-//			}
 			std::ostringstream msg2;
 			msg2<<"done with entanglement";
 			progress_.printline(msg2,std::cout);
@@ -258,7 +250,6 @@ namespace Dmrg {
 			waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrs);
 
 			msg<<"new size of basis="<<rSprime.size();
-//			assert(ftransform_.n_col()==cache.bprime.size());
 			progress_.printline(msg,std::cout);
 		}
 
@@ -291,7 +282,6 @@ namespace Dmrg {
 			if (eigs.size()>=newKeptStates)
 				statesToRemove = eigs.size()-newKeptStates;
 			RealType discWeight = sumUpTo(eigs,statesToRemove);
-// 			std::cerr<<"newKeptstates="<<newKeptStates<<"\n";
 			std::ostringstream msg;
 			if (newKeptStates != keptStates) {
 				// we report that the "m" value has been changed and...
@@ -371,8 +361,6 @@ namespace Dmrg {
 			PsimagLite::IoSimple::Out io(file,parallelRank);
 			io<<eigs;
 			counter++;
-// 			std::cerr<<eigs;
-// 			std::cerr<<"-----------------\n";
 		}
 
 		ReflectionSymmetryType& reflectionOperator_;

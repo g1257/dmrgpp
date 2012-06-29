@@ -228,10 +228,6 @@ namespace Dmrg {
 				}
 			}
 
-//			std::cerr<<"TOOOOOOOOOTALLLLLLLLLLLLLL="<<total<<"\n";
-//			printFullMatrix(modelHelper.leftRightSuper().left().hamiltonian(),"LEFT HAM");
-//			printFullMatrix(modelHelper.leftRightSuper().right().hamiltonian(),"RIGHT HAM");
-
 //			SharedMemoryType pthreads;
 			ParallelConnectionsType parallelConnections;
 			parallelConnections.loopCreate(total,hc,concurrency_);
@@ -239,7 +235,7 @@ namespace Dmrg {
 		}
 
 		/**
-		Returns H, the hamiltonian of the FeAs model for basis1 and partition 
+		Returns H, the hamiltonian for basis1 and partition 
 		$m$ consisting of the external product of basis2$\\otimes$basis3
 		Note: Used only for debugging purposes
 		*/

@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c)  2008 , UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -112,13 +110,11 @@ namespace Dmrg {
 	
 	template<typename ObserverHelperType_,typename ModelType>
 	class CorrelationsSkeleton {
-		//typedef typename MatrixType::value_type FieldType;
 		typedef size_t IndexType;
 		typedef PsimagLite::PackIndices PackIndicesType;
 
 	public:
 		typedef ObserverHelperType_ ObserverHelperType;
-		//typedef typename ObserverHelperType::IoInputType IoInputType;
 		typedef typename ObserverHelperType::MatrixType MatrixType;
 		typedef typename ObserverHelperType::VectorType VectorType ;
 		typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
@@ -147,13 +143,8 @@ namespace Dmrg {
 				const ModelType& model,
 				bool verbose = false)
 		: helper_(helper),verbose_(verbose)
-		{
-// 			typename ModelType::HilbertBasisType basis;
-// 			std::vector<size_t> quantumNumbs;
-// 			model.setNaturalBasis(basis,quantumNumbs,1);
-// 			model.findElectrons(oneSiteElectrons_,basis);
-		}
-		
+		{}
+
 		size_t numberOfSites() const
 		{
 			return helper_.leftRightSuper().sites();
@@ -163,8 +154,6 @@ namespace Dmrg {
 		void growDirectly(MatrixType& Odest,const MatrixType& Osrc,size_t i,
 				int fermionicSign,size_t ns,bool transform = true)
 		{
-			//ProfilingType profile("growDirectly "+
-			//	ttos(i)+" ns="+ttos(ns));
 			Odest =Osrc;
 			// from 0 --> i
 			int nt=i-1;
@@ -220,16 +209,10 @@ namespace Dmrg {
 				return;
 			}
 			dmrgMultiplyEnviron(result,O1,O2,fermionicSign,ns);
-			//	if (result.n_row()!=helper_.rows()) {
-			//		std::cerr<<result.n_row()<<" "<<helper_.rows()<<"\n";
-			//		throw std::runtime_error("dmrgMultiply: mismatch in transform\n");
-			//	}
-
 		}
 
 		void createWithModification(MatrixType& Om,const MatrixType& O,char mod)
 		{
-			//ProfilingType profile("create with modification="+mod);
 			if (mod == 'n' || mod == 'N') {
 				Om = O;
 				return;
@@ -343,20 +326,11 @@ namespace Dmrg {
 				std::cerr<<"!="<<eprime<<"\n";
 				throw std::runtime_error("problem in dmrgMultiply\n");
 			}
-// 			if (nj>oneSiteElectrons_.size())
-// 				throw std::runtime_error("Problem in dmrgMultiplyEnviron\n");
-
-//			const std::vector<size_t>&  ve = helper_.leftRightSuper().right().
-//					electronsVector(BasisType::BEFORE_TRANSFORM);
 
 			PackIndicesType pack(nj);
 			for (size_t r=0;r<eprime;r++) {
 				size_t e,u;
 				pack.unpack(e,u,helper_.leftRightSuper().right().permutation(r));
-//				size_t nx0 = ve[r];
-//				if (nx0<oneSiteElectrons_[e]) throw std::runtime_error(
-//						"Problem in fluffUpEnviron_\n");
-//				nx0 -= oneSiteElectrons_[e];
 				size_t nx0 = helper_.leftRightSuper().right().
 							electrons(BasisType::AFTER_TRANSFORM);
 				RealType f = (nx0 & 1) ? fermionicSign : 1;
@@ -402,10 +376,6 @@ namespace Dmrg {
 				bool transform)
 		{
 			size_t n =helper_.leftRightSuper().right().size();
-
-// 			if (growOption==GROW_LEFT &&
-// 					n/O.n_row()>oneSiteElectrons_.size())
-// 				throw std::runtime_error("Problem in fluffUpEnviron\n");
 
 			MatrixType ret(n,n);
 			for (size_t e=0;e<n;e++) {
@@ -678,7 +648,6 @@ namespace Dmrg {
 							permutation(t));
 					size_t r0,r1;
 					pack2.unpack(r0,r1,helper_.leftRightSuper().right().permutation(r));
-					//size_t electrons = helper_.leftRightSuper().super().electrons(t);
 					size_t electrons = helper_.leftRightSuper().left().electrons(eta);
 					RealType sign = (electrons & 1) ? fermionSign : 1.0;
 
@@ -768,7 +737,6 @@ namespace Dmrg {
 
 		ObserverHelperType& helper_; //<-- NB: We are not the owner
 		bool verbose_;
-// 		std::vector<size_t> oneSiteElectrons_;
 	};  //class CorrelationsSkeleton
 } // namespace Dmrg
 

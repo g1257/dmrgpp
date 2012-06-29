@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -70,11 +69,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 #ifndef MODELHELPER_LOC_HEADER_H
 #define MODELHELPER_LOC_HEADER_H
 
-//#include "RightLeftLocal.h"
 #include "PackIndices.h" // in PsimagLite
 #include "Link.h"
 
@@ -105,7 +102,6 @@ namespace Dmrg {
 		typedef typename BasisType::BlockType BlockType;
 		typedef typename BasisType::RealType RealType;
 		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-		//typedef RightLeftLocal<BasisType,BasisWithOperatorsType,SparseMatrixType> RightLeftLocalType;
 		typedef Link<SparseElementType,RealType> LinkType;
 
 		enum { System=0,Environ=1 };
@@ -120,8 +116,6 @@ namespace Dmrg {
 		  basis3tc_(lrs_.right().numberOfOperators()),
 		  alpha_(lrs_.super().size()),
 		  beta_(lrs_.super().size())
-//		  reflection_(useReflection)
-// 		  numberOfOperators_(lrs_.left().numberOfOperatorsPerSite())
 		{
 			createBuffer();
 			createTcOperators(basis2tc_,lrs_.left());
@@ -133,18 +127,11 @@ namespace Dmrg {
 
 		static bool isSu2() { return false; }
 
-//		const BasisType& basis1() const { return basis1_; }
-//
-//		const BasisWithOperatorsType& basis2() const  { return basis2_; }
-//
-//		const BasisWithOperatorsType& basis3() const  { return basis3_; }
-
 		const SparseMatrixType& getReducedOperator(char modifier,
 		                                          size_t i,
 		                                          size_t sigma,
 		                                          size_t type) const
 		{
-// 			size_t ii = i*numberOfOperators_+sigma;
 			if (modifier=='N') {
 				if (type==System) {
 					PairType ii =lrs_.left().getOperatorIndices(i,sigma); 
@@ -177,7 +164,6 @@ namespace Dmrg {
 		                     const LinkType& link,
 		                     bool flipped = false) const
 		{
-			//int const SystemEnviron=1,EnvironSystem=2;
 			RealType fermionSign =(link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
 
 			//! work only on partition m
@@ -234,7 +220,6 @@ namespace Dmrg {
 		                     const LinkType& link,
 		                     bool flipped = false) const
 		{
-			//int const SystemEnviron=1,EnvironSystem=2;
 			RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
 
 			if (link.type==ProgramGlobals::ENVIRON_SYSTEM)  {
@@ -251,9 +236,7 @@ namespace Dmrg {
 			int total = lrs_.super().partition(m+1) - offset;
 
 			for (int i=0;i<total;i++) {
-				//if (reflection_.outsideReflectionBounds(i)) continue;
 				// row i of the ordered product basis
-				//utils::getCoordinates(alpha,beta,modelHelper.basis1().permutation(i+offset),ns);
 				int alpha=alpha_[i];
 				int beta=beta_[i];
 				SparseElementType& xSubI = x[i];
@@ -279,10 +262,6 @@ namespace Dmrg {
 
 						SparseElementType tmp = tmp2 * B.getValue(kk);
 						xSubI += tmp * y[j];
-						//if (tmp==static_cast<MatrixElementType>(0.0)) continue;
-						//reflection_.elementMultiplication(tmp , x,y,i,j);
-						//matrixBlock.pushCol(j-offset);
-						//matrixBlock.pushValue(tmp);
 					}
 				}
 			}
@@ -305,19 +284,15 @@ namespace Dmrg {
 
 			PackIndicesType pack(ns);
 			for (i=0;i<bs;i++) {
-				//if (reflection_.outsideReflectionBounds(i)) continue;
 				size_t r,beta;
 				pack.unpack(r,beta,lrs_.super().permutation(i+offset));
 
 				// row i of the ordered product basis
 				for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
 					alphaPrime = hamiltonian.getCol(k);
-					//j = basis1_.permutationInverse(alphaPrime + betaPrimeNs)-offset;
-					//if (j<0 || j>=bs) continue;
 					int j = buffer_[alphaPrime][beta];
 					if (j<0) continue;
 					x[i]+= hamiltonian.getValue(k)*y[j];
-					//reflection_.elementMultiplication(hamiltonian.getValue(k), x,y,i,j);
 				}
 			}
 		}
@@ -338,20 +313,14 @@ namespace Dmrg {
 
 			PackIndicesType pack(ns);
 			for (i=0;i<bs;i++) {
-//				if (reflection_.outsideReflectionBounds(i)) continue;
 				size_t alpha,r;
 				pack.unpack(alpha,r,lrs_.super().permutation(i+offset));
 
 				// row i of the ordered product basis
 				for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
-
-					//betaPrimeNs  = hamiltonian.getCol(k) *ns;
-					//j = basis1_.permutationInverse(alpha + betaPrimeNs)-offset;
-					//if (j<0 || j>=bs) continue;
 					int j = buffer_[alpha][hamiltonian.getCol(k)];
 					if (j<0) continue;
 					x[i]+= hamiltonian.getValue(k)*y[j];
-//					reflection_.elementMultiplication(hamiltonian.getValue(k) , x,y,i,j);
 				}
 			}
 		}
@@ -371,15 +340,11 @@ namespace Dmrg {
 			SparseMatrixType hamiltonian;
 			if (option) {
 				hamiltonian = lrs_.left().hamiltonian();
-				//ns = basis2_.size();
 			} else {
 				hamiltonian = lrs_.right().hamiltonian();
-				//ns = 
 			}
-//			std::cerr<<__FILE__<<":"<<__LINE__<<":\n";
 			PsimagLite::Matrix<SparseElementType> fullm;
 			crsMatrixToFullMatrix(fullm,hamiltonian);
-			//printNonZero(fullm,std::cerr);
 			matrixBlock.resize(bs,bs);
 
 			int counter=0;
@@ -396,8 +361,7 @@ namespace Dmrg {
 					alphaPrime=alpha;
 					r=beta;
 				}
-				if (r>=hamiltonian.row())
-					throw std::runtime_error("DrmgModelHelper::calcHamiltonianPart(): internal error\n");
+				assert(r<hamiltonian.row());
 				// row i of the ordered product basis
 				for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
 
@@ -414,31 +378,6 @@ namespace Dmrg {
 			matrixBlock.setRow(lrs_.super().partition(m+1)-offset,counter);
 		}
 
-//		void getReflectedEigs(RealType& energyTmp,
-//		                      std::vector<SparseElementType>& tmpVec,
-//		                      RealType energyTmp1,
-//		                      const std::vector<SparseElementType>& tmpVec1,
-//		                      RealType energyTmp2,
-//		                      const std::vector<SparseElementType>& tmpVec2) const
-//		{
-//			reflection_.getReflectedEigs(energyTmp,tmpVec,energyTmp1,tmpVec1,energyTmp2,tmpVec2);
-//		}
-
-//		void setReflectionSymmetry(size_t reflectionSector)
-//		{
-//			reflection_.setReflectionSymmetry(reflectionSector);
-//		}
-
-//		void printFullMatrix(const SparseMatrixType& matrix) const
-//		{
-//			reflection_.printFullMatrix(matrix);
-//		}
-
-//		void printFullMatrixMathematica(const SparseMatrixType& matrix) const
-//		{
-//			reflection_.printFullMatrixMathematica(matrix);
-//		}
-
 		const LeftRightSuperType& leftRightSuper() const
 		{
 			return lrs_;
@@ -450,9 +389,6 @@ namespace Dmrg {
 		std::vector<std::vector<int> > buffer_;
 		std::vector<SparseMatrixType> basis2tc_,basis3tc_;
 		std::vector<size_t> alpha_,beta_;
-//		ReflectionSymmetryType reflection_;
-// 		size_t numberOfOperators_;
-		//RightLeftLocalType rightLeftLocal_;
 
 		const SparseMatrixType& getTcOperator(int i,size_t sigma,size_t type) const
 		{

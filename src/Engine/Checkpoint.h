@@ -228,7 +228,6 @@ namespace Dmrg {
 			if (x==std::string::npos) return s1 + s2;
 			std::string suf = s2.substr(x+1,s2.length());
 			std::string dir = s2.substr(0,s2.length()-suf.length());
-			//throw std::runtime_error("testing\n");
 			return dir + s1 + suf;
 		}
 

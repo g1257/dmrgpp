@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2008 , UT-Battelle, LLC
+Copyright (c) 2008-2012, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 1.0.0]
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -206,7 +204,6 @@ namespace Dmrg {
 			for (size_t i=0;i<n;i++) {
 				if (i>0 && i%2!=0) continue;
 				for (size_t j=i+2;j<n;j++) {
-					//if (j== n-2) continue;
 					if (j%2!=0) continue;
 					if (i+1>=n-1) continue;
 					fpd.push_back(fourPointDelta(i,j,gammas,model));
@@ -256,7 +253,6 @@ namespace Dmrg {
 			const MatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx); // C_{gamma2,down}
 			const MatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx); // C_{gamma3,up}
 
-			//if (i+1>=n-1 || j+1>=n-1) return 0;
 			return fourpoint_(
 					'C',i,opC0,
 			       'C',i+1,opC1,

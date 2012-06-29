@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -117,42 +115,14 @@ namespace Dmrg {
 				}
 			}
 
-//			SparseVector() {}
-			
 			SparseVector(size_t n) : size_(n),isSorted_(false) { }
 			
-			/*void normalize()
-			{
-				FieldType norma = std::norm(values_);
-				for (size_t i=0;i<values_.size();i++) values_[i] /= norma;
-			}*/
-
 			void resize(size_t x)
 			{
 				values_.clear();
 				indices_.clear();
 				size_=x;
 			}
-
-//			FieldType& operator[](size_t index)
-//			{
-//				int i=PsimagLite::isInVector(indices_,index);
-//				if (i<0) i=add(index,0);
-//				return values_[i];
-//			}
-			
-//			//FIXME: disable due to performance reasons
-//			FieldType operator[](size_t index) const
-//			{
-//				int i=PsimagLite::isInVector(indices_,index);
-//				if (i<0) {
-//					//std::cerr<<"index="<<index<<"\n";
-//					//utils::vectorPrint(indices_,"indices",std::cerr);
-//					//throw std::runtime_error("SparseVector::operator[](): index out of range.\n");
-//					return 0;
-//				}
-//				return values_[i];
-//			}
 
 			//! adds an index (maybe the indices should be sorted at some point)
 			size_t add(int index,const FieldType& value)
@@ -182,14 +152,6 @@ namespace Dmrg {
 			
 			FieldType value(size_t x) const { return values_[x]; }
 
-			/*FieldType norm2() const
-			{
-				FieldType sum=0;
-				for (size_t i=0;i<indices_.size();i++) 
-					sum += std::conj(values_[i])*values_[i];
-				return sum;
-			}*/
-			
 			void toChunk(std::vector<FieldType>& dest,size_t i0, size_t total, bool test=false) const
 			{
 				if (test) {
@@ -382,11 +344,6 @@ namespace Dmrg {
 	template<typename T>
 	T operator*(const SparseVector<T>& v1,const SparseVector<T>& v2)
 	{
-//		SparseVector<T> v1c = v1;
-//		SparseVector<T> v2c = v2;
-//		v1c.sort();
-//		v2c.sort();
-
 		return v1.scalarProduct(v2);
 	}
 } // namespace Dmrg

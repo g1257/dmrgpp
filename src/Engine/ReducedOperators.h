@@ -501,9 +501,6 @@ namespace Dmrg {
 
 		void changeBasis(SparseMatrixType &v)
 		{
-//			SparseMatrixType tmpMatrix=transformFullFast(v,ftransform_);
-//			v= tmpMatrix;
-
 			SparseMatrixType transformConj;
 			transposeConjugate(transformConj,ftransform_);
 			SparseMatrixType tmp = v*ftransform_;
