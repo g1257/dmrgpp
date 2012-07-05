@@ -120,7 +120,7 @@ namespace Dmrg {
 		}
 
 		bool operator()(VectorWithOffsetType& c,
-				const VectorWithOffsetType& eToTheBetaH,
+		                const VectorWithOffsetType& eToTheBetaH,
 		                size_t site,
 		                size_t direction)
 		{
@@ -144,7 +144,7 @@ namespace Dmrg {
 		void internalAction(VectorWithOffsetType& dest2,
 		                    const VectorWithOffsetType& src2,
 		                    size_t site,
-		                    size_t direction)
+		                    size_t direction) const
 		{
 			size_t nk = mettsStochastics_.hilbertSize(site);
 			if (dest2.size()==0) {
@@ -152,7 +152,7 @@ namespace Dmrg {
 			}
 
 			std::vector<RealType> p(nk,0);
-			probability(p,dest2,direction,nk);
+			probability(p,src2,direction,nk);
 			RealType sum = 0;
 			for (size_t i=0;i<p.size();i++)
 				sum += p[i];
@@ -173,11 +173,11 @@ namespace Dmrg {
 		}
 
 		void collapseVector(VectorWithOffsetType& dest, // <<---- CPS
-				    const VectorWithOffsetType& src, // <--- MPS
+		                    const VectorWithOffsetType& src, // <--- MPS
 		                    size_t direction,
-				    size_t indexFixed, // <--- m1
-				    size_t nk,  // <-- size of the Hilbert sp. of one site
-				    bool option = false) const
+		                    size_t indexFixed, // <--- m1
+		                    size_t nk,  // <-- size of the Hilbert sp. of one site
+		                    bool option = false) const
 		{
 			assert(src.sectors()==1);
 			dest = src;
@@ -192,12 +192,12 @@ namespace Dmrg {
 		}
 
 		void collapseVector(VectorType& w, // <<---- CPS
-				    const VectorType& v, // <--- MPS
-				    size_t direction,
-				    size_t m, // <-- non-zero sector
-				    size_t indexFixed, // <--- m1
-				    size_t nk,// <-- size of the Hilbert sp. of one site
-				    bool option) const
+		                    const VectorType& v, // <--- MPS
+		                    size_t direction,
+		                    size_t m, // <-- non-zero sector
+		                    size_t indexFixed, // <--- m1
+		                    size_t nk,// <-- size of the Hilbert sp. of one site
+		                    bool option) const
 		{
 			if (direction==EXPAND_SYSTEM)  collapseVectorLeft(w,v,m,indexFixed,nk);
 			else  collapseVectorRight(w,v,m,indexFixed,nk);
@@ -251,10 +251,10 @@ namespace Dmrg {
 		}
 
 		void collapseVectorRight(VectorType& w, // <<---- CPS
-					const VectorType& v, // <--- MPS
-					size_t m, // <-- non-zero sector
-					size_t indexFixed, // <--- m1
-					size_t nk) const // <-- size of the Hilbert sp. of one site
+		                         const VectorType& v, // <--- MPS
+		                         size_t m, // <-- non-zero sector
+		                         size_t indexFixed, // <--- m1
+		                         size_t nk) const // <-- size of the Hilbert sp. of one site
 		{
 			size_t offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
@@ -287,7 +287,7 @@ namespace Dmrg {
 		void probability(std::vector<RealType>& p,
 		                 const VectorWithOffsetType& src,
 		                 size_t direction,
-				 size_t nk) const // <-- size of the Hilbert sp. of one site
+		                 size_t nk) const // <-- size of the Hilbert sp. of one site
 		{
 			RealType sum = 0;
 			for (size_t alpha=0;alpha<nk;alpha++) {
@@ -318,9 +318,10 @@ namespace Dmrg {
 				for (size_t j=0;j<nk;j++)
 					collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
 //			if (nk!=4)
-				return;
+				//return;
 
-//			rotation4d(collapseBasis_);
+			rotation4d(collapseBasis_);
+			return;
 
 			collapseBasis_(0,0) = collapseBasis_(3,3) = 1.0;
 
@@ -330,12 +331,12 @@ namespace Dmrg {
 			collapseBasis_(2,1) = sin(phi);
 			collapseBasis_(1,2) = -collapseBasis_(2,1);
 
-//			//return;
+			//return;
 
-//			phi = 2*M_PI*rng_();
-//			collapseBasis_(0,0) = collapseBasis_(3,3) = cos(phi);
-//			collapseBasis_(3,0) = sin(phi);
-//			collapseBasis_(0,3) = -collapseBasis_(3,0);
+			phi = 2*M_PI*rng_();
+			collapseBasis_(0,0) = collapseBasis_(3,3) = cos(phi);
+			collapseBasis_(3,0) = sin(phi);
+			collapseBasis_(0,3) = -collapseBasis_(3,0);
 		}
 
 		void rotation4d(MatrixType& m) const

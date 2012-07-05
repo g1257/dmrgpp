@@ -814,7 +814,7 @@ namespace Dmrg {
 						RealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
 						sum += std::conj(T(kprime,k))*tmpV;
 					}
-					RealType tmp = (eigs[k]-Eg)*betas_[timeIndex];
+					RealType tmp = (eigs[k])*betas_[timeIndex];
 					r[k] = sum * exp(-tmp);
 				}
 			}
