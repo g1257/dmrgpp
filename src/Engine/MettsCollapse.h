@@ -317,85 +317,41 @@ namespace Dmrg {
 			for (size_t i=0;i<nk;i++)
 				for (size_t j=0;j<nk;j++)
 					collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
-//			if (nk!=4)
-				//return;
+			if (nk!=4) return;
 
 			rotation4d(collapseBasis_);
-			return;
 
-			collapseBasis_(0,0) = collapseBasis_(3,3) = 1.0;
-
-			RealType phi = 2*M_PI*rng_();
-			//RealType phi = (rng()>0.5) ? M_PI*0.5 : M_PI*0.25;
-			collapseBasis_(1,1) = collapseBasis_(2,2) = cos(phi);
-			collapseBasis_(2,1) = sin(phi);
-			collapseBasis_(1,2) = -collapseBasis_(2,1);
-
-			//return;
-
-			phi = 2*M_PI*rng_();
-			collapseBasis_(0,0) = collapseBasis_(3,3) = cos(phi);
-			collapseBasis_(3,0) = sin(phi);
-			collapseBasis_(0,3) = -collapseBasis_(3,0);
 		}
 
 		void rotation4d(MatrixType& m) const
 		{
 			assert(m.n_row()==4 && m.n_col()==4);
-			std::vector<RealType> params(m.n_row());
-			RealType phi = 2*M_PI*rng_();
-			params[0]=cos(phi)/sqrt(2.0);
-			params[1]=sin(phi)/sqrt(2.0);
 
-			phi = 2*M_PI*rng_();
-			params[1]=cos(phi)/sqrt(2.0);
-			params[2]=sin(phi)/sqrt(2.0);
 			MatrixType aux1(m.n_row(),m.n_col());
-			phi = 2*M_PI*rng_();
-			rotation4dAux(aux1,params,1.0);
+			RealType theta = M_PI*rng_();
+			rotation2d(aux1,0,1,theta);
 
-			params[0]=cos(phi)/sqrt(2.0);
-			params[1]=sin(phi)/sqrt(2.0);
-			phi = 2*M_PI*rng_();
-			params[1]=cos(phi)/sqrt(2.0);
-			params[2]=sin(phi)/sqrt(2.0);
+			theta = M_PI*rng_();
 			MatrixType aux2(m.n_row(),m.n_col());
-			rotation4dAux(aux2,params,-1.0);
+			rotation2d(aux2,1,2,theta);
 
 			MatrixType aux3(m.n_row(),m.n_col());
-			phi = 2*M_PI*rng_();
-			params[0]=cos(phi)/sqrt(2.0);
-			params[2]=sin(phi)/sqrt(2.0);
-			phi = 2*M_PI*rng_();
-			params[1]=cos(phi)/sqrt(2.0);
-			params[3]=sin(phi)/sqrt(2.0);
-			rotation4dAux(aux3,params,1.0);
+			theta = M_PI*rng_();
+			rotation2d(aux3,2,3,theta);
 
 			MatrixType aux4(m.n_row(),m.n_col());
-			phi = 2*M_PI*rng_();
-			params[0]=cos(phi)/sqrt(2.0);
-			params[2]=sin(phi)/sqrt(2.0);
-			phi = 2*M_PI*rng_();
-			params[1]=cos(phi)/sqrt(2.0);
-			params[3]=sin(phi)/sqrt(2.0);
-			rotation4dAux(aux4,params,-1.0);
+			theta = M_PI*rng_();
+			rotation2d(aux4,3,0,theta);
 
 			m = (aux1 * aux2)*(aux3*aux4);
 		}
 
-		void rotation4dAux(MatrixType& m,const std::vector<RealType>& params,RealType sign) const
+		void rotation2d(MatrixType& m,size_t x,size_t y,const RealType& theta) const
 		{
-			assert(m.n_row()==4 && m.n_col()==4);
-			for (size_t i=0;i<m.n_row();i++) m(i,i) = params[0];
-			m(0,1)=params[1];
-			m(0,2)=params[2];
-			m(0,3)=params[3];
-			m(1,2)=params[4]*sign;
-			m(1,3)= -params[2]*sign;
-			m(2,3)= params[1]*sign;
-			for (size_t i=0;i<m.n_row();i++)
-				for (size_t j=i+1;j<m.n_row();j++)
-					m(j,i) = -m(i,j);
+			for (size_t i=0;i<m.n_row();i++) m(i,i) = 1.0;
+			m(x,x) = m(y,y) = cos(theta);
+			m(x,y) = sin(theta);
+			m(y,x) = -sin(theta);
 		}
 
 		const MettsStochasticsType& mettsStochastics_;
