@@ -334,24 +334,24 @@ namespace Dmrg {
 		}
 
 		//! Compute correct value of onsite potential  for  site ind and internal degree of freedom sigma
-		RealType computeOnsitePotential(int type,int ind,int sigma,int smax,int emin) const 
-		{
-			//! There are two cases:
-			//! 1. (ind,jnd) in SUX --> use input hoppings
-			//! 2. (ind,jnd) in YUE --> use reflected hoppings
-			int totalS=modelParameters_.linSize;
-			RealType x=0;
-			switch (type) {
-				case ProgramGlobals::ENVIRON_ENVIRON:
-					x=modelParameters_.potentialV[dmrgGeometry_.findReflection(ind)+sigma*totalS];
-					break;
+//		RealType computeOnsitePotential(int type,int ind,int sigma,int smax,int emin) const
+//		{
+//			//! There are two cases:
+//			//! 1. (ind,jnd) in SUX --> use input hoppings
+//			//! 2. (ind,jnd) in YUE --> use reflected hoppings
+//			int totalS=modelParameters_.linSize;
+//			RealType x=0;
+//			switch (type) {
+//				case ProgramGlobals::ENVIRON_ENVIRON:
+//					x=modelParameters_.potentialV[dmrgGeometry_.findReflection(ind)+sigma*totalS];
+//					break;
 
-				case ProgramGlobals::SYSTEM_SYSTEM:
-					x=modelParameters_.potentialV[ind+sigma*totalS];
-					break;
-			}
-			return x;
-		}
+//				case ProgramGlobals::SYSTEM_SYSTEM:
+//					x=modelParameters_.potentialV[ind+sigma*totalS];
+//					break;
+//			}
+//			return x;
+//		}
 
 		//! Find c^\dagger_isigma in the natural basis natBasis
 		SparseMatrixType findOperatorMatrices(int i,int sigma,std::vector<typename HilbertSpaceHubbardType::HilbertState> const &natBasis) const

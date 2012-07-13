@@ -539,6 +539,7 @@ namespace Dmrg {
 				}
 				addInteraction(hmatrix,cm,i);
 				addMagneticField(hmatrix,cm,i,block[i]);
+				addPotentialV(hmatrix,cm,i,block[i]);
 			}
 		}
 
@@ -645,6 +646,24 @@ namespace Dmrg {
 			tmp += (-1.0)*ndown;
 			hmatrix += modelParameters_.magneticField(2,actualIndexOfSite) * tmp;
 
+		}
+
+		void addPotentialV(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i,size_t actualIndexOfSite) const
+		{
+			for (int orb=0;orb<NUMBER_OF_ORBITALS;orb++)
+				addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb);
+		}
+
+		void addPotentialV(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i,size_t actualIndexOfSite,size_t orbital) const
+		{
+			SparseMatrixType nup = n(cm[orbital+SPIN_UP*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
+			SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
+
+
+			size_t linSize = geometry_.numberOfSites();
+
+			hmatrix += modelParameters_.potentialV[actualIndexOfSite + 0*linSize] * nup;
+			hmatrix += modelParameters_.potentialV[actualIndexOfSite  + 1*linSize] * ndown;
 		}
 
 		SparseMatrixType n(const SparseMatrixType& c) const
