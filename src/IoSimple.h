@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -70,7 +69,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
+
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -246,13 +245,18 @@ namespace PsimagLite {
 
 			In() { }
 
-			In(std::string const &fn) : filename_(fn), fin_(fn.c_str())
+			In(std::string const &fn) : filename_(fn), fin_(fn.c_str()),binaryIn_(fn+".bin")
 			{
 				if (!fin_ || !fin_.good() || fin_.bad()) {
 					std::string s = "IoSimple::ctor(...): Can't open file "
 							+filename_+"\n";
 					throw std::runtime_error(s.c_str());
 				}
+			}
+
+			~In()
+			{
+				fin_.close();
 			}
 
 			void open(std::string const &fn)
@@ -264,12 +268,14 @@ namespace PsimagLite {
 							+ filename_ + "\n";
 					throw std::runtime_error(s.c_str());
 				}
+				binaryIn_.open(fn+".bin");
 			}
 
 			void close() 
 			{
 				filename_="FILE_IS_CLOSED"; 
-				fin_.close(); 
+				fin_.close();
+				binaryIn_.close();
 			}
 
 			template<typename X>
@@ -306,7 +312,9 @@ namespace PsimagLite {
 					fin_.close();
 					fin_.open(filename_.c_str());
 					readline(x,s,counter-1);
-				}	
+				}
+
+				binaryIn_.readline(x,s,level);
 				return counter;
 				
 			}
@@ -326,6 +334,7 @@ namespace PsimagLite {
 					fin_>>tmp;
 					x[i]=tmp;
 				}
+				binaryIn_.read(x,s,level,beQuiet);
 				return sc;
 			}
 
@@ -359,6 +368,7 @@ namespace PsimagLite {
 					s2 += " could not parse it\n";
 					throw std::runtime_error(s2.c_str());
 				}
+				binaryIn_.read(x,s,level);
 			}
 			
 			template<typename X>
@@ -380,6 +390,8 @@ namespace PsimagLite {
 			                                      LongIntegerType level=0,
 			                                      bool beQuiet=false)
 			{
+				binaryIn_.advance(s,level,beQuiet);
+
 				std::string temp="NOTFOUND";
 				std::string tempSaved="NOTFOUND";
 				LongSizeType counter=0;
@@ -452,6 +464,7 @@ namespace PsimagLite {
 					fin_>>tmp2;
 					x[i]=std::pair<T,T>(tmp1,tmp2);
 				}
+				binaryIn_.read(x,s,level);
 			}
 
 			template<typename X,template<typename> class SomeType>
@@ -481,6 +494,7 @@ namespace PsimagLite {
 			{
 				advance(s,level);
 				fin_>>mat;
+				binaryIn_.readMatrix(mat,s,level);
 			}
 
 			template<
@@ -502,9 +516,8 @@ namespace PsimagLite {
 			{
 				fin_.clear(); // forget we hit the end of file
 				fin_.seekg(0, std::ios::beg); // move to the start of the file
+				binaryIn_.rewind();
 			}
-
-			~In() { fin_.close(); }
 
 			const char* filename() const 
 			{
@@ -513,9 +526,9 @@ namespace PsimagLite {
 
 			template<typename X>
 			friend void operator>>(In& io,X& t);
-			
+
 		private:
-			
+
 			//! full contains label[key]=value
 			template<typename X>
 			void getKey(std::string& key,X& x,const std::string& full)
@@ -544,7 +557,8 @@ namespace PsimagLite {
 			}
 
 			std::string filename_;
-			std::ifstream 	fin_;
+			std::ifstream fin_;
+			IoBinary::In binaryIn_;
 		};
 	}; //class IoSimple
 

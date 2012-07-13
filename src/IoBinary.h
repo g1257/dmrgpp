@@ -421,6 +421,7 @@ namespace PsimagLite {
 
 			In(std::string const &fn) : filename_(fn), fin_(-1),memoryPool_(0)
 			{
+				if (!ENABLED) return;
 				fin_= ::open(fn.c_str(),O_RDONLY);
 				if (fin_<0) {
 					std::string s = "IoBinary::ctor(...): Can't open file "
@@ -431,12 +432,14 @@ namespace PsimagLite {
 
 			~In()
 			{
+				if (!ENABLED) return;
 				if (memoryPool_) delete [] memoryPool_;
 				if (fin_>0) ::close(fin_);
 			}
 
 			void open(std::string const &fn)
 			{
+				if (!ENABLED) return;
 				filename_=fn;
 				fin_= ::open(fn.c_str(),O_RDONLY);
 				if (fin_<0) {
@@ -448,6 +451,7 @@ namespace PsimagLite {
 
 			void close() 
 			{
+				if (!ENABLED) return;
 				filename_="FILE_IS_CLOSED";
 				assert(fin_>=0);
 				::close(fin_);
@@ -456,6 +460,7 @@ namespace PsimagLite {
 			template<typename X>
 			size_t readline(X &x,const std::string &s,LongIntegerType level=0)
 			{
+				if (!ENABLED) return 0;
 				std::pair<std::string,size_t> sc = advance(s,level,false);
 				//std::cerr<<"FOUND--------->\n";
 				char check = 0;
@@ -481,6 +486,7 @@ namespace PsimagLite {
 							   LongIntegerType level=0,
 							   bool beQuiet = false)
 			{
+				if (!ENABLED) return std::pair<std::string,size_t>("NOT_ENABLED",0);
 				std::pair<std::string,size_t> sc = advance(s,level,beQuiet);
 				//std::cerr<<"FOUND--------->\n";
 				char check = 0;
@@ -544,6 +550,7 @@ namespace PsimagLite {
 
 			size_t count(const std::string& s)
 			{
+				if (!ENABLED) return 0;
 				size_t counter = 0;
 				while(true) {
 					std::string temp = readNextLabel();
@@ -557,6 +564,7 @@ namespace PsimagLite {
 							      LongIntegerType level=0,
 							      bool beQuiet=false)
 			{
+				if (!ENABLED) return std::pair<std::string,size_t>("NOT_ENALBED",0);
 				//std::string temp="NOTFOUND";
 				std::string tempSaved="NOTFOUND";
 				LongSizeType counter=0;
@@ -654,6 +662,7 @@ namespace PsimagLite {
 					std::string const &s,
 					LongIntegerType level= 0)
 			{
+				if (!ENABLED) return;
 				advance(s,level);
 				std::cerr<<"FOUND--------->\n";
 				char check = 0;
@@ -685,6 +694,7 @@ namespace PsimagLite {
 
 			void rewind()
 			{
+				if (!ENABLED) return;
 				throw std::runtime_error("IoBinary::rewind(): Unimplemented\n");
 //				fin_.clear(); // forget we hit the end of file
 //				fin_.seekg(0, std::ios::beg); // move to the start of the file
@@ -700,6 +710,7 @@ namespace PsimagLite {
 
 			std::string readNextLabel()
 			{
+				if (!ENABLED) return "NOT_ENABLED";
 				std::string magicLabel = "LABEL";
 				char c = 0;
 				size_t j= 0;
@@ -752,6 +763,7 @@ namespace PsimagLite {
 
 			void readCheckTotalAndType(char& check,size_t& total,PairType& type)
 			{
+				if (!ENABLED) return;
 				check = 0;
 				::read(fin_,&check,1);
 				total = 0;
@@ -765,6 +777,7 @@ namespace PsimagLite {
 
 			static std::string nameOfType(const PairType& type)
 			{
+				if (!ENABLED) return "NOT_ENABLED";
 				std::string type1 = "UNKNOWN";
 				if (type.first==TYPE_INT) type1 = "INT";
 				else if (type.first==TYPE_SIZE_T) type1="SIZE_T";
