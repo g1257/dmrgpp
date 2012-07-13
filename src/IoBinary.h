@@ -274,18 +274,18 @@ namespace PsimagLite {
 				printLabel(label);
 
 				char check = 0;
-				write(fout_, (const void *)&check,1);
+				mywrite(fout_, (const void *)&check,1);
 				size_t total = 0;
-				write(fout_, (const void *)&total,sizeof(total));
+				mywrite(fout_, (const void *)&total,sizeof(total));
 
 				typename X::value_type dummy;
 				TypeType type = TYPE_VECTOR | charTypeOf(dummy);
-				write(fout_,(const void *)&type,sizeof(type));
+				mywrite(fout_,(const void *)&type,sizeof(type));
 				size_t length = x.size();
-				write(fout_,(const void *)&length,sizeof(length));
+				mywrite(fout_,(const void *)&length,sizeof(length));
 
 				const typename X::value_type* const ptr = &(x[0]);
-				write(fout_, (const void *)ptr,length*sizeof(dummy));
+				mywrite(fout_, (const void *)ptr,length*sizeof(dummy));
 			}
 
 			//! Specialization for bool (FIXME: std::vector<bool> is evil, remove it!)
@@ -296,18 +296,18 @@ namespace PsimagLite {
 				printLabel(label);
 
 				char check = 0;
-				write(fout_, (const void *)&check,1);
+				mywrite(fout_, (const void *)&check,1);
 				size_t total = 0;
-				write(fout_, (const void *)&total,sizeof(total));
+				mywrite(fout_, (const void *)&total,sizeof(total));
 
 				bool dummy;
 				TypeType type = TYPE_VECTOR | charTypeOf(dummy);
-				write(fout_,(const void *)&type,sizeof(type));
+				mywrite(fout_,(const void *)&type,sizeof(type));
 				std::vector<char> xx(x.size());
 				convertFromBool(xx,x);
 				size_t length = xx.size();
-				write(fout_,(const void *)&length,sizeof(length));
-				write(fout_,(const void *)&(xx[0]),length);
+				mywrite(fout_,(const void *)&length,sizeof(length));
+				mywrite(fout_,(const void *)&(xx[0]),length);
 			}
 
 			template<class T>
@@ -318,12 +318,15 @@ namespace PsimagLite {
 				makeSureFileIsOpen();
 				printLabel(s);
 				char check = 0;
-				write(fout_, (const void *)&check,1);
+				mywrite(fout_, (const void *)&check,1);
+
 				size_t total = 1;
-				write(fout_, (const void *)&total,sizeof(total));
+				mywrite(fout_, (const void *)&total,sizeof(total));
+
 				TypeType type = charTypeOf(something);
-				write(fout_,(const void *)&type,sizeof(type));
-				write(fout_,(const void*)&something,sizeof(something));
+				mywrite(fout_,(const void *)&type,sizeof(type));
+
+				mywrite(fout_,(const void*)&something,sizeof(something));
 			}
 
 			void print(const std::string& s)
@@ -331,9 +334,10 @@ namespace PsimagLite {
 				if (!ENABLED) return;
 				printLabel(s);
 				char check = 0;
-				write(fout_, (const void *)&check,1);
+				mywrite(fout_, (const void *)&check,1);
+
 				size_t total = 0;
-				write(fout_, (const void *)&total,sizeof(total));
+				mywrite(fout_, (const void *)&total,sizeof(total));
 			}
 
 			template<typename SomeMatrixType>
@@ -344,13 +348,16 @@ namespace PsimagLite {
 				printLabel(s);
 
 				char check = 0;
-				write(fout_, (const void *)&check,1);
+
+				mywrite(fout_, (const void *)&check,1);
+
 				size_t total = 0;
-				write(fout_, (const void *)&total,sizeof(total));
+
+				mywrite(fout_, (const void *)&total,sizeof(total));
 
 				typename SomeMatrixType::value_type dummy;
 				TypeType type = TYPE_MATRIX | charTypeOf(dummy);
-				write(fout_,(const void *)&type,sizeof(type));
+				mywrite(fout_,(const void *)&type,sizeof(type));
 
 				mat.print(fout_);
 			}
@@ -363,13 +370,16 @@ namespace PsimagLite {
 				printLabel(s);
 
 				char check = 0;
-				write(fout_, (const void *)&check,1);
+				mywrite(fout_, (const void *)&check,1);
+
 				size_t total = 0;
-				write(fout_, (const void *)&total,sizeof(total));
+				mywrite(fout_, (const void *)&total,sizeof(total));
 
 				SomeType dummy;
 				TypeType type = TYPE_MATRIX | charTypeOf(dummy);
-				write(fout_,(const void *)&type,sizeof(type));
+
+				mywrite(fout_,(const void *)&type,sizeof(type));
+
 				std::print(fout_,mat);
 			}
 
@@ -386,10 +396,10 @@ namespace PsimagLite {
 				makeSureFileIsOpen();
 
 				char label1[] = {'L','A','B','E','L'};
-				write(fout_,label1,5);
+				mywrite(fout_,label1,5);
 				size_t length = s.length();
-				write(fout_,(const void *)&length,sizeof(length));
-				write(fout_, (const void *)&(s[0]),length);
+				mywrite(fout_,(const void *)&length,sizeof(length));
+				mywrite(fout_, (const void *)&(s[0]),length);
 			}
 
 			void makeSureFileIsOpen() const
@@ -402,10 +412,16 @@ namespace PsimagLite {
 				}
 			}
 
+			void mywrite(int fd,const void *buf,size_t count) const
+			{
+				ssize_t ret = write(fd,buf,count);
+				failIfNegative(ret,__FILE__,__LINE__);
+			}
+
 			int rank_;
 			std::string filename_;
 			int fout_;
-		};
+		}; // class Out
 
 		class In {
 
@@ -475,7 +491,8 @@ namespace PsimagLite {
 					throw std::runtime_error(str.c_str());
 				}
 
-				::read(fin_,&x,sizeof(x));
+				myread(fin_,&x,sizeof(x));
+
 				return sc.second;
 				
 			}
@@ -765,11 +782,11 @@ namespace PsimagLite {
 			{
 				if (!ENABLED) return;
 				check = 0;
-				::read(fin_,&check,1);
+				myread(fin_,&check,1);
 				total = 0;
-				::read(fin_,&total,sizeof(total));
+				myread(fin_,&total,sizeof(total));
 				type.first = 0;
-				::read(fin_,&type.first,1);
+				myread(fin_,&type.first,1);
 				type.second = type.first;
 				type.second >>= 4;
 				type.first &= 15;
@@ -799,7 +816,7 @@ namespace PsimagLite {
 			void readVector(std::vector<X>& x)
 			{
 				size_t xsize = 0;
-				::read(fin_,&xsize,sizeof(xsize));
+				myread(fin_,&xsize,sizeof(xsize));
 
 				std::cerr<<"xsize="<<xsize<<"\n";
 				x.resize(xsize);
@@ -845,6 +862,12 @@ namespace PsimagLite {
 //				x = atof(val.c_str());
 //			}
 
+			void myread(int fd, void *buf, size_t count)
+			{
+				ssize_t ret = ::read(fd,buf,count);
+				failIfNegative(ret,__FILE__,__LINE__);
+			}
+
 			std::string filename_;
 			int 	fin_;
 			TypeType* memoryPool_;
@@ -875,6 +898,15 @@ namespace PsimagLite {
 		static void convertFromBool(std::vector<char>& xx,const std::vector<bool>& x)
 		{
 			for (size_t i=0;i<xx.size();i++) xx[i] = (x[i]) ? 48 : 49;
+		}
+
+		static void failIfNegative(const ssize_t& x,const std::string& thisFile,int lineno)
+		{
+			if (x>=0) return;
+			std::string str(thisFile);
+			str += " " + ttos(lineno) + "\n";
+			str += "Read or Write has failed\n";
+			throw std::runtime_error(str.c_str());
 		}
 
 	}; //class IoBinary
