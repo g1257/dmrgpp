@@ -240,7 +240,9 @@ namespace Dmrg {
 			} 
 			if (what=="c") {
 				PsimagLite::Matrix<SparseElementType> tmp;
-				crsMatrixToFullMatrix(tmp,creationMatrix[orbital + spin*NUMBER_OF_ORBITALS].data);
+				SparseMatrixType cdagger;
+				transposeConjugate(cdagger,creationMatrix[orbital + spin*NUMBER_OF_ORBITALS].data);
+				crsMatrixToFullMatrix(tmp,cdagger);
 				return tmp;
 			}
 			if (what=="d") { // delta = c^\dagger * c^dagger
