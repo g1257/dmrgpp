@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009 , UT-Battelle, LLC
 All rights reserved
@@ -70,7 +69,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -82,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PSIMAGLITE_STACK_H_
 #define PSIMAGLITE_STACK_H_
 #include <stack>
+#include "BinarySaveLoad.h"
 
 namespace std {
 	template<typename FieldType>
@@ -114,7 +113,7 @@ namespace std {
 	{
 		stack<FieldType> st2 = st;
 		size_t tmp = st2.size();
-		::write(fd,&tmp,sizeof(tmp));
+		PsimagLite::BinarySaveLoad::save(fd,tmp);
 		while(!st2.empty()) {
 			FieldType x = st2.top();
 			x.print(fd);

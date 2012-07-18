@@ -88,7 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include <cstdlib>
 #include <map>
-#include "IoBinary.h"
 
 namespace PsimagLite {
 	//! IoSimple class handles Input/Output (IO) for the Dmrg++ program 
@@ -108,7 +107,7 @@ namespace PsimagLite {
 			}
 
 			Out(const std::string& fn,int rank)
-			: rank_(rank),filename_(fn),fout_(0),binaryOut_(fn + ".bin",rank)
+			: rank_(rank),filename_(fn),fout_(0)
 			{
 				if (rank_!=0) return;
 				if (!fout_) fout_=new std::ofstream;
@@ -139,7 +138,6 @@ namespace PsimagLite {
 				fout_->open(fn.c_str(),mode);
 				if (!(*fout_) || !fout_->good())
 					throw std::runtime_error("Out: error while opening file!\n");
-				binaryOut_.open(fn+".bin",mode,rank);
 			}
 
 			void close()
@@ -148,7 +146,6 @@ namespace PsimagLite {
 					throw std::runtime_error("close: not possible\n");
 				filename_="FILE_IS_CLOSED";
 				fout_->close();
-				binaryOut_.close();
 			}
 
 //			void printline(const std::string &s)
@@ -164,7 +161,6 @@ namespace PsimagLite {
 				(*fout_)<<s.str()<<"\n";
 				s.flush();
 				s.seekp(std::ios_base::beg);
-				binaryOut_.print(s.str());
 			}
 
 			template<typename X>
@@ -174,7 +170,6 @@ namespace PsimagLite {
 				(*fout_)<<label<<"\n";
 				(*fout_)<<x.size()<<"\n";
 				for (size_t i=0;i<x.size();i++) (*fout_)<<x[i]<<"\n";
-				binaryOut_.printVector(x,label);
 			}
 
 			template<class T>
@@ -185,7 +180,6 @@ namespace PsimagLite {
 					throw std::runtime_error("Out: file not open!\n");
 				(*fout_)<<label;
 				(*fout_)<<something<<"\n";
-				binaryOut_.print(label,something);
 			}
 
 			void print(const std::string& something)
@@ -195,7 +189,6 @@ namespace PsimagLite {
 				size_t last = something.length();
 				if (last>0) last--;
 				if (something[last]!='\n') (*fout_)<<"\n";
-				binaryOut_.print(something);
 			}
 
 			template<typename X>
@@ -204,7 +197,6 @@ namespace PsimagLite {
 				if (rank_!=0) return;
 				(*fout_)<<s<<"\n";
 				(*fout_)<<mat;
-				binaryOut_.printMatrix(mat,s);
 			}
 
 			template<typename X>
@@ -213,7 +205,6 @@ namespace PsimagLite {
 				if (rank_!=0) return;
 				(*fout_)<<s<<"\n";
 				(*fout_)<<mat;
-				binaryOut_.printMatrix(mat,s);
 			}
 
 			int rank() { return rank_; }
@@ -232,7 +223,6 @@ namespace PsimagLite {
 			int rank_;
 			std::string filename_;
 			std::ofstream* fout_;
-			IoBinary::Out binaryOut_;
 		};
 
 		class In {
@@ -245,7 +235,7 @@ namespace PsimagLite {
 
 			In() { }
 
-			In(std::string const &fn) : filename_(fn), fin_(fn.c_str()),binaryIn_(fn+".bin")
+			In(std::string const &fn) : filename_(fn), fin_(fn.c_str())
 			{
 				if (!fin_ || !fin_.good() || fin_.bad()) {
 					std::string s = "IoSimple::ctor(...): Can't open file "
@@ -268,14 +258,12 @@ namespace PsimagLite {
 							+ filename_ + "\n";
 					throw std::runtime_error(s.c_str());
 				}
-				binaryIn_.open(fn+".bin");
 			}
 
 			void close() 
 			{
 				filename_="FILE_IS_CLOSED"; 
 				fin_.close();
-				binaryIn_.close();
 			}
 
 			template<typename X>
@@ -314,7 +302,6 @@ namespace PsimagLite {
 					readline(x,s,counter-1);
 				}
 
-				binaryIn_.readline(x,s,level);
 				return counter;
 				
 			}
@@ -334,7 +321,6 @@ namespace PsimagLite {
 					fin_>>tmp;
 					x[i]=tmp;
 				}
-				binaryIn_.read(x,s,level,beQuiet);
 				return sc;
 			}
 
@@ -368,7 +354,6 @@ namespace PsimagLite {
 					s2 += " could not parse it\n";
 					throw std::runtime_error(s2.c_str());
 				}
-				binaryIn_.read(x,s,level);
 			}
 			
 			template<typename X>
@@ -390,7 +375,6 @@ namespace PsimagLite {
 			                                      LongIntegerType level=0,
 			                                      bool beQuiet=false)
 			{
-				binaryIn_.advance(s,level,beQuiet);
 
 				std::string temp="NOTFOUND";
 				std::string tempSaved="NOTFOUND";
@@ -464,7 +448,6 @@ namespace PsimagLite {
 					fin_>>tmp2;
 					x[i]=std::pair<T,T>(tmp1,tmp2);
 				}
-				binaryIn_.read(x,s,level);
 			}
 
 			template<typename X,template<typename> class SomeType>
@@ -494,7 +477,6 @@ namespace PsimagLite {
 			{
 				advance(s,level);
 				fin_>>mat;
-				binaryIn_.readMatrix(mat,s,level);
 			}
 
 			template<
@@ -516,7 +498,6 @@ namespace PsimagLite {
 			{
 				fin_.clear(); // forget we hit the end of file
 				fin_.seekg(0, std::ios::beg); // move to the start of the file
-				binaryIn_.rewind();
 			}
 
 			const char* filename() const 
@@ -558,7 +539,6 @@ namespace PsimagLite {
 
 			std::string filename_;
 			std::ifstream fin_;
-			IoBinary::In binaryIn_;
 		};
 	}; //class IoSimple
 

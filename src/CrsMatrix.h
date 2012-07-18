@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h" 
 #include "Complex.h"
 #include <cassert>
+#include "BinarySaveLoad.h"
 
 namespace PsimagLite {
 
@@ -302,11 +303,11 @@ namespace PsimagLite {
 
 		void print(int fd) const
 		{
-			::write(fd,(const void *)&nrow_,sizeof(nrow_));
-			::write(fd,(const void *)&ncol_,sizeof(ncol_));
-			::write(fd,(const void *)&(rowptr_[0]),sizeof(int)*rowptr_.size());
-			::write(fd,(const void *)&(colind_[0]),sizeof(int)*colind_.size());
-			::write(fd,(const void *)&(values_[0]),sizeof(T)*values_.size());
+			BinarySaveLoad::save(fd,nrow_);
+			BinarySaveLoad::save(fd,ncol_);
+			BinarySaveLoad::save(fd,rowptr_);
+			BinarySaveLoad::save(fd,colind_);
+			BinarySaveLoad::save(fd,values_);
 		}
 
 		/*bool operator==(const CrsMatrix<T>& B) const
