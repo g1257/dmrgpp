@@ -97,9 +97,12 @@ namespace Dmrg {
 		typedef typename MettsStochasticsType::PairType PairType;
 		typedef typename MettsStochasticsType::LeftRightSuperType LeftRightSuperType;
 		typedef typename MettsStochasticsType::RealType RealType;
+		typedef typename MettsStochasticsType::RngType RngType;
 		typedef PsimagLite::Matrix<RealType> MatrixType;
+
 		enum {EXPAND_ENVIRON=ProgramGlobals::EXPAND_ENVIRON,
 		      EXPAND_SYSTEM=ProgramGlobals::EXPAND_SYSTEM};
+		
 		static const bool COLLAPSE_INTO_RANDOM_BASIS = false;
 
 	public:
@@ -108,13 +111,13 @@ namespace Dmrg {
 
 		MettsCollapse(const MettsStochasticsType& mettsStochastics,
 			      const LeftRightSuperType& lrs,
-			      size_t seed)
+			      RngType& rng)
 		: mettsStochastics_(mettsStochastics),
 		  lrs_(lrs),
+		  rng_(rng),
 		  progress_("MettsCollapse",0),
 		  prevDirection_(ProgramGlobals::INFINITE),
-		  collapseBasis_(mettsStochastics_.hilbertSize(0),mettsStochastics_.hilbertSize(0)),
-		  rng_(seed)
+		  collapseBasis_(mettsStochastics_.hilbertSize(0),mettsStochastics_.hilbertSize(0))
 		{
 			setCollapseBasis();
 		}
@@ -356,11 +359,11 @@ namespace Dmrg {
 
 		const MettsStochasticsType& mettsStochastics_;
 		const LeftRightSuperType& lrs_;
+		RngType& rng_;
 		PsimagLite::ProgressIndicator progress_;
 		size_t prevDirection_;
 		MatrixType collapseBasis_;
 		std::vector<size_t> sitesSeen_;
-		PsimagLite::Random48<RealType> rng_;
 	};  //class MettsCollapse
 } // namespace Dmrg
 /*@}*/

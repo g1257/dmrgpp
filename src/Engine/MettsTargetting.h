@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MettsCollapse.h"
 #include "VectorWithOffset.h"
 #include "ParametersForSolver.h"
+#include "Random48.h"
 
 namespace Dmrg {
 	template<
@@ -112,13 +113,14 @@ namespace Dmrg {
 			    LeftRightSuperType;
 			typedef typename LeftRightSuperType::BasisWithOperatorsType
 			    BasisWithOperatorsType;
+			typedef typename BasisWithOperatorsType::BasisType BasisType;
 			typedef std::vector<RealType> VectorType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType>
 			    LanczosSolverType;
 			typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-			typedef typename BasisWithOperatorsType::BasisType BasisType;
+			//typedef typename BasisWithOperatorsType::BasisType BasisType;
 			typedef MettsParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
 			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
@@ -128,11 +130,13 @@ namespace Dmrg {
 			typedef BlockMatrix<RealType,MatrixType> BlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef MettsSerializer<RealType,VectorWithOffsetType> MettsSerializerType;
-			typedef MettsStochastics<ModelType> MettsStochasticsType;
+			typedef typename PsimagLite::Random48<RealType> RngType;
+			typedef MettsStochastics<ModelType,RngType> MettsStochasticsType;
 			typedef typename MettsStochasticsType::PairType PairType;
 			typedef MettsCollapse<VectorWithOffsetType,MettsStochasticsType> MettsCollapseType;
 			typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
-			
+			//typedef typename RngType::LongType LongType;
+
 			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -157,8 +161,9 @@ namespace Dmrg {
 			  progress_("MettsTargetting(AlphaStage)",0),
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
-			  mettsStochastics_(model,mettsStruct.rngSeed),
-			  mettsCollapse_(mettsStochastics_,lrs_,mettsStruct.rngSeed),
+			  random48_(mettsStruct.rngSeed),
+			  mettsStochastics_(model,random48_),
+			  mettsCollapse_(mettsStochastics_,lrs_,random48_),
 			  timesWithoutAdvancement_(0),
 			  prevDirection_(INFINITE),
 			  systemPrev_(),
@@ -453,11 +458,11 @@ namespace Dmrg {
 					assert(std::norm(targetVectors_[advance])>1e-6);
 
 //					examineTarget(targetVectors_[advance],advance);
-					populateCorrectSector(phiNew,lrs_);
-					//phiNew.populateSectors(lrs_.super());
+					//populateCorrectSector(phiNew,lrs_);
+					phiNew.populateSectors(lrs_.super());
 					// OK, now that we got the partition number right, let's wft:
 					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_,nk);
-					//phiNew.collapseSectors();
+					phiNew.collapseSectors();
 					assert(std::norm(phiNew)>1e-6);
 					targetVectors_[index] = phiNew;
 					//examineTarget(targetVectors_[index],index);
@@ -470,9 +475,18 @@ namespace Dmrg {
 			{
 				// only way of getting the quantum number where the
 				//  the pure resides
-				size_t m = getPartition();
-				size_t qn = lrs_.super().qn(lrs_.super().partition(m));
-				
+				//size_t m = getPartition();
+				//size_t qn = lrs_.super().qn(lrs_.super().partition(m));
+				size_t linSize = model_.geometry().numberOfSites();
+				std::vector<size_t> tqn(2,0);
+				if (model_.params().targetQuantumNumbers.size()>=2) {
+					tqn[0] = round(model_.params().targetQuantumNumbers[0]*linSize);
+					tqn[1] = round(model_.params().targetQuantumNumbers[1]*linSize);
+				} else {
+					tqn[0] = model_.params().electronsUp;
+					tqn[1] = model_.params().electronsDown;
+				}
+				size_t qn = BasisType::pseudoQuantumNumber(tqn);
 				mettsStochastics_.update(qn,sites);
 			}
 
@@ -639,8 +653,8 @@ namespace Dmrg {
 
 			void setFromInfinite(VectorWithOffsetType& phi,const LeftRightSuperType& lrs) const
 			{
-				populateCorrectSector(phi,lrs);
-				//phi.populateSectors(lrs.super());
+				//populateCorrectSector(phi,lrs);
+				phi.populateSectors(lrs.super());
 				//std::cerr<<"NUUUUUUMBBBBBBBERRRRRRRRR OF SEEEEECTTTTTTTTORRRRRRRRS="<<phi.sectors()<<"\n";
 				for (size_t ii=0;ii<phi.sectors();ii++) {
 					size_t i0 = phi.sector(ii);
@@ -648,7 +662,7 @@ namespace Dmrg {
 					getFullVector(v,i0,lrs);
 					phi.setDataInSector(v,i0);
 				}
-				//phi.collapseSectors();
+				phi.collapseSectors();
 				assert(std::norm(phi)>1e-6);
 			}
 
@@ -1017,6 +1031,7 @@ namespace Dmrg {
 			RealType gsWeight_;
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
+			RngType random48_;
 			MettsStochasticsType mettsStochastics_;
 			MettsCollapseType mettsCollapse_;
 			size_t timesWithoutAdvancement_;

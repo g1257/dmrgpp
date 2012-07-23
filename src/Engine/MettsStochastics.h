@@ -84,25 +84,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <stdexcept>
 #include "ProgressIndicator.h"
-#include "Random48.h"
 #include <algorithm>
 #include "TypeToString.h"
 
 namespace Dmrg {
-	template<typename ModelType>
+	template<typename ModelType,typename RngType_>
 	class MettsStochastics  {
+
 	public:
+
 		typedef std::pair<size_t,size_t> PairType;
 		typedef typename ModelType::RealType RealType;
 		typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
-		typedef typename PsimagLite::Random48<RealType> RngType;
-		typedef typename RngType::LongType LongType;
 		typedef typename ModelType::HilbertBasisType HilbertBasisType;
+		typedef RngType_ RngType;
 
-		MettsStochastics(const ModelType& model,const LongType& seed)
+		MettsStochastics(const ModelType& model,RngType& random48)
 		: model_(model),
+		  random48_(random48),
 		  progress_("MettsStochastics",0),
-		  random48_(seed),
 		  addedSites_(0)
 		{}
 
@@ -155,7 +155,7 @@ namespace Dmrg {
 				pureStates_.resize(sites.second+2);
 				for (size_t i=0;i<pureStates_.size();i++)
 					pureStates_[i] = size_t(random48_()*model_.hilbertSize(i));
-
+				getStochasticsAll(qn);
 				addedSites_.push_back(sites.first-1);
 				addedSites_.push_back(sites.second+1);
 				currentSites.push_back(sites.first-1);
@@ -167,7 +167,7 @@ namespace Dmrg {
 				addedSites_.push_back(sites.second);
 				qnVsSize_.resize(addedSites_.size()+1,0);
 				qnVsSize_[addedSites_.size()]=qn;
-				getStochasticsUpToThisPoint(qn,currentSites);
+				//getStochasticsUpToThisPoint(qn,currentSites);
 				return; // INFINITE
 			}
 
@@ -219,34 +219,27 @@ namespace Dmrg {
 // 			}
 // 		}
 
-		void getStochasticsUpToThisPoint(size_t qn,
-		                                 const std::vector<size_t>& currentSites) 
+		void getStochasticsAll(size_t qn)
 		{
-			// fix target quantum number
-			size_t symm = getSymmetry();
+			size_t allSites = model_.geometry().numberOfSites();
+			assert(allSites==pureStates_.size());
+			size_t symm = getSymmetryAllSites();
 			size_t counter = 0;
 			while(symm!=qn) {
 				counter++;
 				if (counter>1e6) {
 					std::string s(__FILE__);
-					s += std::string(" ") + ttos(__LINE__) + std::string(" ") + 
+					s += std::string(" ") + ttos(__LINE__) + std::string(" ") +
 					std::string(__FUNCTION__);
 					s += std::string(" too many iterations\n");
 					throw std::runtime_error(s.c_str());
 				}
-				for (size_t i=0;i<currentSites.size();i++) {
-					size_t thisSite = currentSites[i];
-					if (i==1 && currentSites[0]==currentSites[1]) break;
+				for (size_t i=0;i<allSites;i++) {
+					size_t thisSite = i;
 					raiseOrLowerSymm(thisSite,(symm<qn));
-					symm = getSymmetry();
+					symm = getSymmetryAllSites();
 					if (symm==qn) break;
 				}
-// 				raiseOrLowerSymm(sites.first,(symm<qn));
-// 				symm = getSymmetry();
-// 				if (sites.second==sites.first) continue;
-// 				if (symm==qn) break;
-// 				raiseOrLowerSymm(sites.second,(symm<qn));
-// 				symm = getSymmetry();
 			}
 			std::ostringstream msg;
 			msg<<"targetQn="<<qn<<" sites="<<addedSites_.size()<<" Pure=";
@@ -254,6 +247,36 @@ namespace Dmrg {
 				msg<<pureStates_[i]<<" ";
 			progress_.printline(msg,std::cout);
 		}
+
+//		void getStochasticsUpToThisPoint(size_t qn,
+//		                                 const std::vector<size_t>& currentSites)
+//		{
+//			// fix target quantum number
+//			size_t symm = getSymmetry();
+//			size_t counter = 0;
+//			while(symm!=qn) {
+//				counter++;
+//				if (counter>1e6) {
+//					std::string s(__FILE__);
+//					s += std::string(" ") + ttos(__LINE__) + std::string(" ") +
+//					std::string(__FUNCTION__);
+//					s += std::string(" too many iterations\n");
+//					throw std::runtime_error(s.c_str());
+//				}
+//				for (size_t i=0;i<currentSites.size();i++) {
+//					size_t thisSite = currentSites[i];
+//					if (i==1 && currentSites[0]==currentSites[1]) break;
+//					raiseOrLowerSymm(thisSite,(symm<qn));
+//					symm = getSymmetry();
+//					if (symm==qn) break;
+//				}
+//			}
+//			std::ostringstream msg;
+//			msg<<"targetQn="<<qn<<" sites="<<addedSites_.size()<<" Pure=";
+//			for (size_t i=0;i<pureStates_.size();i++)
+//				msg<<pureStates_[i]<<" ";
+//			progress_.printline(msg,std::cout);
+//		}
 
 		// assumes states in basisOfOneSite_ are ordered in increasing
 		// symmetry
@@ -269,22 +292,36 @@ namespace Dmrg {
 		}
 
 		// assumes local symmetry througout
-		size_t getSymmetry() const
+//		size_t getSymmetry() const
+//		{
+//			std::vector<size_t> quantumNumbsOneSite;
+//			HilbertBasisType basisOfOneSite;
+			
+//			size_t sum = 0;
+//			for (size_t i=0;i<addedSites_.size();i++) {
+//				basisForOneSite(quantumNumbsOneSite,basisOfOneSite,addedSites_[i]);
+//				sum += quantumNumbsOneSite[pureStates_[addedSites_[i]]];
+//			}
+//			return sum;
+//		}
+
+		size_t getSymmetryAllSites() const
 		{
 			std::vector<size_t> quantumNumbsOneSite;
 			HilbertBasisType basisOfOneSite;
-			
+
+			size_t allSites = model_.geometry().numberOfSites();
 			size_t sum = 0;
-			for (size_t i=0;i<addedSites_.size();i++) {
-				basisForOneSite(quantumNumbsOneSite,basisOfOneSite,addedSites_[i]);
-				sum += quantumNumbsOneSite[pureStates_[addedSites_[i]]];
+			for (size_t i=0;i<allSites;i++) {
+				basisForOneSite(quantumNumbsOneSite,basisOfOneSite,i);
+				sum += quantumNumbsOneSite[pureStates_[i]];
 			}
 			return sum;
 		}
 
 		const ModelType& model_;
+		RngType& random48_;
 		PsimagLite::ProgressIndicator progress_;
-		RngType random48_;
 		std::vector<size_t> pureStates_;
 		std::vector<size_t> addedSites_;
 // 		std::vector<size_t> quantumNumbsOneSite_;
