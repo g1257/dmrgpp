@@ -145,7 +145,6 @@ namespace Dmrg {
 
 		void update(size_t qn,const PairType& sites)
 		{
-			static bool firstCall = true;
 			std::vector<size_t> currentSites;
 			currentSites.push_back(sites.first);
 			currentSites.push_back(sites.second);
@@ -168,13 +167,8 @@ namespace Dmrg {
 				addedSites_.push_back(sites.second);
 				qnVsSize_.resize(addedSites_.size()+1,0);
 				qnVsSize_[addedSites_.size()]=qn;
-				//getStochasticsUpToThisPoint(qn,currentSites);
+				getStochasticsUpToThisPoint(qn,currentSites);
 				return; // INFINITE
-			}
-
-			if (firstCall) {
-				firstCall = false;
-				getStochasticsUpToThisPoint(qn,addedSites_);
 			}
 
 			//FINITE: all this is bogus because we're not using
@@ -226,15 +220,16 @@ namespace Dmrg {
 // 		}
 
 		void getStochasticsUpToThisPoint(size_t qn,
-						 const std::vector<size_t>& currentSites)
+		                                 const std::vector<size_t>& currentSites) 
 		{
+			// fix target quantum number
 			size_t symm = getSymmetry();
 			size_t counter = 0;
 			while(symm!=qn) {
 				counter++;
 				if (counter>1e6) {
 					std::string s(__FILE__);
-					s += std::string(" ") + ttos(__LINE__) + std::string(" ") +
+					s += std::string(" ") + ttos(__LINE__) + std::string(" ") + 
 					std::string(__FUNCTION__);
 					s += std::string(" too many iterations\n");
 					throw std::runtime_error(s.c_str());
@@ -246,6 +241,12 @@ namespace Dmrg {
 					symm = getSymmetry();
 					if (symm==qn) break;
 				}
+// 				raiseOrLowerSymm(sites.first,(symm<qn));
+// 				symm = getSymmetry();
+// 				if (sites.second==sites.first) continue;
+// 				if (symm==qn) break;
+// 				raiseOrLowerSymm(sites.second,(symm<qn));
+// 				symm = getSymmetry();
 			}
 			std::ostringstream msg;
 			msg<<"targetQn="<<qn<<" sites="<<addedSites_.size()<<" Pure=";
