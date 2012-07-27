@@ -480,14 +480,14 @@ namespace Dmrg {
 				size_t linSize = model_.geometry().numberOfSites();
 				std::vector<size_t> tqn(2,0);
 				if (model_.params().targetQuantumNumbers.size()>=2) {
-					tqn[0] = round(model_.params().targetQuantumNumbers[0]*linSize);
-					tqn[1] = round(model_.params().targetQuantumNumbers[1]*linSize);
+					tqn[0] = size_t(round(model_.params().targetQuantumNumbers[0]*linSize));
+					tqn[1] = size_t(round(model_.params().targetQuantumNumbers[1]*linSize));
 				} else {
 					tqn[0] = model_.params().electronsUp;
 					tqn[1] = model_.params().electronsDown;
 				}
 				size_t qn = BasisType::pseudoQuantumNumber(tqn);
-				mettsStochastics_.update(qn,sites);
+				mettsStochastics_.update(qn,sites,mettsStruct_.rngSeed);
 			}
 
 			size_t getPartition() const

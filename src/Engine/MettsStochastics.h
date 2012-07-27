@@ -98,6 +98,7 @@ namespace Dmrg {
 		typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelType::HilbertBasisType HilbertBasisType;
 		typedef RngType_ RngType;
+		typedef typename RngType::LongType LongType;
 
 		MettsStochastics(const ModelType& model,RngType& random48)
 		: model_(model),
@@ -143,7 +144,7 @@ namespace Dmrg {
 			throw std::runtime_error(s.c_str());
 		}
 
-		void update(size_t qn,const PairType& sites)
+		void update(size_t qn,const PairType& sites,size_t seed)
 		{
 			std::vector<size_t> currentSites;
 			currentSites.push_back(sites.first);
@@ -153,9 +154,8 @@ namespace Dmrg {
 				if (sites.first!=1)
 					throw std::runtime_error("MettsStochastics::update(...): must start from 0\n");
 				pureStates_.resize(sites.second+2);
-				for (size_t i=0;i<pureStates_.size();i++)
-					pureStates_[i] = size_t(random48_()*model_.hilbertSize(i));
-				getStochasticsAll(qn);
+				initialSetOfPures(seed);
+				getStochasticsAll(qn,seed);
 				addedSites_.push_back(sites.first-1);
 				addedSites_.push_back(sites.second+1);
 				currentSites.push_back(sites.first-1);
@@ -192,7 +192,6 @@ namespace Dmrg {
 			collapseBasisWeights *= norm1;
 		}
 
-
 	private:
 
 		void basisForOneSite(std::vector<size_t>& quantumNumbsOneSite,HilbertBasisType& basisOfOneSite,size_t site) const
@@ -219,10 +218,11 @@ namespace Dmrg {
 // 			}
 // 		}
 
-		void getStochasticsAll(size_t qn)
+		void getStochasticsAll(size_t qn,size_t seed)
 		{
 			size_t allSites = model_.geometry().numberOfSites();
 			assert(allSites==pureStates_.size());
+			size_t nk = model_.hilbertSize(0);
 			size_t symm = getSymmetryAllSites();
 			size_t counter = 0;
 			while(symm!=qn) {
@@ -235,14 +235,15 @@ namespace Dmrg {
 					throw std::runtime_error(s.c_str());
 				}
 				for (size_t i=0;i<allSites;i++) {
-					size_t thisSite = i;
-					raiseOrLowerSymm(thisSite,(symm<qn));
+					size_t thisSite = size_t(random48_()*allSites);
+					raiseOrLowerSymm(thisSite,(symm<qn),nk);
 					symm = getSymmetryAllSites();
 					if (symm==qn) break;
 				}
 			}
 			std::ostringstream msg;
-			msg<<"targetQn="<<qn<<" sites="<<addedSites_.size()<<" Pure=";
+			msg<<"targetQn="<<qn<<" sites="<<addedSites_.size();
+			msg<<" seed="<<seed<<" Pure=";
 			for (size_t i=0;i<pureStates_.size();i++)
 				msg<<pureStates_[i]<<" ";
 			progress_.printline(msg,std::cout);
@@ -280,15 +281,18 @@ namespace Dmrg {
 
 		// assumes states in basisOfOneSite_ are ordered in increasing
 		// symmetry
-		void raiseOrLowerSymm(size_t site,bool raiseSymm)
+		void raiseOrLowerSymm(size_t site,bool raiseSymm,size_t nk)
 		{
 			if (raiseSymm) {
 				if (pureStates_[site]<model_.hilbertSize(site)-1)
 					pureStates_[site]++;
+				else
+					pureStates_[site]=0;
 				return;
 			}
 			
 			if (pureStates_[site]>0) pureStates_[site]--;
+			else pureStates_[site] = nk-1;
 		}
 
 		// assumes local symmetry througout
@@ -317,6 +321,27 @@ namespace Dmrg {
 				sum += quantumNumbsOneSite[pureStates_[i]];
 			}
 			return sum;
+		}
+
+		void initialSetOfPures(LongType seed)
+		{
+//			size_t nk = model_.hilbertSize(0);
+//			for (size_t i=0;i<pureStates_.size();i++) {
+//				pureStates_[i] = getState(i,nk,seed);
+//			}
+
+			for (size_t i=0;i<pureStates_.size();i++)
+				pureStates_[i] = size_t(random48_()*model_.hilbertSize(i));
+		}
+
+		size_t getState(size_t i,size_t nk,LongType seed) const
+		{
+			size_t myshift = nk*i;
+			seed >>= myshift;
+			size_t mask = 1;
+			mask <<= nk;
+			mask --;
+			return (seed & mask);
 		}
 
 		const ModelType& model_;
