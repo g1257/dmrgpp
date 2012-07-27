@@ -139,6 +139,12 @@ namespace Dmrg {
 			  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 		{
 			setPauliMatrix();
+			if (modelParameters_.potentialV.size()!=4*geometry.numberOfSites()) {
+				std::string str(__FILE__);
+				str += " " + ttos(__LINE__) + "\n";
+				str += "potentialV length must be 4 times the number of sites\n";
+				throw std::runtime_error(str.c_str());
+			}
 		}
 
 // 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
@@ -664,8 +670,10 @@ namespace Dmrg {
 
 			size_t linSize = geometry_.numberOfSites();
 
-			hmatrix += modelParameters_.potentialV[actualIndexOfSite + 0*linSize] * nup;
-			hmatrix += modelParameters_.potentialV[actualIndexOfSite  + 1*linSize] * ndown;
+			size_t iUp = actualIndexOfSite + (orbital + 0*NUMBER_OF_ORBITALS)*linSize;
+			hmatrix += modelParameters_.potentialV[iUp] * nup;
+			size_t iDown = actualIndexOfSite + (orbital + 1*NUMBER_OF_ORBITALS)*linSize;
+			hmatrix += modelParameters_.potentialV[iDown] * ndown;
 		}
 
 		SparseMatrixType n(const SparseMatrixType& c) const

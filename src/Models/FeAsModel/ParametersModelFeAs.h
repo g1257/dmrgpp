@@ -94,9 +94,9 @@ namespace Dmrg {
 		ParametersModelFeAs(IoInputType& io)
 		: magneticField(0,0)
 		{
-	
 			io.read(hubbardU,"hubbardU");
 			io.read(potentialV,"potentialV");
+
 			try {
 				io.readMatrix(magneticField,"MagneticField");
 			} catch (std::exception& e) {
