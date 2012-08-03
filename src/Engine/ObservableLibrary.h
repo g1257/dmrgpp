@@ -342,6 +342,7 @@ namespace Dmrg {
 
 		void onePointHookForZero(size_t i0,const OperatorType& opA,const std::string& gsOrTime)
 		{
+			if (hasTimeEvolution_) return;
 			if (observe_.site()!=1 || observe_.isAtCorner(numberOfSites_)) return;
 			assert(observe_.site()==1);
 			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(i0,opA);

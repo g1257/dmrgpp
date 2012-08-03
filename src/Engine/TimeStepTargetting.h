@@ -163,7 +163,7 @@ namespace Dmrg {
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
 				size_t n = times_.size();
-				RealType factor = (n+4.0)/(n+2.0);
+				RealType factor = 1.0;
 				for (size_t i=0;i<n;i++) {
 					times_[i] = i*tau/(n-1);
 					weight_[i] = factor/(n+4);
@@ -178,7 +178,6 @@ namespace Dmrg {
 				gsWeight_=1.0-sum;
 				sum += gsWeight_;
 				assert(fabs(sum-1.0)<1e-5);
-				std::cerr<<"GSWEIGHT="<<gsWeight_<<"\n";
 			}
 
 			RealType weight(size_t i) const
@@ -215,14 +214,7 @@ namespace Dmrg {
 
 			const VectorWithOffsetType& gs() const { return psi_; }
 
-			bool includeGroundStage() const
-			{
-				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
-				if (!b) return true;
-				b = (fabs(gsWeight_)>1e-6);
-				std::cerr<<"includeGroundState="<<b<<"\n";
-				return b;
-			}
+			bool includeGroundStage() const {return true; }
 
 			const RealType& time() const {return currentTime_; }
 
