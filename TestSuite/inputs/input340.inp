@@ -25,7 +25,10 @@ Connectors 1 0.1
 Connectors 1 0.02
 Connectors 1 0.02 
 hubbardU	4 0.0 0.0 0.0 0.0 
-potentialV	8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+potentialV	32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+                   0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+                   0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+                   0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=FeAsBasedScExtended
 SolverOptions=none
 Version=61289987cdd32b8485213ac0415baf4e9cd16432

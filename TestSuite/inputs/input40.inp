@@ -17,7 +17,10 @@ Connectors 2 2
 +0.20828 -0.079
 -0.079 +0.20828
 hubbardU	4 0.0 0.0 0.0 0.0 
-potentialV	8 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+potentialV	32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+                   0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+                   0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+                   0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=FeAsBasedSc
 SolverOptions=nowft,useSu2Symmetry
 Version=61289987cdd32b8485213ac0415baf4e9cd16432
