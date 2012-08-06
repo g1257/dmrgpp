@@ -982,17 +982,9 @@ namespace Dmrg {
 			          const PairType& sites) const
 			{
 				VectorWithOffsetType dest;
-				OperatorType A;
-				size_t site = 0; // sites.first; <-- site-dependent Hilbert space not supported by METTS
-				PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("nup",site,0));
-				A.data = tmpC;
-//				PsimagLite::CrsMatrix<RealType> tmpCt;
-//				transposeConjugate(tmpCt,tmpC);
-//				multiply(A.data,tmpCt,tmpC);
-				A.fermionSign = 1;
-				//A.data = tmpC;
-				typename ModelType::HilbertBasisType basis;
-				std::vector<size_t> quantumNumbs;
+				OperatorType A = getObservableToTest(model_.params().model);
+//				typename ModelType::HilbertBasisType basis;
+//				std::vector<size_t> quantumNumbs;
 //				assert(sites.first==sites.second);
 				std::vector<size_t> electrons;
 				findElectronsOfOneSite(electrons,sites.first);
@@ -1015,6 +1007,31 @@ namespace Dmrg {
 				std::cerr<<sites.first<<" "<<sum<<" "<<" "<<currentBeta_;
 				std::cerr<<" "<<label<<" "<<nor<<" "<<std::norm(src2);
 				std::cerr<<" "<<std::norm(dest)<<"    "<<sum/(nor*nor)<<"\n";
+			}
+
+			OperatorType getObservableToTest(const std::string& modelName) const
+			{
+				OperatorType A;
+				size_t site = 0; // sites.first; <-- site-dependent Hilbert space not supported by METTS
+
+				if (modelName=="HubbardOneBand") {
+					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("nup",site,0));
+					A.data = tmpC;
+					A.fermionSign = 1;
+					return A;
+				}
+				if (modelName=="FeAsBasedSc" || modelName=="FeAsBasedScExtended") {
+					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("c",site,0));
+					PsimagLite::CrsMatrix<RealType> tmpCdagger;
+					transposeConjugate(tmpCdagger,tmpC);
+					multiply(A.data,tmpCdagger,tmpC);
+					A.fermionSign = 1;
+					return A;
+				}
+				std::string s(__FILE__);
+				s += " " + ttos(__LINE__) + "\n";
+				s += "Model " + modelName + " not supported by MettsTargetting\n";
+				throw std::runtime_error(s.c_str());
 			}
 
 			size_t stage_;

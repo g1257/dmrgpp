@@ -258,6 +258,13 @@ namespace Dmrg {
 				crsMatrixToFullMatrix(tmp,atmp);
 				return tmp;
 			}
+			if (what=="identity") {
+				assert(creationMatrix.size()>0);
+				size_t row1 = creationMatrix[0].data.row();
+				PsimagLite::Matrix<SparseElementType> tmp(row1,row1);
+				for (size_t i=0;i<tmp.n_row();i++) tmp(i,i) = 1.0;
+				return tmp;
+			}
 			std::cerr<<"what="<<what<<"\n";
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 		}
