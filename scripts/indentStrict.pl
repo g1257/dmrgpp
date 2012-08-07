@@ -19,6 +19,8 @@ my @mystack;
 my $sizeOfTabs = 4;
 my $comment = 0;
 my @tooLongLines;
+my $namespacesOpen = 0;
+my $lastLabel = "NO_LABEL";
 
 my $fout = "tmp.txt";
 open(FILE,$file) or die "Cannot open file $file: $!\n";
@@ -175,6 +177,7 @@ while(<FILE>) {
 	$parensBalance += ($parensOpen - $parensClosed);
 
 	my $label = getLabel($_);
+
 	if ($co==0 and !$hasSemicolonAtTheEnd) {
 		if ($label eq "if" or $label eq "for" or $label eq "else" or $label eq "foreach") {
 			$parensBalance = $parensOpen - $parensClosed;
@@ -195,7 +198,7 @@ while(<FILE>) {
 	}
 	my $tmpLevel = $indentLevel;
 	$indentLevel += ($co-$cc);
-	print STDERR "Line $.: tmplevel= $tmpLevel indentLevel= $indentLevel balance=$parensBalance co=$co cc=$cc\n";
+	print STDERR "Line $.: tmplevel= $tmpLevel indentLevel= $indentLevel balance=$parensBalance co=$co cc=$cc label=$label\n";
 	$tmpLevel = $indentLevel if ($co<$cc and !$braceAtTheEnd);
 	$tmpLevel-- if ($tmpLevel>0 and $label eq "else" and $co>0);
 	
@@ -206,10 +209,19 @@ while(<FILE>) {
 	if (/public\:/ || /private\:/ || /protected\:/ || /case [^\:]+\:/  || /default\:/) {
 		$tmpLevel-- if ($tmpLevel>0);
 	}
+
+	#close namespace if needed
+	if ($tmpLevel<$namespacesOpen) {
+		print STDERR "Closing namespace namespacesOpen = $namespacesOpen\n";
+		$namespacesOpen -= ($tmpLevel+1);
+	}
 	# check trailing whitespace
 	my $w = $_;
 	$w =~ /(^[ \t]*)(.*$)/;	
-	checkTrailingWhite($1,$tmpLevel);
+	checkTrailingWhite($1,$tmpLevel,$label);
+
+	$namespacesOpen++ if ($label eq "namespace" and length($o)>0);
+
 	print FOUT $lforEcho;
 }
 close(FILE);
@@ -245,7 +257,7 @@ sub printWarnings
 
 sub checkTrailingWhite
 {
-	my ($w,$inLevel) = @_;
+	my ($w,$inLevel,$label) = @_;
 	# space before tabs is an error:
 	if ($w =~ / \t/) {
 		$lforEcho =~ s/(^ +)\t/\t/;
@@ -254,7 +266,8 @@ sub checkTrailingWhite
 	my $tbs = $w;
 	$tbs =~ s/[^\t]//g;
 	my $ctbs = length($tbs);
-	($ctbs==$inLevel) or die "FATAL: Indentation level $inLevel tabs $ctbs, for line $line\n";
+	$inLevel -= $namespacesOpen;
+	($ctbs==$inLevel) or die "$0: FATAL: Indentation level $inLevel tabs $ctbs, for line $line label=$label\n";
 }
 
 sub getLabel
@@ -262,13 +275,16 @@ sub getLabel
 	my ($t)=@_;
 	my $tt = $t;
 	$tt =~ s/\".+\"//;
-	my $label = "function";
-	$label = "class" if ($tt=~/[^a-zA-Z]class[^a-zA-Z]/);
-	$label = "if" if ($tt=~/[^a-zA-Z]if[^a-zA-Z]/);
-	$label = "for" if ($tt=~/[^a-zA-Z]for[^a-zA-Z]/);
-	$label = "foreach" if ($tt=~/[^a-zA-Z]foreach[^a-zA-Z]/);
-	$label = "else" if ($tt=~/[^a-zA-Z]else[^a-zA-Z]/);
-	$label = "enum" if ($tt=~/[^a-zA-Z]enum[^a-zA-Z]/);
-	$label = "switch" if ($tt=~/[^a-zA-Z]switch[^a-zA-Z]/);
+	my $label = $lastLabel;
+	$label = "class" if ($tt=~/[^a-zA-Z]*class[^a-zA-Z]/);
+	$label = "namespace" if ($tt=~/[^a-zA-Z]*namespace[^a-zA-Z]/); 
+	$label = "if" if ($tt=~/[^a-zA-Z]*if[^a-zA-Z]/);
+	$label = "for" if ($tt=~/[^a-zA-Z]*for[^a-zA-Z]/);
+	$label = "foreach" if ($tt=~/[^a-zA-Z]*foreach[^a-zA-Z]/);
+	$label = "else" if ($tt=~/[^a-zA-Z]*else[^a-zA-Z]/);
+	$label = "enum" if ($tt=~/[^a-zA-Z]*enum[^a-zA-Z]/);
+	$label = "switch" if ($tt=~/[^a-zA-Z]*switch[^a-zA-Z]/);
+	$label = "function" if ($tt=~/\(/);
+	$lastLabel = $label;
 	return $label;
 }
