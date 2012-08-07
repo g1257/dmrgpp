@@ -183,7 +183,7 @@ namespace PsimagLite {
 				dirs_ = 2;
 				maxConnections_=4;
 				io.readline(x,"LadderLeg=");
-				if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
+				if (x!=2) std::cerr<<"WARNING: LadderLeg!=2 is experimental!\n";
 				ladder_ = new Ladder(linSize,x);
 				break;
 			case LADDERX:

@@ -203,7 +203,7 @@ while(<FILE>) {
 	$braceAtTheEnd = 0;
 	
 	#check for public or private:
-	if (/public\:/ || /private\:/ || /protected\:/ || /case [^\:]+\:/) {
+	if (/public\:/ || /private\:/ || /protected\:/ || /case [^\:]+\:/  || /default\:/) {
 		$tmpLevel-- if ($tmpLevel>0);
 	}
 	# check trailing whitespace

@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <fstream>
 #include <iostream>
 #include <cassert>
-#include <vector>
+#include "Vector.h"
 #include <cstdlib>
 #include <map>
 #include "Matrix.h"
@@ -292,8 +292,8 @@ public:
 			size_t adjExpected = atoi(numericVector_[0].c_str());
 
 			if (!inputCheck_.check(lastLabel_,numericVector_,line_) && numericVector_.size()!=adjExpected+1) {
-				std::cout<<" Number of numbers to follow is wrong, expected ";
-				std::cout<<(numericVector_.size()-1)<<" got "<<adjExpected<<"\n";
+				std::cout<<" Number of numbers to follow is wrong, expected "<<adjExpected<<" got ";
+				std::cout<<(numericVector_.size()-1)<<"\n";
 				std::cerr<<"Line="<<line_<<"\n";
 				throw std::runtime_error(s.c_str());
 			}

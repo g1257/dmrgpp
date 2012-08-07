@@ -186,6 +186,7 @@ namespace PsimagLite {
 			friend std::ostream& operator<<(std::ostream& os,const Geometry<RealType2,PgType>& g);
 
 		private:
+
 			size_t linSize_;
 			std::vector<GeometryTermType> terms_;
 			

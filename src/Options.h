@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 #include "Split.h"
 
 namespace PsimagLite {

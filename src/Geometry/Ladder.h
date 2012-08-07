@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 2.4.0]
@@ -68,9 +67,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -91,6 +89,7 @@ namespace PsimagLite {
 
 		Ladder(size_t linSize,size_t leg) : linSize_(linSize),leg_(leg)
 		{
+			if (leg & 1) throw std::runtime_error("Ladder: leg must be even\n");
 		}
 
 		size_t getVectorSize(size_t dirId) const
@@ -99,7 +98,6 @@ namespace PsimagLite {
 			else if (dirId==DIRECTION_Y) return linSize_ - linSize_/leg_;
 
 			throw std::runtime_error("Unknown direction\n");
-
 		}
 
 		bool connected(size_t i1,size_t i2) const
@@ -123,10 +121,26 @@ namespace PsimagLite {
 
 		bool fringe(size_t i,size_t smax,size_t emin) const
 		{
-			bool a = (i<emin && i>=smax-1);
-			bool b = (i>smax && i<=emin+1);
-			return (a || b);
+			size_t c = smax % leg_;
+			size_t r = 2 + 2*c;
+			if (c>=leg_/2) r = r - leg_;
 
+			if (smax+1 == emin) r = leg_; // finite loops
+
+			bool a = (i<emin && i>=smax - r + 1);
+			bool b = (i>smax && i<=emin + r - 1);
+			return (a || b);
+		}
+
+		// siteEnv is fringe in the environment
+		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteEnv) const
+		{
+			if (smax+1 == emin) return siteEnv; // finite loops
+
+//			size_t c = smax % leg_;
+			size_t s = int(emin/leg_) - int(smax/leg_);
+//			if (c>=leg_/2) s++;
+			return  siteEnv - s*leg_;
 		}
 
 		size_t handle(size_t i1,size_t i2) const
@@ -140,12 +154,6 @@ namespace PsimagLite {
 				return imin-imin/leg_;
 			}
 			throw std::runtime_error("hanlde: Unknown direction\n");
-		}
-
-		// siteNew2 is fringe in the environment
-		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
-		{
-			return smax+siteNew2-emin+1;
 		}
 
 		bool sameColumn(size_t i1,size_t i2) const
