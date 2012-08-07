@@ -137,9 +137,10 @@ namespace PsimagLite {
 		{
 			if (smax+1 == emin) return siteEnv; // finite loops
 
-//			size_t c = smax % leg_;
+			size_t c = smax % leg_;
 			size_t s = int(emin/leg_) - int(smax/leg_);
-//			if (c>=leg_/2) s++;
+			assert(s>0);
+			if (c>=leg_/2) s--;
 			return  siteEnv - s*leg_;
 		}
 
