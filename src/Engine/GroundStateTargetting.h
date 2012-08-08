@@ -188,10 +188,16 @@ namespace Dmrg {
 			            const BlockType& block2,
 			            size_t loopNumber)
 			{
-				if (!BasisType::useSu2Symmetry())
+				if (BasisType::useSu2Symmetry()) {
+					noCocoon("not when Su(2) symmetry is in use");
+					return;
+				}
+
+				try {
 					cocoon(direction,block1);
-				else
-					noCocoon();
+				} catch (std::exception& e) {
+					noCocoon("unsupported by the model");
+				}
 			}
 
 			const LeftRightSuperType& leftRightSuper() const
@@ -239,10 +245,10 @@ namespace Dmrg {
 
 		private:
 
-			void noCocoon() const
+			void noCocoon(const std::string& msg) const
 			{
 				std::cout<<"-------------&*&*&* In-situ measurements start\n";
-				std::cout<<"----- NO COCOON WHEN SU(2) SYMMETRY IS IN USE (sorry)\n";
+				std::cout<<"----- NO COCOON POSSIBLE, reason="<<msg<<"\n";
 				std::cout<<"-------------&*&*&* In-situ measurements end\n";
 			}
 
