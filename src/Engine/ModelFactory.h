@@ -472,6 +472,15 @@ namespace Dmrg {
 			throw std::runtime_error("getConnection(...) failed\n");
 		}
 
+		void findElectronsOfOneSite(std::vector<size_t>& electrons,size_t site) const
+		{
+			std::vector<size_t> block(1,site);
+			HilbertBasisType basis;
+			std::vector<size_t> quantumNumbs;
+			setNaturalBasis(basis,quantumNumbs,block);
+			findElectrons(electrons,basis,site);
+		}
+
 
 	private:
 

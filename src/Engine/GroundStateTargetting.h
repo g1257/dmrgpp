@@ -135,8 +135,10 @@ namespace Dmrg {
 			                      const WaveFunctionTransfType& wft,  // wft is ignored here
 			                      const size_t& quantumSector) // quantumSector is ignored here
 			: lrs_(lrs),
+			  model_(model),
 			  waveFunctionTransformation_(wft),
-			  progress_("GroundStateTargetting",0)
+			  progress_("GroundStateTargetting",0),
+			  applyOpLocal_(lrs)
 			{
 			}
 
@@ -186,7 +188,10 @@ namespace Dmrg {
 			            const BlockType& block2,
 			            size_t loopNumber)
 			{
-				// Nothing to see here
+				if (!BasisType::useSu2Symmetry())
+					cocoon(direction,block1);
+				else
+					noCocoon();
 			}
 
 			const LeftRightSuperType& leftRightSuper() const
@@ -233,10 +238,82 @@ namespace Dmrg {
 			}
 
 		private:
-			VectorWithOffsetType psi_;
+
+			void noCocoon() const
+			{
+				std::cout<<"-------------&*&*&* In-situ measurements start\n";
+				std::cout<<"----- NO COCOON WHEN SU(2) SYMMETRY IS IN USE (sorry)\n";
+				std::cout<<"-------------&*&*&* In-situ measurements end\n";
+			}
+
+			// in situ computation:
+			void cocoon(size_t direction,const BlockType& block) const
+			{
+				size_t site = block[0];
+				PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("nup",0,0));
+				int fermionSign1 = 1;
+				const std::pair<size_t,size_t> jm1(0,0);
+				RealType angularFactor1 = 1.0;
+				typename OperatorType::Su2RelatedType su2Related1;
+				OperatorType nup(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
+
+				nup.data = tmpC;
+				nup.fermionSign = 1;
+
+				std::cout<<"-------------&*&*&* In-situ measurements start\n";
+				test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
+//				std::string s = "<P0|nup|P0>";
+//				test(targetVectors_[0],targetVectors_[0],direction,s,site,nup);
+
+				PsimagLite::CrsMatrix<RealType> tmpC2(model_.naturalOperator("ndown",0,0));
+				OperatorType ndown(tmpC2,fermionSign1,jm1,angularFactor1,su2Related1);
+				test(psi_,psi_,direction,"<PSI|ndown|PSI>",site,ndown);
+//				s = "<P0|ndown|P0>";
+//				test(psi_,targetVectors_[0],direction,s,site,ndown);
+
+				PsimagLite::CrsMatrix<RealType> tmpC3 = tmpC * tmpC2;
+				OperatorType doubleOcc(tmpC3,fermionSign1,jm1,angularFactor1,su2Related1);
+				test(psi_,psi_,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc);
+
+				std::cout<<"-------------&*&*&* In-situ measurements end\n";
+			}
+
+			void test(const VectorWithOffsetType& src1,
+					  const VectorWithOffsetType& src2,
+					  size_t systemOrEnviron,
+					  const std::string& label,
+					  size_t site,
+					  const OperatorType& A) const
+			{
+				std::vector<size_t> electrons;
+				model_.findElectronsOfOneSite(electrons,site);
+				FermionSign fs(lrs_.left(),electrons);
+				VectorWithOffsetType dest;
+				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
+
+				RealType sum = 0;
+				for (size_t ii=0;ii<dest.sectors();ii++) {
+					size_t i = dest.sector(ii);
+					size_t offset1 = dest.offset(i);
+					for (size_t jj=0;jj<src2.sectors();jj++) {
+						size_t j = src2.sector(jj);
+						size_t offset2 = src2.offset(j);
+						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+						for (size_t k=0;k<dest.effectiveSize(i);k++)
+							sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
+					}
+				}
+				std::cout<<site<<" "<<sum<<" "<<" 0";
+				std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
+			}
+
 			const LeftRightSuperType& lrs_;
+			const ModelType& model_;
 			const WaveFunctionTransfType& waveFunctionTransformation_;
+			VectorWithOffsetType psi_;
 			PsimagLite::ProgressIndicator progress_;
+			ApplyOperatorType applyOpLocal_;
+
 	};     //class GroundStateTargetting
 
 	template<

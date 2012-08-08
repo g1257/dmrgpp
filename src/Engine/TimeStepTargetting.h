@@ -521,15 +521,6 @@ namespace Dmrg {
 				return "undefined";
 			}
 
-			void findElectronsOfOneSite(std::vector<size_t>& electrons,size_t site) const
-			{
-				std::vector<size_t> block(1,site);
-				typename ModelType::HilbertBasisType basis;
-				std::vector<size_t> quantumNumbs;
-				model_.setNaturalBasis(basis,quantumNumbs,block);
-				model_.findElectrons(electrons,basis,site);
-			}
-
 			void computePhi(size_t i,VectorWithOffsetType& phiNew,
 					const VectorWithOffsetType& phiOld,size_t systemOrEnviron,size_t site)
 			{
@@ -541,7 +532,7 @@ namespace Dmrg {
 					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
 					std::vector<size_t> electrons;
-					findElectronsOfOneSite(electrons,site);
+					model_.findElectronsOfOneSite(electrons,site);
 					FermionSign fs(lrs_.left(),electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
 //					std::cerr<<"APPLYING OPERATOR --> NORM of phiNew="<<norm(phiNew)<<" NORM of phiOld="<<norm(phiOld)<<" when i="<<i<<"\n";
@@ -953,7 +944,7 @@ namespace Dmrg {
 			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron,size_t site)
 			{
 				std::vector<size_t> electrons;
-				findElectronsOfOneSite(electrons,site);
+				model_.findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
 				if (allStages(WFT_NOADVANCE)) {
 					VectorWithOffsetType tmpVector = psi_;
@@ -992,7 +983,7 @@ namespace Dmrg {
 				  const OperatorType& A) const
 			{
 				std::vector<size_t> electrons;
-				findElectronsOfOneSite(electrons,site);
+				model_.findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
 				VectorWithOffsetType dest;
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);

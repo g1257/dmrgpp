@@ -245,6 +245,10 @@ namespace Dmrg {
 		template<typename FieldType2>
 		friend FieldType2 std::norm(const Dmrg::VectorWithOffset<std::complex<FieldType2> >& v);
 
+		template<typename FieldType2>
+		friend FieldType2 operator*(const Dmrg::VectorWithOffset<FieldType2>& v1,
+									const Dmrg::VectorWithOffset<FieldType2>& v2);
+
 		template<typename FieldType3,typename FieldType2>
 		friend VectorWithOffset<FieldType2> operator*(const FieldType3& value,const VectorWithOffset<FieldType2>& v);
 		
@@ -291,13 +295,20 @@ namespace Dmrg {
 	template<typename FieldType>
 	const FieldType VectorWithOffset<FieldType>::zero_=0;
 
-	template<typename FieldType>
-	std::ostream& operator<<(std::ostream& os,const VectorWithOffset<FieldType>& s)
-	{
-		s.print(os,"VectorWithOffset");
-		return os;
-	}
+//	template<typename FieldType>
+//	std::ostream& operator<<(std::ostream& os,const VectorWithOffset<FieldType>& s)
+//	{
+//		s.print(os,"VectorWithOffset");
+//		return os;
+//	}
 	
+	template<typename FieldType>
+	inline FieldType operator*(const Dmrg::VectorWithOffset<FieldType>& v1,
+							   const Dmrg::VectorWithOffset<FieldType>& v2)
+	{
+		return (v1.data_ * v2.data_);
+	}
+
 	template<typename FieldType,typename FieldType2>
 	inline VectorWithOffset<FieldType2> operator*(const FieldType& value,const VectorWithOffset<FieldType2>& v)
 	{
