@@ -189,10 +189,14 @@ int main(int argc,char *argv[])
 	int opt = 0;
 	std::string strUsage(argv[0]);
 	strUsage += " -f filename";
-	while ((opt = getopt(argc, argv,"f:")) != -1) {
+	std::string insitu("");
+	while ((opt = getopt(argc, argv,"f:o:")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
+			break;
+		case 'o':
+			insitu = optarg;
 			break;
 		default:
 			inputCheck.usageMain(strUsage);
@@ -222,6 +226,8 @@ int main(int argc,char *argv[])
 	GeometryType geometry(io);
 
 	ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> dmrgSolverParams(io);
+
+	if (insitu!="") dmrgSolverParams.insitu = insitu;
 
 #ifndef USE_PTHREADS
 	inputCheck.checkForThreads(dmrgSolverParams.nthreads);

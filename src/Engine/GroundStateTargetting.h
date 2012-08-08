@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GroundStateParams.h"
 #include "ApplyOperatorLocal.h"
 #include <stdexcept>
+#include "Tokenizer.h"
 
 namespace Dmrg {
 
@@ -188,8 +189,10 @@ namespace Dmrg {
 			            const BlockType& block2,
 			            size_t loopNumber)
 			{
+				if (model_.params().insitu=="") return;
+
 				if (BasisType::useSu2Symmetry()) {
-					noCocoon("not when Su(2) symmetry is in use");
+					noCocoon("not when SU(2) symmetry is in use");
 					return;
 				}
 
@@ -248,7 +251,7 @@ namespace Dmrg {
 			void noCocoon(const std::string& msg) const
 			{
 				std::cout<<"-------------&*&*&* In-situ measurements start\n";
-				std::cout<<"----- NO COCOON POSSIBLE, reason="<<msg<<"\n";
+				std::cout<<"----- NO IN-SITU MEAS. POSSIBLE, reason="<<msg<<"\n";
 				std::cout<<"-------------&*&*&* In-situ measurements end\n";
 			}
 
@@ -256,30 +259,22 @@ namespace Dmrg {
 			void cocoon(size_t direction,const BlockType& block) const
 			{
 				size_t site = block[0];
-				PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("nup",0,0));
 				int fermionSign1 = 1;
 				const std::pair<size_t,size_t> jm1(0,0);
 				RealType angularFactor1 = 1.0;
 				typename OperatorType::Su2RelatedType su2Related1;
-				OperatorType nup(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
-
-				nup.data = tmpC;
-				nup.fermionSign = 1;
 
 				std::cout<<"-------------&*&*&* In-situ measurements start\n";
-				test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
-//				std::string s = "<P0|nup|P0>";
-//				test(targetVectors_[0],targetVectors_[0],direction,s,site,nup);
 
-				PsimagLite::CrsMatrix<RealType> tmpC2(model_.naturalOperator("ndown",0,0));
-				OperatorType ndown(tmpC2,fermionSign1,jm1,angularFactor1,su2Related1);
-				test(psi_,psi_,direction,"<PSI|ndown|PSI>",site,ndown);
-//				s = "<P0|ndown|P0>";
-//				test(psi_,targetVectors_[0],direction,s,site,ndown);
-
-				PsimagLite::CrsMatrix<RealType> tmpC3 = tmpC * tmpC2;
-				OperatorType doubleOcc(tmpC3,fermionSign1,jm1,angularFactor1,su2Related1);
-				test(psi_,psi_,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc);
+				std::vector<std::string> vecStr;
+				PsimagLite::tokenizer(model_.params().insitu,vecStr,",");
+				for (size_t i=0;i<vecStr.size();i++) {
+					const std::string& opLabel = vecStr[i];
+					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator(opLabel,0,0));
+					OperatorType nup(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
+					std::string tmpStr = "<PSI|" + opLabel + "|PSI>";
+					test(psi_,psi_,direction,tmpStr,site,nup);
+				}
 
 				std::cout<<"-------------&*&*&* In-situ measurements end\n";
 			}

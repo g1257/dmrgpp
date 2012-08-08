@@ -295,6 +295,7 @@ namespace Dmrg {
 		size_t nthreads;
 		int useReflectionSymmetry;
 		std::string fileForDensityMatrixEigs;
+		std::string insitu;
 
 		//! Read Dmrg parameters from inp file
 		ParametersDmrgSolver(InputValidatorType& io)
@@ -416,8 +417,11 @@ namespace Dmrg {
 				io.readline(fileForDensityMatrixEigs,"FileForDensityMatrixEigs=");
 			} catch (std::exception& e) {}
 
-		} 
-
+			insitu = "";
+			try {
+				io.readline(insitu,"insitu=");
+			} catch (std::exception& e) {}
+		}
 	};
 
 	//! print dmrg parameters
