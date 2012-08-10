@@ -86,14 +86,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 	
 	class LadderBath  {
+
 			typedef std::pair<int,int> PairType;
 			typedef Ladder LadderType;
-		public:
+
+			static const bool IS_PERIODIC_Y = false;
+
+	public:
 			enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_BATH};
 
 			LadderBath(size_t linSize,size_t leg,size_t bathSitesPerSite) :
 				linSize_(linSize),bathSitesPerSite_(bathSitesPerSite),
-				clusterSize_(linSize_/(1+bathSitesPerSite_)),ladder_(clusterSize_,leg)
+				clusterSize_(linSize_/(1+bathSitesPerSite_)),ladder_(clusterSize_,leg,IS_PERIODIC_Y)
 			{
 			}
 

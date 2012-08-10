@@ -91,7 +91,10 @@ namespace PsimagLite {
 		public:
 			enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_XPY,DIRECTION_XMY};
 
-			LadderX(size_t linSize,size_t leg) : ladder_(linSize,leg),linSize_(linSize),leg_(leg)
+			static const bool IS_PERIODIC_Y = false;
+
+			LadderX(size_t linSize,size_t leg)
+			: ladder_(linSize,leg,IS_PERIODIC_Y),linSize_(linSize),leg_(leg)
 			{
 			}
 

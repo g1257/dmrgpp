@@ -87,15 +87,18 @@ namespace PsimagLite {
 	public:
 		enum {DIRECTION_X,DIRECTION_Y};
 
-		Ladder(size_t linSize,size_t leg) : linSize_(linSize),leg_(leg)
+		Ladder(size_t linSize,size_t leg,bool isPeriodicY)
+		: linSize_(linSize),leg_(leg),isPeriodicY_(isPeriodicY)
 		{
 			if (leg & 1) throw std::runtime_error("Ladder: leg must be even\n");
+			if (leg == 2)  isPeriodicY_ = false;
+			if (leg>2) std::cerr<<"isPeriodicY="<<isPeriodicY_<<"\n";
 		}
 
 		size_t getVectorSize(size_t dirId) const
 		{
 			if (dirId==DIRECTION_X) return linSize_-leg_;
-			else if (dirId==DIRECTION_Y) return linSize_ - linSize_/leg_;
+			else if (dirId==DIRECTION_Y) return (isPeriodicY_) ? linSize_ : linSize_ - linSize_/leg_;
 
 			throw std::runtime_error("Unknown direction\n");
 		}
@@ -107,14 +110,14 @@ namespace PsimagLite {
 			size_t c2 = i2/leg_;
 			size_t r1 = i1%leg_;
 			size_t r2 = i2%leg_;
-			if (c1==c2) return GeometryUtils::neighbors(r1,r2);
+			if (c1==c2) return GeometryUtils::neighbors(r1,r2,isPeriodicY_,leg_-1);
 			if (r1==r2) return GeometryUtils::neighbors(c1,c2);
 			return false;
 		}
 
 		size_t calcDir(size_t i1,size_t i2) const
 		{
-			if (!connected(i1,i2)) throw std::runtime_error("Calcdir\n");
+			assert(connected(i1,i2));
 			if (sameColumn(i1,i2)) return DIRECTION_Y;
 			return DIRECTION_X;
 		}
@@ -148,11 +151,14 @@ namespace PsimagLite {
 		{
 			size_t dir = calcDir(i1,i2);
 			size_t imin = (i1<i2) ? i1 : i2;
+			size_t y = imin/leg_;
 			switch(dir) {
 			case DIRECTION_X:
 				return imin;
 			case DIRECTION_Y:
-				return imin-imin/leg_;
+				if (!isPeriodicY_) return imin-imin/leg_;
+				if (imin ==0 || imin % leg_ == 0) imin = (i1>i2) ? i1 : i2;
+				return imin-imin/leg_ + y;
 			}
 			throw std::runtime_error("hanlde: Unknown direction\n");
 		}
@@ -187,6 +193,7 @@ namespace PsimagLite {
 
 		size_t linSize_;
 		size_t leg_;
+		bool isPeriodicY_;
 	}; // class Ladder
 } // namespace PsimagLite 
 

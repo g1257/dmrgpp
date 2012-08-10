@@ -173,6 +173,7 @@ namespace PsimagLite {
 		{
 			n_=getGeometry(s);
 			int x=0,tmp=0;
+			int periodicY = 0;
 			switch (n_) {
 			case CHAIN:
 				dirs_ = 1;
@@ -183,8 +184,11 @@ namespace PsimagLite {
 				dirs_ = 2;
 				maxConnections_=4;
 				io.readline(x,"LadderLeg=");
-				if (x!=2) std::cerr<<"WARNING: LadderLeg!=2 is experimental!\n";
-				ladder_ = new Ladder(linSize,x);
+				if (x!=2) {
+					std::cerr<<"WARNING: LadderLeg!=2 is experimental!\n";
+					io.readline(periodicY,"PeriodicY=");
+				}
+				ladder_ = new Ladder(linSize,x,(periodicY>0));
 				break;
 			case LADDERX:
 				dirs_ = 4;
