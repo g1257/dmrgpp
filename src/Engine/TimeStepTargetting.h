@@ -163,7 +163,7 @@ namespace Dmrg {
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
 				size_t n = times_.size();
-				RealType factor = 1.0;
+				RealType factor = (n+4.0)/(n+2.0);
 				for (size_t i=0;i<n;i++) {
 					times_[i] = i*tau/(n-1);
 					weight_[i] = factor/(n+4);
@@ -178,6 +178,7 @@ namespace Dmrg {
 				gsWeight_=1.0-sum;
 				sum += gsWeight_;
 				assert(fabs(sum-1.0)<1e-5);
+				std::cerr<<"GSWEIGHT="<<gsWeight_<<"\n";
 			}
 
 			RealType weight(size_t i) const
@@ -214,7 +215,14 @@ namespace Dmrg {
 
 			const VectorWithOffsetType& gs() const { return psi_; }
 
-			bool includeGroundStage() const {return true; }
+			bool includeGroundStage() const
+			{
+				if (!noStageIs(DISABLED)) return true;
+				bool b = (fabs(gsWeight_)>1e-6);
+
+				std::cerr<<"includeGroundState="<<b<<"\n";
+				return b;
+			}
 
 			const RealType& time() const {return currentTime_; }
 
@@ -461,13 +469,15 @@ namespace Dmrg {
 				std::cout<<"-------------&*&*&* In-situ measurements start\n";
 				if (noStageIs(DISABLED)) std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 				else std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
-				test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
+				if (includeGroundStage())
+					test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
 				std::string s = "<P0|nup|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,nup);
 
 				PsimagLite::CrsMatrix<ComplexType> tmpC2(model_.naturalOperator("ndown",0,0));
 				OperatorType ndown(tmpC2,fermionSign1,jm1,angularFactor1,su2Related1);
-				test(psi_,psi_,direction,"<PSI|ndown|PSI>",site,ndown);
+				if (includeGroundStage())
+					test(psi_,psi_,direction,"<PSI|ndown|PSI>",site,ndown);
 				s = "<P0|ndown|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,ndown);
 
