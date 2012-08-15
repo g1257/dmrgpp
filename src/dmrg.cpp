@@ -196,7 +196,12 @@ int main(int argc,char *argv[])
 			filename = optarg;
 			break;
 		case 'o':
-			insitu += optarg;
+			if (insitu=="") {
+				insitu = optarg;
+			} else {
+				insitu += ",";
+				insitu += optarg;
+			}
 			break;
 		default:
 			inputCheck.usageMain(strUsage);

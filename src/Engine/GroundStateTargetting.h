@@ -270,8 +270,11 @@ namespace Dmrg {
 				PsimagLite::tokenizer(model_.params().insitu,vecStr,",");
 				for (size_t i=0;i<vecStr.size();i++) {
 					const std::string& opLabel = vecStr[i];
-					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator(opLabel,0,0));
-					OperatorType nup(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
+					OperatorType nup;
+					if (!fillOperatorFromFile(nup,opLabel)) {
+						PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator(opLabel,0,0));
+						nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
+					}
 					std::string tmpStr = "<PSI|" + opLabel + "|PSI>";
 					test(psi_,psi_,direction,tmpStr,site,nup);
 				}
@@ -306,6 +309,77 @@ namespace Dmrg {
 				}
 				std::cout<<site<<" "<<sum<<" "<<" 0";
 				std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
+			}
+
+			bool fillOperatorFromFile(OperatorType& nup,const std::string& label2) const
+			{
+				if (label2.length()<2 || label2[0]!=':') return false;
+				std::string label = label2.substr(1,label2.length()-1);
+
+				std::ifstream fin(label.c_str());
+				if (!fin || fin.bad() || !fin.good()) return false;
+
+				std::string line1("");
+				fin>>line1;
+				if (fin.eof() || line1!="TSPOperator=raw") return false;
+
+				line1="";
+				fin>>line1;
+				if (fin.eof() || line1!="RAW_MATRIX") return false;
+
+				line1="";
+				fin>>line1;
+				if (fin.eof()) return false;
+
+				std::string line2("");
+				fin>>line2;
+				if (fin.eof()) return false;
+
+				int n = atoi(line1.c_str());
+				if (n!=atoi(line2.c_str()) || n<=0) return false;
+
+				PsimagLite::Matrix<RealType> m(n,n);
+				for (int i=0;i<n;i++) {
+					for (int j=0;j<n;j++) {
+						line1="";
+						fin>>line1;
+						if (fin.eof()) return false;
+						m(i,j) = atof(line1.c_str());
+					}
+				}
+
+				line1="";
+				fin>>line1;
+				if (fin.eof()) return false;
+				int fermionicSign = 0;
+				if (line1=="FERMIONSIGN=-1") fermionicSign = -1;
+				if (line1!="FERMIONSIGN=1") fermionicSign = 1;
+
+				if (fermionicSign==0) return false;
+
+				line1="";
+				fin>>line1;
+				if (fin.eof() || line1!="JMVALUES") return false;
+
+				const std::pair<size_t,size_t> jm1(0,0);
+				line1="";
+				fin>>line1;
+				if (fin.eof()) return false;
+
+
+				line1="";
+				fin>>line1;
+				if (fin.eof()) return false;
+
+				typename OperatorType::Su2RelatedType su2Related1;
+				RealType angularFactor1 = 1.0;
+				line1="";
+				fin>>line1;
+				if (fin.eof() || line1.substr(0,14)!="AngularFactor=") return false;
+
+				PsimagLite::CrsMatrix<RealType> msparse(m);
+				nup = OperatorType(msparse,fermionicSign,jm1,angularFactor1,su2Related1);
+				return true;
 			}
 
 			const LeftRightSuperType& lrs_;
