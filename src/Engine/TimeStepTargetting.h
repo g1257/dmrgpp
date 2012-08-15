@@ -178,7 +178,7 @@ namespace Dmrg {
 				gsWeight_=1.0-sum;
 				sum += gsWeight_;
 				assert(fabs(sum-1.0)<1e-5);
-				std::cerr<<"GSWEIGHT="<<gsWeight_<<"\n";
+//				std::cerr<<"GSWEIGHT="<<gsWeight_<<"\n";
 			}
 
 			RealType weight(size_t i) const
@@ -220,7 +220,7 @@ namespace Dmrg {
 				if (!noStageIs(DISABLED)) return true;
 				bool b = (fabs(gsWeight_)>1e-6);
 
-				std::cerr<<"includeGroundState="<<b<<"\n";
+//				std::cerr<<"includeGroundState="<<b<<"\n";
 				return b;
 			}
 
