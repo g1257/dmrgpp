@@ -196,7 +196,7 @@ int main(int argc,char *argv[])
 			filename = optarg;
 			break;
 		case 'o':
-			insitu = optarg;
+			insitu += optarg;
 			break;
 		default:
 			inputCheck.usageMain(strUsage);

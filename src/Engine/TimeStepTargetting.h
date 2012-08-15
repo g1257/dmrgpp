@@ -469,15 +469,15 @@ namespace Dmrg {
 				std::cout<<"-------------&*&*&* In-situ measurements start\n";
 				if (noStageIs(DISABLED)) std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 				else std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
-				if (includeGroundStage())
-					test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
+				//if (includeGroundStage())
+				test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
 				std::string s = "<P0|nup|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,nup);
 
 				PsimagLite::CrsMatrix<ComplexType> tmpC2(model_.naturalOperator("ndown",0,0));
 				OperatorType ndown(tmpC2,fermionSign1,jm1,angularFactor1,su2Related1);
-				if (includeGroundStage())
-					test(psi_,psi_,direction,"<PSI|ndown|PSI>",site,ndown);
+				//if (includeGroundStage())
+				test(psi_,psi_,direction,"<PSI|ndown|PSI>",site,ndown);
 				s = "<P0|ndown|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,ndown);
 

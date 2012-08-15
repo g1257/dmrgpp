@@ -193,12 +193,13 @@ namespace Dmrg {
 			wft_.triggerOn(lrs);
 
 			RealType gsEnergy = 0;
-			if (!target.includeGroundStage()) return gsEnergy;
 
 			bool onlyWft = false;
 			if (direction != WaveFunctionTransfType::INFINITE)
 				onlyWft = ((parameters_.finiteLoop[loopIndex].saveOption & 2)>0) ? true : false;
 		
+			if (!target.includeGroundStage()) onlyWft = true;
+
 			std::ostringstream msg0;
 			msg0<<"Setting up Hamiltonian basis of size="<<lrs.super().size();
 			progress_.printline(msg0,std::cout);
