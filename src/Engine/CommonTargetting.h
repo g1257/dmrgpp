@@ -111,6 +111,12 @@ namespace Dmrg {
 		typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 		typedef DynamicSerializer<RealType,VectorWithOffsetType,PostProcType>
 		        DynamicSerializerType;
+		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
+		typedef typename BasisWithOperatorsType::BasisType BasisType;
+		typedef typename BasisType::BlockType BlockType;
+		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,VectorType> ApplyOperatorType;
 
 		enum {DISABLED,OPERATOR,CONVERGING};
 		enum {
@@ -123,39 +129,37 @@ namespace Dmrg {
 
 		CommonTargetting(const LeftRightSuperType& lrs,
 		                 const ModelType& model,
-		                 const TargettingParamsType& tstStruct,
-		                 std::vector<VectorWithOffsetType>& targetVectors) 
+						 const TargettingParamsType& tstStruct)
 		: lrs_(lrs),
 		  model_(model),
 		  tstStruct_(tstStruct),
-		  targetVectors_(targetVectors),
+		  applyOpLocal_(lrs),
 		  progress_("CommonTargetting",0)
-//		  applyOpLocal_(lrs),
-//		  gsWeight_(1.0)
 		{
 		}
 
-		RealType normSquared(size_t i) const
+		RealType normSquared(const VectorWithOffsetType& v) const
 		{
 			// call to mult will conjugate one of the vector
-			return std::real(multiply(targetVectors_[i],targetVectors_[i]));
+			return std::real(multiply(v,v));
 		}
 		
 		template<typename IoOutputType>
 		void save(const std::vector<size_t>& block,
 		          IoOutputType& io,
-		          const PostProcType& cf) const
+				  const PostProcType& cf,
+				  const std::vector<VectorWithOffsetType>& targetVectors) const
 		{
-			DynamicSerializerType dynS(cf,block[0],targetVectors_);
+			DynamicSerializerType dynS(cf,block[0],targetVectors);
 			dynS.save(io);
 		}
 
 		template<typename IoInputType>
-		void load(IoInputType& io)
+		void load(IoInputType& io,std::vector<VectorWithOffsetType>& targetVectors)
 		{
 			DynamicSerializerType dynS(io,IoInputType::In::LAST_INSTANCE);
-			for (size_t i=0;i<targetVectors_.size();i++)
-				targetVectors_[i] = dynS.vector(i);
+			for (size_t i=0;i<targetVectors.size();i++)
+				targetVectors[i] = dynS.vector(i);
 			
 		}
 
@@ -208,35 +212,19 @@ namespace Dmrg {
 		                  const VectorWithOffsetType& psi,
 		                  const std::vector<size_t>& stage,
 		                  const std::vector<RealType>& weights,
-		                  size_t nk) const
+						  size_t nk,
+						  const std::vector<VectorWithOffsetType>& targetVectors) const
 		{
 			wft.setInitialVector(v,psi,lrs_,nk);
 			if (!allStages(CONVERGING,stage)) return;
-			std::vector<VectorWithOffsetType> vv(targetVectors_.size());
-			for (size_t i=0;i<targetVectors_.size();i++) {
-				wft.setInitialVector(vv[i],targetVectors_[i],lrs_,nk);
+			std::vector<VectorWithOffsetType> vv(targetVectors.size());
+			for (size_t i=0;i<targetVectors.size();i++) {
+				wft.setInitialVector(vv[i],targetVectors[i],lrs_,nk);
 				if (std::norm(vv[i])<1e-6) continue;
 				VectorWithOffsetType w= weights[i]*vv[i];
 				v += w;
 			}
 		}
-// 		void guessPhiSectors(VectorWithOffsetType& phi,
-// 		                     size_t i,
-// 		                     size_t systemOrEnviron)
-// 		{
-// 			FermionSign fs(lrs_.left(),tstStruct_.electrons);
-// 			if (allStages(CONVERGING)) {
-// 				VectorWithOffsetType tmpVector = psi_;
-// 				for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
-// 					applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],fs,
-// 					              systemOrEnviron);
-// 					tmpVector = phi;
-// 				}
-// 				return;
-// 			}
-// 			applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,
-// 			              systemOrEnviron);
-// 		}
 
 		void findElectronsOfOneSite(std::vector<size_t>& electrons,size_t site) const
 		{
@@ -247,26 +235,148 @@ namespace Dmrg {
 			model_.findElectrons(electrons,basis,site);
 		}
 
+		void noCocoon(const std::string& msg) const
+		{
+			std::cout<<"-------------&*&*&* In-situ measurements start\n";
+			std::cout<<"----- NO IN-SITU MEAS. POSSIBLE, reason="<<msg<<"\n";
+			std::cout<<"-------------&*&*&* In-situ measurements end\n";
+		}
+
+		// in situ computation:
+		void cocoon(size_t direction,const BlockType& block,const VectorWithOffsetType& psi) const
+		{
+			size_t site = block[0];
+			int fermionSign1 = 1;
+			const std::pair<size_t,size_t> jm1(0,0);
+			RealType angularFactor1 = 1.0;
+			typename OperatorType::Su2RelatedType su2Related1;
+
+			std::cout<<"-------------&*&*&* In-situ measurements start\n";
+
+			std::vector<std::string> vecStr;
+			PsimagLite::tokenizer(model_.params().insitu,vecStr,",");
+			for (size_t i=0;i<vecStr.size();i++) {
+				const std::string& opLabel = vecStr[i];
+				OperatorType nup;
+				if (!fillOperatorFromFile(nup,opLabel)) {
+					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator(opLabel,0,0));
+					nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
+				}
+				std::string tmpStr = "<PSI|" + opLabel + "|PSI>";
+				test(psi,psi,direction,tmpStr,site,nup);
+			}
+
+			std::cout<<"-------------&*&*&* In-situ measurements end\n";
+		}
+
 	private:
 
-// 		void zeroOutVectors()
-// 		{
-// 			for (size_t i=0;i<targetVectors_.size();i++)
-// 				targetVectors_[i].resize(lrs_.super().size());
-// 		}
+		void test(const VectorWithOffsetType& src1,
+				  const VectorWithOffsetType& src2,
+				  size_t systemOrEnviron,
+				  const std::string& label,
+				  size_t site,
+				  const OperatorType& A) const
+		{
+			std::vector<size_t> electrons;
+			model_.findElectronsOfOneSite(electrons,site);
+			FermionSign fs(lrs_.left(),electrons);
+			VectorWithOffsetType dest;
+			applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
-// 		std::vector<size_t> stage_;
-// 		VectorWithOffsetType psi_;
+			RealType sum = 0;
+			for (size_t ii=0;ii<dest.sectors();ii++) {
+				size_t i = dest.sector(ii);
+				size_t offset1 = dest.offset(i);
+				for (size_t jj=0;jj<src2.sectors();jj++) {
+					size_t j = src2.sector(jj);
+					size_t offset2 = src2.offset(j);
+					if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+					for (size_t k=0;k<dest.effectiveSize(i);k++)
+						sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
+				}
+			}
+			std::cout<<site<<" "<<sum<<" "<<" 0";
+			std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
+		}
+
+		bool fillOperatorFromFile(OperatorType& nup,const std::string& label2) const
+		{
+			if (label2.length()<2 || label2[0]!=':') return false;
+			std::string label = label2.substr(1,label2.length()-1);
+
+			std::ifstream fin(label.c_str());
+			if (!fin || fin.bad() || !fin.good()) return false;
+
+			std::string line1("");
+			fin>>line1;
+			if (fin.eof() || line1!="TSPOperator=raw") return false;
+
+			line1="";
+			fin>>line1;
+			if (fin.eof() || line1!="RAW_MATRIX") return false;
+
+			line1="";
+			fin>>line1;
+			if (fin.eof()) return false;
+
+			std::string line2("");
+			fin>>line2;
+			if (fin.eof()) return false;
+
+			int n = atoi(line1.c_str());
+			if (n!=atoi(line2.c_str()) || n<=0) return false;
+
+			PsimagLite::Matrix<RealType> m(n,n);
+			for (int i=0;i<n;i++) {
+				for (int j=0;j<n;j++) {
+					line1="";
+					fin>>line1;
+					if (fin.eof()) return false;
+					m(i,j) = atof(line1.c_str());
+				}
+			}
+
+			line1="";
+			fin>>line1;
+			if (fin.eof()) return false;
+			int fermionicSign = 0;
+			if (line1=="FERMIONSIGN=-1") fermionicSign = -1;
+			if (line1!="FERMIONSIGN=1") fermionicSign = 1;
+
+			if (fermionicSign==0) return false;
+
+			line1="";
+			fin>>line1;
+			if (fin.eof() || line1!="JMVALUES") return false;
+
+			const std::pair<size_t,size_t> jm1(0,0);
+			line1="";
+			fin>>line1;
+			if (fin.eof()) return false;
+
+
+			line1="";
+			fin>>line1;
+			if (fin.eof()) return false;
+
+			typename OperatorType::Su2RelatedType su2Related1;
+			RealType angularFactor1 = 1.0;
+			line1="";
+			fin>>line1;
+			if (fin.eof() || line1.substr(0,14)!="AngularFactor=") return false;
+
+			PsimagLite::CrsMatrix<RealType> msparse(m);
+			nup = OperatorType(msparse,fermionicSign,jm1,angularFactor1,su2Related1);
+			return true;
+		}
+
+
 		const LeftRightSuperType& lrs_;
 		const ModelType& model_;
 		const TargettingParamsType& tstStruct_;
-		std::vector<VectorWithOffsetType>& targetVectors_;
-// 		const WaveFunctionTransfType& waveFunctionTransformation_;
+		ApplyOperatorType applyOpLocal_;
 		PsimagLite::ProgressIndicator progress_;
-// 		ApplyOperatorType applyOpLocal_;
-// 		RealType gsWeight_;
-// 		std::vector<VectorWithOffsetType> targetVectors_;
-// 		std::vector<RealType> weight_;
 	}; // class CommonTargetting
 
 	template<typename ModelType,

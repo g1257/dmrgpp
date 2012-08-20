@@ -120,7 +120,7 @@ namespace Dmrg {
 	operator<<(std::ostream& os,const DynamicDmrgParams<ModelType>& t)
 	{
 		os<<"#TargetParams.type=DynamicDmrg\n";
-		const typename TimeStepParams<ModelType>::TargetParamsCommonType&
+		const typename DynamicDmrgParams<ModelType>::TargetParamsCommonType&
 			tp = t;
 		os<<tp;
 		os<<"DynamicDmrgType="<<t.type<<"\n";

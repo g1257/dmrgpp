@@ -87,6 +87,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ApplyOperatorLocal.h"
 #include <stdexcept>
 #include "Tokenizer.h"
+#include "CommonTargetting.h"
+#include "ParametersForSolver.h"
 
 namespace Dmrg {
 
@@ -109,37 +111,38 @@ namespace Dmrg {
 			typedef typename ModelType::RealType RealType;
 			typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 			typedef std::vector<RealType> VectorType;
-			typedef LanczosSolverTemplate<RealType,InternalProductType,VectorType> LanczosSolverType;
+		typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
+			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 			typedef typename ModelType::ModelHelperType ModelHelperType;
 			typedef typename ModelHelperType::LeftRightSuperType
 				LeftRightSuperType;
 			typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 			typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-			//typedef psimag::Matrix<RealType> MatrixType;
-			//typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 			typedef typename BasisWithOperatorsType::BasisType BasisType;
 			typedef typename BasisType::BlockType BlockType;
 			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 			typedef VectorType TargetVectorType;
 			typedef GroundStateParams<ModelType> TargettingParamsType;
-			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
-			
+			typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
+				CommonTargettingType;
+			typedef typename CommonTargettingType::ApplyOperatorType ApplyOperatorType;
+
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
 			
 			GroundStateTargetting(const LeftRightSuperType& lrs,
 			                      const ModelType& model,
-			                      const TargettingParamsType& t,
+								  const TargettingParamsType& tstStruct,
 			                      const WaveFunctionTransfType& wft,  // wft is ignored here
 			                      const size_t& quantumSector) // quantumSector is ignored here
 			: lrs_(lrs),
 			  model_(model),
 			  waveFunctionTransformation_(wft),
 			  progress_("GroundStateTargetting",0),
-			  applyOpLocal_(lrs)
+			  commonTargetting_(lrs,model,tstStruct)
 			{
 			}
 
@@ -192,14 +195,14 @@ namespace Dmrg {
 				if (model_.params().insitu=="") return;
 
 				if (BasisType::useSu2Symmetry()) {
-					noCocoon("not when SU(2) symmetry is in use");
+					commonTargetting_.noCocoon("not when SU(2) symmetry is in use");
 					return;
 				}
 
 				try {
-					cocoon(direction,block1);
+					commonTargetting_.cocoon(direction,block1,psi_);
 				} catch (std::exception& e) {
-					noCocoon("unsupported by the model");
+					commonTargetting_.noCocoon("unsupported by the model");
 				}
 			}
 
@@ -248,146 +251,12 @@ namespace Dmrg {
 
 		private:
 
-			void noCocoon(const std::string& msg) const
-			{
-				std::cout<<"-------------&*&*&* In-situ measurements start\n";
-				std::cout<<"----- NO IN-SITU MEAS. POSSIBLE, reason="<<msg<<"\n";
-				std::cout<<"-------------&*&*&* In-situ measurements end\n";
-			}
-
-			// in situ computation:
-			void cocoon(size_t direction,const BlockType& block) const
-			{
-				size_t site = block[0];
-				int fermionSign1 = 1;
-				const std::pair<size_t,size_t> jm1(0,0);
-				RealType angularFactor1 = 1.0;
-				typename OperatorType::Su2RelatedType su2Related1;
-
-				std::cout<<"-------------&*&*&* In-situ measurements start\n";
-
-				std::vector<std::string> vecStr;
-				PsimagLite::tokenizer(model_.params().insitu,vecStr,",");
-				for (size_t i=0;i<vecStr.size();i++) {
-					const std::string& opLabel = vecStr[i];
-					OperatorType nup;
-					if (!fillOperatorFromFile(nup,opLabel)) {
-						PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator(opLabel,0,0));
-						nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
-					}
-					std::string tmpStr = "<PSI|" + opLabel + "|PSI>";
-					test(psi_,psi_,direction,tmpStr,site,nup);
-				}
-
-				std::cout<<"-------------&*&*&* In-situ measurements end\n";
-			}
-
-			void test(const VectorWithOffsetType& src1,
-					  const VectorWithOffsetType& src2,
-					  size_t systemOrEnviron,
-					  const std::string& label,
-					  size_t site,
-					  const OperatorType& A) const
-			{
-				std::vector<size_t> electrons;
-				model_.findElectronsOfOneSite(electrons,site);
-				FermionSign fs(lrs_.left(),electrons);
-				VectorWithOffsetType dest;
-				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
-
-				RealType sum = 0;
-				for (size_t ii=0;ii<dest.sectors();ii++) {
-					size_t i = dest.sector(ii);
-					size_t offset1 = dest.offset(i);
-					for (size_t jj=0;jj<src2.sectors();jj++) {
-						size_t j = src2.sector(jj);
-						size_t offset2 = src2.offset(j);
-						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
-						for (size_t k=0;k<dest.effectiveSize(i);k++)
-							sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
-					}
-				}
-				std::cout<<site<<" "<<sum<<" "<<" 0";
-				std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
-			}
-
-			bool fillOperatorFromFile(OperatorType& nup,const std::string& label2) const
-			{
-				if (label2.length()<2 || label2[0]!=':') return false;
-				std::string label = label2.substr(1,label2.length()-1);
-
-				std::ifstream fin(label.c_str());
-				if (!fin || fin.bad() || !fin.good()) return false;
-
-				std::string line1("");
-				fin>>line1;
-				if (fin.eof() || line1!="TSPOperator=raw") return false;
-
-				line1="";
-				fin>>line1;
-				if (fin.eof() || line1!="RAW_MATRIX") return false;
-
-				line1="";
-				fin>>line1;
-				if (fin.eof()) return false;
-
-				std::string line2("");
-				fin>>line2;
-				if (fin.eof()) return false;
-
-				int n = atoi(line1.c_str());
-				if (n!=atoi(line2.c_str()) || n<=0) return false;
-
-				PsimagLite::Matrix<RealType> m(n,n);
-				for (int i=0;i<n;i++) {
-					for (int j=0;j<n;j++) {
-						line1="";
-						fin>>line1;
-						if (fin.eof()) return false;
-						m(i,j) = atof(line1.c_str());
-					}
-				}
-
-				line1="";
-				fin>>line1;
-				if (fin.eof()) return false;
-				int fermionicSign = 0;
-				if (line1=="FERMIONSIGN=-1") fermionicSign = -1;
-				if (line1!="FERMIONSIGN=1") fermionicSign = 1;
-
-				if (fermionicSign==0) return false;
-
-				line1="";
-				fin>>line1;
-				if (fin.eof() || line1!="JMVALUES") return false;
-
-				const std::pair<size_t,size_t> jm1(0,0);
-				line1="";
-				fin>>line1;
-				if (fin.eof()) return false;
-
-
-				line1="";
-				fin>>line1;
-				if (fin.eof()) return false;
-
-				typename OperatorType::Su2RelatedType su2Related1;
-				RealType angularFactor1 = 1.0;
-				line1="";
-				fin>>line1;
-				if (fin.eof() || line1.substr(0,14)!="AngularFactor=") return false;
-
-				PsimagLite::CrsMatrix<RealType> msparse(m);
-				nup = OperatorType(msparse,fermionicSign,jm1,angularFactor1,su2Related1);
-				return true;
-			}
-
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
 			const WaveFunctionTransfType& waveFunctionTransformation_;
 			VectorWithOffsetType psi_;
 			PsimagLite::ProgressIndicator progress_;
-			ApplyOperatorType applyOpLocal_;
+			CommonTargettingType commonTargetting_;
 
 	};     //class GroundStateTargetting
 

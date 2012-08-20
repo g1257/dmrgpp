@@ -158,7 +158,7 @@ namespace Dmrg {
 		  progress_("DynamicTargetting",0),
 		  applyOpLocal_(lrs),
 		  gsWeight_(1.0),
-		  commonTargetting_(lrs,model,tstStruct,targetVectors_)
+		  commonTargetting_(lrs,model,tstStruct)
 		{
 			if (!wft.isEnabled())
 				throw std::runtime_error(" DynamicTargetting needs an enabled wft\n");
@@ -188,7 +188,7 @@ namespace Dmrg {
 
 		RealType normSquared(size_t i) const
 		{
-			return commonTargetting_.normSquared(i);
+			return commonTargetting_.normSquared(targetVectors_[i]);
 		}
 
 // 		const RealType& operator[](size_t i) const { return psi_[i]; }
@@ -265,7 +265,7 @@ namespace Dmrg {
 
 		void initialGuess(VectorWithOffsetType& v,size_t nk) const
 		{
-			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,nk);
+			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,nk,targetVectors_);
 		}
 
 		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -287,7 +287,7 @@ namespace Dmrg {
 			params.isign = s;
 
 			PostProcType cf(ab_,params);
-			commonTargetting_.save(block,io,cf);
+			commonTargetting_.save(block,io,cf,targetVectors_);
 			
 			psi_.save(io,"PSI");
 		}
@@ -298,7 +298,7 @@ namespace Dmrg {
 
 			typename IoType::In io(f);
 
-			commonTargetting_.load(io);
+			commonTargetting_.load(io,targetVectors_);
 
 			psi_.load(io,"PSI");
 		}
