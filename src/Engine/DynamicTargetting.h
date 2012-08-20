@@ -191,10 +191,6 @@ namespace Dmrg {
 			return commonTargetting_.normSquared(targetVectors_[i]);
 		}
 
-// 		const RealType& operator[](size_t i) const { return psi_[i]; }
-
-// 		RealType& operator[](size_t i) { return psi_[i]; }
-
 		const VectorWithOffsetType& gs() const { return psi_; }
 
 		bool includeGroundStage() const {return true; }
@@ -258,9 +254,18 @@ namespace Dmrg {
 			Eg_ = Eg;
 			calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
 
-			//cocoon(direction,block); // in-situ
+			if (model_.params().insitu=="") return;
 
-			//if (needsPrinting) printVectors(block); // for post-processing
+			if (BasisType::useSu2Symmetry()) {
+				commonTargetting_.noCocoon("not when SU(2) symmetry is in use");
+				return;
+			}
+
+			try {
+				commonTargetting_.cocoon(direction,site,psi_);
+			} catch (std::exception& e) {
+				commonTargetting_.noCocoon("unsupported by the model");
+			}
 		}
 
 		void initialGuess(VectorWithOffsetType& v,size_t nk) const

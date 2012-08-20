@@ -243,9 +243,8 @@ namespace Dmrg {
 		}
 
 		// in situ computation:
-		void cocoon(size_t direction,const BlockType& block,const VectorWithOffsetType& psi) const
+		void cocoon(size_t direction,size_t site,const VectorWithOffsetType& psi) const
 		{
-			size_t site = block[0];
 			int fermionSign1 = 1;
 			const std::pair<size_t,size_t> jm1(0,0);
 			RealType angularFactor1 = 1.0;

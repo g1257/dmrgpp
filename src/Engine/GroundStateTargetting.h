@@ -200,7 +200,8 @@ namespace Dmrg {
 				}
 
 				try {
-					commonTargetting_.cocoon(direction,block1,psi_);
+					assert(block1.size()>0);
+					commonTargetting_.cocoon(direction,block1[0],psi_);
 				} catch (std::exception& e) {
 					commonTargetting_.noCocoon("unsupported by the model");
 				}
