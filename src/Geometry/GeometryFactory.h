@@ -186,7 +186,13 @@ namespace PsimagLite {
 				io.readline(x,"LadderLeg=");
 				if (x!=2) {
 					std::cerr<<"WARNING: LadderLeg!=2 is experimental!\n";
+				}
+				try {
 					io.readline(periodicY,"PeriodicY=");
+					if (x==2) throw std::runtime_error("LadderLeg==2 cannot have PeriodicY set\n");
+					std::cerr<<"INFO: PeriodicY="<<periodicY<<"\n";
+				} catch (std::exception& e) {
+					if (x>2) throw std::runtime_error("LadderLeg>2 must have PeriodicY= line\n");
 				}
 				ladder_ = new Ladder(linSize,x,(periodicY>0));
 				break;
