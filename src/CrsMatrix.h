@@ -947,7 +947,15 @@ namespace PsimagLite {
 		multiply(c,a,b);
 		return c;
 	}
-		
+
+//	template<typename T>
+//	void printFullMatrix(const CrsMatrix<T>& s,const std::string& label)
+//	{
+//		PsimagLite::Matrix<T> mtmp;
+//		crsMatrixToFullMatrix(mtmp,s);
+//		std::cerr<<"----------->  "<<label<<"  <----------------\n";
+//		std::cerr<<mtmp;
+//	}
 } // namespace PsimagLite 
 /*@}*/	
 #endif

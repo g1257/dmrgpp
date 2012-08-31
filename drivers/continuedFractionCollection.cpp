@@ -48,8 +48,8 @@ void plotAll(const ContinuedFractionCollectionType& cfCollection,
 	ContinuedFractionCollectionType::PlotDataType v;
 	cfCollection.plot(v,params);
 	for (size_t x=0;x<v.size();x++) {
-		std::cout<<v[x].first<<" "<<std::real(v[x].second);
-		std::cout<<" "<<std::imag(v[x].second)<<"\n";
+		std::cout<<v[x].first<<" "<<std::imag(v[x].second);
+		std::cout<<" "<<std::real(v[x].second)<<"\n";
 	}
 }
 
@@ -61,8 +61,8 @@ void plotOneByOne(const ContinuedFractionCollectionType& cfCollection,
 		ContinuedFractionCollectionType::PlotDataType v;
 		cfCollection.plotOne(i,v,params);
 		for (size_t x=0;x<v.size();x++) {
-			std::cout<<v[x].first<<" "<<std::real(v[x].second);
-			std::cout<<" "<<std::imag(v[x].second)<<"\n";
+			std::cout<<v[x].first<<" "<<std::imag(v[x].second);
+			std::cout<<" "<<std::real(v[x].second)<<"\n";
 		}
 	}
 }

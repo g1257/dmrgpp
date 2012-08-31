@@ -75,8 +75,7 @@ namespace PsimagLite {
 		void save(IoOutputType& io) const
 		{
 			std::string s = "#CONTINUEDFRACTIONCOLLECTION=";
-			s += ttos(data_.size());
-			io.printline(s);
+			io.print(s,data_.size());
 			for (size_t i=0;i<data_.size();i++) data_[i].save(io);
 		}
 
