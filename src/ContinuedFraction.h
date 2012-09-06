@@ -77,6 +77,7 @@ namespace PsimagLite {
 		template<typename IoOutputType>
 		void save(IoOutputType& io) const
 		{
+			io.setPrecision(12);
 			ab_.save(io);
 
 			io.print("#CFWeight=",weight_);

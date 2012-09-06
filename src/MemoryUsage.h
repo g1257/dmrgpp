@@ -83,13 +83,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <time.h>
 #include "Split.h"
 
 namespace PsimagLite {
 	class MemoryUsage {
 		static const size_t MY_MAX_LINE = 40240;
+
 	public:
-		MemoryUsage(const std::string& myself="") : data_(""),myself_(myself)
+
+		MemoryUsage(const std::string& myself="") : data_(""),myself_(myself),startTime_(::time(0))
 		{
 			if (myself_=="") myself_="/proc/self/status";
 			update();
@@ -133,18 +136,20 @@ namespace PsimagLite {
 
 		double time()
 		{
-			update();
+			return ::time(0)-startTime_;
+			/*update();
 			std::vector<std::string> v;
 			split(v,data_.c_str(),' ');
 			if (v.size()<15) return 0;
 			double xuser =  atof(v[13].c_str());
 			double xsys = atof(v[14].c_str());
-			return xuser + xsys;
+			return xuser + xsys;*/
 		}
 
 	private:
 
 		std::string data_,myself_;
+		time_t startTime_;
 	}; // class MemoryUsage
 
 } // namespace PsimagLite 

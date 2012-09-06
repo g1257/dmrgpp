@@ -215,6 +215,12 @@ namespace PsimagLite {
 				fout_->flush();
 			}
 
+			void setPrecision(size_t x)
+			{
+				if (!fout_) return;
+				fout_->precision(x);
+			}
+
 			template<typename X>
 			friend Out& operator<<(Out& io,const X& t);
 

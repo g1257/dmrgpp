@@ -47,6 +47,7 @@ void plotAll(const ContinuedFractionCollectionType& cfCollection,
 {
 	ContinuedFractionCollectionType::PlotDataType v;
 	cfCollection.plot(v,params);
+	std::cout.precision(12);
 	for (size_t x=0;x<v.size();x++) {
 		std::cout<<v[x].first<<" "<<std::imag(v[x].second);
 		std::cout<<" "<<std::real(v[x].second)<<"\n";
@@ -57,6 +58,7 @@ void plotOneByOne(const ContinuedFractionCollectionType& cfCollection,
 		const PlotParamsType& params)
 {
 	
+	std::cout.precision(12);
 	for (size_t i=0;i<cfCollection.size();i++) {
 		ContinuedFractionCollectionType::PlotDataType v;
 		cfCollection.plotOne(i,v,params);
