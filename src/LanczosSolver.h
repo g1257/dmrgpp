@@ -269,6 +269,11 @@ namespace PsimagLite {
 //					"LanczosSolver::tridiag(): Unsupported\n");
 // 				if (eps_>=tolerance_) return;
 			}
+
+			std::ostringstream msg;
+			msg<<"Decomposition done for mat.rank="<<mat_.rank();
+			msg<<" after "<<j<<" steps.";
+			progress_.printline(msg,std::cout);
 		}
 
 		void oneStepDecomposition(

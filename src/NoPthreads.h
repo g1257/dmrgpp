@@ -112,6 +112,10 @@ public:
 			pfh.thread_function_(i,1,total,0);
 	}
 
+	std::string name() const { return "nopthreads"; }
+
+	size_t threads() const { return 1; }
+
 	template<typename T,typename SomeConcurrencyType>
 	void reduce(T& x,SomeConcurrencyType& conc) {}
 

@@ -92,7 +92,8 @@ namespace PsimagLite {
 		{
 			if (leg & 1) throw std::runtime_error("Ladder: leg must be even\n");
 			if (leg == 2)  isPeriodicY_ = false;
-			if (leg>2) std::cerr<<"isPeriodicY="<<isPeriodicY_<<"\n";
+			//if (leg>2) std::cerr<<"isPeriodicY="<<isPeriodicY_<<"\n";
+			if (linSize % leg !=0) throw std::runtime_error("Ladder: leg must divide number of sites\n");
 		}
 
 		size_t getVectorSize(size_t dirId) const

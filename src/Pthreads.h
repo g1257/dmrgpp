@@ -141,7 +141,7 @@ public:
 		pthread_mutex_destroy(&mutex_);
 	}
 
-	std::string name() const { return "phtreads"; }
+	std::string name() const { return "pthreads"; }
 
 	size_t threads() const { return nthreads_; }
 
