@@ -230,24 +230,7 @@ namespace Dmrg {
 		}
 
 	private:
-		ParametersDmrgSolver<RealType,InputValidatorType> parameters_;
-		const ModelType& model_;
-		ConcurrencyType& concurrency_;
-		const TargettingParamsType& targetStruct_;
-		bool verbose_;
-		LeftRightSuperType lrs_;
-		typename IoType::Out io_;
-		typename IoType::In ioIn_;
-		PsimagLite::ProgressIndicator progress_;
-		size_t quantumSector_;
-		int stepCurrent_;
-		CheckpointType checkpoint_;
-		WaveFunctionTransfType wft_;
-		std::vector<BlockType> sitesIndices_;
-		ReflectionSymmetryType reflectionOperator_;
-		DiagonalizationType diagonalization_;
-		TruncationType truncate_;
-		
+
 		/** I shall give a procedural description of the DMRG method in the following.
 		We start with an initial block $S$ (the initial system) and $E$ (the initial environment). 
 		Consider two sets of blocks $X$ and $Y$. 
@@ -574,18 +557,37 @@ namespace Dmrg {
 			quantumSector_=MyBasis::pseudoQuantumNumber(targetQuantumNumbers);
 		}
 
-		void printMemoryUsage() const
+		void printMemoryUsage()
 		{
-			PsimagLite::MemoryUsage musage;
-			std::string vmPeak = musage.findEntry("VmPeak:");
-			std::string vmSize = musage.findEntry("VmSize:");
+			musage_.update();
+			std::string vmPeak = musage_.findEntry("VmPeak:");
+			std::string vmSize = musage_.findEntry("VmSize:");
 			std::ostringstream msg;
 			msg<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
 			progress_.printline(msg,std::cout);
 			std::ostringstream msg2;
-			msg2<<"Amount of time scheduled (user plus system): "<<musage.time()<<" clock ticks";
+			msg2<<"Engine clock: "<<musage_.time()<<" seconds";
 			progress_.printline(msg2,std::cout);
 		}
+
+		PsimagLite::MemoryUsage musage_;
+		ParametersDmrgSolver<RealType,InputValidatorType> parameters_;
+		const ModelType& model_;
+		ConcurrencyType& concurrency_;
+		const TargettingParamsType& targetStruct_;
+		bool verbose_;
+		LeftRightSuperType lrs_;
+		typename IoType::Out io_;
+		typename IoType::In ioIn_;
+		PsimagLite::ProgressIndicator progress_;
+		size_t quantumSector_;
+		int stepCurrent_;
+		CheckpointType checkpoint_;
+		WaveFunctionTransfType wft_;
+		std::vector<BlockType> sitesIndices_;
+		ReflectionSymmetryType reflectionOperator_;
+		DiagonalizationType diagonalization_;
+		TruncationType truncate_;
 
 	}; //class DmrgSolver
 } // namespace Dmrg
