@@ -370,6 +370,7 @@ namespace Dmrg {
 				msg<<"Finite loop number "<<i;
 				msg<<" with l="<<parameters_.finiteLoop[i].stepLength;
 				msg<<" keptStates="<<parameters_.finiteLoop[i].keptStates;
+				msg<<". "<<(parameters_.finiteLoop.size()-i)<<" more loops to go.";
 				progress_.printline(msg,std::cout);
 				
 				if (i>0) {

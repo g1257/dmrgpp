@@ -135,6 +135,9 @@ namespace Dmrg {
 				MatrixType opC = model_.naturalOperator("c",site,0); // c_{0,0} spin up
 				MatrixType opCtranspose = transposeConjugate(opC);
 				measureOne("OperatorC",opC,opCtranspose,-1,rows,cols);
+				MatrixType opC2 = model_.naturalOperator("c",site,1); // c_{0,0} spin down 
+				MatrixType opCtranspose2 = transposeConjugate(opC2);
+				measureOne("OperatorC",opC2,opCtranspose2,-1,rows,cols);
 			} else if (label=="nn") {
 				MatrixType opN = model_.naturalOperator("n",site,0);
 				measureOne("OperatorN",opN,opN,1,rows,cols);

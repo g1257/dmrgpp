@@ -158,12 +158,13 @@ namespace Dmrg {
 		  progress_("DynamicTargetting",0),
 		  applyOpLocal_(lrs),
 		  gsWeight_(1.0),
-		  commonTargetting_(lrs,model,tstStruct)
+		  commonTargetting_(lrs,model,tstStruct),
+		  weightForContinuedFraction_(0)
 		{
 			if (!wft.isEnabled())
 				throw std::runtime_error(" DynamicTargetting needs an enabled wft\n");
 			paramsForSolver_.steps = ProgramGlobals::LanczosSteps;
-			paramsForSolver_.tolerance = -1.0;
+			paramsForSolver_.tolerance = 1e-12;
 			paramsForSolver_.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 		}
 
@@ -193,7 +194,7 @@ namespace Dmrg {
 
 		const VectorWithOffsetType& gs() const { return psi_; }
 
-		bool includeGroundStage() const {return true; }
+		bool includeGroundStage() const {return fabs(gsWeight_)>1e-6; }
 
 		size_t size() const
 		{
@@ -254,7 +255,7 @@ namespace Dmrg {
 			Eg_ = Eg;
 			calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
 
-			if (model_.params().insitu=="") return;
+			if (model_.params().insitu=="" || !includeGroundStage()) return;
 
 			if (BasisType::useSu2Symmetry()) {
 				commonTargetting_.noCocoon("not when SU(2) symmetry is in use");
@@ -413,7 +414,8 @@ namespace Dmrg {
 			}
 
 			setWeights();
-			weightForContinuedFraction_ = phi*phi;
+			if (fabs(weightForContinuedFraction_)<1e-6) weightForContinuedFraction_ = phi*phi;
+//			std::cerr<<"weight==============="<<weightForContinuedFraction_<<"\n";
 		}
 
 		void getLanczosVectors(DenseMatrixType& V,
@@ -441,21 +443,23 @@ namespace Dmrg {
 
 		void setWeights()
 		{
+			gsWeight_ = 0.0;
 			RealType sum  = 0;
 			weight_.resize(targetVectors_.size());
 			for (size_t r=0;r<weight_.size();r++) {
-				weight_[r] =0;
-				for (size_t i=0;i<targetVectors_[0].sectors();i++) {
-					VectorType v,w;
-					size_t i0 = targetVectors_[0].sector(i);
-					targetVectors_[0].extract(v,i0);
-					targetVectors_[r].extract(w,i0);
-					weight_[r] += dynWeightOf(v,w);
-				}
+//				weight_[r] =0;
+//				for (size_t i=0;i<targetVectors_[0].sectors();i++) {
+//					VectorType v,w;
+//					size_t i0 = targetVectors_[0].sector(i);
+//					targetVectors_[0].extract(v,i0);
+//					targetVectors_[r].extract(w,i0);
+//					weight_[r] += dynWeightOf(v,w);
+//				}
+				weight_[r] = 1.0;
 				sum += weight_[r];
 			}
-			for (size_t r=0;r<weight_.size();r++) weight_[r] *= 0.5/sum;
-			gsWeight_ = 0.5;
+			for (size_t r=0;r<weight_.size();r++) weight_[r] *=(1.0-gsWeight_)/sum;
+
 			
 		}
 
