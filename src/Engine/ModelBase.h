@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Su2SymmetryGlobals.h"
 #include "InputNg.h"
 #include "InputCheck.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 	
@@ -138,7 +139,7 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		ModelBase(const DmrgGeometryType& geometry,ConcurrencyType& concurrency)
-		: dmrgGeometry_(geometry),concurrency_(concurrency)
+		: dmrgGeometry_(geometry),concurrency_(concurrency),progress_("ModelBase",concurrency.rank())
 		{
 			Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 			MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
@@ -228,7 +229,6 @@ namespace Dmrg {
 				}
 			}
 
-//			SharedMemoryType pthreads;
 			ParallelConnectionsType parallelConnections;
 			parallelConnections.loopCreate(total,hc,concurrency_);
 			hc.sync(parallelConnections,concurrency_);
@@ -288,6 +288,7 @@ namespace Dmrg {
 
 		const DmrgGeometryType& dmrgGeometry_;
 		ConcurrencyType& concurrency_;
+		PsimagLite::ProgressIndicator progress_;
 	};     //class ModelBase
 } // namespace Dmrg
 /*@}*/

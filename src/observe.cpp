@@ -32,13 +32,6 @@ typedef PsimagLite::ConcurrencyMpi<RealType> ConcurrencyType;
 #endif
 #include "Geometry.h" 
 #include "CrsMatrix.h"
-#ifdef USE_PTHREADS
-#include "Pthreads.h"
-#define PTHREADS_NAME Pthreads
-#else
-#include "NoPthreads.h"
-#define PTHREADS_NAME NoPthreads
-#endif 
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
 #include "InternalProductOnTheFly.h"
@@ -182,7 +175,7 @@ void mainLoop(GeometryType& geometry,
 	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType,ConcurrencyType> ModelHelperType;
-	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,PsimagLite::PTHREADS_NAME,DmrgSolverParametersType> ModelType;
+	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,PTHREADS_NAME,DmrgSolverParametersType> ModelType;
 	typedef TargettingTemplate<PsimagLite::LanczosSolver,
 	                           InternalProductOnTheFly,
 	                           WaveFunctionTransfFactory,

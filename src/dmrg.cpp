@@ -35,18 +35,6 @@ typedef PsimagLite::ConcurrencyMpi<MatrixElementType> ConcurrencyType;
 #include "ModelFactory.h"
 #include "OperatorsBase.h"
 #include "Geometry.h"
-#ifdef USE_PTHREADS
-#include "Pthreads.h"
-#define PTHREADS_NAME PsimagLite::Pthreads
-#else
-#ifdef USE_THREADS_WITH_MPI
-#include "ThreadsWithMpi.h"
-#define PTHREADS_NAME PsimagLite::ThreadsWithMpi
-#else
-#include "NoPthreads.h"
-#define PTHREADS_NAME PsimagLite::NoPthreads
-#endif  // #ifdef USE_THREADS_WITH_MPI
-#endif // #ifdef USE_PTHREADS
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
 #include "InternalProductOnTheFly.h"
