@@ -136,6 +136,7 @@ namespace Dmrg {
 		{
 			size_ = someBasis.size();
 			nonzeroSectors_.clear();
+			data_.clear();
 			data_.resize(v.size());
 			offsets_.resize(v.size()+1);
 			for (size_t i=0;i<v.size();i++) {
@@ -158,6 +159,7 @@ namespace Dmrg {
 			size_t np = someBasis.partition()-1;
 			size_ = someBasis.size();
 			nonzeroSectors_.clear();
+			data_.clear();
 			data_.resize(np);
 			offsets_.resize(np+1);
 			for (size_t i=0;i<np;i++) {
@@ -210,6 +212,7 @@ namespace Dmrg {
 				offsets_[i] = someBasis.partition(i);
 			assert(offsets_[offsets_.size()-1]==size_);
 			
+			data_.clear();
 			data_.resize(someBasis.partition()-1);
 			
 			nonzeroSectors_.clear();
@@ -341,6 +344,7 @@ namespace Dmrg {
 			if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): size<0\n");
 			size_ = x;
 			io.read(offsets_,"#offsets");
+			data_.clear();
 			data_.resize(offsets_.size());
 			io.readline(x,"#nonzero=");
 			if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): nonzerosectors<0\n");

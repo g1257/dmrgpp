@@ -172,6 +172,7 @@ namespace Dmrg {
 					aOperators[i] = myOp;
 				}
 				noOperator = isNoOperator();
+				checkSizesOfOperators();
 			}
 			
 			std::vector<size_t> sites;
@@ -216,6 +217,14 @@ namespace Dmrg {
 			{
 			}
 			
+			void checkSizesOfOperators()
+			{
+				for (size_t i=0;i<data_.size();i++) {
+					size_t n = data_[i].n_row();
+					if (n!=model_.hilbertSize(0)) throw std::runtime_error("CommonTargetting\n");
+				}
+			}
+
 			const ModelType& model_;
 			std::vector<MatrixType> data_; 
 	}; // class TargetParamsCommon
