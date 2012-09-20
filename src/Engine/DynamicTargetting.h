@@ -256,7 +256,8 @@ namespace Dmrg {
 			if (count==0) return;
 
 			Eg_ = Eg;
-			if (fabs(weightForContinuedFraction_)<1e-6 || !FAST_COMPUTATION) {
+
+			if (isLanczosNeeded(site)) {
 				calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
 			} else {
 				wftLanczosVectors(site,phiNew);
@@ -277,7 +278,10 @@ namespace Dmrg {
 
 		void initialGuess(VectorWithOffsetType& v,size_t nk) const
 		{
-			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,nk,targetVectors_);
+			if (FAST_COMPUTATION)
+				wft_.setInitialVector(v,psi_,lrs_,nk);
+			else
+				commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,nk,targetVectors_);
 		}
 
 		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -324,6 +328,21 @@ namespace Dmrg {
 		}
 
 	private:
+
+		bool isLanczosNeeded(size_t site)
+		{
+			if (!FAST_COMPUTATION) return true;
+
+			if (fabs(weightForContinuedFraction_)<1e-6) return true;
+
+			size_t numberOfSites = lrs_.super().block().size();
+
+			size_t middle = size_t(numberOfSites/2);
+			if (site==middle-1) return true;
+
+			return false;
+
+		}
 
 		size_t evolve(size_t i,
 		              VectorWithOffsetType& phiNew,
