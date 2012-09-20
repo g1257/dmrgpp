@@ -291,6 +291,7 @@ namespace Dmrg {
 			params.Eg = Eg_;
 			params.weight = s2*weightForContinuedFraction_;
 			params.isign = s;
+			if (tstStruct_.aOperators[0].fermionSign>0) s2 *= s;
 
 			PostProcType cf(ab_,params);
 			commonTargetting_.save(block,io,cf,targetVectors_);
