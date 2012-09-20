@@ -330,6 +330,8 @@ namespace Dmrg {
 			// nothing to do here
 		}
 
+		const ModelType& model() const { return model_; }
+
 	private:
 
 		bool isLanczosNeeded(size_t site)

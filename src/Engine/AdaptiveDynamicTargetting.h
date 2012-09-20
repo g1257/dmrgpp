@@ -167,6 +167,8 @@ namespace Dmrg {
 					"needs an enabled wft\n");
 		}
 
+		const ModelType& model() const { return model_; }
+
 		RealType weight(size_t i) const
 		{
 			assert(commonTargetting_.allStages(DISABLED,stage_));

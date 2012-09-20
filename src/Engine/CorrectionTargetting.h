@@ -148,6 +148,8 @@ namespace Dmrg {
 			{
 			}
 			
+			const ModelType& model() const { return model_; }
+
 			RealType normSquared(size_t i) const
 			{
 				return std::real(multiply(targetVectors_[i],targetVectors_[i]));

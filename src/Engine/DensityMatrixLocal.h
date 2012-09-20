@@ -75,6 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include "BlockMatrix.h"
 #include "DensityMatrixBase.h"
+#include "ParallelDensityMatrix.h"
 
 namespace Dmrg {
 	//!
@@ -145,6 +146,7 @@ namespace Dmrg {
 				DmrgBasisType const &pSE,
 				int direction)
 		{
+			typedef ParallelDensityMatrix<RealType,BlockMatrixType,DmrgBasisWithOperatorsType,TargettingType> ParallelDensityMatrixType;
 			{
 				std::ostringstream msg;
 				msg<<"Init partition for all targets";
@@ -162,17 +164,31 @@ namespace Dmrg {
 				RealType w = target.gsWeight();
 				
 				// if we are to target the ground state do it now:
+				ParallelDensityMatrixType helperDm(target,pBasis,pBasisSummed,pSE,direction,m,matrixBlock);
+
 				if (target.includeGroundStage())
-					initPartition(matrixBlock,pBasis,m,target.gs(),
+					helperDm.initPartition(matrixBlock,pBasis,m,target.gs(),
 							pBasisSummed,pSE,direction,w);
 				
 				// target all other states if any:
-				for (size_t i=0;i<target.size();i++) {
-					w = target.weight(i)/target.normSquared(i);
-					initPartition(matrixBlock,pBasis,m,target(i),
-							pBasisSummed,pSE,direction,w);
+				if (target.size()>0) {
+
+					PTHREADS_NAME<ParallelDensityMatrixType> threadedDm;
+					PTHREADS_NAME<ParallelDensityMatrixType>::setThreads(target.model().params().nthreads);
+					if (threadedDm.name()=="pthreads") {
+						std::ostringstream msg;
+						msg<<"Threading with "<<threadedDm.threads();
+						progress_.printline(msg,std::cout);
+					}
+
+					threadedDm.loopCreate(target.size(),helperDm,target.model().concurrency());
+
+//					for (size_t i=0;i<target.size();i++) {
+//						w = target.weight(i)/target.normSquared(i);
+//						initPartition(matrixBlock,pBasis,m,target(i),
+//						              pBasisSummed,pSE,direction,w);
+//					}
 				}
-				
 				// set this matrix block into data_
 				data_.setBlock(m,pBasis.partition(m),matrixBlock);
 			}
@@ -194,111 +210,11 @@ namespace Dmrg {
     					DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_>& dm);
 
 	private:
+
 		ProgressIndicatorType progress_;
 		BlockMatrixType data_;
 		bool debug_,verbose_;
 
-		void initPartition(BuildingBlockType& matrixBlock,
-				DmrgBasisWithOperatorsType const &pBasis,
-				size_t m,
-				const TargetVectorType& v,
-				DmrgBasisWithOperatorsType const &pBasisSummed,
-				DmrgBasisType const &pSE,
-    			size_t direction,
-				RealType weight)
-		{
-			if (direction!=EXPAND_SYSTEM) 
-				initPartitionExpandEnviron(matrixBlock,pBasis,m,v,pBasisSummed,pSE,weight);
-			else
-				initPartitionExpandSystem(matrixBlock,pBasis,m,v,pBasisSummed,pSE,weight);
-		}
-
-		void initPartitionExpandEnviron(BuildingBlockType& matrixBlock,
-				DmrgBasisWithOperatorsType const &pBasis,
-				size_t m,
-				const TargetVectorType& v,
-				DmrgBasisWithOperatorsType const &pBasisSummed,
-				DmrgBasisType const &pSE,
-				RealType weight)
-		{
-			
-			size_t ns=pBasisSummed.size();
-			size_t ne=pSE.size()/ns;
-			
-			for (size_t i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
-				for (size_t j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
-						
-					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m)) +=
-						densityMatrixExpandEnviron(i,j,v,pBasisSummed,pSE,ns,ne)*weight;
-					}
-				}
-		}
-
-		void initPartitionExpandSystem(BuildingBlockType& matrixBlock,
-				DmrgBasisWithOperatorsType const &pBasis,
-				size_t m,
-				const TargetVectorType& v,
-				DmrgBasisWithOperatorsType const &pBasisSummed,
-				DmrgBasisType const &pSE,
-				RealType weight)
-		{
-			size_t ne = pBasisSummed.size();
-			size_t ns = pSE.size()/ne;
-			
-			for (size_t i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
-				for (size_t j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
-						
-					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m)) +=
-						densityMatrixExpandSystem(i,j,v,pBasisSummed,pSE,ns,ne)*weight;
-				}
-			}
-		}
-
-		DensityMatrixElementType densityMatrixExpandEnviron(
-				size_t alpha1,
-				size_t alpha2,
-				const TargetVectorType& v,
-				DmrgBasisWithOperatorsType const &pBasisSummed,
-				DmrgBasisType const &pSE,
-				size_t ns,
-				size_t ne)
-		{
-			
-			size_t total=pBasisSummed.size();
-			
-			DensityMatrixElementType sum=0;
-			
-			size_t x2 = alpha2*ns;
-			size_t x1 = alpha1*ns;
-			for (size_t beta=0;beta<total;beta++) {
-				size_t jj = pSE.permutationInverse(beta + x2);
-				size_t ii = pSE.permutationInverse(beta + x1);
-				sum += v[ii] * std::conj(v[jj]);
-			}
-			return sum;
-		}
-
-		DensityMatrixElementType densityMatrixExpandSystem(
-				size_t alpha1,
-				size_t alpha2,
-				const TargetVectorType& v,
-				DmrgBasisWithOperatorsType const &pBasisSummed,
-				DmrgBasisType const &pSE,
-				size_t ns,
-				size_t ne)
-		{
-			
-			size_t total=pBasisSummed.size();
-			
-			DensityMatrixElementType sum=0;
-
-			for (size_t beta=0;beta<total;beta++) {
-				size_t jj = pSE.permutationInverse(alpha2+beta*ns);
-				size_t ii = pSE.permutationInverse(alpha1+beta*ns);
-				sum += v[ii] * std::conj(v[jj]);
-			}
-			return sum;
-		}
 	}; // class DensityMatrixLocal
 
 	template<

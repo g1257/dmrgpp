@@ -190,6 +190,8 @@ namespace Dmrg {
 				assert(fabs(sum-1.0)<1e-5);
 			}
 
+			const ModelType& model() const { return model_; }
+
 			RealType weight(size_t i) const
 			{
 				return weight_[i]; //(allStages(DISABLED)) ? 0.5 : weight_[i];

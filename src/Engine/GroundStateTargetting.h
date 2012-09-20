@@ -146,6 +146,8 @@ namespace Dmrg {
 			{
 			}
 
+			const ModelType& model() const { return model_; }
+
 			RealType normSquared(size_t i) const
 			{
 				throw std::runtime_error("GST: What are you doing here?\n");

@@ -181,6 +181,8 @@ namespace Dmrg {
 //				std::cerr<<"GSWEIGHT="<<gsWeight_<<"\n";
 			}
 
+			const ModelType& model() const { return model_; }
+
 			RealType weight(size_t i) const
 			{
 				if (allStages(DISABLED)) throw std::runtime_error(
