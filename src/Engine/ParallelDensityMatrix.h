@@ -139,7 +139,6 @@ namespace Dmrg {
 				initPartitionExpandSystem(matrixBlock,pBasis,m,v,pBasisSummed,pSE,weight);
 		}
 
-
 	private:
 
 		void initPartitionExpandEnviron(BuildingBlockType& matrixBlock,

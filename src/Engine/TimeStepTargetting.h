@@ -92,7 +92,10 @@ namespace Dmrg {
 	         template<typename> class VectorWithOffsetTemplate>
 	class TimeStepTargetting  {
 
-		public:
+		static const bool DO_FAST_COMPUTATION = true;
+
+	public:
+
 			typedef ModelType_ ModelType;
 			typedef ConcurrencyType_ ConcurrencyType;
 			typedef IoType_ IoType;
@@ -146,7 +149,7 @@ namespace Dmrg {
 			  lrs_(lrs),
 			  model_(model),
 			  tstStruct_(tstStruct),
-			  waveFunctionTransformation_(wft),
+			  wft_(wft),
 			  progress_("TimeStepTargetting",0),
 			  currentTime_(0),
 			  times_(tstStruct_.timeSteps),
@@ -256,8 +259,12 @@ namespace Dmrg {
 				VectorWithOffsetType vectorSum;
 				size_t max = tstStruct_.sites.size();
 
-				if (noStageIs(DISABLED)) max = 1;
-				
+				if (noStageIs(DISABLED)) {
+					max = 1;
+					for (size_t i=0;i<stage_.size();i++)
+						if (stage_[i]==OPERATOR) stage_[i] = WFT_NOADVANCE;
+				}
+
 				// Loop over each operator that needs to be applied 
 				// in turn to the g.s.
 
@@ -374,17 +381,17 @@ namespace Dmrg {
 
 			void initialGuess(VectorWithOffsetType& v,size_t nk) const
 			{
-				waveFunctionTransformation_.setInitialVector(v,psi_,lrs_,nk);
-				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
-				if (!b) return;
-				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
-				for (size_t i=0;i<targetVectors_.size();i++) {
-					waveFunctionTransformation_.setInitialVector
-					(vv[i],targetVectors_[i],lrs_,nk);
-					if (norm(vv[i])<1e-6) continue;
-					VectorWithOffsetType w= weight_[i]*vv[i];
-					v += w;
-				}
+				wft_.setInitialVector(v,psi_,lrs_,nk);
+//				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
+//				if (!b) return;
+//				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
+//				for (size_t i=0;i<targetVectors_.size();i++) {
+//					wft_.setInitialVector
+//					(vv[i],targetVectors_[i],lrs_,nk);
+//					if (norm(vv[i])<1e-6) continue;
+//					VectorWithOffsetType w= weight_[i]*vv[i];
+//					v += w;
+//				}
 			}
 
 			template<typename IoOutputType>
@@ -416,6 +423,40 @@ namespace Dmrg {
 			}
 
 		private:
+
+			class FunctionForRungeKutta {
+
+			public:
+
+				FunctionForRungeKutta(const RealType& E0,
+							  const LeftRightSuperType& lrs,
+							  const ModelType& model,
+							  RealType Eg,
+							  const VectorWithOffsetType& phi,
+							  size_t i0)
+					: E0_(E0),
+					  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
+					  modelHelper_(p_,lrs),
+					  lanczosHelper_(&model,&modelHelper_)
+				{
+				}
+
+				TargetVectorType operator()(const RealType& t,const TargetVectorType& y) const
+				{
+					TargetVectorType x(y.size());
+					lanczosHelper_.matrixVectorProduct(x,y);
+					for (size_t i=0;i<x.size();i++) x[i] -= E0_*y[i];
+					ComplexType icomplex(0,1);
+					return -icomplex * x;
+				}
+
+			private:
+
+				RealType E0_;
+				size_t p_;
+				typename ModelType::ModelHelperType modelHelper_;
+				typename LanczosSolverType::LanczosMatrixType lanczosHelper_;
+			}; // FunctionForRungeKutta
 
 			void printEnergies() const
 			{
@@ -560,7 +601,7 @@ namespace Dmrg {
 					else phiNew.populateSectors(lrs_.super());
 
 					// OK, now that we got the partition number right, let's wft:
-					waveFunctionTransformation_.setInitialVector(phiNew,targetVectors_[advance],
+					wft_.setInitialVector(phiNew,targetVectors_[advance],
 							lrs_,nk); // generalize for su(2)
 					phiNew.collapseSectors();
 //					std::cerr<<"WFT --> NORM of phiNew="<<norm(phiNew)<<" NORM of tv="<<norm(targetVectors_[advance])<<" when i="<<i<<" advance="<<advance<<"\n";
@@ -612,40 +653,6 @@ namespace Dmrg {
 				checkNorms();
 			}
 
-			class FunctionForRungeKutta {
-
-			public:
-
-				FunctionForRungeKutta(const RealType& E0,
-						      const LeftRightSuperType& lrs,
-						      const ModelType& model,
-						      RealType Eg,
-						      const VectorWithOffsetType& phi,
-						      size_t i0)
-					: E0_(E0),
-					  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
-					  modelHelper_(p_,lrs),
-					  lanczosHelper_(&model,&modelHelper_)
-				{
-				}
-
-				TargetVectorType operator()(const RealType& t,const TargetVectorType& y) const
-				{
-					TargetVectorType x(y.size());
-					lanczosHelper_.matrixVectorProduct(x,y);
-					for (size_t i=0;i<x.size();i++) x[i] -= E0_*y[i];
-					ComplexType icomplex(0,1);
-					return -icomplex * x;
-				}
-
-			private:
-
-				RealType E0_;
-				size_t p_;
-				typename ModelType::ModelHelperType modelHelper_;
-				typename LanczosSolverType::LanczosMatrixType lanczosHelper_;
-			}; // FunctionForRungeKutta
-
 			void calcTimeVectors(RealType Eg,
 					     const VectorWithOffsetType& phi,
 					     size_t systemOrEnviron,
@@ -670,7 +677,7 @@ namespace Dmrg {
 				}
 			}
 
-			void checkNorms()
+			void checkNorms() const
 			{
 				std::ostringstream msg;
 				msg<<"Checking norms: ";
@@ -692,6 +699,14 @@ namespace Dmrg {
 					return;
 				}
 
+				if (needsLanczos()) calcTimeVectorsKrylov1(Eg,phi,systemOrEnviron);
+				else calcTimeVectorsWft(Eg,phi,systemOrEnviron);
+			}
+
+			void calcTimeVectorsKrylov1(RealType Eg,
+										   const VectorWithOffsetType& phi,
+										   size_t systemOrEnviron)
+			{
 				std::vector<ComplexMatrixType> V(phi.sectors());
 				std::vector<ComplexMatrixType> T(phi.sectors());
 				
@@ -709,42 +724,34 @@ namespace Dmrg {
 				//checkNorms();
 			}
 
-//			void calcTimeVectorsKrylov0(RealType Eg,
-//						   const VectorWithOffsetType& phi,
-//						   size_t systemOrEnviron)
-//			{
-//				for (size_t i=1;i<times_.size();i++) {
-//					calcTargetVector0(targetVectors_[i],phi,Eg,times_[i]);
-//				}
-//			}
+			void calcTimeVectorsWft(RealType Eg,
+										   const VectorWithOffsetType& phi,
+										   size_t systemOrEnviron)
+			{
+				targetVectors_[0] = phi;
+				size_t nk = model_.hilbertSize(0);
+				for (size_t i=1;i<targetVectors_.size();i++) {
+					VectorWithOffsetType phiNew = phi;
+					wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk); // generalize for su(2)
+					targetVectors_[i]=phiNew;
+				}
+			}
 
-//			void calcTargetVector0(VectorWithOffsetType& v,
-//						const VectorWithOffsetType& phi,
-//						RealType Eg,
-//						RealType t)
-//			{
-//				v = phi;
-//				for (size_t ii=0;ii<phi.sectors();ii++) {
-//					size_t i0 = phi.sector(ii);
-//					ComplexVectorType r;
-//					calcTargetVector0(r,phi,Eg,t,i0);
-//					v.setDataInSector(r,i0);
-//				}
-//			}
+			bool needsLanczos() const
+			{
+				if (!DO_FAST_COMPUTATION) return true;
 
-//			void calcTargetVector0(ComplexVectorType& r,
-//			                       const VectorWithOffsetType& phi,
-//			                       RealType Eg,
-//			                       RealType t,
-//			                       size_t i0)
-//			{
-//				for (size_t i=0;i<total;i++) {
+				if (!allStages(WFT_NOADVANCE)) {
+					for (size_t i=0;i<stage_.size();i++) {
+						std::cerr<<stage_[i]<<" ";
+					}
+					std::cerr<<"\n";
+				} else {
+					std::cerr<<"About to return true\n";
+				}
 
-//					ComplexType c(cos(tmp),-sin(tmp));
-//					r[i] = c * phi.fastAccess(i0,i);
-//				}
-//			}
-
+				return !allStages(WFT_NOADVANCE);
+			}
 
 			//! Do not normalize states here, it leads to wrong results (!)
 			void calcTargetVectors(const VectorWithOffsetType& phi,
@@ -758,6 +765,7 @@ namespace Dmrg {
 				targetVectors_[0] = phi;
 //				normalize(targetVectors_[0]);
 				for (size_t i=1;i<times_.size();i++) {
+					targetVectors_[i] = phi;
 					// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
 					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
 //					normalize(targetVectors_[i]);
@@ -970,11 +978,11 @@ namespace Dmrg {
 				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,systemOrEnviron);
 			}
 
-			void zeroOutVectors()
-			{
-				for (size_t i=0;i<targetVectors_.size();i++) 
-					targetVectors_[i].resize(lrs_.super().size());
-			}
+//			void zeroOutVectors()
+//			{
+//				for (size_t i=0;i<targetVectors_.size();i++)
+//					targetVectors_[i].resize(lrs_.super().size());
+//			}
 
 //			void printHeader()
 //			{
@@ -1021,7 +1029,7 @@ namespace Dmrg {
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
 			const TargettingParamsType& tstStruct_;
-			const WaveFunctionTransfType& waveFunctionTransformation_;
+			const WaveFunctionTransfType& wft_;
 			PsimagLite::ProgressIndicator progress_;
 			RealType currentTime_;
 			std::vector<RealType> times_,weight_;
