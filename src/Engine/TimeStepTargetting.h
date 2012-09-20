@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ParametersForSolver.h"
 #include "RungeKutta.h"
+#include "ParallelWft.h"
 
 namespace Dmrg {
 	template<template<typename,typename,typename> class LanczosSolverTemplate,
@@ -91,8 +92,6 @@ namespace Dmrg {
 	         typename IoType_,
 	         template<typename> class VectorWithOffsetTemplate>
 	class TimeStepTargetting  {
-
-		static const bool DO_FAST_COMPUTATION = true;
 
 	public:
 
@@ -724,22 +723,50 @@ namespace Dmrg {
 				//checkNorms();
 			}
 
+//			void calcTimeVectorsWft(RealType Eg,
+//										   const VectorWithOffsetType& phi,
+//										   size_t systemOrEnviron)
+//			{
+//				targetVectors_[0] = phi;
+//				size_t nk = model_.hilbertSize(0);
+//				for (size_t i=1;i<targetVectors_.size();i++) {
+//					VectorWithOffsetType phiNew = phi;
+//					wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk); // generalize for su(2)
+//					targetVectors_[i]=phiNew;
+//				}
+//			}
+
 			void calcTimeVectorsWft(RealType Eg,
-										   const VectorWithOffsetType& phi,
-										   size_t systemOrEnviron)
+									const VectorWithOffsetType& phi,
+									size_t systemOrEnviron)
 			{
 				targetVectors_[0] = phi;
-				size_t nk = model_.hilbertSize(0);
+				// don't wft since we did it before
+				//size_t numberOfSites = lrs_.super().block().size();
+				//if (site==0 || site==numberOfSites -1)  return;
+
+				typedef ParallelWft<RealType,VectorWithOffsetType,WaveFunctionTransfType,LeftRightSuperType> ParallelWftType;
+				PTHREADS_NAME<ParallelWftType> threadedWft;
+				PTHREADS_NAME<ParallelWftType>::setThreads(model_.params().nthreads);
+				if (threadedWft.name()=="pthreads") {
+					std::ostringstream msg;
+					msg<<"Threading with "<<threadedWft.threads();
+					progress_.printline(msg,std::cout);
+				} else {
+					std::cerr<<"NOOOOOOOOOOOOOOO THREADDDSSSSSS "<<threadedWft.name()<<" "<<threadedWft.threads()<<"\n";
+				}
+
+				ParallelWftType helperWft(targetVectors_,model_.hilbertSize(0),wft_,lrs_);
+				threadedWft.loopCreate(targetVectors_.size()-1,helperWft,model_.concurrency());
 				for (size_t i=1;i<targetVectors_.size();i++) {
-					VectorWithOffsetType phiNew = phi;
-					wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk); // generalize for su(2)
-					targetVectors_[i]=phiNew;
+					assert(targetVectors_[i].size()==targetVectors_[0].size());
 				}
 			}
 
 			bool needsLanczos() const
 			{
-				if (!DO_FAST_COMPUTATION) return true;
+				if (model_.params().options.find("fasttarget")==std::string::npos)
+					return true;
 
 				if (!allStages(WFT_NOADVANCE)) {
 					for (size_t i=0;i<stage_.size();i++) {
