@@ -103,6 +103,9 @@ namespace Dmrg {
 	         template<typename> class VectorWithOffsetTemplate
 	>
 	class DynamicTargetting  {
+
+		static size_t const FAST_COMPUTATION = 1;
+
 	public:
 
 		typedef ModelType_ ModelType;
@@ -253,8 +256,11 @@ namespace Dmrg {
 			if (count==0) return;
 
 			Eg_ = Eg;
-			calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
-
+			if (fabs(weightForContinuedFraction_)<1e-6 || !FAST_COMPUTATION) {
+				calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
+			} else {
+				wftLanczosVectors(site,phiNew);
+			}
 			if (model_.params().insitu=="" || !includeGroundStage()) return;
 
 			if (BasisType::useSu2Symmetry()) {
@@ -417,6 +423,21 @@ namespace Dmrg {
 			setWeights();
 			if (fabs(weightForContinuedFraction_)<1e-6) weightForContinuedFraction_ = phi*phi;
 //			std::cerr<<"weight==============="<<weightForContinuedFraction_<<"\n";
+		}
+
+		void wftLanczosVectors(size_t site,const VectorWithOffsetType& phi)
+		{
+			targetVectors_[0] = phi;
+			// don't wft since we did it before
+			size_t numberOfSites = lrs_.super().block().size();
+			if (site==0 || site==numberOfSites -1)  return;
+
+			size_t nk = model_.hilbertSize(site);
+			for (size_t i=1;i<targetVectors_.size();i++) {
+				VectorWithOffsetType phiNew = targetVectors_[0];
+				wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk);
+				targetVectors_[i] = phiNew;
+			}
 		}
 
 		void getLanczosVectors(DenseMatrixType& V,
