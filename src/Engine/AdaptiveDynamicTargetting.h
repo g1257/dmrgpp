@@ -160,7 +160,8 @@ namespace Dmrg {
 		  gsWeight_(1.0),
 		  targetVectors_(2),
 		  commonTargetting_(lrs,model,tstStruct),
-		  done_(false)
+		  done_(false),
+		  weightForContinuedFraction_(0)
 		{
 			if (!wft.isEnabled()) throw std::runtime_error(" DynamicTargetting "
 					"needs an enabled wft\n");
@@ -198,7 +199,7 @@ namespace Dmrg {
 
 		bool includeGroundStage() const
 		{
-			return (gsWeight_==0) ?  false : true;
+			return (fabs(gsWeight_)>1e-6);
 		}
 
 		size_t size() const
@@ -440,7 +441,7 @@ namespace Dmrg {
 				setLanczosVectors(i0,sv,p,site,phiNew);
 			}
 			setWeights();
-			if (lastLanczosVector_==1)
+			if (lastLanczosVector_==1 && fabs(weightForContinuedFraction_)<1e-6)
 				weightForContinuedFraction_ = targetVectors_[0]*targetVectors_[0];
 		}
 
@@ -550,7 +551,7 @@ namespace Dmrg {
 //				}
 				sum += weight_[r];
 			}
-			gsWeight_ = 0.2;
+			gsWeight_ = 0.0;
 			for (size_t r=0;r<weight_.size();r++) weight_[r] *= (1-gsWeight_)/sum;
 		}
 
