@@ -27,6 +27,7 @@ Please see full open source license included in file LICENSE.
 #include "LAPACK.h"
 #include "Complex.h"
 #include <cassert>
+#include "TypeToString.h"
 
 namespace PsimagLite {
 	template<typename T>
@@ -460,6 +461,43 @@ namespace PsimagLite {
 			throw std::runtime_error("diag: cheev: failed with info!=0.\n");
 		}
 
+	}
+
+	void svd(Matrix<double> &a,std::vector<double>& s)
+	{
+		std::cerr<<"PsimagLite::svd(...) is experimental\n";
+		char jobz = 'A';
+		int m = a.n_row();
+		int n = a.n_col();
+		int lda = m;
+		int min = (m<n) ? m : n;
+
+		s.resize(min);
+		int ldu = m;
+		int ucol = m;
+		Matrix<double> u(ldu,ucol);
+		int ldvt = n;
+		Matrix<double> vt(ldvt,n);
+
+		std::vector<double> work(100);
+		int info = 0;
+		std::vector<int> iwork(8*min);
+
+		// query optimal work
+		int lwork = -1;
+		psimag::LAPACK::dgesdd_(&jobz,&m,&n,&(a(0,0)),&lda,&(s[0]),&(u(0,0)),&ldu,&(vt(0,0)), &ldvt,&(work[0]), &lwork,&(iwork[0]), &info);
+		if (info!=0) {
+			std::string str(__FILE__);
+			str += " " + ttos(__LINE__);
+			str += " PsimagLite::svd(...) failed with info=" + ttos(info) + "\n";
+			throw std::runtime_error(str.c_str());
+		}
+		lwork = work[0];
+		work.resize(lwork+10);
+		// real work:
+		psimag::LAPACK::dgesdd_(&jobz,&m,&n,&(a(0,0)),&lda,&(s[0]),&(u(0,0)),&ldu,&(vt(0,0)), &ldvt,&(work[0]), &lwork,&(iwork[0]), &info);
+
+		a = u;
 	}
 
 	template<typename T>

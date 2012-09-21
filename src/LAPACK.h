@@ -38,6 +38,7 @@ namespace LAPACK {
 
   extern "C" int  dgetri_(int* N, double* A, int* LDA, int* IPIV,  double* WORK, int* LWORK, int* INFO);
 
+  extern "C" int  dgesdd_(char* jobz,int* m,int* n, double* a,int* lda,double* s,double* u, int* ldu, double* vt, int* ldvt,double* work,int* lwork,int* iwork,int* info);
 // ============================================================================
   inline void GESV(int ma,int mb,float* a,int lda,int* pivot,
 		   float* b,int ldb,int& info) {
@@ -71,6 +72,9 @@ namespace LAPACK {
   inline void GETRI(int na, std::complex<double>* a, int lda, int* pivot, std::complex<double>* work, int lwork, int& info) {
     zgetri_(&na,a,&lda,pivot,work,&lwork,&info);
   }
+
+  // =========== svd functions ============
+
   
 }      /* namespace LAPACK */
 }      /* namespace psimag */
