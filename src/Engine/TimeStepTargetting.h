@@ -260,8 +260,10 @@ namespace Dmrg {
 
 				if (noStageIs(DISABLED)) {
 					max = 1;
-					for (size_t i=0;i<stage_.size();i++)
+					for (size_t i=0;i<stage_.size();i++) {
 						if (stage_[i]==OPERATOR) stage_[i] = WFT_NOADVANCE;
+						if (stage_[i]==WFT_ADVANCE) stage_[i] = WFT_NOADVANCE;
+					}
 				}
 
 				// Loop over each operator that needs to be applied 
@@ -768,16 +770,14 @@ namespace Dmrg {
 				if (model_.params().options.find("fasttarget")==std::string::npos)
 					return true;
 
-				if (!allStages(WFT_NOADVANCE)) {
-					for (size_t i=0;i<stage_.size();i++) {
-						std::cerr<<stage_[i]<<" ";
-					}
-					std::cerr<<"\n";
-				} else {
-					std::cerr<<"About to return true\n";
+				bool b = (!allStages(WFT_NOADVANCE));
+				std::cerr<<"STAGE=";
+				for (size_t i=0;i<stage_.size();i++) {
+					std::cerr<<stage_[i]<<" ";
 				}
+				std::cerr<<" returning="<<b<<"\n";
 
-				return !allStages(WFT_NOADVANCE);
+				return b;
 			}
 
 			//! Do not normalize states here, it leads to wrong results (!)
