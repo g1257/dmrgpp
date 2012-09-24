@@ -169,8 +169,8 @@ namespace Dmrg {
 		{
 			if (!wft.isEnabled())
 				throw std::runtime_error(" DynamicTargetting needs an enabled wft\n");
-			paramsForSolver_.steps = ProgramGlobals::LanczosSteps;
-			paramsForSolver_.tolerance = 1e-12;
+			paramsForSolver_.steps = model_.params().lanczosSteps;
+			paramsForSolver_.tolerance = model_.params().lanczosEps;
 			paramsForSolver_.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 		}
 

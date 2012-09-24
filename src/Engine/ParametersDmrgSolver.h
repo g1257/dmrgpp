@@ -296,9 +296,12 @@ namespace Dmrg {
 		int useReflectionSymmetry;
 		std::string fileForDensityMatrixEigs;
 		std::string insitu;
+		size_t lanczosSteps;
+		FieldType lanczosEps;
 
 		//! Read Dmrg parameters from inp file
 		ParametersDmrgSolver(InputValidatorType& io)
+			: lanczosSteps(200),lanczosEps(1e-12)
 		{
 			io.readline(model,"Model=");
 			io.readline(options,"SolverOptions=");
@@ -421,6 +424,14 @@ namespace Dmrg {
 			try {
 				io.readline(insitu,"insitu=");
 			} catch (std::exception& e) {}
+
+			try {
+				io.readline(insitu,"LanczosSteps=");
+			} catch (std::exception& e) {}
+
+			try {
+				io.readline(insitu,"LanczosEps=");
+			} catch (std::exception& e) {}
 		}
 	};
 
@@ -439,7 +450,9 @@ namespace Dmrg {
 		os<<"parameters.keptStatesInfinite="<<parameters.keptStatesInfinite<<"\n";
 		os<<"finiteLoop\n";
 		os<<parameters.finiteLoop;
-		
+		os<<"parameters.lanczosSteps="<<parameters.lanczosSteps<<"\n";
+		os<<"parameters.LanczosEps="<<parameters.lanczosEps<<"\n";
+
 		if (parameters.targetQuantumNumbers.size()>0) {
 			os<<"parameters.targetQuantumNumbers=";
 			for (size_t i=0;i<parameters.targetQuantumNumbers.size();i++)

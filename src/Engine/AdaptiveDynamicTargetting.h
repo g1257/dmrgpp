@@ -458,11 +458,9 @@ namespace Dmrg {
 			typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 			LanczosMatrixType h(&model_,&modelHelper);
 
-			size_t iter= ProgramGlobals::LanczosSteps;
-
 			ParametersForSolverType params;
-			params.steps = iter;
-			params.tolerance = 1e-12;
+			params.steps = model_.params().lanczosSteps;
+			params.tolerance = model_.params().lanczosEps;
 			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 
 			LanczosSolverType lanczosSolver(h,params);

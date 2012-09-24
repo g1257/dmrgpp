@@ -321,8 +321,6 @@ namespace Dmrg {
 					 const LeftRightSuperType& lrs,
 					 const SomeVectorType& initialVector)
 		{
-			RealType eps=ProgramGlobals::LanczosTolerance;
-			int iter=ProgramGlobals::LanczosSteps;
 			std::vector<RealType> tmpVec1,tmpVec2;
 			//srand48(7123443);
 
@@ -350,8 +348,7 @@ namespace Dmrg {
 			std::ostringstream msg;
 			msg<<"I will now diagonalize a matrix of size="<<modelHelper.size();
 			progress_.printline(msg,std::cout);
-			diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,
-					initialVector,iter,eps);
+			diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,initialVector);
 		}
 		
 		template<typename SomeVectorType>
@@ -359,9 +356,7 @@ namespace Dmrg {
 					 SomeVectorType &tmpVec,
 					 double &energyTmp,
 					 typename ModelType::ModelHelperType& modelHelper,
-					 const SomeVectorType& initialVector,
-					 size_t iter,
-					 RealType eps)
+					 const SomeVectorType& initialVector)
 //       		int reflectionSector= -1)
 		{
 			//if (reflectionSector>=0) modelHelper.setReflectionSymmetry(reflectionSector);
@@ -376,8 +371,8 @@ namespace Dmrg {
 			typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(&model_,&modelHelper,rs);
 
 			ParametersForSolverType params;
-			params.steps = iter;
-			params.tolerance = eps;
+			params.steps = parameters_.lanczosSteps;
+			params.tolerance = parameters_.lanczosEps;
 			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 			params.options= parameters_.options;
 			params.lotaMemory=false; //!(parameters_.options.find("DoNotSaveLanczosVectors")!=std::string::npos);

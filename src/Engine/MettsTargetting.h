@@ -868,13 +868,10 @@ namespace Dmrg {
 				typename ModelType::ModelHelperType modelHelper(p,lrs_);
 				 		//,useReflection_);
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
-			
-				RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
-				size_t iter= ProgramGlobals::LanczosSteps;
 
 				ParametersForSolverType params;
-				params.steps = iter;
-				params.tolerance = eps;
+				params.steps = model_.params().lanczosSteps;
+				params.tolerance = model_.params().lanczosEps;
 				params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 
 				LanczosSolverType lanczosSolver(lanczosHelper,params,&V);
