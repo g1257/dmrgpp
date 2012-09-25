@@ -426,11 +426,11 @@ namespace Dmrg {
 			} catch (std::exception& e) {}
 
 			try {
-				io.readline(insitu,"LanczosSteps=");
+				io.readline(lanczosSteps,"LanczosSteps=");
 			} catch (std::exception& e) {}
 
 			try {
-				io.readline(insitu,"LanczosEps=");
+				io.readline(lanczosEps,"LanczosEps=");
 			} catch (std::exception& e) {}
 		}
 	};
