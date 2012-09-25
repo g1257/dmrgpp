@@ -152,12 +152,14 @@ namespace Dmrg {
 
 			size_t ns=pBasisSummed.size();
 			size_t ne=pSE.size()/ns;
+			size_t start = pBasis.partition(m);
+			size_t length = pBasis.partition(m+1) - start;
+			size_t total=pBasisSummed.size();
 
-			for (size_t i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
-				for (size_t j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
-
-					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m)) +=
-							densityMatrixExpandEnviron(i,j,v,pBasisSummed,pSE,ns,ne)*weight;
+			for (size_t i=0;i<length;++i) {
+				size_t ieff = i +start;
+				for (size_t j=0;j<length;++j) {
+					matrixBlock(i,j) += densityMatrixExpandEnviron(ieff,j+start,v,total,pSE,ns,ne)*weight;
 				}
 			}
 		}
@@ -172,12 +174,14 @@ namespace Dmrg {
 		{
 			size_t ne = pBasisSummed.size();
 			size_t ns = pSE.size()/ne;
+			size_t start = pBasis.partition(m);
+			size_t length = pBasis.partition(m+1) - start;
+			size_t total=pBasisSummed.size();
 
-			for (size_t i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
-				for (size_t j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
-
-					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m)) +=
-							densityMatrixExpandSystem(i,j,v,pBasisSummed,pSE,ns,ne)*weight;
+			for (size_t i=0;i<length;++i) {
+				size_t ieff = i +start;
+				for (size_t j=0;j<length;++j) {
+					matrixBlock(i,j) += densityMatrixExpandSystem(ieff,j+start,v,total,pSE,ns,ne)*weight;
 				}
 			}
 		}
@@ -186,14 +190,11 @@ namespace Dmrg {
 			size_t alpha1,
 			size_t alpha2,
 			const TargetVectorType& v,
-			BasisWithOperatorsType const &pBasisSummed,
+			size_t total,
 			BasisType const &pSE,
 			size_t ns,
 			size_t ne)
 		{
-
-			size_t total=pBasisSummed.size();
-
 			DensityMatrixElementType sum=0;
 
 			size_t x2 = alpha2*ns;
@@ -210,19 +211,18 @@ namespace Dmrg {
 			size_t alpha1,
 			size_t alpha2,
 			const TargetVectorType& v,
-			BasisWithOperatorsType const &pBasisSummed,
+			size_t total,
 			BasisType const &pSE,
 			size_t ns,
 			size_t ne)
 		{
-
-			size_t total=pBasisSummed.size();
-
 			DensityMatrixElementType sum=0;
 
-			for (size_t beta=0;beta<total;beta++) {
-				size_t jj = pSE.permutationInverse(alpha2+beta*ns);
-				size_t ii = pSE.permutationInverse(alpha1+beta*ns);
+			size_t totalNs = total * ns;
+
+			for (size_t betaNs=0;betaNs<totalNs;betaNs+=ns) {
+				size_t jj = pSE.permutationInverse(alpha2+betaNs);
+				size_t ii = pSE.permutationInverse(alpha1+betaNs);
 				sum += v[ii] * std::conj(v[jj]);
 			}
 			return sum;
