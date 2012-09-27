@@ -349,7 +349,29 @@ namespace PsimagLite {
 			}
 			throw std::runtime_error("Unknown geometry\n");
 		}
-		
+
+		size_t length(size_t i) const
+		{
+			switch (n_) {
+			case CHAIN:
+				return chain_->length(i);
+			case LADDER:
+				return ladder_->length(i);
+			}
+			throw std::runtime_error("length(): unsupported by this geometry\n");
+		}
+
+		size_t translate(size_t site,size_t dir,size_t amount) const
+		{
+			switch (n_) {
+			case CHAIN:
+				return chain_->translate(site,dir,amount);
+			case LADDER:
+				return ladder_->translate(site,dir,amount);
+			}
+			throw std::runtime_error("translate(): unsupported by this geometry\n");
+		}
+
 		size_t maxConnections() const { return maxConnections_; }
 
 		size_t findReflection(size_t site) const

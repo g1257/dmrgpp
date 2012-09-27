@@ -264,10 +264,17 @@ namespace PsimagLite {
 		 ** row-compressed format */
 		template<typename S>
 		void matrixVectorProduct (std::vector<S> &x, std::vector<S> const &y) const
-		{ 
-			for (size_t i = 0; i < y.size(); i++)
-				for (int j = rowptr_[i]; j < rowptr_[i + 1]; j++)
+		{
+			assert(x.size()==y.size());
+			for (size_t i = 0; i < y.size(); i++) {
+				assert(i+1<rowptr_.size());
+				for (int j = rowptr_[i]; j < rowptr_[i + 1]; j++) {
+					assert(size_t(j)<values_.size());
+					assert(size_t(j)<colind_.size());
+					assert(size_t(colind_[j])<y.size());
 					x[i] += values_[j] * y[colind_[j]];
+				}
+			}
 		}
 
 		size_t row() const { return nrow_; }

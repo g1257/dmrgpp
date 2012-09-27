@@ -184,13 +184,44 @@ namespace PsimagLite {
 		{
 			return "ladder";
 		}
+
+		size_t length(size_t i) const
+		{
+			assert(i<2);
+			return (i==1) ? leg_ : size_t(linSize_/leg_);
+		}
+
+		size_t translate(size_t site,size_t dir,size_t amount) const
+		{
+			assert(dir<2);
+			size_t x = size_t(site/leg_);
+			size_t y = site % leg_;
+			size_t lx = size_t(linSize_/leg_);
+			if (dir==DIRECTION_X) x = translateInternal(x,lx,amount);
+			else y = translateInternal(y,leg_,amount);
+			size_t ind = y + x*leg_;
+			assert(ind<linSize_);
+			return ind;
+		}	
 		
 		size_t findReflection(size_t site) const
 		{
-			throw std::runtime_error("findReflection: unimplemented (sorry)\n");
+			size_t x = size_t(site/leg_);
+			size_t y = site % leg_;
+			size_t lx = size_t(linSize_/leg_);
+			size_t ind = y + (lx-x-1)*leg_;
+			assert(ind<linSize_);
+			return ind;
 		}
 
 	private:
+
+		size_t translateInternal(size_t c,size_t l,size_t amount) const
+		{
+			c += amount;
+			while(c>=l) c-=l;
+			return c;
+		}
 
 		size_t linSize_;
 		size_t leg_;

@@ -137,10 +137,24 @@ namespace PsimagLite {
 				return linSize_ - site -1;
 			}
 
+			size_t length(size_t i) const
+			{
+				assert(i==0);
+				return linSize_;
+			}
+
+			size_t translate(size_t site,size_t dir,size_t amount) const
+			{
+				assert(dir==0);
+				
+				site+=amount;
+				while(site>=linSize_) site -= linSize_;
+				return site;
+			}
+
 		private:
 
 			size_t linSize_;
-			size_t leg_;
 	}; // class Ladder
 } // namespace PsimagLite 
 

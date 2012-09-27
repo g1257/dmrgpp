@@ -182,6 +182,16 @@ namespace PsimagLite {
 				return terms_[termId].findReflection(site);
 			}
 
+			size_t length(size_t i,size_t termId) const
+			{
+				return terms_[termId].length(i);
+			}
+
+			size_t translate(size_t site,size_t dir, size_t amount,size_t termId) const
+			{
+				return terms_[termId].translate(site,dir,amount);
+			}
+
 			template<typename RealType2,typename PgType>
 			friend std::ostream& operator<<(std::ostream& os,const Geometry<RealType2,PgType>& g);
 
