@@ -605,9 +605,9 @@ namespace PsimagLite {
 
 	//! C = A*B,  all matrices are CRS matrices
 	//! idea is from http://web.maths.unsw.edu.au/~farid/Papers/Hons/node23.html
-	template<typename S,typename S2>
+	template<typename S,typename S3,typename S2>
 	void multiply(CrsMatrix<S> &C,
-		      CrsMatrix<S> const &A,
+		      CrsMatrix<S3> const &A,
 		      CrsMatrix<S2> const &B)
 	{
 		int j,s,mlast,itemp,jbk;
