@@ -148,12 +148,11 @@ namespace PsimagLite {
 				fout_->close();
 			}
 
-//			void printline(const std::string &s)
-//			{
-//				if (rank_!=0) return;
-//				(*fout_)<<s<<"\n";
-//				binaryOut_.print(s);
-//			}
+			void printline(const std::string &s)
+			{
+				if (rank_!=0) return;
+				(*fout_)<<s<<"\n";
+			}
 
 			void printline(std::ostringstream &s)
 			{
