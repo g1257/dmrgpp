@@ -197,7 +197,7 @@ namespace Dmrg {
 			io.printline(s);
 			s="#m="+ttos(m_);
 			io.printline(s);
-			io.print(label);
+			//io.print(label);
 
 //			io.print("#size=",size_);
 //			io.print("#offset=",offset_);
