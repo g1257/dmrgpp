@@ -492,7 +492,7 @@ namespace PsimagLite {
 			str += " PsimagLite::svd(...) failed with info=" + ttos(info) + "\n";
 			throw std::runtime_error(str.c_str());
 		}
-		lwork = work[0];
+		lwork = int(work[0]);
 		work.resize(lwork+10);
 		// real work:
 		psimag::LAPACK::dgesdd_(&jobz,&m,&n,&(a(0,0)),&lda,&(s[0]),&(u(0,0)),&ldu,&(vt(0,0)), &ldvt,&(work[0]), &lwork,&(iwork[0]), &info);
