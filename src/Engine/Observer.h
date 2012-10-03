@@ -96,7 +96,7 @@ namespace Dmrg {
 		typename ModelType,
 		typename IoInputType>
 	class Observer {
-		typedef SparseVector<FieldType> VectorType;
+		typedef PsimagLite::SparseVector<FieldType> VectorType;
 		typedef typename ModelType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelType::RealType RealType;
 		typedef PsimagLite::Matrix<FieldType> MatrixType;

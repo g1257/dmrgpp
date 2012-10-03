@@ -94,7 +94,7 @@ namespace Dmrg {
 		size_t ni;
 		size_t nj;
 		std::vector<PsimagLite::Matrix<FieldType> > correlationVector;
-		SparseVector<FieldType> wavefunction;
+		PsimagLite::SparseVector<FieldType> wavefunction;
 	};
 	
 	//! Companion function:
