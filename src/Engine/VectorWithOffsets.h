@@ -322,15 +322,23 @@ namespace Dmrg {
 		template<typename IoOutputter>
 		void save(IoOutputter& io,const std::string& label) const
 		{
-			io.print(label);
-			io.print("#size=",size_);
+			io.printline(label);
+			std::string s="#size="+ttos(size_);
+			io.printline(s);
+
+//			io.print(label);
+//			io.print("#size=",size_);
 			io.printVector(offsets_,"#offsets");
-			io.print("#nonzero=",nonzeroSectors_.size());
+			s = "#nonzero="+ttos(nonzeroSectors_.size());
+			io.printline(s);
+//			io.print("#nonzero=",nonzeroSectors_.size());
 
 			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
 				size_t j =  nonzeroSectors_[jj];
-				std::string s="#sector="+ttos(j);
-				io.print("#sector",j);
+				s="#sector="+ttos(j);
+				io.printline(s);
+//				std::string s="#sector="+ttos(j);
+//				io.print("#sector",j);
 				io.printVector(data_[j],s);
 			}
 		}

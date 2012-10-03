@@ -473,7 +473,7 @@ namespace Dmrg {
 		template<typename IoOutputter>
 		void save(IoOutputter& io,const std::string& ss) const
 		{
-			io.print("#NAME="+ss);
+			io.printline("#NAME="+ss);
 			saveInternal(io);
 		}
 
@@ -484,7 +484,7 @@ namespace Dmrg {
 			//std::ostringstream msg;
 			//msg<<"Now saving to disk";
 			//progress_.printline(msg,std::cerr);
-			io.print("#NAME="+name_);
+			io.printline("#NAME="+name_);
 			saveInternal(io);
 
 		}
@@ -523,7 +523,8 @@ namespace Dmrg {
 		template<typename IoOutputter>
 		void saveInternal(IoOutputter& io) const
 		{
-			io.print("#useSu2Symmetry=",useSu2Symmetry_);
+			std::string s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
+			io.printline(s);
 			io.printVector(block_,"#BLOCK");
 			io.printVector(quantumNumbers_,"#QN");
 			io.printVector(electrons_,"#ELECTRONS");

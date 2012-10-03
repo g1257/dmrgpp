@@ -156,17 +156,27 @@ namespace Dmrg {
 			template<typename IoOutputter>
 			void save(IoOutputter& io) const
 			{
-				io.print("#TIME=",currentTime_);
+				std::string s = "#TIME=" + ttos(currentTime_);
+				io.printline(s);
+				s = "#TCENTRALSITE=" + ttos(site_);
+				io.printline(s);
+				s = "#TNUMBEROFVECTORS="+ttos(targetVectors_.size());
+				io.printline(s);
 
-				io.print("#TCENTRALSITE=",site_);
+//				io.print("#TIME=",currentTime_);
 
-				io.print("#TNUMBEROFVECTORS=",targetVectors_.size());
+//				io.print("#TCENTRALSITE=",site_);
+
+//				io.print("#TNUMBEROFVECTORS=",targetVectors_.size());
 
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					std::string label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
 					targetVectors_[i].save(io,label);
 				}
-				io.print("#MARKER=",marker_);
+
+//				io.print("#MARKER=",marker_);
+				s="#MARKER="+ttos(marker_);
+				io.printline(s);
 			}
 
 		private:

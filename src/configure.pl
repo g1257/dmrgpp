@@ -155,16 +155,16 @@ dmrg:  dmrg.o gitrev
 correctionVectorMulti: correctionVectorMulti.o
 	\$(CXX) -o correctionVectorMulti correctionVectorMulti.o \$(LDFLAGS)
 
+observe:  observe.o
+	\$(CXX) -o observe observe.o \$(LDFLAGS)
+	strip observe
+
 # dependencies brought about by Makefile.dep
 %.o: %.cpp Makefile gitrev Engine/Version.h
 	\$(CXX) \$(CPPFLAGS) -c \$< 
 
 Makefile.dep: Engine/Version.h dmrg.cpp
 	\$(CXX) \$(CPPFLAGS) -MM dmrg.cpp  > Makefile.dep
-
-observe:  observe.o
-	\$(CXX) -o observe observe.o \$(LDFLAGS)
-	strip observe
 
 Engine/Version.h: gitrev
 	./gitrev > Engine/Version.h	

@@ -122,9 +122,11 @@ namespace Dmrg {
 			{
 				//ioOut_.open(fileOut_,std::ios_base::trunc,rank_);
 				ioOut_.open(fileOut_,std::ios_base::app,rank_);
-				ioOut_.print("#STACKMETARANK=",rank_);
-				
-				ioOut_.print("#STACKMETATOTAL=",total_);
+//				ioOut_.print("#STACKMETARANK=",rank_);
+				ioOut_.printline("#STACKMETARANK="+ttos(rank_));
+
+//				ioOut_.print("#STACKMETATOTAL=",total_);
+				ioOut_.printline("#STACKMETATOTAL="+ttos(total_));
 				//ioOut_.printline("#STACKMETADEBUG="+ttos(debug_));
 				ioOut_<<"#STACKMETASTACK\n";
 				ioOut_<<stack_;
