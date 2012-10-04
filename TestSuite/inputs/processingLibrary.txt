@@ -18,6 +18,13 @@ Let $raw = $srcDir/raw$testNum.txt
 Let $options = ccnnszsz
 Execute runObserve($input, $raw,$options)
 
+[RawObservables]
+Let $rawObs = $srcDir/raw$testNum.txt
+Let $oracle = $oraclesDir/raw$testNum.txt
+Let $diff = $resultsDir/raw$testNum.diff
+CallOnce observables
+Diff $rawObs $oracle > $diff
+
 [C]
 Let $result = $resultsDir/operatorC$testNum.txt
 Let $oracle = $oraclesDir/operatorC$testNum.txt
