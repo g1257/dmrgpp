@@ -166,6 +166,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		const OperatorType& getOperatorByIndex(int i) const
 		{
 			assert(!useSu2Symmetry_);
+			assert(i>=0 && size_t(i)<operators_.size());
 			return operators_[i];
 		}
 

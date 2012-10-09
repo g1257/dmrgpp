@@ -265,6 +265,7 @@ namespace Dmrg {
 			this->setSymmetryRelated(qm);
 			setHamiltonian(h);
 			operators_.setOperators(ops);
+			operatorsPerSite_.clear();
 			operatorsPerSite_.push_back(ops.size());
 		}
 
