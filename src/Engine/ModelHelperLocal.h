@@ -113,9 +113,7 @@ namespace Dmrg {
 		  lrs_(lrs),
 		  buffer_(lrs_.left().size()),
 		  basis2tc_(lrs_.left().numberOfOperators()),
-		  basis3tc_(lrs_.right().numberOfOperators()),
-		  alpha_(lrs_.super().size()),
-		  beta_(lrs_.super().size())
+		  basis3tc_(lrs_.right().numberOfOperators())
 		{
 			createBuffer();
 			createTcOperators(basis2tc_,lrs_.left());
@@ -431,6 +429,8 @@ namespace Dmrg {
 			int total = lrs_.super().partition(m_+1) - offset;
 
 			PackIndicesType pack(ns);
+			alpha_.resize(total);
+			beta_.resize(total);
 			for (int i=0;i<total;i++) {
 				// row i of the ordered product basis
 				pack.unpack(alpha_[i],beta_[i],lrs_.super().permutation(i+offset));
