@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2008 , UT-Battelle, LLC
+Copyright (c) 2008-2012, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 1.0.0]
+[DMRG++, Version 2.0.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -103,6 +100,7 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		
 	public:
+
 		FourPointCorrelations(ObserverHelperType& precomp,CorrelationsSkeletonType& skeleton,bool verbose=false)
 			: helper_(precomp),skeleton_(skeleton),verbose_(verbose)
 		{
@@ -115,19 +113,32 @@ namespace Dmrg {
 				char mod2,size_t i2,const MatrixType& O2,
 				char mod3,size_t i3,const MatrixType& O3,
 				char mod4,size_t i4,const MatrixType& O4,
-				int fermionicSign)
+				int fermionicSign) const
 		{
 			if (i1>i2 || i3>i4)
 				throw std::runtime_error("calcCorrelation: FourPoint needs ordered points\n");
 			if (i1==i2 || i3==i4)
 				throw std::runtime_error("calcCorrelation: FourPoint needs distinct points\n");
-			
+
+			MatrixType O2gt;
+
+			firstStage(O2gt,mod1,i1,O1,mod2,i2,O2,fermionicSign);
+
+			return secondStage(O2gt,i2,mod3,i3,O3,mod4,i4,O4,fermionicSign);
+		}
+
+		//! requires i1<i2
+		void firstStage(
+				MatrixType& O2gt,
+				char mod1,size_t i1,const MatrixType& O1,
+				char mod2,size_t i2,const MatrixType& O2,
+				int fermionicSign) const
+		{
+
 			// Take care of modifiers
-			MatrixType O1m, O2m,O3m,O4m;
+			MatrixType O1m, O2m;
 			skeleton_.createWithModification(O1m,O1,mod1);
 			skeleton_.createWithModification(O2m,O2,mod2);
-			skeleton_.createWithModification(O3m,O3,mod3);
-			skeleton_.createWithModification(O4m,O4,mod4);
 			if (verbose_) {
 				std::cerr<<"O1m, mod="<<mod1<<"\n";
 				std::cerr<<O1m;
@@ -136,7 +147,7 @@ namespace Dmrg {
 			}
 			
 			// Multiply and grow ("snowball")
-			MatrixType O1g,O2g,O3g,O4g;
+			MatrixType O1g,O2g;
 
 			int ns = i2-1;
 			if (ns<0) ns = 0;
@@ -145,14 +156,27 @@ namespace Dmrg {
 			
 			
 			helper_.setPointer(ns);
-			MatrixType O2gt; 
 			helper_.transform(O2gt,O2g);
 			if (verbose_) {
 				std::cerr<<"O2gt\n";
 				std::cerr<<O2gt;
 			}
-			
-			ns = i3-1;
+		}
+
+		//! requires i2<i3<i4
+		FieldType secondStage(
+			const MatrixType& O2gt,
+			size_t i2,
+			char mod3,size_t i3,const MatrixType& O3,
+			char mod4,size_t i4,const MatrixType& O4,
+			int fermionicSign) const
+		{
+			// Take care of modifiers
+			MatrixType O3m,O4m;
+			skeleton_.createWithModification(O3m,O3,mod3);
+			skeleton_.createWithModification(O4m,O4,mod4);
+
+			int ns = i3-1;
 			if (ns<0) ns = 0;
 			helper_.setPointer(ns);
 			MatrixType Otmp;
@@ -162,6 +186,7 @@ namespace Dmrg {
 				std::cerr<<Otmp;
 			}
 
+			MatrixType O3g,O4g;
 			if (i4==skeleton_.numberOfSites()-1) {
 				if (i3<i4-1) { // not tested
 					skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns);
@@ -204,7 +229,7 @@ namespace Dmrg {
 	private:
 			
 		//! i can be zero here!!
-		void growDirectly4p(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns)
+		void growDirectly4p(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns) const
 		{
 			Odest =Osrc;
 			std::vector<int> signs;

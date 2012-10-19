@@ -126,14 +126,15 @@ bool observeOneFullSweep(
 
 	if (modelName.find("FeAsBasedSc")!=std::string::npos ||
 	    modelName.find("FeAsBasedScExtended")!=std::string::npos) {
-		if (obsOptions.find("dd")!=std::string::npos &&
-		    geometry.label(0).find("ladder")!=std::string::npos) {
+		bool dd4 = (obsOptions.find("dd4")!=std::string::npos);
+
+		if (obsOptions.find("dd")!=std::string::npos && !dd4 &&
+			geometry.label(0).find("ladder")!=std::string::npos) {
 			observerLib.measure("dd",rows,n);
 		}
 
 		// FOUR-POINT DELTA-DELTA^DAGGER:
-		if (obsOptions.find("dd4")!=std::string::npos &&
-		    geometry.label(0).find("ladder")!=std::string::npos) {
+		if (dd4 && geometry.label(0).find("ladder")!=std::string::npos) {
 			observerLib.measure("dd4",rows,n);
 		} // if dd4
 	}

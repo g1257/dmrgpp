@@ -187,18 +187,28 @@ namespace Dmrg {
 				measureOne("TWO-POINT DELTA-DELTA^DAGGER",oDelta,oDeltaT,1,
 						rows,cols);
 			} else if (label=="dd4") {
+				if (model_.geometry().label(0)!="ladderx") {
+					std::string str(__FILE__);
+					str += " " + ttos(__LINE__) + "\n";
+					str += "dd4 only available for ladderx\n";
+					throw std::runtime_error(str.c_str());
+				}
 				for (size_t g=0;g<16;g++) {
-					std::vector<FieldType> fpd;
 					std::vector<size_t> gammas(4,0);
 					gammas[0] = (g & 1);
 					gammas[1] = (g & 2)>>1;
 					gammas[2] = (g & 4) >> 2;
 					gammas[3] = (g & 8) >> 3;
-					observe_.fourPointDeltas(fpd,numberOfSites_,
-							gammas,model_);
-					for (size_t step=0;step<fpd.size();step++) {
-						// step --> (i,j) FIXME
-						std::cout<<step<<" "<<g<<" "<<fpd[step]<<"\n";
+					std::cout<<"#DD4 for the following orbitals: ";
+					for (size_t i=0;i<gammas.size();i++) std::cout<<gammas[i]<<" ";
+					std::cout<<"\n";
+					MatrixType fpd(numberOfSites_/2,numberOfSites_/2);
+					observe_.fourPointDeltas(fpd,gammas,model_);
+					for (size_t i=0;i<fpd.n_row();i++) {
+						for (size_t j=0;j<fpd.n_col();j++) {
+							std::cout<<fpd(i,j)<<" ";
+						}
+						std::cout<<"\n";
 					}
 				}
 			} else {

@@ -162,46 +162,55 @@ namespace Dmrg {
 
 		void transform(MatrixType& ret,const MatrixType& O2) const
 		{
+			checkPos();
 			return dSerializerV_[currentPos_]->transform(ret,O2);
 		}
 
 		size_t columns() const
 		{
+			checkPos();
 			return dSerializerV_[currentPos_]->columns();
 		}
 
 		size_t rows() const
 		{
+			checkPos();
 			return dSerializerV_[currentPos_]->rows();
 		}
 
 		const FermionSignType& fermionicSignLeft() const
 		{
+			checkPos();
 			return dSerializerV_[currentPos_]->fermionicSignLeft();
 		}
 
 		const FermionSignType& fermionicSignRight() const
 		{
+			checkPos();
 			return dSerializerV_[currentPos_]->fermionicSignRight();
 		}
 
 		const LeftRightSuperType& leftRightSuper() const
 		{
+			checkPos();
 			return dSerializerV_[currentPos_]->leftRightSuper();
 		}
 
 		size_t direction() const
 		{
+			checkPos();
 			return dSerializerV_[currentPos_]->direction();
 		}
 
 		const VectorWithOffsetType& wavefunction() const
 		{
+			checkPos();
 			return dSerializerV_[currentPos_]->wavefunction();
 		}
 
 		RealType time() const
 		{
+			assert(currentPos_<timeSerializerV_.size());
 			return timeSerializerV_[currentPos_].time();
 		}
 
@@ -219,6 +228,7 @@ namespace Dmrg {
 
 		size_t marker() const
 		{
+			assert(currentPos_<timeSerializerV_.size());
 			return timeSerializerV_[currentPos_].marker();
 		}
 
@@ -246,6 +256,7 @@ namespace Dmrg {
 			VectorWithOffsetType1,LeftSuperType1>& precomp);
 
 	private:
+
 		bool init(bool hasTimeEvolution,size_t nf)
 		{
 
@@ -315,12 +326,18 @@ namespace Dmrg {
 			io_.readline(x,"#DIRECTION=",ns);
 			io_.rewind();
 		}
-		
-//		void getTimeVector(VectorWithOffsetType& timeVector,size_t ns)
-//		{
-//			timeVector.load(io2_,"targetVector0",ns);
-//			io_.rewind();
-//		}
+
+		void checkPos() const
+		{
+			if (currentPos_<dSerializerV_.size()) return;
+			assert(false);
+			std::string str(__FILE__);
+			str += " " + ttos(__LINE__) + "\n";
+			str += " currentPos=" + ttos(currentPos_);
+			str += " > serializer.size=" + ttos(dSerializerV_.size());
+			str += "\n";
+			throw std::runtime_error(str.c_str());
+		}
 
 		IoInputType& io_;
 		std::vector<DmrgSerializerType*> dSerializerV_;

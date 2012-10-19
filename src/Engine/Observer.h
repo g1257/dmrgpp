@@ -191,8 +191,7 @@ namespace Dmrg {
 		}
 
 		template<typename SomeModelType>
-		void fourPointDeltas(std::vector<FieldType>& fpd,
-				size_t n,
+		void fourPointDeltas(MatrixType& fpd,
 				const std::vector<size_t>& gammas,
 				const SomeModelType& model)
 		{
@@ -201,12 +200,32 @@ namespace Dmrg {
 				std::cerr<<" expected "<<4<<" got "<<gammas.size()<<"\n";
 				throw std::runtime_error("Observer::fourPointDeltas(...)\n");
 			}
-			for (size_t i=0;i<n;i++) {
-				if (i>0 && i%2!=0) continue;
-				for (size_t j=i+2;j<n;j++) {
-					if (j%2!=0) continue;
-					if (i+1>=n-1) continue;
-					fpd.push_back(fourPointDelta(i,j,gammas,model));
+
+			size_t nsites = 2*fpd.n_row();
+			assert(fpd.n_row()==fpd.n_col());
+
+			size_t hs = model.hilbertSize(0);
+			size_t nx = 0;
+			while(hs) {
+				hs>>=1;
+				nx++;
+			}
+			nx /= 2;
+			size_t site = 0;
+			assert(fpd.n_row()>1);
+
+			for (size_t i=0;i<fpd.n_row()-1;i++) {
+				if (2*i+1>=nsites) continue;
+				const MatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx); // C_{gamma0,up}
+				const MatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx); // C_{gamma1,down}
+				MatrixType O2gt;
+				fourpoint_.firstStage(O2gt,'C',2*i,opC0,'C',2*i+1,opC1,-1);
+
+				for (size_t j=i+1;j<fpd.n_col();j++) {
+					const MatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx); // C_{gamma2,down}
+					const MatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx); // C_{gamma3,up}
+					if (2*j+1>=nsites) continue;
+					fpd(i,j) = fourpoint_.secondStage(O2gt,2*i+1,'N',2*j,opC2,'N',2*j+1,opC3,-1);
 				}
 			}
 		}
@@ -234,30 +253,6 @@ namespace Dmrg {
 			if (str=="gs") return GS_VECTOR;
 			if (str=="time") return TIME_VECTOR;
 			throw std::runtime_error("Observer::bracketStringToNumber(...): must be gs or time");
-		}
-
-
-		template<typename SomeModelType>
-		FieldType fourPointDelta(size_t i,size_t j,const std::vector<size_t>& gammas,const SomeModelType& model)
-		{
-			size_t hs = model.hilbertSize(0);
-			size_t nx = 0;
-			while(hs) {
-				hs>>=1;
-				nx++;
-			}
-			nx /= 2;
-			size_t site = 0;
-			const MatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx); // C_{gamma0,up}
-			const MatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx); // C_{gamma1,down}
-			const MatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx); // C_{gamma2,down}
-			const MatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx); // C_{gamma3,up}
-
-			return fourpoint_(
-					'C',i,opC0,
-			       'C',i+1,opC1,
-			       'N',j,opC2,
-			       'N',j+1,opC3,-1);
 		}
 
 		ObserverHelperType helper_;
