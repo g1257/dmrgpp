@@ -147,12 +147,13 @@ namespace Dmrg {
 
 		size_t numberOfSites() const
 		{
-			return helper_.leftRightSuper().sites();
+			size_t threadId = 0;
+			return helper_.leftRightSuper(threadId).sites();
 		}
 
 		//! i can be zero here!!
 		void growDirectly(MatrixType& Odest,const MatrixType& Osrc,size_t i,
-				int fermionicSign,size_t ns,bool transform = true)
+				int fermionicSign,size_t ns,bool transform,size_t threadId)
 		{
 			Odest =Osrc;
 			// from 0 --> i
@@ -160,21 +161,21 @@ namespace Dmrg {
 			if (nt<0) nt=0;
 			
 			for (size_t s=nt;s<ns;s++) {
-				helper_.setPointer(s);
-				size_t growOption = growthDirection(s,nt,i);
-				MatrixType Onew(helper_.columns(),helper_.columns());
-				fluffUp(Onew,Odest,fermionicSign,growOption,false);
+				helper_.setPointer(threadId,s);
+				size_t growOption = growthDirection(s,nt,i,threadId);
+				MatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
+				fluffUp(Onew,Odest,fermionicSign,growOption,false,threadId);
 				if (!transform && s == ns-1) {
 					Odest = Onew;
 					continue;
 				}
-				helper_.transform(Odest,Onew);
+				helper_.transform(Odest,Onew,threadId);
 			}
 		}
 		
-		size_t growthDirection(size_t s,int nt,size_t i) const
+		size_t growthDirection(size_t s,int nt,size_t i,size_t threadId) const
 		{
-			size_t dir = helper_.direction();
+			size_t dir = helper_.direction(threadId);
 			size_t growOption = (dir==EXPAND_SYSTEM) ?
 					GROW_RIGHT : GROW_LEFT;
 
@@ -188,27 +189,32 @@ namespace Dmrg {
 		}
 
 		// Perfomance critical:
-		void fluffUp(MatrixType& ret2,const MatrixType& O,int fermionicSign,
-			     int growOption=GROW_RIGHT,bool transform = true)
+		void fluffUp(MatrixType& ret2,
+					 const MatrixType& O,
+					 int fermionicSign,
+					 int growOption,//=GROW_RIGHT,
+					 bool transform, //= true
+					 size_t threadId)
 		{
-			if (helper_.direction()==EXPAND_SYSTEM) {
-				fluffUpSystem(ret2,O,fermionicSign,growOption,transform);
+			if (helper_.direction(threadId)==EXPAND_SYSTEM) {
+				fluffUpSystem(ret2,O,fermionicSign,growOption,transform,threadId);
 				return;
 			}
-			fluffUpEnviron(ret2,O,fermionicSign,growOption,transform);
+			fluffUpEnviron(ret2,O,fermionicSign,growOption,transform,threadId);
 		}
 		
 		void dmrgMultiply(MatrixType& result,
-					const MatrixType& O1,
-					const MatrixType& O2,
-					int fermionicSign,
-				 	size_t ns)
+						  const MatrixType& O1,
+						  const MatrixType& O2,
+						  int fermionicSign,
+						  size_t ns,
+						  size_t threadId)
 		{
-			if (helper_.direction()==EXPAND_SYSTEM) {
-				dmrgMultiplySystem(result,O1,O2,fermionicSign,ns);
+			if (helper_.direction(threadId)==EXPAND_SYSTEM) {
+				dmrgMultiplySystem(result,O1,O2,fermionicSign,ns,threadId);
 				return;
 			}
-			dmrgMultiplyEnviron(result,O1,O2,fermionicSign,ns);
+			dmrgMultiplyEnviron(result,O1,O2,fermionicSign,ns,threadId);
 		}
 
 		void createWithModification(MatrixType& Om,const MatrixType& O,char mod)
@@ -220,13 +226,13 @@ namespace Dmrg {
 			transposeConjugate(Om,O);
 		}
 
-		FieldType bracket(const MatrixType& A,int fermionicSign)
+		FieldType bracket(const MatrixType& A,int fermionicSign,size_t threadId)
 		{
 			try {
-				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
-				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET,threadId);
 
-				return bracket_(A,src1,src2,fermionicSign);
+				return bracket_(A,src1,src2,fermionicSign,threadId);
 			} catch (std::exception& e) {
 				std::cerr<<"CAUGHT: "<<e.what();
 				std::cerr<<"WARNING: CorrelationsSkeleton::bracket(...):";
@@ -235,12 +241,12 @@ namespace Dmrg {
 			}
 		}
 
-		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,int fermionSign)
+		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,int fermionSign,size_t threadId)
 		{
 			try {
-				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
-				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
-				return bracketRightCorner_(A,B,fermionSign,src1,src2);
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET,threadId);
+				return bracketRightCorner_(A,B,fermionSign,src1,src2,threadId);
 			}  catch (std::exception& e) {
 				std::cerr<<"CAUGHT: "<<e.what();
 				std::cerr<<"WARNING: CorrelationsSkeleton::bracketRightCorner(...):";
@@ -250,12 +256,12 @@ namespace Dmrg {
 		}
 
 		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,
-				const MatrixType& C,int fermionSign)
+				const MatrixType& C,int fermionSign,size_t threadId)
 		{
 			try {
-				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
-				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
-				return bracketRightCorner_(A,B,C,fermionSign,src1,src2);
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET,threadId);
+				return bracketRightCorner_(A,B,C,fermionSign,src1,src2,threadId);
 			} catch (std::exception& e) {
 				std::cerr<<"CAUGHT: "<<e.what();
 				std::cerr<<"WARNING: CorrelationsSkeleton::bracketRightCornerABC(...):";
@@ -267,24 +273,25 @@ namespace Dmrg {
 	private:
 		
 		void dmrgMultiplySystem(MatrixType& result,
-							const MatrixType& O1,
-							const MatrixType& O2,
-							int fermionicSign,
-						 	size_t ns)
+								const MatrixType& O1,
+								const MatrixType& O2,
+								int fermionicSign,
+								size_t ns,
+								size_t threadId)
 		{
 			size_t ni=O1.n_row();
 			size_t nj=O2.n_row();
 
-			helper_.setPointer(ns);
-			size_t sprime = helper_.leftRightSuper().left().size(); //ni*nj;
+			helper_.setPointer(threadId,ns);
+			size_t sprime = helper_.leftRightSuper(threadId).left().size(); //ni*nj;
 			result.resize(sprime,sprime);
 
 			for (size_t r=0;r<result.n_row();r++)
 				for (size_t r2=0;r2<result.n_col();r2++)
 					result(r,r2)=0;
 
-			if (helper_.leftRightSuper().left().size()!=sprime) {
-				std::cerr<<"WARNING: "<<helper_.leftRightSuper().left().size();
+			if (helper_.leftRightSuper(threadId).left().size()!=sprime) {
+				std::cerr<<"WARNING: "<<helper_.leftRightSuper(threadId).left().size();
 				std::cerr<<"!="<<sprime<<"\n";
 				throw std::runtime_error("problem in dmrgMultiply\n");
 			}
@@ -292,11 +299,11 @@ namespace Dmrg {
 			PackIndicesType pack(ni);
 			for (size_t r=0;r<sprime;r++) {
 				size_t e,u;
-				pack.unpack(e,u,helper_.leftRightSuper().left().permutation(r));
-				RealType f = helper_.fermionicSignLeft()(e,fermionicSign);
+				pack.unpack(e,u,helper_.leftRightSuper(threadId).left().permutation(r));
+				RealType f = helper_.fermionicSignLeft(threadId)(e,fermionicSign);
 				for (size_t e2=0;e2<ni;e2++) {
 					for (size_t u2=0;u2<nj;u2++) {
-						size_t r2 = helper_.leftRightSuper().left().
+						size_t r2 = helper_.leftRightSuper(threadId).left().
 								permutationInverse(e2 + u2*ni);
 						result(r,r2) += O1(e,e2)*O2(u,u2)*f;
 					}
@@ -305,24 +312,25 @@ namespace Dmrg {
 		}
 
 		void dmrgMultiplyEnviron(MatrixType& result,
-							const MatrixType& O1,
-							const MatrixType& O2,
-							int fermionicSign,
-						 	size_t ns)
+								 const MatrixType& O1,
+								 const MatrixType& O2,
+								 int fermionicSign,
+								 size_t ns,
+								 size_t threadId)
 		{
 			size_t ni=O1.n_row();
 			size_t nj=O2.n_row();
 
-			helper_.setPointer(ns);
-			size_t eprime = helper_.leftRightSuper().right().size(); //ni*nj;
+			helper_.setPointer(threadId,ns);
+			size_t eprime = helper_.leftRightSuper(threadId).right().size(); //ni*nj;
 			result.resize(eprime,eprime);
 
 			for (size_t r=0;r<result.n_row();r++)
 				for (size_t r2=0;r2<result.n_col();r2++)
 					result(r,r2)=0;
 
-			if (helper_.leftRightSuper().right().size()!=eprime) {
-				std::cerr<<"WARNING: "<<helper_.leftRightSuper().right().size();
+			if (helper_.leftRightSuper(threadId).right().size()!=eprime) {
+				std::cerr<<"WARNING: "<<helper_.leftRightSuper(threadId).right().size();
 				std::cerr<<"!="<<eprime<<"\n";
 				throw std::runtime_error("problem in dmrgMultiply\n");
 			}
@@ -330,13 +338,13 @@ namespace Dmrg {
 			PackIndicesType pack(nj);
 			for (size_t r=0;r<eprime;r++) {
 				size_t e,u;
-				pack.unpack(e,u,helper_.leftRightSuper().right().permutation(r));
-				size_t nx0 = helper_.leftRightSuper().right().
+				pack.unpack(e,u,helper_.leftRightSuper(threadId).right().permutation(r));
+				size_t nx0 = helper_.leftRightSuper(threadId).right().
 							electrons(BasisType::AFTER_TRANSFORM);
 				RealType f = (nx0 & 1) ? fermionicSign : 1;
 				for (size_t e2=0;e2<nj;e2++) {
 					for (size_t u2=0;u2<ni;u2++) {
-						size_t r2 = helper_.leftRightSuper().right().
+						size_t r2 = helper_.leftRightSuper(threadId).right().
 								permutationInverse(e2 + u2*nj);
 						if (r2>=eprime) throw std::runtime_error("Error\n");
 						result(r,r2) += O2(e,e2)*O1(u,u2)*f;
@@ -351,19 +359,20 @@ namespace Dmrg {
 				const MatrixType& O,
 				int fermionicSign,
 				int growOption,
-				bool transform)
+				bool transform,
+			size_t threadId)
 		{
-			size_t n =helper_.leftRightSuper().left().size();
+			size_t n =helper_.leftRightSuper(threadId).left().size();
 
 			MatrixType ret(n,n);
 
 			for (size_t e=0;e<n;e++) {
 				for (size_t e2=0;e2<n;e2++) {
 					ret(e,e2) = fluffUpSystem_(
-							O,e,e2,fermionicSign,growOption);
+							O,e,e2,fermionicSign,growOption,threadId);
 				}
 			}
-			if (transform) helper_.transform(ret2,ret);
+			if (transform) helper_.transform(ret2,ret,threadId);
 			else ret2 = ret;
 		}
 
@@ -373,18 +382,19 @@ namespace Dmrg {
 				const MatrixType& O,
 				int fermionicSign,
 				int growOption,
-				bool transform)
+				bool transform,
+			size_t threadId)
 		{
-			size_t n =helper_.leftRightSuper().right().size();
+			size_t n =helper_.leftRightSuper(threadId).right().size();
 
 			MatrixType ret(n,n);
 			for (size_t e=0;e<n;e++) {
 				for (size_t e2=0;e2<n;e2++) {
 					ret(e,e2) = fluffUpEnviron_(
-							O,e,e2,fermionicSign,growOption);
+							O,e,e2,fermionicSign,growOption,threadId);
 				}
 			}
-			if (transform) helper_.transform(ret2,ret);
+			if (transform) helper_.transform(ret2,ret,threadId);
 			else ret2 = ret;
 		}
 
@@ -393,28 +403,29 @@ namespace Dmrg {
 				const MatrixType& O,
 				size_t e,size_t e2,
 				int fermionicSign,
-				int growOption)
+				int growOption,
+			size_t threadId)
 		{
 			size_t n = O.n_row();
-			size_t m = size_t(helper_.leftRightSuper().left().size()/n);
+			size_t m = size_t(helper_.leftRightSuper(threadId).left().size()/n);
 			RealType sign = static_cast<RealType>(1.0);
 
 			// Sperm[e] = i +k*n or e= k + i*m
 			// Sperm[e2] = j+k*n or e2=k+j*m
 			size_t i,j,k,k2;
 			if (growOption==GROW_RIGHT) {
-				if (size_t(helper_.leftRightSuper().left().permutation(e)/n)!=
-						size_t(helper_.leftRightSuper().left().permutation(e2)/n)) return 0;
+				if (size_t(helper_.leftRightSuper(threadId).left().permutation(e)/n)!=
+						size_t(helper_.leftRightSuper(threadId).left().permutation(e2)/n)) return 0;
 				PackIndicesType pack(n);
-				pack.unpack(i,k,helper_.leftRightSuper().left().permutation(e));
-				pack.unpack(j,k2,helper_.leftRightSuper().left().permutation(e2));
+				pack.unpack(i,k,helper_.leftRightSuper(threadId).left().permutation(e));
+				pack.unpack(j,k2,helper_.leftRightSuper(threadId).left().permutation(e2));
 			} else {
-				if (size_t(helper_.leftRightSuper().left().permutation(e)%m)!=
-						size_t(helper_.leftRightSuper().left().permutation(e2)%m)) return 0;
+				if (size_t(helper_.leftRightSuper(threadId).left().permutation(e)%m)!=
+						size_t(helper_.leftRightSuper(threadId).left().permutation(e2)%m)) return 0;
 				PackIndicesType pack(m);
-				pack.unpack(k,i,helper_.leftRightSuper().left().permutation(e));
-				pack.unpack(k2,j,helper_.leftRightSuper().left().permutation(e2));
-				sign = helper_.fermionicSignLeft()(k,fermionicSign);
+				pack.unpack(k,i,helper_.leftRightSuper(threadId).left().permutation(e));
+				pack.unpack(k2,j,helper_.leftRightSuper(threadId).left().permutation(e2));
+				sign = helper_.fermionicSignLeft(threadId)(k,fermionicSign);
 			}
 			if (k!=k2) return 0;
 			return O(i,j)*sign;
@@ -425,10 +436,11 @@ namespace Dmrg {
 				const MatrixType& O,
 				size_t e,size_t e2,
 				int fermionicSign,
-				int growOption)
+				int growOption,
+			size_t threadId)
 		{
 			size_t n = O.n_row();
-			size_t m = size_t(helper_.leftRightSuper().right().size()/n);
+			size_t m = size_t(helper_.leftRightSuper(threadId).right().size()/n);
 			RealType sign = 1;
 
 			// Eperm[e] = i +k*n or e= k + i*m
@@ -438,15 +450,15 @@ namespace Dmrg {
 
 			if (growOption==GROW_RIGHT) {
 				PackIndicesType pack(n);
-				pack.unpack(i,k,helper_.leftRightSuper().right().permutation(e));
-				pack.unpack(j,k2,helper_.leftRightSuper().right().permutation(e2));
-				size_t nx0 = helper_.leftRightSuper().left().electrons(BasisType::AFTER_TRANSFORM);
+				pack.unpack(i,k,helper_.leftRightSuper(threadId).right().permutation(e));
+				pack.unpack(j,k2,helper_.leftRightSuper(threadId).right().permutation(e2));
+				size_t nx0 = helper_.leftRightSuper(threadId).left().electrons(BasisType::AFTER_TRANSFORM);
 				sign = (nx0 & 1) ? fermionicSign : 1;
 			} else {
 				PackIndicesType pack(m);
-				pack.unpack(k,i,helper_.leftRightSuper().right().permutation(e));
-				pack.unpack(k2,j,helper_.leftRightSuper().right().permutation(e2));
-				size_t nx0 = helper_.leftRightSuper().super().electrons(BasisType::AFTER_TRANSFORM);
+				pack.unpack(k,i,helper_.leftRightSuper(threadId).right().permutation(e));
+				pack.unpack(k2,j,helper_.leftRightSuper(threadId).right().permutation(e2));
+				size_t nx0 = helper_.leftRightSuper(threadId).super().electrons(BasisType::AFTER_TRANSFORM);
 				sign = (nx0 & 1) ?  fermionicSign : 1;
 			}
 			if (k!=k2) return 0;
@@ -454,33 +466,35 @@ namespace Dmrg {
 		}
 
 		RealType bracket_(
-				const MatrixType& A,
-				const VectorWithOffsetType& vec1,
-				const VectorWithOffsetType& vec2,
-				int fermionicSign)
+			const MatrixType& A,
+			const VectorWithOffsetType& vec1,
+			const VectorWithOffsetType& vec2,
+			int fermionicSign,
+			size_t threadId)
 		{
 			if (verbose_)
-				std::cerr<<"SE.size="<<helper_.leftRightSuper().super().size()<<"\n";
+				std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
 
-			if (vec1.size()!=helper_.leftRightSuper().super().size() ||
+			if (vec1.size()!=helper_.leftRightSuper(threadId).super().size() ||
 								vec1.size()!=vec2.size())
 				throw std::runtime_error(
 					"CorrelationsSkeleton::bracket_(...): Error\n");
 
-			if (helper_.direction()==EXPAND_SYSTEM) {
-				return bracketSystem_(A,vec1,vec2);
+			if (helper_.direction(threadId)==EXPAND_SYSTEM) {
+				return bracketSystem_(A,vec1,vec2,threadId);
 			}
-			return bracketEnviron_(A,vec1,vec2,fermionicSign);
+			return bracketEnviron_(A,vec1,vec2,fermionicSign,threadId);
 		}
 
 		RealType bracketSystem_(
 						const MatrixType& A,
 						const VectorWithOffsetType& vec1,
-						const VectorWithOffsetType& vec2)
+						const VectorWithOffsetType& vec2,
+			size_t threadId)
 		{
 			SparseMatrixType Acrs(A);
 			FieldType sum=0;
-			PackIndicesType pack(helper_.leftRightSuper().left().size());
+			PackIndicesType pack(helper_.leftRightSuper(threadId).left().size());
 			for (size_t x=0;x<vec1.sectors();x++) {
 				size_t sector = vec1.sector(x);
 				size_t offset = vec1.offset(sector);
@@ -488,11 +502,11 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					pack.unpack(r,eta,helper_.leftRightSuper().super().
+					pack.unpack(r,eta,helper_.leftRightSuper(threadId).super().
 							permutation(t));
 					for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
 						size_t r2 = Acrs.getCol(k);
-						size_t t2 = helper_.leftRightSuper().super().
+						size_t t2 = helper_.leftRightSuper(threadId).super().
 								permutationInverse(r2+eta*A.n_col());
 						if (t2<offset || t2>=total) continue;
 						sum += Acrs.getValue(k)*vec1[t]*std::conj(vec2[t2]);
@@ -507,11 +521,12 @@ namespace Dmrg {
 						const MatrixType& A,
 						const VectorWithOffsetType& vec1,
 						const VectorWithOffsetType& vec2,
-						int fermionicSign)
+						int fermionicSign,
+			size_t threadId)
 		{
 			SparseMatrixType Acrs(A);
 			FieldType sum=0;
-			PackIndicesType pack(helper_.leftRightSuper().left().size());
+			PackIndicesType pack(helper_.leftRightSuper(threadId).left().size());
 
 			for (size_t x=0;x<vec1.sectors();x++) {
 				size_t sector = vec1.sector(x);
@@ -520,15 +535,15 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					pack.unpack(r,eta,helper_.leftRightSuper().super().
+					pack.unpack(r,eta,helper_.leftRightSuper(threadId).super().
 							permutation(t));
 					if (eta>=Acrs.row()) throw std::runtime_error("Error\n");
-					size_t nx0 = helper_.leftRightSuper().left().electrons(BasisType::AFTER_TRANSFORM);
+					size_t nx0 = helper_.leftRightSuper(threadId).left().electrons(BasisType::AFTER_TRANSFORM);
 					RealType sign = (nx0 & 1) ? fermionicSign : 1;
 					for (int k=Acrs.getRowPtr(eta);k<Acrs.getRowPtr(eta+1);k++) {
 						size_t eta2 = Acrs.getCol(k);
-						size_t t2 = helper_.leftRightSuper().super().
-							permutationInverse(r+eta2*helper_.leftRightSuper().left().size());
+						size_t t2 = helper_.leftRightSuper(threadId).super().
+							permutationInverse(r+eta2*helper_.leftRightSuper(threadId).left().size());
 						if (t2<offset || t2>=total) continue;
 						sum += Acrs.getValue(k)*vec1[t]*std::conj(vec2[t2])*sign;
 					}
@@ -539,15 +554,16 @@ namespace Dmrg {
 		}
 		
 		RealType bracketRightCorner_(
-				const MatrixType& A,
-				const MatrixType& B,
-				int fermionSign,
-				const VectorWithOffsetType& vec1,
-				const VectorWithOffsetType& vec2)
+			const MatrixType& A,
+			const MatrixType& B,
+			int fermionSign,
+			const VectorWithOffsetType& vec1,
+			const VectorWithOffsetType& vec2,
+			size_t threadId)
 		{
-			if (helper_.direction()==EXPAND_SYSTEM)
-				return brRghtCrnrSystem_(A,B,fermionSign,vec1,vec2);
-			return brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2);
+			if (helper_.direction(threadId)==EXPAND_SYSTEM)
+				return brRghtCrnrSystem_(A,B,fermionSign,vec1,vec2,threadId);
+			return brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2,threadId);
 		}
 
 		RealType brRghtCrnrSystem_(
@@ -555,17 +571,18 @@ namespace Dmrg {
 						const MatrixType& B,
 						int fermionSign,
 						const VectorWithOffsetType& vec1,
-						const VectorWithOffsetType& vec2)
+						const VectorWithOffsetType& vec2,
+			size_t threadId)
 		{
-			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper().super().size()<<"\n";
+			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
 
 			SparseMatrixType Acrs(A);
 			SparseMatrixType Bcrs(B);
 			FieldType sum=0;
-			size_t ni = helper_.leftRightSuper().left().size()/Bcrs.row(); // = Acrs.rank()
+			size_t ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.row(); // = Acrs.rank()
 
 			// some sanity checks:
-			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper().super().size())
+			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper(threadId).super().size())
 				throw std::runtime_error("Observe::brRghtCrnrSystem_(...): "
 						"vec.size!=SE.size\n");
 			if (ni!=Acrs.row())
@@ -573,7 +590,7 @@ namespace Dmrg {
 						"ni!=Acrs.rank\n");
 
 			// ok, we're ready for the main course:
-			PackIndicesType pack1(helper_.leftRightSuper().left().size());
+			PackIndicesType pack1(helper_.leftRightSuper(threadId).left().size());
 			PackIndicesType pack2(ni);
 			for (size_t x=0;x<vec1.sectors();x++) {
 				size_t sector = vec1.sector(x);
@@ -582,13 +599,13 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					pack1.unpack(r,eta,helper_.leftRightSuper().super().
+					pack1.unpack(r,eta,helper_.leftRightSuper(threadId).super().
 							permutation(t));
 					size_t r0,r1;
-					pack2.unpack(r0,r1,helper_.leftRightSuper().left().
+					pack2.unpack(r0,r1,helper_.leftRightSuper(threadId).left().
 							permutation(r));
-					size_t electrons = helper_.leftRightSuper().super().electrons(t);
-					electrons -= helper_.leftRightSuper().right().electrons(eta);
+					size_t electrons = helper_.leftRightSuper(threadId).super().electrons(t);
+					electrons -= helper_.leftRightSuper(threadId).right().electrons(eta);
 					RealType sign = (electrons & 1) ? fermionSign : 1.0;
 
 					for (int k=Acrs.getRowPtr(r0);k<Acrs.getRowPtr(r0+1);k++) {
@@ -596,10 +613,10 @@ namespace Dmrg {
 						for (int k2 = Bcrs.getRowPtr(eta);
 								k2<Bcrs.getRowPtr(eta+1);k2++) {
 							size_t eta2 = Bcrs.getCol(k2);
-							size_t rprime = helper_.leftRightSuper().left().
+							size_t rprime = helper_.leftRightSuper(threadId).left().
 									permutationInverse(r0prime+r1*ni);
-							size_t t2 = helper_.leftRightSuper().super().permutationInverse(
-									rprime+eta2*helper_.leftRightSuper().left().size());
+							size_t t2 = helper_.leftRightSuper(threadId).super().permutationInverse(
+									rprime+eta2*helper_.leftRightSuper(threadId).left().size());
 							if (t2<offset || t2>=total) continue;
 							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*
 									vec1[t]*std::conj(vec2[t2])*sign;
@@ -616,9 +633,10 @@ namespace Dmrg {
 				const MatrixType& B,
 				int fermionSign,
 				const VectorWithOffsetType& vec1,
-				const VectorWithOffsetType& vec2)
+				const VectorWithOffsetType& vec2,
+			size_t threadId)
 		{
-			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper().super().size()<<"\n";
+			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
 
 			SparseMatrixType Acrs(A);
 			SparseMatrixType Bcrs(B);
@@ -626,15 +644,15 @@ namespace Dmrg {
 			size_t ni = Bcrs.row();
 
 			// some sanity checks:
-			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper().super().size())
+			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper(threadId).super().size())
 				throw std::runtime_error("Observe::brLftCrnrEnviron_(...): "
 						"vec.size!=SE.size\n");
-			if (helper_.leftRightSuper().right().size()/Bcrs.row()!=Acrs.row())
+			if (helper_.leftRightSuper(threadId).right().size()/Bcrs.row()!=Acrs.row())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): "
 						"helper_.leftRightSuper().right().size()/Bcrs.rank()!=Acrs.rank\n");
 
 			// ok, we're ready for the main course:
-			PackIndicesType pack1(helper_.leftRightSuper().left().size());
+			PackIndicesType pack1(helper_.leftRightSuper(threadId).left().size());
 			PackIndicesType pack2(ni);
 
 			for (size_t x=0;x<vec1.sectors();x++) {
@@ -644,11 +662,11 @@ namespace Dmrg {
 				for (size_t t=offset;t<total;t++) {
 					size_t eta,r;
 
-					pack1.unpack(eta,r,helper_.leftRightSuper().super().
+					pack1.unpack(eta,r,helper_.leftRightSuper(threadId).super().
 							permutation(t));
 					size_t r0,r1;
-					pack2.unpack(r0,r1,helper_.leftRightSuper().right().permutation(r));
-					size_t electrons = helper_.leftRightSuper().left().electrons(eta);
+					pack2.unpack(r0,r1,helper_.leftRightSuper(threadId).right().permutation(r));
+					size_t electrons = helper_.leftRightSuper(threadId).left().electrons(eta);
 					RealType sign = (electrons & 1) ? fermionSign : 1.0;
 
 					for (int k=Acrs.getRowPtr(r1);k<Acrs.getRowPtr(r1+1);k++) {
@@ -656,10 +674,10 @@ namespace Dmrg {
 						for (int k2 = Bcrs.getRowPtr(eta);
 								k2<Bcrs.getRowPtr(eta+1);k2++) {
 							size_t eta2 = Bcrs.getCol(k2);
-							size_t rprime = helper_.leftRightSuper().right().
+							size_t rprime = helper_.leftRightSuper(threadId).right().
 									permutationInverse(r0+r1prime*ni);
-							size_t t2 = helper_.leftRightSuper().super().permutationInverse(
-									eta2+rprime*helper_.leftRightSuper().left().size());
+							size_t t2 = helper_.leftRightSuper(threadId).super().permutationInverse(
+									eta2+rprime*helper_.leftRightSuper(threadId).left().size());
 							if (t2<offset || t2>=total) continue;
 							sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec1[t]*
 									std::conj(vec2[t2])*sign;
@@ -672,27 +690,28 @@ namespace Dmrg {
 		}
 
 		RealType bracketRightCorner_(
-				const MatrixType& A1,
-				const MatrixType& A2,
-				const MatrixType& B,
-				int fermionSign,
-				const VectorWithOffsetType& vec1,
-				const VectorWithOffsetType& vec2)
+			const MatrixType& A1,
+			const MatrixType& A2,
+			const MatrixType& B,
+			int fermionSign,
+			const VectorWithOffsetType& vec1,
+			const VectorWithOffsetType& vec2,
+			size_t threadId)
 		{
-			if (helper_.direction()!=EXPAND_SYSTEM) return 0;
+			if (helper_.direction(threadId)!=EXPAND_SYSTEM) return 0;
 
 			RealType norma = std::norm(vec1);
 
-			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper().super().size()<<"\n";
+			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
 
 			SparseMatrixType A1crs(A1);
 			SparseMatrixType A2crs(A2);
 			SparseMatrixType Bcrs(B);
 			FieldType sum=0;
-			size_t ni = helper_.leftRightSuper().left().size()/Bcrs.row(); // = Acrs.rank()
+			size_t ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.row(); // = Acrs.rank()
 
 			// some sanity checks:
-			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper().super().size())
+			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper(threadId).super().size())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): vec.size!=SE.size\n");
 			if (ni!=A1crs.row())
 				throw std::runtime_error("Observe::bracketRightCorner_(...): ni!=A1crs.rank\n");
@@ -700,7 +719,7 @@ namespace Dmrg {
 				throw std::runtime_error("Observe::bracketRightCorner_(...): Bcrs.rank!=A2crs.rank\n");
 
 			// ok, we're ready for the main course:
-			PackIndicesType pack1(helper_.leftRightSuper().left().size());
+			PackIndicesType pack1(helper_.leftRightSuper(threadId).left().size());
 			PackIndicesType pack2(ni);
 
 			for (size_t x=0;x<vec1.sectors();x++) {
@@ -711,11 +730,11 @@ namespace Dmrg {
 					size_t eta,r;
 
 					pack1.unpack(r,eta,
-							helper_.leftRightSuper().super().permutation(t));
+							helper_.leftRightSuper(threadId).super().permutation(t));
 					size_t r0,r1;
 					pack2.unpack(r0,r1,
-							helper_.leftRightSuper().left().permutation(r));
-					RealType sign =  helper_.leftRightSuper().right().fermionicSign(r1,fermionSign);
+							helper_.leftRightSuper(threadId).left().permutation(r));
+					RealType sign =  helper_.leftRightSuper(threadId).right().fermionicSign(r1,fermionSign);
 
 					for (int k1=A1crs.getRowPtr(r0);k1<A1crs.getRowPtr(r0+1);k1++) {
 						size_t r0prime = A1crs.getCol(k1);
@@ -723,8 +742,8 @@ namespace Dmrg {
 							size_t r1prime = A2crs.getCol(k2);
 								for (int k3 = Bcrs.getRowPtr(eta);k3<Bcrs.getRowPtr(eta+1);k3++) {
 									size_t eta2 = Bcrs.getCol(k3);
-									size_t rprime = helper_.leftRightSuper().left().permutationInverse(r0prime+r1prime*ni);
-									size_t t2 = helper_.leftRightSuper().super().permutationInverse(rprime+eta2*helper_.leftRightSuper().left().size());
+									size_t rprime = helper_.leftRightSuper(threadId).left().permutationInverse(r0prime+r1prime*ni);
+									size_t t2 = helper_.leftRightSuper(threadId).super().permutationInverse(rprime+eta2*helper_.leftRightSuper(threadId).left().size());
 									if (t2<offset || t2>=total) continue;
 									sum += A1crs.getValue(k1)*A2crs.getValue(k2)*Bcrs.getValue(k3)*vec1[t]*std::conj(vec2[t2])*sign;
 								}

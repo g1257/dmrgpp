@@ -119,12 +119,13 @@ namespace Dmrg {
 		ObserverHelper(
 				IoInputType& io,
 				size_t nf,
+				size_t numberOfPthreads,
 				bool hasTimeEvolution,
 				bool verbose)
 			:	io_(io),
 				dSerializerV_(),//(1,DmrgSerializerType(io_,true)),
 				timeSerializerV_(),//(nf),
-				currentPos_(0),
+				currentPos_(numberOfPthreads),
 				verbose_(verbose),
 				bracket_(2,GS_VECTOR),
 				noMoreData_(false)
@@ -144,13 +145,17 @@ namespace Dmrg {
 		
 		bool endOfData() const { return noMoreData_; }
 
-		void setPointer(size_t pos)
+		void setPointer(size_t threadId,size_t pos)
 		{
-			//std::cerr<<"POS="<<pos<<"\n";
-			currentPos_=pos;
+			assert(threadId<currentPos_.size());
+			currentPos_[threadId]=pos;
 		}
 
-		size_t getPointer() const { return currentPos_; }
+		size_t getPointer(size_t threadId) const
+		{
+			assert(threadId<currentPos_.size());
+			return currentPos_[threadId];
+		}
 
 		void setBrackets(size_t left,size_t right)
 		{
@@ -158,67 +163,71 @@ namespace Dmrg {
 			bracket_[RIGHT_BRACKET]=right;
 		}
 
-		size_t bracket(size_t leftOrRight) const { return bracket_[leftOrRight]; }
-
-		void transform(MatrixType& ret,const MatrixType& O2) const
+		size_t bracket(size_t leftOrRight) const
 		{
-			checkPos();
-			return dSerializerV_[currentPos_]->transform(ret,O2);
+			return bracket_[leftOrRight];
 		}
 
-		size_t columns() const
+		void transform(MatrixType& ret,const MatrixType& O2,size_t threadId) const
 		{
-			checkPos();
-			return dSerializerV_[currentPos_]->columns();
+			checkPos(threadId);
+			return dSerializerV_[currentPos_[threadId]]->transform(ret,O2);
 		}
 
-		size_t rows() const
+		size_t columns(size_t threadId) const
 		{
-			checkPos();
-			return dSerializerV_[currentPos_]->rows();
+			checkPos(threadId);
+			return dSerializerV_[currentPos_[threadId]]->columns();
 		}
 
-		const FermionSignType& fermionicSignLeft() const
+		size_t rows(size_t threadId) const
 		{
-			checkPos();
-			return dSerializerV_[currentPos_]->fermionicSignLeft();
+			checkPos(threadId);
+			return dSerializerV_[currentPos_[threadId]]->rows();
 		}
 
-		const FermionSignType& fermionicSignRight() const
+		const FermionSignType& fermionicSignLeft(size_t threadId) const
 		{
-			checkPos();
-			return dSerializerV_[currentPos_]->fermionicSignRight();
+			checkPos(threadId);
+			return dSerializerV_[currentPos_[threadId]]->fermionicSignLeft();
 		}
 
-		const LeftRightSuperType& leftRightSuper() const
+		const FermionSignType& fermionicSignRight(size_t threadId) const
 		{
-			checkPos();
-			return dSerializerV_[currentPos_]->leftRightSuper();
+			checkPos(threadId);
+			return dSerializerV_[currentPos_[threadId]]->fermionicSignRight();
 		}
 
-		size_t direction() const
+		const LeftRightSuperType& leftRightSuper(size_t threadId) const
 		{
-			checkPos();
-			return dSerializerV_[currentPos_]->direction();
+			checkPos(threadId);
+			return dSerializerV_[currentPos_[threadId]]->leftRightSuper();
 		}
 
-		const VectorWithOffsetType& wavefunction() const
+		size_t direction(size_t threadId) const
 		{
-			checkPos();
-			return dSerializerV_[currentPos_]->wavefunction();
+			checkPos(threadId);
+			return dSerializerV_[currentPos_[threadId]]->direction();
 		}
 
-		RealType time() const
+		const VectorWithOffsetType& wavefunction(size_t threadId) const
 		{
-			assert(currentPos_<timeSerializerV_.size());
-			return timeSerializerV_[currentPos_].time();
+			checkPos(threadId);
+			return dSerializerV_[currentPos_[threadId]]->wavefunction();
 		}
 
-		//! This applies more generally (ie. not only to time)
-		size_t site() const
+		RealType time(size_t threadId) const
 		{
-			return  (timeSerializerV_.size()==0) ? dSerializerV_[currentPos_]->site()
-							     : timeSerializerV_[currentPos_].site();
+			checkPos(threadId);
+			return timeSerializerV_[currentPos_[threadId]].time();
+		}
+
+		size_t site(size_t threadId) const
+		{
+			checkPos(threadId);
+			return  (timeSerializerV_.size()==0) ?
+						dSerializerV_[currentPos_[threadId]]->site()
+					  : timeSerializerV_[currentPos_[threadId]].site();
 		}
 		
 		size_t size() const
@@ -226,26 +235,24 @@ namespace Dmrg {
 			return dSerializerV_.size(); //-1;
 		}
 
-		size_t marker() const
+		size_t marker(size_t threadId) const
 		{
-			assert(currentPos_<timeSerializerV_.size());
-			return timeSerializerV_[currentPos_].marker();
+			checkPos(threadId);
+			return timeSerializerV_[currentPos_[threadId]].marker();
 		}
 
-		const VectorWithOffsetType& getVectorFromBracketId(size_t leftOrRight) const
+		const VectorWithOffsetType& getVectorFromBracketId(size_t leftOrRight,size_t threadId) const
 		{
 			if (bracket(leftOrRight)==GS_VECTOR) {
-				return wavefunction();
+				return wavefunction(threadId);
 			}
-			return timeVector();
+			return timeVector(threadId);
 		}
 
-		const VectorWithOffsetType& timeVector() const
+		const VectorWithOffsetType& timeVector(size_t threadId) const
 		{
-			if (currentPos_>=timeSerializerV_.size() || 
-						 timeSerializerV_[currentPos_].size()==0)
-				throw std::runtime_error("timeVector has a problem\n");
-			return timeSerializerV_[currentPos_].vector();
+			checkPos(threadId);
+			return timeSerializerV_[currentPos_[threadId]].vector();
 		}
 
 		template<typename IoInputType1,typename MatrixType1,
@@ -327,14 +334,50 @@ namespace Dmrg {
 			io_.rewind();
 		}
 
-		void checkPos() const
+		void checkPos(size_t threadId) const
 		{
-			if (currentPos_<dSerializerV_.size()) return;
+			if (threadId>=currentPos_.size())
+				checkFailedThread(threadId);
+
+			size_t pos = currentPos_[threadId];
+
+			if (pos>=dSerializerV_.size()) checkFailed1(threadId,pos);
+
+			bool hasTimeE = (timeSerializerV_.size()>0);
+
+			if (!hasTimeE) return;
+			if (pos>=timeSerializerV_.size()) checkFailed2(threadId,pos);
+		}
+
+		void checkFailedThread(size_t threadId) const
+		{
 			assert(false);
 			std::string str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
-			str += " currentPos=" + ttos(currentPos_);
-			str += " > serializer.size=" + ttos(dSerializerV_.size());
+			str += " thread=" + ttos(threadId);
+			str += " >= currentPos.size=" + ttos(currentPos_.size());
+			str += "\n";
+			throw std::runtime_error(str.c_str());
+		}
+
+		void checkFailed1(size_t threadId,size_t pos) const
+		{
+			assert(false);
+			std::string str(__FILE__);
+			str += " " + ttos(__LINE__) + "\n";
+			str += " thread=" + ttos(threadId) + " currentPos=" + ttos(pos);
+			str += " >= serializer.size=" + ttos(dSerializerV_.size());
+			str += "\n";
+			throw std::runtime_error(str.c_str());
+		}
+
+		void checkFailed2(size_t threadId,size_t pos) const
+		{
+			assert(false);
+			std::string str(__FILE__);
+			str += " " + ttos(__LINE__) + "\n";
+			str += " thread=" + ttos(threadId) + " currentPos=" + ttos(pos);
+			str += " >= time serializer.size=" + ttos(timeSerializerV_.size());
 			str += "\n";
 			throw std::runtime_error(str.c_str());
 		}
@@ -342,7 +385,7 @@ namespace Dmrg {
 		IoInputType& io_;
 		std::vector<DmrgSerializerType*> dSerializerV_;
 		std::vector<TimeSerializerType> timeSerializerV_;
-		size_t currentPos_;
+		std::vector<size_t> currentPos_; // it's a vector: one per pthread
 		bool verbose_;
 		std::vector<size_t> bracket_;
 		bool noMoreData_;

@@ -133,7 +133,7 @@ namespace Dmrg {
 				const ModelType& model,
 				ConcurrencyType& concurrency,
 				bool verbose=false)
-		: helper_(io,nf,hasTimeEvolution,verbose),
+		: helper_(io,nf,model.params().nthreads,hasTimeEvolution,verbose),
 		  concurrency_(concurrency),
 		  verbose_(verbose),
 		  onepoint_(helper_),
@@ -144,23 +144,23 @@ namespace Dmrg {
 
 		size_t size() const { return helper_.size(); }
 
-		RealType time() const { return helper_.time(); }
+		RealType time(size_t threadId) const { return helper_.time(threadId); }
 
-		size_t site() const { return helper_.site(); }
+		size_t site(size_t threadId) const { return helper_.site(threadId); }
 
-		size_t marker() const { return helper_.marker(); }
+		size_t marker(size_t threadId) const { return helper_.marker(threadId); }
 
-		void setPointer(size_t x) { helper_.setPointer(x); }
+		void setPointer(size_t threadId,size_t x) { helper_.setPointer(threadId,x); }
 
 		bool endOfData() const { return helper_.endOfData(); }
 
 		// return true if
 		// we're at site 1 or n-2
-		bool isAtCorner(size_t numberOfSites) const
+		bool isAtCorner(size_t numberOfSites,size_t threadId) const
 		{
-			bool es = (helper_.direction() == ProgramGlobals::EXPAND_SYSTEM);
-			if (es && helper_.site() ==  numberOfSites-2) return true;
-			if (!es && helper_.site() == 1) return true;
+			bool es = (helper_.direction(threadId) == ProgramGlobals::EXPAND_SYSTEM);
+			if (es && helper_.site(threadId) ==  numberOfSites-2) return true;
+			if (!es && helper_.site(threadId) == 1) return true;
 			return false;
 		}
 
@@ -214,18 +214,19 @@ namespace Dmrg {
 			size_t site = 0;
 			assert(fpd.n_row()>1);
 
+			size_t threadId = 0;
 			for (size_t i=0;i<fpd.n_row()-1;i++) {
 				if (2*i+1>=nsites) continue;
 				const MatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx); // C_{gamma0,up}
 				const MatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx); // C_{gamma1,down}
 				MatrixType O2gt;
-				fourpoint_.firstStage(O2gt,'C',2*i,opC0,'C',2*i+1,opC1,-1);
+				fourpoint_.firstStage(O2gt,'C',2*i,opC0,'C',2*i+1,opC1,-1,threadId);
 
 				for (size_t j=i+1;j<fpd.n_col();j++) {
 					const MatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx); // C_{gamma2,down}
 					const MatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx); // C_{gamma3,up}
 					if (2*j+1>=nsites) continue;
-					fpd(i,j) = fourpoint_.secondStage(O2gt,2*i+1,'N',2*j,opC2,'N',2*j+1,opC3,-1);
+					fpd(i,j) = fourpoint_.secondStage(O2gt,2*i+1,'N',2*j,opC2,'N',2*j+1,opC3,-1,threadId);
 				}
 			}
 		}

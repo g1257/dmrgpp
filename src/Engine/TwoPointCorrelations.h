@@ -131,9 +131,11 @@ namespace Dmrg {
 		{
 			PsimagLite::Matrix<FieldType> w(rows,cols);
 
-			initCache(O1,rows,cols,fermionicSign);
+			size_t threadId = 0;
+			initCache(O1,rows,cols,fermionicSign,threadId);
 
 			PsimagLite::Range<ConcurrencyType> range(0,rows*cols,concurrency_);
+
 
 			for (;!range.end();range.next()) {
 				size_t ij = range.index();
@@ -141,7 +143,7 @@ namespace Dmrg {
 				size_t j = size_t(ij/rows);
 
 				if (i>j) continue;
-				w(i,j) = calcCorrelation(i,j,O1,O2,fermionicSign);
+				w(i,j) = calcCorrelation(i,j,O1,O2,fermionicSign,threadId);
 
 				if (verbose_) {
 					std::cerr<<"Result for i="<<i;
@@ -156,10 +158,10 @@ namespace Dmrg {
 
 	private:
 
-		void initCache(const MatrixType& O1,size_t n1, size_t nf,int fermionicSign)
+		void initCache(const MatrixType& O1,size_t n1, size_t nf,int fermionicSign,size_t threadId)
 		{
 			clearCache(n1, nf);
-            precomputeGrowth(O1,fermionicSign,n1,nf-1);
+			precomputeGrowth(O1,fermionicSign,n1,nf-1,threadId);
 		}
 
 		// Return the vector: O1 * O2 |psi>
@@ -167,19 +169,20 @@ namespace Dmrg {
 		// Note1: O1 is applied to site i and O2 is applied to site j
 		// Note2: O1 and O2 operators must commute or anti-commute (set fermionicSign accordingly)
 		FieldType calcCorrelation(
-					size_t i,
-					size_t j,
-					const MatrixType& O1,
-					const MatrixType& O2,
-					int fermionicSign)
+			size_t i,
+			size_t j,
+			const MatrixType& O1,
+			const MatrixType& O2,
+			int fermionicSign,
+			size_t threadId)
 		{
 			FieldType c = 0;
 			if (i==j) {
-				c=calcDiagonalCorrelation(i,O1,O2,fermionicSign);
+				c=calcDiagonalCorrelation(i,O1,O2,fermionicSign,threadId);
 			} else if (i>j) {
-				c= -calcCorrelation_(j,i,O2,O1,fermionicSign);
+				c= -calcCorrelation_(j,i,O2,O1,fermionicSign,threadId);
 			} else {
-				c=calcCorrelation_(i,j,O1,O2,fermionicSign);
+				c=calcCorrelation_(i,j,O1,O2,fermionicSign,threadId);
 			}
 			return c;
 		}
@@ -207,25 +210,27 @@ namespace Dmrg {
 		}
 
 		FieldType calcDiagonalCorrelation(
-					size_t i,
-					const MatrixType& O1,
-					const MatrixType& O2,
-					int fermionicSign)
+			size_t i,
+			const MatrixType& O1,
+			const MatrixType& O2,
+			int fermionicSign,
+			size_t threadId)
 		{
 			size_t n = O1.n_row();
 			MatrixType O1new=identity(n);
 
 			MatrixType O2new=multiplyTranspose(O1,O2);
-			if (i==0) return calcCorrelation_(0,1,O2new,O1new,1);
-			return calcCorrelation_(i-1,i,O1new,O2new,1);
+			if (i==0) return calcCorrelation_(0,1,O2new,O1new,1,threadId);
+			return calcCorrelation_(i-1,i,O1new,O2new,1,threadId);
 		}
 
 		FieldType calcCorrelation_(
-					size_t i,
-					size_t j,
-					const MatrixType& O1,
-					const MatrixType& O2,
-					int fermionicSign)
+			size_t i,
+			size_t j,
+			const MatrixType& O1,
+			const MatrixType& O2,
+			int fermionicSign,
+			size_t threadId)
 		{
 			
 			if (i>=j) throw std::runtime_error(
@@ -236,24 +241,24 @@ namespace Dmrg {
 
 			if (j==skeleton_.numberOfSites()-1) {
 				if (i==j-1) {
-					helper_.setPointer(j-2);
-					size_t ni = helper_.leftRightSuper().left().size()/
-							helper_.leftRightSuper().right().size();
+					helper_.setPointer(threadId,j-2);
+					size_t ni = helper_.leftRightSuper(threadId).left().size()/
+							helper_.leftRightSuper(threadId).right().size();
 					MatrixType O1g(ni,ni);
 					for (size_t x=0;x<O1g.n_row();x++) O1g(x,x) = 1.0;
-					return skeleton_.bracketRightCorner(O1g,O1m,O2m,fermionicSign);
+					return skeleton_.bracketRightCorner(O1g,O1m,O2m,fermionicSign,threadId);
 				}
-				MatrixType O1g,O2g;
-				skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2);
-				helper_.setPointer(j-2);
-				return skeleton_.bracketRightCorner(O1g,O2m,fermionicSign);
+				MatrixType O1g;
+				skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2,true,threadId);
+				helper_.setPointer(threadId,j-2);
+				return skeleton_.bracketRightCorner(O1g,O2m,fermionicSign,threadId);
 			}
 			MatrixType O1g,O2g;
 			size_t ns = j-1;
-			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns);
-			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);
+			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns,true,threadId);
+			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns,threadId);
 
-			return skeleton_.bracket(O2g,fermionicSign);
+			return skeleton_.bracket(O2g,fermionicSign,threadId);
 		}
 
 		MatrixType identity(size_t n)
@@ -299,7 +304,8 @@ namespace Dmrg {
 				const MatrixType& Osrc,
 				int fermionicSign,
 				size_t ns,
-				size_t nfinal)
+				size_t nfinal,
+			size_t threadId)
 		{
 			for (size_t i=0;i<ns;i++) {
 				int nt=i-1;
@@ -313,7 +319,7 @@ namespace Dmrg {
 						std::cerr<<" out of "<<(nfinal-1)<<"\n";
 					}
 					growRecursive(grownOperators_[i][s-nt-1],Oinc,i,
-							fermionicSign,s-1);
+							fermionicSign,s-1,threadId);
 					Oinc = grownOperators_[i][s-nt-1];
 				}
 			}
@@ -325,19 +331,20 @@ namespace Dmrg {
 				const MatrixType& Osrc,
 				size_t i,
 				int fermionicSign,
-				size_t s)
+				size_t s,
+						   size_t threadId)
 		{
 			std::vector<int> signs;
 			// from 0 --> i
 			int nt=i-1;
 			if (nt<0) nt=0;
 			
-			helper_.setPointer(s);
-			size_t growOption = skeleton_.growthDirection(s,nt,i);
+			helper_.setPointer(threadId,s);
+			size_t growOption = skeleton_.growthDirection(s,nt,i,threadId);
 
-			MatrixType Onew(helper_.columns(),helper_.columns());
+			MatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
 			Odest = Onew;
-			skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption);
+			skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption,true,threadId);
 		}
 
 		ObserverHelperType& helper_;

@@ -126,18 +126,19 @@ namespace Dmrg {
 			// Note that I can't print sites when there no time evolution
 			// since the DmrgSerializer doens't have sites yet
 			// as opposed to the TimeSerializer
-			if (hasTimeEvolution_) printSites();
+			size_t threadId = 0;
+			if (hasTimeEvolution_) printSites(threadId);
 			size_t site = 0; // FIXME: No support for site varying operators
 			if (label=="cc") {
 				MatrixType opC = model_.naturalOperator("c",site,0); // c_{0,0} spin up
 				MatrixType opCtranspose = transposeConjugate(opC);
-				measureOne("OperatorC",opC,opCtranspose,-1,rows,cols);
+				measureOne("OperatorC",opC,opCtranspose,-1,rows,cols,threadId);
 				MatrixType opC2 = model_.naturalOperator("c",site,1); // c_{0,0} spin down 
 				MatrixType opCtranspose2 = transposeConjugate(opC2);
-				measureOne("OperatorC",opC2,opCtranspose2,-1,rows,cols);
+				measureOne("OperatorC",opC2,opCtranspose2,-1,rows,cols,threadId);
 			} else if (label=="nn") {
 				MatrixType opN = model_.naturalOperator("n",site,0);
-				measureOne("OperatorN",opN,opN,1,rows,cols);
+				measureOne("OperatorN",opN,opN,1,rows,cols,threadId);
 			} else if (label=="szsz") {
 				MatrixType Sz = model_.naturalOperator("z",site,0);
 				szsz_ = observe_.correlations(Sz,Sz,1,rows,cols);
@@ -185,7 +186,7 @@ namespace Dmrg {
 				MatrixType oDeltaT;
 				transposeConjugate(oDeltaT,oDelta);
 				measureOne("TWO-POINT DELTA-DELTA^DAGGER",oDelta,oDeltaT,1,
-						rows,cols);
+						rows,cols,threadId);
 			} else if (label=="dd4") {
 				if (model_.geometry().label(0)!="ladderx") {
 					std::string str(__FILE__);
@@ -221,9 +222,10 @@ namespace Dmrg {
 		{
 			SparseMatrixType A;
 			Su2RelatedType su2Related1;
+			size_t threadId = 0;
 
 			if (label=="superDensity") {
-				A.makeDiagonal(model_.hilbertSize(observe_.site()),1.0);
+				A.makeDiagonal(model_.hilbertSize(observe_.site(threadId)),1.0);
 				std::pair<size_t,size_t> zeroZero(0,0);
 				OperatorType opIdentity(A,1,zeroZero,1,su2Related1);
 				observe_.setBrackets("time","time");
@@ -233,15 +235,15 @@ namespace Dmrg {
 						superDensity<<"\n";
 			} else if (label=="nupNdown") {
 				multiply(A,matrixNup_,matrixNdown_);
-				measureOnePoint(A,"nupNdown");
+				measureOnePoint(A,"nupNdown",threadId);
 			} else if (label=="nup+ndown") {
 				A = matrixNup_;
 				A += matrixNdown_;
-				measureOnePoint(A,"nup+ndown");
+				measureOnePoint(A,"nup+ndown",threadId);
 			} else if (label=="sz") {
 				A = matrixNup_;
 				A += (-1)*matrixNdown_;
-				measureOnePoint(A,"sz");
+				measureOnePoint(A,"sz",threadId);
 			} else {
 				std::string s = "Unknown label: " + label + "\n";
 					throw std::runtime_error(s.c_str());
@@ -258,6 +260,7 @@ namespace Dmrg {
 		void measureTheOnePoints(size_t numberOfDofs)
 		{
 			size_t site = 0; // FIXME : account for Hilbert spaces changing with site
+			size_t threadId = 0;
 			for (size_t dof=0;dof<numberOfDofs;dof++) {
 				for (size_t dof2=dof;dof2<numberOfDofs;dof2++) {
 					MatrixType opCup = model_.naturalOperator("c",site,dof);
@@ -268,7 +271,7 @@ namespace Dmrg {
 					SparseMatrixType A(Afull);
 					std::string str("c^\\dagger(dof=");
 					str += ttos(dof) + ") c(dof=" + ttos(dof2) + ")";
-					measureOnePoint(A,str);
+					measureOnePoint(A,str,threadId);
 				}
 			}
 		}
@@ -276,26 +279,27 @@ namespace Dmrg {
 	private:
 
 		void measureOne(const std::string& label,
-			const PsimagLite::Matrix<FieldType>& op1,
-			const PsimagLite::Matrix<FieldType>& op2,
-			int fermionSign,
-			size_t rows,
-			size_t cols)
+						const PsimagLite::Matrix<FieldType>& op1,
+						const PsimagLite::Matrix<FieldType>& op2,
+						int fermionSign,
+						size_t rows,
+						size_t cols,
+						size_t threadId)
 		{
 			const MatrixType& v =
 				observe_.correlations(op1,op2,fermionSign,rows,cols);;
 			if (concurrency_.root()) {
 				if (hasTimeEvolution_)
-					std::cout<<"#Time="<<observe_.time()<<"\n";
+					std::cout<<"#Time="<<observe_.time(threadId)<<"\n";
 				std::cout<<label<<":\n";
 				std::cout<<v;
 			}
 		}
 
-		void measureOnePoint(const SparseMatrixType& A,const std::string& label)
+		void measureOnePoint(const SparseMatrixType& A,const std::string& label,size_t threadId)
 		{
 			Su2RelatedType su2Related1;
-			printMarker();
+			printMarker(threadId);
 			std::cout<<"#Using Matrix A:\n";
 			for (size_t i=0;i<A.row();i++) {
 				for (size_t j=0;j<A.col();j++)
@@ -309,28 +313,28 @@ namespace Dmrg {
 			for (size_t i0 = 0;i0<observe_.size();i0++) {
 				// for g.s. use this one:
 				observe_.setBrackets("gs","gs");
-				observe_.setPointer(i0);
+				observe_.setPointer(threadId,i0);
 
-				onePointHookForZero(i0,opA,"gs");
+				onePointHookForZero(i0,opA,"gs",threadId);
 
 				FieldType tmp1 = observe_.template
 						onePoint<ApplyOperatorType>(i0,opA);
-				std::cout<<observe_.site()<<" "<<tmp1;
+				std::cout<<observe_.site(threadId)<<" "<<tmp1;
 
 				if (hasTimeEvolution_) { // for time vector use this one:
 					observe_.setBrackets("time","time");
 
-					onePointHookForZero(i0,opA,"time");
+					onePointHookForZero(i0,opA,"time",threadId);
 
 					FieldType tmp2 = observe_.template
 							 onePoint<ApplyOperatorType>(i0,opA);
 
-					std::cout<<" "<<tmp2<<" "<<observe_.time();
+					std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
 				}
 				std::cout<<"\n";
 				// also calculate next or prev. site:
-				if (observe_.isAtCorner(numberOfSites_)) {
-					size_t x = (observe_.site()==1) ? 0 : numberOfSites_-1;
+				if (observe_.isAtCorner(numberOfSites_,threadId)) {
+					size_t x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
 					// do the corner case
 					// for g.s. use this one:
 					observe_.setBrackets("gs","gs");
@@ -343,49 +347,49 @@ namespace Dmrg {
 						observe_.setBrackets("time","time");
 						FieldType tmp2 = observe_.template
 								 onePoint<ApplyOperatorType>(i0,opA,doCorner);
-						std::cout<<" "<<tmp2<<" "<<observe_.time();
+						std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
 					}
 					std::cout<<"\n";
 				}
 			}
 		}
 
-		void onePointHookForZero(size_t i0,const OperatorType& opA,const std::string& gsOrTime)
+		void onePointHookForZero(size_t i0,const OperatorType& opA,const std::string& gsOrTime,size_t threadId)
 		{
 			if (hasTimeEvolution_) return;
-			if (observe_.site()!=1 || observe_.isAtCorner(numberOfSites_)) return;
-			assert(observe_.site()==1);
+			if (observe_.site(threadId)!=1 || observe_.isAtCorner(numberOfSites_,threadId)) return;
+			assert(observe_.site(threadId)==1);
 			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(i0,opA);
 			std::cout<<0<<" "<<tmp1;
 			if (hasTimeEvolution_ && gsOrTime=="time") std::cout<<"\n";
 			if (!hasTimeEvolution_) std::cout<<"\n";
 		}
 
-		void printSites()
+		void printSites(size_t threadId)
 		{
-			printMarker();
+			printMarker(threadId);
 			std::cout<<"#Sites=";
-			observe_.setPointer(0);
-			if (observe_.site()==1) std::cout<<"0 ";
-			if (observe_.site()==numberOfSites_-2)
+			observe_.setPointer(threadId,0);
+			if (observe_.site(threadId)==1) std::cout<<"0 ";
+			if (observe_.site(threadId)==numberOfSites_-2)
 				std::cout<<(numberOfSites_-1)<<" ";
 			for (size_t i=0;i<observe_.size();i++) {
-				observe_.setPointer(i);
-				size_t x = observe_.site();
+				observe_.setPointer(threadId,i);
+				size_t x = observe_.site(threadId);
 				std::cout<<x<<" ";
 			}
-			if (observe_.site()==1) std::cout<<"0";
-			if (observe_.site() ==numberOfSites_-2) {
+			if (observe_.site(threadId)==1) std::cout<<"0";
+			if (observe_.site(threadId) ==numberOfSites_-2) {
 				std::cout<<(numberOfSites_-1);
 			}
 
 			std::cout<<"\n";
 		}
 
-		void printMarker()
+		void printMarker(size_t threadId) const
 		{
 			if (!hasTimeEvolution_) return;
-			size_t marker = observe_.marker();
+			size_t marker = observe_.marker(threadId);
 			std::string s = "INVALID MARKER";
 			switch (marker) {
 			case 0:

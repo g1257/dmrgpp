@@ -117,13 +117,14 @@ namespace Dmrg {
 			const typename ApplyOperatorType::OperatorType& A,
 			bool corner = false)
 		{
+			size_t threadId =0;
 			size_t pnter=site;
-			helper_.setPointer(pnter);
+			helper_.setPointer(threadId,pnter);
 			try {
-				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
-				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET,threadId);
 
-				return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner);
+				return onePointInternal<ApplyOperatorType>(site,A,src1,src2,corner,threadId);
 			} catch (std::exception& e) {
 				std::cerr<<"CAUGHT: "<<e.what();
 				std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
@@ -133,16 +134,17 @@ namespace Dmrg {
 
 		template<typename ApplyOperatorType>
 		FieldType hookForZero(size_t site,
-				      const typename ApplyOperatorType::OperatorType& A,
-				      bool corner = false)
+					  const typename ApplyOperatorType::OperatorType& A,
+					  bool corner = false)
 		{
 			size_t pnter=site;
-			helper_.setPointer(pnter);
+			size_t threadId = 0;
+			helper_.setPointer(threadId,pnter);
 			try {
-				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET);
-				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET);
+				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
+				const VectorWithOffsetType& src2 =  helper_.getVectorFromBracketId(RIGHT_BRACKET,threadId);
 
-				return onePointInternalHookForZero<ApplyOperatorType>(site,A,src1,src2,corner);
+				return onePointInternalHookForZero<ApplyOperatorType>(site,A,src1,src2,corner,threadId);
 			} catch (std::exception& e) {
 				std::cerr<<"CAUGHT: "<<e.what();
 				std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
@@ -154,17 +156,18 @@ namespace Dmrg {
 
 		template<typename ApplyOperatorType>
 		FieldType onePointInternal(size_t site,
-					   const typename ApplyOperatorType::OperatorType& A,
-					   const VectorWithOffsetType& src1,
-					   const VectorWithOffsetType& src2,
-					   bool corner = false)
+								   const typename ApplyOperatorType::OperatorType& A,
+								   const VectorWithOffsetType& src1,
+								   const VectorWithOffsetType& src2,
+								   bool corner,
+								   size_t threadId)
 		{
 			
-			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper());
+			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
 			VectorWithOffsetType dest;
 //			assert(helper_.fermionicSignLeft().size()==helper_.leftRightSuper().left().size());
-			applyOpLocal1(dest,src1,A,helper_.fermionicSignLeft(),
-					helper_.direction(),corner);
+			applyOpLocal1(dest,src1,A,helper_.fermionicSignLeft(threadId),
+					helper_.direction(threadId),corner);
 				
 			FieldType sum = static_cast<FieldType>(0.0);
 			const VectorWithOffsetType& v1 = dest;
@@ -187,13 +190,14 @@ namespace Dmrg {
 						      const typename ApplyOperatorType::OperatorType& A,
 						      const VectorWithOffsetType& src1,
 						      const VectorWithOffsetType& src2,
-						      bool corner = false)
+							  bool corner, //= false
+											  size_t threadId)
 		{
 
-			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper());
+			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
 			VectorWithOffsetType dest;
 //			assert(helper_.fermionicSignLeft().size()==helper_.leftRightSuper().left().size());
-			applyOpLocal1.hookForZero(dest,src1,A,helper_.fermionicSignLeft(),helper_.direction(),corner);
+			applyOpLocal1.hookForZero(dest,src1,A,helper_.fermionicSignLeft(threadId),helper_.direction(threadId),corner);
 
 			FieldType sum = static_cast<FieldType>(0.0);
 			const VectorWithOffsetType& v1 = dest;

@@ -109,11 +109,12 @@ namespace Dmrg {
 		//! Four-point: these are expensive and uncached!!!
 		//! requires i1<i2<i3<i4
 		FieldType operator()(
-				char mod1,size_t i1,const MatrixType& O1,
-				char mod2,size_t i2,const MatrixType& O2,
-				char mod3,size_t i3,const MatrixType& O3,
-				char mod4,size_t i4,const MatrixType& O4,
-				int fermionicSign) const
+			char mod1,size_t i1,const MatrixType& O1,
+			char mod2,size_t i2,const MatrixType& O2,
+			char mod3,size_t i3,const MatrixType& O3,
+			char mod4,size_t i4,const MatrixType& O4,
+			int fermionicSign,
+			size_t threadId) const
 		{
 			if (i1>i2 || i3>i4)
 				throw std::runtime_error("calcCorrelation: FourPoint needs ordered points\n");
@@ -122,17 +123,18 @@ namespace Dmrg {
 
 			MatrixType O2gt;
 
-			firstStage(O2gt,mod1,i1,O1,mod2,i2,O2,fermionicSign);
+			firstStage(O2gt,mod1,i1,O1,mod2,i2,O2,fermionicSign,threadId);
 
-			return secondStage(O2gt,i2,mod3,i3,O3,mod4,i4,O4,fermionicSign);
+			return secondStage(O2gt,i2,mod3,i3,O3,mod4,i4,O4,fermionicSign,threadId);
 		}
 
 		//! requires i1<i2
 		void firstStage(
-				MatrixType& O2gt,
-				char mod1,size_t i1,const MatrixType& O1,
-				char mod2,size_t i2,const MatrixType& O2,
-				int fermionicSign) const
+			MatrixType& O2gt,
+			char mod1,size_t i1,const MatrixType& O1,
+			char mod2,size_t i2,const MatrixType& O2,
+			int fermionicSign,
+			size_t threadId) const
 		{
 
 			// Take care of modifiers
@@ -151,12 +153,11 @@ namespace Dmrg {
 
 			int ns = i2-1;
 			if (ns<0) ns = 0;
-			skeleton_.growDirectly(O1g,O1m,i1,fermionicSign,ns);
-			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns);
+			skeleton_.growDirectly(O1g,O1m,i1,fermionicSign,ns,true,threadId);
+			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns,threadId);
 			
-			
-			helper_.setPointer(ns);
-			helper_.transform(O2gt,O2g);
+			helper_.setPointer(threadId,ns);
+			helper_.transform(O2gt,O2g,threadId);
 			if (verbose_) {
 				std::cerr<<"O2gt\n";
 				std::cerr<<O2gt;
@@ -169,7 +170,8 @@ namespace Dmrg {
 			size_t i2,
 			char mod3,size_t i3,const MatrixType& O3,
 			char mod4,size_t i4,const MatrixType& O4,
-			int fermionicSign) const
+			int fermionicSign,
+			size_t threadId) const
 		{
 			// Take care of modifiers
 			MatrixType O3m,O4m;
@@ -178,9 +180,9 @@ namespace Dmrg {
 
 			int ns = i3-1;
 			if (ns<0) ns = 0;
-			helper_.setPointer(ns);
+			helper_.setPointer(threadId,ns);
 			MatrixType Otmp;
-			growDirectly4p(Otmp,O2gt,i2+1,fermionicSign,ns);
+			growDirectly4p(Otmp,O2gt,i2+1,fermionicSign,ns,threadId);
 			if (verbose_) {
 				std::cerr<<"Otmp\n";
 				std::cerr<<Otmp;
@@ -189,25 +191,25 @@ namespace Dmrg {
 			MatrixType O3g,O4g;
 			if (i4==skeleton_.numberOfSites()-1) {
 				if (i3<i4-1) { // not tested
-					skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns);
-					skeleton_.growDirectly(Otmp,O3g,i3,fermionicSign,i4-2);
-					helper_.setPointer(i4-2);
-					return skeleton_.bracketRightCorner(Otmp,O4m,fermionicSign);
+					skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns,threadId);
+					skeleton_.growDirectly(Otmp,O3g,i3,fermionicSign,i4-2,true,threadId);
+					helper_.setPointer(threadId,i4-2);
+					return skeleton_.bracketRightCorner(Otmp,O4m,fermionicSign,threadId);
 				}
-				helper_.setPointer(i4-2);
-				return skeleton_.bracketRightCorner(Otmp,O3m,O4m,fermionicSign);
+				helper_.setPointer(threadId,i4-2);
+				return skeleton_.bracketRightCorner(Otmp,O3m,O4m,fermionicSign,threadId);
 			}
 
-			skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns);
+			skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns,threadId);
 			if (verbose_) {
 				std::cerr<<"O3g\n";
 				std::cerr<<O3g;
 			}
-			helper_.setPointer(ns);
+			helper_.setPointer(threadId,ns);
 
 
 			MatrixType O3gt; 
-			helper_.transform(O3gt,O3g);
+			helper_.transform(O3gt,O3g,threadId);
 			if (verbose_) {
 				std::cerr<<"O3gt\n";
 				std::cerr<<O3gt;
@@ -215,21 +217,21 @@ namespace Dmrg {
 
 			ns = i4-1;
 			if (ns<0) ns = 0;
-			helper_.setPointer(ns);
-			growDirectly4p(Otmp,O3gt,i3+1,fermionicSign,ns);
+			helper_.setPointer(threadId,ns);
+			growDirectly4p(Otmp,O3gt,i3+1,fermionicSign,ns,threadId);
 			if (verbose_) {
 				std::cerr<<"Otmp\n";
 				std::cerr<<Otmp;
 			}
 
-			skeleton_.dmrgMultiply(O4g,Otmp,O4m,fermionicSign,ns);
-			return skeleton_.bracket(O4g,fermionicSign);
+			skeleton_.dmrgMultiply(O4g,Otmp,O4m,fermionicSign,ns,threadId);
+			return skeleton_.bracket(O4g,fermionicSign,threadId);
 		}
 			
 	private:
 			
 		//! i can be zero here!!
-		void growDirectly4p(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns) const
+		void growDirectly4p(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns,size_t threadId) const
 		{
 			Odest =Osrc;
 			std::vector<int> signs;
@@ -238,11 +240,11 @@ namespace Dmrg {
 			if (nt<0) nt=0;
 			
 			for (size_t s=nt;s<ns;s++) {
-				helper_.setPointer(s);
+				helper_.setPointer(threadId,s);
 				int growOption = GROW_RIGHT;
 				
-				MatrixType Onew(helper_.columns(),helper_.columns());
-				skeleton_.fluffUp(Onew,Odest,fermionicSign,growOption);
+				MatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
+				skeleton_.fluffUp(Onew,Odest,fermionicSign,growOption,true,threadId);
 				Odest = Onew;
 				
 			}
