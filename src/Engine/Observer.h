@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h" // for operator*
 #include "VectorWithOffset.h" // for operator*
 #include "Profiling.h"
+#include "Parallel4PointDs.h"
 
 namespace Dmrg {
 	
@@ -211,24 +212,27 @@ namespace Dmrg {
 				nx++;
 			}
 			nx /= 2;
-			size_t site = 0;
+
 			assert(fpd.n_row()>1);
+			typedef std::pair<size_t,size_t> PairType;
 
-			size_t threadId = 0;
-			for (size_t i=0;i<fpd.n_row()-1;i++) {
+			std::vector<PairType> pairs;
+			for (size_t i=0;i<fpd.n_row();i++) {
 				if (2*i+1>=nsites) continue;
-				const MatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx); // C_{gamma0,up}
-				const MatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx); // C_{gamma1,down}
-				MatrixType O2gt;
-				fourpoint_.firstStage(O2gt,'C',2*i,opC0,'C',2*i+1,opC1,-1,threadId);
-
 				for (size_t j=i+1;j<fpd.n_col();j++) {
-					const MatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx); // C_{gamma2,down}
-					const MatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx); // C_{gamma3,up}
 					if (2*j+1>=nsites) continue;
-					fpd(i,j) = fourpoint_.secondStage(O2gt,2*i+1,'N',2*j,opC2,'N',2*j+1,opC3,-1,threadId);
+					pairs.push_back(PairType(i,j));
 				}
 			}
+
+			typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
+			PTHREADS_NAME<Parallel4PointDsType> threaded4PointDs;
+			PTHREADS_NAME<Parallel4PointDsType>::setThreads(model.params().nthreads);
+
+			Parallel4PointDsType helper4PointDs(fpd,fourpoint_,model,gammas,pairs);
+
+			threaded4PointDs.loopCreate(pairs.size(),helper4PointDs,model.concurrency());
+
 		}
 
 		template<typename ApplyOperatorType>

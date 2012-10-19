@@ -89,7 +89,6 @@ namespace Dmrg {
 
 		typedef typename CorrelationsSkeletonType::ObserverHelperType
 			ObserverHelperType;
-		typedef typename ObserverHelperType::MatrixType MatrixType;
 		typedef typename ObserverHelperType::VectorType VectorType ;
 		typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType ;
@@ -100,6 +99,8 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		
 	public:
+
+		typedef typename ObserverHelperType::MatrixType MatrixType;
 
 		FourPointCorrelations(ObserverHelperType& precomp,CorrelationsSkeletonType& skeleton,bool verbose=false)
 			: helper_(precomp),skeleton_(skeleton),verbose_(verbose)
