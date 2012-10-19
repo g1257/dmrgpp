@@ -142,7 +142,7 @@ namespace Dmrg {
 
 			std::vector<PairType> pairs;
 			for (size_t i=0;i<rows;i++) {
-				for (size_t j=i+1;j<cols;j++) {
+				for (size_t j=i;j<cols;j++) {
 					if (i>j) continue;
 					pairs.push_back(PairType(i,j));
 				}
