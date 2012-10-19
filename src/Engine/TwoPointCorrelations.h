@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // for operator*
 #include "Profiling.h"
 #include "Range.h"
+#include "Parallel2PointCorrelations.h"
 
 namespace Dmrg {
 	
@@ -93,7 +94,6 @@ namespace Dmrg {
 	class TwoPointCorrelations {
 		typedef typename CorrelationsSkeletonType::ObserverHelperType
 			ObserverHelperType;
-		typedef typename ObserverHelperType::MatrixType MatrixType;
 		typedef typename ObserverHelperType::VectorType VectorType ;
 		typedef typename ObserverHelperType::VectorWithOffsetType
 			VectorWithOffsetType;
@@ -102,6 +102,7 @@ namespace Dmrg {
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef PsimagLite::Profiling ProfilingType;
+		typedef TwoPointCorrelations<CorrelationsSkeletonType,ConcurrencyType> ThisType;
 
 		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		static size_t const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
@@ -111,12 +112,17 @@ namespace Dmrg {
 		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 
 	public:
+
+		typedef typename ObserverHelperType::MatrixType MatrixType;
+
 		TwoPointCorrelations(
-				ObserverHelperType& helper,
-				CorrelationsSkeletonType& skeleton,
-				ConcurrencyType& concurrency,
-				bool verbose=false)
-		: helper_(helper),
+			size_t nthreads,
+			ObserverHelperType& helper,
+			CorrelationsSkeletonType& skeleton,
+			ConcurrencyType& concurrency,
+			bool verbose=false)
+		: nthreads_(nthreads),
+		  helper_(helper),
 		  skeleton_(skeleton),
 		  concurrency_(concurrency),
 		  verbose_(verbose)
@@ -129,39 +135,29 @@ namespace Dmrg {
 				size_t rows,
 				size_t cols)
 		{
-			PsimagLite::Matrix<FieldType> w(rows,cols);
-
 			size_t threadId = 0;
 			initCache(O1,rows,cols,fermionicSign,threadId);
 
-			PsimagLite::Range<ConcurrencyType> range(0,rows*cols,concurrency_);
+			typedef std::pair<size_t,size_t> PairType;
 
-
-			for (;!range.end();range.next()) {
-				size_t ij = range.index();
-				size_t i = ij % rows;
-				size_t j = size_t(ij/rows);
-
-				if (i>j) continue;
-				w(i,j) = calcCorrelation(i,j,O1,O2,fermionicSign,threadId);
-
-				if (verbose_) {
-					std::cerr<<"Result for i="<<i;
-					std::cerr<<" and j="<<j<<"  rank="<<concurrency_.rank()<<"\n";
+			std::vector<PairType> pairs;
+			for (size_t i=0;i<rows;i++) {
+				for (size_t j=i+1;j<cols;j++) {
+					if (i>j) continue;
+					pairs.push_back(PairType(i,j));
 				}
 			}
 
-			concurrency_.reduce(w);
+			typedef Parallel2PointCorrelations<RealType,ThisType> Parallel2PointCorrelationsType;
+			PTHREADS_NAME<Parallel2PointCorrelationsType> threaded2Points;
+			PTHREADS_NAME<Parallel2PointCorrelationsType>::setThreads(nthreads_);
+
+			PsimagLite::Matrix<FieldType> w(rows,cols);
+			Parallel2PointCorrelationsType helper2Points(w,*this,pairs,O1,O2,fermionicSign);
+
+			threaded2Points.loopCreate(pairs.size(),helper2Points,concurrency_);
 
 			return w;
-		}
-
-	private:
-
-		void initCache(const MatrixType& O1,size_t n1, size_t nf,int fermionicSign,size_t threadId)
-		{
-			clearCache(n1, nf);
-			precomputeGrowth(O1,fermionicSign,n1,nf-1,threadId);
 		}
 
 		// Return the vector: O1 * O2 |psi>
@@ -185,6 +181,14 @@ namespace Dmrg {
 				c=calcCorrelation_(i,j,O1,O2,fermionicSign,threadId);
 			}
 			return c;
+		}
+
+	private:
+
+		void initCache(const MatrixType& O1,size_t n1, size_t nf,int fermionicSign,size_t threadId)
+		{
+			clearCache(n1, nf);
+			precomputeGrowth(O1,fermionicSign,n1,nf-1,threadId);
 		}
 
 		MatrixType multiplyTranspose(
@@ -287,7 +291,7 @@ namespace Dmrg {
 				size_t i,
 				int fermionicSign,
 				size_t ns,
-				size_t isDiagonal)
+				size_t isDiagonal) const
 		{
 			if (isDiagonal==DIAGONAL) {
 				static MatrixType Ox;
@@ -347,6 +351,7 @@ namespace Dmrg {
 			skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption,true,threadId);
 		}
 
+		size_t nthreads_;
 		ObserverHelperType& helper_;
 		CorrelationsSkeletonType& skeleton_;
 		ConcurrencyType& concurrency_;

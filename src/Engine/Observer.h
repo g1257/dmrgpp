@@ -139,7 +139,7 @@ namespace Dmrg {
 		  verbose_(verbose),
 		  onepoint_(helper_),
 		  skeleton_(helper_,model,verbose),
-		  twopoint_(helper_,skeleton_,concurrency_),
+		  twopoint_(model.params().nthreads,helper_,skeleton_,concurrency_),
 		  fourpoint_(helper_,skeleton_)
 		{}
 
