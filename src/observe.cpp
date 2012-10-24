@@ -18,6 +18,7 @@ const std::string license=
 
 typedef double RealType;
 
+#include <unistd.h>
 #include "Observer.h"
 #include "ObservableLibrary.h"
 #include "IoSimple.h"

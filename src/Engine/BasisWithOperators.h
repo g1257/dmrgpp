@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -261,7 +258,7 @@ namespace Dmrg {
 		                BasisDataType const &qm,
 		                const std::vector<OperatorType>& ops)
 		{
-			set(block);
+			this->set(block);
 			this->setSymmetryRelated(qm);
 			setHamiltonian(h);
 			operators_.setOperators(ops);
@@ -366,7 +363,7 @@ namespace Dmrg {
 	std::ostream& operator<<(std::ostream& os,
 	                         const BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
 	{
-		throw std::runtime_error("Unimplemented <<");
+		throw std::runtime_error("Unimplemented <<\n");
 		return os;
 	}
 
@@ -374,7 +371,7 @@ namespace Dmrg {
 	std::istream& operator>>(std::istream& is,
 	                         BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
 	{
-		throw std::runtime_error("Unimplemented >>");
+		throw std::runtime_error("Unimplemented >>\n");
 		return is;
 	}
 } // namespace Dmrg

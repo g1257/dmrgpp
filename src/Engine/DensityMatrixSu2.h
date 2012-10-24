@@ -245,24 +245,24 @@ namespace Dmrg {
 		//! only used for debugging
 		bool areAllMsEqual(DmrgBasisWithOperatorsType const &pBasis)
 		{
-			PsimagLite::AlmostEqual<RealType> almostEqual(1e-5);
+//			PsimagLite::AlmostEqual<RealType> almostEqual(1e-5);
 
-			for (size_t m=0;m<pBasis.partition()-1;m++) {
-				std::pair<size_t,size_t> jmPair1 =  pBasis.jmValue(pBasis.partition(m));
-				size_t ne1 = pBasis.electrons(pBasis.partition(m));
-				for (size_t p=0;p<pBasis.partition()-1;p++) {
-					std::pair<size_t,size_t> jmPair2 =  pBasis.jmValue(pBasis.partition(p));
-					size_t ne2 = pBasis.electrons(pBasis.partition(p));
+//			for (size_t m=0;m<pBasis.partition()-1;m++) {
+//				std::pair<size_t,size_t> jmPair1 =  pBasis.jmValue(pBasis.partition(m));
+//				size_t ne1 = pBasis.electrons(pBasis.partition(m));
+//				for (size_t p=0;p<pBasis.partition()-1;p++) {
+//					std::pair<size_t,size_t> jmPair2 =  pBasis.jmValue(pBasis.partition(p));
+//					size_t ne2 = pBasis.electrons(pBasis.partition(p));
 
-					if (jmPair1.first == jmPair2.first && ne1==ne2) {
+//					if (jmPair1.first == jmPair2.first && ne1==ne2) {
 						
-						if (!almostEqual(data_(m),data_(p))) {
-							std::cerr<<"Checking m="<<m<<" against p="<<p<<"\n";
-							throw std::runtime_error("error\n");
-						}
-					}
-				}
-			}
+//						if (!almostEqual(data_(m),data_(p))) {
+//							std::cerr<<"Checking m="<<m<<" against p="<<p<<"\n";
+//							throw std::runtime_error("error\n");
+//						}
+//					}
+//				}
+//			}
 			return true;
 		}
 		DensityMatrixElementType densityMatrixAux(size_t alpha1,size_t alpha2,const TargettingType& target,
