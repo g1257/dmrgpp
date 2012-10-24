@@ -222,6 +222,12 @@ namespace Dmrg {
 				crsMatrixToFullMatrix(tmp,creationMatrix[index2Op_[block[0]] + orbital + spin*norb].data);
 				return tmp;
 			}
+			if (what=="nup") {
+				return nUpOrDown(block,SPIN_UP);
+			}
+			if (what=="ndown") {
+				return nUpOrDown(block,SPIN_DOWN);
+			}
 			if (what=="d") { // delta = c^\dagger * c^dagger
 				throw std::runtime_error("delta unimplemented for this model\n");
 			}
@@ -463,13 +469,15 @@ namespace Dmrg {
 		{
 			assert(block.size()==1);
 			size_t site = block[0];
-			MatrixType tmp;
 			size_t norb = dOf(site)/NUMBER_OF_SPINS;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
+			assert(creationMatrix.size()>0);
+			size_t rank = creationMatrix[0].data.row();
+			MatrixType tmp(rank,rank);
 			for (size_t orb=0;orb<norb;orb++)
-				tmp += multiplyTc(creationMatrix[orb+SPIN_UP*norb].data,
-				                  creationMatrix[orb+SPIN_DOWN*norb].data);
+				tmp += multiplyTc(creationMatrix[orb+spin1*norb].data,
+								  creationMatrix[orb+spin2*norb].data);
 			return tmp;
 		}
 

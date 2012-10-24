@@ -331,13 +331,18 @@ namespace Dmrg {
 
 				model_.fullHamiltonian(fullm,modelHelper);
 
-				if (!isHermitian(fullm,true))
-					throw std::runtime_error("Not hermitian matrix block\n");
-
 				PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 				crsMatrixToFullMatrix(fullm2,fullm);
 				if (PsimagLite::isZero(fullm2)) std::cerr<<"Matrix is zero\n";
-				printNonZero(fullm2,std::cerr);
+				if (fullm.row()>40) {
+					printNonZero(fullm2,std::cerr);
+				} else {
+					printFullMatrix(fullm,"matrix",1);
+				}
+
+				if (!isHermitian(fullm,true))
+					throw std::runtime_error("Not hermitian matrix block\n");
+
 				std::vector<RealType> eigs(fullm2.n_row());
 				PsimagLite::diag(fullm2,eigs,'V');
 				std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
@@ -385,7 +390,6 @@ namespace Dmrg {
 			} else {
 				lanczosOrDavidson = new PsimagLite::LanczosSolver<ParametersForSolverType,MyInternalProduct,SomeVectorType>(lanczosHelper,params);
 			}
-
 
 			if (lanczosHelper.rank()==0) {
 				energyTmp=10000;

@@ -228,8 +228,8 @@ namespace Dmrg {
 			block[0]=site;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
-			size_t iup = SPIN_UP + site*DEGREES_OF_FREEDOM;
-			size_t idown = SPIN_DOWN + site*DEGREES_OF_FREEDOM;
+			size_t iup = SPIN_UP;
+			size_t idown = SPIN_DOWN;
 			if (what=="+" or what=="i") {
 				PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[iup].data,creationMatrix[idown].data);
 				return tmp;
@@ -246,8 +246,8 @@ namespace Dmrg {
 				return tmp;
 			} else if (what=="c") {
 				PsimagLite::Matrix<SparseElementType> tmp;
-				assert(dof + site*DEGREES_OF_FREEDOM<creationMatrix.size());
-				crsMatrixToFullMatrix(tmp,creationMatrix[dof + site*DEGREES_OF_FREEDOM].data);
+				assert(dof<creationMatrix.size());
+				crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
 				return tmp;
 			} else if (what=="nup") {
 				PsimagLite::Matrix<SparseElementType> cup = naturalOperator("c",site,SPIN_UP);

@@ -190,14 +190,14 @@ namespace Dmrg {
 			if (what=="z") {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				size_t x = 2*NUMBER_OF_ORBITALS+1;
-				crsMatrixToFullMatrix(tmp,creationMatrix[x+6*site].data);
+				crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
 				return tmp;
 			}
 
 			if (what=="+") {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				size_t x = 2*NUMBER_OF_ORBITALS;
-				crsMatrixToFullMatrix(tmp,creationMatrix[x+6*site].data);
+				crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
 				return tmp;
 			}
 
@@ -205,7 +205,7 @@ namespace Dmrg {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				size_t x = 2*NUMBER_OF_ORBITALS;
 				SparseMatrixType tmp2;
-				transposeConjugate(tmp2,creationMatrix[x+6*site].data);
+				transposeConjugate(tmp2,creationMatrix[x].data);
 				crsMatrixToFullMatrix(tmp,tmp2);
 				return tmp;
 			}

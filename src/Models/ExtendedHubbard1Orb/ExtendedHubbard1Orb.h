@@ -167,7 +167,7 @@ namespace Dmrg {
 
 			if (what=="n") {
 				PsimagLite::Matrix<SparseElementType> tmp;
-				crsMatrixToFullMatrix(tmp,creationMatrix[2+site*3].data);
+				crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
 				return tmp;
 			} else {
 				return modelHubbard_.naturalOperator(what,site,dof);
