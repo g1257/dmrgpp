@@ -250,6 +250,7 @@ namespace Dmrg {
 		}
 
 	private:
+
 		ParametersModelHeisenberg<RealType>  modelParameters_;
 		GeometryType const &geometry_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;

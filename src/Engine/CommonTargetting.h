@@ -258,7 +258,7 @@ namespace Dmrg {
 				const std::string& opLabel = vecStr[i];
 				OperatorType nup;
 				if (!fillOperatorFromFile(nup,opLabel)) {
-					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator(opLabel,0,0));
+					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator(opLabel,site,0));
 					nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
 				}
 				std::string tmpStr = "<PSI|" + opLabel + "|PSI>";
