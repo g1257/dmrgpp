@@ -20,6 +20,7 @@ Please see full open source license included in file LICENSE.
 #ifndef MATRIX_H_
 #define MATRIX_H_
 
+#include <unistd.h>
 #include <vector>
 #include <stdexcept>
 #include <iostream>
@@ -135,9 +136,9 @@ namespace PsimagLite {
 
 		void print(int fd) const
 		{
-			write(fd,(const void*)&ncol_,sizeof(ncol_));
-			write(fd,(const void*)&nrow_,sizeof(nrow_));
-			write(fd,(const void*)&(data_[0]),sizeof(T)*nrow_*ncol_);
+            ::write(fd,(const void*)&ncol_,sizeof(ncol_));
+            ::write(fd,(const void*)&nrow_,sizeof(nrow_));
+            ::write(fd,(const void*)&(data_[0]),sizeof(T)*nrow_*ncol_);
 
 		}
 
@@ -147,6 +148,11 @@ namespace PsimagLite {
 			::read(fd,&nrow_,sizeof(nrow_));
 			data_.resize(nrow_*ncol_);
 			::read(fd,&(data_[0]),sizeof(T)*nrow_*ncol_);
+		}
+
+		void setTo(const T& val)
+		{
+			for (size_t i=0;i<data_.size();i++) data_[i]=val;
 		}
 
 	private:
