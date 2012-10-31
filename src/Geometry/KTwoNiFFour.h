@@ -264,8 +264,21 @@ namespace PsimagLite {
 		
 		int signChange(size_t i1,size_t i2) const
 		{
-			if (isInverted(i1) || isInverted(i2)) return signChange_;
-			return 1;
+			// change the sign of Cu-O
+			size_t newi1 = std::min(i1,i2);
+			size_t newi2 = std::max(i1,i2);
+			PairType type1 = findTypeOfSite(newi1);
+			PairType type2 = findTypeOfSite(newi2);
+			int sign1 = 1;
+			if (type1.first!=type2.first) {
+				
+				int diff = (type1.first==TYPE_O) ? newi2-newi1 : newi1-newi2;
+				assert(diff==1 || diff==2 || diff==3);
+				if (diff<2) sign1 = -1;
+			}
+			
+			if (isInverted(i1) || isInverted(i2)) return signChange_*sign1;
+			return sign1;
 		}
 
 	private:
