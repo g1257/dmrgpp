@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009-2011, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -272,7 +269,7 @@ namespace PsimagLite {
 			int sign1 = 1;
 			if (type1.first!=type2.first) {
 				
-				int diff = (type1.first==TYPE_O) ? newi2-newi1 : newi1-newi2;
+				int diff =  newi2-newi1;
 				assert(diff==1 || diff==2 || diff==3);
 				if (diff<2) sign1 = -1;
 			}
