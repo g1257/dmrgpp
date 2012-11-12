@@ -114,8 +114,6 @@ namespace Dmrg {
 		
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;
-		static const int NUMBER_OF_ORBITALS=2;
-		static const size_t DEGREES_OF_FREEDOM=2*NUMBER_OF_ORBITALS;
 		static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
 		static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
 
@@ -136,9 +134,10 @@ namespace Dmrg {
 			  reinterpretY_(9),
 			  modelParameters_(io),
 			  geometry_(geometry),
-			  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
+			  spinSquared_(spinSquaredHelper_,modelParameters_.orbitals,2*modelParameters_.orbitals)
 		{
-			setPauliMatrix();
+			LinkProductType::setOrbitals(modelParameters_.orbitals);
+//			setPauliMatrix();
 			if (modelParameters_.potentialV.size()!=4*geometry.numberOfSites()) {
 				std::string str(__FILE__);
 				str += " " + ttos(__LINE__) + "\n";
@@ -149,7 +148,7 @@ namespace Dmrg {
 
 // 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
 
-		size_t hilbertSize(size_t site) const { return (size_t)pow(2,NUMBER_OF_ORBITALS*2); } 
+		size_t hilbertSize(size_t site) const { return (size_t)pow(2,modelParameters_.orbitals*2); }
 
 		void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
@@ -187,22 +186,23 @@ namespace Dmrg {
 
 			//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 			creationMatrix.clear();
+			size_t dofs = 2*modelParameters_.orbitals;
 			for (size_t i=0;i<block.size();i++) {
-				for (size_t sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
+				for (size_t sigma=0;sigma<dofs;sigma++) {
 					findOperatorMatrices(tmpMatrix,i,sigma,natBasis);
 					size_t m=0;
 					int asign=1;
-					if (sigma>1) {
+					if (sigma>modelParameters_.orbitals-1) {
 						m=1;
 						asign= -1;
 					}
 					typename OperatorType::Su2RelatedType su2related;
 					if (sigma <2) {
-						su2related.source.push_back(i*DEGREES_OF_FREEDOM+sigma);
-						su2related.source.push_back(i*DEGREES_OF_FREEDOM+sigma + NUMBER_OF_ORBITALS);	
+						su2related.source.push_back(i*dofs+sigma);
+						su2related.source.push_back(i*dofs+sigma + modelParameters_.orbitals);
 						su2related.transpose.push_back(-1);
 						su2related.transpose.push_back(-1);
-						su2related.offset = NUMBER_OF_ORBITALS;
+						su2related.offset = modelParameters_.orbitals;
 					}	
 					OperatorType myOp(tmpMatrix,-1,typename OperatorType::PairType(1,m),asign,su2related);
 					creationMatrix.push_back(myOp);
@@ -217,51 +217,54 @@ namespace Dmrg {
 			block[0]=site;
 			std::vector<OperatorType> creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
-			size_t orbital = dof % NUMBER_OF_ORBITALS;
-			size_t spin = dof/NUMBER_OF_ORBITALS;
+			size_t orbital = dof % modelParameters_.orbitals;
+			size_t spin = dof/modelParameters_.orbitals;
+			assert(creationMatrix.size()>0);
+			size_t nrow = creationMatrix[0].data.row();
 
 			if (what=="+" or what=="i") {
-				PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[0].data,creationMatrix[2].data);
-				PsimagLite::Matrix<SparseElementType> tmp2 = multiplyTc(creationMatrix[1].data,creationMatrix[3].data);
-				return tmp+tmp2;
+				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+				for (size_t x=0;x<modelParameters_.orbitals;x++)
+					tmp += multiplyTc(creationMatrix[x].data,creationMatrix[x+modelParameters_.orbitals].data);
+				return tmp;
 			}
 			if (what=="-") {
-				PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[2].data,creationMatrix[0].data);
-				PsimagLite::Matrix<SparseElementType> tmp2 = multiplyTc(creationMatrix[3].data,creationMatrix[1].data);
-				return tmp+tmp2;
+				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+				for (size_t x=0;x<modelParameters_.orbitals;x++)
+					tmp += multiplyTc(creationMatrix[x+modelParameters_.orbitals].data,creationMatrix[x].data);
+				return tmp;
 			}
 			if (what=="z") {
-				PsimagLite::Matrix<SparseElementType> tmp =multiplyTc(creationMatrix[0].data,creationMatrix[0].data)
-						+ multiplyTc(creationMatrix[1].data,creationMatrix[1].data);
-				PsimagLite::Matrix<SparseElementType> tmp2 =multiplyTc(creationMatrix[2].data,creationMatrix[2].data)
-						+ multiplyTc(creationMatrix[3].data,creationMatrix[3].data);
+				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+				PsimagLite::Matrix<SparseElementType> tmp2(nrow,nrow);
+				for (size_t x=0;x<modelParameters_.orbitals;x++) {
+					tmp += multiplyTc(creationMatrix[x].data,creationMatrix[x].data);
+					tmp += multiplyTc(creationMatrix[x+modelParameters_.orbitals].data,creationMatrix[x+modelParameters_.orbitals].data);
+				}
 				return tmp-tmp2;
 			}
 			if (what=="n") {
-				PsimagLite::Matrix<SparseElementType> tmp =  multiplyTc(creationMatrix[0].data,creationMatrix[0].data)
-						+ multiplyTc(creationMatrix[1].data,creationMatrix[1].data)
-				 		+ multiplyTc(creationMatrix[2].data,creationMatrix[2].data)
-						+ multiplyTc(creationMatrix[3].data,creationMatrix[3].data);
+				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+				for (size_t x=0;x<2*modelParameters_.orbitals;x++)
+					tmp += multiplyTc(creationMatrix[x].data,creationMatrix[x].data);
 				return tmp;
 			} 
 			if (what=="c") {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				SparseMatrixType cdagger;
-				transposeConjugate(cdagger,creationMatrix[orbital + spin*NUMBER_OF_ORBITALS].data);
+				transposeConjugate(cdagger,creationMatrix[orbital + spin*modelParameters_.orbitals].data);
 				crsMatrixToFullMatrix(tmp,cdagger);
 				return tmp;
 			}
 			if (what=="d") { // delta = c^\dagger * c^dagger
 				SparseMatrixType atmp;
-				multiply(atmp,creationMatrix[orbital+orbital+NUMBER_OF_ORBITALS].data,creationMatrix[orbital].data);
+				multiply(atmp,creationMatrix[orbital+orbital+modelParameters_.orbitals].data,creationMatrix[orbital].data);
 				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,atmp);
 				return tmp;
 			}
 			if (what=="identity") {
-				assert(creationMatrix.size()>0);
-				size_t row1 = creationMatrix[0].data.row();
-				PsimagLite::Matrix<SparseElementType> tmp(row1,row1);
+				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
 				for (size_t i=0;i<tmp.n_row();i++) tmp(i,i) = 1.0;
 				return tmp;
 			}
@@ -277,7 +280,7 @@ namespace Dmrg {
 		{
 			assert(block.size()==1);
 			HilbertState a=0;
-			int sitesTimesDof=DEGREES_OF_FREEDOM;
+			int sitesTimesDof=2*modelParameters_.orbitals;
 			HilbertState total = (1<<sitesTimesDof);
 
 			std::vector<HilbertState>  basisTmp;
@@ -308,41 +311,30 @@ namespace Dmrg {
 		
 
 	private:
+
 		HilbertState reinterpretX_,reinterpretY_;
 		ParametersModelFeAs<RealType>  modelParameters_;
 		GeometryType const &geometry_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
-		std::vector<PsimagLite::Matrix<RealType> > pauliMatrix_;
+		//std::vector<PsimagLite::Matrix<RealType> > pauliMatrix_;
 
 		//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS 
 		RealType sign(HilbertState const &ket, int i,size_t sigma) const
 		{
 			int value=0;
-			for (size_t alpha=0;alpha<DEGREES_OF_FREEDOM;alpha++) 
+			size_t dofs=2*modelParameters_.orbitals;
+			for (size_t alpha=0;alpha<dofs;alpha++)
 				value += HilbertSpaceFeAsType::calcNofElectrons(ket,0,i,alpha);
 			// add electron on site 0 if needed
 			if (i>0) value += HilbertSpaceFeAsType::electronsAtGivenSite(ket,0);
 
-			//order for sign is: up a (sigma==0), down a (sigma==2), up b (sigma==1), down b(sigma==3)
-			unsigned int x = HilbertSpaceFeAsType::get(ket,i);	
-			switch (sigma) {
-				case 0:
-					break;
-				case 1:
-					if (x & 1) value++;
-					if (x & 4) value++;
-					break; 
-				case 2:
-					if (x&1) value++;
-					break;
-				case 3:
-					if (x&1) value++;
-					if (x&4) value++;
-					if (x&2) value++;
-					break;
-				
+			//order for sign is: up a, b, c and then down, a, b, c
+			unsigned int x = HilbertSpaceFeAsType::get(ket,i);
+			for (size_t j=1;j<sigma;j++) {
+				int mask = (1<<(j-1));
+				if (x & mask) value++;
 			}
 			if (value==0 || value%2==0) return 1.0;
 
@@ -374,7 +366,7 @@ namespace Dmrg {
 					cm(ii,jj) =sign(ket,i,sigma);
 				}
 			}
-			if (REINTERPRET) reinterpret(cm,natBasis);
+			if (REINTERPRET && modelParameters_.orbitals==2) reinterpret(cm,natBasis);
 
 			SparseMatrixType temp;
 			fullMatrixToCrsMatrix(temp,cm);
@@ -511,8 +503,8 @@ namespace Dmrg {
 
 		int nini(const HilbertState& state,size_t i,size_t gamma1,size_t spin1,size_t gamma2,size_t spin2) const
 		{
-			int tmp1 = HilbertSpaceFeAsType::calcNofElectrons(state,i,gamma1+spin1*NUMBER_OF_ORBITALS);
-		 	int tmp2 = HilbertSpaceFeAsType::calcNofElectrons(state,i,gamma2+spin2*NUMBER_OF_ORBITALS);
+			int tmp1 = HilbertSpaceFeAsType::calcNofElectrons(state,i,gamma1+spin1*modelParameters_.orbitals);
+			int tmp2 = HilbertSpaceFeAsType::calcNofElectrons(state,i,gamma2+spin2*modelParameters_.orbitals);
 			return tmp1*tmp2;
 		}
 
@@ -524,6 +516,9 @@ namespace Dmrg {
 
 			hmatrix.makeDiagonal(cm[0].data.row());
 			
+			size_t orbitalsSquared = (modelParameters_.orbitals*modelParameters_.orbitals);
+			size_t degreesOfFreedom = 2*modelParameters_.orbitals;
+
 			for (size_t i=0;i<n;i++) {
 				//! hopping part
 				for (size_t j=0;j<n;j++) {
@@ -537,16 +532,17 @@ namespace Dmrg {
 						
 							if (i==j || tmp==0.0) continue;
 
-							size_t spin = dofs/4;
-							size_t xtmp = (spin==0) ? 0 : 4;
+							size_t spin = dofs/orbitalsSquared;
+							size_t xtmp = (spin==0) ? 0 : orbitalsSquared;
 							xtmp = dofs - xtmp;
-							size_t orb1 = xtmp/2;
-							size_t orb2 = (xtmp & 1);
+							size_t orb1 = xtmp/modelParameters_.orbitals;
+							size_t orb2 = xtmp % modelParameters_.orbitals;
 							
-							size_t dof1 = orb1 + spin*2;
-							size_t dof2 = orb2 + spin*2;
-							transposeConjugate(tmpMatrix2,cm[dof2+j*DEGREES_OF_FREEDOM].data);
-							multiply(tmpMatrix,cm[dof1+i*DEGREES_OF_FREEDOM].data,tmpMatrix2);
+							size_t dof1 = orb1 + spin*modelParameters_.orbitals;
+							size_t dof2 = orb2 + spin*modelParameters_.orbitals;
+
+							transposeConjugate(tmpMatrix2,cm[dof2+j*degreesOfFreedom].data);
+							multiply(tmpMatrix,cm[dof1+i*degreesOfFreedom].data,tmpMatrix2);
 							multiplyScalar(tmpMatrix2,tmpMatrix,tmp);
 							hmatrix += tmpMatrix2;
 						}
@@ -569,12 +565,12 @@ namespace Dmrg {
 		//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
 		void addInteractionU1(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i) const
 		{
-			int dof=DEGREES_OF_FREEDOM;
+			int dof=2*modelParameters_.orbitals;
 			SparseMatrixType tmpMatrix,tmpMatrix2;
 
-			for (size_t alpha=0;alpha<size_t(NUMBER_OF_ORBITALS);alpha++) {
-				SparseMatrixType m1=cm[alpha+SPIN_UP*NUMBER_OF_ORBITALS+i*dof].data;
-				SparseMatrixType m2=cm[alpha+SPIN_DOWN*NUMBER_OF_ORBITALS+i*dof].data;
+			for (size_t alpha=0;alpha<size_t(modelParameters_.orbitals);alpha++) {
+				SparseMatrixType m1=cm[alpha+SPIN_UP*modelParameters_.orbitals+i*dof].data;
+				SparseMatrixType m2=cm[alpha+SPIN_DOWN*modelParameters_.orbitals+i*dof].data;
 
 				multiply(tmpMatrix,n(m1),n(m2));
 				multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[0]); // this is U
@@ -585,38 +581,45 @@ namespace Dmrg {
 		//! Term is U[1] n_{i BAND0 } n_{i BAND1}
 		void addInteractionU2(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i) const
 		{
-			size_t orbital0=0,orbital1=1;
-			SparseMatrixType tmpMatrix,tmpMatrix2;
 
-			multiply(tmpMatrix, nSummedOverSpin(cm,i,orbital0),nSummedOverSpin(cm,i,orbital1));
-			multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[1]);// this is U'-J/2
-			hmatrix += tmpMatrix2;
+			for (size_t orb1=0;orb1<modelParameters_.orbitals;orb1++) {
+				for (size_t orb2=orb1+1;orb2<modelParameters_.orbitals;orb2++) {
+				SparseMatrixType tmpMatrix,tmpMatrix2;
+				multiply(tmpMatrix, nSummedOverSpin(cm,i,orb1),nSummedOverSpin(cm,i,orb2));
+				multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[1]);// this is U'-J/2
+				hmatrix += tmpMatrix2;
+				}
+			}
 		}
 
 		//! Term is U[2] S_{i BAND0 } S_{i BAND1}
 		void addInteractionJ1(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i) const
 		{
-			size_t orbital0=0,orbital1=1;
-			SparseMatrixType tmpMatrix2,tmpMatrix;
 			RealType val=0;
 			RealType val2=2.0;
 			RealType val3=4.0;
 
-			multiply(tmpMatrix, spinOperator(cm,i,orbital0,0),spinOperator(cm,i,orbital1,1));
-			val = modelParameters_.hubbardU[2]/val2;
-			multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
-			hmatrix += tmpMatrix2;
+			for (size_t orb1=0;orb1<modelParameters_.orbitals;orb1++) {
+				for (size_t orb2=orb1+1;orb2<modelParameters_.orbitals;orb2++) {
+					SparseMatrixType tmpMatrix2,tmpMatrix;
 
-			multiply(tmpMatrix, spinOperator(cm,i,orbital0,1),spinOperator(cm,i,orbital1,0));
-			val = modelParameters_.hubbardU[2]/val2;
-			multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
-			hmatrix += tmpMatrix2;
 
-			multiply(tmpMatrix, spinOperator(cm,i,orbital0,2),spinOperator(cm,i,orbital1,2));
-			val = modelParameters_.hubbardU[2]/val3;
-			multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
-			hmatrix += tmpMatrix2;
-			return;
+					multiply(tmpMatrix, spinOperator(cm,i,orb1,0),spinOperator(cm,i,orb2,1));
+					val = modelParameters_.hubbardU[2]/val2;
+					multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
+					hmatrix += tmpMatrix2;
+
+					multiply(tmpMatrix, spinOperator(cm,i,orb1,1),spinOperator(cm,i,orb2,0));
+					val = modelParameters_.hubbardU[2]/val2;
+					multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
+					hmatrix += tmpMatrix2;
+
+					multiply(tmpMatrix, spinOperator(cm,i,orb1,2),spinOperator(cm,i,orb2,2));
+					val = modelParameters_.hubbardU[2]/val3;
+					multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
+					hmatrix += tmpMatrix2;
+				}
+			}
 		}
 
 		//! Term is U[3] \sum_{\alpha}\bar{n}_{i\alpha UP} \bar{n}_{i\alpha DOWN} 
@@ -625,7 +628,7 @@ namespace Dmrg {
 		{
 			SparseMatrixType tmpMatrix,tmpMatrix2;
 
-			for (size_t alpha=0;alpha<size_t(NUMBER_OF_ORBITALS);alpha++) {
+			for (size_t alpha=0;alpha<size_t(modelParameters_.orbitals);alpha++) {
 				multiply(tmpMatrix,nBar(cm,i,alpha,SPIN_UP),nBar(cm,i,alpha,SPIN_DOWN));
 				multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[3]); // this is -J
 				hmatrix += tmpMatrix2;
@@ -636,16 +639,17 @@ namespace Dmrg {
 		{
 			if (modelParameters_.magneticField.n_row()<3) return;
 			assert(actualIndexOfSite<modelParameters_.magneticField.n_col());
-			for (int orb=0;orb<NUMBER_OF_ORBITALS;orb++)
+			for (size_t orb=0;orb<modelParameters_.orbitals;orb++)
 				addMagneticField(hmatrix,cm,i,actualIndexOfSite,orb);
 		}
 
 		void addMagneticField(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i,size_t actualIndexOfSite,size_t orbital) const
 		{
-			SparseMatrixType cup = cm[orbital+SPIN_UP*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data;
+			int dof=2*modelParameters_.orbitals;
+			SparseMatrixType cup = cm[orbital+SPIN_UP*modelParameters_.orbitals+i*dof].data;
 			SparseMatrixType cupTranspose;
 			transposeConjugate(cupTranspose,cup);
-			SparseMatrixType cdown = cm[orbital+SPIN_DOWN*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data;
+			SparseMatrixType cdown = cm[orbital+SPIN_DOWN*modelParameters_.orbitals+i*dof].data;
 			SparseMatrixType A = cupTranspose * cdown;
 			SparseMatrixType Atranspose;
 			transposeConjugate(Atranspose,A);
@@ -665,21 +669,22 @@ namespace Dmrg {
 
 		void addPotentialV(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i,size_t actualIndexOfSite) const
 		{
-			for (int orb=0;orb<NUMBER_OF_ORBITALS;orb++)
+			for (size_t orb=0;orb<modelParameters_.orbitals;orb++)
 				addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb);
 		}
 
 		void addPotentialV(SparseMatrixType &hmatrix,const std::vector<OperatorType>& cm,size_t i,size_t actualIndexOfSite,size_t orbital) const
 		{
-			SparseMatrixType nup = n(cm[orbital+SPIN_UP*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
-			SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
+			int dof=2*modelParameters_.orbitals;
+			SparseMatrixType nup = n(cm[orbital+SPIN_UP*modelParameters_.orbitals+i*dof].data);
+			SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*modelParameters_.orbitals+i*dof].data);
 
 
 			size_t linSize = geometry_.numberOfSites();
 
-			size_t iUp = actualIndexOfSite + (orbital + 0*NUMBER_OF_ORBITALS)*linSize;
+			size_t iUp = actualIndexOfSite + (orbital + 0*modelParameters_.orbitals)*linSize;
 			hmatrix += modelParameters_.potentialV[iUp] * nup;
-			size_t iDown = actualIndexOfSite + (orbital + 1*NUMBER_OF_ORBITALS)*linSize;
+			size_t iDown = actualIndexOfSite + (orbital + 1*modelParameters_.orbitals)*linSize;
 			hmatrix += modelParameters_.potentialV[iDown] * ndown;
 		}
 
@@ -695,17 +700,19 @@ namespace Dmrg {
 
 		SparseMatrixType nBar(const std::vector<OperatorType>& cm,size_t i,size_t orbital,size_t spin) const
 		{
-			SparseMatrixType tmpMatrix,cdagger=cm[orbital+spin*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data;
+			size_t dofs = 2 * modelParameters_.orbitals;
+			SparseMatrixType tmpMatrix,cdagger=cm[orbital+spin*modelParameters_.orbitals+i*dofs].data;
 			SparseMatrixType cbar;
-			transposeConjugate(cbar,cm[1-orbital+(1-spin)*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
+			transposeConjugate(cbar,cm[1-orbital+(1-spin)*modelParameters_.orbitals+i*dofs].data);
 			multiply(tmpMatrix,cdagger,cbar);
 			return tmpMatrix;
 		}
 
 		SparseMatrixType nSummedOverSpin(const std::vector<OperatorType>& cm,size_t i,size_t orbital) const
 		{
-			SparseMatrixType tmpMatrix = n(cm[orbital+SPIN_UP*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
-			tmpMatrix += n(cm[orbital+SPIN_DOWN*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
+			size_t dofs = 2 * modelParameters_.orbitals;
+			SparseMatrixType tmpMatrix = n(cm[orbital+SPIN_UP*modelParameters_.orbitals+i*dofs].data);
+			tmpMatrix += n(cm[orbital+SPIN_DOWN*modelParameters_.orbitals+i*dofs].data);
 			return tmpMatrix;
 		}
 
@@ -729,33 +736,34 @@ namespace Dmrg {
 
 		SparseMatrixType spinOperatorAux(const std::vector<OperatorType>& cm,size_t i,size_t orbital,size_t spin1,size_t spin2) const
 		{
+			size_t dofs = 2 * modelParameters_.orbitals;
 			SparseMatrixType result,temp;
-			transposeConjugate(temp,cm[orbital+spin2*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data);
+			transposeConjugate(temp,cm[orbital+spin2*modelParameters_.orbitals+i*dofs].data);
 			multiply(
 				result, // =
-				cm[orbital+spin1*NUMBER_OF_ORBITALS+i*DEGREES_OF_FREEDOM].data, // times
+				cm[orbital+spin1*modelParameters_.orbitals+i*dofs].data, // times
 				temp
 			);
 					
 			return result;
 		}
 
-		void setPauliMatrix()
-		{
-			PsimagLite::Matrix<RealType> matrixTmp(2,2);
-			// x component
-			matrixTmp(0,0)=matrixTmp(1,0)=matrixTmp(0,1)=matrixTmp(1,1)=0;
-			matrixTmp(1,0)=matrixTmp(0,1)=1;
-			pauliMatrix_.push_back(matrixTmp);
-			// y component
-			matrixTmp(0,0)=matrixTmp(1,0)=matrixTmp(0,1)=matrixTmp(1,1)=0;
-			matrixTmp(1,0)=matrixTmp(0,1)=1;
-			pauliMatrix_.push_back(matrixTmp);
-			// z component
-			matrixTmp(0,0)=matrixTmp(1,0)=matrixTmp(0,1)=matrixTmp(1,1)=0;
-			matrixTmp(0,0)= 1; matrixTmp(1,1)= -1;
-			pauliMatrix_.push_back(matrixTmp);
-		}
+//		void setPauliMatrix()
+//		{
+//			PsimagLite::Matrix<RealType> matrixTmp(2,2);
+//			// x component
+//			matrixTmp(0,0)=matrixTmp(1,0)=matrixTmp(0,1)=matrixTmp(1,1)=0;
+//			matrixTmp(1,0)=matrixTmp(0,1)=1;
+//			pauliMatrix_.push_back(matrixTmp);
+//			// y component
+//			matrixTmp(0,0)=matrixTmp(1,0)=matrixTmp(0,1)=matrixTmp(1,1)=0;
+//			matrixTmp(1,0)=matrixTmp(0,1)=1;
+//			pauliMatrix_.push_back(matrixTmp);
+//			// z component
+//			matrixTmp(0,0)=matrixTmp(1,0)=matrixTmp(0,1)=matrixTmp(1,1)=0;
+//			matrixTmp(0,0)= 1; matrixTmp(1,1)= -1;
+//			pauliMatrix_.push_back(matrixTmp);
+//		}
 
 		void diagTest(const SparseMatrixType& fullm,const std::string& str) const
 		{

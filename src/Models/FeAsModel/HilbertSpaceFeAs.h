@@ -97,32 +97,27 @@ namespace Dmrg {
 	//! A class to operate on n-ary numbers (base n)
 	template<typename Word>
 	class HilbertSpaceFeAs {
+
+		static size_t orbitals_;
+
 	public:
+
 		typedef Word HilbertState;	
-		static size_t const NUMBER_OF_ORBITALS =2;
-		static size_t const NUMBER_OF_STATES = 4; //2*NUMBER_OF_ORBITALS;
+
 		enum {SPIN_UP=0,SPIN_DOWN=1};
 		
-		//! For state "a" set electron on site "j" to value "value"
-		/* static void set(Word &a,size_t j,size_t value) 
+		static void setOrbitals(size_t orbitals)
 		{
-			
-			size_t k=NUMBER_OF_STATES*j;
-			size_t ones = 2*NUMBER_OF_STATES-1;
-			Word mask=(ones<<k);
-			Word b =(a & (~mask));
-			
-			mask=(value<<k);
-			
-			a= (b | mask);
-		}*/
-
+			orbitals_=orbitals;
+			assert(orbitals==2 || orbitals==3);
+		}
 		
 		// Get electronic state on site "j" in binary number "a"
 		static Word get(Word const &a,size_t j)
 		{
-			size_t k=NUMBER_OF_STATES*j;
-			size_t ones = (1<<(NUMBER_OF_STATES))-1;
+			size_t dofs = 2*orbitals_;
+			size_t k=dofs*j;
+			size_t ones = (1<<(dofs))-1;
 			Word mask=(ones<<k);
 			
 			mask &= a;
@@ -131,11 +126,11 @@ namespace Dmrg {
 			
 		}
 		
-		
 		// Create electron with internal dof  "sigma" on site "j" in binary number "a"
 		static void create(Word &a,size_t j,size_t sigma)
 		{
-			size_t k=NUMBER_OF_STATES*j;
+			size_t dofs = 2*orbitals_;
+			size_t k=dofs*j;
 			Word mask=(1<<(k+sigma));
 			a |= mask;
 		}
@@ -154,13 +149,14 @@ namespace Dmrg {
 		//! returns the number of electrons of internal dof "value" in binary number "data"
 		static int getNofDigits(Word const &data,size_t value)
 		{
+			size_t dofs = 2*orbitals_;
 			int ret=0;
 			Word data2=data;
 			size_t i=0;
 			do {
-				 if ( (data & (1<<(NUMBER_OF_STATES*i+value))) ) ret++;
+				 if ( (data & (1<<(dofs*i+value))) ) ret++;
 				 i++;
-			} while (data2>>=NUMBER_OF_STATES);
+			} while (data2>>=dofs);
 			
 			return ret;
 		}
@@ -168,9 +164,10 @@ namespace Dmrg {
 		//! Number of electrons with spin spin (sums over bands)
 		static int electronsWithGivenSpin(Word const &data,size_t spin)
 		{
+			size_t dofs = 2*orbitals_;
 			size_t sum=0;
-			size_t beginX=spin*NUMBER_OF_ORBITALS;
-			size_t endX=beginX + NUMBER_OF_ORBITALS;
+			size_t beginX=spin*orbitals_;
+			size_t endX=beginX + dofs;
 			
 			for (size_t x=beginX;x<endX;x++)
 				sum += getNofDigits(data,x);
@@ -183,8 +180,8 @@ namespace Dmrg {
 		static int electronsAtGivenSite(Word const &data,size_t site)
 		{
 			size_t sum=0;
-			
-			for (size_t sector=0;sector<NUMBER_OF_STATES;sector++)
+			size_t dofs = 2*orbitals_;
+			for (size_t sector=0;sector<dofs;sector++)
 				sum += calcNofElectrons(data,site,sector);
 			
 			return sum;	
@@ -192,26 +189,31 @@ namespace Dmrg {
 		}
 		//! Number of electrons with dof sector between i and j excluding i and j in binary number "ket"
 		//!  intended for when i<j
-		 static int calcNofElectrons(Word const &ket,size_t i,size_t j,size_t sector)
+		static int calcNofElectrons(Word const &ket,size_t i,size_t j,size_t sector)
 		{
+			size_t dofs = 2*orbitals_;
 			size_t ii=i+1;
 			if (ii>=j) return 0;
 			Word m=0;
-			for (size_t k=NUMBER_OF_STATES*ii;k<NUMBER_OF_STATES*j;k++) m |= (1<<k);
+			for (size_t k=dofs*ii;k<dofs*j;k++) m |= (1<<k);
 			m = m & ket;
 			return getNofDigits(m,sector);
 		} 
 		
 		//! Number of electrons with dof sector on site i in binary number "ket"
-		 static int calcNofElectrons(Word const &ket,size_t i,size_t sector)
+		static int calcNofElectrons(Word const &ket,size_t i,size_t sector)
 		{
+			size_t dofs = 2*orbitals_;
 			Word m=0;
-			for (size_t k=NUMBER_OF_STATES*i;k<NUMBER_OF_STATES*(i+1);k++) m |= (1<<k);
+			for (size_t k=dofs*i;k<dofs*(i+1);k++) m |= (1<<k);
 			m = m & ket;
 			return getNofDigits(m,sector);
 		} 
 		
 	}; // class HilbertSpaceFeAs
+
+	template<typename Word>
+	size_t HilbertSpaceFeAs<Word>::orbitals_ = 2;
 } // namespace Dmrg
 
 /*@}*/	

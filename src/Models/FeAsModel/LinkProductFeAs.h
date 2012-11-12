@@ -90,28 +90,38 @@ namespace Dmrg {
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			typedef std::pair<size_t,size_t> PairType;
 			
-		public:
+			static size_t orbitals_;
+
+	public:
+
 			typedef typename ModelHelperType::RealType RealType;
-			
-			//! There are 4 different orbitals
-			//! and 2 spins. Spin is diagonal so we end up with 8 possiblities
-			//! a up a up, a up b up, b up a up, b up, b up,
+
+		static void setOrbitals(size_t orbitals)
+		{
+			orbitals_=orbitals;
+			assert(orbitals==2 || orbitals==3);
+		}
+
+			//! There are orbitals*orbitals different orbitals
+			//! and 2 spins. Spin is diagonal so we end up with 2*orbitals*orbitals possiblities
+			//! a up a up, a up b up, b up a up, b up, b up, etc
 			//! and similarly for spin down.
 			template<typename SomeStructType>
 			static size_t dofs(size_t term,const SomeStructType& additional)
 			{
-				return 8;
+				return 2*orbitals_*orbitals_;
 			}
 			
 			// has only dependence on orbital
 			template<typename SomeStructType>
 			static PairType connectorDofs(size_t term,size_t dofs,const SomeStructType& additional)
 			{
-				size_t spin = dofs/4;
-				size_t xtmp = (spin==0) ? 0 : 4;
+				size_t orbitalsSquared = orbitals_*orbitals_;
+				size_t spin = dofs/orbitalsSquared;
+				size_t xtmp = (spin==0) ? 0 : orbitalsSquared;
 				xtmp = dofs - xtmp;
-				size_t orb1 = xtmp/2;
-				size_t orb2 = (xtmp & 1);
+				size_t orb1 = xtmp/orbitals_;
+				size_t orb2 = xtmp % orbitals_;
 				return PairType(orb1,orb2); // has only dependence on orbital
 			}
 
@@ -145,21 +155,27 @@ namespace Dmrg {
 			// spin is diagonal
 			static std::pair<size_t,size_t> operatorDofs(size_t dofs)
 			{
-				size_t spin = dofs/4;
-				size_t xtmp = (spin==0) ? 0 : 4;
+				size_t orbitalsSquared = orbitals_*orbitals_;
+				size_t spin = dofs/orbitalsSquared;
+				size_t xtmp = (spin==0) ? 0 : orbitalsSquared;
 				xtmp = dofs - xtmp;
-				size_t orb1 = xtmp/2;
-				size_t orb2 = (xtmp & 1);
-				size_t op1 = orb1 + spin*2;
-				size_t op2 = orb2 + spin*2;
+				size_t orb1 = xtmp/orbitals_;
+				size_t orb2 = xtmp % orbitals_;
+				size_t op1 = orb1 + spin*orbitals_;
+				size_t op2 = orb2 + spin*orbitals_;
 				return std::pair<size_t,size_t>(op1,op2);
 			}
 			
 			static size_t getSpin(size_t dofs)
 			{
-				return dofs/4;
+				size_t orbitalsSquared = orbitals_*orbitals_;
+				return dofs/orbitalsSquared;
 			}
 	}; // class LinkPRoductFeAs
+
+template<typename ModelHelperType>
+size_t LinkProductFeAs<ModelHelperType>::orbitals_ = 2;
+
 } // namespace Dmrg
 /*@}*/
 #endif

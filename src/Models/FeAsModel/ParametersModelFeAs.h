@@ -94,6 +94,7 @@ namespace Dmrg {
 		ParametersModelFeAs(IoInputType& io)
 		: magneticField(0,0)
 		{
+			io.readline(orbitals,"Orbitals=");
 			io.read(hubbardU,"hubbardU");
 			io.read(potentialV,"potentialV");
 
@@ -108,6 +109,7 @@ namespace Dmrg {
 				throw std::runtime_error("Magnetic Field: Expecting as many columns are there are sites\n");
 		}
 		
+		size_t orbitals;
 		// Hubbard U values (one for each site)
 		std::vector<Field> hubbardU; 
 		// Onsite potential values, one for each site
