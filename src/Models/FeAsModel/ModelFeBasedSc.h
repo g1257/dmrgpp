@@ -138,10 +138,10 @@ namespace Dmrg {
 			LinkProductType::setOrbitals(modelParameters_.orbitals);
 			HilbertSpaceFeAsType::setOrbitals(modelParameters_.orbitals);
 //			setPauliMatrix();
-			if (modelParameters_.potentialV.size()!=4*geometry.numberOfSites()) {
+			if (modelParameters_.potentialV.size()!=2*modelParameters_.orbitals*geometry.numberOfSites()) {
 				std::string str(__FILE__);
 				str += " " + ttos(__LINE__) + "\n";
-				str += "potentialV length must be 4 times the number of sites\n";
+				str += "potentialV length must be 2*orbitals times the number of sites\n";
 				throw std::runtime_error(str.c_str());
 			}
 		}
@@ -639,10 +639,12 @@ namespace Dmrg {
 		{
 			SparseMatrixType tmpMatrix,tmpMatrix2;
 
-			for (size_t alpha=0;alpha<size_t(modelParameters_.orbitals);alpha++) {
-				multiply(tmpMatrix,nBar(cm,i,alpha,SPIN_UP),nBar(cm,i,alpha,SPIN_DOWN));
-				multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[3]); // this is -J
-				hmatrix += tmpMatrix2;
+			for (size_t orb1=0;orb1<modelParameters_.orbitals;orb1++) {
+				for (size_t orb2=orb1+1;orb2<modelParameters_.orbitals;orb2++) {
+					multiply(tmpMatrix,nBar(cm,i,orb1,orb2,SPIN_UP),nBar(cm,i,orb1,orb2,SPIN_DOWN));
+					multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[3]); // this is -J
+					hmatrix += tmpMatrix2;
+				}
 			}
 		}
 
@@ -709,12 +711,12 @@ namespace Dmrg {
 			return tmpMatrix;
 		}
 
-		SparseMatrixType nBar(const std::vector<OperatorType>& cm,size_t i,size_t orbital,size_t spin) const
+		SparseMatrixType nBar(const std::vector<OperatorType>& cm,size_t i,size_t orb1,size_t orb2,size_t spin) const
 		{
 			size_t dofs = 2 * modelParameters_.orbitals;
-			SparseMatrixType tmpMatrix,cdagger=cm[orbital+spin*modelParameters_.orbitals+i*dofs].data;
+			SparseMatrixType tmpMatrix,cdagger=cm[orb1+spin*modelParameters_.orbitals+i*dofs].data;
 			SparseMatrixType cbar;
-			transposeConjugate(cbar,cm[1-orbital+(1-spin)*modelParameters_.orbitals+i*dofs].data);
+			transposeConjugate(cbar,cm[orb2+(1-spin)*modelParameters_.orbitals+i*dofs].data);
 			multiply(tmpMatrix,cdagger,cbar);
 			return tmpMatrix;
 		}
