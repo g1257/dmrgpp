@@ -112,7 +112,6 @@ namespace Dmrg {
 		typedef typename ModelHelperType::BlockType Block;
 //		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 		
-		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;
 		static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
 		static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
@@ -137,6 +136,7 @@ namespace Dmrg {
 			  spinSquared_(spinSquaredHelper_,modelParameters_.orbitals,2*modelParameters_.orbitals)
 		{
 			LinkProductType::setOrbitals(modelParameters_.orbitals);
+			HilbertSpaceFeAsType::setOrbitals(modelParameters_.orbitals);
 //			setPauliMatrix();
 			if (modelParameters_.potentialV.size()!=4*geometry.numberOfSites()) {
 				std::string str(__FILE__);
@@ -197,7 +197,7 @@ namespace Dmrg {
 						asign= -1;
 					}
 					typename OperatorType::Su2RelatedType su2related;
-					if (sigma <2) {
+					if (sigma <modelParameters_.orbitals) {
 						su2related.source.push_back(i*dofs+sigma);
 						su2related.source.push_back(i*dofs+sigma + modelParameters_.orbitals);
 						su2related.transpose.push_back(-1);
@@ -330,10 +330,20 @@ namespace Dmrg {
 			// add electron on site 0 if needed
 			if (i>0) value += HilbertSpaceFeAsType::electronsAtGivenSite(ket,0);
 
-			//order for sign is: up a, b, c and then down, a, b, c
+			//order for sign is: a up, a down, b up, b down, etc
 			unsigned int x = HilbertSpaceFeAsType::get(ket,i);
-			for (size_t j=1;j<sigma;j++) {
-				int mask = (1<<(j-1));
+			int spin = sigma/modelParameters_.orbitals;
+			size_t orb = sigma % modelParameters_.orbitals;
+
+			for (size_t j=0;j<orb;j++) {
+				for (size_t k=0;k<2;k++) {
+					size_t ind = j + k * modelParameters_.orbitals;
+					int mask = (1<<ind);
+					if (x & mask) value++;
+				}
+			}
+			if (spin==SPIN_DOWN) {
+				int mask = (1<<orb);
 				if (x & mask) value++;
 			}
 			if (value==0 || value%2==0) return 1.0;
@@ -431,6 +441,7 @@ namespace Dmrg {
 		PairType calcJmvalue(const HilbertState& ket) const
 		{
 			PairType jm(0,0);
+			if (modelParameters_.orbitals!=2) return jm;
 			size_t x=reinterpretX_,y=reinterpretY_; // these states need reinterpretation
 
 			if (ket==x) {

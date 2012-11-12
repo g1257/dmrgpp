@@ -109,7 +109,7 @@ namespace Dmrg {
 		static void setOrbitals(size_t orbitals)
 		{
 			orbitals_=orbitals;
-			assert(orbitals==2 || orbitals==3);
+			assert(orbitals_==2 || orbitals_==3);
 		}
 		
 		// Get electronic state on site "j" in binary number "a"
@@ -164,10 +164,9 @@ namespace Dmrg {
 		//! Number of electrons with spin spin (sums over bands)
 		static int electronsWithGivenSpin(Word const &data,size_t spin)
 		{
-			size_t dofs = 2*orbitals_;
 			size_t sum=0;
 			size_t beginX=spin*orbitals_;
-			size_t endX=beginX + dofs;
+			size_t endX=beginX + orbitals_;
 			
 			for (size_t x=beginX;x<endX;x++)
 				sum += getNofDigits(data,x);

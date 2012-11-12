@@ -99,7 +99,7 @@ namespace Dmrg {
 		static void setOrbitals(size_t orbitals)
 		{
 			orbitals_=orbitals;
-			assert(orbitals==2 || orbitals==3);
+			assert(orbitals_==2 || orbitals_==3);
 		}
 
 			//! There are orbitals*orbitals different orbitals
