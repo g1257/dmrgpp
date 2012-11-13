@@ -640,7 +640,8 @@ namespace Dmrg {
 			SparseMatrixType tmpMatrix,tmpMatrix2;
 
 			for (size_t orb1=0;orb1<modelParameters_.orbitals;orb1++) {
-				for (size_t orb2=orb1+1;orb2<modelParameters_.orbitals;orb2++) {
+				for (size_t orb2=0;orb2<modelParameters_.orbitals;orb2++) {
+					if (orb1==orb2) continue;
 					multiply(tmpMatrix,nBar(cm,i,orb1,orb2,SPIN_UP),nBar(cm,i,orb1,orb2,SPIN_DOWN));
 					multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[3]); // this is -J
 					hmatrix += tmpMatrix2;
