@@ -41,7 +41,7 @@ namespace PsimagLite {
 		typedef long int LongType;
 		typedef T value_type; // legacy name
 		RandomForTests(int seed) //LongType seed = 127773,size_t rank = 0,size_t nprocs = 1)
-		: next_(1)
+		: next_(seed)
 		{
 		}
 
