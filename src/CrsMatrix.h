@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -81,8 +81,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CRSMATRIX_HEADER_H
 #define CRSMATRIX_HEADER_H
 #include <algorithm>
-#include "BLAS.h" 
-#include "Matrix.h" 
+#include "BLAS.h"
+#include "Matrix.h"
 #include "Complex.h"
 #include <cassert>
 #include "BinarySaveLoad.h"
@@ -90,10 +90,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 
 	//! A Sparse Matrix in Compressed Row Storage (CRS) format.
-	/** 
+	/**
 	The CRS format puts the subsequent nonzero elements of the matrix rows
 	in contiguous memory locations. We create 3 vectors: one for complex numbers containing the values of the
-	matrix entries 
+	matrix entries
 	and the other two for integers ($colind$ and $rowptr$).
 	The vector $values$ stores the values of the non-zero elements of the matrix,
 	as they are traversed in a row-wise fashion.
@@ -107,7 +107,7 @@ namespace PsimagLite {
 	To illustrate how the CRS format works, consider the non-symmetric matrix defined by
 	\begin{equation}
 		A=\left[\begin{tabular}{llllll}
-  
+
 		10 &  0 & 0 & 0  & -2 & 0 \\
 		3 &  9 &  0 &  0 &  0 &  3 \\
 		0 &  7 &  8 &  7 &  0 &  0 \\
@@ -127,8 +127,8 @@ namespace PsimagLite {
     public:
     	typedef T MatrixElementType;
 		typedef T value_type;
-		
-		CrsMatrix() : nrow_(0),ncol_(0) { } 
+
+		CrsMatrix() : nrow_(0),ncol_(0) { }
 
 		~CrsMatrix() {  }
 
@@ -237,12 +237,12 @@ namespace PsimagLite {
 					counter2++;
 				}
 				counter+=counter2;
-				
+
 			}
 			setRow(m.rank(),counter);
 		}
 
-		void operator+=(CrsMatrix<T> const &m) 
+		void operator+=(CrsMatrix<T> const &m)
 		{
 			assert(m.row()==m.col());
 			CrsMatrix<T> c;
@@ -251,13 +251,13 @@ namespace PsimagLite {
 			*this =c;
 		}
 
-		T operator()(int i,int j) const 
+		T operator()(int i,int j) const
 		{
 			for (int k=rowptr_[i];k<rowptr_[i+1];k++) if (colind_[k]==j) return values_[k];
 			return static_cast<T>(0.0);
 		}
 
-		int nonZero() const { return colind_.size(); }		
+		int nonZero() const { return colind_.size(); }
 
 		/** performs x = x + A * y
 		 ** where x and y are vectors and A is a sparse matrix in
@@ -293,7 +293,7 @@ namespace PsimagLite {
 			rowptr_.resize(row+1);
 			values_.resize(row);
 			colind_.resize(row);
-			
+
 			for (size_t i=0;i<row;i++) {
 				values_[i]=value;
 				colind_[i]=i;
@@ -349,25 +349,25 @@ namespace PsimagLite {
 			}
 #endif
 		}
-		
+
 		template<typename S>
 		friend std::ostream &operator<<(std::ostream &os,const CrsMatrix<S> &m);
-		
+
 		template<typename S,typename S2>
 		friend void multiplyScalar(CrsMatrix<S> &ret,CrsMatrix<S> const &s,S2 const &v);
-		
+
 		template<class S>
 		friend void difference(const CrsMatrix<S>& A,const CrsMatrix<S>& B);
 
 		template<typename S>
 		friend void MpiBroadcast(CrsMatrix<S> *v,int rank);
-	
+
 		template<typename S>
 		friend void MpiSend(CrsMatrix<S>  *v,int iproc,int i);
-	
+
 		template<typename S>
 		friend void MpiRecv(CrsMatrix<S> *v,int iproc,int i);
-		
+
 		template<typename CrsMatrixType>
 		friend std::istream &operator>>(std::istream &is,CrsMatrix<CrsMatrixType>& m);
 
@@ -388,16 +388,16 @@ namespace PsimagLite {
 		os<<n<<" "<<m.col()<<"\n";
 		for (size_t i=0;i<n+1;i++) os<<m.rowptr_[i]<<" ";
 		os<<"\n";
-		
+
 		size_t nonzero=m.nonZero();
 		os<<nonzero<<"\n";
 		for (size_t i=0;i<nonzero;i++) os<<m.colind_[i]<<" ";
 		os<<"\n";
-		
+
 		os<<nonzero<<"\n";
 		for (size_t i=0;i<nonzero;i++) os<<m.values_[i]<<" ";
 		os<<"\n";
-		
+
 		return os;
 	}
 
@@ -444,9 +444,9 @@ namespace PsimagLite {
 	// Use the constructor if possible
  	template<typename T,class FullMatrixTemplate>
 	void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const FullMatrixTemplate& a)
-	{		
+	{
 		crsMatrix.resize(a.n_row(),a.n_col());
-		
+
 		size_t counter = 0;
 		for (size_t i = 0; i < a.n_row(); i++) {
 			crsMatrix.setRow(i,counter);
@@ -456,13 +456,13 @@ namespace PsimagLite {
 				crsMatrix.pushCol(j);
 				counter++;
 			}
-			
+
 		}
 		crsMatrix.setRow(crsMatrix.row(),counter);
 		crsMatrix.checkValidity();
-	} 
+	}
 
-	/** If order==false then 
+	/** If order==false then
 	    creates B such that B_{i1+j1*nout,i2+j2*nout)=A(j1,j2)\delta_{i1,i2}
 	    if order==true then
 	    creates B such that B_{i1+j1*na,i2+j2*na)=A(i1,i2)\delta_{j1,j2}
@@ -537,7 +537,7 @@ namespace PsimagLite {
 				}
 			}
 		}
-		C.setRow(n,counter);	
+		C.setRow(n,counter);
 	}
 
 	//! Computes C = A external product B (with signs)
@@ -573,7 +573,7 @@ namespace PsimagLite {
 				}
 			}
 		}
-		C.setRow(n,counter);	
+		C.setRow(n,counter);
 	}
 
 	//! Sets ret = s * v where ret and s are CRS matrices and v is a scalar number
@@ -615,18 +615,18 @@ namespace PsimagLite {
 		std::vector<int> ptr(n,-1),index(n,0);
 		std::vector<S> temp(n,0);
 		S tmp;
-		
+
 		C.resize(n,B.col());
-		
-		// mlast pointer to the last place we updated in the C vector 
+
+		// mlast pointer to the last place we updated in the C vector
 		mlast = 0;
 		// for (size_t l=0;l<n;l++) ptr[l] = -1;
 		// over the rows of A
 		for (size_t i=0;i<n;i++) {
 			C.setRow(i,mlast);
-			// start calculations for row 
+			// start calculations for row
 			itemp = 0;
-			for(j = A.getRowPtr(i);j< A.getRowPtr(i+1);j++) { 
+			for(j = A.getRowPtr(i);j< A.getRowPtr(i+1);j++) {
 				size_t istart = B.getRowPtr(A.getCol(j));
 				size_t iend = B.getRowPtr(A.getCol(j)+1);
 				for (size_t k = istart; k< iend;k++) {
@@ -642,7 +642,7 @@ namespace PsimagLite {
 			   		}
 				}
 			}
-			// before you leave this row update array c , jc 	
+			// before you leave this row update array c , jc
 			for (s=0;s<itemp;s++) {
 				C.pushValue(temp[s]);
 				C.pushCol(index[s]);
@@ -668,7 +668,7 @@ namespace PsimagLite {
 		}
 	}
 
-	//! Sets B=transpose(conjugate(A))	
+	//! Sets B=transpose(conjugate(A))
 	template<typename S,typename S2>
 	inline void transposeConjugate(CrsMatrix<S>  &B,CrsMatrix<S2> const &A)
 	{
@@ -689,7 +689,45 @@ namespace PsimagLite {
 
 		size_t counter=0;
 		for (size_t i=0;i<B.row();i++) {
-			
+
+			B.setRow(i,counter);
+			for (size_t j=0;j<col[i].size();j++) {
+				if (value[i][j]==static_cast<S>(0.0)) continue;
+				B.pushCol(col[i][j]);
+				B.pushValue(std::conj(value[i][j]));
+				counter++;
+			}
+		}
+		B.setRow(B.row(),counter);
+	}
+
+	//! Sets B=transpose(conjugate(A))
+	template<typename S,typename S2>
+	inline void transposeConjugate(CrsMatrix<S>  &B,CrsMatrix<S2> const &A,std::vector<std::vector<int> >& col,
+		std::vector<std::vector<S2> >& value)
+	{
+		size_t n=A.row();
+		assert(col.size()==n);
+		assert(value.size()==n);
+		for (size_t i=0;i<n;i++) {
+			col[i].clear();
+			value[i].clear();
+		}
+
+		// B(j,i) = conj(A(i,j))
+		for (size_t i=0;i<n;i++) {
+			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+				col[A.getCol(k)].push_back(i);
+				S2 w = A.getValue(k);
+				value[A.getCol(k)].push_back(w);
+			}
+		}
+
+		B.resize(A.col(),A.row());
+
+		size_t counter=0;
+		for (size_t i=0;i<B.row();i++) {
+
 			B.setRow(i,counter);
 			for (size_t j=0;j<col[i].size();j++) {
 				if (value[i][j]==static_cast<S>(0.0)) continue;
@@ -707,9 +745,9 @@ namespace PsimagLite {
 // 		CrsMatrix<S> temp;
 // 		transposeConjugate(temp,m);
 // 		return temp;
-// 	}	
+// 	}
 
-	//! Sets A = B(i,perm(j)), A and B CRS matrices	
+	//! Sets A = B(i,perm(j)), A and B CRS matrices
 	template<class S>
 	void permute(CrsMatrix<S> &A,CrsMatrix<S> const &B,std::vector<size_t> const &perm)
 	{
@@ -735,7 +773,7 @@ namespace PsimagLite {
 		A.checkValidity();
 	}
 
-	//! Sets A = B(perm(i),j), A and B CRS matrices		
+	//! Sets A = B(perm(i),j), A and B CRS matrices
 	template<class S>
 	void permuteInverse(CrsMatrix<S> &A,CrsMatrix<S> const &B,std::vector<size_t> const &perm)
 	{
@@ -766,7 +804,7 @@ namespace PsimagLite {
 //		double alpha=1.0;
 //		double beta=0.0;
 //		Matrix<T> fmS,fmTmp(nBig,nSmall);
-		
+
 //		crsMatrixToFullMatrix(fmS,S);
 
 //		psimag::BLAS::GEMM('N','N',nBig,nSmall,nBig,alpha,&(fmS(0,0)),nBig,&(fmB(0,0)),nBig,beta,&(fmTmp(0,0)),nBig);
@@ -793,7 +831,7 @@ namespace PsimagLite {
 
 		size_t counter=0;
 		for (size_t k2=0;k2<n;k2++) valueTmp[k2]= static_cast<T>(0.0);
-		
+
 		for (size_t i = 0; i < n; i++) {
 			int k;
 			A.setRow(i,counter);
@@ -807,7 +845,7 @@ namespace PsimagLite {
 					index.push_back(B.getCol(k));
 				}
 
-				// inspect C 
+				// inspect C
 				for (k=C.getRowPtr(i);k<C.getRowPtr(i+1);k++) {
 					tmp = C.getValue(k);
 					if (C.getCol(k)>=int(valueTmp.size()) || C.getCol(k)<0) throw std::runtime_error("operatorPlus (2)\n");
@@ -860,7 +898,7 @@ namespace PsimagLite {
 	{
 		int counter=0;
 		CrsMatrix<T> Bfull(A.row(),A.col());
-		
+
 		for (size_t i=0;i<offset;i++) Bfull.setRow(i,counter);
 
 		for (size_t ii=0;ii<B.row();ii++) {
@@ -881,12 +919,12 @@ namespace PsimagLite {
 		A += Bfull;
 		A.checkValidity();
 	}
-	
+
 	template<class T>
-	bool isDiagonal(const CrsMatrix<T>& A) 
+	bool isDiagonal(const CrsMatrix<T>& A)
 	{
 		size_t n = A.getSize();
-		for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++) if (i!=j && fabs(A(i,j))>1e-6) return false;	
+		for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++) if (i!=j && fabs(A(i,j))>1e-6) return false;
 		return true;
 	}
 
@@ -904,9 +942,9 @@ namespace PsimagLite {
 		}
 		return true;
 	}
-	
+
 	template<class T>
-	bool isTheIdentity(const CrsMatrix<T>& A,double eps=1e-6) 
+	bool isTheIdentity(const CrsMatrix<T>& A,double eps=1e-6)
 	{
 		if (A.row()!=A.col()) return false;
 		size_t n = A.row();
@@ -925,12 +963,12 @@ namespace PsimagLite {
 			}
 		}
 		return true;
-	}		
+	}
 
 	template<typename T>
 	Matrix<T> multiplyTc(const CrsMatrix<T>& a,const CrsMatrix<T>& b)
 	{
-		
+
 		CrsMatrix<T> bb,c;
 		transposeConjugate(bb,b);
 		multiply(c,a,bb);
@@ -963,6 +1001,6 @@ namespace PsimagLite {
 //		std::cerr<<"----------->  "<<label<<"  <----------------\n";
 //		std::cerr<<mtmp;
 //	}
-} // namespace PsimagLite 
-/*@}*/	
+} // namespace PsimagLite
+/*@}*/
 #endif
