@@ -49,6 +49,7 @@ namespace PsimagLite {
 		{
 			next_ = 16807 * (next_ % 127773) - 2836 * (next_ / 127773);
 			if (next_ <= 0) next_ += 2147483647;
+			if (next_ >= 2147483647) next_=0;
 			return static_cast<T>(next_) / 2147483647.0;
 		}
 	private:
