@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -106,7 +103,7 @@ namespace Dmrg {
 				io.readline(advanceEach,"TSPAdvanceEach=");
 				io.readline(beta,"Beta=");
 				io.readline(rngSeed,"TSPRngSeed=");
-				
+				io.readline(rotateBasis,"TSPRotateBasis=");
 // 				typename ModelType::HilbertBasisType basis;
 // 				std::vector<size_t> quantumNumbs;
 // 				model.setNaturalBasis(basis,quantumNumbs,1);
@@ -118,6 +115,7 @@ namespace Dmrg {
 			size_t advanceEach;
 			int long long rngSeed;
 			RealType beta;
+			size_t rotateBasis;
 // 			std::vector<size_t> electrons;
 	}; // class MettsParams
 	
@@ -131,6 +129,7 @@ namespace Dmrg {
 		os<<"#TargetParams.advanceEach="<<t.advanceEach<<"\n";
 		os<<"#TargetParams.beta="<<t.beta<<"\n";
 		os<<"#TargetParams.TSPRngSeed="<<t.rngSeed<<"\n";
+		os<<"#TargetParams.TSPRotateBasis="<<t.rotateBasis<<"\n";
 		//const typename MettsParams<ModelType>::TargetParamsCommonType& tp = t;
 		//os<<tp;
 		return os;

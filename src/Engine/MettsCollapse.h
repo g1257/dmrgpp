@@ -87,15 +87,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h"
 #include "Matrix.h"
 #include "ProgramGlobals.h"
-#include "Random48.h"
 
 namespace Dmrg {
-	template<typename VectorWithOffsetType,typename MettsStochasticsType>
+	template<typename VectorWithOffsetType,typename MettsStochasticsType,typename TargettingParamsType>
 	class MettsCollapse  {
 
 		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef typename MettsStochasticsType::PairType PairType;
 		typedef typename MettsStochasticsType::LeftRightSuperType LeftRightSuperType;
+		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename MettsStochasticsType::RealType RealType;
 		typedef typename MettsStochasticsType::RngType RngType;
 		typedef PsimagLite::Matrix<RealType> MatrixType;
@@ -111,10 +112,13 @@ namespace Dmrg {
 
 		MettsCollapse(const MettsStochasticsType& mettsStochastics,
 			      const LeftRightSuperType& lrs,
-			      RngType& rng)
+					  const TargettingParamsType& targetParams)
+//				  int long long seed,
+//					  size_t rotateBasis)
 		: mettsStochastics_(mettsStochastics),
 		  lrs_(lrs),
-		  rng_(rng),
+		  rng_(targetParams.rngSeed),
+		  targetParams_(targetParams),
 		  progress_("MettsCollapse",0),
 		  prevDirection_(ProgramGlobals::INFINITE),
 		  collapseBasis_(mettsStochastics_.hilbertSize(0),mettsStochastics_.hilbertSize(0))
@@ -127,8 +131,16 @@ namespace Dmrg {
 		                size_t site,
 		                size_t direction)
 		{
-
-			internalAction(c,eToTheBetaH,site,direction);
+			if (targetParams_.rotateBasis==2)
+				setCollapseBasis();
+			internalAction(c,eToTheBetaH,site,direction,false);
+			size_t nk = mettsStochastics_.hilbertSize(site);
+			if (atBorder(direction,nk)) {
+				size_t site2 = 0;
+				if (site+2==lrs_.super().block().size())
+					site2 = site + 1;
+				internalAction(c,eToTheBetaH,site2,direction,true);
+			}
 			sitesSeen_.push_back(site);
 			
 			if (direction==prevDirection_) return false;
@@ -147,7 +159,8 @@ namespace Dmrg {
 		void internalAction(VectorWithOffsetType& dest2,
 		                    const VectorWithOffsetType& src2,
 		                    size_t site,
-		                    size_t direction) const
+							size_t direction,
+							bool border) const
 		{
 			size_t nk = mettsStochastics_.hilbertSize(site);
 			if (dest2.size()==0) {
@@ -155,7 +168,7 @@ namespace Dmrg {
 			}
 
 			std::vector<RealType> p(nk,0);
-			probability(p,src2,direction,nk);
+			probability(p,dest2,direction,nk,border);
 			RealType sum = 0;
 			for (size_t i=0;i<p.size();i++)
 				sum += p[i];
@@ -165,45 +178,48 @@ namespace Dmrg {
 			size_t indexFixed = mettsStochastics_.chooseRandomState(p,site);
 			std::cerr<<"SITE="<<site<<" PROBS=";
 			for (size_t i=0;i<p.size();i++) std::cerr<<p[i]<<" ";
-			std::cerr<<" CHOSEN="<<indexFixed<<"\n";
+			std::cerr<<" CHOSEN="<<indexFixed<<" BORDER="<<border<<"\n";
 			 // m1 == indexFixed in FIXME write paper reference here
 
-			collapseVector(dest,dest2,direction,indexFixed,nk,true);
+			collapseVector(dest,dest2,direction,indexFixed,nk,border);
 			RealType x = std::norm(dest);
+
 			assert(x>1e-6);
 			dest2 = (1.0/x) * dest;
 			assert(dest2.size()==src2.size());
 		}
 
-		void collapseVector(VectorWithOffsetType& dest, // <<---- CPS
+		void collapseVector(VectorWithOffsetType& dest2, // <<---- CPS
 		                    const VectorWithOffsetType& src, // <--- MPS
 		                    size_t direction,
 		                    size_t indexFixed, // <--- m1
 		                    size_t nk,  // <-- size of the Hilbert sp. of one site
-		                    bool option = false) const
+							bool border) const
 		{
-			assert(src.sectors()==1);
-			dest = src;
-			for (size_t ii=0;ii<src.sectors();ii++) {
-				size_t i0 = src.sector(ii);
-				VectorType vdest,vsrc;
-				src.extract(vsrc,i0);
-				collapseVector(vdest,vsrc,direction,i0,indexFixed,nk,option);
-				dest.setDataInSector(vdest,i0);
+			VectorWithOffsetType dest = dest2;
+			dest.populateSectors(lrs_.super());
+			for (size_t ii=0;ii<dest.sectors();ii++) {
+				size_t i0 = dest.sector(ii);
+				collapseVector(dest,src,direction,i0,indexFixed,nk,border);
 			}
-			//assert(std::norm(dest)>1e-6);
+			dest.collapseSectors();
+
+			dest2 =  dest;
+			std::cerr<<" Norm of the collapsed="<<std::norm(dest2)<<"\n";
+//			if (fabs(x)<1e-6)
+//				throw std::runtime_error("collapseVector\n");
 		}
 
-		void collapseVector(VectorType& w, // <<---- CPS
-		                    const VectorType& v, // <--- MPS
+		void collapseVector(VectorWithOffsetType& w, // <<---- CPS
+							const VectorWithOffsetType& v, // <--- MPS
 		                    size_t direction,
 		                    size_t m, // <-- non-zero sector
 		                    size_t indexFixed, // <--- m1
 		                    size_t nk,// <-- size of the Hilbert sp. of one site
-		                    bool option) const
+							bool border) const
 		{
-			if (direction==EXPAND_SYSTEM)  collapseVectorLeft(w,v,m,indexFixed,nk);
-			else  collapseVectorRight(w,v,m,indexFixed,nk);
+			if (direction==EXPAND_SYSTEM)  collapseVectorLeft(w,v,m,indexFixed,nk,border);
+			else  collapseVectorRight(w,v,m,indexFixed,nk,border);
 			//if (option && direction!=prevDirection_) compare1(w,v);
 //			assert(fabs(PsimagLite::norm(w))>1e-6);
 		}
@@ -221,8 +237,21 @@ namespace Dmrg {
 			std::cout<<__FILE__<<" "<<__LINE__<<" count="<<fraction<<"%\n";
 		}
 
-		void collapseVectorLeft(VectorType& w, // <<---- CPS
-					const VectorType& v, // <--- MPS
+		void collapseVectorLeft(VectorWithOffsetType& w, // <<---- CPS
+					const VectorWithOffsetType& v, // <--- MPS
+					size_t m, // <-- non-zero sector
+					size_t indexFixed, // <--- m1
+					size_t nk, // <-- size of the Hilbert sp. of one site
+					bool border) const
+		{
+			if (border)
+				collapseLeftBorder(w,v,m,indexFixed,nk);
+			else
+				collapseVectorLeft(w,v,m,indexFixed,nk);
+		}
+
+		void collapseVectorLeft(VectorWithOffsetType& w, // <<---- CPS
+					const VectorWithOffsetType& v, // <--- MPS
 					size_t m, // <-- non-zero sector
 					size_t indexFixed, // <--- m1
 					size_t nk) const // <-- size of the Hilbert sp. of one site
@@ -233,28 +262,61 @@ namespace Dmrg {
 			size_t ns = lrs_.left().size();
 			PackIndicesType packSuper(ns);
 			PackIndicesType packLeft(ns/nk);
-			w.resize(total);
 			for (size_t i=0;i<size_t(total);i++) {
-				w[i] = 0;
 				size_t alpha,beta;
 				packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
 
 				size_t alpha0,alpha1;
 				packLeft.unpack(alpha0,alpha1,lrs_.left().permutation(alpha));
 
-				RealType sum = 0;
 				for (size_t alpha1Prime=0;alpha1Prime<nk;alpha1Prime++) {
 					size_t alphaPrime = packLeft.pack(alpha0,alpha1Prime,lrs_.left().permutationInverse());
 					size_t iprime = packSuper.pack(alphaPrime,beta,lrs_.super().permutationInverse());
-					if (iprime<offset || iprime>=offset+total) continue;
-					sum += v[iprime-offset]*collapseBasis_(alpha1Prime,indexFixed);
+					w[i+offset] += v[iprime]*collapseBasis_(alpha1Prime,indexFixed)* collapseBasis_(alpha1,indexFixed);
+
 				}
-				w[i] = sum * collapseBasis_(alpha1,indexFixed);
 			}
 		}
 
-		void collapseVectorRight(VectorType& w, // <<---- CPS
-		                         const VectorType& v, // <--- MPS
+		void collapseLeftBorder(VectorWithOffsetType& w, // <<---- CPS
+					const VectorWithOffsetType& v, // <--- MPS
+					size_t m, // <-- non-zero sector
+					size_t indexFixed, // <--- m1
+					size_t nk) const // <-- size of the Hilbert sp. of one site
+		{
+			assert(lrs_.right().size()==nk);
+			size_t offset = lrs_.super().partition(m);
+			int total = lrs_.super().partition(m+1) - offset;
+
+			size_t ns = lrs_.left().size();
+			PackIndicesType packSuper(ns);
+
+			for (size_t i=0;i<size_t(total);i++) {
+				size_t alpha,beta;
+				packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
+
+				for (size_t betaPrime=0;betaPrime<nk;betaPrime++) {
+					size_t iprime = packSuper.pack(alpha,betaPrime,lrs_.super().permutationInverse());
+					w[i+offset] += v[iprime]*collapseBasis_(betaPrime,indexFixed) * collapseBasis_(beta,indexFixed);
+				}
+			}
+		}
+
+		void collapseVectorRight(VectorWithOffsetType& w, // <<---- CPS
+								 const VectorWithOffsetType& v, // <--- MPS
+								 size_t m, // <-- non-zero sector
+								 size_t indexFixed, // <--- m1
+								 size_t nk, // <-- size of the Hilbert sp. of one site
+								 bool border) const
+		{
+			if (border)
+				collapseRightBorder(w,v,m,indexFixed,nk);
+			else
+				collapseVectorRight(w,v,m,indexFixed,nk);
+		}
+
+		void collapseVectorRight(VectorWithOffsetType& w, // <<---- CPS
+								 const VectorWithOffsetType& v, // <--- MPS
 		                         size_t m, // <-- non-zero sector
 		                         size_t indexFixed, // <--- m1
 		                         size_t nk) const // <-- size of the Hilbert sp. of one site
@@ -265,24 +327,42 @@ namespace Dmrg {
 			size_t ns = lrs_.left().size();
 			PackIndicesType packSuper(ns);
 			PackIndicesType packRight(nk);
-			w.resize(total);
 			for (size_t i=0;i<size_t(total);i++) {
-				w[i] = 0;
 				size_t alpha,beta;
 				packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
 
 				size_t beta0,beta1;
 				packRight.unpack(beta0,beta1,lrs_.right().permutation(beta));
 
-				RealType sum = 0;
 				for (size_t beta0Prime=0;beta0Prime<nk;beta0Prime++) {
 					size_t betaPrime =  packRight.pack(beta0Prime,beta1,lrs_.right().permutationInverse());
 					size_t iprime = packSuper.pack(alpha,betaPrime,lrs_.super().permutationInverse());
-					if (iprime<offset || iprime>=offset+total) continue;
-					sum += v[iprime-offset]*collapseBasis_(beta0Prime,indexFixed);
+					w[i+offset] += v[iprime]*collapseBasis_(beta0Prime,indexFixed)* collapseBasis_(beta0,indexFixed);
 				}
+			}
+		}
 
-				w[i] = sum * collapseBasis_(beta0,indexFixed);
+		void collapseRightBorder(VectorWithOffsetType& w, // <<---- CPS
+								 const VectorWithOffsetType& v, // <--- MPS
+								 size_t m, // <-- non-zero sector
+								 size_t indexFixed, // <--- m1
+								 size_t nk) const // <-- size of the Hilbert sp. of one site
+		{
+			assert(lrs_.left().size()==nk);
+			size_t offset = lrs_.super().partition(m);
+			int total = lrs_.super().partition(m+1) - offset;
+
+			size_t ns = lrs_.left().size();
+			PackIndicesType packSuper(ns);
+
+			for (size_t i=0;i<size_t(total);i++) {
+				size_t alpha,beta;
+				packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
+
+				for (size_t alphaPrime=0;alphaPrime<nk;alphaPrime++) {
+					size_t iprime = packSuper.pack(alphaPrime,beta,lrs_.super().permutationInverse());
+					w[i+offset] += v[iprime]*collapseBasis_(alphaPrime,indexFixed) * collapseBasis_(alpha,indexFixed);
+				}
 			}
 		}
 
@@ -290,16 +370,23 @@ namespace Dmrg {
 		void probability(std::vector<RealType>& p,
 		                 const VectorWithOffsetType& src,
 		                 size_t direction,
-		                 size_t nk) const // <-- size of the Hilbert sp. of one site
+						 size_t nk, // <-- size of the Hilbert sp. of one site
+						 bool border) const
 		{
+			RealType tmp = std::norm(src);
+			if (fabs(tmp-1.0)>1e-3)
+				throw std::runtime_error("probability\n");
+
 			RealType sum = 0;
 			for (size_t alpha=0;alpha<nk;alpha++) {
 				VectorWithOffsetType dest;
-				collapseVector(dest,src,direction,alpha,nk);
+				collapseVector(dest,src,direction,alpha,nk,border);
 				RealType x = std::norm(dest);
 				sum += x*x;
 				p[alpha] = x*x;
 			}
+			if (fabs(sum-1.0)>1e-3)
+				throw std::runtime_error("probability sum\n");
 			assert(fabs(sum)>1e-6);
 			for(size_t alpha=0;alpha<p.size();alpha++) p[alpha] /= sum;
 		}
@@ -320,46 +407,88 @@ namespace Dmrg {
 			for (size_t i=0;i<nk;i++)
 				for (size_t j=0;j<nk;j++)
 					collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
-			if (nk!=4) return;
 
-			rotation4d(collapseBasis_);
+			if (targetParams_.rotateBasis>0)
+				rotationNd(collapseBasis_,nk);
+			std::cout<<"Collapse basis:\n";
+			std::cout<<collapseBasis_;
 
 		}
 
-		void rotation4d(MatrixType& m) const
+//		void rotation4d(MatrixType& m) const
+//		{
+//			assert(m.n_row()==4 && m.n_col()==4);
+
+//			MatrixType aux1(m.n_row(),m.n_col());
+//			RealType theta = M_PI*rng_();
+//			rotation2d(aux1,0,1,theta);
+
+//			theta = M_PI*rng_();
+//			MatrixType aux2(m.n_row(),m.n_col());
+//			rotation2d(aux2,1,2,theta);
+
+//			MatrixType aux3(m.n_row(),m.n_col());
+//			theta = M_PI*rng_();
+//			rotation2d(aux3,2,3,theta);
+
+//			MatrixType aux4(m.n_row(),m.n_col());
+//			theta = M_PI*rng_();
+//			rotation2d(aux4,3,0,theta);
+
+//			m = (aux1 * aux2)*(aux3*aux4);
+//		}
+
+		void rotationNd(MatrixType& m,size_t hilbertSize) const
 		{
-			assert(m.n_row()==4 && m.n_col()==4);
-
-			MatrixType aux1(m.n_row(),m.n_col());
-			RealType theta = M_PI*rng_();
-			rotation2d(aux1,0,1,theta);
-
-			theta = M_PI*rng_();
-			MatrixType aux2(m.n_row(),m.n_col());
-			rotation2d(aux2,1,2,theta);
-
-			MatrixType aux3(m.n_row(),m.n_col());
-			theta = M_PI*rng_();
-			rotation2d(aux3,2,3,theta);
-
-			MatrixType aux4(m.n_row(),m.n_col());
-			theta = M_PI*rng_();
-			rotation2d(aux4,3,0,theta);
-
-			m = (aux1 * aux2)*(aux3*aux4);
+			for (size_t i=0;i<hilbertSize;i++) {
+				MatrixType aux1(m.n_row(),m.n_col());
+				RealType theta = M_PI*rng_();
+				size_t i1 = i;
+				size_t i2 = i+1;
+				if (i==hilbertSize-1) i2=0;
+				rotation2d(aux1,i1,i2,theta);
+				if (i==0) m = aux1;
+				else m = (m*aux1);
+			}
 		}
 
 		void rotation2d(MatrixType& m,size_t x,size_t y,const RealType& theta) const
 		{
+			std::cout<<"Theta="<<theta<<"\n";
 			for (size_t i=0;i<m.n_row();i++) m(i,i) = 1.0;
 			m(x,x) = m(y,y) = cos(theta);
 			m(x,y) = sin(theta);
 			m(y,x) = -sin(theta);
 		}
 
+		bool atBorder(size_t direction,size_t nk) const
+		{
+			bool b1 = (direction==EXPAND_SYSTEM && lrs_.right().size()==nk);
+			bool b2 = (direction==EXPAND_ENVIRON && lrs_.left().size()==nk);
+			return (b1 || b2);
+		}
+
+		void examineVector(const VectorWithOffsetType& phi) const
+		{
+			for (size_t ii=0;ii<phi.sectors();ii++) {
+				size_t i0 = phi.sector(ii);
+				VectorType v;
+				phi.extract(v,i0);
+				RealType tmpNorm = PsimagLite::norm(v);
+				if (fabs(tmpNorm)>1e-5) {
+					size_t j = lrs_.super().qn(lrs_.super().partition(i0));
+					std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
+					std::cerr<<"examineVector: qns= ";
+					for (size_t k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
+					std::cerr<<"\n";
+				}
+			}
+		}
+
 		const MettsStochasticsType& mettsStochastics_;
 		const LeftRightSuperType& lrs_;
-		RngType& rng_;
+		mutable RngType rng_;
+		const TargettingParamsType& targetParams_;
 		PsimagLite::ProgressIndicator progress_;
 		size_t prevDirection_;
 		MatrixType collapseBasis_;

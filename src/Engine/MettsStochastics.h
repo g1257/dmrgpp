@@ -100,9 +100,9 @@ namespace Dmrg {
 		typedef RngType_ RngType;
 		typedef typename RngType::LongType LongType;
 
-		MettsStochastics(const ModelType& model,RngType& random48)
+		MettsStochastics(const ModelType& model,int long long seed)
 		: model_(model),
-		  random48_(random48),
+		  rng_(seed),
 		  progress_("MettsStochastics",0),
 		  addedSites_(0)
 		{}
@@ -114,7 +114,9 @@ namespace Dmrg {
 			std::vector<size_t> quantumNumbsOneSite;
 			HilbertBasisType basisOfOneSite;
 			basisForOneSite(quantumNumbsOneSite,basisOfOneSite,site);
-			return basisOfOneSite[pureStates_[site]];
+			size_t tmp = size_t(rng_()*model_.hilbertSize(site));
+			assert(tmp<basisOfOneSite.size());
+			return basisOfOneSite[tmp];
 		}
 
 		// recommendation for understanding this
@@ -130,7 +132,8 @@ namespace Dmrg {
 				std::cerr<<basisOfOneSite[i]<<" ";
 			std::cerr<<"\n";
 
-			RealType r = random48_();
+			RealType r = rng_();
+			std::cout<<"RANDOM="<<r<<"\n";
 			RealType s1 = 0;
 			RealType s2 = 0;
 			for (size_t i=0;i<probs.size();++i) {
@@ -155,7 +158,7 @@ namespace Dmrg {
 					throw std::runtime_error("MettsStochastics::update(...): must start from 0\n");
 				pureStates_.resize(sites.second+2);
 				initialSetOfPures(seed);
-				getStochasticsAll(qn,seed);
+				//getStochasticsAll(qn,seed);
 				addedSites_.push_back(sites.first-1);
 				addedSites_.push_back(sites.second+1);
 				currentSites.push_back(sites.first-1);
@@ -185,7 +188,7 @@ namespace Dmrg {
 		{
 			size_t nk = model_.hilbertSize(site);
 			for (size_t alpha=0;alpha<nk;alpha++) {
-				RealType randomNumber = random48_();
+				RealType randomNumber = rng_();
 				collapseBasisWeights[alpha] = randomNumber;
 			}
 			RealType norm1  = 1.0/PsimagLite::norm(collapseBasisWeights);
@@ -235,7 +238,7 @@ namespace Dmrg {
 					throw std::runtime_error(s.c_str());
 				}
 				for (size_t i=0;i<allSites;i++) {
-					size_t thisSite = size_t(random48_()*allSites);
+					size_t thisSite = size_t(rng_()*allSites);
 					raiseOrLowerSymm(thisSite,(symm<qn),nk);
 					symm = getSymmetryAllSites();
 					if (symm==qn) break;
@@ -331,7 +334,7 @@ namespace Dmrg {
 //			}
 
 			for (size_t i=0;i<pureStates_.size();i++)
-				pureStates_[i] = size_t(random48_()*model_.hilbertSize(i));
+				pureStates_[i] = size_t(rng_()*model_.hilbertSize(i));
 		}
 
 		size_t getState(size_t i,size_t nk,LongType seed) const
@@ -345,7 +348,7 @@ namespace Dmrg {
 		}
 
 		const ModelType& model_;
-		RngType& random48_;
+		mutable RngType rng_;
 		PsimagLite::ProgressIndicator progress_;
 		std::vector<size_t> pureStates_;
 		std::vector<size_t> addedSites_;

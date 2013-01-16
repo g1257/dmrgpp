@@ -81,7 +81,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MettsCollapse.h"
 #include "VectorWithOffset.h"
 #include "ParametersForSolver.h"
-#include "Random48.h"
+#include "RandomForTests.h"
+#include "TimeSerializer.h"
 
 namespace Dmrg {
 	template<
@@ -130,11 +131,13 @@ namespace Dmrg {
 			typedef BlockMatrix<RealType,MatrixType> BlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef MettsSerializer<RealType,VectorWithOffsetType> MettsSerializerType;
-			typedef typename PsimagLite::Random48<RealType> RngType;
+			typedef typename PsimagLite::RandomForTests<RealType> RngType;
 			typedef MettsStochastics<ModelType,RngType> MettsStochasticsType;
 			typedef typename MettsStochasticsType::PairType PairType;
-			typedef MettsCollapse<VectorWithOffsetType,MettsStochasticsType> MettsCollapseType;
+			typedef MettsCollapse<VectorWithOffsetType,MettsStochasticsType,TargettingParamsType> MettsCollapseType;
 			typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
+			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+
 			//typedef typename RngType::LongType LongType;
 
 			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
@@ -161,9 +164,8 @@ namespace Dmrg {
 			  progress_("MettsTargetting(AlphaStage)",0),
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
-			  random48_(mettsStruct.rngSeed),
-			  mettsStochastics_(model,random48_),
-			  mettsCollapse_(mettsStochastics_,lrs_,random48_),
+			  mettsStochastics_(model,mettsStruct.rngSeed),
+			  mettsCollapse_(mettsStochastics_,lrs_,mettsStruct),
 			  timesWithoutAdvancement_(0),
 			  prevDirection_(INFINITE),
 			  systemPrev_(),
@@ -285,7 +287,14 @@ namespace Dmrg {
 				for (size_t i=0;i<targetVectors_.size();i++)
 					assert(targetVectors_[i].size()==0 || targetVectors_[i].size()==lrs_.super().permutationVector().size());
 
-				cocoon(direction,sites);
+				cocoon(direction,sites,false);
+
+				if (sites.first==sites.second) {
+					if (isAtBorder(direction,sites.first))
+						cocoon(direction,sites,true);
+				}
+
+				printEnergies(); // in-situ
 
 				if (stage_!=COLLAPSE) return;
 
@@ -295,22 +304,28 @@ namespace Dmrg {
 				if (hasCollapsed) {
 					//throw std::runtime_error("collapsed testing\n");
 					std::string s = "  COLLAPSEHERE  ";
-					test(targetVectors_[n1],targetVectors_[n1],direction,s,sites);
+					test(targetVectors_[n1],targetVectors_[n1],direction,s,sites,false);
+					if (isAtBorder(direction,sites.first))
+						test(targetVectors_[n1],targetVectors_[n1],direction,s,sites,true);
 				}
 			}
 
 			void load(const std::string& f)
 			{
-				throw std::runtime_error("Metts: load() unimplemented\n");
-// 				for (size_t i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
-// 
-// 				typename IoType::In io(f);
-// 
-// 				TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
-// 				for (size_t i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
-// 				currentBeta_ = ts.time();
-// 
-// 				psi_.load(io,"PSI");
+				//throw std::runtime_error("Metts: load() unimplemented\n");
+				stage_ = WFT_NOADVANCE;
+ 
+ 				typename IoType::In io(f);
+ 
+ 				TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
+ 				for (size_t i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
+ 				currentBeta_ = ts.time();
+ 
+				/*int site = 0;
+				io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
+								if (site<0) throw std::runtime_error("Metts::load(...): site cannot be negative\n");
+ 				targetVectors_[0].load(io,"PSI");
+				*/
 			}
 
 			void print(std::ostream& os) const
@@ -347,13 +362,23 @@ namespace Dmrg {
 			void save(const std::vector<size_t>& block,IoOutputType& io) const
 			{
 				std::ostringstream msg;
-				msg<<"WARNING: save(...) unimplemented";
-// 				msg<<"Saving state...";
+ 				msg<<"Saving state...";
  				progress_.printline(msg,std::cout);
-// 
-// 				TimeSerializerType ts(currentBeta_,block[0],targetVectors_);
-// 				ts.save(io);
-// 				psi_.save(io,"PSI");
+
+				size_t marker = 0;
+				if (noStageIs(DISABLED)) marker = 1;
+				std::vector<VectorWithOffsetType> targetVectors(targetVectors_.size());
+				if (mettsStruct_.beta>currentBeta_) {
+					for (size_t i=0;i<targetVectors.size();i++)
+						targetVectors[i].resize(0);
+				} else {
+					targetVectors = targetVectors_;
+				}
+				TimeSerializerType ts(currentBeta_,block[0],targetVectors,marker);
+ 				ts.save(io);
+				/* std::string s = "#TCENTRALSITE=" + ttos(block[0]);
+				io.printline(s);
+ 				targetVectors_[0].save(io,"PSI");*/
 			}
 
 			RealType time() const { return 0; }
@@ -373,7 +398,7 @@ namespace Dmrg {
 			            std::pair<size_t,size_t> sites,
 			            size_t loopNumber)
 			{
-				if (index==0 && start==0) advanceCounterAndComputeStage();
+				if (index==0 && start==0) advanceCounterAndComputeStage(sites.first);
 
 				std::ostringstream msg;
 				msg<<"Evolving, stage="<<getStage()<<" loopNumber="<<loopNumber;
@@ -384,9 +409,31 @@ namespace Dmrg {
 				advanceOrWft(index,indexAdvance,direction,nk,sites);
 			}
 
-			void advanceCounterAndComputeStage()
+			void advanceCounterAndComputeStage(size_t site)
 			{
 				if (stage_!=COLLAPSE) stage_=WFT_NOADVANCE;
+
+				if (stage_==COLLAPSE) {
+					if (!allSitesCollapsed()) {
+						if (sitesCollapsed_.size()>2*model_.geometry().numberOfSites())
+							throw std::runtime_error("advanceCounterAndComputeStage\n");
+						printAdvancement();
+						return;
+					}
+
+					sitesCollapsed_.clear();
+					stage_ = WFT_NOADVANCE;
+					timesWithoutAdvancement_=0;
+					currentBeta_ = 0;
+					std::ostringstream msg;
+					size_t n1 = mettsStruct_.timeSteps;
+					RealType x = std::norm(targetVectors_[n1]);
+					msg<<"Changing direction, setting collapsed with norm="<<x;
+					progress_.printline(msg,std::cout);
+					targetVectors_[0] = targetVectors_[n1];
+					printAdvancement();
+					return;
+				}
 
 				if (timesWithoutAdvancement_ < mettsStruct_.advanceEach) {
 					timesWithoutAdvancement_++;
@@ -402,29 +449,20 @@ namespace Dmrg {
 					return;
 				}
 
+				if (stage_!=COLLAPSE && currentBeta_>=mettsStruct_.beta && site!=1) {
+					printAdvancement();
+					return;
+				}
+
 				if (stage_!=COLLAPSE && currentBeta_>=mettsStruct_.beta) {
 					stage_ = COLLAPSE;
+					sitesCollapsed_.clear();
 					size_t n1 = mettsStruct_.timeSteps;
 					targetVectors_[n1].resize(0);
 					timesWithoutAdvancement_=0;
 					printAdvancement();
 					return;
 				}
-
-				if (stage_==COLLAPSE) {
-					stage_ = WFT_NOADVANCE;
-					timesWithoutAdvancement_=0;
-					currentBeta_ = 0;
-					std::ostringstream msg;
-					size_t n1 = mettsStruct_.timeSteps;
-					RealType x = std::norm(targetVectors_[n1]);
-					msg<<"Changing direction, setting collapsed with norm="<<x;
-					progress_.printline(msg,std::cout);
-					targetVectors_[0] = targetVectors_[n1];
-					printAdvancement();
-					return;
-				}
-
 			}
 
 			void printAdvancement() const
@@ -510,7 +548,8 @@ namespace Dmrg {
 				size_t betaFixed = mettsStochastics_.chooseRandomState(sites.second);
 
 				std::ostringstream msg;
-				msg<<"New pures for site"<<sites;
+				msg<<"New pures for site "<<sites.first<<" is "<<alphaFixed;
+				msg<<" and for site "<<sites.second<<" is "<<betaFixed;
 				progress_.printline(msg,std::cerr);
 
 				const MatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
@@ -544,6 +583,8 @@ namespace Dmrg {
 
 				PackIndicesType pack(lrs.left().size());
 				v.resize(total);
+				assert(PsimagLite::norm(pureVectors_.first)>1e-6);
+				assert(PsimagLite::norm(pureVectors_.second)>1e-6);
 				for (int i=0;i<total;i++) {
 					size_t alpha,beta;
 					pack.unpack(alpha,beta,lrs.super().permutation(i+offset));
@@ -563,43 +604,50 @@ namespace Dmrg {
 				VectorType tmpVector;
 				if (transform.n_row()==0) {
 					tmpVector = oldVector;
+					assert(PsimagLite::norm(tmpVector)>1e-6);
 				} else {
 					delayedTransform(tmpVector,oldVector,direction,transform,site);
+					assert(PsimagLite::norm(tmpVector)>1e-6);
 				}
 				size_t ns = tmpVector.size();
 				size_t nk = model_.hilbertSize(site);
 				size_t newSize =  (transform.n_col()==0) ? (ns*ns) : 
 							transform.n_col() * nk;
 				newVector.resize(newSize);
-				//for (size_t alpha=0;alpha<newVector.size();alpha++) newVector[alpha] = 0;
+				for (size_t alpha=0;alpha<newVector.size();alpha++)
+					newVector[alpha] = 0;
 
-//				for (size_t alpha=0;alpha<ns;alpha++) {
-//					size_t gamma = (direction==ProgramGlobals::SYSTEM) ?
-//					    basis.permutationInverse(alpha + alphaFixed*ns) :
-//					    basis.permutationInverse(alphaFixed + alpha*nk);
-//					newVector[gamma] = tmpVector[alpha];
-//				}
-				for (size_t gamma=0;gamma<newVector.size();gamma++) {
-					newVector[gamma] = 0;
-					for (size_t alpha=0;alpha<ns;alpha++) {
-						size_t gammaPrime = (direction==ProgramGlobals::SYSTEM) ?
-									basis.permutationInverse(alpha + alphaFixed*ns) :
-									basis.permutationInverse(alphaFixed + alpha*nk);
-
-						if (gamma == gammaPrime)
-							newVector[gamma] += tmpVector[alpha];
-					}
+				for (size_t alpha=0;alpha<ns;alpha++) {
+					size_t gamma = (direction==ProgramGlobals::SYSTEM) ?
+						basis.permutationInverse(alpha + alphaFixed*ns) :
+						basis.permutationInverse(alphaFixed + alpha*nk);
+					newVector[gamma] = tmpVector[alpha];
 				}
+//				for (size_t gamma=0;gamma<newVector.size();gamma++) {
+//					newVector[gamma] = 0;
+//					for (size_t alpha=0;alpha<ns;alpha++) {
+//						size_t gammaPrime = (direction==ProgramGlobals::SYSTEM) ?
+//									basis.permutationInverse(alpha + alphaFixed*ns) :
+//									basis.permutationInverse(alphaFixed + alpha*nk);
+
+//						if (gamma == gammaPrime)
+//							newVector[gamma] += tmpVector[alpha];
+//					}
+//				}
+				std::ostringstream msg2;
+				msg2<<"Old size of pure is "<<ns<<" norm="<<PsimagLite::norm(tmpVector);
+				progress_.printline(msg2,std::cerr);
 				std::ostringstream msg;
 				msg<<"New size of pure is "<<newSize<<" norm="<<PsimagLite::norm(newVector);
 				progress_.printline(msg,std::cerr);
+				assert(PsimagLite::norm(newVector)>1e-6);
 			}
 
 			void delayedTransform(VectorType& newVector,
-			                      VectorType& oldVector,
-			                      size_t direction,
-			                      const MatrixType& transform,
-			                      size_t site)
+								  VectorType& oldVector,
+								  size_t direction,
+								  const MatrixType& transform,
+								  size_t site)
 			{
 				assert(oldVector.size()==transform.n_row());
 
@@ -622,7 +670,23 @@ namespace Dmrg {
 						
 						assert(gammaPrime<transform.n_row());
 						newVector[gamma] += transform(gammaPrime,gamma) *
-								      oldVector[gammaPrime];
+									  oldVector[gammaPrime];
+					}
+				}
+			}
+
+			void simpleTransform(VectorType& newVector,
+								  VectorType& oldVector,
+								  const MatrixType& transform)
+			{
+				assert(oldVector.size()==transform.n_row());
+
+
+				for (size_t gamma=0;gamma<newVector.size();gamma++) {
+					newVector[gamma] = 0;
+					for (size_t gammaPrime=0;gammaPrime<oldVector.size();gammaPrime++) {
+						newVector[gamma] += transform(gammaPrime,gamma) *
+									  oldVector[gammaPrime];
 					}
 				}
 			}
@@ -631,10 +695,17 @@ namespace Dmrg {
 			{
 				size_t sitePlusOrMinus = (site==1) ? 0 : site+1;
 				size_t alphaFixed = mettsStochastics_.chooseRandomState(sitePlusOrMinus);
+
+				std::ostringstream msg;
+				msg<<"New pures for site "<<sitePlusOrMinus<<" is "<<alphaFixed;
+				progress_.printline(msg,std::cerr);
+
 				oldVector.resize(model_.hilbertSize(site));
+				assert(alphaFixed<oldVector.size());
 				for (size_t i=0;i<oldVector.size();i++) {
 					oldVector[i] = (i==alphaFixed) ? 1 : 0;
 				}
+				assert(PsimagLite::norm(oldVector)>1e-6);
 			}
 
 			void populateCorrectSector(VectorWithOffsetType& phi,const LeftRightSuperType& lrs) const
@@ -662,6 +733,14 @@ namespace Dmrg {
 					size_t i0 = phi.sector(ii);
 					VectorType v;
 					getFullVector(v,i0,lrs);
+					RealType tmpNorm = PsimagLite::norm(v);
+					if (fabs(tmpNorm-1.0)<1e-6) {
+						size_t j = lrs.super().qn(lrs.super().partition(i0));
+						std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
+						std::cerr<<"setFromInfinite: qns= ";
+						for (size_t k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
+						std::cerr<<"\n";
+					}
 					phi.setDataInSector(v,i0);
 				}
 				phi.collapseSectors();
@@ -669,14 +748,15 @@ namespace Dmrg {
 			}
 
 			// in situ computation:
-			void cocoon(size_t direction,const PairType& sites) const
+			void cocoon(size_t direction,const PairType& sites,bool corner)
 			{
 				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
 				//test(psi_,psi_,direction,"<PSI|A|PSI>",sites);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
-					test(targetVectors_[j],targetVectors_[j],direction,s,sites);
+					size_t site = test(targetVectors_[j],targetVectors_[j],direction,s,sites,corner);
+					if (stage_==COLLAPSE && j==0) sitesCollapsed_.push_back(site);
 				}
 				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
 			}
@@ -974,11 +1054,12 @@ namespace Dmrg {
 				model_.findElectrons(electrons,basis,site);
 			}
 
-			void test(const VectorWithOffsetType& src1,
+			size_t test(const VectorWithOffsetType& src1,
 			          const VectorWithOffsetType& src2,
 			          size_t systemOrEnviron,
 			          const std::string& label,
-			          const PairType& sites) const
+					  const PairType& sites,
+					  bool corner) const
 			{
 				VectorWithOffsetType dest;
 				OperatorType A = getObservableToTest(model_.params().model);
@@ -988,7 +1069,7 @@ namespace Dmrg {
 				std::vector<size_t> electrons;
 				findElectronsOfOneSite(electrons,sites.first);
 				FermionSign fs(lrs_.left(),electrons);
-				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
+				applyOpLocal_(dest,src1,A,fs,systemOrEnviron,corner);
 
 				RealType sum = 0;
 				for (size_t ii=0;ii<dest.sectors();ii++) {
@@ -1003,9 +1084,20 @@ namespace Dmrg {
 					}
 				}
 				RealType nor = std::norm(src1);
-				std::cerr<<sites.first<<" "<<sum<<" "<<" "<<currentBeta_;
+				size_t site = sites.first;
+				if (corner) {
+					if (site==1) {
+						site=0;
+					} else {
+						site=model_.geometry().numberOfSites()-1;
+					}
+				}
+
+				std::cerr<<site<<" "<<sum<<" "<<" "<<currentBeta_;
 				std::cerr<<" "<<label<<" "<<nor<<" "<<std::norm(src2);
 				std::cerr<<" "<<std::norm(dest)<<"    "<<sum/(nor*nor)<<"\n";
+
+				return site;
 			}
 
 			OperatorType getObservableToTest(const std::string& modelName) const
@@ -1033,6 +1125,58 @@ namespace Dmrg {
 				throw std::runtime_error(s.c_str());
 			}
 
+			void printEnergies() const
+			{
+				for (size_t i=0;i<targetVectors_.size();i++)
+					printEnergies(targetVectors_[i],i);
+			}
+
+			void printEnergies(const VectorWithOffsetType& phi,size_t whatTarget) const
+			{
+				for (size_t ii=0;ii<phi.sectors();ii++) {
+					size_t i = phi.sector(ii);
+					printEnergies(phi,whatTarget,i);
+				}
+			}
+
+			void printEnergies(const VectorWithOffsetType& phi,size_t whatTarget, size_t i0) const
+			{
+				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
+				typename ModelType::ModelHelperType modelHelper(p,lrs_);
+						//,useReflection_);
+				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
+
+
+				size_t total = phi.effectiveSize(i0);
+				TargetVectorType phi2(total);
+				phi.extract(phi2,i0);
+				TargetVectorType x(total);
+				lanczosHelper.matrixVectorProduct(x,phi2);
+				std::ostringstream msg;
+				msg<<"Hamiltonian average at beta="<<currentBeta_<<" for target="<<whatTarget;
+				msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<(phi2*x)<<" <phi(t)|phi(t)>="<<(phi2*phi2);
+				progress_.printline(msg,std::cout);
+			}
+
+			bool isAtBorder(size_t direction,size_t site) const
+			{
+				if (direction==EXPAND_SYSTEM && site+2==model_.geometry().numberOfSites())
+					return true;
+				if (direction!=EXPAND_SYSTEM && site==1)
+					return true;
+				return false;
+			}
+
+			bool allSitesCollapsed() const
+			{
+				size_t n = model_.geometry().numberOfSites();
+				for (size_t i=0;i<n;i++) {
+					bool seen = (std::find(sitesCollapsed_.begin(),sitesCollapsed_.end(),i) != sitesCollapsed_.end());
+					if (!seen) return false;
+				}
+				return true;
+			}
+
 			size_t stage_;
 			//VectorWithOffsetType psi_;
 			const LeftRightSuperType& lrs_;
@@ -1047,7 +1191,6 @@ namespace Dmrg {
 			RealType gsWeight_;
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
-			RngType random48_;
 			MettsStochasticsType mettsStochastics_;
 			MettsCollapseType mettsCollapse_;
 			size_t timesWithoutAdvancement_;
@@ -1055,6 +1198,7 @@ namespace Dmrg {
 			MettsPrev systemPrev_;
 			MettsPrev environPrev_;
 			std::pair<VectorType,VectorType> pureVectors_;
+			std::vector<size_t> sitesCollapsed_;
 	};     //class MettsTargetting
 
 	template<
