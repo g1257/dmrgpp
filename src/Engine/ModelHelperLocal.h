@@ -392,9 +392,11 @@ namespace Dmrg {
 		{
 			if (type==System) {
 				PairType ii =lrs_.left().getOperatorIndices(i,sigma);
+				assert(ii.first<basis2tc_.size());
 				return basis2tc_[ii.first];
 			}
 			PairType ii =lrs_.right().getOperatorIndices(i,sigma);
+			assert(ii.first<basis3tc_.size());
 			return basis3tc_[ii.first];
 		}
 
@@ -416,10 +418,41 @@ namespace Dmrg {
 		}
 
 		void createTcOperators(std::vector<SparseMatrixType>& basistc,
+							   const BasisWithOperatorsType& basis)
+		{
+			if (basistc.size()==0) return;
+			size_t n=basis.getOperatorByIndex(0).data.row();
+			bool b = true;
+			for (size_t i=0;i<basistc.size();i++) {
+				if (basis.getOperatorByIndex(i).data.row()!=n) {
+					b=false;
+					break;
+				}
+			}
+			if (b) createTcOperatorsCached(basistc,basis);
+			else createTcOperatorsSimple(basistc,basis);
+		}
+
+		void createTcOperatorsSimple(std::vector<SparseMatrixType>& basistc,
 		                       const BasisWithOperatorsType& basis)
 		{
 			for (size_t i=0;i<basistc.size();i++)
 				transposeConjugate(basistc[i],basis.getOperatorByIndex(i).data);
+		}
+
+		void createTcOperatorsCached(std::vector<SparseMatrixType>& basistc,
+							   const BasisWithOperatorsType& basis)
+		{
+			if (basistc.size()==0) return;
+			size_t n=basis.getOperatorByIndex(0).data.row();
+			std::vector<std::vector<int> > col(n);
+			std::vector<std::vector<typename SparseMatrixType::value_type> > value(n);
+			for (size_t i=0;i<basistc.size();i++) {
+				const SparseMatrixType& tmp = basis.getOperatorByIndex(i).data;
+				assert(tmp.row()==n);
+				transposeConjugate(basistc[i],tmp,col,value);
+
+			}
 		}
 
 		void createAlphaAndBeta()

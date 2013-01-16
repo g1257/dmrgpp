@@ -711,12 +711,13 @@ namespace Dmrg {
 			size_t ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.row(); // = Acrs.rank()
 
 			// some sanity checks:
-			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper(threadId).super().size())
-				throw std::runtime_error("Observe::bracketRightCorner_(...): vec.size!=SE.size\n");
-			if (ni!=A1crs.row())
-				throw std::runtime_error("Observe::bracketRightCorner_(...): ni!=A1crs.rank\n");
-			if (Bcrs.row()!=A2crs.row())
-				throw std::runtime_error("Observe::bracketRightCorner_(...): Bcrs.rank!=A2crs.rank\n");
+			assert(vec1.size()==vec2.size());
+
+			if (vec1.size()==0) return 0;
+
+			assert(vec1.size()==helper_.leftRightSuper(threadId).super().size());
+			assert(ni==A1crs.row());
+			assert(Bcrs.row()==A2crs.row());
 
 			// ok, we're ready for the main course:
 			PackIndicesType pack1(helper_.leftRightSuper(threadId).left().size());
