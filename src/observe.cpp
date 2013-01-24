@@ -61,11 +61,16 @@ typedef PsimagLite::IoSimple::In IoInputType;
 typedef PsimagLite::InputNg<InputCheck> InputNgType;
 typedef ParametersDmrgSolver<RealType,InputNgType::Readable> DmrgSolverParametersType;
 
-size_t dofsFromModelName(const std::string& modelName)
+template<typename ModelType>
+size_t dofsFromModelName(const ModelType& model)
 {
-	if (modelName.find("FeAsBasedSc")!=std::string::npos) return 4;
-	if (modelName.find("FeAsBasedScExtended")!=std::string::npos) return 4;
-	if (modelName.find("HubbardOneBand")!=std::string::npos) return 2;
+	const std::string& modelName = model.params().model;
+	size_t site = 0; // FIXME : account for Hilbert spaces changing with site
+	size_t dofs = log(model.hilbertSize(site))/log(2.0);
+	std::cerr<<"DOFS= "<<dofs<<" <------------------------------------\n";
+	if (modelName.find("FeAsBasedSc")!=std::string::npos) return dofs;
+	if (modelName.find("FeAsBasedScExtended")!=std::string::npos) return dofs;
+	if (modelName.find("HubbardOneBand")!=std::string::npos) return dofs;
 	return 0;
 }
 
@@ -107,7 +112,7 @@ bool observeOneFullSweep(
 	const std::string& modelName = model.params().model;
 	size_t rows = n; // could be n/2 if there's enough symmetry
 
-	size_t numberOfDofs = dofsFromModelName(modelName);
+	size_t numberOfDofs = dofsFromModelName(model);
 	if (!hasTimeEvolution && obsOptions.find("onepoint")!=std::string::npos) {
 		observerLib.measureTheOnePoints(numberOfDofs);
 	}
@@ -140,18 +145,16 @@ bool observeOneFullSweep(
 		} // if dd4
 	}
 
-	//if (s.find("heisenberg")!=std::string::npos) {
 	if (obsOptions.find("s+s-")!=std::string::npos) {
 		observerLib.measure("s+s-",rows,n);
 	}
-	if (obsOptions.find("s-s+")!=std::string::npos) {
-		observerLib.measure("s-s+",rows,n);
-	}
+//	if (obsOptions.find("s-s+")!=std::string::npos) {
+//		observerLib.measure("s-s+",rows,n);
+//	}
 	if (obsOptions.find("ss")!=std::string::npos) {
 		observerLib.measure("ss",rows,n);
 	}
 
-	//}
 	return observerLib.endOfData();
 }
 

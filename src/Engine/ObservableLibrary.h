@@ -261,8 +261,12 @@ namespace Dmrg {
 		{
 			size_t site = 0; // FIXME : account for Hilbert spaces changing with site
 			size_t threadId = 0;
+			size_t orbitals = numberOfDofs/2;
 			for (size_t dof=0;dof<numberOfDofs;dof++) {
+				size_t spin = dof/orbitals;
 				for (size_t dof2=dof;dof2<numberOfDofs;dof2++) {
+					size_t spin2 = dof2/orbitals;
+					if (spin!=spin2) continue;
 					MatrixType opCup = model_.naturalOperator("c",site,dof);
 					MatrixType opCdown = model_.naturalOperator("c",site,dof2);
 					MatrixType opCupTranspose;
@@ -303,7 +307,7 @@ namespace Dmrg {
 			std::cout<<"#Using Matrix A:\n";
 			for (size_t i=0;i<A.row();i++) {
 				for (size_t j=0;j<A.col();j++)
-					std::cout<<"#A("<<i<<","<<j<<")="<<A(i,j)<<" ";
+					std::cout<<A(i,j)<<" ";
 				std::cout<<"\n";
 			}
 			OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
