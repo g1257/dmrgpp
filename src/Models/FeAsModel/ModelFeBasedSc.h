@@ -239,7 +239,7 @@ namespace Dmrg {
 				PsimagLite::Matrix<SparseElementType> tmp2(nrow,nrow);
 				for (size_t x=0;x<modelParameters_.orbitals;x++) {
 					tmp += multiplyTc(creationMatrix[x].data,creationMatrix[x].data);
-					tmp += multiplyTc(creationMatrix[x+modelParameters_.orbitals].data,creationMatrix[x+modelParameters_.orbitals].data);
+					tmp2 += multiplyTc(creationMatrix[x+modelParameters_.orbitals].data,creationMatrix[x+modelParameters_.orbitals].data);
 				}
 				return tmp-tmp2;
 			}
