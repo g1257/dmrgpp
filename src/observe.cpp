@@ -66,7 +66,7 @@ size_t dofsFromModelName(const ModelType& model)
 {
 	const std::string& modelName = model.params().model;
 	size_t site = 0; // FIXME : account for Hilbert spaces changing with site
-	size_t dofs = log(model.hilbertSize(site))/log(2.0);
+	size_t dofs = size_t(log(model.hilbertSize(site))/log(2.0));
 	std::cerr<<"DOFS= "<<dofs<<" <------------------------------------\n";
 	if (modelName.find("FeAsBasedSc")!=std::string::npos) return dofs;
 	if (modelName.find("FeAsBasedScExtended")!=std::string::npos) return dofs;
