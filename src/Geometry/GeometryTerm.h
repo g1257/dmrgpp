@@ -204,6 +204,27 @@ namespace PsimagLite {
 				return geometryFactory_.translate(site,dir,amount);
 			}
 
+			void print(std::ostream& os,size_t linSize) const
+			{
+				size_t dofs = 1;
+				for (size_t dof1=0;dof1<dofs;dof1++) {
+					for (size_t dof2=0;dof2<dofs;dof2++) {
+						os<<"dof1="<<dof1<<" dof2="<<dof2<<"\n";
+						for (size_t i=0;i<linSize;i++) {
+							for (size_t j=0;j<linSize;j++) {
+								if (!connected(i,j)) {
+									os<<0<<" ";
+									continue;
+								}
+								os<<operator()(i,dof1,j,dof2)<<" ";
+							}
+							os<<"\n";
+						}
+						os<<"\n";
+					}
+				}
+			}
+
 			template<typename RealType_>	
 			friend std::ostream& operator<<(std::ostream& os,const GeometryTerm<RealType_>& gt);
 	

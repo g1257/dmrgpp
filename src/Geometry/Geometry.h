@@ -192,6 +192,12 @@ namespace PsimagLite {
 				return terms_[termId].translate(site,dir,amount);
 			}
 
+			void print(std::ostream& os) const
+			{
+				for (size_t i=0;i<terms_.size();i++)
+					terms_[i].print(os,linSize_);
+			}
+
 			template<typename RealType2,typename PgType>
 			friend std::ostream& operator<<(std::ostream& os,const Geometry<RealType2,PgType>& g);
 

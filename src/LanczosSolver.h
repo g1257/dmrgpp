@@ -254,6 +254,7 @@ namespace PsimagLite {
 				if (eps_>0) {
 					ground(enew,j+1, ab,nullVector);
 					if (fabs (enew - eold) < eps_) exitFlag=true;
+					if (exitFlag && mat_.rank()<=4) break;
 					if (exitFlag && j>=4) break;
 				}
 		

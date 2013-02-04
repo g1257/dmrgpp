@@ -121,6 +121,13 @@ namespace PsimagLite {
 		  return *this;
 		}
 
+		Matrix<T>& operator*=(const T& value)
+		{
+			for(size_t i=0;i<ncol_*nrow_;i++)
+				data_[i] *= value;
+			return *this;
+		}
+
 		void print(std::ostream& os,const double& eps) const
 		{
 			 os<<nrow_<<" "<<ncol_<<"\n";
@@ -469,10 +476,9 @@ namespace PsimagLite {
 
 	}
 
-	void svd(Matrix<double> &a,std::vector<double>& s)
+	void svd(Matrix<double> &a,std::vector<double>& s,char jobz)
 	{
 		std::cerr<<"PsimagLite::svd(...) is experimental\n";
-		char jobz = 'A';
 		int m = a.n_row();
 		int n = a.n_col();
 		int lda = m;
@@ -502,7 +508,12 @@ namespace PsimagLite {
 		work.resize(lwork+10);
 		// real work:
 		psimag::LAPACK::dgesdd_(&jobz,&m,&n,&(a(0,0)),&lda,&(s[0]),&(u(0,0)),&ldu,&(vt(0,0)), &ldvt,&(work[0]), &lwork,&(iwork[0]), &info);
-
+		if (info!=0) {
+			std::string str(__FILE__);
+			str += " " + ttos(__LINE__);
+			str += " PsimagLite::svd(...) failed with info=" + ttos(info) + "\n";
+			throw std::runtime_error(str.c_str());
+		}
 		a = u;
 	}
 
@@ -629,7 +640,7 @@ namespace PsimagLite {
 	template<class T>
 	void transposeConjugate(Matrix<T>& m2,const Matrix<T>& m)
 	{
-		m2.resize(m.n_row(),m.n_col());
+		m2.resize(m.n_col(),m.n_row());
 		for (size_t i=0;i<m2.n_row();i++)
 			for (size_t j=0;j<m2.n_col();j++) 
 				m2(i,j)=std::conj(m(j,i));
