@@ -107,7 +107,7 @@ namespace Dmrg {
 	>
 	class DynamicTargetting  {
 
-		static size_t const FAST_COMPUTATION = 1;
+		static size_t const FAST_COMPUTATION = 0;
 
 	public:
 
@@ -169,8 +169,10 @@ namespace Dmrg {
 		{
 			if (!wft.isEnabled())
 				throw std::runtime_error(" DynamicTargetting needs an enabled wft\n");
-			paramsForSolver_.steps = model_.params().lanczosSteps;
-			paramsForSolver_.tolerance = model_.params().lanczosEps;
+			/* paramsForSolver_.steps = model_.params().lanczosSteps; */
+			/* paramsForSolver_.tolerance = model_.params().lanczosEps; */
+			paramsForSolver_.steps = tstStruct_.steps;
+			paramsForSolver_.tolerance = tstStruct_.eps;
 			paramsForSolver_.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 		}
 

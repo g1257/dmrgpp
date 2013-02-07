@@ -172,7 +172,7 @@ namespace Dmrg {
 
 		RealType weight(size_t i) const
 		{
-			assert(commonTargetting_.allStages(DISABLED,stage_));
+			/* assert(commonTargetting_.allStages(DISABLED,stage_)); */
 			return weight_[i];
 		}
 
@@ -246,14 +246,20 @@ namespace Dmrg {
 				if (tstStruct_.concatenation==PRODUCT) {
 					phiOld = phiNew;
 				} else {
+				  if(i==0){
+					vectorSum = phiNew;
+				  } else {
+				    if(tstStruct_.sites[i]==site)
 					vectorSum += phiNew;
+				  }
 				}
 			}
 			if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 
+			if (!commonTargetting_.noStageIs(DISABLED,stage_))
+			  Eg_ = Eg;
 			if (count==0) return;
 
-			if (!commonTargetting_.noStageIs(DISABLED,stage_)) Eg_ = Eg;
 			calcDynVectors(phiNew,direction);
 
 			//cocoon(direction,block); // in-situ
