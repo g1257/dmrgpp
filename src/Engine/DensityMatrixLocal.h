@@ -76,6 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BlockMatrix.h"
 #include "DensityMatrixBase.h"
 #include "ParallelDensityMatrix.h"
+#include "NoPthreads.h"
 
 namespace Dmrg {
 	//!
@@ -173,8 +174,8 @@ namespace Dmrg {
 				// target all other states if any:
 				if (target.size()>0) {
 
-					PTHREADS_NAME<ParallelDensityMatrixType> threadedDm;
-					PTHREADS_NAME<ParallelDensityMatrixType>::setThreads(target.model().params().nthreads);
+					PsimagLite::NoPthreads<ParallelDensityMatrixType> threadedDm;
+					PsimagLite::NoPthreads<ParallelDensityMatrixType>::setThreads(target.model().params().nthreads);
 					if (threadedDm.name()=="pthreads") {
 						std::ostringstream msg;
 						msg<<"Threading with "<<threadedDm.threads();
