@@ -135,8 +135,8 @@ namespace Dmrg {
 				size_t rows,
 				size_t cols)
 		{
-			size_t threadId = 0;
-			initCache(O1,rows,cols,fermionicSign,threadId);
+//			size_t threadId = 0;
+//			initCache(O1,rows,cols,fermionicSign,threadId);
 
 			typedef std::pair<size_t,size_t> PairType;
 
@@ -185,11 +185,11 @@ namespace Dmrg {
 
 	private:
 
-		void initCache(const MatrixType& O1,size_t n1, size_t nf,int fermionicSign,size_t threadId)
-		{
-			clearCache(n1, nf);
-			precomputeGrowth(O1,fermionicSign,n1,nf-1,threadId);
-		}
+//		void initCache(const MatrixType& O1,size_t n1, size_t nf,int fermionicSign,size_t threadId)
+//		{
+//			clearCache(n1, nf);
+//			precomputeGrowth(O1,fermionicSign,n1,nf-1,threadId);
+//		}
 
 		MatrixType multiplyTranspose(
 				const MatrixType& O1,
@@ -272,63 +272,63 @@ namespace Dmrg {
 			return ret;
 		}
 		
-		void clearCache(size_t  ns,size_t nf)
-		{
-			growCached_.clear();
-			grownOperators_.clear();
-			std::vector<MatrixType> v;
-			for (size_t i=0;i<nf;i++) {
-				MatrixType tmp(1,1);
-				v.push_back(tmp);
-			}
-			for (size_t i=0;i<ns;i++) 
-				grownOperators_.push_back(v);
-		}
+//		void clearCache(size_t  ns,size_t nf)
+//		{
+//			growCached_.clear();
+//			grownOperators_.clear();
+//			std::vector<MatrixType> v;
+//			for (size_t i=0;i<nf;i++) {
+//				MatrixType tmp(1,1);
+//				v.push_back(tmp);
+//			}
+//			for (size_t i=0;i<ns;i++)
+//				grownOperators_.push_back(v);
+//		}
 
-		//! i can be zero here!!
-		const MatrixType* grow(
-				const MatrixType& Osrc,
-				size_t i,
-				int fermionicSign,
-				size_t ns,
-				size_t isDiagonal) const
-		{
-			if (isDiagonal==DIAGONAL) {
-				static MatrixType Ox;
-				skeleton_.growDirectly(Ox,Osrc,i,fermionicSign,ns);
-				return &Ox;
-			}	
-			int nt=i-1;
-			if (nt<0) nt=0;
-			return &(grownOperators_[i][ns-nt-1]);
-		}
+//		//! i can be zero here!!
+//		const MatrixType* grow(
+//				const MatrixType& Osrc,
+//				size_t i,
+//				int fermionicSign,
+//				size_t ns,
+//				size_t isDiagonal) const
+//		{
+//			if (isDiagonal==DIAGONAL) {
+//				static MatrixType Ox;
+//				skeleton_.growDirectly(Ox,Osrc,i,fermionicSign,ns);
+//				return &Ox;
+//			}
+//			int nt=i-1;
+//			if (nt<0) nt=0;
+//			return &(grownOperators_[i][ns-nt-1]);
+//		}
 
-		//! i can be zero here!!
-		void precomputeGrowth(
-				const MatrixType& Osrc,
-				int fermionicSign,
-				size_t ns,
-				size_t nfinal,
-			size_t threadId)
-		{
-			for (size_t i=0;i<ns;i++) {
-				int nt=i-1;
-				if (nt<0) nt=0;
-				MatrixType Oinc = Osrc;
-				if (verbose_)
-					std::cerr<<"Precomputing "<<i<<" out of "<<(ns-1)<<"\n";
-				for (size_t s=nt+1;s<nfinal;s++) {
-					if (verbose_) {
-						std::cerr<<"\tPrecomputing "<<s;
-						std::cerr<<" out of "<<(nfinal-1)<<"\n";
-					}
-					growRecursive(grownOperators_[i][s-nt-1],Oinc,i,
-							fermionicSign,s-1,threadId);
-					Oinc = grownOperators_[i][s-nt-1];
-				}
-			}
-			if (verbose_) std::cerr<<"precomputeGrowth done\n";
-		}
+//		//! i can be zero here!!
+//		void precomputeGrowth(
+//				const MatrixType& Osrc,
+//				int fermionicSign,
+//				size_t ns,
+//				size_t nfinal,
+//			size_t threadId)
+//		{
+//			for (size_t i=0;i<ns;i++) {
+//				int nt=i-1;
+//				if (nt<0) nt=0;
+//				MatrixType Oinc = Osrc;
+//				if (verbose_)
+//					std::cerr<<"Precomputing "<<i<<" out of "<<(ns-1)<<"\n";
+//				for (size_t s=nt+1;s<nfinal;s++) {
+//					if (verbose_) {
+//						std::cerr<<"\tPrecomputing "<<s;
+//						std::cerr<<" out of "<<(nfinal-1)<<"\n";
+//					}
+//					growRecursive(grownOperators_[i][s-nt-1],Oinc,i,
+//							fermionicSign,s-1,threadId);
+//					Oinc = grownOperators_[i][s-nt-1];
+//				}
+//			}
+//			if (verbose_) std::cerr<<"precomputeGrowth done\n";
+//		}
 
 		//! i can be zero here!!
 		void growRecursive(MatrixType& Odest,
@@ -356,8 +356,8 @@ namespace Dmrg {
 		CorrelationsSkeletonType& skeleton_;
 		ConcurrencyType& concurrency_;
 		bool verbose_;
-		std::vector<size_t> growCached_;
-		std::vector<std::vector<MatrixType> > grownOperators_;
+//		std::vector<size_t> growCached_;
+//		std::vector<std::vector<MatrixType> > grownOperators_;
 		
 	};  //class TwoPointCorrelations
 } // namespace Dmrg
