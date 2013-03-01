@@ -131,7 +131,7 @@ namespace Dmrg {
 		                size_t site,
 		                size_t direction)
 		{
-			if (targetParams_.rotateBasis==2)
+			if (targetParams_.collapse.find("every")!=std::string::npos)
 				setCollapseBasis();
 			internalAction(c,eToTheBetaH,site,direction,false);
 			size_t nk = mettsStochastics_.hilbertSize(site);
@@ -386,7 +386,7 @@ namespace Dmrg {
 				p[alpha] = x*x;
 			}
 			if (fabs(sum-1.0)>1e-3)
-				throw std::runtime_error("probability sum\n");
+				std::cerr<<"probability sum="<<sum<<"\n";
 			assert(fabs(sum)>1e-6);
 			for(size_t alpha=0;alpha<p.size();alpha++) p[alpha] /= sum;
 		}
@@ -408,13 +408,25 @@ namespace Dmrg {
 				for (size_t j=0;j<nk;j++)
 					collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
 
-			if (targetParams_.rotateBasis>0)
+			if (targetParams_.collapse.find("random")!=std::string::npos)
 				rotationNd(collapseBasis_,nk);
+			if (targetParams_.collapse.find("particle")!=std::string::npos)
+				particleCollapse(collapseBasis_);
 			std::cout<<"Collapse basis:\n";
 			std::cout<<collapseBasis_;
 
 		}
 
+		void particleCollapse(MatrixType& m) const
+		{
+			if (m.n_row()!=4 || m.n_col()!=4)
+				throw std::runtime_error("particleCollapse: only for 4 states\n");
+
+			MatrixType m2(m.n_row(),m.n_col());
+			RealType theta = M_PI*rng_();
+			rotation2d(m2,1,2,theta);
+			m=m2;
+		}
 //		void rotation4d(MatrixType& m) const
 //		{
 //			assert(m.n_row()==4 && m.n_col()==4);
