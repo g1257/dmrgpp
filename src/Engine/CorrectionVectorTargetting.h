@@ -435,8 +435,8 @@ namespace Dmrg {
 			LanczosMatrixType h(&model_,&modelHelper);
 
 			ParametersForSolverType params;
-			params.steps = model_.params().lanczosSteps;
-			params.tolerance = model_.params().lanczosEps;
+			params.steps = tstStruct_.steps;
+			params.tolerance = tstStruct_.eps;
 			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 			
 			LanczosSolverType lanczosSolver(h,params,&V);

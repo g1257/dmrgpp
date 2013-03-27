@@ -110,10 +110,14 @@ namespace Dmrg {
 //			io.rewind();
 			this->concatenation = SUM;
 			io.readline(type,"DynamicDmrgType=");
+			io.readline(steps,"DynamicDmrgSteps=");
+			io.readline(eps,"DynamicDmrgEps=");
 			io.readline(omega,"CorrectionVectorOmega=");
 			io.readline(eta,"CorrectionVectorEta=");
 		  }
 		size_t type;
+		size_t steps;
+		RealType eps;
 		RealType omega;
 		RealType eta;
 	}; // class CorrectionVectorParams
@@ -127,6 +131,8 @@ namespace Dmrg {
 			tp = t;
 		os<<tp;
 		os<<"DynamicDmrgType="<<t.type<<"\n";
+		os<<"DynamicDmrgSteps="<<t.steps<<"\n";
+		os<<"DynamicDmrgEps="<<t.eps<<"\n";
 		os<<"CorrectionVectorOmega="<<t.omega<<"\n";
 		os<<"CorrectionVectorEta="<<t.eta<<"\n";
 		return os;
