@@ -304,11 +304,13 @@ namespace Dmrg {
 		{
 			Su2RelatedType su2Related1;
 			printMarker(threadId);
-			std::cout<<"#Using Matrix A:\n";
-			for (size_t i=0;i<A.row();i++) {
-				for (size_t j=0;j<A.col();j++)
-					std::cout<<A(i,j)<<" ";
-				std::cout<<"\n";
+			if (A.row()<=4) {
+				std::cout<<"#Using Matrix A:\n";
+				for (size_t i=0;i<A.row();i++) {
+					for (size_t j=0;j<A.col();j++)
+						std::cout<<A(i,j)<<" ";
+					std::cout<<"\n";
+				}
 			}
 			OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
 			std::cout<<"site "<<label<<"(gs) ";
