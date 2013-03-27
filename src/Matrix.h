@@ -82,11 +82,14 @@ namespace PsimagLite {
 
 		const T& operator()(size_t i,size_t j) const
 		{
+			assert(i<nrow_ && j<ncol_);
+			assert(i+j*nrow_<data_.size());
 			return data_[i+j*nrow_];
 		}
 
 		T& operator()(size_t i,size_t j)
 		{
+			assert(i<nrow_ && j<ncol_);
 			assert(i+j*nrow_<data_.size());
 			return data_[i+j*nrow_];
 		}
@@ -476,11 +479,11 @@ namespace PsimagLite {
 
 	}
 
-	void svd(Matrix<double> &a,std::vector<double>& s,char jobz)
+	void svd(char jobz,Matrix<double> &a,std::vector<double>& s,Matrix<double>& vt)
 	{
-		std::cerr<<"PsimagLite::svd(...) is experimental\n";
 		int m = a.n_row();
 		int n = a.n_col();
+		std::cerr<<"Trying PsimagLite::svd(...) "<<m<<"x"<<n<<"\n";
 		int lda = m;
 		int min = (m<n) ? m : n;
 
@@ -489,11 +492,12 @@ namespace PsimagLite {
 		int ucol = m;
 		Matrix<double> u(ldu,ucol);
 		int ldvt = n;
-		Matrix<double> vt(ldvt,n);
+		//Matrix<double> vt(ldvt,n);
+		vt.resize(ldvt,n);
 
-		std::vector<double> work(100);
+		std::vector<double> work(100,0);
 		int info = 0;
-		std::vector<int> iwork(8*min);
+		std::vector<int> iwork(8*min,0);
 
 		// query optimal work
 		int lwork = -1;

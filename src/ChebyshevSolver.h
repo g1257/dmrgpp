@@ -114,6 +114,7 @@ namespace PsimagLite {
 
 	public:
 
+		typedef SolverParametersType ParametersSolverType;
 		typedef MatrixType LanczosMatrixType;
 		typedef std::vector<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;

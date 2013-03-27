@@ -101,6 +101,7 @@ namespace PsimagLite {
 
 		size_t pack(size_t x0,size_t x1,const std::vector<size_t>& permutationInverse) const
 		{
+			assert(x0+n_*x1<permutationInverse.size());
 			return permutationInverse[x0+n_*x1];
 		}
 
