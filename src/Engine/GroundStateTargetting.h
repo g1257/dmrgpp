@@ -111,7 +111,7 @@ namespace Dmrg {
 			typedef typename ModelType::RealType RealType;
 			typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 			typedef std::vector<RealType> VectorType;
-		typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
+			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 			typedef typename ModelType::ModelHelperType ModelHelperType;
 			typedef typename ModelHelperType::LeftRightSuperType

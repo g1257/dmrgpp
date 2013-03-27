@@ -115,6 +115,7 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
+		typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,VectorType> ApplyOperatorType;
 
@@ -266,6 +267,32 @@ namespace Dmrg {
 			}
 
 			std::cout<<"-------------&*&*&* In-situ measurements end\n";
+		}
+
+		void computeCorrection(VectorWithOffsetType& v,
+							   size_t direction,
+							   const BlockType& block1,
+							   const VectorWithOffsetType& psi) const
+		{
+			// operators in the one-site basis:
+			std::vector<OperatorType> creationMatrix;
+			SparseMatrixType hmatrix;
+			BasisDataType q;
+
+			RealType time = 0;
+			model_.setNaturalBasis(creationMatrix,hmatrix,q,block1,time);
+			std::vector<size_t> electronsOneSite(q.electronsUp.size());
+			for (size_t i=0;i<electronsOneSite.size();i++)
+				electronsOneSite[i] = q.electronsUp[i] + q.electronsDown[i];
+
+			FermionSign fs(lrs_.left(),electronsOneSite);
+			for (size_t j=0;j<creationMatrix.size();j++) {
+				VectorWithOffsetType phiTemp;
+				applyOpLocal_(phiTemp,psi,creationMatrix[j],
+							  fs,direction);
+				if (j==0) v = phiTemp;
+				else v += phiTemp;
+			}
 		}
 
 	private:

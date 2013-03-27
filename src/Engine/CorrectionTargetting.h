@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <string>
 #include "CorrectionParams.h"
-#include "ApplyOperatorLocal.h"
+#include "CommonTargetting.h"
 #include <stdexcept>
 
 namespace Dmrg {
@@ -109,12 +109,12 @@ namespace Dmrg {
 			typedef typename ModelType::RealType RealType;
 			typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 			typedef std::vector<RealType> VectorType;
-			typedef LanczosSolverTemplate<RealType,InternalProductType,VectorType> LanczosSolverType;
+			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
+			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 			typedef typename ModelType::ModelHelperType ModelHelperType;
 			typedef typename ModelHelperType::LeftRightSuperType
 				LeftRightSuperType;
 			typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-			typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
 			typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			//typedef psimag::Matrix<RealType> MatrixType;
 			//typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
@@ -124,8 +124,10 @@ namespace Dmrg {
 			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 			typedef VectorType TargetVectorType;
 			typedef CorrectionParams<ModelType> TargettingParamsType;
-			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
+			typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
+			CommonTargettingType;
+			typedef typename CommonTargettingType::ApplyOperatorType ApplyOperatorType;
 			
 			enum {DISABLED,ENABLED};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -144,7 +146,8 @@ namespace Dmrg {
 			  progress_("CorrectionTargetting",0),
 			  stage_(DISABLED),
 			  targetVectors_(1),
-			  applyOpLocal_(lrs)
+			  applyOpLocal_(lrs),
+			  commonTargetting_(lrs,model,correctionStruct)
 			{
 			}
 			
@@ -200,28 +203,12 @@ namespace Dmrg {
 			            const BlockType& block2,
 			            size_t loopNumber)
 			{
+				cocoon(block1,direction);
+
 				if (direction==INFINITE) return;
 				stage_ = ENABLED;
 
-				// operators in the one-site basis:
-				std::vector<OperatorType> creationMatrix;
-				SparseMatrixType hmatrix;
-				BasisDataType q;
-
-				RealType time = 0;
-				model_.setNaturalBasis(creationMatrix,hmatrix,q,block1,time);
-				std::vector<size_t> electronsOneSite(q.electronsUp.size());
-				for (size_t i=0;i<electronsOneSite.size();i++)
-					electronsOneSite[i] = q.electronsUp[i] + q.electronsDown[i];
-
-				FermionSign fs(lrs_.left(),electronsOneSite);
-				for (size_t j=0;j<creationMatrix.size();j++) {
-					VectorWithOffsetType phiTemp;
-					applyOpLocal_(phiTemp,psi_,creationMatrix[j],
-							fs,direction);
-					if (j==0) targetVectors_[0] = phiTemp;
-					else targetVectors_[0] += phiTemp;
-				}
+				commonTargetting_.computeCorrection(targetVectors_[0],direction,block1,psi_);
 			}
 			
 			const LeftRightSuperType& leftRightSuper() const
@@ -274,6 +261,24 @@ namespace Dmrg {
 			}
 
 		private:
+
+			void cocoon(const BlockType& block1,size_t direction) const
+			{
+				if (model_.params().insitu=="") return;
+
+				if (BasisType::useSu2Symmetry()) {
+					commonTargetting_.noCocoon("not when SU(2) symmetry is in use");
+					return;
+				}
+
+				try {
+					assert(block1.size()>0);
+					commonTargetting_.cocoon(direction,block1[0],psi_);
+				} catch (std::exception& e) {
+					commonTargetting_.noCocoon("unsupported by the model");
+				}
+			}
+
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
 			const TargettingParamsType& correctionStruct_;
@@ -283,6 +288,7 @@ namespace Dmrg {
 			VectorWithOffsetType psi_;
 			std::vector<VectorWithOffsetType> targetVectors_;
 			ApplyOperatorType applyOpLocal_;
+			CommonTargettingType commonTargetting_;
 	};     //class CorrectionTargetting
 
 	template<
