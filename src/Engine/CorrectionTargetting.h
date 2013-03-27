@@ -162,7 +162,7 @@ namespace Dmrg {
 			{
 				if (stage_ == DISABLED) throw std::runtime_error(
 					"CorrectionTargetting: What are you doing here?\n");
-				return correctionStruct_.a;;
+				return correctionStruct_.correctionA;
 			}
 			
 			RealType gsWeight() const
@@ -252,7 +252,7 @@ namespace Dmrg {
 			void print(std::ostream& os) const
 			{
 				os<<"CorrectionWeightGroundState=1\n";
-				os<<"CorrectionWeightCorrection="<<correctionStruct_.a<<"\n";
+				os<<"CorrectionWeightCorrection="<<correctionStruct_.correctionA<<"\n";
 			}
 
 			void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const

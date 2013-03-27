@@ -85,13 +85,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CORRECTION_V_PARAMS_H
 
 #include "TargetParamsCommon.h"
+#include "CorrectionParams.h"
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
 	template<typename ModelType>
-	class CorrectionVectorParams : public TargetParamsCommon<ModelType> {
+	class CorrectionVectorParams : public TargetParamsCommon<ModelType>, public CorrectionParams<ModelType> {
 	public:
 		typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
+		typedef CorrectionParams<ModelType> CorrectionParamsType;
 		typedef typename ModelType::RealType RealType;
 			
 		typedef typename ModelType::OperatorType OperatorType;
@@ -105,7 +107,7 @@ namespace Dmrg {
 
 		template<typename IoInputter>
 		CorrectionVectorParams(IoInputter& io,const ModelType& model)
-		: TargetParamsCommonType(io,model)
+		: TargetParamsCommonType(io,model),CorrectionParamsType(io,model)
 		  {
 //			io.rewind();
 			this->concatenation = SUM;

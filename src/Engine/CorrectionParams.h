@@ -95,13 +95,13 @@ namespace Dmrg {
 		CorrectionParams(IoInputter& io,const ModelType& model)
 		{
 //			io.rewind();
-			io.readline(a,"CorrectionA=");
+			io.readline(correctionA,"CorrectionA=");
 // 			typename ModelType::HilbertBasisType basis;
 // 			std::vector<size_t> q;
 // 			model.setNaturalBasis(basis,q,1);
 // 			model.findElectrons(electrons,basis);
 		}
-		RealType a;
+		RealType correctionA;
 // 		std::vector<size_t> electrons;
 	}; // class CorrectionParams
 	
@@ -110,7 +110,7 @@ namespace Dmrg {
 	operator<<(std::ostream& os,const CorrectionParams<ModelType>& t)
 	{
 		os<<"#TargetParams.type=correction\n";
-		os<<"#TargetCorrection.a="<<t.a<<"\n";
+		os<<"#TargetCorrection.correctionA="<<t.correctionA<<"\n";
 		return os;
 	}
 } // namespace Dmrg 

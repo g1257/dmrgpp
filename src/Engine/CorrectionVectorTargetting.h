@@ -138,7 +138,7 @@ namespace Dmrg {
 		         CorrectionVectorFunctionType;
 		typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
 				 CommonTargettingType;
-				 
+
 		enum {DISABLED,OPERATOR,CONVERGING};
 		enum {	EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 				EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -161,8 +161,9 @@ namespace Dmrg {
 		 progress_("CorrectionVectorTargetting",0),
 		 applyOpLocal_(lrs),
 		 gsWeight_(1.0),
-		 targetVectors_(3),
-		 commonTargetting_(lrs,model,tstStruct)
+		 targetVectors_(4),
+		 commonTargetting_(lrs,model,tstStruct),
+		 correctionEnabled_(false)
 		{
 			if (!wft.isEnabled()) throw std::runtime_error(" CorrectionVectorTargetting "
 					"needs an enabled wft\n");
@@ -178,7 +179,7 @@ namespace Dmrg {
 
 		RealType gsWeight() const
 		{
-			if (commonTargetting_.allStages(DISABLED,stage_)) return 1.0;
+			if (!correctionEnabled_) return 1.0;
 			return gsWeight_;
 		}
 		
@@ -200,7 +201,8 @@ namespace Dmrg {
 		
 		size_t size() const
 		{
-			if (commonTargetting_.allStages(DISABLED,stage_)) return 0;
+			if (!correctionEnabled_) return 0;
+			if (commonTargetting_.allStages(DISABLED,stage_)) return 1;
 			return targetVectors_.size();
 		}
 		
@@ -258,6 +260,13 @@ namespace Dmrg {
 
 			if (!commonTargetting_.noStageIs(DISABLED,stage_))
 			  Eg_ = Eg;
+
+			if (direction!=INFINITE) {
+				correctionEnabled_=true;
+				std::vector<size_t> block1(1,site);
+				addCorrection(direction,block1);
+			}
+
 			if (count==0) return;
 
 			calcDynVectors(phiNew,direction);
@@ -373,7 +382,7 @@ namespace Dmrg {
 			} else if (stage_[i]== CONVERGING) {
 				if (site==0 || site==numberOfSites -1)  {
 					// don't wft since we did it before
-					phiNew = targetVectors_[0];
+					phiNew = targetVectors_[1];
 					return;
 				}
 				std::ostringstream msg;
@@ -387,7 +396,7 @@ namespace Dmrg {
 
 				// OK, now that we got the partition number right, let's wft:
 				size_t nk = model_.hilbertSize(site);
-				wft_.setInitialVector(phiNew,targetVectors_[0],lrs_,nk);
+				wft_.setInitialVector(phiNew,targetVectors_[1],lrs_,nk);
 				phiNew.collapseSectors();
 				
 			} else {
@@ -400,7 +409,7 @@ namespace Dmrg {
 				const VectorWithOffsetType& phi,
 				size_t systemOrEnviron)
 		{
-			for (size_t i=0;i<targetVectors_.size();i++)
+			for (size_t i=1;i<targetVectors_.size();i++)
 				targetVectors_[i] = phi;
 
 			for (size_t i=0;i<phi.sectors();i++) {
@@ -409,14 +418,14 @@ namespace Dmrg {
 				phi.extract(sv,i0);
 				// g.s. is included separately
 				// set Aq
-				targetVectors_[0].setDataInSector(sv,i0);
+				targetVectors_[1].setDataInSector(sv,i0);
 				// set xi
 				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
 				VectorType xi(sv.size(),0),xr(sv.size(),0);
 				computeXiAndXr(xi,xr,sv,p);
-				targetVectors_[1].setDataInSector(xi,i0);
+				targetVectors_[2].setDataInSector(xi,i0);
 				//set xr
-				targetVectors_[2].setDataInSector(xr,i0);
+				targetVectors_[3].setDataInSector(xr,i0);
 				DenseMatrixType V;
 				getLanczosVectors(V,sv,p);
 			}
@@ -481,19 +490,19 @@ namespace Dmrg {
 		{
 			RealType sum  = 0;
 			weight_.resize(targetVectors_.size());
-			for (size_t r=0;r<weight_.size();r++) {
+			for (size_t r=1;r<weight_.size();r++) {
 				weight_[r] =0;
-				for (size_t i=0;i<targetVectors_[0].sectors();i++) {
+				for (size_t i=0;i<targetVectors_[1].sectors();i++) {
 					VectorType v,w;
-					size_t i0 = targetVectors_[0].sector(i);
-					targetVectors_[0].extract(v,i0);
+					size_t i0 = targetVectors_[1].sector(i);
+					targetVectors_[1].extract(v,i0);
 					targetVectors_[r].extract(w,i0);
 					weight_[r] += dynWeightOf(v,w);
 				}
 				sum += weight_[r];
 			}
 			for (size_t r=0;r<weight_.size();r++) weight_[r] *= 0.5/sum;
-			gsWeight_ = 0.5;
+			gsWeight_ = 0.5-weight_[0];
 
 		}
 
@@ -507,6 +516,14 @@ namespace Dmrg {
 			return sum;
 		}
 
+		void addCorrection(size_t direction,const BlockType& block1)
+		{
+			commonTargetting_.computeCorrection(targetVectors_[0],direction,block1,psi_);
+			weight_.resize(1);
+			weight_[0]=tstStruct_.correctionA;
+			gsWeight_ = 1.0-weight_[0];
+		}
+
 		std::vector<size_t> stage_;
 		VectorWithOffsetType psi_;
 		const LeftRightSuperType& lrs_;
@@ -518,6 +535,7 @@ namespace Dmrg {
 		RealType gsWeight_;
 		std::vector<VectorWithOffsetType> targetVectors_;
 		CommonTargettingType commonTargetting_;
+		bool correctionEnabled_;
 		std::vector<RealType> weight_;
 		TridiagonalMatrixType ab_;
 		RealType Eg_;
