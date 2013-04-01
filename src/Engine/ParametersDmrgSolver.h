@@ -320,17 +320,17 @@ namespace Dmrg {
 			size_t repeat = 0;
 
 			try {
-				io.read(repeat,"RepeatFiniteLoopsTimes=");
+				io.readline(repeat,"RepeatFiniteLoopsTimes=");
 			}  catch (std::exception& e) {}
 
 			size_t fromFl = 0;
 			try {
-				io.read(fromFl,"RepeatFiniteLoopsFrom=");
+				io.readline(fromFl,"RepeatFiniteLoopsFrom=");
 			}  catch (std::exception& e) {}
 
 			size_t upToFl = finiteLoop.size()-1;
 			try {
-				io.read(upToFl,"RepeatFiniteLoopsTo=");
+				io.readline(upToFl,"RepeatFiniteLoopsTo=");
 			}  catch (std::exception& e) {}
 
 			if (upToFl>=finiteLoop.size()) {
