@@ -593,9 +593,9 @@ namespace PsimagLite {
 	template<typename T>
 	bool isZero(const PsimagLite::Matrix<T>& m)
 	{
-		bool eps=1e-5;
+		T eps=1e-5;
 		for (size_t i=0;i<m.n_row();i++)
-			for (size_t j=0;j<m.n_row();j++)
+			for (size_t j=0;j<m.n_col();j++)
 				if (fabs(m(i,j))>eps) return false;
 		return true;
 	}

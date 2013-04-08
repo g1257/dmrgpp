@@ -317,21 +317,12 @@ namespace PsimagLite {
 			BinarySaveLoad::save(fd,values_);
 		}
 
-		/*bool operator==(const CrsMatrix<T>& B) const
+		PsimagLite::Matrix<T> toDense() const
 		{
-			if (!utils::vectorEqual(values_,B.values_)) return false;
-			if (!utils::vectorEqual(colind_,B.colind_)) return false;
-			if (!utils::vectorEqual(rowptr_,B.rowptr_)) return false;
-			return true;
-		}*/
-
-//		void set(const std::vector<int> &rowptr,const std::vector<int>& colind,const std::vector<T>& values)
-//		{
-//			rowptr_=rowptr;
-//			colind_=colind;
-//			values_=values;
-//			row=rowptr.size()-1;
-//		}
+			PsimagLite::Matrix<T> m;
+			crsMatrixToFullMatrix(m,*this);
+			return m;
+		}
 
 		void checkValidity() const
 		{
