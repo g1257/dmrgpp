@@ -310,6 +310,19 @@ namespace Dmrg {
 			return (what==ProgramGlobals::SYSTEM) ? dmrgWaveStruct_.ws : dmrgWaveStruct_.we;
 		}
 
+		const SparseMatrixType& stackTransform(size_t what) const
+		{
+			if (what==ProgramGlobals::SYSTEM) {
+				if (wsStack_.size()==0) return dmrgWaveStruct_.ws;
+				return wsStack_.top();
+			} else {
+				if (weStack_.size()==0) return dmrgWaveStruct_.we;
+				return weStack_.top();
+			}
+		}
+
+		const LeftRightSuperType& lrs() const { return dmrgWaveStruct_.lrs; }
+
 		bool isEnabled() const { return isEnabled_; }
 		
 	private:

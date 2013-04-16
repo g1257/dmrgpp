@@ -281,9 +281,8 @@ namespace Dmrg {
 				     std::vector<size_t>& q,
 				     const std::vector<size_t>& block) const
 		{
-			assert(block.size()==1);
 			HilbertState a=0;
-			int sitesTimesDof=DEGREES_OF_FREEDOM;
+			int sitesTimesDof=DEGREES_OF_FREEDOM*block.size();
 			HilbertState total = (1<<sitesTimesDof);
 
 			HilbertBasisType  basisTmp;
@@ -302,6 +301,85 @@ namespace Dmrg {
 		void print(std::ostream& os) const
 		{
 			os<<modelParameters_;
+		}
+
+		//! Full hamiltonian from creation matrices cm
+		void calcHamiltonian(SparseMatrixType &hmatrix,
+							 std::vector<OperatorType> const &cm,
+							 Block const &block,
+							 RealType time,
+							 RealType factorForDiagonals=1.0)  const
+		{
+			size_t n=block.size();
+			//int type,sigma;
+			SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
+
+			hmatrix.makeDiagonal(cm[0].data.row());
+			size_t linSize = dmrgGeometry_.numberOfSites();
+
+			for (size_t i=0;i<n;i++) {
+				//! hopping part
+				for (size_t j=0;j<n;j++) {
+					for (size_t term=0;term<dmrgGeometry_.terms();term++) {
+						typename DmrgGeometryType::AdditionalDataType additional;
+						dmrgGeometry_.fillAdditionalData(additional,term,block[i],block[j]);
+						size_t dofsTotal = LinkProductType::dofs(term,additional);
+						for (size_t dofs=0;dofs<dofsTotal;dofs++) {
+							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs,additional);
+							RealType tmp = dmrgGeometry_(block[i],edofs.first,block[j],edofs.second,term);
+
+							if (i==j || tmp==0.0) continue;
+
+							size_t sigma = dofs;
+							transposeConjugate(tmpMatrix2,cm[sigma+j*offset_].data);
+							multiply(tmpMatrix,cm[sigma+i*offset_].data,tmpMatrix2);
+							multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
+							hmatrix += tmpMatrix2;
+						}
+					}
+				}
+				// onsite U hubbard
+				//n_i up
+				size_t sigma =0; // up sector
+				transposeConjugate(tmpMatrix,cm[sigma+i*offset_].data);
+				multiply(niup,tmpMatrix,cm[sigma+i*offset_].data);
+				//n_i down
+				sigma =1; // down sector
+				transposeConjugate(tmpMatrix,cm[sigma+i*offset_].data);
+				multiply(nidown,tmpMatrix,cm[sigma+i*offset_].data);
+
+				multiply(tmpMatrix,niup,nidown);
+				//type = dmrgGeometry_.calcConnectorType(block[i],block[i]);
+				RealType tmp = modelParameters_.hubbardU[block[i]]*factorForDiagonals; //computeHubbardUValue(type,block[i],smax,emin);
+				multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
+
+				hmatrix += tmpMatrix2;
+
+				// V_iup term
+				tmp = modelParameters_.potentialV[block[i]+0*linSize]*factorForDiagonals;
+				multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
+				hmatrix += tmpMatrix;
+
+				// V_idown term
+				tmp = modelParameters_.potentialV[block[i]+1*linSize]*factorForDiagonals;
+				multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
+				hmatrix += tmpMatrix;
+
+
+				if (modelParameters_.potentialT.size()==0) continue;
+
+				// VT_iup term
+				tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
+				tmp *= cos(time*modelParameters_.omega);
+				multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
+				hmatrix += tmpMatrix;
+
+				// VT_idown term
+				tmp = modelParameters_.potentialT[block[i]]*factorForDiagonals;
+				tmp *= cos(time*modelParameters_.omega);
+				multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
+				hmatrix += tmpMatrix;
+			}
 		}
 
 	private:
@@ -455,85 +533,6 @@ namespace Dmrg {
 			PairType jm= spinSquaredHelper_.getJmPair(sz);
 
 			return jm;
-		}
-
-		//! Full hamiltonian from creation matrices cm
-		void calcHamiltonian(SparseMatrixType &hmatrix,
-				     std::vector<OperatorType> const &cm,
-				     Block const &block,
-				     RealType time) const
-		{
-			size_t n=block.size();
-			//int type,sigma;
-			SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
-			
-			hmatrix.makeDiagonal(cm[0].data.row());
-			size_t linSize = dmrgGeometry_.numberOfSites();
-			assert(block.size()==1);
-			
-			for (size_t i=0;i<n;i++) {
-				//! hopping part
-				for (size_t j=0;j<n;j++) {
-					for (size_t term=0;term<dmrgGeometry_.terms();term++) {
-						typename DmrgGeometryType::AdditionalDataType additional;
-						dmrgGeometry_.fillAdditionalData(additional,term,block[i],block[j]);
-						size_t dofsTotal = LinkProductType::dofs(term,additional);
-						for (size_t dofs=0;dofs<dofsTotal;dofs++) {
-							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs,additional);
-							RealType tmp = dmrgGeometry_(block[i],edofs.first,block[j],edofs.second,term);
-						
-							if (i==j || tmp==0.0) continue;
-				
-							size_t sigma = dofs;
-							transposeConjugate(tmpMatrix2,cm[sigma+j*offset_].data);
-							multiply(tmpMatrix,cm[sigma+i*offset_].data,tmpMatrix2);
-							multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
-							hmatrix += tmpMatrix2;
-						}
-					}
-				}
-				// onsite U hubbard 
-				//n_i up
-				size_t sigma =0; // up sector
-				transposeConjugate(tmpMatrix,cm[sigma+i*offset_].data);
-				multiply(niup,tmpMatrix,cm[sigma+i*offset_].data);
-				//n_i down
-				sigma =1; // down sector
-				transposeConjugate(tmpMatrix,cm[sigma+i*offset_].data);
-				multiply(nidown,tmpMatrix,cm[sigma+i*offset_].data);
-				 
-				multiply(tmpMatrix,niup,nidown);
-				//type = dmrgGeometry_.calcConnectorType(block[i],block[i]);
-				RealType tmp = modelParameters_.hubbardU[block[i]]; //computeHubbardUValue(type,block[i],smax,emin);
-				multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
-
-				hmatrix += tmpMatrix2;
-
-				// V_iup term
-				tmp = modelParameters_.potentialV[block[i]+0*linSize];
-				multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
-				hmatrix += tmpMatrix;
-
-				// V_idown term
-				tmp = modelParameters_.potentialV[block[i]+1*linSize];
-				multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
-				hmatrix += tmpMatrix;
-
-
-				if (modelParameters_.potentialT.size()==0) return;
-
-				// VT_iup term
-				tmp = modelParameters_.potentialT[block[i]];
-				tmp *= cos(time*modelParameters_.omega);
-				multiplyScalar(tmpMatrix,niup,static_cast<SparseElementType>(tmp));
-				hmatrix += tmpMatrix;
-
-				// VT_idown term
-				tmp = modelParameters_.potentialT[block[i]];
-				tmp *= cos(time*modelParameters_.omega);
-				multiplyScalar(tmpMatrix,nidown,static_cast<SparseElementType>(tmp));
-				hmatrix += tmpMatrix;
-			}
 		}
 	};	//class ModelHubbard
 

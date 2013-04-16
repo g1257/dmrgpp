@@ -198,7 +198,8 @@ namespace Dmrg {
 			if (direction != WaveFunctionTransfType::INFINITE)
 				onlyWft = ((parameters_.finiteLoop[loopIndex].saveOption & 2)>0) ? true : false;
 		
-			if (!target.includeGroundStage()) return gsEnergy;
+			if (parameters_.options.find("MettsTargetting")!=std::string::npos)
+				return gsEnergy;
 
 			std::ostringstream msg0;
 			msg0<<"Setting up Hamiltonian basis of size="<<lrs.super().size();

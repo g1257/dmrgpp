@@ -497,9 +497,10 @@ namespace std {
 		FieldType sum=0;
 		for (size_t ii=0;ii<v.nonzeroSectors_.size();ii++) {
 			size_t i = v.nonzeroSectors_[ii];
-			sum += PsimagLite::norm(v.data_[i]);
+			FieldType tmp = PsimagLite::norm(v.data_[i]);
+			sum += tmp*tmp;
 		}
-		return sum;
+		return sqrt(sum);
 	}
 	
 	template<typename FieldType>
@@ -508,9 +509,10 @@ namespace std {
 		FieldType sum=0;
 		for (size_t ii=0;ii<v.nonzeroSectors_.size();ii++) {
 			size_t i = v.nonzeroSectors_[ii];
-			sum += PsimagLite::norm(v.data_[i]);
+			FieldType tmp = PsimagLite::norm(v.data_[i]);
+			sum += tmp*tmp;
 		}
-		return sum;
+		return sqrt(sum);
 	}
 
 }

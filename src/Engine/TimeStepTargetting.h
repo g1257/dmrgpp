@@ -80,8 +80,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeStepParams.h"
 #include "ProgramGlobals.h"
 #include "ParametersForSolver.h"
-#include "RungeKutta.h"
 #include "ParallelWft.h"
+#include "TimeVectorsKrylov.h"
+#include "TimeVectorsRungeKutta.h"
+#include "TimeVectorsSuzukiTrotter.h"
 
 namespace Dmrg {
 	template<template<typename,typename,typename> class LanczosSolverTemplate,
@@ -116,7 +118,6 @@ namespace Dmrg {
 			typedef std::vector<RealType> VectorType;
 			//typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
-			typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 			typedef typename BasisWithOperatorsType::BasisType BasisType;
 			typedef TimeStepParams<ModelType> TargettingParamsType;
@@ -129,6 +130,14 @@ namespace Dmrg {
 			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 			typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 			typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
+			typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,
+									LanczosSolverType,VectorWithOffsetType> TimeVectorsBaseType;
+			typedef TimeVectorsKrylov<TargettingParamsType,ModelType,WaveFunctionTransfType,
+									  LanczosSolverType,VectorWithOffsetType> TimeVectorsKrylovType;
+			typedef TimeVectorsRungeKutta<TargettingParamsType,ModelType,WaveFunctionTransfType,
+										  LanczosSolverType,VectorWithOffsetType> TimeVectorsRungeKuttaType;
+			typedef TimeVectorsSuzukiTrotter<TargettingParamsType,ModelType,WaveFunctionTransfType,
+											 LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
 
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -155,7 +164,8 @@ namespace Dmrg {
 			  weight_(tstStruct_.timeSteps),
 			  targetVectors_(tstStruct_.timeSteps),
 			  applyOpLocal_(lrs),
-			  E0_(0)
+			  E0_(0),
+			  timeVectorsBase_(0)
 			{
 				if (!wft.isEnabled()) throw std::runtime_error
 				       (" TimeStepTargetting needs an enabled wft\n");
@@ -181,6 +191,31 @@ namespace Dmrg {
 				sum += gsWeight_;
 				assert(fabs(sum-1.0)<1e-5);
 //				std::cerr<<"GSWEIGHT="<<gsWeight_<<"\n";
+
+				std::string s (__FILE__);
+				s += " Unknown algorithm\n";
+				switch (tstStruct_.algorithm) {
+				case TargettingParamsType::KRYLOV:
+					timeVectorsBase_ = new TimeVectorsKrylovType(
+								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0_);
+					break;
+				case TargettingParamsType::RUNGE_KUTTA:
+					timeVectorsBase_ = new TimeVectorsRungeKuttaType(
+								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0_);
+					break;
+				case TargettingParamsType::SUZUKI_TROTTER:
+					timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(
+								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0_);
+					break;
+				default:
+					throw std::runtime_error(s.c_str());
+				}
+			}
+
+			~TimeStepTargetting()
+			{
+				if (timeVectorsBase_)
+					delete timeVectorsBase_;
 			}
 
 			const ModelType& model() const { return model_; }
@@ -211,6 +246,7 @@ namespace Dmrg {
 				   const SomeBasisType& someBasis)
 			{
 				psi_.set(v,someBasis);
+				assert(psi_.size()==lrs_.super().size());
 			}
 
 			const ComplexType& operator[](size_t i) const { return psi_[i]; }
@@ -285,7 +321,7 @@ namespace Dmrg {
 				//std::cerr<<"site="<<block1[0]<<" COUNT="<<count<<"\n";
 				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 
-				calcTimeVectors(Eg,phiNew,direction);
+				timeVectorsBase_->calcTimeVectors(Eg,phiNew,direction);
 				
 				cocoon(direction,block1); // in-situ
 				printEnergies(); // in-situ
@@ -424,40 +460,6 @@ namespace Dmrg {
 			}
 
 		private:
-
-			class FunctionForRungeKutta {
-
-			public:
-
-				FunctionForRungeKutta(const RealType& E0,
-							  const LeftRightSuperType& lrs,
-							  const ModelType& model,
-							  RealType Eg,
-							  const VectorWithOffsetType& phi,
-							  size_t i0)
-					: E0_(E0),
-					  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
-					  modelHelper_(p_,lrs),
-					  lanczosHelper_(&model,&modelHelper_)
-				{
-				}
-
-				TargetVectorType operator()(const RealType& t,const TargetVectorType& y) const
-				{
-					TargetVectorType x(y.size());
-					lanczosHelper_.matrixVectorProduct(x,y);
-					for (size_t i=0;i<x.size();i++) x[i] -= E0_*y[i];
-					ComplexType icomplex(0,1);
-					return -icomplex * x;
-				}
-
-			private:
-
-				RealType E0_;
-				size_t p_;
-				typename ModelType::ModelHelperType modelHelper_;
-				typename LanczosSolverType::LanczosMatrixType lanczosHelper_;
-			}; // FunctionForRungeKutta
 
 			void printEnergies() const
 			{
@@ -599,7 +601,10 @@ namespace Dmrg {
 
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
 					size_t advance = indexNoAdvance;
-					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
+					if (stage_[i] == WFT_ADVANCE) {
+						advance = indexAdvance;
+						timeVectorsBase_->timeHasAdvanced();
+					}
 					std::ostringstream msg;
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
@@ -622,68 +627,6 @@ namespace Dmrg {
 
 			}
 
-			void calcTimeVectors(RealType Eg,
-					      const VectorWithOffsetType& phi,
-					      size_t systemOrEnviron)
-			{
-				std::string s (__FILE__);
-				s += " Unknown algorithm\n";
-				switch (tstStruct_.algorithm) {
-				case TargettingParamsType::KRYLOV:
-					return calcTimeVectorsKrylov(Eg,phi,systemOrEnviron);
-				case TargettingParamsType::RUNGE_KUTTA:
-					return calcTimeVectorsRungeKutta(Eg,phi,systemOrEnviron);
-				default:
-					throw std::runtime_error(s.c_str());
-				}
-			}
-
-			void calcTimeVectorsRungeKutta(RealType Eg,
-						       const VectorWithOffsetType& phi,
-						       size_t systemOrEnviron)
-			{
-				std::ostringstream msg;
-				msg<<"EXPERIMENTAL: using RungeKutta";
-
-				RealType norma = std::norm(phi);
-				if (norma<1e-10) return;
-				msg<<" Norm of phi= "<<norma;
-				progress_.printline(msg,std::cout);
-
-				// set non-zero sectors
-				for (size_t i=0;i<times_.size();i++) targetVectors_[i] = phi;
-
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i = phi.sector(ii);
-					calcTimeVectors(Eg,phi,systemOrEnviron,i);
-				}
-				checkNorms();
-			}
-
-			void calcTimeVectors(RealType Eg,
-					     const VectorWithOffsetType& phi,
-					     size_t systemOrEnviron,
-					     size_t i0)
-			{
-				size_t total = phi.effectiveSize(i0);
-				TargetVectorType phi0(total);
-				phi.extract(phi0,i0);
-//				std::cerr<<"norma of phi0="<<PsimagLite::norm(phi0)<<"\n";
-				FunctionForRungeKutta f(E0_,lrs_,model_,Eg,phi,i0);
-
-				RealType epsForRK = tstStruct_.tau/(times_.size()-1.0);
-				PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType> rungeKutta(f,epsForRK);
-
-				std::vector<TargetVectorType> result;
-				rungeKutta.solve(result,0.0,times_.size(),phi0);
-				assert(result.size()==times_.size());
-
-				for (size_t i=0;i<times_.size();i++) {
-//					std::cerr<<"norma of result["<<i<<"]="<<PsimagLite::norm(result[i])<<"\n";
-					targetVectors_[i].setDataInSector(result[i],i0);
-				}
-			}
-
 			void checkNorms() const
 			{
 				std::ostringstream msg;
@@ -696,198 +639,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 			}
 
-			void calcTimeVectorsKrylov(RealType Eg,
-						   const VectorWithOffsetType& phi,
-						   size_t systemOrEnviron)
-			{
-				if (currentTime_==0 && tstStruct_.noOperator) {
-					for (size_t i=0;i<times_.size();i++)
-						targetVectors_[i]=phi;
-					return;
-				}
 
-				if (needsLanczos()) calcTimeVectorsKrylov1(Eg,phi,systemOrEnviron);
-				else calcTimeVectorsWft(Eg,phi,systemOrEnviron);
-			}
-
-			void calcTimeVectorsKrylov1(RealType Eg,
-										   const VectorWithOffsetType& phi,
-										   size_t systemOrEnviron)
-			{
-				std::vector<ComplexMatrixType> V(phi.sectors());
-				std::vector<ComplexMatrixType> T(phi.sectors());
-				
-				std::vector<size_t> steps(phi.sectors());
-				
-				triDiag(phi,T,V,steps);
-				
-				std::vector<std::vector<RealType> > eigs(phi.sectors());
-
-				for (size_t ii=0;ii<phi.sectors();ii++) 
-					PsimagLite::diag(T[ii],eigs[ii],'V');
-				
-				calcTargetVectors(phi,T,V,Eg,eigs,steps,systemOrEnviron);
-
-				//checkNorms();
-			}
-
-//			void calcTimeVectorsWft(RealType Eg,
-//										   const VectorWithOffsetType& phi,
-//										   size_t systemOrEnviron)
-//			{
-//				targetVectors_[0] = phi;
-//				size_t nk = model_.hilbertSize(0);
-//				for (size_t i=1;i<targetVectors_.size();i++) {
-//					VectorWithOffsetType phiNew = phi;
-//					wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk); // generalize for su(2)
-//					targetVectors_[i]=phiNew;
-//				}
-//			}
-
-			void calcTimeVectorsWft(RealType Eg,
-									const VectorWithOffsetType& phi,
-									size_t systemOrEnviron)
-			{
-				targetVectors_[0] = phi;
-				// don't wft since we did it before
-				//size_t numberOfSites = lrs_.super().block().size();
-				//if (site==0 || site==numberOfSites -1)  return;
-
-				typedef ParallelWft<RealType,VectorWithOffsetType,WaveFunctionTransfType,LeftRightSuperType> ParallelWftType;
-				PTHREADS_NAME<ParallelWftType> threadedWft;
-				PTHREADS_NAME<ParallelWftType>::setThreads(model_.params().nthreads);
-				if (threadedWft.name()=="pthreads") {
-					std::ostringstream msg;
-					msg<<"Threading with "<<threadedWft.threads();
-					progress_.printline(msg,std::cout);
-				} else {
-					std::cerr<<"NOOOOOOOOOOOOOOO THREADDDSSSSSS "<<threadedWft.name()<<" "<<threadedWft.threads()<<"\n";
-				}
-
-				ParallelWftType helperWft(targetVectors_,model_.hilbertSize(0),wft_,lrs_);
-				threadedWft.loopCreate(targetVectors_.size()-1,helperWft,model_.concurrency());
-				for (size_t i=1;i<targetVectors_.size();i++) {
-					assert(targetVectors_[i].size()==targetVectors_[0].size());
-				}
-			}
-
-			bool needsLanczos() const
-			{
-				if (model_.params().options.find("fasttarget")==std::string::npos)
-					return true;
-
-				bool b = (!allStages(WFT_NOADVANCE));
-				std::cerr<<"STAGE=";
-				for (size_t i=0;i<stage_.size();i++) {
-					std::cerr<<stage_[i]<<" ";
-				}
-				std::cerr<<" returning="<<b<<"\n";
-
-				return b;
-			}
-
-			//! Do not normalize states here, it leads to wrong results (!)
-			void calcTargetVectors(const VectorWithOffsetType& phi,
-					       const std::vector<ComplexMatrixType>& T,
-					       const std::vector<ComplexMatrixType>& V,
-					       RealType Eg,
-					       const std::vector<VectorType>& eigs,
-					       std::vector<size_t> steps,
-					       size_t systemOrEnviron)
-			{
-				targetVectors_[0] = phi;
-//				normalize(targetVectors_[0]);
-				for (size_t i=1;i<times_.size();i++) {
-					targetVectors_[i] = phi;
-					// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
-//					normalize(targetVectors_[i]);
-				}
-			}
-
-			void calcTargetVector(
-						VectorWithOffsetType& v,
-						const VectorWithOffsetType& phi,
-						const std::vector<ComplexMatrixType>& T,
-						const std::vector<ComplexMatrixType>& V,
-						RealType Eg,
-						const std::vector<VectorType>& eigs,
-						RealType t,
-						std::vector<size_t> steps)
-			{
-				v = phi;
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i0 = phi.sector(ii);
-					ComplexVectorType r;
-					calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],t,steps[ii],i0);
-					//std::cerr<<"TARGET FOR t="<<t<<" "<<PsimagLite::norm(r)<<" "<<norm(phi)<<"\n";
-					v.setDataInSector(r,i0);
-				}
-			}
-
-			void calcTargetVector(
-						ComplexVectorType& r,
-						const VectorWithOffsetType& phi,
-						const ComplexMatrixType& T,
-						const ComplexMatrixType& V,
-						RealType Eg,
-						const VectorType& eigs,
-						RealType t,
-						size_t steps,
-						size_t i0)
-			{
-				size_t n2 = steps;
-				size_t n = V.n_row();
-				if (T.n_col()!=T.n_row()) throw std::runtime_error("T is not square\n");
-				if (V.n_col()!=T.n_col()) throw std::runtime_error("V is not nxn2\n");
-				// for (size_t j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
-				ComplexType zone = 1.0;
-				ComplexType zzero = 0.0;
-
-				//check1(phi,i0);
-				//check2(T,V,phi,n2,i0);
-				ComplexVectorType tmp(n2);
-				r.resize(n2);
-				calcR(r,T,V,phi,Eg,eigs,t,steps,i0);
-//				std::cerr<<"TARGET FOR t="<<t<<" after calcR norm="<<PsimagLite::norm(r)<<"\n";
-				psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0,0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1 );
-//				std::cerr<<"TARGET FOR t="<<t<<" after S^\\dagger norm="<<PsimagLite::norm(tmp)<<"\n";
-				r.resize(n);
-				psimag::BLAS::GEMV('N', n,  n2, zone, &(V(0,0)), n, &(tmp[0]),1, zzero, &(r[0]),   1 );
-			}
-
-			void calcR(ComplexVectorType& r,
-				   const ComplexMatrixType& T,
-				   const ComplexMatrixType& V,
-				   const VectorWithOffsetType& phi,
-				   RealType Eg,
-				   const VectorType& eigs,
-				   RealType t,
-				   size_t n2,
-				   size_t i0)
-			{
-				for (size_t k=0;k<n2;k++) {
-					ComplexType sum = 0.0;
-					for (size_t kprime=0;kprime<n2;kprime++) {
-						ComplexType tmpV = calcVTimesPhi(kprime,V,phi,i0);
-						sum += conj(T(kprime,k))*tmpV;
-					}
-					RealType tmp = (eigs[k]-E0_)*t;
-					ComplexType c(cos(tmp),-sin(tmp));
-					r[k] = c * sum;
-				}
-			}
-
-			ComplexType calcVTimesPhi(size_t kprime,const ComplexMatrixType& V,const VectorWithOffsetType& phi,
-						 size_t i0) const
-			{
-				ComplexType ret = 0;
-				size_t total = phi.effectiveSize(i0);
-
-				for (size_t j=0;j<total;j++)
-					ret += conj(V(j,kprime))*phi.fastAccess(i0,j);
-				return ret;
-			}
 
 			void check1(const VectorWithOffsetType& phi,size_t i0) const
 			{
@@ -933,45 +685,6 @@ namespace Dmrg {
 					}
 					std::cerr<<"V["<<i<<"] * V[0] = "<<sum<<"\n";
 				}
-			}
-
-			void triDiag(
-					const VectorWithOffsetType& phi,
-					std::vector<ComplexMatrixType>& T,
-	 				std::vector<ComplexMatrixType>& V,
-					std::vector<size_t>& steps)
-			{
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i = phi.sector(ii);
-					steps[ii] = triDiag(phi,T[ii],V[ii],i);
-				}
-			}
-
-			size_t triDiag(const VectorWithOffsetType& phi,ComplexMatrixType& T,ComplexMatrixType& V,size_t i0)
-			{
-				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
-				typename ModelType::ModelHelperType modelHelper(p,lrs_);
-				 		//,useReflection_);
-				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
-			
-				ParametersForSolverType params;
-				params.steps = model_.params().lanczosSteps;
-				params.tolerance = model_.params().lanczosEps;
-				params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
-
-				LanczosSolverType lanczosSolver(lanczosHelper,params,&V);
-				
-				TridiagonalMatrixType ab;
-				size_t total = phi.effectiveSize(i0);
-				TargetVectorType phi2(total);
-				phi.extract(phi2,i0);
-				/* std::ostringstream msg;
-				msg<<"Calling tridiagonalDecomposition...\n";
-				progress_.printline(msg,std::cerr);*/
-				lanczosSolver.decomposition(phi2,ab);
-				lanczosSolver.buildDenseMatrix(T,ab);
-				//check1(V,phi2);
-				return lanczosSolver.steps();
 			}
 
 			//! This check is invalid if there are more than one sector
@@ -1068,6 +781,7 @@ namespace Dmrg {
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
 			RealType E0_;
+			TimeVectorsBaseType* timeVectorsBase_;
 
 	};     //class TimeStepTargetting
 

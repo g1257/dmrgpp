@@ -406,18 +406,47 @@ namespace Dmrg {
 		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,
 					 Block const &block)
 		{
-			assert(block.size()==1);
-			return creationMatrix[block[0]];
+			switch(model_) {
+			case HUBBARD_ONE_BAND:
+				return modelHubbard_->setOperatorMatrices(creationMatrix,block);
+			case HEISENBERG_SPIN_ONEHALF:
+				return modelHeisenberg_->setOperatorMatrices(creationMatrix,block);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->setOperatorMatrices(creationMatrix,block);
+			case FEAS:
+				return modelFeAs_->setOperatorMatrices(creationMatrix,block);
+			case FEAS_EXT:
+				return modelFeAsExt_->setOperatorMatrices(creationMatrix,block);
+			case IMMM:
+				return modelImmm_->setOperatorMatrices(creationMatrix,block);
+			}
 		}
 
 		void setNaturalBasis(HilbertBasisType& basis,
 				     std::vector<size_t>& q,
 				     const std::vector<size_t>& block) const
 		{
-			assert(block.size()==1);
-			size_t index=block[0];
-			basis=basis_[index];
-			q=q_[index];
+			if (block.size()==1) {
+				size_t index=block[0];
+				basis=basis_[index];
+				q=q_[index];
+				return;
+			}
+			switch(model_) {
+			case HUBBARD_ONE_BAND:
+				return modelHubbard_->setNaturalBasis(basis,q,block);
+			case HEISENBERG_SPIN_ONEHALF:
+				return modelHeisenberg_->setNaturalBasis(basis,q,block);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->setNaturalBasis(basis,q,block);
+			case FEAS:
+				return modelFeAs_->setNaturalBasis(basis,q,block);
+			case FEAS_EXT:
+				return modelFeAsExt_->setNaturalBasis(basis,q,block);
+			case IMMM:
+				return modelImmm_->setNaturalBasis(basis,q,block);
+			}
+
 		}
 
 //		size_t maxConnections() const
@@ -481,6 +510,61 @@ namespace Dmrg {
 			findElectrons(electrons,basis,site);
 		}
 
+		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,Block const &block) const
+		{
+			switch(model_) {
+			case HUBBARD_ONE_BAND:
+				return modelHubbard_->setOperatorMatrices(creationMatrix,block);
+			case HEISENBERG_SPIN_ONEHALF:
+				return modelHeisenberg_->setOperatorMatrices(creationMatrix,block);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->setOperatorMatrices(creationMatrix,block);
+			case FEAS:
+				return modelFeAs_->setOperatorMatrices(creationMatrix,block);
+			case FEAS_EXT:
+				return modelFeAsExt_->setOperatorMatrices(creationMatrix,block);
+			case IMMM:
+				return modelImmm_->setOperatorMatrices(creationMatrix,block);
+			}
+		}
+
+		void hamiltonianOnLink(SparseMatrixType& hmatrix,
+							   const Block& block,
+							   const RealType& time,
+							   RealType factorForDiagonals) const
+		{
+			assert(block.size()==2);
+
+			std::vector<OperatorType> cm;
+			setOperatorMatrices(cm,block);
+			calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
+
+			// FIXME: Take care of overlaps of diagonal part of H
+			// FIXME: Take care of borders maybe
+		}
+
+		void calcHamiltonian(SparseMatrixType &hmatrix,
+							 std::vector<OperatorType> const &cm,
+							 Block const &block,
+							 RealType time,
+							 RealType factorForDiagonals) const
+		{
+			switch(model_) {
+			case HUBBARD_ONE_BAND:
+				return modelHubbard_->calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
+				//			case HEISENBERG_SPIN_ONEHALF:
+				//				return modelHeisenberg_->calcHamiltonian(hmatrix,cm,block,time);
+				//			case HUBBARD_ONE_BAND_EXT:
+				//				return modelHubbardExt_->calcHamiltonian(hmatrix,cm,block,time);
+				//			case FEAS:
+				//				return modelFeAs_->calcHamiltonian(hmatrix,cm,block,time);
+				//			case FEAS_EXT:
+				//				return modelFeAsExt_->calcHamiltonian(hmatrix,cm,block,time);
+				//			case IMMM:
+				//				return modelImmm_->calcHamiltonian(hmatrix,cm,block,time);
+			}
+			throw std::runtime_error("calcHamiltonian\n");
+		}
 
 	private:
 
