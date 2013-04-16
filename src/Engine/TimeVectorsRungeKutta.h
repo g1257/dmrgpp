@@ -85,6 +85,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
+template<typename RealType>
+RealType minusOneOrMinusI(const RealType&)
+{
+	return -1;
+}
+
+template<typename RealType>
+std::complex<RealType> expComplexOrReal(std::complex<RealType>&)
+{
+	return std::complex<RealType>(0.0,-1.0);
+}
+
 template<typename TargettingParamsType,
 		 typename ModelType,
 		 typename WaveFunctionTransfType,
@@ -177,8 +189,8 @@ private:
 			TargetVectorType x(y.size());
 			lanczosHelper_.matrixVectorProduct(x,y);
 			for (size_t i=0;i<x.size();i++) x[i] -= E0_*y[i];
-			ComplexOrRealType icomplex(0,1);
-			return -icomplex * x;
+			ComplexOrRealType icomplex = minusOneOrMinusI(static_cast<ComplexOrRealType>(0.0));
+			return icomplex * x;
 		}
 
 	private:
@@ -209,7 +221,6 @@ private:
 		assert(result.size()==times_.size());
 
 		for (size_t i=0;i<startEnd.second;i++) {
-			//					std::cerr<<"norma of result["<<i<<"]="<<PsimagLite::norm(result[i])<<"\n";
 			targetVectors_[i].setDataInSector(result[i],i0);
 		}
 	}

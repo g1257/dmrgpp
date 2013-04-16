@@ -193,11 +193,8 @@ private:
 		for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
 			assert(i<targetVectors_.size());
 			targetVectors_[i] = phi;
-			VectorWithOffsetType v;
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(v,phi,T,V,Eg,eigs,i,steps);
-			RealType x = (TargettingParamsType::normalize()) ? 1.0/std::norm(v) : 1.0;
-			targetVectors_[i]= x* v;
+			calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,i,steps);
 		}
 	}
 

@@ -124,8 +124,6 @@ namespace Dmrg {
 			}
 		}
 
-		static bool normalize() { return false; }
-
 		RealType tau;
 		size_t timeSteps;
 		size_t advanceEach;

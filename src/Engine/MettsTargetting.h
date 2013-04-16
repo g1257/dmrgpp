@@ -797,9 +797,16 @@ namespace Dmrg {
 			                       size_t systemOrEnviron)
 			{
 				for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
-					VectorWithOffsetType v;
 					// Only time differences here (i.e. betas_[i] not betas_[i]+currentBeta_)
-					calcTargetVector(v,phi,T,V,Eg,eigs,i,steps);
+					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,i,steps);
+				}
+				normalizeVectors(startEnd);
+			}
+
+			void normalizeVectors(const PairType& startEnd)
+			{
+				for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
+					VectorWithOffsetType v = targetVectors_[i];
 					RealType x = 1.0/std::norm(v);
 					targetVectors_[i]= x* v;
 				}
