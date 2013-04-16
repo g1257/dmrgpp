@@ -85,18 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename RealType>
-void expComplexOrReal(RealType& x,const RealType& y)
-{
-	x = exp(-y);
-}
-
-template<typename RealType>
-void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
-{
-	x = std::complex<RealType>(cos(y),-sin(y));
-}
-
 template<typename TargettingParamsType,
 		 typename ModelType,
 		 typename WaveFunctionTransfType,
@@ -266,7 +254,7 @@ private:
 			}
 			RealType tmp = (eigs[k]-E0_)*times_[timeIndex];
 			ComplexOrRealType c = 0.0;
-			expComplexOrReal(c,tmp);
+			PsimagLite::expComplexOrReal(c,-tmp);
 			r[k] = sum * c;
 		}
 	}

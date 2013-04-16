@@ -85,14 +85,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename RealType>
-RealType minusOneOrMinusI(const RealType&)
-{
-	return -1;
-}
+//template<typename RealType>
+//RealType minusOneOrMinusI(const RealType&)
+//{
+//	return -1;
+//}
 
 template<typename RealType>
-std::complex<RealType> expComplexOrReal(std::complex<RealType>&)
+std::complex<RealType> minusOneOrMinusI(const std::complex<RealType>&)
 {
 	return std::complex<RealType>(0.0,-1.0);
 }
