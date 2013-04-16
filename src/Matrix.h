@@ -31,6 +31,19 @@ Please see full open source license included in file LICENSE.
 #include "TypeToString.h"
 
 namespace PsimagLite {
+
+template<typename RealType>
+void expComplexOrReal(RealType& x,const RealType& y)
+{
+	x = exp(y);
+}
+
+template<typename RealType>
+void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
+{
+	x = std::complex<RealType>(cos(y),sin(y));
+}
+
 	template<typename T>
 	class  Matrix  {
 	public:
@@ -368,19 +381,6 @@ namespace PsimagLite {
 	void exp(Matrix<T>& m)
 	{
 		size_t n = m.n_row();
-//		Matrix<T> res(n,n);
-//		for (size_t i=0;i<n;i++) res(i,i)=1;
-//		res += m;
-//		Matrix<T> tmp = m;
-//		T val = 1;
-
-//		for (size_t x=2;x<max;x++) {
-//			val /= x;
-//			tmp = (tmp*m);
-//			res += val*tmp;
-//		}
-//		m = res;
-
 		std::vector<double> eigs(n);
 		diag(m,eigs,'V');
 		Matrix<T> expm(n,n);
@@ -389,7 +389,8 @@ namespace PsimagLite {
 				T sum = 0;
 				for (size_t k=0;k<n;k++) {
 					double alpha = eigs[k];
-					T tmp = T(cos(alpha),sin(alpha));
+					T tmp = 0.0;
+					expComplexOrReal(tmp,alpha);
 					sum+= std::conj(m(i,k))*m(j,k)*tmp;
 				}
 				expm(i,j) = sum;
@@ -593,10 +594,9 @@ namespace PsimagLite {
 	template<typename T>
 	bool isZero(const PsimagLite::Matrix<T>& m)
 	{
-		T eps=1e-5;
 		for (size_t i=0;i<m.n_row();i++)
 			for (size_t j=0;j<m.n_col();j++)
-				if (fabs(m(i,j))>eps) return false;
+				if (fabs(m(i,j))>0) return false;
 		return true;
 	}
 
