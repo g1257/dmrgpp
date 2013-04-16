@@ -280,6 +280,8 @@ namespace Dmrg {
 				MyBasisWithOperators &pE,
 				TargettingType& psi)
 		{
+			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=std::string::npos);
+
 			checkpoint_.push(pS,pE);
 
 			RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
@@ -302,7 +304,8 @@ namespace Dmrg {
 
 				truncate_.changeBasis(pS,pE,psi,parameters_.keptStatesInfinite);
 
-				checkpoint_.push(pS,pE);
+				if (!twoSiteDmrg) checkpoint_.push(pS,pE);
+				else checkpoint_.push(lrs_.left(),lrs_.right());
 
 				printMemoryUsage();
 			}
@@ -446,6 +449,7 @@ namespace Dmrg {
 						size_t direction,
 						size_t saveOption)
 		{
+			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=std::string::npos);
 			const std::vector<size_t>& eS = pS.electronsVector();
 			FermionSignType fsS(eS);
 
@@ -458,9 +462,9 @@ namespace Dmrg {
 			io_.printline(msg2);
 
 			if (direction==EXPAND_SYSTEM) {
-				checkpoint_.push(pS,ProgramGlobals::SYSTEM);
+				checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,ProgramGlobals::SYSTEM);
 			} else {
-				checkpoint_.push(pE,ProgramGlobals::ENVIRON);
+				checkpoint_.push((twoSiteDmrg) ? lrs_.right() : pE,ProgramGlobals::ENVIRON);
 			}
 			if (saveOption==SAVE_TO_DISK)
 				serialize(fsS,fsE,target,truncate_.transform(),direction);

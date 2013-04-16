@@ -238,7 +238,11 @@ namespace Dmrg {
 		size_t partition() const { return partition_.size(); }
 
 		//! returns the permutation of i 
-		size_t permutation(size_t i) const { return  permutationVector_[i]; }
+		size_t permutation(size_t i) const
+		{
+			assert(i<permutationVector_.size());
+			return  permutationVector_[i];
+		}
 
 		//! Return the permutation vector
 		const std::vector<size_t>& permutationVector() const
@@ -247,7 +251,11 @@ namespace Dmrg {
 		}
 
 		//! returns the inverse permutation of i 
-		int permutationInverse(int i) const { return permInverse_[i]; }
+		int permutationInverse(size_t i) const
+		{
+			assert(i<permInverse_.size());
+			return permInverse_[i];
+		}
 
 		//! returns the inverse permutation vector
 		const std::vector<size_t>& permutationInverse() const { return permInverse_; }

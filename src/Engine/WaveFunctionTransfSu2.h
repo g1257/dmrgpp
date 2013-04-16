@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -120,13 +117,17 @@ namespace Dmrg {
 				const size_t& stage,
 				const bool& firstCall,
 				const size_t& counter,
-				const DmrgWaveStructType& dmrgWaveStruct)
+				const DmrgWaveStructType& dmrgWaveStruct,
+				bool twoSiteDmrg)
 		: stage_(stage),
 		  firstCall_(firstCall),
 		  counter_(counter),
 		  dmrgWaveStruct_(dmrgWaveStruct),
 		  progress_("WaveFunctionTransfLocal",0)
-		{}
+		{
+			if (twoSiteDmrg)
+				throw std::runtime_error("SU(2) does not support two-site DMRG yet\n");
+		}
 
 		
 		virtual void transformVector(VectorWithOffsetType& psiDest,

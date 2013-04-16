@@ -246,8 +246,10 @@ namespace Dmrg {
 			rSprime.truncateBasis(ftransform_,cache.transform,
 							    cache.eigs,cache.removedIndices,concurrency_);
 			LeftRightSuperType lrs(rSprime,(BasisWithOperatorsType&) eBasis,
-					       (BasisType&)lrs_.super());
-			waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrs);
+						   (BasisType&)lrs_.super());
+			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=std::string::npos);
+			const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
+			waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrsForWft);
 
 			msg<<"new size of basis="<<rSprime.size();
 			progress_.printline(msg,std::cout);
@@ -262,8 +264,10 @@ namespace Dmrg {
 			rEprime.truncateBasis(ftransform_,cache.transform,
 							    cache.eigs,cache.removedIndices,concurrency_);
 			LeftRightSuperType lrs((BasisWithOperatorsType&) sBasis,
-					       rEprime,(BasisType&)lrs_.super());
-			waveFunctionTransformation_.push(ftransform_,EXPAND_ENVIRON,lrs);
+						   rEprime,(BasisType&)lrs_.super());
+			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=std::string::npos);
+			const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
+			waveFunctionTransformation_.push(ftransform_,EXPAND_ENVIRON,lrsForWft);
 			msg<<"new size of basis="<<rEprime.size();
 			progress_.printline(msg,std::cout);
 		}

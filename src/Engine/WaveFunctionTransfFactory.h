@@ -129,15 +129,17 @@ namespace Dmrg {
 		  filenameOut_(params.filename),
 		  WFT_STRING("Wft"),
 		  wftImpl_(0),
-		  rng_(3433117)
+		  rng_(3433117),
+		  twoSiteDmrg_(params.options.find("twositedmrg")!=std::string::npos)
 		{
 			if (!isEnabled_) return;
+
 			if (params.options.find("checkpoint")!=std::string::npos || params.options.find("restart")!=std::string::npos)
 				load();
 			if (BasisType::useSu2Symmetry()) {
-				wftImpl_=new WaveFunctionTransfSu2Type(stage_,firstCall_,counter_,dmrgWaveStruct_);
+				wftImpl_=new WaveFunctionTransfSu2Type(stage_,firstCall_,counter_,dmrgWaveStruct_,twoSiteDmrg_);
 			} else {
-				wftImpl_=new WaveFunctionTransfLocalType(stage_,firstCall_,counter_,dmrgWaveStruct_);
+				wftImpl_=new WaveFunctionTransfLocalType(stage_,firstCall_,counter_,dmrgWaveStruct_,twoSiteDmrg_);
 			}
 		}
 
@@ -271,7 +273,7 @@ namespace Dmrg {
 
 		void push(const SparseMatrixType& transform,
 			  size_t direction,
-			  LeftRightSuperType& lrs)
+			  const LeftRightSuperType& lrs)
 		{
 			if (!isEnabled_) return;
 			
@@ -343,6 +345,8 @@ namespace Dmrg {
 				if (wsStack_.size()>=1) {
 					dmrgWaveStruct_.ws=wsStack_.top();
 					wsStack_.pop();
+					if (twoSiteDmrg_ && wsStack_.size()>0)
+						dmrgWaveStruct_.ws=wsStack_.top();
 				} else {
 					throw std::runtime_error("System Stack is empty\n");
 				}
@@ -352,6 +356,8 @@ namespace Dmrg {
 				if (weStack_.size()>=1) { 
 					dmrgWaveStruct_.we=weStack_.top();
 					weStack_.pop();
+					if (twoSiteDmrg_ && weStack_.size()>0)
+						dmrgWaveStruct_.we=weStack_.top();
 				} else {
 					throw std::runtime_error("Environ Stack is empty\n");
 				}
@@ -451,6 +457,7 @@ namespace Dmrg {
 		std::stack<SparseMatrixType> wsStack_,weStack_;
 		WaveFunctionTransfBaseType* wftImpl_;
 		PsimagLite::Random48<RealType> rng_;
+		bool twoSiteDmrg_;
 	}; // class WaveFunctionTransformation
 } // namespace Dmrg
 
