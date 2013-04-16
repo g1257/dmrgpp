@@ -85,41 +85,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h" // so that std::norm() becomes visible here
 #include "VectorWithOffset.h" // so that std::norm() becomes visible here
 #include "WaveFunctionTransfBase.h"
+#include "MatrixOrIdentity.h"
 
 namespace Dmrg {
-	
-template<typename SparseMatrixType>
-class FakeMatrix {
-
-	typedef typename SparseMatrixType::value_type SparseElementType;
-
-public:
-
-	FakeMatrix(bool enabled,const SparseMatrixType& m)
-		: enabled_(enabled),m_(m),one_(1.0)
-	{}
-
-	size_t getRowPtr(size_t i) const
-	{
-		return (enabled_) ? m_.getRowPtr(i) : i;
-	}
-
-	size_t getCol(size_t i) const
-	{
-		return (enabled_) ? m_.getCol(i) : i;
-	}
-
-	const SparseElementType& getValue(size_t i) const
-	{
-		return (enabled_) ? m_.getValue(i) : one_;
-	}
-
-private:
-
-	bool enabled_;
-	const SparseMatrixType& m_;
-	SparseElementType one_;
-}; // class FakeMatrix
 
 	template<typename DmrgWaveStructType,typename VectorWithOffsetType>
 	class WaveFunctionTransfLocal : public
@@ -137,7 +105,7 @@ private:
 		typedef typename BasisType::FactorsType FactorsType;
 		typedef typename DmrgWaveStructType::LeftRightSuperType
 					LeftRightSuperType;
-		typedef FakeMatrix<SparseMatrixType> FakeMatrixType;
+		typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 
 		static const size_t INFINITE = ProgramGlobals::INFINITE;
 		static const size_t EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
@@ -315,7 +283,7 @@ private:
 		{
 			size_t ni=dmrgWaveStruct_.lrs.left().size(); //dmrgWaveStruct_.ws.col();
 			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/nk;
-			FakeMatrixType wsRef2(twoSiteDmrg_ && nip>nk,ws);
+			MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>nk,ws);
 
 
 			SparseElementType sum=0;
@@ -476,7 +444,7 @@ private:
 			SparseElementType sum=0;
 			size_t ni = dmrgWaveStruct_.lrs.right().size()/nk;
 
-			FakeMatrixType weRef(twoSiteDmrg_ && ni>nk,we);
+			MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>nk,we);
 
 			for (int k=wsT.getRowPtr(is);k<wsT.getRowPtr(is+1);k++) {
 				size_t ip = wsT.getCol(k);
@@ -527,7 +495,7 @@ private:
 			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			PackIndicesType pack1(nip);
 			PackIndicesType pack2(nk);
-			FakeMatrixType wsRef(twoSiteDmrg_,dmrgWaveStruct_.ws);
+			MatrixOrIdentityType wsRef(twoSiteDmrg_,dmrgWaveStruct_.ws);
 			size_t nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.col() : nip;
 
 			for (size_t x=start;x<final;x++) {
@@ -579,7 +547,7 @@ private:
 			size_t final = psiDest.effectiveSize(i0)+start;
 			PackIndicesType pack1(nalpha);
 			PackIndicesType pack2(nip);
-			FakeMatrixType weRef(twoSiteDmrg_,dmrgWaveStruct_.we);
+			MatrixOrIdentityType weRef(twoSiteDmrg_,dmrgWaveStruct_.we);
 
 			for (size_t x=start;x<final;x++) {
 				psiDest[x] = 0.0;

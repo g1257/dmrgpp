@@ -277,7 +277,7 @@ namespace Dmrg {
 			int offset = lrs_.super().partition(m);
 			int i,k,alphaPrime;
 			int bs = lrs_.super().partition(m+1)-offset;
-			SparseMatrixType hamiltonian = lrs_.left().hamiltonian();
+			const SparseMatrixType& hamiltonian = lrs_.left().hamiltonian();
 			size_t ns = lrs_.left().size();
 
 			PackIndicesType pack(ns);
@@ -306,7 +306,7 @@ namespace Dmrg {
 			int offset = lrs_.super().partition(m);
 			int i,k;
 			int bs = lrs_.super().partition(m+1)-offset;
-			SparseMatrixType hamiltonian = lrs_.right().hamiltonian();
+			const SparseMatrixType& hamiltonian = lrs_.right().hamiltonian();
 			size_t ns = lrs_.left().size();
 
 			PackIndicesType pack(ns);

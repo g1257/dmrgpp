@@ -538,9 +538,6 @@ namespace Dmrg {
 			std::vector<OperatorType> cm;
 			setOperatorMatrices(cm,block);
 			calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
-
-			// FIXME: Take care of overlaps of diagonal part of H
-			// FIXME: Take care of borders maybe
 		}
 
 		void calcHamiltonian(SparseMatrixType &hmatrix,

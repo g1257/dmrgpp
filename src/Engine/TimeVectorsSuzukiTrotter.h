@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "TimeVectorsBase.h"
 #include "VectorWithOffsets.h"
+#include "MatrixOrIdentity.h"
 
 namespace Dmrg {
 
@@ -110,6 +111,7 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType BlockType;
+	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 
 public:
 
@@ -129,13 +131,15 @@ public:
 		  model_(model),
 		  wft_(wft),
 		  lrs_(lrs),
-		  E0_(E0)
+		  E0_(E0),
+		  twoSiteDmrg_(wft_.twoSiteDmrg())
 	{}
 
 	virtual void calcTimeVectors(RealType Eg,
 								 const VectorWithOffsetType& phi,
 								 size_t systemOrEnviron)
 	{
+		static bool firstcall = true;
 		std::ostringstream msg;
 		msg<<"EXPERIMENTAL: using SuzukiTrotter";
 
@@ -147,6 +151,14 @@ public:
 		// set non-zero sectors
 		targetVectors_[0] = phi;
 
+		for (size_t i=1;i<times_.size();i++)
+			if (targetVectors_[i].size()==0)
+				targetVectors_[i] = phi;
+
+		if (firstcall) {
+			firstcall=false;
+			return;
+		}
 		// skip odd links if expanding system and
 		// skip even links if expanding environ
 		size_t lastIndexLeft = lrs_.left().block().size();
@@ -155,21 +167,26 @@ public:
 		bool oddLink = (lrs_.left().block()[lastIndexLeft] & 1);
 		bool b1 = (oddLink && systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM);
 		bool b2 = (!oddLink && systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON);
+		if (b2 && lrs_.left().block().size()==1)
+			b2=false;
 
 		wftAll(lrs_.left().block()[lastIndexLeft]);
 
 		if (b1 || b2) return;
 
 		bool areAllLinksSeen = allLinksSeen();
-		std::cout<<"LINKS SEEN ";
+		std::ostringstream msg2;
+		msg2<<"LINKS SEEN ";
 		for (size_t i=0;i<linksSeen_.size();i++)
-			std::cout<<linksSeen_[i]<<" ";
-		std::cout<<"\n";
+			msg2<<linksSeen_[i]<<" ";
+		progress_.printline(msg2,std::cout);
 
 		if (!areAllLinksSeen) {
 			linksSeen_.push_back(lastIndexLeft);
 		} else {
-			std::cout<<"ALL LINKS SEEN\n";
+			std::ostringstream msg3;
+			msg3<<"ALL LINKS SEEN";
+			progress_.printline(msg3,std::cout);
 			return;
 		}
 
@@ -184,7 +201,9 @@ public:
 	virtual void timeHasAdvanced()
 	{
 		linksSeen_.clear();
-		std::cout<<"ALL LINKS CLEARED\n";
+		std::ostringstream msg;
+		msg<<"ALL LINKS CLEARED";
+		progress_.printline(msg,std::cout);
 	}
 
 private:
@@ -193,7 +212,7 @@ private:
 	{
 		size_t nsites = model_.geometry().numberOfSites();
 		assert(nsites>0);
-		for (size_t i=1;i<nsites-1;i++) {
+		for (size_t i=0;i<nsites-1;i++) {
 			std::vector<size_t>::const_iterator it = find(linksSeen_.begin(),linksSeen_.end(),i);
 			if (it == linksSeen_.end()) return false;
 		}
@@ -260,7 +279,7 @@ private:
 		block[1]=lrs_.right().block()[0];
 
 		ComplexMatrixType m;
-		suzukiTrotterGetMatrix(m,systemOrEnviron,block,time);
+		getMatrix(m,systemOrEnviron,block,time);
 
 		SparseMatrixType transformS = wft_.stackTransform(ProgramGlobals::SYSTEM);
 		SparseMatrixType transformST;
@@ -279,17 +298,15 @@ private:
 		for (size_t i=0;i<phi0.size();i++) {
 			size_t xp=0,yp=0;
 			packSuper.unpack(xp,yp,lrs_.super().permutation(i+offset));
-
-
 			if (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM) {
-				SuzukiTrotterTimeVectorSystem(result,phi0,xp,yp,packSuper,block,m,i,offset,transformE,transformET);
+				timeVectorSystem(result,phi0,xp,yp,packSuper,block,m,i,offset,transformE,transformET);
 			} else {
-				SuzukiTrotterTimeVectorEnviron(result,phi0,xp,yp,packSuper,block,m,i,offset,transformS,transformST);
+				timeVectorEnviron(result,phi0,xp,yp,packSuper,block,m,i,offset,transformS,transformST);
 			}
 		}
 	}
 
-	void SuzukiTrotterTimeVectorSystem(TargetVectorType& result,
+	void timeVectorSystem(TargetVectorType& result,
 									   const TargetVectorType& phi0,
 									   size_t xp,
 									   size_t yp,
@@ -311,35 +328,39 @@ private:
 		PackIndicesType packLeft(nx);
 		PackIndicesType packRight(hilbertSize);
 
-		assert(transform.col()==lrs_.right().size());
-		assert(transform.row()==oldLrs.right().permutationInverse().size());
+		if (!twoSiteDmrg_) {
+			assert(transform.col()==lrs_.right().size());
+			assert(transform.row()==oldLrs.right().permutationInverse().size());
+		}
 
-		for (int k=transformT.getRowPtr(yp);k<transformT.getRowPtr(yp+1);k++) {
+		MatrixOrIdentityType transformT1(!twoSiteDmrg_,transformT);
+		MatrixOrIdentityType transform1(!twoSiteDmrg_,transform);
+		for (size_t k=transformT1.getRowPtr(yp);k<transformT1.getRowPtr(yp+1);k++) {
 			size_t x1=0,x2p=0;
 			packLeft.unpack(x1,x2p,lrs_.left().permutation(xp));
 
-			size_t yfull = transformT.getCol(k);
+			size_t yfull = transformT1.getCol(k);
 			size_t y1p=0,y2=0;
 			packRight.unpack(y1p,y2,oldLrs.right().permutation(yfull));
 
 			for (size_t x2=0;x2<hilbertSize;x2++) {
 				for (size_t y1=0;y1<hilbertSize;y1++) {
 					size_t yfull2 = packRight.pack(y1,y2,oldLrs.right().permutationInverse());
-					for (int k2=transform.getRowPtr(yfull2);k2<transform.getRowPtr(yfull2+1);k2++) {
-						size_t y = transform.getCol(k2);
+					for (size_t k2=transform1.getRowPtr(yfull2);k2<transform1.getRowPtr(yfull2+1);k2++) {
+						size_t y = transform1.getCol(k2);
 						size_t x = packLeft.pack(x1,x2,lrs_.left().permutationInverse());
 						size_t j = packSuper.pack(x,y,lrs_.super().permutationInverse());
 						ComplexType tmp = m(iperm[x2+y1*hilbertSize],iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)==0) continue;
 						assert(j>=offset && j<offset+phi0.size());
-						result[j-offset] += tmp*phi0[i]*transformT.getValue(k)*transform.getValue(k2);
+						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*transform1.getValue(k2);
 					}
 				}
 			}
 		}
 	}
 
-	void SuzukiTrotterTimeVectorEnviron(TargetVectorType& result,
+	void timeVectorEnviron(TargetVectorType& result,
 										const TargetVectorType& phi0,
 										size_t xp,
 										size_t yp,
@@ -361,11 +382,16 @@ private:
 		PackIndicesType packLeft(nx);
 		PackIndicesType packRight(hilbertSize);
 
-		assert(transform.col()==lrs_.left().size());
-		assert(transform.row()==oldLrs.left().permutationInverse().size());
+		if (!twoSiteDmrg_) {
+			assert(transform.col()==lrs_.left().size());
+			assert(transform.row()==oldLrs.left().permutationInverse().size());
+		}
 
-		for (int k=transformT.getRowPtr(xp);k<transformT.getRowPtr(xp+1);k++) {
-			size_t xfull = transformT.getCol(k);
+		MatrixOrIdentityType transformT1(!twoSiteDmrg_,transformT);
+		MatrixOrIdentityType transform1(!twoSiteDmrg_,transform);
+
+		for (size_t k=transformT1.getRowPtr(xp);k<transformT1.getRowPtr(xp+1);k++) {
+			size_t xfull = transformT1.getCol(k);
 			size_t x1=0,x2p=0;
 			packLeft.unpack(x1,x2p,oldLrs.left().permutation(xfull));
 			assert(x2p<hilbertSize);
@@ -376,15 +402,15 @@ private:
 			for (size_t x2=0;x2<hilbertSize;x2++) {
 				for (size_t y1=0;y1<hilbertSize;y1++) {
 					size_t xfull2 = packLeft.pack(x1,x2,oldLrs.left().permutationInverse());
-					for (int k2=transform.getRowPtr(xfull2);k2<transform.getRowPtr(xfull2+1);k2++) {
-						size_t x = transform.getCol(k2);
+					for (size_t k2=transform1.getRowPtr(xfull2);k2<transform1.getRowPtr(xfull2+1);k2++) {
+						size_t x = transform1.getCol(k2);
 						size_t y = packRight.pack(y1,y2,lrs_.right().permutationInverse());
 						size_t j = packSuper.pack(x,y,lrs_.super().permutationInverse());
 						ComplexType tmp = m(iperm[x2+y1*hilbertSize],iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)==0) continue;
 						assert(j>=offset && j<offset+phi0.size());
 						//								if (j<offset || j>=offset+phi0.size()) continue;
-						result[j-offset] += tmp*phi0[i]*transformT.getValue(k)*transform.getValue(k2);
+						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*transform1.getValue(k2);
 					}
 				}
 			}
@@ -405,24 +431,24 @@ private:
 		}
 	}
 
-	void suzukiTrotterGetMatrix(ComplexMatrixType& m,size_t systemOrEnviron,const BlockType& block,const RealType& time) const
+	void getMatrix(ComplexMatrixType& m,size_t systemOrEnviron,const BlockType& block,const RealType& time) const
 	{
+		assert(block.size()==2);
 		SparseMatrixType hmatrix;
 		RealType factorForDiagonals = (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM) ? 1.0 : 0.0;
+		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON && block[0]==0) factorForDiagonals = 1.0;
+
+		if (fabs(factorForDiagonals)>1e-6) {
+			std::ostringstream msg;
+			msg<<"LINKS factors="<<factorForDiagonals<<" added for diagonals on sites ";
+			msg<<block[0]<<" and "<<block[1];
+			progress_.printline(msg,std::cout);
+		}
 		model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
 		crsMatrixToFullMatrix(m,hmatrix);
-		//				std::cout<<"Before mult\n";
-		//				std::cout<<m;
 		assert(isHermitian(m));
-		m *= time*ComplexType(0.0,-1.0);
-
-		//				std::cout<<"Before exp\n";
-		//				std::cout<<m;
-
+		m *= ComplexType(-time,0.0);
 		exp(m);
-
-		//				std::cout<<"After exp\n";
-		//				std::cout<<m;
 	}
 
 	PsimagLite::ProgressIndicator progress_;
@@ -434,6 +460,7 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
 	const RealType& E0_;
+	bool twoSiteDmrg_;
 	std::vector<size_t> linksSeen_;
 }; //class TimeVectorsSuzukiTrotter
 } // namespace Dmrg

@@ -326,6 +326,8 @@ namespace Dmrg {
 		const LeftRightSuperType& lrs() const { return dmrgWaveStruct_.lrs; }
 
 		bool isEnabled() const { return isEnabled_; }
+
+		bool twoSiteDmrg() const { return twoSiteDmrg_; }
 		
 	private:
 		

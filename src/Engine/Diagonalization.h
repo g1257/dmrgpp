@@ -260,7 +260,9 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				TargetVectorType initialVectorBySector(weights[i]);
 				initialVector.extract(initialVectorBySector,i);
-				assert(PsimagLite::norm(initialVectorBySector)>1e-6);
+				RealType norma = PsimagLite::norm(initialVectorBySector);
+				assert(norma>1e-6);
+				initialVectorBySector /= norma;
 				if (onlyWft) {
 					vecSaved[i]=initialVectorBySector;
 					gsEnergy = oldEnergy_;
