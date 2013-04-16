@@ -80,50 +80,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef METTS_PARAMS_H
 #define METTS_PARAMS_H
 
-#include<vector>
+#include "TimeVectorsParams.h"
 
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class MettsParams {
+class MettsParams : public TimeVectorsParams<ModelType> {
 public:
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorType OperatorType;
-
+	typedef TimeVectorsParams<ModelType> TimeVectorParamsType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
-	enum {KRYLOV,RUNGE_KUTTA,SUZUKI_TROTTER};
 	template<typename IoInputter>
 	MettsParams(IoInputter& io,const ModelType& model)
-	    : tau(0),timeSteps(0),advanceEach(0),noOperator(false)
+	    : TimeVectorParamsType(io,model),noOperator(false)
 	{
-		io.readline(tau,"TSPTau=");
-		io.readline(timeSteps,"TSPTimeSteps=");
-		io.readline(advanceEach,"TSPAdvanceEach=");
-		std::string s="";
-		algorithm = KRYLOV;
-		try {
-			io.readline(s,"TSPAlgorithm=");
-			if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta")
-				algorithm = RUNGE_KUTTA;
-			if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter")
-				algorithm = SUZUKI_TROTTER;
-		} catch (std::exception& e) {
-			std::string s(__FILE__);
-			s += "\n FATAL: TSPAlgorithm not found in input file.\n";
-			s += "Please add either TSPAlgorithm=Krylov or TSPAlgorithm=RungeKutta";
-			s += " or TSPAlgorithm=SuzukiTrotter just below the TSPAdvanceEach= line in the input file.\n";
-			throw std::runtime_error(s.c_str());
-		}
 		io.readline(beta,"Beta=");
 		io.readline(rngSeed,"TSPRngSeed=");
 		io.readline(collapse,"MettsCollapse=");
 	}
 
-	RealType tau;
-	size_t timeSteps;
-	size_t advanceEach;
-	size_t algorithm;
 	bool noOperator;
 	int long long rngSeed;
 	RealType beta;
@@ -134,15 +111,12 @@ template<typename ModelType>
 inline std::ostream&
 operator<<(std::ostream& os,const MettsParams<ModelType>& t)
 {
-	os<<"#TargetParams.type=TimeStep\n";
-	os<<"#TargetParams.tau="<<t.tau<<"\n";
-	os<<"#TargetParams.timeSteps="<<t.timeSteps<<"\n";
-	os<<"#TargetParams.advanceEach="<<t.advanceEach<<"\n";
+	os<<"#TargetParams.type=Metts";
+	const typename MettsParams<ModelType>::TimeVectorParamsType& tp = t;
+	os<<tp;
 	os<<"#TargetParams.beta="<<t.beta<<"\n";
 	os<<"#TargetParams.TSPRngSeed="<<t.rngSeed<<"\n";
 	os<<"#TargetParams.MettsCollapse="<<t.collapse<<"\n";
-	//const typename MettsParams<ModelType>::TargetParamsCommonType& tp = t;
-	//os<<tp;
 	return os;
 }
 } // namespace Dmrg 

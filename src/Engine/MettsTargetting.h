@@ -334,7 +334,6 @@ namespace Dmrg {
 				bool hasCollapsed = mettsCollapse_(targetVectors_[n1],targetVectors_[n1-1],sites.first,direction);
 
 				if (hasCollapsed) {
-					//throw std::runtime_error("collapsed testing\n");
 					std::string s = "  COLLAPSEHERE  ";
 					test(targetVectors_[n1],targetVectors_[n1],direction,s,sites,false);
 					if (isAtBorder(direction,sites.first))
@@ -344,7 +343,6 @@ namespace Dmrg {
 
 			void load(const std::string& f)
 			{
-				//throw std::runtime_error("Metts: load() unimplemented\n");
 				stage_ = WFT_NOADVANCE;
  
  				typename IoType::In io(f);
@@ -352,12 +350,6 @@ namespace Dmrg {
  				TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
  				for (size_t i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
  				currentBeta_ = ts.time();
- 
-				/*int site = 0;
-				io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
-								if (site<0) throw std::runtime_error("Metts::load(...): site cannot be negative\n");
- 				targetVectors_[0].load(io,"PSI");
-				*/
 			}
 
 			void print(std::ostream& os) const
@@ -806,42 +798,6 @@ namespace Dmrg {
 				normalizeVectors(startEnd);
 			}
 
-			void calcTimeVectorsTest(const PairType& startEnd,
-			                            RealType Eg,
-			                            const VectorWithOffsetType& phi,
-			                            size_t systemOrEnviron)
-			{
-				std::vector<MatrixType> V(phi.sectors());
-				std::vector<MatrixType> T(phi.sectors());
-
-				std::vector<size_t> steps(phi.sectors());
-
-				triDiag(phi,T,V,steps);
-
-				std::vector<std::vector<RealType> > eigs(phi.sectors());
-						
-				for (size_t ii=0;ii<phi.sectors();ii++) 
-					PsimagLite::diag(T[ii],eigs[ii],'V');
-				
-				calcTargetVectors(startEnd,phi,T,V,Eg,eigs,steps,systemOrEnviron);
-			}
-
-			void calcTargetVectors(const PairType& startEnd,
-			                       const VectorWithOffsetType& phi,
-			                       const std::vector<MatrixType>& T,
-			                       const std::vector<MatrixType>& V,
-			                       RealType Eg,
-			                       const std::vector<VectorType>& eigs,
-					       std::vector<size_t> steps,
-			                       size_t systemOrEnviron)
-			{
-				for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
-					// Only time differences here (i.e. betas_[i] not betas_[i]+currentBeta_)
-					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,i,steps);
-				}
-
-			}
-
 			void normalizeVectors(const PairType& startEnd)
 			{
 				for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
@@ -849,124 +805,6 @@ namespace Dmrg {
 					RealType x = 1.0/std::norm(v);
 					targetVectors_[i]= x* v;
 				}
-			}
-
-			void calcTargetVector(VectorWithOffsetType& v,
-			                      const VectorWithOffsetType& phi,
-			                      const std::vector<MatrixType>& T,
-			                      const std::vector<MatrixType>& V,
-			                      RealType Eg,
-			                      const std::vector<VectorType>& eigs,
-	    	                      size_t timeIndex,
-			                      std::vector<size_t> steps)
-			{
-				v = phi;
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i0 = phi.sector(ii);
-					VectorType r;
-					calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],timeIndex,steps[ii],i0);
-					v.setDataInSector(r,i0);
-				}
-			}
-
-			void calcTargetVector(VectorType& r,
-      		                      const VectorWithOffsetType& phi,
-			                      const MatrixType& T,
-			                      const MatrixType& V,
-			                      RealType Eg,
-			                      const VectorType& eigs,
-			                      size_t timeIndex,
-			                      size_t steps,
-			                      size_t i0)
-			{
-				size_t n2 = steps;
-				size_t n = V.n_row();
-				assert(T.n_col()==T.n_row());
-				assert(V.n_col()==T.n_col());
-
-				RealType rone = 1.0;
-				RealType rzero = 0.0;
-				
-				VectorType tmp(n2);
-				r.resize(n2);
-				calcR(r,T,V,phi,Eg,eigs,timeIndex,steps,i0);
-				psimag::BLAS::GEMV('N', n2, n2, rone, &(T(0,0)), n2, &(r[0]), 1, rzero, &(tmp[0]), 1 );
-				r.resize(n);
-				psimag::BLAS::GEMV('N', n,  n2, rone, &(V(0,0)), n, &(tmp[0]),1, rzero, &(r[0]),   1 );
-			}
-
-			void calcR(VectorType& r,
-				   const MatrixType& T,
-			           const MatrixType& V,
-				   const VectorWithOffsetType& phi,
-				   RealType Eg,
-				   const VectorType& eigs,
-				   size_t timeIndex,
-			           size_t n2,
-			           size_t i0)
-			{
-				for (size_t k=0;k<n2;k++) {
-					RealType sum = 0.0;
-					for (size_t kprime=0;kprime<n2;kprime++) {
-						RealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
-						sum += std::conj(T(kprime,k))*tmpV;
-					}
-					RealType tmp = (eigs[k])*betas_[timeIndex];
-					r[k] = sum * exp(-tmp);
-				}
-			}
-
-			RealType calcVTimesPhi(size_t kprime,
-			                      const MatrixType& V,
-			                      const VectorWithOffsetType& phi,
-			                      size_t i0)
-			{
-				RealType ret = 0;
-				size_t total = phi.effectiveSize(i0);
-				
-				for (size_t j=0;j<total;j++)
-					ret += std::conj(V(j,kprime))*phi.fastAccess(i0,j);
-				return ret;
-			}
-
-			void triDiag(const VectorWithOffsetType& phi,
-			             std::vector<MatrixType>& T,
-	 		             std::vector<MatrixType>& V,
-			             std::vector<size_t>& steps)
-			{
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i = phi.sector(ii);
-					steps[ii] = triDiag(phi,T[ii],V[ii],i);
-				}
-			}
-
-			size_t triDiag(const VectorWithOffsetType& phi,
-			               MatrixType& T,
-			               MatrixType& V,
-			               size_t i0)
-			{
-				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
-				typename ModelType::ModelHelperType modelHelper(p,lrs_);
-				 		//,useReflection_);
-				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
-
-				ParametersForSolverType params;
-				params.steps = model_.params().lanczosSteps;
-				params.tolerance = model_.params().lanczosEps;
-				params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
-
-				LanczosSolverType lanczosSolver(lanczosHelper,params,&V);
-
-				TridiagonalMatrixType ab;
-				size_t total = phi.effectiveSize(i0);
-				TargetVectorType phi2(total);
-				phi.extract(phi2,i0);
-				RealType x = PsimagLite::norm(phi2);
-				assert(x>1e-6);
-				std::cerr<<"norm of phi2="<<x<<"\n";
-				lanczosSolver.decomposition(phi2,ab);
-				lanczosSolver.buildDenseMatrix(T,ab);
-				return lanczosSolver.steps();
 			}
 
 			RealType setOneInterval(const RealType& factor,
@@ -1006,9 +844,6 @@ namespace Dmrg {
 			{
 				VectorWithOffsetType dest;
 				OperatorType A = getObservableToTest(model_.params().model);
-//				typename ModelType::HilbertBasisType basis;
-//				std::vector<size_t> quantumNumbs;
-//				assert(sites.first==sites.second);
 				std::vector<size_t> electrons;
 				findElectronsOfOneSite(electrons,sites.first);
 				FermionSign fs(lrs_.left(),electrons);

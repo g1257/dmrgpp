@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -72,52 +72,69 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TargetStructureParams.h
+/*! \file TimeVectorsParams.h
  *
  *  This is a structure to represent the parameters of the TimeStep Evolution
  *  algorithm. Don't add functions to this class because
  *  this class's data is all public
  */
-#ifndef TIMESTEP_PARAMS_H
-#define TIMESTEP_PARAMS_H
-
-#include "TimeVectorsParams.h"
-#include "TargetParamsCommon.h"
+#ifndef TIME_VECTORS_PARAMS_H
+#define TIME_VECTORS_PARAMS_H
 
 namespace Dmrg {
-	//! Coordinates reading of TargetSTructure from input file
-	template<typename ModelType>
-	class TimeStepParams : public TimeVectorsParams<ModelType>, public TargetParamsCommon<ModelType> {
+//! Coordinates reading of TargetSTructure from input file
+template<typename ModelType>
+class TimeVectorsParams {
 
-	public:
+public:
 
-		typedef TimeVectorsParams<ModelType> TimeVectorParamsType;
-		typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
-		typedef typename ModelType::RealType RealType;
+	enum {KRYLOV,RUNGE_KUTTA,SUZUKI_TROTTER};
 
-		static size_t const PRODUCT = TargetParamsCommonType::PRODUCT;
+	typedef typename ModelType::RealType RealType;
 
-		template<typename IoInputter>
-		TimeStepParams(IoInputter& io,const ModelType& model)
-			: TimeVectorParamsType(io,model),
-		      TargetParamsCommonType(io,model)
-
-		{}
-
-	}; // class TimeStepParams
-	
-	template<typename ModelType>
-	inline std::ostream&
-	operator<<(std::ostream& os,const TimeStepParams<ModelType>& t)
+	template<typename IoInputter>
+	TimeVectorsParams(IoInputter& io,const ModelType& model)
+	    : tau(0),timeSteps(0),advanceEach(0),algorithm(KRYLOV)
 	{
-		os<<"#TargetParams.type=TimeStep\n";
-		const typename TimeStepParams<ModelType>::TimeVectorParamsType& tp1 = t;
-		os<<tp1;
-		const typename TimeStepParams<ModelType>::TargetParamsCommonType& tp = t;
-		os<<tp;
-		return os;
+		io.readline(tau,"TSPTau=");
+		io.readline(timeSteps,"TSPTimeSteps=");
+		io.readline(advanceEach,"TSPAdvanceEach=");
+		std::string s="";
+
+		try {
+			io.readline(s,"TSPAlgorithm=");
+			if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta")
+				algorithm = RUNGE_KUTTA;
+			if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter")
+				algorithm = SUZUKI_TROTTER;
+		} catch (std::exception& e) {
+			std::string s(__FILE__);
+			s += "\n FATAL: TSPAlgorithm not found in input file.\n";
+			s += "Please add either TSPAlgorithm=Krylov or TSPAlgorithm=RungeKutta";
+			s += " or TSPAlgorithm=SuzukiTrotter just below the TSPAdvanceEach= line in the input file.\n";
+			throw std::runtime_error(s.c_str());
+		}
 	}
+
+	RealType tau;
+	size_t timeSteps;
+	size_t advanceEach;
+	size_t algorithm;
+
+}; // class TimeVectorsParams
+
+template<typename ModelType>
+inline std::ostream&
+operator<<(std::ostream& os,const TimeVectorsParams<ModelType>& t)
+{
+	os<<"#TargetParams.type=TimeVectors";
+	os<<"#TargetParams.tau="<<t.tau<<"\n";
+	os<<"#TargetParams.timeSteps="<<t.timeSteps<<"\n";
+	os<<"#TargetParams.advanceEach="<<t.advanceEach<<"\n";
+	os<<"#TargetParams.algorithm="<<t.algorithm<<"\n";
+	return os;
+}
 } // namespace Dmrg 
 
 /*@}*/
-#endif // TIMESTEP_PARAMS_H
+#endif // TIME_VECTORS_PARAMS_H
