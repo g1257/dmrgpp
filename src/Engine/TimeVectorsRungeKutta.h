@@ -100,11 +100,13 @@ class TimeVectorsRungeKutta : public  TimeVectorsBase<
 	typedef typename TargettingParamsType::RealType RealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef std::complex<RealType> ComplexType;
-//	typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
-	typedef std::vector<ComplexType> VectorComplexType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixComplexOrRealType;
+	typedef std::vector<ComplexOrRealType> VectorComplexOrRealType;
 	typedef std::vector<RealType> VectorRealType;
-	typedef VectorComplexType TargetVectorType;
+	typedef VectorComplexOrRealType TargetVectorType;
 
 public:
 
@@ -172,7 +174,7 @@ private:
 			TargetVectorType x(y.size());
 			lanczosHelper_.matrixVectorProduct(x,y);
 			for (size_t i=0;i<x.size();i++) x[i] -= E0_*y[i];
-			ComplexType icomplex(0,1);
+			ComplexOrRealType icomplex(0,1);
 			return -icomplex * x;
 		}
 

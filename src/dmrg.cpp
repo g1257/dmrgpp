@@ -66,8 +66,7 @@ typedef ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> Parameters
 
 template<typename ModelFactoryType,
 	 template<typename,typename> class InternalProductTemplate,
-         typename TargettingType,
-         typename MySparseMatrix>
+         typename TargettingType>
 void mainLoop3(GeometryType& geometry,
               ParametersDmrgSolverType& dmrgSolverParams,
               ConcurrencyType& concurrency,
@@ -120,7 +119,7 @@ void mainLoop2(GeometryType& geometry,
 					   PsimagLite::IoSimple,
 					   VectorWithOffsetTemplate
 					   > TargettingType;
-		mainLoop3<ModelFactoryType, InternalProductTemplate,TargettingType,MySparseMatrix>
+		mainLoop3<ModelFactoryType, InternalProductTemplate,TargettingType>
 		(geometry,dmrgSolverParams,concurrency,io);
 	} else {
 		typedef TargettingTemplate<PsimagLite::LanczosSolver,
@@ -131,7 +130,7 @@ void mainLoop2(GeometryType& geometry,
 					   PsimagLite::IoSimple,
 					   VectorWithOffsetTemplate
 					   > TargettingType;
-		mainLoop3<ModelFactoryType,InternalProductTemplate,TargettingType,MySparseMatrix>
+		mainLoop3<ModelFactoryType,InternalProductTemplate,TargettingType>
 		(geometry,dmrgSolverParams,concurrency,io);
 	}
 }

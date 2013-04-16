@@ -102,16 +102,16 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 	typedef typename TargettingParamsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef std::complex<RealType> ComplexType;
-	typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
-	typedef std::vector<ComplexType> VectorComplexType;
-	typedef std::vector<RealType> VectorRealType;
-	typedef VectorComplexType TargetVectorType;
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixComplexOrRealType;
+	typedef std::vector<ComplexOrRealType> VectorComplexOrRealType;
+	typedef std::vector<RealType> VectorRealType;
+	typedef VectorComplexOrRealType TargetVectorType;
 
 public:
 
@@ -278,7 +278,7 @@ private:
 		block[0]=lrs_.left().block()[lastIndexLeft];
 		block[1]=lrs_.right().block()[0];
 
-		ComplexMatrixType m;
+		MatrixComplexOrRealType m;
 		getMatrix(m,systemOrEnviron,block,time);
 
 		SparseMatrixType transformS = wft_.stackTransform(ProgramGlobals::SYSTEM);
@@ -312,7 +312,7 @@ private:
 									   size_t yp,
 									   const PackIndicesType& packSuper,
 									   const BlockType& block,
-									   const ComplexMatrixType& m,
+									   const MatrixComplexOrRealType& m,
 									   size_t i,
 									   size_t offset,
 									   const SparseMatrixType& transform,
@@ -350,7 +350,7 @@ private:
 						size_t y = transform1.getCol(k2);
 						size_t x = packLeft.pack(x1,x2,lrs_.left().permutationInverse());
 						size_t j = packSuper.pack(x,y,lrs_.super().permutationInverse());
-						ComplexType tmp = m(iperm[x2+y1*hilbertSize],iperm[x2p+y1p*hilbertSize]);
+						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)==0) continue;
 						assert(j>=offset && j<offset+phi0.size());
 						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*transform1.getValue(k2);
@@ -366,7 +366,7 @@ private:
 										size_t yp,
 										const PackIndicesType& packSuper,
 										const BlockType& block,
-										const ComplexMatrixType& m,
+										const MatrixComplexOrRealType& m,
 										size_t i,
 										size_t offset,
 										const SparseMatrixType& transform,
@@ -406,7 +406,7 @@ private:
 						size_t x = transform1.getCol(k2);
 						size_t y = packRight.pack(y1,y2,lrs_.right().permutationInverse());
 						size_t j = packSuper.pack(x,y,lrs_.super().permutationInverse());
-						ComplexType tmp = m(iperm[x2+y1*hilbertSize],iperm[x2p+y1p*hilbertSize]);
+						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)==0) continue;
 						assert(j>=offset && j<offset+phi0.size());
 						//								if (j<offset || j>=offset+phi0.size()) continue;
@@ -431,7 +431,7 @@ private:
 		}
 	}
 
-	void getMatrix(ComplexMatrixType& m,size_t systemOrEnviron,const BlockType& block,const RealType& time) const
+	void getMatrix(MatrixComplexOrRealType& m,size_t systemOrEnviron,const BlockType& block,const RealType& time) const
 	{
 		assert(block.size()==2);
 		SparseMatrixType hmatrix;
@@ -447,7 +447,7 @@ private:
 		model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
 		crsMatrixToFullMatrix(m,hmatrix);
 		assert(isHermitian(m));
-		m *= ComplexType(-time,0.0);
+		m *= ComplexOrRealType(-time,0.0);
 		exp(m);
 	}
 

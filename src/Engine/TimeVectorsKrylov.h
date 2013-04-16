@@ -99,13 +99,14 @@ class TimeVectorsKrylov : public  TimeVectorsBase<
 
 	typedef typename TargettingParamsType::RealType RealType;
 	typedef std::vector<RealType> VectorRealType;
-	typedef std::complex<RealType> ComplexType;
-	typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
-	typedef std::vector<ComplexType> VectorComplexType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixComplexOrRealType;
+	typedef std::vector<ComplexOrRealType> TargetVectorType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef VectorComplexType TargetVectorType;
 
 public:
 
@@ -146,8 +147,8 @@ private:
 								const VectorWithOffsetType& phi,
 								size_t systemOrEnviron)
 	{
-		std::vector<ComplexMatrixType> V(phi.sectors());
-		std::vector<ComplexMatrixType> T(phi.sectors());
+		std::vector<MatrixComplexOrRealType> V(phi.sectors());
+		std::vector<MatrixComplexOrRealType> T(phi.sectors());
 
 		std::vector<size_t> steps(phi.sectors());
 
@@ -165,8 +166,8 @@ private:
 
 	//! Do not normalize states here, it leads to wrong results (!)
 	void calcTargetVectors(const VectorWithOffsetType& phi,
-						   const std::vector<ComplexMatrixType>& T,
-						   const std::vector<ComplexMatrixType>& V,
+						   const std::vector<MatrixComplexOrRealType>& T,
+						   const std::vector<MatrixComplexOrRealType>& V,
 						   RealType Eg,
 						   const std::vector<VectorRealType>& eigs,
 						   std::vector<size_t> steps,
@@ -185,8 +186,8 @@ private:
 	void calcTargetVector(
 			VectorWithOffsetType& v,
 			const VectorWithOffsetType& phi,
-			const std::vector<ComplexMatrixType>& T,
-			const std::vector<ComplexMatrixType>& V,
+			const std::vector<MatrixComplexOrRealType>& T,
+			const std::vector<MatrixComplexOrRealType>& V,
 			RealType Eg,
 			const std::vector<VectorRealType>& eigs,
 			RealType t,
@@ -195,7 +196,7 @@ private:
 		v = phi;
 		for (size_t ii=0;ii<phi.sectors();ii++) {
 			size_t i0 = phi.sector(ii);
-			VectorComplexType r;
+			TargetVectorType r;
 			calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],t,steps[ii],i0);
 			//std::cerr<<"TARGET FOR t="<<t<<" "<<PsimagLite::norm(r)<<" "<<norm(phi)<<"\n";
 			v.setDataInSector(r,i0);
@@ -203,10 +204,10 @@ private:
 	}
 
 	void calcTargetVector(
-			VectorComplexType& r,
+			TargetVectorType& r,
 			const VectorWithOffsetType& phi,
-			const ComplexMatrixType& T,
-			const ComplexMatrixType& V,
+			const MatrixComplexOrRealType& T,
+			const MatrixComplexOrRealType& V,
 			RealType Eg,
 			const VectorRealType& eigs,
 			RealType t,
@@ -218,12 +219,12 @@ private:
 		if (T.n_col()!=T.n_row()) throw std::runtime_error("T is not square\n");
 		if (V.n_col()!=T.n_col()) throw std::runtime_error("V is not nxn2\n");
 		// for (size_t j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
-		ComplexType zone = 1.0;
-		ComplexType zzero = 0.0;
+		ComplexOrRealType zone = 1.0;
+		ComplexOrRealType zzero = 0.0;
 
 		//check1(phi,i0);
 		//check2(T,V,phi,n2,i0);
-		VectorComplexType tmp(n2);
+		TargetVectorType tmp(n2);
 		r.resize(n2);
 		calcR(r,T,V,phi,Eg,eigs,t,steps,i0);
 		//				std::cerr<<"TARGET FOR t="<<t<<" after calcR norm="<<PsimagLite::norm(r)<<"\n";
@@ -233,9 +234,9 @@ private:
 		psimag::BLAS::GEMV('N', n,  n2, zone, &(V(0,0)), n, &(tmp[0]),1, zzero, &(r[0]),   1 );
 	}
 
-	void calcR(VectorComplexType& r,
-			   const ComplexMatrixType& T,
-			   const ComplexMatrixType& V,
+	void calcR(TargetVectorType& r,
+			   const MatrixComplexOrRealType& T,
+			   const MatrixComplexOrRealType& V,
 			   const VectorWithOffsetType& phi,
 			   RealType Eg,
 			   const VectorRealType& eigs,
@@ -244,21 +245,21 @@ private:
 			   size_t i0)
 	{
 		for (size_t k=0;k<n2;k++) {
-			ComplexType sum = 0.0;
+			ComplexOrRealType sum = 0.0;
 			for (size_t kprime=0;kprime<n2;kprime++) {
-				ComplexType tmpV = calcVTimesPhi(kprime,V,phi,i0);
+				ComplexOrRealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
 				sum += conj(T(kprime,k))*tmpV;
 			}
 			RealType tmp = (eigs[k]-E0_)*t;
-			ComplexType c(cos(tmp),-sin(tmp));
+			ComplexOrRealType c(cos(tmp),-sin(tmp));
 			r[k] = c * sum;
 		}
 	}
 
-	ComplexType calcVTimesPhi(size_t kprime,const ComplexMatrixType& V,const VectorWithOffsetType& phi,
+	ComplexOrRealType calcVTimesPhi(size_t kprime,const MatrixComplexOrRealType& V,const VectorWithOffsetType& phi,
 							  size_t i0) const
 	{
-		ComplexType ret = 0;
+		ComplexOrRealType ret = 0;
 		size_t total = phi.effectiveSize(i0);
 
 		for (size_t j=0;j<total;j++)
@@ -268,8 +269,8 @@ private:
 
 	void triDiag(
 			const VectorWithOffsetType& phi,
-			std::vector<ComplexMatrixType>& T,
-			std::vector<ComplexMatrixType>& V,
+			std::vector<MatrixComplexOrRealType>& T,
+			std::vector<MatrixComplexOrRealType>& V,
 			std::vector<size_t>& steps)
 	{
 		for (size_t ii=0;ii<phi.sectors();ii++) {
@@ -278,7 +279,7 @@ private:
 		}
 	}
 
-	size_t triDiag(const VectorWithOffsetType& phi,ComplexMatrixType& T,ComplexMatrixType& V,size_t i0)
+	size_t triDiag(const VectorWithOffsetType& phi,MatrixComplexOrRealType& T,MatrixComplexOrRealType& V,size_t i0)
 	{
 		size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelType::ModelHelperType modelHelper(p,lrs_);
