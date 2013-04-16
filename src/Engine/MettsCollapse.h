@@ -113,8 +113,6 @@ namespace Dmrg {
 		MettsCollapse(const MettsStochasticsType& mettsStochastics,
 			      const LeftRightSuperType& lrs,
 					  const TargettingParamsType& targetParams)
-//				  int long long seed,
-//					  size_t rotateBasis)
 		: mettsStochastics_(mettsStochastics),
 		  lrs_(lrs),
 		  rng_(targetParams.rngSeed),
@@ -206,8 +204,6 @@ namespace Dmrg {
 
 			dest2 =  dest;
 			std::cerr<<" Norm of the collapsed="<<std::norm(dest2)<<"\n";
-//			if (fabs(x)<1e-6)
-//				throw std::runtime_error("collapseVector\n");
 		}
 
 		void collapseVector(VectorWithOffsetType& w, // <<---- CPS
@@ -220,8 +216,6 @@ namespace Dmrg {
 		{
 			if (direction==EXPAND_SYSTEM)  collapseVectorLeft(w,v,m,indexFixed,nk,border);
 			else  collapseVectorRight(w,v,m,indexFixed,nk,border);
-			//if (option && direction!=prevDirection_) compare1(w,v);
-//			assert(fabs(PsimagLite::norm(w))>1e-6);
 		}
 
 		void compare1(const VectorType& v1,const VectorType& v2) const
@@ -427,28 +421,6 @@ namespace Dmrg {
 			rotation2d(m2,1,2,theta);
 			m=m2;
 		}
-//		void rotation4d(MatrixType& m) const
-//		{
-//			assert(m.n_row()==4 && m.n_col()==4);
-
-//			MatrixType aux1(m.n_row(),m.n_col());
-//			RealType theta = M_PI*rng_();
-//			rotation2d(aux1,0,1,theta);
-
-//			theta = M_PI*rng_();
-//			MatrixType aux2(m.n_row(),m.n_col());
-//			rotation2d(aux2,1,2,theta);
-
-//			MatrixType aux3(m.n_row(),m.n_col());
-//			theta = M_PI*rng_();
-//			rotation2d(aux3,2,3,theta);
-
-//			MatrixType aux4(m.n_row(),m.n_col());
-//			theta = M_PI*rng_();
-//			rotation2d(aux4,3,0,theta);
-
-//			m = (aux1 * aux2)*(aux3*aux4);
-//		}
 
 		void rotationNd(MatrixType& m,size_t hilbertSize) const
 		{
@@ -478,23 +450,6 @@ namespace Dmrg {
 			bool b1 = (direction==EXPAND_SYSTEM && lrs_.right().size()==nk);
 			bool b2 = (direction==EXPAND_ENVIRON && lrs_.left().size()==nk);
 			return (b1 || b2);
-		}
-
-		void examineVector(const VectorWithOffsetType& phi) const
-		{
-			for (size_t ii=0;ii<phi.sectors();ii++) {
-				size_t i0 = phi.sector(ii);
-				VectorType v;
-				phi.extract(v,i0);
-				RealType tmpNorm = PsimagLite::norm(v);
-				if (fabs(tmpNorm)>1e-5) {
-					size_t j = lrs_.super().qn(lrs_.super().partition(i0));
-					std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
-					std::cerr<<"examineVector: qns= ";
-					for (size_t k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
-					std::cerr<<"\n";
-				}
-			}
 		}
 
 		const MettsStochasticsType& mettsStochastics_;

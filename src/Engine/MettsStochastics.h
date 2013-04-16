@@ -158,7 +158,6 @@ namespace Dmrg {
 					throw std::runtime_error("MettsStochastics::update(...): must start from 0\n");
 				pureStates_.resize(sites.second+2);
 				initialSetOfPures(seed);
-				//getStochasticsAll(qn,seed);
 				addedSites_.push_back(sites.first-1);
 				addedSites_.push_back(sites.second+1);
 				currentSites.push_back(sites.first-1);
@@ -170,7 +169,6 @@ namespace Dmrg {
 				addedSites_.push_back(sites.second);
 				qnVsSize_.resize(addedSites_.size()+1,0);
 				qnVsSize_[addedSites_.size()]=qn;
-				//getStochasticsUpToThisPoint(qn,currentSites);
 				return; // INFINITE
 			}
 
@@ -178,7 +176,6 @@ namespace Dmrg {
 			// pureStates_ anymore in the finite phase
 			if (std::find(addedSites_.begin(),addedSites_.end(),
 				sites.first) != addedSites_.end()) {
-				//getStochasticsForLattice();
 				addedSites_.clear();
 			}
 			addedSites_.push_back(sites.first);
@@ -202,149 +199,11 @@ namespace Dmrg {
 			std::vector<size_t> block(1,site);
 			model_.setNaturalBasis(basisOfOneSite,quantumNumbsOneSite,block);
 		}
-// 		void getStochasticsForLattice()
-// 		{
-// 			for (size_t i=0;i<pureStates_.size();i++) 
-// 				pureStates_[i] = size_t(random48_()*basisOfOneSite_.size());
-// 			size_t sys = addedSites_.size()/2;
-// 			size_t env = sys;
-// 			addedSites_.clear();
-// 			addedSites_.push_back(0);
-// 			addedSites_.push_back(2*env-1);
-// 			for (size_t i=1;i<sys;i++) {
-// 				addedSites_.push_back(i);
-// 				addedSites_.push_back(2*env-i-1);
-// 				std::vector<size_t> sites;
-// 				sites.push_back(i);
-// 				sites.push_back(2*env-i-1);
-// 				getStochasticsUpToThisPoint(qnVsSize_[addedSites_.size()],sites);
-// 			}
-// 		}
-
-		void getStochasticsAll(size_t qn,size_t seed)
-		{
-			size_t allSites = model_.geometry().numberOfSites();
-			assert(allSites==pureStates_.size());
-			size_t nk = model_.hilbertSize(0);
-			size_t symm = getSymmetryAllSites();
-			size_t counter = 0;
-			while(symm!=qn) {
-				counter++;
-				if (counter>1e6) {
-					std::string s(__FILE__);
-					s += std::string(" ") + ttos(__LINE__) + std::string(" ") +
-					std::string(__FUNCTION__);
-					s += std::string(" too many iterations\n");
-					throw std::runtime_error(s.c_str());
-				}
-				for (size_t i=0;i<allSites;i++) {
-					size_t thisSite = size_t(rng_()*allSites);
-					raiseOrLowerSymm(thisSite,(symm<qn),nk);
-					symm = getSymmetryAllSites();
-					if (symm==qn) break;
-				}
-			}
-			std::ostringstream msg;
-			msg<<"targetQn="<<qn<<" sites="<<addedSites_.size();
-			msg<<" seed="<<seed<<" Pure=";
-			for (size_t i=0;i<pureStates_.size();i++)
-				msg<<pureStates_[i]<<" ";
-			progress_.printline(msg,std::cout);
-		}
-
-//		void getStochasticsUpToThisPoint(size_t qn,
-//		                                 const std::vector<size_t>& currentSites)
-//		{
-//			// fix target quantum number
-//			size_t symm = getSymmetry();
-//			size_t counter = 0;
-//			while(symm!=qn) {
-//				counter++;
-//				if (counter>1e6) {
-//					std::string s(__FILE__);
-//					s += std::string(" ") + ttos(__LINE__) + std::string(" ") +
-//					std::string(__FUNCTION__);
-//					s += std::string(" too many iterations\n");
-//					throw std::runtime_error(s.c_str());
-//				}
-//				for (size_t i=0;i<currentSites.size();i++) {
-//					size_t thisSite = currentSites[i];
-//					if (i==1 && currentSites[0]==currentSites[1]) break;
-//					raiseOrLowerSymm(thisSite,(symm<qn));
-//					symm = getSymmetry();
-//					if (symm==qn) break;
-//				}
-//			}
-//			std::ostringstream msg;
-//			msg<<"targetQn="<<qn<<" sites="<<addedSites_.size()<<" Pure=";
-//			for (size_t i=0;i<pureStates_.size();i++)
-//				msg<<pureStates_[i]<<" ";
-//			progress_.printline(msg,std::cout);
-//		}
-
-		// assumes states in basisOfOneSite_ are ordered in increasing
-		// symmetry
-		void raiseOrLowerSymm(size_t site,bool raiseSymm,size_t nk)
-		{
-			if (raiseSymm) {
-				if (pureStates_[site]<model_.hilbertSize(site)-1)
-					pureStates_[site]++;
-				else
-					pureStates_[site]=0;
-				return;
-			}
-			
-			if (pureStates_[site]>0) pureStates_[site]--;
-			else pureStates_[site] = nk-1;
-		}
-
-		// assumes local symmetry througout
-//		size_t getSymmetry() const
-//		{
-//			std::vector<size_t> quantumNumbsOneSite;
-//			HilbertBasisType basisOfOneSite;
-			
-//			size_t sum = 0;
-//			for (size_t i=0;i<addedSites_.size();i++) {
-//				basisForOneSite(quantumNumbsOneSite,basisOfOneSite,addedSites_[i]);
-//				sum += quantumNumbsOneSite[pureStates_[addedSites_[i]]];
-//			}
-//			return sum;
-//		}
-
-		size_t getSymmetryAllSites() const
-		{
-			std::vector<size_t> quantumNumbsOneSite;
-			HilbertBasisType basisOfOneSite;
-
-			size_t allSites = model_.geometry().numberOfSites();
-			size_t sum = 0;
-			for (size_t i=0;i<allSites;i++) {
-				basisForOneSite(quantumNumbsOneSite,basisOfOneSite,i);
-				sum += quantumNumbsOneSite[pureStates_[i]];
-			}
-			return sum;
-		}
 
 		void initialSetOfPures(LongType seed)
 		{
-//			size_t nk = model_.hilbertSize(0);
-//			for (size_t i=0;i<pureStates_.size();i++) {
-//				pureStates_[i] = getState(i,nk,seed);
-//			}
-
 			for (size_t i=0;i<pureStates_.size();i++)
 				pureStates_[i] = size_t(rng_()*model_.hilbertSize(i));
-		}
-
-		size_t getState(size_t i,size_t nk,LongType seed) const
-		{
-			size_t myshift = nk*i;
-			seed >>= myshift;
-			size_t mask = 1;
-			mask <<= nk;
-			mask --;
-			return (seed & mask);
 		}
 
 		const ModelType& model_;
@@ -352,8 +211,6 @@ namespace Dmrg {
 		PsimagLite::ProgressIndicator progress_;
 		std::vector<size_t> pureStates_;
 		std::vector<size_t> addedSites_;
-// 		std::vector<size_t> quantumNumbsOneSite_;
-// 		typename ModelType::HilbertBasisType basisOfOneSite_;
 		std::vector<size_t> qnVsSize_;
 	};  //class MettsStochastics
 } // namespace Dmrg

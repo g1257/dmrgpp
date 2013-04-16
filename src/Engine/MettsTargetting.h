@@ -121,7 +121,6 @@ namespace Dmrg {
 			    LanczosSolverType;
 			typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-			//typedef typename BasisWithOperatorsType::BasisType BasisType;
 			typedef MettsParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
 			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
@@ -138,16 +137,12 @@ namespace Dmrg {
 			typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
 			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 
-			//typedef typename RngType::LongType LongType;
-
 			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
 			const static size_t SYSTEM = ProgramGlobals::SYSTEM;
 
-			// static size_t const PRODUCT = TargettingParamsType::PRODUCT;
-			// static size_t const SUM = TargettingParamsType::SUM;
 			static const size_t parallelRank_ = 0; // Metts needs to support concurrency FIXME
 
 			MettsTargetting(const LeftRightSuperType& lrs,
@@ -341,21 +336,6 @@ namespace Dmrg {
 			{
 				std::string s("MettsTargetting: Invalid call to initialGuess\n");
 				throw std::runtime_error(s.c_str());
-// 				std::ostringstream msg;
-// 				msg<<"WARNING: initial guess: Needs work";
-// 				progress_.printline(msg,std::cout);
-//  				wft_.setInitialVector(v,psi_,lrs_);
-				
-// 				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
-// 				if (!b) return;
-// 				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
-// 				for (size_t i=0;i<targetVectors_.size();i++) {
-// 					wft_.setInitialVector(vv[i],
-// 						targetVectors_[i],lrs_);
-// 					if (norm(vv[i])<1e-6) continue;
-// 					VectorWithOffsetType w= weight_[i]*vv[i];
-// 					v += w;
-// 				}
 			}
 
 			template<typename IoOutputType>
@@ -376,9 +356,6 @@ namespace Dmrg {
 				}
 				TimeSerializerType ts(currentBeta_,block[0],targetVectors,marker);
  				ts.save(io);
-				/* std::string s = "#TCENTRALSITE=" + ttos(block[0]);
-				io.printline(s);
- 				targetVectors_[0].save(io,"PSI");*/
 			}
 
 			RealType time() const { return 0; }
@@ -481,8 +458,6 @@ namespace Dmrg {
 			{
 				if (targetVectors_[index].size()==0) return;
 				assert(std::norm(targetVectors_[index])>1e-6);
-// 				size_t indexAdvance = betas_.size()-1; // FIXME 
-// 				size_t indexNoAdvance = 0;
 
 				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE || stage_==COLLAPSE) {
 					size_t advance = index;
@@ -497,15 +472,12 @@ namespace Dmrg {
 					//phiNew.populateSectors(lrs_.super());
 					assert(std::norm(targetVectors_[advance])>1e-6);
 
-//					examineTarget(targetVectors_[advance],advance);
-					//populateCorrectSector(phiNew,lrs_);
 					phiNew.populateSectors(lrs_.super());
 					// OK, now that we got the partition number right, let's wft:
 					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_,nk);
 					phiNew.collapseSectors();
 					assert(std::norm(phiNew)>1e-6);
 					targetVectors_[index] = phiNew;
-					//examineTarget(targetVectors_[index],index);
 				} else {
 					assert(false);
 				}
@@ -513,10 +485,6 @@ namespace Dmrg {
 
 			void updateStochastics(const PairType& sites)
 			{
-				// only way of getting the quantum number where the
-				//  the pure resides
-				//size_t m = getPartition();
-				//size_t qn = lrs_.super().qn(lrs_.super().partition(m));
 				size_t linSize = model_.geometry().numberOfSites();
 				std::vector<size_t> tqn(2,0);
 				if (model_.params().targetQuantumNumbers.size()>=2) {
@@ -556,7 +524,6 @@ namespace Dmrg {
 				VectorType newVector1(transformSystem.n_row(),0);
 				getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
 				           alphaFixed,lrs_.left(),transformSystem,sites.first);
-// 				systemPrev_.ns = pureVectors_.first.size();
 				pureVectors_.first = newVector1;
 
 				const MatrixType& transformEnviron = 
@@ -564,10 +531,8 @@ namespace Dmrg {
 				VectorType newVector2(transformEnviron.n_row(),0);
 				getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
 						   betaFixed,lrs_.right(),transformEnviron,sites.second);
-// 				environPrev_.ns = pureVectors_.second.size();
 				pureVectors_.second = newVector2;
 				setFromInfinite(targetVectors_[0],lrs_);
-				//examineTarget(targetVectors_[0],0);
 				assert(std::norm(targetVectors_[0])>1e-6);
 
 				systemPrev_.fixed = alphaFixed;
@@ -708,27 +673,9 @@ namespace Dmrg {
 				assert(PsimagLite::norm(oldVector)>1e-6);
 			}
 
-			void populateCorrectSector(VectorWithOffsetType& phi,const LeftRightSuperType& lrs) const
-			{
-				size_t total = lrs.super().partition()-1;
-				size_t m = getPartition();
-				std::vector<VectorType> vv;
-				for (size_t i=0;i<total;i++) {
-					size_t bs = lrs.super().partition(i+1)-lrs.super().partition(i);
-					if (i!=m) bs=0;
-					VectorType vone(bs);
-					vv.push_back(vone);
-				}
-				
-				phi.set(vv,lrs.super());
-				assert(phi.sectors()==1);
-			}
-
 			void setFromInfinite(VectorWithOffsetType& phi,const LeftRightSuperType& lrs) const
 			{
-				//populateCorrectSector(phi,lrs);
 				phi.populateSectors(lrs.super());
-				//std::cerr<<"NUUUUUUMBBBBBBBERRRRRRRRR OF SEEEEECTTTTTTTTORRRRRRRRS="<<phi.sectors()<<"\n";
 				for (size_t ii=0;ii<phi.sectors();ii++) {
 					size_t i0 = phi.sector(ii);
 					VectorType v;
@@ -960,15 +907,11 @@ namespace Dmrg {
 				size_t total = phi.effectiveSize(i0);
 				TargetVectorType phi2(total);
 				phi.extract(phi2,i0);
-				/* std::ostringstream msg;
-				msg<<"Calling tridiagonalDecomposition...\n";
-				progress_.printline(msg,std::cerr);*/
 				RealType x = PsimagLite::norm(phi2);
 				assert(x>1e-6);
 				std::cerr<<"norm of phi2="<<x<<"\n";
 				lanczosSolver.decomposition(phi2,ab);
 				lanczosSolver.buildDenseMatrix(T,ab);
-				//check1(V,phi2);
 				return lanczosSolver.steps();
 			}
 
@@ -989,60 +932,6 @@ namespace Dmrg {
 				sum += weight_[startEnd.second-1];
 				sum += weight_[startEnd.first];
 				return sum;
-			}
-
-			//! This check is invalid if there are more than one sector
-			void check1(const MatrixType& V,const TargetVectorType& phi2)
-			{
-				assert(V.n_col()<=V.n_row());
-				TargetVectorType r(V.n_col());
-				for (size_t k=0;k<V.n_col();k++) {
-					r[k] = 0.0;
-					for (size_t j=0;j<V.n_row();j++) 
-						r[k] += conj(V(j,k))*phi2[j];
-					// is r(k) == \delta(k,0)
-					if (k==0 && std::norm(r[k]-1.0)>1e-5) 
-						std::cerr<<"WARNING: r[0]="<<r[0]<<" != 1\n";
-					if (k>0 && std::norm(r[k])>1e-5) 
-						std::cerr<<"WARNING: r["<<k<<"]="<<r[k]<<" !=0\n";
-				}
-			}
-
-// 			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
-// 			{
-// 				FermionSign fs(lrs_.left(),mettsStruct_.electrons);
-// 				if (allStages(WFT_NOADVANCE)) {
-// 					VectorWithOffsetType tmpVector = psi_;
-// 					for (size_t j=0;j<mettsStruct_.aOperators.size();j++) {
-// 						applyOpLocal_(phi,tmpVector,mettsStruct_.aOperators[j],fs,
-// 							systemOrEnviron);
-// 						tmpVector = phi;
-// 					}
-// 					return;
-// 				}
-// 				applyOpLocal_(phi,psi_,mettsStruct_.aOperators[i],fs,
-// 								systemOrEnviron);
-// 			}
-
-			void examineTarget(const VectorWithOffsetType& phi,size_t index) const
-			{
-				std::cerr<<"HEEEEEEEREEEEEEEE size="<<phi.size()<<" index="<<index<<" sectors="<<phi.sectors()<<"\n";
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i = phi.sector(ii);
-					VectorType phi2;
-					phi.extract(phi2,i);
-					std::cerr<<"NOOOOOOORMMMMMMMM of "<<i<<" is "<<PsimagLite::norm(phi2)<<" index="<<index;
-					size_t qn = lrs_.super().qn(phi.offset(i));
-					std::cerr<<" sectorSize="<<phi2.size()<<" QN="<<qn<<"\n";
-					PsimagLite::IoSimple::Out io("test1.txt",0);
-					io.printVector(phi2,"phi2");
-				}
-			}
-
-			void zeroOutVectors()
-			{
-				for (size_t i=0;i<targetVectors_.size();i++) 
-					targetVectors_[i].resize(lrs_.super().size());
 			}
 
 			void findElectronsOfOneSite(std::vector<size_t>& electrons,size_t site) const
@@ -1178,7 +1067,6 @@ namespace Dmrg {
 			}
 
 			size_t stage_;
-			//VectorWithOffsetType psi_;
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
 			const TargettingParamsType& mettsStruct_;
@@ -1189,7 +1077,6 @@ namespace Dmrg {
 			std::vector<RealType> betas_,weight_;
 			std::vector<VectorWithOffsetType> targetVectors_;
 			RealType gsWeight_;
-			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
 			MettsStochasticsType mettsStochastics_;
 			MettsCollapseType mettsCollapse_;

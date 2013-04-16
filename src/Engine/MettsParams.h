@@ -87,27 +87,18 @@ namespace Dmrg {
 	template<typename ModelType>
 	class MettsParams {
 		public:
-// 			typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
 			typedef typename ModelType::RealType RealType;
-
-			//static size_t const PRODUCT = TargetParamsCommonType::PRODUCT;
 
 			template<typename IoInputter>
 			MettsParams(IoInputter& io,const ModelType& model)
 				: tau(0),timeSteps(0),advanceEach(0)
 			{
-//				io.rewind();
-				//this->concatenation = PRODUCT;
 				io.readline(tau,"TSPTau=");
 				io.readline(timeSteps,"TSPTimeSteps=");
 				io.readline(advanceEach,"TSPAdvanceEach=");
 				io.readline(beta,"Beta=");
 				io.readline(rngSeed,"TSPRngSeed=");
 				io.readline(collapse,"MettsCollapse=");
-// 				typename ModelType::HilbertBasisType basis;
-// 				std::vector<size_t> quantumNumbs;
-// 				model.setNaturalBasis(basis,quantumNumbs,1);
-// 				model.findElectrons(electrons,basis);
 			}
 			
 			RealType tau;
@@ -116,7 +107,6 @@ namespace Dmrg {
 			int long long rngSeed;
 			RealType beta;
 			std::string collapse;
-// 			std::vector<size_t> electrons;
 	}; // class MettsParams
 	
 	template<typename ModelType>
