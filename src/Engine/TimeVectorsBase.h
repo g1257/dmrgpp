@@ -95,9 +95,12 @@ class TimeVectorsBase  {
 
 public:
 
-	virtual void calcTimeVectors(RealType Eg,
-								 const VectorWithOffsetType& phi,
-								 size_t systemOrEnviron)=0;
+	typedef std::pair<size_t,size_t> PairType;
+
+	virtual void calcTimeVectors(const PairType& startEnd,
+	                             RealType Eg,
+	                             const VectorWithOffsetType& phi,
+	                             size_t systemOrEnviron)=0;
 
 	virtual ~TimeVectorsBase() {}
 

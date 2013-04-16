@@ -98,6 +98,8 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 		LanczosSolverType,
 		VectorWithOffsetType> {
 
+	typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,LanczosSolverType,VectorWithOffsetType> BaseType;
+	typedef typename BaseType::PairType PairType;
 	typedef typename TargettingParamsType::RealType RealType;
 	typedef typename TargettingParamsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -135,7 +137,8 @@ public:
 		  twoSiteDmrg_(wft_.twoSiteDmrg())
 	{}
 
-	virtual void calcTimeVectors(RealType Eg,
+	virtual void calcTimeVectors(const PairType& startEnd,
+	                             RealType Eg,
 								 const VectorWithOffsetType& phi,
 								 size_t systemOrEnviron)
 	{
@@ -190,7 +193,7 @@ public:
 			return;
 		}
 
-		for (size_t i=1;i<times_.size();i++) {
+		for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
 			VectorWithOffsetType src = targetVectors_[i];
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
 			calcTargetVector(targetVectors_[i],Eg,src,systemOrEnviron,times_[i]);

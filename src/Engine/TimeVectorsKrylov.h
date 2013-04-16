@@ -85,6 +85,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
+template<typename RealType>
+void expComplexOrReal(RealType& x,const RealType& y)
+{
+	x = exp(-y);
+}
+
+template<typename RealType>
+void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
+{
+	x = std::complex<RealType>(cos(y),-sin(y));
+}
+
 template<typename TargettingParamsType,
 		 typename ModelType,
 		 typename WaveFunctionTransfType,
@@ -96,7 +108,8 @@ class TimeVectorsKrylov : public  TimeVectorsBase<
 		WaveFunctionTransfType,
 		LanczosSolverType,
 		VectorWithOffsetType> {
-
+	typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,LanczosSolverType,VectorWithOffsetType> BaseType;
+	typedef typename BaseType::PairType PairType;
 	typedef typename TargettingParamsType::RealType RealType;
 	typedef std::vector<RealType> VectorRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -128,9 +141,10 @@ public:
 		  E0_(E0)
 	{}
 
-	virtual void calcTimeVectors(RealType Eg,
-								 const VectorWithOffsetType& phi,
-								 size_t systemOrEnviron)
+	virtual void calcTimeVectors(const PairType& startEnd,
+	                             RealType Eg,
+	                             const VectorWithOffsetType& phi,
+	                             size_t systemOrEnviron)
 	{
 		if (currentTime_==0 && tstStruct_.noOperator) {
 			for (size_t i=0;i<times_.size();i++)
@@ -138,12 +152,13 @@ public:
 			return;
 		}
 
-		calcTimeVectorsKrylov1(Eg,phi,systemOrEnviron);
+		calcTimeVectorsKrylov1(startEnd,Eg,phi,systemOrEnviron);
 	}
 
 private:
 
-	void calcTimeVectorsKrylov1(RealType Eg,
+	void calcTimeVectorsKrylov1(const PairType& startEnd,
+	                            RealType Eg,
 								const VectorWithOffsetType& phi,
 								size_t systemOrEnviron)
 	{
@@ -159,13 +174,14 @@ private:
 		for (size_t ii=0;ii<phi.sectors();ii++)
 			PsimagLite::diag(T[ii],eigs[ii],'V');
 
-		calcTargetVectors(phi,T,V,Eg,eigs,steps,systemOrEnviron);
+		calcTargetVectors(startEnd,phi,T,V,Eg,eigs,steps,systemOrEnviron);
 
 		//checkNorms();
 	}
 
 	//! Do not normalize states here, it leads to wrong results (!)
-	void calcTargetVectors(const VectorWithOffsetType& phi,
+	void calcTargetVectors(const PairType& startEnd,
+	                       const VectorWithOffsetType& phi,
 						   const std::vector<MatrixComplexOrRealType>& T,
 						   const std::vector<MatrixComplexOrRealType>& V,
 						   RealType Eg,
@@ -174,30 +190,31 @@ private:
 						   size_t systemOrEnviron)
 	{
 		targetVectors_[0] = phi;
-		//				normalize(targetVectors_[0]);
-		for (size_t i=1;i<times_.size();i++) {
+		for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
+			assert(i<targetVectors_.size());
 			targetVectors_[i] = phi;
+			VectorWithOffsetType v;
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
-			//					normalize(targetVectors_[i]);
+			calcTargetVector(v,phi,T,V,Eg,eigs,i,steps);
+			RealType x = (TargettingParamsType::normalize()) ? 1.0/std::norm(v) : 1.0;
+			targetVectors_[i]= x* v;
 		}
 	}
 
-	void calcTargetVector(
-			VectorWithOffsetType& v,
-			const VectorWithOffsetType& phi,
-			const std::vector<MatrixComplexOrRealType>& T,
-			const std::vector<MatrixComplexOrRealType>& V,
-			RealType Eg,
-			const std::vector<VectorRealType>& eigs,
-			RealType t,
-			std::vector<size_t> steps)
+	void calcTargetVector(VectorWithOffsetType& v,
+	                      const VectorWithOffsetType& phi,
+	                      const std::vector<MatrixComplexOrRealType>& T,
+	                      const std::vector<MatrixComplexOrRealType>& V,
+	                      RealType Eg,
+	                      const std::vector<VectorRealType>& eigs,
+	                      size_t timeIndex,
+	                      std::vector<size_t> steps)
 	{
 		v = phi;
 		for (size_t ii=0;ii<phi.sectors();ii++) {
 			size_t i0 = phi.sector(ii);
 			TargetVectorType r;
-			calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],t,steps[ii],i0);
+			calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],timeIndex,steps[ii],i0);
 			//std::cerr<<"TARGET FOR t="<<t<<" "<<PsimagLite::norm(r)<<" "<<norm(phi)<<"\n";
 			v.setDataInSector(r,i0);
 		}
@@ -210,7 +227,7 @@ private:
 			const MatrixComplexOrRealType& V,
 			RealType Eg,
 			const VectorRealType& eigs,
-			RealType t,
+			size_t timeIndex,
 			size_t steps,
 			size_t i0)
 	{
@@ -226,7 +243,7 @@ private:
 		//check2(T,V,phi,n2,i0);
 		TargetVectorType tmp(n2);
 		r.resize(n2);
-		calcR(r,T,V,phi,Eg,eigs,t,steps,i0);
+		calcR(r,T,V,phi,Eg,eigs,timeIndex,steps,i0);
 		//				std::cerr<<"TARGET FOR t="<<t<<" after calcR norm="<<PsimagLite::norm(r)<<"\n";
 		psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0,0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1 );
 		//				std::cerr<<"TARGET FOR t="<<t<<" after S^\\dagger norm="<<PsimagLite::norm(tmp)<<"\n";
@@ -240,7 +257,7 @@ private:
 			   const VectorWithOffsetType& phi,
 			   RealType Eg,
 			   const VectorRealType& eigs,
-			   RealType t,
+			   size_t timeIndex,
 			   size_t n2,
 			   size_t i0)
 	{
@@ -250,9 +267,10 @@ private:
 				ComplexOrRealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
 				sum += conj(T(kprime,k))*tmpV;
 			}
-			RealType tmp = (eigs[k]-E0_)*t;
-			ComplexOrRealType c(cos(tmp),-sin(tmp));
-			r[k] = c * sum;
+			RealType tmp = (eigs[k]-E0_)*times_[timeIndex];
+			ComplexOrRealType c = 0.0;
+			expComplexOrReal(c,tmp);
+			r[k] = sum * c;
 		}
 	}
 

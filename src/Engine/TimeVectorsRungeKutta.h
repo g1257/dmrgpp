@@ -97,6 +97,8 @@ class TimeVectorsRungeKutta : public  TimeVectorsBase<
 		LanczosSolverType,
 		VectorWithOffsetType> {
 
+	typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,LanczosSolverType,VectorWithOffsetType> BaseType;
+	typedef typename BaseType::PairType PairType;
 	typedef typename TargettingParamsType::RealType RealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -129,9 +131,10 @@ public:
 		  E0_(E0)
 	{}
 
-	virtual void calcTimeVectors(RealType Eg,
-								 const VectorWithOffsetType& phi,
-								 size_t systemOrEnviron)
+	virtual void calcTimeVectors(const PairType& startEnd,
+	                             RealType Eg,
+	                             const VectorWithOffsetType& phi,
+	                             size_t systemOrEnviron)
 	{
 		std::ostringstream msg;
 		msg<<"EXPERIMENTAL: using RungeKutta";
@@ -146,7 +149,7 @@ public:
 
 		for (size_t ii=0;ii<phi.sectors();ii++) {
 			size_t i = phi.sector(ii);
-			calcTimeVectors(Eg,phi,systemOrEnviron,i);
+			calcTimeVectors(startEnd,Eg,phi,systemOrEnviron,i);
 		}
 	}
 
@@ -186,10 +189,11 @@ private:
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper_;
 	}; // FunctionForRungeKutta
 
-	void calcTimeVectors(RealType Eg,
-						 const VectorWithOffsetType& phi,
-						 size_t systemOrEnviron,
-						 size_t i0)
+	void calcTimeVectors(const PairType& startEnd,
+	                     RealType Eg,
+	                     const VectorWithOffsetType& phi,
+	                     size_t systemOrEnviron,
+	                     size_t i0)
 	{
 		size_t total = phi.effectiveSize(i0);
 		TargetVectorType phi0(total);
@@ -204,7 +208,7 @@ private:
 		rungeKutta.solve(result,0.0,times_.size(),phi0);
 		assert(result.size()==times_.size());
 
-		for (size_t i=0;i<times_.size();i++) {
+		for (size_t i=0;i<startEnd.second;i++) {
 			//					std::cerr<<"norma of result["<<i<<"]="<<PsimagLite::norm(result[i])<<"\n";
 			targetVectors_[i].setDataInSector(result[i],i0);
 		}

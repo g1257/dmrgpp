@@ -321,7 +321,8 @@ namespace Dmrg {
 				//std::cerr<<"site="<<block1[0]<<" COUNT="<<count<<"\n";
 				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 
-				timeVectorsBase_->calcTimeVectors(Eg,phiNew,direction);
+				typename TimeVectorsBaseType::PairType startEnd(0,times_.size());
+				timeVectorsBase_->calcTimeVectors(startEnd,Eg,phiNew,direction);
 				
 				cocoon(direction,block1); // in-situ
 				printEnergies(); // in-situ

@@ -764,7 +764,14 @@ namespace Dmrg {
 				msg<<std::norm(phi);
 				progress_.printline(msg,std::cout);
 				if (std::norm(phi)<1e-6) setFromInfinite(targetVectors_[startEnd.first],lrs_);
+				calcTimeVectorsTest(startEnd,Eg,phi,systemOrEnviron);
+			}
 
+			void calcTimeVectorsTest(const PairType& startEnd,
+			                            RealType Eg,
+			                            const VectorWithOffsetType& phi,
+			                            size_t systemOrEnviron)
+			{
 				std::vector<MatrixType> V(phi.sectors());
 				std::vector<MatrixType> T(phi.sectors());
 
@@ -777,10 +784,11 @@ namespace Dmrg {
 				for (size_t ii=0;ii<phi.sectors();ii++) 
 					PsimagLite::diag(T[ii],eigs[ii],'V');
 				
-				calcTargetVectors(startEnd,T,V,Eg,eigs,steps,systemOrEnviron);
+				calcTargetVectors(startEnd,phi,T,V,Eg,eigs,steps,systemOrEnviron);
 			}
 
 			void calcTargetVectors(const PairType& startEnd,
+			                       const VectorWithOffsetType& phi,
 			                       const std::vector<MatrixType>& T,
 			                       const std::vector<MatrixType>& V,
 			                       RealType Eg,
@@ -791,7 +799,7 @@ namespace Dmrg {
 				for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
 					VectorWithOffsetType v;
 					// Only time differences here (i.e. betas_[i] not betas_[i]+currentBeta_)
-					calcTargetVector(v,targetVectors_[startEnd.first],T,V,Eg,eigs,i,steps);
+					calcTargetVector(v,phi,T,V,Eg,eigs,i,steps);
 					RealType x = 1.0/std::norm(v);
 					targetVectors_[i]= x* v;
 				}
