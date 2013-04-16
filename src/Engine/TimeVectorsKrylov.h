@@ -250,7 +250,7 @@ private:
 			ComplexOrRealType sum = 0.0;
 			for (size_t kprime=0;kprime<n2;kprime++) {
 				ComplexOrRealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
-				sum += conj(T(kprime,k))*tmpV;
+				sum += std::conj(T(kprime,k))*tmpV;
 			}
 			RealType tmp = (eigs[k]-E0_)*times_[timeIndex];
 			ComplexOrRealType c = 0.0;
@@ -266,7 +266,7 @@ private:
 		size_t total = phi.effectiveSize(i0);
 
 		for (size_t j=0;j<total;j++)
-			ret += conj(V(j,kprime))*phi.fastAccess(i0,j);
+			ret += std::conj(V(j,kprime))*phi.fastAccess(i0,j);
 		return ret;
 	}
 

@@ -450,7 +450,7 @@ private:
 		model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
 		crsMatrixToFullMatrix(m,hmatrix);
 		assert(isHermitian(m));
-		m *= ComplexOrRealType(-time,0.0);
+		m *= (-time);
 		exp(m);
 	}
 

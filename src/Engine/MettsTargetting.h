@@ -83,6 +83,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParametersForSolver.h"
 #include "RandomForTests.h"
 #include "TimeSerializer.h"
+#include "TimeVectorsKrylov.h"
+#include "TimeVectorsRungeKutta.h"
+#include "TimeVectorsSuzukiTrotter.h"
 
 namespace Dmrg {
 	template<
@@ -136,6 +139,14 @@ namespace Dmrg {
 			typedef MettsCollapse<VectorWithOffsetType,MettsStochasticsType,TargettingParamsType> MettsCollapseType;
 			typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
 			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+			typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,
+									LanczosSolverType,VectorWithOffsetType> TimeVectorsBaseType;
+			typedef TimeVectorsKrylov<TargettingParamsType,ModelType,WaveFunctionTransfType,
+									  LanczosSolverType,VectorWithOffsetType> TimeVectorsKrylovType;
+			typedef TimeVectorsRungeKutta<TargettingParamsType,ModelType,WaveFunctionTransfType,
+										  LanczosSolverType,VectorWithOffsetType> TimeVectorsRungeKuttaType;
+			typedef TimeVectorsSuzukiTrotter<TargettingParamsType,ModelType,WaveFunctionTransfType,
+											 LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
 
 			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -162,6 +173,7 @@ namespace Dmrg {
 			  mettsStochastics_(model,mettsStruct.rngSeed),
 			  mettsCollapse_(mettsStochastics_,lrs_,mettsStruct),
 			  timesWithoutAdvancement_(0),
+			  timeVectorsBase_(0),
 			  prevDirection_(INFINITE),
 			  systemPrev_(),
 			  environPrev_()
@@ -185,6 +197,31 @@ namespace Dmrg {
 
 				sum += gsWeight_;
 				assert(fabs(sum-1.0)<1e-5);
+
+				std::string s (__FILE__);
+				s += " Unknown algorithm\n";
+				switch (mettsStruct_.algorithm) {
+				case TargettingParamsType::KRYLOV:
+					timeVectorsBase_ = new TimeVectorsKrylovType(
+								currentBeta_,mettsStruct_,betas_,targetVectors_,model_,wft_,lrs_,0);
+					break;
+				case TargettingParamsType::RUNGE_KUTTA:
+					timeVectorsBase_ = new TimeVectorsRungeKuttaType(
+								currentBeta_,mettsStruct_,betas_,targetVectors_,model_,wft_,lrs_,0);
+					break;
+				case TargettingParamsType::SUZUKI_TROTTER:
+					timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(
+								currentBeta_,mettsStruct_,betas_,targetVectors_,model_,wft_,lrs_,0);
+					break;
+				default:
+					throw std::runtime_error(s.c_str());
+				}
+			}
+
+			~MettsTargetting()
+			{
+				if (timeVectorsBase_)
+					delete timeVectorsBase_;
 			}
 
 			const ModelType& model() const { return model_; }
@@ -423,6 +460,7 @@ namespace Dmrg {
 					currentBeta_ += mettsStruct_.tau;
 					timesWithoutAdvancement_=0;
 					printAdvancement();
+					timeVectorsBase_->timeHasAdvanced();
 					return;
 				}
 
@@ -764,7 +802,8 @@ namespace Dmrg {
 				msg<<std::norm(phi);
 				progress_.printline(msg,std::cout);
 				if (std::norm(phi)<1e-6) setFromInfinite(targetVectors_[startEnd.first],lrs_);
-				calcTimeVectorsTest(startEnd,Eg,phi,systemOrEnviron);
+				timeVectorsBase_->calcTimeVectors(startEnd,Eg,phi,systemOrEnviron);
+				normalizeVectors(startEnd);
 			}
 
 			void calcTimeVectorsTest(const PairType& startEnd,
@@ -800,7 +839,7 @@ namespace Dmrg {
 					// Only time differences here (i.e. betas_[i] not betas_[i]+currentBeta_)
 					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,i,steps);
 				}
-				normalizeVectors(startEnd);
+
 			}
 
 			void normalizeVectors(const PairType& startEnd)
@@ -1096,6 +1135,7 @@ namespace Dmrg {
 			MettsStochasticsType mettsStochastics_;
 			MettsCollapseType mettsCollapse_;
 			size_t timesWithoutAdvancement_;
+			TimeVectorsBaseType* timeVectorsBase_;
 			size_t prevDirection_;
 			MettsPrev systemPrev_;
 			MettsPrev environPrev_;
