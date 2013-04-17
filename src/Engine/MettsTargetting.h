@@ -304,8 +304,9 @@ namespace Dmrg {
 					return;
 				}
 
+				size_t max = (noStageIs(DISABLED)) ? 1 : n1;
 				// Advance or wft each target vector for beta/2
-				for (size_t i=0;i<n1;i++) {
+				for (size_t i=0;i<max;i++) {
 					evolve(i,0,n1-1,Eg,direction,sites,loopNumber);
 				}
 
