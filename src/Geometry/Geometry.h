@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2103, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -99,11 +96,9 @@ namespace PsimagLite {
 				int x;
 				io.readline(x,"TotalNumberOfSites=");
 				if (x<0) throw std::runtime_error("TotalNumberOfSites<0 is an error\n");
-				//std::cerr<<"TotalNumberOfSites "<<x<<"\n";
 				linSize_ = x;
 
 				io.readline(x,"NumberOfTerms=");
-				//std::cerr<<"NumberOfTerms "<<x<<"\n";
 				if (x<0) throw std::runtime_error("NumberOfTerms<0 is an error\n");
 
 				for (size_t i=0;i<size_t(x);i++) {
@@ -126,7 +121,6 @@ namespace PsimagLite {
 				(size_t smax,size_t emin,
 				 size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
 			{
-				//std::cerr<<"smax="<<smax<<" emin="<<emin<<"\n";
 				if (smax+1==emin) return terms_[term](i1,edof1,i2,edof2);
 				return terms_[term](smax,emin,i1,edof1,i2,edof2);
 			}
@@ -148,23 +142,50 @@ namespace PsimagLite {
 			
 			size_t numberOfSites() const { return linSize_; }
 			
-			void split(BlockType& S,std::vector<BlockType>& X,std::vector<BlockType>& Y,BlockType& E) const
+			void split(size_t sitesPerBlock,
+			           BlockType& S,
+			           std::vector<BlockType>& X,
+			           std::vector<BlockType>& Y,
+			           BlockType& E) const
 			{
 				size_t middle = linSize_/2;
-				S.push_back(0);
-				for (size_t i=1;i<middle;i++) {
-					std::vector<size_t> tmpV(1);
-					tmpV[0] = i;
+				if (linSize_& 1 ||
+				    linSize_ % sitesPerBlock!=0 ||
+				    size_t(linSize_/sitesPerBlock)<3) {
+					std::string str(__FILE__);
+					str += " " + ttos(__LINE__) + "\n";
+					str += "split error, linSize_=" + ttos(linSize_);
+					str += " sitesPerBlock=" + ttos(sitesPerBlock) + "\n";
+					throw std::runtime_error(str.c_str());
+				}
+				size_t i=0;
+				while(i<sitesPerBlock) {
+					S.push_back(i);
+					i++;
+				}
+				while(i<middle) {
+					std::vector<size_t> tmpV(sitesPerBlock);
+					for (size_t j=0;j<sitesPerBlock;j++)
+						tmpV[j] = i+j;
 					X.push_back(tmpV);
+					i+=sitesPerBlock;
 				}
 				
-				for (int j=linSize_-2;j>=int(middle);j--) {
-					std::vector<size_t> tmpV(1);
-					tmpV[0] = j;
+				size_t lastMiddle=linSize_-sitesPerBlock;
+				while(i<lastMiddle) {
+					std::vector<size_t> tmpV(sitesPerBlock);
+					for (size_t j=0;j<sitesPerBlock;j++) {
+						tmpV[j] = (linSize_-1-i-j)+(middle-1);
+						assert(tmpV[j]<linSize_);
+					}
 					Y.push_back(tmpV);
+					i+=sitesPerBlock;
 				}
-				
-				E.push_back(linSize_-1);
+
+				while(i<linSize_) {
+					E.push_back(i);
+					i++;
+				}
 			}
 			
 			size_t maxConnections(size_t termId = 0) const
