@@ -412,24 +412,16 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				
 				// phi = A|psi>
-				computePhi(i,phiNew,phiOld,direction,block[0]);
+				computePhi(i,phiNew,phiOld,direction,block);
 				
 				return true;
 			}
 
-			void initialGuess(VectorWithOffsetType& v,size_t nk) const
+			void initialGuess(VectorWithOffsetType& v,const std::vector<size_t>& block) const
 			{
-				wft_.setInitialVector(v,psi_,lrs_,nk);
-//				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
-//				if (!b) return;
-//				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
-//				for (size_t i=0;i<targetVectors_.size();i++) {
-//					wft_.setInitialVector
-//					(vv[i],targetVectors_[i],lrs_,nk);
-//					if (norm(vv[i])<1e-6) continue;
-//					VectorWithOffsetType w= weight_[i]*vv[i];
-//					v += w;
-//				}
+				std::vector<size_t> nk;
+				setNk(nk,block);
+				wft_.setInitialVector(v,psi_,lrs_,block);
 			}
 
 			template<typename IoOutputType>
@@ -584,10 +576,22 @@ namespace Dmrg {
 				return "undefined";
 			}
 
-			void computePhi(size_t i,VectorWithOffsetType& phiNew,
-					const VectorWithOffsetType& phiOld,size_t systemOrEnviron,size_t site)
+			void computePhi(size_t i,
+			                VectorWithOffsetType& phiNew,
+			                const VectorWithOffsetType& phiOld,
+			                size_t systemOrEnviron,
+			                const std::vector<size_t>& block)
 			{
-				size_t nk = model_.hilbertSize(site);
+				if (block.size()!=1) {
+					std::string str(__FILE__);
+					str += " " + ttos(__LINE__) + "\n";
+					str += "computePhi only blocks of one site supported\n";
+					throw std::runtime_error(str.c_str());
+				}
+				std::vector<size_t> nk;
+				setNk(nk,block);
+				size_t site = block[0];
+
 				size_t indexAdvance = times_.size()-1;
 				size_t indexNoAdvance = 0;
 				if (stage_[i]==OPERATOR) {
@@ -614,8 +618,7 @@ namespace Dmrg {
 					else phiNew.populateSectors(lrs_.super());
 
 					// OK, now that we got the partition number right, let's wft:
-					wft_.setInitialVector(phiNew,targetVectors_[advance],
-							lrs_,nk); // generalize for su(2)
+					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_,nk); // generalize for su(2)
 					phiNew.collapseSectors();
 //					std::cerr<<"WFT --> NORM of phiNew="<<norm(phiNew)<<" NORM of tv="<<norm(targetVectors_[advance])<<" when i="<<i<<" advance="<<advance<<"\n";
 
@@ -722,22 +725,11 @@ namespace Dmrg {
 				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,systemOrEnviron);
 			}
 
-//			void zeroOutVectors()
-//			{
-//				for (size_t i=0;i<targetVectors_.size();i++)
-//					targetVectors_[i].resize(lrs_.super().size());
-//			}
-
-//			void printHeader()
-//			{
-//				io_.print(tstStruct_);
-//				std::string label = "times";
-//				io_.printVector(times_,label);
-//				label = "weights";
-//				io_.printVector(weight_,label);
-//				std::string s = "GsWeight="+ttos(gsWeight_);
-//				io_.printline(s);
-//			}
+			void setNk(std::vector<size_t>& nk,const std::vector<size_t>& block) const
+			{
+				for (size_t i=0;i<block.size();i++)
+					nk.push_back(model_.hilbertSize(block[i]));
+			}
 
 			void test(const VectorWithOffsetType& src1,
 				  const VectorWithOffsetType& src2,

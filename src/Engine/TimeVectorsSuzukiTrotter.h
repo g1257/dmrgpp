@@ -224,12 +224,11 @@ private:
 
 	void wftAll(size_t site)
 	{
-		size_t nk = model_.hilbertSize(site);
 		for (size_t i=1;i<times_.size();i++)
-			wftOne(i,nk);
+			wftOne(i,site);
 	}
 
-	void wftOne(size_t i,size_t nk)
+	void wftOne(size_t i,size_t site)
 	{
 		if (targetVectors_[i].size()==0)
 			targetVectors_[i] = targetVectors_[0];
@@ -238,6 +237,7 @@ private:
 		phiNew.populateSectors(lrs_.super());
 
 		// OK, now that we got the partition number right, let's wft:
+		std::vector<size_t> nk(1,model_.hilbertSize(site));
 		wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk); // generalize for su(2)
 		phiNew.collapseSectors();
 		targetVectors_[i]=phiNew;

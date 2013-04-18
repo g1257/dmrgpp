@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -89,6 +86,7 @@ namespace Dmrg {
 	template<typename DmrgWaveStructType,typename VectorWithOffsetType>
 	class WaveFunctionTransfBase {
 	public:
+
 		typedef typename DmrgWaveStructType::LeftRightSuperType
 			LeftRightSuperType;
 		typedef typename DmrgWaveStructType::BasisWithOperatorsType
@@ -99,9 +97,20 @@ namespace Dmrg {
 				VectorWithOffsetType& psiDest,
 				const VectorWithOffsetType& psiSrc,
 				const LeftRightSuperType& lrs,
-				size_t nk) const = 0;
+				const std::vector<size_t>& nk) const = 0;
 
 		virtual ~WaveFunctionTransfBase() {}
+
+	protected:
+
+		size_t volumeOf(const std::vector<size_t>& v) const
+		{
+			assert(v.size()>0);
+			size_t ret = v[0];
+			for (size_t i=1;i<v.size();i++) ret *= v[i];
+			return ret;
+		}
+
 
 	}; // class WaveFunctionTransfBase
 } // namespace Dmrg

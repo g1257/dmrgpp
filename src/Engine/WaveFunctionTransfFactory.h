@@ -186,7 +186,7 @@ namespace Dmrg {
 					SomeVectorType& dest,
 					const SomeVectorType2& src,
 					const LeftRightSuperType& lrs,
-					size_t nk) const
+					const std::vector<size_t>& nk) const
 		{
 			bool allow=false;
 			switch (stage_) {
@@ -210,7 +210,6 @@ namespace Dmrg {
 				if (b) std::cerr<<"norm="<<x<<"\n";
 				assert(!b);
 #endif
-				assert(nk>0);
 				createVector(dest,src,lrs,nk);
 			} else {
 				createRandomVector(dest);
@@ -377,11 +376,10 @@ namespace Dmrg {
 			}
 		}
 		
-		void createVector(
-				VectorWithOffsetType& psiDest,
-				const VectorWithOffsetType& psiSrc,
-				const LeftRightSuperType& lrs,
-				size_t nk) const
+		void createVector(VectorWithOffsetType& psiDest,
+		                  const VectorWithOffsetType& psiSrc,
+		                  const LeftRightSuperType& lrs,
+		                  const std::vector<size_t>& nk) const
 		{
 			wftImpl_->transformVector(psiDest,psiSrc,lrs,nk);
 

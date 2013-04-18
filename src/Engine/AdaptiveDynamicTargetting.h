@@ -221,7 +221,13 @@ namespace Dmrg {
 		            const BlockType& block2,
 		            size_t loopNumber)
 		{
-			assert(block1.size()==1);
+			if (block1.size()!=1 || block2.size()!=1) {
+				std::string str(__FILE__);
+				str += " " + ttos(__LINE__) + "\n";
+				str += "evolve only blocks of one site supported\n";
+				throw std::runtime_error(str.c_str());
+			}
+
 			size_t site = block1[0];
 			evolve(Eg,direction,site,loopNumber);
 			size_t numberOfSites = lrs_.super().block().size();
@@ -231,9 +237,10 @@ namespace Dmrg {
 			evolve(Eg,direction,x,loopNumber);
 		}
 
-		void initialGuess(VectorWithOffsetType& v,size_t nk) const
+		void initialGuess(VectorWithOffsetType& v,
+		                  const std::vector<size_t>& block) const
 		{
-			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,nk,targetVectors_);
+			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,block,targetVectors_);
 		}
 		
 		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -399,7 +406,7 @@ namespace Dmrg {
 					phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
-				size_t nk = model_.hilbertSize(site);
+				std::vector<size_t> nk(1,model_.hilbertSize(site));
 				wft_.setInitialVector(phiNew,targetVectors_[0],lrs_,nk);
 				phiNew.collapseSectors();
 				
@@ -411,13 +418,14 @@ namespace Dmrg {
 
 		void wftAllDynVectors(size_t site)
 		{
-			size_t nk = model_.hilbertSize(site);
 			for (size_t i=0;i<=lastLanczosVector_;i++)
-				if (i<2) wftOneDynVector(i,nk);
+				if (i<2) wftOneDynVector(i,site);
 		}
 
-		void wftOneDynVector(size_t i,size_t nk)
+		void wftOneDynVector(size_t i,size_t site)
 		{
+			std::vector<size_t> nk(1,model_.hilbertSize(site));
+
 			VectorWithOffsetType result;
 			result.populateSectors(lrs_.super());
 

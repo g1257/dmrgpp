@@ -133,7 +133,7 @@ namespace Dmrg {
 		virtual void transformVector(VectorWithOffsetType& psiDest,
 					     const VectorWithOffsetType& psiSrc,
 					     const LeftRightSuperType& lrs,
-					     size_t nk) const
+					     const std::vector<size_t>& nk) const
 		{
 			if (stage_==EXPAND_ENVIRON)
 				transformVector1Su2(psiDest,psiSrc,lrs,nk);
@@ -147,7 +147,7 @@ namespace Dmrg {
 		void transformVector1Su2(SomeVectorType& psiDest,
 					 const SomeVectorType& psiSrc,
 					 const LeftRightSuperType& lrs,
-					 size_t nk) const
+					 const std::vector<size_t>& nk) const
 		{
 			assert((size_t)dmrgWaveStruct_.lrs.super().getFactors().row()==psiSrc.size());
 
@@ -165,8 +165,9 @@ namespace Dmrg {
 					 const LeftRightSuperType& lrs,
 					 size_t start,
 					 size_t final,
-					 size_t nk) const
+					 const std::vector<size_t>& nk) const
 		{
+			size_t volumeOfNk = this->volumeOf(nk);
 			const FactorsType& factorsSE = lrs.super().getFactors();
 			const FactorsType& factorsSEOld = dmrgWaveStruct_.lrs.super().getFactors();
 			const FactorsType& factorsE = lrs.right().getFactors();
@@ -181,7 +182,7 @@ namespace Dmrg {
 			transposeConjugate(weT,we);
 			
 			PackIndicesType pack1(nip);
-			PackIndicesType pack2(nk);
+			PackIndicesType pack2(volumeOfNk);
 			for (size_t x=start;x<final;x++) {
 				psiDest[x] = 0;
 				for (int kI = factorsInverseSE.getRowPtr(x);kI < factorsInverseSE.getRowPtr(x+1);kI++) {
@@ -205,12 +206,13 @@ namespace Dmrg {
 						       const FactorsType& factorsSE,
 						       const SparseMatrixType& ws,
 						       const SparseMatrixType& weT,
-						       size_t nk) const
+						       const std::vector<size_t>& nk) const
 		{
+			size_t volumeOfNk = this->volumeOf(nk);
 			size_t ni=dmrgWaveStruct_.ws.col();
 			const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
 			SparseElementType sum=0;
-			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/nk;
+			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 			
 			size_t ipkp=ip+kp*nip;
 			for (int k2I=factorsS.getRowPtr(ipkp);k2I<factorsS.getRowPtr(ipkp+1);k2I++) {
@@ -235,7 +237,7 @@ namespace Dmrg {
 		void transformVector2Su2(SomeVectorType& psiDest,
 					 const SomeVectorType& psiSrc,
 					 const LeftRightSuperType& lrs,
-					 size_t nk) const
+					 const std::vector<size_t>& nk) const
 		{
 			assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
 
@@ -253,9 +255,10 @@ namespace Dmrg {
 					 const LeftRightSuperType& lrs,
 					 size_t start,
 					 size_t final,
-					 size_t nk) const
+					 const std::vector<size_t>& nk) const
 		{
-			size_t nip = lrs.left().getFactors().row()/nk;
+			size_t volumeOfNk = this->volumeOf(nk);
+			size_t nip = lrs.left().getFactors().row()/volumeOfNk;
 			size_t nalpha = lrs.left().getFactors().row();
 			
 			const FactorsType& factorsSE = lrs.super().getFactors();
@@ -268,7 +271,7 @@ namespace Dmrg {
 			SparseMatrixType ws(dmrgWaveStruct_.ws),we(dmrgWaveStruct_.we),wsT;
 			transposeConjugate(wsT,ws);
 			if (dmrgWaveStruct_.lrs.left().getFactors().row()==0) {
-				wsT.makeDiagonal(nk,1.0);
+				wsT.makeDiagonal(volumeOfNk,1.0);
 			}
 			PackIndicesType pack1(nalpha);
 			PackIndicesType pack2(nip);
@@ -313,15 +316,15 @@ namespace Dmrg {
 					       size_t jp,
 					       const SparseMatrixType& wsT,
 					       const SparseMatrixType& we,
-					       size_t nk) const
+					       const std::vector<size_t>& nk) const
 		{
 			size_t nalpha=wsT.row(); //dmrgWaveStruct_.lrs.left().getFactors().rank();
 			assert(nalpha>0);
 			SparseElementType sum=0;
 			const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
 			const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
-			
-			size_t kpjp = kp+jp*nk;
+			size_t volumeOfNk = this->volumeOf(nk);
+			size_t kpjp = kp+jp*volumeOfNk;
 			assert(kpjp<dmrgWaveStruct_.lrs.right().permutationInverse().size());
 			size_t kpjpx = dmrgWaveStruct_.lrs.right().permutationInverse(kpjp);
 			

@@ -213,9 +213,11 @@ namespace Dmrg {
 		                  const VectorWithOffsetType& psi,
 		                  const std::vector<size_t>& stage,
 		                  const std::vector<RealType>& weights,
-						  size_t nk,
+						  const std::vector<size_t>& block,
 						  const std::vector<VectorWithOffsetType>& targetVectors) const
 		{
+			std::vector<size_t> nk;
+			setNk(nk,block);
 			wft.setInitialVector(v,psi,lrs_,nk);
 			if (!allStages(CONVERGING,stage)) return;
 			std::vector<VectorWithOffsetType> vv(targetVectors.size());
@@ -293,6 +295,12 @@ namespace Dmrg {
 				if (j==0) v = phiTemp;
 				else v += phiTemp;
 			}
+		}
+
+		void setNk(std::vector<size_t>& nk,const std::vector<size_t>& block) const
+		{
+			for (size_t i=0;i<block.size();i++)
+				nk.push_back(model_.hilbertSize(block[i]));
 		}
 
 	private:

@@ -107,8 +107,6 @@ namespace Dmrg {
 	>
 	class DynamicTargetting  {
 
-		static size_t const FAST_COMPUTATION = 0;
-
 	public:
 
 		typedef ModelType_ ModelType;
@@ -221,7 +219,12 @@ namespace Dmrg {
 		            const BlockType& block2,
 		            size_t loopNumber)
 		{
-			assert(block1.size()==1);
+			if (block1.size()!=1 || block2.size()!=1) {
+				std::string str(__FILE__);
+				str += " " + ttos(__LINE__) + "\n";
+				str += "evolve only blocks of one site supported\n";
+				throw std::runtime_error(str.c_str());
+			}
 
 			size_t site = block1[0];
 			evolve(Eg,direction,site,loopNumber);
@@ -262,11 +265,8 @@ namespace Dmrg {
 
 			Eg_ = Eg;
 
-			if (isLanczosNeeded(site)) {
-				calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
-			} else {
-				wftLanczosVectors(site,phiNew);
-			}
+			calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
+
 			if (model_.params().insitu=="" || !includeGroundStage()) return;
 
 			if (BasisType::useSu2Symmetry()) {
@@ -281,12 +281,11 @@ namespace Dmrg {
 			}
 		}
 
-		void initialGuess(VectorWithOffsetType& v,size_t nk) const
+		void initialGuess(VectorWithOffsetType& v,const std::vector<size_t>& block) const
 		{
-			if (FAST_COMPUTATION)
-				wft_.setInitialVector(v,psi_,lrs_,nk);
-			else
-				commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,nk,targetVectors_);
+			std::vector<size_t> nk;
+			commonTargetting_.setNk(nk,block);
+			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,nk,targetVectors_);
 		}
 
 		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -335,21 +334,6 @@ namespace Dmrg {
 		const ModelType& model() const { return model_; }
 
 	private:
-
-		bool isLanczosNeeded(size_t site)
-		{
-			if (!FAST_COMPUTATION) return true;
-
-			if (fabs(weightForContinuedFraction_)<1e-6) return true;
-
-			size_t numberOfSites = lrs_.super().block().size();
-
-			size_t middle = size_t(numberOfSites/2);
-			if (site==middle-1) return true;
-
-			return false;
-
-		}
 
 		size_t evolve(size_t i,
 		              VectorWithOffsetType& phiNew,
@@ -417,7 +401,7 @@ namespace Dmrg {
 				phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
-				size_t nk = model_.hilbertSize(site);
+				std::vector<size_t> nk(1, model_.hilbertSize(site));
 				wft_.setInitialVector(phiNew,targetVectors_[0],lrs_,nk);
 				phiNew.collapseSectors();
 

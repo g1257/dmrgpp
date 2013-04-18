@@ -131,7 +131,7 @@ namespace Dmrg {
 		virtual void transformVector(VectorWithOffsetType& psiDest,
 		                             const VectorWithOffsetType& psiSrc,
 		                             const LeftRightSuperType& lrs,
-		                             size_t nk) const
+		                             const std::vector<size_t>& nk) const
 
 		{
 			if (stage_==EXPAND_ENVIRON) {
@@ -158,7 +158,7 @@ namespace Dmrg {
 		void transformVector1(SomeVectorType& psiDest,
 		                      const SomeVectorType& psiSrc,
 		                      const LeftRightSuperType& lrs,
-							  size_t nk) const
+							  const std::vector<size_t>& nk) const
 		{
 			if (twoSiteDmrg_)
 				return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
@@ -174,13 +174,14 @@ namespace Dmrg {
 		                      const SomeVectorType& psiSrc,
 		                      const LeftRightSuperType& lrs,
 		                      size_t i0,
-		                      size_t nk) const
+		                      const std::vector<size_t>& nk) const
 		{
+			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.super().permutationInverse().size()/
 					lrs.right().permutationInverse().size();
 
 			assert(dmrgWaveStruct_.lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.row());
-			assert(lrs.right().permutationInverse().size()/nk==dmrgWaveStruct_.we.col());
+			assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.col());
 
 			size_t start = psiDest.offset(i0);
 			size_t final = psiDest.effectiveSize(i0)+start;
@@ -191,7 +192,7 @@ namespace Dmrg {
 			transposeConjugate(weT,we);
 			
 			PackIndicesType pack1(nip);
-			PackIndicesType pack2(nk);
+			PackIndicesType pack2(volumeOfNk);
 			for (size_t x=start;x<final;x++) {
 				size_t ip,beta,kp,jp;
 				pack1.unpack(ip,beta,(size_t)lrs.super().permutation(x));
@@ -208,10 +209,11 @@ namespace Dmrg {
 				size_t jp,
 				const SparseMatrixType& ws,
 				const SparseMatrixType& weT,
-				size_t nk) const
+				const std::vector<size_t>& nk) const
 		{
+			size_t volumeOfNk = this->volumeOf(nk);
 			size_t ni=dmrgWaveStruct_.ws.col();
-			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/nk;
+			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 			size_t alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip+kp*nip);
 			
 			SparseElementType sum=0;
@@ -232,7 +234,7 @@ namespace Dmrg {
 		void transformVector1FromInfinite(SomeVectorType& psiDest,
 										  const SomeVectorType& psiSrc,
 										  const LeftRightSuperType& lrs,
-										  size_t nk) const
+										  const std::vector<size_t>& nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -245,14 +247,15 @@ namespace Dmrg {
 										  const SomeVectorType& psiSrc,
 										  const LeftRightSuperType& lrs,
 										  size_t i0,
-										  size_t nk) const
+										  const std::vector<size_t>& nk) const
 		{
+			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.super().permutationInverse().size()/
 					lrs.right().permutationInverse().size();
 
-			assert(lrs.left().permutationInverse().size()==nk ||
+			assert(lrs.left().permutationInverse().size()==volumeOfNk ||
 				   lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.row());
-			assert(lrs.right().permutationInverse().size()/nk==dmrgWaveStruct_.we.col());
+			assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.col());
 
 			size_t start = psiDest.offset(i0);
 			size_t final = psiDest.effectiveSize(i0)+start;
@@ -263,7 +266,7 @@ namespace Dmrg {
 			transposeConjugate(weT,we);
 
 			PackIndicesType pack1(nip);
-			PackIndicesType pack2(nk);
+			PackIndicesType pack2(volumeOfNk);
 			for (size_t x=start;x<final;x++) {
 				size_t ip,beta,kp,jp;
 				pack1.unpack(ip,beta,(size_t)lrs.super().permutation(x));
@@ -279,11 +282,12 @@ namespace Dmrg {
 												  size_t jp,
 												  const SparseMatrixType& ws,
 												  const SparseMatrixType& weT,
-												  size_t nk) const
+												  const std::vector<size_t>& nk) const
 		{
+			size_t volumeOfNk = this->volumeOf(nk);
 			size_t ni=dmrgWaveStruct_.lrs.left().size(); //dmrgWaveStruct_.ws.col();
-			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/nk;
-			MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>nk,ws);
+			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
+			MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
 
 
 			SparseElementType sum=0;
@@ -306,7 +310,7 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				size_t nk) const
+				const std::vector<size_t>& nk) const
 		{
 			if (twoSiteDmrg_)
 				return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
@@ -322,9 +326,10 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,size_t i0,
-				size_t nk) const
+				const std::vector<size_t>& nk) const
 		{
-			size_t nip = lrs.left().permutationInverse().size()/nk;
+			size_t volumeOfNk = this->volumeOf(nk);
+			size_t nip = lrs.left().permutationInverse().size()/volumeOfNk;
 			size_t nalpha = lrs.left().permutationInverse().size();
 
 			assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==dmrgWaveStruct_.we.row());
@@ -356,13 +361,14 @@ namespace Dmrg {
 				size_t jp,
 				const SparseMatrixType& wsT,
 				const SparseMatrixType& we,
-				size_t nk) const
+				const std::vector<size_t>& nk) const
 		{
 			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			assert(nalpha==wsT.col());
 
 			SparseElementType sum=0;
-			size_t beta = dmrgWaveStruct_.lrs.right().permutationInverse(kp+jp*nk);
+			size_t volumeOfNk = this->volumeOf(nk);
+			size_t beta = dmrgWaveStruct_.lrs.right().permutationInverse(kp+jp*volumeOfNk);
 
 			for (int k=wsT.getRowPtr(ip);k<wsT.getRowPtr(ip+1);k++) {
 				size_t alpha = wsT.getCol(k);
@@ -382,7 +388,7 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				size_t nk) const
+				const std::vector<size_t>& nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -397,9 +403,10 @@ namespace Dmrg {
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
 				size_t i0,
-				size_t nk) const
+				const std::vector<size_t>& nk) const
 		{
-			size_t nip = lrs.left().permutationInverse().size()/nk;
+			size_t volumeOfNk = this->volumeOf(nk);
+			size_t nip = lrs.left().permutationInverse().size()/volumeOfNk;
 			size_t nalpha = lrs.left().permutationInverse().size();
 			
 			std::ostringstream msg;
@@ -438,20 +445,21 @@ namespace Dmrg {
 				size_t jen,
 				const SparseMatrixType& wsT,
 				const SparseMatrixType& we,
-				size_t nk) const
+				const std::vector<size_t>& nk) const
 		{
 			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			SparseElementType sum=0;
-			size_t ni = dmrgWaveStruct_.lrs.right().size()/nk;
+			size_t volumeOfNk = this->volumeOf(nk);
+			size_t ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
 
-			MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>nk,we);
+			MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
 
 			for (int k=wsT.getRowPtr(is);k<wsT.getRowPtr(is+1);k++) {
 				size_t ip = wsT.getCol(k);
 				SparseElementType sum2 = 0;
 				for (size_t k2=weRef.getRowPtr(jen);k2<weRef.getRowPtr(jen+1);k2++) {
 					size_t jpr = weRef.getCol(k2);
-					size_t jp = dmrgWaveStruct_.lrs.right().permutationInverse(jpl + jpr*nk);
+					size_t jp = dmrgWaveStruct_.lrs.right().permutationInverse(jpl + jpr*volumeOfNk);
 					size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
 					sum2 += wsT.getValue(k)*psiSrc[y]*weRef.getValue(k2);
 
@@ -466,7 +474,7 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				size_t nk) const
+				const std::vector<size_t>& nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -480,8 +488,9 @@ namespace Dmrg {
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
 				size_t i0,
-				size_t nk) const
+				const std::vector<size_t>& nk) const
 		{
+			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.super().permutationInverse().size()/lrs.right().permutationInverse().size();
 			std::ostringstream msg;
 			msg<<" We're bouncing on the right, so buckle up!";
@@ -494,7 +503,7 @@ namespace Dmrg {
 			
 			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			PackIndicesType pack1(nip);
-			PackIndicesType pack2(nk);
+			PackIndicesType pack2(volumeOfNk);
 			MatrixOrIdentityType wsRef(twoSiteDmrg_,dmrgWaveStruct_.ws);
 			size_t nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.col() : nip;
 
@@ -517,7 +526,7 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				size_t nk) const
+				const std::vector<size_t>& nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -532,9 +541,10 @@ namespace Dmrg {
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
 				size_t i0,
-				size_t nk) const
+				const std::vector<size_t>& nk) const
 		{
-			size_t nip = lrs.left().permutationInverse().size()/nk;
+			size_t volumeOfNk = this->volumeOf(nk);
+			size_t nip = lrs.left().permutationInverse().size()/volumeOfNk;
 			size_t nalpha = lrs.left().permutationInverse().size();
 			
 			std::ostringstream msg;
@@ -558,13 +568,12 @@ namespace Dmrg {
 
 				for (size_t k=weRef.getRowPtr(jp);k<weRef.getRowPtr(jp+1);k++) {
 					size_t jp2 = weRef.getCol(k);
-					size_t kpjp = dmrgWaveStruct_.lrs.right().permutationInverse(kp + jp2*nk);
+					size_t kpjp = dmrgWaveStruct_.lrs.right().permutationInverse(kp + jp2*volumeOfNk);
 
 					size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + kpjp*nip);
 					psiDest[x] += psiSrc[y] * weRef.getValue(k);
 				}
-			}
-			
+			}	
 		}
 
 		const size_t& stage_;

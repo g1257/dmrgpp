@@ -141,11 +141,10 @@ namespace Dmrg {
 			if (direction!=WaveFunctionTransfType::INFINITE) throw std::runtime_error(
 				"Diagonalization::operator(): expecting INFINITE direction\n");
 			size_t loopIndex = 0;
-			size_t nk = 0; // bogus
 			std::vector<size_t> sectors;
 			targetedSymmetrySectors(sectors,target.leftRightSuper());
 			reflectionOperator_.update(sectors);
-			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,nk);
+			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,blockLeft);
 			//  targetting: 
 			target.evolve(gsEnergy,direction,blockLeft,blockRight,loopIndex);
 			wft_.triggerOff(target.leftRightSuper()); //,m);
@@ -159,11 +158,8 @@ namespace Dmrg {
 		                    bool needsPrinting)
 		{
 			assert(direction!=WaveFunctionTransfType::INFINITE);
-			assert(block.size()>0);
-			size_t nk = model_.hilbertSize(block[0]);
 
-			assert(allBlockSitesHaveEqualHilbertSize(block));
-			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,nk);
+			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,block);
 			//  targetting: 
 			target.evolve(gsEnergy,direction,block,block,loopIndex);
 			wft_.triggerOff(target.leftRightSuper()); //,m);
@@ -171,16 +167,6 @@ namespace Dmrg {
 		}
 
 	private:
-
-		bool allBlockSitesHaveEqualHilbertSize(const BlockType& block) const
-		{
-			assert(block.size()>0);
-			size_t nk = model_.hilbertSize(block[0]);
-			for (size_t i=1;i<block.size();i++) {
-				if (nk!=model_.hilbertSize(block[i])) return false;
-			}
-			return true;
-		}
 
 		void targetedSymmetrySectors(std::vector<size_t>& mVector,const LeftRightSuperType& lrs) const
 		{
@@ -197,7 +183,7 @@ namespace Dmrg {
 		                       size_t direction,
 		                       size_t loopIndex,
 		                       bool needsPrinting,
-		                       size_t nk)
+		                       const std::vector<size_t>& block)
 
 		{
 			const LeftRightSuperType& lrs= target.leftRightSuper();
@@ -251,7 +237,7 @@ namespace Dmrg {
 					VectorWithOffsetType;
 			VectorWithOffsetType initialVector(weights,lrs.super());
 			
-			target.initialGuess(initialVector,nk);
+			target.initialGuess(initialVector,block);
 
 			for (size_t i=0;i<total;i++) {
 				if (weights[i]==0) continue;

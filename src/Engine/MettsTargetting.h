@@ -292,7 +292,12 @@ namespace Dmrg {
 			            const BlockType& block2,
 			            size_t loopNumber)
 			{
-				assert(block1.size()==1);
+				if (block1.size()!=1 || block2.size()!=1) {
+					std::string str(__FILE__);
+					str += " " + ttos(__LINE__) + "\n";
+					str += "evolve only blocks of one site supported\n";
+					throw std::runtime_error(str.c_str());
+				}
 
 				PairType sites(block1[0],block2[0]);
 				size_t n1 = mettsStruct_.timeSteps;
@@ -362,7 +367,8 @@ namespace Dmrg {
 				os<<"MettsWeightGroundState="<<gsWeight_<<"\n";
 			}
 
-			void initialGuess(VectorWithOffsetType& v,size_t nk) const
+			void initialGuess(VectorWithOffsetType& v,
+			                  const std::vector<size_t>& block) const
 			{
 				std::string s("MettsTargetting: Invalid call to initialGuess\n");
 				throw std::runtime_error(s.c_str());
@@ -412,8 +418,7 @@ namespace Dmrg {
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
 				assert(sites.first==sites.second);
-				size_t nk = model_.hilbertSize(sites.first);
-				advanceOrWft(index,indexAdvance,direction,nk,sites);
+				advanceOrWft(index,indexAdvance,direction,sites);
 			}
 
 			void advanceCounterAndComputeStage(size_t site)
@@ -484,11 +489,11 @@ namespace Dmrg {
 			void advanceOrWft(size_t index,
 					  size_t indexAdvance,
 			                  size_t systemOrEnviron,
-					  size_t nk,
 					  std::pair<size_t,size_t> sites)
 			{
 				if (targetVectors_[index].size()==0) return;
 				assert(std::norm(targetVectors_[index])>1e-6);
+				std::vector<size_t> nk(1,model_.hilbertSize(sites.first));
 
 				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE || stage_==COLLAPSE) {
 					size_t advance = index;
