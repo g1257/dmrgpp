@@ -175,7 +175,8 @@ namespace PsimagLite {
 				while(i<lastMiddle) {
 					std::vector<size_t> tmpV(sitesPerBlock);
 					for (size_t j=0;j<sitesPerBlock;j++) {
-						tmpV[j] = (linSize_-1-i-j)+(middle-1);
+						size_t jj = sitesPerBlock-1-j;
+						tmpV[j] = (linSize_-1-i-jj)+(middle-sitesPerBlock);
 						assert(tmpV[j]<linSize_);
 					}
 					Y.push_back(tmpV);
