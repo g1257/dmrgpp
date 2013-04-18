@@ -349,6 +349,8 @@ transformed operator can be used (or not because of the reason limitation above)
 			io.printMatrix(hamiltonian_,"#HAMILTONIAN");
 		}
 
+		size_t size() const { return operators_.size(); }
+
 	private:
 
 		void reorder(SparseMatrixType &v,const std::vector<size_t>& permutation)

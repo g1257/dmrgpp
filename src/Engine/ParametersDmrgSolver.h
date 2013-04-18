@@ -298,10 +298,11 @@ namespace Dmrg {
 		std::string insitu;
 		size_t lanczosSteps;
 		FieldType lanczosEps;
+		size_t sitesPerBlock;
 
 		//! Read Dmrg parameters from inp file
 		ParametersDmrgSolver(InputValidatorType& io)
-			: lanczosSteps(200),lanczosEps(1e-12)
+		    : lanczosSteps(200),lanczosEps(1e-12),sitesPerBlock(1)
 		{
 			io.readline(model,"Model=");
 			io.readline(options,"SolverOptions=");
@@ -431,6 +432,10 @@ namespace Dmrg {
 
 			try {
 				io.readline(lanczosEps,"LanczosEps=");
+			} catch (std::exception& e) {}
+
+			try {
+				io.readline(sitesPerBlock,"SitesPerBlock=");
 			} catch (std::exception& e) {}
 		}
 	};

@@ -263,7 +263,8 @@ namespace Dmrg {
 			setHamiltonian(h);
 			operators_.setOperators(ops);
 			operatorsPerSite_.clear();
-			operatorsPerSite_.push_back(ops.size());
+			for (size_t i=0;i<block.size();i++)
+				operatorsPerSite_.push_back(size_t(ops.size()/block.size()));
 		}
 
 // 		void getOperatorByIndex(std::string& s,int i) const
@@ -274,9 +275,12 @@ namespace Dmrg {
 		PairType getOperatorIndices(size_t i,size_t sigma) const
 		{
 			size_t sum = 0;
-			for (size_t j=0;j<i;j++)
+			for (size_t j=0;j<i;j++) {
+				assert(j<operatorsPerSite_.size());
 				sum += operatorsPerSite_[j];
-
+			}
+//			assert(sum+sigma<operators_.size());
+			assert(i<operatorsPerSite_.size());
 			return PairType(sum + sigma,operatorsPerSite_[i]);
 		}
 

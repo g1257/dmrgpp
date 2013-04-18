@@ -192,7 +192,7 @@ namespace Dmrg {
 			io_.print("MODEL",model_);
 			BlockType S,E;
 			std::vector<BlockType> X,Y;
-			geometry.split(S,X,Y,E);
+			geometry.split(parameters_.sitesPerBlock,S,X,Y,E);
 			for (size_t i=0;i<X.size();i++) 
 				sitesIndices_.push_back(X[i]);
 			for (size_t i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
@@ -341,9 +341,16 @@ namespace Dmrg {
 			if (parameters_.finiteLoop[0].stepLength<0) direction=EXPAND_ENVIRON;
 			// all right, now we can get the actual site to add:
 
-			std::vector<size_t> siteToAdd(1,pE.block()[0]); // left-most site of pE
+			size_t sitesPerBlock = parameters_.sitesPerBlock;
+			std::vector<size_t> siteToAdd(sitesPerBlock);
+			// left-most site of pE
+			for (size_t j=0;j<siteToAdd.size();j++)
+				siteToAdd[j] = pE.block()[j];
+
 			if (direction==EXPAND_ENVIRON) {
-				siteToAdd[0] = pS.block()[pS.block().size()-1]; // right-most site of pS
+				// right-most site of pS
+				for (size_t j=0;j<siteToAdd.size();j++)
+					siteToAdd[j] = pS.block()[pS.block().size()-1-j];
 			}
 			// now stepCurrent_ is such that sitesIndices_[stepCurrent_] = siteToAdd
 			// so:
@@ -390,7 +397,11 @@ namespace Dmrg {
 
 			wft_.setStage(direction);
 
-			int stepFinal = stepCurrent_+stepLength;
+			size_t sitesPerBlock = parameters_.sitesPerBlock;
+			int stepLengthCorrected = int((stepLength+1-sitesPerBlock)/sitesPerBlock);
+			if (stepLength<0)
+				stepLengthCorrected = int((stepLength+sitesPerBlock-1)/sitesPerBlock);
+			int stepFinal = stepCurrent_+stepLengthCorrected;
 			
 			while(true) {
 				if (size_t(stepCurrent_)>=sitesIndices_.size())

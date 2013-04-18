@@ -159,9 +159,10 @@ namespace Dmrg {
 		                    bool needsPrinting)
 		{
 			assert(direction!=WaveFunctionTransfType::INFINITE);
-			assert(block.size()==1);
-
+			assert(block.size()>0);
 			size_t nk = model_.hilbertSize(block[0]);
+
+			assert(allBlockSitesHaveEqualHilbertSize(block));
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,nk);
 			//  targetting: 
 			target.evolve(gsEnergy,direction,block,block,loopIndex);
@@ -170,6 +171,16 @@ namespace Dmrg {
 		}
 
 	private:
+
+		bool allBlockSitesHaveEqualHilbertSize(const BlockType& block) const
+		{
+			assert(block.size()>0);
+			size_t nk = model_.hilbertSize(block[0]);
+			for (size_t i=1;i<block.size();i++) {
+				if (nk!=model_.hilbertSize(block[i])) return false;
+			}
+			return true;
+		}
 
 		void targetedSymmetrySectors(std::vector<size_t>& mVector,const LeftRightSuperType& lrs) const
 		{

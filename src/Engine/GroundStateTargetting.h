@@ -228,9 +228,7 @@ namespace Dmrg {
 				msg<<"Saving state...";
 				progress_.printline(msg,std::cout);
 
-				if (block.size()!=1) throw std::runtime_error(
-						"GST only supports blocks of size 1\n");
-//				io.print("#TCENTRALSITE=",block[0]);
+				assert(block.size()>0);
 				std::string s = "#TCENTRALSITE=" + ttos(block[0]);
 				io.printline(s);
 				psi_.save(io,"PSI");

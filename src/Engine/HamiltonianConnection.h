@@ -123,6 +123,10 @@ namespace Dmrg {
 				if (type==ProgramGlobals::SYSTEM_SYSTEM || 
 					type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
 
+				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
+					assert(i<modelHelper_.leftRightSuper().left().block().size());
+				}
+
 				SparseMatrixType mBlock;
 
 				for (size_t term=0;term<geometry_.terms();term++) {
