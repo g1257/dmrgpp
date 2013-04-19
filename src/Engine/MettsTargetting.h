@@ -292,20 +292,16 @@ namespace Dmrg {
 			            const BlockType& block2,
 			            size_t loopNumber)
 			{
-				if (block1.size()!=1 || block2.size()!=1) {
-					std::string str(__FILE__);
-					str += " " + ttos(__LINE__) + "\n";
-					str += "evolve only blocks of one site supported\n";
-					throw std::runtime_error(str.c_str());
-				}
+				std::vector<size_t> sites;
+				if (direction==INFINITE)
+					utils::blockUnion(sites,block1,block2);
+				else sites = block1;
 
-				PairType sites(block1[0],block2[0]);
 				size_t n1 = mettsStruct_.timeSteps;
-				
-				updateStochastics(sites);
 
 				if (direction==INFINITE) {
-					getNewPures(sites,n1);
+					updateStochastics(sites);
+					getNewPures(block1,block2);
 					return;
 				}
 
@@ -327,8 +323,8 @@ namespace Dmrg {
 
 				cocoon(direction,sites,false);
 
-				if (sites.first==sites.second) {
-					if (isAtBorder(direction,sites.first))
+				if (direction!=INFINITE) {
+					if (isAtBorder(direction,sites[0]))
 						cocoon(direction,sites,true);
 				}
 
@@ -337,13 +333,15 @@ namespace Dmrg {
 				if (stage_!=COLLAPSE) return;
 
 				// collapse
-				bool hasCollapsed = mettsCollapse_(targetVectors_[n1],targetVectors_[n1-1],sites.first,direction);
+				bool hasCollapsed = mettsCollapse_(targetVectors_[n1],targetVectors_[n1-1],sites,direction);
 
 				if (hasCollapsed) {
 					std::string s = "  COLLAPSEHERE  ";
-					test(targetVectors_[n1],targetVectors_[n1],direction,s,sites,false);
-					if (isAtBorder(direction,sites.first))
-						test(targetVectors_[n1],targetVectors_[n1],direction,s,sites,true);
+					for (size_t i=0;i<sites.size();i++) {
+						test(targetVectors_[n1],targetVectors_[n1],direction,s,sites[i],false);
+						if (isAtBorder(direction,sites[0]))
+							test(targetVectors_[n1],targetVectors_[n1],direction,s,sites[i],true);
+					}
 				}
 			}
 
@@ -408,20 +406,20 @@ namespace Dmrg {
 			            size_t indexAdvance,
 			            RealType Eg,
 			            size_t direction,
-			            std::pair<size_t,size_t> sites,
+			            const std::vector<size_t>& block,
 			            size_t loopNumber)
 			{
-				if (index==0 && start==0) advanceCounterAndComputeStage(sites.first);
+				if (index==0 && start==0)
+					advanceCounterAndComputeStage(block);
 
 				std::ostringstream msg;
 				msg<<"Evolving, stage="<<getStage()<<" loopNumber="<<loopNumber;
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
-				assert(sites.first==sites.second);
-				advanceOrWft(index,indexAdvance,direction,sites);
+				advanceOrWft(index,indexAdvance,direction,block);
 			}
 
-			void advanceCounterAndComputeStage(size_t site)
+			void advanceCounterAndComputeStage(const std::vector<size_t>& block)
 			{
 				if (stage_!=COLLAPSE) stage_=WFT_NOADVANCE;
 
@@ -462,7 +460,7 @@ namespace Dmrg {
 					return;
 				}
 
-				if (stage_!=COLLAPSE && currentBeta_>=mettsStruct_.beta && site!=1) {
+				if (stage_!=COLLAPSE && currentBeta_>=mettsStruct_.beta && block[0]!=block.size()) {
 					printAdvancement();
 					return;
 				}
@@ -487,13 +485,14 @@ namespace Dmrg {
 			}
 
 			void advanceOrWft(size_t index,
-					  size_t indexAdvance,
+			                  size_t indexAdvance,
 			                  size_t systemOrEnviron,
-					  std::pair<size_t,size_t> sites)
+			                  const std::vector<size_t>& block)
 			{
 				if (targetVectors_[index].size()==0) return;
 				assert(std::norm(targetVectors_[index])>1e-6);
-				std::vector<size_t> nk(1,model_.hilbertSize(sites.first));
+				std::vector<size_t> nk;
+				mettsCollapse_.setNk(nk,block);
 
 				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE || stage_==COLLAPSE) {
 					size_t advance = index;
@@ -519,7 +518,7 @@ namespace Dmrg {
 				}
 			}
 
-			void updateStochastics(const PairType& sites)
+			void updateStochastics(const std::vector<size_t>& sites)
 			{
 				size_t linSize = model_.geometry().numberOfSites();
 				std::vector<size_t> tqn(2,0);
@@ -546,34 +545,53 @@ namespace Dmrg {
 				throw std::runtime_error("MettsTargetting: getPartition()\n");
 			}
 
-			void getNewPures(const PairType& sites,size_t n1)
+			// direction here is INFINITE
+			void getNewPures(const std::vector<size_t>& block1,const std::vector<size_t>& block2)
 			{
-				size_t alphaFixed = mettsStochastics_.chooseRandomState(sites.first);
-				size_t betaFixed = mettsStochastics_.chooseRandomState(sites.second);
+				std::vector<size_t> alphaFixed(block1.size());
+				for (size_t i=0;i<alphaFixed.size();i++)
+					alphaFixed[i] = mettsStochastics_.chooseRandomState(block1[i]);
+
+				std::vector<size_t> betaFixed(block2.size());
+				for (size_t i=0;i<betaFixed.size();i++)
+					betaFixed[i] = mettsStochastics_.chooseRandomState(block2[i]);
 
 				std::ostringstream msg;
-				msg<<"New pures for site "<<sites.first<<" is "<<alphaFixed;
-				msg<<" and for site "<<sites.second<<" is "<<betaFixed;
+				msg<<"New pures for ";
+				for (size_t i=0;i<alphaFixed.size();i++)
+					msg<<" site="<<block1[i]<<" is "<<alphaFixed[i];
+				msg<<" and for ";
+				for (size_t i=0;i<betaFixed.size();i++)
+					msg<<" site="<<block2[i]<<" is "<<betaFixed[i];
 				progress_.printline(msg,std::cerr);
 
 				const MatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
 				VectorType newVector1(transformSystem.n_row(),0);
+
+				std::vector<size_t> nk1;
+				mettsCollapse_.setNk(nk1,block1);
+				size_t alphaFixedVolume = mettsCollapse_.volumeOf(alphaFixed,nk1);
+
 				getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
-				           alphaFixed,lrs_.left(),transformSystem,sites.first);
+				           alphaFixedVolume,lrs_.left(),transformSystem,block1);
 				pureVectors_.first = newVector1;
 
 				const MatrixType& transformEnviron = 
 				                        wft_.transform(ProgramGlobals::ENVIRON);
 				VectorType newVector2(transformEnviron.n_row(),0);
+
+				std::vector<size_t> nk2;
+				mettsCollapse_.setNk(nk2,block2);
+				size_t betaFixedVolume = mettsCollapse_.volumeOf(betaFixed,nk2);
 				getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
-						   betaFixed,lrs_.right(),transformEnviron,sites.second);
+						   betaFixedVolume,lrs_.right(),transformEnviron,block2);
 				pureVectors_.second = newVector2;
 				setFromInfinite(targetVectors_[0],lrs_);
 				assert(std::norm(targetVectors_[0])>1e-6);
 
-				systemPrev_.fixed = alphaFixed;
+				systemPrev_.fixed = alphaFixedVolume;
 				systemPrev_.permutationInverse = lrs_.left().permutationInverse();
-				environPrev_.fixed = betaFixed;
+				environPrev_.fixed = betaFixedVolume;
 				environPrev_.permutationInverse = lrs_.right().permutationInverse();
 			}
 
@@ -599,21 +617,24 @@ namespace Dmrg {
 			                size_t alphaFixed,
 			                const BasisWithOperatorsType& basis,
 			                const MatrixType& transform,
-			                size_t site)
+			                const std::vector<size_t>& block)
 			{
-				if (oldVector.size()==0) setInitialPure(oldVector,site);
+				if (oldVector.size()==0)
+					setInitialPure(oldVector,block);
 				VectorType tmpVector;
 				if (transform.n_row()==0) {
 					tmpVector = oldVector;
 					assert(PsimagLite::norm(tmpVector)>1e-6);
 				} else {
-					delayedTransform(tmpVector,oldVector,direction,transform,site);
+					delayedTransform(tmpVector,oldVector,direction,transform,block);
 					assert(PsimagLite::norm(tmpVector)>1e-6);
 				}
 				size_t ns = tmpVector.size();
-				size_t nk = model_.hilbertSize(site);
+				std::vector<size_t> nk;
+				mettsCollapse_.setNk(nk,block);
+				size_t volumeOfNk = mettsCollapse_.volumeOf(nk);
 				size_t newSize =  (transform.n_col()==0) ? (ns*ns) : 
-							transform.n_col() * nk;
+							transform.n_col() * volumeOfNk;
 				newVector.resize(newSize);
 				for (size_t alpha=0;alpha<newVector.size();alpha++)
 					newVector[alpha] = 0;
@@ -621,7 +642,7 @@ namespace Dmrg {
 				for (size_t alpha=0;alpha<ns;alpha++) {
 					size_t gamma = (direction==ProgramGlobals::SYSTEM) ?
 						basis.permutationInverse(alpha + alphaFixed*ns) :
-						basis.permutationInverse(alphaFixed + alpha*nk);
+						basis.permutationInverse(alphaFixed + alpha*volumeOfNk);
 					newVector[gamma] = tmpVector[alpha];
 				}
 //				for (size_t gamma=0;gamma<newVector.size();gamma++) {
@@ -648,11 +669,13 @@ namespace Dmrg {
 								  VectorType& oldVector,
 								  size_t direction,
 								  const MatrixType& transform,
-								  size_t site)
+								  const std::vector<size_t>& block)
 			{
 				assert(oldVector.size()==transform.n_row());
 
-				size_t ne = model_.hilbertSize(site);
+				std::vector<size_t> nk;
+				mettsCollapse_.setNk(nk,block);
+				size_t ne = mettsCollapse_.volumeOf(nk);
 				
 				const std::vector<size_t>& permutationInverse = (direction==SYSTEM)
 				? systemPrev_.permutationInverse : environPrev_.permutationInverse;
@@ -692,19 +715,33 @@ namespace Dmrg {
 				}
 			}
 
-			void setInitialPure(VectorType& oldVector,size_t site)
+			void setInitialPure(VectorType& oldVector,const std::vector<size_t>& block)
 			{
-				size_t sitePlusOrMinus = (site==1) ? 0 : site+1;
-				size_t alphaFixed = mettsStochastics_.chooseRandomState(sitePlusOrMinus);
+				int offset = (block[0]==block.size()) ? -block.size() : block.size();
+				std::vector<size_t> blockCorrected = block;
+				for (size_t i=0;i<blockCorrected.size();i++)
+					blockCorrected[i] += offset;
+
+				std::vector<size_t> nk;
+				mettsCollapse_.setNk(nk,blockCorrected);
+				size_t volumeOfNk = mettsCollapse_.volumeOf(nk);
+				std::vector<size_t> alphaFixed(nk.size());
+				for (size_t i=0;i<alphaFixed.size();i++)
+					alphaFixed[i] = mettsStochastics_.chooseRandomState(blockCorrected[i]);
 
 				std::ostringstream msg;
-				msg<<"New pures for site "<<sitePlusOrMinus<<" is "<<alphaFixed;
+				msg<<"New pures for site ";
+				for (size_t i=0;i<blockCorrected.size();i++)
+					msg<<blockCorrected[i]<<" ";
+				msg<<" is "<<alphaFixed;
 				progress_.printline(msg,std::cerr);
 
-				oldVector.resize(model_.hilbertSize(site));
-				assert(alphaFixed<oldVector.size());
+				size_t volumeOfAlphaFixed = mettsCollapse_.volumeOf(alphaFixed,nk);
+
+				oldVector.resize(volumeOfNk);
+				assert(volumeOfAlphaFixed<oldVector.size());
 				for (size_t i=0;i<oldVector.size();i++) {
-					oldVector[i] = (i==alphaFixed) ? 1 : 0;
+					oldVector[i] = (i==volumeOfAlphaFixed) ? 1 : 0;
 				}
 				assert(PsimagLite::norm(oldVector)>1e-6);
 			}
@@ -731,15 +768,21 @@ namespace Dmrg {
 			}
 
 			// in situ computation:
-			void cocoon(size_t direction,const PairType& sites,bool corner)
+			void cocoon(size_t direction,const std::vector<size_t>& block,bool corner)
+			{
+				for (size_t i=0;i<block.size();i++)
+					cocoon(direction,block[i],corner);
+			}
+
+			// in situ computation:
+			void cocoon(size_t direction,size_t site,bool corner)
 			{
 				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
-				//test(psi_,psi_,direction,"<PSI|A|PSI>",sites);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
 					std::string s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
-					size_t site = test(targetVectors_[j],targetVectors_[j],direction,s,sites,corner);
-					if (stage_==COLLAPSE && j==0) sitesCollapsed_.push_back(site);
+					size_t site2 = test(targetVectors_[j],targetVectors_[j],direction,s,site,corner);
+					if (stage_==COLLAPSE && j==0) sitesCollapsed_.push_back(site2);
 				}
 				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
 			}
@@ -842,16 +885,16 @@ namespace Dmrg {
 			}
 
 			size_t test(const VectorWithOffsetType& src1,
-			          const VectorWithOffsetType& src2,
-			          size_t systemOrEnviron,
-			          const std::string& label,
-					  const PairType& sites,
-					  bool corner) const
+			            const VectorWithOffsetType& src2,
+			            size_t systemOrEnviron,
+			            const std::string& label,
+			            size_t site,
+			            bool corner) const
 			{
 				VectorWithOffsetType dest;
 				OperatorType A = getObservableToTest(model_.params().model);
 				std::vector<size_t> electrons;
-				findElectronsOfOneSite(electrons,sites.first);
+				findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron,corner);
 
@@ -868,20 +911,20 @@ namespace Dmrg {
 					}
 				}
 				RealType nor = std::norm(src1);
-				size_t site = sites.first;
+				size_t site2 = site;
 				if (corner) {
-					if (site==1) {
-						site=0;
+					if (site2==1) {
+						site2=0;
 					} else {
-						site=model_.geometry().numberOfSites()-1;
+						site2 = model_.geometry().numberOfSites() -1;
 					}
 				}
 
-				std::cerr<<site<<" "<<sum<<" "<<" "<<currentBeta_;
+				std::cerr<<site2<<" "<<sum<<" "<<" "<<currentBeta_;
 				std::cerr<<" "<<label<<" "<<nor<<" "<<std::norm(src2);
 				std::cerr<<" "<<std::norm(dest)<<"    "<<sum/(nor*nor)<<"\n";
 
-				return site;
+				return site2;
 			}
 
 			OperatorType getObservableToTest(const std::string& modelName) const

@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include <algorithm>
 #include "TypeToString.h"
+#include "Utils.h"
 
 namespace Dmrg {
 	template<typename ModelType,typename RngType_>
@@ -147,38 +148,20 @@ namespace Dmrg {
 			throw std::runtime_error(s.c_str());
 		}
 
-		void update(size_t qn,const PairType& sites,size_t seed)
+		// call only from INFINITE
+		void update(size_t qn,const std::vector<size_t>& sites,size_t seed)
 		{
-			std::vector<size_t> currentSites;
-			currentSites.push_back(sites.first);
-			currentSites.push_back(sites.second);
-
 			if (addedSites_.size()==0) {
-				if (sites.first!=1)
-					throw std::runtime_error("MettsStochastics::update(...): must start from 0\n");
-				pureStates_.resize(sites.second+2);
+				pureStates_.resize(sites.size());
 				initialSetOfPures(seed);
-				addedSites_.push_back(sites.first-1);
-				addedSites_.push_back(sites.second+1);
-				currentSites.push_back(sites.first-1);
-				currentSites.push_back(sites.second+1);
+				for (size_t i=0;i<sites.size();i++)
+					addedSites_.push_back(sites[i]);
 			}
 
-			if (sites.first!=sites.second) {
-				addedSites_.push_back(sites.first);
-				addedSites_.push_back(sites.second);
-				qnVsSize_.resize(addedSites_.size()+1,0);
-				qnVsSize_[addedSites_.size()]=qn;
-				return; // INFINITE
-			}
-
-			//FINITE: all this is bogus because we're not using
-			// pureStates_ anymore in the finite phase
-			if (std::find(addedSites_.begin(),addedSites_.end(),
-				sites.first) != addedSites_.end()) {
-				addedSites_.clear();
-			}
-			addedSites_.push_back(sites.first);
+			for (size_t i=0;i<sites.size();i++)
+				addedSites_.push_back(sites[i]);
+			qnVsSize_.resize(addedSites_.size()+1,0);
+			qnVsSize_[addedSites_.size()]=qn;
 		}
 
 		void setCollapseBasis(std::vector<RealType>& collapseBasisWeights,size_t site) const

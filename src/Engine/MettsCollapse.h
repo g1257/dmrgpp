@@ -126,25 +126,27 @@ namespace Dmrg {
 
 		bool operator()(VectorWithOffsetType& c,
 		                const VectorWithOffsetType& eToTheBetaH,
-		                size_t site,
+		                std::vector<size_t>& block,
 		                size_t direction)
 		{
+			assert(direction!=ProgramGlobals::INFINITE);
+
 			if (targetParams_.collapse.find("every")!=std::string::npos)
 				setCollapseBasis();
-			internalAction(c,eToTheBetaH,site,direction,false);
-			size_t nk = mettsStochastics_.hilbertSize(site);
-			if (atBorder(direction,nk)) {
-				size_t site2 = 0;
-				if (site+2==lrs_.super().block().size())
-					site2 = site + 1;
-				internalAction(c,eToTheBetaH,site2,direction,true);
+			internalAction(c,eToTheBetaH,block,direction,false);
+			if (atBorder(direction,block)) {
+				std::vector<size_t> block2;
+				setBlockToBorder(block2,block);
+				internalAction(c,eToTheBetaH,block2,direction,true);
 			}
-			sitesSeen_.push_back(site);
+			for (size_t i=0;i<block.size();i++)
+				sitesSeen_.push_back(block[i]);
 			
 			if (direction==prevDirection_) return false;
 			prevDirection_ = direction;
 
-			bool allSitesSeen = checkSites(site);
+			assert(block.size()>0);
+			bool allSitesSeen = checkSites(block[block.size()-1]);
 			if (!allSitesSeen) return false;
 
 			sitesSeen_.clear();
@@ -152,34 +154,69 @@ namespace Dmrg {
 			return true;
 		}
 
+		void setNk(std::vector<size_t>& nk,const std::vector<size_t>& block) const
+		{
+			for (size_t i=0;i<block.size();i++)
+				nk.push_back(mettsStochastics_.hilbertSize(block[i]));
+		}
+
+		size_t volumeOf(const std::vector<size_t>& v) const
+		{
+			assert(v.size()>0);
+			size_t ret = v[0];
+			for (size_t i=1;i<v.size();i++) ret *= v[i];
+			return ret;
+		}
+
+		size_t volumeOf(const std::vector<size_t>& alphaFixed,
+		                const std::vector<size_t>& nk) const
+		{
+			assert(alphaFixed.size()>0);
+			assert(alphaFixed.size()==nk.size());
+			size_t sum = alphaFixed[0];
+			for (size_t i=1;i<alphaFixed.size();i++)
+				sum += alphaFixed[i]*nk[i-1];
+			return sum;
+		}
+
 	private:
 
 		void internalAction(VectorWithOffsetType& dest2,
 		                    const VectorWithOffsetType& src2,
-		                    size_t site,
+		                    const std::vector<size_t>& block,
 							size_t direction,
 							bool border) const
 		{
-			size_t nk = mettsStochastics_.hilbertSize(site);
 			if (dest2.size()==0) {
 				dest2 =  src2;
 			}
 
-			std::vector<RealType> p(nk,0);
-			probability(p,dest2,direction,nk,border);
+			std::vector<size_t> nk;
+			setNk(nk,block);
+			size_t volumeOfNk = volumeOf(nk);
+
+			std::vector<RealType> p(volumeOfNk,0);
+			probability(p,dest2,direction,volumeOfNk,border);
 			RealType sum = 0;
 			for (size_t i=0;i<p.size();i++)
 				sum += p[i];
 			assert(fabs(sum-1.0)<1e-6);
 
 			VectorWithOffsetType dest;
-			size_t indexFixed = mettsStochastics_.chooseRandomState(p,site);
-			std::cerr<<"SITE="<<site<<" PROBS=";
+			std::vector<size_t> indexFixed(block.size());
+			for (size_t i=0;i<block.size();i++)
+				indexFixed[i] = mettsStochastics_.chooseRandomState(p,block[i]);
+
+			size_t volumeOfIndexFixed = volumeOf(indexFixed,nk);
+
+			for (size_t i=0;i<block.size();i++)
+				std::cerr<<"SITES="<<block[i]<<" ";
+			std::cerr<<" PROBS=";
 			for (size_t i=0;i<p.size();i++) std::cerr<<p[i]<<" ";
 			std::cerr<<" CHOSEN="<<indexFixed<<" BORDER="<<border<<"\n";
 			 // m1 == indexFixed in FIXME write paper reference here
 
-			collapseVector(dest,dest2,direction,indexFixed,nk,border);
+			collapseVector(dest,dest2,direction,volumeOfIndexFixed,volumeOfNk,border);
 			RealType x = std::norm(dest);
 
 			assert(x>1e-6);
@@ -364,17 +401,17 @@ namespace Dmrg {
 		void probability(std::vector<RealType>& p,
 		                 const VectorWithOffsetType& src,
 		                 size_t direction,
-						 size_t nk, // <-- size of the Hilbert sp. of one site
-						 bool border) const
+		                 size_t volumeOfNk,
+		                 bool border) const
 		{
 			RealType tmp = std::norm(src);
 			if (fabs(tmp-1.0)>1e-3)
 				throw std::runtime_error("probability\n");
 
 			RealType sum = 0;
-			for (size_t alpha=0;alpha<nk;alpha++) {
+			for (size_t alpha=0;alpha<volumeOfNk;alpha++) {
 				VectorWithOffsetType dest;
-				collapseVector(dest,src,direction,alpha,nk,border);
+				collapseVector(dest,src,direction,alpha,volumeOfNk,border);
 				RealType x = std::norm(dest);
 				sum += x*x;
 				p[alpha] = x*x;
@@ -445,11 +482,26 @@ namespace Dmrg {
 			m(y,x) = -sin(theta);
 		}
 
-		bool atBorder(size_t direction,size_t nk) const
+		bool atBorder(size_t direction,const std::vector<size_t>& block) const
 		{
-			bool b1 = (direction==EXPAND_SYSTEM && lrs_.right().size()==nk);
-			bool b2 = (direction==EXPAND_ENVIRON && lrs_.left().size()==nk);
+			std::vector<size_t> nk;
+			setNk(nk,block);
+			size_t volumeOfNk = volumeOf(nk);
+			bool b1 = (direction==EXPAND_SYSTEM && lrs_.right().size()==volumeOfNk);
+			bool b2 = (direction==EXPAND_ENVIRON && lrs_.left().size()==volumeOfNk);
 			return (b1 || b2);
+		}
+
+		void setBlockToBorder(std::vector<size_t>& block2,const std::vector<size_t>& block) const
+		{
+			block2 = block;
+			assert(block.size()>0);
+			size_t site = block[block.size()-1];
+			bool leftCorner = (site+2==lrs_.super().block().size()) ? false : true;
+			int offset = (leftCorner) ? -block.size() : block.size();
+			for (size_t i=0;i<block2.size();i++) {
+				block2[i] = block[i] + offset;
+			}
 		}
 
 		const MettsStochasticsType& mettsStochastics_;
