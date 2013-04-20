@@ -149,17 +149,23 @@ namespace Dmrg {
 		}
 
 		// call only from INFINITE
-		void update(size_t qn,const std::vector<size_t>& sites,size_t seed)
+		void update(size_t qn,const std::vector<size_t>& block1,const std::vector<size_t>& block2,size_t seed)
 		{
 			if (addedSites_.size()==0) {
-				pureStates_.resize(sites.size());
+				pureStates_.resize(block2[block2.size()-1]+2*block2.size());
 				initialSetOfPures(seed);
-				for (size_t i=0;i<sites.size();i++)
-					addedSites_.push_back(sites[i]);
+				for (size_t i=0;i<block1.size();i++)
+					for (size_t j=0;j<block1.size();j++)
+						addedSites_.push_back(block1[i]+j-block1.size());
+				for (size_t i=0;i<block2.size();i++)
+					for (size_t j=0;j<block2.size();j++)
+						addedSites_.push_back(block2[i]+j+block2.size());
 			}
 
-			for (size_t i=0;i<sites.size();i++)
-				addedSites_.push_back(sites[i]);
+			for (size_t i=0;i<block1.size();i++)
+				addedSites_.push_back(block1[i]);
+			for (size_t i=0;i<block2.size();i++)
+				addedSites_.push_back(block2[i]);
 			qnVsSize_.resize(addedSites_.size()+1,0);
 			qnVsSize_[addedSites_.size()]=qn;
 		}

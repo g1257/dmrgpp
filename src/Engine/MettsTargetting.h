@@ -300,7 +300,7 @@ namespace Dmrg {
 				size_t n1 = mettsStruct_.timeSteps;
 
 				if (direction==INFINITE) {
-					updateStochastics(sites);
+					updateStochastics(block1,block2);
 					getNewPures(block1,block2);
 					return;
 				}
@@ -518,7 +518,7 @@ namespace Dmrg {
 				}
 			}
 
-			void updateStochastics(const std::vector<size_t>& sites)
+			void updateStochastics(const std::vector<size_t>& block1,const std::vector<size_t>& block2)
 			{
 				size_t linSize = model_.geometry().numberOfSites();
 				std::vector<size_t> tqn(2,0);
@@ -530,7 +530,7 @@ namespace Dmrg {
 					tqn[1] = model_.params().electronsDown;
 				}
 				size_t qn = BasisType::pseudoQuantumNumber(tqn);
-				mettsStochastics_.update(qn,sites,mettsStruct_.rngSeed);
+				mettsStochastics_.update(qn,block1,block2,mettsStruct_.rngSeed);
 			}
 
 			size_t getPartition() const
