@@ -296,7 +296,7 @@ namespace Dmrg {
 				progress_.print("Growth done.\n",std::cout);
 				lrs_.printSizes("Infinite",std::cout);
 
-				updateQuantumSector(lrs_.sites(),INFINITE);
+				updateQuantumSector(lrs_.sites(),INFINITE,step);
 
 				lrs_.setToProduct(quantumSector_);
 
@@ -425,7 +425,7 @@ namespace Dmrg {
 					progress_.printline(msg,std::cout);
 				}
 
-				updateQuantumSector(lrs_.sites(),direction);
+				updateQuantumSector(lrs_.sites(),direction,stepCurrent_);
 
 				lrs_.setToProduct(quantumSector_);
 
@@ -520,8 +520,16 @@ namespace Dmrg {
 			return "EXPAND_SYSTEM";
 		}
 
-		void updateQuantumSector(size_t sites,size_t direction)
+		void updateQuantumSector(size_t sites,size_t direction,size_t step)
 		{
+			if (direction==INFINITE && parameters_.adjustQuantumNumbers.size()>0) {
+				std::vector<size_t> targetQuantumNumbers(2,0);
+				assert(step<parameters_.adjustQuantumNumbers.size());
+				targetQuantumNumbers[0]=parameters_.adjustQuantumNumbers[step];
+				targetQuantumNumbers[1]=parameters_.adjustQuantumNumbers[step];
+				setQuantumSector(targetQuantumNumbers,direction);
+				return;
+			}
 			if (parameters_.targetQuantumNumbers.size()>0) {
 				updateQuantumSectorT(sites,direction);
 			} else {

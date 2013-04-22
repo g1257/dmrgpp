@@ -290,6 +290,7 @@ namespace Dmrg {
 		std::string model;
 		std::vector<FieldType> targetQuantumNumbers;
 		size_t electronsUp,electronsDown;
+		std::vector<FieldType> adjustQuantumNumbers;
 		FieldType tolerance;
 		DmrgCheckPoint checkpoint;
 		size_t nthreads;
@@ -390,6 +391,10 @@ namespace Dmrg {
 				s += "\nTargetQuantumNumbers must be specified instead.\n";
 				throw std::runtime_error(s.c_str());
 			}
+
+			try {
+				io.read(adjustQuantumNumbers,"AdjustQuantumNumbers");
+			} catch (std::exception& e) {}
 
 			tolerance = -1.0;
 			try {
