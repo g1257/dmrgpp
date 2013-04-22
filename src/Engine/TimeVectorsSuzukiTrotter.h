@@ -297,6 +297,10 @@ private:
 			transformE.makeDiagonal(hilbertSize,1);
 			transformET.makeDiagonal(hilbertSize,1);
 		}
+		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON && lrs_.left().size()==hilbertSize) {
+			transformS.makeDiagonal(hilbertSize,1);
+			transformST.makeDiagonal(hilbertSize,1);
+		}
 
 		for (size_t i=0;i<phi0.size();i++) {
 			size_t xp=0,yp=0;
