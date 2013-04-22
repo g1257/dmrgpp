@@ -24,7 +24,7 @@ FiniteLoops 24  3 400 0 -3 400 0 -3 400 0 3 400 0
                 3 400 0 -3 400 0 -3 400 0 3 400 0
                 3 400 0 -3 400 0 -3 400 0 3 400 0
 TargetQuantumNumbers 3 0.25 0.25 0
-TSPFilename=tst15.txt
+
 TSPTau=0.1
 TSPTimeSteps=5
 TSPAdvanceEach=4

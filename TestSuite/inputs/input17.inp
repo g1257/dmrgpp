@@ -20,7 +20,7 @@ FiniteLoops 16  3 400 0 -3 400 0 -3 400 0 3 400 0
 		3 400 0 -3 400 0 -3 400 0 3 400 0
 		3 400 0 -3 400 0 -3 400 0 3 400 0
 TargetQuantumNumbers 3 0.25 0.25 0
-TSPFilename=tst17.txt
+
 TSPTau=0.1
 TSPTimeSteps=5
 TSPAdvanceEach=6

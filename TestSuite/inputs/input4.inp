@@ -16,7 +16,6 @@ InfiniteLoopKeptStates=64
 FiniteLoops 3  7 100 0 -7 100 0 -7 100 0 
 TargetQuantumNumbers 2 0.5 0.5
 
-TSPFilename=tst4.txt
 TSPTau=0.1
 TSPTimeSteps=4
 TSPAdvanceEach=5

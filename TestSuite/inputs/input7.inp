@@ -17,7 +17,6 @@ FiniteLoops 8  7 100 0 -7 100 0 -7 100 0 7 100 0
 	       7 100 0 -7 100 0 -7 100 0 7 100 0 
 TargetQuantumNumbers 2 0.5 0.5
 
-TSPFilename=tst7.txt
 TSPTau=0.01
 TSPTimeSteps=10
 TSPAdvanceEach=2
