@@ -369,6 +369,35 @@ namespace Dmrg {
 			setIndex2Sector();
 		}
 
+		//! We don't have a partitioned basis because we don't have the superblock basis at this point
+		//! Therefore, partitioning is bogus here
+		template<typename IoInputter>
+		void loadOneSector(IoInputter& io,const std::string& label,size_t counter=0)
+		{
+			io.advance(label,counter);
+			int x = 0;
+			io.readline(x,"#size=");
+			if (x<0)
+				throw std::runtime_error("VectorWithOffsets::loadOneSector(...): size<0\n");
+			size_ = x;
+			int offset = 0;
+			io.readline(offset,"#offset=");
+			if (offset<0)
+				throw std::runtime_error("VectorWithOffsets::loadOneSector(...): offset<0\n");
+
+			data_.resize(1);
+			offsets_.resize(2);
+			index2Sector_.resize(size_);
+			io.read(data_[0],"#data");
+			nonzeroSectors_.resize(1);
+			nonzeroSectors_[0]=0;
+
+			offsets_[0] = offset;
+
+			offsets_[1]=offset+data_[0].size();
+			setIndex2Sector();
+		}
+
 		VectorWithOffsets<FieldType> operator+=(const VectorWithOffsets<FieldType>& v)
 		{
 			if (nonzeroSectors_.size()==0) {

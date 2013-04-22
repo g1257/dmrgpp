@@ -259,7 +259,8 @@ namespace Dmrg {
 			params.weight = s2*weightForContinuedFraction_;
 			params.isign = s;
 			PostProcType cf(ab_,params);
-			
+			std::string str = "#TCENTRALSITE=" + ttos(block[0]);
+			io.printline(str);
 			commonTargetting_.save(block,io,cf,targetVectors_);
 
 			psi_.save(io,"PSI");
@@ -267,18 +268,25 @@ namespace Dmrg {
 
 		void load(const std::string& f)
 		{
-			for (size_t i=0;i<stage_.size();i++) stage_[i] = CONVERGING;
-
 			typename IoType::In io(f);
 
-			commonTargetting_.load(io,targetVectors_);
+			try {
+				for (size_t i=0;i<stage_.size();i++) stage_[i] = CONVERGING;
 
-			lastLanczosVector_ = targetVectors_.size()-1;
+				commonTargetting_.load(io,targetVectors_);
+				lastLanczosVector_ = targetVectors_.size()-1;
 
-			//! WARNING: USE OF MAGIC BELOW:
-			dynCounter_ = 13; // FIXME: MAYBE SAVE AND LOAD ACTUAL NUMBER HERE
-
-			psi_.load(io,"PSI");
+				//! WARNING: USE OF MAGIC BELOW:
+				dynCounter_ = 13; // FIXME: MAYBE SAVE AND LOAD ACTUAL NUMBER HERE
+				psi_.load(io,"PSI");
+			} catch (std::exception& e) {
+				std::cout<<"WARNING: No special targets found in file "<<f<<"\n";
+				for (size_t i=0;i<stage_.size();i++) stage_[i] = DISABLED;
+				io.rewind();
+				int site = 0;
+				io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
+				psi_.loadOneSector(io,"PSI");
+			}
 		}
 
 		RealType time() const { return 0; }

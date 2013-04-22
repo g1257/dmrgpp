@@ -308,6 +308,10 @@ namespace Dmrg {
 			if (tstStruct_.aOperators[0].fermionSign>0) s2 *= s;
 
 			PostProcType cf(ab_,params);
+
+			std::string str = "#TCENTRALSITE=" + ttos(block[0]);
+			io.printline(str);
+
 			commonTargetting_.save(block,io,cf,targetVectors_);
 			
 			psi_.save(io,"PSI");
@@ -315,13 +319,19 @@ namespace Dmrg {
 
 		void load(const std::string& f)
 		{
-			for (size_t i=0;i<stage_.size();i++) stage_[i] = CONVERGING;
-
 			typename IoType::In io(f);
-
-			commonTargetting_.load(io,targetVectors_);
-
-			psi_.load(io,"PSI");
+			try {
+				for (size_t i=0;i<stage_.size();i++) stage_[i] = CONVERGING;
+				commonTargetting_.load(io,targetVectors_);
+				psi_.load(io,"PSI");
+			} catch (std::exception& e) {
+				std::cout<<"WARNING: No special targets found in file "<<f<<"\n";
+				for (size_t i=0;i<stage_.size();i++) stage_[i] = DISABLED;
+				io.rewind();
+				int site = 0;
+				io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
+				psi_.loadOneSector(io,"PSI");
+			}
 		}
 
 		RealType time() const { return 0; }
