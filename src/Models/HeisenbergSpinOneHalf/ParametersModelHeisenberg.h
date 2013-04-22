@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -70,7 +69,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
@@ -86,15 +85,23 @@ namespace Dmrg {
 	//! Heisenberg Model Parameters
 	template<typename Field>
 	struct ParametersModelHeisenberg {
+
 		// no connectors here, connectors are handled by the geometry
 		template<typename IoInputType>
-		ParametersModelHeisenberg(IoInputType& io) { }
+		ParametersModelHeisenberg(IoInputType& io)
+		    : twiceTheSpin(1)
+		{
+			//io.readline(twiceTheSpin,"TwiceTheSpin=");
+		}
+
+		size_t twiceTheSpin;
 	};
 	
 	//! Function that prints model parameters to stream os
 	template<typename FieldType>
 	std::ostream& operator<<(std::ostream &os,const ParametersModelHeisenberg<FieldType>& parameters)
 	{
+		os<<"TwiceTheSpin="<<parameters.twiceTheSpin<<"\n";
 		return os;
 	}
 } // namespace Dmrg

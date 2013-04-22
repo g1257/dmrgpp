@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ModelBase.h"
 #include "ParametersModelHeisenberg.h"
 #include "LinkProductHeisenbergSpinOneHalf.h"
-#include "HilbertSpaceHubbard.h"
 #include "CrsMatrix.h"
 #include "VerySparseMatrix.h"
 #include "SpinSquaredHelper.h"
@@ -112,8 +111,6 @@ namespace Dmrg {
 		typedef typename SparseMatrixType::value_type SparseElementType;
 //		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 		typedef unsigned int long long WordType;
-		typedef HilbertSpaceHubbard<WordType> HilbertSpaceType;
-		typedef typename HilbertSpaceType::HilbertState HilbertStateType;
 		typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,
 		                  LinkProductType,SharedMemoryTemplate> ModelBaseType;
@@ -125,7 +122,7 @@ namespace Dmrg {
 
 	public:
 		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
-		typedef std::vector<HilbertStateType> HilbertBasisType;
+		typedef std::vector<unsigned int long long> HilbertBasisType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -143,9 +140,7 @@ namespace Dmrg {
 
 		void print(std::ostream& os) const { os<<modelParameters_; }
 
-// 		size_t orbitals() const { return NUMBER_OF_ORBITALS; }
-
-		size_t hilbertSize(size_t site) const { return 2; } 
+		size_t hilbertSize(size_t site) const { return modelParameters_.twiceTheSpin+1; }
 
 		//! find  operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
@@ -155,7 +150,7 @@ namespace Dmrg {
 				     Block const &block,
 				     const RealType& time) const
 		{
-			std::vector<HilbertStateType> natBasis;
+			HilbertBasisType natBasis;
 			
 			std::vector<size_t> qvector;
 			setNaturalBasis(natBasis,qvector,block);
@@ -170,7 +165,7 @@ namespace Dmrg {
 		//! set operator matrices for sites in block
 		void setOperatorMatrices(std::vector<OperatorType> &operatorMatrices,Block const &block) const
 		{
-			std::vector<HilbertStateType> natBasis;
+			HilbertBasisType natBasis;
 			SparseMatrixType tmpMatrix;
 			
 			std::vector<size_t> qvector;
@@ -227,14 +222,13 @@ namespace Dmrg {
 		}
 		
 		//! find all states in the natural basis for a block of n sites
-		void setNaturalBasis(std::vector<HilbertStateType>  &basis,
+		void setNaturalBasis(HilbertBasisType& basis,
 		                     std::vector<size_t>& q,
 		                     const std::vector<size_t>& block) const
 		{
 			assert(block.size()==1);
-			
-			basis.push_back(1);
-			basis.push_back(2);
+			size_t total = modelParameters_.twiceTheSpin + 1;
+			for (size_t i=0;i<total;i++) basis.push_back(i);
 			BasisDataType qq;
 			setSymmetryRelated(qq,basis,block.size());
 			MyBasis::findQuantumNumbers(q,qq);
@@ -246,7 +240,8 @@ namespace Dmrg {
 		                   size_t site) const
 		{
 			electrons.resize(basis.size());
-			for (size_t i=0;i<electrons.size();i++) electrons[i] = 0;
+			for (size_t i=0;i<electrons.size();i++)
+				electrons[i] = 0;
 		}
 
 	private:
@@ -258,49 +253,39 @@ namespace Dmrg {
 		size_t reinterpretX_,reinterpretY_;
 
 		//! Find S^+_i in the natural basis natBasis
-		SparseMatrixType findSplusMatrices(int i,std::vector<HilbertStateType> const &natBasis) const
+		SparseMatrixType findSplusMatrices(int i,const HilbertBasisType& natBasis) const
 		{
-			HilbertStateType bra,ket;
-			int n = natBasis.size();
-			PsimagLite::Matrix<SparseElementType> cm(n,n);
+			size_t total = natBasis.size();
+			PsimagLite::Matrix<SparseElementType> cm(total,total);
+			RealType j = 0.5*modelParameters_.twiceTheSpin;
 
-			for (size_t ii=0;ii<natBasis.size();ii++) {
-				bra=ket=natBasis[ii];
-				if (HilbertSpaceType::get(ket,i)==2) {
-					// it is a down electron, then flip it:
-					HilbertSpaceType::destroy(bra,i,1);
-					HilbertSpaceType::create(bra,i,0);
-					int jj = PsimagLite::isInVector(natBasis,bra);
-					if (jj<0) throw std::runtime_error("findOperatorMatrices: internal error while"
-								"creating.\n");
-					cm(ii,jj)=1.0;
-				}
+			for (size_t ii=0;ii<total;ii++) {
+				size_t ket = natBasis[ii];
+				size_t bra = ket + 1;
+				if (bra>=total) continue;
+				RealType m = ket - j;
+				RealType x = j*(j+1)-m*(m+1);
+				assert(x>=0);
+				cm(ket,bra) = sqrt(x);
 			}
+
 			SparseMatrixType operatorMatrix(cm);
 			return operatorMatrix;
 		}
 
 		//! Find S^z_i in the natural basis natBasis
-		SparseMatrixType findSzMatrices(int i,std::vector<HilbertStateType> const &natBasis) const
+		SparseMatrixType findSzMatrices(int i,const HilbertBasisType& natBasis) const
 		{
-			HilbertStateType ket;
-			int n = natBasis.size();
-			PsimagLite::Matrix<SparseElementType> cm(n,n);
+			size_t total = natBasis.size();
+			PsimagLite::Matrix<SparseElementType> cm(total,total);
+			RealType j = 0.5*modelParameters_.twiceTheSpin;
 
-			for (size_t ii=0;ii<natBasis.size();ii++) {
-				ket=natBasis[ii];
-				switch (HilbertSpaceType::get(ket,i)) {
-					case 1:
-						cm(ii,ii)=0.5;
-						break;
-					case 2:
-						cm(ii,ii)= -0.5;
-						break;
-					default:
-						throw std::runtime_error("findOperatorMatrices: internal error while"
-								"creating.\n");
-				}
+			for (size_t ii=0;ii<total;ii++) {
+				size_t ket = natBasis[ii];
+				RealType m = ket - j;
+				cm(ket,ket) = m;
 			}
+
 			SparseMatrixType operatorMatrix(cm);
 			return operatorMatrix;
 		}
@@ -308,43 +293,11 @@ namespace Dmrg {
 		//! Full hamiltonian from operator matrices cm
 		void calcHamiltonian(SparseMatrixType &hmatrix,std::vector<OperatorType> const &cm,Block const &block) const
 		{
-			size_t n=block.size();
-			//SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
-
+			assert(block.size()==1);
 			hmatrix.makeDiagonal(cm[0].data.row());
-			
-			//! exchange
-			for (size_t i=0;i<n;i++) {
-				SparseMatrixType sPlusOperatorI = cm[i].data; //S^+_i
-				SparseMatrixType szOperatorI =cm[i+n].data; //S^z_i
-				for (size_t j=0;j<n;j++) {
-					for (size_t term=0;term<geometry_.terms();term++) {
-						typename GeometryType::AdditionalDataType additional;
-						geometry_.fillAdditionalData(additional,term,block[i],block[j]);
-						size_t dofsTotal = LinkProductType::dofs(term,additional);
-						for (size_t dofs=0;dofs<dofsTotal;dofs++) {
-							std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs,additional);
-							RealType tmp = geometry_(block[i],edofs.first,block[j],edofs.second,term);
-						
-							if (i==j || tmp==0.0) continue;
-			
-							SparseMatrixType sPlusOperatorJ = cm[j].data;//S^+_j
-							SparseMatrixType tJ, tI;
-							transposeConjugate(tJ,sPlusOperatorJ);
-							transposeConjugate(tI,sPlusOperatorI);
-							hmatrix += (0.5*tmp)*(sPlusOperatorI*tJ);
-							hmatrix += (0.5*tmp)*(tI*sPlusOperatorJ);
-		
-							// S^z_i S^z_j
-							SparseMatrixType szOperatorJ=cm[j+n].data; //S^z_j
-							hmatrix += tmp*(szOperatorI*szOperatorJ);
-						}
-					}
-				}
-			}
 		}
 
-		void setSymmetryRelated(BasisDataType& q,std::vector<HilbertStateType>  const &basis,int n) const
+		void setSymmetryRelated(BasisDataType& q,const HilbertBasisType& basis,int n) const
 		{
 			if (n!=1) std::runtime_error("ModelFeAs::setSymmetryRelated() implemented for n=1 only\n");
 			
@@ -355,20 +308,25 @@ namespace Dmrg {
 			typedef std::pair<size_t,size_t> PairType;
 			std::vector<PairType> jmvalues;
 			std::vector<size_t> flavors; 
-			PairType jmSaved = calcJmvalue<PairType>(basis[0]);
+			PairType jmSaved;
+			jmSaved.first = modelParameters_.twiceTheSpin;
+			jmSaved.second = basis[0];
 			jmSaved.first++;
 			jmSaved.second++;
 
 			std::vector<size_t> electronsUp(basis.size());
 			std::vector<size_t> electronsDown(basis.size());
 			for (size_t i=0;i<basis.size();i++) {
-				PairType jmpair = calcJmvalue<PairType>(basis[i]);
-				
+				PairType jmpair;
+				jmpair.first = modelParameters_.twiceTheSpin;
+				jmpair.second = basis[i];
+				size_t ket = basis[i];
 				jmvalues.push_back(jmpair);
+
 				// nup
-				electronsUp[i] = HilbertSpaceType::getNofDigits(basis[i],HilbertSpaceType::SPIN_UP);
+				electronsUp[i] = (ket==0) ?  0 : 1;
 				// ndown
-				electronsDown[i] = HilbertSpaceType::getNofDigits(basis[i],HilbertSpaceType::SPIN_DOWN);
+				electronsDown[i] = (ket==1) ?  0 : 1;
 
 				flavors.push_back(electronsUp[i]+electronsDown[i]);
 				jmSaved = jmpair;
@@ -377,44 +335,6 @@ namespace Dmrg {
 			q.flavors = flavors;
 			q.electronsUp = electronsUp;
 			q.electronsDown = electronsDown;
-		}
-		
-		// note: we use 2j instead of j
-		// note: we use m+j instead of m
-		// This assures us that both j and m are size_t
-		// Reinterprets 6 and 9
-		template<typename PairType>
-		PairType calcJmvalue(const HilbertStateType& ket) const
-		{
-			PairType jm(0,0);
-
-			size_t x=reinterpretX_,y=reinterpretY_; // these states need reinterpretation
-			if (ket==x) {
-				jm=std::pair<size_t,size_t>(2,1);
-			} else if (ket==y) {
-				jm=std::pair<size_t,size_t>(0,0);
-			} else jm=calcJmValueAux<PairType>(ket);
-			//std::cerr<<jm.first<<" "<<jm.second<<" |--------------\n";
-			return jm; 
-		}
-
-		// note: we use 2j instead of j
-		// note: we use m+j instead of m
-		// This assures us that both j and m are size_t
-		// does not work for 6 or 9
-		template<typename PairType>
-		PairType calcJmValueAux(const HilbertStateType& ket) const
-		{
-			size_t site0=0;
-			size_t site1=0;
-
-			spinSquared_.doOnePairOfSitesA(ket,site0,site1);
-			spinSquared_.doOnePairOfSitesB(ket,site0,site1);
-			spinSquared_.doDiagonal(ket,site0,site1);
-
-			RealType sz = spinSquared_.spinZ(ket,site0);
-			PairType jm= spinSquaredHelper_.getJmPair(sz);
-			return jm;
 		}
 	}; // class ModelHeisenberg
 
@@ -427,22 +347,6 @@ namespace Dmrg {
 		model.print(os);
 		return os;
 	}
-
-// 	template<typename SparseMatrixType>
-// 	SparseMatrixType operator*(const SparseMatrixType& a,const SparseMatrixType& b)
-// 	{
-// 		SparseMatrixType temp;
-// 		multiply(temp,a,b);
-// 		return temp;
-// 	}
-// 
-// 	template<typename RealTypeType,typename SparseMatrixType>
-// 	SparseMatrixType operator*(const RealTypeType& a,const SparseMatrixType& b)
-// 	{
-// 		SparseMatrixType temp;
-// 		multiplyScalar(temp,b,static_cast<typename SparseMatrixType::value_type>(a));
-// 		return temp;
-// 	}
 } // namespace Dmrg
 /*@}*/
 #endif //DMRG_MODEL_HEISENBERG_HEADER_H
