@@ -121,23 +121,21 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
-		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
+		//static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;
 		static const int SPIN_UP=HilbertSpaceImmmType::SPIN_UP;
 		static const int SPIN_DOWN=HilbertSpaceImmmType::SPIN_DOWN;
-		static const int NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
+		static const size_t NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
 		Immm(InputValidatorType& io,GeometryType const &geometry,ConcurrencyType& concurrency)
 		: ModelBaseType(geometry,concurrency),
 		  modelParameters_(io),
 		  geometry_(geometry),
 		  degreesOfFreedom_(geometry_.numberOfSites()),
-		  index2Op_(geometry_.numberOfSites()),
 		  hilbertSpace_(degreesOfFreedom_)
 		{
 			size_t cooperEach = 4;
 			buildDofs(cooperEach);
-			buildIndex2Op();
 		}
 
 		size_t dOf(size_t site) const { return degreesOfFreedom_[site]; }
@@ -184,6 +182,9 @@ namespace Dmrg {
 			//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 			creationMatrix.clear();
 
+			SparseMatrixType nmatrix(natBasis.size(),natBasis.size());
+			SparseMatrixType cTranspose;
+
 			for (size_t sigma=0;sigma<dOf(0);sigma++) {
 				if (!isAllowedThisDof(1<<sigma,block[0])) continue;
 				findOperatorMatrices(tmpMatrix,block[0],sigma,natBasis);
@@ -191,7 +192,15 @@ namespace Dmrg {
 					
 				OperatorType myOp(tmpMatrix,-1,typename OperatorType::PairType(0,0),1,su2related);
 				creationMatrix.push_back(myOp);
+
+				transposeConjugate(cTranspose,tmpMatrix);
+				nmatrix += multiplyTc(cTranspose,cTranspose);
 			}
+
+			// add n_i
+			typename OperatorType::Su2RelatedType su2related2;
+			OperatorType nOp(nmatrix,1,typename OperatorType::PairType(0,0),1,su2related2);
+			creationMatrix.push_back(nOp);
 		}
 
 		MatrixType naturalOperator(const std::string& what,size_t site,size_t dof) const
@@ -215,11 +224,16 @@ namespace Dmrg {
 				return nUpOrDown(block,SPIN_UP)-nUpOrDown(block,SPIN_DOWN);
 			}
 			if (what=="n") {
-				return nUpOrDown(block,SPIN_UP)+nUpOrDown(block,SPIN_DOWN);
+				MatrixType tmp;
+				crsMatrixToFullMatrix(tmp,creationMatrix[creationMatrix.size()-1].data);
+				return tmp;
+				//return nUpOrDown(block,SPIN_UP)+nUpOrDown(block,SPIN_DOWN);
 			} 
 			if (what=="c") {
+				SparseMatrixType tmp2;
+				transposeConjugate(tmp2,creationMatrix[orbital + spin*norb].data);
 				MatrixType tmp;
-				crsMatrixToFullMatrix(tmp,creationMatrix[index2Op_[block[0]] + orbital + spin*norb].data);
+				crsMatrixToFullMatrix(tmp,tmp2);
 				return tmp;
 			}
 			if (what=="nup") {
@@ -414,15 +428,28 @@ namespace Dmrg {
 			
 			// on-site potential:
 			size_t site = block[0];
-			SparseElementType tmp = modelParameters_.potentialV[site];
+			size_t linSize = geometry_.numberOfSites();
+
+			size_t siteCorrected  = 0;
+			for (size_t i=0;i<site;i++) {
+				if (dOf(i)>NUMBER_OF_SPINS) siteCorrected++;
+			}
+
 			for (size_t dof=0;dof<dOf(site);dof++) {
-				SparseMatrixType tmpMatrix = tmp * n(cm[dof].data);
+				size_t norb = dOf(site)/NUMBER_OF_SPINS;
+				assert(norb==1 || norb==2);
+				size_t orb = dof % norb;
+				size_t siteCorrected2 = (orb==0) ? site : siteCorrected;
+				size_t index = siteCorrected2+orb*linSize;
+				assert(index<modelParameters_.potentialV.size());
+				SparseElementType value = modelParameters_.potentialV[index];
+				SparseMatrixType tmpMatrix =value * n(cm[dof].data);
 				hmatrix += tmpMatrix;
 			}
 			// on-site U only for Cu sites, for now:
 			if (dOf(site)!=2) return;
-			tmp = modelParameters_.hubbardU[site];
-			hmatrix +=  tmp * n(cm[0].data) * n(cm[1].data);
+			SparseElementType tmp = modelParameters_.hubbardU[site];
+			hmatrix +=  tmp * nbar(cm[0].data) * nbar(cm[1].data);
 			//addInteraction(hmatrix,cm,block);
 		}
 
@@ -432,6 +459,16 @@ namespace Dmrg {
 			SparseMatrixType cdagger;
 			transposeConjugate(cdagger,c);
 			multiply(tmpMatrix,c,cdagger);
+
+			return tmpMatrix;
+		}
+
+		SparseMatrixType nbar(const SparseMatrixType& c) const
+		{
+			SparseMatrixType tmpMatrix;
+			SparseMatrixType cdagger;
+			transposeConjugate(cdagger,c);
+			multiply(tmpMatrix,cdagger,c);
 
 			return tmpMatrix;
 		}
@@ -446,22 +483,6 @@ namespace Dmrg {
 			std::cout<<str<<" diagTest size="<<fullm.rank()<<" eigs[0]="<<eigs[0]<<"\n";
 			std::cout<<fullm;
 		}
-
-		//! This is a mapping from site to the start of the operators for 
-		//! that site. Note that there are more than one operator per site,
-		//! and the number of operators per site varies.
-		//! So, you have for example operators 0 1 2 3 belonging to site 0;
-		//! 4, 5, 6, 7 to site 1; 8, 9 belonging to site 2, etc.
-		//! That was just an example and might not reflect the actual numbers
-		//! for this model
-		void buildIndex2Op()
-		{
-			size_t counter = 0;
-			for (size_t i=0;i<geometry_.numberOfSites();i++) {
-				index2Op_[i] = counter;
-				counter += dOf(i);
-			}
-		}
 		
 		MatrixType cDaggerCi(const std::vector<size_t>& block,
 		                            size_t spin1,
@@ -475,6 +496,9 @@ namespace Dmrg {
 			assert(creationMatrix.size()>0);
 			size_t rank = creationMatrix[0].data.row();
 			MatrixType tmp(rank,rank);
+			assert(norb*2-1<creationMatrix.size());
+			assert(spin1<2);
+			assert(spin2<2);
 			for (size_t orb=0;orb<norb;orb++)
 				tmp += multiplyTc(creationMatrix[orb+spin1*norb].data,
 								  creationMatrix[orb+spin2*norb].data);
@@ -509,7 +533,6 @@ namespace Dmrg {
 		ParametersImmm<RealType>  modelParameters_;
 		GeometryType const &geometry_;
 		std::vector<size_t> degreesOfFreedom_;
-		std::vector<size_t> index2Op_;
 		HilbertSpaceImmmType hilbertSpace_;
 	};     //class Immm
 

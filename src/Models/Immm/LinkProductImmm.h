@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009-2011, UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -87,19 +84,30 @@ namespace Dmrg {
 	
 	template<typename ModelHelperType>
 	class LinkProductImmm {
+
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			typedef std::pair<size_t,size_t> PairType;
+
+			enum {HOPPING_TERM,W_TERM}; // W_TERM is a term of the form Upd n_i n_j
 
 		public:
 
 			typedef typename ModelHelperType::RealType RealType;
 
-			//! if sites are both TYPE_O then return 8, 2 orbitals, 2 spins
-			//! if sites are TYPE_O and TYPE_C the returns 4
+			//! The term=0 is for hoppings:
+			//! if sites are both TYPE_O then return 8, 2 orbitals, 2 spins, i.e. gamma sigma gamma' sigma = 2x2x2 = 8
+			//! if sites are TYPE_O and TYPE_C the returns 4, i.e. gamma sigma d sigma =  2x2
+			//! The term=1 is for Upd
 			template<typename SomeStructType>
 			static size_t dofs(size_t term,const SomeStructType& additionalData)
-			{ 
+			{
+				if (term==W_TERM) {
+					// No Upd allowed between Oxygens
+					if (additionalData.type1==additionalData.type2)
+						return 0;
+					return 1; // Upd n_o n_Cu
+				}
 				size_t type1 = additionalData.type1;
 				size_t type2 = additionalData.type2;
 				//! both cannot be TYPE_C
@@ -111,6 +119,8 @@ namespace Dmrg {
 			template<typename SomeStructType>
 			static PairType connectorDofs(size_t term,size_t dofs,const SomeStructType& additionalData)
 			{
+				if (term==W_TERM) return PairType(0,0); // Upd
+
 				size_t type1 = additionalData.type1;
 				size_t type2 = additionalData.type2;
 				//! both cannot be TYPE_C
@@ -138,6 +148,22 @@ namespace Dmrg {
 					size_t& category,
 					const AdditionalDataType& additionalData)
 			{
+				if (term==W_TERM) {
+					fermionOrBoson = ProgramGlobals::BOSON;
+					assert(dofs==0);
+					if (additionalData.type1==additionalData.TYPE_C) {
+						ops.first = 2;
+						ops.second = 4;
+					} else {
+						ops.first = 4;
+						ops.second = 2;
+					}
+					angularFactor = 1;
+					angularMomentum = 1;
+					category = 0;
+					return;
+				}
+
 				//!FIXME: Depends on site!!!!
 				fermionOrBoson = ProgramGlobals::FERMION;
 				size_t spin = getSpin(dofs,additionalData);
@@ -150,7 +176,14 @@ namespace Dmrg {
 			
 			template<typename AdditionalDataType>
 			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2,const AdditionalDataType& additionalData)
-			{}
+			{
+				if (term==W_TERM) {
+					value *= 0.5;
+					return;
+				}
+
+				value *= (-1.0);
+			}
 
 		private:
 
@@ -175,12 +208,13 @@ namespace Dmrg {
 					return std::pair<size_t,size_t>(op1,op2);
 				}
 				//! TYPE_C and TYPE_O:
+				assert(dofs<4);
 				size_t spin = dofs/2;
 				size_t xtmp = (spin==0) ? 0 : 2;
 				xtmp = dofs - xtmp;
 				size_t op1 = spin;
 				size_t op2 = xtmp + spin*2;
-				assert(op1<4 && op2<4);
+				assert(op1<2 && op2<4);
 				return (type1==additionalData.TYPE_C) ? PairType(op1,op2) : PairType(op2,op1);
 			}
 
