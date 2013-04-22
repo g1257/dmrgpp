@@ -135,7 +135,7 @@ print FOUT<<EOF;
 # MPI: $mpi
 
 LDFLAGS =    $lapack  $gslLibs $pthreadsLib
-CPPFLAGS = -Werror -Wall  -IEngine -IModels/HubbardOneBand -IModels/HeisenbergSpinOneHalf -IModels/ExtendedHubbard1Orb  -IModels/FeAsModel -IModels/FeAsBasedScExtended -IModels/Immm  -I$PsimagLite -I$PsimagLite/Geometry $usePthreadsOrNot
+CPPFLAGS = -Werror -Wall  -IEngine -IModels/HubbardOneBand -IModels/HeisenbergSpinOneHalf -IModels/ExtendedHubbard1Orb  -IModels/FeAsModel -IModels/FeAsBasedScExtended -IModels/Immm  -IModels/Tj1Orb -I$PsimagLite -I$PsimagLite/Geometry $usePthreadsOrNot
 EOF
 if ($mpi) {
 	print FOUT "CXX = mpicxx -O3 -DNDEBUG \n";
@@ -155,7 +155,7 @@ dmrg:  dmrg.o gitrev
 correctionVectorMulti: correctionVectorMulti.o
 	\$(CXX) -o correctionVectorMulti correctionVectorMulti.o \$(LDFLAGS)
 
-observe:  observe.o
+observe:  observe.o Makefile
 	\$(CXX) -o observe observe.o \$(LDFLAGS)
 	strip observe
 

@@ -221,7 +221,7 @@ namespace Dmrg {
 			{
 				for (size_t i=0;i<data_.size();i++) {
 					size_t n = data_[i].n_row();
-					if (n!=model_.hilbertSize(0)) throw std::runtime_error("CommonTargetting\n");
+					if (n!=model_.hilbertSize(sites[i])) throw std::runtime_error("CommonTargetting\n");
 				}
 			}
 

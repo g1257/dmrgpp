@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009,-2012 UT-Battelle, LLC
+Copyright (c) 2009-2012, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
-
+ 
 *********************************************************
 DISCLAIMER
 
@@ -67,70 +67,48 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Parallel2PointCorrelations.h
+/*! \file ParametersModelTj1Orb.h
  *
- * DOC TBW FIXME
+ *  Contains the parameters for the Hubbard model and function to read them from a JSON file
+ *
  */
-#ifndef PARALLEL_2POINT_CORRELATIONS_H
-#define PARALLEL_2POINT_CORRELATIONS_H
-
-#include "Matrix.h"
+#ifndef ParametersModelTj1Orb_H
+#define ParametersModelTj1Orb_H
+//#include "SimpleReader.h"
 
 namespace Dmrg {
-
-template<typename RealType_,typename TwoPointCorrelationsType>
-class Parallel2PointCorrelations {
-
-	typedef std::pair<size_t,size_t> PairType;
-	typedef typename TwoPointCorrelationsType::MatrixType MatrixType;
-	typedef typename MatrixType::value_type FieldType;
-
-public:
-
-	typedef RealType_ RealType;
-
-	Parallel2PointCorrelations(MatrixType& w,
-							   TwoPointCorrelationsType& twopoint,
-							   const std::vector<PairType>& pairs,
-							   const MatrixType& O1,
-							   const MatrixType& O2,
-							   int fermionicSign)
-		: w_(w),
-		  twopoint_(twopoint),
-		  pairs_(pairs),
-		  O1_(O1),
-		  O2_(O2),
-		  fermionicSign_(fermionicSign)
-	{}
-
-	void thread_function_(size_t threadNum,size_t blockSize,size_t total,pthread_mutex_t* myMutex)
-	{
-		for (size_t p=0;p<blockSize;p++) {
-			size_t px = threadNum * blockSize + p;
-			if (px>=total) continue;
-
-			size_t i = pairs_[px].first;
-			size_t j = pairs_[px].second;
-			size_t threadId = (myMutex==0) ? 0 : threadNum;
-			w_(i,j) = twopoint_.calcCorrelation(i,j,O1_,O2_,fermionicSign_,threadId);
+	//! Hubbard Model Parameters
+	template<typename Field>
+	struct ParametersModelTj1Orb {
+		
+		template<typename IoInputType>
+		ParametersModelTj1Orb(IoInputType& io)
+		{
+			io.read(potentialV,"potentialV");
 		}
+		
+		// Do not include here connection parameters
+
+		// potential V, size=twice the number of sites: for spin up and then for spin down
+		std::vector<Field> potentialV;
+
+		// target number of electrons  in the system
+		int nOfElectrons;
+	};
+	
+	//! Function that prints model parameters to stream os
+	template<typename FieldType>
+	std::ostream& operator<<(std::ostream &os,const ParametersModelTj1Orb<FieldType>& parameters)
+	{
+		os<<"potentialV\n";
+		os<<parameters.potentialV;
+		return os;
 	}
-
-private:
-
-	MatrixType& w_;
-	TwoPointCorrelationsType& twopoint_;
-	const std::vector<PairType>& pairs_;
-	const MatrixType& O1_;
-	const MatrixType& O2_;
-	int fermionicSign_;
-}; // class Parallel2PointCorrelations
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
-#endif // PARALLEL_2POINT_CORRELATIONS_H
+#endif

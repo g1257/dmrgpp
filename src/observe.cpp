@@ -71,6 +71,9 @@ size_t dofsFromModelName(const ModelType& model)
 	if (modelName.find("FeAsBasedSc")!=std::string::npos) return dofs;
 	if (modelName.find("FeAsBasedScExtended")!=std::string::npos) return dofs;
 	if (modelName.find("HubbardOneBand")!=std::string::npos) return dofs;
+
+	// max number here, site dependence taken into account elsewhere
+	if (modelName.find("Immm")!=std::string::npos) return 4;
 	return 0;
 }
 
@@ -112,7 +115,16 @@ bool observeOneFullSweep(
 	const std::string& modelName = model.params().model;
 	size_t rows = n; // could be n/2 if there's enough symmetry
 
+	// Immm supports only onepoint:
+	if (modelName=="Immm" && obsOptions!="onepoint") {
+		std::string str(__FILE__);
+		str += " "  + ttos(__LINE__) + "\n";
+		str += "Model Immm only supports onepoint\n";
+		throw std::runtime_error(str.c_str());
+	}
+
 	size_t numberOfDofs = dofsFromModelName(model);
+
 	if (!hasTimeEvolution && obsOptions.find("onepoint")!=std::string::npos) {
 		observerLib.measureTheOnePoints(numberOfDofs);
 	}
@@ -131,11 +143,12 @@ bool observeOneFullSweep(
 	}
 
 	if (modelName.find("FeAsBasedSc")!=std::string::npos ||
-	    modelName.find("FeAsBasedScExtended")!=std::string::npos) {
+	    modelName.find("FeAsBasedScExtended")!=std::string::npos ||
+	    modelName.find("HubbardOneBand")!=std::string::npos) {
 		bool dd4 = (obsOptions.find("dd4")!=std::string::npos);
 
-		if (obsOptions.find("dd")!=std::string::npos && !dd4 &&
-			geometry.label(0).find("ladder")!=std::string::npos) {
+		if (obsOptions.find("dd")!=std::string::npos && !dd4) { // &&
+			//geometry.label(0).find("ladder")!=std::string::npos) {
 			observerLib.measure("dd",rows,n);
 		}
 
@@ -202,7 +215,7 @@ void mainLoop(GeometryType& geometry,
 	bool moreData = true;
 	const std::string& datafile = params.filename;
 	IoInputType dataIo(datafile);
-	bool hasTimeEvolution = (targetting == "TimeStepTargetting") ? true : false;
+	bool hasTimeEvolution = (targetting == "TimeStepTargetting" || targetting=="MettsTargetting") ? true : false;
 	while (moreData) {
 		try {
 			moreData = !observeOneFullSweep<VectorWithOffsetType,ModelType,
@@ -312,7 +325,7 @@ int main(int argc,char *argv[])
 		return 0;
 	}
 	if (targetting=="MettsTargetting") { // experimental, do not use
-		mainLoop<ModelHelperLocal,VectorWithOffset,MettsTargetting,MySparseMatrixReal>
+		mainLoop<ModelHelperLocal,VectorWithOffsets,MettsTargetting,MySparseMatrixReal>
 		(geometry,targetting,concurrency,io,dmrgSolverParams,options);
 		return 0;
 	}

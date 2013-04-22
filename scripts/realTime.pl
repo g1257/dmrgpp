@@ -4,7 +4,7 @@ use strict;
 my ($label)=@ARGV;
 my ($initial,$final);
 
-$label = "\ 2012\$" if (!defined($label));
+$label = "\ 2013\$" if (!defined($label));
 
 while(<STDIN>) {
 	if (/$label/ and !defined($initial)) {
@@ -38,7 +38,7 @@ sub getTimeInSeconds
 	#Fri Nov 13 20:36:05 2009
 	my @temp = split(/ +/,$t);
 	die "Error in $t\n" if ($#temp<3);
-	return timeInSeconds($temp[3]);
+	return timeInSeconds($temp[3])+$temp[2]*86400;
 }
 
 sub timeInSeconds

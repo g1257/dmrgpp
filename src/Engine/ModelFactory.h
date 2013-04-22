@@ -93,6 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ModelFeBasedSc.h"
 #include "FeAsBasedScExtended.h"
 #include "Immm.h"
+#include "Tj1Orb.h"
 #include "ReflectionOperatorEmpty.h"
 
 namespace Dmrg {
@@ -120,10 +121,12 @@ namespace Dmrg {
 					    SharedMemoryTemplate> FeBasedScExtType;
 		typedef Immm<ModelHelperType_,SparseMatrixType,GeometryType_,
 			     SharedMemoryTemplate> ImmmType;
+		typedef Tj1Orb<ModelHelperType_,SparseMatrixType,GeometryType_,
+				 SharedMemoryTemplate> Tj1OrbType;
 		// end models
 
 		enum {HUBBARD_ONE_BAND,HEISENBERG_SPIN_ONEHALF,
-		      HUBBARD_ONE_BAND_EXT,FEAS,FEAS_EXT,IMMM};
+			  HUBBARD_ONE_BAND_EXT,FEAS,FEAS_EXT,IMMM,TJ_1ORB};
 
 	public:
 
@@ -169,7 +172,8 @@ namespace Dmrg {
 		  modelHubbardExt_(0),
 		  modelFeAs_(0),
 		  modelFeAsExt_(0),
-		  modelImmm_(0)
+		  modelImmm_(0),
+		  modelTj1Orb_(0)
 		{
 			std::string name = params.model;
 			if (name=="HubbardOneBand") {
@@ -202,6 +206,11 @@ namespace Dmrg {
 				ImmmType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=IMMM;
 				init(modelImmm_);
+			} else if (name=="Tj1Orb") {
+				modelTj1Orb_ = new Tj1OrbType(io,geometry,concurrency);
+				Tj1OrbType::ParallelConnectionsType::setThreads(params.nthreads);
+				model_=TJ_1ORB;
+				init(modelTj1Orb_);
 			} else {
 				std::string s(__FILE__);
 				s += " Unknown model " + name + "\n";
@@ -229,6 +238,9 @@ namespace Dmrg {
 				break;
 			case IMMM:
 				delete modelImmm_;
+				break;
+			case TJ_1ORB:
+				delete modelTj1Orb_;
 				break;
 			}
 		}
@@ -258,6 +270,8 @@ namespace Dmrg {
 				return modelFeAsExt_->setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
 			case IMMM:
 				return modelImmm_->setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
+			case TJ_1ORB:
+				return modelTj1Orb_->setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
 			}
 		}
 
@@ -278,6 +292,8 @@ namespace Dmrg {
 				return modelFeAsExt_->naturalOperator(what,site,dof);
 			case IMMM:
 				return modelImmm_->naturalOperator(what,site,dof);
+			case TJ_1ORB:
+				return modelTj1Orb_->naturalOperator(what,site,dof);
 			}
 			std::cerr<<__FILE__<<" Unknown model "<<model_<<"\n";
 			throw std::runtime_error("naturalOperator\n");
@@ -300,6 +316,8 @@ namespace Dmrg {
 				return modelFeAsExt_->findElectrons(electrons,basis,site);
 			case IMMM:
 				return modelImmm_->findElectrons(electrons,basis,site);
+			case TJ_1ORB:
+				return modelTj1Orb_->findElectrons(electrons,basis,site);
 			}
 		}
 
@@ -318,6 +336,8 @@ namespace Dmrg {
 				return modelFeAsExt_->print(os);
 			case IMMM:
 				return modelImmm_->print(os);
+			case TJ_1ORB:
+				return modelTj1Orb_->print(os);
 			}
 		}
 
@@ -339,6 +359,8 @@ namespace Dmrg {
 				return modelFeAsExt_->matrixVectorProduct(x,y,modelHelper);
 			case IMMM:
 				return modelImmm_->matrixVectorProduct(x,y,modelHelper);
+			case TJ_1ORB:
+				return modelTj1Orb_->matrixVectorProduct(x,y,modelHelper);
 			}
 		}
 
@@ -357,6 +379,8 @@ namespace Dmrg {
 				return modelFeAsExt_->addHamiltonianConnection(matrix,lrs);
 			case IMMM:
 				return modelImmm_->addHamiltonianConnection(matrix,lrs);
+			case TJ_1ORB:
+				return modelTj1Orb_->addHamiltonianConnection(matrix,lrs);
 			}
 		}
 		
@@ -377,6 +401,8 @@ namespace Dmrg {
 				return modelFeAsExt_->hamiltonianConnectionProduct(x,y,modelHelper);
 			case IMMM:
 				return modelImmm_->hamiltonianConnectionProduct(x,y,modelHelper);
+			case TJ_1ORB:
+				return modelTj1Orb_->hamiltonianConnectionProduct(x,y,modelHelper);
 			}
 		}
 
@@ -395,6 +421,8 @@ namespace Dmrg {
 				return modelFeAsExt_->fullHamiltonian(matrix,modelHelper);
 			case IMMM:
 				return modelImmm_->fullHamiltonian(matrix,modelHelper);
+			case TJ_1ORB:
+				return modelTj1Orb_->fullHamiltonian(matrix,modelHelper);
 			}
 		}
 
@@ -473,8 +501,11 @@ namespace Dmrg {
 			case FEAS_EXT:
 				return getLinkProductStruct2<FeBasedScExtType>(lps,modelHelper);
 			case IMMM:
-				return getLinkProductStruct2<ModelHubbardType>(lps,modelHelper);
+				return getLinkProductStruct2<ImmmType>(lps,modelHelper);
+			case TJ_1ORB:
+				return getLinkProductStruct2<Tj1OrbType>(lps,modelHelper);
 			}
+			throw std::runtime_error("getLinkProductStruct(...) failed\n");
 			return 0;
 		}
 
@@ -496,7 +527,9 @@ namespace Dmrg {
 			case FEAS_EXT:
 				return getConnection2<FeBasedScExtType>(A,B,ix,lps,modelHelper);
 			case IMMM:
-				return getConnection2<ModelHubbardType>(A,B,ix,lps,modelHelper);
+				return getConnection2<ImmmType>(A,B,ix,lps,modelHelper);
+			case TJ_1ORB:
+				return getConnection2<Tj1OrbType>(A,B,ix,lps,modelHelper);
 			}
 			throw std::runtime_error("getConnection(...) failed\n");
 		}
@@ -577,8 +610,9 @@ namespace Dmrg {
 			HamiltonianConnectionType hc(geometry_,modelHelper,&lps,&x,&y);
 			size_t i =0, j = 0, type = 0,term = 0, dofs =0;
 			ComplexOrRealType tmp = 0.0;
-			hc.prepare(ix,i,j,type,tmp,term,dofs);
-			LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs);
+			typename HamiltonianConnectionType::AdditionalDataType additionalData;
+			hc.prepare(ix,i,j,type,tmp,term,dofs,additionalData);
+			LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs,additionalData);
 			return link2;
 		}
 
@@ -628,6 +662,7 @@ namespace Dmrg {
 		FeBasedScType* modelFeAs_ ;
 		FeBasedScExtType* modelFeAsExt_;
 		ImmmType* modelImmm_;
+		Tj1OrbType* modelTj1Orb_;
 		// models end
 		size_t model_;
 
