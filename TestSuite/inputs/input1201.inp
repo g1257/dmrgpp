@@ -1,0 +1,33 @@
+TotalNumberOfSites=8 
+NumberOfTerms=3
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+	1
+	1.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        0.3
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        -0.4
+
+Model=Tj1Orb
+potentialV 16     0.0 0.0 0.0 0.0         0.0 0.0 0.0 0.0
+                  0.0 0.0 0.0 0.0         0.0 0.0 0.0 0.0
+SolverOptions=none
+Version=v2.6
+OutputFile=data1201.txt
+InfiniteLoopKeptStates=100
+FiniteLoops 4  3 100 0 -3 100 0 -3 100 0 3 100 0
+TargetElectronsUp=2
+TargetElectronsDown=2   
