@@ -79,6 +79,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define OBSERVABLE_LIBRARY_H
 
 #include "Matrix.h" // in PsimagLite
+#include "PreOperatorSiteDependent.h"
+#include "PreOperatorSiteIndependent.h"
 
 namespace Dmrg {
 	
@@ -96,6 +98,9 @@ namespace Dmrg {
 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::value_type FieldType;
 		typedef PsimagLite::Matrix<FieldType> MatrixType;
+		typedef PreOperatorBase<ModelType> PreOperatorBaseType;
+		typedef PreOperatorSiteDependent<ModelType> PreOperatorSiteDependentType;
+		typedef PreOperatorSiteIndependent<ModelType> PreOperatorSiteIndependentType;
 
 		template<typename IoInputter>
 		ObservableLibrary(
@@ -235,15 +240,21 @@ namespace Dmrg {
 						superDensity<<"\n";
 			} else if (label=="nupNdown") {
 				multiply(A,matrixNup_,matrixNdown_);
-				measureOnePoint(A,"nupNdown",threadId);
+				OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+				PreOperatorSiteIndependentType preOperator(opA,"nupNdown",threadId);
+				measureOnePoint(preOperator);
 			} else if (label=="nup+ndown") {
 				A = matrixNup_;
 				A += matrixNdown_;
-				measureOnePoint(A,"nup+ndown",threadId);
+				OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+				PreOperatorSiteIndependentType preOperator(opA,"nup+ndown",threadId);
+				measureOnePoint(preOperator);
 			} else if (label=="sz") {
 				A = matrixNup_;
 				A += (-1)*matrixNdown_;
-				measureOnePoint(A,"sz",threadId);
+				OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+				PreOperatorSiteIndependentType preOperator(opA,"sz",threadId);
+				measureOnePoint(preOperator);
 			} else {
 				std::string s = "Unknown label: " + label + "\n";
 					throw std::runtime_error(s.c_str());
@@ -259,23 +270,13 @@ namespace Dmrg {
 
 		void measureTheOnePoints(size_t numberOfDofs)
 		{
-			size_t site = 0; // FIXME : account for Hilbert spaces changing with site
 			size_t threadId = 0;
-			size_t orbitals = numberOfDofs/2;
 			for (size_t dof=0;dof<numberOfDofs;dof++) {
-				size_t spin = dof/orbitals;
 				for (size_t dof2=dof;dof2<numberOfDofs;dof2++) {
-					size_t spin2 = dof2/orbitals;
-					if (spin!=spin2) continue;
-					MatrixType opCup = model_.naturalOperator("c",site,dof);
-					MatrixType opCdown = model_.naturalOperator("c",site,dof2);
-					MatrixType opCupTranspose;
-					transposeConjugate(opCupTranspose,opCup);
-					MatrixType Afull = opCupTranspose * opCdown;
-					SparseMatrixType A(Afull);
 					std::string str("c^\\dagger(dof=");
 					str += ttos(dof) + ") c(dof=" + ttos(dof2) + ")";
-					measureOnePoint(A,str,threadId);
+					PreOperatorSiteDependentType preOperator(dof,dof2,model_,str,threadId);
+					measureOnePoint(preOperator);
 				}
 			}
 		}
@@ -300,23 +301,23 @@ namespace Dmrg {
 			}
 		}
 
-		void measureOnePoint(const SparseMatrixType& A,const std::string& label,size_t threadId)
+		void measureOnePoint(const PreOperatorBaseType& preOperator)
 		{
-			Su2RelatedType su2Related1;
+			size_t threadId = preOperator.threadId();
 			printMarker(threadId);
-			if (A.row()<=4) {
-				std::cout<<"#Using Matrix A:\n";
-				for (size_t i=0;i<A.row();i++) {
-					for (size_t j=0;j<A.col();j++)
-						std::cout<<A(i,j)<<" ";
+
+			for (size_t i0 = 0;i0<observe_.size();i0++) {
+				if (!preOperator.isValid(i0+1)) continue;
+
+				OperatorType opA = preOperator(i0+1);
+
+				preOperator.printMatrix(opA.data,preOperator.siteDependent(),i0);
+
+				if (i0==0) {
+					std::cout<<"site "<<preOperator.label()<<"(gs) ";
+					if (hasTimeEvolution_) std::cout<<preOperator.label()<<"(timevector) time";
 					std::cout<<"\n";
 				}
-			}
-			OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
-			std::cout<<"site "<<label<<"(gs) ";
-			if (hasTimeEvolution_) std::cout<<label<<"(timevector) time";
-			std::cout<<"\n";
-			for (size_t i0 = 0;i0<observe_.size();i0++) {
 				// for g.s. use this one:
 				observe_.setBrackets("gs","gs");
 				observe_.setPointer(threadId,i0);
@@ -341,18 +342,23 @@ namespace Dmrg {
 				// also calculate next or prev. site:
 				if (observe_.isAtCorner(numberOfSites_,threadId)) {
 					size_t x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
+
+					// operator might be site dependent
+					if (!preOperator.isValid(x)) continue;
+					OperatorType opAcorner = preOperator(x);
+
 					// do the corner case
 					// for g.s. use this one:
 					observe_.setBrackets("gs","gs");
 					bool doCorner = true;
 					FieldType tmp1 = observe_.template
-							onePoint<ApplyOperatorType>(i0,opA,doCorner);
+							onePoint<ApplyOperatorType>(i0,opAcorner,doCorner);
 					std::cout<<x<<" "<<tmp1;
 
 					if (hasTimeEvolution_) {// for time vector use this one:
 						observe_.setBrackets("time","time");
 						FieldType tmp2 = observe_.template
-								 onePoint<ApplyOperatorType>(i0,opA,doCorner);
+								 onePoint<ApplyOperatorType>(i0,opAcorner,doCorner);
 						std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
 					}
 					std::cout<<"\n";
