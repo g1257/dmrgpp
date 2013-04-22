@@ -123,17 +123,15 @@ namespace Dmrg {
 				if (type==ProgramGlobals::SYSTEM_SYSTEM || 
 					type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
 
-				if (type==ProgramGlobals::SYSTEM_ENVIRON) {
-					assert(i<modelHelper_.leftRightSuper().left().block().size());
-				}
-
 				SparseMatrixType mBlock;
 
+				AdditionalDataType additionalData;
+
 				for (size_t term=0;term<geometry_.terms();term++) {
-					geometry_.fillAdditionalData(additionalData_,term,ind,jnd);
-					size_t dofsTotal = LinkProductType::dofs(term,additionalData_);
+					geometry_.fillAdditionalData(additionalData,term,ind,jnd);
+					size_t dofsTotal = LinkProductType::dofs(term,additionalData);
 					for (size_t dofs=0;dofs<dofsTotal;dofs++) {
-						std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs,additionalData_);
+						std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs,additionalData);
 						SparseElementType tmp = geometry_(smax_,emin_,ind,edofs.first,jnd,edofs.second,term);
 				
 						if (tmp==0.0) continue;
@@ -152,7 +150,7 @@ namespace Dmrg {
 							lps->dofssaved[total]=dofs;
 							total++;
 						} else {
-							calcBond(mBlock,i,j,type,tmp,term,dofs);
+							calcBond(mBlock,i,j,type,tmp,term,dofs,additionalData);
 							*matrixBlock += mBlock;
 						}
 					}
@@ -168,9 +166,10 @@ namespace Dmrg {
 				for (size_t p=0;p<blockSize;p++) {
 					size_t ix = threadNum * blockSize + p;
 					if (ix>=total) break;
-					prepare(ix,i,j,type,tmp,term,dofs);
+					AdditionalDataType additionalData;
+					prepare(ix,i,j,type,tmp,term,dofs,additionalData);
 
-					linkProduct(xtemp,y_,i,j,type,tmp,term,dofs);
+					linkProduct(xtemp,y_,i,j,type,tmp,term,dofs,additionalData);
 					
 				}
 				if (myMutex) pthread_mutex_lock( myMutex);
@@ -178,7 +177,7 @@ namespace Dmrg {
 				if (myMutex) pthread_mutex_unlock( myMutex );
 			}
 
-			void prepare(size_t ix,size_t& i,size_t& j,size_t& type,SparseElementType& tmp,size_t& term,size_t& dofs) const
+			void prepare(size_t ix,size_t& i,size_t& j,size_t& type,SparseElementType& tmp,size_t& term,size_t& dofs,AdditionalDataType& additionalData) const
 			{
 				i=lps_.isaved[ix];
 				j=lps_.jsaved[ix];
@@ -188,17 +187,18 @@ namespace Dmrg {
 				tmp=lps_.tmpsaved[ix];
 				size_t ind = modelHelper_.leftRightSuper().super().block()[i];
 				size_t jnd = modelHelper_.leftRightSuper().super().block()[j];
-				geometry_.fillAdditionalData(additionalData_,term,ind,jnd);
+				geometry_.fillAdditionalData(additionalData,term,ind,jnd);
 			}
 
 			LinkType getKron(const SparseMatrixType** A,
-					 const SparseMatrixType** B,
-					 size_t i,
-					 size_t j,
-					 size_t type,
-					 const SparseElementType& valuec,
-					 size_t term,
-					 size_t dofs) const
+							 const SparseMatrixType** B,
+							 size_t i,
+							 size_t j,
+							 size_t type,
+							 const SparseElementType& valuec,
+							 size_t term,
+							 size_t dofs,
+							 const AdditionalDataType& additionalData) const
 			{
 				int offset = modelHelper_.leftRightSuper().left().block().size();
 				PairType ops;
@@ -207,8 +207,8 @@ namespace Dmrg {
 				RealType angularFactor=0;
 				bool isSu2 = modelHelper_.isSu2();
 				SparseElementType value = valuec;
-				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData_);
-				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData_);
+				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData);
+				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData);
 				LinkType link2(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
 				size_t sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
 				size_t envOrSys = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::Environ : ModelHelperType::System;
@@ -222,7 +222,6 @@ namespace Dmrg {
 //				std::cout<<"link2.value="<<link2.value<<"i="<<i<<" j="<<j<<" type="<<type<<" valuec="<<valuec<<" term="<<term<<" dofs="<<dofs<<"\n";
 				return link2;
 			}
-
 
 			template<typename SomeConcurrencyType,typename SomeOtherConcurrencyType>
 			void sync(SomeConcurrencyType& conc,SomeOtherConcurrencyType& conc2)
@@ -239,11 +238,12 @@ namespace Dmrg {
 					size_t type,
 			                const SparseElementType& valuec,
 			                size_t term,
-					size_t dofs) const
+					size_t dofs,
+							const AdditionalDataType& additionalData) const
 			{
 				SparseMatrixType const* A = 0;
 				SparseMatrixType const* B = 0;
-				LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs);
+				LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs,additionalData);
 				modelHelper_.fastOpProdInter(*A,*B,matrixBlock,link2);
 
 				return matrixBlock.nonZero();
@@ -251,17 +251,18 @@ namespace Dmrg {
 
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
 			void linkProduct(std::vector<SparseElementType> &x,
-					 std::vector<SparseElementType> const &y,
-					 size_t i,
-					 size_t j,
-					 size_t type,
-					 const SparseElementType &valuec,
-					 size_t term,
-					 size_t dofs) const
+							 std::vector<SparseElementType> const &y,
+							 size_t i,
+							 size_t j,
+							 size_t type,
+							 const SparseElementType &valuec,
+							 size_t term,
+							 size_t dofs,
+							 AdditionalDataType& additionalData) const
 			{
 				SparseMatrixType const* A = 0;
 				SparseMatrixType const* B = 0;
-				LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs);
+				LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs,additionalData);
 				modelHelper_.fastOpProdInter(x,y,*A,*B,link2);
 			}
 
@@ -273,7 +274,6 @@ namespace Dmrg {
 			const typename GeometryType::BlockType& systemBlock_;
 			const typename GeometryType::BlockType& envBlock_;
 			size_t smax_,emin_;
-			mutable AdditionalDataType additionalData_;
 	}; // class HamiltonianConnection
 } // namespace Dmrg 
 
