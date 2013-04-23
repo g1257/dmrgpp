@@ -421,7 +421,7 @@ namespace Dmrg {
 			{
 				std::vector<size_t> nk;
 				setNk(nk,block);
-				wft_.setInitialVector(v,psi_,lrs_,block);
+				wft_.setInitialVector(v,psi_,lrs_,nk);
 			}
 
 			template<typename IoOutputType>
