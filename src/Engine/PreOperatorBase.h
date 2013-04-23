@@ -94,6 +94,8 @@ class PreOperatorBase  {
 
 public:
 
+	virtual ~PreOperatorBase() {}
+
 	virtual OperatorType operator()(size_t site) const=0;
 
 	virtual std::string label() const=0;

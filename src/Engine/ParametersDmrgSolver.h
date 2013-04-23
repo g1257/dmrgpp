@@ -290,7 +290,7 @@ namespace Dmrg {
 		std::string model;
 		std::vector<FieldType> targetQuantumNumbers;
 		size_t electronsUp,electronsDown;
-		std::vector<FieldType> adjustQuantumNumbers;
+		std::vector<size_t> adjustQuantumNumbers;
 		FieldType tolerance;
 		DmrgCheckPoint checkpoint;
 		size_t nthreads;
