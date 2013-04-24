@@ -1,5 +1,5 @@
 
-LDFLAGS =       -lm  -lpthread -lblas -llapack
+LDFLAGS =       -lm  -lpthread /usr/lib64/liblapack.so.3 /usr/lib64/libblas.so.3 
 CPPFLAGS = -Werror -Wall -I../src -I../src/JSON -I../src/JSON/JsonParser
 CXX = g++ -g3 
 all: $(EXENAME)

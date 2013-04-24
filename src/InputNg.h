@@ -144,9 +144,9 @@ public:
 	
 	class Writeable {
 
-		enum {WHITESPACE,ENDOFLINE,EQUALSIGN,ALPHA_CHAR,NUMERIC_CHAR};
+		enum {WHITESPACE,ENDOFLINE,EQUALSIGN,ALPHA_CHAR,NUMERIC_CHAR,COMMENT};
 
-		enum {IN_LABEL,IN_VALUE_OR_LABEL,IN_VALUE_TEXT,IN_VALUE_NUMERIC};
+		enum {IN_LABEL,IN_VALUE_OR_LABEL,IN_VALUE_TEXT,IN_VALUE_NUMERIC,IN_COMMENT};
 
 	public:
 
@@ -203,19 +203,26 @@ public:
 				switch(type) {
 				case ENDOFLINE:
 					line_++;
+					if (state_==IN_COMMENT) {
+						state_ = IN_LABEL;
+						break;
+					}
 					if (buffer=="") break;
 					saveBuffer(buffer,ENDOFLINE);
 					buffer="";
 					break;
 				case WHITESPACE:
-					if (buffer=="") break;
+					if (buffer=="" || state_==IN_COMMENT) break;
 					saveBuffer(buffer,WHITESPACE);
 					buffer="";
 					break;
 				case EQUALSIGN:
-					if (buffer=="") break;
+					if (buffer=="" || state_==IN_COMMENT) break;
 					saveBuffer(buffer,EQUALSIGN);
 					buffer="";
+					break;
+				case COMMENT:
+					state_=IN_COMMENT;
 					break;
 				default:
 					if (state_==IN_VALUE_OR_LABEL) {
@@ -273,6 +280,7 @@ public:
 			if (c>=48 && c<=58) return NUMERIC_CHAR;
 			if (c=='.' || c=='+' || c=='-') return NUMERIC_CHAR;
 			if (c=='(' || c==')' || c==',') return NUMERIC_CHAR;
+			if (c=='#') return COMMENT;
 			return ALPHA_CHAR;
 		}
 

@@ -432,7 +432,7 @@ sub commandsInterpreter
 	#Keywords in @metaLang are used to hook a command with its routine
 	#Routines, in conjunction with meta language keywords, can be added to expand the runable commands in the processing library
 	#The commands will be executed following the order below from left to right
-	my @metaLang = ("Grep", "Execute", "Gprof", "Diff");
+	my @metaLang = ("Grep", "Execute", "Gprof", "Diff", "CombineContinuedFraction","ComputeContinuedFraction");
 	my @arrangeCommands;
 	
 	foreach my $word(@metaLang) {
@@ -487,5 +487,45 @@ sub hookExecute
 #	print "[$analysis]:Execute command was successful.\n" if($verbose);
 }
 
+sub getLabel
+{
+	my ($file,$label)=@_;
+	open(FILELABEL,$file) or die "$0: Could not open $file: $!\n";
+	my $value;
+	while(<FILELABEL>) {
+		chomp;
+		if (/$label(.*$)/) {
+			$value=$1;
+			last;
+		}
+	}
+	close(FILELABEL);
+	die "$0: Label $label not found in file $file\n" if (!defined($value));
+	return $value;
+}
+
+sub hookComputeContinuedFraction
+{
+	my ($analysis, $arg) = @_;
+	my @temp=split/ /,$arg;
+	die "$0: Error in hookComputeContinuedFraction with arg=$arg\n" if (scalar(@temp)<2);
+
+	my $label = getLabel($temp[0],"#ContinuedFraction=");
+	$arg="";
+	for (my $i=1;$i<scalar(@temp);$i++) {
+		$arg .= " $label " if ($temp[$i]=~/\>/);
+		$arg .= $temp[$i]." ";
+	}
+
+	print STDERR "Executing ./continuedFractionCollection $arg\n";
+	system("./continuedFractionCollection $arg");
+}
+
+sub hookCombineContinuedFraction
+{
+	my ($analysis, $arg) = @_;
+	print STDERR "Executing ./combineContinuedFraction $arg\n";
+	system("./combineContinuedFraction $arg");
+}
 
 1;
