@@ -98,4 +98,15 @@ CallOnce dmrg
 Execute runObserve($input, $result)
 Diff $result $oracle > $diff
 
+[Dynamics]
+Let $inputFile = $inputsDir/input$testNum.inp
+Let $dataFile = $srcDir/data$testNum.txt
+Let $combFile = $resultsDir/data$testNum.comb
+Let $cfFile = $resultsDir/cf$testNum.cf
+Let $oracle = $oraclesDir/cf$testNum.txt
+Let $diff = $resultsDir/cf$testNum.diff
+CallOnce dmrg
+CombineContinuedFraction $dataFile > $combFile
+ComputeContinuedFraction $inputFile -f $combFile > $cfFile
+Diff $cfFile $oracle > $diff
 
