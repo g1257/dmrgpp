@@ -110,3 +110,13 @@ CombineContinuedFraction $dataFile > $combFile
 ComputeContinuedFraction $inputFile -f $combFile > $cfFile
 Diff $cfFile $oracle > $diff
 
+[MettsAverage]
+Let $inputFile = $inputsDir/input$testNum.inp
+Let $rawOutput = $resultsDir/stderrAndOut$testNum.txt
+Let $result = $resultsDir/mettsAverage$testNum.txt
+Let $oracle = $oraclesDir/mettsAverage$testNum.txt
+Let $diff = $resultsDir/mettsAverage$testNum.diff
+CallOnce dmrg
+MettsAverage perl\s../scripts/mettsAverage3.pl $inputFile < $rawOutput &> $result
+Diff $result $oracle > $diff
+

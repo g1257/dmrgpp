@@ -59,4 +59,5 @@ Tests *with* SU(2) symmetry:
 hence non-trivial.
 1200) Tj 1 orb with hopping = 1 and J = 0.3 dens = 0.5
 1201) Tj 1 orb with hopping = 1 and J = 0.3 and W = -0.4 dens = 0.25
+1500) Figure 1 of METTS paper
 #TAGEND DO NOT REMOVE THIS TAG
