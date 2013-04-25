@@ -60,4 +60,28 @@ hence non-trivial.
 1200) Tj 1 orb with hopping = 1 and J = 0.3 dens = 0.5
 1201) Tj 1 orb with hopping = 1 and J = 0.3 and W = -0.4 dens = 0.25
 1500) Figure 1 of METTS paper
+3000) Dynamics: Local Green's function at site 8 for a non-interacting one-band Hubbard model using
+correction vector algorithm (type=0).
+3001) Dynamics: Local Green's function at site 8 for a non-interacting one-band Hubbard model using
+correction vector algorithm (type=1).
+3002) Dynamics: Local Green's function at site 8 for a one-band Hubbard model for U=10 using
+correction vector algorithm (type=0).
+3003) Dynamics: Local Green's function at site 8 for a one-band Hubbard model for U=10 using
+correction vector algorithm (type=1).
+3004) Dynamics: Non-local Green's function at sites (15,0) for a non-interacting one-band Hubbard model
+using correction vector algorithm (type=0).
+3005) Dynamics: Non-local Green's function at sites (15,0) for a non-interacting one-band Hubbard model
+using correction vector algorithm (type=1).
+3006) Dynamics: Non-local Green's function at sites (15,0) for a non-interacting one-band Hubbard model
+using correction vector algorithm (type=2).
+3007) Dynamics: Non-local Green's function at sites (15,0) for a non-interacting one-band Hubbard model
+using correction vector algorithm (type=3).
+3008) Dynamics: Non-local Green's function at sites (15,0) for a one-band Hubbard model for U=10 using
+correction vector algorithm (type=0).
+3009) Dynamics: Non-local Green's function at sites (15,0) for a one-band Hubbard model for U=10 using
+correction vector algorithm (type=1).
+3010) Dynamics: Non-local Green's function at sites (15,0) for a one-band Hubbard model for U=10 using
+correction vector algorithm (type=2).
+3011) Dynamics: Non-local Green's function at sites (15,0) for a one-band Hubbard model for U=10 using
+correction vector algorithm (type=3).
 #TAGEND DO NOT REMOVE THIS TAG

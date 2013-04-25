@@ -103,12 +103,15 @@ Let $inputFile = $inputsDir/input$testNum.inp
 Let $dataFile = $srcDir/data$testNum.txt
 Let $combFile = $resultsDir/data$testNum.comb
 Let $cfFile = $resultsDir/cf$testNum.cf
-Let $oracle = $oraclesDir/cf$testNum.txt
+Let $oracle = $oraclesDir/data$testNum.cf
 Let $diff = $resultsDir/cf$testNum.diff
+Let $paramsFile = $oraclesDir/xmgrace.par
+Let $printFile = $resultsDir/cf$testNum.ps
 CallOnce dmrg
 CombineContinuedFraction $dataFile > $combFile
 ComputeContinuedFraction $inputFile -f $combFile > $cfFile
 Diff $cfFile $oracle > $diff
+Xmgrace -hardcopy -printfile $printFile -param $paramsFile $cfFile $oracle
 
 [MettsAverage]
 Let $inputFile = $inputsDir/input$testNum.inp

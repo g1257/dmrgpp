@@ -1,0 +1,71 @@
+TotalNumberOfSites=16
+NumberOfTerms=1
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors   1  1.0
+
+
+Model=HubbardOneBand
+
+hubbardU   16
+10.0 10.0 10.0 10.0 10.0 10.0 10.0 10.0 10.0 10.0 10.0 10.0 10.0 10.0 10.0 10.0 
+potentialV   32
+-5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 
+-5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 -5 
+
+SolverOptions=twositedmrg,CorrectionVectorTargetting
+CorrectionA=0
+Version=1219aeb832f7990323cca0baa17ad7b87b731ea6
+OutputFile=data3011.txt
+
+InfiniteLoopKeptStates=100
+FiniteLoops  16
+7 100 0 -7 100 0 -7 100 0 7 100 0
+7 100 0 -7 100 0 -7 100 0 7 100 0
+7 100 0 -7 100 0 -7 100 0 7 100 0
+7 100 0 -7 100 0 -7 100 0 7 100 0
+
+TargetElectronsUp=8
+TargetElectronsDown=8
+Threads=4
+
+DynamicDmrgType=3
+TSPSites 2 15 0
+TSPLoops 2 0 0
+TSPProductOrSum=sum
+
+DynamicDmrgSteps=400
+DynamicDmrgEps=1e-16
+DynamicDmrgAdvanceEach=1
+
+CorrectionVectorOmega=0
+CorrectionVectorEta=0.3
+
+TSPOperator=raw
+RAW_MATRIX
+4 4
+0 0 0 0 
+0 0 0 0 
+0 1 0 0 
+0 0 0 0 
+FERMIONSIGN=1
+JMVALUES 0 0
+AngularFactor=1
+
+TSPOperator=raw
+RAW_MATRIX
+4 4
+0 0 0 0 
+0 0 0 0 
+0 -1 0 0 
+0 0 0 0 
+FERMIONSIGN=1
+JMVALUES 0 0
+AngularFactor=1
+
+
+#ContinuedFraction=-b -10 -e 10 -s 0.01 -d 0.3
+
+
