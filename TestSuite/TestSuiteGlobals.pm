@@ -432,7 +432,8 @@ sub commandsInterpreter
 	#Keywords in @metaLang are used to hook a command with its routine
 	#Routines, in conjunction with meta language keywords, can be added to expand the runable commands in the processing library
 	#The commands will be executed following the order below from left to right
-	my @metaLang = ("Grep", "Execute", "Gprof", "Diff", "CombineContinuedFraction","ComputeContinuedFraction");
+	my @metaLang = ("Grep", "Execute", "Gprof", "Diff", "CombineContinuedFraction","ComputeContinuedFraction",
+	                "MettsAverage");
 	my @arrangeCommands;
 	
 	foreach my $word(@metaLang) {
@@ -526,6 +527,28 @@ sub hookCombineContinuedFraction
 	my ($analysis, $arg) = @_;
 	print STDERR "Executing ./combineContinuedFraction $arg\n";
 	system("./combineContinuedFraction $arg");
+}
+
+sub hookMettsAverage
+{
+	my ($analysis, $arg) = @_;
+	my @temp=split/ /,$arg;
+	die "$0: Error in hookMettsAverage with arg=$arg\n" if (scalar(@temp)<3);
+
+	my $executable = $temp[0];
+	$executable=~s/\\s/ /g;
+	my $label = getLabel($temp[1],"Beta=");
+	$arg="";
+	for (my $i=2;$i<scalar(@temp);$i++) {
+		if ($temp[$i]=~/\>/ || $temp[$i]=~/\</) {
+			$arg .= " $label ";
+			$label="";
+		}
+		$arg .= $temp[$i]." ";
+	}
+
+	print STDERR "Executing $executable $arg\n";
+	system("$executable $arg");
 }
 
 1;
