@@ -755,7 +755,11 @@ namespace Dmrg {
 				  const OperatorType& A) const
 			{
 				std::vector<size_t> electrons;
-				model_.findElectronsOfOneSite(electrons,site);
+				size_t lastIndex = lrs_.left().block().size();
+				assert(lastIndex>0);
+				lastIndex--;
+				size_t siteCorrected = lrs_.left().block()[lastIndex];
+				model_.findElectronsOfOneSite(electrons,siteCorrected);
 				FermionSign fs(lrs_.left(),electrons);
 				VectorWithOffsetType dest;
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);

@@ -108,6 +108,7 @@ namespace Dmrg {
 			for (size_t x=0;x<basisElectrons.size();x++) {
 				size_t x0,x1;
 				pack.unpack(x0,x1,basis.permutation(x));
+				assert(x1<electrons.size());
 				int nx0 = basisElectrons[x]-electrons[x1];
 				assert(nx0>=0 && x0<el.size());
 				el[x0] = nx0;
