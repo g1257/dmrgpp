@@ -124,7 +124,8 @@ public:
 							 const ModelType& model,
 							 const WaveFunctionTransfType& wft,
 							 const LeftRightSuperType& lrs,
-							 const RealType& E0)
+							 const RealType& E0,
+	                         const std::vector<size_t>* nonZeroQns)
 		: progress_("TimeVectorsSuzukiTrotter",0),
 		  currentTime_(currentTime),
 		  tstStruct_(tstStruct),
@@ -134,13 +135,15 @@ public:
 		  wft_(wft),
 		  lrs_(lrs),
 		  E0_(E0),
+	      nonZeroQns_(nonZeroQns),
 		  twoSiteDmrg_(wft_.twoSiteDmrg())
 	{}
 
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
 								 const VectorWithOffsetType& phi,
-								 size_t systemOrEnviron)
+								 size_t systemOrEnviron,
+	                             bool allOperatorsApplied)
 	{
 		static bool firstcall = true;
 		std::ostringstream msg;
@@ -155,13 +158,16 @@ public:
 		targetVectors_[0] = phi;
 
 		for (size_t i=1;i<times_.size();i++)
-			if (targetVectors_[i].size()==0)
+			if (targetVectors_[i].size()==0 || !allOperatorsApplied)
 				targetVectors_[i] = phi;
 
 		if (firstcall) {
 			firstcall=false;
 			return;
 		}
+
+		if (!allOperatorsApplied) return;
+
 		// skip odd links if expanding system and
 		// skip even links if expanding environ
 		size_t lastIndexLeft = lrs_.left().block().size();
@@ -230,16 +236,23 @@ private:
 
 	void wftOne(size_t i,size_t site)
 	{
-		if (targetVectors_[i].size()==0)
-			targetVectors_[i] = targetVectors_[0];
-
 		VectorWithOffsetType phiNew;
-		phiNew.populateSectors(lrs_.super());
+		if (nonZeroQns_) {
+			phiNew.populateFromQns(*nonZeroQns_,lrs_.super());
+		} else {
+			phiNew.populateSectors(lrs_.super());
+		}
+		if (targetVectors_[i].size()==0) {
+			targetVectors_[i] = targetVectors_[0];
+			phiNew = targetVectors_[0];
+		}
 
 		// OK, now that we got the partition number right, let's wft:
 		std::vector<size_t> nk(1,model_.hilbertSize(site));
 		wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk); // generalize for su(2)
 		phiNew.collapseSectors();
+		RealType norm = std::norm(phiNew);
+		assert(norm>1e-6);
 		targetVectors_[i]=phiNew;
 	}
 
@@ -467,6 +480,7 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
 	const RealType& E0_;
+	const std::vector<size_t>* nonZeroQns_;
 	bool twoSiteDmrg_;
 	std::vector<size_t> linksSeen_;
 }; //class TimeVectorsSuzukiTrotter

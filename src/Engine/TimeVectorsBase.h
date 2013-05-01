@@ -100,7 +100,8 @@ public:
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             size_t systemOrEnviron)=0;
+	                             size_t systemOrEnviron,
+	                             bool allOperatorsApplied)=0;
 
 	virtual ~TimeVectorsBase() {}
 

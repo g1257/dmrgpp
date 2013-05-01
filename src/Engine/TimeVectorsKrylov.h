@@ -132,7 +132,8 @@ public:
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             size_t systemOrEnviron)
+	                             size_t systemOrEnviron,
+	                             bool allOperatorsApplied)
 	{
 		if (currentTime_==0 && tstStruct_.noOperator) {
 			for (size_t i=0;i<times_.size();i++)

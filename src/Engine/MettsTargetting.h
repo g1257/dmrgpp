@@ -211,7 +211,7 @@ namespace Dmrg {
 					break;
 				case TargettingParamsType::SUZUKI_TROTTER:
 					timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(
-								currentBeta_,mettsStruct_,betas_,targetVectors_,model_,wft_,lrs_,0);
+								currentBeta_,mettsStruct_,betas_,targetVectors_,model_,wft_,lrs_,0,0);
 					break;
 				default:
 					throw std::runtime_error(s.c_str());
@@ -843,7 +843,8 @@ namespace Dmrg {
 				msg<<std::norm(phi);
 				progress_.printline(msg,std::cout);
 				if (std::norm(phi)<1e-6) setFromInfinite(targetVectors_[startEnd.first],lrs_);
-				timeVectorsBase_->calcTimeVectors(startEnd,Eg,phi,systemOrEnviron);
+				bool allOperatorsApplied = (noStageIs(DISABLED));
+				timeVectorsBase_->calcTimeVectors(startEnd,Eg,phi,systemOrEnviron,allOperatorsApplied);
 				normalizeVectors(startEnd);
 			}
 

@@ -205,7 +205,7 @@ namespace Dmrg {
 					break;
 				case TargettingParamsType::SUZUKI_TROTTER:
 					timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(
-								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0_);
+								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0_,&nonZeroQns_);
 					break;
 				default:
 					throw std::runtime_error(s.c_str());
@@ -322,7 +322,8 @@ namespace Dmrg {
 				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 
 				typename TimeVectorsBaseType::PairType startEnd(0,times_.size());
-				timeVectorsBase_->calcTimeVectors(startEnd,Eg,phiNew,direction);
+				bool allOperatorsApplied = (noStageIs(DISABLED) && noStageIs(OPERATOR));
+				timeVectorsBase_->calcTimeVectors(startEnd,Eg,phiNew,direction,allOperatorsApplied);
 				
 				cocoon(direction,block1); // in-situ
 				printEnergies(); // in-situ

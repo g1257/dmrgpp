@@ -146,7 +146,8 @@ public:
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             size_t systemOrEnviron)
+	                             size_t systemOrEnviron,
+	                             bool allOperatorsApplied)
 	{
 		std::ostringstream msg;
 		msg<<"EXPERIMENTAL: using RungeKutta";
