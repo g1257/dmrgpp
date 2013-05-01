@@ -602,6 +602,7 @@ namespace Dmrg {
 					model_.findElectronsOfOneSite(electrons,site);
 					FermionSign fs(lrs_.left(),electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
+					setQuantumNumbers(phiNew);
 //					std::cerr<<"APPLYING OPERATOR --> NORM of phiNew="<<norm(phiNew)<<" NORM of phiOld="<<norm(phiOld)<<" when i="<<i<<"\n";
 
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
@@ -616,11 +617,12 @@ namespace Dmrg {
 
 					if (tstStruct_.aOperators.size()==1)
 						guessPhiSectors(phiNew,i,systemOrEnviron,site);
-					else phiNew.populateSectors(lrs_.super());
+					else
+						phiNew.populateFromQns(nonZeroQns_,lrs_.super());
 
 					// OK, now that we got the partition number right, let's wft:
 					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_,nk); // generalize for su(2)
-					phiNew.collapseSectors();
+//					phiNew.collapseSectors();
 //					std::cerr<<"WFT --> NORM of phiNew="<<norm(phiNew)<<" NORM of tv="<<norm(targetVectors_[advance])<<" when i="<<i<<" advance="<<advance<<"\n";
 
 				} else {
@@ -709,6 +711,18 @@ namespace Dmrg {
 				}
 			}
 
+			void setQuantumNumbers(const VectorWithOffsetType& v)
+			{
+				nonZeroQns_.clear();
+				assert(v.size()==lrs_.super().size());
+				for (size_t i=0;i<v.sectors();i++) {
+					size_t i0 = v.sector(i);
+					size_t state = v.offset(i0);
+					size_t qn = lrs_.super().qn(state);
+					nonZeroQns_.push_back(qn);
+				}
+			}
+
 			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron,size_t site)
 			{
 				std::vector<size_t> electrons;
@@ -776,6 +790,7 @@ namespace Dmrg {
 			ApplyOperatorType applyOpLocal_;
 			RealType E0_;
 			TimeVectorsBaseType* timeVectorsBase_;
+			std::vector<size_t> nonZeroQns_;
 
 	};     //class TimeStepTargetting
 

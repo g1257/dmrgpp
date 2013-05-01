@@ -176,6 +176,35 @@ namespace Dmrg {
 			progress_.printline(msg,std::cout);
 		}
 
+		template<typename SomeBasisType>
+		void populateFromQns(const std::vector<size_t>& qns,
+		                     const SomeBasisType& someBasis)
+		{
+			size_t np = someBasis.partition()-1;
+			size_ = someBasis.size();
+			nonzeroSectors_.clear();
+			data_.clear();
+			data_.resize(np);
+			offsets_.resize(np+1);
+			for (size_t i=0;i<np;i++) {
+				offsets_[i] = someBasis.partition(i);
+			}
+			offsets_[np]=size_;
+
+			for (size_t i=0;i<qns.size();i++) {
+				size_t ip = findPartitionWithThisQn(qns[i],someBasis);
+				size_t total = someBasis.partition(ip+1)-offsets_[ip];
+				VectorType tmpV(total,0);
+				data_[ip] = tmpV;
+				nonzeroSectors_.push_back(ip);
+			}
+
+			setIndex2Sector();
+			std::ostringstream msg;
+			msg<<"populateFromQns "<<np<<" sectors";
+			progress_.printline(msg,std::cout);
+		}
+
 		void collapseSectors()
 		{
 			size_t np = data_.size();
@@ -498,6 +527,17 @@ namespace Dmrg {
 			for (size_t i=0;i<v.size();i++)
 				if (fabs(std::real(v[i]))>eps || fabs(std::imag(v[i]))>eps) return false;
 			return true; 
+		}
+
+		template<typename SomeBasisType>
+		size_t findPartitionWithThisQn(size_t qn,const SomeBasisType& someBasis) const
+		{
+			size_t np = someBasis.partition()-1;
+			for (size_t i=0;i<np;i++) {
+				size_t state = someBasis.partition(i);
+				if (size_t(someBasis.qn(state))==qn) return i;
+			}
+			throw std::runtime_error("findPartitionWithThisQn\n");
 		}
 
 		PsimagLite::ProgressIndicator progress_;
