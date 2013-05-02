@@ -433,7 +433,7 @@ sub commandsInterpreter
 	#Routines, in conjunction with meta language keywords, can be added to expand the runable commands in the processing library
 	#The commands will be executed following the order below from left to right
 	my @metaLang = ("Grep", "Execute", "Gprof", "CombineContinuedFraction","ComputeContinuedFraction",
-	                "MettsAverage","Diff","Xmgrace");
+	                "MettsAverage","TimeEvolution","Diff","Xmgrace");
 	my @arrangeCommands;
 	
 	foreach my $word(@metaLang) {
@@ -547,6 +547,14 @@ sub hookMettsAverage
 		$arg .= $temp[$i]." ";
 	}
 
+	print STDERR "Executing $executable $arg\n";
+	system("$executable $arg");
+}
+
+sub hookTimeEvolution
+{
+	my ($analysis, $arg) = @_;
+	my $executable = "perl ../scripts/timeEvolution.pl ";
 	print STDERR "Executing $executable $arg\n";
 	system("$executable $arg");
 }
