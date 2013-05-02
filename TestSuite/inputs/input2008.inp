@@ -1,0 +1,42 @@
+TotalNumberOfSites=16 
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+
+hubbardU	16 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+		0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+Model=HubbardOneBand
+SolverOptions=TimeStepTargetting,twositedmrg
+Version=53725d9b8f22615ccccc782082f4cd6f51a4e374
+OutputFile=data2008.txt
+InfiniteLoopKeptStates=200 
+FiniteLoops 5    7 200 0 
+                -7 200 0 -7 200 0 7 200 0  7 200 0 
+RepeatFiniteLoopsFrom=1
+RepeatFiniteLoopsTimes=4
+TargetQuantumNumbers 2 0.5 0.5
+
+TSPTau=0.1
+TSPTimeSteps=2
+TSPAdvanceEach=1000
+TSPAlgorithm=SuzukiTrotter
+TSPSites 1 10
+TSPLoops 1 5
+TSPProductOrSum=product
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+0.0    0.0    0.0   0.0
+1.0    0.0    0.0   0.0
+0.0    0.0    0.0   0.0 
+0.0    0.0    1.0   0.0 
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+
+   

@@ -20,7 +20,7 @@ TargetQuantumNumbers 2 0.5 0.5
 
 TSPTau=0.1
 TSPTimeSteps=2
-TSPAdvanceEach=14
+TSPAdvanceEach=28
 TSPAlgorithm=SuzukiTrotter
 TSPSites 1 4 
 TSPLoops 1 3 
