@@ -251,8 +251,7 @@ private:
 		std::vector<size_t> nk(1,model_.hilbertSize(site));
 		wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk); // generalize for su(2)
 		phiNew.collapseSectors();
-		RealType norm = std::norm(phiNew);
-		assert(norm>1e-6);
+		assert(std::norm(phiNew)>1e-6);
 		targetVectors_[i]=phiNew;
 	}
 
