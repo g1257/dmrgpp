@@ -71,12 +71,12 @@ Gprof $executable > $result
 Diff $result $oracle > $diff
 
 [InSituTimeEvolution]
-Let $result = $resultsDir/timeEvolution$testNum.txt
-Let $oracle = $oraclesDir/timeEvolution$testNum.txt
+Let $result = $resultsDir/nupVsTime$testNum.txt
+Let $oracle = $oraclesDir/nupVsTime$testNum.txt
 Let $stdoutAndStdErr = $resultsDir/stderrAndOut$testNum.txt
-Let $diff = $resultsDir timeEvolution$testNum.diff
+Let $diff = $resultsDir/nupVsTime$testNum.diff
 CallOnce dmrg
-Grep 'nup' $stdoutAndStdErr > $result
+TimeEvolution nup 0 < $stdoutAndStdErr > $result
 Diff $result $oracle > $diff
 
 [PostProcessingTimeEvolution]
