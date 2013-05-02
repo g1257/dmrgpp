@@ -1,0 +1,116 @@
+TotalNumberOfSites=8
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+Model=HubbardOneBand
+hubbardU	8  0  0  0  0  0  0  0  0
+potentialV	 16  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 
+SolverOptions=TimeStepTargetting
+Version=version
+OutputFile=data2021.txt
+InfiniteLoopKeptStates=256
+FiniteLoops 5   3 256 0 
+                -3 256 2 -3 256 2 3 256 2 3 256 2
+RepeatFiniteLoopsFrom=1
+RepeatFiniteLoopsTimes=20
+
+TargetQuantumNumbers 2 0.5 0.5
+
+TSPTau=0.1
+TSPTimeSteps=2
+TSPAdvanceEach=6
+TSPAlgorithm=Krylov
+TSPSites 3  4  5  3
+TSPLoops 3  0  0  0
+TSPProductOrSum=sum
+ 
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+0.0    1    0.0   0.0
+0.0    0.0    0.0   0.0
+0.0    0.0    0.0   1
+0.0    0.0    0.0   0.0 
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+0.0    1    0.0   0.0
+0.0    0.0    0.0   0.0
+0.0    0.0    0.0   1
+0.0    0.0    0.0   0.0 
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+0.0    1    0.0   0.0
+0.0    0.0    0.0   0.0
+0.0    0.0    0.0   1
+0.0    0.0    0.0   0.0 
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+0.0    1    0.0   0.0
+0.0    0.0    0.0   0.0
+0.0    0.0    0.0   1
+0.0    0.0    0.0   0.0 
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+0.0    1    0.0   0.0
+0.0    0.0    0.0   0.0
+0.0    0.0    0.0   1
+0.0    0.0    0.0   0.0 
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+0.0    1    0.0   0.0
+0.0    0.0    0.0   0.0
+0.0    0.0    0.0   1
+0.0    0.0    0.0   0.0 
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+0.0    1    0.0   0.0
+0.0    0.0    0.0   0.0
+0.0    0.0    0.0   1
+0.0    0.0    0.0   0.0 
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+0.0    1    0.0   0.0
+0.0    0.0    0.0   0.0
+0.0    0.0    0.0   1
+0.0    0.0    0.0   0.0 
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
