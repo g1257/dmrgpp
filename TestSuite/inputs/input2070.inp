@@ -1,0 +1,53 @@
+TotalNumberOfSites=16 
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+
+hubbardU	16 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+		0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+Model=HubbardOneBand
+SolverOptions=TimeStepTargetting,twositedmrg
+Version=version
+OutputFile=data2070.txt
+InfiniteLoopKeptStates=150 
+FiniteLoops 5   7 200 0
+               -7 200 2 -7 200 2 7 200 2 7 200 2
+RepeatFiniteLoopsFrom=1
+RepeatFiniteLoopsTimes=2
+TargetQuantumNumbers 2 0.5 0.5
+
+TSPTau=0.1
+TSPTimeSteps=2
+TSPAdvanceEach=45
+TSPAlgorithm=SuzukiTrotter
+TSPSites 2 10 11
+TSPLoops 2 0 0
+TSPProductOrSum=product
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+0.0    0.0    0.0   0.0
+0.0   0.0    0.0   -1.0
+0.0    0.0    0.0   1.0 
+0.0    0.0    0.0   0.0 
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+TSPOperator=raw 
+RAW_MATRIX 
+4 4
+0.0    0.0    0.0   0.0
+1.0    0.0    0.0   0.0
+1.0    0.0    0.0   0.0
+0.0    0.0    0.0   0.0
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+
+   

@@ -71,8 +71,8 @@ hence non-trivial. (Suzuki-Trotter)
 2010) Time Evolution (Suzuki-Trotter)
 2015) LadderBath without time advancement (Suzuki-Trotter)
 2018) Time Evolution at U>0 with 6 site chain (Suzuki-Trotter)
-2020) Time Evolution (Suzuki-Trotter)
-#2022) Reserved
+2021) Tests time evolution with 3 operators, which is more than the holon-doublon case, and
+hence non-trivial. (Krylov)
 2024) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
        INF(60)+7(100)-7(100)-7(100)+7(100) test for TimeStepTargetting "creation op" (Krylov)
 2028) Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=1 with 8+8 sites.
@@ -90,7 +90,13 @@ hence non-trivial. (Suzuki-Trotter)
 2060) Test on 6-site chain with U=10, standard Hubbard model.
       Tests the density and double occupation of a time vector,
       defined as exp(iHt) h d |gs>, where h a holon and d a doblon (Suzuki-Trotter)
+2061) Test on 6-site chain with U=10, standard Hubbard model.
+      Tests the density and double occupation of a time vector,
+      defined as exp(iHt) h d |gs>, where h a holon and d a doblon (Krylov)
 #2062) Reserved
+2070) Time Evolution (Suzuki-Trotter)
+2071) Time Evolution (Krylov)
+#2072) Reserved
 3000) Dynamics: Local Green's function at site 8 for a non-interacting one-band Hubbard model using
 correction vector algorithm (type=0).
 3001) Dynamics: Local Green's function at site 8 for a non-interacting one-band Hubbard model using
