@@ -614,7 +614,8 @@ namespace Dmrg {
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 
-					if (tstStruct_.aOperators.size()==1) guessPhiSectors(phiNew,i,systemOrEnviron,site);
+					if (tstStruct_.aOperators.size()==1)
+						guessPhiSectors(phiNew,i,systemOrEnviron,site);
 					else phiNew.populateSectors(lrs_.super());
 
 					// OK, now that we got the partition number right, let's wft:
