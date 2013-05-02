@@ -136,6 +136,7 @@ namespace Dmrg {
 			registerOpts.push_back("inflate");
 			registerOpts.push_back("none");
 			registerOpts.push_back("twositedmrg");
+			registerOpts.push_back("noloadwft");
 			registerOpts.push_back("ChebyshevSolver");
 			registerOpts.push_back("InternalProductStored");
 			registerOpts.push_back("InternalProductKron");

@@ -130,12 +130,21 @@ namespace Dmrg {
 		  WFT_STRING("Wft"),
 		  wftImpl_(0),
 		  rng_(3433117),
-		  twoSiteDmrg_(params.options.find("twositedmrg")!=std::string::npos)
+		  twoSiteDmrg_(params.options.find("twositedmrg")!=std::string::npos),
+		  noLoad_(false)
 		{
 			if (!isEnabled_) return;
 
-			if (params.options.find("checkpoint")!=std::string::npos || params.options.find("restart")!=std::string::npos)
-				load();
+			bool b = (params.options.find("checkpoint")!=std::string::npos ||
+			    params.options.find("restart")!=std::string::npos);
+
+			if (b) {
+				if (params.options.find("noloadwft")!=std::string::npos)
+					noLoad_=true;
+				else
+					load();
+			}
+
 			if (BasisType::useSu2Symmetry()) {
 				wftImpl_=new WaveFunctionTransfSu2Type(stage_,firstCall_,counter_,dmrgWaveStruct_,twoSiteDmrg_);
 			} else {
@@ -172,7 +181,9 @@ namespace Dmrg {
 			}
 			// FIXME: Must check the below change when using SU(2)!!
 			//if (m<0) allow = false; // isEnabled_=false;
-			
+
+			if (noLoad_) allow = false;
+
 			if (!isEnabled_ || !allow) return;
 			beforeWft(lrs);
 			std::ostringstream msg;
@@ -201,6 +212,8 @@ namespace Dmrg {
 			}
 			// FIXME: Must check the below change when using SU(2)!!
 			//if (m<0) allow = false; // isEnabled_=false;
+
+			if (noLoad_) allow = false;
 
 			if (isEnabled_ && allow) {
 #ifndef NDEBUG
@@ -232,6 +245,8 @@ namespace Dmrg {
 			// FIXME: Must check the below change when using SU(2)!!
 			//if (m<0) allow = false; // isEnabled_=false;
 			
+			if (noLoad_) allow = false;
+
 			if (!isEnabled_ || !allow) return;
 			afterWft(lrs);
 			std::ostringstream msg;
@@ -304,6 +319,11 @@ namespace Dmrg {
 			std::ostringstream msg;
 			msg<<"OK, pushing option="<<direction<<" and stage="<<stage_;
 			progress_.printline(msg,std::cout);
+
+			if (noLoad_) {
+				size_t center = computeCenter(lrs,direction);
+				updateNoLoad(lrs,center);
+			}
 		}
 
 		const SparseMatrixType& transform(size_t what) const
@@ -446,6 +466,40 @@ namespace Dmrg {
 			io.readMatrix(weStack_,"weStack");
 		}
 
+		size_t computeCenter(const LeftRightSuperType& lrs,size_t direction) const
+		{
+			if (direction==EXPAND_SYSTEM) {
+				size_t total = lrs.left().block().size();
+				assert(total>0);
+				total--;
+				return lrs.left().block()[total];
+			}
+
+			return lrs.right().block()[0];
+		}
+
+		void updateNoLoad(const LeftRightSuperType& lrs,size_t center)
+		{
+			sitesSeen_.push_back(center);
+			size_t numberOfSites = lrs.super().block().size();
+			if (checkSites(numberOfSites)) {
+				noLoad_=false;
+				std::ostringstream msg;
+				msg<<" now available";
+				progress_.printline(msg,std::cout);
+			}
+		}
+
+		bool checkSites(size_t numberOfSites) const
+		{
+			assert(numberOfSites>0);
+			for (size_t i=1;i<numberOfSites-1;i++) {
+				bool seen = (std::find(sitesSeen_.begin(),sitesSeen_.end(),i) != sitesSeen_.end());
+				if (!seen) return false;
+			}
+			return true;
+		}
+
 		bool isEnabled_;
 		size_t stage_;
 		size_t counter_;
@@ -458,6 +512,8 @@ namespace Dmrg {
 		WaveFunctionTransfBaseType* wftImpl_;
 		PsimagLite::Random48<RealType> rng_;
 		bool twoSiteDmrg_;
+		bool noLoad_;
+		std::vector<size_t> sitesSeen_;
 	}; // class WaveFunctionTransformation
 } // namespace Dmrg
 
