@@ -143,6 +143,11 @@ namespace Dmrg {
 					noLoad_=true;
 				else
 					load();
+			} else {
+				if (params.options.find("noloadwft")!=std::string::npos) {
+					std::string str("Error: noloadwft needs restart or checkpoint\n");
+					throw std::runtime_error(str.c_str());
+				}
 			}
 
 			if (BasisType::useSu2Symmetry()) {
