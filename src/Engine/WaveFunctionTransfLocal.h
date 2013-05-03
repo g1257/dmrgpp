@@ -408,11 +408,6 @@ namespace Dmrg {
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.left().permutationInverse().size()/volumeOfNk;
 			size_t nalpha = lrs.left().permutationInverse().size();
-			
-			std::ostringstream msg;
-			msg<<" We're moving to the finite loop, bumpy ride ahead!";
-			progress_.printline(msg,std::cout);
-			
 
 			assert(nip==dmrgWaveStruct_.ws.col());
 			assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());

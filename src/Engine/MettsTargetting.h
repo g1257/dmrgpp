@@ -440,7 +440,9 @@ namespace Dmrg {
 					RealType x = std::norm(targetVectors_[n1]);
 					msg<<"Changing direction, setting collapsed with norm="<<x;
 					progress_.printline(msg,std::cout);
-					targetVectors_[0] = targetVectors_[n1];
+					for (size_t i=0;i<n1;i++)
+						targetVectors_[i] = targetVectors_[n1];
+					timeVectorsBase_->timeHasAdvanced();
 					printAdvancement();
 					return;
 				}
@@ -456,7 +458,6 @@ namespace Dmrg {
 					currentBeta_ += mettsStruct_.tau;
 					timesWithoutAdvancement_=0;
 					printAdvancement();
-					timeVectorsBase_->timeHasAdvanced();
 					return;
 				}
 
@@ -496,7 +497,10 @@ namespace Dmrg {
 
 				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE || stage_==COLLAPSE) {
 					size_t advance = index;
-					if (stage_ == WFT_ADVANCE) advance = indexAdvance;
+					if (stage_ == WFT_ADVANCE) {
+						advance = indexAdvance;
+						timeVectorsBase_->timeHasAdvanced();
+					}
 					// don't advance the collapsed vector because we'll recompute
 					if (index==weight_.size()-1) advance=index;
 					std::ostringstream msg;
