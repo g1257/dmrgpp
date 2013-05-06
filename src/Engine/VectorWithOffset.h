@@ -89,14 +89,14 @@ namespace Dmrg {
 	public:
 		typedef FieldType value_type;
 		typedef std::pair<size_t,size_t> PairType;
-		typedef std::vector<FieldType> VectorType;
+		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 
 		static const FieldType zero_;
 
 		VectorWithOffset()  : size_(0),offset_(0),m_(0) { }
 
 		template<typename SomeBasisType>
-		VectorWithOffset(const std::vector<size_t>& weights,
+		VectorWithOffset(const typename PsimagLite::Vector<size_t>::Type& weights,
 		                 const SomeBasisType& someBasis)
 		: size_(someBasis.size())
 		{
@@ -124,7 +124,7 @@ namespace Dmrg {
 		}
 
 		template<typename SomeBasisType>
-		void set(const std::vector<VectorType>& v,
+		void set(const typename PsimagLite::Vector<VectorType>::Type& v,
 		         const SomeBasisType& someBasis)
 		{
 			bool found = false;

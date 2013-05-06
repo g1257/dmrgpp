@@ -97,12 +97,12 @@ namespace Dmrg {
 //			io.rewind();
 			io.readline(correctionA,"CorrectionA=");
 // 			typename ModelType::HilbertBasisType basis;
-// 			std::vector<size_t> q;
+// 			typename PsimagLite::Vector<size_t>::Type q;
 // 			model.setNaturalBasis(basis,q,1);
 // 			model.findElectrons(electrons,basis);
 		}
 		RealType correctionA;
-// 		std::vector<size_t> electrons;
+// 		typename PsimagLite::Vector<size_t>::Type electrons;
 	}; // class CorrectionParams
 	
 	template<typename ModelType>

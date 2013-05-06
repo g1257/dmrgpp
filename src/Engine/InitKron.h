@@ -258,9 +258,9 @@ private:
 	GenIjPatchType  ijpatches_;
 	ArrayOfMatStructType aL_;
 	ArrayOfMatStructType* aRt_; // <-- we own it also, it's newed and deleted here
-	std::vector<ArrayOfMatStructType*> xc_;
-	std::vector<ArrayOfMatStructType*> yc_;
-	std::vector<ComplexOrRealType> values_;
+	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type xc_;
+	typename PsimagLite::Vector<ArrayOfMatStructType*>::Type yc_;
+	typename PsimagLite::Vector<ComplexOrRealType>::Type values_;
 
 }; //class InitKron
 } // namespace PsimagLite

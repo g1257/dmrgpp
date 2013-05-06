@@ -97,13 +97,13 @@ namespace Dmrg {
 				VectorWithOffsetType& psiDest,
 				const VectorWithOffsetType& psiSrc,
 				const LeftRightSuperType& lrs,
-				const std::vector<size_t>& nk) const = 0;
+				const typename PsimagLite::Vector<size_t>::Type& nk) const = 0;
 
 		virtual ~WaveFunctionTransfBase() {}
 
 	protected:
 
-		size_t volumeOf(const std::vector<size_t>& v) const
+		size_t volumeOf(const typename PsimagLite::Vector<size_t>::Type& v) const
 		{
 			assert(v.size()>0);
 			size_t ret = v[0];

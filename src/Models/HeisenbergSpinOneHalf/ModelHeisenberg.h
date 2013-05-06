@@ -122,7 +122,7 @@ namespace Dmrg {
 
 	public:
 		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
-		typedef std::vector<unsigned int long long> HilbertBasisType;
+		typedef typename PsimagLite::Vector<unsigned int long long>::Type HilbertBasisType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -144,7 +144,7 @@ namespace Dmrg {
 
 		//! find  operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(std::vector<OperatorType> &operatorMatrices,
+		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&operatorMatrices,
 				     SparseMatrixType &hamiltonian,
 		                     BasisDataType &q,
 				     Block const &block,
@@ -152,7 +152,7 @@ namespace Dmrg {
 		{
 			HilbertBasisType natBasis;
 			
-			std::vector<size_t> qvector;
+			typename PsimagLite::Vector<size_t>::Type qvector;
 			setNaturalBasis(natBasis,qvector,block);
 			
 			setOperatorMatrices(operatorMatrices,block);
@@ -163,12 +163,12 @@ namespace Dmrg {
 		}
 
 		//! set operator matrices for sites in block
-		void setOperatorMatrices(std::vector<OperatorType> &operatorMatrices,Block const &block) const
+		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&operatorMatrices,Block const &block) const
 		{
 			HilbertBasisType natBasis;
 			SparseMatrixType tmpMatrix;
 			
-			std::vector<size_t> qvector;
+			typename PsimagLite::Vector<size_t>::Type qvector;
 			setNaturalBasis(natBasis,qvector,block);
 
 			operatorMatrices.clear();
@@ -201,7 +201,7 @@ namespace Dmrg {
 			Block block;
 			block.resize(1);
 			block[0]=site;
-			std::vector<OperatorType> creationMatrix;
+			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 
 			if (what=="+" or what=="i") { // S^+
@@ -223,8 +223,8 @@ namespace Dmrg {
 		
 		//! find all states in the natural basis for a block of n sites
 		void setNaturalBasis(HilbertBasisType& basis,
-		                     std::vector<size_t>& q,
-		                     const std::vector<size_t>& block) const
+		                     typename PsimagLite::Vector<size_t>::Type& q,
+		                     const typename PsimagLite::Vector<size_t>::Type& block) const
 		{
 			assert(block.size()==1);
 			size_t total = modelParameters_.twiceTheSpin + 1;
@@ -235,7 +235,7 @@ namespace Dmrg {
 		}
 		
 		//! Dummy since this model has no fermion sign
-		void findElectrons(std::vector<size_t>& electrons,
+		void findElectrons(typename PsimagLite::Vector<size_t>::Type& electrons,
 				   const HilbertBasisType& basis,
 		                   size_t site) const
 		{
@@ -291,7 +291,9 @@ namespace Dmrg {
 		}
 
 		//! Full hamiltonian from operator matrices cm
-		void calcHamiltonian(SparseMatrixType &hmatrix,std::vector<OperatorType> const &cm,Block const &block) const
+		void calcHamiltonian(SparseMatrixType& hmatrix,
+		                     const typename PsimagLite::Vector<OperatorType>::Type& cm,
+		                     Block const &block) const
 		{
 			assert(block.size()==1);
 			hmatrix.makeDiagonal(cm[0].data.row());
@@ -306,16 +308,16 @@ namespace Dmrg {
 			// note: we use m+j instead of m
 			// This assures us that both j and m are size_t
 			typedef std::pair<size_t,size_t> PairType;
-			std::vector<PairType> jmvalues;
-			std::vector<size_t> flavors; 
+			typename PsimagLite::Vector<PairType>::Type jmvalues;
+			typename PsimagLite::Vector<size_t>::Type flavors; 
 			PairType jmSaved;
 			jmSaved.first = modelParameters_.twiceTheSpin;
 			jmSaved.second = basis[0];
 			jmSaved.first++;
 			jmSaved.second++;
 
-			std::vector<size_t> electronsUp(basis.size());
-			std::vector<size_t> electronsDown(basis.size());
+			typename PsimagLite::Vector<size_t>::Type electronsUp(basis.size());
+			typename PsimagLite::Vector<size_t>::Type electronsDown(basis.size());
 			for (size_t i=0;i<basis.size();i++) {
 				PairType jmpair;
 				jmpair.first = modelParameters_.twiceTheSpin;

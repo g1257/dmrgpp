@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 // END LICENSE BLOCK
 /** \ingroup DMRG */
@@ -85,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "Matrix.h" // in PsimagLite
 #include "Range.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -175,12 +174,12 @@ namespace Dmrg {
 		friend std::ostream &operator<<(std::ostream &s,BlockMatrix<S,MatrixInBlockTemplate2> const &A);
 		
 		template<typename S,typename Field,typename ConcurrencyTemplate>
-		friend void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,std::vector<Field> &eigs,char option,ConcurrencyTemplate &concurrency);
+		friend void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,typename PsimagLite::Vector<Field> ::Type&eigs,char option,ConcurrencyTemplate &concurrency);
 		
 	private:
 		int rank_; //the rank of this matrix
-		std::vector<int> offsets_; //starting of diagonal offsets for each block
-		std::vector<MatrixInBlockTemplate> data_; // data on each block	
+		typename PsimagLite::Vector<int>::Type offsets_; //starting of diagonal offsets for each block
+		typename PsimagLite::Vector<MatrixInBlockTemplate>::Type data_; // data on each block	
 	
 	}; // class BlockMatrix
 
@@ -250,7 +249,7 @@ namespace Dmrg {
 	}
 
 	template<typename T>
-	void enforcePhase(std::vector<T>& v)
+	void enforcePhase(typename PsimagLite::Vector<T>::Type& v)
 	{
 		enforcePhase(&(v[0]),v.size());
 	}
@@ -266,13 +265,13 @@ namespace Dmrg {
 	//! Parallel version of the diagonalization of a block diagonal matrix
 	template<typename S,typename Field,typename SomeConcurrencyType>
 	void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,
-	                 std::vector<Field> &eigs,
+	                 typename PsimagLite::Vector<Field> ::Type&eigs,
 	                 char option,
 	                 SomeConcurrencyType &concurrency)
 	{
-		std::vector<Field> eigsTmp;
-		std::vector<std::vector<Field> > eigsForGather;
-		std::vector<size_t> weights(C.blocks());
+		typename PsimagLite::Vector<Field>::Type eigsTmp;
+		typename PsimagLite::Vector<typename PsimagLite::Vector<Field>::Type>::Type eigsForGather;
+		typename PsimagLite::Vector<size_t>::Type weights(C.blocks());
 
 		eigsForGather.resize(C.blocks());
 

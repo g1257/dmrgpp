@@ -111,8 +111,8 @@ namespace Dmrg {
 		 lrs_(lrs),
 		 cgObject_(Su2SymmetryGlobalsType::clebschGordanObject)
 		{
-			std::vector<PairType> jsEffective;
-			std::vector<size_t> jvalues;
+			typename PsimagLite::Vector<PairType>::Type jsEffective;
+			typename PsimagLite::Vector<size_t>::Type jvalues;
 			// find all possible j values
 			size_t counter=0;
 			for (size_t i=0;i<lrs.left().numberOfOperators();i++) {
@@ -189,7 +189,7 @@ namespace Dmrg {
 		{
 			size_t xx = basis.numberOfOperators();
 			hamReduced.resize(xx,xx);
-			std::vector<size_t> basisrinverse(basis.size());
+			typename PsimagLite::Vector<size_t>::Type basisrinverse(basis.size());
 			for (size_t i=0;i<basis.size();i++) {
 				size_t f = basis.getFlavor(i);
 				size_t j = basis.jmValue(i).first;
@@ -197,7 +197,7 @@ namespace Dmrg {
 			}
 
 			size_t angularMomentum =0;
-			std::vector<const OperatorType*> opSrc(angularMomentum+1);
+			typename PsimagLite::Vector<const OperatorType*>::Type opSrc(angularMomentum+1);
 
 			OperatorType myOp;
 			myOp.data = basis.hamiltonian();
@@ -245,9 +245,9 @@ namespace Dmrg {
 		}
 
 		void createReducedOperator(SparseMatrixType& opDest,
-		                           const std::vector<const OperatorType*>& opSrc,
+		                           const typename PsimagLite::Vector<const OperatorType*>::Type& opSrc,
 		                           const BasisWithOperatorsType& basis,
-		                           const std::vector<size_t>& basisrInverse,
+		                           const typename PsimagLite::Vector<size_t>::Type& basisrInverse,
 		                           size_t n,
 		                           size_t counter)
 		{
@@ -260,7 +260,7 @@ namespace Dmrg {
 		void createReducedOperator(PsimagLite::Matrix<SparseElementType>& opDest1,
 		                           const OperatorType& opSrc,
 		                           const BasisWithOperatorsType& basis,
-		                           const std::vector<size_t>& basisrInverse)
+		                           const typename PsimagLite::Vector<size_t>::Type& basisrInverse)
 		{
 			for (size_t i=0;i<opSrc.data.row();i++) {
 				PairType jm = basis.jmValue(i);
@@ -280,7 +280,7 @@ namespace Dmrg {
 		                     size_t k,
 		                     size_t mu1,
 		                     size_t mu2,
-		                     std::vector<PairType>& jsEffective)
+		                     typename PsimagLite::Vector<PairType>::Type& jsEffective)
 		{
 			PairType kmu1(k,mu1);
 			PairType kmu2(k,mu2);
@@ -324,7 +324,7 @@ namespace Dmrg {
 			}
 		}
 
-		void calcEffectiveStates(std::vector<PairType> jsEffective)
+		void calcEffectiveStates(typename PsimagLite::Vector<PairType>::Type jsEffective)
 		{
 			int offset = lrs_.super().partition(m_);
 			PairType jm=lrs_.super().jmValue(offset);
@@ -426,10 +426,10 @@ namespace Dmrg {
 		void reorderMap()
 		{
 			if (flavorsOldInverse_.size()==0) return;
-			std::vector<size_t> perm(flavorsOldInverse_.size());
-			Sort<std::vector<size_t> > sort;
+			typename PsimagLite::Vector<size_t>::Type perm(flavorsOldInverse_.size());
+			PsimagLite::Sort<typename PsimagLite::Vector<size_t>::Type > sort;
 			sort.sort(flavorsOldInverse_,perm);
-			std::vector<PairType> r(reducedEffective_.size());
+			typename PsimagLite::Vector<PairType>::Type r(reducedEffective_.size());
 			PsimagLite::Matrix<size_t> reducedInverse(reducedInverse_.n_row(),reducedInverse_.n_col());
 
 			for (size_t i=0;i<reducedEffective_.size();i++) {
@@ -442,12 +442,12 @@ namespace Dmrg {
 
 		size_t m_;
 		const LeftRightSuperType& lrs_;
-		std::vector<PsimagLite::Matrix<SparseElementType> > lfactor_;
+		typename PsimagLite::Vector<PsimagLite::Matrix<SparseElementType> >::Type lfactor_;
 		PsimagLite::Matrix<SparseElementType> lfactorHamiltonian_;
 		SparseMatrixType hamiltonian2_,hamiltonian3_;
-		std::vector<PairType> reducedEffective_;
+		typename PsimagLite::Vector<PairType>::Type reducedEffective_;
 		PsimagLite::Matrix<size_t> reducedInverse_;
-		std::vector<size_t> flavorsOldInverse_;
+		typename PsimagLite::Vector<size_t>::Type flavorsOldInverse_;
 		ClebschGordanType& cgObject_;
 
 	}; // class

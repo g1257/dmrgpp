@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 
 /** \ingroup DMRG */
 /*@{*/
@@ -95,22 +92,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PTHREADS_NAME PsimagLite::NoPthreads
 #endif  // #ifdef USE_THREADS_WITH_MPI
 #endif // #ifdef USE_PTHREADS
+#include "Vector.h"
 
 namespace Dmrg {
-	struct ProgramGlobals {
-		static size_t const MaxNumberOfSites = 300; // max number of sites that a model can use
-		static size_t const MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
-		//static size_t const LanczosSteps = 200; // max number of external Lanczos steps
-		//static double const LanczosTolerance; // tolerance of the Lanczos Algorithm
-		enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
-		enum {SYSTEM_SYSTEM,SYSTEM_ENVIRON,ENVIRON_SYSTEM,ENVIRON_ENVIRON};
-		enum {SYSTEM,ENVIRON};
-		enum {FERMION,BOSON};
+struct ProgramGlobals {
 
+	static size_t const MaxNumberOfSites = 300; // max number of sites that a model can use
+	static size_t const MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
 
-	}; // ProgramGlobals
-	
-	//double const ProgramGlobals::LanczosTolerance = 1e-12;
+	enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
+
+	enum {SYSTEM_SYSTEM,SYSTEM_ENVIRON,ENVIRON_SYSTEM,ENVIRON_ENVIRON};
+
+	enum {SYSTEM,ENVIRON};
+
+	enum {FERMION,BOSON};
+
+}; // ProgramGlobals
+
+//double const ProgramGlobals::LanczosTolerance = 1e-12;
 }; // namespace Dmrg
 /*@}*/
 #endif

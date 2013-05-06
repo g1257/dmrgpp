@@ -93,7 +93,7 @@ template<typename RealType,typename SparseMatrixType>
 class ReflectionTransform {
 
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef std::vector<ComplexOrRealType> VectorType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
 	typedef ReflectionBasis<RealType,SparseMatrixType> ReflectionBasisType;
 
@@ -298,7 +298,7 @@ private:
 			  const SparseMatrixType& Qm) const
 	{
 		size_t n = Q1.rank();
-		std::vector<ComplexOrRealType> sum(n,0.0);
+		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n,0.0);
 		size_t counter = 0;
 		Q.resize(n);
 		size_t minusSector = n - plusSector_;
@@ -386,7 +386,7 @@ private:
 		     const ReflectionBasisType& reflectionBasis,
 		     const RealType& sector) const
 	{
-		const std::vector<size_t>& ipPosOrNeg = reflectionBasis.ipPosOrNeg(sector);
+		const typename PsimagLite::Vector<size_t>::Type& ipPosOrNeg = reflectionBasis.ipPosOrNeg(sector);
 		const SparseMatrixType& reflection = reflectionBasis.reflection();
 		size_t n = reflection.rank();
 
@@ -419,13 +419,13 @@ private:
 		T1.checkValidity();
 
 		// permute columns now:
-		std::vector<int> inversePermutation(n,-1);
+		typename PsimagLite::Vector<int>::Type inversePermutation(n,-1);
 		for (size_t i=0;i<ipPosOrNeg.size();i++)
 			inversePermutation[ipPosOrNeg[i]]=i;
 
 		T1final.resize(n);
 		counter=0;
-		std::vector<ComplexOrRealType> sum(n,0.0);
+		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n,0.0);
 		for (size_t i=0;i<n;i++) {
 			T1final.setRow(i,counter);
 			for (int k = T1.getRowPtr(i);k<T1.getRowPtr(i+1);k++) {

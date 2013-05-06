@@ -152,7 +152,7 @@ namespace Dmrg {
 		}
 
 		template<typename ConcurrencyType>
-		void diag(std::vector<RealType>& eigs,char jobz,ConcurrencyType& concurrency)
+		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz,ConcurrencyType& concurrency)
 		{
 			diagonalise<DensityMatrixElementType,RealType,ConcurrencyType>(data_,eigs,jobz,concurrency);
 			
@@ -225,7 +225,7 @@ namespace Dmrg {
     					DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_>& dm);
 	private:
 		BlockMatrixType data_;
-		std::vector<size_t> mMaximal_;
+		typename PsimagLite::Vector<size_t>::Type mMaximal_;
 		const DmrgBasisWithOperatorsType& pBasis_;
 		bool debug_,verbose_;
 		

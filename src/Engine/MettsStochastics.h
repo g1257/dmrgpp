@@ -112,7 +112,7 @@ namespace Dmrg {
 
 		size_t chooseRandomState(size_t site) const
 		{
-			std::vector<size_t> quantumNumbsOneSite;
+			typename PsimagLite::Vector<size_t>::Type quantumNumbsOneSite;
 			HilbertBasisType basisOfOneSite;
 			basisForOneSite(quantumNumbsOneSite,basisOfOneSite,site);
 			size_t tmp = size_t(rng_()*model_.hilbertSize(site));
@@ -122,9 +122,9 @@ namespace Dmrg {
 
 		// recommendation for understanding this
 		// think of this first as having basisOfOneSite[i] = i
-		size_t chooseRandomState(const std::vector<RealType>& probs,size_t site) const
+		size_t chooseRandomState(const typename PsimagLite::Vector<RealType>::Type& probs,size_t site) const
 		{
-			std::vector<size_t> quantumNumbsOneSite;
+			typename PsimagLite::Vector<size_t>::Type quantumNumbsOneSite;
 			HilbertBasisType basisOfOneSite;
 			basisForOneSite(quantumNumbsOneSite,basisOfOneSite,site);
 
@@ -149,7 +149,7 @@ namespace Dmrg {
 		}
 
 		// call only from INFINITE
-		void update(size_t qn,const std::vector<size_t>& block1,const std::vector<size_t>& block2,size_t seed)
+		void update(size_t qn,const typename PsimagLite::Vector<size_t>::Type& block1,const typename PsimagLite::Vector<size_t>::Type& block2,size_t seed)
 		{
 			if (addedSites_.size()==0) {
 				pureStates_.resize(block2[block2.size()-1]+2*block2.size());
@@ -170,7 +170,7 @@ namespace Dmrg {
 			qnVsSize_[addedSites_.size()]=qn;
 		}
 
-		void setCollapseBasis(std::vector<RealType>& collapseBasisWeights,size_t site) const
+		void setCollapseBasis(typename PsimagLite::Vector<RealType>::Type& collapseBasisWeights,size_t site) const
 		{
 			size_t nk = model_.hilbertSize(site);
 			for (size_t alpha=0;alpha<nk;alpha++) {
@@ -183,9 +183,9 @@ namespace Dmrg {
 
 	private:
 
-		void basisForOneSite(std::vector<size_t>& quantumNumbsOneSite,HilbertBasisType& basisOfOneSite,size_t site) const
+		void basisForOneSite(typename PsimagLite::Vector<size_t>::Type& quantumNumbsOneSite,HilbertBasisType& basisOfOneSite,size_t site) const
 		{
-			std::vector<size_t> block(1,site);
+			typename PsimagLite::Vector<size_t>::Type block(1,site);
 			model_.setNaturalBasis(basisOfOneSite,quantumNumbsOneSite,block);
 		}
 
@@ -198,9 +198,9 @@ namespace Dmrg {
 		const ModelType& model_;
 		mutable RngType rng_;
 		PsimagLite::ProgressIndicator progress_;
-		std::vector<size_t> pureStates_;
-		std::vector<size_t> addedSites_;
-		std::vector<size_t> qnVsSize_;
+		typename PsimagLite::Vector<size_t>::Type pureStates_;
+		typename PsimagLite::Vector<size_t>::Type addedSites_;
+		typename PsimagLite::Vector<size_t>::Type qnVsSize_;
 	};  //class MettsStochastics
 } // namespace Dmrg
 /*@}*/

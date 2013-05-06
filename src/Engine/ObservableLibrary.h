@@ -200,7 +200,7 @@ namespace Dmrg {
 					throw std::runtime_error(str.c_str());
 				}
 				for (size_t g=0;g<16;g++) {
-					std::vector<size_t> gammas(4,0);
+					typename PsimagLite::Vector<size_t>::Type gammas(4,0);
 					gammas[0] = (g & 1);
 					gammas[1] = (g & 2)>>1;
 					gammas[2] = (g & 4) >> 2;

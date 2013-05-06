@@ -94,23 +94,23 @@ namespace Dmrg {
 		public:
 			static int const MAX = 100;
 
-			static size_t encodeQuantumNumber(const std::vector<size_t>& v)
+			static size_t encodeQuantumNumber(const typename PsimagLite::Vector<size_t>::Type& v)
 			{
 				size_t x= v[0] + v[1]*MAX;
 				if (v.size()==3) x += v[2]*MAX*MAX;
 				return x;
 			}
 
-			static std::vector<size_t> decodeQuantumNumber(size_t q)
+			static typename PsimagLite::Vector<size_t>::Type decodeQuantumNumber(size_t q)
 			{
-				std::vector<size_t> v(2);
+				typename PsimagLite::Vector<size_t>::Type v(2);
 				size_t tmp = q ;
 				v[1] = size_t(tmp/MAX);
 				v[0] = tmp % MAX;
 				return v;
 			}
 
-			static size_t pseudoQuantumNumber(const std::vector<size_t>& targets)
+			static size_t pseudoQuantumNumber(const typename PsimagLite::Vector<size_t>::Type& targets)
 			{
 				return encodeQuantumNumber(targets);
 			}
@@ -122,10 +122,10 @@ namespace Dmrg {
 
 			//! find quantum numbers for each state of this basis, 
 			//! considered symmetries for this model are: n_up and n_down
-			static  void findQuantumNumbers(std::vector<size_t> &q,const BasisDataType& basisData) 
+			static  void findQuantumNumbers(typename PsimagLite::Vector<size_t> ::Type&q,const BasisDataType& basisData) 
 			{
 				q.clear();
-				std::vector<size_t> qn(2);
+				typename PsimagLite::Vector<size_t>::Type qn(2);
 				for (size_t i=0;i<basisData.electronsUp.size();i++) {
 					// nup
 					qn[0] = basisData.electronsUp[i];
@@ -137,18 +137,18 @@ namespace Dmrg {
 			}
 
 			template<typename SolverParametersType>
-			void calcRemovedIndices(std::vector<size_t>& removedIndices,
-						std::vector<RealType>& eigs,
+			void calcRemovedIndices(typename PsimagLite::Vector<size_t>::Type& removedIndices,
+						typename PsimagLite::Vector<RealType>::Type& eigs,
 						size_t kept,
 						const SolverParametersType& solverParams) const
 			{
 				if (eigs.size()<=kept) return;
 				// we sort the eigenvalues
 				// note: eigenvalues are not ordered because DensityMatrix is diagonalized in blocks
-				std::vector<size_t> perm(eigs.size());
-				Sort<std::vector<RealType> > sort;
+				typename PsimagLite::Vector<size_t>::Type perm(eigs.size());
+				PsimagLite::Sort<typename PsimagLite::Vector<RealType>::Type > sort;
 				sort.sort(eigs,perm);
-				std::vector<size_t> permInverse(perm.size());
+				typename PsimagLite::Vector<size_t>::Type permInverse(perm.size());
 				for (size_t i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
 				
 				size_t target = eigs.size()-kept;

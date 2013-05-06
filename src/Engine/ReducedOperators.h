@@ -139,7 +139,7 @@ namespace Dmrg {
 
 		const SparseMatrixType& hamiltonian() const { return reducedHamiltonian_; }
 
-		void setOperators(const std::vector<OperatorType>& ops)
+		void setOperators(const typename PsimagLite::Vector<OperatorType>::Type& ops)
 		{
 			if (!useSu2Symmetry_) return;
 			findBasisInverse();
@@ -147,7 +147,7 @@ namespace Dmrg {
 
 			for (size_t i=0;i<ops.size();i++) {
 				size_t angularMomentum =ops[i].jm.first;
-				std::vector<const OperatorType*> opSrc(angularMomentum+1);
+				typename PsimagLite::Vector<const OperatorType*>::Type opSrc(angularMomentum+1);
 				if (ops[i].su2Related.source.size()==0) continue;
 				OperatorType myOp[angularMomentum+1];
 				size_t transposeCounter=0;
@@ -182,7 +182,7 @@ namespace Dmrg {
 			}
 		}
 
-		void setMomentumOfOperators(const std::vector<size_t>& momentum)
+		void setMomentumOfOperators(const PsimagLite::Vector<size_t>::Type& momentum)
 		{
 			momentumOfOperators_=momentum;
 		}
@@ -192,7 +192,7 @@ namespace Dmrg {
 			if (!useSu2Symmetry_) return;
 			findBasisInverse();
 			size_t angularMomentum =0;
-			std::vector<const OperatorType*> opSrc(angularMomentum+1);
+			typename PsimagLite::Vector<const OperatorType*>::Type opSrc(angularMomentum+1);
 
 			OperatorType myOp;
 			myOp.data = hamiltonian;
@@ -239,7 +239,7 @@ namespace Dmrg {
 
 			PsimagLite::Matrix<SparseElementType> fm(nold,nr);
 
-			std::vector<int> inverseP(ftransform.col(),-1);
+			PsimagLite::Vector<int>::Type inverseP(ftransform.col(),-1);
 			for (size_t j=0;j<nr;j++) {
 				size_t jj = thisBasis->reducedIndex(j); //new
 				assert(jj<inverseP.size());
@@ -286,7 +286,7 @@ namespace Dmrg {
 			size_t angularMomentum = myOp.jm.first;
 			int fermionSign = myOp.fermionSign;
 			const SparseMatrixType& A = myOp.data;
-			std::vector<size_t> jvals;
+			PsimagLite::Vector<size_t>::Type jvals;
 
 			if (!order) {
 				basisA = &basis3;
@@ -327,7 +327,7 @@ namespace Dmrg {
 			fullMatrixToCrsMatrix(reducedHamiltonian_,B2);
 		}
 
-		void reorder(size_t k,const std::vector<size_t>& permutation)
+		void reorder(size_t k,const PsimagLite::Vector<size_t>::Type& permutation)
 		{
 			if (!useSu2Symmetry_) return;
 			for (size_t i=0;i<permutation.size();i++)
@@ -335,7 +335,7 @@ namespace Dmrg {
 					throw std::runtime_error("reorderHamiltonian: permutation not the identity!\n");
 		}
 
-		void reorderHamiltonian(const std::vector<size_t>& permutation)
+		void reorderHamiltonian(const PsimagLite::Vector<size_t>::Type& permutation)
 		{
 			if (!useSu2Symmetry_) return;
 			for (size_t i=0;i<permutation.size();i++)
@@ -367,16 +367,16 @@ namespace Dmrg {
 		const DmrgBasisType* thisBasis_;
 		bool useSu2Symmetry_;
 		ClebschGordanType* cgObject_;
-		std::vector<size_t> momentumOfOperators_;
-		std::vector<size_t> basisrinverse_;
-		std::vector<OperatorType> reducedOperators_;
+		PsimagLite::Vector<size_t>::Type momentumOfOperators_;
+		PsimagLite::Vector<size_t>::Type basisrinverse_;
+		typename PsimagLite::Vector<OperatorType>::Type reducedOperators_;
 		SparseMatrixType reducedHamiltonian_;
 		size_t j1Max_,j2Max_;
-		std::vector<std::vector<SparseElementType> > lfactorLeft_;
-		std::vector<std::vector<SparseElementType> > lfactorRight_;
-		std::vector<SparseElementType> lfactorHamLeft_,lfactorHamRight_;
+		typename PsimagLite::Vector<typename PsimagLite::Vector<SparseElementType>::Type>::Type lfactorLeft_;
+		typename PsimagLite::Vector<typename PsimagLite::Vector<SparseElementType>::Type>::Type lfactorRight_;
+		typename PsimagLite::Vector<SparseElementType>::Type lfactorHamLeft_,lfactorHamRight_;
 		PsimagLite::Matrix<int> reducedMapping_;
-		std::vector<std::vector<size_t> > fastBasisLeft_,fastBasisRight_;
+		PsimagLite::Vector<PsimagLite::Vector<size_t>::Type>::Type fastBasisLeft_,fastBasisRight_;
 		PsimagLite::Matrix<size_t> flavorIndexCached_;
 		SparseMatrixType ftransform_;
 
@@ -414,7 +414,7 @@ namespace Dmrg {
 		void calcReducedMapping(const DmrgBasisType& basis2,const DmrgBasisType& basis3)
 		{
 			size_t fMax=0;
-			const std::vector<size_t>& flavorsOld=thisBasis_->flavorsOld();
+			const PsimagLite::Vector<size_t>::Type& flavorsOld=thisBasis_->flavorsOld();
 
 			for (size_t i=0;i<thisBasis_->reducedSize();i++) {
 				size_t ii = thisBasis_->reducedIndex(i);
@@ -476,7 +476,8 @@ namespace Dmrg {
 			}
 		}
 
-		void createReducedOperator(SparseMatrixType& opDest,const std::vector<const OperatorType*>& opSrc)
+		void createReducedOperator(SparseMatrixType& opDest,
+		                           const typename PsimagLite::Vector<const OperatorType*>::Type& opSrc)
 		{
 			size_t n = thisBasis_->reducedSize();
 			DenseMatrixType opDest1(n,n);
@@ -507,7 +508,7 @@ namespace Dmrg {
 			multiply(v,transformConj,tmp);
 		}
 
-		void buildLfactor(std::vector<SparseElementType>& lfactor,
+		void buildLfactor(typename PsimagLite::Vector<SparseElementType>::Type& lfactor,
 		                  bool order,const DmrgBasisType& basis2,
 		                  const DmrgBasisType& basis3,
 		                  size_t k)
@@ -679,10 +680,10 @@ namespace Dmrg {
 			size_t n = B.n_row();
 			//size_t angularMomentum = 0;
 			//if (ki>=0) angularMomentum = momentumOfOperators_[ki];
-			const std::vector<std::vector<size_t> >* fastBasis = &fastBasisLeft_;
+			const typename PsimagLite::Vector<typename PsimagLite::Vector<size_t>::Type>::Type* fastBasis = &fastBasisLeft_;
 			if (!order) fastBasis = &fastBasisRight_;
 			for (size_t i0=0;i0<fastBasis->size();i0++) {
-				const std::vector<size_t>& twopairs = (*fastBasis)[i0];
+				const PsimagLite::Vector<size_t>::Type& twopairs = (*fastBasis)[i0];
 				size_t i = twopairs[0];
 				size_t iprime = twopairs[1];;
 				size_t i1 = twopairs[2];
@@ -726,7 +727,7 @@ namespace Dmrg {
 			}
 		}
 
-		void calcFastBasis(std::vector<std::vector<size_t> >& fastBasis,
+		void calcFastBasis(PsimagLite::Vector<PsimagLite::Vector<size_t>::Type >::Type& fastBasis,
 		                   const DmrgBasisType& basis2,
 		                   const DmrgBasisType& basis3,
 		                   bool order,
@@ -740,7 +741,7 @@ namespace Dmrg {
 				basisB = &basis2;
 			}
 			fastBasis.clear();
-			std::vector<size_t> twopairs(5);
+			PsimagLite::Vector<size_t>::Type twopairs(5);
 			for (size_t i=0;i<thisBasis_->jVals();i++) {
 				twopairs[0]=i;
 				size_t jProd = thisBasis_->jVals(i);

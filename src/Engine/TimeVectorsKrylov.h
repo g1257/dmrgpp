@@ -99,14 +99,14 @@ class TimeVectorsKrylov : public  TimeVectorsBase<
 	typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,LanczosSolverType,VectorWithOffsetType> BaseType;
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargettingParamsType::RealType RealType;
-	typedef std::vector<RealType> VectorRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixComplexOrRealType;
-	typedef std::vector<ComplexOrRealType> TargetVectorType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type TargetVectorType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 
 public:
@@ -114,7 +114,7 @@ public:
 	TimeVectorsKrylov(RealType& currentTime,
 					  const TargettingParamsType& tstStruct,
 					  const VectorRealType& times,
-					  std::vector<VectorWithOffsetType>& targetVectors,
+					  typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
 					  const ModelType& model,
 					  const WaveFunctionTransfType& wft,
 					  const LeftRightSuperType& lrs,
@@ -151,14 +151,14 @@ private:
 								const VectorWithOffsetType& phi,
 								size_t systemOrEnviron)
 	{
-		std::vector<MatrixComplexOrRealType> V(phi.sectors());
-		std::vector<MatrixComplexOrRealType> T(phi.sectors());
+		typename PsimagLite::Vector<MatrixComplexOrRealType>::Type V(phi.sectors());
+		typename PsimagLite::Vector<MatrixComplexOrRealType>::Type T(phi.sectors());
 
-		std::vector<size_t> steps(phi.sectors());
+		typename PsimagLite::Vector<size_t>::Type steps(phi.sectors());
 
 		triDiag(phi,T,V,steps);
 
-		std::vector<std::vector<RealType> > eigs(phi.sectors());
+		typename PsimagLite::Vector<typename PsimagLite::Vector<RealType>::Type>::Type eigs(phi.sectors());
 
 		for (size_t ii=0;ii<phi.sectors();ii++)
 			PsimagLite::diag(T[ii],eigs[ii],'V');
@@ -171,11 +171,11 @@ private:
 	//! Do not normalize states here, it leads to wrong results (!)
 	void calcTargetVectors(const PairType& startEnd,
 	                       const VectorWithOffsetType& phi,
-						   const std::vector<MatrixComplexOrRealType>& T,
-						   const std::vector<MatrixComplexOrRealType>& V,
+						   const typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& T,
+						   const typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& V,
 						   RealType Eg,
-						   const std::vector<VectorRealType>& eigs,
-						   std::vector<size_t> steps,
+						   const typename PsimagLite::Vector<VectorRealType>::Type& eigs,
+						   typename PsimagLite::Vector<size_t>::Type steps,
 						   size_t systemOrEnviron)
 	{
 		targetVectors_[0] = phi;
@@ -189,12 +189,12 @@ private:
 
 	void calcTargetVector(VectorWithOffsetType& v,
 	                      const VectorWithOffsetType& phi,
-	                      const std::vector<MatrixComplexOrRealType>& T,
-	                      const std::vector<MatrixComplexOrRealType>& V,
+	                      const typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& T,
+	                      const typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& V,
 	                      RealType Eg,
-	                      const std::vector<VectorRealType>& eigs,
+	                      const typename PsimagLite::Vector<VectorRealType>::Type& eigs,
 	                      size_t timeIndex,
-	                      std::vector<size_t> steps)
+	                      typename PsimagLite::Vector<size_t>::Type steps)
 	{
 		v = phi;
 		for (size_t ii=0;ii<phi.sectors();ii++) {
@@ -273,9 +273,9 @@ private:
 
 	void triDiag(
 			const VectorWithOffsetType& phi,
-			std::vector<MatrixComplexOrRealType>& T,
-			std::vector<MatrixComplexOrRealType>& V,
-			std::vector<size_t>& steps)
+			typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& T,
+			typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& V,
+			typename PsimagLite::Vector<size_t>::Type& steps)
 	{
 		for (size_t ii=0;ii<phi.sectors();ii++) {
 			size_t i = phi.sector(ii);
@@ -313,7 +313,7 @@ private:
 	RealType& currentTime_;
 	const TargettingParamsType& tstStruct_;
 	const VectorRealType& times_;
-	std::vector<VectorWithOffsetType>& targetVectors_;
+	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;

@@ -95,7 +95,7 @@ namespace Dmrg {
 		DynamicSerializer(
 				const PostProcType& cf,
 				size_t site,
-				const std::vector<VectorType>& targetVectors)
+				const typename PsimagLite::Vector<VectorType>::Type& targetVectors)
 		: cf_(cf),
 		  site_(site),
 		  targetVectors_(targetVectors)
@@ -159,7 +159,7 @@ namespace Dmrg {
 	private:
 		const PostProcType& cf_;
 		size_t site_;
-		std::vector<VectorType> targetVectors_;
+		typename PsimagLite::Vector<VectorType>::Type targetVectors_;
 	}; // class TimeSerializer
 } // namespace Dmrg 
 

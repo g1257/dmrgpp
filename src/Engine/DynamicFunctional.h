@@ -83,7 +83,7 @@ namespace Dmrg {
 		
 		typedef RealType FieldType; // see documentation
 		//typedef std::complex<RealType> ComplexType;
-		//typedef std::vector<ComplexType> VectorComplexType;
+		//typedef typename PsimagLite::Vector<ComplexType>::Type VectorComplexType;
 		
 		
 		DynamicFunctional(

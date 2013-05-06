@@ -94,7 +94,7 @@ namespace Dmrg {
 			
 			TimeSerializer(RealType currentTime,
 				       size_t site,
-				       const std::vector<VectorType>& targetVectors,
+				       const typename PsimagLite::Vector<VectorType>::Type& targetVectors,
 				       size_t marker)
 			: currentTime_(currentTime),
 			  site_(site),
@@ -182,7 +182,7 @@ namespace Dmrg {
 		private:
 			RealType currentTime_;
 			size_t site_;
-			std::vector<VectorType> targetVectors_;
+			typename PsimagLite::Vector<VectorType>::Type targetVectors_;
 			size_t marker_;
 	}; // class TimeSerializer
 } // namespace Dmrg 

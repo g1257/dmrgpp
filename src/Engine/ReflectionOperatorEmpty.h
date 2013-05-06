@@ -95,7 +95,7 @@ class ReflectionOperatorEmpty {
 			SparseMatrixType;
 	typedef typename LeftRightSuperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef std::vector<ComplexOrRealType> VectorType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 
 public:
 
@@ -110,7 +110,7 @@ public:
 		if (isEnabled) throw std::runtime_error("ReflectionOperatorEmpty\n");
 	}
 
-	void update(const std::vector<size_t>& sectors)
+	void update(const typename PsimagLite::Vector<size_t>::Type& sectors)
 	{
 	}
 

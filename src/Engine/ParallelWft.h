@@ -90,7 +90,7 @@ public:
 
 	typedef RealType_ RealType;
 
-	ParallelWft(std::vector<VectorWithOffsetType>& targetVectors,
+	ParallelWft(typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
 				size_t nk,
 				const WaveFunctionTransfType& wft,
 				const LeftRightSuperType& lrs)
@@ -120,7 +120,7 @@ public:
 
 private:
 
-	std::vector<VectorWithOffsetType>& targetVectors_;
+	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
 	size_t nk_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;

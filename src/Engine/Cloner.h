@@ -133,7 +133,7 @@ namespace Dmrg {
 		}
 
 		std::string infile_,outRoot_,ext_;
-		std::vector<LineChangerType> lineChanger_;
+		typename PsimagLite::Vector<LineChangerType>::Type lineChanger_;
 	}; // class Cloner
 
 } // namespace Dmrg

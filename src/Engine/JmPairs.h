@@ -100,7 +100,7 @@ namespace Dmrg {
 			return jmPairs_[indices_[alpha]];
 		}
 
-		JmPairs<PairType>& operator=(const std::vector<PairType>& jmpairs)
+		JmPairs<PairType>& operator=(const typename PsimagLite::Vector<PairType>::Type& jmpairs)
 		{
 			jmPairs_.clear();
 			indices_.clear();
@@ -134,15 +134,15 @@ namespace Dmrg {
 			indices_.clear();
 		}
 
-		void reorder(const std::vector<size_t>& permutation)
+		void reorder(const typename PsimagLite::Vector<size_t>::Type& permutation)
 		{
 			utils::reorder(indices_,permutation);
 		}
 
-		void truncate(const std::vector<size_t>& removedIndices)
+		void truncate(const typename PsimagLite::Vector<size_t>::Type& removedIndices)
 		{
 			utils::truncateVector(indices_,removedIndices);
-			std::vector<size_t> unusedPairs;
+			typename PsimagLite::Vector<size_t>::Type unusedPairs;
 			findUnusedJmPairs(unusedPairs);
 			removeUnusedPairs(unusedPairs);
 		}
@@ -177,20 +177,20 @@ namespace Dmrg {
 		}
 
 	private:
-		std::vector<PairType> jmPairs_;
-		std::vector<size_t> indices_;
+		typename PsimagLite::Vector<PairType>::Type jmPairs_;
+		typename PsimagLite::Vector<size_t>::Type indices_;
 
-		void findUnusedJmPairs(std::vector<size_t>& unusedPairs)
+		void findUnusedJmPairs(typename PsimagLite::Vector<size_t>::Type& unusedPairs)
 		{
 			for (size_t i=0;i<jmPairs_.size();i++)
 				if (isUnusedPair(i)) unusedPairs.push_back(i);
 		}
 
-		void removeUnusedPairs(const std::vector<size_t>& unusedPairs)
+		void removeUnusedPairs(const typename PsimagLite::Vector<size_t>::Type& unusedPairs)
 		{
 			size_t counter=0;
-			std::vector<size_t> neworder(jmPairs_.size());
-			std::vector<PairType> tmpVector(jmPairs_.size()-unusedPairs.size());
+			typename PsimagLite::Vector<size_t>::Type neworder(jmPairs_.size());
+			typename PsimagLite::Vector<PairType>::Type tmpVector(jmPairs_.size()-unusedPairs.size());
 
 			for (size_t i=0;i<jmPairs_.size();i++) {
 				if (PsimagLite::isInVector(unusedPairs,i)>=0) continue;
@@ -199,7 +199,7 @@ namespace Dmrg {
 				counter++;
 			}
 			jmPairs_=tmpVector;
-			std::vector<size_t> tmpVector2(indices_.size());
+			typename PsimagLite::Vector<size_t>::Type tmpVector2(indices_.size());
 			for (size_t i=0;i<indices_.size();i++)
 				tmpVector2[i]=neworder[indices_[i]];
 			indices_=tmpVector2;

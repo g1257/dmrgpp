@@ -97,8 +97,8 @@ public:
 	Parallel4PointDs(MatrixType& fpd,
 					 const FourPointCorrelationsType& fourpoint,
 					 const ModelType& model,
-					 const std::vector<size_t>& gammas,
-					 const std::vector<PairType>& pairs)
+					 const typename PsimagLite::Vector<size_t>::Type& gammas,
+					 const typename PsimagLite::Vector<PairType>::Type& pairs)
 		: fpd_(fpd),fourpoint_(fourpoint),model_(model),gammas_(gammas),pairs_(pairs)
 	{}
 
@@ -124,7 +124,7 @@ public:
 private:
 
 	template<typename SomeModelType>
-	FieldType fourPointDelta(size_t i,size_t j,const std::vector<size_t>& gammas,const SomeModelType& model,size_t threadId) const
+	FieldType fourPointDelta(size_t i,size_t j,const typename PsimagLite::Vector<size_t>::Type& gammas,const SomeModelType& model,size_t threadId) const
 	{
 		size_t hs = model.hilbertSize(0);
 		size_t nx = 0;
@@ -149,8 +149,8 @@ private:
 	MatrixType& fpd_;
 	const FourPointCorrelationsType& fourpoint_;
 	const ModelType& model_;
-	const std::vector<size_t>& gammas_;
-	const std::vector<PairType>& pairs_;
+	const typename PsimagLite::Vector<size_t>::Type& gammas_;
+	const typename PsimagLite::Vector<PairType>::Type& pairs_;
 }; // class Parallel4PointDs
 } // namespace Dmrg 
 

@@ -141,7 +141,7 @@ namespace Dmrg {
 			if (direction!=WaveFunctionTransfType::INFINITE) throw std::runtime_error(
 				"Diagonalization::operator(): expecting INFINITE direction\n");
 			size_t loopIndex = 0;
-			std::vector<size_t> sectors;
+			typename PsimagLite::Vector<size_t>::Type sectors;
 			targetedSymmetrySectors(sectors,target.leftRightSuper());
 			reflectionOperator_.update(sectors);
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,blockLeft);
@@ -168,7 +168,7 @@ namespace Dmrg {
 
 	private:
 
-		void targetedSymmetrySectors(std::vector<size_t>& mVector,const LeftRightSuperType& lrs) const
+		void targetedSymmetrySectors(typename PsimagLite::Vector<size_t>::Type& mVector,const LeftRightSuperType& lrs) const
 		{
 			size_t total = lrs.super().partition()-1;
 			for (size_t i=0;i<total;i++) {
@@ -183,7 +183,7 @@ namespace Dmrg {
 		                       size_t direction,
 		                       size_t loopIndex,
 		                       bool needsPrinting,
-		                       const std::vector<size_t>& block)
+		                       const typename PsimagLite::Vector<size_t>::Type& block)
 
 		{
 			const LeftRightSuperType& lrs= target.leftRightSuper();
@@ -202,21 +202,21 @@ namespace Dmrg {
 			msg0<<"Setting up Hamiltonian basis of size="<<lrs.super().size();
 			progress_.printline(msg0,std::cout);
 		
-			std::vector<TargetVectorType> vecSaved;
-			std::vector<RealType> energySaved;
+			typename PsimagLite::Vector<TargetVectorType>::Type vecSaved;
+			typename PsimagLite::Vector<RealType>::Type energySaved;
 			
 			size_t total = lrs.super().partition()-1;
 
 			energySaved.resize(total);
 			vecSaved.resize(total);
-			std::vector<size_t> weights(total);
+			typename PsimagLite::Vector<size_t>::Type weights(total);
 
 			size_t counter=0;
 			for (size_t i=0;i<total;i++) {
 				size_t bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 				if (verbose_) {
 					size_t j = lrs.super().qn(lrs.super().partition(i));
-					std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
+					typename PsimagLite::Vector<size_t>::Type qns = BasisType::decodeQuantumNumber(j);
 					//std::cerr<<"partition "<<i<<" of size="<<bs<<" has qns=";
 					for (size_t k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
 					//std::cerr<<"\n";
@@ -244,7 +244,7 @@ namespace Dmrg {
 				std::ostringstream msg;
 				msg<<"About to diag. sector with quantum numbs. ";
 				size_t j = lrs.super().qn(lrs.super().partition(i));
-				std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
+				typename PsimagLite::Vector<size_t>::Type qns = BasisType::decodeQuantumNumber(j);
 				for (size_t k=0;k<qns.size();k++) msg<<qns[k]<<" ";
 				msg<<" pseudo="<<lrs.super().pseudoEffectiveNumber(
 						lrs.super().partition(i));
@@ -284,7 +284,7 @@ namespace Dmrg {
 				if (weights[i]==0) continue;
 
 				size_t j = lrs.super().qn(lrs.super().partition(i));
-				std::vector<size_t> qns = BasisType::decodeQuantumNumber(j);
+				typename PsimagLite::Vector<size_t>::Type qns = BasisType::decodeQuantumNumber(j);
 				std::ostringstream msg;
 				msg<<"Found targetted symmetry sector in partition "<<i;
 				msg<<" of size="<<vecSaved[i].size();
@@ -321,7 +321,7 @@ namespace Dmrg {
 					 const LeftRightSuperType& lrs,
 					 const SomeVectorType& initialVector)
 		{
-			std::vector<RealType> tmpVec1,tmpVec2;
+			typename PsimagLite::Vector<RealType>::Type tmpVec1,tmpVec2;
 			//srand48(7123443);
 
 			typename ModelType::ModelHelperType modelHelper(i,lrs); //,useReflection_);
@@ -343,7 +343,7 @@ namespace Dmrg {
 				if (!isHermitian(fullm,true))
 					throw std::runtime_error("Not hermitian matrix block\n");
 
-				std::vector<RealType> eigs(fullm2.n_row());
+				typename PsimagLite::Vector<RealType>::Type eigs(fullm2.n_row());
 				PsimagLite::diag(fullm2,eigs,'V');
 				std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
 				if (parameters_.options.find("test")!=std::string::npos)

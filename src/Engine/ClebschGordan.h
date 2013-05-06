@@ -228,7 +228,7 @@ namespace Dmrg {
 			}
 			
 			static size_t copies_;
-			std::vector<LongType> factorial_;
+			typename PsimagLite::Vector<LongType>::Type factorial_;
 			PsimagLite::ProgressIndicator progress_;
 	}; // ClebschGordan
 	

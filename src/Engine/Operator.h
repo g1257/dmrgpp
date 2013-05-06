@@ -93,8 +93,8 @@ namespace Dmrg {
 				// and when running Abelian
 				// it might be undefined
 		size_t offset;
-		std::vector<size_t> source;
-		std::vector<int> transpose;
+		PsimagLite::Vector<size_t>::Type source;
+		PsimagLite::Vector<int>::Type transpose;
 	};
 
 	inline std::istream& operator>>(std::istream& is,Su2Related& x)
@@ -134,36 +134,52 @@ namespace Dmrg {
 		Su2RelatedType su2Related;
 	};
 
-	template<typename RealType_,typename SparseMatrixType>
-	void fillOperator(std::vector<SparseMatrixType*>& data,
-	                  std::vector<Operator<RealType_,SparseMatrixType> >& op)
+	template<typename RealType_,
+	         typename SparseMatrixType,
+	         template<typename,typename> class SomeVectorTemplate,
+	         template<typename,int> class SomeAllocatorTemplate,
+	         int n>
+	void fillOperator(SomeVectorTemplate<SparseMatrixType*,SomeAllocatorTemplate<SparseMatrixType*,n> >& data,
+	                  SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorTemplate<Operator<RealType_,SparseMatrixType>,n> >& op)
 	{
 		for (size_t i=0;i<data.size();i++) {
 			data[i] = &(op[i].data);
 		}
 	}
 
-	template<typename RealType_,typename SparseMatrixType,typename ConcurrencyType>
-	void gather(std::vector<Operator<RealType_,SparseMatrixType> >& op, ConcurrencyType& concurrency)
+	template<typename RealType_,
+	         typename SparseMatrixType,
+	         typename ConcurrencyType,
+	         template<typename,typename> class SomeVectorTemplate,
+	         template<typename,int> class SomeAllocatorTemplate,
+	         int n>
+	void gather(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorTemplate<Operator<RealType_,SparseMatrixType>,n> >& op,
+	            ConcurrencyType& concurrency)
 	{
-		std::vector<SparseMatrixType* > data(op.size());
-		std::vector<int*> fermionSign(op.size());
-		std::vector<typename Operator<RealType_,SparseMatrixType>::PairType*> jm(op.size());
-		std::vector<RealType_*> angularFactor(op.size());
-		std::vector<typename Operator<RealType_,SparseMatrixType>::Su2RelatedType*> su2Related(op.size());
+		SomeVectorTemplate<SparseMatrixType*,SomeAllocatorTemplate<SparseMatrixType*,n> > data(op.size());
+//		PsimagLite::Vector<int*>::Type fermionSign(op.size());
+//		typename PsimagLite::Vector<typename Operator<RealType_,SparseMatrixType>::PairType*>::Type jm(op.size());
+//		typename PsimagLite::Vector<RealType_*>::Type angularFactor(op.size());
+//		PsimagLite::Vector<typename Operator<RealType_,SparseMatrixType>::Type::Su2RelatedType*> su2Related(op.size());
 
 		fillOperator(data,op);
 		concurrency.gather(data);
 	}
 
-	template<typename RealType_,typename SparseMatrixType,typename ConcurrencyType>
-	void broadcast(std::vector<Operator<RealType_,SparseMatrixType> >& op, ConcurrencyType& concurrency)
+	template<typename RealType_,
+	         typename SparseMatrixType,
+	         typename ConcurrencyType,
+	         template<typename,typename> class SomeVectorTemplate,
+	         template<typename,int> class SomeAllocatorTemplate,
+	         int n>
+	void broadcast(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorTemplate<Operator<RealType_,SparseMatrixType>,n> >& op,
+	               ConcurrencyType& concurrency)
 	{
-		std::vector<SparseMatrixType* > data(op.size());
-		std::vector<int*> fermionSign(op.size());
-		std::vector<typename Operator<RealType_,SparseMatrixType>::PairType*> jm(op.size());
-		std::vector<RealType_*> angularFactor(op.size());
-		std::vector<typename Operator<RealType_,SparseMatrixType>::Su2RelatedType*> su2Related(op.size());
+		SomeVectorTemplate<SparseMatrixType*,SomeAllocatorTemplate<SparseMatrixType*,n> > data(op.size());
+//		PsimagLite::Vector<int*>::Type fermionSign(op.size());
+//		typename PsimagLite::Vector<typename Operator<RealType_,SparseMatrixType>::PairType*>::Type jm(op.size());
+//		typename PsimagLite::Vector<RealType_*>::Type angularFactor(op.size());
+//		typename PsimagLite::Vector<typename Operator<RealType_,SparseMatrixType>::Su2RelatedType*>::Type su2Related(op.size());
 
 		fillOperator(data,op);
 

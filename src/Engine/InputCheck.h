@@ -98,7 +98,7 @@ namespace Dmrg {
 			if (optsReadable_!=0) delete optsReadable_;
 		}
 
-		bool check(const std::string& label,const std::vector<std::string>& vec,size_t line) const
+		bool check(const std::string& label,const PsimagLite::Vector<std::string>::Type& vec,size_t line) const
 		{
 			if (label=="JMVALUES") {
 				if (vec.size()!=2) return error1("JMVALUES",line);
@@ -124,7 +124,7 @@ namespace Dmrg {
 		void check(const std::string& label,const std::string& val,size_t line)
 		{
 			if (label!="SolverOptions") return;
-			std::vector<std::string> registerOpts;
+			PsimagLite::Vector<std::string>::Type registerOpts;
 
 			registerOpts.push_back("restart");
 			registerOpts.push_back("debugmatrix");

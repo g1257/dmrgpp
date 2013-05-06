@@ -151,7 +151,7 @@ transformed operator can be used (or not because of the reason limitation above)
 			reducedOpImpl_.setHamiltonian(hamiltonian_);
 		}
 
-		void setOperators(const std::vector<OperatorType>& ops)
+		void setOperators(const typename PsimagLite::Vector<OperatorType>::Type& ops)
 		{
 			if (!useSu2Symmetry_) operators_=ops;
 			else reducedOpImpl_.setOperators(ops);
@@ -222,7 +222,7 @@ transformed operator can be used (or not because of the reason limitation above)
 			multiply(v,transformConj,tmp);
 		}
 
-		void reorder(const std::vector<size_t>& permutation)
+		void reorder(const typename PsimagLite::Vector<size_t>::Type& permutation)
 		{
 			for (size_t k=0;k<numberOfOperators();k++) {
 				if (!useSu2Symmetry_) reorder(operators_[k].data,permutation);
@@ -232,7 +232,7 @@ transformed operator can be used (or not because of the reason limitation above)
 			reducedOpImpl_.reorderHamiltonian(permutation);
 		}
 
-		void setMomentumOfOperators(const std::vector<size_t>& momentum)
+		void setMomentumOfOperators(const typename PsimagLite::Vector<size_t>::Type& momentum)
 		{
 			reducedOpImpl_.setMomentumOfOperators(momentum);
 		}
@@ -271,7 +271,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		void externalProduct(size_t i,
 		                     const OperatorType& m,
 		                     int x,
-		                     const std::vector<double>& fermionicSigns,
+		                     const typename PsimagLite::Vector<double>::Type& fermionicSigns,
 		                     bool option,
 		                     ApplyFactorsType& apply)
 		{
@@ -298,7 +298,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		{
 			SparseMatrixType tmpMatrix;
 			assert(h2.row()==h2.col());
-			std::vector<double> ones(h2.row(),1.0);
+			typename PsimagLite::Vector<double>::Type ones(h2.row(),1.0);
 			PsimagLite::externalProduct(hamiltonian_,h2,h3.row(),ones,true);
 
 			PsimagLite::externalProduct(tmpMatrix,h3,h2.row(),ones,false);
@@ -329,7 +329,7 @@ transformed operator can be used (or not because of the reason limitation above)
 			return reducedOpImpl_.hamiltonian();
 		}
 
-		//const std::vector<size_t>& electrons() const {return operatorsImpl_.electrons(); }
+		//const typename PsimagLite::Vector<size_t>::Type& electrons() const {return operatorsImpl_.electrons(); }
 
 		void print(int ind= -1) const
 		{
@@ -353,7 +353,7 @@ transformed operator can be used (or not because of the reason limitation above)
 
 	private:
 
-		void reorder(SparseMatrixType &v,const std::vector<size_t>& permutation)
+		void reorder(SparseMatrixType &v,const typename PsimagLite::Vector<size_t>::Type& permutation)
 		{
 			SparseMatrixType matrixTmp;
 
@@ -372,7 +372,7 @@ transformed operator can be used (or not because of the reason limitation above)
 
 		bool useSu2Symmetry_;
 		ReducedOperators<OperatorType,BasisType> reducedOpImpl_;
-		std::vector<OperatorType> operators_;
+		typename PsimagLite::Vector<OperatorType>::Type operators_;
 		SparseMatrixType hamiltonian_;
 		PsimagLite::ProgressIndicator progress_;
 	}; //class OperatorsBase 

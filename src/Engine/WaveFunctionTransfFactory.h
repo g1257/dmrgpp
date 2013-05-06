@@ -102,7 +102,7 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef std::vector<SparseElementType> VectorType;
+		typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef typename BasisType::FactorsType FactorsType;
 		typedef DmrgWaveStruct<LeftRightSuperType> DmrgWaveStructType;
@@ -202,7 +202,7 @@ namespace Dmrg {
 					SomeVectorType& dest,
 					const SomeVectorType2& src,
 					const LeftRightSuperType& lrs,
-					const std::vector<size_t>& nk) const
+					const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			bool allow=false;
 			switch (stage_) {
@@ -404,7 +404,7 @@ namespace Dmrg {
 		void createVector(VectorWithOffsetType& psiDest,
 		                  const VectorWithOffsetType& psiSrc,
 		                  const LeftRightSuperType& lrs,
-		                  const std::vector<size_t>& nk) const
+		                  const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			wftImpl_->transformVector(psiDest,psiSrc,lrs,nk);
 
@@ -518,7 +518,7 @@ namespace Dmrg {
 		PsimagLite::Random48<RealType> rng_;
 		bool twoSiteDmrg_;
 		bool noLoad_;
-		std::vector<size_t> sitesSeen_;
+		typename PsimagLite::Vector<size_t>::Type sitesSeen_;
 	}; // class WaveFunctionTransformation
 } // namespace Dmrg
 

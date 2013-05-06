@@ -116,7 +116,7 @@ class ReflectionColor {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef std::vector<ComplexOrRealType> VectorType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
 
 	enum {AVAILABLE,NOT_AVAILABLE,COLOR};
@@ -155,9 +155,9 @@ public:
 			if (ilabel_[i]==firstColor) ipcolor_.push_back(i);
 	}
 
-	const std::vector<size_t>& ipcolor() const { return ipcolor_; }
+	const typename PsimagLite::Vector<size_t>::Type& ipcolor() const { return ipcolor_; }
 
-	const std::vector<size_t>& isolated() const { return ipIsolated_; }
+	const typename PsimagLite::Vector<size_t>::Type& isolated() const { return ipIsolated_; }
 
 private:
 
@@ -178,17 +178,17 @@ private:
 		if (!idebug_) return;
 		std::cout<<"ncolor="<<ncolor<<"\n";
 		for (size_t icolor=firstColor;icolor<=ncolor;icolor++) {
-			std::vector<size_t> ilist;
+			typename PsimagLite::Vector<size_t>::Type ilist;
 			findWithLabel(ilist,ilabel_,icolor);
 			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
 		}
 	}
 
-	void generateAmatrix(SparseMatrixType& A,const std::vector<size_t>& ipConnected) const
+	void generateAmatrix(SparseMatrixType& A,const typename PsimagLite::Vector<size_t>::Type& ipConnected) const
 	{
 		A.resize(ipConnected.size());
 		size_t counter=0;
-		std::vector<int> ipConnectedInverse(reflection_.rank(),-1);
+		typename PsimagLite::Vector<int>::Type ipConnectedInverse(reflection_.rank(),-1);
 		for (size_t i=0;i<ipConnected.size();i++)
 			ipConnectedInverse[ipConnected[i]]=i;
 
@@ -234,7 +234,7 @@ private:
 		ilabel_.assign(A.rank(),AVAILABLE);
 
 		size_t ncolor = firstColor-1;
-		std::vector<size_t> ilist;
+		typename PsimagLite::Vector<size_t>::Type ilist;
 		RealType eps = 1e-3;
 
 		//while (any( ilabel == unlabeled))
@@ -255,7 +255,7 @@ private:
 					// --------------
 					// mark neighbors
 					// --------------
-					std::vector<size_t> jlist;
+					typename PsimagLite::Vector<size_t>::Type jlist;
 					findConnected(jlist,ni,A,eps);
 					//					jlist = find( A(ni,:) );
 					for (size_t j=0;j<jlist.size();j++) {
@@ -279,7 +279,7 @@ private:
 		return ncolor;
 	}
 
-	void findConnected(std::vector<size_t>& jlist,
+	void findConnected(typename PsimagLite::Vector<size_t>::Type& jlist,
 			   size_t ni,
 			   const SparseMatrixType& A,
 			   const RealType& eps) const
@@ -298,12 +298,12 @@ private:
 		if (!hasDiagonal) jlist.push_back(ni);
 	}
 
-	void gencolorCheck(const std::vector<size_t>& ilabel,size_t ncolor) const
+	void gencolorCheck(const typename PsimagLite::Vector<size_t>::Type& ilabel,size_t ncolor) const
 	{
 		// ------------
 		// double check
 		// ------------
-		std::vector<size_t> ilist;
+		typename PsimagLite::Vector<size_t>::Type ilist;
 		findWithLabel(ilist,ilabel,ncolor);
 //		isok = max( ilabel == ncolor);
 		size_t isok = *std::max(ilist.begin(),ilist.end());
@@ -313,20 +313,20 @@ private:
 		}
 	}
 
-	void findWithLabel(std::vector<size_t>& ilist,
-			   const std::vector<size_t>& ilabel,
+	void findWithLabel(typename PsimagLite::Vector<size_t>::Type& ilist,
+			   const typename PsimagLite::Vector<size_t>::Type& ilabel,
 			   size_t icolor) const
 	{
 		for (size_t i=0;i<ilabel.size();i++)
 			if (ilabel[i]==icolor) ilist.push_back(i);
 	}
 
-//	void gencolorPerm(const std::vector<size_t>& ilabel,
+//	void gencolorPerm(const typename PsimagLite::Vector<size_t>::Type& ilabel,
 //			  size_t firstColor,
 //			  size_t ncolor)
 //	{
 //		// find size:
-//		std::vector<size_t> ilist;
+//		typename PsimagLite::Vector<size_t>::Type ilist;
 //		size_t ip = 0;
 //		iperm_.resize(reflection_.rank());
 
@@ -357,10 +357,10 @@ private:
 
 	const SparseMatrixType& reflection_;
 	bool idebug_;
-	std::vector<size_t> ipIsolated_,ipConnected_;
-	std::vector<size_t> ilabel_;
-//	std::vector<size_t> iperm_;
-	std::vector<size_t> ipcolor_;
+	typename PsimagLite::Vector<size_t>::Type ipIsolated_,ipConnected_;
+	typename PsimagLite::Vector<size_t>::Type ilabel_;
+//	typename PsimagLite::Vector<size_t>::Type iperm_;
+	typename PsimagLite::Vector<size_t>::Type ipcolor_;
 }; // class ReflectionColor
 
 } // namespace Dmrg 

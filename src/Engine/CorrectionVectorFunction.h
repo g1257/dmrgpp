@@ -88,7 +88,7 @@ namespace Dmrg {
 	class	CorrectionVectorFunction {
 
 		typedef typename MatrixType::value_type FieldType;
-		typedef std::vector<FieldType> VectorType;
+		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 
 		class InternalMatrix {
 		public:
@@ -122,7 +122,7 @@ namespace Dmrg {
 
 		void getXi(VectorType& result,const VectorType& sv) const
 		{
-			std::vector<VectorType> x;
+			typename PsimagLite::Vector<VectorType>::Type x;
 			VectorType x0(result.size(),0);
 			x.push_back(x0); // initial ansatz
 			cg_(x,im_,sv);

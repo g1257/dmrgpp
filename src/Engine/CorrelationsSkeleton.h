@@ -93,7 +93,7 @@ namespace Dmrg {
 	struct CorrelationData {
 		size_t ni;
 		size_t nj;
-		std::vector<PsimagLite::Matrix<FieldType> > correlationVector;
+		typename PsimagLite::Vector<PsimagLite::Matrix<FieldType> >::Type correlationVector;
 		PsimagLite::SparseVector<FieldType> wavefunction;
 	};
 	

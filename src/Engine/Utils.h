@@ -88,146 +88,153 @@ namespace std {
 
 //! Utility functions that are still needed
 namespace utils {
-	
-	template<typename SomeType>
-	void reorder(std::vector<SomeType> &v,std::vector<size_t> const &permutation)
-	{
-		std::vector<SomeType> tmpVector(v.size());
-		for (size_t i=0;i<v.size();i++) tmpVector[i]=v[permutation[i]]; 
-		v = tmpVector;
+
+template<template<typename,typename> class SomeVectorTemplate,
+         template<typename,int> class SomeAllocatorTemplate,
+         typename T,
+         int n>
+typename PsimagLite::IsVectorLike<SomeVectorTemplate<T,SomeAllocatorTemplate<T,n> >,void>::True
+reorder(SomeVectorTemplate<T,SomeAllocatorTemplate<T,n> >& v,
+        const SomeVectorTemplate<size_t,SomeAllocatorTemplate<size_t,n> >& permutation)
+{
+	SomeVectorTemplate<T,SomeAllocatorTemplate<T,n> > tmpVector(v.size());
+	for (size_t i=0;i<v.size();i++) tmpVector[i]=v[permutation[i]];
+	v = tmpVector;
+}
+
+template<typename SomeType>
+void reorder(PsimagLite::Matrix<SomeType>& v,const PsimagLite::Vector<size_t>::Type& permutation)
+{
+	PsimagLite::Matrix<SomeType> tmpVector(v.n_row(),v.n_col());
+	for (size_t i=0;i<v.n_row();i++)
+		for (size_t j=0;j<v.n_col();j++)
+			tmpVector(i,j)=v(permutation[i],permutation[j]);
+	v = tmpVector;
+}
+
+//! A = B union C
+template<typename Block>
+void blockUnion(Block &A,Block const &B,Block const &C)
+{
+	A=B;
+	for (size_t i=0;i<C.size();i++) A.push_back(C[i]);
+}
+
+template<typename SomeVectorType>
+typename PsimagLite::IsVectorLike<SomeVectorType,void>::True
+truncateVector(SomeVectorType& v,
+               const SomeVectorType& removedIndices)
+{
+	SomeVectorType tmpVector;
+	for (size_t i=0;i<v.size();i++) {
+		if (PsimagLite::isInVector(removedIndices,i)>=0) continue;
+		tmpVector.push_back(v[i]);
 	}
-	
-	template<typename SomeType>
-	void reorder(PsimagLite::Matrix<SomeType>& v,std::vector<size_t> const &permutation)
-	{
-		PsimagLite::Matrix<SomeType> tmpVector(v.n_row(),v.n_col());
-		for (size_t i=0;i<v.n_row();i++) 
-			for (size_t j=0;j<v.n_col();j++)
-				tmpVector(i,j)=v(permutation[i],permutation[j]); 
-		v = tmpVector;
-	}
-	
-	//! A = B union C
-        template<typename Block>
-        void blockUnion(Block &A,Block const &B,Block const &C)
-        {
-		A=B;
-		for (size_t i=0;i<C.size();i++) A.push_back(C[i]);
-        }
-        
-        template<typename SomeType>
-	void truncateVector(std::vector<SomeType> &v,std::vector<SomeType> const &removedIndices)
-	{
-		std::vector<SomeType> tmpVector;
-		for (size_t i=0;i<v.size();i++) {
-			if (PsimagLite::isInVector(removedIndices,i)>=0) continue;
-			tmpVector.push_back(v[i]);
-		}
-		v=tmpVector;
-	}
-        
-        template<class T>
-	void truncate(PsimagLite::Matrix<T> &A,std::vector<size_t> const &removed,bool rowOption)
-	{
-		size_t j;
-		int x=removed.size();
-		if (x<=0) return;
-		size_t nrow = A.n_row();
-		size_t ncol = A.n_col();
-		
-		size_t n = ncol;
-		if (rowOption)  n = nrow;
-		
-		if (int(n)<=x) {
-			std::cerr<<"psimag::truncate: n="<<n<<" must be larger than x="<<x<<" rowoption="<<rowOption<<"\n";
-			throw std::runtime_error("psimag::truncated\n");
-		}
-		
-		std::vector<int> remap(n);
-		
-		
-		//! find remapping
-		j=0;
-		for (size_t i=0;i<n;i++) {
-			remap[i] = -1;
-			if (PsimagLite::isInVector(removed,i)>=0) continue;
-			remap[i]=j;
-			j++;
-		}
-		if (j!=n-x) throw std::runtime_error("truncate: PsimagLite::Matrix is throwing...\n");
-		
-		//! truncate
-		if (rowOption) {
-			PsimagLite::Matrix<T> B(nrow-x,ncol);
-			for (size_t i=0;i<ncol;i++) {
-				for (j=0;j<nrow;j++) {
-					if (remap[j]<0) continue;
-					B(remap[j],i)=A(j,i);
-				}
-			}
-			A=B; 
-		} else {
-			PsimagLite::Matrix<T> B(nrow,ncol-x);
-			for (size_t i=0;i<nrow;i++) {
-				for (j=0;j<ncol;j++) {
-					if (remap[j]<0) continue;
-					B(i,remap[j])=A(i,j);
-				}
-			}
-			A=B; 
-		}
+	v=tmpVector;
+}
+
+template<class T>
+void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<size_t>::Type& removed,bool rowOption)
+{
+	size_t j;
+	int x=removed.size();
+	if (x<=0) return;
+	size_t nrow = A.n_row();
+	size_t ncol = A.n_col();
+
+	size_t n = ncol;
+	if (rowOption)  n = nrow;
+
+	if (int(n)<=x) {
+		std::cerr<<"psimag::truncate: n="<<n<<" must be larger than x="<<x<<" rowoption="<<rowOption<<"\n";
+		throw std::runtime_error("psimag::truncated\n");
 	}
 
-	template<class T>
-	void truncate(PsimagLite::CrsMatrix<T> &A,std::vector<size_t> const &removed,bool rowOption)
-	{
-		if (rowOption) { // unimplemented
-			assert(false);
-			throw std::runtime_error("truncate: rowoption must not be set\n");
-		}
+	PsimagLite::Vector<int>::Type remap(n);
 
-		size_t x=removed.size();
-		if (x==0) return;
 
-		size_t nrow = A.row();
+	//! find remapping
+	j=0;
+	for (size_t i=0;i<n;i++) {
+		remap[i] = -1;
+		if (PsimagLite::isInVector(removed,i)>=0) continue;
+		remap[i]=j;
+		j++;
+	}
+	if (j!=n-x) throw std::runtime_error("truncate: PsimagLite::Matrix is throwing...\n");
 
-		size_t n = nrow;
-
-		assert(n>x);
-
-		std::vector<int> remap(n);
-
-		//! find remapping
-		size_t j=0;
-		for (size_t i=0;i<n;i++) {
-			remap[i] = -1;
-			if (PsimagLite::isInVector(removed,i)>=0) continue;
-			remap[i]=j;
-			j++;
-		}
-		assert(j==n-x);
-
-		//! truncate
-		PsimagLite::CrsMatrix<T> B(nrow,nrow-x);
-		size_t counter = 0;
-		for (size_t i=0;i<nrow;i++) {
-			B.setRow(i,counter);
-			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-				j = A.getCol(k);
+	//! truncate
+	if (rowOption) {
+		PsimagLite::Matrix<T> B(nrow-x,ncol);
+		for (size_t i=0;i<ncol;i++) {
+			for (j=0;j<nrow;j++) {
 				if (remap[j]<0) continue;
-				B.pushCol(remap[j]);
-				B.pushValue(A.getValue(k));
-				counter++;
-				//B(i,remap[j])=A(i,j);
+				B(remap[j],i)=A(j,i);
 			}
 		}
-		B.setRow(nrow,counter);
-		B.checkValidity();
 		A=B;
+	} else {
+		PsimagLite::Matrix<T> B(nrow,ncol-x);
+		for (size_t i=0;i<nrow;i++) {
+			for (j=0;j<ncol;j++) {
+				if (remap[j]<0) continue;
+				B(i,remap[j])=A(i,j);
+			}
+		}
+		A=B;
+	}
+}
 
+template<class T>
+void truncate(PsimagLite::CrsMatrix<T> &A,const PsimagLite::Vector<size_t>::Type& removed,bool rowOption)
+{
+	if (rowOption) { // unimplemented
+		assert(false);
+		throw std::runtime_error("truncate: rowoption must not be set\n");
 	}
 
-	
+	size_t x=removed.size();
+	if (x==0) return;
+
+	size_t nrow = A.row();
+
+	size_t n = nrow;
+
+	assert(n>x);
+
+	PsimagLite::Vector<int>::Type remap(n);
+
+	//! find remapping
+	size_t j=0;
+	for (size_t i=0;i<n;i++) {
+		remap[i] = -1;
+		if (PsimagLite::isInVector(removed,i)>=0) continue;
+		remap[i]=j;
+		j++;
+	}
+	assert(j==n-x);
+
+	//! truncate
+	PsimagLite::CrsMatrix<T> B(nrow,nrow-x);
+	size_t counter = 0;
+	for (size_t i=0;i<nrow;i++) {
+		B.setRow(i,counter);
+		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+			j = A.getCol(k);
+			if (remap[j]<0) continue;
+			B.pushCol(remap[j]);
+			B.pushValue(A.getValue(k));
+			counter++;
+			//B(i,remap[j])=A(i,j);
+		}
+	}
+	B.setRow(nrow,counter);
+	B.checkValidity();
+	A=B;
+
+}
+
+
 } //namespace utils
 /*@}*/
 #endif

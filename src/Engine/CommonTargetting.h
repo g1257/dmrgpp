@@ -146,17 +146,17 @@ namespace Dmrg {
 		}
 		
 		template<typename IoOutputType>
-		void save(const std::vector<size_t>& block,
+		void save(const typename PsimagLite::Vector<size_t>::Type& block,
 		          IoOutputType& io,
 				  const PostProcType& cf,
-				  const std::vector<VectorWithOffsetType>& targetVectors) const
+				  const typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors) const
 		{
 			DynamicSerializerType dynS(cf,block[0],targetVectors);
 			dynS.save(io);
 		}
 
 		template<typename IoInputType>
-		void load(IoInputType& io,std::vector<VectorWithOffsetType>& targetVectors)
+		void load(IoInputType& io,typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors)
 		{
 			DynamicSerializerType dynS(io,IoInputType::In::LAST_INSTANCE);
 			for (size_t i=0;i<targetVectors.size();i++)
@@ -164,7 +164,7 @@ namespace Dmrg {
 			
 		}
 
-		void checkOrder(size_t i,const std::vector<size_t>& stage) const
+		void checkOrder(size_t i,const typename PsimagLite::Vector<size_t>::Type& stage) const
 		{
 			if (i==0) return;
 			for (size_t j=0;j<i;j++) {
@@ -178,21 +178,21 @@ namespace Dmrg {
 			}
 		}
 
-		bool allStages(size_t x,const std::vector<size_t>& stage) const
+		bool allStages(size_t x,const typename PsimagLite::Vector<size_t>::Type& stage) const
 		{
 			for (size_t i=0;i<stage.size();i++)
 				if (stage[i]!=x) return false;
 			return true;
 		}
 
-		bool noStageIs(size_t x,const std::vector<size_t>& stage) const
+		bool noStageIs(size_t x,const typename PsimagLite::Vector<size_t>::Type& stage) const
 		{
 			for (size_t i=0;i<stage.size();i++)
 				if (stage[i]==x) return false;
 			return true;
 		}
 
-		std::string getStage(size_t i,const std::vector<size_t>& stage) const
+		std::string getStage(size_t i,const typename PsimagLite::Vector<size_t>::Type& stage) const
 		{
 			switch (stage[i]) {
 			case DISABLED:
@@ -211,16 +211,16 @@ namespace Dmrg {
 		void initialGuess(VectorWithOffsetType& v,
 		                  const WaveFunctionTransfType& wft,
 		                  const VectorWithOffsetType& psi,
-		                  const std::vector<size_t>& stage,
-		                  const std::vector<RealType>& weights,
-						  const std::vector<size_t>& block,
-						  const std::vector<VectorWithOffsetType>& targetVectors) const
+		                  const typename PsimagLite::Vector<size_t>::Type& stage,
+		                  const typename PsimagLite::Vector<RealType>::Type& weights,
+						  const typename PsimagLite::Vector<size_t>::Type& block,
+						  const typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors) const
 		{
-			std::vector<size_t> nk;
+			typename PsimagLite::Vector<size_t>::Type nk;
 			setNk(nk,block);
 			wft.setInitialVector(v,psi,lrs_,nk);
 			if (!allStages(CONVERGING,stage)) return;
-			std::vector<VectorWithOffsetType> vv(targetVectors.size());
+			typename PsimagLite::Vector<VectorWithOffsetType>::Type vv(targetVectors.size());
 			for (size_t i=0;i<targetVectors.size();i++) {
 				wft.setInitialVector(vv[i],targetVectors[i],lrs_,nk);
 				if (std::norm(vv[i])<1e-6) continue;
@@ -229,11 +229,11 @@ namespace Dmrg {
 			}
 		}
 
-		void findElectronsOfOneSite(std::vector<size_t>& electrons,size_t site) const
+		void findElectronsOfOneSite(typename PsimagLite::Vector<size_t>::Type& electrons,size_t site) const
 		{
-			std::vector<size_t> block(1,site);
+			typename PsimagLite::Vector<size_t>::Type block(1,site);
 			typename ModelType::HilbertBasisType basis;
-			std::vector<size_t> quantumNumbs;
+			typename PsimagLite::Vector<size_t>::Type quantumNumbs;
 			model_.setNaturalBasis(basis,quantumNumbs,block);
 			model_.findElectrons(electrons,basis,site);
 		}
@@ -255,7 +255,7 @@ namespace Dmrg {
 
 			std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-			std::vector<std::string> vecStr;
+			typename PsimagLite::Vector<std::string>::Type vecStr;
 			PsimagLite::tokenizer(model_.params().insitu,vecStr,",");
 			for (size_t i=0;i<vecStr.size();i++) {
 				const std::string& opLabel = vecStr[i];
@@ -277,13 +277,13 @@ namespace Dmrg {
 							   const VectorWithOffsetType& psi) const
 		{
 			// operators in the one-site basis:
-			std::vector<OperatorType> creationMatrix;
+			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			SparseMatrixType hmatrix;
 			BasisDataType q;
 
 			RealType time = 0;
 			model_.setNaturalBasis(creationMatrix,hmatrix,q,block1,time);
-			std::vector<size_t> electronsOneSite(q.electronsUp.size());
+			typename PsimagLite::Vector<size_t>::Type electronsOneSite(q.electronsUp.size());
 			for (size_t i=0;i<electronsOneSite.size();i++)
 				electronsOneSite[i] = q.electronsUp[i] + q.electronsDown[i];
 
@@ -297,7 +297,7 @@ namespace Dmrg {
 			}
 		}
 
-		void setNk(std::vector<size_t>& nk,const std::vector<size_t>& block) const
+		void setNk(typename PsimagLite::Vector<size_t>::Type& nk,const typename PsimagLite::Vector<size_t>::Type& block) const
 		{
 			for (size_t i=0;i<block.size();i++)
 				nk.push_back(model_.hilbertSize(block[i]));
@@ -312,7 +312,7 @@ namespace Dmrg {
 				  size_t site,
 				  const OperatorType& A) const
 		{
-			std::vector<size_t> electrons;
+			typename PsimagLite::Vector<size_t>::Type electrons;
 			model_.findElectronsOfOneSite(electrons,site);
 			FermionSign fs(lrs_.left(),electrons);
 			VectorWithOffsetType dest;

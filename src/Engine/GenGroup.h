@@ -118,7 +118,7 @@ public:
 
 private:
 
-	std::vector<size_t> istart_;
+	typename PsimagLite::Vector<size_t>::Type istart_;
 }; //GenGroup
 } // namespace PsimagLite
 

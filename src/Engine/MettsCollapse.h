@@ -126,7 +126,7 @@ namespace Dmrg {
 
 		bool operator()(VectorWithOffsetType& c,
 		                const VectorWithOffsetType& eToTheBetaH,
-		                std::vector<size_t>& block,
+		                typename PsimagLite::Vector<size_t>::Type& block,
 		                size_t direction)
 		{
 			assert(direction!=ProgramGlobals::INFINITE);
@@ -135,7 +135,7 @@ namespace Dmrg {
 				setCollapseBasis();
 			internalAction(c,eToTheBetaH,block,direction,false);
 			if (atBorder(direction,block)) {
-				std::vector<size_t> block2;
+				typename PsimagLite::Vector<size_t>::Type block2;
 				setBlockToBorder(block2,block);
 				internalAction(c,eToTheBetaH,block2,direction,true);
 			}
@@ -154,13 +154,13 @@ namespace Dmrg {
 			return true;
 		}
 
-		void setNk(std::vector<size_t>& nk,const std::vector<size_t>& block) const
+		void setNk(typename PsimagLite::Vector<size_t>::Type& nk,const typename PsimagLite::Vector<size_t>::Type& block) const
 		{
 			for (size_t i=0;i<block.size();i++)
 				nk.push_back(mettsStochastics_.hilbertSize(block[i]));
 		}
 
-		size_t volumeOf(const std::vector<size_t>& v) const
+		size_t volumeOf(const typename PsimagLite::Vector<size_t>::Type& v) const
 		{
 			assert(v.size()>0);
 			size_t ret = v[0];
@@ -168,8 +168,8 @@ namespace Dmrg {
 			return ret;
 		}
 
-		size_t volumeOf(const std::vector<size_t>& alphaFixed,
-		                const std::vector<size_t>& nk) const
+		size_t volumeOf(const typename PsimagLite::Vector<size_t>::Type& alphaFixed,
+		                const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			assert(alphaFixed.size()>0);
 			assert(alphaFixed.size()==nk.size());
@@ -183,7 +183,7 @@ namespace Dmrg {
 
 		void internalAction(VectorWithOffsetType& dest2,
 		                    const VectorWithOffsetType& src2,
-		                    const std::vector<size_t>& block,
+		                    const typename PsimagLite::Vector<size_t>::Type& block,
 							size_t direction,
 							bool border) const
 		{
@@ -191,11 +191,11 @@ namespace Dmrg {
 				dest2 =  src2;
 			}
 
-			std::vector<size_t> nk;
+			typename PsimagLite::Vector<size_t>::Type nk;
 			setNk(nk,block);
 			size_t volumeOfNk = volumeOf(nk);
 
-			std::vector<RealType> p(volumeOfNk,0);
+			typename PsimagLite::Vector<RealType>::Type p(volumeOfNk,0);
 			probability(p,dest2,direction,volumeOfNk,border);
 			RealType sum = 0;
 			for (size_t i=0;i<p.size();i++)
@@ -203,7 +203,7 @@ namespace Dmrg {
 			assert(fabs(sum-1.0)<1e-6);
 
 			VectorWithOffsetType dest;
-			std::vector<size_t> indexFixed(block.size());
+			typename PsimagLite::Vector<size_t>::Type indexFixed(block.size());
 			for (size_t i=0;i<block.size();i++)
 				indexFixed[i] = mettsStochastics_.chooseRandomState(p,block[i]);
 
@@ -398,7 +398,7 @@ namespace Dmrg {
 		}
 
 		// p[m] = norm2 of the collapsed_m
-		void probability(std::vector<RealType>& p,
+		void probability(typename PsimagLite::Vector<RealType>::Type& p,
 		                 const VectorWithOffsetType& src,
 		                 size_t direction,
 		                 size_t volumeOfNk,
@@ -482,9 +482,9 @@ namespace Dmrg {
 			m(y,x) = -sin(theta);
 		}
 
-		bool atBorder(size_t direction,const std::vector<size_t>& block) const
+		bool atBorder(size_t direction,const typename PsimagLite::Vector<size_t>::Type& block) const
 		{
-			std::vector<size_t> nk;
+			typename PsimagLite::Vector<size_t>::Type nk;
 			setNk(nk,block);
 			size_t volumeOfNk = volumeOf(nk);
 			bool b1 = (direction==EXPAND_SYSTEM && lrs_.right().size()==volumeOfNk);
@@ -492,7 +492,7 @@ namespace Dmrg {
 			return (b1 || b2);
 		}
 
-		void setBlockToBorder(std::vector<size_t>& block2,const std::vector<size_t>& block) const
+		void setBlockToBorder(typename PsimagLite::Vector<size_t>::Type& block2,const typename PsimagLite::Vector<size_t>::Type& block) const
 		{
 			block2 = block;
 			assert(block.size()>0);
@@ -511,7 +511,7 @@ namespace Dmrg {
 		PsimagLite::ProgressIndicator progress_;
 		size_t prevDirection_;
 		MatrixType collapseBasis_;
-		std::vector<size_t> sitesSeen_;
+		typename PsimagLite::Vector<size_t>::Type sitesSeen_;
 	};  //class MettsCollapse
 } // namespace Dmrg
 /*@}*/

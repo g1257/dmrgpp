@@ -87,12 +87,12 @@ namespace Dmrg {
 		LinkProductStruct(size_t maxSize)
 		: isaved(maxSize),jsaved(maxSize),typesaved(maxSize),
 		  tmpsaved(maxSize),dofssaved(maxSize),termsaved(maxSize) {}
-		std::vector<size_t> isaved,jsaved; //,dof1saved,dof2saved;
-		std::vector<int> typesaved;
-		std::vector<FieldType> tmpsaved;
-		std::vector<size_t> dofssaved,termsaved;
+		typename PsimagLite::Vector<size_t>::Type isaved,jsaved; //,dof1saved,dof2saved;
+		typename PsimagLite::Vector<int>::Type typesaved;
+		typename PsimagLite::Vector<FieldType>::Type tmpsaved;
+		typename PsimagLite::Vector<size_t>::Type dofssaved,termsaved;
 #ifdef NOMUTEX
-		mutable std::vector<std::vector<FieldType> > xtemp;
+		mutable typename PsimagLite::Vector<PsimagLite::Vector<FieldType>::Type::Type > xtemp;
 #endif
 	}; // 
 } // namespace Dmrg

@@ -176,7 +176,7 @@ that knows how to diagonalize a block matrix (i.e. block diagonal matrix).%'
 @o DensityMatrixLocal.h -t
 @{
 		template<typename ConcurrencyType>
-		void diag(std::vector<RealType>& eigs,char jobz,ConcurrencyType& concurrency)
+		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz,ConcurrencyType& concurrency)
 		{
 			diagonalise<DensityMatrixElementType,RealType,ConcurrencyType>(data_,eigs,jobz,concurrency);
 		}

@@ -102,8 +102,8 @@ public:
 		for (size_t j=0;j<ngroup;j++) {
 			size_t j1 = istart(j);
 			size_t j2 = istart(j+1);
-			std::vector<ComplexOrRealType> p(j2-j1,0.0);
-			std::vector<bool> mark(j2-j1,false);
+			typename PsimagLite::Vector<ComplexOrRealType>::Type p(j2-j1,0.0);
+			typename PsimagLite::Vector<bool>::Type mark(j2-j1,false);
 //			if (j1>=j2) continue;
 			for (size_t i=0;i<ngroup;i++) {
 				size_t i1 = istart(i);

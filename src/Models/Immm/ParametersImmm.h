@@ -98,9 +98,9 @@ namespace Dmrg {
 		}
 		
 		// Hubbard U values (one for each site)
-		std::vector<Field> hubbardU; 
+		typename PsimagLite::Vector<Field>::Type hubbardU; 
 		// Onsite potential values, one for each site
-		std::vector<Field> potentialV;
+		typename PsimagLite::Vector<Field>::Type potentialV;
 		// target number of electrons  in the system
 		int nOfElectrons;
 		// target density

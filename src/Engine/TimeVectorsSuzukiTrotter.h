@@ -111,8 +111,8 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixComplexOrRealType;
-	typedef std::vector<ComplexOrRealType> VectorComplexOrRealType;
-	typedef std::vector<RealType> VectorRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef VectorComplexOrRealType TargetVectorType;
 
 public:
@@ -120,12 +120,12 @@ public:
 	TimeVectorsSuzukiTrotter(RealType& currentTime,
 							 const TargettingParamsType& tstStruct,
 							 const VectorRealType& times,
-							 std::vector<VectorWithOffsetType>& targetVectors,
+							 typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
 							 const ModelType& model,
 							 const WaveFunctionTransfType& wft,
 							 const LeftRightSuperType& lrs,
 							 const RealType& E0,
-	                         const std::vector<size_t>* nonZeroQns)
+	                         const PsimagLite::Vector<size_t>::Type* nonZeroQns)
 		: progress_("TimeVectorsSuzukiTrotter",0),
 		  currentTime_(currentTime),
 		  tstStruct_(tstStruct),
@@ -222,7 +222,7 @@ private:
 		size_t nsites = model_.geometry().numberOfSites();
 		assert(nsites>0);
 		for (size_t i=0;i<nsites-1;i++) {
-			std::vector<size_t>::const_iterator it = find(linksSeen_.begin(),linksSeen_.end(),i);
+			PsimagLite::Vector<size_t>::Type::const_iterator it = find(linksSeen_.begin(),linksSeen_.end(),i);
 			if (it == linksSeen_.end()) return false;
 		}
 		return true;
@@ -248,7 +248,7 @@ private:
 		}
 
 		// OK, now that we got the partition number right, let's wft:
-		std::vector<size_t> nk(1,model_.hilbertSize(site));
+		PsimagLite::Vector<size_t>::Type nk(1,model_.hilbertSize(site));
 		wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk); // generalize for su(2)
 		phiNew.collapseSectors();
 		assert(std::norm(phiNew)>1e-6);
@@ -285,7 +285,7 @@ private:
 		// NOTE: result =  exp(iHt) |phi0>
 		size_t ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
-		std::vector<size_t> block(2);
+		PsimagLite::Vector<size_t>::Type block(2);
 
 		size_t lastIndexLeft = lrs_.left().block().size();
 		assert(lastIndexLeft>0);
@@ -337,7 +337,7 @@ private:
 									   const SparseMatrixType& transform,
 									   const SparseMatrixType& transformT) const
 	{
-		std::vector<size_t> iperm;
+		PsimagLite::Vector<size_t>::Type iperm;
 		suzukiTrotterPerm(iperm,block);
 
 		const LeftRightSuperType& oldLrs = lrs_;
@@ -391,7 +391,7 @@ private:
 										const SparseMatrixType& transform,
 										const SparseMatrixType& transformT) const
 	{
-		std::vector<size_t> iperm;
+		PsimagLite::Vector<size_t>::Type iperm;
 		suzukiTrotterPerm(iperm,block);
 
 		const LeftRightSuperType& oldLrs = lrs_;
@@ -436,10 +436,10 @@ private:
 		}
 	}
 
-	void suzukiTrotterPerm(std::vector<size_t>& iperm,const std::vector<size_t>& block) const
+	void suzukiTrotterPerm(PsimagLite::Vector<size_t>::Type& iperm,const PsimagLite::Vector<size_t>::Type& block) const
 	{
 		typename ModelType::HilbertBasisType  basis;
-		std::vector<size_t> q;
+		PsimagLite::Vector<size_t>::Type q;
 		model_.setNaturalBasis(basis,q,block);
 		iperm.resize(basis.size());
 		for (size_t i=0;i<basis.size();i++) {
@@ -474,14 +474,14 @@ private:
 	RealType& currentTime_;
 	const TargettingParamsType& tstStruct_;
 	const VectorRealType& times_;
-	std::vector<VectorWithOffsetType>& targetVectors_;
+	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
 	const RealType& E0_;
-	const std::vector<size_t>* nonZeroQns_;
+	const PsimagLite::Vector<size_t>::Type* nonZeroQns_;
 	bool twoSiteDmrg_;
-	std::vector<size_t> linksSeen_;
+	PsimagLite::Vector<size_t>::Type linksSeen_;
 }; //class TimeVectorsSuzukiTrotter
 } // namespace Dmrg
 /*@}*/

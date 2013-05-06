@@ -104,7 +104,7 @@ class ReflectionOperator {
 			SparseMatrixType;
 	typedef typename LeftRightSuperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef std::vector<ComplexOrRealType> VectorType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
 	typedef ReflectionTransform<RealType,SparseMatrixType> ReflectionTransformType;
 
@@ -139,7 +139,7 @@ public:
 		reflectedRight_=reflectedLeft_;
 	}
 
-	void update(const std::vector<size_t>& sectors)
+	void update(const typename PsimagLite::Vector<size_t>::Type& sectors)
 	{
 		if (!isEnabled_) return;
 //		SparseMatrixType sSuper;
@@ -261,9 +261,9 @@ private:
 //		PackIndicesType pack1(ns);
 //		assert(reflectedLeft_.rank()==ns/n0_);
 //		assert(reflectedRight_.rank()==ns/n0_);
-//		std::vector<int> ptr(total,-1);
-//		std::vector<size_t> index(total,0);
-//		std::vector<ComplexOrRealType> temp(total,0);
+//		typename PsimagLite::Vector<int>::Type ptr(total,-1);
+//		typename PsimagLite::Vector<size_t>::Type index(total,0);
+//		typename PsimagLite::Vector<ComplexOrRealType>::Type temp(total,0);
 
 //		size_t counter = 0;
 //		for (size_t i=0;i<total;i++) {
@@ -287,7 +287,7 @@ private:
 //		s1.checkValidity();
 //	}
 
-//	void transformPartial(SparseMatrixType& s1,const std::vector<RealType>& eigs)
+//	void transformPartial(SparseMatrixType& s1,const typename PsimagLite::Vector<RealType>::Type& eigs)
 //	{
 //		size_t n = s1.rank();
 //		s1.resize(n);
@@ -302,7 +302,7 @@ private:
 //		s1.checkValidity();
 //	}
 
-	void check(const std::vector<size_t>& removedIndices,
+	void check(const typename PsimagLite::Vector<size_t>::Type& removedIndices,
 		   const SparseMatrixType& reflected,
 		   const PsimagLite::Matrix<ComplexOrRealType>& transform1,
 		   const PsimagLite::Matrix<ComplexOrRealType>& transform2)
@@ -316,7 +316,7 @@ private:
 //		printFullMatrix(newreflected,"newreflected",0,eps);
 
 
-		std::vector<size_t> x;
+		typename PsimagLite::Vector<size_t>::Type x;
 		for (size_t ii=0;ii<removedIndices.size();ii++) {
 			size_t i = removedIndices[ii];
 			for (int k=newreflected.getRowPtr(i);k<newreflected.getRowPtr(i+1);k++) {
@@ -326,11 +326,11 @@ private:
 				x.push_back(col);
 			}
 		}
-		Sort<std::vector<size_t> > sort;
-		std::vector<size_t> iperm(x.size());
+		Sort<typename PsimagLite::Vector<size_t>::Type > sort;
+		typename PsimagLite::Vector<size_t>::Type iperm(x.size());
 		sort.sort(x,iperm);
 
-		std::vector<size_t> diffs;
+		typename PsimagLite::Vector<size_t>::Type diffs;
 		getDifferences(diffs,x,removedIndices);
 		for (size_t i=0;i<diffs.size();i++)
 			std::cerr<<"diffs["<<i<<"]="<<diffs[i]<<"\n";
@@ -343,13 +343,13 @@ private:
 
 	}
 
-	void getDifferences(std::vector<size_t>& diffs,
-			    const std::vector<size_t>& x1,
-			    const std::vector<size_t>& x2) const
+	void getDifferences(typename PsimagLite::Vector<size_t>::Type& diffs,
+			    const typename PsimagLite::Vector<size_t>::Type& x1,
+			    const typename PsimagLite::Vector<size_t>::Type& x2) const
 	{
-		std::vector<size_t>::const_iterator it2 = x2.begin();
+		typename PsimagLite::Vector<size_t>::const_iterator::Type it2 = x2.begin();
 		for (size_t i=0;i<x1.size();i++) {
-			std::vector<size_t>::const_iterator it = find(it2,x2.end(),x1[i]);
+			typename PsimagLite::Vector<size_t>::const_iterator::Type it = find(it2,x2.end(),x1[i]);
 			if (it == x2.end()) {
 				diffs.push_back(x1[i]);
 				continue;
@@ -361,7 +361,7 @@ private:
 	void normalize(SparseMatrixType& A) const
 	{
 		size_t n = A.rank();
-		std::vector<ComplexOrRealType> sum(n,0.0);
+		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n,0.0);
 		for (size_t i=0;i<n;i++) {
 			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 				ComplexOrRealType val = A.getValue(k);
@@ -388,9 +388,9 @@ private:
 
 		size_t total = transform1.n_col();
 		newreflected.resize(total);
-		std::vector<int> ptr(total,-1);
-		std::vector<size_t> index(total,0);
-		std::vector<ComplexOrRealType> temp(total,0);
+		typename PsimagLite::Vector<int>::Type ptr(total,-1);
+		typename PsimagLite::Vector<size_t>::Type index(total,0);
+		typename PsimagLite::Vector<ComplexOrRealType>::Type temp(total,0);
 		std::cerr<<"transform1="<<transform1.n_row()<<"x"<<transform1.n_col()<<"\n";
 		std::cerr<<"transform2="<<transform2.n_row()<<"x"<<transform2.n_col()<<"\n";
 
@@ -431,7 +431,7 @@ private:
 		newreflected.checkValidity();
 	}
 
-	void setSsector(SparseMatrixType& sSector,const std::vector<size_t>& sectors) const
+	void setSsector(SparseMatrixType& sSector,const typename PsimagLite::Vector<size_t>::Type& sectors) const
 	{
 		assert(sectors.size()==1);
 		size_t m = sectors[0];
@@ -451,9 +451,9 @@ private:
 		PackIndicesType pack1(ns);
 		assert(reflectedLeft_.rank()==ns/n0_);
 		assert(reflectedRight_.rank()==ns/n0_);
-		std::vector<int> ptr(total,-1);
-		std::vector<size_t> index(total,0);
-		std::vector<ComplexOrRealType> temp(total,0);
+		typename PsimagLite::Vector<int>::Type ptr(total,-1);
+		typename PsimagLite::Vector<size_t>::Type index(total,0);
+		typename PsimagLite::Vector<ComplexOrRealType>::Type temp(total,0);
 
 		for (size_t i=0;i<total;i++) {
 			sSector.setRow(i,counter);
@@ -564,7 +564,7 @@ private:
 //		reflectedFinal.resize(keptstates);
 //		size_t counterl = 0;
 
-//		std::vector<ComplexOrRealType> sum(keptstates,0.0);
+//		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(keptstates,0.0);
 //		for (size_t i=0;i<keptstates;i++) {
 //			reflectedFinal.setRow(i,counterl);
 //			for (int k = reflected.getRowPtr(i); k < reflected.getRowPtr(i+1);k++) {

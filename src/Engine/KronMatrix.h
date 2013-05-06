@@ -105,11 +105,11 @@ public:
 		std::cout<<"KronMatrix: EXPERIMENTAL: preparation done for size="<<initKron.size()<<"\n";
 	}
 
-	void matrixVectorProduct(std::vector<ComplexOrRealType>& vout,
-				 const std::vector<ComplexOrRealType>& vin) const
+	void matrixVectorProduct(typename PsimagLite::Vector<ComplexOrRealType>::Type& vout,
+				 const typename PsimagLite::Vector<ComplexOrRealType>::Type& vin) const
 	{
-		const std::vector<size_t>& permInverse = initKron_.lrs().super().permutationInverse();
-		const std::vector<size_t>& perm = initKron_.lrs().super().permutationVector();
+		const typename PsimagLite::Vector<size_t>::Type& permInverse = initKron_.lrs().super().permutationInverse();
+		const typename PsimagLite::Vector<size_t>::Type& perm = initKron_.lrs().super().permutationVector();
 		const SparseMatrixType& left = initKron_.lrs().left().hamiltonian();
 		const SparseMatrixType& right = initKron_.lrs().right().hamiltonian();
 		size_t nl = left.row();

@@ -111,11 +111,11 @@ namespace Dmrg {
 			typedef typename LeftRightSuperType::BasisWithOperatorsType
 					BasisWithOperatorsType;
 			//typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
-			typedef std::vector<ComplexType> ComplexVectorType;
+			typedef typename PsimagLite::Vector<ComplexType>::Type ComplexVectorType;
 			//typedef std::VectorWithOffset<ComplexType> VectorWithOffsetType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,ComplexVectorType> LanczosSolverType;
-			typedef std::vector<RealType> VectorType;
+			typedef typename PsimagLite::Vector<RealType>::Type VectorType;
 			//typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
@@ -242,7 +242,7 @@ namespace Dmrg {
 			}
 
 			template<typename SomeBasisType>
-			void setGs(const std::vector<TargetVectorType>& v,
+			void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 				   const SomeBasisType& someBasis)
 			{
 				psi_.set(v,someBasis);
@@ -418,15 +418,15 @@ namespace Dmrg {
 				return true;
 			}
 
-			void initialGuess(VectorWithOffsetType& v,const std::vector<size_t>& block) const
+			void initialGuess(VectorWithOffsetType& v,const typename PsimagLite::Vector<size_t>::Type& block) const
 			{
-				std::vector<size_t> nk;
+				typename PsimagLite::Vector<size_t>::Type nk;
 				setNk(nk,block);
 				wft_.setInitialVector(v,psi_,lrs_,nk);
 			}
 
 			template<typename IoOutputType>
-			void save(const std::vector<size_t>& block,IoOutputType& io) const
+			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
 			{
 				std::ostringstream msg;
 				msg<<"Saving state...";
@@ -446,7 +446,7 @@ namespace Dmrg {
 				BlockType X = basisWithOps.block();
 				if (X.size()!=1) return;
 				assert(X[0]==0 || X[0]==lrs_.super().block().size()-1);
-				std::vector<OperatorType> creationMatrix;
+				typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 				SparseMatrixType hmatrix;
 				BasisDataType q;
 				model_.setNaturalBasis(creationMatrix,hmatrix,q,X,currentTime_);
@@ -581,7 +581,7 @@ namespace Dmrg {
 			                VectorWithOffsetType& phiNew,
 			                const VectorWithOffsetType& phiOld,
 			                size_t systemOrEnviron,
-			                const std::vector<size_t>& block)
+			                const typename PsimagLite::Vector<size_t>::Type& block)
 			{
 				if (block.size()!=1) {
 					std::string str(__FILE__);
@@ -589,7 +589,7 @@ namespace Dmrg {
 					str += "computePhi only blocks of one site supported\n";
 					throw std::runtime_error(str.c_str());
 				}
-				std::vector<size_t> nk;
+				typename PsimagLite::Vector<size_t>::Type nk;
 				setNk(nk,block);
 				size_t site = block[0];
 
@@ -599,7 +599,7 @@ namespace Dmrg {
 					std::ostringstream msg;
 					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
-					std::vector<size_t> electrons;
+					typename PsimagLite::Vector<size_t>::Type electrons;
 					model_.findElectronsOfOneSite(electrons,site);
 					FermionSign fs(lrs_.left(),electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
@@ -726,7 +726,7 @@ namespace Dmrg {
 
 			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron,size_t site)
 			{
-				std::vector<size_t> electrons;
+				typename PsimagLite::Vector<size_t>::Type electrons;
 				model_.findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
 				if (allStages(WFT_NOADVANCE)) {
@@ -741,7 +741,7 @@ namespace Dmrg {
 				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,systemOrEnviron);
 			}
 
-			void setNk(std::vector<size_t>& nk,const std::vector<size_t>& block) const
+			void setNk(typename PsimagLite::Vector<size_t>::Type& nk,const typename PsimagLite::Vector<size_t>::Type& block) const
 			{
 				for (size_t i=0;i<block.size();i++)
 					nk.push_back(model_.hilbertSize(block[i]));
@@ -754,7 +754,7 @@ namespace Dmrg {
 				  size_t site,
 				  const OperatorType& A) const
 			{
-				std::vector<size_t> electrons;
+				typename PsimagLite::Vector<size_t>::Type electrons;
 				size_t lastIndex = lrs_.left().block().size();
 				assert(lastIndex>0);
 				lastIndex--;
@@ -780,7 +780,7 @@ namespace Dmrg {
 				std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 			}
 
-			std::vector<size_t> stage_;
+			typename PsimagLite::Vector<size_t>::Type stage_;
 			VectorWithOffsetType psi_;
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
@@ -788,14 +788,14 @@ namespace Dmrg {
 			const WaveFunctionTransfType& wft_;
 			PsimagLite::ProgressIndicator progress_;
 			RealType currentTime_;
-			std::vector<RealType> times_,weight_;
-			std::vector<VectorWithOffsetType> targetVectors_;
+			typename PsimagLite::Vector<RealType>::Type times_,weight_;
+			typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 			RealType gsWeight_;
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
 			RealType E0_;
 			TimeVectorsBaseType* timeVectorsBase_;
-			std::vector<size_t> nonZeroQns_;
+			typename PsimagLite::Vector<size_t>::Type nonZeroQns_;
 
 	};     //class TimeStepTargetting
 

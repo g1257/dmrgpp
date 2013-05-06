@@ -112,12 +112,12 @@ namespace Dmrg {
 		// Do not include here connection parameters
 		// those are handled by the Geometry
 		// Hubbard U values (one for each site)
-		std::vector<Field> hubbardU; 
+		typename PsimagLite::Vector<Field>::Type hubbardU; 
 		// Onsite potential values, one for each site
-		std::vector<Field> potentialV;
+		typename PsimagLite::Vector<Field>::Type potentialV;
 
 		// for time-dependent H:
-		std::vector<Field> potentialT;
+		typename PsimagLite::Vector<Field>::Type potentialT;
 		Field omega;
 
 		// target number of electrons  in the system

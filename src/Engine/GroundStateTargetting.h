@@ -110,7 +110,7 @@ namespace Dmrg {
 
 			typedef typename ModelType::RealType RealType;
 			typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
-			typedef std::vector<RealType> VectorType;
+			typedef typename PsimagLite::Vector<RealType>::Type VectorType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 			typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -165,7 +165,7 @@ namespace Dmrg {
 			}
 
 			template<typename SomeBasisType>
-			void setGs(const std::vector<VectorType>& v,//const std::vector<size_t>& weights,
+			void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<size_t>::Type& weights,
 				   const SomeBasisType& someBasis)
 			{
 				psi_.set(v,someBasis);
@@ -215,15 +215,15 @@ namespace Dmrg {
 			}
 
 			void initialGuess(VectorWithOffsetType& initialVector,
-			                  const std::vector<size_t>& block) const
+			                  const typename PsimagLite::Vector<size_t>::Type& block) const
 			{
-				std::vector<size_t> nk;
+				typename PsimagLite::Vector<size_t>::Type nk;
 				commonTargetting_.setNk(nk,block);
 				waveFunctionTransformation_.setInitialVector(initialVector,psi_,lrs_,nk);
 			}
 
 			template<typename IoOutputType>
-			void save(const std::vector<size_t>& block,IoOutputType& io) const
+			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
 			{
 				std::ostringstream msg;
 				msg<<"Saving state...";

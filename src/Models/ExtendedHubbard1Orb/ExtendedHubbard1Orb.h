@@ -130,7 +130,7 @@ namespace Dmrg {
 
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
+		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 		                     SparseMatrixType &hamiltonian,
 		                     BasisDataType &q,
 				     Block const &block,
@@ -147,7 +147,7 @@ namespace Dmrg {
 		}
 
 		//! set creation matrices for sites in block
-		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,
+		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 		                         Block const &block) const
 		{
 			modelHubbard_.setOperatorMatrices(creationMatrix,block);
@@ -162,7 +162,7 @@ namespace Dmrg {
 			Block block;
 			block.resize(1);
 			block[0]=site;
-			std::vector<OperatorType> creationMatrix;
+			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 
 			if (what=="n") {
@@ -175,8 +175,8 @@ namespace Dmrg {
 		}
 
 		//! find total number of electrons for each state in the basis
-		void findElectrons(std::vector<size_t> &electrons,
-				   const std::vector<HilbertState>& basis,
+		void findElectrons(typename PsimagLite::Vector<size_t> ::Type&electrons,
+				   const typename PsimagLite::Vector<HilbertState>::Type& basis,
 		                   size_t site) const
 		{
 			modelHubbard_.findElectrons(electrons,basis,site);
@@ -185,8 +185,8 @@ namespace Dmrg {
 		//! find all states in the natural basis for a block of n sites
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 		void setNaturalBasis(HilbertBasisType  &basis,
-		                     std::vector<size_t>& q,
-		                     const std::vector<size_t>& block) const
+		                     typename PsimagLite::Vector<size_t>::Type& q,
+		                     const typename PsimagLite::Vector<size_t>::Type& block) const
 		{
 			modelHubbard_.setNaturalBasis(basis,q,block);
 		}
@@ -203,7 +203,7 @@ namespace Dmrg {
 
 		//! Find n_i in the natural basis natBasis
 		SparseMatrixType findOperatorMatrices(int i,
-		                                      std::vector<HilbertState> const &natBasis) const
+		                                      const typename PsimagLite::Vector<HilbertState>::Type& natBasis) const
 		{
 
 			size_t n = natBasis.size();
@@ -224,7 +224,7 @@ namespace Dmrg {
 
 		//! Full hamiltonian from creation matrices cm
 		void addNiNj(SparseMatrixType &hmatrix,
-		             std::vector<OperatorType> const &cm,
+		             const typename PsimagLite::Vector<OperatorType>::Type& cm,
 		             Block const &block) const
 		{
 			//Assume block.size()==1 and then problem solved!! there are no connection if there's only one site ;-)
@@ -234,12 +234,12 @@ namespace Dmrg {
 // 					addNiNj(hmatrix,cm,block,sigma,sigma2);
 		}
 
-		void setNi(std::vector<OperatorType> &creationMatrix,
+		void setNi(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 		           Block const &block) const
 		{
 			assert(block.size()==1);
-			std::vector<HilbertState> natBasis;
-			std::vector<size_t> q;
+			typename PsimagLite::Vector<HilbertState>::Type natBasis;
+			typename PsimagLite::Vector<size_t>::Type q;
 			modelHubbard_.setNaturalBasis(natBasis,q,block);
 
 			SparseMatrixType tmpMatrix = findOperatorMatrices(0,natBasis);

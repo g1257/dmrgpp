@@ -90,18 +90,18 @@ namespace Dmrg {
 	template<typename RealType,typename MatrixType>
 	class	ConjugateGradient {
 		typedef typename MatrixType::value_type FieldType;
-		typedef std::vector<FieldType> VectorType;
+		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 	public:
 		ConjugateGradient(size_t max=1000,const RealType& eps = 1e-6)
 		: max_(max), eps_(eps) {}
 
 		//! A and b, the result x, and also the initial solution x0
-		void operator()(std::vector<VectorType>& x,
+		void operator()(typename PsimagLite::Vector<VectorType>::Type& x,
 		                  const MatrixType& A,
-		                  const std::vector<FieldType>& b) const
+		                  const typename PsimagLite::Vector<FieldType>::Type& b) const
 		{
 			VectorType v = multiply(A,x[0]);
-			std::vector<VectorType> r,p;
+			typename PsimagLite::Vector<VectorType>::Type r,p;
 			r.push_back(b);
 			p.push_back(b);
 			for (size_t i=0;i<r[0].size();i++) {
@@ -109,7 +109,7 @@ namespace Dmrg {
 				p[0][i] = r[0][i];
 			}
 			size_t k = 0;
-			std::vector<FieldType> alpha,beta;
+			typename PsimagLite::Vector<FieldType>::Type alpha,beta;
 			while(k<max_) {
 				FieldType val = scalarProduct(r[k],r[k])/
 				           scalarProduct(p[k],multiply(A,p[k]));

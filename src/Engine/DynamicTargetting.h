@@ -187,7 +187,7 @@ namespace Dmrg {
 		}
 
 		template<typename SomeBasisType>
-		void setGs(const std::vector<TargetVectorType>& v,
+		void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 		           const SomeBasisType& someBasis)
 		{
 			psi_.set(v,someBasis);
@@ -281,9 +281,9 @@ namespace Dmrg {
 			}
 		}
 
-		void initialGuess(VectorWithOffsetType& v,const std::vector<size_t>& block) const
+		void initialGuess(VectorWithOffsetType& v,const typename PsimagLite::Vector<size_t>::Type& block) const
 		{
-			std::vector<size_t> nk;
+			typename PsimagLite::Vector<size_t>::Type nk;
 			commonTargetting_.setNk(nk,block);
 			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,nk,targetVectors_);
 		}
@@ -291,7 +291,7 @@ namespace Dmrg {
 		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
 
 		template<typename IoOutputType>
-		void save(const std::vector<size_t>& block,
+		void save(const typename PsimagLite::Vector<size_t>::Type& block,
 		          IoOutputType& io) const
 		{
 			assert(block.size()==1);
@@ -388,7 +388,7 @@ namespace Dmrg {
 				std::ostringstream msg;
 				msg<<"I'm applying a local operator now";
 				progress_.printline(msg,std::cout);
-				std::vector<size_t> electrons;
+				typename PsimagLite::Vector<size_t>::Type electrons;
 				commonTargetting_.findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
 				applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],
@@ -411,7 +411,7 @@ namespace Dmrg {
 				phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
-				std::vector<size_t> nk(1, model_.hilbertSize(site));
+				typename PsimagLite::Vector<size_t>::Type nk(1, model_.hilbertSize(site));
 				wft_.setInitialVector(phiNew,targetVectors_[0],lrs_,nk);
 				phiNew.collapseSectors();
 
@@ -421,7 +421,7 @@ namespace Dmrg {
 		}
 
 		void calcLanczosVectors(RealType& gsWeight,
-		                        std::vector<RealType>& weights,
+		                        typename PsimagLite::Vector<RealType>::Type& weights,
 		                        const VectorWithOffsetType& phi,
 		                        size_t systemOrEnviron)
 		{
@@ -532,7 +532,7 @@ namespace Dmrg {
 			return sum;
 		}
 
-		std::vector<size_t> stage_;
+		typename PsimagLite::Vector<size_t>::Type stage_;
 		VectorWithOffsetType psi_;
 		const LeftRightSuperType& lrs_;
 		const ModelType& model_;
@@ -541,10 +541,10 @@ namespace Dmrg {
 		PsimagLite::ProgressIndicator progress_;
 		ApplyOperatorType applyOpLocal_;
 		RealType gsWeight_;
-		std::vector<VectorWithOffsetType> targetVectors_;
+		typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 		CommonTargettingType commonTargetting_;
 		ParametersForSolverType paramsForSolver_;
-		std::vector<RealType> weight_;
+		typename PsimagLite::Vector<RealType>::Type weight_;
 		TridiagonalMatrixType ab_;
 		RealType Eg_;
 		RealType weightForContinuedFraction_;

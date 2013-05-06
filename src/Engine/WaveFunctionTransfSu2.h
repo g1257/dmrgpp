@@ -103,7 +103,7 @@ namespace Dmrg {
 			SparseMatrixType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef std::vector<SparseElementType> VectorType;
+		typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef typename BasisType::FactorsType FactorsType;
 		typedef typename DmrgWaveStructType::LeftRightSuperType
@@ -133,7 +133,7 @@ namespace Dmrg {
 		virtual void transformVector(VectorWithOffsetType& psiDest,
 					     const VectorWithOffsetType& psiSrc,
 					     const LeftRightSuperType& lrs,
-					     const std::vector<size_t>& nk) const
+					     const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			if (stage_==EXPAND_ENVIRON)
 				transformVector1Su2(psiDest,psiSrc,lrs,nk);
@@ -147,7 +147,7 @@ namespace Dmrg {
 		void transformVector1Su2(SomeVectorType& psiDest,
 					 const SomeVectorType& psiSrc,
 					 const LeftRightSuperType& lrs,
-					 const std::vector<size_t>& nk) const
+					 const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			assert((size_t)dmrgWaveStruct_.lrs.super().getFactors().row()==psiSrc.size());
 
@@ -165,7 +165,7 @@ namespace Dmrg {
 					 const LeftRightSuperType& lrs,
 					 size_t start,
 					 size_t final,
-					 const std::vector<size_t>& nk) const
+					 const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			const FactorsType& factorsSE = lrs.super().getFactors();
@@ -206,7 +206,7 @@ namespace Dmrg {
 						       const FactorsType& factorsSE,
 						       const SparseMatrixType& ws,
 						       const SparseMatrixType& weT,
-						       const std::vector<size_t>& nk) const
+						       const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t ni=dmrgWaveStruct_.ws.col();
@@ -237,7 +237,7 @@ namespace Dmrg {
 		void transformVector2Su2(SomeVectorType& psiDest,
 					 const SomeVectorType& psiSrc,
 					 const LeftRightSuperType& lrs,
-					 const std::vector<size_t>& nk) const
+					 const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
 
@@ -255,7 +255,7 @@ namespace Dmrg {
 					 const LeftRightSuperType& lrs,
 					 size_t start,
 					 size_t final,
-					 const std::vector<size_t>& nk) const
+					 const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.left().getFactors().row()/volumeOfNk;
@@ -316,7 +316,7 @@ namespace Dmrg {
 					       size_t jp,
 					       const SparseMatrixType& wsT,
 					       const SparseMatrixType& we,
-					       const std::vector<size_t>& nk) const
+					       const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t nalpha=wsT.row(); //dmrgWaveStruct_.lrs.left().getFactors().rank();
 			assert(nalpha>0);

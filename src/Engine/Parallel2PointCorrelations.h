@@ -96,7 +96,7 @@ public:
 
 	Parallel2PointCorrelations(MatrixType& w,
 							   TwoPointCorrelationsType& twopoint,
-							   const std::vector<PairType>& pairs,
+							   const typename PsimagLite::Vector<PairType>::Type& pairs,
 							   const MatrixType& O1,
 							   const MatrixType& O2,
 							   int fermionicSign)
@@ -125,7 +125,7 @@ private:
 
 	MatrixType& w_;
 	TwoPointCorrelationsType& twopoint_;
-	const std::vector<PairType>& pairs_;
+	const typename PsimagLite::Vector<PairType>::Type& pairs_;
 	const MatrixType& O1_;
 	const MatrixType& O2_;
 	int fermionicSign_;

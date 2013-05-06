@@ -383,11 +383,11 @@ namespace Dmrg {
 		}
 
 		IoInputType& io_;
-		std::vector<DmrgSerializerType*> dSerializerV_;
-		std::vector<TimeSerializerType> timeSerializerV_;
-		std::vector<size_t> currentPos_; // it's a vector: one per pthread
+		typename PsimagLite::Vector<DmrgSerializerType*>::Type dSerializerV_;
+		typename PsimagLite::Vector<TimeSerializerType>::Type timeSerializerV_;
+		typename PsimagLite::Vector<size_t>::Type currentPos_; // it's a vector: one per pthread
 		bool verbose_;
-		std::vector<size_t> bracket_;
+		typename PsimagLite::Vector<size_t>::Type bracket_;
 		bool noMoreData_;
 	};  //ObserverHelper
 

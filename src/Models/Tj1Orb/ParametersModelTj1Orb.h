@@ -94,7 +94,7 @@ namespace Dmrg {
 		// Do not include here connection parameters
 
 		// potential V, size=twice the number of sites: for spin up and then for spin down
-		std::vector<Field> potentialV;
+		typename PsimagLite::Vector<Field>::Type potentialV;
 
 		// target number of electrons  in the system
 		int nOfElectrons;

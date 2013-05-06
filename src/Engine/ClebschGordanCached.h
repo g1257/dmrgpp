@@ -189,7 +189,7 @@ namespace Dmrg {
 			int UNDEFINED_VALUE;
 			size_t jmax_;
 			size_t max2_,max22_;
-			std::vector<FieldType> data_;
+			typename PsimagLite::Vector<FieldType>::Type data_;
 			ClebschGordanType cgObject_;
 	}; // class ClebschGordanCached
 	

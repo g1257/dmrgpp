@@ -284,7 +284,7 @@ namespace Dmrg {
 			{
 				SparseMatrixType hmatrix;
 				BasisDataType q;
-				std::vector<OperatorType> creationMatrix;
+				typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 				model.setNaturalBasis(creationMatrix,hmatrix,q,X,time);
 				BasisWithOperatorsType Xbasis("Xbasis");
 

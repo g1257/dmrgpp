@@ -88,10 +88,10 @@ namespace Dmrg {
 	template<typename PairType>
 	struct BasisData {
 		
-		std::vector<size_t> electronsUp;
-		std::vector<size_t> electronsDown;
-		std::vector<PairType> jmValues;
-		std::vector<size_t> flavors; 
+		typename PsimagLite::Vector<size_t>::Type electronsUp;
+		typename PsimagLite::Vector<size_t>::Type electronsDown;
+		typename PsimagLite::Vector<PairType>::Type jmValues;
+		typename PsimagLite::Vector<size_t>::Type flavors; 
 		
 	}; // struct BasisData
 	

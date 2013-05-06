@@ -137,7 +137,7 @@ namespace Dmrg {
 		{
 			typedef std::pair<size_t,size_t> PairType;
 
-			std::vector<PairType> pairs;
+			typename PsimagLite::Vector<PairType>::Type pairs;
 			for (size_t i=0;i<rows;i++) {
 				for (size_t j=i;j<cols;j++) {
 					if (i>j) continue;
@@ -271,7 +271,7 @@ namespace Dmrg {
 				size_t s,
 						   size_t threadId)
 		{
-			std::vector<int> signs;
+			typename PsimagLite::Vector<int>::Type signs;
 			// from 0 --> i
 			int nt=i-1;
 			if (nt<0) nt=0;

@@ -94,14 +94,14 @@ namespace Dmrg {
 	public:
 		typedef FieldType value_type;
 		typedef std::pair<size_t,size_t> PairType;
-		typedef std::vector<FieldType> VectorType;
+		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 			
 		VectorWithOffsets() 
 		: progress_("VectorWithOffsets",0),size_(0),index2Sector_(0)
 		{ }
 			
 		template<typename SomeBasisType>
-		VectorWithOffsets(const std::vector<size_t>& weights,
+		VectorWithOffsets(const typename PsimagLite::Vector<size_t>::Type& weights,
 		                  const SomeBasisType& someBasis)
 		: progress_("VectorWithOffsets",0),
 		  size_(someBasis.size()),
@@ -131,7 +131,7 @@ namespace Dmrg {
 		}
 
 		template<typename SomeBasisType>
-		void set(const std::vector<VectorType>& v,//const std::vector<size_t>& weights,
+		void set(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<size_t>::Type& weights,
 		         const SomeBasisType& someBasis)
 		{
 			size_ = someBasis.size();
@@ -177,7 +177,7 @@ namespace Dmrg {
 		}
 
 		template<typename SomeBasisType>
-		void populateFromQns(const std::vector<size_t>& qns,
+		void populateFromQns(const typename PsimagLite::Vector<size_t>::Type& qns,
 		                     const SomeBasisType& someBasis)
 		{
 			size_t np = someBasis.partition()-1;
@@ -486,7 +486,7 @@ namespace Dmrg {
 		}
 
 		template<typename SomeBasisType>
-		void findPartitions(std::vector<size_t>& p,const VectorType& v,const SomeBasisType& someBasis)
+		void findPartitions(typename PsimagLite::Vector<size_t>::Type& p,const VectorType& v,const SomeBasisType& someBasis)
 		{
 			bool found = false;
 			p.clear();
@@ -542,10 +542,10 @@ namespace Dmrg {
 
 		PsimagLite::ProgressIndicator progress_;
 		size_t size_;
-		std::vector<int> index2Sector_;
-		std::vector<VectorType> data_;
-		std::vector<size_t> offsets_;
-		std::vector<size_t> nonzeroSectors_;
+		typename PsimagLite::Vector<int>::Type index2Sector_;
+		typename PsimagLite::Vector<VectorType>::Type data_;
+		typename PsimagLite::Vector<size_t>::Type offsets_;
+		typename PsimagLite::Vector<size_t>::Type nonzeroSectors_;
 	}; // class VectorWithOffset
 
 // 	template<typename FieldType>

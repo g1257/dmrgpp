@@ -109,7 +109,7 @@ namespace Dmrg {
 			}
 
 			static void setToProduct(const SymmetryRelatedType* symm1,const SymmetryRelatedType* symm2,
-						const std::vector<size_t>& ne1,const std::vector<size_t>& ne2)
+						const PsimagLite::Vector<size_t>::Type& ne1,const PsimagLite::Vector<size_t>::Type& ne2)
 			{
 				symm1_=symm1;
 				symm2_=symm2;
@@ -137,8 +137,8 @@ namespace Dmrg {
 			size_t createFactors(SparseMatrixType& factors,size_t offset)
 			{
 				flavors_.clear();
-				std::vector<size_t> perm(indices_.size());
-				Sort<std::vector<size_t> > sort;
+				PsimagLite::Vector<size_t>::Type perm(indices_.size());
+				PsimagLite::Sort<PsimagLite::Vector<size_t>::Type > sort;
 				sort.sort(flavorIndices_,perm);
 				size_t flavorSaved=flavorIndices_[0];
 				flavors_.push_back(flavorIndices_[0]);
@@ -233,12 +233,12 @@ namespace Dmrg {
 			size_t nelectrons_;
 			int heavy_;
 			ClebschGordanType* cgObject_;
-			std::vector<size_t> indices_;
-			std::vector<FieldType> cg_,values_;
-			std::vector<size_t> flavors_,flavorIndices_;
+			PsimagLite::Vector<size_t>::Type indices_;
+			typename PsimagLite::Vector<FieldType>::Type cg_,values_;
+			typename PsimagLite::Vector<size_t>::Type flavors_,flavorIndices_;
 			
-			static const std::vector<size_t>* ne1_;
-			static const std::vector<size_t>* ne2_;
+			static const PsimagLite::Vector<size_t>::Type* ne1_;
+			static const PsimagLite::Vector<size_t>::Type* ne2_;
 			static const SymmetryRelatedType* symm1_;
 			static const SymmetryRelatedType* symm2_;
 			static size_t flavorsMaxPerSite__,numberOfSites__,electronsMaxPerSite__,jMaxPerSite__;
@@ -285,10 +285,10 @@ namespace Dmrg {
 	const SymmetryRelatedType* JmSubspace<FieldType,SparseMatrixType,SymmetryRelatedType>::symm2_=0;
 
 	template<typename FieldType,typename SparseMatrixType,typename SymmetryRelatedType>
-	const std::vector<size_t>* JmSubspace<FieldType,SparseMatrixType,SymmetryRelatedType>::ne1_=0;
+	const PsimagLite::Vector<size_t>::Type* JmSubspace<FieldType,SparseMatrixType,SymmetryRelatedType>::ne1_=0;
 
 	template<typename FieldType,typename SparseMatrixType,typename SymmetryRelatedType>
-	const std::vector<size_t>* JmSubspace<FieldType,SparseMatrixType,SymmetryRelatedType>::ne2_=0;
+	const PsimagLite::Vector<size_t>::Type* JmSubspace<FieldType,SparseMatrixType,SymmetryRelatedType>::ne2_=0;
 
 } // namespace Dmrg
 

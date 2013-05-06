@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -90,20 +87,20 @@ namespace Dmrg {
 		typedef PsimagLite::PackIndices PackIndicesType;
 
 	public:
-		FermionSign(const std::vector<size_t>& electrons)
+		FermionSign(const PsimagLite::Vector<size_t>::Type& electrons)
 		: signs_(electrons.size())
 		{
 			init(electrons);
 		}
 
 		template<typename SomeBasisType>
-		FermionSign(const SomeBasisType& basis,const std::vector<size_t>& electrons)
+		FermionSign(const SomeBasisType& basis,const typename PsimagLite::Vector<size_t>::Type& electrons)
 		{
 
-			const std::vector<size_t>& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
+			const typename PsimagLite::Vector<size_t>::Type& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
 			if (basisElectrons.size()!=basis.permutationInverse().size()) throw std::runtime_error("Problem\n");
 			size_t nx = basisElectrons.size()/electrons.size();
-			std::vector<size_t> el(nx);
+			typename PsimagLite::Vector<size_t>::Type el(nx);
 			PackIndicesType pack(nx);
 			for (size_t x=0;x<basisElectrons.size();x++) {
 				size_t x0,x1;
@@ -139,14 +136,14 @@ namespace Dmrg {
 
 	private:
 
-		void init(const std::vector<size_t>& electrons)
+		void init(const PsimagLite::Vector<size_t>::Type& electrons)
 		{
 			signs_.resize(electrons.size());
 			for (size_t i=0;i<signs_.size();i++)
 				signs_[i] = (electrons[i] & 1);
 		}
 
-		std::vector<bool> signs_;
+		PsimagLite::Vector<bool>::Type signs_;
 	}; // class FermionSign
 } // namespace Dmrg 
 

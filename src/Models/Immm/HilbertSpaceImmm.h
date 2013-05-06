@@ -107,7 +107,7 @@ namespace Dmrg {
 		static const size_t NUMBER_OF_SPINS = 2;
 		enum {SPIN_UP=0,SPIN_DOWN=1};
 
-		HilbertSpaceImmm(const std::vector<size_t>& degreesOfFreedom)
+		HilbertSpaceImmm(const typename PsimagLite::Vector<size_t>::Type& degreesOfFreedom)
 		: degreesOfFreedom_(degreesOfFreedom)
 		{}
 
@@ -230,7 +230,7 @@ namespace Dmrg {
 			return k;*/
 		}
 
-		const std::vector<size_t>& degreesOfFreedom_;
+		const typename PsimagLite::Vector<size_t>::Type& degreesOfFreedom_;
 	}; // class HilbertSpaceImmm
 } // namespace Dmrg
 

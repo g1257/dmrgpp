@@ -100,7 +100,7 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef std::vector<SparseElementType> VectorType;
+		typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef typename BasisType::FactorsType FactorsType;
 		typedef typename DmrgWaveStructType::LeftRightSuperType
@@ -131,7 +131,7 @@ namespace Dmrg {
 		virtual void transformVector(VectorWithOffsetType& psiDest,
 		                             const VectorWithOffsetType& psiSrc,
 		                             const LeftRightSuperType& lrs,
-		                             const std::vector<size_t>& nk) const
+		                             const typename PsimagLite::Vector<size_t>::Type& nk) const
 
 		{
 			if (stage_==EXPAND_ENVIRON) {
@@ -158,7 +158,7 @@ namespace Dmrg {
 		void transformVector1(SomeVectorType& psiDest,
 		                      const SomeVectorType& psiSrc,
 		                      const LeftRightSuperType& lrs,
-							  const std::vector<size_t>& nk) const
+							  const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			if (twoSiteDmrg_)
 				return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
@@ -174,7 +174,7 @@ namespace Dmrg {
 		                      const SomeVectorType& psiSrc,
 		                      const LeftRightSuperType& lrs,
 		                      size_t i0,
-		                      const std::vector<size_t>& nk) const
+		                      const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.super().permutationInverse().size()/
@@ -209,7 +209,7 @@ namespace Dmrg {
 				size_t jp,
 				const SparseMatrixType& ws,
 				const SparseMatrixType& weT,
-				const std::vector<size_t>& nk) const
+				const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t ni=dmrgWaveStruct_.ws.col();
@@ -234,7 +234,7 @@ namespace Dmrg {
 		void transformVector1FromInfinite(SomeVectorType& psiDest,
 										  const SomeVectorType& psiSrc,
 										  const LeftRightSuperType& lrs,
-										  const std::vector<size_t>& nk) const
+										  const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -247,7 +247,7 @@ namespace Dmrg {
 										  const SomeVectorType& psiSrc,
 										  const LeftRightSuperType& lrs,
 										  size_t i0,
-										  const std::vector<size_t>& nk) const
+										  const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.super().permutationInverse().size()/
@@ -282,7 +282,7 @@ namespace Dmrg {
 												  size_t jp,
 												  const SparseMatrixType& ws,
 												  const SparseMatrixType& weT,
-												  const std::vector<size_t>& nk) const
+												  const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t ni=dmrgWaveStruct_.lrs.left().size(); //dmrgWaveStruct_.ws.col();
@@ -310,7 +310,7 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				const std::vector<size_t>& nk) const
+				const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			if (twoSiteDmrg_)
 				return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
@@ -326,7 +326,7 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,size_t i0,
-				const std::vector<size_t>& nk) const
+				const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.left().permutationInverse().size()/volumeOfNk;
@@ -361,7 +361,7 @@ namespace Dmrg {
 				size_t jp,
 				const SparseMatrixType& wsT,
 				const SparseMatrixType& we,
-				const std::vector<size_t>& nk) const
+				const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			assert(nalpha==wsT.col());
@@ -388,7 +388,7 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				const std::vector<size_t>& nk) const
+				const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -403,7 +403,7 @@ namespace Dmrg {
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
 				size_t i0,
-				const std::vector<size_t>& nk) const
+				const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.left().permutationInverse().size()/volumeOfNk;
@@ -440,7 +440,7 @@ namespace Dmrg {
 				size_t jen,
 				const SparseMatrixType& wsT,
 				const SparseMatrixType& we,
-				const std::vector<size_t>& nk) const
+				const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			SparseElementType sum=0;
@@ -469,7 +469,7 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				const std::vector<size_t>& nk) const
+				const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -483,7 +483,7 @@ namespace Dmrg {
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
 				size_t i0,
-				const std::vector<size_t>& nk) const
+				const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.super().permutationInverse().size()/lrs.right().permutationInverse().size();
@@ -521,7 +521,7 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				const std::vector<size_t>& nk) const
+				const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			for (size_t ii=0;ii<psiDest.sectors();ii++) {
 				size_t i0 = psiDest.sector(ii);
@@ -536,7 +536,7 @@ namespace Dmrg {
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
 				size_t i0,
-				const std::vector<size_t>& nk) const
+				const typename PsimagLite::Vector<size_t>::Type& nk) const
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.left().permutationInverse().size()/volumeOfNk;

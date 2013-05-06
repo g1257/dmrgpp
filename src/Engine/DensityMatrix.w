@@ -239,7 +239,7 @@ it's some other class's problem.%'
 @o DensityMatrix.h -t
 @{
 		template<typename ConcurrencyType>
-		void diag(std::vector<RealType>& eigs,char jobz,
+		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz,
 				ConcurrencyType& concurrency)
 		{
 			if (!DmrgBasisType::useSu2Symmetry()) {

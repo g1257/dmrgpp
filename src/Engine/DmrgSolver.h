@@ -191,7 +191,7 @@ namespace Dmrg {
 
 			io_.print("MODEL",model_);
 			BlockType S,E;
-			std::vector<BlockType> X,Y;
+			typename PsimagLite::Vector<BlockType>::Type X,Y;
 			geometry.split(parameters_.sitesPerBlock,S,X,Y,E);
 			for (size_t i=0;i<X.size();i++) 
 				sitesIndices_.push_back(X[i]);
@@ -209,7 +209,7 @@ namespace Dmrg {
 			if (checkpoint_()) {	
 				checkpoint_.load(pS,pE,psi);
 			} else { // move this block elsewhere:
-				std::vector<OperatorType> creationMatrix;
+				typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 				SparseMatrixType hmatrix;
 				BasisDataType q;
 
@@ -273,8 +273,8 @@ namespace Dmrg {
 		*/
 		void infiniteDmrgLoop(
 				BlockType const &S,
-				std::vector<BlockType> const &X,
-				std::vector<BlockType> const &Y,
+				const typename PsimagLite::Vector<BlockType>::Type& X,
+				const typename PsimagLite::Vector<BlockType>::Type& Y,
 				BlockType const &E,
 				MyBasisWithOperators &pS,
 				MyBasisWithOperators &pE,
@@ -342,7 +342,7 @@ namespace Dmrg {
 			// all right, now we can get the actual site to add:
 
 			size_t sitesPerBlock = parameters_.sitesPerBlock;
-			std::vector<size_t> siteToAdd(sitesPerBlock);
+			typename PsimagLite::Vector<size_t>::Type siteToAdd(sitesPerBlock);
 			// left-most site of pE
 			for (size_t j=0;j<siteToAdd.size();j++)
 				siteToAdd[j] = pE.block()[j];
@@ -461,10 +461,10 @@ namespace Dmrg {
 						size_t saveOption)
 		{
 			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=std::string::npos);
-			const std::vector<size_t>& eS = pS.electronsVector();
+			const typename PsimagLite::Vector<size_t>::Type& eS = pS.electronsVector();
 			FermionSignType fsS(eS);
 
-			const std::vector<size_t>& eE = pS.electronsVector();
+			const typename PsimagLite::Vector<size_t>::Type& eE = pS.electronsVector();
 			FermionSignType fsE(eE);
 
 			truncate_(pS,pE,target,keptStates,direction);
@@ -523,7 +523,7 @@ namespace Dmrg {
 		void updateQuantumSector(size_t sites,size_t direction,size_t step)
 		{
 			if (direction==INFINITE && parameters_.adjustQuantumNumbers.size()>0) {
-				std::vector<size_t> targetQuantumNumbers(2,0);
+				typename PsimagLite::Vector<size_t>::Type targetQuantumNumbers(2,0);
 				assert(step<parameters_.adjustQuantumNumbers.size());
 				targetQuantumNumbers[0]=parameters_.adjustQuantumNumbers[step];
 				targetQuantumNumbers[1]=parameters_.adjustQuantumNumbers[step];
@@ -540,7 +540,7 @@ namespace Dmrg {
 
 		void updateQuantumSectorT(size_t sites,size_t direction)
 		{
-			std::vector<size_t> targetQuantumNumbers(parameters_.targetQuantumNumbers.size());
+			typename PsimagLite::Vector<size_t>::Type targetQuantumNumbers(parameters_.targetQuantumNumbers.size());
 			for (size_t ii=0;ii<targetQuantumNumbers.size();ii++) 
 				targetQuantumNumbers[ii]=size_t(round(parameters_.targetQuantumNumbers[ii]*sites));
 			if (MyBasis::useSu2Symmetry()) {
@@ -557,7 +557,7 @@ namespace Dmrg {
 		void updateQuantumSectorUd(size_t sites,size_t direction)
 		{
 			assert(!MyBasis::useSu2Symmetry());
-			std::vector<size_t> targetQuantumNumbers(2);
+			typename PsimagLite::Vector<size_t>::Type targetQuantumNumbers(2);
 
 			if (direction==INFINITE) {
 				size_t totalSites = model_.geometry().numberOfSites();
@@ -571,7 +571,7 @@ namespace Dmrg {
 			setQuantumSector(targetQuantumNumbers,direction);
 		}
 
-		void setQuantumSector(const std::vector<size_t>& targetQuantumNumbers,size_t direction)
+		void setQuantumSector(const typename PsimagLite::Vector<size_t>::Type& targetQuantumNumbers,size_t direction)
 		{
 			std::ostringstream msg;
 			msg<<"Integer target quantum numbers are: ";
@@ -609,7 +609,7 @@ namespace Dmrg {
 		int stepCurrent_;
 		CheckpointType checkpoint_;
 		WaveFunctionTransfType wft_;
-		std::vector<BlockType> sitesIndices_;
+		typename PsimagLite::Vector<BlockType>::Type sitesIndices_;
 		ReflectionSymmetryType reflectionOperator_;
 		DiagonalizationType diagonalization_;
 		TruncationType truncate_;

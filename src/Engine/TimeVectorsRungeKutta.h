@@ -118,8 +118,8 @@ class TimeVectorsRungeKutta : public  TimeVectorsBase<
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixComplexOrRealType;
-	typedef std::vector<ComplexOrRealType> VectorComplexOrRealType;
-	typedef std::vector<RealType> VectorRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef VectorComplexOrRealType TargetVectorType;
 
 public:
@@ -127,7 +127,7 @@ public:
 	TimeVectorsRungeKutta(RealType& currentTime,
 						  const TargettingParamsType& tstStruct,
 						  const VectorRealType& times,
-						  std::vector<VectorWithOffsetType>& targetVectors,
+						  typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
 						  const ModelType& model,
 						  const WaveFunctionTransfType& wft,
 						  const LeftRightSuperType& lrs,
@@ -218,7 +218,7 @@ private:
 		RealType epsForRK = tstStruct_.tau/(times_.size()-1.0);
 		PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType> rungeKutta(f,epsForRK);
 
-		std::vector<TargetVectorType> result;
+		typename PsimagLite::Vector<TargetVectorType>::Type result;
 		rungeKutta.solve(result,0.0,times_.size(),phi0);
 		assert(result.size()==times_.size());
 
@@ -231,7 +231,7 @@ private:
 	RealType& currentTime_;
 	const TargettingParamsType& tstStruct_;
 	const VectorRealType& times_;
-	std::vector<VectorWithOffsetType>& targetVectors_;
+	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;

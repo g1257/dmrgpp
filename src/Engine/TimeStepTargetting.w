@@ -95,10 +95,10 @@ A long series of typedefs follow. Need to explain these maybe (FIXME).
 			typedef typename LeftRightSuperType::BasisWithOperatorsType
 					BasisWithOperatorsType;
 			//typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
-			typedef std::vector<ComplexType> ComplexVectorType;
+			typedef typename PsimagLite::Vector<ComplexType>::Type ComplexVectorType;
 			//typedef std::VectorWithOffset<ComplexType> VectorWithOffsetType;
 			typedef LanczosSolverTemplate<RealType,InternalProductType,ComplexVectorType> LanczosSolverType;
-			typedef std::vector<RealType> VectorType;
+			typedef typename PsimagLite::Vector<RealType>::Type VectorType;
 			//typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 			typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
@@ -159,7 +159,7 @@ in \verb|WaveFunctionTransformation.h|.
 Now let us look at the private data of this class:
 @d privatedata
 @{
-			std::vector<size_t> stage_;
+			typename PsimagLite::Vector<size_t>::Type stage_;
 			VectorWithOffsetType psi_;
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
@@ -167,8 +167,8 @@ Now let us look at the private data of this class:
 			const WaveFunctionTransfType& waveFunctionTransformation_;
 			PsimagLite::ProgressIndicator progress_;
 			RealType currentTime_;
-			std::vector<RealType> times_,weight_;
-			std::vector<VectorWithOffsetType> targetVectors_;
+			typename PsimagLite::Vector<RealType>::Type times_,weight_;
+			typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 			RealType gsWeight_;
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
@@ -274,7 +274,7 @@ the chunking of this vector.
 @o TimeStepTargetting.h -t
 @{
 			template<typename SomeBasisType>
-			void setGs(const std::vector<TargetVectorType>& v,
+			void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 				   const SomeBasisType& someBasis)
 			{
 				psi_.set(v,someBasis);
@@ -541,7 +541,7 @@ When stages are advancing we need to weight each target WFtransformed  state  wi
 				waveFunctionTransformation_.setInitialVector(v,psi_,lrs_);
 				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
 				if (!b) return;
-				std::vector<VectorWithOffsetType> vv(targetVectors_.size());
+				typename PsimagLite::Vector<VectorWithOffsetType>::Type vv(targetVectors_.size());
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					waveFunctionTransformation_.setInitialVector(vv[i],
 						targetVectors_[i],lrs_);
@@ -557,7 +557,7 @@ The function below prints all target vectors to disk, using the \verb|TimeSerial
 @{
 
 			template<typename IoOutputType>
-			void save(const std::vector<size_t>& block,IoOutputType& io) const
+			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
 			{
 				std::ostringstream msg;
 				msg<<"Saving state...";
@@ -697,14 +697,14 @@ Finally we are ready to $V^\dagger T^dagger \exp(i\epsilon t) TV$ in function \v
       						const VectorWithOffsetType& phi,
 						size_t systemOrEnviron)
 			{
-				std::vector<ComplexMatrixType> V(phi.sectors());
-				std::vector<ComplexMatrixType> T(phi.sectors());
+				typename PsimagLite::Vector<ComplexMatrixType>::Type V(phi.sectors());
+				typename PsimagLite::Vector<ComplexMatrixType>::Type T(phi.sectors());
 				
-				std::vector<size_t> steps(phi.sectors());
+				typename PsimagLite::Vector<size_t>::Type steps(phi.sectors());
 				
 				triDiag(phi,T,V,steps);
 				
-				std::vector<std::vector<RealType> > eigs(phi.sectors());
+				typename PsimagLite::Vector<PsimagLite::Vector<RealType>::Type::Type > eigs(phi.sectors());
 						
 				for (size_t ii=0;ii<phi.sectors();ii++) 
 					PsimagLite::diag(T[ii],eigs[ii],'V');
@@ -720,11 +720,11 @@ index $i$.
 @{
 			void calcTargetVectors(
 						const VectorWithOffsetType& phi,
-						const std::vector<ComplexMatrixType>& T,
-						const std::vector<ComplexMatrixType>& V,
+						const typename PsimagLite::Vector<ComplexMatrixType>::Type& T,
+						const typename PsimagLite::Vector<ComplexMatrixType>::Type& V,
 						RealType Eg,
-      						const std::vector<VectorType>& eigs,
-	    					std::vector<size_t> steps,
+      						const typename PsimagLite::Vector<VectorType>::Type& eigs,
+	    					typename PsimagLite::Vector<size_t>::Type steps,
 					      	size_t systemOrEnviron)
 			{
 				targetVectors_[0] = phi;
@@ -744,12 +744,12 @@ vector with offsets \verb|v|.
 			void calcTargetVector(
 						VectorWithOffsetType& v,
       						const VectorWithOffsetType& phi,
-						const std::vector<ComplexMatrixType>& T,
-						const std::vector<ComplexMatrixType>& V,
+						const typename PsimagLite::Vector<ComplexMatrixType>::Type& T,
+						const typename PsimagLite::Vector<ComplexMatrixType>::Type& V,
 						RealType Eg,
-      						const std::vector<VectorType>& eigs,
+      						const typename PsimagLite::Vector<VectorType>::Type& eigs,
 	    					RealType t,
-						std::vector<size_t> steps)
+						typename PsimagLite::Vector<size_t>::Type steps)
 			{
 				v = phi;
 				for (size_t ii=0;ii<phi.sectors();ii++) {
@@ -845,9 +845,9 @@ Here is tridiag, we loop over (non-zero) symmetry sectors:
 @{
 			void triDiag(
 					const VectorWithOffsetType& phi,
-					std::vector<ComplexMatrixType>& T,
-	 				std::vector<ComplexMatrixType>& V,
-					std::vector<size_t>& steps)
+					typename PsimagLite::Vector<ComplexMatrixType>::Type& T,
+	 				typename PsimagLite::Vector<ComplexMatrixType>::Type& V,
+					typename PsimagLite::Vector<size_t>::Type& steps)
 			{
 				for (size_t ii=0;ii<phi.sectors();ii++) {
 					size_t i = phi.sector(ii);

@@ -111,8 +111,8 @@ namespace Dmrg {
 			: transform(0,0)
 			{}
 			BlockMatrixType transform;
-			std::vector<RealType> eigs;
-			std::vector<size_t> removedIndices;
+			typename PsimagLite::Vector<RealType>::Type eigs;
+			typename PsimagLite::Vector<size_t>::Type removedIndices;
 		}; // TruncationCache
 
 		Truncation(ReflectionSymmetryType& reflectionOperator,
@@ -273,11 +273,11 @@ namespace Dmrg {
 		}
 
 
-		void updateKeptStates(size_t& keptStates,const std::vector<RealType>& eigs2)
+		void updateKeptStates(size_t& keptStates,const typename PsimagLite::Vector<RealType>::Type& eigs2)
 		{
-			std::vector<RealType> eigs = eigs2;
-			std::vector<size_t> perm(eigs.size());
-			Sort<std::vector<RealType> > sort;
+			typename PsimagLite::Vector<RealType>::Type eigs = eigs2;
+			typename PsimagLite::Vector<size_t>::Type perm(eigs.size());
+			PsimagLite::Sort<typename PsimagLite::Vector<RealType>::Type> sort;
 			sort.sort(eigs,perm);
 			dumpEigs(eigs);
 
@@ -317,7 +317,7 @@ namespace Dmrg {
 		We proceed in the same manner for the environment.
 		!PTEX-END */
 		//! eigenvalues are ordered in increasing order
-		size_t computeKeptStates(size_t& keptStates,const std::vector<RealType>& eigs) const
+		size_t computeKeptStates(size_t& keptStates,const typename PsimagLite::Vector<RealType>::Type& eigs) const
 		{
 			if (parameters_.tolerance<0) return keptStates;
 			int start = eigs.size() - keptStates;
@@ -347,7 +347,7 @@ namespace Dmrg {
 			return total;
 		}
 
-		RealType sumUpTo(const std::vector<RealType>& eigs,size_t x) const
+		RealType sumUpTo(const typename PsimagLite::Vector<RealType>::Type& eigs,size_t x) const
 		{
 			RealType discWeight = 0;
 			for (size_t i=0;i<x;i++)
@@ -355,7 +355,7 @@ namespace Dmrg {
 			return discWeight;
 		}
 
-		void dumpEigs(const std::vector<RealType>& eigs) const
+		void dumpEigs(const typename PsimagLite::Vector<RealType>::Type& eigs) const
 		{
 			static size_t counter = 0;
 			if (parameters_.fileForDensityMatrixEigs=="") return;

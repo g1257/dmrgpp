@@ -141,7 +141,7 @@ public:
 
 private:
 
-	std::vector<size_t> patchesLeft_,patchesRight_;
+	typename PsimagLite::Vector<size_t>::Type patchesLeft_,patchesRight_;
 
 }; //class GenIjPatch
 } // namespace PsimagLite

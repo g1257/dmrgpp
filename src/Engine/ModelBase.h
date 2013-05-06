@@ -151,7 +151,9 @@ namespace Dmrg {
 		 * The \\cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$. This function
 		 * has a default implementation.
 		 */
-		void matrixVectorProduct(std::vector<RealType> &x,std::vector<RealType> const &y,ModelHelperType const &modelHelper) const
+		void matrixVectorProduct(typename PsimagLite::Vector<RealType>::Type& x,
+		                         const typename PsimagLite::Vector<RealType>::Type& y,
+		                         ModelHelperType const &modelHelper) const
 		{
 			//! contribution to Hamiltonian from current system
 			modelHelper.hamiltonianLeftProduct(x,y);
@@ -161,7 +163,9 @@ namespace Dmrg {
 			hamiltonianConnectionProduct(x,y,modelHelper);
 		}
 
-		void matrixVectorProduct(std::vector<std::complex<RealType> > &x,std::vector<std::complex<RealType> > const &y,ModelHelperType const &modelHelper) const
+		void matrixVectorProduct(typename PsimagLite::Vector<std::complex<RealType> >::Type& x,
+		                         const typename PsimagLite::Vector<std::complex<RealType> >::Type& y,
+		                         ModelHelperType const &modelHelper) const
 		{
 			//! contribution to Hamiltonian from current system
 			modelHelper.hamiltonianLeftProduct(x,y);
@@ -210,8 +214,9 @@ namespace Dmrg {
 		Let $H_m$ be the Hamiltonian connection between basis2 and basis3 in 
 		the orderof basis1 for block $m$. Then this function does $x+= H_m *y$
 		*/
-		void hamiltonianConnectionProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y,
-			ModelHelperType const &modelHelper) const
+		void hamiltonianConnectionProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
+		                                  const typename PsimagLite::Vector<SparseElementType>::Type& y,
+		                                  ModelHelperType const &modelHelper) const
 		{
 			size_t n=modelHelper.leftRightSuper().super().block().size();
 

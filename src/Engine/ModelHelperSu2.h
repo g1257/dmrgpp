@@ -213,12 +213,12 @@ namespace Dmrg {
 
 		//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
 		//! Has been changed to accomodate for reflection symmetry
-		 void fastOpProdInter(	std::vector<SparseElementType>  &x,
-					std::vector<SparseElementType>  const &y,
-					SparseMatrixType const &A,
-					SparseMatrixType const &B,
-					const LinkType& link,
-	    				bool flipped=false) const 
+		void fastOpProdInter(typename PsimagLite::Vector<SparseElementType>::Type& x,
+		                     const typename PsimagLite::Vector<SparseElementType>::Type& y,
+		                     SparseMatrixType const &A,
+		                     SparseMatrixType const &B,
+		                     const LinkType& link,
+		                     bool flipped=false) const
 		{
 			//int const SystemEnviron=1,EnvironSystem=2;
 			RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
@@ -278,7 +278,8 @@ namespace Dmrg {
 		//! Then, this function does x += H_m * y
 		//! This is a performance critical function
 		//! Has been changed to accomodate for reflection symmetry
-		void hamiltonianLeftProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y) const 
+		void hamiltonianLeftProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
+		                            const typename PsimagLite::Vector<SparseElementType>::Type& y) const
 		{ 
 			//! work only on partition m
 			int m = m_;
@@ -313,7 +314,8 @@ namespace Dmrg {
 		//! Let H_m be  the m-th block (in the ordering of basis1) of H
 		//! Then, this function does x += H_m * y
 		//! This is a performance critical function
-		void hamiltonianRightProduct(std::vector<SparseElementType> &x,std::vector<SparseElementType> const &y) const 
+		void hamiltonianRightProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
+		                             const typename PsimagLite::Vector<SparseElementType>::Type& y) const
 		{ 
 			//! work only on partition m
 			int m = m_;

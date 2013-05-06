@@ -132,7 +132,7 @@ namespace Dmrg {
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
-		typedef std::vector<HilbertState> HilbertBasisType;
+		typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 		
 		ModelHubbard(InputValidatorType& io,
 			     DmrgGeometryType const &dmrgGeometry,
@@ -160,14 +160,14 @@ namespace Dmrg {
 		there, as well as the Hamiltonian and the effective quantum number for
 		each state of this natural basis. To implement the algorithm for a 
 		fixed density, the number of electrons for each state is also needed.*/
-		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
+		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 					     SparseMatrixType &hamiltonian,
 					     BasisDataType &q,
 					     Block const &block,
 					     RealType time) const
 		{
 			HilbertBasisType natBasis;
-			std::vector<size_t> quantumNumbs;
+			typename PsimagLite::Vector<size_t>::Type quantumNumbs;
 			setNaturalBasis(natBasis,quantumNumbs,block);
 
 			setOperatorMatrices(creationMatrix,block);
@@ -183,12 +183,12 @@ namespace Dmrg {
 		 construct the Hamiltonian.
 		 For example, for the Hubbard model these operators are the 
 		 creation operators for sites in block */
-		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,
+		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 						 Block const &block) const
 		{
-			std::vector<typename HilbertSpaceHubbardType::HilbertState> natBasis;
+			typename PsimagLite::Vector<typename HilbertSpaceHubbardType::HilbertState>::Type natBasis;
 			SparseMatrixType tmpMatrix;
-			std::vector<size_t> quantumNumbs;
+			typename PsimagLite::Vector<size_t>::Type quantumNumbs;
 			setNaturalBasis(natBasis,quantumNumbs,block);
 
 			//! Set the operators c^\daggger_{i\sigma} in the natural basis
@@ -226,7 +226,7 @@ namespace Dmrg {
 			Block block;
 			block.resize(1);
 			block[0]=site;
-			std::vector<OperatorType> creationMatrix;
+			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 			size_t iup = SPIN_UP;
 			size_t idown = SPIN_DOWN;
@@ -268,8 +268,8 @@ namespace Dmrg {
 		
 		/** \cppFunction{!PTEX_THISFUNCTION} Sets electrons to the total number of
 		electrons for each state in the basis*/
-		void findElectrons(std::vector<size_t> &electrons,
-					   const std::vector<HilbertState>& basis,
+		void findElectrons(typename PsimagLite::Vector<size_t> ::Type&electrons,
+					   const typename PsimagLite::Vector<HilbertState>::Type& basis,
 					   size_t site) const
 		{
 			int nup,ndown;
@@ -282,8 +282,8 @@ namespace Dmrg {
 		}
 
 		void setNaturalBasis(HilbertBasisType  &basis,
-				     std::vector<size_t>& q,
-				     const std::vector<size_t>& block) const
+				     typename PsimagLite::Vector<size_t>::Type& q,
+				     const typename PsimagLite::Vector<size_t>::Type& block) const
 		{
 			HilbertState a=0;
 			int sitesTimesDof=DEGREES_OF_FREEDOM*block.size();
@@ -294,9 +294,9 @@ namespace Dmrg {
 
 			// reorder the natural basis (needed for MULTIPLE BANDS)
 			findQuantumNumbers(q,basisTmp,1);
-			std::vector<size_t> iperm(q.size());
+			typename PsimagLite::Vector<size_t>::Type iperm(q.size());
 
-			Sort<std::vector<size_t> > sort;
+			PsimagLite::Sort<typename PsimagLite::Vector<size_t>::Type > sort;
 			sort.sort(q,iperm);
 			basis.clear();
 			for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
@@ -309,10 +309,10 @@ namespace Dmrg {
 
 		//! Full hamiltonian from creation matrices cm
 		void calcHamiltonian(SparseMatrixType &hmatrix,
-							 std::vector<OperatorType> const &cm,
-							 Block const &block,
-							 RealType time,
-							 RealType factorForDiagonals=1.0)  const
+		                     const typename PsimagLite::Vector<OperatorType>::Type& cm,
+		                     Block const &block,
+		                     RealType time,
+		                     RealType factorForDiagonals=1.0)  const
 		{
 			size_t n=block.size();
 			//int type,sigma;
@@ -436,7 +436,9 @@ namespace Dmrg {
 //		}
 
 		//! Find c^\dagger_isigma in the natural basis natBasis
-		SparseMatrixType findOperatorMatrices(int i,int sigma,std::vector<typename HilbertSpaceHubbardType::HilbertState> const &natBasis) const
+		SparseMatrixType findOperatorMatrices(int i,
+		                                      int sigma,
+		                                      const typename PsimagLite::Vector<typename HilbertSpaceHubbardType::HilbertState>::Type& natBasis) const
 		{
 			typename HilbertSpaceHubbardType::HilbertState bra,ket;
 			int n = natBasis.size();
@@ -459,7 +461,7 @@ namespace Dmrg {
 			return creationMatrix;
 		}
 
-		void findQuantumNumbers(std::vector<size_t>& q,const HilbertBasisType  &basis,int n) const
+		void findQuantumNumbers(typename PsimagLite::Vector<size_t>::Type& q,const HilbertBasisType  &basis,int n) const
 		{
 			BasisDataType qq;
 			setSymmetryRelated(qq,basis,n);
@@ -475,14 +477,14 @@ namespace Dmrg {
 			// note: we use m+j instead of m
 			// This assures us that both j and m are size_t
 			typedef std::pair<size_t,size_t> PairType;
-			std::vector<PairType> jmvalues;
-			std::vector<size_t> flavors; 
+			typename PsimagLite::Vector<PairType>::Type jmvalues;
+			typename PsimagLite::Vector<size_t>::Type flavors; 
 			PairType jmSaved = calcJmvalue<PairType>(basis[0]);
 			jmSaved.first++;
 			jmSaved.second++;
 
-			std::vector<size_t> electronsUp(basis.size());
-			std::vector<size_t> electronsDown(basis.size());
+			typename PsimagLite::Vector<size_t>::Type electronsUp(basis.size());
+			typename PsimagLite::Vector<size_t>::Type electronsDown(basis.size());
 			for (size_t i=0;i<basis.size();i++) {
 				PairType jmpair = calcJmvalue<PairType>(basis[i]);
 

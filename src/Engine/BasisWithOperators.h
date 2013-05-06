@@ -113,7 +113,7 @@ namespace Dmrg {
 	class	BasisWithOperators : public  OperatorsType_::BasisType {
 
 		typedef std::pair<size_t,size_t> PairType;
-
+		typedef PsimagLite::Vector<size_t>::Type VectorIntegerType;
 
 	public:
 
@@ -164,7 +164,7 @@ namespace Dmrg {
 			// reorder the basis
 			parent.setToProduct(basis2,basis3);
 
-			std::vector<double> fermionicSigns;
+			PsimagLite::Vector<double>::Type fermionicSigns;
 			size_t x = basis2.numberOfOperators()+basis3.numberOfOperators();
 
 			if (this->useSu2Symmetry()) setMomentumOfOperators(basis2);
@@ -216,8 +216,8 @@ namespace Dmrg {
 		}
 
 //		template<typename SolverParametersType>
-//		void changeBasis(std::vector<size_t>& removedIndices,
-//				 std::vector<RealType>& eigs,
+//		void changeBasis(PsimagLite::Vector<size_t>::Type& removedIndices,
+//				 PsimagLite::Vector<RealType>::Type& eigs,
 //				 size_t kept,
 //				 const SolverParametersType& solverParams)
 //		{
@@ -229,8 +229,8 @@ namespace Dmrg {
 		template<typename BlockMatrixType>
 		RealType truncateBasis(SparseMatrixType& ftransform,
 				       const BlockMatrixType& transform,
-				       const std::vector<RealType>& eigs,
-				       const std::vector<size_t>& removedIndices,
+				       const typename PsimagLite::Vector<RealType>::Type& eigs,
+				       const typename PsimagLite::Vector<size_t>::Type& removedIndices,
 				       ConcurrencyType& concurrency)
 		{
 			BasisType &parent = *this;
@@ -256,7 +256,7 @@ namespace Dmrg {
 		void setVarious(BlockType const &block,
 		                SparseMatrixType const &h,
 		                BasisDataType const &qm,
-		                const std::vector<OperatorType>& ops)
+		                const typename PsimagLite::Vector<OperatorType>::Type& ops)
 		{
 			this->set(block);
 			this->setSymmetryRelated(qm);
@@ -339,11 +339,15 @@ namespace Dmrg {
 		}
 
 	private:
-		OperatorsType operators_;
-		std::vector<size_t> operatorsPerSite_;
 
-		template<typename SomeType>
-		void fillFermionicSigns(std::vector<SomeType>& fermionicSigns,const std::vector<size_t>& electrons,int f)
+		OperatorsType operators_;
+		PsimagLite::Vector<size_t>::Type operatorsPerSite_;
+
+		template<typename SomeVectorType>
+		typename PsimagLite::IsVectorLike<SomeVectorType,void>::True
+		fillFermionicSigns(SomeVectorType& fermionicSigns,
+		                   const VectorIntegerType& electrons,
+		                   int f)
 		{
 			fermionicSigns.resize(electrons.size());
 			for (size_t i=0;i<fermionicSigns.size();i++)
@@ -352,7 +356,7 @@ namespace Dmrg {
 
 		void setMomentumOfOperators(const ThisType& basis)
 		{
-			std::vector<size_t> momentum;
+			PsimagLite::Vector<size_t>::Type momentum;
 			for (size_t i=0;i<basis.numberOfOperators();i++) {
 				int x = PsimagLite::isInVector(
 				     momentum,basis.getReducedOperatorByIndex(i).jm.first);

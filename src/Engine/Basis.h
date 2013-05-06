@@ -101,7 +101,7 @@ namespace Dmrg {
 		typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 		typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
 		typedef  BasisData<PairType> BasisDataType;
-		typedef std::vector<size_t> BlockType;
+		typedef typename PsimagLite::Vector<size_t>::Type BlockType;
 
 		enum {BEFORE_TRANSFORM,AFTER_TRANSFORM};
 
@@ -209,7 +209,7 @@ namespace Dmrg {
 		//! Returns the partition that corresponds to quantum number qn
 		int partitionFromQn(size_t qn,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
-			const std::vector<size_t> *quantumNumbers, *partition;
+			const typename PsimagLite::Vector<size_t>::Type *quantumNumbers, *partition;
 
 			if (beforeOrAfterTransform==AFTER_TRANSFORM) {
 				quantumNumbers = &quantumNumbers_;
@@ -245,7 +245,7 @@ namespace Dmrg {
 		}
 
 		//! Return the permutation vector
-		const std::vector<size_t>& permutationVector() const
+		const typename PsimagLite::Vector<size_t>::Type& permutationVector() const
 		{
 			return  permutationVector_;
 		}
@@ -258,7 +258,7 @@ namespace Dmrg {
 		}
 
 		//! returns the inverse permutation vector
-		const std::vector<size_t>& permutationInverse() const { return permInverse_; }
+		const typename PsimagLite::Vector<size_t>::Type& permutationInverse() const { return permInverse_; }
 
 		//! returns the block of sites over which this basis is built
 		const BlockType& block() const { return block_; }
@@ -275,21 +275,21 @@ namespace Dmrg {
 		}
 
 		//! Encodes the quantum numbers into a single unique size_t and returns it
-		static size_t encodeQuantumNumber(const std::vector<size_t>& quantumNumbers)
+		static size_t encodeQuantumNumber(const typename PsimagLite::Vector<size_t>::Type& quantumNumbers)
 		{
 			if (useSu2Symmetry_) return HamiltonianSymmetrySu2Type::encodeQuantumNumber(quantumNumbers);
 			else return HamiltonianSymmetryLocalType::encodeQuantumNumber(quantumNumbers);
 		}
 
 		//! Inverse for encodeQuantumNumber
-		static std::vector<size_t> decodeQuantumNumber(int q)
+		static typename PsimagLite::Vector<size_t>::Type decodeQuantumNumber(int q)
 		{
 			if (useSu2Symmetry_) return HamiltonianSymmetrySu2Type::decodeQuantumNumber(q);
 			else return HamiltonianSymmetryLocalType::decodeQuantumNumber(q);
 		}
 
 		//! Encodes (flavor,jvalue,density) into a unique number and returns it
-		static size_t pseudoQuantumNumber(const std::vector<size_t>& targets)
+		static size_t pseudoQuantumNumber(const typename PsimagLite::Vector<size_t>::Type& targets)
 		{
 			if (useSu2Symmetry_)
 				return HamiltonianSymmetrySu2Type::pseudoQuantumNumber(targets);
@@ -305,7 +305,7 @@ namespace Dmrg {
 		}
 
 		//! Given the information in the structure bdt, calculates the quantum numbers in q
-		static void findQuantumNumbers(std::vector<size_t>& qn,const BasisDataType& basisData)
+		static void findQuantumNumbers(typename PsimagLite::Vector<size_t>::Type& qn,const BasisDataType& basisData)
 		{
 			if (useSu2Symmetry_) HamiltonianSymmetrySu2Type::findQuantumNumbers(qn,basisData);
 			else HamiltonianSymmetryLocalType::findQuantumNumbers(qn,basisData);
@@ -315,8 +315,8 @@ namespace Dmrg {
 		//! transforms this basis by transform
 		//! eigs cannot be const because su(2) needs to sort them due to being obtained in blocks
 		template<typename SolverParametersType>
-		void changeBasis(std::vector<size_t>& removedIndices,
-				 std::vector<RealType>& eigs,
+		void changeBasis(typename PsimagLite::Vector<size_t>::Type& removedIndices,
+				 typename PsimagLite::Vector<RealType>::Type& eigs,
 				 size_t kept,
 				 const SolverParametersType& solverParams)
 		{
@@ -326,16 +326,16 @@ namespace Dmrg {
 
 			if (removedIndices.size()==0) return;
 
-			std::vector<size_t> perm(removedIndices.size());
-			Sort<std::vector<size_t> > sort;
+			typename PsimagLite::Vector<size_t>::Type perm(removedIndices.size());
+			PsimagLite::Sort<typename PsimagLite::Vector<size_t>::Type > sort;
 			sort.sort(removedIndices,perm);
 		}
 
 		template<typename BlockMatrixType>
 		RealType truncateBasis(SparseMatrixType& ftransform,
 				       const BlockMatrixType& transform,
-				       const std::vector<RealType>& eigs,
-				       const std::vector<size_t>& removedIndices)
+				       const typename PsimagLite::Vector<RealType>::Type& eigs,
+				       const typename PsimagLite::Vector<size_t>::Type& removedIndices)
 		{
 			quantumNumbersOld_ = quantumNumbers_;
 			partitionOld_ = partition_;
@@ -410,14 +410,14 @@ namespace Dmrg {
 			symmSu2_.flavor2Index(mm,jm);
 		}
 
-		const std::vector<size_t>& flavorsOld() const
+		const typename PsimagLite::Vector<size_t>::Type& flavorsOld() const
 		{
 			assert(useSu2Symmetry_);
 			return symmSu2_.flavorsOld();
 		}
 
 		//! Returns the vector of electrons for this basis
-		const std::vector<size_t>& electronsVector(size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
+		const typename PsimagLite::Vector<size_t>::Type& electronsVector(size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
 			if (beforeOrAfterTransform == AFTER_TRANSFORM) return electrons_;
 			return electronsOld_;
@@ -544,7 +544,8 @@ namespace Dmrg {
 			else symmLocal_.save(io);
 		}
 
-		RealType calcError(std::vector<RealType> const &eigs,std::vector<size_t> const &removedIndices) const
+		RealType calcError(const typename PsimagLite::Vector<RealType>::Type& eigs,
+		                   const typename PsimagLite::Vector<size_t>::Type& removedIndices) const
 		{
 			RealType sum=static_cast<RealType>(0.0);
 			for (size_t i=0;i<eigs.size();i++)
@@ -552,7 +553,7 @@ namespace Dmrg {
 			return 1.0-sum;
 		}
 
-		void truncate(std::vector<size_t> const &removedIndices)
+		void truncate(const typename PsimagLite::Vector<size_t>::Type& removedIndices)
 		{
 			utils::truncateVector(quantumNumbers_,removedIndices);
 			utils::truncateVector(electrons_,removedIndices);
@@ -574,7 +575,7 @@ namespace Dmrg {
 					for (size_t i=0;i<permutationVector_.size();i++)
 						permutationVector_[i]=i;
 				} else 	{
-					Sort<std::vector<size_t> > sort;
+					PsimagLite::Sort<typename PsimagLite::Vector<size_t>::Type > sort;
 					sort.sort(quantumNumbers_,permutationVector_);
 				}
 			}
@@ -612,10 +613,10 @@ namespace Dmrg {
 		order of hundreds for usual symmetries, making this implementation very practical for
 		systems of correlated electrons.)
 		*/
-		std::vector<size_t> quantumNumbers_;
-		std::vector<size_t> quantumNumbersOld_;
-		std::vector<size_t> electrons_;
-		std::vector<size_t> electronsOld_;
+		typename PsimagLite::Vector<size_t>::Type quantumNumbers_;
+		typename PsimagLite::Vector<size_t>::Type quantumNumbersOld_;
+		typename PsimagLite::Vector<size_t>::Type electrons_;
+		typename PsimagLite::Vector<size_t>::Type electronsOld_;
 
 		/**
 		What remains to be done is to find a partition of the basis which
@@ -631,8 +632,8 @@ namespace Dmrg {
 		Now we know that our Hamiltonian matrix will be composed first of a
 		block of 4x4, then of a block of 2x2, etc.
 		*/
-		std::vector<size_t> partition_;
-		std::vector<size_t> partitionOld_;
+		typename PsimagLite::Vector<size_t>::Type partition_;
+		typename PsimagLite::Vector<size_t>::Type partitionOld_;
 
 		/**
 		We then reorder our basis such that its elements are given in
@@ -641,8 +642,8 @@ namespace Dmrg {
 		\\verb!permutationVector! of class \\cppClass{!PTEX_THISCLASS}.
 		For ease of coding we also store its inverse in \\verb!permInverse!.
 		*/
-		std::vector<size_t> permutationVector_;
-		std::vector<size_t> permInverse_;
+		typename PsimagLite::Vector<size_t>::Type permutationVector_;
+		typename PsimagLite::Vector<size_t>::Type permInverse_;
 		HamiltonianSymmetryLocalType symmLocal_;
 		HamiltonianSymmetrySu2Type symmSu2_;
 		/**

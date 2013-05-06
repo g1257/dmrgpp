@@ -140,7 +140,7 @@ namespace Dmrg {
 
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
+		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 						 SparseMatrixType &hamiltonian,
 						 BasisDataType &q,
 						 Block const &block,
@@ -148,7 +148,7 @@ namespace Dmrg {
 		{
 			
 			HilbertBasisType natBasis;
-			std::vector<size_t> quantumNumbs;
+			typename PsimagLite::Vector<size_t>::Type quantumNumbs;
 			setNaturalBasis(natBasis,quantumNumbs,block);
 
 			setOperatorMatrices(creationMatrix,block);
@@ -161,11 +161,11 @@ namespace Dmrg {
 		}
 
 		//! set creation matrices for sites in block
-		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,Block const &block) const
+		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,Block const &block) const
 		{
-			std::vector<HilbertStateType> natBasis;
+			typename PsimagLite::Vector<HilbertStateType>::Type natBasis;
 			SparseMatrixType tmpMatrix;
-			std::vector<size_t> quantumNumbs;
+			typename PsimagLite::Vector<size_t>::Type quantumNumbs;
 			setNaturalBasis(natBasis,quantumNumbs,block);
 
 			// Set the operators c^\daggger_{i\sigma} in the natural basis
@@ -228,7 +228,7 @@ namespace Dmrg {
 			Block block;
 			block.resize(1);
 			block[0]=site;
-			std::vector<OperatorType> creationMatrix;
+			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 			if (what=="+" or what=="i") {
 				PsimagLite::Matrix<SparseElementType> tmp;
@@ -269,8 +269,8 @@ namespace Dmrg {
 		}
 		
 		//! find total number of electrons for each state in the basis
-		void findElectrons(std::vector<size_t> &electrons,
-					   const std::vector<HilbertStateType>& basis,
+		void findElectrons(typename PsimagLite::Vector<size_t> ::Type&electrons,
+					   const typename PsimagLite::Vector<HilbertStateType>::Type& basis,
 					   size_t site) const
 		{
 			int nup,ndown;
@@ -285,8 +285,8 @@ namespace Dmrg {
 		//! find all states in the natural basis for a block of n sites
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 		void setNaturalBasis(HilbertBasisType  &basis,
-					 std::vector<size_t>& q,
-					 const std::vector<size_t>& block) const
+					 typename PsimagLite::Vector<size_t>::Type& q,
+					 const typename PsimagLite::Vector<size_t>::Type& block) const
 		{
 			assert(block.size()==1);
 			HilbertStateType a=0;
@@ -299,9 +299,9 @@ namespace Dmrg {
 
 			// reorder the natural basis (needed for MULTIPLE BANDS)
 			findQuantumNumbers(q,basisTmp,1);
-			std::vector<size_t> iperm(q.size());
+			typename PsimagLite::Vector<size_t>::Type iperm(q.size());
 
-			Sort<std::vector<size_t> > sort;
+			PsimagLite::Sort<typename PsimagLite::Vector<size_t>::Type > sort;
 			sort.sort(q,iperm);
 			basis.clear();
 			for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
@@ -321,7 +321,9 @@ namespace Dmrg {
 		}
 
 		//! Find c^\dagger_isigma in the natural basis natBasis
-		SparseMatrixType findOperatorMatrices(int i,int sigma,std::vector<HilbertStateType> const &natBasis) const
+		SparseMatrixType findOperatorMatrices(int i,
+		                                      int sigma,
+		                                      const typename PsimagLite::Vector<HilbertStateType>::Type& natBasis) const
 		{
 			HilbertStateType bra,ket;
 			int n = natBasis.size();
@@ -345,7 +347,8 @@ namespace Dmrg {
 		}
 
 		//! Find S^+_i in the natural basis natBasis
-		SparseMatrixType findSplusMatrices(int i,std::vector<HilbertStateType> const &natBasis) const
+		SparseMatrixType findSplusMatrices(int i,
+		                                   const typename PsimagLite::Vector<HilbertStateType>::Type& natBasis) const
 		{
 			HilbertStateType bra,ket;
 			int n = natBasis.size();
@@ -367,7 +370,8 @@ namespace Dmrg {
 		}
 
 		//! Find S^z_i in the natural basis natBasis
-		SparseMatrixType findSzMatrices(int i,std::vector<HilbertStateType> const &natBasis) const
+		SparseMatrixType findSzMatrices(int i,
+		                                const typename PsimagLite::Vector<HilbertStateType>::Type& natBasis) const
 		{
 			HilbertStateType ket;
 			int n = natBasis.size();
@@ -390,7 +394,8 @@ namespace Dmrg {
 		}
 
 		//! Find n_i in the natural basis natBasis
-		SparseMatrixType findNiMatrices(int i,std::vector<HilbertStateType> const &natBasis) const
+		SparseMatrixType findNiMatrices(int i,
+		                                const typename PsimagLite::Vector<HilbertStateType>::Type& natBasis) const
 		{
 			size_t n = natBasis.size();
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
@@ -409,9 +414,9 @@ namespace Dmrg {
 		//! Full hamiltonian from creation matrices cm
 		//! This is usually for n=1 so there are no connections here in most cases
 		void calcHamiltonian(SparseMatrixType &hmatrix,
-					 std::vector<OperatorType> const &cm,
-					 Block const &block,
-					 RealType time) const
+		                     const typename PsimagLite::Vector<OperatorType>::Type& cm,
+		                     Block const &block,
+		                     RealType time) const
 		{
 			size_t n=block.size();
 			//int type,sigma;
@@ -480,7 +485,7 @@ namespace Dmrg {
 			}
 		}
 
-		void findQuantumNumbers(std::vector<size_t>& q,const HilbertBasisType  &basis,int n) const
+		void findQuantumNumbers(typename PsimagLite::Vector<size_t>::Type& q,const HilbertBasisType  &basis,int n) const
 		{
 			BasisDataType qq;
 			setSymmetryRelated(qq,basis,n);
@@ -496,14 +501,14 @@ namespace Dmrg {
 			// note: we use m+j instead of m
 			// This assures us that both j and m are size_t
 			typedef std::pair<size_t,size_t> PairType;
-			std::vector<PairType> jmvalues;
-			std::vector<size_t> flavors;
+			typename PsimagLite::Vector<PairType>::Type jmvalues;
+			typename PsimagLite::Vector<size_t>::Type flavors;
 			PairType jmSaved = calcJmvalue<PairType>(basis[0]);
 			jmSaved.first++;
 			jmSaved.second++;
 
-			std::vector<size_t> electronsUp(basis.size());
-			std::vector<size_t> electronsDown(basis.size());
+			typename PsimagLite::Vector<size_t>::Type electronsUp(basis.size());
+			typename PsimagLite::Vector<size_t>::Type electronsDown(basis.size());
 			for (size_t i=0;i<basis.size();i++) {
 				PairType jmpair = calcJmvalue<PairType>(basis[i]);
 

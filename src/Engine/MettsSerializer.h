@@ -93,7 +93,7 @@ namespace Dmrg {
 			
 			MettsSerializer(RealType currentBeta,
 			                size_t site,
-			                const std::vector<VectorType>& targetVectors)
+			                const typename PsimagLite::Vector<VectorType>::Type& targetVectors)
 			: currentBeta_(currentBeta),site_(site),targetVectors_(targetVectors)
 			{}
 			
@@ -158,7 +158,7 @@ namespace Dmrg {
 		private:
 			RealType currentBeta_;
 			size_t site_;
-			std::vector<VectorType> targetVectors_;
+			typename PsimagLite::Vector<VectorType>::Type targetVectors_;
 	}; // class MettsSerializer
 } // namespace Dmrg 
 

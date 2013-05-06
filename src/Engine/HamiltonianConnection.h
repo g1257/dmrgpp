@@ -95,9 +95,11 @@ namespace Dmrg {
 			typedef std::pair<size_t,size_t> PairType;
 			typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 
-			HamiltonianConnection(const GeometryType& geometry,const ModelHelperType& modelHelper,const LinkProductStructType* lps = 0,
-			std::vector<SparseElementType>* x = 0,
-			const std::vector<SparseElementType>* y = 0)
+		HamiltonianConnection(const GeometryType& geometry,
+		                      const ModelHelperType& modelHelper,
+		                      const LinkProductStructType* lps = 0,
+		                      typename PsimagLite::Vector<SparseElementType>::Type* x = 0,
+		                      const typename PsimagLite::Vector<SparseElementType>::Type* y = 0)
 			: geometry_(geometry),
 			  modelHelper_(modelHelper),
 			  lps_(*lps),x_(*x),y_(*y),
@@ -160,7 +162,7 @@ namespace Dmrg {
 
 			void thread_function_(size_t threadNum,size_t blockSize,size_t total,pthread_mutex_t* myMutex)
 			{
-				std::vector<SparseElementType> xtemp(x_.size(),0);
+				typename PsimagLite::Vector<SparseElementType>::Type xtemp(x_.size(),0);
 				size_t i =0, j = 0, type = 0,term = 0, dofs =0;
 				SparseElementType tmp = 0.0;
 				for (size_t p=0;p<blockSize;p++) {
@@ -250,8 +252,8 @@ namespace Dmrg {
 			}
 
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
-			void linkProduct(std::vector<SparseElementType> &x,
-							 std::vector<SparseElementType> const &y,
+			void linkProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
+							 const typename PsimagLite::Vector<SparseElementType>::Type& y,
 							 size_t i,
 							 size_t j,
 							 size_t type,
@@ -269,8 +271,8 @@ namespace Dmrg {
 			const GeometryType& geometry_;
 			const ModelHelperType& modelHelper_;
 			const LinkProductStructType& lps_;
-			std::vector<SparseElementType>& x_;
-			const std::vector<SparseElementType>& y_;
+			typename PsimagLite::Vector<SparseElementType>::Type& x_;
+			const typename PsimagLite::Vector<SparseElementType>::Type& y_;
 			const typename GeometryType::BlockType& systemBlock_;
 			const typename GeometryType::BlockType& envBlock_;
 			size_t smax_,emin_;

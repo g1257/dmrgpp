@@ -133,7 +133,7 @@ namespace Dmrg {
 		//! find creation operator matrices for (i,sigma) in the natural basis,
 		//! find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
+		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 				     SparseMatrixType &hamiltonian,
 				     BasisDataType &q,
 				     BlockType const &block,
@@ -159,7 +159,7 @@ namespace Dmrg {
 
 		//! set creation matrices for sites in block
 		void setOperatorMatrices(
-				std::vector<OperatorType> &creationMatrix,
+				typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 				BlockType const &block) const
 		{
 			blockIsSize1OrThrow(block);
@@ -180,7 +180,7 @@ namespace Dmrg {
 			BlockType block;
 			block.resize(1);
 			block[0]=site;
-			std::vector<OperatorType> creationMatrix;
+			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 
 			if (what=="z") {
@@ -210,14 +210,14 @@ namespace Dmrg {
 
 		//! find all states in the natural basis for a block of n sites
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-		void setNaturalBasis(std::vector<HilbertState>  &basis,
-		                     std::vector<size_t>& q,
-		                     const std::vector<size_t>& block) const
+		void setNaturalBasis(typename PsimagLite::Vector<HilbertState>  ::Type&basis,
+		                     typename PsimagLite::Vector<size_t>::Type& q,
+		                     const typename PsimagLite::Vector<size_t>::Type& block) const
 		{
 			modelFeAs_.setNaturalBasis(basis,q,block);
 		}
 		
-		void findElectrons(std::vector<size_t>& electrons,const std::vector<HilbertState>  &basis,size_t site) const
+		void findElectrons(typename PsimagLite::Vector<size_t>::Type& electrons,const typename PsimagLite::Vector<HilbertState>  ::Type&basis,size_t site) const
 		{
 			modelFeAs_.findElectrons(electrons,basis,site);
 		}
@@ -226,7 +226,7 @@ namespace Dmrg {
 
 		// add S^+_i to creationMatrix
 		void setSplus(
-				std::vector<OperatorType> &creationMatrix,
+				typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 				const BlockType& block) const
 		{
 			SparseMatrixType m;
@@ -248,7 +248,7 @@ namespace Dmrg {
 
 		// add S^z_i to creationMatrix
 		void setSz(
-				std::vector<OperatorType> &creationMatrix,
+				typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 				const BlockType& block) const
 		{
 			SparseMatrixType m1,m2;
@@ -265,7 +265,7 @@ namespace Dmrg {
 		// add S^+_i to creationMatrix
 		void cDaggerC(
 				SparseMatrixType& sum,
-				const std::vector<OperatorType> &creationMatrix,
+				const typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 				const BlockType& block,
 				RealType value,
 				size_t spin1,
@@ -287,7 +287,7 @@ namespace Dmrg {
 		// add J_{ij} S^+_i S^-_j + S^-_i S^+_j to Hamiltonia
 		void addSplusSminus(
 				SparseMatrixType &hamiltonian,
-				const std::vector<OperatorType> &creationMatrix,
+				const typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 				const BlockType& block) const
 		{
 			// nothing if block.size == 1
@@ -296,7 +296,7 @@ namespace Dmrg {
 		// add J_{ij} S^z_i S^z_j to Hamiltonian
 		void addSzSz(
 				SparseMatrixType &hamiltonian,
-				const std::vector<OperatorType> &creationMatrix,
+				const typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 				const BlockType& block) const
 		{
 			// nothing if block.size == 1

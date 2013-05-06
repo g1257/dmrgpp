@@ -116,8 +116,8 @@ namespace Dmrg {
 
 		//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
 		//! Has been changed to accomodate for reflection symmetry
-		void fastOpProdInter(	std::vector<MatrixElementType>  &x,
-					std::vector<MatrixElementType>  const &y,
+		void fastOpProdInter(	typename PsimagLite::Vector<MatrixElementType>  ::Type&x,
+					typename PsimagLite::Vector<MatrixElementType>  const ::Type&y,
 					SparseMatrixType const &A,
 					SparseMatrixType const &B,
 					int type,
@@ -135,7 +135,7 @@ namespace Dmrg {
 			}
 			size_t leftSize = leftPerm_.size();
 			size_t rightSize = rightPerm_.size();
-			//static const std::vector<MatrixElementType>* yAddress = 0;
+			//static const typename PsimagLite::Vector<MatrixElementType>*::Type yAddress = 0;
 			
 			//if (yAddress!=&y) {
 				preparePhi(yMatrix_,y);
@@ -184,14 +184,14 @@ namespace Dmrg {
 		const BasisType&  basis1_;
 		const BasisWithOperatorsType& basis2_;
 		const BasisWithOperatorsType& basis3_;
-		std::vector<size_t> alpha_,beta_;
-		std::vector<size_t> leftPermInv_,rightPermInv_;
-		std::vector<size_t> leftPerm_,rightPerm_;
+		typename PsimagLite::Vector<size_t>::Type alpha_,beta_;
+		typename PsimagLite::Vector<size_t>::Type leftPermInv_,rightPermInv_;
+		typename PsimagLite::Vector<size_t>::Type leftPerm_,rightPerm_;
 		mutable MatrixType bMatrix_;
 		mutable MatrixType aMatrix_;
 		mutable MatrixType cMatrix_,tmpMatrix_,yMatrix_;
-		//mutable std::vector<const SparseMatrixType*> addressesA_;
-		//mutable std::vector<const SparseMatrixType*> addressesB_;
+		//mutable typename PsimagLite::Vector<const::Type SparseMatrixType*> addressesA_;
+		//mutable typename PsimagLite::Vector<const::Type SparseMatrixType*> addressesB_;
 		
 		
 		void init()
@@ -228,7 +228,7 @@ namespace Dmrg {
 			
 		}
 		
-		void preparePhi(MatrixType& m,std::vector<MatrixElementType>  const &v) const
+		void preparePhi(MatrixType& m,typename PsimagLite::Vector<MatrixElementType>  const ::Type&v) const
 		{
 			int offset = basis1_.partition(m_);
 			int total = basis1_.partition(m_+1) - offset;
@@ -250,7 +250,7 @@ namespace Dmrg {
 			}
 		}
 		
-		void unpreparePhi(std::vector<MatrixElementType>& v,MatrixType& m) const
+		void unpreparePhi(typename PsimagLite::Vector<MatrixElementType>::Type& v,MatrixType& m) const
 		{
 			int offset = basis1_.partition(m_);
 			int total = basis1_.partition(m_+1) - offset;

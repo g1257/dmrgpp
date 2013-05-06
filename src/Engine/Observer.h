@@ -193,7 +193,7 @@ namespace Dmrg {
 
 		template<typename SomeModelType>
 		void fourPointDeltas(MatrixType& fpd,
-				const std::vector<size_t>& gammas,
+				const typename PsimagLite::Vector<size_t>::Type& gammas,
 				const SomeModelType& model)
 		{
 			if (gammas.size()!=4) {
@@ -216,7 +216,7 @@ namespace Dmrg {
 			assert(fpd.n_row()>1);
 			typedef std::pair<size_t,size_t> PairType;
 
-			std::vector<PairType> pairs;
+			typename PsimagLite::Vector<PairType>::Type pairs;
 			for (size_t i=0;i<fpd.n_row();i++) {
 				if (2*i+1>=nsites) continue;
 				for (size_t j=i+1;j<fpd.n_col();j++) {

@@ -111,9 +111,9 @@ namespace Dmrg {
 		
 		size_t orbitals;
 		// Hubbard U values (one for each site)
-		std::vector<Field> hubbardU; 
+		typename PsimagLite::Vector<Field>::Type hubbardU; 
 		// Onsite potential values, one for each site
-		std::vector<Field> potentialV;
+		typename PsimagLite::Vector<Field>::Type potentialV;
 		// target number of electrons  in the system
 		PsimagLite::Matrix<Field> magneticField;
 		int nOfElectrons;

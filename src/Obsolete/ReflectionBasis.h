@@ -95,7 +95,7 @@ class ReflectionBasis {
 	typedef ReflectionColor<RealType,SparseMatrixType> ReflectionColorOrDomType;
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef std::vector<ComplexOrRealType> VectorType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
 
 	enum {AVAILABLE,NOT_AVAILABLE,COLOR};
@@ -111,10 +111,10 @@ public:
 		setIsolated(colorOrDom.isolated());
 		addColor(colorOrDom.ipcolor());
 
-		std::vector<size_t> iavail;
+		typename PsimagLite::Vector<size_t>::Type iavail;
 		prepareAvailable(iavail,colorOrDom.ipcolor(),colorOrDom.isolated());
 
-		std::vector<size_t> ip(iavail.size());
+		typename PsimagLite::Vector<size_t>::Type ip(iavail.size());
 		permute(iavail,ip);
 
 		choleskyFactor(iavail);
@@ -140,7 +140,7 @@ public:
 		return (sector>0) ? R1_ : Rm_;
 	}
 
-	const std::vector<size_t>& ipPosOrNeg(const RealType& sector) const
+	const typename PsimagLite::Vector<size_t>::Type& ipPosOrNeg(const RealType& sector) const
 	{
 		return (sector>0) ? ipPos_ : ipNeg_;
 	}
@@ -153,12 +153,12 @@ public:
 	{
 		SparseMatrixType R1t;
 		transposeConjugate(R1t,R1);
-		std::vector<ComplexOrRealType> r(R1t.rank());
+		typename PsimagLite::Vector<ComplexOrRealType>::Type r(R1t.rank());
 		SparseMatrixType tmpMatrix(r.size(),r.size());
 		size_t counter=0;
 		for (size_t i=0;i<R1t.rank();i++) {
 			tmpMatrix.setRow(i,counter);
-			std::vector<ComplexOrRealType> rhs(R1t.rank(),0);
+			typename PsimagLite::Vector<ComplexOrRealType>::Type rhs(R1t.rank(),0);
 			rhs[i]=1;
 			linearSolverTriangular(r,R1t,rhs);
 			for (size_t i=0;i<r.size();i++) {
@@ -189,18 +189,18 @@ public:
 
 private:
 
-	void prepareAvailable(std::vector<size_t>& iavail,
-			      const std::vector<size_t>& ipcolor,
-			      const std::vector<size_t>& ipIsolated) const
+	void prepareAvailable(typename PsimagLite::Vector<size_t>::Type& iavail,
+			      const typename PsimagLite::Vector<size_t>::Type& ipcolor,
+			      const typename PsimagLite::Vector<size_t>::Type& ipIsolated) const
 	{
-		std::vector<size_t> tmp(reflection_.rank(),1);
+		typename PsimagLite::Vector<size_t>::Type tmp(reflection_.rank(),1);
 		for (size_t i=0;i<ipcolor.size();i++) tmp[ipcolor[i]]=0;
 		for (size_t i=0;i<ipIsolated.size();i++) tmp[ipIsolated[i]]=0;
 		for (size_t i=0;i<tmp.size();i++)
 			if (tmp[i]>0) iavail.push_back(i);
 	}
 
-	void addColor(const std::vector<size_t>& ipcolor)
+	void addColor(const typename PsimagLite::Vector<size_t>::Type& ipcolor)
 	{
 		for (size_t i=0;i<ipcolor.size();i++) {
 			ipPos_.push_back(ipcolor[i]);
@@ -208,16 +208,16 @@ private:
 		}
 	}
 
-	void setIsolated(const std::vector<size_t>& ipIsolated)
+	void setIsolated(const typename PsimagLite::Vector<size_t>::Type& ipIsolated)
 	{
 		if (ipIsolated.size()==0) return;
-		std::vector<ComplexOrRealType> dd(reflection_.rank());
+		typename PsimagLite::Vector<ComplexOrRealType>::Type dd(reflection_.rank());
 		setDiagonal(dd,reflection_);
 		findPermuted(ipPos_,dd,ipIsolated,GREATER_THAN_ZERO);
 		findPermuted(ipNeg_,dd,ipIsolated,LESS_THAN_ZERO);
 	}
 
-	void setDiagonal(std::vector<ComplexOrRealType>& dd,const SparseMatrixType& m) const
+	void setDiagonal(typename PsimagLite::Vector<ComplexOrRealType>::Type& dd,const SparseMatrixType& m) const
 	{
 		for (size_t i=0;i<m.rank();i++) {
 			ComplexOrRealType val = 0;
@@ -232,10 +232,10 @@ private:
 	}
 
 	void setDiagonal(SparseMatrixType& R1,
-			 const std::vector<ComplexOrRealType>& dr,
+			 const typename PsimagLite::Vector<ComplexOrRealType>::Type& dr,
 			 const RealType& sector) const
 	{
-		const std::vector<size_t>& ipPosOrNeg = (sector>0) ? ipPos_ : ipNeg_;
+		const typename PsimagLite::Vector<size_t>::Type& ipPosOrNeg = (sector>0) ? ipPos_ : ipNeg_;
 
 		R1.resize(ipPosOrNeg.size());
 		size_t counter = 0;
@@ -254,9 +254,9 @@ private:
 		R1.checkValidity();
 	}
 
-	void findPermuted(std::vector<size_t>& x,
-			  const std::vector<ComplexOrRealType>& dd,
-			  const std::vector<size_t>& perm,
+	void findPermuted(typename PsimagLite::Vector<size_t>::Type& x,
+			  const typename PsimagLite::Vector<ComplexOrRealType>::Type& dd,
+			  const typename PsimagLite::Vector<size_t>::Type& perm,
 			  size_t lessOrGreater)
 	{
 		for (size_t i=0;i<perm.size();i++) {
@@ -274,14 +274,14 @@ private:
 		}
 	}
 
-	void permute(std::vector<size_t>& iavail,const std::vector<size_t>& ip) const
+	void permute(typename PsimagLite::Vector<size_t>::Type& iavail,const typename PsimagLite::Vector<size_t>::Type& ip) const
 	{
 		for (size_t i=0;i<iavail.size();i++) iavail[i] = iavail[ip[i]];
 	}
 
-	void choleskyFactor( const std::vector<size_t>& iavail)
+	void choleskyFactor( const typename PsimagLite::Vector<size_t>::Type& iavail)
 	{
-		std::vector<ComplexOrRealType> dr(reflection_.rank());
+		typename PsimagLite::Vector<ComplexOrRealType>::Type dr(reflection_.rank());
 
 		setDiagonal(dr,reflection_);
 		setDiagonal(R1_,dr,1.0);
@@ -312,12 +312,12 @@ private:
 		RealType tol = 1e-8;
 
 		// try to add vector to (sector) space, where sector= + or -
-		std::vector<ComplexOrRealType> w(reflection_.rank(),0.0);
+		typename PsimagLite::Vector<ComplexOrRealType>::Type w(reflection_.rank(),0.0);
 		setColumn(w,sector,j,reflectionT);
-		std::vector<size_t>& ipPosOrNeg = (sector>0) ? ipPos_ : ipNeg_;
-		std::vector<ComplexOrRealType> T1w(ipPosOrNeg.size(),0);
+		typename PsimagLite::Vector<size_t>::Type& ipPosOrNeg = (sector>0) ? ipPos_ : ipNeg_;
+		typename PsimagLite::Vector<ComplexOrRealType>::Type T1w(ipPosOrNeg.size(),0);
 		setT1w(T1w,ipPosOrNeg,w,sector,reflectionT);
-		std::vector<ComplexOrRealType> r(R1.rank());
+		typename PsimagLite::Vector<ComplexOrRealType>::Type r(R1.rank());
 		SparseMatrixType R1t;
 		transposeConjugate(R1t,R1);
 		linearSolverTriangular(r,R1t,T1w);
@@ -337,7 +337,7 @@ private:
 
 
 	void growOneRowAndOneColumn(SparseMatrixType& R1,
-				    const std::vector<ComplexOrRealType>& r,
+				    const typename PsimagLite::Vector<ComplexOrRealType>::Type& r,
 				    const ComplexOrRealType& addedValue,
 				    const RealType& sector) const
 	{
@@ -371,9 +371,9 @@ private:
 	/**
 	   Let R1t = transpose(R1), solve   L * r = rhs
 	*/
-	void linearSolverTriangular(std::vector<ComplexOrRealType>& r,
+	void linearSolverTriangular(typename PsimagLite::Vector<ComplexOrRealType>::Type& r,
 				    const SparseMatrixType& R1t,
-				    const std::vector<ComplexOrRealType>& rhs) const
+				    const typename PsimagLite::Vector<ComplexOrRealType>::Type& rhs) const
 	{
 
 		for(size_t irow=0; irow < R1t.rank(); irow++) {
@@ -393,8 +393,8 @@ private:
 		};
 	}
 
-//	void setT1w(std::vector<ComplexOrRealType>& T1w,
-//		    const std::vector<size_t>& ipPosOrNeg,
+//	void setT1w(typename PsimagLite::Vector<ComplexOrRealType>::Type& T1w,
+//		    const typename PsimagLite::Vector<size_t>::Type& ipPosOrNeg,
 //		    size_t j,
 //		    const RealType& sector) const
 //	{
@@ -416,9 +416,9 @@ private:
 //		T1w.setCounter(T1w.rank(),counter);
 //	}
 
-//	void setT1w(std::vector<ComplexOrRealType>& T1w,
-//		    const std::vector<size_t>& ipPosOrNeg,
-//		    const std::vector<ComplexOrRealType>& w,
+//	void setT1w(typename PsimagLite::Vector<ComplexOrRealType>::Type& T1w,
+//		    const typename PsimagLite::Vector<size_t>::Type& ipPosOrNeg,
+//		    const typename PsimagLite::Vector<ComplexOrRealType>::Type& w,
 //		    const RealType& sector) const
 //	{
 //		for (size_t ii=0;ii<ipPosOrNeg.size();ii++) {
@@ -437,14 +437,14 @@ private:
 //		}
 //	}
 
-	void setT1w(std::vector<ComplexOrRealType>& T1w,
-		     const std::vector<size_t>& ipPosOrNeg,
-		     const std::vector<ComplexOrRealType>& w,
+	void setT1w(typename PsimagLite::Vector<ComplexOrRealType>::Type& T1w,
+		     const typename PsimagLite::Vector<size_t>::Type& ipPosOrNeg,
+		     const typename PsimagLite::Vector<ComplexOrRealType>::Type& w,
 		     const RealType& sector,
 		    const SparseMatrixType& reflectionT) const
 	{
 		size_t n = reflectionT.rank();
-		std::vector<int> inverseP(n,-1);
+		typename PsimagLite::Vector<int>::Type inverseP(n,-1);
 		for (size_t ii=0;ii<ipPosOrNeg.size();ii++) {
 			if (isAlmostZero(w[ii],1e-14)) continue;
 			inverseP[ipPosOrNeg[ii]]=ii;
@@ -464,7 +464,7 @@ private:
 
 	}
 
-	void setColumn(std::vector<ComplexOrRealType>& w,const RealType& sector,size_t j,const SparseMatrixType& reflectionT) const
+	void setColumn(typename PsimagLite::Vector<ComplexOrRealType>::Type& w,const RealType& sector,size_t j,const SparseMatrixType& reflectionT) const
 	{
 		for (int k = reflectionT.getRowPtr(j);k<reflectionT.getRowPtr(j+1);k++) {
 			size_t col = reflectionT.getCol(k);
@@ -474,8 +474,8 @@ private:
 		}
 	}
 
-	void findIsolated(std::vector<size_t>& ipIsolated,
-			  std::vector<size_t>& ipConnected,
+	void findIsolated(typename PsimagLite::Vector<size_t>::Type& ipIsolated,
+			  typename PsimagLite::Vector<size_t>::Type& ipConnected,
 			  const SparseMatrixType& reflection_) const
 	{
 		for (size_t i=0;i<reflection_.rank();i++) {
@@ -500,7 +500,7 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	const SparseMatrixType& reflection_;
 	bool idebug_;
-	std::vector<size_t> ipPos_,ipNeg_;
+	typename PsimagLite::Vector<size_t>::Type ipPos_,ipNeg_;
 	SparseMatrixType R1_,Rm_;
 
 }; // class ReflectionBasis

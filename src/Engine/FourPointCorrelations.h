@@ -235,7 +235,7 @@ namespace Dmrg {
 		void growDirectly4p(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns,size_t threadId) const
 		{
 			Odest =Osrc;
-			std::vector<int> signs;
+			typename PsimagLite::Vector<int>::Type signs;
 			// from 0 --> i
 			int nt=i-1;
 			if (nt<0) nt=0;

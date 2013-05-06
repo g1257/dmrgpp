@@ -130,7 +130,7 @@ namespace Dmrg {
 
 	public:
 
-		typedef std::vector<unsigned int long long> HilbertBasisType;
+		typedef typename PsimagLite::Vector<unsigned int long long>::Type HilbertBasisType;
 		typedef ModelHelperType_ ModelHelperType;
 		typedef GeometryType_ GeometryType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -251,10 +251,10 @@ namespace Dmrg {
 
 		const ParametersType& params() const { return params_; }
 
-		void setNaturalBasis(std::vector<OperatorType> &creationMatrix,
+		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 				     SparseMatrixType &hamiltonian,
 				     BasisDataType& q,
-				     const std::vector<size_t>& block,
+				     const typename PsimagLite::Vector<size_t>::Type& block,
 				     const RealType& time) const
 		{
 			switch (model_) {
@@ -299,7 +299,7 @@ namespace Dmrg {
 			throw std::runtime_error("naturalOperator\n");
 		}
 
-		void findElectrons(std::vector<size_t> &electrons,
+		void findElectrons(typename PsimagLite::Vector<size_t> ::Type&electrons,
 				   const HilbertBasisType& basis,
 				   size_t site) const
 		{
@@ -384,9 +384,9 @@ namespace Dmrg {
 			}
 		}
 		
-		void hamiltonianConnectionProduct(std::vector<SparseElementType> &x,
-						  std::vector<SparseElementType> const &y,
-						  ModelHelperType const &modelHelper) const
+		void hamiltonianConnectionProduct(typename PsimagLite::Vector<SparseElementType> ::Type&x,
+		                                  const typename PsimagLite::Vector<SparseElementType>::Type& y,
+		                                  ModelHelperType const &modelHelper) const
 		{
 			switch(model_) {
 			case HUBBARD_ONE_BAND:
@@ -431,7 +431,7 @@ namespace Dmrg {
 			return hilbertSize_[site];
 		}
 
-		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,
+		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 					 Block const &block)
 		{
 			switch(model_) {
@@ -451,8 +451,8 @@ namespace Dmrg {
 		}
 
 		void setNaturalBasis(HilbertBasisType& basis,
-				     std::vector<size_t>& q,
-				     const std::vector<size_t>& block) const
+				     typename PsimagLite::Vector<size_t>::Type& q,
+				     const typename PsimagLite::Vector<size_t>::Type& block) const
 		{
 			if (block.size()==1) {
 				size_t index=block[0];
@@ -534,16 +534,16 @@ namespace Dmrg {
 			throw std::runtime_error("getConnection(...) failed\n");
 		}
 
-		void findElectronsOfOneSite(std::vector<size_t>& electrons,size_t site) const
+		void findElectronsOfOneSite(typename PsimagLite::Vector<size_t>::Type& electrons,size_t site) const
 		{
-			std::vector<size_t> block(1,site);
+			typename PsimagLite::Vector<size_t>::Type block(1,site);
 			HilbertBasisType basis;
-			std::vector<size_t> quantumNumbs;
+			typename PsimagLite::Vector<size_t>::Type quantumNumbs;
 			setNaturalBasis(basis,quantumNumbs,block);
 			findElectrons(electrons,basis,site);
 		}
 
-		void setOperatorMatrices(std::vector<OperatorType> &creationMatrix,Block const &block) const
+		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,Block const &block) const
 		{
 			switch(model_) {
 			case HUBBARD_ONE_BAND:
@@ -568,16 +568,16 @@ namespace Dmrg {
 		{
 			assert(block.size()==2);
 
-			std::vector<OperatorType> cm;
+			typename PsimagLite::Vector<OperatorType>::Type cm;
 			setOperatorMatrices(cm,block);
 			calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
 		}
 
 		void calcHamiltonian(SparseMatrixType &hmatrix,
-							 std::vector<OperatorType> const &cm,
-							 Block const &block,
-							 RealType time,
-							 RealType factorForDiagonals) const
+		                     const typename PsimagLite::Vector<OperatorType>::Type& cm,
+		                     Block const &block,
+		                     RealType time,
+		                     RealType factorForDiagonals) const
 		{
 			switch(model_) {
 			case HUBBARD_ONE_BAND:
@@ -606,7 +606,7 @@ namespace Dmrg {
 				    const ModelHelperType& modelHelper) const
 		{
 			typedef typename SomeModelType::HamiltonianConnectionType HamiltonianConnectionType;
-			std::vector<ComplexOrRealType> x,y; // bogus
+			typename PsimagLite::Vector<ComplexOrRealType>::Type x,y; // bogus
 			HamiltonianConnectionType hc(geometry_,modelHelper,&lps,&x,&y);
 			size_t i =0, j = 0, type = 0,term = 0, dofs =0;
 			ComplexOrRealType tmp = 0.0;
@@ -625,7 +625,7 @@ namespace Dmrg {
 
 			*lps = new LinkProductStructType(maxSize);
 
-			std::vector<ComplexOrRealType> x,y; // bogus
+			typename PsimagLite::Vector<ComplexOrRealType>::Type x,y; // bogus
 
 			typedef typename SomeModelType::HamiltonianConnectionType HamiltonianConnectionType;
 			HamiltonianConnectionType hc(geometry_,modelHelper,*lps,&x,&y);
@@ -643,7 +643,7 @@ namespace Dmrg {
 		void init(SomeModelType* model)
 		{
 			for (size_t i=0;i<hilbertSize_.size();i++) {
-				std::vector<size_t> block(1,i);
+				typename PsimagLite::Vector<size_t>::Type block(1,i);
 				hilbertSize_[i] = model->hilbertSize(i);
 				model->setNaturalBasis(basis_[i],q_[i],block);
 			}
@@ -652,9 +652,9 @@ namespace Dmrg {
 		const ParametersType& params_;	
 		const GeometryType& geometry_;
 		ConcurrencyType& concurrency_;
-		std::vector<size_t> hilbertSize_;
-		std::vector<std::vector<size_t> > q_;
-		std::vector<HilbertBasisType> basis_;
+		typename PsimagLite::Vector<size_t>::Type hilbertSize_;
+		typename PsimagLite::Vector<typename PsimagLite::Vector<size_t>::Type>::Type q_;
+		typename PsimagLite::Vector<HilbertBasisType>::Type basis_;
 		// models start
 		ModelHubbardType* modelHubbard_;
 		ModelHeisenbergType* modelHeisenberg_;

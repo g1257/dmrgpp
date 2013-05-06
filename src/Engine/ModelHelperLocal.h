@@ -211,8 +211,8 @@ namespace Dmrg {
 
 		//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
 		//! Has been changed to accomodate for reflection symmetry
-		void fastOpProdInter(std::vector<SparseElementType>  &x,
-		                     std::vector<SparseElementType>  const &y,
+		void fastOpProdInter(typename PsimagLite::Vector<SparseElementType>::Type&x,
+		                     const typename PsimagLite::Vector<SparseElementType>::Type&y,
 		                     SparseMatrixType const &A,
 		                     SparseMatrixType const &B,
 		                     const LinkType& link,
@@ -251,7 +251,7 @@ namespace Dmrg {
 				for (int k=startk;k<endk;k++) {
 					int alphaPrime = A.getCol(k);
 					SparseElementType tmp2 = A.getValue(k) *fsValue;
-					const std::vector<int>& bufferTmp = buffer_[alphaPrime];
+					const typename PsimagLite::Vector<int>::Type& bufferTmp = buffer_[alphaPrime];
 
 					for (int kk=startkk;kk<endkk;kk++) {
 						int betaPrime= B.getCol(kk);
@@ -270,8 +270,8 @@ namespace Dmrg {
 		//! Then, this function does x += H_m * y
 		//! This is a performance critical function
 		//! Has been changed to accomodate for reflection symmetry
-		void hamiltonianLeftProduct(std::vector<SparseElementType> &x,
-		                            std::vector<SparseElementType> const &y) const
+		void hamiltonianLeftProduct(typename PsimagLite::Vector<SparseElementType> ::Type& x,
+		                            const typename PsimagLite::Vector<SparseElementType>::Type& y) const
 		{
 			int m = m_;
 			int offset = lrs_.super().partition(m);
@@ -299,8 +299,8 @@ namespace Dmrg {
 		//! Let H_m be  the m-th block (in the ordering of basis1) of H
 		//! Then, this function does x += H_m * y
 		//! This is a performance critical function
-		void hamiltonianRightProduct(std::vector<SparseElementType> &x,
-		                             std::vector<SparseElementType> const &y) const
+		void hamiltonianRightProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
+		                             const typename PsimagLite::Vector<SparseElementType>::Type& y) const
 		{
 			int m = m_;
 			int offset = lrs_.super().partition(m);
@@ -384,9 +384,9 @@ namespace Dmrg {
 	private:
 		int m_;
 		const LeftRightSuperType&  lrs_;
-		std::vector<std::vector<int> > buffer_;
-		std::vector<SparseMatrixType> basis2tc_,basis3tc_;
-		std::vector<size_t> alpha_,beta_;
+		typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;
+		typename PsimagLite::Vector<SparseMatrixType>::Type basis2tc_,basis3tc_;
+		typename PsimagLite::Vector<size_t>::Type alpha_,beta_;
 
 		const SparseMatrixType& getTcOperator(int i,size_t sigma,size_t type) const
 		{
@@ -407,7 +407,7 @@ namespace Dmrg {
 			int offset = lrs_.super().partition(m_);
 			int total = lrs_.super().partition(m_+1) - offset;
 
-			std::vector<int>  tmpBuffer(ne);
+			typename PsimagLite::Vector<int>::Type  tmpBuffer(ne);
 			for (size_t alphaPrime=0;alphaPrime<ns;alphaPrime++) {
 				for (size_t betaPrime=0;betaPrime<ne;betaPrime++) {
 					tmpBuffer[betaPrime] =lrs_.super().permutationInverse(alphaPrime + betaPrime*ns) -offset;
@@ -417,7 +417,7 @@ namespace Dmrg {
 			}
 		}
 
-		void createTcOperators(std::vector<SparseMatrixType>& basistc,
+		void createTcOperators(typename PsimagLite::Vector<SparseMatrixType>::Type& basistc,
 							   const BasisWithOperatorsType& basis)
 		{
 			if (basistc.size()==0) return;
@@ -433,20 +433,20 @@ namespace Dmrg {
 			else createTcOperatorsSimple(basistc,basis);
 		}
 
-		void createTcOperatorsSimple(std::vector<SparseMatrixType>& basistc,
+		void createTcOperatorsSimple(typename PsimagLite::Vector<SparseMatrixType>::Type& basistc,
 		                       const BasisWithOperatorsType& basis)
 		{
 			for (size_t i=0;i<basistc.size();i++)
 				transposeConjugate(basistc[i],basis.getOperatorByIndex(i).data);
 		}
 
-		void createTcOperatorsCached(std::vector<SparseMatrixType>& basistc,
+		void createTcOperatorsCached(typename PsimagLite::Vector<SparseMatrixType>::Type& basistc,
 							   const BasisWithOperatorsType& basis)
 		{
 			if (basistc.size()==0) return;
 			size_t n=basis.getOperatorByIndex(0).data.row();
-			std::vector<std::vector<int> > col(n);
-			std::vector<std::vector<typename SparseMatrixType::value_type> > value(n);
+			typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type col(n);
+			typename PsimagLite::Vector<typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type>::Type value(n);
 			for (size_t i=0;i<basistc.size();i++) {
 				const SparseMatrixType& tmp = basis.getOperatorByIndex(i).data;
 				assert(tmp.row()==n);
