@@ -22,17 +22,13 @@ Please see full open source license included in file LICENSE.
 use warnings;
 use strict;
 
-my $hasGsl = "no"; # say "no" here to remove GSL dependence
-
 my $mpi=0;
 my $platform="linux";
 my $lapack="-llapack";
 my $PsimagLite="../../PsimagLite/src";
 my ($pthreads,$pthreadsLib)=(0,"");
-my $brand= "v2.0";
-
-my $gslLibs = " -lgsl  -lgslcblas ";
-$gslLibs =" " if ($hasGsl=~/n/i);
+my $brand= "v3.0";
+my $build="production";
 
 system("make clean");
 
@@ -43,11 +39,6 @@ welcome();
 askQuestions();
 
 createMakefile();
-
-#createDriver();
-
-#createObserverDriver();
-
 
 sub welcome
 {
@@ -91,7 +82,7 @@ sub askQuestions
 	$mpi=1	if ($_=~/^y/i);
 	
 	$pthreads=0;
-	$pthreadsLib="";
+	$pthreadsLib="  ";
 	if ($mpi!=1 && !($platform=~/Darwin/i)) { # cannot use both mpi and pthreads
 		print "Do you want to compile with pthreads enabled?\n";
 		print "Available: y or n\n";
@@ -101,8 +92,10 @@ sub askQuestions
 		if ($_ eq "" or $_ eq "\n") {
 			$_="y";
 		}
-		$pthreadsLib=" -lpthread ";
-		$pthreads=1	if ($_=~/^y/i);
+		if ($_=~/^y/i) {
+			$pthreadsLib=" -lpthread ";
+			$pthreads=1;
+		}
 	}
 	
 	
@@ -115,17 +108,32 @@ sub askQuestions
 		$_=" $lapack ";
 	}
 	$lapack = $_;
-}
 
+	print "Please enter the type of build\n";
+	print "Available: production, debug, callgrind\n";
+	print "Default is: production (press ENTER): ";
+	$_=<STDIN>;
+	chomp;
+	if ($_ eq "" or $_ eq "\n") {
+		$_="production";
+	}
+	$build = $_;
+}
 
 sub createMakefile
 {
 	unlink("Engine/Version.h");
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
 	my $compiler = compilerName();
+	$compiler = " mpicxx " if ($mpi);
 	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 	my $usePthreadsOrNot = " ";
 	$usePthreadsOrNot = " -DUSE_PTHREADS " if ($pthreads);
+	my $optimizations = " -O3 -DNDEBUG ";
+	$optimizations = " -g3 " if ($build eq "debug");
+	$optimizations .= " -g3 " if ($build eq "callgrind");
+	my $strip = "strip ";
+	$strip = " true " if ($build eq "debug" or $build eq "callgrind");
 
 print FOUT<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Modify configure.pl instead
@@ -134,30 +142,22 @@ print FOUT<<EOF;
 # Platform: $platform
 # MPI: $mpi
 
-LDFLAGS =    $lapack  $gslLibs $pthreadsLib
+LDFLAGS =    $lapack  $pthreadsLib
 CPPFLAGS = -Werror -Wall  -IEngine -IModels/HubbardOneBand -IModels/HeisenbergSpinOneHalf -IModels/ExtendedHubbard1Orb  -IModels/FeAsModel -IModels/FeAsBasedScExtended -IModels/Immm  -IModels/Tj1Orb -I$PsimagLite -I$PsimagLite/Geometry $usePthreadsOrNot
-EOF
-if ($mpi) {
-	print FOUT "CXX = mpicxx -O3 -DNDEBUG \n";
-} else {
-	print FOUT "CXX = $compiler  -O3 -DNDEBUG\n";
-	print FOUT "#Comment out line below for debugging (COMMENT ALSO THE strip commands): \n";
-	print FOUT "#CXX = $compiler -g3 #ALSO COMMENT OUT strip command below\n";
-}
-print FOUT<<EOF;
+CXX = $compiler  $optimizations 
 EXENAME = dmrg
 all: \$(EXENAME)
 
 dmrg:  dmrg.o gitrev
 	\$(CXX) -o dmrg dmrg.o \$(LDFLAGS)  
-	strip dmrg
+	$strip dmrg
 
 correctionVectorMulti: correctionVectorMulti.o
 	\$(CXX) -o correctionVectorMulti correctionVectorMulti.o \$(LDFLAGS)
 
 observe:  observe.o Makefile
 	\$(CXX) -o observe observe.o \$(LDFLAGS)
-	strip observe
+	$strip observe
 
 # dependencies brought about by Makefile.dep
 %.o: %.cpp Makefile gitrev Engine/Version.h
