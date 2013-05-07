@@ -147,9 +147,9 @@ namespace std {
 namespace PsimagLite {
 	// FIXME: write proper class here
 	template<typename T>
-	class  Vector : public std::vector<T> {
+	class  Vector  {
 	public:
-		typedef T ValueType;
+		typedef std::vector<T> Type;
 	}; // class Vector
 
 	// change this when using PsimagLite::Vector: 
