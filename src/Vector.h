@@ -34,18 +34,19 @@ inline std::istream& operator>>(std::istream& is,std::pair<T1,T2>& v)
 	return is;
 }
 
-template<class X>
-inline X operator*(const std::vector<X>& v,const std::vector<X>& w)
+template<typename X,typename A>
+inline X operator*(const std::vector<X,A>& v,const std::vector<X,A>& w)
 {
 	X result=0;
 	for (size_t i=0;i<v.size();i++) result += v[i]*conj(w[i]);
 	return result;
 }
 
-template<typename T1,typename T2>
-inline std::vector<T2> operator*(const std::vector<std::vector<T1> >& v1,const std::vector<T2>& v2)
+template<typename T1,typename T2,typename A,typename AA>
+inline std::vector<T2,A> operator*(const std::vector<std::vector<T1,A>,AA>& v1,
+                                 const std::vector<T2,A>& v2)
 {
-	std::vector<T2> v3(v2.size());
+	std::vector<T2,A> v3(v2.size());
 	for (size_t i=0;i<v3.size();i++) {
 		v3[i] = 0;
 		for (size_t j=0;i<v2.size();j++)
@@ -54,30 +55,30 @@ inline std::vector<T2> operator*(const std::vector<std::vector<T1> >& v1,const s
 	return v3;
 }
 
-template<typename T1,typename T2>
-inline std::vector<T2> operator*(const T1& v1,const std::vector<T2>& v2)
+template<typename T1,typename T2,typename A>
+inline std::vector<T2,A> operator*(const T1& v1,const std::vector<T2,A>& v2)
 {
-	std::vector<T2> v3(v2.size());
+	std::vector<T2,A> v3(v2.size());
 	for (size_t i=0;i<v3.size();i++) v3[i] = v1 * v2[i];
 	return v3;
 }
 
-template<typename T1,typename T2>
-inline std::vector<T2> operator*(const std::vector<T2>& v2,const T1& v1)
+template<typename T1,typename T2,typename A>
+inline std::vector<T2,A> operator*(const std::vector<T2,A>& v2,const T1& v1)
 {
 	return v1*v2;
 }
 
-template<typename T>
-std::vector<T> conj(std::vector<T>& v)
+template<typename T,typename A>
+std::vector<T,A> conj(std::vector<T,A>& v)
 {
-	std::vector<T> w(v.size());
+	std::vector<T,A> w(v.size());
 	for (size_t i=0;i<v.size();i++) w[i]=std::conj(v[i]);
 	return w;
 }
 
-template<typename T>
-T scalarProduct(const std::vector<T>& v1, const std::vector<T>& v2)
+template<typename T,typename A>
+T scalarProduct(const std::vector<T,A>& v1, const std::vector<T,A>& v2)
 {
 	T result = 0.0;
 	for(size_t i=0; i < v2.size(); i++)
@@ -85,60 +86,60 @@ T scalarProduct(const std::vector<T>& v1, const std::vector<T>& v2)
 	return result;
 }
 
-template<typename FieldType>
-inline std::vector<FieldType> operator+=(std::vector<FieldType>& v,const std::vector<FieldType>& w)
+template<typename FieldType,typename A>
+inline std::vector<FieldType,A> operator+=(std::vector<FieldType,A>& v,const std::vector<FieldType,A>& w)
 {
 	for (size_t i=0;i<w.size();i++) v[i] += w[i];
 	return v;
 }
 
-template<typename FieldType>
-inline std::vector<FieldType> operator-=(std::vector<FieldType>& v,const std::vector<FieldType>& w)
+template<typename FieldType,typename A>
+inline std::vector<FieldType,A> operator-=(std::vector<FieldType,A>& v,const std::vector<FieldType,A>& w)
 {
 	for (size_t i=0;i<w.size();i++) v[i] -= w[i];
 	return v;
 }
 
-template<typename T1,typename T2>
-inline std::vector<T1> operator*=(std::vector<T1>& v,const T2& t2)
+template<typename T1,typename T2,typename A>
+inline std::vector<T1,A> operator*=(std::vector<T1,A>& v,const T2& t2)
 {
 	for (size_t i=0;i<v.size();i++) v[i] *= t2;
 	return v;
 }
 
-template<typename T1,typename T2>
-inline std::vector<T1> operator/=(std::vector<T1>& v,const T2& t2)
+template<typename T1,typename T2,typename A>
+inline std::vector<T1,A> operator/=(std::vector<T1,A>& v,const T2& t2)
 {
 	for (size_t i=0;i<v.size();i++) v[i] /= t2;
 	return v;
 }
 
-template<typename T1,typename T2>
-inline std::vector<T1> operator+(const std::vector<T1>& v1,const std::vector<T2>& v2)
+template<typename T1,typename T2,typename A>
+inline std::vector<T1,A> operator+(const std::vector<T1,A>& v1,const std::vector<T2,A>& v2)
 {
-	std::vector<T1> v3(v1.size());
+	std::vector<T1,A> v3(v1.size());
 	for (size_t i=0;i<v1.size();i++) v3[i] = v1[i] + v2[i];
 	return v3;
 }
 
-template<typename T1,typename T2>
-inline std::vector<T1> operator-(const std::vector<T1>& v1,const std::vector<T2>& v2)
+template<typename T1,typename T2,typename A>
+inline std::vector<T1,A> operator-(const std::vector<T1,A>& v1,const std::vector<T2,A>& v2)
 {
-	std::vector<T1> v3(v1.size());
+	std::vector<T1,A> v3(v1.size());
 	for (size_t i=0;i<v1.size();i++) v3[i] = v1[i] - v2[i];
 	return v3;
 }
 
-template<class X>
-std::ostream &operator<<(std::ostream &s,const std::vector<X>& v)
+template<class X,typename A>
+std::ostream &operator<<(std::ostream &s,const std::vector<X,A>& v)
 {
 	s<<v.size()<<"\n";
 	for (size_t i=0;i<v.size();i++) s<<v[i]<<"\n";
 	return s;
 }
 
-template<typename FieldType>
-inline std::istream& operator>>(std::istream& is,std::vector<FieldType>& v)
+template<typename FieldType,typename A>
+inline std::istream& operator>>(std::istream& is,std::vector<FieldType,A>& v)
 {
 	int xsize = 0;
 	is>>xsize;
@@ -160,20 +161,20 @@ namespace PsimagLite {
 	}; // class Vector
 
 	// change this when using PsimagLite::Vector: 
-	template<class T>
-	void vectorPrint(const std::vector<T>& v,char const *name,std::ostream &s)
+	template<class T,typename A>
+	void vectorPrint(const std::vector<T,A>& v,char const *name,std::ostream &s)
 	{
 		for (size_t i=0;i<v.size();i++) s<<name<<"["<<i<<"]="<<v[i]<<std::endl;
 	} 
 	
-	template<class X>
-	X norm(const std::vector<X>& v)
+	template<class X,typename A>
+	X norm(const std::vector<X,A>& v)
 	{
 		return sqrt(v*v);
 	}
 
-	template<class X>
-	X norm(const std::vector<std::complex<X> >& v)
+	template<class X,typename A>
+	X norm(const std::vector<std::complex<X>,A>& v)
 	{
 		std::complex<X> x = v*v;
 		if (fabs(imag(x))>1e-5) throw std::runtime_error("Norm isn't real\n");
@@ -181,22 +182,25 @@ namespace PsimagLite {
 	}
 
 	template<typename X,typename RandomType>
-	void randomizeVector(typename Vector<typename RandomType::value_type>::Type& v,const X& a,const X& b,const RandomType& r)
+	void randomizeVector(typename Vector<typename RandomType::value_type>::Type& v,
+	                     const X& a,
+	                     const X& b,
+	                     const RandomType& r)
 	{
 		for (size_t i=0;i<v.size();i++) v[i] = a + b*r.random();
 	}
 	
-	template<typename X,typename Y>
-	int isInVector(const std::vector<X>& natBasis,Y const &v)
+	template<typename X,typename Y,typename A>
+	int isInVector(const std::vector<X,A>& natBasis,Y const &v)
 	{
-		typename std::vector<X>::const_iterator x = find(natBasis.begin(),natBasis.end(),v);
+		typename std::vector<X,A>::const_iterator x = find(natBasis.begin(),natBasis.end(),v);
 		if (x==natBasis.end()) return -1;
 		return x-natBasis.begin();
 		
 	}
 
-	template<typename T>
-	void split(std::vector<T>& v,const char* s1,char sep)
+	template<typename T,typename A>
+	void split(std::vector<T,A>& v,const char* s1,char sep)
 	{
 		std::string buffer = "";
 		std::string s(s1);
