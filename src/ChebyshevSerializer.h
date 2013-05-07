@@ -68,7 +68,7 @@ namespace PsimagLite {
 		typedef VectorType_ VectorType;
 		typedef typename VectorType::value_type FieldType;
 		typedef Matrix<FieldType> MatrixType;
-		typedef std::vector<std::pair<RealType,RealType> > PlotDataType;
+		typedef typename Vector<std::pair<RealType,RealType> >::Type PlotDataType;
 		typedef PlotParams<RealType> PlotParamsType;
 		typedef ParametersForSolver<RealType> ParametersType;
 		typedef KernelPolynomialParameters<RealType> KernelParametersType;
@@ -123,10 +123,10 @@ namespace PsimagLite {
 		{
 			size_t cutoff = kernelParams.cutoff;
 			if (cutoff==0 || moments_.size()<cutoff) cutoff = moments_.size();
-			std::vector<RealType> gn(cutoff,1.0);
+			typename Vector<RealType>::Type gn(cutoff,1.0);
 			initKernel(gn,kernelParams);
 
-			std::vector<RealType> gnmun(gn.size());
+			typename Vector<RealType>::Type gnmun(gn.size());
 			computeGnMuN(gnmun,gn);
 
 			size_t counter = 0;
@@ -162,19 +162,19 @@ namespace PsimagLite {
 
 	private:
 
-		RealType calcF(const RealType& x,const std::vector<RealType>& gnmn) const
+		RealType calcF(const RealType& x,const typename Vector<RealType>::Type& gnmn) const
 		{
 			RealType sum = 0.5*gnmn[0];
 			for (size_t i=1;i<gnmn.size();i++) sum += gnmn[i]*chebyshev_(i,x);
 			return 2.0*sum;
 		}
 		
-		void computeGnMuN( std::vector<RealType>& gnmn,std::vector<RealType>& gn) const
+		void computeGnMuN( typename Vector<RealType>::Type& gnmn,typename Vector<RealType>::Type& gn) const
 		{
 			for (size_t i=0;i<gnmn.size();i++) gnmn[i] = moments_[i] * gn[i];
 		}
 		
-		void initKernel(std::vector<RealType>& gn,
+		void initKernel(typename Vector<RealType>::Type& gn,
 		                const KernelParametersType& kernelParams) const
 		{
 			switch (kernelParams.type) {
@@ -191,7 +191,7 @@ namespace PsimagLite {
 			}
 		}
 
-		void initKernelJackson(std::vector<RealType>& gn) const
+		void initKernelJackson(typename Vector<RealType>::Type& gn) const
 		{
 			size_t nPlus1 = gn.size()+1;
 			RealType cot1 = 1.0/tan(M_PI/nPlus1);
@@ -201,7 +201,7 @@ namespace PsimagLite {
 			}
 		}
 
-		void initKernelLorentz(std::vector<RealType>& gn,
+		void initKernelLorentz(typename Vector<RealType>::Type& gn,
 		                       const RealType& lambda) const
 		{
 			RealType nreal = gn.size();
@@ -211,7 +211,7 @@ namespace PsimagLite {
 			}
 		}
 		ProgressIndicator progress_;
-		std::vector<RealType> moments_;
+		typename Vector<RealType>::Type moments_;
 		ParametersType params_;
 		ChebyshevFunction<RealType> chebyshev_;
 	}; // class ChebyshevSerializer

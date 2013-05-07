@@ -94,8 +94,8 @@ namespace PsimagLite {
 		SampleCRSMatrix(size_t rank,T seed,size_t nonZeros,T maxValue) : rank_(rank),rowptr_(rank+1)
 		{
 			srand48(seed);
-			std::vector<size_t> rows,cols;
-			std::vector<T> vals;
+			typename Vector<size_t>::Type rows,cols;
+			typename Vector<T>::Type vals;
 			for (size_t i=0;i<nonZeros;i++) {
 				// pick a row
 				size_t row = size_t(drand48()*rank);
@@ -136,7 +136,7 @@ namespace PsimagLite {
 		void pushValue(const T& value) { values_.push_back(value); }
 		
 
-		void matrixVectorProduct(std::vector<T>& x, const std::vector<T>& y) const
+		void matrixVectorProduct(typename Vector<T>::Type& x, const typename Vector<T>::Type& y) const
 		{
 			for (size_t i = 0; i < y.size(); i++)
 				for (size_t j = rowptr_[i]; j < rowptr_[i + 1]; j++)
@@ -161,7 +161,7 @@ namespace PsimagLite {
 		
 
 		template<typename SomeIoOutputType,typename SomeFieldType>
-		void saveVector(SomeIoOutputType& io,const std::vector<SomeFieldType>& v) const
+		void saveVector(SomeIoOutputType& io,const typename Vector<SomeFieldType>::Type& v) const
 		{
 			io<<v.size()<<"\n";
 			for (size_t i=0;i<v.size();i++) {
@@ -172,7 +172,7 @@ namespace PsimagLite {
 		
 
 		template<typename SomeIoInputType,typename SomeFieldType>
-		void readVector(SomeIoInputType& io,std::vector<SomeFieldType>& v) const
+		void readVector(SomeIoInputType& io,typename Vector<SomeFieldType>::Type& v) const
 		{
 			int size=0;
 			io>>size;
@@ -184,11 +184,11 @@ namespace PsimagLite {
 		}
 		
 
-		void fillMatrix(std::vector<size_t>& rows,std::vector<size_t>& cols,
-				std::vector<T>& vals)
+		void fillMatrix(typename Vector<size_t>::Type& rows,typename Vector<size_t>::Type& cols,
+				typename Vector<T>::Type& vals)
 		{
-			Sort<std::vector<size_t> > s;
-		    std::vector<size_t> iperm(rows.size());
+			Sort<typename Vector<size_t>::Type > s;
+		    typename Vector<size_t>::Type iperm(rows.size());
 			s.sort(rows,iperm);
 			size_t counter = 0;
 			size_t prevRow = rows[0]+1;
@@ -210,9 +210,9 @@ namespace PsimagLite {
 		
 		
 		size_t rank_;
-		std::vector<size_t> rowptr_;
-		std::vector<size_t> colind_;
-		std::vector<T> values_;
+		typename Vector<size_t>::Type rowptr_;
+		typename Vector<size_t>::Type colind_;
+		typename Vector<T>::Type values_;
 		
 	}; // class SampleCRSMatrix
 	

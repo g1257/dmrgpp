@@ -106,27 +106,27 @@ public:
 		mywrite(fd,(const void *)&x,sizeof(x));
 	}
 
-	static void save(int fd,const std::vector<int>& vec)
+	static void save(int fd,const typename Vector<int>::Type& vec)
 	{
 		vsave_(fd,vec);
 	}
 
-	static void save(int fd,const std::vector<size_t>& vec)
+	static void save(int fd,const typename Vector<size_t>::Type& vec)
 	{
 		vsave_(fd,vec);
 	}
 
-	static void save(int fd,const std::vector<double>& vec)
+	static void save(int fd,const typename Vector<double>::Type& vec)
 	{
 		vsave_(fd,vec);
 	}
 
-	static void save(int fd,const std::vector<float>& vec)
+	static void save(int fd,const typename Vector<float>::Type& vec)
 	{
 		vsave_(fd,vec);
 	}
 
-	static void save(int fd,const std::vector<std::complex<double> >& vec)
+	static void save(int fd,const typename Vector<std::complex<double> >::Type& vec)
 	{
 		vsave_(fd,vec);
 	}
@@ -146,7 +146,7 @@ public:
 private:
 
 	template<typename NativeType>
-	static void vsave_(int fd,const std::vector<NativeType>& vec)
+	static void vsave_(int fd,const typename Vector<NativeType>::Type& vec)
 	{
 		size_t length = vec.size();
 		mywrite(fd,(const void *)&length,sizeof(length));

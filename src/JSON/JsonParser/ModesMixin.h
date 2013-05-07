@@ -31,7 +31,7 @@ namespace JsonParser {
       MODE_OBJECT = 4
     } ModeType;
 
-    std::vector<ModeType> stack;
+    typename Vector<ModeType>::Type stack;
     
     ModesMixin():
       stack(1,MODE_DONE)

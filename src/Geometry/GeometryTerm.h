@@ -273,7 +273,7 @@ namespace PsimagLite {
 			size_t linSize_;
 			size_t maxEdof_;
 			GeometryFactory geometryFactory_;
-			std::vector<GeometryDirectionType> directions_;
+			typename Vector<GeometryDirectionType>::Type directions_;
 			PsimagLite::Matrix<RealType> cachedValues_;
 	}; // class GeometryTerm
 

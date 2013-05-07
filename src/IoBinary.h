@@ -607,7 +607,7 @@ namespace PsimagLite {
 //			}
 
 //			template<typename T>
-//			void read(std::vector<std::pair<T,T> > &x,
+//			void read(typename Vector<std::pair<T,T> > ::Type&x,
 //			          std::string const &s,
 //			          LongIntegerType level=0)
 //			{
@@ -783,7 +783,7 @@ namespace PsimagLite {
 		private:
 
 			template<typename X>
-			void readVector(std::vector<X>& x)
+			void readVector(typename Vector<X>::Type& x)
 			{
 				size_t xsize = 0;
 				myread(fin_,&xsize,sizeof(xsize));
@@ -799,7 +799,7 @@ namespace PsimagLite {
 				}
 			}
 
-			void readVector(std::vector<bool>& x)
+			void readVector(typename Vector<bool>::Type& x)
 			{
 				size_t xsize = 0;
 				myread(fin_,&xsize,sizeof(xsize));
@@ -807,7 +807,7 @@ namespace PsimagLite {
 				std::cerr<<"xsize="<<xsize<<"\n";
 				x.resize(xsize);
 
-				std::vector<char> tmp(xsize);
+				typename Vector<char>::Type tmp(xsize);
 
 				int l = ::read(fin_,&(tmp[0]),xsize);
 				if (size_t(l)!=xsize) throw std::runtime_error("Mmm!\n");
@@ -883,7 +883,7 @@ namespace PsimagLite {
 			return TYPE_PAIR | charTypeOf(dummy2);
 		}
 
-		static void convertFromBool(std::vector<char>& xx,const std::vector<bool>& x)
+		static void convertFromBool(typename Vector<char>::Type& xx,const typename Vector<bool>::Type& x)
 		{
 			for (size_t i=0;i<xx.size();i++) convertFromBool(xx[i],x[i]);
 		}
@@ -898,7 +898,7 @@ namespace PsimagLite {
 			x = (xx=='1') ? true : false;
 		}
 
-		static void convertToBool(std::vector<bool>& x,const std::vector<char>& xx)
+		static void convertToBool(typename Vector<bool>::Type& x,const typename Vector<char>::Type& xx)
 		{
 			for (size_t i=0;i<xx.size();i++) {
 				bool b = false;

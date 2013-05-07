@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
-#include "Split.h"
 
 namespace PsimagLite {
 
@@ -99,11 +98,11 @@ public:
 
 		enum {DISABLED,PERMISSIVE,STRICT};
 	
-		Writeable(std::vector<std::string>& registeredOptions,size_t mode)
+		Writeable(typename Vector<std::string>::Type& registeredOptions,size_t mode)
 		: registeredOptions_(registeredOptions),mode_(mode)
 		{}
 
-		void set(std::vector<std::string>& optsThatAreSet,const std::string& opts)
+		void set(typename Vector<std::string>::Type& optsThatAreSet,const std::string& opts)
 		{
 			if (mode_==DISABLED) return;
 			split(optsThatAreSet,opts.c_str(),',');
@@ -119,7 +118,7 @@ public:
 		}
 
 	private:
-		std::vector<std::string> registeredOptions_;
+		typename Vector<std::string>::Type registeredOptions_;
 		size_t mode_;
 	}; // class Writeable
 
@@ -137,7 +136,7 @@ public:
 			return (!b);
 		}
 	private:
-		std::vector<std::string> optsThatAreSet_;
+		typename Vector<std::string>::Type optsThatAreSet_;
 
 	}; // class Readable
 

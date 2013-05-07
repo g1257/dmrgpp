@@ -76,10 +76,10 @@ namespace dca {
     MapType<std::string, bool>                          bools;
     MapType<std::string, std::string>                   strings;
     MapType<std::string, double>                        numbers;
-    MapType<std::string, std::vector<double> >          vectors;
-    MapType<std::string, std::vector<int> >             intvectors;
-    MapType<std::string, std::vector<size_t> >          sizetvectors;
-    MapType<std::string, std::vector<std::string> >     stringLists;
+    MapType<std::string, typename Vector<double>::Type >          vectors;
+    MapType<std::string, typename Vector<int>::Type >             intvectors;
+    MapType<std::string, typename Vector<size_t>::Type >          sizetvectors;
+    MapType<std::string, typename Vector<std::string>::Type >     stringLists;
     MapType<std::string, const psimag::Matrix<int>*>    intMatrices;
     MapType<std::string, const psimag::Matrix<double>*> dblMatrices;
     MapType<std::string, const psimag::Matrix<std::complex<double> >*> cMatrices;
@@ -95,9 +95,9 @@ namespace dca {
     void add(std::string key, const int&    val)              { numbers[key] = val;  }
     void add(std::string key, const double& val)              { numbers[key] = val;  }
 
-    void add(std::string key, const std::vector<double>&    vals) { vectors[key]     = vals; }
-    void add(std::string key, const std::vector<int>&       vals) { intvectors[key]  = vals; }
-    void add(std::string key, const std::vector<size_t>&    vals) { sizetvectors[key]= vals; }
+    void add(std::string key, const typename Vector<double>::Type&    vals) { vectors[key]     = vals; }
+    void add(std::string key, const typename Vector<int>::Type&       vals) { intvectors[key]  = vals; }
+    void add(std::string key, const typename Vector<size_t>::Type&    vals) { sizetvectors[key]= vals; }
     void add(std::string key, const psimag::Matrix<int>&    mat ) { intMatrices[key] = &mat; }
     void add(std::string key, const psimag::Matrix<double>& mat ) { dblMatrices[key] = &mat; }
 
@@ -255,7 +255,7 @@ namespace dca {
     template<typename T>
     static
     void valString(std::ostream& os, int offset, int keyWidth,
-		   const std::vector<T>& val) {
+		   const typename Vector<T>::Type& val) {
       size_t width = maxElementStringWidth(val);
       printList(val,os,',',width);
     }
@@ -320,7 +320,7 @@ namespace dca {
     }
 
     template<typename T>
-    std::string toString(const std::map<std::string, std::vector<T> >& map) {
+    std::string toString(const std::map<std::string, typename Vector<T> >::Type& map) {
 
       typedef std::map<std::string,T> MapType;
       typedef typename MapType::const_iterator CITR;
@@ -339,7 +339,7 @@ namespace dca {
 
     template<class T>
     inline
-    void printVector(std::vector<T> vec,
+    void printVector(typename Vector<T>::Type vec,
 		     std::string title,
 		     std::ostream& os)  {
       os.precision(precis);

@@ -12,7 +12,7 @@ int main()
 	std::cout<<"A\n";
 	std::cout<<a;
 
-	std::vector<double> s;
+	typename Vector<double>::Type s;
 
 	svd(a,s);
 

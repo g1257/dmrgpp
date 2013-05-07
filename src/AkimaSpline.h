@@ -104,7 +104,7 @@ class AkimaSpline {
 				w[i] = fabs(d[i+1] - d[i]); 
 		}
 		
-		std::vector<AkimaStruct> akimaStruct_;
+		typename Vector<AkimaStruct>::Type akimaStruct_;
 		IntervalType interval_;
 };
 

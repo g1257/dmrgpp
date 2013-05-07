@@ -133,7 +133,7 @@ namespace PsimagLite {
 		}
 
 		ProgressIndicator progress_;
-		std::vector<ContinuedFractionType> data_;
+		typename Vector<ContinuedFractionType>::Type data_;
 	}; // class ContinuedFractionCollection
 } // namespace PsimagLite 
 /*@}*/

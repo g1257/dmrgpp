@@ -39,7 +39,7 @@ namespace JsonParser {
     } WhateverType;
   
     typedef std::map<std::wstring,Whatever> WhateverMap;
-    typedef std::vector<Whatever>           WhateverVector;
+    typedef typename Vector<Whatever>::Type           WhateverVector;
 
     typedef std::map<std::wstring,const JsonParser::Whatever*> FlatMapType;
 
@@ -451,7 +451,7 @@ namespace JsonParser {
   template<> class TYPE<double>         { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_DOUBLE;   } };
   template<> class TYPE<bool>           { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_BOOL;     } };
   template<> class TYPE<std::map<std::wstring,Whatever> >  { public: Whatever::WhateverType to() {return Whatever::WHATEVER_MAP;    } };
-  template<> class TYPE<std::vector<Whatever> >            { public: Whatever::WhateverType to() {return Whatever::WHATEVER_VECTOR; } };
+  template<> class TYPE<typename Vector<Whatever>::Type >            { public: Whatever::WhateverType to() {return Whatever::WHATEVER_VECTOR; } };
   
   //======================================================================
   
@@ -612,7 +612,7 @@ namespace JsonParser {
   }
 
   template<typename T>
-  std::vector<T>& operator <= (std::vector<T>& lhs, const Whatever& w) {
+  typename Vector<T>::Type& operator <= (typename Vector<T>::Type& lhs, const Whatever& w) {
 
     switch (w.type) {
     case Whatever::WHATEVER_VECTOR:
@@ -630,7 +630,7 @@ namespace JsonParser {
     case Whatever::WHATEVER_UNKNOWN:
     default: {
       std::ostringstream msg;
-      msg << "std::vector<t> <= " << w.sname() << " produced a type error!\n";
+      msg << "typename Vector<t>::Type <= " << w.sname() << " produced a type error!\n";
       msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a std::vector<t>!\n";
       throw std::logic_error(msg.str());
     }

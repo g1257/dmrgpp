@@ -92,7 +92,7 @@ namespace PsimagLite {
 	class LinearPrediction {
 		typedef Matrix<FieldType> MatrixType;
 	public:
-		LinearPrediction(const std::vector<FieldType>& y)
+		LinearPrediction(const typename Vector<FieldType>::Type& y)
 		: y_(y)
 		{
 			size_t ysize = y.size();
@@ -100,7 +100,7 @@ namespace PsimagLite {
 				"LinearPrediction::ctor(...): data set must contain an even number of points\n");
 			size_t n = ysize/2;
 			MatrixType A(n,n);
-			std::vector<FieldType> B(n);
+			typename Vector<FieldType>::Type B(n);
 			computeA(A);
 			computeB(B);
 			computeD(A,B);
@@ -125,14 +125,14 @@ namespace PsimagLite {
 	private:
 		//! Note: A and B cannot be const. here due to the ultimate
 		//! call to BLAS::GEMV
-		void computeD(MatrixType& A,std::vector<FieldType>& B)
+		void computeD(MatrixType& A,typename Vector<FieldType>::Type& B)
 		{
 			size_t n = B.size();
-			std::vector<int> ipiv(n); // use signed integers here!!
+			typename Vector<int>::Type ipiv(n); // use signed integers here!!
 			int info = 0;
 			psimag::LAPACK::DGETRF(n, n, &(A(0,0)), n, &(ipiv[0]), info);
 
-			std::vector<FieldType> work(2);
+			typename Vector<FieldType>::Type work(2);
 			int lwork = -1; // query mode
 			psimag::LAPACK::DGETRI(n, &(A(0,0)), n,  &(ipiv[0]),
 					&(work[0]), lwork,info );
@@ -160,7 +160,7 @@ namespace PsimagLite {
 			}
 		}
 
-		void computeB(std::vector<FieldType>& B) const
+		void computeB(typename Vector<FieldType>::Type& B) const
 		{
 			size_t n = B.size();
 			for (size_t l=0;l<n;l++) {
@@ -170,8 +170,8 @@ namespace PsimagLite {
 			}
 		}
 
-		std::vector<FieldType> y_;
-		std::vector<FieldType> d_;
+		typename Vector<FieldType>::Type y_;
+		typename Vector<FieldType>::Type d_;
 	}; // class LinearPrediction
 } // namespace PsimagLite 
 

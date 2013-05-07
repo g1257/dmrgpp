@@ -114,7 +114,7 @@ namespace PsimagLite {
 		Range(size_t start,
 		     size_t total,
 		     const ConcurrencyType& concurrency,
-		     const std::vector<size_t>& weights,
+		     const typename Vector<size_t>::Type& weights,
 		     CommType mpiComm=COMM_WORLD,
 		     bool isStrict=false)
 		: concurrency_(concurrency),
@@ -139,7 +139,7 @@ namespace PsimagLite {
 		  indicesOfThisProc_(nprocs_),
 		  isStrict_(isStrict)
 		{
-			std::vector<size_t> weights(total,1);
+			typename Vector<size_t>::Type weights(total,1);
 			init(weights,mpiComm);
 		}
 
@@ -166,17 +166,17 @@ namespace PsimagLite {
 		size_t step_; // step within this processor
 		size_t total_; // total number of indices total_(total),
 		size_t nprocs_;
-		std::vector<std::vector<size_t> > indicesOfThisProc_; // given rank and step it maps the index
+		Vector<Vector<size_t>::Type >::Type indicesOfThisProc_; // given rank and step it maps the index
 		bool isStrict_; // does nproc need to divide total?
-		std::vector<size_t> myIndices_; // indices assigned to this processor
+		typename Vector<size_t>::Type myIndices_; // indices assigned to this processor
 
-		void init(const std::vector<size_t>& weights,CommType mpiComm)
+		void init(const typename Vector<size_t>::Type& weights,CommType mpiComm)
 		{ 
 			if (isStrict_ && total_%nprocs_!=0)
 				throw std::runtime_error("Nprocs must divide total for this range\n");
 
 			// distribute the load among the processors
-			std::vector<size_t> loads(nprocs_,0);
+			typename Vector<size_t>::Type loads(nprocs_,0);
 			
 			for (size_t i=0;i<total_;i++) {
 				size_t r = findLowestLoad(loads);
@@ -188,7 +188,7 @@ namespace PsimagLite {
 			myIndices_=indicesOfThisProc_[r1];
 		}
 
-		size_t findLowestLoad(std::vector<size_t> const &loads) const
+		size_t findLowestLoad(const Vector<size_t>::Type& loads) const
 		{
 			size_t x= 1000000;
 			size_t ret=0;
@@ -220,7 +220,7 @@ namespace PsimagLite {
 		Range(size_t start,
 		     size_t total,
 		     ConcurrencyType& concurrency,
-		     const std::vector<size_t>& weights,
+		     const typename Vector<size_t>::Type& weights,
 		     CommType mpiComm=0) : step_(start),total_(total)
 		{}
 

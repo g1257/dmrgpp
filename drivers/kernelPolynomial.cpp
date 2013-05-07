@@ -38,7 +38,7 @@ int main(int argc,char *argv[])
 	int opt = 0;
 	std::string file="";
 	typedef double RealType;
-	typedef std::vector<RealType> VectorType;
+	typedef typename Vector<RealType>::Type VectorType;
 
 	RealType wbegin = 0;
 	RealType wend = 0;

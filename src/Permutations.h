@@ -93,8 +93,8 @@ namespace PsimagLite {
 		Permutations(const ContainerType& orig) : data_(orig.size())
 		{
 			for (size_t i=0;i<data_.size();i++) data_[i] = orig[i];
-			Sort<std::vector<size_t> > mysort;
-			std::vector<size_t> iperm(data_.size());
+			Sort<typename Vector<size_t>::Type > mysort;
+			typename Vector<size_t>::Type iperm(data_.size());
 			mysort.sort(data_,iperm);
 		}
 
@@ -120,7 +120,7 @@ namespace PsimagLite {
 			std::swap(data_[k],data_[l]);
 			size_t c = data_.size()-1;
 			if (size_t(k)+1>=data_.size()-1) return true;
-			std::vector<size_t> tmp = data_;
+			typename Vector<size_t>::Type tmp = data_;
 			for (size_t i=k+1;i<data_.size();i++)
 				data_[c--] = tmp[i];
 			return true;
@@ -156,7 +156,7 @@ namespace PsimagLite {
 			}
 			return saved;
 		}
-		std::vector<size_t> data_;
+		typename Vector<size_t>::Type data_;
 
 	}; // Permutations
 	

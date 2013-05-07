@@ -93,8 +93,8 @@ namespace PsimagLite {
 	public:
 
 		typedef typename CrsMatrixType::value_type ValueType;
-		typedef std::vector<size_t> ColumnsType;
-		typedef std::vector<ValueType> VectorType;
+		typedef typename Vector<size_t>::Type ColumnsType;
+		typedef typename Vector<ValueType>::Type VectorType;
 	
 		SparseRowCached(size_t cacheSize)
 		: cols_(cacheSize),values_(cacheSize),counter_(0)
@@ -162,7 +162,7 @@ namespace PsimagLite {
 	private:
 
 		ColumnsType cols_;
-		std::vector<ValueType> values_;
+		typename Vector<ValueType>::Type values_;
 		size_t counter_;
 			
 	}; // class SparseRowCached

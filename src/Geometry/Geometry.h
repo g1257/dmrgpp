@@ -87,7 +87,7 @@ namespace PsimagLite {
 		public:
 			typedef  RealType_ RealType;
 			typedef GeometryTerm<RealType> GeometryTermType;
-			typedef std::vector<size_t> BlockType;
+			typedef typename Vector<size_t>::Type BlockType;
 			typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
 
 			template<typename IoInputter>
@@ -144,8 +144,8 @@ namespace PsimagLite {
 			
 			void split(size_t sitesPerBlock,
 			           BlockType& S,
-			           std::vector<BlockType>& X,
-			           std::vector<BlockType>& Y,
+			           typename Vector<BlockType>::Type& X,
+			           typename Vector<BlockType>::Type& Y,
 			           BlockType& E) const
 			{
 				size_t middle = linSize_/2;
@@ -164,7 +164,7 @@ namespace PsimagLite {
 					i++;
 				}
 				while(i<middle) {
-					std::vector<size_t> tmpV(sitesPerBlock);
+					typename Vector<size_t>::Type tmpV(sitesPerBlock);
 					for (size_t j=0;j<sitesPerBlock;j++)
 						tmpV[j] = i+j;
 					X.push_back(tmpV);
@@ -173,7 +173,7 @@ namespace PsimagLite {
 				
 				size_t lastMiddle=linSize_-sitesPerBlock;
 				while(i<lastMiddle) {
-					std::vector<size_t> tmpV(sitesPerBlock);
+					typename Vector<size_t>::Type tmpV(sitesPerBlock);
 					for (size_t j=0;j<sitesPerBlock;j++) {
 						size_t jj = sitesPerBlock-1-j;
 						tmpV[j] = (linSize_-1-i-jj)+(middle-sitesPerBlock);
@@ -226,7 +226,7 @@ namespace PsimagLite {
 		private:
 
 			size_t linSize_;
-			std::vector<GeometryTermType> terms_;
+			typename Vector<GeometryTermType>::Type terms_;
 			
 	}; // class Geometry
 

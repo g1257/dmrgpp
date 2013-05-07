@@ -96,8 +96,8 @@ namespace PsimagLite {
 	/** MatrixType must have the following interface:
 	 * RealType type to indicate the matrix type
 	 * rank() member function to indicate the rank of the matrix
-	 * matrixVectorProduct(std::vector< RealType>& x,const 
-	 *        std::vector< RealType>& const y) 
+	 * matrixVectorProduct(typename Vector< RealType>::Type& x,const 
+	 *        typename Vector< RealType>::Type& const y) 
 	 *    member function that implements the operation x += Hy
 	 * 
 	 * SolverParametersType is just a structure with a few things
@@ -116,7 +116,7 @@ namespace PsimagLite {
 
 		typedef SolverParametersType ParametersSolverType;
 		typedef MatrixType LanczosMatrixType;
-		typedef std::vector<RealType> TridiagonalMatrixType;
+		typedef typename Vector<RealType>::Type TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 // 		typedef Matrix<VectorElementType> DenseMatrixType;
 		typedef ChebyshevSerializer<RealType,TridiagonalMatrixType> PostProcType;

@@ -47,7 +47,7 @@ struct SolverParameters {
 
 };
 
-typedef std::vector<ComplexOrRealType> VectorType;
+typedef typename Vector<ComplexOrRealType>::Type VectorType;
 typedef CrsMatrix<ComplexOrRealType> SparseMatrixType;
 typedef LanczosOrDavidsonBase<SolverParameters,SparseMatrixType,VectorType> SparseSolverType;
 typedef LanczosSolver<SolverParameters,SparseMatrixType,VectorType> LanczosSolverType;
@@ -105,7 +105,7 @@ int main(int argc,char *argv[])
 	// create a random matrix:
 	Random48<RealType> random(seed);
 	SparseMatrixType sparse(n,n);
-	std::vector<bool> seenThisColumn(n);
+	typename Vector<bool>::Type seenThisColumn(n);
 	size_t counter = 0;
 	for (size_t i=0;i<n;i++) {
 		sparse.setRow(i,counter);

@@ -7,7 +7,7 @@ int main(int argc,char* argv[])
 		std::cerr<<"USAGE is "<<argv[0]<<" comma,separated,list,of,options\n";
 		return 1;
 	}
-	std::vector<std::string> registerOpts;
+	typename Vector<std::string>::Type registerOpts;
 	registerOpts.push_back("fast");
 	registerOpts.push_back("verbose");
 	registerOpts.push_back("hasthreads");

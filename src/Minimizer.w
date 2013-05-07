@@ -75,7 +75,7 @@ private:
 @d privateTypedefsAndConstants
 @{
 typedef typename FunctionType::FieldType FieldType;
-typedef std::vector<FieldType> VectorType;
+typedef typename Vector<FieldType>::Type VectorType;
 typedef Minimizer<RealType,FunctionType> ThisType;
 
 @}

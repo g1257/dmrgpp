@@ -95,7 +95,7 @@ template<typename RealType,
 class RungeKutta {
 
 	typedef typename ArrayType::value_type ComplexOrRealType;
-	typedef std::vector<ComplexOrRealType> VectorType;
+	typedef typename Vector<ComplexOrRealType>::Type VectorType;
 
 public:
 
@@ -103,13 +103,13 @@ public:
 	: f_(f),h_(h),verbose_(false)
 	{ }
 
-	void solve(std::vector<VectorType>& result, RealType t0, RealType t, const ArrayType& y0) const
+	void solve(typename Vector<VectorType>::Type& result, RealType t0, RealType t, const ArrayType& y0) const
 	{
 		size_t N = static_cast<size_t> (std::real((t - t0)/h_));
 		solve(result,t0,N,y0);
 	}
 
-	void solve(std::vector<VectorType>& result,RealType t0, size_t N, const ArrayType& y0) const
+	void solve(typename Vector<VectorType>::Type& result,RealType t0, size_t N, const ArrayType& y0) const
 	{
 		ArrayType k1(y0), k2(y0), k3(y0), k4(y0);
 		RealType w1 = 1, w2 = 2, w3 = 2, w4 = 1, wtotInverse = 1.0/6.0;

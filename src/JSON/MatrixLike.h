@@ -38,7 +38,7 @@ namespace psimag {
 
     public:
 
-      typedef std::vector<VectorLikeType>        DoubleVectorType;
+      typedef typename Vector<VectorLikeType>::Type        DoubleVectorType;
       typedef typename DoubleVectorType::value_type InnerVectorType;
       typedef typename InnerVectorType::value_type  value_type;
       typedef typename InnerVectorType::value_type  FieldType;
@@ -315,7 +315,7 @@ namespace psimag {
 	LAPACK::DGETRI(N,&INV(0,0),LDA,&pivots[0],blocksize,-1,info);
       
 	lwork  = static_cast<int>(blocksize)*N;
-	std::vector<double> work(lwork);
+	typename Vector<double>::Type work(lwork);
       
 	LAPACK::DGETRI(N,&INV(0,0),LDA,&pivots[0],&work[0],lwork,info);
  
@@ -332,7 +332,7 @@ namespace psimag {
 	return info;
       }
     private:
-      std::vector<int> pivots;
+      typename Vector<int>::Type pivots;
     };
 
   } /* namespace MatrixLike */

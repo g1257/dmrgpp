@@ -4,7 +4,7 @@
 void readMe(const std::string& myfile)
 {
 	PsimagLite::IoBinary::In fin(myfile);
-	std::vector<double> v;
+	typename Vector<double>::Type v;
 	fin.read(v,"MyVector");
 	std::cout<<"MyVector\n";
 	std::cout<<v;
@@ -24,7 +24,7 @@ int main()
 	PsimagLite::IoBinary::Out fout(myfile,rank);
 	std::string s = "Hello World!";
 	fout.print(s);
-	std::vector<double> m(10);
+	typename Vector<double>::Type m(10);
 
 	srand48(3490201);
 	for (size_t i=0;i<m.size();i++)

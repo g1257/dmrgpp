@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <fstream>
 #include <string>
 #include <time.h>
-#include "Split.h"
 
 namespace PsimagLite {
 	class MemoryUsage {
@@ -138,7 +137,7 @@ namespace PsimagLite {
 		{
 			return ::time(0)-startTime_;
 			/*update();
-			std::vector<std::string> v;
+			typename Vector<std::string>::Type v;
 			split(v,data_.c_str(),' ');
 			if (v.size()<15) return 0;
 			double xuser =  atof(v[13].c_str());

@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "Complex.h"
 #include <cassert>
-#include "BinarySaveLoad.h"
+//#include "BinarySaveLoad.h"
 
 namespace PsimagLite {
 
@@ -263,7 +263,7 @@ namespace PsimagLite {
 		 ** where x and y are vectors and A is a sparse matrix in
 		 ** row-compressed format */
 		template<typename S>
-		void matrixVectorProduct (std::vector<S> &x, std::vector<S> const &y) const
+		void matrixVectorProduct(std::vector<S>& x, const std::vector<S>& y) const
 		{
 			assert(x.size()==y.size());
 			for (size_t i = 0; i < y.size(); i++) {
@@ -308,14 +308,14 @@ namespace PsimagLite {
 
 		const T& getValue(size_t i) const { assert(i<values_.size()); return values_[i]; }
 
-		void print(int fd) const
-		{
-			BinarySaveLoad::save(fd,nrow_);
-			BinarySaveLoad::save(fd,ncol_);
-			BinarySaveLoad::save(fd,rowptr_);
-			BinarySaveLoad::save(fd,colind_);
-			BinarySaveLoad::save(fd,values_);
-		}
+//		void print(int fd) const
+//		{
+//			BinarySaveLoad::save(fd,nrow_);
+//			BinarySaveLoad::save(fd,ncol_);
+//			BinarySaveLoad::save(fd,rowptr_);
+//			BinarySaveLoad::save(fd,colind_);
+//			BinarySaveLoad::save(fd,values_);
+//		}
 
 		PsimagLite::Matrix<T> toDense() const
 		{
@@ -331,7 +331,7 @@ namespace PsimagLite {
 			assert(n+1==rowptr_.size());
 			assert(nrow_>0 && ncol_>0);
 			for (size_t i=0;i<n;i++) {
-				std::vector<size_t> p(ncol_,0);
+				typename Vector<size_t>::Type p(ncol_,0);
 				for (int k=rowptr_[i];k<rowptr_[i+1];k++) {
 					size_t col = colind_[k];
 					assert(p[col]==0);
@@ -363,9 +363,9 @@ namespace PsimagLite {
 		friend std::istream &operator>>(std::istream &is,CrsMatrix<CrsMatrixType>& m);
 
 	private:
-		std::vector<int> rowptr_;
-		std::vector<int> colind_;
-		std::vector<T> values_;
+		typename Vector<int>::Type rowptr_;
+		typename Vector<int>::Type colind_;
+		typename Vector<T>::Type values_;
 		size_t nrow_,ncol_;
 	}; // class CrsMatrix
 
@@ -460,11 +460,11 @@ namespace PsimagLite {
 	    where na=rank(A)
 	  */
 	template<class T>
-	void externalProduct(CrsMatrix<T>  &B,
-			     CrsMatrix<T> const &A,
-			     int nout,
-			     std::vector<double> const &signs,
-			     bool order=true)
+	void externalProduct(CrsMatrix<T>& B,
+	                     const CrsMatrix<T>& A,
+	                     int nout,
+	                     const Vector<double>::Type& signs,
+	                     bool order=true)
 	{
 		int na=A.row();
 		T tmp;
@@ -536,7 +536,7 @@ namespace PsimagLite {
 	void externalProduct(CrsMatrix<T>  &C,
 			     CrsMatrix<T> const &A,
 			     CrsMatrix<T> const &B,
-			     const std::vector<int>& signs,
+			     const typename Vector<int>::Type& signs,
 			     bool option=false)
 	{
 		assert(A.row()==A.col());
@@ -603,8 +603,8 @@ namespace PsimagLite {
 	{
 		int j,s,mlast,itemp,jbk;
 		size_t n = A.row();
-		std::vector<int> ptr(n,-1),index(n,0);
-		std::vector<S> temp(n,0);
+		typename Vector<int>::Type ptr(n,-1),index(n,0);
+		typename Vector<S>::Type temp(n,0);
 		S tmp;
 
 		C.resize(n,B.col());
@@ -647,7 +647,7 @@ namespace PsimagLite {
 
 	// vector2 = sparseMatrix * vector1
 	template<class S>
-	void multiply(std::vector<S>& v2, const CrsMatrix<S>& m, const std::vector<S>& v1)
+	void multiply(typename Vector<S>::Type& v2, const CrsMatrix<S>& m, const typename Vector<S>::Type& v1)
 	{
 		size_t n = m.row();
 		v2.resize(n);
@@ -664,8 +664,8 @@ namespace PsimagLite {
 	inline void transposeConjugate(CrsMatrix<S>  &B,CrsMatrix<S2> const &A)
 	{
 		size_t n=A.row();
-		std::vector<std::vector<int> > col(n);
-		std::vector<std::vector<S2> > value(n);
+		Vector<Vector<int>::Type >::Type col(n);
+		typename Vector<typename Vector<S2>::Type>::Type value(n);
 
 		// B(j,i) = conj(A(i,j))
 		for (size_t i=0;i<n;i++) {
@@ -694,8 +694,8 @@ namespace PsimagLite {
 
 	//! Sets B=transpose(conjugate(A))
 	template<typename S,typename S2>
-	inline void transposeConjugate(CrsMatrix<S>  &B,CrsMatrix<S2> const &A,std::vector<std::vector<int> >& col,
-		std::vector<std::vector<S2> >& value)
+	inline void transposeConjugate(CrsMatrix<S>  &B,CrsMatrix<S2> const &A,typename Vector<typename Vector<int>::Type >::Type& col,
+		typename Vector<typename Vector<S2>::Type >::Type& value)
 	{
 		size_t n=A.row();
 		assert(col.size()==n);
@@ -740,14 +740,14 @@ namespace PsimagLite {
 
 	//! Sets A = B(i,perm(j)), A and B CRS matrices
 	template<class S>
-	void permute(CrsMatrix<S> &A,CrsMatrix<S> const &B,std::vector<size_t> const &perm)
+	void permute(CrsMatrix<S> &A,CrsMatrix<S> const &B,const Vector<size_t>::Type& perm)
 	{
 		size_t  n = B.row();
 
 		assert(B.row()==B.col());
 		A.resize(B.row(),B.col());
 
-		std::vector<int> permInverse(n);
+		typename Vector<int>::Type permInverse(n);
 		for (size_t i=0;i<n;i++) permInverse[perm[i]]=i;
 
 		size_t counter=0;
@@ -766,7 +766,9 @@ namespace PsimagLite {
 
 	//! Sets A = B(perm(i),j), A and B CRS matrices
 	template<class S>
-	void permuteInverse(CrsMatrix<S> &A,CrsMatrix<S> const &B,std::vector<size_t> const &perm)
+	void permuteInverse(CrsMatrix<S>& A,
+	                    const CrsMatrix<S>& B,
+	                    const Vector<size_t>::Type& perm)
 	{
 		size_t n = B.row();
 		A.resize(n,B.col());
@@ -816,8 +818,8 @@ namespace PsimagLite {
 
 		assert(n>=C.row());
 
-		std::vector<T>  valueTmp(n);
-		std::vector<int> index;
+		typename Vector<T>::Type  valueTmp(n);
+		typename Vector<int>::Type index;
 		A.resize(n,B.col());
 
 		size_t counter=0;

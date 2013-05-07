@@ -145,7 +145,7 @@ namespace PsimagLite {
 		size_t size() const { return a_.size(); }
 
 	private:
-		std::vector<FieldType> a_,b_;
+		typename Vector<FieldType>::Type a_,b_;
 	}; // class TridiagonalMatrix
 } // namespace PsimagLite
 

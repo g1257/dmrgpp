@@ -7,7 +7,7 @@ extern "C" void dsyev_(char *,char *,int *,double *,int *, double *,double *,int
 int main()
 {
 	int n = 100;
-	std::vector<double> m(n*n);
+	typename Vector<double>::Type m(n*n);
 	// fill "matrix"
 	for (size_t i=0;i<size_t(n*n);i++) m[i] =  5*drand48();
 	// symmetrize:
@@ -15,11 +15,11 @@ int main()
 		for (size_t j=i+1;j<size_t(n);j++)
 			m[i+j*n] = m[j+i*n];
 
-	std::vector<double> eigs(n);
+	typename Vector<double>::Type eigs(n);
 	char jobz='V';
 	char uplo='U';
 	int lda=n;
-	std::vector<double> work(3);
+	typename Vector<double>::Type work(3);
 	int info = 0;
 	int lwork= -1;
 

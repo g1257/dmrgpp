@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PSIMAGLITE_STACK_H_
 #define PSIMAGLITE_STACK_H_
 #include <stack>
-#include "BinarySaveLoad.h"
+#include "Vector.h"
 
 namespace std {
 	template<typename FieldType>
@@ -100,7 +100,7 @@ namespace std {
 	template<typename X>
 	istream& operator>>(istream& is,stack<X>& x)
 	{
-		std::vector<X> tmpVec;
+		typename PsimagLite::Vector<X>::Type tmpVec;
 		is>>tmpVec;
 		for (int i=tmpVec.size()-1;i>=0;i--) {
 				x.push(tmpVec[i]);
@@ -108,18 +108,18 @@ namespace std {
 		return is;
 	}
 
-	template<typename FieldType>
-	void print(int fd, const std::stack<FieldType>& st)
-	{
-		stack<FieldType> st2 = st;
-		size_t tmp = st2.size();
-		PsimagLite::BinarySaveLoad::save(fd,tmp);
-		while(!st2.empty()) {
-			FieldType x = st2.top();
-			x.print(fd);
-			st2.pop();
-		}
-	}
+//	template<typename FieldType>
+//	void print(int fd, const std::stack<FieldType>& st)
+//	{
+//		stack<FieldType> st2 = st;
+//		size_t tmp = st2.size();
+//		PsimagLite::BinarySaveLoad::save(fd,tmp);
+//		while(!st2.empty()) {
+//			FieldType x = st2.top();
+//			x.print(fd);
+//			st2.pop();
+//		}
+//	}
 } // namespace std 
 
 /*@}*/	

@@ -63,7 +63,7 @@ int main(int argc,char *argv[])
 	}
 
 	PsimagLite::IoSimple::In io(file);
-	std::vector<FieldType> y;
+	typename Vector<FieldType>::Type y;
 	io.read(y,label);
 	size_t n = y.size();
 	std::cout<<"#Found "<<n<<" points in file "<<file<<"\n";

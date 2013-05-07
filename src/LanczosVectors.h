@@ -167,7 +167,7 @@ namespace PsimagLite {
 		}
 
 		void hookForZ(VectorType& z,
-			      const std::vector<RealType>& c,
+			      const typename Vector<RealType>::Type& c,
 			      const TridiagonalMatrixType& ab)
 		{
 			if (!lotaMemory_) {

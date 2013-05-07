@@ -21,7 +21,7 @@ Please see full open source license included in file LICENSE.
 #define MATRIX_H_
 
 #include <unistd.h>
-#include <vector>
+#include "Vector.h"
 #include <stdexcept>
 #include <iostream>
 #include "Lapack.h"
@@ -180,7 +180,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	private:
 		size_t nrow_,ncol_;
-		std::vector<T> data_;
+		typename Vector<T>::Type data_;
 	}; // class Matrix
 
 	template<typename T>
@@ -216,10 +216,10 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 	{
 		int n = m.n_row();
 		int info = 0;
-		std::vector<int> ipiv(n,0);
+		typename Vector<int>::Type ipiv(n,0);
 		psimag::LAPACK::zgetrf_(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
 		int lwork = -1;
-		std::vector<T> work(2);
+		typename Vector<T>::Type work(2);
 		psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
 		lwork = std::real(work[0]);
 		work.resize(lwork+2);
@@ -234,7 +234,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 	{
 		size_t i,j;
 		os<<A.n_row()<<" "<<A.n_col()<<"\n";
-		std::vector<T> values;
+		typename Vector<T>::Type values;
 		std::string s = "symbolicPrint: Not enough characters\n";
 		size_t maxCharacters = 25;	
 		for (i=0;i<A.n_row();i++) {
@@ -336,10 +336,10 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 	}
 
 	template<typename T>
-	std::vector<T> operator*(const Matrix<T>& a,const std::vector<T>& b)
+	typename Vector<T>::Type operator*(const Matrix<T>& a,const typename Vector<T>::Type& b)
 	{
 		assert(a.n_col()==b.size());
-		std::vector<T> v(a.n_row());
+		typename Vector<T>::Type v(a.n_row());
 		for (size_t i=0;i<a.n_row();i++) {
 			T sum = 0;
 			for (size_t j=0;j<b.size();j++) sum += a(i,j)*b[j];
@@ -349,10 +349,10 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 	}
 
 	template<typename T>
-	std::vector<T> operator*(const std::vector<T>& b,const Matrix<T>& a)
+	typename Vector<T>::Type operator*(const std::vector<T>& b,const Matrix<T>& a)
 	{
 		assert(a.n_row()==b.size());
-		std::vector<T> v(a.n_col());
+		typename Vector<T>::Type v(a.n_col());
 		for (size_t i=0;i<a.n_col();i++) {
 			T sum = 0;
 			for (size_t j=0;j<b.size();j++) sum += b[j] * a(j,i);
@@ -381,7 +381,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 	void exp(Matrix<T>& m)
 	{
 		size_t n = m.n_row();
-		std::vector<double> eigs(n);
+		typename Vector<double>::Type eigs(n);
 		diag(m,eigs,'V');
 		Matrix<T> expm(n,n);
 		for (size_t i=0;i<n;i++) {
@@ -400,13 +400,13 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	}
 
-	void diag(Matrix<double> &m,std::vector<double> &eigs,char option)
+	void diag(Matrix<double> &m,typename Vector<double> ::Type&eigs,char option)
 	{
 		char jobz=option;
 		char uplo='U';
 		int n=m.n_row();
 		int lda=m.n_col();
-		std::vector<double> work(3);
+		typename Vector<double>::Type work(3);
 		int info,lwork= -1;
 
 		if (lda<=0) throw std::runtime_error("lda<=0\n");
@@ -430,14 +430,14 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	}
 
-	void diag(Matrix<std::complex<double> > &m,std::vector<double> &eigs,char option)
+	void diag(Matrix<std::complex<double> > &m,typename Vector<double> ::Type&eigs,char option)
 	{
 		char jobz=option;
 		char uplo='U';
 		int n=m.n_row();
 		int lda=m.n_col();
-		std::vector<std::complex<double> > work(3);
-		std::vector<double> rwork(3*n);
+		typename Vector<std::complex<double> >::Type work(3);
+		typename Vector<double>::Type rwork(3*n);
 		int info,lwork= -1;
 
 		eigs.resize(n);
@@ -455,14 +455,14 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	}
 
-	void diag(Matrix<std::complex<float> > &m,std::vector<float> &eigs,char option)
+	void diag(Matrix<std::complex<float> > &m,typename Vector<float> ::Type&eigs,char option)
 	{
 		char jobz=option;
 		char uplo='U';
 		int n=m.n_row();
 		int lda=m.n_col();
-		std::vector<std::complex<float> > work(3);
-		std::vector<float> rwork(3*n);
+		typename Vector<std::complex<float> >::Type work(3);
+		typename Vector<float>::Type rwork(3*n);
 		int info,lwork= -1;
 
 		eigs.resize(n);
@@ -480,7 +480,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	}
 
-	void svd(char jobz,Matrix<double> &a,std::vector<double>& s,Matrix<double>& vt)
+	void svd(char jobz,Matrix<double> &a,typename Vector<double>::Type& s,Matrix<double>& vt)
 	{
 		int m = a.n_row();
 		int n = a.n_col();
@@ -496,9 +496,9 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		//Matrix<double> vt(ldvt,n);
 		vt.resize(ldvt,n);
 
-		std::vector<double> work(100,0);
+		typename Vector<double>::Type work(100,0);
 		int info = 0;
-		std::vector<int> iwork(8*min,0);
+		typename Vector<int>::Type iwork(8*min,0);
 
 		// query optimal work
 		int lwork = -1;

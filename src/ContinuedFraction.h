@@ -46,7 +46,7 @@ namespace PsimagLite {
 		typedef typename std::complex<RealType> ComplexType;
 		typedef typename TridiagonalMatrixType::value_type FieldType;
 		typedef Matrix<FieldType> MatrixType;
-		typedef std::vector<std::pair<RealType,ComplexType> > PlotDataType;
+		typedef typename Vector<std::pair<RealType,ComplexType> >::Type PlotDataType;
 		typedef PlotParams<RealType> PlotParamsType;
 		typedef ParametersForSolver<RealType> ParametersType;
 
@@ -160,8 +160,8 @@ namespace PsimagLite {
 		RealType Eg_;
 		RealType weight_;
 		int isign_;
-		std::vector<RealType> eigs_;
-		std::vector<RealType> intensity_;
+		typename Vector<RealType>::Type eigs_;
+		typename Vector<RealType>::Type intensity_;
 	}; // class ContinuedFraction
 } // namespace PsimagLite 
 /*@}*/

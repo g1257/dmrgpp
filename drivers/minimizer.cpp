@@ -9,7 +9,7 @@ T square(const T& t1)
 }
 
 template<typename T>
-std::ostream& operator<<(std::ostream& os,const std::vector<T>& v)
+std::ostream& operator<<(std::ostream& os,const typename Vector<T>::Type& v)
 {
 	os<<v.size()<<"\n";
 	for (size_t i=0;i<v.size();i++)
@@ -38,7 +38,7 @@ public:
 int main(int argc,char *argv[])
 {
 	size_t n=2;
-	std::vector<RealType> x(n);
+	typename Vector<RealType>::Type x(n);
 	
 	// inital guess:
 	for (size_t i=0;i<n;i++)

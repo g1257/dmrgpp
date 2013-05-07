@@ -30,7 +30,7 @@ namespace PsimagLite {
 		Random48(LongType seed,size_t rank = 0,size_t nprocs = 1)
 		{
 			srand48(seed);
-			std::vector<LongType> vOfSeeds(nprocs);
+			typename Vector<LongType>::Type vOfSeeds(nprocs);
 			for (size_t i=0;i<vOfSeeds.size();i++) vOfSeeds[i] = LongType(10000*random());
 			seed_=vOfSeeds[rank];
 			srand48(seed_);

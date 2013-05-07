@@ -95,8 +95,8 @@ namespace PsimagLite {
 	//! MatrixType must have the following interface:
 	//! 	RealType type to indicate the matrix type
 	//! 	rank() member function to indicate the rank of the matrix
-	//! 	matrixVectorProduct(std::vector< RealType>& x,const 
-	//!     std::vector< RealType>& const y) 
+	//! 	matrixVectorProduct(typename Vector< RealType>::Type& x,const 
+	//!     typename Vector< RealType>::Type& const y) 
 	//!    	   member function that implements the operation x += Hy
 
 	template<typename SolverParametersType,typename MatrixType,typename VectorType>
@@ -179,7 +179,7 @@ namespace PsimagLite {
 			TridiagonalMatrixType ab;
 
 			decomposition(y,ab);
-			std::vector<RealType> c(steps_);
+			typename Vector<RealType>::Type c(steps_);
 			try {
 				ground(gsEnergy,steps_, ab, c);
 			} catch (std::exception &e) {
@@ -240,7 +240,7 @@ namespace PsimagLite {
 			bool exitFlag=false;
 			size_t j = 0;
 			lanczosVectors_.saveInitialVector(y);
-			std::vector<RealType> nullVector(0);
+			typename Vector<RealType>::Type nullVector(0);
 			for (; j < max_nstep; j++) {
 				for (size_t i = 0; i < mat_.rank(); i++) 
 					lanczosVectors_(i,j) = y[i];
@@ -314,7 +314,7 @@ namespace PsimagLite {
 			progress_.printline(msg,os);
 		}
 		
-		void ground(RealType &s,int n, const TridiagonalMatrixType& ab,std::vector<RealType>& gs)
+		void ground(RealType &s,int n, const TridiagonalMatrixType& ab,typename Vector<RealType>::Type& gs)
 		{
 			int i, k, l, m;
 			RealType c, dd, f, g, h, p, r, *d, *e, *v = 0, *vki;
@@ -440,7 +440,7 @@ namespace PsimagLite {
 			//printNonZero(a,std::cerr);
 			std::cerr<<"----------------\n";
 
-			std::vector<RealType> eigs(a.n_row());
+			typename Vector<RealType>::Type eigs(a.n_row());
 			diag(a,eigs,'V');
 			for (size_t i=0;i<a.n_row();i++) std::cerr<<a(i,0)<<" ";
 			std::cerr<<"\n";

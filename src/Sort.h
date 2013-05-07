@@ -3,8 +3,9 @@
 #define SORT_H_H
 #include <iostream>
 #include <algorithm>
-#include <vector>
+#include "Vector.h"
 
+namespace PsimagLite {
 template<typename ContainerType>
 class Sort {
 	public:
@@ -14,7 +15,7 @@ class Sort {
 	class Compare {
 
 		public:
-			Compare(const std::vector<PairType>& x) : x_(x)
+			Compare(const typename Vector<PairType>::Type& x) : x_(x)
 			{}
 
 			bool operator()(const PairType& x1,const PairType& x2)
@@ -23,17 +24,17 @@ class Sort {
 				return false;
 			}
 		private:
-			const std::vector<PairType>& x_;
+			const typename Vector<PairType>::Type& x_;
 	};
 
-	void sort(ContainerType& x,std::vector<size_t>& iperm,size_t smallSize=0)
+	void sort(ContainerType& x,typename Vector<size_t>::Type& iperm,size_t smallSize=0)
 	{
 		size_t n = x.size();
 		if (n==0) return;
 		// FIXME: DON'T USE smallSize, just say n=iperm.size()
 		if (smallSize!=0) n = smallSize;
 		PairType onep(x[0],0);
-		std::vector<PairType> p(n,onep);
+		typename Vector<PairType>::Type p(n,onep);
 		for (size_t i=0;i<n;i++) {
 			p[i].first = x[i];
 			p[i].second = i;
@@ -46,5 +47,6 @@ class Sort {
 	}
 
 }; //class Sort
+} // namespace PsimagLite
 
 #endif // SORT_H_H

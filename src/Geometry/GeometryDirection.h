@@ -182,8 +182,8 @@ namespace PsimagLite {
 			size_t dirId_;
 			const GeometryFactoryType* geometryFactory_;
 			size_t dataType_;
-			std::vector<RealType> dataNumbers_;
-			std::vector<MatrixType> dataMatrices_;
+			typename Vector<RealType>::Type dataNumbers_;
+			typename Vector<MatrixType>::Type dataMatrices_;
 	}; // class GeometryDirection
 
 	template<typename RealType,typename GeometryFactoryType>

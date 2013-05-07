@@ -26,7 +26,7 @@ Please see full open source license included in file LICENSE.
 #include "AkimaSpline.h"
 
 typedef double FieldType;
-typedef std::vector<FieldType> VectorType;
+typedef typename Vector<FieldType>::Type VectorType;
 typedef AkimaSpline<VectorType> AkimaSplineType;
 typedef AkimaSplineType::IntervalType IntervalType;
 

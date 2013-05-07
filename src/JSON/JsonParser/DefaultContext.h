@@ -27,7 +27,7 @@ namespace JsonParser {
     //======================================================================
 
     Whatever                  result;
-    std::vector<Whatever*>    stack;
+    typename Vector<Whatever*>::Type    stack;
     std::wstring              key;
     bool                      trace;
 

@@ -28,7 +28,7 @@ namespace JsonParser {
     class Pair {
     public:
       StateType               newState;
-      std::vector<ActionType> actions;
+      typename Vector<ActionType>::Type actions;
       
       Pair(const Pair& other):
 	newState(other.newState),

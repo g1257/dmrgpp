@@ -147,7 +147,7 @@ public:
 
 		VectorType t = initialVector;
 
-		std::vector<VectorType> v,vA;
+		typename Vector<VectorType>::Type v,vA;
 		size_t m = 0;
 		while(m<steps_) {
 			algorithm4_14(t,v);
@@ -197,7 +197,7 @@ private:
 		throw std::runtime_error(s.c_str());
 	}
 
-	void algorithm4_14(VectorType& t,const std::vector<VectorType>& v)
+	void algorithm4_14(VectorType& t,const typename Vector<VectorType>::Type& v)
 	{
 		size_t m = v.size();
 		if (m==0) return;

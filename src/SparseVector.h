@@ -94,7 +94,7 @@ namespace PsimagLite {
 			typedef FieldType value_type;
 			typedef std::pair<size_t,size_t> PairType;
 			
-			SparseVector(const std::vector<FieldType>& v)
+			SparseVector(const typename Vector<FieldType>::Type& v)
 			: size_(v.size()),isSorted_(false)
 			{
 				FieldType zerovalue=static_cast<FieldType>(0);
@@ -106,7 +106,7 @@ namespace PsimagLite {
 				}
 			}
 			
-			void fromChunk(const std::vector<FieldType>& v,size_t offset,size_t total)
+			void fromChunk(const typename Vector<FieldType>::Type& v,size_t offset,size_t total)
 			{
 				resize(total);
 				for (size_t i=0;i<v.size();i++) {
@@ -152,7 +152,7 @@ namespace PsimagLite {
 			
 			FieldType value(size_t x) const { return values_[x]; }
 
-			void toChunk(std::vector<FieldType>& dest,size_t i0, size_t total, bool test=false) const
+			void toChunk(typename Vector<FieldType>::Type& dest,size_t i0, size_t total, bool test=false) const
 			{
 				if (test) {
 					PairType firstLast = findFirstLast();
@@ -166,7 +166,7 @@ namespace PsimagLite {
 			}
 			
 			template<typename SomeBasisType>
-			size_t toChunk(std::vector<FieldType>& dest,const SomeBasisType& parts) const
+			size_t toChunk(typename Vector<FieldType>::Type& dest,const SomeBasisType& parts) const
 			{
 				size_t part = findPartition(parts);
 				size_t offset = parts.partition(part);
@@ -268,15 +268,15 @@ namespace PsimagLite {
 			{
 				if (indices_.size()<2 || isSorted_) return;
 
-				Sort<std::vector<size_t> > sort;
-				std::vector<size_t> iperm(indices_.size());
+				Sort<typename Vector<size_t>::Type > sort;
+				typename Vector<size_t>::Type iperm(indices_.size());
 				sort.sort(indices_,iperm);
-				std::vector<FieldType> values(iperm.size());
+				typename Vector<FieldType>::Type values(iperm.size());
 				for (size_t i=0;i<values_.size();i++) values[i] = values_[iperm[i]];
 				values_.clear();
 				FieldType sum = values[0];
 				size_t prevIndex = indices_[0];
-				std::vector<size_t> indices;
+				typename Vector<size_t>::Type indices;
 
 				for (size_t i=1;i<indices_.size();i++) {
 
@@ -320,8 +320,8 @@ namespace PsimagLite {
 						*( std::max_element(indices_.begin(), indices_.end() ) ));
 			}
 			
-			std::vector<FieldType> values_;
-			std::vector<size_t> indices_;
+			typename Vector<FieldType>::Type values_;
+			typename Vector<size_t>::Type indices_;
 			size_t size_;
 			bool isSorted_;
 	}; // class SparseVector
