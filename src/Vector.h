@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009 , UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -16,7 +15,6 @@ Please see full open source license included in file LICENSE.
 *********************************************************
 
 */
-// END LICENSE BLOCK
 #ifndef PSIVECTOR_H_
 #define PSIVECTOR_H_
 
@@ -27,6 +25,15 @@ Please see full open source license included in file LICENSE.
 
 // temporary hack until Vector is used:
 namespace std {
+
+template<typename T1,typename T2>
+inline std::istream& operator>>(std::istream& is,std::pair<T1,T2>& v)
+{
+	is>>v.first;
+	is>>v.second;
+	return is;
+}
+
 template<class X>
 inline X operator*(const std::vector<X>& v,const std::vector<X>& w)
 {

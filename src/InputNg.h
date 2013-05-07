@@ -445,7 +445,7 @@ public:
 			assert(len>1);
 			val.resize(len-1);
 			for (size_t i=0;i<len-1;i++) {
-				val[i]=static_cast<T>(atof(it->second[i+1].c_str()));
+				val[i]=static_cast<typename VectorLikeType::value_type>(atof(it->second[i+1].c_str()));
 			}
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
@@ -461,7 +461,7 @@ public:
 			size_t len =  it->second.size();
 			val.resize(len);
 			for (size_t i=0;i<len;i++) {
-				val[i]=static_cast<T>(atof(it->second[i].c_str()));
+				val[i]=static_cast<typename VectorLikeType::value_type>(atof(it->second[i].c_str()));
 			}
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
