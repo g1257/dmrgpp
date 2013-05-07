@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 	void tokenizer(const std::string& str,
-	               typename Vector<std::string>::Type& tokens,
+	               Vector<std::string>::Type& tokens,
                        const std::string& delimiters = " ") 
 	{
 		// Skip delimiters at beginning.

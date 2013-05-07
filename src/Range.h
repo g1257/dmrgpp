@@ -220,7 +220,7 @@ namespace PsimagLite {
 		Range(size_t start,
 		     size_t total,
 		     ConcurrencyType& concurrency,
-		     const typename Vector<size_t>::Type& weights,
+		     const Vector<size_t>::Type& weights,
 		     CommType mpiComm=0) : step_(start),total_(total)
 		{}
 

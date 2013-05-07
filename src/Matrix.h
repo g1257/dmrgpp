@@ -400,13 +400,13 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	}
 
-	void diag(Matrix<double> &m,typename Vector<double> ::Type&eigs,char option)
+	void diag(Matrix<double> &m,Vector<double> ::Type&eigs,char option)
 	{
 		char jobz=option;
 		char uplo='U';
 		int n=m.n_row();
 		int lda=m.n_col();
-		typename Vector<double>::Type work(3);
+		Vector<double>::Type work(3);
 		int info,lwork= -1;
 
 		if (lda<=0) throw std::runtime_error("lda<=0\n");
@@ -430,14 +430,14 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	}
 
-	void diag(Matrix<std::complex<double> > &m,typename Vector<double> ::Type&eigs,char option)
+	void diag(Matrix<std::complex<double> > &m,Vector<double> ::Type&eigs,char option)
 	{
 		char jobz=option;
 		char uplo='U';
 		int n=m.n_row();
 		int lda=m.n_col();
-		typename Vector<std::complex<double> >::Type work(3);
-		typename Vector<double>::Type rwork(3*n);
+		Vector<std::complex<double> >::Type work(3);
+		Vector<double>::Type rwork(3*n);
 		int info,lwork= -1;
 
 		eigs.resize(n);
@@ -455,14 +455,14 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	}
 
-	void diag(Matrix<std::complex<float> > &m,typename Vector<float> ::Type&eigs,char option)
+	void diag(Matrix<std::complex<float> > &m,Vector<float> ::Type&eigs,char option)
 	{
 		char jobz=option;
 		char uplo='U';
 		int n=m.n_row();
 		int lda=m.n_col();
-		typename Vector<std::complex<float> >::Type work(3);
-		typename Vector<float>::Type rwork(3*n);
+		Vector<std::complex<float> >::Type work(3);
+		Vector<float>::Type rwork(3*n);
 		int info,lwork= -1;
 
 		eigs.resize(n);
@@ -480,7 +480,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	}
 
-	void svd(char jobz,Matrix<double> &a,typename Vector<double>::Type& s,Matrix<double>& vt)
+	void svd(char jobz,Matrix<double> &a,std::vector<double>& s,Matrix<double>& vt)
 	{
 		int m = a.n_row();
 		int n = a.n_col();
@@ -496,9 +496,9 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		//Matrix<double> vt(ldvt,n);
 		vt.resize(ldvt,n);
 
-		typename Vector<double>::Type work(100,0);
+		Vector<double>::Type work(100,0);
 		int info = 0;
-		typename Vector<int>::Type iwork(8*min,0);
+		Vector<int>::Type iwork(8*min,0);
 
 		// query optimal work
 		int lwork = -1;

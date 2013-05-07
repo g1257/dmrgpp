@@ -98,11 +98,11 @@ public:
 
 		enum {DISABLED,PERMISSIVE,STRICT};
 	
-		Writeable(typename Vector<std::string>::Type& registeredOptions,size_t mode)
+		Writeable(Vector<std::string>::Type& registeredOptions,size_t mode)
 		: registeredOptions_(registeredOptions),mode_(mode)
 		{}
 
-		void set(typename Vector<std::string>::Type& optsThatAreSet,const std::string& opts)
+		void set(Vector<std::string>::Type& optsThatAreSet,const std::string& opts)
 		{
 			if (mode_==DISABLED) return;
 			split(optsThatAreSet,opts.c_str(),',');
@@ -118,7 +118,7 @@ public:
 		}
 
 	private:
-		typename Vector<std::string>::Type registeredOptions_;
+		Vector<std::string>::Type registeredOptions_;
 		size_t mode_;
 	}; // class Writeable
 
@@ -136,7 +136,7 @@ public:
 			return (!b);
 		}
 	private:
-		typename Vector<std::string>::Type optsThatAreSet_;
+		Vector<std::string>::Type optsThatAreSet_;
 
 	}; // class Readable
 

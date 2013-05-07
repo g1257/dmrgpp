@@ -99,7 +99,7 @@ namespace PsimagLite {
 			x = q.rem;
 		}
 
-		size_t pack(size_t x0,size_t x1,const typename Vector<size_t>::Type& permutationInverse) const
+		size_t pack(size_t x0,size_t x1,const Vector<size_t>::Type& permutationInverse) const
 		{
 			assert(x0+n_*x1<permutationInverse.size());
 			return permutationInverse[x0+n_*x1];
