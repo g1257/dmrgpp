@@ -348,13 +348,14 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		return v;
 	}
 
-	template<typename T>
-	typename Vector<T>::Type operator*(const std::vector<T>& b,const Matrix<T>& a)
+	template<typename VectorLikeType>
+	VectorLikeType operator*(const VectorLikeType& b,
+	                         const Matrix<typename VectorLikeType::value_type>& a)
 	{
 		assert(a.n_row()==b.size());
-		typename Vector<T>::Type v(a.n_col());
+		VectorLikeType v(a.n_col());
 		for (size_t i=0;i<a.n_col();i++) {
-			T sum = 0;
+			typename VectorLikeType::value_type sum = 0;
 			for (size_t j=0;j<b.size();j++) sum += b[j] * a(j,i);
 			v[i] = sum;
 		}
@@ -480,7 +481,8 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	}
 
-	void svd(char jobz,Matrix<double> &a,std::vector<double>& s,Matrix<double>& vt)
+	template<typename VectorLikeType>
+	void svd(char jobz,Matrix<double> &a,VectorLikeType& s,Matrix<double>& vt)
 	{
 		int m = a.n_row();
 		int n = a.n_col();

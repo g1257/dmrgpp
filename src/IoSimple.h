@@ -315,7 +315,7 @@ namespace PsimagLite {
 			std::pair<std::string,size_t> read(X &x,
 			                                   std::string const &s,
 			                                   LongIntegerType level=0,
-							   bool beQuiet = false)
+			                                   bool beQuiet = false)
 			{
 				std::pair<std::string,size_t> sc = advance(s,level,beQuiet);
 				int xsize;
@@ -328,6 +328,24 @@ namespace PsimagLite {
 				}
 				return sc;
 			}
+
+//			template<typename VectorLikeType>
+//			void read(VectorLikeType &x,
+//			          std::string const &s,
+//			          LongIntegerType level=0)
+//			{
+//				advance(s,level);
+//				int xsize;
+//				fin_>>xsize;
+//				x.resize(xsize);
+//				typename VectorLikeType::value_type::first_type tmp1;
+//				typename VectorLikeType::value_type::second_type tmp2;
+//				for (int i=0;i<xsize;i++) {
+//					fin_>>tmp1;
+//					fin_>>tmp2;
+//					x[i]=typename VectorLikeType::value_type(tmp1,tmp2);
+//				}
+//			}
 
 			//! Assumes something of the form 
 			//! label[key]=value
@@ -436,23 +454,6 @@ namespace PsimagLite {
 					+s+" in file "+filename_+"\n";
 				throw std::runtime_error(s.c_str());
 				
-			}
-
-			template<typename T>
-			void read(std::vector<std::pair<T,T> > &x,
-			          std::string const &s,
-			          LongIntegerType level=0)
-			{
-				advance(s,level);
-				int xsize;
-				fin_>>xsize;
-				x.resize(xsize);
-				T tmp1,tmp2;
-				for (int i=0;i<xsize;i++) {
-					fin_>>tmp1;
-					fin_>>tmp2;
-					x[i]=std::pair<T,T>(tmp1,tmp2);
-				}
 			}
 
 			template<typename X,template<typename> class SomeType>

@@ -146,7 +146,7 @@ namespace PsimagLite {
 			/* Divide tasks into procs/x distinct groups based upon rank */ 
 			size_t segmentSize = size_t(procs/numberOfSegments);
 			size_t r = rank(mpiComm);
-			typename Vector<int>::Type rv;
+			Vector<int>::Type rv;
 
 			getSegmentsDirect(rv,numberOfSegments,segmentSize,r);
 			CommType comm1 = getCommFromSegments(origGroup,rv);
@@ -165,9 +165,9 @@ namespace PsimagLite {
 			if (rank(mpiComm)==0) v = w;
 		}
 
-		void reduce(typename Vector<double>::Type& v,CommType mpiComm=COMM_WORLD) const
+		void reduce(Vector<double>::Type& v,CommType mpiComm=COMM_WORLD) const
 		{
-			typename Vector<double>::Type w(v.size());
+			Vector<double>::Type w(v.size());
 			
 			int x = MPI_Reduce(&(v[0]),&(w[0]),v.size(),
 			                   MPI_DOUBLE,MPI_SUM,0,mpiComm);
@@ -178,7 +178,7 @@ namespace PsimagLite {
 
 		void reduce(typename Vector<std::complex<double> >::Type& v,CommType mpiComm=COMM_WORLD) const
 		{
-			typename Vector<std::complex<double>::Type > w(v.size());
+			typename Vector<std::complex<double> >::Type w(v.size());
 			
 			int x = MPI_Reduce(&(v[0]),&(w[0]),2*v.size(),
 			                   MPI_DOUBLE,MPI_SUM,0,mpiComm);
@@ -207,7 +207,7 @@ namespace PsimagLite {
 
 		void allReduce(typename Vector<double>::Type& v,CommType mpiComm=COMM_WORLD) const
 		{
-			typename Vector<double>::Type w(v.size(),0);
+			Vector<double>::Type w(v.size(),0);
 			int x = MPI_Allreduce(&(v[0]),&(w[0]),v.size(),MPI_DOUBLE,MPI_SUM,mpiComm);
 			checkError(x,"MPI_Allreduce");
 			v = w;
@@ -215,19 +215,11 @@ namespace PsimagLite {
 
 		void allReduce(typename Vector<std::complex<double> >::Type& v,CommType mpiComm=COMM_WORLD) const
 		{
-			typename Vector<std::complex<double>::Type > w(v.size(),0);
+			typename Vector<std::complex<double> >::Type w(v.size(),0);
 			int x = MPI_Allreduce(&(v[0]),&(w[0]),2*v.size(),MPI_DOUBLE,MPI_SUM,mpiComm);
 			checkError(x,"MPI_Allreduce");
 			v = w;
 		}
-
-		/*void allReduce(typename Vector<std::complex<double> >::Type& v,CommType mpiComm=COMM_WORLD) const
-		{
-			typename Vector<std::complex<double>::Type > w(v.size(),0);
-			int x = MPI_Allreduce(&(v[0]),&(w[0]),2*v.size(),MPI_DOUBLE,MPI_SUM,mpiComm);
-			checkError(x,"MPI_Allreduce");
-			v = w;
-		}*/
 		
 		void allReduce(PsimagLite::Matrix<double>& m,CommType mpiComm=COMM_WORLD) const
 		{
@@ -249,7 +241,7 @@ namespace PsimagLite {
 			m = w;
 		}
 
-		void gather(typename Vector<PsimagLite::Matrix<double> > ::Type&v,CommType mpiComm=COMM_WORLD)
+		void gather(typename Vector<PsimagLite::Matrix<double> >::Type& v,CommType mpiComm=COMM_WORLD)
 		{
 			std::string s = "You hit an unimplemented function.\n";
 			s += "Contribute to PsimagLite development and make a difference!\n";
@@ -266,9 +258,9 @@ namespace PsimagLite {
 			v = w;
 		}
 
-		void gather(typename Vector<double>::Type& v,CommType mpiComm=COMM_WORLD)
+		void gather(Vector<double>::Type& v,CommType mpiComm=COMM_WORLD)
 		{
-			typename Vector<double>::Type w(v.size(),0);
+			Vector<double>::Type w(v.size(),0);
 			assert(v.size()>0);
 			assert(w.size()>0);
 			assert(v.size()==w.size());
@@ -276,25 +268,6 @@ namespace PsimagLite {
 			checkError(x,"MPI_Gather");
 			v = w;
 		}
-
-
-// 		template<typename T>
-// 		void broadcast(typename Vector<typename Vector<T>::Type > ::Type&v,CommType mpiComm=COMM_WORLD) 
-// 		{ 
-// 			for (size_t i=0;i<v.size();i++) MpiBroadcast(&(v[i]),0);
-// 		}
-// 
-// 		template<typename DataType>
-// 		void broadcast(typename Vector<DataType> ::Type&v,CommType mpiComm=COMM_WORLD) 
-// 		{ 
-// 			for (size_t i=0;i<v.size();i++) MpiBroadcast(&(v[i]),0);
-// 		}
-// 		
-// 		template<typename DataType>
-// 		void broadcast(typename Vector<DataType*> ::Type&v,CommType mpiComm=COMM_WORLD) 
-// 		{ 
-// 			for (size_t i=0;i<v.size();i++) MpiBroadcast(v[i],0);
-// 		}
 
 		void broadcast(bool& b,CommType mpiComm=COMM_WORLD)
 		{
@@ -304,7 +277,7 @@ namespace PsimagLite {
 			b = (val==1) ? true : false;
 		}
 
-		void broadcast(typename Vector<double>::Type& v,CommType mpiComm=COMM_WORLD)
+		void broadcast(Vector<double>::Type& v,CommType mpiComm=COMM_WORLD)
 		{
 			int x = MPI_Bcast(&(v[0]),v.size(), MPI_DOUBLE,0,mpiComm);
 			checkError(x,"MPI_Bcast");
@@ -333,12 +306,12 @@ namespace PsimagLite {
 			}
 		}
 
-		void getSegmentsDirect(typename Vector<int>::Type& rv,size_t numberOfSegments,size_t segmentSize,size_t r)
+		void getSegmentsDirect(Vector<int>::Type& rv,size_t numberOfSegments,size_t segmentSize,size_t r)
 		{
-			typename Vector<std::vector<int>::Type > ranks;
+			typename Vector<typename Vector<int>::Type>::Type ranks;
 			size_t thisSegment = 0;
 			for (size_t i=0;i<segmentSize;i++) {
-				typename Vector<int>::Type tmp(numberOfSegments);
+				Vector<int>::Type tmp(numberOfSegments);
 				for (size_t j=0;j<numberOfSegments;j++) {
 					tmp[j] = j*segmentSize+i;
 					if (r==size_t(tmp[j])) thisSegment=i;
@@ -348,13 +321,13 @@ namespace PsimagLite {
 			rv = ranks[thisSegment];
 		}
 
-		void getSegmentsAdjuct(typename Vector<int>::Type& rv,size_t numberOfSegments,size_t segmentSize,size_t r)
+		void getSegmentsAdjuct(Vector<int>::Type& rv,size_t numberOfSegments,size_t segmentSize,size_t r)
 		{
 			
-			typename Vector<std::vector<int>::Type > ranks;
+			typename Vector<typename Vector<int>::Type > ranks;
 			size_t thisSegment = 0;
 			for (size_t i=0;i<numberOfSegments;i++) {
-				typename Vector<int>::Type tmp;
+				Vector<int>::Type tmp;
 				size_t start = i*segmentSize;
 				size_t end = (i+1)*segmentSize;
 				if (r>=start && r<end) thisSegment = i;
@@ -364,7 +337,7 @@ namespace PsimagLite {
 			rv = ranks[thisSegment];
 		}
 
-		CommType getCommFromSegments(MPI_Group origGroup,typename Vector<int>::Type& rv)
+		CommType getCommFromSegments(MPI_Group origGroup,Vector<int>::Type& rv)
 		{
 			MPI_Group newGroup;
 			int status = MPI_Group_incl(origGroup,rv.size(),&(rv[0]),&newGroup);

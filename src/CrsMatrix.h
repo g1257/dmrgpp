@@ -262,8 +262,8 @@ namespace PsimagLite {
 		/** performs x = x + A * y
 		 ** where x and y are vectors and A is a sparse matrix in
 		 ** row-compressed format */
-		template<typename S>
-		void matrixVectorProduct(std::vector<S>& x, const std::vector<S>& y) const
+		template<typename VectorLikeType>
+		void matrixVectorProduct(VectorLikeType& x, const VectorLikeType& y) const
 		{
 			assert(x.size()==y.size());
 			for (size_t i = 0; i < y.size(); i++) {

@@ -138,7 +138,7 @@ class InputNg {
 	typedef MyCompare MyCompareType;
 
 	typedef std::map<std::string,std::string,MyCompareType> MapStrStrType;
-	typedef std::map<std::string,std::vector<std::string>,MyCompareType> MapStrVecType;
+	typedef std::map<std::string,Vector<std::string>::Type,MyCompareType> MapStrVecType;
 
 public:
 	
@@ -185,8 +185,8 @@ public:
 		}
 
 		void set(MapStrStrType& mapStrStr,
-			MapStrVecType& mapStrVec,
-			std::vector<std::string>& labelsForRemoval) const
+		         MapStrVecType& mapStrVec,
+		         Vector<std::string>::Type& labelsForRemoval) const
 		{
 			mapStrStr=mapStrStr_;
 			mapStrVec=mapStrVec_,
@@ -347,13 +347,13 @@ public:
 		std::string data_;
 		size_t line_;
 		size_t state_;
-		std::vector<std::string> numericVector_;
+		Vector<std::string>::Type numericVector_;
 		std::string lastLabel_;
 		InputCheckType inputCheck_;
 		bool verbose_;
 		std::map<std::string,std::string,MyCompareType> mapStrStr_;
-		std::map<std::string,std::vector<std::string>,MyCompareType> mapStrVec_;
-		std::vector<std::string> labelsForRemoval_;
+		std::map<std::string,Vector<std::string>::Type,MyCompareType> mapStrVec_;
+		Vector<std::string>::Type labelsForRemoval_;
 	}; // class Writeable
 
 	class Readable {
@@ -433,12 +433,12 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
-		template<typename T>
-		void read(std::vector<T>& val,const std::string& label)
+		template<typename VectorLikeType>
+		void read(VectorLikeType& val,const std::string& label)
 		{
 			std::string label2 = label2label(label);
 
-			std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			std::map<std::string,Vector<std::string>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			size_t len =  it->second.size();
@@ -450,12 +450,12 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
 
-		template<typename T>
-		void readKnownSize(std::vector<T>& val,const std::string& label)
+		template<typename VectorLikeType>
+		void readKnownSize(VectorLikeType& val,const std::string& label)
 		{
 			std::string label2 = label2label(label);
 
-			std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			std::map<std::string,Vector<std::string>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			size_t len =  it->second.size();
@@ -470,7 +470,7 @@ public:
 		{
 			std::string label2 = label2label(label);
 
-			std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			std::map<std::string,Vector<std::string>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
@@ -498,7 +498,7 @@ public:
 		{
 			std::string label2 = label2label(label);
 
-			std::map<std::string,std::vector<std::string> >::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			std::map<std::string,Vector<std::string>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
@@ -529,7 +529,7 @@ public:
 		template<typename SomeMapType>
 		void cleanLabelsIfNeeded(const std::string& label,SomeMapType& mymap,typename SomeMapType::iterator& it)
 		{
-			std::vector<std::string>::iterator it2 = find(labelsForRemoval_.begin(),labelsForRemoval_.end(),label);
+			Vector<std::string>::Type::iterator it2 = find(labelsForRemoval_.begin(),labelsForRemoval_.end(),label);
 			if (it2!=labelsForRemoval_.end()) mymap.erase(it);
 		}
 
@@ -570,8 +570,8 @@ public:
 		}
 
 		std::map<std::string,std::string,MyCompareType> mapStrStr_;
-		std::map<std::string,std::vector<std::string>,MyCompareType> mapStrVec_;
-		std::vector<std::string> labelsForRemoval_;
+		std::map<std::string,Vector<std::string>::Type,MyCompareType> mapStrVec_;
+		Vector<std::string>::Type labelsForRemoval_;
 	}; // class Readable
 
 	static std::string findRootLabel(const std::string& label)
