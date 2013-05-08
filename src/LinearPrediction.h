@@ -136,7 +136,7 @@ namespace PsimagLite {
 			int lwork = -1; // query mode
 			psimag::LAPACK::GETRI(n, &(A(0,0)), n,  &(ipiv[0]),
 					&(work[0]), lwork,info );
-			lwork = work[0];
+			lwork = static_cast<int>(work[0]);
 			if (lwork<=0) throw
 				std::runtime_error("LinearPrediction:: internal error\n");
 			work.resize(lwork);

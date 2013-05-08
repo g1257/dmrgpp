@@ -41,7 +41,7 @@ int main(int argc,char *argv[])
 		size_t rank = std::atoi(argv[1]);
 		unsigned int long long seed = 343981;
 		RealType ratio = std::atof(argv[2]);
-		size_t nonZeros = (ratio * rank *rank);
+		size_t nonZeros = size_t(ratio * rank *rank);
 		RealType maxValue = 10.0;
 		SampleCRSMatrix<RealType> m(rank,seed,nonZeros,maxValue);
 		std::cout<<m;

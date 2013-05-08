@@ -91,7 +91,7 @@ namespace PsimagLite {
 		}
 		
 
-		SampleCRSMatrix(size_t rank,T seed,size_t nonZeros,T maxValue) : rank_(rank),rowptr_(rank+1)
+		SampleCRSMatrix(size_t rank,size_t seed,size_t nonZeros,T maxValue) : rank_(rank),rowptr_(rank+1)
 		{
 			srand48(seed);
 			typename Vector<size_t>::Type rows,cols;

@@ -252,7 +252,7 @@ namespace PsimagLite {
 
 		void gather(typename Vector<std::complex<double> >::Type& v,CommType mpiComm=COMM_WORLD)
 		{
-			typename Vector<std::complex<double>::Type > w(v.size(),0);
+			Vector<std::complex<double> >::Type w(v.size(),0);
 			int x = MPI_Gather(&(v[0]),2*v.size(), MPI_DOUBLE,&(w[0]),2*w.size(),MPI_DOUBLE,0,mpiComm); 
 			checkError(x,"MPI_Gather");
 			v = w;
@@ -324,7 +324,7 @@ namespace PsimagLite {
 		void getSegmentsAdjuct(Vector<int>::Type& rv,size_t numberOfSegments,size_t segmentSize,size_t r)
 		{
 			
-			typename Vector<typename Vector<int>::Type > ranks;
+			Vector<Vector<int>::Type>::Type ranks;
 			size_t thisSegment = 0;
 			for (size_t i=0;i<numberOfSegments;i++) {
 				Vector<int>::Type tmp;
