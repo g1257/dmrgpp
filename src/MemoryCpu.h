@@ -30,24 +30,42 @@ Please see full open source license included in file LICENSE.
 #include <cstdlib>
 #include <iostream>
 #include <cassert>
+#include "ProgressIndicator.h"
 
 class MemoryCpu {
 
 public:
+
+	MemoryCpu()
+	    : progress_("MemoryCpu",0)
+	{}
 
 	void deallocate(void *p)
 	{
 		assert(p);
 		free(p);
 		p=0;
+		std::ostringstream msg;
+		msg<<"Freed "<<p;
+		progress_.printline(msg,std::cout);
 	}
 
 	void* allocate(size_t x)
 	{
 		void *p = malloc(x);
+		std::ostringstream msg;
+		msg<<"Allocated starting at "<<p<<" "<<x<<" bytes";
+		progress_.printline(msg,std::cout);
 		return p;
 	}
+
+private:
+
+	PsimagLite::ProgressIndicator progress_;
+
 }; // class MemoryCpu
+
+MemoryCpu globalMemoryCpu;
 
 /*@}*/
 #endif // MEMORY_CPU_H

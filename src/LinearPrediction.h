@@ -130,18 +130,18 @@ namespace PsimagLite {
 			size_t n = B.size();
 			typename Vector<int>::Type ipiv(n); // use signed integers here!!
 			int info = 0;
-			psimag::LAPACK::DGETRF(n, n, &(A(0,0)), n, &(ipiv[0]), info);
+			psimag::LAPACK::GETRF(n, n, &(A(0,0)), n, &(ipiv[0]), info);
 
 			typename Vector<FieldType>::Type work(2);
 			int lwork = -1; // query mode
-			psimag::LAPACK::DGETRI(n, &(A(0,0)), n,  &(ipiv[0]),
+			psimag::LAPACK::GETRI(n, &(A(0,0)), n,  &(ipiv[0]),
 					&(work[0]), lwork,info );
 			lwork = work[0];
 			if (lwork<=0) throw
 				std::runtime_error("LinearPrediction:: internal error\n");
 			work.resize(lwork);
 			// actual work:
-			psimag::LAPACK::DGETRI(n, &(A(0,0)), n,  &(ipiv[0]),
+			psimag::LAPACK::GETRI(n, &(A(0,0)), n,  &(ipiv[0]),
 								&(work[0]), lwork,info );
 
 			d_.resize(n);

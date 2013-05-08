@@ -21,6 +21,8 @@ Please see full open source license included in file LICENSE.
 #define RANDOM48_H
 #include <cstdlib>
 #include <iostream>
+#include "Vector.h"
+
 namespace PsimagLite {
 	template<typename T>
 	class  Random48 {
@@ -30,7 +32,7 @@ namespace PsimagLite {
 		Random48(LongType seed,size_t rank = 0,size_t nprocs = 1)
 		{
 			srand48(seed);
-			typename Vector<LongType>::Type vOfSeeds(nprocs);
+			PsimagLite::Vector<LongType>::Type vOfSeeds(nprocs);
 			for (size_t i=0;i<vOfSeeds.size();i++) vOfSeeds[i] = LongType(10000*random());
 			seed_=vOfSeeds[rank];
 			srand48(seed_);

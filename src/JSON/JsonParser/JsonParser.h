@@ -304,7 +304,7 @@ namespace JsonParser {
 	
       Pair pair = AugmentedStateTranslationTable::getStateActionPair(state,nextClass);
       
-      typename Vector<ActionType>::Type& actions(pair.actions);
+      PsimagLite::Vector<ActionType>::Type& actions(pair.actions);
       
 
       if(trace) std::cout << "actions.size() = " << actions.size() ;

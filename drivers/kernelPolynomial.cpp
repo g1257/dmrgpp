@@ -38,7 +38,7 @@ int main(int argc,char *argv[])
 	int opt = 0;
 	std::string file="";
 	typedef double RealType;
-	typedef typename Vector<RealType>::Type VectorType;
+	typedef PsimagLite::Vector<RealType>::Type VectorType;
 
 	RealType wbegin = 0;
 	RealType wend = 0;

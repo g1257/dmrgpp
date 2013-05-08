@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef OPTIONS_HEADER_H
 #define OPTIONS_HEADER_H
 
-#include <vector>
+#include "Vector.h"
 #include <string>
 #include <cassert>
 #include <stdexcept>
@@ -94,11 +94,13 @@ class Options {
 public:
 	class Writeable {
 
+		typedef PsimagLite::Vector<std::string>::Type VectorStringType;
+
 	public:
 
 		enum {DISABLED,PERMISSIVE,STRICT};
 	
-		Writeable(Vector<std::string>::Type& registeredOptions,size_t mode)
+		Writeable(VectorStringType& registeredOptions,size_t mode)
 		: registeredOptions_(registeredOptions),mode_(mode)
 		{}
 

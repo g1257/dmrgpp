@@ -27,7 +27,8 @@ class Sort {
 			const typename Vector<PairType>::Type& x_;
 	};
 
-	void sort(ContainerType& x,typename Vector<size_t>::Type& iperm,size_t smallSize=0)
+	template<typename A>
+	void sort(ContainerType& x,typename std::vector<size_t,A>& iperm,size_t smallSize=0)
 	{
 		size_t n = x.size();
 		if (n==0) return;

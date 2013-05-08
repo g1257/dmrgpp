@@ -160,8 +160,8 @@ namespace PsimagLite {
 	private:
 		
 
-		template<typename SomeIoOutputType,typename SomeFieldType>
-		void saveVector(SomeIoOutputType& io,const typename Vector<SomeFieldType>::Type& v) const
+		template<typename SomeIoOutputType,typename SomeVectorType>
+		typename IsVectorLike<SomeVectorType,void>::True saveVector(SomeIoOutputType& io,const SomeVectorType& v) const
 		{
 			io<<v.size()<<"\n";
 			for (size_t i=0;i<v.size();i++) {
@@ -171,8 +171,8 @@ namespace PsimagLite {
 		}
 		
 
-		template<typename SomeIoInputType,typename SomeFieldType>
-		void readVector(SomeIoInputType& io,typename Vector<SomeFieldType>::Type& v) const
+		template<typename SomeIoInputType,typename SomeVectorType>
+		typename IsVectorLike<SomeVectorType,void>::True readVector(SomeIoInputType& io,SomeVectorType& v) const
 		{
 			int size=0;
 			io>>size;

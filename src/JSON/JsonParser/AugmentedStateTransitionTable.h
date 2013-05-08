@@ -28,7 +28,7 @@ namespace JsonParser {
     class Pair {
     public:
       StateType               newState;
-      typename Vector<ActionType>::Type actions;
+      PsimagLite::Vector<ActionType>::Type actions;
       
       Pair(const Pair& other):
 	newState(other.newState),

@@ -48,7 +48,7 @@ public:
 		if (n>this->max_size()) throw
 			std::runtime_error("Bad allocation\n");
 
-		typename BaseType::pointer x = (typename BaseType::pointer) globalMemoryPool.allocate(n*sizeof(T));
+		typename BaseType::pointer x = (typename BaseType::pointer) globalMemoryCpu.allocate(n*sizeof(T));
 
 //		x = (typename BaseType::pointer) malloc(n*sizeof(T));
 		return static_cast<T*>(x);
@@ -56,7 +56,7 @@ public:
 
 	void deallocate(typename BaseType::pointer p, typename BaseType::size_type n)
 	{
-		globalMemoryPool.deallocate(p);
+		globalMemoryCpu.deallocate(p);
 	}
 
 }; // class AllocatorCpu

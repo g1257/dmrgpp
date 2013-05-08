@@ -94,7 +94,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef RANGE_HEADER_H
 #define RANGE_HEADER_H
 #include <stdexcept>
-#include <vector>
+#include "Vector.h"
 #include "ConcurrencySerial.h" // for the default Range
 
 /** How to use the Range class: See drivers/range.cpp
@@ -112,11 +112,11 @@ namespace PsimagLite {
 		static const CommType COMM_WORLD;
 
 		Range(size_t start,
-		     size_t total,
-		     const ConcurrencyType& concurrency,
-		     const typename Vector<size_t>::Type& weights,
-		     CommType mpiComm=COMM_WORLD,
-		     bool isStrict=false)
+		      size_t total,
+		      const ConcurrencyType& concurrency,
+		      const Vector<size_t>::Type& weights,
+		      CommType mpiComm=COMM_WORLD,
+		      bool isStrict=false)
 		: concurrency_(concurrency),
 		  step_(start),
 		  total_(total),

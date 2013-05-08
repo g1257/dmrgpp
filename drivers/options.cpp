@@ -7,11 +7,11 @@ int main(int argc,char* argv[])
 		std::cerr<<"USAGE is "<<argv[0]<<" comma,separated,list,of,options\n";
 		return 1;
 	}
-	typename Vector<std::string>::Type registerOpts;
+	PsimagLite::Vector<std::string>::Type registerOpts;
 	registerOpts.push_back("fast");
 	registerOpts.push_back("verbose");
 	registerOpts.push_back("hasthreads");
-	PsimagLite::Options::Writeable optWriteable(registerOpts);
+	PsimagLite::Options::Writeable optWriteable(registerOpts,PsimagLite::Options::Writeable::STRICT);
 	
 	std::string myoptions(argv[1]);
 	PsimagLite::Options::Readable optsReadable(optWriteable,myoptions);

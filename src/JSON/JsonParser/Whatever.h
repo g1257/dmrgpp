@@ -15,7 +15,7 @@
 #include <iostream>
 #include <sstream>
 #include <map>
-#include <vector>
+#include "Vector.h"
 #include "CharacterMapper.h"
 
 namespace JsonParser {
@@ -39,7 +39,7 @@ namespace JsonParser {
     } WhateverType;
   
     typedef std::map<std::wstring,Whatever> WhateverMap;
-    typedef typename Vector<Whatever>::Type           WhateverVector;
+    typedef PsimagLite::Vector<Whatever>::Type           WhateverVector;
 
     typedef std::map<std::wstring,const JsonParser::Whatever*> FlatMapType;
 
@@ -451,7 +451,7 @@ namespace JsonParser {
   template<> class TYPE<double>         { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_DOUBLE;   } };
   template<> class TYPE<bool>           { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_BOOL;     } };
   template<> class TYPE<std::map<std::wstring,Whatever> >  { public: Whatever::WhateverType to() {return Whatever::WHATEVER_MAP;    } };
-  template<> class TYPE<typename Vector<Whatever>::Type >            { public: Whatever::WhateverType to() {return Whatever::WHATEVER_VECTOR; } };
+  template<> class TYPE<PsimagLite::Vector<Whatever>::Type >            { public: Whatever::WhateverType to() {return Whatever::WHATEVER_VECTOR; } };
   
   //======================================================================
   
@@ -612,7 +612,7 @@ namespace JsonParser {
   }
 
   template<typename T>
-  typename Vector<T>::Type& operator <= (typename Vector<T>::Type& lhs, const Whatever& w) {
+  typename PsimagLite::Vector<T>::Type& operator <= (typename PsimagLite::Vector<T>::Type& lhs, const Whatever& w) {
 
     switch (w.type) {
     case Whatever::WHATEVER_VECTOR:

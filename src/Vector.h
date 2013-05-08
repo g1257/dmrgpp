@@ -22,6 +22,7 @@ Please see full open source license included in file LICENSE.
 #include <iostream>
 #include <stdexcept>
 #include "Complex.h"
+#include "AllocatorCpu.h"
 
 // temporary hack until Vector is used:
 namespace std {
@@ -153,12 +154,27 @@ inline std::istream& operator>>(std::istream& is,std::vector<FieldType,A>& v)
 } // namespace std 
 
 namespace PsimagLite {
-	// FIXME: write proper class here
 	template<typename T>
 	class  Vector  {
 	public:
-		typedef std::vector<T> Type;
+		typedef std::vector<T,AllocatorCpu<T,1> > Type;
 	}; // class Vector
+
+	template<>
+	class  Vector<bool>  {
+	public:
+		typedef std::vector<bool> Type;
+	}; // class Vector
+
+	template<typename T1,typename T2>
+	class IsVectorLike {
+	};
+
+	template<typename T1,typename T2>
+	class IsVectorLike<std::vector<T1,AllocatorCpu<T1,1> >,T2> {
+	public:
+	        typedef T2 True;
+	};
 
 	// change this when using PsimagLite::Vector: 
 	template<class T,typename A>

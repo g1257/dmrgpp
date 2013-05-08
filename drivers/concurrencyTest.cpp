@@ -34,9 +34,9 @@ typedef PsimagLite::ConcurrencyMpi<RealType> ConcurrencyType;
 typedef PsimagLite::ConcurrencySerial<RealType> ConcurrencyType;
 #endif
 
-typedef typename Vector<RealType>::Type VectorType;
+typedef PsimagLite::Vector<RealType>::Type VectorType;
 
-void setVectors(typename Vector<VectorType>::Type& vec, size_t total1, size_t total2)
+void setVectors(PsimagLite::Vector<VectorType>::Type& vec, size_t total1, size_t total2)
 {
 	VectorType series(total1*total2);
 	VectorType tmp(total2);
@@ -69,7 +69,7 @@ int main(int argc,char *argv[])
 	
 	PsimagLite::Range<ConcurrencyType> range(0,total1,concurrency,comm.second);
 
-	typename Vector<VectorType>::Type vec;
+	PsimagLite::Vector<VectorType>::Type vec;
 	setVectors(vec,total1,total2);
 	VectorType sum(total1);
 	while(!range.end()) {

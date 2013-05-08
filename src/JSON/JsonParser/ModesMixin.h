@@ -31,7 +31,7 @@ namespace JsonParser {
       MODE_OBJECT = 4
     } ModeType;
 
-    typename Vector<ModeType>::Type stack;
+    PsimagLite::Vector<ModeType>::Type stack;
     
     ModesMixin():
       stack(1,MODE_DONE)

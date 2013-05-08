@@ -12,9 +12,10 @@ int main()
 	std::cout<<"A\n";
 	std::cout<<a;
 
-	typename Vector<double>::Type s;
+	PsimagLite::Vector<double>::Type s;
+	MatrixType vt;
 
-	svd(a,s);
+	svd('A',a,s,vt);
 
 	std::cout<<"U\n";
 	std::cout<<a;

@@ -64,7 +64,7 @@ private:
 typedef double RealType;
 typedef std::complex<RealType> ComplexOrRealType;
 //typedef RealType ComplexOrRealType;
-typedef typename Vector<ComplexOrRealType>::Type VectorType;
+typedef PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 typedef GammaCiCj<RealType,VectorType,MatrixType> GammaCiCjType;
 typedef PsimagLite::IoSimple::In IoInType;
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	typename Vector<VectorType>::Type result;
+	PsimagLite::Vector<VectorType>::Type result;
 	rk.solve(result,wbegin,wend, y0);
 	for (size_t i=0;i<result.size();i++) {
 		RealType time = wbegin + wstep*i;

@@ -281,6 +281,13 @@ namespace PsimagLite {
 
 		size_t col() const { return ncol_; }
 
+		size_t rank() const
+		{
+			if (nrow_!=ncol_)
+				throw std::runtime_error("CrsMatrix: rank(): only for square matrices\n");
+			return nrow_;
+		}
+
 		void pushCol(size_t i) { colind_.push_back(i); }
 
 		void pushValue(T const &value) { values_.push_back(value); }

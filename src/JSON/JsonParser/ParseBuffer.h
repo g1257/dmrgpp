@@ -28,7 +28,7 @@ namespace JsonParser {
   public:
 
     //    std::wstringstream& superStream;
-    typename Vector<wchar_t>::Type theCharacters;
+    PsimagLite::Vector<wchar_t>::Type theCharacters;
     bool                 trace;
 
     //======================================================================

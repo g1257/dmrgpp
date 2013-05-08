@@ -27,7 +27,7 @@ namespace JsonParser {
     //======================================================================
 
     Whatever                  result;
-    typename Vector<Whatever*>::Type    stack;
+    PsimagLite::Vector<Whatever*>::Type    stack;
     std::wstring              key;
     bool                      trace;
 
