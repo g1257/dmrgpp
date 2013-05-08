@@ -14,7 +14,7 @@ std::ostream& operator<<(std::ostream& os,const typename Vector<T>::Type& v)
 	return os;
 }
 
-void fillRandomVector(typename Vector<RealType>::Type& x,RealType maxValue)
+void fillRandomVector(Vector<RealType>::Type& x,RealType maxValue)
 {
 	unsigned int long long seed = 7334211;
 	srand48(seed);
