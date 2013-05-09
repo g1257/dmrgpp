@@ -344,7 +344,7 @@ namespace Dmrg {
 		PsimagLite::Vector<size_t>::Type operatorsPerSite_;
 
 		template<typename SomeVectorType>
-		typename PsimagLite::IsVectorLike<SomeVectorType,void>::True
+		typename PsimagLite::HasType<PsimagLite::IsVectorLike<SomeVectorType>::True,void>::Type
 		fillFermionicSigns(SomeVectorType& fermionicSigns,
 		                   const VectorIntegerType& electrons,
 		                   int f)

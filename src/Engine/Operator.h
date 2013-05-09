@@ -137,10 +137,10 @@ namespace Dmrg {
 	template<typename RealType_,
 	         typename SparseMatrixType,
 	         template<typename,typename> class SomeVectorTemplate,
-	         template<typename,int> class SomeAllocatorTemplate,
-	         int n>
-	void fillOperator(SomeVectorTemplate<SparseMatrixType*,SomeAllocatorTemplate<SparseMatrixType*,n> >& data,
-	                  SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorTemplate<Operator<RealType_,SparseMatrixType>,n> >& op)
+	         typename SomeAllocator1Type,
+	         typename SomeAllocator2Type>
+	void fillOperator(SomeVectorTemplate<SparseMatrixType*,SomeAllocator1Type>& data,
+	                  SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocator2Type>& op)
 	{
 		for (size_t i=0;i<data.size();i++) {
 			data[i] = &(op[i].data);
@@ -151,12 +151,11 @@ namespace Dmrg {
 	         typename SparseMatrixType,
 	         typename ConcurrencyType,
 	         template<typename,typename> class SomeVectorTemplate,
-	         template<typename,int> class SomeAllocatorTemplate,
-	         int n>
-	void gather(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorTemplate<Operator<RealType_,SparseMatrixType>,n> >& op,
+	         typename SomeAllocatorType>
+	void gather(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorType>& op,
 	            ConcurrencyType& concurrency)
 	{
-		SomeVectorTemplate<SparseMatrixType*,SomeAllocatorTemplate<SparseMatrixType*,n> > data(op.size());
+		SomeVectorTemplate<SparseMatrixType*,typename PsimagLite::Allocator<SparseMatrixType*>::Type> data(op.size());
 //		PsimagLite::Vector<int*>::Type fermionSign(op.size());
 //		typename PsimagLite::Vector<typename Operator<RealType_,SparseMatrixType>::PairType*>::Type jm(op.size());
 //		typename PsimagLite::Vector<RealType_*>::Type angularFactor(op.size());
@@ -170,12 +169,11 @@ namespace Dmrg {
 	         typename SparseMatrixType,
 	         typename ConcurrencyType,
 	         template<typename,typename> class SomeVectorTemplate,
-	         template<typename,int> class SomeAllocatorTemplate,
-	         int n>
-	void broadcast(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorTemplate<Operator<RealType_,SparseMatrixType>,n> >& op,
+	         typename SomeAllocatorType>
+	void broadcast(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorType>& op,
 	               ConcurrencyType& concurrency)
 	{
-		SomeVectorTemplate<SparseMatrixType*,SomeAllocatorTemplate<SparseMatrixType*,n> > data(op.size());
+		SomeVectorTemplate<SparseMatrixType*,typename PsimagLite::Allocator<SparseMatrixType*>::Type> data(op.size());
 //		PsimagLite::Vector<int*>::Type fermionSign(op.size());
 //		typename PsimagLite::Vector<typename Operator<RealType_,SparseMatrixType>::PairType*>::Type jm(op.size());
 //		typename PsimagLite::Vector<RealType_*>::Type angularFactor(op.size());

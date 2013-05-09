@@ -90,14 +90,14 @@ namespace std {
 namespace utils {
 
 template<template<typename,typename> class SomeVectorTemplate,
-         template<typename,int> class SomeAllocatorTemplate,
-         typename T,
-         int n>
-typename PsimagLite::IsVectorLike<SomeVectorTemplate<T,SomeAllocatorTemplate<T,n> >,void>::True
-reorder(SomeVectorTemplate<T,SomeAllocatorTemplate<T,n> >& v,
-        const SomeVectorTemplate<size_t,SomeAllocatorTemplate<size_t,n> >& permutation)
+         typename SomeAllocator1Type,
+         typename SomeAllocator2Type,
+         typename T>
+typename PsimagLite::HasType<PsimagLite::IsVectorLike<SomeVectorTemplate<T,SomeAllocator1Type> >::True,void>::Type
+reorder(SomeVectorTemplate<T,SomeAllocator1Type>& v,
+        const SomeVectorTemplate<size_t,SomeAllocator2Type>& permutation)
 {
-	SomeVectorTemplate<T,SomeAllocatorTemplate<T,n> > tmpVector(v.size());
+	SomeVectorTemplate<T,SomeAllocator1Type> tmpVector(v.size());
 	for (size_t i=0;i<v.size();i++) tmpVector[i]=v[permutation[i]];
 	v = tmpVector;
 }
@@ -121,7 +121,7 @@ void blockUnion(Block &A,Block const &B,Block const &C)
 }
 
 template<typename SomeVectorType>
-typename PsimagLite::IsVectorLike<SomeVectorType,void>::True
+typename PsimagLite::HasType<PsimagLite::IsVectorLike<SomeVectorType>::True,void>::Type
 truncateVector(SomeVectorType& v,
                const SomeVectorType& removedIndices)
 {
