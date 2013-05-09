@@ -24,12 +24,14 @@ Please see full open source license included in file LICENSE.
  */
 #ifndef STRING_HEADER_H
 #define STRING_HEADER_H
-#include<string>
+#include <string>
 #include "AllocatorCpu.h"
 
 namespace PsimagLite {
 
-typedef std::basic_string<char,std::char_traits<char> > String; //,Allocator<char> > String;
+typedef std::basic_string<char,std::char_traits<char>,Allocator<char>::Type> String;
+typedef std::basic_istringstream<char,std::char_traits<char>,Allocator<char>::Type> IstringStream;
+typedef std::basic_ostringstream<char,std::char_traits<char>,Allocator<char>::Type> OstringStream;
 
 } // namespace PsimagLite
 

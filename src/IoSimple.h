@@ -284,7 +284,7 @@ namespace PsimagLite {
 					if (fin_.eof()) break;
 					if (temp.substr(0,s.size())==s) {
 						foundOnce =true;
-						std::istringstream temp2(temp.substr(s.size(),
+						IstringStream temp2(temp.substr(s.size(),
 								temp.size()));
 						temp2 >> x;
 						if (level>=0 && counter==LongSizeType(level)) {
@@ -298,7 +298,7 @@ namespace PsimagLite {
 					String emessage =
 						"IoSimple::In::readline(): Not found "+s+
 						" in file "+filename_;
-					throw std::runtime_error(s);
+					throw std::runtime_error(emessage.c_str());
 				}
 
 				if (level==LAST_INSTANCE) {

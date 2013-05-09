@@ -103,7 +103,7 @@ bool fringe(size_t i,size_t smax,size_t emin) const;
 size_t getSubstituteSite(size_t smax,size_t emin,size_t i) const;
 
 // Returns the name of this geometry
-std::string label() const;
+String label() const;
 
 // Assume i and j are connected sites.
 // This function returns the connection number on a direction by direction basis. 

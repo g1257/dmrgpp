@@ -40,8 +40,9 @@ template<typename T,int templateParamFlags> class AllocatorCpu : public std::all
 
 public:
 
-	template <class U> struct rebind { typedef AllocatorCpu<U,templateParamFlags>
-									   other; };
+	template <class U> struct rebind {
+		typedef AllocatorCpu<U,templateParamFlags> other;
+	}; // struct rebind
 
 	typename BaseType::pointer allocate(typename BaseType::size_type n,void* = 0)
 	{
