@@ -44,8 +44,8 @@ public:
 		assert(p);
 		free(p);
 		std::ostringstream msg;
-		msg<<"Freed "<<p;
-		std::cout<<msg<<"\n";
+		msg<<"// Freed "<<p;
+		std::cout<<msg.str()<<"\n";
 		p=0;
 	}
 
@@ -53,8 +53,8 @@ public:
 	{
 		void *p = malloc(x);
 		std::ostringstream msg;
-		msg<<"Allocated starting at "<<p<<" "<<x<<" bytes";
-		std::cout<<msg<<"\n";
+		msg<<"// Allocated starting at "<<p<<" "<<x<<" bytes";
+		std::cout<<msg.str()<<"\n";
 		return p;
 	}
 
