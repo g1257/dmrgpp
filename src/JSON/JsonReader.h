@@ -51,7 +51,7 @@ namespace dca {
     {
       std::wifstream file(fileName.c_str());
       if (!file || !file.good() || file.bad()) {
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "JsonReader::constructor(): cannot open file " << fileName << "\n";
 	throw std::runtime_error(msg.str());
       }
@@ -85,7 +85,7 @@ namespace dca {
     const JsonAccessor& searchFor(const PsimagLite::String key) const {
       const JsonAccessor& result = searchFlatMapFor(key);
       if (result.type  == JsonAccessor::WHATEVER_NULL) {
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "In JsonReader::searchFor, Could not find key '" << key << "' in the input file!";
 	throw std::logic_error(msg.str());
       }
@@ -104,7 +104,7 @@ namespace dca {
 	return result;
       const JsonAccessor& result2 = searchFlatMapFor(key2);
       if (result2.type  == JsonAccessor::WHATEVER_NULL) {
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "In JsonReader::searchFor, Could not find keys '" << key1 << "' '" << key2 << "' in the input file!";
 	throw std::logic_error(msg.str());
       }
@@ -172,7 +172,7 @@ namespace dca {
 	// They must be the same:
 	if (int(lhs.n_row()) != in_rows or 
 	    int(lhs.n_col()) != in_cols) {
-	  std::ostringstream msg;
+	  PsimagLite::OstringStream msg;
 	  msg << "JsonReader => Transposer<matrix>: size mis-match!\n";
 	  msg << " Attempt to read a "
 	      << "(" << in_rows << "," << in_cols << ") matrix into a "
@@ -203,7 +203,7 @@ namespace dca {
     
     if (w.type == JsonParser::Whatever::WHATEVER_MAT) {
       
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "Whatever.loadMatrixLikeFromFile(" << mat.n_row() << "," << mat.n_col()  << ")\n";
       
       std::wifstream file(w.filename.c_str());
@@ -211,7 +211,7 @@ namespace dca {
       if (! file.is_open()) {
 	enum {BUFF_SIZE=300};
 	char buffer[BUFF_SIZE];
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "JsonReader =>Transposer could not find file " << w.filename << "!\n";
 	msg << " The current directory is: " << getcwd(buffer,BUFF_SIZE) << "\n";
 	throw std::logic_error(msg.str());
@@ -263,7 +263,7 @@ namespace dca {
 	// They must be the same:
 	if (int(lhs.n_row()) != in_rows or 
 	    int(lhs.n_col()) != in_cols) {
-	  std::ostringstream msg;
+	  PsimagLite::OstringStream msg;
 	  msg << "JsonReader => matrix: Matrix size mis-match!\n";
 	  msg << " Attempt to read a "
 	      << "(" << in_rows << "," << in_cols << ") matrix into a "
@@ -285,7 +285,7 @@ namespace dca {
       
       MatrixTemplate<T>& mat(lhs);
 
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "Whatever.loadMatrix(" << mat.n_row() << "," << mat.n_col()  << ")\n";
       
       std::wifstream file(w.filename.c_str());
@@ -293,7 +293,7 @@ namespace dca {
       if (! file.is_open()) {
 	enum {BUFF_SIZE=300};
 	char buffer[BUFF_SIZE];
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "JsonReader => matrix could not find file " << w.filename << "!\n";
 	msg << " The current directory is: " << getcwd(buffer,BUFF_SIZE) << "\n";
 	throw std::logic_error(msg.str());

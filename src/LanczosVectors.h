@@ -202,7 +202,7 @@ namespace PsimagLite {
 		{
 			if (!lotaMemory_) return false;
 
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Testing whether matrix is zero...";
 			progress_.printline(msg,std::cout);
 

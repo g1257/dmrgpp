@@ -138,7 +138,7 @@ namespace PsimagLite {
 			params.steps=400;
 			setMode(params.options);
 			computeAandB();
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Constructing... mat.rank="<<mat_.rank()<<" steps="<<params.steps;
 			progress_.printline(msg,std::cout);
 		}
@@ -252,7 +252,7 @@ namespace PsimagLite {
 				//throw std::runtime_error("Norm\n");
 			}
 
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg.precision(8);
 			msg<<"Found Energy="<<energyTmp<<" after "<<params_.steps;
 			msg<<" iterations, "<<" orig. norm="<<norma;
@@ -293,7 +293,7 @@ namespace PsimagLite {
 
 		void computeAandB()
 		{
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Asking LanczosSolver to compute spectrum bounds...";
 			progress_.printline(msg,std::cout);
 
@@ -328,7 +328,7 @@ namespace PsimagLite {
 			params_.oneOverA=2.0/(eMax-eMin);
 			params_.b=(eMax+eMin)/2;
 			
-			std::ostringstream msg2;
+			PsimagLite::OstringStream msg2;
 			msg2<<"Spectrum bounds computed, eMax="<<eMax<<" eMin="<<eMin;
 			progress_.printline(msg2,std::cout);
 		}

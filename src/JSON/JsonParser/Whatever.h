@@ -180,7 +180,7 @@ namespace JsonParser {
 
     void assertOkWhateverType(WhateverType t, PsimagLite::String location) const {
       if (type != t) {
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	std::wstring tName(typeName(t));
 	std::wstring t2Name(typeName(type));
 	msg << "Error in '" << location << "' '" << sname() << "'\n"
@@ -194,7 +194,7 @@ namespace JsonParser {
     void assertWhateverMap(PsimagLite::String moreMsg="") const {
       if (type != WHATEVER_MAP) {
 	std::wstring t2Name(typeName(type));
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << sname();
 	msg << " is the wrong type should be WHATEVER_MAP actual type is " <<  PsimagLite::String(t2Name.begin(),t2Name.end())  << "\n";
 	msg << moreMsg;
@@ -234,7 +234,7 @@ namespace JsonParser {
       this->assertWhateverMap("In assertKey");
 
       if (whateverMap.count(key) !=  1) {
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << sname() << "[" << PsimagLite::String(key.begin(),key.end()) << "] key not found!\n";
 	throw std::logic_error(msg.str());
       }
@@ -290,7 +290,7 @@ namespace JsonParser {
     
     int count(std::wstring key) const {
       
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "count(" << PsimagLite::String(key.begin(),key.end())  << ")";
       assertOkWhateverType(WHATEVER_MAP, msg.str());
       
@@ -301,12 +301,12 @@ namespace JsonParser {
     
     Whatever& operator[] (size_t index) {
       
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "Whatever[" << index << "]";
       assertOkWhateverType(WHATEVER_VECTOR, msg.str());
       
       if (!(index <= whateverVector.size()) ) {
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "There was no value for, Whatever[" << index << "] \n";
 	throw std::range_error(msg.str());
       }
@@ -318,12 +318,12 @@ namespace JsonParser {
     
     const Whatever& operator[] (size_t index) const {
       
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "Whatever[" << index << "]";
       assertOkWhateverType(WHATEVER_VECTOR, msg.str());
       
       if (!(index <= whateverVector.size()) ) {
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "There was no value for, Whatever[" << index << "] \n";
 	throw std::range_error(msg.str());
       }
@@ -335,7 +335,7 @@ namespace JsonParser {
     
     Whatever& back() {
       
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "Whatever.back()";
       assertOkWhateverType(WHATEVER_VECTOR, msg.str());
       
@@ -347,7 +347,7 @@ namespace JsonParser {
     template<typename T>
     Whatever& push_back(T& value) {
       
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "Whatever.push_back()";
       assertOkWhateverType(WHATEVER_VECTOR, msg.str());
       
@@ -358,7 +358,7 @@ namespace JsonParser {
 
     Whatever& push_back() {
       
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "Whatever.push_back()";
       assertOkWhateverType(WHATEVER_VECTOR, msg.str());
       
@@ -368,7 +368,7 @@ namespace JsonParser {
 
     Whatever& push_back_null() {
       
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "Whatever.push_back_null()";
       assertOkWhateverType(WHATEVER_VECTOR, msg.str());
       
@@ -471,7 +471,7 @@ namespace JsonParser {
     case Whatever::WHATEVER_NULL:
     case Whatever::WHATEVER_UNKNOWN:
     default: {
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "int d <= " << w.sname() << " produced a type error!\n";
       msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a int!\n";
       throw std::logic_error(msg.str());
@@ -483,7 +483,7 @@ namespace JsonParser {
 	  int x = 0;
 	  x <= w;
 	  if (x<0) {
-		  std::ostringstream msg;
+		  PsimagLite::OstringStream msg;
 		  msg << "Expecting size_t got negative int: "<<x<<"\n";
 		  throw std::logic_error(msg.str());
 	  }
@@ -513,7 +513,7 @@ namespace JsonParser {
     case Whatever::WHATEVER_NULL:
     case Whatever::WHATEVER_UNKNOWN:
     default: {
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "std::complex<T>  <= " << w.sname() << " produced a type error!\n";
       msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a std::complex<T>!\n";
       throw std::logic_error(msg.str());
@@ -534,7 +534,7 @@ namespace JsonParser {
     case Whatever::WHATEVER_NULL:
     case Whatever::WHATEVER_UNKNOWN:
     default: {
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "String d <= " << w.sname() << " produced a type error!\n";
       msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a String!\n";
       throw std::logic_error(msg.str());
@@ -557,7 +557,7 @@ namespace JsonParser {
     case Whatever::WHATEVER_NULL:
     case Whatever::WHATEVER_UNKNOWN:
     default: {
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "float d <= " << w.sname() << " produced a type error!\n";
       msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a float!\n";
       throw std::logic_error(msg.str());
@@ -580,7 +580,7 @@ namespace JsonParser {
     case Whatever::WHATEVER_NULL:
     case Whatever::WHATEVER_UNKNOWN:
     default: {
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "float bool <= " << w.sname() << " produced a type error!\n";
       msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a bool!\n";
       throw std::logic_error(msg.str());
@@ -604,7 +604,7 @@ namespace JsonParser {
     case Whatever::WHATEVER_NULL:
     case Whatever::WHATEVER_UNKNOWN:
     default: {
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "double d <= " << w.sname() << " produced a type error!\n";
       msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a double!\n";
       throw std::logic_error(msg.str());
@@ -630,7 +630,7 @@ namespace JsonParser {
     case Whatever::WHATEVER_NULL:
     case Whatever::WHATEVER_UNKNOWN:
     default: {
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "typename Vector<t>::Type <= " << w.sname() << " produced a type error!\n";
       msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a std::vector<t>!\n";
       throw std::logic_error(msg.str());
@@ -665,7 +665,7 @@ namespace JsonParser {
     case Whatever::WHATEVER_NULL:
     case Whatever::WHATEVER_UNKNOWN:
     default: {
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "std::map<t,t2> <= " << w.sname() << " produced a type error!\n";
       msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a std::map!\n";
       throw std::logic_error(msg.str());

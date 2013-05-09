@@ -255,7 +255,7 @@ namespace PsimagLite {
 			}
 
 
-//			void printline(std::ostringstream &s)
+//			void printline(PsimagLite::OstringStream &s)
 //			{
 //				if (rank_!=0) return;
 //				(*fout_)<<s.str()<<"\n";

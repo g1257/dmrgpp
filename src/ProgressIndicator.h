@@ -98,7 +98,7 @@ namespace PsimagLite {
 			os<<prefix_<<s<<"\n";
 		}
 
-		void printline(std::ostringstream &s,std::ostream& os) const
+		void printline(OstringStream &s,std::ostream& os) const
 		{
 			if (rank_!=0) return;
 			os<<prefix_<<s.str()<<"\n";

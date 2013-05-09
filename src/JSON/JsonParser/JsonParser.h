@@ -122,7 +122,7 @@ namespace JsonParser {
       }
       
       if (nextChar < 0) {
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "JsonParser::getNextCharacterandClass produced a unrecognized next_char " << nextChar << " |-> " << ((char) wctob(nextChar)) << "\n";
 	msg << " In file '" << filename << "' \n";
 	msg << "     around line          : " << numLines << "\n";
@@ -269,7 +269,7 @@ namespace JsonParser {
 	return;
 
       case Abort: {
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "JsonParser::performAction was sent abort from AugmentedStateTranslationTable\n"
 	    << "  nextChar   = '" << ((char) wctob(nextChar)) << "'\n" 
 	    << "  nextClass  = "  << clsName(nextClass) << "\n"
@@ -285,7 +285,7 @@ namespace JsonParser {
 	return;
       }
       default: {
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "JsonParser::performAction was passed a unkown action " << actionName(action) << "\n";
 	throw std::logic_error(msg.str());
       }

@@ -113,7 +113,7 @@ public:
 		  rng_(343311)
 	{
 		setMode(params.options);
-		std::ostringstream msg;
+		PsimagLite::OstringStream msg;
 		msg<<"Constructing... mat.rank="<<mat_.rank();
 		msg<<" steps="<<steps_<<" eps="<<eps_;
 		progress_.printline(msg,std::cout);

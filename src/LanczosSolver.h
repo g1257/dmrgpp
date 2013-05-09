@@ -113,7 +113,7 @@ namespace PsimagLite {
 		typedef typename LanczosVectorsType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 // 		typedef Matrix<VectorElementType> DenseMatrixType;
-		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
+		typedef ContinuedFraction<RealType,TridiagonalMatrixType>
 		                    PostProcType;
 
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
@@ -132,7 +132,7 @@ namespace PsimagLite {
 		{
 // 			assert(storageForLanczosVectors || !params.lotaMemory);
 			setMode(params.options);
-			std::ostringstream msg;
+			OstringStream msg;
 			msg<<"Constructing... mat.rank="<<mat_.rank();
 			msg<<" steps="<<steps_<<" eps="<<eps_;
 			progress_.printline(msg,std::cout);
@@ -272,7 +272,7 @@ namespace PsimagLite {
 // 				if (eps_>=tolerance_) return;
 			}
 
-			std::ostringstream msg;
+			OstringStream msg;
 			msg<<"Decomposition done for mat.rank="<<mat_.rank();
 			msg<<" after "<<j<<" steps.";
 			progress_.printline(msg,std::cout);
@@ -308,7 +308,7 @@ namespace PsimagLite {
 				//throw std::runtime_error("Norm\n");
 			}
 			
-			std::ostringstream msg;
+			OstringStream msg;
 			msg.precision(8);
 			msg<<"Found Energy="<<energyTmp<<" after "<<iter;
 			msg<<" iterations, "<<" orig. norm="<<norma;
@@ -415,7 +415,7 @@ namespace PsimagLite {
 				const VectorType& initialVector)
 		{
 			size_t n =mat_.rank();
-			PsimagLite::Matrix<VectorElementType> a(n,n);
+			Matrix<VectorElementType> a(n,n);
 			for (size_t i=0;i<n;i++) {
 				VectorType x(n);
 				getColumn(mat_,x,i);
@@ -457,7 +457,7 @@ namespace PsimagLite {
 		RealType eps_;
 		size_t mode_;
 		size_t stepsForEnergyConvergence_;
-		PsimagLite::Random48<RealType> rng_;
+		Random48<RealType> rng_;
 		LanczosVectorsType lanczosVectors_;
 	}; // class LanczosSolver
 } // namespace PsimagLite

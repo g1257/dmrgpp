@@ -300,7 +300,7 @@ namespace psimag {
 	LAPACK::GETRF(N,N,&INV(0,0),LDA,&pivots[0],info);
       
 	if (info != 0) {
-	  std::ostringstream message;
+	  PsimagLite::OstringStream message;
 	  message << "INVERT(A,B): GETRF failed! \n";
 	  if (info < 0) 
 	    message << "The " << -info << "th argument had an illegal value!\n";
@@ -321,7 +321,7 @@ namespace psimag {
 	LAPACK::GETRI(N,&INV(0,0),LDA,&pivots[0],&work[0],lwork,info);
  
 	if (info != 0) {
-	  std::ostringstream message;
+	  PsimagLite::OstringStream message;
 	  message << "INVERT(A,B): GETRI failed! \n";
 	  if (info < 0) 
 	    message << "The " << -info << "th argument had an illegal value!\n";

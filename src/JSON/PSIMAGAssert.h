@@ -54,7 +54,7 @@ void _Assert(const char * filename, int lineno, A assertion, E except)
 {
   if (!assertion) 
     {
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "ASSERTION FAILED AT:"<<filename<<":"<<lineno<<"\n";
       msg << except.what() << std::endl;
       throw E(msg.str());
@@ -68,7 +68,7 @@ void _Assert(const char * filename, int lineno,
 {
   if (!assertion) 
     {
-      std::ostringstream msg;
+      PsimagLite::OstringStream msg;
       msg << "ASSERTION FAILED AT:"<<filename<<":"<<lineno<<"\n";
       throw std::exception(msg.str());
     }

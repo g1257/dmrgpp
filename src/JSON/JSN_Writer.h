@@ -291,7 +291,7 @@ namespace dca {
     static
     String toString(const std::map<String, String>& map) {
 
-      std::ostringstream buff;
+      PsimagLite::OstringStream buff;
       buff << "{";
       std::map<String,String>::const_iterator itr;
       for (itr = map.begin(); itr != map.end(); itr++) {
@@ -309,7 +309,7 @@ namespace dca {
       typedef std::map<String,T> MapType;
       typedef typename MapType::const_iterator CITR;
 
-      std::ostringstream buff;
+      PsimagLite::OstringStream buff;
       buff << "{";
       for (CITR itr = map.begin(); itr != map.end(); itr++) {
 	if (itr != map.begin())
@@ -326,7 +326,7 @@ namespace dca {
       typedef std::map<String,T> MapType;
       typedef typename MapType::const_iterator CITR;
 
-      std::ostringstream buff;
+      PsimagLite::OstringStream buff;
       buff << "{";
 
       for (CITR itr = map.begin(); itr != map.end(); itr++) {
@@ -360,7 +360,7 @@ namespace dca {
     //====================================================================== 
     static 
     String quoted(String str) {
-      std::ostringstream result;
+      PsimagLite::OstringStream result;
       result << "\"" << str << "\"";
       return result.str();
     }

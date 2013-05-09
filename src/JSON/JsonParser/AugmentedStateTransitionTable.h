@@ -51,7 +51,7 @@ namespace JsonParser {
     static Pair getStateActionPair(StateType state, CharacterClass cls) {
 
       if (!(state < NR_STATES) || !(cls < NR_CLASSES) ) {
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "StateTranslationTable ("<< state << " < " << NR_STATES << "," << cls << " < " << NR_CLASSES << ")\n";
 	msg << "StateTranslationTable ("<< name(state) << "," << clsName(cls) << ")\n";
 	throw std::logic_error(msg.str());
@@ -259,7 +259,7 @@ namespace JsonParser {
 	}
 
       default:
-	std::ostringstream msg;
+	PsimagLite::OstringStream msg;
 	msg << "AugmentedStateTranslationTable::getStateActionPair was passed a unkown state " << name(state) << "\n";
 	throw std::logic_error(msg.str());
       }
