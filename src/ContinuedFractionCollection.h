@@ -64,7 +64,7 @@ namespace PsimagLite {
 				String s = "ContinuedFractionCollection::ctor(...): ";
 				s += "Expected a positive number of items, got " +
 						ttos(n);
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 			}
 			for (size_t i=0;i<size_t(n);i++) {
 				ContinuedFractionType cf(io);
@@ -118,7 +118,7 @@ namespace PsimagLite {
 				if (v1.size()!=v2.size()) {
 					String s = "ContinuedFractionCollection::acc...(...)";
 					s += " vectors must be of same length\n";
-					throw std::runtime_error(s.c_str());
+					throw RuntimeError(s.c_str());
 				}
 			}
 			for (size_t i=0;i<v1.size();i++) {
@@ -127,7 +127,7 @@ namespace PsimagLite {
 					v1[i].first = v2[i].first;
 					v1[i].second = v2[i].second;
 				} else {
-					if (v1[i].first!=v2[i].first) throw std::runtime_error("CF: x coordinate different\n");
+					if (v1[i].first!=v2[i].first) throw RuntimeError("CF: x coordinate different\n");
 					v1[i].second += v2[i].second;
 				}
 			}

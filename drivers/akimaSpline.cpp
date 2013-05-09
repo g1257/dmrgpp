@@ -35,7 +35,7 @@ void readTwoColumnData(const String& file,VectorType& v0,VectorType& v1)
 {
 	std::ifstream fin(file.c_str());
 	if (!fin || !fin.good() || fin.bad()) throw
-		std::runtime_error("Cannot open file\n");
+		RuntimeError("Cannot open file\n");
 	while(!fin.eof()) {
 		String s;
 		fin>>s;

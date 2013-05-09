@@ -56,7 +56,7 @@ int main(int argc,char *argv[])
 		RealType maxValue = 10.0;
 		testMultiply(m,maxValue);
 	} else {
-		throw std::runtime_error("Wrong number of arguments\n");
+		throw RuntimeError("Wrong number of arguments\n");
 	}
 
 

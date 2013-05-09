@@ -153,7 +153,8 @@ inline std::istream& operator>>(std::istream& is,std::vector<FieldType,A>& v)
 {
 	int xsize = 0;
 	is>>xsize;
-	if (xsize<0) throw std::runtime_error(">> vector: size is negative\n");
+	if (xsize<0)
+		throw PsimagLite::RuntimeError(">> vector: size is negative\n");
 	v.resize(xsize);
 	for (size_t i=0;i<size_t(xsize);i++) {
 		is>>v[i];
@@ -221,7 +222,7 @@ namespace PsimagLite {
 	X norm(const std::vector<std::complex<X>,A>& v)
 	{
 		std::complex<X> x = v*v;
-		if (fabs(imag(x))>1e-5) throw std::runtime_error("Norm isn't real\n");
+		if (fabs(imag(x))>1e-5) throw RuntimeError("Norm isn't real\n");
 		return sqrt(real(x));
 	}
 

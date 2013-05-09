@@ -166,7 +166,7 @@ private:
 		String str(thisFile);
 		str += " " + ttos(lineno) + "\n";
 		str += "Read or Write has failed\n";
-		throw std::runtime_error(str.c_str());
+		throw RuntimeError(str.c_str());
 	}
 }; // BinarySaveLoad
 

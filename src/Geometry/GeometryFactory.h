@@ -190,10 +190,10 @@ namespace PsimagLite {
 				}
 				try {
 					io.readline(periodicY,"PeriodicY=");
-					if (x==2) throw std::runtime_error("LadderLeg==2 cannot have PeriodicY set\n");
+					if (x==2) throw RuntimeError("LadderLeg==2 cannot have PeriodicY set\n");
 					std::cerr<<"INFO: PeriodicY="<<periodicY<<"\n";
 				} catch (std::exception& e) {
-					if (x>2) throw std::runtime_error("LadderLeg>2 must have PeriodicY= line\n");
+					if (x>2) throw RuntimeError("LadderLeg>2 must have PeriodicY= line\n");
 				}
 				ladder_ = new Ladder(linSize,x,(periodicY>0));
 				break;
@@ -201,15 +201,15 @@ namespace PsimagLite {
 				dirs_ = 4;
 				maxConnections_=4;
 				io.readline(x,"LadderLeg=");
-				if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
+				if (x!=2) throw RuntimeError("LadderLeg!=2 is not implememnted yet (sorry)\n");
 				ladderx_ = new LadderX(linSize,x);
 				break;
 			case LADDERBATH:
 				dirs_ = 3; // X,Y, and BATH
 				io.readline(x,"LadderLeg=");
-				if (x!=2) throw std::runtime_error("LadderLeg!=2 is not implememnted yet (sorry)\n");
+				if (x!=2) throw RuntimeError("LadderLeg!=2 is not implememnted yet (sorry)\n");
 				io.readline(tmp,"BathSitesPerSite=");
-				if (tmp<0) throw std::runtime_error("BathSitesPerSite<0 is an error\n");
+				if (tmp<0) throw RuntimeError("BathSitesPerSite<0 is an error\n");
 				ladderbath_ = new LadderBath(linSize,x,tmp);
 				maxConnections_ = ladderbath_->maxConnections();
 				break;
@@ -226,7 +226,7 @@ namespace PsimagLite {
 				ktwoniffour_ = new KTwoNiFFour(linSize,x);
 				break;
 			default:
-				throw std::runtime_error("Unknown geometry\n");
+				throw RuntimeError("Unknown geometry\n");
 			}
 		}
 
@@ -246,7 +246,7 @@ namespace PsimagLite {
 			case KTWONIFFOUR:
 				return ktwoniffour_->handle(i,j);
 			}
-			throw std::runtime_error("Unknown geometry\n");
+			throw RuntimeError("Unknown geometry\n");
 		}
 
 		size_t getVectorSize(size_t dirId) const
@@ -263,7 +263,7 @@ namespace PsimagLite {
 			case KTWONIFFOUR:
 				return ktwoniffour_->getVectorSize(dirId);
 			}
-			throw std::runtime_error("Unknown geometry\n");
+			throw RuntimeError("Unknown geometry\n");
 		}
 
 		bool connected(size_t i1,size_t i2) const
@@ -280,7 +280,7 @@ namespace PsimagLite {
 			case KTWONIFFOUR:
 				return ktwoniffour_->connected(i1,i2);
 			}
-			throw std::runtime_error("Unknown geometry\n");
+			throw RuntimeError("Unknown geometry\n");
 		}
 
 		size_t calcDir(size_t i1,size_t i2) const
@@ -297,7 +297,7 @@ namespace PsimagLite {
 			case KTWONIFFOUR:
 				return ktwoniffour_->calcDir(i1,i2);
 			}
-			throw std::runtime_error("Unknown geometry\n");
+			throw RuntimeError("Unknown geometry\n");
 		}
 
 		bool fringe(size_t i,size_t smax,size_t emin) const
@@ -314,7 +314,7 @@ namespace PsimagLite {
 			case KTWONIFFOUR:
 				return ktwoniffour_->fringe(i,smax,emin);
 			}
-			throw std::runtime_error("Unknown geometry\n");
+			throw RuntimeError("Unknown geometry\n");
 		}
 
 		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
@@ -331,7 +331,7 @@ namespace PsimagLite {
 			case KTWONIFFOUR:
 				return ktwoniffour_->getSubstituteSite(smax,emin,siteNew2);
 			}
-			throw std::runtime_error("Unknown geometry\n");
+			throw RuntimeError("Unknown geometry\n");
 		}
 
 		String label() const
@@ -348,7 +348,7 @@ namespace PsimagLite {
 			case KTWONIFFOUR:
 				return ktwoniffour_->label();
 			}
-			throw std::runtime_error("Unknown geometry\n");
+			throw RuntimeError("Unknown geometry\n");
 		}
 
 		size_t length(size_t i) const
@@ -359,7 +359,7 @@ namespace PsimagLite {
 			case LADDER:
 				return ladder_->length(i);
 			}
-			throw std::runtime_error("length(): unsupported by this geometry\n");
+			throw RuntimeError("length(): unsupported by this geometry\n");
 		}
 
 		size_t translate(size_t site,size_t dir,size_t amount) const
@@ -370,7 +370,7 @@ namespace PsimagLite {
 			case LADDER:
 				return ladder_->translate(site,dir,amount);
 			}
-			throw std::runtime_error("translate(): unsupported by this geometry\n");
+			throw RuntimeError("translate(): unsupported by this geometry\n");
 		}
 
 		size_t maxConnections() const { return maxConnections_; }
@@ -389,7 +389,7 @@ namespace PsimagLite {
 			case KTWONIFFOUR:
 				return ktwoniffour_->findReflection(site);
 			}
-			throw std::runtime_error("Unknown geometry\n");
+			throw RuntimeError("Unknown geometry\n");
 		}
 
 		void fillAdditionalData(AdditionalDataType& additionalData,size_t ind,size_t jnd) const
@@ -443,7 +443,7 @@ namespace PsimagLite {
 			else if (s=="ladderx") x=LADDERX;
 			else if (s=="bathedcluster") x=LADDERBATH;
 			else if (s=="ktwoniffour") x = KTWONIFFOUR;
-			else throw std::runtime_error("unknown geometry\n");
+			else throw RuntimeError("unknown geometry\n");
 			return x;
 		}
 

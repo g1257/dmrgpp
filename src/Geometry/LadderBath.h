@@ -155,7 +155,7 @@ namespace PsimagLite {
 				if (c1.first<0 && c2.first<0) return handleInCluster(i1,i2);
 				// cluster - bath or bath cluster
 				PairType x =  (c1.first<0) ? c2 : c1;
-				if (x.first<0 || x.second<0) throw std::runtime_error("Internal error in handle\n");
+				if (x.first<0 || x.second<0) throw RuntimeError("Internal error in handle\n");
 				size_t firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
 				x.first -= firstClusterSite;
 
@@ -165,7 +165,7 @@ namespace PsimagLite {
 			// siteNew2 is fringe in the environment
 			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
 			{
-				throw std::runtime_error("Umhph, ouch, ayyayyayy, what?\n");
+				throw RuntimeError("Umhph, ouch, ayyayyayy, what?\n");
 			}
 
 			String label() const
@@ -180,7 +180,7 @@ namespace PsimagLite {
 			
 			size_t findReflection(size_t site) const
 			{
-				throw std::runtime_error("findReflection: unimplemented (sorry)\n");
+				throw RuntimeError("findReflection: unimplemented (sorry)\n");
 			}
 
 		private:

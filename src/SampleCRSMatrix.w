@@ -247,7 +247,7 @@ void readVector(SomeIoInputType& io,typename Vector<SomeFieldType>::Type& v) con
 {
 	int size=0;
 	io>>size;
-	if (size<0) throw std::runtime_error("readVector: size is zero\n");
+	if (size<0) throw RuntimeError("readVector: size is zero\n");
 	v.resize(size);
 	for (size_t i=0;i<v.size();i++) {
 		io>>v[i];

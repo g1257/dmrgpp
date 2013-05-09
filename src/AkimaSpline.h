@@ -21,9 +21,9 @@ class AkimaSpline {
 		AkimaSpline(const VectorType& x,const VectorType& s)
 		{
 			if (x.size()!=s.size())
-				throw std::runtime_error("Number of X and Y points must be the same\n");
+				throw RuntimeError("Number of X and Y points must be the same\n");
 			if (x.size()<3) throw
-				std::runtime_error("Number of X too small\n");
+				RuntimeError("Number of X too small\n");
 			VectorType sprime;
 			calculateSprime(sprime,x,s);
 			for (size_t i=0;i<x.size()-1;i++) {
@@ -61,11 +61,11 @@ class AkimaSpline {
 		size_t findRange(const RealType& x) const
 		{
 			if (x<interval_.first || x>interval_.second)
-				throw std::runtime_error("Akima: out of range\n");
+				throw RuntimeError("Akima: out of range\n");
 			for (size_t i=0;i<akimaStruct_.size();i++)
 				if (x>=akimaStruct_[i].x0 && x<=akimaStruct_[i].x1) return i;
 	
-			throw std::runtime_error("Akima: findRange(): internal error\n");
+			throw RuntimeError("Akima: findRange(): internal error\n");
 		}
 		
 		void calculateSprime(VectorType& sprime,const VectorType& x,const VectorType& s) const

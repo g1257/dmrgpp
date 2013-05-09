@@ -158,7 +158,7 @@ namespace PsimagLite {
 					case DIRECTION_XMY:// only checked for leg_=2
 						return imin/leg_;
 				}
-				throw std::runtime_error("handle: Unknown direction\n");
+				throw RuntimeError("handle: Unknown direction\n");
 			}
 
 			// siteNew2 is fringe in the environment
@@ -174,7 +174,7 @@ namespace PsimagLite {
 			
 			size_t findReflection(size_t site) const
 			{
-				throw std::runtime_error("findReflection: unimplemented (sorry)\n");
+				throw RuntimeError("findReflection: unimplemented (sorry)\n");
 			}
 
 		private:

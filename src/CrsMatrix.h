@@ -285,7 +285,7 @@ namespace PsimagLite {
 		size_t rank() const
 		{
 			if (nrow_!=ncol_)
-				throw std::runtime_error("CrsMatrix: rank(): only for square matrices\n");
+				throw RuntimeError("CrsMatrix: rank(): only for square matrices\n");
 			return nrow_;
 		}
 
@@ -405,10 +405,10 @@ namespace PsimagLite {
 	{
 		int n;
 		is>>n;
-		if (n<0) throw std::runtime_error(
+		if (n<0) throw RuntimeError(
 				"is>>CrsMatrix(...): Rows must be positive\n");
 		int ncol=0;
-		if (ncol<0) throw std::runtime_error(
+		if (ncol<0) throw RuntimeError(
 					"is>>CrsMatrix(...): Cols must be positive\n");
 		is>>ncol;
 		m.resize(n,ncol);
@@ -841,7 +841,7 @@ namespace PsimagLite {
 				// inspect this
 				index.clear();
 				for (k=B.getRowPtr(i);k<B.getRowPtr(i+1);k++) {
-					if (B.getCol(k)<0 || size_t(B.getCol(k))>=n) throw std::runtime_error("operatorPlus (1)\n");
+					if (B.getCol(k)<0 || size_t(B.getCol(k))>=n) throw RuntimeError("operatorPlus (1)\n");
 					valueTmp[B.getCol(k)]=B.getValue(k);
 					index.push_back(B.getCol(k));
 				}
@@ -849,7 +849,7 @@ namespace PsimagLite {
 				// inspect C
 				for (k=C.getRowPtr(i);k<C.getRowPtr(i+1);k++) {
 					tmp = C.getValue(k);
-					if (C.getCol(k)>=int(valueTmp.size()) || C.getCol(k)<0) throw std::runtime_error("operatorPlus (2)\n");
+					if (C.getCol(k)>=int(valueTmp.size()) || C.getCol(k)<0) throw RuntimeError("operatorPlus (2)\n");
 
 					valueTmp[C.getCol(k)] += tmp;
 					index.push_back(C.getCol(k));
@@ -859,7 +859,7 @@ namespace PsimagLite {
 				for (size_t kk=0;kk<index.size();kk++) {
 					if (k==index[kk]) continue;
 					k=index[kk];
-					if (k<0 || size_t(k)>=n) throw std::runtime_error("operatorPlus (3)\n");
+					if (k<0 || size_t(k)>=n) throw RuntimeError("operatorPlus (3)\n");
 					tmp = valueTmp[k];
 					if (tmp!=static_cast<T>(0.0)) {
 						A.pushCol(k);
@@ -913,7 +913,7 @@ namespace PsimagLite {
 				counter++;
 			}
 		}
-		//if (i>A.rank()) throw std::runtime_error("sumBlock\n");
+		//if (i>A.rank()) throw RuntimeError("sumBlock\n");
 		for (size_t i=B.row()+offset;i<A.row();i++) Bfull.setRow(i,counter);
 		Bfull.setRow(A.row(),counter);
 		Bfull.checkValidity();

@@ -267,7 +267,7 @@ namespace PsimagLite {
 				max_nstep = j + 1;
 				lanczosVectors_.reset(mat_.rank(),max_nstep);
 				ab.resize(max_nstep);
-//				throw std::runtime_error(
+//				throw RuntimeError(
 //					"LanczosSolver::tridiag(): Unsupported\n");
 // 				if (eps_>=tolerance_) return;
 			}
@@ -305,7 +305,7 @@ namespace PsimagLite {
 			
 			if (norma<1e-5 || norma>100) {
 				std::cerr<<"norma="<<norma<<"\n";
-				//throw std::runtime_error("Norm\n");
+				//throw RuntimeError("Norm\n");
 			}
 			
 			OstringStream msg;
@@ -393,7 +393,7 @@ namespace PsimagLite {
 
 			delete [] d;
 			delete [] e;
-			if (intCounter>maxCounter) throw std::runtime_error("LanczosSolver::ground(): internal error\n");
+			if (intCounter>maxCounter) throw RuntimeError("LanczosSolver::ground(): internal error\n");
 
 		}
 		
@@ -422,7 +422,7 @@ namespace PsimagLite {
 				for (size_t j=0;j<n;j++) a(i,j)=x[j];
 			}
 			bool ih  = isHermitian(a,true);
-			if (!ih) throw std::runtime_error("computeGroundState: Matrix not hermitian\n");
+			if (!ih) throw RuntimeError("computeGroundState: Matrix not hermitian\n");
 
 			std::cerr<<"Matrix hermitian="<<ih<<"\n";
 			/*RealType eps2=1e-6;
@@ -448,7 +448,7 @@ namespace PsimagLite {
 			std::cerr<<"--------------------------------\n";
 			std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
 
-			throw std::runtime_error("testing lanczos solver\n");
+			throw RuntimeError("testing lanczos solver\n");
 		}
 
 		ProgressIndicator progress_;

@@ -100,7 +100,7 @@ namespace PsimagLite {
 //                    if (x>eps_) {
 //						std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j);
 //						std::cerr<<" b("<<i<<","<<j<<")="<<b(i,j)<<"\n";
-//						throw std::runtime_error("almostEqual\n");
+//						throw RuntimeError("almostEqual\n");
 //					}
 //				}
 //			}

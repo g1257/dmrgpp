@@ -158,7 +158,7 @@ namespace PsimagLite {
 				if (test) {
 					PairType firstLast = findFirstLast();
 					if (i0>firstLast.first || i0+total<firstLast.second) 
-						throw std::runtime_error("SparseVector::toChunk(...)"
+						throw RuntimeError("SparseVector::toChunk(...)"
 							" check failed\n");
 				}
 				dest.resize(total);
@@ -199,7 +199,7 @@ namespace PsimagLite {
 						break;
 					}
 				}
-				if (ret!=ret2) throw std::runtime_error("SparseVector::findPartition(...)"
+				if (ret!=ret2) throw RuntimeError("SparseVector::findPartition(...)"
 						"vector extends more than one partition\n");
 				return ret;
 			}

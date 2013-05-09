@@ -216,7 +216,7 @@ namespace PsimagLite {
 					String s(__FILE__);
 					s += " " + ttos(__LINE__) + "\n";
 					s += "Cannot open file " + filename_ + " for writing\n";
-					throw std::runtime_error(s.c_str());
+					throw RuntimeError(s.c_str());
 				}
 			}
 
@@ -234,7 +234,7 @@ namespace PsimagLite {
 				rank_=rank;
 				if (rank_!=0) return;
 				if (filename_=="OSTREAM")
-					throw std::runtime_error("open: not possible\n");
+					throw RuntimeError("open: not possible\n");
 				filename_=fn;
 				//if (!fout_) fout_=new std::ofstream;
 				int flags = 0;
@@ -242,14 +242,14 @@ namespace PsimagLite {
 				else if (mode==std::ios_base::app) flags = O_WRONLY | O_APPEND;
 				fout_ = ::open(fn.c_str(),flags, S_IRUSR | S_IWUSR);
 				if (fout_<0)
-					throw std::runtime_error("Out: error while opening file!\n");
+					throw RuntimeError("Out: error while opening file!\n");
 			}
 
 			void close()
 			{
 				if (!ENABLED) return;
 				if (fout_<0)
-					throw std::runtime_error("close: not possible\n");
+					throw RuntimeError("close: not possible\n");
 				filename_="FILE_IS_CLOSED";
 				::close(fout_);
 			}
@@ -384,7 +384,7 @@ namespace PsimagLite {
 					String s(__FILE__);
 					s += ttos(__LINE__) + "\n";
 					s += "File " + filename_ + " is not open\n";
-					throw std::runtime_error(s.c_str());
+					throw RuntimeError(s.c_str());
 				}
 			}
 
@@ -412,7 +412,7 @@ namespace PsimagLite {
 				if (fin_<0) {
 					String s = "IoBinary::ctor(...): Can't open file "
 							+filename_+"\n";
-					throw std::runtime_error(s.c_str());
+					throw RuntimeError(s.c_str());
 				}
 			}
 
@@ -431,7 +431,7 @@ namespace PsimagLite {
 				if (fin_<0) {
 					String s = "IoBinaryIn::open(...) failed for file "
 							+ filename_ + "\n";
-					throw std::runtime_error(s.c_str());
+					throw RuntimeError(s.c_str());
 				}
 			}
 
@@ -458,7 +458,7 @@ namespace PsimagLite {
 					String str(__FILE__);
 					str += ttos(__FILE__) + "\n";
 					str += "Expecting a single item\n";
-					throw std::runtime_error(str.c_str());
+					throw RuntimeError(str.c_str());
 				}
 
 				myread(fin_,&x,sizeof(x));
@@ -485,7 +485,7 @@ namespace PsimagLite {
 					return sc;
 				}
 
-				throw std::runtime_error("Unimplemented read\n");
+				throw RuntimeError("Unimplemented read\n");
 			}
 
 			//! Assumes something of the form 
@@ -516,7 +516,7 @@ namespace PsimagLite {
 //					String s2 (__FILE__);
 //					s2 += " No " + s + " found in the input file or ";
 //					s2 += " could not parse it\n";
-//					throw std::runtime_error(s2.c_str());
+//					throw RuntimeError(s2.c_str());
 //				}
 //			}
 			
@@ -583,7 +583,7 @@ namespace PsimagLite {
 						std::cerr<<"Not found "<<s<<" in file "<<filename_;
 						std::cerr<<" level="<<level<<" counter="<<counter<<"\n";
 					}
-					throw std::runtime_error("IoBinary::In::read()\n");
+					throw RuntimeError("IoBinary::In::read()\n");
 				}
 				//std::cerr<<"------------\n";
 				return std::pair<String,size_t>(tempSaved,counter);
@@ -603,7 +603,7 @@ namespace PsimagLite {
 //				}
 //				String ss = "IoBinary::count(...): too many "
 //					+s+" in file "+filename_+"\n";
-//				throw std::runtime_error(s.c_str());
+//				throw RuntimeError(s.c_str());
 				
 //			}
 
@@ -661,7 +661,7 @@ namespace PsimagLite {
 					return;
 				}
 
-				throw std::runtime_error("Unimplemented read\n");
+				throw RuntimeError("Unimplemented read\n");
 			}
 
 //			template<
@@ -682,7 +682,7 @@ namespace PsimagLite {
 			void rewind()
 			{
 				if (!ENABLED) return;
-				throw std::runtime_error("IoBinary::rewind(): Unimplemented\n");
+				throw RuntimeError("IoBinary::rewind(): Unimplemented\n");
 //				fin_.clear(); // forget we hit the end of file
 //				fin_.seekg(0, std::ios::beg); // move to the start of the file
 			}
@@ -708,7 +708,7 @@ namespace PsimagLite {
 						s += " " + ttos(__LINE__);
 						s += "\nCannot read next label\n";
 						return "NOTFOUND";
-						//throw std::runtime_error(s.c_str());
+						//throw RuntimeError(s.c_str());
 					}
 					if (c==magicLabel[j]) {
 						j++;
@@ -725,7 +725,7 @@ namespace PsimagLite {
 					String s(__FILE__);
 					s += " " + ttos(__LINE__);
 					s += "\nCannot read next label (2)\n";
-					throw std::runtime_error(s.c_str());
+					throw RuntimeError(s.c_str());
 				}
 
 				if (size_t(y)>=MEMORY_POOL_SIZE) {
@@ -739,7 +739,7 @@ namespace PsimagLite {
 					String s(__FILE__);
 					s += " " + ttos(__LINE__);
 					s += "\nCannot read next label (3)\n";
-					throw std::runtime_error(s.c_str());
+					throw RuntimeError(s.c_str());
 				}
 				String ret="";
 				for (size_t i=0;i<size_t(x);i++) ret += memoryPool_[i];
@@ -795,7 +795,7 @@ namespace PsimagLite {
 				X tmp;
 				for (size_t i=0;i<xsize;i++) {
 					int l = ::read(fin_,&tmp,sizeof(tmp));
-					if (l!=sizeof(tmp)) throw std::runtime_error("Mmm!\n");
+					if (l!=sizeof(tmp)) throw RuntimeError("Mmm!\n");
 					x[i]=tmp;
 				}
 			}
@@ -811,7 +811,7 @@ namespace PsimagLite {
 				typename Vector<char>::Type tmp(xsize);
 
 				int l = ::read(fin_,&(tmp[0]),xsize);
-				if (size_t(l)!=xsize) throw std::runtime_error("Mmm!\n");
+				if (size_t(l)!=xsize) throw RuntimeError("Mmm!\n");
 
 				convertToBool(x,tmp);
 			}
@@ -841,7 +841,7 @@ namespace PsimagLite {
 //					String s(__FILE__);
 //					s += "Something failed while parsing line " + full;
 //					s += " of input file\n";
-//					throw std::runtime_error(s.c_str());
+//					throw RuntimeError(s.c_str());
 //				}
 //				String val="";
 //				for (size_t k=j;k<full.length();k++)
@@ -914,7 +914,7 @@ namespace PsimagLite {
 			String str(thisFile);
 			str += " " + ttos(lineno) + "\n";
 			str += "Read or Write has failed\n";
-			throw std::runtime_error(str.c_str());
+			throw RuntimeError(str.c_str());
 		}
 
 	}; //class IoBinary

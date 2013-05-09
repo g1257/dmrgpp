@@ -158,7 +158,7 @@ namespace PsimagLite {
 		RealType iOfOmega(const RealType& z,RealType offset,int isign) const
 
 		{
-			throw std::runtime_error("iOfOmega: unimplemented\n");
+			throw RuntimeError("iOfOmega: unimplemented\n");
 		}
 
 	private:

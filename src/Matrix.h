@@ -111,7 +111,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		void resize(size_t nrow,size_t ncol)
 		{
 			if (nrow_!=0 || ncol_!=0) throw
-				std::runtime_error("Matrix::resize(...): only applies when Matrix is empty\n");
+				RuntimeError("Matrix::resize(...): only applies when Matrix is empty\n");
 			reset(nrow,ncol);
 		}
 
@@ -226,7 +226,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		work.resize(lwork+2);
 		psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
 		String s = "zgetri_ failed\n";
-		if (info!=0) throw std::runtime_error(s.c_str());
+		if (info!=0) throw RuntimeError(s.c_str());
 
 	}
 
@@ -262,7 +262,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 					if (b2) {
 						values.push_back(val);
 						if (values.size()>maxCharacters)
-							throw std::runtime_error(s.c_str());
+							throw RuntimeError(s.c_str());
 						char chark = k + 65;
 						os<<" "<<chark<<" ";
 					} else {
@@ -411,7 +411,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		Vector<double>::Type work(3);
 		int info,lwork= -1;
 
-		if (lda<=0) throw std::runtime_error("lda<=0\n");
+		if (lda<=0) throw RuntimeError("lda<=0\n");
 
 		eigs.resize(n);
 
@@ -419,7 +419,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		dsyev_(&jobz,&uplo,&n,&(m(0,0)),&lda, &(eigs[0]),&(work[0]),&lwork, &info);
 		if (info!=0) {
 			std::cerr<<"info="<<info<<"\n";
-			throw std::runtime_error("diag: dsyev_: failed with info!=0.\n");
+			throw RuntimeError("diag: dsyev_: failed with info!=0.\n");
 		}
 		lwork = int(work[0])+1;
 		work.resize(lwork+1);
@@ -427,7 +427,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		dsyev_(&jobz,&uplo,&n,&(m(0,0)),&lda, &(eigs[0]),&(work[0]),&lwork, &info);
 		if (info!=0) {
 			std::cerr<<"info="<<info<<"\n";
-			throw std::runtime_error("diag: dsyev_: failed with info!=0.\n");
+			throw RuntimeError("diag: dsyev_: failed with info!=0.\n");
 		}
 
 	}
@@ -452,7 +452,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		zheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
 		if (info!=0) {
 			std::cerr<<"info="<<info<<"\n";
-			throw std::runtime_error("diag: zheev: failed with info!=0.\n");
+			throw RuntimeError("diag: zheev: failed with info!=0.\n");
 		}
 
 	}
@@ -477,7 +477,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		cheev_(&jobz,&uplo,&n,&(m(0,0)),&lda,&(eigs[0]),&(work[0]),&lwork,&(rwork[0]),&info);
 		if (info!=0) {
 			std::cerr<<"info="<<info<<"\n";
-			throw std::runtime_error("diag: cheev: failed with info!=0.\n");
+			throw RuntimeError("diag: cheev: failed with info!=0.\n");
 		}
 
 	}
@@ -510,7 +510,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 			String str(__FILE__);
 			str += " " + ttos(__LINE__);
 			str += " PsimagLite::svd(...) failed with info=" + ttos(info) + "\n";
-			throw std::runtime_error(str.c_str());
+			throw RuntimeError(str.c_str());
 		}
 		lwork = int(work[0]);
 		work.resize(lwork+10);
@@ -520,7 +520,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 			String str(__FILE__);
 			str += " " + ttos(__LINE__);
 			str += " PsimagLite::svd(...) failed with info=" + ttos(info) + "\n";
-			throw std::runtime_error(str.c_str());
+			throw RuntimeError(str.c_str());
 		}
 		a = u;
 	}
@@ -530,7 +530,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 	{
 		size_t n=A.n_row();
 		double eps=1e-6;
-		if (n!=A.n_col()) throw std::runtime_error
+		if (n!=A.n_col()) throw RuntimeError
 			("isHermitian called on a non-square matrix.\n");
 		for (size_t i=0;i<n;i++) for (size_t j=0;j<n;j++)
 			if (std::norm(A(i,j)-std::conj(A(j,i)))>eps) {

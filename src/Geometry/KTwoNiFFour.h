@@ -110,7 +110,7 @@ namespace PsimagLite {
 		size_t getVectorSize(size_t dirId) const
 		{
 			assert(false);
-			throw std::runtime_error("getVectorSize: unimplemented\n");
+			throw RuntimeError("getVectorSize: unimplemented\n");
 		}
 
 		bool connected(size_t i1,size_t i2) const
@@ -226,7 +226,7 @@ namespace PsimagLite {
 		
 		size_t findReflection(size_t site) const
 		{
-			throw std::runtime_error("findReflection: unimplemented (sorry)\n");
+			throw RuntimeError("findReflection: unimplemented (sorry)\n");
 		}
 
 		void fillAdditionalData(AdditionalData& additionalData,size_t ind,size_t jnd) const

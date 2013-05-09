@@ -107,14 +107,14 @@ namespace PsimagLite {
 					if (dataNumbers_.size()!=n) {
 						String s(__FILE__);
 						s += " " + ttos(dataNumbers_.size()) + " != " + ttos(n) + "\n";
-					 	throw std::runtime_error(s.c_str());
+					 	throw RuntimeError(s.c_str());
 					}
 				} else {
 					for (size_t i=0;i<n;i++) {
 						MatrixType m;
 						io.readMatrix(m,"Connectors");
 // 						if (m.n_row()!=edof || m.n_col()!=edof)
-// 							throw std::runtime_error("GeometryDirection\n");
+// 							throw RuntimeError("GeometryDirection\n");
 						dataMatrices_.push_back(m);
 					}
 				}

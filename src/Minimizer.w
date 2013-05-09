@@ -137,7 +137,7 @@ int simplex(VectorType& minVector,RealType delta=1e-3,RealType tolerance=1e-3)
 	for (size_t iter=0;iter<maxIter_;iter++) {
 		int status = gsl_multimin_fminimizer_iterate (gslS_);
 
-		if (status) throw std::runtime_error("Minimizer::simplex(...): Error encountered\n");
+		if (status) throw RuntimeError("Minimizer::simplex(...): Error encountered\n");
 
 		RealType size = gsl_multimin_fminimizer_size(gslS_);
 		status = gsl_multimin_test_size(size, tolerance);

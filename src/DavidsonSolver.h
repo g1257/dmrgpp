@@ -144,7 +144,7 @@ public:
 	{
 		String s(__FILE__);
 		s += " Unimplemented\n";
-		throw std::runtime_error(s.c_str());
+		throw RuntimeError(s.c_str());
 
 		VectorType t = initialVector;
 
@@ -172,7 +172,7 @@ public:
 			}
 			callMinRes();
 			m++;
-			if (m>=steps_) throw std::runtime_error
+			if (m>=steps_) throw RuntimeError
 					("DavidsonSolver: failed to converge\n");
 
 		}
@@ -195,7 +195,7 @@ private:
 	{
 		String s(__FILE__);
 		s += " Unimplemented\n";
-		throw std::runtime_error(s.c_str());
+		throw RuntimeError(s.c_str());
 	}
 
 	void algorithm4_14(VectorType& t,const typename Vector<VectorType>::Type& v)
@@ -220,14 +220,14 @@ private:
 	{
 		String s(__FILE__);
 		s += " Unimplemented\n";
-		throw std::runtime_error(s.c_str());
+		throw RuntimeError(s.c_str());
 	}
 
 	void largestEigenpair(RealType& theta,VectorType& s,const PsimagLite::Matrix<ComplexOrRealType>& M)
 	{
 		String st(__FILE__);
 		st += " Unimplemented\n";
-		throw std::runtime_error(st.c_str());
+		throw RuntimeError(st.c_str());
 	}
 
 	ProgressIndicator progress_;

@@ -136,7 +136,7 @@ namespace PsimagLite {
 	private:
 		void thereSnoGsl() const
 		{
-			throw std::runtime_error("You need to compile with the GSL\n");
+			throw RuntimeError("You need to compile with the GSL\n");
 		}
 		
 	}; // class GslWrapper

@@ -138,7 +138,7 @@ namespace PsimagLite {
 			if (procs%numberOfSegments !=0) {
 				String s("Segment size must be a divisor of nprocs ");
 				s += String("__FUNCTION__") + __FILE__+" : " + ttos(__LINE__);
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 			}
 			/* Extract the original group handle */ 
 			MPI_Group origGroup;
@@ -248,7 +248,7 @@ namespace PsimagLite {
 			s += "Contribute to PsimagLite development and make a difference!\n";
 			s += "Implement this function!\n";
 			s += ttos(__FUNCTION__) + __FILE__ + " : " + ttos(__LINE__) + "\n"; 
-			throw std::runtime_error(s.c_str());
+			throw RuntimeError(s.c_str());
 		}
 
 		void gather(typename Vector<std::complex<double> >::Type& v,CommType mpiComm=COMM_WORLD)
@@ -303,7 +303,7 @@ namespace PsimagLite {
 			if (x!=MPI_SUCCESS) {
 				String s2("ConcurrencyMpi::");
 				s2 += s + " failed\n";
-				throw std::runtime_error(s2.c_str());
+				throw RuntimeError(s2.c_str());
 			}
 		}
 
@@ -342,7 +342,7 @@ namespace PsimagLite {
 		{
 			MPI_Group newGroup;
 			int status = MPI_Group_incl(origGroup,rv.size(),&(rv[0]),&newGroup);
-			if (status!=MPI_SUCCESS) throw std::runtime_error("getCommFromSegments\n");
+			if (status!=MPI_SUCCESS) throw RuntimeError("getCommFromSegments\n");
 			CommType* newComm = new CommType;
 			garbage_.push_back(newComm);
 			MPI_Comm_create(COMM_WORLD, newGroup, newComm);

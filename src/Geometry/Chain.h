@@ -97,7 +97,7 @@ namespace PsimagLite {
 
 			size_t getVectorSize(size_t dirId) const
 			{
-				if (dirId!=DIRECTION_X) throw std::runtime_error("Chain must have direction 0\n");
+				if (dirId!=DIRECTION_X) throw RuntimeError("Chain must have direction 0\n");
 				return linSize_-1;
 			}
 

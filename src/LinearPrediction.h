@@ -96,7 +96,7 @@ namespace PsimagLite {
 		: y_(y)
 		{
 			size_t ysize = y.size();
-			if (ysize&1) throw std::runtime_error(
+			if (ysize&1) throw RuntimeError(
 				"LinearPrediction::ctor(...): data set must contain an even number of points\n");
 			size_t n = ysize/2;
 			MatrixType A(n,n);
@@ -138,7 +138,7 @@ namespace PsimagLite {
 					&(work[0]), lwork,info );
 			lwork = static_cast<int>(work[0]);
 			if (lwork<=0) throw
-				std::runtime_error("LinearPrediction:: internal error\n");
+				RuntimeError("LinearPrediction:: internal error\n");
 			work.resize(lwork);
 			// actual work:
 			psimag::LAPACK::GETRI(n, &(A(0,0)), n,  &(ipiv[0]),

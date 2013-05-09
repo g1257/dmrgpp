@@ -231,7 +231,7 @@ namespace PsimagLite {
 			String s2("Hmmm...this ain't looking good...");
 			s2 += String(__FILE__) + " " + ttos(__LINE__) + " ";
 			s2 += s;
-			throw std::runtime_error(s);
+			throw RuntimeError(s);
 		}
 
 		void setMode(const String& options)
@@ -249,7 +249,7 @@ namespace PsimagLite {
 
 			if (norma<1e-5 || norma>100) {
 				std::cerr<<"norma="<<norma<<"\n";
-				//throw std::runtime_error("Norm\n");
+				//throw RuntimeError("Norm\n");
 			}
 
 			PsimagLite::OstringStream msg;

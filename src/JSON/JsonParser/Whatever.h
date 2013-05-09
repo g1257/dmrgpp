@@ -381,7 +381,7 @@ namespace JsonParser {
 
     template<typename T>
     void get (T& value) {
-      std::istringstream valueStream(valueString);
+      PsimagLite::IstringStream valueStream(valueString);
       valueStream >> value;
     }
 

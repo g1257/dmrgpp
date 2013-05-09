@@ -57,7 +57,7 @@ int main(int argc,char *argv[])
 	if (argc<4) {
 		PsimagLite::String s(argv[0]);
 		s += ": Needs total1, total2 and segmentSize as args\n";
-		throw std::runtime_error(s.c_str());
+		throw PsimagLite::RuntimeError(s.c_str());
 	}
 	typedef ConcurrencyType::CommType CommType;
 	ConcurrencyType concurrency(argc,argv);

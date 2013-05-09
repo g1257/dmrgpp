@@ -96,11 +96,11 @@ namespace PsimagLite {
 			{
 				int x;
 				io.readline(x,"TotalNumberOfSites=");
-				if (x<0) throw std::runtime_error("TotalNumberOfSites<0 is an error\n");
+				if (x<0) throw RuntimeError("TotalNumberOfSites<0 is an error\n");
 				linSize_ = x;
 
 				io.readline(x,"NumberOfTerms=");
-				if (x<0) throw std::runtime_error("NumberOfTerms<0 is an error\n");
+				if (x<0) throw RuntimeError("NumberOfTerms<0 is an error\n");
 
 				for (size_t i=0;i<size_t(x);i++) {
 					terms_.push_back(GeometryTermType(io,i,linSize_,debug));
@@ -157,7 +157,7 @@ namespace PsimagLite {
 					str += " " + ttos(__LINE__) + "\n";
 					str += "split error, linSize_=" + ttos(linSize_);
 					str += " sitesPerBlock=" + ttos(sitesPerBlock) + "\n";
-					throw std::runtime_error(str.c_str());
+					throw RuntimeError(str.c_str());
 				}
 				size_t i=0;
 				while(i<sitesPerBlock) {

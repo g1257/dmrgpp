@@ -173,7 +173,7 @@ namespace PsimagLite {
 		void init(const typename Vector<size_t>::Type& weights,CommType mpiComm)
 		{ 
 			if (isStrict_ && total_%nprocs_!=0)
-				throw std::runtime_error("Nprocs must divide total for this range\n");
+				throw RuntimeError("Nprocs must divide total for this range\n");
 
 			// distribute the load among the processors
 			typename Vector<size_t>::Type loads(nprocs_,0);

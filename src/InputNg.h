@@ -164,7 +164,7 @@ public:
 			if (!fin || !fin.good() || fin.bad()) {
 				String s(__FILE__);
 				s += " Cannot open file " + file + "\n";
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 			}
 
 			char c=0;
@@ -290,13 +290,13 @@ public:
 			if (numericVector_.size()==1) {
 				String s(__FILE__);
 				s += " use equal sign instead of space in line "+ttos(line_) + "\n";
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 				return;
 			}
 			String s(__FILE__);
 			if (numericVector_.size()==0) {
 				std::cerr<<"Line="<<line_<<"\n";
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 			}
 			size_t adjExpected = atoi(numericVector_[0].c_str());
 
@@ -304,7 +304,7 @@ public:
 				std::cout<<" Number of numbers to follow is wrong, expected "<<adjExpected<<" got ";
 				std::cout<<(numericVector_.size()-1)<<"\n";
 				std::cerr<<"Line="<<line_<<"\n";
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 			}
 			String adjLabel=adjLabelForDuplicates(lastLabel_,mapStrVec_);
 			mapStrVec_[adjLabel]=numericVector_;
@@ -477,7 +477,7 @@ public:
 			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
 				String s(__FILE__);
 				s += " readMatrix: \n";
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 			}
 			size_t nrow = size_t( atoi(it->second[0].c_str()));
 			size_t ncol = size_t( atoi(it->second[1].c_str()));
@@ -485,7 +485,7 @@ public:
 			if (it->second.size()<2+nrow*ncol) {
 				String s(__FILE__);
 				s += " readMatrix: \n";
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 			}
 			size_t k = 2;
 			for (size_t i=0;i<m.n_row();i++)
@@ -505,7 +505,7 @@ public:
 			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
 				String s(__FILE__);
 				s += " readMatrix: \n";
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 			}
 			size_t nrow = size_t( atoi(it->second[0].c_str()));
 			size_t ncol = size_t( atoi(it->second[1].c_str()));
@@ -513,12 +513,12 @@ public:
 			if (it->second.size()<2+nrow*ncol) {
 				String s(__FILE__);
 				s += " readMatrix: \n";
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 			}
 			size_t k = 2;
 			for (size_t i=0;i<m.n_row();i++) {
 				for (size_t j=0;j<m.n_row();j++) {
-					std::istringstream is(it->second[k++]);
+					IstringStream is(it->second[k++]);
 					is >> m(i,j);
 				}
 			}
@@ -541,7 +541,7 @@ public:
 			if (len==0) {
 				String s(__FILE__);
 				s += " readline: label cannot be null\n";
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 			}
 			if (label.at(len-1)=='=') len--;
 			return label.substr(0,len);
@@ -567,7 +567,7 @@ public:
 			s += " The (probably) mandatory label: " + label;
 			if (label2.length()>0 && label2!=label) s += " (a.k.a. " + label2 +")";
 			s += " was not found in the input file.\n";
-			throw std::runtime_error(s.c_str());
+			throw RuntimeError(s.c_str());
 		}
 
 		std::map<String,String,MyCompareType> mapStrStr_;

@@ -104,7 +104,7 @@ namespace PsimagLite {
 			{
 				int x;
 				io.readline(x,"DegreesOfFreedom=");
-				if (x<=0) throw std::runtime_error("DegreesOfFreedom<=0 is an error\n");
+				if (x<=0) throw RuntimeError("DegreesOfFreedom<=0 is an error\n");
 				//std::cerr<<"DegreesOfFreedom "<<x<<"\n";
 				size_t edof = (x==1) ? GeometryDirectionType::NUMBERS : GeometryDirectionType::MATRICES;
 				String s;

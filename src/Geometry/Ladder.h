@@ -91,10 +91,10 @@ namespace PsimagLite {
 		Ladder(size_t linSize,size_t leg,bool isPeriodicY)
 		: linSize_(linSize),leg_(leg),isPeriodicY_(isPeriodicY)
 		{
-			if (leg & 1) throw std::runtime_error("Ladder: leg must be even\n");
+			if (leg & 1) throw RuntimeError("Ladder: leg must be even\n");
 			if (leg == 2)  isPeriodicY_ = false;
 			//if (leg>2) std::cerr<<"isPeriodicY="<<isPeriodicY_<<"\n";
-			if (linSize % leg !=0) throw std::runtime_error("Ladder: leg must divide number of sites\n");
+			if (linSize % leg !=0) throw RuntimeError("Ladder: leg must divide number of sites\n");
 		}
 
 		size_t getVectorSize(size_t dirId) const
@@ -102,7 +102,7 @@ namespace PsimagLite {
 			if (dirId==DIRECTION_X) return linSize_-leg_;
 			else if (dirId==DIRECTION_Y) return (isPeriodicY_) ? linSize_ : linSize_ - linSize_/leg_;
 
-			throw std::runtime_error("Unknown direction\n");
+			throw RuntimeError("Unknown direction\n");
 		}
 
 		bool connected(size_t i1,size_t i2) const
@@ -162,7 +162,7 @@ namespace PsimagLite {
 				if (imin ==0 || imin % leg_ == 0) imin = (i1>i2) ? i1 : i2;
 				return imin-imin/leg_ + y;
 			}
-			throw std::runtime_error("hanlde: Unknown direction\n");
+			throw RuntimeError("hanlde: Unknown direction\n");
 		}
 
 		bool sameColumn(size_t i1,size_t i2) const

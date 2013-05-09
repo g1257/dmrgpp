@@ -113,7 +113,7 @@ namespace PsimagLite {
 				if (!fout_) fout_=new std::ofstream;
 				fout_->open(fn.c_str());
 				if (!(*fout_) || !fout_->good())
-					throw std::runtime_error("Out: error while opening file!\n");
+					throw RuntimeError("Out: error while opening file!\n");
 			}
 
 			~Out()
@@ -132,18 +132,18 @@ namespace PsimagLite {
 				rank_=rank;
 				if (rank_!=0) return;
 				if (filename_=="OSTREAM") 
-					throw std::runtime_error("open: not possible\n");
+					throw RuntimeError("open: not possible\n");
 				filename_=fn;
 				if (!fout_) fout_=new std::ofstream;
 				fout_->open(fn.c_str(),mode);
 				if (!(*fout_) || !fout_->good())
-					throw std::runtime_error("Out: error while opening file!\n");
+					throw RuntimeError("Out: error while opening file!\n");
 			}
 
 			void close()
 			{
 				if (filename_=="OSTREAM")
-					throw std::runtime_error("close: not possible\n");
+					throw RuntimeError("close: not possible\n");
 				filename_="FILE_IS_CLOSED";
 				fout_->close();
 			}
@@ -176,7 +176,7 @@ namespace PsimagLite {
 			{
 				if (rank_!=0) return;
 				if (!(*fout_) || !fout_->good())
-					throw std::runtime_error("Out: file not open!\n");
+					throw RuntimeError("Out: file not open!\n");
 				(*fout_)<<label;
 				(*fout_)<<something<<"\n";
 			}
@@ -245,7 +245,7 @@ namespace PsimagLite {
 				if (!fin_ || !fin_.good() || fin_.bad()) {
 					String s = "IoSimple::ctor(...): Can't open file "
 							+filename_+"\n";
-					throw std::runtime_error(s.c_str());
+					throw RuntimeError(s.c_str());
 				}
 			}
 
@@ -261,7 +261,7 @@ namespace PsimagLite {
 				if (!fin_ || !fin_.good() || fin_.bad()) {
 					String s = "IoSimpleIn::open(...) failed for file "
 							+ filename_ + "\n";
-					throw std::runtime_error(s.c_str());
+					throw RuntimeError(s.c_str());
 				}
 			}
 
@@ -278,7 +278,7 @@ namespace PsimagLite {
 				bool found=false;
 				bool foundOnce =false;
 				LongSizeType counter=0;
-				if (fin_.bad() || !fin_.good()) throw std::runtime_error("Readline\n");
+				if (fin_.bad() || !fin_.good()) throw RuntimeError("Readline\n");
 				while(!fin_.eof()) {
 					fin_>>temp;
 					if (fin_.eof()) break;
@@ -298,7 +298,7 @@ namespace PsimagLite {
 					String emessage =
 						"IoSimple::In::readline(): Not found "+s+
 						" in file "+filename_;
-					throw std::runtime_error(emessage.c_str());
+					throw RuntimeError(emessage.c_str());
 				}
 
 				if (level==LAST_INSTANCE) {
@@ -375,7 +375,7 @@ namespace PsimagLite {
 					String s2 (__FILE__);
 					s2 += " No " + s + " found in the input file or ";
 					s2 += " could not parse it\n";
-					throw std::runtime_error(s2.c_str());
+					throw RuntimeError(s2.c_str());
 				}
 			}
 			
@@ -432,7 +432,7 @@ namespace PsimagLite {
 						std::cerr<<"Not found "<<s<<" in file "<<filename_;
 						std::cerr<<" level="<<level<<" counter="<<counter<<"\n";
 					}
-					throw std::runtime_error("IoSimple::In::read()\n");
+					throw RuntimeError("IoSimple::In::read()\n");
 				}
 				//std::cerr<<"------------\n";
 				return std::pair<String,size_t>(tempSaved,counter);
@@ -452,7 +452,7 @@ namespace PsimagLite {
 				}
 				String ss = "IoSimple::count(...): too many "
 					+s+" in file "+filename_+"\n";
-				throw std::runtime_error(s.c_str());
+				throw RuntimeError(s.c_str());
 				
 			}
 
@@ -535,7 +535,7 @@ namespace PsimagLite {
 					String s(__FILE__);
 					s += "Something failed while parsing line " + full;
 					s += " of input file\n";
-					throw std::runtime_error(s.c_str());
+					throw RuntimeError(s.c_str());
 				}
 				String val="";
 				for (size_t k=j;k<full.length();k++)
