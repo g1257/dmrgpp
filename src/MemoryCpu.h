@@ -44,10 +44,10 @@ public:
 	{
 		assert(p);
 		free(p);
-		p=0;
 		std::ostringstream msg;
 		msg<<"Freed "<<p;
 		progress_.printline(msg,std::cout);
+		p=0;
 	}
 
 	void* allocate(size_t x)

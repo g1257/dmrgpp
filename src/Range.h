@@ -246,7 +246,7 @@ namespace PsimagLite {
 		size_t step_; // step within this processor
 		size_t total_; // total number of indices
 	}; // class Range
-} // namespace Dmrg
+} // namespace PsimagLite
 
 /*@}*/	
 #endif // RANGE_HEADER_H

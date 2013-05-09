@@ -15,6 +15,14 @@ Please see full open source license included in file LICENSE.
 *********************************************************
 
 */
+/** \ingroup PsimagLite */
+/*@{*/
+
+/*! \file Vector.h
+ *
+ *
+ */
+
 #ifndef PSIVECTOR_H_
 #define PSIVECTOR_H_
 
@@ -154,10 +162,11 @@ inline std::istream& operator>>(std::istream& is,std::vector<FieldType,A>& v)
 } // namespace std 
 
 namespace PsimagLite {
+
 	template<typename T>
 	class  Vector  {
 	public:
-		typedef std::vector<T,AllocatorCpu<T,1> > Type;
+		typedef std::vector<T,typename Allocator<T>::Type> Type;
 	}; // class Vector
 
 	template<>
@@ -166,14 +175,32 @@ namespace PsimagLite {
 		typedef std::vector<bool> Type;
 	}; // class Vector
 
-	template<typename T1,typename T2>
+	template<typename T>
 	class IsVectorLike {
+	public:
+		enum {True = false};
 	};
 
-	template<typename T1,typename T2>
-	class IsVectorLike<std::vector<T1,AllocatorCpu<T1,1> >,T2> {
+	template<typename T>
+	class IsVectorLike<std::vector<T,AllocatorCpu<T,1> > > {
 	public:
-	        typedef T2 True;
+	        enum {True = true};
+	};
+
+	template<typename T>
+	class IsVectorLike<std::vector<T> > {
+	public:
+	        enum {True = true};
+	};
+
+	template<bool b,typename T>
+	class HasType {
+	};
+
+	template<typename T>
+	class HasType<true,T> {
+	public:
+		typedef T Type;
 	};
 
 	// change this when using PsimagLite::Vector: 
@@ -239,5 +266,7 @@ namespace PsimagLite {
 		v.push_back(tmp);
 	}
 }// namespace PsimagLite
+
+/*@}*/
 #endif // PSIVECTOR_H_
 

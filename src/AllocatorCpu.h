@@ -61,6 +61,16 @@ public:
 
 }; // class AllocatorCpu
 
+template<typename T>
+class Allocator {
+public:
+#ifdef USE_CUSTOM_ALLOCATOR
+	typedef AllocatorCpu<T,1> Type;
+#else
+	typedef std::allocator<T> Type;
+#endif
+}; // class Allocator
+
 } // namespace PsimagLite
 
 /*@}*/

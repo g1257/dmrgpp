@@ -161,7 +161,8 @@ namespace PsimagLite {
 		
 
 		template<typename SomeIoOutputType,typename SomeVectorType>
-		typename IsVectorLike<SomeVectorType,void>::True saveVector(SomeIoOutputType& io,const SomeVectorType& v) const
+		typename HasType<IsVectorLike<SomeVectorType>::True,void>::Type
+		saveVector(SomeIoOutputType& io,const SomeVectorType& v) const
 		{
 			io<<v.size()<<"\n";
 			for (size_t i=0;i<v.size();i++) {
@@ -172,7 +173,8 @@ namespace PsimagLite {
 		
 
 		template<typename SomeIoInputType,typename SomeVectorType>
-		typename IsVectorLike<SomeVectorType,void>::True readVector(SomeIoInputType& io,SomeVectorType& v) const
+		typename HasType<IsVectorLike<SomeVectorType>::True,void>::Type
+		readVector(SomeIoInputType& io,SomeVectorType& v) const
 		{
 			int size=0;
 			io>>size;
