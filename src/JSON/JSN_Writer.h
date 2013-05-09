@@ -12,6 +12,7 @@ Author: Michael S. Summers
 #define dca_JSN_Writer_H
 
 #include "VectorLike.h"
+#include "String.h"
 
 namespace dca {
 
@@ -40,9 +41,9 @@ namespace dca {
     class KeyReference {
     public:
       JSN& writer;
-      std::string key;
+      String key;
 
-      KeyReference(std::string k, JSN& w):
+      KeyReference(String k, JSN& w):
 	writer(w),
 	key   (k)
       {}
@@ -56,16 +57,16 @@ namespace dca {
 	return writer;
       }
 
-      KeyReference operator[](std::string subKey) { return writer.getComponentWriter(key)[subKey]; }
+      KeyReference operator[](String subKey) { return writer.getComponentWriter(key)[subKey]; }
     };
 
     //======================================================================
 
-    KeyReference operator[](std::string key) { return KeyReference(key,*this); }
+    KeyReference operator[](String key) { return KeyReference(key,*this); }
 
     //======================================================================
 
-    ThisType& getComponentWriter(std::string key) { return writers[key]; }
+    ThisType& getComponentWriter(String key) { return writers[key]; }
 
     //======================================================================
 
@@ -73,46 +74,46 @@ namespace dca {
     int  precis;
     mutable bool printedFirstLine;
 
-    MapType<std::string, bool>                          bools;
-    MapType<std::string, std::string>                   strings;
-    MapType<std::string, double>                        numbers;
-    MapType<std::string, typename Vector<double>::Type >          vectors;
-    MapType<std::string, typename Vector<int>::Type >             intvectors;
-    MapType<std::string, typename Vector<size_t>::Type >          sizetvectors;
-    MapType<std::string, typename Vector<std::string>::Type >     stringLists;
-    MapType<std::string, const psimag::Matrix<int>*>    intMatrices;
-    MapType<std::string, const psimag::Matrix<double>*> dblMatrices;
-    MapType<std::string, const psimag::Matrix<std::complex<double> >*> cMatrices;
+    MapType<String, bool>                          bools;
+    MapType<String, String>                   strings;
+    MapType<String, double>                        numbers;
+    MapType<String, typename Vector<double>::Type >          vectors;
+    MapType<String, typename Vector<int>::Type >             intvectors;
+    MapType<String, typename Vector<size_t>::Type >          sizetvectors;
+    MapType<String, typename Vector<String>::Type >     stringLists;
+    MapType<String, const psimag::Matrix<int>*>    intMatrices;
+    MapType<String, const psimag::Matrix<double>*> dblMatrices;
+    MapType<String, const psimag::Matrix<std::complex<double> >*> cMatrices;
 
-    MapType<std::string, ThisType>                   writers;
+    MapType<String, ThisType>                   writers;
     
     //======================================================================
 
-    void add(std::string key, const bool&          b)   { bools  [key] = b;    }
-    void add(std::string key, const char*        str)   { strings[key] = str;  }
-    void add(std::string key, const std::string& str)   { strings[key] = str;  }
-    void add(std::string key, const size_t& val)              { numbers[key] = val;  }
-    void add(std::string key, const int&    val)              { numbers[key] = val;  }
-    void add(std::string key, const double& val)              { numbers[key] = val;  }
+    void add(String key, const bool&          b)   { bools  [key] = b;    }
+    void add(String key, const char*        str)   { strings[key] = str;  }
+    void add(String key, const String& str)   { strings[key] = str;  }
+    void add(String key, const size_t& val)              { numbers[key] = val;  }
+    void add(String key, const int&    val)              { numbers[key] = val;  }
+    void add(String key, const double& val)              { numbers[key] = val;  }
 
-    void add(std::string key, const typename Vector<double>::Type&    vals) { vectors[key]     = vals; }
-    void add(std::string key, const typename Vector<int>::Type&       vals) { intvectors[key]  = vals; }
-    void add(std::string key, const typename Vector<size_t>::Type&    vals) { sizetvectors[key]= vals; }
-    void add(std::string key, const psimag::Matrix<int>&    mat ) { intMatrices[key] = &mat; }
-    void add(std::string key, const psimag::Matrix<double>& mat ) { dblMatrices[key] = &mat; }
+    void add(String key, const typename Vector<double>::Type&    vals) { vectors[key]     = vals; }
+    void add(String key, const typename Vector<int>::Type&       vals) { intvectors[key]  = vals; }
+    void add(String key, const typename Vector<size_t>::Type&    vals) { sizetvectors[key]= vals; }
+    void add(String key, const psimag::Matrix<int>&    mat ) { intMatrices[key] = &mat; }
+    void add(String key, const psimag::Matrix<double>& mat ) { dblMatrices[key] = &mat; }
 
     //======================================================================
 
     template<class T>
-    void add(std::string key, const T& obj){ 
+    void add(String key, const T& obj){ 
       obj.toJSN(getComponentWriter(key));
     }
 
     //======================================================================
 
     template<typename T>
-    void add(std::string key, const std::map<std::string, T>& map) {
-      typedef typename std::map<std::string, T>::const_iterator itr;
+    void add(String key, const std::map<String, T>& map) {
+      typedef typename std::map<String, T>::const_iterator itr;
       ThisType& writer = writers[key]; 
       for(itr i=map.begin(); i!= map.end(); i++) 
 	writer.add(i->first,i->second);
@@ -122,9 +123,9 @@ namespace dca {
 
     template<typename ValType>
     static
-    int maxKeyWidth( const MapType<std::string, ValType>& map) {
+    int maxKeyWidth( const MapType<String, ValType>& map) {
       size_t result = 0;
-      typedef typename MapType<std::string, ValType>::const_iterator itr;
+      typedef typename MapType<String, ValType>::const_iterator itr;
       for(itr i=map.begin(); i!= map.end(); i++) 
 	if( i->first.length() > result)
 	  result = i->first.length();
@@ -177,12 +178,12 @@ namespace dca {
 
     template<typename ValType>
     void printLines(std::ostream& os,
-		    const MapType<std::string, ValType>& map,
+		    const MapType<String, ValType>& map,
 		    int offset, 
 		    int keyWidth,
 		    Position position=Middle) const {
       
-      typedef typename MapType<std::string, ValType>::const_iterator itr;
+      typedef typename MapType<String, ValType>::const_iterator itr;
       
       for(itr i=map.begin(); i!= map.end(); i++) {
 	printLine(os,i->first,i->second,offset,keyWidth,printedFirstLine);
@@ -195,7 +196,7 @@ namespace dca {
     template<typename ValType>
     static
     void printLine(std::ostream& os,
-		   const std::string& key,
+		   const String& key,
 		   const ValType&     val,
 		   int  offset, 
 		   int  keyWidth,
@@ -203,7 +204,7 @@ namespace dca {
 		   bool printVal=true)  {
 
       if (printedFirstLine_) 
-	os << ",\n" << std::string(offset,' ') ;
+	os << ",\n" << String(offset,' ') ;
       
       os << std::setw(keyWidth) << std::left << quoted(key);
       os << " : ";
@@ -242,7 +243,7 @@ namespace dca {
 
     static
     void valString(std::ostream& os, int offset, int keyWidth,
-		   const std::string& val) {
+		   const String& val) {
       os << quoted(val);
     }
 
@@ -288,11 +289,11 @@ namespace dca {
     //======================================================================
       
     static
-    std::string toString(const std::map<std::string, std::string>& map) {
+    String toString(const std::map<String, String>& map) {
 
       std::ostringstream buff;
       buff << "{";
-      std::map<std::string,std::string>::const_iterator itr;
+      std::map<String,String>::const_iterator itr;
       for (itr = map.begin(); itr != map.end(); itr++) {
 	if (itr != map.begin())
 	  buff << ",";
@@ -304,8 +305,8 @@ namespace dca {
 
     template<typename T>
     static
-    std::string toString(const std::map<std::string, T>& map) {
-      typedef std::map<std::string,T> MapType;
+    String toString(const std::map<String, T>& map) {
+      typedef std::map<String,T> MapType;
       typedef typename MapType::const_iterator CITR;
 
       std::ostringstream buff;
@@ -320,9 +321,9 @@ namespace dca {
     }
 
     template<typename T>
-    std::string toString(const std::map<std::string, typename Vector<T> >::Type& map) {
+    String toString(const std::map<String, typename Vector<T> >::Type& map) {
 
-      typedef std::map<std::string,T> MapType;
+      typedef std::map<String,T> MapType;
       typedef typename MapType::const_iterator CITR;
 
       std::ostringstream buff;
@@ -340,7 +341,7 @@ namespace dca {
     template<class T>
     inline
     void printVector(typename Vector<T>::Type vec,
-		     std::string title,
+		     String title,
 		     std::ostream& os)  {
       os.precision(precis);
       os << std::fixed; // scientific;
@@ -358,7 +359,7 @@ namespace dca {
     }
     //====================================================================== 
     static 
-    std::string quoted(std::string str) {
+    String quoted(String str) {
       std::ostringstream result;
       result << "\"" << str << "\"";
       return result.str();

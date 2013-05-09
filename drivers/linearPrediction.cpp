@@ -24,6 +24,7 @@ Please see full open source license included in file LICENSE.
 #include <cstdlib>
 #include "IoSimple.h"
 #include "LinearPrediction.h"
+#include "String.h"
 
 typedef double FieldType;
 typedef PsimagLite::LinearPrediction<FieldType> LinearPredictionType;
@@ -36,8 +37,8 @@ void usage(const char *progName)
 int main(int argc,char *argv[])
 {
 	int opt = 0;
-	std::string file="";
-	std::string label="";
+	PsimagLite::String file="";
+	PsimagLite::String label="";
 	size_t p = 0;
 	while ((opt = getopt(argc, argv,
 			"f:p:l:")) != -1) {

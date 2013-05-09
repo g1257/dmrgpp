@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "Complex.h"
 #include <cassert>
+#include "String.h"
 //#include "BinarySaveLoad.h"
 
 namespace PsimagLite {
@@ -585,7 +586,7 @@ namespace PsimagLite {
 	}
 
 	template<typename T>
-	void printFullMatrix(const CrsMatrix<T>& s,const std::string& name,size_t how=0,double eps = 1e-20)
+	void printFullMatrix(const CrsMatrix<T>& s,const String& name,size_t how=0,double eps = 1e-20)
 	{
 		PsimagLite::Matrix<T> fullm(s.row(),s.col());
 		crsMatrixToFullMatrix(fullm,s);
@@ -994,7 +995,7 @@ namespace PsimagLite {
 	}
 
 //	template<typename T>
-//	void printFullMatrix(const CrsMatrix<T>& s,const std::string& label)
+//	void printFullMatrix(const CrsMatrix<T>& s,const String& label)
 //	{
 //		PsimagLite::Matrix<T> mtmp;
 //		crsMatrixToFullMatrix(mtmp,s);

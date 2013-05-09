@@ -14,6 +14,7 @@
 #include <wchar.h>
 #include <iostream>
 #include <fstream>
+#include "String.h"
 
 int main(int argc,char *argv[]) {
   
@@ -22,7 +23,7 @@ int main(int argc,char *argv[]) {
     return -1;
   }
 
-  std::string    fileName(argv[1]);
+  PsimagLite::String    fileName(argv[1]);
 /*  std::wifstream file;
   
   file.open(fileName.c_str());*/

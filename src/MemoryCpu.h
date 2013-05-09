@@ -30,15 +30,14 @@ Please see full open source license included in file LICENSE.
 #include <cstdlib>
 #include <iostream>
 #include <cassert>
-#include "ProgressIndicator.h"
+#include <string>
+#include <sstream>
+
+namespace PsimagLite {
 
 class MemoryCpu {
 
 public:
-
-	MemoryCpu()
-	    : progress_("MemoryCpu",0)
-	{}
 
 	void deallocate(void *p)
 	{
@@ -46,7 +45,7 @@ public:
 		free(p);
 		std::ostringstream msg;
 		msg<<"Freed "<<p;
-		progress_.printline(msg,std::cout);
+		std::cout<<msg<<"\n";
 		p=0;
 	}
 
@@ -55,17 +54,14 @@ public:
 		void *p = malloc(x);
 		std::ostringstream msg;
 		msg<<"Allocated starting at "<<p<<" "<<x<<" bytes";
-		progress_.printline(msg,std::cout);
+		std::cout<<msg<<"\n";
 		return p;
 	}
-
-private:
-
-	PsimagLite::ProgressIndicator progress_;
 
 }; // class MemoryCpu
 
 MemoryCpu globalMemoryCpu;
+} // namespace PsimagLite
 
 /*@}*/
 #endif // MEMORY_CPU_H

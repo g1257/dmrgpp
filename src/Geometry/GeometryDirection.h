@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GEOMETRY_DIR_H
 #define GEOMETRY_DIR_H
 #include <cassert>
+#include "String.h"
 
 namespace PsimagLite {
 	
@@ -95,7 +96,7 @@ namespace PsimagLite {
 
 			template<typename IoInputter>
 			GeometryDirection(IoInputter& io,size_t dirId,size_t edof,
-					  const std::string& options,
+					  const String& options,
 					  const GeometryFactoryType& geometryFactory)
 			: dirId_(dirId),geometryFactory_(&geometryFactory)
 			{
@@ -104,7 +105,7 @@ namespace PsimagLite {
 				if (edof==NUMBERS) {
 					io.read(dataNumbers_,"Connectors");
 					if (dataNumbers_.size()!=n) {
-						std::string s(__FILE__);
+						String s(__FILE__);
 						s += " " + ttos(dataNumbers_.size()) + " != " + ttos(n) + "\n";
 					 	throw std::runtime_error(s.c_str());
 					}
@@ -171,9 +172,9 @@ namespace PsimagLite {
 
 		private:
 
-			size_t getVectorSize(const std::string& s)
+			size_t getVectorSize(const String& s)
 			{
-				if (s.find("ConstantValues")!=std::string::npos)
+				if (s.find("ConstantValues")!=String::npos)
 					return 1;
 
 				return geometryFactory_->getVectorSize(dirId_);

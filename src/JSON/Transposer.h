@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <iostream>
 #include <iomanip>
+#include "String.h"
 
 //#include "PSIMAGAssert.h"
 #include "BLAS.h"
@@ -53,7 +54,7 @@ namespace psimag {
 
     //======================================================================
 
-    void toJSN(std::ostream& os, std::string title, int width) const {
+    void toJSN(std::ostream& os, PsimagLite::String title, int width) const {
       MatrixLike::toJSN((*this),os,title,width);
     }
 

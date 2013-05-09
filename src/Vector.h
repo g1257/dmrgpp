@@ -31,6 +31,7 @@ Please see full open source license included in file LICENSE.
 #include <stdexcept>
 #include "Complex.h"
 #include "AllocatorCpu.h"
+#include "String.h"
 
 // temporary hack until Vector is used:
 namespace std {
@@ -245,8 +246,8 @@ namespace PsimagLite {
 	template<typename T,typename A>
 	void split(std::vector<T,A>& v,const char* s1,char sep)
 	{
-		std::string buffer = "";
-		std::string s(s1);
+		String buffer = "";
+		String s(s1);
 		T tmp;
 		for (size_t i=0;i<s.length();i++) {
 			if (s[i]==sep) {

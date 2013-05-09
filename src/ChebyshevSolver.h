@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include "ChebyshevSerializer.h"
 #include "LanczosSolver.h"
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -225,20 +226,20 @@ namespace PsimagLite {
 
 	private:
 
-		void unimplemented(const std::string& s) const
+		void unimplemented(const String& s) const
 		{
-			std::string s2("Hmmm...this ain't looking good...");
-			s2 += std::string(__FILE__) + " " + ttos(__LINE__) + " ";
+			String s2("Hmmm...this ain't looking good...");
+			s2 += String(__FILE__) + " " + ttos(__LINE__) + " ";
 			s2 += s;
 			throw std::runtime_error(s);
 		}
 
-		void setMode(const std::string& options)
+		void setMode(const String& options)
 		{
-			if (options.find("lanczosdebug")!=std::string::npos)
+			if (options.find("lanczosdebug")!=String::npos)
 				mode_ |=  DEBUG;
 
-			if (options.find("lanczosAllowsZero")!=std::string::npos)
+			if (options.find("lanczosAllowsZero")!=String::npos)
 				mode_ |= ALLOWS_ZERO;
 		}
 

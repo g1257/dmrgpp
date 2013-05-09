@@ -24,6 +24,7 @@ Please see full open source license included in file LICENSE.
 #include <cstdlib>
 #include "Vector.h"
 #include "Range.h"
+#include "String.h"
 
 typedef double RealType;
 #ifdef USE_MPI
@@ -54,7 +55,7 @@ void setVectors(PsimagLite::Vector<VectorType>::Type& vec, size_t total1, size_t
 int main(int argc,char *argv[])
 {
 	if (argc<4) {
-		std::string s(argv[0]);
+		PsimagLite::String s(argv[0]);
 		s += ": Needs total1, total2 and segmentSize as args\n";
 		throw std::runtime_error(s.c_str());
 	}

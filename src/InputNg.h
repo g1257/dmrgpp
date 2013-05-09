@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cstdlib>
 #include <map>
 #include "Matrix.h"
+#include "String.h"
 //#include "Utils.h"
 
 namespace PsimagLite {
@@ -101,10 +102,10 @@ class InputNg {
 
 		enum {FIRST,SECOND};
 
-		typedef std::pair<std::string,size_t> PairType;
+		typedef std::pair<String,size_t> PairType;
 
 	public:
-		bool operator()(const std::string& x1,const std::string& x2)
+		bool operator()(const String& x1,const String& x2)
 		{
 			PairType p1 = mysplit(x1);
 			PairType p2 = mysplit(x2);
@@ -117,11 +118,11 @@ class InputNg {
 		}
 	private:
 
-		PairType mysplit(const std::string& x) const
+		PairType mysplit(const String& x) const
 		{
 			size_t mode=FIRST;
-			std::string xfirst = "";
-			std::string xsecond = "";
+			String xfirst = "";
+			String xsecond = "";
 			for (size_t i=0;i<x.length();i++) {
 				if (x[i]=='@') {
 					mode=SECOND;
@@ -137,8 +138,8 @@ class InputNg {
 	
 	typedef MyCompare MyCompareType;
 
-	typedef std::map<std::string,std::string,MyCompareType> MapStrStrType;
-	typedef std::map<std::string,Vector<std::string>::Type,MyCompareType> MapStrVecType;
+	typedef std::map<String,String,MyCompareType> MapStrStrType;
+	typedef std::map<String,Vector<String>::Type,MyCompareType> MapStrVecType;
 
 public:
 	
@@ -150,7 +151,7 @@ public:
 
 	public:
 
-		Writeable(const std::string& file,const InputCheckType& inputCheck)
+		Writeable(const String& file,const InputCheckType& inputCheck)
 			: data_(""),
 			  line_(0),
 			  state_(IN_LABEL),
@@ -161,7 +162,7 @@ public:
 		{
 			std::ifstream fin(file.c_str());
 			if (!fin || !fin.good() || fin.bad()) {
-				std::string s(__FILE__);
+				String s(__FILE__);
 				s += " Cannot open file " + file + "\n";
 				throw std::runtime_error(s.c_str());
 			}
@@ -186,7 +187,7 @@ public:
 
 		void set(MapStrStrType& mapStrStr,
 		         MapStrVecType& mapStrVec,
-		         Vector<std::string>::Type& labelsForRemoval) const
+		         Vector<String>::Type& labelsForRemoval) const
 		{
 			mapStrStr=mapStrStr_;
 			mapStrVec=mapStrVec_,
@@ -197,7 +198,7 @@ public:
 
 		void check()
 		{
-			std::string buffer="";
+			String buffer="";
 			for (size_t i=0;i<data_.length();i++) {
 				size_t type = findTypeOf(data_.at(i));
 				switch(type) {
@@ -241,10 +242,10 @@ public:
 			if (numericVector_.size()>0) checkNumbers();
 		}
 
-		void saveBuffer(const std::string& buffer,size_t whatchar)
+		void saveBuffer(const String& buffer,size_t whatchar)
 		{
-			std::string s(__FILE__);
-			std::string adjLabel="";
+			String s(__FILE__);
+			String adjLabel="";
 			switch(state_) {
 			case IN_LABEL:
 				if (verbose_) std::cout<<"Read label="<<buffer<<"\n";
@@ -255,7 +256,7 @@ public:
 			case IN_VALUE_OR_LABEL:
 				std::cerr<<"Line="<<line_<<"\n";
 				s += "Error while buffer=" + buffer;
-				s += std::string(" and current line=") + std::string("\n");
+				s += String(" and current line=") + String("\n");
 				break;
 			case IN_VALUE_TEXT:
 				if (verbose_) std::cout<<"Read text value="<<buffer<<"\n";
@@ -287,12 +288,12 @@ public:
 		void checkNumbers()
 		{
 			if (numericVector_.size()==1) {
-				std::string s(__FILE__);
+				String s(__FILE__);
 				s += " use equal sign instead of space in line "+ttos(line_) + "\n";
 				throw std::runtime_error(s.c_str());
 				return;
 			}
-			std::string s(__FILE__);
+			String s(__FILE__);
 			if (numericVector_.size()==0) {
 				std::cerr<<"Line="<<line_<<"\n";
 				throw std::runtime_error(s.c_str());
@@ -305,37 +306,37 @@ public:
 				std::cerr<<"Line="<<line_<<"\n";
 				throw std::runtime_error(s.c_str());
 			}
-			std::string adjLabel=adjLabelForDuplicates(lastLabel_,mapStrVec_);
+			String adjLabel=adjLabelForDuplicates(lastLabel_,mapStrVec_);
 			mapStrVec_[adjLabel]=numericVector_;
 
 		}
 
 		template<typename SomeMapType>
-		std::string adjLabelForDuplicates(const std::string& label,SomeMapType& mymap)
+		String adjLabelForDuplicates(const String& label,SomeMapType& mymap)
 		{
-			std::string rootLabel = findRootLabel(label);
+			String rootLabel = findRootLabel(label);
 			int x = findLastOccurrence(rootLabel,mymap);
 			if (x<0) return label;
 			labelsForRemoval_.push_back(rootLabel);
 			x++;
-			std::string newlabel = rootLabel + "@" + ttos(x);
+			String newlabel = rootLabel + "@" + ttos(x);
 			if (verbose_) std::cerr<<"NEWLABEL=*"<<newlabel<<"*\n";
 			return newlabel;
 		}
 
 		template<typename SomeMapType>
-		int findLastOccurrence(const std::string& root1,SomeMapType& mymap)
+		int findLastOccurrence(const String& root1,SomeMapType& mymap)
 		{
 			int x = -1;
 			for (typename SomeMapType::iterator it=mymap.begin();it!=mymap.end();++it) {
-				std::string root2 = findRootLabel(it->first);
+				String root2 = findRootLabel(it->first);
 				if (root1==root2) x++;
 			}
 			return x;
 		}
 
 		template<typename T1,typename T2,typename T3>
-		void printMap(std::map<T1,T2,T3>& mp,const std::string& label)
+		void printMap(std::map<T1,T2,T3>& mp,const String& label)
 		{
 			std::cout<<label<<"\n";
 			typename  std::map<T1,T2>::iterator it;
@@ -344,16 +345,16 @@ public:
 			}
 		}
 
-		std::string data_;
+		String data_;
 		size_t line_;
 		size_t state_;
-		Vector<std::string>::Type numericVector_;
-		std::string lastLabel_;
+		Vector<String>::Type numericVector_;
+		String lastLabel_;
 		InputCheckType inputCheck_;
 		bool verbose_;
-		std::map<std::string,std::string,MyCompareType> mapStrStr_;
-		std::map<std::string,Vector<std::string>::Type,MyCompareType> mapStrVec_;
-		Vector<std::string>::Type labelsForRemoval_;
+		std::map<String,String,MyCompareType> mapStrStr_;
+		std::map<String,Vector<String>::Type,MyCompareType> mapStrVec_;
+		Vector<String>::Type labelsForRemoval_;
 	}; // class Writeable
 
 	class Readable {
@@ -365,10 +366,10 @@ public:
 			inputWriteable.set(mapStrStr_,mapStrVec_,labelsForRemoval_);
 		}
 
-		void readline(std::string& val,const std::string& label)
+		void readline(String& val,const String& label)
 		{
-			std::string label2 = label2label(label);
-			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			String label2 = label2label(label);
+			std::map<String,String>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= it->second.c_str();
@@ -376,10 +377,10 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
-		void readline(double& val,const std::string& label)
+		void readline(double& val,const String& label)
 		{
-			std::string label2 = label2label(label);
-			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			String label2 = label2label(label);
+			std::map<String,String>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atof(it->second.c_str());
@@ -387,10 +388,10 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
-		void readline(long long int& val,const std::string& label)
+		void readline(long long int& val,const String& label)
 		{
-			std::string label2 = label2label(label);
-			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			String label2 = label2label(label);
+			std::map<String,String>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atoi(it->second.c_str());
@@ -398,10 +399,10 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
-		void readline(size_t& val,const std::string& label)
+		void readline(size_t& val,const String& label)
 		{
-			std::string label2 = label2label(label);
-			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			String label2 = label2label(label);
+			std::map<String,String>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atoi(it->second.c_str());
@@ -409,10 +410,10 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
-		void readline(int& val,const std::string& label)
+		void readline(int& val,const String& label)
 		{
-			std::string label2 = label2label(label);
-			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			String label2 = label2label(label);
+			std::map<String,String>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atoi(it->second.c_str());
@@ -420,11 +421,11 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
-		void read(long unsigned int& val,const std::string& label)
+		void read(long unsigned int& val,const String& label)
 		{
-			std::string label2 = label2label(label);
+			String label2 = label2label(label);
 
-			std::map<std::string,std::string>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			std::map<String,String>::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 
@@ -434,11 +435,11 @@ public:
 		}
 
 		template<typename VectorLikeType>
-		void read(VectorLikeType& val,const std::string& label)
+		void read(VectorLikeType& val,const String& label)
 		{
-			std::string label2 = label2label(label);
+			String label2 = label2label(label);
 
-			std::map<std::string,Vector<std::string>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			std::map<String,Vector<String>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			size_t len =  it->second.size();
@@ -451,11 +452,11 @@ public:
 		}
 
 		template<typename VectorLikeType>
-		void readKnownSize(VectorLikeType& val,const std::string& label)
+		void readKnownSize(VectorLikeType& val,const String& label)
 		{
-			std::string label2 = label2label(label);
+			String label2 = label2label(label);
 
-			std::map<std::string,Vector<std::string>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			std::map<String,Vector<String>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			size_t len =  it->second.size();
@@ -466,15 +467,15 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
 
-		void readMatrix(PsimagLite::Matrix<double>& m,const std::string& label)
+		void readMatrix(PsimagLite::Matrix<double>& m,const String& label)
 		{
-			std::string label2 = label2label(label);
+			String label2 = label2label(label);
 
-			std::map<std::string,Vector<std::string>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			std::map<String,Vector<String>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
-				std::string s(__FILE__);
+				String s(__FILE__);
 				s += " readMatrix: \n";
 				throw std::runtime_error(s.c_str());
 			}
@@ -482,7 +483,7 @@ public:
 			size_t ncol = size_t( atoi(it->second[1].c_str()));
 			m.resize(nrow,ncol);
 			if (it->second.size()<2+nrow*ncol) {
-				std::string s(__FILE__);
+				String s(__FILE__);
 				s += " readMatrix: \n";
 				throw std::runtime_error(s.c_str());
 			}
@@ -494,15 +495,15 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
 
-		void readMatrix(PsimagLite::Matrix<std::complex<double> >& m,const std::string& label)
+		void readMatrix(PsimagLite::Matrix<std::complex<double> >& m,const String& label)
 		{
-			std::string label2 = label2label(label);
+			String label2 = label2label(label);
 
-			std::map<std::string,Vector<std::string>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			std::map<String,Vector<String>::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
-				std::string s(__FILE__);
+				String s(__FILE__);
 				s += " readMatrix: \n";
 				throw std::runtime_error(s.c_str());
 			}
@@ -510,7 +511,7 @@ public:
 			size_t ncol = size_t( atoi(it->second[1].c_str()));
 			m.resize(nrow,ncol);
 			if (it->second.size()<2+nrow*ncol) {
-				std::string s(__FILE__);
+				String s(__FILE__);
 				s += " readMatrix: \n";
 				throw std::runtime_error(s.c_str());
 			}
@@ -527,18 +528,18 @@ public:
 	private:
 
 		template<typename SomeMapType>
-		void cleanLabelsIfNeeded(const std::string& label,SomeMapType& mymap,typename SomeMapType::iterator& it)
+		void cleanLabelsIfNeeded(const String& label,SomeMapType& mymap,typename SomeMapType::iterator& it)
 		{
-			Vector<std::string>::Type::iterator it2 = find(labelsForRemoval_.begin(),labelsForRemoval_.end(),label);
+			Vector<String>::Type::iterator it2 = find(labelsForRemoval_.begin(),labelsForRemoval_.end(),label);
 			if (it2!=labelsForRemoval_.end()) mymap.erase(it);
 		}
 
 
-		std::string label2label(const std::string& label)
+		String label2label(const String& label)
 		{
 			size_t len = label.length();
 			if (len==0) {
-				std::string s(__FILE__);
+				String s(__FILE__);
 				s += " readline: label cannot be null\n";
 				throw std::runtime_error(s.c_str());
 			}
@@ -547,10 +548,10 @@ public:
 		}
 
 		template<typename SomeMapType>
-		typename SomeMapType::iterator findFirstValueForLabel(const std::string& label,SomeMapType& mymap)
+		typename SomeMapType::iterator findFirstValueForLabel(const String& label,SomeMapType& mymap)
 		{
 			for (typename SomeMapType::iterator it=mymap.begin();it!=mymap.end();++it) {
-				std::string root2 = findRootLabel(it->first);
+				String root2 = findRootLabel(it->first);
 				if (label==root2) {
 					return it;
 				}
@@ -558,10 +559,10 @@ public:
 			return mymap.end();
 		}
 
-		void throwWithMessage(const std::string& label,const std::string& label2="")
+		void throwWithMessage(const String& label,const String& label2="")
 		{
-			std::string s("Message issued by: ");
-			s += std::string(__FILE__) + "\n";
+			String s("Message issued by: ");
+			s += String(__FILE__) + "\n";
 			s += "ATTENTION: ERROR MESSAGE, PLEASE READ: ";
 			s += " The (probably) mandatory label: " + label;
 			if (label2.length()>0 && label2!=label) s += " (a.k.a. " + label2 +")";
@@ -569,14 +570,14 @@ public:
 			throw std::runtime_error(s.c_str());
 		}
 
-		std::map<std::string,std::string,MyCompareType> mapStrStr_;
-		std::map<std::string,Vector<std::string>::Type,MyCompareType> mapStrVec_;
-		Vector<std::string>::Type labelsForRemoval_;
+		std::map<String,String,MyCompareType> mapStrStr_;
+		std::map<String,Vector<String>::Type,MyCompareType> mapStrVec_;
+		Vector<String>::Type labelsForRemoval_;
 	}; // class Readable
 
-	static std::string findRootLabel(const std::string& label)
+	static String findRootLabel(const String& label)
 	{
-		std::string buffer="";
+		String buffer="";
 		size_t len = label.length();
 		for (size_t i=0;i<len;i++) {
 			if (label.at(i)=='@') break;

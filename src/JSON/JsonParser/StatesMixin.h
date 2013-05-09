@@ -12,7 +12,7 @@
 #ifndef  JsonParser_StatesMixin_H
 #define  JsonParser_StatesMixin_H
 
-#include <string>
+#include "String.h"
 
 namespace JsonParser {
 
@@ -51,7 +51,7 @@ namespace JsonParser {
       NR_STATES
     } StateType;
     
-    static std::string  name(StateType state) {
+    static PsimagLite::String  name(StateType state) {
 
       switch (state) {
       case GO: return "GO: start    ";

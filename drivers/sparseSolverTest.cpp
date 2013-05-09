@@ -22,6 +22,7 @@ Please see full open source license included in file LICENSE.
 #include "DavidsonSolver.h"
 #include "CrsMatrix.h"
 #include "Random48.h"
+#include "String.h"
 
 using namespace PsimagLite;
 
@@ -43,7 +44,7 @@ struct SolverParameters {
 	RealType tolerance;
 	size_t stepsForEnergyConvergence;
 	bool lotaMemory;
-	std::string options;
+	String options;
 
 };
 

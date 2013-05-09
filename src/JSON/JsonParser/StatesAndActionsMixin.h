@@ -12,7 +12,7 @@
 #ifndef  JsonParser_StatesAndActionsMixin_H
 #define  JsonParser_StatesAndActionsMixin_H
 
-#include <string>
+#include "String.h"
 
 namespace JsonParser {
 
@@ -89,7 +89,7 @@ namespace JsonParser {
       return false;
     }
 
-    static std::string  name(StatesAndActionsType stateOrAction) {
+    static String  name(StatesAndActionsType stateOrAction) {
 
       switch (stateOrAction) {
       case GO: return "GO: start    ";

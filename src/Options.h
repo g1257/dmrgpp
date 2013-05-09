@@ -81,11 +81,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define OPTIONS_HEADER_H
 
 #include "Vector.h"
-#include <string>
 #include <cassert>
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -94,7 +94,7 @@ class Options {
 public:
 	class Writeable {
 
-		typedef PsimagLite::Vector<std::string>::Type VectorStringType;
+		typedef PsimagLite::Vector<String>::Type VectorStringType;
 
 	public:
 
@@ -104,7 +104,7 @@ public:
 		: registeredOptions_(registeredOptions),mode_(mode)
 		{}
 
-		void set(Vector<std::string>::Type& optsThatAreSet,const std::string& opts)
+		void set(Vector<String>::Type& optsThatAreSet,const String& opts)
 		{
 			if (mode_==DISABLED) return;
 			split(optsThatAreSet,opts.c_str(),',');
@@ -112,7 +112,7 @@ public:
 				bool b = (find(registeredOptions_.begin(),registeredOptions_.end(),optsThatAreSet[i])==registeredOptions_.end());
 				if (!b) continue;
 				
-				std::string s(__FILE__);
+				String s(__FILE__);
 				s += ": Unknown option " + optsThatAreSet[i] + "\n";
 				if (mode_==PERMISSIVE) std::cout<<" *** WARNING **: "<<s;
 				if (mode_==STRICT) throw std::runtime_error(s.c_str());
@@ -120,25 +120,25 @@ public:
 		}
 
 	private:
-		Vector<std::string>::Type registeredOptions_;
+		Vector<String>::Type registeredOptions_;
 		size_t mode_;
 	}; // class Writeable
 
 	class Readable {
 
 	public:
-		Readable(Writeable& optsWrite,const std::string& optsString)
+		Readable(Writeable& optsWrite,const String& optsString)
 		{
 			optsWrite.set(optsThatAreSet_,optsString);
 		}
 
-		bool isSet(const std::string& thisOption) const
+		bool isSet(const String& thisOption) const
 		{
 			bool b = (find(optsThatAreSet_.begin(),optsThatAreSet_.end(),thisOption)==optsThatAreSet_.end());
 			return (!b);
 		}
 	private:
-		Vector<std::string>::Type optsThatAreSet_;
+		Vector<String>::Type optsThatAreSet_;
 
 	}; // class Readable
 

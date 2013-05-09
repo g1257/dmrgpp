@@ -13,7 +13,7 @@
 #define  JsonParser_ModesMixin_H
 
 #include <vector>
-#include <string>
+#include "String.h"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -39,7 +39,7 @@ namespace JsonParser {
     
     //======================================================================
 
-    std::string modeName(ModeType m) {
+    PsimagLite::String modeName(ModeType m) {
       switch (m) {
       case MODE_ARRAY:
 	return "MODE_ARRAY";

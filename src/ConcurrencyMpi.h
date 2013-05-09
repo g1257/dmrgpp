@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <mpi.h>
 #include "Concurrency.h"
 #include "TypeToString.h"
+#include "String.h"
 
 namespace PsimagLite {
 	template<typename BogusType=int>
@@ -102,7 +103,7 @@ namespace PsimagLite {
 			MPI_Init(&argc,&argv);
 		}
 
-		std::string name() const { return "mpi"; }
+		String name() const { return "mpi"; }
 
 		~ConcurrencyMpi()
 		{
@@ -135,8 +136,8 @@ namespace PsimagLite {
 		{
 			size_t procs = nprocs(mpiComm);
 			if (procs%numberOfSegments !=0) {
-				std::string s("Segment size must be a divisor of nprocs ");
-				s += std::string("__FUNCTION__") + __FILE__+" : " + ttos(__LINE__);
+				String s("Segment size must be a divisor of nprocs ");
+				s += String("__FUNCTION__") + __FILE__+" : " + ttos(__LINE__);
 				throw std::runtime_error(s.c_str());
 			}
 			/* Extract the original group handle */ 
@@ -243,7 +244,7 @@ namespace PsimagLite {
 
 		void gather(typename Vector<PsimagLite::Matrix<double> >::Type& v,CommType mpiComm=COMM_WORLD)
 		{
-			std::string s = "You hit an unimplemented function.\n";
+			String s = "You hit an unimplemented function.\n";
 			s += "Contribute to PsimagLite development and make a difference!\n";
 			s += "Implement this function!\n";
 			s += ttos(__FUNCTION__) + __FILE__ + " : " + ttos(__LINE__) + "\n"; 
@@ -297,10 +298,10 @@ namespace PsimagLite {
 	private:
 		typename Vector<CommType*>::Type garbage_;
 
-		void checkError(int x,const std::string& s) const
+		void checkError(int x,const String& s) const
 		{
 			if (x!=MPI_SUCCESS) {
-				std::string s2("ConcurrencyMpi::");
+				String s2("ConcurrencyMpi::");
 				s2 += s + " failed\n";
 				throw std::runtime_error(s2.c_str());
 			}

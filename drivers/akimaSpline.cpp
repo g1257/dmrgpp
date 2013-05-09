@@ -24,19 +24,20 @@ Please see full open source license included in file LICENSE.
 #include <cstdlib>
 #include "Vector.h"
 #include "AkimaSpline.h"
+#include "String.h"
 
 typedef double FieldType;
 typedef typename Vector<FieldType>::Type VectorType;
 typedef AkimaSpline<VectorType> AkimaSplineType;
 typedef AkimaSplineType::IntervalType IntervalType;
 
-void readTwoColumnData(const std::string& file,VectorType& v0,VectorType& v1)
+void readTwoColumnData(const String& file,VectorType& v0,VectorType& v1)
 {
 	std::ifstream fin(file.c_str());
 	if (!fin || !fin.good() || fin.bad()) throw
 		std::runtime_error("Cannot open file\n");
 	while(!fin.eof()) {
-		std::string s;
+		String s;
 		fin>>s;
 		if (s[0]=='#') continue;
 		FieldType x = std::atof(s.c_str());

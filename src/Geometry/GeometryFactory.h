@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LadderX.h"
 #include "LadderBath.h"
 #include "KTwoNiFFour.h"
+#include "String.h"
 
 namespace PsimagLite {
 	
@@ -169,7 +170,7 @@ namespace PsimagLite {
 		}
 
 		template<typename IoType>
-		void init(IoType& io,const std::string& s,size_t linSize)
+		void init(IoType& io,const String& s,size_t linSize)
 		{
 			n_=getGeometry(s);
 			int x=0,tmp=0;
@@ -333,7 +334,7 @@ namespace PsimagLite {
 			throw std::runtime_error("Unknown geometry\n");
 		}
 
-		std::string label() const
+		String label() const
 		{
 			switch (n_) {
 			case CHAIN:
@@ -434,7 +435,7 @@ namespace PsimagLite {
 
 	private:
 
-		size_t getGeometry(const std::string& s) const
+		size_t getGeometry(const String& s) const
 		{
 			size_t x = 0;
 			if (s=="chain") x=CHAIN;

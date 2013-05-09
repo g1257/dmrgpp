@@ -28,7 +28,7 @@ Please see full open source license included in file LICENSE.
 #ifndef LINE_MARKER_H
 #define LINE_MARKER_H
 #include <iostream>
-#include <string>
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -36,12 +36,12 @@ namespace PsimagLite {
 	public:
 		
 
-		LineMarker(const std::string& name) : name_(name+"=0")
+		LineMarker(const String& name) : name_(name+"=0")
 		{
 		}
 
 		template<typename IoInputType>
-		LineMarker(IoInputType& io,const std::string& name,size_t level = 0)
+		LineMarker(IoInputType& io,const String& name,size_t level = 0)
 		{
 			name_ = name + "=0";
 			size_t x = 0; // bogus
@@ -56,7 +56,7 @@ namespace PsimagLite {
 		}
 
 	private:
-		std::string name_;
+		String name_;
 
 	}; // class LineMarker
 } // namespace PsimagLite 

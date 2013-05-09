@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Matrix.h"
 #include "Random48.h"
+#include "String.h"
 
 
 namespace PsimagLite {
@@ -141,7 +142,7 @@ public:
 					VectorType &z,
 					const VectorType& initialVector)
 	{
-		std::string s(__FILE__);
+		String s(__FILE__);
 		s += " Unimplemented\n";
 		throw std::runtime_error(s.c_str());
 
@@ -179,11 +180,11 @@ public:
 
 private:
 
-	void setMode(const std::string& options)
+	void setMode(const String& options)
 	{
-		if (options.find("lanczosdebug")!=std::string::npos)
+		if (options.find("lanczosdebug")!=String::npos)
 			mode_ |=  ParentType::DEBUG;
-		if (options.find("lanczosAllowsZero")!=std::string::npos)
+		if (options.find("lanczosAllowsZero")!=String::npos)
 			mode_ |= ParentType::ALLOWS_ZERO;
 	}
 
@@ -192,7 +193,7 @@ private:
 				    VectorType& z,
 				    const VectorType& initialVector)
 	{
-		std::string s(__FILE__);
+		String s(__FILE__);
 		s += " Unimplemented\n";
 		throw std::runtime_error(s.c_str());
 	}
@@ -217,14 +218,14 @@ private:
 
 	void callMinRes()
 	{
-		std::string s(__FILE__);
+		String s(__FILE__);
 		s += " Unimplemented\n";
 		throw std::runtime_error(s.c_str());
 	}
 
 	void largestEigenpair(RealType& theta,VectorType& s,const PsimagLite::Matrix<ComplexOrRealType>& M)
 	{
-		std::string st(__FILE__);
+		String st(__FILE__);
 		st += " Unimplemented\n";
 		throw std::runtime_error(st.c_str());
 	}

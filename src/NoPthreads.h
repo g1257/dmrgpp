@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <iostream>
 #include "Concurrency.h"
+#include "String.h"
 
 // bogus: to compile without pthreads
 //typedef  int pthread_mutex_t;
@@ -112,7 +113,7 @@ public:
 			pfh.thread_function_(i,1,total,0);
 	}
 
-	std::string name() const { return "nopthreads"; }
+	String name() const { return "nopthreads"; }
 
 	size_t threads() const { return 1; }
 

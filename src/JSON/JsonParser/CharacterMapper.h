@@ -13,8 +13,9 @@
 #define  JsonParser_CharacterMapper_H
 
 #include <wchar.h>
-#include <string>
+#include "String.h"
 #include <stdexcept>
+
 namespace JsonParser {
 
   class CharacterMapper {
@@ -66,7 +67,7 @@ namespace JsonParser {
       NR_CLASSES
     } CharacterClass;
 
-     static std::string clsName(CharacterClass cls) {
+     static PsimagLite::String clsName(CharacterClass cls) {
       switch (cls) {
       case C_SPACE: return "C_SPACE space ";
       case C_WHITE: return "C_WHITE other whitespace ";
@@ -148,7 +149,7 @@ namespace JsonParser {
 	std::wostringstream msg;
 	msg << L"CharacterMapper::wcharToClass(" << widec << L") resulted in an error!\n";
 	std::wstring m(msg.str());
-	throw std::logic_error(std::string(m.begin(), m.end()));
+	throw std::logic_error(PsimagLite::String(m.begin(), m.end()));
       }
       
       return result;

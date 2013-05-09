@@ -26,6 +26,7 @@ Please see full open source license included in file LICENSE.
 #include "TridiagonalMatrix.h"
 #include "ContinuedFraction.h"
 #include "ContinuedFractionCollection.h"
+#include "String.h"
 
 using namespace PsimagLite;
 typedef double RealType;
@@ -48,7 +49,7 @@ int main(int argc,char *argv[])
 
 	ContinuedFractionCollectionType cfCollection;
 
-	std::string s = "#Avector";
+	String s = "#Avector";
 	for (int x = 1;x<argc;x++) {
 		IoSimple::In io(argv[x]);
 		io.advance(s,IoSimple::In::LAST_INSTANCE);

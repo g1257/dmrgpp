@@ -12,7 +12,7 @@
 #define DCA_JSON_READER_HEADER_H
 
 #include <stdio.h>
-#include <string>
+#include "String.h"
 #include <vector>
 #include <dirent.h>
 #include <iostream>
@@ -36,14 +36,14 @@ namespace dca {
     typedef JsonParser::Whatever                       JsonAccessor;
     typedef JsonParser::Whatever::FlatMapType          FlatMapType;
 
-    std::string                          fileName;
+    PsimagLite::String                          fileName;
     JsonParser::JsonParser<JsonDataType> parser;
     JsonAccessor&                        parseResult;
     FlatMapType                          flatMap;
 
     //======================================================================
 
-    JsonReader(std::string inputFileName):
+    JsonReader(PsimagLite::String inputFileName):
       fileName(inputFileName),
       parser(),
       parseResult(parser.ctx.result),
@@ -70,7 +70,7 @@ namespace dca {
       }
     }
 
-    const JsonAccessor& operator[] (const std::string key) const {
+    const JsonAccessor& operator[] (const PsimagLite::String key) const {
       return parseResult[key];
     }
 
@@ -78,11 +78,11 @@ namespace dca {
       return parseResult[index];
     }
 
-    int count(const std::string key) const {
+    int count(const PsimagLite::String key) const {
       return parseResult.count(key);
     }
 
-    const JsonAccessor& searchFor(const std::string key) const {
+    const JsonAccessor& searchFor(const PsimagLite::String key) const {
       const JsonAccessor& result = searchFlatMapFor(key);
       if (result.type  == JsonAccessor::WHATEVER_NULL) {
 	std::ostringstream msg;
@@ -92,13 +92,13 @@ namespace dca {
       return result;
     }
 
-    const JsonAccessor& lookFor(const std::string key) const {
+    const JsonAccessor& lookFor(const PsimagLite::String key) const {
       const JsonAccessor& result = searchFlatMapFor(key);
       return result;
     }
 
-    const JsonAccessor& searchFor(const std::string key1,
-				  const std::string key2) const {
+    const JsonAccessor& searchFor(const PsimagLite::String key1,
+				  const PsimagLite::String key2) const {
       const JsonAccessor& result = searchFlatMapFor(key1);
       if (result.type  != JsonAccessor::WHATEVER_NULL)
 	return result;
@@ -113,7 +113,7 @@ namespace dca {
 
     //====================================================================== map[]
     
-    const JsonAccessor& searchFlatMapFor(const std::string key) const {
+    const JsonAccessor& searchFlatMapFor(const PsimagLite::String key) const {
 
       std::wstring wKey(key.begin(), key.end());
 
@@ -125,7 +125,7 @@ namespace dca {
 
 	size_t pos = candidateKey.rfind(wKey);
 	// does the candidate key contain wKey?
-	if (pos == std::string::npos) 
+	if (pos == PsimagLite::String::npos)
 	  continue; // wKey not found skip it
 
 	// candidate begins with key

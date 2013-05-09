@@ -82,12 +82,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define IOSIMPLE_HEADER_H
 
 #include <iostream>
-#include <string>
 #include <vector>
 #include <fstream>
 #include "Matrix.h"
 #include <cstdlib>
 #include <map>
+#include "String.h"
 
 namespace PsimagLite {
 	//! IoSimple class handles Input/Output (IO) for the Dmrg++ program 
@@ -106,7 +106,7 @@ namespace PsimagLite {
 				fout_=(std::ofstream *)&os;
 			}
 
-			Out(const std::string& fn,int rank)
+			Out(const String& fn,int rank)
 			: rank_(rank),filename_(fn),fout_(0)
 			{
 				if (rank_!=0) return;
@@ -125,7 +125,7 @@ namespace PsimagLite {
 			}
 
 			void open(
-					std::string const &fn,
+					String const &fn,
 					std::ios_base::openmode mode,
 					int rank)
 			{
@@ -148,7 +148,7 @@ namespace PsimagLite {
 				fout_->close();
 			}
 
-			void printline(const std::string &s)
+			void printline(const String &s)
 			{
 				if (rank_!=0) return;
 				(*fout_)<<s<<"\n";
@@ -163,7 +163,7 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			void printVector(X const &x,std::string const &label)
+			void printVector(X const &x,String const &label)
 			{
 				if (rank_!=0) return;
 				(*fout_)<<label<<"\n";
@@ -172,7 +172,7 @@ namespace PsimagLite {
 			}
 
 			template<class T>
-			void print(const std::string& label,const T&  something)
+			void print(const String& label,const T&  something)
 			{
 				if (rank_!=0) return;
 				if (!(*fout_) || !fout_->good())
@@ -181,7 +181,7 @@ namespace PsimagLite {
 				(*fout_)<<something<<"\n";
 			}
 
-			void print(const std::string& something)
+			void print(const String& something)
 			{
 				if (rank_!=0) return;
 				(*fout_)<<something;
@@ -191,7 +191,7 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			void printMatrix(Matrix<X> const &mat,std::string const &s)
+			void printMatrix(Matrix<X> const &mat,String const &s)
 			{
 				if (rank_!=0) return;
 				(*fout_)<<s<<"\n";
@@ -199,7 +199,7 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			void printMatrix(X const &mat,std::string const &s)
+			void printMatrix(X const &mat,String const &s)
 			{
 				if (rank_!=0) return;
 				(*fout_)<<s<<"\n";
@@ -226,7 +226,7 @@ namespace PsimagLite {
 		private:
 
 			int rank_;
-			std::string filename_;
+			String filename_;
 			std::ofstream* fout_;
 		};
 
@@ -240,10 +240,10 @@ namespace PsimagLite {
 
 			In() { }
 
-			In(std::string const &fn) : filename_(fn), fin_(fn.c_str())
+			In(String const &fn) : filename_(fn), fin_(fn.c_str())
 			{
 				if (!fin_ || !fin_.good() || fin_.bad()) {
-					std::string s = "IoSimple::ctor(...): Can't open file "
+					String s = "IoSimple::ctor(...): Can't open file "
 							+filename_+"\n";
 					throw std::runtime_error(s.c_str());
 				}
@@ -254,12 +254,12 @@ namespace PsimagLite {
 				fin_.close();
 			}
 
-			void open(std::string const &fn)
+			void open(String const &fn)
 			{
 				filename_=fn;
 				fin_.open(fn.c_str());
 				if (!fin_ || !fin_.good() || fin_.bad()) {
-					std::string s = "IoSimpleIn::open(...) failed for file "
+					String s = "IoSimpleIn::open(...) failed for file "
 							+ filename_ + "\n";
 					throw std::runtime_error(s.c_str());
 				}
@@ -272,9 +272,9 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			size_t readline(X &x,const std::string &s,LongIntegerType level=0)
+			size_t readline(X &x,const String &s,LongIntegerType level=0)
 			{
-				std::string temp;
+				String temp;
 				bool found=false;
 				bool foundOnce =false;
 				LongSizeType counter=0;
@@ -295,7 +295,7 @@ namespace PsimagLite {
 					}
 				}
 				if (!foundOnce || (!found && level!=LAST_INSTANCE)) {
-					std::string emessage =
+					String emessage =
 						"IoSimple::In::readline(): Not found "+s+
 						" in file "+filename_;
 					throw std::runtime_error(s);
@@ -312,12 +312,12 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			std::pair<std::string,size_t> read(X &x,
-			                                   std::string const &s,
+			std::pair<String,size_t> read(X &x,
+			                                   String const &s,
 			                                   LongIntegerType level=0,
 			                                   bool beQuiet = false)
 			{
-				std::pair<std::string,size_t> sc = advance(s,level,beQuiet);
+				std::pair<String,size_t> sc = advance(s,level,beQuiet);
 				int xsize;
 				fin_>>xsize;
 				x.resize(xsize);
@@ -331,7 +331,7 @@ namespace PsimagLite {
 
 //			template<typename VectorLikeType>
 //			void read(VectorLikeType &x,
-//			          std::string const &s,
+//			          String const &s,
 //			          LongIntegerType level=0)
 //			{
 //				advance(s,level);
@@ -350,17 +350,17 @@ namespace PsimagLite {
 			//! Assumes something of the form 
 			//! label[key]=value
 			template<typename X>
-			void read(std::map<std::string,X> &x,
-			          std::string const &s,
+			void read(std::map<String,X> &x,
+			          String const &s,
 			          LongIntegerType level=0)
 			{
 				size_t counter=0;
 				bool beQuiet = true;
 				while(true) {
 					try {
-						std::pair<std::string,size_t> sc = advance(s,level,beQuiet);
+						std::pair<String,size_t> sc = advance(s,level,beQuiet);
 						// sc.first contains the full string and also value
-						std::string key;
+						String key;
 						X val=0;
 						getKey(key,val,sc.first);
 				
@@ -372,7 +372,7 @@ namespace PsimagLite {
 				}
 				rewind();
 				if (counter==0) {
-					std::string s2 (__FILE__);
+					String s2 (__FILE__);
 					s2 += " No " + s + " found in the input file or ";
 					s2 += " could not parse it\n";
 					throw std::runtime_error(s2.c_str());
@@ -380,11 +380,11 @@ namespace PsimagLite {
 			}
 			
 			template<typename X>
-			std::pair<std::string,size_t> readKnownSize(X &x,
-			                                            std::string const &s,
+			std::pair<String,size_t> readKnownSize(X &x,
+			                                            String const &s,
 			                                            LongIntegerType level=0)
 			{
-				std::pair<std::string,size_t> sc = advance(s,level);
+				std::pair<String,size_t> sc = advance(s,level);
 				
 				for (size_t i=0;i<x.size();i++) {
 					typename X::value_type tmp;
@@ -394,13 +394,13 @@ namespace PsimagLite {
 				return sc;
 			}
 
-			std::pair<std::string,size_t> advance(std::string const &s,
+			std::pair<String,size_t> advance(String const &s,
 			                                      LongIntegerType level=0,
 			                                      bool beQuiet=false)
 			{
 
-				std::string temp="NOTFOUND";
-				std::string tempSaved="NOTFOUND";
+				String temp="NOTFOUND";
+				String tempSaved="NOTFOUND";
 				LongSizeType counter=0;
 				bool found=false;
 				//size_t c = 0;
@@ -423,7 +423,7 @@ namespace PsimagLite {
 					fin_.close();
 					fin_.open(filename_.c_str());
 					if (counter>1) advance(s,counter-2);
-					return std::pair<std::string,size_t>(tempSaved,counter);
+					return std::pair<String,size_t>(tempSaved,counter);
 				}
 				
 				//std::cerr<<"count="<<c<<"\n";
@@ -435,10 +435,10 @@ namespace PsimagLite {
 					throw std::runtime_error("IoSimple::In::read()\n");
 				}
 				//std::cerr<<"------------\n";
-				return std::pair<std::string,size_t>(tempSaved,counter);
+				return std::pair<String,size_t>(tempSaved,counter);
 			}
 			
-			size_t count(const std::string& s)
+			size_t count(const String& s)
 			{
 				size_t i = 0;
 				while(i<1000) {
@@ -450,7 +450,7 @@ namespace PsimagLite {
 						return i;
 					}
 				}
-				std::string ss = "IoSimple::count(...): too many "
+				String ss = "IoSimple::count(...): too many "
 					+s+" in file "+filename_+"\n";
 				throw std::runtime_error(s.c_str());
 				
@@ -458,7 +458,7 @@ namespace PsimagLite {
 
 			template<typename X,template<typename> class SomeType>
 			void readSparseVector(SomeType<X> &x,
-			                      std::string const &s,
+			                      String const &s,
 			                      LongIntegerType level=0)
 			{
 				advance(s,level);
@@ -478,7 +478,7 @@ namespace PsimagLite {
 
 			template<typename X>
 			void readMatrix(X &mat,
-			                std::string const &s,
+			                String const &s,
 			                LongIntegerType level= 0)
 			{
 				advance(s,level);
@@ -491,7 +491,7 @@ namespace PsimagLite {
 				template<typename,template<typename> class>
 			class X>
 			void readMatrix(X<FieldType,SparseMatrixTemplate>& op,
-			                const std::string& s,
+			                const String& s,
 			                LongIntegerType level=0)
 			{
 				advance(s,level);
@@ -518,7 +518,7 @@ namespace PsimagLite {
 
 			//! full contains label[key]=value
 			template<typename X>
-			void getKey(std::string& key,X& x,const std::string& full)
+			void getKey(String& key,X& x,const String& full)
 			{
 				size_t i=0;
 				for (;i<full.length();i++) {
@@ -532,18 +532,18 @@ namespace PsimagLite {
 				}
 				j++;
 				if (full[j++]!='=') {
-					std::string s(__FILE__);
+					String s(__FILE__);
 					s += "Something failed while parsing line " + full;
 					s += " of input file\n";
 					throw std::runtime_error(s.c_str());
 				}
-				std::string val="";
+				String val="";
 				for (size_t k=j;k<full.length();k++)
 					val += full[k];
 				x = atof(val.c_str());
 			}
 
-			std::string filename_;
+			String filename_;
 			std::ifstream fin_;
 		};
 	}; //class IoSimple
@@ -563,7 +563,7 @@ namespace PsimagLite {
 	}
 
 	template<typename T1,typename T2>
-	void printMap(std::ostream& os, const std::map<T1,T2>& x,const std::string& label)
+	void printMap(std::ostream& os, const std::map<T1,T2>& x,const String& label)
 	{
 		typedef typename std::map<T1,T2>::const_iterator MapIteratorType;
 		for (MapIteratorType it = x.begin();it!=x.end();++it) {
@@ -578,7 +578,7 @@ namespace Spf {
 
 	class IoSimpleIn : public PsimagLite::IoSimple::In {
 	public:
-		IoSimpleIn(const char* fn) : PsimagLite::IoSimple::In(std::string(fn)) { } 
+		IoSimpleIn(const char* fn) : PsimagLite::IoSimple::In(PsimagLite::String(fn)) { }
 	};
 }
 /*@}*/	

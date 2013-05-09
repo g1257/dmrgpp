@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <pthread.h>
 #include <iostream>
 #include "Concurrency.h"
+#include "String.h"
 
 template<typename PthreadFunctionHolderType>
 struct PthreadFunctionStruct {
@@ -141,7 +142,7 @@ public:
 		pthread_mutex_destroy(&mutex_);
 	}
 
-	std::string name() const { return "pthreads"; }
+	String name() const { return "pthreads"; }
 
 	size_t threads() const { return nthreads_; }
 

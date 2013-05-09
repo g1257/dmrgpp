@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LADDER_BATH_H
 
 #include "Ladder.h"
+#include "String.h"
 
 namespace PsimagLite {
 	
@@ -167,7 +168,7 @@ namespace PsimagLite {
 				throw std::runtime_error("Umhph, ouch, ayyayyayy, what?\n");
 			}
 
-			std::string label() const
+			String label() const
 			{
 				return "ladderbath";
 			}

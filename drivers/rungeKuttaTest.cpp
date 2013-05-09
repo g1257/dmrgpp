@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <complex>
+#include "String.h"
 
 #include "Vector.h"
 #include "Matrix.h"
@@ -78,11 +79,11 @@ void usage(const char *progName)
 int main(int argc, char* argv[])
 {
 	int opt;
-	std::string file = "";
+	PsimagLite::String file = "";
 	RealType wbegin=0.;
 	RealType wend=10.;
 	RealType wstep=0.01;
-	std::string file2 = "";
+	PsimagLite::String file2 = "";
 
 	while ((opt = getopt(argc, argv,"f:i:b:e:s:")) != -1) {
 		switch (opt) {

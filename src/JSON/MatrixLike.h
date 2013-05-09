@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <iostream>
 #include <iomanip>
+#include "String.h"
 
 #include "PSIMAGAssert.h"
 #include "BLAS.h"
@@ -95,7 +96,7 @@ namespace psimag {
     void printList(const MatrixLikeType& matrix,
 		   std::ostream& os,
 		   int           width  = 13,
-		   std::string   offset = "") {
+		   PsimagLite::String   offset = "") {
       os << "[";
       
       size_t lastRow = matrix.n_row()-1;
@@ -126,7 +127,7 @@ namespace psimag {
      */
     /*template<typename MatrixLikeType>
     Tag toXML(const MatrixLikeType& matrix,
-	      std::string name="MatrixLike") {
+	      String name="MatrixLike") {
       Tag tag(name);
       tag["rows"] = matrix.n_row();
       tag["cols"] = matrix.n_col();
@@ -141,7 +142,7 @@ namespace psimag {
     template<typename MatrixLikeType>
     void toJSN(const MatrixLikeType& matrix,
 	       std::ostream& os, 
-	       std::string title="MatrixLike",
+	       PsimagLite::String title="MatrixLike",
 	       int width=13) {
       
       os.precision(width);
@@ -158,9 +159,9 @@ namespace psimag {
     
     template<typename MatrixLikeType>
     void writeVTK(const MatrixLikeType& matrix,
-		  std::string fileName,
-		  std::string version    = "0.1",
-		  std::string byte_order = "BigEndian") {
+		  PsimagLite::String fileName,
+		  PsimagLite::String version    = "0.1",
+		  PsimagLite::String byte_order = "BigEndian") {
       
       throw std::logic_error("================================================= Later we will write a VTK file for fileName << \n");    
     }

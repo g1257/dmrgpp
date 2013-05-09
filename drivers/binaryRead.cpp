@@ -1,5 +1,6 @@
 #include "IoBinary.h"
 #include "Vector.h"
+#include "String.h"
 
 typedef std::pair<size_t,size_t>PairType;
 
@@ -7,11 +8,11 @@ int main(int argc,char *argv[])
 {
 
 	if (argc<2) return 1;
-	std::string myfile(argv[1]);
+	String myfile(argv[1]);
 	PsimagLite::IoBinary::In fin(myfile);
 
 	while(true) {
-		std::string label = fin.readNextLabel();
+		String label = fin.readNextLabel();
 		if (label=="NOTFOUND") break;
 		std::cout<<"label="<<label<<"\n";
 		char check = 0;

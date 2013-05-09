@@ -1,6 +1,4 @@
-// BEGIN LICENSE BLOCK
-/*
-Copyright (c) 2009 , UT-Battelle, LLC
+/* Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -68,9 +66,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -83,19 +79,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TOKENIZER_H
 #include <iostream>
 #include <fstream>
-#include <string>
+#include "String.h"
 
 namespace PsimagLite {
-	void tokenizer(const std::string& str,
-	               Vector<std::string>::Type& tokens,
-                       const std::string& delimiters = " ") 
+	void tokenizer(const String& str,
+	               Vector<String>::Type& tokens,
+                       const String& delimiters = " ") 
 	{
 		// Skip delimiters at beginning.
-		std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+		String::size_type lastPos = str.find_first_not_of(delimiters, 0);
 		// Find first "non-delimiter".
-		std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+		String::size_type pos     = str.find_first_of(delimiters, lastPos);
 
-		while (std::string::npos != pos || std::string::npos != lastPos)
+		while (String::npos != pos || String::npos != lastPos)
 		{
 			// Found a token, add it to the vector.
 			tokens.push_back(str.substr(lastPos, pos - lastPos));

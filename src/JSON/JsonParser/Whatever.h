@@ -17,6 +17,7 @@
 #include <map>
 #include "Vector.h"
 #include "CharacterMapper.h"
+#include "String.h"
 
 namespace JsonParser {
   
@@ -75,9 +76,9 @@ namespace JsonParser {
   
     //======================================================================
 
-    static std::string ntypeName(WhateverType t) {
+    static PsimagLite::String ntypeName(WhateverType t) {
       std::wstring wname(typeName(t));
-      return std::string(wname.begin(), wname.end());
+      return PsimagLite::String(wname.begin(), wname.end());
     }
 
     //======================================================================
@@ -92,7 +93,7 @@ namespace JsonParser {
     double         whateverDouble;
     std::wstring   myKey;
     int            myIndex;
-    std::string    filename;
+    PsimagLite::String    filename;
     int            startPos;
     int            endPos;
 
@@ -141,9 +142,9 @@ namespace JsonParser {
 
     //======================================================================
 
-    std::string sname() const {
+    PsimagLite::String sname() const {
       std::wstring wname(name());
-      return std::string(wname.begin(),wname.end());
+      return PsimagLite::String(wname.begin(),wname.end());
     }
 
     //======================================================================
@@ -177,25 +178,25 @@ namespace JsonParser {
 
     //======================================================================
 
-    void assertOkWhateverType(WhateverType t, std::string location) const {
+    void assertOkWhateverType(WhateverType t, PsimagLite::String location) const {
       if (type != t) {
 	std::ostringstream msg;
 	std::wstring tName(typeName(t));
 	std::wstring t2Name(typeName(type));
 	msg << "Error in '" << location << "' '" << sname() << "'\n"
-	    << " assertOkWhateverType(" << std::string(tName.begin(),tName.end()) << ") actual type is " <<  std::string(t2Name.begin(),t2Name.end())  << "\n";
+	    << " assertOkWhateverType(" << PsimagLite::String(tName.begin(),tName.end()) << ") actual type is " <<  PsimagLite::String(t2Name.begin(),t2Name.end())  << "\n";
 	throw std::logic_error(msg.str());
       }
     }
       
     //======================================================================
 
-    void assertWhateverMap(std::string moreMsg="") const {
+    void assertWhateverMap(PsimagLite::String moreMsg="") const {
       if (type != WHATEVER_MAP) {
 	std::wstring t2Name(typeName(type));
 	std::ostringstream msg;
 	msg << sname();
-	msg << " is the wrong type should be WHATEVER_MAP actual type is " <<  std::string(t2Name.begin(),t2Name.end())  << "\n";
+	msg << " is the wrong type should be WHATEVER_MAP actual type is " <<  PsimagLite::String(t2Name.begin(),t2Name.end())  << "\n";
 	msg << moreMsg;
 	throw std::logic_error(msg.str());
       }
@@ -234,7 +235,7 @@ namespace JsonParser {
 
       if (whateverMap.count(key) !=  1) {
 	std::ostringstream msg;
-	msg << sname() << "[" << std::string(key.begin(),key.end()) << "] key not found!\n";
+	msg << sname() << "[" << PsimagLite::String(key.begin(),key.end()) << "] key not found!\n";
 	throw std::logic_error(msg.str());
       }
     }
@@ -256,7 +257,7 @@ namespace JsonParser {
     
     //====================================================================== map[]
     
-    Whatever& operator[] (const std::string key) {
+    Whatever& operator[] (const PsimagLite::String key) {
       std::wstring wKey(key.begin(),key.end());
       assertKey(wKey);
       return whateverMap[wKey];
@@ -264,7 +265,7 @@ namespace JsonParser {
     
     //====================================================================== map[]
     
-    const Whatever& operator[] (const std::string key) const {
+    const Whatever& operator[] (const PsimagLite::String key) const {
       std::wstring wKey(key.begin(),key.end());
       assertKey(wKey);
       WhateverMap& wm = const_cast<WhateverMap&>(whateverMap);
@@ -281,7 +282,7 @@ namespace JsonParser {
       
     //====================================================================== count
     
-    int count(std::string key) const {
+    int count(PsimagLite::String key) const {
       return count(std::wstring(key.begin(),key.end()));
     }
       
@@ -290,7 +291,7 @@ namespace JsonParser {
     int count(std::wstring key) const {
       
       std::ostringstream msg;
-      msg << "count(" << std::string(key.begin(),key.end())  << ")";
+      msg << "count(" << PsimagLite::String(key.begin(),key.end())  << ")";
       assertOkWhateverType(WHATEVER_MAP, msg.str());
       
       return whateverMap.count(key);
@@ -440,13 +441,13 @@ namespace JsonParser {
 //     operator int()          {  int         result <= *this; return result;  }
 //     operator double()       {  double      result <= *this; return result;  }
 //     operator float()        {  double      result <= *this; return static_cast<float>(result);  }
-//     operator std::string()  {  std::string result <= *this; return result;  }
+//     operator String()  {  String result <= *this; return result;  }
 
   };
 
   template<typename T> class TYPE       { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_UNKNOWN;  } };
 
-  template<> class TYPE<std::string>    { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_STRING;   } };
+  template<> class TYPE<PsimagLite::String>    { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_STRING;   } };
   template<> class TYPE<int>            { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_INTEGER;  } };
   template<> class TYPE<double>         { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_DOUBLE;   } };
   template<> class TYPE<bool>           { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_BOOL;     } };
@@ -520,10 +521,10 @@ namespace JsonParser {
     }
   }
 
-  std::string& operator <= (std::string& lhs, const Whatever& w) {
+  PsimagLite::String& operator <= (PsimagLite::String& lhs, const Whatever& w) {
     switch (w.type) {
     case Whatever::WHATEVER_STRING:
-      lhs = std::string(w.valueString.begin(), w.valueString.end());
+      lhs = PsimagLite::String(w.valueString.begin(), w.valueString.end());
       return lhs;
     case Whatever::WHATEVER_MAT: 
     case Whatever::WHATEVER_MATRIX:
@@ -534,8 +535,8 @@ namespace JsonParser {
     case Whatever::WHATEVER_UNKNOWN:
     default: {
       std::ostringstream msg;
-      msg << "std::string d <= " << w.sname() << " produced a type error!\n";
-      msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a std::string!\n";
+      msg << "String d <= " << w.sname() << " produced a type error!\n";
+      msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a String!\n";
       throw std::logic_error(msg.str());
     }
     }
@@ -638,7 +639,7 @@ namespace JsonParser {
   }
 
   template<typename T>
-  std::map<std::string,T>& operator <= (std::map<std::string,T>& lhs, const Whatever& w) {
+  std::map<PsimagLite::String,T>& operator <= (std::map<PsimagLite::String,T>& lhs, const Whatever& w) {
 
     switch (w.type) {
     case Whatever::WHATEVER_MAP: {
@@ -649,7 +650,7 @@ namespace JsonParser {
       WhateverMapType::const_iterator itr = w.whateverMap.begin();
       for (; itr != w.whateverMap.end(); itr++) {
 	//	const std::pair<std::wstring,Whatever>& pair(*itr);
-	std::string key(itr->first.begin(), itr->first.end());
+	PsimagLite::String key(itr->first.begin(), itr->first.end());
 	lhs[key] <= itr->second;
       }
       return lhs;

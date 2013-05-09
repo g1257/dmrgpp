@@ -32,6 +32,7 @@ Please see full open source license included in file LICENSE.
 #define CONTINUED_FRACTION_COLL_H
 #include <iostream>
 #include "TypeToString.h"
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -60,7 +61,7 @@ namespace PsimagLite {
 			int n = 0;
 			io.readline(n,"#CONTINUEDFRACTIONCOLLECTION=",level);
 			if (n<=0) {
-				std::string s = "ContinuedFractionCollection::ctor(...): ";
+				String s = "ContinuedFractionCollection::ctor(...): ";
 				s += "Expected a positive number of items, got " +
 						ttos(n);
 				throw std::runtime_error(s.c_str());
@@ -74,7 +75,7 @@ namespace PsimagLite {
 		template<typename IoOutputType>
 		void save(IoOutputType& io) const
 		{
-			std::string s = "#CONTINUEDFRACTIONCOLLECTION=";
+			String s = "#CONTINUEDFRACTIONCOLLECTION=";
 			io.print(s,data_.size());
 			for (size_t i=0;i<data_.size();i++) data_[i].save(io);
 		}
@@ -115,7 +116,7 @@ namespace PsimagLite {
 				v1.resize(v2.size());
 			} else {
 				if (v1.size()!=v2.size()) {
-					std::string s = "ContinuedFractionCollection::acc...(...)";
+					String s = "ContinuedFractionCollection::acc...(...)";
 					s += " vectors must be of same length\n";
 					throw std::runtime_error(s.c_str());
 				}

@@ -21,6 +21,7 @@
 #include "ParseBuffer.h"
 #include "DefaultContext.h"
 #include "AugmentedStateTransitionTable.h"
+#include "String.h"
 
 namespace JsonParser {
   
@@ -57,7 +58,7 @@ namespace JsonParser {
 
     bool                 trace;
 
-    std::string          filename;
+    PsimagLite::String          filename;
 
     //======================================================================
 

@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "Vector.h" // in PsimagLite
 #include "Sort.h"
+#include "String.h"
 
 namespace PsimagLite {
 	template<typename FieldType>
@@ -135,7 +136,7 @@ namespace PsimagLite {
 
 			size_t size() const { return size_; }
 
-			void print(std::ostream& os,const std::string& label) const
+			void print(std::ostream& os,const String& label) const
 			{
 				os<<label<<", ";
 				os<<size_<<", ";

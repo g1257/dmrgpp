@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define KTWONIFFOUR_H
 #include <stdexcept>
 #include <cassert>
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -213,7 +214,7 @@ namespace PsimagLite {
 			return 0;
 		}
 
-		std::string label() const
+		String label() const
 		{
 			return "KTwoNiFFour";
 		}

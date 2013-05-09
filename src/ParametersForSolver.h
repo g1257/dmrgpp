@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "Random48.h"
 #include "TypeToString.h"
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -105,7 +106,7 @@ namespace PsimagLite {
 		size_t steps;
 		RealType tolerance;
 		size_t stepsForEnergyConvergence;
-		std::string options;
+		String options;
 		RealType oneOverA,b;
 		RealType Eg;
 		RealType weight;

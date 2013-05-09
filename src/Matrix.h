@@ -29,6 +29,7 @@ Please see full open source license included in file LICENSE.
 #include "Complex.h"
 #include <cassert>
 #include "TypeToString.h"
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -224,7 +225,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		lwork = std::real(work[0]);
 		work.resize(lwork+2);
 		psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
-		std::string s = "zgetri_ failed\n";
+		String s = "zgetri_ failed\n";
 		if (info!=0) throw std::runtime_error(s.c_str());
 
 	}
@@ -235,7 +236,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		size_t i,j;
 		os<<A.n_row()<<" "<<A.n_col()<<"\n";
 		typename Vector<T>::Type values;
-		std::string s = "symbolicPrint: Not enough characters\n";
+		String s = "symbolicPrint: Not enough characters\n";
 		size_t maxCharacters = 25;	
 		for (i=0;i<A.n_row();i++) {
 			for (j=0;j<A.n_col();j++) {
@@ -506,7 +507,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		int lwork = -1;
 		psimag::LAPACK::dgesdd_(&jobz,&m,&n,&(a(0,0)),&lda,&(s[0]),&(u(0,0)),&ldu,&(vt(0,0)), &ldvt,&(work[0]), &lwork,&(iwork[0]), &info);
 		if (info!=0) {
-			std::string str(__FILE__);
+			String str(__FILE__);
 			str += " " + ttos(__LINE__);
 			str += " PsimagLite::svd(...) failed with info=" + ttos(info) + "\n";
 			throw std::runtime_error(str.c_str());
@@ -516,7 +517,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		// real work:
 		psimag::LAPACK::dgesdd_(&jobz,&m,&n,&(a(0,0)),&lda,&(s[0]),&(u(0,0)),&ldu,&(vt(0,0)), &ldvt,&(work[0]), &lwork,&(iwork[0]), &info);
 		if (info!=0) {
-			std::string str(__FILE__);
+			String str(__FILE__);
 			str += " " + ttos(__LINE__);
 			str += " PsimagLite::svd(...) failed with info=" + ttos(info) + "\n";
 			throw std::runtime_error(str.c_str());

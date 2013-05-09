@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "Complex.h"
 #include "Vector.h"
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -154,7 +155,7 @@ private:
 
 	void checkNorm(const VectorType& yi,const VectorType& y0) const
 	{
-		std::string s(__FILE__);
+		String s(__FILE__);
 		s+= " Norma not preserved\n";
 		RealType norma = PsimagLite::norm(yi);
 		RealType originalNorm = PsimagLite::norm(y0);

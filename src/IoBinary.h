@@ -180,6 +180,7 @@ If it were written in ascii = 43 bytes.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include "String.h"
 
 namespace PsimagLite {
 	//! IoBinary class handles Input/Output (IO) in binary format
@@ -206,13 +207,13 @@ namespace PsimagLite {
 
 			Out()  : rank_(0),fout_(-1) {}
 
-			Out(const std::string& fn,int rank) : rank_(rank),filename_(fn),fout_(-1)
+			Out(const String& fn,int rank) : rank_(rank),filename_(fn),fout_(-1)
 			{
 				if (!ENABLED) return;
 				if (rank_!=0) return;
 				fout_ = ::open(fn.c_str(),O_WRONLY | O_CREAT | O_NOCTTY | O_TRUNC, S_IRUSR | S_IWUSR);
 				if (fout_<0) {
-					std::string s(__FILE__);
+					String s(__FILE__);
 					s += " " + ttos(__LINE__) + "\n";
 					s += "Cannot open file " + filename_ + " for writing\n";
 					throw std::runtime_error(s.c_str());
@@ -227,7 +228,7 @@ namespace PsimagLite {
 				::close(fout_);
 			}
 
-			void open(std::string const &fn,std::ios_base::openmode mode,int rank)
+			void open(String const &fn,std::ios_base::openmode mode,int rank)
 			{
 				if (!ENABLED) return;
 				rank_=rank;
@@ -265,7 +266,7 @@ namespace PsimagLite {
 
 
 			template<typename X>
-			void printVector(X const &x,std::string const &label)
+			void printVector(X const &x,String const &label)
 			{
 				if (!ENABLED) return;
 				if (rank_!=0) return;
@@ -290,7 +291,7 @@ namespace PsimagLite {
 			}
 
 			template<class T>
-			void print(const std::string& s,const T&  something)
+			void print(const String& s,const T&  something)
 			{
 				if (!ENABLED) return;
 				if (rank_!=0) return;
@@ -308,7 +309,7 @@ namespace PsimagLite {
 				BinarySaveLoad::save(fout_,something);
 			}
 
-			void print(const std::string& s)
+			void print(const String& s)
 			{
 				if (!ENABLED) return;
 				printLabel(s);
@@ -320,7 +321,7 @@ namespace PsimagLite {
 			}
 
 			template<typename SomeMatrixType>
-			void printMatrix(const SomeMatrixType& mat,std::string const &s)
+			void printMatrix(const SomeMatrixType& mat,String const &s)
 			{
 				if (!ENABLED) return;
 				if (rank_!=0) return;
@@ -338,7 +339,7 @@ namespace PsimagLite {
 			}
 
 //			template<typename SomeType>
-//			void printMatrix(const std::stack<SomeType>& mat,std::string const &s)
+//			void printMatrix(const std::stack<SomeType>& mat,String const &s)
 //			{
 //				if (!ENABLED) return;
 //				if (rank_!=0) return;
@@ -365,7 +366,7 @@ namespace PsimagLite {
 
 		private:
 
-			void printLabel(const std::string& s)
+			void printLabel(const String& s)
 			{
 				if (rank_!=0) return;
 				makeSureFileIsOpen();
@@ -380,7 +381,7 @@ namespace PsimagLite {
 			void makeSureFileIsOpen() const
 			{
 				if (fout_<0) {
-					std::string s(__FILE__);
+					String s(__FILE__);
 					s += ttos(__LINE__) + "\n";
 					s += "File " + filename_ + " is not open\n";
 					throw std::runtime_error(s.c_str());
@@ -388,7 +389,7 @@ namespace PsimagLite {
 			}
 
 			int rank_;
-			std::string filename_;
+			String filename_;
 			int fout_;
 		}; // class Out
 
@@ -404,12 +405,12 @@ namespace PsimagLite {
 			In() : filename_(""),fin_(-1),memoryPool_(0)
 			{}
 
-			In(std::string const &fn) : filename_(fn), fin_(-1),memoryPool_(0)
+			In(String const &fn) : filename_(fn), fin_(-1),memoryPool_(0)
 			{
 				if (!ENABLED) return;
 				fin_= ::open(fn.c_str(),O_RDONLY);
 				if (fin_<0) {
-					std::string s = "IoBinary::ctor(...): Can't open file "
+					String s = "IoBinary::ctor(...): Can't open file "
 							+filename_+"\n";
 					throw std::runtime_error(s.c_str());
 				}
@@ -422,13 +423,13 @@ namespace PsimagLite {
 				if (fin_>0) ::close(fin_);
 			}
 
-			void open(std::string const &fn)
+			void open(String const &fn)
 			{
 				if (!ENABLED) return;
 				filename_=fn;
 				fin_= ::open(fn.c_str(),O_RDONLY);
 				if (fin_<0) {
-					std::string s = "IoBinaryIn::open(...) failed for file "
+					String s = "IoBinaryIn::open(...) failed for file "
 							+ filename_ + "\n";
 					throw std::runtime_error(s.c_str());
 				}
@@ -443,10 +444,10 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			size_t readline(X &x,const std::string &s,LongIntegerType level=0)
+			size_t readline(X &x,const String &s,LongIntegerType level=0)
 			{
 				if (!ENABLED) return 0;
-				std::pair<std::string,size_t> sc = advance(s,level,false);
+				std::pair<String,size_t> sc = advance(s,level,false);
 				//std::cerr<<"FOUND--------->\n";
 				char check = 0;
 				size_t total = 0;
@@ -454,7 +455,7 @@ namespace PsimagLite {
 				readCheckTotalAndType(check,total,type);
 
 				if (total!=1) {
-					std::string str(__FILE__);
+					String str(__FILE__);
 					str += ttos(__FILE__) + "\n";
 					str += "Expecting a single item\n";
 					throw std::runtime_error(str.c_str());
@@ -467,13 +468,13 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			std::pair<std::string,size_t> read(X &x,
-							   std::string const &s,
+			std::pair<String,size_t> read(X &x,
+							   String const &s,
 							   LongIntegerType level=0,
 							   bool beQuiet = false)
 			{
-				if (!ENABLED) return std::pair<std::string,size_t>("NOT_ENABLED",0);
-				std::pair<std::string,size_t> sc = advance(s,level,beQuiet);
+				if (!ENABLED) return std::pair<String,size_t>("NOT_ENABLED",0);
+				std::pair<String,size_t> sc = advance(s,level,beQuiet);
 				//std::cerr<<"FOUND--------->\n";
 				char check = 0;
 				size_t total = 0;
@@ -490,17 +491,17 @@ namespace PsimagLite {
 			//! Assumes something of the form 
 			//! label[key]=value
 //			template<typename X>
-//			void read(std::map<std::string,X> &x,
-//			          std::string const &s,
+//			void read(std::map<String,X> &x,
+//			          String const &s,
 //			          LongIntegerType level=0)
 //			{
 //				size_t counter=0;
 //				bool beQuiet = true;
 //				while(true) {
 //					try {
-//						std::pair<std::string,size_t> sc = advance(s,level,beQuiet);
+//						std::pair<String,size_t> sc = advance(s,level,beQuiet);
 //						// sc.first contains the full string and also value
-//						std::string key;
+//						String key;
 //						X val=0;
 //						getKey(key,val,sc.first);
 				
@@ -512,7 +513,7 @@ namespace PsimagLite {
 //				}
 //				rewind();
 //				if (counter==0) {
-//					std::string s2 (__FILE__);
+//					String s2 (__FILE__);
 //					s2 += " No " + s + " found in the input file or ";
 //					s2 += " could not parse it\n";
 //					throw std::runtime_error(s2.c_str());
@@ -520,11 +521,11 @@ namespace PsimagLite {
 //			}
 			
 //			template<typename X>
-//			std::pair<std::string,size_t> readKnownSize(X &x,
-//			                                            std::string const &s,
+//			std::pair<String,size_t> readKnownSize(X &x,
+//			                                            String const &s,
 //			                                            LongIntegerType level=0)
 //			{
-//				std::pair<std::string,size_t> sc = advance(s,level);
+//				std::pair<String,size_t> sc = advance(s,level);
 				
 //				for (size_t i=0;i<x.size();i++) {
 //					typename X::value_type tmp;
@@ -534,31 +535,31 @@ namespace PsimagLite {
 //				return sc;
 //			}
 
-			size_t count(const std::string& s)
+			size_t count(const String& s)
 			{
 				if (!ENABLED) return 0;
 				size_t counter = 0;
 				while(true) {
-					std::string temp = readNextLabel();
+					String temp = readNextLabel();
 					if (temp=="NOTFOUND") break;
 					counter++;
 				}
 				return counter;
 			}
 
-			std::pair<std::string,size_t> advance(std::string const &s,
+			std::pair<String,size_t> advance(String const &s,
 							      LongIntegerType level=0,
 							      bool beQuiet=false)
 			{
-				if (!ENABLED) return std::pair<std::string,size_t>("NOT_ENALBED",0);
-				//std::string temp="NOTFOUND";
-				std::string tempSaved="NOTFOUND";
+				if (!ENABLED) return std::pair<String,size_t>("NOT_ENALBED",0);
+				//String temp="NOTFOUND";
+				String tempSaved="NOTFOUND";
 				LongSizeType counter=0;
 				bool found=false;
 				//size_t c = 0;
 				while(true) {
 
-					std::string temp = readNextLabel();
+					String temp = readNextLabel();
 					if (temp=="NOTFOUND") break;
 					if (temp.substr(0,s.size())==s) {
 						tempSaved = temp;
@@ -573,7 +574,7 @@ namespace PsimagLite {
 					::close(fin_);
 					fin_ = ::open(filename_.c_str(),O_RDONLY);
 					if (counter>1) advance(s,counter-2);
-					return std::pair<std::string,size_t>(tempSaved,counter);
+					return std::pair<String,size_t>(tempSaved,counter);
 				}
 				
 				//std::cerr<<"count="<<c<<"\n";
@@ -585,10 +586,10 @@ namespace PsimagLite {
 					throw std::runtime_error("IoBinary::In::read()\n");
 				}
 				//std::cerr<<"------------\n";
-				return std::pair<std::string,size_t>(tempSaved,counter);
+				return std::pair<String,size_t>(tempSaved,counter);
 			}
 			
-//			size_t count(const std::string& s)
+//			size_t count(const String& s)
 //			{
 //				size_t i = 0;
 //				while(i<1000) {
@@ -600,7 +601,7 @@ namespace PsimagLite {
 //						return i;
 //					}
 //				}
-//				std::string ss = "IoBinary::count(...): too many "
+//				String ss = "IoBinary::count(...): too many "
 //					+s+" in file "+filename_+"\n";
 //				throw std::runtime_error(s.c_str());
 				
@@ -608,7 +609,7 @@ namespace PsimagLite {
 
 //			template<typename T>
 //			void read(typename Vector<std::pair<T,T> > ::Type&x,
-//			          std::string const &s,
+//			          String const &s,
 //			          LongIntegerType level=0)
 //			{
 //				advance(s,level);
@@ -625,7 +626,7 @@ namespace PsimagLite {
 
 //			template<typename X,template<typename> class SomeType>
 //			void readSparseVector(SomeType<X> &x,
-//			                      std::string const &s,
+//			                      String const &s,
 //			                      LongIntegerType level=0)
 //			{
 //				advance(s,level);
@@ -645,7 +646,7 @@ namespace PsimagLite {
 
 			template<typename X>
 			void readMatrix(X &mat,
-					std::string const &s,
+					String const &s,
 					LongIntegerType level= 0)
 			{
 				if (!ENABLED) return;
@@ -669,7 +670,7 @@ namespace PsimagLite {
 //				template<typename,template<typename> class>
 //			class X>
 //			void readMatrix(X<FieldType,SparseMatrixTemplate>& op,
-//			                const std::string& s,
+//			                const String& s,
 //			                LongIntegerType level=0)
 //			{
 //				advance(s,level);
@@ -694,16 +695,16 @@ namespace PsimagLite {
 //			template<typename X>
 //			friend void operator>>(In& io,X& t);
 
-			std::string readNextLabel()
+			String readNextLabel()
 			{
 				if (!ENABLED) return "NOT_ENABLED";
-				std::string magicLabel = "LABEL";
+				String magicLabel = "LABEL";
 				char c = 0;
 				size_t j= 0;
 				while (true) {
 					int x = ::read(fin_,&c,1);
 					if (x!=1) {
-						std::string s(__FILE__);
+						String s(__FILE__);
 						s += " " + ttos(__LINE__);
 						s += "\nCannot read next label\n";
 						return "NOTFOUND";
@@ -721,26 +722,26 @@ namespace PsimagLite {
 				size_t y = 0;
 				int x = ::read(fin_,&y,sizeof(y));
 				if (x!=sizeof(y)) {
-					std::string s(__FILE__);
+					String s(__FILE__);
 					s += " " + ttos(__LINE__);
 					s += "\nCannot read next label (2)\n";
 					throw std::runtime_error(s.c_str());
 				}
 
 				if (size_t(y)>=MEMORY_POOL_SIZE) {
-					std::string s(__FILE__);
+					String s(__FILE__);
 					s += " "  + ttos(__LINE__) + "\nMemory Pool " + ttos(MEMORY_POOL_SIZE);
 					s +=  " is too small, needed " + ttos(y) + "\n";
 				}
 				if (!memoryPool_) memoryPool_ = new TypeType[MEMORY_POOL_SIZE];
 				x = ::read(fin_,memoryPool_,y);
 				if (size_t(x)!=y) {
-					std::string s(__FILE__);
+					String s(__FILE__);
 					s += " " + ttos(__LINE__);
 					s += "\nCannot read next label (3)\n";
 					throw std::runtime_error(s.c_str());
 				}
-				std::string ret="";
+				String ret="";
 				for (size_t i=0;i<size_t(x);i++) ret += memoryPool_[i];
 				std::cerr<<"FOUND!!! ret="<<ret<<"\n";
 				return ret;
@@ -762,16 +763,16 @@ namespace PsimagLite {
 				type.first &= 15;
 			}
 
-			static std::string nameOfType(const PairType& type)
+			static String nameOfType(const PairType& type)
 			{
 				if (!ENABLED) return "NOT_ENABLED";
-				std::string type1 = "UNKNOWN";
+				String type1 = "UNKNOWN";
 				if (type.first==TYPE_INT) type1 = "INT";
 				else if (type.first==TYPE_SIZE_T) type1="SIZE_T";
 				else if (type.first==TYPE_FLOAT) type1="FLOAT";
 				else if (type.first==TYPE_DOUBLE) type1="DOUBLE";
 
-				std::string type2 = "";
+				String type2 = "";
 				if (type.second==TYPE_VECTOR) type2="VECTOR";
 				if (type.second==TYPE_MATRIX) type2="MATRIX";
 				if (type.second==TYPE_PAIR) type2="PAIR";
@@ -823,7 +824,7 @@ namespace PsimagLite {
 
 			//! full contains label[key]=value
 //			template<typename X>
-//			void getKey(std::string& key,X& x,const std::string& full)
+//			void getKey(String& key,X& x,const String& full)
 //			{
 //				size_t i=0;
 //				for (;i<full.length();i++) {
@@ -837,12 +838,12 @@ namespace PsimagLite {
 //				}
 //				j++;
 //				if (full[j++]!='=') {
-//					std::string s(__FILE__);
+//					String s(__FILE__);
 //					s += "Something failed while parsing line " + full;
 //					s += " of input file\n";
 //					throw std::runtime_error(s.c_str());
 //				}
-//				std::string val="";
+//				String val="";
 //				for (size_t k=j;k<full.length();k++)
 //					val += full[k];
 //				x = atof(val.c_str());
@@ -854,7 +855,7 @@ namespace PsimagLite {
 				failIfNegative(ret,__FILE__,__LINE__);
 			}
 
-			std::string filename_;
+			String filename_;
 			int 	fin_;
 			TypeType* memoryPool_;
 		};
@@ -862,7 +863,7 @@ namespace PsimagLite {
 		template<typename T>
 		static size_t charTypeOf(const T& dummy)
 		{
-			std::string s(__FILE__);
+			String s(__FILE__);
 			s += " " + ttos(__LINE__) + "\nNo known type\n";
 			std::cerr<<"ATTENTION!!!! "<<s;
 			return TYPE_UNKNOWN;
@@ -907,10 +908,10 @@ namespace PsimagLite {
 			}
 		}
 
-		static void failIfNegative(const ssize_t& x,const std::string& thisFile,int lineno)
+		static void failIfNegative(const ssize_t& x,const String& thisFile,int lineno)
 		{
 			if (x>=0) return;
-			std::string str(thisFile);
+			String str(thisFile);
 			str += " " + ttos(lineno) + "\n";
 			str += "Read or Write has failed\n";
 			throw std::runtime_error(str.c_str());
@@ -933,7 +934,7 @@ namespace PsimagLite {
 //	}
 
 //	template<typename T1,typename T2>
-//	void printMap(std::ostream& os, const std::map<T1,T2>& x,const std::string& label)
+//	void printMap(std::ostream& os, const std::map<T1,T2>& x,const String& label)
 //	{
 //		typedef typename std::map<T1,T2>::const_iterator MapIteratorType;
 //		for (MapIteratorType it = x.begin();it!=x.end();++it) {
@@ -948,7 +949,7 @@ namespace PsimagLite {
 
 //	class IoBinaryIn : public PsimagLite::IoBinary::In {
 //	public:
-//		IoBinaryIn(const char* fn) : PsimagLite::IoBinary::In(std::string(fn)) { }
+//		IoBinaryIn(const char* fn) : PsimagLite::IoBinary::In(String(fn)) { }
 //	};
 //}
 /*@}*/	

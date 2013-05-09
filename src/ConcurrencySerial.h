@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CONCURRENCY_SERIAL_HEADER_H
 #include <vector>
 #include "Concurrency.h"
+#include "String.h"
 
 namespace PsimagLite {
 	//! Implements the Concurrency.h interface in the Serial case
@@ -102,7 +103,7 @@ namespace PsimagLite {
 
 		int rank(CommType comm1=COMM_WORLD) const { return 0; }
 
-		std::string name() const { return "serial"; }
+		String name() const { return "serial"; }
 
 		template<typename DataType>
 		void reduce(DataType& v,CommType mpiComm=COMM_WORLD) {}

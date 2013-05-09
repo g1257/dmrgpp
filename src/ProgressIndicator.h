@@ -1,6 +1,4 @@
-// BEGIN LICENSE BLOCK
-/*
-Copyright (c) 2009, UT-Battelle, LLC
+/* Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -68,9 +66,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -83,20 +79,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PROGRESS_INDICATOR_H
 
 #include <iostream>
-#include <string>
 #include <sstream>
 #include <vector>
+#include "String.h"
 
 namespace PsimagLite {
 	class ProgressIndicator {
 	public:
-		ProgressIndicator(const std::string& caller,size_t rank) : caller_(caller),rank_(rank) 
+		ProgressIndicator(const String& caller,size_t rank) : caller_(caller),rank_(rank) 
 		{
 			prefix_ = caller_ + ": ";
 		}
 	
 		template<typename SomeOutputType>	
-		void printline(const std::string &s,SomeOutputType& os) const
+		void printline(const String &s,SomeOutputType& os) const
 		{
 			if (rank_!=0) return;
 			os<<prefix_<<s<<"\n";
@@ -109,15 +105,15 @@ namespace PsimagLite {
 			s.seekp(std::ios_base::beg);
 		}
 
-		void print(const std::string& something,std::ostream& os) const
+		void print(const String& something,std::ostream& os) const
 		{
 			if (rank_!=0) return;
 			os<<prefix_<<something;
 		}
 	private:
-		std::string caller_;
+		String caller_;
 		size_t rank_;
-		std::string prefix_;
+		String prefix_;
 	}; // ProgressIndicator
 } // namespace PsimagLite 
 

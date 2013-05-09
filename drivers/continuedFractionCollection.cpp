@@ -26,6 +26,7 @@ Please see full open source license included in file LICENSE.
 #include "TridiagonalMatrix.h"
 #include "ContinuedFraction.h"
 #include "ContinuedFractionCollection.h"
+#include "String.h"
 
 using namespace PsimagLite;
 typedef double RealType;
@@ -72,7 +73,7 @@ void plotOneByOne(const ContinuedFractionCollectionType& cfCollection,
 int main(int argc,char *argv[])
 {
 	int opt = 0;
-	std::string file="";
+	String file="";
 	RealType wbegin = 0;
 	RealType wend = 0;
 	RealType wstep = 0;

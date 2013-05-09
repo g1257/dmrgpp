@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GeometryDirection.h"
 #include "GeometryFactory.h"
 #include <cassert>
+#include "String.h"
 
 namespace PsimagLite {
 	
@@ -106,11 +107,11 @@ namespace PsimagLite {
 				if (x<=0) throw std::runtime_error("DegreesOfFreedom<=0 is an error\n");
 				//std::cerr<<"DegreesOfFreedom "<<x<<"\n";
 				size_t edof = (x==1) ? GeometryDirectionType::NUMBERS : GeometryDirectionType::MATRICES;
-				std::string s;
+				String s;
 				io.readline(s,"GeometryKind=");
 				//std::cerr<<"GeometryKind "<<s<<"\n";
 
-				std::string gOptions;
+				String gOptions;
 				io.readline(gOptions,"GeometryOptions=");
 				//std::cerr<<"GeometryOptions "<<gOptions<<"\n";
 
@@ -174,7 +175,7 @@ namespace PsimagLite {
 				return geometryFactory_.connected(i1,i2);
 			}
 
-			std::string label() const
+			String label() const
 			{
 				return geometryFactory_.label();
 			}

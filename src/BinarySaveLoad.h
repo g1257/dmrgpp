@@ -85,10 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define BINARY_LOAD_SAVE_H
 
 #include <iostream>
-#include <string>
 #include <vector>
 #include <complex>
 #include "TypeToString.h"
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -160,10 +160,10 @@ private:
 	}
 
 
-	static void failIfNegative(const ssize_t& x,const std::string& thisFile,int lineno)
+	static void failIfNegative(const ssize_t& x,const String& thisFile,int lineno)
 	{
 		if (x>=0) return;
-		std::string str(thisFile);
+		String str(thisFile);
 		str += " " + ttos(lineno) + "\n";
 		str += "Read or Write has failed\n";
 		throw std::runtime_error(str.c_str());

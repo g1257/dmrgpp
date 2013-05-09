@@ -16,6 +16,7 @@
 #include <iostream>
 #include <sstream>
 #include "assert.h"
+#include "String.h"
 
 namespace JsonParser {
   
@@ -131,9 +132,9 @@ namespace JsonParser {
 
     //======================================================================
     
-    std::string CurrentContext() {
+    PsimagLite::String CurrentContext() {
       std::wstring result(referencedObject().name());
-      return std::string(result.begin(),result.end());
+      return PsimagLite::String(result.begin(),result.end());
     }
     
     //======================================================================
@@ -175,7 +176,7 @@ namespace JsonParser {
 
     //======================================================================
     
-    void MatrixBegin(std::string filename, size_t charNum) {
+    void MatrixBegin(PsimagLite::String filename, size_t charNum) {
       beginObjectOrArray<Whatever::WHATEVER_MAT>();
       currentObject().filename = filename;
       currentObject().startPos = charNum;
@@ -230,7 +231,7 @@ namespace JsonParser {
     
     //======================================================================
     
-    void Max(std::string s) {
+    void Max(PsimagLite::String s) {
       throw std::logic_error("Max! What is this?");
     }
     

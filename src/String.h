@@ -29,7 +29,7 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-typedef std::basic_string<char,std::char_traits<char>,Allocator<char,1> > string;
+typedef std::basic_string<char,std::char_traits<char> > String; //,Allocator<char> > String;
 
 } // namespace PsimagLite
 

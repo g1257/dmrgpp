@@ -41,6 +41,7 @@ Please see full open source license included in file LICENSE.
 #include "PlotParams.h"
 #include "ChebyshevFunction.h"
 #include <cassert>
+#include "String.h"
 
 namespace PsimagLite {
 	
@@ -61,7 +62,7 @@ namespace PsimagLite {
 	template<typename RealType,typename VectorType_>
 	class ChebyshevSerializer  {
 
-		static const std::string stringMarker_;
+		static const String stringMarker_;
 
 	public:
 
@@ -96,7 +97,7 @@ namespace PsimagLite {
 		template<typename IoOutputType>
 		void save(IoOutputType& io) const
 		{
-			std::string s(stringMarker_);
+			String s(stringMarker_);
 			io.print(s);
 			io.print("#ChebyshevEnergy=",params_.Eg);
 			io.print("#ChebyshevOneOverA=",params_.oneOverA);
@@ -105,7 +106,7 @@ namespace PsimagLite {
 			io.printVector(moments_,"#ChebyshevMoments");
 		}
 		
-		static const std::string& stringMarker() { return stringMarker_; }
+		static const String& stringMarker() { return stringMarker_; }
 		
 
 // 		void set(const VectorType& ab,
@@ -217,7 +218,7 @@ namespace PsimagLite {
 	}; // class ChebyshevSerializer
 	
 	template<typename RealType,typename VectorType>
-	const std::string ChebyshevSerializer<RealType,VectorType>::stringMarker_ =
+	const String ChebyshevSerializer<RealType,VectorType>::stringMarker_ =
 	                                               "#ChebyshevSerializerMarker";
 } // namespace PsimagLite 
 /*@}*/

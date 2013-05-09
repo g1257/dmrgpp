@@ -4,15 +4,15 @@
 #ifndef TYPE_TO_STRING_H
 #define TYPE_TO_STRING_H
 
-#include <string>
 #include <sstream>
+#include "String.h"
 
 namespace PsimagLite {
 	template<class T>
-	std::string typeToString(T t)
+	String typeToString(T t)
 	{
 		std::stringstream ss;
-		std::string str;
+		String str;
 		ss.precision(10);
 		ss<<t;
 		ss>>str;
@@ -21,7 +21,7 @@ namespace PsimagLite {
 }
 
 template<class T>
-std::string ttos(T t)
+PsimagLite::String ttos(T t)
 {
 	return PsimagLite::typeToString(t);
 }

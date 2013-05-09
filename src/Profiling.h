@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009 , UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -16,15 +15,14 @@ Please see full open source license included in file LICENSE.
 *********************************************************
 
 */
-// END LICENSE BLOCK
 
 // A class to profile a scope of code
 #ifndef PROFILING_H_
 #define PROFILING_H_
 
-#include <string>
 #include <iostream>
 #include "MemoryUsage.h"
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -48,7 +46,7 @@ namespace PsimagLite {
 		}
 
 		public:
-			Profiling(const std::string& s,std::ostream& os = std::cout) 
+			Profiling(const String& s,std::ostream& os = std::cout) 
 			: message_(s),
 			  memoryUsage_("/proc/self/stat"),
 			  start_(memoryUsage_.time()),
@@ -80,7 +78,7 @@ namespace PsimagLite {
 				isDead_ = true;
 			}
 
-			std::string message_;
+			String message_;
 			MemoryUsage memoryUsage_;
 			double start_;
 			bool isDead_;

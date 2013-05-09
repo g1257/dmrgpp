@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Random48.h"
 #include "ContinuedFraction.h"
 #include "LanczosOrDavidsonBase.h"
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -291,10 +292,10 @@ namespace PsimagLite {
 
 	private:
 
-		void setMode(const std::string& options)
+		void setMode(const String& options)
 		{
-			if (options.find("lanczosdebug")!=std::string::npos) mode_ |=  DEBUG;
-			if (options.find("lanczosAllowsZero")!=std::string::npos) mode_ |= ALLOWS_ZERO;
+			if (options.find("lanczosdebug")!=String::npos) mode_ |=  DEBUG;
+			if (options.find("lanczosAllowsZero")!=String::npos) mode_ |= ALLOWS_ZERO;
 		}
 
 		void info(RealType energyTmp,const VectorType& x,std::ostream& os)

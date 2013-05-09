@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <stdexcept>
 #include "Ladder.h"
+#include "String.h"
 
 namespace PsimagLite {
 	
@@ -166,7 +167,7 @@ namespace PsimagLite {
 				return smax+siteNew2-emin+1;
 			}
 
-			std::string label() const
+			String label() const
 			{
 				return "ladderx";
 			}

@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "Random48.h"
 #include "ContinuedFraction.h"
+#include "String.h"
 
 namespace PsimagLite {
 
@@ -243,7 +244,7 @@ namespace PsimagLite {
 			btmp = sqrt (btmp);
 
 //			if (fabs(btmp)<1e-10) {
-//				std::string s(__FILE__);
+//				String s(__FILE__);
 //				s += " oneStepDecomposition: Ay=<y|A|y>y at line " + ttos(__LINE__) + "\n";
 //				s += "PsimagLite AI is not sofisticated enough to handle this, maybe because\n";
 //				s += "PsimagLite's author NI is not good enough... OK, that's all I have to say\n";

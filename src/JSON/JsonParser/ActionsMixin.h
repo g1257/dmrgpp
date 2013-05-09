@@ -12,7 +12,7 @@
 #ifndef  JsonParser_ActionsMixin_H
 #define  JsonParser_ActionsMixin_H
 
-#include <string>
+#include "String.h"
 
 namespace JsonParser {
   
@@ -43,7 +43,7 @@ namespace JsonParser {
       NR_ACTIONS
     } ActionType;
     
-    static std::string  actionName(ActionType action) {
+    static PsimagLite::String  actionName(ActionType action) {
       
       switch (action) {
       case Consume: return " Consume the character    ";

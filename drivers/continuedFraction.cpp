@@ -25,6 +25,7 @@ Please see full open source license included in file LICENSE.
 #include "IoSimple.h"
 #include "TridiagonalMatrix.h"
 #include "ContinuedFraction.h"
+#include "String.h"
 
 using namespace PsimagLite;
 typedef double RealType;
@@ -41,7 +42,7 @@ void usage(const char *progName)
 int main(int argc,char *argv[])
 {
 	int opt = 0;
-	std::string file="";
+	String file="";
 	RealType wbegin = 0;
 	RealType wend = 0;
 	RealType wstep = 0;

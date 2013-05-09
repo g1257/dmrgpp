@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CHAIN_H
 #define CHAIN_H
 #include "GeometryUtils.h"
+#include "String.h"
 
 namespace PsimagLite {
 	
@@ -124,7 +125,7 @@ namespace PsimagLite {
 				return smax+1;
 			}
 
-			std::string label() const
+			String label() const
 			{
 				return "chain";
 			}

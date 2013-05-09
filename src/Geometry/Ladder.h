@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LADDER_H
 
 #include "GeometryUtils.h"
+#include "String.h"
 
 namespace PsimagLite {
 	
@@ -180,7 +181,7 @@ namespace PsimagLite {
 			return false;
 		}
 
-		std::string label() const
+		String label() const
 		{
 			return "ladder";
 		}

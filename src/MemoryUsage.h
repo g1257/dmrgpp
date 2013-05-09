@@ -1,6 +1,4 @@
-// BEGIN LICENSE BLOCK
-/*
-Copyright (c) 2009 , UT-Battelle, LLC
+/* Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -68,9 +66,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -82,8 +78,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MEMORY_USAGE_H
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <time.h>
+#include "String.h"
 
 namespace PsimagLite {
 	class MemoryUsage {
@@ -91,7 +87,7 @@ namespace PsimagLite {
 
 	public:
 
-		MemoryUsage(const std::string& myself="") : data_(""),myself_(myself),startTime_(::time(0))
+		MemoryUsage(const String& myself="") : data_(""),myself_(myself),startTime_(::time(0))
 		{
 			if (myself_=="") myself_="/proc/self/status";
 			update();
@@ -105,23 +101,23 @@ namespace PsimagLite {
 			data_ = "";
 			while (!ifp.eof()) {
 				ifp.getline(tmp,MY_MAX_LINE);
-				data_ += std::string(tmp);
-				data_ += std::string("\n");
+				data_ += String(tmp);
+				data_ += String("\n");
 			}
 			ifp.close();
 		}
 		
-		std::string findEntry(const std::string& label)
+		String findEntry(const String& label)
 		{
 			size_t x = data_.find(label);
-			if (x==std::string::npos) {
+			if (x==String::npos) {
 				return "NOT_FOUND";
 			}
 			x += label.length();
 			size_t y = data_.find("\n",x);
 			size_t len = y-x;
-			if (y==std::string::npos) len = data_.length()-x;
-			std::string s2 = data_.substr(x,len);
+			if (y==String::npos) len = data_.length()-x;
+			String s2 = data_.substr(x,len);
 			x = 0;
 			for (size_t i=0;i<s2.length();i++) {
 				x++;
@@ -137,7 +133,7 @@ namespace PsimagLite {
 		{
 			return ::time(0)-startTime_;
 			/*update();
-			typename Vector<std::string>::Type v;
+			typename Vector<String>::Type v;
 			split(v,data_.c_str(),' ');
 			if (v.size()<15) return 0;
 			double xuser =  atof(v[13].c_str());
@@ -147,7 +143,7 @@ namespace PsimagLite {
 
 	private:
 
-		std::string data_,myself_;
+		String data_,myself_;
 		time_t startTime_;
 	}; // class MemoryUsage
 

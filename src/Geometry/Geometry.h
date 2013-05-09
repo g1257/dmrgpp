@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_H
 
 #include "GeometryTerm.h"
+#include "String.h"
 
 namespace PsimagLite {
 	
@@ -106,7 +107,7 @@ namespace PsimagLite {
 				}
 			}
 
-			std::string label(size_t i) const { return terms_[i].label(); }
+			String label(size_t i) const { return terms_[i].label(); }
 			
 			size_t connectionKind(size_t smax,size_t ind,size_t jnd) const
 			{
@@ -152,7 +153,7 @@ namespace PsimagLite {
 				if (linSize_& 1 ||
 				    linSize_ % sitesPerBlock!=0 ||
 				    size_t(linSize_/sitesPerBlock)<3) {
-					std::string str(__FILE__);
+					String str(__FILE__);
 					str += " " + ttos(__LINE__) + "\n";
 					str += "split error, linSize_=" + ttos(linSize_);
 					str += " sitesPerBlock=" + ttos(sitesPerBlock) + "\n";

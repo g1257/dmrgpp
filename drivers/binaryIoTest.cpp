@@ -1,7 +1,8 @@
 #include "IoBinary.h"
 #include "Vector.h"
+#include "String.h"
 
-void readMe(const std::string& myfile)
+void readMe(const String& myfile)
 {
 	PsimagLite::IoBinary::In fin(myfile);
 	typename Vector<double>::Type v;
@@ -20,9 +21,9 @@ void readMe(const std::string& myfile)
 int main()
 {
 	size_t rank = 0;
-	std::string myfile = "myfile.txt";
+	String myfile = "myfile.txt";
 	PsimagLite::IoBinary::Out fout(myfile,rank);
-	std::string s = "Hello World!";
+	String s = "Hello World!";
 	fout.print(s);
 	typename Vector<double>::Type m(10);
 

@@ -84,12 +84,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <sys/time.h>
 #include <time.h>
+#include "String.h"
  
 namespace PsimagLite {
 	
 	class HostInfo {
 	public:
-		std::string getTimeDate()
+		String getTimeDate()
 		{
 			struct timeval tv;
 			time_t tt;

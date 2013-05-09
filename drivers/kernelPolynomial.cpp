@@ -18,13 +18,13 @@ Please see full open source license included in file LICENSE.
 */
 // END LICENSE BLOCK
 
-#include <string>
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
 #include "ChebyshevSerializer.h"
 #include "IoSimple.h"
+#include "String.h"
 
 void usage(const char *progName)
 {
@@ -36,7 +36,7 @@ void usage(const char *progName)
 int main(int argc,char *argv[])
 {
 	int opt = 0;
-	std::string file="";
+	PsimagLite::String file="";
 	typedef double RealType;
 	typedef PsimagLite::Vector<RealType>::Type VectorType;
 
