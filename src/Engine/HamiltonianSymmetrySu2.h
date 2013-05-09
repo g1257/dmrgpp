@@ -164,9 +164,9 @@ namespace Dmrg {
 				v[2]=jm.first;
 				v[0]=jm.second;
 				double m = jm.second+0.5*(ne-jm.first);
-				if (m<0 || m>65535) throw std::runtime_error(" neJmToIndex\n");
+				if (m<0 || m>65535) throw PsimagLite::RuntimeError(" neJmToIndex\n");
 				v[0]=size_t(m);
-				if (ne<v[0]) throw std::runtime_error(" neJmToIndex 2\n");
+				if (ne<v[0]) throw PsimagLite::RuntimeError(" neJmToIndex 2\n");
 				v[1]=ne-v[0];
 				return encodeQuantumNumber(v);
 			}
@@ -174,7 +174,7 @@ namespace Dmrg {
 			static size_t encodeQuantumNumber(const typename PsimagLite::Vector<size_t>::Type& v)
 			{
 				size_t x= v[0] + v[1]*MAX;
-				if (v[0]>=MAX || v[1]>=MAX || v[2]>=MAX) throw std::runtime_error("encodeQuantumNumber\n");
+				if (v[0]>=MAX || v[1]>=MAX || v[2]>=MAX) throw PsimagLite::RuntimeError("encodeQuantumNumber\n");
 				if (v.size()==3) x += v[2]*MAX*MAX;
 				return x;
 			}
@@ -271,7 +271,7 @@ namespace Dmrg {
 
 				removedIndices.clear();
 
-				if (solverParams.options.find("inflate")!=std::string::npos)
+				if (solverParams.options.find("inflate")!=PsimagLite::String::npos)
 					inclusiveRemoval(removedIndices,perm,eigs,target);
 				else exclusiveRemoval(removedIndices,perm,eigs,target);
 			}
@@ -329,7 +329,7 @@ namespace Dmrg {
 			{
 				jmValues_.save(io);
 				io.printVector(flavors_,"#su2flavors");
-				std::string s="#su2FlavorsMax=" + ttos(flavorsMax_)+"\n";
+				PsimagLite::String s="#su2FlavorsMax=" + ttos(flavorsMax_)+"\n";
 				io.print(s); 
 				s="#su2ElectronsMax="+ttos(electronsMax_)+"\n";
 				io.print(s); 
@@ -476,7 +476,7 @@ namespace Dmrg {
 						std::cerr<<" heavy="<<jmSubspaces_[i].heavy()<<"\n";
 						std::cerr<<"--------------------------------------------\n";
 					}
-					throw std::runtime_error("HSSU2.h::createFactors(): factors are empty\n");
+					throw PsimagLite::RuntimeError("HSSU2.h::createFactors(): factors are empty\n");
 				}
 				factors.sort();
 				factors_ = factors;

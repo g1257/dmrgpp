@@ -342,7 +342,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		}
 
 		template<typename IoOutputter>
-		void save(IoOutputter& io,const std::string& s) const
+		void save(IoOutputter& io,const PsimagLite::String& s) const
 		{
 			if (!useSu2Symmetry_) io.printVector(operators_,"#OPERATORS");
 			else reducedOpImpl_.save(io,s);

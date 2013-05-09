@@ -156,19 +156,19 @@ namespace Dmrg {
 			size_t ns = lrs_.left().permutationVector().size();
 			size_t nx = ns/A.data.row();
 			if (src.size()!=lrs_.super().permutationVector().size())
-				throw std::runtime_error("applyLocalOpSystem SE\n");
+				throw PsimagLite::RuntimeError("applyLocalOpSystem SE\n");
 
 			PackIndicesType pack1(ns);
 			PackIndicesType pack2(nx);
 			for (size_t i=offset;i<final;i++) {
 				size_t x=0,y=0;
 				pack1.unpack(x,y,lrs_.super().permutation(i));
-				//if (y>=basisE_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem E\n");
+				//if (y>=basisE_.permutationVector().size()) throw PsimagLite::RuntimeError("applyLocalOpSystem E\n");
 				size_t x0=0,x1=0;
 				assert(x<lrs_.left().permutationVector().size());
 				pack2.unpack(x0,x1,lrs_.left().permutation(x));
 				/*int nx0 = basisS_.electrons(x)-electrons[x1];
-					if (nx0<0) throw std::runtime_error("TimeStepTargetting::applyLocalOpSystem(...)\n");
+					if (nx0<0) throw PsimagLite::RuntimeError("TimeStepTargetting::applyLocalOpSystem(...)\n");
 				 */
 				RealType sign = 1.0; //fermionSign(x0,A.fermionSign);
 				for (int k=A.data.getRowPtr(x0);k<A.data.getRowPtr(x0+1);k++) {
@@ -198,7 +198,7 @@ namespace Dmrg {
 					applyLocalOpSystem(dest2,src,A,fermionSign,i);
 					break;
 				case LEFT_CORNER:
-					throw std::runtime_error("applyLocalOpSystem: internal error\n");
+					throw PsimagLite::RuntimeError("applyLocalOpSystem: internal error\n");
 					break;
 				case RIGHT_CORNER:
 					applyLocalOpRightCorner(dest2,src,A,i);
@@ -220,19 +220,19 @@ namespace Dmrg {
 			size_t ns = lrs_.left().permutationVector().size();
 			size_t nx = ns/A.data.row();
 			if (src.size()!=lrs_.super().permutationVector().size())
-				throw std::runtime_error("applyLocalOpSystem SE\n");
+				throw PsimagLite::RuntimeError("applyLocalOpSystem SE\n");
 
 			PackIndicesType pack1(ns);
 			PackIndicesType pack2(nx);
 			for (size_t i=offset;i<final;i++) {
 				size_t x=0,y=0;
 				pack1.unpack(x,y,lrs_.super().permutation(i));
-				//if (y>=basisE_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem E\n");
+				//if (y>=basisE_.permutationVector().size()) throw PsimagLite::RuntimeError("applyLocalOpSystem E\n");
 				size_t x0=0,x1=0;
 				assert(x<lrs_.left().permutationVector().size());
 				pack2.unpack(x0,x1,lrs_.left().permutation(x));
 				/*int nx0 = basisS_.electrons(x)-electrons[x1];
-					if (nx0<0) throw std::runtime_error("TimeStepTargetting::applyLocalOpSystem(...)\n");
+					if (nx0<0) throw PsimagLite::RuntimeError("TimeStepTargetting::applyLocalOpSystem(...)\n");
 				 */
 				RealType sign = fermionSign(x0,A.fermionSign);
 				for (int k=A.data.getRowPtr(x1);k<A.data.getRowPtr(x1+1);k++) {
@@ -264,7 +264,7 @@ namespace Dmrg {
 					applyLocalOpLeftCorner(dest2,src,A,i);
 					break;
 				case RIGHT_CORNER:
-					throw std::runtime_error("applyLocalOpEnviron: internal error\n");
+					throw PsimagLite::RuntimeError("applyLocalOpEnviron: internal error\n");
 					break;
 				}
 			}
@@ -333,16 +333,16 @@ namespace Dmrg {
 			size_t ns = lrs_.left().permutationVector().size();
 			//size_t nx = ns/A.data.rank();
 			if (src.size()!=lrs_.super().permutationVector().size())
-				throw std::runtime_error("applyLocalOpSystem SE\n");
+				throw PsimagLite::RuntimeError("applyLocalOpSystem SE\n");
 
 			PackIndicesType pack(ns);
 
 			for (size_t i=offset;i<final;i++) {
 				size_t x=0,y=0;
 				pack.unpack(x,y,lrs_.super().permutation(i));
-				//if (y>=basisE_.permutationVector().size()) throw std::runtime_error("applyLocalOpSystem E\n");
+				//if (y>=basisE_.permutationVector().size()) throw PsimagLite::RuntimeError("applyLocalOpSystem E\n");
 				if (x>=lrs_.left().permutationVector().size())
-					throw std::runtime_error("applyLocalOpSystem S\n");
+					throw PsimagLite::RuntimeError("applyLocalOpSystem S\n");
 				RealType sign = lrs_.left().fermionicSign(x,A.fermionSign);
 				for (int k=A.data.getRowPtr(y);k<A.data.getRowPtr(y+1);k++) {
 					size_t yprime = A.data.getCol(k);

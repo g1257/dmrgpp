@@ -165,7 +165,7 @@ namespace Dmrg {
 			return false;
 		}
 
-		void setBrackets(const std::string& left,const std::string& right)
+		void setBrackets(const PsimagLite::String& left,const PsimagLite::String& right)
 		{
 			helper_.setBrackets(bracketStringToNumber(left),
 					bracketStringToNumber(right));
@@ -199,7 +199,7 @@ namespace Dmrg {
 			if (gammas.size()!=4) {
 				std::cerr<<"Observer: fourPointDeltas(...):  wrong number of gammas ";
 				std::cerr<<" expected "<<4<<" got "<<gammas.size()<<"\n";
-				throw std::runtime_error("Observer::fourPointDeltas(...)\n");
+				throw PsimagLite::RuntimeError("Observer::fourPointDeltas(...)\n");
 			}
 
 			size_t nsites = 2*fpd.n_row();
@@ -253,11 +253,11 @@ namespace Dmrg {
 
 	private:
 
-		size_t bracketStringToNumber(const std::string& str) const
+		size_t bracketStringToNumber(const PsimagLite::String& str) const
 		{
 			if (str=="gs") return GS_VECTOR;
 			if (str=="time") return TIME_VECTOR;
-			throw std::runtime_error("Observer::bracketStringToNumber(...): must be gs or time");
+			throw PsimagLite::RuntimeError("Observer::bracketStringToNumber(...): must be gs or time");
 		}
 
 		ObserverHelperType helper_;

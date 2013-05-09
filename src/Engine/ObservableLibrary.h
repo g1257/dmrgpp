@@ -126,7 +126,7 @@ namespace Dmrg {
 			}
 		}
 
-		void measure(const std::string& label,size_t rows,size_t cols)
+		void measure(const PsimagLite::String& label,size_t rows,size_t cols)
 		{
 			// Note that I can't print sites when there no time evolution
 			// since the DmrgSerializer doens't have sites yet
@@ -194,10 +194,10 @@ namespace Dmrg {
 						rows,cols,threadId);
 			} else if (label=="dd4") {
 				if (model_.geometry().label(0)!="ladderx") {
-					std::string str(__FILE__);
+					PsimagLite::String str(__FILE__);
 					str += " " + ttos(__LINE__) + "\n";
 					str += "dd4 only available for ladderx\n";
-					throw std::runtime_error(str.c_str());
+					throw PsimagLite::RuntimeError(str.c_str());
 				}
 				for (size_t g=0;g<16;g++) {
 					typename PsimagLite::Vector<size_t>::Type gammas(4,0);
@@ -218,12 +218,12 @@ namespace Dmrg {
 					}
 				}
 			} else {
-				std::string s = "Unknown label: " + label + "\n";
-				throw std::runtime_error(s.c_str());
+				PsimagLite::String s = "Unknown label: " + label + "\n";
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 		}
 
-		void measureTime(const std::string& label)
+		void measureTime(const PsimagLite::String& label)
 		{
 			SparseMatrixType A;
 			Su2RelatedType su2Related1;
@@ -256,12 +256,12 @@ namespace Dmrg {
 				PreOperatorSiteIndependentType preOperator(opA,"sz",threadId);
 				measureOnePoint(preOperator);
 			} else {
-				std::string s = "Unknown label: " + label + "\n";
-					throw std::runtime_error(s.c_str());
+				PsimagLite::String s = "Unknown label: " + label + "\n";
+					throw PsimagLite::RuntimeError(s.c_str());
 			}
 		}
 
-		void setBrackets(const std::string& left,const std::string& right)
+		void setBrackets(const PsimagLite::String& left,const PsimagLite::String& right)
 		{
 			observe_.setBrackets(left,right);
 		}
@@ -273,7 +273,7 @@ namespace Dmrg {
 			size_t threadId = 0;
 			for (size_t dof=0;dof<numberOfDofs;dof++) {
 				for (size_t dof2=dof;dof2<numberOfDofs;dof2++) {
-					std::string str("c^\\dagger(dof=");
+					PsimagLite::String str("c^\\dagger(dof=");
 					str += ttos(dof) + ") c(dof=" + ttos(dof2) + ")";
 					PreOperatorSiteDependentType preOperator(dof,dof2,model_,str,threadId);
 					measureOnePoint(preOperator);
@@ -283,7 +283,7 @@ namespace Dmrg {
 
 	private:
 
-		void measureOne(const std::string& label,
+		void measureOne(const PsimagLite::String& label,
 						const PsimagLite::Matrix<FieldType>& op1,
 						const PsimagLite::Matrix<FieldType>& op2,
 						int fermionSign,
@@ -366,7 +366,7 @@ namespace Dmrg {
 			}
 		}
 
-		void onePointHookForZero(size_t i0,const OperatorType& opA,const std::string& gsOrTime,size_t threadId)
+		void onePointHookForZero(size_t i0,const OperatorType& opA,const PsimagLite::String& gsOrTime,size_t threadId)
 		{
 			if (hasTimeEvolution_) return;
 			if (observe_.site(threadId)!=1 || observe_.isAtCorner(numberOfSites_,threadId)) return;
@@ -402,7 +402,7 @@ namespace Dmrg {
 		{
 			if (!hasTimeEvolution_) return;
 			size_t marker = observe_.marker(threadId);
-			std::string s = "INVALID MARKER";
+			PsimagLite::String s = "INVALID MARKER";
 			switch (marker) {
 			case 0:
 				s=" NOT ALL OPERATORS APPLIED YET";

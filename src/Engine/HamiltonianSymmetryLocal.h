@@ -188,8 +188,8 @@ namespace Dmrg {
 			{
 				// don't print factors since they're the identity anywaysfactors_
 //				io.print("#FACTORSSIZE=",factors_.row());
-				std::string tmp = ttos(factors_.row());
-				std::string s="#FACTORSSIZE="+tmp;
+				PsimagLite::String tmp = ttos(factors_.row());
+				PsimagLite::String s="#FACTORSSIZE="+tmp;
 				io.printline(s);
 			}
 

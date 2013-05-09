@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GS_TARGETTING_H
 #define GS_TARGETTING_H
 #include <iostream>
-#include <string>
+#include "String.h"
 #include "GroundStateParams.h"
 #include "ApplyOperatorLocal.h"
 #include <stdexcept>
@@ -150,12 +150,12 @@ namespace Dmrg {
 
 			RealType normSquared(size_t i) const
 			{
-				throw std::runtime_error("GST: What are you doing here?\n");
+				throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
 			}
 
 			RealType weight(size_t i) const
 			{
-				throw std::runtime_error("GST: What are you doing here?\n");
+				throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
 				return 0;
 			}
 
@@ -185,7 +185,7 @@ namespace Dmrg {
 
 			const VectorWithOffsetType& operator()(size_t i) const
 			{
-				throw std::runtime_error("GroundStateTargetting::operator()(...)\n");
+				throw PsimagLite::RuntimeError("GroundStateTargetting::operator()(...)\n");
 			}
 
 			void evolve(RealType Eg,
@@ -225,22 +225,22 @@ namespace Dmrg {
 			template<typename IoOutputType>
 			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
 			{
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Saving state...";
 				progress_.printline(msg,std::cout);
 
 				assert(block.size()>0);
-				std::string s = "#TCENTRALSITE=" + ttos(block[0]);
+				PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
 				io.printline(s);
 				psi_.save(io,"PSI");
 			}
 
-			void load(const std::string& f)
+			void load(const PsimagLite::String& f)
 			{
 				IoInputType io(f);
 				int site=0;
 				io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
-				if (site<0) throw std::runtime_error(
+				if (site<0) throw PsimagLite::RuntimeError(
 						"GST::load(...): site cannot be negative\n");
 				psi_.load(io,"PSI");
 			}

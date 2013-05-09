@@ -117,9 +117,9 @@ namespace Dmrg {
 			}
 
 			LeftRightSuper(
-					const std::string& slabel,
-					const std::string& elabel,
-					const std::string& selabel)
+					const PsimagLite::String& slabel,
+					const PsimagLite::String& elabel,
+					const PsimagLite::String& selabel)
 			: progress_("LeftRightSuper",0),
 			  left_(0),right_(0),super_(0),refCounter_(0)
 			{
@@ -181,9 +181,9 @@ namespace Dmrg {
 				grow(*right_,model,pE,X,GROW_TO_THE_LEFT,time);
 			}
 
-			void printSizes(const std::string& label,std::ostream& os) const
+			void printSizes(const PsimagLite::String& label,std::ostream& os) const
 			{
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<label<<": left-block basis="<<left_->size();
 				msg<<", right-block basis="<<right_->size();
 				msg<<" sites="<<left_->block().size()<<"+";
@@ -223,14 +223,14 @@ namespace Dmrg {
 
 			void left(const BasisWithOperatorsType& left)
 			{
-				if (refCounter_>0) throw std::runtime_error
+				if (refCounter_>0) throw PsimagLite::RuntimeError
 						("LeftRightSuper::left(...): not the owner\n");
 				*left_=left; // deep copy
 			}
 
 			void right(const BasisWithOperatorsType& right)
 			{
-				if (refCounter_>0) throw std::runtime_error
+				if (refCounter_>0) throw PsimagLite::RuntimeError
 						("LeftRightSuper::right(...): not the owner\n");
 				*right_=right; // deep copy
 			}

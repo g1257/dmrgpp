@@ -308,8 +308,8 @@ private:
 //		isok = max( ilabel == ncolor);
 		size_t isok = *std::max(ilist.begin(),ilist.end());
 		if (isok==0) {
-			std::string s = "ncolor " + ttos(ncolor) + " max(ilabel) " + ttos(isok) + "\n";
-			//throw std::runtime_error(s.c_str());
+			PsimagLite::String s = "ncolor " + ttos(ncolor) + " max(ilabel) " + ttos(isok) + "\n";
+			//throw PsimagLite::RuntimeError(s.c_str());
 		}
 	}
 

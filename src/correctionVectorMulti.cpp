@@ -26,9 +26,9 @@ int main(int argc,char *argv[])
 {
 	ConcurrencyType concurrency(argc,argv);
 	int opt;
-	std::string infile = "";
-	std::string dataRoot = "";
-	std::string inputRoot = "";
+	PsimagLite::String infile = "";
+	PsimagLite::String dataRoot = "";
+	PsimagLite::String inputRoot = "";
 	
 	while ((opt = getopt(argc, argv,
 		"i:d:o:")) != -1) {

@@ -1,5 +1,5 @@
-#include <string>
-const std::string license=
+#include "String.h"
+const PsimagLite::String license=
 "Copyright (c) 2009-2012 , UT-Battelle, LLC\n"
 "All rights reserved\n"
 "\n"
@@ -69,7 +69,7 @@ struct OperatorOptions {
 	
 	size_t site;
 	size_t dof;
-	std::string label;
+	PsimagLite::String label;
 };
 
 template<template<typename,typename> class ModelHelperTemplate,
@@ -81,7 +81,7 @@ template<template<typename,typename> class ModelHelperTemplate,
          template<typename> class> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop(GeometryType& geometry,
-              const std::string& targetting,
+              const PsimagLite::String& targetting,
               ConcurrencyType& concurrency,
 	      InputNgType::Readable& io,
 	      const DmrgSolverParametersType& params,
@@ -126,7 +126,7 @@ int main(int argc,char *argv[])
 {
 	using namespace Dmrg;
 
-	std::string filename="";
+	PsimagLite::String filename="";
 	OperatorOptions options;
 	int opt = 0;
 	while ((opt = getopt(argc, argv,"f:s:l:d:")) != -1) {
@@ -176,14 +176,14 @@ int main(int argc,char *argv[])
 
 
 	bool su2=false;
-	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;
-	std::string targetting="GroundStateTargetting";
+	if (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos) su2=true;
+	PsimagLite::String targetting="GroundStateTargetting";
 	const char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
                      "CorrectionVectorTargetting","CorrectionTargetting","MettsTargetting"};
 	size_t totalTargets = 6;
 	for (size_t i = 0;i<totalTargets;++i)
-		if (dmrgSolverParams.options.find(targets[i])!=std::string::npos) targetting=targets[i];
-	if (targetting!="GroundStateTargetting" && su2) throw std::runtime_error("SU(2)"
+		if (dmrgSolverParams.options.find(targets[i])!=PsimagLite::String::npos) targetting=targets[i];
+	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
  		" supports only GroundStateTargetting for now (sorry!)\n");
 	
 	if (su2) {

@@ -126,7 +126,7 @@ namespace Dmrg {
 		  progress_("WaveFunctionTransfLocal",0)
 		{
 			if (twoSiteDmrg)
-				throw std::runtime_error("SU(2) does not support two-site DMRG yet\n");
+				throw PsimagLite::RuntimeError("SU(2) does not support two-site DMRG yet\n");
 		}
 
 		
@@ -293,7 +293,7 @@ namespace Dmrg {
 			RealType x = std::norm(psiDest);
 			if (fabs(x)>1e-6) return;
 //			assert(false);
-			std::ostringstream msg1,msg2,msg3;
+			PsimagLite::OstringStream msg1,msg2,msg3;
 			msg1<<"WARNING: WFT forced to stop, this is a know issue with SU(2).";
 			progress_.printline(msg1,std::cout);
 			msg2<<"WARNING: If you are targeting anything other the ground state results will be wrong";

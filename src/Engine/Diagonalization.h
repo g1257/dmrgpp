@@ -138,7 +138,7 @@ namespace Dmrg {
 		                    const BlockType& blockLeft,
 		                    const BlockType& blockRight)
 		{
-			if (direction!=WaveFunctionTransfType::INFINITE) throw std::runtime_error(
+			if (direction!=WaveFunctionTransfType::INFINITE) throw PsimagLite::RuntimeError(
 				"Diagonalization::operator(): expecting INFINITE direction\n");
 			size_t loopIndex = 0;
 			typename PsimagLite::Vector<size_t>::Type sectors;
@@ -195,10 +195,10 @@ namespace Dmrg {
 			if (direction != WaveFunctionTransfType::INFINITE)
 				onlyWft = ((parameters_.finiteLoop[loopIndex].saveOption & 2)>0) ? true : false;
 		
-			if (parameters_.options.find("MettsTargetting")!=std::string::npos)
+			if (parameters_.options.find("MettsTargetting")!=PsimagLite::String::npos)
 				return gsEnergy;
 
-			std::ostringstream msg0;
+			PsimagLite::OstringStream msg0;
 			msg0<<"Setting up Hamiltonian basis of size="<<lrs.super().size();
 			progress_.printline(msg0,std::cout);
 		
@@ -241,7 +241,7 @@ namespace Dmrg {
 
 			for (size_t i=0;i<total;i++) {
 				if (weights[i]==0) continue;
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"About to diag. sector with quantum numbs. ";
 				size_t j = lrs.super().qn(lrs.super().partition(i));
 				typename PsimagLite::Vector<size_t>::Type qns = BasisType::decodeQuantumNumber(j);
@@ -285,12 +285,12 @@ namespace Dmrg {
 
 				size_t j = lrs.super().qn(lrs.super().partition(i));
 				typename PsimagLite::Vector<size_t>::Type qns = BasisType::decodeQuantumNumber(j);
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Found targetted symmetry sector in partition "<<i;
 				msg<<" of size="<<vecSaved[i].size();
 				progress_.printline(msg,std::cout);
 
-				std::ostringstream msg2;
+				PsimagLite::OstringStream msg2;
 				msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[i]);
 				msg2<<" and quantum numbers are ";
 				for (size_t k=0;k<qns.size();k++) msg2<<qns[k]<<" ";
@@ -301,7 +301,7 @@ namespace Dmrg {
 			target.setGs(vecSaved,lrs.super());
 
 			if (concurrency_.root()) {
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg.precision(8);
 				msg<<"#Energy="<<gsEnergy;
 				if (counter>1) msg<<" attention: found "<<counter<<" matrix blocks";
@@ -326,7 +326,7 @@ namespace Dmrg {
 
 			typename ModelType::ModelHelperType modelHelper(i,lrs); //,useReflection_);
 
-			if (parameters_.options.find("debugmatrix")!=std::string::npos) {
+			if (parameters_.options.find("debugmatrix")!=PsimagLite::String::npos) {
 				SparseMatrixType fullm;
 
 				model_.fullHamiltonian(fullm,modelHelper);
@@ -341,16 +341,16 @@ namespace Dmrg {
 				}
 
 				if (!isHermitian(fullm,true))
-					throw std::runtime_error("Not hermitian matrix block\n");
+					throw PsimagLite::RuntimeError("Not hermitian matrix block\n");
 
 				typename PsimagLite::Vector<RealType>::Type eigs(fullm2.n_row());
 				PsimagLite::diag(fullm2,eigs,'V');
 				std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
-				if (parameters_.options.find("test")!=std::string::npos)
+				if (parameters_.options.find("test")!=PsimagLite::String::npos)
 					throw std::logic_error
 					         ("Exiting due to option test in the input file\n");
 			}
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"I will now diagonalize a matrix of size="<<modelHelper.size();
 			progress_.printline(msg,std::cout);
 			diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,initialVector);
@@ -380,11 +380,11 @@ namespace Dmrg {
 			params.tolerance = parameters_.lanczosEps;
 			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 			params.options= parameters_.options;
-			params.lotaMemory=false; //!(parameters_.options.find("DoNotSaveLanczosVectors")!=std::string::npos);
+			params.lotaMemory=false; //!(parameters_.options.find("DoNotSaveLanczosVectors")!=PsimagLite::String::npos);
 
 			LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
 
-			bool useDavidson = (parameters_.options.find("useDavidson")!=std::string::npos);
+			bool useDavidson = (parameters_.options.find("useDavidson")!=PsimagLite::String::npos);
 			if (useDavidson) {
 				lanczosOrDavidson = new PsimagLite::DavidsonSolver<ParametersForSolverType,MyInternalProduct,SomeVectorType>(lanczosHelper,params);
 			} else {
@@ -396,7 +396,7 @@ namespace Dmrg {
 				if (lanczosOrDavidson) delete lanczosOrDavidson;
 				return;
 			}
-			/*std::ostringstream msg;
+			/*PsimagLite::OstringStream msg;
 			msg<<"Calling computeGroundState...\n";
 			progress_.printline(msg,std::cerr);
 			*/

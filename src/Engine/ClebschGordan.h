@@ -107,11 +107,11 @@ namespace Dmrg {
 			{
 				factorial_.resize(numberOfFactorials),
 				createFactorials();
-				//std::ostringstream msg;
+				//PsimagLite::OstringStream msg;
 				//msg<<"init called "<<copies_<<" times, numberOfFactorials="<<numberOfFactorials<<"\n";
 				//progress_.printline(msg,std::cout);
 				copies_++;
-				if (copies_>3) {//throw std::runtime_error("ClebschGordanCached: too many copies\n");
+				if (copies_>3) {//throw PsimagLite::RuntimeError("ClebschGordanCached: too many copies\n");
 					std::cerr<<"WARNING: ClebschGordan has ";
 					std::cerr<<copies_<<" copies.\n";
 				}

@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef RUNNER_HEADER_H
 #define RUNNER_HEADER_H
 
-#include <string>
+#include "String.h"
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -92,22 +92,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	class	Runner {
 	public:
-		Runner(const std::string& exec,
-		       const std::string& inputRoot,
-		       const std::string& ext)
+		Runner(const PsimagLite::String& exec,
+		       const PsimagLite::String& inputRoot,
+		       const PsimagLite::String& ext)
 		: exec_(exec),inputRoot_(inputRoot),ext_(ext)
 		{
 		}
 		
 		void operator()(size_t i) const
 		{
-			std::string s = exec_ + " " + inputRoot_ + ttos(i) + ext_;
+			PsimagLite::String s = exec_ + " " + inputRoot_ + ttos(i) + ext_;
 			system(s.c_str());
 		}
 
 	private:
 
-		std::string exec_,inputRoot_,ext_;
+		PsimagLite::String exec_,inputRoot_,ext_;
 	}; // class Runner
 } // namespace Dmrg
 

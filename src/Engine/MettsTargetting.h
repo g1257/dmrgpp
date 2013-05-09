@@ -178,7 +178,7 @@ namespace Dmrg {
 			  systemPrev_(),
 			  environPrev_()
 			{
-				if (!wft.isEnabled()) throw std::runtime_error(" MettsTargetting "
+				if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" MettsTargetting "
 							"needs an enabled wft\n");
 
 				RealType tau =mettsStruct_.tau/(mettsStruct_.timeSteps-1);
@@ -198,7 +198,7 @@ namespace Dmrg {
 				sum += gsWeight_;
 				assert(fabs(sum-1.0)<1e-5);
 
-				std::string s (__FILE__);
+				PsimagLite::String s (__FILE__);
 				s += " Unknown algorithm\n";
 				switch (mettsStruct_.algorithm) {
 				case TargettingParamsType::KRYLOV:
@@ -214,7 +214,7 @@ namespace Dmrg {
 								currentBeta_,mettsStruct_,betas_,targetVectors_,model_,wft_,lrs_,0,0);
 					break;
 				default:
-					throw std::runtime_error(s.c_str());
+					throw PsimagLite::RuntimeError(s.c_str());
 				}
 			}
 
@@ -251,14 +251,14 @@ namespace Dmrg {
 
 			const RealType& operator[](size_t i) const
 			{
-				std::string s("MettsTargetting: invalid const operator[]\n");
-				throw std::runtime_error(s.c_str());
+				PsimagLite::String s("MettsTargetting: invalid const operator[]\n");
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 
 			RealType& operator[](size_t i)
 			{
-				std::string s("MettsTargetting: invalid operator[]\n");
-				throw std::runtime_error(s.c_str());
+				PsimagLite::String s("MettsTargetting: invalid operator[]\n");
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 
 			const VectorWithOffsetType& gs() const 
@@ -336,7 +336,7 @@ namespace Dmrg {
 				bool hasCollapsed = mettsCollapse_(targetVectors_[n1],targetVectors_[n1-1],sites,direction);
 
 				if (hasCollapsed) {
-					std::string s = "  COLLAPSEHERE  ";
+					PsimagLite::String s = "  COLLAPSEHERE  ";
 					for (size_t i=0;i<sites.size();i++) {
 						test(targetVectors_[n1],targetVectors_[n1],direction,s,sites[i],false);
 						if (isAtBorder(direction,sites[0]))
@@ -345,7 +345,7 @@ namespace Dmrg {
 				}
 			}
 
-			void load(const std::string& f)
+			void load(const PsimagLite::String& f)
 			{
 				stage_ = WFT_NOADVANCE;
  
@@ -368,14 +368,14 @@ namespace Dmrg {
 			void initialGuess(VectorWithOffsetType& v,
 			                  const typename PsimagLite::Vector<size_t>::Type& block) const
 			{
-				std::string s("MettsTargetting: Invalid call to initialGuess\n");
-				throw std::runtime_error(s.c_str());
+				PsimagLite::String s("MettsTargetting: Invalid call to initialGuess\n");
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 
 			template<typename IoOutputType>
 			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
 			{
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
  				msg<<"Saving state...";
  				progress_.printline(msg,std::cout);
 
@@ -412,7 +412,7 @@ namespace Dmrg {
 				if (index==0 && start==0)
 					advanceCounterAndComputeStage(block);
 
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Evolving, stage="<<getStage()<<" loopNumber="<<loopNumber;
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
@@ -426,7 +426,7 @@ namespace Dmrg {
 				if (stage_==COLLAPSE) {
 					if (!allSitesCollapsed()) {
 						if (sitesCollapsed_.size()>2*model_.geometry().numberOfSites())
-							throw std::runtime_error("advanceCounterAndComputeStage\n");
+							throw PsimagLite::RuntimeError("advanceCounterAndComputeStage\n");
 						printAdvancement();
 						return;
 					}
@@ -435,7 +435,7 @@ namespace Dmrg {
 					stage_ = WFT_NOADVANCE;
 					timesWithoutAdvancement_=0;
 					currentBeta_ = 0;
-					std::ostringstream msg;
+					PsimagLite::OstringStream msg;
 					size_t n1 = mettsStruct_.timeSteps;
 					RealType x = std::norm(targetVectors_[n1]);
 					msg<<"Changing direction, setting collapsed with norm="<<x;
@@ -479,7 +479,7 @@ namespace Dmrg {
 
 			void printAdvancement() const
 			{
-				std::ostringstream msg2;
+				PsimagLite::OstringStream msg2;
 				msg2<<"Steps without advance: "<<timesWithoutAdvancement_;
 				if (timesWithoutAdvancement_>0)
 					progress_.printline(msg2,std::cout);
@@ -503,7 +503,7 @@ namespace Dmrg {
 					}
 					// don't advance the collapsed vector because we'll recompute
 					if (index==weight_.size()-1) advance=index;
-					std::ostringstream msg;
+					PsimagLite::OstringStream msg;
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 
@@ -546,7 +546,7 @@ namespace Dmrg {
 						lrs_.super().partition(i))==quantumSector_ )
 						return i;
 				}
-				throw std::runtime_error("MettsTargetting: getPartition()\n");
+				throw PsimagLite::RuntimeError("MettsTargetting: getPartition()\n");
 			}
 
 			// direction here is INFINITE
@@ -560,7 +560,7 @@ namespace Dmrg {
 				for (size_t i=0;i<betaFixed.size();i++)
 					betaFixed[i] = mettsStochastics_.chooseRandomState(block2[i]);
 
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"New pures for ";
 				for (size_t i=0;i<alphaFixed.size();i++)
 					msg<<" site="<<block1[i]<<" is "<<alphaFixed[i];
@@ -660,10 +660,10 @@ namespace Dmrg {
 //							newVector[gamma] += tmpVector[alpha];
 //					}
 //				}
-				std::ostringstream msg2;
+				PsimagLite::OstringStream msg2;
 				msg2<<"Old size of pure is "<<ns<<" norm="<<PsimagLite::norm(tmpVector);
 				progress_.printline(msg2,std::cerr);
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"New size of pure is "<<newSize<<" norm="<<PsimagLite::norm(newVector);
 				progress_.printline(msg,std::cerr);
 				assert(PsimagLite::norm(newVector)>1e-6);
@@ -733,7 +733,7 @@ namespace Dmrg {
 				for (size_t i=0;i<alphaFixed.size();i++)
 					alphaFixed[i] = mettsStochastics_.chooseRandomState(blockCorrected[i]);
 
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"New pures for site ";
 				for (size_t i=0;i<blockCorrected.size();i++)
 					msg<<blockCorrected[i]<<" ";
@@ -784,7 +784,7 @@ namespace Dmrg {
 				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
-					std::string s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
+					PsimagLite::String s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
 					size_t site2 = test(targetVectors_[j],targetVectors_[j],direction,s,site,corner);
 					if (stage_==COLLAPSE && j==0) sitesCollapsed_.push_back(site2);
 				}
@@ -796,11 +796,11 @@ namespace Dmrg {
 				if (i==0) return;
 				for (size_t j=0;j<i;j++) {
 					if (stage_ == DISABLED) {
-						std::string s ="TST:: Seeing tst site "+ttos(mettsStruct_.sites[i]);
+						PsimagLite::String s ="TST:: Seeing tst site "+ttos(mettsStruct_.sites[i]);
 						s =s + " before having seen";
 						s = s + " site "+ttos(j);
 						s = s +". Please order your tst sites in order of appearance.\n";
-						throw std::runtime_error(s);
+						throw PsimagLite::RuntimeError(s);
 					}
 				}
 			}
@@ -818,7 +818,7 @@ namespace Dmrg {
 				return true;
 			}
 
-			std::string getStage() const
+			PsimagLite::String getStage() const
 			{
 				switch (stage_) {
 					case DISABLED:
@@ -842,7 +842,7 @@ namespace Dmrg {
 			                     size_t systemOrEnviron)
 			{
 				const VectorWithOffsetType& phi = targetVectors_[startEnd.first];
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<" vector number "<<startEnd.first<<" has norm ";
 				msg<<std::norm(phi);
 				progress_.printline(msg,std::cout);
@@ -892,7 +892,7 @@ namespace Dmrg {
 			size_t test(const VectorWithOffsetType& src1,
 			            const VectorWithOffsetType& src2,
 			            size_t systemOrEnviron,
-			            const std::string& label,
+			            const PsimagLite::String& label,
 			            size_t site,
 			            bool corner) const
 			{
@@ -910,7 +910,7 @@ namespace Dmrg {
 					for (size_t jj=0;jj<src2.sectors();jj++) {
 						size_t j = src2.sector(jj);
 						size_t offset2 = src2.offset(j);
-						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+						if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
 						for (size_t k=0;k<dest.effectiveSize(i);k++) 
 							sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
 					}
@@ -932,7 +932,7 @@ namespace Dmrg {
 				return site2;
 			}
 
-			OperatorType getObservableToTest(const std::string& modelName) const
+			OperatorType getObservableToTest(const PsimagLite::String& modelName) const
 			{
 				OperatorType A;
 				size_t site = 0; // sites.first; <-- site-dependent Hilbert space not supported by METTS
@@ -951,10 +951,10 @@ namespace Dmrg {
 					A.fermionSign = 1;
 					return A;
 				}
-				std::string s(__FILE__);
+				PsimagLite::String s(__FILE__);
 				s += " " + ttos(__LINE__) + "\n";
 				s += "Model " + modelName + " not supported by MettsTargetting\n";
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 
 			void printEnergies() const
@@ -984,7 +984,7 @@ namespace Dmrg {
 				phi.extract(phi2,i0);
 				TargetVectorType x(total);
 				lanczosHelper.matrixVectorProduct(x,phi2);
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Hamiltonian average at beta="<<currentBeta_<<" for target="<<whatTarget;
 				msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<(phi2*x)<<" <phi(t)|phi(t)>="<<(phi2*phi2);
 				progress_.printline(msg,std::cout);

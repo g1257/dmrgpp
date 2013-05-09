@@ -132,7 +132,7 @@ namespace Dmrg {
 		  error_(0.0)
 		{
 			if (parameters_.tolerance<0) return;
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"has tolerance= "<<parameters_.tolerance;
 			progress_.printline(msg,std::cout);
 		}
@@ -231,7 +231,7 @@ namespace Dmrg {
 			rSprime = pBasis;
 			rSprime.changeBasis(cache.removedIndices,cache.eigs,keptStates,parameters_);
 
-			std::ostringstream msg2;
+			PsimagLite::OstringStream msg2;
 			msg2<<"done with entanglement";
 			progress_.printline(msg2,std::cout);
 
@@ -240,14 +240,14 @@ namespace Dmrg {
 		void truncateBasisSystem(BasisWithOperatorsType& rSprime,const BasisWithOperatorsType& eBasis)
 		{
 
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			TruncationCache& cache = leftCache_;
 
 			rSprime.truncateBasis(ftransform_,cache.transform,
 							    cache.eigs,cache.removedIndices,concurrency_);
 			LeftRightSuperType lrs(rSprime,(BasisWithOperatorsType&) eBasis,
 						   (BasisType&)lrs_.super());
-			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=std::string::npos);
+			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
 			const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
 			waveFunctionTransformation_.push(ftransform_,EXPAND_SYSTEM,lrsForWft);
 
@@ -258,14 +258,14 @@ namespace Dmrg {
 		void truncateBasisEnviron(BasisWithOperatorsType& rEprime,const BasisWithOperatorsType& sBasis)
 		{
 
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			TruncationCache& cache = rightCache_;
 
 			rEprime.truncateBasis(ftransform_,cache.transform,
 							    cache.eigs,cache.removedIndices,concurrency_);
 			LeftRightSuperType lrs((BasisWithOperatorsType&) sBasis,
 						   rEprime,(BasisType&)lrs_.super());
-			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=std::string::npos);
+			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
 			const LeftRightSuperType& lrsForWft = (twoSiteDmrg) ? lrs_ : lrs;
 			waveFunctionTransformation_.push(ftransform_,EXPAND_ENVIRON,lrsForWft);
 			msg<<"new size of basis="<<rEprime.size();
@@ -286,7 +286,7 @@ namespace Dmrg {
 			if (eigs.size()>=newKeptStates)
 				statesToRemove = eigs.size()-newKeptStates;
 			RealType discWeight = sumUpTo(eigs,statesToRemove);
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			if (newKeptStates != keptStates) {
 				// we report that the "m" value has been changed and...
 				msg<<"Reducing kept states to "<<newKeptStates<<" from "<<keptStates;
@@ -359,7 +359,7 @@ namespace Dmrg {
 		{
 			static size_t counter = 0;
 			if (parameters_.fileForDensityMatrixEigs=="") return;
-			std::string file(parameters_.fileForDensityMatrixEigs);
+			PsimagLite::String file(parameters_.fileForDensityMatrixEigs);
 			file += ttos(counter);
 			size_t parallelRank = 0;
 			PsimagLite::IoSimple::Out io(file,parallelRank);

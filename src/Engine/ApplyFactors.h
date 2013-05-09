@@ -94,7 +94,7 @@ namespace Dmrg {
 			void operator()(SparseMatrixType& m) const 
 			{
 				if (!enabled_) return;
-				if (factors_.row()!=m.row()) throw std::runtime_error("Problem applying factors\n");
+				if (factors_.row()!=m.row()) throw PsimagLite::RuntimeError("Problem applying factors\n");
 				applyFactors(m);
 				
 			}

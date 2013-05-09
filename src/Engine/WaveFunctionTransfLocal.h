@@ -123,7 +123,7 @@ namespace Dmrg {
 		  twoSiteDmrg_(twoSiteDmrg),
 		  progress_("WaveFunctionTransfLocal",0)
 		{
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Constructing...";
 			progress_.printline(msg,std::cout);
 		}
@@ -487,7 +487,7 @@ namespace Dmrg {
 		{
 			size_t volumeOfNk = this->volumeOf(nk);
 			size_t nip = lrs.super().permutationInverse().size()/lrs.right().permutationInverse().size();
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<" We're bouncing on the right, so buckle up!";
 			progress_.printline(msg,std::cout);
 			
@@ -542,7 +542,7 @@ namespace Dmrg {
 			size_t nip = lrs.left().permutationInverse().size()/volumeOfNk;
 			size_t nalpha = lrs.left().permutationInverse().size();
 			
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<" We're bouncing on the left, so buckle up!";
 			progress_.printline(msg,std::cout);
 			

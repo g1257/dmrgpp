@@ -139,10 +139,10 @@ namespace Dmrg {
 			HilbertSpaceFeAsType::setOrbitals(modelParameters_.orbitals);
 //			setPauliMatrix();
 			if (modelParameters_.potentialV.size()!=2*modelParameters_.orbitals*geometry.numberOfSites()) {
-				std::string str(__FILE__);
+				PsimagLite::String str(__FILE__);
 				str += " " + ttos(__LINE__) + "\n";
 				str += "potentialV length must be 2*orbitals times the number of sites\n";
-				throw std::runtime_error(str.c_str());
+				throw PsimagLite::RuntimeError(str.c_str());
 			}
 		}
 
@@ -210,7 +210,7 @@ namespace Dmrg {
 			}
 		}
 
-		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,size_t site,size_t dof) const
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,size_t site,size_t dof) const
 		{
 			Block block;
 			block.resize(1);
@@ -370,11 +370,11 @@ namespace Dmrg {
 				} else {
 					HilbertSpaceFeAsType::create(bra,i,sigma);
 					int jj = PsimagLite::isInVector(natBasis,bra);
-					if (jj<0) throw std::runtime_error("findOperatorMatrices: internal error while"
+					if (jj<0) throw PsimagLite::RuntimeError("findOperatorMatrices: internal error while"
 							"creating.\n");
 					if (ii==size_t(jj)) {
 						std::cerr<<"ii="<<i<<" ket="<<ket<<" bra="<<bra<<" sigma="<<sigma<<"\n";
-						throw std::runtime_error("Creation operator cannot be diagonal\n");
+						throw PsimagLite::RuntimeError("Creation operator cannot be diagonal\n");
 					}
 					cm(ii,jj) =sign(ket,i,sigma);
 				}
@@ -397,7 +397,7 @@ namespace Dmrg {
 		                        const typename PsimagLite::Vector<HilbertState>::Type& basis,
 		                        int n) const
 		{
-			if (n!=1) std::runtime_error("ModelFeAs::setSymmetryRelated() implemented for n=1 only\n");
+			if (n!=1) PsimagLite::RuntimeError("ModelFeAs::setSymmetryRelated() implemented for n=1 only\n");
 
 			// find j,m and flavors (do it by hand since we assume n==1)
 			// note: we use 2j instead of j
@@ -484,7 +484,7 @@ namespace Dmrg {
 		                 const typename PsimagLite::Vector<HilbertState>::Type& basis) const
 		{
 			int n  = cm.n_row();
-			if (n!=16) throw std::runtime_error("reinterpret (unimplemented case): "
+			if (n!=16) throw PsimagLite::RuntimeError("reinterpret (unimplemented case): "
 						"blocks must be of size 1, and basis of size 16\n");
 			PsimagLite::Matrix<SparseElementType> cmCopy(n,n);
 			int i,j;
@@ -785,7 +785,7 @@ namespace Dmrg {
 //			pauliMatrix_.push_back(matrixTmp);
 //		}
 
-		void diagTest(const SparseMatrixType& fullm,const std::string& str) const
+		void diagTest(const SparseMatrixType& fullm,const PsimagLite::String& str) const
 		{
 			if (fullm.rank()!=256) return;
 			PsimagLite::Matrix<SparseElementType> fullm2;

@@ -146,7 +146,7 @@ public:
 	                             bool allOperatorsApplied)
 	{
 		static bool firstcall = true;
-		std::ostringstream msg;
+		PsimagLite::OstringStream msg;
 		msg<<"EXPERIMENTAL: using SuzukiTrotter";
 
 		RealType norma = std::norm(phi);
@@ -184,7 +184,7 @@ public:
 		if (b1 || b2) return;
 
 		bool areAllLinksSeen = allLinksSeen();
-		std::ostringstream msg2;
+		PsimagLite::OstringStream msg2;
 		msg2<<"LINKS SEEN ";
 		for (size_t i=0;i<linksSeen_.size();i++)
 			msg2<<linksSeen_[i]<<" ";
@@ -193,7 +193,7 @@ public:
 		if (!areAllLinksSeen) {
 			linksSeen_.push_back(lastIndexLeft);
 		} else {
-			std::ostringstream msg3;
+			PsimagLite::OstringStream msg3;
 			msg3<<"ALL LINKS SEEN";
 			progress_.printline(msg3,std::cout);
 			return;
@@ -210,7 +210,7 @@ public:
 	virtual void timeHasAdvanced()
 	{
 		linksSeen_.clear();
-		std::ostringstream msg;
+		PsimagLite::OstringStream msg;
 		msg<<"ALL LINKS CLEARED";
 		progress_.printline(msg,std::cout);
 	}
@@ -458,7 +458,7 @@ private:
 		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON && block[0]==0) factorForDiagonals = 1.0;
 
 		if (fabs(factorForDiagonals)>1e-6) {
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"LINKS factors="<<factorForDiagonals<<" added for diagonals on sites ";
 			msg<<block[0]<<" and "<<block[1];
 			progress_.printline(msg,std::cout);

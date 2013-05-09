@@ -203,7 +203,7 @@ namespace Dmrg {
 			creationMatrix.push_back(nOp);
 		}
 
-		MatrixType naturalOperator(const std::string& what,size_t site,size_t dof) const
+		MatrixType naturalOperator(const PsimagLite::String& what,size_t site,size_t dof) const
 		{
 			Block block;
 			block.resize(1);
@@ -243,7 +243,7 @@ namespace Dmrg {
 				return nUpOrDown(block,SPIN_DOWN);
 			}
 			if (what=="d") { // delta = c^\dagger * c^dagger
-				throw std::runtime_error("delta unimplemented for this model\n");
+				throw PsimagLite::RuntimeError("delta unimplemented for this model\n");
 			}
 			std::cerr<<"what="<<what<<"\n";
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
@@ -473,7 +473,7 @@ namespace Dmrg {
 			return tmpMatrix;
 		}
 
-		void diagTest(const SparseMatrixType& fullm,const std::string& str) const
+		void diagTest(const SparseMatrixType& fullm,const PsimagLite::String& str) const
 		{
 			if (fullm.rank()!=256) return;
 			MatrixType fullm2;

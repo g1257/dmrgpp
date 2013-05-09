@@ -94,9 +94,9 @@ public:
 	GenGroup(const BasisType& qvals)
 	{
 		if (qvals.size()<2) {
-			std::string s(__FILE__);
+			PsimagLite::String s(__FILE__);
 			s += " qvals must have more than one element\n";
-			throw std::runtime_error(s.c_str());
+			throw PsimagLite::RuntimeError(s.c_str());
 		}
 		assert(qvals.size()>1);
 		istart_.push_back(0);

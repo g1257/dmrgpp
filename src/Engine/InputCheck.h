@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef INPUT_CHECK_H
 #define INPUT_CHECK_H
 #include <vector>
-#include <string>
+#include "String.h"
 #include <stdexcept>
 #include "Options.h"
 
@@ -98,7 +98,7 @@ namespace Dmrg {
 			if (optsReadable_!=0) delete optsReadable_;
 		}
 
-		bool check(const std::string& label,const PsimagLite::Vector<std::string>::Type& vec,size_t line) const
+		bool check(const PsimagLite::String& label,const PsimagLite::Vector<PsimagLite::String>::Type& vec,size_t line) const
 		{
 			if (label=="JMVALUES") {
 				if (vec.size()!=2) return error1("JMVALUES",line);
@@ -121,10 +121,10 @@ namespace Dmrg {
 			return false;
 		}
 
-		void check(const std::string& label,const std::string& val,size_t line)
+		void check(const PsimagLite::String& label,const PsimagLite::String& val,size_t line)
 		{
 			if (label!="SolverOptions") return;
-			PsimagLite::Vector<std::string>::Type registerOpts;
+			PsimagLite::Vector<PsimagLite::String>::Type registerOpts;
 
 			registerOpts.push_back("restart");
 			registerOpts.push_back("debugmatrix");
@@ -152,7 +152,7 @@ namespace Dmrg {
 			optsReadable_ = new  OptionsReadableType(optWriteable,val);
 		}
 
-		bool isSet(const std::string& thisOption) const
+		bool isSet(const PsimagLite::String& thisOption) const
 		{
 			return optsReadable_->isSet(thisOption);
 		}
@@ -161,25 +161,25 @@ namespace Dmrg {
 		{
 			if (nthreads==1) return;
 
-			std::string message1(__FILE__);
+			PsimagLite::String message1(__FILE__);
 			message1 += " FATAL: You are requesting nthreads>0 but you did not compile with USE_PTHREADS enabled\n";
 			message1 += " Either set Threads=1 in the input file (you won't have threads though) or\n";
 			message1 += " add -DUSE_PTHREADS to the CPP_FLAGS in your Makefile and recompile\n";
-			throw std::runtime_error(message1.c_str());
+			throw PsimagLite::RuntimeError(message1.c_str());
 		}
 
-		void usageMain(const std::string& name) const
+		void usageMain(const PsimagLite::String& name) const
 		{
 			std::cerr<<"USAGE is "<<name<<"\n";
 		}
 
 	private:
 
-		bool error1(const std::string& message,size_t line) const
+		bool error1(const PsimagLite::String& message,size_t line) const
 		{
-			std::string s(__FILE__);
+			PsimagLite::String s(__FILE__);
 			s += " : Input error for label " + message + " near line " + ttos(line) + "\n";
-			throw std::runtime_error(s.c_str());
+			throw PsimagLite::RuntimeError(s.c_str());
 
 		}
 

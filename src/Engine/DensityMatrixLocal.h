@@ -149,7 +149,7 @@ namespace Dmrg {
 		{
 			typedef ParallelDensityMatrix<RealType,BlockMatrixType,DmrgBasisWithOperatorsType,TargettingType> ParallelDensityMatrixType;
 			{
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Init partition for all targets";
 				progress_.printline(msg,std::cout);
 			}
@@ -177,7 +177,7 @@ namespace Dmrg {
 					PTHREADS_NAME<ParallelDensityMatrixType> threadedDm;
 					PTHREADS_NAME<ParallelDensityMatrixType>::setThreads(target.model().params().nthreads);
 					if (threadedDm.name()=="pthreads") {
-						std::ostringstream msg;
+						PsimagLite::OstringStream msg;
 						msg<<"Threading with "<<threadedDm.threads();
 						progress_.printline(msg,std::cout);
 					}
@@ -194,7 +194,7 @@ namespace Dmrg {
 				data_.setBlock(m,pBasis.partition(m),matrixBlock);
 			}
 			{
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Done with init partition";
 				progress_.printline(msg,std::cout);
 			}

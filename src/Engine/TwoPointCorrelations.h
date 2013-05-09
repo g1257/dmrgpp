@@ -228,7 +228,7 @@ namespace Dmrg {
 			size_t threadId)
 		{
 			
-			if (i>=j) throw std::runtime_error(
+			if (i>=j) throw PsimagLite::RuntimeError(
 					"Observer::calcCorrelation_(...): i must be smaller than j\n");
 			MatrixType O1m,O2m;
 			skeleton_.createWithModification(O1m,O1,'n');

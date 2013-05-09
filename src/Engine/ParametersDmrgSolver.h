@@ -152,8 +152,8 @@ namespace Dmrg {
 	//!PTEX_LABEL{139}
 	inline void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,size_t totalSites)
 	{
-		std::string s = "checkFiniteLoops: I'm falling out of the lattice ";
-		std::string loops = "";
+		PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
+		PsimagLite::String loops = "";
 		int x = totalSites/2-1; // must be signed
 		if (finiteLoop[0].stepLength<0) x++;
 		int prevDeltaSign = 1;
@@ -164,16 +164,16 @@ namespace Dmrg {
 				s = "Error for finite loop number " + ttos(i) + "\n";
 				s += "Once you say 1 on a finite loop, then all";
 				s += " finite loops that follow must have 1.";
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 			if (sopt == 0 && thisSaveOption ==1) {
 				sopt = 1;
 				if (size_t(x) != 1 && size_t(x)!=totalSites-2) {
-					s = __FILE__ + std::string(": FATAL: for finite loop number ")
+					s = __FILE__ + PsimagLite::String(": FATAL: for finite loop number ")
 						+ ttos(i) + "\n";
 					s += "Saving finite loops must start at the left or";
 					s += " right end of the lattice\n";
-					throw std::runtime_error(s.c_str());
+					throw PsimagLite::RuntimeError(s.c_str());
 				}
 			}
 			// naive location:
@@ -202,7 +202,7 @@ namespace Dmrg {
 				s =s + "x=" + ttos(x) + " last delta=" +
 						ttos(delta);
 				s =s + " sites=" + ttos(totalSites);
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 		}
 			
@@ -226,7 +226,7 @@ namespace Dmrg {
 
 	struct DmrgCheckPoint {
 		bool enabled;
-		std::string filename;
+		PsimagLite::String filename;
 	};
 
 	std::istream &operator>>(std::istream& is,DmrgCheckPoint& c)
@@ -282,12 +282,12 @@ namespace Dmrg {
 	template<typename FieldType,typename InputValidatorType>
 	struct ParametersDmrgSolver {
 
-		std::string filename;
+		PsimagLite::String filename;
 		size_t keptStatesInfinite;
 		typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
-		std::string version;
-		std::string options;
-		std::string model;
+		PsimagLite::String version;
+		PsimagLite::String options;
+		PsimagLite::String model;
 		typename PsimagLite::Vector<FieldType>::Type targetQuantumNumbers;
 		size_t electronsUp,electronsDown;
 		typename PsimagLite::Vector<size_t>::Type adjustQuantumNumbers;
@@ -295,8 +295,8 @@ namespace Dmrg {
 		DmrgCheckPoint checkpoint;
 		size_t nthreads;
 		int useReflectionSymmetry;
-		std::string fileForDensityMatrixEigs;
-		std::string insitu;
+		PsimagLite::String fileForDensityMatrixEigs;
+		PsimagLite::String insitu;
 		size_t lanczosSteps;
 		FieldType lanczosEps;
 		size_t sitesPerBlock;
@@ -336,16 +336,16 @@ namespace Dmrg {
 			}  catch (std::exception& e) {}
 
 			if (upToFl>=finiteLoop.size()) {
-				std::string s (__FILE__);
+				PsimagLite::String s (__FILE__);
 				s += "\nFATAL: RepeatFiniteLoopsTo=" + ttos(upToFl) + " is larger than current finite loops\n";
 				s += "\nMaximum is " + ttos(finiteLoop.size())+ "\n";
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 			if (fromFl>upToFl) {
-				std::string s (__FILE__);
+				PsimagLite::String s (__FILE__);
 				s += "\nFATAL: RepeatFiniteLoopsFrom=" + ttos(fromFl) + " is larger than RepeatFiniteLoopsTo\n";
 				s += "\nMaximum is " + ttos(upToFl)+ "\n";
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 			upToFl++;
 
@@ -356,8 +356,8 @@ namespace Dmrg {
 				}
 			}
 
-			if (options.find("hasQuantumNumbers")!=std::string::npos) {
-				std::string s = "*** WARNING: hasQuantumNumbers ";
+			if (options.find("hasQuantumNumbers")!=PsimagLite::String::npos) {
+				PsimagLite::String s = "*** WARNING: hasQuantumNumbers ";
 				s += "option is obsolete in input file\n";
 				std::cerr<<s;
 			}
@@ -373,23 +373,23 @@ namespace Dmrg {
 			} catch (std::exception& e) {}
 
 			if (hasElectrons && targetQuantumNumbers.size()>0) {
-				std::string s (__FILE__);
+				PsimagLite::String s (__FILE__);
 				s += "\nFATAL: Specifying both TargetElectronsUp/Down and TargetQuantumNumbers is an error.";
 				s += "\nSpecify one or the other only.\n";
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 
 			if (!hasElectrons && targetQuantumNumbers.size()==0) {
-				std::string s (__FILE__);
+				PsimagLite::String s (__FILE__);
 				s += "\nFATAL: Either TargetElectronsUp/Down or TargetQuantumNumbers must be specified.\n";
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 
-			if (options.find("useSu2Symmetry")!=std::string::npos && hasElectrons) {
-				std::string s (__FILE__);
+			if (options.find("useSu2Symmetry")!=PsimagLite::String::npos && hasElectrons) {
+				PsimagLite::String s (__FILE__);
 				s += "\nFATAL: TargetElectronsUp/Down cannot be specified while using SU(2) symmetry\n";
 				s += "\nTargetQuantumNumbers must be specified instead.\n";
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 
 			try {
@@ -401,9 +401,9 @@ namespace Dmrg {
 				io.readline(tolerance,"TruncationTolerance=");
 			} catch (std::exception& e) {}
 
-			if (options.find("checkpoint")!=std::string::npos)
+			if (options.find("checkpoint")!=PsimagLite::String::npos)
 				io.readline(checkpoint.filename,"CheckpointFilename=");
-			else if (options.find("restart")!=std::string::npos)
+			else if (options.find("restart")!=PsimagLite::String::npos)
 				io.readline(checkpoint.filename,"RestartFilename=");
 
 			nthreads=1; // provide a default value
@@ -412,9 +412,9 @@ namespace Dmrg {
 			} catch (std::exception& e) {}
 
 			if (nthreads==0) {
-				std::string s (__FILE__);
+				PsimagLite::String s (__FILE__);
 				s += "\nFATAL: nthreads cannot be zero\n";
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 
 			useReflectionSymmetry=0;

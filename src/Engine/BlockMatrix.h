@@ -212,7 +212,7 @@ namespace Dmrg {
 				accumulate(C.data_[i],B.data_[counter++]);
 				if (counter>=B.offsets_.size()) break;
 			}
-			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1) throw std::runtime_error("operatorPlus: restriction not met.\n");	
+			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1) throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");	
 		}
 	}
 
@@ -228,7 +228,7 @@ namespace Dmrg {
 				accumulate(A.data_[i],B.data_[counter++]);
 				if (counter>=B.offsets_.size()) break;
 			}
-			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1) throw std::runtime_error("operatorPlus: restriction not met.\n");	
+			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1) throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");	
 		}
 	 	
 	}

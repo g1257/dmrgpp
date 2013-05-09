@@ -1,5 +1,5 @@
-#include <string>
-const std::string license=
+#include "String.h"
+const PsimagLite::String license=
 "Copyright (c) 2009-2012 , UT-Battelle, LLC\n"
 "All rights reserved\n"
 "\n"
@@ -110,7 +110,7 @@ void mainLoop2(GeometryType& geometry,
 	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,
 			     PTHREADS_NAME,ParametersDmrgSolverType> ModelFactoryType;
 
-	if (dmrgSolverParams.options.find("ChebyshevSolver")!=std::string::npos) {
+	if (dmrgSolverParams.options.find("ChebyshevSolver")!=PsimagLite::String::npos) {
 		typedef TargettingTemplate<PsimagLite::ChebyshevSolver,
 					   InternalProductTemplate,
 					   WaveFunctionTransfFactory,
@@ -148,13 +148,13 @@ void mainLoop(GeometryType& geometry,
               ConcurrencyType& concurrency,
 	      InputNgType::Readable& io)
 {
-	if (dmrgSolverParams.options.find("InternalProductStored")!=std::string::npos) {
+	if (dmrgSolverParams.options.find("InternalProductStored")!=PsimagLite::String::npos) {
 		mainLoop2<ModelHelperTemplate,
 		         InternalProductStored,
 		         VectorWithOffsetTemplate,
 		         TargettingTemplate,
 		         MySparseMatrix>(geometry,dmrgSolverParams,concurrency,io);
-	} else if (dmrgSolverParams.options.find("InternalProductKron")!=std::string::npos) {
+	} else if (dmrgSolverParams.options.find("InternalProductKron")!=PsimagLite::String::npos) {
 		mainLoop2<ModelHelperTemplate,
 			 InternalProductKron,
 			 VectorWithOffsetTemplate,
@@ -172,11 +172,11 @@ void mainLoop(GeometryType& geometry,
 int main(int argc,char *argv[])
 {
 	InputCheck inputCheck;
-	std::string filename="";
+	PsimagLite::String filename="";
 	int opt = 0;
-	std::string strUsage(argv[0]);
+	PsimagLite::String strUsage(argv[0]);
 	strUsage += " -f filename";
-	std::string insitu("");
+	PsimagLite::String insitu("");
 	while ((opt = getopt(argc, argv,"f:o:")) != -1) {
 		switch (opt) {
 		case 'f':
@@ -226,15 +226,15 @@ int main(int argc,char *argv[])
 #endif
 
 	bool su2=false;
-	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;
-	std::string targetting="GroundStateTargetting";
+	if (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos) su2=true;
+	PsimagLite::String targetting="GroundStateTargetting";
 	const char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
                      "CorrectionVectorTargetting","CorrectionTargetting","MettsTargetting"};
 	size_t totalTargets = 6;
 	for (size_t i = 0;i<totalTargets;++i)
-		if (dmrgSolverParams.options.find(targets[i])!=std::string::npos) targetting=targets[i];
+		if (dmrgSolverParams.options.find(targets[i])!=PsimagLite::String::npos) targetting=targets[i];
 
-	if (targetting!="GroundStateTargetting" && su2) throw std::runtime_error("SU(2)"
+	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
  		" supports only GroundStateTargetting for now (sorry!)\n");
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 

@@ -169,11 +169,11 @@ namespace Dmrg {
 			if (i==0) return;
 			for (size_t j=0;j<i;j++) {
 				if (stage[j] == DISABLED) {
-					std::string s ="TST:: Seeing dynamic site "+ttos(tstStruct_.sites[i]);
+					PsimagLite::String s ="TST:: Seeing dynamic site "+ttos(tstStruct_.sites[i]);
 					s =s + " before having seen";
 					s = s + " site "+ttos(j);
 					s = s +". Please order your dynamic sites in order of appearance.\n";
-					throw std::runtime_error(s);
+					throw PsimagLite::RuntimeError(s);
 				}
 			}
 		}
@@ -192,7 +192,7 @@ namespace Dmrg {
 			return true;
 		}
 
-		std::string getStage(size_t i,const typename PsimagLite::Vector<size_t>::Type& stage) const
+		PsimagLite::String getStage(size_t i,const typename PsimagLite::Vector<size_t>::Type& stage) const
 		{
 			switch (stage[i]) {
 			case DISABLED:
@@ -238,7 +238,7 @@ namespace Dmrg {
 			model_.findElectrons(electrons,basis,site);
 		}
 
-		void noCocoon(const std::string& msg) const
+		void noCocoon(const PsimagLite::String& msg) const
 		{
 			std::cout<<"-------------&*&*&* In-situ measurements start\n";
 			std::cout<<"----- NO IN-SITU MEAS. POSSIBLE, reason="<<msg<<"\n";
@@ -255,16 +255,16 @@ namespace Dmrg {
 
 			std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-			typename PsimagLite::Vector<std::string>::Type vecStr;
+			typename PsimagLite::Vector<PsimagLite::String>::Type vecStr;
 			PsimagLite::tokenizer(model_.params().insitu,vecStr,",");
 			for (size_t i=0;i<vecStr.size();i++) {
-				const std::string& opLabel = vecStr[i];
+				const PsimagLite::String& opLabel = vecStr[i];
 				OperatorType nup;
 				if (!fillOperatorFromFile(nup,opLabel)) {
 					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator(opLabel,site,0));
 					nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
 				}
-				std::string tmpStr = "<PSI|" + opLabel + "|PSI>";
+				PsimagLite::String tmpStr = "<PSI|" + opLabel + "|PSI>";
 				test(psi,psi,direction,tmpStr,site,nup);
 			}
 
@@ -308,7 +308,7 @@ namespace Dmrg {
 		void test(const VectorWithOffsetType& src1,
 				  const VectorWithOffsetType& src2,
 				  size_t systemOrEnviron,
-				  const std::string& label,
+				  const PsimagLite::String& label,
 				  size_t site,
 				  const OperatorType& A) const
 		{
@@ -325,7 +325,7 @@ namespace Dmrg {
 				for (size_t jj=0;jj<src2.sectors();jj++) {
 					size_t j = src2.sector(jj);
 					size_t offset2 = src2.offset(j);
-					if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+					if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
 					for (size_t k=0;k<dest.effectiveSize(i);k++)
 						sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
 				}
@@ -334,15 +334,15 @@ namespace Dmrg {
 			std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 		}
 
-		bool fillOperatorFromFile(OperatorType& nup,const std::string& label2) const
+		bool fillOperatorFromFile(OperatorType& nup,const PsimagLite::String& label2) const
 		{
 			if (label2.length()<2 || label2[0]!=':') return false;
-			std::string label = label2.substr(1,label2.length()-1);
+			PsimagLite::String label = label2.substr(1,label2.length()-1);
 
 			std::ifstream fin(label.c_str());
 			if (!fin || fin.bad() || !fin.good()) return false;
 
-			std::string line1("");
+			PsimagLite::String line1("");
 			fin>>line1;
 			if (fin.eof() || line1!="TSPOperator=raw") return false;
 
@@ -354,7 +354,7 @@ namespace Dmrg {
 			fin>>line1;
 			if (fin.eof()) return false;
 
-			std::string line2("");
+			PsimagLite::String line2("");
 			fin>>line2;
 			if (fin.eof()) return false;
 

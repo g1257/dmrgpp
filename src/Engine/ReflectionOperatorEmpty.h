@@ -107,7 +107,7 @@ public:
 		: lrs_(lrs)
 	{
 		assert(!isEnabled);
-		if (isEnabled) throw std::runtime_error("ReflectionOperatorEmpty\n");
+		if (isEnabled) throw PsimagLite::RuntimeError("ReflectionOperatorEmpty\n");
 	}
 
 	void update(const typename PsimagLite::Vector<size_t>::Type& sectors)

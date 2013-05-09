@@ -118,9 +118,9 @@ namespace Dmrg {
 			size_t threadId) const
 		{
 			if (i1>i2 || i3>i4)
-				throw std::runtime_error("calcCorrelation: FourPoint needs ordered points\n");
+				throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs ordered points\n");
 			if (i1==i2 || i3==i4)
-				throw std::runtime_error("calcCorrelation: FourPoint needs distinct points\n");
+				throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
 
 			MatrixType O2gt;
 

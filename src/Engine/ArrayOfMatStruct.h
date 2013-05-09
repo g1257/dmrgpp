@@ -166,12 +166,12 @@ private:
 
 //	ArrayOfMatStruct& operator=(ArrayOfMatStruct& other)
 //	{
-//		throw std::runtime_error("operator= is disabled\n");
+//		throw PsimagLite::RuntimeError("operator= is disabled\n");
 //	}
 
 //	ArrayOfMatStruct(ArrayOfMatStruct& other)
 //	{
-//		throw std::runtime_error("copy ctor is disabled\n");
+//		throw PsimagLite::RuntimeError("copy ctor is disabled\n");
 //	}
 
 //	ArrayOfMatStruct(const ArrayOfMatStruct& other);

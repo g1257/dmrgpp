@@ -221,7 +221,7 @@ namespace Dmrg {
 		}
 
 		/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the unmangled (natural) basis of one-site */
-		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
 										  size_t site,
 										  size_t dof) const
 		{

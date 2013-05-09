@@ -130,11 +130,11 @@ namespace Dmrg {
 
 		enum {GROW_RIGHT,GROW_LEFT};
 
-		BasisWithOperators(const std::string& s) :BasisType(s),operators_(this) {}
+		BasisWithOperators(const PsimagLite::String& s) :BasisType(s),operators_(this) {}
 
 		template<typename IoInputter>
 		BasisWithOperators(IoInputter& io,
-		                   const std::string& ss,
+		                   const PsimagLite::String& ss,
 		                   size_t counter=0)
 		: BasisType(io,ss,counter),operators_(io,0,this)
 		{
@@ -267,7 +267,7 @@ namespace Dmrg {
 				operatorsPerSite_.push_back(size_t(ops.size()/block.size()));
 		}
 
-// 		void getOperatorByIndex(std::string& s,int i) const
+// 		void getOperatorByIndex(PsimagLite::String& s,int i) const
 // 		{
 // 			operators_.getOperatorByIndex(i);
 // 		}
@@ -304,7 +304,7 @@ namespace Dmrg {
 // 			return operators_.getOperator(i,sigma);
 // 		}
 
-// 		const OperatorType& getOperator(const std::string& s,int i) const
+// 		const OperatorType& getOperator(const PsimagLite::String& s,int i) const
 // 		{
 // 			return operators_.getOperator(s,i);
 // 		}
@@ -323,7 +323,7 @@ namespace Dmrg {
 		}
 
 		template<typename IoOutputter>
-		void save(IoOutputter& io,const std::string& s) const
+		void save(IoOutputter& io,const PsimagLite::String& s) const
 		{
 			BasisType::save(io,s); // parent saves
 			operators_.save(io,s);
@@ -371,7 +371,7 @@ namespace Dmrg {
 	std::ostream& operator<<(std::ostream& os,
 	                         const BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
 	{
-		throw std::runtime_error("Unimplemented <<\n");
+		throw PsimagLite::RuntimeError("Unimplemented <<\n");
 		return os;
 	}
 
@@ -379,7 +379,7 @@ namespace Dmrg {
 	std::istream& operator>>(std::istream& is,
 	                         BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
 	{
-		throw std::runtime_error("Unimplemented >>\n");
+		throw PsimagLite::RuntimeError("Unimplemented >>\n");
 		return is;
 	}
 } // namespace Dmrg

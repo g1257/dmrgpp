@@ -94,13 +94,13 @@ class PreOperatorSiteIndependent  : public PreOperatorBase<ModelType> {
 
 public:
 
-	PreOperatorSiteIndependent(const OperatorType& m,const std::string& str,size_t threadId)
+	PreOperatorSiteIndependent(const OperatorType& m,const PsimagLite::String& str,size_t threadId)
 		: m_(m),str_(str),threadId_(threadId)
 	{}
 
 	virtual OperatorType operator()(size_t site) const { return m_; }
 
-	virtual std::string label() const { return str_; }
+	virtual PsimagLite::String label() const { return str_; }
 
 	virtual size_t threadId() const { return threadId_; }
 
@@ -111,7 +111,7 @@ public:
 private:
 
 	const OperatorType& m_;
-	std::string str_;
+	PsimagLite::String str_;
 	size_t threadId_;
 };     //class PreOperatorSiteIndependent
 } // namespace Dmrg

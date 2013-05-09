@@ -175,7 +175,7 @@ namespace Dmrg {
 		  modelImmm_(0),
 		  modelTj1Orb_(0)
 		{
-			std::string name = params.model;
+			PsimagLite::String name = params.model;
 			if (name=="HubbardOneBand") {
 				modelHubbard_ = new ModelHubbardType(io,geometry,concurrency);
 				ModelHubbardType::ParallelConnectionsType::setThreads(params.nthreads);
@@ -212,9 +212,9 @@ namespace Dmrg {
 				model_=TJ_1ORB;
 				init(modelTj1Orb_);
 			} else {
-				std::string s(__FILE__);
+				PsimagLite::String s(__FILE__);
 				s += " Unknown model " + name + "\n";
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 		}
 
@@ -275,7 +275,7 @@ namespace Dmrg {
 			}
 		}
 
-		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
 								      size_t site,
 								      size_t dof) const
 		{
@@ -296,7 +296,7 @@ namespace Dmrg {
 				return modelTj1Orb_->naturalOperator(what,site,dof);
 			}
 			std::cerr<<__FILE__<<" Unknown model "<<model_<<"\n";
-			throw std::runtime_error("naturalOperator\n");
+			throw PsimagLite::RuntimeError("naturalOperator\n");
 		}
 
 		void findElectrons(typename PsimagLite::Vector<size_t> ::Type&electrons,
@@ -482,7 +482,7 @@ namespace Dmrg {
 //			return geometry_.maxConnections();
 //		}
 
-//		const std::string& name() const
+//		const PsimagLite::String& name() const
 //		{
 //			return params_.model;
 //		}
@@ -505,7 +505,7 @@ namespace Dmrg {
 			case TJ_1ORB:
 				return getLinkProductStruct2<Tj1OrbType>(lps,modelHelper);
 			}
-			throw std::runtime_error("getLinkProductStruct(...) failed\n");
+			throw PsimagLite::RuntimeError("getLinkProductStruct(...) failed\n");
 			return 0;
 		}
 
@@ -531,7 +531,7 @@ namespace Dmrg {
 			case TJ_1ORB:
 				return getConnection2<Tj1OrbType>(A,B,ix,lps,modelHelper);
 			}
-			throw std::runtime_error("getConnection(...) failed\n");
+			throw PsimagLite::RuntimeError("getConnection(...) failed\n");
 		}
 
 		void findElectronsOfOneSite(typename PsimagLite::Vector<size_t>::Type& electrons,size_t site) const
@@ -593,7 +593,7 @@ namespace Dmrg {
 				//			case IMMM:
 				//				return modelImmm_->calcHamiltonian(hmatrix,cm,block,time);
 			}
-			throw std::runtime_error("calcHamiltonian\n");
+			throw PsimagLite::RuntimeError("calcHamiltonian\n");
 		}
 
 	private:

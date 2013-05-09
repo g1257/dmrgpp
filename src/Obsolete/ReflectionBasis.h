@@ -287,7 +287,7 @@ private:
 		setDiagonal(R1_,dr,1.0);
 		setDiagonal(Rm_,dr,-1.0);
 
-		std::ostringstream msg2;
+		PsimagLite::OstringStream msg2;
 		msg2<<"needs extra churn, iavail="<<iavail.size();
 		progress_.printline(msg2,std::cout);
 
@@ -299,7 +299,7 @@ private:
 			if (doneOneSector(i,j,R1_,1.0,reflectionT)) break;
 			if (doneOneSector(i,j,Rm_,-1.0,reflectionT)) break;
 		}
-		std::ostringstream msg;
+		PsimagLite::OstringStream msg;
 		msg<<"R1.rank="<<R1_.rank()<<" Rm.rank="<<Rm_.rank();
 		progress_.printline(msg,std::cout);
 	}
@@ -428,7 +428,7 @@ private:
 //				ComplexOrRealType val = reflection_.getValue(k);
 //				if (isAlmostZero(val,1e-6)) continue;
 //				size_t col = reflection_.getCol(k);
-//				if (col>=T1w.size()) throw std::runtime_error("setT1w\n");
+//				if (col>=T1w.size()) throw PsimagLite::RuntimeError("setT1w\n");
 //				//if (col==i) val += sector;
 //				val *= sector;
 //				T1w[col] += val*w[ii];

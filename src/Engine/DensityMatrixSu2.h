@@ -239,7 +239,7 @@ namespace Dmrg {
 				size_t ne1 = pBasis.electrons(pBasis.partition(m));
 				if (jm1.first==jm2.first && jm1.first==jm1.second && ne1==ne2) return m;
 			}
-			throw std::runtime_error("	findMaximalPartition : none found\n");
+			throw PsimagLite::RuntimeError("	findMaximalPartition : none found\n");
 		}
 
 		//! only used for debugging
@@ -258,7 +258,7 @@ namespace Dmrg {
 						
 //						if (!almostEqual(data_(m),data_(p))) {
 //							std::cerr<<"Checking m="<<m<<" against p="<<p<<"\n";
-//							throw std::runtime_error("error\n");
+//							throw PsimagLite::RuntimeError("error\n");
 //						}
 //					}
 //				}
@@ -330,13 +330,13 @@ namespace Dmrg {
 				std::cerr<<"row size different "<<bp1.n_row()<<"!="<<bp2.n_row()<<"\n";
 				std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
 				std::cerr<<data_<<"\n";
-				throw std::runtime_error("Density Matrix Check: failed\n");
+				throw PsimagLite::RuntimeError("Density Matrix Check: failed\n");
 			}
 			if (bp1.n_col()!=bp2.n_col()) {
 				std::cerr<<"col size different "<<bp1.n_col()<<"!="<<bp2.n_col()<<"\n";
 				std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
 				std::cerr<<data_<<"\n";
-				throw std::runtime_error("Density Matrix Check: failed\n");
+				throw PsimagLite::RuntimeError("Density Matrix Check: failed\n");
 			}
 			if (!debug_) return;
 
@@ -349,7 +349,7 @@ namespace Dmrg {
 						std::cerr<<data_(p1)<<"\n";
 						std::cerr<<"******************\n";
 						std::cerr<<data_(p2)<<"\n";
-						throw std::runtime_error("Density Matrix Check: failed (differ)\n");
+						throw PsimagLite::RuntimeError("Density Matrix Check: failed (differ)\n");
 					}
 				}
 			}
@@ -365,7 +365,7 @@ namespace Dmrg {
 			if (!PsimagLite::isTheIdentity(result)) {
 				//utils::matrixPrint(result,std::cerr);
 				std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
-				throw std::runtime_error("Density Matrix Check2: failed\n");
+				throw PsimagLite::RuntimeError("Density Matrix Check2: failed\n");
 			}
 					
 		}

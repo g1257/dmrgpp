@@ -98,21 +98,21 @@ namespace Dmrg {
 		typedef std::stack<BasisWithOperatorsType> MemoryStackType;
 		typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
 
-		const std::string SYSTEM_STACK_STRING;
-		const std::string ENVIRON_STACK_STRING;
+		const PsimagLite::String SYSTEM_STACK_STRING;
+		const PsimagLite::String ENVIRON_STACK_STRING;
 
 		Checkpoint(const ParametersType& parameters,size_t rank = 0,bool debug=false) :
 			SYSTEM_STACK_STRING("SystemStack"),
 			ENVIRON_STACK_STRING("EnvironStack"),
 			parameters_(parameters),
-			enabled_(parameters_.options.find("checkpoint")!=std::string::npos || parameters_.options.find("restart")!=std::string::npos),
+			enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos || parameters_.options.find("restart")!=PsimagLite::String::npos),
 			systemDisk_(SYSTEM_STACK_STRING+parameters_.checkpoint.filename , SYSTEM_STACK_STRING+parameters_.filename,enabled_,rank),
 			envDisk_(ENVIRON_STACK_STRING+parameters_.checkpoint.filename , ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank),
 			progress_("Checkpoint",rank)
 		{
 			if (!enabled_) return;
 			if (parameters_.checkpoint.filename == parameters_.filename) {
-				throw std::runtime_error("Checkpoint::ctor(...): "
+				throw PsimagLite::RuntimeError("Checkpoint::ctor(...): "
 						"this run will overwrite previous, throwing\n");
 			}
 			loadStacksDiskToMemory();
@@ -126,7 +126,7 @@ namespace Dmrg {
 		// Not related to stacks
 		void save(const BasisWithOperatorsType &pS,const BasisWithOperatorsType &pE,typename IoType::Out& io) const
 		{
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Saving pS and pE...";
 			progress_.printline(msg,std::cout);
 			pS.save(io,"#CHKPOINTSYSTEM");
@@ -141,7 +141,7 @@ namespace Dmrg {
 			size_t loop = ioTmp.count("#NAME=#CHKPOINTSYSTEM");
 			if (loop<1) {
 				std::cerr<<"There are no resumable loops in file "<<parameters_.checkpoint.filename<<"\n";
-				throw std::runtime_error("Checkpoint::load(...)\n");
+				throw PsimagLite::RuntimeError("Checkpoint::load(...)\n");
 			}
 			loop--;
 			BasisWithOperatorsType pS1(ioTmp,"#CHKPOINTSYSTEM",loop);
@@ -191,7 +191,7 @@ namespace Dmrg {
 
 		void loadStacksDiskToMemory()
 		{
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Loading sys. and env. stacks from disk...";
 			progress_.printline(msg,std::cout);
 
@@ -201,7 +201,7 @@ namespace Dmrg {
 
 		void loadStacksMemoryToDisk()
 		{
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Writing sys. and env. stacks to disk...";
 			progress_.printline(msg,std::cout);
 			loadStack(systemDisk_,systemStack_);
@@ -222,12 +222,12 @@ namespace Dmrg {
 		//! Move elsewhere
 		//! returns s1+s2 if s2 has no '/',
 		//! if s2 = s2a + '/' + s2b return s2a + '/' + s1 + s2b
-		std::string appendWithDir(const std::string& s1,const std::string& s2) const
+		PsimagLite::String appendWithDir(const PsimagLite::String& s1,const PsimagLite::String& s2) const
 		{
 			size_t x = s2.find("/");
-			if (x==std::string::npos) return s1 + s2;
-			std::string suf = s2.substr(x+1,s2.length());
-			std::string dir = s2.substr(0,s2.length()-suf.length());
+			if (x==PsimagLite::String::npos) return s1 + s2;
+			PsimagLite::String suf = s2.substr(x+1,s2.length());
+			PsimagLite::String dir = s2.substr(0,s2.length()-suf.length());
 			return dir + s1 + suf;
 		}
 

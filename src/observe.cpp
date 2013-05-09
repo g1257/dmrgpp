@@ -1,5 +1,5 @@
-#include <string>
-const std::string license=
+#include "String.h"
+const PsimagLite::String license=
 "Copyright (c) 2009-2012 , UT-Battelle, LLC\n"
 "All rights reserved\n"
 "\n"
@@ -64,16 +64,16 @@ typedef ParametersDmrgSolver<RealType,InputNgType::Readable> DmrgSolverParameter
 template<typename ModelType>
 size_t dofsFromModelName(const ModelType& model)
 {
-	const std::string& modelName = model.params().model;
+	const PsimagLite::String& modelName = model.params().model;
 	size_t site = 0; // FIXME : account for Hilbert spaces changing with site
 	size_t dofs = size_t(log(model.hilbertSize(site))/log(2.0));
 	std::cerr<<"DOFS= "<<dofs<<" <------------------------------------\n";
-	if (modelName.find("FeAsBasedSc")!=std::string::npos) return dofs;
-	if (modelName.find("FeAsBasedScExtended")!=std::string::npos) return dofs;
-	if (modelName.find("HubbardOneBand")!=std::string::npos) return dofs;
+	if (modelName.find("FeAsBasedSc")!=PsimagLite::String::npos) return dofs;
+	if (modelName.find("FeAsBasedScExtended")!=PsimagLite::String::npos) return dofs;
+	if (modelName.find("HubbardOneBand")!=PsimagLite::String::npos) return dofs;
 
 	// max number here, site dependence taken into account elsewhere
-	if (modelName.find("Immm")!=std::string::npos) return 4;
+	if (modelName.find("Immm")!=PsimagLite::String::npos) return 4;
 	return 0;
 }
 
@@ -82,7 +82,7 @@ bool observeOneFullSweep(
 	IoInputType& io,
 	const GeometryType& geometry,
 	const ModelType& model,
-	const std::string& obsOptions,
+	const PsimagLite::String& obsOptions,
 	bool hasTimeEvolution,
 	ConcurrencyType& concurrency)
 {
@@ -92,79 +92,79 @@ bool observeOneFullSweep(
 		ObserverType;
 	typedef ObservableLibrary<ObserverType,TargettingType> ObservableLibraryType;
 	size_t n  = geometry.numberOfSites();
-	//std::string sSweeps = "sweeps=";
-	//std::string::size_type begin = obsOptions.find(sSweeps);
-	//if (begin != std::string::npos) {
-	//	std::string sTmp = obsOptions.substr(begin+sSweeps.length(),std::string::npos);
+	//PsimagLite::String sSweeps = "sweeps=";
+	//PsimagLite::String::size_type begin = obsOptions.find(sSweeps);
+	//if (begin != PsimagLite::String::npos) {
+	//	PsimagLite::String sTmp = obsOptions.substr(begin+sSweeps.length(),PsimagLite::String::npos);
 		//std::cout<<"sTmp="<<sTmp<<"\n";
 	//	n = atoi(sTmp.c_str());
 	//}
 	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,concurrency,verbose);
 	
 	bool ot = false;
-	if (obsOptions.find("ot")!=std::string::npos || obsOptions.find("time")!=std::string::npos) ot = true;
+	if (obsOptions.find("ot")!=PsimagLite::String::npos || obsOptions.find("time")!=PsimagLite::String::npos) ot = true;
 	if (hasTimeEvolution && ot) {
 		observerLib.measureTime("superDensity");
 		observerLib.measureTime("nupNdown");
 		observerLib.measureTime("nup+ndown");
-		if (obsOptions.find("sz")!=std::string::npos) observerLib.measureTime("sz");
+		if (obsOptions.find("sz")!=PsimagLite::String::npos) observerLib.measureTime("sz");
 	}
 
 	if (hasTimeEvolution) observerLib.setBrackets("time","time");
 
-	const std::string& modelName = model.params().model;
+	const PsimagLite::String& modelName = model.params().model;
 	size_t rows = n; // could be n/2 if there's enough symmetry
 
 	// Immm supports only onepoint:
 	if (modelName=="Immm" && obsOptions!="onepoint") {
-		std::string str(__FILE__);
+		PsimagLite::String str(__FILE__);
 		str += " "  + ttos(__LINE__) + "\n";
 		str += "Model Immm only supports onepoint\n";
-		throw std::runtime_error(str.c_str());
+		throw PsimagLite::RuntimeError(str.c_str());
 	}
 
 	size_t numberOfDofs = dofsFromModelName(model);
 
-	if (!hasTimeEvolution && obsOptions.find("onepoint")!=std::string::npos) {
+	if (!hasTimeEvolution && obsOptions.find("onepoint")!=PsimagLite::String::npos) {
 		observerLib.measureTheOnePoints(numberOfDofs);
 	}
 
-	if (modelName.find("Heisenberg")==std::string::npos) {
-		if (obsOptions.find("cc")!=std::string::npos) {
+	if (modelName.find("Heisenberg")==PsimagLite::String::npos) {
+		if (obsOptions.find("cc")!=PsimagLite::String::npos) {
 			observerLib.measure("cc",rows,n);
 		}
 
-		if (obsOptions.find("nn")!=std::string::npos) {
+		if (obsOptions.find("nn")!=PsimagLite::String::npos) {
 			observerLib.measure("nn",rows,n);
 		}
 	}
-	if (obsOptions.find("szsz")!=std::string::npos) {
+	if (obsOptions.find("szsz")!=PsimagLite::String::npos) {
 		observerLib.measure("szsz",rows,n);
 	}
 
-	if (modelName.find("FeAsBasedSc")!=std::string::npos ||
-	    modelName.find("FeAsBasedScExtended")!=std::string::npos ||
-	    modelName.find("HubbardOneBand")!=std::string::npos) {
-		bool dd4 = (obsOptions.find("dd4")!=std::string::npos);
+	if (modelName.find("FeAsBasedSc")!=PsimagLite::String::npos ||
+	    modelName.find("FeAsBasedScExtended")!=PsimagLite::String::npos ||
+	    modelName.find("HubbardOneBand")!=PsimagLite::String::npos) {
+		bool dd4 = (obsOptions.find("dd4")!=PsimagLite::String::npos);
 
-		if (obsOptions.find("dd")!=std::string::npos && !dd4) { // &&
-			//geometry.label(0).find("ladder")!=std::string::npos) {
+		if (obsOptions.find("dd")!=PsimagLite::String::npos && !dd4) { // &&
+			//geometry.label(0).find("ladder")!=PsimagLite::String::npos) {
 			observerLib.measure("dd",rows,n);
 		}
 
 		// FOUR-POINT DELTA-DELTA^DAGGER:
-		if (dd4 && geometry.label(0).find("ladder")!=std::string::npos) {
+		if (dd4 && geometry.label(0).find("ladder")!=PsimagLite::String::npos) {
 			observerLib.measure("dd4",rows,n);
 		} // if dd4
 	}
 
-	if (obsOptions.find("s+s-")!=std::string::npos) {
+	if (obsOptions.find("s+s-")!=PsimagLite::String::npos) {
 		observerLib.measure("s+s-",rows,n);
 	}
-//	if (obsOptions.find("s-s+")!=std::string::npos) {
+//	if (obsOptions.find("s-s+")!=PsimagLite::String::npos) {
 //		observerLib.measure("s-s+",rows,n);
 //	}
-	if (obsOptions.find("ss")!=std::string::npos) {
+	if (obsOptions.find("ss")!=PsimagLite::String::npos) {
 		observerLib.measure("ss",rows,n);
 	}
 
@@ -180,11 +180,11 @@ template<template<typename,typename> class ModelHelperTemplate,
          template<typename> class> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop(GeometryType& geometry,
-              const std::string& targetting,
+              const PsimagLite::String& targetting,
               ConcurrencyType& concurrency,
 	      InputNgType::Readable& io,
 	      const DmrgSolverParametersType& params,
-              const std::string& obsOptions)
+              const PsimagLite::String& obsOptions)
 {
 	typedef Operator<RealType,MySparseMatrix> OperatorType;
 	typedef Basis<RealType,MySparseMatrix> BasisType;
@@ -213,7 +213,7 @@ void mainLoop(GeometryType& geometry,
 	TargettingParamsType tsp(io,model);
 	
 	bool moreData = true;
-	const std::string& datafile = params.filename;
+	const PsimagLite::String& datafile = params.filename;
 	IoInputType dataIo(datafile);
 	bool hasTimeEvolution = (targetting == "TimeStepTargetting" || targetting=="MettsTargetting") ? true : false;
 	while (moreData) {
@@ -240,8 +240,8 @@ int main(int argc,char *argv[])
 {
 	using namespace Dmrg;
 
-	std::string filename="";
-	std::string options = "";
+	PsimagLite::String filename="";
+	PsimagLite::String options = "";
 	int opt = 0;
 	while ((opt = getopt(argc, argv,"f:o:")) != -1) {
 		switch (opt) {
@@ -284,14 +284,14 @@ int main(int argc,char *argv[])
 
 
 	bool su2=false;
-	if (dmrgSolverParams.options.find("useSu2Symmetry")!=std::string::npos) su2=true;
-	std::string targetting="GroundStateTargetting";
+	if (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos) su2=true;
+	PsimagLite::String targetting="GroundStateTargetting";
 	const char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
                      "CorrectionVectorTargetting","CorrectionTargetting","MettsTargetting"};
 	size_t totalTargets = 6;
 	for (size_t i = 0;i<totalTargets;++i)
-		if (dmrgSolverParams.options.find(targets[i])!=std::string::npos) targetting=targets[i];
-	if (targetting!="GroundStateTargetting" && su2) throw std::runtime_error("SU(2)"
+		if (dmrgSolverParams.options.find(targets[i])!=PsimagLite::String::npos) targetting=targets[i];
+	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
  		" supports only GroundStateTargetting for now (sorry!)\n");
 	
 	if (su2) {

@@ -105,16 +105,16 @@ namespace Dmrg {
 		DynamicSerializer(IoInputType& io,size_t lastInstance = 0)
 		: cf_(io)
 		{
-			std::string s = "#DCENTRALSITE=";
+			PsimagLite::String s = "#DCENTRALSITE=";
 			int xi=0;
 			io.readline(xi,s);
-			if (xi<0) throw std::runtime_error(
+			if (xi<0) throw PsimagLite::RuntimeError(
 					"DynamicSerializer:: site cannot be negative\n");
 			site_ = xi;
 
 			s = "#DNUMBEROFVECTORS=";
 			io.readline(xi,s);
-			if (xi<=0) throw std::runtime_error(
+			if (xi<=0) throw PsimagLite::RuntimeError(
 					"DynamicSerializer:: n. of vectors must be positive\n");
 			targetVectors_.resize(xi);
 			for (size_t i=0;i<targetVectors_.size();i++) {
@@ -127,7 +127,7 @@ namespace Dmrg {
 		void save(IoOutputter& io) const
 		{
 			cf_.save(io);
-			std::string s = "#DCENTRALSITE=" + ttos(site_);
+			PsimagLite::String s = "#DCENTRALSITE=" + ttos(site_);
 			io.printline(s);
 			s = "#DNUMBEROFVECTORS="+ttos(targetVectors_.size());
 			io.printline(s);
@@ -136,7 +136,7 @@ namespace Dmrg {
 //			io.print("#DNUMBEROFVECTORS=",targetVectors_.size());
 
 			for (size_t i=0;i<targetVectors_.size();i++) {
-				std::string label = "targetVector"+ttos(i);
+				PsimagLite::String label = "targetVector"+ttos(i);
 				targetVectors_[i].save(io,label);
 			}
 		}

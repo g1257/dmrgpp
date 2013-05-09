@@ -99,7 +99,7 @@ public:
 		io.readline(tau,"TSPTau=");
 		io.readline(timeSteps,"TSPTimeSteps=");
 		io.readline(advanceEach,"TSPAdvanceEach=");
-		std::string s="";
+		PsimagLite::String s="";
 
 		try {
 			io.readline(s,"TSPAlgorithm=");
@@ -108,11 +108,11 @@ public:
 			if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter")
 				algorithm = SUZUKI_TROTTER;
 		} catch (std::exception& e) {
-			std::string s(__FILE__);
+			PsimagLite::String s(__FILE__);
 			s += "\n FATAL: TSPAlgorithm not found in input file.\n";
 			s += "Please add either TSPAlgorithm=Krylov or TSPAlgorithm=RungeKutta";
 			s += " or TSPAlgorithm=SuzukiTrotter just below the TSPAdvanceEach= line in the input file.\n";
-			throw std::runtime_error(s.c_str());
+			throw PsimagLite::RuntimeError(s.c_str());
 		}
 	}
 

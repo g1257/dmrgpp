@@ -219,7 +219,7 @@ namespace Dmrg {
 		}
 		
 		/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the unmangled (natural) basis of one-site */
-		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
 									      size_t site,
 									      size_t dof) const
 		{
@@ -451,7 +451,7 @@ namespace Dmrg {
 				} else {
 					HilbertSpaceHubbardType::create(bra,i,sigma);
 					int jj = PsimagLite::isInVector(natBasis,bra);
-					if (jj<0) throw std::runtime_error("findOperatorMatrices: internal error while"
+					if (jj<0) throw PsimagLite::RuntimeError("findOperatorMatrices: internal error while"
 							"creating.\n");
 					cm(ii,jj) =sign(ket,i,sigma);
 				}
@@ -470,7 +470,7 @@ namespace Dmrg {
 
 		void setSymmetryRelated(BasisDataType& q,HilbertBasisType  const &basis,int n) const
 		{
-			if (n!=1) std::runtime_error("ModelHubbard::setSymmetryRelated() implemented for n=1 only\n");
+			if (n!=1) PsimagLite::RuntimeError("ModelHubbard::setSymmetryRelated() implemented for n=1 only\n");
 
 			// find j,m and flavors (do it by hand since we assume n==1)
 			// note: we use 2j instead of j

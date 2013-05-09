@@ -92,7 +92,7 @@ namespace Dmrg {
 			void operator()(const Word& ket,const Word& bra,const FieldType& value)
 			{
 				if (ket!=bra) {
-					throw std::runtime_error("SpinSquaredHelper::operator(): ket!=bra\n");
+					throw PsimagLite::RuntimeError("SpinSquaredHelper::operator(): ket!=bra\n");
 				}
 				if (ket!=ketSaved_) data_=0;
 				ketSaved_=ket;
@@ -117,15 +117,15 @@ namespace Dmrg {
 			{
 				FieldType r = sqrt(t);
 				int ri=int(r);
-				if (ri!=r) std::runtime_error("SpinSquaredHelper:: sqrt(1+4d) not an integer\n");
+				if (ri!=r) PsimagLite::RuntimeError("SpinSquaredHelper:: sqrt(1+4d) not an integer\n");
 				return ri;
 			}
 
 			size_t getJvalue() const
 			{
-				if (data_<0) std::runtime_error("SpinSquaredHelper::getJvalue(): d<0\n");
+				if (data_<0) PsimagLite::RuntimeError("SpinSquaredHelper::getJvalue(): d<0\n");
 				int tmp = perfectSquareOrCrash(1.0+4.0*data_);
-				if (tmp<1) std::runtime_error("SpinSquaredHelper::getJvalue(): sqrt(1+4d)<1\n");
+				if (tmp<1) PsimagLite::RuntimeError("SpinSquaredHelper::getJvalue(): sqrt(1+4d)<1\n");
 				size_t ret = tmp-1;
 				return ret;	
 			}
@@ -133,9 +133,9 @@ namespace Dmrg {
 			size_t getMvalue(const FieldType& m,size_t j) const
 			{
 				FieldType tmp = m+j*0.5;
-				if (tmp<0)  std::runtime_error("SpinSquaredHelper::getMvalue(): j+m <0\n");
+				if (tmp<0)  PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue(): j+m <0\n");
 				size_t ret = size_t(tmp);
-				if (ret!=tmp) std::runtime_error("SpinSquaredHelper::getMvalue(): j+m not size_t\n");
+				if (ret!=tmp) PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue(): j+m not size_t\n");
 				return ret;
 			}
 		}; // class SpinSquaredHelper

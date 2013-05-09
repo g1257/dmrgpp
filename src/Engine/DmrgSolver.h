@@ -164,15 +164,15 @@ namespace Dmrg {
 			io_.print("PARAMETERS",parameters_);
 			io_.print("TARGETSTRUCT",targetStruct_);
 			PsimagLite::HostInfo hostInfo;
-			std::string s =hostInfo.getTimeDate();
+			PsimagLite::String s =hostInfo.getTimeDate();
 			io_.print(s);
-			if (parameters_.options.find("verbose")!=std::string::npos) verbose_=true;
+			if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
 		}
 
 		~DmrgSolver()
 		{
 			PsimagLite::HostInfo hostInfo;
-			std::string s =hostInfo.getTimeDate();
+			PsimagLite::String s =hostInfo.getTimeDate();
 			io_.print(s);
 		}
 
@@ -182,10 +182,10 @@ namespace Dmrg {
 			if (checkpoint_())
 				std::cerr<<"WARNING: Will not check finite loops for consistency while checkpoint is in use\n";
 			 else 
-				if (parameters_.options.find("nofiniteloops")==std::string::npos)
+				if (parameters_.options.find("nofiniteloops")==PsimagLite::String::npos)
 					checkFiniteLoops(parameters_.finiteLoop,geometry.numberOfSites());
 
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Turning the engine on";
 			progress_.printline(msg,std::cout);
 
@@ -198,7 +198,7 @@ namespace Dmrg {
 			for (size_t i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
 
 			//wft_.init();
-			//if (parameters_.options.find("nowft")!=std::string::npos) wft_.disable();
+			//if (parameters_.options.find("nowft")!=PsimagLite::String::npos) wft_.disable();
 
 			TargettingType psi(lrs_,model_,targetStruct_,wft_,quantumSector_);
 			io_.print("PSI",psi);
@@ -224,7 +224,7 @@ namespace Dmrg {
 
 			finiteDmrgLoops(S,E,pS,pE,psi);
 
-			std::ostringstream msg2;
+			PsimagLite::OstringStream msg2;
 			msg2<<"Turning off the engine.";
 			progress_.printline(msg2,std::cout);
 		}
@@ -280,13 +280,13 @@ namespace Dmrg {
 				MyBasisWithOperators &pE,
 				TargettingType& psi)
 		{
-			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=std::string::npos);
+			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
 
 			checkpoint_.push(pS,pE);
 
 			RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
 			for (size_t step=0;step<X.size();step++) {
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
 				progress_.printline(msg,std::cout);
 
@@ -328,9 +328,9 @@ namespace Dmrg {
 				     MyBasisWithOperators &pE,
 				     TargettingType& psi)
 		{
-			if (parameters_.options.find("nofiniteloops")!=std::string::npos) return;
+			if (parameters_.options.find("nofiniteloops")!=PsimagLite::String::npos) return;
 			if (parameters_.finiteLoop.size()==0)
-				throw std::runtime_error("finiteDmrgLoops(...): there are no finite loops! (and nofiniteloops is not set)\n");
+				throw PsimagLite::RuntimeError("finiteDmrgLoops(...): there are no finite loops! (and nofiniteloops is not set)\n");
 			
 			// set initial site to add to either system or environment:
 			// this is a bit tricky and has been a source of endless bugs
@@ -355,11 +355,11 @@ namespace Dmrg {
 			// now stepCurrent_ is such that sitesIndices_[stepCurrent_] = siteToAdd
 			// so:
 			int sc = PsimagLite::isInVector(sitesIndices_,siteToAdd);
-			if (sc<0) throw std::runtime_error("finiteDmrgLoops(...): internal error: siteIndices_\n");
+			if (sc<0) throw PsimagLite::RuntimeError("finiteDmrgLoops(...): internal error: siteIndices_\n");
 			stepCurrent_ = sc; // phew!!, that's all folks, now bugs, go away!!
 			
 			for (size_t i=0;i<parameters_.finiteLoop.size();i++)  {
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Finite loop number "<<i;
 				msg<<" with l="<<parameters_.finiteLoop[i].stepLength;
 				msg<<" keptStates="<<parameters_.finiteLoop[i].keptStates;
@@ -405,7 +405,7 @@ namespace Dmrg {
 			
 			while(true) {
 				if (size_t(stepCurrent_)>=sitesIndices_.size())
-					throw std::runtime_error("stepCurrent_ too large!\n");
+					throw PsimagLite::RuntimeError("stepCurrent_ too large!\n");
 
 				RealType time = target.time();
 				if (direction==EXPAND_SYSTEM) {
@@ -418,7 +418,7 @@ namespace Dmrg {
 
 				lrs_.printSizes("finite",std::cout);
 				if (verbose_) {
-					std::ostringstream msg;
+					PsimagLite::OstringStream msg;
 					msg<<" stackS="<<checkpoint_.stackSize(ProgramGlobals::SYSTEM);
 					msg<<" stackE="<<checkpoint_.stackSize(ProgramGlobals::ENVIRON)<< " step="<<stepCurrent_;
 					msg<<" loopIndex="<<loopIndex<<" length="<<stepLength<<" StepFinal="<<stepFinal;
@@ -435,7 +435,7 @@ namespace Dmrg {
 				changeTruncateAndSerialize(pS,pE,target,keptStates,direction,saveOption);
 
 				if (finalStep(stepLength,stepFinal)) break;
-				if (stepCurrent_<0) throw std::runtime_error("DmrgSolver::finiteStep() currentStep_ is negative\n");
+				if (stepCurrent_<0) throw PsimagLite::RuntimeError("DmrgSolver::finiteStep() currentStep_ is negative\n");
 
 				printMemoryUsage();
 				
@@ -447,7 +447,7 @@ namespace Dmrg {
 				pS = lrs_.left();
 			}
 			if (saveOption==SAVE_TO_DISK) {
-				std::string s="#WAVEFUNCTION_ENERGY="+ttos(gsEnergy);
+				PsimagLite::String s="#WAVEFUNCTION_ENERGY="+ttos(gsEnergy);
 				io_.printline(s);
 //				io_.print("#WAVEFUNCTION_ENERGY=",gsEnergy);
 			}
@@ -460,7 +460,7 @@ namespace Dmrg {
 						size_t direction,
 						size_t saveOption)
 		{
-			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=std::string::npos);
+			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
 			const typename PsimagLite::Vector<size_t>::Type& eS = pS.electronsVector();
 			FermionSignType fsS(eS);
 
@@ -468,7 +468,7 @@ namespace Dmrg {
 			FermionSignType fsE(eE);
 
 			truncate_(pS,pE,target,keptStates,direction);
-			std::ostringstream msg2;
+			PsimagLite::OstringStream msg2;
 			msg2<<"#Error="<<truncate_.error();
 			io_.printline(msg2);
 
@@ -513,7 +513,7 @@ namespace Dmrg {
 			return false;
 		}
 
-		std::string getDirection(size_t dir) const
+		PsimagLite::String getDirection(size_t dir) const
 		{
 			if (dir==INFINITE) return  "INFINITE";
 			if (dir==EXPAND_ENVIRON) return "EXPAND_ENVIRON";
@@ -573,7 +573,7 @@ namespace Dmrg {
 
 		void setQuantumSector(const typename PsimagLite::Vector<size_t>::Type& targetQuantumNumbers,size_t direction)
 		{
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Integer target quantum numbers are: ";
 			for (size_t ii=0;ii<targetQuantumNumbers.size();ii++)
 				msg<<targetQuantumNumbers[ii]<<" ";
@@ -585,12 +585,12 @@ namespace Dmrg {
 		void printMemoryUsage()
 		{
 			musage_.update();
-			std::string vmPeak = musage_.findEntry("VmPeak:");
-			std::string vmSize = musage_.findEntry("VmSize:");
-			std::ostringstream msg;
+			PsimagLite::String vmPeak = musage_.findEntry("VmPeak:");
+			PsimagLite::String vmSize = musage_.findEntry("VmSize:");
+			PsimagLite::OstringStream msg;
 			msg<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
 			progress_.printline(msg,std::cout);
-			std::ostringstream msg2;
+			PsimagLite::OstringStream msg2;
 			msg2<<"Engine clock: "<<musage_.time()<<" seconds";
 			progress_.printline(msg2,std::cout);
 		}

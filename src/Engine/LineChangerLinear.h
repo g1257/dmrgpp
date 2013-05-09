@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINE_CHANGER_LINEAR_H
 #define LINE_CHANGER_LINEAR_H
 
-#include <string>
+#include "String.h"
 #include <vector>
 #include "TypeToString.h"
 
@@ -90,18 +90,18 @@ namespace Dmrg {
 	template<typename ValueType>
 	class	LineChangerLinear {
 	public:
-		LineChangerLinear(const std::string& match,
+		LineChangerLinear(const PsimagLite::String& match,
 		                  ValueType step,
 		                  ValueType init,
-		                  const std::string& pre,
-		                  const std::string& post)
+		                  const PsimagLite::String& pre,
+		                  const PsimagLite::String& post)
 		: match_(match),step_(step),init_(init),pre_(pre),post_(post)
 		{
 		}
 		
-		const std::string& string() const { return match_; }
+		const PsimagLite::String& string() const { return match_; }
 		
-		bool act(size_t i,std::string& line) const
+		bool act(size_t i,PsimagLite::String& line) const
 		{
 			ValueType val = i*step_ + init_;
 			line=match_ + pre_ + ttos(val) + post_;
@@ -110,9 +110,9 @@ namespace Dmrg {
 
 	private:
 
-		std::string match_;
+		PsimagLite::String match_;
 		ValueType step_,init_;
-		std::string pre_,post_;
+		PsimagLite::String pre_,post_;
 	}; // class LineChangerLinear
 
 } // namespace Dmrg

@@ -293,7 +293,7 @@ namespace Dmrg {
 			if (helper_.leftRightSuper(threadId).left().size()!=sprime) {
 				std::cerr<<"WARNING: "<<helper_.leftRightSuper(threadId).left().size();
 				std::cerr<<"!="<<sprime<<"\n";
-				throw std::runtime_error("problem in dmrgMultiply\n");
+				throw PsimagLite::RuntimeError("problem in dmrgMultiply\n");
 			}
 
 			PackIndicesType pack(ni);
@@ -332,7 +332,7 @@ namespace Dmrg {
 			if (helper_.leftRightSuper(threadId).right().size()!=eprime) {
 				std::cerr<<"WARNING: "<<helper_.leftRightSuper(threadId).right().size();
 				std::cerr<<"!="<<eprime<<"\n";
-				throw std::runtime_error("problem in dmrgMultiply\n");
+				throw PsimagLite::RuntimeError("problem in dmrgMultiply\n");
 			}
 
 			PackIndicesType pack(nj);
@@ -346,7 +346,7 @@ namespace Dmrg {
 					for (size_t u2=0;u2<ni;u2++) {
 						size_t r2 = helper_.leftRightSuper(threadId).right().
 								permutationInverse(e2 + u2*nj);
-						if (r2>=eprime) throw std::runtime_error("Error\n");
+						if (r2>=eprime) throw PsimagLite::RuntimeError("Error\n");
 						result(r,r2) += O2(e,e2)*O1(u,u2)*f;
 					}
 				}
@@ -477,7 +477,7 @@ namespace Dmrg {
 
 			if (vec1.size()!=helper_.leftRightSuper(threadId).super().size() ||
 								vec1.size()!=vec2.size())
-				throw std::runtime_error(
+				throw PsimagLite::RuntimeError(
 					"CorrelationsSkeleton::bracket_(...): Error\n");
 
 			if (helper_.direction(threadId)==EXPAND_SYSTEM) {
@@ -537,7 +537,7 @@ namespace Dmrg {
 
 					pack.unpack(r,eta,helper_.leftRightSuper(threadId).super().
 							permutation(t));
-					if (eta>=Acrs.row()) throw std::runtime_error("Error\n");
+					if (eta>=Acrs.row()) throw PsimagLite::RuntimeError("Error\n");
 					size_t nx0 = helper_.leftRightSuper(threadId).left().electrons(BasisType::AFTER_TRANSFORM);
 					RealType sign = (nx0 & 1) ? fermionicSign : 1;
 					for (int k=Acrs.getRowPtr(eta);k<Acrs.getRowPtr(eta+1);k++) {
@@ -583,10 +583,10 @@ namespace Dmrg {
 
 			// some sanity checks:
 			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper(threadId).super().size())
-				throw std::runtime_error("Observe::brRghtCrnrSystem_(...): "
+				throw PsimagLite::RuntimeError("Observe::brRghtCrnrSystem_(...): "
 						"vec.size!=SE.size\n");
 			if (ni!=Acrs.row())
-				throw std::runtime_error("Observe::brRghtCrnrSystem_(...): "
+				throw PsimagLite::RuntimeError("Observe::brRghtCrnrSystem_(...): "
 						"ni!=Acrs.rank\n");
 
 			// ok, we're ready for the main course:
@@ -645,10 +645,10 @@ namespace Dmrg {
 
 			// some sanity checks:
 			if (vec1.size()!=vec2.size() || vec1.size()!=helper_.leftRightSuper(threadId).super().size())
-				throw std::runtime_error("Observe::brLftCrnrEnviron_(...): "
+				throw PsimagLite::RuntimeError("Observe::brLftCrnrEnviron_(...): "
 						"vec.size!=SE.size\n");
 			if (helper_.leftRightSuper(threadId).right().size()/Bcrs.row()!=Acrs.row())
-				throw std::runtime_error("Observe::bracketRightCorner_(...): "
+				throw PsimagLite::RuntimeError("Observe::bracketRightCorner_(...): "
 						"helper_.leftRightSuper().right().size()/Bcrs.rank()!=Acrs.rank\n");
 
 			// ok, we're ready for the main course:

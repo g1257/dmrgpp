@@ -147,7 +147,7 @@ void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<size_t>::Type& r
 
 	if (int(n)<=x) {
 		std::cerr<<"psimag::truncate: n="<<n<<" must be larger than x="<<x<<" rowoption="<<rowOption<<"\n";
-		throw std::runtime_error("psimag::truncated\n");
+		throw PsimagLite::RuntimeError("psimag::truncated\n");
 	}
 
 	PsimagLite::Vector<int>::Type remap(n);
@@ -161,7 +161,7 @@ void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<size_t>::Type& r
 		remap[i]=j;
 		j++;
 	}
-	if (j!=n-x) throw std::runtime_error("truncate: PsimagLite::Matrix is throwing...\n");
+	if (j!=n-x) throw PsimagLite::RuntimeError("truncate: PsimagLite::Matrix is throwing...\n");
 
 	//! truncate
 	if (rowOption) {
@@ -190,7 +190,7 @@ void truncate(PsimagLite::CrsMatrix<T> &A,const PsimagLite::Vector<size_t>::Type
 {
 	if (rowOption) { // unimplemented
 		assert(false);
-		throw std::runtime_error("truncate: rowoption must not be set\n");
+		throw PsimagLite::RuntimeError("truncate: rowoption must not be set\n");
 	}
 
 	size_t x=removed.size();

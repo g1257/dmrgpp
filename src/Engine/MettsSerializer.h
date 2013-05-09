@@ -100,21 +100,21 @@ namespace Dmrg {
 			MettsSerializer(typename PsimagLite::IoSimple::In& io,size_t lastInstance = 0)
 			{
 				RealType x=0;
-				std::string s = "#BETA=";
+				PsimagLite::String s = "#BETA=";
 				if (lastInstance) io.readline(x,s,lastInstance);
 				else io.readline(x,s);
-				if (x<0) throw std::runtime_error("MettsSerializer:: time cannot be negative\n");
+				if (x<0) throw PsimagLite::RuntimeError("MettsSerializer:: time cannot be negative\n");
 				currentBeta_ = x;
 				
 				s = "#TCENTRALSITE=";
 				int xi=0;
 				io.readline(xi,s);
-				if (xi<0) throw std::runtime_error("MettsSerializer:: site cannot be negative\n");
+				if (xi<0) throw PsimagLite::RuntimeError("MettsSerializer:: site cannot be negative\n");
 				site_ = xi;
 				
 				s = "#TNUMBEROFVECTORS=";
 				io.readline(xi,s);
-				if (xi<=0) throw std::runtime_error("MettsSerializer:: n. of vectors must be positive\n");
+				if (xi<=0) throw PsimagLite::RuntimeError("MettsSerializer:: n. of vectors must be positive\n");
 				targetVectors_.resize(xi);
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					s = "targetVector"+ttos(i);
@@ -143,14 +143,14 @@ namespace Dmrg {
 			template<typename IoOutputter>
 			void save(IoOutputter& io) const
 			{
-				std::string s = "#BETA=" + ttos(currentBeta_);
+				PsimagLite::String s = "#BETA=" + ttos(currentBeta_);
 				io.printline(s);
 				s = "#TCENTRALSITE=" + ttos(site_);
 				io.printline(s);
 				s = "#TNUMBEROFVECTORS="+ttos(targetVectors_.size());
 				io.printline(s);
 				for (size_t i=0;i<targetVectors_.size();i++) {
-					std::string label = "targetVector"+ttos(i)+"_"+ttos(currentBeta_);
+					PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentBeta_);
 					targetVectors_[i].save(io,label);
 				}
 			}

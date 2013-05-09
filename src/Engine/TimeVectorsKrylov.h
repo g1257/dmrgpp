@@ -219,8 +219,8 @@ private:
 	{
 		size_t n2 = steps;
 		size_t n = V.n_row();
-		if (T.n_col()!=T.n_row()) throw std::runtime_error("T is not square\n");
-		if (V.n_col()!=T.n_col()) throw std::runtime_error("V is not nxn2\n");
+		if (T.n_col()!=T.n_row()) throw PsimagLite::RuntimeError("T is not square\n");
+		if (V.n_col()!=T.n_col()) throw PsimagLite::RuntimeError("V is not nxn2\n");
 		// for (size_t j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
 		ComplexOrRealType zone = 1.0;
 		ComplexOrRealType zzero = 0.0;
@@ -301,7 +301,7 @@ private:
 		size_t total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
 		phi.extract(phi2,i0);
-		/* std::ostringstream msg;
+		/* PsimagLite::OstringStream msg;
 		msg<<"Calling tridiagonalDecomposition...\n";
 		progress_.printline(msg,std::cerr);*/
 		lanczosSolver.decomposition(phi2,ab);

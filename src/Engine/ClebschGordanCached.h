@@ -110,11 +110,11 @@ namespace Dmrg {
 				max22_=max2_*max2_;
 				data_.resize(max22_*jmax_*2,UNDEFINED_VALUE);
 				cgObject_.init(nfactorials);
-				//std::ostringstream msg;
+				//PsimagLite::OstringStream msg;
 				//msg<<"init called "<<copies_<<" times, jmax="<<jmax<<"\n";
 				//progress_.printline(msg,std::cout);
 				copies_++;
-				if (copies_>2) {//throw std::runtime_error("ClebschGordanCached: too many copies\n");
+				if (copies_>2) {//throw PsimagLite::RuntimeError("ClebschGordanCached: too many copies\n");
 					std::cerr<<"WARNING: ClebschGordanCached has ";
 					std::cerr<<copies_<<" copies.\n";
 				}
@@ -144,13 +144,13 @@ namespace Dmrg {
 				x *= jm.second;
 				x /= 2;
 				x += jm.first;
-				if (x<0 || x>=max2_) throw std::runtime_error("problem calcSubIndex\n");
+				if (x<0 || x>=max2_) throw PsimagLite::RuntimeError("problem calcSubIndex\n");
 				return x;	
 			}
 
 			size_t calcIndex(size_t i1,size_t i2) const
 			{
-				if (i1>=max2_ || i2>=max2_) throw std::runtime_error("problem\n");
+				if (i1>=max2_ || i2>=max2_) throw PsimagLite::RuntimeError("problem\n");
 				return i1+i2*max2_;
 			}
 

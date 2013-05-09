@@ -104,7 +104,7 @@ namespace Dmrg {
 			for (size_t i=0;i<weights.size();i++) {
 				if (weights[i]>0) {
 					if (found)
-						throw std::runtime_error("VectorWithOffset::"
+						throw PsimagLite::RuntimeError("VectorWithOffset::"
 						  " more than one non-zero sector found. "
 						  " Maybe you should be using VectorWithOffsets instead?\n");
 					data_.resize(weights[i]);
@@ -131,7 +131,7 @@ namespace Dmrg {
 			size_ = someBasis.size();
 			for (size_t i=0;i<v.size();i++) {
 				if (v[i].size()>0) {
-					if (found) throw std::runtime_error("VectorWithOffset::"
+					if (found) throw PsimagLite::RuntimeError("VectorWithOffset::"
 						" more than one non-zero sector found. "
 						" Maybe you should be using VectorWithOffsets instead?\n");
 					data_ = v[i];
@@ -140,7 +140,7 @@ namespace Dmrg {
 					found = true;
 				}
 			}
-			if (!found) throw std::runtime_error("Set failed\n");
+			if (!found) throw PsimagLite::RuntimeError("Set failed\n");
 		}
 		
 		template<typename SomeBasisType>
@@ -188,10 +188,10 @@ namespace Dmrg {
 		}
 
 		template<typename IoOutputter>
-		void save(IoOutputter& io,const std::string& label) const
+		void save(IoOutputter& io,const PsimagLite::String& label) const
 		{
 			io.printline(label);
-			std::string s="#size="+ttos(size_);
+			PsimagLite::String s="#size="+ttos(size_);
 			io.printline(s);
 			s="#offset="+ttos(offset_);
 			io.printline(s);
@@ -206,18 +206,18 @@ namespace Dmrg {
 		}
 
 		template<typename IoInputter>
-		void load(IoInputter& io,const std::string& label,size_t counter=0)
+		void load(IoInputter& io,const PsimagLite::String& label,size_t counter=0)
 		{
 			io.advance(label,counter);
 			int x = 0;
 			io.readline(x,"#size=");
-			if (x<0) throw std::runtime_error("VectorWithOffset::load(...): size<0\n");
+			if (x<0) throw PsimagLite::RuntimeError("VectorWithOffset::load(...): size<0\n");
 			size_ = x;
 			io.readline(x,"#offset=");
-			if (x<0) throw std::runtime_error("VectorWithOffset::load(...): offset<0\n");
+			if (x<0) throw PsimagLite::RuntimeError("VectorWithOffset::load(...): offset<0\n");
 			offset_ = x;
 			io.readline(x,"#m=");
-			if (x<0) throw std::runtime_error("VectorWithOffset::load(...): m<0\n");
+			if (x<0) throw PsimagLite::RuntimeError("VectorWithOffset::load(...): m<0\n");
 			m_ = x;
 			io.read(data_,"#data");
 		}
@@ -238,7 +238,7 @@ namespace Dmrg {
 		FieldType& operator[](size_t i)
 		{
 // 			if (i<offset_ || i>= (offset_+data_.size()))
-// 				throw std::runtime_error("VectorWithOffset\n");
+// 				throw PsimagLite::RuntimeError("VectorWithOffset\n");
 			return data_[i-offset_];
 		}
 		
@@ -272,14 +272,14 @@ namespace Dmrg {
 			size_t p = 0;
 			for (size_t i=0;i<someBasis.partition()-1;i++) {
 				if (nonZeroPartition(v,someBasis,i)) {
-					if (found) throw std::runtime_error("VectorWithOFfset::"
+					if (found) throw PsimagLite::RuntimeError("VectorWithOFfset::"
 						" More than one partition found\n");
 					found = true;
 					p = i;
 				}
 			}
 			if (!found)
-				throw std::runtime_error("VectorWithOFfset::"
+				throw PsimagLite::RuntimeError("VectorWithOFfset::"
 				                         " No partition found\n");
 			return p;
 		}
@@ -351,7 +351,7 @@ namespace std {
 	inline std::complex<FieldType> operator*(const Dmrg::VectorWithOffset<std::complex<FieldType> >& v1,
 	                                         const Dmrg::VectorWithOffset<std::complex<FieldType> >& v2)
 	{
-		throw std::runtime_error("Unimplemented\n");
+		throw PsimagLite::RuntimeError("Unimplemented\n");
 	}
 
 }

@@ -128,7 +128,7 @@ namespace Dmrg {
 					return;
 				default:
 					std::cerr<<"value="<<value<<"\n";
-					throw std::runtime_error("HilbertSpaceHubbard: set: invalid value.\n");
+					throw PsimagLite::RuntimeError("HilbertSpaceHubbard: set: invalid value.\n");
 					
 						
 			}
@@ -142,7 +142,7 @@ namespace Dmrg {
 			mask >>= (2*j);
 			if (mask>3) {
 				std::cerr<<"Error: mask="<<mask<<"\n";
-			 	throw std::runtime_error("HilbertSpaceHubbard: get: invalid  mask.\n");
+			 	throw PsimagLite::RuntimeError("HilbertSpaceHubbard: get: invalid  mask.\n");
 			}
 			return mask;
 			
@@ -163,7 +163,7 @@ namespace Dmrg {
 					return;
 				default:
 					std::cerr<<"sigma="<<sigma<<"\n";
-					throw std::runtime_error("HilbertSpaceHubbard: destroy: invalid value.\n");		
+					throw PsimagLite::RuntimeError("HilbertSpaceHubbard: destroy: invalid value.\n");		
 			}
 		}
 		
@@ -182,7 +182,7 @@ namespace Dmrg {
 					return;
 				default:
 					std::cerr<<"sigma="<<sigma<<"\n";
-					throw std::runtime_error("HilbertSpaceHubbard: create: invalid value.\n");		
+					throw PsimagLite::RuntimeError("HilbertSpaceHubbard: create: invalid value.\n");		
 			}
 		}
 		

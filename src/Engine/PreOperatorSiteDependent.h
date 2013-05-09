@@ -98,7 +98,7 @@ class PreOperatorSiteDependent  : public PreOperatorBase<ModelType> {
 
 public:
 
-	PreOperatorSiteDependent(size_t dof,size_t dof2,const ModelType& model,const std::string& str,size_t threadId)
+	PreOperatorSiteDependent(size_t dof,size_t dof2,const ModelType& model,const PsimagLite::String& str,size_t threadId)
 		: dof_(dof),dof2_(dof2),model_(model),str_(str),threadId_(threadId)
 	{}
 
@@ -129,7 +129,7 @@ public:
 		return (dof_<nx && dof2_<nx);
 	}
 
-	virtual std::string label() const { return str_; }
+	virtual PsimagLite::String label() const { return str_; }
 
 	virtual size_t threadId() const { return threadId_; }
 
@@ -144,7 +144,7 @@ private:
 	size_t dof_;
 	size_t dof2_;
 	const ModelType& model_;
-	std::string str_;
+	PsimagLite::String str_;
 	size_t threadId_;
 };     //class PreOperatorSiteDependent
 } // namespace Dmrg

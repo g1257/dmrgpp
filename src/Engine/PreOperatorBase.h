@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PRE_OPERATOR_BASE_H
 #define PRE_OPERATOR_BASE_H
 #include <iostream>
-#include <string>
+#include "String.h"
 
 namespace Dmrg {
 
@@ -98,7 +98,7 @@ public:
 
 	virtual OperatorType operator()(size_t site) const=0;
 
-	virtual std::string label() const=0;
+	virtual PsimagLite::String label() const=0;
 
 	virtual size_t threadId() const=0;
 

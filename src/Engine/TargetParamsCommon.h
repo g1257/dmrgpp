@@ -111,15 +111,15 @@ namespace Dmrg {
 				//io.readline(filename,"TSPFilename="); // filename
 				io.read(sites,"TSPSites");
 				io.read(startingLoops,"TSPLoops");
-				std::string productOrSum="product";
+				PsimagLite::String productOrSum="product";
 				try {
 					io.readline(productOrSum,"TSPProductOrSum=");
 				} catch (std::exception& e) {
-					std::string s(__FILE__);
+					PsimagLite::String s(__FILE__);
 					s += "\n FATAL: Must provide TSPProductOrSum=.\n"; 
 					s += "Please add TSPProductOrSum=product or TSPProductOrSum=sum  ";
 					s += "immediately below the TSPLoops= line in the input file\n";
-					throw std::runtime_error(s.c_str());
+					throw PsimagLite::RuntimeError(s.c_str());
 				}
 
 				//! Concatenation specifies what to do with
@@ -129,9 +129,9 @@ namespace Dmrg {
 				} else if (productOrSum=="sum") {
 					this->concatenation = SUM;
 				} else {
-					std::string s(__FILE__);
+					PsimagLite::String s(__FILE__);
 					s += " : Unknown concatentation " + productOrSum + "\n";
-					throw std::runtime_error(s.c_str());
+					throw PsimagLite::RuntimeError(s.c_str());
 				}
 
 				data_.resize(sites.size());
@@ -142,7 +142,7 @@ namespace Dmrg {
 // 				model_.findElectrons(electrons,basis);
 			
 				for (size_t i=0;i<sites.size();i++) {
-					std::string s;
+					PsimagLite::String s;
 					io.readline(s,"TSPOperator=");
 					if (s == "cooked") {
 						io.readline(s,"COOKED_OPERATOR=");
@@ -189,11 +189,11 @@ namespace Dmrg {
 				RealType eps = 1e-6;
 				if (norma>eps) return;
 
-				std::string s(__FILE__);
+				PsimagLite::String s(__FILE__);
 				s += " : " + ttos(__LINE__) + "\n";
 				s += "RAW_MATRIX or COOKED_OPERATOR number " + ttos(i);
 				s += " is less than " + ttos(eps) + "\n";
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 			}
 
 
@@ -203,7 +203,7 @@ namespace Dmrg {
 				return (isTheIdentity(data_[0]));
 			}
 
-			void setCookedData(size_t i,const std::string& s,const typename PsimagLite::Vector<size_t>::Type& v)
+			void setCookedData(size_t i,const PsimagLite::String& s,const typename PsimagLite::Vector<size_t>::Type& v)
 			{
 				data_[i]=model_.naturalOperator(s,v[0],v[1]);
 			}
@@ -221,7 +221,7 @@ namespace Dmrg {
 			{
 				for (size_t i=0;i<data_.size();i++) {
 					size_t n = data_[i].n_row();
-					if (n!=model_.hilbertSize(sites[i])) throw std::runtime_error("CommonTargetting\n");
+					if (n!=model_.hilbertSize(sites[i])) throw PsimagLite::RuntimeError("CommonTargetting\n");
 				}
 			}
 

@@ -162,7 +162,7 @@ namespace Dmrg {
 		  done_(false),
 		  weightForContinuedFraction_(0)
 		{
-			if (!wft.isEnabled()) throw std::runtime_error(" DynamicTargetting "
+			if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" DynamicTargetting "
 					"needs an enabled wft\n");
 		}
 
@@ -221,10 +221,10 @@ namespace Dmrg {
 		            size_t loopNumber)
 		{
 			if (block1.size()!=1 || block2.size()!=1) {
-				std::string str(__FILE__);
+				PsimagLite::String str(__FILE__);
 				str += " " + ttos(__LINE__) + "\n";
 				str += "evolve only blocks of one site supported\n";
-				throw std::runtime_error(str.c_str());
+				throw PsimagLite::RuntimeError(str.c_str());
 			}
 
 			size_t site = block1[0];
@@ -258,14 +258,14 @@ namespace Dmrg {
 			params.weight = s2*weightForContinuedFraction_;
 			params.isign = s;
 			PostProcType cf(ab_,params);
-			std::string str = "#TCENTRALSITE=" + ttos(block[0]);
+			PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
 			io.printline(str);
 			commonTargetting_.save(block,io,cf,targetVectors_);
 
 			psi_.save(io,"PSI");
 		}
 
-		void load(const std::string& f)
+		void load(const PsimagLite::String& f)
 		{
 			typename IoType::In io(f);
 
@@ -359,7 +359,7 @@ namespace Dmrg {
 			//std::cerr<<"XYZ AFTER stage="<<stage_[0]<<" "<<stage_[1]<<" site="<<site<<"\n";
 			if (stage_[i] == OPERATOR) commonTargetting_.checkOrder(i,stage_);
 
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Evolving, stage="<<commonTargetting_.getStage(i,stage_);
 			msg<<" site="<<site<<" loopNumber="<<loopNumber;
 			msg<<" Eg="<<Eg;
@@ -384,7 +384,7 @@ namespace Dmrg {
 				bool corner = (tstStruct_.sites[i]==0 ||
 						tstStruct_.sites[i]==numberOfSites -1) ? true : false;
 
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"I'm applying a local operator now";
 				progress_.printline(msg,std::cout);
 				typename PsimagLite::Vector<size_t>::Type electrons;
@@ -393,7 +393,7 @@ namespace Dmrg {
 				applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],
 						fs,systemOrEnviron,corner);
 				RealType norma = std::norm(phiNew);
-				if (norma==0) throw std::runtime_error(
+				if (norma==0) throw PsimagLite::RuntimeError(
 						"Norm of phi is zero\n");
 				//std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 				
@@ -403,7 +403,7 @@ namespace Dmrg {
 					phiNew = targetVectors_[0];
 					return;
 				}
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"I'm calling the WFT now";
 				progress_.printline(msg,std::cout);
 
@@ -418,7 +418,7 @@ namespace Dmrg {
 				phiNew.collapseSectors();
 				
 			} else {
-				throw std::runtime_error("It's 5 am, do you know what line "
+				throw PsimagLite::RuntimeError("It's 5 am, do you know what line "
 					" your code is exec-ing?\n");
 			}
 		}

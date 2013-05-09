@@ -155,7 +155,7 @@ namespace Dmrg {
 			setNi(creationMatrix,block);
 		}
 
-		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
 								      size_t site,
 								      size_t dof) const
 		{

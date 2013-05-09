@@ -167,9 +167,9 @@ namespace Dmrg {
 			  E0_(0),
 			  timeVectorsBase_(0)
 			{
-				if (!wft.isEnabled()) throw std::runtime_error
+				if (!wft.isEnabled()) throw PsimagLite::RuntimeError
 				       (" TimeStepTargetting needs an enabled wft\n");
-				if (tstStruct_.sites.size()==0) throw std::runtime_error
+				if (tstStruct_.sites.size()==0) throw PsimagLite::RuntimeError
 				       (" TimeStepTargetting needs at least one TSPSite\n");
 
 				RealType tau =tstStruct_.tau;
@@ -192,7 +192,7 @@ namespace Dmrg {
 				assert(fabs(sum-1.0)<1e-5);
 //				std::cerr<<"GSWEIGHT="<<gsWeight_<<"\n";
 
-				std::string s (__FILE__);
+				PsimagLite::String s (__FILE__);
 				s += " Unknown algorithm\n";
 				switch (tstStruct_.algorithm) {
 				case TargettingParamsType::KRYLOV:
@@ -208,7 +208,7 @@ namespace Dmrg {
 								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0_,&nonZeroQns_);
 					break;
 				default:
-					throw std::runtime_error(s.c_str());
+					throw PsimagLite::RuntimeError(s.c_str());
 				}
 			}
 
@@ -222,7 +222,7 @@ namespace Dmrg {
 
 			RealType weight(size_t i) const
 			{
-				if (allStages(DISABLED)) throw std::runtime_error(
+				if (allStages(DISABLED)) throw PsimagLite::RuntimeError(
 						"TST: What are you doing here?\n");
 				return weight_[i];
 				//return 1.0;
@@ -329,7 +329,7 @@ namespace Dmrg {
 				printEnergies(); // in-situ
 			}
 
-			void load(const std::string& f)
+			void load(const PsimagLite::String& f)
 			{
 				for (size_t i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
 
@@ -403,11 +403,11 @@ namespace Dmrg {
 				if (!firstSeeLeftCorner && i==lastI && stage_[i]==WFT_NOADVANCE && site==1)
 					firstSeeLeftCorner=true;
 
-				std::ostringstream msg2;
+				PsimagLite::OstringStream msg2;
 				msg2<<"Steps without advance: "<<timesWithoutAdvancement<<" site="<<site<<" currenTime="<<currentTime_;
 				if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
 				
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
@@ -428,7 +428,7 @@ namespace Dmrg {
 			template<typename IoOutputType>
 			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
 			{
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Saving state...";
 				progress_.printline(msg,std::cout);
 
@@ -482,7 +482,7 @@ namespace Dmrg {
 				phi.extract(phi2,i0);
 				TargetVectorType x(total);
 				lanczosHelper.matrixVectorProduct(x,phi2);
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Hamiltonian average at time="<<currentTime_<<" for target="<<whatTarget;
 				msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<(phi2*x)<<" <phi(t)|phi(t)>="<<(phi2*phi2);
 				progress_.printline(msg,std::cout);
@@ -511,7 +511,7 @@ namespace Dmrg {
 				else std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
 				//if (includeGroundStage())
 				test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
-				std::string s = "<P0|nup|P0>";
+				PsimagLite::String s = "<P0|nup|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,nup);
 
 				PsimagLite::CrsMatrix<ComplexType> tmpC2(model_.naturalOperator("ndown",0,0));
@@ -535,11 +535,11 @@ namespace Dmrg {
 				if (i==0 || tstStruct_.sites.size()==0) return;
 				for (size_t j=0;j<i;j++) {
 					if (stage_[j] == DISABLED) {
-						std::string s ="TST:: Seeing tst site "+ttos(tstStruct_.sites[i]);
+						PsimagLite::String s ="TST:: Seeing tst site "+ttos(tstStruct_.sites[i]);
 						s =s + " before having seen";
 						s = s + " site "+ttos(tstStruct_.sites[j]);
 						s = s +". Please order your tst sites in order of appearance.\n";
-						throw std::runtime_error(s);
+						throw PsimagLite::RuntimeError(s);
 					}
 				}
 			}
@@ -558,7 +558,7 @@ namespace Dmrg {
 				return true;
 			}
 
-			std::string getStage(size_t i) const
+			PsimagLite::String getStage(size_t i) const
 			{
 				switch (stage_[i]) {
 					case DISABLED:
@@ -584,10 +584,10 @@ namespace Dmrg {
 			                const typename PsimagLite::Vector<size_t>::Type& block)
 			{
 				if (block.size()!=1) {
-					std::string str(__FILE__);
+					PsimagLite::String str(__FILE__);
 					str += " " + ttos(__LINE__) + "\n";
 					str += "computePhi only blocks of one site supported\n";
-					throw std::runtime_error(str.c_str());
+					throw PsimagLite::RuntimeError(str.c_str());
 				}
 				typename PsimagLite::Vector<size_t>::Type nk;
 				setNk(nk,block);
@@ -596,7 +596,7 @@ namespace Dmrg {
 				size_t indexAdvance = times_.size()-1;
 				size_t indexNoAdvance = 0;
 				if (stage_[i]==OPERATOR) {
-					std::ostringstream msg;
+					PsimagLite::OstringStream msg;
 					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
 					typename PsimagLite::Vector<size_t>::Type electrons;
@@ -612,7 +612,7 @@ namespace Dmrg {
 						advance = indexAdvance;
 						timeVectorsBase_->timeHasAdvanced();
 					}
-					std::ostringstream msg;
+					PsimagLite::OstringStream msg;
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 
@@ -627,17 +627,17 @@ namespace Dmrg {
 //					std::cerr<<"WFT --> NORM of phiNew="<<norm(phiNew)<<" NORM of tv="<<norm(targetVectors_[advance])<<" when i="<<i<<" advance="<<advance<<"\n";
 
 				} else {
-					throw std::runtime_error("It's 5 am, do you know what line "
+					throw PsimagLite::RuntimeError("It's 5 am, do you know what line "
 						" your code is exec-ing?\n");
 				}
 				RealType norma = norm(phiNew);
-				if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
+				if (norma==0) throw PsimagLite::RuntimeError("Norm of phi is zero\n");
 
 			}
 
 			void checkNorms() const
 			{
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Checking norms: ";
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					RealType norma = std::norm(targetVectors_[i]);
@@ -750,7 +750,7 @@ namespace Dmrg {
 			void test(const VectorWithOffsetType& src1,
 				  const VectorWithOffsetType& src2,
 				  size_t systemOrEnviron,
-				  const std::string& label,
+				  const PsimagLite::String& label,
 				  size_t site,
 				  const OperatorType& A) const
 			{
@@ -771,7 +771,7 @@ namespace Dmrg {
 					for (size_t jj=0;jj<src2.sectors();jj++) {
 						size_t j = src2.sector(jj);
 						size_t offset2 = src2.offset(j);
-						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+						if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
 						for (size_t k=0;k<dest.effectiveSize(i);k++) 
 							sum+= dest[k+offset1] * conj(src2[k+offset2]);
 					}

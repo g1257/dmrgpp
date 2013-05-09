@@ -196,7 +196,7 @@ namespace Dmrg {
 			}
 		}
 		
-		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,size_t site,size_t dof) const
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,size_t site,size_t dof) const
 		{
 			Block block;
 			block.resize(1);
@@ -301,7 +301,7 @@ namespace Dmrg {
 
 		void setSymmetryRelated(BasisDataType& q,const HilbertBasisType& basis,int n) const
 		{
-			if (n!=1) std::runtime_error("ModelFeAs::setSymmetryRelated() implemented for n=1 only\n");
+			if (n!=1) PsimagLite::RuntimeError("ModelFeAs::setSymmetryRelated() implemented for n=1 only\n");
 			
 			// find j,m and flavors (do it by hand since we assume n==1)
 			// note: we use 2j instead of j

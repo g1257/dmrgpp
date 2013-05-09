@@ -98,7 +98,7 @@ namespace Dmrg {
 		{
 
 			const typename PsimagLite::Vector<size_t>::Type& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
-			if (basisElectrons.size()!=basis.permutationInverse().size()) throw std::runtime_error("Problem\n");
+			if (basisElectrons.size()!=basis.permutationInverse().size()) throw PsimagLite::RuntimeError("Problem\n");
 			size_t nx = basisElectrons.size()/electrons.size();
 			typename PsimagLite::Vector<size_t>::Type el(nx);
 			PackIndicesType pack(nx);

@@ -121,14 +121,14 @@ public:
 		  lrs_(io)
 	{
 		if (bogus) return;
-		std::string s = "#WAVEFUNCTION_sites=";
+		PsimagLite::String s = "#WAVEFUNCTION_sites=";
 		wavefunction_.load(io,s);
 		s = "#TRANSFORM_sites=";
 		io.readMatrix(transform_,s);
 		s = "#DIRECTION=";
 		int x = 0;
 		io.readline(x,s);
-		if (x<0) throw std::runtime_error(
+		if (x<0) throw PsimagLite::RuntimeError(
 					"DmrgSerializer:: direction must be non-negative\n");
 		direction_ = x;
 	}
@@ -142,7 +142,7 @@ public:
 		lrs_.save(io);
 
 		// save wavefunction
-		std::string label = "#WAVEFUNCTION_sites=";
+		PsimagLite::String label = "#WAVEFUNCTION_sites=";
 		for (size_t i=0;i<lrs_.super().block().size();i++) {
 			label += ttos(lrs_.super().block()[i])+",";
 		}
@@ -154,7 +154,7 @@ public:
 			label += ttos(lrs_.left().block()[i])+",";
 		}
 		io.printMatrix(transform_,label);
-		std::string s = "#DIRECTION="+ttos(direction_);
+		PsimagLite::String s = "#DIRECTION="+ttos(direction_);
 		io.printline(s);
 //		io.print("#DIRECTION=",direction_);
 	}

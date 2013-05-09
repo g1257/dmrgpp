@@ -161,7 +161,7 @@ public:
 
 		if (!isEnabled_) return;
 		if (keptStates>=transform1.n_col()) return;
-		std::ostringstream msg;
+		PsimagLite::OstringStream msg;
 		msg<<"updateKeptStates";
 		progress_.printline(msg,std::cout);
 
@@ -539,7 +539,7 @@ private:
 	}
 
 
-	void printSparseMatrix(SparseMatrixType& s1,const std::string& label,const RealType& eps) const
+	void printSparseMatrix(SparseMatrixType& s1,const PsimagLite::String& label,const RealType& eps) const
 	{
 		std::cout<<label<<"\n";
 		for (size_t i=0;i<s1.rank();i++) {

@@ -294,7 +294,7 @@ namespace Dmrg {
 			}
 
 			int ki = PsimagLite::isInVector(momentumOfOperators_,angularMomentum);
-			if (ki<0) throw std::runtime_error("Operator has unknown momentum\n");
+			if (ki<0) throw PsimagLite::RuntimeError("Operator has unknown momentum\n");
 			PsimagLite::Matrix<SparseElementType> B(n,n);
 			externalProd_(B,basisA,basisB,A,ki,order,fermionSign);
 			fullMatrixToCrsMatrix(reducedOperators_[ind].data,B);
@@ -332,7 +332,7 @@ namespace Dmrg {
 			if (!useSu2Symmetry_) return;
 			for (size_t i=0;i<permutation.size();i++)
 				if (permutation[i]!=i)
-					throw std::runtime_error("reorderHamiltonian: permutation not the identity!\n");
+					throw PsimagLite::RuntimeError("reorderHamiltonian: permutation not the identity!\n");
 		}
 
 		void reorderHamiltonian(const PsimagLite::Vector<size_t>::Type& permutation)
@@ -340,7 +340,7 @@ namespace Dmrg {
 			if (!useSu2Symmetry_) return;
 			for (size_t i=0;i<permutation.size();i++)
 				if (permutation[i]!=i)
-					throw std::runtime_error("reorderHamiltonian: permutation not the identity!\n");
+					throw PsimagLite::RuntimeError("reorderHamiltonian: permutation not the identity!\n");
 		}
 
 		size_t size() const { return reducedOperators_.size(); }
@@ -358,7 +358,7 @@ namespace Dmrg {
 		}
 
 		template<typename IoOutputter>
-		void save(IoOutputter& io,const std::string& s) const
+		void save(IoOutputter& io,const PsimagLite::String& s) const
 		{
 			io.printVector(reducedOperators_,"#OPERATORS");
 		}
@@ -418,7 +418,7 @@ namespace Dmrg {
 
 			for (size_t i=0;i<thisBasis_->reducedSize();i++) {
 				size_t ii = thisBasis_->reducedIndex(i);
-				if (ii>=flavorsOld.size()) throw std::runtime_error("Ouch!!\n");
+				if (ii>=flavorsOld.size()) throw PsimagLite::RuntimeError("Ouch!!\n");
 				size_t f = flavorsOld[ii];
 				if (f>fMax) fMax=f;
 			}

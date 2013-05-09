@@ -104,7 +104,7 @@ public:
 	bool noOperator;
 	int long long rngSeed;
 	RealType beta;
-	std::string collapse;
+	PsimagLite::String collapse;
 }; // class MettsParams
 
 template<typename ModelType>

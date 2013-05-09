@@ -146,7 +146,7 @@ namespace Dmrg {
 					nonzeroSectors_.push_back(i);
 					//firstSector_ = i;
 				}
-				//if (v[i].size()!=0 && weights[i]==0) throw std::runtime_error("VectorWithOffsets::"
+				//if (v[i].size()!=0 && weights[i]==0) throw PsimagLite::RuntimeError("VectorWithOffsets::"
 				//			"set(...)\n");
 			}
 			offsets_[v.size()]=size_;
@@ -171,7 +171,7 @@ namespace Dmrg {
 			}
 			offsets_[np]=size_;
 			setIndex2Sector();
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Populated "<<np<<" sectors";
 			progress_.printline(msg,std::cout);
 		}
@@ -200,7 +200,7 @@ namespace Dmrg {
 			}
 
 			setIndex2Sector();
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"populateFromQns "<<qns.size()<<" sectors";
 			progress_.printline(msg,std::cout);
 		}
@@ -217,7 +217,7 @@ namespace Dmrg {
 				}
 			}
 			setIndex2Sector();
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Collapsed. Non-zero sectors now are "<<nonzeroSectors_.size();
 			progress_.printline(msg,std::cout);
 		}
@@ -325,7 +325,7 @@ namespace Dmrg {
 				return data_[0][0];
 			}
 			return data_[j][i-offsets_[j]];
-			//throw std::runtime_error("VectorWithOffsets can't build itself dynamically yet (sorry!)\n");
+			//throw PsimagLite::RuntimeError("VectorWithOffsets can't build itself dynamically yet (sorry!)\n");
 		}
 		
 		/*ThisType& operator= (const ThisType& f)
@@ -349,10 +349,10 @@ namespace Dmrg {
 		}
 
 		template<typename IoOutputter>
-		void save(IoOutputter& io,const std::string& label) const
+		void save(IoOutputter& io,const PsimagLite::String& label) const
 		{
 			io.printline(label);
-			std::string s="#size="+ttos(size_);
+			PsimagLite::String s="#size="+ttos(size_);
 			io.printline(s);
 
 //			io.print(label);
@@ -366,32 +366,32 @@ namespace Dmrg {
 				size_t j =  nonzeroSectors_[jj];
 				s="#sector="+ttos(j);
 				io.printline(s);
-//				std::string s="#sector="+ttos(j);
+//				PsimagLite::String s="#sector="+ttos(j);
 //				io.print("#sector",j);
 				io.printVector(data_[j],s);
 			}
 		}
 		
 		template<typename IoInputter>
-		void load(IoInputter& io,const std::string& label,size_t counter=0)
+		void load(IoInputter& io,const PsimagLite::String& label,size_t counter=0)
 		{
 			io.advance(label,counter);
 			int x = 0;
 			io.readline(x,"#size=");
-			if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): size<0\n");
+			if (x<0) throw PsimagLite::RuntimeError("VectorWithOffsets::load(...): size<0\n");
 			size_ = x;
 			io.read(offsets_,"#offsets");
 			data_.clear();
 			data_.resize(offsets_.size());
 			io.readline(x,"#nonzero=");
-			if (x<0) throw std::runtime_error("VectorWithOffsets::load(...): nonzerosectors<0\n");
+			if (x<0) throw PsimagLite::RuntimeError("VectorWithOffsets::load(...): nonzerosectors<0\n");
 			nonzeroSectors_.resize(x);
 			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
 				io.readline(x,"#sector=");
 				if (x<0) 
-					throw std::runtime_error("VectorWithOffsets::load(...): sector<0\n");
+					throw PsimagLite::RuntimeError("VectorWithOffsets::load(...): sector<0\n");
 				if (size_t(x)>=data_.size()) 
-					throw std::runtime_error("VectorWithOffsets::load(...): sector too big\n");
+					throw PsimagLite::RuntimeError("VectorWithOffsets::load(...): sector too big\n");
 				nonzeroSectors_[jj] = x;
 				io.read(data_[x],"#sector=");
 			}
@@ -401,18 +401,18 @@ namespace Dmrg {
 		//! We don't have a partitioned basis because we don't have the superblock basis at this point
 		//! Therefore, partitioning is bogus here
 		template<typename IoInputter>
-		void loadOneSector(IoInputter& io,const std::string& label,size_t counter=0)
+		void loadOneSector(IoInputter& io,const PsimagLite::String& label,size_t counter=0)
 		{
 			io.advance(label,counter);
 			int x = 0;
 			io.readline(x,"#size=");
 			if (x<0)
-				throw std::runtime_error("VectorWithOffsets::loadOneSector(...): size<0\n");
+				throw PsimagLite::RuntimeError("VectorWithOffsets::loadOneSector(...): size<0\n");
 			size_ = x;
 			int offset = 0;
 			io.readline(offset,"#offset=");
 			if (offset<0)
-				throw std::runtime_error("VectorWithOffsets::loadOneSector(...): offset<0\n");
+				throw PsimagLite::RuntimeError("VectorWithOffsets::loadOneSector(...): offset<0\n");
 
 			data_.resize(1);
 			offsets_.resize(2);
@@ -493,17 +493,17 @@ namespace Dmrg {
 			for (size_t i=0;i<someBasis.partition()-1;i++) {
 				if (nonZeroPartition(v,someBasis,i)) {
 					if (found) {
-//						std::ostringstream msg;
+//						PsimagLite::OstringStream msg;
 //						msg<<"More than one partition found";
 //						progress_.printline(msg,std::cout);
-						//throw std::runtime_error("quiting\n");
+						//throw PsimagLite::RuntimeError("quiting\n");
 					}
 					found = true;
 					p.push_back(i);
 				}
 			}
 			if (!found) {
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"No partition found";
 				progress_.printline(msg,std::cout);
 				//p.push_back(0);
@@ -537,7 +537,7 @@ namespace Dmrg {
 				size_t state = someBasis.partition(i);
 				if (size_t(someBasis.qn(state))==qn) return i;
 			}
-			throw std::runtime_error("findPartitionWithThisQn\n");
+			throw PsimagLite::RuntimeError("findPartitionWithThisQn\n");
 		}
 
 		PsimagLite::ProgressIndicator progress_;
@@ -595,7 +595,7 @@ namespace Dmrg {
 
 		if (fabs(norma-1.0)<eps) return;
 
-		std::string s(__FILE__);
+		PsimagLite::String s(__FILE__);
 		s += " " + ttos(__LINE__);
 		std::cerr<<s<<" norm= "<<norma<<"\n";
 		assert(fabs(norma)>eps);
@@ -639,7 +639,7 @@ namespace Dmrg {
 			size_t i = v1.sector(ii);
 			for (size_t jj=0;jj<v1.sectors();jj++) {
 				size_t j = v2.sector(jj);
-				if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+				if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
 				size_t offset = v1.offset(i);
 				for (size_t k=0;k<v1.effectiveSize(i);k++) 
 					sum+= v1[k+offset] * conj(v2[k+offset]);
@@ -657,7 +657,7 @@ namespace Dmrg {
 			size_t i = v1.sector(ii);
 			for (size_t jj=0;jj<v1.sectors();jj++) {
 				size_t j = v2.sector(jj);
-				if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+				if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
 				size_t offset = v1.offset(i);
 				for (size_t k=0;k<v1.effectiveSize(i);k++)
 					sum+= v1[k+offset] * std::conj(v2[k+offset]);
@@ -682,12 +682,12 @@ namespace Dmrg {
 	VectorWithOffsets<FieldType> operator+(const VectorWithOffsets<FieldType>& v1,
 					       const VectorWithOffsets<FieldType>& v2)
 	{
-		std::string s = "VectorWithOffsets + VectorWithOffsets failed\n";
-		if (v1.nonzeroSectors_!=v2.nonzeroSectors_) throw std::runtime_error(s.c_str());
+		PsimagLite::String s = "VectorWithOffsets + VectorWithOffsets failed\n";
+		if (v1.nonzeroSectors_!=v2.nonzeroSectors_) throw PsimagLite::RuntimeError(s.c_str());
 		for (size_t ii=0;ii<v1.nonzeroSectors_.size();ii++) {
 			size_t i = v1.nonzeroSectors_[ii];
 			if (v1.data_[i].size()!=v2.data_[i].size())
-				throw std::runtime_error(s.c_str());
+				throw PsimagLite::RuntimeError(s.c_str());
 		}
 		VectorWithOffsets<FieldType> w = v1;
 		w += v2;

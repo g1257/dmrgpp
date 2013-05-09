@@ -105,21 +105,21 @@ namespace Dmrg {
 			TimeSerializer(typename PsimagLite::IoSimple::In& io,size_t lastInstance = 0)
 			{
 				RealType x=0;
-				std::string s = "#TIME=";
+				PsimagLite::String s = "#TIME=";
 				if (lastInstance) io.readline(x,s,lastInstance);
 				else io.readline(x,s);
-				if (x<0) throw std::runtime_error("TimeSerializer:: time cannot be negative\n");
+				if (x<0) throw PsimagLite::RuntimeError("TimeSerializer:: time cannot be negative\n");
 				currentTime_ = x;
 				
 				s = "#TCENTRALSITE=";
 				int xi=0;
 				io.readline(xi,s);
-				if (xi<0) throw std::runtime_error("TimeSerializer:: site cannot be negative\n");
+				if (xi<0) throw PsimagLite::RuntimeError("TimeSerializer:: site cannot be negative\n");
 				site_ = xi;
 				
 				s = "#TNUMBEROFVECTORS=";
 				io.readline(xi,s);
-				if (xi<=0) throw std::runtime_error("TimeSerializer:: n. of vectors must be positive\n");
+				if (xi<=0) throw PsimagLite::RuntimeError("TimeSerializer:: n. of vectors must be positive\n");
 				targetVectors_.resize(xi);
 				for (size_t i=0;i<targetVectors_.size();i++) {
 					s = "targetVector"+ttos(i);
@@ -127,7 +127,7 @@ namespace Dmrg {
 				}
 				s = "#MARKER=";
 				io.readline(xi,s);
-				if (xi<0) throw std::runtime_error("TimeSerializer:: marker must be positive\n");
+				if (xi<0) throw PsimagLite::RuntimeError("TimeSerializer:: marker must be positive\n");
 				marker_=xi;
 			}
 			
@@ -156,7 +156,7 @@ namespace Dmrg {
 			template<typename IoOutputter>
 			void save(IoOutputter& io) const
 			{
-				std::string s = "#TIME=" + ttos(currentTime_);
+				PsimagLite::String s = "#TIME=" + ttos(currentTime_);
 				io.printline(s);
 				s = "#TCENTRALSITE=" + ttos(site_);
 				io.printline(s);
@@ -170,7 +170,7 @@ namespace Dmrg {
 //				io.print("#TNUMBEROFVECTORS=",targetVectors_.size());
 
 				for (size_t i=0;i<targetVectors_.size();i++) {
-					std::string label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
+					PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
 					targetVectors_[i].save(io,label);
 				}
 

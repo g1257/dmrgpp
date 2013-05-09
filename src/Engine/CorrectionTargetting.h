@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CORRECTION_TARGETTING_H
 #define CORRECTION_TARGETTING_H
 #include <iostream>
-#include <string>
+#include "String.h"
 #include "CorrectionParams.h"
 #include "CommonTargetting.h"
 #include <stdexcept>
@@ -160,7 +160,7 @@ namespace Dmrg {
 			
 			RealType weight(size_t i) const
 			{
-				if (stage_ == DISABLED) throw std::runtime_error(
+				if (stage_ == DISABLED) throw PsimagLite::RuntimeError(
 					"CorrectionTargetting: What are you doing here?\n");
 				return correctionStruct_.correctionA;
 			}
@@ -221,7 +221,7 @@ namespace Dmrg {
 			{
 				RealType eps = 1e-6;
 				if (psi_.size()>0 && std::norm(psi_)<eps)
-					throw std::runtime_error("psi's norm is zero\n");
+					throw PsimagLite::RuntimeError("psi's norm is zero\n");
 				typename PsimagLite::Vector<size_t>::Type nk;
 				commonTargetting_.setNk(nk,block);
 				waveFunctionTransformation_.setInitialVector(initialVector,psi_,lrs_,nk);
@@ -230,24 +230,24 @@ namespace Dmrg {
 			template<typename IoOutputType>
 			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
 			{
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Saving state...";
 				progress_.printline(msg,std::cout);
 
-				if (block.size()!=1) throw std::runtime_error(
+				if (block.size()!=1) throw PsimagLite::RuntimeError(
 						"GST only supports blocks of size 1\n");
 				//io.print("#TCENTRALSITE=",block[0]);
-				std::string s = "#TCENTRALSITE=" + ttos(block[0]);
+				PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
 				io.printline(s);
 				psi_.save(io,"PSI");
 			}
 
-			void load(const std::string& f)
+			void load(const PsimagLite::String& f)
 			{
 				IoInputType io(f);
 				int site=0;
 				io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
-				if (site<0) throw std::runtime_error(
+				if (site<0) throw PsimagLite::RuntimeError(
 						"GST::load(...): site cannot be negative\n");
 				psi_.load(io,"PSI");
 			}

@@ -131,7 +131,7 @@ namespace Dmrg {
 		{
 			assert(direction!=ProgramGlobals::INFINITE);
 
-			if (targetParams_.collapse.find("every")!=std::string::npos)
+			if (targetParams_.collapse.find("every")!=PsimagLite::String::npos)
 				setCollapseBasis();
 			internalAction(c,eToTheBetaH,block,direction,false);
 			if (atBorder(direction,block)) {
@@ -406,7 +406,7 @@ namespace Dmrg {
 		{
 			RealType tmp = std::norm(src);
 			if (fabs(tmp-1.0)>1e-3)
-				throw std::runtime_error("probability\n");
+				throw PsimagLite::RuntimeError("probability\n");
 
 			RealType sum = 0;
 			for (size_t alpha=0;alpha<volumeOfNk;alpha++) {
@@ -439,9 +439,9 @@ namespace Dmrg {
 				for (size_t j=0;j<nk;j++)
 					collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
 
-			if (targetParams_.collapse.find("random")!=std::string::npos)
+			if (targetParams_.collapse.find("random")!=PsimagLite::String::npos)
 				rotationNd(collapseBasis_,nk);
-			if (targetParams_.collapse.find("particle")!=std::string::npos)
+			if (targetParams_.collapse.find("particle")!=PsimagLite::String::npos)
 				particleCollapse(collapseBasis_);
 			std::cout<<"Collapse basis:\n";
 			std::cout<<collapseBasis_;
@@ -451,7 +451,7 @@ namespace Dmrg {
 		void particleCollapse(MatrixType& m) const
 		{
 			if (m.n_row()!=4 || m.n_col()!=4)
-				throw std::runtime_error("particleCollapse: only for 4 states\n");
+				throw PsimagLite::RuntimeError("particleCollapse: only for 4 states\n");
 
 			MatrixType m2(m.n_row(),m.n_col());
 			RealType theta = M_PI*rng_();

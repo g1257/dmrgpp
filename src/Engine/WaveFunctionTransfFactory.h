@@ -120,7 +120,7 @@ namespace Dmrg {
 		
 		template<typename SomeParametersType>
 		WaveFunctionTransfFactory(SomeParametersType& params)
-		: isEnabled_(!(params.options.find("nowft")!=std::string::npos)),
+		: isEnabled_(!(params.options.find("nowft")!=PsimagLite::String::npos)),
 		  stage_(INFINITE),
 		  counter_(0),
 		  firstCall_(true),
@@ -130,23 +130,23 @@ namespace Dmrg {
 		  WFT_STRING("Wft"),
 		  wftImpl_(0),
 		  rng_(3433117),
-		  twoSiteDmrg_(params.options.find("twositedmrg")!=std::string::npos),
+		  twoSiteDmrg_(params.options.find("twositedmrg")!=PsimagLite::String::npos),
 		  noLoad_(false)
 		{
 			if (!isEnabled_) return;
 
-			bool b = (params.options.find("checkpoint")!=std::string::npos ||
-			    params.options.find("restart")!=std::string::npos);
+			bool b = (params.options.find("checkpoint")!=PsimagLite::String::npos ||
+			    params.options.find("restart")!=PsimagLite::String::npos);
 
 			if (b) {
-				if (params.options.find("noloadwft")!=std::string::npos)
+				if (params.options.find("noloadwft")!=PsimagLite::String::npos)
 					noLoad_=true;
 				else
 					load();
 			} else {
-				if (params.options.find("noloadwft")!=std::string::npos) {
-					std::string str("Error: noloadwft needs restart or checkpoint\n");
-					throw std::runtime_error(str.c_str());
+				if (params.options.find("noloadwft")!=PsimagLite::String::npos) {
+					PsimagLite::String str("Error: noloadwft needs restart or checkpoint\n");
+					throw PsimagLite::RuntimeError(str.c_str());
 				}
 			}
 
@@ -191,7 +191,7 @@ namespace Dmrg {
 
 			if (!isEnabled_ || !allow) return;
 			beforeWft(lrs);
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Window open, ready to transform vectors";
 			progress_.printline(msg,std::cout);
 		}
@@ -254,7 +254,7 @@ namespace Dmrg {
 
 			if (!isEnabled_ || !allow) return;
 			afterWft(lrs);
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Window closed, no more transformations, please";
 			progress_.printline(msg,std::cout);
 		}
@@ -270,7 +270,7 @@ namespace Dmrg {
 				createRandomVector(y,offset,final);
 			}
 			if (!isEnabled_) return; // don't make noise unless enabled
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Yes, I'm awake, but there's nothing heavy to do now";
 			progress_.printline(msg,std::cout);
 		}
@@ -321,7 +321,7 @@ namespace Dmrg {
 			}
 
 			dmrgWaveStruct_.lrs=lrs;
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"OK, pushing option="<<direction<<" and stage="<<stage_;
 			progress_.printline(msg,std::cout);
 
@@ -374,7 +374,7 @@ namespace Dmrg {
 					if (twoSiteDmrg_ && wsStack_.size()>0)
 						dmrgWaveStruct_.ws=wsStack_.top();
 				} else {
-					throw std::runtime_error("System Stack is empty\n");
+					throw PsimagLite::RuntimeError("System Stack is empty\n");
 				}
 			}
 			
@@ -385,7 +385,7 @@ namespace Dmrg {
 					if (twoSiteDmrg_ && weStack_.size()>0)
 						dmrgWaveStruct_.we=weStack_.top();
 				} else {
-					throw std::runtime_error("Environ Stack is empty\n");
+					throw PsimagLite::RuntimeError("Environ Stack is empty\n");
 				}
 			}
 			if (counter_==0 && stage_==EXPAND_SYSTEM) {
@@ -408,7 +408,7 @@ namespace Dmrg {
 		{
 			wftImpl_->transformVector(psiDest,psiSrc,lrs,nk);
 
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Transformation completed";
 			progress_.printline(msg,std::cout);
 		}
@@ -431,11 +431,11 @@ namespace Dmrg {
 
 		void save() const
 		{
-			if (!isEnabled_) throw std::runtime_error(
+			if (!isEnabled_) throw PsimagLite::RuntimeError(
 					"WFT::save(...) called but wft is disabled\n");
 
 			typename IoType::Out io(WFT_STRING + filenameOut_,0);
-			std::string s="isEnabled="+ttos(isEnabled_);
+			PsimagLite::String s="isEnabled="+ttos(isEnabled_);
 			io.printline(s);
 			s="stage="+ttos(stage_);
 			io.printline(s);
@@ -457,7 +457,7 @@ namespace Dmrg {
 
 		void load()
 		{
-			if (!isEnabled_) throw std::runtime_error(
+			if (!isEnabled_) throw PsimagLite::RuntimeError(
 					"WFT::load(...) called but wft is disabled\n");
 
 			typename IoType::In io(WFT_STRING + filenameIn_);
@@ -489,7 +489,7 @@ namespace Dmrg {
 			size_t numberOfSites = lrs.super().block().size();
 			if (checkSites(numberOfSites)) {
 				noLoad_=false;
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<" now available";
 				progress_.printline(msg,std::cout);
 			}
@@ -510,8 +510,8 @@ namespace Dmrg {
 		size_t counter_;
 		bool firstCall_;
 		PsimagLite::ProgressIndicator progress_;
-		std::string filenameIn_,filenameOut_;
-		const std::string WFT_STRING;
+		PsimagLite::String filenameIn_,filenameOut_;
+		const PsimagLite::String WFT_STRING;
 		DmrgWaveStructType dmrgWaveStruct_;
 		std::stack<SparseMatrixType> wsStack_,weStack_;
 		WaveFunctionTransfBaseType* wftImpl_;

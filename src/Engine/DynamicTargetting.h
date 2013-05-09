@@ -166,7 +166,7 @@ namespace Dmrg {
 		  weightForContinuedFraction_(0)
 		{
 			if (!wft.isEnabled())
-				throw std::runtime_error(" DynamicTargetting needs an enabled wft\n");
+				throw PsimagLite::RuntimeError(" DynamicTargetting needs an enabled wft\n");
 			/* paramsForSolver_.steps = model_.params().lanczosSteps; */
 			/* paramsForSolver_.tolerance = model_.params().lanczosEps; */
 			paramsForSolver_.steps = tstStruct_.steps;
@@ -220,10 +220,10 @@ namespace Dmrg {
 		            size_t loopNumber)
 		{
 			if (block1.size()!=1 || block2.size()!=1) {
-				std::string str(__FILE__);
+				PsimagLite::String str(__FILE__);
 				str += " " + ttos(__LINE__) + "\n";
 				str += "evolve only blocks of one site supported\n";
-				throw std::runtime_error(str.c_str());
+				throw PsimagLite::RuntimeError(str.c_str());
 			}
 
 			size_t site = block1[0];
@@ -309,7 +309,7 @@ namespace Dmrg {
 
 			PostProcType cf(ab_,params);
 
-			std::string str = "#TCENTRALSITE=" + ttos(block[0]);
+			PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
 			io.printline(str);
 
 			commonTargetting_.save(block,io,cf,targetVectors_);
@@ -317,7 +317,7 @@ namespace Dmrg {
 			psi_.save(io,"PSI");
 		}
 
-		void load(const std::string& f)
+		void load(const PsimagLite::String& f)
 		{
 			typename IoType::In io(f);
 			try {
@@ -362,7 +362,7 @@ namespace Dmrg {
 			else stage_[i]=CONVERGING;
 			if (stage_[i] == OPERATOR) commonTargetting_.checkOrder(i,stage_);
 
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Evolving, stage="<<commonTargetting_.getStage(i,stage_);
 			msg<<" site="<<site<<" loopNumber="<<loopNumber;
 			msg<<" Eg="<<Eg;
@@ -385,7 +385,7 @@ namespace Dmrg {
 
 				bool corner = (tstStruct_.sites[i]==0 ||tstStruct_.sites[i]==numberOfSites -1) ? true : false;
 
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"I'm applying a local operator now";
 				progress_.printline(msg,std::cout);
 				typename PsimagLite::Vector<size_t>::Type electrons;
@@ -395,7 +395,7 @@ namespace Dmrg {
 				              fs,systemOrEnviron,corner);
 				RealType norma = std::norm(phiNew);
 				if (norma==0)
-					throw std::runtime_error("Norm of phi is zero\n");
+					throw PsimagLite::RuntimeError("Norm of phi is zero\n");
 				//std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 
 			} else if (stage_[i]== CONVERGING) {
@@ -404,7 +404,7 @@ namespace Dmrg {
 					phiNew = targetVectors_[0];
 					return;
 				}
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"I'm calling the WFT now";
 				progress_.printline(msg,std::cout);
 
@@ -457,7 +457,7 @@ namespace Dmrg {
 			PTHREADS_NAME<ParallelWftType> threadedWft;
 			PTHREADS_NAME<ParallelWftType>::setThreads(model_.params().nthreads);
 			if (threadedWft.name()=="pthreads") {
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Threading with "<<threadedWft.threads();
 				progress_.printline(msg,std::cout);
 			} else {

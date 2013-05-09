@@ -108,7 +108,7 @@ namespace Dmrg {
 		typedef RealType_ RealType;
 
 		//! Constructor, s=name of this basis 
-		Basis(const std::string& s)
+		Basis(const PsimagLite::String& s)
 		: dmrgTransformed_(false), name_(s), progress_(s,0)
 		{
 			symmLocal_.createDummyFactors(1,1);
@@ -116,7 +116,7 @@ namespace Dmrg {
 
 		//! Loads this basis from memory or disk
 		template<typename IoInputter>
-		Basis(IoInputter& io,const std::string& ss,size_t counter=0,bool bogus = false)
+		Basis(IoInputter& io,const PsimagLite::String& ss,size_t counter=0,bool bogus = false)
 		: dmrgTransformed_(false), name_(ss), progress_(ss,0)
 		{
 			io.advance("#NAME="+ss,counter);
@@ -127,14 +127,14 @@ namespace Dmrg {
 		template<typename IoInputter>
 		void load(IoInputter& io)
 		{
-			std::string nn="#NAME=";
-			std::pair<std::string,size_t> sc = io.advance(nn);
+			PsimagLite::String nn="#NAME=";
+			std::pair<PsimagLite::String,size_t> sc = io.advance(nn);
 			name_ = sc.first.substr(nn.size(),sc.first.size());
 			loadInternal(io);
 		}
 
 		//! Returns the name of this basis
-		const std::string& name() const { return name_; }
+		const PsimagLite::String& name() const { return name_; }
 
 		//! Sets the block of sites for this basis
 		void set(BlockType const &B) { block_ = B; }
@@ -271,7 +271,7 @@ namespace Dmrg {
 		{
 			for (size_t j=0;j<partition_.size()-1;j++)
 				if (i>=partition_[j] && i<partition_[j+1]) return j;
-			throw std::runtime_error("BasisImplementation:: No partition found for this state\n");
+			throw PsimagLite::RuntimeError("BasisImplementation:: No partition found for this state\n");
 		}
 
 		//! Encodes the quantum numbers into a single unique size_t and returns it
@@ -345,12 +345,12 @@ namespace Dmrg {
 
 			if (removedIndices.size()==0) return 0;
 
-			std::ostringstream msg0;
+			PsimagLite::OstringStream msg0;
 			msg0<<"Truncating transform...";
 			utils::truncate(ftransform,removedIndices,false);
 			progress_.printline(msg0,std::cerr);
 
-			std::ostringstream msg2;
+			PsimagLite::OstringStream msg2;
 			msg2<<"Truncating indices...";
 			progress_.printline(msg2,std::cerr);
 			truncate(removedIndices);
@@ -358,7 +358,7 @@ namespace Dmrg {
 			// N.B.: false below means that we don't truncate the permutation vectors
 			//	because they're needed for the WFT
 			findPermutationAndPartition(false);
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<"Done with changeBasis";
 			progress_.printline(msg,std::cerr);
 			return calcError(eigs,removedIndices);
@@ -479,7 +479,7 @@ namespace Dmrg {
 
 		//! saves this basis to disk
 		template<typename IoOutputter>
-		void save(IoOutputter& io,const std::string& ss) const
+		void save(IoOutputter& io,const PsimagLite::String& ss) const
 		{
 			io.printline("#NAME="+ss);
 			saveInternal(io);
@@ -489,7 +489,7 @@ namespace Dmrg {
 		template<typename IoOutputter>
 		void save(IoOutputter& io) const
 		{
-			//std::ostringstream msg;
+			//PsimagLite::OstringStream msg;
 			//msg<<"Now saving to disk";
 			//progress_.printline(msg,std::cerr);
 			io.printline("#NAME="+name_);
@@ -531,7 +531,7 @@ namespace Dmrg {
 		template<typename IoOutputter>
 		void saveInternal(IoOutputter& io) const
 		{
-			std::string s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
+			PsimagLite::String s="#useSu2Symmetry="+ttos(useSu2Symmetry_);
 			io.printline(s);
 			io.printVector(block_,"#BLOCK");
 			io.printVector(quantumNumbers_,"#QN");
@@ -652,7 +652,7 @@ namespace Dmrg {
 		*/
 		BlockType block_;
 		bool dmrgTransformed_;
-		std::string name_;
+		PsimagLite::String name_;
 		PsimagLite::ProgressIndicator progress_;
 //		ReflectionSymmetryType reflection_;
 		static bool useSu2Symmetry_;
@@ -680,7 +680,7 @@ namespace Dmrg {
 	template<typename RealType,typename SparseMatrixType>
 	std::istream& operator>>(std::istream& is,Basis<RealType,SparseMatrixType>& x)
 	{
-		throw std::runtime_error("Unimplemented >>");
+		throw PsimagLite::RuntimeError("Unimplemented >>");
 		return is;
 	}
 

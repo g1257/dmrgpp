@@ -203,7 +203,7 @@ namespace Dmrg {
 		void operator+=(VerySparseMatrix<T>& other)
 		{
 			if (sorted_ && other.sorted()) plusEqualOrd(other);
-			else throw std::runtime_error("VerySparseMatrix::operator+=(): unsorted\n"); //plusEqualUnord(other);
+			else throw PsimagLite::RuntimeError("VerySparseMatrix::operator+=(): unsorted\n"); //plusEqualUnord(other);
 		}
 
 		void sort()
@@ -266,7 +266,7 @@ namespace Dmrg {
 		template<typename IoType>
 		void saveToDisk(IoType& outHandle)
 		{
-			std::string s = "rank="+ttos(rank_);
+			PsimagLite::String s = "rank="+ttos(rank_);
 			outHandle.printline(s);
 			outHandle.printVector(coordinates_,"coordinates");
 			outHandle.printVector(values_,"values");
@@ -278,7 +278,7 @@ namespace Dmrg {
 		void loadFromDisk(IoType& inHandle,bool check=false)
 		{
 			clear();
-			std::string s = "rank=";
+			PsimagLite::String s = "rank=";
 			inHandle.readline(rank_,s);
 			inHandle.read(coordinates_,"coordinates");
 			if (check) checkCoordinates();
@@ -304,7 +304,7 @@ namespace Dmrg {
 			}
 			if (flag==0) return;
 			std::cerr<<"rank="<<rank_<<"\n";
-			throw std::runtime_error("VerySparseMatrix::checkCoordinates()\n");
+			throw PsimagLite::RuntimeError("VerySparseMatrix::checkCoordinates()\n");
 		}
 		
 		bool sorted() const { return sorted_; }
@@ -368,7 +368,7 @@ namespace Dmrg {
 		
 // 		void plusEqualUnord(VerySparseMatrix<T>& other)
 // 		{
-// 			throw std::runtime_error("dfjdkfdf\n");
+// 			throw PsimagLite::RuntimeError("dfjdkfdf\n");
 // 			typename PsimagLite::Vector<size_t>::Type cols1,cols2;
 // 			size_t startIndex1=0,startIndex2=0;
 // 			typename PsimagLite::Vector<PairType>::Type newCoordinates;

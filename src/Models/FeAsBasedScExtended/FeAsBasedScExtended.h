@@ -173,7 +173,7 @@ namespace Dmrg {
 			setSz(creationMatrix,block);
 		}
 
-		PsimagLite::Matrix<SparseElementType> naturalOperator(const std::string& what,
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
 								      size_t site,
 								      size_t dof) const
 		{
@@ -305,7 +305,7 @@ namespace Dmrg {
 		void blockIsSize1OrThrow(const BlockType& block) const
 		{
 			if (block.size()==1) return;
-			throw std::runtime_error(
+			throw PsimagLite::RuntimeError(
 				"FeAsBasedExtended:: Added blocks must be of size 1"
 					"or is unimplemented otherwise\n");
 		}

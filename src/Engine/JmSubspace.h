@@ -119,7 +119,7 @@ namespace Dmrg {
 
 			void push (size_t index,const PairType& jm1,const PairType& jm2,size_t nelectrons)
 			{
-				if (nelectrons!=nelectrons_) throw std::runtime_error("JmSubspace::push(): nelectrons changed!!\n");
+				if (nelectrons!=nelectrons_) throw PsimagLite::RuntimeError("JmSubspace::push(): nelectrons changed!!\n");
 				indices_.push_back(index);
 				setFlavorsIndex(index,jm1,jm2);
 			}
@@ -214,7 +214,7 @@ namespace Dmrg {
 					int x=PsimagLite::isInVector(indices_,i);
 					if (x<0) return i;
 				}
-				throw std::runtime_error("findfreerow: no free rows\n");
+				throw PsimagLite::RuntimeError("findfreerow: no free rows\n");
 			}	
 
 			static size_t flavor(size_t f1,size_t f2,size_t ne1,size_t ne2,size_t j1,size_t j2)

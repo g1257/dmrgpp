@@ -149,7 +149,7 @@ public:
 	                             size_t systemOrEnviron,
 	                             bool allOperatorsApplied)
 	{
-		std::ostringstream msg;
+		PsimagLite::OstringStream msg;
 		msg<<"EXPERIMENTAL: using RungeKutta";
 
 		RealType norma = std::norm(phi);

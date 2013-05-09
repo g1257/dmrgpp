@@ -130,7 +130,7 @@ namespace Dmrg {
 				bracket_(2,GS_VECTOR),
 				noMoreData_(false)
 		{
-			if (!init(hasTimeEvolution,nf)) throw std::runtime_error(
+			if (!init(hasTimeEvolution,nf)) throw PsimagLite::RuntimeError(
 					"No more data to construct this object\n");
 
 		}
@@ -303,13 +303,13 @@ namespace Dmrg {
 
 		void integrityChecks()
 		{
-			if (dSerializerV_.size()!=timeSerializerV_.size()) throw std::runtime_error("Error 1\n");
+			if (dSerializerV_.size()!=timeSerializerV_.size()) throw PsimagLite::RuntimeError("Error 1\n");
 			if (dSerializerV_.size()==0) return;
 			for (size_t x=0;x<dSerializerV_.size()-1;x++) {
 				size_t n = dSerializerV_[x]->leftRightSuper().super().size();
 				if (n==0) continue;
 				if (n!=timeSerializerV_[x].size())
-					throw std::runtime_error("Error 2\n");
+					throw PsimagLite::RuntimeError("Error 2\n");
 			}
 			
 		}
@@ -352,34 +352,34 @@ namespace Dmrg {
 		void checkFailedThread(size_t threadId) const
 		{
 			assert(false);
-			std::string str(__FILE__);
+			PsimagLite::String str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
 			str += " thread=" + ttos(threadId);
 			str += " >= currentPos.size=" + ttos(currentPos_.size());
 			str += "\n";
-			throw std::runtime_error(str.c_str());
+			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
 		void checkFailed1(size_t threadId,size_t pos) const
 		{
 			assert(false);
-			std::string str(__FILE__);
+			PsimagLite::String str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
 			str += " thread=" + ttos(threadId) + " currentPos=" + ttos(pos);
 			str += " >= serializer.size=" + ttos(dSerializerV_.size());
 			str += "\n";
-			throw std::runtime_error(str.c_str());
+			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
 		void checkFailed2(size_t threadId,size_t pos) const
 		{
 			assert(false);
-			std::string str(__FILE__);
+			PsimagLite::String str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
 			str += " thread=" + ttos(threadId) + " currentPos=" + ttos(pos);
 			str += " >= time serializer.size=" + ttos(timeSerializerV_.size());
 			str += "\n";
-			throw std::runtime_error(str.c_str());
+			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
 		IoInputType& io_;

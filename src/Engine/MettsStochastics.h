@@ -142,10 +142,10 @@ namespace Dmrg {
 				if (s1<r && r<=s2) return basisOfOneSite[i];
 				s1 = s2;
 			}
-			std::string s(__FILE__);
-			s += std::string(" ") + ttos(__LINE__) + " " + __FUNCTION__ +
+			PsimagLite::String s(__FILE__);
+			s += PsimagLite::String(" ") + ttos(__LINE__) + " " + __FUNCTION__ +
 			     " Probabilities don't amount to 1\n";
-			throw std::runtime_error(s.c_str());
+			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
 		// call only from INFINITE

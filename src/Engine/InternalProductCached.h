@@ -99,7 +99,7 @@ namespace Dmrg {
 		InternalProductCached(ModelType const *model,ModelHelperType const *modelHelper)
 		: progress_("InternalProductCached",0),model_(model),modelHelper_(modelHelper)
 		{
-			std::ostringstream msg;
+			PsimagLite::OstringStream msg;
 			msg<<" ctor called, size is"<<modelHelper->size();
 			progress_.printline(msg,std::cout);
 			SparseMatrixType matrixBlock;

@@ -205,7 +205,7 @@ The body of the constructor follows:
 @o TimeStepTargetting.h -t
 @{
 			{
-				if (!wft.isEnabled()) throw std::runtime_error(" TimeStepTargetting "
+				if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" TimeStepTargetting "
 							"needs an enabled wft\n");
 				
 				RealType tau =tstStruct_.tau;
@@ -226,7 +226,7 @@ The body of the constructor follows:
 				gsWeight_=1.0-sum;
 				sum += gsWeight_;
 				//for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
-				if (fabs(sum-1.0)>1e-5) throw std::runtime_error("Weights don't amount to one\n");
+				if (fabs(sum-1.0)>1e-5) throw PsimagLite::RuntimeError("Weights don't amount to one\n");
 				//printHeader();
 			}
 @}
@@ -239,7 +239,7 @@ this would be an error.%
 @{
 			RealType weight(size_t i) const
 			{
-				if (allStages(DISABLED)) throw std::runtime_error(
+				if (allStages(DISABLED)) throw PsimagLite::RuntimeError(
 						"TST: What are you doing here?\n");
 				return weight_[i];
 				//return 1.0;
@@ -417,7 +417,7 @@ shrinkage:
 @o TimeStepTargetting.h -t
 @{
 				if (block.size()!=1) throw 
-					std::runtime_error("TimeStepTargetting::evolve(...):"
+					PsimagLite::RuntimeError("TimeStepTargetting::evolve(...):"
 							" blocks of size != 1 are unsupported (sorry)\n");
 				size_t site = block[0];
 @}
@@ -461,11 +461,11 @@ Up to now, we simply set the stage but we are yet to apply the operator to the s
 We delegate that to function \verb|computePhi| that will be explain below.
 @o TimeStepTargetting.h -t
 @{
-				std::ostringstream msg2;
+				PsimagLite::OstringStream msg2;
 				msg2<<"Steps without advance: "<<timesWithoutAdvancement;
 				if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
 				
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
@@ -488,13 +488,13 @@ to apply this operator to state \verb|phiOld| and store the result in \verb|phiN
 				size_t indexAdvance = times_.size()-1;
 				size_t indexNoAdvance = 0;
 				if (stage_[i]==OPERATOR) {
-					std::ostringstream msg;
+					PsimagLite::OstringStream msg;
 					msg<<"I'm applying a local operator now";
 					progress_.printline(msg,std::cout);
 					FermionSign fs(lrs_.left(),tstStruct_.electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
 					RealType norma = norm(phiNew);
-					if (norma==0) throw std::runtime_error("Norm of phi is zero\n");
+					if (norma==0) throw PsimagLite::RuntimeError("Norm of phi is zero\n");
 					//std::cerr<<"Norm of phi="<<norma<<" when i="<<i<<"\n";
 @}
 Else we need to advance in space with the WFT. In principle, to do this we just call
@@ -508,7 +508,7 @@ or just populate all sectors with and then ``collapse'' the non-zero sectors for
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
 					size_t advance = indexNoAdvance;
 					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
-					std::ostringstream msg;
+					PsimagLite::OstringStream msg;
 					msg<<"I'm calling the WFT now";
 					progress_.printline(msg,std::cout);
 					
@@ -521,7 +521,7 @@ or just populate all sectors with and then ``collapse'' the non-zero sectors for
 					phiNew.collapseSectors();
 					
 				} else {
-					throw std::runtime_error("It's 5 am, do you know what line "
+					throw PsimagLite::RuntimeError("It's 5 am, do you know what line "
 						" your code is exec-ing?\n");
 				}
 			}		
@@ -559,7 +559,7 @@ The function below prints all target vectors to disk, using the \verb|TimeSerial
 			template<typename IoOutputType>
 			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
 			{
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Saving state...";
 				progress_.printline(msg,std::cout);
 
@@ -574,7 +574,7 @@ We'll visit one function at a time. %'
 
 @d load
 @{
-void load(const std::string& f)
+void load(const PsimagLite::String& f)
 {
 	for (size_t i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
 
@@ -602,7 +602,7 @@ This is done only for debugging purposes, and uses the function \verb|test|.
 				test(psi_,psi_,direction,"<PSI|A|PSI>",site);
 				
 				for (size_t j=0;j<targetVectors_.size();j++) {
-					std::string s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
+					PsimagLite::String s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
 					test(targetVectors_[j],targetVectors_[j],direction,s,site);
 				}
 				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
@@ -619,11 +619,11 @@ need to be the same as the order in which the DMRG sweeping process encounters t
 				if (i==0) return;
 				for (size_t j=0;j<i;j++) {
 					if (stage_[j] == DISABLED) {
-						std::string s ="TST:: Seeing tst site "+utils::ttos(tstStruct_.sites[i]);
+						PsimagLite::String s ="TST:: Seeing tst site "+utils::ttos(tstStruct_.sites[i]);
 						s =s + " before having seen";
 						s = s + " site "+utils::ttos(j);
 						s = s +". Please order your tst sites in order of appearance.\n";
-						throw std::runtime_error(s);
+						throw PsimagLite::RuntimeError(s);
 					}
 				}
 			}
@@ -657,7 +657,7 @@ The function below returns true if no stage is $x$, else false.
 This function returns a string (human-readable) representation of the stage given by $i$.
 @o TimeStepTargetting.h -t
 @{
-			std::string getStage(size_t i) const
+			PsimagLite::String getStage(size_t i) const
 			{
 				switch (stage_[i]) {
 					case DISABLED:
@@ -780,8 +780,8 @@ It is the vector calculated by \verb|calcR| as explained below.
 			{
 				size_t n2 = steps;
 				size_t n = V.n_row();
-				if (T.n_col()!=T.n_row()) throw std::runtime_error("T is not square\n");
-				if (V.n_col()!=T.n_col()) throw std::runtime_error("V is not nxn2\n");
+				if (T.n_col()!=T.n_row()) throw PsimagLite::RuntimeError("T is not square\n");
+				if (V.n_col()!=T.n_col()) throw PsimagLite::RuntimeError("V is not nxn2\n");
 				// for (size_t j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
 				ComplexType zone = 1.0;
 				ComplexType zzero = 0.0;
@@ -876,7 +876,7 @@ And now for each symmetry sector:
 				size_t total = phi.effectiveSize(i0);
 				TargetVectorType phi2(total);
 				phi.extract(phi2,i0);
-				/* std::ostringstream msg;
+				/* PsimagLite::OstringStream msg;
 				msg<<"Calling tridiagonalDecomposition...\n";
 				progress_.printline(msg,std::cerr);*/
 				lanczosSolver.tridiagonalDecomposition(phi2,ab,V);
@@ -892,7 +892,7 @@ A validity check
 			//! This check is invalid if there are more than one sector
 			void check1(const ComplexMatrixType& V,const TargetVectorType& phi2)
 			{
-				if (V.n_col()>V.n_row()) throw std::runtime_error("cols > rows\n");
+				if (V.n_col()>V.n_row()) throw PsimagLite::RuntimeError("cols > rows\n");
 				TargetVectorType r(V.n_col());
 				for (size_t k=0;k<V.n_col();k++) {
 					r[k] = 0.0;
@@ -953,11 +953,11 @@ Print header to disk to index the time vectors. This indexing wil lbe used at po
 //			void printHeader()
 //			{
 //				io_.print(tstStruct_);
-//				std::string label = "times";
+//				PsimagLite::String label = "times";
 //				io_.printVector(times_,label);
 //				label = "weights";
 //				io_.printVector(weight_,label);
-//				std::string s = "GsWeight="+utils::ttos(gsWeight_);
+//				PsimagLite::String s = "GsWeight="+utils::ttos(gsWeight_);
 //				io_.printline(s);
 //			}
 @}
@@ -970,7 +970,7 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 					const VectorWithOffsetType& src1,
 					const VectorWithOffsetType& src2,
 					size_t systemOrEnviron,
-				 	const std::string& label,
+				 	const PsimagLite::String& label,
 					size_t site) const
 			{
 				VectorWithOffsetType dest;
@@ -991,7 +991,7 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 					for (size_t jj=0;jj<src2.sectors();jj++) {
 						size_t j = src2.sector(jj);
 						size_t offset2 = src2.offset(j);
-						if (i!=j) continue; //throw std::runtime_error("Not same sector\n");
+						if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
 						for (size_t k=0;k<dest.effectiveSize(i);k++) 
 							sum+= dest[k+offset1] * conj(src2[k+offset2]);
 					}

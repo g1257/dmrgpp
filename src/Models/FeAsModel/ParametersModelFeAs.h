@@ -104,9 +104,9 @@ namespace Dmrg {
 
 			}
 			if (magneticField.n_row()!=0 && magneticField.n_row()!=3)
-				throw std::runtime_error("Magnetic Field: if present must have 3 rows\n");
+				throw PsimagLite::RuntimeError("Magnetic Field: if present must have 3 rows\n");
 			if (magneticField.n_row()!=0 && magneticField.n_col()!=potentialV.size())
-				throw std::runtime_error("Magnetic Field: Expecting as many columns are there are sites\n");
+				throw PsimagLite::RuntimeError("Magnetic Field: Expecting as many columns are there are sites\n");
 		}
 		
 		size_t orbitals;

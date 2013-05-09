@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CLONER_HEADER_H
 #define CLONER_HEADER_H
 
-#include <string>
+#include "String.h"
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -93,9 +93,9 @@ namespace Dmrg {
 	class	Cloner {
 		static const size_t  LINE_LENGTH = 1024;
 	public:
-		Cloner(const std::string& infile,
-		       const std::string& outRoot,
-		       const std::string& ext)
+		Cloner(const PsimagLite::String& infile,
+		       const PsimagLite::String& outRoot,
+		       const PsimagLite::String& ext)
 		: infile_(infile),outRoot_(outRoot),ext_(ext)
 		{}
 
@@ -107,12 +107,12 @@ namespace Dmrg {
 		void createInputFile(size_t ind) const
 		{
 			std::ifstream fin(infile_.c_str());
-			std::string outfile = outRoot_ + ttos(ind) + ext_;
+			PsimagLite::String outfile = outRoot_ + ttos(ind) + ext_;
 			std::ofstream fout(outfile.c_str());
 			char line[LINE_LENGTH];
 			while(!fin.eof()) {
 				fin.getline(line,LINE_LENGTH);
-				std::string s(line);
+				PsimagLite::String s(line);
 				if (!procLine(s,ind)) continue;
 				fout<<s<<"\n";
 			}
@@ -122,17 +122,17 @@ namespace Dmrg {
 
 	private:
 
-		bool procLine(std::string& s,size_t ind) const
+		bool procLine(PsimagLite::String& s,size_t ind) const
 		{
 			for (size_t i=0;i<lineChanger_.size();i++) {
-				if (s.find(lineChanger_[i].string())!=std::string::npos) {
+				if (s.find(lineChanger_[i].string())!=PsimagLite::String::npos) {
 					return lineChanger_[i].act(ind,s);
 				}
 			}
 			return true;
 		}
 
-		std::string infile_,outRoot_,ext_;
+		PsimagLite::String infile_,outRoot_,ext_;
 		typename PsimagLite::Vector<LineChangerType>::Type lineChanger_;
 	}; // class Cloner
 

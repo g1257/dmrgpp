@@ -88,7 +88,7 @@ namespace Dmrg {
 		typedef typename PsimagLite::IoSimple::Out IoOutType;
 
 		public:
-			DiskStack(const std::string &file1,const std::string &file2,bool hasLoad,size_t rank=0) :
+			DiskStack(const PsimagLite::String &file1,const PsimagLite::String &file2,bool hasLoad,size_t rank=0) :
 				rank_(rank),
 				fileIn_(file1),
 				fileOut_(file2),
@@ -104,7 +104,7 @@ namespace Dmrg {
 					ioIn_.open(fileIn_);
 				} catch (std::exception& e) {
 					std::cerr<<"Problem opening reading file "<<fileIn_<<"\n";
-					throw std::runtime_error("DiskStack::load(...)\n");
+					throw PsimagLite::RuntimeError("DiskStack::load(...)\n");
 				}
 				ioIn_.readline(rank_,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
 				//ioIn_.readline(total_,"#STACKMETATOTAL="); <-- KEEP TOTAL=0, THIS IS A NEW FILE!!
@@ -112,7 +112,7 @@ namespace Dmrg {
 				ioIn_.advance("#STACKMETASTACK");
 				ioIn_>>stack_;
 				ioIn_.close();
-				std::ostringstream msg;
+				PsimagLite::OstringStream msg;
 				msg<<"Attempting to read from file " + fileIn_ + " succeeded";
 				progress_.printline(msg,std::cout);
 				
@@ -137,7 +137,7 @@ namespace Dmrg {
 
 			void push(DataType const &d) 
 			{
-				//std::string tmpLabel = fileOut_ + ttos(total_);
+				//PsimagLite::String tmpLabel = fileOut_ + ttos(total_);
 				ioOut_.open(fileOut_,std::ios_base::app,rank_);
 				d.save(ioOut_);
 				ioOut_.close();
@@ -145,9 +145,9 @@ namespace Dmrg {
 				stack_.push(total_);
 				total_++;
 
-				//std::string s = "Pushing with label="+fileOut_+" and total="+ttos(total_);
+				//PsimagLite::String s = "Pushing with label="+fileOut_+" and total="+ttos(total_);
 				//debugPrint(s);
-				//std::ostringstream msg;
+				//PsimagLite::OstringStream msg;
 				//msg<<s;
 				//progress_.printline(msg,std::cout);
 			}
@@ -155,8 +155,8 @@ namespace Dmrg {
 			void pop()
 			{
 				stack_.pop();
-//				std::string s = "Popping with label="+fileIn_+" stack_.top="+ttos(stack_.top());
-//				std::ostringstream msg;
+//				PsimagLite::String s = "Popping with label="+fileIn_+" stack_.top="+ttos(stack_.top());
+//				PsimagLite::OstringStream msg;
 //				msg<<s;
 //				progress_.printline(msg,std::cout);
 			}
@@ -165,8 +165,8 @@ namespace Dmrg {
 			{
 				ioIn_.open(fileIn_);
 				DataType dt(ioIn_,"",stack_.top());
-//				std::string s = "Topping with label="+fileIn_+" stack_.top="+ttos(stack_.top());
-//				std::ostringstream msg;
+//				PsimagLite::String s = "Topping with label="+fileIn_+" stack_.top="+ttos(stack_.top());
+//				PsimagLite::OstringStream msg;
 //				msg<<s;
 //				progress_.printline(msg,std::cout);
 				ioIn_.close();
@@ -181,7 +181,7 @@ namespace Dmrg {
 		private:
 
 			size_t rank_;
-			std::string fileIn_,fileOut_;
+			PsimagLite::String fileIn_,fileOut_;
 			int total_;
 			PsimagLite::ProgressIndicator progress_;
 			IoInType ioIn_;
