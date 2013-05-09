@@ -127,7 +127,7 @@ namespace JsonParser {
 	msg << " In file '" << filename << "' \n";
 	msg << "     around line          : " << numLines << "\n";
 	msg << "     at character position: " << numChar << "\n";
-	throw std::range_error(msg.str());
+	throw PsimagLite::RangeError(msg.str());
       }
       
       return result;
@@ -278,7 +278,7 @@ namespace JsonParser {
 	    << "  character# = " << numChar << "\n"
 	    << "  line#      = " << numLines << "\n"
 	    << "  context    = " << ctx.CurrentContext();
-	throw std::logic_error(msg.str());
+	throw PsimagLite::LogicError(msg.str());
       }
       case EndFile: {
 	ctx.End(numChar,numLines);
@@ -287,7 +287,7 @@ namespace JsonParser {
       default: {
 	PsimagLite::OstringStream msg;
 	msg << "JsonParser::performAction was passed a unkown action " << actionName(action) << "\n";
-	throw std::logic_error(msg.str());
+	throw PsimagLite::LogicError(msg.str());
       }
       }
     }

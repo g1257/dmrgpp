@@ -163,7 +163,7 @@ namespace psimag {
 		  PsimagLite::String version    = "0.1",
 		  PsimagLite::String byte_order = "BigEndian") {
       
-      throw std::logic_error("================================================= Later we will write a VTK file for fileName << \n");    
+      throw PsimagLite::LogicError("================================================= Later we will write a VTK file for fileName << \n");    
     }
     
 
@@ -306,7 +306,7 @@ namespace psimag {
 	    message << "The " << -info << "th argument had an illegal value!\n";
 	  else
 	    message << "U("<<info<<","<<info<<") was exactly zero. \n";
-	  throw std::logic_error(message.str());
+	  throw PsimagLite::LogicError(message.str());
 	}
 
 	int    lwork(-1);
@@ -327,7 +327,7 @@ namespace psimag {
 	    message << "The " << -info << "th argument had an illegal value!\n";
 	  else
 	    message << "U("<<info<<","<<info<<") was exactly zero. \n";
-	  throw std::logic_error(message.str());
+	  throw PsimagLite::LogicError(message.str());
 	}
 	
 	return info;

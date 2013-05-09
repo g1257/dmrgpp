@@ -149,7 +149,7 @@ namespace JsonParser {
 	std::wostringstream msg;
 	msg << L"CharacterMapper::wcharToClass(" << widec << L") resulted in an error!\n";
 	std::wstring m(msg.str());
-	throw std::logic_error(PsimagLite::String(m.begin(), m.end()));
+	throw PsimagLite::LogicError(PsimagLite::String(m.begin(), m.end()));
       }
       
       return result;
@@ -213,7 +213,7 @@ namespace JsonParser {
       // 	  buffer.push_back( '\\');
       // 	  buffer.push_back( 'u');
       default:
-	throw std::logic_error("JsonParser: Encountered an escapped character that was not recognized.");
+	throw PsimagLite::LogicError("JsonParser: Encountered an escapped character that was not recognized.");
       }
     }
       

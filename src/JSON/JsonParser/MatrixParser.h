@@ -69,13 +69,13 @@ namespace JsonParser {
     void consume(std::complex<T>& cmplx) {
       T r,i;
       if (!consume(L'['))
-	throw std::logic_error("parsing error in consume(std::complex<Fieldtype> cmplx)\n  missing [\n");
+	throw PsimagLite::LogicError("parsing error in consume(std::complex<Fieldtype> cmplx)\n  missing [\n");
       inputStream >> r;
       if (!consume(L','))
-	throw std::logic_error("parsing error in consume(std::complex<Fieldtype> cmplx)\n  missing ,\n");
+	throw PsimagLite::LogicError("parsing error in consume(std::complex<Fieldtype> cmplx)\n  missing ,\n");
       inputStream >> i;
       if(!consume(L']'))
-	throw std::logic_error("parsing error in consume(std::complex<Fieldtype> cmplx)\n  missing ]\n");
+	throw PsimagLite::LogicError("parsing error in consume(std::complex<Fieldtype> cmplx)\n  missing ]\n");
       cmplx = std::complex<T>(r,i);
     }
     
@@ -85,7 +85,7 @@ namespace JsonParser {
       
       //Consume the lead bracket for the array
       if (!consume(L'['))
-	throw std::logic_error("Missing [ marking the start of the array in consumeMatrix()\n");
+	throw PsimagLite::LogicError("Missing [ marking the start of the array in consumeMatrix()\n");
 	
       size_t datarow(0);
 
@@ -95,7 +95,7 @@ namespace JsonParser {
 
 	//Consume the lead bracket for the next row
 	if(!consume(L'['))
-	  throw std::logic_error("Missing [ marking the start of a row in consumeMarix()");
+	  throw PsimagLite::LogicError("Missing [ marking the start of a row in consumeMarix()");
 	
 	size_t datacol(0);
 

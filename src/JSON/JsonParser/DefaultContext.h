@@ -232,7 +232,7 @@ namespace JsonParser {
     //======================================================================
     
     void Max(PsimagLite::String s) {
-      throw std::logic_error("Max! What is this?");
+      throw PsimagLite::LogicError("Max! What is this?");
     }
     
     //======================================================================
@@ -243,7 +243,7 @@ namespace JsonParser {
     //======================================================================
     
     void None() {
-      throw std::logic_error("None! What is this?");
+      throw PsimagLite::LogicError("None! What is this?");
     }
 
   

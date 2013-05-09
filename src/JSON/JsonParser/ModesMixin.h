@@ -65,13 +65,13 @@ namespace JsonParser {
 	PsimagLite::OstringStream msg;
 	msg << "JsonParser.pop was expecting mode " << modeName(expectedMode) << " to be on the back of the stack. \n"
 	    << "However the stack was empty!\n";
-	throw std::logic_error(msg.str());
+	throw PsimagLite::LogicError(msg.str());
       }
       if (expectedMode != stack.back()) {
 	PsimagLite::OstringStream msg;
 	msg << "JsonParser.pop was expecting mode " << modeName(expectedMode) << " to be on the back of the stack. \n"
 	    << "However the back of the stack contained " << modeName(stack.back()) << "\n";
-	throw std::logic_error(msg.str());
+	throw PsimagLite::LogicError(msg.str());
       }
       stack.pop_back();
     }

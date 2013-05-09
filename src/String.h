@@ -33,6 +33,27 @@ typedef std::basic_string<char,std::char_traits<char>,Allocator<char>::Type> Str
 typedef std::basic_istringstream<char,std::char_traits<char>,Allocator<char>::Type> IstringStream;
 typedef std::basic_ostringstream<char,std::char_traits<char>,Allocator<char>::Type> OstringStream;
 
+class RuntimeError : public std::runtime_error {
+public:
+  explicit RuntimeError (const String& what_arg)
+	    : std::runtime_error(what_arg.c_str())
+	{}
+};
+
+class RangeError : public std::range_error {
+public:
+  explicit RangeError(const String& what_arg)
+	    : std::range_error(what_arg.c_str())
+	{}
+};
+
+class LogicError : public std::logic_error {
+public:
+  explicit LogicError (const String& what_arg)
+	    : std::logic_error(what_arg.c_str())
+	{}
+};
+
 } // namespace PsimagLite
 
 /*@}*/

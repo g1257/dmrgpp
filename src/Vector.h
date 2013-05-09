@@ -252,7 +252,7 @@ namespace PsimagLite {
 		for (size_t i=0;i<s.length();i++) {
 			if (s[i]==sep) {
 				if (buffer=="") continue;
-				std::istringstream buffer2(buffer);
+				PsimagLite::IstringStream buffer2(buffer);
 				buffer2 >> tmp;
 				buffer="";
 				v.push_back(tmp);
@@ -261,7 +261,7 @@ namespace PsimagLite {
 			}
 		}
 		if (buffer=="") return;
-		std::istringstream buffer2(buffer);
+		PsimagLite::IstringStream buffer2(buffer);
 		buffer2 >> tmp;
 		buffer="";
 		v.push_back(tmp);

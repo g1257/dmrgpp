@@ -54,7 +54,7 @@ namespace JsonParser {
 	PsimagLite::OstringStream msg;
 	msg << "StateTranslationTable ("<< state << " < " << NR_STATES << "," << cls << " < " << NR_CLASSES << ")\n";
 	msg << "StateTranslationTable ("<< name(state) << "," << clsName(cls) << ")\n";
-	throw std::logic_error(msg.str());
+	throw PsimagLite::LogicError(msg.str());
       }
       
       switch (state) {
@@ -261,7 +261,7 @@ namespace JsonParser {
       default:
 	PsimagLite::OstringStream msg;
 	msg << "AugmentedStateTranslationTable::getStateActionPair was passed a unkown state " << name(state) << "\n";
-	throw std::logic_error(msg.str());
+	throw PsimagLite::LogicError(msg.str());
       }
     }
   };

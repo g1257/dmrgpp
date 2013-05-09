@@ -53,7 +53,7 @@ namespace dca {
       if (!file || !file.good() || file.bad()) {
 	PsimagLite::OstringStream msg;
 	msg << "JsonReader::constructor(): cannot open file " << fileName << "\n";
-	throw std::runtime_error(msg.str());
+	throw PsimagLite::RuntimeError(msg.str());
       }
 
       parser.filename = fileName;		
@@ -87,7 +87,7 @@ namespace dca {
       if (result.type  == JsonAccessor::WHATEVER_NULL) {
 	PsimagLite::OstringStream msg;
 	msg << "In JsonReader::searchFor, Could not find key '" << key << "' in the input file!";
-	throw std::logic_error(msg.str());
+	throw PsimagLite::LogicError(msg.str());
       }
       return result;
     }
@@ -106,7 +106,7 @@ namespace dca {
       if (result2.type  == JsonAccessor::WHATEVER_NULL) {
 	PsimagLite::OstringStream msg;
 	msg << "In JsonReader::searchFor, Could not find keys '" << key1 << "' '" << key2 << "' in the input file!";
-	throw std::logic_error(msg.str());
+	throw PsimagLite::LogicError(msg.str());
       }
       return result2;
     }
@@ -179,7 +179,7 @@ namespace dca {
 	      << "(" << lhs.n_row() << "," << lhs.n_col() << ") matrix!\n";
 	  msg << "\nNote: If the target transposed matrix has zero rows and columns then the reader \n"
 	      << "      will set the target matrix to the size of the input matrix!\n";
-	  throw std::logic_error(msg.str());
+	  throw PsimagLite::LogicError(msg.str());
 	}
       }
       else 
@@ -214,7 +214,7 @@ namespace dca {
 	PsimagLite::OstringStream msg;
 	msg << "JsonReader =>Transposer could not find file " << w.filename << "!\n";
 	msg << " The current directory is: " << getcwd(buffer,BUFF_SIZE) << "\n";
-	throw std::logic_error(msg.str());
+	throw PsimagLite::LogicError(msg.str());
       }
       
       file.seekg(w.startPos);
@@ -243,7 +243,7 @@ namespace dca {
       return;
     }
 
-    throw std::logic_error("mat <= Whatever error wrong type!");
+    throw PsimagLite::LogicError("mat <= Whatever error wrong type!");
   }
 
   //======================================================================
@@ -270,7 +270,7 @@ namespace dca {
 	      << "(" << lhs.n_row() << "," << lhs.n_col() << ") matrix!\n";
 	  msg << "\nNote: If the target matrix has zero rows and columns then the reader \n"
 	      << "      will set the target matrix to the size of the input matrix!\n";
-	  throw std::logic_error(msg.str());
+	  throw PsimagLite::LogicError(msg.str());
 	}
       }
       else 
@@ -296,7 +296,7 @@ namespace dca {
 	PsimagLite::OstringStream msg;
 	msg << "JsonReader => matrix could not find file " << w.filename << "!\n";
 	msg << " The current directory is: " << getcwd(buffer,BUFF_SIZE) << "\n";
-	throw std::logic_error(msg.str());
+	throw PsimagLite::LogicError(msg.str());
       }
       
       file.seekg(w.startPos);
@@ -321,7 +321,7 @@ namespace dca {
       }
       return lhs;
     }
-    throw std::logic_error("mat <= Whatever error wrong type!");
+    throw PsimagLite::LogicError("mat <= Whatever error wrong type!");
   }
 
 
