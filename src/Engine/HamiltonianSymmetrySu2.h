@@ -345,7 +345,7 @@ namespace Dmrg {
 				
 			}
 
-			void flavor2Index(std::map<size_t,size_t>& flavorsOldInverse, const PairType& jm) const
+			void flavor2Index(PsimagLite::Map<size_t,size_t>::Type& flavorsOldInverse, const PairType& jm) const
 			{
 				for (size_t i=0;i<flavorsOld_.size();i++) {
 					if (jmValues_[i]!=jm) continue;

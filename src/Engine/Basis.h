@@ -404,7 +404,7 @@ namespace Dmrg {
 			return symmSu2_.flavor2Index(f1,f2,ne1,ne2,j1,j2);
 		}
 
-		void flavor2Index(std::map<size_t,size_t>& mm,const PairType& jm) const
+		void flavor2Index(PsimagLite::Map<size_t,size_t>::Type& mm,const PairType& jm) const
 		{
 			assert(useSu2Symmetry_);
 			symmSu2_.flavor2Index(mm,jm);

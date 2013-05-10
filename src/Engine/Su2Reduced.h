@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SU2_REDUCED_HEADER_H
 #define SU2_REDUCED_HEADER_H
 
-#include <map>
+#include "Map.h"
 #include "Su2SymmetryGlobals.h"
 
 /** \ingroup DMRG */
@@ -403,7 +403,7 @@ namespace Dmrg {
 
 		void getFlavorMap(const PairType& jm)
 		{
-			std::map<size_t,size_t> flavorsOldInverse;
+			PsimagLite::Map<size_t,size_t>::Type flavorsOldInverse;
 			lrs_.super().flavor2Index(flavorsOldInverse,jm);
 			flavorsOldInverse_.resize(reducedEffective_.size());
 
