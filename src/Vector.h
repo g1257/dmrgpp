@@ -174,7 +174,7 @@ namespace PsimagLite {
 	template<>
 	class  Vector<bool>  {
 	public:
-		typedef std::vector<bool> Type;
+		typedef std::vector<bool,Allocator<bool>::Type> Type;
 	}; // class Vector
 
 	template<typename T>
