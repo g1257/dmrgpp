@@ -28,10 +28,13 @@ Please see full open source license included in file LICENSE.
 #include <vector>
 #include <stdexcept>
 #include <cstdlib>
+#ifdef USE_CUSTOM_ALLOCATOR
 #include "MemoryCpu.h"
+#endif
 
 namespace PsimagLite {
 
+#ifdef USE_CUSTOM_ALLOCATOR
 template<typename T,int templateParamFlags> class AllocatorCpu : public std::allocator<T> {
 	typedef typename std::allocator<T> BaseType;
 
@@ -61,6 +64,7 @@ public:
 	}
 
 }; // class AllocatorCpu
+#endif
 
 template<typename T>
 class Allocator {
@@ -71,6 +75,16 @@ public:
 	typedef std::allocator<T> Type;
 #endif
 }; // class Allocator
+
+template<bool b,typename T>
+class HasType {
+};
+
+template<typename T>
+class HasType<true,T> {
+public:
+	typedef T Type;
+};
 
 } // namespace PsimagLite
 

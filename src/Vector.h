@@ -184,7 +184,7 @@ namespace PsimagLite {
 	};
 
 	template<typename T>
-	class IsVectorLike<std::vector<T,AllocatorCpu<T,1> > > {
+	class IsVectorLike<std::vector<T,Allocator<T> > > {
 	public:
 	        enum {True = true};
 	};
@@ -193,16 +193,6 @@ namespace PsimagLite {
 	class IsVectorLike<std::vector<T> > {
 	public:
 	        enum {True = true};
-	};
-
-	template<bool b,typename T>
-	class HasType {
-	};
-
-	template<typename T>
-	class HasType<true,T> {
-	public:
-		typedef T Type;
 	};
 
 	// change this when using PsimagLite::Vector: 

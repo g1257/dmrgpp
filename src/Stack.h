@@ -80,46 +80,63 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PSIMAGLITE_STACK_H_
 #define PSIMAGLITE_STACK_H_
 #include <stack>
+#include "AllocatorCpu.h"
 #include "Vector.h"
 
+namespace PsimagLite {
+
+template<typename T>
+class Stack {
+
+	typedef std::deque<T,typename Allocator<T>::Type> DequeType_;
+
+public:
+
+	typedef std::stack<T,DequeType_> Type;
+}; // class Stack
+}
+
+template<typename T>
+class IsStackLike {
+public:
+	enum {True = false};
+};
+
+template<typename T>
+class IsStackLike<std::stack<T,Allocator<T> > > {
+public:
+	enum {True = true};
+};
+
 namespace std {
-	template<typename FieldType>
-	ostream& operator<<(ostream& os,const stack<FieldType>& st)
-	{
-		stack<FieldType> st2 = st;
-		os<<st2.size()<<"\n";
-		while(!st2.empty()) {
-			FieldType x = st2.top();
-			os<<x<<"\n";
-			st2.pop();
-		}
-		return os;
-
+template<typename StackType>
+HasType<IsStackLike<StackType>::True,ostream>::Type&
+operator<<(ostream& os,const StackType& st)
+{
+	StackType st2 = st;
+	os<<st2.size()<<"\n";
+	while(!st2.empty()) {
+		typename StackType::value_type x = st2.top();
+		os<<x<<"\n";
+		st2.pop();
 	}
+	return os;
 
-	template<typename X>
-	istream& operator>>(istream& is,stack<X>& x)
-	{
-		typename PsimagLite::Vector<X>::Type tmpVec;
-		is>>tmpVec;
-		for (int i=tmpVec.size()-1;i>=0;i--) {
-				x.push(tmpVec[i]);
-		}
-		return is;
+}
+
+template<typename StackType>
+HasType<IsStackLike<StackType>::True,istream>::Type&
+operator>>(istream& is,StackType& x)
+{
+	typedef typename StackType::value_type ValueType;
+	typename PsimagLite::Vector<ValueType>::Type tmpVec;
+	is>>tmpVec;
+	for (int i=tmpVec.size()-1;i>=0;i--) {
+		x.push(tmpVec[i]);
 	}
+	return is;
+}
 
-//	template<typename FieldType>
-//	void print(int fd, const std::stack<FieldType>& st)
-//	{
-//		stack<FieldType> st2 = st;
-//		size_t tmp = st2.size();
-//		PsimagLite::BinarySaveLoad::save(fd,tmp);
-//		while(!st2.empty()) {
-//			FieldType x = st2.top();
-//			x.print(fd);
-//			st2.pop();
-//		}
-//	}
 } // namespace std 
 
 /*@}*/	
