@@ -186,7 +186,7 @@ namespace Dmrg {
 			PsimagLite::ProgressIndicator progress_;
 			IoInType ioIn_;
 			IoOutType ioOut_;
-			std::stack<int> stack_;
+			PsimagLite::Stack<int>::Type stack_;
 	}; // class DiskStack
 
 	template<typename DataType>

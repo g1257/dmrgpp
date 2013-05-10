@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CHECKPOINT_H
 #define CHECKPOINT_H
 
-#include <stack>
+#include "Stack.h"
 #include "DiskStack.h"
 #include "ProgressIndicator.h"
 #include "ProgramGlobals.h"
@@ -95,7 +95,7 @@ namespace Dmrg {
 		typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 		typedef typename TargettingType::IoType IoType;
-		typedef std::stack<BasisWithOperatorsType> MemoryStackType;
+		typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;
 		typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
 
 		const PsimagLite::String SYSTEM_STACK_STRING;

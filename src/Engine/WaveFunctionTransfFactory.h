@@ -513,7 +513,7 @@ namespace Dmrg {
 		PsimagLite::String filenameIn_,filenameOut_;
 		const PsimagLite::String WFT_STRING;
 		DmrgWaveStructType dmrgWaveStruct_;
-		std::stack<SparseMatrixType> wsStack_,weStack_;
+		typename PsimagLite::Stack<SparseMatrixType>::Type wsStack_,weStack_;
 		WaveFunctionTransfBaseType* wftImpl_;
 		PsimagLite::Random48<RealType> rng_;
 		bool twoSiteDmrg_;
