@@ -491,7 +491,7 @@ namespace PsimagLite {
 			//! Assumes something of the form 
 			//! label[key]=value
 //			template<typename X>
-//			void read(std::map<String,X> &x,
+//			void read(Map<String,X>::Type& x,
 //			          String const &s,
 //			          LongIntegerType level=0)
 //			{
@@ -934,9 +934,9 @@ namespace PsimagLite {
 //	}
 
 //	template<typename T1,typename T2>
-//	void printMap(std::ostream& os, const std::map<T1,T2>& x,const String& label)
+//	void printMap(std::ostream& os, const Map<T1,T2>::Type& x,const String& label)
 //	{
-//		typedef typename std::map<T1,T2>::const_iterator MapIteratorType;
+//		typedef typename Map<T1,T2>::Type::const_iterator MapIteratorType;
 //		for (MapIteratorType it = x.begin();it!=x.end();++it) {
 //			os<<label<<"["<<it->first<<"]="<<it->second<<"\n";
 //		}

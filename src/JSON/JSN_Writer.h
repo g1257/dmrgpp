@@ -112,8 +112,8 @@ namespace dca {
     //======================================================================
 
     template<typename T>
-    void add(String key, const std::map<String, T>& map) {
-      typedef typename std::map<String, T>::const_iterator itr;
+    void add(String key, const Map<String, T>::Type& map) {
+      typedef typename Map<String, T>::Type::const_iterator itr;
       ThisType& writer = writers[key]; 
       for(itr i=map.begin(); i!= map.end(); i++) 
 	writer.add(i->first,i->second);
@@ -289,11 +289,11 @@ namespace dca {
     //======================================================================
       
     static
-    String toString(const std::map<String, String>& map) {
+    String toString(const Map<String, String>::Type& map) {
 
       PsimagLite::OstringStream buff;
       buff << "{";
-      std::map<String,String>::const_iterator itr;
+      Map<String,String>::Type::const_iterator itr;
       for (itr = map.begin(); itr != map.end(); itr++) {
 	if (itr != map.begin())
 	  buff << ",";
@@ -305,8 +305,8 @@ namespace dca {
 
     template<typename T>
     static
-    String toString(const std::map<String, T>& map) {
-      typedef std::map<String,T> MapType;
+    String toString(const Map<String, T>::Type& map) {
+      typedef Map<String,T>::Type MapType;
       typedef typename MapType::const_iterator CITR;
 
       PsimagLite::OstringStream buff;
@@ -321,9 +321,9 @@ namespace dca {
     }
 
     template<typename T>
-    String toString(const std::map<String, typename Vector<T> >::Type& map) {
+    String toString(const Map<String, typename Vector<T> >::Type::Type& map) {
 
-      typedef std::map<String,T> MapType;
+      typedef Map<String,T>::Type MapType;
       typedef typename MapType::const_iterator CITR;
 
       PsimagLite::OstringStream buff;

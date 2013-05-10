@@ -14,7 +14,7 @@
 #include <complex>
 #include <iostream>
 #include <sstream>
-#include <map>
+#include "Map.h"
 #include "Vector.h"
 #include "CharacterMapper.h"
 #include "String.h"
@@ -39,10 +39,10 @@ namespace JsonParser {
       WHATEVER_UNKNOWN
     } WhateverType;
   
-    typedef std::map<std::wstring,Whatever> WhateverMap;
+    typedef typename PsimagLite::Map<std::wstring,Whatever>::Type WhateverMap;
     typedef PsimagLite::Vector<Whatever>::Type           WhateverVector;
 
-    typedef std::map<std::wstring,const JsonParser::Whatever*> FlatMapType;
+    typedef typename PsimagLite::Map<std::wstring,const JsonParser::Whatever*>::Type FlatMapType;
 
     
     //====================================================================== WhateverType
@@ -451,7 +451,7 @@ namespace JsonParser {
   template<> class TYPE<int>            { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_INTEGER;  } };
   template<> class TYPE<double>         { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_DOUBLE;   } };
   template<> class TYPE<bool>           { public: static Whatever::WhateverType to() {return Whatever::WHATEVER_BOOL;     } };
-  template<> class TYPE<std::map<std::wstring,Whatever> >  { public: Whatever::WhateverType to() {return Whatever::WHATEVER_MAP;    } };
+  template<> class TYPE<PsimagLite::Map<std::wstring,Whatever>::Type >  { public: Whatever::WhateverType to() {return Whatever::WHATEVER_MAP;    } };
   template<> class TYPE<PsimagLite::Vector<Whatever>::Type >            { public: Whatever::WhateverType to() {return Whatever::WHATEVER_VECTOR; } };
   
   //======================================================================
@@ -639,12 +639,12 @@ namespace JsonParser {
   }
 
   template<typename T>
-  std::map<PsimagLite::String,T>& operator <= (std::map<PsimagLite::String,T>& lhs, const Whatever& w) {
+  typename PsimagLite::Map<PsimagLite::String,T>::Type& operator <= (typename PsimagLite::Map<PsimagLite::String,T>::Type& lhs, const Whatever& w) {
 
     switch (w.type) {
     case Whatever::WHATEVER_MAP: {
       
-      typedef std::map<std::wstring,Whatever> WhateverMapType;
+      typedef PsimagLite::Map<std::wstring,Whatever>::Type WhateverMapType;
       lhs.clear();
     
       WhateverMapType::const_iterator itr = w.whateverMap.begin();
@@ -666,7 +666,7 @@ namespace JsonParser {
     case Whatever::WHATEVER_UNKNOWN:
     default: {
       PsimagLite::OstringStream msg;
-      msg << "std::map<t,t2> <= " << w.sname() << " produced a type error!\n";
+      msg << "Map<t,t2>::Type <= " << w.sname() << " produced a type error!\n";
       msg << " trying to assign a " << Whatever::ntypeName(w.type) << " to a std::map!\n";
       throw PsimagLite::LogicError(msg.str());
     }
