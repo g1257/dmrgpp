@@ -184,13 +184,7 @@ namespace PsimagLite {
 	};
 
 	template<typename T>
-	class IsVectorLike<std::vector<T,Allocator<T> > > {
-	public:
-	        enum {True = true};
-	};
-
-	template<typename T>
-	class IsVectorLike<std::vector<T> > {
+	class IsVectorLike<std::vector<T,typename Allocator<T>::Type> > {
 	public:
 	        enum {True = true};
 	};

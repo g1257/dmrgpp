@@ -94,7 +94,6 @@ public:
 
 	typedef std::stack<T,DequeType_> Type;
 }; // class Stack
-}
 
 template<typename T>
 class IsStackLike {
@@ -103,15 +102,14 @@ public:
 };
 
 template<typename T>
-class IsStackLike<std::stack<T,Allocator<T> > > {
+class IsStackLike<std::stack<T,std::deque<T,typename Allocator<T>::Type> > > {
 public:
 	enum {True = true};
 };
 
-namespace std {
 template<typename StackType>
-HasType<IsStackLike<StackType>::True,ostream>::Type&
-operator<<(ostream& os,const StackType& st)
+typename HasType<IsStackLike<StackType>::True,std::ostream>::Type&
+operator<<(std::ostream& os,const StackType& st)
 {
 	StackType st2 = st;
 	os<<st2.size()<<"\n";
@@ -125,8 +123,8 @@ operator<<(ostream& os,const StackType& st)
 }
 
 template<typename StackType>
-HasType<IsStackLike<StackType>::True,istream>::Type&
-operator>>(istream& is,StackType& x)
+typename HasType<IsStackLike<StackType>::True,std::istream>::Type&
+operator>>(std::istream& is,StackType& x)
 {
 	typedef typename StackType::value_type ValueType;
 	typename PsimagLite::Vector<ValueType>::Type tmpVec;
@@ -137,7 +135,7 @@ operator>>(istream& is,StackType& x)
 	return is;
 }
 
-} // namespace std 
+} // namespace PsimagLite
 
 /*@}*/	
 #endif // PSIMAGLITE_STACK_H_

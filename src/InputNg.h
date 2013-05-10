@@ -138,8 +138,8 @@ class InputNg {
 	
 	typedef MyCompare MyCompareType;
 
-	typedef Map<String,String,MyCompareType>::Type MapStrStrType;
-	typedef Map<String,Vector<String>::Type::Type,MyCompareType> MapStrVecType;
+	typedef typename Map<String,String,MyCompareType>::Type MapStrStrType;
+	typedef typename Map<String,Vector<String>::Type,MyCompareType>::Type MapStrVecType;
 
 public:
 	
@@ -335,11 +335,14 @@ public:
 			return x;
 		}
 
-		template<typename T1,typename T2,typename T3>
-		void printMap(Map<T1,T2,T3>::Type& mp,const String& label)
+		template<typename MapType>
+		typename HasType<IsMapLike<MapType>::True,void>::Type
+		printMap(MapType& mp,const String& label)
 		{
+			typedef typename MapType::key_type KeyType;
+			typedef typename MapType::mapped_type MappedType;
 			std::cout<<label<<"\n";
-			typename  Map<T1,T2>::Type::iterator it;
+			typename  Map<KeyType,MappedType>::Type::iterator it;
 			for (it=mp.begin();it!=mp.end();++it) {
 				std::cout<<it->first<<" "<<it->second<<"\n";
 			}
@@ -352,8 +355,8 @@ public:
 		String lastLabel_;
 		InputCheckType inputCheck_;
 		bool verbose_;
-		Map<String,String,MyCompareType>::Type mapStrStr_;
-		Map<String,Vector<String>::Type::Type,MyCompareType> mapStrVec_;
+		typename Map<String,String,MyCompareType>::Type mapStrStr_;
+		typename Map<String,Vector<String>::Type,MyCompareType>::Type mapStrVec_;
 		Vector<String>::Type labelsForRemoval_;
 	}; // class Writeable
 
@@ -439,7 +442,7 @@ public:
 		{
 			String label2 = label2label(label);
 
-			Map<String,Vector<String>::Type::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			Map<String,Vector<String>::Type>::Type::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			size_t len =  it->second.size();
@@ -456,7 +459,7 @@ public:
 		{
 			String label2 = label2label(label);
 
-			Map<String,Vector<String>::Type::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			Map<String,Vector<String>::Type>::Type::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			size_t len =  it->second.size();
@@ -471,7 +474,7 @@ public:
 		{
 			String label2 = label2label(label);
 
-			Map<String,Vector<String>::Type::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			Map<String,Vector<String>::Type>::Type::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
@@ -499,7 +502,7 @@ public:
 		{
 			String label2 = label2label(label);
 
-			Map<String,Vector<String>::Type::Type>::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			Map<String,Vector<String>::Type>::Type::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
@@ -570,8 +573,8 @@ public:
 			throw RuntimeError(s.c_str());
 		}
 
-		Map<String,String,MyCompareType>::Type mapStrStr_;
-		Map<String,Vector<String>::Type::Type,MyCompareType> mapStrVec_;
+		typename Map<String,String,MyCompareType>::Type mapStrStr_;
+		typename Map<String,Vector<String>::Type,MyCompareType>::Type mapStrVec_;
 		Vector<String>::Type labelsForRemoval_;
 	}; // class Readable
 

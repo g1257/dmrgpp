@@ -43,9 +43,18 @@ template<typename T,int templateParamFlags> class AllocatorCpu : public std::all
 
 public:
 
-	template <class U> struct rebind {
+	template<typename U>
+	struct rebind {
 		typedef AllocatorCpu<U,templateParamFlags> other;
 	}; // struct rebind
+
+	AllocatorCpu() {}
+
+	// FIXME: needs template constraints here
+	template <typename OtherType>
+	AllocatorCpu(const OtherType& x)
+	    : std::allocator<T>(x)
+	{}
 
 	typename BaseType::pointer allocate(typename BaseType::size_type n,void* = 0)
 	{
