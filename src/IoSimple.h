@@ -312,10 +312,11 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			std::pair<String,size_t> read(X &x,
-			                                   String const &s,
-			                                   LongIntegerType level=0,
-			                                   bool beQuiet = false)
+			typename HasType<IsVectorLike<X>::True,std::pair<String,size_t> >::Type
+			read(X &x,
+			     String const &s,
+			     LongIntegerType level=0,
+			     bool beQuiet = false)
 			{
 				std::pair<String,size_t> sc = advance(s,level,beQuiet);
 				int xsize;
@@ -349,10 +350,11 @@ namespace PsimagLite {
 
 			//! Assumes something of the form 
 			//! label[key]=value
-			template<typename X>
-			void read(typename Map<String,X>::Type& x,
-			          String const &s,
-			          LongIntegerType level=0)
+			template<typename MapType>
+			typename HasType<IsMapLike<MapType>::True,void>::Type
+			read(MapType& x,
+			     String const &s,
+			     LongIntegerType level=0)
 			{
 				size_t counter=0;
 				bool beQuiet = true;
@@ -361,7 +363,7 @@ namespace PsimagLite {
 						std::pair<String,size_t> sc = advance(s,level,beQuiet);
 						// sc.first contains the full string and also value
 						String key;
-						X val=0;
+						typename MapType::mapped_type val=0;
 						getKey(key,val,sc.first);
 				
 						x[key]=val;
@@ -560,15 +562,6 @@ namespace PsimagLite {
 	void operator>>(IoSimple::In& io,T& t)
 	{
 		io.fin_>>t;
-	}
-
-	template<typename T1,typename T2>
-	void printMap(std::ostream& os, const typename Map<T1,T2>::Type& x,const String& label)
-	{
-		typedef typename Map<T1,T2>::Type::const_iterator MapIteratorType;
-		for (MapIteratorType it = x.begin();it!=x.end();++it) {
-			os<<label<<"["<<it->first<<"]="<<it->second<<"\n";
-		}
 	}
 
 } // namespace PsimagLite 

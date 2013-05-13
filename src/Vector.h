@@ -124,10 +124,10 @@ inline std::vector<T1,A> operator/=(std::vector<T1,A>& v,const T2& t2)
 	return v;
 }
 
-template<typename T1,typename T2,typename A>
-inline std::vector<T1,A> operator+(const std::vector<T1,A>& v1,const std::vector<T2,A>& v2)
+template<typename T1,typename T2,typename A1,typename A2>
+inline std::vector<T1,A1> operator+(const std::vector<T1,A1>& v1,const std::vector<T2,A2>& v2)
 {
-	std::vector<T1,A> v3(v1.size());
+	std::vector<T1,A1> v3(v1.size());
 	for (size_t i=0;i<v1.size();i++) v3[i] = v1[i] + v2[i];
 	return v3;
 }
