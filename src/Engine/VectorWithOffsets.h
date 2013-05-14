@@ -201,7 +201,7 @@ namespace Dmrg {
 
 			setIndex2Sector();
 			std::ostringstream msg;
-			msg<<"populateFromQns "<<np<<" sectors";
+			msg<<"populateFromQns "<<qns.size()<<" sectors";
 			progress_.printline(msg,std::cout);
 		}
 
