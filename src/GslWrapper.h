@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #endif
 
 #include <stdexcept>
+#include "Vector.h"
 
 namespace PsimagLite {
 
@@ -136,7 +137,7 @@ namespace PsimagLite {
 	private:
 		void thereSnoGsl() const
 		{
-			throw RuntimeError("You need to compile with the GSL\n");
+			throw PsimagLite::RuntimeError("You need to compile with the GSL\n");
 		}
 		
 	}; // class GslWrapper
