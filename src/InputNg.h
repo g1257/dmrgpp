@@ -201,6 +201,8 @@ public:
 			String buffer="";
 			for (size_t i=0;i<data_.length();i++) {
 				size_t type = findTypeOf(data_.at(i));
+				if (state_ == IN_COMMENT && type != ENDOFLINE)
+					continue;
 				switch(type) {
 				case ENDOFLINE:
 					line_++;
@@ -437,8 +439,42 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
+		template<typename MapLikeType>
+		typename HasType<IsMapLike<MapLikeType>::True,void>::Type
+		read(MapLikeType& val,const String& label)
+		{
+			String label2 = label2label(label);
+
+			typedef typename Map<String,String,MyCompareType>::Type::iterator MyIteratorType;
+			for (MyIteratorType it=mapStrStr_.begin();it!=mapStrStr_.end();++it) {
+				String mystr = it->first;
+				size_t it0 = mystr.find(label2);
+				if (it0 == String::npos) continue;
+				String::iterator it1 = find(mystr.begin(),mystr.end(),'[');
+				if (it1 == mystr.end()) continue;
+				String::iterator it2 = find(mystr.begin(),mystr.end(),']');
+				if (it2 == mystr.end()) {
+					String str("Malformed ");
+					str += mystr + " entry\n";
+					throw RuntimeError(str);
+				}
+				String mystr2 = mystr;
+				mystr2.erase(0,label2.length()+1);
+				mystr2.erase(mystr2.length()-1,1);
+				val[mystr2] = atof(it->second.c_str());
+			}
+//			size_t len =  it->second.size();
+//			assert(len>1);
+//			val.resize(len-1);
+//			for (size_t i=0;i<len-1;i++) {
+//				val[i]=static_cast<typename VectorLikeType::value_type>(atof(it->second[i+1].c_str()));
+//			}
+//			cleanLabelsIfNeeded(label2,mapStrVec_,it);
+		}
+
 		template<typename VectorLikeType>
-		void read(VectorLikeType& val,const String& label)
+		typename HasType<IsVectorLike<VectorLikeType>::True,void>::Type
+		read(VectorLikeType& val,const String& label)
 		{
 			String label2 = label2label(label);
 
