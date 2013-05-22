@@ -93,7 +93,7 @@ template<template<typename,typename> class SomeVectorTemplate,
          typename SomeAllocator1Type,
          typename SomeAllocator2Type,
          typename T>
-typename PsimagLite::HasType<PsimagLite::IsVectorLike<SomeVectorTemplate<T,SomeAllocator1Type> >::True,void>::Type
+typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorTemplate<T,SomeAllocator1Type> >::True,void>::Type
 reorder(SomeVectorTemplate<T,SomeAllocator1Type>& v,
         const SomeVectorTemplate<size_t,SomeAllocator2Type>& permutation)
 {
@@ -121,7 +121,7 @@ void blockUnion(Block &A,Block const &B,Block const &C)
 }
 
 template<typename SomeVectorType>
-typename PsimagLite::HasType<PsimagLite::IsVectorLike<SomeVectorType>::True,void>::Type
+typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,void>::Type
 truncateVector(SomeVectorType& v,
                const SomeVectorType& removedIndices)
 {
