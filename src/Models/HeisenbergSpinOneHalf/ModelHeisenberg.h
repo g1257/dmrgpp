@@ -335,8 +335,13 @@ namespace Dmrg {
 			}
 			q.jmValues=jmvalues;
 			q.flavors = flavors;
-			q.electronsUp = electronsUp;
-			q.electronsDown = electronsDown;
+			q.electrons = electronsUp + electronsDown;
+			q.szPlusConst.resize(electronsUp.size());
+			for (size_t i=0;i<q.szPlusConst.size();i++) {
+				q.szPlusConst[i] = (modelParameters_.twiceTheSpin + electronsUp[i]) - electronsDown[i];
+				assert(!(q.szPlusConst[i] & 1));
+				q.szPlusConst[i] = static_cast<size_t>(q.szPlusConst[i]*0.5);
+			}
 		}
 	}; // class ModelHeisenberg
 

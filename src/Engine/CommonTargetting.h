@@ -283,11 +283,8 @@ namespace Dmrg {
 
 			RealType time = 0;
 			model_.setNaturalBasis(creationMatrix,hmatrix,q,block1,time);
-			typename PsimagLite::Vector<size_t>::Type electronsOneSite(q.electronsUp.size());
-			for (size_t i=0;i<electronsOneSite.size();i++)
-				electronsOneSite[i] = q.electronsUp[i] + q.electronsDown[i];
 
-			FermionSign fs(lrs_.left(),electronsOneSite);
+			FermionSign fs(lrs_.left(),q.electrons);
 			for (size_t j=0;j<creationMatrix.size();j++) {
 				VectorWithOffsetType phiTemp;
 				applyOpLocal_(phiTemp,psi,creationMatrix[j],

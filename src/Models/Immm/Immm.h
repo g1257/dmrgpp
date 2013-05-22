@@ -406,8 +406,8 @@ namespace Dmrg {
 			}
 			q.jmValues=jmvalues;
 			q.flavors = flavors;
-			q.electronsUp = electronsUp;
-			q.electronsDown = electronsDown;
+			q.electrons = electronsUp + electronsDown;
+			q.szPlusConst = electronsUp;
 		}
 
 		//! Not implemented, su(2) symmetry won't work

@@ -183,7 +183,8 @@ namespace Dmrg {
 
 	private:
 
-		void basisForOneSite(typename PsimagLite::Vector<size_t>::Type& quantumNumbsOneSite,HilbertBasisType& basisOfOneSite,size_t site) const
+		void basisForOneSite(typename PsimagLite::Vector<size_t>::Type& quantumNumbsOneSite,
+		                     HilbertBasisType& basisOfOneSite,size_t site) const
 		{
 			typename PsimagLite::Vector<size_t>::Type block(1,site);
 			model_.setNaturalBasis(basisOfOneSite,quantumNumbsOneSite,block);

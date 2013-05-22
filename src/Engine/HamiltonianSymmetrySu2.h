@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -127,31 +124,20 @@ namespace Dmrg {
 			{
 				jmValues_=basisData.jmValues;
 				flavors_=basisData.flavors;
-				flavorsMax_= *(std::max_element(
-						flavors_.begin(),flavors_.end()));
-					//flavors_[utils::vectorMax<size_t,std::greater<size_t> >(flavors_,0)];
-
-				size_t electronsMax1 = *(std::max_element(
-						basisData.electronsUp.begin(),basisData.electronsUp.end()));
-					// basisData.electronsUp[utils::vectorMax<size_t,std::greater<size_t>
-					//	>(basisData.electronsUp,0)];
-
-				size_t electronsMax2 = *(std::max_element(
-						basisData.electronsDown.begin(),basisData.electronsDown.end()));
-					// basisData.electronsDown[utils::vectorMax<size_t,std::greater<size_t>
-					//	>(basisData.electronsDown,0)];
-				electronsMax_=electronsMax1+electronsMax2;
+				flavorsMax_= *(std::max_element(flavors_.begin(),flavors_.end()));
+				electronsMax_ = *(std::max_element(basisData.electrons.begin(),basisData.electrons.end()));
 				jMax_=0;
 				jmValues_.maxFirst<std::greater<size_t> >(jMax_);
 				jMax_++;
 				calcReducedBasis();
 			}
 
-			static void findQuantumNumbers(typename PsimagLite::Vector<size_t> ::Type&q,const BasisDataType& basisData) 
+			static void findQuantumNumbers(typename PsimagLite::Vector<size_t> ::Type&q,
+			                               const BasisDataType& basisData)
 			{
-				q.resize(basisData.electronsUp.size());
+				q.resize(basisData.electrons.size());
 				for (size_t i=0;i<q.size();i++) {
-					size_t ne = basisData.electronsUp[i]+basisData.electronsDown[i];
+					size_t ne = basisData.electrons[i];
 					PairType jmpair = basisData.jmValues[i];
 					q[i]=neJmToIndex(ne,jmpair);
 				}
@@ -160,21 +146,19 @@ namespace Dmrg {
 			static size_t neJmToIndex(size_t ne,const PairType& jm) 
 			{
 				typename PsimagLite::Vector<size_t>::Type v(3);
-				v[2]=0;
-				v[2]=jm.first;
-				v[0]=jm.second;
 				double m = jm.second+0.5*(ne-jm.first);
-				if (m<0 || m>65535) throw PsimagLite::RuntimeError(" neJmToIndex\n");
-				v[0]=size_t(m);
-				if (ne<v[0]) throw PsimagLite::RuntimeError(" neJmToIndex 2\n");
-				v[1]=ne-v[0];
+				v[0]=static_cast<size_t>(m);
+				assert(ne>=v[0]);
+				v[1] = ne - v[0];
+				v[2]=jm.first;
 				return encodeQuantumNumber(v);
 			}
 
 			static size_t encodeQuantumNumber(const typename PsimagLite::Vector<size_t>::Type& v)
 			{
 				size_t x= v[0] + v[1]*MAX;
-				if (v[0]>=MAX || v[1]>=MAX || v[2]>=MAX) throw PsimagLite::RuntimeError("encodeQuantumNumber\n");
+				if (v[0]>=MAX || v[1]>=MAX || v[2]>=MAX)
+					throw PsimagLite::RuntimeError("encodeQuantumNumber\n");
 				if (v.size()==3) x += v[2]*MAX*MAX;
 				return x;
 			}
@@ -192,9 +176,18 @@ namespace Dmrg {
 			//! targets[0]=nup, targets[1]=ndown,  targets[2]=2j
 			static size_t pseudoQuantumNumber(const typename PsimagLite::Vector<size_t>::Type& v)
 			{
-				size_t x= (v[0] + v[1]);
+				size_t x= v[0] + v[1];
 				x += v[2]*2*MAX;
 				return x;
+			}
+
+			size_t pseudoEffectiveNumber(size_t nelectrons,size_t jtilde) const
+			{
+				typename PsimagLite::Vector<size_t>::Type v(3);
+				v[0]=nelectrons;
+				v[1]=0;
+				v[2]=jtilde;
+				return pseudoQuantumNumber(v);
 			}
 
 			void setToProduct(
@@ -225,15 +218,6 @@ namespace Dmrg {
 				electronsMax_ = *(std::max_element(
 						electrons.begin(),electrons.end()));
 		//				electrons[utils::vectorMax<size_t,std::greater<size_t> >(electrons,0)];
-			}
-
-			size_t pseudoEffectiveNumber(size_t nelectrons,size_t jtilde) const
-			{
-				typename PsimagLite::Vector<size_t>::Type v(3);
-				v[0]=nelectrons;
-				v[1]=0;
-				v[2]=jtilde;
-				return pseudoQuantumNumber(v);
 			}
 
 			PairType getJmValue(size_t alpha) const
@@ -397,7 +381,7 @@ namespace Dmrg {
 				electrons.resize(qns.size());
 				for (size_t i=0;i<qns.size();i++) {
 					typename PsimagLite::Vector<size_t>::Type v = decodeQuantumNumber(qns[i]);
-					electrons[i]=v[0]+v[1];
+					electrons[i]=v[0] + v[1];
 				}
 			}
 

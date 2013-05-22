@@ -434,8 +434,8 @@ namespace Dmrg {
 			}
 			q.jmValues=jmvalues;
 			q.flavors = flavors;
-			q.electronsUp = electronsUp;
-			q.electronsDown = electronsDown;
+			q.electrons = electronsUp + electronsDown;
+			q.szPlusConst = electronsUp;
 		}
 
 		// note: we use 2j instead of j

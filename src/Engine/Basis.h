@@ -143,9 +143,7 @@ namespace Dmrg {
 		void setSymmetryRelated(const BasisDataType& basisData)
 		{
 			if (useSu2Symmetry_) symmSu2_.set(basisData);
-			electrons_.resize(basisData.electronsUp.size());
-			for (size_t i=0;i<basisData.electronsUp.size();i++)
-				electrons_[i]=basisData.electronsUp[i]+basisData.electronsDown[i];
+			electrons_ = basisData.electrons;
 			findQuantumNumbers(quantumNumbers_,basisData);
 			findPermutationAndPartition();
 			electronsOld_=electrons_;
@@ -294,14 +292,16 @@ namespace Dmrg {
 			if (useSu2Symmetry_)
 				return HamiltonianSymmetrySu2Type::pseudoQuantumNumber(targets);
 			else
-				return HamiltonianSymmetryLocalType::pseudoQuantumNumber(targets);
+				return HamiltonianSymmetryLocalType::encodeQuantumNumber(targets);
 		}
 
 		//! Inverse of pseudoQuantumNumber
 		size_t pseudoEffectiveNumber(size_t i) const
 		{
-			if (useSu2Symmetry_) return symmSu2_.pseudoEffectiveNumber(electrons_[i],symmSu2_.jmValue(i).first);
-			else return quantumNumbers_[i];
+			if (useSu2Symmetry_)
+				return symmSu2_.pseudoEffectiveNumber(electrons_[i],symmSu2_.jmValue(i).first);
+			else
+				return quantumNumbers_[i];
 		}
 
 		//! Given the information in the structure bdt, calculates the quantum numbers in q

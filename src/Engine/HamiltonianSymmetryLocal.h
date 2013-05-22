@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -110,11 +107,6 @@ namespace Dmrg {
 				return v;
 			}
 
-			static size_t pseudoQuantumNumber(const typename PsimagLite::Vector<size_t>::Type& targets)
-			{
-				return encodeQuantumNumber(targets);
-			}
-
 			size_t getFlavor(size_t i) const
 			{
 				return 0; // meaningless
@@ -126,12 +118,15 @@ namespace Dmrg {
 			{
 				q.clear();
 				typename PsimagLite::Vector<size_t>::Type qn(2);
-				for (size_t i=0;i<basisData.electronsUp.size();i++) {
-					// nup
-					qn[0] = basisData.electronsUp[i];
-					// ndown
-					qn[1] = basisData.electronsDown[i];
-					// total spin
+				for (size_t i=0;i<basisData.electrons.size();i++) {
+					// n
+					qn[1] = basisData.electrons[i];
+					// sz + const.
+					qn[0] = basisData.szPlusConst[i];
+
+					assert(qn[1]>=qn[0]);
+					qn[1] -= qn[0];
+
 					q.push_back(encodeQuantumNumber(qn));
 				}
 			}
