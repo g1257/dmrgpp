@@ -49,7 +49,7 @@ public:
 };
 
 template<typename MapType>
-typename HasType<IsMapLike<MapType>::True,void>::Type
+typename EnableIf<IsMapLike<MapType>::True,void>::Type
 printMap(std::ostream& os, const MapType& x,const String& label)
 {
 	typedef typename MapType::const_iterator MapIteratorType;

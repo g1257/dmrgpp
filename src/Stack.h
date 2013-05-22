@@ -108,7 +108,7 @@ public:
 };
 
 template<typename StackType>
-typename HasType<IsStackLike<StackType>::True,std::ostream>::Type&
+typename EnableIf<IsStackLike<StackType>::True,std::ostream>::Type&
 operator<<(std::ostream& os,const StackType& st)
 {
 	StackType st2 = st;
@@ -123,7 +123,7 @@ operator<<(std::ostream& os,const StackType& st)
 }
 
 template<typename StackType>
-typename HasType<IsStackLike<StackType>::True,std::istream>::Type&
+typename EnableIf<IsStackLike<StackType>::True,std::istream>::Type&
 operator>>(std::istream& is,StackType& x)
 {
 	typedef typename StackType::value_type ValueType;

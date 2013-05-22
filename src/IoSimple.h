@@ -312,7 +312,7 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			typename HasType<IsVectorLike<X>::True,std::pair<String,size_t> >::Type
+			typename EnableIf<IsVectorLike<X>::True,std::pair<String,size_t> >::Type
 			read(X &x,
 			     String const &s,
 			     LongIntegerType level=0,
@@ -351,7 +351,7 @@ namespace PsimagLite {
 			//! Assumes something of the form 
 			//! label[key]=value
 			template<typename MapType>
-			typename HasType<IsMapLike<MapType>::True,void>::Type
+			typename EnableIf<IsMapLike<MapType>::True,void>::Type
 			read(MapType& x,
 			     String const &s,
 			     LongIntegerType level=0)

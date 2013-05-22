@@ -86,11 +86,11 @@ public:
 }; // class Allocator
 
 template<bool b,typename T>
-class HasType {
+class EnableIf {
 };
 
 template<typename T>
-class HasType<true,T> {
+class EnableIf<true,T> {
 public:
 	typedef T Type;
 };

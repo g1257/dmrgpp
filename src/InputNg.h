@@ -338,7 +338,7 @@ public:
 		}
 
 		template<typename MapType>
-		typename HasType<IsMapLike<MapType>::True,void>::Type
+		typename EnableIf<IsMapLike<MapType>::True,void>::Type
 		printMap(MapType& mp,const String& label)
 		{
 			typedef typename MapType::key_type KeyType;
@@ -440,7 +440,7 @@ public:
 		}
 
 		template<typename MapLikeType>
-		typename HasType<IsMapLike<MapLikeType>::True,void>::Type
+		typename EnableIf<IsMapLike<MapLikeType>::True,void>::Type
 		read(MapLikeType& val,const String& label)
 		{
 			String label2 = label2label(label);
@@ -473,7 +473,7 @@ public:
 		}
 
 		template<typename VectorLikeType>
-		typename HasType<IsVectorLike<VectorLikeType>::True,void>::Type
+		typename EnableIf<IsVectorLike<VectorLikeType>::True,void>::Type
 		read(VectorLikeType& val,const String& label)
 		{
 			String label2 = label2label(label);
