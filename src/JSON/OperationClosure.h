@@ -45,7 +45,7 @@ namespace psimag {
   public:
     
     const OperandType& operand;
-    size_t iterationCount;
+    SizeType iterationCount;
     PsimagLite::String msg;
 
     UnaryOperationClosure(const OperandType& theOperand):

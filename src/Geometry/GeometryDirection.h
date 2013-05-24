@@ -95,12 +95,12 @@ namespace PsimagLite {
 			enum {NUMBERS,MATRICES};
 
 			template<typename IoInputter>
-			GeometryDirection(IoInputter& io,size_t dirId,size_t edof,
+			GeometryDirection(IoInputter& io,SizeType dirId,SizeType edof,
 					  const String& options,
 					  const GeometryFactoryType& geometryFactory)
 			: dirId_(dirId),geometryFactory_(&geometryFactory)
 			{
-				size_t n = getVectorSize(options);
+				SizeType n = getVectorSize(options);
 				dataType_ = edof;
 				if (edof==NUMBERS) {
 					io.read(dataNumbers_,"Connectors");
@@ -110,7 +110,7 @@ namespace PsimagLite {
 					 	throw RuntimeError(s.c_str());
 					}
 				} else {
-					for (size_t i=0;i<n;i++) {
+					for (SizeType i=0;i<n;i++) {
 						MatrixType m;
 						io.readMatrix(m,"Connectors");
 // 						if (m.n_row()!=edof || m.n_col()!=edof)
@@ -120,15 +120,15 @@ namespace PsimagLite {
 				}
 			}
 
-// 			const RealType& operator()(size_t i,size_t j) const
+// 			const RealType& operator()(SizeType i,SizeType j) const
 // 			{
 // 				if (dataType_==NUMBERS) return dataNumbers_[0];
 // 				return dataMatrices_[0](i,j);
 // 			}
 
-			RealType operator()(size_t i,size_t edof1,size_t j,size_t edof2) const
+			RealType operator()(SizeType i,SizeType edof1,SizeType j,SizeType edof2) const
 			{
-				size_t h = (constantValues()) ? 0 : geometryFactory_->handle(i,j);
+				SizeType h = (constantValues()) ? 0 : geometryFactory_->handle(i,j);
 				
 				if (dataType_==NUMBERS) {
 					assert(dataNumbers_.size()>h);
@@ -147,17 +147,17 @@ namespace PsimagLite {
 				return tmp * signChange;
 			}
 
-			size_t nRow() const
+			SizeType nRow() const
 			{
 				return (dataType_==NUMBERS) ? 1 : dataMatrices_[0].n_row();
 			}
 			
-			size_t nCol() const
+			SizeType nCol() const
 			{
 				return (dataType_==NUMBERS) ? 1 : dataMatrices_[0].n_col();
 			}
 			
-			size_t size() const
+			SizeType size() const
 			{
 				return (dataType_==NUMBERS) ? dataNumbers_.size() : dataMatrices_.size();
 			}
@@ -172,7 +172,7 @@ namespace PsimagLite {
 
 		private:
 
-			size_t getVectorSize(const String& s)
+			SizeType getVectorSize(const String& s)
 			{
 				if (s.find("ConstantValues")!=String::npos)
 					return 1;
@@ -180,9 +180,9 @@ namespace PsimagLite {
 				return geometryFactory_->getVectorSize(dirId_);
 			}
 			
-			size_t dirId_;
+			SizeType dirId_;
 			const GeometryFactoryType* geometryFactory_;
-			size_t dataType_;
+			SizeType dataType_;
 			typename Vector<RealType>::Type dataNumbers_;
 			typename Vector<MatrixType>::Type dataMatrices_;
 	}; // class GeometryDirection
@@ -194,13 +194,13 @@ namespace PsimagLite {
 		if (gd.dataType_==GeometryDirection<RealType,GeometryFactoryType>::NUMBERS) {
 			os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
 			os<<"#GeometryNumbers=";
-			for (size_t i=0;i<gd.dataNumbers_.size();i++) {
+			for (SizeType i=0;i<gd.dataNumbers_.size();i++) {
 				os<<gd.dataNumbers_[i]<<" ";
 			}
 			os<<"\n";
 		} else {
 			os<<"#GeometryMatrixSize="<<gd.dataMatrices_.size()<<"\n";
-			for (size_t i=0;i<gd.dataMatrices_.size();i++) 
+			for (SizeType i=0;i<gd.dataMatrices_.size();i++) 
 				os<<gd.dataMatrices_[i];
 		}
 		return os;

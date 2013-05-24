@@ -9,10 +9,10 @@ int main()
 	int n = 100;
 	PsimagLite::Vector<double>::Type m(n*n);
 	// fill "matrix"
-	for (size_t i=0;i<size_t(n*n);i++) m[i] =  5*drand48();
+	for (SizeType i=0;i<SizeType(n*n);i++) m[i] =  5*drand48();
 	// symmetrize:
-	for (size_t i=0;i<size_t(n);i++)
-		for (size_t j=i+1;j<size_t(n);j++)
+	for (SizeType i=0;i<SizeType(n);i++)
+		for (SizeType j=i+1;j<SizeType(n);j++)
 			m[i+j*n] = m[j+i*n];
 
 	PsimagLite::Vector<double>::Type eigs(n);

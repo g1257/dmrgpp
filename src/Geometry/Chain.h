@@ -86,41 +86,41 @@ namespace PsimagLite {
 		public:
 			enum { DIRECTION_X };
 
-			Chain(size_t linSize) : linSize_(linSize)
+			Chain(SizeType linSize) : linSize_(linSize)
 			{
 			}
 
-			size_t handle(size_t i,size_t j) const
+			SizeType handle(SizeType i,SizeType j) const
 			{
 				return (i<j) ? i : j;
 			}
 
-			size_t getVectorSize(size_t dirId) const
+			SizeType getVectorSize(SizeType dirId) const
 			{
 				if (dirId!=DIRECTION_X) throw RuntimeError("Chain must have direction 0\n");
 				return linSize_-1;
 			}
 
-			bool connected(size_t i1,size_t i2) const
+			bool connected(SizeType i1,SizeType i2) const
 			{
 				if (i1==i2) return false;
 				return GeometryUtils::neighbors(i1,i2);
 			}
 
 			// assumes i1 and i2 are connected
-			size_t calcDir(size_t i1,size_t i2) const
+			SizeType calcDir(SizeType i1,SizeType i2) const
 			{
 				return DIRECTION_X;
 			}
 
-			bool fringe(size_t i,size_t smax,size_t emin) const
+			bool fringe(SizeType i,SizeType smax,SizeType emin) const
 			{
 				return (i==smax || i==emin);
 
 			}
 
 			// siteNew2 is fringe in the environment
-			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+			SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
 			{
 				return smax+1;
 			}
@@ -130,18 +130,18 @@ namespace PsimagLite {
 				return "chain";
 			}
 			
-			size_t findReflection(size_t site) const
+			SizeType findReflection(SizeType site) const
 			{
 				return linSize_ - site -1;
 			}
 
-			size_t length(size_t i) const
+			SizeType length(SizeType i) const
 			{
 				assert(i==0);
 				return linSize_;
 			}
 
-			size_t translate(size_t site,size_t dir,size_t amount) const
+			SizeType translate(SizeType site,SizeType dir,SizeType amount) const
 			{
 				assert(dir==0);
 				
@@ -152,7 +152,7 @@ namespace PsimagLite {
 
 		private:
 
-			size_t linSize_;
+			SizeType linSize_;
 	}; // class Ladder
 } // namespace PsimagLite 
 

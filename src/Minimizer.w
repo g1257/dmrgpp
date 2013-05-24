@@ -83,14 +83,14 @@ typedef Minimizer<RealType,FunctionType> ThisType;
 @d privateData
 @{
 FunctionType& function_;
-size_t maxIter_;
+SizeType maxIter_;
 const gsl_multimin_fminimizer_type *gslT_;
 gsl_multimin_fminimizer *gslS_;
 @}
 
 @d constructor
 @{
-Minimizer(FunctionType& function,size_t maxIter)
+Minimizer(FunctionType& function,SizeType maxIter)
 		: function_(function),
 		  maxIter_(maxIter),
 		  gslT_(gsl_multimin_fminimizer_nmsimplex2),
@@ -120,12 +120,12 @@ int simplex(VectorType& minVector,RealType delta=1e-3,RealType tolerance=1e-3)
 	gsl_vector *x;
 	/* Starting point,  */
 	x = gsl_vector_alloc (function_.size());
-	for (size_t i=0;i<minVector.size();i++)
+	for (SizeType i=0;i<minVector.size();i++)
 		gsl_vector_set (x, i, minVector[i]);
 
 	gsl_vector *xs;
 	xs = gsl_vector_alloc (function_.size());
-	for (size_t i=0;i<minVector.size();i++)
+	for (SizeType i=0;i<minVector.size();i++)
 		gsl_vector_set (xs, i, delta);
 
 	gsl_multimin_function func;
@@ -134,7 +134,7 @@ int simplex(VectorType& minVector,RealType delta=1e-3,RealType tolerance=1e-3)
 	func.params = &function_;
 	gsl_multimin_fminimizer_set (gslS_, &func, x, xs);
 
-	for (size_t iter=0;iter<maxIter_;iter++) {
+	for (SizeType iter=0;iter<maxIter_;iter++) {
 		int status = gsl_multimin_fminimizer_iterate (gslS_);
 
 		if (status) throw RuntimeError("Minimizer::simplex(...): Error encountered\n");
@@ -162,9 +162,9 @@ int simplex(VectorType& minVector,RealType delta=1e-3,RealType tolerance=1e-3)
 
 @d found
 @{
-void found(VectorType& minVector,gsl_vector* x,size_t iter)
+void found(VectorType& minVector,gsl_vector* x,SizeType iter)
 {
-	for (size_t i=0;i<minVector.size();i++)
+	for (SizeType i=0;i<minVector.size();i++)
 		minVector[i] = gsl_vector_get(x,i);
 }
 @}
@@ -177,11 +177,11 @@ public:
 	MockVector(const gsl_vector *v) : v_(v)
 	{
 	}
-	const FieldType& operator[](size_t i) const
+	const FieldType& operator[](SizeType i) const
 	{
 		return v_->data[i];
 	}
-	size_t size() const { return v_->size; }
+	SizeType size() const { return v_->size; }
 private:
 	const gsl_vector *v_;
 }; // class MockVector

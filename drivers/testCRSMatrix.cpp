@@ -8,7 +8,7 @@ template<typename T>
 std::ostream& operator<<(std::ostream& os,const typename Vector<T>::Type& v)
 {
 	os<<v.size()<<"\n";
-	for (size_t i=0;i<v.size();i++)
+	for (SizeType i=0;i<v.size();i++)
 		os<<v[i]<<" ";
 	os<<"\n";
 	return os;
@@ -18,7 +18,7 @@ void fillRandomVector(Vector<RealType>::Type& x,RealType maxValue)
 {
 	unsigned int long long seed = 7334211;
 	srand48(seed);
-	for (size_t i=0;i<x.size();i++)
+	for (SizeType i=0;i<x.size();i++)
 		x[i] = drand48()*maxValue;
 }
 
@@ -38,10 +38,10 @@ int main(int argc,char *argv[])
 {
 
 	if (argc==3) {
-		size_t rank = std::atoi(argv[1]);
+		SizeType rank = std::atoi(argv[1]);
 		unsigned int long long seed = 343981;
 		RealType ratio = std::atof(argv[2]);
-		size_t nonZeros = size_t(ratio * rank *rank);
+		SizeType nonZeros = SizeType(ratio * rank *rank);
 		RealType maxValue = 10.0;
 		SampleCRSMatrix<RealType> m(rank,seed,nonZeros,maxValue);
 		std::cout<<m;

@@ -95,9 +95,9 @@ namespace PsimagLite {
 	
 	class GeometryFactory {
 		
-		typedef std::pair<size_t,size_t> PairType;
+		typedef std::pair<SizeType,SizeType> PairType;
 
-		static size_t refCounter_;
+		static SizeType refCounter_;
 
 	public:
 
@@ -170,7 +170,7 @@ namespace PsimagLite {
 		}
 
 		template<typename IoType>
-		void init(IoType& io,const String& s,size_t linSize)
+		void init(IoType& io,const String& s,SizeType linSize)
 		{
 			n_=getGeometry(s);
 			int x=0,tmp=0;
@@ -230,9 +230,9 @@ namespace PsimagLite {
 			}
 		}
 
-		size_t dirs() const { return dirs_; } // <-- move elsewhere FIXME
+		SizeType dirs() const { return dirs_; } // <-- move elsewhere FIXME
 
-		size_t handle(size_t i,size_t j) const
+		SizeType handle(SizeType i,SizeType j) const
 		{
 			switch (n_) {
 			case CHAIN:
@@ -249,7 +249,7 @@ namespace PsimagLite {
 			throw RuntimeError("Unknown geometry\n");
 		}
 
-		size_t getVectorSize(size_t dirId) const
+		SizeType getVectorSize(SizeType dirId) const
 		{
 			switch (n_) {
 			case CHAIN:
@@ -266,7 +266,7 @@ namespace PsimagLite {
 			throw RuntimeError("Unknown geometry\n");
 		}
 
-		bool connected(size_t i1,size_t i2) const
+		bool connected(SizeType i1,SizeType i2) const
 		{
 			switch (n_) {
 			case CHAIN:
@@ -283,7 +283,7 @@ namespace PsimagLite {
 			throw RuntimeError("Unknown geometry\n");
 		}
 
-		size_t calcDir(size_t i1,size_t i2) const
+		SizeType calcDir(SizeType i1,SizeType i2) const
 		{
 			switch (n_) {
 			case CHAIN:
@@ -300,7 +300,7 @@ namespace PsimagLite {
 			throw RuntimeError("Unknown geometry\n");
 		}
 
-		bool fringe(size_t i,size_t smax,size_t emin) const
+		bool fringe(SizeType i,SizeType smax,SizeType emin) const
 		{
 			switch (n_) {
 			case CHAIN:
@@ -317,7 +317,7 @@ namespace PsimagLite {
 			throw RuntimeError("Unknown geometry\n");
 		}
 
-		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+		SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
 		{
 			switch (n_) {
 			case CHAIN:
@@ -351,7 +351,7 @@ namespace PsimagLite {
 			throw RuntimeError("Unknown geometry\n");
 		}
 
-		size_t length(size_t i) const
+		SizeType length(SizeType i) const
 		{
 			switch (n_) {
 			case CHAIN:
@@ -362,7 +362,7 @@ namespace PsimagLite {
 			throw RuntimeError("length(): unsupported by this geometry\n");
 		}
 
-		size_t translate(size_t site,size_t dir,size_t amount) const
+		SizeType translate(SizeType site,SizeType dir,SizeType amount) const
 		{
 			switch (n_) {
 			case CHAIN:
@@ -373,9 +373,9 @@ namespace PsimagLite {
 			throw RuntimeError("translate(): unsupported by this geometry\n");
 		}
 
-		size_t maxConnections() const { return maxConnections_; }
+		SizeType maxConnections() const { return maxConnections_; }
 
-		size_t findReflection(size_t site) const
+		SizeType findReflection(SizeType site) const
 		{
 			switch (n_) {
 			case CHAIN:
@@ -392,7 +392,7 @@ namespace PsimagLite {
 			throw RuntimeError("Unknown geometry\n");
 		}
 
-		void fillAdditionalData(AdditionalDataType& additionalData,size_t ind,size_t jnd) const
+		void fillAdditionalData(AdditionalDataType& additionalData,SizeType ind,SizeType jnd) const
 		{
 			switch (n_) {
 			case KTWONIFFOUR:
@@ -403,7 +403,7 @@ namespace PsimagLite {
 			}
 		}
 
-		int index(size_t i1,size_t edof1,size_t edofTotal) const
+		int index(SizeType i1,SizeType edof1,SizeType edofTotal) const
 		{
 			switch (n_) {
 			case KTWONIFFOUR:
@@ -413,7 +413,7 @@ namespace PsimagLite {
 			}
 		}
 
-		size_t matrixRank(size_t linSize,size_t maxEdof) const
+		SizeType matrixRank(SizeType linSize,SizeType maxEdof) const
 		{
 			switch (n_) {
 			case KTWONIFFOUR:
@@ -423,7 +423,7 @@ namespace PsimagLite {
 			}
 		}
 
-		int signChange(size_t i1, size_t i2) const
+		int signChange(SizeType i1, SizeType i2) const
 		{
 			switch (n_) {
 			case KTWONIFFOUR:
@@ -435,9 +435,9 @@ namespace PsimagLite {
 
 	private:
 
-		size_t getGeometry(const String& s) const
+		SizeType getGeometry(const String& s) const
 		{
-			size_t x = 0;
+			SizeType x = 0;
 			if (s=="chain") x=CHAIN;
 			else if (s=="ladder") x=LADDER;
 			else if (s=="ladderx") x=LADDERX;
@@ -449,9 +449,9 @@ namespace PsimagLite {
 
 		// ATTENTION: THIS CLASS HAS CUSTOM ASSIGNMENT OPERATOR
 		// AND COPY CONTRUCTORS
-		size_t dirs_; // move to object.dirs()
-		size_t n_;
-		size_t maxConnections_;
+		SizeType dirs_; // move to object.dirs()
+		SizeType n_;
+		SizeType maxConnections_;
 		Chain* chain_;
 		Ladder* ladder_;
 		LadderX* ladderx_;
@@ -459,7 +459,7 @@ namespace PsimagLite {
 		KTwoNiFFour* ktwoniffour_;
 	}; // class GeometryFactory
 
-	size_t GeometryFactory::refCounter_=0;
+	SizeType GeometryFactory::refCounter_=0;
 
 } // namespace PsimagLite 
 

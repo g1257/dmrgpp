@@ -140,11 +140,11 @@ namespace PsimagLite {
 
 		virtual void computeGroundState(RealType& gsEnergy,VectorType& z)
 		{
-			size_t n =mat_.rank();
+			SizeType n =mat_.rank();
 			RealType atmp=0.0;
 			VectorType y(n);
 
-			for (size_t i=0;i<n;i++) {
+			for (SizeType i=0;i<n;i++) {
 				y[i]=rng_()-0.5;
 				atmp += std::real(y[i]*std::conj(y[i]));
 			}
@@ -153,7 +153,7 @@ namespace PsimagLite {
 				return;
 			}
 			atmp = 1.0 / sqrt (atmp);
-			for (size_t i = 0; i < n; i++) y[i] *= atmp;
+			for (SizeType i = 0; i < n; i++) y[i] *= atmp;
 			computeGroundState(gsEnergy,z,y);
 		}
 
@@ -166,16 +166,16 @@ namespace PsimagLite {
 				return;
 			}
 
-			size_t n=mat_.rank();
+			SizeType n=mat_.rank();
 			VectorType y(n);
 
 			RealType atmp=0.0;
-			for (size_t i=0;i<n;i++) {
+			for (SizeType i=0;i<n;i++) {
 				y[i]=initialVector[i];
 				atmp += std::real(y[i]*std::conj(y[i]));
 			}
 			atmp = 1.0 / sqrt (atmp);
-			for (size_t i = 0; i < mat_.rank(); i++) y[i] *= atmp;
+			for (SizeType i = 0; i < mat_.rank(); i++) y[i] *= atmp;
 
 			TridiagonalMatrixType ab;
 
@@ -217,19 +217,19 @@ namespace PsimagLite {
 			*            |               .     .  a[j-2]  b[j-2] |
 			*            |               .     .  b[j-2]  a[j-1] |
 			*/
-			size_t& max_nstep = steps_;
+			SizeType& max_nstep = steps_;
 			
 			assert(initVector.size()==mat_.rank());
 			
 			VectorType x(mat_.rank());
 			VectorType y = initVector;
 			RealType atmp = 0;
-			for (size_t i = 0; i < mat_.rank(); i++) {
+			for (SizeType i = 0; i < mat_.rank(); i++) {
 				x[i] = 0;
 				atmp += std::real(y[i]*std::conj(y[i]));
  			}
 
-			for (size_t i = 0; i < y.size(); i++) y[i] /= sqrt(atmp);
+			for (SizeType i = 0; i < y.size(); i++) y[i] /= sqrt(atmp);
 
 			if (max_nstep > mat_.rank()) max_nstep = mat_.rank();
 			lanczosVectors_.resize(mat_.rank(),max_nstep);
@@ -239,11 +239,11 @@ namespace PsimagLite {
 
 			RealType eold = 100.;
 			bool exitFlag=false;
-			size_t j = 0;
+			SizeType j = 0;
 			lanczosVectors_.saveInitialVector(y);
 			typename Vector<RealType>::Type nullVector(0);
 			for (; j < max_nstep; j++) {
-				for (size_t i = 0; i < mat_.rank(); i++) 
+				for (SizeType i = 0; i < mat_.rank(); i++) 
 					lanczosVectors_(i,j) = y[i];
 
 				RealType btmp = 0;
@@ -288,7 +288,7 @@ namespace PsimagLite {
 			lanczosVectors_.oneStepDecomposition(x,y,atmp,btmp);
 		}
 
-		size_t steps() const {return steps_; }
+		SizeType steps() const {return steps_; }
 
 	private:
 
@@ -301,7 +301,7 @@ namespace PsimagLite {
 		void info(RealType energyTmp,const VectorType& x,std::ostream& os)
 		{
 			RealType norma=norm(x);
-			size_t& iter = steps_;
+			SizeType& iter = steps_;
 			
 			if (norma<1e-5 || norma>100) {
 				std::cerr<<"norma="<<norma<<"\n";
@@ -397,11 +397,11 @@ namespace PsimagLite {
 
 		}
 		
-		void getColumn(MatrixType const &mat,VectorType& x,size_t col)
+		void getColumn(MatrixType const &mat,VectorType& x,SizeType col)
 		{
-			size_t n =x.size();
+			SizeType n =x.size();
 			VectorType y(n);
-			for (size_t i=0;i<n;i++) {
+			for (SizeType i=0;i<n;i++) {
 				x[i]=0;
 				y[i]=0;
 				if (i==col) y[i]=1.0;
@@ -414,12 +414,12 @@ namespace PsimagLite {
 				VectorType& z,
 				const VectorType& initialVector)
 		{
-			size_t n =mat_.rank();
+			SizeType n =mat_.rank();
 			Matrix<VectorElementType> a(n,n);
-			for (size_t i=0;i<n;i++) {
+			for (SizeType i=0;i<n;i++) {
 				VectorType x(n);
 				getColumn(mat_,x,i);
-				for (size_t j=0;j<n;j++) a(i,j)=x[j];
+				for (SizeType j=0;j<n;j++) a(i,j)=x[j];
 			}
 			bool ih  = isHermitian(a,true);
 			if (!ih) throw RuntimeError("computeGroundState: Matrix not hermitian\n");
@@ -427,9 +427,9 @@ namespace PsimagLite {
 			std::cerr<<"Matrix hermitian="<<ih<<"\n";
 			/*RealType eps2=1e-6;
 			std::cerr.precision(8);
-			for (size_t i=0;i<n;i++) {
-				size_t counter=0;
-				for (size_t j=0;j<n;j++) {
+			for (SizeType i=0;i<n;i++) {
+				SizeType counter=0;
+				for (SizeType j=0;j<n;j++) {
 					if (psimag::norm(a(i,j))>eps2) {
 						std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j)<<" ";
 						counter++;
@@ -443,7 +443,7 @@ namespace PsimagLite {
 
 			typename Vector<RealType>::Type eigs(a.n_row());
 			diag(a,eigs,'V');
-			for (size_t i=0;i<a.n_row();i++) std::cerr<<a(i,0)<<" ";
+			for (SizeType i=0;i<a.n_row();i++) std::cerr<<a(i,0)<<" ";
 			std::cerr<<"\n";
 			std::cerr<<"--------------------------------\n";
 			std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
@@ -453,10 +453,10 @@ namespace PsimagLite {
 
 		ProgressIndicator progress_;
 		MatrixType const& mat_;
-		size_t steps_;
+		SizeType steps_;
 		RealType eps_;
-		size_t mode_;
-		size_t stepsForEnergyConvergence_;
+		SizeType mode_;
+		SizeType stepsForEnergyConvergence_;
 		Random48<RealType> rng_;
 		LanczosVectorsType lanczosVectors_;
 	}; // class LanczosSolver

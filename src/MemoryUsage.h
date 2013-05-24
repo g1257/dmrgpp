@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 	class MemoryUsage {
-		static const size_t MY_MAX_LINE = 40240;
+		static const SizeType MY_MAX_LINE = 40240;
 
 	public:
 
@@ -109,17 +109,17 @@ namespace PsimagLite {
 		
 		String findEntry(const String& label)
 		{
-			size_t x = data_.find(label);
+			SizeType x = data_.find(label);
 			if (x==String::npos) {
 				return "NOT_FOUND";
 			}
 			x += label.length();
-			size_t y = data_.find("\n",x);
-			size_t len = y-x;
+			SizeType y = data_.find("\n",x);
+			SizeType len = y-x;
 			if (y==String::npos) len = data_.length()-x;
 			String s2 = data_.substr(x,len);
 			x = 0;
-			for (size_t i=0;i<s2.length();i++) {
+			for (SizeType i=0;i<s2.length();i++) {
 				x++;
 				if (s2.at(i)==' ' || s2.at(i)=='\t') continue;
 				else break;

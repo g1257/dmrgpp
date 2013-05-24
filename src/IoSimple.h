@@ -168,7 +168,7 @@ namespace PsimagLite {
 				if (rank_!=0) return;
 				(*fout_)<<label<<"\n";
 				(*fout_)<<x.size()<<"\n";
-				for (size_t i=0;i<x.size();i++) (*fout_)<<x[i]<<"\n";
+				for (SizeType i=0;i<x.size();i++) (*fout_)<<x[i]<<"\n";
 			}
 
 			template<class T>
@@ -185,7 +185,7 @@ namespace PsimagLite {
 			{
 				if (rank_!=0) return;
 				(*fout_)<<something;
-				size_t last = something.length();
+				SizeType last = something.length();
 				if (last>0) last--;
 				if (something[last]!='\n') (*fout_)<<"\n";
 			}
@@ -214,7 +214,7 @@ namespace PsimagLite {
 				fout_->flush();
 			}
 
-			void setPrecision(size_t x)
+			void setPrecision(SizeType x)
 			{
 				if (!fout_) return;
 				fout_->precision(x);
@@ -272,7 +272,7 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			size_t readline(X &x,const String &s,LongIntegerType level=0)
+			SizeType readline(X &x,const String &s,LongIntegerType level=0)
 			{
 				String temp;
 				bool found=false;
@@ -312,13 +312,13 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			typename EnableIf<IsVectorLike<X>::True,std::pair<String,size_t> >::Type
+			typename EnableIf<IsVectorLike<X>::True,std::pair<String,SizeType> >::Type
 			read(X &x,
 			     String const &s,
 			     LongIntegerType level=0,
 			     bool beQuiet = false)
 			{
-				std::pair<String,size_t> sc = advance(s,level,beQuiet);
+				std::pair<String,SizeType> sc = advance(s,level,beQuiet);
 				int xsize;
 				fin_>>xsize;
 				x.resize(xsize);
@@ -356,11 +356,11 @@ namespace PsimagLite {
 			     String const &s,
 			     LongIntegerType level=0)
 			{
-				size_t counter=0;
+				SizeType counter=0;
 				bool beQuiet = true;
 				while(true) {
 					try {
-						std::pair<String,size_t> sc = advance(s,level,beQuiet);
+						std::pair<String,SizeType> sc = advance(s,level,beQuiet);
 						// sc.first contains the full string and also value
 						String key;
 						typename MapType::mapped_type val=0;
@@ -382,13 +382,13 @@ namespace PsimagLite {
 			}
 			
 			template<typename X>
-			std::pair<String,size_t> readKnownSize(X &x,
+			std::pair<String,SizeType> readKnownSize(X &x,
 			                                            String const &s,
 			                                            LongIntegerType level=0)
 			{
-				std::pair<String,size_t> sc = advance(s,level);
+				std::pair<String,SizeType> sc = advance(s,level);
 				
-				for (size_t i=0;i<x.size();i++) {
+				for (SizeType i=0;i<x.size();i++) {
 					typename X::value_type tmp;
 					fin_>>tmp;
 					x[i]=tmp;
@@ -396,7 +396,7 @@ namespace PsimagLite {
 				return sc;
 			}
 
-			std::pair<String,size_t> advance(String const &s,
+			std::pair<String,SizeType> advance(String const &s,
 			                                      LongIntegerType level=0,
 			                                      bool beQuiet=false)
 			{
@@ -405,7 +405,7 @@ namespace PsimagLite {
 				String tempSaved="NOTFOUND";
 				LongSizeType counter=0;
 				bool found=false;
-				//size_t c = 0;
+				//SizeType c = 0;
 				while(!fin_.eof()) {
 					fin_>>temp;
 					//c++;
@@ -425,7 +425,7 @@ namespace PsimagLite {
 					fin_.close();
 					fin_.open(filename_.c_str());
 					if (counter>1) advance(s,counter-2);
-					return std::pair<String,size_t>(tempSaved,counter);
+					return std::pair<String,SizeType>(tempSaved,counter);
 				}
 				
 				//std::cerr<<"count="<<c<<"\n";
@@ -437,12 +437,12 @@ namespace PsimagLite {
 					throw RuntimeError("IoSimple::In::read()\n");
 				}
 				//std::cerr<<"------------\n";
-				return std::pair<String,size_t>(tempSaved,counter);
+				return std::pair<String,SizeType>(tempSaved,counter);
 			}
 			
-			size_t count(const String& s)
+			SizeType count(const String& s)
 			{
-				size_t i = 0;
+				SizeType i = 0;
 				while(i<1000) {
 					try {
 						advance(s,0,true);
@@ -522,12 +522,12 @@ namespace PsimagLite {
 			template<typename X>
 			void getKey(String& key,X& x,const String& full)
 			{
-				size_t i=0;
+				SizeType i=0;
 				for (;i<full.length();i++) {
 					if (full[i]=='[') break;
 				}
 				key = "";
-				size_t j=i+1;
+				SizeType j=i+1;
 				for (;j<full.length();j++) {
 					if (full[j]==']') break;
 					key += full[j];
@@ -540,7 +540,7 @@ namespace PsimagLite {
 					throw RuntimeError(s.c_str());
 				}
 				String val="";
-				for (size_t k=j;k<full.length();k++)
+				for (SizeType k=j;k<full.length();k++)
 					val += full[k];
 				x = atof(val.c_str());
 			}

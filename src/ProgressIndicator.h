@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 	class ProgressIndicator {
 	public:
-		ProgressIndicator(const String& caller,size_t rank) : caller_(caller),rank_(rank) 
+		ProgressIndicator(const String& caller,SizeType rank) : caller_(caller),rank_(rank) 
 		{
 			prefix_ = caller_ + ": ";
 		}
@@ -112,7 +112,7 @@ namespace PsimagLite {
 		}
 	private:
 		String caller_;
-		size_t rank_;
+		SizeType rank_;
 		String prefix_;
 	}; // ProgressIndicator
 } // namespace PsimagLite 

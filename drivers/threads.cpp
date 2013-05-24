@@ -32,10 +32,10 @@ public:
 
 	typedef double RealType;
 
-	void thread_function_(size_t threadNum,size_t blockSize,size_t total,pthread_mutex_t* myMutex)
+	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
 	{
-		for (size_t p=0;p<blockSize;p++) {
-			size_t taskNumber = threadNum*blockSize + p;
+		for (SizeType p=0;p<blockSize;p++) {
+			SizeType taskNumber = threadNum*blockSize + p;
 			if (taskNumber>=total) break;
 			std::cout<<"This is thread number "<<threadNum<<" and taskNumber="<<taskNumber<<"\n";
 		}
@@ -53,8 +53,8 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
-	size_t nthreads  = atoi(argv[1]);
-	size_t ntasks = atoi(argv[2]);
+	SizeType nthreads  = atoi(argv[1]);
+	SizeType ntasks = atoi(argv[2]);
 
 	std::cout<<"Using "<<nthreads<<" threads.\n";
 

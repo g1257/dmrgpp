@@ -104,33 +104,33 @@ namespace PsimagLite {
 			io.printVector(b_,"#Bvector");
 		}
 
-		void resize(size_t n,FieldType value)
+		void resize(SizeType n,FieldType value)
 		{
 			resize(n);
-			for (size_t i=0;i<n;i++) a_[i]=b_[i]=value;
+			for (SizeType i=0;i<n;i++) a_[i]=b_[i]=value;
 		}
 
-		void resize(size_t n)
+		void resize(SizeType n)
 		{
 			a_.resize(n);
 			b_.resize(n);
 		}
 
-		FieldType& a(size_t i) { return a_[i]; }
-		FieldType& b(size_t i) { return b_[i]; }
+		FieldType& a(SizeType i) { return a_[i]; }
+		FieldType& b(SizeType i) { return b_[i]; }
 
-		const FieldType& a(size_t i) const { return a_[i]; }
-		const FieldType& b(size_t i) const { return b_[i]; }
+		const FieldType& a(SizeType i) const { return a_[i]; }
+		const FieldType& b(SizeType i) const { return b_[i]; }
 
 		template<typename SomeMatrixType>
 		void buildDenseMatrix(SomeMatrixType& m) const
 		{
 			m.resize(a_.size(),a_.size());
-			for (size_t i=0;i<m.n_row();i++) 
-				for (size_t j=0;j<m.n_col();j++)
+			for (SizeType i=0;i<m.n_row();i++) 
+				for (SizeType j=0;j<m.n_col();j++)
 					m(i,j)=0;
 
-			for (size_t i=0;i<a_.size();i++) {
+			for (SizeType i=0;i<a_.size();i++) {
 				m(i,i) = a_[i];
 				if (i>0) m(i,i-1) = m(i-1,i) = b_[i-1];
 			}
@@ -142,7 +142,7 @@ namespace PsimagLite {
 			b_.push_back(b);
 		}
 
-		size_t size() const { return a_.size(); }
+		SizeType size() const { return a_.size(); }
 
 	private:
 		typename Vector<FieldType>::Type a_,b_;

@@ -96,24 +96,24 @@ namespace PsimagLite {
 		struct AdditionalData {
 			AdditionalData() : type1(0),type2(0),TYPE_C(KTwoNiFFour::TYPE_C) {}
 
-			size_t type1;
-			size_t type2;
-			size_t TYPE_C;
+			SizeType type1;
+			SizeType type2;
+			SizeType TYPE_C;
 		};
 
-		KTwoNiFFour(size_t linSize,int signChange) 
+		KTwoNiFFour(SizeType linSize,int signChange) 
 		: linSize_(linSize),signChange_(signChange)
 		{
 			std::cerr<<"SIGN CHANGE="<<signChange<<"\n";
 		}
 
-		size_t getVectorSize(size_t dirId) const
+		SizeType getVectorSize(SizeType dirId) const
 		{
 			assert(false);
 			throw RuntimeError("getVectorSize: unimplemented\n");
 		}
 
-		bool connected(size_t i1,size_t i2) const
+		bool connected(SizeType i1,SizeType i2) const
 		{
 			if (i1==i2) return false;
 			PairType type1 = findTypeOfSite(i1);
@@ -124,8 +124,8 @@ namespace PsimagLite {
 			//! o-o
 			if (type1.first == type2.first && type1.first == TYPE_O) {
 				if (type1.second==type2.second) return false;
-				size_t newi1 = (type1.second==SUBTYPE_X) ? i1 : i2;
-				size_t newi2 = (type1.second==SUBTYPE_X) ? i2 : i1;
+				SizeType newi1 = (type1.second==SUBTYPE_X) ? i1 : i2;
+				SizeType newi2 = (type1.second==SUBTYPE_X) ? i2 : i1;
 				if (newi1>newi2) {
 					assert(newi1>=4);
 					if (newi1-2==newi2 || newi1-3==newi2) return true;
@@ -136,8 +136,8 @@ namespace PsimagLite {
 				return false;
 			}
 			//! o-c or c-o
-			size_t newi1 = (type1.first==TYPE_O) ? i1 : i2;
-			size_t newi2 = (type1.first==TYPE_O) ? i2 : i1;
+			SizeType newi1 = (type1.first==TYPE_O) ? i1 : i2;
+			SizeType newi2 = (type1.first==TYPE_O) ? i2 : i1;
 			assert(newi2>=3);
 			if (newi2-1==newi1 || newi2-2==newi1 || newi2-3==newi1 || newi2+1==newi1)
 				return true;
@@ -145,36 +145,36 @@ namespace PsimagLite {
 		}
 
 		// assumes i1 and i2 are connected
-		size_t calcDir(size_t i1,size_t i2) const
+		SizeType calcDir(SizeType i1,SizeType i2) const
 		{
 			PairType type1 = findTypeOfSite(i1);
 			PairType type2 = findTypeOfSite(i2);
 			//! o-o
 			if (type1.first == type2.first && type1.first == TYPE_O) {
 				assert(type1.second!=type2.second);
-				size_t newi1 = (type1.second==SUBTYPE_X) ? i1 : i2;
-				size_t newi2 = (type1.second==SUBTYPE_X) ? i2 : i1;
+				SizeType newi1 = (type1.second==SUBTYPE_X) ? i1 : i2;
+				SizeType newi2 = (type1.second==SUBTYPE_X) ? i2 : i1;
 				if (newi1>newi2) {
 					assert(newi1>=4);
-					size_t distance = newi1-newi2;
+					SizeType distance = newi1-newi2;
 					if (distance==2) return DIR_XPY; 
 					assert(distance==3);
 					return DIR_XMY;
 				}
-				size_t distance = newi2-newi1;
+				SizeType distance = newi2-newi1;
 				if (distance==1)  return DIR_XPY; 
 				assert(distance==2);
 				return DIR_XMY;
 			}
 			//! o-c or c-o
-			size_t newi1 = (type1.first==TYPE_O) ? i1 : i2;
+			SizeType newi1 = (type1.first==TYPE_O) ? i1 : i2;
 			type1 = findTypeOfSite(newi1);
 			return (type1.second==SUBTYPE_X) ? DIR_X : DIR_Y;
 		}
 
-		bool fringe(size_t i,size_t smax,size_t emin) const
+		bool fringe(SizeType i,SizeType smax,SizeType emin) const
 		{
-			size_t r = smax%4;
+			SizeType r = smax%4;
 			switch (r) {
 			case 0:
 				return fringe0(i,smax,emin);
@@ -190,16 +190,16 @@ namespace PsimagLite {
 		}
 
 		// assumes i1 and i2 are connected
-		size_t handle(size_t i1,size_t i2) const
+		SizeType handle(SizeType i1,SizeType i2) const
 		{
 			assert(false);
 			return 0;
 		}
 
 		// siteNew2 is fringe in the environment
-		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+		SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
 		{
-			size_t r = smax%4;
+			SizeType r = smax%4;
 			switch (r) {
 			case 0:
 				return subs0(smax,emin,siteNew2);
@@ -219,52 +219,52 @@ namespace PsimagLite {
 			return "KTwoNiFFour";
 		}
 
-		size_t maxConnections() const
+		SizeType maxConnections() const
 		{
 			return 6;
 		}
 		
-		size_t findReflection(size_t site) const
+		SizeType findReflection(SizeType site) const
 		{
 			throw RuntimeError("findReflection: unimplemented (sorry)\n");
 		}
 
-		void fillAdditionalData(AdditionalData& additionalData,size_t ind,size_t jnd) const
+		void fillAdditionalData(AdditionalData& additionalData,SizeType ind,SizeType jnd) const
 		{
 			additionalData.type1 = findTypeOfSite(ind).first;
 			additionalData.type2 = findTypeOfSite(jnd).first;
 			additionalData.TYPE_C = TYPE_C;
 		}
 
-		size_t matrixRank() const
+		SizeType matrixRank() const
 		{
-			size_t sites = linSize_;
-			size_t no = 0;
-			size_t nc = 0;
-			for (size_t i=0;i<sites;i++) {
-				size_t type1 = findTypeOfSite(i).first;
+			SizeType sites = linSize_;
+			SizeType no = 0;
+			SizeType nc = 0;
+			for (SizeType i=0;i<sites;i++) {
+				SizeType type1 = findTypeOfSite(i).first;
 				if (type1==TYPE_C) nc++;
 				else no++;
 			}
 			return 2*no+nc;
 		}
 		
-		int index(size_t i,size_t orb) const
+		int index(SizeType i,SizeType orb) const
 		{
-			size_t type1 = findTypeOfSite(i).first;
+			SizeType type1 = findTypeOfSite(i).first;
 			if (type1==TYPE_C && orb>0) return -1;
 			if (type1==TYPE_C || orb==0) return i;
-			size_t sites = linSize_;
-			size_t tmp = (i+1)/4;
+			SizeType sites = linSize_;
+			SizeType tmp = (i+1)/4;
 			assert(sites+i>=tmp);
 			return sites+i-tmp;
 		}
 		
-		int signChange(size_t i1,size_t i2) const
+		int signChange(SizeType i1,SizeType i2) const
 		{
 			// change the sign of Cu-O
-			size_t newi1 = std::min(i1,i2);
-			size_t newi2 = std::max(i1,i2);
+			SizeType newi1 = std::min(i1,i2);
+			SizeType newi2 = std::max(i1,i2);
 			PairType type1 = findTypeOfSite(newi1);
 			PairType type2 = findTypeOfSite(newi2);
 			int sign1 = 1;
@@ -284,40 +284,40 @@ namespace PsimagLite {
 		//! Given as a pair, first number is the type,
 		//! If first number == TYPE_C then second number is bogus
 		//! If first number == TYPE_O then second number is the subtype
-		PairType findTypeOfSite(size_t site) const
+		PairType findTypeOfSite(SizeType site) const
 		{
-			size_t sitePlusOne = site + 1;
-			size_t r = sitePlusOne%4;
+			SizeType sitePlusOne = site + 1;
+			SizeType r = sitePlusOne%4;
 			if (r==0) return PairType(TYPE_C,0);
 			
 			if (r==1) return PairType(TYPE_O,SUBTYPE_X);
 			return PairType(TYPE_O,SUBTYPE_Y);
 		}
 		
-		bool isInverted(size_t i) const
+		bool isInverted(SizeType i) const
 		{
-			size_t j = i+4;
+			SizeType j = i+4;
 			return ((j%8)==0);
 		}
 		
-		bool fringe0(size_t i,size_t smax,size_t emin) const
+		bool fringe0(SizeType i,SizeType smax,SizeType emin) const
 		{
 			return (i==smax || i==emin);
 		}
 		
-		size_t subs0(size_t smax,size_t emin,size_t i) const
+		SizeType subs0(SizeType smax,SizeType emin,SizeType i) const
 		{
 			return smax+3;
 		}
 
-		bool fringe1(size_t i,size_t smax,size_t emin) const
+		bool fringe1(SizeType i,SizeType smax,SizeType emin) const
 		{
 			bool b1 = (i==smax || i==smax-1);
 			bool b2 = (i==emin || i==emin+1 || i==emin+2);
 			return (b1 || b2);
 		}
 		
-		size_t subs1(size_t smax,size_t emin,size_t i) const
+		SizeType subs1(SizeType smax,SizeType emin,SizeType i) const
 		{
 			if (i==emin) return smax+3;
 			if (i==emin+1) return smax+2;
@@ -326,29 +326,29 @@ namespace PsimagLite {
 			return 0;
 		}
 		
-		bool fringe2(size_t i,size_t smax,size_t emin) const
+		bool fringe2(SizeType i,SizeType smax,SizeType emin) const
 		{
 			return (i==smax-2 || i==emin+2);
 		}
 		
-		size_t subs2(size_t smax,size_t emin,size_t i) const
+		SizeType subs2(SizeType smax,SizeType emin,SizeType i) const
 		{
 			assert(i==emin+2);
 			return smax+1;
 		}
 
-		bool fringe3(size_t i,size_t smax,size_t emin) const
+		bool fringe3(SizeType i,SizeType smax,SizeType emin) const
 		{
 			return (i==emin || i==smax || i==smax-1 || i==smax-2);
 		}
 		
-		size_t subs3(size_t smax,size_t emin,size_t i) const
+		SizeType subs3(SizeType smax,SizeType emin,SizeType i) const
 		{
 			assert(i==emin);
 			return smax+1;
 		}
 
-		size_t linSize_;
+		SizeType linSize_;
 		int signChange_;
 	}; // class KTwoNiFFour
 } // namespace PsimagLite 

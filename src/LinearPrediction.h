@@ -95,10 +95,10 @@ namespace PsimagLite {
 		LinearPrediction(const typename Vector<FieldType>::Type& y)
 		: y_(y)
 		{
-			size_t ysize = y.size();
+			SizeType ysize = y.size();
 			if (ysize&1) throw RuntimeError(
 				"LinearPrediction::ctor(...): data set must contain an even number of points\n");
-			size_t n = ysize/2;
+			SizeType n = ysize/2;
 			MatrixType A(n,n);
 			typename Vector<FieldType>::Type B(n);
 			computeA(A);
@@ -106,17 +106,17 @@ namespace PsimagLite {
 			computeD(A,B);
 		}
 
-		const FieldType& operator()(size_t i) const
+		const FieldType& operator()(SizeType i) const
 		{
 			return y_[i];
 		}
 
-		void predict(size_t p)
+		void predict(SizeType p)
 		{
-			size_t n = y_.size();
-			for (size_t i=n;i<n+p;i++) {
+			SizeType n = y_.size();
+			for (SizeType i=n;i<n+p;i++) {
 				FieldType sum = 0;
-				for (size_t j=0;j<d_.size();j++)
+				for (SizeType j=0;j<d_.size();j++)
 					sum += d_[j]*y_[i-j-1];
 				y_.push_back(sum);
 			}
@@ -127,7 +127,7 @@ namespace PsimagLite {
 		//! call to BLAS::GEMV
 		void computeD(MatrixType& A,typename Vector<FieldType>::Type& B)
 		{
-			size_t n = B.size();
+			SizeType n = B.size();
 			typename Vector<int>::Type ipiv(n); // use signed integers here!!
 			int info = 0;
 			psimag::LAPACK::GETRF(n, n, &(A(0,0)), n, &(ipiv[0]), info);
@@ -150,11 +150,11 @@ namespace PsimagLite {
 
 		void computeA(MatrixType& A) const
 		{
-			size_t n = A.n_row();
-			for (size_t l=0;l<n;l++) {
-				for (size_t j=0;j<n;j++) {
+			SizeType n = A.n_row();
+			for (SizeType l=0;l<n;l++) {
+				for (SizeType j=0;j<n;j++) {
 					A(l,j) = 0;
-					for (size_t i=n;i<2*n;i++)
+					for (SizeType i=n;i<2*n;i++)
 						A(l,j) += y_[i-l-1] * y_[i-j-1];
 				}
 			}
@@ -162,10 +162,10 @@ namespace PsimagLite {
 
 		void computeB(typename Vector<FieldType>::Type& B) const
 		{
-			size_t n = B.size();
-			for (size_t l=0;l<n;l++) {
+			SizeType n = B.size();
+			for (SizeType l=0;l<n;l++) {
 				B[l] = 0;
-				for (size_t i=n;i<2*n;i++)
+				for (SizeType i=n;i<2*n;i++)
 					B[l] += y_[i-l-1] * y_[i];
 			}
 		}

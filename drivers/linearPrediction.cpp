@@ -39,7 +39,7 @@ int main(int argc,char *argv[])
 	int opt = 0;
 	PsimagLite::String file="";
 	PsimagLite::String label="";
-	size_t p = 0;
+	SizeType p = 0;
 	while ((opt = getopt(argc, argv,
 			"f:p:l:")) != -1) {
 		switch (opt) {
@@ -66,11 +66,11 @@ int main(int argc,char *argv[])
 	PsimagLite::IoSimple::In io(file);
 	PsimagLite::Vector<FieldType>::Type y;
 	io.read(y,label);
-	size_t n = y.size();
+	SizeType n = y.size();
 	std::cout<<"#Found "<<n<<" points in file "<<file<<"\n";
 	LinearPredictionType linearPrediction(y);
 	linearPrediction.predict(p);
-	for (size_t i=0;i<p+n;i++) {
+	for (SizeType i=0;i<p+n;i++) {
 		std::cout<<i<<" "<<linearPrediction(i)<<"\n";
 	}
 }

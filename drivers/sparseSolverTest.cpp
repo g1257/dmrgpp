@@ -40,9 +40,9 @@ struct SolverParameters {
 		  options("")
 	{}
 
-	size_t steps;
+	SizeType steps;
 	RealType tolerance;
-	size_t stepsForEnergyConvergence;
+	SizeType stepsForEnergyConvergence;
 	bool lotaMemory;
 	String options;
 
@@ -64,10 +64,10 @@ int main(int argc,char *argv[])
 {
 	int opt = 0;
 	bool useDavidson = false;
-	size_t n = 0;
+	SizeType n = 0;
 	RealType maxValue = 0;
-	size_t maxCol = 0;
-	size_t seed = 0;
+	SizeType maxCol = 0;
+	SizeType seed = 0;
 	bool lotaMemory = true;
 
 	while ((opt = getopt(argc, argv,
@@ -99,7 +99,7 @@ int main(int argc,char *argv[])
 
 	// sanity checks
 	if (n==0) usage(argv[0]);
-	if (maxCol==0) maxCol = 1 + size_t(0.1*n);
+	if (maxCol==0) maxCol = 1 + SizeType(0.1*n);
 	if (std::norm(maxValue)<1e-6) maxValue = 1.0;
 	if (seed==0) seed = 3443331;
 
@@ -107,14 +107,14 @@ int main(int argc,char *argv[])
 	Random48<RealType> random(seed);
 	SparseMatrixType sparse(n,n);
 	Vector<bool>::Type seenThisColumn(n);
-	size_t counter = 0;
-	for (size_t i=0;i<n;i++) {
+	SizeType counter = 0;
+	for (SizeType i=0;i<n;i++) {
 		sparse.setRow(i,counter);
 		// random vector:
-		size_t x = 1+size_t(random()*maxCol);
-		for (size_t j=0;j<seenThisColumn.size();j++) seenThisColumn[j]=false;
-		for (size_t j=0;j<x;j++) {
-			size_t col = size_t(random()*n);
+		SizeType x = 1+SizeType(random()*maxCol);
+		for (SizeType j=0;j<seenThisColumn.size();j++) seenThisColumn[j]=false;
+		for (SizeType j=0;j<x;j++) {
+			SizeType col = SizeType(random()*n);
 			if (seenThisColumn[col]) continue;
 			seenThisColumn[col]=true;
 			ComplexOrRealType val = random()*maxValue;

@@ -94,8 +94,8 @@ namespace PsimagLite {
 //			const Matrix<SomeType>& a,
 //			const Matrix<SomeType>& b)
 //		{
-//			for (size_t i=0;i<a.n_row();i++) {
-//                for (size_t j=0;j<a.n_col();j++) {
+//			for (SizeType i=0;i<a.n_row();i++) {
+//                for (SizeType j=0;j<a.n_col();j++) {
 //                    RealType x = std::norm(a(i,j)-b(i,j));
 //                    if (x>eps_) {
 //						std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j);

@@ -88,7 +88,7 @@ namespace PsimagLite {
 		public:
 			typedef  RealType_ RealType;
 			typedef GeometryTerm<RealType> GeometryTermType;
-			typedef typename Vector<size_t>::Type BlockType;
+			typedef typename Vector<SizeType>::Type BlockType;
 			typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
 
 			template<typename IoInputter>
@@ -102,16 +102,16 @@ namespace PsimagLite {
 				io.readline(x,"NumberOfTerms=");
 				if (x<0) throw RuntimeError("NumberOfTerms<0 is an error\n");
 
-				for (size_t i=0;i<size_t(x);i++) {
+				for (SizeType i=0;i<SizeType(x);i++) {
 					terms_.push_back(GeometryTermType(io,i,linSize_,debug));
 				}
 			}
 
-			String label(size_t i) const { return terms_[i].label(); }
+			String label(SizeType i) const { return terms_[i].label(); }
 			
-			size_t connectionKind(size_t smax,size_t ind,size_t jnd) const
+			SizeType connectionKind(SizeType smax,SizeType ind,SizeType jnd) const
 			{
-				size_t middle = smax + 1;
+				SizeType middle = smax + 1;
 				if (ind<middle && jnd>=middle) return ProgramGlobalsType::SYSTEM_ENVIRON;
 				if (jnd<middle && ind>=middle) return ProgramGlobalsType::ENVIRON_SYSTEM;
 				if (ind<middle) return ProgramGlobalsType::SYSTEM_SYSTEM;
@@ -119,64 +119,64 @@ namespace PsimagLite {
 			}
 			
 			RealType operator()
-				(size_t smax,size_t emin,
-				 size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
+				(SizeType smax,SizeType emin,
+				 SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
 			{
 				if (smax+1==emin) return terms_[term](i1,edof1,i2,edof2);
 				return terms_[term](smax,emin,i1,edof1,i2,edof2);
 			}
 
 			RealType operator()
-				(size_t i1,size_t edof1,size_t i2, size_t edof2,size_t term) const
+				(SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
 			{
 				return terms_[term](i1,edof1,i2,edof2);
 			}
 			
 			// needs to check all terms FIXME:
-			bool connected(size_t smax,size_t emin,size_t i1,size_t i2) const
+			bool connected(SizeType smax,SizeType emin,SizeType i1,SizeType i2) const
 			{
 				if (smax+1==emin) return terms_[0].connected(i1,i2); // any term will do
 				return terms_[0].connected(smax,emin,i1,i2); // any term will do
 			}
 
-			size_t terms() const { return terms_.size(); }
+			SizeType terms() const { return terms_.size(); }
 			
-			size_t numberOfSites() const { return linSize_; }
+			SizeType numberOfSites() const { return linSize_; }
 			
-			void split(size_t sitesPerBlock,
+			void split(SizeType sitesPerBlock,
 			           BlockType& S,
 			           typename Vector<BlockType>::Type& X,
 			           typename Vector<BlockType>::Type& Y,
 			           BlockType& E) const
 			{
-				size_t middle = linSize_/2;
+				SizeType middle = linSize_/2;
 				if (linSize_& 1 ||
 				    linSize_ % sitesPerBlock!=0 ||
-				    size_t(linSize_/sitesPerBlock)<3) {
+				    SizeType(linSize_/sitesPerBlock)<3) {
 					String str(__FILE__);
 					str += " " + ttos(__LINE__) + "\n";
 					str += "split error, linSize_=" + ttos(linSize_);
 					str += " sitesPerBlock=" + ttos(sitesPerBlock) + "\n";
 					throw RuntimeError(str.c_str());
 				}
-				size_t i=0;
+				SizeType i=0;
 				while(i<sitesPerBlock) {
 					S.push_back(i);
 					i++;
 				}
 				while(i<middle) {
-					typename Vector<size_t>::Type tmpV(sitesPerBlock);
-					for (size_t j=0;j<sitesPerBlock;j++)
+					typename Vector<SizeType>::Type tmpV(sitesPerBlock);
+					for (SizeType j=0;j<sitesPerBlock;j++)
 						tmpV[j] = i+j;
 					X.push_back(tmpV);
 					i+=sitesPerBlock;
 				}
 				
-				size_t lastMiddle=linSize_-sitesPerBlock;
+				SizeType lastMiddle=linSize_-sitesPerBlock;
 				while(i<lastMiddle) {
-					typename Vector<size_t>::Type tmpV(sitesPerBlock);
-					for (size_t j=0;j<sitesPerBlock;j++) {
-						size_t jj = sitesPerBlock-1-j;
+					typename Vector<SizeType>::Type tmpV(sitesPerBlock);
+					for (SizeType j=0;j<sitesPerBlock;j++) {
+						SizeType jj = sitesPerBlock-1-j;
 						tmpV[j] = (linSize_-1-i-jj)+(middle-sitesPerBlock);
 						assert(tmpV[j]<linSize_);
 					}
@@ -190,34 +190,34 @@ namespace PsimagLite {
 				}
 			}
 			
-			size_t maxConnections(size_t termId = 0) const
+			SizeType maxConnections(SizeType termId = 0) const
 			{
 				return terms_[termId].maxConnections();
 			}
 			
-			void fillAdditionalData(AdditionalDataType& additionalData,size_t term,size_t ind,size_t jnd) const
+			void fillAdditionalData(AdditionalDataType& additionalData,SizeType term,SizeType ind,SizeType jnd) const
 			{
 				terms_[term].fillAdditionalData(additionalData,ind,jnd);
 			}
 
-			size_t findReflection(size_t site,size_t termId) const
+			SizeType findReflection(SizeType site,SizeType termId) const
 			{
 				return terms_[termId].findReflection(site);
 			}
 
-			size_t length(size_t i,size_t termId) const
+			SizeType length(SizeType i,SizeType termId) const
 			{
 				return terms_[termId].length(i);
 			}
 
-			size_t translate(size_t site,size_t dir, size_t amount,size_t termId) const
+			SizeType translate(SizeType site,SizeType dir, SizeType amount,SizeType termId) const
 			{
 				return terms_[termId].translate(site,dir,amount);
 			}
 
 			void print(std::ostream& os) const
 			{
-				for (size_t i=0;i<terms_.size();i++)
+				for (SizeType i=0;i<terms_.size();i++)
 					terms_[i].print(os,linSize_);
 			}
 
@@ -226,7 +226,7 @@ namespace PsimagLite {
 
 		private:
 
-			size_t linSize_;
+			SizeType linSize_;
 			typename Vector<GeometryTermType>::Type terms_;
 			
 	}; // class Geometry
@@ -236,7 +236,7 @@ namespace PsimagLite {
 	{
 		os<<"#GeometrySize="<<g.linSize_<<"\n";
 		os<<"#GeometryTerms="<<g.terms_.size()<<"\n";
-		for (size_t i=0;i<g.terms_.size();i++) os<<g.terms_[i];
+		for (SizeType i=0;i<g.terms_.size();i++) os<<g.terms_[i];
 		return os;
 	}
 } // namespace PsimagLite 

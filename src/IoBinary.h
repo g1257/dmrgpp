@@ -103,7 +103,7 @@ Parts marked with (*) are optional.
 (1) label
 Size of this part: variable
 1.1 the 5 characters LABEL ( 5 bytes)
-1.2 the size of the actual label (sizeof(size_t), usually 8 bytes)
+1.2 the size of the actual label (sizeof(SizeType), usually 8 bytes)
 1.3 the label (variable size)
 
 (2) checksum including (3), (4), (5) and (6).
@@ -111,18 +111,18 @@ Size of this part: 1 byte if we use, let's say, CRC-8
 Rationale: This is for consistency check.
 
 (3) total record size including (4), (5) and (6).
-Size of this part = sizeof(size_t) usually 8 bytes.
+Size of this part = sizeof(SizeType) usually 8 bytes.
 Rationale: This is for consistency check.
 
 (4) type
 Size of this part: 1 byte
 4.1 The 4 lower bits describe the native type, for example,
-int, size_t, double, float, char *, ..., we have space here for 16 possibilities
+int, SizeType, double, float, char *, ..., we have space here for 16 possibilities
 4.2 The 4 higher bits describe composite structures, for example,
 vector, matrix, etc. We might reserve the last bit to indicate complex.
 
 (5) The size of the payload
-Size of this part: sizeof(size_t), usually 8 bytes
+Size of this part: sizeof(SizeType), usually 8 bytes
 
 (6) The actual payload.
 Size of this part: variable
@@ -187,16 +187,16 @@ namespace PsimagLite {
 	class IoBinary {
 
 		typedef unsigned char TypeType;
-		typedef std::pair<size_t,size_t> PairType;
+		typedef std::pair<SizeType,SizeType> PairType;
 
 		enum {TYPE_INT=1,TYPE_SIZE_T=2,TYPE_FLOAT=3,TYPE_DOUBLE=4,TYPE_BOOL=5};
 
 		enum {TYPE_VECTOR = 16,TYPE_MATRIX = 32, TYPE_PAIR = 48, TYPE_UNKNOWN = 64};
 
 #ifdef HAVE_BINARY_IO
-		static const size_t ENABLED=1;
+		static const SizeType ENABLED=1;
 #else
-		static const size_t ENABLED=0;
+		static const SizeType ENABLED=0;
 #endif
 
 	public:
@@ -274,16 +274,16 @@ namespace PsimagLite {
 
 				char check = 0;
 				BinarySaveLoad::mywrite(fout_, (const void *)&check,1);
-				size_t total = 0;
+				SizeType total = 0;
 				BinarySaveLoad::mywrite(fout_, (const void *)&total,sizeof(total));
 
 				typename X::value_type dummy;
 				TypeType type = TYPE_VECTOR | charTypeOf(dummy);
 				BinarySaveLoad::mywrite(fout_,(const void *)&type,sizeof(type));
-//				size_t length = x.size();
+//				SizeType length = x.size();
 //				BinarySaveLoad::mywrite(fout_,(const void *)&length,sizeof(length));
 
-//				for (size_t i=0;i<x.size();i++) {
+//				for (SizeType i=0;i<x.size();i++) {
 //					const typename X::value_type* const ptr = &(x[i]);
 //					BinarySaveLoad::mywrite(fout_, (const void *)ptr,sizeof(dummy));
 //				}
@@ -300,7 +300,7 @@ namespace PsimagLite {
 				char check = 0;
 				BinarySaveLoad::mywrite(fout_, (const void *)&check,1);
 
-				size_t total = 1;
+				SizeType total = 1;
 				BinarySaveLoad::mywrite(fout_, (const void *)&total,sizeof(total));
 
 				TypeType type = charTypeOf(something);
@@ -316,7 +316,7 @@ namespace PsimagLite {
 				char check = 0;
 				BinarySaveLoad::mywrite(fout_, (const void *)&check,1);
 
-				size_t total = 0;
+				SizeType total = 0;
 				BinarySaveLoad::mywrite(fout_, (const void *)&total,sizeof(total));
 			}
 
@@ -331,7 +331,7 @@ namespace PsimagLite {
 
 				BinarySaveLoad::mywrite(fout_, (const void *)&check,1);
 
-				size_t total = 0;
+				SizeType total = 0;
 
 				BinarySaveLoad::mywrite(fout_, (const void *)&total,sizeof(total));
 
@@ -348,7 +348,7 @@ namespace PsimagLite {
 //				char check = 0;
 //				BinarySaveLoad::mywrite(fout_, (const void *)&check,1);
 
-//				size_t total = 0;
+//				SizeType total = 0;
 //				BinarySaveLoad::mywrite(fout_, (const void *)&total,sizeof(total));
 
 //				SomeType dummy;
@@ -373,7 +373,7 @@ namespace PsimagLite {
 
 				char label1[] = {'L','A','B','E','L'};
 				BinarySaveLoad::mywrite(fout_,label1,5);
-				size_t length = s.length();
+				SizeType length = s.length();
 				BinarySaveLoad::mywrite(fout_,(const void *)&length,sizeof(length));
 				BinarySaveLoad::mywrite(fout_, (const void *)&(s[0]),length);
 			}
@@ -398,7 +398,7 @@ namespace PsimagLite {
 		public:
 
 			static const int LAST_INSTANCE=-1;
-			static const size_t MEMORY_POOL_SIZE = 10240;
+			static const SizeType MEMORY_POOL_SIZE = 10240;
 			typedef int long long LongIntegerType;
 			typedef unsigned int long long LongSizeType;
 
@@ -444,13 +444,13 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			size_t readline(X &x,const String &s,LongIntegerType level=0)
+			SizeType readline(X &x,const String &s,LongIntegerType level=0)
 			{
 				if (!ENABLED) return 0;
-				std::pair<String,size_t> sc = advance(s,level,false);
+				std::pair<String,SizeType> sc = advance(s,level,false);
 				//std::cerr<<"FOUND--------->\n";
 				char check = 0;
-				size_t total = 0;
+				SizeType total = 0;
 				PairType type;
 				readCheckTotalAndType(check,total,type);
 
@@ -468,16 +468,16 @@ namespace PsimagLite {
 			}
 
 			template<typename X>
-			std::pair<String,size_t> read(X &x,
+			std::pair<String,SizeType> read(X &x,
 							   String const &s,
 							   LongIntegerType level=0,
 							   bool beQuiet = false)
 			{
-				if (!ENABLED) return std::pair<String,size_t>("NOT_ENABLED",0);
-				std::pair<String,size_t> sc = advance(s,level,beQuiet);
+				if (!ENABLED) return std::pair<String,SizeType>("NOT_ENABLED",0);
+				std::pair<String,SizeType> sc = advance(s,level,beQuiet);
 				//std::cerr<<"FOUND--------->\n";
 				char check = 0;
-				size_t total = 0;
+				SizeType total = 0;
 				PairType type;
 				readCheckTotalAndType(check,total,type);
 				if (type.second == TYPE_VECTOR) {
@@ -495,11 +495,11 @@ namespace PsimagLite {
 //			          String const &s,
 //			          LongIntegerType level=0)
 //			{
-//				size_t counter=0;
+//				SizeType counter=0;
 //				bool beQuiet = true;
 //				while(true) {
 //					try {
-//						std::pair<String,size_t> sc = advance(s,level,beQuiet);
+//						std::pair<String,SizeType> sc = advance(s,level,beQuiet);
 //						// sc.first contains the full string and also value
 //						String key;
 //						X val=0;
@@ -521,13 +521,13 @@ namespace PsimagLite {
 //			}
 			
 //			template<typename X>
-//			std::pair<String,size_t> readKnownSize(X &x,
+//			std::pair<String,SizeType> readKnownSize(X &x,
 //			                                            String const &s,
 //			                                            LongIntegerType level=0)
 //			{
-//				std::pair<String,size_t> sc = advance(s,level);
+//				std::pair<String,SizeType> sc = advance(s,level);
 				
-//				for (size_t i=0;i<x.size();i++) {
+//				for (SizeType i=0;i<x.size();i++) {
 //					typename X::value_type tmp;
 //					fin_>>tmp;
 //					x[i]=tmp;
@@ -535,10 +535,10 @@ namespace PsimagLite {
 //				return sc;
 //			}
 
-			size_t count(const String& s)
+			SizeType count(const String& s)
 			{
 				if (!ENABLED) return 0;
-				size_t counter = 0;
+				SizeType counter = 0;
 				while(true) {
 					String temp = readNextLabel();
 					if (temp=="NOTFOUND") break;
@@ -547,16 +547,16 @@ namespace PsimagLite {
 				return counter;
 			}
 
-			std::pair<String,size_t> advance(String const &s,
+			std::pair<String,SizeType> advance(String const &s,
 							      LongIntegerType level=0,
 							      bool beQuiet=false)
 			{
-				if (!ENABLED) return std::pair<String,size_t>("NOT_ENALBED",0);
+				if (!ENABLED) return std::pair<String,SizeType>("NOT_ENALBED",0);
 				//String temp="NOTFOUND";
 				String tempSaved="NOTFOUND";
 				LongSizeType counter=0;
 				bool found=false;
-				//size_t c = 0;
+				//SizeType c = 0;
 				while(true) {
 
 					String temp = readNextLabel();
@@ -574,7 +574,7 @@ namespace PsimagLite {
 					::close(fin_);
 					fin_ = ::open(filename_.c_str(),O_RDONLY);
 					if (counter>1) advance(s,counter-2);
-					return std::pair<String,size_t>(tempSaved,counter);
+					return std::pair<String,SizeType>(tempSaved,counter);
 				}
 				
 				//std::cerr<<"count="<<c<<"\n";
@@ -586,12 +586,12 @@ namespace PsimagLite {
 					throw RuntimeError("IoBinary::In::read()\n");
 				}
 				//std::cerr<<"------------\n";
-				return std::pair<String,size_t>(tempSaved,counter);
+				return std::pair<String,SizeType>(tempSaved,counter);
 			}
 			
-//			size_t count(const String& s)
+//			SizeType count(const String& s)
 //			{
-//				size_t i = 0;
+//				SizeType i = 0;
 //				while(i<1000) {
 //					try {
 //						advance(s,0,true);
@@ -653,7 +653,7 @@ namespace PsimagLite {
 				advance(s,level);
 				std::cerr<<"FOUND--------->\n";
 				char check = 0;
-				size_t total = 0;
+				SizeType total = 0;
 				PairType type;
 				readCheckTotalAndType(check,total,type);
 				if (type.second == TYPE_MATRIX) {
@@ -700,7 +700,7 @@ namespace PsimagLite {
 				if (!ENABLED) return "NOT_ENABLED";
 				String magicLabel = "LABEL";
 				char c = 0;
-				size_t j= 0;
+				SizeType j= 0;
 				while (true) {
 					int x = ::read(fin_,&c,1);
 					if (x!=1) {
@@ -719,7 +719,7 @@ namespace PsimagLite {
 					if (j==magicLabel.length()) break;
 				}
 
-				size_t y = 0;
+				SizeType y = 0;
 				int x = ::read(fin_,&y,sizeof(y));
 				if (x!=sizeof(y)) {
 					String s(__FILE__);
@@ -728,27 +728,27 @@ namespace PsimagLite {
 					throw RuntimeError(s.c_str());
 				}
 
-				if (size_t(y)>=MEMORY_POOL_SIZE) {
+				if (SizeType(y)>=MEMORY_POOL_SIZE) {
 					String s(__FILE__);
 					s += " "  + ttos(__LINE__) + "\nMemory Pool " + ttos(MEMORY_POOL_SIZE);
 					s +=  " is too small, needed " + ttos(y) + "\n";
 				}
 				if (!memoryPool_) memoryPool_ = new TypeType[MEMORY_POOL_SIZE];
 				x = ::read(fin_,memoryPool_,y);
-				if (size_t(x)!=y) {
+				if (SizeType(x)!=y) {
 					String s(__FILE__);
 					s += " " + ttos(__LINE__);
 					s += "\nCannot read next label (3)\n";
 					throw RuntimeError(s.c_str());
 				}
 				String ret="";
-				for (size_t i=0;i<size_t(x);i++) ret += memoryPool_[i];
+				for (SizeType i=0;i<SizeType(x);i++) ret += memoryPool_[i];
 				std::cerr<<"FOUND!!! ret="<<ret<<"\n";
 				return ret;
 
 			}
 
-			void readCheckTotalAndType(char& check,size_t& total,PairType& type)
+			void readCheckTotalAndType(char& check,SizeType& total,PairType& type)
 			{
 				if (!ENABLED) return;
 				check = 0;
@@ -786,14 +786,14 @@ namespace PsimagLite {
 			template<typename X>
 			void readVector(typename Vector<X>::Type& x)
 			{
-				size_t xsize = 0;
+				SizeType xsize = 0;
 				myread(fin_,&xsize,sizeof(xsize));
 
 				std::cerr<<"xsize="<<xsize<<"\n";
 				x.resize(xsize);
 
 				X tmp;
-				for (size_t i=0;i<xsize;i++) {
+				for (SizeType i=0;i<xsize;i++) {
 					int l = ::read(fin_,&tmp,sizeof(tmp));
 					if (l!=sizeof(tmp)) throw RuntimeError("Mmm!\n");
 					x[i]=tmp;
@@ -802,7 +802,7 @@ namespace PsimagLite {
 
 			void readVector(typename Vector<bool>::Type& x)
 			{
-				size_t xsize = 0;
+				SizeType xsize = 0;
 				myread(fin_,&xsize,sizeof(xsize));
 
 				std::cerr<<"xsize="<<xsize<<"\n";
@@ -811,7 +811,7 @@ namespace PsimagLite {
 				typename Vector<char>::Type tmp(xsize);
 
 				int l = ::read(fin_,&(tmp[0]),xsize);
-				if (size_t(l)!=xsize) throw RuntimeError("Mmm!\n");
+				if (SizeType(l)!=xsize) throw RuntimeError("Mmm!\n");
 
 				convertToBool(x,tmp);
 			}
@@ -826,12 +826,12 @@ namespace PsimagLite {
 //			template<typename X>
 //			void getKey(String& key,X& x,const String& full)
 //			{
-//				size_t i=0;
+//				SizeType i=0;
 //				for (;i<full.length();i++) {
 //					if (full[i]=='[') break;
 //				}
 //				key = "";
-//				size_t j=i+1;
+//				SizeType j=i+1;
 //				for (;j<full.length();j++) {
 //					if (full[j]==']') break;
 //					key += full[j];
@@ -844,14 +844,14 @@ namespace PsimagLite {
 //					throw RuntimeError(s.c_str());
 //				}
 //				String val="";
-//				for (size_t k=j;k<full.length();k++)
+//				for (SizeType k=j;k<full.length();k++)
 //					val += full[k];
 //				x = atof(val.c_str());
 //			}
 
-			void myread(int fd, void *buf, size_t count)
+			void myread(int fd, void *buf, SizeType count)
 			{
-				ssize_t ret = ::read(fd,buf,count);
+				sSizeType ret = ::read(fd,buf,count);
 				failIfNegative(ret,__FILE__,__LINE__);
 			}
 
@@ -861,7 +861,7 @@ namespace PsimagLite {
 		};
 
 		template<typename T>
-		static size_t charTypeOf(const T& dummy)
+		static SizeType charTypeOf(const T& dummy)
 		{
 			String s(__FILE__);
 			s += " " + ttos(__LINE__) + "\nNo known type\n";
@@ -869,16 +869,16 @@ namespace PsimagLite {
 			return TYPE_UNKNOWN;
 		}
 
-		static size_t charTypeOf(const double& dummy) { return TYPE_DOUBLE; }
+		static SizeType charTypeOf(const double& dummy) { return TYPE_DOUBLE; }
 
-		static size_t charTypeOf(const float& dummy) { return TYPE_FLOAT; }
+		static SizeType charTypeOf(const float& dummy) { return TYPE_FLOAT; }
 
-		static size_t charTypeOf(const size_t& dummy) { return TYPE_SIZE_T; }
+		static SizeType charTypeOf(const SizeType& dummy) { return TYPE_SIZE_T; }
 
-		static size_t charTypeOf(const bool& dummy) { return TYPE_BOOL; }
+		static SizeType charTypeOf(const bool& dummy) { return TYPE_BOOL; }
 
 		template<typename T>
-		static size_t charTypeOf(const std::pair<T,T>& dummy)
+		static SizeType charTypeOf(const std::pair<T,T>& dummy)
 		{
 			T dummy2;
 			return TYPE_PAIR | charTypeOf(dummy2);
@@ -886,7 +886,7 @@ namespace PsimagLite {
 
 		static void convertFromBool(typename Vector<char>::Type& xx,const typename Vector<bool>::Type& x)
 		{
-			for (size_t i=0;i<xx.size();i++) convertFromBool(xx[i],x[i]);
+			for (SizeType i=0;i<xx.size();i++) convertFromBool(xx[i],x[i]);
 		}
 
 		static void convertFromBool(char& xx,const bool& x)
@@ -901,14 +901,14 @@ namespace PsimagLite {
 
 		static void convertToBool(typename Vector<bool>::Type& x,const typename Vector<char>::Type& xx)
 		{
-			for (size_t i=0;i<xx.size();i++) {
+			for (SizeType i=0;i<xx.size();i++) {
 				bool b = false;
 				convertToBool(b,xx[i]);
 				x[i] = b;
 			}
 		}
 
-		static void failIfNegative(const ssize_t& x,const String& thisFile,int lineno)
+		static void failIfNegative(const sSizeType& x,const String& thisFile,int lineno)
 		{
 			if (x>=0) return;
 			String str(thisFile);

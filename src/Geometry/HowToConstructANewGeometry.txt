@@ -82,37 +82,37 @@ Follow the example in Chain.h
 (3)  Implement the API as follows:
 
 // Returns the number of connections in direction dirId
-size_t getVectorSize(size_t dirId) const;
+SizeType getVectorSize(SizeType dirId) const;
 
 // Are sites i1 and i2 connected? If yes, returns true, else returns false.
-bool connected(size_t i1,size_t i2) const;
+bool connected(SizeType i1,SizeType i2) const;
 
 // Assuming that i1 and i2 are connected, returns the direction along
 // which they are connected.
-size_t calcDir(size_t i1,size_t i2) const;
+SizeType calcDir(SizeType i1,SizeType i2) const;
 
 // Assume that the largest site of the system is smax, and
 // that the smallest site of the environ is emin,
 // Returns true if site i is in the relative fringe, else returns false.
-bool fringe(size_t i,size_t smax,size_t emin) const;
+bool fringe(SizeType i,SizeType smax,SizeType emin) const;
 
 // Assume that the largest site of the system is smax, and
 // that the smallest site of the environ is emin,
 // Assume that site i is in the relative environ fringe.
 // This function returns the substitute site for site i.
-size_t getSubstituteSite(size_t smax,size_t emin,size_t i) const;
+SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType i) const;
 
 // Returns the name of this geometry
 String label() const;
 
 // Assume i and j are connected sites.
 // This function returns the connection number on a direction by direction basis. 
-size_t handle(size_t i,size_t j) const;
+SizeType handle(SizeType i,SizeType j) const;
 
 // Returns the reflection of any site site of the lattice, considering a
 // vertical reflection axis at the middle of the lattice.
 // THIS FUNCTION IS DEPRECATED. YOUR GEOMETRY DOES NOT NEED TO BE REFLECTION SYMMETRIC
-size_t findReflection(size_t site) const;
+SizeType findReflection(SizeType site) const;
 
 
 (4) Hook up your geometry.

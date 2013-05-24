@@ -93,13 +93,13 @@ namespace PsimagLite {
 	struct SparseVector {
 		public:
 			typedef FieldType value_type;
-			typedef std::pair<size_t,size_t> PairType;
+			typedef std::pair<SizeType,SizeType> PairType;
 			
 			SparseVector(const typename Vector<FieldType>::Type& v)
 			: size_(v.size()),isSorted_(false)
 			{
 				FieldType zerovalue=static_cast<FieldType>(0);
-				for (size_t i=0;i<v.size();i++) {
+				for (SizeType i=0;i<v.size();i++) {
 					if (v[i]!=zerovalue) {
 						values_.push_back(v[i]);
 						indices_.push_back(i);
@@ -107,18 +107,18 @@ namespace PsimagLite {
 				}
 			}
 			
-			void fromChunk(const typename Vector<FieldType>::Type& v,size_t offset,size_t total)
+			void fromChunk(const typename Vector<FieldType>::Type& v,SizeType offset,SizeType total)
 			{
 				resize(total);
-				for (size_t i=0;i<v.size();i++) {
+				for (SizeType i=0;i<v.size();i++) {
 					indices_.push_back(i+offset);
 					values_.push_back(v[i]);
 				}
 			}
 
-			SparseVector(size_t n) : size_(n),isSorted_(false) { }
+			SparseVector(SizeType n) : size_(n),isSorted_(false) { }
 			
-			void resize(size_t x)
+			void resize(SizeType x)
 			{
 				values_.clear();
 				indices_.clear();
@@ -126,7 +126,7 @@ namespace PsimagLite {
 			}
 
 			//! adds an index (maybe the indices should be sorted at some point)
-			size_t add(int index,const FieldType& value)
+			SizeType add(int index,const FieldType& value)
 			{
 				indices_.push_back(index);
 				values_.push_back(value);
@@ -134,26 +134,26 @@ namespace PsimagLite {
 				return values_.size()-1;
 			}
 
-			size_t size() const { return size_; }
+			SizeType size() const { return size_; }
 
 			void print(std::ostream& os,const String& label) const
 			{
 				os<<label<<", ";
 				os<<size_<<", ";
 				os<<indices_.size()<<", ";
-				for (size_t i=0;i<indices_.size();i++) {
+				for (SizeType i=0;i<indices_.size();i++) {
 					os<<indices_[i]<<" "<<values_[i]<<",";
 				}
 				os<<"\n";
 			}
 
-			size_t indices() const { return indices_.size(); }
+			SizeType indices() const { return indices_.size(); }
 
-			size_t index(size_t x) const { return indices_[x]; }
+			SizeType index(SizeType x) const { return indices_[x]; }
 			
-			FieldType value(size_t x) const { return values_[x]; }
+			FieldType value(SizeType x) const { return values_[x]; }
 
-			void toChunk(typename Vector<FieldType>::Type& dest,size_t i0, size_t total, bool test=false) const
+			void toChunk(typename Vector<FieldType>::Type& dest,SizeType i0, SizeType total, bool test=false) const
 			{
 				if (test) {
 					PairType firstLast = findFirstLast();
@@ -162,37 +162,37 @@ namespace PsimagLite {
 							" check failed\n");
 				}
 				dest.resize(total);
-				for (size_t i=0;i<indices_.size();i++) 
+				for (SizeType i=0;i<indices_.size();i++) 
 					dest[indices_[i]-i0]=values_[i];
 			}
 			
 			template<typename SomeBasisType>
-			size_t toChunk(typename Vector<FieldType>::Type& dest,const SomeBasisType& parts) const
+			SizeType toChunk(typename Vector<FieldType>::Type& dest,const SomeBasisType& parts) const
 			{
-				size_t part = findPartition(parts);
-				size_t offset = parts.partition(part);
-				size_t total = parts.partition(part+1)-offset;
+				SizeType part = findPartition(parts);
+				SizeType offset = parts.partition(part);
+				SizeType total = parts.partition(part+1)-offset;
 				dest.resize(total);
-				for (size_t i=0;i<total;i++) dest[i]=0;
-				for (size_t i=0;i<indices_.size();i++) 
+				for (SizeType i=0;i<total;i++) dest[i]=0;
+				for (SizeType i=0;i<indices_.size();i++) 
 					dest[indices_[i]-offset]=values_[i];
 				return part;
 			}
 			
 			template<typename SomeBasisType>
-			size_t findPartition(const SomeBasisType& parts) const
+			SizeType findPartition(const SomeBasisType& parts) const
 			{
 				PairType firstLast = findFirstLast();
-				size_t ret = 0;
-				for (size_t i=0;i<parts.partition();i++) {
+				SizeType ret = 0;
+				for (SizeType i=0;i<parts.partition();i++) {
 					if (firstLast.first>=parts.partition(i)) {
 						ret = i;
 					} else {
 						break;
 					}
 				}
-				size_t ret2 = 1;
-				for (size_t i=0;i<parts.partition();i++) {
+				SizeType ret2 = 1;
+				for (SizeType i=0;i<parts.partition();i++) {
 					if (firstLast.second>parts.partition(i)) {
 						ret2 = i;
 					} else {
@@ -207,13 +207,13 @@ namespace PsimagLite {
 			template<typename T>
 			SparseVector<FieldType> operator*=(const T& val)
 			{
-				 for (size_t i=0;i<values_.size();i++) values_[i] *= val;
+				 for (SizeType i=0;i<values_.size();i++) values_[i] *= val;
 				 return *this;
 			}
 
 			SparseVector<FieldType> operator-=(const SparseVector<FieldType>& v)
 			{
-				 for (size_t i=0;i<v.values_.size();i++) {
+				 for (SizeType i=0;i<v.values_.size();i++) {
 					 values_.push_back(-v.values_[i]);
 					 indices_.push_back(v.indices_[i]);
 				 }
@@ -225,7 +225,7 @@ namespace PsimagLite {
 			{
 				assert(isSorted_);
 				assert(v.isSorted_);
-				for (size_t i=0;i<v.values_.size();i++) {
+				for (SizeType i=0;i<v.values_.size();i++) {
 					if (indices_[i]!=v.indices_[i]) return false;
 					FieldType val = values_[i] - v.values_[i];
 					if (!isAlmostZero(val,1e-8)) return false;
@@ -239,7 +239,7 @@ namespace PsimagLite {
 				assert(indices_.size()==1 || isSorted_);
 				assert(v.indices_.size()==1 || v.isSorted_);
 				FieldType sum = 0;
-				size_t i = 0, j = 0, index = 0;
+				SizeType i = 0, j = 0, index = 0;
 
 				for (;i<indices_.size();i++) {
 					index = indices_[i];
@@ -256,8 +256,8 @@ namespace PsimagLite {
 
 			bool isOne()
 			{
-				size_t x = 0;
-				for (size_t i=0;i<indices_.size();i++) {
+				SizeType x = 0;
+				for (SizeType i=0;i<indices_.size();i++) {
 					if (isAlmostZero(values_[i],1e-4)) continue;
 					x++;
 					if (x>1) return false;
@@ -269,17 +269,17 @@ namespace PsimagLite {
 			{
 				if (indices_.size()<2 || isSorted_) return;
 
-				Sort<typename Vector<size_t>::Type > sort;
-				typename Vector<size_t>::Type iperm(indices_.size());
+				Sort<typename Vector<SizeType>::Type > sort;
+				typename Vector<SizeType>::Type iperm(indices_.size());
 				sort.sort(indices_,iperm);
 				typename Vector<FieldType>::Type values(iperm.size());
-				for (size_t i=0;i<values_.size();i++) values[i] = values_[iperm[i]];
+				for (SizeType i=0;i<values_.size();i++) values[i] = values_[iperm[i]];
 				values_.clear();
 				FieldType sum = values[0];
-				size_t prevIndex = indices_[0];
-				typename Vector<size_t>::Type indices;
+				SizeType prevIndex = indices_[0];
+				typename Vector<SizeType>::Type indices;
 
-				for (size_t i=1;i<indices_.size();i++) {
+				for (SizeType i=1;i<indices_.size();i++) {
 
 					if (indices_[i]!=prevIndex) {
 						if (std::norm(sum)>1e-16) {
@@ -322,8 +322,8 @@ namespace PsimagLite {
 			}
 			
 			typename Vector<FieldType>::Type values_;
-			typename Vector<size_t>::Type indices_;
-			size_t size_;
+			typename Vector<SizeType>::Type indices_;
+			SizeType size_;
 			bool isSorted_;
 	}; // class SparseVector
 	
@@ -338,7 +338,7 @@ namespace PsimagLite {
 	SparseVector<T2> operator*(const T& val,const SparseVector<T2>& sv)
 	{
 		 SparseVector<T2> res = sv;
-		 for (size_t i=0;i<res.values_.size();i++) res.values_[i] *= val;
+		 for (SizeType i=0;i<res.values_.size();i++) res.values_[i] *= val;
 		 return res;
 	}
 
@@ -354,7 +354,7 @@ namespace PsimagLite {
 	inline FieldType norm(const PsimagLite::SparseVector<FieldType>& v)
 	{
 		FieldType sum=0;
-		for (size_t i=0;i<v.indices();i++) sum += std::conj(v.value(i))*v.value(i);
+		for (SizeType i=0;i<v.indices();i++) sum += std::conj(v.value(i))*v.value(i);
 		return sqrt(sum);
 	}
 	
@@ -362,7 +362,7 @@ namespace PsimagLite {
 	inline FieldType norm(const PsimagLite::SparseVector<std::complex<FieldType> >& v)
 	{
 		std::complex<FieldType> sum=0;
-		for (size_t i=0;i<v.indices();i++) sum += std::conj(v.value(i))*v.value(i);
+		for (SizeType i=0;i<v.indices();i++) sum += std::conj(v.value(i))*v.value(i);
 		return real(sqrt(sum));
 	}
 

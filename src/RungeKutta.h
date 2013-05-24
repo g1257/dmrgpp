@@ -106,11 +106,11 @@ public:
 
 	void solve(typename Vector<VectorType>::Type& result, RealType t0, RealType t, const ArrayType& y0) const
 	{
-		size_t N = static_cast<size_t> (std::real((t - t0)/h_));
+		SizeType N = static_cast<SizeType> (std::real((t - t0)/h_));
 		solve(result,t0,N,y0);
 	}
 
-	void solve(typename Vector<VectorType>::Type& result,RealType t0, size_t N, const ArrayType& y0) const
+	void solve(typename Vector<VectorType>::Type& result,RealType t0, SizeType N, const ArrayType& y0) const
 	{
 		ArrayType k1(y0), k2(y0), k3(y0), k4(y0);
 		RealType w1 = 1, w2 = 2, w3 = 2, w4 = 1, wtotInverse = 1.0/6.0;
@@ -118,14 +118,14 @@ public:
 		RealType ti = t0;
 		ArrayType yi = y0;
 
-		for(size_t i = 0; i < N; i++) {
+		for(SizeType i = 0; i < N; i++) {
 			k1 = h_ * f_(ti, yi);
 			k2 = h_ * f_(ti + h_*0.5, yi + k1*0.5);
 			k3 = h_ * f_(ti + h_*0.5, yi + k2*0.5);
 			k4 = h_ * f_(ti + h_, yi + k3);
 
 			VectorType myresult(findSizeOf(yi));
-			for (size_t j=0;j<myresult.size();j++) myresult[j] = findValueOf(yi,j);
+			for (SizeType j=0;j<myresult.size();j++) myresult[j] = findValueOf(yi,j);
 			result.push_back(myresult);
 			ti += h_;
 			yi += (w1*k1 + w2*k2 + w3*k3 + w4*k4) * wtotInverse;
@@ -135,19 +135,19 @@ public:
 
 private:
 
-	ComplexOrRealType findValueOf(const VectorType& yi,size_t j) const
+	ComplexOrRealType findValueOf(const VectorType& yi,SizeType j) const
 	{
 		return yi[j];
 	}
 
-	ComplexOrRealType findValueOf(const PsimagLite::Matrix<ComplexOrRealType>& yi,size_t j) const
+	ComplexOrRealType findValueOf(const PsimagLite::Matrix<ComplexOrRealType>& yi,SizeType j) const
 	{
 		return yi(j,j);
 	}
 
-	size_t findSizeOf(const VectorType& yi) const { return yi.size(); }
+	SizeType findSizeOf(const VectorType& yi) const { return yi.size(); }
 
-	size_t findSizeOf(const PsimagLite::Matrix<ComplexOrRealType>& yi) const { return yi.n_row(); }
+	SizeType findSizeOf(const PsimagLite::Matrix<ComplexOrRealType>& yi) const { return yi.n_row(); }
 
 	void checkNorm(const PsimagLite::Matrix<ComplexOrRealType>& yi,
 		       const PsimagLite::Matrix<ComplexOrRealType>& y0)const

@@ -50,18 +50,18 @@ namespace psimag {
 	doubleVector(dv)
       {}
 
-      size_t n_row() const { return doubleVector.size(); }
-      size_t n_col() const { return doubleVector[0].size(); }
+      SizeType n_row() const { return doubleVector.size(); }
+      SizeType n_col() const { return doubleVector[0].size(); }
       
-      value_type operator() (size_t i, size_t j) {
+      value_type operator() (SizeType i, SizeType j) {
 	return doubleVector[i][j];
       }
 
-      const value_type operator() (size_t i, size_t j) const {
+      const value_type operator() (SizeType i, SizeType j) const {
 	return doubleVector[i][j];
       }
       
-      size_t size() const {return n_row()*n_col();}
+      SizeType size() const {return n_row()*n_col();}
       
     };
 
@@ -72,11 +72,11 @@ namespace psimag {
     
     template<typename MatrixLikeType>
     void printRow(const MatrixLikeType& matrix,
-		  size_t row,
+		  SizeType row,
 		  std::ostream& os,
 		  int width=13) {
       os << "[";
-      for(size_t j=0; j<matrix.n_col(); j++) 
+      for(SizeType j=0; j<matrix.n_col(); j++) 
 	os << " " << std::setw(width) << matrix(row,j) << ",";
       os << "]";
     }
@@ -85,8 +85,8 @@ namespace psimag {
     void print(const MatrixLikeType& matrix,
 	       std::ostream& os,
 	       int width=13) {
-      for(size_t i=0; i<matrix.n_row(); i++) {
-	for(size_t j=0; j<matrix.n_col; j++) 
+      for(SizeType i=0; i<matrix.n_row(); i++) {
+	for(SizeType j=0; j<matrix.n_col; j++) 
 	  os << " " << std::setw(width) << matrix(i,j);
 	os << "\n";
       }
@@ -99,8 +99,8 @@ namespace psimag {
 		   PsimagLite::String   offset = "") {
       os << "[";
       
-      size_t lastRow = matrix.n_row()-1;
-      for(size_t row=0; row<matrix.n_row(); row++) {
+      SizeType lastRow = matrix.n_row()-1;
+      for(SizeType row=0; row<matrix.n_row(); row++) {
 	if(row!= 0)
 	  os << offset;
 	printRow(matrix,row,os,width);
@@ -172,9 +172,9 @@ namespace psimag {
     template<typename VectorLikeType,
 	     typename MatrixLikeType> 
     VectorLikeType& setVectorFromRow(const MatrixLikeType& matrix,
-				     size_t row, 
+				     SizeType row, 
 				     VectorLikeType& result)  {
-      for (size_t col=0; col < matrix.n_col(); col++) {
+      for (SizeType col=0; col < matrix.n_col(); col++) {
 	result[col] = matrix(row,col);
       }
       return result;
@@ -183,9 +183,9 @@ namespace psimag {
     template<typename VectorLikeType,
 	     typename MatrixLikeType> 
     VectorLikeType& setVectorFromCol(const MatrixLikeType& matrix,
-				 size_t col, 
+				 SizeType col, 
 				 VectorLikeType& result)  {
-      for (size_t row=0; row < matrix.n_row(); row++) {
+      for (SizeType row=0; row < matrix.n_row(); row++) {
 	result[row] = matrix(row,col);
       }
       return result;
@@ -196,7 +196,7 @@ namespace psimag {
     typename VectorLikeType2::value_type scalarProduct(const VectorLikeType1& v1,
 						       const VectorLikeType2& v2) {
       typename VectorLikeType2::value_type result = v1[0] * v2[0];
-      for(size_t i=1; i < v2.size(); i++)
+      for(SizeType i=1; i < v2.size(); i++)
 	result += v1[i] * v2[i];
       return result;
     }
@@ -205,8 +205,8 @@ namespace psimag {
     inline
     MatrixLikeType& increment(MatrixLikeType& matrix,
 			      typename MatrixLikeType::value_type val) {
-      for (size_t row=0; row < matrix.n_row(); row++) 
-	for (size_t col=0; col < matrix.n_col(); col++) 
+      for (SizeType row=0; row < matrix.n_row(); row++) 
+	for (SizeType col=0; col < matrix.n_col(); col++) 
 	  matrix(row,col) += val;
       return matrix;
     }
@@ -215,8 +215,8 @@ namespace psimag {
     inline
     MatrixLikeType& decrement(MatrixLikeType& matrix,
 			      typename MatrixLikeType::value_type val) {
-      for (size_t row=0; row < matrix.n_row(); row++) 
-	for (size_t col=0; col < matrix.n_col(); col++) 
+      for (SizeType row=0; row < matrix.n_row(); row++) 
+	for (SizeType col=0; col < matrix.n_col(); col++) 
 	  matrix(row,col) -= val;
       return matrix;
     }
@@ -225,8 +225,8 @@ namespace psimag {
     inline
     MatrixLikeType& times(MatrixLikeType& matrix,
 			  typename MatrixLikeType::value_type val) {
-      for (size_t row=0; row < matrix.n_row(); row++) 
-	for (size_t col=0; col < matrix.n_col(); col++) 
+      for (SizeType row=0; row < matrix.n_row(); row++) 
+	for (SizeType col=0; col < matrix.n_col(); col++) 
 	  matrix(row,col) *= val;
       return matrix;
     }
@@ -235,8 +235,8 @@ namespace psimag {
     inline
     MatrixLikeType& divide(MatrixLikeType& matrix,
 			   typename MatrixLikeType::value_type val) {
-      for (size_t row=0; row < matrix.n_row(); row++) 
-	for (size_t col=0; col < matrix.n_col(); col++) 
+      for (SizeType row=0; row < matrix.n_row(); row++) 
+	for (SizeType col=0; col < matrix.n_col(); col++) 
 	  matrix(row,col) /= val;
       return matrix;
     }
@@ -244,8 +244,8 @@ namespace psimag {
     template<typename MatrixLikeType> 
     inline
     MatrixLikeType& squareElements(MatrixLikeType& matrix) {
-      for (size_t row=0; row < matrix.n_row(); row++) 
-	for (size_t col=0; col < matrix.n_col(); col++) 
+      for (SizeType row=0; row < matrix.n_row(); row++) 
+	for (SizeType col=0; col < matrix.n_col(); col++) 
 	  matrix(row,col) *= matrix(row,col);
       return matrix;
     }
@@ -255,8 +255,8 @@ namespace psimag {
     inline
     MatrixLikeType2& copy(const MatrixLikeType1& matrix1,
 			  MatrixLikeType2& matrix2) {
-      for (size_t row=0; row < matrix2.n_row(); row++) 
-	for (size_t col=0; col < matrix2.n_col(); col++) 
+      for (SizeType row=0; row < matrix2.n_row(); row++) 
+	for (SizeType col=0; col < matrix2.n_col(); col++) 
 	  matrix2(row,col) = matrix1(row,col);
       return matrix2;
     }
@@ -266,8 +266,8 @@ namespace psimag {
     inline
     bool equals(const MatrixLikeType1& matrix1,
 		const MatrixLikeType2& matrix2) {
-      for (size_t row=0; row < matrix1.n_row(); row++) 
-	for (size_t col=0; col < matrix1.n_col(); col++) 
+      for (SizeType row=0; row < matrix1.n_row(); row++) 
+	for (SizeType col=0; col < matrix1.n_col(); col++) 
 	  if (matrix2(row,col) != matrix1(row,col)) 
 	    return false;
       return true;

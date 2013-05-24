@@ -104,18 +104,18 @@ namespace PsimagLite {
 template<typename PthreadFunctionHolderType>
 class NoPthreads : public Concurrency<typename PthreadFunctionHolderType::RealType> {
 public:
-	static void setThreads(size_t dummy) { } // dummy
+	static void setThreads(SizeType dummy) { } // dummy
 	
 	template<typename SomeConcurrencyType>
-	void loopCreate(size_t total,PthreadFunctionHolderType& pfh,SomeConcurrencyType& conc)
+	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh,SomeConcurrencyType& conc)
 	{
-		for (size_t i=0;i<total;i++)
+		for (SizeType i=0;i<total;i++)
 			pfh.thread_function_(i,1,total,0);
 	}
 
 	String name() const { return "nopthreads"; }
 
-	size_t threads() const { return 1; }
+	SizeType threads() const { return 1; }
 
 	template<typename T,typename SomeConcurrencyType>
 	void reduce(T& x,SomeConcurrencyType& conc) {}

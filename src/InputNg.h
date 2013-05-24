@@ -102,7 +102,7 @@ class InputNg {
 
 		enum {FIRST,SECOND};
 
-		typedef std::pair<String,size_t> PairType;
+		typedef std::pair<String,SizeType> PairType;
 
 	public:
 		bool operator()(const String& x1,const String& x2)
@@ -120,10 +120,10 @@ class InputNg {
 
 		PairType mysplit(const String& x) const
 		{
-			size_t mode=FIRST;
+			SizeType mode=FIRST;
 			String xfirst = "";
 			String xsecond = "";
-			for (size_t i=0;i<x.length();i++) {
+			for (SizeType i=0;i<x.length();i++) {
 				if (x[i]=='@') {
 					mode=SECOND;
 					continue;
@@ -199,8 +199,8 @@ public:
 		void check()
 		{
 			String buffer="";
-			for (size_t i=0;i<data_.length();i++) {
-				size_t type = findTypeOf(data_.at(i));
+			for (SizeType i=0;i<data_.length();i++) {
+				SizeType type = findTypeOf(data_.at(i));
 				if (state_ == IN_COMMENT && type != ENDOFLINE)
 					continue;
 				switch(type) {
@@ -244,7 +244,7 @@ public:
 			if (numericVector_.size()>0) checkNumbers();
 		}
 
-		void saveBuffer(const String& buffer,size_t whatchar)
+		void saveBuffer(const String& buffer,SizeType whatchar)
 		{
 			String s(__FILE__);
 			String adjLabel="";
@@ -275,7 +275,7 @@ public:
 			}
 		}
 
-		size_t findTypeOf(char c) const
+		SizeType findTypeOf(char c) const
 		{
 			if (c=='\n') return ENDOFLINE;
 			if (c==' ' || c=='\t') return WHITESPACE;
@@ -300,7 +300,7 @@ public:
 				std::cerr<<"Line="<<line_<<"\n";
 				throw RuntimeError(s.c_str());
 			}
-			size_t adjExpected = atoi(numericVector_[0].c_str());
+			SizeType adjExpected = atoi(numericVector_[0].c_str());
 
 			if (!inputCheck_.check(lastLabel_,numericVector_,line_) && numericVector_.size()!=adjExpected+1) {
 				std::cout<<" Number of numbers to follow is wrong, expected "<<adjExpected<<" got ";
@@ -351,8 +351,8 @@ public:
 		}
 
 		String data_;
-		size_t line_;
-		size_t state_;
+		SizeType line_;
+		SizeType state_;
 		Vector<String>::Type numericVector_;
 		String lastLabel_;
 		InputCheckType inputCheck_;
@@ -406,7 +406,7 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
-		void readline(size_t& val,const String& label)
+		void readline(SizeType& val,const String& label)
 		{
 			String label2 = label2label(label);
 			Map<String,String>::Type::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
@@ -450,7 +450,7 @@ public:
 			typedef typename Map<String,String,MyCompareType>::Type::iterator MyIteratorType;
 			for (MyIteratorType it=mapStrStr_.begin();it!=mapStrStr_.end();++it) {
 				String mystr = it->first;
-				size_t it0 = mystr.find(label2);
+				SizeType it0 = mystr.find(label2);
 				if (it0 == String::npos) continue;
 				String::iterator it1 = find(mystr.begin(),mystr.end(),'[');
 				if (it1 == mystr.end()) continue;
@@ -465,10 +465,10 @@ public:
 				mystr2.erase(mystr2.length()-1,1);
 				val[mystr2] = atof(it->second.c_str());
 			}
-//			size_t len =  it->second.size();
+//			SizeType len =  it->second.size();
 //			assert(len>1);
 //			val.resize(len-1);
-//			for (size_t i=0;i<len-1;i++) {
+//			for (SizeType i=0;i<len-1;i++) {
 //				val[i]=static_cast<typename VectorLikeType::value_type>(atof(it->second[i+1].c_str()));
 //			}
 //			cleanLabelsIfNeeded(label2,mapStrVec_,it);
@@ -483,10 +483,10 @@ public:
 			Map<String,Vector<String>::Type>::Type::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
-			size_t len =  it->second.size();
+			SizeType len =  it->second.size();
 			assert(len>1);
 			val.resize(len-1);
-			for (size_t i=0;i<len-1;i++) {
+			for (SizeType i=0;i<len-1;i++) {
 				val[i]=static_cast<typename VectorLikeType::value_type>(atof(it->second[i+1].c_str()));
 			}
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
@@ -500,9 +500,9 @@ public:
 			Map<String,Vector<String>::Type>::Type::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
-			size_t len =  it->second.size();
+			SizeType len =  it->second.size();
 			val.resize(len);
-			for (size_t i=0;i<len;i++) {
+			for (SizeType i=0;i<len;i++) {
 				val[i]=static_cast<typename VectorLikeType::value_type>(atof(it->second[i].c_str()));
 			}
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
@@ -522,17 +522,17 @@ public:
 				s += " readMatrix: \n";
 				throw RuntimeError(s.c_str());
 			}
-			size_t nrow = size_t( atoi(it->second[0].c_str()));
-			size_t ncol = size_t( atoi(it->second[1].c_str()));
+			SizeType nrow = SizeType( atoi(it->second[0].c_str()));
+			SizeType ncol = SizeType( atoi(it->second[1].c_str()));
 			m.resize(nrow,ncol);
 			if (it->second.size()<2+nrow*ncol) {
 				String s(__FILE__);
 				s += " readMatrix: \n";
 				throw RuntimeError(s.c_str());
 			}
-			size_t k = 2;
-			for (size_t i=0;i<m.n_row();i++)
-				for (size_t j=0;j<m.n_col();j++)
+			SizeType k = 2;
+			for (SizeType i=0;i<m.n_row();i++)
+				for (SizeType j=0;j<m.n_col();j++)
 					m(i,j) = atof(it->second[k++].c_str());
 
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
@@ -552,17 +552,17 @@ public:
 				s += " readMatrix: \n";
 				throw RuntimeError(s.c_str());
 			}
-			size_t nrow = size_t( atoi(it->second[0].c_str()));
-			size_t ncol = size_t( atoi(it->second[1].c_str()));
+			SizeType nrow = SizeType( atoi(it->second[0].c_str()));
+			SizeType ncol = SizeType( atoi(it->second[1].c_str()));
 			m.resize(nrow,ncol);
 			if (it->second.size()<2+nrow*ncol) {
 				String s(__FILE__);
 				s += " readMatrix: \n";
 				throw RuntimeError(s.c_str());
 			}
-			size_t k = 2;
-			for (size_t i=0;i<m.n_row();i++) {
-				for (size_t j=0;j<m.n_row();j++) {
+			SizeType k = 2;
+			for (SizeType i=0;i<m.n_row();i++) {
+				for (SizeType j=0;j<m.n_row();j++) {
 					IstringStream is(it->second[k++]);
 					is >> m(i,j);
 				}
@@ -582,7 +582,7 @@ public:
 
 		String label2label(const String& label)
 		{
-			size_t len = label.length();
+			SizeType len = label.length();
 			if (len==0) {
 				String s(__FILE__);
 				s += " readline: label cannot be null\n";
@@ -623,8 +623,8 @@ public:
 	static String findRootLabel(const String& label)
 	{
 		String buffer="";
-		size_t len = label.length();
-		for (size_t i=0;i<len;i++) {
+		SizeType len = label.length();
+		for (SizeType i=0;i<len;i++) {
 			if (label.at(i)=='@') break;
 			buffer += label.at(i);
 		}

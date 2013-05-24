@@ -180,8 +180,8 @@ namespace PsimagLite {
 
 			lanczosVectors_.reset(y.size(),params_.steps);
 			ab.resize(2*params_.steps,0);
-			for (size_t j=0; j < lanczosVectors_.n_col(); j++) {
-				for (size_t i = 0; i < mat_.rank(); i++)
+			for (SizeType j=0; j < lanczosVectors_.n_col(); j++) {
+				for (SizeType i = 0; i < mat_.rank(); i++)
 					lanczosVectors_(i,j) = y[i];
 				RealType atmp = 0;
 				RealType btmp = 0;
@@ -208,21 +208,21 @@ namespace PsimagLite {
 			RealType val = (isFirst) ? 1.0 : 2.0;
 
 			atmp = 0.0;
-			for (size_t i = 0; i < mat_.rank(); i++) 
+			for (SizeType i = 0; i < mat_.rank(); i++) 
 				atmp += std::real(y[i]*std::conj(y[i]));
 
-			for (size_t i = 0; i < mat_.rank(); i++) {
+			for (SizeType i = 0; i < mat_.rank(); i++) {
 				VectorElementType tmp = val*z[i] - x[i];
 				x[i] = y[i];
 				y[i] = tmp;
 			}
 
 			btmp = 0.0;
-			for (size_t i = 0; i < mat_.rank(); i++)
+			for (SizeType i = 0; i < mat_.rank(); i++)
 				btmp += std::real(y[i]*std::conj(x[i]));
 		}
 
-		size_t steps() const {return params_.steps; }
+		SizeType steps() const {return params_.steps; }
 
 	private:
 
@@ -273,15 +273,15 @@ namespace PsimagLite {
 			: matx_(mat),y_(matx_.rank())
 			{}
 
-			size_t rank() const { return matx_.rank(); }
+			SizeType rank() const { return matx_.rank(); }
 
 			void matrixVectorProduct (VectorType &x,const VectorType &y) const
 			{
-				for (size_t i=0;i<y_.size();i++) y_[i] = -y[i];
+				for (SizeType i=0;i<y_.size();i++) y_[i] = -y[i];
 				matx_.matrixVectorProduct(x,y_);
 			}
 			
-			VectorElementType operator()(size_t i,size_t j) const
+			VectorElementType operator()(SizeType i,SizeType j) const
 			{
 				return matx_(i,j);
 			}
@@ -336,7 +336,7 @@ namespace PsimagLite {
 		ProgressIndicator progress_;
 		MatrixType const& mat_;
 		SolverParametersType& params_;
-		size_t mode_;
+		SizeType mode_;
 		RngType rng_;
 		LanczosVectorsType lanczosVectors_;
 		//! Scaling factors for the Chebyshev expansion

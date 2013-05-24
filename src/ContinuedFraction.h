@@ -106,8 +106,8 @@ namespace PsimagLite {
 
 		void plot(PlotDataType& result,const PlotParamsType& params) const
 		{
-			size_t counter = 0;
-			size_t n = size_t((params.omega2 - params.omega1)/params.deltaOmega); 
+			SizeType counter = 0;
+			SizeType n = SizeType((params.omega2 - params.omega1)/params.deltaOmega); 
 			if (result.size()==0) result.resize(n);
 			for (RealType omega = params.omega1;omega <params.omega2;omega+=params.deltaOmega) {
 				ComplexType z(omega,params.delta);
@@ -132,13 +132,13 @@ namespace PsimagLite {
 			if (weight_==0) return ComplexType(0,0);
 
 			ComplexType sum = 0;
-			for (size_t l=0;l<intensity_.size();l++)
+			for (SizeType l=0;l<intensity_.size();l++)
 				sum +=intensity_[l]/(z-isign*(offset - eigs_[l]));
 
 			return sum*weight_;
 		}
 
-		size_t size() const { return ab_.size(); }
+		SizeType size() const { return ab_.size(); }
 
 	private:
 
@@ -150,7 +150,7 @@ namespace PsimagLite {
 			eigs_.resize(T.n_row());
 			diag(T,eigs_,'V');
 			intensity_.resize(T.n_row());
-			for (size_t i=0;i<T.n_row();i++) {
+			for (SizeType i=0;i<T.n_row();i++) {
 				intensity_[i]= T(0,i)*T(0,i);
 			}
 		}

@@ -49,12 +49,12 @@ namespace JsonParser {
     bool                 allow_comments; 
     StateType            before_comment_state;
     bool                 comment; 
-    size_t               comment_begin_offset;
+    SizeType               comment_begin_offset;
 
     //======================================================================
 
-    size_t               numChar;
-    size_t               numLines;
+    SizeType               numChar;
+    SizeType               numLines;
 
     bool                 trace;
 
@@ -310,7 +310,7 @@ namespace JsonParser {
 
       if(trace) std::cout << "actions.size() = " << actions.size() ;
 
-      for (size_t i=0; i< actions.size(); i++) {
+      for (SizeType i=0; i< actions.size(); i++) {
 	
 	performAction(nextChar, nextClass, state, actions[i]);
 

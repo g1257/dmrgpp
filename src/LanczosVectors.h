@@ -131,34 +131,34 @@ namespace PsimagLite {
 			if (needsDelete_) delete data_;
 		}
 
-		void resize(size_t matrixRank,size_t steps)
+		void resize(SizeType matrixRank,SizeType steps)
 		{
 			steps_= steps;
 			if (!lotaMemory_) return;
 			data_->reset(matrixRank,steps);
 		}
 		
-		void reset(size_t matrixRank,size_t steps)
+		void reset(SizeType matrixRank,SizeType steps)
 		{
 			if (!lotaMemory_) return;
 			data_->reset(matrixRank,steps);
 		}
 
-		VectorElementType& operator()(size_t i,size_t j)
+		VectorElementType& operator()(SizeType i,SizeType j)
 		{
 			if (!lotaMemory_) return dummy_;
 			return data_->operator()(i,j);
 		}
 		
-		const VectorElementType& operator()(size_t i,size_t j) const
+		const VectorElementType& operator()(SizeType i,SizeType j) const
 		{
 			if (!lotaMemory_) return dummy_;
 			return data_->operator()(i,j);
 		}
 
-		size_t n_col() const { return data_->n_col(); }
+		SizeType n_col() const { return data_->n_col(); }
 
-		size_t n_row() const { return data_->n_row(); }
+		SizeType n_row() const { return data_->n_row(); }
 
 		bool lotaMemory() const { return lotaMemory_; }
 		
@@ -174,12 +174,12 @@ namespace PsimagLite {
 			if (!lotaMemory_) {
 				VectorType x(z.size(),0.0);
 				VectorType y = ysaved_;
-				for (size_t i = 0; i < z.size(); i++)
+				for (SizeType i = 0; i < z.size(); i++)
 					z[i] = 0.0;
 				RealType atmp = 0.0;
-				for (size_t j=0; j < c.size(); j++) {
+				for (SizeType j=0; j < c.size(); j++) {
 					RealType ctmp = c[j];
-					for (size_t i = 0; i < y.size(); i++)
+					for (SizeType i = 0; i < y.size(); i++)
 						z[i] += ctmp * y[i];
 					RealType btmp = 0;
 					oneStepDecomposition(x,y,atmp,btmp);
@@ -187,9 +187,9 @@ namespace PsimagLite {
 				return;
 			}
 
-			for (size_t j = 0; j < data_->n_col(); j++) {
+			for (SizeType j = 0; j < data_->n_col(); j++) {
 				RealType ctmp = c[j];
- 				for (size_t i = 0; i < data_->n_row(); i++) {
+ 				for (SizeType i = 0; i < data_->n_row(); i++) {
 					z[i] += ctmp * data_->operator()(i,j);
 				}
 			}
@@ -208,15 +208,15 @@ namespace PsimagLite {
 
 			VectorType x(mat_.rank());
 
-			for (size_t i = 0; i < x.size(); i++) x[i] = 0.0;
+			for (SizeType i = 0; i < x.size(); i++) x[i] = 0.0;
 
 			mat_.matrixVectorProduct (x, y); // x+= Hy
 
-			for (size_t i = 0; i < x.size(); i++)
+			for (SizeType i = 0; i < x.size(); i++)
 				if (std::real(x[i]*std::conj(x[i]))!=0) return false;
 
-			for (size_t j=0; j < data_->n_col(); j++) {
-				for (size_t i = 0; i < mat_.rank(); i++) {
+			for (SizeType j=0; j < data_->n_col(); j++) {
+				for (SizeType i = 0; i < mat_.rank(); i++) {
 						data_->operator()(i,j) = (i==j) ? 0.0 : 1.1;
 				}
 				ab.a(j) = 0.0;
@@ -233,10 +233,10 @@ namespace PsimagLite {
 			mat_.matrixVectorProduct (x, y); // x+= Hy
 
 			atmp = 0.0;
-			for (size_t i = 0; i < mat_.rank(); i++)
+			for (SizeType i = 0; i < mat_.rank(); i++)
 				atmp += std::real(y[i]*std::conj(x[i]));
 			btmp = 0.0;
-			for (size_t i = 0; i < mat_.rank(); i++) {
+			for (SizeType i = 0; i < mat_.rank(); i++) {
 				x[i] -= atmp * y[i];
 				btmp += std::real(x[i]*std::conj(x[i]));
 			}
@@ -252,7 +252,7 @@ namespace PsimagLite {
 //				throw RuntimeError(s.c_str());
 //			}
 			if (fabs(btmp)<1e-10) {
-				for (size_t i = 0; i < mat_.rank(); i++) {
+				for (SizeType i = 0; i < mat_.rank(); i++) {
 					VectorElementType tmp = y[i];
 					y[i] = x[i];
 					x[i] = -btmp * tmp;
@@ -260,7 +260,7 @@ namespace PsimagLite {
 				return;
 			}
 
-			for (size_t i = 0; i < mat_.rank(); i++) {
+			for (SizeType i = 0; i < mat_.rank(); i++) {
 				//lanczosVectors(i,j) = y[i];
 				VectorElementType tmp = y[i];
 				y[i] = x[i] / btmp;
@@ -280,7 +280,7 @@ namespace PsimagLite {
 		bool lotaMemory_;
 		VectorElementType dummy_;
 		bool needsDelete_;
-		size_t steps_;
+		SizeType steps_;
 		VectorType ysaved_;
 		DenseMatrixType* data_;
 	}; // class LanczosVectors

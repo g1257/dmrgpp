@@ -87,9 +87,9 @@ namespace PsimagLite {
                        const String& delimiters = " ") 
 	{
 		// Skip delimiters at beginning.
-		String::size_type lastPos = str.find_first_not_of(delimiters, 0);
+		String::SizeTypeype lastPos = str.find_first_not_of(delimiters, 0);
 		// Find first "non-delimiter".
-		String::size_type pos     = str.find_first_of(delimiters, lastPos);
+		String::SizeTypeype pos     = str.find_first_of(delimiters, lastPos);
 
 		while (String::npos != pos || String::npos != lastPos)
 		{

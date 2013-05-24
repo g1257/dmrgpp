@@ -108,7 +108,7 @@ namespace PsimagLite {
 		~ConcurrencyMpi()
 		{
 			MPI_Finalize();
-			for (size_t i=0;i<garbage_.size();i++)
+			for (SizeType i=0;i<garbage_.size();i++)
 				delete garbage_[i];
 		}
 
@@ -132,9 +132,9 @@ namespace PsimagLite {
 			return false;
 		}
 		
-		CommPairType newCommFromSegments(size_t numberOfSegments,CommType mpiComm=COMM_WORLD)
+		CommPairType newCommFromSegments(SizeType numberOfSegments,CommType mpiComm=COMM_WORLD)
 		{
-			size_t procs = nprocs(mpiComm);
+			SizeType procs = nprocs(mpiComm);
 			if (procs%numberOfSegments !=0) {
 				String s("Segment size must be a divisor of nprocs ");
 				s += String("__FUNCTION__") + __FILE__+" : " + ttos(__LINE__);
@@ -145,8 +145,8 @@ namespace PsimagLite {
 			MPI_Comm_group(mpiComm, &origGroup); 
 			
 			/* Divide tasks into procs/x distinct groups based upon rank */ 
-			size_t segmentSize = size_t(procs/numberOfSegments);
-			size_t r = rank(mpiComm);
+			SizeType segmentSize = SizeType(procs/numberOfSegments);
+			SizeType r = rank(mpiComm);
 			Vector<int>::Type rv;
 
 			getSegmentsDirect(rv,numberOfSegments,segmentSize,r);
@@ -307,32 +307,32 @@ namespace PsimagLite {
 			}
 		}
 
-		void getSegmentsDirect(Vector<int>::Type& rv,size_t numberOfSegments,size_t segmentSize,size_t r)
+		void getSegmentsDirect(Vector<int>::Type& rv,SizeType numberOfSegments,SizeType segmentSize,SizeType r)
 		{
 			typename Vector<typename Vector<int>::Type>::Type ranks;
-			size_t thisSegment = 0;
-			for (size_t i=0;i<segmentSize;i++) {
+			SizeType thisSegment = 0;
+			for (SizeType i=0;i<segmentSize;i++) {
 				Vector<int>::Type tmp(numberOfSegments);
-				for (size_t j=0;j<numberOfSegments;j++) {
+				for (SizeType j=0;j<numberOfSegments;j++) {
 					tmp[j] = j*segmentSize+i;
-					if (r==size_t(tmp[j])) thisSegment=i;
+					if (r==SizeType(tmp[j])) thisSegment=i;
 				}
 				ranks.push_back(tmp);
 			}
 			rv = ranks[thisSegment];
 		}
 
-		void getSegmentsAdjuct(Vector<int>::Type& rv,size_t numberOfSegments,size_t segmentSize,size_t r)
+		void getSegmentsAdjuct(Vector<int>::Type& rv,SizeType numberOfSegments,SizeType segmentSize,SizeType r)
 		{
 			
 			Vector<Vector<int>::Type>::Type ranks;
-			size_t thisSegment = 0;
-			for (size_t i=0;i<numberOfSegments;i++) {
+			SizeType thisSegment = 0;
+			for (SizeType i=0;i<numberOfSegments;i++) {
 				Vector<int>::Type tmp;
-				size_t start = i*segmentSize;
-				size_t end = (i+1)*segmentSize;
+				SizeType start = i*segmentSize;
+				SizeType end = (i+1)*segmentSize;
 				if (r>=start && r<end) thisSegment = i;
-				for (size_t j=start;j<end;j++) tmp.push_back(j);
+				for (SizeType j=start;j<end;j++) tmp.push_back(j);
 				ranks.push_back(tmp);
 			}
 			rv = ranks[thisSegment];

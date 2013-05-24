@@ -94,12 +94,12 @@ namespace PsimagLite {
 
 			static const bool IS_PERIODIC_Y = false;
 
-			LadderX(size_t linSize,size_t leg)
+			LadderX(SizeType linSize,SizeType leg)
 			: ladder_(linSize,leg,IS_PERIODIC_Y),linSize_(linSize),leg_(leg)
 			{
 			}
 
-			size_t getVectorSize(size_t dirId) const
+			SizeType getVectorSize(SizeType dirId) const
 			{
 				switch (dirId) {
 				case DIRECTION_XPY:
@@ -110,30 +110,30 @@ namespace PsimagLite {
 				return ladder_.getVectorSize(dirId);
 			}
 
-			bool connected(size_t i1,size_t i2) const
+			bool connected(SizeType i1,SizeType i2) const
 			{
 				if (i1==i2) return false;
 				if (ladder_.connected(i1,i2)) return true;
-				size_t c1 = i1/leg_;
-				size_t c2 = i2/leg_;
-				size_t r1 = i1%leg_;
-				size_t r2 = i2%leg_;
+				SizeType c1 = i1/leg_;
+				SizeType c2 = i2/leg_;
+				SizeType r1 = i1%leg_;
+				SizeType r2 = i2%leg_;
 				if (c1==c2) return GeometryUtils::neighbors(r1,r2);
 				if (r1==r2) return GeometryUtils::neighbors(c1,c2);
 				return (GeometryUtils::neighbors(r1,r2) && GeometryUtils::neighbors(c1,c2));
 			}
 
 			// assumes i1 and i2 are connected
-			size_t calcDir(size_t i1,size_t i2) const
+			SizeType calcDir(SizeType i1,SizeType i2) const
 			{
 				if (ladder_.sameColumn(i1,i2)) return DIRECTION_Y;
 				if (ladder_.sameRow(i1,i2)) return DIRECTION_X;
-				size_t imin = (i1<i2) ? i1 : i2;
+				SizeType imin = (i1<i2) ? i1 : i2;
 				if (imin&1) return DIRECTION_XPY;
 				return DIRECTION_XMY;
 			}
 
-			bool fringe(size_t i,size_t smax,size_t emin) const
+			bool fringe(SizeType i,SizeType smax,SizeType emin) const
 			{
 				bool a = (i<emin && i>=smax-1);
 				bool b = (i>smax && i<=emin+1);
@@ -144,10 +144,10 @@ namespace PsimagLite {
 			}
 
 			// assumes i1 and i2 are connected
-			size_t handle(size_t i1,size_t i2) const
+			SizeType handle(SizeType i1,SizeType i2) const
 			{
-				size_t dir = calcDir(i1,i2);
-				size_t imin = (i1<i2) ? i1 : i2;
+				SizeType dir = calcDir(i1,i2);
+				SizeType imin = (i1<i2) ? i1 : i2;
 				switch(dir) {
 					case DIRECTION_X:
 						return imin;
@@ -162,7 +162,7 @@ namespace PsimagLite {
 			}
 
 			// siteNew2 is fringe in the environment
-			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+			SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
 			{
 				return smax+siteNew2-emin+1;
 			}
@@ -172,7 +172,7 @@ namespace PsimagLite {
 				return "ladderx";
 			}
 			
-			size_t findReflection(size_t site) const
+			SizeType findReflection(SizeType site) const
 			{
 				throw RuntimeError("findReflection: unimplemented (sorry)\n");
 			}
@@ -180,8 +180,8 @@ namespace PsimagLite {
 		private:
 
 			LadderType ladder_; // owner
-			size_t linSize_;
-			size_t leg_;
+			SizeType linSize_;
+			SizeType leg_;
 	}; // class LadderBath
 } // namespace PsimagLite 
 

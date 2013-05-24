@@ -41,7 +41,7 @@ void readTwoColumnData(const String& file,VectorType& v0,VectorType& v1)
 		fin>>s;
 		if (s[0]=='#') continue;
 		FieldType x = std::atof(s.c_str());
-		size_t size=v0.size();
+		SizeType size=v0.size();
 		if (size>1 && x<v0[size-1]) break;
 		v0.push_back(x);
 		fin>>s;
@@ -59,7 +59,7 @@ int main(int argc,char *argv[])
 	AkimaSplineType akimaSpline(x,s);
 	FieldType xstart = std::atof(argv[2]);
 	FieldType xend = std::atof(argv[3]);
-	size_t total = std::atoi(argv[4]);
+	SizeType total = std::atoi(argv[4]);
 	FieldType xstep = (xend-xstart)/total;
 
 	for (FieldType x=xstart;x<xend;x+=xstep) {

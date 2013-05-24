@@ -103,9 +103,9 @@ namespace PsimagLite {
 		  options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(true)
 		{} 
 
-		size_t steps;
+		SizeType steps;
 		RealType tolerance;
-		size_t stepsForEnergyConvergence;
+		SizeType stepsForEnergyConvergence;
 		String options;
 		RealType oneOverA,b;
 		RealType Eg;

@@ -38,7 +38,7 @@ typedef PsimagLite::ConcurrencyMpi <RealType> ConcurrencyType;
 int main(int argc,char *argv[])
 {
 	ConcurrencyType concurrency(argc,argv);
-	size_t total = 10;
+	SizeType total = 10;
 	PsimagLite::Range < ConcurrencyType > range(0,total,concurrency);
 
 	RealType sum = 0.0;

@@ -85,10 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 	
 	namespace GeometryUtils {
-		bool neighbors(size_t i1,size_t i2,bool periodic = false,size_t period = 1)
+		bool neighbors(SizeType i1,SizeType i2,bool periodic = false,SizeType period = 1)
 		{
-			size_t imin = (i1<i2) ? i1 : i2;
-			size_t imax = (i1>i2) ? i1 : i2;
+			SizeType imin = (i1<i2) ? i1 : i2;
+			SizeType imax = (i1>i2) ? i1 : i2;
 			bool b = (imax-imin==1);
 			if (!periodic) return b;
 			bool b2 = (imax-imin == period);

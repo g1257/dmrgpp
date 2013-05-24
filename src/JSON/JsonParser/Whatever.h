@@ -274,7 +274,7 @@ namespace JsonParser {
     
     //======================================================================
     
-    size_t size() const {
+    SizeType size() const {
       
       assertOkWhateverType(WHATEVER_VECTOR, "vector.size()");
       return whateverVector.size();
@@ -299,7 +299,7 @@ namespace JsonParser {
       
     //====================================================================== Vector[]
     
-    Whatever& operator[] (size_t index) {
+    Whatever& operator[] (SizeType index) {
       
       PsimagLite::OstringStream msg;
       msg << "Whatever[" << index << "]";
@@ -316,7 +316,7 @@ namespace JsonParser {
 
     //====================================================================== Vector[]
     
-    const Whatever& operator[] (size_t index) const {
+    const Whatever& operator[] (SizeType index) const {
       
       PsimagLite::OstringStream msg;
       msg << "Whatever[" << index << "]";
@@ -479,12 +479,12 @@ namespace JsonParser {
     }
   }
 
-  size_t& operator <=(size_t& lhs, const Whatever& w) {
+  SizeType& operator <=(SizeType& lhs, const Whatever& w) {
 	  int x = 0;
 	  x <= w;
 	  if (x<0) {
 		  PsimagLite::OstringStream msg;
-		  msg << "Expecting size_t got negative int: "<<x<<"\n";
+		  msg << "Expecting SizeType got negative int: "<<x<<"\n";
 		  throw PsimagLite::LogicError(msg.str());
 	  }
 	  lhs = x;
@@ -618,7 +618,7 @@ namespace JsonParser {
     switch (w.type) {
     case Whatever::WHATEVER_VECTOR:
       lhs.resize(w.whateverVector.size(),0);
-      for (size_t i=0; i< lhs.size(); i++)
+      for (SizeType i=0; i< lhs.size(); i++)
 	lhs[i] <= w.whateverVector[i];
       return lhs;
     case Whatever::WHATEVER_MAT: 
@@ -702,7 +702,7 @@ namespace JsonParser {
       break;
     case Whatever::WHATEVER_VECTOR:
       os << "[";
-      for (size_t i=0; i<w.whateverVector.size();i++)
+      for (SizeType i=0; i<w.whateverVector.size();i++)
 	os << w.whateverVector[i] << ",";
       os << "]";
       break;

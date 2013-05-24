@@ -92,9 +92,9 @@ namespace PsimagLite {
 
 		Permutations(const ContainerType& orig) : data_(orig.size())
 		{
-			for (size_t i=0;i<data_.size();i++) data_[i] = orig[i];
-			Sort<typename Vector<size_t>::Type > mysort;
-			typename Vector<size_t>::Type iperm(data_.size());
+			for (SizeType i=0;i<data_.size();i++) data_[i] = orig[i];
+			Sort<typename Vector<SizeType>::Type > mysort;
+			typename Vector<SizeType>::Type iperm(data_.size());
 			mysort.sort(data_,iperm);
 		}
 
@@ -118,22 +118,22 @@ namespace PsimagLite {
 
 			int l = largestl(k);
 			std::swap(data_[k],data_[l]);
-			size_t c = data_.size()-1;
-			if (size_t(k)+1>=data_.size()-1) return true;
-			typename Vector<size_t>::Type tmp = data_;
-			for (size_t i=k+1;i<data_.size();i++)
+			SizeType c = data_.size()-1;
+			if (SizeType(k)+1>=data_.size()-1) return true;
+			typename Vector<SizeType>::Type tmp = data_;
+			for (SizeType i=k+1;i<data_.size();i++)
 				data_[c--] = tmp[i];
 			return true;
 		}
 
 
-		size_t operator[](size_t i) const
+		SizeType operator[](SizeType i) const
 		{
 			//if (i>=data_.size()) throw RuntimeError("Permutations error\n");
 			return data_[i];
 		}
 
-		size_t size() const { return data_.size(); }
+		SizeType size() const { return data_.size(); }
 
 
 	private:
@@ -141,22 +141,22 @@ namespace PsimagLite {
 		int largestk() const
 		{
 			int saved = -1;
-			size_t tot = data_.size()-1;
-			for (size_t i=0;i<tot;i++) {
+			SizeType tot = data_.size()-1;
+			for (SizeType i=0;i<tot;i++) {
 				if (data_[i]<data_[i+1]) saved = i;
 			}
 			return saved;
 		}
 
-		size_t largestl(size_t k) const
+		SizeType largestl(SizeType k) const
 		{
-			size_t saved = 0;
-			for (size_t i=0;i<data_.size();i++) {
+			SizeType saved = 0;
+			for (SizeType i=0;i<data_.size();i++) {
 				if (data_[k]<data_[i]) saved = i;
 			}
 			return saved;
 		}
-		typename Vector<size_t>::Type data_;
+		typename Vector<SizeType>::Type data_;
 
 	}; // Permutations
 	
@@ -164,7 +164,7 @@ namespace PsimagLite {
 	std::ostream& operator<<(std::ostream& os,
 	                          const Permutations<T>& ig)
 	{
-		for (size_t i=0;i<ig.size();i++) os<<ig[i]<<" ";
+		for (SizeType i=0;i<ig.size();i++) os<<ig[i]<<" ";
 		return os;
 	}
 } // namespace Dmrg 

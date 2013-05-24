@@ -91,8 +91,8 @@ template<typename PthreadFunctionHolderType>
 struct PthreadFunctionStruct {
 	PthreadFunctionHolderType* pfh;
 	int threadNum;	
-	size_t blockSize;
-	size_t total;
+	SizeType blockSize;
+	SizeType total;
 	pthread_mutex_t* mutex;
 };
 
@@ -115,16 +115,16 @@ public:
 	Pthreads()
 	{}
 
-	static void setThreads(size_t nthreads) {nthreads_=nthreads; }
+	static void setThreads(SizeType nthreads) {nthreads_=nthreads; }
 
 	template<typename SomeConcurrencyType>
-	void loopCreate(size_t total,PthreadFunctionHolderType& pfh,SomeConcurrencyType& conc)
+	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh,SomeConcurrencyType& conc)
 	{
 		PthreadFunctionStruct<PthreadFunctionHolderType> pfs[nthreads_];
 		pthread_mutex_init(&(mutex_), NULL);
 		pthread_t thread_id[nthreads_];
 //		std::cerr<<"Pthreads: total="<<total<<" threads="<<nthreads_<<"\n";
-		for (size_t j=0; j <nthreads_; j++) {
+		for (SizeType j=0; j <nthreads_; j++) {
 			int ret=0;
 			pfs[j].threadNum = j;
 			pfs[j].pfh = &pfh;
@@ -137,26 +137,26 @@ public:
 				std::cerr<<"Thread creation failed: "<<ret<<"\n";
 		}
 
-		for (size_t j=0; j <nthreads_; j++) pthread_join( thread_id[j], NULL);
+		for (SizeType j=0; j <nthreads_; j++) pthread_join( thread_id[j], NULL);
 
 		pthread_mutex_destroy(&mutex_);
 	}
 
 	String name() const { return "pthreads"; }
 
-	size_t threads() const { return nthreads_; }
+	SizeType threads() const { return nthreads_; }
 
 	template<typename T,typename SomeConcurrencyType>
 	void reduce(T& x,SomeConcurrencyType& conc) {}
 
 private:
-	static size_t nthreads_;
+	static SizeType nthreads_;
 	pthread_mutex_t mutex_;
 
 }; // Pthreads class
 
 template<typename PthreadFunctionHolderType>
-size_t Pthreads<PthreadFunctionHolderType>::nthreads_=1;
+SizeType Pthreads<PthreadFunctionHolderType>::nthreads_=1;
 } // namespace Dmrg
 
 /*@}*/

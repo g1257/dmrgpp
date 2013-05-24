@@ -39,7 +39,7 @@ namespace PsimagLite {
 
 class GitRevision {
 
-	static const size_t MAX_LINE  = 4096;
+	static const SizeType MAX_LINE  = 4096;
 
 public:
 	
@@ -106,7 +106,7 @@ private:
 
 	String getCurrentPath()
 	{
-		size_t bufsize = 4096;
+		SizeType bufsize = 4096;
 		char* buf = new char[bufsize];
 		retp_ = getcwd(buf,bufsize);
 

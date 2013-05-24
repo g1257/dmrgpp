@@ -101,9 +101,9 @@ private:
 From what we discussed above the private data is
 @d privateData
 @{
-size_t rank_;
-typename Vector<size_t>::Type rowptr_;
-typename Vector<size_t>::Type colind_;
+SizeType rank_;
+typename Vector<SizeType>::Type rowptr_;
+typename Vector<SizeType>::Type colind_;
 typename Vector<T>::Type values_;
 @}
 
@@ -118,7 +118,7 @@ The constructor is
 The empty constructor just creates an empty CRS matrix with the rank given:
 @d emptyConstructor
 @{
-SampleCRSMatrix(size_t rank) : rank_(rank),rowptr_(rank+1)
+SampleCRSMatrix(SizeType rank) : rank_(rank),rowptr_(rank+1)
 {
 }
 @}
@@ -127,16 +127,16 @@ The random constructor, takes a seed, and the number of non-zero values and fill
 randomly. Note that $T$ must be a real type here:
 @d randomConstructor
 @{
-SampleCRSMatrix(size_t rank,T seed,size_t nonZeros,T maxValue) : rank_(rank),rowptr_(rank+1)
+SampleCRSMatrix(SizeType rank,T seed,SizeType nonZeros,T maxValue) : rank_(rank),rowptr_(rank+1)
 {
 	srand48(seed);
-	typename Vector<size_t>::Type rows,cols;
+	typename Vector<SizeType>::Type rows,cols;
 	typename Vector<T>::Type vals;
-	for (size_t i=0;i<nonZeros;i++) {
+	for (SizeType i=0;i<nonZeros;i++) {
 		// pick a row
-		size_t row = size_t(drand48()*rank);
+		SizeType row = SizeType(drand48()*rank);
 		// and a column
-		size_t col = size_t(drand48()*rank);
+		SizeType col = SizeType(drand48()*rank);
 		// and a value
 		T val = drand48()*maxValue;
 		rows.push_back(row);
@@ -187,15 +187,15 @@ performs $\vec{x} = \vec{x} + A * \vec{y}$,
  @{
 void matrixVectorProduct(typename Vector<T>::Type& x, const typename Vector<T>::Type& y) const
 {
-	for (size_t i = 0; i < y.size(); i++)
-		for (size_t j = rowptr_[i]; j < rowptr_[i + 1]; j++)
+	for (SizeType i = 0; i < y.size(); i++)
+		for (SizeType j = rowptr_[i]; j < rowptr_[i + 1]; j++)
 			x[i] += values_[j] * y[colind_[j]];
 }
 @}
 
 @d rank
 @{
-size_t rank() const { return rank_; }
+SizeType rank() const { return rank_; }
 @}
 
 @d pushCol
@@ -233,7 +233,7 @@ template<typename SomeIoOutputType,typename SomeFieldType>
 void saveVector(SomeIoOutputType& io,const typename Vector<SomeFieldType>::Type& v) const
 {
 	io<<v.size()<<"\n";
-	for (size_t i=0;i<v.size();i++) {
+	for (SizeType i=0;i<v.size();i++) {
 		io<<v[i]<<" ";
 	}
 	io<<"\n";
@@ -249,7 +249,7 @@ void readVector(SomeIoInputType& io,typename Vector<SomeFieldType>::Type& v) con
 	io>>size;
 	if (size<0) throw RuntimeError("readVector: size is zero\n");
 	v.resize(size);
-	for (size_t i=0;i<v.size();i++) {
+	for (SizeType i=0;i<v.size();i++) {
 		io>>v[i];
 	}
 }
@@ -257,16 +257,16 @@ void readVector(SomeIoInputType& io,typename Vector<SomeFieldType>::Type& v) con
 
 @d fillMatrix
 @{
-void fillMatrix(typename Vector<size_t>::Type& rows,typename Vector<size_t>::Type& cols,
+void fillMatrix(typename Vector<SizeType>::Type& rows,typename Vector<SizeType>::Type& cols,
 		typename Vector<T>::Type& vals)
 {
-	Sort<typename Vector<size_t>::Type > s;
-    typename Vector<size_t>::Type iperm(rows.size());
+	Sort<typename Vector<SizeType>::Type > s;
+    typename Vector<SizeType>::Type iperm(rows.size());
 	s.sort(rows,iperm);
-	size_t counter = 0;
-	size_t prevRow = rows[0]+1;
-	for (size_t i=0;i<rows.size();i++) {
-		size_t row = rows[i];
+	SizeType counter = 0;
+	SizeType prevRow = rows[0]+1;
+	for (SizeType i=0;i<rows.size();i++) {
+		SizeType row = rows[i];
 		if (prevRow!=row) {
 			// add new row
 			rowptr_[row] = counter++;
@@ -275,8 +275,8 @@ void fillMatrix(typename Vector<size_t>::Type& rows,typename Vector<size_t>::Typ
 		colind_.push_back(cols[iperm[i]]);
 		values_.push_back(vals[iperm[i]]);
 	}
-	size_t lastNonZeroRow = rows[rows.size()-1];
-	for (size_t i=lastNonZeroRow+1;i<=rank_;i++)
+	SizeType lastNonZeroRow = rows[rows.size()-1];
+	for (SizeType i=lastNonZeroRow+1;i<=rank_;i++)
 		rowptr_[i] = counter;
 }
 @}

@@ -45,10 +45,10 @@ int main(int argc,char *argv[])
 	RealType wstep = 0;
 	typedef PsimagLite::ChebyshevSerializer<RealType,VectorType> ChebyshevSerializerType;
 	typedef  ChebyshevSerializerType::KernelParametersType KernelParametersType;
-	size_t type = KernelParametersType::JACKSON;
+	SizeType type = KernelParametersType::JACKSON;
 	RealType lambda = 0.0;
 	bool makeZero = false;
-	size_t cutoff = 0;
+	SizeType cutoff = 0;
 	while ((opt = getopt(argc, argv,"f:b:e:s:c:l:zd")) != -1) {
 		switch (opt) {
 		case 'f':
@@ -99,7 +99,7 @@ int main(int argc,char *argv[])
 	ChebyshevSerializerType::PlotDataType v;
 	KernelParametersType kernelParams(type,cutoff,lambda);
 	chebyshevSerializer.plot(v,params,kernelParams);
-	for (size_t x=0;x<v.size();x++) {
+	for (SizeType x=0;x<v.size();x++) {
 		RealType tmp = v[x].second;
 		if (tmp<0 && makeZero) tmp = 0;
 		std::cout<<v[x].first<<" "<<tmp<<"\n";

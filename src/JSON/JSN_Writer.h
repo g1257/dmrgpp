@@ -30,7 +30,7 @@ namespace dca {
 
     //======================================================================
 
-    JSN(size_t offset_=0):
+    JSN(SizeType offset_=0):
       offset          (offset_),
       precis          (10),
       printedFirstLine(false)
@@ -79,7 +79,7 @@ namespace dca {
     MapType<String, double>                        numbers;
     MapType<String, typename Vector<double>::Type >          vectors;
     MapType<String, typename Vector<int>::Type >             intvectors;
-    MapType<String, typename Vector<size_t>::Type >          sizetvectors;
+    MapType<String, typename Vector<SizeType>::Type >          sizetvectors;
     MapType<String, typename Vector<String>::Type >     stringLists;
     MapType<String, const psimag::Matrix<int>*>    intMatrices;
     MapType<String, const psimag::Matrix<double>*> dblMatrices;
@@ -92,13 +92,13 @@ namespace dca {
     void add(String key, const bool&          b)   { bools  [key] = b;    }
     void add(String key, const char*        str)   { strings[key] = str;  }
     void add(String key, const String& str)   { strings[key] = str;  }
-    void add(String key, const size_t& val)              { numbers[key] = val;  }
+    void add(String key, const SizeType& val)              { numbers[key] = val;  }
     void add(String key, const int&    val)              { numbers[key] = val;  }
     void add(String key, const double& val)              { numbers[key] = val;  }
 
     void add(String key, const typename Vector<double>::Type&    vals) { vectors[key]     = vals; }
     void add(String key, const typename Vector<int>::Type&       vals) { intvectors[key]  = vals; }
-    void add(String key, const typename Vector<size_t>::Type&    vals) { sizetvectors[key]= vals; }
+    void add(String key, const typename Vector<SizeType>::Type&    vals) { sizetvectors[key]= vals; }
     void add(String key, const psimag::Matrix<int>&    mat ) { intMatrices[key] = &mat; }
     void add(String key, const psimag::Matrix<double>& mat ) { dblMatrices[key] = &mat; }
 
@@ -124,7 +124,7 @@ namespace dca {
     template<typename ValType>
     static
     int maxKeyWidth( const MapType<String, ValType>& map) {
-      size_t result = 0;
+      SizeType result = 0;
       typedef typename MapType<String, ValType>::const_iterator itr;
       for(itr i=map.begin(); i!= map.end(); i++) 
 	if( i->first.length() > result)
@@ -257,7 +257,7 @@ namespace dca {
     static
     void valString(std::ostream& os, int offset, int keyWidth,
 		   const typename Vector<T>::Type& val) {
-      size_t width = maxElementStringWidth(val);
+      SizeType width = maxElementStringWidth(val);
       printList(val,os,',',width);
     }
 
@@ -351,7 +351,7 @@ namespace dca {
 	 << " \'size\': " << vec.size() << ", \n";
       os << " \'data\': ";
       os << "array([[";
-      for(size_t j=0; j<vec.size(); j++) 
+      for(SizeType j=0; j<vec.size(); j++) 
 	os << " " << std::setw(precis) << vec[j] << ",\n";
       os << "]])\n";
       

@@ -88,7 +88,7 @@ namespace PsimagLite {
 	public:
 		enum {DIRECTION_X,DIRECTION_Y};
 
-		Ladder(size_t linSize,size_t leg,bool isPeriodicY)
+		Ladder(SizeType linSize,SizeType leg,bool isPeriodicY)
 		: linSize_(linSize),leg_(leg),isPeriodicY_(isPeriodicY)
 		{
 			if (leg & 1) throw RuntimeError("Ladder: leg must be even\n");
@@ -97,7 +97,7 @@ namespace PsimagLite {
 			if (linSize % leg !=0) throw RuntimeError("Ladder: leg must divide number of sites\n");
 		}
 
-		size_t getVectorSize(size_t dirId) const
+		SizeType getVectorSize(SizeType dirId) const
 		{
 			if (dirId==DIRECTION_X) return linSize_-leg_;
 			else if (dirId==DIRECTION_Y) return (isPeriodicY_) ? linSize_ : linSize_ - linSize_/leg_;
@@ -105,29 +105,29 @@ namespace PsimagLite {
 			throw RuntimeError("Unknown direction\n");
 		}
 
-		bool connected(size_t i1,size_t i2) const
+		bool connected(SizeType i1,SizeType i2) const
 		{
 			if (i1==i2) return false;
-			size_t c1 = i1/leg_;
-			size_t c2 = i2/leg_;
-			size_t r1 = i1%leg_;
-			size_t r2 = i2%leg_;
+			SizeType c1 = i1/leg_;
+			SizeType c2 = i2/leg_;
+			SizeType r1 = i1%leg_;
+			SizeType r2 = i2%leg_;
 			if (c1==c2) return GeometryUtils::neighbors(r1,r2,isPeriodicY_,leg_-1);
 			if (r1==r2) return GeometryUtils::neighbors(c1,c2);
 			return false;
 		}
 
-		size_t calcDir(size_t i1,size_t i2) const
+		SizeType calcDir(SizeType i1,SizeType i2) const
 		{
 			assert(connected(i1,i2));
 			if (sameColumn(i1,i2)) return DIRECTION_Y;
 			return DIRECTION_X;
 		}
 
-		bool fringe(size_t i,size_t smax,size_t emin) const
+		bool fringe(SizeType i,SizeType smax,SizeType emin) const
 		{
-			size_t c = smax % leg_;
-			size_t r = 2 + 2*c;
+			SizeType c = smax % leg_;
+			SizeType r = 2 + 2*c;
 			if (c>=leg_/2) r = r - leg_;
 
 			if (smax+1 == emin) r = leg_; // finite loops
@@ -138,22 +138,22 @@ namespace PsimagLite {
 		}
 
 		// siteEnv is fringe in the environment
-		size_t getSubstituteSite(size_t smax,size_t emin,size_t siteEnv) const
+		SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteEnv) const
 		{
 			if (smax+1 == emin) return siteEnv; // finite loops
 
-			size_t c = smax % leg_;
-			size_t s = int(emin/leg_) - int(smax/leg_);
+			SizeType c = smax % leg_;
+			SizeType s = int(emin/leg_) - int(smax/leg_);
 			assert(s>0);
 			if (c>=leg_/2) s--;
 			return  siteEnv - s*leg_;
 		}
 
-		size_t handle(size_t i1,size_t i2) const
+		SizeType handle(SizeType i1,SizeType i2) const
 		{
-			size_t dir = calcDir(i1,i2);
-			size_t imin = (i1<i2) ? i1 : i2;
-			size_t y = imin/leg_;
+			SizeType dir = calcDir(i1,i2);
+			SizeType imin = (i1<i2) ? i1 : i2;
+			SizeType y = imin/leg_;
 			switch(dir) {
 			case DIRECTION_X:
 				return imin;
@@ -165,18 +165,18 @@ namespace PsimagLite {
 			throw RuntimeError("hanlde: Unknown direction\n");
 		}
 
-		bool sameColumn(size_t i1,size_t i2) const
+		bool sameColumn(SizeType i1,SizeType i2) const
 		{
-			size_t c1 = i1/leg_;
-			size_t c2 = i2/leg_;
+			SizeType c1 = i1/leg_;
+			SizeType c2 = i2/leg_;
 			if (c1 == c2) return true;
 			return false;
 		}
 
-		bool sameRow(size_t i1,size_t i2) const
+		bool sameRow(SizeType i1,SizeType i2) const
 		{
-			size_t c1 = i1%leg_;
-			size_t c2 = i2%leg_;
+			SizeType c1 = i1%leg_;
+			SizeType c2 = i2%leg_;
 			if (c1 == c2) return true;
 			return false;
 		}
@@ -186,46 +186,46 @@ namespace PsimagLite {
 			return "ladder";
 		}
 
-		size_t length(size_t i) const
+		SizeType length(SizeType i) const
 		{
 			assert(i<2);
-			return (i==1) ? leg_ : size_t(linSize_/leg_);
+			return (i==1) ? leg_ : SizeType(linSize_/leg_);
 		}
 
-		size_t translate(size_t site,size_t dir,size_t amount) const
+		SizeType translate(SizeType site,SizeType dir,SizeType amount) const
 		{
 			assert(dir<2);
-			size_t x = size_t(site/leg_);
-			size_t y = site % leg_;
-			size_t lx = size_t(linSize_/leg_);
+			SizeType x = SizeType(site/leg_);
+			SizeType y = site % leg_;
+			SizeType lx = SizeType(linSize_/leg_);
 			if (dir==DIRECTION_X) x = translateInternal(x,lx,amount);
 			else y = translateInternal(y,leg_,amount);
-			size_t ind = y + x*leg_;
+			SizeType ind = y + x*leg_;
 			assert(ind<linSize_);
 			return ind;
 		}	
 		
-		size_t findReflection(size_t site) const
+		SizeType findReflection(SizeType site) const
 		{
-			size_t x = size_t(site/leg_);
-			size_t y = site % leg_;
-			size_t lx = size_t(linSize_/leg_);
-			size_t ind = y + (lx-x-1)*leg_;
+			SizeType x = SizeType(site/leg_);
+			SizeType y = site % leg_;
+			SizeType lx = SizeType(linSize_/leg_);
+			SizeType ind = y + (lx-x-1)*leg_;
 			assert(ind<linSize_);
 			return ind;
 		}
 
 	private:
 
-		size_t translateInternal(size_t c,size_t l,size_t amount) const
+		SizeType translateInternal(SizeType c,SizeType l,SizeType amount) const
 		{
 			c += amount;
 			while(c>=l) c-=l;
 			return c;
 		}
 
-		size_t linSize_;
-		size_t leg_;
+		SizeType linSize_;
+		SizeType leg_;
 		bool isPeriodicY_;
 	}; // class Ladder
 } // namespace PsimagLite 

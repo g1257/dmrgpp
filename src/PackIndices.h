@@ -86,10 +86,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 	class PackIndices {
 	public:
-		PackIndices(size_t n) : n_(n) { }
+		PackIndices(SizeType n) : n_(n) { }
 	
 		//! given ind and n, get x and y such that ind = x + y*n
-		void unpack(size_t& x,size_t& y,size_t ind) const
+		void unpack(SizeType& x,SizeType& y,SizeType ind) const
 		{
 			//y  = ind/n;
 			//x = ind - y*n;
@@ -99,14 +99,14 @@ namespace PsimagLite {
 			x = q.rem;
 		}
 
-		size_t pack(size_t x0,size_t x1,const Vector<size_t>::Type& permutationInverse) const
+		SizeType pack(SizeType x0,SizeType x1,const Vector<SizeType>::Type& permutationInverse) const
 		{
 			assert(x0+n_*x1<permutationInverse.size());
 			return permutationInverse[x0+n_*x1];
 		}
 
 	private:
-		size_t n_;
+		SizeType n_;
 	}; // class PackIndices
 } // namespace PsimagLite 
 

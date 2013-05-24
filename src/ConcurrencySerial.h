@@ -117,7 +117,7 @@ namespace PsimagLite {
 		template<typename DataType>
 		void broadcast(DataType &v,CommType mpiComm=COMM_WORLD) { }
 
-		CommPairType newCommFromSegments(size_t x,CommType mpiComm=0)
+		CommPairType newCommFromSegments(SizeType x,CommType mpiComm=0)
 		{
 			return CommPairType(0,0);
 		}
@@ -129,7 +129,7 @@ namespace PsimagLite {
 	private:
 
 		int step_;
-		size_t total_;
+		SizeType total_;
 	}; // Class ConcurrencySerial
 } // namespace Dmrg
 

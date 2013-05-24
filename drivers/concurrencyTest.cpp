@@ -37,13 +37,13 @@ typedef PsimagLite::ConcurrencySerial<RealType> ConcurrencyType;
 
 typedef PsimagLite::Vector<RealType>::Type VectorType;
 
-void setVectors(PsimagLite::Vector<VectorType>::Type& vec, size_t total1, size_t total2)
+void setVectors(PsimagLite::Vector<VectorType>::Type& vec, SizeType total1, SizeType total2)
 {
 	VectorType series(total1*total2);
 	VectorType tmp(total2);
-	size_t k = 0;
-	for (size_t j=0;j<total1;j++) {
-		for (size_t i=0;i<total2;i++) {
+	SizeType k = 0;
+	for (SizeType j=0;j<total1;j++) {
+		for (SizeType i=0;i<total2;i++) {
 			RealType val = (k<2) ? 1 : series[k-1] + series[k-2];
 			tmp[i] = val;
 			series[k++] = val;
@@ -63,9 +63,9 @@ int main(int argc,char *argv[])
 	ConcurrencyType concurrency(argc,argv);
 	
 	
-	size_t total1 = atoi(argv[1]);
-	size_t total2 = atoi(argv[2]);
-	size_t ySize = atoi(argv[3]);
+	SizeType total1 = atoi(argv[1]);
+	SizeType total2 = atoi(argv[2]);
+	SizeType ySize = atoi(argv[3]);
 	std::pair<CommType,CommType> comm = concurrency.newCommFromSegments(ySize);
 	
 	PsimagLite::Range<ConcurrencyType> range(0,total1,concurrency,comm.second);
@@ -74,11 +74,11 @@ int main(int argc,char *argv[])
 	setVectors(vec,total1,total2);
 	VectorType sum(total1);
 	while(!range.end()) {
-		size_t i = range.index();
+		SizeType i = range.index();
 		VectorType& v = vec[i];
 		PsimagLite::Range<ConcurrencyType> range2(0,total2,concurrency,comm.first);
 		while(!range2.end()) {
-			size_t j = range2.index();
+			SizeType j = range2.index();
 			sum[i] += v[j];
 			std::cout<<"i="<<i<<" j="<<j<<" comm1.rank="<<concurrency.rank(comm.first);
 			std::cout<<" comm2.rank="<<concurrency.rank(comm.second)<<" world.rank="<<concurrency.rank()<<"\n";

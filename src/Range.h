@@ -111,10 +111,10 @@ namespace PsimagLite {
 		typedef typename ConcurrencyType::CommType CommType;
 		static const CommType COMM_WORLD;
 
-		Range(size_t start,
-		      size_t total,
+		Range(SizeType start,
+		      SizeType total,
 		      const ConcurrencyType& concurrency,
-		      const Vector<size_t>::Type& weights,
+		      const Vector<SizeType>::Type& weights,
 		      CommType mpiComm=COMM_WORLD,
 		      bool isStrict=false)
 		: concurrency_(concurrency),
@@ -127,8 +127,8 @@ namespace PsimagLite {
 			init(weights,mpiComm);
 		}
 
-		Range(size_t start,
-		     size_t total,
+		Range(SizeType start,
+		     SizeType total,
 		     const ConcurrencyType& concurrency,           
 		     CommType mpiComm=COMM_WORLD,
 		     bool isStrict=false)
@@ -139,7 +139,7 @@ namespace PsimagLite {
 		  indicesOfThisProc_(nprocs_),
 		  isStrict_(isStrict)
 		{
-			typename Vector<size_t>::Type weights(total,1);
+			typename Vector<SizeType>::Type weights(total,1);
 			init(weights,mpiComm);
 		}
 
@@ -158,41 +158,41 @@ namespace PsimagLite {
 // 			return (assigned_ && step_<myIndices_.size() && myIndices_[step_]<total_ );
 // 		}
 
-		size_t index() const { return myIndices_[step_]; }
+		SizeType index() const { return myIndices_[step_]; }
 
 	private:
 
 		const ConcurrencyType& concurrency_;
-		size_t step_; // step within this processor
-		size_t total_; // total number of indices total_(total),
-		size_t nprocs_;
-		Vector<Vector<size_t>::Type >::Type indicesOfThisProc_; // given rank and step it maps the index
+		SizeType step_; // step within this processor
+		SizeType total_; // total number of indices total_(total),
+		SizeType nprocs_;
+		Vector<Vector<SizeType>::Type >::Type indicesOfThisProc_; // given rank and step it maps the index
 		bool isStrict_; // does nproc need to divide total?
-		typename Vector<size_t>::Type myIndices_; // indices assigned to this processor
+		typename Vector<SizeType>::Type myIndices_; // indices assigned to this processor
 
-		void init(const typename Vector<size_t>::Type& weights,CommType mpiComm)
+		void init(const typename Vector<SizeType>::Type& weights,CommType mpiComm)
 		{ 
 			if (isStrict_ && total_%nprocs_!=0)
 				throw RuntimeError("Nprocs must divide total for this range\n");
 
 			// distribute the load among the processors
-			typename Vector<size_t>::Type loads(nprocs_,0);
+			typename Vector<SizeType>::Type loads(nprocs_,0);
 			
-			for (size_t i=0;i<total_;i++) {
-				size_t r = findLowestLoad(loads);
+			for (SizeType i=0;i<total_;i++) {
+				SizeType r = findLowestLoad(loads);
 				indicesOfThisProc_[r].push_back(i);
 				loads[r] += weights[i];
 			}
 			// set myIndices_
-			size_t r1=concurrency_.rank(mpiComm);
+			SizeType r1=concurrency_.rank(mpiComm);
 			myIndices_=indicesOfThisProc_[r1];
 		}
 
-		size_t findLowestLoad(const Vector<size_t>::Type& loads) const
+		SizeType findLowestLoad(const Vector<SizeType>::Type& loads) const
 		{
-			size_t x= 1000000;
-			size_t ret=0;
-			for (size_t i=0;i<loads.size();i++) {
+			SizeType x= 1000000;
+			SizeType ret=0;
+			for (SizeType i=0;i<loads.size();i++) {
 				if (loads[i]<x) {
 					x=loads[i];
 					ret =i;
@@ -217,15 +217,15 @@ namespace PsimagLite {
 
 		typedef ConcurrencyType::CommType CommType;
 
-		Range(size_t start,
-		     size_t total,
+		Range(SizeType start,
+		     SizeType total,
 		     ConcurrencyType& concurrency,
-		     const Vector<size_t>::Type& weights,
+		     const Vector<SizeType>::Type& weights,
 		     CommType mpiComm=0) : step_(start),total_(total)
 		{}
 
-		Range(size_t start,
-		     size_t total,
+		Range(SizeType start,
+		     SizeType total,
 		     ConcurrencyType& concurrency,           
 		     CommType mpiComm=0) : step_(start),total_(total)
 		{}
@@ -239,12 +239,12 @@ namespace PsimagLite {
 
 // 		bool hasNext() const { return step_ <total_; }
 
-		size_t index() const { return step_; }
+		SizeType index() const { return step_; }
 
 	private:
 
-		size_t step_; // step within this processor
-		size_t total_; // total number of indices
+		SizeType step_; // step within this processor
+		SizeType total_; // total number of indices
 	}; // class Range
 } // namespace PsimagLite
 

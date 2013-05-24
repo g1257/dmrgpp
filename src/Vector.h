@@ -48,7 +48,7 @@ template<typename X,typename A>
 inline X operator*(const std::vector<X,A>& v,const std::vector<X,A>& w)
 {
 	X result=0;
-	for (size_t i=0;i<v.size();i++) result += v[i]*conj(w[i]);
+	for (SizeType i=0;i<v.size();i++) result += v[i]*conj(w[i]);
 	return result;
 }
 
@@ -57,9 +57,9 @@ inline std::vector<T2,A> operator*(const std::vector<std::vector<T1,A>,AA>& v1,
                                  const std::vector<T2,A>& v2)
 {
 	std::vector<T2,A> v3(v2.size());
-	for (size_t i=0;i<v3.size();i++) {
+	for (SizeType i=0;i<v3.size();i++) {
 		v3[i] = 0;
-		for (size_t j=0;i<v2.size();j++)
+		for (SizeType j=0;i<v2.size();j++)
 			v3[i] += v1[i][j] * v2[j];
 	}
 	return v3;
@@ -69,7 +69,7 @@ template<typename T1,typename T2,typename A>
 inline std::vector<T2,A> operator*(const T1& v1,const std::vector<T2,A>& v2)
 {
 	std::vector<T2,A> v3(v2.size());
-	for (size_t i=0;i<v3.size();i++) v3[i] = v1 * v2[i];
+	for (SizeType i=0;i<v3.size();i++) v3[i] = v1 * v2[i];
 	return v3;
 }
 
@@ -83,7 +83,7 @@ template<typename T,typename A>
 std::vector<T,A> conj(std::vector<T,A>& v)
 {
 	std::vector<T,A> w(v.size());
-	for (size_t i=0;i<v.size();i++) w[i]=std::conj(v[i]);
+	for (SizeType i=0;i<v.size();i++) w[i]=std::conj(v[i]);
 	return w;
 }
 
@@ -91,7 +91,7 @@ template<typename T,typename A>
 T scalarProduct(const std::vector<T,A>& v1, const std::vector<T,A>& v2)
 {
 	T result = 0.0;
-	for(size_t i=0; i < v2.size(); i++)
+	for(SizeType i=0; i < v2.size(); i++)
 		result += std::conj(v1[i]) * v2[i];
 	return result;
 }
@@ -99,28 +99,28 @@ T scalarProduct(const std::vector<T,A>& v1, const std::vector<T,A>& v2)
 template<typename FieldType,typename A>
 inline std::vector<FieldType,A> operator+=(std::vector<FieldType,A>& v,const std::vector<FieldType,A>& w)
 {
-	for (size_t i=0;i<w.size();i++) v[i] += w[i];
+	for (SizeType i=0;i<w.size();i++) v[i] += w[i];
 	return v;
 }
 
 template<typename FieldType,typename A>
 inline std::vector<FieldType,A> operator-=(std::vector<FieldType,A>& v,const std::vector<FieldType,A>& w)
 {
-	for (size_t i=0;i<w.size();i++) v[i] -= w[i];
+	for (SizeType i=0;i<w.size();i++) v[i] -= w[i];
 	return v;
 }
 
 template<typename T1,typename T2,typename A>
 inline std::vector<T1,A> operator*=(std::vector<T1,A>& v,const T2& t2)
 {
-	for (size_t i=0;i<v.size();i++) v[i] *= t2;
+	for (SizeType i=0;i<v.size();i++) v[i] *= t2;
 	return v;
 }
 
 template<typename T1,typename T2,typename A>
 inline std::vector<T1,A> operator/=(std::vector<T1,A>& v,const T2& t2)
 {
-	for (size_t i=0;i<v.size();i++) v[i] /= t2;
+	for (SizeType i=0;i<v.size();i++) v[i] /= t2;
 	return v;
 }
 
@@ -128,7 +128,7 @@ template<typename T1,typename T2,typename A1,typename A2>
 inline std::vector<T1,A1> operator+(const std::vector<T1,A1>& v1,const std::vector<T2,A2>& v2)
 {
 	std::vector<T1,A1> v3(v1.size());
-	for (size_t i=0;i<v1.size();i++) v3[i] = v1[i] + v2[i];
+	for (SizeType i=0;i<v1.size();i++) v3[i] = v1[i] + v2[i];
 	return v3;
 }
 
@@ -136,7 +136,7 @@ template<typename T1,typename T2,typename A>
 inline std::vector<T1,A> operator-(const std::vector<T1,A>& v1,const std::vector<T2,A>& v2)
 {
 	std::vector<T1,A> v3(v1.size());
-	for (size_t i=0;i<v1.size();i++) v3[i] = v1[i] - v2[i];
+	for (SizeType i=0;i<v1.size();i++) v3[i] = v1[i] - v2[i];
 	return v3;
 }
 
@@ -144,7 +144,7 @@ template<class X,typename A>
 std::ostream &operator<<(std::ostream &s,const std::vector<X,A>& v)
 {
 	s<<v.size()<<"\n";
-	for (size_t i=0;i<v.size();i++) s<<v[i]<<"\n";
+	for (SizeType i=0;i<v.size();i++) s<<v[i]<<"\n";
 	return s;
 }
 
@@ -156,7 +156,7 @@ inline std::istream& operator>>(std::istream& is,std::vector<FieldType,A>& v)
 	if (xsize<0)
 		throw PsimagLite::RuntimeError(">> vector: size is negative\n");
 	v.resize(xsize);
-	for (size_t i=0;i<size_t(xsize);i++) {
+	for (SizeType i=0;i<SizeType(xsize);i++) {
 		is>>v[i];
 	}
 	return is;
@@ -193,7 +193,7 @@ namespace PsimagLite {
 	template<class T,typename A>
 	void vectorPrint(const std::vector<T,A>& v,char const *name,std::ostream &s)
 	{
-		for (size_t i=0;i<v.size();i++) s<<name<<"["<<i<<"]="<<v[i]<<std::endl;
+		for (SizeType i=0;i<v.size();i++) s<<name<<"["<<i<<"]="<<v[i]<<std::endl;
 	} 
 	
 	template<class X,typename A>
@@ -216,7 +216,7 @@ namespace PsimagLite {
 	                     const X& b,
 	                     const RandomType& r)
 	{
-		for (size_t i=0;i<v.size();i++) v[i] = a + b*r.random();
+		for (SizeType i=0;i<v.size();i++) v[i] = a + b*r.random();
 	}
 	
 	template<typename X,typename Y,typename A>
@@ -234,7 +234,7 @@ namespace PsimagLite {
 		String buffer = "";
 		String s(s1);
 		T tmp;
-		for (size_t i=0;i<s.length();i++) {
+		for (SizeType i=0;i<s.length();i++) {
 			if (s[i]==sep) {
 				if (buffer=="") continue;
 				PsimagLite::IstringStream buffer2(buffer);

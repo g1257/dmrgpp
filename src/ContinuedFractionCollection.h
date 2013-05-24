@@ -55,7 +55,7 @@ namespace PsimagLite {
 		}
 
 		template<typename IoInputType>
-		ContinuedFractionCollection(IoInputType& io,size_t level = 0)
+		ContinuedFractionCollection(IoInputType& io,SizeType level = 0)
 		: progress_("ContinuedFractionCollection",0)
 		{
 			int n = 0;
@@ -66,7 +66,7 @@ namespace PsimagLite {
 						ttos(n);
 				throw RuntimeError(s.c_str());
 			}
-			for (size_t i=0;i<size_t(n);i++) {
+			for (SizeType i=0;i<SizeType(n);i++) {
 				ContinuedFractionType cf(io);
 				data_.push_back(cf);
 			}
@@ -77,7 +77,7 @@ namespace PsimagLite {
 		{
 			String s = "#CONTINUEDFRACTIONCOLLECTION=";
 			io.print(s,data_.size());
-			for (size_t i=0;i<data_.size();i++) data_[i].save(io);
+			for (SizeType i=0;i<data_.size();i++) data_[i].save(io);
 		}
 
 		void push(const ContinuedFractionType& cf)
@@ -89,7 +89,7 @@ namespace PsimagLite {
 				PlotDataType& result,
 				const PlotParamsType& params) const
 		{
-			for (size_t i=0;i<data_.size();i++) {
+			for (SizeType i=0;i<data_.size();i++) {
 				PlotDataType result1;
 				data_[i].plot(result1,params);
 				accumulate(result, result1);
@@ -97,14 +97,14 @@ namespace PsimagLite {
 		}
 
 		void plotOne(
-				size_t i,
+				SizeType i,
 				PlotDataType& result,
 				const PlotParamsType& params) const
 		{
 			data_[i].plot(result,params);
 		}
 
-		size_t size() const { return data_.size(); }
+		SizeType size() const { return data_.size(); }
 
 	private:
 
@@ -121,7 +121,7 @@ namespace PsimagLite {
 					throw RuntimeError(s.c_str());
 				}
 			}
-			for (size_t i=0;i<v1.size();i++) {
+			for (SizeType i=0;i<v1.size();i++) {
 
 				if (wasEmpty) {
 					v1[i].first = v2[i].first;

@@ -20,7 +20,7 @@ void readMe(const String& myfile)
 
 int main()
 {
-	size_t rank = 0;
+	SizeType rank = 0;
 	String myfile = "myfile.txt";
 	PsimagLite::IoBinary::Out fout(myfile,rank);
 	String s = "Hello World!";
@@ -28,7 +28,7 @@ int main()
 	typename Vector<double>::Type m(10);
 
 	srand48(3490201);
-	for (size_t i=0;i<m.size();i++)
+	for (SizeType i=0;i<m.size();i++)
 		m[i]=drand48();
 	fout.printVector(m,"MyVector");
 	std::cout<<"MyVector\n";
@@ -36,8 +36,8 @@ int main()
 	std::cout<<"------------------\n";
 
 	PsimagLite::Matrix<float> a(10,20);
-	for (size_t i=0;i<a.n_row();i++)
-		for (size_t j=0;j<a.n_col();j++)
+	for (SizeType i=0;i<a.n_row();i++)
+		for (SizeType j=0;j<a.n_col();j++)
 			a(i,j)=drand48();
 
 	fout.printMatrix(a,"MyMatrix");

@@ -115,7 +115,7 @@ namespace PsimagLite {
 			return *fx;
 		}
 		
-		gsl_integration_workspace * gsl_integration_workspace_alloc (size_t n) const
+		gsl_integration_workspace * gsl_integration_workspace_alloc (SizeType n) const
 		{
 			thereSnoGsl();
 			int* x = new int;
@@ -127,8 +127,8 @@ namespace PsimagLite {
 			thereSnoGsl();
 		}
 		
-		int gsl_integration_qagp (const gsl_function * f, double * pts, size_t npts, double epsabs, 
-		             double epsrel, size_t limit, gsl_integration_workspace * workspace, double * result, double * abserr) const
+		int gsl_integration_qagp (const gsl_function * f, double * pts, SizeType npts, double epsabs, 
+		             double epsrel, SizeType limit, gsl_integration_workspace * workspace, double * result, double * abserr) const
 		{
 			thereSnoGsl();
 			return 0;
@@ -155,7 +155,7 @@ namespace PsimagLite {
 			return ::gsl_set_error_handler(new_handler);
 		}
 		
-		gsl_integration_workspace * gsl_integration_workspace_alloc (size_t n) const
+		gsl_integration_workspace * gsl_integration_workspace_alloc (SizeType n) const
 		{
 			return ::gsl_integration_workspace_alloc(n);
 		}
@@ -165,8 +165,8 @@ namespace PsimagLite {
 			return ::gsl_integration_workspace_free(w);
 		}
 		
-		int gsl_integration_qagp (const gsl_function * f, double * pts, size_t npts, double epsabs, 
-		  double epsrel, size_t limit, gsl_integration_workspace * workspace, double * result, double * abserr) const
+		int gsl_integration_qagp (const gsl_function * f, double * pts, SizeType npts, double epsabs, 
+		  double epsrel, SizeType limit, gsl_integration_workspace * workspace, double * result, double * abserr) const
 		{
 			return ::gsl_integration_qagp(f,pts,npts,epsabs,epsrel,limit,workspace,result,abserr);
 		}

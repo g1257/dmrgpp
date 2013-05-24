@@ -101,7 +101,7 @@ public:
 		mywrite(fd,(const void *)&x,sizeof(x));
 	}
 
-	static void save(int fd,size_t x)
+	static void save(int fd,SizeType x)
 	{
 		mywrite(fd,(const void *)&x,sizeof(x));
 	}
@@ -111,7 +111,7 @@ public:
 		vsave_(fd,vec);
 	}
 
-	static void save(int fd,const typename Vector<size_t>::Type& vec)
+	static void save(int fd,const typename Vector<SizeType>::Type& vec)
 	{
 		vsave_(fd,vec);
 	}
@@ -137,9 +137,9 @@ public:
 		composed.save(fd);
 	}
 
-	static void mywrite(int fd,const void *buf,size_t count)
+	static void mywrite(int fd,const void *buf,SizeType count)
 	{
-		ssize_t ret = write(fd,buf,count);
+		sSizeType ret = write(fd,buf,count);
 		failIfNegative(ret,__FILE__,__LINE__);
 	}
 
@@ -148,19 +148,19 @@ private:
 	template<typename NativeType>
 	static void vsave_(int fd,const typename Vector<NativeType>::Type& vec)
 	{
-		size_t length = vec.size();
+		SizeType length = vec.size();
 		mywrite(fd,(const void *)&length,sizeof(length));
 
 		const NativeType dummy = 0;
 
-		for (size_t i=0;i<vec.size();i++) {
+		for (SizeType i=0;i<vec.size();i++) {
 			const NativeType* const ptr = &(vec[i]);
 			mywrite(fd, (const void *)ptr,sizeof(dummy));
 		}
 	}
 
 
-	static void failIfNegative(const ssize_t& x,const String& thisFile,int lineno)
+	static void failIfNegative(const sSizeType& x,const String& thisFile,int lineno)
 	{
 		if (x>=0) return;
 		String str(thisFile);

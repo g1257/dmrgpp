@@ -62,21 +62,21 @@ namespace psimag {
 
     // ----- MatrixLike
     
-    size_t n_col() const { return mat.n_row(); }
-    size_t n_row() const { return mat.n_col(); }
+    SizeType n_col() const { return mat.n_row(); }
+    SizeType n_row() const { return mat.n_col(); }
     
-    value_type& operator () (size_t rowIndex, size_t colIndex) {
+    value_type& operator () (SizeType rowIndex, SizeType colIndex) {
       // Assuming mat provides it's own asserts!
       return mat(colIndex,rowIndex);
     }
     
 
-    const value_type& operator () (size_t rowIndex, size_t colIndex) const {
+    const value_type& operator () (SizeType rowIndex, SizeType colIndex) const {
       // Assuming mat provides it's own asserts!
       return mat(colIndex,rowIndex);
     }
 
-    void resize(size_t nRow, size_t nCol) {
+    void resize(SizeType nRow, SizeType nCol) {
       mat.resize(nCol,nRow);
     }
 
@@ -84,13 +84,13 @@ namespace psimag {
 
     // these probably should return elements is a different order ?? &*&*
 
-    size_t size()  const { return mat.size(); }
+    SizeType size()  const { return mat.size(); }
     
-    const value_type& operator[] (size_t componentIndex) const {
+    const value_type& operator[] (SizeType componentIndex) const {
       return mat[componentIndex];
     }
     
-    value_type& operator[] (size_t componentIndex)  {
+    value_type& operator[] (SizeType componentIndex)  {
       return mat[componentIndex];
     }
   };
@@ -106,11 +106,11 @@ namespace psimag {
     
     MatrixLikeType mat;
     
-    Transposed(size_t nrows, size_t nCols):
+    Transposed(SizeType nrows, SizeType nCols):
       mat(nrows,nCols)
     {}
     
-    Transposed(size_t nrows):
+    Transposed(SizeType nrows):
       mat(nrows)
     {}
     
@@ -122,39 +122,39 @@ namespace psimag {
       return mat;
     }
 
-    void eraseRowAndColumn(size_t r, size_t c){
+    void eraseRowAndColumn(SizeType r, SizeType c){
       mat.eraseRowAndColumn(c,r);
     }
 
     // ----- MatrixLike
     
-    size_t n_col() const { return mat.n_row(); }
-    size_t n_row() const { return mat.n_col(); }
+    SizeType n_col() const { return mat.n_row(); }
+    SizeType n_row() const { return mat.n_col(); }
     
-    value_type& operator () (size_t rowIndex, size_t colIndex) {
+    value_type& operator () (SizeType rowIndex, SizeType colIndex) {
       // Assuming mat provides it's own asserts!
       return mat(colIndex,rowIndex);
     }
     
 
-    value_type operator () (size_t rowIndex, size_t colIndex) const {
+    value_type operator () (SizeType rowIndex, SizeType colIndex) const {
       // Assuming mat provides it's own asserts!
       return mat(colIndex,rowIndex);
     }
 
-    void resize(size_t nRow, size_t nCol) {
+    void resize(SizeType nRow, SizeType nCol) {
       mat.resize(nCol,nRow);
     }
 
     // ----- VectorLike
 
-    size_t size()  const { return mat.size(); }
+    SizeType size()  const { return mat.size(); }
     
-    const value_type& operator[] (size_t componentIndex) const {
+    const value_type& operator[] (SizeType componentIndex) const {
       return mat[componentIndex];
     }
     
-    value_type& operator[] (size_t componentIndex)  {
+    value_type& operator[] (SizeType componentIndex)  {
       return mat[componentIndex];
     }
   };

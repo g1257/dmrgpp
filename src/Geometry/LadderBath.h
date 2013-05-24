@@ -96,19 +96,19 @@ namespace PsimagLite {
 	public:
 			enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_BATH};
 
-			LadderBath(size_t linSize,size_t leg,size_t bathSitesPerSite) :
+			LadderBath(SizeType linSize,SizeType leg,SizeType bathSitesPerSite) :
 				linSize_(linSize),bathSitesPerSite_(bathSitesPerSite),
 				clusterSize_(linSize_/(1+bathSitesPerSite_)),ladder_(clusterSize_,leg,IS_PERIODIC_Y)
 			{
 			}
 
-			size_t getVectorSize(size_t dirId) const
+			SizeType getVectorSize(SizeType dirId) const
 			{
 				if (dirId==DIRECTION_BATH) return bathSitesPerSite_*clusterSize_;
 				return ladder_.getVectorSize(dirId);
 			}
 
-			bool connected(size_t i1,size_t i2) const
+			bool connected(SizeType i1,SizeType i2) const
 			{
 				if (i1==i2) return false;
 				int c1 = getClusterSite(i1).first;
@@ -120,14 +120,14 @@ namespace PsimagLite {
 				if (c1>=0 && c2>=0) return false;
 				// cluster - bath
 				if (c1<0) {
-					return (size_t(c2)==i1) ? true : false;
+					return (SizeType(c2)==i1) ? true : false;
 				}
 				// bath - cluster
-				return (size_t(c1)==i2) ? true : false;
+				return (SizeType(c1)==i2) ? true : false;
 			}
 
 			// assumes i1 and i2 are connected
-			size_t calcDir(size_t i1,size_t i2) const
+			SizeType calcDir(SizeType i1,SizeType i2) const
 			{
 				int c1 = getClusterSite(i1).first;
 				int c2 = getClusterSite(i2).first;
@@ -138,7 +138,7 @@ namespace PsimagLite {
 				return DIRECTION_BATH;
 			}
 
-			bool fringe(size_t i,size_t smax,size_t emin) const
+			bool fringe(SizeType i,SizeType smax,SizeType emin) const
 			{
 				int c = getClusterSite(i).first;
 				if (c>=0) return false; // no bath site is ever fringe
@@ -146,7 +146,7 @@ namespace PsimagLite {
 			}
 
 			// assumes i1 and i2 are connected
-			size_t handle(size_t i1,size_t i2) const
+			SizeType handle(SizeType i1,SizeType i2) const
 			{
 				PairType c1 = getClusterSite(i1);
 				PairType c2 = getClusterSite(i2);
@@ -156,14 +156,14 @@ namespace PsimagLite {
 				// cluster - bath or bath cluster
 				PairType x =  (c1.first<0) ? c2 : c1;
 				if (x.first<0 || x.second<0) throw RuntimeError("Internal error in handle\n");
-				size_t firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+				SizeType firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
 				x.first -= firstClusterSite;
 
 				return x.first*bathSitesPerSite_+x.second;
 			}
 
 			// siteNew2 is fringe in the environment
-			size_t getSubstituteSite(size_t smax,size_t emin,size_t siteNew2) const
+			SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
 			{
 				throw RuntimeError("Umhph, ouch, ayyayyayy, what?\n");
 			}
@@ -173,12 +173,12 @@ namespace PsimagLite {
 				return "ladderbath";
 			}
 			
-			size_t maxConnections() const
+			SizeType maxConnections() const
 			{
 				return clusterSize_+1;
 			}
 			
-			size_t findReflection(size_t site) const
+			SizeType findReflection(SizeType site) const
 			{
 				throw RuntimeError("findReflection: unimplemented (sorry)\n");
 			}
@@ -188,43 +188,43 @@ namespace PsimagLite {
 			// if i is in the cluster return the pair (-1,-1)
 			// else return the corresponding cluster site c and the number
 			// of this bath site as a pair (c,b)
-			PairType getClusterSite(size_t i) const
+			PairType getClusterSite(SizeType i) const
 			{
-				size_t firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
-				size_t lastP1ClusterSite = firstClusterSite + clusterSize_;
+				SizeType firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+				SizeType lastP1ClusterSite = firstClusterSite + clusterSize_;
 				if (i>=firstClusterSite && i<lastP1ClusterSite) return PairType(-1,-1);
 
-				size_t middle = linSize_/2;
-				size_t cs = clusterSize_/2;
+				SizeType middle = linSize_/2;
+				SizeType cs = clusterSize_/2;
 				// now i is in the bath:
 				if (i<middle) { // i is in the system
 					return PairType(i%cs + firstClusterSite,i/cs);
 				}
 				// is in the bath and in the environ:
-				size_t iprime = i - lastP1ClusterSite;
-				size_t offset = lastP1ClusterSite - cs;
+				SizeType iprime = i - lastP1ClusterSite;
+				SizeType offset = lastP1ClusterSite - cs;
 				return PairType(iprime%cs + offset,iprime/cs);
 			}
 
 			// assumes i1 and i2 are in the cluster
 			// if connected return true, else false
-			bool connectedInCluster(size_t i1,size_t i2) const
+			bool connectedInCluster(SizeType i1,SizeType i2) const
 			{
 				ladderize(i1,i2);
 				return ladder_.connected(i1,i2);
 			}
 
 			// assumes i1 and i2 are connected and in the cluster
-			size_t calcDirInCluster(size_t i1,size_t i2) const
+			SizeType calcDirInCluster(SizeType i1,SizeType i2) const
 			{
 				ladderize(i1,i2);
 				return ladder_.calcDir(i1,i2);
 			}
 
 			// assumes i1 and i2 are in the cluster
-			bool fringeInCluster(size_t i,size_t smax,size_t emin) const
+			bool fringeInCluster(SizeType i,SizeType smax,SizeType emin) const
 			{
-				size_t firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+				SizeType firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
 				i -= firstClusterSite;
 				smax -= firstClusterSite;
 				emin -= firstClusterSite;
@@ -232,22 +232,22 @@ namespace PsimagLite {
 			}
 
 			// assumes i1 and i2 are connected and in the cluster
-			size_t handleInCluster(size_t i1,size_t i2) const
+			SizeType handleInCluster(SizeType i1,SizeType i2) const
 			{
 				ladderize(i1,i2);
 				return ladder_.handle(i1,i2);
 			}
 
-			void ladderize(size_t& i1,size_t& i2) const
+			void ladderize(SizeType& i1,SizeType& i2) const
 			{
-				size_t firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+				SizeType firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
 				i1 -= firstClusterSite;
 				i2 -= firstClusterSite;
 			}
 
-			size_t linSize_;
-			size_t bathSitesPerSite_;
-			size_t clusterSize_;
+			SizeType linSize_;
+			SizeType bathSitesPerSite_;
+			SizeType clusterSize_;
 			LadderType ladder_;
 	}; // class LadderBath
 } // namespace PsimagLite 

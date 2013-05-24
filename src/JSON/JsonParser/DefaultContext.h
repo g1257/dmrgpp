@@ -62,7 +62,7 @@ namespace JsonParser {
 	return result;
       }
       case Whatever::WHATEVER_VECTOR:  {
-	size_t idx = current.size();
+	SizeType idx = current.size();
 	current.push_back();
 	Whatever& result(current.back());
 	result.myIndex = idx;
@@ -139,7 +139,7 @@ namespace JsonParser {
     
     //======================================================================
     
-    void End(size_t numChars, size_t numLines) {
+    void End(SizeType numChars, SizeType numLines) {
       std::cout << "Parsing completed! read " << numChars << " characters and " << numLines << " lines.\n";
     }
     
@@ -151,7 +151,7 @@ namespace JsonParser {
     
     //======================================================================
     
-    void MatrixEnd(size_t charNum) {
+    void MatrixEnd(SizeType charNum) {
       currentObject().endPos = charNum;
       endObjectOrArray<Whatever::WHATEVER_MAT>();
     }
@@ -176,7 +176,7 @@ namespace JsonParser {
 
     //======================================================================
     
-    void MatrixBegin(PsimagLite::String filename, size_t charNum) {
+    void MatrixBegin(PsimagLite::String filename, SizeType charNum) {
       beginObjectOrArray<Whatever::WHATEVER_MAT>();
       currentObject().filename = filename;
       currentObject().startPos = charNum;

@@ -87,7 +87,7 @@ namespace JsonParser {
       if (!consume(L'['))
 	throw PsimagLite::LogicError("Missing [ marking the start of the array in consumeMatrix()\n");
 	
-      size_t datarow(0);
+      SizeType datarow(0);
 
       while( !consume(L']')           && 
 	     inputStream.good()       && 
@@ -97,7 +97,7 @@ namespace JsonParser {
 	if(!consume(L'['))
 	  throw PsimagLite::LogicError("Missing [ marking the start of a row in consumeMarix()");
 	
-	size_t datacol(0);
+	SizeType datacol(0);
 
 	
 	while(!consume(L']')) { // while we don't hit the end of the row 

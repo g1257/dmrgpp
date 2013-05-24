@@ -41,10 +41,10 @@ namespace PsimagLite {
 		}
 
 		template<typename IoInputType>
-		LineMarker(IoInputType& io,const String& name,size_t level = 0)
+		LineMarker(IoInputType& io,const String& name,SizeType level = 0)
 		{
 			name_ = name + "=0";
-			size_t x = 0; // bogus
+			SizeType x = 0; // bogus
 			io.readline(x,name_,level);
 
 		}

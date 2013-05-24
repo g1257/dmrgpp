@@ -29,11 +29,11 @@ namespace PsimagLite {
 	public:
 		typedef long int LongType;
 		typedef T value_type; // legacy name
-		Random48(LongType seed,size_t rank = 0,size_t nprocs = 1)
+		Random48(LongType seed,SizeType rank = 0,SizeType nprocs = 1)
 		{
 			srand48(seed);
 			PsimagLite::Vector<LongType>::Type vOfSeeds(nprocs);
-			for (size_t i=0;i<vOfSeeds.size();i++) vOfSeeds[i] = LongType(10000*random());
+			for (SizeType i=0;i<vOfSeeds.size();i++) vOfSeeds[i] = LongType(10000*random());
 			seed_=vOfSeeds[rank];
 			srand48(seed_);
 			

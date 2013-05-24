@@ -50,12 +50,12 @@ namespace PsimagLite {
 
 		enum {JACKSON,LORENTZ,DIRICHLET};
 
-		KernelPolynomialParameters(size_t type1,size_t cutoff1,const RealType& lambda1)
+		KernelPolynomialParameters(SizeType type1,SizeType cutoff1,const RealType& lambda1)
 		: type(type1),cutoff(cutoff1),lambda(lambda1)
 		{}
 
-		size_t type;
-		size_t cutoff;
+		SizeType type;
+		SizeType cutoff;
 		RealType lambda;
 	}; // struct KernelPolynomialParameters
 	
@@ -122,7 +122,7 @@ namespace PsimagLite {
 		          const PlotParamsType& params,
 		          const KernelParametersType& kernelParams) const
 		{
-			size_t cutoff = kernelParams.cutoff;
+			SizeType cutoff = kernelParams.cutoff;
 			if (cutoff==0 || moments_.size()<cutoff) cutoff = moments_.size();
 			typename Vector<RealType>::Type gn(cutoff,1.0);
 			initKernel(gn,kernelParams);
@@ -130,8 +130,8 @@ namespace PsimagLite {
 			typename Vector<RealType>::Type gnmun(gn.size());
 			computeGnMuN(gnmun,gn);
 
-			size_t counter = 0;
-			size_t n = size_t((params.omega2 - params.omega1)/params.deltaOmega); 
+			SizeType counter = 0;
+			SizeType n = SizeType((params.omega2 - params.omega1)/params.deltaOmega); 
 			if (result.size()==0) result.resize(n);
 			RealType offset = params_.Eg;
 			std::cerr<<"gn[0]="<<gn[0]<<" gn[5]="<<gn[5]<<"\n";
@@ -166,13 +166,13 @@ namespace PsimagLite {
 		RealType calcF(const RealType& x,const typename Vector<RealType>::Type& gnmn) const
 		{
 			RealType sum = 0.5*gnmn[0];
-			for (size_t i=1;i<gnmn.size();i++) sum += gnmn[i]*chebyshev_(i,x);
+			for (SizeType i=1;i<gnmn.size();i++) sum += gnmn[i]*chebyshev_(i,x);
 			return 2.0*sum;
 		}
 		
 		void computeGnMuN( typename Vector<RealType>::Type& gnmn,typename Vector<RealType>::Type& gn) const
 		{
-			for (size_t i=0;i<gnmn.size();i++) gnmn[i] = moments_[i] * gn[i];
+			for (SizeType i=0;i<gnmn.size();i++) gnmn[i] = moments_[i] * gn[i];
 		}
 		
 		void initKernel(typename Vector<RealType>::Type& gn,
@@ -194,9 +194,9 @@ namespace PsimagLite {
 
 		void initKernelJackson(typename Vector<RealType>::Type& gn) const
 		{
-			size_t nPlus1 = gn.size()+1;
+			SizeType nPlus1 = gn.size()+1;
 			RealType cot1 = 1.0/tan(M_PI/nPlus1);
-			for (size_t i=0;i<gn.size();i++) {
+			for (SizeType i=0;i<gn.size();i++) {
 				gn[i] = (nPlus1-i)*cos(M_PI*i/nPlus1)+sin(M_PI*i/nPlus1)*cot1;
 				gn[i] /= nPlus1;
 			}
@@ -207,7 +207,7 @@ namespace PsimagLite {
 		{
 			RealType nreal = gn.size();
 			RealType sinhlambda = sinh(lambda);
-			for (size_t i=0;i<gn.size();i++) {
+			for (SizeType i=0;i<gn.size();i++) {
 				gn[i] = sinh(lambda*(1-i/nreal))/sinhlambda;
 			}
 		}

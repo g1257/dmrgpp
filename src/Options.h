@@ -100,7 +100,7 @@ public:
 
 		enum {DISABLED,PERMISSIVE,STRICT};
 	
-		Writeable(VectorStringType& registeredOptions,size_t mode)
+		Writeable(VectorStringType& registeredOptions,SizeType mode)
 		: registeredOptions_(registeredOptions),mode_(mode)
 		{}
 
@@ -108,7 +108,7 @@ public:
 		{
 			if (mode_==DISABLED) return;
 			split(optsThatAreSet,opts.c_str(),',');
-			for (size_t i=0;i<optsThatAreSet.size();i++) {
+			for (SizeType i=0;i<optsThatAreSet.size();i++) {
 				bool b = (find(registeredOptions_.begin(),registeredOptions_.end(),optsThatAreSet[i])==registeredOptions_.end());
 				if (!b) continue;
 				
@@ -121,7 +121,7 @@ public:
 
 	private:
 		Vector<String>::Type registeredOptions_;
-		size_t mode_;
+		SizeType mode_;
 	}; // class Writeable
 
 	class Readable {

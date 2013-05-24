@@ -171,7 +171,7 @@ namespace JsonParser {
       if (s.size() == 0) 
 	return false;
       
-      for (size_t i=0; i< s.size(); i++) {
+      for (SizeType i=0; i< s.size(); i++) {
 	c = s[i];
 	if (c < 0 || c >= 128) 
 	  return false;

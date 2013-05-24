@@ -12,7 +12,7 @@ template<typename T>
 std::ostream& operator<<(std::ostream& os,const typename Vector<T>::Type& v)
 {
 	os<<v.size()<<"\n";
-	for (size_t i=0;i<v.size();i++)
+	for (SizeType i=0;i<v.size();i++)
 		os<<v[i]<<" ";
 	os<<"\n";
 	return os;
@@ -31,20 +31,20 @@ public:
 	{
 		return square(v[0]-2)+square(v[1]-3);
 	}
-	size_t size() const { return  2; }
+	SizeType size() const { return  2; }
 };
 
 
 int main(int argc,char *argv[])
 {
-	size_t n=2;
+	SizeType n=2;
 	typename Vector<RealType>::Type x(n);
 	
 	// inital guess:
-	for (size_t i=0;i<n;i++)
+	for (SizeType i=0;i<n;i++)
 		x[i] = drand48();
 	
-	size_t maxIter = 100;
+	SizeType maxIter = 100;
 	MyFunctionTest f;
 	Minimizer<RealType,MyFunctionTest> min(f,maxIter);
 

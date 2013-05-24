@@ -93,18 +93,18 @@ namespace PsimagLite {
 	public:
 
 		typedef typename CrsMatrixType::value_type ValueType;
-		typedef typename Vector<size_t>::Type ColumnsType;
+		typedef typename Vector<SizeType>::Type ColumnsType;
 		typedef typename Vector<ValueType>::Type VectorType;
 	
-		SparseRowCached(size_t cacheSize)
+		SparseRowCached(SizeType cacheSize)
 		: cols_(cacheSize),values_(cacheSize),counter_(0)
 		{}
 
-		void add(size_t col,ValueType value)
+		void add(SizeType col,ValueType value)
 		{
 /*			cols_.push_back(col);
 			values_.push_back(value);*/
-			size_t cacheSize = cols_.size();
+			SizeType cacheSize = cols_.size();
 			if (counter_>=cacheSize) {
 				cacheSize *= 2;
 				cols_.resize(cacheSize);
@@ -119,7 +119,7 @@ namespace PsimagLite {
 		ValueType matrixVectorProduct(const VectorType& y)
 		{
 			ValueType sum = 0;
-			for (size_t i=0;i<counter_;i++)
+			for (SizeType i=0;i<counter_;i++)
 				sum += values_[i]*y[cols_[i]];
 			counter_=0;
 			return sum;
@@ -130,7 +130,7 @@ namespace PsimagLite {
 //			values_.clear();
 //		}
 
-		size_t finalize(CrsMatrixType& matrix)
+		SizeType finalize(CrsMatrixType& matrix)
 		{
 			//assert(cols_.size()==values_.size());
 			if (counter_==0) return 0;
@@ -138,10 +138,10 @@ namespace PsimagLite {
 			Sort<ColumnsType> s;
 			ColumnsType iperm(counter_);
 			s.sort(cols_,iperm,counter_);
-			size_t prevCol = cols_[0];
-			size_t counter = 0;
+			SizeType prevCol = cols_[0];
+			SizeType counter = 0;
 			ValueType value = 0;
-			for (size_t i=0;i<counter_;i++) {
+			for (SizeType i=0;i<counter_;i++) {
 				if (cols_[i]==prevCol) {
 					value += values_[iperm[i]];
 					continue;
@@ -163,7 +163,7 @@ namespace PsimagLite {
 
 		ColumnsType cols_;
 		typename Vector<ValueType>::Type values_;
-		size_t counter_;
+		SizeType counter_;
 			
 	}; // class SparseRowCached
 

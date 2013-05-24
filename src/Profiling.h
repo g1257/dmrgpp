@@ -26,7 +26,7 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-		std::ostream& operator<<(std::ostream& os,const std::pair<size_t,size_t>& p)
+		std::ostream& operator<<(std::ostream& os,const std::pair<SizeType,SizeType>& p)
 		{
 
 			os<<p.first<<" "<<p.second<<" ";
@@ -35,13 +35,13 @@ namespace PsimagLite {
 
 	class  Profiling {
 
-		//typedef std::pair<size_t,size_t> PairType;
+		//typedef std::pair<SizeType,SizeType> PairType;
 
 		double diff(double x1,double x2) const //const PairType& p1,const PairType& p2) const
 		{
 			return x1 - x2;
-			// size_t sec = p1.first -p2.first;
-			// size_t usec = p1.second - p2.second;
+			// SizeType sec = p1.first -p2.first;
+			// SizeType usec = p1.second - p2.second;
 			// return double(sec) + double(usec)/1000000.0; 
 		}
 

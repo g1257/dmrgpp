@@ -88,10 +88,10 @@ namespace PsimagLite {
 	class SparseRow {
 	public:
 		typedef typename CrsMatrixType::value_type ValueType;
-		typedef typename Vector<size_t>::Type ColumnsType;
+		typedef typename Vector<SizeType>::Type ColumnsType;
 		typedef typename Vector<ValueType>::Type VectorType;
 
-		void add(size_t col,ValueType value)
+		void add(SizeType col,ValueType value)
 		{
 			cols_.push_back(col);
 			values_.push_back(value);
@@ -100,7 +100,7 @@ namespace PsimagLite {
 		ValueType matrixVectorProduct(const VectorType& y) const
 		{
 			ValueType sum = 0;
-			for (size_t i=0;i<cols_.size();i++)
+			for (SizeType i=0;i<cols_.size();i++)
 				sum += values_[i]*y[cols_[i]];
 			return sum;
 		}
@@ -110,7 +110,7 @@ namespace PsimagLite {
 //			values_.clear();
 //		}
 
-		size_t finalize(CrsMatrixType& matrix)
+		SizeType finalize(CrsMatrixType& matrix)
 		{
 			assert(cols_.size()==values_.size());
 			if (cols_.size()==0) return 0;
@@ -118,10 +118,10 @@ namespace PsimagLite {
 			Sort<ColumnsType> s;
 			ColumnsType iperm(cols_.size());
 			s.sort(cols_,iperm);
-			size_t prevCol = cols_[0];
-			size_t counter = 0;
+			SizeType prevCol = cols_[0];
+			SizeType counter = 0;
 			ValueType value = 0;
-			for (size_t i=0;i<cols_.size();i++) {
+			for (SizeType i=0;i<cols_.size();i++) {
 				assert(cols_[i]<matrix.col());
 				if (cols_[i]==prevCol) {
 					value += values_[iperm[i]];
@@ -145,7 +145,7 @@ namespace PsimagLite {
 			if (cols_.size()==0) return 0;
 
 			ValueType sum = 0.0;
-			for (size_t i=0;i<cols_.size();i++)
+			for (SizeType i=0;i<cols_.size();i++)
 				sum += values_[i] * y[cols_[i]];
 			return sum;
 		}

@@ -121,11 +121,11 @@ public:
 
 	virtual void computeGroundState(RealType& gsEnergy,VectorType& z)
 	{
-		size_t n =mat_.rank();
+		SizeType n =mat_.rank();
 		RealType atmp=0.0;
 		VectorType y(n);
 
-		for (size_t i=0;i<n;i++) {
+		for (SizeType i=0;i<n;i++) {
 			y[i]=rng_()-0.5;
 			atmp += std::real(y[i]*std::conj(y[i]));
 		}
@@ -134,7 +134,7 @@ public:
 			return;
 		}
 		atmp = 1.0 / sqrt (atmp);
-		for (size_t i = 0; i < n; i++) y[i] *= atmp;
+		for (SizeType i = 0; i < n; i++) y[i] *= atmp;
 		computeGroundState(gsEnergy,z,y);
 	}
 
@@ -149,7 +149,7 @@ public:
 //		VectorType t = initialVector;
 
 //		typename Vector<VectorType>::Type v,vA;
-//		size_t m = 0;
+//		SizeType m = 0;
 //		while(m<steps_) {
 //			algorithm4_14(t,v);
 //			v.push_back((1.0/(t*t))*t);
@@ -157,7 +157,7 @@ public:
 //			mat_.matrixVectorProduct(x,v[m]);
 //			vA.push_back(x);
 //			PsimagLite::Matrix<ComplexOrRealType> M(m+1,m+1);
-//			for (size_t i=0;i<M.n_row();i++)
+//			for (SizeType i=0;i<M.n_row();i++)
 //				M(i,m) = std::conj(v[i])*vA[m];
 //			RealType theta = 0;
 //			VectorType s;
@@ -200,17 +200,17 @@ private:
 
 	void algorithm4_14(VectorType& t,const typename Vector<VectorType>::Type& v)
 	{
-		size_t m = v.size();
+		SizeType m = v.size();
 		if (m==0) return;
 		// select a value for k less than 1
 		RealType k = 0.25;
 		RealType tauin= std::real(t*t);
-		for (size_t i=0;i<m;i++) {
+		for (SizeType i=0;i<m;i++) {
 			ComplexOrRealType tmp = scalarProduct(v[i],t);
 			t=t-tmp*t;
 		}
 		if (std::real(t*t)/tauin>k) return;
-		for (size_t i=0;i<m;i++) {
+		for (SizeType i=0;i<m;i++) {
 			ComplexOrRealType tmp = scalarProduct(v[i],t);
 			t=t-tmp*v[i];
 		}
@@ -232,10 +232,10 @@ private:
 
 	ProgressIndicator progress_;
 	MatrixType const& mat_;
-	size_t steps_;
+	SizeType steps_;
 	RealType eps_;
-	size_t mode_;
-//	size_t stepsForEnergyConvergence_;
+	SizeType mode_;
+//	SizeType stepsForEnergyConvergence_;
 	PsimagLite::Random48<RealType> rng_;
 }; // class DavidsonSolver
 } // namespace PsimagLite

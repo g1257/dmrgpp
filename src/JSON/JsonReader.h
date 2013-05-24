@@ -123,7 +123,7 @@ namespace dca {
 
 	const std::wstring& candidateKey = itr->first;
 
-	size_t pos = candidateKey.rfind(wKey);
+	SizeType pos = candidateKey.rfind(wKey);
 	// does the candidate key contain wKey?
 	if (pos == PsimagLite::String::npos)
 	  continue; // wKey not found skip it
@@ -228,14 +228,14 @@ namespace dca {
 
       // Note that we resize if the matrix size is zero
       if (mat.size() == 0) {  
-	size_t rows =  w.whateverVector.size();
-	size_t cols =  w.whateverVector[0].size();
+	SizeType rows =  w.whateverVector.size();
+	SizeType cols =  w.whateverVector[0].size();
 	mat.resize(rows,cols);
       }
 
-      for(size_t i=0; i< mat.n_row(); i++) {
+      for(SizeType i=0; i< mat.n_row(); i++) {
 	const JsonParser::Whatever& row = w.whateverVector[i];
-	for(size_t j=0; j< mat.n_col(); j++) {
+	for(SizeType j=0; j< mat.n_col(); j++) {
 	  const JsonParser::Whatever& value = row[j];
 	  mat(i,j) <= value;
 	}
@@ -308,13 +308,13 @@ namespace dca {
 
     if (w.type == JsonParser::Whatever::WHATEVER_VECTOR) {
       if (lhs.n_row() == 0 || lhs.n_col()==0 ) {
-	size_t rows =  w.whateverVector.size();
-	size_t cols =  w.whateverVector[0].size();
+	SizeType rows =  w.whateverVector.size();
+	SizeType cols =  w.whateverVector[0].size();
 	lhs.resize(rows,cols);
       }
-      for(size_t i=0; i< lhs.n_row(); i++) {
+      for(SizeType i=0; i< lhs.n_row(); i++) {
 	const JsonParser::Whatever& row = w.whateverVector[i];
-	for(size_t j=0; j< lhs.n_col(); j++) {
+	for(SizeType j=0; j< lhs.n_col(); j++) {
 	  const JsonParser::Whatever& value = row[j];
 	  lhs(i,j) <= value;
 	}

@@ -81,7 +81,7 @@ int main(int argc,char *argv[])
 	ContinuedFractionType cf(io);
 	typename ContinuedFractionType::PlotDataType v;
 	cf.plot(v,wbegin,wend,wstep,delta);
-	for (size_t x=0;x<v.size();x++) {
+	for (SizeType x=0;x<v.size();x++) {
 		std::cout<<v[x].first<<" "<<std::real(v[x].second);
 		std::cout<<" "<<std::imag(v[x].second)<<"\n";
 	}
