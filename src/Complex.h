@@ -37,6 +37,21 @@ namespace std {
 	{
 		return std::complex<double>(real(y)*x,imag(y)*x);
 	}
-}
+} // namespace std
+
+namespace PsimagLite {
+
+	template<typename ComplexOrRealType>
+	class Real {
+	public:
+		typedef ComplexOrRealType Type;
+	};
+
+	template<typename RealType>
+	class Real<std::complex<RealType> > {
+	public:
+		typedef RealType Type;
+	};
+} // namespace PsimagLite
 
 #endif // PSICOMPLEX_H_

@@ -383,14 +383,14 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 	void exp(Matrix<T>& m)
 	{
 		size_t n = m.n_row();
-		typename Vector<double>::Type eigs(n);
+		typename Vector<typename Real<T>::Type>::Type eigs(n);
 		diag(m,eigs,'V');
 		Matrix<T> expm(n,n);
 		for (size_t i=0;i<n;i++) {
 			for (size_t j=0;j<n;j++) {
 				T sum = 0;
 				for (size_t k=0;k<n;k++) {
-					double alpha = eigs[k];
+					typename Real<T>::Type alpha = eigs[k];
 					T tmp = 0.0;
 					expComplexOrReal(tmp,alpha);
 					sum+= std::conj(m(i,k))*m(j,k)*tmp;
@@ -402,7 +402,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	}
 
-	void diag(Matrix<double> &m,Vector<double> ::Type&eigs,char option)
+	void diag(Matrix<double> &m,Vector<double> ::Type& eigs,char option)
 	{
 		char jobz=option;
 		char uplo='U';
@@ -457,7 +457,37 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 
 	}
 
-	void diag(Matrix<std::complex<float> > &m,Vector<float> ::Type&eigs,char option)
+	void diag(Matrix<float> &m,Vector<float> ::Type& eigs,char option)
+	{
+		char jobz=option;
+		char uplo='U';
+		int n=m.n_row();
+		int lda=m.n_col();
+		Vector<float>::Type work(3);
+		int info,lwork= -1;
+
+		if (lda<=0) throw RuntimeError("lda<=0\n");
+
+		eigs.resize(n);
+
+		// query:
+		ssyev_(&jobz,&uplo,&n,&(m(0,0)),&lda, &(eigs[0]),&(work[0]),&lwork, &info);
+		if (info!=0) {
+			std::cerr<<"info="<<info<<"\n";
+			throw RuntimeError("diag: dsyev_: failed with info!=0.\n");
+		}
+		lwork = int(work[0])+1;
+		work.resize(lwork+1);
+		// real work:
+		ssyev_(&jobz,&uplo,&n,&(m(0,0)),&lda, &(eigs[0]),&(work[0]),&lwork, &info);
+		if (info!=0) {
+			std::cerr<<"info="<<info<<"\n";
+			throw RuntimeError("diag: dsyev_: failed with info!=0.\n");
+		}
+
+	}
+
+	void diag(Matrix<std::complex<float> > &m,Vector<float> ::Type& eigs,char option)
 	{
 		char jobz=option;
 		char uplo='U';
@@ -579,7 +609,7 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		}
 		
 		for (size_t i=0;i<a.n_row();i++) 
-			if (std::norm(a(i,i)-1.0)>0) return false;
+			if (std::norm(a(i,i)-static_cast<T>(1.0))>0) return false;
 			 
 		return true;
 	}

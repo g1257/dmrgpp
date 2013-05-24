@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Complex.h"
 #include <cassert>
 #include "String.h"
-//#include "BinarySaveLoad.h"
+#include "loki/TypeTraits.h"
 
 namespace PsimagLite {
 
@@ -467,12 +467,16 @@ namespace PsimagLite {
 	    creates B such that B_{i1+j1*na,i2+j2*na)=A(i1,i2)\delta_{j1,j2}
 	    where na=rank(A)
 	  */
-	template<class T>
-	void externalProduct(CrsMatrix<T>& B,
-	                     const CrsMatrix<T>& A,
-	                     int nout,
-	                     const Vector<double>::Type& signs,
-	                     bool order=true)
+
+	template<typename T,typename VectorLikeType>
+	typename EnableIf<IsVectorLike<VectorLikeType>::True &&
+	Loki::TypeTraits<typename VectorLikeType::value_type>::isFloat,
+	void>::Type
+	externalProduct(CrsMatrix<T>& B,
+	                const CrsMatrix<T>& A,
+	                int nout,
+	                const VectorLikeType& signs,
+	                bool order=true)
 	{
 		int na=A.row();
 		T tmp;

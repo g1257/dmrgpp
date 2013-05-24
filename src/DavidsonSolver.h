@@ -146,36 +146,36 @@ public:
 		s += " Unimplemented\n";
 		throw RuntimeError(s.c_str());
 
-		VectorType t = initialVector;
+//		VectorType t = initialVector;
 
-		typename Vector<VectorType>::Type v,vA;
-		size_t m = 0;
-		while(m<steps_) {
-			algorithm4_14(t,v);
-			v.push_back((1.0/(t*t))*t);
-			VectorType x(mat_.rank(),0.0);
-			mat_.matrixVectorProduct(x,v[m]);
-			vA.push_back(x);
-			PsimagLite::Matrix<ComplexOrRealType> M(m+1,m+1);
-			for (size_t i=0;i<M.n_row();i++)
-				M(i,m) = std::conj(v[i])*vA[m];
-			RealType theta = 0;
-			VectorType s;
-			largestEigenpair(theta,s,M);
-			VectorType u = v * s;
-			VectorType uA = vA * s;
-			VectorType r = uA - theta * u;
-			if (std::real(r*r)<=eps_) {
-				gsEnergy = theta;
-				z = u;
-				break;
-			}
-			callMinRes();
-			m++;
-			if (m>=steps_) throw RuntimeError
-					("DavidsonSolver: failed to converge\n");
+//		typename Vector<VectorType>::Type v,vA;
+//		size_t m = 0;
+//		while(m<steps_) {
+//			algorithm4_14(t,v);
+//			v.push_back((1.0/(t*t))*t);
+//			VectorType x(mat_.rank(),0.0);
+//			mat_.matrixVectorProduct(x,v[m]);
+//			vA.push_back(x);
+//			PsimagLite::Matrix<ComplexOrRealType> M(m+1,m+1);
+//			for (size_t i=0;i<M.n_row();i++)
+//				M(i,m) = std::conj(v[i])*vA[m];
+//			RealType theta = 0;
+//			VectorType s;
+//			largestEigenpair(theta,s,M);
+//			VectorType u = v * s;
+//			VectorType uA = vA * s;
+//			VectorType r = uA - theta * u;
+//			if (std::real(r*r)<=eps_) {
+//				gsEnergy = theta;
+//				z = u;
+//				break;
+//			}
+//			callMinRes();
+//			m++;
+//			if (m>=steps_) throw RuntimeError
+//					("DavidsonSolver: failed to converge\n");
 
-		}
+//		}
 	}
 
 private:

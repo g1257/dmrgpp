@@ -90,7 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Map.h"
 #include "Matrix.h"
 #include "String.h"
-//#include "Utils.h"
+#include "loki/TypeTraits.h"
 
 namespace PsimagLite {
 
@@ -382,7 +382,9 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
-		void readline(double& val,const String& label)
+		template<typename FloatingType>
+		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
+		readline(FloatingType& val,const String& label)
 		{
 			String label2 = label2label(label);
 			Map<String,String>::Type::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
@@ -506,7 +508,9 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
 
-		void readMatrix(PsimagLite::Matrix<double>& m,const String& label)
+		template<typename FloatingType>
+		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
+		readMatrix(PsimagLite::Matrix<FloatingType>& m,const String& label)
 		{
 			String label2 = label2label(label);
 
@@ -534,7 +538,9 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
 
-		void readMatrix(PsimagLite::Matrix<std::complex<double> >& m,const String& label)
+		template<typename FloatingType>
+		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
+		readMatrix(PsimagLite::Matrix<std::complex<FloatingType> >& m,const String& label)
 		{
 			String label2 = label2label(label);
 
