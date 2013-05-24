@@ -101,21 +101,21 @@ public:
 
 	ReflectionOperatorEmpty(LeftRightSuperType& lrs,
 			   ConcurrencyType& concurrency,
-			   size_t n0,
+			   SizeType n0,
 			   bool isEnabled,
-			   size_t expandSys)
+			   SizeType expandSys)
 		: lrs_(lrs)
 	{
 		assert(!isEnabled);
 		if (isEnabled) throw PsimagLite::RuntimeError("ReflectionOperatorEmpty\n");
 	}
 
-	void update(const typename PsimagLite::Vector<size_t>::Type& sectors)
+	void update(const typename PsimagLite::Vector<SizeType>::Type& sectors)
 	{
 	}
 
 //	template<typename SomeStructType>
-//	void updateKeptStates(size_t& keptStates,
+//	void updateKeptStates(SizeType& keptStates,
 //			      const SomeStructType& cacheLeft,
 //			      const SomeStructType& cacheRight)
 //	{

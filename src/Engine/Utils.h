@@ -95,19 +95,19 @@ template<template<typename,typename> class SomeVectorTemplate,
          typename T>
 typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorTemplate<T,SomeAllocator1Type> >::True,void>::Type
 reorder(SomeVectorTemplate<T,SomeAllocator1Type>& v,
-        const SomeVectorTemplate<size_t,SomeAllocator2Type>& permutation)
+        const SomeVectorTemplate<SizeType,SomeAllocator2Type>& permutation)
 {
 	SomeVectorTemplate<T,SomeAllocator1Type> tmpVector(v.size());
-	for (size_t i=0;i<v.size();i++) tmpVector[i]=v[permutation[i]];
+	for (SizeType i=0;i<v.size();i++) tmpVector[i]=v[permutation[i]];
 	v = tmpVector;
 }
 
 template<typename SomeType>
-void reorder(PsimagLite::Matrix<SomeType>& v,const PsimagLite::Vector<size_t>::Type& permutation)
+void reorder(PsimagLite::Matrix<SomeType>& v,const PsimagLite::Vector<SizeType>::Type& permutation)
 {
 	PsimagLite::Matrix<SomeType> tmpVector(v.n_row(),v.n_col());
-	for (size_t i=0;i<v.n_row();i++)
-		for (size_t j=0;j<v.n_col();j++)
+	for (SizeType i=0;i<v.n_row();i++)
+		for (SizeType j=0;j<v.n_col();j++)
 			tmpVector(i,j)=v(permutation[i],permutation[j]);
 	v = tmpVector;
 }
@@ -117,7 +117,7 @@ template<typename Block>
 void blockUnion(Block &A,Block const &B,Block const &C)
 {
 	A=B;
-	for (size_t i=0;i<C.size();i++) A.push_back(C[i]);
+	for (SizeType i=0;i<C.size();i++) A.push_back(C[i]);
 }
 
 template<typename SomeVectorType>
@@ -126,7 +126,7 @@ truncateVector(SomeVectorType& v,
                const SomeVectorType& removedIndices)
 {
 	SomeVectorType tmpVector;
-	for (size_t i=0;i<v.size();i++) {
+	for (SizeType i=0;i<v.size();i++) {
 		if (PsimagLite::isInVector(removedIndices,i)>=0) continue;
 		tmpVector.push_back(v[i]);
 	}
@@ -134,15 +134,15 @@ truncateVector(SomeVectorType& v,
 }
 
 template<class T>
-void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<size_t>::Type& removed,bool rowOption)
+void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<SizeType>::Type& removed,bool rowOption)
 {
-	size_t j;
+	SizeType j;
 	int x=removed.size();
 	if (x<=0) return;
-	size_t nrow = A.n_row();
-	size_t ncol = A.n_col();
+	SizeType nrow = A.n_row();
+	SizeType ncol = A.n_col();
 
-	size_t n = ncol;
+	SizeType n = ncol;
 	if (rowOption)  n = nrow;
 
 	if (int(n)<=x) {
@@ -155,7 +155,7 @@ void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<size_t>::Type& r
 
 	//! find remapping
 	j=0;
-	for (size_t i=0;i<n;i++) {
+	for (SizeType i=0;i<n;i++) {
 		remap[i] = -1;
 		if (PsimagLite::isInVector(removed,i)>=0) continue;
 		remap[i]=j;
@@ -166,7 +166,7 @@ void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<size_t>::Type& r
 	//! truncate
 	if (rowOption) {
 		PsimagLite::Matrix<T> B(nrow-x,ncol);
-		for (size_t i=0;i<ncol;i++) {
+		for (SizeType i=0;i<ncol;i++) {
 			for (j=0;j<nrow;j++) {
 				if (remap[j]<0) continue;
 				B(remap[j],i)=A(j,i);
@@ -175,7 +175,7 @@ void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<size_t>::Type& r
 		A=B;
 	} else {
 		PsimagLite::Matrix<T> B(nrow,ncol-x);
-		for (size_t i=0;i<nrow;i++) {
+		for (SizeType i=0;i<nrow;i++) {
 			for (j=0;j<ncol;j++) {
 				if (remap[j]<0) continue;
 				B(i,remap[j])=A(i,j);
@@ -186,27 +186,27 @@ void truncate(PsimagLite::Matrix<T> &A,const PsimagLite::Vector<size_t>::Type& r
 }
 
 template<class T>
-void truncate(PsimagLite::CrsMatrix<T> &A,const PsimagLite::Vector<size_t>::Type& removed,bool rowOption)
+void truncate(PsimagLite::CrsMatrix<T> &A,const PsimagLite::Vector<SizeType>::Type& removed,bool rowOption)
 {
 	if (rowOption) { // unimplemented
 		assert(false);
 		throw PsimagLite::RuntimeError("truncate: rowoption must not be set\n");
 	}
 
-	size_t x=removed.size();
+	SizeType x=removed.size();
 	if (x==0) return;
 
-	size_t nrow = A.row();
+	SizeType nrow = A.row();
 
-	size_t n = nrow;
+	SizeType n = nrow;
 
 	assert(n>x);
 
 	PsimagLite::Vector<int>::Type remap(n);
 
 	//! find remapping
-	size_t j=0;
-	for (size_t i=0;i<n;i++) {
+	SizeType j=0;
+	for (SizeType i=0;i<n;i++) {
 		remap[i] = -1;
 		if (PsimagLite::isInVector(removed,i)>=0) continue;
 		remap[i]=j;
@@ -216,8 +216,8 @@ void truncate(PsimagLite::CrsMatrix<T> &A,const PsimagLite::Vector<size_t>::Type
 
 	//! truncate
 	PsimagLite::CrsMatrix<T> B(nrow,nrow-x);
-	size_t counter = 0;
-	for (size_t i=0;i<nrow;i++) {
+	SizeType counter = 0;
+	for (SizeType i=0;i<nrow;i++) {
 		B.setRow(i,counter);
 		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 			j = A.getCol(k);

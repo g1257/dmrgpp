@@ -140,7 +140,7 @@ namespace Dmrg {
 
 		void print(std::ostream& os) const { os<<modelParameters_; }
 
-		size_t hilbertSize(size_t site) const { return modelParameters_.twiceTheSpin+1; }
+		SizeType hilbertSize(SizeType site) const { return modelParameters_.twiceTheSpin+1; }
 
 		//! find  operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
@@ -152,7 +152,7 @@ namespace Dmrg {
 		{
 			HilbertBasisType natBasis;
 			
-			typename PsimagLite::Vector<size_t>::Type qvector;
+			typename PsimagLite::Vector<SizeType>::Type qvector;
 			setNaturalBasis(natBasis,qvector,block);
 			
 			setOperatorMatrices(operatorMatrices,block);
@@ -168,11 +168,11 @@ namespace Dmrg {
 			HilbertBasisType natBasis;
 			SparseMatrixType tmpMatrix;
 			
-			typename PsimagLite::Vector<size_t>::Type qvector;
+			typename PsimagLite::Vector<SizeType>::Type qvector;
 			setNaturalBasis(natBasis,qvector,block);
 
 			operatorMatrices.clear();
-			for (size_t i=0;i<block.size();i++) {
+			for (SizeType i=0;i<block.size();i++) {
 				// Set the operators S^+_i in the natural basis
 				tmpMatrix=findSplusMatrices(i,natBasis);
 
@@ -196,7 +196,7 @@ namespace Dmrg {
 			}
 		}
 		
-		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,size_t site,size_t dof) const
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
 		{
 			Block block;
 			block.resize(1);
@@ -223,24 +223,24 @@ namespace Dmrg {
 		
 		//! find all states in the natural basis for a block of n sites
 		void setNaturalBasis(HilbertBasisType& basis,
-		                     typename PsimagLite::Vector<size_t>::Type& q,
-		                     const typename PsimagLite::Vector<size_t>::Type& block) const
+		                     typename PsimagLite::Vector<SizeType>::Type& q,
+		                     const typename PsimagLite::Vector<SizeType>::Type& block) const
 		{
 			assert(block.size()==1);
-			size_t total = modelParameters_.twiceTheSpin + 1;
-			for (size_t i=0;i<total;i++) basis.push_back(i);
+			SizeType total = modelParameters_.twiceTheSpin + 1;
+			for (SizeType i=0;i<total;i++) basis.push_back(i);
 			BasisDataType qq;
 			setSymmetryRelated(qq,basis,block.size());
 			MyBasis::findQuantumNumbers(q,qq);
 		}
 		
 		//! Dummy since this model has no fermion sign
-		void findElectrons(typename PsimagLite::Vector<size_t>::Type& electrons,
+		void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,
 				   const HilbertBasisType& basis,
-		                   size_t site) const
+		                   SizeType site) const
 		{
 			electrons.resize(basis.size());
-			for (size_t i=0;i<electrons.size();i++)
+			for (SizeType i=0;i<electrons.size();i++)
 				electrons[i] = 0;
 		}
 
@@ -250,18 +250,18 @@ namespace Dmrg {
 		GeometryType const &geometry_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
-		size_t reinterpretX_,reinterpretY_;
+		SizeType reinterpretX_,reinterpretY_;
 
 		//! Find S^+_i in the natural basis natBasis
 		SparseMatrixType findSplusMatrices(int i,const HilbertBasisType& natBasis) const
 		{
-			size_t total = natBasis.size();
+			SizeType total = natBasis.size();
 			PsimagLite::Matrix<SparseElementType> cm(total,total);
 			RealType j = 0.5*modelParameters_.twiceTheSpin;
 
-			for (size_t ii=0;ii<total;ii++) {
-				size_t ket = natBasis[ii];
-				size_t bra = ket + 1;
+			for (SizeType ii=0;ii<total;ii++) {
+				SizeType ket = natBasis[ii];
+				SizeType bra = ket + 1;
 				if (bra>=total) continue;
 				RealType m = ket - j;
 				RealType x = j*(j+1)-m*(m+1);
@@ -276,12 +276,12 @@ namespace Dmrg {
 		//! Find S^z_i in the natural basis natBasis
 		SparseMatrixType findSzMatrices(int i,const HilbertBasisType& natBasis) const
 		{
-			size_t total = natBasis.size();
+			SizeType total = natBasis.size();
 			PsimagLite::Matrix<SparseElementType> cm(total,total);
 			RealType j = 0.5*modelParameters_.twiceTheSpin;
 
-			for (size_t ii=0;ii<total;ii++) {
-				size_t ket = natBasis[ii];
+			for (SizeType ii=0;ii<total;ii++) {
+				SizeType ket = natBasis[ii];
 				RealType m = ket - j;
 				cm(ket,ket) = m;
 			}
@@ -306,23 +306,23 @@ namespace Dmrg {
 			// find j,m and flavors (do it by hand since we assume n==1)
 			// note: we use 2j instead of j
 			// note: we use m+j instead of m
-			// This assures us that both j and m are size_t
-			typedef std::pair<size_t,size_t> PairType;
+			// This assures us that both j and m are SizeType
+			typedef std::pair<SizeType,SizeType> PairType;
 			typename PsimagLite::Vector<PairType>::Type jmvalues;
-			typename PsimagLite::Vector<size_t>::Type flavors; 
+			typename PsimagLite::Vector<SizeType>::Type flavors; 
 			PairType jmSaved;
 			jmSaved.first = modelParameters_.twiceTheSpin;
 			jmSaved.second = basis[0];
 			jmSaved.first++;
 			jmSaved.second++;
 
-			typename PsimagLite::Vector<size_t>::Type electronsUp(basis.size());
-			typename PsimagLite::Vector<size_t>::Type electronsDown(basis.size());
-			for (size_t i=0;i<basis.size();i++) {
+			typename PsimagLite::Vector<SizeType>::Type electronsUp(basis.size());
+			typename PsimagLite::Vector<SizeType>::Type electronsDown(basis.size());
+			for (SizeType i=0;i<basis.size();i++) {
 				PairType jmpair;
 				jmpair.first = modelParameters_.twiceTheSpin;
 				jmpair.second = basis[i];
-				size_t ket = basis[i];
+				SizeType ket = basis[i];
 				jmvalues.push_back(jmpair);
 
 				// nup
@@ -337,10 +337,10 @@ namespace Dmrg {
 			q.flavors = flavors;
 			q.electrons = electronsUp + electronsDown;
 			q.szPlusConst.resize(electronsUp.size());
-			for (size_t i=0;i<q.szPlusConst.size();i++) {
+			for (SizeType i=0;i<q.szPlusConst.size();i++) {
 				q.szPlusConst[i] = (modelParameters_.twiceTheSpin + electronsUp[i]) - electronsDown[i];
 				assert(!(q.szPlusConst[i] & 1));
-				q.szPlusConst[i] = static_cast<size_t>(q.szPlusConst[i]*0.5);
+				q.szPlusConst[i] = static_cast<SizeType>(q.szPlusConst[i]*0.5);
 			}
 		}
 	}; // class ModelHeisenberg

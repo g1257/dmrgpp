@@ -146,7 +146,7 @@ public:
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             size_t systemOrEnviron,
+	                             SizeType systemOrEnviron,
 	                             bool allOperatorsApplied)
 	{
 		PsimagLite::OstringStream msg;
@@ -158,10 +158,10 @@ public:
 		progress_.printline(msg,std::cout);
 
 		// set non-zero sectors
-		for (size_t i=0;i<times_.size();i++) targetVectors_[i] = phi;
+		for (SizeType i=0;i<times_.size();i++) targetVectors_[i] = phi;
 
-		for (size_t ii=0;ii<phi.sectors();ii++) {
-			size_t i = phi.sector(ii);
+		for (SizeType ii=0;ii<phi.sectors();ii++) {
+			SizeType i = phi.sector(ii);
 			calcTimeVectors(startEnd,Eg,phi,systemOrEnviron,i);
 		}
 	}
@@ -177,7 +177,7 @@ private:
 					  const ModelType& model,
 					  RealType Eg,
 					  const VectorWithOffsetType& phi,
-					  size_t i0)
+					  SizeType i0)
 			: E0_(E0),
 			  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
 			  modelHelper_(p_,lrs),
@@ -189,7 +189,7 @@ private:
 		{
 			TargetVectorType x(y.size());
 			lanczosHelper_.matrixVectorProduct(x,y);
-			for (size_t i=0;i<x.size();i++) x[i] -= E0_*y[i];
+			for (SizeType i=0;i<x.size();i++) x[i] -= E0_*y[i];
 			ComplexOrRealType tmp = 0;
 			ComplexOrRealType icomplex = minusOneOrMinusI(tmp);
 			return icomplex * x;
@@ -198,7 +198,7 @@ private:
 	private:
 
 		RealType E0_;
-		size_t p_;
+		SizeType p_;
 		typename ModelType::ModelHelperType modelHelper_;
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper_;
 	}; // FunctionForRungeKutta
@@ -206,10 +206,10 @@ private:
 	void calcTimeVectors(const PairType& startEnd,
 	                     RealType Eg,
 	                     const VectorWithOffsetType& phi,
-	                     size_t systemOrEnviron,
-	                     size_t i0)
+	                     SizeType systemOrEnviron,
+	                     SizeType i0)
 	{
-		size_t total = phi.effectiveSize(i0);
+		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi0(total);
 		phi.extract(phi0,i0);
 		//				std::cerr<<"norma of phi0="<<PsimagLite::norm(phi0)<<"\n";
@@ -222,7 +222,7 @@ private:
 		rungeKutta.solve(result,0.0,times_.size(),phi0);
 		assert(result.size()==times_.size());
 
-		for (size_t i=0;i<startEnd.second;i++) {
+		for (SizeType i=0;i<startEnd.second;i++) {
 			targetVectors_[i].setDataInSector(result[i],i0);
 		}
 	}

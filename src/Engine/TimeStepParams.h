@@ -95,7 +95,7 @@ namespace Dmrg {
 		typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
 		typedef typename ModelType::RealType RealType;
 
-		static size_t const PRODUCT = TargetParamsCommonType::PRODUCT;
+		static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
 
 		template<typename IoInputter>
 		TimeStepParams(IoInputter& io,const ModelType& model)

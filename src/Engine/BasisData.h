@@ -88,10 +88,10 @@ namespace Dmrg {
 	template<typename PairType>
 	struct BasisData {
 		
-		typename PsimagLite::Vector<size_t>::Type electrons;
-		typename PsimagLite::Vector<size_t>::Type szPlusConst;
+		typename PsimagLite::Vector<SizeType>::Type electrons;
+		typename PsimagLite::Vector<SizeType>::Type szPlusConst;
 		typename PsimagLite::Vector<PairType>::Type jmValues;
-		typename PsimagLite::Vector<size_t>::Type flavors; 
+		typename PsimagLite::Vector<SizeType>::Type flavors; 
 		
 	}; // struct BasisData
 	

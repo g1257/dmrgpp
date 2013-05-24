@@ -92,7 +92,7 @@ namespace Dmrg {
 		typedef typename MatrixType::value_type FieldType;
 		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 	public:
-		ConjugateGradient(size_t max=1000,const RealType& eps = 1e-6)
+		ConjugateGradient(SizeType max=1000,const RealType& eps = 1e-6)
 		: max_(max), eps_(eps) {}
 
 		//! A and b, the result x, and also the initial solution x0
@@ -104,11 +104,11 @@ namespace Dmrg {
 			typename PsimagLite::Vector<VectorType>::Type r,p;
 			r.push_back(b);
 			p.push_back(b);
-			for (size_t i=0;i<r[0].size();i++) {
+			for (SizeType i=0;i<r[0].size();i++) {
 				r[0][i] = b[i] - v[i];
 				p[0][i] = r[0][i];
 			}
-			size_t k = 0;
+			SizeType k = 0;
 			typename PsimagLite::Vector<FieldType>::Type alpha,beta;
 			while(k<max_) {
 				FieldType val = scalarProduct(r[k],r[k])/
@@ -132,7 +132,7 @@ namespace Dmrg {
 		FieldType scalarProduct(const VectorType& v1,const VectorType& v2) const
 		{
 			FieldType sum = 0;
-			for (size_t i=0;i<v1.size();i++) sum += std::conj(v1[i])*v2[i];
+			for (SizeType i=0;i<v1.size();i++) sum += std::conj(v1[i])*v2[i];
 			return sum;
 		}
 
@@ -143,7 +143,7 @@ namespace Dmrg {
 			return y;
 		}
 
-		size_t max_;
+		SizeType max_;
 		RealType eps_;
 	}; // class ConjugateGradient
 

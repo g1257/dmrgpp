@@ -86,7 +86,7 @@ namespace Dmrg {
 template<typename ModelType,typename FourPointCorrelationsType>
 class Parallel4PointDs {
 
-	typedef std::pair<size_t,size_t> PairType;
+	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename FourPointCorrelationsType::MatrixType MatrixType;
 	typedef typename MatrixType::value_type FieldType;
 
@@ -97,19 +97,19 @@ public:
 	Parallel4PointDs(MatrixType& fpd,
 					 const FourPointCorrelationsType& fourpoint,
 					 const ModelType& model,
-					 const typename PsimagLite::Vector<size_t>::Type& gammas,
+					 const typename PsimagLite::Vector<SizeType>::Type& gammas,
 					 const typename PsimagLite::Vector<PairType>::Type& pairs)
 		: fpd_(fpd),fourpoint_(fourpoint),model_(model),gammas_(gammas),pairs_(pairs)
 	{}
 
-	void thread_function_(size_t threadNum,size_t blockSize,size_t total,pthread_mutex_t* myMutex)
+	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
 	{
-		for (size_t p=0;p<blockSize;p++) {
-			size_t px = threadNum * blockSize + p;
+		for (SizeType p=0;p<blockSize;p++) {
+			SizeType px = threadNum * blockSize + p;
 			if (px>=total) continue;
 
-			size_t i = pairs_[px].first;
-			size_t j = pairs_[px].second;
+			SizeType i = pairs_[px].first;
+			SizeType j = pairs_[px].second;
 
 			fpd_(i,j) = fourPointDelta(2*i,2*j,gammas_,model_,threadNum);
 		}
@@ -124,16 +124,16 @@ public:
 private:
 
 	template<typename SomeModelType>
-	FieldType fourPointDelta(size_t i,size_t j,const typename PsimagLite::Vector<size_t>::Type& gammas,const SomeModelType& model,size_t threadId) const
+	FieldType fourPointDelta(SizeType i,SizeType j,const typename PsimagLite::Vector<SizeType>::Type& gammas,const SomeModelType& model,SizeType threadId) const
 	{
-		size_t hs = model.hilbertSize(0);
-		size_t nx = 0;
+		SizeType hs = model.hilbertSize(0);
+		SizeType nx = 0;
 		while(hs) {
 			hs>>=1;
 			nx++;
 		}
 		nx /= 2;
-		size_t site = 0;
+		SizeType site = 0;
 		const MatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx); // C_{gamma0,up}
 		const MatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx); // C_{gamma1,down}
 		const MatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx); // C_{gamma2,down}
@@ -149,7 +149,7 @@ private:
 	MatrixType& fpd_;
 	const FourPointCorrelationsType& fourpoint_;
 	const ModelType& model_;
-	const typename PsimagLite::Vector<size_t>::Type& gammas_;
+	const typename PsimagLite::Vector<SizeType>::Type& gammas_;
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
 }; // class Parallel4PointDs
 } // namespace Dmrg 

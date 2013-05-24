@@ -104,19 +104,19 @@ namespace Dmrg {
 		typedef PsimagLite::Profiling ProfilingType;
 		typedef TwoPointCorrelations<CorrelationsSkeletonType,ConcurrencyType> ThisType;
 
-		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
-		static size_t const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
-		static size_t const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
-		static size_t const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
-		static const size_t EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
-		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
+		static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
+		static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
+		static SizeType const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
+		static SizeType const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
+		static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
+		static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 
 	public:
 
 		typedef typename ObserverHelperType::MatrixType MatrixType;
 
 		TwoPointCorrelations(
-			size_t nthreads,
+			SizeType nthreads,
 			ObserverHelperType& helper,
 			CorrelationsSkeletonType& skeleton,
 			ConcurrencyType& concurrency,
@@ -132,14 +132,14 @@ namespace Dmrg {
 				const MatrixType& O1,
 				const MatrixType& O2,
 				int fermionicSign,
-				size_t rows,
-				size_t cols)
+				SizeType rows,
+				SizeType cols)
 		{
-			typedef std::pair<size_t,size_t> PairType;
+			typedef std::pair<SizeType,SizeType> PairType;
 
 			typename PsimagLite::Vector<PairType>::Type pairs;
-			for (size_t i=0;i<rows;i++) {
-				for (size_t j=i;j<cols;j++) {
+			for (SizeType i=0;i<rows;i++) {
+				for (SizeType j=i;j<cols;j++) {
 					if (i>j) continue;
 					pairs.push_back(PairType(i,j));
 				}
@@ -162,12 +162,12 @@ namespace Dmrg {
 		// Note1: O1 is applied to site i and O2 is applied to site j
 		// Note2: O1 and O2 operators must commute or anti-commute (set fermionicSign accordingly)
 		FieldType calcCorrelation(
-			size_t i,
-			size_t j,
+			SizeType i,
+			SizeType j,
 			const MatrixType& O1,
 			const MatrixType& O2,
 			int fermionicSign,
-			size_t threadId)
+			SizeType threadId)
 		{
 			FieldType c = 0;
 			if (i==j) {
@@ -186,32 +186,32 @@ namespace Dmrg {
 				const MatrixType& O1,
 				const MatrixType& O2)
 		{
-			size_t n=O1.n_row();
+			SizeType n=O1.n_row();
 			MatrixType ret(n,n);
-			for (size_t s=0;s<n;s++) 
-				for (size_t t=0;t<n;t++) 
-					for (size_t w=0;w<n;w++) 
+			for (SizeType s=0;s<n;s++) 
+				for (SizeType t=0;t<n;t++) 
+					for (SizeType w=0;w<n;w++) 
 						ret(s,t) += std::conj(O1(s,w))*O2(w,t);
 			return ret;
 		}
 
 		MatrixType add(const MatrixType& O1,const MatrixType& O2)
 		{
-			size_t n=O1.n_row();
+			SizeType n=O1.n_row();
 			MatrixType ret(n,n);
-			for (size_t s=0;s<n;s++) for (size_t t=0;t<n;t++)
+			for (SizeType s=0;s<n;s++) for (SizeType t=0;t<n;t++)
 				ret(s,t) += O1(s,t)+O2(s,t);
 			return ret;
 		}
 
 		FieldType calcDiagonalCorrelation(
-			size_t i,
+			SizeType i,
 			const MatrixType& O1,
 			const MatrixType& O2,
 			int fermionicSign,
-			size_t threadId)
+			SizeType threadId)
 		{
-			size_t n = O1.n_row();
+			SizeType n = O1.n_row();
 			MatrixType O1new=identity(n);
 
 			MatrixType O2new=multiplyTranspose(O1,O2);
@@ -220,12 +220,12 @@ namespace Dmrg {
 		}
 
 		FieldType calcCorrelation_(
-			size_t i,
-			size_t j,
+			SizeType i,
+			SizeType j,
 			const MatrixType& O1,
 			const MatrixType& O2,
 			int fermionicSign,
-			size_t threadId)
+			SizeType threadId)
 		{
 			
 			if (i>=j) throw PsimagLite::RuntimeError(
@@ -237,10 +237,10 @@ namespace Dmrg {
 			if (j==skeleton_.numberOfSites()-1) {
 				if (i==j-1) {
 					helper_.setPointer(threadId,j-2);
-					size_t ni = helper_.leftRightSuper(threadId).left().size()/
+					SizeType ni = helper_.leftRightSuper(threadId).left().size()/
 							helper_.leftRightSuper(threadId).right().size();
 					MatrixType O1g(ni,ni);
-					for (size_t x=0;x<O1g.n_row();x++) O1g(x,x) = 1.0;
+					for (SizeType x=0;x<O1g.n_row();x++) O1g(x,x) = 1.0;
 					return skeleton_.bracketRightCorner(O1g,O1m,O2m,fermionicSign,threadId);
 				}
 				MatrixType O1g;
@@ -249,27 +249,27 @@ namespace Dmrg {
 				return skeleton_.bracketRightCorner(O1g,O2m,fermionicSign,threadId);
 			}
 			MatrixType O1g,O2g;
-			size_t ns = j-1;
+			SizeType ns = j-1;
 			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns,true,threadId);
 			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns,threadId);
 
 			return skeleton_.bracket(O2g,fermionicSign,threadId);
 		}
 
-		MatrixType identity(size_t n)
+		MatrixType identity(SizeType n)
 		{
 			MatrixType ret(n,n);
-			for (size_t s=0;s<n;s++)  ret(s,s)=static_cast<RealType>(1.0);
+			for (SizeType s=0;s<n;s++)  ret(s,s)=static_cast<RealType>(1.0);
 			return ret;
 		}
 
 		//! i can be zero here!!
 		void growRecursive(MatrixType& Odest,
 				const MatrixType& Osrc,
-				size_t i,
+				SizeType i,
 				int fermionicSign,
-				size_t s,
-						   size_t threadId)
+				SizeType s,
+						   SizeType threadId)
 		{
 			typename PsimagLite::Vector<int>::Type signs;
 			// from 0 --> i
@@ -277,14 +277,14 @@ namespace Dmrg {
 			if (nt<0) nt=0;
 			
 			helper_.setPointer(threadId,s);
-			size_t growOption = skeleton_.growthDirection(s,nt,i,threadId);
+			SizeType growOption = skeleton_.growthDirection(s,nt,i,threadId);
 
 			MatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
 			Odest = Onew;
 			skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption,true,threadId);
 		}
 
-		size_t nthreads_;
+		SizeType nthreads_;
 		ObserverHelperType& helper_;
 		CorrelationsSkeletonType& skeleton_;
 		ConcurrencyType& concurrency_;

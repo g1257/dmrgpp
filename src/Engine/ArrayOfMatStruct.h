@@ -96,45 +96,45 @@ public:
 	ArrayOfMatStruct(const SparseMatrixType& sparse,GenGroupType& istart)
 	: data_(istart.size()-1,istart.size()-1)
 	{
-		size_t ngroup = istart.size()-1;
+		SizeType ngroup = istart.size()-1;
 		//SparseMatrixType tmp2;
 
-		for (size_t j=0;j<ngroup;j++) {
-			size_t j1 = istart(j);
-			size_t j2 = istart(j+1);
+		for (SizeType j=0;j<ngroup;j++) {
+			SizeType j1 = istart(j);
+			SizeType j2 = istart(j+1);
 			typename PsimagLite::Vector<ComplexOrRealType>::Type p(j2-j1,0.0);
 			typename PsimagLite::Vector<bool>::Type mark(j2-j1,false);
 //			if (j1>=j2) continue;
-			for (size_t i=0;i<ngroup;i++) {
-				size_t i1 = istart(i);
-				size_t i2 = istart(i+1);
+			for (SizeType i=0;i<ngroup;i++) {
+				SizeType i1 = istart(i);
+				SizeType i2 = istart(i+1);
 //				if (i1>=i2) continue;
 
 				//tmp2.resize(i2-i1,j2-j1);
 				data_(i,j) = SparseMatrixType(i2-i1,j2-j1);
 				SparseMatrixType& tmp = data_(i,j);
-				size_t counter = 0;
+				SizeType counter = 0;
 
-				for (size_t ii=i1;ii<i2;ii++) {
-					size_t row = ii - i1;
+				for (SizeType ii=i1;ii<i2;ii++) {
+					SizeType row = ii - i1;
 					tmp.setRow(row,counter);
 
 
-					size_t start = sparse.getRowPtr(ii);
-					size_t end = sparse.getRowPtr(ii+1);
-					size_t minCol = 0;
-					size_t maxCol = p.size()-1;
-					for (size_t k = start;k<end;k++) {
+					SizeType start = sparse.getRowPtr(ii);
+					SizeType end = sparse.getRowPtr(ii+1);
+					SizeType minCol = 0;
+					SizeType maxCol = p.size()-1;
+					for (SizeType k = start;k<end;k++) {
 						int col = sparse.getCol(k)-j1;
 						if (col<0) continue;
-						if (size_t(col)>=j2-j1) continue; // ARE COLUMNS SORTED?
+						if (SizeType(col)>=j2-j1) continue; // ARE COLUMNS SORTED?
 						p[col] += sparse.getValue(k);
 						mark[col] = true;
-						if (size_t(col)<minCol) minCol = col;
-						if (size_t(col)>maxCol) maxCol = col;
+						if (SizeType(col)<minCol) minCol = col;
+						if (SizeType(col)>maxCol) maxCol = col;
 					}
 
-					for (size_t rr=minCol;rr<=maxCol;rr++) {
+					for (SizeType rr=minCol;rr<=maxCol;rr++) {
 						if (!mark[rr]) continue;
 						tmp.pushCol(rr);
 						tmp.pushValue(p[rr]);
@@ -149,7 +149,7 @@ public:
 		}
 	}
 
-	const SparseMatrixType& operator()(size_t i,size_t j) const
+	const SparseMatrixType& operator()(SizeType i,SizeType j) const
 	{
 		assert(i<data_.n_row() && j<data_.n_col());
 		return data_(i,j);
@@ -157,8 +157,8 @@ public:
 
 	~ArrayOfMatStruct()
 	{
-//		for (size_t j=0;j<data_.n_row();j++)
-//			for (size_t i=0;i<data_.n_col();i++)
+//		for (SizeType j=0;j<data_.n_row();j++)
+//			for (SizeType i=0;i<data_.n_col();i++)
 //				if (data_(i,j)) delete data_(i,j);
 	}
 

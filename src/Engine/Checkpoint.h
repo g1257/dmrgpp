@@ -101,7 +101,7 @@ namespace Dmrg {
 		const PsimagLite::String SYSTEM_STACK_STRING;
 		const PsimagLite::String ENVIRON_STACK_STRING;
 
-		Checkpoint(const ParametersType& parameters,size_t rank = 0,bool debug=false) :
+		Checkpoint(const ParametersType& parameters,SizeType rank = 0,bool debug=false) :
 			SYSTEM_STACK_STRING("SystemStack"),
 			ENVIRON_STACK_STRING("EnvironStack"),
 			parameters_(parameters),
@@ -138,7 +138,7 @@ namespace Dmrg {
 		{
 
 			typename IoType::In ioTmp(parameters_.checkpoint.filename);
-			size_t loop = ioTmp.count("#NAME=#CHKPOINTSYSTEM");
+			SizeType loop = ioTmp.count("#NAME=#CHKPOINTSYSTEM");
 			if (loop<1) {
 				std::cerr<<"There are no resumable loops in file "<<parameters_.checkpoint.filename<<"\n";
 				throw PsimagLite::RuntimeError("Checkpoint::load(...)\n");
@@ -157,13 +157,13 @@ namespace Dmrg {
 			envStack_.push(pE);
 		}
 
-		void push(const BasisWithOperatorsType &pSorE,size_t what)
+		void push(const BasisWithOperatorsType &pSorE,SizeType what)
 		{
 			if (what==ProgramGlobals::ENVIRON) envStack_.push(pSorE);
 			else systemStack_.push(pSorE);
 		}
 
-		BasisWithOperatorsType shrink(size_t what,const TargettingType& target)
+		BasisWithOperatorsType shrink(SizeType what,const TargettingType& target)
 		{
 			if (what==ProgramGlobals::ENVIRON) return shrink(envStack_,target);
 			else return shrink(systemStack_,target);
@@ -171,7 +171,7 @@ namespace Dmrg {
 
 		bool operator()() const { return enabled_; }
 
-		size_t stackSize(size_t what) const
+		SizeType stackSize(SizeType what) const
 		{
 			if (what==ProgramGlobals::ENVIRON) return envStack_.size();
 			return systemStack_.size();
@@ -224,7 +224,7 @@ namespace Dmrg {
 		//! if s2 = s2a + '/' + s2b return s2a + '/' + s1 + s2b
 		PsimagLite::String appendWithDir(const PsimagLite::String& s1,const PsimagLite::String& s2) const
 		{
-			size_t x = s2.find("/");
+			SizeType x = s2.find("/");
 			if (x==PsimagLite::String::npos) return s1 + s2;
 			PsimagLite::String suf = s2.substr(x+1,s2.length());
 			PsimagLite::String dir = s2.substr(0,s2.length()-suf.length());

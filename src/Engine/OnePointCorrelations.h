@@ -113,12 +113,12 @@ namespace Dmrg {
 		{}
 
 		template<typename ApplyOperatorType>
-		FieldType operator()(size_t site,
+		FieldType operator()(SizeType site,
 			const typename ApplyOperatorType::OperatorType& A,
 			bool corner = false)
 		{
-			size_t threadId =0;
-			size_t pnter=site;
+			SizeType threadId =0;
+			SizeType pnter=site;
 			helper_.setPointer(threadId,pnter);
 			try {
 				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
@@ -133,12 +133,12 @@ namespace Dmrg {
 		}
 
 		template<typename ApplyOperatorType>
-		FieldType hookForZero(size_t site,
+		FieldType hookForZero(SizeType site,
 					  const typename ApplyOperatorType::OperatorType& A,
 					  bool corner = false)
 		{
-			size_t pnter=site;
-			size_t threadId = 0;
+			SizeType pnter=site;
+			SizeType threadId = 0;
 			helper_.setPointer(threadId,pnter);
 			try {
 				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
@@ -155,12 +155,12 @@ namespace Dmrg {
 	private:
 
 		template<typename ApplyOperatorType>
-		FieldType onePointInternal(size_t site,
+		FieldType onePointInternal(SizeType site,
 								   const typename ApplyOperatorType::OperatorType& A,
 								   const VectorWithOffsetType& src1,
 								   const VectorWithOffsetType& src2,
 								   bool corner,
-								   size_t threadId)
+								   SizeType threadId)
 		{
 			
 			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
@@ -172,13 +172,13 @@ namespace Dmrg {
 			FieldType sum = static_cast<FieldType>(0.0);
 			const VectorWithOffsetType& v1 = dest;
 			const VectorWithOffsetType& v2 = src2;
-			for (size_t ii=0;ii<v1.sectors();ii++) {
-				size_t i = v1.sector(ii);
-				for (size_t jj=0;jj<v1.sectors();jj++) {
-					size_t j = v2.sector(jj);
+			for (SizeType ii=0;ii<v1.sectors();ii++) {
+				SizeType i = v1.sector(ii);
+				for (SizeType jj=0;jj<v1.sectors();jj++) {
+					SizeType j = v2.sector(jj);
 					if (i!=j) continue;
-					size_t offset = v1.offset(i);
-					for (size_t k=0;k<v1.effectiveSize(i);k++) 
+					SizeType offset = v1.offset(i);
+					for (SizeType k=0;k<v1.effectiveSize(i);k++) 
 						sum+= v1[k+offset] * std::conj(v2[k+offset]);
 				}
 			}
@@ -186,12 +186,12 @@ namespace Dmrg {
 		}
 
 		template<typename ApplyOperatorType>
-		FieldType onePointInternalHookForZero(size_t site,
+		FieldType onePointInternalHookForZero(SizeType site,
 						      const typename ApplyOperatorType::OperatorType& A,
 						      const VectorWithOffsetType& src1,
 						      const VectorWithOffsetType& src2,
 							  bool corner, //= false
-											  size_t threadId)
+											  SizeType threadId)
 		{
 
 			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
@@ -202,13 +202,13 @@ namespace Dmrg {
 			FieldType sum = static_cast<FieldType>(0.0);
 			const VectorWithOffsetType& v1 = dest;
 			const VectorWithOffsetType& v2 = src2;
-			for (size_t ii=0;ii<v1.sectors();ii++) {
-				size_t i = v1.sector(ii);
-				for (size_t jj=0;jj<v1.sectors();jj++) {
-					size_t j = v2.sector(jj);
+			for (SizeType ii=0;ii<v1.sectors();ii++) {
+				SizeType i = v1.sector(ii);
+				for (SizeType jj=0;jj<v1.sectors();jj++) {
+					SizeType j = v2.sector(jj);
 					if (i!=j) continue;
-					size_t offset = v1.offset(i);
-					for (size_t k=0;k<v1.effectiveSize(i);k++)
+					SizeType offset = v1.offset(i);
+					for (SizeType k=0;k<v1.effectiveSize(i);k++)
 						sum+= v1[k+offset] * std::conj(v2[k+offset]);
 				}
 			}

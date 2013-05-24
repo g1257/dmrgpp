@@ -144,7 +144,7 @@ public:
 		dest1 *= (1.0/norm1);
 		assert(isHermitian(dest1));
 
-		size_t minusSector = H.rank()-plusSector_;
+		SizeType minusSector = H.rank()-plusSector_;
 
 		multiply(destm,Qmt,HQm);
 		reshape(destm,minusSector);
@@ -178,11 +178,11 @@ public:
 #endif
 	}
 
-	bool isThePartialIdentity(const SparseMatrixType& A,size_t partialSize,const RealType& eps = 1e-6) const
+	bool isThePartialIdentity(const SparseMatrixType& A,SizeType partialSize,const RealType& eps = 1e-6) const
 	{
-		for (size_t i=0;i<partialSize;i++) {
+		for (SizeType i=0;i<partialSize;i++) {
 			for (int k = A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-				size_t col = A.getCol(k);
+				SizeType col = A.getCol(k);
 				if (col>=partialSize) continue;
 				ComplexOrRealType val = A.getValue(k);
 				if (i==col && !isAlmostZero(val-1.0,eps)) return false;
@@ -205,10 +205,10 @@ public:
 			  SomeVectorType& initVector1,
 			  SomeVectorType& initVector2) const
 	{
-		size_t minusSector = initVector.size()-plusSector_;
+		SizeType minusSector = initVector.size()-plusSector_;
 		initVector1.resize(plusSector_);
 		initVector2.resize(minusSector);
-		for (size_t i=0;i<initVector.size();i++) {
+		for (SizeType i=0;i<initVector.size();i++) {
 			if (i<plusSector_) initVector1[i]=initVector[i];
 			else  initVector2[i-plusSector_]=initVector[i];
 		}
@@ -220,9 +220,9 @@ private:
 	{
 		SparseMatrixType C;
 		multiply(C,A,B);
-		for (size_t i=0;i<C.rank();i++) {
+		for (SizeType i=0;i<C.rank();i++) {
 			for (int k=C.getRowPtr(i);k<C.getRowPtr(i+1);k++) {
-				size_t col = C.getCol(k);
+				SizeType col = C.getCol(k);
 				if (col==i) {
 					return std::real(C.getValue(k));
 				}
@@ -232,14 +232,14 @@ private:
 		return 0;
 	}
 
-	void reshape(SparseMatrixType& A,size_t n2) const
+	void reshape(SparseMatrixType& A,SizeType n2) const
 	{
 		SparseMatrixType B(n2,n2);
-		size_t counter = 0;
-		for (size_t i=0;i<n2;i++) {
+		SizeType counter = 0;
+		for (SizeType i=0;i<n2;i++) {
 			B.setRow(i,counter);
 			for (int k = A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-				size_t col = A.getCol(k);
+				SizeType col = A.getCol(k);
 				ComplexOrRealType val = A.getValue(k);
 				if (col>=n2) {
 					assert(isAlmostZero(val,1e-5));
@@ -251,7 +251,7 @@ private:
 			}
 		}
 #ifndef NDEBUG
-		for (size_t i=n2;i<A.rank();i++) {
+		for (SizeType i=n2;i<A.rank();i++) {
 			for (int k = A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 				ComplexOrRealType val = A.getValue(k);
 				assert(isAlmostZero(val,1e-5));
@@ -297,16 +297,16 @@ private:
 			  const SparseMatrixType& Q1,
 			  const SparseMatrixType& Qm) const
 	{
-		size_t n = Q1.rank();
+		SizeType n = Q1.rank();
 		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n,0.0);
-		size_t counter = 0;
+		SizeType counter = 0;
 		Q.resize(n);
-		size_t minusSector = n - plusSector_;
-		for (size_t i=0;i<n;i++) {
+		SizeType minusSector = n - plusSector_;
+		for (SizeType i=0;i<n;i++) {
 			Q.setRow(i,counter);
 			// add Q1
 			for (int k = Q1.getRowPtr(i);k<Q1.getRowPtr(i+1);k++) {
-				size_t col = Q1.getCol(k);
+				SizeType col = Q1.getCol(k);
 				if (col>=plusSector_) continue;
 				ComplexOrRealType val =  Q1.getValue(k);
 				Q.pushValue(val);
@@ -316,7 +316,7 @@ private:
 			}
 			// add Qm
 			for (int k = Qm.getRowPtr(i);k<Qm.getRowPtr(i+1);k++) {
-				size_t col = Qm.getCol(k);
+				SizeType col = Qm.getCol(k);
 				if (col>=minusSector) continue;
 				ComplexOrRealType val =  Qm.getValue(k);
 				Q.pushValue(val);
@@ -327,7 +327,7 @@ private:
 		}
 		Q.setRow(Q.rank(),counter);
 		// normalize
-//		for (size_t i=0;i<n;i++) {
+//		for (SizeType i=0;i<n;i++) {
 //			if (isAlmostZero(sum[i],1e-10)) continue;
 //			sum[i] = 1.0/sqrt(sum[i]);
 //			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
@@ -352,13 +352,13 @@ private:
 
 	void split(const SparseMatrixType& Q)
 	{
-		size_t n = Q.rank();
+		SizeType n = Q.rank();
 		Q1_.resize(n);
-		size_t counter = 0;
-		for (size_t i=0;i<n;i++) {
+		SizeType counter = 0;
+		for (SizeType i=0;i<n;i++) {
 			Q1_.setRow(i,counter);
 			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
-				size_t col = Q.getCol(k);
+				SizeType col = Q.getCol(k);
 				if (col>=plusSector_) continue;
 				Q1_.pushCol(col);
 				Q1_.pushValue(Q.getValue(k));
@@ -369,10 +369,10 @@ private:
 
 		counter = 0;
 		Qm_.resize(n);
-		for (size_t i=0;i<n;i++) {
+		for (SizeType i=0;i<n;i++) {
 			Qm_.setRow(i,counter);
 			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
-				size_t col = Q.getCol(k);
+				SizeType col = Q.getCol(k);
 				if (col<plusSector_) continue;
 				Qm_.pushCol(col-plusSector_);
 				Qm_.pushValue(Q.getValue(k));
@@ -386,17 +386,17 @@ private:
 		     const ReflectionBasisType& reflectionBasis,
 		     const RealType& sector) const
 	{
-		const typename PsimagLite::Vector<size_t>::Type& ipPosOrNeg = reflectionBasis.ipPosOrNeg(sector);
+		const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg = reflectionBasis.ipPosOrNeg(sector);
 		const SparseMatrixType& reflection = reflectionBasis.reflection();
-		size_t n = reflection.rank();
+		SizeType n = reflection.rank();
 
 		SparseMatrixType T1(n,n);
-		size_t counter = 0;
-		for (size_t i=0;i<n;i++) {
+		SizeType counter = 0;
+		for (SizeType i=0;i<n;i++) {
 			T1.setRow(i,counter);
 			bool hasDiagonal = false;
 			for (int k = reflection.getRowPtr(i);k<reflection.getRowPtr(i+1);k++) {
-				size_t col = reflection.getCol(k);
+				SizeType col = reflection.getCol(k);
 				ComplexOrRealType val = reflection.getValue(k);
 				if (col==i) {
 					val += sector;
@@ -420,20 +420,20 @@ private:
 
 		// permute columns now:
 		typename PsimagLite::Vector<int>::Type inversePermutation(n,-1);
-		for (size_t i=0;i<ipPosOrNeg.size();i++)
+		for (SizeType i=0;i<ipPosOrNeg.size();i++)
 			inversePermutation[ipPosOrNeg[i]]=i;
 
 		T1final.resize(n);
 		counter=0;
 		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n,0.0);
-		for (size_t i=0;i<n;i++) {
+		for (SizeType i=0;i<n;i++) {
 			T1final.setRow(i,counter);
 			for (int k = T1.getRowPtr(i);k<T1.getRowPtr(i+1);k++) {
 				int col = inversePermutation[T1.getCol(k)];
 				if (col<0) continue;
 				ComplexOrRealType val = T1.getValue(k);
 				if (isAlmostZero(val,1e-10)) continue;
-				assert(size_t(col)<ipPosOrNeg.size());
+				assert(SizeType(col)<ipPosOrNeg.size());
 				T1final.pushCol(col);
 				T1final.pushValue(val);
 				sum[i] += std::conj(val)*val;
@@ -444,7 +444,7 @@ private:
 		T1final.checkValidity();
 
 		// normalize T1
-//		for (size_t i=0;i<n;i++) {
+//		for (SizeType i=0;i<n;i++) {
 //			if (isAlmostZero(sum[i],1e-12)) continue;
 //			sum[i] = 1.0/sqrt(sum[i]);
 
@@ -455,7 +455,7 @@ private:
 	}
 
 	bool idebug_;
-	size_t plusSector_;
+	SizeType plusSector_;
 	SparseMatrixType Q1_,Qm_;
 
 }; // class ReflectionTransform

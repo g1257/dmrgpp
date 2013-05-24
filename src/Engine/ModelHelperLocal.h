@@ -89,7 +89,7 @@ namespace Dmrg {
 	class ModelHelperLocal {
 
 		typedef PsimagLite::PackIndices PackIndicesType;
-		typedef std::pair<size_t,size_t> PairType;
+		typedef std::pair<SizeType,SizeType> PairType;
 
 	public:
 		typedef LeftRightSuperType_ LeftRightSuperType;
@@ -106,7 +106,7 @@ namespace Dmrg {
 
 		enum { System=0,Environ=1 };
 
-		ModelHelperLocal(size_t m,
+		ModelHelperLocal(SizeType m,
 		                 const LeftRightSuperType& lrs,
 		                 bool useReflection=false)
 		: m_(m),
@@ -121,14 +121,14 @@ namespace Dmrg {
 			createAlphaAndBeta();
 		}
 
-		size_t m() const { return m_; }
+		SizeType m() const { return m_; }
 
 		static bool isSu2() { return false; }
 
 		const SparseMatrixType& getReducedOperator(char modifier,
-		                                          size_t i,
-		                                          size_t sigma,
-		                                          size_t type) const
+		                                          SizeType i,
+		                                          SizeType sigma,
+		                                          SizeType type) const
 		{
 			if (modifier=='N') {
 				if (type==System) {
@@ -281,11 +281,11 @@ namespace Dmrg {
 			int i,k,alphaPrime;
 			int bs = lrs_.super().partition(m+1)-offset;
 			const SparseMatrixType& hamiltonian = lrs_.left().hamiltonian();
-			size_t ns = lrs_.left().size();
+			SizeType ns = lrs_.left().size();
 
 			PackIndicesType pack(ns);
 			for (i=0;i<bs;i++) {
-				size_t r,beta;
+				SizeType r,beta;
 				pack.unpack(r,beta,lrs_.super().permutation(i+offset));
 
 				// row i of the ordered product basis
@@ -310,11 +310,11 @@ namespace Dmrg {
 			int i,k;
 			int bs = lrs_.super().partition(m+1)-offset;
 			const SparseMatrixType& hamiltonian = lrs_.right().hamiltonian();
-			size_t ns = lrs_.left().size();
+			SizeType ns = lrs_.left().size();
 
 			PackIndicesType pack(ns);
 			for (i=0;i<bs;i++) {
-				size_t alpha,r;
+				SizeType alpha,r;
 				pack.unpack(alpha,r,lrs_.super().permutation(i+offset));
 
 				// row i of the ordered product basis
@@ -334,10 +334,10 @@ namespace Dmrg {
 		                         bool option) const
 		{
 			int m  = m_;
-			size_t offset = lrs_.super().partition(m);
+			SizeType offset = lrs_.super().partition(m);
 			int k,alphaPrime=0,betaPrime=0;
 			int bs = lrs_.super().partition(m+1)-offset;
-			size_t ns=lrs_.left().size();
+			SizeType ns=lrs_.left().size();
 			SparseMatrixType hamiltonian;
 			if (option) {
 				hamiltonian = lrs_.left().hamiltonian();
@@ -350,11 +350,11 @@ namespace Dmrg {
 
 			int counter=0;
 			PackIndicesType pack(ns);
-			for (size_t i=offset;i<lrs_.super().partition(m+1);i++) {
+			for (SizeType i=offset;i<lrs_.super().partition(m+1);i++) {
 				matrixBlock.setRow(i-offset,counter);
-				size_t alpha,beta;
+				SizeType alpha,beta;
 				pack.unpack(alpha,beta,lrs_.super().permutation(i));
-				size_t r=beta;
+				SizeType r=beta;
 				if (option) {
 					betaPrime=beta;
 					r = alpha;
@@ -368,7 +368,7 @@ namespace Dmrg {
 
 					if (option) alphaPrime = hamiltonian.getCol(k);
 					else 	    betaPrime  = hamiltonian.getCol(k);
-					size_t j = lrs_.super().permutationInverse(alphaPrime + betaPrime * ns);
+					SizeType j = lrs_.super().permutationInverse(alphaPrime + betaPrime * ns);
 					if (j<offset || j>=lrs_.super().partition(m+1)) continue;
 					SparseElementType tmp = hamiltonian.getValue(k);
 					matrixBlock.pushCol(j-offset);
@@ -389,9 +389,9 @@ namespace Dmrg {
 		const LeftRightSuperType&  lrs_;
 		typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;
 		typename PsimagLite::Vector<SparseMatrixType>::Type basis2tc_,basis3tc_;
-		typename PsimagLite::Vector<size_t>::Type alpha_,beta_;
+		typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
 
-		const SparseMatrixType& getTcOperator(int i,size_t sigma,size_t type) const
+		const SparseMatrixType& getTcOperator(int i,SizeType sigma,SizeType type) const
 		{
 			if (type==System) {
 				PairType ii =lrs_.left().getOperatorIndices(i,sigma);
@@ -405,14 +405,14 @@ namespace Dmrg {
 
 		void createBuffer()
 		{
-			size_t ns=lrs_.left().size();
-			size_t ne=lrs_.right().size();
+			SizeType ns=lrs_.left().size();
+			SizeType ne=lrs_.right().size();
 			int offset = lrs_.super().partition(m_);
 			int total = lrs_.super().partition(m_+1) - offset;
 
 			typename PsimagLite::Vector<int>::Type  tmpBuffer(ne);
-			for (size_t alphaPrime=0;alphaPrime<ns;alphaPrime++) {
-				for (size_t betaPrime=0;betaPrime<ne;betaPrime++) {
+			for (SizeType alphaPrime=0;alphaPrime<ns;alphaPrime++) {
+				for (SizeType betaPrime=0;betaPrime<ne;betaPrime++) {
 					tmpBuffer[betaPrime] =lrs_.super().permutationInverse(alphaPrime + betaPrime*ns) -offset;
 					if (tmpBuffer[betaPrime]>=total) tmpBuffer[betaPrime]= -1;
 				}
@@ -424,9 +424,9 @@ namespace Dmrg {
 							   const BasisWithOperatorsType& basis)
 		{
 			if (basistc.size()==0) return;
-			size_t n=basis.getOperatorByIndex(0).data.row();
+			SizeType n=basis.getOperatorByIndex(0).data.row();
 			bool b = true;
-			for (size_t i=0;i<basistc.size();i++) {
+			for (SizeType i=0;i<basistc.size();i++) {
 				if (basis.getOperatorByIndex(i).data.row()!=n) {
 					b=false;
 					break;
@@ -439,7 +439,7 @@ namespace Dmrg {
 		void createTcOperatorsSimple(typename PsimagLite::Vector<SparseMatrixType>::Type& basistc,
 		                       const BasisWithOperatorsType& basis)
 		{
-			for (size_t i=0;i<basistc.size();i++)
+			for (SizeType i=0;i<basistc.size();i++)
 				transposeConjugate(basistc[i],basis.getOperatorByIndex(i).data);
 		}
 
@@ -447,10 +447,10 @@ namespace Dmrg {
 							   const BasisWithOperatorsType& basis)
 		{
 			if (basistc.size()==0) return;
-			size_t n=basis.getOperatorByIndex(0).data.row();
+			SizeType n=basis.getOperatorByIndex(0).data.row();
 			typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type col(n);
 			typename PsimagLite::Vector<typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type>::Type value(n);
-			for (size_t i=0;i<basistc.size();i++) {
+			for (SizeType i=0;i<basistc.size();i++) {
 				const SparseMatrixType& tmp = basis.getOperatorByIndex(i).data;
 				assert(tmp.row()==n);
 				transposeConjugate(basistc[i],tmp,col,value);
@@ -460,7 +460,7 @@ namespace Dmrg {
 
 		void createAlphaAndBeta()
 		{
-			size_t ns=lrs_.left().size();
+			SizeType ns=lrs_.left().size();
 			int offset = lrs_.super().partition(m_);
 			int total = lrs_.super().partition(m_+1) - offset;
 

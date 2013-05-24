@@ -136,49 +136,49 @@ public:
 	{
 		if (aRt_) delete aRt_;
 
-		for (size_t ic=0;ic<xc_.size();ic++) delete xc_[ic];
-		for (size_t ic=0;ic<yc_.size();ic++) delete yc_[ic];
+		for (SizeType ic=0;ic<xc_.size();ic++) delete xc_[ic];
+		for (SizeType ic=0;ic<yc_.size();ic++) delete yc_[ic];
 
 	}
 
-	size_t numberOfThreads() const
+	SizeType numberOfThreads() const
 	{
 		return model_.params().nthreads;
 	}
 
 	const ConcurrencyType& concurrency() const { return model_.concurrency(); }
 
-	const ArrayOfMatStructType& xc(size_t ic) const
+	const ArrayOfMatStructType& xc(SizeType ic) const
 	{
 		return *xc_[ic];
 	}
 
-	const ArrayOfMatStructType& yc(size_t ic) const
+	const ArrayOfMatStructType& yc(SizeType ic) const
 	{
 		return *yc_[ic];
 	}
 
-	size_t patch(typename GenIjPatchType::LeftOrRightEnumType i,size_t j) const
+	SizeType patch(typename GenIjPatchType::LeftOrRightEnumType i,SizeType j) const
 	{
 		return ijpatches_(i,j);
 	}
 
-	size_t patch() const {return ijpatches_.size(); }
+	SizeType patch() const {return ijpatches_.size(); }
 
 	const LeftRightSuperType& lrs() const
 	{
 		return modelHelper_.leftRightSuper();
 	}
 
-	size_t offset() const
+	SizeType offset() const
 	{
-		size_t m = modelHelper_.m();
+		SizeType m = modelHelper_.m();
 		return modelHelper_.leftRightSuper().super().partition(m);
 	}
 
-	size_t size() const { return modelHelper_.size(); }
+	SizeType size() const { return modelHelper_.size(); }
 
-	size_t connections() const { return xc_.size(); }
+	SizeType connections() const { return xc_.size(); }
 
 	const ArrayOfMatStructType& aRt () const
 	{
@@ -200,7 +200,7 @@ public:
 		return gengroupRight_;
 	}
 
-	const ComplexOrRealType& value(size_t i) const
+	const ComplexOrRealType& value(SizeType i) const
 	{
 		assert(values_.size()>i);
 		return values_[i];
@@ -211,9 +211,9 @@ private:
 	void convertXcYcArrays()
 	{
 		LinkProductStructType* lps = 0;
-		size_t total = model_.getLinkProductStruct(&lps,modelHelper_);
+		SizeType total = model_.getLinkProductStruct(&lps,modelHelper_);
 
-		for (size_t ix=0;ix<total;ix++) {
+		for (SizeType ix=0;ix<total;ix++) {
 			SparseMatrixType const* A = 0;
 			SparseMatrixType const* B = 0;
 

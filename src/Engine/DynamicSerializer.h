@@ -94,7 +94,7 @@ namespace Dmrg {
 
 		DynamicSerializer(
 				const PostProcType& cf,
-				size_t site,
+				SizeType site,
 				const typename PsimagLite::Vector<VectorType>::Type& targetVectors)
 		: cf_(cf),
 		  site_(site),
@@ -102,7 +102,7 @@ namespace Dmrg {
 		{}
 
 		template<typename IoInputType>
-		DynamicSerializer(IoInputType& io,size_t lastInstance = 0)
+		DynamicSerializer(IoInputType& io,SizeType lastInstance = 0)
 		: cf_(io)
 		{
 			PsimagLite::String s = "#DCENTRALSITE=";
@@ -117,7 +117,7 @@ namespace Dmrg {
 			if (xi<=0) throw PsimagLite::RuntimeError(
 					"DynamicSerializer:: n. of vectors must be positive\n");
 			targetVectors_.resize(xi);
-			for (size_t i=0;i<targetVectors_.size();i++) {
+			for (SizeType i=0;i<targetVectors_.size();i++) {
 				s = "targetVector"+ttos(i);
 				targetVectors_[i].load(io,s);
 			}
@@ -135,30 +135,30 @@ namespace Dmrg {
 //			io.print("#DCENTRALSITE=",site_);
 //			io.print("#DNUMBEROFVECTORS=",targetVectors_.size());
 
-			for (size_t i=0;i<targetVectors_.size();i++) {
+			for (SizeType i=0;i<targetVectors_.size();i++) {
 				PsimagLite::String label = "targetVector"+ttos(i);
 				targetVectors_[i].save(io,label);
 			}
 		}
 
-		size_t size(size_t i=0) const
+		SizeType size(SizeType i=0) const
 		{
 			return  targetVectors_[i].size();
 		}
 
-		size_t site() const
+		SizeType site() const
 		{
 			return  site_;
 		}
 
-		const VectorType& vector(size_t i=0) const
+		const VectorType& vector(SizeType i=0) const
 		{
 			return targetVectors_[i];
 		}
 
 	private:
 		const PostProcType& cf_;
-		size_t site_;
+		SizeType site_;
 		typename PsimagLite::Vector<VectorType>::Type targetVectors_;
 	}; // class TimeSerializer
 } // namespace Dmrg 

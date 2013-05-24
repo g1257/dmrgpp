@@ -52,7 +52,7 @@ int main(int argc,char *argv[])
 		usage(argv[0]);
 		return 1;
 	}
-	size_t total = concurrency.nprocs();
+	SizeType total = concurrency.nprocs();
 
 	ClonerType cloner(infile,inputRoot,".inp");
 	LineChangerType lcl1("CorrectionVectorOmega=",0.5,0.0,"","");
@@ -63,7 +63,7 @@ int main(int argc,char *argv[])
 	RunnerType run("./dmrg",inputRoot,".inp");
 
 	concurrency.loopCreate(total);
-	size_t i = 0;
+	SizeType i = 0;
 	while(concurrency.loop(i)) {
 		cloner.createInputFile(i);
 		run(i);

@@ -132,11 +132,11 @@ public:
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             size_t systemOrEnviron,
+	                             SizeType systemOrEnviron,
 	                             bool allOperatorsApplied)
 	{
 		if (currentTime_==0 && tstStruct_.noOperator) {
-			for (size_t i=0;i<times_.size();i++)
+			for (SizeType i=0;i<times_.size();i++)
 				targetVectors_[i]=phi;
 			return;
 		}
@@ -149,18 +149,18 @@ private:
 	void calcTimeVectorsKrylov1(const PairType& startEnd,
 	                            RealType Eg,
 								const VectorWithOffsetType& phi,
-								size_t systemOrEnviron)
+								SizeType systemOrEnviron)
 	{
 		typename PsimagLite::Vector<MatrixComplexOrRealType>::Type V(phi.sectors());
 		typename PsimagLite::Vector<MatrixComplexOrRealType>::Type T(phi.sectors());
 
-		typename PsimagLite::Vector<size_t>::Type steps(phi.sectors());
+		typename PsimagLite::Vector<SizeType>::Type steps(phi.sectors());
 
 		triDiag(phi,T,V,steps);
 
 		typename PsimagLite::Vector<typename PsimagLite::Vector<RealType>::Type>::Type eigs(phi.sectors());
 
-		for (size_t ii=0;ii<phi.sectors();ii++)
+		for (SizeType ii=0;ii<phi.sectors();ii++)
 			PsimagLite::diag(T[ii],eigs[ii],'V');
 
 		calcTargetVectors(startEnd,phi,T,V,Eg,eigs,steps,systemOrEnviron);
@@ -175,11 +175,11 @@ private:
 						   const typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& V,
 						   RealType Eg,
 						   const typename PsimagLite::Vector<VectorRealType>::Type& eigs,
-						   typename PsimagLite::Vector<size_t>::Type steps,
-						   size_t systemOrEnviron)
+						   typename PsimagLite::Vector<SizeType>::Type steps,
+						   SizeType systemOrEnviron)
 	{
 		targetVectors_[0] = phi;
-		for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
+		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
 			assert(i<targetVectors_.size());
 			targetVectors_[i] = phi;
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
@@ -193,12 +193,12 @@ private:
 	                      const typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& V,
 	                      RealType Eg,
 	                      const typename PsimagLite::Vector<VectorRealType>::Type& eigs,
-	                      size_t timeIndex,
-	                      typename PsimagLite::Vector<size_t>::Type steps)
+	                      SizeType timeIndex,
+	                      typename PsimagLite::Vector<SizeType>::Type steps)
 	{
 		v = phi;
-		for (size_t ii=0;ii<phi.sectors();ii++) {
-			size_t i0 = phi.sector(ii);
+		for (SizeType ii=0;ii<phi.sectors();ii++) {
+			SizeType i0 = phi.sector(ii);
 			TargetVectorType r;
 			calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],timeIndex,steps[ii],i0);
 			//std::cerr<<"TARGET FOR t="<<t<<" "<<PsimagLite::norm(r)<<" "<<norm(phi)<<"\n";
@@ -213,15 +213,15 @@ private:
 			const MatrixComplexOrRealType& V,
 			RealType Eg,
 			const VectorRealType& eigs,
-			size_t timeIndex,
-			size_t steps,
-			size_t i0)
+			SizeType timeIndex,
+			SizeType steps,
+			SizeType i0)
 	{
-		size_t n2 = steps;
-		size_t n = V.n_row();
+		SizeType n2 = steps;
+		SizeType n = V.n_row();
 		if (T.n_col()!=T.n_row()) throw PsimagLite::RuntimeError("T is not square\n");
 		if (V.n_col()!=T.n_col()) throw PsimagLite::RuntimeError("V is not nxn2\n");
-		// for (size_t j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
+		// for (SizeType j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
 		ComplexOrRealType zone = 1.0;
 		ComplexOrRealType zzero = 0.0;
 
@@ -243,13 +243,13 @@ private:
 			   const VectorWithOffsetType& phi,
 			   RealType Eg,
 			   const VectorRealType& eigs,
-			   size_t timeIndex,
-			   size_t n2,
-			   size_t i0)
+			   SizeType timeIndex,
+			   SizeType n2,
+			   SizeType i0)
 	{
-		for (size_t k=0;k<n2;k++) {
+		for (SizeType k=0;k<n2;k++) {
 			ComplexOrRealType sum = 0.0;
-			for (size_t kprime=0;kprime<n2;kprime++) {
+			for (SizeType kprime=0;kprime<n2;kprime++) {
 				ComplexOrRealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
 				sum += std::conj(T(kprime,k))*tmpV;
 			}
@@ -260,13 +260,13 @@ private:
 		}
 	}
 
-	ComplexOrRealType calcVTimesPhi(size_t kprime,const MatrixComplexOrRealType& V,const VectorWithOffsetType& phi,
-							  size_t i0) const
+	ComplexOrRealType calcVTimesPhi(SizeType kprime,const MatrixComplexOrRealType& V,const VectorWithOffsetType& phi,
+							  SizeType i0) const
 	{
 		ComplexOrRealType ret = 0;
-		size_t total = phi.effectiveSize(i0);
+		SizeType total = phi.effectiveSize(i0);
 
-		for (size_t j=0;j<total;j++)
+		for (SizeType j=0;j<total;j++)
 			ret += std::conj(V(j,kprime))*phi.fastAccess(i0,j);
 		return ret;
 	}
@@ -275,17 +275,17 @@ private:
 			const VectorWithOffsetType& phi,
 			typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& T,
 			typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& V,
-			typename PsimagLite::Vector<size_t>::Type& steps)
+			typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
-		for (size_t ii=0;ii<phi.sectors();ii++) {
-			size_t i = phi.sector(ii);
+		for (SizeType ii=0;ii<phi.sectors();ii++) {
+			SizeType i = phi.sector(ii);
 			steps[ii] = triDiag(phi,T[ii],V[ii],i);
 		}
 	}
 
-	size_t triDiag(const VectorWithOffsetType& phi,MatrixComplexOrRealType& T,MatrixComplexOrRealType& V,size_t i0)
+	SizeType triDiag(const VectorWithOffsetType& phi,MatrixComplexOrRealType& T,MatrixComplexOrRealType& V,SizeType i0)
 	{
-		size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
+		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelType::ModelHelperType modelHelper(p,lrs_);
 				//,useReflection_);
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
@@ -298,7 +298,7 @@ private:
 		LanczosSolverType lanczosSolver(lanczosHelper,params,&V);
 
 		TridiagonalMatrixType ab;
-		size_t total = phi.effectiveSize(i0);
+		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
 		phi.extract(phi2,i0);
 		/* PsimagLite::OstringStream msg;

@@ -122,7 +122,7 @@ namespace Dmrg {
 			progress_.printline(msg,std::cout);
 		}
 
-		size_t rank() const { return matrixStored_[pointer_].row(); }
+		SizeType rank() const { return matrixStored_[pointer_].row(); }
 
 		template<typename SomeVectorType>
 		void matrixVectorProduct(SomeVectorType &x, SomeVectorType const &y) const
@@ -130,20 +130,20 @@ namespace Dmrg {
 			 matrixStored_[pointer_].matrixVectorProduct(x,y);
 		}
 
-		HamiltonianElementType operator()(size_t i,size_t j) const
+		HamiltonianElementType operator()(SizeType i,SizeType j) const
 		{
 			return matrixStored_[pointer_](i,j);
 		}
 
-		size_t reflectionSector() const { return pointer_; }
+		SizeType reflectionSector() const { return pointer_; }
 
-		void reflectionSector(size_t p) { pointer_=p; }
+		void reflectionSector(SizeType p) { pointer_=p; }
 
 	private:
 		ModelType const *model_;
 		ModelHelperType const *modelHelper_;
 		typename PsimagLite::Vector<SparseMatrixType>::Type matrixStored_;
-		size_t pointer_;
+		SizeType pointer_;
 		PsimagLite::ProgressIndicator progress_;
 	}; // class InternalProductStored
 } // namespace Dmrg

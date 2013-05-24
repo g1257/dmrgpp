@@ -142,7 +142,7 @@ namespace Dmrg {
 	\\end{itemize} */
 	struct FiniteLoop {
 		int stepLength; // how much to go right (+) or left (-)
-		size_t keptStates; // kept states
+		SizeType keptStates; // kept states
 		int saveOption; // to save or not to save
 		FiniteLoop(int sl,int ks,int so)
 			: stepLength(sl),keptStates(ks),saveOption(so)
@@ -150,16 +150,16 @@ namespace Dmrg {
 	};
 
 	//!PTEX_LABEL{139}
-	inline void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,size_t totalSites)
+	inline void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,SizeType totalSites)
 	{
 		PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
 		PsimagLite::String loops = "";
 		int x = totalSites/2-1; // must be signed
 		if (finiteLoop[0].stepLength<0) x++;
 		int prevDeltaSign = 1;
-		size_t sopt = 0; // have we started saving yet?
-		for (size_t i=0;i<finiteLoop.size();i++)  {
-			size_t thisSaveOption = (finiteLoop[i].saveOption & 1);
+		SizeType sopt = 0; // have we started saving yet?
+		for (SizeType i=0;i<finiteLoop.size();i++)  {
+			SizeType thisSaveOption = (finiteLoop[i].saveOption & 1);
 			if (sopt == 1 && thisSaveOption ==0) {
 				s = "Error for finite loop number " + ttos(i) + "\n";
 				s += "Once you say 1 on a finite loop, then all";
@@ -168,7 +168,7 @@ namespace Dmrg {
 			}
 			if (sopt == 0 && thisSaveOption ==1) {
 				sopt = 1;
-				if (size_t(x) != 1 && size_t(x)!=totalSites-2) {
+				if (SizeType(x) != 1 && SizeType(x)!=totalSites-2) {
 					s = __FILE__ + PsimagLite::String(": FATAL: for finite loop number ")
 						+ ttos(i) + "\n";
 					s += "Saving finite loops must start at the left or";
@@ -192,7 +192,7 @@ namespace Dmrg {
 				s = s + "on the left end\n";
 				flag = true;
 			}
-			if (size_t(x)>=totalSites-1) {
+			if (SizeType(x)>=totalSites-1) {
 				s = s + "on the right end\n";
 				flag = true;
 			}
@@ -283,23 +283,23 @@ namespace Dmrg {
 	struct ParametersDmrgSolver {
 
 		PsimagLite::String filename;
-		size_t keptStatesInfinite;
+		SizeType keptStatesInfinite;
 		typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
 		PsimagLite::String version;
 		PsimagLite::String options;
 		PsimagLite::String model;
 		typename PsimagLite::Vector<FieldType>::Type targetQuantumNumbers;
-		size_t electronsUp,electronsDown;
-		typename PsimagLite::Vector<size_t>::Type adjustQuantumNumbers;
+		SizeType electronsUp,electronsDown;
+		typename PsimagLite::Vector<SizeType>::Type adjustQuantumNumbers;
 		FieldType tolerance;
 		DmrgCheckPoint checkpoint;
-		size_t nthreads;
+		SizeType nthreads;
 		int useReflectionSymmetry;
 		PsimagLite::String fileForDensityMatrixEigs;
 		PsimagLite::String insitu;
-		size_t lanczosSteps;
+		SizeType lanczosSteps;
 		FieldType lanczosEps;
-		size_t sitesPerBlock;
+		SizeType sitesPerBlock;
 
 		//! Read Dmrg parameters from inp file
 		ParametersDmrgSolver(InputValidatorType& io)
@@ -312,25 +312,25 @@ namespace Dmrg {
 			io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
 			typename PsimagLite::Vector<FieldType>::Type tmpVec;
 			io.read(tmpVec,"FiniteLoops");
-			for (size_t i=0;i<tmpVec.size();i+=3) {
+			for (SizeType i=0;i<tmpVec.size();i+=3) {
 				typename PsimagLite::Vector<int>::Type xTmp(3);
-				for (size_t j=0;j<xTmp.size();j++) xTmp[j]=int(tmpVec[i+j]);
+				for (SizeType j=0;j<xTmp.size();j++) xTmp[j]=int(tmpVec[i+j]);
 				FiniteLoop fl(xTmp[0],xTmp[1],xTmp[2]);
 				finiteLoop.push_back(fl);
 			}
 
-			size_t repeat = 0;
+			SizeType repeat = 0;
 
 			try {
 				io.readline(repeat,"RepeatFiniteLoopsTimes=");
 			}  catch (std::exception& e) {}
 
-			size_t fromFl = 0;
+			SizeType fromFl = 0;
 			try {
 				io.readline(fromFl,"RepeatFiniteLoopsFrom=");
 			}  catch (std::exception& e) {}
 
-			size_t upToFl = finiteLoop.size()-1;
+			SizeType upToFl = finiteLoop.size()-1;
 			try {
 				io.readline(upToFl,"RepeatFiniteLoopsTo=");
 			}  catch (std::exception& e) {}
@@ -349,8 +349,8 @@ namespace Dmrg {
 			}
 			upToFl++;
 
-			for (size_t i=0;i<repeat;i++) {
-				for (size_t j=fromFl;j<upToFl;j++) {
+			for (SizeType i=0;i<repeat;i++) {
+				for (SizeType j=fromFl;j<upToFl;j++) {
 					FiniteLoop fl = finiteLoop[j];
 					finiteLoop.push_back(fl);
 				}
@@ -465,7 +465,7 @@ namespace Dmrg {
 
 		if (parameters.targetQuantumNumbers.size()>0) {
 			os<<"parameters.targetQuantumNumbers=";
-			for (size_t i=0;i<parameters.targetQuantumNumbers.size();i++)
+			for (SizeType i=0;i<parameters.targetQuantumNumbers.size();i++)
 				os<<parameters.targetQuantumNumbers[i]<<" ";
 			os<<"\n";
 		} else {

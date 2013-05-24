@@ -97,17 +97,17 @@ namespace Dmrg {
 				VectorWithOffsetType& psiDest,
 				const VectorWithOffsetType& psiSrc,
 				const LeftRightSuperType& lrs,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const = 0;
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const = 0;
 
 		virtual ~WaveFunctionTransfBase() {}
 
 	protected:
 
-		size_t volumeOf(const typename PsimagLite::Vector<size_t>::Type& v) const
+		SizeType volumeOf(const typename PsimagLite::Vector<SizeType>::Type& v) const
 		{
 			assert(v.size()>0);
-			size_t ret = v[0];
-			for (size_t i=1;i<v.size();i++) ret *= v[i];
+			SizeType ret = v[0];
+			for (SizeType i=1;i<v.size();i++) ret *= v[i];
 			return ret;
 		}
 

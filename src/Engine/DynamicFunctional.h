@@ -108,7 +108,7 @@ namespace Dmrg {
 		RealType operator()(const SomeVectorType &v) const
 		{
 			VectorType vC(v.size());
-			for (size_t i=0;i<v.size();i++) vC[i] = v[i];
+			for (SizeType i=0;i<v.size();i++) vC[i] = v[i];
 			VectorType x(vC.size(),0.0);
 
 			H_.matrixVectorProduct(x,vC); // x += H_ vC
@@ -121,7 +121,7 @@ namespace Dmrg {
 			return sum;
 		}
 
-		size_t size() const {return H_.rank(); }
+		SizeType size() const {return H_.rank(); }
 
 	private:
 

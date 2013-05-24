@@ -88,7 +88,7 @@ namespace Dmrg {
 	struct VectorWithOffset {
 	public:
 		typedef FieldType value_type;
-		typedef std::pair<size_t,size_t> PairType;
+		typedef std::pair<SizeType,SizeType> PairType;
 		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 
 		static const FieldType zero_;
@@ -96,12 +96,12 @@ namespace Dmrg {
 		VectorWithOffset()  : size_(0),offset_(0),m_(0) { }
 
 		template<typename SomeBasisType>
-		VectorWithOffset(const typename PsimagLite::Vector<size_t>::Type& weights,
+		VectorWithOffset(const typename PsimagLite::Vector<SizeType>::Type& weights,
 		                 const SomeBasisType& someBasis)
 		: size_(someBasis.size())
 		{
 			bool found = false;
-			for (size_t i=0;i<weights.size();i++) {
+			for (SizeType i=0;i<weights.size();i++) {
 				if (weights[i]>0) {
 					if (found)
 						throw PsimagLite::RuntimeError("VectorWithOffset::"
@@ -115,7 +115,7 @@ namespace Dmrg {
 			}
 		}
 
-		void resize(size_t x)
+		void resize(SizeType x)
 		{
 			size_ = x;
 			data_.clear();
@@ -129,7 +129,7 @@ namespace Dmrg {
 		{
 			bool found = false;
 			size_ = someBasis.size();
-			for (size_t i=0;i<v.size();i++) {
+			for (SizeType i=0;i<v.size();i++) {
 				if (v[i].size()>0) {
 					if (found) throw PsimagLite::RuntimeError("VectorWithOffset::"
 						" more than one non-zero sector found. "
@@ -150,9 +150,9 @@ namespace Dmrg {
 			try {
 				m_ = findPartition(v,someBasis);
 				offset_ = someBasis.partition(m_);
-				size_t total = someBasis.partition(m_+1) - offset_;
+				SizeType total = someBasis.partition(m_+1) - offset_;
 				data_.resize(total);
-				for (size_t i=0;i<total;i++) data_[i] = v[i+offset_];
+				for (SizeType i=0;i<total;i++) data_[i] = v[i+offset_];
 			} catch (std::exception& e) {
 				std::cerr<<e.what();
 				m_=0;
@@ -161,20 +161,20 @@ namespace Dmrg {
 			}
 		}
 
-		size_t sectors() const { return 1; }
+		SizeType sectors() const { return 1; }
 
-		size_t sector(size_t dummy) const { return m_; }
+		SizeType sector(SizeType dummy) const { return m_; }
 
-		size_t offset(size_t dummy) const { return offset_; }
+		SizeType offset(SizeType dummy) const { return offset_; }
 
-		size_t effectiveSize(size_t dummy) const { return data_.size(); }
+		SizeType effectiveSize(SizeType dummy) const { return data_.size(); }
 
-		void setDataInSector(const VectorType& v,size_t dummy)
+		void setDataInSector(const VectorType& v,SizeType dummy)
 		{
 			data_=v;
 		}
 
-		void extract(VectorType& v, size_t dummy = 0) const
+		void extract(VectorType& v, SizeType dummy = 0) const
 		{
 			v=data_;
 		}
@@ -183,7 +183,7 @@ namespace Dmrg {
 		void toSparse(SparseVectorType& sv) const
 		{
 			sv.resize(size_);
-			for (size_t i=0;i<data_.size();i++)
+			for (SizeType i=0;i<data_.size();i++)
 				sv[i+offset_] = data_[i];
 		}
 
@@ -206,7 +206,7 @@ namespace Dmrg {
 		}
 
 		template<typename IoInputter>
-		void load(IoInputter& io,const PsimagLite::String& label,size_t counter=0)
+		void load(IoInputter& io,const PsimagLite::String& label,SizeType counter=0)
 		{
 			io.advance(label,counter);
 			int x = 0;
@@ -222,27 +222,27 @@ namespace Dmrg {
 			io.read(data_,"#data");
 		}
 
-		size_t size() const { return size_; }
+		SizeType size() const { return size_; }
 
-		size_t effectiveSize() const { return data_.size(); }
+		SizeType effectiveSize() const { return data_.size(); }
 
-		size_t offset() const { return offset_; }
+		SizeType offset() const { return offset_; }
 
-		 const FieldType& operator[](size_t i) const
+		 const FieldType& operator[](SizeType i) const
 		{
 			if (i<offset_ || i>= (offset_+data_.size())) return zero_;
 			//assert(i>=offset_ && i<offset_+data_.size());
 			return data_[i-offset_];
 		}
 
-		FieldType& operator[](size_t i)
+		FieldType& operator[](SizeType i)
 		{
 // 			if (i<offset_ || i>= (offset_+data_.size()))
 // 				throw PsimagLite::RuntimeError("VectorWithOffset\n");
 			return data_[i-offset_];
 		}
 		
-		const FieldType& fastAccess(size_t i,size_t j) const 
+		const FieldType& fastAccess(SizeType i,SizeType j) const 
 		{
 			return data_[j];
 		}
@@ -266,11 +266,11 @@ namespace Dmrg {
 
 	private:
 		template<typename SomeBasisType>
-		size_t findPartition(const VectorType& v,const SomeBasisType& someBasis)
+		SizeType findPartition(const VectorType& v,const SomeBasisType& someBasis)
 		{
 			bool found = false;
-			size_t p = 0;
-			for (size_t i=0;i<someBasis.partition()-1;i++) {
+			SizeType p = 0;
+			for (SizeType i=0;i<someBasis.partition()-1;i++) {
 				if (nonZeroPartition(v,someBasis,i)) {
 					if (found) throw PsimagLite::RuntimeError("VectorWithOFfset::"
 						" More than one partition found\n");
@@ -285,19 +285,19 @@ namespace Dmrg {
 		}
 
 		template<typename SomeBasisType>
-		bool nonZeroPartition(const VectorType& v,const SomeBasisType& someBasis,size_t i)
+		bool nonZeroPartition(const VectorType& v,const SomeBasisType& someBasis,SizeType i)
 		{
 			typename VectorType::value_type zero = 0;
-			for (size_t j=someBasis.partition(i);j<someBasis.partition(i+1);j++) {
+			for (SizeType j=someBasis.partition(i);j<someBasis.partition(i+1);j++) {
 				if (v[j]!=zero) return true;
 			}
 			return false;
 		}
 
-		size_t size_;
+		SizeType size_;
 		VectorType data_;
-		size_t offset_;
-		size_t m_; // partition 
+		SizeType offset_;
+		SizeType m_; // partition 
 	}; // class VectorWithOffset
 
 	template<typename FieldType>

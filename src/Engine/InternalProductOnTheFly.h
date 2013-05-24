@@ -102,7 +102,7 @@ namespace Dmrg {
 			
 		}
 
-		size_t rank() const { return modelHelper_->size(); }
+		SizeType rank() const { return modelHelper_->size(); }
 
 		template<typename SomeVectorType>
 		void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
@@ -110,9 +110,9 @@ namespace Dmrg {
 			 model_->matrixVectorProduct(x,y,*modelHelper_);
 		}
 
-		size_t reflectionSector() const { return 0; }
+		SizeType reflectionSector() const { return 0; }
 
-		void reflectionSector(size_t p) {  }
+		void reflectionSector(SizeType p) {  }
 
 	private:
 		ModelType const *model_;

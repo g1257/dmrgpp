@@ -141,7 +141,7 @@ if we want to print informational stuff.
 			const DmrgBasisWithOperatorsType& pBasis,
 			const DmrgBasisWithOperatorsType& pBasisSummed,
 			const DmrgBasisType& pSE,
-			size_t direction,
+			SizeType direction,
 			bool debug=false,
 			bool verbose=false)
 			
@@ -207,7 +207,7 @@ enough.
 Again nothing can be actually done here, we simply delegate to the appropriate class.
 @o DensityMatrix.h -t
 @{
-		size_t rank() { return densityMatrixImpl_->rank(); }
+		SizeType rank() { return densityMatrixImpl_->rank(); }
 @}
 
 These are just checks to see if everything is OK.

@@ -91,7 +91,7 @@ public:
 	typedef RealType_ RealType;
 
 	ParallelWft(typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
-				size_t nk,
+				SizeType nk,
 				const WaveFunctionTransfType& wft,
 				const LeftRightSuperType& lrs)
 		: targetVectors_(targetVectors),
@@ -100,11 +100,11 @@ public:
 		  lrs_(lrs)
 	{}
 
-	void thread_function_(size_t threadNum,size_t blockSize,size_t total,pthread_mutex_t* myMutex)
+	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
 	{
-		size_t nk = nk_;
-		for (size_t p=0;p<blockSize;p++) {
-			size_t ix = threadNum * blockSize + p + 1;
+		SizeType nk = nk_;
+		for (SizeType p=0;p<blockSize;p++) {
+			SizeType ix = threadNum * blockSize + p + 1;
 			if (ix>=targetVectors_.size()) break;
 			VectorWithOffsetType phiNew = targetVectors_[0];
 			wft_.setInitialVector(phiNew,targetVectors_[ix],lrs_,nk);
@@ -121,7 +121,7 @@ public:
 private:
 
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
-	size_t nk_;
+	SizeType nk_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
 }; // class ParallelWft

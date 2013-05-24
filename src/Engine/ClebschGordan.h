@@ -95,15 +95,15 @@ namespace Dmrg {
 	class ClebschGordan {
 			typedef FieldType LongType;
 		public:
-			typedef std::pair<size_t,size_t> PairType;
-			ClebschGordan(size_t numberOfFactorials) :
+			typedef std::pair<SizeType,SizeType> PairType;
+			ClebschGordan(SizeType numberOfFactorials) :
 				factorial_(numberOfFactorials),
 					   progress_("ClebschGordan",0)
 			{
 				init(numberOfFactorials);
 			}
 
-			void init(size_t numberOfFactorials)
+			void init(SizeType numberOfFactorials)
 			{
 				factorial_.resize(numberOfFactorials),
 				createFactorials();
@@ -191,7 +191,7 @@ namespace Dmrg {
 			FieldType cg_f2(FieldType j3,FieldType m3,FieldType j1,FieldType m1,FieldType j2,FieldType m2)  const
 			{
 				FieldType sumk = 0;
-				for (size_t k=0;k<factorial_.size();k++) {
+				for (SizeType k=0;k<factorial_.size();k++) {
 					if (j1+j2-j3-k <0) continue;
 					if (j3-j1-m2+k <0) continue;
 					if (j3-j2+m1+k <0) continue;
@@ -215,7 +215,7 @@ namespace Dmrg {
 			void createFactorials() 
 			{
 				factorial_[0]=1;
-				for (size_t i=1;i<factorial_.size();i++) factorial_[i]=i*factorial_[i-1];
+				for (SizeType i=1;i<factorial_.size();i++) factorial_[i]=i*factorial_[i-1];
 			}
 
 			LongType fact_(LongType x) const { return factorial_[(int)x]; }
@@ -227,13 +227,13 @@ namespace Dmrg {
 				return -1;
 			}
 			
-			static size_t copies_;
+			static SizeType copies_;
 			typename PsimagLite::Vector<LongType>::Type factorial_;
 			PsimagLite::ProgressIndicator progress_;
 	}; // ClebschGordan
 	
 	template<typename FieldType>
-	size_t ClebschGordan<FieldType>::copies_=0;
+	SizeType ClebschGordan<FieldType>::copies_=0;
 } // namespace Dmrg
 
 /*@}*/

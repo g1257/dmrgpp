@@ -105,7 +105,7 @@ public:
 		       const LeftRightSuperType& lrs,
 		       const VectorType& wf,
 		       const SparseMatrixType& transform,
-		       size_t direction)
+		       SizeType direction)
 		: fS_(fS),
 		  fE_(fE),
 		  lrs_(lrs),
@@ -143,14 +143,14 @@ public:
 
 		// save wavefunction
 		PsimagLite::String label = "#WAVEFUNCTION_sites=";
-		for (size_t i=0;i<lrs_.super().block().size();i++) {
+		for (SizeType i=0;i<lrs_.super().block().size();i++) {
 			label += ttos(lrs_.super().block()[i])+",";
 		}
 		//SparseVector<typename TargettingType::TargetVectorType::value_type> psiSparse(target.gs());
 		wavefunction_.save(io,label);
 
 		label = "#TRANSFORM_sites=";
-		for (size_t i=0;i<lrs_.left().block().size();i++) {
+		for (SizeType i=0;i<lrs_.left().block().size();i++) {
 			label += ttos(lrs_.left().block()[i])+",";
 		}
 		io.printMatrix(transform_,label);
@@ -176,14 +176,14 @@ public:
 
 	const VectorType& wavefunction() const { return wavefunction_; }
 
-	size_t columns() const { return transform_.col(); }
+	SizeType columns() const { return transform_.col(); }
 
-	size_t rows() const { return transform_.row(); }
+	SizeType rows() const { return transform_.row(); }
 
-	size_t direction() const { return direction_; }
+	SizeType direction() const { return direction_; }
 
 	// experimental!!
-	size_t site() const
+	SizeType site() const
 	{
 		if (direction_==ProgramGlobals::EXPAND_SYSTEM) return lrs_.right().block()[0]-1;
 		else return lrs_.right().block()[0];
@@ -197,8 +197,8 @@ public:
 		int nSmall = transform.n_col();
 		MatrixType fmTmp(nSmall,nBig);
 		typename MatrixType::value_type alpha=1.0,beta=0.0;
-		if (ret.n_row()!=size_t(nSmall) || ret.n_col()!=
-				size_t(nSmall)) ret.reset(nSmall,nSmall);
+		if (ret.n_row()!=SizeType(nSmall) || ret.n_col()!=
+				SizeType(nSmall)) ret.reset(nSmall,nSmall);
 		psimag::BLAS::GEMM('N','N',nBig,nSmall,nBig,alpha,
 				   &(O(0,0)),nBig,&(transform(0,0)),nBig,beta,
 				   &(fmTmp(0,0)),nBig);
@@ -219,7 +219,7 @@ private:
 	LeftRightSuperType lrs_;
 	VectorType wavefunction_;
 	SparseMatrixType transform_;
-	size_t direction_;
+	SizeType direction_;
 }; // class DmrgSerializer
 } // namespace Dmrg 
 

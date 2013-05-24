@@ -101,7 +101,7 @@ namespace Dmrg {
 		typedef MatrixType_ MatrixType;
 		typedef VectorType_ VectorType;
 		typedef VectorWithOffsetType_ VectorWithOffsetType;
-		typedef size_t IndexType;
+		typedef SizeType IndexType;
 		typedef typename VectorType::value_type FieldType;
 		typedef typename LeftRightSuperType::BasisWithOperatorsType
 				BasisWithOperatorsType;
@@ -118,8 +118,8 @@ namespace Dmrg {
 
 		ObserverHelper(
 				IoInputType& io,
-				size_t nf,
-				size_t numberOfPthreads,
+				SizeType nf,
+				SizeType numberOfPthreads,
 				bool hasTimeEvolution,
 				bool verbose)
 			:	io_(io),
@@ -137,7 +137,7 @@ namespace Dmrg {
 		
 		~ObserverHelper() 
 		{
-			for (size_t i=0;i<dSerializerV_.size();i++) {
+			for (SizeType i=0;i<dSerializerV_.size();i++) {
 				DmrgSerializerType* p = dSerializerV_[i];
 				delete p;
 			}
@@ -145,84 +145,84 @@ namespace Dmrg {
 		
 		bool endOfData() const { return noMoreData_; }
 
-		void setPointer(size_t threadId,size_t pos)
+		void setPointer(SizeType threadId,SizeType pos)
 		{
 			assert(threadId<currentPos_.size());
 			currentPos_[threadId]=pos;
 		}
 
-		size_t getPointer(size_t threadId) const
+		SizeType getPointer(SizeType threadId) const
 		{
 			assert(threadId<currentPos_.size());
 			return currentPos_[threadId];
 		}
 
-		void setBrackets(size_t left,size_t right)
+		void setBrackets(SizeType left,SizeType right)
 		{
 			bracket_[LEFT_BRACKET]=left;
 			bracket_[RIGHT_BRACKET]=right;
 		}
 
-		size_t bracket(size_t leftOrRight) const
+		SizeType bracket(SizeType leftOrRight) const
 		{
 			return bracket_[leftOrRight];
 		}
 
-		void transform(MatrixType& ret,const MatrixType& O2,size_t threadId) const
+		void transform(MatrixType& ret,const MatrixType& O2,SizeType threadId) const
 		{
 			checkPos(threadId);
 			return dSerializerV_[currentPos_[threadId]]->transform(ret,O2);
 		}
 
-		size_t columns(size_t threadId) const
+		SizeType columns(SizeType threadId) const
 		{
 			checkPos(threadId);
 			return dSerializerV_[currentPos_[threadId]]->columns();
 		}
 
-		size_t rows(size_t threadId) const
+		SizeType rows(SizeType threadId) const
 		{
 			checkPos(threadId);
 			return dSerializerV_[currentPos_[threadId]]->rows();
 		}
 
-		const FermionSignType& fermionicSignLeft(size_t threadId) const
+		const FermionSignType& fermionicSignLeft(SizeType threadId) const
 		{
 			checkPos(threadId);
 			return dSerializerV_[currentPos_[threadId]]->fermionicSignLeft();
 		}
 
-		const FermionSignType& fermionicSignRight(size_t threadId) const
+		const FermionSignType& fermionicSignRight(SizeType threadId) const
 		{
 			checkPos(threadId);
 			return dSerializerV_[currentPos_[threadId]]->fermionicSignRight();
 		}
 
-		const LeftRightSuperType& leftRightSuper(size_t threadId) const
+		const LeftRightSuperType& leftRightSuper(SizeType threadId) const
 		{
 			checkPos(threadId);
 			return dSerializerV_[currentPos_[threadId]]->leftRightSuper();
 		}
 
-		size_t direction(size_t threadId) const
+		SizeType direction(SizeType threadId) const
 		{
 			checkPos(threadId);
 			return dSerializerV_[currentPos_[threadId]]->direction();
 		}
 
-		const VectorWithOffsetType& wavefunction(size_t threadId) const
+		const VectorWithOffsetType& wavefunction(SizeType threadId) const
 		{
 			checkPos(threadId);
 			return dSerializerV_[currentPos_[threadId]]->wavefunction();
 		}
 
-		RealType time(size_t threadId) const
+		RealType time(SizeType threadId) const
 		{
 			checkPos(threadId);
 			return timeSerializerV_[currentPos_[threadId]].time();
 		}
 
-		size_t site(size_t threadId) const
+		SizeType site(SizeType threadId) const
 		{
 			checkPos(threadId);
 			return  (timeSerializerV_.size()==0) ?
@@ -230,18 +230,18 @@ namespace Dmrg {
 					  : timeSerializerV_[currentPos_[threadId]].site();
 		}
 		
-		size_t size() const
+		SizeType size() const
 		{
 			return dSerializerV_.size(); //-1;
 		}
 
-		size_t marker(size_t threadId) const
+		SizeType marker(SizeType threadId) const
 		{
 			checkPos(threadId);
 			return timeSerializerV_[currentPos_[threadId]].marker();
 		}
 
-		const VectorWithOffsetType& getVectorFromBracketId(size_t leftOrRight,size_t threadId) const
+		const VectorWithOffsetType& getVectorFromBracketId(SizeType leftOrRight,SizeType threadId) const
 		{
 			if (bracket(leftOrRight)==GS_VECTOR) {
 				return wavefunction(threadId);
@@ -249,7 +249,7 @@ namespace Dmrg {
 			return timeVector(threadId);
 		}
 
-		const VectorWithOffsetType& timeVector(size_t threadId) const
+		const VectorWithOffsetType& timeVector(SizeType threadId) const
 		{
 			checkPos(threadId);
 			return timeSerializerV_[currentPos_[threadId]].vector();
@@ -264,7 +264,7 @@ namespace Dmrg {
 
 	private:
 
-		bool init(bool hasTimeEvolution,size_t nf)
+		bool init(bool hasTimeEvolution,SizeType nf)
 		{
 
 			dSerializerV_.clear();
@@ -273,8 +273,8 @@ namespace Dmrg {
 			// without ever rewinding
 			// In other words, file rewinding is left to the user
 			// of the observer/observerhelper class.
-			size_t offset = 0;
-			size_t counter=0;
+			SizeType offset = 0;
+			SizeType counter=0;
 			while(true) {
 				if (nf>0 && dSerializerV_.size()==nf) break;
 				if (verbose_)
@@ -305,8 +305,8 @@ namespace Dmrg {
 		{
 			if (dSerializerV_.size()!=timeSerializerV_.size()) throw PsimagLite::RuntimeError("Error 1\n");
 			if (dSerializerV_.size()==0) return;
-			for (size_t x=0;x<dSerializerV_.size()-1;x++) {
-				size_t n = dSerializerV_[x]->leftRightSuper().super().size();
+			for (SizeType x=0;x<dSerializerV_.size()-1;x++) {
+				SizeType n = dSerializerV_[x]->leftRightSuper().super().size();
 				if (n==0) continue;
 				if (n!=timeSerializerV_[x].size())
 					throw PsimagLite::RuntimeError("Error 2\n");
@@ -320,7 +320,7 @@ namespace Dmrg {
 			io_.rewind();
 		}
 
-		void getWaveFunction(VectorType& wavefunction,size_t ns)
+		void getWaveFunction(VectorType& wavefunction,SizeType ns)
 		{
 			VectorWithOffsetType tmpV;
 			tmpV.load(io_,"#WAVEFUNCTION_sites=",ns);
@@ -334,12 +334,12 @@ namespace Dmrg {
 			io_.rewind();
 		}
 
-		void checkPos(size_t threadId) const
+		void checkPos(SizeType threadId) const
 		{
 			if (threadId>=currentPos_.size())
 				checkFailedThread(threadId);
 
-			size_t pos = currentPos_[threadId];
+			SizeType pos = currentPos_[threadId];
 
 			if (pos>=dSerializerV_.size()) checkFailed1(threadId,pos);
 
@@ -349,7 +349,7 @@ namespace Dmrg {
 			if (pos>=timeSerializerV_.size()) checkFailed2(threadId,pos);
 		}
 
-		void checkFailedThread(size_t threadId) const
+		void checkFailedThread(SizeType threadId) const
 		{
 			assert(false);
 			PsimagLite::String str(__FILE__);
@@ -360,7 +360,7 @@ namespace Dmrg {
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
-		void checkFailed1(size_t threadId,size_t pos) const
+		void checkFailed1(SizeType threadId,SizeType pos) const
 		{
 			assert(false);
 			PsimagLite::String str(__FILE__);
@@ -371,7 +371,7 @@ namespace Dmrg {
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
-		void checkFailed2(size_t threadId,size_t pos) const
+		void checkFailed2(SizeType threadId,SizeType pos) const
 		{
 			assert(false);
 			PsimagLite::String str(__FILE__);
@@ -385,9 +385,9 @@ namespace Dmrg {
 		IoInputType& io_;
 		typename PsimagLite::Vector<DmrgSerializerType*>::Type dSerializerV_;
 		typename PsimagLite::Vector<TimeSerializerType>::Type timeSerializerV_;
-		typename PsimagLite::Vector<size_t>::Type currentPos_; // it's a vector: one per pthread
+		typename PsimagLite::Vector<SizeType>::Type currentPos_; // it's a vector: one per pthread
 		bool verbose_;
-		typename PsimagLite::Vector<size_t>::Type bracket_;
+		typename PsimagLite::Vector<SizeType>::Type bracket_;
 		bool noMoreData_;
 	};  //ObserverHelper
 
@@ -406,7 +406,7 @@ namespace Dmrg {
 				VectorWithOffsetType1,
 				LeftRightSuperType1>& p)
 	{
-		for (size_t i=0;i<p.SpermutationInverse_.size();i++) {
+		for (SizeType i=0;i<p.SpermutationInverse_.size();i++) {
 			os<<"i="<<i<<"\n";
 			os<<"\tS.size="<<p.SpermutationInverse_[i].size();
 			os<<" "<<p.Spermutation_[i].size()<<"\n";

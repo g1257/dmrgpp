@@ -121,9 +121,9 @@ namespace Dmrg {
 		  modelHubbard_(io,dmrgGeometry,concurrency)
 		{}
 
-// 		size_t orbitals() const { return modelHubbard_.orbitals(); }
+// 		SizeType orbitals() const { return modelHubbard_.orbitals(); }
 
-		size_t hilbertSize(size_t site) const
+		SizeType hilbertSize(SizeType site) const
 		{
 			return modelHubbard_.hilbertSize(site);
 		}
@@ -156,8 +156,8 @@ namespace Dmrg {
 		}
 
 		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
-								      size_t site,
-								      size_t dof) const
+								      SizeType site,
+								      SizeType dof) const
 		{
 			Block block;
 			block.resize(1);
@@ -175,9 +175,9 @@ namespace Dmrg {
 		}
 
 		//! find total number of electrons for each state in the basis
-		void findElectrons(typename PsimagLite::Vector<size_t> ::Type&electrons,
+		void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
 				   const typename PsimagLite::Vector<HilbertState>::Type& basis,
-		                   size_t site) const
+		                   SizeType site) const
 		{
 			modelHubbard_.findElectrons(electrons,basis,site);
 		}
@@ -185,8 +185,8 @@ namespace Dmrg {
 		//! find all states in the natural basis for a block of n sites
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 		void setNaturalBasis(HilbertBasisType  &basis,
-		                     typename PsimagLite::Vector<size_t>::Type& q,
-		                     const typename PsimagLite::Vector<size_t>::Type& block) const
+		                     typename PsimagLite::Vector<SizeType>::Type& q,
+		                     const typename PsimagLite::Vector<SizeType>::Type& block) const
 		{
 			modelHubbard_.setNaturalBasis(basis,q,block);
 		}
@@ -206,13 +206,13 @@ namespace Dmrg {
 		                                      const typename PsimagLite::Vector<HilbertState>::Type& natBasis) const
 		{
 
-			size_t n = natBasis.size();
+			SizeType n = natBasis.size();
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
 
-			for (size_t ii=0;ii<natBasis.size();ii++) {
+			for (SizeType ii=0;ii<natBasis.size();ii++) {
 				HilbertState ket=natBasis[ii];
 				cm(ii,ii) = 0.0;
-				for (size_t sigma=0;sigma<2;sigma++)
+				for (SizeType sigma=0;sigma<2;sigma++)
 					if (HilbertSpaceHubbardType::isNonZero(ket,i,sigma))
 						cm(ii,ii) += 1.0;
 			}
@@ -229,8 +229,8 @@ namespace Dmrg {
 		{
 			//Assume block.size()==1 and then problem solved!! there are no connection if there's only one site ;-)
 			assert(block.size()==1);
-// 			for (size_t sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) 
-// 				for (size_t sigma2=0;sigma2<DEGREES_OF_FREEDOM;sigma2++) 
+// 			for (SizeType sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) 
+// 				for (SizeType sigma2=0;sigma2<DEGREES_OF_FREEDOM;sigma2++) 
 // 					addNiNj(hmatrix,cm,block,sigma,sigma2);
 		}
 
@@ -239,7 +239,7 @@ namespace Dmrg {
 		{
 			assert(block.size()==1);
 			typename PsimagLite::Vector<HilbertState>::Type natBasis;
-			typename PsimagLite::Vector<size_t>::Type q;
+			typename PsimagLite::Vector<SizeType>::Type q;
 			modelHubbard_.setNaturalBasis(natBasis,q,block);
 
 			SparseMatrixType tmpMatrix = findOperatorMatrices(0,natBasis);

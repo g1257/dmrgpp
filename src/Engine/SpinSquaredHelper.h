@@ -100,11 +100,11 @@ namespace Dmrg {
 			}
 
 			//! receives m, returns (2*j,m+j)
-			std::pair<size_t,size_t> getJmPair(const FieldType& m) const
+			std::pair<SizeType,SizeType> getJmPair(const FieldType& m) const
 			{
-				size_t j = getJvalue();
-				size_t mtilde = getMvalue(m,j);
-				return std::pair<size_t,size_t>(j,mtilde);
+				SizeType j = getJvalue();
+				SizeType mtilde = getMvalue(m,j);
+				return std::pair<SizeType,SizeType>(j,mtilde);
 			}
 
 			void clear() { data_=0; }
@@ -121,21 +121,21 @@ namespace Dmrg {
 				return ri;
 			}
 
-			size_t getJvalue() const
+			SizeType getJvalue() const
 			{
 				if (data_<0) PsimagLite::RuntimeError("SpinSquaredHelper::getJvalue(): d<0\n");
 				int tmp = perfectSquareOrCrash(1.0+4.0*data_);
 				if (tmp<1) PsimagLite::RuntimeError("SpinSquaredHelper::getJvalue(): sqrt(1+4d)<1\n");
-				size_t ret = tmp-1;
+				SizeType ret = tmp-1;
 				return ret;	
 			}
 
-			size_t getMvalue(const FieldType& m,size_t j) const
+			SizeType getMvalue(const FieldType& m,SizeType j) const
 			{
 				FieldType tmp = m+j*0.5;
 				if (tmp<0)  PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue(): j+m <0\n");
-				size_t ret = size_t(tmp);
-				if (ret!=tmp) PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue(): j+m not size_t\n");
+				SizeType ret = SizeType(tmp);
+				if (ret!=tmp) PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue(): j+m not SizeType\n");
 				return ret;
 			}
 		}; // class SpinSquaredHelper

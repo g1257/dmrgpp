@@ -109,7 +109,7 @@ transformed operator can be used (or not because of the reason limitation above)
 	template<typename OperatorType_,typename BasisType_>
 	class OperatorsBase {
 		
-		typedef std::pair<size_t,size_t> PairType;
+		typedef std::pair<SizeType,SizeType> PairType;
 		static const bool EXCLUDE = false;
 
 	public:
@@ -128,7 +128,7 @@ transformed operator can be used (or not because of the reason limitation above)
 
 		template<typename IoInputter>
 		OperatorsBase(IoInputter& io,
-		              size_t level,
+		              SizeType level,
 		              const BasisType* thisBasis)
 		: useSu2Symmetry_(BasisType::useSu2Symmetry()),
 		  reducedOpImpl_(io,level,thisBasis),
@@ -166,7 +166,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		const OperatorType& getOperatorByIndex(int i) const
 		{
 			assert(!useSu2Symmetry_);
-			assert(i>=0 && size_t(i)<operators_.size());
+			assert(i>=0 && SizeType(i)<operators_.size());
 			return operators_[i];
 		}
 
@@ -176,7 +176,7 @@ transformed operator can be used (or not because of the reason limitation above)
 			return reducedOpImpl_.getReducedOperatorByIndex(i);
 		}
 
-		size_t numberOfOperators() const
+		SizeType numberOfOperators() const
 		{
 			if (useSu2Symmetry_) return reducedOpImpl_.size();
 			return operators_.size();
@@ -186,14 +186,14 @@ transformed operator can be used (or not because of the reason limitation above)
 		void changeBasis(const SparseMatrixType& ftransform,
 		                 const BasisType* thisBasis,
 				 ConcurrencyType &concurrency)
-// 		                 const std::pair<size_t,size_t>& startEnd)
+// 		                 const std::pair<SizeType,SizeType>& startEnd)
 		{
 			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
-			size_t total = numberOfOperators();
+			SizeType total = numberOfOperators();
 
 			PsimagLite::Range<ConcurrencyType> range(0,total,concurrency);
 			for (;!range.end();range.next()) {
-				size_t k = range.index();
+				SizeType k = range.index();
 				if (isExcluded(k,thisBasis)) {
 					operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
 					continue;
@@ -222,9 +222,9 @@ transformed operator can be used (or not because of the reason limitation above)
 			multiply(v,transformConj,tmp);
 		}
 
-		void reorder(const typename PsimagLite::Vector<size_t>::Type& permutation)
+		void reorder(const typename PsimagLite::Vector<SizeType>::Type& permutation)
 		{
-			for (size_t k=0;k<numberOfOperators();k++) {
+			for (SizeType k=0;k<numberOfOperators();k++) {
 				if (!useSu2Symmetry_) reorder(operators_[k].data,permutation);
 				reducedOpImpl_.reorder(k,permutation);
 			}
@@ -232,12 +232,12 @@ transformed operator can be used (or not because of the reason limitation above)
 			reducedOpImpl_.reorderHamiltonian(permutation);
 		}
 
-		void setMomentumOfOperators(const typename PsimagLite::Vector<size_t>::Type& momentum)
+		void setMomentumOfOperators(const typename PsimagLite::Vector<SizeType>::Type& momentum)
 		{
 			reducedOpImpl_.setMomentumOfOperators(momentum);
 		}
 
-		void setToProduct(const BasisType& basis2,const BasisType& basis3,size_t x,const BasisType* thisBasis)
+		void setToProduct(const BasisType& basis2,const BasisType& basis3,SizeType x,const BasisType* thisBasis)
 		{
 			if (!useSu2Symmetry_) operators_.resize(x);
 			reducedOpImpl_.setToProduct(basis2,basis3,x,thisBasis);
@@ -268,7 +268,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		and !PTEX\\_REF{HERE}.
 		*/
 		template<typename ApplyFactorsType>
-		void externalProduct(size_t i,
+		void externalProduct(SizeType i,
 		                     const OperatorType& m,
 		                     int x,
 		                     const typename PsimagLite::Vector<RealType>::Type& fermionicSigns,
@@ -284,7 +284,7 @@ transformed operator can be used (or not because of the reason limitation above)
 			apply(operators_[i].data);
 		}
 
-		void externalProductReduced(size_t i,
+		void externalProductReduced(SizeType i,
 		                            const BasisType& basis2,
 		                            const BasisType& basis3,
 		                            bool option,
@@ -329,12 +329,12 @@ transformed operator can be used (or not because of the reason limitation above)
 			return reducedOpImpl_.hamiltonian();
 		}
 
-		//const typename PsimagLite::Vector<size_t>::Type& electrons() const {return operatorsImpl_.electrons(); }
+		//const typename PsimagLite::Vector<SizeType>::Type& electrons() const {return operatorsImpl_.electrons(); }
 
 		void print(int ind= -1) const
 		{
 			if (!useSu2Symmetry_) {
-				if (ind<0) for (size_t i=0;i<operators_.size();i++) std::cerr<<operators_[i];
+				if (ind<0) for (SizeType i=0;i<operators_.size();i++) std::cerr<<operators_[i];
 				else std::cerr<<operators_[ind];
 			} else {
 				reducedOpImpl_.print(ind);
@@ -349,11 +349,11 @@ transformed operator can be used (or not because of the reason limitation above)
 			io.printMatrix(hamiltonian_,"#HAMILTONIAN");
 		}
 
-		size_t size() const { return operators_.size(); }
+		SizeType size() const { return operators_.size(); }
 
 	private:
 
-		void reorder(SparseMatrixType &v,const typename PsimagLite::Vector<size_t>::Type& permutation)
+		void reorder(SparseMatrixType &v,const typename PsimagLite::Vector<SizeType>::Type& permutation)
 		{
 			SparseMatrixType matrixTmp;
 
@@ -361,9 +361,9 @@ transformed operator can be used (or not because of the reason limitation above)
 			permuteInverse(v,matrixTmp,permutation);
 		}
 
-		bool isExcluded(size_t k,
+		bool isExcluded(SizeType k,
 			       const BasisType* thisBasis)
-// 		               const std::pair<size_t,size_t>& startEnd)
+// 		               const std::pair<SizeType,SizeType>& startEnd)
 		{
 			if (!EXCLUDE) return false; // <-- this is the safest answer
 // 			if (k<startEnd.first || k>=startEnd.second) return true;

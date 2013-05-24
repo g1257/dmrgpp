@@ -191,13 +191,13 @@ namespace Dmrg {
 				progress_.printline(msg,os);
 			}
 
-			size_t sites() const
+			SizeType sites() const
 			{
 				return left_->block().size() + right_->block().size();
 			}
 
 			/*!PTEX_LABEL{setToProductLrs} */
-			void setToProduct(size_t quantumSector)
+			void setToProduct(SizeType quantumSector)
 			{
 				super_->setToProduct(*left_,*right_,quantumSector);
 			}
@@ -279,7 +279,7 @@ namespace Dmrg {
 			          const SomeModelType& model,
 				  BasisWithOperatorsType &pS,
 				  const BlockType& X,
-			          size_t dir,
+			          SizeType dir,
 				  RealType time)
 			{
 				SparseMatrixType hmatrix;
@@ -310,7 +310,7 @@ namespace Dmrg {
 			BasisWithOperatorsType* left_;
 			BasisWithOperatorsType* right_;
 			SuperBlockType* super_;
-			size_t refCounter_;
+			SizeType refCounter_;
 			
 	}; // class LeftRightSuper
 

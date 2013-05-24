@@ -86,7 +86,7 @@ namespace Dmrg {
 template<typename RealType_,typename TwoPointCorrelationsType>
 class Parallel2PointCorrelations {
 
-	typedef std::pair<size_t,size_t> PairType;
+	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename TwoPointCorrelationsType::MatrixType MatrixType;
 	typedef typename MatrixType::value_type FieldType;
 
@@ -108,15 +108,15 @@ public:
 		  fermionicSign_(fermionicSign)
 	{}
 
-	void thread_function_(size_t threadNum,size_t blockSize,size_t total,pthread_mutex_t* myMutex)
+	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
 	{
-		for (size_t p=0;p<blockSize;p++) {
-			size_t px = threadNum * blockSize + p;
+		for (SizeType p=0;p<blockSize;p++) {
+			SizeType px = threadNum * blockSize + p;
 			if (px>=total) continue;
 
-			size_t i = pairs_[px].first;
-			size_t j = pairs_[px].second;
-			size_t threadId = (myMutex==0) ? 0 : threadNum;
+			SizeType i = pairs_[px].first;
+			SizeType j = pairs_[px].second;
+			SizeType threadId = (myMutex==0) ? 0 : threadNum;
 			w_(i,j) = twopoint_.calcCorrelation(i,j,O1_,O2_,fermionicSign_,threadId);
 		}
 	}

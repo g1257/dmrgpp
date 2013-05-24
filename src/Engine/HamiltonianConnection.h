@@ -92,7 +92,7 @@ namespace Dmrg {
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 			typedef typename ModelHelperType::LinkType LinkType;
-			typedef std::pair<size_t,size_t> PairType;
+			typedef std::pair<SizeType,SizeType> PairType;
 			typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 
 		HamiltonianConnection(const GeometryType& geometry,
@@ -109,18 +109,18 @@ namespace Dmrg {
 			  emin_(*std::min_element(envBlock_.begin(),envBlock_.end()))
 			{}
 
-			bool compute(size_t i,
-			             size_t j,
+			bool compute(SizeType i,
+			             SizeType j,
 			             SparseMatrixType* matrixBlock,
 				     LinkProductStructType* lps,
-				     size_t& total) const
+				     SizeType& total) const
 			{
 				bool flag=false;
-				size_t ind = modelHelper_.leftRightSuper().super().block()[i];
-				size_t jnd = modelHelper_.leftRightSuper().super().block()[j];
+				SizeType ind = modelHelper_.leftRightSuper().super().block()[i];
+				SizeType jnd = modelHelper_.leftRightSuper().super().block()[j];
 
 				if (!geometry_.connected(smax_,emin_,ind,jnd)) return flag;
-				size_t type = geometry_.connectionKind(smax_,ind,jnd);
+				SizeType type = geometry_.connectionKind(smax_,ind,jnd);
 
 				if (type==ProgramGlobals::SYSTEM_SYSTEM || 
 					type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
@@ -129,11 +129,11 @@ namespace Dmrg {
 
 				AdditionalDataType additionalData;
 
-				for (size_t term=0;term<geometry_.terms();term++) {
+				for (SizeType term=0;term<geometry_.terms();term++) {
 					geometry_.fillAdditionalData(additionalData,term,ind,jnd);
-					size_t dofsTotal = LinkProductType::dofs(term,additionalData);
-					for (size_t dofs=0;dofs<dofsTotal;dofs++) {
-						std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs,additionalData);
+					SizeType dofsTotal = LinkProductType::dofs(term,additionalData);
+					for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
+						std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,dofs,additionalData);
 						SparseElementType tmp = geometry_(smax_,emin_,ind,edofs.first,jnd,edofs.second,term);
 				
 						if (tmp==static_cast<RealType>(0.0)) continue;
@@ -160,13 +160,13 @@ namespace Dmrg {
 				return flag;
 			}
 
-			void thread_function_(size_t threadNum,size_t blockSize,size_t total,pthread_mutex_t* myMutex)
+			void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
 			{
 				typename PsimagLite::Vector<SparseElementType>::Type xtemp(x_.size(),0);
-				size_t i =0, j = 0, type = 0,term = 0, dofs =0;
+				SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
 				SparseElementType tmp = 0.0;
-				for (size_t p=0;p<blockSize;p++) {
-					size_t ix = threadNum * blockSize + p;
+				for (SizeType p=0;p<blockSize;p++) {
+					SizeType ix = threadNum * blockSize + p;
 					if (ix>=total) break;
 					AdditionalDataType additionalData;
 					prepare(ix,i,j,type,tmp,term,dofs,additionalData);
@@ -175,11 +175,11 @@ namespace Dmrg {
 					
 				}
 				if (myMutex) pthread_mutex_lock( myMutex);
-				for (size_t i=0;i<x_.size();i++) x_[i]+=xtemp[i];
+				for (SizeType i=0;i<x_.size();i++) x_[i]+=xtemp[i];
 				if (myMutex) pthread_mutex_unlock( myMutex );
 			}
 
-			void prepare(size_t ix,size_t& i,size_t& j,size_t& type,SparseElementType& tmp,size_t& term,size_t& dofs,AdditionalDataType& additionalData) const
+			void prepare(SizeType ix,SizeType& i,SizeType& j,SizeType& type,SparseElementType& tmp,SizeType& term,SizeType& dofs,AdditionalDataType& additionalData) const
 			{
 				i=lps_.isaved[ix];
 				j=lps_.jsaved[ix];
@@ -187,35 +187,35 @@ namespace Dmrg {
 				term = lps_.termsaved[ix];
 				dofs = lps_.dofssaved[ix];
 				tmp=lps_.tmpsaved[ix];
-				size_t ind = modelHelper_.leftRightSuper().super().block()[i];
-				size_t jnd = modelHelper_.leftRightSuper().super().block()[j];
+				SizeType ind = modelHelper_.leftRightSuper().super().block()[i];
+				SizeType jnd = modelHelper_.leftRightSuper().super().block()[j];
 				geometry_.fillAdditionalData(additionalData,term,ind,jnd);
 			}
 
 			LinkType getKron(const SparseMatrixType** A,
 							 const SparseMatrixType** B,
-							 size_t i,
-							 size_t j,
-							 size_t type,
+							 SizeType i,
+							 SizeType j,
+							 SizeType type,
 							 const SparseElementType& valuec,
-							 size_t term,
-							 size_t dofs,
+							 SizeType term,
+							 SizeType dofs,
 							 const AdditionalDataType& additionalData) const
 			{
 				int offset = modelHelper_.leftRightSuper().left().block().size();
 				PairType ops;
 				std::pair<char,char> mods('N','C');
-				size_t fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
+				SizeType fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
 				RealType angularFactor=0;
 				bool isSu2 = modelHelper_.isSu2();
 				SparseElementType value = valuec;
 				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData);
 				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData);
 				LinkType link2(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
-				size_t sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
-				size_t envOrSys = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::Environ : ModelHelperType::System;
-				size_t site1Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site1 : link2.site1-offset;
-				size_t site2Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site2-offset : link2.site2;
+				SizeType sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
+				SizeType envOrSys = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::Environ : ModelHelperType::System;
+				SizeType site1Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site1 : link2.site1-offset;
+				SizeType site2Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site2-offset : link2.site2;
 
 				*A = &modelHelper_.getReducedOperator(link2.mods.first,site1Corrected,link2.ops.first,sysOrEnv);
 				*B = &modelHelper_.getReducedOperator(link2.mods.second,site2Corrected,link2.ops.second,envOrSys);
@@ -234,13 +234,13 @@ namespace Dmrg {
 		private:
 
 			//! Adds a connector between system and environment
-			size_t calcBond(SparseMatrixType &matrixBlock,
-					size_t i,
-			                size_t j,
-					size_t type,
+			SizeType calcBond(SparseMatrixType &matrixBlock,
+					SizeType i,
+			                SizeType j,
+					SizeType type,
 			                const SparseElementType& valuec,
-			                size_t term,
-					size_t dofs,
+			                SizeType term,
+					SizeType dofs,
 							const AdditionalDataType& additionalData) const
 			{
 				SparseMatrixType const* A = 0;
@@ -254,12 +254,12 @@ namespace Dmrg {
 			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
 			void linkProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
 							 const typename PsimagLite::Vector<SparseElementType>::Type& y,
-							 size_t i,
-							 size_t j,
-							 size_t type,
+							 SizeType i,
+							 SizeType j,
+							 SizeType type,
 							 const SparseElementType &valuec,
-							 size_t term,
-							 size_t dofs,
+							 SizeType term,
+							 SizeType dofs,
 							 AdditionalDataType& additionalData) const
 			{
 				SparseMatrixType const* A = 0;
@@ -275,7 +275,7 @@ namespace Dmrg {
 			const typename PsimagLite::Vector<SparseElementType>::Type& y_;
 			const typename GeometryType::BlockType& systemBlock_;
 			const typename GeometryType::BlockType& envBlock_;
-			size_t smax_,emin_;
+			SizeType smax_,emin_;
 	}; // class HamiltonianConnection
 } // namespace Dmrg 
 

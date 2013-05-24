@@ -100,8 +100,8 @@ namespace Dmrg {
 
 			struct MettsPrev {
 				MettsPrev() : fixed(0),permutationInverse(0) { }
-				size_t fixed;
-				typename PsimagLite::Vector<size_t>::Type permutationInverse;
+				SizeType fixed;
+				typename PsimagLite::Vector<SizeType>::Type permutationInverse;
 			};
 
 		public:
@@ -152,15 +152,15 @@ namespace Dmrg {
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
-			const static size_t SYSTEM = ProgramGlobals::SYSTEM;
+			const static SizeType SYSTEM = ProgramGlobals::SYSTEM;
 
-			static const size_t parallelRank_ = 0; // Metts needs to support concurrency FIXME
+			static const SizeType parallelRank_ = 0; // Metts needs to support concurrency FIXME
 
 			MettsTargetting(const LeftRightSuperType& lrs,
 	 		                const ModelType& model,
 			                const TargettingParamsType& mettsStruct,
 			                const WaveFunctionTransfType& wft,
-			                const size_t& quantumSector)
+			                const SizeType& quantumSector)
 			: stage_(DISABLED),
 			  lrs_(lrs),
 			  model_(model),
@@ -182,8 +182,8 @@ namespace Dmrg {
 							"needs an enabled wft\n");
 
 				RealType tau =mettsStruct_.tau/(mettsStruct_.timeSteps-1);
-				size_t n1 = mettsStruct_.timeSteps;
-				size_t n = mettsStruct_.timeSteps + 1;
+				SizeType n1 = mettsStruct_.timeSteps;
+				SizeType n = mettsStruct_.timeSteps + 1;
 
 				betas_.resize(n1);
 				weight_.resize(n);
@@ -226,7 +226,7 @@ namespace Dmrg {
 
 			const ModelType& model() const { return model_; }
 
-			RealType weight(size_t i) const
+			RealType weight(SizeType i) const
 			{
 				return weight_[i]; //(allStages(DISABLED)) ? 0.5 : weight_[i];
 			}
@@ -236,7 +236,7 @@ namespace Dmrg {
 				return gsWeight_; //(allStages(DISABLED)) ?  0.5 : gsWeight_;
 			}
 
-			RealType normSquared(size_t i) const
+			RealType normSquared(SizeType i) const
 			{
 				// call to mult will conjugate one of the vectors
 				return multiply(targetVectors_[i],targetVectors_[i]); 
@@ -249,13 +249,13 @@ namespace Dmrg {
 				//psi_.set(v,someBasis);
 			}
 
-			const RealType& operator[](size_t i) const
+			const RealType& operator[](SizeType i) const
 			{
 				PsimagLite::String s("MettsTargetting: invalid const operator[]\n");
 				throw PsimagLite::RuntimeError(s.c_str());
 			}
 
-			RealType& operator[](size_t i)
+			RealType& operator[](SizeType i)
 			{
 				PsimagLite::String s("MettsTargetting: invalid operator[]\n");
 				throw PsimagLite::RuntimeError(s.c_str());
@@ -268,15 +268,15 @@ namespace Dmrg {
 
 			bool includeGroundStage() const {return (fabs(gsWeight_)>1e-6); }
 
-			size_t size() const
+			SizeType size() const
 			{
 				if (allStages(DISABLED)) return 1;
-				size_t n = targetVectors_.size();
+				SizeType n = targetVectors_.size();
 				if (targetVectors_[n-1].size()==0) n--;
 				return n;
 			}
 
-			const VectorWithOffsetType& operator()(size_t i) const
+			const VectorWithOffsetType& operator()(SizeType i) const
 			{
 				return targetVectors_[i];
 			}
@@ -287,17 +287,17 @@ namespace Dmrg {
 			}
 
 			void evolve(RealType Eg,
-			            size_t direction,
+			            SizeType direction,
 			            const BlockType& block1,
 			            const BlockType& block2,
-			            size_t loopNumber)
+			            SizeType loopNumber)
 			{
-				typename PsimagLite::Vector<size_t>::Type sites;
+				typename PsimagLite::Vector<SizeType>::Type sites;
 				if (direction==INFINITE)
 					utils::blockUnion(sites,block1,block2);
 				else sites = block1;
 
-				size_t n1 = mettsStruct_.timeSteps;
+				SizeType n1 = mettsStruct_.timeSteps;
 
 				if (direction==INFINITE) {
 					updateStochastics(block1,block2);
@@ -305,9 +305,9 @@ namespace Dmrg {
 					return;
 				}
 
-				size_t max = (noStageIs(DISABLED)) ? 1 : n1;
+				SizeType max = (noStageIs(DISABLED)) ? 1 : n1;
 				// Advance or wft each target vector for beta/2
-				for (size_t i=0;i<max;i++) {
+				for (SizeType i=0;i<max;i++) {
 					evolve(i,0,n1-1,Eg,direction,sites,loopNumber);
 				}
 
@@ -318,7 +318,7 @@ namespace Dmrg {
 				if (targetVectors_[n1].size()>0)
 					evolve(n1,n1,n1-1,Eg,direction,sites,loopNumber);
 
-				for (size_t i=0;i<targetVectors_.size();i++)
+				for (SizeType i=0;i<targetVectors_.size();i++)
 					assert(targetVectors_[i].size()==0 || targetVectors_[i].size()==lrs_.super().permutationVector().size());
 
 				cocoon(direction,sites,false);
@@ -337,7 +337,7 @@ namespace Dmrg {
 
 				if (hasCollapsed) {
 					PsimagLite::String s = "  COLLAPSEHERE  ";
-					for (size_t i=0;i<sites.size();i++) {
+					for (SizeType i=0;i<sites.size();i++) {
 						test(targetVectors_[n1],targetVectors_[n1],direction,s,sites[i],false);
 						if (isAtBorder(direction,sites[0]))
 							test(targetVectors_[n1],targetVectors_[n1],direction,s,sites[i],true);
@@ -352,38 +352,38 @@ namespace Dmrg {
  				typename IoType::In io(f);
  
  				TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
- 				for (size_t i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
+ 				for (SizeType i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
  				currentBeta_ = ts.time();
 			}
 
 			void print(std::ostream& os) const
 			{
 				os<<"MettsWeightsTimeVectors=";
-				for (size_t i=0;i<weight_.size();i++)
+				for (SizeType i=0;i<weight_.size();i++)
 					os<<weight_[i]<<" ";
 				os<<"\n";
 				os<<"MettsWeightGroundState="<<gsWeight_<<"\n";
 			}
 
 			void initialGuess(VectorWithOffsetType& v,
-			                  const typename PsimagLite::Vector<size_t>::Type& block) const
+			                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 			{
 				PsimagLite::String s("MettsTargetting: Invalid call to initialGuess\n");
 				throw PsimagLite::RuntimeError(s.c_str());
 			}
 
 			template<typename IoOutputType>
-			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
+			void save(const typename PsimagLite::Vector<SizeType>::Type& block,IoOutputType& io) const
 			{
 				PsimagLite::OstringStream msg;
  				msg<<"Saving state...";
  				progress_.printline(msg,std::cout);
 
-				size_t marker = 0;
+				SizeType marker = 0;
 				if (noStageIs(DISABLED)) marker = 1;
 				typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors(targetVectors_.size());
 				if (mettsStruct_.beta>currentBeta_) {
-					for (size_t i=0;i<targetVectors.size();i++)
+					for (SizeType i=0;i<targetVectors.size();i++)
 						targetVectors[i].resize(0);
 				} else {
 					targetVectors = targetVectors_;
@@ -401,13 +401,13 @@ namespace Dmrg {
 
 		private:
 
-			void evolve(size_t index,
-			            size_t start,
-			            size_t indexAdvance,
+			void evolve(SizeType index,
+			            SizeType start,
+			            SizeType indexAdvance,
 			            RealType Eg,
-			            size_t direction,
-			            const typename PsimagLite::Vector<size_t>::Type& block,
-			            size_t loopNumber)
+			            SizeType direction,
+			            const typename PsimagLite::Vector<SizeType>::Type& block,
+			            SizeType loopNumber)
 			{
 				if (index==0 && start==0)
 					advanceCounterAndComputeStage(block);
@@ -419,7 +419,7 @@ namespace Dmrg {
 				advanceOrWft(index,indexAdvance,direction,block);
 			}
 
-			void advanceCounterAndComputeStage(const typename PsimagLite::Vector<size_t>::Type& block)
+			void advanceCounterAndComputeStage(const typename PsimagLite::Vector<SizeType>::Type& block)
 			{
 				if (stage_!=COLLAPSE) stage_=WFT_NOADVANCE;
 
@@ -436,11 +436,11 @@ namespace Dmrg {
 					timesWithoutAdvancement_=0;
 					currentBeta_ = 0;
 					PsimagLite::OstringStream msg;
-					size_t n1 = mettsStruct_.timeSteps;
+					SizeType n1 = mettsStruct_.timeSteps;
 					RealType x = std::norm(targetVectors_[n1]);
 					msg<<"Changing direction, setting collapsed with norm="<<x;
 					progress_.printline(msg,std::cout);
-					for (size_t i=0;i<n1;i++)
+					for (SizeType i=0;i<n1;i++)
 						targetVectors_[i] = targetVectors_[n1];
 					timeVectorsBase_->timeHasAdvanced();
 					printAdvancement();
@@ -469,7 +469,7 @@ namespace Dmrg {
 				if (stage_!=COLLAPSE && currentBeta_>=mettsStruct_.beta) {
 					stage_ = COLLAPSE;
 					sitesCollapsed_.clear();
-					size_t n1 = mettsStruct_.timeSteps;
+					SizeType n1 = mettsStruct_.timeSteps;
 					targetVectors_[n1].resize(0);
 					timesWithoutAdvancement_=0;
 					printAdvancement();
@@ -485,18 +485,18 @@ namespace Dmrg {
 					progress_.printline(msg2,std::cout);
 			}
 
-			void advanceOrWft(size_t index,
-			                  size_t indexAdvance,
-			                  size_t systemOrEnviron,
-			                  const typename PsimagLite::Vector<size_t>::Type& block)
+			void advanceOrWft(SizeType index,
+			                  SizeType indexAdvance,
+			                  SizeType systemOrEnviron,
+			                  const typename PsimagLite::Vector<SizeType>::Type& block)
 			{
 				if (targetVectors_[index].size()==0) return;
 				assert(std::norm(targetVectors_[index])>1e-6);
-				typename PsimagLite::Vector<size_t>::Type nk;
+				typename PsimagLite::Vector<SizeType>::Type nk;
 				mettsCollapse_.setNk(nk,block);
 
 				if (stage_== WFT_NOADVANCE || stage_== WFT_ADVANCE || stage_==COLLAPSE) {
-					size_t advance = index;
+					SizeType advance = index;
 					if (stage_ == WFT_ADVANCE) {
 						advance = indexAdvance;
 						timeVectorsBase_->timeHasAdvanced();
@@ -522,25 +522,25 @@ namespace Dmrg {
 				}
 			}
 
-			void updateStochastics(const typename PsimagLite::Vector<size_t>::Type& block1,const typename PsimagLite::Vector<size_t>::Type& block2)
+			void updateStochastics(const typename PsimagLite::Vector<SizeType>::Type& block1,const typename PsimagLite::Vector<SizeType>::Type& block2)
 			{
-				size_t linSize = model_.geometry().numberOfSites();
-				typename PsimagLite::Vector<size_t>::Type tqn(2,0);
+				SizeType linSize = model_.geometry().numberOfSites();
+				typename PsimagLite::Vector<SizeType>::Type tqn(2,0);
 				if (model_.params().targetQuantumNumbers.size()>=2) {
-					tqn[0] = size_t(round(model_.params().targetQuantumNumbers[0]*linSize));
-					tqn[1] = size_t(round(model_.params().targetQuantumNumbers[1]*linSize));
+					tqn[0] = SizeType(round(model_.params().targetQuantumNumbers[0]*linSize));
+					tqn[1] = SizeType(round(model_.params().targetQuantumNumbers[1]*linSize));
 				} else {
 					tqn[0] = model_.params().electronsUp;
 					tqn[1] = model_.params().electronsDown;
 				}
-				size_t qn = BasisType::pseudoQuantumNumber(tqn);
+				SizeType qn = BasisType::pseudoQuantumNumber(tqn);
 				mettsStochastics_.update(qn,block1,block2,mettsStruct_.rngSeed);
 			}
 
-			size_t getPartition() const
+			SizeType getPartition() const
 			{
-				size_t total = lrs_.super().partition()-1;
-				for (size_t i=0;i<total;i++) {
+				SizeType total = lrs_.super().partition()-1;
+				for (SizeType i=0;i<total;i++) {
 					// Do only one sector unless doing su(2) with j>0, then do all m's
 					if (lrs_.super().pseudoEffectiveNumber(
 						lrs_.super().partition(i))==quantumSector_ )
@@ -550,31 +550,31 @@ namespace Dmrg {
 			}
 
 			// direction here is INFINITE
-			void getNewPures(const typename PsimagLite::Vector<size_t>::Type& block1,const typename PsimagLite::Vector<size_t>::Type& block2)
+			void getNewPures(const typename PsimagLite::Vector<SizeType>::Type& block1,const typename PsimagLite::Vector<SizeType>::Type& block2)
 			{
-				typename PsimagLite::Vector<size_t>::Type alphaFixed(block1.size());
-				for (size_t i=0;i<alphaFixed.size();i++)
+				typename PsimagLite::Vector<SizeType>::Type alphaFixed(block1.size());
+				for (SizeType i=0;i<alphaFixed.size();i++)
 					alphaFixed[i] = mettsStochastics_.chooseRandomState(block1[i]);
 
-				typename PsimagLite::Vector<size_t>::Type betaFixed(block2.size());
-				for (size_t i=0;i<betaFixed.size();i++)
+				typename PsimagLite::Vector<SizeType>::Type betaFixed(block2.size());
+				for (SizeType i=0;i<betaFixed.size();i++)
 					betaFixed[i] = mettsStochastics_.chooseRandomState(block2[i]);
 
 				PsimagLite::OstringStream msg;
 				msg<<"New pures for ";
-				for (size_t i=0;i<alphaFixed.size();i++)
+				for (SizeType i=0;i<alphaFixed.size();i++)
 					msg<<" site="<<block1[i]<<" is "<<alphaFixed[i];
 				msg<<" and for ";
-				for (size_t i=0;i<betaFixed.size();i++)
+				for (SizeType i=0;i<betaFixed.size();i++)
 					msg<<" site="<<block2[i]<<" is "<<betaFixed[i];
 				progress_.printline(msg,std::cerr);
 
 				const MatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
 				VectorType newVector1(transformSystem.n_row(),0);
 
-				typename PsimagLite::Vector<size_t>::Type nk1;
+				typename PsimagLite::Vector<SizeType>::Type nk1;
 				mettsCollapse_.setNk(nk1,block1);
-				size_t alphaFixedVolume = mettsCollapse_.volumeOf(alphaFixed,nk1);
+				SizeType alphaFixedVolume = mettsCollapse_.volumeOf(alphaFixed,nk1);
 
 				getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
 				           alphaFixedVolume,lrs_.left(),transformSystem,block1);
@@ -584,9 +584,9 @@ namespace Dmrg {
 				                        wft_.transform(ProgramGlobals::ENVIRON);
 				VectorType newVector2(transformEnviron.n_row(),0);
 
-				typename PsimagLite::Vector<size_t>::Type nk2;
+				typename PsimagLite::Vector<SizeType>::Type nk2;
 				mettsCollapse_.setNk(nk2,block2);
-				size_t betaFixedVolume = mettsCollapse_.volumeOf(betaFixed,nk2);
+				SizeType betaFixedVolume = mettsCollapse_.volumeOf(betaFixed,nk2);
 				getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
 						   betaFixedVolume,lrs_.right(),transformEnviron,block2);
 				pureVectors_.second = newVector2;
@@ -599,7 +599,7 @@ namespace Dmrg {
 				environPrev_.permutationInverse = lrs_.right().permutationInverse();
 			}
 
-			void getFullVector(typename PsimagLite::Vector<RealType>::Type& v,size_t m,const LeftRightSuperType& lrs) const
+			void getFullVector(typename PsimagLite::Vector<RealType>::Type& v,SizeType m,const LeftRightSuperType& lrs) const
 			{
 				int offset = lrs.super().partition(m);
 				int total = lrs.super().partition(m+1) - offset;
@@ -609,7 +609,7 @@ namespace Dmrg {
 				assert(PsimagLite::norm(pureVectors_.first)>1e-6);
 				assert(PsimagLite::norm(pureVectors_.second)>1e-6);
 				for (int i=0;i<total;i++) {
-					size_t alpha,beta;
+					SizeType alpha,beta;
 					pack.unpack(alpha,beta,lrs.super().permutation(i+offset));
 					v[i] = pureVectors_.first[alpha] * pureVectors_.second[beta];
 				}
@@ -617,11 +617,11 @@ namespace Dmrg {
 
 			void getNewPure(VectorType& newVector,
 			                VectorType& oldVector,
-			                size_t direction,
-			                size_t alphaFixed,
+			                SizeType direction,
+			                SizeType alphaFixed,
 			                const BasisWithOperatorsType& basis,
 			                const MatrixType& transform,
-			                const typename PsimagLite::Vector<size_t>::Type& block)
+			                const typename PsimagLite::Vector<SizeType>::Type& block)
 			{
 				if (oldVector.size()==0)
 					setInitialPure(oldVector,block);
@@ -633,26 +633,26 @@ namespace Dmrg {
 					delayedTransform(tmpVector,oldVector,direction,transform,block);
 					assert(PsimagLite::norm(tmpVector)>1e-6);
 				}
-				size_t ns = tmpVector.size();
-				typename PsimagLite::Vector<size_t>::Type nk;
+				SizeType ns = tmpVector.size();
+				typename PsimagLite::Vector<SizeType>::Type nk;
 				mettsCollapse_.setNk(nk,block);
-				size_t volumeOfNk = mettsCollapse_.volumeOf(nk);
-				size_t newSize =  (transform.n_col()==0) ? (ns*ns) : 
+				SizeType volumeOfNk = mettsCollapse_.volumeOf(nk);
+				SizeType newSize =  (transform.n_col()==0) ? (ns*ns) : 
 							transform.n_col() * volumeOfNk;
 				newVector.resize(newSize);
-				for (size_t alpha=0;alpha<newVector.size();alpha++)
+				for (SizeType alpha=0;alpha<newVector.size();alpha++)
 					newVector[alpha] = 0;
 
-				for (size_t alpha=0;alpha<ns;alpha++) {
-					size_t gamma = (direction==ProgramGlobals::SYSTEM) ?
+				for (SizeType alpha=0;alpha<ns;alpha++) {
+					SizeType gamma = (direction==ProgramGlobals::SYSTEM) ?
 						basis.permutationInverse(alpha + alphaFixed*ns) :
 						basis.permutationInverse(alphaFixed + alpha*volumeOfNk);
 					newVector[gamma] = tmpVector[alpha];
 				}
-//				for (size_t gamma=0;gamma<newVector.size();gamma++) {
+//				for (SizeType gamma=0;gamma<newVector.size();gamma++) {
 //					newVector[gamma] = 0;
-//					for (size_t alpha=0;alpha<ns;alpha++) {
-//						size_t gammaPrime = (direction==ProgramGlobals::SYSTEM) ?
+//					for (SizeType alpha=0;alpha<ns;alpha++) {
+//						SizeType gammaPrime = (direction==ProgramGlobals::SYSTEM) ?
 //									basis.permutationInverse(alpha + alphaFixed*ns) :
 //									basis.permutationInverse(alphaFixed + alpha*nk);
 
@@ -671,30 +671,30 @@ namespace Dmrg {
 
 			void delayedTransform(VectorType& newVector,
 								  VectorType& oldVector,
-								  size_t direction,
+								  SizeType direction,
 								  const MatrixType& transform,
-								  const typename PsimagLite::Vector<size_t>::Type& block)
+								  const typename PsimagLite::Vector<SizeType>::Type& block)
 			{
 				assert(oldVector.size()==transform.n_row());
 
-				typename PsimagLite::Vector<size_t>::Type nk;
+				typename PsimagLite::Vector<SizeType>::Type nk;
 				mettsCollapse_.setNk(nk,block);
-				size_t ne = mettsCollapse_.volumeOf(nk);
+				SizeType ne = mettsCollapse_.volumeOf(nk);
 				
-				const typename PsimagLite::Vector<size_t>::Type& permutationInverse = (direction==SYSTEM)
+				const typename PsimagLite::Vector<SizeType>::Type& permutationInverse = (direction==SYSTEM)
 				? systemPrev_.permutationInverse : environPrev_.permutationInverse;
-				size_t nsPrev = permutationInverse.size()/ne;
+				SizeType nsPrev = permutationInverse.size()/ne;
 				
 				newVector.resize(transform.n_col());
 				//newVector = oldVector * transform;
-				for (size_t gamma=0;gamma<newVector.size();gamma++) {
+				for (SizeType gamma=0;gamma<newVector.size();gamma++) {
 					newVector[gamma] = 0;
-					for (size_t alpha=0;alpha<nsPrev;alpha++) {
-						size_t noPermIndex =  (direction==SYSTEM)
+					for (SizeType alpha=0;alpha<nsPrev;alpha++) {
+						SizeType noPermIndex =  (direction==SYSTEM)
 								   ? alpha + systemPrev_.fixed*nsPrev
 								   : environPrev_.fixed + alpha*ne;
 						
-						size_t gammaPrime = permutationInverse[noPermIndex];
+						SizeType gammaPrime = permutationInverse[noPermIndex];
 						
 						assert(gammaPrime<transform.n_row());
 						newVector[gamma] += transform(gammaPrime,gamma) *
@@ -710,41 +710,41 @@ namespace Dmrg {
 				assert(oldVector.size()==transform.n_row());
 
 
-				for (size_t gamma=0;gamma<newVector.size();gamma++) {
+				for (SizeType gamma=0;gamma<newVector.size();gamma++) {
 					newVector[gamma] = 0;
-					for (size_t gammaPrime=0;gammaPrime<oldVector.size();gammaPrime++) {
+					for (SizeType gammaPrime=0;gammaPrime<oldVector.size();gammaPrime++) {
 						newVector[gamma] += transform(gammaPrime,gamma) *
 									  oldVector[gammaPrime];
 					}
 				}
 			}
 
-			void setInitialPure(VectorType& oldVector,const typename PsimagLite::Vector<size_t>::Type& block)
+			void setInitialPure(VectorType& oldVector,const typename PsimagLite::Vector<SizeType>::Type& block)
 			{
 				int offset = (block[0]==block.size()) ? -block.size() : block.size();
-				typename PsimagLite::Vector<size_t>::Type blockCorrected = block;
-				for (size_t i=0;i<blockCorrected.size();i++)
+				typename PsimagLite::Vector<SizeType>::Type blockCorrected = block;
+				for (SizeType i=0;i<blockCorrected.size();i++)
 					blockCorrected[i] += offset;
 
-				typename PsimagLite::Vector<size_t>::Type nk;
+				typename PsimagLite::Vector<SizeType>::Type nk;
 				mettsCollapse_.setNk(nk,blockCorrected);
-				size_t volumeOfNk = mettsCollapse_.volumeOf(nk);
-				typename PsimagLite::Vector<size_t>::Type alphaFixed(nk.size());
-				for (size_t i=0;i<alphaFixed.size();i++)
+				SizeType volumeOfNk = mettsCollapse_.volumeOf(nk);
+				typename PsimagLite::Vector<SizeType>::Type alphaFixed(nk.size());
+				for (SizeType i=0;i<alphaFixed.size();i++)
 					alphaFixed[i] = mettsStochastics_.chooseRandomState(blockCorrected[i]);
 
 				PsimagLite::OstringStream msg;
 				msg<<"New pures for site ";
-				for (size_t i=0;i<blockCorrected.size();i++)
+				for (SizeType i=0;i<blockCorrected.size();i++)
 					msg<<blockCorrected[i]<<" ";
 				msg<<" is "<<alphaFixed;
 				progress_.printline(msg,std::cerr);
 
-				size_t volumeOfAlphaFixed = mettsCollapse_.volumeOf(alphaFixed,nk);
+				SizeType volumeOfAlphaFixed = mettsCollapse_.volumeOf(alphaFixed,nk);
 
 				oldVector.resize(volumeOfNk);
 				assert(volumeOfAlphaFixed<oldVector.size());
-				for (size_t i=0;i<oldVector.size();i++) {
+				for (SizeType i=0;i<oldVector.size();i++) {
 					oldVector[i] = (i==volumeOfAlphaFixed) ? 1 : 0;
 				}
 				assert(PsimagLite::norm(oldVector)>1e-6);
@@ -753,16 +753,16 @@ namespace Dmrg {
 			void setFromInfinite(VectorWithOffsetType& phi,const LeftRightSuperType& lrs) const
 			{
 				phi.populateSectors(lrs.super());
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i0 = phi.sector(ii);
+				for (SizeType ii=0;ii<phi.sectors();ii++) {
+					SizeType i0 = phi.sector(ii);
 					VectorType v;
 					getFullVector(v,i0,lrs);
 					RealType tmpNorm = PsimagLite::norm(v);
 					if (fabs(tmpNorm-1.0)<1e-6) {
-						size_t j = lrs.super().qn(lrs.super().partition(i0));
-						typename PsimagLite::Vector<size_t>::Type qns = BasisType::decodeQuantumNumber(j);
+						SizeType j = lrs.super().qn(lrs.super().partition(i0));
+						typename PsimagLite::Vector<SizeType>::Type qns = BasisType::decodeQuantumNumber(j);
 						std::cerr<<"setFromInfinite: qns= ";
-						for (size_t k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
+						for (SizeType k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
 						std::cerr<<"\n";
 					}
 					phi.setDataInSector(v,i0);
@@ -772,29 +772,29 @@ namespace Dmrg {
 			}
 
 			// in situ computation:
-			void cocoon(size_t direction,const typename PsimagLite::Vector<size_t>::Type& block,bool corner)
+			void cocoon(SizeType direction,const typename PsimagLite::Vector<SizeType>::Type& block,bool corner)
 			{
-				for (size_t i=0;i<block.size();i++)
+				for (SizeType i=0;i<block.size();i++)
 					cocoon(direction,block[i],corner);
 			}
 
 			// in situ computation:
-			void cocoon(size_t direction,size_t site,bool corner)
+			void cocoon(SizeType direction,SizeType site,bool corner)
 			{
 				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
 				
-				for (size_t j=0;j<targetVectors_.size();j++) {
+				for (SizeType j=0;j<targetVectors_.size();j++) {
 					PsimagLite::String s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
-					size_t site2 = test(targetVectors_[j],targetVectors_[j],direction,s,site,corner);
+					SizeType site2 = test(targetVectors_[j],targetVectors_[j],direction,s,site,corner);
 					if (stage_==COLLAPSE && j==0) sitesCollapsed_.push_back(site2);
 				}
 				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
 			}
 
-			void checkOrder(size_t i) const
+			void checkOrder(SizeType i) const
 			{
 				if (i==0) return;
-				for (size_t j=0;j<i;j++) {
+				for (SizeType j=0;j<i;j++) {
 					if (stage_ == DISABLED) {
 						PsimagLite::String s ="TST:: Seeing tst site "+ttos(mettsStruct_.sites[i]);
 						s =s + " before having seen";
@@ -805,15 +805,15 @@ namespace Dmrg {
 				}
 			}
 
-			bool allStages(size_t x) const
+			bool allStages(SizeType x) const
 			{
 				if (stage_!=x) return false;
 				return true;
 			}
 
-			bool noStageIs(size_t x) const
+			bool noStageIs(SizeType x) const
 			{
-				//for (size_t i=0;i<stage_.size();i++)
+				//for (SizeType i=0;i<stage_.size();i++)
 				if (stage_==x) return false;
 				return true;
 			}
@@ -839,7 +839,7 @@ namespace Dmrg {
 
 			void calcTimeVectors(const PairType& startEnd,
 			                     RealType Eg,
-			                     size_t systemOrEnviron)
+			                     SizeType systemOrEnviron)
 			{
 				const VectorWithOffsetType& phi = targetVectors_[startEnd.first];
 				PsimagLite::OstringStream msg;
@@ -854,7 +854,7 @@ namespace Dmrg {
 
 			void normalizeVectors(const PairType& startEnd)
 			{
-				for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
+				for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
 					VectorWithOffsetType v = targetVectors_[i];
 					RealType x = 1.0/std::norm(v);
 					targetVectors_[i]= x* v;
@@ -866,7 +866,7 @@ namespace Dmrg {
 			                        const RealType& tau)
 			{
 				RealType sum = 0;
-				for (size_t i=startEnd.first;i<startEnd.second;i++) {
+				for (SizeType i=startEnd.first;i<startEnd.second;i++) {
 					betas_[i] = (i-startEnd.first)*tau;
 					weight_[i] = factor;
 					sum += weight_[i];
@@ -880,43 +880,43 @@ namespace Dmrg {
 				return sum;
 			}
 
-			void findElectronsOfOneSite(typename PsimagLite::Vector<size_t>::Type& electrons,size_t site) const
+			void findElectronsOfOneSite(typename PsimagLite::Vector<SizeType>::Type& electrons,SizeType site) const
 			{
-				typename PsimagLite::Vector<size_t>::Type block(1,site);
+				typename PsimagLite::Vector<SizeType>::Type block(1,site);
 				typename ModelType::HilbertBasisType basis;
-				typename PsimagLite::Vector<size_t>::Type quantumNumbs;
+				typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
 				model_.setNaturalBasis(basis,quantumNumbs,block);
 				model_.findElectrons(electrons,basis,site);
 			}
 
-			size_t test(const VectorWithOffsetType& src1,
+			SizeType test(const VectorWithOffsetType& src1,
 			            const VectorWithOffsetType& src2,
-			            size_t systemOrEnviron,
+			            SizeType systemOrEnviron,
 			            const PsimagLite::String& label,
-			            size_t site,
+			            SizeType site,
 			            bool corner) const
 			{
 				VectorWithOffsetType dest;
 				OperatorType A = getObservableToTest(model_.params().model);
-				typename PsimagLite::Vector<size_t>::Type electrons;
+				typename PsimagLite::Vector<SizeType>::Type electrons;
 				findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron,corner);
 
 				RealType sum = 0;
-				for (size_t ii=0;ii<dest.sectors();ii++) {
-					size_t i = dest.sector(ii);
-					size_t offset1 = dest.offset(i);
-					for (size_t jj=0;jj<src2.sectors();jj++) {
-						size_t j = src2.sector(jj);
-						size_t offset2 = src2.offset(j);
+				for (SizeType ii=0;ii<dest.sectors();ii++) {
+					SizeType i = dest.sector(ii);
+					SizeType offset1 = dest.offset(i);
+					for (SizeType jj=0;jj<src2.sectors();jj++) {
+						SizeType j = src2.sector(jj);
+						SizeType offset2 = src2.offset(j);
 						if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
-						for (size_t k=0;k<dest.effectiveSize(i);k++) 
+						for (SizeType k=0;k<dest.effectiveSize(i);k++) 
 							sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
 					}
 				}
 				RealType nor = std::norm(src1);
-				size_t site2 = site;
+				SizeType site2 = site;
 				if (corner) {
 					if (site2==1) {
 						site2=0;
@@ -935,7 +935,7 @@ namespace Dmrg {
 			OperatorType getObservableToTest(const PsimagLite::String& modelName) const
 			{
 				OperatorType A;
-				size_t site = 0; // sites.first; <-- site-dependent Hilbert space not supported by METTS
+				SizeType site = 0; // sites.first; <-- site-dependent Hilbert space not supported by METTS
 
 				if (modelName=="HubbardOneBand") {
 					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("nup",site,0));
@@ -959,27 +959,27 @@ namespace Dmrg {
 
 			void printEnergies() const
 			{
-				for (size_t i=0;i<targetVectors_.size();i++)
+				for (SizeType i=0;i<targetVectors_.size();i++)
 					printEnergies(targetVectors_[i],i);
 			}
 
-			void printEnergies(const VectorWithOffsetType& phi,size_t whatTarget) const
+			void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget) const
 			{
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i = phi.sector(ii);
+				for (SizeType ii=0;ii<phi.sectors();ii++) {
+					SizeType i = phi.sector(ii);
 					printEnergies(phi,whatTarget,i);
 				}
 			}
 
-			void printEnergies(const VectorWithOffsetType& phi,size_t whatTarget, size_t i0) const
+			void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget, SizeType i0) const
 			{
-				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
+				SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 				typename ModelType::ModelHelperType modelHelper(p,lrs_);
 						//,useReflection_);
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 
 
-				size_t total = phi.effectiveSize(i0);
+				SizeType total = phi.effectiveSize(i0);
 				TargetVectorType phi2(total);
 				phi.extract(phi2,i0);
 				TargetVectorType x(total);
@@ -990,7 +990,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 			}
 
-			bool isAtBorder(size_t direction,size_t site) const
+			bool isAtBorder(SizeType direction,SizeType site) const
 			{
 				if (direction==EXPAND_SYSTEM && site+2==model_.geometry().numberOfSites())
 					return true;
@@ -1001,20 +1001,20 @@ namespace Dmrg {
 
 			bool allSitesCollapsed() const
 			{
-				size_t n = model_.geometry().numberOfSites();
-				for (size_t i=0;i<n;i++) {
+				SizeType n = model_.geometry().numberOfSites();
+				for (SizeType i=0;i<n;i++) {
 					bool seen = (std::find(sitesCollapsed_.begin(),sitesCollapsed_.end(),i) != sitesCollapsed_.end());
 					if (!seen) return false;
 				}
 				return true;
 			}
 
-			size_t stage_;
+			SizeType stage_;
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
 			const TargettingParamsType& mettsStruct_;
 			const WaveFunctionTransfType& wft_;
-			const size_t& quantumSector_;
+			const SizeType& quantumSector_;
 			PsimagLite::ProgressIndicator progress_;
 			RealType currentBeta_;
 			typename PsimagLite::Vector<RealType>::Type betas_,weight_;
@@ -1023,13 +1023,13 @@ namespace Dmrg {
 			ApplyOperatorType applyOpLocal_;
 			MettsStochasticsType mettsStochastics_;
 			MettsCollapseType mettsCollapse_;
-			size_t timesWithoutAdvancement_;
+			SizeType timesWithoutAdvancement_;
 			TimeVectorsBaseType* timeVectorsBase_;
-			size_t prevDirection_;
+			SizeType prevDirection_;
 			MettsPrev systemPrev_;
 			MettsPrev environPrev_;
 			std::pair<VectorType,VectorType> pureVectors_;
-			typename PsimagLite::Vector<size_t>::Type sitesCollapsed_;
+			typename PsimagLite::Vector<SizeType>::Type sitesCollapsed_;
 	};     //class MettsTargetting
 
 	template<

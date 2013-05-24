@@ -108,19 +108,19 @@ public:
 	void matrixVectorProduct(typename PsimagLite::Vector<ComplexOrRealType>::Type& vout,
 				 const typename PsimagLite::Vector<ComplexOrRealType>::Type& vin) const
 	{
-		const typename PsimagLite::Vector<size_t>::Type& permInverse = initKron_.lrs().super().permutationInverse();
-		const typename PsimagLite::Vector<size_t>::Type& perm = initKron_.lrs().super().permutationVector();
+		const typename PsimagLite::Vector<SizeType>::Type& permInverse = initKron_.lrs().super().permutationInverse();
+		const typename PsimagLite::Vector<SizeType>::Type& perm = initKron_.lrs().super().permutationVector();
 		const SparseMatrixType& left = initKron_.lrs().left().hamiltonian();
 		const SparseMatrixType& right = initKron_.lrs().right().hamiltonian();
-		size_t nl = left.row();
-		size_t nr = right.row();
-		size_t nq = initKron_.size();
-		size_t offset = initKron_.offset();
+		SizeType nl = left.row();
+		SizeType nr = right.row();
+		SizeType nq = initKron_.size();
+		SizeType offset = initKron_.offset();
 
 		MatrixType V(nl,nr);
-		for (size_t i=0;i<nl;i++) {
-			for (size_t j=0;j<nr;j++) {
-				size_t r = permInverse[i+j*nl];
+		for (SizeType i=0;i<nl;i++) {
+			for (SizeType j=0;j<nr;j++) {
+				SizeType r = permInverse[i+j*nl];
 				if (r<offset || r>=offset+nq) continue;
 				V(i,j) = vin[r-offset];
 			}
@@ -132,10 +132,10 @@ public:
 		computeLeft(W,V);
 		computeConnections(W,V);
 
-		for (size_t r=0;r<vout.size();r++) {
+		for (SizeType r=0;r<vout.size();r++) {
 			div_t divresult = div(perm[r+offset],nl);
-			size_t i = divresult.rem;
-			size_t j = divresult.quot;
+			SizeType i = divresult.rem;
+			SizeType j = divresult.quot;
 			vout[r] += W(i,j);
 		}
 	}
@@ -144,26 +144,26 @@ private:
 
 	void computeRight(MatrixType& W,const MatrixType& V) const
 	{
-		size_t npatches = initKron_.patch();
+		SizeType npatches = initKron_.patch();
 		const GenGroupType& istartLeft = initKron_.istartLeft();
 		const GenGroupType& istartRight = initKron_.istartRight();
 		const ArrayOfMatStructType& artStruct = initKron_.aRt();
 
-		for (size_t ipatch = 0;ipatch<npatches;ipatch++) {
-			size_t i = initKron_.patch(GenIjPatchType::LEFT,ipatch);
-			size_t j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
+		for (SizeType ipatch = 0;ipatch<npatches;ipatch++) {
+			SizeType i = initKron_.patch(GenIjPatchType::LEFT,ipatch);
+			SizeType j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
 
-			size_t i1 = istartLeft(i);
-			size_t i2 = istartLeft(i+1);
+			SizeType i1 = istartLeft(i);
+			SizeType i2 = istartLeft(i+1);
 
-			size_t j1 = istartRight(j);
-			//size_t j2 = istartRight(j+1);
+			SizeType j1 = istartRight(j);
+			//SizeType j2 = istartRight(j+1);
 
 			const SparseMatrixType& tmp = artStruct(j,j);
-			for (size_t ii=i1;ii<i2;ii++) {
-				for (size_t mr=0;mr<tmp.row();mr++) {
+			for (SizeType ii=i1;ii<i2;ii++) {
+				for (SizeType mr=0;mr<tmp.row();mr++) {
 					for (int kk=tmp.getRowPtr(mr);kk<tmp.getRowPtr(mr+1);kk++) {
-						size_t col = tmp.getCol(kk) + j1;
+						SizeType col = tmp.getCol(kk) + j1;
 //						if (col>=i2) continue;
 						W(ii,col) += V(ii, mr+j1) * tmp.getValue(kk);
 					}
@@ -174,27 +174,27 @@ private:
 
 	void computeLeft(MatrixType& W,const MatrixType& V) const
 	{
-		size_t npatches = initKron_.patch();
+		SizeType npatches = initKron_.patch();
 		const GenGroupType& istartLeft = initKron_.istartLeft();
 		const GenGroupType& istartRight = initKron_.istartRight();
 		const ArrayOfMatStructType& alStruct = initKron_.aL();
 
-		for (size_t ipatch = 0;ipatch<npatches;ipatch++) {
-			size_t i = initKron_.patch(GenIjPatchType::LEFT,ipatch);
-			size_t j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
+		for (SizeType ipatch = 0;ipatch<npatches;ipatch++) {
+			SizeType i = initKron_.patch(GenIjPatchType::LEFT,ipatch);
+			SizeType j = initKron_.patch(GenIjPatchType::RIGHT,ipatch);
 
-			size_t i1 = istartLeft(i);
-//			size_t i2 = istartLeft(i+1);
+			SizeType i1 = istartLeft(i);
+//			SizeType i2 = istartLeft(i+1);
 
-			size_t j1 = istartRight(j);
-			size_t j2 = istartRight(j+1);
+			SizeType j1 = istartRight(j);
+			SizeType j2 = istartRight(j+1);
 
 			const SparseMatrixType& tmp = alStruct(i,i);
 
-			for (size_t jj=j1;jj<j2;jj++) {
-				for (size_t mr=0;mr<tmp.row();mr++) {
+			for (SizeType jj=j1;jj<j2;jj++) {
+				for (SizeType mr=0;mr<tmp.row();mr++) {
 					for (int kk=tmp.getRowPtr(mr);kk<tmp.getRowPtr(mr+1);kk++) {
-						size_t col = tmp.getCol(kk) + i1;
+						SizeType col = tmp.getCol(kk) + i1;
 //						if (col>=i2) continue;
 						W(mr+i1,jj) += tmp.getValue(kk) *  V(col, jj);
 					}
@@ -212,7 +212,7 @@ private:
 		typedef typename ParallelConnectionsInnerType::Type ParallelConnectionsInnerTypeType;
 		ParallelConnectionsInnerTypeType parallelConnections;
 		parallelConnections.setThreads(initKron_.numberOfThreads());
-		size_t npatches = initKron_.patch();
+		SizeType npatches = initKron_.patch();
 		parallelConnections.loopCreate(npatches,kc,initKron_.concurrency());
 		//hc.sync(parallelConnections,concurrency_);
 	}

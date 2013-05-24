@@ -125,7 +125,7 @@ namespace Dmrg {
 		static const int FERMION_SIGN = -1;
 		static const int SPIN_UP=HilbertSpaceImmmType::SPIN_UP;
 		static const int SPIN_DOWN=HilbertSpaceImmmType::SPIN_DOWN;
-		static const size_t NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
+		static const SizeType NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
 		Immm(InputValidatorType& io,GeometryType const &geometry,ConcurrencyType& concurrency)
 		: ModelBaseType(geometry,concurrency),
@@ -134,13 +134,13 @@ namespace Dmrg {
 		  degreesOfFreedom_(geometry_.numberOfSites()),
 		  hilbertSpace_(degreesOfFreedom_)
 		{
-			size_t cooperEach = 4;
+			SizeType cooperEach = 4;
 			buildDofs(cooperEach);
 		}
 
-		size_t dOf(size_t site) const { return degreesOfFreedom_[site]; }
+		SizeType dOf(SizeType site) const { return degreesOfFreedom_[site]; }
 
-		size_t hilbertSize(size_t site) const
+		SizeType hilbertSize(SizeType site) const
 		{
 			return (1<<dOf(site));
 		} 
@@ -157,7 +157,7 @@ namespace Dmrg {
 		{
 			assert(block.size()==1);
 			typename PsimagLite::Vector<HilbertState>::Type natBasis;
-			typename PsimagLite::Vector<size_t>::Type qvector;
+			typename PsimagLite::Vector<SizeType>::Type qvector;
 			setNaturalBasis(natBasis,qvector,block);			
 
 			setOperatorMatrices(creationMatrix,block);
@@ -176,7 +176,7 @@ namespace Dmrg {
 			assert(block.size()==1);
 			typename PsimagLite::Vector<HilbertState>::Type natBasis;
 			SparseMatrixType tmpMatrix;
-			typename PsimagLite::Vector<size_t>::Type qvector;
+			typename PsimagLite::Vector<SizeType>::Type qvector;
 			setNaturalBasis(natBasis,qvector,block);
 
 			//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
@@ -185,7 +185,7 @@ namespace Dmrg {
 			SparseMatrixType nmatrix(natBasis.size(),natBasis.size());
 			SparseMatrixType cTranspose;
 
-			for (size_t sigma=0;sigma<dOf(0);sigma++) {
+			for (SizeType sigma=0;sigma<dOf(0);sigma++) {
 				if (!isAllowedThisDof(1<<sigma,block[0])) continue;
 				findOperatorMatrices(tmpMatrix,block[0],sigma,natBasis);
 				typename OperatorType::Su2RelatedType su2related;
@@ -203,17 +203,17 @@ namespace Dmrg {
 			creationMatrix.push_back(nOp);
 		}
 
-		MatrixType naturalOperator(const PsimagLite::String& what,size_t site,size_t dof) const
+		MatrixType naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
 		{
 			Block block;
 			block.resize(1);
 			block[0]=site;
-			size_t norb = dOf(block[0])/HilbertSpaceImmmType::NUMBER_OF_SPINS;
+			SizeType norb = dOf(block[0])/HilbertSpaceImmmType::NUMBER_OF_SPINS;
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
-			size_t orbitals = dOf(site)/2;
-			size_t orbital = dof % orbitals;
-			size_t spin = dof / orbitals;
+			SizeType orbitals = dOf(site)/2;
+			SizeType orbital = dof % orbitals;
+			SizeType spin = dof / orbitals;
 			if (what=="+" or what=="i") {
 				return cDaggerCi(block,SPIN_UP,SPIN_DOWN);
 			}
@@ -252,11 +252,11 @@ namespace Dmrg {
 		//! find all states in the natural basis for a block of n sites
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 		void setNaturalBasis(typename PsimagLite::Vector<HilbertState>  ::Type&basis,
-		                     typename PsimagLite::Vector<size_t>::Type& q,
-		                     const typename PsimagLite::Vector<size_t>::Type& block) const
+		                     typename PsimagLite::Vector<SizeType>::Type& q,
+		                     const typename PsimagLite::Vector<SizeType>::Type& block) const
 		{
 			assert(block.size()==1);
-			size_t dof =  dOf(0);
+			SizeType dof =  dOf(0);
 			HilbertState total = (1<<dof);
 
 			typename PsimagLite::Vector<HilbertState>::Type  basisTmp;
@@ -267,24 +267,24 @@ namespace Dmrg {
 
 			// reorder the natural basis (needed for MULTIPLE BANDS)
 			findQuantumNumbers(q,basisTmp,block[0]);
-			typename PsimagLite::Vector<size_t>::Type iperm(q.size());
-			PsimagLite::Sort<typename PsimagLite::Vector<size_t>::Type > sort;
+			typename PsimagLite::Vector<SizeType>::Type iperm(q.size());
+			PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type > sort;
 			sort.sort(q,iperm);
 			basis.clear();
-			for (size_t i=0;i<iperm.size();i++) 
+			for (SizeType i=0;i<iperm.size();i++) 
 				basis.push_back(basisTmp[iperm[i]]);
 		}
 
-		void findElectrons(typename PsimagLite::Vector<size_t>::Type& electrons,
+		void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,
 		                   const typename PsimagLite::Vector<HilbertState>::Type& basis,
-		                   size_t site) const
+		                   SizeType site) const
 		{
 			electrons.resize(basis.size());
-			for (size_t i=0;i<basis.size();i++) {
+			for (SizeType i=0;i<basis.size();i++) {
 				// nup
-				size_t nup = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_UP);
+				SizeType nup = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_UP);
 				// ndown
-				size_t ndown = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_DOWN);
+				SizeType ndown = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_DOWN);
 				electrons[i] = nup + ndown;
 			}
 		}
@@ -293,11 +293,11 @@ namespace Dmrg {
 
 		//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS 
-		RealType sign(HilbertState const &ket, size_t site,size_t sigma) const
+		RealType sign(HilbertState const &ket, SizeType site,SizeType sigma) const
 		{
 			int value=0;
-			size_t dof = dOf(0);
-			for (size_t alpha=0;alpha<dof;alpha++) 
+			SizeType dof = dOf(0);
+			for (SizeType alpha=0;alpha<dof;alpha++) 
 				value += hilbertSpace_.calcNofElectrons(ket,0,site,alpha);
 
 			// add electron on site 0 if needed
@@ -330,15 +330,15 @@ namespace Dmrg {
 		//! Find c^\dagger_i\gamma\sigma in the natural basis natBasis
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 		void findOperatorMatrices(SparseMatrixType& creationMatrix,
-		                          size_t site,
-		                          size_t sigma,
+		                          SizeType site,
+		                          SizeType sigma,
 		                          const typename PsimagLite::Vector<HilbertState>::Type& natBasis) const
 		{
 			HilbertState bra,ket;
-			size_t n = natBasis.size();
+			SizeType n = natBasis.size();
 			MatrixType cm(n,n);
 
-			for (size_t ii=0;ii<n;ii++) {
+			for (SizeType ii=0;ii<n;ii++) {
 				bra=ket=natBasis[ii];
 				
 				if (hilbertSpace_.isNonZero(ket,0,sigma)) {
@@ -347,7 +347,7 @@ namespace Dmrg {
 					hilbertSpace_.create(bra,0,sigma);
 					int jj = PsimagLite::isInVector(natBasis,bra);
 					assert(jj>=0);
-					assert(ii!=size_t(jj));
+					assert(ii!=SizeType(jj));
 					cm(ii,jj) =sign(ket,0,sigma);
 				}
 			}
@@ -358,9 +358,9 @@ namespace Dmrg {
 			transposeConjugate(creationMatrix,temp);
 		}
 
-		void findQuantumNumbers(typename PsimagLite::Vector<size_t>::Type& q,
+		void findQuantumNumbers(typename PsimagLite::Vector<SizeType>::Type& q,
 		                        const typename PsimagLite::Vector<HilbertState>::Type& basis,
-		                        size_t site) const
+		                        SizeType site) const
 		{
 			BasisDataType qq;
 			setSymmetryRelated(qq,basis,site);
@@ -369,32 +369,32 @@ namespace Dmrg {
 
 		void setSymmetryRelated(BasisDataType& q,
 		                        const typename PsimagLite::Vector<HilbertState>::Type& basis,
-		                        size_t site) const
+		                        SizeType site) const
 		{
 			// find j,m and flavors (do it by hand since we assume n==1)
 			// note: we use 2j instead of j
 			// note: we use m+j instead of m
-			// This assures us that both j and m are size_t
-			typedef std::pair<size_t,size_t> PairType;
+			// This assures us that both j and m are SizeType
+			typedef std::pair<SizeType,SizeType> PairType;
 			typename PsimagLite::Vector<PairType>::Type jmvalues;
-			typename PsimagLite::Vector<size_t>::Type flavors; 
+			typename PsimagLite::Vector<SizeType>::Type flavors; 
 			PairType jmSaved = calcJmvalue<PairType>(basis[0]);
 			jmSaved.first++;
 			jmSaved.second++;
 
-			typename PsimagLite::Vector<size_t>::Type electronsUp(basis.size());
-			typename PsimagLite::Vector<size_t>::Type electronsDown(basis.size());
-			for (size_t i=0;i<basis.size();i++) {
+			typename PsimagLite::Vector<SizeType>::Type electronsUp(basis.size());
+			typename PsimagLite::Vector<SizeType>::Type electronsDown(basis.size());
+			for (SizeType i=0;i<basis.size();i++) {
 				PairType jmpair = calcJmvalue<PairType>(basis[i]);
 
 				jmvalues.push_back(jmpair);
 
-// 				size_t na = hilbertSpace_.calcNofElectrons(basis[i],0,0) +
+// 				SizeType na = hilbertSpace_.calcNofElectrons(basis[i],0,0) +
 // 						hilbertSpace_.calcNofElectrons(basis[i],0,0+2);
-// 				size_t nb = hilbertSpace_.calcNofElectrons(basis[i],0,1) +
+// 				SizeType nb = hilbertSpace_.calcNofElectrons(basis[i],0,1) +
 // 						hilbertSpace_.calcNofElectrons(basis[i],0,1+2);
 
-				size_t flavor = 0; // na  + 3*nb;
+				SizeType flavor = 0; // na  + 3*nb;
 
 				flavors.push_back(flavor);
 				jmSaved = jmpair;
@@ -427,20 +427,20 @@ namespace Dmrg {
 			hmatrix.makeDiagonal(cm[0].data.row());
 			
 			// on-site potential:
-			size_t site = block[0];
-			size_t linSize = geometry_.numberOfSites();
+			SizeType site = block[0];
+			SizeType linSize = geometry_.numberOfSites();
 
-			size_t siteCorrected  = 0;
-			for (size_t i=0;i<site;i++) {
+			SizeType siteCorrected  = 0;
+			for (SizeType i=0;i<site;i++) {
 				if (dOf(i)>NUMBER_OF_SPINS) siteCorrected++;
 			}
 
-			for (size_t dof=0;dof<dOf(site);dof++) {
-				size_t norb = dOf(site)/NUMBER_OF_SPINS;
+			for (SizeType dof=0;dof<dOf(site);dof++) {
+				SizeType norb = dOf(site)/NUMBER_OF_SPINS;
 				assert(norb==1 || norb==2);
-				size_t orb = dof % norb;
-				size_t siteCorrected2 = (orb==0) ? site : siteCorrected;
-				size_t index = siteCorrected2+orb*linSize;
+				SizeType orb = dof % norb;
+				SizeType siteCorrected2 = (orb==0) ? site : siteCorrected;
+				SizeType index = siteCorrected2+orb*linSize;
 				assert(index<modelParameters_.potentialV.size());
 				SparseElementType value = modelParameters_.potentialV[index];
 				SparseMatrixType tmpMatrix =value * n(cm[dof].data);
@@ -484,28 +484,28 @@ namespace Dmrg {
 			std::cout<<fullm;
 		}
 		
-		MatrixType cDaggerCi(const typename PsimagLite::Vector<size_t>::Type& block,
-		                            size_t spin1,
-		                            size_t spin2) const
+		MatrixType cDaggerCi(const typename PsimagLite::Vector<SizeType>::Type& block,
+		                            SizeType spin1,
+		                            SizeType spin2) const
 		{
 			assert(block.size()==1);
-			size_t site = block[0];
-			size_t norb = dOf(site)/NUMBER_OF_SPINS;
+			SizeType site = block[0];
+			SizeType norb = dOf(site)/NUMBER_OF_SPINS;
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 			assert(creationMatrix.size()>0);
-			size_t rank = creationMatrix[0].data.row();
+			SizeType rank = creationMatrix[0].data.row();
 			MatrixType tmp(rank,rank);
 			assert(norb*2-1<creationMatrix.size());
 			assert(spin1<2);
 			assert(spin2<2);
-			for (size_t orb=0;orb<norb;orb++)
+			for (SizeType orb=0;orb<norb;orb++)
 				tmp += multiplyTc(creationMatrix[orb+spin1*norb].data,
 								  creationMatrix[orb+spin2*norb].data);
 			return tmp;
 		}
 
-		MatrixType nUpOrDown(const typename PsimagLite::Vector<size_t>::Type& block,size_t spin) const
+		MatrixType nUpOrDown(const typename PsimagLite::Vector<SizeType>::Type& block,SizeType spin) const
 		{
 			return cDaggerCi(block,spin,spin);
 		}
@@ -513,26 +513,26 @@ namespace Dmrg {
 		//! If there's only spin  at site i degreesOfFreedom_[i]=2
 		//! If there's spin an norb orbitals then degreesOfFreedom_[i]=2*norb
 		//! etc.
-		void buildDofs(size_t copperEach)
+		void buildDofs(SizeType copperEach)
 		{
-			size_t counter = 5;
-			for (size_t i=0;i<degreesOfFreedom_.size();i++) {
+			SizeType counter = 5;
+			for (SizeType i=0;i<degreesOfFreedom_.size();i++) {
 				if (counter%copperEach==0) degreesOfFreedom_[i]=2;
 				else degreesOfFreedom_[i]=4;
 				counter++;
 			}
 		}
 
-		bool isAllowedThisDof(size_t alpha,size_t site) const
+		bool isAllowedThisDof(SizeType alpha,SizeType site) const
 		{
-			size_t norb1 = dOf(site)/NUMBER_OF_SPINS;
+			SizeType norb1 = dOf(site)/NUMBER_OF_SPINS;
 			if (norb1>1) return true;
 			return ((alpha & 10)==0) ? true : false;
 		}
 
 		ParametersImmm<RealType>  modelParameters_;
 		GeometryType const &geometry_;
-		typename PsimagLite::Vector<size_t>::Type degreesOfFreedom_;
+		typename PsimagLite::Vector<SizeType>::Type degreesOfFreedom_;
 		HilbertSpaceImmmType hilbertSpace_;
 	};     //class Immm
 

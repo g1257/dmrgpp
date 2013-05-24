@@ -93,7 +93,7 @@ namespace Dmrg {
 		typedef psimag::Matrix<MatrixElementType> MatrixType;
 		
 		RightLeftLocal(int m,const BasisType& basis1,  const BasisWithOperatorsType& basis2,
-			 const BasisWithOperatorsType& basis3,size_t orbitals,bool useReflection=false) 
+			 const BasisWithOperatorsType& basis3,SizeType orbitals,bool useReflection=false) 
 		:
 			m_(m),
 			basis1_(basis1),
@@ -110,8 +110,8 @@ namespace Dmrg {
 
 		~RightLeftLocal()
 		{
-			//for (size_t i=0;i<bMatrix_.size();i++) delete bMatrix_[i];
-			//for (size_t i=0;i<aMatrix_.size();i++) delete aMatrix_[i];
+			//for (SizeType i=0;i<bMatrix_.size();i++) delete bMatrix_[i];
+			//for (SizeType i=0;i<aMatrix_.size();i++) delete aMatrix_[i];
 		}
 
 		//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
@@ -122,7 +122,7 @@ namespace Dmrg {
 					SparseMatrixType const &B,
 					int type,
 					MatrixElementType  &hop,
-					bool operatorsAreFermions=true,size_t angularMomentum=1,MatrixElementType angularSign= -1.0,size_t category=0,bool dummy2=false) const
+					bool operatorsAreFermions=true,SizeType angularMomentum=1,MatrixElementType angularSign= -1.0,SizeType category=0,bool dummy2=false) const
 		{
 			int const SystemEnviron=1,EnvironSystem=2;
 			int fermionSign =  (operatorsAreFermions) ? -1 : 1;
@@ -133,8 +133,8 @@ namespace Dmrg {
 				fastOpProdInter(x,y,B,A,SystemEnviron,hop2,operatorsAreFermions);
 				return;
 			}
-			size_t leftSize = leftPerm_.size();
-			size_t rightSize = rightPerm_.size();
+			SizeType leftSize = leftPerm_.size();
+			SizeType rightSize = rightPerm_.size();
 			//static const typename PsimagLite::Vector<MatrixElementType>*::Type yAddress = 0;
 			
 			//if (yAddress!=&y) {
@@ -184,9 +184,9 @@ namespace Dmrg {
 		const BasisType&  basis1_;
 		const BasisWithOperatorsType& basis2_;
 		const BasisWithOperatorsType& basis3_;
-		typename PsimagLite::Vector<size_t>::Type alpha_,beta_;
-		typename PsimagLite::Vector<size_t>::Type leftPermInv_,rightPermInv_;
-		typename PsimagLite::Vector<size_t>::Type leftPerm_,rightPerm_;
+		typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
+		typename PsimagLite::Vector<SizeType>::Type leftPermInv_,rightPermInv_;
+		typename PsimagLite::Vector<SizeType>::Type leftPerm_,rightPerm_;
 		mutable MatrixType bMatrix_;
 		mutable MatrixType aMatrix_;
 		mutable MatrixType cMatrix_,tmpMatrix_,yMatrix_;
@@ -196,13 +196,13 @@ namespace Dmrg {
 		
 		void init()
 		{
-			size_t ns=basis2_.size();
-			size_t ne=basis3_.size();
+			SizeType ns=basis2_.size();
+			SizeType ne=basis3_.size();
 			int offset = basis1_.partition(m_);
 			int total = basis1_.partition(m_+1) - offset;
 
-			for (size_t alphaPrime=0;alphaPrime<ns;alphaPrime++) {
-				for (size_t betaPrime=0;betaPrime<ne;betaPrime++) {	
+			for (SizeType alphaPrime=0;alphaPrime<ns;alphaPrime++) {
+				for (SizeType betaPrime=0;betaPrime<ne;betaPrime++) {	
 					int tmp =basis1_.permutationInverse(alphaPrime + betaPrime*ns) - offset;
 					if (tmp>=total || tmp<0) continue;
 					int x = PsimagLite\:\:isInVector(leftPerm_,alphaPrime);
@@ -213,12 +213,12 @@ namespace Dmrg {
 			}
 			
 			
-			for (size_t i=0;i<rightPerm_.size();i++) rightPermInv_[rightPerm_[i]]=i;
+			for (SizeType i=0;i<rightPerm_.size();i++) rightPermInv_[rightPerm_[i]]=i;
 			
-			for (size_t i=0;i<leftPerm_.size();i++) leftPermInv_[leftPerm_[i]]=i;
+			for (SizeType i=0;i<leftPerm_.size();i++) leftPermInv_[leftPerm_[i]]=i;
 			
-			size_t leftSize = leftPerm_.size();
-			size_t rightSize = rightPerm_.size();
+			SizeType leftSize = leftPerm_.size();
+			SizeType rightSize = rightPerm_.size();
 			
 			yMatrix_.resize(leftSize,rightSize);
 			cMatrix_.resize(rightSize,leftSize);
@@ -232,19 +232,19 @@ namespace Dmrg {
 		{
 			int offset = basis1_.partition(m_);
 			int total = basis1_.partition(m_+1) - offset;
-			/*for (size_t i=0;i<leftPerm_.size();i++) {
-				size_t x = leftPerm_[i];
-				for (size_t j=0;j<rightPerm_.size();j++) {
-					size_t y = rightPerm_[j];
+			/*for (SizeType i=0;i<leftPerm_.size();i++) {
+				SizeType x = leftPerm_[i];
+				for (SizeType j=0;j<rightPerm_.size();j++) {
+					SizeType y = rightPerm_[j];
 					int ii = basis1_.permutationInverse(x+y*basis2_.size())-offset;
 					if (ii<0 || ii>=total) continue;
 					m(i,j) = v[ii];
 				}
 			}*/
 			
-			//size_t ns = basis2_.size();
+			//SizeType ns = basis2_.size();
 			for (int i=0;i<total;i++) {
-				//size_t alpha,beta;
+				//SizeType alpha,beta;
 				//utils::getCoordinates(alpha,beta,basis1_.permutation(i+offset),ns);
 				m(leftPermInv_[alpha_[i]],rightPermInv_[beta_[i]])=v[i];
 			}
@@ -254,10 +254,10 @@ namespace Dmrg {
 		{
 			int offset = basis1_.partition(m_);
 			int total = basis1_.partition(m_+1) - offset;
-			/*for (size_t i=0;i<leftPerm_.size();i++) {
-				size_t x = leftPerm_[i];
-				for (size_t j=0;j<rightPerm_.size();j++) {
-					size_t y = rightPerm_[j];
+			/*for (SizeType i=0;i<leftPerm_.size();i++) {
+				SizeType x = leftPerm_[i];
+				for (SizeType j=0;j<rightPerm_.size();j++) {
+					SizeType y = rightPerm_[j];
 					int ii = basis1_.permutationInverse(x+y*basis2_.size())-offset;
 					if (ii<0 || ii>=total) continue;
 					//MatrixElementType a =v[ii];
@@ -266,9 +266,9 @@ namespace Dmrg {
 				}
 			}*/
 			
-			size_t ns = basis2_.size();
+			SizeType ns = basis2_.size();
 			for (int i=0;i<total;i++) {
-				size_t alpha,beta;
+				SizeType alpha,beta;
 				utils::getCoordinates(alpha,beta,basis1_.permutation(i+offset),ns);
 				v[i] =m(leftPermInv_[alpha_[i]],rightPermInv_[beta_[i]]);
 			}
@@ -276,10 +276,10 @@ namespace Dmrg {
 		
 		void prepareB(MatrixType& m,SparseMatrixType const &B) const
 		{
-			for (size_t i=0;i<rightPerm_.size();i++) {
-				size_t x = rightPerm_[i];
-				for (size_t j=0;j<rightPerm_.size();j++) {
-					size_t y = rightPerm_[j];
+			for (SizeType i=0;i<rightPerm_.size();i++) {
+				SizeType x = rightPerm_[i];
+				for (SizeType j=0;j<rightPerm_.size();j++) {
+					SizeType y = rightPerm_[j];
 					m(i,j) = B(x,y);
 				}
 			}
@@ -289,11 +289,11 @@ namespace Dmrg {
 			      bool operatorsAreFermions) const
 		{
 			int fermionSign =  (operatorsAreFermions) ? -1 : 1;
-			for (size_t i=0;i<leftPerm_.size();i++) {
-				size_t x = leftPerm_[i];
+			for (SizeType i=0;i<leftPerm_.size();i++) {
+				SizeType x = leftPerm_[i];
 				MatrixElementType tmp = basis2_.fermionicSign(x,fermionSign);
-				for (size_t j=0;j<leftPerm_.size();j++) {
-					size_t y = leftPerm_[j];
+				for (SizeType j=0;j<leftPerm_.size();j++) {
+					SizeType y = leftPerm_[j];
 					m(i,j) = A(x,y)*tmp;
 				}
 			}
@@ -301,7 +301,7 @@ namespace Dmrg {
 		
 		void createAlphaAndBeta()
 		{
-			size_t ns=basis2_.size();
+			SizeType ns=basis2_.size();
 			int offset = basis1_.partition(m_);
 			int total = basis1_.partition(m_+1) - offset;
 

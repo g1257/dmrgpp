@@ -97,7 +97,7 @@ namespace Dmrg {
 
 		typedef FieldType value_type;
 		typedef typename PsimagLite::Real<FieldType>::Type RealType;
-		typedef std::pair<size_t,size_t> PairType;
+		typedef std::pair<SizeType,SizeType> PairType;
 		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 			
 		VectorWithOffsets() 
@@ -105,7 +105,7 @@ namespace Dmrg {
 		{ }
 			
 		template<typename SomeBasisType>
-		VectorWithOffsets(const typename PsimagLite::Vector<size_t>::Type& weights,
+		VectorWithOffsets(const typename PsimagLite::Vector<SizeType>::Type& weights,
 		                  const SomeBasisType& someBasis)
 		: progress_("VectorWithOffsets",0),
 		  size_(someBasis.size()),
@@ -113,7 +113,7 @@ namespace Dmrg {
 		  data_(weights.size()),
 		  offsets_(weights.size()+1)
 		{
-			for (size_t i=0;i<weights.size();i++) {
+			for (SizeType i=0;i<weights.size();i++) {
 				data_[i].resize(weights[i]);
 				offsets_[i] = someBasis.partition(i);
 				if (weights[i]>0) {
@@ -125,7 +125,7 @@ namespace Dmrg {
 			setIndex2Sector();
 		}
 
-		void resize(size_t x)
+		void resize(SizeType x)
 		{
 			size_ = x;
 			index2Sector_.resize(x);
@@ -135,7 +135,7 @@ namespace Dmrg {
 		}
 
 		template<typename SomeBasisType>
-		void set(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<size_t>::Type& weights,
+		void set(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<SizeType>::Type& weights,
 		         const SomeBasisType& someBasis)
 		{
 			size_ = someBasis.size();
@@ -143,7 +143,7 @@ namespace Dmrg {
 			data_.clear();
 			data_.resize(v.size());
 			offsets_.resize(v.size()+1);
-			for (size_t i=0;i<v.size();i++) {
+			for (SizeType i=0;i<v.size();i++) {
 				data_[i] = v[i];
 				offsets_[i] = someBasis.partition(i);
 				if (v[i].size()>0) {
@@ -160,15 +160,15 @@ namespace Dmrg {
 		template<typename SomeBasisType>
 		void populateSectors(const SomeBasisType& someBasis)
 		{
-			size_t np = someBasis.partition()-1;
+			SizeType np = someBasis.partition()-1;
 			size_ = someBasis.size();
 			nonzeroSectors_.clear();
 			data_.clear();
 			data_.resize(np);
 			offsets_.resize(np+1);
-			for (size_t i=0;i<np;i++) {
+			for (SizeType i=0;i<np;i++) {
 				offsets_[i] = someBasis.partition(i);
-				size_t total = someBasis.partition(i+1)-offsets_[i];
+				SizeType total = someBasis.partition(i+1)-offsets_[i];
 				VectorType tmpV(total,0);
 				data_[i] = tmpV;
 				nonzeroSectors_.push_back(i);
@@ -181,23 +181,23 @@ namespace Dmrg {
 		}
 
 		template<typename SomeBasisType>
-		void populateFromQns(const typename PsimagLite::Vector<size_t>::Type& qns,
+		void populateFromQns(const typename PsimagLite::Vector<SizeType>::Type& qns,
 		                     const SomeBasisType& someBasis)
 		{
-			size_t np = someBasis.partition()-1;
+			SizeType np = someBasis.partition()-1;
 			size_ = someBasis.size();
 			nonzeroSectors_.clear();
 			data_.clear();
 			data_.resize(np);
 			offsets_.resize(np+1);
-			for (size_t i=0;i<np;i++) {
+			for (SizeType i=0;i<np;i++) {
 				offsets_[i] = someBasis.partition(i);
 			}
 			offsets_[np]=size_;
 
-			for (size_t i=0;i<qns.size();i++) {
-				size_t ip = findPartitionWithThisQn(qns[i],someBasis);
-				size_t total = someBasis.partition(ip+1)-offsets_[ip];
+			for (SizeType i=0;i<qns.size();i++) {
+				SizeType ip = findPartitionWithThisQn(qns[i],someBasis);
+				SizeType total = someBasis.partition(ip+1)-offsets_[ip];
 				VectorType tmpV(total,0);
 				data_[ip] = tmpV;
 				nonzeroSectors_.push_back(ip);
@@ -211,9 +211,9 @@ namespace Dmrg {
 
 		void collapseSectors()
 		{
-			size_t np = data_.size();
+			SizeType np = data_.size();
 			nonzeroSectors_.clear();
-			for (size_t i=0;i<np;i++) {
+			for (SizeType i=0;i<np;i++) {
 				if (isZero(data_[i])) {
 					data_[i].resize(0);
 				} else {
@@ -226,14 +226,14 @@ namespace Dmrg {
 			progress_.printline(msg,std::cout);
 		}
 
-		void setDataInSector(const VectorType& v,size_t i0)
+		void setDataInSector(const VectorType& v,SizeType i0)
 		{
 			data_[i0] = v;
 		}
 
-		size_t sectors() const { return nonzeroSectors_.size(); }
+		SizeType sectors() const { return nonzeroSectors_.size(); }
 
-		size_t sector(size_t i) const { return nonzeroSectors_[i]; }
+		SizeType sector(SizeType i) const { return nonzeroSectors_[i]; }
 
 		template<typename SomeBasisType>
 		void fromFull(const VectorType& v,const SomeBasisType& someBasis)
@@ -241,7 +241,7 @@ namespace Dmrg {
 			size_ = someBasis.size();
 			
 			offsets_.resize(someBasis.partition());
-			for (size_t i=0;i<someBasis.partition();i++)
+			for (SizeType i=0;i<someBasis.partition();i++)
 				offsets_[i] = someBasis.partition(i);
 			assert(offsets_[offsets_.size()-1]==size_);
 			
@@ -250,34 +250,34 @@ namespace Dmrg {
 			
 			nonzeroSectors_.clear();
 			findPartitions(nonzeroSectors_,v,someBasis);
-			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-				size_t j = nonzeroSectors_[jj];
+			for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
+				SizeType j = nonzeroSectors_[jj];
 				//firstSector_ = j;
-				size_t offset = offsets_[j];
-				size_t total = offsets_[j+1]-offset;
+				SizeType offset = offsets_[j];
+				SizeType total = offsets_[j+1]-offset;
 				data_[j].resize(total);
-				for (size_t i=0;i<total;i++) data_[j][i] = v[i+offset];
+				for (SizeType i=0;i<total;i++) data_[j][i] = v[i+offset];
 			}
 			setIndex2Sector();
 		}
 
-		void extract(VectorType& v,size_t i) const
+		void extract(VectorType& v,SizeType i) const
 		{
 			v=data_[i];
 		}
 		
-		size_t size() const { return size_; }
+		SizeType size() const { return size_; }
 		
-		size_t effectiveSize(size_t i) const { return data_[i].size(); }
+		SizeType effectiveSize(SizeType i) const { return data_[i].size(); }
 		 
-		size_t offset(size_t i) const { return offsets_[i]; }
+		SizeType offset(SizeType i) const { return offsets_[i]; }
 		
-		const FieldType& fastAccess(size_t i,size_t j) const 
+		const FieldType& fastAccess(SizeType i,SizeType j) const 
 		{
 			return data_[i][j];
 		}
 				
-		const FieldType& operator[](size_t i) const //__attribute__((always_inline))
+		const FieldType& operator[](SizeType i) const //__attribute__((always_inline))
 		{
 			assert(i<index2Sector_.size());
 			int j = index2Sector_[i];
@@ -289,15 +289,15 @@ namespace Dmrg {
 				else return zero_;
 			}*/
 			
-// 			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-// 				size_t j = nonzeroSectors_[jj];
+// 			for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
+// 				SizeType j = nonzeroSectors_[jj];
 // 				if (i<offsets_[j] || i>=offsets_[j+1]) continue;
 // 				return data_[j][i-offsets_[j]];
 // 			}
 // 			return zero_;
 
-//				size_t x = nonzeroSectors_.size()/2;
-//				size_t j = 0;
+//				SizeType x = nonzeroSectors_.size()/2;
+//				SizeType j = 0;
 //				while(true) {
 //					j = nonzeroSectors_[x];
 //					if (i<offsets_[j]) {
@@ -315,10 +315,10 @@ namespace Dmrg {
 //				return data_[j][i-offsets_[j]];
 		}
 		
-		FieldType& operator[](size_t i) //__attribute__((always_inline))
+		FieldType& operator[](SizeType i) //__attribute__((always_inline))
 		{
-// 			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-// 				size_t j = nonzeroSectors_[jj];
+// 			for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
+// 				SizeType j = nonzeroSectors_[jj];
 // 				if (i>=offsets_[j] && i<offsets_[j+1]) {
 // 					return data_[j][i-offsets_[j]];
 // 				}
@@ -345,9 +345,9 @@ namespace Dmrg {
 		void toSparse(SparseVectorType& sv) const
 		{
 			sv.resize(size_);
-			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-				size_t j =  nonzeroSectors_[jj];
-				for (size_t i=0;i<data_[j].size();i++)
+			for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
+				SizeType j =  nonzeroSectors_[jj];
+				for (SizeType i=0;i<data_[j].size();i++)
 					sv[i+offsets_[j]] = data_[j][i];
 			}
 		}
@@ -366,8 +366,8 @@ namespace Dmrg {
 			io.printline(s);
 //			io.print("#nonzero=",nonzeroSectors_.size());
 
-			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-				size_t j =  nonzeroSectors_[jj];
+			for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
+				SizeType j =  nonzeroSectors_[jj];
 				s="#sector="+ttos(j);
 				io.printline(s);
 //				PsimagLite::String s="#sector="+ttos(j);
@@ -377,7 +377,7 @@ namespace Dmrg {
 		}
 		
 		template<typename IoInputter>
-		void load(IoInputter& io,const PsimagLite::String& label,size_t counter=0)
+		void load(IoInputter& io,const PsimagLite::String& label,SizeType counter=0)
 		{
 			io.advance(label,counter);
 			int x = 0;
@@ -390,11 +390,11 @@ namespace Dmrg {
 			io.readline(x,"#nonzero=");
 			if (x<0) throw PsimagLite::RuntimeError("VectorWithOffsets::load(...): nonzerosectors<0\n");
 			nonzeroSectors_.resize(x);
-			for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
+			for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
 				io.readline(x,"#sector=");
 				if (x<0) 
 					throw PsimagLite::RuntimeError("VectorWithOffsets::load(...): sector<0\n");
-				if (size_t(x)>=data_.size()) 
+				if (SizeType(x)>=data_.size()) 
 					throw PsimagLite::RuntimeError("VectorWithOffsets::load(...): sector too big\n");
 				nonzeroSectors_[jj] = x;
 				io.read(data_[x],"#sector=");
@@ -405,7 +405,7 @@ namespace Dmrg {
 		//! We don't have a partitioned basis because we don't have the superblock basis at this point
 		//! Therefore, partitioning is bogus here
 		template<typename IoInputter>
-		void loadOneSector(IoInputter& io,const PsimagLite::String& label,size_t counter=0)
+		void loadOneSector(IoInputter& io,const PsimagLite::String& label,SizeType counter=0)
 		{
 			io.advance(label,counter);
 			int x = 0;
@@ -441,8 +441,8 @@ namespace Dmrg {
 				setIndex2Sector();
 				return *this;
 			}
-			for (size_t ii=0;ii<nonzeroSectors_.size();ii++) {
-				size_t i = nonzeroSectors_[ii];
+			for (SizeType ii=0;ii<nonzeroSectors_.size();ii++) {
+				SizeType i = nonzeroSectors_[ii];
 				data_[i] += v.data_[i];
 			}
 			setIndex2Sector();
@@ -479,10 +479,10 @@ namespace Dmrg {
 		{
 			if (index2Sector_.size()!=size_) index2Sector_.resize(size_);
 			//assert(size_>0);
-			for (size_t i=0;i<size_;i++) {
+			for (SizeType i=0;i<size_;i++) {
 				index2Sector_[i] = -1;
-				for (size_t jj=0;jj<nonzeroSectors_.size();jj++) {
-					size_t j = nonzeroSectors_[jj];
+				for (SizeType jj=0;jj<nonzeroSectors_.size();jj++) {
+					SizeType j = nonzeroSectors_[jj];
 					if (i<offsets_[j] || i>=offsets_[j+1]) continue;
 					index2Sector_[i] = j;
 				}
@@ -490,11 +490,11 @@ namespace Dmrg {
 		}
 
 		template<typename SomeBasisType>
-		void findPartitions(typename PsimagLite::Vector<size_t>::Type& p,const VectorType& v,const SomeBasisType& someBasis)
+		void findPartitions(typename PsimagLite::Vector<SizeType>::Type& p,const VectorType& v,const SomeBasisType& someBasis)
 		{
 			bool found = false;
 			p.clear();
-			for (size_t i=0;i<someBasis.partition()-1;i++) {
+			for (SizeType i=0;i<someBasis.partition()-1;i++) {
 				if (nonZeroPartition(v,someBasis,i)) {
 					if (found) {
 //						PsimagLite::OstringStream msg;
@@ -516,10 +516,10 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeBasisType>
-		bool nonZeroPartition(const VectorType& v,const SomeBasisType& someBasis,size_t i)
+		bool nonZeroPartition(const VectorType& v,const SomeBasisType& someBasis,SizeType i)
 		{
 			typename VectorType::value_type zero = 0;
-			for (size_t j=someBasis.partition(i);j<someBasis.partition(i+1);j++) {
+			for (SizeType j=someBasis.partition(i);j<someBasis.partition(i+1);j++) {
 				if (v[j]!=zero) return true;
 			}
 			return false;
@@ -528,28 +528,28 @@ namespace Dmrg {
 		bool isZero(const VectorType& v) const
 		{
 			RealType eps = 1e-5;
-			for (size_t i=0;i<v.size();i++)
+			for (SizeType i=0;i<v.size();i++)
 				if (fabs(std::real(v[i]))>eps || fabs(std::imag(v[i]))>eps) return false;
 			return true; 
 		}
 
 		template<typename SomeBasisType>
-		size_t findPartitionWithThisQn(size_t qn,const SomeBasisType& someBasis) const
+		SizeType findPartitionWithThisQn(SizeType qn,const SomeBasisType& someBasis) const
 		{
-			size_t np = someBasis.partition()-1;
-			for (size_t i=0;i<np;i++) {
-				size_t state = someBasis.partition(i);
-				if (size_t(someBasis.qn(state))==qn) return i;
+			SizeType np = someBasis.partition()-1;
+			for (SizeType i=0;i<np;i++) {
+				SizeType state = someBasis.partition(i);
+				if (SizeType(someBasis.qn(state))==qn) return i;
 			}
 			throw PsimagLite::RuntimeError("findPartitionWithThisQn\n");
 		}
 
 		PsimagLite::ProgressIndicator progress_;
-		size_t size_;
+		SizeType size_;
 		typename PsimagLite::Vector<int>::Type index2Sector_;
 		typename PsimagLite::Vector<VectorType>::Type data_;
-		typename PsimagLite::Vector<size_t>::Type offsets_;
-		typename PsimagLite::Vector<size_t>::Type nonzeroSectors_;
+		typename PsimagLite::Vector<SizeType>::Type offsets_;
+		typename PsimagLite::Vector<SizeType>::Type nonzeroSectors_;
 	}; // class VectorWithOffset
 
 // 	template<typename FieldType>
@@ -568,8 +568,8 @@ namespace std {
 	inline FieldType norm(const Dmrg::VectorWithOffsets<FieldType>& v)
 	{
 		FieldType sum=0;
-		for (size_t ii=0;ii<v.nonzeroSectors_.size();ii++) {
-			size_t i = v.nonzeroSectors_[ii];
+		for (SizeType ii=0;ii<v.nonzeroSectors_.size();ii++) {
+			SizeType i = v.nonzeroSectors_[ii];
 			FieldType tmp = PsimagLite::norm(v.data_[i]);
 			sum += tmp*tmp;
 		}
@@ -580,8 +580,8 @@ namespace std {
 	inline FieldType norm(const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v)
 	{
 		FieldType sum=0;
-		for (size_t ii=0;ii<v.nonzeroSectors_.size();ii++) {
-			size_t i = v.nonzeroSectors_[ii];
+		for (SizeType ii=0;ii<v.nonzeroSectors_.size();ii++) {
+			SizeType i = v.nonzeroSectors_[ii];
 			FieldType tmp = PsimagLite::norm(v.data_[i]);
 			sum += tmp*tmp;
 		}
@@ -604,8 +604,8 @@ namespace Dmrg {
 		std::cerr<<s<<" norm= "<<norma<<"\n";
 		assert(fabs(norma)>eps);
 
-		for (size_t i=0;i<v.data_.size();i++)
-			for (size_t j=0;j<v.data_[i].size();j++) 
+		for (SizeType i=0;i<v.data_.size();i++)
+			for (SizeType j=0;j<v.data_[i].size();j++) 
 				v.data_[i][j] /= norma;
 	}
 
@@ -614,8 +614,8 @@ namespace Dmrg {
 	                                        const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v2)
 	{
 		std::complex<FieldType> sum=0;
-		for (size_t ii=0;ii<v1.nonzeroSectors_.size();ii++) {
-			size_t i = v1.nonzeroSectors_[ii];
+		for (SizeType ii=0;ii<v1.nonzeroSectors_.size();ii++) {
+			SizeType i = v1.nonzeroSectors_[ii];
 			sum += v1.data_[i]*v2.data_[i]; // call to * will conj()
 		}
 		return sum;
@@ -626,8 +626,8 @@ namespace Dmrg {
 	                          const Dmrg::VectorWithOffsets<FieldType>& v2)
 	{
 		FieldType sum=0;
-		for (size_t ii=0;ii<v1.nonzeroSectors_.size();ii++) {
-			size_t i = v1.nonzeroSectors_[ii];
+		for (SizeType ii=0;ii<v1.nonzeroSectors_.size();ii++) {
+			SizeType i = v1.nonzeroSectors_[ii];
 			sum += v1.data_[i]*v2.data_[i]; // call to * will conj()
 		}
 		return sum;
@@ -639,13 +639,13 @@ namespace Dmrg {
 	                                         const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v2)
 	{
 		std::complex<FieldType> sum = 0;
-		for (size_t ii=0;ii<v1.sectors();ii++) {
-			size_t i = v1.sector(ii);
-			for (size_t jj=0;jj<v1.sectors();jj++) {
-				size_t j = v2.sector(jj);
+		for (SizeType ii=0;ii<v1.sectors();ii++) {
+			SizeType i = v1.sector(ii);
+			for (SizeType jj=0;jj<v1.sectors();jj++) {
+				SizeType j = v2.sector(jj);
 				if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
-				size_t offset = v1.offset(i);
-				for (size_t k=0;k<v1.effectiveSize(i);k++) 
+				SizeType offset = v1.offset(i);
+				for (SizeType k=0;k<v1.effectiveSize(i);k++) 
 					sum+= v1[k+offset] * conj(v2[k+offset]);
 			}
 		}
@@ -657,13 +657,13 @@ namespace Dmrg {
 	                           const Dmrg::VectorWithOffsets<FieldType>& v2)
 	{
 		FieldType sum = 0;
-		for (size_t ii=0;ii<v1.sectors();ii++) {
-			size_t i = v1.sector(ii);
-			for (size_t jj=0;jj<v1.sectors();jj++) {
-				size_t j = v2.sector(jj);
+		for (SizeType ii=0;ii<v1.sectors();ii++) {
+			SizeType i = v1.sector(ii);
+			for (SizeType jj=0;jj<v1.sectors();jj++) {
+				SizeType j = v2.sector(jj);
 				if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
-				size_t offset = v1.offset(i);
-				for (size_t k=0;k<v1.effectiveSize(i);k++)
+				SizeType offset = v1.offset(i);
+				for (SizeType k=0;k<v1.effectiveSize(i);k++)
 					sum+= v1[k+offset] * std::conj(v2[k+offset]);
 			}
 		}
@@ -675,8 +675,8 @@ namespace Dmrg {
 	{
 		VectorWithOffsets<FieldType2> w = v;
 
-		for (size_t ii=0;ii<w.nonzeroSectors_.size();ii++) {
-			size_t i = w.nonzeroSectors_[ii];
+		for (SizeType ii=0;ii<w.nonzeroSectors_.size();ii++) {
+			SizeType i = w.nonzeroSectors_[ii];
 			w.data_[i] *= value;
 		}
 		return w;
@@ -688,8 +688,8 @@ namespace Dmrg {
 	{
 		PsimagLite::String s = "VectorWithOffsets + VectorWithOffsets failed\n";
 		if (v1.nonzeroSectors_!=v2.nonzeroSectors_) throw PsimagLite::RuntimeError(s.c_str());
-		for (size_t ii=0;ii<v1.nonzeroSectors_.size();ii++) {
-			size_t i = v1.nonzeroSectors_[ii];
+		for (SizeType ii=0;ii<v1.nonzeroSectors_.size();ii++) {
+			SizeType i = v1.nonzeroSectors_[ii];
 			if (v1.data_[i].size()!=v2.data_[i].size())
 				throw PsimagLite::RuntimeError(s.c_str());
 		}

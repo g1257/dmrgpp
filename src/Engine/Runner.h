@@ -99,7 +99,7 @@ namespace Dmrg {
 		{
 		}
 		
-		void operator()(size_t i) const
+		void operator()(SizeType i) const
 		{
 			PsimagLite::String s = exec_ + " " + inputRoot_ + ttos(i) + ext_;
 			system(s.c_str());

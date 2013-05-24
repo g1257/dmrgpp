@@ -117,9 +117,9 @@ public:
 	}
 
 	RealType tau;
-	size_t timeSteps;
-	size_t advanceEach;
-	size_t algorithm;
+	SizeType timeSteps;
+	SizeType advanceEach;
+	SizeType algorithm;
 
 }; // class TimeVectorsParams
 

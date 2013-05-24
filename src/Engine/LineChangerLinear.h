@@ -101,7 +101,7 @@ namespace Dmrg {
 		
 		const PsimagLite::String& string() const { return match_; }
 		
-		bool act(size_t i,PsimagLite::String& line) const
+		bool act(SizeType i,PsimagLite::String& line) const
 		{
 			ValueType val = i*step_ + init_;
 			line=match_ + pre_ + ttos(val) + post_;

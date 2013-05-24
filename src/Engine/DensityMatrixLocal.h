@@ -109,7 +109,7 @@ namespace Dmrg {
 			const DmrgBasisWithOperatorsType& pBasis,
 			const DmrgBasisWithOperatorsType& pBasisSummed,
 			const DmrgBasisType& pSE,
-			size_t direction,bool debug=false,bool verbose=false) 
+			SizeType direction,bool debug=false,bool verbose=false) 
 		:
 			progress_("DensityMatrixLocal",parallelRank_),
 			data_(pBasis.size(),
@@ -124,7 +124,7 @@ namespace Dmrg {
 			return data_;
 		}
 
-		virtual size_t rank() { return data_.rank(); }
+		virtual SizeType rank() { return data_.rank(); }
 
 		virtual void check(int direction)
 		{
@@ -154,9 +154,9 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 			}
 			//loop over all partitions:
-			for (size_t m=0;m<pBasis.partition()-1;m++) {
+			for (SizeType m=0;m<pBasis.partition()-1;m++) {
 				// size of this partition
-				size_t bs = pBasis.partition(m+1)-pBasis.partition(m);
+				SizeType bs = pBasis.partition(m+1)-pBasis.partition(m);
 				
 				// density matrix block for this partition:
 				BuildingBlockType matrixBlock(bs,bs);
@@ -184,7 +184,7 @@ namespace Dmrg {
 
 					threadedDm.loopCreate(target.size(),helperDm,target.model().concurrency());
 
-//					for (size_t i=0;i<target.size();i++) {
+//					for (SizeType i=0;i<target.size();i++) {
 //						w = target.weight(i)/target.normSquared(i);
 //						initPartition(matrixBlock,pBasis,m,target(i),
 //						              pBasisSummed,pSE,direction,w);
@@ -227,8 +227,8 @@ namespace Dmrg {
 	std::ostream& operator<<(std::ostream& os,
 				const DensityMatrixLocal<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType>& dm)
 	{
-		for (size_t m=0;m<dm.data_.blocks();m++) {
-			size_t ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
+		for (SizeType m=0;m<dm.data_.blocks();m++) {
+			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
 			os<<" ne="<<ne<<"\n"; 
 			os<<dm.data_(m)<<"\n";
 		}

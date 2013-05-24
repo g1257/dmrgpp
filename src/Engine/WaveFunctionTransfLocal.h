@@ -107,13 +107,13 @@ namespace Dmrg {
 					LeftRightSuperType;
 		typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 
-		static const size_t INFINITE = ProgramGlobals::INFINITE;
-		static const size_t EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
-		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
+		static const SizeType INFINITE = ProgramGlobals::INFINITE;
+		static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
+		static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 		
-		WaveFunctionTransfLocal(const size_t& stage,
+		WaveFunctionTransfLocal(const SizeType& stage,
 		                        const bool& firstCall,
-		                        const size_t& counter,
+		                        const SizeType& counter,
 								const DmrgWaveStructType& dmrgWaveStruct,
 								bool twoSiteDmrg)
 		: stage_(stage),
@@ -131,7 +131,7 @@ namespace Dmrg {
 		virtual void transformVector(VectorWithOffsetType& psiDest,
 		                             const VectorWithOffsetType& psiSrc,
 		                             const LeftRightSuperType& lrs,
-		                             const typename PsimagLite::Vector<size_t>::Type& nk) const
+		                             const typename PsimagLite::Vector<SizeType>::Type& nk) const
 
 		{
 			if (stage_==EXPAND_ENVIRON) {
@@ -158,13 +158,13 @@ namespace Dmrg {
 		void transformVector1(SomeVectorType& psiDest,
 		                      const SomeVectorType& psiSrc,
 		                      const LeftRightSuperType& lrs,
-							  const typename PsimagLite::Vector<size_t>::Type& nk) const
+							  const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
 			if (twoSiteDmrg_)
 				return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 
-			for (size_t ii=0;ii<psiDest.sectors();ii++) {
-				size_t i0 = psiDest.sector(ii);
+			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
+				SizeType i0 = psiDest.sector(ii);
 				transformVector1(psiDest,psiSrc,lrs,i0,nk);
 			}
 		}
@@ -173,18 +173,18 @@ namespace Dmrg {
 		void transformVector1(SomeVectorType& psiDest,
 		                      const SomeVectorType& psiSrc,
 		                      const LeftRightSuperType& lrs,
-		                      size_t i0,
-		                      const typename PsimagLite::Vector<size_t>::Type& nk) const
+		                      SizeType i0,
+		                      const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			size_t volumeOfNk = this->volumeOf(nk);
-			size_t nip = lrs.super().permutationInverse().size()/
+			SizeType volumeOfNk = this->volumeOf(nk);
+			SizeType nip = lrs.super().permutationInverse().size()/
 					lrs.right().permutationInverse().size();
 
 			assert(dmrgWaveStruct_.lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.row());
 			assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.col());
 
-			size_t start = psiDest.offset(i0);
-			size_t final = psiDest.effectiveSize(i0)+start;
+			SizeType start = psiDest.offset(i0);
+			SizeType final = psiDest.effectiveSize(i0)+start;
 			
 			const SparseMatrixType& ws = dmrgWaveStruct_.ws;
 			const SparseMatrixType& we = dmrgWaveStruct_.we;
@@ -193,10 +193,10 @@ namespace Dmrg {
 			
 			PackIndicesType pack1(nip);
 			PackIndicesType pack2(volumeOfNk);
-			for (size_t x=start;x<final;x++) {
-				size_t ip,beta,kp,jp;
-				pack1.unpack(ip,beta,(size_t)lrs.super().permutation(x));
-				pack2.unpack(kp,jp,(size_t)lrs.right().permutation(beta));
+			for (SizeType x=start;x<final;x++) {
+				SizeType ip,beta,kp,jp;
+				pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x));
+				pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
 				psiDest[x]=createAux1b(psiSrc,ip,kp,jp,ws,weT,nk);
 			}
 		}
@@ -204,25 +204,25 @@ namespace Dmrg {
 		template<typename SomeVectorType>
 		SparseElementType createAux1b(
 				const SomeVectorType& psiSrc,
-				size_t ip,
-				size_t kp,
-				size_t jp,
+				SizeType ip,
+				SizeType kp,
+				SizeType jp,
 				const SparseMatrixType& ws,
 				const SparseMatrixType& weT,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			size_t volumeOfNk = this->volumeOf(nk);
-			size_t ni=dmrgWaveStruct_.ws.col();
-			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
-			size_t alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip+kp*nip);
+			SizeType volumeOfNk = this->volumeOf(nk);
+			SizeType ni=dmrgWaveStruct_.ws.col();
+			SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
+			SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip+kp*nip);
 			
 			SparseElementType sum=0;
 
 			for (int k = ws.getRowPtr(alpha);k<ws.getRowPtr(alpha+1);k++) {
-				size_t i = ws.getCol(k);
+				SizeType i = ws.getCol(k);
 				for (int k2=weT.getRowPtr(jp);k2<weT.getRowPtr(jp+1);k2++) {
-					size_t j = weT.getCol(k2);
-					size_t x = dmrgWaveStruct_.lrs.super().permutationInverse(i+j*ni);
+					SizeType j = weT.getCol(k2);
+					SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(i+j*ni);
 					sum += ws.getValue(k)*weT.getValue(k2)*psiSrc[x];
 				}
 			}
@@ -234,10 +234,10 @@ namespace Dmrg {
 		void transformVector1FromInfinite(SomeVectorType& psiDest,
 										  const SomeVectorType& psiSrc,
 										  const LeftRightSuperType& lrs,
-										  const typename PsimagLite::Vector<size_t>::Type& nk) const
+										  const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			for (size_t ii=0;ii<psiDest.sectors();ii++) {
-				size_t i0 = psiDest.sector(ii);
+			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
+				SizeType i0 = psiDest.sector(ii);
 				transformVector1FromInfinite(psiDest,psiSrc,lrs,i0,nk);
 			}
 		}
@@ -246,19 +246,19 @@ namespace Dmrg {
 		void transformVector1FromInfinite(SomeVectorType& psiDest,
 										  const SomeVectorType& psiSrc,
 										  const LeftRightSuperType& lrs,
-										  size_t i0,
-										  const typename PsimagLite::Vector<size_t>::Type& nk) const
+										  SizeType i0,
+										  const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			size_t volumeOfNk = this->volumeOf(nk);
-			size_t nip = lrs.super().permutationInverse().size()/
+			SizeType volumeOfNk = this->volumeOf(nk);
+			SizeType nip = lrs.super().permutationInverse().size()/
 					lrs.right().permutationInverse().size();
 
 			assert(lrs.left().permutationInverse().size()==volumeOfNk ||
 				   lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.row());
 			assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.col());
 
-			size_t start = psiDest.offset(i0);
-			size_t final = psiDest.effectiveSize(i0)+start;
+			SizeType start = psiDest.offset(i0);
+			SizeType final = psiDest.effectiveSize(i0)+start;
 
 			SparseMatrixType ws(dmrgWaveStruct_.ws);
 			SparseMatrixType we(dmrgWaveStruct_.we);
@@ -267,37 +267,37 @@ namespace Dmrg {
 
 			PackIndicesType pack1(nip);
 			PackIndicesType pack2(volumeOfNk);
-			for (size_t x=start;x<final;x++) {
-				size_t ip,beta,kp,jp;
-				pack1.unpack(ip,beta,(size_t)lrs.super().permutation(x));
-				pack2.unpack(kp,jp,(size_t)lrs.right().permutation(beta));
+			for (SizeType x=start;x<final;x++) {
+				SizeType ip,beta,kp,jp;
+				pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x));
+				pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
 				psiDest[x]=createAux1bFromInfinite(psiSrc,ip,kp,jp,ws,weT,nk);
 			}
 		}
 
 		template<typename SomeVectorType>
 		SparseElementType createAux1bFromInfinite(const SomeVectorType& psiSrc,
-												  size_t ip,
-												  size_t kp,
-												  size_t jp,
+												  SizeType ip,
+												  SizeType kp,
+												  SizeType jp,
 												  const SparseMatrixType& ws,
 												  const SparseMatrixType& weT,
-												  const typename PsimagLite::Vector<size_t>::Type& nk) const
+												  const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			size_t volumeOfNk = this->volumeOf(nk);
-			size_t ni=dmrgWaveStruct_.lrs.left().size(); //dmrgWaveStruct_.ws.col();
-			size_t nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
+			SizeType volumeOfNk = this->volumeOf(nk);
+			SizeType ni=dmrgWaveStruct_.lrs.left().size(); //dmrgWaveStruct_.ws.col();
+			SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 			MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
 
 
 			SparseElementType sum=0;
-			for (size_t k3=wsRef2.getRowPtr(ip);k3<wsRef2.getRowPtr(ip+1);k3++) {
-				size_t ip2 = wsRef2.getCol(k3);
-				size_t alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip2+kp*nip);
+			for (SizeType k3=wsRef2.getRowPtr(ip);k3<wsRef2.getRowPtr(ip+1);k3++) {
+				SizeType ip2 = wsRef2.getCol(k3);
+				SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip2+kp*nip);
 
 				for (int k = weT.getRowPtr(jp);k<weT.getRowPtr(jp+1);k++) {
-					size_t jp2 = weT.getCol(k);
-					size_t x = dmrgWaveStruct_.lrs.super().permutationInverse(alpha+jp2*ni);
+					SizeType jp2 = weT.getCol(k);
+					SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(alpha+jp2*ni);
 					sum += weT.getValue(k)*psiSrc[x]*wsRef2.getValue(k3);
 
 				}
@@ -310,13 +310,13 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
 			if (twoSiteDmrg_)
 				return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 
-			for (size_t ii=0;ii<psiDest.sectors();ii++) {
-				size_t i0 = psiDest.sector(ii);
+			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
+				SizeType i0 = psiDest.sector(ii);
 				transformVector2(psiDest,psiSrc,lrs,i0,nk);
 			}
 		}
@@ -325,18 +325,18 @@ namespace Dmrg {
 		void transformVector2(
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs,size_t i0,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const
+				const LeftRightSuperType& lrs,SizeType i0,
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			size_t volumeOfNk = this->volumeOf(nk);
-			size_t nip = lrs.left().permutationInverse().size()/volumeOfNk;
-			size_t nalpha = lrs.left().permutationInverse().size();
+			SizeType volumeOfNk = this->volumeOf(nk);
+			SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
+			SizeType nalpha = lrs.left().permutationInverse().size();
 
 			assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==dmrgWaveStruct_.we.row());
 			assert(nip==dmrgWaveStruct_.ws.col());
 
-			size_t start = psiDest.offset(i0);
-			size_t final = psiDest.effectiveSize(i0)+start;
+			SizeType start = psiDest.offset(i0);
+			SizeType final = psiDest.effectiveSize(i0)+start;
 			
 			const SparseMatrixType& we = dmrgWaveStruct_.we;
 			const SparseMatrixType& ws = dmrgWaveStruct_.ws;
@@ -345,10 +345,10 @@ namespace Dmrg {
 			
 			PackIndicesType pack1(nalpha);
 			PackIndicesType pack2(nip);
-			for (size_t x=start;x<final;x++) {
-				size_t ip,alpha,kp,jp;
-				pack1.unpack(alpha,jp,(size_t)lrs.super().permutation(x));
-				pack2.unpack(ip,kp,(size_t)lrs.left().permutation(alpha));
+			for (SizeType x=start;x<final;x++) {
+				SizeType ip,alpha,kp,jp;
+				pack1.unpack(alpha,jp,(SizeType)lrs.super().permutation(x));
+				pack2.unpack(ip,kp,(SizeType)lrs.left().permutation(alpha));
 				psiDest[x]=createAux2b(psiSrc,ip,kp,jp,wsT,we,nk);
 			}
 		}
@@ -356,27 +356,27 @@ namespace Dmrg {
 		template<typename SomeVectorType>
 		SparseElementType createAux2b(
 				const SomeVectorType& psiSrc,
-				size_t ip,
-				size_t kp,
-				size_t jp,
+				SizeType ip,
+				SizeType kp,
+				SizeType jp,
 				const SparseMatrixType& wsT,
 				const SparseMatrixType& we,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
+			SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			assert(nalpha==wsT.col());
 
 			SparseElementType sum=0;
-			size_t volumeOfNk = this->volumeOf(nk);
-			size_t beta = dmrgWaveStruct_.lrs.right().permutationInverse(kp+jp*volumeOfNk);
+			SizeType volumeOfNk = this->volumeOf(nk);
+			SizeType beta = dmrgWaveStruct_.lrs.right().permutationInverse(kp+jp*volumeOfNk);
 
 			for (int k=wsT.getRowPtr(ip);k<wsT.getRowPtr(ip+1);k++) {
-				size_t alpha = wsT.getCol(k);
-				size_t begink = we.getRowPtr(beta);
-				size_t endk = we.getRowPtr(beta+1);
-				for (size_t k2=begink;k2<endk;++k2) {
-					size_t j = we.getCol(k2);
-					size_t x = dmrgWaveStruct_.lrs.super().permutationInverse(alpha+j*nalpha);
+				SizeType alpha = wsT.getCol(k);
+				SizeType begink = we.getRowPtr(beta);
+				SizeType endk = we.getRowPtr(beta+1);
+				for (SizeType k2=begink;k2<endk;++k2) {
+					SizeType j = we.getCol(k2);
+					SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(alpha+j*nalpha);
 					sum += wsT.getValue(k)*we.getValue(k2)*psiSrc[x]; //*weRef.getValue(k3);
 				}
 			}
@@ -388,10 +388,10 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			for (size_t ii=0;ii<psiDest.sectors();ii++) {
-				size_t i0 = psiDest.sector(ii);
+			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
+				SizeType i0 = psiDest.sector(ii);
 				transformVector2FromInfinite(psiDest,psiSrc,lrs,i0,nk);
 			}
 		}
@@ -402,18 +402,18 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				size_t i0,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const
+				SizeType i0,
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			size_t volumeOfNk = this->volumeOf(nk);
-			size_t nip = lrs.left().permutationInverse().size()/volumeOfNk;
-			size_t nalpha = lrs.left().permutationInverse().size();
+			SizeType volumeOfNk = this->volumeOf(nk);
+			SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
+			SizeType nalpha = lrs.left().permutationInverse().size();
 
 			assert(nip==dmrgWaveStruct_.ws.col());
 			assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
 
-			size_t start = psiDest.offset(i0);
-			size_t final = psiDest.effectiveSize(i0)+start;
+			SizeType start = psiDest.offset(i0);
+			SizeType final = psiDest.effectiveSize(i0)+start;
 			
 			const SparseMatrixType& we = dmrgWaveStruct_.we;
 			const SparseMatrixType& ws = dmrgWaveStruct_.ws;
@@ -422,11 +422,11 @@ namespace Dmrg {
 			
 			PackIndicesType pack1(nalpha);
 			PackIndicesType pack2(nip);
-			for (size_t x=start;x<final;x++) {
-				size_t isn,jen;
-				pack1.unpack(isn,jen,(size_t)lrs.super().permutation(x));
-				size_t is,jpl;
-				pack2.unpack(is,jpl,(size_t)lrs.left().permutation(isn));
+			for (SizeType x=start;x<final;x++) {
+				SizeType isn,jen;
+				pack1.unpack(isn,jen,(SizeType)lrs.super().permutation(x));
+				SizeType is,jpl;
+				pack2.unpack(is,jpl,(SizeType)lrs.left().permutation(isn));
 				psiDest[x]=createAux2bFromInfinite(psiSrc,is,jpl,jen,wsT,we,nk);
 			}
 		}
@@ -435,27 +435,27 @@ namespace Dmrg {
 		template<typename SomeVectorType>
 		SparseElementType createAux2bFromInfinite(
 				const SomeVectorType& psiSrc,
-				size_t is,
-				size_t jpl,
-				size_t jen,
+				SizeType is,
+				SizeType jpl,
+				SizeType jen,
 				const SparseMatrixType& wsT,
 				const SparseMatrixType& we,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
+			SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			SparseElementType sum=0;
-			size_t volumeOfNk = this->volumeOf(nk);
-			size_t ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
+			SizeType volumeOfNk = this->volumeOf(nk);
+			SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
 
 			MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
 
 			for (int k=wsT.getRowPtr(is);k<wsT.getRowPtr(is+1);k++) {
-				size_t ip = wsT.getCol(k);
+				SizeType ip = wsT.getCol(k);
 				SparseElementType sum2 = 0;
-				for (size_t k2=weRef.getRowPtr(jen);k2<weRef.getRowPtr(jen+1);k2++) {
-					size_t jpr = weRef.getCol(k2);
-					size_t jp = dmrgWaveStruct_.lrs.right().permutationInverse(jpl + jpr*volumeOfNk);
-					size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
+				for (SizeType k2=weRef.getRowPtr(jen);k2<weRef.getRowPtr(jen+1);k2++) {
+					SizeType jpr = weRef.getCol(k2);
+					SizeType jp = dmrgWaveStruct_.lrs.right().permutationInverse(jpl + jpr*volumeOfNk);
+					SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
 					sum2 += wsT.getValue(k)*psiSrc[y]*weRef.getValue(k2);
 
 				}
@@ -469,10 +469,10 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			for (size_t ii=0;ii<psiDest.sectors();ii++) {
-				size_t i0 = psiDest.sector(ii);
+			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
+				SizeType i0 = psiDest.sector(ii);
 				transformVector1bounce(psiDest,psiSrc,lrs,i0,nk);
 			}
 		}
@@ -482,35 +482,35 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				size_t i0,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const
+				SizeType i0,
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			size_t volumeOfNk = this->volumeOf(nk);
-			size_t nip = lrs.super().permutationInverse().size()/lrs.right().permutationInverse().size();
+			SizeType volumeOfNk = this->volumeOf(nk);
+			SizeType nip = lrs.super().permutationInverse().size()/lrs.right().permutationInverse().size();
 			PsimagLite::OstringStream msg;
 			msg<<" We're bouncing on the right, so buckle up!";
 			progress_.printline(msg,std::cout);
 			
 			assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
 			
-			size_t start = psiDest.offset(i0);
-			size_t final = psiDest.effectiveSize(i0)+start;
+			SizeType start = psiDest.offset(i0);
+			SizeType final = psiDest.effectiveSize(i0)+start;
 			
-			size_t nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
+			SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			PackIndicesType pack1(nip);
 			PackIndicesType pack2(volumeOfNk);
 			MatrixOrIdentityType wsRef(twoSiteDmrg_,dmrgWaveStruct_.ws);
-			size_t nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.col() : nip;
+			SizeType nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.col() : nip;
 
-			for (size_t x=start;x<final;x++) {
+			for (SizeType x=start;x<final;x++) {
 				psiDest[x] = 0.0;
-				size_t ip,beta,kp,jp;
-				pack1.unpack(ip,beta,(size_t)lrs.super().permutation(x));
-				for (size_t k=wsRef.getRowPtr(ip);k<wsRef.getRowPtr(ip+1);k++) {
-					size_t ip2 = wsRef.getCol(k);
-					pack2.unpack(kp,jp,(size_t)lrs.right().permutation(beta));
-					size_t ipkp = dmrgWaveStruct_.lrs.left().permutationInverse(ip2 + kp*nip2);
-					size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ipkp + jp*nalpha);
+				SizeType ip,beta,kp,jp;
+				pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x));
+				for (SizeType k=wsRef.getRowPtr(ip);k<wsRef.getRowPtr(ip+1);k++) {
+					SizeType ip2 = wsRef.getCol(k);
+					pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
+					SizeType ipkp = dmrgWaveStruct_.lrs.left().permutationInverse(ip2 + kp*nip2);
+					SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ipkp + jp*nalpha);
 					psiDest[x] += psiSrc[y]*wsRef.getValue(k);
 				}
 			}
@@ -521,10 +521,10 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			for (size_t ii=0;ii<psiDest.sectors();ii++) {
-				size_t i0 = psiDest.sector(ii);
+			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
+				SizeType i0 = psiDest.sector(ii);
 				transformVector2bounce(psiDest,psiSrc,lrs,i0,nk);
 			}
 		}
@@ -535,12 +535,12 @@ namespace Dmrg {
 				SomeVectorType& psiDest,
 				const SomeVectorType& psiSrc,
 				const LeftRightSuperType& lrs,
-				size_t i0,
-				const typename PsimagLite::Vector<size_t>::Type& nk) const
+				SizeType i0,
+				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			size_t volumeOfNk = this->volumeOf(nk);
-			size_t nip = lrs.left().permutationInverse().size()/volumeOfNk;
-			size_t nalpha = lrs.left().permutationInverse().size();
+			SizeType volumeOfNk = this->volumeOf(nk);
+			SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
+			SizeType nalpha = lrs.left().permutationInverse().size();
 			
 			PsimagLite::OstringStream msg;
 			msg<<" We're bouncing on the left, so buckle up!";
@@ -548,32 +548,32 @@ namespace Dmrg {
 			
 			assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
 
-			size_t start = psiDest.offset(i0);
-			size_t final = psiDest.effectiveSize(i0)+start;
+			SizeType start = psiDest.offset(i0);
+			SizeType final = psiDest.effectiveSize(i0)+start;
 			PackIndicesType pack1(nalpha);
 			PackIndicesType pack2(nip);
 			MatrixOrIdentityType weRef(twoSiteDmrg_,dmrgWaveStruct_.we);
 
-			for (size_t x=start;x<final;x++) {
+			for (SizeType x=start;x<final;x++) {
 				psiDest[x] = 0.0;
 
-				size_t ip,alpha,kp,jp;
-				pack1.unpack(alpha,jp,(size_t)lrs.super().permutation(x));
-				pack2.unpack(ip,kp,(size_t)lrs.left().permutation(alpha));
+				SizeType ip,alpha,kp,jp;
+				pack1.unpack(alpha,jp,(SizeType)lrs.super().permutation(x));
+				pack2.unpack(ip,kp,(SizeType)lrs.left().permutation(alpha));
 
-				for (size_t k=weRef.getRowPtr(jp);k<weRef.getRowPtr(jp+1);k++) {
-					size_t jp2 = weRef.getCol(k);
-					size_t kpjp = dmrgWaveStruct_.lrs.right().permutationInverse(kp + jp2*volumeOfNk);
+				for (SizeType k=weRef.getRowPtr(jp);k<weRef.getRowPtr(jp+1);k++) {
+					SizeType jp2 = weRef.getCol(k);
+					SizeType kpjp = dmrgWaveStruct_.lrs.right().permutationInverse(kp + jp2*volumeOfNk);
 
-					size_t y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + kpjp*nip);
+					SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + kpjp*nip);
 					psiDest[x] += psiSrc[y] * weRef.getValue(k);
 				}
 			}	
 		}
 
-		const size_t& stage_;
+		const SizeType& stage_;
 		const bool& firstCall_;
-		const size_t& counter_;
+		const SizeType& counter_;
 		const DmrgWaveStructType& dmrgWaveStruct_;
 		bool twoSiteDmrg_;
 		PsimagLite::ProgressIndicator progress_;

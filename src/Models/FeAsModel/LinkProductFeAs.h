@@ -88,15 +88,15 @@ namespace Dmrg {
 	class LinkProductFeAs {
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef std::pair<size_t,size_t> PairType;
+			typedef std::pair<SizeType,SizeType> PairType;
 			
-			static size_t orbitals_;
+			static SizeType orbitals_;
 
 	public:
 
 			typedef typename ModelHelperType::RealType RealType;
 
-		static void setOrbitals(size_t orbitals)
+		static void setOrbitals(SizeType orbitals)
 		{
 			orbitals_=orbitals;
 			assert(orbitals_==2 || orbitals_==3);
@@ -107,38 +107,38 @@ namespace Dmrg {
 			//! a up a up, a up b up, b up a up, b up, b up, etc
 			//! and similarly for spin down.
 			template<typename SomeStructType>
-			static size_t dofs(size_t term,const SomeStructType& additional)
+			static SizeType dofs(SizeType term,const SomeStructType& additional)
 			{
 				return 2*orbitals_*orbitals_;
 			}
 			
 			// has only dependence on orbital
 			template<typename SomeStructType>
-			static PairType connectorDofs(size_t term,size_t dofs,const SomeStructType& additional)
+			static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
 			{
-				size_t orbitalsSquared = orbitals_*orbitals_;
-				size_t spin = dofs/orbitalsSquared;
-				size_t xtmp = (spin==0) ? 0 : orbitalsSquared;
+				SizeType orbitalsSquared = orbitals_*orbitals_;
+				SizeType spin = dofs/orbitalsSquared;
+				SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
 				xtmp = dofs - xtmp;
-				size_t orb1 = xtmp/orbitals_;
-				size_t orb2 = xtmp % orbitals_;
+				SizeType orb1 = xtmp/orbitals_;
+				SizeType orb2 = xtmp % orbitals_;
 				return PairType(orb1,orb2); // has only dependence on orbital
 			}
 
 			template<typename SomeStructType>
 			static void setLinkData(
-					size_t term,
-					size_t dofs,
+					SizeType term,
+					SizeType dofs,
      					bool isSu2,
-					size_t& fermionOrBoson,
+					SizeType& fermionOrBoson,
 					PairType& ops,
      					std::pair<char,char>& mods,
-					size_t& angularMomentum,
+					SizeType& angularMomentum,
      					RealType& angularFactor,
-					size_t& category,const SomeStructType& additional)
+					SizeType& category,const SomeStructType& additional)
 			{
 				fermionOrBoson = ProgramGlobals::FERMION;
-				size_t spin = getSpin(dofs);
+				SizeType spin = getSpin(dofs);
 				ops = operatorDofs(dofs);
 				angularFactor = 1;
 				if (spin==1) angularFactor = -1;
@@ -147,34 +147,34 @@ namespace Dmrg {
 			}
 			
 			template<typename SomeStructType>
-			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2,const SomeStructType& additional)
+			static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType& additional)
 			{
 			}
 
 		private:
 			// spin is diagonal
-			static std::pair<size_t,size_t> operatorDofs(size_t dofs)
+			static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs)
 			{
-				size_t orbitalsSquared = orbitals_*orbitals_;
-				size_t spin = dofs/orbitalsSquared;
-				size_t xtmp = (spin==0) ? 0 : orbitalsSquared;
+				SizeType orbitalsSquared = orbitals_*orbitals_;
+				SizeType spin = dofs/orbitalsSquared;
+				SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
 				xtmp = dofs - xtmp;
-				size_t orb1 = xtmp/orbitals_;
-				size_t orb2 = xtmp % orbitals_;
-				size_t op1 = orb1 + spin*orbitals_;
-				size_t op2 = orb2 + spin*orbitals_;
-				return std::pair<size_t,size_t>(op1,op2);
+				SizeType orb1 = xtmp/orbitals_;
+				SizeType orb2 = xtmp % orbitals_;
+				SizeType op1 = orb1 + spin*orbitals_;
+				SizeType op2 = orb2 + spin*orbitals_;
+				return std::pair<SizeType,SizeType>(op1,op2);
 			}
 			
-			static size_t getSpin(size_t dofs)
+			static SizeType getSpin(SizeType dofs)
 			{
-				size_t orbitalsSquared = orbitals_*orbitals_;
+				SizeType orbitalsSquared = orbitals_*orbitals_;
 				return dofs/orbitalsSquared;
 			}
 	}; // class LinkPRoductFeAs
 
 template<typename ModelHelperType>
-size_t LinkProductFeAs<ModelHelperType>::orbitals_ = 2;
+SizeType LinkProductFeAs<ModelHelperType>::orbitals_ = 2;
 
 } // namespace Dmrg
 /*@}*/

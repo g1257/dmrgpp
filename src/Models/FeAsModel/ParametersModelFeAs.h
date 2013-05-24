@@ -109,7 +109,7 @@ namespace Dmrg {
 				throw PsimagLite::RuntimeError("Magnetic Field: Expecting as many columns are there are sites\n");
 		}
 		
-		size_t orbitals;
+		SizeType orbitals;
 		// Hubbard U values (one for each site)
 		typename PsimagLite::Vector<Field>::Type hubbardU; 
 		// Onsite potential values, one for each site

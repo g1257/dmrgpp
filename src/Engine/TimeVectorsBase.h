@@ -95,12 +95,12 @@ class TimeVectorsBase  {
 
 public:
 
-	typedef std::pair<size_t,size_t> PairType;
+	typedef std::pair<SizeType,SizeType> PairType;
 
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             size_t systemOrEnviron,
+	                             SizeType systemOrEnviron,
 	                             bool allOperatorsApplied)=0;
 
 	virtual ~TimeVectorsBase() {}

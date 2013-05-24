@@ -137,16 +137,16 @@ namespace Dmrg {
 		enum {	EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 				EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 				INFINITE=WaveFunctionTransfType::INFINITE};
-		static size_t const PRODUCT = TargettingParamsType::PRODUCT;
-		static size_t const SUM = TargettingParamsType::SUM;
+		static SizeType const PRODUCT = TargettingParamsType::PRODUCT;
+		static SizeType const SUM = TargettingParamsType::SUM;
 
-		static const size_t parallelRank_ = 0; // DYNT needs to support concurrency FIXME
+		static const SizeType parallelRank_ = 0; // DYNT needs to support concurrency FIXME
 
 		AdaptiveDynamicTargetting(const LeftRightSuperType& lrs,
 		                          const ModelType& model,
 		                          const TargettingParamsType& tstStruct,
 		                          const WaveFunctionTransfType& wft,
-		                          const size_t& quantumSector) // quantumSector ignored here
+		                          const SizeType& quantumSector) // quantumSector ignored here
 		: stage_(tstStruct.sites.size(),DISABLED),
 		  lrs_(lrs),
 		  model_(model),
@@ -168,7 +168,7 @@ namespace Dmrg {
 
 		const ModelType& model() const { return model_; }
 
-		RealType weight(size_t i) const
+		RealType weight(SizeType i) const
 		{
 			assert(commonTargetting_.allStages(DISABLED,stage_));
 			return weight_[i];
@@ -180,7 +180,7 @@ namespace Dmrg {
 			return gsWeight_;
 		}
 		
-		RealType normSquared(size_t i) const
+		RealType normSquared(SizeType i) const
 		{
 			return commonTargetting_.normSquared(targetVectors_[i]);
 		}
@@ -192,9 +192,9 @@ namespace Dmrg {
 			psi_.set(v,someBasis);
 		}
 
-// 		const RealType& operator[](size_t i) const { return psi_[i]; }
+// 		const RealType& operator[](SizeType i) const { return psi_[i]; }
 					
-		RealType& operator[](size_t i) { return psi_[i]; }
+		RealType& operator[](SizeType i) { return psi_[i]; }
 
 		const VectorWithOffsetType& gs() const { return psi_; }
 
@@ -203,22 +203,22 @@ namespace Dmrg {
 			return (fabs(gsWeight_)>1e-6);
 		}
 
-		size_t size() const
+		SizeType size() const
 		{
 			if (!commonTargetting_.allStages(CONVERGING,stage_)) return 0;
 			return lastLanczosVector_;
 		}
 
-		const VectorWithOffsetType& operator()(size_t i) const
+		const VectorWithOffsetType& operator()(SizeType i) const
 		{
 			return targetVectors_[i];
 		}
 		
 		void evolve(RealType Eg,
-		            size_t direction,
+		            SizeType direction,
 		            const BlockType& block1,
 		            const BlockType& block2,
-		            size_t loopNumber)
+		            SizeType loopNumber)
 		{
 			if (block1.size()!=1 || block2.size()!=1) {
 				PsimagLite::String str(__FILE__);
@@ -227,17 +227,17 @@ namespace Dmrg {
 				throw PsimagLite::RuntimeError(str.c_str());
 			}
 
-			size_t site = block1[0];
+			SizeType site = block1[0];
 			evolve(Eg,direction,site,loopNumber);
-			size_t numberOfSites = lrs_.super().block().size();
+			SizeType numberOfSites = lrs_.super().block().size();
 			if (site>1 && site<numberOfSites-2) return;
 			//corner case
-			size_t x = (site==1) ? 0 : numberOfSites-1;
+			SizeType x = (site==1) ? 0 : numberOfSites-1;
 			evolve(Eg,direction,x,loopNumber);
 		}
 
 		void initialGuess(VectorWithOffsetType& v,
-		                  const typename PsimagLite::Vector<size_t>::Type& block) const
+		                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 		{
 			commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,block,targetVectors_);
 		}
@@ -245,10 +245,10 @@ namespace Dmrg {
 		const LeftRightSuperType& leftRightSuper() const { return lrs_; }
 
 		template<typename IoOutputType>
-		void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
+		void save(const typename PsimagLite::Vector<SizeType>::Type& block,IoOutputType& io) const
 		{
 			assert(block.size()==1);
-			size_t type = tstStruct_.type;
+			SizeType type = tstStruct_.type;
 			int s = (type&1) ? -1 : 1;
 			int s2 = (type>1) ? -1 : 1;
 			
@@ -270,7 +270,7 @@ namespace Dmrg {
 			typename IoType::In io(f);
 
 			try {
-				for (size_t i=0;i<stage_.size();i++) stage_[i] = CONVERGING;
+				for (SizeType i=0;i<stage_.size();i++) stage_[i] = CONVERGING;
 
 				commonTargetting_.load(io,targetVectors_);
 				lastLanczosVector_ = targetVectors_.size()-1;
@@ -280,7 +280,7 @@ namespace Dmrg {
 				psi_.load(io,"PSI");
 			} catch (std::exception& e) {
 				std::cout<<"WARNING: No special targets found in file "<<f<<"\n";
-				for (size_t i=0;i<stage_.size();i++) stage_[i] = DISABLED;
+				for (SizeType i=0;i<stage_.size();i++) stage_[i] = DISABLED;
 				io.rewind();
 				int site = 0;
 				io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
@@ -297,7 +297,7 @@ namespace Dmrg {
 
 	private:
 
-		void evolve(RealType Eg,size_t direction,size_t site,size_t loopNumber)
+		void evolve(RealType Eg,SizeType direction,SizeType site,SizeType loopNumber)
 		{
 			Eg_ = Eg;
 			VectorWithOffsetType phiNew;
@@ -307,26 +307,26 @@ namespace Dmrg {
 				return;
 			}
 			
-			size_t numberOfSites = lrs_.super().block().size();
+			SizeType numberOfSites = lrs_.super().block().size();
 			if (site>0 && site<numberOfSites-1) wftAllDynVectors(site);
 			
 			if (!done_) calcDynVectors(site,phiNew);
 		}
 
-		void getPhi(VectorWithOffsetType& phiNew,RealType Eg,size_t direction,size_t site,
-					size_t loopNumber)
+		void getPhi(VectorWithOffsetType& phiNew,RealType Eg,SizeType direction,SizeType site,
+					SizeType loopNumber)
 		{
-			size_t count =0;
+			SizeType count =0;
 			VectorWithOffsetType phiOld = psi_;
 			
 			VectorWithOffsetType vectorSum;
 			
-			size_t max = tstStruct_.sites.size();
+			SizeType max = tstStruct_.sites.size();
 			if (commonTargetting_.allStages(CONVERGING,stage_)) max = 1;
 			
 			// Loop over each operator that needs to be applied
 			// in turn to the g.s.
-			for (size_t i=0;i<max;i++) {
+			for (SizeType i=0;i<max;i++) {
 				//std::cerr<<"XYZ 0 i="<<i<<" site="<<site<<"\n";
 				count += evolve(i,phiNew,phiOld,Eg,direction,site,loopNumber,max-1);
 				if (tstStruct_.concatenation==PRODUCT) {
@@ -338,15 +338,15 @@ namespace Dmrg {
 			if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 		}
 
-		size_t evolve(
-				size_t i,
+		SizeType evolve(
+				SizeType i,
 				VectorWithOffsetType& phiNew,
 				VectorWithOffsetType& phiOld,
 				RealType Eg,
-				size_t direction,
-				size_t site,
-				size_t loopNumber,
-				size_t lastI)
+				SizeType direction,
+				SizeType site,
+				SizeType loopNumber,
+				SizeType lastI)
 		{	
 			if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return 0;
 
@@ -372,13 +372,13 @@ namespace Dmrg {
 		}
 
 		void computePhi(
-				size_t i,
-				size_t site,
+				SizeType i,
+				SizeType site,
 				VectorWithOffsetType& phiNew,
 				VectorWithOffsetType& phiOld,
-				size_t systemOrEnviron) const
+				SizeType systemOrEnviron) const
 		{
-			size_t numberOfSites = lrs_.super().block().size();
+			SizeType numberOfSites = lrs_.super().block().size();
 			if (stage_[i]==OPERATOR) {
 
 				bool corner = (tstStruct_.sites[i]==0 ||
@@ -387,7 +387,7 @@ namespace Dmrg {
 				PsimagLite::OstringStream msg;
 				msg<<"I'm applying a local operator now";
 				progress_.printline(msg,std::cout);
-				typename PsimagLite::Vector<size_t>::Type electrons;
+				typename PsimagLite::Vector<SizeType>::Type electrons;
 				commonTargetting_.findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
 				applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],
@@ -413,7 +413,7 @@ namespace Dmrg {
 					phiNew.populateSectors(lrs_.super());
 
 				// OK, now that we got the partition number right, let's wft:
-				typename PsimagLite::Vector<size_t>::Type nk(1,model_.hilbertSize(site));
+				typename PsimagLite::Vector<SizeType>::Type nk(1,model_.hilbertSize(site));
 				wft_.setInitialVector(phiNew,targetVectors_[0],lrs_,nk);
 				phiNew.collapseSectors();
 				
@@ -423,15 +423,15 @@ namespace Dmrg {
 			}
 		}
 
-		void wftAllDynVectors(size_t site)
+		void wftAllDynVectors(SizeType site)
 		{
-			for (size_t i=0;i<=lastLanczosVector_;i++)
+			for (SizeType i=0;i<=lastLanczosVector_;i++)
 				if (i<2) wftOneDynVector(i,site);
 		}
 
-		void wftOneDynVector(size_t i,size_t site)
+		void wftOneDynVector(SizeType i,SizeType site)
 		{
-			typename PsimagLite::Vector<size_t>::Type nk(1,model_.hilbertSize(site));
+			typename PsimagLite::Vector<SizeType>::Type nk(1,model_.hilbertSize(site));
 
 			VectorWithOffsetType result;
 			result.populateSectors(lrs_.super());
@@ -444,13 +444,13 @@ namespace Dmrg {
 			targetVectors_[i] = result;
 		}
 
-		void calcDynVectors(size_t site,const VectorWithOffsetType& phiNew)
+		void calcDynVectors(SizeType site,const VectorWithOffsetType& phiNew)
 		{
-			for (size_t i=0;i<targetVectors_[0].sectors();i++) {
+			for (SizeType i=0;i<targetVectors_[0].sectors();i++) {
 				VectorType sv;
-				size_t i0 = targetVectors_[0].sector(i);
+				SizeType i0 = targetVectors_[0].sector(i);
 				targetVectors_[0].extract(sv,i0);
-				size_t p = lrs_.super().findPartitionNumber(targetVectors_[0].offset(i0));
+				SizeType p = lrs_.super().findPartitionNumber(targetVectors_[0].offset(i0));
 				if (i==0) {
 					if (lastLanczosVector_==0)
 						targetVectors_[1] = targetVectors_[0];
@@ -463,10 +463,10 @@ namespace Dmrg {
 		}
 
 		void setLanczosVectors(
-				size_t i0,
+				SizeType i0,
 				const VectorType& sv,
-				size_t p,
-				size_t site,
+				SizeType p,
+				SizeType site,
 				const VectorWithOffsetType& phiNew)
 		{
 			typename ModelType::ModelHelperType modelHelper(p,lrs_);
@@ -534,12 +534,12 @@ namespace Dmrg {
 			lanczosSolver.push(ab_,a,b);
 		}
 
-// 		void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron) const
+// 		void guessPhiSectors(VectorWithOffsetType& phi,SizeType i,SizeType systemOrEnviron) const
 // 		{
 // 			FermionSign fs(lrs_.left(),tstStruct_.electrons);
 // 			if (allStages(CONVERGING)) {
 // 				VectorWithOffsetType tmpVector = psi_;
-// 				for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
+// 				for (SizeType j=0;j<tstStruct_.aOperators.size();j++) {
 // 					applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],fs,
 // 							systemOrEnviron);
 // 					tmpVector = phi;
@@ -554,12 +554,12 @@ namespace Dmrg {
 		{
 			RealType sum  = 0;
 			weight_.resize(targetVectors_.size());
-			for (size_t r=0;r<weight_.size();r++) {
+			for (SizeType r=0;r<weight_.size();r++) {
 				weight_[r] = (r>lastLanczosVector_) ? 0 : 1;
 
-//				for (size_t i=0;i<targetVectors_[0].sectors();i++) {
+//				for (SizeType i=0;i<targetVectors_[0].sectors();i++) {
 //					VectorType v,w;
-//					size_t i0 = targetVectors_[0].sector(i);
+//					SizeType i0 = targetVectors_[0].sector(i);
 //					targetVectors_[0].extract(v,i0);
 //					targetVectors_[r].extract(w,i0);
 //					weight_[r] += dynWeightOf(v,w);
@@ -567,13 +567,13 @@ namespace Dmrg {
 				sum += weight_[r];
 			}
 			gsWeight_ = 0.0;
-			for (size_t r=0;r<weight_.size();r++) weight_[r] *= (1-gsWeight_)/sum;
+			for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1-gsWeight_)/sum;
 		}
 
 		RealType dynWeightOf(VectorType& v,const VectorType& w) const
 		{
 			RealType sum = 0;
-			for (size_t i=0;i<v.size();i++) {
+			for (SizeType i=0;i<v.size();i++) {
 				if (i>=w.size()) continue;
 				RealType tmp = std::real(v[i]*w[i]);
 				sum += tmp*tmp;
@@ -588,14 +588,14 @@ namespace Dmrg {
 			v /= x;
 		}
 
-		typename PsimagLite::Vector<size_t>::Type stage_;
+		typename PsimagLite::Vector<SizeType>::Type stage_;
 		VectorWithOffsetType psi_;
 		const LeftRightSuperType& lrs_;
 		const ModelType& model_;
 		const TargettingParamsType& tstStruct_;
 		const WaveFunctionTransfType& wft_;
-		size_t lastLanczosVector_;
-		size_t dynCounter_;
+		SizeType lastLanczosVector_;
+		SizeType dynCounter_;
 		PsimagLite::ProgressIndicator progress_;
 		ApplyOperatorType applyOpLocal_;
 		RealType gsWeight_;

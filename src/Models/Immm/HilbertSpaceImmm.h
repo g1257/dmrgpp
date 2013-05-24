@@ -104,20 +104,20 @@ namespace Dmrg {
 
 		typedef Word HilbertState;
 
-		static const size_t NUMBER_OF_SPINS = 2;
+		static const SizeType NUMBER_OF_SPINS = 2;
 		enum {SPIN_UP=0,SPIN_DOWN=1};
 
-		HilbertSpaceImmm(const typename PsimagLite::Vector<size_t>::Type& degreesOfFreedom)
+		HilbertSpaceImmm(const typename PsimagLite::Vector<SizeType>::Type& degreesOfFreedom)
 		: degreesOfFreedom_(degreesOfFreedom)
 		{}
 
-		size_t dOf() const { return degreesOfFreedom_[0]; }
+		SizeType dOf() const { return degreesOfFreedom_[0]; }
 		
 		// Get electronic state on site "j" in binary number "a"
-		Word get(Word const &a,size_t j) const
+		Word get(Word const &a,SizeType j) const
 		{
-			size_t k=degreesOfFreedomUpTo(j);
-			size_t ones = (1<<(dOf()))-1;
+			SizeType k=degreesOfFreedomUpTo(j);
+			SizeType ones = (1<<(dOf()))-1;
 			Word mask=(ones<<k);
 
 			mask &= a;
@@ -127,15 +127,15 @@ namespace Dmrg {
 		}
 
 		// Create electron with internal dof  "sigma" on site "j" in binary number "a"
-		void create(Word &a,size_t j,size_t sigma) const
+		void create(Word &a,SizeType j,SizeType sigma) const
 		{
-			size_t k=degreesOfFreedomUpTo(j);
+			SizeType k=degreesOfFreedomUpTo(j);
 			Word mask=(1<<(k+sigma));
 			a |= mask;
 		}
 		
 		// Is there an electron with internal dof  "sigma" on site "i" in binary number "ket"?
-		bool isNonZero(Word const &ket,size_t i,size_t sigma) const
+		bool isNonZero(Word const &ket,SizeType i,SizeType sigma) const
 		{
 			
 			Word tmp=get(ket,i);
@@ -146,15 +146,15 @@ namespace Dmrg {
 		}
 		
 		//! returns the number of electrons of internal dof "value" in binary number "data"
-		int getNofDigits(const Word& data,size_t value) const
+		int getNofDigits(const Word& data,SizeType value) const
 		{
 			int ret=0;
 			Word data2=data;
-			size_t i=0;
-			size_t dof = 0;
+			SizeType i=0;
+			SizeType dof = 0;
 
 			do {
-				size_t k=degreesOfFreedomUpTo(i);
+				SizeType k=degreesOfFreedomUpTo(i);
 				dof = dOf();
 				if ( (data & (1<<(k+value))) ) ret++;
 				i++;
@@ -164,26 +164,26 @@ namespace Dmrg {
 		}
 		
 		//! Number of electrons with spin spin (sums over bands)
-		int electronsWithGivenSpin(Word const &data,size_t site,size_t spin) const
+		int electronsWithGivenSpin(Word const &data,SizeType site,SizeType spin) const
 		{
 			
-			size_t norb = dOf()/NUMBER_OF_SPINS;
-			size_t beginX=spin*norb;
-			size_t endX=beginX + norb;
-			size_t sum=0;
+			SizeType norb = dOf()/NUMBER_OF_SPINS;
+			SizeType beginX=spin*norb;
+			SizeType endX=beginX + norb;
+			SizeType sum=0;
 
-			for (size_t x=beginX;x<endX;x++) sum += getNofDigits(data,x);
+			for (SizeType x=beginX;x<endX;x++) sum += getNofDigits(data,x);
 			
 			return sum;	
 			
 		}
 
 		//! Number of electrons at given site (sum over all bands)
-		int electronsAtGivenSite(const Word& data,size_t site) const
+		int electronsAtGivenSite(const Word& data,SizeType site) const
 		{
-			size_t sum=0;
+			SizeType sum=0;
 			
-			for (size_t sector=0;sector<dOf();sector++)
+			for (SizeType sector=0;sector<dOf();sector++)
 				sum += calcNofElectrons(data,0,sector);
 			
 			return sum;	
@@ -192,15 +192,15 @@ namespace Dmrg {
 
 		//! Number of electrons with dof sector between i and j excluding i and j in binary number "ket"
 		//!  intended for when i<j
-		 int calcNofElectrons(const Word& ket,size_t i,size_t j,size_t sector) const
+		 int calcNofElectrons(const Word& ket,SizeType i,SizeType j,SizeType sector) const
 		{
-			size_t ii=i+1;
+			SizeType ii=i+1;
 			if (ii>=j) return 0;
 			Word m=0;
-			for (size_t site = ii;site<j;site++) {
-				size_t k = degreesOfFreedomUpTo(site);
-				size_t dof = dOf();
-				for (size_t sigma=0;sigma<dof;sigma++)
+			for (SizeType site = ii;site<j;site++) {
+				SizeType k = degreesOfFreedomUpTo(site);
+				SizeType dof = dOf();
+				for (SizeType sigma=0;sigma<dof;sigma++)
 					m |= (1<<(k+sigma));
 			}
 			m &= ket;
@@ -208,13 +208,13 @@ namespace Dmrg {
 		} 
 
 		//! Number of electrons with dof sector on site i in binary number "ket"
-		int calcNofElectrons(Word const &ket,size_t i,size_t sector) const
+		int calcNofElectrons(Word const &ket,SizeType i,SizeType sector) const
 		{
 			Word m=0;
 			
-			size_t k = degreesOfFreedomUpTo(i);
-			size_t dof = dOf();
-			for (size_t sigma=0;sigma<dof;sigma++) m |= (1<<(k+sigma));
+			SizeType k = degreesOfFreedomUpTo(i);
+			SizeType dof = dOf();
+			for (SizeType sigma=0;sigma<dof;sigma++) m |= (1<<(k+sigma));
 			
 			m &= ket;
 			return getNofDigits(m,sector);
@@ -222,15 +222,15 @@ namespace Dmrg {
 
 	private:
 
-		size_t degreesOfFreedomUpTo(size_t j) const
+		SizeType degreesOfFreedomUpTo(SizeType j) const
 		{
 			return dOf()*j;
-/*			size_t k=0;
-			for (size_t kk=0;kk<j;kk++) k += dOf(kk);
+/*			SizeType k=0;
+			for (SizeType kk=0;kk<j;kk++) k += dOf(kk);
 			return k;*/
 		}
 
-		const typename PsimagLite::Vector<size_t>::Type& degreesOfFreedom_;
+		const typename PsimagLite::Vector<SizeType>::Type& degreesOfFreedom_;
 	}; // class HilbertSpaceImmm
 } // namespace Dmrg
 

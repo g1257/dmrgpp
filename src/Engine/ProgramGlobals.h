@@ -97,8 +97,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 struct ProgramGlobals {
 
-	static size_t const MaxNumberOfSites = 300; // max number of sites that a model can use
-	static size_t const MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
+	static SizeType const MaxNumberOfSites = 300; // max number of sites that a model can use
+	static SizeType const MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
 
 	enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
 

@@ -93,8 +93,8 @@ namespace Dmrg {
 		typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType ;
 
-		typedef size_t IndexType;
-		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
+		typedef SizeType IndexType;
+		static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		
@@ -110,12 +110,12 @@ namespace Dmrg {
 		//! Four-point: these are expensive and uncached!!!
 		//! requires i1<i2<i3<i4
 		FieldType operator()(
-			char mod1,size_t i1,const MatrixType& O1,
-			char mod2,size_t i2,const MatrixType& O2,
-			char mod3,size_t i3,const MatrixType& O3,
-			char mod4,size_t i4,const MatrixType& O4,
+			char mod1,SizeType i1,const MatrixType& O1,
+			char mod2,SizeType i2,const MatrixType& O2,
+			char mod3,SizeType i3,const MatrixType& O3,
+			char mod4,SizeType i4,const MatrixType& O4,
 			int fermionicSign,
-			size_t threadId) const
+			SizeType threadId) const
 		{
 			if (i1>i2 || i3>i4)
 				throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs ordered points\n");
@@ -132,10 +132,10 @@ namespace Dmrg {
 		//! requires i1<i2
 		void firstStage(
 			MatrixType& O2gt,
-			char mod1,size_t i1,const MatrixType& O1,
-			char mod2,size_t i2,const MatrixType& O2,
+			char mod1,SizeType i1,const MatrixType& O1,
+			char mod2,SizeType i2,const MatrixType& O2,
 			int fermionicSign,
-			size_t threadId) const
+			SizeType threadId) const
 		{
 
 			// Take care of modifiers
@@ -168,11 +168,11 @@ namespace Dmrg {
 		//! requires i2<i3<i4
 		FieldType secondStage(
 			const MatrixType& O2gt,
-			size_t i2,
-			char mod3,size_t i3,const MatrixType& O3,
-			char mod4,size_t i4,const MatrixType& O4,
+			SizeType i2,
+			char mod3,SizeType i3,const MatrixType& O3,
+			char mod4,SizeType i4,const MatrixType& O4,
 			int fermionicSign,
-			size_t threadId) const
+			SizeType threadId) const
 		{
 			// Take care of modifiers
 			MatrixType O3m,O4m;
@@ -232,7 +232,7 @@ namespace Dmrg {
 	private:
 			
 		//! i can be zero here!!
-		void growDirectly4p(MatrixType& Odest,const MatrixType& Osrc,size_t i,int fermionicSign,size_t ns,size_t threadId) const
+		void growDirectly4p(MatrixType& Odest,const MatrixType& Osrc,SizeType i,int fermionicSign,SizeType ns,SizeType threadId) const
 		{
 			Odest =Osrc;
 			typename PsimagLite::Vector<int>::Type signs;
@@ -240,7 +240,7 @@ namespace Dmrg {
 			int nt=i-1;
 			if (nt<0) nt=0;
 			
-			for (size_t s=nt;s<ns;s++) {
+			for (SizeType s=nt;s<ns;s++) {
 				helper_.setPointer(threadId,s);
 				int growOption = GROW_RIGHT;
 				

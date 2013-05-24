@@ -98,11 +98,11 @@ class PreOperatorSiteDependent  : public PreOperatorBase<ModelType> {
 
 public:
 
-	PreOperatorSiteDependent(size_t dof,size_t dof2,const ModelType& model,const PsimagLite::String& str,size_t threadId)
+	PreOperatorSiteDependent(SizeType dof,SizeType dof2,const ModelType& model,const PsimagLite::String& str,SizeType threadId)
 		: dof_(dof),dof2_(dof2),model_(model),str_(str),threadId_(threadId)
 	{}
 
-	virtual OperatorType operator()(size_t site) const
+	virtual OperatorType operator()(SizeType site) const
 	{
 		MatrixType opCup = model_.naturalOperator("c",site,dof_);
 		MatrixType opCdown = model_.naturalOperator("c",site,dof2_);
@@ -111,16 +111,16 @@ public:
 		MatrixType Afull = opCupTranspose * opCdown;
 		SparseMatrixType A(Afull);
 		Su2RelatedType su2Related1;
-		OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+		OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
 
 		return opA;
 	}
 
-	virtual bool isValid(size_t i0) const
+	virtual bool isValid(SizeType i0) const
 	{
 		if (!siteDependent()) return true;
-		size_t hilbert = model_.hilbertSize(i0);
-		size_t nx=0;
+		SizeType hilbert = model_.hilbertSize(i0);
+		SizeType nx=0;
 		while(hilbert) {
 			nx++;
 			hilbert >>= 1;
@@ -131,7 +131,7 @@ public:
 
 	virtual PsimagLite::String label() const { return str_; }
 
-	virtual size_t threadId() const { return threadId_; }
+	virtual SizeType threadId() const { return threadId_; }
 
 	virtual bool siteDependent() const
 	{
@@ -141,11 +141,11 @@ public:
 
 private:
 
-	size_t dof_;
-	size_t dof2_;
+	SizeType dof_;
+	SizeType dof2_;
 	const ModelType& model_;
 	PsimagLite::String str_;
-	size_t threadId_;
+	SizeType threadId_;
 };     //class PreOperatorSiteDependent
 } // namespace Dmrg
 /*@}*/

@@ -112,8 +112,8 @@ namespace Dmrg {
 	template<typename OperatorsType_,typename ConcurrencyType_>
 	class	BasisWithOperators : public  OperatorsType_::BasisType {
 
-		typedef std::pair<size_t,size_t> PairType;
-		typedef PsimagLite::Vector<size_t>::Type VectorIntegerType;
+		typedef std::pair<SizeType,SizeType> PairType;
+		typedef PsimagLite::Vector<SizeType>::Type VectorIntegerType;
 
 	public:
 
@@ -135,7 +135,7 @@ namespace Dmrg {
 		template<typename IoInputter>
 		BasisWithOperators(IoInputter& io,
 		                   const PsimagLite::String& ss,
-		                   size_t counter=0)
+		                   SizeType counter=0)
 		: BasisType(io,ss,counter),operators_(io,0,this)
 		{
 			io.read(operatorsPerSite_,"#OPERATORSPERSITE");
@@ -165,14 +165,14 @@ namespace Dmrg {
 			parent.setToProduct(basis2,basis3);
 
 			typename PsimagLite::Vector<RealType>::Type fermionicSigns;
-			size_t x = basis2.numberOfOperators()+basis3.numberOfOperators();
+			SizeType x = basis2.numberOfOperators()+basis3.numberOfOperators();
 
 			if (this->useSu2Symmetry()) setMomentumOfOperators(basis2);
 			operators_.setToProduct(basis2,basis3,x,this);
 			ApplyFactors<FactorsType> apply(this->getFactors(),this->useSu2Symmetry());
 			int savedSign = 0;
 
-			for (size_t i=0;i<this->numberOfOperators();i++) {
+			for (SizeType i=0;i<this->numberOfOperators();i++) {
 				if (i<basis2.numberOfOperators()) {
 					if (!this->useSu2Symmetry()) {
 						const OperatorType& myOp =  basis2.getOperatorByIndex(i);
@@ -206,19 +206,19 @@ namespace Dmrg {
 			//! re-order operators and hamiltonian 
 			operators_.reorder(this->permutationVector());
 			
-			size_t offset1 = basis2.operatorsPerSite_.size();
+			SizeType offset1 = basis2.operatorsPerSite_.size();
 			operatorsPerSite_.resize(offset1+basis3.operatorsPerSite_.size());
-			for (size_t i=0;i<offset1;i++)
+			for (SizeType i=0;i<offset1;i++)
 				operatorsPerSite_[i] =  basis2.operatorsPerSite_[i];
 			
-			for (size_t i=0;i<basis3.operatorsPerSite_.size();i++)
+			for (SizeType i=0;i<basis3.operatorsPerSite_.size();i++)
 				operatorsPerSite_[i+offset1] =  basis3.operatorsPerSite_[i];
 		}
 
 //		template<typename SolverParametersType>
-//		void changeBasis(PsimagLite::Vector<size_t>::Type& removedIndices,
+//		void changeBasis(PsimagLite::Vector<SizeType>::Type& removedIndices,
 //				 PsimagLite::Vector<RealType>::Type& eigs,
-//				 size_t kept,
+//				 SizeType kept,
 //				 const SolverParametersType& solverParams)
 //		{
 //			this->changeBasis(removedIndices,eigs,kept,solverParams);
@@ -230,7 +230,7 @@ namespace Dmrg {
 		RealType truncateBasis(SparseMatrixType& ftransform,
 				       const BlockMatrixType& transform,
 				       const typename PsimagLite::Vector<RealType>::Type& eigs,
-				       const typename PsimagLite::Vector<size_t>::Type& removedIndices,
+				       const typename PsimagLite::Vector<SizeType>::Type& removedIndices,
 				       ConcurrencyType& concurrency)
 		{
 			BasisType &parent = *this;
@@ -263,8 +263,8 @@ namespace Dmrg {
 			setHamiltonian(h);
 			operators_.setOperators(ops);
 			operatorsPerSite_.clear();
-			for (size_t i=0;i<block.size();i++)
-				operatorsPerSite_.push_back(size_t(ops.size()/block.size()));
+			for (SizeType i=0;i<block.size();i++)
+				operatorsPerSite_.push_back(SizeType(ops.size()/block.size()));
 		}
 
 // 		void getOperatorByIndex(PsimagLite::String& s,int i) const
@@ -272,10 +272,10 @@ namespace Dmrg {
 // 			operators_.getOperatorByIndex(i);
 // 		}
 
-		PairType getOperatorIndices(size_t i,size_t sigma) const
+		PairType getOperatorIndices(SizeType i,SizeType sigma) const
 		{
-			size_t sum = 0;
-			for (size_t j=0;j<i;j++) {
+			SizeType sum = 0;
+			for (SizeType j=0;j<i;j++) {
 				assert(j<operatorsPerSite_.size());
 				sum += operatorsPerSite_[j];
 			}
@@ -309,14 +309,14 @@ namespace Dmrg {
 // 			return operators_.getOperator(s,i);
 // 		}
 
-		size_t numberOfOperators() const { return operators_.numberOfOperators(); }
+		SizeType numberOfOperators() const { return operators_.numberOfOperators(); }
 
-// 		static size_t numberOfOperatorsPerSite()
+// 		static SizeType numberOfOperatorsPerSite()
 // 		{
 // 			return 	OperatorsType::numberOfOperatorsPerSite();
 // 		}
 
-		int fermionicSign(size_t i,int fsign) const
+		int fermionicSign(SizeType i,int fsign) const
 		{
 			const BasisType &parent = *this;
 			return parent.fermionicSign(i,fsign);
@@ -341,7 +341,7 @@ namespace Dmrg {
 	private:
 
 		OperatorsType operators_;
-		PsimagLite::Vector<size_t>::Type operatorsPerSite_;
+		PsimagLite::Vector<SizeType>::Type operatorsPerSite_;
 
 		template<typename SomeVectorType>
 		typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,void>::Type
@@ -350,14 +350,14 @@ namespace Dmrg {
 		                   int f)
 		{
 			fermionicSigns.resize(electrons.size());
-			for (size_t i=0;i<fermionicSigns.size();i++)
+			for (SizeType i=0;i<fermionicSigns.size();i++)
 				fermionicSigns[i]= (electrons[i]%2==0) ? 1.0 : static_cast<RealType>(f);
 		}
 
 		void setMomentumOfOperators(const ThisType& basis)
 		{
-			PsimagLite::Vector<size_t>::Type momentum;
-			for (size_t i=0;i<basis.numberOfOperators();i++) {
+			PsimagLite::Vector<SizeType>::Type momentum;
+			for (SizeType i=0;i<basis.numberOfOperators();i++) {
 				int x = PsimagLite::isInVector(
 				     momentum,basis.getReducedOperatorByIndex(i).jm.first);
 				if (x<0)

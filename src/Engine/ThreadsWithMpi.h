@@ -101,20 +101,20 @@ namespace PsimagLite {
 template<typename PthreadFunctionHolderType>
 class ThreadsWithMpi : public Concurrency<typename PthreadFunctionHolderType::RealType> {
 public:
-	static void setThreads(size_t dummy) { } // dummy
+	static void setThreads(SizeType dummy) { } // dummy
 	
 
 	template<typename SomeConcurrencyType>
-	void loopCreate(size_t total,PthreadFunctionHolderType& pfh,SomeConcurrencyType& concurrency)
+	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh,SomeConcurrencyType& concurrency)
 	{
 		PsimagLite::Range<SomeConcurrencyType> range(0,total,concurrency);
 
-		size_t np = concurrency.nprocs();
-		size_t blockSize = total/np; 
+		SizeType np = concurrency.nprocs();
+		SizeType blockSize = total/np; 
 		if (total%np!=0) blockSize++;
 
 		for (;!range.end();range.next())  {
-			size_t i = range.index();
+			SizeType i = range.index();
 			pfh.thread_function_(i,blocksize,total,0);
 		}
 	}

@@ -104,7 +104,7 @@ namespace Dmrg {
 		}
 
 		template<typename IoInputter>
-		ReducedOperators(IoInputter& io,size_t level,const DmrgBasisType* thisBasis)
+		ReducedOperators(IoInputter& io,SizeType level,const DmrgBasisType* thisBasis)
 		: thisBasis_(thisBasis),
 		  useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
 		  cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
@@ -127,11 +127,11 @@ namespace Dmrg {
 
 		const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
 		{
-			size_t s = size_t(p.first/p.second);
-			size_t tmp = p.first%p.second;
-			size_t offset = reducedOperators_[s*p.second].su2Related.offset;
-			size_t g = tmp%offset;
-			size_t i0 = s*p.second+g;
+			SizeType s = SizeType(p.first/p.second);
+			SizeType tmp = p.first%p.second;
+			SizeType offset = reducedOperators_[s*p.second].su2Related.offset;
+			SizeType g = tmp%offset;
+			SizeType i0 = s*p.second+g;
 
 			if (modifier=='N') return getReducedOperatorByIndex(i0);
 			else return getReducedOperatorByIndex(i0+offset);
@@ -145,14 +145,14 @@ namespace Dmrg {
 			findBasisInverse();
 			reducedOperators_.resize(ops.size());
 
-			for (size_t i=0;i<ops.size();i++) {
-				size_t angularMomentum =ops[i].jm.first;
+			for (SizeType i=0;i<ops.size();i++) {
+				SizeType angularMomentum =ops[i].jm.first;
 				typename PsimagLite::Vector<const OperatorType*>::Type opSrc(angularMomentum+1);
 				if (ops[i].su2Related.source.size()==0) continue;
 				OperatorType myOp[angularMomentum+1];
-				size_t transposeCounter=0;
+				SizeType transposeCounter=0;
 
-				for (size_t m=0;m<=angularMomentum;m++) {
+				for (SizeType m=0;m<=angularMomentum;m++) {
 					int tr = ops[i].su2Related.transpose[m];
 					if (tr>=0) {
 						transposeConjugate(myOp[transposeCounter].data,
@@ -174,7 +174,7 @@ namespace Dmrg {
 				reducedOperators_[i].angularFactor=opSrc[0]->angularFactor;
 
 				reducedOperators_[i].su2Related.offset = ops[i].su2Related.offset;
-				size_t i1 = i +  ops[i].su2Related.offset;
+				SizeType i1 = i +  ops[i].su2Related.offset;
 				createReducedConj(angularMomentum,reducedOperators_[i1].data,reducedOperators_[i].data);
 				reducedOperators_[i1].fermionSign=opSrc[0]->fermionSign;
 				reducedOperators_[i1].jm=opSrc[0]->jm;
@@ -182,7 +182,7 @@ namespace Dmrg {
 			}
 		}
 
-		void setMomentumOfOperators(const PsimagLite::Vector<size_t>::Type& momentum)
+		void setMomentumOfOperators(const PsimagLite::Vector<SizeType>::Type& momentum)
 		{
 			momentumOfOperators_=momentum;
 		}
@@ -191,7 +191,7 @@ namespace Dmrg {
 		{
 			if (!useSu2Symmetry_) return;
 			findBasisInverse();
-			size_t angularMomentum =0;
+			SizeType angularMomentum =0;
 			typename PsimagLite::Vector<const OperatorType*>::Type opSrc(angularMomentum+1);
 
 			OperatorType myOp;
@@ -203,7 +203,7 @@ namespace Dmrg {
 			createReducedOperator(reducedHamiltonian_,opSrc);
 		}
 
-		void setToProduct(const DmrgBasisType& basis2,const DmrgBasisType& basis3,size_t x,const DmrgBasisType* thisBasis)
+		void setToProduct(const DmrgBasisType& basis2,const DmrgBasisType& basis3,SizeType x,const DmrgBasisType* thisBasis)
 		{
 			if (!useSu2Symmetry_) return;
 			thisBasis_ = thisBasis;
@@ -214,13 +214,13 @@ namespace Dmrg {
 
 			// build all lfactors
 			lfactorLeft_.resize(momentumOfOperators_.size());
-			for (size_t i=0;i<momentumOfOperators_.size();i++) {
+			for (SizeType i=0;i<momentumOfOperators_.size();i++) {
 				buildLfactor(lfactorLeft_[i],true,basis2,basis3,momentumOfOperators_[i]); // left
 			}
 			buildLfactor(lfactorHamLeft_,true,basis2,basis3,0);
 
 			lfactorRight_.resize(momentumOfOperators_.size());
-			for (size_t i=0;i<momentumOfOperators_.size();i++) {
+			for (SizeType i=0;i<momentumOfOperators_.size();i++) {
 				buildLfactor(lfactorRight_[i],false,basis2,basis3,momentumOfOperators_[i]); // right
 			}
 			buildLfactor(lfactorHamRight_,false,basis2,basis3,0);
@@ -234,21 +234,21 @@ namespace Dmrg {
 		{
 			if (!useSu2Symmetry_) return;
 
-			size_t nr=thisBasis->reducedSize();
-			size_t nold = thisBasis_->reducedSize();
+			SizeType nr=thisBasis->reducedSize();
+			SizeType nold = thisBasis_->reducedSize();
 
 			PsimagLite::Matrix<SparseElementType> fm(nold,nr);
 
 			PsimagLite::Vector<int>::Type inverseP(ftransform.col(),-1);
-			for (size_t j=0;j<nr;j++) {
-				size_t jj = thisBasis->reducedIndex(j); //new
+			for (SizeType j=0;j<nr;j++) {
+				SizeType jj = thisBasis->reducedIndex(j); //new
 				assert(jj<inverseP.size());
 				inverseP[jj] =  j;
 			}
-			for (size_t i=0;i<nold;i++) {
-				size_t ii =thisBasis_->reducedIndex(i); // old
+			for (SizeType i=0;i<nold;i++) {
+				SizeType ii =thisBasis_->reducedIndex(i); // old
 				for (int k = ftransform.getRowPtr(ii);k<ftransform.getRowPtr(ii+1);k++) {
-					size_t jj = ftransform.getCol(k);
+					SizeType jj = ftransform.getCol(k);
 					assert(jj<inverseP.size());
 					int j = inverseP[jj];
 					if (j<0) continue;
@@ -260,7 +260,7 @@ namespace Dmrg {
 
 		}
 
-		void changeBasis(size_t k)
+		void changeBasis(SizeType k)
 		{
 			if (!useSu2Symmetry_) return;
 			changeBasis(reducedOperators_[k].data);
@@ -272,21 +272,21 @@ namespace Dmrg {
 			changeBasis(reducedHamiltonian_);
 		}
 
-		void externalProduct(size_t ind,
+		void externalProduct(SizeType ind,
 		                     const DmrgBasisType& basis2,
 		                     const DmrgBasisType& basis3,
 		                     bool order,
 		                     const OperatorType& myOp)
 		{
 			if (!useSu2Symmetry_) return;
-			size_t n = thisBasis_->reducedSize();
+			SizeType n = thisBasis_->reducedSize();
 
 			const DmrgBasisType* basisA = &basis2;
 			const DmrgBasisType* basisB = &basis3;
-			size_t angularMomentum = myOp.jm.first;
+			SizeType angularMomentum = myOp.jm.first;
 			int fermionSign = myOp.fermionSign;
 			const SparseMatrixType& A = myOp.data;
-			PsimagLite::Vector<size_t>::Type jvals;
+			PsimagLite::Vector<SizeType>::Type jvals;
 
 			if (!order) {
 				basisA = &basis3;
@@ -311,7 +311,7 @@ namespace Dmrg {
 		{
 			if (!useSu2Symmetry_) return;
 
-			size_t n = thisBasis_->reducedSize();
+			SizeType n = thisBasis_->reducedSize();
 			const DmrgBasisType* basisA = &basis2;
 			const DmrgBasisType* basisB = &basis3;
 			PsimagLite::Matrix<SparseElementType> B2(n,n);
@@ -327,23 +327,23 @@ namespace Dmrg {
 			fullMatrixToCrsMatrix(reducedHamiltonian_,B2);
 		}
 
-		void reorder(size_t k,const PsimagLite::Vector<size_t>::Type& permutation)
+		void reorder(SizeType k,const PsimagLite::Vector<SizeType>::Type& permutation)
 		{
 			if (!useSu2Symmetry_) return;
-			for (size_t i=0;i<permutation.size();i++)
+			for (SizeType i=0;i<permutation.size();i++)
 				if (permutation[i]!=i)
 					throw PsimagLite::RuntimeError("reorderHamiltonian: permutation not the identity!\n");
 		}
 
-		void reorderHamiltonian(const PsimagLite::Vector<size_t>::Type& permutation)
+		void reorderHamiltonian(const PsimagLite::Vector<SizeType>::Type& permutation)
 		{
 			if (!useSu2Symmetry_) return;
-			for (size_t i=0;i<permutation.size();i++)
+			for (SizeType i=0;i<permutation.size();i++)
 				if (permutation[i]!=i)
 					throw PsimagLite::RuntimeError("reorderHamiltonian: permutation not the identity!\n");
 		}
 
-		size_t size() const { return reducedOperators_.size(); }
+		SizeType size() const { return reducedOperators_.size(); }
 
 		template<typename ConcurrencyType>
 		void gather(ConcurrencyType& concurrency)
@@ -367,22 +367,22 @@ namespace Dmrg {
 		const DmrgBasisType* thisBasis_;
 		bool useSu2Symmetry_;
 		ClebschGordanType* cgObject_;
-		PsimagLite::Vector<size_t>::Type momentumOfOperators_;
-		PsimagLite::Vector<size_t>::Type basisrinverse_;
+		PsimagLite::Vector<SizeType>::Type momentumOfOperators_;
+		PsimagLite::Vector<SizeType>::Type basisrinverse_;
 		typename PsimagLite::Vector<OperatorType>::Type reducedOperators_;
 		SparseMatrixType reducedHamiltonian_;
-		size_t j1Max_,j2Max_;
+		SizeType j1Max_,j2Max_;
 		typename PsimagLite::Vector<typename PsimagLite::Vector<SparseElementType>::Type>::Type lfactorLeft_;
 		typename PsimagLite::Vector<typename PsimagLite::Vector<SparseElementType>::Type>::Type lfactorRight_;
 		typename PsimagLite::Vector<SparseElementType>::Type lfactorHamLeft_,lfactorHamRight_;
 		PsimagLite::Matrix<int> reducedMapping_;
-		PsimagLite::Vector<PsimagLite::Vector<size_t>::Type>::Type fastBasisLeft_,fastBasisRight_;
-		PsimagLite::Matrix<size_t> flavorIndexCached_;
+		PsimagLite::Vector<PsimagLite::Vector<SizeType>::Type>::Type fastBasisLeft_,fastBasisRight_;
+		PsimagLite::Matrix<SizeType> flavorIndexCached_;
 		SparseMatrixType ftransform_;
 
-		SparseElementType lfactor(int ki,bool order,size_t j1,size_t j2,size_t j1prime,size_t jProd,size_t jProdPrime) const
+		SparseElementType lfactor(int ki,bool order,SizeType j1,SizeType j2,SizeType j1prime,SizeType jProd,SizeType jProdPrime) const
 		{
-			size_t ix=lfactorIndex(order,j1,j2,j1prime,jProd,jProdPrime);
+			SizeType ix=lfactorIndex(order,j1,j2,j1prime,jProd,jProdPrime);
 			if (ki<0) {
 				if (order) return lfactorHamLeft_[ix];
 				return lfactorHamRight_[ix];
@@ -391,46 +391,46 @@ namespace Dmrg {
 			return lfactorRight_[ki][ix];
 		}
 
-		size_t lfactorIndex(bool order,size_t j1,size_t j2,size_t j1prime,size_t jProd,size_t jProdPrime) const
+		SizeType lfactorIndex(bool order,SizeType j1,SizeType j2,SizeType j1prime,SizeType jProd,SizeType jProdPrime) const
 		{
 			if (order) return lfactorIndexLeft(j1,j2,j1prime,jProd,jProdPrime);
 			return lfactorIndexRight(j1,j2,j1prime,jProd,jProdPrime);
 		}
 
-		size_t lfactorIndexLeft(size_t j1,size_t j2,size_t j1prime,size_t jProd,size_t jProdPrime) const
+		SizeType lfactorIndexLeft(SizeType j1,SizeType j2,SizeType j1prime,SizeType jProd,SizeType jProdPrime) const
 		{
-			size_t ix = j1+j2*j1Max_+j1prime*j1Max_*j2Max_+jProd*j1Max_*j1Max_*j2Max_+
+			SizeType ix = j1+j2*j1Max_+j1prime*j1Max_*j2Max_+jProd*j1Max_*j1Max_*j2Max_+
 			            jProdPrime*thisBasis_->jMax()*j1Max_*j1Max_*j2Max_;
 			return ix;
 		}
 
-		size_t lfactorIndexRight(size_t j2,size_t j1,size_t j2prime,size_t jProd,size_t jProdPrime) const
+		SizeType lfactorIndexRight(SizeType j2,SizeType j1,SizeType j2prime,SizeType jProd,SizeType jProdPrime) const
 		{
-			size_t ix = j2+j1*j2Max_+j2prime*j2Max_*j1Max_+jProd*j2Max_*j2Max_*j1Max_+
+			SizeType ix = j2+j1*j2Max_+j2prime*j2Max_*j1Max_+jProd*j2Max_*j2Max_*j1Max_+
 			            jProdPrime*thisBasis_->jMax()*j2Max_*j2Max_*j1Max_;
 			return ix;
 		}
 
 		void calcReducedMapping(const DmrgBasisType& basis2,const DmrgBasisType& basis3)
 		{
-			size_t fMax=0;
-			const PsimagLite::Vector<size_t>::Type& flavorsOld=thisBasis_->flavorsOld();
+			SizeType fMax=0;
+			const PsimagLite::Vector<SizeType>::Type& flavorsOld=thisBasis_->flavorsOld();
 
-			for (size_t i=0;i<thisBasis_->reducedSize();i++) {
-				size_t ii = thisBasis_->reducedIndex(i);
+			for (SizeType i=0;i<thisBasis_->reducedSize();i++) {
+				SizeType ii = thisBasis_->reducedIndex(i);
 				if (ii>=flavorsOld.size()) throw PsimagLite::RuntimeError("Ouch!!\n");
-				size_t f = flavorsOld[ii];
+				SizeType f = flavorsOld[ii];
 				if (f>fMax) fMax=f;
 			}
 			fMax++;
 			reducedMapping_.reset(thisBasis_->jMax(),fMax);
-			for (size_t i=0;i<reducedMapping_.n_row();i++)
-				for (size_t j=0;j<reducedMapping_.n_col();j++)
+			for (SizeType i=0;i<reducedMapping_.n_row();i++)
+				for (SizeType j=0;j<reducedMapping_.n_col();j++)
 					reducedMapping_(i,j)= -1;
-			for (size_t i=0;i<thisBasis_->reducedSize();i++) {
-				size_t ii = thisBasis_->reducedIndex(i);
-				size_t j = thisBasis_->jmValue(ii).first;
-				size_t f = flavorsOld[ii];
+			for (SizeType i=0;i<thisBasis_->reducedSize();i++) {
+				SizeType ii = thisBasis_->reducedIndex(i);
+				SizeType j = thisBasis_->jmValue(ii).first;
+				SizeType f = flavorsOld[ii];
 				reducedMapping_(j,f)=i;
 			}
 		}
@@ -438,16 +438,16 @@ namespace Dmrg {
 		void findBasisInverse()
 		{
 			basisrinverse_.resize(thisBasis_->size());
-			for (size_t i=0;i<thisBasis_->size();i++) {
-				size_t f = thisBasis_->getFlavor(i);
-				size_t j = thisBasis_->jmValue(i).first;
+			for (SizeType i=0;i<thisBasis_->size();i++) {
+				SizeType f = thisBasis_->getFlavor(i);
+				SizeType j = thisBasis_->jmValue(i).first;
 				basisrinverse_[i]=findJf(j,f);
 			}
 		}
 
-		size_t findJf(size_t j,size_t f)
+		SizeType findJf(SizeType j,SizeType f)
 		{
-			for (size_t i=0;i<thisBasis_->reducedSize();i++) {
+			for (SizeType i=0;i<thisBasis_->reducedSize();i++) {
 				PairType jm=thisBasis_->jmValue(thisBasis_->reducedIndex(i));
 				if (jm.first!=j) continue;
 				if (thisBasis_->getFlavor(thisBasis_->reducedIndex(i))!=f) continue;
@@ -456,14 +456,14 @@ namespace Dmrg {
 			return 0; //bogus
 		}
 
-		void createReducedConj(size_t k1 ,SparseMatrixType& opDest,const SparseMatrixType& opSrc)
+		void createReducedConj(SizeType k1 ,SparseMatrixType& opDest,const SparseMatrixType& opSrc)
 		{
-//			size_t n=opSrc.rank();
+//			SizeType n=opSrc.rank();
 			transposeConjugate(opDest,opSrc);
-			for (size_t i=0;i<opSrc.row();i++) {
+			for (SizeType i=0;i<opSrc.row();i++) {
 				PairType jm = thisBasis_->jmValue(thisBasis_->reducedIndex(i));
 				for (int k=opDest.getRowPtr(i);k<opDest.getRowPtr(i+1);k++) {
-					size_t j=opDest.getCol(k);
+					SizeType j=opDest.getCol(k);
 					PairType jmPrime = thisBasis_->jmValue(thisBasis_->reducedIndex(j));
 					SparseElementType factor=SparseElementType(jm.first+1)/SparseElementType(jmPrime.first+1);
 					factor = sqrt(factor);
@@ -479,19 +479,19 @@ namespace Dmrg {
 		void createReducedOperator(SparseMatrixType& opDest,
 		                           const typename PsimagLite::Vector<const OperatorType*>::Type& opSrc)
 		{
-			size_t n = thisBasis_->reducedSize();
+			SizeType n = thisBasis_->reducedSize();
 			DenseMatrixType opDest1(n,n);
-			for (size_t i=0;i<opSrc.size();i++)
+			for (SizeType i=0;i<opSrc.size();i++)
 				createReducedOperator(opDest1,*opSrc[i]); //,PairType(k,mu1),mysign);
 			fullMatrixToCrsMatrix(opDest,opDest1);
 		}
 
 		void createReducedOperator(DenseMatrixType& opDest1,const OperatorType& opSrc)
 		{
-			for (size_t i=0;i<opSrc.data.row();i++) {
+			for (SizeType i=0;i<opSrc.data.row();i++) {
 				PairType jm = thisBasis_->jmValue(i);
 				for (int l=opSrc.data.getRowPtr(i);l<opSrc.data.getRowPtr(i+1);l++) {
-					size_t iprime = opSrc.data.getCol(l);
+					SizeType iprime = opSrc.data.getCol(l);
 					PairType jmPrime = thisBasis_->jmValue(iprime);
 					RealType divisor = opSrc.angularFactor*(jmPrime.first+1);
 					opDest1(basisrinverse_[i],basisrinverse_[iprime]) +=
@@ -511,9 +511,9 @@ namespace Dmrg {
 		void buildLfactor(typename PsimagLite::Vector<SparseElementType>::Type& lfactor,
 		                  bool order,const DmrgBasisType& basis2,
 		                  const DmrgBasisType& basis3,
-		                  size_t k)
+		                  SizeType k)
 		{
-			size_t jMax=j1Max_;
+			SizeType jMax=j1Max_;
 			if (!order) jMax = j2Max_;
 
 			const DmrgBasisType* basisA = &basis2;
@@ -524,12 +524,12 @@ namespace Dmrg {
 			}
 
 			lfactor.resize(j1Max_*j2Max_*jMax*thisBasis_->jMax()*thisBasis_->jMax());
-			for (size_t i1=0;i1<basisA->jVals();i1++) {
-				for (size_t i2=0;i2<basisB->jVals();i2++) {
-					for (size_t i1prime=0;i1prime<basisA->jVals();i1prime++) {
-						for (size_t i=0;i<thisBasis_->jVals();i++) {
-							for (size_t iprime=0;iprime<thisBasis_->jVals();iprime++) {
-								size_t ix = lfactorIndex(order,basisA->jVals(i1),
+			for (SizeType i1=0;i1<basisA->jVals();i1++) {
+				for (SizeType i2=0;i2<basisB->jVals();i2++) {
+					for (SizeType i1prime=0;i1prime<basisA->jVals();i1prime++) {
+						for (SizeType i=0;i<thisBasis_->jVals();i++) {
+							for (SizeType iprime=0;iprime<thisBasis_->jVals();iprime++) {
+								SizeType ix = lfactorIndex(order,basisA->jVals(i1),
 								            basisB->jVals(i2),basisA->jVals(i1prime),
 								            thisBasis_->jVals(i),thisBasis_->jVals(iprime));
 
@@ -544,32 +544,32 @@ namespace Dmrg {
 		}
 
 		SparseElementType calcLfactor(bool order,
-		                              size_t j1,
-		                              size_t j2,
-		                              size_t j1prime,
-		                              size_t jProd,
-		                              size_t jProdPrime,
-		                              size_t k) const
+		                              SizeType j1,
+		                              SizeType j2,
+		                              SizeType j1prime,
+		                              SizeType jProd,
+		                              SizeType jProdPrime,
+		                              SizeType k) const
 		{
 			if (order) return 	 calcLfactorLeft(j1,j2,j1prime,jProd,jProdPrime,k);
 			return calcLfactorRight(j1,j2,j1prime,jProd,jProdPrime,k);
 		}
 
-		SparseElementType calcLfactorLeft(size_t j1,size_t j2,size_t j1prime,size_t jProd,size_t jProdPrime,size_t k) const
+		SparseElementType calcLfactorLeft(SizeType j1,SizeType j2,SizeType j1prime,SizeType jProd,SizeType jProdPrime,SizeType k) const
 		{
 			SparseElementType sum=0;
-			for (size_t m1=0;m1<=j1;m1++) {
+			for (SizeType m1=0;m1<=j1;m1++) {
 				PairType jm1(j1,m1);
-				for (size_t m2=0;m2<=j2;m2++) {
+				for (SizeType m2=0;m2<=j2;m2++) {
 					PairType jm2(j2,m2);
-					for (size_t mCapital=0;mCapital<=k;mCapital++) {
+					for (SizeType mCapital=0;mCapital<=k;mCapital++) {
 						PairType jmCapital(k,mCapital);
 						// get m
 						int x = j1+j2-jProd;
 						if (x%2!=0) continue;
 						x/=2;
 						if (m1+m2-x<0) continue;
-						size_t m = m1 + m2 - x;
+						SizeType m = m1 + m2 - x;
 						if (m>jProd) continue;
 						PairType jm(jProd,m);
 
@@ -578,7 +578,7 @@ namespace Dmrg {
 						if (x%2!=0) continue;
 						x/=2;
 						if (m +mCapital-x<0) continue;
-						size_t mPrime = m +mCapital-x;
+						SizeType mPrime = m +mCapital-x;
 						if (mPrime>jProdPrime) continue;
 						PairType jmPrime(jProdPrime,mPrime);
 
@@ -587,7 +587,7 @@ namespace Dmrg {
 						if (x%2!=0) continue;
 						x/=2;
 						if (mPrime + x - m2 < 0) continue;
-						size_t m1prime = mPrime + x - m2;
+						SizeType m1prime = mPrime + x - m2;
 						if (m1prime > j1prime) continue;
 						PairType jm1prime(j1prime,m1prime);
 
@@ -608,21 +608,21 @@ namespace Dmrg {
 			return sum/RealType(jProdPrime+1);
 		}
 
-		SparseElementType calcLfactorRight(size_t j2,size_t j1,size_t j2prime,size_t jProd,size_t jProdPrime,size_t k) const
+		SparseElementType calcLfactorRight(SizeType j2,SizeType j1,SizeType j2prime,SizeType jProd,SizeType jProdPrime,SizeType k) const
 		{
 			SparseElementType sum=0;
-			for (size_t m1=0;m1<=j1;m1++) {
+			for (SizeType m1=0;m1<=j1;m1++) {
 				PairType jm1(j1,m1);
-				for (size_t m2=0;m2<=j2;m2++) {
+				for (SizeType m2=0;m2<=j2;m2++) {
 					PairType jm2(j2,m2);
-					for (size_t mCapital=0;mCapital<=k;mCapital++) {
+					for (SizeType mCapital=0;mCapital<=k;mCapital++) {
 						PairType jmCapital(k,mCapital);
 						// get m=m1+m2
 						int x = j1+j2-jProd;
 						if (x%2!=0) continue;
 						x/=2;
 						if (m1+m2-x<0) continue;
-						size_t m = m1 + m2 - x;
+						SizeType m = m1 + m2 - x;
 						if (m>jProd) continue;
 						PairType jm(jProd,m);
 
@@ -631,7 +631,7 @@ namespace Dmrg {
 						if (x%2!=0) continue;
 						x/=2;
 						if (m - x + mCapital<0) continue;
-						size_t mPrime = m - x +mCapital;
+						SizeType mPrime = m - x +mCapital;
 						if (mPrime>jProdPrime) continue;
 						PairType jmPrime(jProdPrime,mPrime);
 
@@ -640,7 +640,7 @@ namespace Dmrg {
 						if (x%2!=0) continue;
 						x/=2;
 						if (mPrime + x - m1 < 0) continue;
-						size_t m2prime = mPrime + x - m1;
+						SizeType m2prime = mPrime + x - m1;
 						if (m2prime > j2prime) continue;
 						PairType jm2prime(j2prime,m2prime);
 
@@ -661,7 +661,7 @@ namespace Dmrg {
 			return sum/RealType(jProdPrime+1);
 		}
 
-		bool checkJvalues(size_t jProd,size_t j1,size_t j2) const
+		bool checkJvalues(SizeType jProd,SizeType j1,SizeType j2) const
 		{
 			if (jProd>j1+j2) return false;
 			if (j1>j2 && jProd<j1-j2) return false;
@@ -677,38 +677,38 @@ namespace Dmrg {
 		                   bool order,
 		                   int fermionSign)
 		{
-			size_t n = B.n_row();
-			//size_t angularMomentum = 0;
+			SizeType n = B.n_row();
+			//SizeType angularMomentum = 0;
 			//if (ki>=0) angularMomentum = momentumOfOperators_[ki];
-			const typename PsimagLite::Vector<typename PsimagLite::Vector<size_t>::Type>::Type* fastBasis = &fastBasisLeft_;
+			const typename PsimagLite::Vector<typename PsimagLite::Vector<SizeType>::Type>::Type* fastBasis = &fastBasisLeft_;
 			if (!order) fastBasis = &fastBasisRight_;
-			for (size_t i0=0;i0<fastBasis->size();i0++) {
-				const PsimagLite::Vector<size_t>::Type& twopairs = (*fastBasis)[i0];
-				size_t i = twopairs[0];
-				size_t iprime = twopairs[1];;
-				size_t i1 = twopairs[2];
-				size_t i2 = twopairs[3];
+			for (SizeType i0=0;i0<fastBasis->size();i0++) {
+				const PsimagLite::Vector<SizeType>::Type& twopairs = (*fastBasis)[i0];
+				SizeType i = twopairs[0];
+				SizeType iprime = twopairs[1];;
+				SizeType i1 = twopairs[2];
+				SizeType i2 = twopairs[3];
 
-				size_t ii1 = basisA->reducedIndex(i1);
-				size_t j1 = basisA->jmValue(ii1).first;
+				SizeType ii1 = basisA->reducedIndex(i1);
+				SizeType j1 = basisA->jmValue(ii1).first;
 
-				size_t ii2 = basisB->reducedIndex(i2);
-				size_t j2 = basisB->jmValue(ii2).first;
-				size_t ne2 = basisB->electrons(ii2);
+				SizeType ii2 = basisB->reducedIndex(i2);
+				SizeType j2 = basisB->jmValue(ii2).first;
+				SizeType ne2 = basisB->electrons(ii2);
 
-				size_t jProd = thisBasis_->jVals(i);
-				size_t jProdPrime = thisBasis_->jVals(iprime);
+				SizeType jProd = thisBasis_->jVals(i);
+				SizeType jProdPrime = thisBasis_->jVals(iprime);
 
 				int ix = twopairs[4];
 				RealType fsign = 1;
 				if (!order && (ne2%2 !=0)) fsign = fermionSign;
 
 				for (int k=A.getRowPtr(i1);k<A.getRowPtr(i1+1);k++) {
-					size_t i1prime = A.getCol(k);
-					size_t ii1prime = basisA->reducedIndex(i1prime);
-					size_t j1prime  = basisA->jmValue(ii1prime).first;
+					SizeType i1prime = A.getCol(k);
+					SizeType ii1prime = basisA->reducedIndex(i1prime);
+					SizeType j1prime  = basisA->jmValue(ii1prime).first;
 
-					size_t fprime=0;
+					SizeType fprime=0;
 					if (order) fprime = flavorIndexCached_(i1prime,i2);
 					else fprime = flavorIndexCached_(i2,i1prime);
 
@@ -727,11 +727,11 @@ namespace Dmrg {
 			}
 		}
 
-		void calcFastBasis(PsimagLite::Vector<PsimagLite::Vector<size_t>::Type >::Type& fastBasis,
+		void calcFastBasis(PsimagLite::Vector<PsimagLite::Vector<SizeType>::Type >::Type& fastBasis,
 		                   const DmrgBasisType& basis2,
 		                   const DmrgBasisType& basis3,
 		                   bool order,
-		                   size_t n)
+		                   SizeType n)
 		{
 			const DmrgBasisType* basisA = &basis2;
 			const DmrgBasisType* basisB = &basis3;
@@ -741,37 +741,37 @@ namespace Dmrg {
 				basisB = &basis2;
 			}
 			fastBasis.clear();
-			PsimagLite::Vector<size_t>::Type twopairs(5);
-			for (size_t i=0;i<thisBasis_->jVals();i++) {
+			PsimagLite::Vector<SizeType>::Type twopairs(5);
+			for (SizeType i=0;i<thisBasis_->jVals();i++) {
 				twopairs[0]=i;
-				size_t jProd = thisBasis_->jVals(i);
-				for (size_t iprime=0;iprime<thisBasis_->jVals();iprime++) {
+				SizeType jProd = thisBasis_->jVals(i);
+				for (SizeType iprime=0;iprime<thisBasis_->jVals();iprime++) {
 					twopairs[1]=iprime;
-					for (size_t i1=0;i1<basisA->reducedSize();i1++) {
+					for (SizeType i1=0;i1<basisA->reducedSize();i1++) {
 						twopairs[2]=i1;
-						size_t ii1 = basisA->reducedIndex(i1);
-						size_t ne1 = basisA->electrons(ii1);
-						size_t j1 = basisA->jmValue(ii1).first;
-						size_t f1 = basisA->getFlavor(ii1);
+						SizeType ii1 = basisA->reducedIndex(i1);
+						SizeType ne1 = basisA->electrons(ii1);
+						SizeType j1 = basisA->jmValue(ii1).first;
+						SizeType f1 = basisA->getFlavor(ii1);
 
-						for (size_t i2=0;i2<basisB->reducedSize();i2++) {
+						for (SizeType i2=0;i2<basisB->reducedSize();i2++) {
 
 							twopairs[3]=i2;
-							size_t ii2 = basisB->reducedIndex(i2);
-							size_t ne2 = basisB->electrons(ii2);
-							size_t j2 = basisB->jmValue(ii2).first;
-							size_t f2 = basisB->getFlavor(ii2);
+							SizeType ii2 = basisB->reducedIndex(i2);
+							SizeType ne2 = basisB->electrons(ii2);
+							SizeType j2 = basisB->jmValue(ii2).first;
+							SizeType f2 = basisB->getFlavor(ii2);
 							if (jProd>j1+j2) continue;
 							if (j1>j2 && jProd<j1-j2) continue;
 							if (j2>j1 && jProd<j2-j1) continue;
 
-							size_t f = 0;
+							SizeType f = 0;
 							if (order) f = thisBasis_->flavor2Index(f1,f2,ne1,ne2,j1,j2);
 							else f = thisBasis_->flavor2Index(f2,f1,ne2,ne1,j2,j1);
 
 							// jProd,f --> ix
 							int ix = reducedMapping_(jProd,f);
-							if (ix<0 || size_t(ix)>=n) continue;
+							if (ix<0 || SizeType(ix)>=n) continue;
 							twopairs[4]=ix;
 
 							fastBasis.push_back(twopairs);
@@ -784,16 +784,16 @@ namespace Dmrg {
 		void cacheFlavorIndex(const DmrgBasisType& basis2,const DmrgBasisType& basis3)
 		{
 			flavorIndexCached_.reset(basis2.reducedSize(),basis3.reducedSize());
-			for (size_t i1=0;i1<basis2.reducedSize();i1++) {
-				size_t ii1 = basis2.reducedIndex(i1);
-				size_t ne1 = basis2.electrons(ii1);
-				size_t j1 = basis2.jmValue(ii1).first;
-				size_t f1 = basis2.getFlavor(ii1);
-				for (size_t i2=0;i2<basis3.reducedSize();i2++) {
-					size_t ii2 = basis3.reducedIndex(i2);
-					size_t j2  = basis3.jmValue(ii2).first;
-					size_t f2 = basis3.getFlavor(ii2);
-					size_t ne2 = basis3.electrons(ii2);
+			for (SizeType i1=0;i1<basis2.reducedSize();i1++) {
+				SizeType ii1 = basis2.reducedIndex(i1);
+				SizeType ne1 = basis2.electrons(ii1);
+				SizeType j1 = basis2.jmValue(ii1).first;
+				SizeType f1 = basis2.getFlavor(ii1);
+				for (SizeType i2=0;i2<basis3.reducedSize();i2++) {
+					SizeType ii2 = basis3.reducedIndex(i2);
+					SizeType j2  = basis3.jmValue(ii2).first;
+					SizeType f2 = basis3.getFlavor(ii2);
+					SizeType ne2 = basis3.electrons(ii2);
 					flavorIndexCached_(i1,i2)=thisBasis_->flavor2Index(f1,f2,ne1,ne2,j1,j2);
 				}
 			}

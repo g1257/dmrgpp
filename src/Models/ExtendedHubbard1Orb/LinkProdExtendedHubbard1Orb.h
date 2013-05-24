@@ -88,7 +88,7 @@ namespace Dmrg {
 	template<typename ModelHelperType>
 	class LinkProdExtendedHubbard1Orb {
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			typedef std::pair<size_t,size_t> PairType;
+			typedef std::pair<SizeType,SizeType> PairType;
 			enum {TERM_HOPPING=0,TERM_NINJ=1};
 
 		public:
@@ -97,15 +97,15 @@ namespace Dmrg {
 
 			template<typename SomeStructType>
 			static void setLinkData(
-					size_t term,
-					size_t dofs,
+					SizeType term,
+					SizeType dofs,
      					bool isSu2,
-					size_t& fermionOrBoson,
+					SizeType& fermionOrBoson,
 					PairType& ops,
      					std::pair<char,char>& mods,
-					size_t& angularMomentum,
+					SizeType& angularMomentum,
      					RealType& angularFactor,
-					size_t& category,const SomeStructType& additional)
+					SizeType& category,const SomeStructType& additional)
 			{
 				if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
 				else fermionOrBoson = ProgramGlobals::FERMION;
@@ -119,15 +119,15 @@ namespace Dmrg {
 			}
 
 			template<typename SomeStructType>
-			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2,const SomeStructType& additional)
+			static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType& additional)
 			{
 			}
 			
 			template<typename SomeStructType>
-			static size_t dofs(size_t term,const SomeStructType& additional) { return (term==TERM_NINJ) ? 1 : 2; }
+			static SizeType dofs(SizeType term,const SomeStructType& additional) { return (term==TERM_NINJ) ? 1 : 2; }
 			
 			template<typename SomeStructType>
-			static PairType connectorDofs(size_t term,size_t dofs,const SomeStructType& additional)
+			static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
 			{
 				return PairType(0,0); // no orbital and no dependence on spin
 			}

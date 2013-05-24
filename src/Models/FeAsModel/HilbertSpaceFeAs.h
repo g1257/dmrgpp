@@ -98,7 +98,7 @@ namespace Dmrg {
 	template<typename Word>
 	class HilbertSpaceFeAs {
 
-		static size_t orbitals_;
+		static SizeType orbitals_;
 
 	public:
 
@@ -106,18 +106,18 @@ namespace Dmrg {
 
 		enum {SPIN_UP=0,SPIN_DOWN=1};
 		
-		static void setOrbitals(size_t orbitals)
+		static void setOrbitals(SizeType orbitals)
 		{
 			orbitals_=orbitals;
 			assert(orbitals_==2 || orbitals_==3);
 		}
 		
 		// Get electronic state on site "j" in binary number "a"
-		static Word get(Word const &a,size_t j)
+		static Word get(Word const &a,SizeType j)
 		{
-			size_t dofs = 2*orbitals_;
-			size_t k=dofs*j;
-			size_t ones = (1<<(dofs))-1;
+			SizeType dofs = 2*orbitals_;
+			SizeType k=dofs*j;
+			SizeType ones = (1<<(dofs))-1;
 			Word mask=(ones<<k);
 			
 			mask &= a;
@@ -127,16 +127,16 @@ namespace Dmrg {
 		}
 		
 		// Create electron with internal dof  "sigma" on site "j" in binary number "a"
-		static void create(Word &a,size_t j,size_t sigma)
+		static void create(Word &a,SizeType j,SizeType sigma)
 		{
-			size_t dofs = 2*orbitals_;
-			size_t k=dofs*j;
+			SizeType dofs = 2*orbitals_;
+			SizeType k=dofs*j;
 			Word mask=(1<<(k+sigma));
 			a |= mask;
 		}
 		
 		// Is there an electron with internal dof  "sigma" on site "i" in binary number "ket"?
-		static bool isNonZero(Word const &ket,size_t i,size_t sigma)
+		static bool isNonZero(Word const &ket,SizeType i,SizeType sigma)
 		{
 			
 			Word tmp=get(ket,i);
@@ -147,12 +147,12 @@ namespace Dmrg {
 		}
 		
 		//! returns the number of electrons of internal dof "value" in binary number "data"
-		static int getNofDigits(Word const &data,size_t value)
+		static int getNofDigits(Word const &data,SizeType value)
 		{
-			size_t dofs = 2*orbitals_;
+			SizeType dofs = 2*orbitals_;
 			int ret=0;
 			Word data2=data;
-			size_t i=0;
+			SizeType i=0;
 			do {
 				 if ( (data & (1<<(dofs*i+value))) ) ret++;
 				 i++;
@@ -162,13 +162,13 @@ namespace Dmrg {
 		}
 		
 		//! Number of electrons with spin spin (sums over bands)
-		static int electronsWithGivenSpin(Word const &data,size_t spin)
+		static int electronsWithGivenSpin(Word const &data,SizeType spin)
 		{
-			size_t sum=0;
-			size_t beginX=spin*orbitals_;
-			size_t endX=beginX + orbitals_;
+			SizeType sum=0;
+			SizeType beginX=spin*orbitals_;
+			SizeType endX=beginX + orbitals_;
 			
-			for (size_t x=beginX;x<endX;x++)
+			for (SizeType x=beginX;x<endX;x++)
 				sum += getNofDigits(data,x);
 			
 			return sum;	
@@ -176,11 +176,11 @@ namespace Dmrg {
 		}
 		
 		//! Number of electrons at given site (sum over all bands)
-		static int electronsAtGivenSite(Word const &data,size_t site)
+		static int electronsAtGivenSite(Word const &data,SizeType site)
 		{
-			size_t sum=0;
-			size_t dofs = 2*orbitals_;
-			for (size_t sector=0;sector<dofs;sector++)
+			SizeType sum=0;
+			SizeType dofs = 2*orbitals_;
+			for (SizeType sector=0;sector<dofs;sector++)
 				sum += calcNofElectrons(data,site,sector);
 			
 			return sum;	
@@ -188,23 +188,23 @@ namespace Dmrg {
 		}
 		//! Number of electrons with dof sector between i and j excluding i and j in binary number "ket"
 		//!  intended for when i<j
-		static int calcNofElectrons(Word const &ket,size_t i,size_t j,size_t sector)
+		static int calcNofElectrons(Word const &ket,SizeType i,SizeType j,SizeType sector)
 		{
-			size_t dofs = 2*orbitals_;
-			size_t ii=i+1;
+			SizeType dofs = 2*orbitals_;
+			SizeType ii=i+1;
 			if (ii>=j) return 0;
 			Word m=0;
-			for (size_t k=dofs*ii;k<dofs*j;k++) m |= (1<<k);
+			for (SizeType k=dofs*ii;k<dofs*j;k++) m |= (1<<k);
 			m = m & ket;
 			return getNofDigits(m,sector);
 		} 
 		
 		//! Number of electrons with dof sector on site i in binary number "ket"
-		static int calcNofElectrons(Word const &ket,size_t i,size_t sector)
+		static int calcNofElectrons(Word const &ket,SizeType i,SizeType sector)
 		{
-			size_t dofs = 2*orbitals_;
+			SizeType dofs = 2*orbitals_;
 			Word m=0;
-			for (size_t k=dofs*i;k<dofs*(i+1);k++) m |= (1<<k);
+			for (SizeType k=dofs*i;k<dofs*(i+1);k++) m |= (1<<k);
 			m = m & ket;
 			return getNofDigits(m,sector);
 		} 
@@ -212,7 +212,7 @@ namespace Dmrg {
 	}; // class HilbertSpaceFeAs
 
 	template<typename Word>
-	size_t HilbertSpaceFeAs<Word>::orbitals_ = 2;
+	SizeType HilbertSpaceFeAs<Word>::orbitals_ = 2;
 } // namespace Dmrg
 
 /*@}*/	

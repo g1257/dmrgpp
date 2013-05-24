@@ -94,7 +94,7 @@ namespace Dmrg {
 			//io.readline(twiceTheSpin,"TwiceTheSpin=");
 		}
 
-		size_t twiceTheSpin;
+		SizeType twiceTheSpin;
 	};
 	
 	//! Function that prints model parameters to stream os

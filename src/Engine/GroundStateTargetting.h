@@ -137,7 +137,7 @@ namespace Dmrg {
 			                      const ModelType& model,
 								  const TargettingParamsType& tstStruct,
 			                      const WaveFunctionTransfType& wft,  // wft is ignored here
-			                      const size_t& quantumSector) // quantumSector is ignored here
+			                      const SizeType& quantumSector) // quantumSector is ignored here
 			: lrs_(lrs),
 			  model_(model),
 			  waveFunctionTransformation_(wft),
@@ -148,12 +148,12 @@ namespace Dmrg {
 
 			const ModelType& model() const { return model_; }
 
-			RealType normSquared(size_t i) const
+			RealType normSquared(SizeType i) const
 			{
 				throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
 			}
 
-			RealType weight(size_t i) const
+			RealType weight(SizeType i) const
 			{
 				throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
 				return 0;
@@ -165,7 +165,7 @@ namespace Dmrg {
 			}
 
 			template<typename SomeBasisType>
-			void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<size_t>::Type& weights,
+			void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<SizeType>::Type& weights,
 				   const SomeBasisType& someBasis)
 			{
 				psi_.set(v,someBasis);
@@ -178,21 +178,21 @@ namespace Dmrg {
 
 			bool includeGroundStage() const {return true; }
 
-			size_t size() const 
+			SizeType size() const 
 			{
 				return 0;
 			}
 
-			const VectorWithOffsetType& operator()(size_t i) const
+			const VectorWithOffsetType& operator()(SizeType i) const
 			{
 				throw PsimagLite::RuntimeError("GroundStateTargetting::operator()(...)\n");
 			}
 
 			void evolve(RealType Eg,
-			            size_t direction,
+			            SizeType direction,
 			            const BlockType& block1,
 			            const BlockType& block2,
-			            size_t loopNumber)
+			            SizeType loopNumber)
 			{
 				if (model_.params().insitu=="") return;
 
@@ -215,15 +215,15 @@ namespace Dmrg {
 			}
 
 			void initialGuess(VectorWithOffsetType& initialVector,
-			                  const typename PsimagLite::Vector<size_t>::Type& block) const
+			                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 			{
-				typename PsimagLite::Vector<size_t>::Type nk;
+				typename PsimagLite::Vector<SizeType>::Type nk;
 				commonTargetting_.setNk(nk,block);
 				waveFunctionTransformation_.setInitialVector(initialVector,psi_,lrs_,nk);
 			}
 
 			template<typename IoOutputType>
-			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
+			void save(const typename PsimagLite::Vector<SizeType>::Type& block,IoOutputType& io) const
 			{
 				PsimagLite::OstringStream msg;
 				msg<<"Saving state...";

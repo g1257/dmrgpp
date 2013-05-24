@@ -138,7 +138,7 @@ namespace Dmrg {
  			                     const ModelType& model,
 			                     const TargettingParamsType& correctionStruct,
      		                     const WaveFunctionTransfType& wft, // wft is ignored here
-			                     const size_t& quantumSector) // quantumSector ignored here
+			                     const SizeType& quantumSector) // quantumSector ignored here
 			: lrs_(lrs),
 			  model_(model),
 			  correctionStruct_(correctionStruct),
@@ -153,12 +153,12 @@ namespace Dmrg {
 			
 			const ModelType& model() const { return model_; }
 
-			RealType normSquared(size_t i) const
+			RealType normSquared(SizeType i) const
 			{
 				return std::real(multiply(targetVectors_[i],targetVectors_[i]));
 			}
 			
-			RealType weight(size_t i) const
+			RealType weight(SizeType i) const
 			{
 				if (stage_ == DISABLED) throw PsimagLite::RuntimeError(
 					"CorrectionTargetting: What are you doing here?\n");
@@ -171,7 +171,7 @@ namespace Dmrg {
 			}
 			
 			template<typename SomeBasisType>
-			void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<size_t>::Type& weights,
+			void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<SizeType>::Type& weights,
 				   const SomeBasisType& someBasis)
 			{
 				psi_.set(v,someBasis);
@@ -184,13 +184,13 @@ namespace Dmrg {
 					
 			bool includeGroundStage() const {return true; }
 			
-			size_t size() const 
+			SizeType size() const 
 			{
 				if (stage_==DISABLED) return 0;
 				return targetVectors_.size();
 			}
 			
-			const VectorWithOffsetType& operator()(size_t i) const
+			const VectorWithOffsetType& operator()(SizeType i) const
 			{
 				return targetVectors_[i];
 			}
@@ -198,10 +198,10 @@ namespace Dmrg {
 			RealType time() const { return 0; }
 			
 			void evolve(RealType Eg,
-			            size_t direction,
+			            SizeType direction,
 			            const BlockType& block1,
 			            const BlockType& block2,
-			            size_t loopNumber)
+			            SizeType loopNumber)
 			{
 				cocoon(block1,direction);
 
@@ -217,18 +217,18 @@ namespace Dmrg {
 			}
 
 			void initialGuess(VectorWithOffsetType& initialVector,
-			                  const typename PsimagLite::Vector<size_t>::Type& block) const
+			                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 			{
 				RealType eps = 1e-6;
 				if (psi_.size()>0 && std::norm(psi_)<eps)
 					throw PsimagLite::RuntimeError("psi's norm is zero\n");
-				typename PsimagLite::Vector<size_t>::Type nk;
+				typename PsimagLite::Vector<SizeType>::Type nk;
 				commonTargetting_.setNk(nk,block);
 				waveFunctionTransformation_.setInitialVector(initialVector,psi_,lrs_,nk);
 			}
 			
 			template<typename IoOutputType>
-			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
+			void save(const typename PsimagLite::Vector<SizeType>::Type& block,IoOutputType& io) const
 			{
 				PsimagLite::OstringStream msg;
 				msg<<"Saving state...";
@@ -265,7 +265,7 @@ namespace Dmrg {
 
 		private:
 
-			void cocoon(const BlockType& block1,size_t direction) const
+			void cocoon(const BlockType& block1,SizeType direction) const
 			{
 				if (model_.params().insitu=="") return;
 
@@ -287,7 +287,7 @@ namespace Dmrg {
 			const TargettingParamsType& correctionStruct_;
 			const WaveFunctionTransfType& waveFunctionTransformation_;
 			PsimagLite::ProgressIndicator progress_;
-			size_t stage_;
+			SizeType stage_;
 			VectorWithOffsetType psi_;
 			typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 			ApplyOperatorType applyOpLocal_;

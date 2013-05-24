@@ -135,7 +135,7 @@ In this stage we're adavancing in space and time%'
 			INFINITE=WaveFunctionTransfType::INFINITE};
 
 
-			static const size_t parallelRank_ = 0; // TST needs to support concurrency FIXME
+			static const SizeType parallelRank_ = 0; // TST needs to support concurrency FIXME
 @}
 
 Now comes the constructor which takes 6 arguments.
@@ -159,7 +159,7 @@ in \verb|WaveFunctionTransformation.h|.
 Now let us look at the private data of this class:
 @d privatedata
 @{
-			typename PsimagLite::Vector<size_t>::Type stage_;
+			typename PsimagLite::Vector<SizeType>::Type stage_;
 			VectorWithOffsetType psi_;
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
@@ -211,8 +211,8 @@ The body of the constructor follows:
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
 				RealType factor = 1.0;
-				size_t n = times_.size();
-				for (size_t i=0;i<n;i++) {
+				SizeType n = times_.size();
+				for (SizeType i=0;i<n;i++) {
 					times_[i] = i*tau/(n-1);
 					weight_[i] = factor/(n+4);
 					sum += weight_[i];
@@ -225,7 +225,7 @@ The body of the constructor follows:
 				
 				gsWeight_=1.0-sum;
 				sum += gsWeight_;
-				//for (size_t i=0;i<weight_.size();i++) sum += weight_[i];
+				//for (SizeType i=0;i<weight_.size();i++) sum += weight_[i];
 				if (fabs(sum-1.0)>1e-5) throw PsimagLite::RuntimeError("Weights don't amount to one\n");
 				//printHeader();
 			}
@@ -237,7 +237,7 @@ Note that it throws if you ask for weights of time-vectors when all stages are d
 this would be an error.%
 @o TimeStepTargetting.h -t
 @{
-			RealType weight(size_t i) const
+			RealType weight(SizeType i) const
 			{
 				if (allStages(DISABLED)) throw PsimagLite::RuntimeError(
 						"TST: What are you doing here?\n");
@@ -261,7 +261,7 @@ During the disabled stages it is $1$ since there are no other vectors to target.
 This member function returns the squared norm of time vector number $i$.
 @o TimeStepTargetting.h -t
 @{
-			RealType normSquared(size_t i) const
+			RealType normSquared(SizeType i) const
 			{
 				// call to mult will conjugate one of the vector
 				return real(multiply(targetVectors_[i],targetVectors_[i])); 
@@ -286,9 +286,9 @@ Returns the $i-$th element of the ground state \verb|psi|.
 
 @o TimeStepTargetting.h -t
 @{
-			const ComplexType& operator[](size_t i) const { return psi_[i]; }
+			const ComplexType& operator[](SizeType i) const { return psi_[i]; }
 			
-			ComplexType& operator[](size_t i) { return psi_[i]; }
+			ComplexType& operator[](SizeType i) { return psi_[i]; }
 @}
 
 Returns the full ground state vector as a vector with offset:
@@ -309,7 +309,7 @@ the ground state? Note that when all stages are disabled no time vectors are
 included.
 @o TimeStepTargetting.h -t
 @{
-			size_t size() const
+			SizeType size() const
 			{
 				if (allStages(DISABLED)) return 0;
 				return targetVectors_.size();
@@ -319,7 +319,7 @@ included.
 Returns the full time vector number $i$ as a vector with offsets:
 @o TimeStepTargetting.h -t
 @{
-			const VectorWithOffsetType& operator()(size_t i) const
+			const VectorWithOffsetType& operator()(SizeType i) const
 			{
 				return targetVectors_[i];
 			}
@@ -351,19 +351,19 @@ These two functions call other functions. We'll continue linearly describing eac
 in order of appearance.
 @o TimeStepTargetting.h -t
 @{
-			void evolve(RealType Eg,size_t direction,const BlockType& block,
-				size_t loopNumber)
+			void evolve(RealType Eg,SizeType direction,const BlockType& block,
+				SizeType loopNumber)
 			{
-				size_t count =0;
+				SizeType count =0;
 				VectorWithOffsetType phiOld = psi_;
 				VectorWithOffsetType phiNew;
-				size_t max = tstStruct_.sites.size();
+				SizeType max = tstStruct_.sites.size();
 				
 				if (noStageIs(DISABLED)) max = 1;
 				
 				// Loop over each operator that needs to be applied 
 				// in turn to the g.s.
-				for (size_t i=0;i<max;i++) {
+				for (SizeType i=0;i<max;i++) {
 					count += evolve(i,phiNew,phiOld,Eg,direction,block,loopNumber,max-1);
 					phiOld = phiNew;
 				}
@@ -394,17 +394,17 @@ state \verb|phiOld| into \verb|phiNew|.
 Let's look at the algorithm in detail.%'
 @o TimeStepTargetting.h -t
 @{
-			size_t evolve(
-					size_t i,
+			SizeType evolve(
+					SizeType i,
 					VectorWithOffsetType& phiNew,
 					VectorWithOffsetType& phiOld,
 					RealType Eg,
-					size_t direction,
+					SizeType direction,
 					const BlockType& block,
-					size_t loopNumber,
-				     	size_t lastI)
+					SizeType loopNumber,
+				     	SizeType lastI)
 			{
-				static size_t  timesWithoutAdvancement=0;
+				static SizeType  timesWithoutAdvancement=0;
 @}
 If we have not yet reached the finite loop that the user specified as a starting loop,
 or if we are in the infinite algorithm phase, then we do nothing:
@@ -419,7 +419,7 @@ shrinkage:
 				if (block.size()!=1) throw 
 					PsimagLite::RuntimeError("TimeStepTargetting::evolve(...):"
 							" blocks of size != 1 are unsupported (sorry)\n");
-				size_t site = block[0];
+				SizeType site = block[0];
 @}
 If the stage is disabled and this is not the site on which the user specified, through \verb|tstStruct_.sites|,
 to apply the operator, then do nothing:
@@ -482,11 +482,11 @@ call \verb|applyLocal| (see function \verb|operator()| in file \verb|ApplyLocalO
 to apply this operator to state \verb|phiOld| and store the result in \verb|phiNew|.
 @d computephi1
 @{
-			void computePhi(size_t i,VectorWithOffsetType& phiNew,
-					VectorWithOffsetType& phiOld,size_t systemOrEnviron)
+			void computePhi(SizeType i,VectorWithOffsetType& phiNew,
+					VectorWithOffsetType& phiOld,SizeType systemOrEnviron)
 			{
-				size_t indexAdvance = times_.size()-1;
-				size_t indexNoAdvance = 0;
+				SizeType indexAdvance = times_.size()-1;
+				SizeType indexNoAdvance = 0;
 				if (stage_[i]==OPERATOR) {
 					PsimagLite::OstringStream msg;
 					msg<<"I'm applying a local operator now";
@@ -506,7 +506,7 @@ or just populate all sectors with and then ``collapse'' the non-zero sectors for
 @d computephi2
 @{
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
-					size_t advance = indexNoAdvance;
+					SizeType advance = indexNoAdvance;
 					if (stage_[i] == WFT_ADVANCE) advance = indexAdvance;
 					PsimagLite::OstringStream msg;
 					msg<<"I'm calling the WFT now";
@@ -542,7 +542,7 @@ When stages are advancing we need to weight each target WFtransformed  state  wi
 				bool b = allStages(WFT_ADVANCE) || allStages(WFT_NOADVANCE);
 				if (!b) return;
 				typename PsimagLite::Vector<VectorWithOffsetType>::Type vv(targetVectors_.size());
-				for (size_t i=0;i<targetVectors_.size();i++) {
+				for (SizeType i=0;i<targetVectors_.size();i++) {
 					waveFunctionTransformation_.setInitialVector(vv[i],
 						targetVectors_[i],lrs_);
 					if (norm(vv[i])<1e-6) continue;
@@ -557,7 +557,7 @@ The function below prints all target vectors to disk, using the \verb|TimeSerial
 @{
 
 			template<typename IoOutputType>
-			void save(const typename PsimagLite::Vector<size_t>::Type& block,IoOutputType& io) const
+			void save(const typename PsimagLite::Vector<SizeType>::Type& block,IoOutputType& io) const
 			{
 				PsimagLite::OstringStream msg;
 				msg<<"Saving state...";
@@ -576,12 +576,12 @@ We'll visit one function at a time. %'
 @{
 void load(const PsimagLite::String& f)
 {
-	for (size_t i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
+	for (SizeType i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
 
 	typename IoType::In io(f);
 
 	TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
-	for (size_t i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
+	for (SizeType i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
 	currentTime_ = ts.time();
 
 	psi_.load(io,"PSI");
@@ -595,13 +595,13 @@ This is done only for debugging purposes, and uses the function \verb|test|.
 		private:
 			
 			// in situ computation:
-			void cocoon(size_t direction,const BlockType& block) const
+			void cocoon(SizeType direction,const BlockType& block) const
 			{
-				size_t site = block[0];
+				SizeType site = block[0];
 				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
 				test(psi_,psi_,direction,"<PSI|A|PSI>",site);
 				
-				for (size_t j=0;j<targetVectors_.size();j++) {
+				for (SizeType j=0;j<targetVectors_.size();j++) {
 					PsimagLite::String s = "<P"+utils::ttos(j)+"|A|P"+utils::ttos(j)+">";
 					test(targetVectors_[j],targetVectors_[j],direction,s,site);
 				}
@@ -614,10 +614,10 @@ In other words, the order in which the user specifies the affected sites for the
 need to be the same as the order in which the DMRG sweeping process encounters those sites. Else we throw.
 @o TimeStepTargetting.h -t
 @{
-			void checkOrder(size_t i) const
+			void checkOrder(SizeType i) const
 			{
 				if (i==0) return;
-				for (size_t j=0;j<i;j++) {
+				for (SizeType j=0;j<i;j++) {
 					if (stage_[j] == DISABLED) {
 						PsimagLite::String s ="TST:: Seeing tst site "+utils::ttos(tstStruct_.sites[i]);
 						s =s + " before having seen";
@@ -635,9 +635,9 @@ Else it returns false.
 Valid stages were noted before (cross reference here FIXME).
 @o TimeStepTargetting.h -t
 @{
-			bool allStages(size_t x) const
+			bool allStages(SizeType x) const
 			{
-				for (size_t i=0;i<stage_.size();i++)
+				for (SizeType i=0;i<stage_.size();i++)
 					if (stage_[i]!=x) return false;
 				return true;
 			}
@@ -646,9 +646,9 @@ Valid stages were noted before (cross reference here FIXME).
 The function below returns true if no stage is $x$, else false.
 @o TimeStepTargetting.h -t
 @{
-			bool noStageIs(size_t x) const
+			bool noStageIs(SizeType x) const
 			{
-				for (size_t i=0;i<stage_.size();i++)
+				for (SizeType i=0;i<stage_.size();i++)
 					if (stage_[i]==x) return false;
 				return true;
 			}
@@ -657,7 +657,7 @@ The function below returns true if no stage is $x$, else false.
 This function returns a string (human-readable) representation of the stage given by $i$.
 @o TimeStepTargetting.h -t
 @{
-			PsimagLite::String getStage(size_t i) const
+			PsimagLite::String getStage(SizeType i) const
 			{
 				switch (stage_[i]) {
 					case DISABLED:
@@ -695,18 +695,18 @@ Finally we are ready to $V^\dagger T^dagger \exp(i\epsilon t) TV$ in function \v
 			void calcTimeVectors(
 						RealType Eg,
       						const VectorWithOffsetType& phi,
-						size_t systemOrEnviron)
+						SizeType systemOrEnviron)
 			{
 				typename PsimagLite::Vector<ComplexMatrixType>::Type V(phi.sectors());
 				typename PsimagLite::Vector<ComplexMatrixType>::Type T(phi.sectors());
 				
-				typename PsimagLite::Vector<size_t>::Type steps(phi.sectors());
+				typename PsimagLite::Vector<SizeType>::Type steps(phi.sectors());
 				
 				triDiag(phi,T,V,steps);
 				
 				typename PsimagLite::Vector<PsimagLite::Vector<RealType>::Type::Type > eigs(phi.sectors());
 						
-				for (size_t ii=0;ii<phi.sectors();ii++) 
+				for (SizeType ii=0;ii<phi.sectors();ii++) 
 					PsimagLite::diag(T[ii],eigs[ii],'V');
 				
 				calcTargetVectors(phi,T,V,Eg,eigs,steps,systemOrEnviron);
@@ -724,11 +724,11 @@ index $i$.
 						const typename PsimagLite::Vector<ComplexMatrixType>::Type& V,
 						RealType Eg,
       						const typename PsimagLite::Vector<VectorType>::Type& eigs,
-	    					typename PsimagLite::Vector<size_t>::Type steps,
-					      	size_t systemOrEnviron)
+	    					typename PsimagLite::Vector<SizeType>::Type steps,
+					      	SizeType systemOrEnviron)
 			{
 				targetVectors_[0] = phi;
-				for (size_t i=1;i<times_.size();i++) {
+				for (SizeType i=1;i<times_.size();i++) {
 					// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
 					calcTargetVector(targetVectors_[i],phi,T,V,Eg,eigs,times_[i],steps);
 					//normalize(targetVectors_[i]);
@@ -749,11 +749,11 @@ vector with offsets \verb|v|.
 						RealType Eg,
       						const typename PsimagLite::Vector<VectorType>::Type& eigs,
 	    					RealType t,
-						typename PsimagLite::Vector<size_t>::Type steps)
+						typename PsimagLite::Vector<SizeType>::Type steps)
 			{
 				v = phi;
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i0 = phi.sector(ii);
+				for (SizeType ii=0;ii<phi.sectors();ii++) {
+					SizeType i0 = phi.sector(ii);
 					ComplexVectorType r;
 					calcTargetVector(r,phi,T[ii],V[ii],Eg,eigs[ii],t,steps[ii],i0);
 					v.setDataInSector(r,i0);
@@ -775,14 +775,14 @@ It is the vector calculated by \verb|calcR| as explained below.
 						RealType Eg,
       						const VectorType& eigs,
 	    					RealType t,
-	  					size_t steps,
-						size_t i0)
+	  					SizeType steps,
+						SizeType i0)
 			{
-				size_t n2 = steps;
-				size_t n = V.n_row();
+				SizeType n2 = steps;
+				SizeType n = V.n_row();
 				if (T.n_col()!=T.n_row()) throw PsimagLite::RuntimeError("T is not square\n");
 				if (V.n_col()!=T.n_col()) throw PsimagLite::RuntimeError("V is not nxn2\n");
-				// for (size_t j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
+				// for (SizeType j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
 				ComplexType zone = 1.0;
 				ComplexType zzero = 0.0;
 				
@@ -809,12 +809,12 @@ to substract the ground state energy \verb|Eg|. This returns the vector $exp(iDt
     				RealType Eg,
 				const VectorType& eigs,
     				RealType t,
-				size_t n2,
-				size_t i0)
+				SizeType n2,
+				SizeType i0)
 			{
-				for (size_t k=0;k<n2;k++) {
+				for (SizeType k=0;k<n2;k++) {
 					ComplexType sum = 0.0;
-					for (size_t kprime=0;kprime<n2;kprime++) {
+					for (SizeType kprime=0;kprime<n2;kprime++) {
 						ComplexType tmpV = calcVTimesPhi(kprime,V,phi,i0);
 						sum += conj(T(kprime,k))*tmpV;
 					}
@@ -828,13 +828,13 @@ to substract the ground state energy \verb|Eg|. This returns the vector $exp(iDt
 This function does $\sum_x V_{k',x} phi_{x}$, that is $V\phi$%'
 @o TimeStepTargetting.h -t
 @{
-			ComplexType calcVTimesPhi(size_t kprime,const ComplexMatrixType& V,const VectorWithOffsetType& phi,
-						 size_t i0)
+			ComplexType calcVTimesPhi(SizeType kprime,const ComplexMatrixType& V,const VectorWithOffsetType& phi,
+						 SizeType i0)
 			{
 				ComplexType ret = 0;
-				size_t total = phi.effectiveSize(i0);
+				SizeType total = phi.effectiveSize(i0);
 				
-				for (size_t j=0;j<total;j++)
+				for (SizeType j=0;j<total;j++)
 					ret += conj(V(j,kprime))*phi.fastAccess(i0,j);
 				return ret;
 			}
@@ -847,10 +847,10 @@ Here is tridiag, we loop over (non-zero) symmetry sectors:
 					const VectorWithOffsetType& phi,
 					typename PsimagLite::Vector<ComplexMatrixType>::Type& T,
 	 				typename PsimagLite::Vector<ComplexMatrixType>::Type& V,
-					typename PsimagLite::Vector<size_t>::Type& steps)
+					typename PsimagLite::Vector<SizeType>::Type& steps)
 			{
-				for (size_t ii=0;ii<phi.sectors();ii++) {
-					size_t i = phi.sector(ii);
+				for (SizeType ii=0;ii<phi.sectors();ii++) {
+					SizeType i = phi.sector(ii);
 					steps[ii] = triDiag(phi,T[ii],V[ii],i);
 				}
 			}
@@ -859,21 +859,21 @@ Here is tridiag, we loop over (non-zero) symmetry sectors:
 And now for each symmetry sector:
 @o TimeStepTargetting.h -t
 @{
-			size_t triDiag(const VectorWithOffsetType& phi,ComplexMatrixType& T,ComplexMatrixType& V,size_t i0)
+			SizeType triDiag(const VectorWithOffsetType& phi,ComplexMatrixType& T,ComplexMatrixType& V,SizeType i0)
 			{
-				size_t p = lrs_.super().findPartitionNumber(phi.offset(i0));
+				SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 				typename ModelType::ModelHelperType modelHelper(p,lrs_,model_.orbitals());
 				 		//,useReflection_);
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 			
 				RealType eps= 0.01*ProgramGlobals::LanczosTolerance;
-				size_t iter= ProgramGlobals::LanczosSteps;
+				SizeType iter= ProgramGlobals::LanczosSteps;
 
 				//srand48(3243447);
 				LanczosSolverType lanczosSolver(lanczosHelper,iter,eps,parallelRank_);
 				
 				TridiagonalMatrixType ab;
-				size_t total = phi.effectiveSize(i0);
+				SizeType total = phi.effectiveSize(i0);
 				TargetVectorType phi2(total);
 				phi.extract(phi2,i0);
 				/* PsimagLite::OstringStream msg;
@@ -894,9 +894,9 @@ A validity check
 			{
 				if (V.n_col()>V.n_row()) throw PsimagLite::RuntimeError("cols > rows\n");
 				TargetVectorType r(V.n_col());
-				for (size_t k=0;k<V.n_col();k++) {
+				for (SizeType k=0;k<V.n_col();k++) {
 					r[k] = 0.0;
-					for (size_t j=0;j<V.n_row();j++) 
+					for (SizeType j=0;j<V.n_row();j++) 
 						r[k] += conj(V(j,k))*phi2[j];
 					// is r(k) == \delta(k,0)
 					if (k==0 && std::norm(r[k]-1.0)>1e-5) 
@@ -914,18 +914,18 @@ vector are not going to coincide with the non-zero sectors of the result vector,
 do the empty sectors be the same.
 Note that using simpy
 \begin{verbatim}:
-size_t partition = targetVectors_[0].findPartition(lrs_.super());
+SizeType partition = targetVectors_[0].findPartition(lrs_.super());
 \end{verbatim}
 doesn't work, since \verb|targetVectors_[0]| is stale at this point%'
 This function should not be called one more than one operators will be applied.
 @o TimeStepTargetting.h -t
 @{
-			void guessPhiSectors(VectorWithOffsetType& phi,size_t i,size_t systemOrEnviron)
+			void guessPhiSectors(VectorWithOffsetType& phi,SizeType i,SizeType systemOrEnviron)
 			{
 				FermionSign fs(lrs_.left(),tstStruct_.electrons);
 				if (allStages(WFT_NOADVANCE)) {
 					VectorWithOffsetType tmpVector = psi_;
-					for (size_t j=0;j<tstStruct_.aOperators.size();j++) {
+					for (SizeType j=0;j<tstStruct_.aOperators.size();j++) {
 						applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],fs,
 							systemOrEnviron);
 						tmpVector = phi;
@@ -942,7 +942,7 @@ The function below makes all target vectors empty:
 @{
 			void zeroOutVectors()
 			{
-				for (size_t i=0;i<targetVectors_.size();i++) 
+				for (SizeType i=0;i<targetVectors_.size();i++) 
 					targetVectors_[i].resize(lrs_.super().size());
 			}
 @}
@@ -969,9 +969,9 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 			void test(	
 					const VectorWithOffsetType& src1,
 					const VectorWithOffsetType& src2,
-					size_t systemOrEnviron,
+					SizeType systemOrEnviron,
 				 	const PsimagLite::String& label,
-					size_t site) const
+					SizeType site) const
 			{
 				VectorWithOffsetType dest;
 				OperatorType A = tstStruct_.aOperators[0];
@@ -985,14 +985,14 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
 				ComplexType sum = 0;
-				for (size_t ii=0;ii<dest.sectors();ii++) {
-					size_t i = dest.sector(ii);
-					size_t offset1 = dest.offset(i);
-					for (size_t jj=0;jj<src2.sectors();jj++) {
-						size_t j = src2.sector(jj);
-						size_t offset2 = src2.offset(j);
+				for (SizeType ii=0;ii<dest.sectors();ii++) {
+					SizeType i = dest.sector(ii);
+					SizeType offset1 = dest.offset(i);
+					for (SizeType jj=0;jj<src2.sectors();jj++) {
+						SizeType j = src2.sector(jj);
+						SizeType offset2 = src2.offset(j);
 						if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
-						for (size_t k=0;k<dest.effectiveSize(i);k++) 
+						for (SizeType k=0;k<dest.effectiveSize(i);k++) 
 							sum+= dest[k+offset1] * conj(src2[k+offset2]);
 					}
 				}
@@ -1006,7 +1006,7 @@ This is mainly for testing purposes, since measurements are better done, post-pr
 	void print(std::ostream& os) const
 	{
 		os<<"TSTWeightsTimeVectors=";
-		for (size_t i=0;i<weight_.size();i++)
+		for (SizeType i=0;i<weight_.size();i++)
 			os<<weight_[i]<<" ";
 		os<<"\n";
 		os<<"TSTWeightGroundState="<<gsWeight_<<"\n";

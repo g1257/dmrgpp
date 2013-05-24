@@ -86,22 +86,22 @@ namespace Dmrg {
 	class LinkProductHeisenbergSpinOneHalf {
 			
 		public:
-			typedef std::pair<size_t,size_t> PairType;
+			typedef std::pair<SizeType,SizeType> PairType;
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
 			typedef typename ModelHelperType::RealType RealType;
 
 			template<typename SomeStructType>
 			static void setLinkData(
-					size_t term,
-					size_t dofs,
+					SizeType term,
+					SizeType dofs,
      					bool isSu2,
-					size_t& fermionOrBoson,
-					std::pair<size_t,size_t>& ops,
+					SizeType& fermionOrBoson,
+					std::pair<SizeType,SizeType>& ops,
 					std::pair<char,char>& mods,
-					size_t& angularMomentum,
+					SizeType& angularMomentum,
      					RealType& angularFactor,
-					size_t& category,
+					SizeType& category,
 					const SomeStructType& additional)
 			{
 				fermionOrBoson = ProgramGlobals::BOSON;
@@ -127,7 +127,7 @@ namespace Dmrg {
 			}
 
 			template<typename SomeStructType>
-			static void valueModifier(SparseElementType& value,size_t term,size_t dofs,bool isSu2,const SomeStructType& additional)
+			static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType& additional)
 			{
 				if (isSu2) value = -value;
 				if (dofs<2) value *= 0.5;
@@ -139,20 +139,20 @@ namespace Dmrg {
 			//! Sminus Splus and
 			//! Sz Sz
 			template<typename SomeStructType>
-			static size_t dofs(size_t term,const SomeStructType& additional) { return 3; }
+			static SizeType dofs(SizeType term,const SomeStructType& additional) { return 3; }
 
 			template<typename SomeStructType>
-			static PairType connectorDofs(size_t term,size_t dofs,const SomeStructType& additional)
+			static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
 			{
 				return PairType(0,0); // no orbital and no anisotropy
 			}
 
 		private:
 			
-			static PairType operatorDofs(size_t dofs,bool isSu2)
+			static PairType operatorDofs(SizeType dofs,bool isSu2)
 			{
 				if (dofs<2) return PairType(0,0);
-				size_t x = (isSu2) ? 0 : 1;
+				SizeType x = (isSu2) ? 0 : 1;
 				return PairType(x,x);
 			}
 	}; // class LinkProductHeisenbergSpinOneHalf

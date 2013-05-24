@@ -92,8 +92,8 @@ namespace Dmrg {
 		{}		// we always print offset
 				// and when running Abelian
 				// it might be undefined
-		size_t offset;
-		PsimagLite::Vector<size_t>::Type source;
+		SizeType offset;
+		PsimagLite::Vector<SizeType>::Type source;
 		PsimagLite::Vector<int>::Type transpose;
 	};
 
@@ -114,7 +114,7 @@ namespace Dmrg {
 	struct Operator {
 		typedef RealType_ RealType;
 		typedef SparseMatrixType_ SparseMatrixType;
-		typedef std::pair<size_t,size_t> PairType;
+		typedef std::pair<SizeType,SizeType> PairType;
 		typedef Su2Related Su2RelatedType;
 		Operator() {}
 
@@ -142,7 +142,7 @@ namespace Dmrg {
 	void fillOperator(SomeVectorTemplate<SparseMatrixType*,SomeAllocator1Type>& data,
 	                  SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocator2Type>& op)
 	{
-		for (size_t i=0;i<data.size();i++) {
+		for (SizeType i=0;i<data.size();i++) {
 			data[i] = &(op[i].data);
 		}
 	}

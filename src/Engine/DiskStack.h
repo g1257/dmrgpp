@@ -88,7 +88,7 @@ namespace Dmrg {
 		typedef typename PsimagLite::IoSimple::Out IoOutType;
 
 		public:
-			DiskStack(const PsimagLite::String &file1,const PsimagLite::String &file2,bool hasLoad,size_t rank=0) :
+			DiskStack(const PsimagLite::String &file1,const PsimagLite::String &file2,bool hasLoad,SizeType rank=0) :
 				rank_(rank),
 				fileIn_(file1),
 				fileOut_(file2),
@@ -173,14 +173,14 @@ namespace Dmrg {
 				return dt;
 			}
 
-			size_t size() const { return stack_.size(); }
+			SizeType size() const { return stack_.size(); }
 
 			template<typename DataType_>
 			friend std::ostream& operator<<(std::ostream& os,const DiskStack<DataType_>& ds);
 
 		private:
 
-			size_t rank_;
+			SizeType rank_;
 			PsimagLite::String fileIn_,fileOut_;
 			int total_;
 			PsimagLite::ProgressIndicator progress_;

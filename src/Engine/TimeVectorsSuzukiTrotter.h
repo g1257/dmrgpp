@@ -125,7 +125,7 @@ public:
 							 const WaveFunctionTransfType& wft,
 							 const LeftRightSuperType& lrs,
 							 const RealType& E0,
-	                         const PsimagLite::Vector<size_t>::Type* nonZeroQns)
+	                         const PsimagLite::Vector<SizeType>::Type* nonZeroQns)
 		: progress_("TimeVectorsSuzukiTrotter",0),
 		  currentTime_(currentTime),
 		  tstStruct_(tstStruct),
@@ -142,7 +142,7 @@ public:
 	virtual void calcTimeVectors(const PairType& startEnd,
 	                             RealType Eg,
 								 const VectorWithOffsetType& phi,
-								 size_t systemOrEnviron,
+								 SizeType systemOrEnviron,
 	                             bool allOperatorsApplied)
 	{
 		static bool firstcall = true;
@@ -157,7 +157,7 @@ public:
 		// set non-zero sectors
 		targetVectors_[0] = phi;
 
-		for (size_t i=1;i<times_.size();i++)
+		for (SizeType i=1;i<times_.size();i++)
 			if (targetVectors_[i].size()==0 || !allOperatorsApplied)
 				targetVectors_[i] = phi;
 
@@ -170,7 +170,7 @@ public:
 
 		// skip odd links if expanding system and
 		// skip even links if expanding environ
-		size_t lastIndexLeft = lrs_.left().block().size();
+		SizeType lastIndexLeft = lrs_.left().block().size();
 		assert(lastIndexLeft>0);
 		lastIndexLeft--;
 		bool oddLink = (lrs_.left().block()[lastIndexLeft] & 1);
@@ -186,7 +186,7 @@ public:
 		bool areAllLinksSeen = allLinksSeen();
 		PsimagLite::OstringStream msg2;
 		msg2<<"LINKS SEEN ";
-		for (size_t i=0;i<linksSeen_.size();i++)
+		for (SizeType i=0;i<linksSeen_.size();i++)
 			msg2<<linksSeen_[i]<<" ";
 		progress_.printline(msg2,std::cout);
 
@@ -199,7 +199,7 @@ public:
 			return;
 		}
 
-		for (size_t i=startEnd.first+1;i<startEnd.second;i++) {
+		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
 			VectorWithOffsetType src = targetVectors_[i];
 			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
 			calcTargetVector(targetVectors_[i],Eg,src,systemOrEnviron,times_[i]);
@@ -219,22 +219,22 @@ private:
 
 	bool allLinksSeen() const
 	{
-		size_t nsites = model_.geometry().numberOfSites();
+		SizeType nsites = model_.geometry().numberOfSites();
 		assert(nsites>0);
-		for (size_t i=0;i<nsites-1;i++) {
-			PsimagLite::Vector<size_t>::Type::const_iterator it = find(linksSeen_.begin(),linksSeen_.end(),i);
+		for (SizeType i=0;i<nsites-1;i++) {
+			PsimagLite::Vector<SizeType>::Type::const_iterator it = find(linksSeen_.begin(),linksSeen_.end(),i);
 			if (it == linksSeen_.end()) return false;
 		}
 		return true;
 	}
 
-	void wftAll(size_t site)
+	void wftAll(SizeType site)
 	{
-		for (size_t i=1;i<times_.size();i++)
+		for (SizeType i=1;i<times_.size();i++)
 			wftOne(i,site);
 	}
 
-	void wftOne(size_t i,size_t site)
+	void wftOne(SizeType i,SizeType site)
 	{
 		VectorWithOffsetType phiNew;
 		if (nonZeroQns_) {
@@ -248,7 +248,7 @@ private:
 		}
 
 		// OK, now that we got the partition number right, let's wft:
-		PsimagLite::Vector<size_t>::Type nk(1,model_.hilbertSize(site));
+		PsimagLite::Vector<SizeType>::Type nk(1,model_.hilbertSize(site));
 		wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk); // generalize for su(2)
 		phiNew.collapseSectors();
 		assert(std::norm(phiNew)>1e-6);
@@ -258,12 +258,12 @@ private:
 	void calcTargetVector(VectorWithOffsetType& target,
 						  RealType Eg,
 						  const VectorWithOffsetType& phi,
-						  size_t systemOrEnviron,
+						  SizeType systemOrEnviron,
 						  const RealType& time)
 	{
-		for (size_t ii=0;ii<phi.sectors();ii++) {
-			size_t i0 = phi.sector(ii);
-			size_t total = phi.effectiveSize(i0);
+		for (SizeType ii=0;ii<phi.sectors();ii++) {
+			SizeType i0 = phi.sector(ii);
+			SizeType total = phi.effectiveSize(i0);
 			TargetVectorType result(total,0.0);
 			calcTimeVectorsSuzukiTrotter(result,Eg,phi,systemOrEnviron,i0,time);
 			//NOTE: targetVectors_[0] = exp(iHt) |phi>
@@ -274,20 +274,20 @@ private:
 	void calcTimeVectorsSuzukiTrotter(TargetVectorType& result,
 									  RealType Eg,
 									  const VectorWithOffsetType& phi,
-									  size_t systemOrEnviron,
-									  size_t i0,
+									  SizeType systemOrEnviron,
+									  SizeType i0,
 									  const RealType& time) const
 	{
-		size_t offset = phi.offset(i0);
+		SizeType offset = phi.offset(i0);
 		TargetVectorType phi0(result.size());
 		phi.extract(phi0,i0);
 
 		// NOTE: result =  exp(iHt) |phi0>
-		size_t ns = lrs_.left().size();
+		SizeType ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
-		PsimagLite::Vector<size_t>::Type block(2);
+		PsimagLite::Vector<SizeType>::Type block(2);
 
-		size_t lastIndexLeft = lrs_.left().block().size();
+		SizeType lastIndexLeft = lrs_.left().block().size();
 		assert(lastIndexLeft>0);
 		lastIndexLeft--;
 		block[0]=lrs_.left().block()[lastIndexLeft];
@@ -304,7 +304,7 @@ private:
 		SparseMatrixType transformET;
 		transposeConjugate(transformET,transformE);
 
-		size_t hilbertSize = model_.hilbertSize(block[0]);
+		SizeType hilbertSize = model_.hilbertSize(block[0]);
 		if (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM && lrs_.right().size()==hilbertSize) {
 			transformE.makeDiagonal(hilbertSize,1);
 			transformET.makeDiagonal(hilbertSize,1);
@@ -314,8 +314,8 @@ private:
 			transformST.makeDiagonal(hilbertSize,1);
 		}
 
-		for (size_t i=0;i<phi0.size();i++) {
-			size_t xp=0,yp=0;
+		for (SizeType i=0;i<phi0.size();i++) {
+			SizeType xp=0,yp=0;
 			packSuper.unpack(xp,yp,lrs_.super().permutation(i+offset));
 			if (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM) {
 				timeVectorSystem(result,phi0,xp,yp,packSuper,block,m,i,offset,transformE,transformET);
@@ -327,23 +327,23 @@ private:
 
 	void timeVectorSystem(TargetVectorType& result,
 									   const TargetVectorType& phi0,
-									   size_t xp,
-									   size_t yp,
+									   SizeType xp,
+									   SizeType yp,
 									   const PackIndicesType& packSuper,
 									   const BlockType& block,
 									   const MatrixComplexOrRealType& m,
-									   size_t i,
-									   size_t offset,
+									   SizeType i,
+									   SizeType offset,
 									   const SparseMatrixType& transform,
 									   const SparseMatrixType& transformT) const
 	{
-		PsimagLite::Vector<size_t>::Type iperm;
+		PsimagLite::Vector<SizeType>::Type iperm;
 		suzukiTrotterPerm(iperm,block);
 
 		const LeftRightSuperType& oldLrs = lrs_;
-		size_t hilbertSize = model_.hilbertSize(block[0]);
-		size_t ns = lrs_.left().size();
-		size_t nx = ns/hilbertSize;
+		SizeType hilbertSize = model_.hilbertSize(block[0]);
+		SizeType ns = lrs_.left().size();
+		SizeType nx = ns/hilbertSize;
 		PackIndicesType packLeft(nx);
 		PackIndicesType packRight(hilbertSize);
 
@@ -354,21 +354,21 @@ private:
 
 		MatrixOrIdentityType transformT1(!twoSiteDmrg_,transformT);
 		MatrixOrIdentityType transform1(!twoSiteDmrg_,transform);
-		for (size_t k=transformT1.getRowPtr(yp);k<transformT1.getRowPtr(yp+1);k++) {
-			size_t x1=0,x2p=0;
+		for (SizeType k=transformT1.getRowPtr(yp);k<transformT1.getRowPtr(yp+1);k++) {
+			SizeType x1=0,x2p=0;
 			packLeft.unpack(x1,x2p,lrs_.left().permutation(xp));
 
-			size_t yfull = transformT1.getCol(k);
-			size_t y1p=0,y2=0;
+			SizeType yfull = transformT1.getCol(k);
+			SizeType y1p=0,y2=0;
 			packRight.unpack(y1p,y2,oldLrs.right().permutation(yfull));
 
-			for (size_t x2=0;x2<hilbertSize;x2++) {
-				for (size_t y1=0;y1<hilbertSize;y1++) {
-					size_t yfull2 = packRight.pack(y1,y2,oldLrs.right().permutationInverse());
-					for (size_t k2=transform1.getRowPtr(yfull2);k2<transform1.getRowPtr(yfull2+1);k2++) {
-						size_t y = transform1.getCol(k2);
-						size_t x = packLeft.pack(x1,x2,lrs_.left().permutationInverse());
-						size_t j = packSuper.pack(x,y,lrs_.super().permutationInverse());
+			for (SizeType x2=0;x2<hilbertSize;x2++) {
+				for (SizeType y1=0;y1<hilbertSize;y1++) {
+					SizeType yfull2 = packRight.pack(y1,y2,oldLrs.right().permutationInverse());
+					for (SizeType k2=transform1.getRowPtr(yfull2);k2<transform1.getRowPtr(yfull2+1);k2++) {
+						SizeType y = transform1.getCol(k2);
+						SizeType x = packLeft.pack(x1,x2,lrs_.left().permutationInverse());
+						SizeType j = packSuper.pack(x,y,lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)==0) continue;
 						assert(j>=offset && j<offset+phi0.size());
@@ -381,23 +381,23 @@ private:
 
 	void timeVectorEnviron(TargetVectorType& result,
 										const TargetVectorType& phi0,
-										size_t xp,
-										size_t yp,
+										SizeType xp,
+										SizeType yp,
 										const PackIndicesType& packSuper,
 										const BlockType& block,
 										const MatrixComplexOrRealType& m,
-										size_t i,
-										size_t offset,
+										SizeType i,
+										SizeType offset,
 										const SparseMatrixType& transform,
 										const SparseMatrixType& transformT) const
 	{
-		PsimagLite::Vector<size_t>::Type iperm;
+		PsimagLite::Vector<SizeType>::Type iperm;
 		suzukiTrotterPerm(iperm,block);
 
 		const LeftRightSuperType& oldLrs = lrs_;
-		size_t hilbertSize = model_.hilbertSize(block[0]);
-		size_t ns = oldLrs.left().permutationInverse().size();
-		size_t nx = ns/hilbertSize;
+		SizeType hilbertSize = model_.hilbertSize(block[0]);
+		SizeType ns = oldLrs.left().permutationInverse().size();
+		SizeType nx = ns/hilbertSize;
 		PackIndicesType packLeft(nx);
 		PackIndicesType packRight(hilbertSize);
 
@@ -409,22 +409,22 @@ private:
 		MatrixOrIdentityType transformT1(!twoSiteDmrg_,transformT);
 		MatrixOrIdentityType transform1(!twoSiteDmrg_,transform);
 
-		for (size_t k=transformT1.getRowPtr(xp);k<transformT1.getRowPtr(xp+1);k++) {
-			size_t xfull = transformT1.getCol(k);
-			size_t x1=0,x2p=0;
+		for (SizeType k=transformT1.getRowPtr(xp);k<transformT1.getRowPtr(xp+1);k++) {
+			SizeType xfull = transformT1.getCol(k);
+			SizeType x1=0,x2p=0;
 			packLeft.unpack(x1,x2p,oldLrs.left().permutation(xfull));
 			assert(x2p<hilbertSize);
 
-			size_t y1p=0,y2=0;
+			SizeType y1p=0,y2=0;
 			packRight.unpack(y1p,y2,lrs_.right().permutation(yp));
 
-			for (size_t x2=0;x2<hilbertSize;x2++) {
-				for (size_t y1=0;y1<hilbertSize;y1++) {
-					size_t xfull2 = packLeft.pack(x1,x2,oldLrs.left().permutationInverse());
-					for (size_t k2=transform1.getRowPtr(xfull2);k2<transform1.getRowPtr(xfull2+1);k2++) {
-						size_t x = transform1.getCol(k2);
-						size_t y = packRight.pack(y1,y2,lrs_.right().permutationInverse());
-						size_t j = packSuper.pack(x,y,lrs_.super().permutationInverse());
+			for (SizeType x2=0;x2<hilbertSize;x2++) {
+				for (SizeType y1=0;y1<hilbertSize;y1++) {
+					SizeType xfull2 = packLeft.pack(x1,x2,oldLrs.left().permutationInverse());
+					for (SizeType k2=transform1.getRowPtr(xfull2);k2<transform1.getRowPtr(xfull2+1);k2++) {
+						SizeType x = transform1.getCol(k2);
+						SizeType y = packRight.pack(y1,y2,lrs_.right().permutationInverse());
+						SizeType j = packSuper.pack(x,y,lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],iperm[x2p+y1p*hilbertSize]);
 						if (std::norm(tmp)==0) continue;
 						assert(j>=offset && j<offset+phi0.size());
@@ -436,21 +436,21 @@ private:
 		}
 	}
 
-	void suzukiTrotterPerm(PsimagLite::Vector<size_t>::Type& iperm,const PsimagLite::Vector<size_t>::Type& block) const
+	void suzukiTrotterPerm(PsimagLite::Vector<SizeType>::Type& iperm,const PsimagLite::Vector<SizeType>::Type& block) const
 	{
 		typename ModelType::HilbertBasisType  basis;
-		PsimagLite::Vector<size_t>::Type q;
+		PsimagLite::Vector<SizeType>::Type q;
 		model_.setNaturalBasis(basis,q,block);
 		iperm.resize(basis.size());
-		for (size_t i=0;i<basis.size();i++) {
-			size_t ket = basis[i];
+		for (SizeType i=0;i<basis.size();i++) {
+			SizeType ket = basis[i];
 			int jj = PsimagLite::isInVector(basis,ket);
 			assert(jj>=0);
 			iperm[ket] = jj;
 		}
 	}
 
-	void getMatrix(MatrixComplexOrRealType& m,size_t systemOrEnviron,const BlockType& block,const RealType& time) const
+	void getMatrix(MatrixComplexOrRealType& m,SizeType systemOrEnviron,const BlockType& block,const RealType& time) const
 	{
 		assert(block.size()==2);
 		SparseMatrixType hmatrix;
@@ -479,9 +479,9 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
 	const RealType& E0_;
-	const PsimagLite::Vector<size_t>::Type* nonZeroQns_;
+	const PsimagLite::Vector<SizeType>::Type* nonZeroQns_;
 	bool twoSiteDmrg_;
-	PsimagLite::Vector<size_t>::Type linksSeen_;
+	PsimagLite::Vector<SizeType>::Type linksSeen_;
 }; //class TimeVectorsSuzukiTrotter
 } // namespace Dmrg
 /*@}*/

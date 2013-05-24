@@ -94,17 +94,17 @@ public:
 		: enabled_(enabled),m_(m),one_(1.0)
 	{}
 
-	size_t getRowPtr(size_t i) const
+	SizeType getRowPtr(SizeType i) const
 	{
 		return (enabled_) ? m_.getRowPtr(i) : i;
 	}
 
-	size_t getCol(size_t i) const
+	SizeType getCol(SizeType i) const
 	{
 		return (enabled_) ? m_.getCol(i) : i;
 	}
 
-	const SparseElementType& getValue(size_t i) const
+	const SparseElementType& getValue(SizeType i) const
 	{
 		return (enabled_) ? m_.getValue(i) : one_;
 	}

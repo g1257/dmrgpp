@@ -100,7 +100,7 @@ public:
 		}
 		assert(qvals.size()>1);
 		istart_.push_back(0);
-		for (size_t i=0;i<qvals.size()-1;i++) {
+		for (SizeType i=0;i<qvals.size()-1;i++) {
 			if (qvals.qn(i+1)==qvals.qn(i)) continue;
 			istart_.push_back(i+1);
 		}
@@ -109,16 +109,16 @@ public:
 		//std::cout<<istart_;
 	}
 
-	const size_t& operator()(size_t i) const
+	const SizeType& operator()(SizeType i) const
 	{
 		return istart_[i];
 	}
 
-	size_t size() const { return istart_.size(); }
+	SizeType size() const { return istart_.size(); }
 
 private:
 
-	typename PsimagLite::Vector<size_t>::Type istart_;
+	typename PsimagLite::Vector<SizeType>::Type istart_;
 }; //GenGroup
 } // namespace PsimagLite
 

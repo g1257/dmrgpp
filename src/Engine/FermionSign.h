@@ -87,23 +87,23 @@ namespace Dmrg {
 		typedef PsimagLite::PackIndices PackIndicesType;
 
 	public:
-		FermionSign(const PsimagLite::Vector<size_t>::Type& electrons)
+		FermionSign(const PsimagLite::Vector<SizeType>::Type& electrons)
 		: signs_(electrons.size())
 		{
 			init(electrons);
 		}
 
 		template<typename SomeBasisType>
-		FermionSign(const SomeBasisType& basis,const typename PsimagLite::Vector<size_t>::Type& electrons)
+		FermionSign(const SomeBasisType& basis,const typename PsimagLite::Vector<SizeType>::Type& electrons)
 		{
 
-			const typename PsimagLite::Vector<size_t>::Type& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
+			const typename PsimagLite::Vector<SizeType>::Type& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
 			if (basisElectrons.size()!=basis.permutationInverse().size()) throw PsimagLite::RuntimeError("Problem\n");
-			size_t nx = basisElectrons.size()/electrons.size();
-			typename PsimagLite::Vector<size_t>::Type el(nx);
+			SizeType nx = basisElectrons.size()/electrons.size();
+			typename PsimagLite::Vector<SizeType>::Type el(nx);
 			PackIndicesType pack(nx);
-			for (size_t x=0;x<basisElectrons.size();x++) {
-				size_t x0,x1;
+			for (SizeType x=0;x<basisElectrons.size();x++) {
+				SizeType x0,x1;
 				pack.unpack(x0,x1,basis.permutation(x));
 				assert(x1<electrons.size());
 				int nx0 = basisElectrons[x]-electrons[x1];
@@ -120,7 +120,7 @@ namespace Dmrg {
 			io.read(signs_,"#FERMIONICSIGN");
 		}
 
-		int operator()(size_t i,int f) const
+		int operator()(SizeType i,int f) const
 		{
 			assert(i<signs_.size());
 			return (signs_[i]) ? f : 1;
@@ -132,14 +132,14 @@ namespace Dmrg {
 			io.printVector(signs_,"#FERMIONICSIGN");
 		}
 
-		size_t size() const { return signs_.size(); }
+		SizeType size() const { return signs_.size(); }
 
 	private:
 
-		void init(const PsimagLite::Vector<size_t>::Type& electrons)
+		void init(const PsimagLite::Vector<SizeType>::Type& electrons)
 		{
 			signs_.resize(electrons.size());
-			for (size_t i=0;i<signs_.size();i++)
+			for (SizeType i=0;i<signs_.size();i++)
 				signs_[i] = (electrons[i] & 1);
 		}
 

@@ -66,11 +66,11 @@ typedef PsimagLite::InputNg<InputCheck> InputNgType;
 typedef ParametersDmrgSolver<RealType,InputNgType::Readable> DmrgSolverParametersType;
 
 template<typename ModelType>
-size_t dofsFromModelName(const ModelType& model)
+SizeType dofsFromModelName(const ModelType& model)
 {
 	const PsimagLite::String& modelName = model.params().model;
-	size_t site = 0; // FIXME : account for Hilbert spaces changing with site
-	size_t dofs = size_t(log(model.hilbertSize(site))/log(2.0));
+	SizeType site = 0; // FIXME : account for Hilbert spaces changing with site
+	SizeType dofs = SizeType(log(model.hilbertSize(site))/log(2.0));
 	std::cerr<<"DOFS= "<<dofs<<" <------------------------------------\n";
 	if (modelName.find("FeAsBasedSc")!=PsimagLite::String::npos) return dofs;
 	if (modelName.find("FeAsBasedScExtended")!=PsimagLite::String::npos) return dofs;
@@ -95,9 +95,9 @@ bool observeOneFullSweep(
 	typedef Observer<FieldType,VectorWithOffsetType,ModelType,IoInputType> 
 		ObserverType;
 	typedef ObservableLibrary<ObserverType,TargettingType> ObservableLibraryType;
-	size_t n  = geometry.numberOfSites();
+	SizeType n  = geometry.numberOfSites();
 	//PsimagLite::String sSweeps = "sweeps=";
-	//PsimagLite::String::size_type begin = obsOptions.find(sSweeps);
+	//PsimagLite::String::SizeTypeype begin = obsOptions.find(sSweeps);
 	//if (begin != PsimagLite::String::npos) {
 	//	PsimagLite::String sTmp = obsOptions.substr(begin+sSweeps.length(),PsimagLite::String::npos);
 		//std::cout<<"sTmp="<<sTmp<<"\n";
@@ -117,7 +117,7 @@ bool observeOneFullSweep(
 	if (hasTimeEvolution) observerLib.setBrackets("time","time");
 
 	const PsimagLite::String& modelName = model.params().model;
-	size_t rows = n; // could be n/2 if there's enough symmetry
+	SizeType rows = n; // could be n/2 if there's enough symmetry
 
 	// Immm supports only onepoint:
 	if (modelName=="Immm" && obsOptions!="onepoint") {
@@ -127,7 +127,7 @@ bool observeOneFullSweep(
 		throw PsimagLite::RuntimeError(str.c_str());
 	}
 
-	size_t numberOfDofs = dofsFromModelName(model);
+	SizeType numberOfDofs = dofsFromModelName(model);
 
 	if (!hasTimeEvolution && obsOptions.find("onepoint")!=PsimagLite::String::npos) {
 		observerLib.measureTheOnePoints(numberOfDofs);
@@ -292,8 +292,8 @@ int main(int argc,char *argv[])
 	PsimagLite::String targetting="GroundStateTargetting";
 	const char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
                      "CorrectionVectorTargetting","CorrectionTargetting","MettsTargetting"};
-	size_t totalTargets = 6;
-	for (size_t i = 0;i<totalTargets;++i)
+	SizeType totalTargets = 6;
+	for (SizeType i = 0;i<totalTargets;++i)
 		if (dmrgSolverParams.options.find(targets[i])!=PsimagLite::String::npos) targetting=targets[i];
 	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
  		" supports only GroundStateTargetting for now (sorry!)\n");

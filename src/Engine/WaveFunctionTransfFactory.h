@@ -114,9 +114,9 @@ namespace Dmrg {
 		typedef WaveFunctionTransfSu2<DmrgWaveStructType,VectorWithOffsetType>
 					WaveFunctionTransfSu2Type;
 
-		static const size_t INFINITE = ProgramGlobals::INFINITE;
-		static const size_t EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
-		static const size_t EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
+		static const SizeType INFINITE = ProgramGlobals::INFINITE;
+		static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
+		static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 		
 		template<typename SomeParametersType>
 		WaveFunctionTransfFactory(SomeParametersType& params)
@@ -164,7 +164,7 @@ namespace Dmrg {
 			delete wftImpl_;
 		}
 
-		void setStage(size_t stage)
+		void setStage(SizeType stage)
 		{
 			if (stage == stage_) return;
 			stage_=stage;
@@ -202,7 +202,7 @@ namespace Dmrg {
 					SomeVectorType& dest,
 					const SomeVectorType2& src,
 					const LeftRightSuperType& lrs,
-					const typename PsimagLite::Vector<size_t>::Type& nk) const
+					const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
 			bool allow=false;
 			switch (stage_) {
@@ -262,11 +262,11 @@ namespace Dmrg {
 		template<typename SomeVectorType>
 		void createRandomVector(SomeVectorType& y) const
 		{
-			for (size_t jj=0;jj<y.sectors();jj++) {
-				size_t j = y.sector(jj);
-				size_t offset = y.offset(j);
-				size_t total = y.effectiveSize(j);
-				size_t final = offset + total;
+			for (SizeType jj=0;jj<y.sectors();jj++) {
+				SizeType j = y.sector(jj);
+				SizeType offset = y.offset(j);
+				SizeType total = y.effectiveSize(j);
+				SizeType final = offset + total;
 				createRandomVector(y,offset,final);
 			}
 			if (!isEnabled_) return; // don't make noise unless enabled
@@ -276,22 +276,22 @@ namespace Dmrg {
 		}
 		
 		template<typename SomeVectorType>
-		void createRandomVector(SomeVectorType& y,size_t offset,size_t final) const
+		void createRandomVector(SomeVectorType& y,SizeType offset,SizeType final) const
 		{
 			typename SomeVectorType::value_type tmp;
    			RealType atmp=0;
-			for (size_t i=offset;i<final;i++) {
+			for (SizeType i=offset;i<final;i++) {
 				myRandomT(tmp);
 				y[i]=tmp;
 				atmp += std::real(y[i]*std::conj(y[i]));
 			}
 			atmp = 1.0 / sqrt (atmp);
-			for (size_t i=offset;i<final;i++) y[i] *= atmp;
+			for (SizeType i=offset;i<final;i++) y[i] *= atmp;
 
 		}
 
 		void push(const SparseMatrixType& transform,
-			  size_t direction,
+			  SizeType direction,
 			  const LeftRightSuperType& lrs)
 		{
 			if (!isEnabled_) return;
@@ -326,17 +326,17 @@ namespace Dmrg {
 			progress_.printline(msg,std::cout);
 
 			if (noLoad_) {
-				size_t center = computeCenter(lrs,direction);
+				SizeType center = computeCenter(lrs,direction);
 				updateNoLoad(lrs,center);
 			}
 		}
 
-		const SparseMatrixType& transform(size_t what) const
+		const SparseMatrixType& transform(SizeType what) const
 		{
 			return (what==ProgramGlobals::SYSTEM) ? dmrgWaveStruct_.ws : dmrgWaveStruct_.we;
 		}
 
-		const SparseMatrixType& stackTransform(size_t what) const
+		const SparseMatrixType& stackTransform(SizeType what) const
 		{
 			if (what==ProgramGlobals::SYSTEM) {
 				if (wsStack_.size()==0) return dmrgWaveStruct_.ws;
@@ -404,7 +404,7 @@ namespace Dmrg {
 		void createVector(VectorWithOffsetType& psiDest,
 		                  const VectorWithOffsetType& psiSrc,
 		                  const LeftRightSuperType& lrs,
-		                  const typename PsimagLite::Vector<size_t>::Type& nk) const
+		                  const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
 			wftImpl_->transformVector(psiDest,psiSrc,lrs,nk);
 
@@ -471,10 +471,10 @@ namespace Dmrg {
 			io.readMatrix(weStack_,"weStack");
 		}
 
-		size_t computeCenter(const LeftRightSuperType& lrs,size_t direction) const
+		SizeType computeCenter(const LeftRightSuperType& lrs,SizeType direction) const
 		{
 			if (direction==EXPAND_SYSTEM) {
-				size_t total = lrs.left().block().size();
+				SizeType total = lrs.left().block().size();
 				assert(total>0);
 				total--;
 				return lrs.left().block()[total];
@@ -483,10 +483,10 @@ namespace Dmrg {
 			return lrs.right().block()[0];
 		}
 
-		void updateNoLoad(const LeftRightSuperType& lrs,size_t center)
+		void updateNoLoad(const LeftRightSuperType& lrs,SizeType center)
 		{
 			sitesSeen_.push_back(center);
-			size_t numberOfSites = lrs.super().block().size();
+			SizeType numberOfSites = lrs.super().block().size();
 			if (checkSites(numberOfSites)) {
 				noLoad_=false;
 				PsimagLite::OstringStream msg;
@@ -495,10 +495,10 @@ namespace Dmrg {
 			}
 		}
 
-		bool checkSites(size_t numberOfSites) const
+		bool checkSites(SizeType numberOfSites) const
 		{
 			assert(numberOfSites>0);
-			for (size_t i=1;i<numberOfSites-1;i++) {
+			for (SizeType i=1;i<numberOfSites-1;i++) {
 				bool seen = (std::find(sitesSeen_.begin(),sitesSeen_.end(),i) != sitesSeen_.end());
 				if (!seen) return false;
 			}
@@ -506,8 +506,8 @@ namespace Dmrg {
 		}
 
 		bool isEnabled_;
-		size_t stage_;
-		size_t counter_;
+		SizeType stage_;
+		SizeType counter_;
 		bool firstCall_;
 		PsimagLite::ProgressIndicator progress_;
 		PsimagLite::String filenameIn_,filenameOut_;
@@ -518,7 +518,7 @@ namespace Dmrg {
 		PsimagLite::Random48<RealType> rng_;
 		bool twoSiteDmrg_;
 		bool noLoad_;
-		typename PsimagLite::Vector<size_t>::Type sitesSeen_;
+		typename PsimagLite::Vector<SizeType>::Type sitesSeen_;
 	}; // class WaveFunctionTransformation
 } // namespace Dmrg
 

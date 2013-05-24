@@ -112,14 +112,14 @@ namespace Dmrg {
 			{}
 			BlockMatrixType transform;
 			typename PsimagLite::Vector<RealType>::Type eigs;
-			typename PsimagLite::Vector<size_t>::Type removedIndices;
+			typename PsimagLite::Vector<SizeType>::Type removedIndices;
 		}; // TruncationCache
 
 		Truncation(ReflectionSymmetryType& reflectionOperator,
 		           WaveFunctionTransfType& waveFunctionTransformation,
 		           ConcurrencyType& concurrency,
 		           const ParametersType& parameters,
-		           size_t maxConnections,
+		           SizeType maxConnections,
 		           bool verbose)
 		: reflectionOperator_(reflectionOperator),
 		  lrs_(reflectionOperator_.leftRightSuper()),
@@ -140,8 +140,8 @@ namespace Dmrg {
 		void operator()(BasisWithOperatorsType& pS,
 		                BasisWithOperatorsType& pE,
 				const TargettingType& target,
-		                size_t keptStates,
-		                size_t direction)
+		                SizeType keptStates,
+		                SizeType direction)
 		{
 			if (direction==EXPAND_SYSTEM) {
 				progress_.print("for Environment\n",std::cout);
@@ -164,7 +164,7 @@ namespace Dmrg {
 		void changeBasis(BasisWithOperatorsType& sBasis,
 				 BasisWithOperatorsType& eBasis,
 				 const TargettingType& target,
-				 size_t keptStates)
+				 SizeType keptStates)
 		{
 			changeBasis(sBasis,target,keptStates,EXPAND_SYSTEM);
 			changeBasis(eBasis,target,keptStates,EXPAND_ENVIRON);
@@ -178,8 +178,8 @@ namespace Dmrg {
 
 		void changeBasis(BasisWithOperatorsType& rSprime,
 				 const TargettingType& target,
-				 size_t keptStates,
-				 size_t direction)
+				 SizeType keptStates,
+				 SizeType direction)
 		{
 			/** !PTEX-START Truncation
 			Let us define the density matrices for system:
@@ -273,16 +273,16 @@ namespace Dmrg {
 		}
 
 
-		void updateKeptStates(size_t& keptStates,const typename PsimagLite::Vector<RealType>::Type& eigs2)
+		void updateKeptStates(SizeType& keptStates,const typename PsimagLite::Vector<RealType>::Type& eigs2)
 		{
 			typename PsimagLite::Vector<RealType>::Type eigs = eigs2;
-			typename PsimagLite::Vector<size_t>::Type perm(eigs.size());
+			typename PsimagLite::Vector<SizeType>::Type perm(eigs.size());
 			PsimagLite::Sort<typename PsimagLite::Vector<RealType>::Type> sort;
 			sort.sort(eigs,perm);
 			dumpEigs(eigs);
 
-			size_t newKeptStates = computeKeptStates(keptStates,eigs);
-			size_t statesToRemove = 0;
+			SizeType newKeptStates = computeKeptStates(keptStates,eigs);
+			SizeType statesToRemove = 0;
 			if (eigs.size()>=newKeptStates)
 				statesToRemove = eigs.size()-newKeptStates;
 			RealType discWeight = sumUpTo(eigs,statesToRemove);
@@ -317,16 +317,16 @@ namespace Dmrg {
 		We proceed in the same manner for the environment.
 		!PTEX-END */
 		//! eigenvalues are ordered in increasing order
-		size_t computeKeptStates(size_t& keptStates,const typename PsimagLite::Vector<RealType>::Type& eigs) const
+		SizeType computeKeptStates(SizeType& keptStates,const typename PsimagLite::Vector<RealType>::Type& eigs) const
 		{
 			if (parameters_.tolerance<0) return keptStates;
 			int start = eigs.size() - keptStates;
 			if (start<0) start = 0;
 			int maxToRemove = eigs.size()-parameters_.keptStatesInfinite;
 			if (maxToRemove<0) maxToRemove = 0;
-			size_t total = parameters_.keptStatesInfinite;
+			SizeType total = parameters_.keptStatesInfinite;
 			RealType discWeight=sumUpTo(eigs,start);
-			// maybe we should use int instead of size_t here!!!
+			// maybe we should use int instead of SizeType here!!!
 			
 			for (int i=start;i<maxToRemove;i++) {
 				// calculate the discarded weight if we keep i states.
@@ -347,21 +347,21 @@ namespace Dmrg {
 			return total;
 		}
 
-		RealType sumUpTo(const typename PsimagLite::Vector<RealType>::Type& eigs,size_t x) const
+		RealType sumUpTo(const typename PsimagLite::Vector<RealType>::Type& eigs,SizeType x) const
 		{
 			RealType discWeight = 0;
-			for (size_t i=0;i<x;i++)
+			for (SizeType i=0;i<x;i++)
 				discWeight += fabs(eigs[i]); 
 			return discWeight;
 		}
 
 		void dumpEigs(const typename PsimagLite::Vector<RealType>::Type& eigs) const
 		{
-			static size_t counter = 0;
+			static SizeType counter = 0;
 			if (parameters_.fileForDensityMatrixEigs=="") return;
 			PsimagLite::String file(parameters_.fileForDensityMatrixEigs);
 			file += ttos(counter);
-			size_t parallelRank = 0;
+			SizeType parallelRank = 0;
 			PsimagLite::IoSimple::Out io(file,parallelRank);
 			io<<eigs;
 			counter++;
@@ -372,7 +372,7 @@ namespace Dmrg {
 		WaveFunctionTransfType& waveFunctionTransformation_;
 		ConcurrencyType& concurrency_;
 		const ParametersType& parameters_;
-		size_t maxConnections_;
+		SizeType maxConnections_;
 		bool verbose_;
 		ProgressIndicatorType progress_;
 		RealType error_;

@@ -93,7 +93,7 @@ namespace Dmrg {
 	template<typename LeftRightSuperType_,typename ConcurrencyType_>
 	class ModelHelperSu2  {
 		
-		typedef std::pair<size_t,size_t> PairType;
+		typedef std::pair<SizeType,SizeType> PairType;
 		
 	public:
 		
@@ -133,7 +133,7 @@ namespace Dmrg {
 			return lrs_.super().qn(state);
 		}
 	
-		const SparseMatrixType& getReducedOperator(char modifier,size_t i,size_t sigma,size_t type) const
+		const SparseMatrixType& getReducedOperator(char modifier,SizeType i,SizeType sigma,SizeType type) const
 		{
 			if (type==System) {
 				PairType ii =lrs_.left().getOperatorIndices(i,sigma); 
@@ -168,32 +168,32 @@ namespace Dmrg {
 
 			matrixBlock.resize(total,total);
 
-			size_t counter=0;
-			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
+			SizeType counter=0;
+			for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 				int ix = su2reduced_.flavorMapping(i)-offset;
 				if (ix<0 || ix>=int(matrixBlock.row())) continue;
 				matrixBlock.setRow(ix,counter);
 				
-				size_t i1=su2reduced_.reducedEffective(i).first;
-				size_t i2=su2reduced_.reducedEffective(i).second;
+				SizeType i1=su2reduced_.reducedEffective(i).first;
+				SizeType i2=su2reduced_.reducedEffective(i).second;
 				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
 				
-				size_t n1=lrs_.left().electrons(lrs_.left().reducedIndex(i1));
+				SizeType n1=lrs_.left().electrons(lrs_.left().reducedIndex(i1));
 				RealType fsign=1;
 				if (n1>0 && n1%2!=0) fsign= fermionSign;
 				
 				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
-				size_t lf1 =jm1.first + jm2.first*lrs_.left().jMax();
+				SizeType lf1 =jm1.first + jm2.first*lrs_.left().jMax();
 					
 				for (int k1=A.getRowPtr(i1);k1<A.getRowPtr(i1+1);k1++) {
-					size_t i1prime = A.getCol(k1);
+					SizeType i1prime = A.getCol(k1);
 					PairType jm1prime = lrs_.left().jmValue(lrs_.left().reducedIndex(i1prime));
 
 					for (int k2=B.getRowPtr(i2);k2<B.getRowPtr(i2+1);k2++) {
-						size_t i2prime = B.getCol(k2);
+						SizeType i2prime = B.getCol(k2);
 						PairType jm2prime = lrs_.right().jmValue(lrs_.right().reducedIndex(i2prime));
 						SparseElementType lfactor;
-						size_t lf2 =jm1prime.first + jm2prime.first*lrs_.left().jMax();
+						SizeType lf2 =jm1prime.first + jm2prime.first*lrs_.left().jMax();
 						lfactor=su2reduced_.reducedFactor(link.angularMomentum,link.category,flip,lf1,lf2);
 						if (lfactor==static_cast<SparseElementType>(0)) continue;
 
@@ -235,30 +235,30 @@ namespace Dmrg {
 			int m = m_;
 			int offset = lrs_.super().partition(m);
 
-			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
+			for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 				int ix = su2reduced_.flavorMapping(i)-offset;
 				if (ix<0 || ix>=int(x.size())) continue;
 
-				size_t i1=su2reduced_.reducedEffective(i).first;
-				size_t i2=su2reduced_.reducedEffective(i).second;
+				SizeType i1=su2reduced_.reducedEffective(i).first;
+				SizeType i2=su2reduced_.reducedEffective(i).second;
 				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
-				size_t n1=lrs_.left().electrons(lrs_.left().reducedIndex(i1));
+				SizeType n1=lrs_.left().electrons(lrs_.left().reducedIndex(i1));
 				RealType fsign=1;
 
 				if (n1>0 && n1%2!=0) fsign= fermionSign;
 
 				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
-				size_t lf1 =jm1.first + jm2.first*lrs_.left().jMax();
+				SizeType lf1 =jm1.first + jm2.first*lrs_.left().jMax();
 
 				for (int k1=A.getRowPtr(i1);k1<A.getRowPtr(i1+1);k1++) {
-					size_t i1prime = A.getCol(k1);
+					SizeType i1prime = A.getCol(k1);
 					PairType jm1prime = lrs_.left().jmValue(lrs_.left().reducedIndex(i1prime));
 
 					for (int k2=B.getRowPtr(i2);k2<B.getRowPtr(i2+1);k2++) {
-						size_t i2prime = B.getCol(k2);
+						SizeType i2prime = B.getCol(k2);
 						PairType jm2prime = lrs_.right().jmValue(lrs_.right().reducedIndex(i2prime));
 						SparseElementType lfactor;
-						size_t lf2 =jm1prime.first + jm2prime.first*lrs_.left().jMax();
+						SizeType lf2 =jm1prime.first + jm2prime.first*lrs_.left().jMax();
 
 						lfactor=su2reduced_.reducedFactor(link.angularMomentum,link.category,flipped,lf1,lf2);
 						if (lfactor==static_cast<SparseElementType>(0)) continue;
@@ -286,18 +286,18 @@ namespace Dmrg {
 			int offset = lrs_.super().partition(m);
 			const SparseMatrixType& A = su2reduced_.hamiltonianLeft();
 
-			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
+			for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 				int ix = su2reduced_.flavorMapping(i)-offset;
 				if (ix<0 || ix>=int(x.size())) continue;
 
-				size_t i1=su2reduced_.reducedEffective(i).first;
-				size_t i2=su2reduced_.reducedEffective(i).second;
+				SizeType i1=su2reduced_.reducedEffective(i).first;
+				SizeType i2=su2reduced_.reducedEffective(i).second;
 
 				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
 				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
 
 				for (int k1=A.getRowPtr(i1);k1<A.getRowPtr(i1+1);k1++) {
-					size_t i1prime = A.getCol(k1);
+					SizeType i1prime = A.getCol(k1);
 					SparseElementType lfactor=su2reduced_.reducedHamiltonianFactor(jm1.first,jm2.first);
 
 					if (lfactor==static_cast<SparseElementType>(0)) continue;
@@ -322,17 +322,17 @@ namespace Dmrg {
 			int offset = lrs_.super().partition(m);
 			const SparseMatrixType& B = su2reduced_.hamiltonianRight();
 
-			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
+			for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 				int ix = su2reduced_.flavorMapping(i)-offset;
 				if (ix<0 || ix>=int(x.size())) continue;
 
-				size_t i1=su2reduced_.reducedEffective(i).first;
-				size_t i2=su2reduced_.reducedEffective(i).second;
+				SizeType i1=su2reduced_.reducedEffective(i).first;
+				SizeType i2=su2reduced_.reducedEffective(i).second;
 				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
 				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
 
 				for (int k2=B.getRowPtr(i2);k2<B.getRowPtr(i2+1);k2++) {
-					size_t i2prime = B.getCol(k2);
+					SizeType i2prime = B.getCol(k2);
 					SparseElementType lfactor=su2reduced_.reducedHamiltonianFactor(jm1.first,jm2.first);
 					if (lfactor==static_cast<SparseElementType>(0)) continue;
 
@@ -354,19 +354,19 @@ namespace Dmrg {
 			const SparseMatrixType& A = su2reduced_.hamiltonianLeft();
 			
 			matrixBlock.resize(bs,bs);
-			size_t counter=0;
-			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
+			SizeType counter=0;
+			for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 				int ix = su2reduced_.flavorMapping(i)-offset;
 				matrixBlock.setRow(ix,counter);
 				if (ix<0 || ix>=int(matrixBlock.row())) continue;
 
-				size_t i1=su2reduced_.reducedEffective(i).first;
-				size_t i2=su2reduced_.reducedEffective(i).second;
+				SizeType i1=su2reduced_.reducedEffective(i).first;
+				SizeType i2=su2reduced_.reducedEffective(i).second;
 				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
 				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
 
 				for (int k1=A.getRowPtr(i1);k1<A.getRowPtr(i1+1);k1++) {
-					size_t i1prime = A.getCol(k1);
+					SizeType i1prime = A.getCol(k1);
 					SparseElementType lfactor=su2reduced_.reducedHamiltonianFactor(jm1.first,jm2.first);
 
 					if (lfactor==static_cast<SparseElementType>(0)) continue;
@@ -392,19 +392,19 @@ namespace Dmrg {
 			const SparseMatrixType& B = su2reduced_.hamiltonianRight();
 
 			matrixBlock.resize(bs,bs);
-			size_t counter=0;
-			for (size_t i=0;i<su2reduced_.reducedEffectiveSize();i++) {
+			SizeType counter=0;
+			for (SizeType i=0;i<su2reduced_.reducedEffectiveSize();i++) {
 				int ix = su2reduced_.flavorMapping(i)-offset;
 				matrixBlock.setRow(ix,counter);
 				if (ix<0 || ix>=int(matrixBlock.row())) continue;
 
-				size_t i1=su2reduced_.reducedEffective(i).first;
-				size_t i2=su2reduced_.reducedEffective(i).second;
+				SizeType i1=su2reduced_.reducedEffective(i).first;
+				SizeType i2=su2reduced_.reducedEffective(i).second;
 				PairType jm1 = lrs_.left().jmValue(lrs_.left().reducedIndex(i1));
 				PairType jm2 = lrs_.right().jmValue(lrs_.right().reducedIndex(i2));
 
 				for (int k2=B.getRowPtr(i2);k2<B.getRowPtr(i2+1);k2++) {
-					size_t i2prime = B.getCol(k2);
+					SizeType i2prime = B.getCol(k2);
 					SparseElementType lfactor=su2reduced_.reducedHamiltonianFactor(jm1.first,jm2.first);
 					if (lfactor==static_cast<SparseElementType>(0)) continue;
 
@@ -429,7 +429,7 @@ namespace Dmrg {
 			else calcHamiltonianPartRight(matrixBlock);
 		}
 
-		size_t m() const {return m_;}
+		SizeType m() const {return m_;}
 
 		const LeftRightSuperType& leftRightSuper() const
 		{

@@ -126,8 +126,8 @@ namespace Dmrg {
 
 		bool operator()(VectorWithOffsetType& c,
 		                const VectorWithOffsetType& eToTheBetaH,
-		                typename PsimagLite::Vector<size_t>::Type& block,
-		                size_t direction)
+		                typename PsimagLite::Vector<SizeType>::Type& block,
+		                SizeType direction)
 		{
 			assert(direction!=ProgramGlobals::INFINITE);
 
@@ -135,11 +135,11 @@ namespace Dmrg {
 				setCollapseBasis();
 			internalAction(c,eToTheBetaH,block,direction,false);
 			if (atBorder(direction,block)) {
-				typename PsimagLite::Vector<size_t>::Type block2;
+				typename PsimagLite::Vector<SizeType>::Type block2;
 				setBlockToBorder(block2,block);
 				internalAction(c,eToTheBetaH,block2,direction,true);
 			}
-			for (size_t i=0;i<block.size();i++)
+			for (SizeType i=0;i<block.size();i++)
 				sitesSeen_.push_back(block[i]);
 			
 			if (direction==prevDirection_) return false;
@@ -154,27 +154,27 @@ namespace Dmrg {
 			return true;
 		}
 
-		void setNk(typename PsimagLite::Vector<size_t>::Type& nk,const typename PsimagLite::Vector<size_t>::Type& block) const
+		void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,const typename PsimagLite::Vector<SizeType>::Type& block) const
 		{
-			for (size_t i=0;i<block.size();i++)
+			for (SizeType i=0;i<block.size();i++)
 				nk.push_back(mettsStochastics_.hilbertSize(block[i]));
 		}
 
-		size_t volumeOf(const typename PsimagLite::Vector<size_t>::Type& v) const
+		SizeType volumeOf(const typename PsimagLite::Vector<SizeType>::Type& v) const
 		{
 			assert(v.size()>0);
-			size_t ret = v[0];
-			for (size_t i=1;i<v.size();i++) ret *= v[i];
+			SizeType ret = v[0];
+			for (SizeType i=1;i<v.size();i++) ret *= v[i];
 			return ret;
 		}
 
-		size_t volumeOf(const typename PsimagLite::Vector<size_t>::Type& alphaFixed,
-		                const typename PsimagLite::Vector<size_t>::Type& nk) const
+		SizeType volumeOf(const typename PsimagLite::Vector<SizeType>::Type& alphaFixed,
+		                const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
 			assert(alphaFixed.size()>0);
 			assert(alphaFixed.size()==nk.size());
-			size_t sum = alphaFixed[0];
-			for (size_t i=1;i<alphaFixed.size();i++)
+			SizeType sum = alphaFixed[0];
+			for (SizeType i=1;i<alphaFixed.size();i++)
 				sum += alphaFixed[i]*nk[i-1];
 			return sum;
 		}
@@ -183,36 +183,36 @@ namespace Dmrg {
 
 		void internalAction(VectorWithOffsetType& dest2,
 		                    const VectorWithOffsetType& src2,
-		                    const typename PsimagLite::Vector<size_t>::Type& block,
-							size_t direction,
+		                    const typename PsimagLite::Vector<SizeType>::Type& block,
+							SizeType direction,
 							bool border) const
 		{
 			if (dest2.size()==0) {
 				dest2 =  src2;
 			}
 
-			typename PsimagLite::Vector<size_t>::Type nk;
+			typename PsimagLite::Vector<SizeType>::Type nk;
 			setNk(nk,block);
-			size_t volumeOfNk = volumeOf(nk);
+			SizeType volumeOfNk = volumeOf(nk);
 
 			typename PsimagLite::Vector<RealType>::Type p(volumeOfNk,0);
 			probability(p,dest2,direction,volumeOfNk,border);
 			RealType sum = 0;
-			for (size_t i=0;i<p.size();i++)
+			for (SizeType i=0;i<p.size();i++)
 				sum += p[i];
 			assert(fabs(sum-1.0)<1e-6);
 
 			VectorWithOffsetType dest;
-			typename PsimagLite::Vector<size_t>::Type indexFixed(block.size());
-			for (size_t i=0;i<block.size();i++)
+			typename PsimagLite::Vector<SizeType>::Type indexFixed(block.size());
+			for (SizeType i=0;i<block.size();i++)
 				indexFixed[i] = mettsStochastics_.chooseRandomState(p,block[i]);
 
-			size_t volumeOfIndexFixed = volumeOf(indexFixed,nk);
+			SizeType volumeOfIndexFixed = volumeOf(indexFixed,nk);
 
-			for (size_t i=0;i<block.size();i++)
+			for (SizeType i=0;i<block.size();i++)
 				std::cerr<<"SITES="<<block[i]<<" ";
 			std::cerr<<" PROBS=";
-			for (size_t i=0;i<p.size();i++) std::cerr<<p[i]<<" ";
+			for (SizeType i=0;i<p.size();i++) std::cerr<<p[i]<<" ";
 			std::cerr<<" CHOSEN="<<indexFixed<<" BORDER="<<border<<"\n";
 			 // m1 == indexFixed in FIXME write paper reference here
 
@@ -226,15 +226,15 @@ namespace Dmrg {
 
 		void collapseVector(VectorWithOffsetType& dest2, // <<---- CPS
 		                    const VectorWithOffsetType& src, // <--- MPS
-		                    size_t direction,
-		                    size_t indexFixed, // <--- m1
-		                    size_t nk,  // <-- size of the Hilbert sp. of one site
+		                    SizeType direction,
+		                    SizeType indexFixed, // <--- m1
+		                    SizeType nk,  // <-- size of the Hilbert sp. of one site
 							bool border) const
 		{
 			VectorWithOffsetType dest = dest2;
 			dest.populateSectors(lrs_.super());
-			for (size_t ii=0;ii<dest.sectors();ii++) {
-				size_t i0 = dest.sector(ii);
+			for (SizeType ii=0;ii<dest.sectors();ii++) {
+				SizeType i0 = dest.sector(ii);
 				collapseVector(dest,src,direction,i0,indexFixed,nk,border);
 			}
 			dest.collapseSectors();
@@ -245,10 +245,10 @@ namespace Dmrg {
 
 		void collapseVector(VectorWithOffsetType& w, // <<---- CPS
 							const VectorWithOffsetType& v, // <--- MPS
-		                    size_t direction,
-		                    size_t m, // <-- non-zero sector
-		                    size_t indexFixed, // <--- m1
-		                    size_t nk,// <-- size of the Hilbert sp. of one site
+		                    SizeType direction,
+		                    SizeType m, // <-- non-zero sector
+		                    SizeType indexFixed, // <--- m1
+		                    SizeType nk,// <-- size of the Hilbert sp. of one site
 							bool border) const
 		{
 			if (direction==EXPAND_SYSTEM)  collapseVectorLeft(w,v,m,indexFixed,nk,border);
@@ -258,9 +258,9 @@ namespace Dmrg {
 		void compare1(const VectorType& v1,const VectorType& v2) const
 		{
 			assert(v1.size()==v2.size());
-			size_t count = 0;
-			for (size_t i=0;i<v1.size();i++) {
-				for (size_t j=0;j<v2.size();j++) {
+			SizeType count = 0;
+			for (SizeType i=0;i<v1.size();i++) {
+				for (SizeType j=0;j<v2.size();j++) {
 					if (fabs(v1[i]-v2[i])>1e-3) count++;
 				}
 			}
@@ -270,9 +270,9 @@ namespace Dmrg {
 
 		void collapseVectorLeft(VectorWithOffsetType& w, // <<---- CPS
 					const VectorWithOffsetType& v, // <--- MPS
-					size_t m, // <-- non-zero sector
-					size_t indexFixed, // <--- m1
-					size_t nk, // <-- size of the Hilbert sp. of one site
+					SizeType m, // <-- non-zero sector
+					SizeType indexFixed, // <--- m1
+					SizeType nk, // <-- size of the Hilbert sp. of one site
 					bool border) const
 		{
 			if (border)
@@ -283,26 +283,26 @@ namespace Dmrg {
 
 		void collapseVectorLeft(VectorWithOffsetType& w, // <<---- CPS
 					const VectorWithOffsetType& v, // <--- MPS
-					size_t m, // <-- non-zero sector
-					size_t indexFixed, // <--- m1
-					size_t nk) const // <-- size of the Hilbert sp. of one site
+					SizeType m, // <-- non-zero sector
+					SizeType indexFixed, // <--- m1
+					SizeType nk) const // <-- size of the Hilbert sp. of one site
 		{
-			size_t offset = lrs_.super().partition(m);
+			SizeType offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
 
-			size_t ns = lrs_.left().size();
+			SizeType ns = lrs_.left().size();
 			PackIndicesType packSuper(ns);
 			PackIndicesType packLeft(ns/nk);
-			for (size_t i=0;i<size_t(total);i++) {
-				size_t alpha,beta;
+			for (SizeType i=0;i<SizeType(total);i++) {
+				SizeType alpha,beta;
 				packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
 
-				size_t alpha0,alpha1;
+				SizeType alpha0,alpha1;
 				packLeft.unpack(alpha0,alpha1,lrs_.left().permutation(alpha));
 
-				for (size_t alpha1Prime=0;alpha1Prime<nk;alpha1Prime++) {
-					size_t alphaPrime = packLeft.pack(alpha0,alpha1Prime,lrs_.left().permutationInverse());
-					size_t iprime = packSuper.pack(alphaPrime,beta,lrs_.super().permutationInverse());
+				for (SizeType alpha1Prime=0;alpha1Prime<nk;alpha1Prime++) {
+					SizeType alphaPrime = packLeft.pack(alpha0,alpha1Prime,lrs_.left().permutationInverse());
+					SizeType iprime = packSuper.pack(alphaPrime,beta,lrs_.super().permutationInverse());
 					w[i+offset] += v[iprime]*collapseBasis_(alpha1Prime,indexFixed)* collapseBasis_(alpha1,indexFixed);
 
 				}
@@ -311,23 +311,23 @@ namespace Dmrg {
 
 		void collapseLeftBorder(VectorWithOffsetType& w, // <<---- CPS
 					const VectorWithOffsetType& v, // <--- MPS
-					size_t m, // <-- non-zero sector
-					size_t indexFixed, // <--- m1
-					size_t nk) const // <-- size of the Hilbert sp. of one site
+					SizeType m, // <-- non-zero sector
+					SizeType indexFixed, // <--- m1
+					SizeType nk) const // <-- size of the Hilbert sp. of one site
 		{
 			assert(lrs_.right().size()==nk);
-			size_t offset = lrs_.super().partition(m);
+			SizeType offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
 
-			size_t ns = lrs_.left().size();
+			SizeType ns = lrs_.left().size();
 			PackIndicesType packSuper(ns);
 
-			for (size_t i=0;i<size_t(total);i++) {
-				size_t alpha,beta;
+			for (SizeType i=0;i<SizeType(total);i++) {
+				SizeType alpha,beta;
 				packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
 
-				for (size_t betaPrime=0;betaPrime<nk;betaPrime++) {
-					size_t iprime = packSuper.pack(alpha,betaPrime,lrs_.super().permutationInverse());
+				for (SizeType betaPrime=0;betaPrime<nk;betaPrime++) {
+					SizeType iprime = packSuper.pack(alpha,betaPrime,lrs_.super().permutationInverse());
 					w[i+offset] += v[iprime]*collapseBasis_(betaPrime,indexFixed) * collapseBasis_(beta,indexFixed);
 				}
 			}
@@ -335,9 +335,9 @@ namespace Dmrg {
 
 		void collapseVectorRight(VectorWithOffsetType& w, // <<---- CPS
 								 const VectorWithOffsetType& v, // <--- MPS
-								 size_t m, // <-- non-zero sector
-								 size_t indexFixed, // <--- m1
-								 size_t nk, // <-- size of the Hilbert sp. of one site
+								 SizeType m, // <-- non-zero sector
+								 SizeType indexFixed, // <--- m1
+								 SizeType nk, // <-- size of the Hilbert sp. of one site
 								 bool border) const
 		{
 			if (border)
@@ -348,26 +348,26 @@ namespace Dmrg {
 
 		void collapseVectorRight(VectorWithOffsetType& w, // <<---- CPS
 								 const VectorWithOffsetType& v, // <--- MPS
-		                         size_t m, // <-- non-zero sector
-		                         size_t indexFixed, // <--- m1
-		                         size_t nk) const // <-- size of the Hilbert sp. of one site
+		                         SizeType m, // <-- non-zero sector
+		                         SizeType indexFixed, // <--- m1
+		                         SizeType nk) const // <-- size of the Hilbert sp. of one site
 		{
-			size_t offset = lrs_.super().partition(m);
+			SizeType offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
 
-			size_t ns = lrs_.left().size();
+			SizeType ns = lrs_.left().size();
 			PackIndicesType packSuper(ns);
 			PackIndicesType packRight(nk);
-			for (size_t i=0;i<size_t(total);i++) {
-				size_t alpha,beta;
+			for (SizeType i=0;i<SizeType(total);i++) {
+				SizeType alpha,beta;
 				packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
 
-				size_t beta0,beta1;
+				SizeType beta0,beta1;
 				packRight.unpack(beta0,beta1,lrs_.right().permutation(beta));
 
-				for (size_t beta0Prime=0;beta0Prime<nk;beta0Prime++) {
-					size_t betaPrime =  packRight.pack(beta0Prime,beta1,lrs_.right().permutationInverse());
-					size_t iprime = packSuper.pack(alpha,betaPrime,lrs_.super().permutationInverse());
+				for (SizeType beta0Prime=0;beta0Prime<nk;beta0Prime++) {
+					SizeType betaPrime =  packRight.pack(beta0Prime,beta1,lrs_.right().permutationInverse());
+					SizeType iprime = packSuper.pack(alpha,betaPrime,lrs_.super().permutationInverse());
 					w[i+offset] += v[iprime]*collapseBasis_(beta0Prime,indexFixed)* collapseBasis_(beta0,indexFixed);
 				}
 			}
@@ -375,23 +375,23 @@ namespace Dmrg {
 
 		void collapseRightBorder(VectorWithOffsetType& w, // <<---- CPS
 								 const VectorWithOffsetType& v, // <--- MPS
-								 size_t m, // <-- non-zero sector
-								 size_t indexFixed, // <--- m1
-								 size_t nk) const // <-- size of the Hilbert sp. of one site
+								 SizeType m, // <-- non-zero sector
+								 SizeType indexFixed, // <--- m1
+								 SizeType nk) const // <-- size of the Hilbert sp. of one site
 		{
 			assert(lrs_.left().size()==nk);
-			size_t offset = lrs_.super().partition(m);
+			SizeType offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
 
-			size_t ns = lrs_.left().size();
+			SizeType ns = lrs_.left().size();
 			PackIndicesType packSuper(ns);
 
-			for (size_t i=0;i<size_t(total);i++) {
-				size_t alpha,beta;
+			for (SizeType i=0;i<SizeType(total);i++) {
+				SizeType alpha,beta;
 				packSuper.unpack(alpha,beta,lrs_.super().permutation(i+offset));
 
-				for (size_t alphaPrime=0;alphaPrime<nk;alphaPrime++) {
-					size_t iprime = packSuper.pack(alphaPrime,beta,lrs_.super().permutationInverse());
+				for (SizeType alphaPrime=0;alphaPrime<nk;alphaPrime++) {
+					SizeType iprime = packSuper.pack(alphaPrime,beta,lrs_.super().permutationInverse());
 					w[i+offset] += v[iprime]*collapseBasis_(alphaPrime,indexFixed) * collapseBasis_(alpha,indexFixed);
 				}
 			}
@@ -400,8 +400,8 @@ namespace Dmrg {
 		// p[m] = norm2 of the collapsed_m
 		void probability(typename PsimagLite::Vector<RealType>::Type& p,
 		                 const VectorWithOffsetType& src,
-		                 size_t direction,
-		                 size_t volumeOfNk,
+		                 SizeType direction,
+		                 SizeType volumeOfNk,
 		                 bool border) const
 		{
 			RealType tmp = std::norm(src);
@@ -409,7 +409,7 @@ namespace Dmrg {
 				throw PsimagLite::RuntimeError("probability\n");
 
 			RealType sum = 0;
-			for (size_t alpha=0;alpha<volumeOfNk;alpha++) {
+			for (SizeType alpha=0;alpha<volumeOfNk;alpha++) {
 				VectorWithOffsetType dest;
 				collapseVector(dest,src,direction,alpha,volumeOfNk,border);
 				RealType x = std::norm(dest);
@@ -419,12 +419,12 @@ namespace Dmrg {
 			if (fabs(sum-1.0)>1e-3)
 				std::cerr<<"probability sum="<<sum<<"\n";
 			assert(fabs(sum)>1e-6);
-			for(size_t alpha=0;alpha<p.size();alpha++) p[alpha] /= sum;
+			for(SizeType alpha=0;alpha<p.size();alpha++) p[alpha] /= sum;
 		}
 
-		bool checkSites(size_t site) const
+		bool checkSites(SizeType site) const
 		{
-			for (size_t i=1;i<site+1;i++) {
+			for (SizeType i=1;i<site+1;i++) {
 				bool seen = (std::find(sitesSeen_.begin(),sitesSeen_.end(),i) != sitesSeen_.end());
 				if (!seen) return false;
 			}
@@ -433,10 +433,10 @@ namespace Dmrg {
 
 		void setCollapseBasis()
 		{
-			size_t nk = collapseBasis_.n_row();
+			SizeType nk = collapseBasis_.n_row();
 
-			for (size_t i=0;i<nk;i++)
-				for (size_t j=0;j<nk;j++)
+			for (SizeType i=0;i<nk;i++)
+				for (SizeType j=0;j<nk;j++)
 					collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
 
 			if (targetParams_.collapse.find("random")!=PsimagLite::String::npos)
@@ -459,13 +459,13 @@ namespace Dmrg {
 			m=m2;
 		}
 
-		void rotationNd(MatrixType& m,size_t hilbertSize) const
+		void rotationNd(MatrixType& m,SizeType hilbertSize) const
 		{
-			for (size_t i=0;i<hilbertSize;i++) {
+			for (SizeType i=0;i<hilbertSize;i++) {
 				MatrixType aux1(m.n_row(),m.n_col());
 				RealType theta = M_PI*rng_();
-				size_t i1 = i;
-				size_t i2 = i+1;
+				SizeType i1 = i;
+				SizeType i2 = i+1;
 				if (i==hilbertSize-1) i2=0;
 				rotation2d(aux1,i1,i2,theta);
 				if (i==0) m = aux1;
@@ -473,33 +473,33 @@ namespace Dmrg {
 			}
 		}
 
-		void rotation2d(MatrixType& m,size_t x,size_t y,const RealType& theta) const
+		void rotation2d(MatrixType& m,SizeType x,SizeType y,const RealType& theta) const
 		{
 			std::cout<<"Theta="<<theta<<"\n";
-			for (size_t i=0;i<m.n_row();i++) m(i,i) = 1.0;
+			for (SizeType i=0;i<m.n_row();i++) m(i,i) = 1.0;
 			m(x,x) = m(y,y) = cos(theta);
 			m(x,y) = sin(theta);
 			m(y,x) = -sin(theta);
 		}
 
-		bool atBorder(size_t direction,const typename PsimagLite::Vector<size_t>::Type& block) const
+		bool atBorder(SizeType direction,const typename PsimagLite::Vector<SizeType>::Type& block) const
 		{
-			typename PsimagLite::Vector<size_t>::Type nk;
+			typename PsimagLite::Vector<SizeType>::Type nk;
 			setNk(nk,block);
-			size_t volumeOfNk = volumeOf(nk);
+			SizeType volumeOfNk = volumeOf(nk);
 			bool b1 = (direction==EXPAND_SYSTEM && lrs_.right().size()==volumeOfNk);
 			bool b2 = (direction==EXPAND_ENVIRON && lrs_.left().size()==volumeOfNk);
 			return (b1 || b2);
 		}
 
-		void setBlockToBorder(typename PsimagLite::Vector<size_t>::Type& block2,const typename PsimagLite::Vector<size_t>::Type& block) const
+		void setBlockToBorder(typename PsimagLite::Vector<SizeType>::Type& block2,const typename PsimagLite::Vector<SizeType>::Type& block) const
 		{
 			block2 = block;
 			assert(block.size()>0);
-			size_t site = block[block.size()-1];
+			SizeType site = block[block.size()-1];
 			bool leftCorner = (site+2==lrs_.super().block().size()) ? false : true;
 			int offset = (leftCorner) ? -block.size() : block.size();
-			for (size_t i=0;i<block2.size();i++) {
+			for (SizeType i=0;i<block2.size();i++) {
 				block2[i] = block[i] + offset;
 			}
 		}
@@ -509,9 +509,9 @@ namespace Dmrg {
 		mutable RngType rng_;
 		const TargettingParamsType& targetParams_;
 		PsimagLite::ProgressIndicator progress_;
-		size_t prevDirection_;
+		SizeType prevDirection_;
 		MatrixType collapseBasis_;
-		typename PsimagLite::Vector<size_t>::Type sitesSeen_;
+		typename PsimagLite::Vector<SizeType>::Type sitesSeen_;
 	};  //class MettsCollapse
 } // namespace Dmrg
 /*@}*/

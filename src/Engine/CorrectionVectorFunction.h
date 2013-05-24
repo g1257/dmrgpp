@@ -96,7 +96,7 @@ namespace Dmrg {
 			InternalMatrix(const MatrixType& m,const InfoType& info)
 			: m_(m),info_(info) {}
 
-			size_t rank() const { return m_.rank(); }
+			SizeType rank() const { return m_.rank(); }
 
 			void matrixVectorProduct(VectorType& x,const VectorType& y) const
 			{
@@ -126,7 +126,7 @@ namespace Dmrg {
 			VectorType x0(result.size(),0);
 			x.push_back(x0); // initial ansatz
 			cg_(x,im_,sv);
-			size_t k = x.size();
+			SizeType k = x.size();
 			result = x[k-1];
 		}
 

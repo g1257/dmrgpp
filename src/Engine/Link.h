@@ -87,11 +87,11 @@ namespace Dmrg {
 	
 	template<typename FieldType,typename RealType>
 	struct Link {
-		typedef std::pair<size_t,size_t> PairType;
-		Link(size_t i,size_t j,size_t type1,const FieldType& value1,size_t dofs1,
-		    	size_t fOb,const PairType& ops1,const std::pair<char,char>& mods1,
-       			size_t aM,RealType aF,
-	  		size_t cat) 
+		typedef std::pair<SizeType,SizeType> PairType;
+		Link(SizeType i,SizeType j,SizeType type1,const FieldType& value1,SizeType dofs1,
+		    	SizeType fOb,const PairType& ops1,const std::pair<char,char>& mods1,
+       			SizeType aM,RealType aF,
+	  		SizeType cat) 
 			: site1(i),site2(j),
 			type(type1),value(value1),dofs(dofs1),
 			fermionOrBoson(fOb),ops(ops1),mods(mods1),
@@ -100,16 +100,16 @@ namespace Dmrg {
 		{
 		}
 		
-		size_t site1,site2;
-		size_t type;
+		SizeType site1,site2;
+		SizeType type;
 		FieldType value;
-		size_t dofs;
-		size_t fermionOrBoson;
-		std::pair<size_t,size_t> ops; // operator indices
+		SizeType dofs;
+		SizeType fermionOrBoson;
+		std::pair<SizeType,SizeType> ops; // operator indices
 		std::pair<char,char> mods; // operator modifiers
-		size_t angularMomentum;
+		SizeType angularMomentum;
 		RealType angularFactor;
-		size_t category;
+		SizeType category;
 		
 	}; // struct Link
 } // namespace Dmrg 

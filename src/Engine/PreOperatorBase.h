@@ -96,23 +96,23 @@ public:
 
 	virtual ~PreOperatorBase() {}
 
-	virtual OperatorType operator()(size_t site) const=0;
+	virtual OperatorType operator()(SizeType site) const=0;
 
 	virtual PsimagLite::String label() const=0;
 
-	virtual size_t threadId() const=0;
+	virtual SizeType threadId() const=0;
 
 	virtual bool siteDependent() const=0;
 
-	virtual bool isValid(size_t i0) const=0;
+	virtual bool isValid(SizeType i0) const=0;
 
-	void printMatrix(const SparseMatrixType& A,bool siteDependent,size_t i0) const
+	void printMatrix(const SparseMatrixType& A,bool siteDependent,SizeType i0) const
 	{
 		if (siteDependent) return;
 		if (!siteDependent && i0>0) return;
 		std::cout<<"#Using Matrix A:\n";
-		for (size_t i=0;i<A.row();i++) {
-			for (size_t j=0;j<A.col();j++)
+		for (SizeType i=0;i<A.row();i++) {
+			for (SizeType j=0;j<A.col();j++)
 				std::cout<<A(i,j)<<" ";
 			std::cout<<"\n";
 		}

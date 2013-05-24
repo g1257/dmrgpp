@@ -234,8 +234,8 @@ int main(int argc,char *argv[])
 	PsimagLite::String targetting="GroundStateTargetting";
 	const char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
                      "CorrectionVectorTargetting","CorrectionTargetting","MettsTargetting"};
-	size_t totalTargets = 6;
-	for (size_t i = 0;i<totalTargets;++i)
+	SizeType totalTargets = 6;
+	for (SizeType i = 0;i<totalTargets;++i)
 		if (dmrgSolverParams.options.find(targets[i])!=PsimagLite::String::npos) targetting=targets[i];
 
 	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"

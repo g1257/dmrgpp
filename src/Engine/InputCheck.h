@@ -98,15 +98,15 @@ namespace Dmrg {
 			if (optsReadable_!=0) delete optsReadable_;
 		}
 
-		bool check(const PsimagLite::String& label,const PsimagLite::Vector<PsimagLite::String>::Type& vec,size_t line) const
+		bool check(const PsimagLite::String& label,const PsimagLite::Vector<PsimagLite::String>::Type& vec,SizeType line) const
 		{
 			if (label=="JMVALUES") {
 				if (vec.size()!=2) return error1("JMVALUES",line);
 				return true;
 			} else if (label=="RAW_MATRIX") {
-				size_t row = atoi(vec[0].c_str());
-				size_t col = atoi(vec[1].c_str());
-				size_t n = row*col;
+				SizeType row = atoi(vec[0].c_str());
+				SizeType col = atoi(vec[1].c_str());
+				SizeType n = row*col;
 				if (vec.size()!=n+2) return error1("RAW_MATRIX",line);
 				return true;
 			} else if (label=="Connectors") {
@@ -114,14 +114,14 @@ namespace Dmrg {
 			} else if (label=="MagneticField") {
 				return true;
 			} else if (label=="FiniteLoops") {
-				size_t n = atoi(vec[0].c_str());
+				SizeType n = atoi(vec[0].c_str());
 				if (vec.size()!=3*n+1)  return error1("FiniteLoops",line);
 				return true;
 			}
 			return false;
 		}
 
-		void check(const PsimagLite::String& label,const PsimagLite::String& val,size_t line)
+		void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType line)
 		{
 			if (label!="SolverOptions") return;
 			PsimagLite::Vector<PsimagLite::String>::Type registerOpts;
@@ -157,7 +157,7 @@ namespace Dmrg {
 			return optsReadable_->isSet(thisOption);
 		}
 
-		void checkForThreads(size_t nthreads) const
+		void checkForThreads(SizeType nthreads) const
 		{
 			if (nthreads==1) return;
 
@@ -175,7 +175,7 @@ namespace Dmrg {
 
 	private:
 
-		bool error1(const PsimagLite::String& message,size_t line) const
+		bool error1(const PsimagLite::String& message,SizeType line) const
 		{
 			PsimagLite::String s(__FILE__);
 			s += " : Input error for label " + message + " near line " + ttos(line) + "\n";

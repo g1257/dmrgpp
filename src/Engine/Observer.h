@@ -117,10 +117,10 @@ namespace Dmrg {
 			FourPointCorrelationsType;
 		typedef PsimagLite::Profiling ProfilingType;
 
-		static size_t const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
-		static size_t const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
-		static size_t const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
-		static size_t const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
+		static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
+		static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
+		static SizeType const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
+		static SizeType const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
 		enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,
 			TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
 		enum {LEFT_BRACKET=ObserverHelperType::LEFT_BRACKET,
@@ -129,7 +129,7 @@ namespace Dmrg {
 	public:
 		Observer(
 				IoInputType& io,
-				size_t nf,
+				SizeType nf,
 				bool hasTimeEvolution,
 				const ModelType& model,
 				ConcurrencyType& concurrency,
@@ -143,21 +143,21 @@ namespace Dmrg {
 		  fourpoint_(helper_,skeleton_)
 		{}
 
-		size_t size() const { return helper_.size(); }
+		SizeType size() const { return helper_.size(); }
 
-		RealType time(size_t threadId) const { return helper_.time(threadId); }
+		RealType time(SizeType threadId) const { return helper_.time(threadId); }
 
-		size_t site(size_t threadId) const { return helper_.site(threadId); }
+		SizeType site(SizeType threadId) const { return helper_.site(threadId); }
 
-		size_t marker(size_t threadId) const { return helper_.marker(threadId); }
+		SizeType marker(SizeType threadId) const { return helper_.marker(threadId); }
 
-		void setPointer(size_t threadId,size_t x) { helper_.setPointer(threadId,x); }
+		void setPointer(SizeType threadId,SizeType x) { helper_.setPointer(threadId,x); }
 
 		bool endOfData() const { return helper_.endOfData(); }
 
 		// return true if
 		// we're at site 1 or n-2
-		bool isAtCorner(size_t numberOfSites,size_t threadId) const
+		bool isAtCorner(SizeType numberOfSites,SizeType threadId) const
 		{
 			bool es = (helper_.direction(threadId) == ProgramGlobals::EXPAND_SYSTEM);
 			if (es && helper_.site(threadId) ==  numberOfSites-2) return true;
@@ -175,17 +175,17 @@ namespace Dmrg {
 				const MatrixType& O1,
 				const MatrixType& O2,
 				int fermionicSign,
-				size_t rows,
-				size_t cols)
+				SizeType rows,
+				SizeType cols)
 		{
 			return twopoint_(O1,O2,fermionicSign,rows,cols);
 		}
 
 		FieldType fourPoint(
-				char mod1,size_t i1,const MatrixType& O1,
-				char mod2,size_t i2,const MatrixType& O2,
-				char mod3,size_t i3,const MatrixType& O3,
-				char mod4,size_t i4,const MatrixType& O4,
+				char mod1,SizeType i1,const MatrixType& O1,
+				char mod2,SizeType i2,const MatrixType& O2,
+				char mod3,SizeType i3,const MatrixType& O3,
+				char mod4,SizeType i4,const MatrixType& O4,
 				int fermionicSign)
 		{
 			return fourpoint_(mod1,i1,O1,mod2,i2,O2,mod3,i3,O3,mod4,i4,O4,fermionicSign);
@@ -193,7 +193,7 @@ namespace Dmrg {
 
 		template<typename SomeModelType>
 		void fourPointDeltas(MatrixType& fpd,
-				const typename PsimagLite::Vector<size_t>::Type& gammas,
+				const typename PsimagLite::Vector<SizeType>::Type& gammas,
 				const SomeModelType& model)
 		{
 			if (gammas.size()!=4) {
@@ -202,11 +202,11 @@ namespace Dmrg {
 				throw PsimagLite::RuntimeError("Observer::fourPointDeltas(...)\n");
 			}
 
-			size_t nsites = 2*fpd.n_row();
+			SizeType nsites = 2*fpd.n_row();
 			assert(fpd.n_row()==fpd.n_col());
 
-			size_t hs = model.hilbertSize(0);
-			size_t nx = 0;
+			SizeType hs = model.hilbertSize(0);
+			SizeType nx = 0;
 			while(hs) {
 				hs>>=1;
 				nx++;
@@ -214,12 +214,12 @@ namespace Dmrg {
 			nx /= 2;
 
 			assert(fpd.n_row()>1);
-			typedef std::pair<size_t,size_t> PairType;
+			typedef std::pair<SizeType,SizeType> PairType;
 
 			typename PsimagLite::Vector<PairType>::Type pairs;
-			for (size_t i=0;i<fpd.n_row();i++) {
+			for (SizeType i=0;i<fpd.n_row();i++) {
 				if (2*i+1>=nsites) continue;
-				for (size_t j=i+1;j<fpd.n_col();j++) {
+				for (SizeType j=i+1;j<fpd.n_col();j++) {
 					if (2*j+1>=nsites) continue;
 					pairs.push_back(PairType(i,j));
 				}
@@ -236,7 +236,7 @@ namespace Dmrg {
 		}
 
 		template<typename ApplyOperatorType>
-		FieldType onePoint(size_t site,
+		FieldType onePoint(SizeType site,
 				   const typename ApplyOperatorType::OperatorType& A,
 				   bool corner = false)
 		{
@@ -244,7 +244,7 @@ namespace Dmrg {
 		}
 
 		template<typename ApplyOperatorType>
-		FieldType onePointHookForZero(size_t site,
+		FieldType onePointHookForZero(SizeType site,
 				   const typename ApplyOperatorType::OperatorType& A,
 				   bool corner = false)
 		{
@@ -253,7 +253,7 @@ namespace Dmrg {
 
 	private:
 
-		size_t bracketStringToNumber(const PsimagLite::String& str) const
+		SizeType bracketStringToNumber(const PsimagLite::String& str) const
 		{
 			if (str=="gs") return GS_VECTOR;
 			if (str=="time") return TIME_VECTOR;

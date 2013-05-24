@@ -98,16 +98,16 @@ namespace Dmrg {
 			clebschGordanObject.init(MaximumJValue,NumberOfFactorials);
 		}
 		
-		static size_t MaximumJValue; // this is the maximum allowed \tile{j}=2j value (j is half this value)
-		static size_t NumberOfFactorials; // number of factorials for the Clebsch-Gordan coefficients
+		static SizeType MaximumJValue; // this is the maximum allowed \tile{j}=2j value (j is half this value)
+		static SizeType NumberOfFactorials; // number of factorials for the Clebsch-Gordan coefficients
 		static ClebschGordanType clebschGordanObject;
 	}; // Su2SymmetryGlobals
 	
 	template<typename ClebschGordanType>
-	size_t Su2SymmetryGlobals<ClebschGordanType>::MaximumJValue = 2;
+	SizeType Su2SymmetryGlobals<ClebschGordanType>::MaximumJValue = 2;
 	
 	template<typename ClebschGordanType>
-	size_t Su2SymmetryGlobals<ClebschGordanType>::NumberOfFactorials = 2;
+	SizeType Su2SymmetryGlobals<ClebschGordanType>::NumberOfFactorials = 2;
 	
 	template<typename FieldType>
 	ClebschGordanCached<FieldType> Su2SymmetryGlobals<FieldType>::clebschGordanObject(2);

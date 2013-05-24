@@ -111,7 +111,7 @@ namespace Dmrg {
 				const VectorWithOffsetType& src,
 				const OperatorType& A,
 				const FermionSign& fermionSign,
-				size_t systemOrEnviron,bool corner = false) const
+				SizeType systemOrEnviron,bool corner = false) const
 		{
 			if (!corner) {
 				if (systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM) applyLocalOpSystem(dest,src,A,fermionSign);
@@ -127,16 +127,16 @@ namespace Dmrg {
 				 const VectorWithOffsetType& src,
 				 const OperatorType& A,
 				 const FermionSign& fermionSign,
-				 size_t systemOrEnviron,bool corner = false) const
+				 SizeType systemOrEnviron,bool corner = false) const
 		{
 			assert(systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM);
 
 			TargetVectorType dest2(lrs_.super().size());
 
-			for (size_t i=0;i<dest2.size();i++) dest2[i] = 0;
+			for (SizeType i=0;i<dest2.size();i++) dest2[i] = 0;
 
-			for (size_t ii=0;ii<src.sectors();ii++) {
-				size_t i = src.sector(ii);
+			for (SizeType ii=0;ii<src.sectors();ii++) {
+				SizeType i = src.sector(ii);
 				hookForZeroSystem(dest2,src,A,fermionSign,i);
 			}
 
@@ -148,23 +148,23 @@ namespace Dmrg {
 					const VectorWithOffsetType& src,
 					const OperatorType& A,
 					const FermionSign& fermionSign,
-					size_t i0) const
+					SizeType i0) const
 		{
-			size_t offset = src.offset(i0);
-			size_t final = offset + src.effectiveSize(i0);
-			//size_t counter=0;
-			size_t ns = lrs_.left().permutationVector().size();
-			size_t nx = ns/A.data.row();
+			SizeType offset = src.offset(i0);
+			SizeType final = offset + src.effectiveSize(i0);
+			//SizeType counter=0;
+			SizeType ns = lrs_.left().permutationVector().size();
+			SizeType nx = ns/A.data.row();
 			if (src.size()!=lrs_.super().permutationVector().size())
 				throw PsimagLite::RuntimeError("applyLocalOpSystem SE\n");
 
 			PackIndicesType pack1(ns);
 			PackIndicesType pack2(nx);
-			for (size_t i=offset;i<final;i++) {
-				size_t x=0,y=0;
+			for (SizeType i=offset;i<final;i++) {
+				SizeType x=0,y=0;
 				pack1.unpack(x,y,lrs_.super().permutation(i));
 				//if (y>=basisE_.permutationVector().size()) throw PsimagLite::RuntimeError("applyLocalOpSystem E\n");
-				size_t x0=0,x1=0;
+				SizeType x0=0,x1=0;
 				assert(x<lrs_.left().permutationVector().size());
 				pack2.unpack(x0,x1,lrs_.left().permutation(x));
 				/*int nx0 = basisS_.electrons(x)-electrons[x1];
@@ -172,9 +172,9 @@ namespace Dmrg {
 				 */
 				RealType sign = 1.0; //fermionSign(x0,A.fermionSign);
 				for (int k=A.data.getRowPtr(x0);k<A.data.getRowPtr(x0+1);k++) {
-					size_t x0prime = A.data.getCol(k);
-					size_t xprime = lrs_.left().permutationInverse(x0prime+x1*nx);
-					size_t j = lrs_.super().permutationInverse(xprime+y*ns);
+					SizeType x0prime = A.data.getCol(k);
+					SizeType xprime = lrs_.left().permutationInverse(x0prime+x1*nx);
+					SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
 					dest2[j] += src[i]*A.data.getValue(k)*sign;
 				}
 			}
@@ -185,14 +185,14 @@ namespace Dmrg {
 					const VectorWithOffsetType& src,
 					const OperatorType& A,
 					const FermionSign& fermionSign,
-					size_t whichPartOfTheLattice = MIDDLE) const
+					SizeType whichPartOfTheLattice = MIDDLE) const
 		{
 			TargetVectorType dest2(lrs_.super().size());
 
-			for (size_t i=0;i<dest2.size();i++) dest2[i] = 0;
+			for (SizeType i=0;i<dest2.size();i++) dest2[i] = 0;
 
-			for (size_t ii=0;ii<src.sectors();ii++) {
-				size_t i = src.sector(ii);
+			for (SizeType ii=0;ii<src.sectors();ii++) {
+				SizeType i = src.sector(ii);
 				switch (whichPartOfTheLattice) {
 				case MIDDLE:
 					applyLocalOpSystem(dest2,src,A,fermionSign,i);
@@ -212,23 +212,23 @@ namespace Dmrg {
 					const VectorWithOffsetType& src,
 					const OperatorType& A,
 					const FermionSign& fermionSign,
-					size_t i0) const
+					SizeType i0) const
 		{
-			size_t offset = src.offset(i0);
-			size_t final = offset + src.effectiveSize(i0);
-			//size_t counter=0;
-			size_t ns = lrs_.left().permutationVector().size();
-			size_t nx = ns/A.data.row();
+			SizeType offset = src.offset(i0);
+			SizeType final = offset + src.effectiveSize(i0);
+			//SizeType counter=0;
+			SizeType ns = lrs_.left().permutationVector().size();
+			SizeType nx = ns/A.data.row();
 			if (src.size()!=lrs_.super().permutationVector().size())
 				throw PsimagLite::RuntimeError("applyLocalOpSystem SE\n");
 
 			PackIndicesType pack1(ns);
 			PackIndicesType pack2(nx);
-			for (size_t i=offset;i<final;i++) {
-				size_t x=0,y=0;
+			for (SizeType i=offset;i<final;i++) {
+				SizeType x=0,y=0;
 				pack1.unpack(x,y,lrs_.super().permutation(i));
 				//if (y>=basisE_.permutationVector().size()) throw PsimagLite::RuntimeError("applyLocalOpSystem E\n");
-				size_t x0=0,x1=0;
+				SizeType x0=0,x1=0;
 				assert(x<lrs_.left().permutationVector().size());
 				pack2.unpack(x0,x1,lrs_.left().permutation(x));
 				/*int nx0 = basisS_.electrons(x)-electrons[x1];
@@ -236,9 +236,9 @@ namespace Dmrg {
 				 */
 				RealType sign = fermionSign(x0,A.fermionSign);
 				for (int k=A.data.getRowPtr(x1);k<A.data.getRowPtr(x1+1);k++) {
-					size_t x1prime = A.data.getCol(k);
-					size_t xprime = lrs_.left().permutationInverse(x0+x1prime*nx);
-					size_t j = lrs_.super().permutationInverse(xprime+y*ns);
+					SizeType x1prime = A.data.getCol(k);
+					SizeType xprime = lrs_.left().permutationInverse(x0+x1prime*nx);
+					SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
 					dest2[j] += src[i]*A.data.getValue(k)*sign;
 				}
 			}
@@ -248,14 +248,14 @@ namespace Dmrg {
 		void applyLocalOpEnviron(VectorWithOffsetType& dest,
 					 const VectorWithOffsetType& src,
 					 const OperatorType& A,
-					 size_t whichPartOfTheLattice = MIDDLE) const
+					 SizeType whichPartOfTheLattice = MIDDLE) const
 		{
 			TargetVectorType dest2(lrs_.super().size());
 
-			for (size_t i=0;i<dest2.size();i++) dest2[i] = 0;
+			for (SizeType i=0;i<dest2.size();i++) dest2[i] = 0;
 
-			for (size_t ii=0;ii<src.sectors();ii++) {
-				size_t i = src.sector(ii);
+			for (SizeType ii=0;ii<src.sectors();ii++) {
+				SizeType i = src.sector(ii);
 				switch (whichPartOfTheLattice) {
 				case MIDDLE:
 					applyLocalOpEnviron(dest2,src,A,i);
@@ -274,26 +274,26 @@ namespace Dmrg {
 		void applyLocalOpEnviron(TargetVectorType& dest2,
 					 const VectorWithOffsetType& src,
 					 const OperatorType& A,
-					 size_t i0) const
+					 SizeType i0) const
 		{
-			size_t offset = src.offset(i0);
-			size_t final = offset + src.effectiveSize(i0);
+			SizeType offset = src.offset(i0);
+			SizeType final = offset + src.effectiveSize(i0);
 
-			size_t ns = lrs_.left().size();
-			size_t nx = A.data.row();
+			SizeType ns = lrs_.left().size();
+			SizeType nx = A.data.row();
 			PackIndicesType pack1(ns);
 			PackIndicesType pack2(nx);
 
-			for (size_t i=offset;i<final;i++) {
-				size_t x=0,y=0;
+			for (SizeType i=offset;i<final;i++) {
+				SizeType x=0,y=0;
 				pack1.unpack(x,y,lrs_.super().permutation(i));
-				size_t y0=0,y1=0;
+				SizeType y0=0,y1=0;
 				pack2.unpack(y0,y1,lrs_.right().permutation(y));
 				RealType sign = lrs_.left().fermionicSign(x,A.fermionSign);
 				for (int k=A.data.getRowPtr(y0);k<A.data.getRowPtr(y0+1);k++) {
-					size_t y0prime = A.data.getCol(k);
-					size_t yprime = lrs_.right().permutationInverse(y0prime+y1*nx);
-					size_t j = lrs_.super().permutationInverse(x+yprime*ns);
+					SizeType y0prime = A.data.getCol(k);
+					SizeType yprime = lrs_.right().permutationInverse(y0prime+y1*nx);
+					SizeType j = lrs_.super().permutationInverse(x+yprime*ns);
 					dest2[j] += src[i]*A.data.getValue(k)*sign;
 				}
 			}
@@ -302,21 +302,21 @@ namespace Dmrg {
 		void applyLocalOpLeftCorner(TargetVectorType& dest2,
 					    const VectorWithOffsetType& src,
 					    const OperatorType& A,
-					    size_t i0) const
+					    SizeType i0) const
 		{
-			size_t offset = src.offset(i0);
-			size_t final = offset + src.effectiveSize(i0);
+			SizeType offset = src.offset(i0);
+			SizeType final = offset + src.effectiveSize(i0);
 
-			size_t ns = lrs_.left().size();
+			SizeType ns = lrs_.left().size();
 			PackIndicesType pack(ns);
 
-			for (size_t i=offset;i<final;i++) {
-				size_t x=0,y=0;
+			for (SizeType i=offset;i<final;i++) {
+				SizeType x=0,y=0;
 				pack.unpack(x,y,lrs_.super().permutation(i));
 
 				for (int k=A.data.getRowPtr(x);k<A.data.getRowPtr(x+1);k++) {
-					size_t xprime = A.data.getCol(k);
-					size_t j = lrs_.super().permutationInverse(xprime+y*ns);
+					SizeType xprime = A.data.getCol(k);
+					SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
 					dest2[j] += src[i]*A.data.getValue(k);
 				}
 			}
@@ -325,28 +325,28 @@ namespace Dmrg {
 		void applyLocalOpRightCorner(TargetVectorType& dest2,
 					     const VectorWithOffsetType& src,
 					     const OperatorType& A,
-					     size_t i0) const
+					     SizeType i0) const
 		{
-			size_t offset = src.offset(i0);
-			size_t final = offset + src.effectiveSize(i0);
-			//size_t counter=0;
-			size_t ns = lrs_.left().permutationVector().size();
-			//size_t nx = ns/A.data.rank();
+			SizeType offset = src.offset(i0);
+			SizeType final = offset + src.effectiveSize(i0);
+			//SizeType counter=0;
+			SizeType ns = lrs_.left().permutationVector().size();
+			//SizeType nx = ns/A.data.rank();
 			if (src.size()!=lrs_.super().permutationVector().size())
 				throw PsimagLite::RuntimeError("applyLocalOpSystem SE\n");
 
 			PackIndicesType pack(ns);
 
-			for (size_t i=offset;i<final;i++) {
-				size_t x=0,y=0;
+			for (SizeType i=offset;i<final;i++) {
+				SizeType x=0,y=0;
 				pack.unpack(x,y,lrs_.super().permutation(i));
 				//if (y>=basisE_.permutationVector().size()) throw PsimagLite::RuntimeError("applyLocalOpSystem E\n");
 				if (x>=lrs_.left().permutationVector().size())
 					throw PsimagLite::RuntimeError("applyLocalOpSystem S\n");
 				RealType sign = lrs_.left().fermionicSign(x,A.fermionSign);
 				for (int k=A.data.getRowPtr(y);k<A.data.getRowPtr(y+1);k++) {
-					size_t yprime = A.data.getCol(k);
-					size_t j = lrs_.super().permutationInverse(x+yprime*ns);
+					SizeType yprime = A.data.getCol(k);
+					SizeType j = lrs_.super().permutationInverse(x+yprime*ns);
 					dest2[j] += src[i]*A.data.getValue(k)*sign;
 				}
 			}

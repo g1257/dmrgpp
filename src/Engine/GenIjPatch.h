@@ -109,14 +109,14 @@ public:
 //		std::cerr<<"groupRight.size="<<groupRight.size()<<"\n";
 
 //		std::cerr<<"TARGET QUANTUM NUMBER="<<target<<"\n";
-		for (size_t i=0;i<groupLeft.size()-1;i++) {
-			size_t istart = groupLeft(i);
+		for (SizeType i=0;i<groupLeft.size()-1;i++) {
+			SizeType istart = groupLeft(i);
 			assert(istart<lrs.left().size());
-//			size_t iend = groupLeft(i+1)-1;
-			for (size_t j=0;j<groupRight.size()-1;j++) {
-				size_t jstart = groupRight(j);
+//			SizeType iend = groupLeft(i+1)-1;
+			for (SizeType j=0;j<groupRight.size()-1;j++) {
+				SizeType jstart = groupRight(j);
 				assert(jstart<lrs.right().size());
-//				size_t jend = groupRight(j+1);
+//				SizeType jend = groupRight(j+1);
 
 				if (lrs.left().qn(istart) + lrs.right().qn(jstart)!=target) continue;
 
@@ -127,13 +127,13 @@ public:
 		}
 	}
 
-	size_t operator()(LeftOrRightEnumType leftOrRight,size_t i) const
+	SizeType operator()(LeftOrRightEnumType leftOrRight,SizeType i) const
 	{
 		assert(i<patchesLeft_.size() && i<patchesRight_.size());
 		return (leftOrRight==LEFT) ? patchesLeft_[i] : patchesRight_[i];
 	}
 
-	size_t size() const
+	SizeType size() const
 	{
 		assert(patchesLeft_.size()==patchesRight_.size());
 		return patchesLeft_.size();
@@ -141,7 +141,7 @@ public:
 
 private:
 
-	typename PsimagLite::Vector<size_t>::Type patchesLeft_,patchesRight_;
+	typename PsimagLite::Vector<SizeType>::Type patchesLeft_,patchesRight_;
 
 }; //class GenIjPatch
 } // namespace PsimagLite

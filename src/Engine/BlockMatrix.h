@@ -149,7 +149,7 @@ namespace Dmrg {
 		
 		int offsets(int i) const { return offsets_[i]; }
 		
-		size_t blocks() const { return data_.size(); }
+		SizeType blocks() const { return data_.size(); }
 		
 		T operator()(int i,int j) const 
 		{	
@@ -187,7 +187,7 @@ namespace Dmrg {
 	template<class S,class MatrixInBlockTemplate>
 	std::ostream &operator<<(std::ostream &s,BlockMatrix<S,MatrixInBlockTemplate> const &A)
 	{
-		for (size_t m=0;m<A.blocks();m++) {
+		for (SizeType m=0;m<A.blocks();m++) {
 			int nrank = A.offsets(m+1)-A.offsets(m);
 			s<<"block number "<<m<<" has rank "<<nrank<<"\n";
 			s<<A.data_[m];
@@ -200,7 +200,7 @@ namespace Dmrg {
 	void operatorPlus(BlockMatrix<S,MatrixInBlockTemplate>  &C,
 			  BlockMatrix<S,MatrixInBlockTemplate>  const &A,BlockMatrix<S,MatrixInBlockTemplate> const &B)
 	{
-		size_t i;
+		SizeType i;
 		int counter=0;
 		C.rank_ = A.rank_;
 		C.offsets_=A.offsets_;
@@ -220,7 +220,7 @@ namespace Dmrg {
 	template<class S,class MatrixInBlockTemplate>
 	void operatorPlus(BlockMatrix<S,MatrixInBlockTemplate>   &A,BlockMatrix<S,MatrixInBlockTemplate> const &B)
 	{
-		size_t i;
+		SizeType i;
 		int counter=0;
 
 		for (i=0;i<A.data_.size();i++) {
@@ -234,10 +234,10 @@ namespace Dmrg {
 	}
 
 	template<typename T>
-	void enforcePhase(T* v,size_t n)
+	void enforcePhase(T* v,SizeType n)
 	{
 		T sign1=0;
-		for (size_t j=0;j<n;j++) {
+		for (SizeType j=0;j<n;j++) {
 			if (std::norm(v[j])>1e-6) {
 				if (std::real(v[j])>0) sign1=1;
 				else sign1= -1;
@@ -245,7 +245,7 @@ namespace Dmrg {
 			}
 		}
 		// get a consistent phase
-		for (size_t j=0;j<n;j++) v[j] *= sign1;
+		for (SizeType j=0;j<n;j++) v[j] *= sign1;
 	}
 
 	template<typename T>
@@ -258,7 +258,7 @@ namespace Dmrg {
 	void enforcePhase(PsimagLite::Matrix<T>& a)
 	{
 		T* vpointer = &(a(0,0));
-		for (size_t i=0;i<a.n_col();i++)
+		for (SizeType i=0;i<a.n_col();i++)
 			enforcePhase(&(vpointer[i*a.n_row()]),a.n_row());
 	}
 
@@ -271,11 +271,11 @@ namespace Dmrg {
 	{
 		typename PsimagLite::Vector<Field>::Type eigsTmp;
 		typename PsimagLite::Vector<typename PsimagLite::Vector<Field>::Type>::Type eigsForGather;
-		typename PsimagLite::Vector<size_t>::Type weights(C.blocks());
+		typename PsimagLite::Vector<SizeType>::Type weights(C.blocks());
 
 		eigsForGather.resize(C.blocks());
 
-		for (size_t m=0;m<C.blocks();m++) {
+		for (SizeType m=0;m<C.blocks();m++) {
 			eigsForGather[m].resize(C.offsets(m+1)-C.offsets(m));
 			weights[m] =  C.offsets(m+1)-C.offsets(m);
 		}
@@ -285,7 +285,7 @@ namespace Dmrg {
 		PsimagLite::Range<SomeConcurrencyType> range(0,C.blocks(),concurrency,weights);
 
 		for (;!range.end();range.next()) {
-			size_t m=range.index();
+			SizeType m=range.index();
 			PsimagLite::diag(C.data_[m],eigsTmp,option);
 			enforcePhase(C.data_[m]);
 			for (int j=C.offsets(m);j< C.offsets(m+1);j++) 
@@ -295,7 +295,7 @@ namespace Dmrg {
 		concurrency.gather(C.data_);
 		concurrency.gather(eigsForGather);
 
-		for (size_t m=0;m<C.blocks();m++) {
+		for (SizeType m=0;m<C.blocks();m++) {
 			for (int j=C.offsets(m);j< C.offsets(m+1);j++) 
 				eigs[j]=eigsForGather[m][j-C.offsets(m)];
 		}
@@ -310,7 +310,7 @@ namespace Dmrg {
 		bool flag=true;
 		MatrixInBlockTemplate matrixTmp;
 		
-		for (size_t m=0;m<B.blocks();m++) {
+		for (SizeType m=0;m<B.blocks();m++) {
 			matrixTmp = B(m);
 			if (!isUnitary(matrixTmp)) flag=false;
 		}
@@ -329,12 +329,12 @@ namespace Dmrg {
 	template<class S>
 	void blockMatrixToSparseMatrix(PsimagLite::CrsMatrix<S> &fm,BlockMatrix<S,PsimagLite::Matrix<S> > const &B)
 	{
-		size_t n = B.rank();
+		SizeType n = B.rank();
 		fm.resize(n,n);
-		size_t counter=0;
-		for (size_t i=0;i<n;i++) {
+		SizeType counter=0;
+		for (SizeType i=0;i<n;i++) {
 			fm.setRow(i,counter);
-			for (size_t j=0;j<n;j++) {
+			for (SizeType j=0;j<n;j++) {
 				S val = B(i,j);
 				if (std::norm(val)<1e-10) continue;
 				fm.pushValue(val);

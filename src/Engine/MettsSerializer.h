@@ -92,12 +92,12 @@ namespace Dmrg {
 			MettsSerializer() { }
 			
 			MettsSerializer(RealType currentBeta,
-			                size_t site,
+			                SizeType site,
 			                const typename PsimagLite::Vector<VectorType>::Type& targetVectors)
 			: currentBeta_(currentBeta),site_(site),targetVectors_(targetVectors)
 			{}
 			
-			MettsSerializer(typename PsimagLite::IoSimple::In& io,size_t lastInstance = 0)
+			MettsSerializer(typename PsimagLite::IoSimple::In& io,SizeType lastInstance = 0)
 			{
 				RealType x=0;
 				PsimagLite::String s = "#BETA=";
@@ -116,25 +116,25 @@ namespace Dmrg {
 				io.readline(xi,s);
 				if (xi<=0) throw PsimagLite::RuntimeError("MettsSerializer:: n. of vectors must be positive\n");
 				targetVectors_.resize(xi);
-				for (size_t i=0;i<targetVectors_.size();i++) {
+				for (SizeType i=0;i<targetVectors_.size();i++) {
 					s = "targetVector"+ttos(i);
 					targetVectors_[i].load(io,s);
 				}
 			}
 			
-			size_t size(size_t i=0) const
+			SizeType size(SizeType i=0) const
 			{
 				return  targetVectors_[i].size();
 			}
 			
 			RealType beta() const { return currentBeta_; }
 			
-			size_t site() const
+			SizeType site() const
 			{
 				return  site_;
 			}
 			
-			const VectorType& vector(size_t i=0) const 
+			const VectorType& vector(SizeType i=0) const 
 			{
 				return targetVectors_[i];
 			}
@@ -149,7 +149,7 @@ namespace Dmrg {
 				io.printline(s);
 				s = "#TNUMBEROFVECTORS="+ttos(targetVectors_.size());
 				io.printline(s);
-				for (size_t i=0;i<targetVectors_.size();i++) {
+				for (SizeType i=0;i<targetVectors_.size();i++) {
 					PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentBeta_);
 					targetVectors_[i].save(io,label);
 				}
@@ -157,7 +157,7 @@ namespace Dmrg {
 
 		private:
 			RealType currentBeta_;
-			size_t site_;
+			SizeType site_;
 			typename PsimagLite::Vector<VectorType>::Type targetVectors_;
 	}; // class MettsSerializer
 } // namespace Dmrg 

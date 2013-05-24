@@ -97,7 +97,7 @@ namespace Dmrg {
 				  DEGREES_OF_FREEDOM(DEGREES_OF_FREEDOM1)
 			{}
 
-			void doOnePairOfSitesA(const Word& ket,size_t i,size_t j) const
+			void doOnePairOfSitesA(const Word& ket,SizeType i,SizeType j) const
 			{
 				FieldType value = 0.5;
 				Word bra=ket;
@@ -130,7 +130,7 @@ namespace Dmrg {
 				if (ret==0) callback_(ket,bra,value);
 			}
 
-			void doOnePairOfSitesB(const Word& ket,size_t i,size_t j) const
+			void doOnePairOfSitesB(const Word& ket,SizeType i,SizeType j) const
 			{
 				FieldType value = 0.5;
 				Word bra=ket;
@@ -163,16 +163,16 @@ namespace Dmrg {
 				if (ret==0) callback_(ket,bra,value);
 			}
 
-			void doDiagonal(const Word& ket,size_t i,size_t j) const
+			void doDiagonal(const Word& ket,SizeType i,SizeType j) const
 			{
 				FieldType value = spinZ(ket,i)*spinZ(ket,j);
 				callback_(ket,ket,value);
 			}
 
-			FieldType spinZ(const Word& ket,size_t i) const
+			FieldType spinZ(const Word& ket,SizeType i) const
 			{
 				int sum=0;
-				for (size_t gamma=0;gamma<size_t(NUMBER_OF_ORBITALS);gamma++) {
+				for (SizeType gamma=0;gamma<SizeType(NUMBER_OF_ORBITALS);gamma++) {
 					sum += n(ket,i,gamma,SPIN_UP);
 					sum -= n(ket,i,gamma,SPIN_DOWN);
 				}	
@@ -184,29 +184,29 @@ namespace Dmrg {
 			int const NUMBER_OF_ORBITALS;
 			int const DEGREES_OF_FREEDOM;
 
-			int c(Word& ket,size_t i,size_t gamma,size_t spin,int ret=0) const
+			int c(Word& ket,SizeType i,SizeType gamma,SizeType spin,int ret=0) const
 			{
 				if (ret<0) return ret;
-				size_t shift_ = (DEGREES_OF_FREEDOM*i);
+				SizeType shift_ = (DEGREES_OF_FREEDOM*i);
 				Word mask = 1<<(shift_ + gamma+spin*NUMBER_OF_ORBITALS);
 				if ((ket & mask)==0) return -1;
 				ket ^= mask;
 				return 0;
 			}
 
-			int cDagger(Word& ket,size_t i,size_t gamma,size_t spin,int ret=0) const
+			int cDagger(Word& ket,SizeType i,SizeType gamma,SizeType spin,int ret=0) const
 			{
 				if (ret<0) return ret;
-				size_t shift_ = (DEGREES_OF_FREEDOM*i);
+				SizeType shift_ = (DEGREES_OF_FREEDOM*i);
 				Word mask = 1<<(shift_+gamma+spin*NUMBER_OF_ORBITALS);
 				if ((ket & mask)>0) return -1;
 				ket |= mask;
 				return 0;
 			}
 
-			int n(const Word& ket,size_t i,size_t gamma,size_t spin) const
+			int n(const Word& ket,SizeType i,SizeType gamma,SizeType spin) const
 			{
-				size_t shift_ = (DEGREES_OF_FREEDOM*i);
+				SizeType shift_ = (DEGREES_OF_FREEDOM*i);
 				Word mask = 1<<(shift_+gamma+spin*NUMBER_OF_ORBITALS);
 				if ((ket & mask)>0) return 1;
 				return 0;

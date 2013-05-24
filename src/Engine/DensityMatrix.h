@@ -117,7 +117,7 @@ namespace Dmrg {
 			const DmrgBasisWithOperatorsType& pBasis,
 			const DmrgBasisWithOperatorsType& pBasisSummed,
 			const DmrgBasisType& pSE,
-			size_t direction,
+			SizeType direction,
 			bool debug=false,
 			bool verbose=false)
 			
@@ -142,7 +142,7 @@ namespace Dmrg {
 			return densityMatrixImpl_->operator()();
 		}
 
-		size_t rank() { return densityMatrixImpl_->rank(); }
+		SizeType rank() { return densityMatrixImpl_->rank(); }
 
 		void check(int direction)
 		{

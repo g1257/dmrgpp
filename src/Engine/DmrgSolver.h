@@ -193,9 +193,9 @@ namespace Dmrg {
 			BlockType S,E;
 			typename PsimagLite::Vector<BlockType>::Type X,Y;
 			geometry.split(parameters_.sitesPerBlock,S,X,Y,E);
-			for (size_t i=0;i<X.size();i++) 
+			for (SizeType i=0;i<X.size();i++) 
 				sitesIndices_.push_back(X[i]);
-			for (size_t i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
+			for (SizeType i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
 
 			//wft_.init();
 			//if (parameters_.options.find("nowft")!=PsimagLite::String::npos) wft_.disable();
@@ -285,7 +285,7 @@ namespace Dmrg {
 			checkpoint_.push(pS,pE);
 
 			RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
-			for (size_t step=0;step<X.size();step++) {
+			for (SizeType step=0;step<X.size();step++) {
 				PsimagLite::OstringStream msg;
 				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
 				progress_.printline(msg,std::cout);
@@ -337,19 +337,19 @@ namespace Dmrg {
 			// basically we have pS on the left and pE on the right, 
 			// and we need to determine which site is to be added
 			// let us set the initial direction first:
-			size_t direction = EXPAND_SYSTEM;
+			SizeType direction = EXPAND_SYSTEM;
 			if (parameters_.finiteLoop[0].stepLength<0) direction=EXPAND_ENVIRON;
 			// all right, now we can get the actual site to add:
 
-			size_t sitesPerBlock = parameters_.sitesPerBlock;
-			typename PsimagLite::Vector<size_t>::Type siteToAdd(sitesPerBlock);
+			SizeType sitesPerBlock = parameters_.sitesPerBlock;
+			typename PsimagLite::Vector<SizeType>::Type siteToAdd(sitesPerBlock);
 			// left-most site of pE
-			for (size_t j=0;j<siteToAdd.size();j++)
+			for (SizeType j=0;j<siteToAdd.size();j++)
 				siteToAdd[j] = pE.block()[j];
 
 			if (direction==EXPAND_ENVIRON) {
 				// right-most site of pS
-				for (size_t j=0;j<siteToAdd.size();j++)
+				for (SizeType j=0;j<siteToAdd.size();j++)
 					siteToAdd[j] = pS.block()[pS.block().size()-1-j];
 			}
 			// now stepCurrent_ is such that sitesIndices_[stepCurrent_] = siteToAdd
@@ -358,7 +358,7 @@ namespace Dmrg {
 			if (sc<0) throw PsimagLite::RuntimeError("finiteDmrgLoops(...): internal error: siteIndices_\n");
 			stepCurrent_ = sc; // phew!!, that's all folks, now bugs, go away!!
 			
-			for (size_t i=0;i<parameters_.finiteLoop.size();i++)  {
+			for (SizeType i=0;i<parameters_.finiteLoop.size();i++)  {
 				PsimagLite::OstringStream msg;
 				msg<<"Finite loop number "<<i;
 				msg<<" with l="<<parameters_.finiteLoop[i].stepLength;
@@ -384,27 +384,27 @@ namespace Dmrg {
 				BlockType const &E,
 				MyBasisWithOperators &pS,
 				MyBasisWithOperators &pE,
-				size_t loopIndex,
+				SizeType loopIndex,
     				TargettingType& target)
 		{
 			int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
-			size_t keptStates = parameters_.finiteLoop[loopIndex].keptStates;
+			SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
 			int saveOption = (parameters_.finiteLoop[loopIndex].saveOption & 1);
 			RealType gsEnergy=0;
 			
-			size_t direction=EXPAND_SYSTEM;
+			SizeType direction=EXPAND_SYSTEM;
 			if (stepLength<0) direction=EXPAND_ENVIRON;
 
 			wft_.setStage(direction);
 
-			size_t sitesPerBlock = parameters_.sitesPerBlock;
+			SizeType sitesPerBlock = parameters_.sitesPerBlock;
 			int stepLengthCorrected = int((stepLength+1-sitesPerBlock)/sitesPerBlock);
 			if (stepLength<0)
 				stepLengthCorrected = int((stepLength+sitesPerBlock-1)/sitesPerBlock);
 			int stepFinal = stepCurrent_+stepLengthCorrected;
 			
 			while(true) {
-				if (size_t(stepCurrent_)>=sitesIndices_.size())
+				if (SizeType(stepCurrent_)>=sitesIndices_.size())
 					throw PsimagLite::RuntimeError("stepCurrent_ too large!\n");
 
 				RealType time = target.time();
@@ -456,15 +456,15 @@ namespace Dmrg {
 		void changeTruncateAndSerialize(MyBasisWithOperators& pS,
 						MyBasisWithOperators& pE,
 						const TargettingType& target,
-						size_t keptStates,
-						size_t direction,
-						size_t saveOption)
+						SizeType keptStates,
+						SizeType direction,
+						SizeType saveOption)
 		{
 			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
-			const typename PsimagLite::Vector<size_t>::Type& eS = pS.electronsVector();
+			const typename PsimagLite::Vector<SizeType>::Type& eS = pS.electronsVector();
 			FermionSignType fsS(eS);
 
-			const typename PsimagLite::Vector<size_t>::Type& eE = pS.electronsVector();
+			const typename PsimagLite::Vector<SizeType>::Type& eE = pS.electronsVector();
 			FermionSignType fsE(eE);
 
 			truncate_(pS,pE,target,keptStates,direction);
@@ -485,7 +485,7 @@ namespace Dmrg {
 		               const FermionSignType& fsE,
 		               const TargettingType& target,
 			       const SparseMatrixType& transform,
-		               size_t direction)
+		               SizeType direction)
 		{
 			DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
 
@@ -513,17 +513,17 @@ namespace Dmrg {
 			return false;
 		}
 
-		PsimagLite::String getDirection(size_t dir) const
+		PsimagLite::String getDirection(SizeType dir) const
 		{
 			if (dir==INFINITE) return  "INFINITE";
 			if (dir==EXPAND_ENVIRON) return "EXPAND_ENVIRON";
 			return "EXPAND_SYSTEM";
 		}
 
-		void updateQuantumSector(size_t sites,size_t direction,size_t step)
+		void updateQuantumSector(SizeType sites,SizeType direction,SizeType step)
 		{
 			if (direction==INFINITE && parameters_.adjustQuantumNumbers.size()>0) {
-				typename PsimagLite::Vector<size_t>::Type targetQuantumNumbers(2,0);
+				typename PsimagLite::Vector<SizeType>::Type targetQuantumNumbers(2,0);
 				assert(step<parameters_.adjustQuantumNumbers.size());
 				targetQuantumNumbers[0]=parameters_.adjustQuantumNumbers[step];
 				targetQuantumNumbers[1]=parameters_.adjustQuantumNumbers[step];
@@ -538,13 +538,13 @@ namespace Dmrg {
 
 		}
 
-		void updateQuantumSectorT(size_t sites,size_t direction)
+		void updateQuantumSectorT(SizeType sites,SizeType direction)
 		{
-			typename PsimagLite::Vector<size_t>::Type targetQuantumNumbers(parameters_.targetQuantumNumbers.size());
-			for (size_t ii=0;ii<targetQuantumNumbers.size();ii++) 
-				targetQuantumNumbers[ii]=size_t(round(parameters_.targetQuantumNumbers[ii]*sites));
+			typename PsimagLite::Vector<SizeType>::Type targetQuantumNumbers(parameters_.targetQuantumNumbers.size());
+			for (SizeType ii=0;ii<targetQuantumNumbers.size();ii++) 
+				targetQuantumNumbers[ii]=SizeType(round(parameters_.targetQuantumNumbers[ii]*sites));
 			if (MyBasis::useSu2Symmetry()) {
-				size_t ne = targetQuantumNumbers[0]+targetQuantumNumbers[1];
+				SizeType ne = targetQuantumNumbers[0]+targetQuantumNumbers[1];
 				if (ne%2==0) {
 					if (targetQuantumNumbers[2]%2!=0) targetQuantumNumbers[2]++;
 				} else {
@@ -554,15 +554,15 @@ namespace Dmrg {
 			setQuantumSector(targetQuantumNumbers,direction);
 		}
 
-		void updateQuantumSectorUd(size_t sites,size_t direction)
+		void updateQuantumSectorUd(SizeType sites,SizeType direction)
 		{
 			assert(!MyBasis::useSu2Symmetry());
-			typename PsimagLite::Vector<size_t>::Type targetQuantumNumbers(2);
+			typename PsimagLite::Vector<SizeType>::Type targetQuantumNumbers(2);
 
 			if (direction==INFINITE) {
-				size_t totalSites = model_.geometry().numberOfSites();
-				targetQuantumNumbers[0]=size_t(round(parameters_.electronsUp*sites/totalSites));
-				targetQuantumNumbers[1]=size_t(round(parameters_.electronsDown*sites/totalSites));
+				SizeType totalSites = model_.geometry().numberOfSites();
+				targetQuantumNumbers[0]=SizeType(round(parameters_.electronsUp*sites/totalSites));
+				targetQuantumNumbers[1]=SizeType(round(parameters_.electronsDown*sites/totalSites));
 			} else {
 				targetQuantumNumbers[0]=parameters_.electronsUp;
 				targetQuantumNumbers[1]=parameters_.electronsDown;
@@ -571,11 +571,11 @@ namespace Dmrg {
 			setQuantumSector(targetQuantumNumbers,direction);
 		}
 
-		void setQuantumSector(const typename PsimagLite::Vector<size_t>::Type& targetQuantumNumbers,size_t direction)
+		void setQuantumSector(const typename PsimagLite::Vector<SizeType>::Type& targetQuantumNumbers,SizeType direction)
 		{
 			PsimagLite::OstringStream msg;
 			msg<<"Integer target quantum numbers are: ";
-			for (size_t ii=0;ii<targetQuantumNumbers.size();ii++)
+			for (SizeType ii=0;ii<targetQuantumNumbers.size();ii++)
 				msg<<targetQuantumNumbers[ii]<<" ";
 			progress_.printline(msg,std::cout);
 			if (direction==INFINITE) io_.printVector(targetQuantumNumbers,"TargetedQuantumNumbers");
@@ -605,7 +605,7 @@ namespace Dmrg {
 		typename IoType::Out io_;
 		typename IoType::In ioIn_;
 		PsimagLite::ProgressIndicator progress_;
-		size_t quantumSector_;
+		SizeType quantumSector_;
 		int stepCurrent_;
 		CheckpointType checkpoint_;
 		WaveFunctionTransfType wft_;

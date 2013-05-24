@@ -91,7 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	template<typename LineChangerType>
 	class	Cloner {
-		static const size_t  LINE_LENGTH = 1024;
+		static const SizeType  LINE_LENGTH = 1024;
 	public:
 		Cloner(const PsimagLite::String& infile,
 		       const PsimagLite::String& outRoot,
@@ -104,7 +104,7 @@ namespace Dmrg {
 			lineChanger_.push_back(lineChanger);
 		}
 
-		void createInputFile(size_t ind) const
+		void createInputFile(SizeType ind) const
 		{
 			std::ifstream fin(infile_.c_str());
 			PsimagLite::String outfile = outRoot_ + ttos(ind) + ext_;
@@ -122,9 +122,9 @@ namespace Dmrg {
 
 	private:
 
-		bool procLine(PsimagLite::String& s,size_t ind) const
+		bool procLine(PsimagLite::String& s,SizeType ind) const
 		{
-			for (size_t i=0;i<lineChanger_.size();i++) {
+			for (SizeType i=0;i<lineChanger_.size();i++) {
 				if (s.find(lineChanger_[i].string())!=PsimagLite::String::npos) {
 					return lineChanger_[i].act(ind,s);
 				}

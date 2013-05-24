@@ -95,7 +95,7 @@ namespace Dmrg {
 		typedef PairType_ PairType;
 		typedef PairType value_type;
 
-		PairType operator[](size_t alpha) const
+		PairType operator[](SizeType alpha) const
 		{
 			return jmPairs_[indices_[alpha]];
 		}
@@ -104,7 +104,7 @@ namespace Dmrg {
 		{
 			jmPairs_.clear();
 			indices_.clear();
-			for (size_t i=0;i<jmpairs.size();i++) {
+			for (SizeType i=0;i<jmpairs.size();i++) {
 				int x = PsimagLite::isInVector(jmPairs_,jmpairs[i]);
 				if (x<0) {
 					jmPairs_.push_back(jmpairs[i]);
@@ -116,7 +116,7 @@ namespace Dmrg {
 		}
 
 		//! indices_[alpha] = jm
-		void push(const PairType& jm,size_t alpha)
+		void push(const PairType& jm,SizeType alpha)
 		{
 			int x = PsimagLite::isInVector(jmPairs_,jm);
 
@@ -134,33 +134,33 @@ namespace Dmrg {
 			indices_.clear();
 		}
 
-		void reorder(const typename PsimagLite::Vector<size_t>::Type& permutation)
+		void reorder(const typename PsimagLite::Vector<SizeType>::Type& permutation)
 		{
 			utils::reorder(indices_,permutation);
 		}
 
-		void truncate(const typename PsimagLite::Vector<size_t>::Type& removedIndices)
+		void truncate(const typename PsimagLite::Vector<SizeType>::Type& removedIndices)
 		{
 			utils::truncateVector(indices_,removedIndices);
-			typename PsimagLite::Vector<size_t>::Type unusedPairs;
+			typename PsimagLite::Vector<SizeType>::Type unusedPairs;
 			findUnusedJmPairs(unusedPairs);
 			removeUnusedPairs(unusedPairs);
 		}
 
 		template<typename Op>
-		void maxFirst(size_t& maxvalue)
+		void maxFirst(SizeType& maxvalue)
 		{
 			Op f;
-			for (size_t i=0;i<jmPairs_.size();i++) {
+			for (SizeType i=0;i<jmPairs_.size();i++) {
 				if (f(jmPairs_[i].first,maxvalue)) {
 					maxvalue=jmPairs_[i].first;
 				}
 			}
 		}
 
-		size_t size() const { return indices_.size(); }
+		SizeType size() const { return indices_.size(); }
 
-		void resize(size_t dummy) { }; // does nothing, safely
+		void resize(SizeType dummy) { }; // does nothing, safely
 
 		template<typename IoOutputter>
 		void save(IoOutputter& io) const
@@ -178,36 +178,36 @@ namespace Dmrg {
 
 	private:
 		typename PsimagLite::Vector<PairType>::Type jmPairs_;
-		typename PsimagLite::Vector<size_t>::Type indices_;
+		typename PsimagLite::Vector<SizeType>::Type indices_;
 
-		void findUnusedJmPairs(typename PsimagLite::Vector<size_t>::Type& unusedPairs)
+		void findUnusedJmPairs(typename PsimagLite::Vector<SizeType>::Type& unusedPairs)
 		{
-			for (size_t i=0;i<jmPairs_.size();i++)
+			for (SizeType i=0;i<jmPairs_.size();i++)
 				if (isUnusedPair(i)) unusedPairs.push_back(i);
 		}
 
-		void removeUnusedPairs(const typename PsimagLite::Vector<size_t>::Type& unusedPairs)
+		void removeUnusedPairs(const typename PsimagLite::Vector<SizeType>::Type& unusedPairs)
 		{
-			size_t counter=0;
-			typename PsimagLite::Vector<size_t>::Type neworder(jmPairs_.size());
+			SizeType counter=0;
+			typename PsimagLite::Vector<SizeType>::Type neworder(jmPairs_.size());
 			typename PsimagLite::Vector<PairType>::Type tmpVector(jmPairs_.size()-unusedPairs.size());
 
-			for (size_t i=0;i<jmPairs_.size();i++) {
+			for (SizeType i=0;i<jmPairs_.size();i++) {
 				if (PsimagLite::isInVector(unusedPairs,i)>=0) continue;
 				tmpVector[counter]=jmPairs_[i];
 				neworder[i]=counter;
 				counter++;
 			}
 			jmPairs_=tmpVector;
-			typename PsimagLite::Vector<size_t>::Type tmpVector2(indices_.size());
-			for (size_t i=0;i<indices_.size();i++)
+			typename PsimagLite::Vector<SizeType>::Type tmpVector2(indices_.size());
+			for (SizeType i=0;i<indices_.size();i++)
 				tmpVector2[i]=neworder[indices_[i]];
 			indices_=tmpVector2;
 		}
 
-		bool isUnusedPair(size_t ind)
+		bool isUnusedPair(SizeType ind)
 		{
-			for (size_t i=0;i<indices_.size();i++)
+			for (SizeType i=0;i<indices_.size();i++)
 				if (indices_[i]==ind) return false;
 			return true;
 		}
@@ -216,12 +216,12 @@ namespace Dmrg {
 	template<typename PairType>
 	std::ostream& operator<<(std::ostream& os,JmPairs<PairType> jmPairs)
 	{
-		for (size_t i=0;i<jmPairs.size();i++)
+		for (SizeType i=0;i<jmPairs.size();i++)
 			os<<"jmPair["<<i<<"]="<<jmPairs[i]<<"\n";
 		return os;
 	}
 
-	std::istream& operator>>(std::istream& is,std::pair<size_t,size_t>& pair)
+	std::istream& operator>>(std::istream& is,std::pair<SizeType,SizeType>& pair)
 	{
 		is>>pair.first;
 		is>>pair.second;

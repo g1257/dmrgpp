@@ -189,7 +189,7 @@ namespace Dmrg {
 			int bs,offset;
 			SparseMatrixType matrixBlock;
 
-			for (size_t m=0;m<lrs.super().partition()-1;m++) {
+			for (SizeType m=0;m<lrs.super().partition()-1;m++) {
 				offset =lrs.super().partition(m);
 				bs = lrs.super().partition(m+1)-offset;
 				matrixBlock.makeDiagonal(bs);
@@ -205,7 +205,7 @@ namespace Dmrg {
 			}
 		}
 
-		size_t maxConnections() const
+		SizeType maxConnections() const
 		{
 			return dmrgGeometry_.maxConnections();
 		}
@@ -218,18 +218,18 @@ namespace Dmrg {
 		                                  const typename PsimagLite::Vector<SparseElementType>::Type& y,
 		                                  ModelHelperType const &modelHelper) const
 		{
-			size_t n=modelHelper.leftRightSuper().super().block().size();
+			SizeType n=modelHelper.leftRightSuper().super().block().size();
 
 			//SparseMatrixType matrix;
-			size_t maxSize = maxConnections() * 4 * 16;
+			SizeType maxSize = maxConnections() * 4 * 16;
 			maxSize *= maxSize;
 
 			static LinkProductStructType lps(maxSize);
 			HamiltonianConnectionType hc(dmrgGeometry_,modelHelper,&lps,&x,&y);
 
-			size_t total = 0;
-			for (size_t i=0;i<n;i++) {
-				for (size_t j=0;j<n;j++) {
+			SizeType total = 0;
+			for (SizeType i=0;i<n;i++) {
+				for (SizeType j=0;j<n;j++) {
 					hc.compute(i,j,0,&lps,total);
 				}
 			}
@@ -270,8 +270,8 @@ namespace Dmrg {
 		void addHamiltonianConnection(VerySparseMatrix<SparseElementType>& matrix,
 					      const ModelHelperType& modelHelper) const
 		{
-			size_t n=modelHelper.leftRightSuper().sites();
-			size_t matrixRank = matrix.rank();
+			SizeType n=modelHelper.leftRightSuper().sites();
+			SizeType matrixRank = matrix.rank();
 			VerySparseMatrixType matrix2(matrixRank);
 			typedef HamiltonianConnection<
 					DmrgGeometryType,
@@ -279,9 +279,9 @@ namespace Dmrg {
 					LinkProductType> SomeHamiltonianConnectionType;
 			SomeHamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
 
-			size_t total = 0;
-			for (size_t i=0;i<n;i++) {
-				for (size_t j=0;j<n;j++) {
+			SizeType total = 0;
+			for (SizeType i=0;i<n;i++) {
+				for (SizeType j=0;j<n;j++) {
 					SparseMatrixType matrixBlock(matrixRank,matrixRank);
 					if (!hc.compute(i,j,&matrixBlock,0,total)) continue;
 					VerySparseMatrixType vsm(matrixBlock);

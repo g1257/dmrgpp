@@ -101,7 +101,7 @@ namespace Dmrg {
 		typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 		typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
 		typedef  BasisData<PairType> BasisDataType;
-		typedef typename PsimagLite::Vector<size_t>::Type BlockType;
+		typedef typename PsimagLite::Vector<SizeType>::Type BlockType;
 
 		enum {BEFORE_TRANSFORM,AFTER_TRANSFORM};
 
@@ -116,7 +116,7 @@ namespace Dmrg {
 
 		//! Loads this basis from memory or disk
 		template<typename IoInputter>
-		Basis(IoInputter& io,const PsimagLite::String& ss,size_t counter=0,bool bogus = false)
+		Basis(IoInputter& io,const PsimagLite::String& ss,SizeType counter=0,bool bogus = false)
 		: dmrgTransformed_(false), name_(ss), progress_(ss,0)
 		{
 			io.advance("#NAME="+ss,counter);
@@ -128,7 +128,7 @@ namespace Dmrg {
 		void load(IoInputter& io)
 		{
 			PsimagLite::String nn="#NAME=";
-			std::pair<PsimagLite::String,size_t> sc = io.advance(nn);
+			std::pair<PsimagLite::String,SizeType> sc = io.advance(nn);
 			name_ = sc.first.substr(nn.size(),sc.first.size());
 			loadInternal(io);
 		}
@@ -176,13 +176,13 @@ namespace Dmrg {
 				symmSu2_.setToProduct(su2Symmetry2.symmSu2_,su2Symmetry3.symmSu2_,pseudoQn,
 						su2Symmetry2.electrons_,su2Symmetry3.electrons_,electrons_,quantumNumbers_);
 			} else {
-				size_t ns = su2Symmetry2.size();
-				size_t ne = su2Symmetry3.size();
+				SizeType ns = su2Symmetry2.size();
+				SizeType ne = su2Symmetry3.size();
 
 				quantumNumbers_.clear();
 				electrons_.clear();
 
-				for (size_t j=0;j<ne;j++) for (size_t i=0;i<ns;i++) {
+				for (SizeType j=0;j<ne;j++) for (SizeType i=0;i<ns;i++) {
 					quantumNumbers_.push_back(su2Symmetry2.quantumNumbers_[i]+su2Symmetry3.quantumNumbers_[j]);
 					electrons_.push_back(su2Symmetry2.electrons(i)+su2Symmetry3.electrons(j));
 				}
@@ -197,7 +197,7 @@ namespace Dmrg {
 		}
 
 		//! returns the effective quantum number of basis state i
-		int qn(int i,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
+		int qn(int i,SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
 			if (beforeOrAfterTransform==AFTER_TRANSFORM)
 				return quantumNumbers_[i];
@@ -205,9 +205,9 @@ namespace Dmrg {
 		}
 
 		//! Returns the partition that corresponds to quantum number qn
-		int partitionFromQn(size_t qn,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
+		int partitionFromQn(SizeType qn,SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
-			const typename PsimagLite::Vector<size_t>::Type *quantumNumbers, *partition;
+			const typename PsimagLite::Vector<SizeType>::Type *quantumNumbers, *partition;
 
 			if (beforeOrAfterTransform==AFTER_TRANSFORM) {
 				quantumNumbers = &quantumNumbers_;
@@ -217,15 +217,15 @@ namespace Dmrg {
 				partition = &partitionOld_;
 			}
 
-			for (size_t i=0;i<partition->size();i++) {
-				size_t state = (*partition)[i];
+			for (SizeType i=0;i<partition->size();i++) {
+				SizeType state = (*partition)[i];
 				if ((*quantumNumbers)[state]==qn) return i;
 			}
 			return -1;
 		}
 
 		//! returns the start of basis partition i (see paper)
-		size_t partition(size_t i,size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
+		SizeType partition(SizeType i,SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
 			if (beforeOrAfterTransform==AFTER_TRANSFORM)
 				return partition_[i];
@@ -233,61 +233,61 @@ namespace Dmrg {
 		}
 
 		//! returns number of partitions for this basis (see paper)
-		size_t partition() const { return partition_.size(); }
+		SizeType partition() const { return partition_.size(); }
 
 		//! returns the permutation of i 
-		size_t permutation(size_t i) const
+		SizeType permutation(SizeType i) const
 		{
 			assert(i<permutationVector_.size());
 			return  permutationVector_[i];
 		}
 
 		//! Return the permutation vector
-		const typename PsimagLite::Vector<size_t>::Type& permutationVector() const
+		const typename PsimagLite::Vector<SizeType>::Type& permutationVector() const
 		{
 			return  permutationVector_;
 		}
 
 		//! returns the inverse permutation of i 
-		int permutationInverse(size_t i) const
+		int permutationInverse(SizeType i) const
 		{
 			assert(i<permInverse_.size());
 			return permInverse_[i];
 		}
 
 		//! returns the inverse permutation vector
-		const typename PsimagLite::Vector<size_t>::Type& permutationInverse() const { return permInverse_; }
+		const typename PsimagLite::Vector<SizeType>::Type& permutationInverse() const { return permInverse_; }
 
 		//! returns the block of sites over which this basis is built
 		const BlockType& block() const { return block_; }
 
 		//! returns the size of this basis
-		size_t size() const { return quantumNumbers_.size(); }
+		SizeType size() const { return quantumNumbers_.size(); }
 
 		//! finds the partition that contains basis state i
-		size_t findPartitionNumber(size_t i) const
+		SizeType findPartitionNumber(SizeType i) const
 		{
-			for (size_t j=0;j<partition_.size()-1;j++)
+			for (SizeType j=0;j<partition_.size()-1;j++)
 				if (i>=partition_[j] && i<partition_[j+1]) return j;
 			throw PsimagLite::RuntimeError("BasisImplementation:: No partition found for this state\n");
 		}
 
-		//! Encodes the quantum numbers into a single unique size_t and returns it
-		static size_t encodeQuantumNumber(const typename PsimagLite::Vector<size_t>::Type& quantumNumbers)
+		//! Encodes the quantum numbers into a single unique SizeType and returns it
+		static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& quantumNumbers)
 		{
 			if (useSu2Symmetry_) return HamiltonianSymmetrySu2Type::encodeQuantumNumber(quantumNumbers);
 			else return HamiltonianSymmetryLocalType::encodeQuantumNumber(quantumNumbers);
 		}
 
 		//! Inverse for encodeQuantumNumber
-		static typename PsimagLite::Vector<size_t>::Type decodeQuantumNumber(int q)
+		static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(int q)
 		{
 			if (useSu2Symmetry_) return HamiltonianSymmetrySu2Type::decodeQuantumNumber(q);
 			else return HamiltonianSymmetryLocalType::decodeQuantumNumber(q);
 		}
 
 		//! Encodes (flavor,jvalue,density) into a unique number and returns it
-		static size_t pseudoQuantumNumber(const typename PsimagLite::Vector<size_t>::Type& targets)
+		static SizeType pseudoQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& targets)
 		{
 			if (useSu2Symmetry_)
 				return HamiltonianSymmetrySu2Type::pseudoQuantumNumber(targets);
@@ -296,7 +296,7 @@ namespace Dmrg {
 		}
 
 		//! Inverse of pseudoQuantumNumber
-		size_t pseudoEffectiveNumber(size_t i) const
+		SizeType pseudoEffectiveNumber(SizeType i) const
 		{
 			if (useSu2Symmetry_)
 				return symmSu2_.pseudoEffectiveNumber(electrons_[i],symmSu2_.jmValue(i).first);
@@ -305,7 +305,7 @@ namespace Dmrg {
 		}
 
 		//! Given the information in the structure bdt, calculates the quantum numbers in q
-		static void findQuantumNumbers(typename PsimagLite::Vector<size_t>::Type& qn,const BasisDataType& basisData)
+		static void findQuantumNumbers(typename PsimagLite::Vector<SizeType>::Type& qn,const BasisDataType& basisData)
 		{
 			if (useSu2Symmetry_) HamiltonianSymmetrySu2Type::findQuantumNumbers(qn,basisData);
 			else HamiltonianSymmetryLocalType::findQuantumNumbers(qn,basisData);
@@ -315,9 +315,9 @@ namespace Dmrg {
 		//! transforms this basis by transform
 		//! eigs cannot be const because su(2) needs to sort them due to being obtained in blocks
 		template<typename SolverParametersType>
-		void changeBasis(typename PsimagLite::Vector<size_t>::Type& removedIndices,
+		void changeBasis(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
 				 typename PsimagLite::Vector<RealType>::Type& eigs,
-				 size_t kept,
+				 SizeType kept,
 				 const SolverParametersType& solverParams)
 		{
 			removedIndices.clear();
@@ -326,8 +326,8 @@ namespace Dmrg {
 
 			if (removedIndices.size()==0) return;
 
-			typename PsimagLite::Vector<size_t>::Type perm(removedIndices.size());
-			PsimagLite::Sort<typename PsimagLite::Vector<size_t>::Type > sort;
+			typename PsimagLite::Vector<SizeType>::Type perm(removedIndices.size());
+			PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type > sort;
 			sort.sort(removedIndices,perm);
 		}
 
@@ -335,7 +335,7 @@ namespace Dmrg {
 		RealType truncateBasis(SparseMatrixType& ftransform,
 				       const BlockMatrixType& transform,
 				       const typename PsimagLite::Vector<RealType>::Type& eigs,
-				       const typename PsimagLite::Vector<size_t>::Type& removedIndices)
+				       const typename PsimagLite::Vector<SizeType>::Type& removedIndices)
 		{
 			quantumNumbersOld_ = quantumNumbers_;
 			partitionOld_ = partition_;
@@ -369,9 +369,9 @@ namespace Dmrg {
 		//! (see section about Symmetries in paper)
 		void findPartition()
 		{
-			size_t qtmp = quantumNumbers_[0]+1;
+			SizeType qtmp = quantumNumbers_[0]+1;
 			partition_.clear();
-			for (size_t i=0;i<size();i++) {
+			for (SizeType i=0;i<size();i++) {
 				if (quantumNumbers_[i]!=qtmp) {
 					partition_.push_back(i);
 					qtmp = quantumNumbers_[i];
@@ -389,45 +389,45 @@ namespace Dmrg {
 		}
 
 		//! returns the number of electrons for state i of this basis
-		size_t electrons(size_t i) const { return electrons_[i];  }
+		SizeType electrons(SizeType i) const { return electrons_[i];  }
 
 		//! returns the flavor of state i of this basis 
-		size_t getFlavor(size_t i) const
+		SizeType getFlavor(SizeType i) const
 		{
 			if (useSu2Symmetry_) return symmSu2_.getFlavor(i);
 			else return  symmLocal_.getFlavor(i);
 		}
 
-		size_t flavor2Index(size_t f1,size_t f2,size_t ne1,size_t ne2,size_t j1,size_t j2) const
+		SizeType flavor2Index(SizeType f1,SizeType f2,SizeType ne1,SizeType ne2,SizeType j1,SizeType j2) const
 		{
 			assert(useSu2Symmetry_);
 			return symmSu2_.flavor2Index(f1,f2,ne1,ne2,j1,j2);
 		}
 
-		void flavor2Index(PsimagLite::Map<size_t,size_t>::Type& mm,const PairType& jm) const
+		void flavor2Index(PsimagLite::Map<SizeType,SizeType>::Type& mm,const PairType& jm) const
 		{
 			assert(useSu2Symmetry_);
 			symmSu2_.flavor2Index(mm,jm);
 		}
 
-		const typename PsimagLite::Vector<size_t>::Type& flavorsOld() const
+		const typename PsimagLite::Vector<SizeType>::Type& flavorsOld() const
 		{
 			assert(useSu2Symmetry_);
 			return symmSu2_.flavorsOld();
 		}
 
 		//! Returns the vector of electrons for this basis
-		const typename PsimagLite::Vector<size_t>::Type& electronsVector(size_t beforeOrAfterTransform=AFTER_TRANSFORM) const
+		const typename PsimagLite::Vector<SizeType>::Type& electronsVector(SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
 		{
 			if (beforeOrAfterTransform == AFTER_TRANSFORM) return electrons_;
 			return electronsOld_;
 		}
 
 		//! Returns the fermionic sign for state i
-		int fermionicSign(size_t i,int f) const { return (electrons_[i]&1) ? f : 1; }
+		int fermionicSign(SizeType i,int f) const { return (electrons_[i]&1) ? f : 1; }
 
 		//! Returns the (j,m) for state i of this basis
-		PairType jmValue(size_t i) const
+		PairType jmValue(SizeType i) const
 		{
 			if (!useSu2Symmetry_) return PairType(0,0);
 			return symmSu2_.jmValue(i);
@@ -443,35 +443,35 @@ namespace Dmrg {
 		bool dmrgTransformed() const { return dmrgTransformed_; }
 
 		//! Returns the reduced (by the Wigner Eckart theorem) index corresponding to state i of this basis
-		size_t reducedIndex(size_t i) const
+		SizeType reducedIndex(SizeType i) const
 		{
 			assert(useSu2Symmetry_);
 			return symmSu2_.reducedIndex(i);
 		}
 
 		//! Returns the size of this basis when reduced (by the Wigner-Eckart theorem)
-		size_t reducedSize() const
+		SizeType reducedSize() const
 		{
 			assert(useSu2Symmetry_);
 			return symmSu2_.reducedSize();
 		}
 
 		//! Returns the i-th distinct j value for this basis
-		size_t jVals(size_t i) const
+		SizeType jVals(SizeType i) const
 		{
 			assert(useSu2Symmetry_);
 			return symmSu2_.jVals(i);
 		}
 
 		//! Returns the number of distinct j values for this basis
-		size_t jVals() const
+		SizeType jVals() const
 		{
 			assert(useSu2Symmetry_);
 			return symmSu2_.jVals();
 		}
 
 		//! Returns the maximum j value in this basis
-		size_t jMax() const
+		SizeType jMax() const
 		{
 			//assert(useSu2Symmetry_);
 			return symmSu2_.jMax();
@@ -520,7 +520,7 @@ namespace Dmrg {
 			io.read(partition_,"#PARTITION");
 			io.read(permInverse_,"#PERMUTATIONINVERSE");
 			permutationVector_.resize(permInverse_.size());
-			for (size_t i=0;i<permInverse_.size();i++) permutationVector_[permInverse_[i]]=i;
+			for (SizeType i=0;i<permInverse_.size();i++) permutationVector_[permInverse_[i]]=i;
 			dmrgTransformed_=false;
 			if (useSu2Symmetry_)
 				symmSu2_.load(io);
@@ -545,15 +545,15 @@ namespace Dmrg {
 		}
 
 		RealType calcError(const typename PsimagLite::Vector<RealType>::Type& eigs,
-		                   const typename PsimagLite::Vector<size_t>::Type& removedIndices) const
+		                   const typename PsimagLite::Vector<SizeType>::Type& removedIndices) const
 		{
 			RealType sum=static_cast<RealType>(0.0);
-			for (size_t i=0;i<eigs.size();i++)
+			for (SizeType i=0;i<eigs.size();i++)
 				if (PsimagLite::isInVector(removedIndices,i)<0) sum+=eigs[i];
 			return 1.0-sum;
 		}
 
-		void truncate(const typename PsimagLite::Vector<size_t>::Type& removedIndices)
+		void truncate(const typename PsimagLite::Vector<SizeType>::Type& removedIndices)
 		{
 			utils::truncateVector(quantumNumbers_,removedIndices);
 			utils::truncateVector(electrons_,removedIndices);
@@ -572,10 +572,10 @@ namespace Dmrg {
 				permutationVector_.resize(size());
 				if (useSu2Symmetry_) 	{
 					//symmSu2_.orderFlavors(permutationVector_,partition_);
-					for (size_t i=0;i<permutationVector_.size();i++)
+					for (SizeType i=0;i<permutationVector_.size();i++)
 						permutationVector_[i]=i;
 				} else 	{
-					PsimagLite::Sort<typename PsimagLite::Vector<size_t>::Type > sort;
+					PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type > sort;
 					sort.sort(quantumNumbers_,permutationVector_);
 				}
 			}
@@ -584,7 +584,7 @@ namespace Dmrg {
 
 			if (changePermutation) {
 				permInverse_.resize(permutationVector_.size());
-				for (size_t i=0;i<permInverse_.size();i++)
+				for (SizeType i=0;i<permInverse_.size();i++)
 					permInverse_[permutationVector_[i]]=i;
 
 			}
@@ -613,10 +613,10 @@ namespace Dmrg {
 		order of hundreds for usual symmetries, making this implementation very practical for
 		systems of correlated electrons.)
 		*/
-		typename PsimagLite::Vector<size_t>::Type quantumNumbers_;
-		typename PsimagLite::Vector<size_t>::Type quantumNumbersOld_;
-		typename PsimagLite::Vector<size_t>::Type electrons_;
-		typename PsimagLite::Vector<size_t>::Type electronsOld_;
+		typename PsimagLite::Vector<SizeType>::Type quantumNumbers_;
+		typename PsimagLite::Vector<SizeType>::Type quantumNumbersOld_;
+		typename PsimagLite::Vector<SizeType>::Type electrons_;
+		typename PsimagLite::Vector<SizeType>::Type electronsOld_;
 
 		/**
 		What remains to be done is to find a partition of the basis which
@@ -632,8 +632,8 @@ namespace Dmrg {
 		Now we know that our Hamiltonian matrix will be composed first of a
 		block of 4x4, then of a block of 2x2, etc.
 		*/
-		typename PsimagLite::Vector<size_t>::Type partition_;
-		typename PsimagLite::Vector<size_t>::Type partitionOld_;
+		typename PsimagLite::Vector<SizeType>::Type partition_;
+		typename PsimagLite::Vector<SizeType>::Type partitionOld_;
 
 		/**
 		We then reorder our basis such that its elements are given in
@@ -642,8 +642,8 @@ namespace Dmrg {
 		\\verb!permutationVector! of class \\cppClass{!PTEX_THISCLASS}.
 		For ease of coding we also store its inverse in \\verb!permInverse!.
 		*/
-		typename PsimagLite::Vector<size_t>::Type permutationVector_;
-		typename PsimagLite::Vector<size_t>::Type permInverse_;
+		typename PsimagLite::Vector<SizeType>::Type permutationVector_;
+		typename PsimagLite::Vector<SizeType>::Type permInverse_;
 		HamiltonianSymmetryLocalType symmLocal_;
 		HamiltonianSymmetrySu2Type symmSu2_;
 		/**

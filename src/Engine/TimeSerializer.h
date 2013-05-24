@@ -93,16 +93,16 @@ namespace Dmrg {
 			TimeSerializer() { }
 			
 			TimeSerializer(RealType currentTime,
-				       size_t site,
+				       SizeType site,
 				       const typename PsimagLite::Vector<VectorType>::Type& targetVectors,
-				       size_t marker)
+				       SizeType marker)
 			: currentTime_(currentTime),
 			  site_(site),
 			  targetVectors_(targetVectors),
 			  marker_(marker)
 			{}
 			
-			TimeSerializer(typename PsimagLite::IoSimple::In& io,size_t lastInstance = 0)
+			TimeSerializer(typename PsimagLite::IoSimple::In& io,SizeType lastInstance = 0)
 			{
 				RealType x=0;
 				PsimagLite::String s = "#TIME=";
@@ -121,7 +121,7 @@ namespace Dmrg {
 				io.readline(xi,s);
 				if (xi<=0) throw PsimagLite::RuntimeError("TimeSerializer:: n. of vectors must be positive\n");
 				targetVectors_.resize(xi);
-				for (size_t i=0;i<targetVectors_.size();i++) {
+				for (SizeType i=0;i<targetVectors_.size();i++) {
 					s = "targetVector"+ttos(i);
 					targetVectors_[i].load(io,s);
 				}
@@ -131,24 +131,24 @@ namespace Dmrg {
 				marker_=xi;
 			}
 			
-			size_t size(size_t i=0) const
+			SizeType size(SizeType i=0) const
 			{
 				return  targetVectors_[i].size();
 			}
 			
 			RealType time() const { return currentTime_; }
 			
-			size_t site() const
+			SizeType site() const
 			{
 				return  site_;
 			}
 			
-			const VectorType& vector(size_t i=0) const 
+			const VectorType& vector(SizeType i=0) const 
 			{
 				return targetVectors_[i];
 			}
 			
-			size_t marker() const
+			SizeType marker() const
 			{
 				return marker_;
 			}
@@ -169,7 +169,7 @@ namespace Dmrg {
 
 //				io.print("#TNUMBEROFVECTORS=",targetVectors_.size());
 
-				for (size_t i=0;i<targetVectors_.size();i++) {
+				for (SizeType i=0;i<targetVectors_.size();i++) {
 					PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentTime_);
 					targetVectors_[i].save(io,label);
 				}
@@ -181,9 +181,9 @@ namespace Dmrg {
 
 		private:
 			RealType currentTime_;
-			size_t site_;
+			SizeType site_;
 			typename PsimagLite::Vector<VectorType>::Type targetVectors_;
-			size_t marker_;
+			SizeType marker_;
 	}; // class TimeSerializer
 } // namespace Dmrg 
 

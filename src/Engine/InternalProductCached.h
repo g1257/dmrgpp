@@ -110,7 +110,7 @@ namespace Dmrg {
 			matrixStored_ += matrixBlock;
 		}
 
-		size_t rank() const { return matrixStored_.rank(); }
+		SizeType rank() const { return matrixStored_.rank(); }
 
 		template<typename SomeVectorType>
 		void matrixVectorProduct(SomeVectorType &x, SomeVectorType const &y) const
@@ -119,7 +119,7 @@ namespace Dmrg {
 			 model_->hamiltonianConnectionProduct(x,y,*modelHelper_);
 		}
 
-//		HamiltonianElementType operator()(size_t i,size_t j) const
+//		HamiltonianElementType operator()(SizeType i,SizeType j) const
 //		{
 //			return matrixStored_(i,j);
 //		}

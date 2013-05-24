@@ -105,65 +105,65 @@ public:
 	}
 
 	//! ATTENTION: ONLY VALID ON X86 AND X86_64 WHERE += IS ATOMIC
-	void thread_function_(size_t threadNum,size_t blockSize,size_t total,pthread_mutex_t* myMutex)
+	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
 	{
-		size_t nC = initKron_.connections();
+		SizeType nC = initKron_.connections();
 		const GenGroupType& istartLeft = initKron_.istartLeft();
 		const GenGroupType& istartRight = initKron_.istartRight();
 		MatrixType intermediate(W_.n_row(),W_.n_col());
 
 //		std::cerr<<"threadNum="<<threadNum<<" blockSize="<<blockSize<<" total="<<total<<"\n";
-		for (size_t p=0;p<blockSize;p++) {
-			size_t outPatch = threadNum * blockSize + p;
+		for (SizeType p=0;p<blockSize;p++) {
+			SizeType outPatch = threadNum * blockSize + p;
 			if (outPatch>=total) break;
-			for (size_t inPatch=0;inPatch<total;inPatch++) {
-				for (size_t ic=0;ic<nC;ic++) {
+			for (SizeType inPatch=0;inPatch<total;inPatch++) {
+				for (SizeType ic=0;ic<nC;ic++) {
 					const ComplexOrRealType& val = initKron_.value(ic);
 					const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 					const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
 
-					size_t i = initKron_.patch(GenIjPatchType::LEFT,inPatch);
-					size_t j = initKron_.patch(GenIjPatchType::RIGHT,inPatch);
+					SizeType i = initKron_.patch(GenIjPatchType::LEFT,inPatch);
+					SizeType j = initKron_.patch(GenIjPatchType::RIGHT,inPatch);
 
-					size_t ip = initKron_.patch(GenIjPatchType::LEFT,outPatch);
-					size_t jp = initKron_.patch(GenIjPatchType::RIGHT,outPatch);
+					SizeType ip = initKron_.patch(GenIjPatchType::LEFT,outPatch);
+					SizeType jp = initKron_.patch(GenIjPatchType::RIGHT,outPatch);
 
-					size_t i1 = istartLeft(i);
-//					size_t i2 = istartLeft(i+1);
+					SizeType i1 = istartLeft(i);
+//					SizeType i2 = istartLeft(i+1);
 
-					size_t j1 = istartRight(j);
-					size_t j2 = istartRight(j+1);
+					SizeType j1 = istartRight(j);
+					SizeType j2 = istartRight(j+1);
 
-					size_t ip1 = istartLeft(ip);
-//					size_t ip2 = istartLeft(ip+1);
+					SizeType ip1 = istartLeft(ip);
+//					SizeType ip2 = istartLeft(ip+1);
 
-					size_t jp1 = istartRight(jp);
-//					size_t jp2 = istartLeft(jp+1);
+					SizeType jp1 = istartRight(jp);
+//					SizeType jp2 = istartLeft(jp+1);
 
 					const SparseMatrixType& tmp1 =  xiStruct(ip,i);
 					const SparseMatrixType& tmp2 =  yiStruct(j,jp);
 
-					size_t colsize = j2 -j1;
-					for (size_t mr2=0;mr2<colsize;mr2++)
-						for (size_t mr=0;mr<tmp1.row();mr++)
+					SizeType colsize = j2 -j1;
+					for (SizeType mr2=0;mr2<colsize;mr2++)
+						for (SizeType mr=0;mr<tmp1.row();mr++)
 							intermediate(mr,mr2)=0.0;
 
-					for (size_t mr=0;mr<tmp1.row();mr++) {
+					for (SizeType mr=0;mr<tmp1.row();mr++) {
 						for (int k3=tmp1.getRowPtr(mr);k3<tmp1.getRowPtr(mr+1);k3++) {
-							size_t col3 = tmp1.getCol(k3)+i1;
+							SizeType col3 = tmp1.getCol(k3)+i1;
 							ComplexOrRealType valtmp = val * tmp1.getValue(k3);
-							for (size_t mr2=j1;mr2<j2;mr2++) {
+							for (SizeType mr2=j1;mr2<j2;mr2++) {
 								intermediate(mr,mr2-j1) += valtmp * V_(col3,mr2);
 							}
 						}
 					}
-					for (size_t mr2=0;mr2<colsize;mr2++) {
-						size_t start = tmp2.getRowPtr(mr2);
-						size_t end = tmp2.getRowPtr(mr2+1);
-						for (size_t k4=start;k4<end;k4++) {
+					for (SizeType mr2=0;mr2<colsize;mr2++) {
+						SizeType start = tmp2.getRowPtr(mr2);
+						SizeType end = tmp2.getRowPtr(mr2+1);
+						for (SizeType k4=start;k4<end;k4++) {
 							ComplexOrRealType value1 = tmp2.getValue(k4);
-							size_t col4 = tmp2.getCol(k4)+jp1;
-							for (size_t mr=0;mr<tmp1.row();mr++) {
+							SizeType col4 = tmp2.getCol(k4)+jp1;
+							for (SizeType mr=0;mr<tmp1.row();mr++) {
 								W_(mr+ip1,col4) += intermediate(mr,mr2) * value1;
 							}
 						}

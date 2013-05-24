@@ -118,15 +118,15 @@ namespace Dmrg {
 		typedef typename MyBasis::BlockType BlockType;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
-		static const size_t SPIN_UP = ModelFeAsType::SPIN_UP;
-		static const size_t SPIN_DOWN = ModelFeAsType::SPIN_DOWN;
+		static const SizeType SPIN_UP = ModelFeAsType::SPIN_UP;
+		static const SizeType SPIN_DOWN = ModelFeAsType::SPIN_DOWN;
 
 		FeAsBasedScExtended(InputValidatorType& io,GeometryType const &geometry,ConcurrencyType& concurrency)
 			: ModelBaseType(geometry,concurrency),modelParameters_(io), geometry_(geometry),
 			  modelFeAs_(io,geometry,concurrency),orbitals_(modelParameters_.orbitals)
 		{}
 
-		size_t hilbertSize(size_t site) const { return modelFeAs_.hilbertSize(site); }
+		SizeType hilbertSize(SizeType site) const { return modelFeAs_.hilbertSize(site); }
 
 		void print(std::ostream& os) const { modelFeAs_.print(os); }
 
@@ -174,8 +174,8 @@ namespace Dmrg {
 		}
 
 		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
-								      size_t site,
-								      size_t dof) const
+								      SizeType site,
+								      SizeType dof) const
 		{
 			BlockType block;
 			block.resize(1);
@@ -185,21 +185,21 @@ namespace Dmrg {
 
 			if (what=="z") {
 				PsimagLite::Matrix<SparseElementType> tmp;
-				size_t x = 2*orbitals_+1;
+				SizeType x = 2*orbitals_+1;
 				crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
 				return tmp;
 			}
 
 			if (what=="+") {
 				PsimagLite::Matrix<SparseElementType> tmp;
-				size_t x = 2*orbitals_;
+				SizeType x = 2*orbitals_;
 				crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
 				return tmp;
 			}
 
 			if (what=="-") { // delta = c^\dagger * c^dagger
 				PsimagLite::Matrix<SparseElementType> tmp;
-				size_t x = 2*orbitals_;
+				SizeType x = 2*orbitals_;
 				SparseMatrixType tmp2;
 				transposeConjugate(tmp2,creationMatrix[x].data);
 				crsMatrixToFullMatrix(tmp,tmp2);
@@ -211,13 +211,13 @@ namespace Dmrg {
 		//! find all states in the natural basis for a block of n sites
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 		void setNaturalBasis(typename PsimagLite::Vector<HilbertState>  ::Type&basis,
-		                     typename PsimagLite::Vector<size_t>::Type& q,
-		                     const typename PsimagLite::Vector<size_t>::Type& block) const
+		                     typename PsimagLite::Vector<SizeType>::Type& q,
+		                     const typename PsimagLite::Vector<SizeType>::Type& block) const
 		{
 			modelFeAs_.setNaturalBasis(basis,q,block);
 		}
 		
-		void findElectrons(typename PsimagLite::Vector<size_t>::Type& electrons,const typename PsimagLite::Vector<HilbertState>  ::Type&basis,size_t site) const
+		void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,const typename PsimagLite::Vector<HilbertState>  ::Type&basis,SizeType site) const
 		{
 			modelFeAs_.findElectrons(electrons,basis,site);
 		}
@@ -232,7 +232,7 @@ namespace Dmrg {
 			SparseMatrixType m;
 			cDaggerC(m,creationMatrix,block,1.0,SPIN_UP,SPIN_DOWN);
 			Su2RelatedType su2related;
-			size_t offset = 2*orbitals_;
+			SizeType offset = 2*orbitals_;
 			su2related.source.push_back(offset);
 			su2related.source.push_back(offset+1);
 			su2related.source.push_back(offset);
@@ -268,11 +268,11 @@ namespace Dmrg {
 				const typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 				const BlockType& block,
 				RealType value,
-				size_t spin1,
-				size_t spin2) const
+				SizeType spin1,
+				SizeType spin2) const
 		{
 			SparseMatrixType tmpMatrix,tmpMatrix2;
-			for (size_t orbital=0;orbital<orbitals_;orbital++) {
+			for (SizeType orbital=0;orbital<orbitals_;orbital++) {
 				transposeConjugate(tmpMatrix2,
 						creationMatrix[orbital+spin2*orbitals_].data);
 				multiply(tmpMatrix,
@@ -313,7 +313,7 @@ namespace Dmrg {
 		ParametersModelFeAs<RealType>  modelParameters_;
 		GeometryType const &geometry_;
 		ModelFeAsType modelFeAs_;
-		size_t orbitals_;
+		SizeType orbitals_;
 	};     //class FeAsBasedScExtended
 
 	template<

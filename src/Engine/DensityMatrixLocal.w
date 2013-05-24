@@ -101,7 +101,7 @@ if we want to print informational stuff.
 			const DmrgBasisWithOperatorsType& pBasis,
 			const DmrgBasisWithOperatorsType& pBasisSummed,
 			const DmrgBasisType& pSE,
-			size_t direction,bool debug=false,bool verbose=false) 
+			SizeType direction,bool debug=false,bool verbose=false) 
 @}
 
 Note the colon that comes here indicating that we're setting stuff on the stack.
@@ -149,7 +149,7 @@ function is needed at all. Need to check where it's used. It seems that having t
 enough
 @o DensityMatrixLocal.h -t
 @{
-		virtual size_t rank() { return data_.rank(); }
+		virtual SizeType rank() { return data_.rank(); }
 @}
 
 These are just checks to see if everything is OK. They're empty for this local symmetries implementation.%'
@@ -199,9 +199,9 @@ since the density matrix is the sum of the density matrices for each state we wa
 				int direction)
 		{	
 			//loop over all partitions:
-			for (size_t m=0;m<pBasis.partition()-1;m++) {
+			for (SizeType m=0;m<pBasis.partition()-1;m++) {
 				// size of this partition
-				size_t bs = pBasis.partition(m+1)-pBasis.partition(m);
+				SizeType bs = pBasis.partition(m+1)-pBasis.partition(m);
 				
 				// density matrix block for this partition:
 				BuildingBlockType matrixBlock(bs,bs);
@@ -214,7 +214,7 @@ since the density matrix is the sum of the density matrices for each state we wa
 					initPartition(matrixBlock,pBasis,m,target.gs(),pBasisSummed,pSE,direction,w);
 				
 				// target all other states if any:
-				for (size_t i=0;i<target.size();i++) {
+				for (SizeType i=0;i<target.size();i++) {
 					w = target.weight(i)/target.normSquared(i);
 					initPartition(matrixBlock,pBasis,m,target(i),pBasisSummed,pSE,direction,w);
 				}
@@ -256,11 +256,11 @@ The algorithm distingushes if we're expanding the system or the environment.%'
 @{
 		void initPartition(BuildingBlockType& matrixBlock,
 				DmrgBasisWithOperatorsType const &pBasis,
-				size_t m,
+				SizeType m,
 				const TargetVectorType& v,
 				DmrgBasisWithOperatorsType const &pBasisSummed,
 				DmrgBasisType const &pSE,
-    				size_t direction,
+    				SizeType direction,
 				RealType weight)
 		{
 			if (direction!=EXPAND_SYSTEM) 
@@ -278,18 +278,18 @@ described below.
 @{
 		void initPartitionExpandEnviron(BuildingBlockType& matrixBlock,
 				DmrgBasisWithOperatorsType const &pBasis,
-				size_t m,
+				SizeType m,
 				const TargetVectorType& v,
 				DmrgBasisWithOperatorsType const &pBasisSummed,
 				DmrgBasisType const &pSE,
 				RealType weight)
 		{
 			
-			size_t ns=pBasisSummed.size();
-			size_t ne=pSE.size()/ns;
+			SizeType ns=pBasisSummed.size();
+			SizeType ne=pSE.size()/ns;
 			
-			for (size_t i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
-				for (size_t j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
+			for (SizeType i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
+				for (SizeType j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
 						
 					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m)) +=
 						densityMatrixExpandEnviron(i,j,v,pBasisSummed,pSE,ns,ne)*weight;
@@ -306,17 +306,17 @@ described below.
 @{
 		void initPartitionExpandSystem(BuildingBlockType& matrixBlock,
 				DmrgBasisWithOperatorsType const &pBasis,
-				size_t m,
+				SizeType m,
 				const TargetVectorType& v,
 				DmrgBasisWithOperatorsType const &pBasisSummed,
 				DmrgBasisType const &pSE,
 				RealType weight)
 		{
-			size_t ne = pBasisSummed.size();
-			size_t ns = pSE.size()/ne;
+			SizeType ne = pBasisSummed.size();
+			SizeType ns = pSE.size()/ne;
 			
-			for (size_t i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
-				for (size_t j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
+			for (SizeType i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
+				for (SizeType j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
 						
 					matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m)) +=
 						densityMatrixExpandSystem(i,j,v,pBasisSummed,pSE,ns,ne)*weight;
@@ -332,24 +332,24 @@ This is exactly Eq.~(\ref{eq:densitymatrix}).
 @o DensityMatrixLocal.h -t
 @{
 		DensityMatrixElementType densityMatrixExpandEnviron(
-				size_t alpha1,
-				size_t alpha2,
+				SizeType alpha1,
+				SizeType alpha2,
 				const TargetVectorType& v,
 				DmrgBasisWithOperatorsType const &pBasisSummed,
 				DmrgBasisType const &pSE,
-				size_t ns,
-				size_t ne)
+				SizeType ns,
+				SizeType ne)
 		{
 			
-			size_t total=pBasisSummed.size();
+			SizeType total=pBasisSummed.size();
 			
 			DensityMatrixElementType sum=0;
 			
-			size_t x2 = alpha2*ns;
-			size_t x1 = alpha1*ns;
-			for (size_t beta=0;beta<total;beta++) {
-				size_t jj = pSE.permutationInverse(beta + x2);
-				size_t ii = pSE.permutationInverse(beta + x1);
+			SizeType x2 = alpha2*ns;
+			SizeType x1 = alpha1*ns;
+			for (SizeType beta=0;beta<total;beta++) {
+				SizeType jj = pSE.permutationInverse(beta + x2);
+				SizeType ii = pSE.permutationInverse(beta + x1);
 				sum += v[ii] * std::conj(v[jj]);
 			}
 			return sum;
@@ -362,22 +362,22 @@ This is exactly Eq.~(\ref{eq:densitymatrix}).
 @o DensityMatrixLocal.h -t
 @{
 		DensityMatrixElementType densityMatrixExpandSystem(
-				size_t alpha1,
-				size_t alpha2,
+				SizeType alpha1,
+				SizeType alpha2,
 				const TargetVectorType& v,
 				DmrgBasisWithOperatorsType const &pBasisSummed,
 				DmrgBasisType const &pSE,
-				size_t ns,
-				size_t ne)
+				SizeType ns,
+				SizeType ne)
 		{
 			
-			size_t total=pBasisSummed.size();
+			SizeType total=pBasisSummed.size();
 			
 			DensityMatrixElementType sum=0;
 
-			for (size_t beta=0;beta<total;beta++) {
-				size_t jj = pSE.permutationInverse(alpha2+beta*ns);
-				size_t ii = pSE.permutationInverse(alpha1+beta*ns);
+			for (SizeType beta=0;beta<total;beta++) {
+				SizeType jj = pSE.permutationInverse(alpha2+beta*ns);
+				SizeType ii = pSE.permutationInverse(alpha1+beta*ns);
 				sum += v[ii] * std::conj(v[jj]);
 			}
 			return sum;
@@ -399,8 +399,8 @@ Printing of each block is delegated to the type of each block (usually a Psimag 
 	std::ostream& operator<<(std::ostream& os,
 				const DensityMatrixLocal<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType>& dm)
 	{
-		for (size_t m=0;m<dm.data_.blocks();m++) {
-			size_t ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
+		for (SizeType m=0;m<dm.data_.blocks();m++) {
+			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
 			os<<" ne="<<ne<<"\n"; 
 			os<<dm.data_(m)<<"\n";
 		}

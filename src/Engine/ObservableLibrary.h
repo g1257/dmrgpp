@@ -105,7 +105,7 @@ namespace Dmrg {
 		template<typename IoInputter>
 		ObservableLibrary(
 				IoInputter& io,
-				size_t numberOfSites,
+				SizeType numberOfSites,
 				bool hasTimeEvolution,
 				const ModelType& model,
 				ConcurrencyType& concurrency,
@@ -119,21 +119,21 @@ namespace Dmrg {
 				 szsz_(0,0)
 		{
 			if (hasTimeEvolution) {
-				size_t site = 0;
+				SizeType site = 0;
 				// FIXME: No support for site varying operators
 				fullMatrixToCrsMatrix(matrixNup_,model_.naturalOperator("nup",site,0));
 				fullMatrixToCrsMatrix(matrixNdown_,model_.naturalOperator("ndown",site,0));
 			}
 		}
 
-		void measure(const PsimagLite::String& label,size_t rows,size_t cols)
+		void measure(const PsimagLite::String& label,SizeType rows,SizeType cols)
 		{
 			// Note that I can't print sites when there no time evolution
 			// since the DmrgSerializer doens't have sites yet
 			// as opposed to the TimeSerializer
-			size_t threadId = 0;
+			SizeType threadId = 0;
 			if (hasTimeEvolution_) printSites(threadId);
-			size_t site = 0; // FIXME: No support for site varying operators
+			SizeType site = 0; // FIXME: No support for site varying operators
 			if (label=="cc") {
 				MatrixType opC = model_.naturalOperator("c",site,0); // c_{0,0} spin up
 				MatrixType opCtranspose = transposeConjugate(opC);
@@ -176,8 +176,8 @@ namespace Dmrg {
 
 				MatrixType spinTotal(szsz_.n_row(),szsz_.n_col());
 
-				for (size_t i=0;i<spinTotal.n_row();i++)
-					for (size_t j=0;j<spinTotal.n_col();j++)
+				for (SizeType i=0;i<spinTotal.n_row();i++)
+					for (SizeType j=0;j<spinTotal.n_col();j++)
 						spinTotal(i,j) = static_cast<RealType>(0.5)*(sPlusSminus_(i,j) +
 								sMinusSplus_(i,j)) + szsz_(i,j);
 
@@ -199,19 +199,19 @@ namespace Dmrg {
 					str += "dd4 only available for ladderx\n";
 					throw PsimagLite::RuntimeError(str.c_str());
 				}
-				for (size_t g=0;g<16;g++) {
-					typename PsimagLite::Vector<size_t>::Type gammas(4,0);
+				for (SizeType g=0;g<16;g++) {
+					typename PsimagLite::Vector<SizeType>::Type gammas(4,0);
 					gammas[0] = (g & 1);
 					gammas[1] = (g & 2)>>1;
 					gammas[2] = (g & 4) >> 2;
 					gammas[3] = (g & 8) >> 3;
 					std::cout<<"#DD4 for the following orbitals: ";
-					for (size_t i=0;i<gammas.size();i++) std::cout<<gammas[i]<<" ";
+					for (SizeType i=0;i<gammas.size();i++) std::cout<<gammas[i]<<" ";
 					std::cout<<"\n";
 					MatrixType fpd(numberOfSites_/2,numberOfSites_/2);
 					observe_.fourPointDeltas(fpd,gammas,model_);
-					for (size_t i=0;i<fpd.n_row();i++) {
-						for (size_t j=0;j<fpd.n_col();j++) {
+					for (SizeType i=0;i<fpd.n_row();i++) {
+						for (SizeType j=0;j<fpd.n_col();j++) {
 							std::cout<<fpd(i,j)<<" ";
 						}
 						std::cout<<"\n";
@@ -227,11 +227,11 @@ namespace Dmrg {
 		{
 			SparseMatrixType A;
 			Su2RelatedType su2Related1;
-			size_t threadId = 0;
+			SizeType threadId = 0;
 
 			if (label=="superDensity") {
 				A.makeDiagonal(model_.hilbertSize(observe_.site(threadId)),1.0);
-				std::pair<size_t,size_t> zeroZero(0,0);
+				std::pair<SizeType,SizeType> zeroZero(0,0);
 				OperatorType opIdentity(A,1,zeroZero,1,su2Related1);
 				observe_.setBrackets("time","time");
 				FieldType superDensity = observe_.template
@@ -240,19 +240,19 @@ namespace Dmrg {
 						superDensity<<"\n";
 			} else if (label=="nupNdown") {
 				multiply(A,matrixNup_,matrixNdown_);
-				OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+				OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
 				PreOperatorSiteIndependentType preOperator(opA,"nupNdown",threadId);
 				measureOnePoint(preOperator);
 			} else if (label=="nup+ndown") {
 				A = matrixNup_;
 				A += matrixNdown_;
-				OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+				OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
 				PreOperatorSiteIndependentType preOperator(opA,"nup+ndown",threadId);
 				measureOnePoint(preOperator);
 			} else if (label=="sz") {
 				A = matrixNup_;
 				A += (-1)*matrixNdown_;
-				OperatorType opA(A,1,std::pair<size_t,size_t>(0,0),1,su2Related1);
+				OperatorType opA(A,1,std::pair<SizeType,SizeType>(0,0),1,su2Related1);
 				PreOperatorSiteIndependentType preOperator(opA,"sz",threadId);
 				measureOnePoint(preOperator);
 			} else {
@@ -268,11 +268,11 @@ namespace Dmrg {
 
 		bool endOfData() const { return observe_.endOfData(); }
 
-		void measureTheOnePoints(size_t numberOfDofs)
+		void measureTheOnePoints(SizeType numberOfDofs)
 		{
-			size_t threadId = 0;
-			for (size_t dof=0;dof<numberOfDofs;dof++) {
-				for (size_t dof2=dof;dof2<numberOfDofs;dof2++) {
+			SizeType threadId = 0;
+			for (SizeType dof=0;dof<numberOfDofs;dof++) {
+				for (SizeType dof2=dof;dof2<numberOfDofs;dof2++) {
 					PsimagLite::String str("c^\\dagger(dof=");
 					str += ttos(dof) + ") c(dof=" + ttos(dof2) + ")";
 					PreOperatorSiteDependentType preOperator(dof,dof2,model_,str,threadId);
@@ -287,9 +287,9 @@ namespace Dmrg {
 						const PsimagLite::Matrix<FieldType>& op1,
 						const PsimagLite::Matrix<FieldType>& op2,
 						int fermionSign,
-						size_t rows,
-						size_t cols,
-						size_t threadId)
+						SizeType rows,
+						SizeType cols,
+						SizeType threadId)
 		{
 			const MatrixType& v =
 				observe_.correlations(op1,op2,fermionSign,rows,cols);;
@@ -303,10 +303,10 @@ namespace Dmrg {
 
 		void measureOnePoint(const PreOperatorBaseType& preOperator)
 		{
-			size_t threadId = preOperator.threadId();
+			SizeType threadId = preOperator.threadId();
 			printMarker(threadId);
 
-			for (size_t i0 = 0;i0<observe_.size();i0++) {
+			for (SizeType i0 = 0;i0<observe_.size();i0++) {
 				if (!preOperator.isValid(i0+1)) continue;
 
 				OperatorType opA = preOperator(i0+1);
@@ -341,7 +341,7 @@ namespace Dmrg {
 				std::cout<<"\n";
 				// also calculate next or prev. site:
 				if (observe_.isAtCorner(numberOfSites_,threadId)) {
-					size_t x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
+					SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
 
 					// operator might be site dependent
 					if (!preOperator.isValid(x)) continue;
@@ -366,7 +366,7 @@ namespace Dmrg {
 			}
 		}
 
-		void onePointHookForZero(size_t i0,const OperatorType& opA,const PsimagLite::String& gsOrTime,size_t threadId)
+		void onePointHookForZero(SizeType i0,const OperatorType& opA,const PsimagLite::String& gsOrTime,SizeType threadId)
 		{
 			if (hasTimeEvolution_) return;
 			if (observe_.site(threadId)!=1 || observe_.isAtCorner(numberOfSites_,threadId)) return;
@@ -377,7 +377,7 @@ namespace Dmrg {
 			if (!hasTimeEvolution_) std::cout<<"\n";
 		}
 
-		void printSites(size_t threadId)
+		void printSites(SizeType threadId)
 		{
 			printMarker(threadId);
 			std::cout<<"#Sites=";
@@ -385,9 +385,9 @@ namespace Dmrg {
 			if (observe_.site(threadId)==1) std::cout<<"0 ";
 			if (observe_.site(threadId)==numberOfSites_-2)
 				std::cout<<(numberOfSites_-1)<<" ";
-			for (size_t i=0;i<observe_.size();i++) {
+			for (SizeType i=0;i<observe_.size();i++) {
 				observe_.setPointer(threadId,i);
-				size_t x = observe_.site(threadId);
+				SizeType x = observe_.site(threadId);
 				std::cout<<x<<" ";
 			}
 			if (observe_.site(threadId)==1) std::cout<<"0";
@@ -398,10 +398,10 @@ namespace Dmrg {
 			std::cout<<"\n";
 		}
 
-		void printMarker(size_t threadId) const
+		void printMarker(SizeType threadId) const
 		{
 			if (!hasTimeEvolution_) return;
-			size_t marker = observe_.marker(threadId);
+			SizeType marker = observe_.marker(threadId);
 			PsimagLite::String s = "INVALID MARKER";
 			switch (marker) {
 			case 0:
@@ -414,7 +414,7 @@ namespace Dmrg {
 			std::cout<<s<<"\n";
 		}
 
-		size_t numberOfSites_;
+		SizeType numberOfSites_;
 		bool hasTimeEvolution_;
 		const ModelType& model_; // not the owner
 		ConcurrencyType& concurrency_; // not the owner

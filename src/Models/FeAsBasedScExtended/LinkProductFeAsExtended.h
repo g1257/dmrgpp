@@ -91,7 +91,7 @@ namespace Dmrg {
 	class LinkProductFeAsExtended {
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef std::pair<size_t,size_t> PairType;
+			typedef std::pair<SizeType,SizeType> PairType;
 			typedef LinkProductFeAs<ModelHelperType> LinkProductFeAsType;
 			typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType>
 				LinkProductHeisenbergType;
@@ -101,13 +101,13 @@ namespace Dmrg {
 
 			enum {TERM_HOPPING, TERM_J};
 
-			static const size_t DEGREES_OF_FREEDOM = 4;
+			static const SizeType DEGREES_OF_FREEDOM = 4;
 
 		public:
 			typedef typename ModelHelperType::RealType RealType;
 			
 			template<typename SomeStructType>
-			static size_t dofs(size_t term,const SomeStructType& additional)
+			static SizeType dofs(SizeType term,const SomeStructType& additional)
 			{
 				return (term==TERM_J) ?
 						LinkProductHeisenbergType::dofs(term,additional) :
@@ -116,7 +116,7 @@ namespace Dmrg {
 			
 			// has only dependence on orbital
 			template<typename SomeStructType>
-			static PairType connectorDofs(size_t term,size_t dofs,const SomeStructType& additional)
+			static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
 			{
 				if (term==TERM_HOPPING)
 					return LinkProductFeAsType::connectorDofs(term,dofs,additional);
@@ -126,15 +126,15 @@ namespace Dmrg {
 
 			template<typename SomeStructType>
 			static void setLinkData(
-					size_t term,
-					size_t dofs,
+					SizeType term,
+					SizeType dofs,
      					bool isSu2,
-					size_t& fermionOrBoson,
+					SizeType& fermionOrBoson,
 					PairType& ops,
      					std::pair<char,char>& mods,
-					size_t& angularMomentum,
+					SizeType& angularMomentum,
      					RealType& angularFactor,
-					size_t& category,const SomeStructType& additional)
+					SizeType& category,const SomeStructType& additional)
 			{
 				if (term==TERM_HOPPING)
 					return LinkProductFeAsType::setLinkData(
@@ -144,7 +144,7 @@ namespace Dmrg {
 				LinkProductHeisenbergType::setLinkData(
 						term,dofs,isSu2,fermionOrBoson,ops,mods,
 						angularMomentum,angularFactor,category,additional);
-				size_t offset1 = DEGREES_OF_FREEDOM;
+				SizeType offset1 = DEGREES_OF_FREEDOM;
 				ops.first += offset1;
 				ops.second += offset1;
 			}
@@ -152,8 +152,8 @@ namespace Dmrg {
 			template<typename SomeStructType>
 			static void valueModifier(
 					SparseElementType& value,
-					size_t term,
-					size_t dofs,bool isSu2,const SomeStructType& additional)
+					SizeType term,
+					SizeType dofs,bool isSu2,const SomeStructType& additional)
 			{
 				if (term==TERM_HOPPING) return
 						LinkProductFeAsType::valueModifier(

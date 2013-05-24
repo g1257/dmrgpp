@@ -93,7 +93,7 @@ namespace Dmrg {
 			typedef typename ClebschGordanType::PairType PairType;
 			
 		public:
-			ClebschGordanCached(size_t jmax) 
+			ClebschGordanCached(SizeType jmax) 
 			: progress_("ClebschGordanCached",0),
 			  UNDEFINED_VALUE(-1000),
 			jmax_(jmax),
@@ -103,7 +103,7 @@ namespace Dmrg {
 				init(jmax,2);
 			}
 			
-			void init(size_t jmax,size_t nfactorials)
+			void init(SizeType jmax,SizeType nfactorials)
 			{
 				jmax_=jmax;
 				max2_=((jmax_-1)*(jmax_+2))/2+1;
@@ -124,12 +124,12 @@ namespace Dmrg {
 			{
 				if (!checkCg(jm,jm1,jm2)) return 0;
 
-				size_t index1 = calcSubIndex(jm1);
-				size_t index2 = calcSubIndex(jm2);
-				size_t jmin=0;
+				SizeType index1 = calcSubIndex(jm1);
+				SizeType index2 = calcSubIndex(jm2);
+				SizeType jmin=0;
 				if (jm1.first>jm2.first) jmin = jm1.first-jm2.first;
 				else jmin = jm2.first-jm1.first;
-				size_t x = calcIndex(index1,index2)+(jm.first-jmin)*max22_;
+				SizeType x = calcIndex(index1,index2)+(jm.first-jmin)*max22_;
 				if (data_[x]== UNDEFINED_VALUE) {
 					data_[x]=cgObject_(jm,jm1,jm2);
 				}
@@ -137,10 +137,10 @@ namespace Dmrg {
 			}
 
 		private:
-			size_t calcSubIndex(const PairType& jm) const
+			SizeType calcSubIndex(const PairType& jm) const
 			{
 				if (jm.second==0) return jm.first;
-				size_t x = 2*jmax_-1-jm.second;
+				SizeType x = 2*jmax_-1-jm.second;
 				x *= jm.second;
 				x /= 2;
 				x += jm.first;
@@ -148,7 +148,7 @@ namespace Dmrg {
 				return x;	
 			}
 
-			size_t calcIndex(size_t i1,size_t i2) const
+			SizeType calcIndex(SizeType i1,SizeType i2) const
 			{
 				if (i1>=max2_ || i2>=max2_) throw PsimagLite::RuntimeError("problem\n");
 				return i1+i2*max2_;
@@ -159,15 +159,15 @@ namespace Dmrg {
 				if (!checkCg1(jm.first,jm1.first,jm2.first)) return false;
 				int m=calcM(jm.first,jm1,jm2);
 				if (m<0) return false;
-				if (size_t(m)!=jm.second) return false;
+				if (SizeType(m)!=jm.second) return false;
 				return true;
 				
 			}
 
-			bool checkCg1(size_t j,size_t j1,size_t j2) const
+			bool checkCg1(SizeType j,SizeType j1,SizeType j2) const
 			{
 				if (j>j1+j2) return false;
-				size_t jmin=0;
+				SizeType jmin=0;
 				if (j1<j2) jmin = j2-j1;
 				else jmin  = j1-j2;
 				if (j<jmin) return false;
@@ -175,26 +175,26 @@ namespace Dmrg {
 				return true;
 			}
 
-			int calcM(size_t j,const PairType& jm1,const PairType& jm2) const
+			int calcM(SizeType j,const PairType& jm1,const PairType& jm2) const
 			{
 				int x = jm1.first+jm2.first-j;
 				if (x%2!=0) return -1;
 				x =x/2;
-				if (x<0 || jm1.second+jm2.second<size_t(x)) return -1;
+				if (x<0 || jm1.second+jm2.second<SizeType(x)) return -1;
 				return jm1.second+jm2.second-x;
 			}
 			
-			static size_t copies_;
+			static SizeType copies_;
 			PsimagLite::ProgressIndicator progress_;
 			int UNDEFINED_VALUE;
-			size_t jmax_;
-			size_t max2_,max22_;
+			SizeType jmax_;
+			SizeType max2_,max22_;
 			typename PsimagLite::Vector<FieldType>::Type data_;
 			ClebschGordanType cgObject_;
 	}; // class ClebschGordanCached
 	
 	template<typename FieldType>
-	size_t ClebschGordanCached<FieldType>::copies_=0;
+	SizeType ClebschGordanCached<FieldType>::copies_=0;
 	
 }; // namespace Dmrg
 /*@}*/

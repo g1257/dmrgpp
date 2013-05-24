@@ -84,13 +84,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	template<typename FieldType>
 	struct LinkProductStruct {
-		LinkProductStruct(size_t maxSize)
+		LinkProductStruct(SizeType maxSize)
 		: isaved(maxSize),jsaved(maxSize),typesaved(maxSize),
 		  tmpsaved(maxSize),dofssaved(maxSize),termsaved(maxSize) {}
-		typename PsimagLite::Vector<size_t>::Type isaved,jsaved; //,dof1saved,dof2saved;
+		typename PsimagLite::Vector<SizeType>::Type isaved,jsaved; //,dof1saved,dof2saved;
 		typename PsimagLite::Vector<int>::Type typesaved;
 		typename PsimagLite::Vector<FieldType>::Type tmpsaved;
-		typename PsimagLite::Vector<size_t>::Type dofssaved,termsaved;
+		typename PsimagLite::Vector<SizeType>::Type dofssaved,termsaved;
 #ifdef NOMUTEX
 		mutable typename PsimagLite::Vector<PsimagLite::Vector<FieldType>::Type::Type > xtemp;
 #endif

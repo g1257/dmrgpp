@@ -254,7 +254,7 @@ namespace Dmrg {
 		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 				     SparseMatrixType &hamiltonian,
 				     BasisDataType& q,
-				     const typename PsimagLite::Vector<size_t>::Type& block,
+				     const typename PsimagLite::Vector<SizeType>::Type& block,
 				     const RealType& time) const
 		{
 			switch (model_) {
@@ -276,8 +276,8 @@ namespace Dmrg {
 		}
 
 		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
-								      size_t site,
-								      size_t dof) const
+								      SizeType site,
+								      SizeType dof) const
 		{
 			switch(model_) {
 			case HUBBARD_ONE_BAND:
@@ -299,9 +299,9 @@ namespace Dmrg {
 			throw PsimagLite::RuntimeError("naturalOperator\n");
 		}
 
-		void findElectrons(typename PsimagLite::Vector<size_t> ::Type&electrons,
+		void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
 				   const HilbertBasisType& basis,
-				   size_t site) const
+				   SizeType site) const
 		{
 			switch(model_) {
 			case HUBBARD_ONE_BAND:
@@ -426,7 +426,7 @@ namespace Dmrg {
 			}
 		}
 
-		size_t hilbertSize(size_t site) const
+		SizeType hilbertSize(SizeType site) const
 		{
 			return hilbertSize_[site];
 		}
@@ -451,11 +451,11 @@ namespace Dmrg {
 		}
 
 		void setNaturalBasis(HilbertBasisType& basis,
-				     typename PsimagLite::Vector<size_t>::Type& q,
-				     const typename PsimagLite::Vector<size_t>::Type& block) const
+				     typename PsimagLite::Vector<SizeType>::Type& q,
+				     const typename PsimagLite::Vector<SizeType>::Type& block) const
 		{
 			if (block.size()==1) {
-				size_t index=block[0];
+				SizeType index=block[0];
 				basis=basis_[index];
 				q=q_[index];
 				return;
@@ -477,7 +477,7 @@ namespace Dmrg {
 
 		}
 
-//		size_t maxConnections() const
+//		SizeType maxConnections() const
 //		{
 //			return geometry_.maxConnections();
 //		}
@@ -487,7 +487,7 @@ namespace Dmrg {
 //			return params_.model;
 //		}
 
-		size_t getLinkProductStruct(LinkProductStructType** lps,const ModelHelperType& modelHelper) const
+		SizeType getLinkProductStruct(LinkProductStructType** lps,const ModelHelperType& modelHelper) const
 		{
 			switch(model_) {
 			case HUBBARD_ONE_BAND:
@@ -511,7 +511,7 @@ namespace Dmrg {
 
 		LinkType getConnection(const SparseMatrixType** A,
 				   const SparseMatrixType** B,
-				   size_t ix,
+				   SizeType ix,
 				   const LinkProductStructType& lps,
 				   const ModelHelperType& modelHelper) const
 		{
@@ -534,11 +534,11 @@ namespace Dmrg {
 			throw PsimagLite::RuntimeError("getConnection(...) failed\n");
 		}
 
-		void findElectronsOfOneSite(typename PsimagLite::Vector<size_t>::Type& electrons,size_t site) const
+		void findElectronsOfOneSite(typename PsimagLite::Vector<SizeType>::Type& electrons,SizeType site) const
 		{
-			typename PsimagLite::Vector<size_t>::Type block(1,site);
+			typename PsimagLite::Vector<SizeType>::Type block(1,site);
 			HilbertBasisType basis;
-			typename PsimagLite::Vector<size_t>::Type quantumNumbs;
+			typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
 			setNaturalBasis(basis,quantumNumbs,block);
 			findElectrons(electrons,basis,site);
 		}
@@ -601,14 +601,14 @@ namespace Dmrg {
 		template<typename SomeModelType>
 		LinkType getConnection2(const SparseMatrixType** A,
 				    const SparseMatrixType** B,
-				    size_t ix,
+				    SizeType ix,
 				    const LinkProductStructType& lps,
 				    const ModelHelperType& modelHelper) const
 		{
 			typedef typename SomeModelType::HamiltonianConnectionType HamiltonianConnectionType;
 			typename PsimagLite::Vector<ComplexOrRealType>::Type x,y; // bogus
 			HamiltonianConnectionType hc(geometry_,modelHelper,&lps,&x,&y);
-			size_t i =0, j = 0, type = 0,term = 0, dofs =0;
+			SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
 			ComplexOrRealType tmp = 0.0;
 			typename HamiltonianConnectionType::AdditionalDataType additionalData;
 			hc.prepare(ix,i,j,type,tmp,term,dofs,additionalData);
@@ -617,10 +617,10 @@ namespace Dmrg {
 		}
 
 		template<typename SomeModelType>
-		size_t getLinkProductStruct2(LinkProductStructType** lps,const ModelHelperType& modelHelper) const
+		SizeType getLinkProductStruct2(LinkProductStructType** lps,const ModelHelperType& modelHelper) const
 		{
-			size_t n=modelHelper.leftRightSuper().super().block().size();
-			size_t maxSize = geometry_.maxConnections() * 4 * 16;
+			SizeType n=modelHelper.leftRightSuper().super().block().size();
+			SizeType maxSize = geometry_.maxConnections() * 4 * 16;
 			maxSize *= maxSize;
 
 			*lps = new LinkProductStructType(maxSize);
@@ -629,9 +629,9 @@ namespace Dmrg {
 
 			typedef typename SomeModelType::HamiltonianConnectionType HamiltonianConnectionType;
 			HamiltonianConnectionType hc(geometry_,modelHelper,*lps,&x,&y);
-			size_t total = 0;
-			for (size_t i=0;i<n;i++) {
-				for (size_t j=0;j<n;j++) {
+			SizeType total = 0;
+			for (SizeType i=0;i<n;i++) {
+				for (SizeType j=0;j<n;j++) {
 					hc.compute(i,j,0,*lps,total);
 				}
 			}
@@ -642,8 +642,8 @@ namespace Dmrg {
 		template<typename SomeModelType>
 		void init(SomeModelType* model)
 		{
-			for (size_t i=0;i<hilbertSize_.size();i++) {
-				typename PsimagLite::Vector<size_t>::Type block(1,i);
+			for (SizeType i=0;i<hilbertSize_.size();i++) {
+				typename PsimagLite::Vector<SizeType>::Type block(1,i);
 				hilbertSize_[i] = model->hilbertSize(i);
 				model->setNaturalBasis(basis_[i],q_[i],block);
 			}
@@ -652,8 +652,8 @@ namespace Dmrg {
 		const ParametersType& params_;	
 		const GeometryType& geometry_;
 		ConcurrencyType& concurrency_;
-		typename PsimagLite::Vector<size_t>::Type hilbertSize_;
-		typename PsimagLite::Vector<typename PsimagLite::Vector<size_t>::Type>::Type q_;
+		typename PsimagLite::Vector<SizeType>::Type hilbertSize_;
+		typename PsimagLite::Vector<typename PsimagLite::Vector<SizeType>::Type>::Type q_;
 		typename PsimagLite::Vector<HilbertBasisType>::Type basis_;
 		// models start
 		ModelHubbardType* modelHubbard_;
@@ -664,7 +664,7 @@ namespace Dmrg {
 		ImmmType* modelImmm_;
 		Tj1OrbType* modelTj1Orb_;
 		// models end
-		size_t model_;
+		SizeType model_;
 
 	};     //class ModelFactory
 

@@ -118,7 +118,7 @@ namespace Dmrg {
                         const bool& verbose,
 			ReflectionSymmetryType& reflectionOperator,
                         IoOutType& io,
-                        const size_t& quantumSector,
+                        const SizeType& quantumSector,
                        WaveFunctionTransfType& waveFunctionTransformation)
 		: parameters_(parameters),
 		  model_(model),
@@ -134,14 +134,14 @@ namespace Dmrg {
 
 		//!PTEX_LABEL{Diagonalization}
 		RealType operator()(TargettingType& target,
-		                    size_t direction,
+		                    SizeType direction,
 		                    const BlockType& blockLeft,
 		                    const BlockType& blockRight)
 		{
 			if (direction!=WaveFunctionTransfType::INFINITE) throw PsimagLite::RuntimeError(
 				"Diagonalization::operator(): expecting INFINITE direction\n");
-			size_t loopIndex = 0;
-			typename PsimagLite::Vector<size_t>::Type sectors;
+			SizeType loopIndex = 0;
+			typename PsimagLite::Vector<SizeType>::Type sectors;
 			targetedSymmetrySectors(sectors,target.leftRightSuper());
 			reflectionOperator_.update(sectors);
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,blockLeft);
@@ -152,9 +152,9 @@ namespace Dmrg {
 		}
 
 		RealType operator()(TargettingType& target,
-		                    size_t direction,
+		                    SizeType direction,
 		                    const BlockType& block,
-		                    size_t loopIndex,
+		                    SizeType loopIndex,
 		                    bool needsPrinting)
 		{
 			assert(direction!=WaveFunctionTransfType::INFINITE);
@@ -168,11 +168,11 @@ namespace Dmrg {
 
 	private:
 
-		void targetedSymmetrySectors(typename PsimagLite::Vector<size_t>::Type& mVector,const LeftRightSuperType& lrs) const
+		void targetedSymmetrySectors(typename PsimagLite::Vector<SizeType>::Type& mVector,const LeftRightSuperType& lrs) const
 		{
-			size_t total = lrs.super().partition()-1;
-			for (size_t i=0;i<total;i++) {
-				//size_t bs = lrs.super().partition(i+1)-lrs.super().partition(i);
+			SizeType total = lrs.super().partition()-1;
+			for (SizeType i=0;i<total;i++) {
+				//SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 				if (lrs.super().pseudoEffectiveNumber(lrs.super().partition(i))!=quantumSector_ )
 					continue;
 				mVector.push_back(i);
@@ -180,10 +180,10 @@ namespace Dmrg {
 		}
 
 		RealType internalMain_(TargettingType& target,
-		                       size_t direction,
-		                       size_t loopIndex,
+		                       SizeType direction,
+		                       SizeType loopIndex,
 		                       bool needsPrinting,
-		                       const typename PsimagLite::Vector<size_t>::Type& block)
+		                       const typename PsimagLite::Vector<SizeType>::Type& block)
 
 		{
 			const LeftRightSuperType& lrs= target.leftRightSuper();
@@ -205,20 +205,20 @@ namespace Dmrg {
 			typename PsimagLite::Vector<TargetVectorType>::Type vecSaved;
 			typename PsimagLite::Vector<RealType>::Type energySaved;
 			
-			size_t total = lrs.super().partition()-1;
+			SizeType total = lrs.super().partition()-1;
 
 			energySaved.resize(total);
 			vecSaved.resize(total);
-			typename PsimagLite::Vector<size_t>::Type weights(total);
+			typename PsimagLite::Vector<SizeType>::Type weights(total);
 
-			size_t counter=0;
-			for (size_t i=0;i<total;i++) {
-				size_t bs = lrs.super().partition(i+1)-lrs.super().partition(i);
+			SizeType counter=0;
+			for (SizeType i=0;i<total;i++) {
+				SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 				if (verbose_) {
-					size_t j = lrs.super().qn(lrs.super().partition(i));
-					typename PsimagLite::Vector<size_t>::Type qns = BasisType::decodeQuantumNumber(j);
+					SizeType j = lrs.super().qn(lrs.super().partition(i));
+					typename PsimagLite::Vector<SizeType>::Type qns = BasisType::decodeQuantumNumber(j);
 					//std::cerr<<"partition "<<i<<" of size="<<bs<<" has qns=";
-					for (size_t k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
+					for (SizeType k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
 					//std::cerr<<"\n";
 				}
 
@@ -239,13 +239,13 @@ namespace Dmrg {
 			
 			target.initialGuess(initialVector,block);
 
-			for (size_t i=0;i<total;i++) {
+			for (SizeType i=0;i<total;i++) {
 				if (weights[i]==0) continue;
 				PsimagLite::OstringStream msg;
 				msg<<"About to diag. sector with quantum numbs. ";
-				size_t j = lrs.super().qn(lrs.super().partition(i));
-				typename PsimagLite::Vector<size_t>::Type qns = BasisType::decodeQuantumNumber(j);
-				for (size_t k=0;k<qns.size();k++) msg<<qns[k]<<" ";
+				SizeType j = lrs.super().qn(lrs.super().partition(i));
+				typename PsimagLite::Vector<SizeType>::Type qns = BasisType::decodeQuantumNumber(j);
+				for (SizeType k=0;k<qns.size();k++) msg<<qns[k]<<" ";
 				msg<<" pseudo="<<lrs.super().pseudoEffectiveNumber(
 						lrs.super().partition(i));
 				msg<<" quantumSector="<<quantumSector_;
@@ -272,7 +272,7 @@ namespace Dmrg {
 			// calc gs energy
 			if (verbose_ && concurrency_.root()) std::cerr<<"About to calc gs energy\n";
 			gsEnergy=1e6;
-			for (size_t i=0;i<total;i++) {
+			for (SizeType i=0;i<total;i++) {
 				if (weights[i]==0) continue;
 				if (energySaved[i]<gsEnergy) gsEnergy=energySaved[i];
 			}
@@ -280,11 +280,11 @@ namespace Dmrg {
 			if (verbose_ && concurrency_.root()) std::cerr<<"About to calc gs vector\n";
 			//target.reset();
 			counter=0;
-			for (size_t i=0;i<lrs.super().partition()-1;i++) {
+			for (SizeType i=0;i<lrs.super().partition()-1;i++) {
 				if (weights[i]==0) continue;
 
-				size_t j = lrs.super().qn(lrs.super().partition(i));
-				typename PsimagLite::Vector<size_t>::Type qns = BasisType::decodeQuantumNumber(j);
+				SizeType j = lrs.super().qn(lrs.super().partition(i));
+				typename PsimagLite::Vector<SizeType>::Type qns = BasisType::decodeQuantumNumber(j);
 				PsimagLite::OstringStream msg;
 				msg<<"Found targetted symmetry sector in partition "<<i;
 				msg<<" of size="<<vecSaved[i].size();
@@ -293,7 +293,7 @@ namespace Dmrg {
 				PsimagLite::OstringStream msg2;
 				msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[i]);
 				msg2<<" and quantum numbers are ";
-				for (size_t k=0;k<qns.size();k++) msg2<<qns[k]<<" ";
+				for (SizeType k=0;k<qns.size();k++) msg2<<qns[k]<<" ";
 				progress_.printline(msg2,std::cout);
 				counter++;
 			}
@@ -432,7 +432,7 @@ namespace Dmrg {
 		ReflectionSymmetryType& reflectionOperator_;
 		IoOutType& io_;
 		PsimagLite::ProgressIndicator progress_;
-		const size_t& quantumSector_; // this needs to be a reference since DmrgSolver will change it
+		const SizeType& quantumSector_; // this needs to be a reference since DmrgSolver will change it
 		WaveFunctionTransfType& wft_;
 		RealType oldEnergy_;
 	}; // class Diagonalization

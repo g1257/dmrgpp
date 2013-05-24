@@ -100,8 +100,8 @@ namespace Dmrg {
 		typedef typename SparseMatrixType::value_type ComplexOrReal;
 		typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
-		static size_t const PRODUCT = TargetParamsCommonType::PRODUCT;
-		static size_t const SUM = TargetParamsCommonType::SUM;
+		static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
+		static SizeType const SUM = TargetParamsCommonType::SUM;
 
 		template<typename IoInputter>
 		DynamicDmrgParams(IoInputter& io,const ModelType& model)
@@ -113,8 +113,8 @@ namespace Dmrg {
 			io.readline(steps,"DynamicDmrgSteps=");
 			io.readline(eps,"DynamicDmrgEps=");
 		  }
-		size_t type;
-		size_t steps;
+		SizeType type;
+		SizeType steps;
 		RealType eps;
 
 	}; // class DynamicDmrgParams

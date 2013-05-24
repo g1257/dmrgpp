@@ -137,16 +137,16 @@ namespace Dmrg {
 				data_.resize(sites.size());
 				aOperators.resize(sites.size());
 // 				typename ModelType::HilbertBasisType basis;
-// 				typename PsimagLite::Vector<size_t>::Type quantumNumbs;
+// 				typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
 // 				model_.setNaturalBasis(basis,quantumNumbs,1);
 // 				model_.findElectrons(electrons,basis);
 			
-				for (size_t i=0;i<sites.size();i++) {
+				for (SizeType i=0;i<sites.size();i++) {
 					PsimagLite::String s;
 					io.readline(s,"TSPOperator=");
 					if (s == "cooked") {
 						io.readline(s,"COOKED_OPERATOR=");
-						typename PsimagLite::Vector<size_t>::Type v;
+						typename PsimagLite::Vector<SizeType>::Type v;
 						io.read(v,"COOKED_EXTRA");
 						setCookedData(i,s,v);
 					} else {
@@ -157,8 +157,8 @@ namespace Dmrg {
 					}
 					int fermiSign=0;
 					io.readline(fermiSign,"FERMIONSIGN=");
-					std::pair<size_t,size_t> jmValues;
-					typename PsimagLite::Vector<size_t>::Type v(2);
+					std::pair<SizeType,SizeType> jmValues;
+					typename PsimagLite::Vector<SizeType>::Type v(2);
 					io.readKnownSize(v,"JMVALUES");
 					jmValues.first = v[0]; jmValues.second = v[1];
 					RealType angularFactor;
@@ -175,15 +175,15 @@ namespace Dmrg {
 				checkSizesOfOperators();
 			}
 			
-			typename PsimagLite::Vector<size_t>::Type sites;
-			typename PsimagLite::Vector<size_t>::Type startingLoops;
-			size_t concatenation;
+			typename PsimagLite::Vector<SizeType>::Type sites;
+			typename PsimagLite::Vector<SizeType>::Type startingLoops;
+			SizeType concatenation;
 			typename PsimagLite::Vector<OperatorType>::Type aOperators;
 			bool noOperator;
 		
 		private:
 
-			void checkNotZeroMatrix(size_t i,const PsimagLite::Matrix<ComplexOrReal>& m) const
+			void checkNotZeroMatrix(SizeType i,const PsimagLite::Matrix<ComplexOrReal>& m) const
 			{
 				RealType norma = norm2(m);
 				RealType eps = 1e-6;
@@ -203,24 +203,24 @@ namespace Dmrg {
 				return (isTheIdentity(data_[0]));
 			}
 
-			void setCookedData(size_t i,const PsimagLite::String& s,const typename PsimagLite::Vector<size_t>::Type& v)
+			void setCookedData(SizeType i,const PsimagLite::String& s,const typename PsimagLite::Vector<SizeType>::Type& v)
 			{
 				data_[i]=model_.naturalOperator(s,v[0],v[1]);
 			}
 			
-			void setRawData(size_t i,const MatrixType& m)
+			void setRawData(SizeType i,const MatrixType& m)
 			{
 				data_[i]=m;
 			}
 			
-			void set(size_t i,int fermiSign,const PairType& jmValues,RealType angularFactor)
+			void set(SizeType i,int fermiSign,const PairType& jmValues,RealType angularFactor)
 			{
 			}
 			
 			void checkSizesOfOperators()
 			{
-				for (size_t i=0;i<data_.size();i++) {
-					size_t n = data_[i].n_row();
+				for (SizeType i=0;i<data_.size();i++) {
+					SizeType n = data_[i].n_row();
 					if (n!=model_.hilbertSize(sites[i])) throw PsimagLite::RuntimeError("CommonTargetting\n");
 				}
 			}
@@ -234,7 +234,7 @@ namespace Dmrg {
 	operator<<(std::ostream& os,const TargetParamsCommon<ModelType>& t)
 	{
 		os<<"#TargetParams.operators="<<t.aOperators.size()<<"\n";
-		for (size_t i=0;i<t.aOperators.size();i++) {
+		for (SizeType i=0;i<t.aOperators.size();i++) {
 			os<<"#TargetParams.operator "<<i<<"\n";
 			os<<t.aOperators[i];
 		}
