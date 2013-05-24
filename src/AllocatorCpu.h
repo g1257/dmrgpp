@@ -32,7 +32,11 @@ Please see full open source license included in file LICENSE.
 #include "MemoryCpu.h"
 #endif
 
+#ifndef USE_SHORT
 typedef size_t SizeType;
+#else
+typedef unsigned int SizeType;
+#endif
 
 namespace PsimagLite {
 

@@ -110,7 +110,7 @@ public:
 		solve(result,t0,N,y0);
 	}
 
-	void solve(typename Vector<VectorType>::Type& result,RealType t0, SizeType N, const ArrayType& y0) const
+	void solve(typename Vector<VectorType>::Type& result,RealType t0, size_t N, const ArrayType& y0) const
 	{
 		ArrayType k1(y0), k2(y0), k3(y0), k4(y0);
 		RealType w1 = 1, w2 = 2, w3 = 2, w4 = 1, wtotInverse = 1.0/6.0;
