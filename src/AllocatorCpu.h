@@ -32,6 +32,8 @@ Please see full open source license included in file LICENSE.
 #include "MemoryCpu.h"
 #endif
 
+typedef size_t SizeType;
+
 namespace PsimagLite {
 
 #ifdef USE_CUSTOM_ALLOCATOR
