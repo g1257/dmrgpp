@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  00 0 empty state
  *  01 1 up electron
  *  10 2 down electron
- *  11 3 RealType-occupied state
+ *  11 3 doubly-occupied state
  * 
  *  Note: this is a static class
  * 
