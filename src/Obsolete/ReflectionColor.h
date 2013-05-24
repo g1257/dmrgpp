@@ -99,14 +99,14 @@ namespace Dmrg {
 
 // FIXME: MOVE ELSEWHERE:
 template<typename RealType>
-bool isAlmostZero(const RealType& x,double eps = 1e-20)
+bool isAlmostZero(const RealType& x,RealType eps = 1e-20)
 {
 	return (fabs(x)<eps);
 }
 
 // FIXME: MOVE ELSEWHERE:
 template<typename RealType>
-bool isAlmostZero(const std::complex<RealType>& x,double eps = 1e-20)
+bool isAlmostZero(const std::complex<RealType>& x,RealType eps = 1e-20)
 {
 	return (fabs(real(x)*real(x)+imag(x)*imag(x))<eps);
 }
@@ -301,7 +301,7 @@ private:
 	void gencolorCheck(const typename PsimagLite::Vector<size_t>::Type& ilabel,size_t ncolor) const
 	{
 		// ------------
-		// double check
+		// RealType check
 		// ------------
 		typename PsimagLite::Vector<size_t>::Type ilist;
 		findWithLabel(ilist,ilabel,ncolor);

@@ -108,9 +108,19 @@ struct ProgramGlobals {
 
 	enum {FERMION,BOSON};
 
+	template<typename ComplexOrRealType>
+	class Real {
+	public:
+		typedef ComplexOrRealType Type;
+	};
+
+	template<typename RealType>
+	class Real<std::complex<RealType> > {
+	public:
+		typedef RealType Type;
+	};
 }; // ProgramGlobals
 
-//double const ProgramGlobals::LanczosTolerance = 1e-12;
 }; // namespace Dmrg
 /*@}*/
 #endif

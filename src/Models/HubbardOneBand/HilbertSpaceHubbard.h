@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -82,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  00 0 empty state
  *  01 1 up electron
  *  10 2 down electron
- *  11 3 double-occupied state
+ *  11 3 RealType-occupied state
  * 
  *  Note: this is a static class
  * 

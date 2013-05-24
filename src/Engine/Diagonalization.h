@@ -317,7 +317,7 @@ namespace Dmrg {
 		template<typename SomeVectorType>
 		void diagonaliseOneBlock(int i,
 					 SomeVectorType &tmpVec,
-					 double &energyTmp,
+					 RealType &energyTmp,
 					 const LeftRightSuperType& lrs,
 					 const SomeVectorType& initialVector)
 		{
@@ -359,7 +359,7 @@ namespace Dmrg {
 		template<typename SomeVectorType>
 		void diagonaliseOneBlock(int i,
 					 SomeVectorType &tmpVec,
-					 double &energyTmp,
+					 RealType &energyTmp,
 					 typename ModelType::ModelHelperType& modelHelper,
 					 const SomeVectorType& initialVector)
 //       		int reflectionSector= -1)
@@ -434,7 +434,7 @@ namespace Dmrg {
 		PsimagLite::ProgressIndicator progress_;
 		const size_t& quantumSector_; // this needs to be a reference since DmrgSolver will change it
 		WaveFunctionTransfType& wft_;
-		double oldEnergy_;
+		RealType oldEnergy_;
 	}; // class Diagonalization
 } // namespace Dmrg 
 

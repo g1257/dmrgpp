@@ -522,10 +522,10 @@ namespace Dmrg {
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,ndown);
 
 				PsimagLite::CrsMatrix<ComplexType> tmpC3 = (nup.data * ndown.data);
-				OperatorType doubleOcc(tmpC3,fermionSign1,jm1,angularFactor1,su2Related1);
-				test(psi_,psi_,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc);
-				s = "<P0|doubleOcc|P0>";
-				test(targetVectors_[0],targetVectors_[0],direction,s,site,doubleOcc);
+				OperatorType RealTypeOcc(tmpC3,fermionSign1,jm1,angularFactor1,su2Related1);
+				test(psi_,psi_,direction,"<PSI|RealTypeOcc|PSI>",site,RealTypeOcc);
+				s = "<P0|RealTypeOcc|P0>";
+				test(targetVectors_[0],targetVectors_[0],direction,s,site,RealTypeOcc);
 
 				std::cout<<"-------------&*&*&* In-situ measurements end\n";
 			}

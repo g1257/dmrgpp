@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -119,6 +116,8 @@ transformed operator can be used (or not because of the reason limitation above)
 		typedef BasisType_ BasisType;
 		typedef OperatorType_ OperatorType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+		typedef typename SparseMatrixType::value_type ComplexOrRealType;
+		typedef typename ProgramGlobals::Real<ComplexOrRealType>::Type RealType;
 
 		OperatorsBase(const BasisType* thisBasis)
 		: useSu2Symmetry_(BasisType::useSu2Symmetry()),
@@ -271,7 +270,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		void externalProduct(size_t i,
 		                     const OperatorType& m,
 		                     int x,
-		                     const typename PsimagLite::Vector<double>::Type& fermionicSigns,
+		                     const typename PsimagLite::Vector<RealType>::Type& fermionicSigns,
 		                     bool option,
 		                     ApplyFactorsType& apply)
 		{
@@ -298,7 +297,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		{
 			SparseMatrixType tmpMatrix;
 			assert(h2.row()==h2.col());
-			typename PsimagLite::Vector<double>::Type ones(h2.row(),1.0);
+			typename PsimagLite::Vector<RealType>::Type ones(h2.row(),1.0);
 			PsimagLite::externalProduct(hamiltonian_,h2,h3.row(),ones,true);
 
 			PsimagLite::externalProduct(tmpMatrix,h3,h2.row(),ones,false);

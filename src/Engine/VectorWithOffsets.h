@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Complex.h"
 #include "ProgressIndicator.h"
 #include <cassert>
+#include "ProgramGlobals.h"
 
 // FIXME: a more generic solution is needed instead of tying the non-zero structure to basis
 namespace Dmrg {
@@ -91,8 +92,11 @@ namespace Dmrg {
 	class VectorWithOffsets {
 		typedef VectorWithOffsets<FieldType> ThisType;
 		static FieldType const zero_;
+
 	public:
+
 		typedef FieldType value_type;
+		typedef typename ProgramGlobals::Real<FieldType>::Type RealType;
 		typedef std::pair<size_t,size_t> PairType;
 		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 			
@@ -523,7 +527,7 @@ namespace Dmrg {
 		
 		bool isZero(const VectorType& v) const
 		{
-			double eps = 1e-5;
+			RealType eps = 1e-5;
 			for (size_t i=0;i<v.size();i++)
 				if (fabs(std::real(v[i]))>eps || fabs(std::imag(v[i]))>eps) return false;
 			return true; 

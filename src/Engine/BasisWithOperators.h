@@ -164,7 +164,7 @@ namespace Dmrg {
 			// reorder the basis
 			parent.setToProduct(basis2,basis3);
 
-			PsimagLite::Vector<double>::Type fermionicSigns;
+			typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 			size_t x = basis2.numberOfOperators()+basis3.numberOfOperators();
 
 			if (this->useSu2Symmetry()) setMomentumOfOperators(basis2);
@@ -351,7 +351,7 @@ namespace Dmrg {
 		{
 			fermionicSigns.resize(electrons.size());
 			for (size_t i=0;i<fermionicSigns.size();i++)
-				fermionicSigns[i]= (electrons[i]%2==0) ? 1.0 : static_cast<double>(f);
+				fermionicSigns[i]= (electrons[i]%2==0) ? 1.0 : static_cast<RealType>(f);
 		}
 
 		void setMomentumOfOperators(const ThisType& basis)

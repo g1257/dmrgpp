@@ -16,7 +16,11 @@ const PsimagLite::String license=
 "*********************************************************\n"
 "\n";
 
+#ifndef USE_FLOAT
 typedef double MatrixElementType;
+#else
+typedef float MatrixElementType;
+#endif
 
 #include "CrsMatrix.h"
 #include "LanczosSolver.h"

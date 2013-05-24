@@ -29,6 +29,7 @@ my $PsimagLite="../../PsimagLite/src";
 my ($pthreads,$pthreadsLib)=(0,"");
 my $brand= "v3.0";
 my $build="production";
+my $floating="";
 
 system("make clean");
 
@@ -118,6 +119,20 @@ sub askQuestions
 		$_="production";
 	}
 	$build = $_;
+
+	print "Please enter the type of floating point to be used\n";
+	print "Available: double or float\n";
+	print "Default is: double (press ENTER): ";
+	$_=<STDIN>;
+	chomp;
+	if ($_ eq "" or $_ eq "\n") {
+		$_ = "double";
+	}
+
+	if ($_ eq "float") {
+		$floating = " -DUSE_FLOAT ";
+	}
+
 }
 
 sub createMakefile
@@ -143,7 +158,7 @@ print FOUT<<EOF;
 # MPI: $mpi
 
 LDFLAGS =    $lapack  $pthreadsLib
-CPPFLAGS = -Werror -Wall  -IEngine -IModels/HubbardOneBand -IModels/HeisenbergSpinOneHalf -IModels/ExtendedHubbard1Orb  -IModels/FeAsModel -IModels/FeAsBasedScExtended -IModels/Immm  -IModels/Tj1Orb -I$PsimagLite -I$PsimagLite/Geometry $usePthreadsOrNot
+CPPFLAGS = -Werror -Wall  -IEngine -IModels/HubbardOneBand -IModels/HeisenbergSpinOneHalf -IModels/ExtendedHubbard1Orb  -IModels/FeAsModel -IModels/FeAsBasedScExtended -IModels/Immm  -IModels/Tj1Orb -I$PsimagLite -I$PsimagLite/Geometry $usePthreadsOrNot $floating
 CXX = $compiler  $optimizations 
 EXENAME = dmrg
 all: \$(EXENAME)

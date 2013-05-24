@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -269,7 +266,7 @@ namespace Dmrg {
 			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,size_t direction)
 		{
 			DensityMatrixElementType sum=0;
-			// The g.s. has to be treated separately because it's usually a vector of double, whereas
+			// The g.s. has to be treated separately because it's usually a vector of RealType, whereas
 			// the other targets might be complex, and C++ generic programming capabilities are weak... we need D!!!
 			if (target.includeGroundStage()) sum +=  densityMatrixHasFactors(alpha1,alpha2,target.gs(),
 			    		pBasisSummed,pSE,direction)*target.gsWeight();

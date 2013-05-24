@@ -16,7 +16,11 @@ const PsimagLite::String license=
 "*********************************************************\n"
 "\n";
 
+#ifndef USE_FLOAT
 typedef double RealType;
+#else
+typedef float RealType;
+#endif
 
 #include <unistd.h>
 #include "Observer.h"

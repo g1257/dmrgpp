@@ -146,7 +146,7 @@ namespace Dmrg {
 			static size_t neJmToIndex(size_t ne,const PairType& jm) 
 			{
 				typename PsimagLite::Vector<size_t>::Type v(3);
-				double m = jm.second+0.5*(ne-jm.first);
+				RealType m = jm.second+0.5*(ne-jm.first);
 				v[0]=static_cast<size_t>(m);
 				assert(ne>=v[0]);
 				v[1] = ne - v[0];
