@@ -246,7 +246,10 @@ namespace Dmrg {
 				 *   here the environ is applied first and has to "cross"
 				 *   the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
 				 */
-				SparseElementType fsValue = (link.fermionOrBoson == ProgramGlobals::FERMION) ? lrs_.left().fermionicSign(alpha,int(fermionSign))*link.value : link.value;
+				RealType fermionSign = lrs_.left().fermionicSign(alpha,int(fermionSign));
+				SparseElementType fsValue = (link.fermionOrBoson == ProgramGlobals::FERMION)
+				        ? fermionSign*link.value
+				        : link.value;
 
 				for (int k=startk;k<endk;k++) {
 					int alphaPrime = A.getCol(k);

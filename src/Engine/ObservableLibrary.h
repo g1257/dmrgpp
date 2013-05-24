@@ -178,7 +178,7 @@ namespace Dmrg {
 
 				for (size_t i=0;i<spinTotal.n_row();i++)
 					for (size_t j=0;j<spinTotal.n_col();j++)
-						spinTotal(i,j) = 0.5*(sPlusSminus_(i,j) +
+						spinTotal(i,j) = static_cast<RealType>(0.5)*(sPlusSminus_(i,j) +
 								sMinusSplus_(i,j)) + szsz_(i,j);
 
 				if (concurrency_.root()) {

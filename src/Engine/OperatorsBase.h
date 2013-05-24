@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Range.h"
 #include <cassert>
 #include "ProgressIndicator.h"
+#include "Complex.h"
 
 namespace Dmrg {
 /**
@@ -117,7 +118,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		typedef OperatorType_ OperatorType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type ComplexOrRealType;
-		typedef typename ProgramGlobals::Real<ComplexOrRealType>::Type RealType;
+		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
 		OperatorsBase(const BasisType* thisBasis)
 		: useSu2Symmetry_(BasisType::useSu2Symmetry()),

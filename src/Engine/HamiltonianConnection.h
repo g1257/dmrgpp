@@ -136,7 +136,7 @@ namespace Dmrg {
 						std::pair<size_t,size_t> edofs = LinkProductType::connectorDofs(term,dofs,additionalData);
 						SparseElementType tmp = geometry_(smax_,emin_,ind,edofs.first,jnd,edofs.second,term);
 				
-						if (tmp==0.0) continue;
+						if (tmp==static_cast<RealType>(0.0)) continue;
 						
 						flag = true;
 						// if .. else here is inefficient FIXME

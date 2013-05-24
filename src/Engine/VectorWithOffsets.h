@@ -96,7 +96,7 @@ namespace Dmrg {
 	public:
 
 		typedef FieldType value_type;
-		typedef typename ProgramGlobals::Real<FieldType>::Type RealType;
+		typedef typename PsimagLite::Real<FieldType>::Type RealType;
 		typedef std::pair<size_t,size_t> PairType;
 		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 			
