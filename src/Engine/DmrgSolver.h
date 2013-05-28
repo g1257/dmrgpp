@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SOLVER_DMRG_HEADER_H
 #define SOLVER_DMRG_HEADER_H
 
-#include "HostInfo.h"
+#include "ApplicationInfo.h"
 #include "ParametersDmrgSolver.h"
 #include "Diagonalization.h"
 #include "ProgressIndicator.h"
@@ -146,6 +146,7 @@ namespace Dmrg {
 		  model_(model),
 		  concurrency_(concurrency),
 		  targetStruct_(targetStruct),
+		  appInfo_("DmrgSolver:"),
 		  verbose_(false),
 		  lrs_("pSprime","pEprime","pSE"),
 		  io_(parameters_.filename,concurrency.rank()),
@@ -161,19 +162,15 @@ namespace Dmrg {
 		  truncate_(reflectionOperator_,wft_,concurrency_,parameters_,
 			    model_.geometry().maxConnections(),verbose_)
 		{
+			io_.print(appInfo_);
 			io_.print("PARAMETERS",parameters_);
 			io_.print("TARGETSTRUCT",targetStruct_);
-			PsimagLite::HostInfo hostInfo;
-			PsimagLite::String s =hostInfo.getTimeDate();
-			io_.print(s);
 			if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
 		}
 
 		~DmrgSolver()
 		{
-			PsimagLite::HostInfo hostInfo;
-			PsimagLite::String s =hostInfo.getTimeDate();
-			io_.print(s);
+			io_.print(appInfo_);
 		}
 
 		void main(const GeometryType& geometry)
@@ -600,6 +597,7 @@ namespace Dmrg {
 		const ModelType& model_;
 		ConcurrencyType& concurrency_;
 		const TargettingParamsType& targetStruct_;
+		PsimagLite::ApplicationInfo appInfo_;
 		bool verbose_;
 		LeftRightSuperType lrs_;
 		typename IoType::Out io_;
