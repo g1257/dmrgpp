@@ -38,7 +38,7 @@ typedef PsimagLite::ConcurrencyMpi<MatrixElementType> ConcurrencyType;
 #endif
 #include "ModelFactory.h"
 #include "OperatorsBase.h"
-#include "Geometry.h"
+#include "Geometry/Geometry.h"
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
 #include "InternalProductOnTheFly.h"

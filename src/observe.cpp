@@ -35,7 +35,7 @@ typedef PsimagLite::ConcurrencySerial<RealType> ConcurrencyType;
 #include "ConcurrencyMpi.h"
 typedef PsimagLite::ConcurrencyMpi<RealType> ConcurrencyType;
 #endif
-#include "Geometry.h" 
+#include "Geometry/Geometry.h"
 #include "CrsMatrix.h"
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"

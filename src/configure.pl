@@ -25,7 +25,7 @@ use strict;
 my $mpi=0;
 my $platform="linux";
 my $lapack="-llapack";
-my $PsimagLite="../../PsimagLite/src";
+my $PsimagLite="../../PsimagLite";
 my ($pthreads,$pthreadsLib)=(0,"");
 my $brand= "v3.0";
 my $build="production";
@@ -158,7 +158,7 @@ print FOUT<<EOF;
 # MPI: $mpi
 
 LDFLAGS =    $lapack  $pthreadsLib
-CPPFLAGS = -Werror -Wall  -IEngine -IModels/HubbardOneBand -IModels/HeisenbergSpinOneHalf -IModels/ExtendedHubbard1Orb  -IModels/FeAsModel -IModels/FeAsBasedScExtended -IModels/Immm  -IModels/Tj1Orb -I$PsimagLite -I$PsimagLite/Geometry $usePthreadsOrNot $floating
+CPPFLAGS = -Werror -Wall  -IEngine -IModels/HubbardOneBand -IModels/HeisenbergSpinOneHalf -IModels/ExtendedHubbard1Orb  -IModels/FeAsModel -IModels/FeAsBasedScExtended -IModels/Immm  -IModels/Tj1Orb -I$PsimagLite/src -I$PsimagLite $usePthreadsOrNot $floating
 CXX = $compiler  $optimizations 
 EXENAME = dmrg
 all: \$(EXENAME)
