@@ -190,6 +190,13 @@ namespace PsimagLite {
 				if (something[last]!='\n') (*fout_)<<"\n";
 			}
 
+			template<typename SomePrintableType>
+			void print(const SomePrintableType& something)
+			{
+				if (rank_!=0) return;
+				(*fout_)<<something;
+			}
+
 			template<typename X>
 			void printMatrix(Matrix<X> const &mat,String const &s)
 			{

@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009 , UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -79,28 +76,62 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  * Information about the host computer
  */
   
-#ifndef HOST_INFO_H
-#define HOST_INFO_H
+#ifndef APPLICATION_INFO_H
+#define APPLICATION_INFO_H
 
 #include <sys/time.h>
 #include <time.h>
 #include "String.h"
  
 namespace PsimagLite {
-	
-	class HostInfo {
-	public:
-		String getTimeDate()
-		{
-			struct timeval tv;
-			time_t tt;
+
+class ApplicationInfo {
+
+public:
+
+	ApplicationInfo(const PsimagLite::String& name)
+	    : firstCall_(true),name_(name)
+	{
+		std::cout<<(*this);
+	}
+
+	~ApplicationInfo()
+	{
+		std::cout<<getTimeDate();
+	}
+
+	String getTimeDate() const
+	{
+		struct timeval tv;
+		time_t tt;
 		
-			gettimeofday(&tv,0);
-			tt=tv.tv_sec; /* seconds since 1970 */
-			return asctime(localtime(&tt));
-		}
-	}; // class HostInfo
+		gettimeofday(&tv,0);
+		tt=tv.tv_sec; /* seconds since 1970 */
+		return asctime(localtime(&tt));
+	}
+
+	friend std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai);
+
+private:
+
+	mutable bool firstCall_;
+	PsimagLite::String name_;
+}; // class ApplicationInfo
+
+std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai)
+{
+	os<<ai.getTimeDate();
+	if (!ai.firstCall_) return os;
+	os<<ai.name_<<" sizeof(SizeType)="<<sizeof(SizeType)<<"\n";
+#ifdef USE_FLOAT
+	os<<ai.name_<<" using float\n";
+#else
+	os<<ai.name_<<" using double\n";
+#endif
+	return os;
+}
+
 } // namespace PsimagLite 
 
 /*@}*/	
-#endif // HOST_INFO_H
+#endif // APPLICATION_INFO_H
