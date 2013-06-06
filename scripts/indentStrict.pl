@@ -155,11 +155,18 @@ while(<FILE>) {
 	}
 
 	# std::string is deprecated
-	if (/std::string /) {
-		print "WARNING: std::string is deprecated. Include \"String.h\" and use PsimagLite::String instead\n" unless ($nowarn);
+	my @stringclasses = ("string","istringstream","ostringstream","logic_error","range_error","runtime_error");
+	foreach my $stringclass (@stringclasses) {
+		if (/std::$stringclass /) {
+			my $capitalclass = ucfirst($stringclass);
+			if ($capitalclass =~ /_(.{1})/) {
+				my $tmp = uc($1);
+				$capitalclass =~ s/_(.{1})/$tmp/;
+			}
+			print "WARNING: std::$stringclass is deprecated. Include \"String.h\" and use PsimagLite::$capitalclass instead\n" unless ($nowarn);
+		}
 	}
-	
-	
+
 	# line length
 	$r = $_;
 	$r =~ s/\t//g;
