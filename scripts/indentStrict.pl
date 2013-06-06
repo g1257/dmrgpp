@@ -138,6 +138,27 @@ while(<FILE>) {
 		$lforEcho =~s/foreach\(/foreach \(/;
 		print "ERROR: Lack of space after if/for/foreach/while in line $line goes against rule -sai -saf -saw\n" unless ($noerrors);
 	}
+
+	# size_t is deprecated
+	if (/size_t /) {
+		print "WARNING: size_t is deprecated. Use SizeType instead\n" unless ($nowarn);
+	}
+	
+	# std::vector, std::map and std::stack are deprecated
+	my @stdclasses = ("vector","map","stack");
+	foreach my $stdclass (@stdclasses) {
+		if (/std::$stdclass<([^>]+)>/) {
+			my $capitalclass = ucfirst($stdclass);
+			print "WARNING: std::$stdclass is deprecated. Include \"$capitalclass.h\" and use [typename] PsimagLite::$capitalclass<$1>::Type instead.\n"
+			unless ($nowarn);
+		}
+	}
+
+	# std::string is deprecated
+	if (/std::string /) {
+		print "WARNING: std::string is deprecated. Include \"String.h\" and use PsimagLite::String instead\n" unless ($nowarn);
+	}
+	
 	
 	# line length
 	$r = $_;
