@@ -419,7 +419,7 @@ namespace PsimagLite {
 			case KTWONIFFOUR:
 				return ktwoniffour_->matrixRank();
 			default:
-				return linSize*linSize*maxEdof*maxEdof;
+				return linSize*maxEdof;
 			}
 		}
 
