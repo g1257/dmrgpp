@@ -219,6 +219,12 @@ namespace Dmrg {
 			collapseVector(dest,dest2,direction,volumeOfIndexFixed,volumeOfNk,border);
 			RealType x = std::norm(dest);
 
+			if (x<1e-6 && dest.sectors()==0) {
+				std::cout<<"norm of dest2= "<<std::norm(dest2)<<"\n";
+				dest2 = dest;
+				return;
+			}
+
 			assert(x>1e-6);
 			dest2 = (1.0/x) * dest;
 			assert(dest2.size()==src2.size());
@@ -445,7 +451,7 @@ namespace Dmrg {
 				particleCollapse(collapseBasis_);
 			std::cout<<"Collapse basis:\n";
 			std::cout<<collapseBasis_;
-
+			checkBasis();
 		}
 
 		void particleCollapse(MatrixType& m) const
@@ -502,6 +508,14 @@ namespace Dmrg {
 			for (SizeType i=0;i<block2.size();i++) {
 				block2[i] = block[i] + offset;
 			}
+		}
+
+		void checkBasis() const
+		{
+			MatrixType transpose;
+			transposeConjugate(transpose,collapseBasis_);
+			MatrixType shouldBeI = collapseBasis_ * transpose;
+			assert(isTheIdentity(shouldBeI));
 		}
 
 		const MettsStochasticsType& mettsStochastics_;

@@ -112,34 +112,19 @@ namespace Dmrg {
 
 		SizeType chooseRandomState(SizeType site) const
 		{
-			typename PsimagLite::Vector<SizeType>::Type quantumNumbsOneSite;
-			HilbertBasisType basisOfOneSite;
-			basisForOneSite(quantumNumbsOneSite,basisOfOneSite,site);
 			SizeType tmp = SizeType(rng_()*model_.hilbertSize(site));
-			assert(tmp<basisOfOneSite.size());
-			return basisOfOneSite[tmp];
+			return tmp;
 		}
 
-		// recommendation for understanding this
-		// think of this first as having basisOfOneSite[i] = i
 		SizeType chooseRandomState(const typename PsimagLite::Vector<RealType>::Type& probs,SizeType site) const
 		{
-			typename PsimagLite::Vector<SizeType>::Type quantumNumbsOneSite;
-			HilbertBasisType basisOfOneSite;
-			basisForOneSite(quantumNumbsOneSite,basisOfOneSite,site);
-
-			std::cerr<<"basisOfOneSite ";
-			for (SizeType i=0;i<basisOfOneSite.size();i++)
-				std::cerr<<basisOfOneSite[i]<<" ";
-			std::cerr<<"\n";
-
 			RealType r = rng_();
 			std::cout<<"RANDOM="<<r<<"\n";
 			RealType s1 = 0;
 			RealType s2 = 0;
 			for (SizeType i=0;i<probs.size();++i) {
 				s2 = s1 + probs[i];
-				if (s1<r && r<=s2) return basisOfOneSite[i];
+				if (s1<r && r<=s2) return i;
 				s1 = s2;
 			}
 			PsimagLite::String s(__FILE__);
@@ -182,13 +167,6 @@ namespace Dmrg {
 		}
 
 	private:
-
-		void basisForOneSite(typename PsimagLite::Vector<SizeType>::Type& quantumNumbsOneSite,
-		                     HilbertBasisType& basisOfOneSite,SizeType site) const
-		{
-			typename PsimagLite::Vector<SizeType>::Type block(1,site);
-			model_.setNaturalBasis(basisOfOneSite,quantumNumbsOneSite,block);
-		}
 
 		void initialSetOfPures(LongType seed)
 		{
