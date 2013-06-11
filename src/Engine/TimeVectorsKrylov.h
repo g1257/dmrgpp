@@ -317,7 +317,7 @@ private:
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
-	const RealType& E0_;
+	RealType E0_;
 }; //class TimeVectorsKrylov
 } // namespace Dmrg
 /*@}*/

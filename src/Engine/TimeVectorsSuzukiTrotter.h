@@ -478,7 +478,7 @@ private:
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
-	const RealType& E0_;
+	RealType E0_;
 	const PsimagLite::Vector<SizeType>::Type* nonZeroQns_;
 	bool twoSiteDmrg_;
 	PsimagLite::Vector<SizeType>::Type linksSeen_;
