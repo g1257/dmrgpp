@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,55 +67,70 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
-
-
 /** \ingroup PsimagLite */
 /*@{*/
 
-/*! \file NoPthreads.h
- *
- *  If you want to say no to pthreads
+/*! \file Mpi.h
  *
  */
-#ifndef NO_PTHREADS_HEADER_H
-#define NO_PTHREADS_HEADER_H
+#ifndef MPI_HEADER_H
+#define MPI_HEADER_H
+#include <stdexcept>
+#include "Vector.h"
 
-#include <iostream>
-#include "String.h"
-
-// bogus: to compile without pthreads
-//typedef  int pthread_mutex_t;
-
-
-// bogus: to compile without pthreads
-void pthread_mutex_lock(int myMutex)
-{
-}
-// bogus: to compile without pthreads
-void pthread_mutex_unlock(int myMutex)
-{
-}
 namespace PsimagLite {
-template<typename PthreadFunctionHolderType>
-class NoPthreads {
+
+namespace MPI {
+
+#ifdef USE_MPI
+void init(int argc, char *argv[])
+{
+	MPI_Init(&argc,&argv);
+}
+
+void commSize(CommType mpiComm,int& tmp)
+{
+	MPI_Comm_size(mpiComm,&tmp);
+}
+#else
+typedef int CommType;
+int COMM_WORLD = 0;
+
+void init(int argc, char *argv[]) {}
+
+void commSize(CommType mpiComm,int& tmp)
+{
+	tmp=1;
+}
+#endif
+} // namespace MPI
+
+template<typename InstanceType>
+class Mpi {
 public:
+
 	static void setThreads(SizeType dummy) { } // dummy
-	
-	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
+
+	void loopCreate(SizeType total,
+	                InstanceType& pfh)
 	{
 		for (SizeType i=0;i<total;i++)
 			pfh.thread_function_(i,1,total,0);
 	}
 
-	String name() const { return "nopthreads"; }
+	String name() const { return "mpi"; }
 
-	SizeType threads() const { return 1; }
+	SizeType nprocs(MPI::CommType mpiComm=MPI::COMM_WORLD) const
+	{
+		int tmp;
+		MPI::commSize(mpiComm,tmp);
+		return tmp;
+	}
 
-}; // NoPthreads
-} // namespace Dmrg
-/*@}*/
+}; // Mpi
+
+} // namespace PsimagLite 
+
+/*@}*/	
 #endif
-

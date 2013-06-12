@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <pthread.h>
 #include <iostream>
-#include "Concurrency.h"
 #include "String.h"
 
 template<typename PthreadFunctionHolderType>
@@ -110,15 +109,14 @@ void *thread_function_wrapper(void *dummyPtr)
 
 namespace PsimagLite {
 template<typename PthreadFunctionHolderType>
-class Pthreads : public PsimagLite::Concurrency<typename PthreadFunctionHolderType::RealType> {
+class Pthreads  {
 public:
 	Pthreads()
 	{}
 
 	static void setThreads(SizeType nthreads) {nthreads_=nthreads; }
 
-	template<typename SomeConcurrencyType>
-	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh,SomeConcurrencyType& conc)
+	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
 	{
 		PthreadFunctionStruct<PthreadFunctionHolderType> pfs[nthreads_];
 		pthread_mutex_init(&(mutex_), NULL);
@@ -145,9 +143,6 @@ public:
 	String name() const { return "pthreads"; }
 
 	SizeType threads() const { return nthreads_; }
-
-	template<typename T,typename SomeConcurrencyType>
-	void reduce(T& x,SomeConcurrencyType& conc) {}
 
 private:
 	static SizeType nthreads_;

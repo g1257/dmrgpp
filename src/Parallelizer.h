@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,55 +67,49 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
-
-
 /** \ingroup PsimagLite */
 /*@{*/
 
-/*! \file NoPthreads.h
- *
- *  If you want to say no to pthreads
+/*! \file Parallelizer.h
  *
  */
-#ifndef NO_PTHREADS_HEADER_H
-#define NO_PTHREADS_HEADER_H
+#ifndef PARALLELIZER_H
+#define PARALLELIZER_H
+#include <stdexcept>
+#include "Vector.h"
 
-#include <iostream>
-#include "String.h"
+#ifdef USE_PTHREADS
 
-// bogus: to compile without pthreads
-//typedef  int pthread_mutex_t;
-
-
-// bogus: to compile without pthreads
-void pthread_mutex_lock(int myMutex)
-{
-}
-// bogus: to compile without pthreads
-void pthread_mutex_unlock(int myMutex)
-{
-}
-namespace PsimagLite {
-template<typename PthreadFunctionHolderType>
-class NoPthreads {
-public:
-	static void setThreads(SizeType dummy) { } // dummy
-	
-	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
-	{
-		for (SizeType i=0;i<total;i++)
-			pfh.thread_function_(i,1,total,0);
-	}
-
-	String name() const { return "nopthreads"; }
-
-	SizeType threads() const { return 1; }
-
-}; // NoPthreads
-} // namespace Dmrg
-/*@}*/
+#include "Pthreads.h"
+#ifdef USE_MPI
+#error "No hybrid Pthreads and MPI supported yet"
 #endif
 
+#else
+
+#ifdef USE_MPI
+#include "Mpi.h"
+#else
+#include "NoPthreads.h"
+#endif // USE_MPI
+
+#endif // USE_PTHREADS
+
+namespace PsimagLite {
+template<typename ConcurrencyType,typename InstanceType>
+class Parallelizer
+#ifdef USE_PTHREADS
+        : public Pthreads<InstanceType> {
+#else
+        : public NoPthreads<InstanceType>  {
+#endif
+
+public:
+
+
+};
+} // namespace PsimagLite 
+
+/*@}*/	
+#endif
