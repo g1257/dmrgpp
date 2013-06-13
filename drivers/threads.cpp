@@ -44,7 +44,7 @@ public:
 
 int main(int argc,char *argv[])
 {
-	typedef PsimagLite::Concurrency<double> ConcurrencyType;
+	typedef PsimagLite::Concurrency ConcurrencyType;
 
 	
 	if (argc!=3) {

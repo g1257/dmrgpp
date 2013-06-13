@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename FieldType>
 class Concurrency {
 public:
 
@@ -101,6 +100,24 @@ public:
 	{
 		MPI::finalize();
 	}
+
+	static bool root(MPI::CommType comm = MPI::COMM_WORLD)
+	{
+		return (MPI::commRank(comm) == 0);
+	}
+
+	static SizeType nprocs(MPI::CommType comm = MPI::COMM_WORLD)
+	{
+		return MPI::commSize(comm);
+	}
+
+	static SizeType rank(MPI::CommType comm = MPI::COMM_WORLD)
+	{
+		return MPI::commRank(comm);
+	}
+
+	template<typename DataType>
+	static void reduce(DataType& v,MPI::CommType mpiComm = MPI::COMM_WORLD) {}
 
 };
 } // namespace PsimagLite 

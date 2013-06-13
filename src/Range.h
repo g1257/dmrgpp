@@ -102,130 +102,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-	template<typename ConcurrencyType>
 	class Range {
 
 	public:
 
-		typedef typename ConcurrencyType::CommType CommType;
-		static const CommType COMM_WORLD;
+		typedef int CommType;
 
 		Range(SizeType start,
 		      SizeType total,
-		      const ConcurrencyType& concurrency,
 		      const Vector<SizeType>::Type& weights,
-		      CommType mpiComm=COMM_WORLD,
-		      bool isStrict=false)
-		: concurrency_(concurrency),
-		  step_(start),
-		  total_(total),
-		  nprocs_(concurrency.nprocs(mpiComm)),
-		  indicesOfThisProc_(nprocs_),
-		  isStrict_(isStrict)
-		{
-			init(weights,mpiComm);
-		}
-
-		Range(SizeType start,
-		     SizeType total,
-		     const ConcurrencyType& concurrency,           
-		     CommType mpiComm=COMM_WORLD,
-		     bool isStrict=false)
-		: concurrency_(concurrency),
-		  step_(start),
-		  total_(total),
-		  nprocs_(concurrency.nprocs(mpiComm)),
-		  indicesOfThisProc_(nprocs_),
-		  isStrict_(isStrict)
-		{
-			typename Vector<SizeType>::Type weights(total,1);
-			init(weights,mpiComm);
-		}
-
-		void next()
-		{
-			step_++;
-		}
-
-		bool end() const
-		{
-			return (step_>=myIndices_.size() || myIndices_[step_]>=total_ );
-		}
-
-// 		bool hasNext() const 
-// 		{
-// 			return (assigned_ && step_<myIndices_.size() && myIndices_[step_]<total_ );
-// 		}
-
-		SizeType index() const { return myIndices_[step_]; }
-
-	private:
-
-		const ConcurrencyType& concurrency_;
-		SizeType step_; // step within this processor
-		SizeType total_; // total number of indices total_(total),
-		SizeType nprocs_;
-		Vector<Vector<SizeType>::Type >::Type indicesOfThisProc_; // given rank and step it maps the index
-		bool isStrict_; // does nproc need to divide total?
-		typename Vector<SizeType>::Type myIndices_; // indices assigned to this processor
-
-		void init(const typename Vector<SizeType>::Type& weights,CommType mpiComm)
-		{ 
-			if (isStrict_ && total_%nprocs_!=0)
-				throw RuntimeError("Nprocs must divide total for this range\n");
-
-			// distribute the load among the processors
-			typename Vector<SizeType>::Type loads(nprocs_,0);
-			
-			for (SizeType i=0;i<total_;i++) {
-				SizeType r = findLowestLoad(loads);
-				indicesOfThisProc_[r].push_back(i);
-				loads[r] += weights[i];
-			}
-			// set myIndices_
-			SizeType r1=concurrency_.rank(mpiComm);
-			myIndices_=indicesOfThisProc_[r1];
-		}
-
-		SizeType findLowestLoad(const Vector<SizeType>::Type& loads) const
-		{
-			SizeType x= 1000000;
-			SizeType ret=0;
-			for (SizeType i=0;i<loads.size();i++) {
-				if (loads[i]<x) {
-					x=loads[i];
-					ret =i;
-				}
-			}
-			return ret;
-		}
-	}; // class Range
-
-	template<typename ConcurrencyType>
-	const typename Range<ConcurrencyType>::CommType 
-	Range<ConcurrencyType>::COMM_WORLD = ConcurrencyType::COMM_WORLD;
-
-
-	//! Specialization for performance reasons
-	template<>
-	class Range<ConcurrencySerial<> > {
-
-		typedef ConcurrencySerial<> ConcurrencyType;
-
-	public:
-
-		typedef ConcurrencyType::CommType CommType;
-
-		Range(SizeType start,
-		     SizeType total,
-		     ConcurrencyType& concurrency,
-		     const Vector<SizeType>::Type& weights,
-		     CommType mpiComm=0) : step_(start),total_(total)
+		      CommType mpiComm=0) : step_(start),total_(total)
 		{}
 
 		Range(SizeType start,
-		     SizeType total,
-		     ConcurrencyType& concurrency,           
+		     SizeType total,         
 		     CommType mpiComm=0) : step_(start),total_(total)
 		{}
 
@@ -236,7 +126,7 @@ namespace PsimagLite {
 
 		bool end() const { return step_>=total_; }
 
-// 		bool hasNext() const { return step_ <total_; }
+		PsimagLite::String parallelizer() const { return "serial"; }
 
 		SizeType index() const { return step_; }
 
