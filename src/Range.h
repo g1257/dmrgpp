@@ -95,7 +95,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define RANGE_HEADER_H
 #include <stdexcept>
 #include "Vector.h"
-#include "ConcurrencySerial.h" // for the default Range
 
 /** How to use the Range class: See drivers/range.cpp
  * 

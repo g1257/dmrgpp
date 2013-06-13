@@ -5,8 +5,8 @@ CXX = g++ -g3
 all: $(EXENAME)
 HEADERSH = ../src/AkimaSpline.h ../src/Vector.h ../src/SampleCRSMatrix.h ../src/Minimizer.h
 EXECUTABLES = sparseSolverTest testCRSMatrix rungeKuttaTest combineContinuedFraction \
-concurrencyTest continuedFractionCollection gitrev jsonExample \
-kernelPolynomial linearPrediction options randomTest range svd testLapack threads
+continuedFractionCollection gitrev jsonExample \
+kernelPolynomial linearPrediction options randomTest svd testLapack threads
 
 all: $(EXECUTABLES)
 

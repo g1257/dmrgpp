@@ -14,40 +14,39 @@ Please see full open source license included in file LICENSE.
 *********************************************************
 
 */
-#include "ConcurrencySerial.h"
+#include "Concurrency.h"
 #include <iostream>
 #include <cstdlib>
-#ifdef USE_PTHREADS
-#define PTHREADS_NAME PsimagLite::Pthreads
-#include "Pthreads.h"
-#else
-#define PTHREADS_NAME PsimagLite::NoPthreads
-#include "NoPthreads.h"
-#endif
+#include "Parallelizer.h"
 
-
+template<typename MutexType>
 class MyHelper {
 
 public:
 
 	typedef double RealType;
 
-	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
+	void thread_function_(SizeType threadNum,
+	                      SizeType blockSize,
+	                      SizeType total,
+	                      MutexType* myMutex)
 	{
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType taskNumber = threadNum*blockSize + p;
 			if (taskNumber>=total) break;
-			std::cout<<"This is thread number "<<threadNum<<" and taskNumber="<<taskNumber<<"\n";
+			std::cout<<"This is thread number "<<threadNum;
+			std::cout<<" and taskNumber="<<taskNumber<<"\n";
 		}
 	}
 
 }; // class MyHelper
 
-typedef PsimagLite::ConcurrencySerial<double> ConcurrencyType;
-typedef MyHelper HelperType;
 
 int main(int argc,char *argv[])
 {
+	typedef PsimagLite::Concurrency<double> ConcurrencyType;
+
+	
 	if (argc!=3) {
 		std::cout<<"USAGE: "<<argv[0]<<" nthreads ntasks\n";
 		return 1;
@@ -56,16 +55,19 @@ int main(int argc,char *argv[])
 	SizeType nthreads  = atoi(argv[1]);
 	SizeType ntasks = atoi(argv[2]);
 
-	std::cout<<"Using "<<nthreads<<" threads.\n";
 
 	ConcurrencyType concurrency(argc,argv);
 
-	PTHREADS_NAME<HelperType> threadObject;
+	typedef MyHelper<ConcurrencyType::MutexType> HelperType;
+	typedef PsimagLite::Parallelizer<ConcurrencyType,HelperType> ParallelizerType;
+	ParallelizerType threadObject;
 
-	PTHREADS_NAME<HelperType>::setThreads(nthreads);
+	ParallelizerType::setThreads(nthreads);
 
 	HelperType helper;
 
+	std::cout<<"Using "<<threadObject.name();
+	std::cout<<" with "<<threadObject.threads()<<" threads.\n";
 	threadObject.loopCreate(ntasks,helper);
 
 }
