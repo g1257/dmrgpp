@@ -49,7 +49,7 @@ public:
 		p=0;
 	}
 
-	void* allocate(SizeType x)
+	void* allocate(size_t x)
 	{
 		void *p = malloc(x);
 		std::ostringstream msg;
