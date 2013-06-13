@@ -145,6 +145,19 @@ public:
 
 	SizeType threads() const { return nthreads_; }
 
+	template<typename SomeVectorType>
+	typename EnableIf<IsVectorLike<SomeVectorType>::True,void>::Type
+	gather(SomeVectorType& v)
+	{
+		for (size_t i=1;i<v.size();i++) {
+			v[0] += v[i];
+		}
+	}
+
+	template<typename T>
+	void broadcast(T& t)
+	{}
+
 private:
 	static SizeType nthreads_;
 	pthread_mutex_t mutex_;

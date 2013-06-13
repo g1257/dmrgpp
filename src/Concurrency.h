@@ -85,11 +85,29 @@ namespace PsimagLite {
 class Concurrency {
 public:
 
+	class Info {
+
+	public:
+
+		enum {SERIAL,PTHREADS,MPI};
+
 #ifndef USE_PTHREADS
-	typedef int MutexType;
+		typedef int MutexType;
+		static const SizeType mode = PTHREADS;
+
 #else
-	typedef pthread_mutex_t MutexType;
+
+#ifdef USE_MPI
+		static const SizeType mode = MPI;
+#else
+		static const SizeType mode = SERIAL;
 #endif
+
+		typedef pthread_mutex_t MutexType;
+
+#endif
+
+	};
 
 	Concurrency(int argc, char *argv[])
 	{

@@ -19,17 +19,15 @@ Please see full open source license included in file LICENSE.
 #include <cstdlib>
 #include "Parallelizer.h"
 
-template<typename MutexType>
+template<typename InfoType>
 class MyHelper {
 
 public:
 
-	typedef double RealType;
-
 	void thread_function_(SizeType threadNum,
 	                      SizeType blockSize,
 	                      SizeType total,
-	                      MutexType* myMutex)
+	                      typename InfoType::MutexType* myMutex)
 	{
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType taskNumber = threadNum*blockSize + p;
@@ -58,7 +56,7 @@ int main(int argc,char *argv[])
 
 	ConcurrencyType concurrency(argc,argv);
 
-	typedef MyHelper<ConcurrencyType::MutexType> HelperType;
+	typedef MyHelper<ConcurrencyType::Info> HelperType;
 	typedef PsimagLite::Parallelizer<ConcurrencyType,HelperType> ParallelizerType;
 	ParallelizerType threadObject;
 

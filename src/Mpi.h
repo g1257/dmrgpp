@@ -158,6 +158,18 @@ public:
 		return MPI::commSize(mpiComm);
 	}
 
+	template<typename T>
+	void gather(T& t)
+	{
+		throw PsimagLite::RuntimeError("mpi gather unimplemented\n");
+	}
+
+	template<typename T>
+	void broadcast(T& t)
+	{
+		throw PsimagLite::RuntimeError("mpi gather unimplemented\n");
+	}
+
 }; // Mpi
 
 } // namespace PsimagLite 

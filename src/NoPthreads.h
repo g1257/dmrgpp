@@ -106,6 +106,14 @@ public:
 
 	SizeType threads() const { return 1; }
 
+	template<typename T>
+	void gather(T& v)
+	{}
+
+	template<typename T>
+	void broadcast(T& t)
+	{}
+
 }; // NoPthreads
 } // namespace Dmrg
 /*@}*/
