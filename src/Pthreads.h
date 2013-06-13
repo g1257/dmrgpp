@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -68,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 // END LICENSE BLOCK
 /** \ingroup PsimagLite */
@@ -98,7 +96,8 @@ struct PthreadFunctionStruct {
 template<typename PthreadFunctionHolderType>
 void *thread_function_wrapper(void *dummyPtr)
 {
-	PthreadFunctionStruct<PthreadFunctionHolderType> *pfs = (PthreadFunctionStruct<PthreadFunctionHolderType> *) dummyPtr;
+	PthreadFunctionStruct<PthreadFunctionHolderType> *pfs =
+	        (PthreadFunctionStruct<PthreadFunctionHolderType> *) dummyPtr;
 
 	PthreadFunctionHolderType *pfh = pfs->pfh;
 
@@ -121,7 +120,7 @@ public:
 		PthreadFunctionStruct<PthreadFunctionHolderType> pfs[nthreads_];
 		pthread_mutex_init(&(mutex_), NULL);
 		pthread_t thread_id[nthreads_];
-//		std::cerr<<"Pthreads: total="<<total<<" threads="<<nthreads_<<"\n";
+
 		for (SizeType j=0; j <nthreads_; j++) {
 			int ret=0;
 			pfs[j].threadNum = j;
@@ -130,8 +129,10 @@ public:
 			pfs[j].blockSize = total/nthreads_;
 			if (total%nthreads_!=0) pfs[j].blockSize++;
 			pfs[j].mutex = &mutex_;
-			if ((ret=pthread_create(
-				     &thread_id[j], NULL, thread_function_wrapper<PthreadFunctionHolderType>, &pfs[j] )))
+			if ((ret=pthread_create(&thread_id[j],
+			                        NULL,
+			                        thread_function_wrapper<PthreadFunctionHolderType>,
+			                        &pfs[j])))
 				std::cerr<<"Thread creation failed: "<<ret<<"\n";
 		}
 

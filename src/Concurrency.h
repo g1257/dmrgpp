@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,49 +67,43 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
 /*! \file Concurrency.h
  *
- * Abstract class that provides an interface to encapsulate parallelization functions
- * To create a new parallelization model: inherit from this class
- * and implement this public interface
  */
 #ifndef CONCURRENCY_HEADER_H
 #define CONCURRENCY_HEADER_H
 #include <stdexcept>
+#include "Vector.h"
+#include "Mpi.h"
 
 namespace PsimagLite {
-	//! Abstract class to encapsulate parallelization functions
-	template<typename FieldType>
-	class Concurrency {
-	
-	protected:
-		//! Returns the rank of this processor	
-		int rank(int dummy= -1) { return 0; }
-		
-		//! Returns the total number of processors 
-		int nprocs(int dummy= -1) { return 1; }
-		
-		//! Returns true if this is the root processor or false otherwise
-		bool root();
-		
-// 		//! The root processor gathers data from each  processor
-// 		template<typename DataType>
-// 		void gather(DataType &v) { }
-		
-		//! The root processor broadcasts data to all processors
-		template<typename DataType>
-		void broadcast(DataType &v) { }
-	
-		//! Wait until all processors have reached this point
-		void barrier() { }
-	};
-} // namespace Dmrg
+
+template<typename FieldType>
+class Concurrency {
+public:
+
+#ifndef USE_PTHREADS
+	typedef int MutexType;
+#else
+	typedef pthread_mutex_t MutexType;
+#endif
+
+	Concurrency(int argc, char *argv[])
+	{
+		MPI::init(argc,argv);
+	}
+
+	~Concurrency()
+	{
+		MPI::finalize();
+	}
+
+};
+} // namespace PsimagLite 
 
 /*@}*/	
 #endif

@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -68,10 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
-
 
 /** \ingroup PsimagLite */
 /*@{*/
@@ -86,10 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <iostream>
 #include "String.h"
-
-// bogus: to compile without pthreads
-//typedef  int pthread_mutex_t;
-
 
 // bogus: to compile without pthreads
 void pthread_mutex_lock(int myMutex)
