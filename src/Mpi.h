@@ -78,31 +78,60 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MPI_HEADER_H
 #include <stdexcept>
 #include "Vector.h"
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
 
 namespace PsimagLite {
 
 namespace MPI {
 
 #ifdef USE_MPI
+typedef MPI_Comm CommType;
+CommType COMM_WORLD = MPI_COMM_WORLD;
+
 void init(int argc, char *argv[])
 {
 	MPI_Init(&argc,&argv);
 }
 
-void commSize(CommType mpiComm,int& tmp)
+void finalize()
 {
-	MPI_Comm_size(mpiComm,&tmp);
+	MPI_Finalize();
 }
+
+SizeType commSize(CommType mpiComm)
+{
+	int tmp = 0;
+	MPI_Comm_size(mpiComm,&tmp);
+	return tmp;
+}
+
+SizeType commRank(CommType mpiComm)
+{
+	int tmp = 0;
+	MPI_Comm_rank(mpiComm,&tmp);
+	return tmp;
+}
+
 #else
 typedef int CommType;
 int COMM_WORLD = 0;
 
 void init(int argc, char *argv[]) {}
 
-void commSize(CommType mpiComm,int& tmp)
+void finalize() {}
+
+SizeType commSize(CommType mpiComm)
 {
-	tmp=1;
+	return 1;
 }
+
+SizeType commRank(CommType mpiComm)
+{
+	return 0;
+}
+
 #endif
 } // namespace MPI
 
@@ -115,17 +144,18 @@ public:
 	void loopCreate(SizeType total,
 	                InstanceType& pfh)
 	{
-		for (SizeType i=0;i<total;i++)
-			pfh.thread_function_(i,1,total,0);
+		SizeType procs = threads(MPI::COMM_WORLD);
+		SizeType rank = MPI::commRank(MPI::COMM_WORLD);
+		SizeType block = static_cast<SizeType>(total/procs);
+		if (total % procs !=0) block++;
+		pfh.thread_function_(rank,block,total,0);
 	}
 
 	String name() const { return "mpi"; }
 
-	SizeType nprocs(MPI::CommType mpiComm=MPI::COMM_WORLD) const
+	SizeType threads(MPI::CommType mpiComm=MPI::COMM_WORLD) const
 	{
-		int tmp;
-		MPI::commSize(mpiComm,tmp);
-		return tmp;
+		return MPI::commSize(mpiComm);
 	}
 
 }; // Mpi

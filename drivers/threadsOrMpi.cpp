@@ -55,7 +55,6 @@ int main(int argc,char *argv[])
 	SizeType nthreads  = atoi(argv[1]);
 	SizeType ntasks = atoi(argv[2]);
 
-	std::cout<<"Using "<<nthreads<<" threads.\n";
 
 	ConcurrencyType concurrency(argc,argv);
 
@@ -67,6 +66,8 @@ int main(int argc,char *argv[])
 
 	HelperType helper;
 
+	std::cout<<"Using "<<threadObject.name();
+	std::cout<<" with "<<threadObject.threads()<<" threads.\n";
 	threadObject.loopCreate(ntasks,helper);
 
 }

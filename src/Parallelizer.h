@@ -90,9 +90,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifdef USE_MPI
 #include "Mpi.h"
-#else
-#include "NoPthreads.h"
 #endif // USE_MPI
+#include "NoPthreads.h"
 
 #endif // USE_PTHREADS
 
@@ -102,7 +101,11 @@ class Parallelizer
 #ifdef USE_PTHREADS
         : public Pthreads<InstanceType> {
 #else
+#ifdef USE_MPI
+	: public Mpi<InstanceType> {
+#else
         : public NoPthreads<InstanceType>  {
+#endif
 #endif
 
 public:

@@ -97,6 +97,11 @@ public:
 		MPI::init(argc,argv);
 	}
 
+	~Concurrency()
+	{
+		MPI::finalize();
+	}
+
 };
 } // namespace PsimagLite 
 

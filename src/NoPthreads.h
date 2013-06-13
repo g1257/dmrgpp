@@ -107,8 +107,7 @@ public:
 	
 	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
 	{
-		for (SizeType i=0;i<total;i++)
-			pfh.thread_function_(i,1,total,0);
+		pfh.thread_function_(0,total,total,0);
 	}
 
 	String name() const { return "nopthreads"; }
