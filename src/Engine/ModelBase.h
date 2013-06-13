@@ -124,8 +124,6 @@ namespace Dmrg {
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHelperType::RealType RealType;
-		typedef typename ModelHelperType::ConcurrencyType
-				ConcurrencyType;
 		typedef typename ModelHelperType::BasisType MyBasis;
 		typedef typename ModelHelperType::BasisWithOperatorsType
 				BasisWithOperatorsType;
@@ -138,8 +136,8 @@ namespace Dmrg {
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
-		ModelBase(const DmrgGeometryType& geometry,ConcurrencyType& concurrency)
-		: dmrgGeometry_(geometry),concurrency_(concurrency),progress_("ModelBase",concurrency.rank())
+		ModelBase(const DmrgGeometryType& geometry)
+		: dmrgGeometry_(geometry),progress_("ModelBase",0)
 		{
 			Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 			MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
@@ -235,8 +233,7 @@ namespace Dmrg {
 			}
 
 			ParallelConnectionsType parallelConnections;
-			parallelConnections.loopCreate(total,hc,concurrency_);
-			hc.sync(parallelConnections,concurrency_);
+			parallelConnections.loopCreate(total,hc);
 		}
 
 		/**
@@ -292,7 +289,6 @@ namespace Dmrg {
 		}
 
 		const DmrgGeometryType& dmrgGeometry_;
-		ConcurrencyType& concurrency_;
 		PsimagLite::ProgressIndicator progress_;
 	};     //class ModelBase
 } // namespace Dmrg

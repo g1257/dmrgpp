@@ -106,8 +106,6 @@ namespace Dmrg {
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename OperatorType::Su2RelatedType Su2RelatedType;
-
-		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef LinkProductFeAsExtended<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,
 				LinkProductType,SharedMemoryTemplate> ModelBaseType;
@@ -121,9 +119,9 @@ namespace Dmrg {
 		static const SizeType SPIN_UP = ModelFeAsType::SPIN_UP;
 		static const SizeType SPIN_DOWN = ModelFeAsType::SPIN_DOWN;
 
-		FeAsBasedScExtended(InputValidatorType& io,GeometryType const &geometry,ConcurrencyType& concurrency)
-			: ModelBaseType(geometry,concurrency),modelParameters_(io), geometry_(geometry),
-			  modelFeAs_(io,geometry,concurrency),orbitals_(modelParameters_.orbitals)
+		FeAsBasedScExtended(InputValidatorType& io,GeometryType const &geometry)
+			: ModelBaseType(geometry),modelParameters_(io), geometry_(geometry),
+			  modelFeAs_(io,geometry),orbitals_(modelParameters_.orbitals)
 		{}
 
 		SizeType hilbertSize(SizeType site) const { return modelFeAs_.hilbertSize(site); }

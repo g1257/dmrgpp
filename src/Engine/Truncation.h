@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "DensityMatrix.h"
 #include "Sort.h"
+#include "Concurrency.h"
 
 namespace Dmrg {
 	
@@ -93,7 +94,6 @@ namespace Dmrg {
 		typedef typename LeftRightSuperType::ProgressIndicatorType ProgressIndicatorType;
 		typedef typename TargettingType::RealType RealType;
 		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
-		typedef typename TargettingType::ConcurrencyType ConcurrencyType;
 		typedef DensityMatrix<RealType,BasisType,BasisWithOperatorsType,TargettingType> DensityMatrixType;
 		typedef typename TargettingType::ModelType ModelType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
@@ -117,14 +117,12 @@ namespace Dmrg {
 
 		Truncation(ReflectionSymmetryType& reflectionOperator,
 		           WaveFunctionTransfType& waveFunctionTransformation,
-		           ConcurrencyType& concurrency,
 		           const ParametersType& parameters,
 		           SizeType maxConnections,
 		           bool verbose)
 		: reflectionOperator_(reflectionOperator),
 		  lrs_(reflectionOperator_.leftRightSuper()),
 		  waveFunctionTransformation_(waveFunctionTransformation),
-		  concurrency_(concurrency),
 		  parameters_(parameters),
 		  maxConnections_(maxConnections),
 		  verbose_(verbose),
@@ -204,7 +202,7 @@ namespace Dmrg {
 			DensityMatrixType dmS(target,pBasis,pBasisSummed,lrs_.super(),direction);
 			dmS.check(direction);
 			
-			if (verbose_ && concurrency_.root()) {
+			if (verbose_ && PsimagLite::Concurrency::root()) {
 				std::cerr<<"Trying to diagonalize density-matrix with size=";
 				std::cerr<<dmS.rank()<<"\n";
 			}
@@ -221,7 +219,7 @@ namespace Dmrg {
 
 			TruncationCache& cache = (direction==EXPAND_SYSTEM) ? leftCache_ : rightCache_;
 
-			dmS.diag(cache.eigs,'V',concurrency_);
+			dmS.diag(cache.eigs,'V');
 			dmS.check2(direction);
 			updateKeptStates(keptStates,cache.eigs);
 
@@ -244,7 +242,7 @@ namespace Dmrg {
 			TruncationCache& cache = leftCache_;
 
 			rSprime.truncateBasis(ftransform_,cache.transform,
-							    cache.eigs,cache.removedIndices,concurrency_);
+							    cache.eigs,cache.removedIndices);
 			LeftRightSuperType lrs(rSprime,(BasisWithOperatorsType&) eBasis,
 						   (BasisType&)lrs_.super());
 			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
@@ -262,7 +260,7 @@ namespace Dmrg {
 			TruncationCache& cache = rightCache_;
 
 			rEprime.truncateBasis(ftransform_,cache.transform,
-							    cache.eigs,cache.removedIndices,concurrency_);
+							    cache.eigs,cache.removedIndices);
 			LeftRightSuperType lrs((BasisWithOperatorsType&) sBasis,
 						   rEprime,(BasisType&)lrs_.super());
 			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
@@ -370,7 +368,6 @@ namespace Dmrg {
 		ReflectionSymmetryType& reflectionOperator_;
 		const LeftRightSuperType& lrs_;
 		WaveFunctionTransfType& waveFunctionTransformation_;
-		ConcurrencyType& concurrency_;
 		const ParametersType& parameters_;
 		SizeType maxConnections_;
 		bool verbose_;

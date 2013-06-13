@@ -28,13 +28,6 @@ typedef float RealType;
 #include "IoSimple.h"
 #include "ModelFactory.h"
 #include "OperatorsBase.h"
-#ifndef USE_MPI
-#include "ConcurrencySerial.h"
-typedef PsimagLite::ConcurrencySerial<RealType> ConcurrencyType;
-#else
-#include "ConcurrencyMpi.h"
-typedef PsimagLite::ConcurrencyMpi<RealType> ConcurrencyType;
-#endif
 #include "Geometry/Geometry.h"
 #include "CrsMatrix.h"
 #include "ModelHelperLocal.h"
@@ -87,8 +80,7 @@ bool observeOneFullSweep(
 	const GeometryType& geometry,
 	const ModelType& model,
 	const PsimagLite::String& obsOptions,
-	bool hasTimeEvolution,
-	ConcurrencyType& concurrency)
+	bool hasTimeEvolution)
 {
 	bool verbose = false;
 	typedef typename SparseMatrixType::value_type FieldType;
@@ -103,7 +95,7 @@ bool observeOneFullSweep(
 		//std::cout<<"sTmp="<<sTmp<<"\n";
 	//	n = atoi(sTmp.c_str());
 	//}
-	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,concurrency,verbose);
+	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,verbose);
 	
 	bool ot = false;
 	if (obsOptions.find("ot")!=PsimagLite::String::npos || obsOptions.find("time")!=PsimagLite::String::npos) ot = true;
@@ -178,17 +170,16 @@ bool observeOneFullSweep(
 	return observerLib.endOfData();
 }
 
-template<template<typename,typename> class ModelHelperTemplate,
+template<template<typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
 		  template<typename,typename> class,
                   template<typename,typename> class,
-                  typename,typename,typename,
+                  typename,typename,
          template<typename> class> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop(GeometryType& geometry,
               const PsimagLite::String& targetting,
-              ConcurrencyType& concurrency,
 	      InputNgType::Readable& io,
 	      const DmrgSolverParametersType& params,
               const PsimagLite::String& obsOptions)
@@ -197,15 +188,14 @@ void mainLoop(GeometryType& geometry,
 	typedef Basis<RealType,MySparseMatrix> BasisType;
 	typedef OperatorsBase<OperatorType,BasisType> OperatorsType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
+	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
-	typedef ModelHelperTemplate<LeftRightSuperType,ConcurrencyType> ModelHelperType;
+	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
 	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,PTHREADS_NAME,DmrgSolverParametersType> ModelType;
 	typedef TargettingTemplate<PsimagLite::LanczosSolver,
 	                           InternalProductOnTheFly,
 	                           WaveFunctionTransfFactory,
 	                           ModelType,
-	                           ConcurrencyType,
 	                           IoInputType,
 	                           VectorWithOffsetTemplate> TargettingType;
 
@@ -213,7 +203,7 @@ void mainLoop(GeometryType& geometry,
 	
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	
-	ModelType model(params,io,geometry,concurrency);
+	ModelType model(params,io,geometry);
 
 	 //! Read TimeEvolution if applicable:
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
@@ -227,7 +217,7 @@ void mainLoop(GeometryType& geometry,
 		try {
 			moreData = !observeOneFullSweep<VectorWithOffsetType,ModelType,
 			            SparseMatrixType,OperatorType,TargettingType>
-			(dataIo,geometry,model,obsOptions,hasTimeEvolution,concurrency);
+			(dataIo,geometry,model,obsOptions,hasTimeEvolution);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"There's no more data\n";
@@ -270,10 +260,11 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
+	typedef PsimagLite::Concurrency ConcurrencyType;
 	ConcurrencyType concurrency(argc,argv);
 	
 	// print license
-	if (concurrency.root()) {
+	if (ConcurrencyType::root()) {
 		std::cerr<<license;
 		Provenance provenance;
 		std::cout<<provenance;
@@ -304,39 +295,39 @@ int main(int argc,char *argv[])
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
 			mainLoop<ModelHelperSu2,VectorWithOffsets,GroundStateTargetting,MySparseMatrixReal>
-			(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+			(geometry,targetting,io,dmrgSolverParams,options);
 		} else {
 			mainLoop<ModelHelperSu2,VectorWithOffset,GroundStateTargetting,MySparseMatrixReal>
-			(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+			(geometry,targetting,io,dmrgSolverParams,options);
 		}
 		return 0;
 	}
 	if (targetting=="TimeStepTargetting") { 
 		mainLoop<ModelHelperLocal,VectorWithOffsets,TimeStepTargetting,MySparseMatrixComplex>
-		(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;
 	}
 	if (targetting=="DynamicTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,DynamicTargetting,MySparseMatrixReal>
-		(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;
 	}
 	if (targetting=="AdaptiveDynamicTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,AdaptiveDynamicTargetting,MySparseMatrixReal>
-		(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;
 	}
 	if (targetting=="CorrectionTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,CorrectionTargetting,MySparseMatrixReal>
-		(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;
 	}
 	if (targetting=="MettsTargetting") { // experimental, do not use
 		mainLoop<ModelHelperLocal,VectorWithOffsets,MettsTargetting,MySparseMatrixReal>
-		(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;
 	}
 	mainLoop<ModelHelperLocal,VectorWithOffset,GroundStateTargetting,MySparseMatrixReal>
-	(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+	(geometry,targetting,io,dmrgSolverParams,options);
 } // main
 

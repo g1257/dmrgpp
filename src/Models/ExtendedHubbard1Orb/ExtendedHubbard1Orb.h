@@ -96,7 +96,6 @@ namespace Dmrg {
 
 		typedef ModelHubbard<ModelHelperType_,SparseMatrixType,DmrgGeometryType,SharedMemoryTemplate> ModelHubbardType;
 		typedef ModelHelperType_ ModelHelperType;
-		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
@@ -113,12 +112,11 @@ namespace Dmrg {
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 		ExtendedHubbard1Orb(InputValidatorType& io,
-				    DmrgGeometryType const &dmrgGeometry,
-				    ConcurrencyType& concurrency)
-		: ModelBaseType(dmrgGeometry,concurrency),
+				    DmrgGeometryType const &dmrgGeometry)
+		: ModelBaseType(dmrgGeometry),
 		  modelParameters_(io),
 		  dmrgGeometry_(dmrgGeometry),
-		  modelHubbard_(io,dmrgGeometry,concurrency)
+		  modelHubbard_(io,dmrgGeometry)
 		{}
 
 // 		SizeType orbitals() const { return modelHubbard_.orbitals(); }

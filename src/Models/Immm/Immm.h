@@ -109,8 +109,6 @@ namespace Dmrg {
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 		typedef typename ModelHelperType::BlockType Block;
-//		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
-		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef LinkProductImmm<ModelHelperType> LinkProductType;
 		typedef  HilbertSpaceImmm<WordType> HilbertSpaceImmmType;
 		typedef typename HilbertSpaceImmmType::HilbertState HilbertState;
@@ -121,14 +119,13 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
-		//static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
 		static const int FERMION_SIGN = -1;
 		static const int SPIN_UP=HilbertSpaceImmmType::SPIN_UP;
 		static const int SPIN_DOWN=HilbertSpaceImmmType::SPIN_DOWN;
 		static const SizeType NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
-		Immm(InputValidatorType& io,GeometryType const &geometry,ConcurrencyType& concurrency)
-		: ModelBaseType(geometry,concurrency),
+		Immm(InputValidatorType& io,GeometryType const &geometry)
+		: ModelBaseType(geometry),
 		  modelParameters_(io),
 		  geometry_(geometry),
 		  degreesOfFreedom_(geometry_.numberOfSites()),

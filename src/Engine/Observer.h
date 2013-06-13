@@ -99,7 +99,6 @@ namespace Dmrg {
 		typename IoInputType>
 	class Observer {
 		typedef PsimagLite::SparseVector<FieldType> VectorType;
-		typedef typename ModelType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelType::RealType RealType;
 		typedef PsimagLite::Matrix<FieldType> MatrixType;
 		typedef typename ModelType::BasisWithOperatorsType
@@ -112,11 +111,11 @@ namespace Dmrg {
 			CorrelationsSkeletonType;
 		typedef OnePointCorrelations<ObserverHelperType>
 			OnePointCorrelationsType;
-		typedef TwoPointCorrelations<CorrelationsSkeletonType,ConcurrencyType>
+		typedef TwoPointCorrelations<CorrelationsSkeletonType>
 			TwoPointCorrelationsType;
 		typedef FourPointCorrelations<CorrelationsSkeletonType>
 			FourPointCorrelationsType;
-		typedef MultiPointCorrelations<CorrelationsSkeletonType,ConcurrencyType>
+		typedef MultiPointCorrelations<CorrelationsSkeletonType>
 			MultiPointCorrelationsType;
 		typedef PsimagLite::Profiling ProfilingType;
 
@@ -135,14 +134,12 @@ namespace Dmrg {
 				SizeType nf,
 				bool hasTimeEvolution,
 				const ModelType& model,
-				ConcurrencyType& concurrency,
 				bool verbose=false)
 		: helper_(io,nf,model.params().nthreads,hasTimeEvolution,verbose),
-		  concurrency_(concurrency),
 		  verbose_(verbose),
 		  onepoint_(helper_),
 		  skeleton_(helper_,model,verbose),
-		  twopoint_(model.params().nthreads,helper_,skeleton_,concurrency_),
+		  twopoint_(model.params().nthreads,helper_,skeleton_),
 		  fourpoint_(helper_,skeleton_)
 		{}
 
@@ -234,7 +231,7 @@ namespace Dmrg {
 
 			Parallel4PointDsType helper4PointDs(fpd,fourpoint_,model,gammas,pairs);
 
-			threaded4PointDs.loopCreate(pairs.size(),helper4PointDs,model.concurrency());
+			threaded4PointDs.loopCreate(pairs.size(),helper4PointDs);
 
 		}
 
@@ -263,7 +260,7 @@ namespace Dmrg {
 		                       SizeType cols)
 		{
 			size_t nthreads = 1;
-			MultiPointCorrelationsType multi(nthreads,helper_,skeleton_,concurrency_);
+			MultiPointCorrelationsType multi(nthreads,helper_,skeleton_);
 			multi(result,O,rows,cols);
 		}
 
@@ -277,7 +274,6 @@ namespace Dmrg {
 		}
 
 		ObserverHelperType helper_;
-		ConcurrencyType& concurrency_;
 		bool verbose_;
 		OnePointCorrelationsType onepoint_;
 		CorrelationsSkeletonType skeleton_;

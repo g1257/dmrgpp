@@ -29,15 +29,9 @@ typedef float MatrixElementType;
 #include "DmrgSolver.h"
 #include "IoSimple.h"
 #include "Operator.h"
-#ifndef USE_MPI
-#include "ConcurrencySerial.h"
-typedef PsimagLite::ConcurrencySerial<MatrixElementType> ConcurrencyType;
-#else
-#include "ConcurrencyMpi.h"
-typedef PsimagLite::ConcurrencyMpi<MatrixElementType> ConcurrencyType;
-#endif
 #include "ModelFactory.h"
 #include "OperatorsBase.h"
+#include "Concurrency.h"
 #include "Geometry/Geometry.h"
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
@@ -72,12 +66,11 @@ template<typename ModelFactoryType,
 	 template<typename,typename> class InternalProductTemplate,
          typename TargettingType>
 void mainLoop3(GeometryType& geometry,
-              ParametersDmrgSolverType& dmrgSolverParams,
-              ConcurrencyType& concurrency,
-	      InputNgType::Readable& io)
+               ParametersDmrgSolverType& dmrgSolverParams,
+               InputNgType::Readable& io)
 {
 	//! Setup the Model
-	ModelFactoryType model(dmrgSolverParams,io,geometry,concurrency);
+	ModelFactoryType model(dmrgSolverParams,io,geometry);
 
 	//! Read TimeEvolution if applicable:
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
@@ -85,32 +78,31 @@ void mainLoop3(GeometryType& geometry,
 
 	//! Setup the dmrg solver:
 	typedef DmrgSolver<InternalProductTemplate,TargettingType> SolverType;
-	SolverType dmrgSolver(dmrgSolverParams,model,concurrency,tsp);
+	SolverType dmrgSolver(dmrgSolverParams,model,tsp);
 
 	//! Calculate observables:
 	dmrgSolver.main(geometry);
 }
 
-template<template<typename,typename> class ModelHelperTemplate,
+template<template<typename> class ModelHelperTemplate,
 	 template<typename,typename> class InternalProductTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
                   template<typename,typename> class,
                   template<typename,typename> class,
-                  typename,typename,typename,
+                  typename,typename,
                   template<typename> class> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop2(GeometryType& geometry,
-              ParametersDmrgSolverType& dmrgSolverParams,
-              ConcurrencyType& concurrency,
-	      InputNgType::Readable& io)
+               ParametersDmrgSolverType& dmrgSolverParams,
+               InputNgType::Readable& io)
 {
 	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
 	typedef Basis<MatrixElementType,MySparseMatrix> BasisType;
 	typedef OperatorsBase<OperatorType,BasisType> OperatorsType;
-	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
+	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
-	typedef ModelHelperTemplate<LeftRightSuperType,ConcurrencyType> ModelHelperType;
+	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
 	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,
 			     PTHREADS_NAME,ParametersDmrgSolverType> ModelFactoryType;
 
@@ -119,37 +111,34 @@ void mainLoop2(GeometryType& geometry,
 					   InternalProductTemplate,
 					   WaveFunctionTransfFactory,
 					   ModelFactoryType,
-					   ConcurrencyType,
 					   PsimagLite::IoSimple,
 					   VectorWithOffsetTemplate
 					   > TargettingType;
 		mainLoop3<ModelFactoryType, InternalProductTemplate,TargettingType>
-		(geometry,dmrgSolverParams,concurrency,io);
+		(geometry,dmrgSolverParams,io);
 	} else {
 		typedef TargettingTemplate<PsimagLite::LanczosSolver,
 					   InternalProductTemplate,
 					   WaveFunctionTransfFactory,
 					   ModelFactoryType,
-					   ConcurrencyType,
 					   PsimagLite::IoSimple,
 					   VectorWithOffsetTemplate
 					   > TargettingType;
 		mainLoop3<ModelFactoryType,InternalProductTemplate,TargettingType>
-		(geometry,dmrgSolverParams,concurrency,io);
+		(geometry,dmrgSolverParams,io);
 	}
 }
 
-template<template<typename,typename> class ModelHelperTemplate,
+template<template<typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
                   template<typename,typename> class,
                   template<typename,typename> class,
-                  typename,typename,typename,
+                  typename,typename,
                   template<typename> class> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop(GeometryType& geometry,
               ParametersDmrgSolverType& dmrgSolverParams,
-              ConcurrencyType& concurrency,
 	      InputNgType::Readable& io)
 {
 	if (dmrgSolverParams.options.find("InternalProductStored")!=PsimagLite::String::npos) {
@@ -157,19 +146,19 @@ void mainLoop(GeometryType& geometry,
 		         InternalProductStored,
 		         VectorWithOffsetTemplate,
 		         TargettingTemplate,
-		         MySparseMatrix>(geometry,dmrgSolverParams,concurrency,io);
+		         MySparseMatrix>(geometry,dmrgSolverParams,io);
 	} else if (dmrgSolverParams.options.find("InternalProductKron")!=PsimagLite::String::npos) {
 		mainLoop2<ModelHelperTemplate,
 			 InternalProductKron,
 			 VectorWithOffsetTemplate,
 			 TargettingTemplate,
-			 MySparseMatrix>(geometry,dmrgSolverParams,concurrency,io);
+			 MySparseMatrix>(geometry,dmrgSolverParams,io);
 	} else {
  		mainLoop2<ModelHelperTemplate,
 		         InternalProductOnTheFly,
 		         VectorWithOffsetTemplate,
 		         TargettingTemplate,
-		         MySparseMatrix>(geometry,dmrgSolverParams,concurrency,io);
+		         MySparseMatrix>(geometry,dmrgSolverParams,io);
 	}
 }
 
@@ -207,10 +196,11 @@ int main(int argc,char *argv[])
 	}
 
 	//! setup distributed parallelization
+	typedef PsimagLite::Concurrency ConcurrencyType;
 	ConcurrencyType concurrency(argc,argv);
 
 	// print license
-	if (concurrency.root()) {
+	if (ConcurrencyType::root()) {
 		std::cerr<<license;
 		Provenance provenance;
 		std::cout<<provenance;
@@ -243,44 +233,44 @@ int main(int argc,char *argv[])
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
 			mainLoop<ModelHelperSu2,VectorWithOffsets,GroundStateTargetting,
-				MySparseMatrixReal>(geometry,dmrgSolverParams,concurrency,io);
+				MySparseMatrixReal>(geometry,dmrgSolverParams,io);
 		} else {
 			mainLoop<ModelHelperSu2,VectorWithOffset,GroundStateTargetting,
-				MySparseMatrixReal>(geometry,dmrgSolverParams,concurrency,io);
+				MySparseMatrixReal>(geometry,dmrgSolverParams,io);
 		}
 		return 0;
 	}
 	if (targetting=="TimeStepTargetting") { 
 		mainLoop<ModelHelperLocal,VectorWithOffsets,TimeStepTargetting,
-			MySparseMatrixComplex>(geometry,dmrgSolverParams,concurrency,io);
+			MySparseMatrixComplex>(geometry,dmrgSolverParams,io);
 			return 0;
 	}
 	if (targetting=="DynamicTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,DynamicTargetting,
-			MySparseMatrixReal>(geometry,dmrgSolverParams,concurrency,io);
+			MySparseMatrixReal>(geometry,dmrgSolverParams,io);
 			return 0;
 	}
 	if (targetting=="AdaptiveDynamicTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,AdaptiveDynamicTargetting,
-			MySparseMatrixReal>(geometry,dmrgSolverParams,concurrency,io);
+			MySparseMatrixReal>(geometry,dmrgSolverParams,io);
 			return 0;
 	}
 	if (targetting=="CorrectionVectorTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,CorrectionVectorTargetting,
-			MySparseMatrixReal>(geometry,dmrgSolverParams,concurrency,io);
+			MySparseMatrixReal>(geometry,dmrgSolverParams,io);
 			return 0;
 	}
 	if (targetting=="CorrectionTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,CorrectionTargetting,
-			MySparseMatrixReal>(geometry,dmrgSolverParams,concurrency,io);
+			MySparseMatrixReal>(geometry,dmrgSolverParams,io);
 			return 0;
 	}
 	if (targetting=="MettsTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,MettsTargetting,
-			MySparseMatrixReal>(geometry,dmrgSolverParams,concurrency,io);
+			MySparseMatrixReal>(geometry,dmrgSolverParams,io);
 			return 0;
 	}
 	mainLoop<ModelHelperLocal,VectorWithOffset,GroundStateTargetting,
-		MySparseMatrixReal>(geometry,dmrgSolverParams,concurrency,io);
+		MySparseMatrixReal>(geometry,dmrgSolverParams,io);
 }
 

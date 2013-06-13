@@ -134,10 +134,9 @@ namespace Dmrg {
 		{
 		}
 
-		template<typename ConcurrencyType>
-		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz,ConcurrencyType& concurrency)
+		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 		{
-			diagonalise<DensityMatrixElementType,RealType,ConcurrencyType>(data_,eigs,jobz,concurrency);
+			diagonalise<DensityMatrixElementType,RealType>(data_,eigs,jobz);
 		}
 
 		virtual void init(
@@ -182,7 +181,7 @@ namespace Dmrg {
 						progress_.printline(msg,std::cout);
 					}
 
-					threadedDm.loopCreate(target.size(),helperDm,target.model().concurrency());
+					threadedDm.loopCreate(target.size(),helperDm);
 
 //					for (SizeType i=0;i<target.size();i++) {
 //						w = target.weight(i)/target.normSquared(i);

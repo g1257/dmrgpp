@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType,typename ConcurrencyType>
+template<typename LeftRightSuperType>
 class ReflectionOperatorEmpty {
 	typedef typename LeftRightSuperType::SparseMatrixType
 			SparseMatrixType;
@@ -100,7 +100,6 @@ class ReflectionOperatorEmpty {
 public:
 
 	ReflectionOperatorEmpty(LeftRightSuperType& lrs,
-			   ConcurrencyType& concurrency,
 			   SizeType n0,
 			   bool isEnabled,
 			   SizeType expandSys)

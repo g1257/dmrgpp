@@ -121,15 +121,15 @@ namespace Dmrg {
 		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;
 
 	public:
-		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
+
 		typedef typename PsimagLite::Vector<unsigned int long long>::Type HilbertBasisType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
-		ModelHeisenberg(InputValidatorType& io,GeometryType const &geometry,ConcurrencyType& concurrency)
-		: ModelBaseType(geometry,concurrency),
+		ModelHeisenberg(InputValidatorType& io,GeometryType const &geometry)
+		: ModelBaseType(geometry),
 		  modelParameters_(io),
 		  geometry_(geometry), 
 		  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),

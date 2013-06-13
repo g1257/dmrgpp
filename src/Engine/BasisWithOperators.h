@@ -109,7 +109,7 @@ namespace Dmrg {
 	 local operators in a Hilbert space basis. These include functions to create 
 	 an outer product of two given Hilbert spaces, to transform a basis, to truncate a basis, etc. 
 	 */
-	template<typename OperatorsType_,typename ConcurrencyType_>
+	template<typename OperatorsType_>
 	class	BasisWithOperators : public  OperatorsType_::BasisType {
 
 		typedef std::pair<SizeType,SizeType> PairType;
@@ -119,12 +119,11 @@ namespace Dmrg {
 
 		typedef typename OperatorsType_::BasisType::RealType RealType;
 		typedef OperatorsType_ OperatorsType;
-		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename OperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-		typedef BasisWithOperators<OperatorsType,ConcurrencyType> 	ThisType;
+		typedef BasisWithOperators<OperatorsType> 	ThisType;
 		typedef typename BasisType::BasisDataType BasisDataType;
 		typedef typename BasisType::FactorsType FactorsType;
 
@@ -230,20 +229,19 @@ namespace Dmrg {
 		RealType truncateBasis(SparseMatrixType& ftransform,
 				       const BlockMatrixType& transform,
 				       const typename PsimagLite::Vector<RealType>::Type& eigs,
-				       const typename PsimagLite::Vector<SizeType>::Type& removedIndices,
-				       ConcurrencyType& concurrency)
+				       const typename PsimagLite::Vector<SizeType>::Type& removedIndices)
 		{
 			BasisType &parent = *this;
 			RealType error = parent.truncateBasis(ftransform,transform,eigs,removedIndices);
 
-			changeBasisDirect(ftransform,concurrency);
+			changeBasisDirect(ftransform);
 
 			return error;
 		}
 
-		void changeBasisDirect(const SparseMatrixType& ftransform, ConcurrencyType& concurrency)
+		void changeBasisDirect(const SparseMatrixType& ftransform)
 		{
-			operators_.changeBasis(ftransform,this,concurrency); //startEnd);
+			operators_.changeBasis(ftransform,this);
 		}
 
 		void setHamiltonian(SparseMatrixType const &h) { operators_.setHamiltonian(h); }
@@ -367,17 +365,17 @@ namespace Dmrg {
 		}
 	}; // class BasisWithOperators
 
-	template<typename OperatorsType,typename ConcurrencyType>
+	template<typename OperatorsType>
 	std::ostream& operator<<(std::ostream& os,
-	                         const BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
+	                         const BasisWithOperators<OperatorsType>& bwo)
 	{
 		throw PsimagLite::RuntimeError("Unimplemented <<\n");
 		return os;
 	}
 
-	template<typename OperatorsType,typename ConcurrencyType>
+	template<typename OperatorsType>
 	std::istream& operator>>(std::istream& is,
-	                         BasisWithOperators<OperatorsType,ConcurrencyType>& bwo)
+	                         BasisWithOperators<OperatorsType>& bwo)
 	{
 		throw PsimagLite::RuntimeError("Unimplemented >>\n");
 		return is;

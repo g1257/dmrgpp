@@ -104,7 +104,6 @@ namespace Dmrg {
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef LinkProductTj1Orb<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
@@ -123,9 +122,8 @@ namespace Dmrg {
 		enum {SPIN_UP, SPIN_DOWN};
 
 		Tj1Orb(InputValidatorType& io,
-				 GeometryType const &dmrgGeometry,
-				 ConcurrencyType& concurrency)
-		: ModelBaseType(dmrgGeometry,concurrency),
+				 GeometryType const &dmrgGeometry)
+		: ModelBaseType(dmrgGeometry),
 		  modelParameters_(io),
 		  geometry_(dmrgGeometry),
 		  offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n

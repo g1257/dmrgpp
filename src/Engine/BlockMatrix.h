@@ -173,8 +173,8 @@ namespace Dmrg {
 		template<class S,class MatrixInBlockTemplate2>
 		friend std::ostream &operator<<(std::ostream &s,BlockMatrix<S,MatrixInBlockTemplate2> const &A);
 		
-		template<typename S,typename Field,typename ConcurrencyTemplate>
-		friend void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,typename PsimagLite::Vector<Field> ::Type&eigs,char option,ConcurrencyTemplate &concurrency);
+		template<typename S,typename Field>
+		friend void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,typename PsimagLite::Vector<Field> ::Type&eigs,char option);
 		
 	private:
 		int rank_; //the rank of this matrix
@@ -263,11 +263,10 @@ namespace Dmrg {
 	}
 
 	//! Parallel version of the diagonalization of a block diagonal matrix
-	template<typename S,typename Field,typename SomeConcurrencyType>
+	template<typename S,typename Field>
 	void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,
 	                 typename PsimagLite::Vector<Field> ::Type&eigs,
-	                 char option,
-	                 SomeConcurrencyType &concurrency)
+	                 char option)
 	{
 		typename PsimagLite::Vector<Field>::Type eigsTmp;
 		typename PsimagLite::Vector<typename PsimagLite::Vector<Field>::Type>::Type eigsForGather;
@@ -282,7 +281,7 @@ namespace Dmrg {
 
 		eigs.resize(C.rank());
 
-		PsimagLite::Range<SomeConcurrencyType> range(0,C.blocks(),concurrency,weights);
+		PsimagLite::Range range(0,C.blocks(),weights);
 
 		for (;!range.end();range.next()) {
 			SizeType m=range.index();
@@ -292,16 +291,16 @@ namespace Dmrg {
 				eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
 		}
 
-		concurrency.gather(C.data_);
-		concurrency.gather(eigsForGather);
+//		concurrency.gather(C.data_);
+//		concurrency.gather(eigsForGather);
 
 		for (SizeType m=0;m<C.blocks();m++) {
 			for (int j=C.offsets(m);j< C.offsets(m+1);j++) 
 				eigs[j]=eigsForGather[m][j-C.offsets(m)];
 		}
 
-		concurrency.broadcast(eigs);
-		concurrency.broadcast(C.data_);
+//		concurrency.broadcast(eigs);
+//		concurrency.broadcast(C.data_);
 	}
 
 	template<class S,class MatrixInBlockTemplate>

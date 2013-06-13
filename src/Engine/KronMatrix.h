@@ -95,7 +95,6 @@ class KronMatrix {
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename InitKronType::GenGroupType GenGroupType;
-	typedef typename InitKronType::ModelHelperType::ConcurrencyType ConcurrencyType;
 
 public:
 
@@ -213,7 +212,7 @@ private:
 		ParallelConnectionsInnerTypeType parallelConnections;
 		parallelConnections.setThreads(initKron_.numberOfThreads());
 		SizeType npatches = initKron_.patch();
-		parallelConnections.loopCreate(npatches,kc,initKron_.concurrency());
+		parallelConnections.loopCreate(npatches,kc);
 		//hc.sync(parallelConnections,concurrency_);
 	}
 

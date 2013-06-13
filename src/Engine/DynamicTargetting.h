@@ -101,7 +101,6 @@ namespace Dmrg {
 		 template<typename,typename> class InternalProductTemplate,
 	         template<typename,typename> class WaveFunctionTransfTemplate,
 	         typename ModelType_,
-	         typename ConcurrencyType_,
 	         typename IoType_,
 	         template<typename> class VectorWithOffsetTemplate
 	>
@@ -110,7 +109,6 @@ namespace Dmrg {
 	public:
 
 		typedef ModelType_ ModelType;
-		typedef ConcurrencyType_ ConcurrencyType;
 		typedef IoType_ IoType;
 		typedef typename ModelType::RealType RealType;
 		typedef std::complex<RealType> ComplexType;
@@ -557,11 +555,10 @@ namespace Dmrg {
  	template<typename,typename> class InternalProductTemplate,
  	template<typename,typename> class WaveFunctionTransfTemplate,
  	typename ModelType_,
- 	typename ConcurrencyType_,
  	typename IoType_,
  	template<typename> class VectorWithOffsetTemplate>
 	std::ostream& operator<<(std::ostream& os,
-	                         const DynamicTargetting<LanczosSolverTemplate,InternalProductTemplate,WaveFunctionTransfTemplate,ModelType_,ConcurrencyType_,IoType_,VectorWithOffsetTemplate>& tst)
+	                         const DynamicTargetting<LanczosSolverTemplate,InternalProductTemplate,WaveFunctionTransfTemplate,ModelType_,IoType_,VectorWithOffsetTemplate>& tst)
 	{
 		os<<"DT=NothingToSeeHereYet\n";
 		return os;

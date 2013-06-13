@@ -117,7 +117,7 @@ namespace Dmrg {
 		static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
 
 	public:
-		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
+
 		typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 		typedef LinkProductFeAs<ModelHelperType> LinkProductType;
 		typedef   ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
@@ -127,8 +127,8 @@ namespace Dmrg {
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 		static SizeType const REINTERPRET  = 1;
-		ModelFeBasedSc(InputValidatorType& io,GeometryType const &geometry,ConcurrencyType& concurrency)
-			: ModelBaseType(geometry,concurrency),
+		ModelFeBasedSc(InputValidatorType& io,GeometryType const &geometry)
+			: ModelBaseType(geometry),
 			  reinterpretX_(6),
 			  reinterpretY_(9),
 			  modelParameters_(io),

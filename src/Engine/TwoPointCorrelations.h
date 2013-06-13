@@ -89,8 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename CorrelationsSkeletonType,
-		typename ConcurrencyType>
+	template<typename CorrelationsSkeletonType>
 	class TwoPointCorrelations {
 		typedef typename CorrelationsSkeletonType::ObserverHelperType
 			ObserverHelperType;
@@ -102,7 +101,7 @@ namespace Dmrg {
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef PsimagLite::Profiling ProfilingType;
-		typedef TwoPointCorrelations<CorrelationsSkeletonType,ConcurrencyType> ThisType;
+		typedef TwoPointCorrelations<CorrelationsSkeletonType> ThisType;
 
 		static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
@@ -119,12 +118,10 @@ namespace Dmrg {
 			SizeType nthreads,
 			ObserverHelperType& helper,
 			CorrelationsSkeletonType& skeleton,
-			ConcurrencyType& concurrency,
 			bool verbose=false)
 		: nthreads_(nthreads),
 		  helper_(helper),
 		  skeleton_(skeleton),
-		  concurrency_(concurrency),
 		  verbose_(verbose)
 		{}
 
@@ -152,7 +149,7 @@ namespace Dmrg {
 			PsimagLite::Matrix<FieldType> w(rows,cols);
 			Parallel2PointCorrelationsType helper2Points(w,*this,pairs,O1,O2,fermionicSign);
 
-			threaded2Points.loopCreate(pairs.size(),helper2Points,concurrency_);
+			threaded2Points.loopCreate(pairs.size(),helper2Points);
 
 			return w;
 		}
@@ -287,7 +284,6 @@ namespace Dmrg {
 		SizeType nthreads_;
 		ObserverHelperType& helper_;
 		CorrelationsSkeletonType& skeleton_;
-		ConcurrencyType& concurrency_;
 		bool verbose_;
 	};  //class TwoPointCorrelations
 } // namespace Dmrg

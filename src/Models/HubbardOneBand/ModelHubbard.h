@@ -111,7 +111,7 @@ namespace Dmrg {
 
 	private:
 
-		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;;
+		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;
 		static const int FERMION_SIGN = -1;
 		static const int DEGREES_OF_FREEDOM=2;
 		static const int NUMBER_OF_ORBITALS=1;
@@ -123,7 +123,6 @@ namespace Dmrg {
 
 	public:
 
-		typedef typename ModelHelperType::ConcurrencyType ConcurrencyType;
 		typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 		typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;
@@ -136,9 +135,8 @@ namespace Dmrg {
 		
 		ModelHubbard(InputValidatorType& io,
 			     DmrgGeometryType const &dmrgGeometry,
-			     ConcurrencyType& concurrency,
 			     SizeType offset = DEGREES_OF_FREEDOM)
-		: ModelBaseType(dmrgGeometry,concurrency),
+		: ModelBaseType(dmrgGeometry),
 		  modelParameters_(io),
 		  dmrgGeometry_(dmrgGeometry),
 		  offset_(offset),

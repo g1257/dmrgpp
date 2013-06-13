@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LanczosSolver.h"
 #include "DavidsonSolver.h"
 #include "ParametersForSolver.h"
+#include "Concurrency.h"
 
 namespace Dmrg {
 	
@@ -98,7 +99,6 @@ namespace Dmrg {
 	 
 	 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 		typedef typename TargettingType::ModelType ModelType;
-		typedef typename TargettingType::ConcurrencyType ConcurrencyType;
 		typedef typename TargettingType::IoType IoType;
 		typedef typename TargettingType::BasisType BasisType;
 		typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -114,7 +114,6 @@ namespace Dmrg {
 
 		Diagonalization(const ParametersType& parameters,
                         const ModelType& model,
-                        ConcurrencyType& concurrency,
                         const bool& verbose,
 			ReflectionSymmetryType& reflectionOperator,
                         IoOutType& io,
@@ -122,7 +121,6 @@ namespace Dmrg {
                        WaveFunctionTransfType& waveFunctionTransformation)
 		: parameters_(parameters),
 		  model_(model),
-		  concurrency_(concurrency),
 		  verbose_(verbose),
 		  reflectionOperator_(reflectionOperator),
 		  io_(io),
@@ -250,7 +248,7 @@ namespace Dmrg {
 						lrs.super().partition(i));
 				msg<<" quantumSector="<<quantumSector_;
 				
-				if (verbose_ && concurrency_.root()) {
+				if (verbose_ && PsimagLite::Concurrency::root()) {
 					msg<<" diagonaliseOneBlock, i="<<i;
 					msg<<" and weight="<<weights[i];
 				}
@@ -270,14 +268,14 @@ namespace Dmrg {
 			}
 
 			// calc gs energy
-			if (verbose_ && concurrency_.root()) std::cerr<<"About to calc gs energy\n";
+			if (verbose_ && PsimagLite::Concurrency::root()) std::cerr<<"About to calc gs energy\n";
 			gsEnergy=1e6;
 			for (SizeType i=0;i<total;i++) {
 				if (weights[i]==0) continue;
 				if (energySaved[i]<gsEnergy) gsEnergy=energySaved[i];
 			}
 
-			if (verbose_ && concurrency_.root()) std::cerr<<"About to calc gs vector\n";
+			if (verbose_ && PsimagLite::Concurrency::root()) std::cerr<<"About to calc gs vector\n";
 			//target.reset();
 			counter=0;
 			for (SizeType i=0;i<lrs.super().partition()-1;i++) {
@@ -300,7 +298,7 @@ namespace Dmrg {
 
 			target.setGs(vecSaved,lrs.super());
 
-			if (concurrency_.root()) {
+			if (PsimagLite::Concurrency::root()) {
 				PsimagLite::OstringStream msg;
 				msg.precision(8);
 				msg<<"#Energy="<<gsEnergy;
@@ -427,7 +425,6 @@ namespace Dmrg {
 
 	 	const ParametersType& parameters_;
 		const ModelType& model_;
-		ConcurrencyType& concurrency_;
 		const bool& verbose_;
 		ReflectionSymmetryType& reflectionOperator_;
 		IoOutType& io_;

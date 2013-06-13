@@ -146,8 +146,6 @@ public:
 		return model_.params().nthreads;
 	}
 
-	const ConcurrencyType& concurrency() const { return model_.concurrency(); }
-
 	const ArrayOfMatStructType& xc(SizeType ic) const
 	{
 		return *xc_[ic];

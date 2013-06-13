@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 
 namespace Dmrg {
-	template<typename LeftRightSuperType_,typename ConcurrencyType_>
+	template<typename LeftRightSuperType_>
 	class ModelHelperLocal {
 
 		typedef PsimagLite::PackIndices PackIndicesType;
@@ -97,7 +97,6 @@ namespace Dmrg {
 		typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename OperatorsType::OperatorType OperatorType;
-		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef typename BasisType::RealType RealType;

@@ -345,16 +345,14 @@ namespace Dmrg {
 
 		SizeType size() const { return reducedOperators_.size(); }
 
-		template<typename ConcurrencyType>
-		void gather(ConcurrencyType& concurrency)
+		void gather()
 		{
-			Dmrg::gather(reducedOperators_,concurrency);
+			Dmrg::gather(reducedOperators_);
 		}
 
-		template<typename ConcurrencyType>
-		void broadcast(ConcurrencyType& concurrency)
+		void broadcast()
 		{
-			Dmrg::broadcast(reducedOperators_,concurrency);
+			Dmrg::broadcast(reducedOperators_);
 		}
 
 		template<typename IoOutputter>

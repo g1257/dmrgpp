@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename CorrelationsSkeletonType,typename ConcurrencyType>
+template<typename CorrelationsSkeletonType>
 class MultiPointCorrelations {
 	typedef typename CorrelationsSkeletonType::ObserverHelperType
 	ObserverHelperType;
@@ -99,7 +99,7 @@ class MultiPointCorrelations {
 	typedef typename VectorType::value_type FieldType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef PsimagLite::Profiling ProfilingType;
-	typedef MultiPointCorrelations<CorrelationsSkeletonType,ConcurrencyType> ThisType;
+	typedef MultiPointCorrelations<CorrelationsSkeletonType> ThisType;
 
 	static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 	static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
@@ -115,12 +115,10 @@ public:
 	MultiPointCorrelations(SizeType nthreads,
 	                       ObserverHelperType& helper,
 	                       CorrelationsSkeletonType& skeleton,
-	                       ConcurrencyType& concurrency,
 	                       bool verbose=false)
 	    : nthreads_(nthreads),
 	      helper_(helper),
 	      skeleton_(skeleton),
-	      concurrency_(concurrency),
 	      verbose_(verbose)
 	{}
 
@@ -186,7 +184,6 @@ private:
 	SizeType nthreads_;
 	ObserverHelperType& helper_;
 	CorrelationsSkeletonType& skeleton_;
-	ConcurrencyType& concurrency_;
 	bool verbose_;
 };  //class MultiPointCorrelations
 } // namespace Dmrg

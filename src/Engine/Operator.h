@@ -149,11 +149,9 @@ namespace Dmrg {
 
 	template<typename RealType_,
 	         typename SparseMatrixType,
-	         typename ConcurrencyType,
 	         template<typename,typename> class SomeVectorTemplate,
 	         typename SomeAllocatorType>
-	void gather(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorType>& op,
-	            ConcurrencyType& concurrency)
+	void gather(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorType>& op)
 	{
 		SomeVectorTemplate<SparseMatrixType*,typename PsimagLite::Allocator<SparseMatrixType*>::Type> data(op.size());
 //		PsimagLite::Vector<int*>::Type fermionSign(op.size());
@@ -162,16 +160,14 @@ namespace Dmrg {
 //		PsimagLite::Vector<typename Operator<RealType_,SparseMatrixType>::Type::Su2RelatedType*> su2Related(op.size());
 
 		fillOperator(data,op);
-		concurrency.gather(data);
+//		concurrency.gather(data);
 	}
 
 	template<typename RealType_,
 	         typename SparseMatrixType,
-	         typename ConcurrencyType,
 	         template<typename,typename> class SomeVectorTemplate,
 	         typename SomeAllocatorType>
-	void broadcast(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorType>& op,
-	               ConcurrencyType& concurrency)
+	void broadcast(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorType>& op)
 	{
 		SomeVectorTemplate<SparseMatrixType*,typename PsimagLite::Allocator<SparseMatrixType*>::Type> data(op.size());
 //		PsimagLite::Vector<int*>::Type fermionSign(op.size());
@@ -181,7 +177,7 @@ namespace Dmrg {
 
 		fillOperator(data,op);
 
-		concurrency.broadcast(data);
+//		concurrency.broadcast(data);
 	}
 
 	template<typename RealType,typename SparseMatrixType>

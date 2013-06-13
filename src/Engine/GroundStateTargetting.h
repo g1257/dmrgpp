@@ -97,13 +97,11 @@ namespace Dmrg {
 			template<typename,typename> class InternalProductTemplate,
      			template<typename,typename> class WaveFunctionTransfTemplate,
      			typename ModelType_,
-			typename ConcurrencyType_,
    			typename IoType_,
       			template<typename> class VectorWithOffsetTemplate>
 	class GroundStateTargetting {
 		public:
 			typedef ModelType_ ModelType;
-			typedef ConcurrencyType_ ConcurrencyType;
 			typedef IoType_ IoType;
 			
 			typedef PsimagLite::IoSimple::In IoInputType;
@@ -268,13 +266,12 @@ namespace Dmrg {
 	template<typename,typename> class InternalProductTemplate,
 	template<typename,typename> class WaveFunctionTransfTemplate,
 	typename ModelType_,
-	typename ConcurrencyType_,
 	typename IoType_,
 	template<typename> class VectorWithOffsetTemplate>
 	std::ostream& operator<<(std::ostream& os,
 			const GroundStateTargetting<LanczosSolverTemplate,
 			InternalProductTemplate,
-			WaveFunctionTransfTemplate,ModelType_,ConcurrencyType_,IoType_,
+			WaveFunctionTransfTemplate,ModelType_,IoType_,
 			VectorWithOffsetTemplate>& tst)
 	{
 		os<<"GSTWeightGroundState=1\n";

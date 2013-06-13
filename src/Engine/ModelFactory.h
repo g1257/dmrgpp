@@ -137,12 +137,10 @@ namespace Dmrg {
 		typedef typename ModelHelperType::BlockType Block;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename ModelHubbardType::InputValidatorType InputValidatorType;
-		typedef typename ModelHelperType::ConcurrencyType
-				ConcurrencyType;
 		typedef typename ModelHelperType::BasisType MyBasis;
 		typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-		typedef ReflectionOperatorEmpty<LeftRightSuperType,ConcurrencyType> ReflectionSymmetryType;
+		typedef ReflectionOperatorEmpty<LeftRightSuperType> ReflectionSymmetryType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename ModelHubbardType::LinkProductStructType LinkProductStructType;
@@ -159,11 +157,9 @@ namespace Dmrg {
 
 		ModelFactory(const ParametersType& params,
 			     InputValidatorType& io,
-			     const GeometryType& geometry,
-			     ConcurrencyType& concurrency)
+			     const GeometryType& geometry)
 		: params_(params),
 		  geometry_(geometry),
-		  concurrency_(concurrency),
 		  hilbertSize_(geometry.numberOfSites()),
 		  q_(hilbertSize_.size()),
 		  basis_(q_.size()),
@@ -177,37 +173,37 @@ namespace Dmrg {
 		{
 			PsimagLite::String name = params.model;
 			if (name=="HubbardOneBand") {
-				modelHubbard_ = new ModelHubbardType(io,geometry,concurrency);
+				modelHubbard_ = new ModelHubbardType(io,geometry);
 				ModelHubbardType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND;
 				init(modelHubbard_);
 			} else if (name=="HeisenbergSpinOneHalf") {
-				modelHeisenberg_ = new ModelHeisenbergType(io,geometry,concurrency);
+				modelHeisenberg_ = new ModelHeisenbergType(io,geometry);
 				ModelHeisenbergType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HEISENBERG_SPIN_ONEHALF;
 				init(modelHeisenberg_);
 			} else if (name=="HubbardOneBandExtended") {
-				modelHubbardExt_ = new ModelHubbardExtType(io,geometry,concurrency);
+				modelHubbardExt_ = new ModelHubbardExtType(io,geometry);
 				ModelHubbardExtType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND_EXT;
 				init(modelHubbardExt_);
 			} else  if (name=="FeAsBasedSc") {
-				modelFeAs_ = new FeBasedScType(io,geometry,concurrency);
+				modelFeAs_ = new FeBasedScType(io,geometry);
 				FeBasedScType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=FEAS;
 				init(modelFeAs_);
 			} else if (name=="FeAsBasedScExtended") {
-				modelFeAsExt_ = new FeBasedScExtType(io,geometry,concurrency);
+				modelFeAsExt_ = new FeBasedScExtType(io,geometry);
 				FeBasedScExtType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=FEAS_EXT;
 				init(modelFeAsExt_);
 			} else if (name=="Immm") {
-				modelImmm_ = new ImmmType(io,geometry,concurrency);
+				modelImmm_ = new ImmmType(io,geometry);
 				ImmmType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=IMMM;
 				init(modelImmm_);
 			} else if (name=="Tj1Orb") {
-				modelTj1Orb_ = new Tj1OrbType(io,geometry,concurrency);
+				modelTj1Orb_ = new Tj1OrbType(io,geometry);
 				Tj1OrbType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=TJ_1ORB;
 				init(modelTj1Orb_);
@@ -244,8 +240,6 @@ namespace Dmrg {
 				break;
 			}
 		}
-
-		const ConcurrencyType& concurrency() const { return concurrency_; }
 
 		const GeometryType& geometry() const { return geometry_; }
 
@@ -651,7 +645,6 @@ namespace Dmrg {
 
 		const ParametersType& params_;	
 		const GeometryType& geometry_;
-		ConcurrencyType& concurrency_;
 		typename PsimagLite::Vector<SizeType>::Type hilbertSize_;
 		typename PsimagLite::Vector<typename PsimagLite::Vector<SizeType>::Type>::Type q_;
 		typename PsimagLite::Vector<HilbertBasisType>::Type basis_;

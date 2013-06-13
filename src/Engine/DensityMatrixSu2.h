@@ -148,10 +148,9 @@ namespace Dmrg {
 			}
 		}
 
-		template<typename ConcurrencyType>
-		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz,ConcurrencyType& concurrency)
+		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 		{
-			diagonalise<DensityMatrixElementType,RealType,ConcurrencyType>(data_,eigs,jobz,concurrency);
+			diagonalise<DensityMatrixElementType,RealType>(data_,eigs,jobz);
 			
 			//make sure non-maximals are equal to maximals
 			// this is needed because otherwise there's no assure that m-independence

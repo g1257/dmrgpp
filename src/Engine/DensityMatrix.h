@@ -154,14 +154,12 @@ namespace Dmrg {
 			densityMatrixImpl_->check2(direction);
 		}
 
-		template<typename ConcurrencyType>
-		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz,
-				ConcurrencyType& concurrency)
+		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 		{
 			if (!DmrgBasisType::useSu2Symmetry()) {
-				densityMatrixLocal_.diag(eigs,jobz,concurrency);
+				densityMatrixLocal_.diag(eigs,jobz);
 			} else {
-				densityMatrixSu2_.diag(eigs,jobz,concurrency);
+				densityMatrixSu2_.diag(eigs,jobz);
 			}
 		}
 

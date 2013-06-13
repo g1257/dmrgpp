@@ -182,16 +182,13 @@ transformed operator can be used (or not because of the reason limitation above)
 			return operators_.size();
 		}
 
-		template<typename ConcurrencyType>
 		void changeBasis(const SparseMatrixType& ftransform,
-		                 const BasisType* thisBasis,
-				 ConcurrencyType &concurrency)
-// 		                 const std::pair<SizeType,SizeType>& startEnd)
+		                 const BasisType* thisBasis)
 		{
 			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
 			SizeType total = numberOfOperators();
 
-			PsimagLite::Range<ConcurrencyType> range(0,total,concurrency);
+			PsimagLite::Range range(0,total);
 			for (;!range.end();range.next()) {
 				SizeType k = range.index();
 				if (isExcluded(k,thisBasis)) {
@@ -203,11 +200,11 @@ transformed operator can be used (or not because of the reason limitation above)
 			}
 
 			if (!useSu2Symmetry_) {
-				gather(operators_,concurrency);
-				broadcast(operators_,concurrency);
+				gather(operators_);
+				broadcast(operators_);
 			} else {
-				reducedOpImpl_.gather(concurrency);
-				reducedOpImpl_.broadcast(concurrency);
+				reducedOpImpl_.gather();
+				reducedOpImpl_.broadcast();
 			}
 
 			changeBasis(hamiltonian_,ftransform);

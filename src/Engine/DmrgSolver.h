@@ -103,30 +103,23 @@ namespace Dmrg {
 		typedef typename ModelType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 
+		static const SizeType CONCURRENCY_RANK = 0;
+
 	public:
 		typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelType::MyBasis MyBasis;
 		typedef typename MyBasis::RealType RealType;
 		typedef typename MyBasis::BlockType BlockType;
 		typedef typename ModelType::BasisWithOperatorsType MyBasisWithOperators;
-		typedef typename ModelType::ModelHelperType::LeftRightSuperType
-				LeftRightSuperType;
+		typedef typename ModelType::ModelHelperType::LeftRightSuperType LeftRightSuperType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
-		typedef typename ModelType::ModelHelperType::ConcurrencyType
-				ConcurrencyType;
-// 		/*typedef TargettingTemplate<PsimagLite::LanczosSolver,InternalProductTemplate,WaveFunctionTransfFactory,
-//   				ModelType,ConcurrencyType,IoType,VectorWithOffsetTemplate> TargettingType;*/
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 		typedef typename ModelType::InputValidatorType InputValidatorType;
 		typedef ParametersDmrgSolver<RealType,InputValidatorType> ParametersType;
 		typedef Diagonalization<ParametersType,TargettingType,InternalProductTemplate> DiagonalizationType;
-
-// 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
-
 		typedef Truncation<LeftRightSuperType,ParametersType,TargettingType> TruncationType;
-
 		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
 		typedef typename ModelType::GeometryType GeometryType;
 		typedef Checkpoint<ParametersType,TargettingType> CheckpointType;
@@ -140,26 +133,24 @@ namespace Dmrg {
 
 		DmrgSolver(ParametersDmrgSolver<RealType,InputValidatorType> const &parameters,
 		           ModelType const &model,
-		           ConcurrencyType &concurrency,
 		           TargettingParamsType& targetStruct)
 		: parameters_(parameters),
 		  model_(model),
-		  concurrency_(concurrency),
 		  targetStruct_(targetStruct),
 		  appInfo_("DmrgSolver:"),
 		  verbose_(false),
 		  lrs_("pSprime","pEprime","pSE"),
-		  io_(parameters_.filename,concurrency.rank()),
+		  io_(parameters_.filename,CONCURRENCY_RANK),
 		  ioIn_(parameters_.filename),
-		  progress_("DmrgSolver",concurrency.rank()),
+		  progress_("DmrgSolver",CONCURRENCY_RANK),
 		  quantumSector_(0),
 		  stepCurrent_(0),
-		  checkpoint_(parameters_,concurrency.rank()),
+		  checkpoint_(parameters_,CONCURRENCY_RANK),
 		  wft_(parameters_),
-		  reflectionOperator_(lrs_,concurrency,model_.hilbertSize(0),parameters_.useReflectionSymmetry,EXPAND_SYSTEM),
-		  diagonalization_(parameters,model,concurrency,verbose_,
+		  reflectionOperator_(lrs_,model_.hilbertSize(0),parameters_.useReflectionSymmetry,EXPAND_SYSTEM),
+		  diagonalization_(parameters,model,verbose_,
 				   reflectionOperator_,io_,quantumSector_,wft_),
-		  truncate_(reflectionOperator_,wft_,concurrency_,parameters_,
+		  truncate_(reflectionOperator_,wft_,parameters_,
 			    model_.geometry().maxConnections(),verbose_)
 		{
 			io_.print(appInfo_);
@@ -595,7 +586,6 @@ namespace Dmrg {
 		PsimagLite::MemoryUsage musage_;
 		ParametersDmrgSolver<RealType,InputValidatorType> parameters_;
 		const ModelType& model_;
-		ConcurrencyType& concurrency_;
 		const TargettingParamsType& targetStruct_;
 		PsimagLite::ApplicationInfo appInfo_;
 		bool verbose_;

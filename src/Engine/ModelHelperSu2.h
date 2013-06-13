@@ -90,7 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg { 	
 	
-	template<typename LeftRightSuperType_,typename ConcurrencyType_>
+	template<typename LeftRightSuperType_>
 	class ModelHelperSu2  {
 		
 		typedef std::pair<SizeType,SizeType> PairType;
@@ -105,7 +105,6 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-		typedef ConcurrencyType_ ConcurrencyType;
 		typedef typename OperatorsType::BasisType BasisType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef typename BasisType::RealType RealType;
@@ -439,7 +438,7 @@ namespace Dmrg {
 	private:
 		int m_;
 		const LeftRightSuperType&  lrs_;
-		Su2Reduced<LeftRightSuperType,ConcurrencyType_> su2reduced_;
+		Su2Reduced<LeftRightSuperType> su2reduced_;
 	};
 } // namespace Dmrg
 /*@}*/

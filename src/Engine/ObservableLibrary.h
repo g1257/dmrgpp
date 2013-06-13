@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h" // in PsimagLite
 #include "PreOperatorSiteDependent.h"
 #include "PreOperatorSiteIndependent.h"
+#include "Concurrency.h"
 
 namespace Dmrg {
 	
@@ -91,7 +92,6 @@ namespace Dmrg {
 		typedef typename ModelType::OperatorType OperatorType;
 		typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 		typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
-		typedef typename ModelType::ConcurrencyType ConcurrencyType;
 		typedef typename ModelType::RealType RealType;
 
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
@@ -108,14 +108,11 @@ namespace Dmrg {
 				SizeType numberOfSites,
 				bool hasTimeEvolution,
 				const ModelType& model,
-				ConcurrencyType& concurrency,
 				bool verbose)
 		: numberOfSites_(numberOfSites),
 		  hasTimeEvolution_(hasTimeEvolution),
 		  model_(model),
-		  concurrency_(concurrency),
-		  observe_(io,numberOfSites-2,hasTimeEvolution,model,
-				  concurrency,verbose),
+		  observe_(io,numberOfSites-2,hasTimeEvolution,model,verbose),
 				 szsz_(0,0)
 		{
 			if (hasTimeEvolution) {
@@ -147,7 +144,7 @@ namespace Dmrg {
 			} else if (label=="szsz") {
 				MatrixType Sz = model_.naturalOperator("z",site,0);
 				szsz_ = observe_.correlations(Sz,Sz,1,rows,cols);
-				if (concurrency_.root()) {
+				if (PsimagLite::Concurrency::root()) {
 					std::cout<<"OperatorSz:\n";
 					std::cout<<szsz_;
 				}
@@ -156,7 +153,7 @@ namespace Dmrg {
 				const MatrixType& sPlus = model_.naturalOperator("+",site,0);
 				MatrixType sPlusT = transposeConjugate(sPlus);
 				sPlusSminus_ = observe_.correlations(sPlus,sPlusT,1,rows,cols);
-				if (concurrency_.root()) {
+				if (PsimagLite::Concurrency::root()) {
 						std::cout<<"OperatorSplus:\n";
 						std::cout<<sPlusSminus_;
 					}
@@ -165,7 +162,7 @@ namespace Dmrg {
 				const MatrixType& sMinus = model_.naturalOperator("-",site,0);
 				MatrixType sMinusT = transposeConjugate(sMinus);
 				sMinusSplus_= observe_.correlations(sMinus,sMinusT,1,rows,cols);
-				if (concurrency_.root()) {
+				if (PsimagLite::Concurrency::root()) {
 					std::cout<<"OperatorSminus:\n";
 					std::cout<<sMinusSplus_;
 				}
@@ -181,7 +178,7 @@ namespace Dmrg {
 						spinTotal(i,j) = static_cast<RealType>(0.5)*(sPlusSminus_(i,j) +
 								sMinusSplus_(i,j)) + szsz_(i,j);
 
-				if (concurrency_.root()) {
+				if (PsimagLite::Concurrency::root()) {
 					std::cout<<"SpinTotal:\n";
 					std::cout<<spinTotal;
 				}
@@ -308,7 +305,7 @@ namespace Dmrg {
 		{
 			const MatrixType& v =
 				observe_.correlations(op1,op2,fermionSign,rows,cols);;
-			if (concurrency_.root()) {
+			if (PsimagLite::Concurrency::root()) {
 				if (hasTimeEvolution_)
 					std::cout<<"#Time="<<observe_.time(threadId)<<"\n";
 				std::cout<<label<<":\n";
@@ -432,7 +429,6 @@ namespace Dmrg {
 		SizeType numberOfSites_;
 		bool hasTimeEvolution_;
 		const ModelType& model_; // not the owner
-		ConcurrencyType& concurrency_; // not the owner
 		ObserverType observe_;
 		SparseMatrixType matrixNup_,matrixNdown_;
 		MatrixType szsz_,sPlusSminus_,sMinusSplus_;
