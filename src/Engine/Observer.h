@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // for operator*
 #include "Profiling.h"
 #include "Parallel4PointDs.h"
+#include "MultiPointCorrelations.h"
 
 namespace Dmrg {
 	
@@ -115,6 +116,8 @@ namespace Dmrg {
 			TwoPointCorrelationsType;
 		typedef FourPointCorrelations<CorrelationsSkeletonType>
 			FourPointCorrelationsType;
+		typedef MultiPointCorrelations<CorrelationsSkeletonType,ConcurrencyType>
+			MultiPointCorrelationsType;
 		typedef PsimagLite::Profiling ProfilingType;
 
 		static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
@@ -249,6 +252,19 @@ namespace Dmrg {
 				   bool corner = false)
 		{
 			return onepoint_.template hookForZero<ApplyOperatorType>(site,A,corner);
+		}
+
+		template<typename VectorLikeType>
+		typename PsimagLite::EnableIf
+		<PsimagLite::IsVectorLike<VectorLikeType>::True,void>::Type
+		multiCorrelations(VectorLikeType& result,
+		                       const MatrixType& O,
+		                       SizeType rows,
+		                       SizeType cols)
+		{
+			size_t nthreads = 1;
+			MultiPointCorrelationsType multi(nthreads,helper_,skeleton_,concurrency_);
+			multi(result,O,rows,cols);
 		}
 
 	private:

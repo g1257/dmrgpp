@@ -162,12 +162,15 @@ bool observeOneFullSweep(
 		} // if dd4
 	}
 
+	if (modelName.find("HubbardOneBand")!=PsimagLite::String::npos &&
+	    obsOptions.find("multi")!=PsimagLite::String::npos) {
+		observerLib.measure("multi",rows,n);
+	}
+
 	if (obsOptions.find("s+s-")!=PsimagLite::String::npos) {
 		observerLib.measure("s+s-",rows,n);
 	}
-//	if (obsOptions.find("s-s+")!=PsimagLite::String::npos) {
-//		observerLib.measure("s-s+",rows,n);
-//	}
+
 	if (obsOptions.find("ss")!=PsimagLite::String::npos) {
 		observerLib.measure("ss",rows,n);
 	}

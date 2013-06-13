@@ -217,6 +217,21 @@ namespace Dmrg {
 						std::cout<<"\n";
 					}
 				}
+			} else if (label == "multi") {
+				if (model_.params().model!="HubbardOneBand")
+					throw PsimagLite::RuntimeError("multi: not for this model\n");
+				MatrixType myMatrix(4,4);
+				myMatrix(0,0) = myMatrix(3,3) = 1.0;
+				myMatrix(1,1) = myMatrix(2,2) = -1.0;
+
+//				myMatrix(0,0) = 0; myMatrix(3,3) = 2.0;
+//				myMatrix(1,1) = 1; myMatrix(2,2) = 1.0;
+
+				typename PsimagLite::Vector<FieldType>::Type result;
+				observe_.multiCorrelations(result,myMatrix,rows,cols);
+				for (SizeType i=0;i<result.size();i++) {
+					std::cout<<i<<" "<<result[i]<<"\n";
+				}
 			} else {
 				PsimagLite::String s = "Unknown label: " + label + "\n";
 				throw PsimagLite::RuntimeError(s.c_str());
