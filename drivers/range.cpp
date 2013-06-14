@@ -22,35 +22,94 @@
  *
  */
 
-#include "Range.h"
+#include "Concurrency.h"
+#include "Parallelizer.h"
 #include <iostream>
 
-typedef double RealType;
+class MyLoop {
 
-#ifndef USE_MPI
-#include "ConcurrencySerial.h"
-typedef PsimagLite::ConcurrencySerial<> ConcurrencyType;
-#else
-#include "ConcurrencyMpi.h"
-typedef PsimagLite::ConcurrencyMpi <RealType> ConcurrencyType;
-#endif
+	typedef PsimagLite::Concurrency ConcurrencyType;
+
+public:
+
+	MyLoop(SizeType nthreads)
+	    : sum_(nthreads)
+	{}
+
+	void thread_function_(SizeType threadNum,
+	                      SizeType blockSize,
+	                      SizeType total,
+	                      typename ConcurrencyType::MutexType* myMutex)
+	{
+		for (SizeType p=0;p<blockSize;p++) {
+			SizeType taskNumber = threadNum*blockSize + p;
+			if (taskNumber>=total) break;
+
+			std::cout<<"This is thread number "<<threadNum;
+			std::cout<<" and taskNumber="<<taskNumber<<"\n";
+
+			SizeType ind = ConcurrencyType::storageIndex(threadNum);
+			sum_[ind] += taskNumber;
+		}
+	}
+
+	template<typename SomeParallelType>
+	SizeType sum(SomeParallelType& p)
+	{
+		if (ConcurrencyType::mode == ConcurrencyType::MPI) {
+			SizeType tmp = sum_[0];
+			p.gather(tmp);
+			p.bcast(tmp);
+			return tmp;
+		}
+		return sumInternal(sum_);
+	}
+
+private:
+
+	template<typename SomeVectorType>
+	typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,
+	                              typename SomeVectorType::value_type>::Type
+	sumInternal(SomeVectorType& v)
+	{
+		typename SomeVectorType::value_type tmp = 0;
+		for (size_t i=0;i<v.size();i++) {
+			tmp += v[i];
+		}
+		return tmp;
+	}
+
+	PsimagLite::Vector<SizeType>::Type sum_;
+};
 
 int main(int argc,char *argv[])
 {
+
+	typedef PsimagLite::Concurrency ConcurrencyType;
 	ConcurrencyType concurrency(argc,argv);
-	SizeType total = 10;
-	PsimagLite::Range < ConcurrencyType > range(0,total,concurrency);
 
-	RealType sum = 0.0;
-	while (!range.end()) {
-		sum += range.index();
-		range.next();
+	typedef MyLoop HelperType;
+	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
+	ParallelizerType threadObject;
+
+	if (argc < 3) return 1;
+
+	SizeType total = atoi(argv[1]);
+
+	SizeType nthreads = 1;
+	if (ConcurrencyType::mode == ConcurrencyType::PTHREADS) {
+		if (argc != 3) return 1;
+		nthreads = atoi(argv[2]);
 	}
-	concurrency.reduce(sum);
+	ParallelizerType::setThreads(nthreads);
+
+	HelperType helper(nthreads);
+
+	std::cout<<"Using "<<threadObject.name();
+	std::cout<<" with "<<threadObject.threads()<<" threads.\n";
+	threadObject.loopCreate(total,helper);
+
+	SizeType sum = helper.sum(threadObject);
+
 	if (concurrency.root()) std::cout<<"sum="<<sum<<"\n";
-
-	PsimagLite::Range < ConcurrencyType > range2(0,total,concurrency);
-	for (;!range2.end();range2.next()) {
-		std::cout<<"rank="<<concurrency.rank()<<" "<<range2.index()<<"\n";
-	}
 }

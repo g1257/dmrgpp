@@ -77,6 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CONCURRENCY_HEADER_H
 #define CONCURRENCY_HEADER_H
 #include <stdexcept>
+#include <cassert>
 #include "Vector.h"
 #include "Mpi.h"
 
@@ -85,33 +86,42 @@ namespace PsimagLite {
 class Concurrency {
 public:
 
-	class Info {
-
-	public:
-
-		enum {SERIAL,PTHREADS,MPI};
+	static SizeType mode;
 
 #ifndef USE_PTHREADS
-		typedef int MutexType;
-		static const SizeType mode = PTHREADS;
-
+	typedef int MutexType;
 #else
-
-#ifdef USE_MPI
-		static const SizeType mode = MPI;
-#else
-		static const SizeType mode = SERIAL;
+	typedef pthread_mutex_t MutexType;
 #endif
 
-		typedef pthread_mutex_t MutexType;
+	enum {SERIAL=0,PTHREADS=1,MPI=2,PTHREADS_AND_MPI=3};
 
-#endif
+	static SizeType storageIndex(SizeType threadNum)
+	{
+		switch (mode) {
+		case SERIAL:
+			assert(threadNum == 0);
+		case PTHREADS:
+			return threadNum;
+		case MPI:
+			return 0;
+		}
+		throw RuntimeError("storageIndex PTHREADS_AND_MPI not supported yet\n");
+	}
 
-	};
 
 	Concurrency(int argc, char *argv[])
 	{
+		mode = 0;
+#ifdef USE_PTHREADS
+		mode |= 1;
+#endif
+#ifdef USE_MPI
 		MPI::init(argc,argv);
+		mode |= 2;
+#endif
+		if (mode == PTHREADS_AND_MPI)
+			throw RuntimeError("mode PTHREADS_AND_MPI not supported yet\n");
 	}
 
 	~Concurrency()
@@ -138,6 +148,8 @@ public:
 	static void reduce(DataType& v,MPI::CommType mpiComm = MPI::COMM_WORLD) {}
 
 };
+
+SizeType Concurrency::mode = 0;
 } // namespace PsimagLite 
 
 /*@}*/	

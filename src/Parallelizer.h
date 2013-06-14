@@ -96,7 +96,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #endif // USE_PTHREADS
 
 namespace PsimagLite {
-template<typename ConcurrencyType,typename InstanceType>
+template<typename InstanceType>
 class Parallelizer
 #ifdef USE_PTHREADS
         : public Pthreads<InstanceType> {

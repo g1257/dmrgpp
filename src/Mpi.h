@@ -165,7 +165,7 @@ public:
 	}
 
 	template<typename T>
-	void broadcast(T& t)
+	void bcast(T& t)
 	{
 		throw PsimagLite::RuntimeError("mpi gather unimplemented\n");
 	}

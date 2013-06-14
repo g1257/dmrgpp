@@ -1,11 +1,11 @@
 
 LDFLAGS =       -lm  -lpthread /usr/lib64/liblapack.so.3 /usr/lib64/libblas.so.3
 CPPFLAGS = -Werror -Wall -I../src -I../src/JSON -I../src/JSON/JsonParser # -DUSE_CUSTOM_ALLOCATOR
-CXX = g++ -g3
+CXX = g++ -g3 -DUSE_PTHREADS
 all: $(EXENAME)
 HEADERSH = ../src/AkimaSpline.h ../src/Vector.h ../src/SampleCRSMatrix.h ../src/Minimizer.h
 EXECUTABLES = sparseSolverTest testCRSMatrix rungeKuttaTest combineContinuedFraction \
-continuedFractionCollection gitrev jsonExample \
+continuedFractionCollection gitrev jsonExample range \
 kernelPolynomial linearPrediction options randomTest svd testLapack threads
 
 all: $(EXECUTABLES)

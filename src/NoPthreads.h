@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define NO_PTHREADS_HEADER_H
 
 #include <iostream>
+#include <cassert>
 #include "String.h"
 
 // bogus: to compile without pthreads
@@ -111,7 +112,7 @@ public:
 	{}
 
 	template<typename T>
-	void broadcast(T& t)
+	void bcast(T& t)
 	{}
 
 }; // NoPthreads
