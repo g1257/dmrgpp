@@ -139,13 +139,16 @@ template<typename InstanceType>
 class Mpi {
 public:
 
-	static void setThreads(SizeType dummy) { } // dummy
+	Mpi(SizeType npthreads=1,MPI::CommType comm = MPI::COMM_WORLD)
+	    : comm_(comm)
+	{
+	}
 
 	void loopCreate(SizeType total,
 	                InstanceType& pfh)
 	{
-		SizeType procs = threads(MPI::COMM_WORLD);
-		SizeType rank = MPI::commRank(MPI::COMM_WORLD);
+		SizeType procs = threads(comm_);
+		SizeType rank = MPI::commRank(comm_);
 		SizeType block = static_cast<SizeType>(total/procs);
 		if (total % procs !=0) block++;
 		pfh.thread_function_(rank,block,total,0);
@@ -153,9 +156,9 @@ public:
 
 	String name() const { return "mpi"; }
 
-	SizeType threads(MPI::CommType mpiComm=MPI::COMM_WORLD) const
+	SizeType threads() const
 	{
-		return MPI::commSize(mpiComm);
+		return MPI::commSize((comm_));
 	}
 
 	template<typename T>
@@ -175,6 +178,10 @@ public:
 	{
 		throw PsimagLite::RuntimeError("mpi bcast unimplemented\n");
 	}
+
+private:
+
+	MPI::CommType comm_;
 
 }; // Mpi
 

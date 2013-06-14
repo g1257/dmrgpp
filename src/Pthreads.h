@@ -109,11 +109,12 @@ void *thread_function_wrapper(void *dummyPtr)
 namespace PsimagLite {
 template<typename PthreadFunctionHolderType>
 class Pthreads  {
-public:
-	Pthreads()
-	{}
 
-	static void setThreads(SizeType nthreads) {nthreads_=nthreads; }
+public:
+
+	Pthreads(SizeType npthreads,int comm = 0)
+	    : nthreads_(npthreads)
+	{}
 
 	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
 	{
@@ -158,13 +159,12 @@ public:
 	{}
 
 private:
-	static SizeType nthreads_;
+
+	SizeType nthreads_;
 	pthread_mutex_t mutex_;
 
 }; // Pthreads class
 
-template<typename PthreadFunctionHolderType>
-SizeType Pthreads<PthreadFunctionHolderType>::nthreads_=1;
 } // namespace Dmrg
 
 /*@}*/

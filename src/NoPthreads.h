@@ -96,7 +96,11 @@ namespace PsimagLite {
 template<typename PthreadFunctionHolderType>
 class NoPthreads {
 public:
-	static void setThreads(SizeType dummy) { } // dummy
+
+	NoPthreads(SizeType npthreads=1,int comm = 0)
+	{
+		assert(npthreads==1);
+	}
 	
 	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
 	{

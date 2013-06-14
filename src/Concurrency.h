@@ -94,6 +94,11 @@ public:
 #else
 	typedef pthread_mutex_t MutexType;
 #endif
+#ifndef USE_MPI
+	typedef int CommType;
+#else
+	typedef MPI::CommType CommType;
+#endif
 
 	enum {SERIAL=0,PTHREADS=1,MPI=2,PTHREADS_AND_MPI=3};
 
@@ -123,13 +128,15 @@ public:
 		throw RuntimeError("storageIndex PTHREADS_AND_MPI not supported yet\n");
 	}
 
-	Concurrency(int argc, char *argv[])
+	Concurrency(int argc, char *argv[],size_t nthreads)
 	{
+		npthreads = nthreads;
 		mode = 0;
 		npthreads = 1;
 #ifdef USE_PTHREADS
 		mode |= 1;
 #endif
+		assert(npthreads == 1);
 #ifdef USE_MPI
 		MPI::init(argc,argv);
 		mode |= 2;

@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PARALLELIZER_H
 #include <stdexcept>
 #include "Vector.h"
+#include "Concurrency.h"
 
 #ifdef USE_PTHREADS
 
@@ -100,16 +101,22 @@ template<typename InstanceType>
 class Parallelizer
 #ifdef USE_PTHREADS
         : public Pthreads<InstanceType> {
+	typedef Pthreads<InstanceType> BaseType;
 #else
 #ifdef USE_MPI
-	: public Mpi<InstanceType> {
+        : public Mpi<InstanceType> {
+	typedef Mpi<InstanceType> BaseType;
 #else
         : public NoPthreads<InstanceType>  {
+	typedef NoPthreads<InstanceType> BaseType;
 #endif
 #endif
 
 public:
 
+	Parallelizer(SizeType npthreads,Concurrency::CommType comm)
+	    : BaseType(npthreads,comm)
+	{}
 
 };
 } // namespace PsimagLite 

@@ -86,22 +86,23 @@ int main(int argc,char *argv[])
 {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	ConcurrencyType concurrency(argc,argv);
-
-	typedef MyLoop HelperType;
-	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
-	ParallelizerType threadObject;
-
-	if (argc < 3) return 1;
-
-	SizeType total = atoi(argv[1]);
 
 	SizeType nthreads = 1;
 	if (ConcurrencyType::mode == ConcurrencyType::PTHREADS) {
 		if (argc != 3) return 1;
 		nthreads = atoi(argv[2]);
 	}
-	ParallelizerType::setThreads(nthreads);
+
+	ConcurrencyType concurrency(argc,argv,nthreads);
+
+	typedef MyLoop HelperType;
+	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
+	ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
+	                              PsimagLite::MPI::COMM_WORLD);
+
+	if (argc < 3) return 1;
+
+	SizeType total = atoi(argv[1]);
 
 	HelperType helper(nthreads,total);
 
