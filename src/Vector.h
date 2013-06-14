@@ -228,6 +228,18 @@ namespace PsimagLite {
 		
 	}
 
+	template<typename SomeVectorType>
+	typename EnableIf<IsVectorLike<SomeVectorType>::True,
+	                  typename SomeVectorType::value_type>::Type
+	sum(SomeVectorType& v)
+	{
+		typename SomeVectorType::value_type tmp = 0;
+		for (size_t i=0;i<v.size();i++) {
+			tmp += v[i];
+		}
+		return tmp;
+	}
+
 	template<typename T,typename A>
 	void split(std::vector<T,A>& v,const char* s1,char sep)
 	{

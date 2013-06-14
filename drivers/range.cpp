@@ -33,7 +33,8 @@ class MyLoop {
 public:
 
 	MyLoop(SizeType nthreads,SizeType total)
-	    : sum_(nthreads),v_(total)
+	    : sum_(ConcurrencyType::storageSize(nthreads)),
+	      v_(total)
 	{}
 
 	void thread_function_(SizeType threadNum,
@@ -63,7 +64,7 @@ public:
 			p.bcast(tmp);
 			return tmp;
 		}
-		return sumInternal(sum_);
+		return PsimagLite::sum(sum_);
 	}
 
 	template<typename SomeParallelType>
@@ -76,18 +77,6 @@ public:
 	}
 
 private:
-
-	template<typename SomeVectorType>
-	typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,
-	                              typename SomeVectorType::value_type>::Type
-	sumInternal(SomeVectorType& v)
-	{
-		typename SomeVectorType::value_type tmp = 0;
-		for (size_t i=0;i<v.size();i++) {
-			tmp += v[i];
-		}
-		return tmp;
-	}
 
 	PsimagLite::Vector<SizeType>::Type sum_;
 	PsimagLite::Vector<SizeType>::Type v_;

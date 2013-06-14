@@ -87,6 +87,7 @@ class Concurrency {
 public:
 
 	static SizeType mode;
+	static SizeType npthreads;
 
 #ifndef USE_PTHREADS
 	typedef int MutexType;
@@ -95,6 +96,19 @@ public:
 #endif
 
 	enum {SERIAL=0,PTHREADS=1,MPI=2,PTHREADS_AND_MPI=3};
+
+	static SizeType storageSize(SizeType npthreads)
+	{
+		switch (mode) {
+		case SERIAL:
+			assert(npthreads == 1);
+		case PTHREADS:
+			return npthreads;
+		case MPI:
+			return 1;
+		}
+		throw RuntimeError("storageIndex PTHREADS_AND_MPI not supported yet\n");
+	}
 
 	static SizeType storageIndex(SizeType threadNum)
 	{
@@ -109,10 +123,10 @@ public:
 		throw RuntimeError("storageIndex PTHREADS_AND_MPI not supported yet\n");
 	}
 
-
 	Concurrency(int argc, char *argv[])
 	{
 		mode = 0;
+		npthreads = 1;
 #ifdef USE_PTHREADS
 		mode |= 1;
 #endif
@@ -150,6 +164,7 @@ public:
 };
 
 SizeType Concurrency::mode = 0;
+SizeType Concurrency::npthreads = 1;
 } // namespace PsimagLite 
 
 /*@}*/	
