@@ -209,8 +209,9 @@ private:
 		KronConnectionsType kc(initKron_,W,V);
 		typedef typename InitKronType::template ParallelConnectionsInner<KronConnectionsType> ParallelConnectionsInnerType;
 		typedef typename ParallelConnectionsInnerType::Type ParallelConnectionsInnerTypeType;
-		ParallelConnectionsInnerTypeType parallelConnections;
-		parallelConnections.setThreads(initKron_.numberOfThreads());
+		ParallelConnectionsInnerTypeType parallelConnections(PsimagLite::Concurrency::npthreads,
+		                                                     PsimagLite::MPI::COMM_WORLD);
+
 		SizeType npatches = initKron_.patch();
 		parallelConnections.loopCreate(npatches,kc);
 		//hc.sync(parallelConnections,concurrency_);

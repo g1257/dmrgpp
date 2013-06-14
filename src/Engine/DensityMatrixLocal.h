@@ -173,8 +173,8 @@ namespace Dmrg {
 				// target all other states if any:
 				if (target.size()>0) {
 
-					PTHREADS_NAME<ParallelDensityMatrixType> threadedDm;
-					PTHREADS_NAME<ParallelDensityMatrixType>::setThreads(target.model().params().nthreads);
+					PTHREADS_NAME<ParallelDensityMatrixType> threadedDm(PsimagLite::Concurrency::npthreads,
+					                                                    PsimagLite::MPI::COMM_WORLD);
 					if (threadedDm.name()=="pthreads") {
 						PsimagLite::OstringStream msg;
 						msg<<"Threading with "<<threadedDm.threads();

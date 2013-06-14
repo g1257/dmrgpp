@@ -336,8 +336,7 @@ namespace Dmrg {
 	{
 		typedef typename BlockMatrix<S,PsimagLite::Matrix<S> >::LoopForDiag LoopForDiagType;
 		typedef PsimagLite::Parallelizer<LoopForDiagType> ParallelizerType;
-		ParallelizerType threadObject;
-		ParallelizerType::setThreads(PsimagLite::Concurrency::npthreads);
+		ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,PsimagLite::MPI::COMM_WORLD);
 
 		LoopForDiagType helper(C,eigs,option);
 

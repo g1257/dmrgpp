@@ -232,7 +232,8 @@ namespace Dmrg {
 				}
 			}
 
-			ParallelConnectionsType parallelConnections;
+			ParallelConnectionsType parallelConnections(PsimagLite::Concurrency::npthreads,
+			                                            PsimagLite::MPI::COMM_WORLD);
 			parallelConnections.loopCreate(total,hc);
 		}
 

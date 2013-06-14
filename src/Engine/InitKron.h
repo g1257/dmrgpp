@@ -141,11 +141,6 @@ public:
 
 	}
 
-	SizeType numberOfThreads() const
-	{
-		return model_.params().nthreads;
-	}
-
 	const ArrayOfMatStructType& xc(SizeType ic) const
 	{
 		return *xc_[ic];

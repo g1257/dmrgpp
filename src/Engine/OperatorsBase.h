@@ -255,8 +255,8 @@ transformed operator can be used (or not because of the reason limitation above)
 		                 const BasisType* thisBasis)
 		{
 			typedef PsimagLite::Parallelizer<MyLoop> ParallelizerType;
-			ParallelizerType threadObject;
-			ParallelizerType::setThreads(ConcurrencyType::npthreads);
+			ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
+			                              PsimagLite::MPI::COMM_WORLD);
 
 			MyLoop helper(useSu2Symmetry_,reducedOpImpl_,operators_,ftransform,thisBasis);
 

@@ -89,6 +89,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "Parallel4PointDs.h"
 #include "MultiPointCorrelations.h"
+#include "Concurrency.h"
+#include "Parallelizer.h"
 
 namespace Dmrg {
 	
@@ -139,7 +141,7 @@ namespace Dmrg {
 		  verbose_(verbose),
 		  onepoint_(helper_),
 		  skeleton_(helper_,model,verbose),
-		  twopoint_(model.params().nthreads,helper_,skeleton_),
+		  twopoint_(helper_,skeleton_),
 		  fourpoint_(helper_,skeleton_)
 		{}
 
@@ -226,8 +228,8 @@ namespace Dmrg {
 			}
 
 			typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
-			PTHREADS_NAME<Parallel4PointDsType> threaded4PointDs;
-			PTHREADS_NAME<Parallel4PointDsType>::setThreads(model.params().nthreads);
+			PTHREADS_NAME<Parallel4PointDsType> threaded4PointDs(PsimagLite::Concurrency::npthreads,
+			                                                     PsimagLite::MPI::COMM_WORLD);
 
 			Parallel4PointDsType helper4PointDs(fpd,fourpoint_,model,gammas,pairs);
 

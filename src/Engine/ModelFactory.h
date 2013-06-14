@@ -174,37 +174,30 @@ namespace Dmrg {
 			PsimagLite::String name = params.model;
 			if (name=="HubbardOneBand") {
 				modelHubbard_ = new ModelHubbardType(io,geometry);
-				ModelHubbardType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND;
 				init(modelHubbard_);
 			} else if (name=="HeisenbergSpinOneHalf") {
 				modelHeisenberg_ = new ModelHeisenbergType(io,geometry);
-				ModelHeisenbergType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HEISENBERG_SPIN_ONEHALF;
 				init(modelHeisenberg_);
 			} else if (name=="HubbardOneBandExtended") {
 				modelHubbardExt_ = new ModelHubbardExtType(io,geometry);
-				ModelHubbardExtType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=HUBBARD_ONE_BAND_EXT;
 				init(modelHubbardExt_);
 			} else  if (name=="FeAsBasedSc") {
 				modelFeAs_ = new FeBasedScType(io,geometry);
-				FeBasedScType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=FEAS;
 				init(modelFeAs_);
 			} else if (name=="FeAsBasedScExtended") {
 				modelFeAsExt_ = new FeBasedScExtType(io,geometry);
-				FeBasedScExtType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=FEAS_EXT;
 				init(modelFeAsExt_);
 			} else if (name=="Immm") {
 				modelImmm_ = new ImmmType(io,geometry);
-				ImmmType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=IMMM;
 				init(modelImmm_);
 			} else if (name=="Tj1Orb") {
 				modelTj1Orb_ = new Tj1OrbType(io,geometry);
-				Tj1OrbType::ParallelConnectionsType::setThreads(params.nthreads);
 				model_=TJ_1ORB;
 				init(modelTj1Orb_);
 			} else {

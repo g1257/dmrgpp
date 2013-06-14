@@ -85,6 +85,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // for operator*
 #include "Profiling.h"
 #include "Parallel2PointCorrelations.h"
+#include "Concurrency.h"
+#include "Parallelizer.h"
 
 namespace Dmrg {
 	
@@ -113,13 +115,10 @@ namespace Dmrg {
 
 		typedef typename ObserverHelperType::MatrixType MatrixType;
 
-		TwoPointCorrelations(
-			SizeType nthreads,
-			ObserverHelperType& helper,
+		TwoPointCorrelations(ObserverHelperType& helper,
 			CorrelationsSkeletonType& skeleton,
 			bool verbose=false)
-		: nthreads_(nthreads),
-		  helper_(helper),
+		: helper_(helper),
 		  skeleton_(skeleton),
 		  verbose_(verbose)
 		{}
@@ -142,8 +141,8 @@ namespace Dmrg {
 			}
 
 			typedef Parallel2PointCorrelations<RealType,ThisType> Parallel2PointCorrelationsType;
-			PTHREADS_NAME<Parallel2PointCorrelationsType> threaded2Points;
-			PTHREADS_NAME<Parallel2PointCorrelationsType>::setThreads(nthreads_);
+			PTHREADS_NAME<Parallel2PointCorrelationsType> threaded2Points(PsimagLite::Concurrency::npthreads,
+			                                                              PsimagLite::MPI::COMM_WORLD);
 
 			PsimagLite::Matrix<FieldType> w(rows,cols);
 			Parallel2PointCorrelationsType helper2Points(w,*this,pairs,O1,O2,fermionicSign);
@@ -280,7 +279,6 @@ namespace Dmrg {
 			skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption,true,threadId);
 		}
 
-		SizeType nthreads_;
 		ObserverHelperType& helper_;
 		CorrelationsSkeletonType& skeleton_;
 		bool verbose_;
