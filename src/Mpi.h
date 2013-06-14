@@ -165,9 +165,15 @@ public:
 	}
 
 	template<typename T>
+	void allGather(T& v)
+	{
+		throw PsimagLite::RuntimeError("mpi allGather unimplemented\n");
+	}
+
+	template<typename T>
 	void bcast(T& t)
 	{
-		throw PsimagLite::RuntimeError("mpi gather unimplemented\n");
+		throw PsimagLite::RuntimeError("mpi bcast unimplemented\n");
 	}
 
 }; // Mpi

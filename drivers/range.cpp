@@ -32,8 +32,8 @@ class MyLoop {
 
 public:
 
-	MyLoop(SizeType nthreads)
-	    : sum_(nthreads)
+	MyLoop(SizeType nthreads,SizeType total)
+	    : sum_(nthreads),v_(total)
 	{}
 
 	void thread_function_(SizeType threadNum,
@@ -50,6 +50,7 @@ public:
 
 			SizeType ind = ConcurrencyType::storageIndex(threadNum);
 			sum_[ind] += taskNumber;
+			v_[taskNumber] = taskNumber * taskNumber;
 		}
 	}
 
@@ -63,6 +64,15 @@ public:
 			return tmp;
 		}
 		return sumInternal(sum_);
+	}
+
+	template<typename SomeParallelType>
+	const PsimagLite::Vector<SizeType>::Type& v(SomeParallelType& p)
+	{
+		if (ConcurrencyType::mode == ConcurrencyType::MPI) {
+			p.allGather(v_);
+		}
+		return v_;
 	}
 
 private:
@@ -80,6 +90,7 @@ private:
 	}
 
 	PsimagLite::Vector<SizeType>::Type sum_;
+	PsimagLite::Vector<SizeType>::Type v_;
 };
 
 int main(int argc,char *argv[])
@@ -103,7 +114,7 @@ int main(int argc,char *argv[])
 	}
 	ParallelizerType::setThreads(nthreads);
 
-	HelperType helper(nthreads);
+	HelperType helper(nthreads,total);
 
 	std::cout<<"Using "<<threadObject.name();
 	std::cout<<" with "<<threadObject.threads()<<" threads.\n";
@@ -112,4 +123,6 @@ int main(int argc,char *argv[])
 	SizeType sum = helper.sum(threadObject);
 
 	if (concurrency.root()) std::cout<<"sum="<<sum<<"\n";
+
+	std::cout<<helper.v(threadObject);
 }

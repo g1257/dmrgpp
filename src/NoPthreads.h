@@ -112,6 +112,10 @@ public:
 	{}
 
 	template<typename T>
+	void allGather(T& v)
+	{}
+
+	template<typename T>
 	void bcast(T& t)
 	{}
 
