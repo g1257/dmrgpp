@@ -3,9 +3,9 @@
 use strict;
 use warnings;
 
-my ($beta)=@ARGV;
+my ($beta,$operator)=@ARGV;
 
-defined($beta) or die "USAGE: $0 beta\n";
+defined($operator) or die "USAGE: $0 beta operator\n";
 
 my $minSite = 1000;
 my $maxSite = 0;
@@ -13,8 +13,9 @@ my @value;
 my @value2;
 my @counter;
 
+my $label = "P0|".$operator;
 while(<STDIN>) {
-	if (/P0/) {
+	if (/\Q$label/) {
 		my @temp=split;
 		my $site = $temp[0];
 		my $val = $temp[1];
@@ -62,5 +63,6 @@ for (my $i=0;$i<$total;$i++) {
 }
 ($denominator>0) or die "$0: No data found yet\n";
 $average /= $denominator;
-print STDERR "#Average=".$average."\n";
+print STDERR "#Average= ".$average."\n";
+print STDERR "#Total= $total\n";
 

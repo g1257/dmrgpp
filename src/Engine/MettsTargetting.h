@@ -334,11 +334,12 @@ namespace Dmrg {
 				bool hasCollapsed = mettsCollapse_(targetVectors_[n1],targetVectors_[n1-1],sites,direction);
 
 				if (hasCollapsed) {
+					const OperatorType& A = getObservableToTest(0,model_.params().model);
 					PsimagLite::String s = "  COLLAPSEHERE  ";
 					for (SizeType i=0;i<sites.size();i++) {
-						test(targetVectors_[n1],targetVectors_[n1],direction,s,sites[i],false);
+						test(targetVectors_[n1],targetVectors_[n1],direction,A,s,sites[i],false);
 						if (isAtBorder(direction,sites[0]))
-							test(targetVectors_[n1],targetVectors_[n1],direction,s,sites[i],true);
+							test(targetVectors_[n1],targetVectors_[n1],direction,A,s,sites[i],true);
 					}
 				}
 			}
@@ -769,21 +770,40 @@ namespace Dmrg {
 				assert(std::norm(phi)>1e-6);
 			}
 
-			// in situ computation:
-			void cocoon(SizeType direction,const typename PsimagLite::Vector<SizeType>::Type& block,bool corner)
+			void cocoon(SizeType direction,
+			            const typename PsimagLite::Vector<SizeType>::Type& block,
+			            bool corner)
 			{
-				for (SizeType i=0;i<block.size();i++)
-					cocoon(direction,block[i],corner);
+				SizeType obsToTest = getObservablesToTest(model_.params().model);
+				for (SizeType i = 0; i < obsToTest; i++) {
+					PsimagLite::String label = getObservableLabel(i,model_.params().model);
+					cocoon(direction,block,corner,getObservableToTest(i,model_.params().model),label);
+				}
 			}
 
 			// in situ computation:
-			void cocoon(SizeType direction,SizeType site,bool corner)
+			void cocoon(SizeType direction,
+			            const typename PsimagLite::Vector<SizeType>::Type& block,
+			            bool corner,
+			            const OperatorType& A,
+			            const PsimagLite::String& label)
+			{
+				for (SizeType i=0;i<block.size();i++)
+					cocoon(direction,block[i],corner,A,label);
+			}
+
+			// in situ computation:
+			void cocoon(SizeType direction,
+			            SizeType site,
+			            bool corner,
+			            const OperatorType& A,
+			            const PsimagLite::String& operatorLabel)
 			{
 				std::cerr<<"-------------&*&*&* In-situ measurements start\n";
 				
 				for (SizeType j=0;j<targetVectors_.size();j++) {
-					PsimagLite::String s = "<P"+ttos(j)+"|A|P"+ttos(j)+">";
-					SizeType site2 = test(targetVectors_[j],targetVectors_[j],direction,s,site,corner);
+					PsimagLite::String s = "<P"+ttos(j)+"|" + operatorLabel + "|P"+ttos(j)+">";
+					SizeType site2 = test(targetVectors_[j],targetVectors_[j],direction,A,s,site,corner);
 					if (stage_==COLLAPSE && j==0) sitesCollapsed_.push_back(site2);
 				}
 				std::cerr<<"-------------&*&*&* In-situ measurements end\n";
@@ -890,12 +910,12 @@ namespace Dmrg {
 			SizeType test(const VectorWithOffsetType& src1,
 			            const VectorWithOffsetType& src2,
 			            SizeType systemOrEnviron,
+			            const OperatorType& A,
 			            const PsimagLite::String& label,
 			            SizeType site,
 			            bool corner) const
 			{
 				VectorWithOffsetType dest;
-				OperatorType A = getObservableToTest(model_.params().model);
 				typename PsimagLite::Vector<SizeType>::Type electrons;
 				findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
@@ -930,24 +950,52 @@ namespace Dmrg {
 				return site2;
 			}
 
-			OperatorType getObservableToTest(const PsimagLite::String& modelName) const
+			SizeType getObservablesToTest(const PsimagLite::String& modelName) const
+			{
+				if (modelName=="HubbardOneBand") return 1;
+
+				if (modelName=="FeAsBasedSc" || modelName=="FeAsBasedScExtended")
+					return 2;
+
+				PsimagLite::String s(__FILE__);
+				s += " " + ttos(__LINE__) + "\n";
+				s += "Model " + modelName + " not supported by MettsTargetting\n";
+				throw PsimagLite::RuntimeError(s.c_str());
+			}
+
+			OperatorType getObservableToTest(size_t ind,const PsimagLite::String& modelName) const
 			{
 				OperatorType A;
 				SizeType site = 0; // sites.first; <-- site-dependent Hilbert space not supported by METTS
 
 				if (modelName=="HubbardOneBand") {
+					assert(ind == 0);
 					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("nup",site,0));
 					A.data = tmpC;
 					A.fermionSign = 1;
 					return A;
 				}
 				if (modelName=="FeAsBasedSc" || modelName=="FeAsBasedScExtended") {
-					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("c",site,0));
+					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("c",site,ind));
 					PsimagLite::CrsMatrix<RealType> tmpCdagger;
 					transposeConjugate(tmpCdagger,tmpC);
 					multiply(A.data,tmpCdagger,tmpC);
 					A.fermionSign = 1;
 					return A;
+				}
+				PsimagLite::String s(__FILE__);
+				s += " " + ttos(__LINE__) + "\n";
+				s += "Model " + modelName + " not supported by MettsTargetting\n";
+				throw PsimagLite::RuntimeError(s.c_str());
+			}
+
+			PsimagLite::String getObservableLabel(size_t i,const PsimagLite::String& modelName) const
+			{
+				if (modelName=="HubbardOneBand") {
+					return "nup";
+				}
+				if (modelName=="FeAsBasedSc" || modelName=="FeAsBasedScExtended") {
+					return "n" + ttos(i);
 				}
 				PsimagLite::String s(__FILE__);
 				s += " " + ttos(__LINE__) + "\n";
