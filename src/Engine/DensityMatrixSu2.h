@@ -150,7 +150,7 @@ namespace Dmrg {
 
 		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 		{
-			diagonalise<DensityMatrixElementType,RealType>(data_,eigs,jobz);
+			diagonalise(data_,eigs,jobz);
 			
 			//make sure non-maximals are equal to maximals
 			// this is needed because otherwise there's no assure that m-independence

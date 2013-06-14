@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define OPERATORS_BASE_H
 
 #include "ReducedOperators.h"
-#include "Range.h"
 #include <cassert>
 #include "ProgressIndicator.h"
 #include "Complex.h"
@@ -119,6 +118,74 @@ transformed operator can be used (or not because of the reason limitation above)
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type ComplexOrRealType;
 		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+		typedef PsimagLite::Concurrency ConcurrencyType;
+
+		class MyLoop {
+
+		public:
+
+			MyLoop(bool useSu2Symmetry,
+			       ReducedOperators<OperatorType,BasisType>& reducedOpImpl,
+			       typename PsimagLite::Vector<OperatorType>::Type& operators,
+			       const SparseMatrixType& ftransform1,
+			       const BasisType* thisBasis1)
+			    : useSu2Symmetry_(useSu2Symmetry),
+			      reducedOpImpl_(reducedOpImpl),
+			      operators_(operators),
+			      ftransform(ftransform1),
+			      thisBasis(thisBasis1)
+			{
+				reducedOpImpl_.prepareTransform(ftransform,thisBasis);
+			}
+
+			void thread_function_(SizeType threadNum,
+			                      SizeType blockSize,
+			                      SizeType total,
+			                      typename ConcurrencyType::MutexType* myMutex)
+			{
+				for (SizeType p=0;p<blockSize;p++) {
+					SizeType taskNumber = threadNum*blockSize + p;
+					if (taskNumber>=total) break;
+
+					SizeType k = taskNumber;
+					if (isExcluded(k,thisBasis)) {
+						operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
+						continue;
+					}
+					if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform);
+					reducedOpImpl_.changeBasis(k);
+				}
+			}
+
+			template<typename SomeParallelType>
+			void gather(SomeParallelType& p)
+			{
+				if (!useSu2Symmetry_) {
+					p.gather(operators_);
+					p.bcast(operators_);
+				} else {
+					reducedOpImpl_.gather(p);
+					reducedOpImpl_.bcast(p);
+				}
+			}
+
+		private:
+
+			bool isExcluded(SizeType k,
+			                const BasisType* thisBasis)
+	// 		               const std::pair<SizeType,SizeType>& startEnd)
+			{
+				if (!EXCLUDE) return false; // <-- this is the safest answer
+	// 			if (k<startEnd.first || k>=startEnd.second) return true;
+				return false;
+			}
+
+			bool useSu2Symmetry_;
+			ReducedOperators<OperatorType,BasisType>& reducedOpImpl_;
+			typename PsimagLite::Vector<OperatorType>::Type& operators_;
+			const SparseMatrixType& ftransform;
+			const BasisType* thisBasis;
+		};
 
 		OperatorsBase(const BasisType* thisBasis)
 		: useSu2Symmetry_(BasisType::useSu2Symmetry()),
@@ -185,33 +252,21 @@ transformed operator can be used (or not because of the reason limitation above)
 		void changeBasis(const SparseMatrixType& ftransform,
 		                 const BasisType* thisBasis)
 		{
-			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
-			SizeType total = numberOfOperators();
+			typedef PsimagLite::Parallelizer<MyLoop> ParallelizerType;
+			ParallelizerType threadObject;
+			ParallelizerType::setThreads(ConcurrencyType::npthreads);
 
-			PsimagLite::Range range(0,total);
-			for (;!range.end();range.next()) {
-				SizeType k = range.index();
-				if (isExcluded(k,thisBasis)) {
-					operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
-					continue;
-				}
-				if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform);
-				reducedOpImpl_.changeBasis(k);
-			}
+			MyLoop helper(useSu2Symmetry_,reducedOpImpl_,operators_,ftransform,thisBasis);
 
-			if (!useSu2Symmetry_) {
-				gather(operators_);
-				broadcast(operators_);
-			} else {
-				reducedOpImpl_.gather();
-				reducedOpImpl_.broadcast();
-			}
+			threadObject.loopCreate(numberOfOperators(),helper); // FIXME: needs weights
+
+			helper.gather(threadObject);
 
 			changeBasis(hamiltonian_,ftransform);
 			reducedOpImpl_.changeBasisHamiltonian();
 		}
 
-		void changeBasis(SparseMatrixType &v,const SparseMatrixType& ftransform)
+		static void changeBasis(SparseMatrixType &v,const SparseMatrixType& ftransform)
 		{
 			SparseMatrixType transformConj;
 			transposeConjugate(transformConj,ftransform);
@@ -356,15 +411,6 @@ transformed operator can be used (or not because of the reason limitation above)
 
 			permute(matrixTmp,v,permutation);
 			permuteInverse(v,matrixTmp,permutation);
-		}
-
-		bool isExcluded(SizeType k,
-			       const BasisType* thisBasis)
-// 		               const std::pair<SizeType,SizeType>& startEnd)
-		{
-			if (!EXCLUDE) return false; // <-- this is the safest answer
-// 			if (k<startEnd.first || k>=startEnd.second) return true;
-			return false;
 		}
 
 		bool useSu2Symmetry_;

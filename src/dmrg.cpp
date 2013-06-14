@@ -219,6 +219,8 @@ int main(int argc,char *argv[])
 	inputCheck.checkForThreads(dmrgSolverParams.nthreads);
 #endif
 
+	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
+
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos) su2=true;
 	PsimagLite::String targetting="GroundStateTargetting";

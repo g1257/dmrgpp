@@ -136,7 +136,7 @@ namespace Dmrg {
 
 		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 		{
-			diagonalise<DensityMatrixElementType,RealType>(data_,eigs,jobz);
+			diagonalise(data_,eigs,jobz);
 		}
 
 		virtual void init(

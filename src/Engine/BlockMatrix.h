@@ -82,8 +82,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <iostream>
 #include "Matrix.h" // in PsimagLite
-#include "Range.h"
 #include "ProgramGlobals.h"
+#include "Concurrency.h"
+#include "Parallelizer.h"
 
 namespace Dmrg {
 
@@ -96,6 +97,98 @@ namespace Dmrg {
 	public:
 
 		typedef MatrixInBlockTemplate BuildingBlockType;
+
+		class LoopForDiag {
+
+			typedef PsimagLite::Concurrency ConcurrencyType;
+			typedef BlockMatrix<T,MatrixInBlockTemplate> BlockMatrixType;
+			typedef typename PsimagLite::Real<T>::Type RealType;
+		public:
+
+			LoopForDiag(BlockMatrixType  &C1,
+			            typename PsimagLite::Vector<RealType>::Type& eigs1,
+	                    char option1)
+			    : C(C1),
+			      eigs(eigs1),
+			      option(option1),
+			      eigsForGather(C.blocks()),
+			      weights(C.blocks())
+			{
+
+				for (SizeType m=0;m<C.blocks();m++) {
+					eigsForGather[m].resize(C.offsets(m+1)-C.offsets(m));
+					weights[m] =  C.offsets(m+1)-C.offsets(m);
+				}
+
+				eigs.resize(C.rank());
+			}
+
+			void thread_function_(SizeType threadNum,
+			                      SizeType blockSize,
+			                      SizeType total,
+			                      typename PsimagLite::Concurrency::MutexType* myMutex)
+			{
+				for (SizeType p=0;p<blockSize;p++) {
+					SizeType taskNumber = threadNum*blockSize + p;
+					if (taskNumber>=total) break;
+
+					SizeType m = taskNumber;
+					PsimagLite::diag(C.data_[m],eigsTmp,option);
+					enforcePhase(C.data_[m]);
+					for (int j=C.offsets(m);j< C.offsets(m+1);j++)
+						eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
+				}
+			}
+
+			template<typename SomeParallelType>
+			void gather(SomeParallelType& p)
+			{
+				if (ConcurrencyType::mode == ConcurrencyType::MPI) {
+					p.allGather(eigs);
+					p.allGather(C.data_);
+				}
+
+				for (SizeType m=0;m<C.blocks();m++) {
+					for (int j=C.offsets(m);j< C.offsets(m+1);j++)
+						eigs[j]=eigsForGather[m][j-C.offsets(m)];
+				}
+			}
+
+		private:
+
+			void enforcePhase(T* v,SizeType n)
+			{
+				T sign1=0;
+				for (SizeType j=0;j<n;j++) {
+					if (std::norm(v[j])>1e-6) {
+						if (std::real(v[j])>0) sign1=1;
+						else sign1= -1;
+						break;
+					}
+				}
+				// get a consistent phase
+				for (SizeType j=0;j<n;j++) v[j] *= sign1;
+			}
+
+			void enforcePhase(typename PsimagLite::Vector<T>::Type& v)
+			{
+				enforcePhase(&(v[0]),v.size());
+			}
+
+			void enforcePhase(PsimagLite::Matrix<T>& a)
+			{
+				T* vpointer = &(a(0,0));
+				for (SizeType i=0;i<a.n_col();i++)
+					enforcePhase(&(vpointer[i*a.n_row()]),a.n_row());
+			}
+
+			BlockMatrixType  &C;
+			typename PsimagLite::Vector<RealType>::Type& eigs;
+			char option;
+			typename PsimagLite::Vector<RealType>::Type eigsTmp;
+			typename PsimagLite::Vector<typename PsimagLite::Vector<RealType>::Type>::Type eigsForGather;
+			typename PsimagLite::Vector<SizeType>::Type weights;
+		};
 
 		BlockMatrix(int rank,int blocks) : rank_(rank),offsets_(blocks+1),data_(blocks) 
 		{
@@ -233,74 +326,22 @@ namespace Dmrg {
 	 	
 	}
 
-	template<typename T>
-	void enforcePhase(T* v,SizeType n)
-	{
-		T sign1=0;
-		for (SizeType j=0;j<n;j++) {
-			if (std::norm(v[j])>1e-6) {
-				if (std::real(v[j])>0) sign1=1;
-				else sign1= -1;
-				break;
-			}
-		}
-		// get a consistent phase
-		for (SizeType j=0;j<n;j++) v[j] *= sign1;
-	}
-
-	template<typename T>
-	void enforcePhase(typename PsimagLite::Vector<T>::Type& v)
-	{
-		enforcePhase(&(v[0]),v.size());
-	}
-
-	template<typename T>
-	void enforcePhase(PsimagLite::Matrix<T>& a)
-	{
-		T* vpointer = &(a(0,0));
-		for (SizeType i=0;i<a.n_col();i++)
-			enforcePhase(&(vpointer[i*a.n_row()]),a.n_row());
-	}
-
 	//! Parallel version of the diagonalization of a block diagonal matrix
-	template<typename S,typename Field>
-	void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,
-	                 typename PsimagLite::Vector<Field> ::Type&eigs,
-	                 char option)
+	template<typename S,typename SomeVectorType>
+	typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,
+	void>::Type
+	diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >& C,
+	            SomeVectorType& eigs,
+	            char option)
 	{
-		typename PsimagLite::Vector<Field>::Type eigsTmp;
-		typename PsimagLite::Vector<typename PsimagLite::Vector<Field>::Type>::Type eigsForGather;
-		typename PsimagLite::Vector<SizeType>::Type weights(C.blocks());
+		typedef typename BlockMatrix<S,PsimagLite::Matrix<S> >::LoopForDiag LoopForDiagType;
+		typedef PsimagLite::Parallelizer<LoopForDiagType> ParallelizerType;
+		ParallelizerType threadObject;
+		ParallelizerType::setThreads(PsimagLite::Concurrency::npthreads);
 
-		eigsForGather.resize(C.blocks());
+		LoopForDiagType helper(C,eigs,option);
 
-		for (SizeType m=0;m<C.blocks();m++) {
-			eigsForGather[m].resize(C.offsets(m+1)-C.offsets(m));
-			weights[m] =  C.offsets(m+1)-C.offsets(m);
-		}
-
-		eigs.resize(C.rank());
-
-		PsimagLite::Range range(0,C.blocks(),weights);
-
-		for (;!range.end();range.next()) {
-			SizeType m=range.index();
-			PsimagLite::diag(C.data_[m],eigsTmp,option);
-			enforcePhase(C.data_[m]);
-			for (int j=C.offsets(m);j< C.offsets(m+1);j++) 
-				eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
-		}
-
-//		concurrency.gather(C.data_);
-//		concurrency.gather(eigsForGather);
-
-		for (SizeType m=0;m<C.blocks();m++) {
-			for (int j=C.offsets(m);j< C.offsets(m+1);j++) 
-				eigs[j]=eigsForGather[m][j-C.offsets(m)];
-		}
-
-//		concurrency.broadcast(eigs);
-//		concurrency.broadcast(C.data_);
+		threadObject.loopCreate(C.blocks(),helper); // FIXME: needs weights
 	}
 
 	template<class S,class MatrixInBlockTemplate>

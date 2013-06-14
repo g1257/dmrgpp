@@ -345,14 +345,16 @@ namespace Dmrg {
 
 		SizeType size() const { return reducedOperators_.size(); }
 
-		void gather()
+		template<typename SomeParallelType>
+		void gather(SomeParallelType& p)
 		{
-			Dmrg::gather(reducedOperators_);
+			p.gather(reducedOperators_);
 		}
 
-		void broadcast()
+		template<typename SomeParallelType>
+		void bcast(SomeParallelType& p)
 		{
-			Dmrg::broadcast(reducedOperators_);
+			p.bcast(reducedOperators_);
 		}
 
 		template<typename IoOutputter>

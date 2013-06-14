@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h" // for operator*
 #include "VectorWithOffset.h" // for operator*
 #include "Profiling.h"
-#include "Range.h"
 
 namespace Dmrg {
 
