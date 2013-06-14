@@ -83,6 +83,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "ProgressIndicator.h"
 #include "Complex.h"
+#include "Concurrency.h"
+#include "Parallelizer.h"
 
 namespace Dmrg {
 /**

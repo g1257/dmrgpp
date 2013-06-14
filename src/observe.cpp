@@ -280,7 +280,7 @@ int main(int argc,char *argv[])
 	//ParametersModelType mp(io);
 	DmrgSolverParametersType dmrgSolverParams(io);
 
-	ConcurrencyType::nthreads = dmrgSolverParams.nthreads;
+	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos) su2=true;

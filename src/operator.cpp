@@ -28,13 +28,7 @@ typedef float RealType;
 #include "IoSimple.h"
 #include "ModelFactory.h"
 #include "OperatorsBase.h"
-#ifndef USE_MPI
-#include "ConcurrencySerial.h"
-typedef PsimagLite::ConcurrencySerial<RealType> ConcurrencyType;
-#else
-#include "ConcurrencyMpi.h"
-typedef PsimagLite::ConcurrencyMpi<RealType> ConcurrencyType;
-#endif
+#include "Concurrency.h"
 #include "Geometry/Geometry.h" 
 #include "CrsMatrix.h"
 #include "ModelHelperLocal.h"
@@ -76,34 +70,32 @@ struct OperatorOptions {
 	PsimagLite::String label;
 };
 
-template<template<typename,typename> class ModelHelperTemplate,
+template<template<typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
-		  template<typename,typename> class,
                   template<typename,typename> class,
-                  typename,typename,typename,
-         template<typename> class> class TargettingTemplate,
+                  template<typename,typename> class,
+                  typename,typename,
+                  template<typename> class> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop(GeometryType& geometry,
               const PsimagLite::String& targetting,
-              ConcurrencyType& concurrency,
-	      InputNgType::Readable& io,
-	      const DmrgSolverParametersType& params,
+              InputNgType::Readable& io,
+              const DmrgSolverParametersType& params,
               const OperatorOptions& obsOptions)
 {
 	typedef Operator<RealType,MySparseMatrix> OperatorType;
 	typedef Basis<RealType,MySparseMatrix> BasisType;
 	typedef OperatorsBase<OperatorType,BasisType> OperatorsType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-	typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType; 
+	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
-	typedef ModelHelperTemplate<LeftRightSuperType,ConcurrencyType> ModelHelperType;
+	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
 	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,PTHREADS_NAME,DmrgSolverParametersType> ModelType;
 	typedef TargettingTemplate<PsimagLite::LanczosSolver,
 	                           InternalProductOnTheFly,
 	                           WaveFunctionTransfFactory,
 	                           ModelType,
-	                           ConcurrencyType,
 	                           IoInputType,
 	                           VectorWithOffsetTemplate> TargettingType;
 
@@ -113,7 +105,7 @@ void mainLoop(GeometryType& geometry,
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	
-	ModelType model(params,io,geometry,concurrency);
+	ModelType model(params,io,geometry);
 	
 
 	MatrixType opC2 = model.naturalOperator(obsOptions.label,obsOptions.site,obsOptions.dof);
@@ -128,6 +120,8 @@ void usage(const char* name)
 
 int main(int argc,char *argv[])
 {
+	typedef PsimagLite::Concurrency ConcurrencyType;
+
 	using namespace Dmrg;
 
 	PsimagLite::String filename="";
@@ -162,7 +156,7 @@ int main(int argc,char *argv[])
 	ConcurrencyType concurrency(argc,argv);
 	
 	// print license
-	if (concurrency.root()) {
+	if (ConcurrencyType::root()) {
 		std::cerr<<license;
 		Provenance provenance;
 		std::cout<<provenance;
@@ -193,39 +187,39 @@ int main(int argc,char *argv[])
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
 			mainLoop<ModelHelperSu2,VectorWithOffsets,GroundStateTargetting,MySparseMatrixReal>
-			(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+			(geometry,targetting,io,dmrgSolverParams,options);
 		} else {
 			mainLoop<ModelHelperSu2,VectorWithOffset,GroundStateTargetting,MySparseMatrixReal>
-			(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+			(geometry,targetting,io,dmrgSolverParams,options);
 		}
 		return 0;
 	}
 	if (targetting=="TimeStepTargetting") { 
 		mainLoop<ModelHelperLocal,VectorWithOffsets,TimeStepTargetting,MySparseMatrixComplex>
-		(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;
 	}
 	if (targetting=="DynamicTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,DynamicTargetting,MySparseMatrixReal>
-		(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;
 	}
 	if (targetting=="AdaptiveDynamicTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,AdaptiveDynamicTargetting,MySparseMatrixReal>
-		(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;
 	}
 	if (targetting=="CorrectionTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,CorrectionTargetting,MySparseMatrixReal>
-		(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;
 	}
 	if (targetting=="MettsTargetting") { // experimental, do not use
 		mainLoop<ModelHelperLocal,VectorWithOffset,MettsTargetting,MySparseMatrixReal>
-		(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;
 	}
 	mainLoop<ModelHelperLocal,VectorWithOffset,GroundStateTargetting,MySparseMatrixReal>
-	(geometry,targetting,concurrency,io,dmrgSolverParams,options);
+	(geometry,targetting,io,dmrgSolverParams,options);
 } // main
 
