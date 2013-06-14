@@ -261,7 +261,7 @@ int main(int argc,char *argv[])
 	}
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	ConcurrencyType concurrency(argc,argv);
+	ConcurrencyType concurrency(argc,argv,1);
 	
 	// print license
 	if (ConcurrencyType::root()) {

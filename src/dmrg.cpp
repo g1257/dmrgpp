@@ -195,9 +195,8 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
-	//! setup distributed parallelization
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	ConcurrencyType concurrency(argc,argv);
+	ConcurrencyType concurrency(argc,argv,1);
 
 	// print license
 	if (ConcurrencyType::root()) {
