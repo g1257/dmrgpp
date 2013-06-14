@@ -9,8 +9,8 @@
  *
  */
 
-#include "JsonReader.h"
-#include "DefaultContext.h"
+#include "JSON/JsonReader.h"
+#include "JSON/JsonParser/DefaultContext.h"
 #include <wchar.h>
 #include <iostream>
 #include <fstream>

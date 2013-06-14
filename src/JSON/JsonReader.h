@@ -20,11 +20,11 @@
 #include <fstream>
 #include <iomanip>
 
-#include "Whatever.h"
+#include "JsonParser/Whatever.h"
 #include "Matrix.h"
 #include "Transposer.h"
-#include "JsonParser.h"
-#include "MatrixParser.h"
+#include "JsonParser/JsonParser.h"
+#include "JsonParser/MatrixParser.h"
 
 namespace dca {
 

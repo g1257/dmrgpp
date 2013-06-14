@@ -17,7 +17,7 @@
 #include <map>
 #include <vector>
 #include "CharacterMapper.h"
-#include "MatrixLike.h"
+#include "../MatrixLike.h"
 
 namespace JsonParser {
   

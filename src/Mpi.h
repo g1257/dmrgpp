@@ -147,7 +147,7 @@ public:
 	void loopCreate(SizeType total,
 	                InstanceType& pfh)
 	{
-		SizeType procs = threads(comm_);
+		SizeType procs = threads();
 		SizeType rank = MPI::commRank(comm_);
 		SizeType block = static_cast<SizeType>(total/procs);
 		if (total % procs !=0) block++;
@@ -158,7 +158,7 @@ public:
 
 	SizeType threads() const
 	{
-		return MPI::commSize((comm_));
+		return MPI::commSize(comm_);
 	}
 
 	template<typename T>

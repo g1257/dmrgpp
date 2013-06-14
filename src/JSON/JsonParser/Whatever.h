@@ -39,10 +39,10 @@ namespace JsonParser {
       WHATEVER_UNKNOWN
     } WhateverType;
   
-    typedef typename PsimagLite::Map<std::wstring,Whatever>::Type WhateverMap;
+    typedef PsimagLite::Map<std::wstring,Whatever>::Type WhateverMap;
     typedef PsimagLite::Vector<Whatever>::Type           WhateverVector;
 
-    typedef typename PsimagLite::Map<std::wstring,const JsonParser::Whatever*>::Type FlatMapType;
+    typedef PsimagLite::Map<std::wstring,const JsonParser::Whatever*>::Type FlatMapType;
 
     
     //====================================================================== WhateverType
