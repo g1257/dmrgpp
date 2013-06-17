@@ -7,6 +7,7 @@ my @drivers = ("sparseSolverTest", "testCRSMatrix", "rungeKuttaTest", "combineCo
 "continuedFractionCollection", "gitrev", "jsonExample", "range",
 "kernelPolynomial", "linearPrediction", "options", "randomTest", "svd", "testLapack", "threads");
 
+my $lapack = findLapack();
 backupMakefile();
 writeMakefile();
 make();
@@ -35,7 +36,7 @@ print FILE<<EOF;
 # Platform: Linux
 # MPI: 0
 
-LDFLAGS =      -llapack    -lm  -lpthread 
+LDFLAGS =      $lapack    -lm  -lpthread 
 CPPFLAGS = -Werror -Wall -I../  -I../src
 CXX = g++ -O3 -DNDEBUG
 
@@ -79,4 +80,41 @@ sub combineAllDrivers
 	}
 	return $buffer;
 }
+
+sub findLapack
+{
+	my $stringToTest = "-llapack -lblas";
+	my $ret = tryWith($stringToTest);
+	return $stringToTest if ($ret == 0);
+
+	$stringToTest = "/usr/lib64/liblapack.so.3 /usr/lib64/libblas.so.3";
+	$ret = tryWith($stringToTest);
+	return $stringToTest if ($ret == 0);
+
+	return "/usr/lib/liblapack.so.3 /usr/lib/libblas.so.3";
+}
+
+sub tryWith
+{
+	my ($stringToTest) = @_;
+	my $tmpfile = `mktemp`;
+	open(FOUT,">$tmpfile") or return 1;
+	print FOUT "int main() {}\n";
+	close(FOUT);
+	my $ret = open(PIPE,"g++ test.cpp $stringToTest  2>&1 | ");
+	if (!$ret) {
+	 	system("rm -f $tmpfile");	
+		return 1;
+	}
+	my $buffer = "";
+	while(<PIPE>) {
+		$buffer .= $_;
+	}
+	close(PIPE);
+	system("rm -f $tmpfile");
+	$buffer =~ s/ //;
+	$ret = ($buffer eq "" or $buffer eq "\n") ? 0 : 1;
+	return $ret;
+}
+
 
