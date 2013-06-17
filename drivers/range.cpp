@@ -46,8 +46,8 @@ public:
 			SizeType taskNumber = threadNum*blockSize + p;
 			if (taskNumber>=total) break;
 
-			std::cout<<"This is thread number "<<threadNum;
-			std::cout<<" and taskNumber="<<taskNumber<<"\n";
+//			std::cout<<"This is thread number "<<threadNum;
+//			std::cout<<" and taskNumber="<<taskNumber<<"\n";
 
 			SizeType ind = ConcurrencyType::storageIndex(threadNum);
 			sum_[ind] += taskNumber;
