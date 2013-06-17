@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #ifdef USE_MPI
 #include <mpi.h>
+#include <loki/TypeTraits.h>
 #endif
 
 namespace PsimagLite {
@@ -89,6 +90,31 @@ namespace MPI {
 #ifdef USE_MPI
 typedef MPI_Comm CommType;
 CommType COMM_WORLD = MPI_COMM_WORLD;
+
+template<typename T>
+struct MpiData
+{
+	static const MPI_Datatype Type;
+};
+
+template<>
+const MPI_Datatype MpiData<unsigned int long>::Type = MPI_LONG;
+
+template<>
+const MPI_Datatype MpiData<unsigned int>::Type = MPI_INTEGER;
+
+void checkError(int errorCode,const PsimagLite::String& caller,CommType comm = COMM_WORLD)
+{
+	if (errorCode == MPI_SUCCESS)
+		return;
+
+	char errorMessage[MPI_MAX_ERROR_STRING];
+	int messageLength = 0;
+	MPI_Error_string(errorCode,errorMessage,&messageLength);
+	std::cerr<<"Error in call to "<<caller<<" ";
+	std::cerr<<errorMessage<<"\n";
+	MPI_Abort(comm, -1);
+}
 
 void init(int argc, char *argv[])
 {
@@ -114,6 +140,70 @@ SizeType commRank(CommType mpiComm)
 	return tmp;
 }
 
+void bcast(SizeType& v,int root = 0, CommType mpiComm = COMM_WORLD)
+{
+	int errorCode = MPI_Bcast(&v,1,MPI_INTEGER,root,mpiComm);
+	checkError(errorCode,"MPI_Bcast",mpiComm);
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True,
+void>::Type allGather(SomeVectorType& v,CommType mpiComm = COMM_WORLD)
+{
+	SomeVectorType recvbuf = v;
+	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
+	int errorCode = MPI_Allgather(&(v[0]),v.size(),datatype,&(recvbuf[0]),v.size(),datatype,mpiComm);
+	checkError(errorCode,"MPI_Allgather",mpiComm);
+
+	v = recvbuf;
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True,
+void>::Type gather(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
+{
+	SomeVectorType recvbuf(v.size());
+	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
+	int errorCode = MPI_Gather(&(v[0]),v.size(),datatype,&(recvbuf[0]),v.size(),datatype,root,mpiComm);
+	checkError(errorCode,"MPI_Gather",mpiComm);
+
+	if (commRank(mpiComm) == root)
+		v = recvbuf;
+}
+
+template<typename NumericType>
+typename EnableIf<Loki::TypeTraits<NumericType>::IsArith,
+void>::Type gather(NumericType& v,int root = 0, CommType mpiComm = COMM_WORLD)
+{
+	int recvbuf = 0;
+	MPI_Datatype datatype = MpiData<NumericType>::Type;
+	int errorCode = MPI_Gather(&v,1,datatype,&recvbuf,1,datatype,root,mpiComm);
+	checkError(errorCode,"MPI_Gather",mpiComm);
+
+	if (commRank(mpiComm) == static_cast<SizeType>(root))
+		v = recvbuf;
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+Loki::TypeTraits<typename SomeVectorType::value_type>::isIntegral,
+void>::Type allReduce(SomeVectorType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
+{
+	SomeVectorType recvbuf = v;
+	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
+	int errorCode = MPI_Allreduce(&(v[0]),&(recvbuf[0]),v.size(),datatype,op,mpiComm);
+	checkError(errorCode,"MPI_Allreduce",mpiComm);
+	v = recvbuf;
+}
+
+void allReduce(SizeType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
+{
+	int result = 0;
+	int errorCode = MPI_Allreduce(&v,&result,1,MPI_INTEGER,op,mpiComm);
+	checkError(errorCode,"MPI_Allreduce",mpiComm);
+	v = result;
+}
+
 #else
 typedef int CommType;
 int COMM_WORLD = 0;
@@ -131,6 +221,22 @@ SizeType commRank(CommType mpiComm)
 {
 	return 0;
 }
+
+template<typename T>
+void bcast(T &t)
+{}
+
+template<typename T>
+void allGather(T &t)
+{}
+
+template<typename T>
+void gather(T &t)
+{}
+
+template<typename T>
+void allReduce(T &t)
+{}
 
 #endif
 } // namespace MPI
@@ -164,19 +270,25 @@ public:
 	template<typename T>
 	void gather(T& t)
 	{
-		throw PsimagLite::RuntimeError("mpi gather unimplemented\n");
+		MPI::gather(t);
 	}
 
 	template<typename T>
 	void allGather(T& v)
 	{
-		throw PsimagLite::RuntimeError("mpi allGather unimplemented\n");
+		MPI::allGather(v);	
+	}
+
+	template<typename T>
+	void allReduce(T& v)
+	{
+		MPI::allReduce(v);
 	}
 
 	template<typename T>
 	void bcast(T& t)
 	{
-		throw PsimagLite::RuntimeError("mpi bcast unimplemented\n");
+		MPI::bcast(t);
 	}
 
 private:

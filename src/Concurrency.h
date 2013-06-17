@@ -132,11 +132,9 @@ public:
 	{
 		npthreads = nthreads;
 		mode = 0;
-		npthreads = 1;
 #ifdef USE_PTHREADS
 		mode |= 1;
 #endif
-		assert(npthreads == 1);
 #ifdef USE_MPI
 		MPI::init(argc,argv);
 		mode |= 2;

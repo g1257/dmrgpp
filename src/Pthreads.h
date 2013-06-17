@@ -158,6 +158,10 @@ public:
 	void bcast(T& t)
 	{}
 
+	template<typename T>
+	void allReduce(T& v)
+	{}
+
 private:
 
 	SizeType nthreads_;

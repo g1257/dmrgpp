@@ -34,7 +34,7 @@ public:
 
 	MyLoop(SizeType nthreads,SizeType total)
 	    : sum_(ConcurrencyType::storageSize(nthreads)),
-	      v_(total)
+	      v_(total,0)
 	{}
 
 	void thread_function_(SizeType threadNum,
@@ -56,23 +56,29 @@ public:
 	}
 
 	template<typename SomeParallelType>
-	SizeType sum(SomeParallelType& p)
+	void sync(SomeParallelType& p)
 	{
 		if (ConcurrencyType::mode == ConcurrencyType::MPI) {
+			assert(sum_.size() == 1);
 			SizeType tmp = sum_[0];
-			p.gather(tmp);
-			p.bcast(tmp);
-			return tmp;
+			p.allReduce(tmp);
+			sum_[0] = tmp;
+
+			p.allReduce(v_);
+		} else {
+			SizeType tmp = PsimagLite::sum(sum_);
+			sum_[0] = tmp;
 		}
-		return PsimagLite::sum(sum_);
 	}
 
-	template<typename SomeParallelType>
-	const PsimagLite::Vector<SizeType>::Type& v(SomeParallelType& p)
+	SizeType sum() const
 	{
-		if (ConcurrencyType::mode == ConcurrencyType::MPI) {
-			p.allGather(v_);
-		}
+		assert(sum_.size() > 0);
+		return sum_[0];
+	}
+
+	const PsimagLite::Vector<SizeType>::Type& v() const
+	{
 		return v_;
 	}
 
@@ -88,10 +94,7 @@ int main(int argc,char *argv[])
 	typedef PsimagLite::Concurrency ConcurrencyType;
 
 	SizeType nthreads = 1;
-	if (ConcurrencyType::mode == ConcurrencyType::PTHREADS) {
-		if (argc != 3) return 1;
-		nthreads = atoi(argv[2]);
-	}
+	if (argc == 3) nthreads = atoi(argv[2]);
 
 	ConcurrencyType concurrency(argc,argv,nthreads);
 
@@ -100,19 +103,23 @@ int main(int argc,char *argv[])
 	ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
 	                              PsimagLite::MPI::COMM_WORLD);
 
-	if (argc < 3) return 1;
+	if (argc < 2) return 1;
 
 	SizeType total = atoi(argv[1]);
 
 	HelperType helper(nthreads,total);
 
-	std::cout<<"Using "<<threadObject.name();
-	std::cout<<" with "<<threadObject.threads()<<" threads.\n";
 	threadObject.loopCreate(total,helper);
 
-	SizeType sum = helper.sum(threadObject);
+	helper.sync(threadObject);
 
-	if (concurrency.root()) std::cout<<"sum="<<sum<<"\n";
+	SizeType sum = helper.sum();
 
-	std::cout<<helper.v(threadObject);
+	if (ConcurrencyType::root()) {
+		std::cout<<"Using "<<threadObject.name();
+		std::cout<<" with "<<threadObject.threads()<<" threads.\n";
+		std::cout<<"sum="<<sum<<"\n";
+		std::cout<<helper.v();
+	}
+		
 }

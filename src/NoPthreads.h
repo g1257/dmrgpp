@@ -123,6 +123,10 @@ public:
 	void bcast(T& t)
 	{}
 
+	template<typename T>
+	void allReduce(T& v)
+	{}
+
 }; // NoPthreads
 } // namespace Dmrg
 /*@}*/
