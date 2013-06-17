@@ -342,6 +342,8 @@ namespace Dmrg {
 		LoopForDiagType helper(C,eigs,option);
 
 		threadObject.loopCreate(C.blocks(),helper); // FIXME: needs weights
+
+		helper.gather(threadObject);
 	}
 
 	template<class S,class MatrixInBlockTemplate>
