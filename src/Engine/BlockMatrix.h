@@ -133,6 +133,7 @@ namespace Dmrg {
 					if (taskNumber>=total) break;
 
 					SizeType m = taskNumber;
+					typename PsimagLite::Vector<RealType>::Type eigsTmp;
 					PsimagLite::diag(C.data_[m],eigsTmp,option);
 					enforcePhase(C.data_[m]);
 					for (int j=C.offsets(m);j< C.offsets(m+1);j++)
@@ -144,7 +145,7 @@ namespace Dmrg {
 			void gather(SomeParallelType& p)
 			{
 				if (ConcurrencyType::mode == ConcurrencyType::MPI) {
-					p.allGather(eigs);
+					p.allGather(eigsForGather);
 					p.allGather(C.data_);
 				}
 
@@ -185,7 +186,6 @@ namespace Dmrg {
 			BlockMatrixType  &C;
 			typename PsimagLite::Vector<RealType>::Type& eigs;
 			char option;
-			typename PsimagLite::Vector<RealType>::Type eigsTmp;
 			typename PsimagLite::Vector<typename PsimagLite::Vector<RealType>::Type>::Type eigsForGather;
 			typename PsimagLite::Vector<SizeType>::Type weights;
 		};
