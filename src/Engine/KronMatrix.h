@@ -83,6 +83,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Matrix.h"
 #include "KronConnections.h"
+#include "Concurrency.h"
+#include "Parallelizer.h"
 
 namespace Dmrg {
 
@@ -207,9 +209,9 @@ private:
 	{
 		typedef KronConnections<InitKronType> KronConnectionsType;
 		KronConnectionsType kc(initKron_,W,V);
-		typedef typename InitKronType::template ParallelConnectionsInner<KronConnectionsType> ParallelConnectionsInnerType;
-		typedef typename ParallelConnectionsInnerType::Type ParallelConnectionsInnerTypeType;
-		ParallelConnectionsInnerTypeType parallelConnections(PsimagLite::Concurrency::npthreads,
+
+		typedef PsimagLite::Parallelizer<KronConnectionsType> ParallelizerType;
+		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
 		                                                     PsimagLite::MPI::COMM_WORLD);
 
 		SizeType npatches = initKron_.patch();

@@ -104,7 +104,7 @@ void mainLoop2(GeometryType& geometry,
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
 	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,
-			     PTHREADS_NAME,ParametersDmrgSolverType> ModelFactoryType;
+	        ParametersDmrgSolverType> ModelFactoryType;
 
 	if (dmrgSolverParams.options.find("ChebyshevSolver")!=PsimagLite::String::npos) {
 		typedef TargettingTemplate<PsimagLite::ChebyshevSolver,

@@ -88,20 +88,19 @@ namespace Dmrg {
 	//! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
 	template<typename ModelHelperType_,
 	typename SparseMatrixType,
-	typename DmrgGeometryType,
-	template<typename> class SharedMemoryTemplate>
-	class ExtendedHubbard1Orb : public ModelBase<ModelHelperType_,SparseMatrixType,DmrgGeometryType,LinkProdExtendedHubbard1Orb<ModelHelperType_>,SharedMemoryTemplate> {
+	typename DmrgGeometryType>
+	class ExtendedHubbard1Orb : public ModelBase<ModelHelperType_,SparseMatrixType,DmrgGeometryType,LinkProdExtendedHubbard1Orb<ModelHelperType_> > {
 
 	public:
 
-		typedef ModelHubbard<ModelHelperType_,SparseMatrixType,DmrgGeometryType,SharedMemoryTemplate> ModelHubbardType;
+		typedef ModelHubbard<ModelHelperType_,SparseMatrixType,DmrgGeometryType> ModelHubbardType;
 		typedef ModelHelperType_ ModelHelperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef LinkProdExtendedHubbard1Orb<ModelHelperType> LinkProductType;
-		typedef ModelBase<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
+		typedef ModelBase<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType> ModelBaseType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
@@ -252,10 +251,9 @@ namespace Dmrg {
 
 	template<typename ModelHelperType,
  	typename SparseMatrixType,
- 	typename DmrgGeometryType,
- 	template<typename> class SharedMemoryTemplate>
+ 	typename DmrgGeometryType>
 	std::ostream &operator<<(std::ostream &os,
-	                         const ExtendedHubbard1Orb<ModelHelperType,SparseMatrixType,DmrgGeometryType,SharedMemoryTemplate>& model)
+	                         const ExtendedHubbard1Orb<ModelHelperType,SparseMatrixType,DmrgGeometryType>& model)
 	{
 		model.print(os);
 		return os;

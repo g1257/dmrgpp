@@ -88,24 +88,21 @@ namespace Dmrg {
 	//! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment
 	template<typename ModelHelperType_,
 	typename SparseMatrixType,
-	typename GeometryType,
-	template<typename> class SharedMemoryTemplate>
+	typename GeometryType>
 	class Tj1Orb : public ModelBase<ModelHelperType_,SparseMatrixType,GeometryType,
-		LinkProductTj1Orb<ModelHelperType_>,SharedMemoryTemplate> {
+		LinkProductTj1Orb<ModelHelperType_> > {
 
 	public:
 
-		typedef ModelHubbard<ModelHelperType_,SparseMatrixType,GeometryType,
-		SharedMemoryTemplate> ModelHubbardType;
-		typedef ModelHeisenberg<ModelHelperType_,SparseMatrixType,GeometryType,
-		SharedMemoryTemplate> ModelHeisenbergType;
+		typedef ModelHubbard<ModelHelperType_,SparseMatrixType,GeometryType> ModelHubbardType;
+		typedef ModelHeisenberg<ModelHelperType_,SparseMatrixType,GeometryType> ModelHeisenbergType;
 		typedef ModelHelperType_ ModelHelperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef LinkProductTj1Orb<ModelHelperType> LinkProductType;
-		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
+		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType> ModelBaseType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
@@ -565,10 +562,9 @@ namespace Dmrg {
 
 	template<typename ModelHelperType,
 	typename SparseMatrixType,
-	typename GeometryType,
-	template<typename> class SharedMemoryTemplate>
+	typename GeometryType>
 	std::ostream &operator<<(std::ostream &os,
-		const Tj1Orb<ModelHelperType,SparseMatrixType,GeometryType,SharedMemoryTemplate>& model)
+		const Tj1Orb<ModelHelperType,SparseMatrixType,GeometryType>& model)
 	{
 		model.print(os);
 		return os;

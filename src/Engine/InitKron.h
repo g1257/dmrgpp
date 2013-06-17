@@ -102,14 +102,6 @@ public:
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef typename ModelType::LinkProductStructType LinkProductStructType;
 
-	// export ParallelTemplate
-	template<typename T2>
-	class ParallelConnectionsInner {
-	public:
-		typedef typename ModelType::template ParallelConnectionsInner<T2> InnerType;
-		typedef typename InnerType::Type Type;
-	};
-
 	InitKron(const ModelType& model,const ModelHelperType& modelHelper)
 	: model_(model),
 	  modelHelper_(modelHelper),

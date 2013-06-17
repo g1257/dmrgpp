@@ -94,10 +94,9 @@ namespace Dmrg {
 	template<
 		typename ModelHelperType_,
 		typename SparseMatrixType,
-		typename GeometryType,
-  		template<typename> class SharedMemoryTemplate>
+		typename GeometryType>
 	class Immm : public ModelBase<ModelHelperType_,SparseMatrixType,GeometryType,
- 	LinkProductImmm<ModelHelperType_>,SharedMemoryTemplate> {
+ 	LinkProductImmm<ModelHelperType_> > {
 
 		typedef unsigned int long long WordType;
 
@@ -113,7 +112,7 @@ namespace Dmrg {
 		typedef  HilbertSpaceImmm<WordType> HilbertSpaceImmmType;
 		typedef typename HilbertSpaceImmmType::HilbertState HilbertState;
 		typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
-		typedef   ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
+		typedef   ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType> ModelBaseType;
 		typedef	 typename ModelBaseType::MyBasis MyBasis;
 		typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
@@ -535,13 +534,11 @@ namespace Dmrg {
 
 	template<typename ModelHelperType,
 	         typename SparseMatrixType,
-	         typename GeometryType,
-	         template<typename> class SharedMemoryTemplate>
+	         typename GeometryType>
 	std::ostream &operator<<(std::ostream &os,
 	                         const Immm<ModelHelperType,
-	                                    SparseMatrixType,
-	                                    GeometryType,
-	                                    SharedMemoryTemplate>& model)
+	                         SparseMatrixType,
+	                         GeometryType>& model)
 	{
 		model.print(os);
 		return os;

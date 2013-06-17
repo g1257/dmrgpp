@@ -95,11 +95,10 @@ namespace Dmrg {
 	
 	template<typename ModelHelperType_,
 	typename SparseMatrixType,
-	typename GeometryType,
-	template<typename> class SharedMemoryTemplate>
+	typename GeometryType>
 	class ModelHeisenberg
 		: public ModelBase<ModelHelperType_,SparseMatrixType,GeometryType,
-  	LinkProductHeisenbergSpinOneHalf<ModelHelperType_>,SharedMemoryTemplate> {
+  	LinkProductHeisenbergSpinOneHalf<ModelHelperType_> > {
 
 	public:
 		typedef ModelHelperType_ ModelHelperType;
@@ -113,7 +112,7 @@ namespace Dmrg {
 		typedef unsigned int long long WordType;
 		typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,
-		                  LinkProductType,SharedMemoryTemplate> ModelBaseType;
+		                  LinkProductType> ModelBaseType;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 		static const int NUMBER_OF_ORBITALS=1;
@@ -347,9 +346,9 @@ namespace Dmrg {
 
 	template<typename ModelHelperType,
 	typename SparseMatrixType,
-	typename GeometryType,
-	template<typename> class SharedMemoryTemplate>
-	std::ostream &operator<<(std::ostream &os,const ModelHeisenberg<ModelHelperType,SparseMatrixType,GeometryType,SharedMemoryTemplate>& model)
+	typename GeometryType>
+	std::ostream &operator<<(std::ostream &os,
+	                         const ModelHeisenberg<ModelHelperType,SparseMatrixType,GeometryType>& model)
 	{
 		model.print(os);
 		return os;

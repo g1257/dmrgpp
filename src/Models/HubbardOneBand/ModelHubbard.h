@@ -96,10 +96,9 @@ namespace Dmrg {
 	//! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
 	template<typename ModelHelperType_,
 	typename SparseMatrixType,
-	typename DmrgGeometryType,
-	template<typename> class SharedMemoryTemplate>
+	typename DmrgGeometryType>
 	class ModelHubbard : public ModelBase<ModelHelperType_,SparseMatrixType,DmrgGeometryType,
-		LinkProductHubbardOneBand<ModelHelperType_>,SharedMemoryTemplate> {
+		LinkProductHubbardOneBand<ModelHelperType_> > {
 
 	public:
 
@@ -126,7 +125,7 @@ namespace Dmrg {
 		typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 		typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;
-		typedef ModelBase<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType,SharedMemoryTemplate> ModelBaseType;
+		typedef ModelBase<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType> ModelBaseType;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -542,9 +541,9 @@ namespace Dmrg {
 
 	template<typename ModelHelperType,
 	typename SparseMatrixType,
-	typename DmrgGeometryType,
-	template<typename> class SharedMemoryTemplate>
-	std::ostream& operator<<(std::ostream& os,const ModelHubbard<ModelHelperType,SparseMatrixType,DmrgGeometryType,SharedMemoryTemplate>& model)
+	typename DmrgGeometryType>
+	std::ostream& operator<<(std::ostream& os,
+	                         const ModelHubbard<ModelHelperType,SparseMatrixType,DmrgGeometryType>& model)
 	{
 		model.print(os);
 		return os;

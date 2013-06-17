@@ -111,8 +111,7 @@ namespace Dmrg {
 	template<typename ModelHelperType,
 	typename SparseMatrixType,
  	typename DmrgGeometryType,
-  	typename LinkProductType,
-	template<typename> class ParallelConnectionsTemplate>
+  	typename LinkProductType>
 	class ModelBase  {
 
 		typedef typename SparseMatrixType::value_type SparseElementType;
@@ -129,7 +128,6 @@ namespace Dmrg {
 				BasisWithOperatorsType;
 		typedef DmrgGeometryType GeometryType;
 		typedef HamiltonianConnection<DmrgGeometryType,ModelHelperType,LinkProductType> HamiltonianConnectionType;
-		typedef ParallelConnectionsTemplate<HamiltonianConnectionType> ParallelConnectionsType;
 		typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 		typedef typename ModelHelperType::LeftRightSuperType
 				LeftRightSuperType;
@@ -231,8 +229,8 @@ namespace Dmrg {
 					hc.compute(i,j,0,&lps,total);
 				}
 			}
-
-			ParallelConnectionsType parallelConnections(PsimagLite::Concurrency::npthreads,
+			typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
+			ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
 			                                            PsimagLite::MPI::COMM_WORLD);
 			parallelConnections.loopCreate(total,hc);
 		}

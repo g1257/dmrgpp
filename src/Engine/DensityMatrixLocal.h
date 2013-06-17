@@ -77,6 +77,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DensityMatrixBase.h"
 #include "ParallelDensityMatrix.h"
 #include "NoPthreads.h"
+#include "Concurrency.h"
+#include "Parallelizer.h"
 
 namespace Dmrg {
 	//!
@@ -117,7 +119,6 @@ namespace Dmrg {
 			debug_(debug),verbose_(verbose)
 		{
 		}
-
 
 		virtual BlockMatrixType& operator()()
 		{
@@ -172,23 +173,13 @@ namespace Dmrg {
 				
 				// target all other states if any:
 				if (target.size()>0) {
-
-					PTHREADS_NAME<ParallelDensityMatrixType> threadedDm(PsimagLite::Concurrency::npthreads,
-					                                                    PsimagLite::MPI::COMM_WORLD);
-					if (threadedDm.name()=="pthreads") {
-						PsimagLite::OstringStream msg;
-						msg<<"Threading with "<<threadedDm.threads();
-						progress_.printline(msg,std::cout);
-					}
+					typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
+					ParallelizerType threadedDm(PsimagLite::Concurrency::npthreads,
+					                            PsimagLite::MPI::COMM_WORLD);
 
 					threadedDm.loopCreate(target.size(),helperDm);
-
-//					for (SizeType i=0;i<target.size();i++) {
-//						w = target.weight(i)/target.normSquared(i);
-//						initPartition(matrixBlock,pBasis,m,target(i),
-//						              pBasisSummed,pSE,direction,w);
-//					}
 				}
+
 				// set this matrix block into data_
 				data_.setBlock(m,pBasis.partition(m),matrixBlock);
 			}

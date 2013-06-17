@@ -88,16 +88,14 @@ namespace Dmrg {
 	template<
 		typename ModelHelperType_,
 		typename SparseMatrixType,
-		typename GeometryType,
-		template<typename> class SharedMemoryTemplate>
+		typename GeometryType>
 	class FeAsBasedScExtended : public ModelBase<
 			ModelHelperType_,SparseMatrixType,GeometryType,
-			LinkProductFeAsExtended<ModelHelperType_>,
-			SharedMemoryTemplate> {
+			LinkProductFeAsExtended<ModelHelperType_> > {
 		
 	public:
 		typedef ModelFeBasedSc<ModelHelperType_,SparseMatrixType,
-			GeometryType,SharedMemoryTemplate> ModelFeAsType;
+			GeometryType> ModelFeAsType;
 		typedef typename ModelFeAsType::HilbertState HilbertState;
 		typedef typename ModelFeAsType::HilbertBasisType HilbertBasisType;
 		typedef ModelHelperType_ ModelHelperType;
@@ -108,7 +106,7 @@ namespace Dmrg {
 		typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 		typedef LinkProductFeAsExtended<ModelHelperType> LinkProductType;
 		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,
-				LinkProductType,SharedMemoryTemplate> ModelBaseType;
+				LinkProductType> ModelBaseType;
 		typedef	 typename ModelBaseType::MyBasis MyBasis;
 		typedef	 typename ModelBaseType::BasisWithOperatorsType
 				MyBasisWithOperators;
@@ -317,15 +315,11 @@ namespace Dmrg {
 	template<
 		typename ModelHelperType,
 		typename SparseMatrixType,
-		typename GeometryType,
-		template<typename> class SharedMemoryTemplate
-		>
+		typename GeometryType>
 	std::ostream &operator<<(std::ostream &os,const FeAsBasedScExtended<
 		ModelHelperType,
 		SparseMatrixType,
-		GeometryType,
-		SharedMemoryTemplate
-		>& model)
+		GeometryType>& model)
 	{
 		model.print(os);
 		return os;

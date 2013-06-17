@@ -191,7 +191,7 @@ void mainLoop(GeometryType& geometry,
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
-	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,PTHREADS_NAME,DmrgSolverParametersType> ModelType;
+	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,DmrgSolverParametersType> ModelType;
 	typedef TargettingTemplate<PsimagLite::LanczosSolver,
 	                           InternalProductOnTheFly,
 	                           WaveFunctionTransfFactory,

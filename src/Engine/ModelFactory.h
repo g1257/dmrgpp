@@ -101,7 +101,6 @@ namespace Dmrg {
 	template<typename ModelHelperType_,
 	typename SparseMatrixType,
 	typename GeometryType_,
-	template<typename> class SharedMemoryTemplate,
 	typename ParametersType>
 	class ModelFactory  {
 
@@ -109,20 +108,13 @@ namespace Dmrg {
 		typedef VerySparseMatrix<SparseElementType> VerySparseMatrixType;
 
 		// start models here:
-		typedef ModelHubbard<ModelHelperType_,SparseMatrixType,GeometryType_,
-				     SharedMemoryTemplate> ModelHubbardType;
-		typedef ModelHeisenberg<ModelHelperType_,SparseMatrixType,GeometryType_,
-					SharedMemoryTemplate> ModelHeisenbergType;
-		typedef ExtendedHubbard1Orb<ModelHelperType_,SparseMatrixType,GeometryType_,
-					    SharedMemoryTemplate> ModelHubbardExtType;
-		typedef ModelFeBasedSc<ModelHelperType_,SparseMatrixType,GeometryType_,
-				       SharedMemoryTemplate> FeBasedScType;
-		typedef FeAsBasedScExtended<ModelHelperType_,SparseMatrixType,GeometryType_,
-					    SharedMemoryTemplate> FeBasedScExtType;
-		typedef Immm<ModelHelperType_,SparseMatrixType,GeometryType_,
-			     SharedMemoryTemplate> ImmmType;
-		typedef Tj1Orb<ModelHelperType_,SparseMatrixType,GeometryType_,
-				 SharedMemoryTemplate> Tj1OrbType;
+		typedef ModelHubbard<ModelHelperType_,SparseMatrixType,GeometryType_> ModelHubbardType;
+		typedef ModelHeisenberg<ModelHelperType_,SparseMatrixType,GeometryType_> ModelHeisenbergType;
+		typedef ExtendedHubbard1Orb<ModelHelperType_,SparseMatrixType,GeometryType_> ModelHubbardExtType;
+		typedef ModelFeBasedSc<ModelHelperType_,SparseMatrixType,GeometryType_> FeBasedScType;
+		typedef FeAsBasedScExtended<ModelHelperType_,SparseMatrixType,GeometryType_> FeBasedScExtType;
+		typedef Immm<ModelHelperType_,SparseMatrixType,GeometryType_> ImmmType;
+		typedef Tj1Orb<ModelHelperType_,SparseMatrixType,GeometryType_> Tj1OrbType;
 		// end models
 
 		enum {HUBBARD_ONE_BAND,HEISENBERG_SPIN_ONEHALF,
@@ -146,14 +138,6 @@ namespace Dmrg {
 		typedef typename ModelHubbardType::LinkProductStructType LinkProductStructType;
 		typedef typename ModelHelperType::LinkType LinkType;
 		typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
-		typedef typename ModelHubbardType::ParallelConnectionsType ParallelConnectionsType;
-
-		// export ParallelTemplate
-		template<typename T2>
-		class ParallelConnectionsInner {
-		public:
-			typedef SharedMemoryTemplate<T2> Type;
-		};
 
 		ModelFactory(const ParametersType& params,
 			     InputValidatorType& io,
@@ -657,10 +641,9 @@ namespace Dmrg {
 	template<typename ModelHelperType,
 		 typename SparseMatrixType,
 		 typename GeometryType,
-		 template<typename> class SharedMemoryTemplate,
 		 typename ParametersType>
 	std::ostream& operator<<(std::ostream& os,const ModelFactory<ModelHelperType,
-				 SparseMatrixType,GeometryType,SharedMemoryTemplate,ParametersType>& mf)
+				 SparseMatrixType,GeometryType,ParametersType>& mf)
 	{
 		mf.print(os);
 		return os;

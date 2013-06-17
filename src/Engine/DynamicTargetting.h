@@ -91,7 +91,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h"
 #include "CommonTargetting.h"
 #include <cassert>
-
+#include "Concurrency.h"
+#include "Parallelizer.h"
 #include "ProgramGlobals.h"
 #include "ParallelWft.h"
 
@@ -450,29 +451,16 @@ namespace Dmrg {
 			SizeType numberOfSites = lrs_.super().block().size();
 			if (site==0 || site==numberOfSites -1)  return;
 
-
 			typedef ParallelWft<RealType,VectorWithOffsetType,WaveFunctionTransfType,LeftRightSuperType> ParallelWftType;
-			PTHREADS_NAME<ParallelWftType> threadedWft;
-			PTHREADS_NAME<ParallelWftType>::setThreads(model_.params().nthreads);
-			if (threadedWft.name()=="pthreads") {
-				PsimagLite::OstringStream msg;
-				msg<<"Threading with "<<threadedWft.threads();
-				progress_.printline(msg,std::cout);
-			} else {
-				std::cerr<<"NOOOOOOOOOOOOOOO THREADDDSSSSSS "<<threadedWft.name()<<" "<<threadedWft.threads()<<"\n";
-			}
+			typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
+			ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,PsimagLite::MPI::COMM_WORLD);
 
 			ParallelWftType helperWft(targetVectors_,model_.hilbertSize(site),wft_,lrs_);
 			threadedWft.loopCreate(targetVectors_.size()-1,helperWft,model_.concurrency());
+
 			for (SizeType i=1;i<targetVectors_.size();i++) {
 				assert(targetVectors_[i].size()==targetVectors_[0].size());
 			}
-//			SizeType nk = model_.hilbertSize(site);
-//			for (SizeType i=1;i<targetVectors_.size();i++) {
-//				VectorWithOffsetType phiNew = targetVectors_[0];
-//				wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk);
-//				targetVectors_[i] = phiNew;
-//			}
 		}
 
 		void getLanczosVectors(DenseMatrixType& V,
