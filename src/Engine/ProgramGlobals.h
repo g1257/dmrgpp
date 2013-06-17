@@ -80,18 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PROGRAM_LIMITS_H
 #define PROGRAM_LIMITS_H
 
-#ifdef USE_PTHREADS
-#include "Pthreads.h"
-#define PTHREADS_NAME PsimagLite::Pthreads
-#else
-#ifdef USE_THREADS_WITH_MPI
-#include "ThreadsWithMpi.h"
-#define PTHREADS_NAME PsimagLite::ThreadsWithMpi
-#else
-#include "NoPthreads.h"
-#define PTHREADS_NAME PsimagLite::NoPthreads
-#endif  // #ifdef USE_THREADS_WITH_MPI
-#endif // #ifdef USE_PTHREADS
 #include "Vector.h"
 
 namespace Dmrg {

@@ -141,8 +141,9 @@ namespace Dmrg {
 			}
 
 			typedef Parallel2PointCorrelations<RealType,ThisType> Parallel2PointCorrelationsType;
-			PTHREADS_NAME<Parallel2PointCorrelationsType> threaded2Points(PsimagLite::Concurrency::npthreads,
-			                                                              PsimagLite::MPI::COMM_WORLD);
+			typedef PsimagLite::Parallelizer<Parallel2PointCorrelationsType> ParallelizerType;
+			ParallelizerType threaded2Points(PsimagLite::Concurrency::npthreads,
+			                                 PsimagLite::MPI::COMM_WORLD);
 
 			PsimagLite::Matrix<FieldType> w(rows,cols);
 			Parallel2PointCorrelationsType helper2Points(w,*this,pairs,O1,O2,fermionicSign);

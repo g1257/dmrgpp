@@ -228,13 +228,13 @@ namespace Dmrg {
 			}
 
 			typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
-			PTHREADS_NAME<Parallel4PointDsType> threaded4PointDs(PsimagLite::Concurrency::npthreads,
-			                                                     PsimagLite::MPI::COMM_WORLD);
+			typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
+			ParallelizerType threaded4PointDs(PsimagLite::Concurrency::npthreads,
+			                                  PsimagLite::MPI::COMM_WORLD);
 
 			Parallel4PointDsType helper4PointDs(fpd,fourpoint_,model,gammas,pairs);
 
 			threaded4PointDs.loopCreate(pairs.size(),helper4PointDs);
-
 		}
 
 		template<typename ApplyOperatorType>
