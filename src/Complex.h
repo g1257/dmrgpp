@@ -52,6 +52,18 @@ namespace PsimagLite {
 	public:
 		typedef RealType Type;
 	};
+
+	template<typename T>
+	class IsComplexNumber {
+	public:
+		enum { True = false};
+	};
+
+	template<typename T>
+	class IsComplexNumber<std::complex<T> > {
+	public:
+		enum { True = true};
+	};
 } // namespace PsimagLite
 
 #endif // PSICOMPLEX_H_

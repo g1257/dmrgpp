@@ -117,7 +117,7 @@ int main(int argc,char *argv[])
 
 	threadObject.loopCreate(total,helper);
 
-	helper.sync(threadObject);
+	helper.sync();
 
 	SizeType sum = helper.sum();
 

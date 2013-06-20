@@ -263,6 +263,19 @@ namespace PsimagLite {
 		buffer="";
 		v.push_back(tmp);
 	}
+
+	template<typename T>
+	class IsPairLike {
+	public:
+		enum {True = false};
+	};
+
+	template<typename T>
+	class IsPairLike<std::pair<T,T> > {
+	public:
+		enum {True = true};
+	};
+
 }// namespace PsimagLite
 
 /*@}*/

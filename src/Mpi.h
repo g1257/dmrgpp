@@ -155,7 +155,7 @@ void>::Type bcast(NumericType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 
 template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
-Loki::TypeTraits<typename SomeVectorType::value_type>::IsArith,
+Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
 void>::Type allGather(SomeVectorType& v,CommType mpiComm = COMM_WORLD)
 {
 	SomeVectorType recvbuf = v;
@@ -184,7 +184,34 @@ void>::Type allGather(SomeVectorType& v,CommType mpiComm = COMM_WORLD)
 
 template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
-Loki::TypeTraits<typename SomeVectorType::value_type>::IsArith,
+IsPairLike<typename SomeVectorType::value_type>::True,
+void>::Type allGather(SomeVectorType& v,CommType mpiComm = COMM_WORLD)
+{
+	typedef typename SomeVectorType::value_type PairType;
+	typedef typename PairType::first_type FirstType;
+	typedef typename PairType::second_type SecondType;
+
+	for (SizeType i = 0; i < v.size(); i++) {
+		FirstType tmp = v[i].first;
+		FirstType tmp2;
+		MPI_Datatype datatype = MpiData<typename PairType::first_type>::Type;
+		int errorCode = MPI_Allgather(&tmp,1,datatype,&tmp2,1,datatype,mpiComm);
+		checkError(errorCode,"MPI_Allgather",mpiComm);
+
+		SecondType tmp3 = v[i].second;
+		SecondType tmp4;
+		MPI_Datatype datatype2 = MpiData<typename PairType::second_type>::Type;
+		errorCode = MPI_Allgather(&tmp3,1,datatype2,&tmp4,1,datatype2,mpiComm);
+		checkError(errorCode,"MPI_Allgather",mpiComm);
+
+		v[i] = PairType(tmp2,tmp4);
+	}
+}
+
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
 void>::Type gather(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 {
 	SomeVectorType recvbuf(v.size());
@@ -211,15 +238,32 @@ void>::Type gather(NumericType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 
 template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
-Loki::TypeTraits<typename SomeVectorType::value_type>::IsArith,
+Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
 void>::Type reduce(SomeVectorType& v,
                    MPI_Op op = MPI_SUM,
                    int root = 0,
-                   CommType mpiComm=COMM_WORLD) const
+                   CommType mpiComm = COMM_WORLD)
 {
 	SomeVectorType w(v.size());
 	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
 	int errorCode = MPI_Reduce(&(v[0]),&(w[0]),v.size(),datatype,op,root,mpiComm);
+	checkError(errorCode,"MPI_Reduce",mpiComm);
+
+	if (commRank(mpiComm) == static_cast<SizeType>(root))
+		v = w;
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+IsComplexNumber<typename SomeVectorType::value_type>::True,
+void>::Type reduce(SomeVectorType& v,
+                   MPI_Op op = MPI_SUM,
+                   int root = 0,
+                   CommType mpiComm = COMM_WORLD)
+{
+	SomeVectorType w(v.size());
+	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
+	int errorCode = MPI_Reduce(&(v[0]),&(w[0]),2*v.size(),datatype,op,root,mpiComm);
 	checkError(errorCode,"MPI_Reduce",mpiComm);
 
 	if (commRank(mpiComm) == static_cast<SizeType>(root))
