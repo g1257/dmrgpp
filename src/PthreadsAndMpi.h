@@ -95,7 +95,7 @@ class PthreadsAndMpi : public Pthreads<PthreadFunctionHolderType>  {
 public:
 
 	PthreadsAndMpi(SizeType npthreads,MPI::CommType comm = MPI::COMM_WORLD)
-	    : BaseType(npthreads,comm),nthreads_(npthreads),comm_(comm)
+	    : BaseType(npthreads),nthreads_(npthreads),comm_(comm)
 	{}
 
 	String name() const { return "pthreadsandmpi"; }

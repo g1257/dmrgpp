@@ -60,17 +60,14 @@ public:
 		}
 	}
 
-	template<typename SomeParallelType>
-	void sync(SomeParallelType& p)
+	void sync()
 	{
-		bool hasMpi = (ConcurrencyType::mode & ConcurrencyType::MPI);
-		bool hasPthreads = (ConcurrencyType::mode & ConcurrencyType::PTHREADS);
-		if (hasPthreads) {
+		if (ConcurrencyType::hasPthreads()) {
 			SizeType tmp = PsimagLite::sum(sum_);
 			sum_[0] = tmp;
 		}
 
-		if (hasMpi) {
+		if (ConcurrencyType::hasMpi()) {
 			SizeType tmp = sum_[0];
 			PsimagLite::MPI::allReduce(tmp);
 			sum_[0] = tmp;

@@ -163,8 +163,15 @@ public:
 		return MPI::commRank(comm);
 	}
 
-	template<typename DataType>
-	static void reduce(DataType& v,MPI::CommType mpiComm = MPI::COMM_WORLD) {}
+	static bool hasMpi()
+	{
+		return (mode & MPI);
+	}
+
+	static bool hasPthreads()
+	{
+		return (mode & PTHREADS);
+	}
 
 };
 
