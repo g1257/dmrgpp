@@ -84,87 +84,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "String.h"
 #include "Mpi.h"
-
-template<typename PthreadFunctionHolderType>
-struct PthreadFunctionStruct {
-	PthreadFunctionHolderType* pfh;
-	int threadNum;	
-	SizeType blockSize;
-	SizeType total;
-	pthread_mutex_t* mutex;
-};
-
-template<typename PthreadFunctionHolderType>
-void *thread_function_wrapper(void *dummyPtr)
-{
-	PthreadFunctionStruct<PthreadFunctionHolderType> *pfs =
-	        (PthreadFunctionStruct<PthreadFunctionHolderType> *) dummyPtr;
-
-	PthreadFunctionHolderType *pfh = pfs->pfh;
-
-	pfh->thread_function_(pfs->threadNum,pfs->blockSize,pfs->total,pfs->mutex);
-
-	return 0;
-}
+#include "Pthreads.h"
 
 namespace PsimagLite {
 template<typename PthreadFunctionHolderType>
-class PthreadsAndMpi  {
+class PthreadsAndMpi : public Pthreads<PthreadFunctionHolderType>  {
+
+	typedef Pthreads<PthreadFunctionHolderType> BaseType;
 
 public:
 
 	PthreadsAndMpi(SizeType npthreads,MPI::CommType comm = MPI::COMM_WORLD)
-	    : nthreads_(npthreads),comm_(comm)
+	    : BaseType(npthreads,comm),nthreads_(npthreads),comm_(comm)
 	{}
-
-	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
-	{
-		PthreadFunctionStruct<PthreadFunctionHolderType> pfs[nthreads_];
-		pthread_mutex_init(&(mutex_), NULL);
-		pthread_t thread_id[nthreads_];
-		SizeType mpiprocs = MPI::commSize(comm_);
-
-		for (SizeType j=0; j <nthreads_; j++) {
-			int ret=0;
-			pfs[j].threadNum = j;
-			pfs[j].pfh = &pfh;
-			pfs[j].total = total;
-			pfs[j].blockSize = total/(nthreads_*mpiprocs);
-			if (total%nthreads_!=0) pfs[j].blockSize++;
-			pfs[j].mutex = &mutex_;
-			if ((ret=pthread_create(&thread_id[j],
-			                        NULL,
-			                        thread_function_wrapper<PthreadFunctionHolderType>,
-			                        &pfs[j])))
-				std::cerr<<"Thread creation failed: "<<ret<<"\n";
-		}
-
-		for (SizeType j=0; j <nthreads_; j++) pthread_join( thread_id[j], NULL);
-
-		pthread_mutex_destroy(&mutex_);
-	}
 
 	String name() const { return "pthreadsandmpi"; }
 
 	SizeType threads() const { return nthreads_; }
 
 	SizeType mpiProcs() const { return MPI::commSize(comm_); }
-
-	template<typename T>
-	void gather(T& t)
-	{}
-
-	template<typename T>
-	void allGather(T& v)
-	{}
-
-	template<typename T>
-	void bcast(T& t)
-	{}
-
-	template<typename T>
-	void allReduce(T& v)
-	{}
 
 private:
 
