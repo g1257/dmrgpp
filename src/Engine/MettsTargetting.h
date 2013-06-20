@@ -128,7 +128,7 @@ namespace Dmrg {
 			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 			typedef VectorType TargetVectorType;
 			typedef PsimagLite::Matrix<RealType> MatrixType;
-			typedef BlockMatrix<RealType,MatrixType> BlockMatrixType;
+			typedef BlockMatrix<MatrixType> BlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef MettsSerializer<RealType,VectorWithOffsetType> MettsSerializerType;
 			typedef typename PsimagLite::RandomForTests<RealType> RngType;

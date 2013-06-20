@@ -112,10 +112,13 @@ public:
 		const GenGroupType& istartRight = initKron_.istartRight();
 		MatrixType intermediate(W_.n_row(),W_.n_col());
 
-//		std::cerr<<"threadNum="<<threadNum<<" blockSize="<<blockSize<<" total="<<total<<"\n";
+		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+		SizeType npthreads = PsimagLite::Concurrency::npthreads;
+
 		for (SizeType p=0;p<blockSize;p++) {
-			SizeType outPatch = threadNum * blockSize + p;
+			SizeType outPatch = (threadNum+npthreads*mpiRank)*blockSize + p;
 			if (outPatch>=total) break;
+
 			for (SizeType inPatch=0;inPatch<total;inPatch++) {
 				for (SizeType ic=0;ic<nC;ic++) {
 					const ComplexOrRealType& val = initKron_.value(ic);

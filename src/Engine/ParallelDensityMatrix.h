@@ -115,8 +115,11 @@ namespace Dmrg {
 
 		void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
 		{
+			SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+			SizeType npthreads = PsimagLite::Concurrency::npthreads;
+
 			for (SizeType p=0;p<blockSize;p++) {
-				SizeType ix = threadNum * blockSize + p;
+				SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p;
 				if (ix>=target_.size()) break;
 				RealType w = target_.weight(ix)/target_.normSquared(ix);
 				initPartition(matrixBlock_,pBasis_,m_,target_(ix),

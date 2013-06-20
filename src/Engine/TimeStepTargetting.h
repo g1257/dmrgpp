@@ -123,7 +123,7 @@ namespace Dmrg {
 			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
 			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 			typedef ComplexVectorType TargetVectorType;
-			typedef BlockMatrix<ComplexType,ComplexMatrixType> ComplexBlockMatrixType;
+			typedef BlockMatrix<ComplexMatrixType> ComplexBlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
 			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
 			typedef typename OperatorType::SparseMatrixType SparseMatrixType;

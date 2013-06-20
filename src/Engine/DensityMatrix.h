@@ -107,10 +107,8 @@ namespace Dmrg {
 
 	public:
 
-		typedef BlockMatrix<DensityMatrixElementType,
-			PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
-		typedef typename BlockMatrixType::BuildingBlockType
-			BuildingBlockType;
+		typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
+		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 
 		DensityMatrix(
 			const TargettingType& target,

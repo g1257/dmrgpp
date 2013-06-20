@@ -345,16 +345,14 @@ namespace Dmrg {
 
 		SizeType size() const { return reducedOperators_.size(); }
 
-		template<typename SomeParallelType>
-		void gather(SomeParallelType& p)
+		void gather()
 		{
-			p.gather(reducedOperators_);
+			PsimagLite::MPI::gather(reducedOperators_);
 		}
 
-		template<typename SomeParallelType>
-		void bcast(SomeParallelType& p)
+		void bcast()
 		{
-			p.bcast(reducedOperators_);
+			PsimagLite::MPI::bcast(reducedOperators_);
 		}
 
 		template<typename IoOutputter>

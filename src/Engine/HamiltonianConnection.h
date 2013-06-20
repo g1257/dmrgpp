@@ -165,9 +165,14 @@ namespace Dmrg {
 				typename PsimagLite::Vector<SparseElementType>::Type xtemp(x_.size(),0);
 				SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
 				SparseElementType tmp = 0.0;
+
+				SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+				SizeType npthreads = PsimagLite::Concurrency::npthreads;
+
 				for (SizeType p=0;p<blockSize;p++) {
-					SizeType ix = threadNum * blockSize + p;
+					SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p;
 					if (ix>=total) break;
+
 					AdditionalDataType additionalData;
 					prepare(ix,i,j,type,tmp,term,dofs,additionalData);
 

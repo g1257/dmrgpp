@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PARALLEL_WFT_H
 #define PARALLEL_WFT_H
 
-
+#include "Vector.h"
 
 namespace Dmrg {
 
@@ -103,20 +103,17 @@ public:
 	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
 	{
 		SizeType nk = nk_;
+		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+		SizeType npthreads = PsimagLite::Concurrency::npthreads;
+
 		for (SizeType p=0;p<blockSize;p++) {
-			SizeType ix = threadNum * blockSize + p + 1;
+			SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p + 1;
 			if (ix>=targetVectors_.size()) break;
 			VectorWithOffsetType phiNew = targetVectors_[0];
 			wft_.setInitialVector(phiNew,targetVectors_[ix],lrs_,nk);
 			targetVectors_[ix] = phiNew;
 		}
 	}
-
-	//			template<typename SomeConcurrencyType,typename SomeOtherConcurrencyType>
-	//			void sync(SomeConcurrencyType& conc,SomeOtherConcurrencyType& conc2)
-	//			{
-	//				conc.reduce(x_,conc2);
-	//			}
 
 private:
 

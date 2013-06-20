@@ -91,18 +91,20 @@ namespace Dmrg {
 	//! A block matrix class
 	//! Blocks can be of any type and are templated with the type MatrixInBlockTemplate
 	//
-	template<class T,class MatrixInBlockTemplate>
+	template<typename MatrixInBlockTemplate>
 	class BlockMatrix {
 
 	public:
 
 		typedef MatrixInBlockTemplate BuildingBlockType;
+		typedef typename BuildingBlockType::value_type FieldType;
+		typedef BlockMatrix<MatrixInBlockTemplate> BlockMatrixType;
 
 		class LoopForDiag {
 
 			typedef PsimagLite::Concurrency ConcurrencyType;
-			typedef BlockMatrix<T,MatrixInBlockTemplate> BlockMatrixType;
-			typedef typename PsimagLite::Real<T>::Type RealType;
+			typedef typename PsimagLite::Real<FieldType>::Type RealType;
+
 		public:
 
 			LoopForDiag(BlockMatrixType  &C1,
@@ -128,8 +130,11 @@ namespace Dmrg {
 			                      SizeType total,
 			                      typename PsimagLite::Concurrency::MutexType* myMutex)
 			{
+				SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+				SizeType npthreads = ConcurrencyType::npthreads;
+
 				for (SizeType p=0;p<blockSize;p++) {
-					SizeType taskNumber = threadNum*blockSize + p;
+					SizeType taskNumber = (threadNum+npthreads*mpiRank)*blockSize + p;
 					if (taskNumber>=total) break;
 
 					SizeType m = taskNumber;
@@ -141,12 +146,11 @@ namespace Dmrg {
 				}
 			}
 
-			template<typename SomeParallelType>
-			void gather(SomeParallelType& p)
+			void gather()
 			{
-				if (ConcurrencyType::mode == ConcurrencyType::MPI) {
-					p.allGather(eigsForGather);
-					p.allGather(C.data_);
+				if (ConcurrencyType::hasMpi()) {
+					PsimagLite::MPI::allGather(eigsForGather);
+					PsimagLite::MPI::allGather(C.data_);
 				}
 
 				for (SizeType m=0;m<C.blocks();m++) {
@@ -157,9 +161,9 @@ namespace Dmrg {
 
 		private:
 
-			void enforcePhase(T* v,SizeType n)
+			void enforcePhase(FieldType* v,SizeType n)
 			{
-				T sign1=0;
+				FieldType sign1=0;
 				for (SizeType j=0;j<n;j++) {
 					if (std::norm(v[j])>1e-6) {
 						if (std::real(v[j])>0) sign1=1;
@@ -171,14 +175,14 @@ namespace Dmrg {
 				for (SizeType j=0;j<n;j++) v[j] *= sign1;
 			}
 
-			void enforcePhase(typename PsimagLite::Vector<T>::Type& v)
+			void enforcePhase(typename PsimagLite::Vector<FieldType>::Type& v)
 			{
 				enforcePhase(&(v[0]),v.size());
 			}
 
-			void enforcePhase(PsimagLite::Matrix<T>& a)
+			void enforcePhase(PsimagLite::Matrix<FieldType>& a)
 			{
-				T* vpointer = &(a(0,0));
+				FieldType* vpointer = &(a(0,0));
 				for (SizeType i=0;i<a.n_col();i++)
 					enforcePhase(&(vpointer[i*a.n_row()]),a.n_row());
 			}
@@ -195,16 +199,16 @@ namespace Dmrg {
 			offsets_[blocks]=rank;
 		}
 
-		void operator+=(BlockMatrix<T,MatrixInBlockTemplate> const &m)
+		void operator+=(const BlockMatrixType& m)
 		{
-			BlockMatrix<T,MatrixInBlockTemplate> c;
+			BlockMatrixType c;
 			if (offsets_.size()<m.blocks()) operatorPlus(c,*this,m);
 			else operatorPlus(c,m,*this);
 			*this = c;
 		}
 
 		//! Sets all blocks of size 1 and value value
-		void makeDiagonal(int n,T const &value)
+		void makeDiagonal(int n,const FieldType& value)
 		{
 			rank_ = n;
 			MatrixInBlockTemplate m;
@@ -223,18 +227,24 @@ namespace Dmrg {
 		//! Set block to the zero matrix, 
 		void setToZero(int n)
 		{
-			T value=static_cast<T>(0.0);
+			FieldType value=static_cast<FieldType>(0.0);
 			makeDiagonal(n,value);
 		}
 		
 		//! set block to the identity matrix
 		void setToIdentity(int n)
 		{
-			T value=static_cast<T>(1.0);
+			FieldType value=static_cast<FieldType>(1.0);
 			makeDiagonal(n,value);
 		}
 		
-		void setBlock(int i,int offset,MatrixInBlockTemplate const &m) { data_[i]=m; offsets_[i]=offset; }
+		void setBlock(int i,int offset,MatrixInBlockTemplate const &m)
+		{
+			assert(i<data_.size());
+			data_[i]=m;
+			assert(i<offsets_.size());
+			offsets_[i]=offset;
+		}
 		
 		void sumBlock(int i,MatrixInBlockTemplate const &m) { data_[i] += m; }
 		
@@ -244,12 +254,13 @@ namespace Dmrg {
 		
 		SizeType blocks() const { return data_.size(); }
 		
-		T operator()(int i,int j) const 
+		FieldType operator()(int i,int j) const
 		{	
 			int k;
 			for (k=data_.size()-1;k>=0;k--) if (i>=offsets_[k]) break;
 			
-			if (j<offsets_[k] || j>=offsets_[k+1]) return static_cast<T>(0.0);
+			if (j<offsets_[k] || j>=offsets_[k+1])
+				return static_cast<FieldType>(0.0);
 			return data_[k](i-offsets_[k],j-offsets_[k]);
 			
 		}
@@ -257,18 +268,19 @@ namespace Dmrg {
 		
 		MatrixInBlockTemplate operator()(int i) const { return data_[i]; }
 		
-		template<class S,class MatrixInBlockTemplate2>
-		friend void operatorPlus(BlockMatrix<S,MatrixInBlockTemplate2>  &C,BlockMatrix<S,MatrixInBlockTemplate2>  const &A,BlockMatrix<S,MatrixInBlockTemplate2> const &B);
+		template<class MatrixInBlockTemplate2>
+		friend void operatorPlus(BlockMatrix<MatrixInBlockTemplate2>& C,
+		                         const BlockMatrix<MatrixInBlockTemplate2>& A,
+		                         const BlockMatrix<MatrixInBlockTemplate2>& B);
 		
-		template<class S,class MatrixInBlockTemplate2>
-		friend void operatorPlus(BlockMatrix<S,MatrixInBlockTemplate2>   &A,BlockMatrix<S,MatrixInBlockTemplate2> const &B);
+		template<class MatrixInBlockTemplate2>
+		friend void operatorPlus(BlockMatrix<MatrixInBlockTemplate2>& A,
+		                         const BlockMatrix<MatrixInBlockTemplate2>& B);
 	
-		template<class S,class MatrixInBlockTemplate2>
-		friend std::ostream &operator<<(std::ostream &s,BlockMatrix<S,MatrixInBlockTemplate2> const &A);
-		
-		template<typename S,typename Field>
-		friend void diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >  &C,typename PsimagLite::Vector<Field> ::Type&eigs,char option);
-		
+		template<class MatrixInBlockTemplate2>
+		friend std::ostream &operator<<(std::ostream &s,
+		                                const BlockMatrix<MatrixInBlockTemplate2>& A);
+
 	private:
 		int rank_; //the rank of this matrix
 		typename PsimagLite::Vector<int>::Type offsets_; //starting of diagonal offsets for each block
@@ -277,8 +289,8 @@ namespace Dmrg {
 	}; // class BlockMatrix
 
 	// Companion Functions
-	template<class S,class MatrixInBlockTemplate>
-	std::ostream &operator<<(std::ostream &s,BlockMatrix<S,MatrixInBlockTemplate> const &A)
+	template<class MatrixInBlockTemplate>
+	std::ostream &operator<<(std::ostream &s,const BlockMatrix<MatrixInBlockTemplate>& A)
 	{
 		for (SizeType m=0;m<A.blocks();m++) {
 			int nrank = A.offsets(m+1)-A.offsets(m);
@@ -289,9 +301,10 @@ namespace Dmrg {
 	}
 
 	//C=A+ B where A.offsets is contained in B.offsets
-	template<class S,class MatrixInBlockTemplate>
-	void operatorPlus(BlockMatrix<S,MatrixInBlockTemplate>  &C,
-			  BlockMatrix<S,MatrixInBlockTemplate>  const &A,BlockMatrix<S,MatrixInBlockTemplate> const &B)
+	template<class MatrixInBlockTemplate>
+	void operatorPlus(BlockMatrix<MatrixInBlockTemplate>& C,
+	                  const BlockMatrix<MatrixInBlockTemplate>& A,
+	                  const BlockMatrix<MatrixInBlockTemplate>& B)
 	{
 		SizeType i;
 		int counter=0;
@@ -305,13 +318,15 @@ namespace Dmrg {
 				accumulate(C.data_[i],B.data_[counter++]);
 				if (counter>=B.offsets_.size()) break;
 			}
-			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1) throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");	
+			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
+				throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
 		}
 	}
 
 	//A+= B where A.offsets is contained in B.offsets
-	template<class S,class MatrixInBlockTemplate>
-	void operatorPlus(BlockMatrix<S,MatrixInBlockTemplate>   &A,BlockMatrix<S,MatrixInBlockTemplate> const &B)
+	template<class MatrixInBlockTemplate>
+	void operatorPlus(BlockMatrix<MatrixInBlockTemplate>& A,
+	                  const BlockMatrix<MatrixInBlockTemplate>& B)
 	{
 		SizeType i;
 		int counter=0;
@@ -321,32 +336,34 @@ namespace Dmrg {
 				accumulate(A.data_[i],B.data_[counter++]);
 				if (counter>=B.offsets_.size()) break;
 			}
-			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1) throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");	
+			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
+				throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
 		}
 	 	
 	}
 
 	//! Parallel version of the diagonalization of a block diagonal matrix
-	template<typename S,typename SomeVectorType>
+	template<typename SomeVectorType,typename SomeFieldType>
 	typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,
 	void>::Type
-	diagonalise(BlockMatrix<S,PsimagLite::Matrix<S> >& C,
+	diagonalise(BlockMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
 	            SomeVectorType& eigs,
 	            char option)
 	{
-		typedef typename BlockMatrix<S,PsimagLite::Matrix<S> >::LoopForDiag LoopForDiagType;
+		typedef typename BlockMatrix<PsimagLite::Matrix<SomeFieldType> >::LoopForDiag LoopForDiagType;
 		typedef PsimagLite::Parallelizer<LoopForDiagType> ParallelizerType;
-		ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,PsimagLite::MPI::COMM_WORLD);
+		ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
+		                              PsimagLite::MPI::COMM_WORLD);
 
 		LoopForDiagType helper(C,eigs,option);
 
 		threadObject.loopCreate(C.blocks(),helper); // FIXME: needs weights
 
-		helper.gather(threadObject);
+		helper.gather();
 	}
 
-	template<class S,class MatrixInBlockTemplate>
-	bool isUnitary(BlockMatrix<S,MatrixInBlockTemplate> const &B)
+	template<class MatrixInBlockTemplate>
+	bool isUnitary(const BlockMatrix<MatrixInBlockTemplate>& B)
 	{
 		bool flag=true;
 		MatrixInBlockTemplate matrixTmp;
@@ -359,7 +376,8 @@ namespace Dmrg {
 	}
 
 	template<class S>
-	void blockMatrixToFullMatrix(PsimagLite::Matrix<S> &fm,BlockMatrix<S,PsimagLite::Matrix<S> > const &B)
+	void blockMatrixToFullMatrix(PsimagLite::Matrix<S>& fm,
+	                             const BlockMatrix<PsimagLite::Matrix<S> >& B)
 	{
 		int n = B.rank();
 		int i,j;
@@ -368,7 +386,8 @@ namespace Dmrg {
 	}
 
 	template<class S>
-	void blockMatrixToSparseMatrix(PsimagLite::CrsMatrix<S> &fm,BlockMatrix<S,PsimagLite::Matrix<S> > const &B)
+	void blockMatrixToSparseMatrix(PsimagLite::CrsMatrix<S>& fm,
+	                               const BlockMatrix<PsimagLite::Matrix<S> >& B)
 	{
 		SizeType n = B.rank();
 		fm.resize(n,n);
@@ -386,8 +405,6 @@ namespace Dmrg {
 		fm.setRow(n,counter);
 		fm.checkValidity();
 	}
-
-
 } // namespace Dmrg
 /*@}*/	
 

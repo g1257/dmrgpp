@@ -145,8 +145,11 @@ transformed operator can be used (or not because of the reason limitation above)
 			                      SizeType total,
 			                      typename ConcurrencyType::MutexType* myMutex)
 			{
+				SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+				SizeType npthreads = ConcurrencyType::npthreads;
+
 				for (SizeType p=0;p<blockSize;p++) {
-					SizeType taskNumber = threadNum*blockSize + p;
+					SizeType taskNumber = (threadNum+npthreads*mpiRank)*blockSize + p;
 					if (taskNumber>=total) break;
 
 					SizeType k = taskNumber;
@@ -159,15 +162,14 @@ transformed operator can be used (or not because of the reason limitation above)
 				}
 			}
 
-			template<typename SomeParallelType>
-			void gather(SomeParallelType& p)
+			void gather()
 			{
 				if (!useSu2Symmetry_) {
-					p.gather(operators_);
-					p.bcast(operators_);
+					PsimagLite::MPI::gather(operators_);
+					PsimagLite::MPI::bcast(operators_);
 				} else {
-					reducedOpImpl_.gather(p);
-					reducedOpImpl_.bcast(p);
+					reducedOpImpl_.gather();
+					reducedOpImpl_.bcast();
 				}
 			}
 
@@ -262,7 +264,7 @@ transformed operator can be used (or not because of the reason limitation above)
 
 			threadObject.loopCreate(numberOfOperators(),helper); // FIXME: needs weights
 
-			helper.gather(threadObject);
+			helper.gather();
 
 			changeBasis(hamiltonian_,ftransform);
 			reducedOpImpl_.changeBasisHamiltonian();

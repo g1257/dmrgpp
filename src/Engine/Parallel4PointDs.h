@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PARALLEL_4POINT_DS_H
 
 #include "Matrix.h"
+#include "Mpi.h"
 
 namespace Dmrg {
 
@@ -104,8 +105,11 @@ public:
 
 	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
 	{
+		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+		SizeType npthreads = PsimagLite::Concurrency::npthreads;
+
 		for (SizeType p=0;p<blockSize;p++) {
-			SizeType px = threadNum * blockSize + p;
+			SizeType px = (threadNum+npthreads*mpiRank)*blockSize + p;
 			if (px>=total) continue;
 
 			SizeType i = pairs_[px].first;
