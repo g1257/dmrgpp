@@ -103,6 +103,9 @@ const MPI_Datatype MpiData<unsigned int long>::Type = MPI_LONG;
 template<>
 const MPI_Datatype MpiData<unsigned int>::Type = MPI_INTEGER;
 
+template<>
+const MPI_Datatype MpiData<double>::Type = MPI_DOUBLE;
+
 void checkError(int errorCode,const PsimagLite::String& caller,CommType comm = COMM_WORLD)
 {
 	if (errorCode == MPI_SUCCESS)
@@ -147,7 +150,8 @@ void bcast(SizeType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 }
 
 template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True,
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+Loki::TypeTraits<typename SomeVectorType::value_type>::IsArith,
 void>::Type allGather(SomeVectorType& v,CommType mpiComm = COMM_WORLD)
 {
 	SomeVectorType recvbuf = v;
@@ -159,7 +163,24 @@ void>::Type allGather(SomeVectorType& v,CommType mpiComm = COMM_WORLD)
 }
 
 template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True,
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+IsVectorLike<typename SomeVectorType::value_type>::True,
+void>::Type allGather(SomeVectorType& v,CommType mpiComm = COMM_WORLD)
+{
+	typedef typename SomeVectorType::value_type DataType;
+	for (SizeType i=0;i<v.size();i++) {
+		DataType& vv = v[i];
+		DataType recvbuf = vv;
+		MPI_Datatype datatype = MpiData<typename DataType::value_type>::Type;
+		int errorCode = MPI_Allgather(&(vv[0]),vv.size(),datatype,&(recvbuf[0]),vv.size(),datatype,mpiComm);
+		checkError(errorCode,"MPI_Allgather",mpiComm);
+		vv = recvbuf;
+	}
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+Loki::TypeTraits<typename SomeVectorType::value_type>::IsArith,
 void>::Type gather(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 {
 	SomeVectorType recvbuf(v.size());
