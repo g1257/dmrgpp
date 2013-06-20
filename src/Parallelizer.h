@@ -82,9 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifdef USE_PTHREADS
 
+#ifndef USE_MPI
 #include "Pthreads.h"
-#ifdef USE_MPI
-#error "No hybrid Pthreads and MPI supported yet"
+#else
+#include "PthreadsAndMpi.h"
 #endif
 
 #else
@@ -100,8 +101,15 @@ namespace PsimagLite {
 template<typename InstanceType>
 class Parallelizer
 #ifdef USE_PTHREADS
+
+#ifdef USE_MPI
+	: public PthreadsAndMpi<InstanceType> {
+	typedef PthreadsAndMpi<InstanceType> BaseType;
+#else
         : public Pthreads<InstanceType> {
 	typedef Pthreads<InstanceType> BaseType;
+#endif
+
 #else
 #ifdef USE_MPI
         : public Mpi<InstanceType> {

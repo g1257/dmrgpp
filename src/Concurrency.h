@@ -108,11 +108,12 @@ public:
 		case SERIAL:
 			assert(npthreads == 1);
 		case PTHREADS:
+		case PTHREADS_AND_MPI:
 			return npthreads;
 		case MPI:
 			return 1;
 		}
-		throw RuntimeError("storageIndex PTHREADS_AND_MPI not supported yet\n");
+		throw RuntimeError("storageSize: wrong mode\n");
 	}
 
 	static SizeType storageIndex(SizeType threadNum)
@@ -121,11 +122,12 @@ public:
 		case SERIAL:
 			assert(threadNum == 0);
 		case PTHREADS:
+		case PTHREADS_AND_MPI:
 			return threadNum;
 		case MPI:
 			return 0;
 		}
-		throw RuntimeError("storageIndex PTHREADS_AND_MPI not supported yet\n");
+		throw RuntimeError("storageIndex: wrong mode\n");
 	}
 
 	Concurrency(int argc, char *argv[],size_t nthreads)
@@ -139,8 +141,6 @@ public:
 		MPI::init(argc,argv);
 		mode |= 2;
 #endif
-		if (mode == PTHREADS_AND_MPI)
-			throw RuntimeError("mode PTHREADS_AND_MPI not supported yet\n");
 	}
 
 	~Concurrency()

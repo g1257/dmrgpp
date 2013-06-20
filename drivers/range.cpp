@@ -25,6 +25,7 @@
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include <iostream>
+#include <unistd.h>
 
 class MyLoop {
 
@@ -33,7 +34,8 @@ class MyLoop {
 public:
 
 	MyLoop(SizeType nthreads,SizeType total)
-	    : sum_(ConcurrencyType::storageSize(nthreads)),
+	    : nthreads_(nthreads),
+	      sum_(ConcurrencyType::storageSize(nthreads)),
 	      v_(total,0)
 	{}
 
@@ -42,9 +44,12 @@ public:
 	                      SizeType total,
 	                      ConcurrencyType::MutexType* myMutex)
 	{
+		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		for (SizeType p=0;p<blockSize;p++) {
-			SizeType taskNumber = threadNum*blockSize + p;
+			SizeType taskNumber = (threadNum+nthreads_*mpiRank)*blockSize + p;
 			if (taskNumber>=total) break;
+
+			sleep(1);
 
 //			std::cout<<"This is thread number "<<threadNum;
 //			std::cout<<" and taskNumber="<<taskNumber<<"\n";
@@ -58,16 +63,19 @@ public:
 	template<typename SomeParallelType>
 	void sync(SomeParallelType& p)
 	{
-		if (ConcurrencyType::mode == ConcurrencyType::MPI) {
-			assert(sum_.size() == 1);
-			SizeType tmp = sum_[0];
-			p.allReduce(tmp);
-			sum_[0] = tmp;
-
-			p.allReduce(v_);
-		} else {
+		bool hasMpi = (ConcurrencyType::mode & ConcurrencyType::MPI);
+		bool hasPthreads = (ConcurrencyType::mode & ConcurrencyType::PTHREADS);
+		if (hasPthreads) {
 			SizeType tmp = PsimagLite::sum(sum_);
 			sum_[0] = tmp;
+		}
+
+		if (hasMpi) {
+			SizeType tmp = sum_[0];
+			PsimagLite::MPI::allReduce(tmp);
+			sum_[0] = tmp;
+
+			PsimagLite::MPI::allReduce(v_);
 		}
 	}
 
@@ -84,6 +92,7 @@ public:
 
 private:
 
+	SizeType nthreads_;
 	PsimagLite::Vector<SizeType>::Type sum_;
 	PsimagLite::Vector<SizeType>::Type v_;
 };
@@ -116,8 +125,9 @@ int main(int argc,char *argv[])
 	SizeType sum = helper.sum();
 
 	if (ConcurrencyType::root()) {
-		std::cout<<"Using "<<threadObject.name();
-		std::cout<<" with "<<threadObject.threads()<<" threads.\n";
+		std::cout<<"Using "<<threadObject.name()<<" mode= "<<ConcurrencyType::mode;
+		std::cout<<" with "<<threadObject.threads();
+		std::cout<<" threads and "<<threadObject.mpiProcs()<<" mpi procs.\n";
 		std::cout<<"sum="<<sum<<"\n";
 		std::cout<<helper.v();
 	}

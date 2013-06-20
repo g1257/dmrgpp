@@ -25,18 +25,27 @@ class MyHelper {
 
 public:
 
+	MyHelper(SizeType nthreads)
+	    : nthreads_(nthreads)
+	{}
+
 	void thread_function_(SizeType threadNum,
 	                      SizeType blockSize,
 	                      SizeType total,
 	                      ConcurrencyType::MutexType* myMutex)
 	{
+		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		for (SizeType p=0;p<blockSize;p++) {
-			SizeType taskNumber = threadNum*blockSize + p;
+			SizeType taskNumber = (threadNum+nthreads_*mpiRank)*blockSize + p;
 			if (taskNumber>=total) break;
 //			std::cout<<"This is thread number "<<threadNum;
 //			std::cout<<" and taskNumber="<<taskNumber<<"\n";
 		}
 	}
+
+private:
+
+	SizeType nthreads_;
 
 }; // class MyHelper
 
@@ -61,7 +70,7 @@ int main(int argc,char *argv[])
 	ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
 	                              PsimagLite::MPI::COMM_WORLD);
 
-	HelperType helper;
+	HelperType helper(nthreads);
 
 	std::cout<<"Using "<<threadObject.name();
 	std::cout<<" with "<<threadObject.threads()<<" threads.\n";

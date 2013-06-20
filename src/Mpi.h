@@ -267,30 +267,6 @@ public:
 		return MPI::commSize(comm_);
 	}
 
-	template<typename T>
-	void gather(T& t)
-	{
-		MPI::gather(t);
-	}
-
-	template<typename T>
-	void allGather(T& v)
-	{
-		MPI::allGather(v);	
-	}
-
-	template<typename T>
-	void allReduce(T& v)
-	{
-		MPI::allReduce(v);
-	}
-
-	template<typename T>
-	void bcast(T& t)
-	{
-		MPI::bcast(t);
-	}
-
 private:
 
 	MPI::CommType comm_;

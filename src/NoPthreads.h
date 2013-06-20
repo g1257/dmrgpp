@@ -111,21 +111,7 @@ public:
 
 	SizeType threads() const { return 1; }
 
-	template<typename T>
-	void gather(T& v)
-	{}
-
-	template<typename T>
-	void allGather(T& v)
-	{}
-
-	template<typename T>
-	void bcast(T& t)
-	{}
-
-	template<typename T>
-	void allReduce(T& v)
-	{}
+	SizeType mpiProcs() const { return 1; }
 
 }; // NoPthreads
 } // namespace Dmrg

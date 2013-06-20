@@ -146,21 +146,7 @@ public:
 
 	SizeType threads() const { return nthreads_; }
 
-	template<typename T>
-	void gather(T& t)
-	{}
-
-	template<typename T>
-	void allGather(T& v)
-	{}
-
-	template<typename T>
-	void bcast(T& t)
-	{}
-
-	template<typename T>
-	void allReduce(T& v)
-	{}
+	SizeType mpiProcs() const { return 1; }
 
 private:
 
