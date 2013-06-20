@@ -36,7 +36,7 @@ print FILE<<EOF;
 # Platform: Linux
 # MPI: 0
 
-LDFLAGS =      $lapack    -lm  -lpthread 
+LDFLAGS =      $lapack    -lm  -lpthread
 CPPFLAGS = -Werror -Wall -I../  -I../src
 CXX = g++ -O3 -DNDEBUG
 
@@ -46,7 +46,7 @@ EOF
 foreach my $what (@drivers) {
 print FILE<<EOF;
 $what.o: $what.cpp  Makefile
-	\$(CXX) \$(CPPFLAGS) -c $what.cpp  
+	\$(CXX) \$(CPPFLAGS) -c $what.cpp
 
 $what: $what.o
 	\$(CXX) -o  $what $what.o \$(LDFLAGS)
@@ -97,13 +97,14 @@ sub findLapack
 sub tryWith
 {
 	my ($stringToTest) = @_;
-	my $tmpfile = `mktemp`;
+	my $tmpfile = `mktemp XXXXXXXXXX.cpp`;
 	open(FOUT,">$tmpfile") or return 1;
 	print FOUT "int main() {}\n";
 	close(FOUT);
-	my $ret = open(PIPE,"g++ test.cpp $stringToTest  2>&1 | ");
+	chomp($tmpfile);
+	my $ret = open(PIPE,"g++ $tmpfile $stringToTest  2>&1 | ");
 	if (!$ret) {
-	 	system("rm -f $tmpfile");	
+	 	system("rm -f $tmpfile");
 		return 1;
 	}
 	my $buffer = "";

@@ -143,9 +143,12 @@ SizeType commRank(CommType mpiComm)
 	return tmp;
 }
 
-void bcast(SizeType& v,int root = 0, CommType mpiComm = COMM_WORLD)
+template<typename NumericType>
+typename EnableIf<Loki::TypeTraits<NumericType>::isArith,
+void>::Type bcast(NumericType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 {
-	int errorCode = MPI_Bcast(&v,1,MPI_INTEGER,root,mpiComm);
+	MPI_Datatype datatype = MpiData<NumericType>::Type;
+	int errorCode = MPI_Bcast(&v,1,datatype,root,mpiComm);
 	checkError(errorCode,"MPI_Bcast",mpiComm);
 }
 
@@ -193,7 +196,7 @@ void>::Type gather(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD
 }
 
 template<typename NumericType>
-typename EnableIf<Loki::TypeTraits<NumericType>::IsArith,
+typename EnableIf<Loki::TypeTraits<NumericType>::isArith,
 void>::Type gather(NumericType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 {
 	int recvbuf = 0;
