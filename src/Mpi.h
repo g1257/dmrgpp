@@ -90,6 +90,7 @@ namespace MPI {
 #ifdef USE_MPI
 typedef MPI_Comm CommType;
 CommType COMM_WORLD = MPI_COMM_WORLD;
+MPI_Op SUM = MPI_SUM;
 
 template<typename T>
 struct MpiData
@@ -210,6 +211,23 @@ void>::Type gather(NumericType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 
 template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
+Loki::TypeTraits<typename SomeVectorType::value_type>::IsArith,
+void>::Type reduce(SomeVectorType& v,
+                   MPI_Op op = MPI_SUM,
+                   int root = 0,
+                   CommType mpiComm=COMM_WORLD) const
+{
+	SomeVectorType w(v.size());
+	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
+	int errorCode = MPI_Reduce(&(v[0]),&(w[0]),v.size(),datatype,op,root,mpiComm);
+	checkError(errorCode,"MPI_Reduce",mpiComm);
+
+	if (commRank(mpiComm) == static_cast<SizeType>(root))
+		v = w;
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
 Loki::TypeTraits<typename SomeVectorType::value_type>::isIntegral,
 void>::Type allReduce(SomeVectorType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
 {
@@ -231,6 +249,7 @@ void allReduce(SizeType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
 #else
 typedef int CommType;
 int COMM_WORLD = 0;
+int SUM = 0;
 
 void init(int argc, char *argv[]) {}
 
@@ -256,6 +275,10 @@ void allGather(T &t)
 
 template<typename T>
 void gather(T &t)
+{}
+
+template<typename T>
+void reduce(T &t,int op = 0,int root = 0,int comm = 0)
 {}
 
 template<typename T>
