@@ -164,6 +164,8 @@ void mainLoop(GeometryType& geometry,
 
 int main(int argc,char *argv[])
 {
+	typedef PsimagLite::Concurrency ConcurrencyType;
+	ConcurrencyType concurrency(&argc,&argv,1);
 	InputCheck inputCheck;
 	PsimagLite::String filename="";
 	int opt = 0;
@@ -194,9 +196,6 @@ int main(int argc,char *argv[])
 		inputCheck.usageMain(strUsage);
 		return 1;
 	}
-
-	typedef PsimagLite::Concurrency ConcurrencyType;
-	ConcurrencyType concurrency(argc,argv,1);
 
 	// print license
 	if (ConcurrencyType::root()) {

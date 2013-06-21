@@ -153,7 +153,7 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
-	ConcurrencyType concurrency(argc,argv,1);
+	ConcurrencyType concurrency(&argc,&argv,1);
 	
 	// print license
 	if (ConcurrencyType::root()) {

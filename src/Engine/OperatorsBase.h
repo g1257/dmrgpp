@@ -187,8 +187,7 @@ transformed operator can be used (or not because of the reason limitation above)
 
 			void gatherOperators()
 			{
-				for (SizeType i = 0; i < operators_.size(); i++)
-					Dmrg::gather(operators_[i]);
+				PsimagLite::MPI::pointByPointGather(operators_);
 			}
 
 			void bcastOperators()

@@ -149,8 +149,10 @@ namespace Dmrg {
 			void gather()
 			{
 				if (ConcurrencyType::hasMpi()) {
-					PsimagLite::MPI::allGather(eigsForGather);
-					PsimagLite::MPI::allGather(C.data_);
+					PsimagLite::MPI::pointByPointGather(eigsForGather);
+					PsimagLite::MPI::bcast(eigsForGather);
+					PsimagLite::MPI::pointByPointGather(C.data_);
+					PsimagLite::MPI::bcast(C.data_);
 				}
 
 				for (SizeType m=0;m<C.blocks();m++) {
@@ -238,7 +240,7 @@ namespace Dmrg {
 			makeDiagonal(n,value);
 		}
 		
-		void setBlock(int i,int offset,MatrixInBlockTemplate const &m)
+		void setBlock(SizeType i,int offset,MatrixInBlockTemplate const &m)
 		{
 			assert(i<data_.size());
 			data_[i]=m;

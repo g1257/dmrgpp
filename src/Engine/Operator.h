@@ -110,12 +110,20 @@ namespace Dmrg {
 		return os;
 	}
 
-	void gather(Su2Related& su2Related)
+	void send(Su2Related& su2Related,int root,int tag,PsimagLite::MPI::CommType mpiComm)
 	{
-		PsimagLite::MPI::gather(su2Related.offset);
-		PsimagLite::MPI::gather(su2Related.source);
-		PsimagLite::MPI::gather(su2Related.transpose);
+		PsimagLite::MPI::send(su2Related.offset,root,tag,mpiComm);
+		PsimagLite::MPI::send(su2Related.source,root,tag+1,mpiComm);
+		PsimagLite::MPI::send(su2Related.transpose,root,tag+2,mpiComm);
 	}
+
+	void recv(Su2Related& su2Related,int root,int tag,PsimagLite::MPI::CommType mpiComm)
+	{
+		PsimagLite::MPI::recv(su2Related.offset,root,tag,mpiComm);
+		PsimagLite::MPI::recv(su2Related.source,root,tag+1,mpiComm);
+		PsimagLite::MPI::recv(su2Related.transpose,root,tag+2,mpiComm);
+	}
+	
 
 	void bcast(Su2Related& su2Related)
 	{
@@ -141,6 +149,23 @@ namespace Dmrg {
 		: data(data1),fermionSign(fermionSign1),jm(jm1),angularFactor(angularFactor1),su2Related(su2Related1)
 		{}
 
+		void send(int root,int tag,PsimagLite::MPI::CommType mpiComm)
+		{
+			data.send(root,tag,mpiComm);
+			PsimagLite::MPI::send(fermionSign,root,tag+1,mpiComm);
+			PsimagLite::MPI::send(jm,root,tag+2,mpiComm);
+			PsimagLite::MPI::send(angularFactor,root,tag+3,mpiComm);
+			Dmrg::send(su2Related,root,tag+4,mpiComm);
+		}
+
+		void recv(int root,int tag,PsimagLite::MPI::CommType mpiComm)
+		{
+			data.recv(root,tag,mpiComm);
+			PsimagLite::MPI::recv(fermionSign,root,tag+1,mpiComm);
+			PsimagLite::MPI::recv(jm,root,tag+2,mpiComm);
+			Dmrg::recv(su2Related,root,tag+4,mpiComm);
+		}
+
 		SparseMatrixType data;
 		int fermionSign; // does this operator commute or anticommute with others of the same class on different sites
 		PairType  jm; // angular momentum of this operator	
@@ -148,16 +173,6 @@ namespace Dmrg {
 
 		Su2RelatedType su2Related;
 	};
-
-	template<typename RealType,typename SparseMatrixType>
-	void gather(Operator<RealType,SparseMatrixType>& op)
-	{
-		PsimagLite::gather(op.data);
-		PsimagLite::MPI::gather(op.fermionSign);
-		PsimagLite::MPI::gather(op.jm);
-		PsimagLite::MPI::gather(op.angularFactor);
-		gather(op.su2Related);
-	}
 
 	template<typename RealType,typename SparseMatrixType>
 	void bcast(Operator<RealType,SparseMatrixType>& op)

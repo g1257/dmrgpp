@@ -347,8 +347,7 @@ namespace Dmrg {
 
 		void gather()
 		{
-			for (SizeType i = 0; i < reducedOperators_.size(); i++)
-				Dmrg::gather(reducedOperators_[i]);
+			PsimagLite::MPI::pointByPointGather(reducedOperators_);
 		}
 
 		void bcast()
