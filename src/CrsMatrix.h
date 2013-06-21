@@ -317,15 +317,6 @@ namespace PsimagLite {
 
 		const T& getValue(SizeType i) const { assert(i<values_.size()); return values_[i]; }
 
-//		void print(int fd) const
-//		{
-//			BinarySaveLoad::save(fd,nrow_);
-//			BinarySaveLoad::save(fd,ncol_);
-//			BinarySaveLoad::save(fd,rowptr_);
-//			BinarySaveLoad::save(fd,colind_);
-//			BinarySaveLoad::save(fd,values_);
-//		}
-
 		PsimagLite::Matrix<T> toDense() const
 		{
 			PsimagLite::Matrix<T> m;
@@ -350,6 +341,25 @@ namespace PsimagLite {
 #endif
 		}
 
+		void send(int root,int tag,MPI::CommType mpiComm)
+		{
+			MPI::send(nrow_,root,tag,mpiComm);
+			MPI::send(ncol_,root,tag+1,mpiComm);
+			MPI::send(rowptr_,root,tag+2,mpiComm);
+			MPI::send(colind_,root,tag+3,mpiComm);
+			MPI::send(values_,root,tag+4,mpiComm);
+		}
+
+		void recv(int root,int tag,MPI::CommType mpiComm)
+		{
+			MPI::recv(nrow_,root,tag,mpiComm);
+			MPI::recv(ncol_,root,tag+1,mpiComm);
+			MPI::recv(rowptr_,root,tag+2,mpiComm);
+			MPI::recv(colind_,root,tag+3,mpiComm);
+			MPI::recv(values_,root,tag+4,mpiComm);
+		}
+	
+
 		template<typename S>
 		friend std::ostream &operator<<(std::ostream &os,const CrsMatrix<S> &m);
 
@@ -370,9 +380,6 @@ namespace PsimagLite {
 
 		template<typename CrsMatrixType>
 		friend std::istream &operator>>(std::istream &is,CrsMatrix<CrsMatrixType>& m);
-
-		template<typename S>
-		friend void gather(CrsMatrix<S>& m);
 
 		template<typename S>
 		friend void bcast(CrsMatrix<S>& m);
@@ -431,16 +438,6 @@ namespace PsimagLite {
 		for (SizeType i=0;i<m.values_.size();i++) is>>m.values_[i];
 
 		return is;
-	}
-
-	template<typename S>
-	void gather(CrsMatrix<S>& m)
-	{
-		PsimagLite::MPI::gather(m.rowptr_);
-                PsimagLite::MPI::gather(m.colind_);
-                PsimagLite::MPI::gather(m.values_);
-                PsimagLite::MPI::gather(m.nrow_);
-		PsimagLite::MPI::gather(m.ncol_);
 	}
 
 	template<typename S>

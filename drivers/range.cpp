@@ -102,7 +102,7 @@ int main(int argc,char *argv[])
 	SizeType nthreads = 1;
 	if (argc == 3) nthreads = atoi(argv[2]);
 
-	ConcurrencyType concurrency(argc,argv,nthreads);
+	ConcurrencyType concurrency(&argc,&argv,nthreads);
 
 	typedef MyLoop HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;

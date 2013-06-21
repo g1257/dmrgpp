@@ -130,7 +130,7 @@ public:
 		throw RuntimeError("storageIndex: wrong mode\n");
 	}
 
-	Concurrency(int argc, char *argv[],size_t nthreads)
+	Concurrency(int* argc, char **argv[],size_t nthreads)
 	{
 		npthreads = nthreads;
 		mode = 0;

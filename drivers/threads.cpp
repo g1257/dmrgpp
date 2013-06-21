@@ -63,7 +63,7 @@ int main(int argc,char *argv[])
 	SizeType nthreads  = atoi(argv[1]);
 	SizeType ntasks = atoi(argv[2]);
 
-	ConcurrencyType concurrency(argc,argv,nthreads);
+	ConcurrencyType concurrency(&argc,&argv,nthreads);
 
 	typedef MyHelper HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;

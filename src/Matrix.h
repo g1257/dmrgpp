@@ -30,6 +30,7 @@ Please see full open source license included in file LICENSE.
 #include <cassert>
 #include "TypeToString.h"
 #include "String.h"
+#include "Mpi.h"
 
 namespace PsimagLite {
 
@@ -179,7 +180,29 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 			for (SizeType i=0;i<data_.size();i++) data_[i]=val;
 		}
 
+		void send(int root,int tag,MPI::CommType mpiComm)
+		{
+			MPI::send(nrow_,root,tag,mpiComm);
+			MPI::send(ncol_,root,tag+1,mpiComm);
+			MPI::send(data_,root,tag+2,mpiComm);
+		}
+
+		void recv(int root,int tag,MPI::CommType mpiComm)
+		{
+			MPI::recv(nrow_,root,tag,mpiComm);
+			MPI::recv(ncol_,root,tag+1,mpiComm);
+			MPI::recv(data_,root,tag+2,mpiComm);
+		}
+
+		void bcast(int root,MPI::CommType mpiComm)
+		{
+			MPI::bcast(nrow_,root,mpiComm);
+			MPI::bcast(ncol_,root,mpiComm);
+			MPI::bcast(data_,root,mpiComm);
+		}
+
 	private:
+
 		SizeType nrow_,ncol_;
 		typename Vector<T>::Type data_;
 	}; // class Matrix
