@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef OPERATOR_H
 #define OPERATOR_H
+#include "CrsMatrix.h"
 
 namespace Dmrg {
 	//! This is a structure, don't add member functions here!
@@ -109,6 +110,20 @@ namespace Dmrg {
 		return os;
 	}
 
+	void gather(Su2Related& su2Related)
+	{
+		PsimagLite::MPI::gather(su2Related.offset);
+		PsimagLite::MPI::gather(su2Related.source);
+		PsimagLite::MPI::gather(su2Related.transpose);
+	}
+
+	void bcast(Su2Related& su2Related)
+	{
+		PsimagLite::MPI::bcast(su2Related.offset);
+		PsimagLite::MPI::bcast(su2Related.source);
+		PsimagLite::MPI::bcast(su2Related.transpose);
+	}
+
 	//! This is a structure, don't add member functions here!
 	template<typename RealType_,typename SparseMatrixType_>
 	struct Operator {
@@ -133,6 +148,26 @@ namespace Dmrg {
 
 		Su2RelatedType su2Related;
 	};
+
+	template<typename RealType,typename SparseMatrixType>
+	void gather(Operator<RealType,SparseMatrixType>& op)
+	{
+		PsimagLite::gather(op.data);
+		PsimagLite::MPI::gather(op.fermionSign);
+		PsimagLite::MPI::gather(op.jm);
+		PsimagLite::MPI::gather(op.angularFactor);
+		gather(op.su2Related);
+	}
+
+	template<typename RealType,typename SparseMatrixType>
+	void bcast(Operator<RealType,SparseMatrixType>& op)
+	{
+		PsimagLite::bcast(op.data);
+		PsimagLite::MPI::bcast(op.fermionSign);
+		PsimagLite::MPI::bcast(op.jm);
+		PsimagLite::MPI::bcast(op.angularFactor);
+		bcast(op.su2Related);
+	}
 
 	template<typename RealType_,
 	         typename SparseMatrixType,

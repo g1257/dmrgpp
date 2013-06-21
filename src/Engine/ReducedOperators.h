@@ -347,12 +347,14 @@ namespace Dmrg {
 
 		void gather()
 		{
-			PsimagLite::MPI::gather(reducedOperators_);
+			for (SizeType i = 0; i < reducedOperators_.size(); i++)
+				Dmrg::gather(reducedOperators_[i]);
 		}
 
 		void bcast()
 		{
-			PsimagLite::MPI::bcast(reducedOperators_);
+			for (SizeType i = 0; i < reducedOperators_.size(); i++)
+				Dmrg::bcast(reducedOperators_[i]);
 		}
 
 		template<typename IoOutputter>

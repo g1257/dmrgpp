@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Complex.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
+#include "Operator.h"
 
 namespace Dmrg {
 /**
@@ -165,8 +166,8 @@ transformed operator can be used (or not because of the reason limitation above)
 			void gather()
 			{
 				if (!useSu2Symmetry_) {
-					PsimagLite::MPI::gather(operators_);
-					PsimagLite::MPI::bcast(operators_);
+					gatherOperators();
+					bcastOperators();
 				} else {
 					reducedOpImpl_.gather();
 					reducedOpImpl_.bcast();
@@ -182,6 +183,18 @@ transformed operator can be used (or not because of the reason limitation above)
 				if (!EXCLUDE) return false; // <-- this is the safest answer
 	// 			if (k<startEnd.first || k>=startEnd.second) return true;
 				return false;
+			}
+
+			void gatherOperators()
+			{
+				for (SizeType i = 0; i < operators_.size(); i++)
+					Dmrg::gather(operators_[i]);
+			}
+
+			void bcastOperators()
+			{
+				for (SizeType i = 0; i < operators_.size(); i++)
+					Dmrg::bcast(operators_[i]);
 			}
 
 			bool useSu2Symmetry_;
