@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "String.h"
 #include "loki/TypeTraits.h"
+#include "Mpi.h"
 
 namespace PsimagLite {
 
@@ -370,6 +371,12 @@ namespace PsimagLite {
 		template<typename CrsMatrixType>
 		friend std::istream &operator>>(std::istream &is,CrsMatrix<CrsMatrixType>& m);
 
+		template<typename S>
+		friend void gather(CrsMatrix<S>& m);
+
+		template<typename S>
+		friend void bcast(CrsMatrix<S>& m);
+
 	private:
 		typename Vector<int>::Type rowptr_;
 		typename Vector<int>::Type colind_;
@@ -424,6 +431,26 @@ namespace PsimagLite {
 		for (SizeType i=0;i<m.values_.size();i++) is>>m.values_[i];
 
 		return is;
+	}
+
+	template<typename S>
+	void gather(CrsMatrix<S>& m)
+	{
+		PsimagLite::MPI::gather(m.rowptr_);
+                PsimagLite::MPI::gather(m.colind_);
+                PsimagLite::MPI::gather(m.values_);
+                PsimagLite::MPI::gather(m.nrow_);
+		PsimagLite::MPI::gather(m.ncol_);
+	}
+
+	template<typename S>
+	void bcast(CrsMatrix<S>& m)
+	{
+		PsimagLite::MPI::bcast(m.rowptr_);
+		PsimagLite::MPI::bcast(m.colind_);
+		PsimagLite::MPI::bcast(m.values_);
+		PsimagLite::MPI::bcast(m.nrow_);
+		PsimagLite::MPI::bcast(m.ncol_);
 	}
 
 	//! Transforms a Compressed-Row-Storage (CRS) into a full Matrix (Fast version)

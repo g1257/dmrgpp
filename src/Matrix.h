@@ -185,6 +185,18 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 	}; // class Matrix
 
 	template<typename T>
+	class IsMatrixLike {
+	public:
+		enum { True = false};
+	};
+
+	template<typename T>
+	class IsMatrixLike<Matrix<T> > {
+	public:
+		enum { True = true};
+	};
+
+	template<typename T>
 	std::ostream &operator<<(std::ostream &os,Matrix<T> const &A)
 	{
 		SizeType i,j;

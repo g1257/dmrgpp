@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifdef USE_MPI
 #include <mpi.h>
 #include <loki/TypeTraits.h>
+#include "Matrix.h"
 #endif
 
 namespace PsimagLite {
@@ -106,6 +107,9 @@ const MPI_Datatype MpiData<unsigned int>::Type = MPI_INTEGER;
 
 template<>
 const MPI_Datatype MpiData<double>::Type = MPI_DOUBLE;
+
+template<>
+const MPI_Datatype MpiData<int>::Type = MPI_INTEGER;
 
 void checkError(int errorCode,const PsimagLite::String& caller,CommType comm = COMM_WORLD)
 {
@@ -151,6 +155,42 @@ void>::Type bcast(NumericType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 	MPI_Datatype datatype = MpiData<NumericType>::Type;
 	int errorCode = MPI_Bcast(&v,1,datatype,root,mpiComm);
 	checkError(errorCode,"MPI_Bcast",mpiComm);
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
+void>::Type bcast(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
+{
+	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
+	int errorCode = MPI_Bcast(&v,v.size(),datatype,root,mpiComm);
+	checkError(errorCode,"MPI_Bcast",mpiComm);
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+                  IsComplexNumber<typename SomeVectorType::value_type>::True,
+void>::Type bcast(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
+{
+        MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
+        int errorCode = MPI_Bcast(&v,2*v.size(),datatype,root,mpiComm);
+        checkError(errorCode,"MPI_Bcast",mpiComm);
+}
+
+template<typename T1,typename T2>
+typename EnableIf<Loki::TypeTraits<T1>::isArith &
+                  Loki::TypeTraits<T2>::isArith,
+void>::Type bcast(std::pair<T1,T2>& p,int root = 0, CommType mpiComm = COMM_WORLD)
+{
+        T1 t1 = p.first;
+        MPI_Datatype datatype = MpiData<T1>::Type;
+	int errorCode = MPI_Bcast(&t1,1,datatype,root,mpiComm);
+
+        T2 t2 = p.second;
+        MPI_Datatype datatype2 = MpiData<T2>::Type;
+	errorCode = MPI_Bcast(&t2,1,datatype2,root,mpiComm);
+
+	p = std::pair<T1,T2>(t1,t2);
 }
 
 template<typename SomeVectorType>
@@ -208,6 +248,55 @@ void>::Type allGather(SomeVectorType& v,CommType mpiComm = COMM_WORLD)
 	}
 }
 
+template<typename SomeMatrixType>
+typename EnableIf<IsMatrixLike<SomeMatrixType>::True &
+Loki::TypeTraits<typename SomeMatrixType::value_type>::isArith,
+void>::Type allGather(SomeMatrixType& v,CommType mpiComm = COMM_WORLD)
+{
+	SomeMatrixType recvbuf = v;
+	MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type>::Type;
+	int errorCode = MPI_Allgather(&(v[0]),v.size(),datatype,&(recvbuf[0]),v.size(),datatype,mpiComm);
+	checkError(errorCode,"MPI_Allgather",mpiComm);
+
+	v = recvbuf;
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+                  IsMatrixLike<typename SomeVectorType::value_type>::True &
+                  Loki::TypeTraits<typename SomeVectorType::value_type::value_type>::isArith,
+void>::Type allGather(SomeVectorType& v,CommType mpiComm = COMM_WORLD)
+{
+	typedef typename SomeVectorType::value_type SomeMatrixType;
+
+	for (SizeType i = 0; i < v.size(); i++) {
+		SomeMatrixType& vv = v[i];
+		SizeType total = vv.n_row() * vv.n_col();
+		SomeMatrixType recvbuf = vv;
+		MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type>::Type;
+		int errorCode = MPI_Allgather(&(vv(0,0)),total,datatype,&(recvbuf(0,0)),total,datatype,mpiComm);
+		checkError(errorCode,"MPI_Allgather",mpiComm);
+		vv = recvbuf;
+	}
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+                  IsMatrixLike<typename SomeVectorType::value_type>::True &
+                  IsComplexNumber<typename SomeVectorType::value_type::value_type>::True,
+void>::Type allGather(SomeVectorType& v,CommType mpiComm = COMM_WORLD)
+{
+	typedef typename SomeVectorType::value_type SomeMatrixType;
+	for (SizeType i = 0; i < v.size(); i++) {
+		SomeMatrixType& vv = v[i];
+		SizeType total = vv.n_row() * vv.n_col();
+		SomeMatrixType recvbuf = vv;
+		MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type::value_type>::Type;
+		int errorCode = MPI_Allgather(&(vv(0,0)),2*total,datatype,&(recvbuf(0,0)),2*total,datatype,mpiComm);
+		checkError(errorCode,"MPI_Allgather",mpiComm);
+		vv = recvbuf;
+	}
+}
 
 template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
@@ -219,8 +308,22 @@ void>::Type gather(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD
 	int errorCode = MPI_Gather(&(v[0]),v.size(),datatype,&(recvbuf[0]),v.size(),datatype,root,mpiComm);
 	checkError(errorCode,"MPI_Gather",mpiComm);
 
-	if (commRank(mpiComm) == root)
+	if (commRank(mpiComm) == static_cast<SizeType>(root))
 		v = recvbuf;
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+                  IsComplexNumber<typename SomeVectorType::value_type>::True,
+void>::Type gather(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
+{
+        SomeVectorType recvbuf(v.size());
+        MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
+        int errorCode = MPI_Gather(&(v[0]),2*v.size(),datatype,&(recvbuf[0]),2*v.size(),datatype,root,mpiComm);
+        checkError(errorCode,"MPI_Gather",mpiComm);
+
+        if (commRank(mpiComm) == static_cast<SizeType>(root))
+                v = recvbuf;
 }
 
 template<typename NumericType>
@@ -234,6 +337,27 @@ void>::Type gather(NumericType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 
 	if (commRank(mpiComm) == static_cast<SizeType>(root))
 		v = recvbuf;
+}
+
+template<typename T1,typename T2>
+typename EnableIf<Loki::TypeTraits<T1>::isArith &
+                  Loki::TypeTraits<T2>::isArith,
+void>::Type gather(std::pair<T1,T2>& p,int root = 0, CommType mpiComm = COMM_WORLD)
+{
+	T1 t1 = p.first;
+	T1 recvbuf;
+	MPI_Datatype datatype = MpiData<T1>::Type;
+	int errorCode = MPI_Gather(&t1,1,datatype,&recvbuf,1,datatype,root,mpiComm);
+	checkError(errorCode,"MPI_Gather",mpiComm);
+
+	T2 t2 = p.second;
+	T2 recvbuf2;
+	MPI_Datatype datatype2 = MpiData<T2>::Type;
+	errorCode = MPI_Gather(&t2,1,datatype2,&recvbuf2,1,datatype2,root,mpiComm);
+	checkError(errorCode,"MPI_Gather",mpiComm);
+
+	if (commRank(mpiComm) == static_cast<SizeType>(root))
+		p = std::pair<T1,T2>(recvbuf,recvbuf2);
 }
 
 template<typename SomeVectorType>
