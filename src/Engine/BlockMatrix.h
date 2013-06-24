@@ -114,7 +114,8 @@ namespace Dmrg {
 			      eigs(eigs1),
 			      option(option1),
 			      eigsForGather(C.blocks()),
-			      weights(C.blocks())
+			      weights(C.blocks()),
+			      hasMpi_(PsimagLite::Concurrency::hasMpi())
 			{
 
 				for (SizeType m=0;m<C.blocks();m++) {
@@ -130,7 +131,7 @@ namespace Dmrg {
 			                      SizeType total,
 			                      typename PsimagLite::Concurrency::MutexType* myMutex)
 			{
-				SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+				SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 				SizeType npthreads = ConcurrencyType::npthreads;
 
 				for (SizeType p=0;p<blockSize;p++) {
@@ -148,7 +149,7 @@ namespace Dmrg {
 
 			void gather()
 			{
-				if (ConcurrencyType::hasMpi()) {
+				if (hasMpi_) {
 					PsimagLite::MPI::pointByPointGather(eigsForGather);
 					PsimagLite::MPI::bcast(eigsForGather);
 					PsimagLite::MPI::pointByPointGather(C.data_);
@@ -194,6 +195,7 @@ namespace Dmrg {
 			char option;
 			typename PsimagLite::Vector<typename PsimagLite::Vector<RealType>::Type>::Type eigsForGather;
 			typename PsimagLite::Vector<SizeType>::Type weights;
+			bool hasMpi_;
 		};
 
 		BlockMatrix(int rank,int blocks) : rank_(rank),offsets_(blocks+1),data_(blocks) 

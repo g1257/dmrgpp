@@ -129,9 +129,9 @@ public:
 
 		MatrixType W(nl,nr);
 
+		computeConnections(W,V);
 		computeRight(W,V);
 		computeLeft(W,V);
-		computeConnections(W,V);
 
 		for (SizeType r=0;r<vout.size();r++) {
 			div_t divresult = div(perm[r+offset],nl);
@@ -212,11 +212,11 @@ private:
 
 		typedef PsimagLite::Parallelizer<KronConnectionsType> ParallelizerType;
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
-		                                                     PsimagLite::MPI::COMM_WORLD);
+		                                     PsimagLite::MPI::COMM_WORLD);
 
 		SizeType npatches = initKron_.patch();
 		parallelConnections.loopCreate(npatches,kc);
-		//hc.sync(parallelConnections,concurrency_);
+		kc.sync();
 	}
 
 	const InitKronType& initKron_;

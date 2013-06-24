@@ -100,7 +100,7 @@ public:
 	typedef typename InitKronType::RealType RealType;
 
 	KronConnections(const InitKronType& initKron,MatrixType& W,const MatrixType& V)
-	: initKron_(initKron),W_(W),V_(V)
+	: initKron_(initKron),W_(W),V_(V),hasMpi_(PsimagLite::Concurrency::hasMpi())
 	{
 	}
 
@@ -112,7 +112,7 @@ public:
 		const GenGroupType& istartRight = initKron_.istartRight();
 		MatrixType intermediate(W_.n_row(),W_.n_col());
 
-		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+		SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
 		for (SizeType p=0;p<blockSize;p++) {
@@ -174,13 +174,18 @@ public:
 				}
 			}
 		}
+	}
 
-
+	void sync()
+	{
+		if (!hasMpi_) return;
+		PsimagLite::MPI::allReduce(W_);
 	}
 
 	const InitKronType& initKron_;
 	MatrixType& W_;
 	const MatrixType& V_;
+	bool hasMpi_;
 }; //class KronConnections
 
 } // namespace PsimagLite

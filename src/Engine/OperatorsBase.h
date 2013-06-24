@@ -136,7 +136,8 @@ transformed operator can be used (or not because of the reason limitation above)
 			      reducedOpImpl_(reducedOpImpl),
 			      operators_(operators),
 			      ftransform(ftransform1),
-			      thisBasis(thisBasis1)
+			      thisBasis(thisBasis1),
+			      hasMpi_(ConcurrencyType::hasMpi())
 			{
 				reducedOpImpl_.prepareTransform(ftransform,thisBasis);
 			}
@@ -146,7 +147,7 @@ transformed operator can be used (or not because of the reason limitation above)
 			                      SizeType total,
 			                      typename ConcurrencyType::MutexType* myMutex)
 			{
-				SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+				SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 				SizeType npthreads = ConcurrencyType::npthreads;
 
 				for (SizeType p=0;p<blockSize;p++) {
@@ -187,11 +188,13 @@ transformed operator can be used (or not because of the reason limitation above)
 
 			void gatherOperators()
 			{
+				if (!hasMpi_) return;
 				PsimagLite::MPI::pointByPointGather(operators_);
 			}
 
 			void bcastOperators()
 			{
+				if (!hasMpi_) return;
 				for (SizeType i = 0; i < operators_.size(); i++)
 					Dmrg::bcast(operators_[i]);
 			}
@@ -201,6 +204,7 @@ transformed operator can be used (or not because of the reason limitation above)
 			typename PsimagLite::Vector<OperatorType>::Type& operators_;
 			const SparseMatrixType& ftransform;
 			const BasisType* thisBasis;
+			bool hasMpi_;
 		};
 
 		OperatorsBase(const BasisType* thisBasis)

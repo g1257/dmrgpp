@@ -110,12 +110,13 @@ namespace Dmrg {
 		  pSE_(pSE),
 		  direction_(direction),
 		  m_(m),
-		  matrixBlock_(matrixBlock)
+		  matrixBlock_(matrixBlock),
+		  hasMpi_(PsimagLite::Concurrency::hasMpi())
 		{}
 
 		void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
 		{
-			SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+			SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 			SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
 			for (SizeType p=0;p<blockSize;p++) {
@@ -238,6 +239,7 @@ namespace Dmrg {
 		int direction_;
 		SizeType m_;
 		BuildingBlockType& matrixBlock_;
+		bool hasMpi_;
 	}; // class ParallelDensityMatrix
 } // namespace Dmrg 
 
