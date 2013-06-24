@@ -729,6 +729,38 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 		return ret;
 	}
 
+#ifdef USE_MPI
+namespace MPI {
+
+template<typename SomeMatrixType>
+typename EnableIf<IsMatrixLike<SomeMatrixType>::True &
+Loki::TypeTraits<typename SomeMatrixType::value_type>::isArith,
+void>::Type allReduce(SomeMatrixType& v,MPI_Op op = MPI_SUM, CommType mpiComm = MPI_COMM_WORLD)
+{
+	SomeMatrixType recvbuf = v;
+	MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type>::Type;
+	SizeType total = v.n_row() * v.n_col();
+	int errorCode = MPI_Allreduce(&(v(0,0)),&(recvbuf(0,0)),total,datatype,op,mpiComm);
+	checkError(errorCode,"MPI_Allreduce",mpiComm);
+	v = recvbuf;
+}
+
+template<typename SomeMatrixType>
+typename EnableIf<IsMatrixLike<SomeMatrixType>::True &
+IsComplexNumber<typename SomeMatrixType::value_type>::True,
+void>::Type allReduce(SomeMatrixType& v,MPI_Op op = MPI_SUM, CommType mpiComm = MPI_COMM_WORLD)
+{
+	SomeMatrixType recvbuf = v;
+	MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type::value_type>::Type;
+	SizeType total = v.n_row() * v.n_col();
+	int errorCode = MPI_Allreduce(&(v(0,0)),&(recvbuf(0,0)),2*total,datatype,op,mpiComm);
+	checkError(errorCode,"MPI_Allreduce",mpiComm);
+	v = recvbuf;
+}
+
+} // namespace MPI
+#endif // USE_MPI
+
 } // namespace PsimagLite
 #endif
 
