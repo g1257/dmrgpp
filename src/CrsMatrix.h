@@ -639,8 +639,8 @@ namespace PsimagLite {
 	{
 		int j,s,mlast,itemp,jbk;
 		SizeType n = A.row();
-		typename Vector<int>::Type ptr(n,-1),index(n,0);
-		typename Vector<S>::Type temp(n,0);
+		typename Vector<int>::Type ptr(B.col(),-1),index(B.col(),0);
+		typename Vector<S>::Type temp(B.col(),0);
 		S tmp;
 
 		C.resize(n,B.col());
