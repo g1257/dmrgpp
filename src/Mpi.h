@@ -175,7 +175,7 @@ void>::Type recv(SomeVectorType& v,int source, int tag, CommType mpiComm = COMM_
 	MPI_Datatype datatype = MpiData<NumericType>::Type;
 	MPI_Status status;
 	SizeType total = v.size();
-	recv(total,source,-tag,mpiComm);
+	recv(total,source,tag,mpiComm);
 	if (v.size() != total) v.resize(total);
 	int errorCode = MPI_Recv(&(v[0]),v.size(),datatype,source,tag,mpiComm,&status);
 	checkError(errorCode,name,mpiComm);
@@ -191,7 +191,7 @@ void>::Type recv(SomeVectorType& v,int source, int tag, CommType mpiComm = COMM_
 	MPI_Datatype datatype = MpiData<typename NumericType::value_type>::Type;
 	MPI_Status status;
 	SizeType total = v.size();
-	recv(total,source,-tag,mpiComm);
+	recv(total,source,tag,mpiComm);
 	if (v.size() != total) v.resize(total);
 	int errorCode = MPI_Recv(&(v[0]),2*v.size(),datatype,source,tag,mpiComm,&status);
 	checkError(errorCode,name,mpiComm);
@@ -223,7 +223,7 @@ void>::Type send(SomeVectorType& v,int dest, int tag, CommType mpiComm = COMM_WO
 	PsimagLite::String name = "MPI_Send";
 	MPI_Datatype datatype = MpiData<NumericType>::Type;
 	int total = v.size();
-	send(total,dest,-tag,mpiComm);
+	send(total,dest,tag,mpiComm);
 	int errorCode = MPI_Send(&(v[0]),v.size(),datatype,dest,tag,mpiComm);
 	checkError(errorCode,name,mpiComm);
 }
@@ -237,7 +237,7 @@ void>::Type send(SomeVectorType& v,int dest, int tag, CommType mpiComm = COMM_WO
 	PsimagLite::String name = "MPI_Send";
 	MPI_Datatype datatype = MpiData<typename NumericType::value_type>::Type;
 	int total = v.size();
-	send(total,dest,-tag,mpiComm);
+	send(total,dest,tag,mpiComm);
 	int errorCode = MPI_Send(&(v[0]),2*v.size(),datatype,dest,tag,mpiComm);
 	checkError(errorCode,name,mpiComm);
 }
@@ -343,7 +343,7 @@ void>::Type bcast(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 	bcast(total,root,mpiComm);
 	if (total != v.size()) v.resize(total,0);
 	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
-	int errorCode = MPI_Bcast(&v,v.size(),datatype,root,mpiComm);
+	int errorCode = MPI_Bcast(&(v[0]),v.size(),datatype,root,mpiComm);
 	checkError(errorCode,"MPI_Bcast",mpiComm);
 }
 
@@ -353,7 +353,7 @@ IsComplexNumber<typename SomeVectorType::value_type>::True,
 void>::Type bcast(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
 {
 	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
-	int errorCode = MPI_Bcast(&v,2*v.size(),datatype,root,mpiComm);
+	int errorCode = MPI_Bcast(&(v[0]),2*v.size(),datatype,root,mpiComm);
 	checkError(errorCode,"MPI_Bcast",mpiComm);
 }
 
