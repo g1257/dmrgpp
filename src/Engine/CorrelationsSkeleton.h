@@ -225,12 +225,14 @@ namespace Dmrg {
 
 		void createWithModification(SparseMatrixType& Om,const MatrixType& O,char mod)
 		{
-			if (mod == 'n' || mod == 'N') {
-				fullMatrixToCrsMatrix(Om,O);
-				return;
-			}
+			SparseMatrixType *tmp = (mod == 'n' || mod == 'N') ? & Om : new SparseMatrixType;
 
-			transposeConjugate(Om,O);
+			fullMatrixToCrsMatrix(*tmp,O);
+
+			if (mod == 'n' || mod == 'N') return;
+
+			transposeConjugate(Om,*tmp);
+			delete tmp;
 		}
 
 		FieldType bracket(const MatrixType& A,int fermionicSign,SizeType threadId)
@@ -447,14 +449,13 @@ namespace Dmrg {
 		}
 
 		// Perfomance critical:
-		FieldType fluffUpSystem_(
-				const MatrixType& O,
-				SizeType e,SizeType e2,
-				int fermionicSign,
-				int growOption,
-			SizeType threadId)
+		FieldType fluffUpSystem_(const SparseMatrixType& O,
+		                         SizeType e,SizeType e2,
+		                         int fermionicSign,
+		                         int growOption,
+		                         SizeType threadId)
 		{
-			SizeType n = O.n_row();
+			SizeType n = O.row();
 			SizeType m = SizeType(helper_.leftRightSuper(threadId).left().size()/n);
 			RealType sign = static_cast<RealType>(1.0);
 
