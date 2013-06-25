@@ -112,7 +112,9 @@ public:
 		  wavefunction_(wf),
 		  transform_(transform),
 		  direction_(direction)
-	{}
+	{
+		transposeConjugate(transformC_,transform_);
+	}
 
 
 	DmrgSerializer(typename PsimagLite::IoSimple::In& io,bool bogus = false)
@@ -125,6 +127,7 @@ public:
 		wavefunction_.load(io,s);
 		s = "#TRANSFORM_sites=";
 		io.readMatrix(transform_,s);
+		transposeConjugate(transformC_,transform_);
 		s = "#DIRECTION=";
 		int x = 0;
 		io.readline(x,s);
@@ -189,23 +192,11 @@ public:
 		else return lrs_.right().block()[0];
 	}
 
-	void transform(MatrixType& ret,const MatrixType& O) const
+	void transform(SparseMatrixType& ret,const SparseMatrixType& O) const
 	{
-		//typedef typename MatrixType::value_type FieldType;
-		MatrixType transform(transform_);
-		int nBig = O.n_row();
-		int nSmall = transform.n_col();
-		MatrixType fmTmp(nSmall,nBig);
-		typename MatrixType::value_type alpha=1.0,beta=0.0;
-		if (ret.n_row()!=SizeType(nSmall) || ret.n_col()!=
-				SizeType(nSmall)) ret.reset(nSmall,nSmall);
-		psimag::BLAS::GEMM('N','N',nBig,nSmall,nBig,alpha,
-				   &(O(0,0)),nBig,&(transform(0,0)),nBig,beta,
-				   &(fmTmp(0,0)),nBig);
-
-		psimag::BLAS::GEMM('C','N',nSmall,nSmall,nBig,alpha,
-				   &(transform(0,0)),nBig,&(fmTmp(0,0)),nBig,beta,
-				   &(ret(0,0)),nSmall);
+		SparseMatrixType ret2;
+		multiply(ret2,transformC_,O);
+		multiply(ret,ret2,transform_);
 	}
 
 private:
@@ -219,6 +210,7 @@ private:
 	LeftRightSuperType lrs_;
 	VectorType wavefunction_;
 	SparseMatrixType transform_;
+	SparseMatrixType transformC_;
 	SizeType direction_;
 }; // class DmrgSerializer
 } // namespace Dmrg 

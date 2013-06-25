@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2008 , UT-Battelle, LLC
+Copyright (c) 2008-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 1.0.0]
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -106,6 +103,7 @@ namespace Dmrg {
 		typedef typename LeftRightSuperType::BasisWithOperatorsType
 				BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
+		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef TimeSerializer<RealType,VectorWithOffsetType>
 			TimeSerializerType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -168,7 +166,7 @@ namespace Dmrg {
 			return bracket_[leftOrRight];
 		}
 
-		void transform(MatrixType& ret,const MatrixType& O2,SizeType threadId) const
+		void transform(SparseMatrixType& ret,const SparseMatrixType& O2,size_t threadId) const
 		{
 			checkPos(threadId);
 			return dSerializerV_[currentPos_[threadId]]->transform(ret,O2);

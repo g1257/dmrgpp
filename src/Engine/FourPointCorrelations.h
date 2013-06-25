@@ -97,7 +97,8 @@ namespace Dmrg {
 		static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		typedef typename VectorType::value_type FieldType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
-		
+		typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
+
 	public:
 
 		typedef typename ObserverHelperType::MatrixType MatrixType;
@@ -122,7 +123,7 @@ namespace Dmrg {
 			if (i1==i2 || i3==i4)
 				throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
 
-			MatrixType O2gt;
+			SparseMatrixType O2gt;
 
 			firstStage(O2gt,mod1,i1,O1,mod2,i2,O2,fermionicSign,threadId);
 
@@ -130,16 +131,15 @@ namespace Dmrg {
 		}
 
 		//! requires i1<i2
-		void firstStage(
-			MatrixType& O2gt,
-			char mod1,SizeType i1,const MatrixType& O1,
-			char mod2,SizeType i2,const MatrixType& O2,
-			int fermionicSign,
-			SizeType threadId) const
+		void firstStage(SparseMatrixType& O2gt,
+		                char mod1,size_t i1,const MatrixType& O1,
+		                char mod2,size_t i2,const MatrixType& O2,
+		                int fermionicSign,
+		                SizeType threadId) const
 		{
 
 			// Take care of modifiers
-			MatrixType O1m, O2m;
+			SparseMatrixType O1m, O2m;
 			skeleton_.createWithModification(O1m,O1,mod1);
 			skeleton_.createWithModification(O2m,O2,mod2);
 			if (verbose_) {
@@ -150,7 +150,7 @@ namespace Dmrg {
 			}
 			
 			// Multiply and grow ("snowball")
-			MatrixType O1g,O2g;
+			SparseMatrixType O1g,O2g;
 
 			int ns = i2-1;
 			if (ns<0) ns = 0;
@@ -166,30 +166,29 @@ namespace Dmrg {
 		}
 
 		//! requires i2<i3<i4
-		FieldType secondStage(
-			const MatrixType& O2gt,
-			SizeType i2,
-			char mod3,SizeType i3,const MatrixType& O3,
-			char mod4,SizeType i4,const MatrixType& O4,
-			int fermionicSign,
-			SizeType threadId) const
+		FieldType secondStage(const SparseMatrixType& O2gt,
+		                      size_t i2,
+		                      char mod3,size_t i3,const MatrixType& O3,
+		                      char mod4,size_t i4,const MatrixType& O4,
+		                      int fermionicSign,
+		                      SizeType threadId) const
 		{
 			// Take care of modifiers
-			MatrixType O3m,O4m;
+			SparseMatrixType O3m,O4m;
 			skeleton_.createWithModification(O3m,O3,mod3);
 			skeleton_.createWithModification(O4m,O4,mod4);
 
 			int ns = i3-1;
 			if (ns<0) ns = 0;
 			helper_.setPointer(threadId,ns);
-			MatrixType Otmp;
+			SparseMatrixType Otmp;
 			growDirectly4p(Otmp,O2gt,i2+1,fermionicSign,ns,threadId);
 			if (verbose_) {
 				std::cerr<<"Otmp\n";
 				std::cerr<<Otmp;
 			}
 
-			MatrixType O3g,O4g;
+			SparseMatrixType O3g,O4g;
 			if (i4==skeleton_.numberOfSites()-1) {
 				if (i3<i4-1) { // not tested
 					skeleton_.dmrgMultiply(O3g,Otmp,O3m,fermionicSign,ns,threadId);
@@ -209,7 +208,7 @@ namespace Dmrg {
 			helper_.setPointer(threadId,ns);
 
 
-			MatrixType O3gt; 
+			SparseMatrixType O3gt;
 			helper_.transform(O3gt,O3g,threadId);
 			if (verbose_) {
 				std::cerr<<"O3gt\n";
@@ -232,10 +231,15 @@ namespace Dmrg {
 	private:
 			
 		//! i can be zero here!!
-		void growDirectly4p(MatrixType& Odest,const MatrixType& Osrc,SizeType i,int fermionicSign,SizeType ns,SizeType threadId) const
+		void growDirectly4p(SparseMatrixType& Odest,
+		                    const SparseMatrixType& Osrc,
+		                    size_t i,
+		                    int fermionicSign,
+		                    size_t ns,
+		                    size_t threadId) const
 		{
 			Odest =Osrc;
-			typename PsimagLite::Vector<int>::Type signs;
+
 			// from 0 --> i
 			int nt=i-1;
 			if (nt<0) nt=0;
@@ -244,7 +248,7 @@ namespace Dmrg {
 				helper_.setPointer(threadId,s);
 				int growOption = GROW_RIGHT;
 				
-				MatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
+				SparseMatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
 				skeleton_.fluffUp(Onew,Odest,fermionicSign,growOption,true,threadId);
 				Odest = Onew;
 				

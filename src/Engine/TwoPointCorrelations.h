@@ -103,6 +103,7 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef PsimagLite::Profiling ProfilingType;
 		typedef TwoPointCorrelations<CorrelationsSkeletonType> ThisType;
+		typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 
 		static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
@@ -130,9 +131,9 @@ namespace Dmrg {
 				SizeType rows,
 				SizeType cols)
 		{
-			typedef std::pair<SizeType,SizeType> PairType;
+			typedef std::pair<size_t,size_t> PairType;
 
-			typename PsimagLite::Vector<PairType>::Type pairs;
+			std::vector<PairType> pairs;
 			for (SizeType i=0;i<rows;i++) {
 				for (SizeType j=i;j<cols;j++) {
 					if (i>j) continue;
@@ -215,18 +216,17 @@ namespace Dmrg {
 			return calcCorrelation_(i-1,i,O1new,O2new,1,threadId);
 		}
 
-		FieldType calcCorrelation_(
-			SizeType i,
-			SizeType j,
-			const MatrixType& O1,
-			const MatrixType& O2,
-			int fermionicSign,
-			SizeType threadId)
+		FieldType calcCorrelation_(SizeType i,
+		                           SizeType j,
+		                           const SparseMatrixType& O1,
+		                           const SparseMatrixType& O2,
+		                           int fermionicSign,
+		                           SizeType threadId)
 		{
 			
 			if (i>=j) throw PsimagLite::RuntimeError(
 					"Observer::calcCorrelation_(...): i must be smaller than j\n");
-			MatrixType O1m,O2m;
+			SparseMatrixType O1m,O2m;
 			skeleton_.createWithModification(O1m,O1,'n');
 			skeleton_.createWithModification(O2m,O2,'n');
 
@@ -235,17 +235,21 @@ namespace Dmrg {
 					helper_.setPointer(threadId,j-2);
 					SizeType ni = helper_.leftRightSuper(threadId).left().size()/
 							helper_.leftRightSuper(threadId).right().size();
-					MatrixType O1g(ni,ni);
-					for (SizeType x=0;x<O1g.n_row();x++) O1g(x,x) = 1.0;
+
+					SparseMatrixType O1g;
+					O1g.makeDiagonal(ni,1.0);
+
 					return skeleton_.bracketRightCorner(O1g,O1m,O2m,fermionicSign,threadId);
 				}
-				MatrixType O1g;
+				SparseMatrixType O1g;
 				skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2,true,threadId);
 				helper_.setPointer(threadId,j-2);
 				return skeleton_.bracketRightCorner(O1g,O2m,fermionicSign,threadId);
 			}
-			MatrixType O1g,O2g;
+
+			SparseMatrixType O1g,O2g;
 			SizeType ns = j-1;
+
 			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,ns,true,threadId);
 			skeleton_.dmrgMultiply(O2g,O1g,O2m,fermionicSign,ns,threadId);
 
@@ -260,14 +264,13 @@ namespace Dmrg {
 		}
 
 		//! i can be zero here!!
-		void growRecursive(MatrixType& Odest,
-				const MatrixType& Osrc,
-				SizeType i,
-				int fermionicSign,
-				SizeType s,
-						   SizeType threadId)
+		void growRecursive(SparseMatrixType& Odest,
+		                   const SparseMatrixType& Osrc,
+		                   size_t i,
+		                   int fermionicSign,
+		                   size_t s,
+		                   size_t threadId)
 		{
-			typename PsimagLite::Vector<int>::Type signs;
 			// from 0 --> i
 			int nt=i-1;
 			if (nt<0) nt=0;

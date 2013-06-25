@@ -152,8 +152,13 @@ namespace Dmrg {
 		}
 
 		//! i can be zero here!!
-		void growDirectly(MatrixType& Odest,const MatrixType& Osrc,SizeType i,
-				int fermionicSign,SizeType ns,bool transform,SizeType threadId)
+		void growDirectly(SparseMatrixType& Odest,
+		                  const SparseMatrixType& Osrc,
+		                  SizeType i,
+		                  int fermionicSign,
+		                  SizeType ns,
+		                  bool transform,
+		                  SizeType threadId)
 		{
 			Odest =Osrc;
 			// from 0 --> i
@@ -163,7 +168,8 @@ namespace Dmrg {
 			for (SizeType s=nt;s<ns;s++) {
 				helper_.setPointer(threadId,s);
 				SizeType growOption = growthDirection(s,nt,i,threadId);
-				MatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
+				SparseMatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
+
 				fluffUp(Onew,Odest,fermionicSign,growOption,false,threadId);
 				if (!transform && s == ns-1) {
 					Odest = Onew;
@@ -189,8 +195,8 @@ namespace Dmrg {
 		}
 
 		// Perfomance critical:
-		void fluffUp(MatrixType& ret2,
-					 const MatrixType& O,
+		void fluffUp(SparseMatrixType& ret2,
+					 const SparseMatrixType& O,
 					 int fermionicSign,
 					 int growOption,//=GROW_RIGHT,
 					 bool transform, //= true
@@ -203,9 +209,9 @@ namespace Dmrg {
 			fluffUpEnviron(ret2,O,fermionicSign,growOption,transform,threadId);
 		}
 		
-		void dmrgMultiply(MatrixType& result,
-						  const MatrixType& O1,
-						  const MatrixType& O2,
+		void dmrgMultiply(SparseMatrixType& result,
+						  const SparseMatrixType& O1,
+						  const SparseMatrixType& O2,
 						  int fermionicSign,
 						  SizeType ns,
 						  SizeType threadId)
@@ -217,12 +223,13 @@ namespace Dmrg {
 			dmrgMultiplyEnviron(result,O1,O2,fermionicSign,ns,threadId);
 		}
 
-		void createWithModification(MatrixType& Om,const MatrixType& O,char mod)
+		void createWithModification(SparseMatrixType& Om,const MatrixType& O,char mod)
 		{
 			if (mod == 'n' || mod == 'N') {
-				Om = O;
+				fullMatrixToCrsMatrix(Om,O);
 				return;
 			}
+
 			transposeConjugate(Om,O);
 		}
 
@@ -272,23 +279,18 @@ namespace Dmrg {
 
 	private:
 		
-		void dmrgMultiplySystem(MatrixType& result,
-								const MatrixType& O1,
-								const MatrixType& O2,
+		void dmrgMultiplySystem(SparseMatrixType& result,
+								const SparseMatrixType& O1,
+								const SparseMatrixType& O2,
 								int fermionicSign,
 								SizeType ns,
 								SizeType threadId)
 		{
-			SizeType ni=O1.n_row();
-			SizeType nj=O2.n_row();
+			SizeType ni=O1.row();
 
 			helper_.setPointer(threadId,ns);
 			SizeType sprime = helper_.leftRightSuper(threadId).left().size(); //ni*nj;
 			result.resize(sprime,sprime);
-
-			for (SizeType r=0;r<result.n_row();r++)
-				for (SizeType r2=0;r2<result.n_col();r2++)
-					result(r,r2)=0;
 
 			if (helper_.leftRightSuper(threadId).left().size()!=sprime) {
 				std::cerr<<"WARNING: "<<helper_.leftRightSuper(threadId).left().size();
@@ -296,38 +298,52 @@ namespace Dmrg {
 				throw PsimagLite::RuntimeError("problem in dmrgMultiply\n");
 			}
 
+			std::vector<size_t> col(sprime,0);
+			std::vector<typename SparseMatrixType::value_type> value(sprime,0);
+
 			PackIndicesType pack(ni);
+
+			SizeType counter = 0;
 			for (SizeType r=0;r<sprime;r++) {
 				SizeType e,u;
 				pack.unpack(e,u,helper_.leftRightSuper(threadId).left().permutation(r));
 				RealType f = helper_.fermionicSignLeft(threadId)(e,fermionicSign);
-				for (SizeType e2=0;e2<ni;e2++) {
-					for (SizeType u2=0;u2<nj;u2++) {
+				result.setRow(r,counter);
+				for (int k=O1.getRowPtr(e);k<O1.getRowPtr(e+1);k++) {
+					SizeType e2 = O1.getCol(k);
+					for (int k2=O2.getRowPtr(u);k2<O2.getRowPtr(u+1);k2++) {
+						SizeType u2 = O2.getCol(k2);
 						SizeType r2 = helper_.leftRightSuper(threadId).left().
 								permutationInverse(e2 + u2*ni);
-						result(r,r2) += O1(e,e2)*O2(u,u2)*f;
+						value[r2] += O1.getValue(k)*O2.getValue(k2)*f;
+						col[r2] = 1;
 					}
 				}
+				for (SizeType i=0;i<col.size();i++) {
+					if (col[i]==0) continue;
+					result.pushCol(i);
+					result.pushValue(value[i]);
+					counter++;
+					value[i] = 0.0;
+					col[i] = 0;
+				}
 			}
+			result.setRow(result.row(),counter);
+			result.checkValidity();
 		}
 
-		void dmrgMultiplyEnviron(MatrixType& result,
-								 const MatrixType& O1,
-								 const MatrixType& O2,
+		void dmrgMultiplyEnviron(SparseMatrixType& result,
+								 const SparseMatrixType& O1,
+								 const SparseMatrixType& O2,
 								 int fermionicSign,
 								 SizeType ns,
 								 SizeType threadId)
 		{
-			SizeType ni=O1.n_row();
-			SizeType nj=O2.n_row();
+			SizeType nj=O2.row();
 
 			helper_.setPointer(threadId,ns);
 			SizeType eprime = helper_.leftRightSuper(threadId).right().size(); //ni*nj;
 			result.resize(eprime,eprime);
-
-			for (SizeType r=0;r<result.n_row();r++)
-				for (SizeType r2=0;r2<result.n_col();r2++)
-					result(r,r2)=0;
 
 			if (helper_.leftRightSuper(threadId).right().size()!=eprime) {
 				std::cerr<<"WARNING: "<<helper_.leftRightSuper(threadId).right().size();
@@ -335,32 +351,53 @@ namespace Dmrg {
 				throw PsimagLite::RuntimeError("problem in dmrgMultiply\n");
 			}
 
+			std::vector<size_t> col(eprime,0);
+			std::vector<typename SparseMatrixType::value_type> value(eprime,0);
+
 			PackIndicesType pack(nj);
-			for (SizeType r=0;r<eprime;r++) {
-				SizeType e,u;
+
+			SizeType counter = 0;
+			for (size_t r=0;r<eprime;r++) {
+				result.setRow(r,counter);
+				size_t e,u;
+
 				pack.unpack(e,u,helper_.leftRightSuper(threadId).right().permutation(r));
 				SizeType nx0 = helper_.leftRightSuper(threadId).right().
 							electrons(BasisType::AFTER_TRANSFORM);
 				RealType f = (nx0 & 1) ? fermionicSign : 1;
-				for (SizeType e2=0;e2<nj;e2++) {
-					for (SizeType u2=0;u2<ni;u2++) {
-						SizeType r2 = helper_.leftRightSuper(threadId).right().
+
+				for (int k=O2.getRowPtr(e);k<O2.getRowPtr(e+1);k++) {
+					size_t e2 = O2.getCol(k);
+					for (int k2=O1.getRowPtr(u);k2<O1.getRowPtr(u+1);k2++) {
+						size_t u2 = O1.getCol(k2);
+						size_t r2 = helper_.leftRightSuper(threadId).right().
 								permutationInverse(e2 + u2*nj);
-						if (r2>=eprime) throw PsimagLite::RuntimeError("Error\n");
-						result(r,r2) += O2(e,e2)*O1(u,u2)*f;
+						assert(r2<eprime);
+						col[r2] = 1;
+						value[r2] += O2.getValue(k)*O1.getValue(k2)*f;
 					}
 				}
+				for (size_t i=0;i<col.size();i++) {
+					if (col[i]==0) continue;
+					result.pushCol(i);
+					result.pushValue(value[i]);
+					counter++;
+					value[i] = 0.0;
+					col[i] = 0;
+				}
 			}
+
+			result.setRow(result.row(),counter);
+			result.checkValidity();
 		}
 
 		// Perfomance critical:
-		void fluffUpSystem(
-				MatrixType& ret2,
-				const MatrixType& O,
-				int fermionicSign,
-				int growOption,
-				bool transform,
-			SizeType threadId)
+		void fluffUpSystem(SparseMatrixType& ret2,
+						   const SparseMatrixType& O,
+						   int fermionicSign,
+						   int growOption,
+						   bool transform,
+						   size_t threadId)
 		{
 			SizeType n =helper_.leftRightSuper(threadId).left().size();
 
@@ -372,14 +409,20 @@ namespace Dmrg {
 							O,e,e2,fermionicSign,growOption,threadId);
 				}
 			}
-			if (transform) helper_.transform(ret2,ret,threadId);
-			else ret2 = ret;
+
+			if (transform) {
+				SparseMatrixType ret3(ret);
+				helper_.transform(ret2,ret3,threadId);
+				return;
+			}
+
+			fullMatrixToCrsMatrix(ret2,ret);
 		}
 
 		// Perfomance critical:
 		void fluffUpEnviron(
-				MatrixType& ret2,
-				const MatrixType& O,
+				SparseMatrixType& ret2,
+				const SparseMatrixType& O,
 				int fermionicSign,
 				int growOption,
 				bool transform,
@@ -394,8 +437,13 @@ namespace Dmrg {
 							O,e,e2,fermionicSign,growOption,threadId);
 				}
 			}
-			if (transform) helper_.transform(ret2,ret,threadId);
-			else ret2 = ret;
+			if (transform) {
+				SparseMatrixType ret3(ret);
+				helper_.transform(ret2,ret3,threadId);
+				return;
+			}
+
+			fullMatrixToCrsMatrix(ret2,ret);
 		}
 
 		// Perfomance critical:

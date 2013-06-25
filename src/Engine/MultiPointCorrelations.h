@@ -99,6 +99,7 @@ class MultiPointCorrelations {
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef PsimagLite::Profiling ProfilingType;
 	typedef MultiPointCorrelations<CorrelationsSkeletonType> ThisType;
+	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 
 	static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 	static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
@@ -125,17 +126,17 @@ public:
 	typename PsimagLite::EnableIf
 	<PsimagLite::IsVectorLike<VectorLikeType>::True,void>::Type
 	operator()(VectorLikeType& result,
-	           const MatrixType& O,
+	           const SparseMatrixType& O,
 	           SizeType rows,
 	           SizeType cols)
 	{
 		assert(rows == cols);
 		size_t threadId = 0;
 		result.resize(rows);
-		MatrixType Og;
-		MatrixType identity(O.n_row(),O.n_col());
-		for (SizeType i=0;i<identity.n_row();i++)
-			identity(i,i) = 1.0;
+		SparseMatrixType Og;
+		SparseMatrixType identity(O.row(),O.col());
+
+		identity.makeDiagonal(O.row(),1.0);
 
 		size_t rowsOver2 = static_cast<size_t>(rows/2);
 
@@ -148,10 +149,10 @@ public:
 private:
 
 	// from i to i+1
-	FieldType calcCorrelation_(MatrixType& O2gt,
+	FieldType calcCorrelation_(SparseMatrixType& O2gt,
 	                           SizeType i,
-	                           const MatrixType& O,
-	                           const MatrixType& identity,
+	                           const SparseMatrixType& O,
+	                           const SparseMatrixType& identity,
 	                           SizeType threadId)
 	{
 
@@ -160,7 +161,7 @@ private:
 		int fermionicSign = 1;
 
 		SizeType ns = i;
-		MatrixType O2g;
+		SparseMatrixType O2g;
 		if (i==0) {
 			skeleton_.growDirectly(O2gt,O,i,fermionicSign,ns,true,threadId);
 			skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns,threadId);
@@ -173,7 +174,7 @@ private:
 		//			} else {
 		//				skeleton_.dmrgMultiply(O2g,O2gt,identity,fermionicSign,ns-1,threadId);
 		//			}
-		O2gt.reset(0,0);
+		O2gt.clear();
 		FieldType ret = skeleton_.bracket(O2g,fermionicSign,threadId);
 		helper_.setPointer(threadId,ns-1);
 		helper_.transform(O2gt,O2g,threadId);
