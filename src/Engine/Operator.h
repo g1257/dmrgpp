@@ -163,6 +163,7 @@ namespace Dmrg {
 			data.recv(root,tag,mpiComm);
 			PsimagLite::MPI::recv(fermionSign,root,tag+1,mpiComm);
 			PsimagLite::MPI::recv(jm,root,tag+2,mpiComm);
+			PsimagLite::MPI::recv(angularFactor,root,tag+3,mpiComm);
 			Dmrg::recv(su2Related,root,tag+4,mpiComm);
 		}
 
