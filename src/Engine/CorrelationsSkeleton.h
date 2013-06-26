@@ -223,19 +223,17 @@ namespace Dmrg {
 			dmrgMultiplyEnviron(result,O1,O2,fermionicSign,ns,threadId);
 		}
 
-		void createWithModification(SparseMatrixType& Om,const MatrixType& O,char mod)
+		void createWithModification(SparseMatrixType& Om,const SparseMatrixType& O,char mod)
 		{
-			SparseMatrixType *tmp = (mod == 'n' || mod == 'N') ? & Om : new SparseMatrixType;
+			if (mod == 'n' || mod == 'N') {
+				Om = O;
+				return;
+			}
 
-			fullMatrixToCrsMatrix(*tmp,O);
-
-			if (mod == 'n' || mod == 'N') return;
-
-			transposeConjugate(Om,*tmp);
-			delete tmp;
+			transposeConjugate(Om,O);
 		}
 
-		FieldType bracket(const MatrixType& A,int fermionicSign,SizeType threadId)
+		FieldType bracket(const SparseMatrixType& A,int fermionicSign,SizeType threadId)
 		{
 			try {
 				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
@@ -250,7 +248,7 @@ namespace Dmrg {
 			}
 		}
 
-		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,int fermionSign,SizeType threadId)
+		FieldType bracketRightCorner(const SparseMatrixType& A,const SparseMatrixType& B,int fermionSign,SizeType threadId)
 		{
 			try {
 				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
@@ -264,8 +262,8 @@ namespace Dmrg {
 			}
 		}
 
-		FieldType bracketRightCorner(const MatrixType& A,const MatrixType& B,
-				const MatrixType& C,int fermionSign,SizeType threadId)
+		FieldType bracketRightCorner(const SparseMatrixType& A,const SparseMatrixType& B,
+				const SparseMatrixType& C,int fermionSign,SizeType threadId)
 		{
 			try {
 				const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(LEFT_BRACKET,threadId);
@@ -477,18 +475,18 @@ namespace Dmrg {
 				sign = helper_.fermionicSignLeft(threadId)(k,fermionicSign);
 			}
 			if (k!=k2) return 0;
-			return O(i,j)*sign;
+			return O.element(i,j)*sign;
 		}
 
 		// Perfomance critical:
 		FieldType fluffUpEnviron_(
-				const MatrixType& O,
+				const SparseMatrixType& O,
 				SizeType e,SizeType e2,
 				int fermionicSign,
 				int growOption,
 			SizeType threadId)
 		{
-			SizeType n = O.n_row();
+			SizeType n = O.row();
 			SizeType m = SizeType(helper_.leftRightSuper(threadId).right().size()/n);
 			RealType sign = 1;
 
@@ -511,11 +509,11 @@ namespace Dmrg {
 				sign = (nx0 & 1) ?  fermionicSign : 1;
 			}
 			if (k!=k2) return 0;
-			return O(i,j)*sign;
+			return O.element(i,j)*sign;
 		}
 
 		RealType bracket_(
-			const MatrixType& A,
+			const SparseMatrixType& A,
 			const VectorWithOffsetType& vec1,
 			const VectorWithOffsetType& vec2,
 			int fermionicSign,
@@ -536,7 +534,7 @@ namespace Dmrg {
 		}
 
 		RealType bracketSystem_(
-						const MatrixType& A,
+						const SparseMatrixType& A,
 						const VectorWithOffsetType& vec1,
 						const VectorWithOffsetType& vec2,
 			SizeType threadId)
@@ -556,7 +554,7 @@ namespace Dmrg {
 					for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
 						SizeType r2 = Acrs.getCol(k);
 						SizeType t2 = helper_.leftRightSuper(threadId).super().
-								permutationInverse(r2+eta*A.n_col());
+								permutationInverse(r2+eta*A.col());
 						if (t2<offset || t2>=total) continue;
 						sum += Acrs.getValue(k)*vec1[t]*std::conj(vec2[t2]);
 					}
@@ -567,7 +565,7 @@ namespace Dmrg {
 		}
 
 		RealType bracketEnviron_(
-						const MatrixType& A,
+						const SparseMatrixType& A,
 						const VectorWithOffsetType& vec1,
 						const VectorWithOffsetType& vec2,
 						int fermionicSign,
@@ -603,8 +601,8 @@ namespace Dmrg {
 		}
 		
 		RealType bracketRightCorner_(
-			const MatrixType& A,
-			const MatrixType& B,
+			const SparseMatrixType& A,
+			const SparseMatrixType& B,
 			int fermionSign,
 			const VectorWithOffsetType& vec1,
 			const VectorWithOffsetType& vec2,
@@ -616,8 +614,8 @@ namespace Dmrg {
 		}
 
 		RealType brRghtCrnrSystem_(
-						const MatrixType& A,
-						const MatrixType& B,
+						const SparseMatrixType& Acrs,
+						const SparseMatrixType& Bcrs,
 						int fermionSign,
 						const VectorWithOffsetType& vec1,
 						const VectorWithOffsetType& vec2,
@@ -625,8 +623,6 @@ namespace Dmrg {
 		{
 			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
 
-			SparseMatrixType Acrs(A);
-			SparseMatrixType Bcrs(B);
 			FieldType sum=0;
 			SizeType ni = helper_.leftRightSuper(threadId).left().size()/Bcrs.row(); // = Acrs.rank()
 
@@ -678,8 +674,8 @@ namespace Dmrg {
 		}
 
 		RealType brLftCrnrEnviron_(
-				const MatrixType& A,
-				const MatrixType& B,
+				const SparseMatrixType& Acrs,
+				const SparseMatrixType& Bcrs,
 				int fermionSign,
 				const VectorWithOffsetType& vec1,
 				const VectorWithOffsetType& vec2,
@@ -687,8 +683,6 @@ namespace Dmrg {
 		{
 			if (verbose_) std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
 
-			SparseMatrixType Acrs(A);
-			SparseMatrixType Bcrs(B);
 			FieldType sum=0;
 			SizeType ni = Bcrs.row();
 
@@ -739,9 +733,9 @@ namespace Dmrg {
 		}
 
 		RealType bracketRightCorner_(
-			const MatrixType& A1,
-			const MatrixType& A2,
-			const MatrixType& B,
+			const SparseMatrixType& A1,
+			const SparseMatrixType& A2,
+			const SparseMatrixType& B,
 			int fermionSign,
 			const VectorWithOffsetType& vec1,
 			const VectorWithOffsetType& vec2,

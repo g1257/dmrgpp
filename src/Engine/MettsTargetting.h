@@ -120,6 +120,7 @@ namespace Dmrg {
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType>
 			    LanczosSolverType;
+			typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 			typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 			typedef MettsParams<ModelType> TargettingParamsType;
@@ -568,8 +569,8 @@ namespace Dmrg {
 					msg<<" site="<<block2[i]<<" is "<<betaFixed[i];
 				progress_.printline(msg,std::cerr);
 
-				const MatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
-				VectorType newVector1(transformSystem.n_row(),0);
+				const SparseMatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
+				VectorType newVector1(transformSystem.row(),0);
 
 				typename PsimagLite::Vector<SizeType>::Type nk1;
 				mettsCollapse_.setNk(nk1,block1);
@@ -579,9 +580,9 @@ namespace Dmrg {
 				           alphaFixedVolume,lrs_.left(),transformSystem,block1);
 				pureVectors_.first = newVector1;
 
-				const MatrixType& transformEnviron = 
+				const SparseMatrixType& transformEnviron =
 				                        wft_.transform(ProgramGlobals::ENVIRON);
-				VectorType newVector2(transformEnviron.n_row(),0);
+				VectorType newVector2(transformEnviron.row(),0);
 
 				typename PsimagLite::Vector<SizeType>::Type nk2;
 				mettsCollapse_.setNk(nk2,block2);
@@ -619,13 +620,13 @@ namespace Dmrg {
 			                SizeType direction,
 			                SizeType alphaFixed,
 			                const BasisWithOperatorsType& basis,
-			                const MatrixType& transform,
+			                const SparseMatrixType& transform,
 			                const typename PsimagLite::Vector<SizeType>::Type& block)
 			{
 				if (oldVector.size()==0)
 					setInitialPure(oldVector,block);
 				VectorType tmpVector;
-				if (transform.n_row()==0) {
+				if (transform.row()==0) {
 					tmpVector = oldVector;
 					assert(PsimagLite::norm(tmpVector)>1e-6);
 				} else {
@@ -636,8 +637,8 @@ namespace Dmrg {
 				typename PsimagLite::Vector<SizeType>::Type nk;
 				mettsCollapse_.setNk(nk,block);
 				SizeType volumeOfNk = mettsCollapse_.volumeOf(nk);
-				SizeType newSize =  (transform.n_col()==0) ? (ns*ns) : 
-							transform.n_col() * volumeOfNk;
+				SizeType newSize =  (transform.col()==0) ? (ns*ns) :
+							transform.col() * volumeOfNk;
 				newVector.resize(newSize);
 				for (SizeType alpha=0;alpha<newVector.size();alpha++)
 					newVector[alpha] = 0;
@@ -671,7 +672,7 @@ namespace Dmrg {
 			void delayedTransform(VectorType& newVector,
 								  VectorType& oldVector,
 								  SizeType direction,
-								  const MatrixType& transform,
+								  const SparseMatrixType& transform,
 								  const typename PsimagLite::Vector<SizeType>::Type& block)
 			{
 				assert(oldVector.size()==transform.n_row());
@@ -684,7 +685,7 @@ namespace Dmrg {
 				? systemPrev_.permutationInverse : environPrev_.permutationInverse;
 				SizeType nsPrev = permutationInverse.size()/ne;
 				
-				newVector.resize(transform.n_col());
+				newVector.resize(transform.col());
 				//newVector = oldVector * transform;
 				for (SizeType gamma=0;gamma<newVector.size();gamma++) {
 					newVector[gamma] = 0;
@@ -696,7 +697,7 @@ namespace Dmrg {
 						SizeType gammaPrime = permutationInverse[noPermIndex];
 						
 						assert(gammaPrime<transform.n_row());
-						newVector[gamma] += transform(gammaPrime,gamma) *
+						newVector[gamma] += transform.element(gammaPrime,gamma) *
 									  oldVector[gammaPrime];
 					}
 				}

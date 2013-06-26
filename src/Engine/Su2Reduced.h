@@ -270,7 +270,7 @@ namespace Dmrg {
 
 					RealType divisor = opSrc.angularFactor*(jmPrime.first+1);
 					opDest1(basisrInverse[i],basisrInverse[iprime]) +=
-					                   opSrc.data(i,iprime)*cgObject_(jmPrime,jm,opSrc.jm)/divisor;
+					                   opSrc.data.element(i,iprime)*cgObject_(jmPrime,jm,opSrc.jm)/divisor;
 
 				}
 			}

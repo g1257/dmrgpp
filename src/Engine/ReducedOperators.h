@@ -494,7 +494,7 @@ namespace Dmrg {
 					PairType jmPrime = thisBasis_->jmValue(iprime);
 					RealType divisor = opSrc.angularFactor*(jmPrime.first+1);
 					opDest1(basisrinverse_[i],basisrinverse_[iprime]) +=
-					        opSrc.data(i,iprime)*cgObject_->operator()(jmPrime,jm,opSrc.jm)/divisor;
+					        opSrc.data.element(i,iprime)*cgObject_->operator()(jmPrime,jm,opSrc.jm)/divisor;
 				}
 			}
 		}

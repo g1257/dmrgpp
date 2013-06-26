@@ -113,7 +113,7 @@ public:
 		std::cout<<"#Using Matrix A:\n";
 		for (SizeType i=0;i<A.row();i++) {
 			for (SizeType j=0;j<A.col();j++)
-				std::cout<<A(i,j)<<" ";
+				std::cout<<A.element(i,j)<<" ";
 			std::cout<<"\n";
 		}
 	}
