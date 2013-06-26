@@ -141,7 +141,7 @@ namespace Dmrg {
 			  model_(model),
 			  correctionStruct_(correctionStruct),
 			  waveFunctionTransformation_(wft),
-			  progress_("CorrectionTargetting",0),
+			  progress_("CorrectionTargetting"),
 			  stage_(DISABLED),
 			  targetVectors_(1),
 			  applyOpLocal_(lrs),

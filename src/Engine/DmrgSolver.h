@@ -142,7 +142,7 @@ namespace Dmrg {
 		  lrs_("pSprime","pEprime","pSE"),
 		  io_(parameters_.filename,CONCURRENCY_RANK),
 		  ioIn_(parameters_.filename),
-		  progress_("DmrgSolver",CONCURRENCY_RANK),
+		  progress_("DmrgSolver"),
 		  quantumSector_(0),
 		  stepCurrent_(0),
 		  checkpoint_(parameters_,CONCURRENCY_RANK),

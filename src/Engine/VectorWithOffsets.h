@@ -101,13 +101,13 @@ namespace Dmrg {
 		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 			
 		VectorWithOffsets() 
-		: progress_("VectorWithOffsets",0),size_(0),index2Sector_(0)
+		: progress_("VectorWithOffsets"),size_(0),index2Sector_(0)
 		{ }
 			
 		template<typename SomeBasisType>
 		VectorWithOffsets(const typename PsimagLite::Vector<SizeType>::Type& weights,
 		                  const SomeBasisType& someBasis)
-		: progress_("VectorWithOffsets",0),
+		: progress_("VectorWithOffsets"),
 		  size_(someBasis.size()),
 		  index2Sector_(size_),
 		  data_(weights.size()),

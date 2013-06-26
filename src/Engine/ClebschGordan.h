@@ -98,7 +98,7 @@ namespace Dmrg {
 			typedef std::pair<SizeType,SizeType> PairType;
 			ClebschGordan(SizeType numberOfFactorials) :
 				factorial_(numberOfFactorials),
-					   progress_("ClebschGordan",0)
+					   progress_("ClebschGordan")
 			{
 				init(numberOfFactorials);
 			}

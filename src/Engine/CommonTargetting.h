@@ -135,7 +135,7 @@ namespace Dmrg {
 		  model_(model),
 		  tstStruct_(tstStruct),
 		  applyOpLocal_(lrs),
-		  progress_("CommonTargetting",0)
+		  progress_("CommonTargetting")
 		{
 		}
 

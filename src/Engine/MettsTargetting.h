@@ -166,7 +166,7 @@ namespace Dmrg {
 			  mettsStruct_(mettsStruct),
 			  wft_(wft),
 			  quantumSector_(quantumSector),
-			  progress_("MettsTargetting",0),
+			  progress_("MettsTargetting"),
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
 			  mettsStochastics_(model,mettsStruct.rngSeed),

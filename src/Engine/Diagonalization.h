@@ -124,7 +124,7 @@ namespace Dmrg {
 		  verbose_(verbose),
 		  reflectionOperator_(reflectionOperator),
 		  io_(io),
-		  progress_("Diag.",0),
+		  progress_("Diag."),
 		  quantumSector_(quantumSector),
 		  wft_(waveFunctionTransformation),
 		  oldEnergy_(0)

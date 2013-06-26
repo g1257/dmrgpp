@@ -99,7 +99,7 @@ namespace Dmrg {
 		InternalProductStored(ModelType const *model,
 				      ModelHelperType const *modelHelper,
 				      const ReflectionSymmetryType* rs=0)
-		: matrixStored_(2),pointer_(0),progress_("InternalProductStored",0)
+		: matrixStored_(2),pointer_(0),progress_("InternalProductStored")
 		{
 			model_ = model;
 			modelHelper_=modelHelper;

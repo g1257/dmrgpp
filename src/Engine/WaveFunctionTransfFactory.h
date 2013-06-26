@@ -124,7 +124,7 @@ namespace Dmrg {
 		  stage_(INFINITE),
 		  counter_(0),
 		  firstCall_(true),
-		  progress_("WaveFunctionTransf",0),
+		  progress_("WaveFunctionTransf"),
 		  filenameIn_(params.checkpoint.filename),
 		  filenameOut_(params.filename),
 		  WFT_STRING("Wft"),

@@ -210,7 +210,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		OperatorsBase(const BasisType* thisBasis)
 		: useSu2Symmetry_(BasisType::useSu2Symmetry()),
 		  reducedOpImpl_(thisBasis),
-		  progress_("Operators",0)
+		  progress_("Operators")
 		{}
 
 		template<typename IoInputter>
@@ -219,7 +219,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		              const BasisType* thisBasis)
 		: useSu2Symmetry_(BasisType::useSu2Symmetry()),
 		  reducedOpImpl_(io,level,thisBasis),
-		  progress_("Operators",0)
+		  progress_("Operators")
 		{
 			if (!useSu2Symmetry_) io.read(operators_,"#OPERATORS");
 

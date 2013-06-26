@@ -123,7 +123,7 @@ namespace Dmrg {
 		  firstCall_(firstCall),
 		  counter_(counter),
 		  dmrgWaveStruct_(dmrgWaveStruct),
-		  progress_("WaveFunctionTransfLocal",0)
+		  progress_("WaveFunctionTransfLocal")
 		{
 			if (twoSiteDmrg)
 				throw PsimagLite::RuntimeError("SU(2) does not support two-site DMRG yet\n");

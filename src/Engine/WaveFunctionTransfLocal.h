@@ -121,7 +121,7 @@ namespace Dmrg {
 		  counter_(counter),
 		  dmrgWaveStruct_(dmrgWaveStruct),
 		  twoSiteDmrg_(twoSiteDmrg),
-		  progress_("WaveFunctionTransfLocal",0)
+		  progress_("WaveFunctionTransfLocal")
 		{
 			PsimagLite::OstringStream msg;
 			msg<<"Constructing...";

@@ -139,7 +139,7 @@ namespace Dmrg {
 			: lrs_(lrs),
 			  model_(model),
 			  waveFunctionTransformation_(wft),
-			  progress_("GroundStateTargetting",0),
+			  progress_("GroundStateTargetting"),
 			  commonTargetting_(lrs,model,tstStruct)
 			{
 			}

@@ -113,7 +113,7 @@ namespace Dmrg {
 			const DmrgBasisType& pSE,
 			SizeType direction,bool debug=false,bool verbose=false) 
 		:
-			progress_("DensityMatrixLocal",parallelRank_),
+			progress_("DensityMatrixLocal"),
 			data_(pBasis.size(),
 			pBasis.partition()-1),
 			debug_(debug),verbose_(verbose)

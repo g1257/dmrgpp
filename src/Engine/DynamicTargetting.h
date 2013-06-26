@@ -158,7 +158,7 @@ namespace Dmrg {
 		  model_(model),
 		  tstStruct_(tstStruct),
 		  wft_(wft),
-		  progress_("DynamicTargetting",0),
+		  progress_("DynamicTargetting"),
 		  applyOpLocal_(lrs),
 		  gsWeight_(1.0),
 		  commonTargetting_(lrs,model,tstStruct),

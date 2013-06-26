@@ -94,7 +94,7 @@ namespace Dmrg {
 			
 		public:
 			ClebschGordanCached(SizeType jmax) 
-			: progress_("ClebschGordanCached",0),
+			: progress_("ClebschGordanCached"),
 			  UNDEFINED_VALUE(-1000),
 			jmax_(jmax),
 			 max2_(((jmax_-1)*(jmax_+2))/2+1),max22_(max2_*max2_),

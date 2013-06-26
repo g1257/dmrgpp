@@ -108,7 +108,7 @@ namespace Dmrg {
 			enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos || parameters_.options.find("restart")!=PsimagLite::String::npos),
 			systemDisk_(SYSTEM_STACK_STRING+parameters_.checkpoint.filename , SYSTEM_STACK_STRING+parameters_.filename,enabled_,rank),
 			envDisk_(ENVIRON_STACK_STRING+parameters_.checkpoint.filename , ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank),
-			progress_("Checkpoint",rank)
+			progress_("Checkpoint")
 		{
 			if (!enabled_) return;
 			if (parameters_.checkpoint.filename == parameters_.filename) {

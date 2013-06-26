@@ -109,7 +109,7 @@ namespace Dmrg {
 
 		//! Constructor, s=name of this basis 
 		Basis(const PsimagLite::String& s)
-		: dmrgTransformed_(false), name_(s), progress_(s,0)
+		: dmrgTransformed_(false), name_(s), progress_(s)
 		{
 			symmLocal_.createDummyFactors(1,1);
 		}
@@ -117,7 +117,7 @@ namespace Dmrg {
 		//! Loads this basis from memory or disk
 		template<typename IoInputter>
 		Basis(IoInputter& io,const PsimagLite::String& ss,SizeType counter=0,bool bogus = false)
-		: dmrgTransformed_(false), name_(ss), progress_(ss,0)
+		: dmrgTransformed_(false), name_(ss), progress_(ss)
 		{
 			io.advance("#NAME="+ss,counter);
 			loadInternal(io);

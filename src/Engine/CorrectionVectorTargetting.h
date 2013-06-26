@@ -156,7 +156,7 @@ namespace Dmrg {
 		 model_(model),
 		 tstStruct_(tstStruct),
 		 wft_(wft),
-		 progress_("CorrectionVectorTargetting",0),
+		 progress_("CorrectionVectorTargetting"),
 		 applyOpLocal_(lrs),
 		 gsWeight_(1.0),
 		 targetVectors_(4),

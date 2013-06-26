@@ -126,7 +126,7 @@ public:
 							 const LeftRightSuperType& lrs,
 							 const RealType& E0,
 	                         const PsimagLite::Vector<SizeType>::Type* nonZeroQns)
-		: progress_("TimeVectorsSuzukiTrotter",0),
+		: progress_("TimeVectorsSuzukiTrotter"),
 		  currentTime_(currentTime),
 		  tstStruct_(tstStruct),
 		  times_(times),

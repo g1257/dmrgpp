@@ -107,7 +107,7 @@ namespace Dmrg {
 
 			template<typename IoInputter>
 			LeftRightSuper(IoInputter& io)
-			: progress_("LeftRightSuper",0),
+			: progress_("LeftRightSuper"),
 			  left_(0),right_(0),super_(0),refCounter_(0)
 			{
 				// watch out: same order as save here:
@@ -120,7 +120,7 @@ namespace Dmrg {
 					const PsimagLite::String& slabel,
 					const PsimagLite::String& elabel,
 					const PsimagLite::String& selabel)
-			: progress_("LeftRightSuper",0),
+			: progress_("LeftRightSuper"),
 			  left_(0),right_(0),super_(0),refCounter_(0)
 			{
 				left_ = new BasisWithOperatorsType(slabel);
@@ -143,13 +143,13 @@ namespace Dmrg {
 					BasisWithOperatorsType& left,
 					BasisWithOperatorsType& right,
 					SuperBlockType& super)
-			: progress_("LeftRightSuper",0),
+			: progress_("LeftRightSuper"),
 			  left_(&left),right_(&right),super_(&super),refCounter_(1)
 			{
 			}
 
 			LeftRightSuper(const ThisType& rls)
-			: progress_("LeftRightSuper",0),refCounter_(1)
+			: progress_("LeftRightSuper"),refCounter_(1)
 			{
 				left_=rls.left_;
 				right_=rls.right_;

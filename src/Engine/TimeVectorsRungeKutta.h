@@ -132,7 +132,7 @@ public:
 						  const WaveFunctionTransfType& wft,
 						  const LeftRightSuperType& lrs,
 						  const RealType& E0)
-		: progress_("TimeVectorsRungeKutta",0),
+		: progress_("TimeVectorsRungeKutta"),
 		  currentTime_(currentTime),
 		  tstStruct_(tstStruct),
 		  times_(times),

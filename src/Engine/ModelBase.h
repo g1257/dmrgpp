@@ -135,7 +135,7 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
 		ModelBase(const DmrgGeometryType& geometry)
-		: dmrgGeometry_(geometry),progress_("ModelBase",0)
+		: dmrgGeometry_(geometry),progress_("ModelBase")
 		{
 			Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 			MyBasis::useSu2Symmetry(ModelHelperType::isSu2());

@@ -156,7 +156,7 @@ namespace Dmrg {
 			  model_(model),
 			  tstStruct_(tstStruct),
 			  wft_(wft),
-			  progress_("TimeStepTargetting",0),
+			  progress_("TimeStepTargetting"),
 			  currentTime_(0),
 			  times_(tstStruct_.timeSteps),
 			  weight_(tstStruct_.timeSteps),

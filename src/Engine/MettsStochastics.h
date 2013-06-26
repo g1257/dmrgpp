@@ -104,7 +104,7 @@ namespace Dmrg {
 		MettsStochastics(const ModelType& model,int long long seed)
 		: model_(model),
 		  rng_(seed),
-		  progress_("MettsStochastics",0),
+		  progress_("MettsStochastics"),
 		  addedSites_(0)
 		{}
 

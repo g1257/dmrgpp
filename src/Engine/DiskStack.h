@@ -93,7 +93,7 @@ namespace Dmrg {
 				fileIn_(file1),
 				fileOut_(file2),
 				total_(0),
-				progress_("DiskStack",rank)
+				progress_("DiskStack")
 			{
 				if (!hasLoad) {
 					ioOut_.open(fileOut_,std::ios_base::trunc,rank_);

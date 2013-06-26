@@ -117,7 +117,7 @@ namespace Dmrg {
 		  lrs_(lrs),
 		  rng_(targetParams.rngSeed),
 		  targetParams_(targetParams),
-		  progress_("MettsCollapse",0),
+		  progress_("MettsCollapse"),
 		  prevDirection_(ProgramGlobals::INFINITE),
 		  collapseBasis_(mettsStochastics_.hilbertSize(0),mettsStochastics_.hilbertSize(0))
 		{

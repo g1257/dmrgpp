@@ -126,7 +126,7 @@ namespace Dmrg {
 		  parameters_(parameters),
 		  maxConnections_(maxConnections),
 		  verbose_(verbose),
-		  progress_("Truncation",0),
+		  progress_("Truncation"),
 		  error_(0.0)
 		{
 			if (parameters_.tolerance<0) return;

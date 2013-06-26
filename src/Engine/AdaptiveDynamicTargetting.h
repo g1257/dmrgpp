@@ -152,7 +152,7 @@ namespace Dmrg {
 		  wft_(wft),
 		  lastLanczosVector_(0),
 		  dynCounter_(0),
-		  progress_("AdaptiveDynamicTargetting",0),
+		  progress_("AdaptiveDynamicTargetting"),
 		  applyOpLocal_(lrs),
 		  gsWeight_(1.0),
 		  targetVectors_(2),
