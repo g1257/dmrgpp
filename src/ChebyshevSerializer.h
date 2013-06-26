@@ -75,7 +75,7 @@ namespace PsimagLite {
 		typedef KernelPolynomialParameters<RealType> KernelParametersType;
 
 		ChebyshevSerializer(const VectorType& ab,const ParametersType& params)
-		: progress_("ChebyshevSerializer",0),
+		: progress_("ChebyshevSerializer"),
 		  moments_(ab),
 		  params_(params)
 		{}
@@ -86,7 +86,7 @@ namespace PsimagLite {
 
 		template<typename IoInputType>
 		ChebyshevSerializer(IoInputType& io)
-		: progress_("ChebyshevSerializer",0)
+		: progress_("ChebyshevSerializer")
 		{
  			io.readline(params_.Eg,"#ChebyshevEnergy=");
 			io.readline(params_.oneOverA,"#ChebyshevOneOverA=");

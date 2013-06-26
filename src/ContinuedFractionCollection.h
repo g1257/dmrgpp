@@ -50,13 +50,13 @@ namespace PsimagLite {
 		typedef typename ContinuedFractionType::PlotParamsType PlotParamsType;
 
 		ContinuedFractionCollection()
-			: progress_("ContinuedFractionCollection",0)
+			: progress_("ContinuedFractionCollection")
 		{
 		}
 
 		template<typename IoInputType>
 		ContinuedFractionCollection(IoInputType& io,SizeType level = 0)
-		: progress_("ContinuedFractionCollection",0)
+		: progress_("ContinuedFractionCollection")
 		{
 			int n = 0;
 			io.readline(n,"#CONTINUEDFRACTIONCOLLECTION=",level);

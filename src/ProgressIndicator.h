@@ -82,11 +82,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sstream>
 #include <vector>
 #include "String.h"
+#include "Concurrency.h"
 
 namespace PsimagLite {
 	class ProgressIndicator {
 	public:
-		ProgressIndicator(const String& caller,SizeType rank) : caller_(caller),rank_(rank) 
+		ProgressIndicator(const String& caller)
+		    : caller_(caller),rank_(Concurrency::rank())
 		{
 			prefix_ = caller_ + ": ";
 		}

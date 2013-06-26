@@ -51,7 +51,7 @@ namespace PsimagLite {
 		typedef ParametersForSolver<RealType> ParametersType;
 
 		ContinuedFraction(const TridiagonalMatrixType& ab,const ParametersType& params)
-		: progress_("ContinuedFraction",0),
+		: progress_("ContinuedFraction"),
 		  ab_(ab),
 		  Eg_(params.Eg),
 		  weight_(params.weight),
@@ -60,11 +60,11 @@ namespace PsimagLite {
 			diagonalize();
 		}
 
-		ContinuedFraction() : progress_("ContinuedFraction",0),
+		ContinuedFraction() : progress_("ContinuedFraction"),
 			ab_(),Eg_(0),weight_(0),isign_(1) { }
 
 		ContinuedFraction(IoSimple::In& io)
-		: progress_("ContinuedFraction",0),ab_(io)
+		: progress_("ContinuedFraction"),ab_(io)
 		{
 			io.readline(weight_,"#CFWeight=");
 			io.readline(Eg_,"#CFEnergy=");

@@ -111,7 +111,7 @@ namespace PsimagLite {
 		LanczosVectors(const MatrixType& mat,
 		               bool lotaMemory,
 		               DenseMatrixType* storage)
-		: progress_("LanczosVectors",0),
+		: progress_("LanczosVectors"),
 		  mat_(mat),
 		  lotaMemory_(lotaMemory),
 		  dummy_(0),

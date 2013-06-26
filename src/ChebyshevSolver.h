@@ -128,7 +128,7 @@ namespace PsimagLite {
 		ChebyshevSolver(MatrixType const &mat,
 		                SolverParametersType& params,
 		                Matrix<VectorElementType>* storageForLanczosVectors=0)
-		: progress_("ChebyshevSolver",0),
+		: progress_("ChebyshevSolver"),
 		  mat_(mat),
 		  params_(params),
 		  mode_(WITH_INFO),
