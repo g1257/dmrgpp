@@ -103,8 +103,6 @@ namespace Dmrg {
 		typedef typename ModelType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 
-		static const SizeType CONCURRENCY_RANK = 0;
-
 	public:
 		typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelType::MyBasis MyBasis;
@@ -140,12 +138,12 @@ namespace Dmrg {
 		  appInfo_("DmrgSolver:"),
 		  verbose_(false),
 		  lrs_("pSprime","pEprime","pSE"),
-		  io_(parameters_.filename,CONCURRENCY_RANK),
+		  io_(parameters_.filename),
 		  ioIn_(parameters_.filename),
 		  progress_("DmrgSolver"),
 		  quantumSector_(0),
 		  stepCurrent_(0),
-		  checkpoint_(parameters_,CONCURRENCY_RANK),
+		  checkpoint_(parameters_),
 		  wft_(parameters_),
 		  reflectionOperator_(lrs_,model_.hilbertSize(0),parameters_.useReflectionSymmetry,EXPAND_SYSTEM),
 		  diagonalization_(parameters,model,verbose_,

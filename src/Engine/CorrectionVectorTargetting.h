@@ -144,8 +144,6 @@ namespace Dmrg {
 		static SizeType const PRODUCT = TargettingParamsType::PRODUCT;
 		static SizeType const SUM = TargettingParamsType::SUM;
 
-		static const SizeType parallelRank_ = 0; // DYNT needs to support concurrency FIXME
-
 		CorrectionVectorTargetting(const LeftRightSuperType& lrs,
 		                           const ModelType& model,
 		                           const TargettingParamsType& tstStruct,

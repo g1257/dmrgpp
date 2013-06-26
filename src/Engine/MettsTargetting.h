@@ -148,12 +148,12 @@ namespace Dmrg {
 											 LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
 
 			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
+
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
-			const static SizeType SYSTEM = ProgramGlobals::SYSTEM;
 
-			static const SizeType parallelRank_ = 0; // Metts needs to support concurrency FIXME
+			const static SizeType SYSTEM = ProgramGlobals::SYSTEM;
 
 			MettsTargetting(const LeftRightSuperType& lrs,
 	 		                const ModelType& model,

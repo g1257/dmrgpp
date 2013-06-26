@@ -359,8 +359,7 @@ namespace Dmrg {
 			if (parameters_.fileForDensityMatrixEigs=="") return;
 			PsimagLite::String file(parameters_.fileForDensityMatrixEigs);
 			file += ttos(counter);
-			SizeType parallelRank = 0;
-			PsimagLite::IoSimple::Out io(file,parallelRank);
+			PsimagLite::IoSimple::Out io(file);
 			io<<eigs;
 			counter++;
 		}

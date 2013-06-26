@@ -99,8 +99,6 @@ namespace Dmrg {
 
 		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
 
-		static int const parallelRank_ = 0; // FIXME <-- ADD PARALLELISM
-
 	public:
 
 		typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;

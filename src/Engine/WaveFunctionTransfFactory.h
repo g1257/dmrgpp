@@ -434,7 +434,7 @@ namespace Dmrg {
 			if (!isEnabled_) throw PsimagLite::RuntimeError(
 					"WFT::save(...) called but wft is disabled\n");
 
-			typename IoType::Out io(WFT_STRING + filenameOut_,0);
+			typename IoType::Out io(WFT_STRING + filenameOut_);
 			PsimagLite::String s="isEnabled="+ttos(isEnabled_);
 			io.printline(s);
 			s="stage="+ttos(stage_);

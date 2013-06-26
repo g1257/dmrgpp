@@ -144,7 +144,6 @@ namespace Dmrg {
 
 			static SizeType const PRODUCT = TargettingParamsType::PRODUCT;
 			static SizeType const SUM = TargettingParamsType::SUM;
-			static const SizeType parallelRank_ = 0; // TST needs to support concurrency FIXME
 
 			TimeStepTargetting(const LeftRightSuperType& lrs,
 	 		                   const ModelType& model,

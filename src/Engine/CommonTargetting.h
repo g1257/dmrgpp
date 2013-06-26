@@ -126,8 +126,6 @@ namespace Dmrg {
 			INFINITE=WaveFunctionTransfType::INFINITE
 		};
 
-		static const SizeType parallelRank_ = 0; // DYNT needs to support concurrency FIXME
-
 		CommonTargetting(const LeftRightSuperType& lrs,
 		                 const ModelType& model,
 						 const TargettingParamsType& tstStruct)

@@ -88,15 +88,16 @@ namespace Dmrg {
 		typedef typename PsimagLite::IoSimple::Out IoOutType;
 
 		public:
-			DiskStack(const PsimagLite::String &file1,const PsimagLite::String &file2,bool hasLoad,SizeType rank=0) :
-				rank_(rank),
-				fileIn_(file1),
+			DiskStack(const PsimagLite::String &file1,
+			          const PsimagLite::String &file2,
+			          bool hasLoad)
+			    : fileIn_(file1),
 				fileOut_(file2),
 				total_(0),
 				progress_("DiskStack")
 			{
 				if (!hasLoad) {
-					ioOut_.open(fileOut_,std::ios_base::trunc,rank_);
+					ioOut_.open(fileOut_,std::ios_base::trunc);
 					ioOut_.close();
 					return;
 				}
@@ -106,7 +107,8 @@ namespace Dmrg {
 					std::cerr<<"Problem opening reading file "<<fileIn_<<"\n";
 					throw PsimagLite::RuntimeError("DiskStack::load(...)\n");
 				}
-				ioIn_.readline(rank_,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
+				int x = 0;
+				ioIn_.readline(x,"#STACKMETARANK=",IoInType::LAST_INSTANCE);
 				//ioIn_.readline(total_,"#STACKMETATOTAL="); <-- KEEP TOTAL=0, THIS IS A NEW FILE!!
 				//ioIn_.readline(debug_,"#STACKMETADEBUG=");
 				ioIn_.advance("#STACKMETASTACK");
@@ -121,9 +123,10 @@ namespace Dmrg {
 			~DiskStack()
 			{
 				//ioOut_.open(fileOut_,std::ios_base::trunc,rank_);
-				ioOut_.open(fileOut_,std::ios_base::app,rank_);
+				int x = 0;
+				ioOut_.open(fileOut_,std::ios_base::app);
 //				ioOut_.print("#STACKMETARANK=",rank_);
-				ioOut_.printline("#STACKMETARANK="+ttos(rank_));
+				ioOut_.printline("#STACKMETARANK="+ttos(x));
 
 //				ioOut_.print("#STACKMETATOTAL=",total_);
 				ioOut_.printline("#STACKMETATOTAL="+ttos(total_));
@@ -138,7 +141,7 @@ namespace Dmrg {
 			void push(DataType const &d) 
 			{
 				//PsimagLite::String tmpLabel = fileOut_ + ttos(total_);
-				ioOut_.open(fileOut_,std::ios_base::app,rank_);
+				ioOut_.open(fileOut_,std::ios_base::app);
 				d.save(ioOut_);
 				ioOut_.close();
 
@@ -180,7 +183,6 @@ namespace Dmrg {
 
 		private:
 
-			SizeType rank_;
 			PsimagLite::String fileIn_,fileOut_;
 			int total_;
 			PsimagLite::ProgressIndicator progress_;

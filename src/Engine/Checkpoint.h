@@ -101,13 +101,13 @@ namespace Dmrg {
 		const PsimagLite::String SYSTEM_STACK_STRING;
 		const PsimagLite::String ENVIRON_STACK_STRING;
 
-		Checkpoint(const ParametersType& parameters,SizeType rank = 0,bool debug=false) :
+		Checkpoint(const ParametersType& parameters) :
 			SYSTEM_STACK_STRING("SystemStack"),
 			ENVIRON_STACK_STRING("EnvironStack"),
 			parameters_(parameters),
 			enabled_(parameters_.options.find("checkpoint")!=PsimagLite::String::npos || parameters_.options.find("restart")!=PsimagLite::String::npos),
-			systemDisk_(SYSTEM_STACK_STRING+parameters_.checkpoint.filename , SYSTEM_STACK_STRING+parameters_.filename,enabled_,rank),
-			envDisk_(ENVIRON_STACK_STRING+parameters_.checkpoint.filename , ENVIRON_STACK_STRING+parameters_.filename,enabled_,rank),
+			systemDisk_(SYSTEM_STACK_STRING+parameters_.checkpoint.filename , SYSTEM_STACK_STRING+parameters_.filename,enabled_),
+			envDisk_(ENVIRON_STACK_STRING+parameters_.checkpoint.filename , ENVIRON_STACK_STRING+parameters_.filename,enabled_),
 			progress_("Checkpoint")
 		{
 			if (!enabled_) return;
