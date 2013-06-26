@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cstdlib>
 #include "Map.h"
 #include "String.h"
+#include "Concurrency.h"
 
 namespace PsimagLite {
 	//! IoSimple class handles Input/Output (IO) for the Dmrg++ program 
@@ -106,8 +107,8 @@ namespace PsimagLite {
 				fout_=(std::ofstream *)&os;
 			}
 
-			Out(const String& fn,int rank)
-			: rank_(rank),filename_(fn),fout_(0)
+			Out(const String& fn)
+			    : rank_(Concurrency::rank()),filename_(fn),fout_(0)
 			{
 				if (rank_!=0) return;
 				if (!fout_) fout_=new std::ofstream;
@@ -124,12 +125,9 @@ namespace PsimagLite {
 				delete fout_;
 			}
 
-			void open(
-					String const &fn,
-					std::ios_base::openmode mode,
-					int rank)
+			void open(String const &fn,
+					std::ios_base::openmode mode)
 			{
-				rank_=rank;
 				if (rank_!=0) return;
 				if (filename_=="OSTREAM") 
 					throw RuntimeError("open: not possible\n");
