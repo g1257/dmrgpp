@@ -253,7 +253,7 @@ namespace PsimagLite {
 			*this =c;
 		}
 
-		T operator()(int i,int j) const
+		T element(int i,int j) const
 		{
 			for (int k=rowptr_[i];k<rowptr_[i+1];k++) if (colind_[k]==j) return values_[k];
 			return static_cast<T>(0.0);
@@ -914,7 +914,7 @@ namespace PsimagLite {
 		if (A.row()!=A.col()) return false;
 		for (SizeType i=0;i<A.row();i++) {
 			for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
-				if (std::norm(A.getValue(k)-std::conj(A(A.getCol(k),i)))<1e-6) continue;
+				if (std::norm(A.getValue(k)-std::conj(A.element(A.getCol(k),i)))<1e-6) continue;
 				assert(false);
 				return false;
 			}

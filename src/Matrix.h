@@ -77,17 +77,6 @@ void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
 				for (SizeType j=0;j<ncol_;j++) 
 					data_[i+j*nrow_] = m(i,j);
 		}
-		
-		template<typename SomeMatrixType>
-		Matrix(const SomeMatrixType& m)
-		{
-			nrow_=m.row();
-			ncol_=m.col();
-			data_.resize(nrow_*ncol_);
-			for (SizeType i=0;i<nrow_;i++)
-				for (SizeType j=0;j<ncol_;j++) 
-					data_[i+j*nrow_] = m(i,j);
-		}
 
 		// default assigment operator is fine
 
