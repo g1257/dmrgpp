@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "LinkProductStruct.h"
 #include "CrsMatrix.h"
+#include "Concurrency.h"
 
 namespace Dmrg {
 	
@@ -94,6 +95,9 @@ namespace Dmrg {
 			typedef typename ModelHelperType::LinkType LinkType;
 			typedef std::pair<SizeType,SizeType> PairType;
 			typedef typename GeometryType::AdditionalDataType AdditionalDataType;
+			typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
+			typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
+			typedef typename PsimagLite::Concurrency ConcurrencyType;
 
 		HamiltonianConnection(const GeometryType& geometry,
 		                      const ModelHelperType& modelHelper,
@@ -106,7 +110,8 @@ namespace Dmrg {
 			  systemBlock_(modelHelper.leftRightSuper().left().block()),
 			  envBlock_(modelHelper.leftRightSuper().right().block()),
 			  smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
-			  emin_(*std::min_element(envBlock_.begin(),envBlock_.end()))
+			  emin_(*std::min_element(envBlock_.begin(),envBlock_.end())),
+		      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::npthreads))
 			{}
 
 			bool compute(SizeType i,
@@ -162,7 +167,8 @@ namespace Dmrg {
 
 			void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
 			{
-				typename PsimagLite::Vector<SparseElementType>::Type xtemp(x_.size(),0);
+
+				xtemp_[threadNum].resize(x_.size(),0);
 				SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
 				SparseElementType tmp = 0.0;
 
@@ -176,12 +182,18 @@ namespace Dmrg {
 					AdditionalDataType additionalData;
 					prepare(ix,i,j,type,tmp,term,dofs,additionalData);
 
-					linkProduct(xtemp,y_,i,j,type,tmp,term,dofs,additionalData);
+					linkProduct(xtemp_[threadNum],y_,i,j,type,tmp,term,dofs,additionalData);
 					
 				}
-				if (myMutex) pthread_mutex_lock( myMutex);
-				for (SizeType i=0;i<x_.size();i++) x_[i]+=xtemp[i];
-				if (myMutex) pthread_mutex_unlock( myMutex );
+			}
+
+			void sync()
+			{
+				for (SizeType threadNum = 0; threadNum < xtemp_.size(); threadNum++)
+					for (SizeType i=0;i<x_.size();i++)
+						x_[i]+=xtemp_[threadNum][i];
+
+				PsimagLite::MPI::allReduce(x_);
 			}
 
 			void prepare(SizeType ix,SizeType& i,SizeType& j,SizeType& type,SparseElementType& tmp,SizeType& term,SizeType& dofs,AdditionalDataType& additionalData) const
@@ -265,7 +277,7 @@ namespace Dmrg {
 							 const SparseElementType &valuec,
 							 SizeType term,
 							 SizeType dofs,
-							 AdditionalDataType& additionalData) const
+							 const AdditionalDataType& additionalData) const
 			{
 				SparseMatrixType const* A = 0;
 				SparseMatrixType const* B = 0;
@@ -281,6 +293,7 @@ namespace Dmrg {
 			const typename GeometryType::BlockType& systemBlock_;
 			const typename GeometryType::BlockType& envBlock_;
 			SizeType smax_,emin_;
+		    VectorVectorType xtemp_;
 	}; // class HamiltonianConnection
 } // namespace Dmrg 
 
