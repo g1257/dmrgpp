@@ -94,8 +94,7 @@ namespace Dmrg {
 			
 		public:
 			ClebschGordanCached(SizeType jmax) 
-			: progress_("ClebschGordanCached"),
-			  UNDEFINED_VALUE(-1000),
+			:  UNDEFINED_VALUE(-1000),
 			jmax_(jmax),
 			 max2_(((jmax_-1)*(jmax_+2))/2+1),max22_(max2_*max2_),
 			data_(max22_*jmax_*2,UNDEFINED_VALUE),cgObject_(2)
@@ -112,7 +111,6 @@ namespace Dmrg {
 				cgObject_.init(nfactorials);
 				//PsimagLite::OstringStream msg;
 				//msg<<"init called "<<copies_<<" times, jmax="<<jmax<<"\n";
-				//progress_.printline(msg,std::cout);
 				copies_++;
 				if (copies_>2) {//throw PsimagLite::RuntimeError("ClebschGordanCached: too many copies\n");
 					std::cerr<<"WARNING: ClebschGordanCached has ";
@@ -185,7 +183,6 @@ namespace Dmrg {
 			}
 			
 			static SizeType copies_;
-			PsimagLite::ProgressIndicator progress_;
 			int UNDEFINED_VALUE;
 			SizeType jmax_;
 			SizeType max2_,max22_;

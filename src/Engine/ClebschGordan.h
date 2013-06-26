@@ -97,8 +97,7 @@ namespace Dmrg {
 		public:
 			typedef std::pair<SizeType,SizeType> PairType;
 			ClebschGordan(SizeType numberOfFactorials) :
-				factorial_(numberOfFactorials),
-					   progress_("ClebschGordan")
+				factorial_(numberOfFactorials)
 			{
 				init(numberOfFactorials);
 			}
@@ -109,7 +108,6 @@ namespace Dmrg {
 				createFactorials();
 				//PsimagLite::OstringStream msg;
 				//msg<<"init called "<<copies_<<" times, numberOfFactorials="<<numberOfFactorials<<"\n";
-				//progress_.printline(msg,std::cout);
 				copies_++;
 				if (copies_>3) {//throw PsimagLite::RuntimeError("ClebschGordanCached: too many copies\n");
 					std::cerr<<"WARNING: ClebschGordan has ";
@@ -229,7 +227,6 @@ namespace Dmrg {
 			
 			static SizeType copies_;
 			typename PsimagLite::Vector<LongType>::Type factorial_;
-			PsimagLite::ProgressIndicator progress_;
 	}; // ClebschGordan
 	
 	template<typename FieldType>
