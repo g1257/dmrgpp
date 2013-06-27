@@ -421,7 +421,7 @@ void>::Type reduce(SomeVectorType& v,
 
 template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
-Loki::TypeTraits<typename SomeVectorType::value_type>::isIntegral,
+Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
 void>::Type allReduce(SomeVectorType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
 {
 	SomeVectorType recvbuf = v;
@@ -431,10 +431,25 @@ void>::Type allReduce(SomeVectorType& v,MPI_Op op = MPI_SUM, CommType mpiComm = 
 	v = recvbuf;
 }
 
-void allReduce(SizeType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+IsComplexNumber<typename SomeVectorType::value_type>::True,
+void>::Type allReduce(SomeVectorType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
+{
+	SomeVectorType recvbuf = v;
+	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
+	int errorCode = MPI_Allreduce(&(v[0]),&(recvbuf[0]),2*v.size(),datatype,op,mpiComm);
+	checkError(errorCode,"MPI_Allreduce",mpiComm);
+	v = recvbuf;
+}
+
+template<typename NumericType>
+typename EnableIf<Loki::TypeTraits<NumericType>::isArith,
+void>::Type allReduce(NumericType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
 {
 	int result = 0;
-	int errorCode = MPI_Allreduce(&v,&result,1,MPI_INTEGER,op,mpiComm);
+	MPI_Datatype datatype = MpiData<NumericType>::Type;
+	int errorCode = MPI_Allreduce(&v,&result,1,datatype,op,mpiComm);
 	checkError(errorCode,"MPI_Allreduce",mpiComm);
 	v = result;
 }
