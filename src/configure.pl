@@ -1,4 +1,4 @@
-#!/usr/bin/perl 
+#!/usr/bin/perl
 =pod
 // BEGIN LICENSE BLOCK
 Copyright (c) 2009 , UT-Battelle, LLC
@@ -11,7 +11,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -22,9 +22,13 @@ Please see full open source license included in file LICENSE.
 use warnings;
 use strict;
 
+use lib "../../PsimagLite/scripts";
+use Make;
+
 my $mpi=0;
 my $platform="linux";
-my $lapack="-llapack";
+my @drivers = ("dmrg","observe","operator");
+my $lapack=Make::findLapack();
 my $PsimagLite="../../PsimagLite";
 my ($pthreads,$pthreadsLib)=(0,"");
 my $brand= "v3.0";
@@ -44,20 +48,20 @@ createMakefile();
 sub welcome
 {
 	print "This is DMRG++ $brand\n";
-	print "This script will help you create a Makefile, main and observer driver for your program\n";
+	print "This script will help you create a Makefile for your program\n";
 	print "Press ENTER to continue...";
 	$_=<STDIN>;
 	print "\n";
-	
+
 }
 
 sub askQuestions
 {
-	
+
 	if ($platform=~/Darwin/i) {
 		$lapack = " -framework Accelerate ";
 	} else { # I'll assume it's linux
-		$lapack = " /usr/lib64/liblapack.so.3 /usr/lib64/libblas.so.3"; 
+		$lapack = " /usr/lib64/liblapack.so.3 /usr/lib64/libblas.so.3";
 	}
 
 	print "Where is your PsimagLite distribution?\n";
@@ -79,9 +83,9 @@ sub askQuestions
 	if ($_ eq "" or $_ eq "\n") {
 		$_="n";
 	}
-	
+
 	$mpi=1	if ($_=~/^y/i);
-	
+
 	$pthreads=0;
 	$pthreadsLib="  ";
 	if ($mpi!=1 && !($platform=~/Darwin/i)) { # cannot use both mpi and pthreads
@@ -98,8 +102,8 @@ sub askQuestions
 			$pthreads=1;
 		}
 	}
-	
-	
+
+
 	print "Please enter the linker flags, LDFLAGS\n";
 	print "Available: Any\n";
 	print "Default is: $lapack (press ENTER): ";
@@ -141,7 +145,8 @@ sub createMakefile
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
 	my $compiler = compilerName();
 	$compiler = " mpicxx " if ($mpi);
-	open(FOUT,">Makefile") or die "Cannot open Makefile for writing: $!\n";
+	my $fh;
+	open($fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 	my $usePthreadsOrNot = " ";
 	$usePthreadsOrNot = " -DUSE_PTHREADS " if ($pthreads);
 	my $optimizations = " -O3 -DNDEBUG ";
@@ -150,65 +155,21 @@ sub createMakefile
 	my $strip = "strip ";
 	$strip = " true " if ($build eq "debug" or $build eq "callgrind");
 
-print FOUT<<EOF;
-# DO NOT EDIT!!! Changes will be lost. Modify configure.pl instead
-# This Makefile was written by configure.pl
-# DMRG++ ($brand) by G.A.
-# Platform: $platform
-# MPI: $mpi
 
-LDFLAGS =    $lapack  $pthreadsLib
-CPPFLAGS = -Werror -Wall  -IEngine -IModels/HubbardOneBand -IModels/HeisenbergSpinOneHalf -IModels/ExtendedHubbard1Orb  -IModels/FeAsModel -IModels/FeAsBasedScExtended -IModels/Immm  -IModels/Tj1Orb -I$PsimagLite/src -I$PsimagLite $usePthreadsOrNot $floating
-CXX = $compiler  $optimizations 
-EXENAME = dmrg
-all: \$(EXENAME)
+	my $cppflags= "-Werror -Wall  -IEngine -IModels/HubbardOneBand -IModels/HeisenbergSpinOneHalf ";
+	$cppflags .= " -IModels/ExtendedHubbard1Orb  -IModels/FeAsModel -IModels/FeAsBasedScExtended ";
+	$cppflags .= " -IModels/Immm  -IModels/Tj1Orb -I$PsimagLite/src -I$PsimagLite $usePthreadsOrNot $floating";
 
-dmrg:  dmrg.o gitrev
-	\$(CXX) -o dmrg dmrg.o \$(LDFLAGS)  
-	$strip dmrg
-
-correctionVectorMulti: correctionVectorMulti.o
-	\$(CXX) -o correctionVectorMulti correctionVectorMulti.o \$(LDFLAGS)
-
-observe:  observe.o Makefile
-	\$(CXX) -o observe observe.o \$(LDFLAGS)
-	$strip observe
-
-# dependencies brought about by Makefile.dep
-%.o: %.cpp Makefile gitrev Engine/Version.h
-	\$(CXX) \$(CPPFLAGS) -c \$< 
-
-Makefile.dep: Engine/Version.h dmrg.cpp
-	\$(CXX) \$(CPPFLAGS) -MM dmrg.cpp  > Makefile.dep
+	Make::make($fh,\@drivers,"DMRG++",$platform,$mpi,"$lapack $pthreadsLib","$compiler $optimizations",$cppflags,$strip,"Engine/Version.h","Engine/Version.h gitrev");
+	local *FH = $fh;
+print FH<<EOF;
 
 Engine/Version.h: gitrev
-	./gitrev > Engine/Version.h	
-
-gitrev: gitrev.o
-	\$(CXX) -o gitrev gitrev.o \$(LDFLAGS)
-
-gitrev.o:
-	\$(CXX) \$(CPPFLAGS) -c gitrev.cpp 
-
-doc:
-	cd ../doc; make
-
-# dependencies brought about by MakefileObserver.dep
-observe.o: Engine/Version.h
-	\$(CXX) \$(CPPFLAGS) -c observe.cpp
-
-MakefileObserver.dep: Engine/Version.h observe.cpp
-	\$(CXX) \$(CPPFLAGS) -MM observe.cpp  > MakefileObserver.dep
-
-clean:
-	rm -f core* \$(EXENAME) *.o *.dep Engine/Version.h gitrev
-
-include Makefile.dep
-include MakefileObserver.dep
-######## End of Makefile ########
+	./gitrev > Engine/Version.h
 
 EOF
-	close(FOUT);
+
+	close($fh);
 	print STDERR "File Makefile has been written\n";
 }
 
@@ -224,7 +185,7 @@ sub isAMac
 	open(PIPE,"uname -a |grep -i Darwin") or return 0;
 	$_=<PIPE>;
 	close(PIPE);
-	
+
 	return 1 unless ($_ eq "" or $_ eq "\n");
 	return 0;
 }
@@ -241,10 +202,9 @@ sub compilerName
 		if ($ret==0) {
 			$compiler = $comp;
 			last;
-		} 
-			
+		}
+
 	}
-	return $compiler if defined $compiler; 
+	return $compiler if defined $compiler;
 	die "$0: No suitable compiler found\n";
 }
-
