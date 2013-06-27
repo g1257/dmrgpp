@@ -104,7 +104,7 @@ namespace PsimagLite {
 	class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> {
 
 		typedef typename SolverParametersType::RealType RealType;
-		typedef LanczosVectors<RealType,MatrixType,VectorType> LanczosVectorsType;
+		typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
 
 	public:
 
@@ -113,8 +113,7 @@ namespace PsimagLite {
 		typedef typename LanczosVectorsType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 // 		typedef Matrix<VectorElementType> DenseMatrixType;
-		typedef ContinuedFraction<RealType,TridiagonalMatrixType>
-		                    PostProcType;
+		typedef ContinuedFraction<TridiagonalMatrixType> PostProcType;
 
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 

@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009-2011, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -68,9 +67,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -92,19 +90,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-	template<typename RealType,typename MatrixType,typename VectorType>
+	template<typename MatrixType,typename VectorType>
 	class LanczosVectors {
 
-		typedef LanczosVectors<RealType,MatrixType,VectorType> ThisType;
 		typedef typename VectorType::value_type ComplexOrRealType;
+		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+		typedef LanczosVectors<MatrixType,VectorType> ThisType;
 
 	public:
 
 		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 		typedef PsimagLite::Matrix<VectorElementType> DenseMatrixType;
-		typedef PsimagLite::ContinuedFraction<RealType,TridiagonalMatrixType>
-		                    PostProcType;
+		typedef PsimagLite::ContinuedFraction<TridiagonalMatrixType> PostProcType;
 
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 

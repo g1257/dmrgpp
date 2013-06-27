@@ -111,7 +111,7 @@ namespace PsimagLite {
 	class ChebyshevSolver {
 
 		typedef typename SolverParametersType::RealType RealType;
-		typedef LanczosVectors<RealType,MatrixType,VectorType> LanczosVectorsType;
+		typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
 
 	public:
 
@@ -120,7 +120,7 @@ namespace PsimagLite {
 		typedef typename Vector<RealType>::Type TridiagonalMatrixType;
 		typedef typename VectorType::value_type VectorElementType;
 // 		typedef Matrix<VectorElementType> DenseMatrixType;
-		typedef ChebyshevSerializer<RealType,TridiagonalMatrixType> PostProcType;
+		typedef ChebyshevSerializer<TridiagonalMatrixType> PostProcType;
 		typedef PsimagLite::Random48<RealType> RngType;
 
 		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};

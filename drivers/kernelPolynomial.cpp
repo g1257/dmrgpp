@@ -43,7 +43,7 @@ int main(int argc,char *argv[])
 	RealType wbegin = 0;
 	RealType wend = 0;
 	RealType wstep = 0;
-	typedef PsimagLite::ChebyshevSerializer<RealType,VectorType> ChebyshevSerializerType;
+	typedef PsimagLite::ChebyshevSerializer<VectorType> ChebyshevSerializerType;
 	typedef  ChebyshevSerializerType::KernelParametersType KernelParametersType;
 	SizeType type = KernelParametersType::JACKSON;
 	RealType lambda = 0.0;
@@ -89,7 +89,7 @@ int main(int argc,char *argv[])
 
 	PsimagLite::IoSimple::In io(file);
 
-	typedef PsimagLite::ChebyshevSerializer<RealType,VectorType> ChebyshevSerializerType;
+	typedef PsimagLite::ChebyshevSerializer<VectorType> ChebyshevSerializerType;
 	
 	io.advance(ChebyshevSerializerType::stringMarker(),PsimagLite::IoSimple::In::LAST_INSTANCE);
 

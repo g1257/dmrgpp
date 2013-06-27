@@ -31,9 +31,8 @@ Please see full open source license included in file LICENSE.
 using namespace PsimagLite;
 typedef double RealType;
 typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
-typedef ContinuedFraction<RealType,TridiagonalMatrixType> ContinuedFractionType;
-typedef ContinuedFractionCollection<ContinuedFractionType>
-	ContinuedFractionCollectionType;
+typedef ContinuedFraction<TridiagonalMatrixType> ContinuedFractionType;
+typedef ContinuedFractionCollection<ContinuedFractionType> ContinuedFractionCollectionType;
 typedef ContinuedFractionType::PlotParamsType PlotParamsType;
 
 void usage(const char *progName)

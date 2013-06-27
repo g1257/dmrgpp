@@ -38,11 +38,13 @@ Please see full open source license included in file LICENSE.
 #include "IoSimple.h"
 
 namespace PsimagLite {
-	template<typename RealType,typename TridiagonalMatrixType_>
+	template<typename TridiagonalMatrixType_>
 	class ContinuedFraction  {
 	public:
 
 		typedef TridiagonalMatrixType_ TridiagonalMatrixType;
+		typedef typename TridiagonalMatrixType::value_type MatrixElementType;
+		typedef typename PsimagLite::Real<MatrixElementType>::Type RealType;
 		typedef typename std::complex<RealType> ComplexType;
 		typedef typename TridiagonalMatrixType::value_type FieldType;
 		typedef Matrix<FieldType> MatrixType;

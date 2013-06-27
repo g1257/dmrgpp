@@ -59,8 +59,11 @@ namespace PsimagLite {
 		RealType lambda;
 	}; // struct KernelPolynomialParameters
 	
-	template<typename RealType,typename VectorType_>
+	template<typename VectorType_>
 	class ChebyshevSerializer  {
+
+		typedef typename VectorType_::value_type VectorElementType;
+		typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
 		static const String stringMarker_;
 
@@ -217,8 +220,8 @@ namespace PsimagLite {
 		ChebyshevFunction<RealType> chebyshev_;
 	}; // class ChebyshevSerializer
 	
-	template<typename RealType,typename VectorType>
-	const String ChebyshevSerializer<RealType,VectorType>::stringMarker_ =
+	template<typename VectorType>
+	const String ChebyshevSerializer<VectorType>::stringMarker_ =
 	                                               "#ChebyshevSerializerMarker";
 } // namespace PsimagLite 
 /*@}*/
