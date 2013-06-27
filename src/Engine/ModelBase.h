@@ -163,12 +163,12 @@ namespace Dmrg {
 		                         const typename PsimagLite::Vector<std::complex<RealType> >::Type& y,
 		                         ModelHelperType const &modelHelper) const
 		{
+			//! contribution to Hamiltonian from connection system-environment
+			hamiltonianConnectionProduct(x,y,modelHelper);
 			//! contribution to Hamiltonian from current system
 			modelHelper.hamiltonianLeftProduct(x,y);
 			//! contribution to Hamiltonian from current envirnoment
 			modelHelper.hamiltonianRightProduct(x,y);
-			//! contribution to Hamiltonian from connection system-environment
-			hamiltonianConnectionProduct(x,y,modelHelper);
 		}
 
 		/**

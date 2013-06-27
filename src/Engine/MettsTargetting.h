@@ -675,7 +675,7 @@ namespace Dmrg {
 								  const SparseMatrixType& transform,
 								  const typename PsimagLite::Vector<SizeType>::Type& block)
 			{
-				assert(oldVector.size()==transform.n_row());
+				assert(oldVector.size()==transform.row());
 
 				typename PsimagLite::Vector<SizeType>::Type nk;
 				mettsCollapse_.setNk(nk,block);
@@ -696,7 +696,7 @@ namespace Dmrg {
 						
 						SizeType gammaPrime = permutationInverse[noPermIndex];
 						
-						assert(gammaPrime<transform.n_row());
+						assert(gammaPrime<transform.row());
 						newVector[gamma] += transform.element(gammaPrime,gamma) *
 									  oldVector[gammaPrime];
 					}

@@ -189,11 +189,14 @@ namespace Dmrg {
 
 			void sync()
 			{
+				typename PsimagLite::Vector<SparseElementType>::Type x(x_.size(),0);
 				for (SizeType threadNum = 0; threadNum < xtemp_.size(); threadNum++)
 					for (SizeType i=0;i<x_.size();i++)
-						x_[i]+=xtemp_[threadNum][i];
+						x[i]+=xtemp_[threadNum][i];
 
-				PsimagLite::MPI::allReduce(x_);
+				PsimagLite::MPI::allReduce(x);
+				for (SizeType i=0;i<x_.size();i++)
+					x_[i] += x[i];
 			}
 
 			void prepare(SizeType ix,SizeType& i,SizeType& j,SizeType& type,SparseElementType& tmp,SizeType& term,SizeType& dofs,AdditionalDataType& additionalData) const
