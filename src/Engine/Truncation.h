@@ -94,7 +94,7 @@ namespace Dmrg {
 		typedef typename LeftRightSuperType::ProgressIndicatorType ProgressIndicatorType;
 		typedef typename TargettingType::RealType RealType;
 		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
-		typedef DensityMatrix<RealType,BasisType,BasisWithOperatorsType,TargettingType> DensityMatrixType;
+		typedef DensityMatrix<BasisType,BasisWithOperatorsType,TargettingType> DensityMatrixType;
 		typedef typename TargettingType::ModelType ModelType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 

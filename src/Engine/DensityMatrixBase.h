@@ -86,9 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	//!
-	template<
-		typename RealType,
-		typename DmrgBasisType,
+	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
 		typename TargettingType
 		>

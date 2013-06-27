@@ -80,9 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<
-		typename RealType,
-		typename DmrgBasisType,
+	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
 		typename TargettingType
 		>
@@ -94,14 +92,15 @@ namespace Dmrg {
 			SparseMatrixType;
 		typedef typename TargettingType::TargetVectorType::value_type
 			DensityMatrixElementType;
+		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
-		typedef DensityMatrixLocal<RealType,DmrgBasisType,
+		typedef DensityMatrixLocal<DmrgBasisType,
 			DmrgBasisWithOperatorsType, TargettingType>
 			DensityMatrixLocalType;
-		typedef DensityMatrixSu2<RealType,DmrgBasisType,
+		typedef DensityMatrixSu2<DmrgBasisType,
 			DmrgBasisWithOperatorsType,TargettingType>
 			DensityMatrixSu2Type;
-		typedef DensityMatrixBase<RealType,DmrgBasisType,
+		typedef DensityMatrixBase<DmrgBasisType,
 			DmrgBasisWithOperatorsType,TargettingType>
 			DensityMatrixBaseType;
 
@@ -161,14 +160,12 @@ namespace Dmrg {
 			}
 		}
 
-		template<
-			typename RealType_,
-			typename DmrgBasisType_,
+		template<typename DmrgBasisType_,
 			typename DmrgBasisWithOperatorsType_,
    			typename TargettingType_
 			> 
 		friend std::ostream& operator<<(std::ostream& os,
-			const DensityMatrix<RealType_,DmrgBasisType_,
+			const DensityMatrix<DmrgBasisType_,
 				DmrgBasisWithOperatorsType_,TargettingType_>&
 						dm);
 
@@ -178,14 +175,12 @@ namespace Dmrg {
 		DensityMatrixBaseType* densityMatrixImpl_;
 	}; // class DensityMatrix
 
-	template<
-		typename RealType,
-		typename DmrgBasisType,
+	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
   		typename TargettingType
 		> 
 	std::ostream& operator<<(std::ostream& os,
-				const DensityMatrix<RealType,DmrgBasisType,
+				const DensityMatrix<DmrgBasisType,
 				DmrgBasisWithOperatorsType,TargettingType>& dm)
 	{
 		os<<(*dm.densityMatrixImpl_);

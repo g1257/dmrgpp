@@ -82,20 +82,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	//!
-	template<
-		typename RealType,
-		typename DmrgBasisType,
+	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
 		typename TargettingType
 		>
 
-	class DensityMatrixLocal : public DensityMatrixBase<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType> {
+	class DensityMatrixLocal : public DensityMatrixBase<DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType> {
 		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 
 		typedef typename DmrgBasisType::FactorsType FactorsType;
 		typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
+		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 
 		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
 
@@ -188,14 +187,12 @@ namespace Dmrg {
 			}
 		}
 
-		template<
-			typename RealType_,
-			typename DmrgBasisType_,
+		template<typename DmrgBasisType_,
 			typename DmrgBasisWithOperatorsType_,
    			typename TargettingType_
 			> 
 		friend std::ostream& operator<<(std::ostream& os,
-				const DensityMatrixLocal<RealType_,
+				const DensityMatrixLocal<
     					DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_>& dm);
 
 	private:
@@ -206,14 +203,12 @@ namespace Dmrg {
 
 	}; // class DensityMatrixLocal
 
-	template<
-		typename RealType,
-		typename DmrgBasisType,
+	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
   		typename TargettingType
 		> 
 	std::ostream& operator<<(std::ostream& os,
-				const DensityMatrixLocal<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType>& dm)
+				const DensityMatrixLocal<DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType>& dm)
 	{
 		for (SizeType m=0;m<dm.data_.blocks();m++) {
 			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));

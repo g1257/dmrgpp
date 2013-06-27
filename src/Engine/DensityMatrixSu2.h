@@ -86,17 +86,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	//!
-	template<
-		typename RealType,
-		typename DmrgBasisType,
+	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
 		typename TargettingType
 		>
-	class DensityMatrixSu2 : public DensityMatrixBase<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType> {
+	class DensityMatrixSu2 : public DensityMatrixBase<DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType> {
 		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
+		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
+
 		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
 		
 	public:
@@ -210,14 +210,12 @@ namespace Dmrg {
 			if (debug_) areAllMsEqual(pBasis);
 		}
 
-		template<
-			typename RealType_,
-			typename DmrgBasisType_,
+		template<typename DmrgBasisType_,
 			typename DmrgBasisWithOperatorsType_,
    			typename TargettingType_
 			> 
 		friend std::ostream& operator<<(std::ostream& os,
-				const DensityMatrixSu2<RealType_,
+				const DensityMatrixSu2<
     					DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_>& dm);
 	private:
 		BlockMatrixType data_;
@@ -368,14 +366,12 @@ namespace Dmrg {
 		
 	}; // class DensityMatrixSu2
 	
-	template<
-		typename RealType,
-		typename DmrgBasisType,
+	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
   		typename TargettingType
 		> 
 	std::ostream& operator<<(std::ostream& os,
-				const DensityMatrixSu2<RealType,DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType>& dm)
+				const DensityMatrixSu2<DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType>& dm)
 	{
 		//std::cerr<<"PRINTING DENSITY-MATRIX WITH OPTION="<<option<<"\n";
 		for (SizeType m=0;m<dm.data_.blocks();m++) {
