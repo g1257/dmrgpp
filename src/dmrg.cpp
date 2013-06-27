@@ -96,7 +96,7 @@ void mainLoop2(GeometryType& geometry,
                ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io)
 {
-	typedef Basis<MatrixElementType,MySparseMatrix> BasisType;
+	typedef Basis<MySparseMatrix> BasisType;
 	typedef Operators<BasisType> OperatorsType;
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;

@@ -89,10 +89,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	//! A class to represent in a light way a Dmrg basis (used only to implement symmetries).
 	//! (See corresponding section in paper)
-	template<typename RealType_,typename SparseMatrixType_>
+	template<typename SparseMatrixType_>
 	class	Basis {
 
-		typedef  Basis<RealType_,SparseMatrixType_> ThisType;
+		typedef typename SparseMatrixType_::value_type SparseElementType;
+		typedef typename PsimagLite::Real<SparseElementType>::Type RealType_;
+		typedef  Basis<SparseMatrixType_> ThisType;
 		typedef HamiltonianSymmetryLocal<RealType_,SparseMatrixType_>  HamiltonianSymmetryLocalType;
 		typedef HamiltonianSymmetrySu2<RealType_,SparseMatrixType_>  HamiltonianSymmetrySu2Type;
 //		typedef Reflection ReflectionSymmetryType;
@@ -104,10 +106,10 @@ namespace Dmrg {
 		typedef  BasisData<PairType> BasisDataType;
 		typedef typename PsimagLite::Vector<SizeType>::Type BlockType;
 		typedef SparseMatrixType_ SparseMatrixType;
+		typedef RealType_ RealType;
 
 		enum {BEFORE_TRANSFORM,AFTER_TRANSFORM};
 
-		typedef RealType_ RealType;
 
 		//! Constructor, s=name of this basis 
 		Basis(const PsimagLite::String& s)
@@ -500,11 +502,11 @@ namespace Dmrg {
 		}
 
 		//! The operator<< is a friend
-		template<typename RealType2,typename SparseMatrixType2>
-		friend std::ostream& operator<<(std::ostream& os,const Basis<RealType2,SparseMatrixType2>& x);
+		template<typename SparseMatrixType2>
+		friend std::ostream& operator<<(std::ostream& os,const Basis<SparseMatrixType2>& x);
 
-		template<typename RealType2,typename SparseMatrixType2>
-		friend std::istream& operator>>(std::istream& is,Basis<RealType2,SparseMatrixType2>& x);
+		template<typename SparseMatrixType2>
+		friend std::istream& operator>>(std::istream& is,Basis<SparseMatrixType2>& x);
 
 	private:
 
@@ -661,8 +663,8 @@ namespace Dmrg {
 
 	}; // class Basis
 
-	template<typename RealType,typename SparseMatrixType>
-	std::ostream& operator<<(std::ostream& os,const Basis<RealType,SparseMatrixType>& x)
+	template<typename SparseMatrixType>
+	std::ostream& operator<<(std::ostream& os,const Basis<SparseMatrixType>& x)
 	{
 		os<<"dmrgTransformed="<<x.dmrgTransformed_<<"\n";
 		os<<"name="<<x.name_<<"\n";
@@ -679,15 +681,15 @@ namespace Dmrg {
 		return os;
 	}
 
-	template<typename RealType,typename SparseMatrixType>
-	std::istream& operator>>(std::istream& is,Basis<RealType,SparseMatrixType>& x)
+	template<typename SparseMatrixType>
+	std::istream& operator>>(std::istream& is,Basis<SparseMatrixType>& x)
 	{
 		throw PsimagLite::RuntimeError("Unimplemented >>");
 		return is;
 	}
 
-	template<typename RealType,typename SparseMatrixType>
-	bool Basis<RealType,SparseMatrixType>::useSu2Symmetry_=false;
+	template<typename SparseMatrixType>
+	bool Basis<SparseMatrixType>::useSu2Symmetry_=false;
 
 } // namespace Dmrg
 

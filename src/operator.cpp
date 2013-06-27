@@ -84,7 +84,7 @@ void mainLoop(GeometryType& geometry,
               const DmrgSolverParametersType& params,
               const OperatorOptions& obsOptions)
 {
-	typedef Basis<RealType,MySparseMatrix> BasisType;
+	typedef Basis<MySparseMatrix> BasisType;
 	typedef Operators<BasisType> OperatorsType;
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
