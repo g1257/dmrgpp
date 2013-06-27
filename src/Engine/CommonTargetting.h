@@ -109,8 +109,7 @@ namespace Dmrg {
 		typedef typename LanczosSolverType::PostProcType PostProcType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
-		typedef DynamicSerializer<RealType,VectorWithOffsetType,PostProcType>
-		        DynamicSerializerType;
+		typedef DynamicSerializer<VectorWithOffsetType,PostProcType> DynamicSerializerType;
 		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;

@@ -127,11 +127,10 @@ namespace Dmrg {
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 		typedef typename LanczosSolverType::PostProcType PostProcType;
-		typedef DynamicSerializer<RealType,VectorWithOffsetType,PostProcType> DynamicSerializerType;
+		typedef DynamicSerializer<VectorWithOffsetType,PostProcType> DynamicSerializerType;
 		typedef typename LanczosSolverType::LanczosMatrixType
 		                                      LanczosMatrixType;
-		typedef CorrectionVectorFunction<RealType,
-		                                  LanczosMatrixType,
+		typedef CorrectionVectorFunction<LanczosMatrixType,
 		                                  TargettingParamsType>
 		         CorrectionVectorFunctionType;
 		typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
