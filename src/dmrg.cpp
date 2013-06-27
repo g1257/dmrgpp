@@ -28,9 +28,8 @@ typedef float MatrixElementType;
 #include "BlockMatrix.h"
 #include "DmrgSolver.h"
 #include "IoSimple.h"
-#include "Operator.h"
 #include "ModelFactory.h"
-#include "OperatorsBase.h"
+#include "Operators.h"
 #include "Concurrency.h"
 #include "Geometry/Geometry.h"
 #include "ModelHelperLocal.h"
@@ -97,9 +96,8 @@ void mainLoop2(GeometryType& geometry,
                ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io)
 {
-	typedef Operator<MatrixElementType,MySparseMatrix> OperatorType;
 	typedef Basis<MatrixElementType,MySparseMatrix> BasisType;
-	typedef OperatorsBase<OperatorType,BasisType> OperatorsType;
+	typedef Operators<BasisType> OperatorsType;
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;

@@ -133,12 +133,15 @@ namespace Dmrg {
 	}
 
 	//! This is a structure, don't add member functions here!
-	template<typename RealType_,typename SparseMatrixType_>
+	template<typename SparseMatrixType_>
 	struct Operator {
-		typedef RealType_ RealType;
+
 		typedef SparseMatrixType_ SparseMatrixType;
+		typedef typename SparseMatrixType::value_type SparseElementType;
+		typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
 		typedef std::pair<SizeType,SizeType> PairType;
 		typedef Su2Related Su2RelatedType;
+
 		Operator() {}
 
 		Operator(const SparseMatrixType& data1,
@@ -175,8 +178,8 @@ namespace Dmrg {
 		Su2RelatedType su2Related;
 	};
 
-	template<typename RealType,typename SparseMatrixType>
-	void bcast(Operator<RealType,SparseMatrixType>& op)
+	template<typename SparseMatrixType>
+	void bcast(Operator<SparseMatrixType>& op)
 	{
 		PsimagLite::bcast(op.data);
 		PsimagLite::MPI::bcast(op.fermionSign);
@@ -185,54 +188,20 @@ namespace Dmrg {
 		bcast(op.su2Related);
 	}
 
-	template<typename RealType_,
-	         typename SparseMatrixType,
+	template<typename SparseMatrixType,
 	         template<typename,typename> class SomeVectorTemplate,
 	         typename SomeAllocator1Type,
 	         typename SomeAllocator2Type>
 	void fillOperator(SomeVectorTemplate<SparseMatrixType*,SomeAllocator1Type>& data,
-	                  SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocator2Type>& op)
+	                  SomeVectorTemplate<Operator<SparseMatrixType>,SomeAllocator2Type>& op)
 	{
 		for (SizeType i=0;i<data.size();i++) {
 			data[i] = &(op[i].data);
 		}
 	}
 
-	template<typename RealType_,
-	         typename SparseMatrixType,
-	         template<typename,typename> class SomeVectorTemplate,
-	         typename SomeAllocatorType>
-	void gather(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorType>& op)
-	{
-		SomeVectorTemplate<SparseMatrixType*,typename PsimagLite::Allocator<SparseMatrixType*>::Type> data(op.size());
-//		PsimagLite::Vector<int*>::Type fermionSign(op.size());
-//		typename PsimagLite::Vector<typename Operator<RealType_,SparseMatrixType>::PairType*>::Type jm(op.size());
-//		typename PsimagLite::Vector<RealType_*>::Type angularFactor(op.size());
-//		PsimagLite::Vector<typename Operator<RealType_,SparseMatrixType>::Type::Su2RelatedType*> su2Related(op.size());
-
-		fillOperator(data,op);
-//		concurrency.gather(data);
-	}
-
-	template<typename RealType_,
-	         typename SparseMatrixType,
-	         template<typename,typename> class SomeVectorTemplate,
-	         typename SomeAllocatorType>
-	void broadcast(SomeVectorTemplate<Operator<RealType_,SparseMatrixType>,SomeAllocatorType>& op)
-	{
-		SomeVectorTemplate<SparseMatrixType*,typename PsimagLite::Allocator<SparseMatrixType*>::Type> data(op.size());
-//		PsimagLite::Vector<int*>::Type fermionSign(op.size());
-//		typename PsimagLite::Vector<typename Operator<RealType_,SparseMatrixType>::PairType*>::Type jm(op.size());
-//		typename PsimagLite::Vector<RealType_*>::Type angularFactor(op.size());
-//		typename PsimagLite::Vector<typename Operator<RealType_,SparseMatrixType>::Su2RelatedType*>::Type su2Related(op.size());
-
-		fillOperator(data,op);
-
-//		concurrency.broadcast(data);
-	}
-
-	template<typename RealType,typename SparseMatrixType>
-	std::istream& operator>>(std::istream& is,Operator<RealType,SparseMatrixType>& op)
+	template<typename SparseMatrixType>
+	std::istream& operator>>(std::istream& is,Operator<SparseMatrixType>& op)
 	{
 		is>>op.data;
 		is>>op.fermionSign;
@@ -242,8 +211,8 @@ namespace Dmrg {
 		return is;
 	}
 
-	template<typename RealType,typename SparseMatrixType>
-	std::ostream& operator<<(std::ostream& os,const Operator<RealType,SparseMatrixType>& op)
+	template<typename SparseMatrixType>
+	std::ostream& operator<<(std::ostream& os,const Operator<SparseMatrixType>& op)
 	{
 		os<<op.data;
 		os<<op.fermionSign<<"\n";

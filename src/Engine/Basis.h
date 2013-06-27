@@ -89,19 +89,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	//! A class to represent in a light way a Dmrg basis (used only to implement symmetries).
 	//! (See corresponding section in paper)
-	template<typename RealType_,typename SparseMatrixType>
+	template<typename RealType_,typename SparseMatrixType_>
 	class	Basis {
 
-		typedef  Basis<RealType_,SparseMatrixType> ThisType;
-		typedef HamiltonianSymmetryLocal<RealType_,SparseMatrixType>  HamiltonianSymmetryLocalType;
-		typedef HamiltonianSymmetrySu2<RealType_,SparseMatrixType>  HamiltonianSymmetrySu2Type;
+		typedef  Basis<RealType_,SparseMatrixType_> ThisType;
+		typedef HamiltonianSymmetryLocal<RealType_,SparseMatrixType_>  HamiltonianSymmetryLocalType;
+		typedef HamiltonianSymmetrySu2<RealType_,SparseMatrixType_>  HamiltonianSymmetrySu2Type;
 //		typedef Reflection ReflectionSymmetryType;
 
 	public:
+
 		typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 		typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
 		typedef  BasisData<PairType> BasisDataType;
 		typedef typename PsimagLite::Vector<SizeType>::Type BlockType;
+		typedef SparseMatrixType_ SparseMatrixType;
 
 		enum {BEFORE_TRANSFORM,AFTER_TRANSFORM};
 

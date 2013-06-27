@@ -27,7 +27,7 @@ typedef float RealType;
 #include "ObservableLibrary.h"
 #include "IoSimple.h"
 #include "ModelFactory.h"
-#include "OperatorsBase.h"
+#include "Operators.h"
 #include "Concurrency.h"
 #include "Geometry/Geometry.h" 
 #include "CrsMatrix.h"
@@ -84,10 +84,8 @@ void mainLoop(GeometryType& geometry,
               const DmrgSolverParametersType& params,
               const OperatorOptions& obsOptions)
 {
-	typedef Operator<RealType,MySparseMatrix> OperatorType;
 	typedef Basis<RealType,MySparseMatrix> BasisType;
-	typedef OperatorsBase<OperatorType,BasisType> OperatorsType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef Operators<BasisType> OperatorsType;
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;

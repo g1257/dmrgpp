@@ -71,13 +71,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file OperatorsBase.h
+/*! \file Operators.h
  *
  *  Documentation needed FIXME 
  *
  */
-#ifndef OPERATORS_BASE_H
-#define OPERATORS_BASE_H
+#ifndef OPERATORS_H
+#define OPERATORS_H
 
 #include "ReducedOperators.h"
 #include <cassert>
@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Complex.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
-#include "Operator.h"
 
 namespace Dmrg {
 /**
@@ -108,8 +107,8 @@ geometries or connections, because all local opeators are availabel at all
 times. Each SCE model class is responsible for determining whether a
 transformed operator can be used (or not because of the reason limitation above).
 */
-	template<typename OperatorType_,typename BasisType_>
-	class OperatorsBase {
+	template<typename BasisType_>
+	class Operators {
 		
 		typedef std::pair<SizeType,SizeType> PairType;
 		static const bool EXCLUDE = false;
@@ -117,7 +116,8 @@ transformed operator can be used (or not because of the reason limitation above)
 	public:
 		
 		typedef BasisType_ BasisType;
-		typedef OperatorType_ OperatorType;
+		typedef ReducedOperators<BasisType> ReducedOperatorsType;
+		typedef typename ReducedOperatorsType::OperatorType OperatorType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type ComplexOrRealType;
 		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
@@ -128,7 +128,7 @@ transformed operator can be used (or not because of the reason limitation above)
 		public:
 
 			MyLoop(bool useSu2Symmetry,
-			       ReducedOperators<OperatorType,BasisType>& reducedOpImpl,
+			       ReducedOperatorsType& reducedOpImpl,
 			       typename PsimagLite::Vector<OperatorType>::Type& operators,
 			       const SparseMatrixType& ftransform1,
 			       const BasisType* thisBasis1)
@@ -200,21 +200,21 @@ transformed operator can be used (or not because of the reason limitation above)
 			}
 
 			bool useSu2Symmetry_;
-			ReducedOperators<OperatorType,BasisType>& reducedOpImpl_;
+			ReducedOperatorsType& reducedOpImpl_;
 			typename PsimagLite::Vector<OperatorType>::Type& operators_;
 			const SparseMatrixType& ftransform;
 			const BasisType* thisBasis;
 			bool hasMpi_;
 		};
 
-		OperatorsBase(const BasisType* thisBasis)
+		Operators(const BasisType* thisBasis)
 		: useSu2Symmetry_(BasisType::useSu2Symmetry()),
 		  reducedOpImpl_(thisBasis),
 		  progress_("Operators")
 		{}
 
 		template<typename IoInputter>
-		OperatorsBase(IoInputter& io,
+		Operators(IoInputter& io,
 		              SizeType level,
 		              const BasisType* thisBasis)
 		: useSu2Symmetry_(BasisType::useSu2Symmetry()),
@@ -434,11 +434,11 @@ transformed operator can be used (or not because of the reason limitation above)
 		}
 
 		bool useSu2Symmetry_;
-		ReducedOperators<OperatorType,BasisType> reducedOpImpl_;
+		ReducedOperatorsType reducedOpImpl_;
 		typename PsimagLite::Vector<OperatorType>::Type operators_;
 		SparseMatrixType hamiltonian_;
 		PsimagLite::ProgressIndicator progress_;
-	}; //class OperatorsBase 
+	}; //class Operators
 } // namespace Dmrg
 
 /*@}*/

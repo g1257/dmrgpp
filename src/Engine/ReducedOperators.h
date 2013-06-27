@@ -85,28 +85,33 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Operator.h"
 
 namespace Dmrg {
-	template<typename OperatorType,typename DmrgBasisType>
+	template<typename BasisType>
 	class ReducedOperators {
-		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+
+		typedef typename BasisType::SparseMatrixType SparseMatrixType;
+		typedef Operator<SparseMatrixType> OperatorType_;
 		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef typename DmrgBasisType::RealType RealType;
-		typedef typename OperatorType::PairType PairType;
+		typedef typename BasisType::RealType RealType;
+		typedef typename OperatorType_::PairType PairType;
 		typedef ClebschGordanCached<RealType> ClebschGordanType;
 		typedef PsimagLite::Matrix<SparseElementType> DenseMatrixType;
 		typedef Su2SymmetryGlobals<RealType> Su2SymmetryGlobalsType;
 
 	public:
-		ReducedOperators(const DmrgBasisType* thisBasis)
+
+		typedef OperatorType_ OperatorType;
+
+		ReducedOperators(const BasisType* thisBasis)
 		: thisBasis_(thisBasis),
-		  useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
+		  useSu2Symmetry_(BasisType::useSu2Symmetry()),
 		  cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
 		{
 		}
 
 		template<typename IoInputter>
-		ReducedOperators(IoInputter& io,SizeType level,const DmrgBasisType* thisBasis)
+		ReducedOperators(IoInputter& io,SizeType level,const BasisType* thisBasis)
 		: thisBasis_(thisBasis),
-		  useSu2Symmetry_(DmrgBasisType::useSu2Symmetry()),
+		  useSu2Symmetry_(BasisType::useSu2Symmetry()),
 		  cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
 		{
 			if (!useSu2Symmetry_) return;
@@ -203,7 +208,7 @@ namespace Dmrg {
 			createReducedOperator(reducedHamiltonian_,opSrc);
 		}
 
-		void setToProduct(const DmrgBasisType& basis2,const DmrgBasisType& basis3,SizeType x,const DmrgBasisType* thisBasis)
+		void setToProduct(const BasisType& basis2,const BasisType& basis3,SizeType x,const BasisType* thisBasis)
 		{
 			if (!useSu2Symmetry_) return;
 			thisBasis_ = thisBasis;
@@ -230,7 +235,7 @@ namespace Dmrg {
 			calcFastBasis(fastBasisRight_,basis2,basis3,false,thisBasis_->reducedSize());
 		}
 
-		void prepareTransform(const SparseMatrixType& ftransform,const DmrgBasisType* thisBasis)
+		void prepareTransform(const SparseMatrixType& ftransform,const BasisType* thisBasis)
 		{
 			if (!useSu2Symmetry_) return;
 
@@ -273,16 +278,16 @@ namespace Dmrg {
 		}
 
 		void externalProduct(SizeType ind,
-		                     const DmrgBasisType& basis2,
-		                     const DmrgBasisType& basis3,
+		                     const BasisType& basis2,
+		                     const BasisType& basis3,
 		                     bool order,
 		                     const OperatorType& myOp)
 		{
 			if (!useSu2Symmetry_) return;
 			SizeType n = thisBasis_->reducedSize();
 
-			const DmrgBasisType* basisA = &basis2;
-			const DmrgBasisType* basisB = &basis3;
+			const BasisType* basisA = &basis2;
+			const BasisType* basisB = &basis3;
 			SizeType angularMomentum = myOp.jm.first;
 			int fermionSign = myOp.fermionSign;
 			const SparseMatrixType& A = myOp.data;
@@ -304,16 +309,16 @@ namespace Dmrg {
 			reducedOperators_[ind].su2Related = myOp.su2Related;
 		}
 
-		void outerProductHamiltonian(const DmrgBasisType& basis2,
-		                             const DmrgBasisType& basis3,
+		void outerProductHamiltonian(const BasisType& basis2,
+		                             const BasisType& basis3,
 		                             const SparseMatrixType& h2,
 		                             const SparseMatrixType& h3)
 		{
 			if (!useSu2Symmetry_) return;
 
 			SizeType n = thisBasis_->reducedSize();
-			const DmrgBasisType* basisA = &basis2;
-			const DmrgBasisType* basisB = &basis3;
+			const BasisType* basisA = &basis2;
+			const BasisType* basisB = &basis3;
 			PsimagLite::Matrix<SparseElementType> B2(n,n);
 			externalProd_(B2,basisA,basisB,h2,-1,true,1);
 
@@ -363,7 +368,7 @@ namespace Dmrg {
 		}
 
 	private:
-		const DmrgBasisType* thisBasis_;
+		const BasisType* thisBasis_;
 		bool useSu2Symmetry_;
 		ClebschGordanType* cgObject_;
 		PsimagLite::Vector<SizeType>::Type momentumOfOperators_;
@@ -410,7 +415,7 @@ namespace Dmrg {
 			return ix;
 		}
 
-		void calcReducedMapping(const DmrgBasisType& basis2,const DmrgBasisType& basis3)
+		void calcReducedMapping(const BasisType& basis2,const BasisType& basis3)
 		{
 			SizeType fMax=0;
 			const PsimagLite::Vector<SizeType>::Type& flavorsOld=thisBasis_->flavorsOld();
@@ -508,15 +513,15 @@ namespace Dmrg {
 		}
 
 		void buildLfactor(typename PsimagLite::Vector<SparseElementType>::Type& lfactor,
-		                  bool order,const DmrgBasisType& basis2,
-		                  const DmrgBasisType& basis3,
+		                  bool order,const BasisType& basis2,
+		                  const BasisType& basis3,
 		                  SizeType k)
 		{
 			SizeType jMax=j1Max_;
 			if (!order) jMax = j2Max_;
 
-			const DmrgBasisType* basisA = &basis2;
-			const DmrgBasisType* basisB = &basis3;
+			const BasisType* basisA = &basis2;
+			const BasisType* basisB = &basis3;
 			if (!order) {
 				basisA = &basis3;
 				basisB = &basis2;
@@ -669,8 +674,8 @@ namespace Dmrg {
 		}
 
 		void externalProd_(PsimagLite::Matrix<SparseElementType>& B,
-		                   const DmrgBasisType* basisA,
-		                   const DmrgBasisType* basisB,
+		                   const BasisType* basisA,
+		                   const BasisType* basisB,
 		                   const SparseMatrixType& A,
 		                   int ki,
 		                   bool order,
@@ -727,13 +732,13 @@ namespace Dmrg {
 		}
 
 		void calcFastBasis(PsimagLite::Vector<PsimagLite::Vector<SizeType>::Type >::Type& fastBasis,
-		                   const DmrgBasisType& basis2,
-		                   const DmrgBasisType& basis3,
+		                   const BasisType& basis2,
+		                   const BasisType& basis3,
 		                   bool order,
 		                   SizeType n)
 		{
-			const DmrgBasisType* basisA = &basis2;
-			const DmrgBasisType* basisB = &basis3;
+			const BasisType* basisA = &basis2;
+			const BasisType* basisB = &basis3;
 
 			if (!order) {
 				basisA = &basis3;
@@ -780,7 +785,7 @@ namespace Dmrg {
 			}
 		}
 
-		void cacheFlavorIndex(const DmrgBasisType& basis2,const DmrgBasisType& basis3)
+		void cacheFlavorIndex(const BasisType& basis2,const BasisType& basis3)
 		{
 			flavorIndexCached_.reset(basis2.reducedSize(),basis3.reducedSize());
 			for (SizeType i1=0;i1<basis2.reducedSize();i1++) {

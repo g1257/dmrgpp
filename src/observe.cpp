@@ -27,7 +27,7 @@ typedef float RealType;
 #include "ObservableLibrary.h"
 #include "IoSimple.h"
 #include "ModelFactory.h"
-#include "OperatorsBase.h"
+#include "Operators.h"
 #include "Geometry/Geometry.h"
 #include "CrsMatrix.h"
 #include "ModelHelperLocal.h"
@@ -74,7 +74,7 @@ SizeType dofsFromModelName(const ModelType& model)
 	return 0;
 }
 
-template<typename VectorWithOffsetType,typename ModelType,typename SparseMatrixType,typename OperatorType,typename TargettingType>
+template<typename VectorWithOffsetType,typename ModelType,typename SparseMatrixType,typename TargettingType>
 bool observeOneFullSweep(
 	IoInputType& io,
 	const GeometryType& geometry,
@@ -184,10 +184,8 @@ void mainLoop(GeometryType& geometry,
 	      const DmrgSolverParametersType& params,
               const PsimagLite::String& obsOptions)
 {
-	typedef Operator<RealType,MySparseMatrix> OperatorType;
 	typedef Basis<RealType,MySparseMatrix> BasisType;
-	typedef OperatorsBase<OperatorType,BasisType> OperatorsType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef Operators<BasisType> OperatorsType;
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
@@ -216,7 +214,7 @@ void mainLoop(GeometryType& geometry,
 	while (moreData) {
 		try {
 			moreData = !observeOneFullSweep<VectorWithOffsetType,ModelType,
-			            SparseMatrixType,OperatorType,TargettingType>
+			            MySparseMatrix,TargettingType>
 			(dataIo,geometry,model,obsOptions,hasTimeEvolution);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
