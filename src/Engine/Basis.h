@@ -95,8 +95,8 @@ namespace Dmrg {
 		typedef typename SparseMatrixType_::value_type SparseElementType;
 		typedef typename PsimagLite::Real<SparseElementType>::Type RealType_;
 		typedef  Basis<SparseMatrixType_> ThisType;
-		typedef HamiltonianSymmetryLocal<RealType_,SparseMatrixType_>  HamiltonianSymmetryLocalType;
-		typedef HamiltonianSymmetrySu2<RealType_,SparseMatrixType_>  HamiltonianSymmetrySu2Type;
+		typedef HamiltonianSymmetryLocal<SparseMatrixType_>  HamiltonianSymmetryLocalType;
+		typedef HamiltonianSymmetrySu2<SparseMatrixType_>  HamiltonianSymmetrySu2Type;
 //		typedef Reflection ReflectionSymmetryType;
 
 	public:

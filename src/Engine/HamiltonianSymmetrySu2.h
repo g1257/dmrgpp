@@ -90,14 +90,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename RealType,typename SparseMatrixType>
+	template<typename SparseMatrixType>
 	class	HamiltonianSymmetrySu2 {
 		public:
+
+			typedef typename SparseMatrixType::value_type SparseElementType;
+			typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
 			typedef std::pair<SizeType,SizeType> PairType;
+
 		private:
 			typedef JmPairs<PairType> JmPairsType;
 			typedef VerySparseMatrix<RealType> VerySparseMatrixType;
-			typedef HamiltonianSymmetrySu2<RealType,SparseMatrixType> ThisType;
+			typedef HamiltonianSymmetrySu2<SparseMatrixType> ThisType;
 			typedef JmSubspace<RealType,VerySparseMatrixType,ThisType> JmSubspaceType;
 			typedef typename JmSubspaceType::FlavorType FlavorType;
 			typedef  BasisData<PairType> BasisDataType;

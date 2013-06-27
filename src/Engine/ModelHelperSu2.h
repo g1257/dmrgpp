@@ -110,7 +110,7 @@ namespace Dmrg {
 		typedef typename BasisType::RealType RealType;
 
 		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef Link<SparseElementType,RealType> LinkType;
+		typedef Link<SparseElementType> LinkType;
 		
 		ModelHelperSu2(int m,const LeftRightSuperType& lrs)
 		: m_(m),

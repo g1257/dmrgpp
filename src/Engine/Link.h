@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
@@ -85,9 +83,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename FieldType,typename RealType>
+	template<typename FieldType>
 	struct Link {
+
 		typedef std::pair<SizeType,SizeType> PairType;
+		typedef typename PsimagLite::Real<FieldType>::Type RealType;
+
 		Link(SizeType i,SizeType j,SizeType type1,const FieldType& value1,SizeType dofs1,
 		    	SizeType fOb,const PairType& ops1,const std::pair<char,char>& mods1,
        			SizeType aM,RealType aF,

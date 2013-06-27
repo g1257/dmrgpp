@@ -83,8 +83,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BasisData.h"
 
 namespace Dmrg {
-	template<typename RealType,typename SparseMatrixType>
+	template<typename SparseMatrixType>
 	class	HamiltonianSymmetryLocal {
+
+		typedef typename SparseMatrixType::value_type SparseElementType;
+		typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
 		typedef  BasisData<std::pair<SizeType,SizeType> > BasisDataType;
 		typedef PsimagLite::CrsMatrix<RealType> FactorsType;
 		

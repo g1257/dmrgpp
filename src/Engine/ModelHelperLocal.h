@@ -101,7 +101,7 @@ namespace Dmrg {
 		typedef typename BasisType::BlockType BlockType;
 		typedef typename BasisType::RealType RealType;
 		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-		typedef Link<SparseElementType,RealType> LinkType;
+		typedef Link<SparseElementType> LinkType;
 
 		enum { System=0,Environ=1 };
 
