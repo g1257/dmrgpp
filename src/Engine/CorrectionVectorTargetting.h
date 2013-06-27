@@ -122,7 +122,7 @@ namespace Dmrg {
 		typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 		typedef VectorType TargetVectorType;
 		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
-		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+		typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 		typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;

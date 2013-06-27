@@ -125,7 +125,7 @@ namespace Dmrg {
 			typedef ComplexVectorType TargetVectorType;
 			typedef BlockMatrix<ComplexMatrixType> ComplexBlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
-			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+			typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 			typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 			typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
 			typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,

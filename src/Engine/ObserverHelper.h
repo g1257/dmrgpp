@@ -104,8 +104,7 @@ namespace Dmrg {
 				BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-		typedef TimeSerializer<RealType,VectorWithOffsetType>
-			TimeSerializerType;
+		typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;

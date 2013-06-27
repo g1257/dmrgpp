@@ -131,13 +131,13 @@ namespace Dmrg {
 			typedef PsimagLite::Matrix<RealType> MatrixType;
 			typedef BlockMatrix<MatrixType> BlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
-			typedef MettsSerializer<RealType,VectorWithOffsetType> MettsSerializerType;
+			typedef MettsSerializer<VectorWithOffsetType> MettsSerializerType;
 			typedef typename PsimagLite::RandomForTests<RealType> RngType;
 			typedef MettsStochastics<ModelType,RngType> MettsStochasticsType;
 			typedef typename MettsStochasticsType::PairType PairType;
 			typedef MettsCollapse<VectorWithOffsetType,MettsStochasticsType,TargettingParamsType> MettsCollapseType;
 			typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
-			typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+			typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 			typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,
 									LanczosSolverType,VectorWithOffsetType> TimeVectorsBaseType;
 			typedef TimeVectorsKrylov<TargettingParamsType,ModelType,WaveFunctionTransfType,

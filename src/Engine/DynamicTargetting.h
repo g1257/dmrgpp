@@ -127,7 +127,7 @@ namespace Dmrg {
 		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef VectorType TargetVectorType;
 		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
-		typedef TimeSerializer<RealType,VectorWithOffsetType> TimeSerializerType;
+		typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 		typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
@@ -450,7 +450,7 @@ namespace Dmrg {
 			SizeType numberOfSites = lrs_.super().block().size();
 			if (site==0 || site==numberOfSites -1)  return;
 
-			typedef ParallelWft<RealType,VectorWithOffsetType,WaveFunctionTransfType,LeftRightSuperType> ParallelWftType;
+			typedef ParallelWft<VectorWithOffsetType,WaveFunctionTransfType,LeftRightSuperType> ParallelWftType;
 			typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
 			ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,PsimagLite::MPI::COMM_WORLD);
 

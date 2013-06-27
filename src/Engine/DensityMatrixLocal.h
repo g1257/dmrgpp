@@ -144,7 +144,7 @@ namespace Dmrg {
 				DmrgBasisType const &pSE,
 				int direction)
 		{
-			typedef ParallelDensityMatrix<RealType,BlockMatrixType,DmrgBasisWithOperatorsType,TargettingType> ParallelDensityMatrixType;
+			typedef ParallelDensityMatrix<BlockMatrixType,DmrgBasisWithOperatorsType,TargettingType> ParallelDensityMatrixType;
 			{
 				PsimagLite::OstringStream msg;
 				msg<<"Init partition for all targets";

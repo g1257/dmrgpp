@@ -83,8 +83,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename RealType,typename VectorType>
+	template<typename VectorType>
 	class MettsSerializer {
+
+		typedef typename VectorType::value_type VectorElementType;
+		typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
+
 		public:
 			
 			// Unfortunately we need a default ctor

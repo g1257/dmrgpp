@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename RealType_,typename TwoPointCorrelationsType>
+template<typename TwoPointCorrelationsType>
 class Parallel2PointCorrelations {
 
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -94,7 +94,7 @@ class Parallel2PointCorrelations {
 
 public:
 
-	typedef RealType_ RealType;
+	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
 	Parallel2PointCorrelations(MatrixType& w,
 							   TwoPointCorrelationsType& twopoint,

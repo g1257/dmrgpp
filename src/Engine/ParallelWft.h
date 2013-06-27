@@ -83,12 +83,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename RealType_,typename VectorWithOffsetType,typename WaveFunctionTransfType,typename LeftRightSuperType>
+template<typename VectorWithOffsetType,typename WaveFunctionTransfType,typename LeftRightSuperType>
 class ParallelWft {
 
 public:
 
-	typedef RealType_ RealType;
+	typedef typename VectorWithOffsetType::value_type VectorElementType;
+	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
 	ParallelWft(typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
 				SizeType nk,

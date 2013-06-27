@@ -84,8 +84,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename RealType,typename VectorType>
+	template<typename VectorType>
 	class TimeSerializer {
+
+		typedef typename VectorType::value_type VectorElementType;
+		typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
+
 		public:
 			
 			// Unfortunately we need a default ctor

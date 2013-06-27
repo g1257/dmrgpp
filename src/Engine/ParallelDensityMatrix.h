@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename RealType_,typename BlockMatrixType,typename BasisWithOperatorsType,
+	template<typename BlockMatrixType,typename BasisWithOperatorsType,
 			 typename TargettingType>
 	class ParallelDensityMatrix {
 
@@ -95,7 +95,7 @@ namespace Dmrg {
 
 	public:
 
-		typedef RealType_ RealType;
+		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 
 		ParallelDensityMatrix(const TargettingType& target,
 							  const BasisWithOperatorsType& pBasis,

@@ -141,7 +141,7 @@ namespace Dmrg {
 				}
 			}
 
-			typedef Parallel2PointCorrelations<RealType,ThisType> Parallel2PointCorrelationsType;
+			typedef Parallel2PointCorrelations<ThisType> Parallel2PointCorrelationsType;
 			typedef PsimagLite::Parallelizer<Parallel2PointCorrelationsType> ParallelizerType;
 			ParallelizerType threaded2Points(PsimagLite::Concurrency::npthreads,
 			                                 PsimagLite::MPI::COMM_WORLD);
