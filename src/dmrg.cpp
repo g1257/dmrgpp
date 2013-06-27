@@ -45,7 +45,7 @@ typedef float MatrixElementType;
 #include "AdaptiveDynamicTargetting.h"
 #include "CorrectionTargetting.h"
 #include "CorrectionVectorTargetting.h"
-#include "MettsTargetting.h" // experimental
+#include "MettsTargetting.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
 #include "BasisWithOperators.h"

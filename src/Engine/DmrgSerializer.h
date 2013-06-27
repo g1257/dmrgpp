@@ -185,7 +185,6 @@ public:
 
 	SizeType direction() const { return direction_; }
 
-	// experimental!!
 	SizeType site() const
 	{
 		if (direction_==ProgramGlobals::EXPAND_SYSTEM) return lrs_.right().block()[0]-1;

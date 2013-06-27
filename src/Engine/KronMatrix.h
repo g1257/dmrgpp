@@ -103,7 +103,7 @@ public:
 	KronMatrix(const InitKronType& initKron)
 	: initKron_(initKron)
 	{
-		std::cout<<"KronMatrix: EXPERIMENTAL: preparation done for size="<<initKron.size()<<"\n";
+		std::cout<<"KronMatrix: preparation done for size="<<initKron.size()<<"\n";
 	}
 
 	void matrixVectorProduct(typename PsimagLite::Vector<ComplexOrRealType>::Type& vout,

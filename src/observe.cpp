@@ -41,7 +41,7 @@ typedef float RealType;
 #include "DynamicTargetting.h"
 #include "AdaptiveDynamicTargetting.h"
 #include "CorrectionTargetting.h"
-#include "MettsTargetting.h" // experimental
+#include "MettsTargetting.h"
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
 #include "InputNg.h"
@@ -323,7 +323,7 @@ int main(int argc,char *argv[])
 		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;
 	}
-	if (targetting=="MettsTargetting") { // experimental, do not use
+	if (targetting=="MettsTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffsets,MettsTargetting,MySparseMatrixReal>
 		(geometry,targetting,io,dmrgSolverParams,options);
 		return 0;

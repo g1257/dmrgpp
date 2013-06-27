@@ -150,7 +150,7 @@ public:
 	                             bool allOperatorsApplied)
 	{
 		PsimagLite::OstringStream msg;
-		msg<<"EXPERIMENTAL: using RungeKutta";
+		msg<<"using RungeKutta";
 
 		RealType norma = std::norm(phi);
 		if (norma<1e-10) return;
