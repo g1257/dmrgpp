@@ -89,11 +89,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Su2SymmetryGlobals.h"
 
 namespace Dmrg {
-	template<typename FieldType,typename SparseMatrixType,typename SymmetryRelatedType>
+	template<typename SparseMatrixType,typename SymmetryRelatedType>
 	class JmSubspace {
+
+			typedef typename SparseMatrixType::value_type SparseElementType;
+			typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
 			typedef std::pair<SizeType,SizeType> PairType;
 			typedef std::pair<PairType,PairType> TwoPairsType;
-			typedef Su2SymmetryGlobals<FieldType> Su2SymmetryGlobalsType;
+			typedef Su2SymmetryGlobals<RealType> Su2SymmetryGlobalsType;
 			typedef typename Su2SymmetryGlobalsType::ClebschGordanType ClebschGordanType;
 			typedef PsimagLite::PackIndices PackIndicesType;
 
@@ -234,7 +237,7 @@ namespace Dmrg {
 			int heavy_;
 			ClebschGordanType* cgObject_;
 			PsimagLite::Vector<SizeType>::Type indices_;
-			typename PsimagLite::Vector<FieldType>::Type cg_,values_;
+			typename PsimagLite::Vector<RealType>::Type cg_,values_;
 			typename PsimagLite::Vector<SizeType>::Type flavors_,flavorIndices_;
 			
 			static const PsimagLite::Vector<SizeType>::Type* ne1_;
@@ -259,7 +262,7 @@ namespace Dmrg {
 				FlavorType flavorPair2 = FlavorType(flavorPair,TwoPairsType(nePair,j1j2));
 				flavorIndices_.push_back(calculateFlavor(flavorPair2));
 
-				FieldType value = 0;
+				RealType value = 0;
 				if (heavy_) value=cgObject_->operator()(jm_,jm1,jm2);
 				values_.push_back(value);
 			}
@@ -278,17 +281,17 @@ namespace Dmrg {
 			}
 	}; // class JmSubspace
 	
-	template<typename FieldType,typename SparseMatrixType,typename SymmetryRelatedType>
-	const SymmetryRelatedType* JmSubspace<FieldType,SparseMatrixType,SymmetryRelatedType>::symm1_=0;
+	template<typename SparseMatrixType,typename SymmetryRelatedType>
+	const SymmetryRelatedType* JmSubspace<SparseMatrixType,SymmetryRelatedType>::symm1_=0;
 
-	template<typename FieldType,typename SparseMatrixType,typename SymmetryRelatedType>
-	const SymmetryRelatedType* JmSubspace<FieldType,SparseMatrixType,SymmetryRelatedType>::symm2_=0;
+	template<typename SparseMatrixType,typename SymmetryRelatedType>
+	const SymmetryRelatedType* JmSubspace<SparseMatrixType,SymmetryRelatedType>::symm2_=0;
 
-	template<typename FieldType,typename SparseMatrixType,typename SymmetryRelatedType>
-	const PsimagLite::Vector<SizeType>::Type* JmSubspace<FieldType,SparseMatrixType,SymmetryRelatedType>::ne1_=0;
+	template<typename SparseMatrixType,typename SymmetryRelatedType>
+	const PsimagLite::Vector<SizeType>::Type* JmSubspace<SparseMatrixType,SymmetryRelatedType>::ne1_=0;
 
-	template<typename FieldType,typename SparseMatrixType,typename SymmetryRelatedType>
-	const PsimagLite::Vector<SizeType>::Type* JmSubspace<FieldType,SparseMatrixType,SymmetryRelatedType>::ne2_=0;
+	template<typename SparseMatrixType,typename SymmetryRelatedType>
+	const PsimagLite::Vector<SizeType>::Type* JmSubspace<SparseMatrixType,SymmetryRelatedType>::ne2_=0;
 
 } // namespace Dmrg
 

@@ -94,12 +94,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<
-		typename FieldType,
-		typename VectorWithOffsetType,
-		typename ModelType,
-		typename IoInputType>
+	template<typename VectorWithOffsetType,typename ModelType,typename IoInputType>
 	class Observer {
+		typedef typename VectorWithOffsetType::value_type FieldType;
 		typedef PsimagLite::SparseVector<FieldType> VectorType;
 		typedef typename ModelType::RealType RealType;
 		typedef PsimagLite::Matrix<FieldType> MatrixType;

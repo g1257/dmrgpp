@@ -84,8 +84,7 @@ bool observeOneFullSweep(
 {
 	bool verbose = false;
 	typedef typename SparseMatrixType::value_type FieldType;
-	typedef Observer<FieldType,VectorWithOffsetType,ModelType,IoInputType> 
-		ObserverType;
+	typedef Observer<VectorWithOffsetType,ModelType,IoInputType> ObserverType;
 	typedef ObservableLibrary<ObserverType,TargettingType> ObservableLibraryType;
 	SizeType n  = geometry.numberOfSites();
 	//PsimagLite::String sSweeps = "sweeps=";

@@ -102,7 +102,7 @@ namespace Dmrg {
 			typedef JmPairs<PairType> JmPairsType;
 			typedef VerySparseMatrix<RealType> VerySparseMatrixType;
 			typedef HamiltonianSymmetrySu2<SparseMatrixType> ThisType;
-			typedef JmSubspace<RealType,VerySparseMatrixType,ThisType> JmSubspaceType;
+			typedef JmSubspace<VerySparseMatrixType,ThisType> JmSubspaceType;
 			typedef typename JmSubspaceType::FlavorType FlavorType;
 			typedef  BasisData<PairType> BasisDataType;
 			
@@ -508,7 +508,7 @@ namespace Dmrg {
 				triplet.second=nelectrons;
 				int x = PsimagLite::isInVector(jmSubspaces_,triplet);
 				if (x<0) { // add new jmSubspace
-					JmSubspace<RealType,VerySparseMatrixType,ThisType> jmSubspace(jm,index,jm1,jm2,nelectrons,heavy);
+					JmSubspace<VerySparseMatrixType,ThisType> jmSubspace(jm,index,jm1,jm2,nelectrons,heavy);
 					jmSubspaces_.push_back(jmSubspace);
 				} else {
 					jmSubspaces_[x].push(index,jm1,jm2,nelectrons);
