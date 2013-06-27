@@ -113,7 +113,7 @@ namespace Dmrg {
 			const MatrixType& m_;
 			const InfoType& info_;
 		};
-		typedef ConjugateGradient<RealType,InternalMatrix> ConjugateGradientType;
+		typedef ConjugateGradient<InternalMatrix> ConjugateGradientType;
 	public:
 		CorrectionVectorFunction(const MatrixType& m,const InfoType& info)
 		: im_(m,info),cg_()

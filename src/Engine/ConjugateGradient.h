@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009-2011, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,9 +67,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
@@ -87,10 +85,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename RealType,typename MatrixType>
+	template<typename MatrixType>
 	class	ConjugateGradient {
 		typedef typename MatrixType::value_type FieldType;
 		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
+		typedef typename PsimagLite::Real<FieldType>::Type RealType;
+
 	public:
 		ConjugateGradient(SizeType max=1000,const RealType& eps = 1e-6)
 		: max_(max), eps_(eps) {}
