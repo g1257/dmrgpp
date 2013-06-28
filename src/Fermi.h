@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009 , UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -78,41 +75,44 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  *  Fermi functions and their derivatives
  */
-  
+
 #ifndef FERMI_H_
 #define FERMI_H_
 #include <cmath>
 
 namespace PsimagLite {
-	template<typename FieldType>
-	FieldType fermi(const FieldType& x)
-	{
-		if (x>50) return 0;
-		if (x<-50) return 1;
-		if (x<0) return 1.0/(1.0+std::exp(x));
-		return std::exp(-x)/(1.0+std::exp(-x));
-		
-	}
-	
-	// Derivative (prime) of Fermi's function
-	template<typename FieldType>
-	FieldType fermiPrime(const FieldType& x)
-	{
-		FieldType res;
-		res= -fermi(x)*fermi(-x);
-		return res;
-	}
-	
-	template<typename FieldType>
-	FieldType logfermi(const FieldType& x)
-	{
-		FieldType res;
-		if (x>20) return -x;
-		if (x<-20) return 0;
-		res = -log(1.0+exp(x));
-		return res;
-	}
+
+template<typename FieldType>
+FieldType fermi(const FieldType& x)
+{
+	if (x>50) return 0;
+	if (x<-50) return 1;
+	if (x<0) return 1.0/(1.0+std::exp(x));
+	return std::exp(-x)/(1.0+std::exp(-x));
+
+}
+
+// Derivative (prime) of Fermi's function
+template<typename FieldType>
+FieldType fermiPrime(const FieldType& x)
+{
+	FieldType res;
+	res= -fermi(x)*fermi(-x);
+	return res;
+}
+
+template<typename FieldType>
+FieldType logfermi(const FieldType& x)
+{
+	FieldType res;
+	if (x>20) return -x;
+	if (x<-20) return 0;
+	res = -log(1.0+exp(x));
+	return res;
+}
+
 } // namespace PsimagLite 
 
 /*@}*/	
 #endif // FERMI_H_
+

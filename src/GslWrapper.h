@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2011 , UT-Battelle, LLC
+Copyright (c) 2011-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -78,7 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  *  Wrapper for GSL functions and types
  */
-  
+
 #ifndef GSL_WRAPPER_H_
 #define GSL_WRAPPER_H_
 
@@ -93,86 +90,103 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 
 #ifndef USE_GSL
-	class GslWrapper {
-	public:
-		typedef int DummyType;
-		typedef DummyType gsl_integration_workspace;
-		typedef double (* GslWrapperFunctionType) (double, void * );
-		
-		typedef void (* gsl_error_handler_t) (const char *,const char *,int,int);
-			
-		struct gsl_function {
-			GslWrapperFunctionType function;
-			void * params;
-		};
+class GslWrapper {
+public:
+	typedef int DummyType;
+	typedef DummyType gsl_integration_workspace;
+	typedef double (* GslWrapperFunctionType) (double, void * );
 
-		gsl_error_handler_t  gsl_set_error_handler (gsl_error_handler_t  new_handler) const
-		{
-			
-			thereSnoGsl();
-			gsl_error_handler_t *fx = new gsl_error_handler_t();
-			
-			return *fx;
-		}
-		
-		gsl_integration_workspace * gsl_integration_workspace_alloc (SizeType n) const
-		{
-			thereSnoGsl();
-			int* x = new int;
-			return x;
-		}
-		
-		void gsl_integration_workspace_free (gsl_integration_workspace * w) const
-		{
-			thereSnoGsl();
-		}
-		
-		int gsl_integration_qagp (const gsl_function * f, double * pts, SizeType npts, double epsabs, 
-		             double epsrel, SizeType limit, gsl_integration_workspace * workspace, double * result, double * abserr) const
-		{
-			thereSnoGsl();
-			return 0;
-		}
-		
-	private:
-		void thereSnoGsl() const
-		{
-			throw PsimagLite::RuntimeError("You need to compile with the GSL\n");
-		}
-		
-	}; // class GslWrapper
+	typedef void (* gsl_error_handler_t) (const char *,const char *,int,int);
+
+	struct gsl_function {
+		GslWrapperFunctionType function;
+		void * params;
+	};
+
+	gsl_error_handler_t  gsl_set_error_handler (gsl_error_handler_t  new_handler) const
+	{
+
+		thereSnoGsl();
+		gsl_error_handler_t *fx = new gsl_error_handler_t();
+
+		return *fx;
+	}
+
+	gsl_integration_workspace * gsl_integration_workspace_alloc (SizeType n) const
+	{
+		thereSnoGsl();
+		int* x = new int;
+		return x;
+	}
+
+	void gsl_integration_workspace_free (gsl_integration_workspace * w) const
+	{
+		thereSnoGsl();
+	}
+
+	int gsl_integration_qagp (const gsl_function * f,
+	                          double * pts,
+	                          SizeType npts,
+	                          double epsabs,
+	                          double epsrel,
+	                          SizeType limit,
+	                          gsl_integration_workspace * workspace,
+	                          double * result,
+	                          double * abserr) const
+	{
+		thereSnoGsl();
+		return 0;
+	}
+
+private:
+	void thereSnoGsl() const
+	{
+		throw PsimagLite::RuntimeError("You need to compile with the GSL\n");
+	}
+
+}; // class GslWrapper
 
 #else
 
-	class GslWrapper {
-	public:
-		
-		typedef ::gsl_integration_workspace gsl_integration_workspace;
-		typedef ::gsl_function gsl_function;
-		
-		gsl_error_handler_t * gsl_set_error_handler (gsl_error_handler_t * new_handler) const
-		{
-			return ::gsl_set_error_handler(new_handler);
-		}
-		
-		gsl_integration_workspace * gsl_integration_workspace_alloc (SizeType n) const
-		{
-			return ::gsl_integration_workspace_alloc(n);
-		}
-		
-		void gsl_integration_workspace_free (gsl_integration_workspace * w) const
-		{
-			return ::gsl_integration_workspace_free(w);
-		}
-		
-		int gsl_integration_qagp (const gsl_function * f, double * pts, SizeType npts, double epsabs, 
-		  double epsrel, SizeType limit, gsl_integration_workspace * workspace, double * result, double * abserr) const
-		{
-			return ::gsl_integration_qagp(f,pts,npts,epsabs,epsrel,limit,workspace,result,abserr);
-		}
-	}; // class GslWrapper
+class GslWrapper {
+public:
+
+	typedef ::gsl_integration_workspace gsl_integration_workspace;
+	typedef ::gsl_function gsl_function;
+
+	gsl_error_handler_t * gsl_set_error_handler (gsl_error_handler_t * new_handler) const
+	{
+		return ::gsl_set_error_handler(new_handler);
+	}
+
+	gsl_integration_workspace * gsl_integration_workspace_alloc (SizeType n) const
+	{
+		return ::gsl_integration_workspace_alloc(n);
+	}
+
+	void gsl_integration_workspace_free (gsl_integration_workspace * w) const
+	{
+		return ::gsl_integration_workspace_free(w);
+	}
+
+	int gsl_integration_qagp (const gsl_function * f,
+	                          double * pts,
+	                          SizeType npts,
+	                          double epsabs,
+	                          double epsrel,
+	                          SizeType limit,
+	                          gsl_integration_workspace * workspace,
+	                          double * result,
+	                          double * abserr) const
+	{
+		return ::gsl_integration_qagp(f,pts,npts,epsabs,epsrel,limit,workspace,result,abserr);
+	}
+}; // class GslWrapper
+
 #endif
+
 } // namespace PsimagLite 
 
 /*@}*/	
 #endif // GSL_WRAPPER_H_
+

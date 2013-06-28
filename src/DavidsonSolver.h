@@ -91,7 +91,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Random48.h"
 #include "String.h"
 
-
 namespace PsimagLite {
 
 template<typename SolverParametersType,typename MatrixType,typename VectorType>
@@ -104,13 +103,13 @@ class DavidsonSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixT
 public:
 
 	DavidsonSolver(MatrixType const &mat,
-		       const SolverParametersType& params)
-		: progress_("DavidsonSolver"),
-		  mat_(mat),
-		  steps_(params.steps),
-		  eps_(params.tolerance),
-		  mode_(ParentType::WITH_INFO),
-		  rng_(343311)
+	               const SolverParametersType& params)
+	    : progress_("DavidsonSolver"),
+	      mat_(mat),
+	      steps_(params.steps),
+	      eps_(params.tolerance),
+	      mode_(ParentType::WITH_INFO),
+	      rng_(343311)
 	{
 		setMode(params.options);
 		PsimagLite::OstringStream msg;
@@ -139,43 +138,12 @@ public:
 	}
 
 	virtual void computeGroundState(RealType &gsEnergy,
-					VectorType &z,
-					const VectorType& initialVector)
+	                                VectorType &z,
+	                                const VectorType& initialVector)
 	{
 		String s(__FILE__);
 		s += " Unimplemented\n";
 		throw RuntimeError(s.c_str());
-
-//		VectorType t = initialVector;
-
-//		typename Vector<VectorType>::Type v,vA;
-//		SizeType m = 0;
-//		while(m<steps_) {
-//			algorithm4_14(t,v);
-//			v.push_back((1.0/(t*t))*t);
-//			VectorType x(mat_.rank(),0.0);
-//			mat_.matrixVectorProduct(x,v[m]);
-//			vA.push_back(x);
-//			PsimagLite::Matrix<ComplexOrRealType> M(m+1,m+1);
-//			for (SizeType i=0;i<M.n_row();i++)
-//				M(i,m) = std::conj(v[i])*vA[m];
-//			RealType theta = 0;
-//			VectorType s;
-//			largestEigenpair(theta,s,M);
-//			VectorType u = v * s;
-//			VectorType uA = vA * s;
-//			VectorType r = uA - theta * u;
-//			if (std::real(r*r)<=eps_) {
-//				gsEnergy = theta;
-//				z = u;
-//				break;
-//			}
-//			callMinRes();
-//			m++;
-//			if (m>=steps_) throw RuntimeError
-//					("DavidsonSolver: failed to converge\n");
-
-//		}
 	}
 
 private:
@@ -190,8 +158,8 @@ private:
 
 	//! only for debugging:
 	void computeGroundStateTest(RealType &gsEnergy,
-				    VectorType& z,
-				    const VectorType& initialVector)
+	                            VectorType& z,
+	                            const VectorType& initialVector)
 	{
 		String s(__FILE__);
 		s += " Unimplemented\n";
@@ -223,7 +191,9 @@ private:
 		throw RuntimeError(s.c_str());
 	}
 
-	void largestEigenpair(RealType& theta,VectorType& s,const PsimagLite::Matrix<ComplexOrRealType>& M)
+	void largestEigenpair(RealType& theta,
+	                      VectorType& s,
+	                      const PsimagLite::Matrix<ComplexOrRealType>& M)
 	{
 		String st(__FILE__);
 		st += " Unimplemented\n";
@@ -235,10 +205,10 @@ private:
 	SizeType steps_;
 	RealType eps_;
 	SizeType mode_;
-//	SizeType stepsForEnergyConvergence_;
 	PsimagLite::Random48<RealType> rng_;
 }; // class DavidsonSolver
 } // namespace PsimagLite
 
 /*@}*/
 #endif // DAVIDSON_SOLVER_H
+

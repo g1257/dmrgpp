@@ -25,7 +25,6 @@ Please see full open source license included in file LICENSE.
  *
  */
 
-
 #ifndef GIT_REVISION_H_
 #define GIT_REVISION_H_
 
@@ -42,9 +41,9 @@ class GitRevision {
 	static const SizeType MAX_LINE  = 4096;
 
 public:
-	
+
 	GitRevision(const String& dir,const String& prefix)
-	: prefix_(prefix),tempFile_("version.txt"),gitCommand_("git"),ret_(0),retp_(0)
+	    : prefix_(prefix),tempFile_("version.txt"),gitCommand_("git"),ret_(0),retp_(0)
 	{
 		String currentPath = getCurrentPath();
 		ret_ = chdir(dir.c_str());
@@ -55,7 +54,7 @@ public:
 	}
 
 	const String& id() const { return id_; }
-	
+
 	String diff() const { return diff_; }
 
 	String prefix() const { return prefix_; }
@@ -73,8 +72,7 @@ private:
 
 	String getId()
 	{
-		String cmd = gitCommand_ +   "  rev-parse HEAD > " + tempFile_ + " 2>/dev/null ";
-		//std::cerr<<"Command is "<<cmd<<"\n";
+		String cmd = gitCommand_ + "  rev-parse HEAD > " + tempFile_ + " 2>/dev/null ";
 		ret_ = system(cmd.c_str());
 		String revision = "unknown";
 		std::ifstream fin(tempFile_.c_str());
@@ -82,7 +80,7 @@ private:
 		fin>>revision;
 		fin.close();
 		if (revision.find("command not found")!=String::npos)
-		       return "unknown";
+			return "unknown";
 		return revision;
 	}
 
@@ -132,11 +130,6 @@ std::ostream& operator<<(std::ostream& os,const GitRevision& gitRev)
 	return os;
 }
 
-//int main(int argc,char *argv[])
-//{
-//	GitRevision gitRev;
-//	std::cout<<gitRev;
-//}
 } // namespace PsimagLite
 
 /*@}*/
