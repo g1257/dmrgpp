@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -75,14 +75,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  * Information about the host computer
  */
-  
+
 #ifndef APPLICATION_INFO_H
 #define APPLICATION_INFO_H
 
 #include <sys/time.h>
 #include <time.h>
 #include "String.h"
- 
+
 namespace PsimagLite {
 
 class ApplicationInfo {
@@ -104,7 +104,7 @@ public:
 	{
 		struct timeval tv;
 		time_t tt;
-		
+
 		gettimeofday(&tv,0);
 		tt=tv.tv_sec; /* seconds since 1970 */
 		return asctime(localtime(&tt));
@@ -135,3 +135,4 @@ std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai)
 
 /*@}*/	
 #endif // APPLICATION_INFO_H
+

@@ -276,6 +276,8 @@ if ($fix) {
 
 sub printWarnings
 {
+	my $n = scalar(@tooLongLines);
+	return if ($n == 0);
 	my $c = 0;
 	print "LINE\tLENGTH (tabsize=$sizeOfTabs)\n";
 	foreach (@tooLongLines) {

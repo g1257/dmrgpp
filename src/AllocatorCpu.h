@@ -69,7 +69,6 @@ public:
 
 		typename BaseType::pointer x = (typename BaseType::pointer) globalMemoryCpu.allocate(n*sizeof(T));
 
-//		x = (typename BaseType::pointer) malloc(n*sizeof(T));
 		return static_cast<T*>(x);
 	}
 
@@ -105,3 +104,4 @@ public:
 
 /*@}*/
 #endif // ALLOCATOR_CPU_H
+
