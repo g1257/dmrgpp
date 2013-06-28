@@ -65,3 +65,4 @@ MemoryCpu globalMemoryCpu;
 
 /*@}*/
 #endif // MEMORY_CPU_H
+

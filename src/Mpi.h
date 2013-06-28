@@ -244,8 +244,11 @@ void>::Type send(SomeVectorType& v,int dest, int tag, CommType mpiComm = COMM_WO
 
 template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
-(Loki::TypeTraits<typename SomeVectorType::value_type>::isArith | IsVectorLike<typename SomeVectorType::value_type>::True),
-void>::Type pointByPointGather(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
+(Loki::TypeTraits<typename SomeVectorType::value_type>::isArith |
+ IsVectorLike<typename SomeVectorType::value_type>::True),
+void>::Type pointByPointGather(SomeVectorType& v,
+                               int root = 0,
+                               CommType mpiComm = COMM_WORLD)
 {
 	typedef typename SomeVectorType::value_type NumericType;
 	int mpiRank = PsimagLite::MPI::commRank(mpiComm);
@@ -277,7 +280,9 @@ template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
 !IsVectorLike<typename SomeVectorType::value_type>::True &
 !Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
-void>::Type pointByPointGather(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
+void>::Type pointByPointGather(SomeVectorType& v,
+                               int root = 0,
+                               CommType mpiComm = COMM_WORLD)
 {
 	int mpiRank = PsimagLite::MPI::commRank(mpiComm);
 	int nprocs = PsimagLite::MPI::commSize(mpiComm);
@@ -301,9 +306,6 @@ void>::Type pointByPointGather(SomeVectorType& v,int root = 0, CommType mpiComm 
 		}
 	}
 }
-
-
-
 
 template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
@@ -422,7 +424,9 @@ void>::Type reduce(SomeVectorType& v,
 template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
 Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
-void>::Type allReduce(SomeVectorType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
+void>::Type allReduce(SomeVectorType& v,
+                      MPI_Op op = MPI_SUM,
+                      CommType mpiComm = COMM_WORLD)
 {
 	SomeVectorType recvbuf = v;
 	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
@@ -434,7 +438,9 @@ void>::Type allReduce(SomeVectorType& v,MPI_Op op = MPI_SUM, CommType mpiComm = 
 template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
 IsComplexNumber<typename SomeVectorType::value_type>::True,
-void>::Type allReduce(SomeVectorType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
+void>::Type allReduce(SomeVectorType& v,
+                      MPI_Op op = MPI_SUM,
+                      CommType mpiComm = COMM_WORLD)
 {
 	SomeVectorType recvbuf = v;
 	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
@@ -535,3 +541,4 @@ private:
 
 /*@}*/	
 #endif
+

@@ -37,7 +37,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -73,7 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file MemoryUsage.h
  *
  */
-  
+
 #ifndef MEMORY_USAGE_H
 #define MEMORY_USAGE_H
 #include <iostream>
@@ -82,72 +82,69 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "String.h"
 
 namespace PsimagLite {
-	class MemoryUsage {
-		static const SizeType MY_MAX_LINE = 40240;
+class MemoryUsage {
 
-	public:
+	static const SizeType MY_MAX_LINE = 40240;
 
-		MemoryUsage(const String& myself="") : data_(""),myself_(myself),startTime_(::time(0))
-		{
-			if (myself_=="") myself_="/proc/self/status";
-			update();
-		}
-		
-		void update()
-		{
-			std::ifstream ifp(myself_.c_str());
-			if (!ifp || !ifp.good() || ifp.bad()) return;
-			char tmp[MY_MAX_LINE];
-			data_ = "";
-			while (!ifp.eof()) {
-				ifp.getline(tmp,MY_MAX_LINE);
-				data_ += String(tmp);
-				data_ += String("\n");
-			}
-			ifp.close();
-		}
-		
-		String findEntry(const String& label)
-		{
-			SizeType x = data_.find(label);
-			if (x==String::npos) {
-				return "NOT_FOUND";
-			}
-			x += label.length();
-			SizeType y = data_.find("\n",x);
-			SizeType len = y-x;
-			if (y==String::npos) len = data_.length()-x;
-			String s2 = data_.substr(x,len);
-			x = 0;
-			for (SizeType i=0;i<s2.length();i++) {
-				x++;
-				if (s2.at(i)==' ' || s2.at(i)=='\t') continue;
-				else break;
-			}
-			if (x>0) x--;
-			len = s2.length()-x;
-			return s2.substr(x,len);
+public:
+
+	MemoryUsage(const String& myself="")
+	    : data_(""),myself_(myself),startTime_(::time(0))
+	{
+		if (myself_=="") myself_="/proc/self/status";
+		update();
+	}
+
+	void update()
+	{
+		std::ifstream ifp(myself_.c_str());
+		if (!ifp || !ifp.good() || ifp.bad()) return;
+		char tmp[MY_MAX_LINE];
+		data_ = "";
+		while (!ifp.eof()) {
+			ifp.getline(tmp,MY_MAX_LINE);
+			data_ += String(tmp);
+			data_ += String("\n");
 		}
 
-		double time()
-		{
-			return ::time(0)-startTime_;
-			/*update();
-			typename Vector<String>::Type v;
-			split(v,data_.c_str(),' ');
-			if (v.size()<15) return 0;
-			double xuser =  atof(v[13].c_str());
-			double xsys = atof(v[14].c_str());
-			return xuser + xsys;*/
+		ifp.close();
+	}
+
+	String findEntry(const String& label)
+	{
+		SizeType x = data_.find(label);
+		if (x==String::npos) {
+			return "NOT_FOUND";
 		}
+		x += label.length();
+		SizeType y = data_.find("\n",x);
+		SizeType len = y-x;
+		if (y==String::npos) len = data_.length()-x;
+		String s2 = data_.substr(x,len);
+		x = 0;
+		for (SizeType i=0;i<s2.length();i++) {
+			x++;
+			if (s2.at(i)==' ' || s2.at(i)=='\t') continue;
+			else break;
+		}
+		if (x>0) x--;
+		len = s2.length()-x;
+		return s2.substr(x,len);
+	}
 
-	private:
+	double time()
+	{
+		return ::time(0)-startTime_;
+	}
 
-		String data_,myself_;
-		time_t startTime_;
-	}; // class MemoryUsage
+private:
+
+	String data_,myself_;
+	time_t startTime_;
+}; // class MemoryUsage
 
 } // namespace PsimagLite 
 
 /*@}*/	
 #endif // MEMORY_USAGE_H
+

@@ -189,6 +189,7 @@ while(<FILE>) {
 		}
 	}
 	my $c = $o;
+	$o =~ s/\"[^\"]+\"//;
 	$o =~ s/[^\{]//g;
 	my $co = length($o);
 	my $hasSemicolonAtTheEnd = 0;
@@ -208,7 +209,15 @@ while(<FILE>) {
 	my $label = getLabel($_);
 
 	if ($co==0 and !$hasSemicolonAtTheEnd) {
-		if ($label eq "if" or $label eq "for" or $label eq "else" or $label eq "foreach" or $label eq "try" or $label eq "catch" or $label eq "switch") {
+		 my @whats = ("if","for","foreach","else","switch","try","catch");
+		 my $flagTmp = 0;
+		 foreach my $what (@whats) {
+			if ($label eq $what) {
+				$flagTmp = 1;
+				last;
+			}
+		}
+		if ($flagTmp) {
 			$parensBalance = $parensOpen - $parensClosed;
 			if ($parensBalance==0) {
 				$co = 1;
@@ -217,6 +226,7 @@ while(<FILE>) {
 		}
 	}
 	push @mystack, $label if ($co==1);
+	$c =~ s/\"[^\"]+\"//;
 	$c =~ s/[^\}]//g;
 	my $cc = length($c);
 	if ($cc==1) {
