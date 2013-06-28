@@ -69,7 +69,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 
 */
-// END LICENSE BLOCK
+
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -96,7 +96,6 @@ namespace PsimagLite {
 
 template<typename InputCheckType>
 class InputNg {
-	
 
 	class MyCompare {
 
@@ -105,6 +104,7 @@ class InputNg {
 		typedef std::pair<String,SizeType> PairType;
 
 	public:
+
 		bool operator()(const String& x1,const String& x2)
 		{
 			PairType p1 = mysplit(x1);
@@ -116,6 +116,7 @@ class InputNg {
 			if (p1.first!=p2.first) return (x1<x2);
 			return (p1.second<p2.second);
 		}
+
 	private:
 
 		PairType mysplit(const String& x) const
@@ -135,14 +136,14 @@ class InputNg {
 			return PairType(xfirst,atoi(xsecond.c_str()));
 		}
 	};
-	
+
 	typedef MyCompare MyCompareType;
 
 	typedef typename Map<String,String,MyCompareType>::Type MapStrStrType;
 	typedef typename Map<String,Vector<String>::Type,MyCompareType>::Type MapStrVecType;
 
 public:
-	
+
 	class Writeable {
 
 		enum {WHITESPACE,ENDOFLINE,EQUALSIGN,ALPHA_CHAR,NUMERIC_CHAR,COMMENT};
@@ -152,13 +153,13 @@ public:
 	public:
 
 		Writeable(const String& file,const InputCheckType& inputCheck)
-			: data_(""),
-			  line_(0),
-			  state_(IN_LABEL),
-			  numericVector_(0),
-			  lastLabel_(""),
-			  inputCheck_(inputCheck),
-			  verbose_(false)
+		    : data_(""),
+		      line_(0),
+		      state_(IN_LABEL),
+		      numericVector_(0),
+		      lastLabel_(""),
+		      inputCheck_(inputCheck),
+		      verbose_(false)
 		{
 			std::ifstream fin(file.c_str());
 			if (!fin || !fin.good() || fin.bad()) {
@@ -168,10 +169,11 @@ public:
 			}
 
 			char c=0;
-			while(!fin.eof()) {
+			while (!fin.eof()) {
 				fin.get(c);
 				data_ += c;
 			}
+
 			fin.close();
 			check();
 
@@ -191,7 +193,7 @@ public:
 		{
 			mapStrStr=mapStrStr_;
 			mapStrVec=mapStrVec_,
-			labelsForRemoval=labelsForRemoval_;
+			        labelsForRemoval=labelsForRemoval_;
 		}
 
 	private:
@@ -302,12 +304,15 @@ public:
 			}
 			SizeType adjExpected = atoi(numericVector_[0].c_str());
 
-			if (!inputCheck_.check(lastLabel_,numericVector_,line_) && numericVector_.size()!=adjExpected+1) {
-				std::cout<<" Number of numbers to follow is wrong, expected "<<adjExpected<<" got ";
+			if (!inputCheck_.check(lastLabel_,numericVector_,line_) &&
+			    numericVector_.size()!=adjExpected+1) {
+				std::cout<<" Number of numbers to follow is wrong, expected ";
+				std::cout<<adjExpected<<" got ";
 				std::cout<<(numericVector_.size()-1)<<"\n";
 				std::cerr<<"Line="<<line_<<"\n";
 				throw RuntimeError(s.c_str());
 			}
+
 			String adjLabel=adjLabelForDuplicates(lastLabel_,mapStrVec_);
 			mapStrVec_[adjLabel]=numericVector_;
 
@@ -364,6 +369,9 @@ public:
 
 	class Readable {
 
+		typedef Map<String,String>::Type::iterator MapStringIteratorType;
+		typedef Map<String,Vector<String>::Type>::Type::iterator MapStringVectorIteratorType;
+
 	public:
 
 		Readable(const Writeable& inputWriteable)
@@ -374,7 +382,7 @@ public:
 		void readline(String& val,const String& label)
 		{
 			String label2 = label2label(label);
-			Map<String,String>::Type::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= it->second.c_str();
@@ -387,7 +395,7 @@ public:
 		readline(FloatingType& val,const String& label)
 		{
 			String label2 = label2label(label);
-			Map<String,String>::Type::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atof(it->second.c_str());
@@ -398,7 +406,7 @@ public:
 		void readline(long long int& val,const String& label)
 		{
 			String label2 = label2label(label);
-			Map<String,String>::Type::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atoi(it->second.c_str());
@@ -409,7 +417,7 @@ public:
 		void readline(SizeType& val,const String& label)
 		{
 			String label2 = label2label(label);
-			Map<String,String>::Type::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atoi(it->second.c_str());
@@ -420,7 +428,7 @@ public:
 		void readline(int& val,const String& label)
 		{
 			String label2 = label2label(label);
-			Map<String,String>::Type::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
 
 			val= atoi(it->second.c_str());
@@ -432,9 +440,8 @@ public:
 		{
 			String label2 = label2label(label);
 
-			Map<String,String>::Type::iterator it =  findFirstValueForLabel(label2,mapStrStr_);
+			MapStringIteratorType it =  findFirstValueForLabel(label2,mapStrStr_);
 			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
-
 
 			val= atoi(it->second.c_str());
 
@@ -465,13 +472,6 @@ public:
 				mystr2.erase(mystr2.length()-1,1);
 				val[mystr2] = atof(it->second.c_str());
 			}
-//			SizeType len =  it->second.size();
-//			assert(len>1);
-//			val.resize(len-1);
-//			for (SizeType i=0;i<len-1;i++) {
-//				val[i]=static_cast<typename VectorLikeType::value_type>(atof(it->second[i+1].c_str()));
-//			}
-//			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
 
 		template<typename VectorLikeType>
@@ -479,15 +479,15 @@ public:
 		read(VectorLikeType& val,const String& label)
 		{
 			String label2 = label2label(label);
-
-			Map<String,Vector<String>::Type>::Type::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			typedef typename VectorLikeType::value_type NumericType;
+			MapStringVectorIteratorType it = findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			SizeType len =  it->second.size();
 			assert(len>1);
 			val.resize(len-1);
 			for (SizeType i=0;i<len-1;i++) {
-				val[i]=static_cast<typename VectorLikeType::value_type>(atof(it->second[i+1].c_str()));
+				val[i]=static_cast<NumericType>(atof(it->second[i+1].c_str()));
 			}
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
@@ -496,14 +496,14 @@ public:
 		void readKnownSize(VectorLikeType& val,const String& label)
 		{
 			String label2 = label2label(label);
-
-			Map<String,Vector<String>::Type>::Type::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			typedef typename VectorLikeType::value_type NumericType;
+			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
 			SizeType len =  it->second.size();
 			val.resize(len);
 			for (SizeType i=0;i<len;i++) {
-				val[i]=static_cast<typename VectorLikeType::value_type>(atof(it->second[i].c_str()));
+				val[i]=static_cast<NumericType>(atof(it->second[i].c_str()));
 			}
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
@@ -514,16 +514,18 @@ public:
 		{
 			String label2 = label2label(label);
 
-			Map<String,Vector<String>::Type>::Type::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
-			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
+			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 ||
+			    atoi(it->second[1].c_str())<=0) {
 				String s(__FILE__);
 				s += " readMatrix: \n";
 				throw RuntimeError(s.c_str());
 			}
-			SizeType nrow = SizeType( atoi(it->second[0].c_str()));
-			SizeType ncol = SizeType( atoi(it->second[1].c_str()));
+
+			SizeType nrow = SizeType(atoi(it->second[0].c_str()));
+			SizeType ncol = SizeType(atoi(it->second[1].c_str()));
 			m.resize(nrow,ncol);
 			if (it->second.size()<2+nrow*ncol) {
 				String s(__FILE__);
@@ -540,20 +542,23 @@ public:
 
 		template<typename FloatingType>
 		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
-		readMatrix(PsimagLite::Matrix<std::complex<FloatingType> >& m,const String& label)
+		readMatrix(PsimagLite::Matrix<std::complex<FloatingType> >& m,
+		           const String& label)
 		{
 			String label2 = label2label(label);
 
-			Map<String,Vector<String>::Type>::Type::iterator it =  findFirstValueForLabel(label2,mapStrVec_);
+			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
 			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
 
-			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 || atoi(it->second[1].c_str())<=0) {
+			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 ||
+			    atoi(it->second[1].c_str())<=0) {
 				String s(__FILE__);
 				s += " readMatrix: \n";
 				throw RuntimeError(s.c_str());
 			}
-			SizeType nrow = SizeType( atoi(it->second[0].c_str()));
-			SizeType ncol = SizeType( atoi(it->second[1].c_str()));
+
+			SizeType nrow = SizeType(atoi(it->second[0].c_str()));
+			SizeType ncol = SizeType(atoi(it->second[1].c_str()));
 			m.resize(nrow,ncol);
 			if (it->second.size()<2+nrow*ncol) {
 				String s(__FILE__);
@@ -573,12 +578,15 @@ public:
 	private:
 
 		template<typename SomeMapType>
-		void cleanLabelsIfNeeded(const String& label,SomeMapType& mymap,typename SomeMapType::iterator& it)
+		void cleanLabelsIfNeeded(const String& label,
+		                         SomeMapType& mymap,
+		                         typename SomeMapType::iterator& it)
 		{
-			Vector<String>::Type::iterator it2 = find(labelsForRemoval_.begin(),labelsForRemoval_.end(),label);
+			Vector<String>::Type::iterator it2 = find(labelsForRemoval_.begin(),
+			                                          labelsForRemoval_.end(),
+			                                          label);
 			if (it2!=labelsForRemoval_.end()) mymap.erase(it);
 		}
-
 
 		String label2label(const String& label)
 		{
@@ -593,7 +601,8 @@ public:
 		}
 
 		template<typename SomeMapType>
-		typename SomeMapType::iterator findFirstValueForLabel(const String& label,SomeMapType& mymap)
+		typename SomeMapType::iterator findFirstValueForLabel(const String& label,
+		                                                      SomeMapType& mymap)
 		{
 			for (typename SomeMapType::iterator it=mymap.begin();it!=mymap.end();++it) {
 				String root2 = findRootLabel(it->first);
@@ -631,10 +640,10 @@ public:
 		return buffer;
 	}
 
-
 }; //InputNg
 } // namespace PsimagLite
 
 /*@}*/
 
 #endif // INPUT_NG_H
+

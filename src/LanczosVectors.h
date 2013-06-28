@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -90,199 +90,193 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-	template<typename MatrixType,typename VectorType>
-	class LanczosVectors {
+template<typename MatrixType,typename VectorType>
+class LanczosVectors {
 
-		typedef typename VectorType::value_type ComplexOrRealType;
-		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-		typedef LanczosVectors<MatrixType,VectorType> ThisType;
+	typedef typename VectorType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef LanczosVectors<MatrixType,VectorType> ThisType;
 
-	public:
+public:
 
-		typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
-		typedef typename VectorType::value_type VectorElementType;
-		typedef PsimagLite::Matrix<VectorElementType> DenseMatrixType;
-		typedef PsimagLite::ContinuedFraction<TridiagonalMatrixType> PostProcType;
+	typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
+	typedef typename VectorType::value_type VectorElementType;
+	typedef PsimagLite::Matrix<VectorElementType> DenseMatrixType;
+	typedef PsimagLite::ContinuedFraction<TridiagonalMatrixType> PostProcType;
 
-		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
+	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
-		LanczosVectors(const MatrixType& mat,
-		               bool lotaMemory,
-		               DenseMatrixType* storage)
-		: progress_("LanczosVectors"),
-		  mat_(mat),
-		  lotaMemory_(lotaMemory),
-		  dummy_(0),
-		  needsDelete_(false),
-		  ysaved_(0)
-		{
-			if (storage) {
-				data_ = storage;
-				return;
-			}
-			data_ = new DenseMatrixType();
-			needsDelete_ = true;
+	LanczosVectors(const MatrixType& mat,
+	               bool lotaMemory,
+	               DenseMatrixType* storage)
+	    : progress_("LanczosVectors"),
+	      mat_(mat),
+	      lotaMemory_(lotaMemory),
+	      dummy_(0),
+	      needsDelete_(false),
+	      ysaved_(0)
+	{
+		if (storage) {
+			data_ = storage;
+			return;
 		}
-		
-		~LanczosVectors()
-		{
-			if (needsDelete_) delete data_;
-		}
+		data_ = new DenseMatrixType();
+		needsDelete_ = true;
+	}
 
-		void resize(SizeType matrixRank,SizeType steps)
-		{
-			steps_= steps;
-			if (!lotaMemory_) return;
-			data_->reset(matrixRank,steps);
-		}
-		
-		void reset(SizeType matrixRank,SizeType steps)
-		{
-			if (!lotaMemory_) return;
-			data_->reset(matrixRank,steps);
-		}
+	~LanczosVectors()
+	{
+		if (needsDelete_) delete data_;
+	}
 
-		VectorElementType& operator()(SizeType i,SizeType j)
-		{
-			if (!lotaMemory_) return dummy_;
-			return data_->operator()(i,j);
-		}
-		
-		const VectorElementType& operator()(SizeType i,SizeType j) const
-		{
-			if (!lotaMemory_) return dummy_;
-			return data_->operator()(i,j);
-		}
+	void resize(SizeType matrixRank,SizeType steps)
+	{
+		steps_= steps;
+		if (!lotaMemory_) return;
+		data_->reset(matrixRank,steps);
+	}
 
-		SizeType n_col() const { return data_->n_col(); }
+	void reset(SizeType matrixRank,SizeType steps)
+	{
+		if (!lotaMemory_) return;
+		data_->reset(matrixRank,steps);
+	}
 
-		SizeType n_row() const { return data_->n_row(); }
+	VectorElementType& operator()(SizeType i,SizeType j)
+	{
+		if (!lotaMemory_) return dummy_;
+		return data_->operator()(i,j);
+	}
 
-		bool lotaMemory() const { return lotaMemory_; }
-		
-		void saveInitialVector(const VectorType& y)
-		{
-			ysaved_ = y;
-		}
+	const VectorElementType& operator()(SizeType i,SizeType j) const
+	{
+		if (!lotaMemory_) return dummy_;
+		return data_->operator()(i,j);
+	}
 
-		void hookForZ(VectorType& z,
-			      const typename Vector<RealType>::Type& c,
-			      const TridiagonalMatrixType& ab)
-		{
-			if (!lotaMemory_) {
-				VectorType x(z.size(),0.0);
-				VectorType y = ysaved_;
-				for (SizeType i = 0; i < z.size(); i++)
-					z[i] = 0.0;
-				RealType atmp = 0.0;
-				for (SizeType j=0; j < c.size(); j++) {
-					RealType ctmp = c[j];
-					for (SizeType i = 0; i < y.size(); i++)
-						z[i] += ctmp * y[i];
-					RealType btmp = 0;
-					oneStepDecomposition(x,y,atmp,btmp);
-				}
-				return;
-			}
+	SizeType n_col() const { return data_->n_col(); }
 
-			for (SizeType j = 0; j < data_->n_col(); j++) {
+	SizeType n_row() const { return data_->n_row(); }
+
+	bool lotaMemory() const { return lotaMemory_; }
+
+	void saveInitialVector(const VectorType& y)
+	{
+		ysaved_ = y;
+	}
+
+	void hookForZ(VectorType& z,
+	              const typename Vector<RealType>::Type& c,
+	              const TridiagonalMatrixType& ab)
+	{
+		if (!lotaMemory_) {
+			VectorType x(z.size(),0.0);
+			VectorType y = ysaved_;
+			for (SizeType i = 0; i < z.size(); i++)
+				z[i] = 0.0;
+			RealType atmp = 0.0;
+			for (SizeType j=0; j < c.size(); j++) {
 				RealType ctmp = c[j];
- 				for (SizeType i = 0; i < data_->n_row(); i++) {
-					z[i] += ctmp * data_->operator()(i,j);
-				}
+				for (SizeType i = 0; i < y.size(); i++)
+					z[i] += ctmp * y[i];
+				RealType btmp = 0;
+				oneStepDecomposition(x,y,atmp,btmp);
 			}
-
+			return;
 		}
 
-		// provides a gracious way to exit if Ay == 0 (we assume that then A=0)
-		bool isHyZero(const VectorType& y,
-		              TridiagonalMatrixType& ab)
-		{
-			if (!lotaMemory_) return false;
-
-			PsimagLite::OstringStream msg;
-			msg<<"Testing whether matrix is zero...";
-			progress_.printline(msg,std::cout);
-
-			VectorType x(mat_.rank());
-
-			for (SizeType i = 0; i < x.size(); i++) x[i] = 0.0;
-
-			mat_.matrixVectorProduct (x, y); // x+= Hy
-
-			for (SizeType i = 0; i < x.size(); i++)
-				if (std::real(x[i]*std::conj(x[i]))!=0) return false;
-
-			for (SizeType j=0; j < data_->n_col(); j++) {
-				for (SizeType i = 0; i < mat_.rank(); i++) {
-						data_->operator()(i,j) = (i==j) ? 0.0 : 1.1;
-				}
-				ab.a(j) = 0.0;
-				ab.b(j) = 0.0;
+		for (SizeType j = 0; j < data_->n_col(); j++) {
+			RealType ctmp = c[j];
+			for (SizeType i = 0; i < data_->n_row(); i++) {
+				z[i] += ctmp * data_->operator()(i,j);
 			}
-			return true;
 		}
 
-		void oneStepDecomposition(VectorType& x,
-					  VectorType& y,
-					  RealType& atmp,
-					  RealType& btmp) const
-		{
-			mat_.matrixVectorProduct (x, y); // x+= Hy
+	}
 
-			atmp = 0.0;
-			for (SizeType i = 0; i < mat_.rank(); i++)
-				atmp += std::real(y[i]*std::conj(x[i]));
-			btmp = 0.0;
+	// provides a gracious way to exit if Ay == 0 (we assume that then A=0)
+	bool isHyZero(const VectorType& y,
+	              TridiagonalMatrixType& ab)
+	{
+		if (!lotaMemory_) return false;
+
+		PsimagLite::OstringStream msg;
+		msg<<"Testing whether matrix is zero...";
+		progress_.printline(msg,std::cout);
+
+		VectorType x(mat_.rank());
+
+		for (SizeType i = 0; i < x.size(); i++) x[i] = 0.0;
+
+		mat_.matrixVectorProduct (x, y); // x+= Hy
+
+		for (SizeType i = 0; i < x.size(); i++)
+			if (std::real(x[i]*std::conj(x[i]))!=0) return false;
+
+		for (SizeType j=0; j < data_->n_col(); j++) {
 			for (SizeType i = 0; i < mat_.rank(); i++) {
-				x[i] -= atmp * y[i];
-				btmp += std::real(x[i]*std::conj(x[i]));
+				data_->operator()(i,j) = (i==j) ? 0.0 : 1.1;
 			}
+			ab.a(j) = 0.0;
+			ab.b(j) = 0.0;
+		}
+		return true;
+	}
 
-			btmp = sqrt (btmp);
+	void oneStepDecomposition(VectorType& x,
+	                          VectorType& y,
+	                          RealType& atmp,
+	                          RealType& btmp) const
+	{
+		mat_.matrixVectorProduct (x, y); // x+= Hy
 
-//			if (fabs(btmp)<1e-10) {
-//				String s(__FILE__);
-//				s += " oneStepDecomposition: Ay=<y|A|y>y at line " + ttos(__LINE__) + "\n";
-//				s += "PsimagLite AI is not sofisticated enough to handle this, maybe because\n";
-//				s += "PsimagLite's author NI is not good enough... OK, that's all I have to say\n";
-//				s += "I'm throwing, and there might not be any catchers\n";
-//				throw RuntimeError(s.c_str());
-//			}
-			if (fabs(btmp)<1e-10) {
-				for (SizeType i = 0; i < mat_.rank(); i++) {
-					VectorElementType tmp = y[i];
-					y[i] = x[i];
-					x[i] = -btmp * tmp;
-				}
-				return;
-			}
+		atmp = 0.0;
+		for (SizeType i = 0; i < mat_.rank(); i++)
+			atmp += std::real(y[i]*std::conj(x[i]));
+		btmp = 0.0;
+		for (SizeType i = 0; i < mat_.rank(); i++) {
+			x[i] -= atmp * y[i];
+			btmp += std::real(x[i]*std::conj(x[i]));
+		}
 
+		btmp = sqrt (btmp);
+
+		if (fabs(btmp)<1e-10) {
 			for (SizeType i = 0; i < mat_.rank(); i++) {
-				//lanczosVectors(i,j) = y[i];
 				VectorElementType tmp = y[i];
-				y[i] = x[i] / btmp;
+				y[i] = x[i];
 				x[i] = -btmp * tmp;
 			}
+			return;
 		}
 
-	private:
-		
-		//! copy ctor and assigment operator are invalid
-		//! because this class contains a pointer:
-		ThisType& operator=(const ThisType& other);
-		LanczosVectors(const ThisType& copy);
+		for (SizeType i = 0; i < mat_.rank(); i++) {
+			//lanczosVectors(i,j) = y[i];
+			VectorElementType tmp = y[i];
+			y[i] = x[i] / btmp;
+			x[i] = -btmp * tmp;
+		}
+	}
 
-		ProgressIndicator progress_;
-		const MatrixType& mat_;
-		bool lotaMemory_;
-		VectorElementType dummy_;
-		bool needsDelete_;
-		SizeType steps_;
-		VectorType ysaved_;
-		DenseMatrixType* data_;
-	}; // class LanczosVectors
+private:
+
+	//! copy ctor and assigment operator are invalid
+	//! because this class contains a pointer:
+	ThisType& operator=(const ThisType& other);
+	LanczosVectors(const ThisType& copy);
+
+	ProgressIndicator progress_;
+	const MatrixType& mat_;
+	bool lotaMemory_;
+	VectorElementType dummy_;
+	bool needsDelete_;
+	SizeType steps_;
+	VectorType ysaved_;
+	DenseMatrixType* data_;
+}; // class LanczosVectors
+
 } // namespace PsimagLite
 
 /*@}*/
 #endif // LANCZOS_VECTORS_HEADER_H
+

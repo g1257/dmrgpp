@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009-2011, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -84,31 +81,32 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LANCZOS_OR_DAVIDSON_BASE_H
 #include <cassert>
 
-
 namespace PsimagLite {
 
-	template<typename SolverParametersType,typename MatrixType_,typename VectorType>
-	class LanczosOrDavidsonBase {
+template<typename SolverParametersType,typename MatrixType_,typename VectorType>
+class LanczosOrDavidsonBase {
 
-		typedef typename SolverParametersType::RealType RealType;
+	typedef typename SolverParametersType::RealType RealType;
 
-	public:
+public:
 
-		typedef MatrixType_ MatrixType;
+	typedef MatrixType_ MatrixType;
 
-		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
+	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
-		virtual void computeGroundState(RealType& gsEnergy,VectorType& z)=0;
+	virtual void computeGroundState(RealType& gsEnergy,VectorType& z)=0;
 
-		virtual void computeGroundState(RealType &gsEnergy,
-						VectorType &z,
-						const VectorType& initialVector)=0;
+	virtual void computeGroundState(RealType &gsEnergy,
+	                                VectorType &z,
+	                                const VectorType& initialVector)=0;
 
-		// To avoid compiler warnings
-		virtual ~LanczosOrDavidsonBase() { }
+	// To avoid compiler warnings
+	virtual ~LanczosOrDavidsonBase() { }
 
-	}; // class LanczosOrDavidsonBase
+}; // class LanczosOrDavidsonBase
+
 } // namespace PsimagLite
 
 /*@}*/
 #endif // LANCZOS_OR_DAVIDSON_BASE_H
+

@@ -62,3 +62,4 @@ printMap(std::ostream& os, const MapType& x,const String& label)
 
 /*@}*/
 #endif // MAP_HEADER_H
+

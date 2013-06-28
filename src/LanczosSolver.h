@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -93,373 +93,361 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-	//! MatrixType must have the following interface:
-	//! 	RealType type to indicate the matrix type
-	//! 	rank() member function to indicate the rank of the matrix
-	//! 	matrixVectorProduct(typename Vector< RealType>::Type& x,const 
-	//!     typename Vector< RealType>::Type& const y) 
-	//!    	   member function that implements the operation x += Hy
+//! MatrixType must have the following interface:
+//! 	RealType type to indicate the matrix type
+//! 	rank() member function to indicate the rank of the matrix
+//! 	matrixVectorProduct(typename Vector< RealType>::Type& x,const
+//!     typename Vector< RealType>::Type& const y)
+//!    	   member function that implements the operation x += Hy
 
-	template<typename SolverParametersType,typename MatrixType,typename VectorType>
-	class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> {
+template<typename SolverParametersType,typename MatrixType,typename VectorType>
+class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> {
 
-		typedef typename SolverParametersType::RealType RealType;
-		typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
+	typedef typename SolverParametersType::RealType RealType;
+	typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
 
-	public:
+public:
 
-		typedef SolverParametersType ParametersSolverType;	
-		typedef MatrixType LanczosMatrixType;
-		typedef typename LanczosVectorsType::TridiagonalMatrixType TridiagonalMatrixType;
-		typedef typename VectorType::value_type VectorElementType;
-// 		typedef Matrix<VectorElementType> DenseMatrixType;
-		typedef ContinuedFraction<TridiagonalMatrixType> PostProcType;
+	typedef SolverParametersType ParametersSolverType;
+	typedef MatrixType LanczosMatrixType;
+	typedef typename LanczosVectorsType::TridiagonalMatrixType TridiagonalMatrixType;
+	typedef typename VectorType::value_type VectorElementType;
+	typedef ContinuedFraction<TridiagonalMatrixType> PostProcType;
 
-		enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
+	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
-		LanczosSolver(MatrixType const &mat,
-		              const SolverParametersType& params,
-		              Matrix<VectorElementType>* storageForLanczosVectors=0)
-		: progress_("LanczosSolver"),
-		  mat_(mat),
-		  steps_(params.steps),
-		  eps_(params.tolerance),
-		  mode_(WITH_INFO),
-		  stepsForEnergyConvergence_(params.stepsForEnergyConvergence),
-		  rng_(343311),
-		  lanczosVectors_(mat_,params.lotaMemory,storageForLanczosVectors)
-		{
-// 			assert(storageForLanczosVectors || !params.lotaMemory);
-			setMode(params.options);
-			OstringStream msg;
-			msg<<"Constructing... mat.rank="<<mat_.rank();
-			msg<<" steps="<<steps_<<" eps="<<eps_;
-			progress_.printline(msg,std::cout);
+	LanczosSolver(MatrixType const &mat,
+	              const SolverParametersType& params,
+	              Matrix<VectorElementType>* storageForLanczosVectors=0)
+	    : progress_("LanczosSolver"),
+	      mat_(mat),
+	      steps_(params.steps),
+	      eps_(params.tolerance),
+	      mode_(WITH_INFO),
+	      stepsForEnergyConvergence_(params.stepsForEnergyConvergence),
+	      rng_(343311),
+	      lanczosVectors_(mat_,params.lotaMemory,storageForLanczosVectors)
+	{
+		setMode(params.options);
+		OstringStream msg;
+		msg<<"Constructing... mat.rank="<<mat_.rank();
+		msg<<" steps="<<steps_<<" eps="<<eps_;
+		progress_.printline(msg,std::cout);
+	}
+
+	virtual void computeGroundState(RealType& gsEnergy,VectorType& z)
+	{
+		SizeType n =mat_.rank();
+		RealType atmp=0.0;
+		VectorType y(n);
+
+		for (SizeType i=0;i<n;i++) {
+			y[i]=rng_()-0.5;
+			atmp += std::real(y[i]*std::conj(y[i]));
+		}
+		if (mode_ & DEBUG) {
+			computeGroundStateTest(gsEnergy,z,y);
+			return;
+		}
+		atmp = 1.0 / sqrt (atmp);
+		for (SizeType i = 0; i < n; i++) y[i] *= atmp;
+		computeGroundState(gsEnergy,z,y);
+	}
+
+	virtual void computeGroundState(RealType &gsEnergy,
+	                                VectorType &z,
+	                                const VectorType& initialVector)
+	{
+		if (mode_ & DEBUG) {
+			computeGroundStateTest(gsEnergy,z,initialVector);
+			return;
 		}
 
-		virtual void computeGroundState(RealType& gsEnergy,VectorType& z)
-		{
-			SizeType n =mat_.rank();
-			RealType atmp=0.0;
-			VectorType y(n);
+		SizeType n=mat_.rank();
+		VectorType y(n);
 
-			for (SizeType i=0;i<n;i++) {
-				y[i]=rng_()-0.5;
-				atmp += std::real(y[i]*std::conj(y[i]));
-			}
-			if (mode_ & DEBUG) {
-				computeGroundStateTest(gsEnergy,z,y);
-				return;
-			}
-			atmp = 1.0 / sqrt (atmp);
-			for (SizeType i = 0; i < n; i++) y[i] *= atmp;
-			computeGroundState(gsEnergy,z,y);
+		RealType atmp=0.0;
+		for (SizeType i=0;i<n;i++) {
+			y[i]=initialVector[i];
+			atmp += std::real(y[i]*std::conj(y[i]));
+		}
+		atmp = 1.0 / sqrt (atmp);
+		for (SizeType i = 0; i < mat_.rank(); i++) y[i] *= atmp;
+
+		TridiagonalMatrixType ab;
+
+		decomposition(y,ab);
+		typename Vector<RealType>::Type c(steps_);
+		try {
+			ground(gsEnergy,steps_, ab, c);
+		} catch (std::exception &e) {
+			std::cerr<<"MatrixRank="<<n<<"\n";
+			throw e;
 		}
 
-		virtual void computeGroundState(RealType &gsEnergy,
-						VectorType &z,
-						const VectorType& initialVector)
-		{
-			if (mode_ & DEBUG) {
-				computeGroundStateTest(gsEnergy,z,initialVector);
-				return;
-			}
+		lanczosVectors_.hookForZ(z,c,ab);
+		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,std::cout);
+	}
 
-			SizeType n=mat_.rank();
-			VectorType y(n);
+	template<typename DenseMatrixType>
+	void buildDenseMatrix(DenseMatrixType& T,const TridiagonalMatrixType& ab) const
+	{
+		ab.buildDenseMatrix(T);
+	}
 
-			RealType atmp=0.0;
-			for (SizeType i=0;i<n;i++) {
-				y[i]=initialVector[i];
-				atmp += std::real(y[i]*std::conj(y[i]));
-			}
-			atmp = 1.0 / sqrt (atmp);
-			for (SizeType i = 0; i < mat_.rank(); i++) y[i] *= atmp;
+	void push(TridiagonalMatrixType& ab,const RealType& a,const RealType& b) const
+	{
+		ab.push(a,b);
+	}
 
-			TridiagonalMatrixType ab;
+	/**
+	  *     In each step of the Lanczos algorithm the values of a[]
+	  *     and b[] are computed.
+	  *     then a tridiagonal matrix T[j] is formed from the matrix
+	  *     T[j-1] as
+	  *
+	  *            | a[0]  b[0]                            |
+	  *            | b[0]  a[1]  b[1]                      |
+	  *     T(j) = |       b[1]    .     .                 |
+	  *            |               .     .  a[j-2]  b[j-2] |
+	  *            |               .     .  b[j-2]  a[j-1] |
+	  */
+	void decomposition(const VectorType& initVector,
+	                   TridiagonalMatrixType& ab)
+	{
+		SizeType& max_nstep = steps_;
 
-			decomposition(y,ab);
-			typename Vector<RealType>::Type c(steps_);
-			try {
-				ground(gsEnergy,steps_, ab, c);
-			} catch (std::exception &e) {
-				std::cerr<<"MatrixRank="<<n<<"\n";
-				throw e;
-			}
+		assert(initVector.size()==mat_.rank());
 
-			lanczosVectors_.hookForZ(z,c,ab);
-			if (mode_ & WITH_INFO) info(gsEnergy,initialVector,std::cout);
+		VectorType x(mat_.rank());
+		VectorType y = initVector;
+		RealType atmp = 0;
+		for (SizeType i = 0; i < mat_.rank(); i++) {
+			x[i] = 0;
+			atmp += std::real(y[i]*std::conj(y[i]));
 		}
 
-		template<typename DenseMatrixType>
-		void buildDenseMatrix(DenseMatrixType& T,const TridiagonalMatrixType& ab) const
-		{
-			ab.buildDenseMatrix(T);
-		}
+		for (SizeType i = 0; i < y.size(); i++) y[i] /= sqrt(atmp);
 
-		void push(TridiagonalMatrixType& ab,const RealType& a,const RealType& b) const
-		{
-			ab.push(a,b);
-		}
+		if (max_nstep > mat_.rank()) max_nstep = mat_.rank();
+		lanczosVectors_.resize(mat_.rank(),max_nstep);
+		ab.resize(max_nstep,0);
 
-		void decomposition(const VectorType& initVector,
-				   TridiagonalMatrixType& ab)
-		{ /**
-			*     In each step of the Lanczos algorithm the values of a[]
-			*     and b[] are computed.
-			*     then a tridiagonal matrix T[j] is formed from the matrix
-			*     T[j-1] as
-			*
-			*            | a[0]  b[0]                            |
-			*            | b[0]  a[1]  b[1]                      |
-			*     T(j) = |       b[1]    .     .                 |
-			*            |               .     .  a[j-2]  b[j-2] |
-			*            |               .     .  b[j-2]  a[j-1] |
-			*/
-			SizeType& max_nstep = steps_;
-			
-			assert(initVector.size()==mat_.rank());
-			
-			VectorType x(mat_.rank());
-			VectorType y = initVector;
-			RealType atmp = 0;
-			for (SizeType i = 0; i < mat_.rank(); i++) {
-				x[i] = 0;
-				atmp += std::real(y[i]*std::conj(y[i]));
- 			}
+		if (mode_ & ALLOWS_ZERO && lanczosVectors_.isHyZero(y,ab)) return;
 
-			for (SizeType i = 0; i < y.size(); i++) y[i] /= sqrt(atmp);
+		RealType eold = 100.;
+		bool exitFlag=false;
+		SizeType j = 0;
+		lanczosVectors_.saveInitialVector(y);
+		typename Vector<RealType>::Type nullVector(0);
+		for (; j < max_nstep; j++) {
+			for (SizeType i = 0; i < mat_.rank(); i++)
+				lanczosVectors_(i,j) = y[i];
 
-			if (max_nstep > mat_.rank()) max_nstep = mat_.rank();
-			lanczosVectors_.resize(mat_.rank(),max_nstep);
-			ab.resize(max_nstep,0);
-			
-			if (mode_ & ALLOWS_ZERO && lanczosVectors_.isHyZero(y,ab)) return;
+			RealType btmp = 0;
+			oneStepDecomposition(x,y,atmp,btmp,j==0);
+			ab.a(j) = atmp;
+			ab.b(j) = btmp;
 
-			RealType eold = 100.;
-			bool exitFlag=false;
-			SizeType j = 0;
-			lanczosVectors_.saveInitialVector(y);
-			typename Vector<RealType>::Type nullVector(0);
-			for (; j < max_nstep; j++) {
-				for (SizeType i = 0; i < mat_.rank(); i++) 
-					lanczosVectors_(i,j) = y[i];
-
-				RealType btmp = 0;
-				oneStepDecomposition(x,y,atmp,btmp,j==0);
-				ab.a(j) = atmp;
-				ab.b(j) = btmp;
-
-				RealType enew = 0;
-				if (eps_>0) {
-					ground(enew,j+1, ab,nullVector);
-					if (fabs (enew - eold) < eps_) exitFlag=true;
-					if (exitFlag && mat_.rank()<=4) break;
-					if (exitFlag && j>=4) break;
-				}
-		
-				eold = enew;
-  			}
-
-
-			if (j < max_nstep) {
-				max_nstep = j + 1;
-				lanczosVectors_.reset(mat_.rank(),max_nstep);
-				ab.resize(max_nstep);
-//				throw RuntimeError(
-//					"LanczosSolver::tridiag(): Unsupported\n");
-// 				if (eps_>=tolerance_) return;
+			RealType enew = 0;
+			if (eps_>0) {
+				ground(enew,j+1, ab,nullVector);
+				if (fabs (enew - eold) < eps_) exitFlag=true;
+				if (exitFlag && mat_.rank()<=4) break;
+				if (exitFlag && j>=4) break;
 			}
 
-			OstringStream msg;
-			msg<<"Decomposition done for mat.rank="<<mat_.rank();
-			msg<<" after "<<j<<" steps.";
-			progress_.printline(msg,std::cout);
+			eold = enew;
 		}
 
-		void oneStepDecomposition(
-				VectorType& x,
-				VectorType& y,
-				RealType& atmp,
-				RealType& btmp,
-				bool isFirst) const
-		{
-			lanczosVectors_.oneStepDecomposition(x,y,atmp,btmp);
+		if (j < max_nstep) {
+			max_nstep = j + 1;
+			lanczosVectors_.reset(mat_.rank(),max_nstep);
+			ab.resize(max_nstep);
 		}
 
-		SizeType steps() const {return steps_; }
+		OstringStream msg;
+		msg<<"Decomposition done for mat.rank="<<mat_.rank();
+		msg<<" after "<<j<<" steps.";
+		progress_.printline(msg,std::cout);
+	}
 
-	private:
+	void oneStepDecomposition(
+	        VectorType& x,
+	        VectorType& y,
+	        RealType& atmp,
+	        RealType& btmp,
+	        bool isFirst) const
+	{
+		lanczosVectors_.oneStepDecomposition(x,y,atmp,btmp);
+	}
 
-		void setMode(const String& options)
-		{
-			if (options.find("lanczosdebug")!=String::npos) mode_ |=  DEBUG;
-			if (options.find("lanczosAllowsZero")!=String::npos) mode_ |= ALLOWS_ZERO;
+	SizeType steps() const {return steps_; }
+
+private:
+
+	void setMode(const String& options)
+	{
+		if (options.find("lanczosdebug")!=String::npos) mode_ |=  DEBUG;
+		if (options.find("lanczosAllowsZero")!=String::npos) mode_ |= ALLOWS_ZERO;
+	}
+
+	void info(RealType energyTmp,const VectorType& x,std::ostream& os)
+	{
+		RealType norma=norm(x);
+		SizeType& iter = steps_;
+
+		if (norma<1e-5 || norma>100) {
+			std::cerr<<"norma="<<norma<<"\n";
 		}
 
-		void info(RealType energyTmp,const VectorType& x,std::ostream& os)
-		{
-			RealType norma=norm(x);
-			SizeType& iter = steps_;
-			
-			if (norma<1e-5 || norma>100) {
-				std::cerr<<"norma="<<norma<<"\n";
-				//throw RuntimeError("Norm\n");
-			}
-			
-			OstringStream msg;
-			msg.precision(8);
-			msg<<"Found Energy="<<energyTmp<<" after "<<iter;
-			msg<<" iterations, "<<" orig. norm="<<norma;
-			progress_.printline(msg,os);
-		}
-		
-		void ground(RealType &s,int n, const TridiagonalMatrixType& ab,typename Vector<RealType>::Type& gs)
-		{
-			int i, k, l, m;
-			RealType c, dd, f, g, h, p, r, *d, *e, *v = 0, *vki;
-			int long intCounter=0;
-			int long maxCounter=stepsForEnergyConvergence_;
-  
-			if (gs.size()>0) {
-				v  = new RealType[n*n];
-				for (k=0;k<n*n;k++) v[k]=0.0;
-				for (k = 0, vki = v; k < n; k++, vki += (n + 1))
+		OstringStream msg;
+		msg.precision(8);
+		msg<<"Found Energy="<<energyTmp<<" after "<<iter;
+		msg<<" iterations, "<<" orig. norm="<<norma;
+		progress_.printline(msg,os);
+	}
+
+	void ground(RealType &s,
+	            int n,
+	            const TridiagonalMatrixType& ab,
+	            typename Vector<RealType>::Type& gs)
+	{
+		int i, k, l, m;
+		RealType c, dd, f, g, h, p, r, *d, *e, *v = 0, *vki;
+		int long intCounter=0;
+		int long maxCounter=stepsForEnergyConvergence_;
+
+		if (gs.size()>0) {
+			v  = new RealType[n*n];
+			for (k=0;k<n*n;k++) v[k]=0.0;
+			for (k = 0, vki = v; k < n; k++, vki += (n + 1))
 				(*vki) = 1.0;
-			}
+		}
 
-			d = new RealType[n]; 
-			e = new RealType[n];
+		d = new RealType[n];
+		e = new RealType[n];
 
-			for (i = 0; i < n; i++) {
-				d[i] = ab.a(i);
-				e[i] = ab.b(i);
-			}
+		for (i = 0; i < n; i++) {
+			d[i] = ab.a(i);
+			e[i] = ab.b(i);
+		}
 
-			for (l = 0; l < n; l++) {
-				do {
-					intCounter++;
-					if (intCounter>maxCounter) {
-						std::cerr<<"lanczos: ground: premature exit (may indicate an internal error)\n";
-						break;
-					}
-					for (m = l; m < n - 1; m++) {
-						dd = fabs (d[m]) + fabs (d[m + 1]);
-						if ((fabs (e[m]) + dd) == dd) break;
-					}
-					if (m != l) {
-						g = (d[l + 1] - d[l]) / (2.0 * e[l]);
-						r = sqrt (g * g + 1.0);
-						g = d[m] - d[l] + e[l] / (g + (g >= 0 ? fabs (r) : -fabs (r)));
-						for (i = m - 1, s = c = 1.0, p = 0.0; i >= l; i--) {
-							f = s * e[i];
-							h = c * e[i];
-							e[i + 1] = (r = sqrt (f * f + g * g));
-							if (r == 0.0) {
-								d[i + 1] -= p;
-								e[m] = 0.0; 
-								break;
-							}
-							s = f / r;
-							c = g / r;
-							g = d[i + 1] - p;
-							r = (d[i] - g) * s + 2.0 * c * h;
-							d[i + 1] = g + (p = s * r);
-							g = c * r - h;
-							if (gs.size()>0)
+		for (l = 0; l < n; l++) {
+			do {
+				intCounter++;
+				if (intCounter>maxCounter) {
+					std::cerr<<"lanczos: ground: premature exit ";
+					std::cerr<<"(may indicate an internal error)\n";
+					break;
+				}
+				for (m = l; m < n - 1; m++) {
+					dd = fabs (d[m]) + fabs (d[m + 1]);
+					if ((fabs (e[m]) + dd) == dd) break;
+				}
+				if (m != l) {
+					g = (d[l + 1] - d[l]) / (2.0 * e[l]);
+					r = sqrt (g * g + 1.0);
+					g = d[m] - d[l] + e[l] / (g + (g >= 0 ? fabs (r) : -fabs (r)));
+					for (i = m - 1, s = c = 1.0, p = 0.0; i >= l; i--) {
+						f = s * e[i];
+						h = c * e[i];
+						e[i + 1] = (r = sqrt (f * f + g * g));
+						if (r == 0.0) {
+							d[i + 1] -= p;
+							e[m] = 0.0;
+							break;
+						}
+						s = f / r;
+						c = g / r;
+						g = d[i + 1] - p;
+						r = (d[i] - g) * s + 2.0 * c * h;
+						d[i + 1] = g + (p = s * r);
+						g = c * r - h;
+						if (gs.size()>0) {
 							for (k = 0, vki = v + i; k < n; k++, vki += n) {
 								f = vki[1];
 								vki[1] = s * vki[0] + c * f;
 								vki[0] = c * vki[0] - s * f;
 							}
 						}
-						if (r == 0.0 && i >= l) continue;
-						d[l] -= p;
-						e[l] = g;
-						e[m] = 0.0;
 					}
-				} while (m != l);
-			}
-
-			for (i = 1, s = d[l = 0]; i < n; i++)
-			if (d[i] < s) s = d[l = i];
-  
-
- 			if (gs.size()>0) {
-				for (k = 0, vki = v + l; k < n; k++, vki += n) gs[k] = (*vki);
-    			delete [] v;
-			}
-
-			delete [] d;
-			delete [] e;
-			if (intCounter>maxCounter) throw RuntimeError("LanczosSolver::ground(): internal error\n");
-
-		}
-		
-		void getColumn(MatrixType const &mat,VectorType& x,SizeType col)
-		{
-			SizeType n =x.size();
-			VectorType y(n);
-			for (SizeType i=0;i<n;i++) {
-				x[i]=0;
-				y[i]=0;
-				if (i==col) y[i]=1.0;
-			}
-			mat.matrixVectorProduct (x, y);
-		}
-		
-		//! only for debugging:
-		void computeGroundStateTest(RealType &gsEnergy,
-				VectorType& z,
-				const VectorType& initialVector)
-		{
-			SizeType n =mat_.rank();
-			Matrix<VectorElementType> a(n,n);
-			for (SizeType i=0;i<n;i++) {
-				VectorType x(n);
-				getColumn(mat_,x,i);
-				for (SizeType j=0;j<n;j++) a(i,j)=x[j];
-			}
-			bool ih  = isHermitian(a,true);
-			if (!ih) throw RuntimeError("computeGroundState: Matrix not hermitian\n");
-
-			std::cerr<<"Matrix hermitian="<<ih<<"\n";
-			/*RealType eps2=1e-6;
-			std::cerr.precision(8);
-			for (SizeType i=0;i<n;i++) {
-				SizeType counter=0;
-				for (SizeType j=0;j<n;j++) {
-					if (psimag::norm(a(i,j))>eps2) {
-						std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j)<<" ";
-						counter++;
-					}
+					if (r == 0.0 && i >= l) continue;
+					d[l] -= p;
+					e[l] = g;
+					e[m] = 0.0;
 				}
-				if (counter>0) std::cerr<<"\n";
-			}*/
-			std::cerr<<a;
-			//printNonZero(a,std::cerr);
-			std::cerr<<"----------------\n";
-
-			typename Vector<RealType>::Type eigs(a.n_row());
-			diag(a,eigs,'V');
-			for (SizeType i=0;i<a.n_row();i++) std::cerr<<a(i,0)<<" ";
-			std::cerr<<"\n";
-			std::cerr<<"--------------------------------\n";
-			std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
-
-			throw RuntimeError("testing lanczos solver\n");
+			} while (m != l);
 		}
 
-		ProgressIndicator progress_;
-		MatrixType const& mat_;
-		SizeType steps_;
-		RealType eps_;
-		SizeType mode_;
-		SizeType stepsForEnergyConvergence_;
-		Random48<RealType> rng_;
-		LanczosVectorsType lanczosVectors_;
-	}; // class LanczosSolver
+		for (i = 1, s = d[l = 0]; i < n; i++)
+			if (d[i] < s) s = d[l = i];
+
+		if (gs.size()>0) {
+			for (k = 0, vki = v + l; k < n; k++, vki += n) gs[k] = (*vki);
+			delete [] v;
+		}
+
+		delete [] d;
+		delete [] e;
+		if (intCounter>maxCounter)
+			throw RuntimeError("LanczosSolver::ground(): internal error\n");
+
+	}
+
+	void getColumn(MatrixType const &mat,VectorType& x,SizeType col)
+	{
+		SizeType n =x.size();
+		VectorType y(n);
+		for (SizeType i=0;i<n;i++) {
+			x[i]=0;
+			y[i]=0;
+			if (i==col) y[i]=1.0;
+		}
+		mat.matrixVectorProduct (x, y);
+	}
+
+	//! only for debugging:
+	void computeGroundStateTest(RealType &gsEnergy,
+	                            VectorType& z,
+	                            const VectorType& initialVector)
+	{
+		SizeType n =mat_.rank();
+		Matrix<VectorElementType> a(n,n);
+		for (SizeType i=0;i<n;i++) {
+			VectorType x(n);
+			getColumn(mat_,x,i);
+			for (SizeType j=0;j<n;j++) a(i,j)=x[j];
+		}
+		bool ih  = isHermitian(a,true);
+		if (!ih) throw RuntimeError("computeGroundState: Matrix not hermitian\n");
+
+		std::cerr<<"Matrix hermitian="<<ih<<"\n";
+		std::cerr<<a;
+		std::cerr<<"----------------\n";
+
+		typename Vector<RealType>::Type eigs(a.n_row());
+		diag(a,eigs,'V');
+		for (SizeType i=0;i<a.n_row();i++) std::cerr<<a(i,0)<<" ";
+		std::cerr<<"\n";
+		std::cerr<<"--------------------------------\n";
+		std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
+
+		throw RuntimeError("testing lanczos solver\n");
+	}
+
+	ProgressIndicator progress_;
+	MatrixType const& mat_;
+	SizeType steps_;
+	RealType eps_;
+	SizeType mode_;
+	SizeType stepsForEnergyConvergence_;
+	Random48<RealType> rng_;
+	LanczosVectorsType lanczosVectors_;
+}; // class LanczosSolver
+
 } // namespace PsimagLite
 
 /*@}*/
 #endif
+
