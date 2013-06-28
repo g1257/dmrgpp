@@ -38,133 +38,133 @@ Please see full open source license included in file LICENSE.
 #include "IoSimple.h"
 
 namespace PsimagLite {
-	template<typename TridiagonalMatrixType_>
-	class ContinuedFraction  {
-	public:
+template<typename TridiagonalMatrixType_>
+class ContinuedFraction  {
+public:
 
-		typedef TridiagonalMatrixType_ TridiagonalMatrixType;
-		typedef typename TridiagonalMatrixType::value_type MatrixElementType;
-		typedef typename PsimagLite::Real<MatrixElementType>::Type RealType;
-		typedef typename std::complex<RealType> ComplexType;
-		typedef typename TridiagonalMatrixType::value_type FieldType;
-		typedef Matrix<FieldType> MatrixType;
-		typedef typename Vector<std::pair<RealType,ComplexType> >::Type PlotDataType;
-		typedef PlotParams<RealType> PlotParamsType;
-		typedef ParametersForSolver<RealType> ParametersType;
+	typedef TridiagonalMatrixType_ TridiagonalMatrixType;
+	typedef typename TridiagonalMatrixType::value_type MatrixElementType;
+	typedef typename PsimagLite::Real<MatrixElementType>::Type RealType;
+	typedef typename std::complex<RealType> ComplexType;
+	typedef typename TridiagonalMatrixType::value_type FieldType;
+	typedef Matrix<FieldType> MatrixType;
+	typedef typename Vector<std::pair<RealType,ComplexType> >::Type PlotDataType;
+	typedef PlotParams<RealType> PlotParamsType;
+	typedef ParametersForSolver<RealType> ParametersType;
 
-		ContinuedFraction(const TridiagonalMatrixType& ab,const ParametersType& params)
-		: progress_("ContinuedFraction"),
-		  ab_(ab),
-		  Eg_(params.Eg),
-		  weight_(params.weight),
-		  isign_(params.isign)
-		{
-			diagonalize();
+	ContinuedFraction(const TridiagonalMatrixType& ab,const ParametersType& params)
+	    : progress_("ContinuedFraction"),
+	      ab_(ab),
+	      Eg_(params.Eg),
+	      weight_(params.weight),
+	      isign_(params.isign)
+	{
+		diagonalize();
+	}
+
+	ContinuedFraction() : progress_("ContinuedFraction"),
+	    ab_(),Eg_(0),weight_(0),isign_(1) { }
+
+	ContinuedFraction(IoSimple::In& io)
+	    : progress_("ContinuedFraction"),ab_(io)
+	{
+		io.readline(weight_,"#CFWeight=");
+		io.readline(Eg_,"#CFEnergy=");
+		io.readline(isign_,"#CFIsign=");
+		io.read(eigs_,"#CFEigs");
+		io.read(intensity_,"#CFIntensities");
+		diagonalize();
+	}
+
+	template<typename IoOutputType>
+	void save(IoOutputType& io) const
+	{
+		io.setPrecision(12);
+		ab_.save(io);
+
+		io.print("#CFWeight=",weight_);
+
+		io.print("#CFEnergy=",Eg_);
+
+		io.print("#CFIsign=" ,isign_);
+
+		io.printVector(eigs_,"#CFEigs");
+		io.printVector(intensity_,"#CFIntensities");
+	}
+
+	void set(
+	        const TridiagonalMatrixType& ab,
+	        const RealType& Eg,
+	        RealType weight,
+	        int isign)
+	{
+		ab_ = ab;
+		Eg_ = Eg;
+		weight_ = weight;
+		isign_ = isign;
+
+		diagonalize();
+	}
+
+	void plot(PlotDataType& result,const PlotParamsType& params) const
+	{
+		SizeType counter = 0;
+		SizeType n = SizeType((params.omega2 - params.omega1)/params.deltaOmega);
+		if (result.size()==0) result.resize(n);
+		for (RealType omega=params.omega1;omega<params.omega2;omega+=params.deltaOmega) {
+			ComplexType z(omega,params.delta);
+			ComplexType res = iOfOmega(z,Eg_,isign_);
+			std::pair<RealType,ComplexType> p(omega,res);
+			result[counter++] = p;
+			if (counter>=result.size()) break;
 		}
+	}
 
-		ContinuedFraction() : progress_("ContinuedFraction"),
-			ab_(),Eg_(0),weight_(0),isign_(1) { }
+	//! Cases:
+	//! (1) < phi0|A (z+(E0-e_k))^{-1}|A^\dagger|phi0> and
+	//! (2) < phi0|A^\dagger (z-(E0-e_k))^{-1}|A|phi0>
+	//! (There are actually 4 cases for the off-diagonal gf because
+	//! A has two cases:
+	//! (1) A = c_i + c_j and
+	//! (2) A = c_i - c_j
+	ComplexType iOfOmega(const ComplexType& z,RealType offset,int isign) const
 
-		ContinuedFraction(IoSimple::In& io)
-		: progress_("ContinuedFraction"),ab_(io)
-		{
-			io.readline(weight_,"#CFWeight=");
-			io.readline(Eg_,"#CFEnergy=");
-			io.readline(isign_,"#CFIsign=");
-			io.read(eigs_,"#CFEigs");
-			io.read(intensity_,"#CFIntensities");
-			diagonalize();
+	{
+		if (weight_==0) return ComplexType(0,0);
+
+		ComplexType sum = 0;
+		for (SizeType l=0;l<intensity_.size();l++)
+			sum +=intensity_[l]/(z-isign*(offset - eigs_[l]));
+
+		return sum*weight_;
+	}
+
+	SizeType size() const { return ab_.size(); }
+
+private:
+
+	void diagonalize()
+	{
+		if (weight_==0) return;
+		MatrixType T;
+		ab_.buildDenseMatrix(T);
+		eigs_.resize(T.n_row());
+		diag(T,eigs_,'V');
+		intensity_.resize(T.n_row());
+		for (SizeType i=0;i<T.n_row();i++) {
+			intensity_[i]= T(0,i)*T(0,i);
 		}
+	}
 
-		template<typename IoOutputType>
-		void save(IoOutputType& io) const
-		{
-			io.setPrecision(12);
-			ab_.save(io);
-
-			io.print("#CFWeight=",weight_);
-
-			io.print("#CFEnergy=",Eg_);
-
-			io.print("#CFIsign=" ,isign_);
-
-			io.printVector(eigs_,"#CFEigs");
-			io.printVector(intensity_,"#CFIntensities");
-		}
-
-		void set(
-			const TridiagonalMatrixType& ab,
-			const RealType& Eg,
-			RealType weight,
-			int isign)
-		{
-			ab_ = ab;
-			Eg_ = Eg;
-			weight_ = weight;
-			isign_ = isign;
-
-			diagonalize();
-		}
-
-		void plot(PlotDataType& result,const PlotParamsType& params) const
-		{
-			SizeType counter = 0;
-			SizeType n = SizeType((params.omega2 - params.omega1)/params.deltaOmega); 
-			if (result.size()==0) result.resize(n);
-			for (RealType omega = params.omega1;omega <params.omega2;omega+=params.deltaOmega) {
-				ComplexType z(omega,params.delta);
-				ComplexType res = iOfOmega(z,Eg_,isign_);
-				std::pair<RealType,ComplexType> p(omega,res);
-				result[counter++] = p;
-				if (counter>=result.size()) break;
-				//std::cout<<omega<<" "<<real(res)<<" "<<imag(res)<<"\n";
-			}
-		} 
-
-		//! Cases: 
-		//! (1) < phi0|A (z+(E0-e_k))^{-1}|A^\dagger|phi0> and
-		//! (2) < phi0|A^\dagger (z-(E0-e_k))^{-1}|A|phi0>
-		//! (There are actually 4 cases for the off-diagonal gf because
-		//! A has two cases:
-		//! (1) A = c_i + c_j and
-		//! (2) A = c_i - c_j
-		ComplexType iOfOmega(const ComplexType& z,RealType offset,int isign) const
-
-		{
-			if (weight_==0) return ComplexType(0,0);
-
-			ComplexType sum = 0;
-			for (SizeType l=0;l<intensity_.size();l++)
-				sum +=intensity_[l]/(z-isign*(offset - eigs_[l]));
-
-			return sum*weight_;
-		}
-
-		SizeType size() const { return ab_.size(); }
-
-	private:
-
-		void diagonalize()
-		{
-			if (weight_==0) return;
-			MatrixType T;
-			ab_.buildDenseMatrix(T);
-			eigs_.resize(T.n_row());
-			diag(T,eigs_,'V');
-			intensity_.resize(T.n_row());
-			for (SizeType i=0;i<T.n_row();i++) {
-				intensity_[i]= T(0,i)*T(0,i);
-			}
-		}
-
-		ProgressIndicator progress_;
-		TridiagonalMatrixType ab_;
-		RealType Eg_;
-		RealType weight_;
-		int isign_;
-		typename Vector<RealType>::Type eigs_;
-		typename Vector<RealType>::Type intensity_;
-	}; // class ContinuedFraction
+	ProgressIndicator progress_;
+	TridiagonalMatrixType ab_;
+	RealType Eg_;
+	RealType weight_;
+	int isign_;
+	typename Vector<RealType>::Type eigs_;
+	typename Vector<RealType>::Type intensity_;
+}; // class ContinuedFraction
 } // namespace PsimagLite 
 /*@}*/
 #endif  //CONTINUED_FRACTION_H
+

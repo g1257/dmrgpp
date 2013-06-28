@@ -23,7 +23,7 @@ Please see full open source license included in file LICENSE.
 /*! \file ChebyshevFunction.h
  *
  * The Chebyshev function
- * 
+ *
  */
 
 #ifndef CHEBYSHEV_FUNCTION_H
@@ -31,29 +31,30 @@ Please see full open source license included in file LICENSE.
 #include <iostream>
 #include "TypeToString.h"
 
-
 namespace PsimagLite {
-	template<typename RealType>
-	class ChebyshevFunction  {
+template<typename RealType>
+class ChebyshevFunction  {
 
-	public:
+public:
 
-		RealType operator()(int m,const RealType& x) const
-		{
-			if (m==0) return 1;
+	RealType operator()(int m,const RealType& x) const
+	{
+		if (m==0) return 1;
 
-			if (m==1) return x;
-			
-			if (m&1) {
-				int p=(m-1)/2;
-				return (2*this->operator()(p,x)*this->operator()(p+1,x)-x);
-			}
+		if (m==1) return x;
 
-			int pp = m/2;
-			RealType tmp=this->operator()(pp,x);
-			return (2*tmp*tmp-1);
+		if (m&1) {
+			int p=(m-1)/2;
+			return (2*this->operator()(p,x)*this->operator()(p+1,x)-x);
 		}
-	}; // class ChebyshevFunction
+
+		int pp = m/2;
+		RealType tmp=this->operator()(pp,x);
+		return (2*tmp*tmp-1);
+	}
+}; // class ChebyshevFunction
+
 } // namespace PsimagLite 
 /*@}*/
 #endif  //CHEBYSHEV_FUNCTION_H
+
