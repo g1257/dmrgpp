@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -83,151 +83,157 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "String.h"
 
 namespace PsimagLite {
-	
-	class Ladder  {
-	public:
-		enum {DIRECTION_X,DIRECTION_Y};
 
-		Ladder(SizeType linSize,SizeType leg,bool isPeriodicY)
-		: linSize_(linSize),leg_(leg),isPeriodicY_(isPeriodicY)
-		{
-			if (leg & 1) throw RuntimeError("Ladder: leg must be even\n");
-			if (leg == 2)  isPeriodicY_ = false;
-			//if (leg>2) std::cerr<<"isPeriodicY="<<isPeriodicY_<<"\n";
-			if (linSize % leg !=0) throw RuntimeError("Ladder: leg must divide number of sites\n");
+class Ladder  {
+public:
+	enum {DIRECTION_X,DIRECTION_Y};
+
+	Ladder(SizeType linSize,SizeType leg,bool isPeriodicY)
+	    : linSize_(linSize),leg_(leg),isPeriodicY_(isPeriodicY)
+	{
+		if (leg & 1)
+			throw RuntimeError("Ladder: leg must be even\n");
+
+		if (leg == 2)
+			isPeriodicY_ = false;
+
+		if (linSize % leg !=0)
+			throw RuntimeError("Ladder: leg must divide number of sites\n");
+	}
+
+	SizeType getVectorSize(SizeType dirId) const
+	{
+		if (dirId==DIRECTION_X)
+			return linSize_-leg_;
+		else if (dirId==DIRECTION_Y)
+			return (isPeriodicY_) ? linSize_ : linSize_ - linSize_/leg_;
+
+		throw RuntimeError("Unknown direction\n");
+	}
+
+	bool connected(SizeType i1,SizeType i2) const
+	{
+		if (i1==i2) return false;
+		SizeType c1 = i1/leg_;
+		SizeType c2 = i2/leg_;
+		SizeType r1 = i1%leg_;
+		SizeType r2 = i2%leg_;
+		if (c1==c2) return GeometryUtils::neighbors(r1,r2,isPeriodicY_,leg_-1);
+		if (r1==r2) return GeometryUtils::neighbors(c1,c2);
+		return false;
+	}
+
+	SizeType calcDir(SizeType i1,SizeType i2) const
+	{
+		assert(connected(i1,i2));
+		if (sameColumn(i1,i2)) return DIRECTION_Y;
+		return DIRECTION_X;
+	}
+
+	bool fringe(SizeType i,SizeType smax,SizeType emin) const
+	{
+		SizeType c = smax % leg_;
+		SizeType r = 2 + 2*c;
+		if (c>=leg_/2) r = r - leg_;
+
+		if (smax+1 == emin) r = leg_; // finite loops
+
+		bool a = (i<emin && i>=smax - r + 1);
+		bool b = (i>smax && i<=emin + r - 1);
+		return (a || b);
+	}
+
+	// siteEnv is fringe in the environment
+	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteEnv) const
+	{
+		if (smax+1 == emin) return siteEnv; // finite loops
+
+		SizeType c = smax % leg_;
+		SizeType s = int(emin/leg_) - int(smax/leg_);
+		assert(s>0);
+		if (c>=leg_/2) s--;
+		return  siteEnv - s*leg_;
+	}
+
+	SizeType handle(SizeType i1,SizeType i2) const
+	{
+		SizeType dir = calcDir(i1,i2);
+		SizeType imin = (i1<i2) ? i1 : i2;
+		SizeType y = imin/leg_;
+		switch(dir) {
+		case DIRECTION_X:
+			return imin;
+		case DIRECTION_Y:
+			if (!isPeriodicY_) return imin-imin/leg_;
+			if (imin ==0 || imin % leg_ == 0) imin = (i1>i2) ? i1 : i2;
+			return imin-imin/leg_ + y;
 		}
+		throw RuntimeError("hanlde: Unknown direction\n");
+	}
 
-		SizeType getVectorSize(SizeType dirId) const
-		{
-			if (dirId==DIRECTION_X) return linSize_-leg_;
-			else if (dirId==DIRECTION_Y) return (isPeriodicY_) ? linSize_ : linSize_ - linSize_/leg_;
+	bool sameColumn(SizeType i1,SizeType i2) const
+	{
+		SizeType c1 = i1/leg_;
+		SizeType c2 = i2/leg_;
+		if (c1 == c2) return true;
+		return false;
+	}
 
-			throw RuntimeError("Unknown direction\n");
-		}
+	bool sameRow(SizeType i1,SizeType i2) const
+	{
+		SizeType c1 = i1%leg_;
+		SizeType c2 = i2%leg_;
+		if (c1 == c2) return true;
+		return false;
+	}
 
-		bool connected(SizeType i1,SizeType i2) const
-		{
-			if (i1==i2) return false;
-			SizeType c1 = i1/leg_;
-			SizeType c2 = i2/leg_;
-			SizeType r1 = i1%leg_;
-			SizeType r2 = i2%leg_;
-			if (c1==c2) return GeometryUtils::neighbors(r1,r2,isPeriodicY_,leg_-1);
-			if (r1==r2) return GeometryUtils::neighbors(c1,c2);
-			return false;
-		}
+	String label() const
+	{
+		return "ladder";
+	}
 
-		SizeType calcDir(SizeType i1,SizeType i2) const
-		{
-			assert(connected(i1,i2));
-			if (sameColumn(i1,i2)) return DIRECTION_Y;
-			return DIRECTION_X;
-		}
+	SizeType length(SizeType i) const
+	{
+		assert(i<2);
+		return (i==1) ? leg_ : SizeType(linSize_/leg_);
+	}
 
-		bool fringe(SizeType i,SizeType smax,SizeType emin) const
-		{
-			SizeType c = smax % leg_;
-			SizeType r = 2 + 2*c;
-			if (c>=leg_/2) r = r - leg_;
+	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	{
+		assert(dir<2);
+		SizeType x = SizeType(site/leg_);
+		SizeType y = site % leg_;
+		SizeType lx = SizeType(linSize_/leg_);
+		if (dir==DIRECTION_X) x = translateInternal(x,lx,amount);
+		else y = translateInternal(y,leg_,amount);
+		SizeType ind = y + x*leg_;
+		assert(ind<linSize_);
+		return ind;
+	}
 
-			if (smax+1 == emin) r = leg_; // finite loops
+	SizeType findReflection(SizeType site) const
+	{
+		SizeType x = SizeType(site/leg_);
+		SizeType y = site % leg_;
+		SizeType lx = SizeType(linSize_/leg_);
+		SizeType ind = y + (lx-x-1)*leg_;
+		assert(ind<linSize_);
+		return ind;
+	}
 
-			bool a = (i<emin && i>=smax - r + 1);
-			bool b = (i>smax && i<=emin + r - 1);
-			return (a || b);
-		}
+private:
 
-		// siteEnv is fringe in the environment
-		SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteEnv) const
-		{
-			if (smax+1 == emin) return siteEnv; // finite loops
+	SizeType translateInternal(SizeType c,SizeType l,SizeType amount) const
+	{
+		c += amount;
+		while (c>=l) c-=l;
+		return c;
+	}
 
-			SizeType c = smax % leg_;
-			SizeType s = int(emin/leg_) - int(smax/leg_);
-			assert(s>0);
-			if (c>=leg_/2) s--;
-			return  siteEnv - s*leg_;
-		}
-
-		SizeType handle(SizeType i1,SizeType i2) const
-		{
-			SizeType dir = calcDir(i1,i2);
-			SizeType imin = (i1<i2) ? i1 : i2;
-			SizeType y = imin/leg_;
-			switch(dir) {
-			case DIRECTION_X:
-				return imin;
-			case DIRECTION_Y:
-				if (!isPeriodicY_) return imin-imin/leg_;
-				if (imin ==0 || imin % leg_ == 0) imin = (i1>i2) ? i1 : i2;
-				return imin-imin/leg_ + y;
-			}
-			throw RuntimeError("hanlde: Unknown direction\n");
-		}
-
-		bool sameColumn(SizeType i1,SizeType i2) const
-		{
-			SizeType c1 = i1/leg_;
-			SizeType c2 = i2/leg_;
-			if (c1 == c2) return true;
-			return false;
-		}
-
-		bool sameRow(SizeType i1,SizeType i2) const
-		{
-			SizeType c1 = i1%leg_;
-			SizeType c2 = i2%leg_;
-			if (c1 == c2) return true;
-			return false;
-		}
-
-		String label() const
-		{
-			return "ladder";
-		}
-
-		SizeType length(SizeType i) const
-		{
-			assert(i<2);
-			return (i==1) ? leg_ : SizeType(linSize_/leg_);
-		}
-
-		SizeType translate(SizeType site,SizeType dir,SizeType amount) const
-		{
-			assert(dir<2);
-			SizeType x = SizeType(site/leg_);
-			SizeType y = site % leg_;
-			SizeType lx = SizeType(linSize_/leg_);
-			if (dir==DIRECTION_X) x = translateInternal(x,lx,amount);
-			else y = translateInternal(y,leg_,amount);
-			SizeType ind = y + x*leg_;
-			assert(ind<linSize_);
-			return ind;
-		}	
-		
-		SizeType findReflection(SizeType site) const
-		{
-			SizeType x = SizeType(site/leg_);
-			SizeType y = site % leg_;
-			SizeType lx = SizeType(linSize_/leg_);
-			SizeType ind = y + (lx-x-1)*leg_;
-			assert(ind<linSize_);
-			return ind;
-		}
-
-	private:
-
-		SizeType translateInternal(SizeType c,SizeType l,SizeType amount) const
-		{
-			c += amount;
-			while(c>=l) c-=l;
-			return c;
-		}
-
-		SizeType linSize_;
-		SizeType leg_;
-		bool isPeriodicY_;
-	}; // class Ladder
+	SizeType linSize_;
+	SizeType leg_;
+	bool isPeriodicY_;
+}; // class Ladder
 } // namespace PsimagLite 
 
 /*@}*/

@@ -2,11 +2,12 @@
 use strict;
 use Getopt::Long;
 
-my ($file,$noerrors,$nowarn,$fix)=("YOU MUST SPECIFY -file filename",0,0,0);
+my ($file,$noerrors,$nowarn,$debug,$fix)=("YOU MUST SPECIFY -file filename",0,0,0);
 defined($file) or die "$0: Needs one argument: the filename\n";
 GetOptions ("ne" => \$noerrors,    # do not display errors
 	"nw"   => \$nowarn,      # do not display warnings
 	"fix"  => \$fix,
+	"d" => \$debug,
 	"file=s"=>\$file);  # fix in place
 
 my $indentLevel = 0;
@@ -207,7 +208,7 @@ while(<FILE>) {
 	my $label = getLabel($_);
 
 	if ($co==0 and !$hasSemicolonAtTheEnd) {
-		if ($label eq "if" or $label eq "for" or $label eq "else" or $label eq "foreach") {
+		if ($label eq "if" or $label eq "for" or $label eq "else" or $label eq "foreach" or $label eq "try" or $label eq "catch" or $label eq "switch") {
 			$parensBalance = $parensOpen - $parensClosed;
 			if ($parensBalance==0) {
 				$co = 1;
@@ -220,15 +221,19 @@ while(<FILE>) {
 	my $cc = length($c);
 	if ($cc==1) {
 		my $tmp = pop @mystack;
+		$label = $tmp;
 		if ($tmp eq "function") {
 			$nextLineMustBeEmpty = 1;
 		}
 	}
 	my $tmpLevel = $indentLevel;
 	$indentLevel += ($co-$cc);
-	print STDERR "Line $.: tmplevel= $tmpLevel indentLevel= $indentLevel balance=$parensBalance co=$co cc=$cc label=$label\n";
+	if ($debug) {
+		print STDERR "Line $.: tmplevel= $tmpLevel indentLevel= $indentLevel balance=$parensBalance co=$co cc=$cc label=$label\n";
+		printList(\@mystack);
+	}
 	$tmpLevel = $indentLevel if ($co<$cc and !$braceAtTheEnd);
-	$tmpLevel-- if ($tmpLevel>0 and $label eq "else" and $co>0);
+	$tmpLevel-- if ($tmpLevel>0 and ($label eq "else" or $label eq "catch") and $co>0);
 	
 	#print "$_ ** $line ** $indentLevel \n"  if ($co<$cc and !$braceAtTheEnd);
 	$braceAtTheEnd = 0;
@@ -241,7 +246,7 @@ while(<FILE>) {
 	#close namespace if needed
 	if ($tmpLevel<$namespacesOpen) {
 		print STDERR "Closing namespace namespacesOpen = $namespacesOpen\n";
-		$namespacesOpen -= ($tmpLevel+1);
+		$namespacesOpen--; #= ($tmpLevel+1);
 	}
 	# check trailing whitespace
 	my $w = $_;
@@ -294,25 +299,54 @@ sub checkTrailingWhite
 	my $tbs = $w;
 	$tbs =~ s/[^\t]//g;
 	my $ctbs = length($tbs);
+
 	$inLevel -= $namespacesOpen;
-	($ctbs==$inLevel) or die "$0: FATAL: Indentation level $inLevel tabs $ctbs, for line $line label=$label\n";
+	($ctbs==$inLevel) or die "$0: FATAL: Indentation level $inLevel tabs $ctbs, for line $line label=$label namespaces=$namespacesOpen\n";
 }
 
 sub getLabel
 {
 	my ($t)=@_;
 	my $tt = $t;
+	
 	$tt =~ s/\".+\"//;
+	
 	my $label = $lastLabel;
-	$label = "class" if ($tt=~/[^a-zA-Z]*class[^a-zA-Z]/);
-	$label = "namespace" if ($tt=~/[^a-zA-Z]*namespace[^a-zA-Z]/); 
-	$label = "if" if ($tt=~/[^a-zA-Z]*if[^a-zA-Z]/);
-	$label = "for" if ($tt=~/[^a-zA-Z]*for[^a-zA-Z]/);
-	$label = "foreach" if ($tt=~/[^a-zA-Z]*foreach[^a-zA-Z]/);
-	$label = "else" if ($tt=~/[^a-zA-Z]*else[^a-zA-Z]/);
-	$label = "enum" if ($tt=~/[^a-zA-Z]*enum[^a-zA-Z]/);
-	$label = "switch" if ($tt=~/[^a-zA-Z]*switch[^a-zA-Z]/);
-	$label = "function" if ($tt=~/\(/);
+	my $flag=0;
+	my @whats = ("class","namespace","if","for","foreach","else","enum","switch","return","try","catch");
+
+	foreach my $what (@whats) {
+		if (isOfType($tt,$what)) {
+			$label = $what;
+			$flag = 1;
+			last;
+		}
+	}
+
+	if (!$flag) {
+		$label = "function";
+	}
+
 	$lastLabel = $label;
 	return $label;
 }
+
+sub isOfType
+{
+	my ($tt,$what) = @_;
+
+	return 1 if ($tt=~/^$what/);
+	return 1 if ($tt=~/[ \t]$what[^a-zA-Z]/);
+	return 0;
+}
+
+sub printList
+{
+	my ($a)= @_;
+	my $n = scalar(@$a);
+	for (my $i = 0; $i < $n; $i++) {
+		print STDERR "$a->[$i] ";
+	}
+	print STDERR "\n";
+}
+

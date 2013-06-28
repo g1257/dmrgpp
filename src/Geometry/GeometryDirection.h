@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 2.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -84,128 +81,123 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "String.h"
 
 namespace PsimagLite {
-	
-	template<typename RealType,typename GeometryFactoryType>
-	class GeometryDirection {
 
-		typedef Matrix<RealType> MatrixType;
+template<typename RealType,typename GeometryFactoryType>
+class GeometryDirection {
 
-		public:
+	typedef Matrix<RealType> MatrixType;
 
-			enum {NUMBERS,MATRICES};
+public:
 
-			template<typename IoInputter>
-			GeometryDirection(IoInputter& io,SizeType dirId,SizeType edof,
-					  const String& options,
-					  const GeometryFactoryType& geometryFactory)
-			: dirId_(dirId),geometryFactory_(&geometryFactory)
-			{
-				SizeType n = getVectorSize(options);
-				dataType_ = edof;
-				if (edof==NUMBERS) {
-					io.read(dataNumbers_,"Connectors");
-					if (dataNumbers_.size()!=n) {
-						String s(__FILE__);
-						s += " " + ttos(dataNumbers_.size()) + " != " + ttos(n) + "\n";
-					 	throw RuntimeError(s.c_str());
-					}
-				} else {
-					for (SizeType i=0;i<n;i++) {
-						MatrixType m;
-						io.readMatrix(m,"Connectors");
-// 						if (m.n_row()!=edof || m.n_col()!=edof)
-// 							throw RuntimeError("GeometryDirection\n");
-						dataMatrices_.push_back(m);
-					}
-				}
-			}
+	enum {NUMBERS,MATRICES};
 
-// 			const RealType& operator()(SizeType i,SizeType j) const
-// 			{
-// 				if (dataType_==NUMBERS) return dataNumbers_[0];
-// 				return dataMatrices_[0](i,j);
-// 			}
-
-			RealType operator()(SizeType i,SizeType edof1,SizeType j,SizeType edof2) const
-			{
-				SizeType h = (constantValues()) ? 0 : geometryFactory_->handle(i,j);
-				
-				if (dataType_==NUMBERS) {
-					assert(dataNumbers_.size()>h);
-					return dataNumbers_[h];
-				}
-				assert(dataMatrices_.size()>h);
-				
-				bool b = (dataMatrices_[h].n_row()>edof1 &&
-				          dataMatrices_[h].n_col()>edof2);
-				
-				assert(b ||  (dataMatrices_[h].n_row()>edof2 &&
-				              dataMatrices_[h].n_col()>edof1));
-
-				RealType tmp = (b) ? dataMatrices_[h](edof1,edof2) : dataMatrices_[h](edof2,edof1);
-				int signChange = geometryFactory_->signChange(i,j);
-				return tmp * signChange;
-			}
-
-			SizeType nRow() const
-			{
-				return (dataType_==NUMBERS) ? 1 : dataMatrices_[0].n_row();
-			}
-			
-			SizeType nCol() const
-			{
-				return (dataType_==NUMBERS) ? 1 : dataMatrices_[0].n_col();
-			}
-			
-			SizeType size() const
-			{
-				return (dataType_==NUMBERS) ? dataNumbers_.size() : dataMatrices_.size();
-			}
-
-			bool constantValues() const
-			{
-				return (size()==1) ? true : false;
-			}
-
-			template<typename RealType_,typename GeometryFactoryType_>
-			friend std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType_,GeometryFactoryType_>& gd);
-
-		private:
-
-			SizeType getVectorSize(const String& s)
-			{
-				if (s.find("ConstantValues")!=String::npos)
-					return 1;
-
-				return geometryFactory_->getVectorSize(dirId_);
-			}
-			
-			SizeType dirId_;
-			const GeometryFactoryType* geometryFactory_;
-			SizeType dataType_;
-			typename Vector<RealType>::Type dataNumbers_;
-			typename Vector<MatrixType>::Type dataMatrices_;
-	}; // class GeometryDirection
-
-	template<typename RealType,typename GeometryFactoryType>
-	std::ostream& operator<<(std::ostream& os,const GeometryDirection<RealType,GeometryFactoryType>& gd)
+	template<typename IoInputter>
+	GeometryDirection(IoInputter& io,SizeType dirId,SizeType edof,
+	                  const String& options,
+	                  const GeometryFactoryType& geometryFactory)
+	    : dirId_(dirId),geometryFactory_(&geometryFactory)
 	{
-		os<<"#GeometrydirId="<<gd.dirId_<<"\n";
-		if (gd.dataType_==GeometryDirection<RealType,GeometryFactoryType>::NUMBERS) {
-			os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
-			os<<"#GeometryNumbers=";
-			for (SizeType i=0;i<gd.dataNumbers_.size();i++) {
-				os<<gd.dataNumbers_[i]<<" ";
+		SizeType n = getVectorSize(options);
+		dataType_ = edof;
+		if (edof==NUMBERS) {
+			io.read(dataNumbers_,"Connectors");
+			if (dataNumbers_.size()!=n) {
+				String s(__FILE__);
+				s += " " + ttos(dataNumbers_.size()) + " != " + ttos(n) + "\n";
+				throw RuntimeError(s.c_str());
 			}
-			os<<"\n";
 		} else {
-			os<<"#GeometryMatrixSize="<<gd.dataMatrices_.size()<<"\n";
-			for (SizeType i=0;i<gd.dataMatrices_.size();i++) 
-				os<<gd.dataMatrices_[i];
+			for (SizeType i=0;i<n;i++) {
+				MatrixType m;
+				io.readMatrix(m,"Connectors");
+				dataMatrices_.push_back(m);
+			}
 		}
-		return os;
 	}
+
+	RealType operator()(SizeType i,SizeType edof1,SizeType j,SizeType edof2) const
+	{
+		SizeType h = (constantValues()) ? 0 : geometryFactory_->handle(i,j);
+
+		if (dataType_==NUMBERS) {
+			assert(dataNumbers_.size()>h);
+			return dataNumbers_[h];
+		}
+		assert(dataMatrices_.size()>h);
+
+		bool b = (dataMatrices_[h].n_row()>edof1 &&
+		          dataMatrices_[h].n_col()>edof2);
+
+		assert(b ||  (dataMatrices_[h].n_row()>edof2 &&
+		              dataMatrices_[h].n_col()>edof1));
+
+		RealType tmp = (b) ? dataMatrices_[h](edof1,edof2) : dataMatrices_[h](edof2,edof1);
+		int signChange = geometryFactory_->signChange(i,j);
+		return tmp * signChange;
+	}
+
+	SizeType nRow() const
+	{
+		return (dataType_==NUMBERS) ? 1 : dataMatrices_[0].n_row();
+	}
+
+	SizeType nCol() const
+	{
+		return (dataType_==NUMBERS) ? 1 : dataMatrices_[0].n_col();
+	}
+
+	SizeType size() const
+	{
+		return (dataType_==NUMBERS) ? dataNumbers_.size() : dataMatrices_.size();
+	}
+
+	bool constantValues() const
+	{
+		return (size()==1) ? true : false;
+	}
+
+	template<typename RealType_,typename GeometryFactoryType_>
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const GeometryDirection<RealType_,GeometryFactoryType_>& gd);
+
+private:
+
+	SizeType getVectorSize(const String& s)
+	{
+		if (s.find("ConstantValues")!=String::npos)
+			return 1;
+
+		return geometryFactory_->getVectorSize(dirId_);
+	}
+
+	SizeType dirId_;
+	const GeometryFactoryType* geometryFactory_;
+	SizeType dataType_;
+	typename Vector<RealType>::Type dataNumbers_;
+	typename Vector<MatrixType>::Type dataMatrices_;
+}; // class GeometryDirection
+
+template<typename RealType,typename GeometryFactoryType>
+std::ostream& operator<<(std::ostream& os,
+                         const GeometryDirection<RealType,GeometryFactoryType>& gd)
+{
+	os<<"#GeometrydirId="<<gd.dirId_<<"\n";
+	if (gd.dataType_==GeometryDirection<RealType,GeometryFactoryType>::NUMBERS) {
+		os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
+		os<<"#GeometryNumbers=";
+		for (SizeType i=0;i<gd.dataNumbers_.size();i++) {
+			os<<gd.dataNumbers_[i]<<" ";
+		}
+		os<<"\n";
+	} else {
+		os<<"#GeometryMatrixSize="<<gd.dataMatrices_.size()<<"\n";
+		for (SizeType i=0;i<gd.dataMatrices_.size();i++)
+			os<<gd.dataMatrices_[i];
+	}
+	return os;
+}
 } // namespace PsimagLite 
 
 /*@}*/
 #endif // GEOMETRY_DIR_H
+

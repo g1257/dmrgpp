@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -86,104 +83,108 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "String.h"
 
 namespace PsimagLite {
-	
-	class LadderX  {
-			typedef Ladder LadderType;
-		public:
-			enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_XPY,DIRECTION_XMY};
 
-			static const bool IS_PERIODIC_Y = false;
+class LadderX  {
 
-			LadderX(SizeType linSize,SizeType leg)
-			: ladder_(linSize,leg,IS_PERIODIC_Y),linSize_(linSize),leg_(leg)
-			{
-			}
+	typedef Ladder LadderType;
 
-			SizeType getVectorSize(SizeType dirId) const
-			{
-				switch (dirId) {
-				case DIRECTION_XPY:
-						return linSize_ - linSize_/leg_;
-				case DIRECTION_XMY:
-					return linSize_ - linSize_/leg_;
-				}
-				return ladder_.getVectorSize(dirId);
-			}
+public:
 
-			bool connected(SizeType i1,SizeType i2) const
-			{
-				if (i1==i2) return false;
-				if (ladder_.connected(i1,i2)) return true;
-				SizeType c1 = i1/leg_;
-				SizeType c2 = i2/leg_;
-				SizeType r1 = i1%leg_;
-				SizeType r2 = i2%leg_;
-				if (c1==c2) return GeometryUtils::neighbors(r1,r2);
-				if (r1==r2) return GeometryUtils::neighbors(c1,c2);
-				return (GeometryUtils::neighbors(r1,r2) && GeometryUtils::neighbors(c1,c2));
-			}
+	enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_XPY,DIRECTION_XMY};
 
-			// assumes i1 and i2 are connected
-			SizeType calcDir(SizeType i1,SizeType i2) const
-			{
-				if (ladder_.sameColumn(i1,i2)) return DIRECTION_Y;
-				if (ladder_.sameRow(i1,i2)) return DIRECTION_X;
-				SizeType imin = (i1<i2) ? i1 : i2;
-				if (imin&1) return DIRECTION_XPY;
-				return DIRECTION_XMY;
-			}
+	static const bool IS_PERIODIC_Y = false;
 
-			bool fringe(SizeType i,SizeType smax,SizeType emin) const
-			{
-				bool a = (i<emin && i>=smax-1);
-				bool b = (i>smax && i<=emin+1);
-				if (smax & 1) return (a || b);
-				a = (i<emin && i>=smax-2);
-				b = (i>smax && i<=emin+2);
-				return (a || b);
-			}
+	LadderX(SizeType linSize,SizeType leg)
+	    : ladder_(linSize,leg,IS_PERIODIC_Y),linSize_(linSize),leg_(leg)
+	{
+	}
 
-			// assumes i1 and i2 are connected
-			SizeType handle(SizeType i1,SizeType i2) const
-			{
-				SizeType dir = calcDir(i1,i2);
-				SizeType imin = (i1<i2) ? i1 : i2;
-				switch(dir) {
-					case DIRECTION_X:
-						return imin;
-					case DIRECTION_Y:
-						return imin-imin/leg_;
-					case DIRECTION_XPY: // only checked for leg_=2
-						return (imin-1)/leg_;
-					case DIRECTION_XMY:// only checked for leg_=2
-						return imin/leg_;
-				}
-				throw RuntimeError("handle: Unknown direction\n");
-			}
+	SizeType getVectorSize(SizeType dirId) const
+	{
+		switch (dirId) {
+		case DIRECTION_XPY:
+			return linSize_ - linSize_/leg_;
+		case DIRECTION_XMY:
+			return linSize_ - linSize_/leg_;
+		}
+		return ladder_.getVectorSize(dirId);
+	}
 
-			// siteNew2 is fringe in the environment
-			SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
-			{
-				return smax+siteNew2-emin+1;
-			}
+	bool connected(SizeType i1,SizeType i2) const
+	{
+		if (i1==i2) return false;
+		if (ladder_.connected(i1,i2)) return true;
+		SizeType c1 = i1/leg_;
+		SizeType c2 = i2/leg_;
+		SizeType r1 = i1%leg_;
+		SizeType r2 = i2%leg_;
+		if (c1==c2) return GeometryUtils::neighbors(r1,r2);
+		if (r1==r2) return GeometryUtils::neighbors(c1,c2);
+		return (GeometryUtils::neighbors(r1,r2) && GeometryUtils::neighbors(c1,c2));
+	}
 
-			String label() const
-			{
-				return "ladderx";
-			}
-			
-			SizeType findReflection(SizeType site) const
-			{
-				throw RuntimeError("findReflection: unimplemented (sorry)\n");
-			}
+	// assumes i1 and i2 are connected
+	SizeType calcDir(SizeType i1,SizeType i2) const
+	{
+		if (ladder_.sameColumn(i1,i2)) return DIRECTION_Y;
+		if (ladder_.sameRow(i1,i2)) return DIRECTION_X;
+		SizeType imin = (i1<i2) ? i1 : i2;
+		if (imin&1) return DIRECTION_XPY;
+		return DIRECTION_XMY;
+	}
 
-		private:
+	bool fringe(SizeType i,SizeType smax,SizeType emin) const
+	{
+		bool a = (i<emin && i>=smax-1);
+		bool b = (i>smax && i<=emin+1);
+		if (smax & 1) return (a || b);
+		a = (i<emin && i>=smax-2);
+		b = (i>smax && i<=emin+2);
+		return (a || b);
+	}
 
-			LadderType ladder_; // owner
-			SizeType linSize_;
-			SizeType leg_;
-	}; // class LadderBath
+	// assumes i1 and i2 are connected
+	SizeType handle(SizeType i1,SizeType i2) const
+	{
+		SizeType dir = calcDir(i1,i2);
+		SizeType imin = (i1<i2) ? i1 : i2;
+		switch(dir) {
+		case DIRECTION_X:
+			return imin;
+		case DIRECTION_Y:
+			return imin-imin/leg_;
+		case DIRECTION_XPY: // only checked for leg_=2
+			return (imin-1)/leg_;
+		case DIRECTION_XMY:// only checked for leg_=2
+			return imin/leg_;
+		}
+		throw RuntimeError("handle: Unknown direction\n");
+	}
+
+	// siteNew2 is fringe in the environment
+	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
+	{
+		return smax+siteNew2-emin+1;
+	}
+
+	String label() const
+	{
+		return "ladderx";
+	}
+
+	SizeType findReflection(SizeType site) const
+	{
+		throw RuntimeError("findReflection: unimplemented (sorry)\n");
+	}
+
+private:
+
+	LadderType ladder_; // owner
+	SizeType linSize_;
+	SizeType leg_;
+}; // class LadderBath
 } // namespace PsimagLite 
 
 /*@}*/
 #endif // GEOMETRY_H
+

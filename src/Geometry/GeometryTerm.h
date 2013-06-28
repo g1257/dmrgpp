@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -90,202 +87,213 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "String.h"
 
 namespace PsimagLite {
-	
-	template<typename RealType>
-	class GeometryTerm {
-			typedef GeometryDirection<RealType,GeometryFactory> GeometryDirectionType;
-		public:
-			
-			typedef typename GeometryFactory::AdditionalDataType AdditionalDataType;
-			
-			template<typename IoInputter>
-			GeometryTerm(IoInputter& io,SizeType termId,SizeType linSize,bool debug=false) :
-				linSize_(linSize),maxEdof_(0)
-			{
-				int x;
-				io.readline(x,"DegreesOfFreedom=");
-				if (x<=0) throw RuntimeError("DegreesOfFreedom<=0 is an error\n");
-				//std::cerr<<"DegreesOfFreedom "<<x<<"\n";
-				SizeType edof = (x==1) ? GeometryDirectionType::NUMBERS : GeometryDirectionType::MATRICES;
-				String s;
-				io.readline(s,"GeometryKind=");
-				//std::cerr<<"GeometryKind "<<s<<"\n";
 
-				String gOptions;
-				io.readline(gOptions,"GeometryOptions=");
-				//std::cerr<<"GeometryOptions "<<gOptions<<"\n";
+template<typename RealType>
+class GeometryTerm {
+	typedef GeometryDirection<RealType,GeometryFactory> GeometryDirectionType;
+public:
 
-				geometryFactory_.init(io,s,linSize);
+	typedef typename GeometryFactory::AdditionalDataType AdditionalDataType;
 
-				for (SizeType i=0;i<geometryFactory_.dirs();i++) {
-					directions_.push_back(GeometryDirectionType(io,i,edof,gOptions,geometryFactory_));
-				}
-
-				findMaxEdof();
-				cacheValues();
-
-				if (debug) {
-					std::cerr<<"Cached values:\n";
-					std::cerr<<cachedValues_;
-					std::cerr<<"-----------\n";
-				}
-			}
-			
-			const RealType& operator()(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
-			{
-				int k1 = geometryFactory_.index(i1,edof1,maxEdof_);
-				int k2 = geometryFactory_.index(i2,edof2,maxEdof_);
-				assert(k1>=0 && k2>=0);
-				return cachedValues_(k1,k2);
-			}
-
-			//assumes 1<smax+1 < emin
-			const RealType& operator()(SizeType smax,SizeType emin,SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
-			{
-				bool bothFringe = (geometryFactory_.fringe(i1,smax,emin) && geometryFactory_.fringe(i2,smax,emin));
-				SizeType siteNew1 = i1;
-				SizeType siteNew2 = i2;
-				SizeType edofNew1 = edof1;
-				SizeType edofNew2 = edof2;
-				if (bothFringe) {
-					if (i2<i1) {
-						siteNew1 = i2;
-						siteNew2 = i1;
-						edofNew1 = edof2;
-						edofNew2 = edof1;
-					}
-					siteNew2 = geometryFactory_.getSubstituteSite(smax,emin,siteNew2);
-				}
-				return operator()(siteNew1,edofNew1,siteNew2,edofNew2);
-			}
-			
-			bool connected(SizeType smax,SizeType emin,SizeType i1,SizeType i2) const
-			{
-				if (i1==i2) return false;
-
-				bool bothFringe = (geometryFactory_.fringe(i1,smax,emin) && geometryFactory_.fringe(i2,smax,emin));
-
-				if (!bothFringe) return geometryFactory_.connected(i1,i2);
-				//std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
-				return true;
-			}
-
-			bool connected(SizeType i1,SizeType i2) const
-			{
-				return geometryFactory_.connected(i1,i2);
-			}
-
-			String label() const
-			{
-				return geometryFactory_.label();
-			}
-
-			SizeType maxConnections() const
-			{
-				return geometryFactory_.maxConnections();
-			}
-
-			void fillAdditionalData(AdditionalDataType& additionalData,SizeType ind,SizeType jnd) const
-			{
-				geometryFactory_.fillAdditionalData(additionalData,ind,jnd);
-			}
-
-			SizeType findReflection(SizeType site) const
-			{
-				return geometryFactory_.findReflection(site);
-			}
-
-			SizeType length(SizeType i) const
-			{
-				return geometryFactory_.length(i);
-			}
-
-			SizeType translate(SizeType site,SizeType dir,SizeType amount) const
-			{
-				return geometryFactory_.translate(site,dir,amount);
-			}
-
-			void print(std::ostream& os,SizeType linSize) const
-			{
-				SizeType dofs = 1;
-				for (SizeType dof1=0;dof1<dofs;dof1++) {
-					for (SizeType dof2=0;dof2<dofs;dof2++) {
-						os<<"dof1="<<dof1<<" dof2="<<dof2<<"\n";
-						for (SizeType i=0;i<linSize;i++) {
-							for (SizeType j=0;j<linSize;j++) {
-								if (!connected(i,j)) {
-									os<<0<<" ";
-									continue;
-								}
-								os<<operator()(i,dof1,j,dof2)<<" ";
-							}
-							os<<"\n";
-						}
-						os<<"\n";
-					}
-				}
-			}
-
-			template<typename RealType_>	
-			friend std::ostream& operator<<(std::ostream& os,const GeometryTerm<RealType_>& gt);
-	
-		private:
-
-			void cacheValues()
-			{
-				SizeType matrixRank = geometryFactory_.matrixRank(linSize_,maxEdof_);
-				cachedValues_.resize(matrixRank,matrixRank);
-
-				for (SizeType i1=0;i1<linSize_;i1++) {
-					for (SizeType i2=0;i2<linSize_;i2++) {
-						if (!geometryFactory_.connected(i1,i2)) continue;
-						for (SizeType edof1=0;edof1<maxEdof_;edof1++) {
-							int k1 = geometryFactory_.index(i1,edof1,maxEdof_);
-							if (k1<0) continue;
-							for (SizeType edof2=0;edof2<maxEdof_;edof2++) {
-								int k2 = geometryFactory_.index(i2,edof2,maxEdof_);
-								if (k2<0) continue;
-								cachedValues_(k1,k2)=calcValue(i1,edof1,i2,edof2);
-							}
-						}
-					}
-				}
-			}
-
-			void findMaxEdof()
-			{
-				maxEdof_ = 0;
-				for (SizeType dir=0;dir<directions_.size();dir++) {
-						maxEdof_ = directions_[dir].nRow();
-						if (maxEdof_< directions_[dir].nCol())
-							maxEdof_ = directions_[dir].nCol();
-				}
-			}
-
-			RealType calcValue(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
-			{
-				if (!geometryFactory_.connected(i1,i2)) return 0.0;
-
-				SizeType dir = geometryFactory_.calcDir(i1,i2);
-				assert(dir<directions_.size());
-				return directions_[dir](i1,edof1,i2,edof2);
-			}
-
-			SizeType linSize_;
-			SizeType maxEdof_;
-			GeometryFactory geometryFactory_;
-			typename Vector<GeometryDirectionType>::Type directions_;
-			PsimagLite::Matrix<RealType> cachedValues_;
-	}; // class GeometryTerm
-
-	template<typename RealType>
-	std::ostream& operator<<(std::ostream& os,const GeometryTerm<RealType>& gt)
+	template<typename IoInputter>
+	GeometryTerm(IoInputter& io,SizeType termId,SizeType linSize,bool debug=false) :
+	    linSize_(linSize),maxEdof_(0)
 	{
-		os<<"#GeometryDirections="<<gt.directions_.size()<<"\n";
-		for (SizeType i=0;i<gt.directions_.size();i++) os<<gt.directions_[i];
-		return os;
+		int x;
+		io.readline(x,"DegreesOfFreedom=");
+		if (x<=0) throw RuntimeError("DegreesOfFreedom<=0 is an error\n");
+		//std::cerr<<"DegreesOfFreedom "<<x<<"\n";
+		SizeType edof = (x==1) ? GeometryDirectionType::NUMBERS : GeometryDirectionType::MATRICES;
+		String s;
+		io.readline(s,"GeometryKind=");
+		//std::cerr<<"GeometryKind "<<s<<"\n";
+
+		String gOptions;
+		io.readline(gOptions,"GeometryOptions=");
+		//std::cerr<<"GeometryOptions "<<gOptions<<"\n";
+
+		geometryFactory_.init(io,s,linSize);
+
+		for (SizeType i=0;i<geometryFactory_.dirs();i++) {
+			directions_.push_back(GeometryDirectionType(io,i,edof,gOptions,geometryFactory_));
+		}
+
+		findMaxEdof();
+		cacheValues();
+
+		if (debug) {
+			std::cerr<<"Cached values:\n";
+			std::cerr<<cachedValues_;
+			std::cerr<<"-----------\n";
+		}
 	}
+
+	const RealType& operator()(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
+	{
+		int k1 = geometryFactory_.index(i1,edof1,maxEdof_);
+		int k2 = geometryFactory_.index(i2,edof2,maxEdof_);
+		assert(k1>=0 && k2>=0);
+		return cachedValues_(k1,k2);
+	}
+
+	//assumes 1<smax+1 < emin
+	const RealType& operator()(SizeType smax,
+	                           SizeType emin,
+	                           SizeType i1,
+	                           SizeType edof1,
+	                           SizeType i2,
+	                           SizeType edof2) const
+	{
+		bool bothFringe = (geometryFactory_.fringe(i1,smax,emin) &&
+		                   geometryFactory_.fringe(i2,smax,emin));
+		SizeType siteNew1 = i1;
+		SizeType siteNew2 = i2;
+		SizeType edofNew1 = edof1;
+		SizeType edofNew2 = edof2;
+		if (bothFringe) {
+			if (i2<i1) {
+				siteNew1 = i2;
+				siteNew2 = i1;
+				edofNew1 = edof2;
+				edofNew2 = edof1;
+			}
+			siteNew2 = geometryFactory_.getSubstituteSite(smax,emin,siteNew2);
+		}
+		return operator()(siteNew1,edofNew1,siteNew2,edofNew2);
+	}
+
+	bool connected(SizeType smax,SizeType emin,SizeType i1,SizeType i2) const
+	{
+		if (i1==i2) return false;
+
+		bool bothFringe = (geometryFactory_.fringe(i1,smax,emin) &&
+		                   geometryFactory_.fringe(i2,smax,emin));
+
+		if (!bothFringe) return geometryFactory_.connected(i1,i2);
+		//std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
+		return true;
+	}
+
+	bool connected(SizeType i1,SizeType i2) const
+	{
+		return geometryFactory_.connected(i1,i2);
+	}
+
+	String label() const
+	{
+		return geometryFactory_.label();
+	}
+
+	SizeType maxConnections() const
+	{
+		return geometryFactory_.maxConnections();
+	}
+
+	void fillAdditionalData(AdditionalDataType& additionalData,
+	                        SizeType ind,
+	                        SizeType jnd) const
+	{
+		geometryFactory_.fillAdditionalData(additionalData,ind,jnd);
+	}
+
+	SizeType findReflection(SizeType site) const
+	{
+		return geometryFactory_.findReflection(site);
+	}
+
+	SizeType length(SizeType i) const
+	{
+		return geometryFactory_.length(i);
+	}
+
+	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	{
+		return geometryFactory_.translate(site,dir,amount);
+	}
+
+	void print(std::ostream& os,SizeType linSize) const
+	{
+		SizeType dofs = 1;
+		for (SizeType dof1=0;dof1<dofs;dof1++) {
+			for (SizeType dof2=0;dof2<dofs;dof2++) {
+				os<<"dof1="<<dof1<<" dof2="<<dof2<<"\n";
+				for (SizeType i=0;i<linSize;i++) {
+					for (SizeType j=0;j<linSize;j++) {
+						if (!connected(i,j)) {
+							os<<0<<" ";
+							continue;
+						}
+						os<<operator()(i,dof1,j,dof2)<<" ";
+					}
+					os<<"\n";
+				}
+				os<<"\n";
+			}
+		}
+	}
+
+	template<typename RealType_>
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const GeometryTerm<RealType_>& gt);
+
+private:
+
+	void cacheValues()
+	{
+		SizeType matrixRank = geometryFactory_.matrixRank(linSize_,maxEdof_);
+		cachedValues_.resize(matrixRank,matrixRank);
+
+		for (SizeType i1=0;i1<linSize_;i1++) {
+			for (SizeType i2=0;i2<linSize_;i2++) {
+				if (!geometryFactory_.connected(i1,i2)) continue;
+				for (SizeType edof1=0;edof1<maxEdof_;edof1++) {
+					int k1 = geometryFactory_.index(i1,edof1,maxEdof_);
+					if (k1<0) continue;
+					for (SizeType edof2=0;edof2<maxEdof_;edof2++) {
+						int k2 = geometryFactory_.index(i2,edof2,maxEdof_);
+						if (k2<0) continue;
+						cachedValues_(k1,k2)=calcValue(i1,edof1,i2,edof2);
+					}
+				}
+			}
+		}
+	}
+
+	void findMaxEdof()
+	{
+		maxEdof_ = 0;
+		for (SizeType dir=0;dir<directions_.size();dir++) {
+			maxEdof_ = directions_[dir].nRow();
+			if (maxEdof_< directions_[dir].nCol())
+				maxEdof_ = directions_[dir].nCol();
+		}
+	}
+
+	RealType calcValue(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
+	{
+		if (!geometryFactory_.connected(i1,i2)) return 0.0;
+
+		SizeType dir = geometryFactory_.calcDir(i1,i2);
+		assert(dir<directions_.size());
+		return directions_[dir](i1,edof1,i2,edof2);
+	}
+
+	SizeType linSize_;
+	SizeType maxEdof_;
+	GeometryFactory geometryFactory_;
+	typename Vector<GeometryDirectionType>::Type directions_;
+	PsimagLite::Matrix<RealType> cachedValues_;
+}; // class GeometryTerm
+
+template<typename RealType>
+std::ostream& operator<<(std::ostream& os,const GeometryTerm<RealType>& gt)
+{
+	os<<"#GeometryDirections="<<gt.directions_.size()<<"\n";
+	for (SizeType i=0;i<gt.directions_.size();i++) os<<gt.directions_[i];
+	return os;
+}
 } // namespace PsimagLite
 
 /*@}*/
 #endif // GEOMETRY_TERM_H
+

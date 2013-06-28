@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -81,79 +81,81 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "String.h"
 
 namespace PsimagLite {
-	
-	class Chain  {
-		public:
-			enum { DIRECTION_X };
 
-			Chain(SizeType linSize) : linSize_(linSize)
-			{
-			}
+class Chain  {
 
-			SizeType handle(SizeType i,SizeType j) const
-			{
-				return (i<j) ? i : j;
-			}
+public:
 
-			SizeType getVectorSize(SizeType dirId) const
-			{
-				if (dirId!=DIRECTION_X) throw RuntimeError("Chain must have direction 0\n");
-				return linSize_-1;
-			}
+	enum { DIRECTION_X };
 
-			bool connected(SizeType i1,SizeType i2) const
-			{
-				if (i1==i2) return false;
-				return GeometryUtils::neighbors(i1,i2);
-			}
+	Chain(SizeType linSize) : linSize_(linSize)
+	{
+	}
 
-			// assumes i1 and i2 are connected
-			SizeType calcDir(SizeType i1,SizeType i2) const
-			{
-				return DIRECTION_X;
-			}
+	SizeType handle(SizeType i,SizeType j) const
+	{
+		return (i<j) ? i : j;
+	}
 
-			bool fringe(SizeType i,SizeType smax,SizeType emin) const
-			{
-				return (i==smax || i==emin);
+	SizeType getVectorSize(SizeType dirId) const
+	{
+		if (dirId!=DIRECTION_X) throw RuntimeError("Chain must have direction 0\n");
+		return linSize_-1;
+	}
 
-			}
+	bool connected(SizeType i1,SizeType i2) const
+	{
+		if (i1==i2) return false;
+		return GeometryUtils::neighbors(i1,i2);
+	}
 
-			// siteNew2 is fringe in the environment
-			SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
-			{
-				return smax+1;
-			}
+	// assumes i1 and i2 are connected
+	SizeType calcDir(SizeType i1,SizeType i2) const
+	{
+		return DIRECTION_X;
+	}
 
-			String label() const
-			{
-				return "chain";
-			}
-			
-			SizeType findReflection(SizeType site) const
-			{
-				return linSize_ - site -1;
-			}
+	bool fringe(SizeType i,SizeType smax,SizeType emin) const
+	{
+		return (i==smax || i==emin);
 
-			SizeType length(SizeType i) const
-			{
-				assert(i==0);
-				return linSize_;
-			}
+	}
 
-			SizeType translate(SizeType site,SizeType dir,SizeType amount) const
-			{
-				assert(dir==0);
-				
-				site+=amount;
-				while(site>=linSize_) site -= linSize_;
-				return site;
-			}
+	// siteNew2 is fringe in the environment
+	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
+	{
+		return smax+1;
+	}
 
-		private:
+	String label() const
+	{
+		return "chain";
+	}
 
-			SizeType linSize_;
-	}; // class Ladder
+	SizeType findReflection(SizeType site) const
+	{
+		return linSize_ - site -1;
+	}
+
+	SizeType length(SizeType i) const
+	{
+		assert(i==0);
+		return linSize_;
+	}
+
+	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	{
+		assert(dir==0);
+
+		site+=amount;
+		while (site>=linSize_) site -= linSize_;
+		return site;
+	}
+
+private:
+
+	SizeType linSize_;
+}; // class Ladder
 } // namespace PsimagLite 
 
 /*@}*/

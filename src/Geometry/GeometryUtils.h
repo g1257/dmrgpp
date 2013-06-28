@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -83,18 +83,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 
 namespace PsimagLite {
-	
-	namespace GeometryUtils {
-		bool neighbors(SizeType i1,SizeType i2,bool periodic = false,SizeType period = 1)
-		{
-			SizeType imin = (i1<i2) ? i1 : i2;
-			SizeType imax = (i1>i2) ? i1 : i2;
-			bool b = (imax-imin==1);
-			if (!periodic) return b;
-			bool b2 = (imax-imin == period);
-			return (b || b2);
-		}
-	} // namespace GeometryUtils
+
+namespace GeometryUtils {
+
+bool neighbors(SizeType i1,SizeType i2,bool periodic = false,SizeType period = 1)
+{
+	SizeType imin = (i1<i2) ? i1 : i2;
+	SizeType imax = (i1>i2) ? i1 : i2;
+	bool b = (imax-imin==1);
+	if (!periodic) return b;
+	bool b2 = (imax-imin == period);
+	return (b || b2);
+}
+
+} // namespace GeometryUtils
+
 } // namespace PsimagLite
 /*@}*/
 #endif // GEOMETRY_UTILS_H
+

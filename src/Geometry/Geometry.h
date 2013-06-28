@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -82,164 +82,172 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "String.h"
 
 namespace PsimagLite {
-	
-	template<typename RealType_,typename ProgramGlobalsType>
-	class Geometry {
-		public:
-			typedef  RealType_ RealType;
-			typedef GeometryTerm<RealType> GeometryTermType;
-			typedef typename Vector<SizeType>::Type BlockType;
-			typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
 
-			template<typename IoInputter>
-			Geometry(IoInputter& io,bool debug=false)
-			{
-				int x;
-				io.readline(x,"TotalNumberOfSites=");
-				if (x<0) throw RuntimeError("TotalNumberOfSites<0 is an error\n");
-				linSize_ = x;
+template<typename RealType_,typename ProgramGlobalsType>
+class Geometry {
 
-				io.readline(x,"NumberOfTerms=");
-				if (x<0) throw RuntimeError("NumberOfTerms<0 is an error\n");
+public:
 
-				for (SizeType i=0;i<SizeType(x);i++) {
-					terms_.push_back(GeometryTermType(io,i,linSize_,debug));
-				}
-			}
+	typedef  RealType_ RealType;
+	typedef GeometryTerm<RealType> GeometryTermType;
+	typedef typename Vector<SizeType>::Type BlockType;
+	typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
 
-			String label(SizeType i) const { return terms_[i].label(); }
-			
-			SizeType connectionKind(SizeType smax,SizeType ind,SizeType jnd) const
-			{
-				SizeType middle = smax + 1;
-				if (ind<middle && jnd>=middle) return ProgramGlobalsType::SYSTEM_ENVIRON;
-				if (jnd<middle && ind>=middle) return ProgramGlobalsType::ENVIRON_SYSTEM;
-				if (ind<middle) return ProgramGlobalsType::SYSTEM_SYSTEM;
-				return ProgramGlobalsType::ENVIRON_ENVIRON;
-			}
-			
-			RealType operator()
-				(SizeType smax,SizeType emin,
-				 SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
-			{
-				if (smax+1==emin) return terms_[term](i1,edof1,i2,edof2);
-				return terms_[term](smax,emin,i1,edof1,i2,edof2);
-			}
-
-			RealType operator()
-				(SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
-			{
-				return terms_[term](i1,edof1,i2,edof2);
-			}
-			
-			// needs to check all terms FIXME:
-			bool connected(SizeType smax,SizeType emin,SizeType i1,SizeType i2) const
-			{
-				if (smax+1==emin) return terms_[0].connected(i1,i2); // any term will do
-				return terms_[0].connected(smax,emin,i1,i2); // any term will do
-			}
-
-			SizeType terms() const { return terms_.size(); }
-			
-			SizeType numberOfSites() const { return linSize_; }
-			
-			void split(SizeType sitesPerBlock,
-			           BlockType& S,
-			           typename Vector<BlockType>::Type& X,
-			           typename Vector<BlockType>::Type& Y,
-			           BlockType& E) const
-			{
-				SizeType middle = linSize_/2;
-				if (linSize_& 1 ||
-				    linSize_ % sitesPerBlock!=0 ||
-				    SizeType(linSize_/sitesPerBlock)<3) {
-					String str(__FILE__);
-					str += " " + ttos(__LINE__) + "\n";
-					str += "split error, linSize_=" + ttos(linSize_);
-					str += " sitesPerBlock=" + ttos(sitesPerBlock) + "\n";
-					throw RuntimeError(str.c_str());
-				}
-				SizeType i=0;
-				while(i<sitesPerBlock) {
-					S.push_back(i);
-					i++;
-				}
-				while(i<middle) {
-					typename Vector<SizeType>::Type tmpV(sitesPerBlock);
-					for (SizeType j=0;j<sitesPerBlock;j++)
-						tmpV[j] = i+j;
-					X.push_back(tmpV);
-					i+=sitesPerBlock;
-				}
-				
-				SizeType lastMiddle=linSize_-sitesPerBlock;
-				while(i<lastMiddle) {
-					typename Vector<SizeType>::Type tmpV(sitesPerBlock);
-					for (SizeType j=0;j<sitesPerBlock;j++) {
-						SizeType jj = sitesPerBlock-1-j;
-						tmpV[j] = (linSize_-1-i-jj)+(middle-sitesPerBlock);
-						assert(tmpV[j]<linSize_);
-					}
-					Y.push_back(tmpV);
-					i+=sitesPerBlock;
-				}
-
-				while(i<linSize_) {
-					E.push_back(i);
-					i++;
-				}
-			}
-			
-			SizeType maxConnections(SizeType termId = 0) const
-			{
-				return terms_[termId].maxConnections();
-			}
-			
-			void fillAdditionalData(AdditionalDataType& additionalData,SizeType term,SizeType ind,SizeType jnd) const
-			{
-				terms_[term].fillAdditionalData(additionalData,ind,jnd);
-			}
-
-			SizeType findReflection(SizeType site,SizeType termId) const
-			{
-				return terms_[termId].findReflection(site);
-			}
-
-			SizeType length(SizeType i,SizeType termId) const
-			{
-				return terms_[termId].length(i);
-			}
-
-			SizeType translate(SizeType site,SizeType dir, SizeType amount,SizeType termId) const
-			{
-				return terms_[termId].translate(site,dir,amount);
-			}
-
-			void print(std::ostream& os) const
-			{
-				for (SizeType i=0;i<terms_.size();i++)
-					terms_[i].print(os,linSize_);
-			}
-
-			template<typename RealType2,typename PgType>
-			friend std::ostream& operator<<(std::ostream& os,const Geometry<RealType2,PgType>& g);
-
-		private:
-
-			SizeType linSize_;
-			typename Vector<GeometryTermType>::Type terms_;
-			
-	}; // class Geometry
-
-	template<typename RealType,typename PgType>
-	std::ostream& operator<<(std::ostream& os,const Geometry<RealType,PgType>& g) 
+	template<typename IoInputter>
+	Geometry(IoInputter& io,bool debug=false)
 	{
-		os<<"#GeometrySize="<<g.linSize_<<"\n";
-		os<<"#GeometryTerms="<<g.terms_.size()<<"\n";
-		for (SizeType i=0;i<g.terms_.size();i++) os<<g.terms_[i];
-		return os;
+		int x;
+		io.readline(x,"TotalNumberOfSites=");
+		if (x<0) throw RuntimeError("TotalNumberOfSites<0 is an error\n");
+		linSize_ = x;
+
+		io.readline(x,"NumberOfTerms=");
+		if (x<0) throw RuntimeError("NumberOfTerms<0 is an error\n");
+
+		for (SizeType i=0;i<SizeType(x);i++) {
+			terms_.push_back(GeometryTermType(io,i,linSize_,debug));
+		}
 	}
+
+	String label(SizeType i) const { return terms_[i].label(); }
+
+	SizeType connectionKind(SizeType smax,SizeType ind,SizeType jnd) const
+	{
+		SizeType middle = smax + 1;
+		if (ind<middle && jnd>=middle) return ProgramGlobalsType::SYSTEM_ENVIRON;
+		if (jnd<middle && ind>=middle) return ProgramGlobalsType::ENVIRON_SYSTEM;
+		if (ind<middle) return ProgramGlobalsType::SYSTEM_SYSTEM;
+		return ProgramGlobalsType::ENVIRON_ENVIRON;
+	}
+
+	RealType operator()
+	(SizeType smax,SizeType emin,
+	 SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
+	{
+		if (smax+1==emin) return terms_[term](i1,edof1,i2,edof2);
+		return terms_[term](smax,emin,i1,edof1,i2,edof2);
+	}
+
+	RealType operator()
+	(SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
+	{
+		return terms_[term](i1,edof1,i2,edof2);
+	}
+
+	// needs to check all terms FIXME:
+	bool connected(SizeType smax,SizeType emin,SizeType i1,SizeType i2) const
+	{
+		if (smax+1==emin) return terms_[0].connected(i1,i2); // any term will do
+		return terms_[0].connected(smax,emin,i1,i2); // any term will do
+	}
+
+	SizeType terms() const { return terms_.size(); }
+
+	SizeType numberOfSites() const { return linSize_; }
+
+	void split(SizeType sitesPerBlock,
+	           BlockType& S,
+	           typename Vector<BlockType>::Type& X,
+	           typename Vector<BlockType>::Type& Y,
+	           BlockType& E) const
+	{
+		SizeType middle = linSize_/2;
+		if (linSize_& 1 ||
+		    linSize_ % sitesPerBlock!=0 ||
+		    SizeType(linSize_/sitesPerBlock)<3) {
+			String str(__FILE__);
+			str += " " + ttos(__LINE__) + "\n";
+			str += "split error, linSize_=" + ttos(linSize_);
+			str += " sitesPerBlock=" + ttos(sitesPerBlock) + "\n";
+			throw RuntimeError(str.c_str());
+		}
+
+		SizeType i=0;
+		while (i<sitesPerBlock) {
+			S.push_back(i);
+			i++;
+		}
+
+		while (i<middle) {
+			typename Vector<SizeType>::Type tmpV(sitesPerBlock);
+			for (SizeType j=0;j<sitesPerBlock;j++)
+				tmpV[j] = i+j;
+			X.push_back(tmpV);
+			i+=sitesPerBlock;
+		}
+
+		SizeType lastMiddle=linSize_-sitesPerBlock;
+		while (i<lastMiddle) {
+			typename Vector<SizeType>::Type tmpV(sitesPerBlock);
+			for (SizeType j=0;j<sitesPerBlock;j++) {
+				SizeType jj = sitesPerBlock-1-j;
+				tmpV[j] = (linSize_-1-i-jj)+(middle-sitesPerBlock);
+				assert(tmpV[j]<linSize_);
+			}
+			Y.push_back(tmpV);
+			i+=sitesPerBlock;
+		}
+
+		while (i<linSize_) {
+			E.push_back(i);
+			i++;
+		}
+	}
+
+	SizeType maxConnections(SizeType termId = 0) const
+	{
+		return terms_[termId].maxConnections();
+	}
+
+	void fillAdditionalData(AdditionalDataType& additionalData,
+	                        SizeType term,
+	                        SizeType ind,
+	                        SizeType jnd) const
+	{
+		terms_[term].fillAdditionalData(additionalData,ind,jnd);
+	}
+
+	SizeType findReflection(SizeType site,SizeType termId) const
+	{
+		return terms_[termId].findReflection(site);
+	}
+
+	SizeType length(SizeType i,SizeType termId) const
+	{
+		return terms_[termId].length(i);
+	}
+
+	SizeType translate(SizeType site,SizeType dir, SizeType amount,SizeType termId) const
+	{
+		return terms_[termId].translate(site,dir,amount);
+	}
+
+	void print(std::ostream& os) const
+	{
+		for (SizeType i=0;i<terms_.size();i++)
+			terms_[i].print(os,linSize_);
+	}
+
+	template<typename RealType2,typename PgType>
+	friend std::ostream& operator<<(std::ostream& os,const Geometry<RealType2,PgType>& g);
+
+private:
+
+	SizeType linSize_;
+	typename Vector<GeometryTermType>::Type terms_;
+
+}; // class Geometry
+
+template<typename RealType,typename PgType>
+std::ostream& operator<<(std::ostream& os,const Geometry<RealType,PgType>& g)
+{
+	os<<"#GeometrySize="<<g.linSize_<<"\n";
+	os<<"#GeometryTerms="<<g.terms_.size()<<"\n";
+	for (SizeType i=0;i<g.terms_.size();i++) os<<g.terms_[i];
+	return os;
+}
 } // namespace PsimagLite 
 
 /*@}*/
 #endif // GEOMETRY_H
+
