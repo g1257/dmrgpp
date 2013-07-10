@@ -105,6 +105,9 @@ namespace Dmrg {
 			enum {GROW_TO_THE_RIGHT = BasisWithOperatorsType::GROW_RIGHT,
 				GROW_TO_THE_LEFT= BasisWithOperatorsType::GROW_LEFT};
 
+			enum {SAVE_ALL = SuperBlockType::SAVE_ALL,
+				  SAVE_PARTIAL = SuperBlockType::SAVE_PARTIAL};
+
 			template<typename IoInputter>
 			LeftRightSuper(IoInputter& io)
 			: progress_("LeftRightSuper"),
@@ -203,11 +206,11 @@ namespace Dmrg {
 			}
 
 			template<typename IoOutputType>
-			void save(IoOutputType& io) const
+			void save(IoOutputType& io,SizeType option) const
 			{
 				super_->save(io);
-				left_->save(io);
-				right_->save(io);
+				left_->save(io,option);
+				right_->save(io,option);
 			}
 
 			const BasisWithOperatorsType& left()  const { return *left_; }

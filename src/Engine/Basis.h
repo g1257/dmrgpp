@@ -110,6 +110,7 @@ namespace Dmrg {
 
 		enum {BEFORE_TRANSFORM,AFTER_TRANSFORM};
 
+		enum {SAVE_ALL, SAVE_PARTIAL};
 
 		//! Constructor, s=name of this basis 
 		Basis(const PsimagLite::String& s)

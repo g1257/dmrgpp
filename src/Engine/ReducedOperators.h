@@ -367,6 +367,13 @@ namespace Dmrg {
 			io.printVector(reducedOperators_,"#OPERATORS");
 		}
 
+		template<typename IoOutputter>
+		void saveEmpty(IoOutputter& io,const PsimagLite::String& s) const
+		{
+			PsimagLite::Vector<SizeType>::Type tmp;
+			io.printVector(tmp,"#OPERATORS");
+		}
+
 	private:
 		const BasisType* thisBasis_;
 		bool useSu2Symmetry_;

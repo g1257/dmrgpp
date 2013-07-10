@@ -321,18 +321,24 @@ namespace Dmrg {
 		}
 
 		template<typename IoOutputter>
-		void save(IoOutputter& io,const PsimagLite::String& s) const
+		void save(IoOutputter& io,const PsimagLite::String& s,SizeType option) const
 		{
 			BasisType::save(io,s); // parent saves
-			operators_.save(io,s);
+			if (option == BasisType::SAVE_ALL)
+				operators_.save(io,s);
+			else
+				operators_.saveEmpty(io,s);
 			io.printVector(operatorsPerSite_,"#OPERATORSPERSITE");
 		}
 
 		template<typename IoOutputter>
-		void save(IoOutputter& io) const
+		void save(IoOutputter& io,SizeType option) const
 		{
 			BasisType::save(io); // parent saves
-			operators_.save(io,this->name());
+			if (option == BasisType::SAVE_ALL)
+				operators_.save(io,this->name());
+			else
+				operators_.saveEmpty(io,this->name());
 			io.printVector(operatorsPerSite_,"#OPERATORSPERSITE");
 		}
 

@@ -124,10 +124,11 @@ namespace Dmrg {
 		typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 
-		enum {SAVE_TO_DISK=1,DO_NOT_SAVE=0};
 		enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
+
+		enum {SAVE_ALL=MyBasis::SAVE_ALL, SAVE_PARTIAL=MyBasis::SAVE_PARTIAL};
 
 		DmrgSolver(ParametersDmrgSolver<RealType,InputValidatorType> const &parameters,
 		           ModelType const &model,
@@ -375,7 +376,7 @@ namespace Dmrg {
 		{
 			int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 			SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
-			int saveOption = (parameters_.finiteLoop[loopIndex].saveOption & 1);
+			int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 			RealType gsEnergy=0;
 			
 			SizeType direction=EXPAND_SYSTEM;
@@ -415,7 +416,7 @@ namespace Dmrg {
 
 				lrs_.setToProduct(quantumSector_);
 
-				bool needsPrinting = (saveOption==SAVE_TO_DISK);
+				bool needsPrinting = (saveOption & 1);
 				gsEnergy =diagonalization_(target,direction,sitesIndices_[stepCurrent_],loopIndex,needsPrinting);
 
 				changeTruncateAndSerialize(pS,pE,target,keptStates,direction,saveOption);
@@ -432,7 +433,7 @@ namespace Dmrg {
 			} else {
 				pS = lrs_.left();
 			}
-			if (saveOption==SAVE_TO_DISK) {
+			if (saveOption & 1) {
 				PsimagLite::String s="#WAVEFUNCTION_ENERGY="+ttos(gsEnergy);
 				io_.printline(s);
 //				io_.print("#WAVEFUNCTION_ENERGY=",gsEnergy);
@@ -444,7 +445,7 @@ namespace Dmrg {
 						const TargettingType& target,
 						SizeType keptStates,
 						SizeType direction,
-						SizeType saveOption)
+						int saveOption)
 		{
 			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
 			const typename PsimagLite::Vector<SizeType>::Type& eS = pS.electronsVector();
@@ -463,19 +464,22 @@ namespace Dmrg {
 			} else {
 				checkpoint_.push((twoSiteDmrg) ? lrs_.right() : pE,ProgramGlobals::ENVIRON);
 			}
-			if (saveOption==SAVE_TO_DISK)
-				serialize(fsS,fsE,target,truncate_.transform(),direction);
+			serialize(fsS,fsE,target,truncate_.transform(),direction,saveOption);
 		}
 
 		void serialize(const FermionSignType& fsS,
 		               const FermionSignType& fsE,
 		               const TargettingType& target,
-			       const SparseMatrixType& transform,
-		               SizeType direction)
+		               const SparseMatrixType& transform,
+		               SizeType direction,
+		               int saveOption)
 		{
+			if (!(saveOption & 1)) return;
+
 			DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
 
-			ds.save(io_);
+			SizeType saveOption2 = (saveOption & 4) ? SAVE_ALL : SAVE_PARTIAL;
+			ds.save(io_,saveOption2);
 
 			target.save(sitesIndices_[stepCurrent_],io_);
 		}

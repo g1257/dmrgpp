@@ -142,7 +142,7 @@ namespace Dmrg {
 			{
 				//PsimagLite::String tmpLabel = fileOut_ + ttos(total_);
 				ioOut_.open(fileOut_,std::ios_base::app);
-				d.save(ioOut_);
+				d.save(ioOut_,DataType::SAVE_ALL);
 				ioOut_.close();
 
 				stack_.push(total_);

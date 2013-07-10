@@ -129,8 +129,8 @@ namespace Dmrg {
 			PsimagLite::OstringStream msg;
 			msg<<"Saving pS and pE...";
 			progress_.printline(msg,std::cout);
-			pS.save(io,"#CHKPOINTSYSTEM");
-			pE.save(io,"#CHKPOINTENVIRON");
+			pS.save(io,"#CHKPOINTSYSTEM",BasisWithOperatorsType::SAVE_ALL);
+			pE.save(io,"#CHKPOINTENVIRON",BasisWithOperatorsType::SAVE_ALL);
 		}
 
 		// Not related to stacks

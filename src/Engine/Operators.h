@@ -421,6 +421,16 @@ transformed operator can be used (or not because of the reason limitation above)
 			io.printMatrix(hamiltonian_,"#HAMILTONIAN");
 		}
 
+		template<typename IoOutputter>
+		void saveEmpty(IoOutputter& io,const PsimagLite::String& s) const
+		{
+			PsimagLite::Vector<SizeType>::Type tmp;
+			if (!useSu2Symmetry_) io.printVector(tmp,"#OPERATORS");
+			else reducedOpImpl_.saveEmpty(io,s);
+			PsimagLite::Matrix<SizeType> tmp2(0,0);
+			io.printMatrix(tmp2,"#HAMILTONIAN");
+		}
+
 		SizeType size() const { return operators_.size(); }
 
 	private:
