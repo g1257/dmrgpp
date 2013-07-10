@@ -326,6 +326,7 @@ public:
 			std::pair<String,SizeType> sc = advance(s,level,beQuiet);
 			int xsize;
 			fin_>>xsize;
+			if (xsize == 0) return sc;
 			x.resize(xsize);
 			for (int i=0;i<xsize;i++) {
 				typename X::value_type tmp;

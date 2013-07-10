@@ -420,10 +420,14 @@ std::istream &operator>>(std::istream &is,CrsMatrix<T>& m)
 	is>>n;
 	if (n<0) throw RuntimeError(
 	            "is>>CrsMatrix(...): Rows must be positive\n");
+
 	int ncol=0;
 	if (ncol<0) throw RuntimeError(
 	            "is>>CrsMatrix(...): Cols must be positive\n");
 	is>>ncol;
+
+	if (n == 0 || ncol == 0) return is;
+
 	m.resize(n,ncol);
 	for (SizeType i=0;i<m.rowptr_.size();i++) is>>m.rowptr_[i];
 
