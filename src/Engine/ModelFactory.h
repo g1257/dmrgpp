@@ -399,6 +399,7 @@ namespace Dmrg {
 
 		SizeType hilbertSize(SizeType site) const
 		{
+			assert(site < hilbertSize_.size());
 			return hilbertSize_[site];
 		}
 
