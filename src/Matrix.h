@@ -658,7 +658,7 @@ bool isTheIdentity(Matrix<T> const &a)
 
 	for (SizeType i=0;i<a.n_row();i++) {
 		for (SizeType j=0;j<a.n_col();j++) {
-			if (i!=j && std::norm(a(i,j))>0)  {
+			if (i!=j && std::norm(a(i,j))>1e-6)  {
 				std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j)<<"\n";
 				return false;
 			}
@@ -666,7 +666,7 @@ bool isTheIdentity(Matrix<T> const &a)
 	}
 
 	for (SizeType i=0;i<a.n_row();i++)
-		if (std::norm(a(i,i)-static_cast<T>(1.0))>0) return false;
+		if (std::norm(a(i,i)-static_cast<T>(1.0))>1e-6) return false;
 
 	return true;
 }
