@@ -311,7 +311,7 @@ namespace Dmrg {
 				}
 
 				// compute imag. time evolution:
-				calcTimeVectors(PairType(0,n1),Eg,direction);
+				calcTimeVectors(PairType(0,n1),Eg,direction,block1);
 
 				// Advance or wft  collapsed vector
 				if (targetVectors_[n1].size()>0)
@@ -858,7 +858,8 @@ namespace Dmrg {
 
 			void calcTimeVectors(const PairType& startEnd,
 			                     RealType Eg,
-			                     SizeType systemOrEnviron)
+			                     SizeType systemOrEnviron,
+			                     const PsimagLite::Vector<SizeType>::Type& block)
 			{
 				const VectorWithOffsetType& phi = targetVectors_[startEnd.first];
 				PsimagLite::OstringStream msg;
@@ -867,7 +868,12 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 				if (std::norm(phi)<1e-6) setFromInfinite(targetVectors_[startEnd.first],lrs_);
 				bool allOperatorsApplied = (noStageIs(DISABLED));
-				timeVectorsBase_->calcTimeVectors(startEnd,Eg,phi,systemOrEnviron,allOperatorsApplied);
+				timeVectorsBase_->calcTimeVectors(startEnd,
+				                                  Eg,
+				                                  phi,
+				                                  systemOrEnviron,
+				                                  allOperatorsApplied,
+				                                  block);
 				normalizeVectors(startEnd);
 			}
 

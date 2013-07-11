@@ -143,7 +143,8 @@ public:
 	                             RealType Eg,
 								 const VectorWithOffsetType& phi,
 								 SizeType systemOrEnviron,
-	                             bool allOperatorsApplied)
+	                             bool allOperatorsApplied,
+	                             const PsimagLite::Vector<SizeType>::Type& block)
 	{
 		static bool firstcall = true;
 		PsimagLite::OstringStream msg;
@@ -179,7 +180,7 @@ public:
 		if (b2 && lrs_.left().block().size()==1)
 			b2=false;
 
-		wftAll(lrs_.left().block()[lastIndexLeft]);
+		wftAll(block);
 
 		if (b1 || b2) return;
 
@@ -228,13 +229,13 @@ private:
 		return true;
 	}
 
-	void wftAll(SizeType site)
+	void wftAll(const PsimagLite::Vector<SizeType>::Type& block)
 	{
 		for (SizeType i=1;i<times_.size();i++)
-			wftOne(i,site);
+			wftOne(i,block);
 	}
 
-	void wftOne(SizeType i,SizeType site)
+	void wftOne(SizeType i,const PsimagLite::Vector<SizeType>::Type& block)
 	{
 		VectorWithOffsetType phiNew;
 		if (nonZeroQns_) {
@@ -248,7 +249,8 @@ private:
 		}
 
 		// OK, now that we got the partition number right, let's wft:
-		PsimagLite::Vector<SizeType>::Type nk(1,model_.hilbertSize(site));
+		PsimagLite::Vector<SizeType>::Type nk;
+		setNk(nk,block);
 		wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk); // generalize for su(2)
 		phiNew.collapseSectors();
 		assert(std::norm(phiNew)>1e-6);
@@ -468,6 +470,13 @@ private:
 		assert(isHermitian(m));
 		m *= (-time);
 		exp(m);
+	}
+
+	void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,
+	           const typename PsimagLite::Vector<SizeType>::Type& block) const
+	{
+		for (SizeType i=0;i<block.size();i++)
+			nk.push_back(model_.hilbertSize(block[i]));
 	}
 
 	PsimagLite::ProgressIndicator progress_;

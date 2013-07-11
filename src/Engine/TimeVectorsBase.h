@@ -101,7 +101,8 @@ public:
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
 	                             SizeType systemOrEnviron,
-	                             bool allOperatorsApplied)=0;
+	                             bool allOperatorsApplied,
+	                             const PsimagLite::Vector<SizeType>::Type& block)=0;
 
 	virtual ~TimeVectorsBase() {}
 

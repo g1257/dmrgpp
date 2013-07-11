@@ -320,7 +320,12 @@ namespace Dmrg {
 
 				typename TimeVectorsBaseType::PairType startEnd(0,times_.size());
 				bool allOperatorsApplied = (noStageIs(DISABLED) && noStageIs(OPERATOR));
-				timeVectorsBase_->calcTimeVectors(startEnd,Eg,phiNew,direction,allOperatorsApplied);
+				timeVectorsBase_->calcTimeVectors(startEnd,
+				                                  Eg,
+				                                  phiNew,
+				                                  direction,
+				                                  allOperatorsApplied,
+				                                  block1);
 				
 				cocoon(direction,block1); // in-situ
 				printEnergies(); // in-situ
