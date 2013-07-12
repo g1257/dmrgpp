@@ -172,7 +172,9 @@ namespace Dmrg {
 				RealType tau =tstStruct_.tau;
 				RealType sum = 0;
 				SizeType n = times_.size();
+				gsWeight_ = (tstStruct_.concatenation == SUM) ? 0.1 : 0.0;
 				RealType factor = (n+4.0)/(n+2.0);
+				factor *= (1.0 - gsWeight_);
 				for (SizeType i=0;i<n;i++) {
 					times_[i] = i*tau/(n-1);
 					weight_[i] = factor/(n+4);
@@ -219,17 +221,14 @@ namespace Dmrg {
 
 			RealType weight(SizeType i) const
 			{
-				if (allStages(DISABLED)) throw PsimagLite::RuntimeError(
-						"TST: What are you doing here?\n");
+				assert(!allStages(DISABLED));
 				return weight_[i];
-				//return 1.0;
 			}
 
 			RealType gsWeight() const
 			{
 				if (allStages(DISABLED)) return 1.0;
 				return gsWeight_;
-				//return 1.0;
 			}
 
 			RealType normSquared(SizeType i) const
@@ -329,6 +328,7 @@ namespace Dmrg {
 				
 				cocoon(direction,block1); // in-situ
 				printEnergies(); // in-situ
+				printNormsAndWeights();
 			}
 
 			void load(const PsimagLite::String& f)
@@ -456,6 +456,23 @@ namespace Dmrg {
 			}
 
 		private:
+
+			void printNormsAndWeights() const
+			{
+				if (allStages(DISABLED)) return;
+
+				PsimagLite::OstringStream msg;
+				msg<<"gsWeight="<<gsWeight_<<" weights= ";
+				for (SizeType i = 0; i < weight_.size(); i++)
+					msg<<weight_[i]<<" ";
+				progress_.printline(msg,std::cout);
+
+				PsimagLite::OstringStream msg2;
+				msg2<<"gsNorm="<<std::norm(psi_)<<" norms= ";
+				for (SizeType i = 0; i < weight_.size(); i++)
+					msg2<<normSquared(i)<<" ";
+				progress_.printline(msg2,std::cout);
+			}
 
 			void printEnergies() const
 			{
