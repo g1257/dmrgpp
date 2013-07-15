@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -87,49 +84,53 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsCommon.h"
 
 namespace Dmrg {
-	//! Coordinates reading of TargetSTructure from input file
-	template<typename ModelType>
-	class AdaptiveDynamicParams : public TargetParamsCommon<ModelType> {
-	public:
-		typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
-		typedef typename ModelType::RealType RealType;
-			
-		typedef typename ModelType::OperatorType OperatorType;
-		typedef typename OperatorType::PairType PairType;
-		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-		typedef typename SparseMatrixType::value_type ComplexOrReal;
-		typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
-		static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
-		static SizeType const SUM = TargetParamsCommonType::SUM;
+//! Coordinates reading of TargetSTructure from input file
+template<typename ModelType>
+class AdaptiveDynamicParams : public TargetParamsCommon<ModelType> {
 
-		template<typename IoInputter>
-		AdaptiveDynamicParams(IoInputter& io,const ModelType& model)
-		: TargetParamsCommonType(io,model)
-		  {
-//			io.rewind();
-			this->concatenation = SUM;
-			io.readline(type,"DynamicDmrgType=");
-			io.readline(advanceEach,"DynamicDmrgAdvanceEach=");
-		  }
-		SizeType type;
-		SizeType advanceEach;
+public:
 
-	}; // class AdaptiveDynamicParams
-	
-	template<typename ModelType>
-	inline std::ostream&
-	operator<<(std::ostream& os,const AdaptiveDynamicParams<ModelType>& t)
+	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
+	typedef typename ModelType::RealType RealType;
+
+	typedef typename ModelType::OperatorType OperatorType;
+	typedef typename OperatorType::PairType PairType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrReal;
+	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
+
+	static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
+	static SizeType const SUM = TargetParamsCommonType::SUM;
+
+	template<typename IoInputter>
+	AdaptiveDynamicParams(IoInputter& io,const ModelType& model)
+	    : TargetParamsCommonType(io,model)
 	{
-		os<<"#TargetParams.type=AdaptiveDynamic\n";
-		const typename TimeStepParams<ModelType>::TargetParamsCommonType&
-			tp = t;
-		os<<tp;
-		os<<"DynamicDmrgType="<<t.type<<"\n";
-		os<<"DynamicDmrgAdvanceEach="<<t.advanceEach<<"\n";
-		return os;
+		this->concatenation = SUM;
+		io.readline(type,"DynamicDmrgType=");
+		io.readline(advanceEach,"DynamicDmrgAdvanceEach=");
 	}
+
+	SizeType type;
+	SizeType advanceEach;
+
+}; // class AdaptiveDynamicParams
+
+template<typename ModelType>
+inline std::ostream&
+operator<<(std::ostream& os,const AdaptiveDynamicParams<ModelType>& t)
+{
+	os<<"#TargetParams.type=AdaptiveDynamic\n";
+	const typename TimeStepParams<ModelType>::TargetParamsCommonType&
+	        tp = t;
+	os<<tp;
+	os<<"DynamicDmrgType="<<t.type<<"\n";
+	os<<"DynamicDmrgAdvanceEach="<<t.advanceEach<<"\n";
+	return os;
+}
 } // namespace Dmrg 
 
 /*@}*/
 #endif //ADAPTIVE_DYNAMIC_PARAMS_H
+

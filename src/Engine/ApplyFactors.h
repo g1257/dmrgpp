@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -83,36 +80,43 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define APPLY_FACTORS_H
 
 namespace Dmrg {
-	template<typename FactorsType>
-	class ApplyFactors {
-		public:
-			ApplyFactors(const FactorsType& factors,bool enabled)
-			: factors_(factors),enabled_(enabled)
-			{}
-			
-			template<typename SparseMatrixType>
-			void operator()(SparseMatrixType& m) const 
-			{
-				if (!enabled_) return;
-				if (factors_.row()!=m.row()) throw PsimagLite::RuntimeError("Problem applying factors\n");
-				applyFactors(m);
-				
-			}
-		private:
-			const FactorsType& factors_;
-			bool enabled_;
-			
-			template<typename SparseMatrixType>
-			void applyFactors(SparseMatrixType& m) const 
-			{
-				SparseMatrixType tmp;
-				multiply(tmp,m,factors_);
-				SparseMatrixType tmp2;
-				transposeConjugate(tmp2,factors_);
-				multiply(m,tmp2,tmp);
-			}
-	}; // class ApplyFactors
+template<typename FactorsType>
+class ApplyFactors {
+
+public:
+
+	ApplyFactors(const FactorsType& factors,bool enabled)
+	    : factors_(factors),enabled_(enabled)
+	{}
+
+	template<typename SparseMatrixType>
+	void operator()(SparseMatrixType& m) const
+	{
+		if (!enabled_) return;
+		if (factors_.row()!=m.row())
+			throw PsimagLite::RuntimeError("Problem applying factors\n");
+		applyFactors(m);
+
+	}
+
+private:
+
+	template<typename SparseMatrixType>
+	void applyFactors(SparseMatrixType& m) const
+	{
+		SparseMatrixType tmp;
+		multiply(tmp,m,factors_);
+		SparseMatrixType tmp2;
+		transposeConjugate(tmp2,factors_);
+		multiply(m,tmp2,tmp);
+	}
+
+	const FactorsType& factors_;
+	bool enabled_;
+
+}; // class ApplyFactors
 } // namespace Dmrg
 
 /*@}*/
 #endif
+

@@ -94,23 +94,20 @@ public:
 	ArrayOfMatStruct() {}
 
 	ArrayOfMatStruct(const SparseMatrixType& sparse,GenGroupType& istart)
-	: data_(istart.size()-1,istart.size()-1)
+	    : data_(istart.size()-1,istart.size()-1)
 	{
 		SizeType ngroup = istart.size()-1;
-		//SparseMatrixType tmp2;
 
 		for (SizeType j=0;j<ngroup;j++) {
 			SizeType j1 = istart(j);
 			SizeType j2 = istart(j+1);
 			typename PsimagLite::Vector<ComplexOrRealType>::Type p(j2-j1,0.0);
 			typename PsimagLite::Vector<bool>::Type mark(j2-j1,false);
-//			if (j1>=j2) continue;
+
 			for (SizeType i=0;i<ngroup;i++) {
 				SizeType i1 = istart(i);
 				SizeType i2 = istart(i+1);
-//				if (i1>=i2) continue;
 
-				//tmp2.resize(i2-i1,j2-j1);
 				data_(i,j) = SparseMatrixType(i2-i1,j2-j1);
 				SparseMatrixType& tmp = data_(i,j);
 				SizeType counter = 0;
@@ -118,7 +115,6 @@ public:
 				for (SizeType ii=i1;ii<i2;ii++) {
 					SizeType row = ii - i1;
 					tmp.setRow(row,counter);
-
 
 					SizeType start = sparse.getRowPtr(ii);
 					SizeType end = sparse.getRowPtr(ii+1);
@@ -156,27 +152,9 @@ public:
 	}
 
 	~ArrayOfMatStruct()
-	{
-//		for (SizeType j=0;j<data_.n_row();j++)
-//			for (SizeType i=0;i<data_.n_col();i++)
-//				if (data_(i,j)) delete data_(i,j);
-	}
+	{}
 
 private:
-
-//	ArrayOfMatStruct& operator=(ArrayOfMatStruct& other)
-//	{
-//		throw PsimagLite::RuntimeError("operator= is disabled\n");
-//	}
-
-//	ArrayOfMatStruct(ArrayOfMatStruct& other)
-//	{
-//		throw PsimagLite::RuntimeError("copy ctor is disabled\n");
-//	}
-
-//	ArrayOfMatStruct(const ArrayOfMatStruct& other);
-
-//	ArrayOfMatStruct& operator=(const ArrayOfMatStruct& other);
 
 	PsimagLite::Matrix<SparseMatrixType> data_;
 
@@ -186,3 +164,4 @@ private:
 /*@}*/
 
 #endif // ARRAY_OF_MAT_STRUCT_H
+
