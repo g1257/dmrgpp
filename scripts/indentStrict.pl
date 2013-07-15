@@ -209,7 +209,7 @@ while(<FILE>) {
 	my $label = getLabel($_);
 
 	if ($co==0 and !$hasSemicolonAtTheEnd) {
-		 my @whats = ("if","for","foreach","else","switch","try","catch");
+		 my @whats = ("else if","if","for","foreach","else","switch","try","catch");
 		 my $flagTmp = 0;
 		 foreach my $what (@whats) {
 			if ($label eq $what) {
@@ -243,7 +243,9 @@ while(<FILE>) {
 		printList(\@mystack);
 	}
 	$tmpLevel = $indentLevel if ($co<$cc and !$braceAtTheEnd);
-	$tmpLevel-- if ($tmpLevel>0 and ($label eq "else" or $label eq "catch") and $co>0);
+	if ($tmpLevel>0 and ($label eq "else" or $label eq "catch" or $label eq "else if") and $co>0) {
+		$tmpLevel--;
+	}
 	
 	#print "$_ ** $line ** $indentLevel \n"  if ($co<$cc and !$braceAtTheEnd);
 	$braceAtTheEnd = 0;
@@ -325,7 +327,7 @@ sub getLabel
 	
 	my $label = $lastLabel;
 	my $flag=0;
-	my @whats = ("class","namespace","if","for","foreach","else","enum","switch","return","try","catch");
+	my @whats = ("class","namespace","else if","if","for","foreach","else","enum","switch","return","try","catch");
 
 	foreach my $what (@whats) {
 		if (isOfType($tt,$what)) {
@@ -348,7 +350,7 @@ sub isOfType
 	my ($tt,$what) = @_;
 
 	return 1 if ($tt=~/^$what/);
-	return 1 if ($tt=~/[ \t]$what[^a-zA-Z]/);
+	return 1 if ($tt=~/[ \t]+$what[^a-zA-Z]/);
 	return 0;
 }
 
