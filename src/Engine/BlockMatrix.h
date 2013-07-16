@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -88,328 +88,331 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	//! A block matrix class
-	//! Blocks can be of any type and are templated with the type MatrixInBlockTemplate
-	//
-	template<typename MatrixInBlockTemplate>
-	class BlockMatrix {
+//! A block matrix class
+//! Blocks can be of any type and are templated with the type MatrixInBlockTemplate
+//
+template<typename MatrixInBlockTemplate>
+class BlockMatrix {
+
+public:
+
+	typedef MatrixInBlockTemplate BuildingBlockType;
+	typedef typename BuildingBlockType::value_type FieldType;
+	typedef BlockMatrix<MatrixInBlockTemplate> BlockMatrixType;
+
+	class LoopForDiag {
+
+		typedef PsimagLite::Concurrency ConcurrencyType;
+		typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
 	public:
 
-		typedef MatrixInBlockTemplate BuildingBlockType;
-		typedef typename BuildingBlockType::value_type FieldType;
-		typedef BlockMatrix<MatrixInBlockTemplate> BlockMatrixType;
-
-		class LoopForDiag {
-
-			typedef PsimagLite::Concurrency ConcurrencyType;
-			typedef typename PsimagLite::Real<FieldType>::Type RealType;
-
-		public:
-
-			LoopForDiag(BlockMatrixType  &C1,
-			            typename PsimagLite::Vector<RealType>::Type& eigs1,
-	                    char option1)
-			    : C(C1),
-			      eigs(eigs1),
-			      option(option1),
-			      eigsForGather(C.blocks()),
-			      weights(C.blocks()),
-			      hasMpi_(PsimagLite::Concurrency::hasMpi())
-			{
-
-				for (SizeType m=0;m<C.blocks();m++) {
-					eigsForGather[m].resize(C.offsets(m+1)-C.offsets(m));
-					weights[m] =  C.offsets(m+1)-C.offsets(m);
-				}
-
-				eigs.resize(C.rank());
-			}
-
-			void thread_function_(SizeType threadNum,
-			                      SizeType blockSize,
-			                      SizeType total,
-			                      typename PsimagLite::Concurrency::MutexType* myMutex)
-			{
-				SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
-				SizeType npthreads = ConcurrencyType::npthreads;
-
-				for (SizeType p=0;p<blockSize;p++) {
-					SizeType taskNumber = (threadNum+npthreads*mpiRank)*blockSize + p;
-					if (taskNumber>=total) break;
-
-					SizeType m = taskNumber;
-					typename PsimagLite::Vector<RealType>::Type eigsTmp;
-					PsimagLite::diag(C.data_[m],eigsTmp,option);
-					enforcePhase(C.data_[m]);
-					for (int j=C.offsets(m);j< C.offsets(m+1);j++)
-						eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
-				}
-			}
-
-			void gather()
-			{
-				if (hasMpi_) {
-					PsimagLite::MPI::pointByPointGather(eigsForGather);
-					PsimagLite::MPI::bcast(eigsForGather);
-					PsimagLite::MPI::pointByPointGather(C.data_);
-					PsimagLite::MPI::bcast(C.data_);
-				}
-
-				for (SizeType m=0;m<C.blocks();m++) {
-					for (int j=C.offsets(m);j< C.offsets(m+1);j++)
-						eigs[j]=eigsForGather[m][j-C.offsets(m)];
-				}
-			}
-
-		private:
-
-			void enforcePhase(FieldType* v,SizeType n)
-			{
-				FieldType sign1=0;
-				for (SizeType j=0;j<n;j++) {
-					if (std::norm(v[j])>1e-6) {
-						if (std::real(v[j])>0) sign1=1;
-						else sign1= -1;
-						break;
-					}
-				}
-				// get a consistent phase
-				for (SizeType j=0;j<n;j++) v[j] *= sign1;
-			}
-
-			void enforcePhase(typename PsimagLite::Vector<FieldType>::Type& v)
-			{
-				enforcePhase(&(v[0]),v.size());
-			}
-
-			void enforcePhase(PsimagLite::Matrix<FieldType>& a)
-			{
-				FieldType* vpointer = &(a(0,0));
-				for (SizeType i=0;i<a.n_col();i++)
-					enforcePhase(&(vpointer[i*a.n_row()]),a.n_row());
-			}
-
-			BlockMatrixType  &C;
-			typename PsimagLite::Vector<RealType>::Type& eigs;
-			char option;
-			typename PsimagLite::Vector<typename PsimagLite::Vector<RealType>::Type>::Type eigsForGather;
-			typename PsimagLite::Vector<SizeType>::Type weights;
-			bool hasMpi_;
-		};
-
-		BlockMatrix(int rank,int blocks) : rank_(rank),offsets_(blocks+1),data_(blocks) 
+		LoopForDiag(BlockMatrixType  &C1,
+		            typename PsimagLite::Vector<RealType>::Type& eigs1,
+		            char option1)
+		    : C(C1),
+		      eigs(eigs1),
+		      option(option1),
+		      eigsForGather(C.blocks()),
+		      weights(C.blocks()),
+		      hasMpi_(PsimagLite::Concurrency::hasMpi())
 		{
-			offsets_[blocks]=rank;
-		}
 
-		void operator+=(const BlockMatrixType& m)
-		{
-			BlockMatrixType c;
-			if (offsets_.size()<m.blocks()) operatorPlus(c,*this,m);
-			else operatorPlus(c,m,*this);
-			*this = c;
-		}
-
-		//! Sets all blocks of size 1 and value value
-		void makeDiagonal(int n,const FieldType& value)
-		{
-			rank_ = n;
-			MatrixInBlockTemplate m;
-			
-			setValue(m,1,value);
-			
-			offsets_.clear();
-			data_.clear();
-			for (int i=0;i<n;i++) {
-				offsets_.push_back(i);
-				data_.push_back(m);
+			for (SizeType m=0;m<C.blocks();m++) {
+				eigsForGather[m].resize(C.offsets(m+1)-C.offsets(m));
+				weights[m] =  C.offsets(m+1)-C.offsets(m);
 			}
-			offsets_.push_back(n);
+
+			eigs.resize(C.rank());
 		}
 
-		//! Set block to the zero matrix, 
-		void setToZero(int n)
+		void thread_function_(SizeType threadNum,
+		                      SizeType blockSize,
+		                      SizeType total,
+		                      typename PsimagLite::Concurrency::MutexType* myMutex)
 		{
-			FieldType value=static_cast<FieldType>(0.0);
-			makeDiagonal(n,value);
+			SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
+			SizeType npthreads = ConcurrencyType::npthreads;
+
+			for (SizeType p=0;p<blockSize;p++) {
+				SizeType taskNumber = (threadNum+npthreads*mpiRank)*blockSize + p;
+				if (taskNumber>=total) break;
+
+				SizeType m = taskNumber;
+				typename PsimagLite::Vector<RealType>::Type eigsTmp;
+				PsimagLite::diag(C.data_[m],eigsTmp,option);
+				enforcePhase(C.data_[m]);
+				for (int j=C.offsets(m);j< C.offsets(m+1);j++)
+					eigsForGather[m][j-C.offsets(m)] = eigsTmp[j-C.offsets(m)];
+			}
 		}
-		
-		//! set block to the identity matrix
-		void setToIdentity(int n)
+
+		void gather()
 		{
-			FieldType value=static_cast<FieldType>(1.0);
-			makeDiagonal(n,value);
+			if (hasMpi_) {
+				PsimagLite::MPI::pointByPointGather(eigsForGather);
+				PsimagLite::MPI::bcast(eigsForGather);
+				PsimagLite::MPI::pointByPointGather(C.data_);
+				PsimagLite::MPI::bcast(C.data_);
+			}
+
+			for (SizeType m=0;m<C.blocks();m++) {
+				for (int j=C.offsets(m);j< C.offsets(m+1);j++)
+					eigs[j]=eigsForGather[m][j-C.offsets(m)];
+			}
 		}
-		
-		void setBlock(SizeType i,int offset,MatrixInBlockTemplate const &m)
-		{
-			assert(i<data_.size());
-			data_[i]=m;
-			assert(i<offsets_.size());
-			offsets_[i]=offset;
-		}
-		
-		void sumBlock(int i,MatrixInBlockTemplate const &m) { data_[i] += m; }
-		
-		int rank() const { return rank_; }
-		
-		int offsets(int i) const { return offsets_[i]; }
-		
-		SizeType blocks() const { return data_.size(); }
-		
-		FieldType operator()(int i,int j) const
-		{	
-			int k;
-			for (k=data_.size()-1;k>=0;k--) if (i>=offsets_[k]) break;
-			
-			if (j<offsets_[k] || j>=offsets_[k+1])
-				return static_cast<FieldType>(0.0);
-			return data_[k](i-offsets_[k],j-offsets_[k]);
-			
-		}
-		
-		
-		MatrixInBlockTemplate operator()(int i) const { return data_[i]; }
-		
-		template<class MatrixInBlockTemplate2>
-		friend void operatorPlus(BlockMatrix<MatrixInBlockTemplate2>& C,
-		                         const BlockMatrix<MatrixInBlockTemplate2>& A,
-		                         const BlockMatrix<MatrixInBlockTemplate2>& B);
-		
-		template<class MatrixInBlockTemplate2>
-		friend void operatorPlus(BlockMatrix<MatrixInBlockTemplate2>& A,
-		                         const BlockMatrix<MatrixInBlockTemplate2>& B);
-	
-		template<class MatrixInBlockTemplate2>
-		friend std::ostream &operator<<(std::ostream &s,
-		                                const BlockMatrix<MatrixInBlockTemplate2>& A);
 
 	private:
-		int rank_; //the rank of this matrix
-		typename PsimagLite::Vector<int>::Type offsets_; //starting of diagonal offsets for each block
-		typename PsimagLite::Vector<MatrixInBlockTemplate>::Type data_; // data on each block	
-	
-	}; // class BlockMatrix
 
-	// Companion Functions
-	template<class MatrixInBlockTemplate>
-	std::ostream &operator<<(std::ostream &s,const BlockMatrix<MatrixInBlockTemplate>& A)
-	{
-		for (SizeType m=0;m<A.blocks();m++) {
-			int nrank = A.offsets(m+1)-A.offsets(m);
-			s<<"block number "<<m<<" has rank "<<nrank<<"\n";
-			s<<A.data_[m];
-		}
-		return s;
-	}
-
-	//C=A+ B where A.offsets is contained in B.offsets
-	template<class MatrixInBlockTemplate>
-	void operatorPlus(BlockMatrix<MatrixInBlockTemplate>& C,
-	                  const BlockMatrix<MatrixInBlockTemplate>& A,
-	                  const BlockMatrix<MatrixInBlockTemplate>& B)
-	{
-		SizeType i;
-		int counter=0;
-		C.rank_ = A.rank_;
-		C.offsets_=A.offsets_;
-		C.data_.resize(A.data_.size());
-		for (i=0;i<A.data_.size();i++) {
-			C.data_[i] = A.data_[i];
-		
-			while(B.offsets_[counter] <A.offsets_[i+1]) {
-				accumulate(C.data_[i],B.data_[counter++]);
-				if (counter>=B.offsets_.size()) break;
-			}
-			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
-				throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
-		}
-	}
-
-	//A+= B where A.offsets is contained in B.offsets
-	template<class MatrixInBlockTemplate>
-	void operatorPlus(BlockMatrix<MatrixInBlockTemplate>& A,
-	                  const BlockMatrix<MatrixInBlockTemplate>& B)
-	{
-		SizeType i;
-		int counter=0;
-
-		for (i=0;i<A.data_.size();i++) {
-			while(B.offsets_[counter] < A.offsets_[i+1]) {
-				accumulate(A.data_[i],B.data_[counter++]);
-				if (counter>=B.offsets_.size()) break;
-			}
-			if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
-				throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
-		}
-	 	
-	}
-
-	//! Parallel version of the diagonalization of a block diagonal matrix
-	template<typename SomeVectorType,typename SomeFieldType>
-	typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,
-	void>::Type
-	diagonalise(BlockMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
-	            SomeVectorType& eigs,
-	            char option)
-	{
-		typedef typename BlockMatrix<PsimagLite::Matrix<SomeFieldType> >::LoopForDiag LoopForDiagType;
-		typedef PsimagLite::Parallelizer<LoopForDiagType> ParallelizerType;
-		ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
-		                              PsimagLite::MPI::COMM_WORLD);
-
-		LoopForDiagType helper(C,eigs,option);
-
-		threadObject.loopCreate(C.blocks(),helper); // FIXME: needs weights
-
-		helper.gather();
-	}
-
-	template<class MatrixInBlockTemplate>
-	bool isUnitary(const BlockMatrix<MatrixInBlockTemplate>& B)
-	{
-		bool flag=true;
-		MatrixInBlockTemplate matrixTmp;
-		
-		for (SizeType m=0;m<B.blocks();m++) {
-			matrixTmp = B(m);
-			if (!isUnitary(matrixTmp)) flag=false;
-		}
-		return flag;
-	}
-
-	template<class S>
-	void blockMatrixToFullMatrix(PsimagLite::Matrix<S>& fm,
-	                             const BlockMatrix<PsimagLite::Matrix<S> >& B)
-	{
-		int n = B.rank();
-		int i,j;
-		fm.reset(n,n);
-		for (j=0;j<n;j++) for (i=0;i<n;i++) fm(i,j)=B(i,j);
-	}
-
-	template<class S>
-	void blockMatrixToSparseMatrix(PsimagLite::CrsMatrix<S>& fm,
-	                               const BlockMatrix<PsimagLite::Matrix<S> >& B)
-	{
-		SizeType n = B.rank();
-		fm.resize(n,n);
-		SizeType counter=0;
-		for (SizeType i=0;i<n;i++) {
-			fm.setRow(i,counter);
+		void enforcePhase(FieldType* v,SizeType n)
+		{
+			FieldType sign1=0;
 			for (SizeType j=0;j<n;j++) {
-				S val = B(i,j);
-				if (std::norm(val)<1e-10) continue;
-				fm.pushValue(val);
-				fm.pushCol(j);
-				counter++;
+				if (std::norm(v[j])>1e-6) {
+					if (std::real(v[j])>0) sign1=1;
+					else sign1= -1;
+					break;
+				}
 			}
+			// get a consistent phase
+			for (SizeType j=0;j<n;j++) v[j] *= sign1;
 		}
-		fm.setRow(n,counter);
-		fm.checkValidity();
+
+		void enforcePhase(typename PsimagLite::Vector<FieldType>::Type& v)
+		{
+			enforcePhase(&(v[0]),v.size());
+		}
+
+		void enforcePhase(PsimagLite::Matrix<FieldType>& a)
+		{
+			FieldType* vpointer = &(a(0,0));
+			for (SizeType i=0;i<a.n_col();i++)
+				enforcePhase(&(vpointer[i*a.n_row()]),a.n_row());
+		}
+
+		BlockMatrixType  &C;
+		typename PsimagLite::Vector<RealType>::Type& eigs;
+		char option;
+		typename PsimagLite::Vector<typename PsimagLite::Vector<RealType>::Type>::Type eigsForGather;
+		typename PsimagLite::Vector<SizeType>::Type weights;
+		bool hasMpi_;
+	};
+
+	BlockMatrix(int rank,int blocks) : rank_(rank),offsets_(blocks+1),data_(blocks)
+	{
+		offsets_[blocks]=rank;
 	}
+
+	void operator+=(const BlockMatrixType& m)
+	{
+		BlockMatrixType c;
+		if (offsets_.size()<m.blocks()) operatorPlus(c,*this,m);
+		else operatorPlus(c,m,*this);
+		*this = c;
+	}
+
+	//! Sets all blocks of size 1 and value value
+	void makeDiagonal(int n,const FieldType& value)
+	{
+		rank_ = n;
+		MatrixInBlockTemplate m;
+
+		setValue(m,1,value);
+
+		offsets_.clear();
+		data_.clear();
+		for (int i=0;i<n;i++) {
+			offsets_.push_back(i);
+			data_.push_back(m);
+		}
+		offsets_.push_back(n);
+	}
+
+	//! Set block to the zero matrix,
+	void setToZero(int n)
+	{
+		FieldType value=static_cast<FieldType>(0.0);
+		makeDiagonal(n,value);
+	}
+
+	//! set block to the identity matrix
+	void setToIdentity(int n)
+	{
+		FieldType value=static_cast<FieldType>(1.0);
+		makeDiagonal(n,value);
+	}
+
+	void setBlock(SizeType i,int offset,MatrixInBlockTemplate const &m)
+	{
+		assert(i<data_.size());
+		data_[i]=m;
+		assert(i<offsets_.size());
+		offsets_[i]=offset;
+	}
+
+	void sumBlock(int i,MatrixInBlockTemplate const &m) { data_[i] += m; }
+
+	int rank() const { return rank_; }
+
+	int offsets(int i) const { return offsets_[i]; }
+
+	SizeType blocks() const { return data_.size(); }
+
+	FieldType operator()(int i,int j) const
+	{
+		int k;
+		for (k=data_.size()-1;k>=0;k--) if (i>=offsets_[k]) break;
+
+		if (j<offsets_[k] || j>=offsets_[k+1])
+			return static_cast<FieldType>(0.0);
+		return data_[k](i-offsets_[k],j-offsets_[k]);
+
+	}
+
+	MatrixInBlockTemplate operator()(int i) const { return data_[i]; }
+
+	template<class MatrixInBlockTemplate2>
+	friend void operatorPlus(BlockMatrix<MatrixInBlockTemplate2>& C,
+	                         const BlockMatrix<MatrixInBlockTemplate2>& A,
+	                         const BlockMatrix<MatrixInBlockTemplate2>& B);
+
+	template<class MatrixInBlockTemplate2>
+	friend void operatorPlus(BlockMatrix<MatrixInBlockTemplate2>& A,
+	                         const BlockMatrix<MatrixInBlockTemplate2>& B);
+
+	template<class MatrixInBlockTemplate2>
+	friend std::ostream &operator<<(std::ostream &s,
+	                                const BlockMatrix<MatrixInBlockTemplate2>& A);
+
+private:
+
+	int rank_; //the rank of this matrix
+	typename PsimagLite::Vector<int>::Type offsets_; //starting of diagonal offsets for each block
+	typename PsimagLite::Vector<MatrixInBlockTemplate>::Type data_; // data on each block
+
+}; // class BlockMatrix
+
+// Companion Functions
+template<class MatrixInBlockTemplate>
+std::ostream &operator<<(std::ostream &s,const BlockMatrix<MatrixInBlockTemplate>& A)
+{
+	for (SizeType m=0;m<A.blocks();m++) {
+		int nrank = A.offsets(m+1)-A.offsets(m);
+		s<<"block number "<<m<<" has rank "<<nrank<<"\n";
+		s<<A.data_[m];
+	}
+	return s;
+}
+
+//C=A+ B where A.offsets is contained in B.offsets
+template<class MatrixInBlockTemplate>
+void operatorPlus(BlockMatrix<MatrixInBlockTemplate>& C,
+                  const BlockMatrix<MatrixInBlockTemplate>& A,
+                  const BlockMatrix<MatrixInBlockTemplate>& B)
+{
+	SizeType i;
+	int counter=0;
+	C.rank_ = A.rank_;
+	C.offsets_=A.offsets_;
+	C.data_.resize(A.data_.size());
+	for (i=0;i<A.data_.size();i++) {
+		C.data_[i] = A.data_[i];
+
+		while (B.offsets_[counter] <A.offsets_[i+1]) {
+			accumulate(C.data_[i],B.data_[counter++]);
+			if (counter>=B.offsets_.size()) break;
+		}
+
+		if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
+			throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
+	}
+}
+
+//A+= B where A.offsets is contained in B.offsets
+template<class MatrixInBlockTemplate>
+void operatorPlus(BlockMatrix<MatrixInBlockTemplate>& A,
+                  const BlockMatrix<MatrixInBlockTemplate>& B)
+{
+	SizeType i;
+	int counter=0;
+
+	for (i=0;i<A.data_.size();i++) {
+		while (B.offsets_[counter] < A.offsets_[i+1]) {
+			accumulate(A.data_[i],B.data_[counter++]);
+			if (counter>=B.offsets_.size()) break;
+		}
+
+		if (counter>=B.offsets_.size() && i<A.offsets_.size()-1)
+			throw PsimagLite::RuntimeError("operatorPlus: restriction not met.\n");
+	}
+
+}
+
+//! Parallel version of the diagonalization of a block diagonal matrix
+template<typename SomeVectorType,typename SomeFieldType>
+typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,
+void>::Type
+diagonalise(BlockMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
+            SomeVectorType& eigs,
+            char option)
+{
+	typedef typename BlockMatrix<PsimagLite::Matrix<SomeFieldType> >::LoopForDiag LoopForDiagType;
+	typedef PsimagLite::Parallelizer<LoopForDiagType> ParallelizerType;
+	ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
+	                              PsimagLite::MPI::COMM_WORLD);
+
+	LoopForDiagType helper(C,eigs,option);
+
+	threadObject.loopCreate(C.blocks(),helper); // FIXME: needs weights
+
+	helper.gather();
+}
+
+template<class MatrixInBlockTemplate>
+bool isUnitary(const BlockMatrix<MatrixInBlockTemplate>& B)
+{
+	bool flag=true;
+	MatrixInBlockTemplate matrixTmp;
+
+	for (SizeType m=0;m<B.blocks();m++) {
+		matrixTmp = B(m);
+		if (!isUnitary(matrixTmp)) flag=false;
+	}
+	return flag;
+}
+
+template<class S>
+void blockMatrixToFullMatrix(PsimagLite::Matrix<S>& fm,
+                             const BlockMatrix<PsimagLite::Matrix<S> >& B)
+{
+	int n = B.rank();
+	int i,j;
+	fm.reset(n,n);
+	for (j=0;j<n;j++) for (i=0;i<n;i++) fm(i,j)=B(i,j);
+}
+
+template<class S>
+void blockMatrixToSparseMatrix(PsimagLite::CrsMatrix<S>& fm,
+                               const BlockMatrix<PsimagLite::Matrix<S> >& B)
+{
+	SizeType n = B.rank();
+	fm.resize(n,n);
+	SizeType counter=0;
+	for (SizeType i=0;i<n;i++) {
+		fm.setRow(i,counter);
+		for (SizeType j=0;j<n;j++) {
+			S val = B(i,j);
+			if (std::norm(val)<1e-10) continue;
+			fm.pushValue(val);
+			fm.pushCol(j);
+			counter++;
+		}
+	}
+	fm.setRow(n,counter);
+	fm.checkValidity();
+}
 } // namespace Dmrg
 /*@}*/	
 
 #endif
+

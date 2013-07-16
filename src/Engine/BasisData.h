@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -85,27 +82,28 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-	template<typename PairType>
-	struct BasisData {
-		
-		typename PsimagLite::Vector<SizeType>::Type electrons;
-		typename PsimagLite::Vector<SizeType>::Type szPlusConst;
-		typename PsimagLite::Vector<PairType>::Type jmValues;
-		typename PsimagLite::Vector<SizeType>::Type flavors; 
-		
-	}; // struct BasisData
-	
-	template<typename IoOutputter, typename PairType> 
-	void save(IoOutputter& io,const BasisData<PairType>& bd)
-	{
-		io.printVector(bd.electronsUp,"#bdElectronsUp");
-		io.printVector(bd.electronsDown,"#bdElectronsDown");
-		io.printVector(bd.jmValues,"#bdJmValues");
-		io.printVector(bd.flavors,"#bdFlavors=");
-		
-	}
-	
+template<typename PairType>
+struct BasisData {
+
+	typename PsimagLite::Vector<SizeType>::Type electrons;
+	typename PsimagLite::Vector<SizeType>::Type szPlusConst;
+	typename PsimagLite::Vector<PairType>::Type jmValues;
+	typename PsimagLite::Vector<SizeType>::Type flavors;
+
+}; // struct BasisData
+
+template<typename IoOutputter, typename PairType>
+void save(IoOutputter& io,const BasisData<PairType>& bd)
+{
+	io.printVector(bd.electronsUp,"#bdElectronsUp");
+	io.printVector(bd.electronsDown,"#bdElectronsDown");
+	io.printVector(bd.jmValues,"#bdJmValues");
+	io.printVector(bd.flavors,"#bdFlavors=");
+
+}
+
 } // namespace Dmrg
 
 /*@}*/
 #endif
+
