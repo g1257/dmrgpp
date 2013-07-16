@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,15 +67,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
 /*! \file ClebschGordanCached.h
  *
- *  
+ *
  *
  */
 #ifndef CLEBSCH_GORDANCACHED_H
@@ -86,113 +84,115 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
-	
-	template<typename FieldType>
-	class ClebschGordanCached {
-			typedef ClebschGordan<FieldType> ClebschGordanType;
-			typedef typename ClebschGordanType::PairType PairType;
-			
-		public:
-			ClebschGordanCached(SizeType jmax) 
-			:  UNDEFINED_VALUE(-1000),
-			jmax_(jmax),
-			 max2_(((jmax_-1)*(jmax_+2))/2+1),max22_(max2_*max2_),
-			data_(max22_*jmax_*2,UNDEFINED_VALUE),cgObject_(2)
-			{
-				init(jmax,2);
-			}
-			
-			void init(SizeType jmax,SizeType nfactorials)
-			{
-				jmax_=jmax;
-				max2_=((jmax_-1)*(jmax_+2))/2+1;
-				max22_=max2_*max2_;
-				data_.resize(max22_*jmax_*2,UNDEFINED_VALUE);
-				cgObject_.init(nfactorials);
-				//PsimagLite::OstringStream msg;
-				//msg<<"init called "<<copies_<<" times, jmax="<<jmax<<"\n";
-				copies_++;
-				if (copies_>2) {//throw PsimagLite::RuntimeError("ClebschGordanCached: too many copies\n");
-					std::cerr<<"WARNING: ClebschGordanCached has ";
-					std::cerr<<copies_<<" copies.\n";
-				}
-			}
 
-			FieldType operator()(const PairType& jm,const PairType& jm1,const PairType& jm2) 
-			{
-				if (!checkCg(jm,jm1,jm2)) return 0;
+template<typename FieldType>
+class ClebschGordanCached {
+	typedef ClebschGordan<FieldType> ClebschGordanType;
+	typedef typename ClebschGordanType::PairType PairType;
 
-				SizeType index1 = calcSubIndex(jm1);
-				SizeType index2 = calcSubIndex(jm2);
-				SizeType jmin=0;
-				if (jm1.first>jm2.first) jmin = jm1.first-jm2.first;
-				else jmin = jm2.first-jm1.first;
-				SizeType x = calcIndex(index1,index2)+(jm.first-jmin)*max22_;
-				if (data_[x]== UNDEFINED_VALUE) {
-					data_[x]=cgObject_(jm,jm1,jm2);
-				}
-				return data_[x];
-			}
+public:
 
-		private:
-			SizeType calcSubIndex(const PairType& jm) const
-			{
-				if (jm.second==0) return jm.first;
-				SizeType x = 2*jmax_-1-jm.second;
-				x *= jm.second;
-				x /= 2;
-				x += jm.first;
-				if (x<0 || x>=max2_) throw PsimagLite::RuntimeError("problem calcSubIndex\n");
-				return x;	
-			}
+	ClebschGordanCached(SizeType jmax)
+	    :  UNDEFINED_VALUE(-1000),
+	      jmax_(jmax),
+	      max2_(((jmax_-1)*(jmax_+2))/2+1),max22_(max2_*max2_),
+	      data_(max22_*jmax_*2,UNDEFINED_VALUE),cgObject_(2)
+	{
+		init(jmax,2);
+	}
 
-			SizeType calcIndex(SizeType i1,SizeType i2) const
-			{
-				if (i1>=max2_ || i2>=max2_) throw PsimagLite::RuntimeError("problem\n");
-				return i1+i2*max2_;
-			}
+	void init(SizeType jmax,SizeType nfactorials)
+	{
+		jmax_=jmax;
+		max2_=((jmax_-1)*(jmax_+2))/2+1;
+		max22_=max2_*max2_;
+		data_.resize(max22_*jmax_*2,UNDEFINED_VALUE);
+		cgObject_.init(nfactorials);
 
-			bool checkCg(const PairType& jm,const PairType& jm1,const PairType& jm2) const
-			{
-				if (!checkCg1(jm.first,jm1.first,jm2.first)) return false;
-				int m=calcM(jm.first,jm1,jm2);
-				if (m<0) return false;
-				if (SizeType(m)!=jm.second) return false;
-				return true;
-				
-			}
+		copies_++;
+		if (copies_>2) {
+			std::cerr<<"WARNING: ClebschGordanCached has ";
+			std::cerr<<copies_<<" copies.\n";
+		}
+	}
 
-			bool checkCg1(SizeType j,SizeType j1,SizeType j2) const
-			{
-				if (j>j1+j2) return false;
-				SizeType jmin=0;
-				if (j1<j2) jmin = j2-j1;
-				else jmin  = j1-j2;
-				if (j<jmin) return false;
-				
-				return true;
-			}
+	FieldType operator()(const PairType& jm,const PairType& jm1,const PairType& jm2)
+	{
+		if (!checkCg(jm,jm1,jm2)) return 0;
 
-			int calcM(SizeType j,const PairType& jm1,const PairType& jm2) const
-			{
-				int x = jm1.first+jm2.first-j;
-				if (x%2!=0) return -1;
-				x =x/2;
-				if (x<0 || jm1.second+jm2.second<SizeType(x)) return -1;
-				return jm1.second+jm2.second-x;
-			}
-			
-			static SizeType copies_;
-			int UNDEFINED_VALUE;
-			SizeType jmax_;
-			SizeType max2_,max22_;
-			typename PsimagLite::Vector<FieldType>::Type data_;
-			ClebschGordanType cgObject_;
-	}; // class ClebschGordanCached
-	
-	template<typename FieldType>
-	SizeType ClebschGordanCached<FieldType>::copies_=0;
-	
+		SizeType index1 = calcSubIndex(jm1);
+		SizeType index2 = calcSubIndex(jm2);
+		SizeType jmin=0;
+		if (jm1.first>jm2.first) jmin = jm1.first-jm2.first;
+		else jmin = jm2.first-jm1.first;
+		SizeType x = calcIndex(index1,index2)+(jm.first-jmin)*max22_;
+		if (data_[x]== UNDEFINED_VALUE) {
+			data_[x]=cgObject_(jm,jm1,jm2);
+		}
+		return data_[x];
+	}
+
+private:
+	SizeType calcSubIndex(const PairType& jm) const
+	{
+		if (jm.second==0) return jm.first;
+		SizeType x = 2*jmax_-1-jm.second;
+		x *= jm.second;
+		x /= 2;
+		x += jm.first;
+		if (x<0 || x>=max2_)
+			throw PsimagLite::RuntimeError("problem calcSubIndex\n");
+		return x;
+	}
+
+	SizeType calcIndex(SizeType i1,SizeType i2) const
+	{
+		if (i1>=max2_ || i2>=max2_) throw PsimagLite::RuntimeError("problem\n");
+		return i1+i2*max2_;
+	}
+
+	bool checkCg(const PairType& jm,const PairType& jm1,const PairType& jm2) const
+	{
+		if (!checkCg1(jm.first,jm1.first,jm2.first)) return false;
+		int m=calcM(jm.first,jm1,jm2);
+		if (m<0) return false;
+		if (SizeType(m)!=jm.second) return false;
+		return true;
+
+	}
+
+	bool checkCg1(SizeType j,SizeType j1,SizeType j2) const
+	{
+		if (j>j1+j2) return false;
+		SizeType jmin=0;
+		if (j1<j2) jmin = j2-j1;
+		else jmin  = j1-j2;
+		if (j<jmin) return false;
+
+		return true;
+	}
+
+	int calcM(SizeType j,const PairType& jm1,const PairType& jm2) const
+	{
+		int x = jm1.first+jm2.first-j;
+		if (x%2!=0) return -1;
+		x =x/2;
+		if (x<0 || jm1.second+jm2.second<SizeType(x)) return -1;
+		return jm1.second+jm2.second-x;
+	}
+
+	static SizeType copies_;
+	int UNDEFINED_VALUE;
+	SizeType jmax_;
+	SizeType max2_,max22_;
+	typename PsimagLite::Vector<FieldType>::Type data_;
+	ClebschGordanType cgObject_;
+}; // class ClebschGordanCached
+
+template<typename FieldType>
+SizeType ClebschGordanCached<FieldType>::copies_=0;
+
 }; // namespace Dmrg
 /*@}*/
 #endif
+

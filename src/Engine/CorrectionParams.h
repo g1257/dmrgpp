@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -85,35 +82,33 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-	//! Coordinates reading of TargetSTructure from input file
-	template<typename ModelType>
-	class CorrectionParams {
-	public:
-		typedef typename ModelType::RealType RealType;
+//! Coordinates reading of TargetSTructure from input file
+template<typename ModelType>
+class CorrectionParams {
 
-		template<typename IoInputter>
-		CorrectionParams(IoInputter& io,const ModelType& model)
-		{
-//			io.rewind();
-			io.readline(correctionA,"CorrectionA=");
-// 			typename ModelType::HilbertBasisType basis;
-// 			typename PsimagLite::Vector<SizeType>::Type q;
-// 			model.setNaturalBasis(basis,q,1);
-// 			model.findElectrons(electrons,basis);
-		}
-		RealType correctionA;
-// 		typename PsimagLite::Vector<SizeType>::Type electrons;
-	}; // class CorrectionParams
-	
-	template<typename ModelType>
-	inline std::ostream&
-	operator<<(std::ostream& os,const CorrectionParams<ModelType>& t)
+public:
+
+	typedef typename ModelType::RealType RealType;
+
+	template<typename IoInputter>
+	CorrectionParams(IoInputter& io,const ModelType& model)
 	{
-		os<<"#TargetParams.type=correction\n";
-		os<<"#TargetCorrection.correctionA="<<t.correctionA<<"\n";
-		return os;
+		io.readline(correctionA,"CorrectionA=");
 	}
+
+	RealType correctionA;
+}; // class CorrectionParams
+
+template<typename ModelType>
+inline std::ostream&
+operator<<(std::ostream& os,const CorrectionParams<ModelType>& t)
+{
+	os<<"#TargetParams.type=correction\n";
+	os<<"#TargetCorrection.correctionA="<<t.correctionA<<"\n";
+	return os;
+}
 } // namespace Dmrg 
 
 /*@}*/
 #endif // CORRECTION_PARAMS_H
+
