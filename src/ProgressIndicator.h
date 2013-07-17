@@ -37,7 +37,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  *  This class handles output to a progress indicator (usually the terminal)
  */
-  
+
 #ifndef PROGRESS_INDICATOR_H
 #define PROGRESS_INDICATOR_H
 
@@ -85,39 +85,45 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 
 namespace PsimagLite {
-	class ProgressIndicator {
-	public:
-		ProgressIndicator(const String& caller)
-		    : caller_(caller),rank_(Concurrency::rank())
-		{
-			prefix_ = caller_ + ": ";
-		}
-	
-		template<typename SomeOutputType>	
-		void printline(const String &s,SomeOutputType& os) const
-		{
-			if (rank_!=0) return;
-			os<<prefix_<<s<<"\n";
-		}
 
-		void printline(OstringStream &s,std::ostream& os) const
-		{
-			if (rank_!=0) return;
-			os<<prefix_<<s.str()<<"\n";
-			s.seekp(std::ios_base::beg);
-		}
+class ProgressIndicator {
 
-		void print(const String& something,std::ostream& os) const
-		{
-			if (rank_!=0) return;
-			os<<prefix_<<something;
-		}
-	private:
-		String caller_;
-		SizeType rank_;
-		String prefix_;
-	}; // ProgressIndicator
+public:
+
+	ProgressIndicator(const String& caller)
+	    : caller_(caller),rank_(Concurrency::rank())
+	{
+		prefix_ = caller_ + ": ";
+	}
+
+	template<typename SomeOutputType>
+	void printline(const String &s,SomeOutputType& os) const
+	{
+		if (rank_!=0) return;
+		os<<prefix_<<s<<"\n";
+	}
+
+	void printline(OstringStream &s,std::ostream& os) const
+	{
+		if (rank_!=0) return;
+		os<<prefix_<<s.str()<<"\n";
+		s.seekp(std::ios_base::beg);
+	}
+
+	void print(const String& something,std::ostream& os) const
+	{
+		if (rank_!=0) return;
+		os<<prefix_<<something;
+	}
+
+private:
+
+	String caller_;
+	SizeType rank_;
+	String prefix_;
+}; // ProgressIndicator
 } // namespace PsimagLite 
 
 /*@}*/	
 #endif
+

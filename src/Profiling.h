@@ -26,66 +26,62 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-		std::ostream& operator<<(std::ostream& os,const std::pair<SizeType,SizeType>& p)
-		{
+std::ostream& operator<<(std::ostream& os,const std::pair<SizeType,SizeType>& p)
+{
 
-			os<<p.first<<" "<<p.second<<" ";
-			return os;
-		}
+	os<<p.first<<" "<<p.second<<" ";
+	return os;
+}
 
-	class  Profiling {
+class  Profiling {
 
-		//typedef std::pair<SizeType,SizeType> PairType;
+	double diff(double x1,double x2) const
+	{
+		return x1 - x2;
+	}
 
-		double diff(double x1,double x2) const //const PairType& p1,const PairType& p2) const
-		{
-			return x1 - x2;
-			// SizeType sec = p1.first -p2.first;
-			// SizeType usec = p1.second - p2.second;
-			// return double(sec) + double(usec)/1000000.0; 
-		}
+public:
 
-		public:
-			Profiling(const String& s,std::ostream& os = std::cout) 
-			: message_(s),
-			  memoryUsage_("/proc/self/stat"),
-			  start_(memoryUsage_.time()),
-			  isDead_(false),
-			  os_(os)
-			{
-				os_<<"Profiling: Starting clock for "<<s<<"\n";
-			}
+	Profiling(const String& s,std::ostream& os = std::cout)
+	    : message_(s),
+	      memoryUsage_("/proc/self/stat"),
+	      start_(memoryUsage_.time()),
+	      isDead_(false),
+	      os_(os)
+	{
+		os_<<"Profiling: Starting clock for "<<s<<"\n";
+	}
 
-			~Profiling()
-			{
-				killIt();
-			}
+	~Profiling()
+	{
+		killIt();
+	}
 
-			void end()
-			{
-				killIt();
-			}
+	void end()
+	{
+		killIt();
+	}
 
-		private:
+private:
 
-			void killIt()
-			{
-				if (isDead_) return;
-				double end = memoryUsage_.time();
-				double elapsed = diff(end,start_);
-				os_<<"Profiling: Stoping clock for "<<message_<<" elapsed="<<elapsed<<"\n";
-				std::cout<<" start="<<start_<<" end="<<end<<"\n";
-				isDead_ = true;
-			}
+	void killIt()
+	{
+		if (isDead_) return;
+		double end = memoryUsage_.time();
+		double elapsed = diff(end,start_);
+		os_<<"Profiling: Stoping clock for "<<message_;
+		os_<<" elapsed="<<elapsed<<"\n";
+		std::cout<<" start="<<start_<<" end="<<end<<"\n";
+		isDead_ = true;
+	}
 
-			String message_;
-			MemoryUsage memoryUsage_;
-			double start_;
-			bool isDead_;
-			std::ostream& os_;
-	}; // Profiling
+	String message_;
+	MemoryUsage memoryUsage_;
+	double start_;
+	bool isDead_;
+	std::ostream& os_;
+}; // Profiling
 } // PsimagLite
 
 #endif
-
 

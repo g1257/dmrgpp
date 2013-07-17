@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009-2011, UT-Battelle, LLC
 All rights reserved
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,16 +67,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 /** \ingroup PsimagLite */
 /*@{*/
 
 /*! \file ParametersForSolver.h
  *
  * Parameters to be able to use LanczosSolver and ChebyshevSolver together
- * 
+ *
  * Note: This is a struct: Add no functions except ctor/dtor!
  */
 
@@ -93,28 +91,29 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-	template<typename RealType_>
-	struct ParametersForSolver {
+template<typename RealType_>
+struct ParametersForSolver {
 
-		typedef RealType_ RealType;
+	typedef RealType_ RealType;
 
-		ParametersForSolver() 
-		: steps(0),tolerance(0),stepsForEnergyConvergence(0),
-		  options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(true)
-		{} 
+	ParametersForSolver()
+	    : steps(0),tolerance(0),stepsForEnergyConvergence(0),
+	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(true)
+	{}
 
-		SizeType steps;
-		RealType tolerance;
-		SizeType stepsForEnergyConvergence;
-		String options;
-		RealType oneOverA,b;
-		RealType Eg;
-		RealType weight;
-		int isign;
-		bool lotaMemory;
+	SizeType steps;
+	RealType tolerance;
+	SizeType stepsForEnergyConvergence;
+	String options;
+	RealType oneOverA,b;
+	RealType Eg;
+	RealType weight;
+	int isign;
+	bool lotaMemory;
 
-	}; // class ParametersForSolver
+}; // class ParametersForSolver
 } // namespace PsimagLite
 
 /*@}*/
 #endif //PARAMETERS_FOR_SOLVER_H
+

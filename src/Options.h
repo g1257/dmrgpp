@@ -92,6 +92,7 @@ namespace PsimagLite {
 class Options {
 
 public:
+
 	class Writeable {
 
 		typedef PsimagLite::Vector<String>::Type VectorStringType;
@@ -99,9 +100,9 @@ public:
 	public:
 
 		enum {DISABLED,PERMISSIVE,STRICT};
-	
+
 		Writeable(VectorStringType& registeredOptions,SizeType mode)
-		: registeredOptions_(registeredOptions),mode_(mode)
+		    : registeredOptions_(registeredOptions),mode_(mode)
 		{}
 
 		void set(Vector<String>::Type& optsThatAreSet,const String& opts)
@@ -109,9 +110,11 @@ public:
 			if (mode_==DISABLED) return;
 			split(optsThatAreSet,opts.c_str(),',');
 			for (SizeType i=0;i<optsThatAreSet.size();i++) {
-				bool b = (find(registeredOptions_.begin(),registeredOptions_.end(),optsThatAreSet[i])==registeredOptions_.end());
+				bool b = (find(registeredOptions_.begin(),
+				               registeredOptions_.end(),
+				               optsThatAreSet[i])==registeredOptions_.end());
 				if (!b) continue;
-				
+
 				String s(__FILE__);
 				s += ": Unknown option " + optsThatAreSet[i] + "\n";
 				if (mode_==PERMISSIVE) std::cout<<" *** WARNING **: "<<s;
@@ -120,6 +123,7 @@ public:
 		}
 
 	private:
+
 		Vector<String>::Type registeredOptions_;
 		SizeType mode_;
 	}; // class Writeable
@@ -127,6 +131,7 @@ public:
 	class Readable {
 
 	public:
+
 		Readable(Writeable& optsWrite,const String& optsString)
 		{
 			optsWrite.set(optsThatAreSet_,optsString);
@@ -134,10 +139,14 @@ public:
 
 		bool isSet(const String& thisOption) const
 		{
-			bool b = (find(optsThatAreSet_.begin(),optsThatAreSet_.end(),thisOption)==optsThatAreSet_.end());
+			bool b = (find(optsThatAreSet_.begin(),
+			               optsThatAreSet_.end(),
+			               thisOption)==optsThatAreSet_.end());
 			return (!b);
 		}
+
 	private:
+
 		Vector<String>::Type optsThatAreSet_;
 
 	}; // class Readable
@@ -146,3 +155,4 @@ public:
 } // namespace PsimagLite
 /*@}*/
 #endif // OPTIONS_HEADER_H
+

@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -88,20 +88,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 void pthread_mutex_lock(int myMutex)
 {
 }
+
 // bogus: to compile without pthreads
 void pthread_mutex_unlock(int myMutex)
 {
 }
+
 namespace PsimagLite {
 template<typename PthreadFunctionHolderType>
 class NoPthreads {
+
 public:
 
 	NoPthreads(SizeType npthreads=1,int comm = 0)
 	{
 		assert(npthreads==1);
 	}
-	
+
 	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
 	{
 		pfh.thread_function_(0,total,total,0);

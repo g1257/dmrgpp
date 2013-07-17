@@ -32,8 +32,14 @@ Please see full open source license included in file LICENSE.
 namespace PsimagLite {
 template<typename RealType>
 struct PlotParams {
-	PlotParams(const RealType& wbegin,const RealType& wend,const RealType& wstep,const RealType& wdelta)
-	: omega1(wbegin),omega2(wend),deltaOmega(wstep),delta(wdelta) { }
+
+	PlotParams(const RealType& wbegin,
+	           const RealType& wend,
+	           const RealType& wstep,
+	           const RealType& wdelta)
+	: omega1(wbegin),omega2(wend),deltaOmega(wstep),delta(wdelta)
+	{}
+
 	RealType omega1;
 	RealType omega2;
 	RealType deltaOmega;
@@ -42,3 +48,4 @@ struct PlotParams {
 } // namespace PsimagLite 
 /*@}*/
 #endif  //PLOT_PARAMS_H
+

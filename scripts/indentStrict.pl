@@ -225,6 +225,7 @@ while(<FILE>) {
 			}	
 		}
 	}
+
 	push @mystack, $label if ($co==1);
 	$c =~ s/\"[^\"]+\"//;
 	$c =~ s/[^\}]//g;
@@ -244,7 +245,7 @@ while(<FILE>) {
 	}
 	$tmpLevel = $indentLevel if ($co<$cc and !$braceAtTheEnd);
 	if ($tmpLevel>0 and ($label eq "else" or $label eq "catch" or $label eq "else if") and $co>0) {
-		$tmpLevel--;
+		$tmpLevel-- if ($_=~/} $label \{/);
 	}
 	
 	#print "$_ ** $line ** $indentLevel \n"  if ($co<$cc and !$braceAtTheEnd);
@@ -348,8 +349,8 @@ sub getLabel
 sub isOfType
 {
 	my ($tt,$what) = @_;
-
 	return 1 if ($tt=~/^$what/);
+	return 1 if ($tt=~/[ \t]+$what$/);
 	return 1 if ($tt=~/[ \t]+$what[^a-zA-Z]/);
 	return 0;
 }
