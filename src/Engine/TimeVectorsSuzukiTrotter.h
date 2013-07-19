@@ -150,7 +150,6 @@ public:
 	                             bool allOperatorsApplied,
 	                             const PsimagLite::Vector<SizeType>::Type& block)
 	{
-		static bool firstcall = true;
 		PsimagLite::OstringStream msg;
 		msg<<"EXPERIMENTAL: using SuzukiTrotter";
 
@@ -165,11 +164,6 @@ public:
 		for (SizeType i=1;i<times_.size();i++)
 			if (targetVectors_[i].size()==0 || !allOperatorsApplied)
 				targetVectors_[i] = phi;
-
-		if (firstcall) {
-			firstcall=false;
-			return;
-		}
 
 		if (!allOperatorsApplied) return;
 
@@ -485,7 +479,7 @@ private:
 		model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
 		crsMatrixToFullMatrix(m,hmatrix);
 		assert(isHermitian(m));
-		m *= (-time);
+		m *= (time);
 		exp(m);
 	}
 
