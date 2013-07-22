@@ -161,11 +161,15 @@ public:
 		// set non-zero sectors
 		targetVectors_[0] = phi;
 
-		for (SizeType i=1;i<times_.size();i++)
-			if (targetVectors_[i].size()==0 || !allOperatorsApplied)
+		bool returnFlag = false;
+		for (SizeType i=1;i<times_.size();i++) {
+			if (targetVectors_[i].size()==0 || !allOperatorsApplied) {
 				targetVectors_[i] = phi;
+				returnFlag = true;
+			}
+		}
 
-		if (!allOperatorsApplied) return;
+		if (returnFlag) return;
 
 		// skip odd links if expanding system and
 		// skip even links if expanding environ
