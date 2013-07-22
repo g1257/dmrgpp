@@ -480,10 +480,10 @@ private:
 			msg<<" added for diagonals on sites "<<block[0]<<" and "<<block[1];
 			progress_.printline(msg,std::cout);
 		}
-		model_.hamiltonianOnLink(hmatrix,block,currentTime_,-factorForDiagonals);
+		model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
 		crsMatrixToFullMatrix(m,hmatrix);
 		assert(isHermitian(m));
-		m *= (time);
+		m *= (-time);
 		exp(m);
 	}
 

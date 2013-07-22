@@ -333,7 +333,7 @@ namespace Dmrg {
 
 							SizeType sigma = dofs;
 							transposeConjugate(tmpMatrix2,cm[sigma+j*offset_].data);
-							multiply(tmpMatrix,cm[sigma+i*offset_].data,tmpMatrix2);
+							multiply(tmpMatrix,tmpMatrix2,cm[sigma+i*offset_].data);
 							multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
 							hmatrix += tmpMatrix2;
 						}
