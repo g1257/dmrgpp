@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009-2011, UT-Battelle, LLC
+Copyright (c) 2009-2011, 2013, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,73 +67,79 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
 /*! \file CorrectionVectorFunction.h
  *
  *  This is an implementation of PRB 60, 225, Eq. (24)
- * 
+ *
  */
 #ifndef CORRECTION_V_FUNCTION_H
 #define CORRECTION_V_FUNCTION_H
 #include "ConjugateGradient.h"
 
 namespace Dmrg {
-	template<typename MatrixType,typename InfoType>
-	class	CorrectionVectorFunction {
+template<typename MatrixType,typename InfoType>
+class	CorrectionVectorFunction {
 
-		typedef typename MatrixType::value_type FieldType;
-		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
-		typedef typename PsimagLite::Real<FieldType>::Type RealType;
+	typedef typename MatrixType::value_type FieldType;
+	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
+	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
-		class InternalMatrix {
-		public:
-			typedef FieldType value_type ;
-			InternalMatrix(const MatrixType& m,const InfoType& info)
-			: m_(m),info_(info) {}
+	class InternalMatrix {
 
-			SizeType rank() const { return m_.rank(); }
-
-			void matrixVectorProduct(VectorType& x,const VectorType& y) const
-			{
-				RealType eta = info_.eta;
-				RealType omega = info_.omega;
-				VectorType xTmp(x.size(),0);
-				m_.matrixVectorProduct(xTmp,y); // xTmp = Hy
-				VectorType x2(x.size(),0);
-				m_.matrixVectorProduct(x2,x); // x2 = H^2 y
-				x = x2 -2 *omega * xTmp + (omega*omega + eta*eta)*y;
-				x /= (-eta);
-			}
-		private:
-			const MatrixType& m_;
-			const InfoType& info_;
-		};
-		typedef ConjugateGradient<InternalMatrix> ConjugateGradientType;
 	public:
-		CorrectionVectorFunction(const MatrixType& m,const InfoType& info)
-		: im_(m,info),cg_()
-		{
-		}
 
-		void getXi(VectorType& result,const VectorType& sv) const
+		typedef FieldType value_type ;
+		InternalMatrix(const MatrixType& m,const InfoType& info)
+		    : m_(m),info_(info) {}
+
+		SizeType rank() const { return m_.rank(); }
+
+		void matrixVectorProduct(VectorType& x,const VectorType& y) const
 		{
-			typename PsimagLite::Vector<VectorType>::Type x;
-			VectorType x0(result.size(),0);
-			x.push_back(x0); // initial ansatz
-			cg_(x,im_,sv);
-			SizeType k = x.size();
-			result = x[k-1];
+			RealType eta = info_.eta;
+			RealType omega = info_.omega;
+			VectorType xTmp(x.size(),0);
+			m_.matrixVectorProduct(xTmp,y); // xTmp = Hy
+			VectorType x2(x.size(),0);
+			m_.matrixVectorProduct(x2,x); // x2 = H^2 y
+			x = x2 -2 *omega * xTmp + (omega*omega + eta*eta)*y;
+			x /= (-eta);
 		}
 
 	private:
-		InternalMatrix im_;
-		ConjugateGradientType cg_;
-	}; // class CorrectionVectorFunction
+
+		const MatrixType& m_;
+		const InfoType& info_;
+	};
+
+	typedef ConjugateGradient<InternalMatrix> ConjugateGradientType;
+
+public:
+
+	CorrectionVectorFunction(const MatrixType& m,const InfoType& info)
+	    : im_(m,info),cg_()
+	{}
+
+	void getXi(VectorType& result,const VectorType& sv) const
+	{
+		typename PsimagLite::Vector<VectorType>::Type x;
+		VectorType x0(result.size(),0);
+		x.push_back(x0); // initial ansatz
+		cg_(x,im_,sv);
+		SizeType k = x.size();
+		result = x[k-1];
+	}
+
+private:
+
+	InternalMatrix im_;
+	ConjugateGradientType cg_;
+}; // class CorrectionVectorFunction
 } // namespace Dmrg
 
 /*@}*/
