@@ -46,6 +46,8 @@ typedef float RealType;
 #include "LeftRightSuper.h"
 #include "InputNg.h"
 #include "Provenance.h"
+#include "InputCheck.h"
+#include "ModelSelector.h"
 
 using namespace Dmrg;
 
@@ -88,11 +90,14 @@ void mainLoop(GeometryType& geometry,
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
-	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,DmrgSolverParametersType> ModelType;
+	typedef ModelBase<ModelHelperType,
+	                  DmrgSolverParametersType,
+	                  InputNgType::Readable,
+	                  GeometryType> ModelBaseType;
 	typedef TargettingTemplate<PsimagLite::LanczosSolver,
 	                           InternalProductOnTheFly,
 	                           WaveFunctionTransfFactory,
-	                           ModelType,
+	                           ModelBaseType,
 	                           IoInputType,
 	                           VectorWithOffsetTemplate> TargettingType;
 
@@ -102,7 +107,8 @@ void mainLoop(GeometryType& geometry,
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	
-	ModelType model(params,io,geometry);
+	ModelSelector<ModelBaseType> modelSelector(params.model);
+	const ModelBaseType& model = modelSelector(params,io,geometry);
 	
 
 	MatrixType opC2 = model.naturalOperator(obsOptions.label,obsOptions.site,obsOptions.dof);

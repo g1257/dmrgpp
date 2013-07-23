@@ -45,6 +45,8 @@ typedef float RealType;
 #include "LeftRightSuper.h"
 #include "InputNg.h"
 #include "Provenance.h"
+#include "InputCheck.h"
+#include "ModelSelector.h"
 
 using namespace Dmrg;
 
@@ -187,11 +189,14 @@ void mainLoop(GeometryType& geometry,
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
-	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,DmrgSolverParametersType> ModelType;
+	typedef ModelBase<ModelHelperType,
+	                  DmrgSolverParametersType,
+	                  InputNgType::Readable,
+	                  GeometryType> ModelBaseType;
 	typedef TargettingTemplate<PsimagLite::LanczosSolver,
 	                           InternalProductOnTheFly,
 	                           WaveFunctionTransfFactory,
-	                           ModelType,
+	                           ModelBaseType,
 	                           IoInputType,
 	                           VectorWithOffsetTemplate> TargettingType;
 
@@ -199,7 +204,8 @@ void mainLoop(GeometryType& geometry,
 	
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	
-	ModelType model(params,io,geometry);
+	ModelSelector<ModelBaseType> modelSelector(params.model);
+	const ModelBaseType& model = modelSelector(params,io,geometry);
 
 	 //! Read TimeEvolution if applicable:
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
@@ -211,7 +217,7 @@ void mainLoop(GeometryType& geometry,
 	bool hasTimeEvolution = (targetting == "TimeStepTargetting" || targetting=="MettsTargetting") ? true : false;
 	while (moreData) {
 		try {
-			moreData = !observeOneFullSweep<VectorWithOffsetType,ModelType,
+			moreData = !observeOneFullSweep<VectorWithOffsetType,ModelBaseType,
 			            MySparseMatrix,TargettingType>
 			(dataIo,geometry,model,obsOptions,hasTimeEvolution);
 		} catch (std::exception& e) {
