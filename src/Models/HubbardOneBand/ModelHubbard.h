@@ -186,7 +186,7 @@ public:
 	void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 	                         Block const &block) const
 	{
-		typename PsimagLite::Vector<typename HilbertSpaceHubbardType::HilbertState>::Type natBasis;
+		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 		typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
 		setNaturalBasis(natBasis,quantumNumbs,block);
@@ -206,7 +206,11 @@ public:
 					su2related.transpose.push_back(-1);
 					su2related.offset = NUMBER_OF_ORBITALS;
 				}
-				OperatorType myOp(tmpMatrix,-1,typename OperatorType::PairType(1,1-sigma),asign,su2related);
+				OperatorType myOp(tmpMatrix,
+				                  -1,
+				                  typename OperatorType::PairType(1,1-sigma),
+				                  asign,
+				                  su2related);
 
 				creationMatrix.push_back(myOp);
 			}
@@ -437,8 +441,8 @@ private:
 			} else {
 				HilbertSpaceHubbardType::create(bra,i,sigma);
 				int jj = PsimagLite::isInVector(natBasis,bra);
-				if (jj<0) throw PsimagLite::RuntimeError("findOperatorMatrices: internal error while"
-				                                         "creating.\n");
+				if (jj<0)
+					throw PsimagLite::RuntimeError("findOperatorMatrices\n");
 				cm(ii,jj) =sign(ket,i,sigma);
 			}
 		}
