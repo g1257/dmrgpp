@@ -97,6 +97,8 @@ namespace Dmrg {
 		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 		typedef typename ModelBaseType::GeometryType GeometryType;
 		typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
+		typedef typename ModelBaseType::LinkProductStructType LinkProductStructType;
+		typedef typename ModelBaseType::LinkType LinkType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -124,11 +126,11 @@ namespace Dmrg {
 
 		Tj1Orb(const SolverParamsType solverParams,
 		       InputValidatorType& io,
-		       GeometryType const &dmrgGeometry)
-		    : ModelBaseType(solverParams,io,dmrgGeometry),
+		       GeometryType const &geometry)
+		    : ModelBaseType(solverParams,io,geometry),
 		      modelParameters_(io),
-		      geometry_(dmrgGeometry),
-		      modelCommon_(),
+		      geometry_(geometry),
+		      modelCommon_(geometry),
 		      offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
 		      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 		{}
@@ -201,6 +203,12 @@ namespace Dmrg {
 			return modelCommon_.hamiltonianOnLink(hmatrix,block,time,factorForDiagonals);
 		}
 
+		virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
+		                              const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.getLinkProductStruct(lps,modelHelper);
+		}
+
 		//! set creation matrices for sites in block
 		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 		                         const BlockType& block) const
@@ -260,6 +268,15 @@ namespace Dmrg {
 
 				creationMatrix.push_back(myOp3);
 			}
+		}
+
+		virtual LinkType getConnection(const SparseMatrixType** A,
+		                       const SparseMatrixType** B,
+		                       SizeType ix,
+		                       const LinkProductStructType& lps,
+		                       const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
 		}
 
 		/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the unmangled (natural) basis of one-site */
@@ -569,12 +586,6 @@ namespace Dmrg {
 
 	};	//class Tj1Orb
 
-	template<typename ModelBaseType>
-	std::ostream &operator<<(std::ostream &os, const Tj1Orb<ModelBaseType>& model)
-	{
-		model.print(os);
-		return os;
-	}
 } // namespace Dmrg
 /*@}*/
 #endif // TJ_1ORB_H

@@ -102,6 +102,7 @@ class ModelCommon  {
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef VerySparseMatrix<SparseElementType> VerySparseMatrixType;
+	typedef typename ModelHelperType::LinkType LinkType;
 
 public:
 
@@ -120,7 +121,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
 	ModelCommon(const GeometryType& geometry)
-	    : dmrgGeometry_(geometry),progress_("ModelCommon")
+	    : geometry_(geometry),progress_("ModelCommon")
 	{
 		Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 		MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
@@ -188,7 +189,7 @@ public:
 
 	SizeType maxConnections() const
 	{
-		return dmrgGeometry_.maxConnections();
+		return geometry_.maxConnections();
 	}
 
 	/**
@@ -206,7 +207,7 @@ public:
 		maxSize *= maxSize;
 
 		static LinkProductStructType lps(maxSize);
-		HamiltonianConnectionType hc(dmrgGeometry_,modelHelper,&lps,&x,&y);
+		HamiltonianConnectionType hc(geometry_,modelHelper,&lps,&x,&y);
 
 		SizeType total = 0;
 		for (SizeType i=0;i<n;i++) {
@@ -259,6 +260,43 @@ public:
 		}
 	}
 
+	SizeType getLinkProductStruct(LinkProductStructType** lps,
+	                              const ModelHelperType& modelHelper) const
+	{
+		SizeType n=modelHelper.leftRightSuper().super().block().size();
+		SizeType maxSize = geometry_.maxConnections() * 4 * 16;
+		maxSize *= maxSize;
+
+		*lps = new LinkProductStructType(maxSize);
+
+		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
+
+		HamiltonianConnectionType hc(geometry_,modelHelper,*lps,&x,&y);
+		SizeType total = 0;
+		for (SizeType i=0;i<n;i++) {
+			for (SizeType j=0;j<n;j++) {
+				hc.compute(i,j,0,*lps,total);
+			}
+		}
+		return total;
+	}
+
+	LinkType getConnection(const SparseMatrixType** A,
+	                       const SparseMatrixType** B,
+	                       SizeType ix,
+	                       const LinkProductStructType& lps,
+	                       const ModelHelperType& modelHelper) const
+	{
+		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
+		HamiltonianConnectionType hc(geometry_,modelHelper,&lps,&x,&y);
+		SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
+		SparseElementType tmp = 0.0;
+		typename HamiltonianConnectionType::AdditionalDataType additionalData;
+		hc.prepare(ix,i,j,type,tmp,term,dofs,additionalData);
+		LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs,additionalData);
+		return link2;
+	}
+
 private:
 
 	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
@@ -270,19 +308,19 @@ private:
 		SizeType ind = block[i];
 		SizeType jnd = block[j];
 
-		if (!dmrgGeometry_.connected(0,1,ind,jnd)) return;
+		if (!geometry_.connected(0,1,ind,jnd)) return;
 
 		SizeType type = 0;
 		SizeType offset = cm.size()/block.size();
 
 		typename GeometryType::AdditionalDataType additionalData;
 
-		for (SizeType term=0;term<dmrgGeometry_.terms();term++) {
-			dmrgGeometry_.fillAdditionalData(additionalData,term,ind,jnd);
+		for (SizeType term=0;term<geometry_.terms();term++) {
+			geometry_.fillAdditionalData(additionalData,term,ind,jnd);
 			SizeType dofsTotal = LinkProductType::dofs(term,additionalData);
 			for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
 				std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,dofs,additionalData);
-				SparseElementType tmp = dmrgGeometry_(ind,edofs.first,jnd,edofs.second,term);
+				SparseElementType tmp = geometry_(ind,edofs.first,jnd,edofs.second,term);
 
 				if (tmp==static_cast<RealType>(0.0)) continue;
 
@@ -318,7 +356,7 @@ private:
 		        GeometryType,
 		        ModelHelperType,
 		        LinkProductType> SomeHamiltonianConnectionType;
-		SomeHamiltonianConnectionType hc(dmrgGeometry_,modelHelper);
+		SomeHamiltonianConnectionType hc(geometry_,modelHelper);
 
 		SizeType total = 0;
 		for (SizeType i=0;i<n;i++) {
@@ -342,7 +380,7 @@ private:
 		return A;
 	}
 
-	const GeometryType& dmrgGeometry_;
+	const GeometryType& geometry_;
 	PsimagLite::ProgressIndicator progress_;
 };     //class ModelCommon
 } // namespace Dmrg

@@ -102,6 +102,8 @@ namespace Dmrg {
 		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 		typedef typename ModelBaseType::GeometryType GeometryType;
 		typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
+		typedef typename ModelBaseType::LinkProductStructType LinkProductStructType;
+		typedef typename ModelBaseType::LinkType LinkType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef	typename ModelBaseType::VectorType VectorType;
@@ -136,7 +138,7 @@ namespace Dmrg {
 		: ModelBaseType(solverParams,io,geometry),
 		  modelParameters_(io),
 		  geometry_(geometry),
-		  modelCommon_(),
+		  modelCommon_(geometry),
 		  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 		  reinterpretX_(maxNumberOfSites),
 		  reinterpretY_(maxNumberOfSites)
@@ -242,6 +244,21 @@ namespace Dmrg {
 			}
 		}
 		
+		virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
+		                              const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.getLinkProductStruct(lps,modelHelper);
+		}
+
+		virtual LinkType getConnection(const SparseMatrixType** A,
+		                       const SparseMatrixType** B,
+		                       SizeType ix,
+		                       const LinkProductStructType& lps,
+		                       const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
+		}
+
 		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
 		{
 			BlockType block;
@@ -395,13 +412,6 @@ namespace Dmrg {
 		}
 	}; // class ModelHeisenberg
 
-	template<typename ModelBaseType>
-	std::ostream &operator<<(std::ostream &os,
-	                         const ModelHeisenberg<ModelBaseType>& model)
-	{
-		model.print(os);
-		return os;
-	}
 } // namespace Dmrg
 /*@}*/
 #endif //DMRG_MODEL_HEISENBERG_HEADER_H

@@ -102,6 +102,8 @@ namespace Dmrg {
 		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 		typedef typename ModelBaseType::GeometryType GeometryType;
 		typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
+		typedef typename ModelBaseType::LinkProductStructType LinkProductStructType;
+		typedef typename ModelBaseType::LinkType LinkType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -133,7 +135,7 @@ namespace Dmrg {
 		: ModelBaseType(solverParams,io,geometry),
 		  modelParameters_(io),
 		  geometry_(geometry),
-		  modelCommon_(),
+		  modelCommon_(geometry),
 		  degreesOfFreedom_(geometry_.numberOfSites()),
 		  hilbertSpace_(degreesOfFreedom_)
 		{
@@ -245,6 +247,21 @@ namespace Dmrg {
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType nOp(nmatrix,1,typename OperatorType::PairType(0,0),1,su2related2);
 			creationMatrix.push_back(nOp);
+		}
+
+		virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
+		                              const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.getLinkProductStruct(lps,modelHelper);
+		}
+
+		virtual LinkType getConnection(const SparseMatrixType** A,
+		                       const SparseMatrixType** B,
+		                       SizeType ix,
+		                       const LinkProductStructType& lps,
+		                       const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
 		}
 
 		MatrixType naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
@@ -593,12 +610,6 @@ namespace Dmrg {
 		HilbertSpaceImmmType hilbertSpace_;
 	};     //class Immm
 
-	template<typename ModelBaseType>
-	std::ostream &operator<<(std::ostream &os, const Immm<ModelBaseType>& model)
-	{
-		model.print(os);
-		return os;
-	}
 } // namespace Dmrg
 /*@}*/
 #endif // IMMM_HEADER_H

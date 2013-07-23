@@ -102,6 +102,8 @@ namespace Dmrg {
 		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 		typedef typename ModelBaseType::GeometryType GeometryType;
 		typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
+		typedef typename ModelBaseType::LinkProductStructType LinkProductStructType;
+		typedef typename ModelBaseType::LinkType LinkType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -134,7 +136,7 @@ namespace Dmrg {
 			  reinterpretY_(9),
 			  modelParameters_(io),
 			  geometry_(geometry),
-		      modelCommon_(),
+		      modelCommon_(geometry),
 			  spinSquared_(spinSquaredHelper_,modelParameters_.orbitals,2*modelParameters_.orbitals)
 		{
 			LinkProductType::setOrbitals(modelParameters_.orbitals);
@@ -251,6 +253,21 @@ namespace Dmrg {
 					creationMatrix.push_back(myOp);
 				}
 			}
+		}
+
+		virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
+		                              const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.getLinkProductStruct(lps,modelHelper);
+		}
+
+		virtual LinkType getConnection(const SparseMatrixType** A,
+		                       const SparseMatrixType** B,
+		                       SizeType ix,
+		                       const LinkProductStructType& lps,
+		                       const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
 		}
 
 		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
@@ -862,12 +879,6 @@ namespace Dmrg {
 		}
 	};     //class ModelFeBasedSc
 
-	template<typename ModelBaseType>
-	std::ostream &operator<<(std::ostream &os, const ModelFeBasedSc<ModelBaseType>& model)
-	{
-		model.print(os);
-		return os;
-	}
 } // namespace Dmrg
 /*@}*/
 #endif

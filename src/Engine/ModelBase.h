@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MODEL_BASE_H
 
 #include "ReflectionOperatorEmpty.h"
+#include "LinkProductStruct.h"
 
 namespace Dmrg {
 
@@ -108,8 +109,10 @@ public:
 	typedef typename MyBasis::BasisDataType BasisDataType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
+	typedef LinkProductStruct<ComplexOrRealType> LinkProductStructType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef ParametersType SolverParamsType;
+	typedef typename ModelHelperType::LinkType LinkType;
 
 	ModelBase(const ParametersType& params,
 	          InputValidatorType& io,
@@ -179,53 +182,34 @@ public:
 	                             RealType time,
 	                             RealType factorForDiagonals) const = 0;
 
+	virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
+	                                      const ModelHelperType& modelHelper) const = 0;
+
+	virtual LinkType getConnection(const SparseMatrixType** A,
+	                               const SparseMatrixType** B,
+			                       SizeType ix,
+			                       const LinkProductStructType& lps,
+			                       const ModelHelperType& modelHelper) const = 0;
 private:
-
-	//	template<typename SomeModelType>
-	//	LinkType getConnection2(const SparseMatrixType** A,
-	//	                        const SparseMatrixType** B,
-	//	                        SizeType ix,
-	//	                        const LinkProductStructType& lps,
-	//	                        const ModelHelperType& modelHelper) const
-	//	{
-	//		typedef typename SomeModelType::HamiltonianConnectionType HamiltonianConnectionType;
-	//		typename PsimagLite::Vector<ComplexOrRealType>::Type x,y; // bogus
-	//		HamiltonianConnectionType hc(geometry_,modelHelper,&lps,&x,&y);
-	//		SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
-	//		ComplexOrRealType tmp = 0.0;
-	//		typename HamiltonianConnectionType::AdditionalDataType additionalData;
-	//		hc.prepare(ix,i,j,type,tmp,term,dofs,additionalData);
-	//		LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs,additionalData);
-	//		return link2;
-	//	}
-
-	//	template<typename SomeModelType>
-	//	SizeType getLinkProductStruct2(LinkProductStructType** lps,const ModelHelperType& modelHelper) const
-	//	{
-	//		SizeType n=modelHelper.leftRightSuper().super().block().size();
-	//		SizeType maxSize = geometry_.maxConnections() * 4 * 16;
-	//		maxSize *= maxSize;
-
-	//		*lps = new LinkProductStructType(maxSize);
-
-	//		typename PsimagLite::Vector<ComplexOrRealType>::Type x,y; // bogus
-
-	//		typedef typename SomeModelType::HamiltonianConnectionType HamiltonianConnectionType;
-	//		HamiltonianConnectionType hc(geometry_,modelHelper,*lps,&x,&y);
-	//		SizeType total = 0;
-	//		for (SizeType i=0;i<n;i++) {
-	//			for (SizeType j=0;j<n;j++) {
-	//				hc.compute(i,j,0,*lps,total);
-	//			}
-	//		}
-	//		return total;
-	//	}
 
 	const ParametersType& params_;
 	const GeometryType& geometry_;
 
 };     //class ModelBase
 
+template<typename ModelHelperType,
+         typename ParametersType,
+         typename InputValidatorType,
+         typename GeometryType>
+std::ostream& operator<<(std::ostream& os,
+                         const ModelBase<ModelHelperType,
+                                         ParametersType,
+                                         InputValidatorType,
+                                         GeometryType>& model)
+{
+	model.print(os);
+	return os;
+}
 } // namespace Dmrg
 /*@}*/
 #endif

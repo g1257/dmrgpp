@@ -101,6 +101,8 @@ public:
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
+	typedef typename ModelBaseType::LinkProductStructType LinkProductStructType;
+	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename ModelHelperType::RealType RealType;
@@ -137,12 +139,12 @@ public:
 
 	ModelHubbard(const SolverParamsType& solverParams,
 	             InputValidatorType& io,
-	             GeometryType const &dmrgGeometry,
+	             GeometryType const &geometry,
 	             SizeType offset = DEGREES_OF_FREEDOM)
-	    : ModelBaseType(solverParams,io,dmrgGeometry),
+	    : ModelBaseType(solverParams,io,geometry),
 	      modelParameters_(io),
-	      dmrgGeometry_(dmrgGeometry),
-	      modelCommon_(),
+	      geometry_(geometry),
+	      modelCommon_(geometry),
 	      offset_(offset),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 	      reinterpretX_(maxNumberOfSites),
@@ -257,6 +259,21 @@ public:
 				creationMatrix.push_back(myOp);
 			}
 		}
+	}
+
+	virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
+	                              const ModelHelperType& modelHelper) const
+	{
+		return modelCommon_.getLinkProductStruct(lps,modelHelper);
+	}
+
+	virtual LinkType getConnection(const SparseMatrixType** A,
+	                       const SparseMatrixType** B,
+	                       SizeType ix,
+	                       const LinkProductStructType& lps,
+	                       const ModelHelperType& modelHelper) const
+	{
+		return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
@@ -382,7 +399,7 @@ public:
 	{
 		SizeType n=block.size();
 		SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
-		SizeType linSize = dmrgGeometry_.numberOfSites();
+		SizeType linSize = geometry_.numberOfSites();
 
 		for (SizeType i=0;i<n;i++) {
 			// onsite U hubbard
@@ -560,20 +577,13 @@ private:
 	}
 
 	ParametersModelHubbard<RealType>  modelParameters_;
-	const GeometryType &dmrgGeometry_;
+	const GeometryType &geometry_;
 	ModelCommonType modelCommon_;
 	SizeType offset_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 	SizeType reinterpretX_,reinterpretY_;
 };	//class ModelHubbard
-
-template<typename ModelBaseType>
-std::ostream& operator<<(std::ostream& os, const ModelHubbard<ModelBaseType>& model)
-{
-	model.print(os);
-	return os;
-}
 
 } // namespace Dmrg
 /*@}*/

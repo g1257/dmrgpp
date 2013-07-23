@@ -96,6 +96,8 @@ namespace Dmrg {
 		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 		typedef typename ModelBaseType::GeometryType GeometryType;
 		typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
+		typedef typename ModelBaseType::LinkProductStructType LinkProductStructType;
+		typedef typename ModelBaseType::LinkType LinkType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
@@ -117,12 +119,12 @@ namespace Dmrg {
 
 		ExtendedHubbard1Orb(const SolverParamsType& solverParams,
 		                    InputValidatorType& io,
-		                    GeometryType const &dmrgGeometry)
-		: ModelBaseType(solverParams,io,dmrgGeometry),
+		                    GeometryType const &geometry)
+		: ModelBaseType(solverParams,io,geometry),
 		  modelParameters_(io),
-		  dmrgGeometry_(dmrgGeometry),
-		  modelCommon_(),
-		  modelHubbard_(solverParams,io,dmrgGeometry)
+		  geometry_(geometry),
+		  modelCommon_(geometry),
+		  modelHubbard_(solverParams,io,geometry)
 		{}
 
 		SizeType hilbertSize(SizeType site) const
@@ -197,6 +199,21 @@ namespace Dmrg {
 			setNi(creationMatrix,block);
 		}
 
+		virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
+		                              const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.getLinkProductStruct(lps,modelHelper);
+		}
+
+		virtual LinkType getConnection(const SparseMatrixType** A,
+		                       const SparseMatrixType** B,
+		                       SizeType ix,
+		                       const LinkProductStructType& lps,
+		                       const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
+		}
+
 		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
 								      SizeType site,
 								      SizeType dof) const
@@ -259,7 +276,7 @@ namespace Dmrg {
 	private:
 
 		ParametersModelHubbard<RealType>  modelParameters_;
-		const GeometryType &dmrgGeometry_;
+		const GeometryType &geometry_;
 		ModelCommonType modelCommon_;
 		ModelHubbardType modelHubbard_;
 
@@ -314,13 +331,6 @@ namespace Dmrg {
 		}
 	};	//class ExtendedHubbard1Orb
 
-	template<typename ModelBaseType>
-	std::ostream &operator<<(std::ostream &os,
-	                         const ExtendedHubbard1Orb<ModelBaseType>& model)
-	{
-		model.print(os);
-		return os;
-	}
 } // namespace Dmrg
 /*@}*/
 #endif // EXTENDED_HUBBARD_1ORB_H

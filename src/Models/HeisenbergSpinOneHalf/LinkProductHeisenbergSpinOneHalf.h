@@ -79,8 +79,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_PRODUCT_HEIS_ONE_HALF_H
 #define LINK_PRODUCT_HEIS_ONE_HALF_H
 
-#include "LinkProductStruct.h"
-
 namespace Dmrg {
 	template<typename ModelHelperType>
 	class LinkProductHeisenbergSpinOneHalf {
