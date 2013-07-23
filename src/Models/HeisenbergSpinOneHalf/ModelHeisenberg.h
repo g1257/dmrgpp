@@ -93,26 +93,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {	
 	
-	template<typename ModelHelperType_,
-	typename SparseMatrixType,
-	typename GeometryType>
-	class ModelHeisenberg
-		: public ModelBase<ModelHelperType_,SparseMatrixType,GeometryType,
-  	LinkProductHeisenbergSpinOneHalf<ModelHelperType_> > {
+	template<typename ModelBaseType>
+	class ModelHeisenberg : public ModelBaseType {
 
 	public:
-		typedef ModelHelperType_ ModelHelperType;
+
+		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+		typedef typename ModelBaseType::GeometryType GeometryType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename ModelHelperType::RealType RealType;
 
 	private:
+
 		typedef typename ModelHelperType::BlockType Block;
+		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
-//		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 		typedef unsigned int long long WordType;
 		typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType> LinkProductType;
-		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,
-		                  LinkProductType> ModelBaseType;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 		static const int NUMBER_OF_ORBITALS=1;
@@ -348,11 +345,9 @@ namespace Dmrg {
 		}
 	}; // class ModelHeisenberg
 
-	template<typename ModelHelperType,
-	typename SparseMatrixType,
-	typename GeometryType>
+	template<typename ModelBaseType>
 	std::ostream &operator<<(std::ostream &os,
-	                         const ModelHeisenberg<ModelHelperType,SparseMatrixType,GeometryType>& model)
+	                         const ModelHeisenberg<ModelBaseType>& model)
 	{
 		model.print(os);
 		return os;

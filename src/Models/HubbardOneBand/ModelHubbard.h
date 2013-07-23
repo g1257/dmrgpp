@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MODEL_HUBBARD_DMRG
 #include <cassert>
 #include "Sort.h" // in PsimagLite
-#include "ModelBase.h"
 #include "ParametersModelHubbard.h"
 #include "HilbertSpaceHubbard.h"
 #include "LinkProductHubbardOneBand.h"
@@ -93,19 +92,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
-template<typename ModelHelperType_,
-         typename SparseMatrixType,
-         typename DmrgGeometryType>
-class ModelHubbard : public ModelBase<ModelHelperType_,SparseMatrixType,DmrgGeometryType,
-        LinkProductHubbardOneBand<ModelHelperType_> > {
+template<typename ModelBaseType>
+class ModelHubbard : public ModelBaseType {
 
 public:
 
-	typedef ModelHelperType_ ModelHelperType;
+	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef unsigned int long long WordType;
 	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -121,25 +119,23 @@ private:
 		  SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN};
 
 	typedef typename ModelHelperType::BlockType Block;
+	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 
 public:
 
 	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 	typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;
-	typedef ModelBase<ModelHelperType,
-	                  SparseMatrixType,
-	                  DmrgGeometryType,
-	                  LinkProductType> ModelBaseType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::BasisDataType BasisDataType;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 
-	ModelHubbard(InputValidatorType& io,
-	             DmrgGeometryType const &dmrgGeometry,
+	ModelHubbard(const SolverParamsType& solverParams,
+	             InputValidatorType& io,
+	             GeometryType const &dmrgGeometry,
 	             SizeType offset = DEGREES_OF_FREEDOM)
-	    : ModelBaseType(dmrgGeometry),
+	    : ModelBaseType(solverParams,io,dmrgGeometry),
 	      modelParameters_(io),
 	      dmrgGeometry_(dmrgGeometry),
 	      offset_(offset),
@@ -519,20 +515,15 @@ private:
 	}
 
 	ParametersModelHubbard<RealType>  modelParameters_;
-	const DmrgGeometryType &dmrgGeometry_;
+	const GeometryType &dmrgGeometry_;
 	SizeType offset_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 	SizeType reinterpretX_,reinterpretY_;
 };	//class ModelHubbard
 
-template<typename ModelHelperType,
-         typename SparseMatrixType,
-         typename DmrgGeometryType>
-std::ostream& operator<<(std::ostream& os,
-                         const ModelHubbard<ModelHelperType,
-                                            SparseMatrixType,
-                                            DmrgGeometryType>& model)
+template<typename ModelBaseType>
+std::ostream& operator<<(std::ostream& os, const ModelHubbard<ModelBaseType>& model)
 {
 	model.print(os);
 	return os;

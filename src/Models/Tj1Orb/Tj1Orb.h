@@ -86,24 +86,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	//! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment
-	template<typename ModelHelperType_,
-	typename SparseMatrixType,
-	typename GeometryType>
-	class Tj1Orb : public ModelBase<ModelHelperType_,SparseMatrixType,GeometryType,
-		LinkProductTj1Orb<ModelHelperType_> > {
+	template<typename ModelBaseType>
+	class Tj1Orb : public ModelBaseType {
 
 	public:
 
-		typedef ModelHubbard<ModelHelperType_,SparseMatrixType,GeometryType> ModelHubbardType;
-		typedef ModelHeisenberg<ModelHelperType_,SparseMatrixType,GeometryType> ModelHeisenbergType;
-		typedef ModelHelperType_ ModelHelperType;
+		typedef ModelHubbard<ModelBaseType> ModelHubbardType;
+		typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
+		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+		typedef typename ModelBaseType::GeometryType GeometryType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 		typedef typename ModelHelperType::RealType RealType;
+		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef LinkProductTj1Orb<ModelHelperType> LinkProductType;
-		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType> ModelBaseType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
@@ -522,11 +520,8 @@ namespace Dmrg {
 
 	};	//class Tj1Orb
 
-	template<typename ModelHelperType,
-	typename SparseMatrixType,
-	typename GeometryType>
-	std::ostream &operator<<(std::ostream &os,
-		const Tj1Orb<ModelHelperType,SparseMatrixType,GeometryType>& model)
+	template<typename ModelBaseType>
+	std::ostream &operator<<(std::ostream &os, const Tj1Orb<ModelBaseType>& model)
 	{
 		model.print(os);
 		return os;

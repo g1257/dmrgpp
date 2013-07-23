@@ -86,21 +86,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	//! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
-	template<typename ModelHelperType_,
-	typename SparseMatrixType,
-	typename DmrgGeometryType>
-	class ExtendedHubbard1Orb : public ModelBase<ModelHelperType_,SparseMatrixType,DmrgGeometryType,LinkProdExtendedHubbard1Orb<ModelHelperType_> > {
+	template<typename ModelBaseType>
+	class ExtendedHubbard1Orb : public ModelBaseType {
 
 	public:
 
-		typedef ModelHubbard<ModelHelperType_,SparseMatrixType,DmrgGeometryType> ModelHubbardType;
-		typedef ModelHelperType_ ModelHelperType;
+		typedef ModelHubbard<ModelBaseType> ModelHubbardType;
+		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+		typedef typename ModelBaseType::GeometryType GeometryType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
+		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef LinkProdExtendedHubbard1Orb<ModelHelperType> LinkProductType;
-		typedef ModelBase<ModelHelperType,SparseMatrixType,DmrgGeometryType,LinkProductType> ModelBaseType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
@@ -109,16 +108,16 @@ namespace Dmrg {
 		typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
 		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
+		typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 
-		ExtendedHubbard1Orb(InputValidatorType& io,
-				    DmrgGeometryType const &dmrgGeometry)
-		: ModelBaseType(dmrgGeometry),
+		ExtendedHubbard1Orb(const SolverParamsType& solverParams,
+		                    InputValidatorType& io,
+		                    GeometryType const &dmrgGeometry)
+		: ModelBaseType(solverParams,io,dmrgGeometry),
 		  modelParameters_(io),
 		  dmrgGeometry_(dmrgGeometry),
-		  modelHubbard_(io,dmrgGeometry)
+		  modelHubbard_(solverParams,io,dmrgGeometry)
 		{}
-
-// 		SizeType orbitals() const { return modelHubbard_.orbitals(); }
 
 		SizeType hilbertSize(SizeType site) const
 		{
@@ -214,7 +213,7 @@ namespace Dmrg {
 	private:
 
 		ParametersModelHubbard<RealType>  modelParameters_;
-		const DmrgGeometryType &dmrgGeometry_;
+		const GeometryType &dmrgGeometry_;
 		ModelHubbardType modelHubbard_;
 
 		//! Find n_i in the natural basis natBasis
@@ -268,11 +267,9 @@ namespace Dmrg {
 		}
 	};	//class ExtendedHubbard1Orb
 
-	template<typename ModelHelperType,
- 	typename SparseMatrixType,
- 	typename DmrgGeometryType>
+	template<typename ModelBaseType>
 	std::ostream &operator<<(std::ostream &os,
-	                         const ExtendedHubbard1Orb<ModelHelperType,SparseMatrixType,DmrgGeometryType>& model)
+	                         const ExtendedHubbard1Orb<ModelBaseType>& model)
 	{
 		model.print(os);
 		return os;

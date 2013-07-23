@@ -28,7 +28,6 @@ typedef float MatrixElementType;
 #include "BlockMatrix.h"
 #include "DmrgSolver.h"
 #include "IoSimple.h"
-#include "ModelFactory.h"
 #include "Operators.h"
 #include "Concurrency.h"
 #include "Geometry/Geometry.h"
@@ -50,6 +49,9 @@ typedef float MatrixElementType;
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
 #include "Provenance.h"
+#include "InputNg.h"
+#include "InputCheck.h"
+#include "ModelSelector.h"
 
 typedef std::complex<MatrixElementType> ComplexType;
 typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
@@ -61,15 +63,16 @@ typedef PsimagLite::Geometry<MatrixElementType,ProgramGlobals> GeometryType;
 typedef PsimagLite::InputNg<InputCheck> InputNgType;
 typedef ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> ParametersDmrgSolverType;
 
-template<typename ModelFactoryType,
-	 template<typename,typename> class InternalProductTemplate,
+template<typename ModelBaseType,
+         template<typename,typename> class InternalProductTemplate,
          typename TargettingType>
 void mainLoop3(GeometryType& geometry,
                ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io)
 {
 	//! Setup the Model
-	ModelFactoryType model(dmrgSolverParams,io,geometry);
+	ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
+	const ModelBaseType& model = modelSelector(dmrgSolverParams,io,geometry);
 
 	//! Read TimeEvolution if applicable:
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
@@ -101,28 +104,30 @@ void mainLoop2(GeometryType& geometry,
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
-	typedef ModelFactory<ModelHelperType,MySparseMatrix,GeometryType,
-	        ParametersDmrgSolverType> ModelFactoryType;
+	typedef ModelBase<ModelHelperType,
+	                  ParametersDmrgSolverType,
+	                  InputNgType::Readable,
+	                  GeometryType> ModelBaseType;
 
 	if (dmrgSolverParams.options.find("ChebyshevSolver")!=PsimagLite::String::npos) {
 		typedef TargettingTemplate<PsimagLite::ChebyshevSolver,
 					   InternalProductTemplate,
 					   WaveFunctionTransfFactory,
-					   ModelFactoryType,
+					   ModelBaseType,
 					   PsimagLite::IoSimple,
 					   VectorWithOffsetTemplate
 					   > TargettingType;
-		mainLoop3<ModelFactoryType, InternalProductTemplate,TargettingType>
+		mainLoop3<ModelBaseType,InternalProductTemplate,TargettingType>
 		(geometry,dmrgSolverParams,io);
 	} else {
 		typedef TargettingTemplate<PsimagLite::LanczosSolver,
 					   InternalProductTemplate,
 					   WaveFunctionTransfFactory,
-					   ModelFactoryType,
+					   ModelBaseType,
 					   PsimagLite::IoSimple,
 					   VectorWithOffsetTemplate
 					   > TargettingType;
-		mainLoop3<ModelFactoryType,InternalProductTemplate,TargettingType>
+		mainLoop3<ModelBaseType,InternalProductTemplate,TargettingType>
 		(geometry,dmrgSolverParams,io);
 	}
 }

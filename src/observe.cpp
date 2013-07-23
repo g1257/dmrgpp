@@ -26,7 +26,6 @@ typedef float RealType;
 #include "Observer.h"
 #include "ObservableLibrary.h"
 #include "IoSimple.h"
-#include "ModelFactory.h"
 #include "Operators.h"
 #include "Geometry/Geometry.h"
 #include "CrsMatrix.h"

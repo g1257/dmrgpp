@@ -90,28 +90,24 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
-	template<
-		typename ModelHelperType_,
-		typename SparseMatrixType,
-		typename GeometryType>
-	class ModelFeBasedSc : public ModelBase<ModelHelperType_,SparseMatrixType,GeometryType,
- 	LinkProductFeAs<ModelHelperType_> > {
+	template<typename ModelBaseType>
+	class ModelFeBasedSc : public ModelBaseType {
 		
 		typedef unsigned int long long WordType;
 		typedef  HilbertSpaceFeAs<WordType> HilbertSpaceFeAsType;
 
 	public:
 
-		typedef ModelHelperType_ ModelHelperType;
+		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+		typedef typename ModelBaseType::GeometryType GeometryType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 		typedef typename ModelHelperType::RealType RealType;
+		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename HilbertSpaceFeAsType::HilbertState HilbertState;
-		
 		typedef typename ModelHelperType::BlockType Block;
-//		typedef typename ModelHelperType::ReflectionSymmetryType ReflectionSymmetryType;
 		
 		static const int FERMION_SIGN = -1;
 		static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -119,7 +115,6 @@ namespace Dmrg {
 
 		typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 		typedef LinkProductFeAs<ModelHelperType> LinkProductType;
-		typedef   ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType> ModelBaseType;
 		typedef	 typename ModelBaseType::MyBasis MyBasis;
 		typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
@@ -817,14 +812,8 @@ namespace Dmrg {
 		}
 	};     //class ModelFeBasedSc
 
-	template<
-		typename ModelHelperType,
-		typename SparseMatrixType,
-		typename GeometryType>
-	std::ostream &operator<<(std::ostream &os,const ModelFeBasedSc<
-		ModelHelperType,
-		SparseMatrixType,
-		GeometryType>& model)
+	template<typename ModelBaseType>
+	std::ostream &operator<<(std::ostream &os, const ModelFeBasedSc<ModelBaseType>& model)
 	{
 		model.print(os);
 		return os;
