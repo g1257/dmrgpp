@@ -167,15 +167,6 @@ public:
 	                             typename PsimagLite::Vector<SizeType>::Type& q,
 	                             const BlockType& block) const = 0;
 
-	virtual void findElectronsOfOneSite(BlockType& electrons,
-	                                    SizeType site) const = 0;
-
-	virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
-	                               const BlockType& block,
-	                               const RealType& time,
-	                               RealType factorForDiagonals) const = 0;
-
-
 	virtual void calcHamiltonian(SparseMatrixType &hmatrix,
 	                             const VectorOperatorType& cm,
 	                             const BlockType& block,
@@ -190,6 +181,28 @@ public:
 			                       SizeType ix,
 			                       const LinkProductStructType& lps,
 			                       const ModelHelperType& modelHelper) const = 0;
+
+	virtual void findElectronsOfOneSite(BlockType& electrons,SizeType site) const
+	{
+		typename PsimagLite::Vector<SizeType>::Type block(1,site);
+		HilbertBasisType basis;
+		typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
+		setNaturalBasis(basis,quantumNumbs,block);
+		findElectrons(electrons,basis,site);
+	}
+
+	virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
+	                               const BlockType& block,
+	                               const RealType& time,
+	                               RealType factorForDiagonals) const
+	{
+		assert(block.size()==2);
+
+		typename PsimagLite::Vector<OperatorType>::Type cm;
+		setOperatorMatrices(cm,block);
+		calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
+	}
+
 private:
 
 	const ParametersType& params_;

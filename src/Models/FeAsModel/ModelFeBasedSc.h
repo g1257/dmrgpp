@@ -206,20 +206,6 @@ namespace Dmrg {
 			return modelCommon_.fullHamiltonian(matrix,modelHelper);
 		}
 
-		virtual void findElectronsOfOneSite(BlockType& electrons,
-		                                    SizeType site) const
-		{
-			return modelCommon_.findElectronsOfOneSite(electrons,site);
-		}
-
-		virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
-		                               const BlockType& block,
-		                               const RealType& time,
-		                               RealType factorForDiagonals) const
-		{
-			return modelCommon_.hamiltonianOnLink(hmatrix,block,time,factorForDiagonals);
-		}
-
 		//! set creation matrices for sites in block
 		void setOperatorMatrices(VectorOperatorType& creationMatrix,
 		                         const BlockType& block) const
@@ -378,7 +364,7 @@ namespace Dmrg {
 		{
 			hmatrix.makeDiagonal(cm[0].data.row());
 
-			this->addConnectionsInNaturalBasis(hmatrix,cm,block);
+			modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block);
 
 			addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 		}
