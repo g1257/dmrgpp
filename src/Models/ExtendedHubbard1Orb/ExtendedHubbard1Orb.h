@@ -193,7 +193,26 @@ namespace Dmrg {
 			modelHubbard_.print(os);
 		}
 
+		//! Full hamiltonian from creation matrices cm
+		void calcHamiltonian(SparseMatrixType &hmatrix,
+		                     const typename PsimagLite::Vector<OperatorType>::Type& cm,
+		                     Block const &block,
+		                     RealType time,
+		                     RealType factorForDiagonals=1.0)  const
+		{
+			hmatrix.makeDiagonal(cm[0].data.row());
+
+			this->addConnectionsInNaturalBasis(hmatrix,cm,block);
+
+			modelHubbard_.addDiagonalsInNaturalBasis(hmatrix,
+			                                         cm,
+			                                         block,
+			                                         time,
+			                                         factorForDiagonals);
+		}
+
 	private:
+
 		ParametersModelHubbard<RealType>  modelParameters_;
 		const DmrgGeometryType &dmrgGeometry_;
 		ModelHubbardType modelHubbard_;

@@ -99,6 +99,7 @@ namespace Dmrg {
 		typedef ModelHelperType_ ModelHelperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
+		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef LinkProductTj1Orb<ModelHelperType> LinkProductType;
@@ -407,68 +408,29 @@ namespace Dmrg {
 		}
 
 		//! Full hamiltonian from creation matrices cm
-		//! This is usually for n=1 so there are no connections here in most cases
 		void calcHamiltonian(SparseMatrixType &hmatrix,
-		                     const typename PsimagLite::Vector<OperatorType>::Type& cm,
+		                     const VectorOperatorType& cm,
 		                     Block const &block,
-		                     RealType time) const
+		                     RealType time,
+		                     RealType factorForDiagonals=1.0)  const
+		{
+			hmatrix.makeDiagonal(cm[0].data.row());
+
+			this->addConnectionsInNaturalBasis(hmatrix,cm,block);
+
+			addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
+		}
+
+		void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+		                                const VectorOperatorType& cm,
+		                                Block const &block,
+		                                RealType time,
+		                                RealType factorForDiagonals=1.0) const
 		{
 			SizeType n=block.size();
-			//int type,sigma;
-			SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
-
-			hmatrix.makeDiagonal(cm[0].data.row());
-//			SizeType linSize = geometry_.numberOfSites();
-			assert(block.size()==1);
 
 			SizeType linSize = geometry_.numberOfSites();
 			for (SizeType i=0;i<n;i++) {
-				//! hopping part
-				SizeType term = 0;
-				for (SizeType j=0;j<n;j++) {
-					typename GeometryType::AdditionalDataType additional;
-					geometry_.fillAdditionalData(additional,term,block[i],block[j]);
-					SizeType dofsTotal = LinkProductType::dofs(term,additional);
-					for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
-						std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,dofs,additional);
-						RealType tmp = geometry_(block[i],edofs.first,block[j],edofs.second,term);
-
-						if (i==j || tmp==0.0) continue;
-
-						SizeType sigma = dofs;
-						transposeConjugate(tmpMatrix2,cm[sigma+j*offset_].data);
-						multiply(tmpMatrix,cm[sigma+i*offset_].data,tmpMatrix2);
-						multiplyScalar(tmpMatrix2,tmpMatrix,static_cast<SparseElementType>(tmp));
-						hmatrix += tmpMatrix2;
-					}
-				}
-
-				SparseMatrixType sPlusOperatorI = cm[2+i*offset_].data; //S^+_i
-				SparseMatrixType szOperatorI =cm[3+i*offset_].data; //S^z_i
-				term=1;
-				for (SizeType j=0;j<n;j++) {
-					typename GeometryType::AdditionalDataType additional;
-					geometry_.fillAdditionalData(additional,term,block[i],block[j]);
-					SizeType dofsTotal = LinkProductType::dofs(term,additional);
-					for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
-						std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,dofs,additional);
-						RealType tmp = geometry_(block[i],edofs.first,block[j],edofs.second,term);
-
-						if (i==j || tmp==0.0) continue;
-
-						SparseMatrixType sPlusOperatorJ = cm[2+j*offset_].data;//S^+_j
-						SparseMatrixType tJ, tI;
-						transposeConjugate(tJ,sPlusOperatorJ);
-						transposeConjugate(tI,sPlusOperatorI);
-						hmatrix += (0.5*tmp)*(sPlusOperatorI*tJ);
-						hmatrix += (0.5*tmp)*(tI*sPlusOperatorJ);
-
-						// S^z_i S^z_j
-						SparseMatrixType szOperatorJ=cm[3+j*offset_].data; //S^z_j
-						hmatrix += tmp*(szOperatorI*szOperatorJ);
-					}
-				}
-
 				// potentialV
 				SparseMatrixType nup(naturalOperator("nup",i,0));
 				SparseMatrixType ndown(naturalOperator("ndown",i,0));
@@ -476,7 +438,7 @@ namespace Dmrg {
 				assert(block[i]+linSize<modelParameters_.potentialV.size());
 				m *= modelParameters_.potentialV[block[i]];
 				m += modelParameters_.potentialV[block[i]+linSize]*ndown;
-				hmatrix += m;
+				hmatrix += factorForDiagonals * m;
 			}
 		}
 

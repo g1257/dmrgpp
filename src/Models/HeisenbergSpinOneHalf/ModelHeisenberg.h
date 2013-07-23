@@ -123,6 +123,7 @@ namespace Dmrg {
 
 		typedef typename PsimagLite::Vector<unsigned int long long>::Type HilbertBasisType;
 		typedef typename OperatorsType::OperatorType OperatorType;
+		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
@@ -144,10 +145,10 @@ namespace Dmrg {
 		//! find  operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
 		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&operatorMatrices,
-				     SparseMatrixType &hamiltonian,
+		                     SparseMatrixType &hamiltonian,
 		                     BasisDataType &q,
-				     Block const &block,
-				     const RealType& time) const
+		                     Block const &block,
+		                     const RealType& time) const
 		{
 			HilbertBasisType natBasis;
 			
@@ -158,7 +159,7 @@ namespace Dmrg {
 			
 			setSymmetryRelated(q,natBasis,block.size());
 			
-			calcHamiltonian(hamiltonian,operatorMatrices,block);
+			calcHamiltonian(hamiltonian,operatorMatrices,block,time);
 		}
 
 		//! set operator matrices for sites in block
@@ -243,6 +244,18 @@ namespace Dmrg {
 				electrons[i] = 0;
 		}
 
+		//! Full hamiltonian from creation matrices cm
+		void calcHamiltonian(SparseMatrixType &hmatrix,
+		                     const VectorOperatorType& cm,
+		                     Block const &block,
+		                     RealType time,
+		                     RealType factorForDiagonals=1.0)  const
+		{
+			hmatrix.makeDiagonal(cm[0].data.row());
+
+			this->addConnectionsInNaturalBasis(hmatrix,cm,block);
+		}
+
 	private:
 
 		ParametersModelHeisenberg<RealType>  modelParameters_;
@@ -287,15 +300,6 @@ namespace Dmrg {
 
 			SparseMatrixType operatorMatrix(cm);
 			return operatorMatrix;
-		}
-
-		//! Full hamiltonian from operator matrices cm
-		void calcHamiltonian(SparseMatrixType& hmatrix,
-		                     const typename PsimagLite::Vector<OperatorType>::Type& cm,
-		                     Block const &block) const
-		{
-			assert(block.size()==1);
-			hmatrix.makeDiagonal(cm[0].data.row());
 		}
 
 		void setSymmetryRelated(BasisDataType& q,const HilbertBasisType& basis,int n) const

@@ -104,6 +104,7 @@ namespace Dmrg {
 		typedef ModelHelperType_ ModelHelperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
+		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef PsimagLite::Matrix<SparseElementType> MatrixType;
@@ -162,7 +163,7 @@ namespace Dmrg {
 			setSymmetryRelated(q,natBasis,block.size());
 
 			//! set hamiltonian
-			calcHamiltonian(hamiltonian,creationMatrix,block);
+			calcHamiltonian(hamiltonian,creationMatrix,block,time);
 		}
 
 		//! set creation matrices for sites in block
@@ -283,6 +284,20 @@ namespace Dmrg {
 				SizeType ndown = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_DOWN);
 				electrons[i] = nup + ndown;
 			}
+		}
+
+		//! Full hamiltonian from creation matrices cm
+		void calcHamiltonian(SparseMatrixType &hmatrix,
+		                     const VectorOperatorType& cm,
+		                     Block const &block,
+		                     RealType time,
+		                     RealType factorForDiagonals=1.0)  const
+		{
+			hmatrix.makeDiagonal(cm[0].data.row());
+
+			this->addConnectionsInNaturalBasis(hmatrix,cm,block);
+
+			addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 		}
 
 	private:
@@ -414,14 +429,12 @@ namespace Dmrg {
 			return jm; 
 		}
 
-		//! Full hamiltonian from creation matrices cm
-		void calcHamiltonian(SparseMatrixType &hmatrix,const typename PsimagLite::Vector<OperatorType>::Type& cm,Block const &block) const
-		{
-			assert(block.size()==1);
-//			SparseMatrixType tmpMatrix,tmpMatrix2;
-
-			hmatrix.makeDiagonal(cm[0].data.row());
-			
+		void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+		                                const VectorOperatorType& cm,
+		                                Block const &block,
+		                                RealType time,
+		                                RealType factorForDiagonals=1.0) const
+		{	
 			// on-site potential:
 			SizeType site = block[0];
 			SizeType linSize = geometry_.numberOfSites();
@@ -440,13 +453,13 @@ namespace Dmrg {
 				assert(index<modelParameters_.potentialV.size());
 				SparseElementType value = modelParameters_.potentialV[index];
 				SparseMatrixType tmpMatrix =value * n(cm[dof].data);
-				hmatrix += tmpMatrix;
+				hmatrix += factorForDiagonals * tmpMatrix;
 			}
+
 			// on-site U only for Cu sites, for now:
 			if (dOf(site)!=2) return;
-			SparseElementType tmp = modelParameters_.hubbardU[site];
+			SparseElementType tmp = factorForDiagonals * modelParameters_.hubbardU[site];
 			hmatrix +=  tmp * nbar(cm[0].data) * nbar(cm[1].data);
-			//addInteraction(hmatrix,cm,block);
 		}
 
 		SparseMatrixType n(const SparseMatrixType& c) const

@@ -554,16 +554,16 @@ namespace Dmrg {
 			switch(model_) {
 			case HUBBARD_ONE_BAND:
 				return modelHubbard_->calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
-				//			case HEISENBERG_SPIN_ONEHALF:
-				//				return modelHeisenberg_->calcHamiltonian(hmatrix,cm,block,time);
-				//			case HUBBARD_ONE_BAND_EXT:
-				//				return modelHubbardExt_->calcHamiltonian(hmatrix,cm,block,time);
-				//			case FEAS:
-				//				return modelFeAs_->calcHamiltonian(hmatrix,cm,block,time);
-				//			case FEAS_EXT:
-				//				return modelFeAsExt_->calcHamiltonian(hmatrix,cm,block,time);
-				//			case IMMM:
-				//				return modelImmm_->calcHamiltonian(hmatrix,cm,block,time);
+			case HEISENBERG_SPIN_ONEHALF:
+				return modelHeisenberg_->calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
+			case HUBBARD_ONE_BAND_EXT:
+				return modelHubbardExt_->calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
+			case FEAS:
+				return modelFeAs_->calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
+			case FEAS_EXT:
+				return modelFeAsExt_->calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
+			case IMMM:
+				return modelImmm_->calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
 			}
 			throw PsimagLite::RuntimeError("calcHamiltonian\n");
 		}

@@ -108,6 +108,7 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef unsigned int long long WordType;
 	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
 private:
 
@@ -320,19 +321,27 @@ public:
 
 	//! Full hamiltonian from creation matrices cm
 	void calcHamiltonian(SparseMatrixType &hmatrix,
-	                     const typename PsimagLite::Vector<OperatorType>::Type& cm,
+	                     const VectorOperatorType& cm,
+	                     Block const &block,
+	                     RealType time,
+	                     RealType factorForDiagonals=1.0)  const
+	{
+		hmatrix.makeDiagonal(cm[0].data.row());
+
+		this->addConnectionsInNaturalBasis(hmatrix,cm,block);
+
+		addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
+	}
+
+	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+	                     const VectorOperatorType& cm,
 	                     Block const &block,
 	                     RealType time,
 	                     RealType factorForDiagonals=1.0)  const
 	{
 		SizeType n=block.size();
-		//int type,sigma;
 		SparseMatrixType tmpMatrix,tmpMatrix2,niup,nidown;
-
-		hmatrix.makeDiagonal(cm[0].data.row());
 		SizeType linSize = dmrgGeometry_.numberOfSites();
-
-		this->addConnectionsInNaturalBasis(hmatrix,cm,block);
 
 		for (SizeType i=0;i<n;i++) {
 			// onsite U hubbard

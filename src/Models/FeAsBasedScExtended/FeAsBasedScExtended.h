@@ -101,6 +101,7 @@ namespace Dmrg {
 		typedef ModelHelperType_ ModelHelperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
+		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename OperatorType::Su2RelatedType Su2RelatedType;
@@ -216,6 +217,20 @@ namespace Dmrg {
 		void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,const typename PsimagLite::Vector<HilbertState>  ::Type&basis,SizeType site) const
 		{
 			modelFeAs_.findElectrons(electrons,basis,site);
+		}
+
+		//! Full hamiltonian from creation matrices cm
+		void calcHamiltonian(SparseMatrixType &hmatrix,
+		                     const VectorOperatorType& cm,
+		                     BlockType const &block,
+		                     RealType time,
+		                     RealType factorForDiagonals=1.0)  const
+		{
+			hmatrix.makeDiagonal(cm[0].data.row());
+
+			this->addConnectionsInNaturalBasis(hmatrix,cm,block);
+
+			modelFeAs_.addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 		}
 
 	private:

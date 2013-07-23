@@ -100,10 +100,12 @@ namespace Dmrg {
 		typedef unsigned int long long WordType;
 		typedef  HilbertSpaceFeAs<WordType> HilbertSpaceFeAsType;
 
-	public:	
+	public:
+
 		typedef ModelHelperType_ ModelHelperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
+		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename HilbertSpaceFeAsType::HilbertState HilbertState;
@@ -114,8 +116,6 @@ namespace Dmrg {
 		static const int FERMION_SIGN = -1;
 		static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
 		static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
-
-	public:
 
 		typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 		typedef LinkProductFeAs<ModelHelperType> LinkProductType;
@@ -153,11 +153,11 @@ namespace Dmrg {
 
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-				     SparseMatrixType &hamiltonian,
-				     BasisDataType &q,
-				     Block const &block,
-				     const RealType& time)  const
+		void setNaturalBasis(VectorOperatorType& creationMatrix,
+		                     SparseMatrixType &hamiltonian,
+		                     BasisDataType &q,
+		                     Block const &block,
+		                     const RealType& time)  const
 		{
 			typename PsimagLite::Vector<HilbertState>::Type natBasis;
 			typename PsimagLite::Vector<SizeType>::Type qvector;
@@ -169,7 +169,7 @@ namespace Dmrg {
 			setSymmetryRelated(q,natBasis,block.size());
 
 			//! set hamiltonian
-			calcHamiltonian(hamiltonian,creationMatrix,block);
+			calcHamiltonian(hamiltonian,creationMatrix,block,time);
 
 			SparseMatrixType tmpMatrix2;
 			tmpMatrix2.makeDiagonal(natBasis.size(),0.0);
@@ -308,6 +308,34 @@ namespace Dmrg {
 			}
 		}
 		
+		//! Full hamiltonian from creation matrices cm
+		void calcHamiltonian(SparseMatrixType &hmatrix,
+		                     const VectorOperatorType& cm,
+		                     Block const &block,
+		                     RealType time,
+		                     RealType factorForDiagonals=1.0)  const
+		{
+			hmatrix.makeDiagonal(cm[0].data.row());
+
+			this->addConnectionsInNaturalBasis(hmatrix,cm,block);
+
+			addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
+		}
+
+		void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+		                                const VectorOperatorType& cm,
+		                                Block const &block,
+		                                RealType time,
+		                                RealType factorForDiagonals=1.0) const
+		{
+			SizeType n=block.size();
+
+			for (SizeType i=0;i<n;i++) {
+				addInteraction(hmatrix,cm,i,factorForDiagonals);
+				addMagneticField(hmatrix,cm,i,block[i],factorForDiagonals);
+				addPotentialV(hmatrix,cm,i,block[i],factorForDiagonals);
+			}
+		}
 
 	private:
 
@@ -524,62 +552,22 @@ namespace Dmrg {
 			return tmp1*tmp2;
 		}
 
-		//! Full hamiltonian from creation matrices cm
-		void calcHamiltonian(SparseMatrixType &hmatrix,const typename PsimagLite::Vector<OperatorType>::Type& cm,Block const &block) const
+		void addInteraction(SparseMatrixType &hmatrix,
+		                    const VectorOperatorType& cm,
+		                    SizeType i,
+		                    RealType factorForDiagonals) const
 		{
-			SizeType n=block.size();
-			SparseMatrixType tmpMatrix,tmpMatrix2;
-
-			hmatrix.makeDiagonal(cm[0].data.row());
-			
-			SizeType orbitalsSquared = (modelParameters_.orbitals*modelParameters_.orbitals);
-			SizeType degreesOfFreedom = 2*modelParameters_.orbitals;
-
-			for (SizeType i=0;i<n;i++) {
-				//! hopping part
-				for (SizeType j=0;j<n;j++) {
-					for (SizeType term=0;term<geometry_.terms();term++) {
-						typename GeometryType::AdditionalDataType additional;
-						geometry_.fillAdditionalData(additional,term,block[i],block[j]);
-						SizeType dofsTotal = LinkProductType::dofs(term,additional);
-						for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
-							std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,dofs,additional);
-							RealType tmp = geometry_(block[i],edofs.first,block[j],edofs.second,term);
-						
-							if (i==j || tmp==0.0) continue;
-
-							SizeType spin = dofs/orbitalsSquared;
-							SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
-							xtmp = dofs - xtmp;
-							SizeType orb1 = xtmp/modelParameters_.orbitals;
-							SizeType orb2 = xtmp % modelParameters_.orbitals;
-							
-							SizeType dof1 = orb1 + spin*modelParameters_.orbitals;
-							SizeType dof2 = orb2 + spin*modelParameters_.orbitals;
-
-							transposeConjugate(tmpMatrix2,cm[dof2+j*degreesOfFreedom].data);
-							multiply(tmpMatrix,cm[dof1+i*degreesOfFreedom].data,tmpMatrix2);
-							multiplyScalar(tmpMatrix2,tmpMatrix,tmp);
-							hmatrix += tmpMatrix2;
-						}
-					}
-				}
-				addInteraction(hmatrix,cm,i);
-				addMagneticField(hmatrix,cm,i,block[i]);
-				addPotentialV(hmatrix,cm,i,block[i]);
-			}
-		}
-
-		void addInteraction(SparseMatrixType &hmatrix,const typename PsimagLite::Vector<OperatorType>::Type& cm,SizeType i) const
-		{
-			addInteractionU1(hmatrix,cm,i);
-			addInteractionU2(hmatrix,cm,i);
-			addInteractionJ1(hmatrix,cm,i);
-			addInteractionJ2(hmatrix,cm,i);
+			addInteractionU1(hmatrix,cm,i,factorForDiagonals);
+			addInteractionU2(hmatrix,cm,i,factorForDiagonals);
+			addInteractionJ1(hmatrix,cm,i,factorForDiagonals);
+			addInteractionJ2(hmatrix,cm,i,factorForDiagonals);
 		}
 
 		//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
-		void addInteractionU1(SparseMatrixType &hmatrix,const typename PsimagLite::Vector<OperatorType>::Type& cm,SizeType i) const
+		void addInteractionU1(SparseMatrixType &hmatrix,
+		                      const VectorOperatorType& cm,
+		                      SizeType i,
+		                      RealType factorForDiagonals) const
 		{
 			int dof=2*modelParameters_.orbitals;
 			SparseMatrixType tmpMatrix,tmpMatrix2;
@@ -589,27 +577,37 @@ namespace Dmrg {
 				SparseMatrixType m2=cm[alpha+SPIN_DOWN*modelParameters_.orbitals+i*dof].data;
 
 				multiply(tmpMatrix,n(m1),n(m2));
-				multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[0]); // this is U
+				multiplyScalar(tmpMatrix2,
+				               tmpMatrix,
+				               factorForDiagonals*modelParameters_.hubbardU[0]); // this is U
 				hmatrix += tmpMatrix2;
 			}
 		}
 
 		//! Term is U[1] n_{i BAND0 } n_{i BAND1}
-		void addInteractionU2(SparseMatrixType &hmatrix,const typename PsimagLite::Vector<OperatorType>::Type& cm,SizeType i) const
+		void addInteractionU2(SparseMatrixType &hmatrix,
+		                      const VectorOperatorType& cm,
+		                      SizeType i,
+		                      RealType factorForDiagonals) const
 		{
 
 			for (SizeType orb1=0;orb1<modelParameters_.orbitals;orb1++) {
 				for (SizeType orb2=orb1+1;orb2<modelParameters_.orbitals;orb2++) {
 				SparseMatrixType tmpMatrix,tmpMatrix2;
 				multiply(tmpMatrix, nSummedOverSpin(cm,i,orb1),nSummedOverSpin(cm,i,orb2));
-				multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[1]);// this is U'-J/2
+				multiplyScalar(tmpMatrix2,
+				               tmpMatrix,
+				               factorForDiagonals*modelParameters_.hubbardU[1]);// this is U'-J/2
 				hmatrix += tmpMatrix2;
 				}
 			}
 		}
 
 		//! Term is U[2] S_{i BAND0 } S_{i BAND1}
-		void addInteractionJ1(SparseMatrixType &hmatrix,const typename PsimagLite::Vector<OperatorType>::Type& cm,SizeType i) const
+		void addInteractionJ1(SparseMatrixType &hmatrix,
+		                      const VectorOperatorType& cm,
+		                      SizeType i,
+		                      RealType factorForDiagonals) const
 		{
 			RealType val=0;
 			RealType val2=2.0;
@@ -622,17 +620,17 @@ namespace Dmrg {
 
 					multiply(tmpMatrix, spinOperator(cm,i,orb1,0),spinOperator(cm,i,orb2,1));
 					val = modelParameters_.hubbardU[2]/val2;
-					multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
+					multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);// this is -2*J
 					hmatrix += tmpMatrix2;
 
 					multiply(tmpMatrix, spinOperator(cm,i,orb1,1),spinOperator(cm,i,orb2,0));
 					val = modelParameters_.hubbardU[2]/val2;
-					multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
+					multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);// this is -2*J
 					hmatrix += tmpMatrix2;
 
 					multiply(tmpMatrix, spinOperator(cm,i,orb1,2),spinOperator(cm,i,orb2,2));
 					val = modelParameters_.hubbardU[2]/val3;
-					multiplyScalar(tmpMatrix2,tmpMatrix,val);// this is -2*J
+					multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*val);// this is -2*J
 					hmatrix += tmpMatrix2;
 				}
 			}
@@ -640,7 +638,10 @@ namespace Dmrg {
 
 		//! Term is U[3] \sum_{\alpha}\bar{n}_{i\alpha UP} \bar{n}_{i\alpha DOWN} 
 		//! where \bar{n}_{i\alpha \spin} = c^\dagger_{i\alpha\spin} c_{i\bar{\alpha}\bar{spin}}
-		void addInteractionJ2(SparseMatrixType &hmatrix,const typename PsimagLite::Vector<OperatorType>::Type& cm,SizeType i) const
+		void addInteractionJ2(SparseMatrixType &hmatrix,
+		                      const VectorOperatorType& cm,
+		                      SizeType i,
+		                      RealType factorForDiagonals) const
 		{
 			SparseMatrixType tmpMatrix,tmpMatrix2;
 
@@ -648,21 +649,32 @@ namespace Dmrg {
 				for (SizeType orb2=0;orb2<modelParameters_.orbitals;orb2++) {
 					if (orb1==orb2) continue;
 					multiply(tmpMatrix,nBar(cm,i,orb1,orb2,SPIN_UP),nBar(cm,i,orb1,orb2,SPIN_DOWN));
-					multiplyScalar(tmpMatrix2,tmpMatrix,modelParameters_.hubbardU[3]); // this is -J
+					multiplyScalar(tmpMatrix2,
+					               tmpMatrix,
+					               factorForDiagonals*modelParameters_.hubbardU[3]); // this is -J
 					hmatrix += tmpMatrix2;
 				}
 			}
 		}
 
-		void addMagneticField(SparseMatrixType &hmatrix,const typename PsimagLite::Vector<OperatorType>::Type& cm,SizeType i,SizeType actualIndexOfSite) const
+		void addMagneticField(SparseMatrixType &hmatrix,
+		                      const VectorOperatorType& cm,
+		                      SizeType i,
+		                      SizeType actualIndexOfSite,
+		                      RealType factorForDiagonals) const
 		{
 			if (modelParameters_.magneticField.n_row()<3) return;
 			assert(actualIndexOfSite<modelParameters_.magneticField.n_col());
 			for (SizeType orb=0;orb<modelParameters_.orbitals;orb++)
-				addMagneticField(hmatrix,cm,i,actualIndexOfSite,orb);
+				addMagneticField(hmatrix,cm,i,actualIndexOfSite,orb,factorForDiagonals);
 		}
 
-		void addMagneticField(SparseMatrixType &hmatrix,const typename PsimagLite::Vector<OperatorType>::Type& cm,SizeType i,SizeType actualIndexOfSite,SizeType orbital) const
+		void addMagneticField(SparseMatrixType &hmatrix,
+		                      const VectorOperatorType& cm,
+		                      SizeType i,
+		                      SizeType actualIndexOfSite,
+		                      SizeType orbital,
+		                      RealType factorForDiagonals) const
 		{
 			int dof=2*modelParameters_.orbitals;
 			SparseMatrixType cup = cm[orbital+SPIN_UP*modelParameters_.orbitals+i*dof].data;
@@ -673,26 +685,35 @@ namespace Dmrg {
 			SparseMatrixType Atranspose;
 			transposeConjugate(Atranspose,A);
 
-			hmatrix += modelParameters_.magneticField(0,actualIndexOfSite) * A;
+			hmatrix += factorForDiagonals * modelParameters_.magneticField(0,actualIndexOfSite) * A;
 
-			hmatrix += modelParameters_.magneticField(1,actualIndexOfSite) * Atranspose;
+			hmatrix += factorForDiagonals * modelParameters_.magneticField(1,actualIndexOfSite) * Atranspose;
 
 			SparseMatrixType nup = n(cup);
 			SparseMatrixType ndown = n(cdown);
 
 			SparseMatrixType tmp = nup;
 			tmp += (-1.0)*ndown;
-			hmatrix += modelParameters_.magneticField(2,actualIndexOfSite) * tmp;
+			hmatrix += factorForDiagonals * modelParameters_.magneticField(2,actualIndexOfSite) * tmp;
 
 		}
 
-		void addPotentialV(SparseMatrixType &hmatrix,const typename PsimagLite::Vector<OperatorType>::Type& cm,SizeType i,SizeType actualIndexOfSite) const
+		void addPotentialV(SparseMatrixType &hmatrix,
+		                   const VectorOperatorType& cm,
+		                   SizeType i,
+		                   SizeType actualIndexOfSite,
+		                   RealType factorForDiagonals) const
 		{
 			for (SizeType orb=0;orb<modelParameters_.orbitals;orb++)
-				addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb);
+				addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb,factorForDiagonals);
 		}
 
-		void addPotentialV(SparseMatrixType &hmatrix,const typename PsimagLite::Vector<OperatorType>::Type& cm,SizeType i,SizeType actualIndexOfSite,SizeType orbital) const
+		void addPotentialV(SparseMatrixType &hmatrix,
+		                   const VectorOperatorType& cm,
+		                   SizeType i,
+		                   SizeType actualIndexOfSite,
+		                   SizeType orbital,
+		                   RealType factorForDiagonals) const
 		{
 			int dof=2*modelParameters_.orbitals;
 			SparseMatrixType nup = n(cm[orbital+SPIN_UP*modelParameters_.orbitals+i*dof].data);
@@ -702,9 +723,9 @@ namespace Dmrg {
 			SizeType linSize = geometry_.numberOfSites();
 
 			SizeType iUp = actualIndexOfSite + (orbital + 0*modelParameters_.orbitals)*linSize;
-			hmatrix += modelParameters_.potentialV[iUp] * nup;
+			hmatrix += factorForDiagonals * modelParameters_.potentialV[iUp] * nup;
 			SizeType iDown = actualIndexOfSite + (orbital + 1*modelParameters_.orbitals)*linSize;
-			hmatrix += modelParameters_.potentialV[iDown] * ndown;
+			hmatrix += factorForDiagonals * modelParameters_.potentialV[iDown] * ndown;
 		}
 
 		SparseMatrixType n(const SparseMatrixType& c) const
