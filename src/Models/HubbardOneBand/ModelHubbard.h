@@ -332,33 +332,9 @@ public:
 		hmatrix.makeDiagonal(cm[0].data.row());
 		SizeType linSize = dmrgGeometry_.numberOfSites();
 
+		this->addConnectionsInNaturalBasis(hmatrix,cm,block);
+
 		for (SizeType i=0;i<n;i++) {
-			//! hopping part
-			for (SizeType j=0;j<n;j++) {
-				for (SizeType term=0;term<dmrgGeometry_.terms();term++) {
-					typename DmrgGeometryType::AdditionalDataType additional;
-					dmrgGeometry_.fillAdditionalData(additional,term,block[i],block[j]);
-					SizeType dofsTotal = LinkProductType::dofs(term,additional);
-					for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
-						std::pair<SizeType,SizeType> edofs =
-						        LinkProductType::connectorDofs(term,dofs,additional);
-						RealType tmp = dmrgGeometry_(block[i],
-						                             edofs.first,
-						                             block[j],
-						                             edofs.second,term);
-
-						if (i==j || tmp==0.0) continue;
-
-						SizeType sigma = dofs;
-						transposeConjugate(tmpMatrix2,cm[sigma+j*offset_].data);
-						multiply(tmpMatrix,tmpMatrix2,cm[sigma+i*offset_].data);
-						multiplyScalar(tmpMatrix2,
-						               tmpMatrix,
-						               static_cast<SparseElementType>(tmp));
-						hmatrix += tmpMatrix2;
-					}
-				}
-			}
 			// onsite U hubbard
 			//n_i up
 			SizeType sigma =0; // up sector

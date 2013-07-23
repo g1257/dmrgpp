@@ -133,6 +133,7 @@ namespace Dmrg {
 				LeftRightSuperType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
+		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
 		ModelBase(const DmrgGeometryType& geometry)
 		: dmrgGeometry_(geometry),progress_("ModelBase")
@@ -262,7 +263,65 @@ namespace Dmrg {
 			matrix = vsm;
 		}
 
+		void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
+		                                  const VectorOperatorType& cm,
+		                                  const Block& block) const
+		{
+			SizeType n = block.size();
+			for (SizeType i=0;i<n;i++) {
+				for (SizeType j=0;j<n;j++) {
+					addConnectionsInNaturalBasis(hmatrix,i,j,cm,block);
+				}
+			}
+		}
+
 	private:
+
+		void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
+		                                  SizeType i,
+		                                  SizeType j,
+		                                  const VectorOperatorType& cm,
+		                                  const Block& block) const
+		{
+			SizeType ind = block[i];
+			SizeType jnd = block[j];
+
+			if (!dmrgGeometry_.connected(0,1,ind,jnd)) return;
+
+			SizeType type = 0;
+			SizeType offset = cm.size()/block.size();
+
+			 typename GeometryType::AdditionalDataType additionalData;
+
+			for (SizeType term=0;term<dmrgGeometry_.terms();term++) {
+				dmrgGeometry_.fillAdditionalData(additionalData,term,ind,jnd);
+				SizeType dofsTotal = LinkProductType::dofs(term,additionalData);
+				for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
+					std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,dofs,additionalData);
+					SparseElementType tmp = dmrgGeometry_(ind,edofs.first,jnd,edofs.second,term);
+
+					if (tmp==static_cast<RealType>(0.0)) continue;
+
+					std::pair<SizeType,SizeType> ops;
+					std::pair<char,char> mods('N','C');
+					SizeType fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
+					RealType angularFactor=0;
+					bool isSu2 = ModelHelperType::isSu2();
+					SparseElementType value = tmp;
+					LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData);
+					LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData);
+					typename ModelHelperType::LinkType link2(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
+
+					const SparseMatrixType& A = cm[link2.ops.first+i*offset].data;
+
+					const SparseMatrixType& B = cm[link2.ops.second+j*offset].data;
+
+
+					hmatrix += tmp * (transposeOrNot(B,link2.mods.second) *
+					                  transposeOrNot(A,link2.mods.first));
+				}
+			}
+		}
 
 		//! Add Hamiltonian connection between basis2 and basis3 in the orderof basis1 for symmetry block m
 		void addHamiltonianConnection(VerySparseMatrix<SparseElementType>& matrix,
@@ -287,6 +346,16 @@ namespace Dmrg {
 				}
 			}
 			matrix += matrix2;
+		}
+
+		SparseMatrixType transposeOrNot(const SparseMatrixType& A,char mod) const
+		{
+			if (mod == 'C' || mod == 'c') {
+				SparseMatrixType Ac;
+				transposeConjugate(Ac,A);
+				return Ac;
+			}
+			return A;
 		}
 
 		const DmrgGeometryType& dmrgGeometry_;
