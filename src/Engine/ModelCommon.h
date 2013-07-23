@@ -72,15 +72,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ModelBase.h
+/*! \file ModelCommon.h
  *
  *  An abstract class to represent the strongly-correlated-electron models that 
  *  can be used with the DmrgSolver
  *
  */
  
-#ifndef DMRG_MODEL_BASE
-#define DMRG_MODEL_BASE
+#ifndef MODEL_COMMON_H
+#define MODEL_COMMON_H
 #include <iostream>
 
 #include "VerySparseMatrix.h"
@@ -112,7 +112,7 @@ namespace Dmrg {
 	typename SparseMatrixType,
  	typename DmrgGeometryType,
   	typename LinkProductType>
-	class ModelBase  {
+	class ModelCommon  {
 
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef VerySparseMatrix<SparseElementType> VerySparseMatrixType;
@@ -135,8 +135,8 @@ namespace Dmrg {
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
-		ModelBase(const DmrgGeometryType& geometry)
-		: dmrgGeometry_(geometry),progress_("ModelBase")
+		ModelCommon(const DmrgGeometryType& geometry)
+		: dmrgGeometry_(geometry),progress_("ModelCommon")
 		{
 			Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 			MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
@@ -360,7 +360,7 @@ namespace Dmrg {
 
 		const DmrgGeometryType& dmrgGeometry_;
 		PsimagLite::ProgressIndicator progress_;
-	};     //class ModelBase
+	};     //class ModelCommon
 } // namespace Dmrg
 /*@}*/
 #endif
