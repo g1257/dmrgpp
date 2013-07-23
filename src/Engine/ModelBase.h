@@ -158,7 +158,7 @@ public:
 	virtual SizeType hilbertSize(SizeType site) const = 0;
 
 	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                                 const BlockType& block) = 0;
+	                                 const BlockType& block) const = 0;
 
 	virtual void setNaturalBasis(HilbertBasisType& basis,
 	                             typename PsimagLite::Vector<SizeType>::Type& q,
@@ -166,9 +166,6 @@ public:
 
 	virtual void findElectronsOfOneSite(BlockType& electrons,
 	                                    SizeType site) const = 0;
-
-	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                                 const BlockType& block) const = 0;
 
 	virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
 	                               const BlockType& block,

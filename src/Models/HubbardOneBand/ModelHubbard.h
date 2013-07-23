@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
 #include "ProgramGlobals.h"
+#include "ModelCommon.h"
 
 namespace Dmrg {
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
@@ -99,14 +100,16 @@ public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef unsigned int long long WordType;
 	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
+	typedef typename ModelBaseType::BasisDataType BasisDataType;
 
 private:
 
@@ -118,17 +121,18 @@ private:
 	enum {SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
 		  SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN};
 
-	typedef typename ModelHelperType::BlockType Block;
+	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+	typedef typename ModelBaseType::VectorType VectorType;
 
 public:
 
 	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 	typedef LinkProductHubbardOneBand<ModelHelperType> LinkProductType;
+	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::BasisDataType BasisDataType;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 
 	ModelHubbard(const SolverParamsType& solverParams,
@@ -138,6 +142,7 @@ public:
 	    : ModelBaseType(solverParams,io,dmrgGeometry),
 	      modelParameters_(io),
 	      dmrgGeometry_(dmrgGeometry),
+	      modelCommon_(),
 	      offset_(offset),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 	      reinterpretX_(maxNumberOfSites),
@@ -157,11 +162,11 @@ public:
 		there, as well as the Hamiltonian and the effective quantum number for
 		each state of this natural basis. To implement the algorithm for a
 		fixed density, the number of electrons for each state is also needed.*/
-	void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	                     SparseMatrixType &hamiltonian,
-	                     BasisDataType &q,
-	                     Block const &block,
-	                     RealType time) const
+	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
+	                             SparseMatrixType &hamiltonian,
+	                             BasisDataType& q,
+	                             const BlockType& block,
+	                             const RealType& time) const
 	{
 		HilbertBasisType natBasis;
 		typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
@@ -176,12 +181,44 @@ public:
 		calcHamiltonian(hamiltonian,creationMatrix,block,time);
 	}
 
+	virtual void matrixVectorProduct(VectorType& x,
+	                                 const VectorType& y,
+	                                 ModelHelperType const &modelHelper) const
+	{
+		return modelCommon_.matrixVectorProduct(x,y,modelHelper);
+	}
+
+	virtual void addHamiltonianConnection(SparseMatrixType &matrix,
+	                                      const LeftRightSuperType& lrs) const
+	{
+		return modelCommon_.addHamiltonianConnection(matrix,lrs);
+	}
+
+	virtual void hamiltonianConnectionProduct(VectorType& x,
+	                                          const VectorType& y,
+	                                          ModelHelperType const &modelHelper) const
+	{
+		return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
+	}
+
+	virtual void fullHamiltonian(SparseMatrixType& matrix,
+	                             const ModelHelperType& modelHelper) const
+	{
+		return modelCommon_.fullHamiltonian(matrix,modelHelper);
+	}
+
+	virtual void findElectronsOfOneSite(BlockType& electrons,
+	                                    SizeType site) const
+	{
+		return modelCommon_.findElectronsOfOneSite(electrons,site);
+	}
+
 	/** \cppFunction{!PTEX_THISFUNCTION} sets local operators needed to
 		 construct the Hamiltonian.
 		 For example, for the Hubbard model these operators are the
 		 creation operators for sites in block */
-	void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	                         Block const &block) const
+	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                                 const BlockType& block) const
 	{
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
@@ -220,7 +257,7 @@ public:
 	                                                      SizeType site,
 	                                                      SizeType dof) const
 	{
-		Block block;
+		BlockType block;
 		block.resize(1);
 		block[0]=site;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
@@ -318,7 +355,7 @@ public:
 	//! Full hamiltonian from creation matrices cm
 	void calcHamiltonian(SparseMatrixType &hmatrix,
 	                     const VectorOperatorType& cm,
-	                     Block const &block,
+	                     const BlockType& block,
 	                     RealType time,
 	                     RealType factorForDiagonals=1.0)  const
 	{
@@ -331,7 +368,7 @@ public:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                     const VectorOperatorType& cm,
-	                     Block const &block,
+	                     const BlockType& block,
 	                     RealType time,
 	                     RealType factorForDiagonals=1.0)  const
 	{
@@ -516,6 +553,7 @@ private:
 
 	ParametersModelHubbard<RealType>  modelParameters_;
 	const GeometryType &dmrgGeometry_;
+	ModelCommonType modelCommon_;
 	SizeType offset_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;

@@ -85,29 +85,24 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LinkProductFeAsExtended.h"
 
 namespace Dmrg {
-	template<
-		typename ModelHelperType_,
-		typename SparseMatrixType,
-		typename GeometryType>
-	class FeAsBasedScExtended : public ModelBase<
-			ModelHelperType_,SparseMatrixType,GeometryType,
-			LinkProductFeAsExtended<ModelHelperType_> > {
+	template<typename ModelBaseType>
+	class FeAsBasedScExtended : public ModelBaseType {
 		
 	public:
-		typedef ModelFeBasedSc<ModelHelperType_,SparseMatrixType,
-			GeometryType> ModelFeAsType;
+
+		typedef ModelFeBasedSc<ModelBaseType> ModelFeAsType;
 		typedef typename ModelFeAsType::HilbertState HilbertState;
 		typedef typename ModelFeAsType::HilbertBasisType HilbertBasisType;
-		typedef ModelHelperType_ ModelHelperType;
+		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+		typedef typename ModelBaseType::GeometryType GeometryType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 		typedef typename ModelHelperType::RealType RealType;
+		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 		typedef LinkProductFeAsExtended<ModelHelperType> LinkProductType;
-		typedef ModelBase<ModelHelperType,SparseMatrixType,GeometryType,
-				LinkProductType> ModelBaseType;
 		typedef	 typename ModelBaseType::MyBasis MyBasis;
 		typedef	 typename ModelBaseType::BasisWithOperatorsType
 				MyBasisWithOperators;
@@ -327,14 +322,9 @@ namespace Dmrg {
 		SizeType orbitals_;
 	};     //class FeAsBasedScExtended
 
-	template<
-		typename ModelHelperType,
-		typename SparseMatrixType,
-		typename GeometryType>
-	std::ostream &operator<<(std::ostream &os,const FeAsBasedScExtended<
-		ModelHelperType,
-		SparseMatrixType,
-		GeometryType>& model)
+	template<typename ModelBaseType>
+	std::ostream &operator<<(std::ostream &os,
+	                         const FeAsBasedScExtended<ModelBaseType>& model)
 	{
 		model.print(os);
 		return os;

@@ -91,21 +91,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 
 namespace Dmrg {
-	template<
-		typename ModelHelperType_,
-		typename SparseMatrixType,
-		typename GeometryType>
-	class Immm : public ModelBase<ModelHelperType_,SparseMatrixType,GeometryType,
- 	LinkProductImmm<ModelHelperType_> > {
+	template<typename ModelBaseType>
+	class Immm : public ModelBaseType {
 
 		typedef unsigned int long long WordType;
 
 	public:
-		typedef ModelHelperType_ ModelHelperType;
+
+		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+		typedef typename ModelBaseType::GeometryType GeometryType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 		typedef typename ModelHelperType::RealType RealType;
+		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 		typedef typename ModelHelperType::BlockType Block;
@@ -113,7 +112,6 @@ namespace Dmrg {
 		typedef  HilbertSpaceImmm<WordType> HilbertSpaceImmmType;
 		typedef typename HilbertSpaceImmmType::HilbertState HilbertState;
 		typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
-		typedef   ModelBase<ModelHelperType,SparseMatrixType,GeometryType,LinkProductType> ModelBaseType;
 		typedef	 typename ModelBaseType::MyBasis MyBasis;
 		typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
@@ -545,13 +543,8 @@ namespace Dmrg {
 		HilbertSpaceImmmType hilbertSpace_;
 	};     //class Immm
 
-	template<typename ModelHelperType,
-	         typename SparseMatrixType,
-	         typename GeometryType>
-	std::ostream &operator<<(std::ostream &os,
-	                         const Immm<ModelHelperType,
-	                         SparseMatrixType,
-	                         GeometryType>& model)
+	template<typename ModelBaseType>
+	std::ostream &operator<<(std::ostream &os, const Immm<ModelBaseType>& model)
 	{
 		model.print(os);
 		return os;
