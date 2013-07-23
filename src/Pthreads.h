@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 template<typename PthreadFunctionHolderType>
 struct PthreadFunctionStruct {
 	PthreadFunctionHolderType* pfh;
-	int threadNum;	
+	int threadNum;
 	SizeType blockSize;
 	SizeType total;
 	pthread_mutex_t* mutex;

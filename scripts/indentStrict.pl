@@ -245,7 +245,7 @@ while(<FILE>) {
 	}
 	$tmpLevel = $indentLevel if ($co<$cc and !$braceAtTheEnd);
 	if ($tmpLevel>0 and ($label eq "else" or $label eq "catch" or $label eq "else if") and $co>0) {
-		$tmpLevel-- if ($_=~/} $label \{/);
+		$tmpLevel-- if ($_=~/} $label .*\{/);
 	}
 	
 	#print "$_ ** $line ** $indentLevel \n"  if ($co<$cc and !$braceAtTheEnd);
