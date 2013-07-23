@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define FEAS_BASED_SC_EX
 #include "ModelFeBasedSc.h"
 #include "LinkProductFeAsExtended.h"
+#include "ModelCommon.h"
 
 namespace Dmrg {
 	template<typename ModelBaseType>
@@ -95,6 +96,7 @@ namespace Dmrg {
 		typedef typename ModelFeAsType::HilbertBasisType HilbertBasisType;
 		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 		typedef typename ModelBaseType::GeometryType GeometryType;
+		typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -103,19 +105,28 @@ namespace Dmrg {
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 		typedef LinkProductFeAsExtended<ModelHelperType> LinkProductType;
+		typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 		typedef	 typename ModelBaseType::MyBasis MyBasis;
 		typedef	 typename ModelBaseType::BasisWithOperatorsType
 				MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename MyBasis::BlockType BlockType;
+		typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+		typedef typename ModelBaseType::VectorType VectorType;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 		static const SizeType SPIN_UP = ModelFeAsType::SPIN_UP;
 		static const SizeType SPIN_DOWN = ModelFeAsType::SPIN_DOWN;
 
-		FeAsBasedScExtended(InputValidatorType& io,GeometryType const &geometry)
-			: ModelBaseType(geometry),modelParameters_(io), geometry_(geometry),
-			  modelFeAs_(io,geometry),orbitals_(modelParameters_.orbitals)
+		FeAsBasedScExtended(const SolverParamsType& solverParams,
+		                    InputValidatorType& io,
+		                    GeometryType const &geometry)
+			: ModelBaseType(solverParams,io,geometry),
+		      modelParameters_(io),
+		      geometry_(geometry),
+			  modelCommon_(),
+		      modelFeAs_(solverParams,io,geometry),
+		      orbitals_(modelParameters_.orbitals)
 		{}
 
 		SizeType hilbertSize(SizeType site) const { return modelFeAs_.hilbertSize(site); }
@@ -147,6 +158,46 @@ namespace Dmrg {
 			// add J_{ij} S^z_i S^z_j to Hamiltonian
 			addSzSz(hamiltonian,creationMatrix,block);
 
+		}
+
+		virtual void matrixVectorProduct(VectorType& x,
+		                                 const VectorType& y,
+		                                 ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.matrixVectorProduct(x,y,modelHelper);
+		}
+
+		virtual void addHamiltonianConnection(SparseMatrixType &matrix,
+		                                      const LeftRightSuperType& lrs) const
+		{
+			return modelCommon_.addHamiltonianConnection(matrix,lrs);
+		}
+
+		virtual void hamiltonianConnectionProduct(VectorType& x,
+		                                          const VectorType& y,
+		                                          ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
+		}
+
+		virtual void fullHamiltonian(SparseMatrixType& matrix,
+		                             const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.fullHamiltonian(matrix,modelHelper);
+		}
+
+		virtual void findElectronsOfOneSite(BlockType& electrons,
+		                                    SizeType site) const
+		{
+			return modelCommon_.findElectronsOfOneSite(electrons,site);
+		}
+
+		virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
+		                               const BlockType& block,
+		                               const RealType& time,
+		                               RealType factorForDiagonals) const
+		{
+			return modelCommon_.hamiltonianOnLink(hmatrix,block,time,factorForDiagonals);
 		}
 
 		//! set creation matrices for sites in block
@@ -318,6 +369,7 @@ namespace Dmrg {
 
 		ParametersModelFeAs<RealType>  modelParameters_;
 		GeometryType const &geometry_;
+		ModelCommonType modelCommon_;
 		ModelFeAsType modelFeAs_;
 		SizeType orbitals_;
 	};     //class FeAsBasedScExtended

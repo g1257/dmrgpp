@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "ProgramGlobals.h"
+#include "ModelCommon.h"
 
 namespace Dmrg {	
 	
@@ -100,16 +101,20 @@ namespace Dmrg {
 
 		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 		typedef typename ModelBaseType::GeometryType GeometryType;
+		typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename ModelHelperType::RealType RealType;
+		typedef	typename ModelBaseType::VectorType VectorType;
 
 	private:
 
-		typedef typename ModelHelperType::BlockType Block;
+		typedef typename ModelBaseType::BlockType BlockType;
+		typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef unsigned int long long WordType;
 		typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType> LinkProductType;
+		typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 		static const int NUMBER_OF_ORBITALS=1;
@@ -125,10 +130,13 @@ namespace Dmrg {
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 
-		ModelHeisenberg(InputValidatorType& io,GeometryType const &geometry)
-		: ModelBaseType(geometry),
+		ModelHeisenberg(const SolverParamsType& solverParams,
+		                InputValidatorType& io,
+		                GeometryType const &geometry)
+		: ModelBaseType(solverParams,io,geometry),
 		  modelParameters_(io),
-		  geometry_(geometry), 
+		  geometry_(geometry),
+		  modelCommon_(),
 		  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 		  reinterpretX_(maxNumberOfSites),
 		  reinterpretY_(maxNumberOfSites)
@@ -141,10 +149,10 @@ namespace Dmrg {
 
 		//! find  operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&operatorMatrices,
+		void setNaturalBasis(VectorOperatorType& operatorMatrices,
 		                     SparseMatrixType &hamiltonian,
 		                     BasisDataType &q,
-		                     Block const &block,
+		                     const BlockType& block,
 		                     const RealType& time) const
 		{
 			HilbertBasisType natBasis;
@@ -159,8 +167,49 @@ namespace Dmrg {
 			calcHamiltonian(hamiltonian,operatorMatrices,block,time);
 		}
 
+		virtual void matrixVectorProduct(VectorType& x,
+		                                 const VectorType& y,
+		                                 ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.matrixVectorProduct(x,y,modelHelper);
+		}
+
+		virtual void addHamiltonianConnection(SparseMatrixType &matrix,
+		                                      const LeftRightSuperType& lrs) const
+		{
+			return modelCommon_.addHamiltonianConnection(matrix,lrs);
+		}
+
+		virtual void hamiltonianConnectionProduct(VectorType& x,
+		                                          const VectorType& y,
+		                                          ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
+		}
+
+		virtual void fullHamiltonian(SparseMatrixType& matrix,
+		                             const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.fullHamiltonian(matrix,modelHelper);
+		}
+
+		virtual void findElectronsOfOneSite(BlockType& electrons,
+		                                    SizeType site) const
+		{
+			return modelCommon_.findElectronsOfOneSite(electrons,site);
+		}
+
+		virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
+		                               const BlockType& block,
+		                               const RealType& time,
+		                               RealType factorForDiagonals) const
+		{
+			return modelCommon_.hamiltonianOnLink(hmatrix,block,time,factorForDiagonals);
+		}
+
 		//! set operator matrices for sites in block
-		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&operatorMatrices,Block const &block) const
+		void setOperatorMatrices(VectorOperatorType& operatorMatrices,
+		                         const BlockType& block) const
 		{
 			HilbertBasisType natBasis;
 			SparseMatrixType tmpMatrix;
@@ -195,7 +244,7 @@ namespace Dmrg {
 		
 		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
 		{
-			Block block;
+			BlockType block;
 			block.resize(1);
 			block[0]=site;
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
@@ -244,7 +293,7 @@ namespace Dmrg {
 		//! Full hamiltonian from creation matrices cm
 		void calcHamiltonian(SparseMatrixType &hmatrix,
 		                     const VectorOperatorType& cm,
-		                     Block const &block,
+		                     const BlockType& block,
 		                     RealType time,
 		                     RealType factorForDiagonals=1.0)  const
 		{
@@ -257,6 +306,7 @@ namespace Dmrg {
 
 		ParametersModelHeisenberg<RealType>  modelParameters_;
 		GeometryType const &geometry_;
+		ModelCommonType modelCommon_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 		SizeType reinterpretX_,reinterpretY_;

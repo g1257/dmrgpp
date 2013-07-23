@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ModelHeisenberg.h"
 #include "LinkProductTj1Orb.h"
 #include "ParametersModelTj1Orb.h"
+#include "ModelCommon.h"
 
 namespace Dmrg {
 	//! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment
@@ -95,6 +96,7 @@ namespace Dmrg {
 		typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
 		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 		typedef typename ModelBaseType::GeometryType GeometryType;
+		typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -102,12 +104,15 @@ namespace Dmrg {
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef LinkProductTj1Orb<ModelHelperType> LinkProductType;
+		typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename ModelHubbardType::HilbertState HilbertStateType;
 		typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
-		typedef typename ModelHelperType::BlockType Block;
+		typedef typename ModelHelperType::BlockType BlockType;
+		typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+		typedef typename ModelBaseType::VectorType VectorType;
 		typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
@@ -117,15 +122,16 @@ namespace Dmrg {
 
 		enum {SPIN_UP, SPIN_DOWN};
 
-		Tj1Orb(InputValidatorType& io,
-				 GeometryType const &dmrgGeometry)
-		: ModelBaseType(dmrgGeometry),
-		  modelParameters_(io),
-		  geometry_(dmrgGeometry),
-		  offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
-		  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
-		{
-		}
+		Tj1Orb(const SolverParamsType solverParams,
+		       InputValidatorType& io,
+		       GeometryType const &dmrgGeometry)
+		    : ModelBaseType(solverParams,io,dmrgGeometry),
+		      modelParameters_(io),
+		      geometry_(dmrgGeometry),
+		      modelCommon_(),
+		      offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
+		      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
+		{}
 
 		SizeType hilbertSize(SizeType site) const
 		{
@@ -134,11 +140,11 @@ namespace Dmrg {
 
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-						 SparseMatrixType &hamiltonian,
-						 BasisDataType &q,
-						 Block const &block,
-						 RealType time) const
+		virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
+		                             SparseMatrixType &hamiltonian,
+		                             BasisDataType& q,
+		                             const BlockType& block,
+		                             const RealType& time) const
 		{
 			
 			HilbertBasisType natBasis;
@@ -154,8 +160,50 @@ namespace Dmrg {
 			calcHamiltonian(hamiltonian,creationMatrix,block,time);
 		}
 
+
+		virtual void matrixVectorProduct(VectorType& x,
+		                                 const VectorType& y,
+		                                 ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.matrixVectorProduct(x,y,modelHelper);
+		}
+
+		virtual void addHamiltonianConnection(SparseMatrixType &matrix,
+		                                      const LeftRightSuperType& lrs) const
+		{
+			return modelCommon_.addHamiltonianConnection(matrix,lrs);
+		}
+
+		virtual void hamiltonianConnectionProduct(VectorType& x,
+		                                          const VectorType& y,
+		                                          ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
+		}
+
+		virtual void fullHamiltonian(SparseMatrixType& matrix,
+		                             const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.fullHamiltonian(matrix,modelHelper);
+		}
+
+		virtual void findElectronsOfOneSite(BlockType& electrons,
+		                                    SizeType site) const
+		{
+			return modelCommon_.findElectronsOfOneSite(electrons,site);
+		}
+
+		virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
+		                               const BlockType& block,
+		                               const RealType& time,
+		                               RealType factorForDiagonals) const
+		{
+			return modelCommon_.hamiltonianOnLink(hmatrix,block,time,factorForDiagonals);
+		}
+
 		//! set creation matrices for sites in block
-		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,Block const &block) const
+		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
+		                         const BlockType& block) const
 		{
 			typename PsimagLite::Vector<HilbertStateType>::Type natBasis;
 			SparseMatrixType tmpMatrix;
@@ -219,7 +267,7 @@ namespace Dmrg {
 										  SizeType site,
 										  SizeType dof) const
 		{
-			Block block;
+			BlockType block;
 			block.resize(1);
 			block[0]=site;
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
@@ -408,7 +456,7 @@ namespace Dmrg {
 		//! Full hamiltonian from creation matrices cm
 		void calcHamiltonian(SparseMatrixType &hmatrix,
 		                     const VectorOperatorType& cm,
-		                     Block const &block,
+		                     const BlockType& block,
 		                     RealType time,
 		                     RealType factorForDiagonals=1.0)  const
 		{
@@ -421,7 +469,7 @@ namespace Dmrg {
 
 		void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 		                                const VectorOperatorType& cm,
-		                                Block const &block,
+		                                const BlockType& block,
 		                                RealType time,
 		                                RealType factorForDiagonals=1.0) const
 		{
@@ -514,6 +562,7 @@ namespace Dmrg {
 
 		ParametersModelTj1Orb<RealType>  modelParameters_;
 		const GeometryType &geometry_;
+		ModelCommonType modelCommon_;
 		SizeType offset_;
 		SpinSquaredHelper<RealType,HilbertStateType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,HilbertStateType> > spinSquared_;

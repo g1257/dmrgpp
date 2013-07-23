@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LinkProductImmm.h"
 #include "ProgramGlobals.h"
 #include <cassert>
+#include "ModelCommon.h"
 
 namespace Dmrg {
 	template<typename ModelBaseType>
@@ -100,6 +101,7 @@ namespace Dmrg {
 
 		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 		typedef typename ModelBaseType::GeometryType GeometryType;
+		typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -107,8 +109,11 @@ namespace Dmrg {
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef PsimagLite::Matrix<SparseElementType> MatrixType;
-		typedef typename ModelHelperType::BlockType Block;
+		typedef typename ModelHelperType::BlockType BlockType;
+		typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+		typedef typename ModelBaseType::VectorType VectorType;
 		typedef LinkProductImmm<ModelHelperType> LinkProductType;
+		typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 		typedef  HilbertSpaceImmm<WordType> HilbertSpaceImmmType;
 		typedef typename HilbertSpaceImmmType::HilbertState HilbertState;
 		typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
@@ -122,10 +127,13 @@ namespace Dmrg {
 		static const int SPIN_DOWN=HilbertSpaceImmmType::SPIN_DOWN;
 		static const SizeType NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
-		Immm(InputValidatorType& io,GeometryType const &geometry)
-		: ModelBaseType(geometry),
+		Immm(const SolverParamsType& solverParams,
+		     InputValidatorType& io,
+		     GeometryType const &geometry)
+		: ModelBaseType(solverParams,io,geometry),
 		  modelParameters_(io),
 		  geometry_(geometry),
+		  modelCommon_(),
 		  degreesOfFreedom_(geometry_.numberOfSites()),
 		  hilbertSpace_(degreesOfFreedom_)
 		{
@@ -147,7 +155,7 @@ namespace Dmrg {
 		void setNaturalBasis(typename PsimagLite::Vector<OperatorType>::Type& creationMatrix,
 		                     SparseMatrixType& hamiltonian,
 		                     BasisDataType& q,
-				             const Block& block,
+				             const BlockType& block,
 				             const RealType& time)  const
 		{
 			assert(block.size()==1);
@@ -164,9 +172,50 @@ namespace Dmrg {
 			calcHamiltonian(hamiltonian,creationMatrix,block,time);
 		}
 
+
+		virtual void matrixVectorProduct(VectorType& x,
+		                                 const VectorType& y,
+		                                 ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.matrixVectorProduct(x,y,modelHelper);
+		}
+
+		virtual void addHamiltonianConnection(SparseMatrixType &matrix,
+		                                      const LeftRightSuperType& lrs) const
+		{
+			return modelCommon_.addHamiltonianConnection(matrix,lrs);
+		}
+
+		virtual void hamiltonianConnectionProduct(VectorType& x,
+		                                          const VectorType& y,
+		                                          ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
+		}
+
+		virtual void fullHamiltonian(SparseMatrixType& matrix,
+		                             const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.fullHamiltonian(matrix,modelHelper);
+		}
+
+		virtual void findElectronsOfOneSite(BlockType& electrons,
+		                                    SizeType site) const
+		{
+			return modelCommon_.findElectronsOfOneSite(electrons,site);
+		}
+
+		virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
+		                               const BlockType& block,
+		                               const RealType& time,
+		                               RealType factorForDiagonals) const
+		{
+			return modelCommon_.hamiltonianOnLink(hmatrix,block,time,factorForDiagonals);
+		}
+
 		//! set creation matrices for sites in block
 		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType>::Type& creationMatrix,
-		                         const Block& block) const
+		                         const BlockType& block) const
 		{
 			assert(block.size()==1);
 			typename PsimagLite::Vector<HilbertState>::Type natBasis;
@@ -200,7 +249,7 @@ namespace Dmrg {
 
 		MatrixType naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
 		{
-			Block block;
+			BlockType block;
 			block.resize(1);
 			block[0]=site;
 			SizeType norb = dOf(block[0])/HilbertSpaceImmmType::NUMBER_OF_SPINS;
@@ -287,7 +336,7 @@ namespace Dmrg {
 		//! Full hamiltonian from creation matrices cm
 		void calcHamiltonian(SparseMatrixType &hmatrix,
 		                     const VectorOperatorType& cm,
-		                     Block const &block,
+		                     const BlockType& block,
 		                     RealType time,
 		                     RealType factorForDiagonals=1.0)  const
 		{
@@ -429,7 +478,7 @@ namespace Dmrg {
 
 		void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 		                                const VectorOperatorType& cm,
-		                                Block const &block,
+		                                const BlockType& block,
 		                                RealType time,
 		                                RealType factorForDiagonals=1.0) const
 		{	
@@ -539,6 +588,7 @@ namespace Dmrg {
 
 		ParametersImmm<RealType>  modelParameters_;
 		GeometryType const &geometry_;
+		ModelCommonType modelCommon_;
 		typename PsimagLite::Vector<SizeType>::Type degreesOfFreedom_;
 		HilbertSpaceImmmType hilbertSpace_;
 	};     //class Immm

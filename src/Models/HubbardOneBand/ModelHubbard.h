@@ -213,6 +213,14 @@ public:
 		return modelCommon_.findElectronsOfOneSite(electrons,site);
 	}
 
+	virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
+	                               const BlockType& block,
+	                               const RealType& time,
+	                               RealType factorForDiagonals) const
+	{
+		return modelCommon_.hamiltonianOnLink(hmatrix,block,time,factorForDiagonals);
+	}
+
 	/** \cppFunction{!PTEX_THISFUNCTION} sets local operators needed to
 		 construct the Hamiltonian.
 		 For example, for the Hubbard model these operators are the

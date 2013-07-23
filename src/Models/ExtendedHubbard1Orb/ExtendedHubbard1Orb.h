@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define EXTENDED_HUBBARD_1ORB_H
 #include "ModelHubbard.h"
 #include "LinkProdExtendedHubbard1Orb.h"
+#include "ModelCommon.h"
 
 namespace Dmrg {
 	//! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
@@ -94,21 +95,25 @@ namespace Dmrg {
 		typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 		typedef typename ModelBaseType::GeometryType GeometryType;
+		typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef LinkProdExtendedHubbard1Orb<ModelHelperType> LinkProductType;
+		typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 		typedef	typename ModelBaseType::MyBasis MyBasis;
 		typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
-		typedef typename ModelHelperType::BlockType Block;
+		typedef typename ModelHelperType::BlockType BlockType;
+		typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+		typedef typename ModelBaseType::VectorType VectorType;
 		typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
 		typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-		typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+		typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 
 		ExtendedHubbard1Orb(const SolverParamsType& solverParams,
 		                    InputValidatorType& io,
@@ -116,6 +121,7 @@ namespace Dmrg {
 		: ModelBaseType(solverParams,io,dmrgGeometry),
 		  modelParameters_(io),
 		  dmrgGeometry_(dmrgGeometry),
+		  modelCommon_(),
 		  modelHubbard_(solverParams,io,dmrgGeometry)
 		{}
 
@@ -126,11 +132,11 @@ namespace Dmrg {
 
 		//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
 		//! for each state in the basis
-		void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-		                     SparseMatrixType &hamiltonian,
-		                     BasisDataType &q,
-				     Block const &block,
-				     RealType time) const
+		virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
+		                             SparseMatrixType &hamiltonian,
+		                             BasisDataType& q,
+		                             const BlockType& block,
+		                             const RealType& time) const
 		{
 
 			modelHubbard_.setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
@@ -142,9 +148,49 @@ namespace Dmrg {
 			addNiNj(hamiltonian,creationMatrix,block);
 		}
 
+		virtual void matrixVectorProduct(VectorType& x,
+		                                 const VectorType& y,
+		                                 ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.matrixVectorProduct(x,y,modelHelper);
+		}
+
+		virtual void addHamiltonianConnection(SparseMatrixType &matrix,
+		                                      const LeftRightSuperType& lrs) const
+		{
+			return modelCommon_.addHamiltonianConnection(matrix,lrs);
+		}
+
+		virtual void hamiltonianConnectionProduct(VectorType& x,
+		                                          const VectorType& y,
+		                                          ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
+		}
+
+		virtual void fullHamiltonian(SparseMatrixType& matrix,
+		                             const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.fullHamiltonian(matrix,modelHelper);
+		}
+
+		virtual void findElectronsOfOneSite(BlockType& electrons,
+		                                    SizeType site) const
+		{
+			return modelCommon_.findElectronsOfOneSite(electrons,site);
+		}
+
+		virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
+		                               const BlockType& block,
+		                               const RealType& time,
+		                               RealType factorForDiagonals) const
+		{
+			return modelCommon_.hamiltonianOnLink(hmatrix,block,time,factorForDiagonals);
+		}
+
 		//! set creation matrices for sites in block
 		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-		                         Block const &block) const
+		                         const BlockType& block) const
 		{
 			modelHubbard_.setOperatorMatrices(creationMatrix,block);
 			// add ni to creationMatrix
@@ -155,7 +201,7 @@ namespace Dmrg {
 								      SizeType site,
 								      SizeType dof) const
 		{
-			Block block;
+			BlockType block;
 			block.resize(1);
 			block[0]=site;
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
@@ -195,7 +241,7 @@ namespace Dmrg {
 		//! Full hamiltonian from creation matrices cm
 		void calcHamiltonian(SparseMatrixType &hmatrix,
 		                     const typename PsimagLite::Vector<OperatorType>::Type& cm,
-		                     Block const &block,
+		                     const BlockType& block,
 		                     RealType time,
 		                     RealType factorForDiagonals=1.0)  const
 		{
@@ -214,6 +260,7 @@ namespace Dmrg {
 
 		ParametersModelHubbard<RealType>  modelParameters_;
 		const GeometryType &dmrgGeometry_;
+		ModelCommonType modelCommon_;
 		ModelHubbardType modelHubbard_;
 
 		//! Find n_i in the natural basis natBasis
@@ -240,7 +287,7 @@ namespace Dmrg {
 		//! Full hamiltonian from creation matrices cm
 		void addNiNj(SparseMatrixType &hmatrix,
 		             const typename PsimagLite::Vector<OperatorType>::Type& cm,
-		             Block const &block) const
+		             const BlockType& block) const
 		{
 			//Assume block.size()==1 and then problem solved!! there are no connection if there's only one site ;-)
 			assert(block.size()==1);
@@ -250,7 +297,7 @@ namespace Dmrg {
 		}
 
 		void setNi(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-		           Block const &block) const
+		           const BlockType& block) const
 		{
 			assert(block.size()==1);
 			typename PsimagLite::Vector<HilbertState>::Type natBasis;

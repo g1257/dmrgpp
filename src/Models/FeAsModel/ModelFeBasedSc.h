@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include "LinkProductFeAs.h"
 #include "ProgramGlobals.h"
+#include "ModelCommon.h"
 
 namespace Dmrg {
 	template<typename ModelBaseType>
@@ -100,6 +101,7 @@ namespace Dmrg {
 
 		typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 		typedef typename ModelBaseType::GeometryType GeometryType;
+		typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelHelperType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
 		typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -107,26 +109,32 @@ namespace Dmrg {
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename HilbertSpaceFeAsType::HilbertState HilbertState;
-		typedef typename ModelHelperType::BlockType Block;
-		
+		typedef typename ModelHelperType::BlockType BlockType;
+		typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+		typedef typename ModelBaseType::VectorType VectorType;
+
 		static const int FERMION_SIGN = -1;
 		static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
 		static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
 
 		typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 		typedef LinkProductFeAs<ModelHelperType> LinkProductType;
+		typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 		typedef	 typename ModelBaseType::MyBasis MyBasis;
 		typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename MyBasis::BasisDataType BasisDataType;
 		typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 		static SizeType const REINTERPRET  = 1;
-		ModelFeBasedSc(InputValidatorType& io,GeometryType const &geometry)
-			: ModelBaseType(geometry),
+		ModelFeBasedSc(const SolverParamsType& solverParams,
+		               InputValidatorType& io,
+		               GeometryType const &geometry)
+			: ModelBaseType(solverParams,io,geometry),
 			  reinterpretX_(6),
 			  reinterpretY_(9),
 			  modelParameters_(io),
 			  geometry_(geometry),
+		      modelCommon_(),
 			  spinSquared_(spinSquaredHelper_,modelParameters_.orbitals,2*modelParameters_.orbitals)
 		{
 			LinkProductType::setOrbitals(modelParameters_.orbitals);
@@ -151,7 +159,7 @@ namespace Dmrg {
 		void setNaturalBasis(VectorOperatorType& creationMatrix,
 		                     SparseMatrixType &hamiltonian,
 		                     BasisDataType &q,
-		                     Block const &block,
+		                     const BlockType& block,
 		                     const RealType& time)  const
 		{
 			typename PsimagLite::Vector<HilbertState>::Type natBasis;
@@ -170,8 +178,49 @@ namespace Dmrg {
 			tmpMatrix2.makeDiagonal(natBasis.size(),0.0);
 		}
 
+		virtual void matrixVectorProduct(VectorType& x,
+		                                 const VectorType& y,
+		                                 ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.matrixVectorProduct(x,y,modelHelper);
+		}
+
+		virtual void addHamiltonianConnection(SparseMatrixType &matrix,
+		                                      const LeftRightSuperType& lrs) const
+		{
+			return modelCommon_.addHamiltonianConnection(matrix,lrs);
+		}
+
+		virtual void hamiltonianConnectionProduct(VectorType& x,
+		                                          const VectorType& y,
+		                                          ModelHelperType const &modelHelper) const
+		{
+			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
+		}
+
+		virtual void fullHamiltonian(SparseMatrixType& matrix,
+		                             const ModelHelperType& modelHelper) const
+		{
+			return modelCommon_.fullHamiltonian(matrix,modelHelper);
+		}
+
+		virtual void findElectronsOfOneSite(BlockType& electrons,
+		                                    SizeType site) const
+		{
+			return modelCommon_.findElectronsOfOneSite(electrons,site);
+		}
+
+		virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
+		                               const BlockType& block,
+		                               const RealType& time,
+		                               RealType factorForDiagonals) const
+		{
+			return modelCommon_.hamiltonianOnLink(hmatrix,block,time,factorForDiagonals);
+		}
+
 		//! set creation matrices for sites in block
-		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,Block const &block) const
+		void setOperatorMatrices(VectorOperatorType& creationMatrix,
+		                         const BlockType& block) const
 		{
 			typename PsimagLite::Vector<HilbertState>::Type natBasis;
 			SparseMatrixType tmpMatrix;
@@ -206,7 +255,7 @@ namespace Dmrg {
 
 		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
 		{
-			Block block;
+			BlockType block;
 			block.resize(1);
 			block[0]=site;
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
@@ -306,7 +355,7 @@ namespace Dmrg {
 		//! Full hamiltonian from creation matrices cm
 		void calcHamiltonian(SparseMatrixType &hmatrix,
 		                     const VectorOperatorType& cm,
-		                     Block const &block,
+		                     const BlockType& block,
 		                     RealType time,
 		                     RealType factorForDiagonals=1.0)  const
 		{
@@ -319,7 +368,7 @@ namespace Dmrg {
 
 		void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 		                                const VectorOperatorType& cm,
-		                                Block const &block,
+		                                const BlockType& block,
 		                                RealType time,
 		                                RealType factorForDiagonals=1.0) const
 		{
@@ -337,6 +386,7 @@ namespace Dmrg {
 		HilbertState reinterpretX_,reinterpretY_;
 		ParametersModelFeAs<RealType>  modelParameters_;
 		GeometryType const &geometry_;
+		ModelCommonType modelCommon_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 		//typename PsimagLite::Vector<PsimagLite::Matrix<RealType>::Type > pauliMatrix_;
