@@ -72,7 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ModelFactory.h
+/*! \file ModelBase.h
  *
  * From a string, chooses the model
  * Note: Due to BaseModel needing the LinkProductType it is
@@ -84,8 +84,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  */
  
-#ifndef MODEL_FACTORY_H
-#define MODEL_FACTORY_H
+#ifndef MODEL_BASE_H
+#define MODEL_BASE_H
 
 #include "ModelHubbard.h"
 #include "ModelHeisenberg.h"
@@ -102,7 +102,7 @@ namespace Dmrg {
 	typename SparseMatrixType,
 	typename GeometryType_,
 	typename ParametersType>
-	class ModelFactory  {
+	class ModelBase  {
 
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef VerySparseMatrix<SparseElementType> VerySparseMatrixType;
@@ -139,7 +139,7 @@ namespace Dmrg {
 		typedef typename ModelHelperType::LinkType LinkType;
 		typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
 
-		ModelFactory(const ParametersType& params,
+		ModelBase(const ParametersType& params,
 			     InputValidatorType& io,
 			     const GeometryType& geometry)
 		: params_(params),
@@ -191,7 +191,7 @@ namespace Dmrg {
 			}
 		}
 
-		~ModelFactory()
+		~ModelBase()
 		{
 			switch (model_) {
 			case HUBBARD_ONE_BAND:
@@ -637,13 +637,13 @@ namespace Dmrg {
 		// models end
 		SizeType model_;
 
-	};     //class ModelFactory
+	};     //class ModelBase
 
 	template<typename ModelHelperType,
 		 typename SparseMatrixType,
 		 typename GeometryType,
 		 typename ParametersType>
-	std::ostream& operator<<(std::ostream& os,const ModelFactory<ModelHelperType,
+	std::ostream& operator<<(std::ostream& os,const ModelBase<ModelHelperType,
 				 SparseMatrixType,GeometryType,ParametersType>& mf)
 	{
 		mf.print(os);
