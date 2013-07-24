@@ -135,15 +135,13 @@ namespace Dmrg {
 		ModelHeisenberg(const SolverParamsType& solverParams,
 		                InputValidatorType& io,
 		                GeometryType const &geometry)
-		: ModelBaseType(solverParams,io,geometry),
-		  modelParameters_(io),
-		  geometry_(geometry),
-		  modelCommon_(geometry),
-		  spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
-		  reinterpretX_(maxNumberOfSites),
-		  reinterpretY_(maxNumberOfSites)
-		{
-		}
+		    : ModelBaseType(solverParams,io,geometry,new ModelCommonType(geometry)),
+		      modelParameters_(io),
+		      geometry_(geometry),
+		      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
+		      reinterpretX_(maxNumberOfSites),
+		      reinterpretY_(maxNumberOfSites)
+		{}
 
 		void print(std::ostream& os) const { os<<modelParameters_; }
 
@@ -166,33 +164,7 @@ namespace Dmrg {
 			
 			setSymmetryRelated(q,natBasis,block.size());
 			
-			calcHamiltonian(hamiltonian,operatorMatrices,block,time);
-		}
-
-		virtual void matrixVectorProduct(VectorType& x,
-		                                 const VectorType& y,
-		                                 ModelHelperType const &modelHelper) const
-		{
-			return modelCommon_.matrixVectorProduct(x,y,modelHelper);
-		}
-
-		virtual void addHamiltonianConnection(SparseMatrixType &matrix,
-		                                      const LeftRightSuperType& lrs) const
-		{
-			return modelCommon_.addHamiltonianConnection(matrix,lrs);
-		}
-
-		virtual void hamiltonianConnectionProduct(VectorType& x,
-		                                          const VectorType& y,
-		                                          ModelHelperType const &modelHelper) const
-		{
-			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
-		}
-
-		virtual void fullHamiltonian(SparseMatrixType& matrix,
-		                             const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.fullHamiltonian(matrix,modelHelper);
+			this->calcHamiltonian(hamiltonian,operatorMatrices,block,time);
 		}
 
 		//! set operator matrices for sites in block
@@ -228,21 +200,6 @@ namespace Dmrg {
 				OperatorType myOp2(tmpMatrix,1,typename OperatorType::PairType(2,1),1.0/sqrt(2.0),su2related2);
 				operatorMatrices.push_back(myOp2);
 			}
-		}
-		
-		virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
-		                              const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.getLinkProductStruct(lps,modelHelper);
-		}
-
-		virtual LinkType getConnection(const SparseMatrixType** A,
-		                       const SparseMatrixType** B,
-		                       SizeType ix,
-		                       const LinkProductStructType& lps,
-		                       const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
 		}
 
 		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
@@ -293,23 +250,17 @@ namespace Dmrg {
 				electrons[i] = 0;
 		}
 
-		//! Full hamiltonian from creation matrices cm
-		void calcHamiltonian(SparseMatrixType &hmatrix,
-		                     const VectorOperatorType& cm,
-		                     const BlockType& block,
-		                     RealType time,
-		                     RealType factorForDiagonals=1.0)  const
-		{
-			hmatrix.makeDiagonal(cm[0].data.row());
-
-			modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block);
-		}
+		virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+		                                        const VectorOperatorType& cm,
+		                                        const BlockType& block,
+		                                        RealType time,
+		                                        RealType factorForDiagonals=1.0)  const
+		{}
 
 	private:
 
 		ParametersModelHeisenberg<RealType>  modelParameters_;
 		GeometryType const &geometry_;
-		ModelCommonType modelCommon_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 		SizeType reinterpretX_,reinterpretY_;

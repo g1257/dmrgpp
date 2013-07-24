@@ -132,10 +132,9 @@ namespace Dmrg {
 		Immm(const SolverParamsType& solverParams,
 		     InputValidatorType& io,
 		     GeometryType const &geometry)
-		: ModelBaseType(solverParams,io,geometry),
+		: ModelBaseType(solverParams,io,geometry,new ModelCommonType(geometry)),
 		  modelParameters_(io),
 		  geometry_(geometry),
-		  modelCommon_(geometry),
 		  degreesOfFreedom_(geometry_.numberOfSites()),
 		  hilbertSpace_(degreesOfFreedom_)
 		{
@@ -171,34 +170,7 @@ namespace Dmrg {
 			setSymmetryRelated(q,natBasis,block.size());
 
 			//! set hamiltonian
-			calcHamiltonian(hamiltonian,creationMatrix,block,time);
-		}
-
-
-		virtual void matrixVectorProduct(VectorType& x,
-		                                 const VectorType& y,
-		                                 ModelHelperType const &modelHelper) const
-		{
-			return modelCommon_.matrixVectorProduct(x,y,modelHelper);
-		}
-
-		virtual void addHamiltonianConnection(SparseMatrixType &matrix,
-		                                      const LeftRightSuperType& lrs) const
-		{
-			return modelCommon_.addHamiltonianConnection(matrix,lrs);
-		}
-
-		virtual void hamiltonianConnectionProduct(VectorType& x,
-		                                          const VectorType& y,
-		                                          ModelHelperType const &modelHelper) const
-		{
-			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
-		}
-
-		virtual void fullHamiltonian(SparseMatrixType& matrix,
-		                             const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.fullHamiltonian(matrix,modelHelper);
+			this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
 		}
 
 		//! set creation matrices for sites in block
@@ -233,21 +205,6 @@ namespace Dmrg {
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType nOp(nmatrix,1,typename OperatorType::PairType(0,0),1,su2related2);
 			creationMatrix.push_back(nOp);
-		}
-
-		virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
-		                              const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.getLinkProductStruct(lps,modelHelper);
-		}
-
-		virtual LinkType getConnection(const SparseMatrixType** A,
-		                       const SparseMatrixType** B,
-		                       SizeType ix,
-		                       const LinkProductStructType& lps,
-		                       const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
 		}
 
 		MatrixType naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
@@ -334,20 +291,6 @@ namespace Dmrg {
 				SizeType ndown = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_DOWN);
 				electrons[i] = nup + ndown;
 			}
-		}
-
-		//! Full hamiltonian from creation matrices cm
-		void calcHamiltonian(SparseMatrixType &hmatrix,
-		                     const VectorOperatorType& cm,
-		                     const BlockType& block,
-		                     RealType time,
-		                     RealType factorForDiagonals=1.0)  const
-		{
-			hmatrix.makeDiagonal(cm[0].data.row());
-
-			modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block);
-
-			addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 		}
 
 	private:
@@ -591,7 +534,6 @@ namespace Dmrg {
 
 		ParametersImmm<RealType>  modelParameters_;
 		GeometryType const &geometry_;
-		ModelCommonType modelCommon_;
 		typename PsimagLite::Vector<SizeType>::Type degreesOfFreedom_;
 		HilbertSpaceImmmType hilbertSpace_;
 	};     //class Immm

@@ -120,10 +120,9 @@ namespace Dmrg {
 		ExtendedHubbard1Orb(const SolverParamsType& solverParams,
 		                    InputValidatorType& io,
 		                    GeometryType const &geometry)
-		: ModelBaseType(solverParams,io,geometry),
+		: ModelBaseType(solverParams,io,geometry,new ModelCommonType(geometry)),
 		  modelParameters_(io),
 		  geometry_(geometry),
-		  modelCommon_(geometry),
 		  modelHubbard_(solverParams,io,geometry)
 		{}
 
@@ -150,32 +149,6 @@ namespace Dmrg {
 			addNiNj(hamiltonian,creationMatrix,block);
 		}
 
-		virtual void matrixVectorProduct(VectorType& x,
-		                                 const VectorType& y,
-		                                 ModelHelperType const &modelHelper) const
-		{
-			return modelCommon_.matrixVectorProduct(x,y,modelHelper);
-		}
-
-		virtual void addHamiltonianConnection(SparseMatrixType &matrix,
-		                                      const LeftRightSuperType& lrs) const
-		{
-			return modelCommon_.addHamiltonianConnection(matrix,lrs);
-		}
-
-		virtual void hamiltonianConnectionProduct(VectorType& x,
-		                                          const VectorType& y,
-		                                          ModelHelperType const &modelHelper) const
-		{
-			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
-		}
-
-		virtual void fullHamiltonian(SparseMatrixType& matrix,
-		                             const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.fullHamiltonian(matrix,modelHelper);
-		}
-
 		//! set creation matrices for sites in block
 		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 		                         const BlockType& block) const
@@ -183,21 +156,6 @@ namespace Dmrg {
 			modelHubbard_.setOperatorMatrices(creationMatrix,block);
 			// add ni to creationMatrix
 			setNi(creationMatrix,block);
-		}
-
-		virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
-		                              const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.getLinkProductStruct(lps,modelHelper);
-		}
-
-		virtual LinkType getConnection(const SparseMatrixType** A,
-		                       const SparseMatrixType** B,
-		                       SizeType ix,
-		                       const LinkProductStructType& lps,
-		                       const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
 		}
 
 		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
@@ -241,17 +199,12 @@ namespace Dmrg {
 			modelHubbard_.print(os);
 		}
 
-		//! Full hamiltonian from creation matrices cm
-		void calcHamiltonian(SparseMatrixType &hmatrix,
-		                     const typename PsimagLite::Vector<OperatorType>::Type& cm,
-		                     const BlockType& block,
-		                     RealType time,
-		                     RealType factorForDiagonals=1.0)  const
+		virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+		                                        const VectorOperatorType& cm,
+		                                        const BlockType& block,
+		                                        RealType time,
+		                                        RealType factorForDiagonals=1.0)  const
 		{
-			hmatrix.makeDiagonal(cm[0].data.row());
-
-			modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block);
-
 			modelHubbard_.addDiagonalsInNaturalBasis(hmatrix,
 			                                         cm,
 			                                         block,
@@ -263,7 +216,6 @@ namespace Dmrg {
 
 		ParametersModelHubbard<RealType>  modelParameters_;
 		const GeometryType &geometry_;
-		ModelCommonType modelCommon_;
 		ModelHubbardType modelHubbard_;
 
 		//! Find n_i in the natural basis natBasis

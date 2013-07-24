@@ -127,10 +127,9 @@ namespace Dmrg {
 		Tj1Orb(const SolverParamsType solverParams,
 		       InputValidatorType& io,
 		       GeometryType const &geometry)
-		    : ModelBaseType(solverParams,io,geometry),
+		    : ModelBaseType(solverParams,io,geometry,new ModelCommonType(geometry)),
 		      modelParameters_(io),
 		      geometry_(geometry),
-		      modelCommon_(geometry),
 		      offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
 		      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 		{}
@@ -159,40 +158,7 @@ namespace Dmrg {
 			setSymmetryRelated(q,natBasis,block.size());
 
 			//! set hamiltonian
-			calcHamiltonian(hamiltonian,creationMatrix,block,time);
-		}
-
-
-		virtual void matrixVectorProduct(VectorType& x,
-		                                 const VectorType& y,
-		                                 ModelHelperType const &modelHelper) const
-		{
-			return modelCommon_.matrixVectorProduct(x,y,modelHelper);
-		}
-
-		virtual void addHamiltonianConnection(SparseMatrixType &matrix,
-		                                      const LeftRightSuperType& lrs) const
-		{
-			return modelCommon_.addHamiltonianConnection(matrix,lrs);
-		}
-
-		virtual void hamiltonianConnectionProduct(VectorType& x,
-		                                          const VectorType& y,
-		                                          ModelHelperType const &modelHelper) const
-		{
-			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
-		}
-
-		virtual void fullHamiltonian(SparseMatrixType& matrix,
-		                             const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.fullHamiltonian(matrix,modelHelper);
-		}
-
-		virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
-		                              const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.getLinkProductStruct(lps,modelHelper);
+			this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
 		}
 
 		//! set creation matrices for sites in block
@@ -254,15 +220,6 @@ namespace Dmrg {
 
 				creationMatrix.push_back(myOp3);
 			}
-		}
-
-		virtual LinkType getConnection(const SparseMatrixType** A,
-		                       const SparseMatrixType** B,
-		                       SizeType ix,
-		                       const LinkProductStructType& lps,
-		                       const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
 		}
 
 		/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the unmangled (natural) basis of one-site */
@@ -456,20 +413,6 @@ namespace Dmrg {
 			return creationMatrix;
 		}
 
-		//! Full hamiltonian from creation matrices cm
-		void calcHamiltonian(SparseMatrixType &hmatrix,
-		                     const VectorOperatorType& cm,
-		                     const BlockType& block,
-		                     RealType time,
-		                     RealType factorForDiagonals=1.0)  const
-		{
-			hmatrix.makeDiagonal(cm[0].data.row());
-
-			modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block);
-
-			addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
-		}
-
 		void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 		                                const VectorOperatorType& cm,
 		                                const BlockType& block,
@@ -565,7 +508,6 @@ namespace Dmrg {
 
 		ParametersModelTj1Orb<RealType>  modelParameters_;
 		const GeometryType &geometry_;
-		ModelCommonType modelCommon_;
 		SizeType offset_;
 		SpinSquaredHelper<RealType,HilbertStateType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,HilbertStateType> > spinSquared_;

@@ -131,12 +131,11 @@ namespace Dmrg {
 		ModelFeBasedSc(const SolverParamsType& solverParams,
 		               InputValidatorType& io,
 		               GeometryType const &geometry)
-			: ModelBaseType(solverParams,io,geometry),
+			: ModelBaseType(solverParams,io,geometry,new ModelCommonType(geometry)),
 			  reinterpretX_(6),
 			  reinterpretY_(9),
 			  modelParameters_(io),
 			  geometry_(geometry),
-		      modelCommon_(geometry),
 			  spinSquared_(spinSquaredHelper_,modelParameters_.orbitals,2*modelParameters_.orbitals)
 		{
 			LinkProductType::setOrbitals(modelParameters_.orbitals);
@@ -174,36 +173,10 @@ namespace Dmrg {
 			setSymmetryRelated(q,natBasis,block.size());
 
 			//! set hamiltonian
-			calcHamiltonian(hamiltonian,creationMatrix,block,time);
+			this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
 
 			SparseMatrixType tmpMatrix2;
 			tmpMatrix2.makeDiagonal(natBasis.size(),0.0);
-		}
-
-		virtual void matrixVectorProduct(VectorType& x,
-		                                 const VectorType& y,
-		                                 ModelHelperType const &modelHelper) const
-		{
-			return modelCommon_.matrixVectorProduct(x,y,modelHelper);
-		}
-
-		virtual void addHamiltonianConnection(SparseMatrixType &matrix,
-		                                      const LeftRightSuperType& lrs) const
-		{
-			return modelCommon_.addHamiltonianConnection(matrix,lrs);
-		}
-
-		virtual void hamiltonianConnectionProduct(VectorType& x,
-		                                          const VectorType& y,
-		                                          ModelHelperType const &modelHelper) const
-		{
-			return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
-		}
-
-		virtual void fullHamiltonian(SparseMatrixType& matrix,
-		                             const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.fullHamiltonian(matrix,modelHelper);
 		}
 
 		//! set creation matrices for sites in block
@@ -239,21 +212,6 @@ namespace Dmrg {
 					creationMatrix.push_back(myOp);
 				}
 			}
-		}
-
-		virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
-		                              const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.getLinkProductStruct(lps,modelHelper);
-		}
-
-		virtual LinkType getConnection(const SparseMatrixType** A,
-		                       const SparseMatrixType** B,
-		                       SizeType ix,
-		                       const LinkProductStructType& lps,
-		                       const ModelHelperType& modelHelper) const
-		{
-			return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
 		}
 
 		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
@@ -354,20 +312,6 @@ namespace Dmrg {
 				electrons[i] = nup + ndown;
 			}
 		}
-		
-		//! Full hamiltonian from creation matrices cm
-		void calcHamiltonian(SparseMatrixType &hmatrix,
-		                     const VectorOperatorType& cm,
-		                     const BlockType& block,
-		                     RealType time,
-		                     RealType factorForDiagonals=1.0)  const
-		{
-			hmatrix.makeDiagonal(cm[0].data.row());
-
-			modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block);
-
-			addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
-		}
 
 		void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 		                                const VectorOperatorType& cm,
@@ -389,7 +333,6 @@ namespace Dmrg {
 		HilbertState reinterpretX_,reinterpretY_;
 		ParametersModelFeAs<RealType>  modelParameters_;
 		GeometryType const &geometry_;
-		ModelCommonType modelCommon_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 		//typename PsimagLite::Vector<PsimagLite::Matrix<RealType>::Type > pauliMatrix_;

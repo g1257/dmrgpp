@@ -95,7 +95,7 @@ namespace Dmrg {
 
 
 template<typename ModelBaseType,typename LinkProductType>
-class ModelCommon  {
+class ModelCommon : public ModelBaseType::ModelCommonBaseType {
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;

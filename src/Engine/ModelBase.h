@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MODEL_BASE_H
 
 #include "ReflectionOperatorEmpty.h"
-#include "LinkProductStruct.h"
+#include "ModelCommonBase.h"
 
 namespace Dmrg {
 
@@ -109,19 +109,26 @@ public:
 	typedef typename MyBasis::BasisDataType BasisDataType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
-	typedef LinkProductStruct<ComplexOrRealType> LinkProductStructType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
+	typedef ModelCommonBase<ModelHelperType> ModelCommonBaseType;
+	typedef typename ModelCommonBaseType::LinkProductStructType LinkProductStructType;
+	typedef typename ModelCommonBaseType::VectorType VectorType;
 	typedef ParametersType SolverParamsType;
 	typedef typename ModelHelperType::LinkType LinkType;
 
+
 	ModelBase(const ParametersType& params,
 	          InputValidatorType& io,
-	          const GeometryType& geometry)
+	          const GeometryType& geometry,
+	          ModelCommonBaseType* modelCommon)
 	    : params_(params),
-	      geometry_(geometry)
+	      geometry_(geometry),
+	      modelCommon_(modelCommon)
 	{}
 
-	virtual ~ModelBase() {}
+	virtual ~ModelBase()
+	{
+		delete modelCommon_;
+	}
 
 	const GeometryType& geometry() const { return geometry_; }
 
@@ -144,20 +151,6 @@ public:
 
 	virtual void print(std::ostream& os) const = 0;
 
-	virtual void matrixVectorProduct(VectorType& x,
-	                                 const VectorType& y,
-	                                 ModelHelperType const &modelHelper) const = 0;
-
-	virtual void addHamiltonianConnection(SparseMatrixType &matrix,
-	                                      const LeftRightSuperType& lrs) const = 0;
-
-	virtual void hamiltonianConnectionProduct(VectorType& x,
-	                                          const VectorType& y,
-	                                          ModelHelperType const &modelHelper) const = 0;
-
-	virtual void fullHamiltonian(SparseMatrixType& matrix,
-	                             const ModelHelperType& modelHelper) const = 0;
-
 	virtual SizeType hilbertSize(SizeType site) const = 0;
 
 	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
@@ -167,20 +160,11 @@ public:
 	                             typename PsimagLite::Vector<SizeType>::Type& q,
 	                             const BlockType& block) const = 0;
 
-	virtual void calcHamiltonian(SparseMatrixType &hmatrix,
-	                             const VectorOperatorType& cm,
-	                             const BlockType& block,
-	                             RealType time,
-	                             RealType factorForDiagonals) const = 0;
-
-	virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
-	                                      const ModelHelperType& modelHelper) const = 0;
-
-	virtual LinkType getConnection(const SparseMatrixType** A,
-	                               const SparseMatrixType** B,
-			                       SizeType ix,
-			                       const LinkProductStructType& lps,
-			                       const ModelHelperType& modelHelper) const = 0;
+	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+	                     const VectorOperatorType& cm,
+	                     const BlockType& block,
+	                     RealType time,
+	                     RealType factorForDiagonals=1.0)  const = 0;
 
 	virtual void findElectronsOfOneSite(BlockType& electrons,SizeType site) const
 	{
@@ -203,10 +187,66 @@ public:
 		calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
 	}
 
+	virtual void matrixVectorProduct(VectorType& x,
+	                                 const VectorType& y,
+	                                 ModelHelperType const &modelHelper) const
+	{
+		return modelCommon_->matrixVectorProduct(x,y,modelHelper);
+	}
+
+	virtual void addHamiltonianConnection(SparseMatrixType &matrix,
+	                                      const LeftRightSuperType& lrs) const
+	{
+		return modelCommon_->addHamiltonianConnection(matrix,lrs);
+	}
+
+	virtual void hamiltonianConnectionProduct(VectorType& x,
+	                                          const VectorType& y,
+	                                          ModelHelperType const &modelHelper) const
+	{
+		return modelCommon_->hamiltonianConnectionProduct(x,y,modelHelper);
+	}
+
+	virtual void fullHamiltonian(SparseMatrixType& matrix,
+	                             const ModelHelperType& modelHelper) const
+	{
+		return modelCommon_->fullHamiltonian(matrix,modelHelper);
+	}
+
+	virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
+	                              const ModelHelperType& modelHelper) const
+	{
+		return modelCommon_->getLinkProductStruct(lps,modelHelper);
+	}
+
+	virtual LinkType getConnection(const SparseMatrixType** A,
+	                       const SparseMatrixType** B,
+	                       SizeType ix,
+	                       const LinkProductStructType& lps,
+	                       const ModelHelperType& modelHelper) const
+	{
+		return modelCommon_->getConnection(A,B,ix,lps,modelHelper);
+	}
+
+	//! Full hamiltonian from creation matrices cm
+	virtual void calcHamiltonian(SparseMatrixType &hmatrix,
+	                     const VectorOperatorType& cm,
+	                     const BlockType& block,
+	                     RealType time,
+	                     RealType factorForDiagonals=1.0)  const
+	{
+		hmatrix.makeDiagonal(cm[0].data.row());
+
+		modelCommon_->addConnectionsInNaturalBasis(hmatrix,cm,block);
+
+		addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
+	}
+
 private:
 
 	const ParametersType& params_;
 	const GeometryType& geometry_;
+	ModelCommonBaseType* modelCommon_;
 
 };     //class ModelBase
 

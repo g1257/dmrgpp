@@ -141,10 +141,9 @@ public:
 	             InputValidatorType& io,
 	             GeometryType const &geometry,
 	             SizeType offset = DEGREES_OF_FREEDOM)
-	    : ModelBaseType(solverParams,io,geometry),
+	    : ModelBaseType(solverParams,io,geometry,new ModelCommonType(geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      modelCommon_(geometry),
 	      offset_(offset),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 	      reinterpretX_(maxNumberOfSites),
@@ -180,33 +179,7 @@ public:
 		setSymmetryRelated(q,natBasis,block.size());
 
 		//! set hamiltonian
-		calcHamiltonian(hamiltonian,creationMatrix,block,time);
-	}
-
-	virtual void matrixVectorProduct(VectorType& x,
-	                                 const VectorType& y,
-	                                 ModelHelperType const &modelHelper) const
-	{
-		return modelCommon_.matrixVectorProduct(x,y,modelHelper);
-	}
-
-	virtual void addHamiltonianConnection(SparseMatrixType &matrix,
-	                                      const LeftRightSuperType& lrs) const
-	{
-		return modelCommon_.addHamiltonianConnection(matrix,lrs);
-	}
-
-	virtual void hamiltonianConnectionProduct(VectorType& x,
-	                                          const VectorType& y,
-	                                          ModelHelperType const &modelHelper) const
-	{
-		return modelCommon_.hamiltonianConnectionProduct(x,y,modelHelper);
-	}
-
-	virtual void fullHamiltonian(SparseMatrixType& matrix,
-	                             const ModelHelperType& modelHelper) const
-	{
-		return modelCommon_.fullHamiltonian(matrix,modelHelper);
+		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} sets local operators needed to
@@ -245,21 +218,6 @@ public:
 				creationMatrix.push_back(myOp);
 			}
 		}
-	}
-
-	virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
-	                              const ModelHelperType& modelHelper) const
-	{
-		return modelCommon_.getLinkProductStruct(lps,modelHelper);
-	}
-
-	virtual LinkType getConnection(const SparseMatrixType** A,
-	                       const SparseMatrixType** B,
-	                       SizeType ix,
-	                       const LinkProductStructType& lps,
-	                       const ModelHelperType& modelHelper) const
-	{
-		return modelCommon_.getConnection(A,B,ix,lps,modelHelper);
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
@@ -361,20 +319,6 @@ public:
 	void print(std::ostream& os) const
 	{
 		os<<modelParameters_;
-	}
-
-	//! Full hamiltonian from creation matrices cm
-	void calcHamiltonian(SparseMatrixType &hmatrix,
-	                     const VectorOperatorType& cm,
-	                     const BlockType& block,
-	                     RealType time,
-	                     RealType factorForDiagonals=1.0)  const
-	{
-		hmatrix.makeDiagonal(cm[0].data.row());
-
-		modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block);
-
-		addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
@@ -564,7 +508,6 @@ private:
 
 	ParametersModelHubbard<RealType>  modelParameters_;
 	const GeometryType &geometry_;
-	ModelCommonType modelCommon_;
 	SizeType offset_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
