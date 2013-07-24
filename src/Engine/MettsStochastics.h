@@ -99,6 +99,7 @@ public:
 	typedef typename ModelType::HilbertBasisType HilbertBasisType;
 	typedef RngType_ RngType;
 	typedef typename RngType::LongType LongType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	MettsStochastics(const ModelType& model,int long long seed)
 	    : model_(model),
@@ -115,8 +116,12 @@ public:
 		return tmp;
 	}
 
-	SizeType chooseRandomState(const typename PsimagLite::Vector<RealType>::Type& probs,
-	                           SizeType site) const
+	SizeType hilbertSizeBlock() const
+	{
+		return pow(model_.hilbertSize(0),model_.params().sitesPerBlock);
+	}
+
+	SizeType chooseRandomState(const VectorRealType& probs) const
 	{
 		RealType r = rng_();
 		std::cout<<"RANDOM="<<r<<"\n";

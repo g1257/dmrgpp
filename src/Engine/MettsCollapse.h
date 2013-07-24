@@ -119,7 +119,8 @@ namespace Dmrg {
 		  targetParams_(targetParams),
 		  progress_("MettsCollapse"),
 		  prevDirection_(ProgramGlobals::INFINITE),
-		  collapseBasis_(mettsStochastics_.hilbertSize(0),mettsStochastics_.hilbertSize(0))
+		  collapseBasis_(mettsStochastics_.hilbertSizeBlock(),
+		                 mettsStochastics_.hilbertSizeBlock())
 		{
 			setCollapseBasis();
 		}
@@ -202,20 +203,16 @@ namespace Dmrg {
 				sum += p[i];
 			assert(fabs(sum-1.0)<1e-6);
 
-			VectorWithOffsetType dest;
-			typename PsimagLite::Vector<SizeType>::Type indexFixed(block.size());
-			for (SizeType i=0;i<block.size();i++)
-				indexFixed[i] = mettsStochastics_.chooseRandomState(p,block[i]);
-
-			SizeType volumeOfIndexFixed = volumeOf(indexFixed,nk);
+			SizeType volumeOfIndexFixed = mettsStochastics_.chooseRandomState(p);
 
 			for (SizeType i=0;i<block.size();i++)
 				std::cerr<<"SITES="<<block[i]<<" ";
 			std::cerr<<" PROBS=";
 			for (SizeType i=0;i<p.size();i++) std::cerr<<p[i]<<" ";
-			std::cerr<<" CHOSEN="<<indexFixed<<" BORDER="<<border<<"\n";
+			std::cerr<<" CHOSEN="<<volumeOfIndexFixed<<" BORDER="<<border<<"\n";
 			 // m1 == indexFixed in FIXME write paper reference here
 
+			VectorWithOffsetType dest;
 			collapseVector(dest,dest2,direction,volumeOfIndexFixed,volumeOfNk,border);
 			RealType x = std::norm(dest);
 
@@ -425,7 +422,10 @@ namespace Dmrg {
 			if (fabs(sum-1.0)>1e-3)
 				std::cerr<<"probability sum="<<sum<<"\n";
 			assert(fabs(sum)>1e-6);
-			for(SizeType alpha=0;alpha<p.size();alpha++) p[alpha] /= sum;
+			for(SizeType alpha=0;alpha<p.size();alpha++) {
+				p[alpha] /= sum;
+				assert(p[alpha]>=0 && p[alpha]<=1);
+			}
 		}
 
 		bool checkSites(SizeType site) const
