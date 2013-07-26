@@ -247,6 +247,8 @@ namespace Dmrg {
 			return data_[j];
 		}
 
+		int index2Sector(SizeType i) const { return 0; }
+
 		template<typename FieldType2>
 		friend FieldType2 std::norm(const Dmrg::VectorWithOffset<FieldType2>& v);
 

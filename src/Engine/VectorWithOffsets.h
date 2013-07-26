@@ -274,6 +274,8 @@ namespace Dmrg {
 		
 		const FieldType& fastAccess(SizeType i,SizeType j) const 
 		{
+			assert(i < data_.size());
+			assert(j < data_[i].size());
 			return data_[i][j];
 		}
 				
@@ -447,6 +449,12 @@ namespace Dmrg {
 			}
 			setIndex2Sector();
 			return *this;
+		}
+
+		int index2Sector(SizeType i) const
+		{
+			assert(i < index2Sector_.size());
+			return index2Sector_[i];
 		}
 		
 		template<typename FieldType2>

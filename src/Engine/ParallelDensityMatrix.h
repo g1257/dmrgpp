@@ -204,9 +204,18 @@ namespace Dmrg {
 			SizeType x2 = alpha2*ns;
 			SizeType x1 = alpha1*ns;
 			for (SizeType beta=0;beta<total;beta++) {
-				SizeType jj = pSE.permutationInverse(beta + x2);
 				SizeType ii = pSE.permutationInverse(beta + x1);
-				sum += v[ii] * std::conj(v[jj]);
+				int sector1 = v.index2Sector(ii);
+				if (sector1 < 0) continue;
+				SizeType start1 = v.offset(sector1);
+
+				SizeType jj = pSE.permutationInverse(beta + x2);
+				int sector2 = v.index2Sector(jj);
+				if (sector2 < 0) continue;
+				SizeType start2 = v.offset(sector2);
+
+				sum += v.fastAccess(sector1,ii-start1)*
+				        std::conj(v.fastAccess(sector2,jj-start2));
 			}
 			return sum;
 		}
@@ -225,10 +234,20 @@ namespace Dmrg {
 			SizeType totalNs = total * ns;
 
 			for (SizeType betaNs=0;betaNs<totalNs;betaNs+=ns) {
-				SizeType jj = pSE.permutationInverse(alpha2+betaNs);
 				SizeType ii = pSE.permutationInverse(alpha1+betaNs);
-				sum += v[ii] * std::conj(v[jj]);
+				int sector1 = v.index2Sector(ii);
+				if (sector1 < 0) continue;
+				SizeType start1 = v.offset(sector1);
+
+				SizeType jj = pSE.permutationInverse(alpha2+betaNs);
+				int sector2 = v.index2Sector(jj);
+				if (sector2 < 0) continue;
+				SizeType start2 = v.offset(sector2);
+
+				sum += v.fastAccess(sector1,ii-start1)*
+				        std::conj(v.fastAccess(sector2,jj-start2));
 			}
+
 			return sum;
 		}
 
