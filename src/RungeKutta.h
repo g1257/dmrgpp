@@ -90,9 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename RealType,
-         typename FunctionType,
-	 typename ArrayType = Vector<RealType> >
+template<typename RealType, typename FunctionType, typename ArrayType = Vector<RealType> >
 class RungeKutta {
 
 	typedef typename ArrayType::value_type ComplexOrRealType;
@@ -101,16 +99,22 @@ class RungeKutta {
 public:
 
 	RungeKutta(const FunctionType& f, const RealType& h)
-	: f_(f),h_(h),verbose_(false)
+	    : f_(f),h_(h),verbose_(false)
 	{ }
 
-	void solve(typename Vector<VectorType>::Type& result, RealType t0, RealType t, const ArrayType& y0) const
+	void solve(typename Vector<VectorType>::Type& result,
+	           RealType t0,
+	           RealType t,
+	           const ArrayType& y0) const
 	{
 		SizeType N = static_cast<SizeType> (std::real((t - t0)/h_));
 		solve(result,t0,N,y0);
 	}
 
-	void solve(typename Vector<VectorType>::Type& result,RealType t0, size_t N, const ArrayType& y0) const
+	void solve(typename Vector<VectorType>::Type& result,
+	           RealType t0,
+	           size_t N,
+	           const ArrayType& y0) const
 	{
 		ArrayType k1(y0), k2(y0), k3(y0), k4(y0);
 		RealType w1 = 1, w2 = 2, w3 = 2, w4 = 1, wtotInverse = 1.0/6.0;
@@ -118,7 +122,7 @@ public:
 		RealType ti = t0;
 		ArrayType yi = y0;
 
-		for(SizeType i = 0; i < N; i++) {
+		for (SizeType i = 0; i < N; i++) {
 			k1 = h_ * f_(ti, yi);
 			k2 = h_ * f_(ti + h_*0.5, yi + k1*0.5);
 			k3 = h_ * f_(ti + h_*0.5, yi + k2*0.5);
@@ -140,17 +144,21 @@ private:
 		return yi[j];
 	}
 
-	ComplexOrRealType findValueOf(const PsimagLite::Matrix<ComplexOrRealType>& yi,SizeType j) const
+	ComplexOrRealType findValueOf(const PsimagLite::Matrix<ComplexOrRealType>& yi,
+	                              SizeType j) const
 	{
 		return yi(j,j);
 	}
 
 	SizeType findSizeOf(const VectorType& yi) const { return yi.size(); }
 
-	SizeType findSizeOf(const PsimagLite::Matrix<ComplexOrRealType>& yi) const { return yi.n_row(); }
+	SizeType findSizeOf(const PsimagLite::Matrix<ComplexOrRealType>& yi) const
+	{
+		return yi.n_row();
+	}
 
 	void checkNorm(const PsimagLite::Matrix<ComplexOrRealType>& yi,
-		       const PsimagLite::Matrix<ComplexOrRealType>& y0)const
+	               const PsimagLite::Matrix<ComplexOrRealType>& y0)const
 	{}
 
 	void checkNorm(const VectorType& yi,const VectorType& y0) const
@@ -161,7 +169,6 @@ private:
 		RealType originalNorm = PsimagLite::norm(y0);
 		if (fabs(norma-originalNorm)>1e-4)
 			std::cerr<<s;
-		//	throw RuntimeError(s.c_str());
 	}
 
 	const FunctionType& f_;
@@ -173,5 +180,4 @@ private:
 
 /*@}*/
 #endif // RUNGE_KUTTA
-
 

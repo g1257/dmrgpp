@@ -8,27 +8,32 @@
 namespace PsimagLite {
 template<typename ContainerType>
 class Sort {
-	public:
+public:
 
 	typedef typename ContainerType::value_type FieldType;
 	typedef std::pair<FieldType,SizeType> PairType;
 	class Compare {
 
-		public:
-			Compare(const typename Vector<PairType>::Type& x) : x_(x)
-			{}
+	public:
 
-			bool operator()(const PairType& x1,const PairType& x2)
-			{
-				if (x1.first<x2.first) return true;
-				return false;
-			}
-		private:
-			const typename Vector<PairType>::Type& x_;
+		Compare(const typename Vector<PairType>::Type& x) : x_(x)
+		{}
+
+		bool operator()(const PairType& x1,const PairType& x2)
+		{
+			if (x1.first<x2.first) return true;
+			return false;
+		}
+
+	private:
+
+		const typename Vector<PairType>::Type& x_;
 	};
 
 	template<typename A>
-	void sort(ContainerType& x,typename std::vector<SizeType,A>& iperm,SizeType smallSize=0)
+	void sort(ContainerType& x,
+	          typename std::vector<SizeType,A>& iperm,
+	          SizeType smallSize=0)
 	{
 		SizeType n = x.size();
 		if (n==0) return;
@@ -51,3 +56,4 @@ class Sort {
 } // namespace PsimagLite
 
 #endif // SORT_H_H
+
