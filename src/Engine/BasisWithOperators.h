@@ -177,9 +177,9 @@ public:
 				if (!this->useSu2Symmetry()) {
 					const OperatorType& myOp =  basis2.getOperatorByIndex(i);
 					if (savedSign != myOp.fermionSign) {
-						fillFermionicSigns(fermionicSigns,
-						                   basis2.electronsVector(),
-						                   myOp.fermionSign);
+						utils::fillFermionicSigns(fermionicSigns,
+						                          basis2.electronsVector(),
+						                          myOp.fermionSign);
 						savedSign = myOp.fermionSign;
 					}
 					operators_.externalProduct(i,
@@ -200,9 +200,9 @@ public:
 					const OperatorType& myOp = basis3.getOperatorByIndex(i-basis2.numberOfOperators());
 
 					if (savedSign != myOp.fermionSign) {
-						fillFermionicSigns(fermionicSigns,
-						                   basis2.electronsVector(),
-						                   myOp.fermionSign);
+						utils::fillFermionicSigns(fermionicSigns,
+						                          basis2.electronsVector(),
+						                          myOp.fermionSign);
 						savedSign = myOp.fermionSign;
 					}
 					operators_.externalProduct(i,
@@ -354,17 +354,6 @@ private:
 
 	OperatorsType operators_;
 	PsimagLite::Vector<SizeType>::Type operatorsPerSite_;
-
-	template<typename SomeVectorType>
-	typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,void>::Type
-	fillFermionicSigns(SomeVectorType& fermionicSigns,
-	                   const VectorIntegerType& electrons,
-	                   int f)
-	{
-		fermionicSigns.resize(electrons.size());
-		for (SizeType i=0;i<fermionicSigns.size();i++)
-			fermionicSigns[i]= (electrons[i]%2==0) ? 1.0 : static_cast<RealType>(f);
-	}
 
 	void setMomentumOfOperators(const ThisType& basis)
 	{

@@ -234,6 +234,19 @@ void truncate(PsimagLite::CrsMatrix<T> &A,const PsimagLite::Vector<SizeType>::Ty
 
 }
 
+template<typename SomeVectorType>
+static
+typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,void>::Type
+fillFermionicSigns(SomeVectorType& fermionicSigns,
+                          const typename PsimagLite::Vector<SizeType>::Type& electrons,
+                          int f)
+{
+	typedef typename SomeVectorType::value_type ValueType;
+	fermionicSigns.resize(electrons.size());
+	for (SizeType i=0;i<fermionicSigns.size();i++)
+		fermionicSigns[i]= (electrons[i]%2==0) ? 1.0 : static_cast<ValueType>(f);
+}
+
 
 } //namespace utils
 /*@}*/
