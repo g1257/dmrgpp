@@ -171,7 +171,7 @@ namespace Dmrg {
 				// target all other states if any:
 				if (target.size()>0) {
 					typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
-					ParallelizerType threadedDm(PsimagLite::Concurrency::npthreads,
+					ParallelizerType threadedDm(1,
 					                            PsimagLite::MPI::COMM_WORLD);
 
 					threadedDm.loopCreate(target.size(),helperDm);
