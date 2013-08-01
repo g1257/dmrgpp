@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Matrix.h"
 #include "Vector.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 
@@ -93,7 +94,7 @@ namespace Dmrg {
 
 	public:
 		ConjugateGradient(SizeType max=1000,const RealType& eps = 1e-6)
-		: max_(max), eps_(eps) {}
+		: progress_("ConjugateGradient"), max_(max), eps_(eps) {}
 
 		//! A and b, the result x, and also the initial solution x0
 		void operator()(typename PsimagLite::Vector<VectorType>::Type& x,
@@ -111,12 +112,13 @@ namespace Dmrg {
 			SizeType k = 0;
 			typename PsimagLite::Vector<FieldType>::Type alpha,beta;
 			while(k<max_) {
+				VectorType tmp = multiply(A,p[k]);
 				FieldType val = scalarProduct(r[k],r[k])/
-				           scalarProduct(p[k],multiply(A,p[k]));
+				           scalarProduct(p[k],tmp);
 				alpha.push_back(val);
 				v = x[k] + alpha[k] * p[k];
 				x.push_back(v);
-				v = r[k] - alpha[k] *multiply(A,p[k]);
+				v = r[k] - alpha[k] * tmp;
 				r.push_back(v);
 				if (PsimagLite::norm(r[k+1])<eps_) break;
 				val = scalarProduct(r[k+1],r[k+1])/scalarProduct(r[k],r[k]);
@@ -125,6 +127,10 @@ namespace Dmrg {
 				p.push_back(v);
 				k++;
 			}
+
+			PsimagLite::OstringStream msg;
+			msg<<"Finished after "<<k<<" steps out of "<<max_;
+			progress_.printline(msg,std::cout);
 		}
 
 	private:
@@ -143,6 +149,7 @@ namespace Dmrg {
 			return y;
 		}
 
+		PsimagLite::ProgressIndicator progress_;
 		SizeType max_;
 		RealType eps_;
 	}; // class ConjugateGradient
