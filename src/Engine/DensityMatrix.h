@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -72,7 +72,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DENSITY_MATRIX_H
 #define DENSITY_MATRIX_H
 
-
 #include "BlockMatrix.h"
 
 #include "DensityMatrixLocal.h"
@@ -80,112 +79,108 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename DmrgBasisType,
-		typename DmrgBasisWithOperatorsType,
-		typename TargettingType
-		>
-	class DensityMatrix {
+template<typename DmrgBasisType,
+         typename DmrgBasisWithOperatorsType,
+         typename TargettingType
+         >
+class DensityMatrix {
 
-		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
+	enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
 
-		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType
-			SparseMatrixType;
-		typedef typename TargettingType::TargetVectorType::value_type
-			DensityMatrixElementType;
-		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
-		typedef typename DmrgBasisType::FactorsType FactorsType;
-		typedef DensityMatrixLocal<DmrgBasisType,
-			DmrgBasisWithOperatorsType, TargettingType>
-			DensityMatrixLocalType;
-		typedef DensityMatrixSu2<DmrgBasisType,
-			DmrgBasisWithOperatorsType,TargettingType>
-			DensityMatrixSu2Type;
-		typedef DensityMatrixBase<DmrgBasisType,
-			DmrgBasisWithOperatorsType,TargettingType>
-			DensityMatrixBaseType;
+	typedef typename DmrgBasisWithOperatorsType::SparseMatrixType
+	SparseMatrixType;
+	typedef typename TargettingType::TargetVectorType::value_type
+	DensityMatrixElementType;
+	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
+	typedef typename DmrgBasisType::FactorsType FactorsType;
+	typedef DensityMatrixLocal<DmrgBasisType,
+	DmrgBasisWithOperatorsType, TargettingType>
+	DensityMatrixLocalType;
+	typedef DensityMatrixSu2<DmrgBasisType,
+	DmrgBasisWithOperatorsType,TargettingType>
+	DensityMatrixSu2Type;
+	typedef DensityMatrixBase<DmrgBasisType,
+	DmrgBasisWithOperatorsType,TargettingType>
+	DensityMatrixBaseType;
 
-	public:
+public:
 
-		typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
-		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
+	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
+	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 
-		DensityMatrix(
-			const TargettingType& target,
-			const DmrgBasisWithOperatorsType& pBasis,
-			const DmrgBasisWithOperatorsType& pBasisSummed,
-			const DmrgBasisType& pSE,
-			SizeType direction,
-			bool debug=false,
-			bool verbose=false)
-			
-
-			: densityMatrixLocal_(target,pBasis,pBasisSummed,pSE,
-					direction,debug,verbose),
-				densityMatrixSu2_(target,pBasis,pBasisSummed,pSE,
-					direction,debug,verbose)
-		{
-
-			if (DmrgBasisType::useSu2Symmetry()) {
-				densityMatrixImpl_ = &densityMatrixSu2_;
-			} else {
-				densityMatrixImpl_ = &densityMatrixLocal_;
-			}
-
-			densityMatrixImpl_->init(target,pBasis,pBasisSummed,pSE,direction);
-		}
-
-		BlockMatrixType& operator()()
-		{
-			return densityMatrixImpl_->operator()();
-		}
-
-		SizeType rank() { return densityMatrixImpl_->rank(); }
-
-		void check(int direction)
-		{
-			return densityMatrixImpl_->check(direction);
-		}
-
-		void check2(int direction)
-		{
-			densityMatrixImpl_->check2(direction);
-		}
-
-		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
-		{
-			if (!DmrgBasisType::useSu2Symmetry()) {
-				densityMatrixLocal_.diag(eigs,jobz);
-			} else {
-				densityMatrixSu2_.diag(eigs,jobz);
-			}
-		}
-
-		template<typename DmrgBasisType_,
-			typename DmrgBasisWithOperatorsType_,
-   			typename TargettingType_
-			> 
-		friend std::ostream& operator<<(std::ostream& os,
-			const DensityMatrix<DmrgBasisType_,
-				DmrgBasisWithOperatorsType_,TargettingType_>&
-						dm);
-
-	private:
-		DensityMatrixLocalType densityMatrixLocal_;
-		DensityMatrixSu2Type densityMatrixSu2_;
-		DensityMatrixBaseType* densityMatrixImpl_;
-	}; // class DensityMatrix
-
-	template<typename DmrgBasisType,
-		typename DmrgBasisWithOperatorsType,
-  		typename TargettingType
-		> 
-	std::ostream& operator<<(std::ostream& os,
-				const DensityMatrix<DmrgBasisType,
-				DmrgBasisWithOperatorsType,TargettingType>& dm)
+	DensityMatrix(const TargettingType& target,
+	              const DmrgBasisWithOperatorsType& pBasis,
+	              const DmrgBasisWithOperatorsType& pBasisSummed,
+	              const DmrgBasisType& pSE,
+	              SizeType direction,
+	              bool debug=false,
+	              bool verbose=false)
+	    : densityMatrixLocal_(target,pBasis,pBasisSummed,pSE,
+	                          direction,debug,verbose),
+	      densityMatrixSu2_(target,pBasis,pBasisSummed,pSE,
+	                        direction,debug,verbose)
 	{
-		os<<(*dm.densityMatrixImpl_);
-		return os;
+
+		if (DmrgBasisType::useSu2Symmetry()) {
+			densityMatrixImpl_ = &densityMatrixSu2_;
+		} else {
+			densityMatrixImpl_ = &densityMatrixLocal_;
+		}
+
+		densityMatrixImpl_->init(target,pBasis,pBasisSummed,pSE,direction);
 	}
+
+	BlockMatrixType& operator()()
+	{
+		return densityMatrixImpl_->operator()();
+	}
+
+	SizeType rank() { return densityMatrixImpl_->rank(); }
+
+	void check(int direction)
+	{
+		return densityMatrixImpl_->check(direction);
+	}
+
+	void check2(int direction)
+	{
+		densityMatrixImpl_->check2(direction);
+	}
+
+	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
+	{
+		if (!DmrgBasisType::useSu2Symmetry()) {
+			densityMatrixLocal_.diag(eigs,jobz);
+		} else {
+			densityMatrixSu2_.diag(eigs,jobz);
+		}
+	}
+
+	template<typename DmrgBasisType_,
+	         typename DmrgBasisWithOperatorsType_,
+	         typename TargettingType_
+	         >
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const DensityMatrix<DmrgBasisType_,
+	                                DmrgBasisWithOperatorsType_,TargettingType_>& dm);
+
+private:
+	DensityMatrixLocalType densityMatrixLocal_;
+	DensityMatrixSu2Type densityMatrixSu2_;
+	DensityMatrixBaseType* densityMatrixImpl_;
+}; // class DensityMatrix
+
+template<typename DmrgBasisType,
+         typename DmrgBasisWithOperatorsType,
+         typename TargettingType
+         >
+std::ostream& operator<<(std::ostream& os,
+                         const DensityMatrix<DmrgBasisType,
+                         DmrgBasisWithOperatorsType,TargettingType>& dm)
+{
+	os<<(*dm.densityMatrixImpl_);
+	return os;
+}
 } // namespace Dmrg
 
 #endif
