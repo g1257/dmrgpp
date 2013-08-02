@@ -116,11 +116,6 @@ public:
 		return tmp;
 	}
 
-	SizeType hilbertSizeBlock() const
-	{
-		return pow(model_.hilbertSize(0),model_.params().sitesPerBlock);
-	}
-
 	SizeType chooseRandomState(const VectorRealType& probs) const
 	{
 		RealType r = rng_();

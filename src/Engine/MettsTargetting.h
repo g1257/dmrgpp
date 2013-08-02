@@ -993,7 +993,7 @@ namespace Dmrg {
 					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("nup",site,0));
 					A.data = tmpC;
 					A.fermionSign = 1;
-					return processSitesPerBlock(A,blockIndex);
+					return processSitesPerBlock(A,blockIndex,site);
 				}
 				if (modelName=="FeAsBasedSc" || modelName=="FeAsBasedScExtended") {
 					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("c",site,ind));
@@ -1001,7 +1001,7 @@ namespace Dmrg {
 					transposeConjugate(tmpCdagger,tmpC);
 					multiply(A.data,tmpCdagger,tmpC);
 					A.fermionSign = 1;
-					return processSitesPerBlock(A,blockIndex);
+					return processSitesPerBlock(A,blockIndex,site);
 				}
 				PsimagLite::String s(__FILE__);
 				s += " " + ttos(__LINE__) + "\n";
@@ -1081,7 +1081,9 @@ namespace Dmrg {
 				return true;
 			}
 
-			OperatorType processSitesPerBlock(const OperatorType& A, SizeType blockIndex) const
+			OperatorType processSitesPerBlock(const OperatorType& A,
+			                                  SizeType blockIndex,
+			                                  SizeType site) const
 			{
 				SizeType sitesPerBlock = model_.params().sitesPerBlock;
 				assert(sitesPerBlock > 0);
@@ -1089,14 +1091,12 @@ namespace Dmrg {
 
 				assert(sitesPerBlock == 2);
 				VectorSizeType electrons;
-				SizeType site = lrs_.right().block()[0];
 				model_.findElectronsOfOneSite(electrons,site);
 
 				typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 				utils::fillFermionicSigns(fermionicSigns,electrons,A.fermionSign);
 
-				SizeType nk = model_.hilbertSize(site);
-				SizeType rightSize = mettsStochastics_.hilbertSizeBlock()/nk;
+				SizeType rightSize = mettsStochastics_.hilbertSize(site);
 				OperatorType B = A;
 				bool option = (blockIndex == 0) ? true : false;
 				externalProduct(B.data,A.data,rightSize,fermionicSigns,option);

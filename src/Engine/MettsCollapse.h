@@ -119,11 +119,8 @@ namespace Dmrg {
 		  targetParams_(targetParams),
 		  progress_("MettsCollapse"),
 		  prevDirection_(ProgramGlobals::INFINITE),
-		  collapseBasis_(mettsStochastics_.hilbertSizeBlock(),
-		                 mettsStochastics_.hilbertSizeBlock())
-		{
-			setCollapseBasis();
-		}
+		  collapseBasis_(0,0)
+		{}
 
 		bool operator()(VectorWithOffsetType& c,
 		                const VectorWithOffsetType& eToTheBetaH,
@@ -132,8 +129,9 @@ namespace Dmrg {
 		{
 			assert(direction!=ProgramGlobals::INFINITE);
 
-			if (targetParams_.collapse.find("every")!=PsimagLite::String::npos)
-				setCollapseBasis();
+			if (targetParams_.collapse.find("every")!=PsimagLite::String::npos ||
+			    collapseBasis_.n_row() == 0)
+					setCollapseBasis(block);
 			internalAction(c,eToTheBetaH,block,direction,false);
 			if (atBorder(direction,block)) {
 				typename PsimagLite::Vector<SizeType>::Type block2;
@@ -437,16 +435,21 @@ namespace Dmrg {
 			return true;
 		}
 
-		void setCollapseBasis()
+		void setCollapseBasis(const typename PsimagLite::Vector<SizeType>::Type& block)
 		{
-			SizeType nk = collapseBasis_.n_row();
+			SizeType nk = 1;
+			for (SizeType i=0;i<block.size();i++)
+				nk *= mettsStochastics_.hilbertSize(block[i]);
 
+			collapseBasis_.resize(nk,nk);
 			for (SizeType i=0;i<nk;i++)
 				for (SizeType j=0;j<nk;j++)
 					collapseBasis_(i,j) = (i==j) ? 1.0 : 0.0;
 
+			assert(block.size()>0);
+			SizeType site = block[0];
 			if (targetParams_.collapse.find("random")!=PsimagLite::String::npos)
-				rotationNd(collapseBasis_,nk);
+				rotationNd(collapseBasis_,mettsStochastics_.hilbertSize(site),block.size());
 			if (targetParams_.collapse.find("particle")!=PsimagLite::String::npos)
 				particleCollapse(collapseBasis_);
 			std::cout<<"Collapse basis:\n";
@@ -463,6 +466,27 @@ namespace Dmrg {
 			RealType theta = M_PI*rng_();
 			rotation2d(m2,1,2,theta);
 			m=m2;
+		}
+
+		void rotationNd(MatrixType& m,
+		                SizeType oneSiteHilbertSize,
+		                SizeType blockSize) const
+		{
+			if (blockSize == 1)
+				return rotationNd(m,oneSiteHilbertSize);
+
+			MatrixType mold;
+			for (SizeType i=0;i<blockSize;i++) {
+				MatrixType aux1(oneSiteHilbertSize,oneSiteHilbertSize);
+				rotationNd(aux1,oneSiteHilbertSize);
+				if (i == 0) {
+					m = aux1;
+				} else {
+					m.reset(0,0);
+					outerProduct(m,mold,aux1);
+				}
+				mold = m;
+			}
 		}
 
 		void rotationNd(MatrixType& m,SizeType hilbertSize) const
@@ -515,7 +539,8 @@ namespace Dmrg {
 			MatrixType transpose;
 			transposeConjugate(transpose,collapseBasis_);
 			MatrixType shouldBeI = collapseBasis_ * transpose;
-			assert(isTheIdentity(shouldBeI));
+			if (isTheIdentity(shouldBeI)) return;
+			throw PsimagLite::RuntimeError("checkBasis\n");
 		}
 
 		const MettsStochasticsType& mettsStochastics_;
