@@ -98,6 +98,8 @@ public:
 
 	void resize(SizeType nrow,SizeType ncol)
 	{
+		if (nrow == nrow_ && ncol == ncol_) return;
+
 		if (nrow_!=0 || ncol_!=0) throw
 			RuntimeError("Matrix::resize(...): only applies when Matrix is empty\n");
 		reset(nrow,ncol);
@@ -749,6 +751,21 @@ PsimagLite::Matrix<T> transposeConjugate(const Matrix<T>& A)
 		for (SizeType j=0;j<A.n_row();j++)
 			ret(i,j)=std::conj(A(j,i));
 	return ret;
+}
+
+template<typename T>
+void outerProduct(Matrix<T>& A,const Matrix<T>& B,const Matrix<T>& C)
+{
+	SizeType ni = B.n_row();
+	SizeType nj = B.n_col();
+
+	A.resize(B.n_row()*C.n_row(),B.n_col()*C.n_col());
+
+	for (SizeType i1 = 0; i1 < B.n_row(); ++i1)
+		for (SizeType j1 = 0; j1 < B.n_col(); ++j1)
+			for (SizeType i2 = 0; i2 < C.n_row(); ++i2)
+				for (SizeType j2 = 0; j2 < C.n_col(); ++j2)
+					A(i1+i2*ni,j1+j2*nj) = B(i1,j1) * C(i2,j2);
 }
 
 #ifdef USE_MPI
