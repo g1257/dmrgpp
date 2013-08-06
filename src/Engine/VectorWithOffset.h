@@ -244,10 +244,17 @@ namespace Dmrg {
 		
 		const FieldType& fastAccess(SizeType i,SizeType j) const 
 		{
+			assert(j<data_.size());
 			return data_[j];
 		}
 
-		int index2Sector(SizeType i) const { return 0; }
+		int index2Sector(SizeType i) const
+		{
+			if (i < offset_ || i >= (offset_+data_.size()))
+				return -1;
+
+			return 0;
+		}
 
 		template<typename FieldType2>
 		friend FieldType2 std::norm(const Dmrg::VectorWithOffset<FieldType2>& v);
