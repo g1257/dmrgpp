@@ -39,10 +39,11 @@ public:
 		if (n==0) return;
 		// FIXME: DON'T USE smallSize, just say n=iperm.size()
 		if (smallSize!=0) n = smallSize;
-		PairType onep(x[0],0);
+		const ContainerType& xread = x;
+		PairType onep(xread[0],0);
 		typename Vector<PairType>::Type p(n,onep);
 		for (SizeType i=0;i<n;i++) {
-			p[i].first = x[i];
+			p[i].first = xread[i];
 			p[i].second = i;
 		}
 		std::sort(p.begin(),p.end(),Compare(p));
