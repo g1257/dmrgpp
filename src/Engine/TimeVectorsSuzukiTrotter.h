@@ -174,14 +174,16 @@ public:
 
 		// skip odd links if expanding system and
 		// skip even links if expanding environ
+		SizeType sitesPerBlock = model_.params().sitesPerBlock;
 		SizeType lastIndexLeft = lrs_.left().block().size();
 		assert(lastIndexLeft>0);
 		lastIndexLeft--;
-		bool oddLink = (lrs_.left().block()[lastIndexLeft] & 1);
+		SizeType site = static_cast<SizeType>(lrs_.left().block()[lastIndexLeft]/
+		                                      sitesPerBlock);
+		bool oddLink = (site & 1);
 		bool b1 = (oddLink && systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM);
 		bool b2 = (!oddLink && systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON);
-		if (b2 && lrs_.left().block().size()==1)
-			b2=false;
+		if (b2 && lrs_.left().block().size() == sitesPerBlock) b2=false;
 
 		wftAll(block);
 
@@ -214,11 +216,6 @@ public:
 
 	virtual void timeHasAdvanced()
 	{
-		if (!allLinksSeen()) {
-			PsimagLite::String str("SuzukiTrotter: Tried to advance when !allLinksSeen\n");
-			throw PsimagLite::RuntimeError(str);
-		}
-
 		linksSeen_.clear();
 		PsimagLite::OstringStream msg;
 		msg<<"ALL LINKS CLEARED";
@@ -231,7 +228,8 @@ private:
 	{
 		SizeType nsites = model_.geometry().numberOfSites();
 		assert(nsites>0);
-		for (SizeType i=0;i<nsites-1;i++) {
+		SizeType start = model_.params().sitesPerBlock - 1;
+		for (SizeType i=start;i<nsites-1;i++) {
 			PsimagLite::Vector<SizeType>::Type::const_iterator it =
 			        find(linksSeen_.begin(),linksSeen_.end(),i);
 			if (it == linksSeen_.end()) return false;
@@ -297,13 +295,9 @@ private:
 		// NOTE: result =  exp(iHt) |phi0>
 		SizeType ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
-		PsimagLite::Vector<SizeType>::Type block(2);
 
-		SizeType lastIndexLeft = lrs_.left().block().size();
-		assert(lastIndexLeft>0);
-		lastIndexLeft--;
-		block[0]=lrs_.left().block()[lastIndexLeft];
-		block[1]=lrs_.right().block()[0];
+		PsimagLite::Vector<SizeType>::Type block;
+		calcBlock(block);
 
 		MatrixComplexOrRealType m;
 		getMatrix(m,systemOrEnviron,block,time);
@@ -385,7 +379,7 @@ private:
 						SizeType j = packSuper.pack(x,y,lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
 						                          iperm[x2p+y1p*hilbertSize]);
-						if (std::norm(tmp)==0) continue;
+						if (std::norm(tmp)<1e-12) continue;
 						assert(j>=offset && j<offset+phi0.size());
 						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*
 						        transform1.getValue(k2);
@@ -445,7 +439,7 @@ private:
 						SizeType j = packSuper.pack(x,y,lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
 						                          iperm[x2p+y1p*hilbertSize]);
-						if (std::norm(tmp)==0) continue;
+						if (std::norm(tmp)<1e-12) continue;
 						assert(j>=offset && j<offset+phi0.size());
 						result[j-offset] += tmp*phi0[i]*transformT1.getValue(k)*
 						        transform1.getValue(k2);
@@ -475,7 +469,6 @@ private:
 	               const BlockType& block,
 	               const RealType& time) const
 	{
-		assert(block.size()==2);
 		SparseMatrixType hmatrix;
 		RealType factorForDiagonals = (systemOrEnviron==ProgramGlobals::EXPAND_SYSTEM) ? 1.0 : 0.0;
 		if (systemOrEnviron==ProgramGlobals::EXPAND_ENVIRON && block[0]==0)
@@ -484,7 +477,9 @@ private:
 		if (fabs(factorForDiagonals)>1e-6) {
 			PsimagLite::OstringStream msg;
 			msg<<"LINKS factors="<<factorForDiagonals;
-			msg<<" added for diagonals on sites "<<block[0]<<" and "<<block[1];
+			msg<<" added for diagonals on sites ";
+			for (SizeType i = 0; i < block.size(); ++i)
+				msg<<block[i]<<" ";
 			progress_.printline(msg,std::cout);
 		}
 		model_.hamiltonianOnLink(hmatrix,block,currentTime_,factorForDiagonals);
@@ -499,6 +494,28 @@ private:
 	{
 		for (SizeType i=0;i<block.size();i++)
 			nk.push_back(model_.hilbertSize(block[i]));
+	}
+
+	void calcBlock(VectorSizeType& block) const
+	{
+		const VectorSizeType& blockLeft = lrs_.left().block();
+		const VectorSizeType& blockRight = lrs_.right().block();
+		SizeType smax = blockLeft[blockLeft.size()-1];
+		SizeType emin = blockRight[0];
+
+		for (SizeType i = 0; i < blockLeft.size(); ++i) {
+			SizeType ind = blockLeft[i];
+			for (SizeType j=0; j < blockRight.size(); ++j) {
+				SizeType jnd = blockRight[j];
+				assert(ind != jnd);
+				if (!model_.geometry().connected(smax,emin,ind,jnd)) continue;
+				block.push_back(ind);
+				block.push_back(jnd);
+			}
+		}
+		PsimagLite::Sort<VectorSizeType> sort;
+		VectorSizeType iperm(block.size());
+		sort.sort(block,iperm);
 	}
 
 	PsimagLite::ProgressIndicator progress_;

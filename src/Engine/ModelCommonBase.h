@@ -128,8 +128,9 @@ public:
 
 
 	virtual void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                  const VectorOperatorType& cm,
-	                                  const BlockType& block) const = 0;
+	                                          const VectorOperatorType& cm,
+	                                          const BlockType& block,
+	                                          bool sysEnvOnly) const = 0;
 
 	virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
 	                              const ModelHelperType& modelHelper) const = 0;

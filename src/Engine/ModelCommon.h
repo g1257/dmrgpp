@@ -250,12 +250,13 @@ public:
 
 	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                  const VectorOperatorType& cm,
-	                                  const Block& block) const
+	                                  const Block& block,
+	                                  bool sysEnvOnly) const
 	{
 		SizeType n = block.size();
 		for (SizeType i=0;i<n;i++) {
 			for (SizeType j=0;j<n;j++) {
-				addConnectionsInNaturalBasis(hmatrix,i,j,cm,block);
+				addConnectionsInNaturalBasis(hmatrix,i,j,cm,block,sysEnvOnly);
 			}
 		}
 	}
@@ -303,12 +304,21 @@ private:
 	                                  SizeType i,
 	                                  SizeType j,
 	                                  const VectorOperatorType& cm,
-	                                  const Block& block) const
+	                                  const Block& block,
+	                                  bool sysEnvOnly) const
 	{
+		SizeType middle = static_cast<SizeType>(block.size()/2);
+		if (middle == 0 && sysEnvOnly) return;
+
+		assert(middle < block.size());
+		middle = block[middle];
+
 		SizeType ind = block[i];
 		SizeType jnd = block[j];
 
 		if (!geometry_.connected(0,1,ind,jnd)) return;
+		if (sysEnvOnly && ind < middle && jnd < middle) return;
+		if (sysEnvOnly && ind >= middle && jnd >= middle) return;
 
 		SizeType type = 0;
 		SizeType offset = cm.size()/block.size();

@@ -307,7 +307,13 @@ namespace Dmrg {
 					return;
 				}
 
-				SizeType max = (noStageIs(DISABLED)) ? 1 : n1;
+				SizeType max = n1;
+
+				if (noStageIs(DISABLED)) {
+					max = 1;
+					if (stage_==WFT_ADVANCE) stage_ = WFT_NOADVANCE;
+				}
+
 				// Advance or wft each target vector for beta/2
 				for (SizeType i=0;i<max;i++) {
 					evolve(i,0,n1-1,Eg,direction,sites,loopNumber);

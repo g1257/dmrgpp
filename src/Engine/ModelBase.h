@@ -180,11 +180,9 @@ public:
 	                               const RealType& time,
 	                               RealType factorForDiagonals) const
 	{
-		assert(block.size()==2);
-
 		typename PsimagLite::Vector<OperatorType>::Type cm;
 		setOperatorMatrices(cm,block);
-		calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals);
+		calcHamiltonian(hmatrix,cm,block,time,factorForDiagonals,true);
 	}
 
 	virtual void matrixVectorProduct(VectorType& x,
@@ -230,14 +228,15 @@ public:
 
 	//! Full hamiltonian from creation matrices cm
 	virtual void calcHamiltonian(SparseMatrixType &hmatrix,
-	                     const VectorOperatorType& cm,
-	                     const BlockType& block,
-	                     RealType time,
-	                     RealType factorForDiagonals=1.0)  const
+	                             const VectorOperatorType& cm,
+	                             const BlockType& block,
+	                             RealType time,
+	                             RealType factorForDiagonals=1.0,
+	                             bool sysEnvOnly=false)  const
 	{
 		hmatrix.makeDiagonal(cm[0].data.row());
 
-		modelCommon_->addConnectionsInNaturalBasis(hmatrix,cm,block);
+		modelCommon_->addConnectionsInNaturalBasis(hmatrix,cm,block,sysEnvOnly);
 
 		addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 	}
