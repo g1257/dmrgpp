@@ -118,6 +118,7 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorComplexOrRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef VectorComplexOrRealType TargetVectorType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
 
@@ -148,7 +149,7 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             SizeType systemOrEnviron,
 	                             bool allOperatorsApplied,
-	                             const PsimagLite::Vector<SizeType>::Type& block)
+	                             const VectorSizeType& block)
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"EXPERIMENTAL: using SuzukiTrotter";
@@ -194,7 +195,8 @@ public:
 		progress_.printline(msg2,std::cout);
 
 		if (!areAllLinksSeen) {
-			linksSeen_.push_back(lastIndexLeft);
+			for (SizeType i = 0; i < block.size(); ++i)
+				linksSeen_.push_back(lastIndexLeft+i);
 		} else {
 			PsimagLite::OstringStream msg3;
 			msg3<<"ALL LINKS SEEN";
@@ -212,6 +214,11 @@ public:
 
 	virtual void timeHasAdvanced()
 	{
+		if (!allLinksSeen()) {
+			PsimagLite::String str("SuzukiTrotter: Tried to advance when !allLinksSeen\n");
+			throw PsimagLite::RuntimeError(str);
+		}
+
 		linksSeen_.clear();
 		PsimagLite::OstringStream msg;
 		msg<<"ALL LINKS CLEARED";

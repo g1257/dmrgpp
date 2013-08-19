@@ -1096,7 +1096,7 @@ namespace Dmrg {
 				typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 				utils::fillFermionicSigns(fermionicSigns,electrons,A.fermionSign);
 
-				SizeType rightSize = mettsStochastics_.hilbertSize(site);
+				SizeType rightSize = model_.hilbertSize(site);
 				OperatorType B = A;
 				bool option = (blockIndex == 0) ? true : false;
 				externalProduct(B.data,A.data,rightSize,fermionicSigns,option);

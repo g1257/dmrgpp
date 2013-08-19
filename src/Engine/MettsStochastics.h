@@ -88,12 +88,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 
 namespace Dmrg {
-template<typename ModelType,typename RngType_>
+template<typename ModelType_,typename RngType_>
 class MettsStochastics  {
 
 public:
 
 	typedef std::pair<SizeType,SizeType> PairType;
+	typedef ModelType_ ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType::HilbertBasisType HilbertBasisType;
@@ -108,7 +109,7 @@ public:
 	      addedSites_(0)
 	{}
 
-	SizeType hilbertSize(SizeType site) const { return model_.hilbertSize(site); }
+	const ModelType& model() const { return model_; }
 
 	SizeType chooseRandomState(SizeType site) const
 	{

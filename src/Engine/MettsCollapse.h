@@ -89,9 +89,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
-	template<typename VectorWithOffsetType,typename MettsStochasticsType,typename TargettingParamsType>
+	template<typename VectorWithOffsetType, typename MettsStochasticsType, typename TargettingParamsType>
 	class MettsCollapse  {
 
+	
 		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef typename MettsStochasticsType::PairType PairType;
 		typedef typename MettsStochasticsType::LeftRightSuperType LeftRightSuperType;
@@ -99,6 +100,7 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename MettsStochasticsType::RealType RealType;
 		typedef typename MettsStochasticsType::RngType RngType;
+		typedef typename MettsStochasticsType::ModelType ModelType;
 		typedef PsimagLite::Matrix<RealType> MatrixType;
 
 		enum {EXPAND_ENVIRON=ProgramGlobals::EXPAND_ENVIRON,
@@ -109,7 +111,7 @@ namespace Dmrg {
 	public:
 
 		typedef PsimagLite::PackIndices PackIndicesType;
-
+		
 		MettsCollapse(const MettsStochasticsType& mettsStochastics,
 			      const LeftRightSuperType& lrs,
 					  const TargettingParamsType& targetParams)
@@ -156,7 +158,7 @@ namespace Dmrg {
 		void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,const typename PsimagLite::Vector<SizeType>::Type& block) const
 		{
 			for (SizeType i=0;i<block.size();i++)
-				nk.push_back(mettsStochastics_.hilbertSize(block[i]));
+				nk.push_back(mettsStochastics_.model().hilbertSize(block[i]));
 		}
 
 		SizeType volumeOf(const typename PsimagLite::Vector<SizeType>::Type& v) const
@@ -428,7 +430,13 @@ namespace Dmrg {
 
 		bool checkSites(SizeType site) const
 		{
-			for (SizeType i=1;i<site+1;i++) {
+			std::cerr<<"MettsCollapse: SITES SEEN ";
+			for (SizeType i=0;i<sitesSeen_.size();++i) 
+				std::cerr<<sitesSeen_[i]<<" ";
+			std::cerr<<"\n";
+
+			SizeType sitesPerBlock = mettsStochastics_.model().params().sitesPerBlock;
+			for (SizeType i=sitesPerBlock;i<site+1;i++) {
 				bool seen = (std::find(sitesSeen_.begin(),sitesSeen_.end(),i) != sitesSeen_.end());
 				if (!seen) return false;
 			}
@@ -439,7 +447,7 @@ namespace Dmrg {
 		{
 			SizeType nk = 1;
 			for (SizeType i=0;i<block.size();i++)
-				nk *= mettsStochastics_.hilbertSize(block[i]);
+				nk *= mettsStochastics_.model().hilbertSize(block[i]);
 
 			collapseBasis_.resize(nk,nk);
 			for (SizeType i=0;i<nk;i++)
@@ -449,7 +457,7 @@ namespace Dmrg {
 			assert(block.size()>0);
 			SizeType site = block[0];
 			if (targetParams_.collapse.find("random")!=PsimagLite::String::npos)
-				rotationNd(collapseBasis_,mettsStochastics_.hilbertSize(site),block.size());
+				rotationNd(collapseBasis_,mettsStochastics_.model().hilbertSize(site),block.size());
 			if (targetParams_.collapse.find("particle")!=PsimagLite::String::npos)
 				particleCollapse(collapseBasis_);
 			std::cout<<"Collapse basis:\n";
