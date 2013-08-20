@@ -550,8 +550,23 @@ namespace Dmrg {
 		{
 			addInteractionU1(hmatrix,cm,i,factorForDiagonals);
 			addInteractionU2(hmatrix,cm,i,factorForDiagonals);
-			addInteractionJ1(hmatrix,cm,i,factorForDiagonals);
-			addInteractionJ2(hmatrix,cm,i,factorForDiagonals);
+			if (!modelParameters_.decay) {
+				addInteractionJ1(hmatrix,cm,i,factorForDiagonals);
+				addInteractionJ2(hmatrix,cm,i,factorForDiagonals);
+			} else {
+				addInteractionV(hmatrix,cm,i,factorForDiagonals);
+			}
+		}
+
+		RealType findHubbardU(SizeType index, SizeType orb1, SizeType orb2) const
+		{
+			if (!modelParameters_.decay) {
+				assert(index < modelParameters_.hubbardU.size());
+				return modelParameters_.hubbardU[index];
+			}
+
+			assert(orb1 + orb2*modelParameters_.orbitals < modelParameters_.hubbardU.size());
+			return modelParameters_.hubbardU[orb1 + orb2*modelParameters_.orbitals];
 		}
 
 		//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
@@ -570,7 +585,7 @@ namespace Dmrg {
 				multiply(tmpMatrix,n(m1),n(m2));
 				multiplyScalar(tmpMatrix2,
 				               tmpMatrix,
-				               factorForDiagonals*modelParameters_.hubbardU[0]); // this is U
+				               factorForDiagonals*findHubbardU(0,alpha,alpha));
 				hmatrix += tmpMatrix2;
 			}
 		}
@@ -588,7 +603,7 @@ namespace Dmrg {
 				multiply(tmpMatrix, nSummedOverSpin(cm,i,orb1),nSummedOverSpin(cm,i,orb2));
 				multiplyScalar(tmpMatrix2,
 				               tmpMatrix,
-				               factorForDiagonals*modelParameters_.hubbardU[1]);// this is U'-J/2
+				               factorForDiagonals*findHubbardU(1,orb1,orb2));
 				hmatrix += tmpMatrix2;
 				}
 			}
@@ -643,6 +658,53 @@ namespace Dmrg {
 					multiplyScalar(tmpMatrix2,
 					               tmpMatrix,
 					               factorForDiagonals*modelParameters_.hubbardU[3]); // this is -J
+					hmatrix += tmpMatrix2;
+				}
+			}
+		}
+
+		void addInteractionV(SparseMatrixType& hmatrix,
+		                     const VectorOperatorType& cm,
+		                     SizeType site,
+	                         RealType factorForDiagonals) const
+		{
+			assert(modelParameters_.orbitals == 3);
+
+			SizeType dofs = 2 * modelParameters_.orbitals;
+
+			SparseMatrixType tmpMatrix1;
+			SparseMatrixType tmpMatrix2;
+			SparseMatrixType tmpMatrix;
+
+			RealType value = modelParameters_.coulombV;
+
+			for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
+				for (SizeType spin2 = 0; spin2 < 2; ++spin2) {
+					if (spin1 == spin2) continue;
+
+					multiply(tmpMatrix1,
+					         cm[2+spin1*modelParameters_.orbitals+site*dofs].data,
+					         cm[0+spin2*modelParameters_.orbitals+site*dofs].data);
+
+
+					SparseMatrixType cmTranspose1;
+					transposeConjugate(cmTranspose1,
+					                   cm[1+spin2*modelParameters_.orbitals+site*dofs].data);
+
+					SparseMatrixType cmTranspose2;
+					transposeConjugate(cmTranspose2,
+					                   cm[1+spin1*modelParameters_.orbitals+site*dofs].data);
+
+					multiply(tmpMatrix2,cmTranspose1,cmTranspose2);
+
+
+					multiply(tmpMatrix,tmpMatrix1,tmpMatrix2);
+					multiplyScalar(tmpMatrix1,
+					               tmpMatrix,
+					               factorForDiagonals*value);
+					hmatrix += tmpMatrix1;
+
+					transposeConjugate(tmpMatrix2,tmpMatrix1);
 					hmatrix += tmpMatrix2;
 				}
 			}

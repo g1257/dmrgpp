@@ -92,11 +92,25 @@ namespace Dmrg {
 		
 		template<typename IoInputType>
 		ParametersModelFeAs(IoInputType& io)
-		: magneticField(0,0)
+		: decay(0),magneticField(0,0)
 		{
 			io.readline(orbitals,"Orbitals=");
 			io.read(hubbardU,"hubbardU");
 			io.read(potentialV,"potentialV");
+
+			try {
+				io.readline(decay,"Decay=");
+				if (decay !=0 && decay != 1)
+					throw PsimagLite::RuntimeError("Decay: expecting 0 or 1\n");
+			} catch (std::exception& e) {}
+
+			if (decay) {
+				if (orbitals != 3)
+					throw PsimagLite::RuntimeError("Decay: expecting 3 orbitals\n");
+				if (hubbardU.size() != 9)
+					throw PsimagLite::RuntimeError("Decay: expecting 9 U values\n");
+				io.readline(coulombV,"CoulombV=");
+			}
 
 			try {
 				io.readMatrix(magneticField,"MagneticField");
@@ -114,6 +128,8 @@ namespace Dmrg {
 		typename PsimagLite::Vector<Field>::Type hubbardU; 
 		// Onsite potential values, one for each site
 		typename PsimagLite::Vector<Field>::Type potentialV;
+		int decay;
+		Field coulombV;
 		// target number of electrons  in the system
 		PsimagLite::Matrix<Field> magneticField;
 		int nOfElectrons;
