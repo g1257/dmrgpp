@@ -94,6 +94,8 @@ namespace Dmrg {
 	         template<typename> class VectorWithOffsetTemplate>
 	class TimeStepTargetting  {
 
+		enum {BORDER_NEITHER, BORDER_LEFT, BORDER_RIGHT};
+
 	public:
 
 			typedef ModelType_ ModelType;
@@ -108,6 +110,7 @@ namespace Dmrg {
 				LeftRightSuperType;
 			typedef typename LeftRightSuperType::BasisWithOperatorsType
 					BasisWithOperatorsType;
+			typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 			//typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
 			typedef typename PsimagLite::Vector<ComplexType>::Type ComplexVectorType;
 			//typedef std::VectorWithOffset<ComplexType> VectorWithOffsetType;
@@ -420,15 +423,15 @@ namespace Dmrg {
 				return true;
 			}
 
-			void initialGuess(VectorWithOffsetType& v,const typename PsimagLite::Vector<SizeType>::Type& block) const
+			void initialGuess(VectorWithOffsetType& v,const VectorSizeType& block) const
 			{
-				typename PsimagLite::Vector<SizeType>::Type nk;
+				VectorSizeType nk;
 				setNk(nk,block);
 				wft_.setInitialVector(v,psi_,lrs_,nk);
 			}
 
 			template<typename IoOutputType>
-			void save(const typename PsimagLite::Vector<SizeType>::Type& block,IoOutputType& io) const
+			void save(const VectorSizeType& block,IoOutputType& io) const
 			{
 				PsimagLite::OstringStream msg;
 				msg<<"Saving state...";
@@ -600,7 +603,7 @@ namespace Dmrg {
 			                VectorWithOffsetType& phiNew,
 			                const VectorWithOffsetType& phiOld,
 			                SizeType systemOrEnviron,
-			                const typename PsimagLite::Vector<SizeType>::Type& block)
+			                const VectorSizeType& block)
 			{
 				if (block.size()!=1) {
 					PsimagLite::String str(__FILE__);
@@ -608,7 +611,7 @@ namespace Dmrg {
 					str += "computePhi only blocks of one site supported\n";
 					throw PsimagLite::RuntimeError(str.c_str());
 				}
-				typename PsimagLite::Vector<SizeType>::Type nk;
+				VectorSizeType nk;
 				setNk(nk,block);
 				SizeType site = block[0];
 
@@ -616,14 +619,16 @@ namespace Dmrg {
 				SizeType indexNoAdvance = 0;
 				if (stage_[i]==OPERATOR) {
 					PsimagLite::OstringStream msg;
-					msg<<"I'm applying a local operator now";
+					msg<<"I'm applying a local operator at site "<<site<<" now";
 					progress_.printline(msg,std::cout);
-					typename PsimagLite::Vector<SizeType>::Type electrons;
+					VectorSizeType electrons;
 					model_.findElectronsOfOneSite(electrons,site);
 					FermionSign fs(lrs_.left(),electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
+
+					applyOperatorAtBorder(phiNew,systemOrEnviron,block);
+
 					setQuantumNumbers(phiNew);
-//					std::cerr<<"APPLYING OPERATOR --> NORM of phiNew="<<norm(phiNew)<<" NORM of phiOld="<<norm(phiOld)<<" when i="<<i<<"\n";
 
 				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
 					SizeType advance = indexNoAdvance;
@@ -652,6 +657,84 @@ namespace Dmrg {
 				RealType norma = norm(phiNew);
 				if (norma==0) throw PsimagLite::RuntimeError("Norm of phi is zero\n");
 
+			}
+
+			void applyOperatorAtBorder(VectorWithOffsetType& phiNew,
+			                           SizeType systemOrEnviron,
+			                           const VectorSizeType& block)
+			{
+				SizeType whichBorder = findWhichBorder(block);
+				if (whichBorder == BORDER_NEITHER) return;
+
+				int iOfBorder = findBorderIndex(whichBorder);
+				if (iOfBorder < 0) return;
+
+				if (block.size() != 1) {
+					PsimagLite::String str("applyOperatorAtBorder(): ");
+					str += " implemented only for block.size() == 1\n";
+					throw PsimagLite::RuntimeError(str);
+				}
+
+				SizeType site = tstStruct_.sites[iOfBorder];
+
+				stage_[iOfBorder] = OPERATOR;
+
+				PsimagLite::OstringStream msg;
+				msg<<"I'm applying a local operator at site "<<site<<" now";
+				progress_.printline(msg,std::cout);
+				VectorSizeType electrons;
+				model_.findElectronsOfOneSite(electrons,site);
+				FermionSign fs(lrs_.left(),electrons);
+				VectorWithOffsetType phiNew2;
+
+				applyOpLocal_(phiNew2,
+				              phiNew,
+				              tstStruct_.aOperators[iOfBorder],
+				              fs,
+				              systemOrEnviron,
+				              true);
+
+				phiNew = phiNew2;
+			}
+
+			SizeType findWhichBorder(const VectorSizeType& block) const
+			{
+				SizeType sitesPerBlock = model_.params().sitesPerBlock;
+
+				SizeType siteMin = *std::min_element(block.begin(),block.end());
+				if (siteMin <= sitesPerBlock) return BORDER_LEFT;
+
+				SizeType siteMax = *std::max_element(block.begin(),block.end());
+				SizeType linSize = model_.geometry().numberOfSites();
+
+				if (siteMax + sitesPerBlock + 1 >= linSize) return BORDER_RIGHT;
+
+				return BORDER_NEITHER;
+
+			}
+
+			int findBorderIndex(SizeType whichBorder) const
+			{
+				assert(whichBorder == BORDER_LEFT || whichBorder == BORDER_RIGHT);
+
+				SizeType sitesPerBlock = model_.params().sitesPerBlock;
+				SizeType linSize = model_.geometry().numberOfSites();
+				assert(sitesPerBlock < linSize);
+				SizeType start = linSize - sitesPerBlock;
+
+				for (SizeType j = 0; j < tstStruct_.sites.size(); ++j) {
+					if (whichBorder == BORDER_LEFT) {
+						for (SizeType i = 0; i < sitesPerBlock; ++i) {
+							if (tstStruct_.sites[j] == i) return j;
+						}
+					} else {
+						for (SizeType i = start; i < linSize; ++i) {
+							if (tstStruct_.sites[j] == i) return j;
+						}
+					}
+				}
+
+				return -1;
 			}
 
 			void checkNorms() const
@@ -745,7 +828,7 @@ namespace Dmrg {
 
 			void guessPhiSectors(VectorWithOffsetType& phi,SizeType i,SizeType systemOrEnviron,SizeType site)
 			{
-				typename PsimagLite::Vector<SizeType>::Type electrons;
+				VectorSizeType electrons;
 				model_.findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
 				if (allStages(WFT_NOADVANCE)) {
@@ -760,7 +843,7 @@ namespace Dmrg {
 				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,systemOrEnviron);
 			}
 
-			void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,const typename PsimagLite::Vector<SizeType>::Type& block) const
+			void setNk(VectorSizeType& nk,const VectorSizeType& block) const
 			{
 				for (SizeType i=0;i<block.size();i++)
 					nk.push_back(model_.hilbertSize(block[i]));
@@ -773,7 +856,7 @@ namespace Dmrg {
 				  SizeType site,
 				  const OperatorType& A) const
 			{
-				typename PsimagLite::Vector<SizeType>::Type electrons;
+				VectorSizeType electrons;
 				SizeType lastIndex = lrs_.left().block().size();
 				assert(lastIndex>0);
 				lastIndex--;
@@ -799,7 +882,7 @@ namespace Dmrg {
 				std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 			}
 
-			typename PsimagLite::Vector<SizeType>::Type stage_;
+			VectorSizeType stage_;
 			VectorWithOffsetType psi_;
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
@@ -814,7 +897,7 @@ namespace Dmrg {
 			ApplyOperatorType applyOpLocal_;
 			RealType E0_;
 			TimeVectorsBaseType* timeVectorsBase_;
-			typename PsimagLite::Vector<SizeType>::Type nonZeroQns_;
+			VectorSizeType nonZeroQns_;
 
 	};     //class TimeStepTargetting
 
