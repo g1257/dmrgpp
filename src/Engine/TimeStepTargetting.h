@@ -626,7 +626,7 @@ namespace Dmrg {
 					FermionSign fs(lrs_.left(),electrons);
 					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
 
-					applyOperatorAtBorder(phiNew,systemOrEnviron,block);
+					applyOperatorAtBorder(phiNew,phiOld,systemOrEnviron,block);
 
 					setQuantumNumbers(phiNew);
 
@@ -660,6 +660,7 @@ namespace Dmrg {
 			}
 
 			void applyOperatorAtBorder(VectorWithOffsetType& phiNew,
+			                           const VectorWithOffsetType& phiOld,
 			                           SizeType systemOrEnviron,
 			                           const VectorSizeType& block)
 			{
@@ -686,15 +687,20 @@ namespace Dmrg {
 				model_.findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
 				VectorWithOffsetType phiNew2;
+				const VectorWithOffsetType& phiSrc = (tstStruct_.concatenation==PRODUCT) ?
+				            phiNew : phiOld;
 
 				applyOpLocal_(phiNew2,
-				              phiNew,
+				              phiSrc,
 				              tstStruct_.aOperators[iOfBorder],
 				              fs,
 				              systemOrEnviron,
 				              true);
 
-				phiNew = phiNew2;
+				if (tstStruct_.concatenation==PRODUCT)
+					phiNew = phiNew2;
+				else
+					phiNew += phiNew2;
 			}
 
 			SizeType findWhichBorder(const VectorSizeType& block) const
