@@ -92,7 +92,7 @@ namespace Dmrg {
 		
 		template<typename IoInputType>
 		ParametersModelFeAs(IoInputType& io)
-		: decay(0),magneticField(0,0)
+		    : decay(0),coulombV(0),magneticField(0,0)
 		{
 			io.readline(orbitals,"Orbitals=");
 			io.read(hubbardU,"hubbardU");
@@ -149,6 +149,10 @@ namespace Dmrg {
 			os<<"MagneticField\n";
 			os<<parameters.magneticField;
 		}
+		os<<"Decay="<<parameters.decay<<"\n";
+		if (parameters.decay)
+			os<<"CoulombV="<<parameters.coulombV<<"\n";
+
 		return os;
 	}
 } // namespace Dmrg
