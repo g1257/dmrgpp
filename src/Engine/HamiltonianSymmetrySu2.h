@@ -109,7 +109,7 @@ namespace Dmrg {
 		public:
 			typedef PsimagLite::CrsMatrix<RealType> FactorsType;
 			
-			static SizeType const MAX = ProgramGlobals::MaxNumberOfSites;
+			static const SizeType MAX = 100;
 
 			HamiltonianSymmetrySu2()
 			: flavors_(0),
@@ -160,15 +160,19 @@ namespace Dmrg {
 
 			static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
 			{
+				assert(v[0] < MAX);
+				assert(v[1] < MAX);
+				assert(v[2] < MAX);
+
 				SizeType x= v[0] + v[1]*MAX;
-				if (v[0]>=MAX || v[1]>=MAX || v[2]>=MAX)
-					throw PsimagLite::RuntimeError("encodeQuantumNumber\n");
 				if (v.size()==3) x += v[2]*MAX*MAX;
 				return x;
 			}
 
 			static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(SizeType q)
 			{
+				assert(q < MAX*MAX*MAX);
+
 				typename PsimagLite::Vector<SizeType>::Type v(3);
 				v[2] = SizeType(q/(MAX*MAX));
 				SizeType tmp = q - v[2]*MAX*MAX;
@@ -180,6 +184,9 @@ namespace Dmrg {
 			//! targets[0]=nup, targets[1]=ndown,  targets[2]=2j
 			static SizeType pseudoQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
 			{
+				assert(v[0] < MAX);
+				assert(v[1] < MAX);
+
 				SizeType x= v[0] + v[1];
 				x += v[2]*2*MAX;
 				return x;

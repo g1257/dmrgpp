@@ -121,7 +121,6 @@ namespace Dmrg {
 
 		static const int NUMBER_OF_ORBITALS=1;
 		static const int DEGREES_OF_FREEDOM=2; // spin up and down
-		static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;
 
 	public:
 
@@ -138,9 +137,7 @@ namespace Dmrg {
 		    : ModelBaseType(solverParams,io,geometry,new ModelCommonType(geometry)),
 		      modelParameters_(io),
 		      geometry_(geometry),
-		      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
-		      reinterpretX_(maxNumberOfSites),
-		      reinterpretY_(maxNumberOfSites)
+		      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 		{}
 
 		void print(std::ostream& os) const { os<<modelParameters_; }
@@ -263,7 +260,6 @@ namespace Dmrg {
 		GeometryType const &geometry_;
 		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
-		SizeType reinterpretX_,reinterpretY_;
 
 		//! Find S^+_i in the natural basis natBasis
 		SparseMatrixType findSplusMatrices(int i,const HilbertBasisType& natBasis) const

@@ -92,10 +92,13 @@ namespace Dmrg {
 		typedef PsimagLite::CrsMatrix<RealType> FactorsType;
 		
 		public:
-			static int const MAX = 100;
+			static const SizeType MAX = 100;
 
 			static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
 			{
+				assert(v[0] < MAX);
+				assert(v[1] < MAX);
+
 				SizeType x= v[0] + v[1]*MAX;
 				if (v.size()==3) x += v[2]*MAX*MAX;
 				return x;
@@ -103,6 +106,8 @@ namespace Dmrg {
 
 			static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(SizeType q)
 			{
+				assert(q < MAX*MAX);
+
 				typename PsimagLite::Vector<SizeType>::Type v(2);
 				SizeType tmp = q ;
 				v[1] = SizeType(tmp/MAX);

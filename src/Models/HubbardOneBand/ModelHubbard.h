@@ -115,7 +115,6 @@ public:
 
 private:
 
-	static int const maxNumberOfSites=ProgramGlobals::MaxNumberOfSites;
 	static const int FERMION_SIGN = -1;
 	static const int DEGREES_OF_FREEDOM=2;
 	static const int NUMBER_OF_ORBITALS=1;
@@ -145,9 +144,7 @@ public:
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      offset_(offset),
-	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
-	      reinterpretX_(maxNumberOfSites),
-	      reinterpretY_(maxNumberOfSites)
+	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the size of the one-site Hilbert space. */
@@ -442,14 +439,14 @@ private:
 		typedef std::pair<SizeType,SizeType> PairType;
 		typename PsimagLite::Vector<PairType>::Type jmvalues;
 		typename PsimagLite::Vector<SizeType>::Type flavors;
-		PairType jmSaved = calcJmvalue<PairType>(basis[0]);
+		PairType jmSaved = calcJmValue<PairType>(basis[0]);
 		jmSaved.first++;
 		jmSaved.second++;
 
 		typename PsimagLite::Vector<SizeType>::Type electronsUp(basis.size());
 		typename PsimagLite::Vector<SizeType>::Type electronsDown(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
-			PairType jmpair = calcJmvalue<PairType>(basis[i]);
+			PairType jmpair = calcJmValue<PairType>(basis[i]);
 
 			jmvalues.push_back(jmpair);
 			// nup
@@ -469,27 +466,9 @@ private:
 	// note: we use 2j instead of j
 	// note: we use m+j instead of m
 	// This assures us that both j and m are SizeType
-	// Reinterprets 6 and 9
-	template<typename PairType>
-	PairType calcJmvalue(const HilbertState& ket) const
-	{
-		PairType jm(0,0);
-
-		SizeType x=reinterpretX_,y=reinterpretY_; // these states need reinterpretation
-		if (ket==x) {
-			jm=std::pair<SizeType,SizeType>(2,1);
-		} else if (ket==y) {
-			jm=std::pair<SizeType,SizeType>(0,0);
-		} else jm=calcJmValueAux<PairType>(ket);
-		return jm;
-	}
-
-	// note: we use 2j instead of j
-	// note: we use m+j instead of m
-	// This assures us that both j and m are SizeType
 	// does not work for 6 or 9
 	template<typename PairType>
-	PairType calcJmValueAux(const HilbertState& ket) const
+	PairType calcJmValue(const HilbertState& ket) const
 	{
 		SizeType site0=0;
 		SizeType site1=0;
@@ -509,7 +488,6 @@ private:
 	SizeType offset_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
-	SizeType reinterpretX_,reinterpretY_;
 };	//class ModelHubbard
 
 } // namespace Dmrg
