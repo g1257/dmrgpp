@@ -226,7 +226,13 @@ namespace Dmrg {
 			assert(creationMatrix.size()>0);
 			SizeType nrow = creationMatrix[0].data.row();
 
-			if (what=="+" or what=="i") {
+			if (what == "i") {
+				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+				for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
+				return tmp;
+			}
+
+			if (what=="+") {
 				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
 				for (SizeType x=0;x<modelParameters_.orbitals;x++)
 					tmp += multiplyTc(creationMatrix[x].data,creationMatrix[x+modelParameters_.orbitals].data);
