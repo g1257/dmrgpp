@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -68,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 // END LICENSE BLOCK
 /** \ingroup DMRG */
@@ -96,6 +94,8 @@ namespace Dmrg {
 			typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type ComplexOrReal;
 			typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
+			typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+			typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 
 			enum {PRODUCT,SUM};
 
@@ -136,17 +136,13 @@ namespace Dmrg {
 
 				data_.resize(sites.size());
 				aOperators.resize(sites.size());
-// 				typename ModelType::HilbertBasisType basis;
-// 				typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
-// 				model_.setNaturalBasis(basis,quantumNumbs,1);
-// 				model_.findElectrons(electrons,basis);
 			
 				for (SizeType i=0;i<sites.size();i++) {
 					PsimagLite::String s;
 					io.readline(s,"TSPOperator=");
 					if (s == "cooked") {
 						io.readline(s,"COOKED_OPERATOR=");
-						typename PsimagLite::Vector<SizeType>::Type v;
+						VectorSizeType v;
 						io.read(v,"COOKED_EXTRA");
 						setCookedData(i,s,v);
 					} else {
@@ -158,7 +154,7 @@ namespace Dmrg {
 					int fermiSign=0;
 					io.readline(fermiSign,"FERMIONSIGN=");
 					std::pair<SizeType,SizeType> jmValues;
-					typename PsimagLite::Vector<SizeType>::Type v(2);
+					VectorSizeType v(2);
 					io.readKnownSize(v,"JMVALUES");
 					jmValues.first = v[0]; jmValues.second = v[1];
 					RealType angularFactor;
@@ -172,11 +168,12 @@ namespace Dmrg {
 					aOperators[i] = myOp;
 				}
 				noOperator = isNoOperator();
+				checkBorderOperators();
 				checkSizesOfOperators();
 			}
 			
-			typename PsimagLite::Vector<SizeType>::Type sites;
-			typename PsimagLite::Vector<SizeType>::Type startingLoops;
+			VectorSizeType sites;
+			VectorSizeType startingLoops;
 			SizeType concatenation;
 			typename PsimagLite::Vector<OperatorType>::Type aOperators;
 			bool noOperator;
@@ -203,7 +200,7 @@ namespace Dmrg {
 				return (isTheIdentity(data_[0]));
 			}
 
-			void setCookedData(SizeType i,const PsimagLite::String& s,const typename PsimagLite::Vector<SizeType>::Type& v)
+			void setCookedData(SizeType i,const PsimagLite::String& s,const VectorSizeType& v)
 			{
 				data_[i]=model_.naturalOperator(s,v[0],v[1]);
 			}
@@ -217,16 +214,53 @@ namespace Dmrg {
 			{
 			}
 			
-			void checkSizesOfOperators()
+			void checkSizesOfOperators() const
 			{
+				if (sites.size() != data_.size() || sites.size() != startingLoops.size())
+					throw PsimagLite::RuntimeError("CommonTargetting\n");
+
 				for (SizeType i=0;i<data_.size();i++) {
 					SizeType n = data_[i].n_row();
-					if (n!=model_.hilbertSize(sites[i])) throw PsimagLite::RuntimeError("CommonTargetting\n");
+					if (n!=model_.hilbertSize(sites[i]))
+						throw PsimagLite::RuntimeError("CommonTargetting\n");
 				}
 			}
 
+			void checkBorderOperators()
+			{
+				if (sites.size() == 0) return;
+
+				SizeType linSize = model_.geometry().numberOfSites();
+
+				if (hasOperatorAt(0) && !hasOperatorAt(1)) {
+					errorBorderOperators(0);
+				}
+
+				if (hasOperatorAt(linSize-1) && !hasOperatorAt(linSize-2)) {
+					errorBorderOperators(linSize-1);
+				}
+			}
+
+			bool hasOperatorAt(SizeType site) const
+			{
+				for (SizeType i = 0; i < sites.size(); ++i) {
+					if (sites[i] == site) return true;
+				}
+				return false;
+			}
+
+			void errorBorderOperators(SizeType site)
+			{
+				SizeType linSize = model_.geometry().numberOfSites();
+				SizeType site2 = (site == 0) ? 1 : linSize - 2;
+
+				PsimagLite::String str("ERROR: Operators at border site: Please ");
+				str += "add the identity operator at site " + ttos(site2) + "\n";
+				throw PsimagLite::RuntimeError(str);
+			}
+
 			const ModelType& model_;
-			typename PsimagLite::Vector<MatrixType>::Type data_; 
+			VectorMatrixType data_;
 	}; // class TargetParamsCommon
 	
 	template<typename ModelType>
