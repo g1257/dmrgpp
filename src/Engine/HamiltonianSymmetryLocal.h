@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define HAM_SYMM_LOCAL_H
 #include "Sort.h" // in PsimagLite
 #include "BasisData.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 	template<typename SparseMatrixType>
@@ -92,26 +93,29 @@ namespace Dmrg {
 		typedef PsimagLite::CrsMatrix<RealType> FactorsType;
 		
 		public:
-			static const SizeType MAX = 100;
 
 			static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
 			{
-				assert(v[0] < MAX);
-				assert(v[1] < MAX);
+				SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
 
-				SizeType x= v[0] + v[1]*MAX;
-				if (v.size()==3) x += v[2]*MAX*MAX;
+				assert(v[0] < maxElectronsOneSpin);
+				assert(v[1] < maxElectronsOneSpin);
+
+				SizeType x= v[0] + v[1]*maxElectronsOneSpin;
+				if (v.size()==3) x += v[2]*maxElectronsOneSpin*maxElectronsOneSpin;
 				return x;
 			}
 
 			static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(SizeType q)
 			{
-				assert(q < MAX*MAX);
+				SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
+
+				assert(q < maxElectronsOneSpin*maxElectronsOneSpin);
 
 				typename PsimagLite::Vector<SizeType>::Type v(2);
 				SizeType tmp = q ;
-				v[1] = SizeType(tmp/MAX);
-				v[0] = tmp % MAX;
+				v[1] = SizeType(tmp/maxElectronsOneSpin);
+				v[0] = tmp % maxElectronsOneSpin;
 				return v;
 			}
 

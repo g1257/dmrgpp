@@ -152,6 +152,14 @@ namespace Dmrg {
 		  truncate_(reflectionOperator_,wft_,parameters_,
 			    model_.geometry().maxConnections(),verbose_)
 		{
+			SizeType tmp = model_.hilbertSize(0);
+			tmp = static_cast<SizeType>(log(tmp)/log(2.0));
+			SizeType maxElectrons = static_cast<SizeType>(tmp/2);
+			if (tmp & 1) maxElectrons++;
+
+			ProgramGlobals::maxElectronsOneSpin =
+			        maxElectrons * model_.geometry().numberOfSites() + 1;
+
 			io_.print(appInfo_);
 			io_.print("PARAMETERS",parameters_);
 			io_.print("TARGETSTRUCT",targetStruct_);

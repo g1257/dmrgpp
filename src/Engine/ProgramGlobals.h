@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 struct ProgramGlobals {
 
+	static SizeType maxElectronsOneSpin;
 	static SizeType const MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
 
 	enum {INFINITE=0,EXPAND_ENVIRON=1,EXPAND_SYSTEM=2};
@@ -96,6 +97,8 @@ struct ProgramGlobals {
 	enum {FERMION,BOSON};
 
 }; // ProgramGlobals
+
+SizeType ProgramGlobals::maxElectronsOneSpin = 0;
 
 }; // namespace Dmrg
 /*@}*/

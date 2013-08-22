@@ -109,8 +109,6 @@ namespace Dmrg {
 		public:
 			typedef PsimagLite::CrsMatrix<RealType> FactorsType;
 			
-			static const SizeType MAX = 100;
-
 			HamiltonianSymmetrySu2()
 			: flavors_(0),
 			  flavorsOld_(0),
@@ -160,35 +158,41 @@ namespace Dmrg {
 
 			static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
 			{
-				assert(v[0] < MAX);
-				assert(v[1] < MAX);
-				assert(v[2] < MAX);
+				SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
 
-				SizeType x= v[0] + v[1]*MAX;
-				if (v.size()==3) x += v[2]*MAX*MAX;
+				assert(v[0] < maxElectronsOneSpin);
+				assert(v[1] < maxElectronsOneSpin);
+				assert(v[2] < maxElectronsOneSpin);
+
+				SizeType x= v[0] + v[1]*maxElectronsOneSpin;
+				if (v.size()==3) x += v[2]*maxElectronsOneSpin*maxElectronsOneSpin;
 				return x;
 			}
 
 			static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(SizeType q)
 			{
-				assert(q < MAX*MAX*MAX);
+				SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
+
+				assert(q < maxElectronsOneSpin*maxElectronsOneSpin*maxElectronsOneSpin);
 
 				typename PsimagLite::Vector<SizeType>::Type v(3);
-				v[2] = SizeType(q/(MAX*MAX));
-				SizeType tmp = q - v[2]*MAX*MAX;
-				v[1] = SizeType(tmp/MAX);
-				v[0] = tmp % MAX;
+				v[2] = SizeType(q/(maxElectronsOneSpin*maxElectronsOneSpin));
+				SizeType tmp = q - v[2]*maxElectronsOneSpin*maxElectronsOneSpin;
+				v[1] = SizeType(tmp/maxElectronsOneSpin);
+				v[0] = tmp % maxElectronsOneSpin;
 				return v;
 			}
 
 			//! targets[0]=nup, targets[1]=ndown,  targets[2]=2j
 			static SizeType pseudoQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
 			{
-				assert(v[0] < MAX);
-				assert(v[1] < MAX);
+				SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
 
 				SizeType x= v[0] + v[1];
-				x += v[2]*2*MAX;
+
+				assert(x < 2*maxElectronsOneSpin);
+
+				x += v[2]*2*maxElectronsOneSpin;
 				return x;
 			}
 
