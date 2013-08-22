@@ -112,6 +112,10 @@ public:
 			s += " Unknown model " + name_ + "\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
+
+		ProgramGlobals::init(model_->hilbertSize(0),
+		                     model_->geometry().numberOfSites());
+
 		return *model_;
 	}
 

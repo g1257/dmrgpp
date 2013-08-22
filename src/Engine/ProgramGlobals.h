@@ -96,6 +96,15 @@ struct ProgramGlobals {
 
 	enum {FERMION,BOSON};
 
+	static void init(SizeType hilbertSize, SizeType numberOfSites)
+	{
+		SizeType tmp = hilbertSize;
+		tmp = static_cast<SizeType>(log(tmp)/log(2.0));
+		SizeType maxElectrons = static_cast<SizeType>(tmp/2);
+		if (tmp & 1) maxElectrons++;
+
+		maxElectronsOneSpin = maxElectrons * numberOfSites + 1;
+	}
 }; // ProgramGlobals
 
 SizeType ProgramGlobals::maxElectronsOneSpin = 0;

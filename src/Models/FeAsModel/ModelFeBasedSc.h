@@ -214,7 +214,9 @@ namespace Dmrg {
 			}
 		}
 
-		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,SizeType site,SizeType dof) const
+		PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
+		                                                      SizeType site,
+		                                                      SizeType dof) const
 		{
 			BlockType block;
 			block.resize(1);
@@ -254,11 +256,10 @@ namespace Dmrg {
 				return tmp-tmp2;
 			}
 			if (what=="n") {
-				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
-				for (SizeType x=0;x<2*modelParameters_.orbitals;x++)
-					tmp += multiplyTc(creationMatrix[x].data,creationMatrix[x].data);
+				PsimagLite::Matrix<SparseElementType> tmp =
+				        multiplyTc(creationMatrix[dof].data,creationMatrix[dof].data);
 				return tmp;
-			} 
+			}
 			if (what=="c") {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				SparseMatrixType cdagger;
