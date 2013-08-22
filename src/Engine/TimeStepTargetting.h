@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsKrylov.h"
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
+#include "CommonTargetting.h"
 
 namespace Dmrg {
 	template<template<typename,typename,typename> class LanczosSolverTemplate,
@@ -139,6 +140,9 @@ namespace Dmrg {
 										  LanczosSolverType,VectorWithOffsetType> TimeVectorsRungeKuttaType;
 			typedef TimeVectorsSuzukiTrotter<TargettingParamsType,ModelType,WaveFunctionTransfType,
 											 LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
+			typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
+		        CommonTargettingType;
+			typedef typename CommonTargettingType::VectorStringType VectorStringType;
 
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -163,6 +167,7 @@ namespace Dmrg {
 			  times_(tstStruct_.timeSteps),
 			  weight_(tstStruct_.timeSteps),
 			  targetVectors_(tstStruct_.timeSteps),
+			  commonTargetting_(lrs,model,tstStruct),
 			  applyOpLocal_(lrs),
 			  E0_(0),
 			  timeVectorsBase_(0)
@@ -224,20 +229,19 @@ namespace Dmrg {
 
 			RealType weight(SizeType i) const
 			{
-				assert(!allStages(DISABLED));
+				assert(!commonTargetting_.allStages(DISABLED,stage_));
 				return weight_[i];
 			}
 
 			RealType gsWeight() const
 			{
-				if (allStages(DISABLED)) return 1.0;
+				if (commonTargetting_.allStages(DISABLED,stage_)) return 1.0;
 				return gsWeight_;
 			}
 
 			RealType normSquared(SizeType i) const
 			{
-				// call to mult will conjugate one of the vector
-				return real(multiply(targetVectors_[i],targetVectors_[i])); 
+				return commonTargetting_.normSquared(targetVectors_[i]);
 			}
 
 			template<typename SomeBasisType>
@@ -256,7 +260,7 @@ namespace Dmrg {
 
 			bool includeGroundStage() const
 			{
-				if (!noStageIs(DISABLED)) return true;
+				if (!commonTargetting_.noStageIs(DISABLED,stage_)) return true;
 				bool b = (fabs(gsWeight_)>1e-6);
 
 //				std::cerr<<"includeGroundState="<<b<<"\n";
@@ -267,7 +271,7 @@ namespace Dmrg {
 
 			SizeType size() const
 			{
-				if (allStages(DISABLED)) return 0;
+				if (commonTargetting_.allStages(DISABLED,stage_)) return 0;
 				return targetVectors_.size();
 			}
 
@@ -293,7 +297,7 @@ namespace Dmrg {
 				VectorWithOffsetType vectorSum;
 				SizeType max = tstStruct_.sites.size();
 
-				if (noStageIs(DISABLED)) {
+				if (commonTargetting_.noStageIs(DISABLED,stage_)) {
 					max = 1;
 					for (SizeType i=0;i<stage_.size();i++) {
 						if (stage_[i]==OPERATOR) stage_[i] = WFT_NOADVANCE;
@@ -321,7 +325,9 @@ namespace Dmrg {
 				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
 
 				typename TimeVectorsBaseType::PairType startEnd(0,times_.size());
-				bool allOperatorsApplied = (noStageIs(DISABLED) && noStageIs(OPERATOR));
+				bool allOperatorsApplied = (commonTargetting_.noStageIs(DISABLED,stage_) &&
+				                            commonTargetting_.noStageIs(OPERATOR,stage_));
+
 				timeVectorsBase_->calcTimeVectors(startEnd,
 				                                  Eg,
 				                                  phiNew,
@@ -392,7 +398,7 @@ namespace Dmrg {
 				} else {
 					stage_[i]=WFT_NOADVANCE;
 				}
-				if (stage_[i] == OPERATOR) checkOrder(i);
+				if (stage_[i] == OPERATOR) commonTargetting_.checkOrder(i,stage_);
 
 				if (timesWithoutAdvancement >= tstStruct_.advanceEach) {
 					stage_[i] = WFT_ADVANCE;
@@ -413,7 +419,8 @@ namespace Dmrg {
 				if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
 				
 				PsimagLite::OstringStream msg;
-				msg<<"Evolving, stage="<<getStage(i)<<" site="<<site<<" loopNumber="<<loopNumber;
+				msg<<"Evolving, stage="<<commonTargetting_.getStage(i,stage_);
+				msg<<" site="<<site<<" loopNumber="<<loopNumber;
 				msg<<" Eg="<<Eg;
 				progress_.printline(msg,std::cout);
 				
@@ -426,7 +433,7 @@ namespace Dmrg {
 			void initialGuess(VectorWithOffsetType& v,const VectorSizeType& block) const
 			{
 				VectorSizeType nk;
-				setNk(nk,block);
+				commonTargetting_.setNk(nk,block);
 				wft_.setInitialVector(v,psi_,lrs_,nk);
 			}
 
@@ -438,7 +445,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 
 				SizeType marker = 0;
-				if (noStageIs(DISABLED)) marker = 1;
+				if (commonTargetting_.noStageIs(DISABLED,stage_)) marker = 1;
 
 				TimeSerializerType ts(currentTime_,block[0],targetVectors_,marker);
 				ts.save(io);
@@ -462,7 +469,7 @@ namespace Dmrg {
 
 			void printNormsAndWeights() const
 			{
-				if (allStages(DISABLED)) return;
+				if (commonTargetting_.allStages(DISABLED,stage_)) return;
 
 				PsimagLite::OstringStream msg;
 				msg<<"gsWeight="<<gsWeight_<<" weights= ";
@@ -513,6 +520,41 @@ namespace Dmrg {
 			// in situ computation:
 			void cocoon(SizeType direction,const BlockType& block) const
 			{
+				PsimagLite::String modelName = model_.params().model;
+
+				if (modelName == "HubbardOneBand" ||
+				    modelName == "HubbardOneBandExtended") {
+					return cocoon_(direction,block);
+				}
+
+				SizeType site = block[0];
+				std::cout<<"-------------&*&*&* In-situ measurements start\n";
+
+				if (commonTargetting_.noStageIs(DISABLED,stage_))
+					std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
+				else
+					std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
+
+				VectorStringType vecStr = commonTargetting_.getOperatorLabels();
+
+				for (SizeType i=0;i<vecStr.size();i++) {
+					const PsimagLite::String& opLabel = vecStr[i];
+					OperatorType nup = commonTargetting_.getOperatorForTest(opLabel,site);
+
+					PsimagLite::String tmpStr = "<PSI|" + opLabel + "|PSI>";
+					test(psi_,psi_,direction,tmpStr,site,nup);
+
+					tmpStr = "<P0|" + opLabel + "|P0>";
+					test(targetVectors_[0],targetVectors_[0],direction,tmpStr,site,nup);
+				}
+
+				std::cout<<"-------------&*&*&* In-situ measurements end\n";
+
+			}
+
+
+			void cocoon_(SizeType direction,const BlockType& block) const
+			{
 				SizeType site = block[0];
 				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.naturalOperator("nup",0,0));
 				//PsimagLite::CrsMatrix<ComplexType> tmpCt;
@@ -529,9 +571,11 @@ namespace Dmrg {
 				//A.data = tmpC;
 
 				std::cout<<"-------------&*&*&* In-situ measurements start\n";
-				if (noStageIs(DISABLED)) std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
-				else std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
-				//if (includeGroundStage())
+				if (commonTargetting_.noStageIs(DISABLED,stage_))
+					std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
+				else
+					std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
+
 				test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
 				PsimagLite::String s = "<P0|nup|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,nup);
@@ -552,53 +596,6 @@ namespace Dmrg {
 				std::cout<<"-------------&*&*&* In-situ measurements end\n";
 			}
 
-			void checkOrder(SizeType i) const
-			{
-				if (i==0 || tstStruct_.sites.size()==0) return;
-				for (SizeType j=0;j<i;j++) {
-					if (stage_[j] == DISABLED) {
-						PsimagLite::String s ="TST:: Seeing tst site "+ttos(tstStruct_.sites[i]);
-						s =s + " before having seen";
-						s = s + " site "+ttos(tstStruct_.sites[j]);
-						s = s +". Please order your tst sites in order of appearance.\n";
-						throw PsimagLite::RuntimeError(s);
-					}
-				}
-			}
-
-			bool allStages(SizeType x) const
-			{
-				for (SizeType i=0;i<stage_.size();i++)
-					if (stage_[i]!=x) return false;
-				return true;
-			}
-
-			bool noStageIs(SizeType x) const
-			{
-				for (SizeType i=0;i<stage_.size();i++)
-					if (stage_[i]==x) return false;
-				return true;
-			}
-
-			PsimagLite::String getStage(SizeType i) const
-			{
-				switch (stage_[i]) {
-					case DISABLED:
-						return "Disabled";
-						break;
-					case OPERATOR:
-						return "Applying operator for the first time";
-						break; 
-					case WFT_ADVANCE:
-						return "WFT with time stepping";
-						break;
-					case WFT_NOADVANCE:
-						return "WFT without time change";
-						break;
-				}
-				return "undefined";
-			}
-
 			void computePhi(SizeType i,
 			                VectorWithOffsetType& phiNew,
 			                const VectorWithOffsetType& phiOld,
@@ -612,7 +609,7 @@ namespace Dmrg {
 					throw PsimagLite::RuntimeError(str.c_str());
 				}
 				VectorSizeType nk;
-				setNk(nk,block);
+				commonTargetting_.setNk(nk,block);
 				SizeType site = block[0];
 
 				SizeType indexAdvance = times_.size()-1;
@@ -837,7 +834,7 @@ namespace Dmrg {
 				VectorSizeType electrons;
 				model_.findElectronsOfOneSite(electrons,site);
 				FermionSign fs(lrs_.left(),electrons);
-				if (allStages(WFT_NOADVANCE)) {
+				if (commonTargetting_.allStages(WFT_NOADVANCE,stage_)) {
 					VectorWithOffsetType tmpVector = psi_;
 					for (SizeType j=0;j<tstStruct_.aOperators.size();j++) {
 						applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],fs,
@@ -847,12 +844,6 @@ namespace Dmrg {
 					return;
 				}
 				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,systemOrEnviron);
-			}
-
-			void setNk(VectorSizeType& nk,const VectorSizeType& block) const
-			{
-				for (SizeType i=0;i<block.size();i++)
-					nk.push_back(model_.hilbertSize(block[i]));
 			}
 
 			void test(const VectorWithOffsetType& src1,
@@ -898,6 +889,7 @@ namespace Dmrg {
 			RealType currentTime_;
 			typename PsimagLite::Vector<RealType>::Type times_,weight_;
 			typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
+			CommonTargettingType commonTargetting_;
 			RealType gsWeight_;
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;

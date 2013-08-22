@@ -112,11 +112,13 @@ public:
 	typedef DynamicSerializer<VectorWithOffsetType,PostProcType> DynamicSerializerType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,VectorType> ApplyOperatorType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
@@ -251,27 +253,42 @@ public:
 	void cocoon(SizeType direction,SizeType site,
 	            const VectorWithOffsetType& psi) const
 	{
-		int fermionSign1 = 1;
-		const std::pair<SizeType,SizeType> jm1(0,0);
-		RealType angularFactor1 = 1.0;
-		typename OperatorType::Su2RelatedType su2Related1;
-
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-		typename PsimagLite::Vector<PsimagLite::String>::Type vecStr;
-		PsimagLite::tokenizer(model_.params().insitu,vecStr,",");
+		VectorStringType vecStr = getOperatorLabels();
+
 		for (SizeType i=0;i<vecStr.size();i++) {
 			const PsimagLite::String& opLabel = vecStr[i];
-			OperatorType nup;
-			if (!fillOperatorFromFile(nup,opLabel)) {
-				PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator(opLabel,site,0));
-				nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
-			}
+			OperatorType nup = getOperatorForTest(opLabel,site);
+
 			PsimagLite::String tmpStr = "<PSI|" + opLabel + "|PSI>";
 			test(psi,psi,direction,tmpStr,site,nup);
 		}
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
+	}
+
+	VectorStringType getOperatorLabels() const
+	{
+		VectorStringType vecStr;
+		PsimagLite::tokenizer(model_.params().insitu,vecStr,",");
+		return vecStr;
+	}
+
+	OperatorType getOperatorForTest(const PsimagLite::String& opLabel,
+	                                SizeType site) const
+	{
+		int fermionSign1 = 1;
+		const std::pair<SizeType,SizeType> jm1(0,0);
+		RealType angularFactor1 = 1.0;
+		typename OperatorType::Su2RelatedType su2Related1;
+
+		OperatorType nup;
+		if (!fillOperatorFromFile(nup,opLabel)) {
+			PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator(opLabel,site,0));
+			nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
+		}
+		return nup;
 	}
 
 	void computeCorrection(VectorWithOffsetType& v,
@@ -377,8 +394,8 @@ private:
 		fin>>line1;
 		if (fin.eof()) return false;
 		int fermionicSign = 0;
-		if (line1=="FERMIONSIGN=-1") fermionicSign = -1;
-		if (line1!="FERMIONSIGN=1") fermionicSign = 1;
+		if (line1 == "FERMIONSIGN=-1") fermionicSign = -1;
+		if (line1 == "FERMIONSIGN=1") fermionicSign = 1;
 
 		if (fermionicSign==0) return false;
 
@@ -401,7 +418,7 @@ private:
 		fin>>line1;
 		if (fin.eof() || line1.substr(0,14)!="AngularFactor=") return false;
 
-		PsimagLite::CrsMatrix<RealType> msparse(m);
+		PsimagLite::CrsMatrix<ComplexOrRealType> msparse(m);
 		nup = OperatorType(msparse,fermionicSign,jm1,angularFactor1,su2Related1);
 		return true;
 	}
