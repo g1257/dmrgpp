@@ -520,20 +520,21 @@ namespace Dmrg {
 			// in situ computation:
 			void cocoon(SizeType direction,const BlockType& block) const
 			{
-				PsimagLite::String modelName = model_.params().model;
-
-				if (modelName == "HubbardOneBand" ||
-				    modelName == "HubbardOneBandExtended") {
-					return cocoon_(direction,block);
-				}
-
-				SizeType site = block[0];
 				std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
 				if (commonTargetting_.noStageIs(DISABLED,stage_))
 					std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 				else
 					std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
+
+				PsimagLite::String modelName = model_.params().model;
+
+				if (modelName == "HubbardOneBand" ||
+				    modelName == "HubbardOneBandExtended") {
+					cocoon_(direction,block);
+				}
+
+				SizeType site = block[0];
 
 				VectorStringType vecStr = commonTargetting_.getOperatorLabels();
 
@@ -549,7 +550,6 @@ namespace Dmrg {
 				}
 
 				std::cout<<"-------------&*&*&* In-situ measurements end\n";
-
 			}
 
 
@@ -570,12 +570,6 @@ namespace Dmrg {
 				nup.fermionSign = 1;
 				//A.data = tmpC;
 
-				std::cout<<"-------------&*&*&* In-situ measurements start\n";
-				if (commonTargetting_.noStageIs(DISABLED,stage_))
-					std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
-				else
-					std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
-
 				test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
 				PsimagLite::String s = "<P0|nup|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,nup);
@@ -592,8 +586,6 @@ namespace Dmrg {
 				test(psi_,psi_,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc);
 				s = "<P0|doubleOcc|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,doubleOcc);
-
-				std::cout<<"-------------&*&*&* In-situ measurements end\n";
 			}
 
 			void computePhi(SizeType i,
