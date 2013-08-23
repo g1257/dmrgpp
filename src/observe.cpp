@@ -113,7 +113,7 @@ bool observeOneFullSweep(IoInputType& io,
 	const PsimagLite::String& modelName = model.params().model;
 	SizeType rows = n; // could be n/2 if there's enough symmetry
 
-	ObserverInterpreter<ObservableLibraryType> observerInterpreter;
+	ObserverInterpreter<ObservableLibraryType> observerInterpreter(model);
 
 	observerInterpreter(list);
 

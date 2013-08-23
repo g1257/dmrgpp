@@ -90,6 +90,7 @@ namespace Dmrg {
 template<typename ObservableLibraryType>
 class ObserverInterpreter {
 
+	typedef typename ObservableLibraryType::ModelType ModelType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename ObservableLibraryType::PreOperatorSiteIndependentType
 	PreOperatorSiteIndependentType;
@@ -102,8 +103,8 @@ class ObserverInterpreter {
 
 	public:
 
-		Bracket(const PsimagLite::String& bracket)
-		    : bracket_(2,""),type_(ONE_POINT)
+		Bracket(const ModelType& model,const PsimagLite::String& bracket)
+		    : model_(model), bracket_(2,""),type_(ONE_POINT)
 		{
 			VectorStringType vecStr;
 			PsimagLite::tokenizer(bracket,vecStr,"|");
@@ -125,8 +126,11 @@ class ObserverInterpreter {
 				throw PsimagLite::RuntimeError(str);
 			}
 
+			op_.push_back(findOperator(name_[0]));
+
 			if (name_.size() == 2) {
 				type_ = TWO_POINT;
+				op_.push_back(findOperator(name_[1]));
 			} else {
 				assert(vecStr.size() == 1);
 			}
@@ -161,6 +165,24 @@ class ObserverInterpreter {
 
 	private:
 
+		OperatorType findOperator(const PsimagLite::String& name) const
+		{
+			if (name.length()<2 || name[0]!=':') {
+				PsimagLite::String str("ObserverInterpreter: syntax error for ");
+				str += name + "\n";
+				throw PsimagLite::RuntimeError(str);
+			}
+
+			PsimagLite::String label = name.substr(1,name.length()-1);
+
+			PsimagLite::IoSimple::In io(label);
+
+			CookedOperator<ModelType> cookedOperator(model_);
+
+			return OperatorType(io,cookedOperator,OperatorType::MUST_BE_NONZERO);
+		}
+
+		const ModelType& model_;
 		VectorStringType bracket_;
 		VectorStringType name_;
 		SizeType type_;
@@ -168,6 +190,10 @@ class ObserverInterpreter {
 	}; // class Bracket
 
 public:
+
+	ObserverInterpreter(const ModelType& model)
+	    : model_(model)
+	{}
 
 	void operator()(const PsimagLite::String& list)
 	{
@@ -177,7 +203,7 @@ public:
 		for (SizeType i = 0; i < vecStr.size(); ++i) {
 			std::cout<<vecStr[i]<<"\n";
 
-			Bracket bracket(vecStr[i]);
+			Bracket bracket(model_, vecStr[i]);
 
 			SizeType threadId = 0;
 			if (bracket.type() == ONE_POINT) {
@@ -200,6 +226,7 @@ public:
 
 private:
 
+	const ModelType& model_;
 
 }; //class ObserverInterpreter
 } // namespace Dmrg

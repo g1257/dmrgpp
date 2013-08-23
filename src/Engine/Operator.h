@@ -155,8 +155,8 @@ namespace Dmrg {
 		: data(data1),fermionSign(fermionSign1),jm(jm1),angularFactor(angularFactor1),su2Related(su2Related1)
 		{}
 
-		template<typename IoInputType, typename CookedDataType>
-		Operator(IoInputType& io, CookedDataType& cookedOperator,bool checkNonZero)
+		template<typename IoInputType, typename CookedOperatorType>
+		Operator(IoInputType& io, CookedOperatorType& cookedOperator,bool checkNonZero)
 		{
 			PsimagLite::String s;
 			PsimagLite::Matrix<SparseElementType> m;
