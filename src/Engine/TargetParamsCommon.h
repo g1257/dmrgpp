@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <stdexcept>
 #include <iostream>
+#include "CookedOperator.h"
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
@@ -92,8 +93,8 @@ namespace Dmrg {
 			typedef typename ModelType::OperatorType OperatorType;
 			typedef typename OperatorType::PairType PairType;
 			typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-			typedef typename SparseMatrixType::value_type ComplexOrReal;
-			typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
+			typedef typename SparseMatrixType::value_type ComplexOrRealType;
+			typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 			typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 			typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 
@@ -107,8 +108,6 @@ namespace Dmrg {
 			   noOperator(false),
 			  model_(model)
 			{
-
-				//io.readline(filename,"TSPFilename="); // filename
 				io.read(sites,"TSPSites");
 				io.read(startingLoops,"TSPLoops");
 				PsimagLite::String productOrSum="product";
@@ -134,39 +133,15 @@ namespace Dmrg {
 					throw PsimagLite::RuntimeError(s.c_str());
 				}
 
-				data_.resize(sites.size());
 				aOperators.resize(sites.size());
-			
+
+				CookedOperator<ModelType> cookedOperator(model_);
+
 				for (SizeType i=0;i<sites.size();i++) {
-					PsimagLite::String s;
-					io.readline(s,"TSPOperator=");
-					if (s == "cooked") {
-						io.readline(s,"COOKED_OPERATOR=");
-						VectorSizeType v;
-						io.read(v,"COOKED_EXTRA");
-						setCookedData(i,s,v);
-					} else {
-						PsimagLite::Matrix<ComplexOrReal> m;
-						io.readMatrix(m,"RAW_MATRIX");
-						setRawData(i,m);
-						checkNotZeroMatrix(i,m);
-					}
-					int fermiSign=0;
-					io.readline(fermiSign,"FERMIONSIGN=");
-					std::pair<SizeType,SizeType> jmValues;
-					VectorSizeType v(2);
-					io.readKnownSize(v,"JMVALUES");
-					jmValues.first = v[0]; jmValues.second = v[1];
-					RealType angularFactor;
-					io.readline(angularFactor,"AngularFactor=");
-					//tsp.set(i,fermiSign,jmValues,angularFactor);
-					SparseMatrixType data(data_[i]);
-	
-					// FIXME: su2related needs to be set properly for when SU(2) is running: 
-					typename OperatorType::Su2RelatedType su2Related; 
-					OperatorType myOp(data,fermiSign, jmValues,angularFactor,su2Related);
+					OperatorType myOp(io,cookedOperator,OperatorType::MUST_BE_NONZERO);
 					aOperators[i] = myOp;
 				}
+
 				noOperator = isNoOperator();
 				checkBorderOperators();
 				checkSizesOfOperators();
@@ -180,47 +155,20 @@ namespace Dmrg {
 		
 		private:
 
-			void checkNotZeroMatrix(SizeType i,const PsimagLite::Matrix<ComplexOrReal>& m) const
-			{
-				RealType norma = norm2(m);
-				RealType eps = 1e-6;
-				if (norma>eps) return;
-
-				PsimagLite::String s(__FILE__);
-				s += " : " + ttos(__LINE__) + "\n";
-				s += "RAW_MATRIX or COOKED_OPERATOR number " + ttos(i);
-				s += " is less than " + ttos(eps) + "\n";
-				throw PsimagLite::RuntimeError(s.c_str());
-			}
-
-
 			bool isNoOperator() const
 			{
-				if (data_.size()!=1) return false;
-				return (isTheIdentity(data_[0]));
-			}
-
-			void setCookedData(SizeType i,const PsimagLite::String& s,const VectorSizeType& v)
-			{
-				data_[i]=model_.naturalOperator(s,v[0],v[1]);
-			}
-			
-			void setRawData(SizeType i,const MatrixType& m)
-			{
-				data_[i]=m;
-			}
-			
-			void set(SizeType i,int fermiSign,const PairType& jmValues,RealType angularFactor)
-			{
+				if (aOperators.size()!=1) return false;
+				return (isTheIdentity(aOperators[0].data) && aOperators[0].fermionSign);
 			}
 			
 			void checkSizesOfOperators() const
 			{
-				if (sites.size() != data_.size() || sites.size() != startingLoops.size())
+				if (sites.size() != aOperators.size() ||
+				    sites.size() != startingLoops.size())
 					throw PsimagLite::RuntimeError("CommonTargetting\n");
 
-				for (SizeType i=0;i<data_.size();i++) {
-					SizeType n = data_[i].n_row();
+				for (SizeType i=0;i<aOperators.size();i++) {
+					SizeType n = aOperators[i].data.row();
 					if (n!=model_.hilbertSize(sites[i]))
 						throw PsimagLite::RuntimeError("CommonTargetting\n");
 				}
@@ -260,7 +208,7 @@ namespace Dmrg {
 			}
 
 			const ModelType& model_;
-			VectorMatrixType data_;
+//			VectorMatrixType data_;
 	}; // class TargetParamsCommon
 	
 	template<typename ModelType>
@@ -272,11 +220,10 @@ namespace Dmrg {
 			os<<"#TargetParams.operator "<<i<<"\n";
 			os<<t.aOperators[i];
 		}
-// 		os<<"#TargetParams.electrons\n";
-// 		os<<t.electrons;
+
 		os<<"#TargetParams.site="<<t.sites;
 		os<<"#TargetParams.startingLoop="<<t.startingLoops<<"\n";
-		//os<<"#TargetParams.filename="<<t.filename<<"\n";
+
 		return os;
 	}
 } // namespace Dmrg 

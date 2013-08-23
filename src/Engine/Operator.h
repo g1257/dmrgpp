@@ -136,6 +136,9 @@ namespace Dmrg {
 	template<typename SparseMatrixType_>
 	struct Operator {
 
+		enum {CAN_BE_ZERO = false, MUST_BE_NONZERO = true};
+
+		typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 		typedef SparseMatrixType_ SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
@@ -151,6 +154,37 @@ namespace Dmrg {
 		         const Su2RelatedType& su2Related1)
 		: data(data1),fermionSign(fermionSign1),jm(jm1),angularFactor(angularFactor1),su2Related(su2Related1)
 		{}
+
+		template<typename IoInputType, typename CookedDataType>
+		Operator(IoInputType& io, CookedDataType& cookedOperator,bool checkNonZero)
+		{
+			PsimagLite::String s;
+			PsimagLite::Matrix<SparseElementType> m;
+
+			io.readline(s,"TSPOperator=");
+
+			if (s == "cooked") {
+				io.readline(s,"COOKED_OPERATOR=");
+				VectorSizeType v;
+				io.read(v,"COOKED_EXTRA");
+				cookedOperator(m,s,v);
+			} else {
+				io.readMatrix(m,"RAW_MATRIX");
+				if (checkNonZero) checkNotZeroMatrix(m);
+			}
+
+			fullMatrixToCrsMatrix(data,m);
+
+			io.readline(fermionSign,"FERMIONSIGN=");
+
+			VectorSizeType v(2);
+			io.readKnownSize(v,"JMVALUES");
+			jm.first = v[0]; jm.second = v[1];
+
+			io.readline(angularFactor,"AngularFactor=");
+
+			// FIXME: su2related needs to be set properly for when SU(2) is running
+		}
 
 		void send(int root,int tag,PsimagLite::MPI::CommType mpiComm)
 		{
@@ -174,8 +208,22 @@ namespace Dmrg {
 		int fermionSign; // does this operator commute or anticommute with others of the same class on different sites
 		PairType  jm; // angular momentum of this operator	
 		RealType angularFactor;
-
 		Su2RelatedType su2Related;
+
+	private:
+
+		void checkNotZeroMatrix(const PsimagLite::Matrix<SparseElementType>& m) const
+		{
+			RealType norma = norm2(m);
+			RealType eps = 1e-6;
+			if (norma>eps) return;
+
+			PsimagLite::String s(__FILE__);
+			s += " : " + ttos(__LINE__) + "\n";
+			s += "RAW_MATRIX or COOKED_OPERATOR ";
+			s += " is less than " + ttos(eps) + "\n";
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
 	};
 
 	template<typename SparseMatrixType>

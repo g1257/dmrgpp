@@ -119,13 +119,13 @@ class ObserverInterpreter {
 
 			PsimagLite::tokenizer(vecStr[1],name_,";");
 
-			if (vecStr.size() != 1 && vecStr.size() != 2) {
+			if (name_.size() != 1 && name_.size() != 2) {
 				PsimagLite::String str("ObserverInterpreter: syntax error for ");
 				str += bracket + " expected one or two operators\n";
 				throw PsimagLite::RuntimeError(str);
 			}
 
-			if (vecStr.size() == 2) {
+			if (name_.size() == 2) {
 				type_ = TWO_POINT;
 			} else {
 				assert(vecStr.size() == 1);
