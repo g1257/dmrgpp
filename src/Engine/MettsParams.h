@@ -96,7 +96,7 @@ public:
 	MettsParams(IoInputter& io,const ModelType& model)
 	    : TimeVectorParamsType(io,model),noOperator(false)
 	{
-		io.readline(beta,"Beta=");
+		io.readline(beta,"BetaDividedByTwo=");
 		io.readline(rngSeed,"TSPRngSeed=");
 		io.readline(collapse,"MettsCollapse=");
 	}
@@ -114,11 +114,12 @@ operator<<(std::ostream& os,const MettsParams<ModelType>& t)
 	os<<"#TargetParams.type=Metts";
 	const typename MettsParams<ModelType>::TimeVectorParamsType& tp = t;
 	os<<tp;
-	os<<"#TargetParams.beta="<<t.beta<<"\n";
-	os<<"#TargetParams.TSPRngSeed="<<t.rngSeed<<"\n";
-	os<<"#TargetParams.MettsCollapse="<<t.collapse<<"\n";
+	os<<"#BetaDividedByTwo="<<t.beta<<"\n";
+	os<<"#TSPRngSeed="<<t.rngSeed<<"\n";
+	os<<"#MettsCollapse="<<t.collapse<<"\n";
 	return os;
 }
+
 } // namespace Dmrg 
 
 /*@}*/
