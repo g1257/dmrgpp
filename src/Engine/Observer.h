@@ -94,19 +94,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename VectorWithOffsetType,typename ModelType,typename IoInputType>
+	template<typename VectorWithOffsetType_,typename ModelType_,typename IoInputType>
 	class Observer {
-		typedef typename VectorWithOffsetType::value_type FieldType;
+		typedef typename VectorWithOffsetType_::value_type FieldType;
 		typedef PsimagLite::SparseVector<FieldType> VectorType;
-		typedef typename ModelType::RealType RealType;
+		typedef typename ModelType_::RealType RealType;
 		typedef PsimagLite::Matrix<FieldType> MatrixType;
-		typedef typename ModelType::BasisWithOperatorsType
+		typedef typename ModelType_::BasisWithOperatorsType
 				BasisWithOperatorsType;
-		typedef typename ModelType::ModelHelperType::LeftRightSuperType
+		typedef typename ModelType_::ModelHelperType::LeftRightSuperType
 				LeftRightSuperType;
 		typedef ObserverHelper<IoInputType,MatrixType,VectorType,
-			VectorWithOffsetType,LeftRightSuperType> ObserverHelperType;
-		typedef CorrelationsSkeleton<ObserverHelperType,ModelType>
+			VectorWithOffsetType_,LeftRightSuperType> ObserverHelperType;
+		typedef CorrelationsSkeleton<ObserverHelperType,ModelType_>
 			CorrelationsSkeletonType;
 		typedef OnePointCorrelations<ObserverHelperType>
 			OnePointCorrelationsType;
@@ -128,6 +128,10 @@ namespace Dmrg {
 			RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
 
 	public:
+
+		typedef ModelType_ ModelType;
+		typedef VectorWithOffsetType_ VectorWithOffsetType;
+
 		Observer(
 				IoInputType& io,
 				SizeType nf,

@@ -47,6 +47,7 @@ typedef float RealType;
 #include "Provenance.h"
 #include "InputCheck.h"
 #include "ModelSelector.h"
+#include "ObserverInterpreter.h"
 
 using namespace Dmrg;
 
@@ -75,41 +76,46 @@ SizeType dofsFromModelName(const ModelType& model)
 	return 0;
 }
 
-template<typename VectorWithOffsetType,typename ModelType,typename SparseMatrixType,typename TargettingType>
-bool observeOneFullSweep(
-	IoInputType& io,
-	const GeometryType& geometry,
-	const ModelType& model,
-	const PsimagLite::String& obsOptions,
-	bool hasTimeEvolution)
+template<typename VectorWithOffsetType,
+         typename ModelType,
+         typename SparseMatrixType>
+bool observeOneFullSweep(IoInputType& io,
+                         const ModelType& model,
+                         const PsimagLite::String& obsOptions,
+                         const PsimagLite::String& list,
+                         bool hasTimeEvolution)
 {
+	const GeometryType& geometry = model.geometry();
 	bool verbose = false;
+
 	typedef typename SparseMatrixType::value_type FieldType;
 	typedef Observer<VectorWithOffsetType,ModelType,IoInputType> ObserverType;
-	typedef ObservableLibrary<ObserverType,TargettingType> ObservableLibraryType;
+	typedef ObservableLibrary<ObserverType> ObservableLibraryType;
+
 	SizeType n  = geometry.numberOfSites();
-	//PsimagLite::String sSweeps = "sweeps=";
-	//PsimagLite::String::SizeTypeype begin = obsOptions.find(sSweeps);
-	//if (begin != PsimagLite::String::npos) {
-	//	PsimagLite::String sTmp = obsOptions.substr(begin+sSweeps.length(),PsimagLite::String::npos);
-		//std::cout<<"sTmp="<<sTmp<<"\n";
-	//	n = atoi(sTmp.c_str());
-	//}
+
 	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,verbose);
 	
 	bool ot = false;
-	if (obsOptions.find("ot")!=PsimagLite::String::npos || obsOptions.find("time")!=PsimagLite::String::npos) ot = true;
+	if (obsOptions.find("ot")!=PsimagLite::String::npos ||
+	    obsOptions.find("time")!=PsimagLite::String::npos) ot = true;
+
 	if (hasTimeEvolution && ot) {
 		observerLib.measureTime("superDensity");
 		observerLib.measureTime("nupNdown");
 		observerLib.measureTime("nup+ndown");
-		if (obsOptions.find("sz")!=PsimagLite::String::npos) observerLib.measureTime("sz");
+		if (obsOptions.find("sz")!=PsimagLite::String::npos)
+			observerLib.measureTime("sz");
 	}
 
 	if (hasTimeEvolution) observerLib.setBrackets("time","time");
 
 	const PsimagLite::String& modelName = model.params().model;
 	SizeType rows = n; // could be n/2 if there's enough symmetry
+
+	ObserverInterpreter<ObservableLibraryType> observerInterpreter;
+
+	observerInterpreter(list);
 
 	// Immm supports only onepoint:
 	if (modelName=="Immm" && obsOptions!="onepoint") {
@@ -172,17 +178,13 @@ bool observeOneFullSweep(
 
 template<template<typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
-         template<template<typename,typename,typename> class,
-		  template<typename,typename> class,
-                  template<typename,typename> class,
-                  typename,typename,
-         template<typename> class> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop(GeometryType& geometry,
               const PsimagLite::String& targetting,
-	      InputNgType::Readable& io,
-	      const DmrgSolverParametersType& params,
-              const PsimagLite::String& obsOptions)
+              InputNgType::Readable& io,
+              const DmrgSolverParametersType& params,
+              const PsimagLite::String& obsOptions,
+              const PsimagLite::String& list)
 {
 	typedef Basis<MySparseMatrix> BasisType;
 	typedef Operators<BasisType> OperatorsType;
@@ -193,23 +195,11 @@ void mainLoop(GeometryType& geometry,
 	                  DmrgSolverParametersType,
 	                  InputNgType::Readable,
 	                  GeometryType> ModelBaseType;
-	typedef TargettingTemplate<PsimagLite::LanczosSolver,
-	                           InternalProductOnTheFly,
-	                           WaveFunctionTransfFactory,
-	                           ModelBaseType,
-	                           IoInputType,
-	                           VectorWithOffsetTemplate> TargettingType;
-
-	typedef DmrgSolver<InternalProductOnTheFly,TargettingType> SolverType;
-	
-	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename MySparseMatrix::value_type ComplexOrRealType;
+	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 	
 	ModelSelector<ModelBaseType> modelSelector(params.model);
 	const ModelBaseType& model = modelSelector(params,io,geometry);
-
-	 //! Read TimeEvolution if applicable:
-	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
-	TargettingParamsType tsp(io,model);
 	
 	bool moreData = true;
 	const PsimagLite::String& datafile = params.filename;
@@ -218,15 +208,13 @@ void mainLoop(GeometryType& geometry,
 	while (moreData) {
 		try {
 			moreData = !observeOneFullSweep<VectorWithOffsetType,ModelBaseType,
-			            MySparseMatrix,TargettingType>
-			(dataIo,geometry,model,obsOptions,hasTimeEvolution);
+			            MySparseMatrix>
+			(dataIo,model,obsOptions,list,hasTimeEvolution);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"There's no more data\n";
 			break;
 		}
-
-		//if (!hasTimeEvolution) break;
 	}
 }
 
@@ -240,8 +228,9 @@ int main(int argc,char *argv[])
 	using namespace Dmrg;
 
 	PsimagLite::String filename="";
-	PsimagLite::String options = "";
+	PsimagLite::String options("");
 	int opt = 0;
+
 	while ((opt = getopt(argc, argv,"f:o:")) != -1) {
 		switch (opt) {
 		case 'f':
@@ -255,6 +244,8 @@ int main(int argc,char *argv[])
 			return 1;
 		}
 	}
+
+	PsimagLite::String list = (optind < argc) ? argv[optind] : "";
 
 	//sanity checks here
 	if (filename=="") {
@@ -284,53 +275,37 @@ int main(int argc,char *argv[])
 
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
-	bool su2=false;
-	if (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos) su2=true;
+	bool su2 = (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos);
 	PsimagLite::String targetting="GroundStateTargetting";
 	const char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
                      "CorrectionVectorTargetting","CorrectionTargetting","MettsTargetting"};
 	SizeType totalTargets = 6;
 	for (SizeType i = 0;i<totalTargets;++i)
-		if (dmrgSolverParams.options.find(targets[i])!=PsimagLite::String::npos) targetting=targets[i];
-	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
- 		" supports only GroundStateTargetting for now (sorry!)\n");
+		if (dmrgSolverParams.options.find(targets[i])!=PsimagLite::String::npos)
+			targetting = targets[i];
+
+	if (targetting!="GroundStateTargetting" && su2)
+		throw PsimagLite::RuntimeError("SU(2) supports only GroundStateTargetting\n");
 	
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
-			mainLoop<ModelHelperSu2,VectorWithOffsets,GroundStateTargetting,MySparseMatrixReal>
-			(geometry,targetting,io,dmrgSolverParams,options);
+			mainLoop<ModelHelperSu2,VectorWithOffsets,MySparseMatrixReal>
+			(geometry,targetting,io,dmrgSolverParams, options, list);
 		} else {
-			mainLoop<ModelHelperSu2,VectorWithOffset,GroundStateTargetting,MySparseMatrixReal>
-			(geometry,targetting,io,dmrgSolverParams,options);
+			mainLoop<ModelHelperSu2,VectorWithOffset,MySparseMatrixReal>
+			(geometry,targetting,io,dmrgSolverParams, options, list);
 		}
 		return 0;
 	}
-	if (targetting=="TimeStepTargetting") { 
-		mainLoop<ModelHelperLocal,VectorWithOffsets,TimeStepTargetting,MySparseMatrixComplex>
-		(geometry,targetting,io,dmrgSolverParams,options);
-		return 0;
+	if (targetting=="GroundStateTargetting") {
+		mainLoop<ModelHelperLocal,VectorWithOffset,MySparseMatrixReal>
+		(geometry,targetting,io,dmrgSolverParams, options, list);
+	} else if (targetting=="TimeStepTargetting") {
+		mainLoop<ModelHelperLocal,VectorWithOffsets,MySparseMatrixComplex>
+		(geometry,targetting,io,dmrgSolverParams, options, list);
+	} else {
+		mainLoop<ModelHelperLocal,VectorWithOffsets,MySparseMatrixReal>
+		(geometry,targetting,io,dmrgSolverParams, options, list);
 	}
-	if (targetting=="DynamicTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,DynamicTargetting,MySparseMatrixReal>
-		(geometry,targetting,io,dmrgSolverParams,options);
-		return 0;
-	}
-	if (targetting=="AdaptiveDynamicTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,AdaptiveDynamicTargetting,MySparseMatrixReal>
-		(geometry,targetting,io,dmrgSolverParams,options);
-		return 0;
-	}
-	if (targetting=="CorrectionTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,CorrectionTargetting,MySparseMatrixReal>
-		(geometry,targetting,io,dmrgSolverParams,options);
-		return 0;
-	}
-	if (targetting=="MettsTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,MettsTargetting,MySparseMatrixReal>
-		(geometry,targetting,io,dmrgSolverParams,options);
-		return 0;
-	}
-	mainLoop<ModelHelperLocal,VectorWithOffset,GroundStateTargetting,MySparseMatrixReal>
-	(geometry,targetting,io,dmrgSolverParams,options);
 } // main
 

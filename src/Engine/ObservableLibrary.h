@@ -85,17 +85,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename ObserverType,typename TargettingType>
+	template<typename ObserverType>
 	class ObservableLibrary {
 	public:
-		typedef typename TargettingType::ModelType ModelType;
+		typedef typename ObserverType::ModelType ModelType;
+		typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelType::OperatorType OperatorType;
 		typedef typename OperatorType::Su2RelatedType Su2RelatedType;
-		typedef typename TargettingType::ApplyOperatorType ApplyOperatorType;
+		typedef typename ObserverType::VectorWithOffsetType VectorWithOffsetType;
+		typedef typename VectorWithOffsetType::VectorType VectorType;
+		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,VectorType>
+		ApplyOperatorType;
 		typedef typename ModelType::RealType RealType;
-
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::value_type FieldType;
 		typedef PsimagLite::Matrix<FieldType> MatrixType;
 		typedef PreOperatorBase<ModelType> PreOperatorBaseType;
@@ -125,22 +127,23 @@ namespace Dmrg {
 
 		void measure(const PsimagLite::String& label,SizeType rows,SizeType cols)
 		{
-			// Note that I can't print sites when there no time evolution
-			// since the DmrgSerializer doens't have sites yet
-			// as opposed to the TimeSerializer
 			SizeType threadId = 0;
-			if (hasTimeEvolution_) printSites(threadId);
+
+			PsimagLite::String str("WARNING: ObservableLibrary: ");
+			str += "deprecated use of measure\n";
+			std::cerr<<str;
+
 			SizeType site = 0; // FIXME: No support for site varying operators
 			if (label=="cc") {
 				MatrixType opC = model_.naturalOperator("c",site,0); // c_{0,0} spin up
 				MatrixType opCtranspose = transposeConjugate(opC);
-				measureOne("OperatorC",opC,opCtranspose,-1,rows,cols,threadId);
+				measureOne("OperatorC",opC,"",opCtranspose,-1,rows,cols,threadId);
 				MatrixType opC2 = model_.naturalOperator("c",site,1); // c_{0,0} spin down 
 				MatrixType opCtranspose2 = transposeConjugate(opC2);
-				measureOne("OperatorC",opC2,opCtranspose2,-1,rows,cols,threadId);
+				measureOne("OperatorC",opC2,"",opCtranspose2,-1,rows,cols,threadId);
 			} else if (label=="nn") {
 				MatrixType opN = model_.naturalOperator("n",site,0);
-				measureOne("OperatorN",opN,opN,1,rows,cols,threadId);
+				measureOne("OperatorN",opN,"",opN,1,rows,cols,threadId);
 			} else if (label=="szsz") {
 				MatrixType Sz = model_.naturalOperator("z",site,0);
 				szsz_ = observe_.correlations(Sz,Sz,1,rows,cols);
@@ -187,7 +190,7 @@ namespace Dmrg {
 				const MatrixType& oDelta = model_.naturalOperator("d",site,0);
 				MatrixType oDeltaT;
 				transposeConjugate(oDeltaT,oDelta);
-				measureOne("TWO-POINT DELTA-DELTA^DAGGER",oDelta,oDeltaT,1,
+				measureOne("TWO-POINT DELTA-DELTA^DAGGER",oDelta,"",oDeltaT,1,
 						rows,cols,threadId);
 			} else if (label=="dd4") {
 				if (model_.geometry().label(0)!="ladderx") {
@@ -237,6 +240,10 @@ namespace Dmrg {
 
 		void measureTime(const PsimagLite::String& label)
 		{
+			PsimagLite::String str("WARNING: ObservableLibrary: ");
+			str += "deprecated use of measureTime\n";
+			std::cerr<<str;
+
 			SparseMatrixType A;
 			Su2RelatedType su2Related1;
 			SizeType threadId = 0;
@@ -273,15 +280,12 @@ namespace Dmrg {
 			}
 		}
 
-		void setBrackets(const PsimagLite::String& left,const PsimagLite::String& right)
-		{
-			observe_.setBrackets(left,right);
-		}
-
-		bool endOfData() const { return observe_.endOfData(); }
-
 		void measureTheOnePoints(SizeType numberOfDofs)
 		{
+			PsimagLite::String str("WARNING: ObservableLibrary: ");
+			str += "measureTheOnePoints is deprecated\n";
+			std::cerr<<str;
+
 			SizeType threadId = 0;
 			for (SizeType dof=0;dof<numberOfDofs;dof++) {
 				for (SizeType dof2=dof;dof2<numberOfDofs;dof2++) {
@@ -293,25 +297,35 @@ namespace Dmrg {
 			}
 		}
 
-	private:
+		void setBrackets(const PsimagLite::String& left,const PsimagLite::String& right)
+		{
+			observe_.setBrackets(left,right);
+		}
 
-		void measureOne(const PsimagLite::String& label,
+		bool endOfData() const { return observe_.endOfData(); }
+
+		void measureOne(const PsimagLite::String& label1,
 						const PsimagLite::Matrix<FieldType>& op1,
+		                const PsimagLite::String& label2,
 						const PsimagLite::Matrix<FieldType>& op2,
 						int fermionSign,
 						SizeType rows,
 						SizeType cols,
 						SizeType threadId)
 		{
+			if (hasTimeEvolution_) printSites(threadId);
+
 			const MatrixType& v =
 				observe_.correlations(op1,op2,fermionSign,rows,cols);;
 			if (PsimagLite::Concurrency::root()) {
 				if (hasTimeEvolution_)
 					std::cout<<"#Time="<<observe_.time(threadId)<<"\n";
-				std::cout<<label<<":\n";
+				std::cout<<label1<<label2<<":\n";
 				std::cout<<v;
 			}
 		}
+
+	private:
 
 		void measureOnePoint(const PreOperatorBaseType& preOperator)
 		{
