@@ -325,6 +325,53 @@ namespace Dmrg {
 			}
 		}
 
+		const ModelType& model() const { return model_; }
+
+		void measureOnePoint(const PsimagLite::String& bra,
+		                     const PreOperatorBaseType& preOperator,
+		                     const PsimagLite::String& ket)
+		{
+			SizeType threadId = preOperator.threadId();
+			printMarker(threadId);
+
+			for (SizeType i0 = 0;i0<observe_.size();i0++) {
+				if (!preOperator.isValid(i0+1)) continue;
+
+				OperatorType opA = preOperator(i0+1);
+
+				preOperator.printMatrix(opA.data,preOperator.siteDependent(),i0);
+
+				if (i0==0) {
+					std::cout<<"site <"<<bra<<"|"<<preOperator.label()<<"|"<<ket<<"\n";
+				}
+
+				observe_.setBrackets(bra,ket);
+				observe_.setPointer(threadId,i0);
+
+				onePointHookForZero(i0,opA,"gs",threadId);
+
+				FieldType tmp1 = observe_.template
+						onePoint<ApplyOperatorType>(i0,opA);
+				std::cout<<observe_.site(threadId)<<" "<<tmp1;
+
+				if (!observe_.isAtCorner(numberOfSites_,threadId)) continue;
+
+				// also calculate next or prev. site:
+				SizeType x = (observe_.site(threadId)==1) ? 0 : numberOfSites_-1;
+
+				// operator might be site dependent
+				if (!preOperator.isValid(x)) continue;
+				OperatorType opAcorner = preOperator(x);
+
+				// do the corner case
+				observe_.setBrackets(bra,ket);
+				bool doCorner = true;
+				tmp1 = observe_.template
+				        onePoint<ApplyOperatorType>(i0,opAcorner,doCorner);
+				std::cout<<x<<" "<<tmp1;
+			}
+		}
+
 	private:
 
 		void measureOnePoint(const PreOperatorBaseType& preOperator)

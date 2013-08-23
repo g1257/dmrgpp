@@ -113,9 +113,9 @@ bool observeOneFullSweep(IoInputType& io,
 	const PsimagLite::String& modelName = model.params().model;
 	SizeType rows = n; // could be n/2 if there's enough symmetry
 
-	ObserverInterpreter<ObservableLibraryType> observerInterpreter(model);
+	ObserverInterpreter<ObservableLibraryType> observerInterpreter(observerLib);
 
-	observerInterpreter(list);
+	observerInterpreter(list,rows,n);
 
 	// Immm supports only onepoint:
 	if (modelName=="Immm" && obsOptions!="onepoint") {

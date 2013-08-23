@@ -95,7 +95,10 @@ class ObserverInterpreter {
 	typedef typename ObservableLibraryType::PreOperatorSiteIndependentType
 	PreOperatorSiteIndependentType;
 	typedef typename ObservableLibraryType::OperatorType OperatorType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
 	enum {ONE_POINT, TWO_POINT};
 
@@ -115,8 +118,19 @@ class ObserverInterpreter {
 				throw PsimagLite::RuntimeError(str);
 			}
 
-			bracket_[0] = vecStr[0];
-			bracket_[1] = vecStr[2];
+			bracket_[0] = vecStr[0].substr(1,vecStr[0].length()-1);
+			if (!isBracket(0)) {
+				PsimagLite::String str("ObserverInterpreter: syntax error: ");
+				str += bracket_[0] + " must be <gs or <time \n";
+				throw PsimagLite::RuntimeError(str);
+			}
+
+			bracket_[1] = vecStr[2].substr(0,vecStr[2].length()-1);
+			if (!isBracket(1)) {
+				PsimagLite::String str("ObserverInterpreter: syntax error: ");
+				str += bracket_[1] + " must be <gs or <time \n";
+				throw PsimagLite::RuntimeError(str);
+			}
 
 			PsimagLite::tokenizer(vecStr[1],name_,";");
 
@@ -150,13 +164,13 @@ class ObserverInterpreter {
 
 		PsimagLite::String bra() const
 		{
-			assert(0 < bracket_.size());
+			assert(isBracket(0));
 			return bracket_[0];
 		}
 
 		PsimagLite::String ket() const
 		{
-			assert(1 < bracket_.size());
+			assert(isBracket(1));
 			return bracket_[1];
 		}
 
@@ -164,6 +178,12 @@ class ObserverInterpreter {
 
 
 	private:
+
+		bool isBracket(SizeType ind) const
+		{
+			if (ind >= bracket_.size()) return false;
+			return (bracket_[ind] == "gs" || bracket_[ind] == "time");
+		}
 
 		OperatorType findOperator(const PsimagLite::String& name) const
 		{
@@ -191,11 +211,11 @@ class ObserverInterpreter {
 
 public:
 
-	ObserverInterpreter(const ModelType& model)
-	    : model_(model)
+	ObserverInterpreter(ObservableLibraryType& observableLibrary)
+	    : observableLibrary_(observableLibrary)
 	{}
 
-	void operator()(const PsimagLite::String& list)
+	void operator()(const PsimagLite::String& list, SizeType rows, SizeType cols)
 	{
 		VectorStringType vecStr;
 		PsimagLite::tokenizer(list,vecStr,",");
@@ -203,30 +223,38 @@ public:
 		for (SizeType i = 0; i < vecStr.size(); ++i) {
 			std::cout<<vecStr[i]<<"\n";
 
-			Bracket bracket(model_, vecStr[i]);
+			Bracket bracket(observableLibrary_.model(), vecStr[i]);
 
 			SizeType threadId = 0;
 			if (bracket.type() == ONE_POINT) {
 				PreOperatorSiteIndependentType preOperator(bracket.op(0),
 				                                           bracket.opName(0),
 				                                           threadId);
-//				measureOnePoint(preOperator);
+				observableLibrary_.measureOnePoint(bracket.bra(),
+				                                   preOperator,
+				                                   bracket.ket());
 			} else {
-//				measureOne(bracket.opName(0),
-//				           bracket.op(0).data,
-//				           bracket.opName(1),
-//				           bracket.op(1).data,
-//				           bracket.op(0).fermionSign,
-//				           rows,
-//				           cols,
-//				           threadId);
+				MatrixType m0;
+				crsMatrixToFullMatrix(m0,bracket.op(0).data);
+
+				MatrixType m1;
+				crsMatrixToFullMatrix(m1,bracket.op(1).data);
+
+				observableLibrary_.measureOne(bracket.opName(0),
+				                              m0,
+				                              bracket.opName(1),
+				                              m1,
+				                              bracket.op(0).fermionSign,
+				                              rows,
+				                              cols,
+				                              threadId);
 			}
 		}
 	}
 
 private:
 
-	const ModelType& model_;
+	ObservableLibraryType& observableLibrary_;
 
 }; //class ObserverInterpreter
 } // namespace Dmrg
