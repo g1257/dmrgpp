@@ -408,6 +408,8 @@ namespace Dmrg {
 				// nothing to do here
 			}
 
+			bool end() const { return false; }
+
 		private:
 
 			void evolve(SizeType index,

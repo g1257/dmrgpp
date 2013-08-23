@@ -289,6 +289,8 @@ public:
 		// nothing to do here
 	}
 
+	bool end() const { return false; }
+
 private:
 
 	void evolve(RealType Eg,SizeType direction,SizeType site,SizeType loopNumber)

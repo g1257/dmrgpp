@@ -465,6 +465,11 @@ namespace Dmrg {
 				basisWithOps.setVarious(X,hmatrix,q,creationMatrix);
 			}
 
+			bool end() const
+			{
+				return (tstStruct_.maxTime != 0 && currentTime_ >= tstStruct_.maxTime);
+			}
+
 		private:
 
 			void printNormsAndWeights() const

@@ -341,6 +341,8 @@ namespace Dmrg {
 
 		const ModelType& model() const { return model_; }
 
+		bool end() const { return false; }
+
 	private:
 
 		SizeType evolve(SizeType i,

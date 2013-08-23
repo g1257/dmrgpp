@@ -100,9 +100,15 @@ namespace Dmrg {
 		template<typename IoInputter>
 		TimeStepParams(IoInputter& io,const ModelType& model)
 			: TimeVectorParamsType(io,model),
-		      TargetParamsCommonType(io,model)
+		      TargetParamsCommonType(io,model),
+		      maxTime(0)
+		{
+			try {
+				io.readline(maxTime,"TSPMaxTime=");
+			} catch (std::exception& e) {}
+		}
 
-		{}
+		RealType maxTime;
 
 	}; // class TimeStepParams
 	
@@ -111,10 +117,16 @@ namespace Dmrg {
 	operator<<(std::ostream& os,const TimeStepParams<ModelType>& t)
 	{
 		os<<"#TargetParams.type=TimeStep\n";
+
 		const typename TimeStepParams<ModelType>::TimeVectorParamsType& tp1 = t;
 		os<<tp1;
+
 		const typename TimeStepParams<ModelType>::TargetParamsCommonType& tp = t;
 		os<<tp;
+
+		if (t.maxTime > 0)
+			os<<"TSPMaxTime="<<t.maxTime<<"\n";
+
 		return os;
 	}
 } // namespace Dmrg 

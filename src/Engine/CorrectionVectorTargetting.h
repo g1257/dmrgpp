@@ -324,6 +324,8 @@ public:
 	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
 	{}
 
+	bool end() const { return false; }
+
 private:
 
 	SizeType evolve(SizeType i,

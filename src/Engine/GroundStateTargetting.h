@@ -250,6 +250,8 @@ namespace Dmrg {
 				// nothing to do here
 			}
 
+			bool end() const { return false; }
+
 		private:
 
 			const LeftRightSuperType& lrs_;

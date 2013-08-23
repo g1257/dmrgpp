@@ -260,6 +260,8 @@ public:
 	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
 	{}
 
+	bool end() const { return false; }
+
 private:
 
 	void cocoon(const BlockType& block1,SizeType direction) const

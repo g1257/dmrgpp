@@ -361,7 +361,9 @@ namespace Dmrg {
 					}
 				}
 				finiteStep(S,E,pS,pE,i,psi);
+				if (psi.end()) break;
 			}
+
 			checkpoint_.save(pS,pE,io_);
 			psi.save(sitesIndices_[stepCurrent_],io_);
 		}
@@ -425,8 +427,10 @@ namespace Dmrg {
 				if (stepCurrent_<0) throw PsimagLite::RuntimeError("DmrgSolver::finiteStep() currentStep_ is negative\n");
 
 				printMemoryUsage();
-				
+
+				if (target.end()) break;
 			}
+
 			if (direction==EXPAND_SYSTEM) {
 				pE = lrs_.right();
 				
