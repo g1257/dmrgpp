@@ -63,12 +63,14 @@ typedef ParametersDmrgSolver<RealType,InputNgType::Readable> DmrgSolverParameter
 struct OperatorOptions {
 	
 	OperatorOptions()
-	: site(0),dof(0),label("")
+	    : site(0),dof(0),label(""),fermionicSign(0),transpose(false)
 	{}
 	
 	SizeType site;
 	SizeType dof;
 	PsimagLite::String label;
+	int fermionicSign;
+	bool transpose;
 };
 
 template<template<typename> class ModelHelperTemplate,
@@ -87,6 +89,7 @@ void mainLoop(GeometryType& geometry,
 {
 	typedef Basis<MySparseMatrix> BasisType;
 	typedef Operators<BasisType> OperatorsType;
+	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef BasisWithOperators<OperatorsType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
@@ -100,9 +103,8 @@ void mainLoop(GeometryType& geometry,
 	                           ModelBaseType,
 	                           IoInputType,
 	                           VectorWithOffsetTemplate> TargettingType;
-
+	typedef std::pair<SizeType,SizeType> PairType;
 	typedef DmrgSolver<InternalProductOnTheFly,TargettingType> SolverType;
-	
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
@@ -110,14 +112,28 @@ void mainLoop(GeometryType& geometry,
 	ModelSelector<ModelBaseType> modelSelector(params.model);
 	const ModelBaseType& model = modelSelector(params,io,geometry);
 
-	MatrixType opC2 = model.naturalOperator(obsOptions.label,obsOptions.site,obsOptions.dof);
-	std::cout<<"label="<<obsOptions.label<<" site="<<obsOptions.site<<" dof="<<obsOptions.dof<<"\n";
-	std::cout<<opC2;
+	MatrixType opC = model.naturalOperator(obsOptions.label,obsOptions.site,obsOptions.dof);
+	std::cout<<"#label="<<obsOptions.label<<" site="<<obsOptions.site<<" dof="<<obsOptions.dof<<"\n";
+
+	Su2Related su2Related;
+
+	MatrixType opC2;
+	if (obsOptions.transpose)
+		transposeConjugate(opC2,opC);
+
+	OperatorType opC3((obsOptions.transpose) ? opC2 : opC,
+	                  obsOptions.fermionicSign,
+	                  PairType(0,0),
+	                  1,
+	                  su2Related);
+
+	opC3.save(std::cout);
 }
 
 void usage(const char* name)
 {
-	std::cerr<<"USAGE is "<<name<<" -f filename -s site -l label -d dof\n";
+	std::cerr<<"USAGE is "<<name<<" -f filename -F ";
+	std::cerr<<"fermionicSign -l label [-d dof] [-s site] [-t]\n";
 }
 
 int main(int argc,char *argv[])
@@ -129,7 +145,7 @@ int main(int argc,char *argv[])
 	PsimagLite::String filename="";
 	OperatorOptions options;
 	int opt = 0;
-	while ((opt = getopt(argc, argv,"f:s:l:d:")) != -1) {
+	while ((opt = getopt(argc, argv,"f:s:l:d:F:t")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -143,6 +159,12 @@ int main(int argc,char *argv[])
 		case 'd':
 			options.dof = atoi(optarg);
 			break;
+		case 't':
+			options.transpose = true;
+			break;
+		case 'F':
+			options.fermionicSign = atoi(optarg);
+			break;
 		default:
 			usage(argv[0]);
 			return 1;
@@ -150,7 +172,7 @@ int main(int argc,char *argv[])
 	}
 
 	//sanity checks here
-	if (filename=="" || options.label=="") {
+	if (filename=="" || options.label=="" || options.fermionicSign == 0) {
 		usage(argv[0]);
 		return 1;
 	}

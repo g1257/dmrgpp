@@ -186,6 +186,18 @@ namespace Dmrg {
 			// FIXME: su2related needs to be set properly for when SU(2) is running
 		}
 
+		void save(std::ostream& os) const
+		{
+			os<<"TSPOperator=raw\n";
+			os<<"RAW_MATRIX\n";
+			PsimagLite::Matrix<SparseElementType> m;
+			crsMatrixToFullMatrix(m,data);
+			os<<m;
+			os<<"FERMIONSIGN="<<fermionSign<<"\n";
+			os<<"JMVALUES 2 "<<jm.first<<" "<<jm.second<<"\n";
+			os<<"AngularFactor="<<angularFactor<<"\n";
+		}
+
 		void send(int root,int tag,PsimagLite::MPI::CommType mpiComm)
 		{
 			data.send(root,tag,mpiComm);

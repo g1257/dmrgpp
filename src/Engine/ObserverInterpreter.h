@@ -146,7 +146,7 @@ class ObserverInterpreter {
 				type_ = TWO_POINT;
 				op_.push_back(findOperator(name_[1]));
 			} else {
-				assert(vecStr.size() == 1);
+				assert(name_.size() == 1);
 			}
 		}
 
