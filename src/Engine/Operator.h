@@ -194,7 +194,7 @@ namespace Dmrg {
 			crsMatrixToFullMatrix(m,data);
 			os<<m;
 			os<<"FERMIONSIGN="<<fermionSign<<"\n";
-			os<<"JMVALUES 2 "<<jm.first<<" "<<jm.second<<"\n";
+			os<<"JMVALUES "<<jm.first<<" "<<jm.second<<"\n";
 			os<<"AngularFactor="<<angularFactor<<"\n";
 		}
 
