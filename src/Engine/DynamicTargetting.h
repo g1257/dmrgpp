@@ -273,7 +273,7 @@ namespace Dmrg {
 			}
 
 			try {
-				commonTargetting_.cocoon(direction,site,psi_);
+				commonTargetting_.cocoon(direction,site,psi_,"PSI");
 			} catch (std::exception& e) {
 				commonTargetting_.noCocoon("unsupported by the model");
 			}

@@ -251,7 +251,8 @@ public:
 
 	// in situ computation:
 	void cocoon(SizeType direction,SizeType site,
-	            const VectorWithOffsetType& psi) const
+	            const VectorWithOffsetType& psi,
+	            const PsimagLite::String& label) const
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
@@ -261,42 +262,11 @@ public:
 			const PsimagLite::String& opLabel = vecStr[i];
 			OperatorType nup = getOperatorForTest(opLabel,site);
 
-			PsimagLite::String tmpStr = "<PSI|" + opLabel + "|PSI>";
+			PsimagLite::String tmpStr = "<"+ label + "|" + opLabel + "|" + label + ">";
 			test(psi,psi,direction,tmpStr,site,nup);
 		}
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
-	}
-
-	VectorStringType getOperatorLabels() const
-	{
-		VectorStringType vecStr;
-		PsimagLite::tokenizer(model_.params().insitu,vecStr,",");
-		return vecStr;
-	}
-
-	OperatorType getOperatorForTest(const PsimagLite::String& opLabel,
-	                                SizeType site) const
-	{
-		int fermionSign1 = 1;
-		const std::pair<SizeType,SizeType> jm1(0,0);
-		RealType angularFactor1 = 1.0;
-		typename OperatorType::Su2RelatedType su2Related1;
-
-		OperatorType nup;
-		try {
-			nup = findOperator(opLabel);
-		} catch (std::exception& e) {
-			if (opLabel[0] == ':') {
-				std::cerr<<e.what();
-				throw e;
-			}
-
-			PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator(opLabel,site,0));
-			nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
-		}
-
-		return nup;
 	}
 
 	void computeCorrection(VectorWithOffsetType& v,
@@ -331,6 +301,37 @@ public:
 
 private:
 
+	VectorStringType getOperatorLabels() const
+	{
+		VectorStringType vecStr;
+		PsimagLite::tokenizer(model_.params().insitu,vecStr,",");
+		return vecStr;
+	}
+
+	OperatorType getOperatorForTest(const PsimagLite::String& opLabel,
+	                                SizeType site) const
+	{
+		int fermionSign1 = 1;
+		const std::pair<SizeType,SizeType> jm1(0,0);
+		RealType angularFactor1 = 1.0;
+		typename OperatorType::Su2RelatedType su2Related1;
+
+		OperatorType nup;
+		try {
+			nup = findOperator(opLabel);
+		} catch (std::exception& e) {
+			if (opLabel[0] == ':') {
+				std::cerr<<e.what();
+				throw e;
+			}
+
+			PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator(opLabel,site,0));
+			nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
+		}
+
+		return nup;
+	}
+
 	void test(const VectorWithOffsetType& src1,
 	          const VectorWithOffsetType& src2,
 	          SizeType systemOrEnviron,
@@ -344,7 +345,7 @@ private:
 		VectorWithOffsetType dest;
 		applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
 
-		RealType sum = 0;
+		ComplexOrRealType sum = 0.0;
 		for (SizeType ii=0;ii<dest.sectors();ii++) {
 			SizeType i = dest.sector(ii);
 			SizeType offset1 = dest.offset(i);

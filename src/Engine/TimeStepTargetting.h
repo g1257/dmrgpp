@@ -541,18 +541,8 @@ namespace Dmrg {
 
 				SizeType site = block[0];
 
-				VectorStringType vecStr = commonTargetting_.getOperatorLabels();
-
-				for (SizeType i=0;i<vecStr.size();i++) {
-					const PsimagLite::String& opLabel = vecStr[i];
-					OperatorType nup = commonTargetting_.getOperatorForTest(opLabel,site);
-
-					PsimagLite::String tmpStr = "<PSI|" + opLabel + "|PSI>";
-					test(psi_,psi_,direction,tmpStr,site,nup);
-
-					tmpStr = "<P0|" + opLabel + "|P0>";
-					test(targetVectors_[0],targetVectors_[0],direction,tmpStr,site,nup);
-				}
+				commonTargetting_.cocoon(direction,site,psi_,"PSI");
+				commonTargetting_.cocoon(direction,site,targetVectors_[0],"P0");
 
 				std::cout<<"-------------&*&*&* In-situ measurements end\n";
 			}
