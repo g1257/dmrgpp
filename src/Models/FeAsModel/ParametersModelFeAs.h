@@ -149,6 +149,7 @@ namespace Dmrg {
 			os<<"MagneticField\n";
 			os<<parameters.magneticField;
 		}
+
 		os<<"Decay="<<parameters.decay<<"\n";
 		if (parameters.decay)
 			os<<"CoulombV="<<parameters.coulombV<<"\n";

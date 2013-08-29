@@ -228,7 +228,7 @@ namespace Dmrg {
 			assert(creationMatrix.size()>0);
 			SizeType nrow = creationMatrix[0].data.row();
 
-			if (what == "i") {
+			if (what == "i" || what=="identity") {
 				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
 				for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
 				return tmp;
@@ -274,11 +274,7 @@ namespace Dmrg {
 				crsMatrixToFullMatrix(tmp,atmp);
 				return tmp;
 			}
-			if (what=="identity") {
-				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
-				for (SizeType i=0;i<tmp.n_row();i++) tmp(i,i) = 1.0;
-				return tmp;
-			}
+
 			std::cerr<<"what="<<what<<"\n";
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 		}
@@ -778,7 +774,6 @@ namespace Dmrg {
 			int dof=2*modelParameters_.orbitals;
 			SparseMatrixType nup = n(cm[orbital+SPIN_UP*modelParameters_.orbitals+i*dof].data);
 			SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*modelParameters_.orbitals+i*dof].data);
-
 
 			SizeType linSize = geometry_.numberOfSites();
 
