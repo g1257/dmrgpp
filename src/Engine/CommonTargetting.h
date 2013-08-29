@@ -250,20 +250,19 @@ public:
 	}
 
 	// in situ computation:
-	void cocoon(SizeType direction,SizeType site,
+	void cocoon(SizeType direction,
+	            SizeType site,
 	            const VectorWithOffsetType& psi,
 	            const PsimagLite::String& label) const
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-		VectorStringType vecStr = getOperatorLabels();
+		cocoon_(direction,site,psi,label);
 
-		for (SizeType i=0;i<vecStr.size();i++) {
-			const PsimagLite::String& opLabel = vecStr[i];
-			OperatorType nup = getOperatorForTest(opLabel,site);
+		int site2 = findBorderSiteFrom(site);
 
-			PsimagLite::String tmpStr = "<"+ label + "|" + opLabel + "|" + label + ">";
-			test(psi,psi,direction,tmpStr,site,nup);
+		if (site2 >= 0) {
+			cocoon_(direction,site2,psi,label);
 		}
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
@@ -300,6 +299,31 @@ public:
 	}
 
 private:
+
+	int findBorderSiteFrom(SizeType site) const
+	{
+		if (site == 1) return 0;
+
+		SizeType n = model_.geometry().numberOfSites();
+		if (site == n - 2) return n - 1;
+
+		return -1;
+	}
+
+	void cocoon_(SizeType direction,SizeType site,
+	             const VectorWithOffsetType& psi,
+	             const PsimagLite::String& label) const
+	{
+		VectorStringType vecStr = getOperatorLabels();
+
+		for (SizeType i=0;i<vecStr.size();i++) {
+			const PsimagLite::String& opLabel = vecStr[i];
+			OperatorType nup = getOperatorForTest(opLabel,site);
+
+			PsimagLite::String tmpStr = "<"+ label + "|" + opLabel + "|" + label + ">";
+			test(psi,psi,direction,tmpStr,site,nup);
+		}
+	}
 
 	VectorStringType getOperatorLabels() const
 	{
