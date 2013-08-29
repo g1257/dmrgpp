@@ -432,9 +432,7 @@ namespace Dmrg {
 
 			void initialGuess(VectorWithOffsetType& v,const VectorSizeType& block) const
 			{
-				VectorSizeType nk;
-				commonTargetting_.setNk(nk,block);
-				wft_.setInitialVector(v,psi_,lrs_,nk);
+				commonTargetting_.initialGuess(v,wft_,block,psi_);
 			}
 
 			template<typename IoOutputType>

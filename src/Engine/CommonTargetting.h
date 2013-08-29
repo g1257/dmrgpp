@@ -213,23 +213,34 @@ public:
 
 	void initialGuess(VectorWithOffsetType& v,
 	                  const WaveFunctionTransfType& wft,
+	                  const typename PsimagLite::Vector<SizeType>::Type& block,
 	                  const VectorWithOffsetType& psi,
 	                  const typename PsimagLite::Vector<SizeType>::Type& stage,
 	                  const typename PsimagLite::Vector<RealType>::Type& weights,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block,
 	                  const typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors) const
 	{
-		typename PsimagLite::Vector<SizeType>::Type nk;
-		setNk(nk,block);
-		wft.setInitialVector(v,psi,lrs_,nk);
+		initialGuess(v,wft,block,psi);
 		if (!allStages(CONVERGING,stage)) return;
+
+		PsimagLite::Vector<SizeType>::Type nk;
+		setNk(nk,block);
 		typename PsimagLite::Vector<VectorWithOffsetType>::Type vv(targetVectors.size());
 		for (SizeType i=0;i<targetVectors.size();i++) {
-			wft.setInitialVector(vv[i],targetVectors[i],lrs_,nk);
+			setInitialVector(vv[i],wft,targetVectors[i],nk);
 			if (std::norm(vv[i])<1e-6) continue;
 			VectorWithOffsetType w= weights[i]*vv[i];
 			v += w;
 		}
+	}
+
+	void initialGuess(VectorWithOffsetType& v,
+	                  const WaveFunctionTransfType& wft,
+	                  const typename PsimagLite::Vector<SizeType>::Type& block,
+	                  const VectorWithOffsetType& psi) const
+	{
+		PsimagLite::Vector<SizeType>::Type nk;
+		setNk(nk,block);
+		setInitialVector(v,wft,psi,nk);
 	}
 
 	void findElectronsOfOneSite(typename PsimagLite::Vector<SizeType>::Type& electrons,
@@ -299,6 +310,20 @@ public:
 	}
 
 private:
+
+	void setInitialVector(VectorWithOffsetType& v,
+	                      const WaveFunctionTransfType& wft,
+	                      const VectorWithOffsetType& psi,
+	                      const PsimagLite::Vector<SizeType>::Type& nk) const
+	{
+		bool noguess = (model_.params().options.find("targetnoguess") !=
+		        PsimagLite::String::npos);
+
+		if (noguess)
+			wft.createRandomVector(v);
+		else
+			wft.setInitialVector(v,psi,lrs_,nk);
+	}
 
 	int findBorderSiteFrom(SizeType site) const
 	{

@@ -215,9 +215,10 @@ namespace Dmrg {
 			void initialGuess(VectorWithOffsetType& initialVector,
 			                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 			{
-				typename PsimagLite::Vector<SizeType>::Type nk;
-				commonTargetting_.setNk(nk,block);
-				waveFunctionTransformation_.setInitialVector(initialVector,psi_,lrs_,nk);
+				commonTargetting_.initialGuess(initialVector,
+				                               waveFunctionTransformation_,
+				                               block,
+				                               psi_);
 			}
 
 			template<typename IoOutputType>

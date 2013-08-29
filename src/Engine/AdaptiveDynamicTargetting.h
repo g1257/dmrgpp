@@ -232,7 +232,7 @@ public:
 	void initialGuess(VectorWithOffsetType& v,
 	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
-		commonTargetting_.initialGuess(v,wft_,psi_,stage_,weight_,block,targetVectors_);
+		commonTargetting_.initialGuess(v,wft_,block,psi_,stage_,weight_,targetVectors_);
 	}
 
 	const LeftRightSuperType& leftRightSuper() const { return lrs_; }

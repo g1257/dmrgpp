@@ -220,9 +220,10 @@ public:
 		RealType eps = 1e-6;
 		if (psi_.size()>0 && std::norm(psi_)<eps)
 			throw PsimagLite::RuntimeError("psi's norm is zero\n");
-		typename PsimagLite::Vector<SizeType>::Type nk;
-		commonTargetting_.setNk(nk,block);
-		waveFunctionTransformation_.setInitialVector(initialVector,psi_,lrs_,nk);
+		commonTargetting_.initialGuess(initialVector,
+		                               waveFunctionTransformation_,
+		                               block,
+		                               psi_);
 	}
 
 	template<typename IoOutputType>
