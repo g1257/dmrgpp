@@ -268,12 +268,12 @@ public:
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-		cocoon_(direction,site,psi,label);
+		cocoon_(direction,site,psi,label,false);
 
-		int site2 = findBorderSiteFrom(site);
+		int site2 = findBorderSiteFrom(site,direction);
 
 		if (site2 >= 0) {
-			cocoon_(direction,site2,psi,label);
+			cocoon_(direction,site2,psi,label,true);
 		}
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
@@ -325,19 +325,20 @@ private:
 			wft.setInitialVector(v,psi,lrs_,nk);
 	}
 
-	int findBorderSiteFrom(SizeType site) const
+	int findBorderSiteFrom(SizeType site, SizeType direction) const
 	{
-		if (site == 1) return 0;
+		if (site == 1 && direction == EXPAND_ENVIRON) return 0;
 
 		SizeType n = model_.geometry().numberOfSites();
-		if (site == n - 2) return n - 1;
+		if (site == n - 2 && direction == EXPAND_SYSTEM) return n - 1;
 
 		return -1;
 	}
 
 	void cocoon_(SizeType direction,SizeType site,
 	             const VectorWithOffsetType& psi,
-	             const PsimagLite::String& label) const
+	             const PsimagLite::String& label,
+	             bool border) const
 	{
 		VectorStringType vecStr = getOperatorLabels();
 
@@ -346,7 +347,7 @@ private:
 			OperatorType nup = getOperatorForTest(opLabel,site);
 
 			PsimagLite::String tmpStr = "<"+ label + "|" + opLabel + "|" + label + ">";
-			test(psi,psi,direction,tmpStr,site,nup);
+			test(psi,psi,direction,tmpStr,site,nup,border);
 		}
 	}
 
@@ -386,13 +387,14 @@ private:
 	          SizeType systemOrEnviron,
 	          const PsimagLite::String& label,
 	          SizeType site,
-	          const OperatorType& A) const
+	          const OperatorType& A,
+	          bool border) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type electrons;
 		model_.findElectronsOfOneSite(electrons,site);
 		FermionSign fs(lrs_.left(),electrons);
 		VectorWithOffsetType dest;
-		applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
+		applyOpLocal_(dest,src1,A,fs,systemOrEnviron,border);
 
 		ComplexOrRealType sum = 0.0;
 		for (SizeType ii=0;ii<dest.sectors();ii++) {
