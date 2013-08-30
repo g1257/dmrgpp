@@ -276,13 +276,8 @@ int main(int argc,char *argv[])
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
 	bool su2 = (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos);
-	PsimagLite::String targetting="GroundStateTargetting";
-	const char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
-                     "CorrectionVectorTargetting","CorrectionTargetting","MettsTargetting"};
-	SizeType totalTargets = 6;
-	for (SizeType i = 0;i<totalTargets;++i)
-		if (dmrgSolverParams.options.find(targets[i])!=PsimagLite::String::npos)
-			targetting = targets[i];
+
+	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
 
 	if (targetting!="GroundStateTargetting" && su2)
 		throw PsimagLite::RuntimeError("SU(2) supports only GroundStateTargetting\n");
@@ -297,6 +292,7 @@ int main(int argc,char *argv[])
 		}
 		return 0;
 	}
+
 	if (targetting=="GroundStateTargetting") {
 		mainLoop<ModelHelperLocal,VectorWithOffset,MySparseMatrixReal>
 		(geometry,targetting,io,dmrgSolverParams, options, list);

@@ -75,11 +75,6 @@ struct OperatorOptions {
 
 template<template<typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
-         template<template<typename,typename,typename> class,
-                  template<typename,typename> class,
-                  template<typename,typename> class,
-                  typename,typename,
-                  template<typename> class> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop(GeometryType& geometry,
               const PsimagLite::String& targetting,
@@ -97,15 +92,9 @@ void mainLoop(GeometryType& geometry,
 	                  DmrgSolverParametersType,
 	                  InputNgType::Readable,
 	                  GeometryType> ModelBaseType;
-	typedef TargettingTemplate<PsimagLite::LanczosSolver,
-	                           InternalProductOnTheFly,
-	                           WaveFunctionTransfFactory,
-	                           ModelBaseType,
-	                           IoInputType,
-	                           VectorWithOffsetTemplate> TargettingType;
+	typedef typename MySparseMatrix::value_type ComplexOrRealType;
+	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 	typedef std::pair<SizeType,SizeType> PairType;
-	typedef DmrgSolver<InternalProductOnTheFly,TargettingType> SolverType;
-	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	
@@ -199,51 +188,32 @@ int main(int argc,char *argv[])
 
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos) su2=true;
-	PsimagLite::String targetting="GroundStateTargetting";
-	const char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
-                     "CorrectionVectorTargetting","CorrectionTargetting","MettsTargetting"};
-	SizeType totalTargets = 6;
-	for (SizeType i = 0;i<totalTargets;++i)
-		if (dmrgSolverParams.options.find(targets[i])!=PsimagLite::String::npos) targetting=targets[i];
+
+	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
+	
 	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
  		" supports only GroundStateTargetting for now (sorry!)\n");
-	
+
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
-			mainLoop<ModelHelperSu2,VectorWithOffsets,GroundStateTargetting,MySparseMatrixReal>
+			mainLoop<ModelHelperSu2,VectorWithOffsets,MySparseMatrixReal>
 			(geometry,targetting,io,dmrgSolverParams,options);
 		} else {
-			mainLoop<ModelHelperSu2,VectorWithOffset,GroundStateTargetting,MySparseMatrixReal>
+			mainLoop<ModelHelperSu2,VectorWithOffset,MySparseMatrixReal>
 			(geometry,targetting,io,dmrgSolverParams,options);
 		}
 		return 0;
 	}
-	if (targetting=="TimeStepTargetting") { 
-		mainLoop<ModelHelperLocal,VectorWithOffsets,TimeStepTargetting,MySparseMatrixComplex>
-		(geometry,targetting,io,dmrgSolverParams,options);
-		return 0;
+
+	if (targetting=="GroundStateTargetting") {
+		mainLoop<ModelHelperLocal,VectorWithOffset,MySparseMatrixReal>
+		(geometry,targetting,io,dmrgSolverParams, options);
+	} else if (targetting=="TimeStepTargetting") {
+		mainLoop<ModelHelperLocal,VectorWithOffsets,MySparseMatrixComplex>
+		(geometry,targetting,io,dmrgSolverParams, options);
+	} else {
+		mainLoop<ModelHelperLocal,VectorWithOffsets,MySparseMatrixReal>
+		(geometry,targetting,io,dmrgSolverParams, options);
 	}
-	if (targetting=="DynamicTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,DynamicTargetting,MySparseMatrixReal>
-		(geometry,targetting,io,dmrgSolverParams,options);
-		return 0;
-	}
-	if (targetting=="AdaptiveDynamicTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,AdaptiveDynamicTargetting,MySparseMatrixReal>
-		(geometry,targetting,io,dmrgSolverParams,options);
-		return 0;
-	}
-	if (targetting=="CorrectionTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,CorrectionTargetting,MySparseMatrixReal>
-		(geometry,targetting,io,dmrgSolverParams,options);
-		return 0;
-	}
-	if (targetting=="MettsTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffset,MettsTargetting,MySparseMatrixReal>
-		(geometry,targetting,io,dmrgSolverParams,options);
-		return 0;
-	}
-	mainLoop<ModelHelperLocal,VectorWithOffset,GroundStateTargetting,MySparseMatrixReal>
-	(geometry,targetting,io,dmrgSolverParams,options);
 } // main
 

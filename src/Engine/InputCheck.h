@@ -174,6 +174,34 @@ namespace Dmrg {
 			std::cerr<<"USAGE is "<<name<<"\n";
 		}
 
+		PsimagLite::String getTargeting(const PsimagLite::String& options) const
+		{
+			PsimagLite::String targetting="GroundStateTargetting";
+
+			const char *targets[]={"TimeStepTargetting",
+			                       "DynamicTargetting",
+			                       "AdaptiveDynamicTargetting",
+			                       "CorrectionVectorTargetting",
+			                       "CorrectionTargetting",
+			                       "MettsTargetting"};
+
+			SizeType totalTargets = 6;
+
+			SizeType count = 0;
+			for (SizeType i = 0;i<totalTargets;++i) {
+				if (options.find(targets[i])!=PsimagLite::String::npos) {
+					targetting = targets[i];
+					count++;
+				}
+			}
+
+			if (count > 1) {
+				throw PsimagLite::RuntimeError("Only one targeting supported\n");
+			}
+
+			return targetting;
+		}
+
 	private:
 
 		bool error1(const PsimagLite::String& message,SizeType line) const

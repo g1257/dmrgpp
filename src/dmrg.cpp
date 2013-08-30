@@ -224,15 +224,12 @@ int main(int argc,char *argv[])
 
 	bool su2=false;
 	if (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos) su2=true;
-	PsimagLite::String targetting="GroundStateTargetting";
-	const char *targets[]={"TimeStepTargetting","DynamicTargetting","AdaptiveDynamicTargetting",
-                     "CorrectionVectorTargetting","CorrectionTargetting","MettsTargetting"};
-	SizeType totalTargets = 6;
-	for (SizeType i = 0;i<totalTargets;++i)
-		if (dmrgSolverParams.options.find(targets[i])!=PsimagLite::String::npos) targetting=targets[i];
+
+	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
 
 	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
  		" supports only GroundStateTargetting for now (sorry!)\n");
+
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
 			mainLoop<ModelHelperSu2,VectorWithOffsets,GroundStateTargetting,
@@ -243,6 +240,7 @@ int main(int argc,char *argv[])
 		}
 		return 0;
 	}
+
 	if (targetting=="TimeStepTargetting") { 
 		mainLoop<ModelHelperLocal,VectorWithOffsets,TimeStepTargetting,
 			MySparseMatrixComplex>(geometry,dmrgSolverParams,io);
