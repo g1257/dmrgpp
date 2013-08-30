@@ -82,8 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef LINK_PRODUCT_EX_H
 #define LINK_PRODUCT_EX_H
-#include "LinkProductHeisenbergSpinOneHalf.h"
-#include "LinkProductFeAs.h"
+#include "../Models/HeisenbergSpinOneHalf/LinkProductHeisenbergSpinOneHalf.h"
+#include "../Models/FeAsModel/LinkProductFeAs.h"
 
 namespace Dmrg {
 	

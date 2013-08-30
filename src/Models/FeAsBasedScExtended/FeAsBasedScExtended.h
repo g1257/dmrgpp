@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef FEAS_BASED_SC_EX
 #define FEAS_BASED_SC_EX
-#include "ModelFeBasedSc.h"
+#include "../Models/FeAsModel/ModelFeBasedSc.h"
 #include "LinkProductFeAsExtended.h"
 #include "ModelCommon.h"
 

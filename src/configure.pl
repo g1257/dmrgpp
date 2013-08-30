@@ -156,9 +156,8 @@ sub createMakefile
 	$strip = " true " if ($build eq "debug" or $build eq "callgrind");
 
 
-	my $cppflags= "-Werror -Wall  -IEngine -IModels/HubbardOneBand -IModels/HeisenbergSpinOneHalf ";
-	$cppflags .= " -IModels/ExtendedHubbard1Orb  -IModels/FeAsModel -IModels/FeAsBasedScExtended ";
-	$cppflags .= " -IModels/Immm  -IModels/Tj1Orb -I$PsimagLite/src -I$PsimagLite $usePthreadsOrNot $floating";
+	my $cppflags= "-Werror -Wall  -IEngine  ";
+	$cppflags .= "  -I$PsimagLite/src -I$PsimagLite $usePthreadsOrNot $floating";
 
 	Make::make($fh,\@drivers,"DMRG++",$platform,$mpi,"$lapack $pthreadsLib","$compiler $optimizations",$cppflags,$strip,"Engine/Version.h","Engine/Version.h gitrev");
 	local *FH = $fh;

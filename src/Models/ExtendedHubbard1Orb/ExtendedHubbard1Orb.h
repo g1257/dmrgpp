@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef EXTENDED_HUBBARD_1ORB_H
 #define EXTENDED_HUBBARD_1ORB_H
-#include "ModelHubbard.h"
+#include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "LinkProdExtendedHubbard1Orb.h"
 #include "ModelCommon.h"
 

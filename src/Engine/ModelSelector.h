@@ -47,13 +47,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "String.h"
 #include <stdexcept>
-#include "ModelHubbard.h"
-#include "ModelHeisenberg.h"
-#include "ExtendedHubbard1Orb.h"
-#include "ModelFeBasedSc.h"
-#include "FeAsBasedScExtended.h"
-#include "Immm.h"
-#include "Tj1Orb.h"
+#include "../Models/HubbardOneBand/ModelHubbard.h"
+#include "../Models/HeisenbergSpinOneHalf/ModelHeisenberg.h"
+#include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
+#include "../Models/FeAsModel/ModelFeBasedSc.h"
+#include "../Models/FeAsBasedScExtended/FeAsBasedScExtended.h"
+#include "../Models/Immm/Immm.h"
+#include "../Models/Tj1Orb/Tj1Orb.h"
 
 namespace Dmrg {
 

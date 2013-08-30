@@ -79,10 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef TJ_1ORB_H
 #define TJ_1ORB_H
-#include "ModelHubbard.h"
-#include "ModelHeisenberg.h"
-#include "LinkProductTj1Orb.h"
-#include "ParametersModelTj1Orb.h"
+#include "../Models/HubbardOneBand/ModelHubbard.h"
+#include "../Models/HeisenbergSpinOneHalf/ModelHeisenberg.h"
+#include "../Models/Tj1Orb/LinkProductTj1Orb.h"
+#include "../Models/Tj1Orb/ParametersModelTj1Orb.h"
 #include "ModelCommon.h"
 
 namespace Dmrg {
