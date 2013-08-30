@@ -117,7 +117,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,VectorType> ApplyOperatorType;
+	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};

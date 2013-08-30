@@ -124,8 +124,7 @@ public:
 	                              VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
 	typedef ApplyOperatorLocal<LeftRightSuperType,
-	                           VectorWithOffsetType,
-	                           TargetVectorType> ApplyOperatorType;
+	                           VectorWithOffsetType> ApplyOperatorType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef WaveFunctionTransfTemplate<LeftRightSuperType,
 	                                   VectorWithOffsetType> WaveFunctionTransfType;

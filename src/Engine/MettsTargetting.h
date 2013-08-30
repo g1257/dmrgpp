@@ -119,21 +119,20 @@ namespace Dmrg {
 			typedef typename LeftRightSuperType::BasisWithOperatorsType
 			    BasisWithOperatorsType;
 			typedef typename BasisWithOperatorsType::BasisType BasisType;
-			typedef typename PsimagLite::Vector<RealType>::Type VectorType;
+			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
+			typedef typename VectorWithOffsetType::VectorType TargetVectorType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType>
+			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,TargetVectorType>
 			    LanczosSolverType;
 			typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 			typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 			typedef MettsParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
-			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
-			typedef VectorType TargetVectorType;
 			typedef PsimagLite::Matrix<RealType> MatrixType;
 			typedef BlockMatrix<MatrixType> BlockMatrixType;
-			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 			typedef MettsSerializer<VectorWithOffsetType> MettsSerializerType;
 			typedef typename PsimagLite::RandomForTests<RealType> RngType;
 			typedef MettsStochastics<ModelType,RngType> MettsStochasticsType;
@@ -583,7 +582,7 @@ namespace Dmrg {
 				progress_.printline(msg,std::cerr);
 
 				const SparseMatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
-				VectorType newVector1(transformSystem.row(),0);
+				TargetVectorType newVector1(transformSystem.row(),0);
 
 				VectorSizeType nk1;
 				mettsCollapse_.setNk(nk1,block1);
@@ -595,7 +594,7 @@ namespace Dmrg {
 
 				const SparseMatrixType& transformEnviron =
 				                        wft_.transform(ProgramGlobals::ENVIRON);
-				VectorType newVector2(transformEnviron.row(),0);
+				TargetVectorType newVector2(transformEnviron.row(),0);
 
 				VectorSizeType nk2;
 				mettsCollapse_.setNk(nk2,block2);
@@ -628,8 +627,8 @@ namespace Dmrg {
 				}
 			}
 
-			void getNewPure(VectorType& newVector,
-			                VectorType& oldVector,
+			void getNewPure(TargetVectorType& newVector,
+			                TargetVectorType& oldVector,
 			                SizeType direction,
 			                SizeType alphaFixed,
 			                const BasisWithOperatorsType& basis,
@@ -638,7 +637,7 @@ namespace Dmrg {
 			{
 				if (oldVector.size()==0)
 					setInitialPure(oldVector,block);
-				VectorType tmpVector;
+				TargetVectorType tmpVector;
 				if (transform.row()==0) {
 					tmpVector = oldVector;
 					assert(PsimagLite::norm(tmpVector)>1e-6);
@@ -682,8 +681,8 @@ namespace Dmrg {
 				assert(PsimagLite::norm(newVector)>1e-6);
 			}
 
-			void delayedTransform(VectorType& newVector,
-								  VectorType& oldVector,
+			void delayedTransform(TargetVectorType& newVector,
+								  TargetVectorType& oldVector,
 								  SizeType direction,
 								  const SparseMatrixType& transform,
 								  const VectorSizeType& block)
@@ -716,8 +715,8 @@ namespace Dmrg {
 				}
 			}
 
-			void simpleTransform(VectorType& newVector,
-								  VectorType& oldVector,
+			void simpleTransform(TargetVectorType& newVector,
+								  TargetVectorType& oldVector,
 								  const MatrixType& transform)
 			{
 				assert(oldVector.size()==transform.n_row());
@@ -732,7 +731,7 @@ namespace Dmrg {
 				}
 			}
 
-			void setInitialPure(VectorType& oldVector,const VectorSizeType& block)
+			void setInitialPure(TargetVectorType& oldVector,const VectorSizeType& block)
 			{
 				int offset = (block[0]==block.size()) ? -block.size() : block.size();
 				VectorSizeType blockCorrected = block;
@@ -768,7 +767,7 @@ namespace Dmrg {
 				phi.populateSectors(lrs.super());
 				for (SizeType ii=0;ii<phi.sectors();ii++) {
 					SizeType i0 = phi.sector(ii);
-					VectorType v;
+					TargetVectorType v;
 					getFullVector(v,i0,lrs);
 					RealType tmpNorm = PsimagLite::norm(v);
 					if (fabs(tmpNorm-1.0)<1e-6) {
@@ -1131,7 +1130,7 @@ namespace Dmrg {
 			SizeType prevDirection_;
 			MettsPrev systemPrev_;
 			MettsPrev environPrev_;
-			std::pair<VectorType,VectorType> pureVectors_;
+			std::pair<TargetVectorType,TargetVectorType> pureVectors_;
 			VectorSizeType sitesCollapsed_;
 	};     //class MettsTargetting
 

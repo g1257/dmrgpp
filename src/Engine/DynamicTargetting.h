@@ -126,7 +126,7 @@ namespace Dmrg {
 		typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef VectorType TargetVectorType;
-		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 		typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;

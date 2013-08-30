@@ -120,7 +120,7 @@ public:
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
-	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;

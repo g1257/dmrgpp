@@ -112,23 +112,19 @@ namespace Dmrg {
 			typedef typename LeftRightSuperType::BasisWithOperatorsType
 					BasisWithOperatorsType;
 			typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-			//typedef BasisWithOperators<OperatorsType,ConcurrencyType> BasisWithOperatorsType;
-			typedef typename PsimagLite::Vector<ComplexType>::Type ComplexVectorType;
-			//typedef std::VectorWithOffset<ComplexType> VectorWithOffsetType;
+			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
+			typedef typename VectorWithOffsetType::VectorType TargetVectorType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,ComplexVectorType> LanczosSolverType;
+			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,TargetVectorType> LanczosSolverType;
 			typedef typename PsimagLite::Vector<RealType>::Type VectorType;
-			//typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 			typedef typename BasisWithOperatorsType::BasisType BasisType;
 			typedef TimeStepParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
-			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
 			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
-			typedef ComplexVectorType TargetVectorType;
 			typedef BlockMatrix<ComplexMatrixType> ComplexBlockMatrixType;
-			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,TargetVectorType> ApplyOperatorType;
+			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 			typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 			typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 			typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
@@ -760,7 +756,7 @@ namespace Dmrg {
 			{
 				check3(V);
 
-				ComplexVectorType r(n2);
+				TargetVectorType r(n2);
 
 				for (SizeType k=0;k<n2;k++) {
 					ComplexType sum = 0.0;

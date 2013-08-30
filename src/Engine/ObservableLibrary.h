@@ -94,8 +94,7 @@ namespace Dmrg {
 		typedef typename OperatorType::Su2RelatedType Su2RelatedType;
 		typedef typename ObserverType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
-		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType,VectorType>
-		ApplyOperatorType;
+		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 		typedef typename ModelType::RealType RealType;
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 		typedef typename VectorWithOffsetType::value_type FieldType;

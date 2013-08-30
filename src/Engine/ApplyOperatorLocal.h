@@ -85,11 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType,
-         typename VectorWithOffsetType_,
-         typename TargetVectorType>
+template<typename LeftRightSuperType, typename VectorWithOffsetType_>
 class ApplyOperatorLocal {
 
+	typedef typename VectorWithOffsetType_::VectorType TargetVectorType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType
 	BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::RealType RealType;

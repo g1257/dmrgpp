@@ -127,8 +127,7 @@ public:
 	typedef PsimagLite::Profiling ProfilingType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef ApplyOperatorLocal<BasisWithOperatorsType,
-	                           VectorWithOffsetType,
-	                           VectorType> ApplyOperatorType;
+	                           VectorWithOffsetType> ApplyOperatorType;
 	typedef PsimagLite::CrsMatrix<FieldType> SparseMatrixType;
 
 	enum {GROW_RIGHT,GROW_LEFT};
