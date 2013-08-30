@@ -310,6 +310,14 @@ public:
 			nk.push_back(model_.hilbertSize(block[i]));
 	}
 
+	RealType setGsWeight(RealType defaultValue) const
+	{
+		if (!model_.params().gsWeight.first)
+			return 	defaultValue;
+
+		return model_.params().gsWeight.second;
+	}
+
 private:
 
 	void setInitialVector(VectorWithOffsetType& v,

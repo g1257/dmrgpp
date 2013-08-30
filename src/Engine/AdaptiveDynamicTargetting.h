@@ -522,7 +522,8 @@ private:
 			weight_[r] = (r>lastLanczosVector_) ? 0 : 1;
 			sum += weight_[r];
 		}
-		gsWeight_ = 0.0;
+
+		gsWeight_ = commonTargetting_.setGsWeight(0.0);
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1-gsWeight_)/sum;
 	}
 

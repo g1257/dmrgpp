@@ -492,6 +492,8 @@ private:
 
 	void setWeights()
 	{
+		gsWeight_ = commonTargetting_.setGsWeight(0.5);
+
 		RealType sum  = 0;
 		weight_.resize(targetVectors_.size());
 		for (SizeType r=1;r<weight_.size();r++) {
@@ -505,9 +507,7 @@ private:
 			}
 			sum += weight_[r];
 		}
-		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= 0.5/sum;
-		gsWeight_ = 0.5-weight_[0];
-
+		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)/sum;
 	}
 
 	RealType dynWeightOf(VectorType& v,const VectorType& w) const

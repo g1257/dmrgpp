@@ -181,6 +181,8 @@ namespace Dmrg {
 				RealType sum = 0;
 				SizeType n = times_.size();
 				gsWeight_ = (tstStruct_.concatenation == SUM) ? 0.1 : 0.0;
+				gsWeight_ = commonTargetting_.setGsWeight(gsWeight_);
+
 				RealType factor = (n+4.0)/(n+2.0);
 				factor *= (1.0 - gsWeight_);
 				for (SizeType i=0;i<n;i++) {
