@@ -367,6 +367,9 @@ namespace Dmrg {
 			}
 			try {
 				io.read(targetQuantumNumbers,"TargetQuantumNumbers");
+				PsimagLite::String s = "*** WARNING: TargetQuantumNumbers ";
+				s += "is deprecated in input file\n";
+				std::cerr<<s;
 			} catch (std::exception& e) {}
 
 			bool hasElectrons = false;
