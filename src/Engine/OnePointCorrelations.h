@@ -115,7 +115,7 @@ namespace Dmrg {
 		template<typename ApplyOperatorType>
 		FieldType operator()(SizeType site,
 			const typename ApplyOperatorType::OperatorType& A,
-			bool corner = false)
+			typename ApplyOperatorType::BorderEnum corner)
 		{
 			SizeType threadId =0;
 			SizeType pnter=site;
@@ -159,7 +159,7 @@ namespace Dmrg {
 								   const typename ApplyOperatorType::OperatorType& A,
 								   const VectorWithOffsetType& src1,
 								   const VectorWithOffsetType& src2,
-								   bool corner,
+								   typename ApplyOperatorType::BorderEnum corner,
 								   SizeType threadId)
 		{
 			
@@ -197,7 +197,7 @@ namespace Dmrg {
 			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
 			VectorWithOffsetType dest;
 //			assert(helper_.fermionicSignLeft().size()==helper_.leftRightSuper().left().size());
-			applyOpLocal1.hookForZero(dest,src1,A,helper_.fermionicSignLeft(threadId),helper_.direction(threadId),corner);
+			applyOpLocal1.hookForZero(dest,src1,A,helper_.fermionicSignLeft(threadId),helper_.direction(threadId));
 
 			FieldType sum = static_cast<FieldType>(0.0);
 			const VectorWithOffsetType& v1 = dest;

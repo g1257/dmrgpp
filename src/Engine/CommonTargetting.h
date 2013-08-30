@@ -118,6 +118,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
+	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
@@ -269,12 +270,12 @@ public:
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-		cocoon_(direction,site,psi,label,false,currentTime);
+		cocoon_(direction,site,psi,label,ApplyOperatorType::BORDER_NO,currentTime);
 
 		int site2 = findBorderSiteFrom(site,direction);
 
 		if (site2 >= 0) {
-			cocoon_(direction,site2,psi,label,true,currentTime);
+			cocoon_(direction,site2,psi,label,ApplyOperatorType::BORDER_YES,currentTime);
 		}
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
@@ -297,7 +298,7 @@ public:
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
 			applyOpLocal_(phiTemp,psi,creationMatrix[j],
-			              fs,direction);
+			              fs,direction,ApplyOperatorType::BORDER_NO);
 			if (j==0) v = phiTemp;
 			else v += phiTemp;
 		}
@@ -347,7 +348,7 @@ private:
 	void cocoon_(SizeType direction,SizeType site,
 	             const VectorWithOffsetType& psi,
 	             const PsimagLite::String& label,
-	             bool border,
+	             BorderEnumType border,
 	             const RealType& currentTime) const
 	{
 		VectorStringType vecStr = getOperatorLabels();
@@ -398,7 +399,7 @@ private:
 	          const PsimagLite::String& label,
 	          SizeType site,
 	          const OperatorType& A,
-	          bool border,
+	          BorderEnumType border,
 	          const RealType& currentTime) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type electrons;

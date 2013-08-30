@@ -121,6 +121,7 @@ public:
 	typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
+	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
@@ -374,8 +375,9 @@ private:
 		SizeType numberOfSites = lrs_.super().block().size();
 		if (stage_[i]==OPERATOR) {
 
-			bool corner = (tstStruct_.sites[i]==0 ||
-			               tstStruct_.sites[i]==numberOfSites -1) ? true : false;
+			BorderEnumType corner = (tstStruct_.sites[i]==0 ||
+			               tstStruct_.sites[i]==numberOfSites -1) ?
+			            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
 
 			PsimagLite::OstringStream msg;
 			msg<<"I'm applying a local operator now";

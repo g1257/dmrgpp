@@ -241,7 +241,7 @@ namespace Dmrg {
 		template<typename ApplyOperatorType>
 		FieldType onePoint(SizeType site,
 				   const typename ApplyOperatorType::OperatorType& A,
-				   bool corner = false)
+				   typename ApplyOperatorType::BorderEnum corner)
 		{
 			return onepoint_.template operator()<ApplyOperatorType>(site,A,corner);
 		}

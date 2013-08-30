@@ -253,7 +253,7 @@ namespace Dmrg {
 				OperatorType opIdentity(A,1,zeroZero,1,su2Related1);
 				observe_.setBrackets("time","time");
 				FieldType superDensity = observe_.template
-						onePoint<ApplyOperatorType>(0,opIdentity);
+						onePoint<ApplyOperatorType>(0,opIdentity,ApplyOperatorType::BORDER_NO);
 				std::cout<<"SuperDensity(Weight of the timeVector)="<<
 						superDensity<<"\n";
 			} else if (label=="nupNdown") {
@@ -350,7 +350,7 @@ namespace Dmrg {
 				onePointHookForZero(i0,opA,"gs",threadId);
 
 				FieldType tmp1 = observe_.template
-						onePoint<ApplyOperatorType>(i0,opA);
+						onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
 				std::cout<<observe_.site(threadId)<<" "<<tmp1;
 
 				if (!observe_.isAtCorner(numberOfSites_,threadId)) continue;
@@ -364,9 +364,8 @@ namespace Dmrg {
 
 				// do the corner case
 				observe_.setBrackets(bra,ket);
-				bool doCorner = true;
 				tmp1 = observe_.template
-				        onePoint<ApplyOperatorType>(i0,opAcorner,doCorner);
+				        onePoint<ApplyOperatorType>(i0,opAcorner,ApplyOperatorType::BORDER_YES);
 				std::cout<<x<<" "<<tmp1;
 			}
 		}
@@ -397,7 +396,7 @@ namespace Dmrg {
 				onePointHookForZero(i0,opA,"gs",threadId);
 
 				FieldType tmp1 = observe_.template
-						onePoint<ApplyOperatorType>(i0,opA);
+						onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
 				std::cout<<observe_.site(threadId)<<" "<<tmp1;
 
 				if (hasTimeEvolution_) { // for time vector use this one:
@@ -406,7 +405,7 @@ namespace Dmrg {
 					onePointHookForZero(i0,opA,"time",threadId);
 
 					FieldType tmp2 = observe_.template
-							 onePoint<ApplyOperatorType>(i0,opA);
+							 onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
 
 					std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
 				}
@@ -422,15 +421,14 @@ namespace Dmrg {
 					// do the corner case
 					// for g.s. use this one:
 					observe_.setBrackets("gs","gs");
-					bool doCorner = true;
 					FieldType tmp1 = observe_.template
-							onePoint<ApplyOperatorType>(i0,opAcorner,doCorner);
+							onePoint<ApplyOperatorType>(i0,opAcorner,ApplyOperatorType::BORDER_YES);
 					std::cout<<x<<" "<<tmp1;
 
 					if (hasTimeEvolution_) {// for time vector use this one:
 						observe_.setBrackets("time","time");
 						FieldType tmp2 = observe_.template
-								 onePoint<ApplyOperatorType>(i0,opAcorner,doCorner);
+								 onePoint<ApplyOperatorType>(i0,opAcorner,ApplyOperatorType::BORDER_YES);
 						std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
 					}
 					std::cout<<"\n";

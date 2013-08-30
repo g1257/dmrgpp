@@ -96,6 +96,8 @@ class ApplyOperatorLocal {
 
 public:
 
+	enum BorderEnum {BORDER_NO = false, BORDER_YES = true};
+
 	enum {MIDDLE,LEFT_CORNER,RIGHT_CORNER};
 
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -112,9 +114,10 @@ public:
 	                const VectorWithOffsetType& src,
 	                const OperatorType& A,
 	                const FermionSign& fermionSign,
-	                SizeType systemOrEnviron,bool corner = false) const
+	                SizeType systemOrEnviron,
+	                BorderEnum corner) const
 	{
-		if (!corner) {
+		if (corner == BORDER_NO) {
 			if (systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM)
 				applyLocalOpSystem(dest,src,A,fermionSign);
 			else
@@ -130,7 +133,7 @@ public:
 	                 const VectorWithOffsetType& src,
 	                 const OperatorType& A,
 	                 const FermionSign& fermionSign,
-	                 SizeType systemOrEnviron,bool corner = false) const
+	                 SizeType systemOrEnviron) const
 	{
 		assert(systemOrEnviron == ProgramGlobals::EXPAND_SYSTEM);
 
@@ -180,6 +183,7 @@ public:
 	}
 
 private:
+
 	void applyLocalOpSystem(VectorWithOffsetType& dest,
 	                        const VectorWithOffsetType& src,
 	                        const OperatorType& A,

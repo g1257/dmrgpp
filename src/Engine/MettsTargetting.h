@@ -133,6 +133,7 @@ namespace Dmrg {
 			typedef PsimagLite::Matrix<RealType> MatrixType;
 			typedef BlockMatrix<MatrixType> BlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
+			typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 			typedef MettsSerializer<VectorWithOffsetType> MettsSerializerType;
 			typedef typename PsimagLite::RandomForTests<RealType> RngType;
 			typedef MettsStochastics<ModelType,RngType> MettsStochasticsType;
@@ -328,11 +329,11 @@ namespace Dmrg {
 				for (SizeType i=0;i<targetVectors_.size();i++)
 					assert(targetVectors_[i].size()==0 || targetVectors_[i].size()==lrs_.super().permutationVector().size());
 
-				cocoon(direction,sites,false);
+				cocoon(direction,sites,ApplyOperatorType::BORDER_NO);
 
 				if (direction!=INFINITE) {
 					if (isAtBorder(direction,sites))
-						cocoon(direction,sites,true);
+						cocoon(direction,sites,ApplyOperatorType::BORDER_YES);
 				}
 
 				printEnergies(); // in-situ
@@ -346,9 +347,21 @@ namespace Dmrg {
 					PsimagLite::String s = "  COLLAPSEHERE  ";
 					for (SizeType i=0;i<sites.size();i++) {
 						const OperatorType& A = getObservableToTest(0,model_.params().model,sites[i],i);
-						test(targetVectors_[n1],targetVectors_[n1],direction,A,s,sites[i],false);
+						test(targetVectors_[n1],
+						     targetVectors_[n1],
+						     direction,
+						     A,
+						     s,
+						     sites[i],
+						     ApplyOperatorType::BORDER_NO);
 						if (isAtBorder(direction,sites))
-							test(targetVectors_[n1],targetVectors_[n1],direction,A,s,sites[i],true);
+							test(targetVectors_[n1],
+							     targetVectors_[n1],
+							     direction,
+							     A,
+							     s,
+							     sites[i],
+							     ApplyOperatorType::BORDER_YES);
 					}
 				}
 			}
@@ -785,7 +798,7 @@ namespace Dmrg {
 
 			void cocoon(SizeType direction,
 			            const VectorSizeType& block,
-			            bool corner)
+			            BorderEnumType corner)
 			{
 				SizeType obsToTest = getObservablesToTest(model_.params().model);
 				for (SizeType i = 0; i < obsToTest; i++) {
@@ -797,7 +810,7 @@ namespace Dmrg {
 			// in situ computation:
 			void cocoon(SizeType direction,
 			            const VectorSizeType& block,
-			            bool corner,
+			            BorderEnumType corner,
 			            SizeType ind,
 			            const PsimagLite::String& label)
 			{
@@ -811,7 +824,7 @@ namespace Dmrg {
 			// in situ computation:
 			void cocoon(SizeType direction,
 			            SizeType site,
-			            bool corner,
+			            BorderEnumType corner,
 			            const OperatorType& A,
 			            const PsimagLite::String& operatorLabel)
 			{
@@ -935,7 +948,7 @@ namespace Dmrg {
 			            const OperatorType& A,
 			            const PsimagLite::String& label,
 			            SizeType site,
-			            bool corner) const
+			            BorderEnumType corner) const
 			{
 				VectorWithOffsetType dest;
 				VectorSizeType electrons;

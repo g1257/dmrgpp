@@ -141,6 +141,7 @@ namespace Dmrg {
 			typedef typename CommonTargettingType::VectorStringType VectorStringType;
 
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
+
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 			INFINITE=WaveFunctionTransfType::INFINITE};
@@ -604,7 +605,12 @@ namespace Dmrg {
 					VectorSizeType electrons;
 					model_.findElectronsOfOneSite(electrons,site);
 					FermionSign fs(lrs_.left(),electrons);
-					applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],fs,systemOrEnviron);
+					applyOpLocal_(phiNew,
+					              phiOld,
+					              tstStruct_.aOperators[i],
+					              fs,
+					              systemOrEnviron,
+					              ApplyOperatorType::BORDER_NO);
 
 					applyOperatorAtBorder(phiNew,phiOld,systemOrEnviron,block);
 
@@ -675,7 +681,7 @@ namespace Dmrg {
 				              tstStruct_.aOperators[iOfBorder],
 				              fs,
 				              systemOrEnviron,
-				              true);
+				              ApplyOperatorType::BORDER_YES);
 
 				if (tstStruct_.concatenation==PRODUCT)
 					phiNew = phiNew2;
@@ -820,13 +826,22 @@ namespace Dmrg {
 				if (commonTargetting_.allStages(WFT_NOADVANCE,stage_)) {
 					VectorWithOffsetType tmpVector = psi_;
 					for (SizeType j=0;j<tstStruct_.aOperators.size();j++) {
-						applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],fs,
-							systemOrEnviron);
+						applyOpLocal_(phi,
+						              tmpVector,
+						              tstStruct_.aOperators[j],
+						              fs,
+						              systemOrEnviron,
+						              ApplyOperatorType::BORDER_NO);
 						tmpVector = phi;
 					}
 					return;
 				}
-				applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,systemOrEnviron);
+				applyOpLocal_(phi,
+				              psi_,
+				              tstStruct_.aOperators[i],
+				              fs,
+				              systemOrEnviron,
+				              ApplyOperatorType::BORDER_NO);
 			}
 
 			void test(const VectorWithOffsetType& src1,
@@ -844,7 +859,7 @@ namespace Dmrg {
 				model_.findElectronsOfOneSite(electrons,siteCorrected);
 				FermionSign fs(lrs_.left(),electrons);
 				VectorWithOffsetType dest;
-				applyOpLocal_(dest,src1,A,fs,systemOrEnviron);
+				applyOpLocal_(dest,src1,A,fs,systemOrEnviron,ApplyOperatorType::BORDER_NO);
 
 				ComplexType sum = 0;
 				for (SizeType ii=0;ii<dest.sectors();ii++) {
