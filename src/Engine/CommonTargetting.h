@@ -264,16 +264,17 @@ public:
 	void cocoon(SizeType direction,
 	            SizeType site,
 	            const VectorWithOffsetType& psi,
-	            const PsimagLite::String& label) const
+	            const PsimagLite::String& label,
+	            const RealType& currentTime) const
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-		cocoon_(direction,site,psi,label,false);
+		cocoon_(direction,site,psi,label,false,currentTime);
 
 		int site2 = findBorderSiteFrom(site,direction);
 
 		if (site2 >= 0) {
-			cocoon_(direction,site2,psi,label,true);
+			cocoon_(direction,site2,psi,label,true,currentTime);
 		}
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
@@ -338,7 +339,8 @@ private:
 	void cocoon_(SizeType direction,SizeType site,
 	             const VectorWithOffsetType& psi,
 	             const PsimagLite::String& label,
-	             bool border) const
+	             bool border,
+	             const RealType& currentTime) const
 	{
 		VectorStringType vecStr = getOperatorLabels();
 
@@ -347,7 +349,7 @@ private:
 			OperatorType nup = getOperatorForTest(opLabel,site);
 
 			PsimagLite::String tmpStr = "<"+ label + "|" + opLabel + "|" + label + ">";
-			test(psi,psi,direction,tmpStr,site,nup,border);
+			test(psi,psi,direction,tmpStr,site,nup,border,currentTime);
 		}
 	}
 
@@ -388,7 +390,8 @@ private:
 	          const PsimagLite::String& label,
 	          SizeType site,
 	          const OperatorType& A,
-	          bool border) const
+	          bool border,
+	          const RealType& currentTime) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type electrons;
 		model_.findElectronsOfOneSite(electrons,site);
@@ -408,7 +411,7 @@ private:
 					sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
 			}
 		}
-		std::cout<<site<<" "<<sum<<" "<<" 0";
+		std::cout<<site<<" "<<sum<<" "<<currentTime;
 		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 	}
 

@@ -539,8 +539,8 @@ namespace Dmrg {
 
 				SizeType site = block[0];
 
-				commonTargetting_.cocoon(direction,site,psi_,"PSI");
-				commonTargetting_.cocoon(direction,site,targetVectors_[0],"P0");
+				commonTargetting_.cocoon(direction,site,psi_,"PSI",currentTime_);
+				commonTargetting_.cocoon(direction,site,targetVectors_[0],"P0",currentTime_);
 
 				std::cout<<"-------------&*&*&* In-situ measurements end\n";
 			}
