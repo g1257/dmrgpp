@@ -38,6 +38,8 @@ while(<STDIN>) {
 $nsites++;
 
 for (my $c=0;$c<$total;$c++) {
+	next if (!allDefined($c,\@values,$nsites));
+
 	print "$times[$c] ";
 	for (my $site=0;$site<$nsites;$site++) {
 		my $val = $values[$site][$c];
@@ -45,6 +47,17 @@ for (my $c=0;$c<$total;$c++) {
 		print "$val ";
 	}
 	print "\n";
+}
+
+sub allDefined
+{
+	my ($c,$v,$nsites) = @_;
+	for (my $site=0;$site<$nsites;$site++) {
+		my $val = $v->[$site][$c];
+		return 0 if (!defined($val));
+	}
+	
+	return 1;
 }
 
 
