@@ -92,7 +92,7 @@ namespace Dmrg {
 		
 		template<typename IoInputType>
 		ParametersModelFeAs(IoInputType& io)
-		    : decay(0),coulombV(0),magneticField(0,0)
+		: potentialT(0),decay(0),coulombV(0),magneticField(0,0)
 		{
 			io.readline(orbitals,"Orbitals=");
 			io.read(hubbardU,"hubbardU");
@@ -117,6 +117,13 @@ namespace Dmrg {
 			} catch (std::exception& e) {
 
 			}
+
+			try {
+				io.read(potentialT,"potentialT");
+			} catch (std::exception& e) {
+
+			}
+
 			if (magneticField.n_row()!=0 && magneticField.n_row()!=3)
 				throw PsimagLite::RuntimeError("Magnetic Field: if present must have 3 rows\n");
 			if (magneticField.n_row()!=0 && magneticField.n_col()!=potentialV.size())
@@ -128,6 +135,7 @@ namespace Dmrg {
 		typename PsimagLite::Vector<Field>::Type hubbardU; 
 		// Onsite potential values, one for each site
 		typename PsimagLite::Vector<Field>::Type potentialV;
+		typename PsimagLite::Vector<Field>::Type potentialT;
 		int decay;
 		Field coulombV;
 		// target number of electrons  in the system
@@ -154,6 +162,10 @@ namespace Dmrg {
 		if (parameters.decay)
 			os<<"CoulombV="<<parameters.coulombV<<"\n";
 
+		if (parameters.potentialT.size()>0) {
+		  os<<"potentialT\n";
+		  os<<parameters.potentialT;
+		}
 		return os;
 	}
 } // namespace Dmrg

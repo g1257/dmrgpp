@@ -327,7 +327,12 @@ namespace Dmrg {
 			for (SizeType i=0;i<n;i++) {
 				addInteraction(hmatrix,cm,i,factorForDiagonals);
 				addMagneticField(hmatrix,cm,i,block[i],factorForDiagonals);
-				addPotentialV(hmatrix,cm,i,block[i],factorForDiagonals);
+
+				if (modelParameters_.potentialT.size()==0 || time==0) {
+				  addPotentialV(hmatrix,cm,i,block[i],factorForDiagonals,modelParameters_.potentialV);
+				} else {
+				  addPotentialV(hmatrix,cm,i,block[i],factorForDiagonals,modelParameters_.potentialT);
+				}
 			}
 		}
 
@@ -758,10 +763,11 @@ namespace Dmrg {
 		                   const VectorOperatorType& cm,
 		                   SizeType i,
 		                   SizeType actualIndexOfSite,
-		                   RealType factorForDiagonals) const
+		                   RealType factorForDiagonals,
+				   const typename PsimagLite::Vector<RealType>::Type& V) const
 		{
 			for (SizeType orb=0;orb<modelParameters_.orbitals;orb++)
-				addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb,factorForDiagonals);
+			  addPotentialV(hmatrix,cm,i,actualIndexOfSite,orb,factorForDiagonals,V);
 		}
 
 		void addPotentialV(SparseMatrixType &hmatrix,
@@ -769,7 +775,8 @@ namespace Dmrg {
 		                   SizeType i,
 		                   SizeType actualIndexOfSite,
 		                   SizeType orbital,
-		                   RealType factorForDiagonals) const
+		                   RealType factorForDiagonals,
+				   const typename PsimagLite::Vector<RealType>::Type& V) const
 		{
 			int dof=2*modelParameters_.orbitals;
 			SparseMatrixType nup = n(cm[orbital+SPIN_UP*modelParameters_.orbitals+i*dof].data);
@@ -778,9 +785,9 @@ namespace Dmrg {
 			SizeType linSize = geometry_.numberOfSites();
 
 			SizeType iUp = actualIndexOfSite + (orbital + 0*modelParameters_.orbitals)*linSize;
-			hmatrix += factorForDiagonals * modelParameters_.potentialV[iUp] * nup;
+			hmatrix += factorForDiagonals * V[iUp] * nup;
 			SizeType iDown = actualIndexOfSite + (orbital + 1*modelParameters_.orbitals)*linSize;
-			hmatrix += factorForDiagonals * modelParameters_.potentialV[iDown] * ndown;
+			hmatrix += factorForDiagonals * V[iDown] * ndown;
 		}
 
 		SparseMatrixType n(const SparseMatrixType& c) const
