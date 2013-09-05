@@ -20,7 +20,7 @@ while(<STDIN>) {
 	$flag = 1 if (/ALL LINKS SEEN/);
 	next unless (/P0/);
 	next unless (/$observable/);
-	next if ($flag==0 and $useFlag);
+	next if ($flag==0 and $useFlag==1);
 
 	my @temp=split;
 	my $denominator = realPart($temp[4]);
@@ -34,8 +34,15 @@ while(<STDIN>) {
 	$counter[$temp[0]]=$c+1;
 	$total = $c+1 if ($total<$c+1);
 	$nsites = $temp[0] if ($nsites<$temp[0]);
+	if ($useFlag == 2) {
+		print STDERR "$denominator\n";
+	}
 }
+
 $nsites++;
+
+exit(0) if ($useFlag == 2);
+
 
 for (my $c=0;$c<$total;$c++) {
 	next if (!allDefined($c,\@values,$nsites));
