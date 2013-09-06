@@ -271,12 +271,8 @@ namespace Dmrg {
 
 			// reorder the natural basis (needed for MULTIPLE BANDS)
 			findQuantumNumbers(q,basisTmp,block[0]);
-			typename PsimagLite::Vector<SizeType>::Type iperm(q.size());
-			PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type > sort;
-			sort.sort(q,iperm);
-			basis.clear();
-			for (SizeType i=0;i<iperm.size();i++) 
-				basis.push_back(basisTmp[iperm[i]]);
+
+			this->orderBasis(basis, q, basisTmp);
 		}
 
 		void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,

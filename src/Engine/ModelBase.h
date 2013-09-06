@@ -82,6 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ReflectionOperatorEmpty.h"
 #include "ModelCommonBase.h"
+#include "Vector.h"
+#include "Sort.h"
 
 namespace Dmrg {
 
@@ -114,7 +116,7 @@ public:
 	typedef typename ModelCommonBaseType::VectorType VectorType;
 	typedef ParametersType SolverParamsType;
 	typedef typename ModelHelperType::LinkType LinkType;
-
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	ModelBase(const ParametersType& params,
 	          InputValidatorType& io,
@@ -130,10 +132,6 @@ public:
 		delete modelCommon_;
 	}
 
-	const GeometryType& geometry() const { return geometry_; }
-
-	const ParametersType& params() const { return params_; }
-
 	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
 	                             SparseMatrixType &hamiltonian,
 	                             BasisDataType& q,
@@ -145,7 +143,7 @@ public:
 	                SizeType site,
 	                SizeType dof) const = 0;
 
-	virtual void findElectrons(typename PsimagLite::Vector<SizeType> ::Type& electrons,
+	virtual void findElectrons(VectorSizeType& electrons,
 	                           const HilbertBasisType& basis,
 	                           SizeType site) const = 0;
 
@@ -239,6 +237,56 @@ public:
 		modelCommon_->addConnectionsInNaturalBasis(hmatrix,cm,block,sysEnvOnly);
 
 		addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
+	}
+
+	const GeometryType& geometry() const { return geometry_; }
+
+	const ParametersType& params() const { return params_; }
+
+	void orderBasis(HilbertBasisType& basis,
+	                VectorSizeType& q,
+	                const HilbertBasisType& basisTmp) const
+	{
+		// reorder the natural basis
+		VectorSizeType iperm(q.size());
+		PsimagLite::Sort<VectorSizeType> sort;
+		sort.sort(q,iperm);
+
+		SizeType total = basisTmp.size();
+		VectorSizeType basis2(total);
+		for (SizeType a=0;a<total;a++)
+			basis2[a] = basisTmp[iperm[a]];
+
+		// Ensure deterministic order for the natural basis
+		SizeType offset = 0;
+		VectorSizeType symmetryBlock;
+
+		basis.resize(total);
+		for (SizeType a=0;a<total;a++) {
+			if (a>0 && q[a] != q[a-1]) {
+				iperm.resize(symmetryBlock.size());
+				sort.sort(symmetryBlock,iperm);
+
+				for (SizeType k = 0; k < symmetryBlock.size(); ++k)
+					basis[k + offset] = symmetryBlock[k];
+
+				offset += symmetryBlock.size();
+				symmetryBlock.clear();
+			}
+
+			symmetryBlock.push_back(basis2[a]);
+		}
+
+		if (symmetryBlock.size() == 0) return;
+
+		iperm.resize(symmetryBlock.size());
+		sort.sort(symmetryBlock,iperm);
+
+		for (SizeType k = 0; k < symmetryBlock.size(); ++k)
+			basis[k + offset] = symmetryBlock[k];
+
+		offset += symmetryBlock.size();
+		symmetryBlock.clear();
 	}
 
 private:

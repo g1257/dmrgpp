@@ -93,9 +93,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	template<typename ModelBaseType>
 	class ModelFeBasedSc : public ModelBaseType {
-		
-		typedef unsigned int long long WordType;
-		typedef  HilbertSpaceFeAs<WordType> HilbertSpaceFeAsType;
 
 	public:
 
@@ -110,12 +107,13 @@ namespace Dmrg {
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef typename HilbertSpaceFeAsType::HilbertState HilbertState;
+		typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
+		typedef typename HilbertBasisType::value_type HilbertState;
+		typedef  HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
 		typedef typename ModelHelperType::BlockType BlockType;
 		typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 		typedef typename ModelBaseType::VectorType VectorType;
-		typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-		typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
+		typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 		typedef LinkProductFeAs<ModelHelperType> LinkProductType;
 		typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 		typedef	 typename ModelBaseType::MyBasis MyBasis;
@@ -163,7 +161,7 @@ namespace Dmrg {
 		                     const BlockType& block,
 		                     const RealType& time)  const
 		{
-			typename PsimagLite::Vector<HilbertState>::Type natBasis;
+			HilbertBasisType natBasis;
 			VectorSizeType qvector;
 			setNaturalBasis(natBasis,qvector,block);			
 
@@ -183,7 +181,7 @@ namespace Dmrg {
 		void setOperatorMatrices(VectorOperatorType& creationMatrix,
 		                         const BlockType& block) const
 		{
-			typename PsimagLite::Vector<HilbertState>::Type natBasis;
+			HilbertBasisType natBasis;
 			SparseMatrixType tmpMatrix;
 			VectorSizeType qvector;
 			setNaturalBasis(natBasis,qvector,block);
@@ -281,7 +279,7 @@ namespace Dmrg {
 		
 		//! find all states in the natural basis for a block of n sites
 		//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-		void setNaturalBasis(typename PsimagLite::Vector<HilbertState>::Type& basis,
+		void setNaturalBasis(HilbertBasisType& basis,
 		                     VectorSizeType& q,
 		                     const VectorSizeType& block) const
 		{
@@ -290,53 +288,16 @@ namespace Dmrg {
 			int sitesTimesDof=2*modelParameters_.orbitals;
 			HilbertState total = (1<<sitesTimesDof);
 
-			typename PsimagLite::Vector<HilbertState>::Type  basisTmp(total);
+			HilbertBasisType basisTmp(total);
 			for (a=0;a<total;a++) basisTmp[a] = a;
 
 			// reorder the natural basis (needed for MULTIPLE BANDS)
 			findQuantumNumbers(q,basisTmp,block.size());
-			VectorSizeType iperm(q.size());
-			PsimagLite::Sort<VectorSizeType > sort;
-			sort.sort(q,iperm);
-
-			PsimagLite::Vector<HilbertState>::Type basis2(total);
-			for (a=0;a<total;a++)
-				basis2[a] = basisTmp[iperm[a]];
-
-			// Ensure deterministic order for the natural basis
-			SizeType offset = 0;
-			VectorSizeType symmetryBlock;
-
-			basis.resize(total);
-			for (a=0;a<total;a++) {
-				if (a>0 && q[a] != q[a-1]) {
-					iperm.resize(symmetryBlock.size());
-					sort.sort(symmetryBlock,iperm);
-
-					for (SizeType k = 0; k < symmetryBlock.size(); ++k)
-						basis[k + offset] = symmetryBlock[k];
-
-					offset += symmetryBlock.size();
-					symmetryBlock.clear();
-				}
-
-				symmetryBlock.push_back(basis2[a]);
-			}
-
-			if (symmetryBlock.size() == 0) return;
-
-			iperm.resize(symmetryBlock.size());
-			sort.sort(symmetryBlock,iperm);
-
-			for (SizeType k = 0; k < symmetryBlock.size(); ++k)
-				basis[k + offset] = symmetryBlock[k];
-
-			offset += symmetryBlock.size();
-			symmetryBlock.clear();
+			this->orderBasis(basis,q,basisTmp);
 		}
 		
 		void findElectrons(VectorSizeType& electrons,
-		                   const typename PsimagLite::Vector<HilbertState>::Type& basis,
+		                   const HilbertBasisType& basis,
 		                   SizeType site) const
 		{
 			electrons.resize(basis.size());
@@ -374,8 +335,8 @@ namespace Dmrg {
 		HilbertState reinterpretX_,reinterpretY_;
 		ParametersModelFeAs<RealType>  modelParameters_;
 		GeometryType const &geometry_;
-		SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
-		SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
+		SpinSquaredHelper<RealType,HilbertState> spinSquaredHelper_;
+		SpinSquared<SpinSquaredHelper<RealType,HilbertState> > spinSquared_;
 		//typename PsimagLite::Vector<PsimagLite::Matrix<RealType>::Type > pauliMatrix_;
 
 		//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
@@ -415,7 +376,7 @@ namespace Dmrg {
 		void findOperatorMatrices(SparseMatrixType& creationMatrix,
 		                          int i,
 		                          int sigma,
-		                          const typename PsimagLite::Vector<HilbertState>::Type& natBasis) const
+		                          const HilbertBasisType& natBasis) const
 		{
 			HilbertState bra,ket;
 			int n = natBasis.size();
@@ -438,6 +399,7 @@ namespace Dmrg {
 					cm(ii,jj) =sign(ket,i,sigma);
 				}
 			}
+
 			if (REINTERPRET && modelParameters_.orbitals==2) reinterpret(cm,natBasis);
 
 			SparseMatrixType temp;
@@ -445,7 +407,7 @@ namespace Dmrg {
 			transposeConjugate(creationMatrix,temp);
 		}
 
-		void findQuantumNumbers(VectorSizeType& q,const typename PsimagLite::Vector<HilbertState>  ::Type&basis,int n) const
+		void findQuantumNumbers(VectorSizeType& q,const HilbertBasisType&basis,int n) const
 		{
 			BasisDataType qq;
 			setSymmetryRelated(qq,basis,n);
@@ -453,7 +415,7 @@ namespace Dmrg {
 		}
 
 		void setSymmetryRelated(BasisDataType& q,
-		                        const typename PsimagLite::Vector<HilbertState>::Type& basis,
+		                        const HilbertBasisType& basis,
 		                        int n) const
 		{
 			if (n!=1) PsimagLite::RuntimeError("ModelFeAs::setSymmetryRelated() implemented for n=1 only\n");
@@ -540,7 +502,7 @@ namespace Dmrg {
 		//! Let |9> = |up a down b> and
 		//! Let |6> = |up b down a>  then
 		void reinterpret(PsimagLite::Matrix<SparseElementType>& cm,
-		                 const typename PsimagLite::Vector<HilbertState>::Type& basis) const
+		                 const HilbertBasisType& basis) const
 		{
 			int n  = cm.n_row();
 			if (n!=16) throw PsimagLite::RuntimeError("reinterpret (unimplemented case): "
