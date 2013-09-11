@@ -91,7 +91,7 @@ namespace Dmrg {
 		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
-
+		typedef PsimagLite::Concurrency ConcurrencyType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
 		typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
@@ -171,10 +171,13 @@ namespace Dmrg {
 				// target all other states if any:
 				if (target.size()>0) {
 					typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
-					ParallelizerType threadedDm(1,
+					SizeType savedNpthreads = ConcurrencyType::npthreads;
+					ConcurrencyType::npthreads = 1;
+					ParallelizerType threadedDm(ConcurrencyType::npthreads,
 					                            PsimagLite::MPI::COMM_WORLD);
 
 					threadedDm.loopCreate(target.size(),helperDm);
+					ConcurrencyType::npthreads = savedNpthreads;
 				}
 
 				// set this matrix block into data_

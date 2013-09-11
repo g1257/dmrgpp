@@ -358,6 +358,9 @@ diagonalise(BlockMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
 {
 	typedef typename BlockMatrix<PsimagLite::Matrix<SomeFieldType> >::LoopForDiag LoopForDiagType;
 	typedef PsimagLite::Parallelizer<LoopForDiagType> ParallelizerType;
+	typedef PsimagLite::Concurrency ConcurrencyType;
+	SizeType savedNpthreads = ConcurrencyType::npthreads;
+	ConcurrencyType::npthreads = 1;
 	ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
 	                              PsimagLite::MPI::COMM_WORLD);
 
@@ -366,6 +369,8 @@ diagonalise(BlockMatrix<PsimagLite::Matrix<SomeFieldType> >& C,
 	threadObject.loopCreate(C.blocks(),helper); // FIXME: needs weights
 
 	helper.gather();
+
+	ConcurrencyType::npthreads = savedNpthreads;
 }
 
 template<class MatrixInBlockTemplate>
