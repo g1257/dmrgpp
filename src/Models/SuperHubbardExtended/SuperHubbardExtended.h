@@ -71,21 +71,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ExtendedHubbard1Orb.h
+/*! \file SuperHubbardExtended.h
  *
  *  Hubbard + V_{ij} n_i n_j
  *
  */
-#ifndef EXTENDED_HUBBARD_1ORB_H
-#define EXTENDED_HUBBARD_1ORB_H
+#ifndef SUPER_HUBBARD_EXTENDED_H
+#define SUPER_HUBBARD_EXTENDED_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "LinkProdExtendedHubbard1Orb.h"
+#include "LinkProdSuperHubbardExtended.h"
 #include "ModelCommon.h"
 
 namespace Dmrg {
 //! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
 template<typename ModelBaseType>
-class ExtendedHubbard1Orb : public ModelBaseType {
+class SuperHubbardExtended : public ModelBaseType {
 
 public:
 
@@ -100,7 +100,7 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProdExtendedHubbard1Orb<ModelHelperType> LinkProductType;
+	typedef LinkProdSuperHubbardExtended<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -113,8 +113,10 @@ public:
 	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 
-	ExtendedHubbard1Orb(const SolverParamsType& solverParams,
+	SuperHubbardExtended(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
 	                    GeometryType const &geometry)
 	    : ModelBaseType(solverParams,io,geometry,new ModelCommonType(geometry)),
@@ -128,7 +130,8 @@ public:
 		return modelHubbard_.hilbertSize(site);
 	}
 
-	//! find creation operator matrices for (i,sigma) in the natural basis, find quantum numbers and number of electrons
+	//! find creation operator matrices for (i,sigma) in the natural basis,
+	//! find quantum numbers and number of electrons
 	//! for each state in the basis
 	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
 	                             SparseMatrixType &hamiltonian,
@@ -147,7 +150,7 @@ public:
 	}
 
 	//! set creation matrices for sites in block
-	void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
+	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	                         const BlockType& block) const
 	{
 		modelHubbard_.setOperatorMatrices(creationMatrix,block);
@@ -162,7 +165,7 @@ public:
 		BlockType block;
 		block.resize(1);
 		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		VectorOperatorType creationMatrix;
 		setOperatorMatrices(creationMatrix,block);
 
 		if (what=="n") {
@@ -176,7 +179,7 @@ public:
 
 	//! find total number of electrons for each state in the basis
 	void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
-	                   const typename PsimagLite::Vector<HilbertState>::Type& basis,
+	                   const VectorHilbertStateType& basis,
 	                   SizeType site) const
 	{
 		modelHubbard_.findElectrons(electrons,basis,site);
@@ -217,7 +220,7 @@ private:
 
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(int i,
-	                                      const typename PsimagLite::Vector<HilbertState>::Type& natBasis) const
+	                                      const VectorHilbertStateType& natBasis) const
 	{
 
 		SizeType n = natBasis.size();
@@ -237,10 +240,11 @@ private:
 
 	//! Full hamiltonian from creation matrices cm
 	void addNiNj(SparseMatrixType &hmatrix,
-	             const typename PsimagLite::Vector<OperatorType>::Type& cm,
+	             const VectorOperatorType& cm,
 	             const BlockType& block) const
 	{
-		//Assume block.size()==1 and then problem solved!! there are no connection if there's only one site ;-)
+		// Assume block.size()==1 and then problem solved!!
+		// there are no connection if there's only one site ;-)
 		assert(block.size()==1);
 	}
 
@@ -248,7 +252,7 @@ private:
 	           const BlockType& block) const
 	{
 		assert(block.size()==1);
-		typename PsimagLite::Vector<HilbertState>::Type natBasis;
+		VectorHilbertStateType natBasis;
 		typename PsimagLite::Vector<SizeType>::Type q;
 		modelHubbard_.setNaturalBasis(natBasis,q,block);
 
@@ -260,9 +264,9 @@ private:
 
 		creationMatrix.push_back(myOp);
 	}
-};	//class ExtendedHubbard1Orb
+};	//class SuperHubbardExtended
 
 } // namespace Dmrg
 /*@}*/
-#endif // EXTENDED_HUBBARD_1ORB_H
+#endif // SUPER_HUBBARD_EXTENDED_H
 

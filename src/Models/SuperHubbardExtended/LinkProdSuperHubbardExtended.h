@@ -72,19 +72,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LinkProdExtendedHubbard1Orb.h
+/*! \file LinkProdSuperHubbardExtended.h
  *
  *  FIXME
  *
  */
-#ifndef LINKPROD_EXTENDED_HUBBARD_1ORB_H
-#define LINKPROD_EXTENDED_HUBBARD_1ORB_H
+#ifndef LINKPROD_SUPER_HUBBARD_EXTENDED_H
+#define LINKPROD_SUPER_HUBBARD_EXTENDED_H
 
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProdExtendedHubbard1Orb {
+class LinkProdSuperHubbardExtended {
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	enum {TERM_HOPPING=0,TERM_NINJ=1};
@@ -129,7 +129,7 @@ public:
 	{
 		return PairType(0,0); // no orbital and no dependence on spin
 	}
-}; // class LinkProdExtendedHubbard1Orb
+}; // class LinkProdSuperHubbardExtended
 } // namespace Dmrg
 /*@}*/
-#endif // LINKPROD_EXTENDED_HUBBARD_1ORB_H
+#endif // LINKPROD_SUPER_HUBBARD_EXTENDED_H
