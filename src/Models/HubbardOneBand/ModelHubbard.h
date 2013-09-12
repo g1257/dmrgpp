@@ -230,49 +230,73 @@ public:
 		setOperatorMatrices(creationMatrix,block);
 		SizeType iup = SPIN_UP;
 		SizeType idown = SPIN_DOWN;
-		if (what=="+" or what=="i") {
+		assert(creationMatrix.size()>0);
+		SizeType nrow = creationMatrix[0].data.row();
+
+		if (what == "i" || what=="identity") {
+			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
+			return tmp;
+		}
+
+		if (what=="+") {
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[idown].data);
 			return tmp;
-		} else if (what=="-") {
+		}
+
+		if (what=="-") {
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[idown].data,creationMatrix[iup].data);
 			return tmp;
-		} else if (what=="z") {
+		}
+
+		if (what=="z") {
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data);
 			PsimagLite::Matrix<SparseElementType> tmp2 =
 			        multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
 			return tmp-tmp2;
-		} else if (what=="n") {
+		}
+
+		if (what=="n") {
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[iup].data,creationMatrix[iup].data)
 			        + multiplyTc(creationMatrix[idown].data,creationMatrix[idown].data);
 			return tmp;
-		} else if (what=="c") {
+		}
+
+		if (what=="c") {
 			PsimagLite::Matrix<SparseElementType> tmp;
 			assert(dof<creationMatrix.size());
 			crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
 			return tmp;
-		} else if (what=="nup") {
+		}
+
+		if (what=="nup") {
 			PsimagLite::Matrix<SparseElementType> cup =
 			        naturalOperator("c",site,SPIN_UP);
 			PsimagLite::Matrix<SparseElementType> nup =
 			        multiplyTransposeConjugate(cup,cup);
 			return nup;
-		} else if (what=="ndown") {
+		}
+
+		if (what=="ndown") {
 			PsimagLite::Matrix<SparseElementType> cdown =
 			        naturalOperator("c",site,SPIN_DOWN);
 			PsimagLite::Matrix<SparseElementType> ndown =
 			        multiplyTransposeConjugate(cdown,cdown);
 			return ndown;
-		} else if (what=="d") {
+		}
+
+		if (what=="d") {
 			PsimagLite::Matrix<SparseElementType> cup =
 			        naturalOperator("c",site,SPIN_UP);
 			PsimagLite::Matrix<SparseElementType> cdown =
 			        naturalOperator("c",site,SPIN_DOWN);
 			return (cup*cdown);
 		}
+
 		std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
 		throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 	}

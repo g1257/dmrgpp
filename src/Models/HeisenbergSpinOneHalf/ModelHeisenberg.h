@@ -206,21 +206,34 @@ namespace Dmrg {
 			block[0]=site;
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
+			assert(creationMatrix.size()>0);
+			SizeType nrow = creationMatrix[0].data.row();
 
-			if (what=="+" or what=="i") { // S^+
+			if (what == "i" || what=="identity") {
+				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+				for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
+				return tmp;
+			}
+
+			if (what=="+") { // S^+
 				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[0].data);
 				return tmp;
-			} else if (what=="-") { // S^-
+			}
+
+			if (what=="-") { // S^-
 				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[0].data);
 				transposeConjugate(tmp);
 				return tmp;
-			} else if (what=="z") { // S^z
+			}
+
+			if (what=="z") { // S^z
 				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[1].data);
 				return tmp;
 			}
+
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 		}
 		
