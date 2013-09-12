@@ -113,7 +113,6 @@ public:
 	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeTypeType;
 
@@ -218,9 +217,12 @@ public:
 
 private:
 
-	ParametersModelHubbard<RealType>  modelParameters_;
-	const GeometryType &geometry_;
-	ModelHubbardType extendedHubbard_;
+	SizeType findMatrixIndex(const PsimagLite::String& what) const
+	{
+		if (what == "+") return 3;
+		if (what == "z") return 4;
+		return 0;
+	}
 
 	//! Full hamiltonian from creation matrices cm
 	void addSiSj(SparseMatrixType &hmatrix,
@@ -248,6 +250,10 @@ private:
 		OperatorType szOp(sz,1,typename OperatorType::PairType(0,0),angularFactor,su2related);
 		creationMatrix.push_back(szOp);
 	}
+
+	ParametersModelHubbard<RealType>  modelParameters_;
+	const GeometryType &geometry_;
+	ModelHubbardType extendedHubbard_;
 };	//class SuperHubbardExtended
 
 } // namespace Dmrg

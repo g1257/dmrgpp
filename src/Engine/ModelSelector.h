@@ -54,6 +54,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/FeAsBasedScExtended/FeAsBasedScExtended.h"
 #include "../Models/Immm/Immm.h"
 #include "../Models/Tj1Orb/Tj1Orb.h"
+#include "../Models/SuperHubbardExtended/SuperHubbardExtended.h"
 
 namespace Dmrg {
 
@@ -74,6 +75,7 @@ class ModelSelector {
 	typedef FeAsBasedScExtended<ModelBaseType> FeBasedScExtType;
 	typedef Immm<ModelBaseType> ImmmType;
 	typedef Tj1Orb<ModelBaseType> Tj1OrbType;
+	typedef SuperHubbardExtended<ModelBaseType> SuperHubbardExtendedType;
 	// end models
 
 public:
@@ -107,6 +109,8 @@ public:
 			model_ = new ImmmType(solverParams,io,geometry);
 		} else if (name_ == "Tj1Orb") {
 			model_ = new Tj1OrbType(solverParams,io,geometry);
+		} else if (name_ == "SuperHubbardExtended") {
+			model_ = new SuperHubbardExtendedType(solverParams,io,geometry);
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " Unknown model " + name_ + "\n";

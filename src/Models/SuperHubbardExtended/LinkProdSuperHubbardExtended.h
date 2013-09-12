@@ -126,14 +126,14 @@ public:
 
 		LinkProductHeisenbergSpinOneHalf<ModelHelperType>::setLinkData(0,
 		                                                               dofs,
-	                                                                   isSu2,
-	                                                                   fermionOrBoson,
-	                                                                   ops,
-	                                                                   mods,
-	                                                                   angularMomentum,
-	                                                                   angularFactor,
-	                                                                   category,
-	                                                                   additional);
+		                                                               isSu2,
+		                                                               fermionOrBoson,
+		                                                               ops,
+		                                                               mods,
+		                                                               angularMomentum,
+		                                                               angularFactor,
+		                                                               category,
+		                                                               additional);
 		ops.first += 3;
 		ops.second += 3;
 	}
@@ -152,11 +152,11 @@ public:
 			                                                                   isSu2,
 			                                                                   additional);
 
-		LinkProductHeisenbergSpinOneHalf<ModelHelperType>::valueModifier(value,
-		                                                                 0,
-		                                                                 dofs,
-		                                                                 isSu2,
-		                                                                 additional);
+		return LinkProductHeisenbergSpinOneHalf<ModelHelperType>::valueModifier(value,
+		                                                                        0,
+		                                                                        dofs,
+		                                                                        isSu2,
+		                                                                        additional);
 	}
 
 	template<typename SomeStructType>
@@ -165,7 +165,7 @@ public:
 		if (term == TERM_HOPPING || term == TERM_NINJ)
 			return LinkProdExtendedHubbard1Orb<ModelHelperType>::dofs(term,additional);
 
-		LinkProductHeisenbergSpinOneHalf<ModelHelperType>::dofs(0,additional);
+		return LinkProductHeisenbergSpinOneHalf<ModelHelperType>::dofs(0,additional);
 	}
 
 	template<typename SomeStructType>
@@ -178,10 +178,13 @@ public:
 			                                                                   dofs,
 			                                                                   additional);
 
-		LinkProductHeisenbergSpinOneHalf<ModelHelperType>::connectorDofs(0,
-		                                                                 dofs,
-	                                                                     additional);
+		return LinkProductHeisenbergSpinOneHalf<ModelHelperType>::connectorDofs(0,
+		                                                                        dofs,
+		                                                                        additional);
 	}
+
+	static SizeType terms() { return 2; }
+
 }; // class LinkProdSuperHubbardExtended
 } // namespace Dmrg
 /*@}*/
