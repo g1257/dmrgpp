@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
@@ -85,53 +83,53 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename ModelHelperType>
-	class LinkProdExtendedHubbard1Orb {
-			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			typedef std::pair<SizeType,SizeType> PairType;
-			enum {TERM_HOPPING=0,TERM_NINJ=1};
+template<typename ModelHelperType>
+class LinkProdExtendedHubbard1Orb {
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef std::pair<SizeType,SizeType> PairType;
+	enum {TERM_HOPPING=0,TERM_NINJ=1};
 
-		public:
-			typedef typename ModelHelperType::RealType RealType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
+public:
+	typedef typename ModelHelperType::RealType RealType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
 
-			template<typename SomeStructType>
-			static void setLinkData(
-					SizeType term,
-					SizeType dofs,
-     					bool isSu2,
-					SizeType& fermionOrBoson,
-					PairType& ops,
-     					std::pair<char,char>& mods,
-					SizeType& angularMomentum,
-     					RealType& angularFactor,
-					SizeType& category,const SomeStructType& additional)
-			{
-				if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
-				else fermionOrBoson = ProgramGlobals::FERMION;
-				if (term==TERM_NINJ) ops = PairType(2,2);
-				else ops = PairType(dofs,dofs);
-				angularFactor = 1;
-				if (dofs==1) angularFactor = -1;
-				angularMomentum = 1;
-				if (term==TERM_NINJ) angularMomentum = 0;
-				category = dofs;
-			}
+	template<typename SomeStructType>
+	static void setLinkData(
+	        SizeType term,
+	        SizeType dofs,
+	        bool isSu2,
+	        SizeType& fermionOrBoson,
+	        PairType& ops,
+	        std::pair<char,char>& mods,
+	        SizeType& angularMomentum,
+	        RealType& angularFactor,
+	        SizeType& category,const SomeStructType& additional)
+	{
+		if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
+		else fermionOrBoson = ProgramGlobals::FERMION;
+		if (term==TERM_NINJ) ops = PairType(2,2);
+		else ops = PairType(dofs,dofs);
+		angularFactor = 1;
+		if (dofs==1) angularFactor = -1;
+		angularMomentum = 1;
+		if (term==TERM_NINJ) angularMomentum = 0;
+		category = dofs;
+	}
 
-			template<typename SomeStructType>
-			static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType& additional)
-			{
-			}
-			
-			template<typename SomeStructType>
-			static SizeType dofs(SizeType term,const SomeStructType& additional) { return (term==TERM_NINJ) ? 1 : 2; }
-			
-			template<typename SomeStructType>
-			static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
-			{
-				return PairType(0,0); // no orbital and no dependence on spin
-			}
-	}; // class LinkProdExtendedHubbard1Orb
+	template<typename SomeStructType>
+	static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType& additional)
+	{
+	}
+
+	template<typename SomeStructType>
+	static SizeType dofs(SizeType term,const SomeStructType& additional) { return (term==TERM_NINJ) ? 1 : 2; }
+
+	template<typename SomeStructType>
+	static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
+	{
+		return PairType(0,0); // no orbital and no dependence on spin
+	}
+}; // class LinkProdExtendedHubbard1Orb
 } // namespace Dmrg
 /*@}*/
 #endif // LINKPROD_EXTENDED_HUBBARD_1ORB_H
