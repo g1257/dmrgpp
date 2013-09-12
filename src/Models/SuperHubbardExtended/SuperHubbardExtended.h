@@ -162,22 +162,19 @@ public:
 	                                                      SizeType site,
 	                                                      SizeType dof) const
 	{
+		SizeType matrixIndex = findMatrixIndex(what);
+
+		if (matrixIndex < 3)
+			return extendedHubbard_.naturalOperator(what,site,dof);
+
 		BlockType block;
 		block.resize(1);
 		block[0]=site;
 		VectorOperatorType creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
-
-		SizeType matrixIndex = findMatrixIndex(what);
-
-		if (matrixIndex >= 3) {
-			PsimagLite::Matrix<SparseElementType> tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[matrixIndex].data);
-			return tmp;
-		}
-
-		return extendedHubbard_.naturalOperator(what,site,dof);
-
+		setSpinMatrices(creationMatrix,block);
+		PsimagLite::Matrix<SparseElementType> tmp;
+		crsMatrixToFullMatrix(tmp,creationMatrix[matrixIndex-3].data);
+		return tmp;
 	}
 
 	//! find total number of electrons for each state in the basis
@@ -239,14 +236,14 @@ private:
 	{
 		assert(block.size()==1);
 
-		SparseMatrixType sPlus = naturalOperator("+",0,0);
+		SparseMatrixType sPlus = extendedHubbard_.naturalOperator("+",0,0);
 		RealType angularFactor= 1;
 		typename OperatorType::Su2RelatedType su2related;
 		su2related.offset = 1; //check FIXME
 		OperatorType sPlusOp(sPlus,1,typename OperatorType::PairType(0,0),angularFactor,su2related);
 		creationMatrix.push_back(sPlusOp);
 
-		SparseMatrixType sz = naturalOperator("z",0,0);
+		SparseMatrixType sz = extendedHubbard_.naturalOperator("z",0,0);
 		OperatorType szOp(sz,1,typename OperatorType::PairType(0,0),angularFactor,su2related);
 		creationMatrix.push_back(szOp);
 	}
