@@ -80,54 +80,107 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINKPROD_SUPER_HUBBARD_EXTENDED_H
 #define LINKPROD_SUPER_HUBBARD_EXTENDED_H
 
+#include "../Models/HeisenbergSpinOneHalf/LinkProductHeisenbergSpinOneHalf.h"
+#include "../Models/ExtendedHubbard1Orb/LinkProdExtendedHubbard1Orb.h"
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
 class LinkProdSuperHubbardExtended {
+
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
-	enum {TERM_HOPPING=0,TERM_NINJ=1};
+	enum {TERM_HOPPING=0 ,TERM_NINJ=1, TERM_SUPER = 2};
 
 public:
+
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
 	template<typename SomeStructType>
-	static void setLinkData(
-	        SizeType term,
-	        SizeType dofs,
-	        bool isSu2,
-	        SizeType& fermionOrBoson,
-	        PairType& ops,
-	        std::pair<char,char>& mods,
-	        SizeType& angularMomentum,
-	        RealType& angularFactor,
-	        SizeType& category,const SomeStructType& additional)
+	static void setLinkData(SizeType term,
+	                        SizeType dofs,
+	                        bool isSu2,
+	                        SizeType& fermionOrBoson,
+	                        PairType& ops,
+	                        std::pair<char,char>& mods,
+	                        SizeType& angularMomentum,
+	                        RealType& angularFactor,
+	                        SizeType& category,
+	                        const SomeStructType& additional)
 	{
-		if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
-		else fermionOrBoson = ProgramGlobals::FERMION;
-		if (term==TERM_NINJ) ops = PairType(2,2);
-		else ops = PairType(dofs,dofs);
-		angularFactor = 1;
-		if (dofs==1) angularFactor = -1;
-		angularMomentum = 1;
-		if (term==TERM_NINJ) angularMomentum = 0;
-		category = dofs;
+		if (term == TERM_HOPPING || term == TERM_NINJ) {
+			return LinkProdExtendedHubbard1Orb<ModelHelperType>::setLinkData(term,
+			                                                                 dofs,
+			                                                                 isSu2,
+			                                                                 fermionOrBoson,
+			                                                                 ops,
+			                                                                 mods,
+			                                                                 angularMomentum,
+			                                                                 angularFactor,
+			                                                                 category,
+			                                                                 additional);
+		}
+
+		assert(term == TERM_SUPER);
+
+		LinkProductHeisenbergSpinOneHalf<ModelHelperType>::setLinkData(0,
+		                                                               dofs,
+	                                                                   isSu2,
+	                                                                   fermionOrBoson,
+	                                                                   ops,
+	                                                                   mods,
+	                                                                   angularMomentum,
+	                                                                   angularFactor,
+	                                                                   category,
+	                                                                   additional);
+		ops.first += 3;
+		ops.second += 3;
 	}
 
 	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType& additional)
+	static void valueModifier(SparseElementType& value,
+	                          SizeType term,
+	                          SizeType dofs,
+	                          bool isSu2,
+	                          const SomeStructType& additional)
 	{
+		if (term == TERM_HOPPING || term == TERM_NINJ)
+			return LinkProdExtendedHubbard1Orb<ModelHelperType>::valueModifier(value,
+			                                                                   term,
+			                                                                   dofs,
+			                                                                   isSu2,
+			                                                                   additional);
+
+		LinkProductHeisenbergSpinOneHalf<ModelHelperType>::valueModifier(value,
+		                                                                 0,
+		                                                                 dofs,
+		                                                                 isSu2,
+		                                                                 additional);
 	}
 
 	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType& additional) { return (term==TERM_NINJ) ? 1 : 2; }
+	static SizeType dofs(SizeType term,const SomeStructType& additional)
+	{
+		if (term == TERM_HOPPING || term == TERM_NINJ)
+			return LinkProdExtendedHubbard1Orb<ModelHelperType>::dofs(term,additional);
+
+		LinkProductHeisenbergSpinOneHalf<ModelHelperType>::dofs(0,additional);
+	}
 
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
+	static PairType connectorDofs(SizeType term,
+	                              SizeType dofs,
+	                              const SomeStructType& additional)
 	{
-		return PairType(0,0); // no orbital and no dependence on spin
+		if (term == TERM_HOPPING || term == TERM_NINJ)
+			return LinkProdExtendedHubbard1Orb<ModelHelperType>::connectorDofs(term,
+			                                                                   dofs,
+			                                                                   additional);
+
+		LinkProductHeisenbergSpinOneHalf<ModelHelperType>::connectorDofs(0,
+		                                                                 dofs,
+	                                                                     additional);
 	}
 }; // class LinkProdSuperHubbardExtended
 } // namespace Dmrg
