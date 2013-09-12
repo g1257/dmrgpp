@@ -162,6 +162,8 @@ namespace Dmrg {
 						value,term,dofs,isSu2,additional);
 
 			}
+
+			static SizeType terms() { return 2; }
 	}; // class LinkProductFeAsExtended
 } // namespace Dmrg
 /*@}*/

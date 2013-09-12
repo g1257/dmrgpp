@@ -185,6 +185,8 @@ namespace Dmrg {
 				value *= (-1.0);
 			}
 
+			static SizeType terms() { return 2; }
+
 		private:
 
 			// spin is diagonal

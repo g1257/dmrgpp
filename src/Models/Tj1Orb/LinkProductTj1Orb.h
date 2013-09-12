@@ -201,6 +201,8 @@ public:
 		return PairType(0,0); // no orbital and no dependence on spin
 	}
 
+	static SizeType terms() { return 2; }
+
 private:
 
 	// only for TERM_SISJ

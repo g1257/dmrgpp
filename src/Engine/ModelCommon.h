@@ -123,6 +123,12 @@ public:
 	ModelCommon(const GeometryType& geometry)
 	    : geometry_(geometry),progress_("ModelCommon")
 	{
+		if (LinkProductType::terms() > geometry_.terms()) {
+			PsimagLite::String str("ModelCommon: NumberOfTerms must be ");
+			str += ttos(LinkProductType::terms()) + " in input file for this model\n";
+			throw PsimagLite::RuntimeError(str);
+		}
+
 		Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 		MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
 	}

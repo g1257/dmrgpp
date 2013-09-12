@@ -151,7 +151,9 @@ namespace Dmrg {
 			{
 			}
 
-		private:
+			static SizeType terms() { return 2; }
+
+	private:
 			// spin is diagonal
 			static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs)
 			{

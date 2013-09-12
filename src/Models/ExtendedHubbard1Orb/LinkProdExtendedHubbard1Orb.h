@@ -131,6 +131,9 @@ namespace Dmrg {
 			{
 				return PairType(0,0); // no orbital and no dependence on spin
 			}
+
+			static SizeType terms() { return 2; }
+
 	}; // class LinkProdExtendedHubbard1Orb
 } // namespace Dmrg
 /*@}*/

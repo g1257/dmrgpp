@@ -145,6 +145,8 @@ namespace Dmrg {
 				return PairType(0,0); // no orbital and no anisotropy
 			}
 
+			static SizeType terms() { return 1; }
+
 		private:
 			
 			static PairType operatorDofs(SizeType dofs,bool isSu2)
