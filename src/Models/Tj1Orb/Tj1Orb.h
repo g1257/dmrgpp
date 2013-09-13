@@ -232,40 +232,60 @@ namespace Dmrg {
 			block[0]=site;
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
-			if (what=="+" or what=="i") {
+			assert(creationMatrix.size()>0);
+			SizeType nrow = creationMatrix[0].data.row();
+
+			if (what == "i" || what=="identity") {
+				PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+				for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
+				return tmp;
+			}
+
+			if (what=="+") {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
 				return tmp;
-			} else if (what=="-") {
+			}
+
+			if (what=="-") {
 				SparseMatrixType tmp2;
 				transposeConjugate(tmp2,creationMatrix[2].data);
 				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,tmp2);
 				return tmp;
-			} else if (what=="z") {
+			}
+
+			if (what=="z") {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[3].data);
 				return tmp;
-			} else if (what=="c") {
+			}
+
+			if (what=="c") {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				assert(dof<2);
-				//SparseMatrixType tmp2;
-				//transposeConjugate(tmp2,creationMatrix[dof].data);
 				crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
 				return tmp;
-			} else if (what=="n") {
+			}
+
+			if (what=="n") {
 				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[4].data);
 				return tmp;
-			}  else if (what=="nup") {
+			}
+
+			if (what=="nup") {
 				PsimagLite::Matrix<SparseElementType> cup = naturalOperator("c",site,SPIN_UP);
 				PsimagLite::Matrix<SparseElementType> nup = multiplyTransposeConjugate(cup,cup);
 				return nup;
-			} else if (what=="ndown") {
+			}
+
+			if (what=="ndown") {
 				PsimagLite::Matrix<SparseElementType> cdown = naturalOperator("c",site,SPIN_DOWN);
 				PsimagLite::Matrix<SparseElementType> ndown = multiplyTransposeConjugate(cdown,cdown);
 				return ndown;
 			}
+
 			std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 		}
