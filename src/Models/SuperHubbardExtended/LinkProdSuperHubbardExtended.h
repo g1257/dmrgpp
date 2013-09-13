@@ -183,7 +183,7 @@ public:
 		                                                                        additional);
 	}
 
-	static SizeType terms() { return 2; }
+	static SizeType terms() { return 3; }
 
 }; // class LinkProdSuperHubbardExtended
 } // namespace Dmrg

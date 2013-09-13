@@ -244,6 +244,7 @@ private:
 		creationMatrix.push_back(sPlusOp);
 
 		SparseMatrixType sz = extendedHubbard_.naturalOperator("z",0,0);
+		sz *= 0.5;
 		OperatorType szOp(sz,1,typename OperatorType::PairType(0,0),angularFactor,su2related);
 		creationMatrix.push_back(szOp);
 	}
