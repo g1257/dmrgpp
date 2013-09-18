@@ -146,11 +146,11 @@ namespace Dmrg {
 			setNi(creationMatrix,block);
 
 			// add V_{ij} n_i n_j to hamiltonian
-			addNiNj(hamiltonian,creationMatrix,block);
+			this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
 		}
 
 		//! set creation matrices for sites in block
-		void setOperatorMatrices(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
+		void setOperatorMatrices(VectorOperatorType&creationMatrix,
 		                         const BlockType& block) const
 		{
 			modelHubbard_.setOperatorMatrices(creationMatrix,block);
@@ -239,33 +239,33 @@ namespace Dmrg {
 			return creationMatrix;
 		}
 
-		//! Full hamiltonian from creation matrices cm
-		void addNiNj(SparseMatrixType &hmatrix,
-		             const typename PsimagLite::Vector<OperatorType>::Type& cm,
-		             const BlockType& block) const
-		{
-			//Assume block.size()==1 and then problem solved!! there are no connection if there's only one site ;-)
-			assert(block.size()==1);
-// 			for (SizeType sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) 
-// 				for (SizeType sigma2=0;sigma2<DEGREES_OF_FREEDOM;sigma2++) 
-// 					addNiNj(hmatrix,cm,block,sigma,sigma2);
-		}
-
-		void setNi(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
+		void setNi(VectorOperatorType& creationMatrix,
 		           const BlockType& block) const
 		{
-			assert(block.size()==1);
+			VectorOperatorType creationMatrix2 = creationMatrix;
+			creationMatrix.clear();
 			typename PsimagLite::Vector<HilbertState>::Type natBasis;
 			typename PsimagLite::Vector<SizeType>::Type q;
 			modelHubbard_.setNaturalBasis(natBasis,q,block);
+			SizeType operatorsPerSite = utils::exactDivision(creationMatrix2.size(),block.size());
+			SizeType k = 0;
 
-			SparseMatrixType tmpMatrix = findOperatorMatrices(0,natBasis);
-			RealType angularFactor= 1;
-			typename OperatorType::Su2RelatedType su2related;
-			su2related.offset = 1; //check FIXME
-			OperatorType myOp(tmpMatrix,1,typename OperatorType::PairType(0,0),angularFactor,su2related);
+			for (SizeType i = 0; i < block.size(); ++i) {
+				SparseMatrixType tmpMatrix = findOperatorMatrices(i,natBasis);
+				RealType angularFactor= 1;
+				typename OperatorType::Su2RelatedType su2related;
+				su2related.offset = 1; //check FIXME
+				OperatorType myOp(tmpMatrix,
+				                  1,
+				                  typename OperatorType::PairType(0,0),
+				                  angularFactor,
+				                  su2related);
 
-			creationMatrix.push_back(myOp);
+				for (SizeType j = 0; j < operatorsPerSite; ++j)
+					creationMatrix.push_back(creationMatrix2[k++]);
+
+				creationMatrix.push_back(myOp);
+			}
 		}
 	};	//class ExtendedHubbard1Orb
 

@@ -247,6 +247,14 @@ fillFermionicSigns(SomeVectorType& fermionicSigns,
 		fermionicSigns[i]= (electrons[i]%2==0) ? 1.0 : static_cast<ValueType>(f);
 }
 
+SizeType exactDivision(SizeType a,SizeType b)
+{
+	SizeType c = static_cast<SizeType>(a/b);
+	if (c * b != a)
+		throw PsimagLite::RuntimeError("exactDivision expected\n");
+
+	return c;
+}
 
 } //namespace utils
 /*@}*/
