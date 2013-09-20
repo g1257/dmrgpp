@@ -151,7 +151,7 @@ namespace Dmrg {
 			{
 			}
 
-			static SizeType terms() { return 2; }
+			static SizeType terms() { return 1; }
 
 	private:
 			// spin is diagonal

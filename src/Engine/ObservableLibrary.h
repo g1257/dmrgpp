@@ -116,7 +116,11 @@ namespace Dmrg {
 		  observe_(io,numberOfSites-2,hasTimeEvolution,model,verbose),
 				 szsz_(0,0)
 		{
-			if (hasTimeEvolution) {
+			PsimagLite::String modelName = model.params().model;
+			bool hubbardLike = (modelName == "HubbardOneBand" ||
+			                    modelName == "HubbardOneBandExtended");
+
+			if (hasTimeEvolution && hubbardLike) {
 				SizeType site = 0;
 				// FIXME: No support for site varying operators
 				fullMatrixToCrsMatrix(matrixNup_,model_.naturalOperator("nup",site,0));
