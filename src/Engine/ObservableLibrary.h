@@ -99,6 +99,7 @@ namespace Dmrg {
 		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 		typedef typename VectorWithOffsetType::value_type FieldType;
 		typedef PsimagLite::Matrix<FieldType> MatrixType;
+		typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 		typedef PreOperatorBase<ModelType> PreOperatorBaseType;
 		typedef PreOperatorSiteDependent<ModelType> PreOperatorSiteDependentType;
 		typedef PreOperatorSiteIndependent<ModelType> PreOperatorSiteIndependentType;
@@ -227,9 +228,6 @@ namespace Dmrg {
 				myMatrix(0,0) = myMatrix(3,3) = 1.0;
 				myMatrix(1,1) = myMatrix(2,2) = -1.0;
 
-//				myMatrix(0,0) = 0; myMatrix(3,3) = 2.0;
-//				myMatrix(1,1) = 1; myMatrix(2,2) = 1.0;
-
 				typename PsimagLite::Vector<FieldType>::Type result;
 				observe_.multiCorrelations(result,myMatrix,rows,cols);
 				for (SizeType i=0;i<result.size();i++) {
@@ -238,6 +236,20 @@ namespace Dmrg {
 			} else {
 				PsimagLite::String s = "Unknown label: " + label + "\n";
 				throw PsimagLite::RuntimeError(s.c_str());
+			}
+		}
+
+		template<typename SomeBracketType>
+		void fourPoint(const SomeBracketType& bracket,
+		               SizeType rows,
+		               SizeType cols,
+		               SizeType threadId)
+		{
+			VectorMatrixType v = observe_.ladder(bracket,rows,cols,threadId);
+
+			for (SizeType i = 0; i < v.size(); ++i) {
+				std::cout<<v[0];
+				std::cout<<"- - - - - - - - - - - - - \n";
 			}
 		}
 

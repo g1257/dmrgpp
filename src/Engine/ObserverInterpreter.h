@@ -100,7 +100,7 @@ class ObserverInterpreter {
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
-	enum {ONE_POINT, TWO_POINT};
+	enum {ONE_POINT, TWO_POINT, FOUR_POINT};
 
 	class Bracket {
 
@@ -134,20 +134,26 @@ class ObserverInterpreter {
 
 			PsimagLite::tokenizer(vecStr[1],name_,";");
 
-			if (name_.size() != 1 && name_.size() != 2) {
+			if (name_.size() != 1 && name_.size() != 2 && name_.size() != 4) {
 				PsimagLite::String str("ObserverInterpreter: syntax error for ");
 				str += bracket + " expected one or two operators\n";
 				throw PsimagLite::RuntimeError(str);
 			}
 
+
 			op_.push_back(findOperator(name_[0]));
 
-			if (name_.size() == 2) {
-				type_ = TWO_POINT;
-				op_.push_back(findOperator(name_[1]));
-			} else {
-				assert(name_.size() == 1);
-			}
+			if (name_.size() == 1) return;
+
+			op_.push_back(findOperator(name_[1]));
+
+			type_ = TWO_POINT;
+			if (name_.size() == 2) return;
+
+			assert(name_.size() == 4);
+			type_ = FOUR_POINT;
+			op_.push_back(findOperator(name_[2]));
+			op_.push_back(findOperator(name_[3]));
 		}
 
 		const OperatorType& op(SizeType ind) const
@@ -174,7 +180,7 @@ class ObserverInterpreter {
 			return bracket_[1];
 		}
 
-		bool type() const { return type_; }
+		SizeType type() const { return type_; }
 
 
 	private:
@@ -233,7 +239,10 @@ public:
 				observableLibrary_.measureOnePoint(bracket.bra(),
 				                                   preOperator,
 				                                   bracket.ket());
-			} else {
+				continue;
+			}
+
+			if (bracket.type() == TWO_POINT) {
 				MatrixType m0;
 				crsMatrixToFullMatrix(m0,bracket.op(0).data);
 
@@ -248,6 +257,14 @@ public:
 				                              rows,
 				                              cols,
 				                              threadId);
+				continue;
+			}
+
+			if (bracket.type() == FOUR_POINT) {
+				observableLibrary_.fourPoint(bracket,
+			                                 rows,
+			                                 cols,
+			                                 threadId);
 			}
 		}
 	}
