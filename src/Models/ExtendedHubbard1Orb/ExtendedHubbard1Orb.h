@@ -205,8 +205,18 @@ namespace Dmrg {
 		                                        RealType time,
 		                                        RealType factorForDiagonals=1.0)  const
 		{
+			// remove the n matrices before sending to Hubbard
+			VectorOperatorType cmCorrected;
+			SizeType k = 0;
+			for (SizeType i = 0; i < block.size(); ++i) {
+				for (SizeType j = 0; j < 2; ++j) {
+					cmCorrected.push_back(cm[k++]);
+				}
+				k++;
+			}
+
 			modelHubbard_.addDiagonalsInNaturalBasis(hmatrix,
-			                                         cm,
+			                                         cmCorrected,
 			                                         block,
 			                                         time,
 			                                         factorForDiagonals);
