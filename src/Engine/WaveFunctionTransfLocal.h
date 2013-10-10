@@ -292,7 +292,8 @@ namespace Dmrg {
 
 			SparseElementType sum=0;
 			for (SizeType k3=wsRef2.getRowPtr(ip);k3<wsRef2.getRowPtr(ip+1);k3++) {
-				SizeType ip2 = wsRef2.getCol(k3);
+				int ip2 = wsRef2.getColOrExit(k3);
+				if (ip2<0) continue;
 				SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip2+kp*nip);
 
 				for (int k = weT.getRowPtr(jp);k<weT.getRowPtr(jp+1);k++) {
@@ -453,7 +454,8 @@ namespace Dmrg {
 				SizeType ip = wsT.getCol(k);
 				SparseElementType sum2 = 0;
 				for (SizeType k2=weRef.getRowPtr(jen);k2<weRef.getRowPtr(jen+1);k2++) {
-					SizeType jpr = weRef.getCol(k2);
+					int jpr = weRef.getColOrExit(k2);
+					if (jpr<0) continue;
 					SizeType jp = dmrgWaveStruct_.lrs.right().permutationInverse(jpl + jpr*volumeOfNk);
 					SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
 					sum2 += wsT.getValue(k)*psiSrc[y]*weRef.getValue(k2);
@@ -507,7 +509,8 @@ namespace Dmrg {
 				SizeType ip,beta,kp,jp;
 				pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x));
 				for (SizeType k=wsRef.getRowPtr(ip);k<wsRef.getRowPtr(ip+1);k++) {
-					SizeType ip2 = wsRef.getCol(k);
+					int ip2 = wsRef.getColOrExit(k);
+					if (ip2 < 0) continue;
 					pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
 					SizeType ipkp = dmrgWaveStruct_.lrs.left().permutationInverse(ip2 + kp*nip2);
 					SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ipkp + jp*nalpha);
@@ -562,7 +565,8 @@ namespace Dmrg {
 				pack2.unpack(ip,kp,(SizeType)lrs.left().permutation(alpha));
 
 				for (SizeType k=weRef.getRowPtr(jp);k<weRef.getRowPtr(jp+1);k++) {
-					SizeType jp2 = weRef.getCol(k);
+					int jp2 = weRef.getColOrExit(k);
+					if (jp2 < 0) continue;
 					SizeType kpjp = dmrgWaveStruct_.lrs.right().permutationInverse(kp + jp2*volumeOfNk);
 
 					SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + kpjp*nip);

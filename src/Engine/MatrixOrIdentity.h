@@ -99,9 +99,11 @@ public:
 		return (enabled_) ? m_.getRowPtr(i) : i;
 	}
 
-	SizeType getCol(SizeType i) const
+	int getColOrExit(SizeType i) const
 	{
-		return (enabled_) ? m_.getCol(i) : i;
+		if (enabled_) return m_.getCol(i);
+		if (i < m_.col()) return i;
+		return -1;
 	}
 
 	const SparseElementType& getValue(SizeType i) const

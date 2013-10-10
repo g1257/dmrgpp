@@ -364,7 +364,8 @@ private:
 			SizeType x1=0,x2p=0;
 			packLeft.unpack(x1,x2p,lrs_.left().permutation(xp));
 
-			SizeType yfull = transformT1.getCol(k);
+			int yfull = transformT1.getColOrExit(k);
+			if (yfull<0) continue;
 			SizeType y1p=0,y2=0;
 			packRight.unpack(y1p,y2,oldLrs.right().permutation(yfull));
 
@@ -374,7 +375,8 @@ private:
 					for (SizeType k2=transform1.getRowPtr(yfull2);
 					     k2<transform1.getRowPtr(yfull2+1);
 					     k2++) {
-						SizeType y = transform1.getCol(k2);
+						int y = transform1.getColOrExit(k2);
+						if (y<0) continue;
 						SizeType x = packLeft.pack(x1,x2,lrs_.left().permutationInverse());
 						SizeType j = packSuper.pack(x,y,lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
@@ -420,7 +422,8 @@ private:
 		MatrixOrIdentityType transform1(!twoSiteDmrg_,transform);
 
 		for (SizeType k=transformT1.getRowPtr(xp);k<transformT1.getRowPtr(xp+1);k++) {
-			SizeType xfull = transformT1.getCol(k);
+			int xfull = transformT1.getColOrExit(k);
+			if (xfull<0) continue;
 			SizeType x1=0,x2p=0;
 			packLeft.unpack(x1,x2p,oldLrs.left().permutation(xfull));
 			assert(x2p<hilbertSize);
@@ -434,7 +437,8 @@ private:
 					for (SizeType k2=transform1.getRowPtr(xfull2);
 					     k2<transform1.getRowPtr(xfull2+1);
 					     k2++) {
-						SizeType x = transform1.getCol(k2);
+						int x = transform1.getColOrExit(k2);
+						if (x<0) continue;
 						SizeType y = packRight.pack(y1,y2,lrs_.right().permutationInverse());
 						SizeType j = packSuper.pack(x,y,lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2+y1*hilbertSize],
