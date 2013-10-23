@@ -45,6 +45,12 @@ SpinPhononFermion, DMRG++, Lanczos++, FreeFermions, and GpusDoneRight.
 
 -----------------------------------------------------------------------------
 
+Hash of the latest commit is also posted at
+
+https://web.ornl.gov/~gz1/hashes.html
+
+-----------------------------------------------------------------------------
+
 [DenseLinearAlgebra]
 BLAS // wrapper
 Lapack <-- Temporary class, do not use, use LAPACK instead

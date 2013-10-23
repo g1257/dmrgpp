@@ -269,7 +269,15 @@ public:
 		OstringStream msg;
 		msg<<"Decomposition done for mat.rank="<<mat_.rank();
 		msg<<" after "<<j<<" steps.";
+
 		progress_.printline(msg,std::cout);
+
+		if (j == max_nstep) {
+			OstringStream msg2;
+			msg2<<"WARNING: Maximum number of steps used. ";
+			msg2<<"Increasing this maximum is recommended.";
+			progress_.printline(msg2,std::cout);
+		}
 	}
 
 	void oneStepDecomposition(
@@ -303,7 +311,7 @@ private:
 
 		OstringStream msg;
 		msg.precision(8);
-		msg<<"Found Energy="<<energyTmp<<" after "<<iter;
+		msg<<"Found lowest eigenvalue= "<<energyTmp<<" after "<<iter;
 		msg<<" iterations, "<<" orig. norm="<<norma;
 		progress_.printline(msg,os);
 	}
