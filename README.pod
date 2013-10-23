@@ -58,6 +58,10 @@
  Title = {DMRG++ Website},
  Publisher = {\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
 
+=head2 Hash of the latest commit is also posted at
+
+ https://web.ornl.gov/~gz1/hashes.html
+
 =head2 Building and Running DMRG++
 
 =head3 Required Software

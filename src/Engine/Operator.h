@@ -168,9 +168,15 @@ namespace Dmrg {
 				VectorSizeType v;
 				io.read(v,"COOKED_EXTRA");
 				cookedOperator(m,s,v);
-			} else {
+			} else if (s == "raw") {
 				io.readMatrix(m,"RAW_MATRIX");
 				if (checkNonZero) checkNotZeroMatrix(m);
+			} else {
+				PsimagLite::String str(__FILE__);
+				str += " : " + ttos(__LINE__) + "\n";
+				str += "Only TSPOperator=cooked or TSPOperator=raw ";
+				str += "allowed, not TSPOperator=" + s + "\n";
+				throw PsimagLite::RuntimeError(str.c_str());
 			}
 
 			fullMatrixToCrsMatrix(data,m);
