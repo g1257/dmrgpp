@@ -122,18 +122,13 @@ class	CorrectionVectorFunction {
 public:
 
 	CorrectionVectorFunction(const MatrixType& m,const InfoType& info)
-	    : im_(m,info),cg_()
+	    : im_(m,info),cg_(info.cgSteps,info.cgEps)
 	{}
 
-	void getXi(VectorType& result,const VectorType& sv,VectorType& x0) const
+	void getXi(VectorType& result,const VectorType& sv) const
 	{
+		VectorType x0(result.size(),0.0);
 		typename PsimagLite::Vector<VectorType>::Type x;
-		if (x0.size() != result.size()) {
-			x0.clear();
-			x0.resize(result.size());
-			for (SizeType i=0;i<x0.size();++i)
-				x0[i] = 0.0;
-		}
 
 		x.push_back(x0); // initial ansatz
 		cg_(x,im_,sv);

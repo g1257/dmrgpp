@@ -462,15 +462,7 @@ private:
 		LanczosMatrixType h(&model_,&modelHelper);
 		CorrectionVectorFunctionType cvft(h,tstStruct_);
 
-		PsimagLite::OstringStream msg;
-		if (xi.size() != x0_.size())
-			msg<<"ConjugateGradient: resetting initial guess";
-		else
-			msg<<"ConjugateGradient: keeping initial guess";
-		progress_.printline(msg,std::cout);
-
-		cvft.getXi(xi,sv,x0_);
-		x0_ = xi;
+		cvft.getXi(xi,sv);
 		// make sure xr is zero
 		for (SizeType i=0;i<xr.size();i++) xr[i] = 0;
 		h.matrixVectorProduct(xr,xi);
@@ -569,7 +561,6 @@ private:
 	TridiagonalMatrixType ab_;
 	RealType Eg_;
 	RealType weightForContinuedFraction_;
-	VectorType x0_;
 
 }; // class CorrectionVectorTargetting
 

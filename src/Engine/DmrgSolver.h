@@ -140,7 +140,6 @@ namespace Dmrg {
 		  verbose_(false),
 		  lrs_("pSprime","pEprime","pSE"),
 		  io_(parameters_.filename),
-		  ioIn_(parameters_.filename),
 		  progress_("DmrgSolver"),
 		  quantumSector_(0),
 		  stepCurrent_(0),
@@ -597,7 +596,6 @@ namespace Dmrg {
 		bool verbose_;
 		LeftRightSuperType lrs_;
 		typename IoType::Out io_;
-		typename IoType::In ioIn_;
 		PsimagLite::ProgressIndicator progress_;
 		SizeType quantumSector_;
 		int stepCurrent_;

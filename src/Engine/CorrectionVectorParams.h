@@ -109,7 +109,10 @@ public:
 
 	template<typename IoInputter>
 	CorrectionVectorParams(IoInputter& io,const ModelType& model)
-	    : TargetParamsCommonType(io,model),CorrectionParamsType(io,model)
+	    : TargetParamsCommonType(io,model),
+	      CorrectionParamsType(io,model),
+	      cgSteps(1000),
+	      cgEps(1e-6)
 	{
 		this->concatenation = SUM;
 		io.readline(type,"DynamicDmrgType=");
@@ -117,6 +120,14 @@ public:
 		io.readline(eps,"DynamicDmrgEps=");
 		io.readline(omega,"CorrectionVectorOmega=");
 		io.readline(eta,"CorrectionVectorEta=");
+
+		try {
+			io.readline(cgSteps,"ConjugateGradientSteps=");
+		} catch (std::exception& e) {}
+
+		try {
+			io.readline(cgEps,"ConjugateGradientEps=");
+		} catch (std::exception& e) {}
 	}
 
 	SizeType type;
@@ -124,6 +135,8 @@ public:
 	RealType eps;
 	RealType omega;
 	RealType eta;
+	SizeType cgSteps;
+	RealType cgEps;
 }; // class CorrectionVectorParams
 
 template<typename ModelType>
@@ -138,6 +151,9 @@ operator<<(std::ostream& os,const CorrectionVectorParams<ModelType>& t)
 	os<<"DynamicDmrgEps="<<t.eps<<"\n";
 	os<<"CorrectionVectorOmega="<<t.omega<<"\n";
 	os<<"CorrectionVectorEta="<<t.eta<<"\n";
+	os<<"ConjugateGradientSteps"<<t.cgSteps<<"\n";
+	os<<"ConjugateGradientEps"<<t.cgEps<<"\n";
+
 	return os;
 }
 } // namespace Dmrg 
