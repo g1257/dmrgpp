@@ -294,13 +294,15 @@ namespace Dmrg {
 			assert(block.size()==1);
 
 			SizeType type = tstStruct_.type;
+			int fermionSign = commonTargetting_.findFermionSignOfTheOperators();
 			int s = (type&1) ? -1 : 1;
 			int s2 = (type>1) ? -1 : 1;
-			
+			int s3 = (type&1) ? -fermionSign : 1;
+
 			if (ab_.size()<2) return;
 			typename PostProcType::ParametersType params = paramsForSolver_;
 			params.Eg = Eg_;
-			params.weight = s2*weightForContinuedFraction_;
+			params.weight = s2*weightForContinuedFraction_*s3;
 			params.isign = s;
 			if (tstStruct_.aOperators[0].fermionSign>0) s2 *= s;
 

@@ -120,6 +120,7 @@ public:
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
@@ -317,6 +318,27 @@ public:
 			return 	defaultValue;
 
 		return model_.params().gsWeight.second;
+	}
+
+	int findFermionSignOfTheOperators() const
+	{
+		const VectorOperatorType& myoperator = tstStruct_.aOperators;
+		int f = 0;
+
+		for (SizeType i = 0; i < myoperator.size(); ++i) {
+			if (f == 0) {
+				f = myoperator[i].fermionSign;
+				continue;
+			}
+
+			if (f != myoperator[i].fermionSign) {
+				std::string str("CorrectionVectorTargetting: ");
+				str += "inconsistent sign for operators\n";
+				throw PsimagLite::RuntimeError(str);
+			}
+		}
+
+		return f;
 	}
 
 private:
