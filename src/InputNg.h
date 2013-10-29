@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "Vector.h"
 #include <cstdlib>
+#include <algorithm>
 #include "Map.h"
 #include "Matrix.h"
 #include "String.h"
@@ -158,6 +159,7 @@ public:
 		      state_(IN_LABEL),
 		      numericVector_(0),
 		      lastLabel_(""),
+		      file_(file),
 		      inputCheck_(inputCheck),
 		      verbose_(false)
 		{
@@ -195,6 +197,8 @@ public:
 			mapStrVec=mapStrVec_,
 			        labelsForRemoval=labelsForRemoval_;
 		}
+
+		const PsimagLite::String& filename() const { return file_; }
 
 	private:
 
@@ -360,6 +364,7 @@ public:
 		SizeType state_;
 		Vector<String>::Type numericVector_;
 		String lastLabel_;
+		PsimagLite::String file_;
 		InputCheckType inputCheck_;
 		bool verbose_;
 		typename Map<String,String,MyCompareType>::Type mapStrStr_;
@@ -374,7 +379,7 @@ public:
 
 	public:
 
-		Readable(const Writeable& inputWriteable)
+		Readable(const Writeable& inputWriteable) : file_(inputWriteable.filename())
 		{
 			inputWriteable.set(mapStrStr_,mapStrVec_,labelsForRemoval_);
 		}
@@ -575,6 +580,11 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
 
+		const PsimagLite::String& filename() const
+		{
+			return file_;
+		}
+
 	private:
 
 		template<typename SomeMapType>
@@ -624,6 +634,7 @@ public:
 			throw RuntimeError(s.c_str());
 		}
 
+		PsimagLite::String file_;
 		typename Map<String,String,MyCompareType>::Type mapStrStr_;
 		typename Map<String,Vector<String>::Type,MyCompareType>::Type mapStrVec_;
 		Vector<String>::Type labelsForRemoval_;
