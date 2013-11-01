@@ -360,6 +360,9 @@ public:
 	}
 
 	template<typename S>
+	friend typename Real<S>::Type norm2(const CrsMatrix<S>& m);
+
+	template<typename S>
 	friend std::ostream &operator<<(std::ostream &os,const CrsMatrix<S> &m);
 
 	template<typename S,typename S2>
@@ -986,6 +989,16 @@ bool isTheIdentity(const CrsMatrix<T>& A,double eps=1e-6)
 		}
 	}
 	return true;
+}
+
+template<typename T>
+typename Real<T>::Type norm2(const CrsMatrix<T>& m)
+{
+	typename Real<T>::Type val = 0;
+	for (SizeType i=0;i<m.values_.size();i++)
+		val += std::conj(m.values_[i])*m.values_[i];
+
+	return val;
 }
 
 template<typename T>
