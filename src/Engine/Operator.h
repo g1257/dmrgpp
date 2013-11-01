@@ -240,7 +240,7 @@ namespace Dmrg {
 			s += " : " + ttos(__LINE__) + "\n";
 			s += "RAW_MATRIX or COOKED_OPERATOR ";
 			s += " is less than " + ttos(eps) + "\n";
-			throw PsimagLite::RuntimeError(s.c_str());
+			std::cerr<<"WARNING: "<<s;
 		}
 	};
 

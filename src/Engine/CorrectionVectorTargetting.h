@@ -380,9 +380,6 @@ private:
 			FermionSign fs(lrs_.left(),electrons);
 			applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],
 			              fs,systemOrEnviron,corner);
-			RealType norma = std::norm(phiNew);
-			if (norma==0)
-				throw PsimagLite::RuntimeError("Norm of phi is zero\n");
 		} else if (stage_[i]== CONVERGING) {
 			if (site==0 || site==numberOfSites -1)  {
 				// don't wft since we did it before

@@ -326,16 +326,22 @@ public:
 		int f = 0;
 
 		for (SizeType i = 0; i < myoperator.size(); ++i) {
+
+			RealType norma = norm2(myoperator[i].data);
+
+			if (norma==0) continue;
+
 			if (f == 0) {
 				f = myoperator[i].fermionSign;
 				continue;
 			}
 
-			if (f != myoperator[i].fermionSign) {
-				std::string str("CorrectionVectorTargetting: ");
-				str += "inconsistent sign for operators\n";
-				throw PsimagLite::RuntimeError(str);
-			}
+			if (f == myoperator[i].fermionSign) continue;
+
+			std::string str("CorrectionVectorTargetting: ");
+			str += "inconsistent sign for operators\n";
+			throw PsimagLite::RuntimeError(str);
+
 		}
 
 		return f;
