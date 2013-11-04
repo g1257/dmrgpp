@@ -532,7 +532,8 @@ namespace Dmrg {
 				PsimagLite::String modelName = model_.params().model;
 
 				if (modelName == "HubbardOneBand" ||
-				    modelName == "HubbardOneBandExtended") {
+				    modelName == "HubbardOneBandExtended" ||
+				    modelName == "Immm") {
 					cocoon_(direction,block);
 				}
 
@@ -548,7 +549,7 @@ namespace Dmrg {
 			void cocoon_(SizeType direction,const BlockType& block) const
 			{
 				SizeType site = block[0];
-				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.naturalOperator("nup",0,0));
+				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.naturalOperator("nup",site,0));
 				//PsimagLite::CrsMatrix<ComplexType> tmpCt;
 				//transposeConjugate(tmpCt,tmpC);
 				//multiply(A.data,tmpCt,tmpC);
@@ -566,7 +567,7 @@ namespace Dmrg {
 				PsimagLite::String s = "<P0|nup|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,nup);
 
-				PsimagLite::CrsMatrix<ComplexType> tmpC2(model_.naturalOperator("ndown",0,0));
+				PsimagLite::CrsMatrix<ComplexType> tmpC2(model_.naturalOperator("ndown",site,0));
 				OperatorType ndown(tmpC2,fermionSign1,jm1,angularFactor1,su2Related1);
 				//if (includeGroundStage())
 				test(psi_,psi_,direction,"<PSI|ndown|PSI>",site,ndown);
