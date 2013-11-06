@@ -321,7 +321,7 @@ int main(int argc,char *argv[])
 
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
-	if (dmrgSolverParams.options.find("complex")) {
+	if (dmrgSolverParams.options.find("complex")!=PsimagLite::String::npos) {
 #ifndef USE_COMPLEX
 		std::cerr<<argv[0]<<" option complex in input file needs compilation ";
 		std::cerr<<" with USE_COMPLEX\n";
