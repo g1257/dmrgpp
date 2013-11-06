@@ -82,10 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename RealType,typename GeometryFactoryType>
+template<typename ComplexOrRealType,typename GeometryFactoryType>
 class GeometryDirection {
 
-	typedef Matrix<RealType> MatrixType;
+	typedef Matrix<ComplexOrRealType> MatrixType;
 
 public:
 
@@ -115,7 +115,7 @@ public:
 		}
 	}
 
-	RealType operator()(SizeType i,SizeType edof1,SizeType j,SizeType edof2) const
+	ComplexOrRealType operator()(SizeType i,SizeType edof1,SizeType j,SizeType edof2) const
 	{
 		SizeType h = (constantValues()) ? 0 : geometryFactory_->handle(i,j);
 
@@ -131,9 +131,9 @@ public:
 		assert(b ||  (dataMatrices_[h].n_row()>edof2 &&
 		              dataMatrices_[h].n_col()>edof1));
 
-		RealType tmp = (b) ? dataMatrices_[h](edof1,edof2) : dataMatrices_[h](edof2,edof1);
+		ComplexOrRealType tmp = (b) ? dataMatrices_[h](edof1,edof2) : dataMatrices_[h](edof2,edof1);
 		int signChange = geometryFactory_->signChange(i,j);
-		return tmp * signChange;
+		return tmp * static_cast<typename PsimagLite::Real<ComplexOrRealType>::Type>(signChange);
 	}
 
 	SizeType nRow() const
@@ -173,16 +173,16 @@ private:
 	SizeType dirId_;
 	const GeometryFactoryType* geometryFactory_;
 	SizeType dataType_;
-	typename Vector<RealType>::Type dataNumbers_;
+	typename Vector<ComplexOrRealType>::Type dataNumbers_;
 	typename Vector<MatrixType>::Type dataMatrices_;
 }; // class GeometryDirection
 
-template<typename RealType,typename GeometryFactoryType>
+template<typename ComplexOrRealType,typename GeometryFactoryType>
 std::ostream& operator<<(std::ostream& os,
-                         const GeometryDirection<RealType,GeometryFactoryType>& gd)
+                         const GeometryDirection<ComplexOrRealType,GeometryFactoryType>& gd)
 {
 	os<<"#GeometrydirId="<<gd.dirId_<<"\n";
-	if (gd.dataType_==GeometryDirection<RealType,GeometryFactoryType>::NUMBERS) {
+	if (gd.dataType_==GeometryDirection<ComplexOrRealType,GeometryFactoryType>::NUMBERS) {
 		os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
 		os<<"#GeometryNumbers=";
 		for (SizeType i=0;i<gd.dataNumbers_.size();i++) {

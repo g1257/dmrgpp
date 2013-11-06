@@ -83,13 +83,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename RealType_,typename ProgramGlobalsType>
+template<typename ComplexOrRealType,typename ProgramGlobalsType>
 class Geometry {
 
 public:
 
-	typedef  RealType_ RealType;
-	typedef GeometryTerm<RealType> GeometryTermType;
+	typedef GeometryTerm<ComplexOrRealType> GeometryTermType;
 	typedef typename Vector<SizeType>::Type BlockType;
 	typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
 
@@ -120,7 +119,7 @@ public:
 		return ProgramGlobalsType::ENVIRON_ENVIRON;
 	}
 
-	RealType operator()
+	ComplexOrRealType operator()
 	(SizeType smax,SizeType emin,
 	 SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
 	{
@@ -128,7 +127,7 @@ public:
 		return terms_[term](smax,emin,i1,edof1,i2,edof2);
 	}
 
-	RealType operator()
+	ComplexOrRealType operator()
 	(SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
 	{
 		return terms_[term](i1,edof1,i2,edof2);
@@ -238,8 +237,8 @@ private:
 
 }; // class Geometry
 
-template<typename RealType,typename PgType>
-std::ostream& operator<<(std::ostream& os,const Geometry<RealType,PgType>& g)
+template<typename ComplexOrRealType,typename PgType>
+std::ostream& operator<<(std::ostream& os,const Geometry<ComplexOrRealType,PgType>& g)
 {
 	os<<"#GeometrySize="<<g.linSize_<<"\n";
 	os<<"#GeometryTerms="<<g.terms_.size()<<"\n";

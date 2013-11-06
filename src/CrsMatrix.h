@@ -994,11 +994,11 @@ bool isTheIdentity(const CrsMatrix<T>& A,double eps=1e-6)
 template<typename T>
 typename Real<T>::Type norm2(const CrsMatrix<T>& m)
 {
-	typename Real<T>::Type val = 0;
+	T val = 0;
 	for (SizeType i=0;i<m.values_.size();i++)
 		val += std::conj(m.values_[i])*m.values_[i];
 
-	return val;
+	return std::real(val);
 }
 
 template<typename T>

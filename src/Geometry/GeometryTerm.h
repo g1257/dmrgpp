@@ -88,9 +88,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename RealType>
+template<typename ComplexOrRealType>
 class GeometryTerm {
-	typedef GeometryDirection<RealType,GeometryFactory> GeometryDirectionType;
+	typedef GeometryDirection<ComplexOrRealType,GeometryFactory> GeometryDirectionType;
 public:
 
 	typedef typename GeometryFactory::AdditionalDataType AdditionalDataType;
@@ -128,7 +128,7 @@ public:
 		}
 	}
 
-	const RealType& operator()(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
+	const ComplexOrRealType& operator()(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
 	{
 		int k1 = geometryFactory_.index(i1,edof1,maxEdof_);
 		int k2 = geometryFactory_.index(i2,edof2,maxEdof_);
@@ -137,7 +137,7 @@ public:
 	}
 
 	//assumes 1<smax+1 < emin
-	const RealType& operator()(SizeType smax,
+	const ComplexOrRealType& operator()(SizeType smax,
 	                           SizeType emin,
 	                           SizeType i1,
 	                           SizeType edof1,
@@ -232,9 +232,9 @@ public:
 		}
 	}
 
-	template<typename RealType_>
+	template<typename ComplexOrRealType_>
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const GeometryTerm<RealType_>& gt);
+	                                const GeometryTerm<ComplexOrRealType_>& gt);
 
 private:
 
@@ -269,7 +269,7 @@ private:
 		}
 	}
 
-	RealType calcValue(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
+	ComplexOrRealType calcValue(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
 	{
 		if (!geometryFactory_.connected(i1,i2)) return 0.0;
 
@@ -282,11 +282,11 @@ private:
 	SizeType maxEdof_;
 	GeometryFactory geometryFactory_;
 	typename Vector<GeometryDirectionType>::Type directions_;
-	PsimagLite::Matrix<RealType> cachedValues_;
+	PsimagLite::Matrix<ComplexOrRealType> cachedValues_;
 }; // class GeometryTerm
 
-template<typename RealType>
-std::ostream& operator<<(std::ostream& os,const GeometryTerm<RealType>& gt)
+template<typename ComplexOrRealType>
+std::ostream& operator<<(std::ostream& os,const GeometryTerm<ComplexOrRealType>& gt)
 {
 	os<<"#GeometryDirections="<<gt.directions_.size()<<"\n";
 	for (SizeType i=0;i<gt.directions_.size();i++) os<<gt.directions_[i];

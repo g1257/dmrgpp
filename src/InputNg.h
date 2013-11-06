@@ -492,7 +492,7 @@ public:
 			assert(len>1);
 			val.resize(len-1);
 			for (SizeType i=0;i<len-1;i++) {
-				val[i]=static_cast<NumericType>(atof(it->second[i+1].c_str()));
+				val[i]=stringToComplexOrReal<NumericType>(it->second[i+1].c_str());
 			}
 			cleanLabelsIfNeeded(label2,mapStrVec_,it);
 		}
@@ -621,6 +621,62 @@ public:
 				}
 			}
 			return mymap.end();
+		}
+
+		template<typename ComplexOrRealType>
+		typename EnableIf<IsComplexNumber<ComplexOrRealType>::True,ComplexOrRealType>::Type
+		stringToComplexOrReal(const PsimagLite::String& s) const
+		{
+			typedef typename Real<ComplexOrRealType>::Type RealType;
+
+			if (s[0]!='(') {
+				return stringToReal<RealType>(s.c_str());
+			}
+
+			std::string buffer("");
+			SizeType start = 0;
+			for (SizeType i = 1; i < s.length(); ++i) {
+				start = i;
+				if (s[i] == ',') break;
+				buffer += s[i];
+			}
+
+			RealType r = stringToReal<RealType>(buffer);
+
+			start++;
+			buffer = "";
+			for (SizeType i = start; i < s.length(); ++i) {
+				if (s[i] == ')') break;
+				buffer += s[i];
+			}
+
+			RealType img = stringToReal<RealType>(buffer);
+
+			return ComplexOrRealType(r,img);
+		}
+
+		template<typename ComplexOrRealType>
+		typename EnableIf<!IsComplexNumber<ComplexOrRealType>::True,
+		typename Real<ComplexOrRealType>::Type>::Type
+		stringToComplexOrReal(const PsimagLite::String& s) const
+		{
+			return stringToReal<typename Real<ComplexOrRealType>::Type>(s);
+		}
+
+		template<typename RealType>
+		RealType stringToReal(const PsimagLite::String& s) const
+		{
+			for (SizeType i = 0; i < s.length(); ++i) {
+				char c = s[i];
+				bool b1 = (c<48 || c>57);
+				bool b2 = (c != '.' && c != '-' && c != '+');
+				if (b1 && b2) {
+					std::string str = s +" is not a real number\n";
+					throw RuntimeError(str);
+				}
+			}
+
+			return atof(s.c_str());
 		}
 
 		void throwWithMessage(const String& label,const String& label2="")
