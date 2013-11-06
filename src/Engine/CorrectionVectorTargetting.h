@@ -105,8 +105,6 @@ public:
 	typedef ModelType_ ModelType;
 	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
-	typedef std::complex<RealType> ComplexType;
-	typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType
@@ -114,9 +112,12 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef InternalProductTemplate<ComplexOrRealType,ModelType> InternalProductType;
 	typedef CorrectionVectorParams<ModelType> TargettingParamsType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
+	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,
@@ -426,7 +427,7 @@ private:
 			getLanczosVectors(V,sv,p);
 		}
 		setWeights();
-		weightForContinuedFraction_ = phi*phi;
+		weightForContinuedFraction_ = std::real(phi*phi);
 	}
 
 	void getLanczosVectors(DenseMatrixType& V,

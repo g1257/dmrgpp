@@ -104,21 +104,21 @@ public:
 	typedef PsimagLite::IoSimple::In IoInputType;
 
 	typedef typename ModelType::RealType RealType;
-	typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-	typedef LanczosSolverTemplate<ParametersForSolverType,
-	                              InternalProductType,VectorType> LanczosSolverType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType
 	LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef InternalProductTemplate<ComplexOrRealType,ModelType> InternalProductType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type TargetVectorType;
+	typedef LanczosSolverTemplate<ParametersForSolverType,
+	                              InternalProductType,TargetVectorType> LanczosSolverType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
-	typedef VectorType TargetVectorType;
+	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 	typedef CorrectionParams<ModelType> TargettingParamsType;
 	typedef WaveFunctionTransfTemplate<LeftRightSuperType,
 	                                   VectorWithOffsetType> WaveFunctionTransfType;
@@ -169,7 +169,7 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,
+	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 	           const SomeBasisType& someBasis)
 	{
 		psi_.set(v,someBasis);

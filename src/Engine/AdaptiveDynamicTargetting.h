@@ -104,7 +104,6 @@ public:
 	typedef ModelType_ ModelType;
 	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
-	typedef std::complex<RealType> ComplexType;
 	typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -113,9 +112,11 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef AdaptiveDynamicParams<ModelType> TargettingParamsType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
+	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
@@ -448,7 +449,7 @@ private:
 		}
 		setWeights();
 		if (lastLanczosVector_==1 && fabs(weightForContinuedFraction_)<1e-6)
-			weightForContinuedFraction_ = targetVectors_[0]*targetVectors_[0];
+			weightForContinuedFraction_ = std::real(targetVectors_[0]*targetVectors_[0]);
 	}
 
 	void setLanczosVectors(
@@ -489,7 +490,7 @@ private:
 		if (norm1<1e-6) {
 			lanczosSolver.push(ab_,a,b);
 			h.matrixVectorProduct(x,y);
-			a = x*y;
+			a = std::real(x*y);
 			lanczosSolver.push(ab_,a,b);
 			done_=true;
 			return;

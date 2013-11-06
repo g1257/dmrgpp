@@ -119,12 +119,13 @@ namespace Dmrg {
 			typedef typename LeftRightSuperType::BasisWithOperatorsType
 			    BasisWithOperatorsType;
 			typedef typename BasisWithOperatorsType::BasisType BasisType;
-			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
+			typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+			typedef typename SparseMatrixType::value_type ComplexOrRealType;
+			typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 			typedef typename VectorWithOffsetType::VectorType TargetVectorType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,TargetVectorType>
 			    LanczosSolverType;
-			typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 			typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 			typedef MettsParams<ModelType> TargettingParamsType;
@@ -241,7 +242,7 @@ namespace Dmrg {
 			RealType normSquared(SizeType i) const
 			{
 				// call to mult will conjugate one of the vectors
-				return multiply(targetVectors_[i],targetVectors_[i]); 
+				return std::real(multiply(targetVectors_[i],targetVectors_[i]));
 			}
 
 			template<typename SomeBasisType>
@@ -624,7 +625,7 @@ namespace Dmrg {
 				environPrev_.permutationInverse = lrs_.right().permutationInverse();
 			}
 
-			void getFullVector(typename PsimagLite::Vector<RealType>::Type& v,SizeType m,const LeftRightSuperType& lrs) const
+			void getFullVector(TargetVectorType& v,SizeType m,const LeftRightSuperType& lrs) const
 			{
 				int offset = lrs.super().partition(m);
 				int total = lrs.super().partition(m+1) - offset;
@@ -965,7 +966,7 @@ namespace Dmrg {
 						SizeType offset2 = src2.offset(j);
 						if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
 						for (SizeType k=0;k<dest.effectiveSize(i);k++) 
-							sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
+							sum+= std::real(dest[k+offset1] * std::conj(src2[k+offset2]));
 					}
 				}
 				RealType nor = std::norm(src1);
@@ -1010,14 +1011,14 @@ namespace Dmrg {
 
 				if (modelName=="HubbardOneBand") {
 					assert(ind == 0);
-					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("nup",site,0));
+					PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator("nup",site,0));
 					A.data = tmpC;
 					A.fermionSign = 1;
 					return processSitesPerBlock(A,blockIndex,site);
 				}
 				if (modelName=="FeAsBasedSc" || modelName=="FeAsBasedScExtended") {
-					PsimagLite::CrsMatrix<RealType> tmpC(model_.naturalOperator("c",site,ind));
-					PsimagLite::CrsMatrix<RealType> tmpCdagger;
+					PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator("c",site,ind));
+					PsimagLite::CrsMatrix<ComplexOrRealType> tmpCdagger;
 					transposeConjugate(tmpCdagger,tmpC);
 					multiply(A.data,tmpCdagger,tmpC);
 					A.fermionSign = 1;

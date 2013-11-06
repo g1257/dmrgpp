@@ -312,12 +312,11 @@ namespace Dmrg {
 		/** Diagonalise the i-th block of the matrix, return its eigenvectors 
 		    in tmpVec and its eigenvalues in energyTmp
 		!PTEX_LABEL{diagonaliseOneBlock} */
-		template<typename SomeVectorType>
 		void diagonaliseOneBlock(int i,
-					 SomeVectorType &tmpVec,
+					 TargetVectorType &tmpVec,
 					 RealType &energyTmp,
 					 const LeftRightSuperType& lrs,
-					 const SomeVectorType& initialVector)
+					 const TargetVectorType& initialVector)
 		{
 			typename PsimagLite::Vector<RealType>::Type tmpVec1,tmpVec2;
 			//srand48(7123443);
@@ -354,12 +353,11 @@ namespace Dmrg {
 			diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,initialVector);
 		}
 		
-		template<typename SomeVectorType>
 		void diagonaliseOneBlock(int i,
-					 SomeVectorType &tmpVec,
+					 TargetVectorType &tmpVec,
 					 RealType &energyTmp,
 					 typename ModelType::ModelHelperType& modelHelper,
-					 const SomeVectorType& initialVector)
+					 const TargetVectorType& initialVector)
 //       		int reflectionSector= -1)
 		{
 			//if (reflectionSector>=0) modelHelper.setReflectionSymmetry(reflectionSector);
@@ -368,9 +366,9 @@ namespace Dmrg {
 
 			ReflectionSymmetryType *rs = 0;
 			if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
-			typedef InternalProductTemplate<typename SomeVectorType::value_type,ModelType> MyInternalProduct;
+			typedef InternalProductTemplate<typename TargetVectorType::value_type,ModelType> MyInternalProduct;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-			typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,MyInternalProduct,SomeVectorType> LanczosOrDavidsonBaseType;
+			typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,MyInternalProduct,TargetVectorType> LanczosOrDavidsonBaseType;
 			typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(&model_,&modelHelper,rs);
 
 			ParametersForSolverType params;
@@ -384,9 +382,9 @@ namespace Dmrg {
 
 			bool useDavidson = (parameters_.options.find("useDavidson")!=PsimagLite::String::npos);
 			if (useDavidson) {
-				lanczosOrDavidson = new PsimagLite::DavidsonSolver<ParametersForSolverType,MyInternalProduct,SomeVectorType>(lanczosHelper,params);
+				lanczosOrDavidson = new PsimagLite::DavidsonSolver<ParametersForSolverType,MyInternalProduct,TargetVectorType>(lanczosHelper,params);
 			} else {
-				lanczosOrDavidson = new PsimagLite::LanczosSolver<ParametersForSolverType,MyInternalProduct,SomeVectorType>(lanczosHelper,params);
+				lanczosOrDavidson = new PsimagLite::LanczosSolver<ParametersForSolverType,MyInternalProduct,TargetVectorType>(lanczosHelper,params);
 			}
 
 			if (lanczosHelper.rank()==0) {
@@ -404,17 +402,17 @@ namespace Dmrg {
 				if (lanczosOrDavidson) delete lanczosOrDavidson;
 				return;
 			}
-			SomeVectorType initialVector1,initialVector2;
+			TargetVectorType initialVector1,initialVector2;
 			reflectionOperator_.setInitState(initialVector,initialVector1,initialVector2);
 			tmpVec.resize(initialVector1.size());
 			lanczosOrDavidson->computeGroundState(energyTmp,tmpVec,initialVector1);
 
 
 			RealType gsEnergy1 = energyTmp;
-			SomeVectorType gsVector1 = tmpVec;
+			TargetVectorType gsVector1 = tmpVec;
 
 			lanczosHelper.reflectionSector(1);
-			SomeVectorType gsVector2(initialVector2.size());
+			TargetVectorType gsVector2(initialVector2.size());
 			RealType gsEnergy2 = 0;
 			lanczosOrDavidson->computeGroundState(gsEnergy2,gsVector2,initialVector2);
 

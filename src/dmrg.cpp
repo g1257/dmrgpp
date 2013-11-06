@@ -53,17 +53,21 @@ typedef float MatrixElementType;
 #include "InputCheck.h"
 #include "ModelSelector.h"
 
-typedef std::complex<MatrixElementType> ComplexType;
-typedef  PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
+typedef  PsimagLite::CrsMatrix<std::complex<MatrixElementType> > MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<MatrixElementType> MySparseMatrixReal;
+#ifdef USE_COMPLEX
+typedef MySparseMatrixComplex MySparseMatrixC;
+#else
+typedef MySparseMatrixReal MySparseMatrixC;
+#endif
 
 using namespace Dmrg;
 
-typedef PsimagLite::Geometry<MatrixElementType,ProgramGlobals> GeometryType;
 typedef PsimagLite::InputNg<InputCheck> InputNgType;
 typedef ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> ParametersDmrgSolverType;
 
-template<typename ModelBaseType,
+template<typename GeometryType,
+         typename ModelBaseType,
          template<typename,typename> class InternalProductTemplate,
          typename TargettingType>
 void mainLoop3(GeometryType& geometry,
@@ -86,7 +90,8 @@ void mainLoop3(GeometryType& geometry,
 	dmrgSolver.main(geometry);
 }
 
-template<template<typename> class ModelHelperTemplate,
+template<typename GeometryType,
+         template<typename> class ModelHelperTemplate,
 	 template<typename,typename> class InternalProductTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
@@ -117,7 +122,7 @@ void mainLoop2(GeometryType& geometry,
 					   PsimagLite::IoSimple,
 					   VectorWithOffsetTemplate
 					   > TargettingType;
-		mainLoop3<ModelBaseType,InternalProductTemplate,TargettingType>
+		mainLoop3<GeometryType,ModelBaseType,InternalProductTemplate,TargettingType>
 		(geometry,dmrgSolverParams,io);
 	} else {
 		typedef TargettingTemplate<PsimagLite::LanczosSolver,
@@ -127,12 +132,13 @@ void mainLoop2(GeometryType& geometry,
 					   PsimagLite::IoSimple,
 					   VectorWithOffsetTemplate
 					   > TargettingType;
-		mainLoop3<ModelBaseType,InternalProductTemplate,TargettingType>
+		mainLoop3<GeometryType,ModelBaseType,InternalProductTemplate,TargettingType>
 		(geometry,dmrgSolverParams,io);
 	}
 }
 
-template<template<typename> class ModelHelperTemplate,
+template<typename GeometryType,
+        template<typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
                   template<typename,typename> class,
@@ -142,27 +148,95 @@ template<template<typename> class ModelHelperTemplate,
          typename MySparseMatrix>
 void mainLoop(GeometryType& geometry,
               ParametersDmrgSolverType& dmrgSolverParams,
-	      InputNgType::Readable& io)
+              InputNgType::Readable& io)
 {
 	if (dmrgSolverParams.options.find("InternalProductStored")!=PsimagLite::String::npos) {
-		mainLoop2<ModelHelperTemplate,
+		mainLoop2<GeometryType,
+		         ModelHelperTemplate,
 		         InternalProductStored,
 		         VectorWithOffsetTemplate,
 		         TargettingTemplate,
 		         MySparseMatrix>(geometry,dmrgSolverParams,io);
 	} else if (dmrgSolverParams.options.find("InternalProductKron")!=PsimagLite::String::npos) {
-		mainLoop2<ModelHelperTemplate,
+		mainLoop2<GeometryType,
+		     ModelHelperTemplate,
 			 InternalProductKron,
 			 VectorWithOffsetTemplate,
 			 TargettingTemplate,
 			 MySparseMatrix>(geometry,dmrgSolverParams,io);
 	} else {
- 		mainLoop2<ModelHelperTemplate,
+ 		mainLoop2<GeometryType,
+		         ModelHelperTemplate,
 		         InternalProductOnTheFly,
 		         VectorWithOffsetTemplate,
 		         TargettingTemplate,
 		         MySparseMatrix>(geometry,dmrgSolverParams,io);
 	}
+}
+
+
+template<typename MySparseMatrix>
+void mainLoop0(InputNgType::Readable& io,
+               ParametersDmrgSolverType& dmrgSolverParams,
+               InputCheck& inputCheck)
+{
+	typedef typename MySparseMatrix::value_type ComplexOrRealType;
+	typedef PsimagLite::Geometry<ComplexOrRealType,ProgramGlobals> GeometryType;
+
+	GeometryType geometry(io);
+
+	bool su2=false;
+	if (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos) su2=true;
+
+	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
+
+	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
+ 		" supports only GroundStateTargetting for now (sorry!)\n");
+
+	if (su2) {
+		if (dmrgSolverParams.targetQuantumNumbers[2]>0) {
+			mainLoop<GeometryType,ModelHelperSu2,VectorWithOffsets,GroundStateTargetting,
+				MySparseMatrix>(geometry,dmrgSolverParams,io);
+		} else {
+			mainLoop<GeometryType,ModelHelperSu2,VectorWithOffset,GroundStateTargetting,
+				MySparseMatrix>(geometry,dmrgSolverParams,io);
+		}
+		return;
+	}
+
+	if (targetting=="TimeStepTargetting") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TimeStepTargetting,
+			MySparseMatrixComplex>(geometry,dmrgSolverParams,io);
+			return;
+	}
+	if (targetting=="DynamicTargetting") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,DynamicTargetting,
+			MySparseMatrix>(geometry,dmrgSolverParams,io);
+			return;
+	}
+	if (targetting=="AdaptiveDynamicTargetting") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,AdaptiveDynamicTargetting,
+			MySparseMatrix>(geometry,dmrgSolverParams,io);
+			return;
+	}
+	if (targetting=="CorrectionVectorTargetting") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,CorrectionVectorTargetting,
+			MySparseMatrix>(geometry,dmrgSolverParams,io);
+			return;
+	}
+	if (targetting=="CorrectionTargetting") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,CorrectionTargetting,
+			MySparseMatrix>(geometry,dmrgSolverParams,io);
+			return;
+	}
+	if (targetting=="MettsTargetting") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,MettsTargetting,
+			MySparseMatrix>(geometry,dmrgSolverParams,io);
+			return;
+	}
+
+	mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,GroundStateTargetting,
+		MySparseMatrix>(geometry,dmrgSolverParams,io);
 }
 
 int main(int argc,char *argv[])
@@ -210,8 +284,6 @@ int main(int argc,char *argv[])
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
 	InputNgType::Readable io(ioWriteable);
 
-	GeometryType geometry(io);
-
 	ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> dmrgSolverParams(io);
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
@@ -222,56 +294,17 @@ int main(int argc,char *argv[])
 
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
-	bool su2=false;
-	if (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos) su2=true;
-
-	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
-
-	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
- 		" supports only GroundStateTargetting for now (sorry!)\n");
-
-	if (su2) {
-		if (dmrgSolverParams.targetQuantumNumbers[2]>0) { 
-			mainLoop<ModelHelperSu2,VectorWithOffsets,GroundStateTargetting,
-				MySparseMatrixReal>(geometry,dmrgSolverParams,io);
-		} else {
-			mainLoop<ModelHelperSu2,VectorWithOffset,GroundStateTargetting,
-				MySparseMatrixReal>(geometry,dmrgSolverParams,io);
-		}
-		return 0;
+	if (dmrgSolverParams.options.find("complex")) {
+#ifndef USE_COMPLEX
+		std::cerr<<argv[0]<<" option complex in input file needs compilation ";
+		std::cerr<<" with USE_COMPLEX\n";
+		return 1;
+#endif
+		std::cerr<<argv[0]<<"EXPERIMENTAL option complex is in use\n";
+		mainLoop0<MySparseMatrixC>(io,dmrgSolverParams,inputCheck);
+	} else {
+		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck);
 	}
 
-	if (targetting=="TimeStepTargetting") { 
-		mainLoop<ModelHelperLocal,VectorWithOffsets,TimeStepTargetting,
-			MySparseMatrixComplex>(geometry,dmrgSolverParams,io);
-			return 0;
-	}
-	if (targetting=="DynamicTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,DynamicTargetting,
-			MySparseMatrixReal>(geometry,dmrgSolverParams,io);
-			return 0;
-	}
-	if (targetting=="AdaptiveDynamicTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,AdaptiveDynamicTargetting,
-			MySparseMatrixReal>(geometry,dmrgSolverParams,io);
-			return 0;
-	}
-	if (targetting=="CorrectionVectorTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,CorrectionVectorTargetting,
-			MySparseMatrixReal>(geometry,dmrgSolverParams,io);
-			return 0;
-	}
-	if (targetting=="CorrectionTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,CorrectionTargetting,
-			MySparseMatrixReal>(geometry,dmrgSolverParams,io);
-			return 0;
-	}
-	if (targetting=="MettsTargetting") {
-		mainLoop<ModelHelperLocal,VectorWithOffsets,MettsTargetting,
-			MySparseMatrixReal>(geometry,dmrgSolverParams,io);
-			return 0;
-	}
-	mainLoop<ModelHelperLocal,VectorWithOffset,GroundStateTargetting,
-		MySparseMatrixReal>(geometry,dmrgSolverParams,io);
 }
 

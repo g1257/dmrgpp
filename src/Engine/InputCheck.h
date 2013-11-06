@@ -134,6 +134,7 @@ namespace Dmrg {
 			registerOpts.push_back("nofiniteloops");
 			registerOpts.push_back("nowft");
 			registerOpts.push_back("targetnoguess");
+			registerOpts.push_back("complex");
 			registerOpts.push_back("inflate");
 			registerOpts.push_back("none");
 			registerOpts.push_back("twositedmrg");

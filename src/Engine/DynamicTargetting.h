@@ -112,8 +112,6 @@ namespace Dmrg {
 		typedef ModelType_ ModelType;
 		typedef IoType_ IoType;
 		typedef typename ModelType::RealType RealType;
-		typedef std::complex<RealType> ComplexType;
-		typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
 		typedef typename ModelType::OperatorsType OperatorsType;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::LeftRightSuperType
@@ -121,9 +119,12 @@ namespace Dmrg {
 		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
+		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+		typedef typename SparseMatrixType::value_type ComplexOrRealType;
+		typedef InternalProductTemplate<ComplexOrRealType,ModelType> InternalProductType;
 		typedef DynamicDmrgParams<ModelType> TargettingParamsType;
 		typedef typename BasisType::BlockType BlockType;
-		typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
+		typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef VectorType TargetVectorType;
 		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
@@ -439,7 +440,8 @@ namespace Dmrg {
 			}
 
 			setWeights();
-			if (fabs(weightForContinuedFraction_)<1e-6) weightForContinuedFraction_ = phi*phi;
+			if (fabs(weightForContinuedFraction_)<1e-6)
+				weightForContinuedFraction_ = std::real(phi*phi);
 //			std::cerr<<"weight==============="<<weightForContinuedFraction_<<"\n";
 		}
 

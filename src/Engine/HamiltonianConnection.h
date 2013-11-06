@@ -142,7 +142,9 @@ namespace Dmrg {
 						SparseElementType tmp = geometry_(smax_,emin_,ind,edofs.first,jnd,edofs.second,term);
 				
 						if (tmp==static_cast<RealType>(0.0)) continue;
-						
+
+						if (ind > jnd) tmp = std::conj(tmp);
+
 						flag = true;
 						// if .. else here is inefficient FIXME
 						//std::cerr<<"Adding "<<i<<" "<<j<<" term"<<term<<" dofs="<<dofs<<" value="<<tmp<<"\n";

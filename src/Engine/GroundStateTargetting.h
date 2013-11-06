@@ -100,17 +100,15 @@ namespace Dmrg {
    			typename IoType_,
       			template<typename> class VectorWithOffsetTemplate>
 	class GroundStateTargetting {
-		public:
+
+	public:
+
 			typedef ModelType_ ModelType;
 			typedef IoType_ IoType;
-			
 			typedef PsimagLite::IoSimple::In IoInputType;
-
 			typedef typename ModelType::RealType RealType;
 			typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
-			typedef typename PsimagLite::Vector<RealType>::Type VectorType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 			typedef typename ModelType::ModelHelperType ModelHelperType;
 			typedef typename ModelHelperType::LeftRightSuperType
 				LeftRightSuperType;
@@ -118,8 +116,11 @@ namespace Dmrg {
 			typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 			typedef typename BasisWithOperatorsType::BasisType BasisType;
+			typedef typename SparseMatrixType::value_type ComplexOrRealType;
+			typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
+			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 			typedef typename BasisType::BlockType BlockType;
-			typedef VectorWithOffsetTemplate<RealType> VectorWithOffsetType;
+			typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 			typedef VectorType TargetVectorType;
 			typedef GroundStateParams<ModelType> TargettingParamsType;
 			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;

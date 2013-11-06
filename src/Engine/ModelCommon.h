@@ -354,6 +354,7 @@ private:
 
 				const SparseMatrixType& B = cm[link2.ops.second+j*offset].data;
 
+				if (ind > jnd) tmp = std::conj(tmp);
 
 				hmatrix += tmp * (transposeOrNot(B,link2.mods.second) *
 				                  transposeOrNot(A,link2.mods.first));
