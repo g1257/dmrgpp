@@ -284,7 +284,7 @@ int main(int argc,char *argv[])
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
 	InputNgType::Readable io(ioWriteable);
 
-	ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> dmrgSolverParams(io);
+	ParametersDmrgSolverType dmrgSolverParams(io);
 
 	if (insitu!="") dmrgSolverParams.insitu = insitu;
 
@@ -300,7 +300,7 @@ int main(int argc,char *argv[])
 		std::cerr<<" with USE_COMPLEX\n";
 		return 1;
 #endif
-		std::cerr<<argv[0]<<"EXPERIMENTAL option complex is in use\n";
+		std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
 		mainLoop0<MySparseMatrixC>(io,dmrgSolverParams,inputCheck);
 	} else {
 		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck);
