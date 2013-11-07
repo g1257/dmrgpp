@@ -36,7 +36,6 @@ typedef float MatrixElementType;
 #include "InternalProductOnTheFly.h"
 #include "InternalProductStored.h"
 #include "InternalProductKron.h"
-//#include "InternalProductCached.h"
 #include "GroundStateTargetting.h"
 #include "TimeStepTargetting.h"
 #include "DynamicTargetting.h"
