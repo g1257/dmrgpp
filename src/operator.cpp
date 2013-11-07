@@ -32,7 +32,6 @@ typedef float RealType;
 #include "CrsMatrix.h"
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
-#include "InternalProductOnTheFly.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
 #include "GroundStateTargetting.h"

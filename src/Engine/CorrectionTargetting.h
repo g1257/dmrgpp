@@ -89,20 +89,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<
-        template<typename,typename,typename> class LanczosSolverTemplate,
-        template<typename> class InternalProductTemplate,
-        template<typename,typename> class WaveFunctionTransfTemplate,
-        typename ModelType_,
-        typename IoType_,
-        template<typename> class VectorWithOffsetTemplate>
+template<template<typename,typename,typename> class LanczosSolverTemplate,
+         typename InternalProductType_,
+         template<typename,typename> class WaveFunctionTransfTemplate,
+         typename IoType_,
+         template<typename> class VectorWithOffsetTemplate>
 class CorrectionTargetting  {
+
 public:
-	typedef ModelType_ ModelType;
+
+	typedef InternalProductType_ InternalProductType;
+	typedef typename InternalProductType::ModelType ModelType;
 	typedef IoType_ IoType;
-
 	typedef PsimagLite::IoSimple::In IoInputType;
-
 	typedef typename ModelType::RealType RealType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -111,7 +110,6 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef InternalProductTemplate<ModelType> InternalProductType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type TargetVectorType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,
 	                              InternalProductType,TargetVectorType> LanczosSolverType;
@@ -295,15 +293,14 @@ private:
 };     //class CorrectionTargetting
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         template<typename> class InternalProductTemplate,
+         typename InternalProductType,
          template<typename,typename> class WaveFunctionTransfTemplate,
-         typename ModelType_,
          typename IoType_,
          template<typename> class VectorWithOffsetTemplate>
 std::ostream& operator<<(std::ostream& os,
                          const CorrectionTargetting<LanczosSolverTemplate,
-                         InternalProductTemplate,
-                         WaveFunctionTransfTemplate,ModelType_,IoType_,
+                         InternalProductType,
+                         WaveFunctionTransfTemplate,IoType_,
                          VectorWithOffsetTemplate>& tst)
 {
 	tst.print(os);

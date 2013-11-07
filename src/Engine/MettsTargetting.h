@@ -89,11 +89,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 
 namespace Dmrg {
-	template<
-			template<typename,typename,typename> class LanczosSolverTemplate,
-			template<typename> class InternalProductTemplate,
+	template<template<typename,typename,typename> class LanczosSolverTemplate,
+			typename InternalProductType_,
 	 		template<typename,typename> class WaveFunctionTransfTemplate,
-    			typename ModelType_,
     			typename IoType_,
        			template<typename> class VectorWithOffsetTemplate>
 	class MettsTargetting  {
@@ -107,10 +105,11 @@ namespace Dmrg {
 			};
 
 		public:
-			typedef ModelType_ ModelType;
+
+			typedef InternalProductType_ InternalProductType;
+			typedef typename InternalProductType::ModelType ModelType;
 			typedef IoType_ IoType;
 			typedef typename ModelType::RealType RealType;
-			typedef InternalProductTemplate<ModelType> InternalProductType;
 			typedef typename ModelType::OperatorsType OperatorsType;
 			typedef typename ModelType::ModelHelperType ModelHelperType;
 			typedef typename ModelHelperType::LeftRightSuperType
@@ -1149,15 +1148,14 @@ namespace Dmrg {
 
 	template<
 		template<typename,typename,typename> class LanczosSolverTemplate,
-			template<typename> class InternalProductTemplate,
+			typename InternalProductType,
  		template<typename,typename> class WaveFunctionTransfTemplate,
-			typename ModelType_,
 			typename IoType_,
    			template<typename> class VectorWithOffsetTemplate>
 	std::ostream& operator<<(std::ostream& os,
 			const MettsTargetting<LanczosSolverTemplate,
-			InternalProductTemplate,
-			WaveFunctionTransfTemplate,ModelType_,IoType_,
+			InternalProductType,
+			WaveFunctionTransfTemplate,IoType_,
 			VectorWithOffsetTemplate>& tst)
 	{
 		tst.print(os);

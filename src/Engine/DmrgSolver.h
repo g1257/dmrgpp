@@ -94,7 +94,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 	//!  A class to represent a generic solver for the Dmrg method
-	template<template<typename> class InternalProductTemplate,typename TargettingType>
+	template<typename TargettingType>
 	class DmrgSolver {
 
 		typedef typename TargettingType::ModelType ModelType;
@@ -115,7 +115,7 @@ namespace Dmrg {
 		typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 		typedef typename ModelType::InputValidatorType InputValidatorType;
 		typedef ParametersDmrgSolver<RealType,InputValidatorType> ParametersType;
-		typedef Diagonalization<ParametersType,TargettingType,InternalProductTemplate> DiagonalizationType;
+		typedef Diagonalization<ParametersType,TargettingType> DiagonalizationType;
 		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 		typedef Truncation<LeftRightSuperType,ParametersType,TargettingType> TruncationType;
 		typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;

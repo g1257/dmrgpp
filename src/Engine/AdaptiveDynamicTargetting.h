@@ -91,20 +91,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<
-        template<typename,typename,typename> class LanczosSolverTemplate,
-        template<typename> class InternalProductTemplate,
-        template<typename,typename> class WaveFunctionTransfTemplate,
-        typename ModelType_,
-        typename IoType_,
-        template<typename> class VectorWithOffsetTemplate>
+template<template<typename,typename,typename> class LanczosSolverTemplate,
+         typename InternalProductType_,
+         template<typename,typename> class WaveFunctionTransfTemplate,
+         typename IoType_,
+         template<typename> class VectorWithOffsetTemplate>
 class AdaptiveDynamicTargetting  {
 public:
 
-	typedef ModelType_ ModelType;
+	typedef InternalProductType_ InternalProductType;
+	typedef typename InternalProductType::ModelType ModelType;
 	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
-	typedef InternalProductTemplate<ModelType> InternalProductType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType
@@ -568,17 +566,15 @@ private:
 	TridiagonalMatrixType ab_;
 }; // class DynamicTargetting
 
-template<
-        template<typename,typename,typename> class LanczosSolverTemplate,
-        template<typename> class InternalProductTemplate,
-        template<typename,typename> class WaveFunctionTransfTemplate,
-        typename ModelType_,
-        typename IoType_,
-        template<typename> class VectorWithOffsetTemplate>
+template<template<typename,typename,typename> class LanczosSolverTemplate,
+         typename InternalProductType,
+         template<typename,typename> class WaveFunctionTransfTemplate,
+         typename IoType_,
+         template<typename> class VectorWithOffsetTemplate>
 std::ostream& operator<<(std::ostream& os,
                          const AdaptiveDynamicTargetting<LanczosSolverTemplate,
-                         InternalProductTemplate,
-                         WaveFunctionTransfTemplate,ModelType_,IoType_,
+                         InternalProductType,
+                         WaveFunctionTransfTemplate,IoType_,
                          VectorWithOffsetTemplate>& tst)
 {
 	os<<"DT=NothingToSeeHereYet\n";

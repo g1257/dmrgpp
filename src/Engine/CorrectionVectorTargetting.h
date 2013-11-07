@@ -93,16 +93,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         template<typename> class InternalProductTemplate,
+         typename InternalProductType_,
          template<typename,typename> class WaveFunctionTransfTemplate,
-         typename ModelType_,
          typename IoType_,
          template<typename> class VectorWithOffsetTemplate>
 class CorrectionVectorTargetting  {
 
 public:
 
-	typedef ModelType_ ModelType;
+	typedef InternalProductType_ InternalProductType;
+	typedef typename InternalProductType::ModelType ModelType;
 	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
@@ -114,7 +114,6 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef InternalProductTemplate<ModelType> InternalProductType;
 	typedef CorrectionVectorParams<ModelType> TargettingParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
@@ -541,15 +540,14 @@ private:
 }; // class CorrectionVectorTargetting
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         template<typename> class InternalProductTemplate,
+         typename InternalProductType,
          template<typename,typename> class WaveFunctionTransfTemplate,
-         typename ModelType_,
          typename IoType_,
          template<typename> class VectorWithOffsetTemplate>
 std::ostream& operator<<(std::ostream& os,
                          const CorrectionVectorTargetting<LanczosSolverTemplate,
-                         InternalProductTemplate,
-                         WaveFunctionTransfTemplate,ModelType_,IoType_,
+                         InternalProductType,
+                         WaveFunctionTransfTemplate,IoType_,
                          VectorWithOffsetTemplate>& tst)
 {
 	os<<"DT=NothingToSeeHereYet\n";

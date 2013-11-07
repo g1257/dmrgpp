@@ -84,11 +84,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-	template<typename ModelType>
+	template<typename ModelType_>
 	class InternalProductOnTheFly {
 
 	public:
 
+		typedef ModelType_ ModelType;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;

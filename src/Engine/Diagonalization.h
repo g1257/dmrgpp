@@ -90,9 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	
-	template<typename ParametersType,
-	         typename TargettingType,
-		 template<typename> class InternalProductTemplate>
+	template<typename ParametersType, typename TargettingType>
 	class Diagonalization {
 
 	public:
@@ -111,6 +109,7 @@ namespace Dmrg {
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
+		typedef typename TargettingType::InternalProductType InternalProductType;
 
 		Diagonalization(const ParametersType& parameters,
                         const ModelType& model,
@@ -366,9 +365,8 @@ namespace Dmrg {
 
 			ReflectionSymmetryType *rs = 0;
 			if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
-			typedef InternalProductTemplate<ModelType> MyInternalProduct;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-			typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,MyInternalProduct,TargetVectorType> LanczosOrDavidsonBaseType;
+			typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,InternalProductType,TargetVectorType> LanczosOrDavidsonBaseType;
 			typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(&model_,&modelHelper,rs);
 
 			ParametersForSolverType params;
@@ -382,9 +380,9 @@ namespace Dmrg {
 
 			bool useDavidson = (parameters_.options.find("useDavidson")!=PsimagLite::String::npos);
 			if (useDavidson) {
-				lanczosOrDavidson = new PsimagLite::DavidsonSolver<ParametersForSolverType,MyInternalProduct,TargetVectorType>(lanczosHelper,params);
+				lanczosOrDavidson = new PsimagLite::DavidsonSolver<ParametersForSolverType,InternalProductType,TargetVectorType>(lanczosHelper,params);
 			} else {
-				lanczosOrDavidson = new PsimagLite::LanczosSolver<ParametersForSolverType,MyInternalProduct,TargetVectorType>(lanczosHelper,params);
+				lanczosOrDavidson = new PsimagLite::LanczosSolver<ParametersForSolverType,InternalProductType,TargetVectorType>(lanczosHelper,params);
 			}
 
 			if (lanczosHelper.rank()==0) {

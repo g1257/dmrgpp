@@ -85,11 +85,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
-	template<typename ModelType>
+	template<typename ModelType_>
 	class InternalProductStored {
 
 	public:	
 
+		typedef ModelType_ ModelType;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelHelperType::RealType RealType;

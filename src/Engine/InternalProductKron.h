@@ -86,11 +86,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "KronMatrix.h"
 
 namespace Dmrg {
-	template<typename ModelType>
+	template<typename ModelType_>
 	class InternalProductKron {
 
 	public:
 
+		typedef ModelType_ ModelType;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
