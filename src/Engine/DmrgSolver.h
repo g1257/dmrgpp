@@ -94,7 +94,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 	//!  A class to represent a generic solver for the Dmrg method
-	template<template<typename,typename> class InternalProductTemplate,typename TargettingType>
+	template<template<typename> class InternalProductTemplate,typename TargettingType>
 	class DmrgSolver {
 
 		typedef typename TargettingType::ModelType ModelType;

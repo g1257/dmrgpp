@@ -91,7 +91,7 @@ namespace Dmrg {
 
 template<
         template<typename,typename,typename> class LanczosSolverTemplate,
-        template<typename,typename> class InternalProductTemplate,
+        template<typename> class InternalProductTemplate,
         template<typename,typename> class WaveFunctionTransfTemplate,
         typename ModelType_,
         typename IoType_,
@@ -111,7 +111,7 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef InternalProductTemplate<ComplexOrRealType,ModelType> InternalProductType;
+	typedef InternalProductTemplate<ModelType> InternalProductType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type TargetVectorType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,
 	                              InternalProductType,TargetVectorType> LanczosSolverType;
@@ -295,7 +295,7 @@ private:
 };     //class CorrectionTargetting
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         template<typename,typename> class InternalProductTemplate,
+         template<typename> class InternalProductTemplate,
          template<typename,typename> class WaveFunctionTransfTemplate,
          typename ModelType_,
          typename IoType_,

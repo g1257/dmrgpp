@@ -84,14 +84,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-	template<typename T,typename ModelType>
+	template<typename ModelType>
 	class InternalProductOnTheFly {
+
 	public:
-		typedef T HamiltonianElementType;
-		typedef T value_type;
+
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
+		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+		typedef typename SparseMatrixType::value_type value_type;
 
 		InternalProductOnTheFly(ModelType const *model,
 					ModelHelperType const *modelHelper,

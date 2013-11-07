@@ -99,7 +99,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 	template<template<typename,typename,typename> class LanczosSolverTemplate,
-		 template<typename,typename> class InternalProductTemplate,
+		 template<typename> class InternalProductTemplate,
 	         template<typename,typename> class WaveFunctionTransfTemplate,
 	         typename ModelType_,
 	         typename IoType_,
@@ -121,7 +121,7 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type ComplexOrRealType;
-		typedef InternalProductTemplate<ComplexOrRealType,ModelType> InternalProductType;
+		typedef InternalProductTemplate<ModelType> InternalProductType;
 		typedef DynamicDmrgParams<ModelType> TargettingParamsType;
 		typedef typename BasisType::BlockType BlockType;
 		typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
@@ -541,7 +541,7 @@ namespace Dmrg {
 
 	template<
  	template<typename,typename,typename> class LanczosSolverTemplate,
- 	template<typename,typename> class InternalProductTemplate,
+ 	template<typename> class InternalProductTemplate,
  	template<typename,typename> class WaveFunctionTransfTemplate,
  	typename ModelType_,
  	typename IoType_,

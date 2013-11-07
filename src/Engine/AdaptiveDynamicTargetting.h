@@ -93,7 +93,7 @@ namespace Dmrg {
 
 template<
         template<typename,typename,typename> class LanczosSolverTemplate,
-        template<typename,typename> class InternalProductTemplate,
+        template<typename> class InternalProductTemplate,
         template<typename,typename> class WaveFunctionTransfTemplate,
         typename ModelType_,
         typename IoType_,
@@ -104,7 +104,7 @@ public:
 	typedef ModelType_ ModelType;
 	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
-	typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
+	typedef InternalProductTemplate<ModelType> InternalProductType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType
@@ -570,7 +570,7 @@ private:
 
 template<
         template<typename,typename,typename> class LanczosSolverTemplate,
-        template<typename,typename> class InternalProductTemplate,
+        template<typename> class InternalProductTemplate,
         template<typename,typename> class WaveFunctionTransfTemplate,
         typename ModelType_,
         typename IoType_,

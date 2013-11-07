@@ -94,7 +94,7 @@ namespace Dmrg {
 
 	template<
 			template<typename,typename,typename> class LanczosSolverTemplate,
-			template<typename,typename> class InternalProductTemplate,
+			template<typename> class InternalProductTemplate,
      			template<typename,typename> class WaveFunctionTransfTemplate,
      			typename ModelType_,
    			typename IoType_,
@@ -107,7 +107,7 @@ namespace Dmrg {
 			typedef IoType_ IoType;
 			typedef PsimagLite::IoSimple::In IoInputType;
 			typedef typename ModelType::RealType RealType;
-			typedef InternalProductTemplate<RealType,ModelType> InternalProductType;
+			typedef InternalProductTemplate<ModelType> InternalProductType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 			typedef typename ModelType::ModelHelperType ModelHelperType;
 			typedef typename ModelHelperType::LeftRightSuperType
@@ -267,7 +267,7 @@ namespace Dmrg {
 
 	template<
 	template<typename,typename,typename> class LanczosSolverTemplate,
-	template<typename,typename> class InternalProductTemplate,
+	template<typename> class InternalProductTemplate,
 	template<typename,typename> class WaveFunctionTransfTemplate,
 	typename ModelType_,
 	typename IoType_,

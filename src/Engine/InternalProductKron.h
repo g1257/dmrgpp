@@ -86,16 +86,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "KronMatrix.h"
 
 namespace Dmrg {
-	template<typename T,typename ModelType>
+	template<typename ModelType>
 	class InternalProductKron {
+
 	public:
-		typedef T HamiltonianElementType;
-		typedef T value_type;
+
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 		typedef InitKron<ModelType,ModelHelperType> InitKronType;
 		typedef KronMatrix<InitKronType> KronMatrixType;
+		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+		typedef typename SparseMatrixType::value_type value_type;
 
 		InternalProductKron(ModelType const *model,
 					ModelHelperType const *modelHelper,

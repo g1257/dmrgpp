@@ -85,16 +85,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
-	template<typename T,typename ModelType>
+	template<typename ModelType>
 	class InternalProductStored {
+
 	public:	
-		typedef T HamiltonianElementType;
-		typedef HamiltonianElementType value_type; 
+
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelHelperType::RealType RealType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
-		//typedef typename SparseMatrixType::value_type SparseElementType;
+		typedef typename SparseMatrixType::value_type value_type;
 
 		InternalProductStored(ModelType const *model,
 				      ModelHelperType const *modelHelper,
@@ -130,7 +130,7 @@ namespace Dmrg {
 			 matrixStored_[pointer_].matrixVectorProduct(x,y);
 		}
 
-		HamiltonianElementType operator()(SizeType i,SizeType j) const
+		value_type operator()(SizeType i,SizeType j) const
 		{
 			return matrixStored_[pointer_](i,j);
 		}

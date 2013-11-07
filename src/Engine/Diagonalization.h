@@ -92,7 +92,7 @@ namespace Dmrg {
 	
 	template<typename ParametersType,
 	         typename TargettingType,
-		 template<typename,typename> class InternalProductTemplate>
+		 template<typename> class InternalProductTemplate>
 	class Diagonalization {
 
 	public:
@@ -366,7 +366,7 @@ namespace Dmrg {
 
 			ReflectionSymmetryType *rs = 0;
 			if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
-			typedef InternalProductTemplate<typename TargetVectorType::value_type,ModelType> MyInternalProduct;
+			typedef InternalProductTemplate<ModelType> MyInternalProduct;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 			typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,MyInternalProduct,TargetVectorType> LanczosOrDavidsonBaseType;
 			typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(&model_,&modelHelper,rs);
