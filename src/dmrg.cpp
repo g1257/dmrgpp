@@ -294,17 +294,12 @@ int main(int argc,char *argv[])
 
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
-	if (dmrgSolverParams.options.find("complex")!=PsimagLite::String::npos) {
-#ifndef USE_COMPLEX
-		std::cerr<<argv[0]<<" option complex in input file needs compilation ";
-		std::cerr<<" with USE_COMPLEX\n";
-		return 1;
-#endif
+#ifdef USE_COMPLEX
 		std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
 		mainLoop0<MySparseMatrixC>(io,dmrgSolverParams,inputCheck);
-	} else {
+#else
 		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck);
-	}
+#endif
 
 }
 
