@@ -91,9 +91,8 @@ namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename InternalProductType_,
-         template<typename,typename> class WaveFunctionTransfTemplate,
-         typename IoType_,
-         template<typename> class VectorWithOffsetTemplate>
+         typename WaveFunctionTransfType_,
+         typename IoType_>
 class CorrectionTargetting  {
 
 public:
@@ -116,10 +115,9 @@ public:
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
+	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef CorrectionParams<ModelType> TargettingParamsType;
-	typedef WaveFunctionTransfTemplate<LeftRightSuperType,
-	                                   VectorWithOffsetType> WaveFunctionTransfType;
 	typedef CommonTargetting<ModelType,
 	                         TargettingParamsType,
 	                         WaveFunctionTransfType,
@@ -294,14 +292,12 @@ private:
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename InternalProductType,
-         template<typename,typename> class WaveFunctionTransfTemplate,
-         typename IoType_,
-         template<typename> class VectorWithOffsetTemplate>
+         typename WaveFunctionTransfType,
+         typename IoType_>
 std::ostream& operator<<(std::ostream& os,
                          const CorrectionTargetting<LanczosSolverTemplate,
                          InternalProductType,
-                         WaveFunctionTransfTemplate,IoType_,
-                         VectorWithOffsetTemplate>& tst)
+                         WaveFunctionTransfType,IoType_>& tst)
 {
 	tst.print(os);
 	return os;

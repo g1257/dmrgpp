@@ -92,11 +92,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<template<typename,typename,typename> class LanczosSolverTemplate,
-			typename InternalProductType_,
-     			template<typename,typename> class WaveFunctionTransfTemplate,
-   			typename IoType_,
-      			template<typename> class VectorWithOffsetTemplate>
+
+template<template<typename,typename,typename> class LanczosSolverTemplate,
+         typename InternalProductType_,
+         typename WaveFunctionTransfType_,
+         typename IoType_>
 	class GroundStateTargetting {
 
 	public:
@@ -118,12 +118,15 @@ namespace Dmrg {
 			typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 			typedef typename BasisType::BlockType BlockType;
-			typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
+			typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+			typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 			typedef VectorType TargetVectorType;
 			typedef GroundStateParams<ModelType> TargettingParamsType;
-			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
-			typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
-				CommonTargettingType;
+			typedef CommonTargetting<ModelType,
+		                             TargettingParamsType,
+		                             WaveFunctionTransfType,
+		                             VectorWithOffsetType,
+		                             LanczosSolverType> CommonTargettingType;
 			typedef typename CommonTargettingType::ApplyOperatorType ApplyOperatorType;
 
 			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -263,17 +266,14 @@ namespace Dmrg {
 
 	};     //class GroundStateTargetting
 
-	template<
-	template<typename,typename,typename> class LanczosSolverTemplate,
-	typename InternalProductType,
-	template<typename,typename> class WaveFunctionTransfTemplate,
-	typename IoType_,
-	template<typename> class VectorWithOffsetTemplate>
+	template<template<typename,typename,typename> class LanczosSolverTemplate,
+	         typename InternalProductType,
+	         typename WaveFunctionTransfType,
+	         typename IoType_>
 	std::ostream& operator<<(std::ostream& os,
-			const GroundStateTargetting<LanczosSolverTemplate,
-			InternalProductType,
-			WaveFunctionTransfTemplate,IoType_,
-			VectorWithOffsetTemplate>& tst)
+	                         const GroundStateTargetting<LanczosSolverTemplate,
+	                         InternalProductType,
+	                         WaveFunctionTransfType,IoType_>& tst)
 	{
 		os<<"GSTWeightGroundState=1\n";
 		return os;

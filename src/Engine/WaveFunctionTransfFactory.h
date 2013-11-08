@@ -91,14 +91,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Random48.h"
 
 namespace Dmrg {
-	template<typename LeftRightSuperType,typename VectorWithOffsetType>
+	template<typename LeftRightSuperType,typename VectorWithOffsetType_>
 	class WaveFunctionTransfFactory {
 		typedef PsimagLite::IoSimple IoType;
 		public:
 		enum {DO_NOT_RESET_COUNTER,RESET_COUNTER};
 
-		typedef typename LeftRightSuperType::BasisWithOperatorsType
-			BasisWithOperatorsType;
+		typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
 		typedef typename SparseMatrixType::value_type SparseElementType;
@@ -106,7 +105,7 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef typename BasisType::FactorsType FactorsType;
 		typedef DmrgWaveStruct<LeftRightSuperType> DmrgWaveStructType;
-
+		typedef VectorWithOffsetType_ VectorWithOffsetType;
 		typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType>
 					WaveFunctionTransfBaseType;
 		typedef WaveFunctionTransfLocal<DmrgWaveStructType,VectorWithOffsetType>

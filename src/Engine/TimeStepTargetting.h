@@ -87,11 +87,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CommonTargetting.h"
 
 namespace Dmrg {
-	template<template<typename,typename,typename> class LanczosSolverTemplate,
-		 typename InternalProductType_,
-	         template<typename,typename> class WaveFunctionTransfTemplate,
-	         typename IoType_,
-	         template<typename> class VectorWithOffsetTemplate>
+
+template<template<typename,typename,typename> class LanczosSolverTemplate,
+         typename InternalProductType_,
+         typename WaveFunctionTransfType_,
+         typename IoType_>
 	class TimeStepTargetting  {
 
 		enum {BORDER_NEITHER, BORDER_LEFT, BORDER_RIGHT};
@@ -110,7 +110,8 @@ namespace Dmrg {
 			typedef typename LeftRightSuperType::BasisWithOperatorsType
 					BasisWithOperatorsType;
 			typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-			typedef VectorWithOffsetTemplate<ComplexType> VectorWithOffsetType;
+			typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+			typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 			typedef typename VectorWithOffsetType::VectorType TargetVectorType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,TargetVectorType> LanczosSolverType;
@@ -120,7 +121,6 @@ namespace Dmrg {
 			typedef typename BasisWithOperatorsType::BasisType BasisType;
 			typedef TimeStepParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
-			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 			typedef BlockMatrix<ComplexMatrixType> ComplexBlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 			typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
@@ -896,17 +896,14 @@ namespace Dmrg {
 
 	};     //class TimeStepTargetting
 
-	template<
-		template<typename,typename,typename> class LanczosSolverTemplate,
-			typename InternalProductType,
- 		template<typename,typename> class WaveFunctionTransfTemplate,
-			typename IoType_,
-   			template<typename> class VectorWithOffsetTemplate>
+	template<template<typename,typename,typename> class LanczosSolverTemplate,
+	         typename InternalProductType,
+	         typename WaveFunctionTransfType,
+	         typename IoType_>
 	std::ostream& operator<<(std::ostream& os,
-			const TimeStepTargetting<LanczosSolverTemplate,
-			InternalProductType,
-			WaveFunctionTransfTemplate,IoType_,
-			VectorWithOffsetTemplate>& tst)
+	                         const TimeStepTargetting<LanczosSolverTemplate,
+	                         InternalProductType,
+	                         WaveFunctionTransfType,IoType_>& tst)
 	{
 		tst.print(os);
 		return os;

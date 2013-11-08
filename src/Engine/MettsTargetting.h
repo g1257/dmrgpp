@@ -89,11 +89,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 
 namespace Dmrg {
-	template<template<typename,typename,typename> class LanczosSolverTemplate,
-			typename InternalProductType_,
-	 		template<typename,typename> class WaveFunctionTransfTemplate,
-    			typename IoType_,
-       			template<typename> class VectorWithOffsetTemplate>
+
+template<template<typename,typename,typename> class LanczosSolverTemplate,
+         typename InternalProductType_,
+         typename WaveFunctionTransfType_,
+         typename IoType_>
 	class MettsTargetting  {
 
 		typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -112,14 +112,13 @@ namespace Dmrg {
 			typedef typename ModelType::RealType RealType;
 			typedef typename ModelType::OperatorsType OperatorsType;
 			typedef typename ModelType::ModelHelperType ModelHelperType;
-			typedef typename ModelHelperType::LeftRightSuperType
-			    LeftRightSuperType;
-			typedef typename LeftRightSuperType::BasisWithOperatorsType
-			    BasisWithOperatorsType;
+			typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+			typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 			typedef typename BasisWithOperatorsType::BasisType BasisType;
 			typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 			typedef typename SparseMatrixType::value_type ComplexOrRealType;
-			typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
+			typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+			typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 			typedef typename VectorWithOffsetType::VectorType TargetVectorType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,TargetVectorType>
@@ -128,7 +127,6 @@ namespace Dmrg {
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 			typedef MettsParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
-			typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 			typedef PsimagLite::Matrix<RealType> MatrixType;
 			typedef BlockMatrix<MatrixType> BlockMatrixType;
 			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
@@ -1146,17 +1144,14 @@ namespace Dmrg {
 			VectorSizeType sitesCollapsed_;
 	};     //class MettsTargetting
 
-	template<
-		template<typename,typename,typename> class LanczosSolverTemplate,
-			typename InternalProductType,
- 		template<typename,typename> class WaveFunctionTransfTemplate,
-			typename IoType_,
-   			template<typename> class VectorWithOffsetTemplate>
+	template<template<typename,typename,typename> class LanczosSolverTemplate,
+	         typename InternalProductType,
+	         typename WaveFunctionTransfType,
+	         typename IoType_>
 	std::ostream& operator<<(std::ostream& os,
-			const MettsTargetting<LanczosSolverTemplate,
-			InternalProductType,
-			WaveFunctionTransfTemplate,IoType_,
-			VectorWithOffsetTemplate>& tst)
+	                         const MettsTargetting<LanczosSolverTemplate,
+	                         InternalProductType,
+	                         WaveFunctionTransfType,IoType_>& tst)
 	{
 		tst.print(os);
 		return os;

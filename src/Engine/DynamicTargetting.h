@@ -100,9 +100,8 @@ namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename InternalProductType_,
-         template<typename,typename> class WaveFunctionTransfTemplate,
-         typename IoType_,
-         template<typename> class VectorWithOffsetTemplate>
+         typename WaveFunctionTransfType_,
+         typename IoType_>
 	class DynamicTargetting  {
 
 	public:
@@ -122,13 +121,13 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 		typedef typename SparseMatrixType::value_type ComplexOrRealType;
 		typedef DynamicDmrgParams<ModelType> TargettingParamsType;
 		typedef typename BasisType::BlockType BlockType;
-		typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
+		typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+		typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename VectorWithOffsetType::VectorType VectorType;
 		typedef VectorType TargetVectorType;
 		typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 		typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 		typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
-		typedef WaveFunctionTransfTemplate<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 		typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 		typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
 		typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
@@ -537,14 +536,14 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 	}; // class DynamicTargetting
 
-	template<
- 	template<typename,typename,typename> class LanczosSolverTemplate,
- 	typename InternalProductType,
- 	template<typename,typename> class WaveFunctionTransfTemplate,
- 	typename IoType_,
- 	template<typename> class VectorWithOffsetTemplate>
+	template<template<typename,typename,typename> class LanczosSolverTemplate,
+	         typename InternalProductType,
+	         typename WaveFunctionTransfType,
+	         typename IoType_>
 	std::ostream& operator<<(std::ostream& os,
-	                         const DynamicTargetting<LanczosSolverTemplate,InternalProductType,WaveFunctionTransfTemplate,IoType_,VectorWithOffsetTemplate>& tst)
+	                         const DynamicTargetting<LanczosSolverTemplate,
+	                         InternalProductType,
+	                         WaveFunctionTransfType,IoType_>& tst)
 	{
 		os<<"DT=NothingToSeeHereYet\n";
 		return os;

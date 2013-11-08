@@ -94,9 +94,8 @@ namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename InternalProductType_,
-         template<typename,typename> class WaveFunctionTransfTemplate,
-         typename IoType_,
-         template<typename> class VectorWithOffsetTemplate>
+         typename WaveFunctionTransfType_,
+         typename IoType_>
 class CorrectionVectorTargetting  {
 
 public:
@@ -116,28 +115,24 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef CorrectionVectorParams<ModelType> TargettingParamsType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
+	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,
 	                              InternalProductType,
 	                              VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
-	typedef ApplyOperatorLocal<LeftRightSuperType,
-	                           VectorWithOffsetType> ApplyOperatorType;
+	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
-	typedef WaveFunctionTransfTemplate<LeftRightSuperType,
-	                                   VectorWithOffsetType> WaveFunctionTransfType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef DynamicSerializer<VectorWithOffsetType,PostProcType> DynamicSerializerType;
-	typedef typename LanczosSolverType::LanczosMatrixType
-	LanczosMatrixType;
+	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,
-	TargettingParamsType>
-	CorrectionVectorFunctionType;
+	                                 TargettingParamsType> CorrectionVectorFunctionType;
 	typedef CommonTargetting<ModelType,
 	                         TargettingParamsType,
 	                         WaveFunctionTransfType,
@@ -541,14 +536,12 @@ private:
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename InternalProductType,
-         template<typename,typename> class WaveFunctionTransfTemplate,
-         typename IoType_,
-         template<typename> class VectorWithOffsetTemplate>
+         typename WaveFunctionTransfType,
+         typename IoType_>
 std::ostream& operator<<(std::ostream& os,
                          const CorrectionVectorTargetting<LanczosSolverTemplate,
                          InternalProductType,
-                         WaveFunctionTransfTemplate,IoType_,
-                         VectorWithOffsetTemplate>& tst)
+                         WaveFunctionTransfType,IoType_>& tst)
 {
 	os<<"DT=NothingToSeeHereYet\n";
 	return os;
