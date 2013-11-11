@@ -683,7 +683,7 @@ private:
 	HamiltonianSymmetryLocalType symmLocal_;
 	HamiltonianSymmetrySu2Type symmSu2_;
 	/**
-		The variable block\_ of a \cppClass{DmrgBasis} object indicates over
+		The variable block of a \cppClass{DmrgBasis} object indicates over
 		which sites the basis represented by this object is being built.
 		*/
 	BlockType block_;

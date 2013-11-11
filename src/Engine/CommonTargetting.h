@@ -173,7 +173,7 @@ public:
 			if (stage[j] == DISABLED) {
 				PsimagLite::String s ="TST:: Seeing dynamic site "+ttos(tstStruct_.sites[i]);
 				s =s + " before having seen";
-				s = s + " site "+ttos(j);
+				s = s + " site "+ttos(tstStruct_.sites[j]);
 				s = s +". Please order your dynamic sites in order of appearance.\n";
 				throw PsimagLite::RuntimeError(s);
 			}

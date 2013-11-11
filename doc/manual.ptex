@@ -329,9 +329,9 @@ the function grow().
 
 \ptexPaste{Dmrg::LeftRightSuper,grow()}
 
-\ptexPaste{Dmrg::OperatorsBase,externalProduct}
+\ptexPaste{Dmrg::Operators,externalProduct}
 
-\ptexPaste{Dmrg::OperatorsBase}
+\ptexPaste{Dmrg::Operators}
 
 Let us now examine in more detail Fig.~\ref{fig:infiniteloop}(c), where 
 we form the outer product of the current system and current environment, and calculate its Hamiltonian.
