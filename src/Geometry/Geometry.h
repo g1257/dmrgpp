@@ -83,11 +83,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename ComplexOrRealType,typename ProgramGlobalsType>
+template<typename ComplexOrRealType_,typename ProgramGlobalsType>
 class Geometry {
 
 public:
 
+	typedef ComplexOrRealType_ ComplexOrRealType;
 	typedef GeometryTerm<ComplexOrRealType> GeometryTermType;
 	typedef typename Vector<SizeType>::Type BlockType;
 	typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
