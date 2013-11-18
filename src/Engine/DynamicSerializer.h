@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -83,80 +83,78 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename VectorType,typename PostProcType>
-	class DynamicSerializer {
-	public:
+template<typename VectorType,typename PostProcType>
+class DynamicSerializer {
+public:
 
-		DynamicSerializer(
-				const PostProcType& cf,
-				SizeType site,
-				const typename PsimagLite::Vector<VectorType>::Type& targetVectors)
-		: cf_(cf),
-		  site_(site),
-		  targetVectors_(targetVectors)
-		{}
+	DynamicSerializer(
+	        const PostProcType& cf,
+	        SizeType site,
+	        const typename PsimagLite::Vector<VectorType>::Type& targetVectors)
+	    : cf_(cf),
+	      site_(site),
+	      targetVectors_(targetVectors)
+	{}
 
-		template<typename IoInputType>
-		DynamicSerializer(IoInputType& io,SizeType lastInstance = 0)
-		: cf_(io)
-		{
-			PsimagLite::String s = "#DCENTRALSITE=";
-			int xi=0;
-			io.readline(xi,s);
-			if (xi<0) throw PsimagLite::RuntimeError(
-					"DynamicSerializer:: site cannot be negative\n");
-			site_ = xi;
+	template<typename IoInputType>
+	DynamicSerializer(IoInputType& io,SizeType lastInstance = 0)
+	    : cf_(io)
+	{
+		PsimagLite::String s = "#DCENTRALSITE=";
+		int xi=0;
+		io.readline(xi,s);
+		if (xi<0) throw PsimagLite::RuntimeError(
+		            "DynamicSerializer:: site cannot be negative\n");
+		site_ = xi;
 
-			s = "#DNUMBEROFVECTORS=";
-			io.readline(xi,s);
-			if (xi<=0) throw PsimagLite::RuntimeError(
-					"DynamicSerializer:: n. of vectors must be positive\n");
-			targetVectors_.resize(xi);
-			for (SizeType i=0;i<targetVectors_.size();i++) {
-				s = "targetVector"+ttos(i);
-				targetVectors_[i].load(io,s);
-			}
+		s = "#DNUMBEROFVECTORS=";
+		io.readline(xi,s);
+		if (xi<=0) throw PsimagLite::RuntimeError(
+		            "DynamicSerializer:: n. of vectors must be positive\n");
+		targetVectors_.resize(xi);
+		for (SizeType i=0;i<targetVectors_.size();i++) {
+			s = "targetVector"+ttos(i);
+			targetVectors_[i].load(io,s);
 		}
+	}
 
-		template<typename IoOutputter>
-		void save(IoOutputter& io) const
-		{
-			cf_.save(io);
-			PsimagLite::String s = "#DCENTRALSITE=" + ttos(site_);
-			io.printline(s);
-			s = "#DNUMBEROFVECTORS="+ttos(targetVectors_.size());
-			io.printline(s);
+	template<typename IoOutputter>
+	void save(IoOutputter& io) const
+	{
+		cf_.save(io);
+		PsimagLite::String s = "#DCENTRALSITE=" + ttos(site_);
+		io.printline(s);
+		s = "#DNUMBEROFVECTORS="+ttos(targetVectors_.size());
+		io.printline(s);
 
-//			io.print("#DCENTRALSITE=",site_);
-//			io.print("#DNUMBEROFVECTORS=",targetVectors_.size());
-
-			for (SizeType i=0;i<targetVectors_.size();i++) {
-				PsimagLite::String label = "targetVector"+ttos(i);
-				targetVectors_[i].save(io,label);
-			}
+		for (SizeType i=0;i<targetVectors_.size();i++) {
+			PsimagLite::String label = "targetVector"+ttos(i);
+			targetVectors_[i].save(io,label);
 		}
+	}
 
-		SizeType size(SizeType i=0) const
-		{
-			return  targetVectors_[i].size();
-		}
+	SizeType size(SizeType i=0) const
+	{
+		return  targetVectors_[i].size();
+	}
 
-		SizeType site() const
-		{
-			return  site_;
-		}
+	SizeType site() const
+	{
+		return  site_;
+	}
 
-		const VectorType& vector(SizeType i=0) const
-		{
-			return targetVectors_[i];
-		}
+	const VectorType& vector(SizeType i=0) const
+	{
+		return targetVectors_[i];
+	}
 
-	private:
-		const PostProcType& cf_;
-		SizeType site_;
-		typename PsimagLite::Vector<VectorType>::Type targetVectors_;
-	}; // class TimeSerializer
+private:
+	const PostProcType& cf_;
+	SizeType site_;
+	typename PsimagLite::Vector<VectorType>::Type targetVectors_;
+}; // class TimeSerializer
 } // namespace Dmrg 
 
 /*@}*/
 #endif
+

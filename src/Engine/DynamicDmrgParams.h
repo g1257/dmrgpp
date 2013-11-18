@@ -1,4 +1,3 @@
-// BEGIN LICENSE BLOCK
 /*
 Copyright (c) 2009, UT-Battelle, LLC
 All rights reserved
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -87,52 +84,53 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsCommon.h"
 
 namespace Dmrg {
-	//! Coordinates reading of TargetSTructure from input file
-	template<typename ModelType>
-	class DynamicDmrgParams : public TargetParamsCommon<ModelType> {
-	public:
-		typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
-		typedef typename ModelType::RealType RealType;
-			
-		typedef typename ModelType::OperatorType OperatorType;
-		typedef typename OperatorType::PairType PairType;
-		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-		typedef typename SparseMatrixType::value_type ComplexOrReal;
-		typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
+//! Coordinates reading of TargetSTructure from input file
+template<typename ModelType>
+class DynamicDmrgParams : public TargetParamsCommon<ModelType> {
+public:
+	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
+	typedef typename ModelType::RealType RealType;
 
-		static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
-		static SizeType const SUM = TargetParamsCommonType::SUM;
+	typedef typename ModelType::OperatorType OperatorType;
+	typedef typename OperatorType::PairType PairType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrReal;
+	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
-		template<typename IoInputter>
-		DynamicDmrgParams(IoInputter& io,const ModelType& model)
-		: TargetParamsCommonType(io,model)
-		  {
-//			io.rewind();
-			this->concatenation = SUM;
-			io.readline(type,"DynamicDmrgType=");
-			io.readline(steps,"DynamicDmrgSteps=");
-			io.readline(eps,"DynamicDmrgEps=");
-		  }
-		SizeType type;
-		SizeType steps;
-		RealType eps;
+	static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
+	static SizeType const SUM = TargetParamsCommonType::SUM;
 
-	}; // class DynamicDmrgParams
-	
-	template<typename ModelType>
-	inline std::ostream&
-	operator<<(std::ostream& os,const DynamicDmrgParams<ModelType>& t)
+	template<typename IoInputter>
+	DynamicDmrgParams(IoInputter& io,const ModelType& model)
+	    : TargetParamsCommonType(io,model)
 	{
-		os<<"#TargetParams.type=DynamicDmrg\n";
-		const typename DynamicDmrgParams<ModelType>::TargetParamsCommonType&
-			tp = t;
-		os<<tp;
-		os<<"DynamicDmrgType="<<t.type<<"\n";
-		os<<"DynamicDmrgSteps="<<t.steps<<"\n";
-		os<<"DynamicDmrgEps="<<t.eps<<"\n";
-		return os;
+		this->concatenation = SUM;
+		io.readline(type,"DynamicDmrgType=");
+		io.readline(steps,"DynamicDmrgSteps=");
+		io.readline(eps,"DynamicDmrgEps=");
 	}
+
+	SizeType type;
+	SizeType steps;
+	RealType eps;
+
+}; // class DynamicDmrgParams
+
+template<typename ModelType>
+inline std::ostream&
+operator<<(std::ostream& os,const DynamicDmrgParams<ModelType>& t)
+{
+	os<<"#TargetParams.type=DynamicDmrg\n";
+	const typename DynamicDmrgParams<ModelType>::TargetParamsCommonType&
+	        tp = t;
+	os<<tp;
+	os<<"DynamicDmrgType="<<t.type<<"\n";
+	os<<"DynamicDmrgSteps="<<t.steps<<"\n";
+	os<<"DynamicDmrgEps="<<t.eps<<"\n";
+	return os;
+}
 } // namespace Dmrg 
 
 /*@}*/
 #endif //DYNAMIC_DMRG_PARAMS_H
+
