@@ -103,7 +103,6 @@ namespace Dmrg {
 		typedef typename BasisWithOperatorsType::RealType RealType;
 		typedef PsimagLite::Profiling ProfilingType;
 		typedef TwoPointCorrelations<CorrelationsSkeletonType> ThisType;
-		typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 
 		static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
 		static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
@@ -114,6 +113,7 @@ namespace Dmrg {
 
 	public:
 
+		typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 		typedef typename ObserverHelperType::MatrixType MatrixType;
 
 		TwoPointCorrelations(ObserverHelperType& helper,
@@ -125,8 +125,8 @@ namespace Dmrg {
 		{}
 
 		PsimagLite::Matrix<FieldType> operator()(
-				const MatrixType& O1,
-				const MatrixType& O2,
+				const SparseMatrixType& O1,
+				const SparseMatrixType& O2,
 				int fermionicSign,
 				SizeType rows,
 				SizeType cols)
@@ -161,8 +161,8 @@ namespace Dmrg {
 		FieldType calcCorrelation(
 			SizeType i,
 			SizeType j,
-			const MatrixType& O1,
-			const MatrixType& O2,
+			const SparseMatrixType& O1,
+			const SparseMatrixType& O2,
 			int fermionicSign,
 			SizeType threadId)
 		{
@@ -179,23 +179,23 @@ namespace Dmrg {
 
 	private:
 
-		MatrixType multiplyTranspose(
-				const MatrixType& O1,
-				const MatrixType& O2)
-		{
-			SizeType n=O1.n_row();
-			MatrixType ret(n,n);
-			for (SizeType s=0;s<n;s++) 
-				for (SizeType t=0;t<n;t++) 
-					for (SizeType w=0;w<n;w++) 
-						ret(s,t) += std::conj(O1(s,w))*O2(w,t);
-			return ret;
-		}
+//		SparseMatrixType multiplyTranspose(
+//				const SparseMatrixType& O1,
+//				const SparseMatrixType& O2)
+//		{
+//			SizeType n=O1.row();
+//			SparseMatrixType ret(n,n);
+//			for (SizeType s=0;s<n;s++)
+//				for (SizeType t=0;t<n;t++)
+//					for (SizeType w=0;w<n;w++)
+//						ret(s,t) += std::conj(O1(s,w))*O2(w,t);
+//			return ret;
+//		}
 
-		MatrixType add(const MatrixType& O1,const MatrixType& O2)
+		SparseMatrixType add(const SparseMatrixType& O1,const SparseMatrixType& O2)
 		{
 			SizeType n=O1.n_row();
-			MatrixType ret(n,n);
+			SparseMatrixType ret(n,n);
 			for (SizeType s=0;s<n;s++) for (SizeType t=0;t<n;t++)
 				ret(s,t) += O1(s,t)+O2(s,t);
 			return ret;
@@ -203,15 +203,17 @@ namespace Dmrg {
 
 		FieldType calcDiagonalCorrelation(
 			SizeType i,
-			const MatrixType& O1,
-			const MatrixType& O2,
+			const SparseMatrixType& O1,
+			const SparseMatrixType& O2,
 			int fermionicSign,
 			SizeType threadId)
 		{
-			SizeType n = O1.n_row();
-			MatrixType O1new=identity(n);
+			SizeType n = O1.row();
+			SparseMatrixType O1new=identity(n);
 
-			MatrixType O2new=multiplyTranspose(O1,O2);
+			SparseMatrixType O1transpose;
+			transposeConjugate(O1transpose,O1);
+			SparseMatrixType O2new = O1 * O2;
 			if (i==0) return calcCorrelation_(0,1,O2new,O1new,1,threadId);
 			return calcCorrelation_(i-1,i,O1new,O2new,1,threadId);
 		}
@@ -256,10 +258,10 @@ namespace Dmrg {
 			return skeleton_.bracket(O2g,fermionicSign,threadId);
 		}
 
-		MatrixType identity(SizeType n)
+		SparseMatrixType identity(SizeType n)
 		{
-			MatrixType ret(n,n);
-			for (SizeType s=0;s<n;s++)  ret(s,s)=static_cast<RealType>(1.0);
+			SparseMatrixType ret(n,n);
+			ret.makeDiagonal(n,1.0);
 			return ret;
 		}
 
@@ -278,7 +280,7 @@ namespace Dmrg {
 			helper_.setPointer(threadId,s);
 			SizeType growOption = skeleton_.growthDirection(s,nt,i,threadId);
 
-			MatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
+			SparseMatrixType Onew(helper_.columns(threadId),helper_.columns(threadId));
 			Odest = Onew;
 			skeleton_.fluffUp(Odest,Osrc,fermionicSign,growOption,true,threadId);
 		}

@@ -90,6 +90,7 @@ class Parallel2PointCorrelations {
 
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename TwoPointCorrelationsType::MatrixType MatrixType;
+	typedef typename TwoPointCorrelationsType::SparseMatrixType SparseMatrixType;
 	typedef typename MatrixType::value_type FieldType;
 
 public:
@@ -99,8 +100,8 @@ public:
 	Parallel2PointCorrelations(MatrixType& w,
 							   TwoPointCorrelationsType& twopoint,
 							   const typename PsimagLite::Vector<PairType>::Type& pairs,
-							   const MatrixType& O1,
-							   const MatrixType& O2,
+							   const SparseMatrixType& O1,
+							   const SparseMatrixType& O2,
 							   int fermionicSign)
 		: w_(w),
 		  twopoint_(twopoint),
@@ -131,8 +132,8 @@ private:
 	MatrixType& w_;
 	TwoPointCorrelationsType& twopoint_;
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
-	const MatrixType& O1_;
-	const MatrixType& O2_;
+	const SparseMatrixType& O1_;
+	const SparseMatrixType& O2_;
 	int fermionicSign_;
 }; // class Parallel2PointCorrelations
 } // namespace Dmrg 
