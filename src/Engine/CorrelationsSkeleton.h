@@ -523,11 +523,11 @@ private:
 		return O.element(i,j)*sign;
 	}
 
-	RealType bracket_(const SparseMatrixType& A,
-	                  const VectorWithOffsetType& vec1,
-	                  const VectorWithOffsetType& vec2,
-	                  int fermionicSign,
-	                  SizeType threadId)
+	FieldType bracket_(const SparseMatrixType& A,
+	                   const VectorWithOffsetType& vec1,
+	                   const VectorWithOffsetType& vec2,
+	                   int fermionicSign,
+	                   SizeType threadId)
 	{
 		if (verbose_)
 			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
@@ -539,10 +539,11 @@ private:
 		if (helper_.direction(threadId)==EXPAND_SYSTEM) {
 			return bracketSystem_(A,vec1,vec2,threadId);
 		}
+
 		return bracketEnviron_(A,vec1,vec2,fermionicSign,threadId);
 	}
 
-	RealType bracketSystem_(const SparseMatrixType& A,
+	FieldType bracketSystem_(const SparseMatrixType& A,
 	                        const VectorWithOffsetType& vec1,
 	                        const VectorWithOffsetType& vec2,
 	                        SizeType threadId)
@@ -568,11 +569,12 @@ private:
 				}
 			}
 		}
+
 		RealType norma = std::norm(vec1);
-		return std::real(sum)/norma;
+		return sum/norma;
 	}
 
-	RealType bracketEnviron_(const SparseMatrixType& A,
+	FieldType bracketEnviron_(const SparseMatrixType& A,
 	                         const VectorWithOffsetType& vec1,
 	                         const VectorWithOffsetType& vec2,
 	                         int fermionicSign,
@@ -606,10 +608,10 @@ private:
 			}
 		}
 		RealType norma = std::norm(vec1);
-		return std::real(sum)/norma;
+		return sum/norma;
 	}
 
-	RealType bracketRightCorner_(const SparseMatrixType& A,
+	FieldType bracketRightCorner_(const SparseMatrixType& A,
 	                             const SparseMatrixType& B,
 	                             int fermionSign,
 	                             const VectorWithOffsetType& vec1,
@@ -621,7 +623,7 @@ private:
 		return brLftCrnrEnviron_(A,B,fermionSign,vec1,vec2,threadId);
 	}
 
-	RealType brRghtCrnrSystem_(const SparseMatrixType& Acrs,
+	FieldType brRghtCrnrSystem_(const SparseMatrixType& Acrs,
 	                           const SparseMatrixType& Bcrs,
 	                           int fermionSign,
 	                           const VectorWithOffsetType& vec1,
@@ -679,10 +681,10 @@ private:
 		}
 
 		RealType norma = std::norm(vec1);
-		return std::real(sum)/norma;
+		return sum/norma;
 	}
 
-	RealType brLftCrnrEnviron_(const SparseMatrixType& Acrs,
+	FieldType brLftCrnrEnviron_(const SparseMatrixType& Acrs,
 	                           const SparseMatrixType& Bcrs,
 	                           int fermionSign,
 	                           const VectorWithOffsetType& vec1,
@@ -739,10 +741,10 @@ private:
 		}
 
 		RealType norma = std::norm(vec1);
-		return std::real(sum)/norma;
+		return sum/norma;
 	}
 
-	RealType bracketRightCorner_(const SparseMatrixType& A1,
+	FieldType bracketRightCorner_(const SparseMatrixType& A1,
 	                             const SparseMatrixType& A2,
 	                             const SparseMatrixType& B,
 	                             int fermionSign,
@@ -812,7 +814,7 @@ private:
 				}
 			}
 		}
-		return std::real(sum)/norma;
+		return sum/norma;
 	}
 
 	ObserverHelperType& helper_; //<-- NB: We are not the owner
