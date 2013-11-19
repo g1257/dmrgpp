@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 
 namespace Dmrg {
-	
+
 	template<typename CorrelationsSkeletonType>
 	class TwoPointCorrelations {
 		typedef typename CorrelationsSkeletonType::ObserverHelperType
@@ -155,7 +155,7 @@ namespace Dmrg {
 		}
 
 		// Return the vector: O1 * O2 |psi>
-		// where |psi> is the g.s. 
+		// where |psi> is the g.s.
 		// Note1: O1 is applied to site i and O2 is applied to site j
 		// Note2: O1 and O2 operators must commute or anti-commute (set fermionicSign accordingly)
 		FieldType calcCorrelation(
@@ -179,19 +179,6 @@ namespace Dmrg {
 
 	private:
 
-//		SparseMatrixType multiplyTranspose(
-//				const SparseMatrixType& O1,
-//				const SparseMatrixType& O2)
-//		{
-//			SizeType n=O1.row();
-//			SparseMatrixType ret(n,n);
-//			for (SizeType s=0;s<n;s++)
-//				for (SizeType t=0;t<n;t++)
-//					for (SizeType w=0;w<n;w++)
-//						ret(s,t) += std::conj(O1(s,w))*O2(w,t);
-//			return ret;
-//		}
-
 		SparseMatrixType add(const SparseMatrixType& O1,const SparseMatrixType& O2)
 		{
 			SizeType n=O1.n_row();
@@ -213,7 +200,7 @@ namespace Dmrg {
 
 			SparseMatrixType O1transpose;
 			transposeConjugate(O1transpose,O1);
-			SparseMatrixType O2new = O1 * O2;
+			SparseMatrixType O2new = O1transpose * O2;
 			if (i==0) return calcCorrelation_(0,1,O2new,O1new,1,threadId);
 			return calcCorrelation_(i-1,i,O1new,O2new,1,threadId);
 		}
@@ -225,7 +212,7 @@ namespace Dmrg {
 		                           int fermionicSign,
 		                           SizeType threadId)
 		{
-			
+
 			if (i>=j) throw PsimagLite::RuntimeError(
 					"Observer::calcCorrelation_(...): i must be smaller than j\n");
 			SparseMatrixType O1m,O2m;
@@ -276,7 +263,7 @@ namespace Dmrg {
 			// from 0 --> i
 			int nt=i-1;
 			if (nt<0) nt=0;
-			
+
 			helper_.setPointer(threadId,s);
 			SizeType growOption = skeleton_.growthDirection(s,nt,i,threadId);
 
