@@ -198,9 +198,7 @@ namespace Dmrg {
 			SizeType n = O1.row();
 			SparseMatrixType O1new=identity(n);
 
-			SparseMatrixType O1transpose;
-			transposeConjugate(O1transpose,O1);
-			SparseMatrixType O2new = O1transpose * O2;
+			SparseMatrixType O2new = O1 * O2;
 			if (i==0) return calcCorrelation_(0,1,O2new,O1new,1,threadId);
 			return calcCorrelation_(i-1,i,O1new,O2new,1,threadId);
 		}
