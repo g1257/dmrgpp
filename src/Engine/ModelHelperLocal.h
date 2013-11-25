@@ -158,8 +158,7 @@ namespace Dmrg {
 		void fastOpProdInter(SparseMatrixType const &A,
 		                     SparseMatrixType const &B,
 		                     SparseMatrixType &matrixBlock,
-		                     const LinkType& link,
-		                     bool flipped = false) const
+		                     const LinkType& link) const
 		{
 			RealType fermionSign =(link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
 
@@ -168,7 +167,7 @@ namespace Dmrg {
 				LinkType link2 = link;
 				link2.value *= fermionSign;
 				link2.type = ProgramGlobals::SYSTEM_ENVIRON;
-				fastOpProdInter(B,A,matrixBlock,link2,true);
+				fastOpProdInter(B,A,matrixBlock,link2);
 				return;
 			}
 
@@ -185,6 +184,10 @@ namespace Dmrg {
 				int alpha=alpha_[i];
 				int beta=beta_[i];
 
+				SparseElementType fsValue = (fermionSign < 0 && fermionSigns_[i])
+				        ? -link.value
+				        : link.value;
+
 				for (int k=A.getRowPtr(alpha);k<A.getRowPtr(alpha+1);k++) {
 					int alphaPrime = A.getCol(k);
 					for (int kk=B.getRowPtr(beta);kk<B.getRowPtr(beta+1);kk++) {
@@ -195,9 +198,7 @@ namespace Dmrg {
 						   here the environ is applied first and has to "cross"
 						   the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
 						  */
-						SparseElementType tmp = A.getValue(k) * B.getValue(kk)*link.value;
-						if (link.fermionOrBoson == ProgramGlobals::FERMION)
-							tmp *= lrs_.left().fermionicSign(alpha,int(fermionSign));
+						SparseElementType tmp = A.getValue(k) * B.getValue(kk)*fsValue;
 						//if (tmp==static_cast<MatrixElementType>(0.0)) continue;
 						matrixBlock.pushCol(j);
 						matrixBlock.pushValue(tmp);
@@ -214,8 +215,7 @@ namespace Dmrg {
 		                     const typename PsimagLite::Vector<SparseElementType>::Type&y,
 		                     SparseMatrixType const &A,
 		                     SparseMatrixType const &B,
-		                     const LinkType& link,
-		                     bool flipped = false) const
+		                     const LinkType& link) const
 		{
 			RealType fermionSign =  (link.fermionOrBoson==ProgramGlobals::FERMION) ? -1 : 1;
 
@@ -223,7 +223,7 @@ namespace Dmrg {
 				LinkType link2 = link;
 				link2.value *= fermionSign;
 				link2.type = ProgramGlobals::SYSTEM_ENVIRON;
-				fastOpProdInter(x,y,B,A,link2,true);
+				fastOpProdInter(x,y,B,A,link2);
 				return;
 			}
 
@@ -232,11 +232,11 @@ namespace Dmrg {
 			int offset = lrs_.super().partition(m);
 			int total = lrs_.super().partition(m+1) - offset;
 
-			for (int i=0;i<total;i++) {
+			for (int i=0;i<total;++i) {
 				// row i of the ordered product basis
 				int alpha=alpha_[i];
 				int beta=beta_[i];
-				SparseElementType& xSubI = x[i];
+				SparseElementType sum = 0.0;
 				int startkk = B.getRowPtr(beta);
 				int endkk = B.getRowPtr(beta+1);
 				int startk = A.getRowPtr(alpha);
@@ -245,25 +245,27 @@ namespace Dmrg {
 				 *   here the environ is applied first and has to "cross"
 				 *   the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
 				 */
-				RealType fs = lrs_.left().fermionicSign(alpha,int(fermionSign));
-				SparseElementType fsValue = (link.fermionOrBoson == ProgramGlobals::FERMION)
-				        ? fs*link.value
+
+				SparseElementType fsValue = (fermionSign < 0 && fermionSigns_[i])
+				        ? -link.value
 				        : link.value;
 
-				for (int k=startk;k<endk;k++) {
+				for (int k=startk;k<endk;++k) {
 					int alphaPrime = A.getCol(k);
 					SparseElementType tmp2 = A.getValue(k) *fsValue;
 					const typename PsimagLite::Vector<int>::Type& bufferTmp = buffer_[alphaPrime];
 
-					for (int kk=startkk;kk<endkk;kk++) {
+					for (int kk=startkk;kk<endkk;++kk) {
 						int betaPrime= B.getCol(kk);
 						int j = bufferTmp[betaPrime];
 						if (j<0) continue;
 
 						SparseElementType tmp = tmp2 * B.getValue(kk);
-						xSubI += tmp * y[j];
+						sum += tmp * y[j];
 					}
 				}
+
+				x[i] += sum;
 			}
 		}
 
@@ -389,6 +391,7 @@ namespace Dmrg {
 		typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;
 		typename PsimagLite::Vector<SparseMatrixType>::Type basis2tc_,basis3tc_;
 		typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
+		typename PsimagLite::Vector<bool>::Type fermionSigns_;
 
 		const SparseMatrixType& getTcOperator(int i,SizeType sigma,SizeType type) const
 		{
@@ -466,9 +469,12 @@ namespace Dmrg {
 			PackIndicesType pack(ns);
 			alpha_.resize(total);
 			beta_.resize(total);
+			fermionSigns_.resize(total);
 			for (int i=0;i<total;i++) {
 				// row i of the ordered product basis
 				pack.unpack(alpha_[i],beta_[i],lrs_.super().permutation(i+offset));
+				int fs = lrs_.left().fermionicSign(alpha_[i],-1);
+				fermionSigns_[i] = (fs < 0) ? true : false;
 			}
 		}
 	}; // class ModelHelperLocal
