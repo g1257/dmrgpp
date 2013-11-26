@@ -126,8 +126,6 @@ public:
 	typedef typename VectorType::value_type FieldType;
 	typedef PsimagLite::Profiling ProfilingType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef ApplyOperatorLocal<BasisWithOperatorsType,
-	                           VectorWithOffsetType> ApplyOperatorType;
 	typedef PsimagLite::CrsMatrix<FieldType> SparseMatrixType;
 
 	enum {GROW_RIGHT,GROW_LEFT};
@@ -324,7 +322,7 @@ private:
 					SizeType u2 = O2.getCol(k2);
 					SizeType r2 = helper_.leftRightSuper(threadId).left().
 					        permutationInverse(e2 + u2*ni);
-					value[r2] += O1.getValue(k)*O2.getValue(k2)*f;
+					value[r2] += std::conj(O1.getValue(k))*O2.getValue(k2)*f;
 					col[r2] = 1;
 				}
 			}
@@ -383,7 +381,7 @@ private:
 					        permutationInverse(e2 + u2*nj);
 					assert(r2<eprime);
 					col[r2] = 1;
-					value[r2] += O2.getValue(k)*O1.getValue(k2)*f;
+					value[r2] += O2.getValue(k)*std::conj(O1.getValue(k2))*f;
 				}
 			}
 			for (SizeType i=0;i<col.size();i++) {
@@ -673,7 +671,7 @@ private:
 						SizeType t2 = helper_.leftRightSuper(threadId).super().
 						        permutationInverse(rprime+eta2*leftSize);
 						if (t2<offset || t2>=total) continue;
-						sum += Acrs.getValue(k)*Bcrs.getValue(k2)*
+						sum += std::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*
 						        vec1[t]*std::conj(vec2[t2])*sign;
 					}
 				}
@@ -733,7 +731,7 @@ private:
 						SizeType t2 = helper_.leftRightSuper(threadId).super().
 						        permutationInverse(eta2+rprime*leftSize);
 						if (t2<offset || t2>=total) continue;
-						sum += Acrs.getValue(k)*Bcrs.getValue(k2)*vec1[t]*
+						sum += std::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*vec1[t]*
 						        std::conj(vec2[t2])*sign;
 					}
 				}
@@ -807,7 +805,7 @@ private:
 							SizeType t2 = helper_.leftRightSuper(threadId).super().
 							        permutationInverse(rprime+eta2*leftSize);
 							if (t2<offset || t2>=total) continue;
-							sum += A1crs.getValue(k1)*A2crs.getValue(k2)*
+							sum += std::conj(A1crs.getValue(k1)*A2crs.getValue(k2))*
 							        Bcrs.getValue(k3)*vec1[t]*std::conj(vec2[t2])*sign;
 						}
 					}
