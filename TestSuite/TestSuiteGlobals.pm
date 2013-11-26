@@ -51,25 +51,19 @@ use strict;
 package TestSuiteGlobals;
 use Getopt::Long;
 
-my ($testDir, $srcDir,$inputsDir,$oraclesDir,$resultsDir);
+my ($testDir, $srcDir,$inputsDir,$oraclesDir,$resultsDir,$specFile);
 
 sub init
 {
-# my $PATH = $testDir = $srcDir = Cwd::abs_path($0);
-# chomp(my $filename = `basename $0`);
-# $testDir =~ s/$filename$//;
-# $srcDir =~ s/TestSuite.*/src\//;
-$TestSuiteGlobals::testDir=`pwd`;
-chomp($TestSuiteGlobals::testDir);
-$TestSuiteGlobals::testDir.="/";
-$TestSuiteGlobals::srcDir=$TestSuiteGlobals::testDir."../src/";
-$TestSuiteGlobals::srcDir=$TestSuiteGlobals::testDir."../" unless (-r $TestSuiteGlobals::testDir."../src/");
-$TestSuiteGlobals::inputsDir = $TestSuiteGlobals::testDir."inputs/";
-$TestSuiteGlobals::oraclesDir = $TestSuiteGlobals::testDir."oracles/";	
-$TestSuiteGlobals::resultsDir = $TestSuiteGlobals::testDir."results/";
-system("mkdir $TestSuiteGlobals::resultsDir") unless (-r "$TestSuiteGlobals::resultsDir");
-
-#print STDERR "$TestSuiteGlobals::inputsDir\n";
+	$TestSuiteGlobals::testDir=`pwd`;
+	chomp($TestSuiteGlobals::testDir);
+	$TestSuiteGlobals::testDir.="/";
+	$TestSuiteGlobals::srcDir=$TestSuiteGlobals::testDir."../src/";
+	$TestSuiteGlobals::srcDir=$TestSuiteGlobals::testDir."../" unless (-r $TestSuiteGlobals::testDir."../src/");
+	$TestSuiteGlobals::inputsDir = $TestSuiteGlobals::testDir."inputs/";
+	$TestSuiteGlobals::oraclesDir = $TestSuiteGlobals::testDir."oracles/";	
+	$TestSuiteGlobals::resultsDir = $TestSuiteGlobals::testDir."results/";
+	system("mkdir $TestSuiteGlobals::resultsDir") unless (-r "$TestSuiteGlobals::resultsDir");
 }
 
 sub doMain
@@ -78,8 +72,11 @@ sub doMain
 #	Get command line options
 	my $all = 0;
 	my $lastTest;
-	die $! if(!GetOptions("n=i" => \$TestSuiteGlobals::testNum, "l=i" => \$lastTest, "all" => \$all));
+	die $! if(!GetOptions("n=i" => \$TestSuiteGlobals::testNum, "l=i" => \$lastTest, "all" => \$all,"s=s" => \$TestSuiteGlobals::specFile));
+	
+	defined($TestSuiteGlobals::specFile) or $TestSuiteGlobals::specFile = "../TestSuite/inputs/production.spec";
 
+	(-r "$TestSuiteGlobals::specFile") or die "$0: doMain: $TestSuiteGlobals::specFile does not exist\n";
 
 	if (!$all) {
 		$TestSuiteGlobals::testNum = selectTest() if (!defined($TestSuiteGlobals::testNum));
@@ -146,15 +143,13 @@ sub hookGrep
 #	print "[$analysis]:Grep command was successful.\n" if($verbose);
 }
 
-#Retrieves model spec file of current test and returns the file with its hash key
-sub getSpecFileAndKey
+#Returns the hash key
+sub getSpecKey
 {
-	my $specFile = $TestSuiteGlobals::inputsDir."model$TestSuiteGlobals::testNum.spec";
-	
-	my $specKey = substr(`md5sum $specFile`,0,8);
+	my $specKey = substr(`md5sum $TestSuiteGlobals::specFile`,0,8);
 	$specKey .= substr(`git rev-parse HEAD`,0,4);
 	
-	return $specFile, $specKey;
+	return $specKey;
 }
 
 #Displays available tests until user selects a valid one
@@ -194,7 +189,7 @@ sub getAvailableTests
 		$temp = $testsArray[$i] + 100;
 		$available .= " $temp";		
 	}
-	
+
 	return $available;
 }
 
@@ -243,11 +238,9 @@ sub runAllTests
 		next if ($tn eq "");
 		next if ($tn<$start);
 
-		my $specFile =  $TestSuiteGlobals::inputsDir."model$tn.spec";
-		next  if (nonFunctionalTest($specFile));
+		my $inputFile =  $TestSuiteGlobals::inputsDir."input$tn.inp";
+		next  if (nonFunctionalTest($inputFile));
 
-		#print "$tn\n";
-		#next if(grep {$_ eq $testsList[$i]}@nonFunctionalTests);
 		$TestSuiteGlobals::testNum = $tn;
 		testSuite($TestSuiteGlobals::testNum);
 		last if($tn == $lastTest);
