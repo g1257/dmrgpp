@@ -150,7 +150,7 @@ sub createMakefile
 	my $usePthreadsOrNot = " ";
 	$usePthreadsOrNot = " -DUSE_PTHREADS " if ($pthreads);
 	my $optimizations = " -O3 -DNDEBUG ";
-	$optimizations = " -g3 " if ($build eq "debug");
+	$optimizations = " -g3 -D_GLIBCXX_DEBUG " if ($build eq "debug");
 	$optimizations .= " -g3 " if ($build eq "callgrind");
 	my $strip = "strip ";
 	$strip = " true " if ($build eq "debug" or $build eq "callgrind");

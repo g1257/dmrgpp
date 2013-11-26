@@ -59,10 +59,10 @@ sub runDmrg
 	#print STDERR "raw=$raw\n";
 	die "Missing input file $inputFile: $!\n" unless (-r "$inputFile");
 	
-	my ($specFile, $specKey) = TestSuiteGlobals::getSpecFileAndKey();
+	my $specKey = TestSuiteGlobals::getSpecKey();
 	my $executable = $TestSuiteGlobals::srcDir."dmrg-".$specKey;
 
-	createExecutable($specFile,$specKey,"dmrg") unless (-x "$executable");
+	createExecutable($TestSuiteGlobals::specFile,$specKey,"dmrg") unless (-x "$executable");
 
 	my $arg = "$executable -f $inputFile &> $raw";
 # 	grep {s/&//} $arg if($verbose);
@@ -82,10 +82,10 @@ sub runObserve
 {
 	my ($inputFile, $raw,$obsOptions) = @_;
 	$obsOptions = "ccnnszsz" if (!defined($obsOptions));
-	my ($specFile, $specKey) = TestSuiteGlobals::getSpecFileAndKey();
+	my $specKey = TestSuiteGlobals::getSpecKey();
 	my $executable = $TestSuiteGlobals::srcDir."observe-".$specKey;
 	
-	createExecutable($specFile,$specKey,"observe") unless (-x "$executable");
+	createExecutable($TestSuiteGlobals::specFile,$specKey,"observe") unless (-x "$executable");
 	
 	my $arg = "$executable -f $inputFile -o $obsOptions &> $raw";
 # 	grep {s/&//} $arg if($verbose);
@@ -104,12 +104,12 @@ sub runObserve
 sub createExecutable
 {
 	my ($specFile,$refKey, $execType) = @_;
+	
+	(-r "$specFile") or die "$0: createExecutable: $specFile does not exist\n";
+
 	my $configFile = "configure.pl";
 	my $arg1 = "./$configFile < $specFile &> /dev/null";
 	my $arg2 = "make $execType -f Makefile &> /dev/null";
-
-# 	grep {s/>.*//} $arg1 if($verbose);
-# 	grep {s/>.*//} $arg2 if($verbose);
 	
 	my $err = chdir($TestSuiteGlobals::srcDir);
 	die "Changing directory to $TestSuiteGlobals::srcDir: $!" if(!$err);
