@@ -10,6 +10,7 @@ use DoxyDocs;
 my $startPtr = $doxydocs;
 
 my $foundHash;
+my $verbose = 0;
 
 while(<STDIN>) {
 	next if (/\\newcommand\{\\ptex/);
@@ -25,7 +26,6 @@ while(<STDIN>) {
 		}
 		findClassOrFile($ptr,$temp[0],\$foundHash);
 		(UNIVERSAL::isa( $foundHash, "HASH" )) or die "$0: Not found file or class $x at line $.\n";
-
 		if ($#temp>=1) {
 			my $nameOfKind = $temp[1];
 			
@@ -37,6 +37,8 @@ while(<STDIN>) {
 			findKind($foundHash,$nameOfKind,\$foundHash,$kind);
 			(UNIVERSAL::isa( $foundHash, "HASH" ))
 				or die "$0: Not found function $x\n";
+
+			printHash($foundHash) if ($verbose);
 		}
 		$x = $temp[0];
 		my $substitution = getDetailed($foundHash);
@@ -44,7 +46,7 @@ while(<STDIN>) {
 		s/\\ptexPaste\{([^\}]+)\}/$substitution/;
 	}
 	if (/\\ptexReadFile\{([^\}]+)\}/) {
-		print STDERR "Reading $1\n";
+		print STDERR "Reading $1\n" if ($verbose);
 		readFile($1);
 		next;
 	}
@@ -88,7 +90,7 @@ sub printHash
 	my ($ptr)=@_;
 	for my $item (keys %$ptr) {
 		my $value = $ptr->{$item};
-		print "key=$item value=$value\n";
+		print STDERR "key=$item value=$value\n";
 	}
 }
 
@@ -108,7 +110,7 @@ sub findKind
 	my ($ptr,$thisFunc,$foundHash,$kind)=@_;
 	my ($lastKind,$lastName)=("","");
 	for my $item (keys %$ptr) {
-#  		print "key=$item\n";
+  		print STDERR "key=$item\n" if ($verbose);
 
 		my $x = $ptr->{$item};
 		
@@ -121,15 +123,17 @@ sub findKind
 		}
 		if ($item eq "kind") {
 			$lastKind = $x;
+			print STDERR "lastKind=$lastKind\n" if ($verbose);
 		}
 		if ($item eq "name") {
 			$lastName = $x;
+			print STDERR "lastName $lastName and thisFunc= $thisFunc\n" if ($verbose);
 		}
 		
 		if ($lastName eq $thisFunc) {
 			next if (defined($kind) and !($lastKind eq $kind));
 			$$foundHash = $ptr;
-# 			print STDERR "Found for hash $$foundHash\n";
+ 			print STDERR "Found for hash $$foundHash\n" if ($verbose);
 			return;
 		}
 	}
@@ -139,14 +143,14 @@ sub findKindA
 {
 	my ($ptr,$thisFunc,$foundHash,$kind)=@_;
 	for my $item (@$ptr) {
-# 		print "key=$item\n";
+ 		print STDERR "findKindA key=$item\n" if ($verbose);
 		my $x = $item;
 		if (UNIVERSAL::isa( $x, "HASH" )) {
 			findKind($x,$thisFunc,$foundHash,$kind);
 		} elsif (UNIVERSAL::isa( $x, "ARRAY" )) {
 			findKindA($x,$thisFunc,$foundHash,$kind);
 		} else {
-# 			print "value=$x\n";
+ 			print STDERR "findKindA value=$x\n" if ($verbose);
 		}
 	}
 }
