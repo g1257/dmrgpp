@@ -350,10 +350,10 @@ public:
 		typename EnableIf<IsMapLike<MapType>::True,void>::Type
 		printMap(MapType& mp,const String& label)
 		{
-			typedef typename MapType::key_type KeyType;
-			typedef typename MapType::mapped_type MappedType;
+//			typedef typename MapType::key_type KeyType;
+//			typedef typename MapType::mapped_type MappedType;
 			std::cout<<label<<"\n";
-			typename  Map<KeyType,MappedType>::Type::iterator it;
+			typename MapType::iterator it;
 			for (it=mp.begin();it!=mp.end();++it) {
 				std::cout<<it->first<<" "<<it->second<<"\n";
 			}
@@ -374,8 +374,8 @@ public:
 
 	class Readable {
 
-		typedef Map<String,String>::Type::iterator MapStringIteratorType;
-		typedef Map<String,Vector<String>::Type>::Type::iterator MapStringVectorIteratorType;
+		typedef typename Map<String,String,MyCompareType>::Type::iterator MapStringIteratorType;
+		typedef typename Map<String,Vector<String>::Type,MyCompareType>::Type::iterator MapStringVectorIteratorType;
 
 	public:
 

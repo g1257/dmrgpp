@@ -5,6 +5,8 @@ use strict;
 
 our $doxydocs;
 
+use lib 'doxygen/perlmod';
+
 use DoxyDocs;
 
 my $startPtr = $doxydocs;
