@@ -1,19 +1,20 @@
 README
 ========================
 
-Licensing 
--------------------------
+\section license Licensing
 
- The full software license for DMRG++ version 2.0.0 
+
+ The full software license for DMRG++ version 2.0.0
  can be found in file LICENSE in the root directory of the code.
- DMRG++ is a free and open source implementation of the 
- DMRG algorithm. You are welcomed to use it and publish data 
- obtained with DMRG++. If you do, 
- B<please cite this work> (see next subsection).
+ DMRG++ is a free and open source implementation of the
+ DMRG algorithm. You are welcomed to use it and publish data
+ obtained with DMRG++. If you do,
+<b>please cite this work</b> (see next subsection).
 
-DISCLAIMER
--------------------------
+\section disclaimer DISCLAIMER
 
+<small>
+<pre>
  THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -36,93 +37,119 @@ DISCLAIMER
  ANY OF THEIR EMPLOYEES, REPRESENTS THAT THE USE OF ANY
  INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
  DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
+</pre>
+</small>
 
-How To Cite This Work
--------------------------
+\section citation How To Cite This Work
 
- author="G. Alvarez",
- title="The density matrix renormalization group for strongly correlated electron
- systems: A generic implementation",
- journal="Computer Physics Communications",
- volume="180",
- pages="1572",
- year="2009"}
+<small>
+<pre>
+\@article{re:alvarez0209,
+author="G. Alvarez",
+title="The Density Matrix Renormalization Group for
+Strongly Correlated Electron Systems: A Generic Implementation",
+journal="Computer Physics Communications",
+volume="180",
+pages="1572-1578",
+year="2009"}
 
- author="G. Alvarez",
- title="Implementation of the SU(2) Hamiltonian symmetry for the DMRG algorithm",
- journal="Computer Physics Communications",
- volume="183",
- pages="2226",
- year="2012"}
- 
- And also:
- @article{
+\@article{re:alvarez0310,
+author="G. Alvarez",
+title="Implementation of the SU(2) Hamiltonian Symmetry for the DMRG Algorithm",
+journal="Computer Physics Communications",
+volume="183",
+pages="2226-2232",
+year="2012"}
+
+
+\@article{re:alvarez0311,
+author="G. Alvarez and  L. G. G. V. Dias da Silva and
+E. Ponce and  E. Dagotto",
+title="Time Evolution with the DMRG Algorithm: A Generic Implementation
+for Strongly Correlated Electronic Systems",
+journal="Phys. Rev. E",
+volume="84",
+pages="056706",
+year="2011"}
+
+\@article{re:alvarez0713,
+author="G. Alvarez",
+title="Production of minimally entangled typical thermal states
+with the Krylov-space approach",
+journal="Phys. Rev. B",
+volume="87",
+pages="245130",
+year="2013"}
+
+And also:
+\@article{re:alvarez08,
  re:webDmrgPlusPlus,
  Author = {G. Alvarez},
  Title = {DMRG++ Website},
  Publisher = {\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
+</pre>
+</small>
+
+\section hashes Code Integrity
 
 Hash of the latest commit is also posted at
--------------------------
 
 https://web.ornl.gov/~gz1/hashes.html
 
-Building and Running DMRG++
--------------------------
+\section building Building and Running DMRG++
 
-### Required Software ###
+\subsection dependencies Required Software
 
-- Item GNU C++ 
+- Item GNU C++
 
-- Item (required) The LAPACK library. 
+- Item (required) The LAPACK library.
 
- The configure.pl script will ask for the LDFLAGS variable 
+ The configure.pl script will ask for the LDFLAGS variable
  to pass to the compiler/linker. If the linux platform was
  chosen the default/suggested LDFLAGS will include -llapack.
  If the osx platform was chosen the default/suggested LDFLAGS will
  include  -framework Accelerate.
  For other platforms the appropriate linker flags must be given.
- More information on LAPACK is here: \url{http://netlib.org/lapack/}
+ More information on LAPACK is at http://netlib.org/lapack/
 
 - Item (required) PsimagLite.
 
- This is here \url{https://github.com/g1257/PsimagLite/}.
- You can do \verb=git clone https://github.com/g1257/PsimagLite.git= in a separate directory
- outside of the DMRG++ distribution. \verb=configure.pl= will ask you where you put it.
+ This is here https://github.com/g1257/PsimagLite/.
+ You can do <code>git clone https://github.com/g1257/PsimagLite.git</code> in a separate directory
+ outside of the DMRG++ distribution. `configure.pl` will ask you where you put it.
 
-- Item (optional) make or gmake 
+- Item (optional) make or gmake
 (only needed to use the Makefile)
 
-- Item (optional) perl 
+- Item (optional) perl
 (only needed to run the configure.pl script)
 
-Quick Start
--------------------------
+\subsection quickstart Quick Start
 
 ### To Build DMRG++: ###
+<code>
+<pre>
  cd src
  perl configure.pl
  (please answer questions regarding depedencies and libraries)
  make
-
+</pre>
+</code>
 
 ### To Run DMRG++: ###
- ./dmrg -f input.inp
- Sample input files can be found under \verb!TestSuite/inputs/!.
+ <code>./dmrg -f input.inp</code>
 
- The files created by \cppFile{configure.pl} are the following:
+ Sample input files can be found under <code>TestSuite/inputs/</code>.
 
- Makefile:
- configure.pl will create the file Makefile
- according to the answers to questions given. 
- In the Makefile, LDFLAGS must contain the linker flags to 
- link with the LAPACK library. Defaults provided 
+<code>configure.pl</code> creates the <code>Makefile</code>
+ according to the answers to questions given.
+ In the Makefile, LDFLAGS must contain the linker flags to
+ link with the LAPACK library. Defaults provided
  automatically by configure.pl should work in most cases.
  If MPI is not selected (serial code) then the compiler will be chosen to be g++.
  Other compilers may work but only the GNU C++ compiler, g++, was tested.
- If MPI is selected then the compiler will be chosen to be mpicxx, which 
- is usually a wrapper script around g++ to take care of linking with MPI libraries 
+ If MPI is selected then the compiler will be chosen to be mpicxx, which
+ is usually a wrapper script around g++ to take care of linking with MPI libraries
  and to include MPI headers. Depending on your MPI installation you might need to
  change the name of this script.
 
- 	
