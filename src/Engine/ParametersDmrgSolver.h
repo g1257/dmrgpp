@@ -236,8 +236,7 @@ namespace Dmrg {
 		return is;	
 	}
 
-	//! Structure that contains the Dmrg parameters
-	/**
+	/** Structure that contains the Dmrg parameters
 	\\inputItem{Model}
 	A string indicating the model, be it HubbardOneBand HeisenbergSpinOneHalf, etc.
 

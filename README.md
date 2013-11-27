@@ -1,6 +1,8 @@
-=pod
+README
+========================
 
-=head2 Licensing
+Licensing 
+-------------------------
 
  The full software license for DMRG++ version 2.0.0 
  can be found in file LICENSE in the root directory of the code.
@@ -9,7 +11,8 @@
  obtained with DMRG++. If you do, 
  B<please cite this work> (see next subsection).
 
-=head2 DISCLAIMER
+DISCLAIMER
+-------------------------
 
  THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
@@ -34,7 +37,8 @@
  INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
  DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
-=head2 How To Cite This Work
+How To Cite This Work
+-------------------------
 
  author="G. Alvarez",
  title="The density matrix renormalization group for strongly correlated electron
@@ -58,19 +62,19 @@
  Title = {DMRG++ Website},
  Publisher = {\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
 
-=head2 Hash of the latest commit is also posted at
+Hash of the latest commit is also posted at
+-------------------------
 
- https://web.ornl.gov/~gz1/hashes.html
+https://web.ornl.gov/~gz1/hashes.html
 
-=head2 Building and Running DMRG++
+Building and Running DMRG++
+-------------------------
 
-=head3 Required Software
+### Required Software ###
 
-=over 4
+- Item GNU C++ 
 
-=item GNU C++ 
-
-=item (required) The LAPACK library. 
+- Item (required) The LAPACK library. 
 
  The configure.pl script will ask for the LDFLAGS variable 
  to pass to the compiler/linker. If the linux platform was
@@ -80,28 +84,29 @@
  For other platforms the appropriate linker flags must be given.
  More information on LAPACK is here: \url{http://netlib.org/lapack/}
 
-=item (required) PsimagLite.
+- Item (required) PsimagLite.
 
  This is here \url{https://github.com/g1257/PsimagLite/}.
  You can do \verb=git clone https://github.com/g1257/PsimagLite.git= in a separate directory
  outside of the DMRG++ distribution. \verb=configure.pl= will ask you where you put it.
 
-=item (optional) make or gmake (only needed to use the Makefile)
+- Item (optional) make or gmake 
+(only needed to use the Makefile)
 
-=item (optional) perl (only needed to run the configure.pl script)
+- Item (optional) perl 
+(only needed to run the configure.pl script)
 
-=back
+Quick Start
+-------------------------
 
-=head2 Quick Start
-
- To Build DMRG++:
+### To Build DMRG++: ###
  cd src
  perl configure.pl
  (please answer questions regarding depedencies and libraries)
  make
 
 
- To Run DMRG++:
+### To Run DMRG++: ###
  ./dmrg -f input.inp
  Sample input files can be found under \verb!TestSuite/inputs/!.
 
@@ -120,5 +125,4 @@
  and to include MPI headers. Depending on your MPI installation you might need to
  change the name of this script.
 
-=cut
  	
