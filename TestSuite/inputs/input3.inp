@@ -18,5 +18,5 @@ FiniteLoops 6  7 400 0 -7 400 0 -7 400 0 7 400 1
 	7 400 1 -1 400 1 
 TargetQuantumNumbers 3 0.5 0.5 0
    
-Threads=2
+#Threads=2
 
