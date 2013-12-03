@@ -1,0 +1,75 @@
+
+# Pre-Preparation
+
+Update Lanczos++, DMRG++, and PsimagLite
+
+Compile Lanczos++, DMRG++, continuedFractionCollection, combineContinuedFraction.
+You do NOT need to move or copy the executables.
+
+Have available an input file (and optionally a batch file)
+for the construction of the templates.
+
+# Preparation
+
+cd somedirectory/
+git clone /path/to/ToolsDmrgDynamics
+cd ToolsDmrgDynamics/
+perl dynamicsPrepare.pl
+(and answer all questions)
+
+# Optional Configuration
+At ANY point below you can change parameters in the following files
+inputTemplate.inp <--- Do not change the $ labels
+batchTemplate.pbs <--- Do not change the $$ labels
+params.txt        <--- Overwritten by dynamicsPrepare.pl
+
+If the executables lanczos or dmrg change please re-run dynamicsPrepare.pl.
+
+# Quick Test
+
+perl oneDynamicTest.pl 3 3 out c
+
+xmgrace out3_3.cf out3_3Lanczos.cf
+
+# Runnning Lanczos or Dmrg serially
+
+## Example: Sum of the diagonals
+
+	perl dynamicsRepeat.pl Lanczos out c nobatch
+
+	This produces all pairs of sites and all parts.
+
+	Now you can post-process one or many times without re-runnning:
+
+	perl dynamicsLoop.pl -2 out c
+	xmgrace outTotal-2.cf
+
+	Instead of -2 use -1 for optical or a non-negative number
+	for the ``momentum.''
+
+	To run DMRG serially just replace Lanczos for Dmrg:
+	perl dynamicsRepeat.pl Dmrg out c nobatch
+	The rest is the same.
+
+#  Runnning Dmrg or Lanczos in parallel
+
+	Do a dry run first:
+
+		perl dynamicsRepeat.pl Dmrg out c nosubmit
+
+	Check the generated Batch files to make sure they look OK.
+
+		Now submit:
+
+		perl dynamicsRepeat.pl Dmrg out c submit
+
+	Postprocessing is as before
+
+		perl dynamicsLoop.pl q out c
+
+	where q is the ``momentum.'' You may post-process many times
+	without re-running.
+
+	To run Lanczos serially just replace Dmrg for Lanczos
+
+
