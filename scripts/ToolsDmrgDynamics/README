@@ -11,9 +11,7 @@ for the construction of the templates.
 
 # Preparation
 
-cd somedirectory/
-git clone /path/to/ToolsDmrgDynamics
-cd ToolsDmrgDynamics/
+cd scripts/ToolsDmrgDynamics/
 perl dynamicsPrepare.pl
 (and answer all questions)
 
