@@ -23,11 +23,7 @@ if (!$b || statOfFile("inputTemplate.inp",7)==0) {
 
 $b = checkForFile("batchTemplate.pbs",0600,"StayAlive");
 if (!$b || statOfFile("batchTemplate.pbs",7)==0) {
-	my $someBatch = getInput("Please enter the filename to use a PBS Batch template: ");
-	my $pbsname = getInput("Please enter a root name for the #PBS -N entry: ");
-	system("perl makeTemplate.pl $someBatch $pbsname > batchTemplate.pbs");
-	print STDERR "$0: WARNING file batchTemplate.pbs size is 0: might want to run makeTemplate.pl manually\n"
-		if (statOfFile("batchTemplate.pbs",7)==0);
+	makeBatch();
 }
 
 my $useParams = "n";
@@ -66,6 +62,21 @@ checkForFile("$psimagLite/../LanczosPlusPlus/src/lanczos",0700);
 systemWrapper("rsync $psimagLite/../dmrgpp/src/dmrg .");
 systemWrapper("rsync $psimagLite/../LanczosPlusPlus/src/lanczos .");
 
+sub makeBatch
+{
+	my $yesOrNo = getInput("Do you want to set up a PBS Batch template? ");
+
+	if (!($yesOrNo=~/^y/i)) {
+		print STDERR "No PBS Batch template will be set\n";
+		return;
+	}
+
+	my $someBatch = getInput("Please enter the filename to use a PBS Batch template: ");
+	my $pbsname = getInput("Please enter a root name for the #PBS -N entry: ");
+	system("perl makeTemplate.pl $someBatch $pbsname > batchTemplate.pbs");
+	print STDERR "$0: WARNING file batchTemplate.pbs size is 0: might want to run makeTemplate.pl manually\n"
+		if (statOfFile("batchTemplate.pbs",7)==0);
+}
 
 sub getInput
 {

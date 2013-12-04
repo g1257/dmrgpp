@@ -27,7 +27,7 @@ if ($bb && ($site2 >= $site)) {
 	for (my $type=0;$type<4;$type++) {
 		last if ($type>1 and $isDiagonal);
 		my $input = createInput($n,$dataRoot,$siteMin,$siteMax,$type);
-		system("./dmrg -f $input >& out");
+		system("./dmrg -f $input &> out");
 		print STDERR "Type $type done\n";
 	}
 	print STDERR "Sites $site $site2 done\n";

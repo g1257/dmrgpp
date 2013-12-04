@@ -27,7 +27,7 @@ for (my $type = 0; $type < 4; ++$type) {
 	last if ($siteMin == $siteMax and $type > 1);
 	my $dataRoot2 = "${dataRoot1}_${type}";
 	$input = createInput($n,$dataRoot2,$siteMin,$siteMax,$type);
-	system("./dmrg -f $input >& out");
+	system("./dmrg -f $input &> out");
 	print STDERR "Sites $site $site2 Type $type done\n";
 }
 
@@ -69,7 +69,7 @@ sub postProc
 sub doLanczos
 {
 	my ($input,$dataRoot,$cOrN) = @_;
-	system("./lanczos -f $input -g $cOrN >& $dataRoot.comb");
+	system("./lanczos -f $input -g $cOrN &> $dataRoot.comb");
 	return functionVsOmega($dataRoot);
 }
 
@@ -293,7 +293,7 @@ sub multiplyMatrix
 	my @temp=split(/ /,$matrix);
 	my $matrix2="";
 	for (my $i=0;$i<scalar(@temp);$i++) {
-		my $_ = -$temp[$i];
+		$_ = -$temp[$i];
 		$matrix2 .= $_." ";
 	}
 	return $matrix2;
