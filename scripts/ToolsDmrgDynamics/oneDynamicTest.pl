@@ -98,6 +98,7 @@ sub createInput
 	my $V = Utils::getLabel($templateInput,"##V=");
 	my $potentialV = setVector(2*$n,$V);
 	my $data = "$dataRoot.txt";
+	my $steps = int($n/2) - 1;
 
 	open(FILE,"$templateInput") or die "$0: Cannot open $templateInput: $!\n";
 

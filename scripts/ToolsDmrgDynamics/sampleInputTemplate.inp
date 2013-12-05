@@ -1,0 +1,65 @@
+TotalNumberOfSites=8
+NumberOfTerms=1
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors   1  1.0
+
+
+Model=HubbardOneBand
+
+##U=0.0
+hubbardU $hubbardU
+##V=0.0
+potentialV $potentialV
+
+SolverOptions=twositedmrg,CorrectionVectorTargetting
+CorrectionA=0
+Version=1219aeb832f7990323cca0baa17ad7b87b731ea6
+OutputFile=$data
+
+InfiniteLoopKeptStates=100
+FiniteLoops  16
+$steps 100 0 -$steps 100 0 -$steps 100 0 $steps 100 0
+$steps 100 0 -$steps 100 0 -$steps 100 0 $steps 100 0
+$steps 100 0 -$steps 100 0 -$steps 100 0 $steps 100 0
+$steps 100 0 -$steps 100 0 -$steps 100 0 $steps 100 0
+
+TargetElectronsUp=4
+TargetElectronsDown=4
+Threads=4
+
+DynamicDmrgType=$type
+TSPSites $sites
+TSPLoops $loops
+TSPProductOrSum=sum
+
+DynamicDmrgSteps=400
+DynamicDmrgEps=1e-16
+DynamicDmrgAdvanceEach=1
+
+CorrectionVectorOmega=0
+CorrectionVectorEta=0.3
+
+TSPOperator=raw
+RAW_MATRIX
+4 4
+$matrix[0]
+
+TSPOperator=raw
+RAW_MATRIX
+4 4
+$matrix[1]
+
+TSPOperator=raw
+RAW_MATRIX
+4 4
+$matrix[2]
+
+TSPOperator=raw
+RAW_MATRIX
+4 4
+$matrix[3]
+
+IsPeriodicX=0
