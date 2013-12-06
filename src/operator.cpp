@@ -94,8 +94,6 @@ void mainLoop(GeometryType& geometry,
 	                  ParametersDmrgSolverType,
 	                  InputNgType::Readable,
 	                  GeometryType> ModelBaseType;
-	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;

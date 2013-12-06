@@ -92,7 +92,6 @@ bool observeOneFullSweep(IoInputType& io,
 	const GeometryType& geometry = model.geometry();
 	bool verbose = false;
 
-	typedef typename SparseMatrixType::value_type FieldType;
 	typedef Observer<VectorWithOffsetType,ModelType,IoInputType> ObserverType;
 	typedef ObservableLibrary<ObserverType> ObservableLibraryType;
 
