@@ -441,7 +441,7 @@ public:
 			cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
-		void read(long unsigned int& val,const String& label)
+		void read(SizeType& val,const String& label)
 		{
 			String label2 = label2label(label);
 
@@ -671,7 +671,7 @@ public:
 				bool b1 = (c<48 || c>57);
 				bool b2 = (c != '.' && c != '-' && c != '+');
 				if (b1 && b2) {
-					std::string str = s +" is not a real number\n";
+					PsimagLite::String str = s +" is not a real number\n";
 					throw RuntimeError(str);
 				}
 			}
