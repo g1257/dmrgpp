@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 
 /** \ingroup DMRG */
@@ -92,192 +91,192 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename InternalProductType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-	class GroundStateTargetting {
+class GroundStateTargetting {
 
-	public:
+public:
 
-			typedef InternalProductType_ InternalProductType;
-			typedef typename InternalProductType::ModelType ModelType;
-			typedef IoType_ IoType;
-			typedef PsimagLite::IoSimple::In IoInputType;
-			typedef typename ModelType::RealType RealType;
-			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-			typedef typename ModelType::ModelHelperType ModelHelperType;
-			typedef typename ModelHelperType::LeftRightSuperType
-				LeftRightSuperType;
-			typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-			typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-			typedef typename BasisWithOperatorsType::BasisType BasisType;
-			typedef typename SparseMatrixType::value_type ComplexOrRealType;
-			typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
-			typedef typename BasisType::BlockType BlockType;
-			typedef WaveFunctionTransfType_ WaveFunctionTransfType;
-			typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-			typedef VectorType TargetVectorType;
-			typedef GroundStateParams<ModelType> TargettingParamsType;
-			typedef CommonTargetting<ModelType,
-		                             TargettingParamsType,
-		                             WaveFunctionTransfType,
-		                             VectorWithOffsetType,
-		                             LanczosSolverType> CommonTargettingType;
-			typedef typename CommonTargettingType::ApplyOperatorType ApplyOperatorType;
+	typedef InternalProductType_ InternalProductType;
+	typedef typename InternalProductType::ModelType ModelType;
+	typedef IoType_ IoType;
+	typedef PsimagLite::IoSimple::In IoInputType;
+	typedef typename ModelType::RealType RealType;
+	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
+	typedef typename ModelType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType
+	LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
+	typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
+	typedef typename BasisType::BlockType BlockType;
+	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
+	typedef VectorType TargetVectorType;
+	typedef GroundStateParams<ModelType> TargettingParamsType;
+	typedef CommonTargetting<ModelType,
+	TargettingParamsType,
+	WaveFunctionTransfType,
+	VectorWithOffsetType,
+	LanczosSolverType> CommonTargettingType;
+	typedef typename CommonTargettingType::ApplyOperatorType ApplyOperatorType;
 
-			enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-			INFINITE=WaveFunctionTransfType::INFINITE};
-			
-			GroundStateTargetting(const LeftRightSuperType& lrs,
-			                      const ModelType& model,
-								  const TargettingParamsType& tstStruct,
-			                      const WaveFunctionTransfType& wft,  // wft is ignored here
-			                      const SizeType& quantumSector) // quantumSector is ignored here
-			: lrs_(lrs),
-			  model_(model),
-			  waveFunctionTransformation_(wft),
-			  progress_("GroundStateTargetting"),
-			  commonTargetting_(lrs,model,tstStruct)
-			{
-			}
+	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
+		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+		  INFINITE=WaveFunctionTransfType::INFINITE};
 
-			const ModelType& model() const { return model_; }
-
-			RealType normSquared(SizeType i) const
-			{
-				throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
-			}
-
-			RealType weight(SizeType i) const
-			{
-				throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
-				return 0;
-			}
-
-			RealType gsWeight() const
-			{
-				return 1;
-			}
-
-			template<typename SomeBasisType>
-			void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<SizeType>::Type& weights,
-				   const SomeBasisType& someBasis)
-			{
-				psi_.set(v,someBasis);
-			}
-
-			const VectorWithOffsetType& gs() const 
-			{
-				return psi_;
-			}
-
-			bool includeGroundStage() const {return true; }
-
-			SizeType size() const 
-			{
-				return 0;
-			}
-
-			const VectorWithOffsetType& operator()(SizeType i) const
-			{
-				throw PsimagLite::RuntimeError("GroundStateTargetting::operator()(...)\n");
-			}
-
-			void evolve(RealType Eg,
-			            SizeType direction,
-			            const BlockType& block1,
-			            const BlockType& block2,
-			            SizeType loopNumber)
-			{
-				if (model_.params().insitu=="") return;
-
-				if (BasisType::useSu2Symmetry()) {
-					commonTargetting_.noCocoon("not when SU(2) symmetry is in use");
-					return;
-				}
-
-				try {
-					assert(block1.size()>0);
-					commonTargetting_.cocoon(direction,block1[0],psi_,"PSI",0);
-				} catch (std::exception& e) {
-					commonTargetting_.noCocoon("unsupported by the model");
-				}
-			}
-
-			const LeftRightSuperType& leftRightSuper() const
-			{
-				return lrs_;
-			}
-
-			void initialGuess(VectorWithOffsetType& initialVector,
-			                  const typename PsimagLite::Vector<SizeType>::Type& block) const
-			{
-				commonTargetting_.initialGuess(initialVector,
-				                               waveFunctionTransformation_,
-				                               block,
-				                               psi_);
-			}
-
-			template<typename IoOutputType>
-			void save(const typename PsimagLite::Vector<SizeType>::Type& block,IoOutputType& io) const
-			{
-				PsimagLite::OstringStream msg;
-				msg<<"Saving state...";
-				progress_.printline(msg,std::cout);
-
-				assert(block.size()>0);
-				PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
-				io.printline(s);
-				psi_.save(io,"PSI");
-			}
-
-			void load(const PsimagLite::String& f)
-			{
-				IoInputType io(f);
-				int site=0;
-				io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
-				if (site<0) throw PsimagLite::RuntimeError(
-						"GST::load(...): site cannot be negative\n");
-				psi_.load(io,"PSI");
-			}
-
-			RealType time() const { return 0; }
-
-			void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
-			{
-				// nothing to do here
-			}
-
-			bool end() const { return false; }
-
-		private:
-
-			const LeftRightSuperType& lrs_;
-			const ModelType& model_;
-			const WaveFunctionTransfType& waveFunctionTransformation_;
-			VectorWithOffsetType psi_;
-			PsimagLite::ProgressIndicator progress_;
-			CommonTargettingType commonTargetting_;
-
-	};     //class GroundStateTargetting
-
-	template<template<typename,typename,typename> class LanczosSolverTemplate,
-	         typename InternalProductType,
-	         typename WaveFunctionTransfType,
-	         typename IoType_>
-	std::ostream& operator<<(std::ostream& os,
-	                         const GroundStateTargetting<LanczosSolverTemplate,
-	                         InternalProductType,
-	                         WaveFunctionTransfType,IoType_>& tst)
+	GroundStateTargetting(const LeftRightSuperType& lrs,
+	                      const ModelType& model,
+	                      const TargettingParamsType& tstStruct,
+	                      const WaveFunctionTransfType& wft,  // wft is ignored here
+	                      const SizeType& quantumSector) // quantumSector is ignored here
+	    : lrs_(lrs),
+	      model_(model),
+	      waveFunctionTransformation_(wft),
+	      progress_("GroundStateTargetting"),
+	      commonTargetting_(lrs,model,tstStruct)
 	{
-		os<<"GSTWeightGroundState=1\n";
-		return os;
 	}
+
+	const ModelType& model() const { return model_; }
+
+	RealType normSquared(SizeType i) const
+	{
+		throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
+	}
+
+	RealType weight(SizeType i) const
+	{
+		throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
+		return 0;
+	}
+
+	RealType gsWeight() const
+	{
+		return 1;
+	}
+
+	template<typename SomeBasisType>
+	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<SizeType>::Type& weights,
+	           const SomeBasisType& someBasis)
+	{
+		psi_.set(v,someBasis);
+	}
+
+	const VectorWithOffsetType& gs() const
+	{
+		return psi_;
+	}
+
+	bool includeGroundStage() const {return true; }
+
+	SizeType size() const
+	{
+		return 0;
+	}
+
+	const VectorWithOffsetType& operator()(SizeType i) const
+	{
+		throw PsimagLite::RuntimeError("GroundStateTargetting::operator()(...)\n");
+	}
+
+	void evolve(RealType Eg,
+	            SizeType direction,
+	            const BlockType& block1,
+	            const BlockType& block2,
+	            SizeType loopNumber)
+	{
+		if (model_.params().insitu=="") return;
+
+		if (BasisType::useSu2Symmetry()) {
+			commonTargetting_.noCocoon("not when SU(2) symmetry is in use");
+			return;
+		}
+
+		try {
+			assert(block1.size()>0);
+			commonTargetting_.cocoon(direction,block1[0],psi_,"PSI",0);
+		} catch (std::exception& e) {
+			commonTargetting_.noCocoon("unsupported by the model");
+		}
+	}
+
+	const LeftRightSuperType& leftRightSuper() const
+	{
+		return lrs_;
+	}
+
+	void initialGuess(VectorWithOffsetType& initialVector,
+	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
+	{
+		commonTargetting_.initialGuess(initialVector,
+		                               waveFunctionTransformation_,
+		                               block,
+		                               psi_);
+	}
+
+	template<typename IoOutputType>
+	void save(const typename PsimagLite::Vector<SizeType>::Type& block,IoOutputType& io) const
+	{
+		PsimagLite::OstringStream msg;
+		msg<<"Saving state...";
+		progress_.printline(msg,std::cout);
+
+		assert(block.size()>0);
+		PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
+		io.printline(s);
+		psi_.save(io,"PSI");
+	}
+
+	void load(const PsimagLite::String& f)
+	{
+		IoInputType io(f);
+		int site=0;
+		io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
+		if (site<0) throw PsimagLite::RuntimeError(
+		            "GST::load(...): site cannot be negative\n");
+		psi_.load(io,"PSI");
+	}
+
+	RealType time() const { return 0; }
+
+	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
+	{
+		// nothing to do here
+	}
+
+	bool end() const { return false; }
+
+private:
+
+	const LeftRightSuperType& lrs_;
+	const ModelType& model_;
+	const WaveFunctionTransfType& waveFunctionTransformation_;
+	VectorWithOffsetType psi_;
+	PsimagLite::ProgressIndicator progress_;
+	CommonTargettingType commonTargetting_;
+
+};     //class GroundStateTargetting
+
+template<template<typename,typename,typename> class LanczosSolverTemplate,
+         typename InternalProductType,
+         typename WaveFunctionTransfType,
+         typename IoType_>
+std::ostream& operator<<(std::ostream& os,
+                         const GroundStateTargetting<LanczosSolverTemplate,
+                         InternalProductType,
+                         WaveFunctionTransfType,IoType_>& tst)
+{
+	os<<"GSTWeightGroundState=1\n";
+	return os;
+}
 } // namespace Dmrg
 /*@}*/
 #endif
+

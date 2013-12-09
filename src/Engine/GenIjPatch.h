@@ -96,7 +96,6 @@ class GenIjPatch {
 public:
 
 	typedef GenGroup<BasisType> GenGroupType;
-//	typedef QvalStruct<LeftRightSuperType> QvalStructType;
 
 	enum LeftOrRightEnumType {LEFT=0,RIGHT=1};
 
@@ -105,22 +104,15 @@ public:
 		GenGroupType groupLeft(lrs.left());
 		GenGroupType groupRight(lrs.right());
 
-//		std::cerr<<"groupLeft.size="<<groupLeft.size()<<"\n";
-//		std::cerr<<"groupRight.size="<<groupRight.size()<<"\n";
-
-//		std::cerr<<"TARGET QUANTUM NUMBER="<<target<<"\n";
 		for (SizeType i=0;i<groupLeft.size()-1;i++) {
 			SizeType istart = groupLeft(i);
 			assert(istart<lrs.left().size());
-//			SizeType iend = groupLeft(i+1)-1;
 			for (SizeType j=0;j<groupRight.size()-1;j++) {
 				SizeType jstart = groupRight(j);
 				assert(jstart<lrs.right().size());
-//				SizeType jend = groupRight(j+1);
 
 				if (lrs.left().qn(istart) + lrs.right().qn(jstart)!=target) continue;
 
-//				npatches++;
 				patchesLeft_.push_back(i);
 				patchesRight_.push_back(j);
 			}
@@ -149,3 +141,4 @@ private:
 /*@}*/
 
 #endif // GEN_IJ_PATCH_HEADER_H
+

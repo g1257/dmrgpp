@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -81,25 +78,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GROUNDSTATE_PARAMS_H
 #define GROUNDSTATE_PARAMS_H
 
-
 namespace Dmrg {
-	//! Coordinates reading of TargetSTructure from input file
-	template<typename ModelType>
-	class GroundStateParams {
-	public:
-		template<typename IoInputter>
-		GroundStateParams(IoInputter& io,const ModelType& model)
-		{}
-	}; // class GroundStateParams
-	
-	template<typename ModelType>
-	inline std::ostream&
-	operator<<(std::ostream& os,const GroundStateParams<ModelType>& t)
-	{
-		os<<"#TargetParams.type=GroundState\n";
-		return os;
-	}
+//! Coordinates reading of TargetSTructure from input file
+template<typename ModelType>
+class GroundStateParams {
+public:
+	template<typename IoInputter>
+	GroundStateParams(IoInputter& io,const ModelType& model)
+	{}
+}; // class GroundStateParams
+
+template<typename ModelType>
+inline std::ostream&
+operator<<(std::ostream& os,const GroundStateParams<ModelType>& t)
+{
+	os<<"#TargetParams.type=GroundState\n";
+	return os;
+}
 } // namespace Dmrg 
 
 /*@}*/
 #endif // GROUNDSTATE_PARAMS_H
+

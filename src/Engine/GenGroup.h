@@ -104,9 +104,8 @@ public:
 			if (qvals.qn(i+1)==qvals.qn(i)) continue;
 			istart_.push_back(i+1);
 		}
+
 		istart_.push_back(qvals.size());
-		//std::cout<<"#ISTART!!!!!\n";
-		//std::cout<<istart_;
 	}
 
 	const SizeType& operator()(SizeType i) const
@@ -125,3 +124,4 @@ private:
 /*@}*/
 
 #endif // GEN_GROUP_HEADER_H
+
