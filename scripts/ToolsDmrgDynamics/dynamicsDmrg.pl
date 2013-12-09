@@ -27,7 +27,13 @@ if ($bb && ($site2 >= $site)) {
 	for (my $type=0;$type<4;$type++) {
 		last if ($type>1 and $isDiagonal);
 		my $input = createInput($n,$dataRoot,$siteMin,$siteMax,$type);
-		system("./dmrg -f $input &> out");
+		my $retSystem = system("./dmrg -f $input &> out");
+		if ($retSystem != 0) {
+			modifyInput($input);
+			$retSystem = system("./dmrg -f $input &> out");
+			die "$0: $input failed\n" if ($retSystem != 0);
+		}
+
 		print STDERR "Type $type done\n";
 	}
 	print STDERR "Sites $site $site2 done\n";
@@ -45,6 +51,38 @@ if ($bb  && ($site2 >= $site)) {
 die "$0: $result does not exist\n" unless (defined($result) and -r "$result");
 
 print STDERR "$0: Done $site $site2\n";
+
+sub modifyInput
+{
+	my ($input) = @_;
+
+	my $fileinput = "file$input";
+	open(FILE,$input) or die "$0: Cannot open $input : $!\n";
+	open(FOUT,"> $fileinput") or die "$0: Cannot ope $fileinput for writing: $!\n";
+
+	while(<FILE>) {
+		if (/^TSPLoops/) {
+			my @temp = split;
+			print FOUT "$temp[0] $temp[1] ";
+			my $total = scalar(@temp);
+			for (my $i = 2; $i < $total; ++$i) {
+				$_ = ($temp[$i] == 1) ? 3 : 1;
+				print FOUT "$_ ";
+			}
+
+			print FOUT "\n";
+			next;
+		}
+
+		print FOUT;
+	}
+
+	close(FILE);
+	close(FOUT);
+	system("cp $fileinput $input");
+	system("sync; sleep 1");
+	unlink("$fileinput");
+}
 
 sub postProc
 {
@@ -116,7 +154,7 @@ sub reorderSites
 	my @sites2 = @$sites;
 	my $nsites = scalar(@sites2);
 
-	my @perm = sort { $sites2[$a] cmp $sites2[$b] } 0 .. @sites2-1;
+	my @perm = sort { $sites2[$a] <  $sites2[$b] } 0 .. @sites2-1;
 
 	my @newsites;
 	my @newloops;
