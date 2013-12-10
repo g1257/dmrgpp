@@ -145,6 +145,7 @@ sub calcSitesAndLoops
 {
 	my ($n,$type,@sites)=@_;
 	my ($sites,$loops,$matrix) = calcSitesAndLoopsAux($n,$type,@sites);
+	
 	return reorderSites($sites,$loops,$matrix);
 }
 
@@ -165,7 +166,7 @@ sub reorderSites
 	}
 
 	for (my $i = 0; $i < $nsites; $i++) {
-		my $j = $nsites - $i - 1;
+		my $j = $i;
 		$newsites[$i] = $sites2[$perm[$j]];
 		$newloops[$i] = $loops->[$perm[$j]];
 		$newmatrix[$i] = $matrix->[$perm[$j]];
@@ -230,8 +231,8 @@ sub calcSitesAndLoopsAux
 		if ($sites[0] == 0) {
 			@sites2 = (1, 0);
 			@loops = ($loopDelay, $loopDelay);
-			$matrix[0] = findMatrix($type,0);
-			$matrix[1] = zeroMatrix();
+			$matrix[0] = zeroMatrix();
+			$matrix[1] = findMatrix($type,0);
 			return (\@sites2,\@loops,\@matrix);
 		}
 
@@ -315,7 +316,7 @@ sub multiplyMatrix
 	my @temp=split(/ /,$matrix);
 	my $matrix2="";
 	for (my $i=0;$i<scalar(@temp);$i++) {
-		my $_ = -$temp[$i];
+		$_ = -$temp[$i];
 		$matrix2 .= $_." ";
 	}
 	return $matrix2;

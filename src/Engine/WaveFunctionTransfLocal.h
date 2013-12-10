@@ -391,20 +391,34 @@ namespace Dmrg {
 				const LeftRightSuperType& lrs,
 				const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
-			for (SizeType ii=0;ii<psiDest.sectors();ii++) {
-				SizeType i0 = psiDest.sector(ii);
-				transformVector2FromInfinite(psiDest,psiSrc,lrs,i0,nk);
+			PsimagLite::OstringStream msg;
+			msg<<" Destination sectors "<<psiDest.sectors();
+			msg<<" Source sectors "<<psiSrc.sectors();
+			progress_.printline(msg,std::cout);
+
+			VectorType psiV;
+			for (SizeType srcI = 0; srcI < psiSrc.sectors(); ++srcI) {
+				SizeType srcII = psiSrc.sector(srcI);
+				psiSrc.extract(psiV,srcII);
+				SizeType offset = psiSrc.offset(srcII);
+				for (SizeType ii=0;ii<psiDest.sectors();ii++) {
+					SizeType i0 = psiDest.sector(ii);
+					SizeType start = psiDest.offset(i0);
+					SizeType final = psiDest.effectiveSize(i0)+start;
+					VectorType dest(final-start,0.0);
+					if (srcI > 0) psiDest.extract(dest,i0);
+					transformVector2FromInfinite(dest,start,psiV,offset,lrs,nk);
+					psiDest.setDataInSector(dest,i0);
+				}
 			}
 		}
 		
-
-		template<typename SomeVectorType>
-		void transformVector2FromInfinite(
-				SomeVectorType& psiDest,
-				const SomeVectorType& psiSrc,
-				const LeftRightSuperType& lrs,
-				SizeType i0,
-				const typename PsimagLite::Vector<SizeType>::Type& nk) const
+		void transformVector2FromInfinite(VectorType& dest,
+		                                  SizeType destOffset,
+		                                  const VectorType& psiV,
+		                                  SizeType offset,
+		                                  const LeftRightSuperType& lrs,
+		                                  const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
 			SizeType volumeOfNk = this->volumeOf(nk);
 			SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
@@ -413,8 +427,7 @@ namespace Dmrg {
 			assert(nip==dmrgWaveStruct_.ws.col());
 			assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
 
-			SizeType start = psiDest.offset(i0);
-			SizeType final = psiDest.effectiveSize(i0)+start;
+
 			
 			const SparseMatrixType& we = dmrgWaveStruct_.we;
 			const SparseMatrixType& ws = dmrgWaveStruct_.ws;
@@ -423,25 +436,25 @@ namespace Dmrg {
 			
 			PackIndicesType pack1(nalpha);
 			PackIndicesType pack2(nip);
-			for (SizeType x=start;x<final;x++) {
+			for (SizeType x=0;x<dest.size();x++) {
 				SizeType isn,jen;
-				pack1.unpack(isn,jen,(SizeType)lrs.super().permutation(x));
+				pack1.unpack(isn,jen,(SizeType)lrs.super().permutation(x+destOffset));
 				SizeType is,jpl;
 				pack2.unpack(is,jpl,(SizeType)lrs.left().permutation(isn));
-				psiDest[x]=createAux2bFromInfinite(psiSrc,is,jpl,jen,wsT,we,nk);
+
+				dest[x] += createAux2bFromInfinite(psiV,offset,is,jpl,jen,wsT,we,nk);
+
 			}
 		}
 
-		// FIXME: INCOMING jen needs to be 4 times as big!!
-		template<typename SomeVectorType>
-		SparseElementType createAux2bFromInfinite(
-				const SomeVectorType& psiSrc,
-				SizeType is,
-				SizeType jpl,
-				SizeType jen,
-				const SparseMatrixType& wsT,
-				const SparseMatrixType& we,
-				const typename PsimagLite::Vector<SizeType>::Type& nk) const
+		SparseElementType createAux2bFromInfinite(const VectorType& psiV,
+		                                          SizeType offset,
+		                                          SizeType is,
+		                                          SizeType jpl,
+		                                          SizeType jen,
+		                                          const SparseMatrixType& wsT,
+		                                          const SparseMatrixType& we,
+		                                          const typename PsimagLite::Vector<SizeType>::Type& nk) const
 		{
 			SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 			SparseElementType sum=0;
@@ -458,7 +471,8 @@ namespace Dmrg {
 					if (jpr<0) continue;
 					SizeType jp = dmrgWaveStruct_.lrs.right().permutationInverse(jpl + jpr*volumeOfNk);
 					SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + jp*nalpha);
-					sum2 += wsT.getValue(k)*psiSrc[y]*weRef.getValue(k2);
+					if (y < offset || y - offset >= psiV.size()) continue;
+					sum2 += wsT.getValue(k)*psiV[y-offset]*weRef.getValue(k2);
 
 				}
 				sum += sum2;
