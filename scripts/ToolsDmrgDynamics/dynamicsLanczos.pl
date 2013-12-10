@@ -15,7 +15,7 @@ my $templateInput = "inputTemplate.inp";
 my $n = Utils::getLabel($templateInput,"TotalNumberOfSites=");
 my @spectral;
 
-my $input = createInput($site,$site2);
+my $input = createInput($n,$site,$site2);
 
 my $siteMin = ($site < $site2) ? $site : $site2;
 my $siteMax = ($site < $site2) ? $site2 : $site;
@@ -43,9 +43,10 @@ print STDERR "$0: Done $site $site2\n";
 
 sub createInput
 {
-	my @sites=@_;
+	my ($n,@sites)=@_;
 	my $type = 0;
 	my $file="input$type.inp";
+	my $steps = int($n/2)-1;
 	open(FOUT,">$file") or die "$0: Cannot write to $file\n";
 
 	my @matrix;
@@ -105,7 +106,7 @@ sub multiplyMatrix
 	my @temp=split/ /,$matrix;
 	my $matrix2="";
 	for (my $i=0;$i<scalar(@temp);$i++) {
-		my $_ = -$temp[$i];
+		$_ = -$temp[$i];
 		$matrix2 .= $_." ";
 	}
 	return $matrix2;
