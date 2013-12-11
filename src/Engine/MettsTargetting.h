@@ -987,7 +987,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			SizeType getObservablesToTest(const PsimagLite::String& modelName) const
 			{
-				if (modelName=="HubbardOneBand") return 1;
+				if (modelName=="HubbardOneBand" || modelName=="SuperHubbardExtended") return 1;
 
 				if (modelName=="FeAsBasedSc" || modelName=="FeAsBasedScExtended")
 					return 2;
@@ -1005,7 +1005,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			{
 				OperatorType A;
 
-				if (modelName=="HubbardOneBand") {
+				if (modelName=="HubbardOneBand" || modelName=="SuperHubbardExtended") {
 					assert(ind == 0);
 					PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator("nup",site,0));
 					A.data = tmpC;
@@ -1028,7 +1028,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			PsimagLite::String getObservableLabel(size_t i,const PsimagLite::String& modelName) const
 			{
-				if (modelName=="HubbardOneBand") {
+				if (modelName=="HubbardOneBand" || modelName=="SuperHubbardExtended") {
 					return "nup";
 				}
 				if (modelName=="FeAsBasedSc" || modelName=="FeAsBasedScExtended") {

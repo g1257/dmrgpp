@@ -28,7 +28,7 @@ TSPAlgorithm=Krylov
 TSPSites 1 5
 TSPLoops 1 0
 TSPProductOrSum=product
-Beta=1.0
+BetaDividedByTwo=1.0
 TSPRngSeed=0
 TSPRotateBasis=1
 MettsCollapse=random
