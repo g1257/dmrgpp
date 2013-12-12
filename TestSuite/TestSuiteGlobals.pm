@@ -530,7 +530,7 @@ sub hookMettsAverage
 
 	my $executable = $temp[0];
 	$executable=~s/\\s/ /g;
-	my $label = getLabel($temp[1],"Beta=");
+	my $label = getLabel($temp[1],"BetaDividedByTwo=");
 	$arg="";
 	for (my $i=2;$i<scalar(@temp);$i++) {
 		if ($temp[$i]=~/\>/ || $temp[$i]=~/\</) {

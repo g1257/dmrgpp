@@ -22,18 +22,18 @@ Please see full open source license included in file LICENSE.
 #include <complex>
 namespace std {
 
-double real(double t) { return t; }
+inline double real(double t) { return t; }
 
-double imag(double t) { return 0.0; }
+inline double imag(double t) { return 0.0; }
 
-double conj(double t) { return t; }
+inline double conj(double t) { return t; }
 
-double norm(double t)
+inline double norm(double t)
 {
 	return fabs(t);
 }
 
-std::complex<double> operator*(int x,const std::complex<double>& y)
+inline std::complex<double> operator*(int x,const std::complex<double>& y)
 {
 	return std::complex<double>(real(y)*x,imag(y)*x);
 }
