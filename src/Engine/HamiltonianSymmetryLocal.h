@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -79,131 +79,127 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef HAM_SYMM_LOCAL_H
 #define HAM_SYMM_LOCAL_H
-#include "Sort.h" // in PsimagLite
+#include "Sort.h"
 #include "BasisData.h"
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
-	template<typename SparseMatrixType>
-	class	HamiltonianSymmetryLocal {
+template<typename SparseMatrixType>
+class	HamiltonianSymmetryLocal {
 
-		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
-		typedef  BasisData<std::pair<SizeType,SizeType> > BasisDataType;
-		typedef PsimagLite::CrsMatrix<RealType> FactorsType;
-		
-		public:
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
+	typedef  BasisData<std::pair<SizeType,SizeType> > BasisDataType;
+	typedef PsimagLite::CrsMatrix<RealType> FactorsType;
 
-			static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
-			{
-				SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
+public:
 
-				assert(v[0] < maxElectronsOneSpin);
-				assert(v[1] < maxElectronsOneSpin);
+	static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
+	{
+		SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
 
-				SizeType x= v[0] + v[1]*maxElectronsOneSpin;
-				if (v.size()==3) x += v[2]*maxElectronsOneSpin*maxElectronsOneSpin;
-				return x;
-			}
+		assert(v[0] < maxElectronsOneSpin);
+		assert(v[1] < maxElectronsOneSpin);
 
-			static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(SizeType q)
-			{
-				SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
+		SizeType x= v[0] + v[1]*maxElectronsOneSpin;
+		if (v.size()==3) x += v[2]*maxElectronsOneSpin*maxElectronsOneSpin;
+		return x;
+	}
 
-				assert(q < maxElectronsOneSpin*maxElectronsOneSpin);
+	static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(SizeType q)
+	{
+		SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
 
-				typename PsimagLite::Vector<SizeType>::Type v(2);
-				SizeType tmp = q ;
-				v[1] = SizeType(tmp/maxElectronsOneSpin);
-				v[0] = tmp % maxElectronsOneSpin;
-				return v;
-			}
+		assert(q < maxElectronsOneSpin*maxElectronsOneSpin);
 
-			SizeType getFlavor(SizeType i) const
-			{
-				return 0; // meaningless
-			}
+		typename PsimagLite::Vector<SizeType>::Type v(2);
+		SizeType tmp = q ;
+		v[1] = SizeType(tmp/maxElectronsOneSpin);
+		v[0] = tmp % maxElectronsOneSpin;
+		return v;
+	}
 
-			//! find quantum numbers for each state of this basis, 
-			//! considered symmetries for this model are: n_up and n_down
-			static  void findQuantumNumbers(typename PsimagLite::Vector<SizeType> ::Type&q,const BasisDataType& basisData) 
-			{
-				q.clear();
-				typename PsimagLite::Vector<SizeType>::Type qn(2);
-				for (SizeType i=0;i<basisData.electrons.size();i++) {
-					// n
-					qn[1] = basisData.electrons[i];
-					// sz + const.
-					qn[0] = basisData.szPlusConst[i];
+	SizeType getFlavor(SizeType i) const
+	{
+		return 0; // meaningless
+	}
 
-					assert(qn[1]>=qn[0]);
-					qn[1] -= qn[0];
+	//! find quantum numbers for each state of this basis,
+	//! considered symmetries for this model are: n_up and n_down
+	static  void findQuantumNumbers(typename PsimagLite::Vector<SizeType> ::Type&q,
+	                                const BasisDataType& basisData)
+	{
+		q.clear();
+		typename PsimagLite::Vector<SizeType>::Type qn(2);
+		for (SizeType i=0;i<basisData.electrons.size();i++) {
+			// n
+			qn[1] = basisData.electrons[i];
+			// sz + const.
+			qn[0] = basisData.szPlusConst[i];
 
-					q.push_back(encodeQuantumNumber(qn));
-				}
-			}
+			assert(qn[1]>=qn[0]);
+			qn[1] -= qn[0];
 
-			template<typename SolverParametersType>
-			void calcRemovedIndices(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
-						typename PsimagLite::Vector<RealType>::Type& eigs,
-						SizeType kept,
-						const SolverParametersType& solverParams) const
-			{
-				if (eigs.size()<=kept) return;
-				// we sort the eigenvalues
-				// note: eigenvalues are not ordered because DensityMatrix is diagonalized in blocks
-				typename PsimagLite::Vector<SizeType>::Type perm(eigs.size());
-				PsimagLite::Sort<typename PsimagLite::Vector<RealType>::Type > sort;
-				sort.sort(eigs,perm);
-				typename PsimagLite::Vector<SizeType>::Type permInverse(perm.size());
-				for (SizeType i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
-				
-				SizeType target = eigs.size()-kept;
-				
-				removedIndices.clear();
-				for (SizeType i=0;i<target;i++) {
-					if (removedIndices.size()>=target) break;
-					if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
-					removedIndices.push_back(perm[i]);
-					
-					
-				}
-				//std::cerr<<"target="<<target<<" size="<<eigs.size();
-				//std::cerr<<" kept="<<kept<<" achieved="<<removedIndices.size()<<"\n";
-			}
+			q.push_back(encodeQuantumNumber(qn));
+		}
+	}
 
-			const FactorsType& getFactors() const 
-			{
-				return factors_;
-			}
+	template<typename SolverParametersType>
+	void calcRemovedIndices(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
+	                        typename PsimagLite::Vector<RealType>::Type& eigs,
+	                        SizeType kept,
+	                        const SolverParametersType& solverParams) const
+	{
+		if (eigs.size()<=kept) return;
+		// we sort the eigenvalues
+		// note: eigenvalues are not ordered because DensityMatrix is diagonalized in blocks
+		typename PsimagLite::Vector<SizeType>::Type perm(eigs.size());
+		PsimagLite::Sort<typename PsimagLite::Vector<RealType>::Type > sort;
+		sort.sort(eigs,perm);
+		typename PsimagLite::Vector<SizeType>::Type permInverse(perm.size());
+		for (SizeType i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
 
-			void createDummyFactors(SizeType ns, SizeType ne)
-			{
-				factors_.makeDiagonal(ns*ne,1);
-			}
+		SizeType target = eigs.size()-kept;
 
-			template<typename IoInputter>
-			void load(IoInputter& io) 
-			{
-				SizeType tmp=0;
-				io.readline(tmp,"#FACTORSSIZE=");
-				factors_.makeDiagonal(tmp,1);
-			}
+		removedIndices.clear();
+		for (SizeType i=0;i<target;i++) {
+			if (removedIndices.size()>=target) break;
+			if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
+			removedIndices.push_back(perm[i]);
+		}
+	}
 
-			template<typename IoOutputter>
-			void save(IoOutputter& io) const
-			{
-				// don't print factors since they're the identity anywaysfactors_
-//				io.print("#FACTORSSIZE=",factors_.row());
-				PsimagLite::String tmp = ttos(factors_.row());
-				PsimagLite::String s="#FACTORSSIZE="+tmp;
-				io.printline(s);
-			}
+	const FactorsType& getFactors() const
+	{
+		return factors_;
+	}
 
-		private:
-			FactorsType factors_;
-	}; //class HamiltonianSymmetryLocal
+	void createDummyFactors(SizeType ns, SizeType ne)
+	{
+		factors_.makeDiagonal(ns*ne,1);
+	}
+
+	template<typename IoInputter>
+	void load(IoInputter& io)
+	{
+		SizeType tmp=0;
+		io.readline(tmp,"#FACTORSSIZE=");
+		factors_.makeDiagonal(tmp,1);
+	}
+
+	template<typename IoOutputter>
+	void save(IoOutputter& io) const
+	{
+		PsimagLite::String tmp = ttos(factors_.row());
+		PsimagLite::String s="#FACTORSSIZE="+tmp;
+		io.printline(s);
+	}
+
+private:
+	FactorsType factors_;
+}; //class HamiltonianSymmetryLocal
 } // namespace Dmrg
 
 /*@}*/
 #endif
+

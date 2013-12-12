@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HAM_SYMM_SU2_H
 #define HAM_SYMM_SU2_H
 
-#include "Sort.h" // in PsimagLite
+#include "Sort.h"
 #include "JmPairs.h"
 #include "VerySparseMatrix.h"
 #include "JmSubspace.h"
@@ -90,542 +90,565 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename SparseMatrixType>
-	class	HamiltonianSymmetrySu2 {
-		public:
+template<typename SparseMatrixType>
+class	HamiltonianSymmetrySu2 {
+public:
 
-			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
-			typedef std::pair<SizeType,SizeType> PairType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
+	typedef std::pair<SizeType,SizeType> PairType;
 
-		private:
-			typedef JmPairs<PairType> JmPairsType;
-			typedef VerySparseMatrix<RealType> VerySparseMatrixType;
-			typedef HamiltonianSymmetrySu2<SparseMatrixType> ThisType;
-			typedef JmSubspace<VerySparseMatrixType,ThisType> JmSubspaceType;
-			typedef typename JmSubspaceType::FlavorType FlavorType;
-			typedef  BasisData<PairType> BasisDataType;
-			
-		public:
-			typedef PsimagLite::CrsMatrix<RealType> FactorsType;
-			
-			HamiltonianSymmetrySu2()
-			: flavors_(0),
-			  flavorsOld_(0),
-			  flavorsMax_(0),
-			  electronsMax_(0),
-			  jMax_(0),
-			  factors_(0,0),
-			  statesReduced_(0),
-			  jvals_(0)
-			{}
+private:
 
-			PairType jmValue(SizeType i) const { return jmValues_[i]; }
+	typedef JmPairs<PairType> JmPairsType;
+	typedef VerySparseMatrix<RealType> VerySparseMatrixType;
+	typedef HamiltonianSymmetrySu2<SparseMatrixType> ThisType;
+	typedef JmSubspace<VerySparseMatrixType,ThisType> JmSubspaceType;
+	typedef typename JmSubspaceType::FlavorType FlavorType;
+	typedef  BasisData<PairType> BasisDataType;
 
-			void set(const BasisDataType& basisData)
-			{
-				jmValues_=basisData.jmValues;
-				flavors_=basisData.flavors;
-				flavorsMax_= *(std::max_element(flavors_.begin(),flavors_.end()));
-				electronsMax_ = *(std::max_element(basisData.electrons.begin(),basisData.electrons.end()));
-				jMax_=0;
-				jmValues_.maxFirst<std::greater<SizeType> >(jMax_);
-				jMax_++;
-				calcReducedBasis();
+public:
+
+	typedef PsimagLite::CrsMatrix<RealType> FactorsType;
+
+	HamiltonianSymmetrySu2()
+	    : flavors_(0),
+	      flavorsOld_(0),
+	      flavorsMax_(0),
+	      electronsMax_(0),
+	      jMax_(0),
+	      factors_(0,0),
+	      statesReduced_(0),
+	      jvals_(0)
+	{}
+
+	PairType jmValue(SizeType i) const { return jmValues_[i]; }
+
+	void set(const BasisDataType& basisData)
+	{
+		jmValues_=basisData.jmValues;
+		flavors_=basisData.flavors;
+		flavorsMax_= *(std::max_element(flavors_.begin(),flavors_.end()));
+		electronsMax_ = *(std::max_element(basisData.electrons.begin(),
+		                                   basisData.electrons.end()));
+		jMax_=0;
+		jmValues_.maxFirst<std::greater<SizeType> >(jMax_);
+		jMax_++;
+		calcReducedBasis();
+	}
+
+	static void findQuantumNumbers(typename PsimagLite::Vector<SizeType> ::Type&q,
+	                               const BasisDataType& basisData)
+	{
+		q.resize(basisData.electrons.size());
+		for (SizeType i=0;i<q.size();i++) {
+			SizeType ne = basisData.electrons[i];
+			PairType jmpair = basisData.jmValues[i];
+			q[i]=neJmToIndex(ne,jmpair);
+		}
+	}
+
+	static SizeType neJmToIndex(SizeType ne,const PairType& jm)
+	{
+		typename PsimagLite::Vector<SizeType>::Type v(3);
+		RealType m = jm.second+0.5*(ne-jm.first);
+		v[0]=static_cast<SizeType>(m);
+		assert(ne>=v[0]);
+		v[1] = ne - v[0];
+		v[2]=jm.first;
+		return encodeQuantumNumber(v);
+	}
+
+	static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
+	{
+		SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
+
+		assert(v[0] < maxElectronsOneSpin);
+		assert(v[1] < maxElectronsOneSpin);
+		assert(v[2] < maxElectronsOneSpin);
+
+		SizeType x= v[0] + v[1]*maxElectronsOneSpin;
+		if (v.size()==3) x += v[2]*maxElectronsOneSpin*maxElectronsOneSpin;
+		return x;
+	}
+
+	static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(SizeType q)
+	{
+		SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
+
+		assert(q < maxElectronsOneSpin*maxElectronsOneSpin*maxElectronsOneSpin);
+
+		typename PsimagLite::Vector<SizeType>::Type v(3);
+		v[2] = SizeType(q/(maxElectronsOneSpin*maxElectronsOneSpin));
+		SizeType tmp = q - v[2]*maxElectronsOneSpin*maxElectronsOneSpin;
+		v[1] = SizeType(tmp/maxElectronsOneSpin);
+		v[0] = tmp % maxElectronsOneSpin;
+		return v;
+	}
+
+	//! targets[0]=nup, targets[1]=ndown,  targets[2]=2j
+	static SizeType pseudoQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
+	{
+		SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
+
+		SizeType x= v[0] + v[1];
+
+		assert(x < 2*maxElectronsOneSpin);
+
+		x += v[2]*2*maxElectronsOneSpin;
+		return x;
+	}
+
+	SizeType pseudoEffectiveNumber(SizeType nelectrons,SizeType jtilde) const
+	{
+		typename PsimagLite::Vector<SizeType>::Type v(3);
+		v[0]=nelectrons;
+		v[1]=0;
+		v[2]=jtilde;
+		return pseudoQuantumNumber(v);
+	}
+
+	void setToProduct(
+	        const HamiltonianSymmetrySu2& symm1,
+	        const HamiltonianSymmetrySu2& symm2,
+	        int pseudoQn,
+	        const typename PsimagLite::Vector<SizeType>::Type& electrons1,
+	        const typename PsimagLite::Vector<SizeType>::Type& electrons2,
+	        typename PsimagLite::Vector<SizeType>::Type& electrons,
+	        typename PsimagLite::Vector<SizeType>::Type& quantumNumbers)
+	{
+		SizeType ns = symm1.jmValues_.size();
+		SizeType ne = symm2.jmValues_.size();
+
+		JmSubspaceType::setToProduct(&symm1,&symm2,electrons1,electrons2);
+
+		findAllowedJm(symm1,symm2,electrons1,electrons2,pseudoQn);;
+		createFactors(ns,ne);
+		setFlavors(quantumNumbers);
+		assert(quantumNumbers.size()==(ns*ne));
+
+		jMax_=0;
+		jmValues_.maxFirst<std::greater<SizeType> >(jMax_);
+		jMax_++;
+		calcReducedBasis();
+		normalizeFlavors();
+		setElectrons(electrons,quantumNumbers);
+		electronsMax_ = *(std::max_element(electrons.begin(),electrons.end()));
+	}
+
+	PairType getJmValue(SizeType alpha) const
+	{
+		return jmValues_[alpha];
+	}
+
+	SizeType getFlavor(SizeType alpha) const
+	{
+		return flavors_[alpha];
+	}
+
+	SizeType flavorsMax() const { return flavorsMax_; }
+
+	SizeType electronsMax() const { return electronsMax_; }
+
+	SizeType jMax() const { return jMax_; }
+
+	template<typename SolverParametersType>
+	void calcRemovedIndices(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
+	                        typename PsimagLite::Vector<RealType>::Type& eigs,
+	                        SizeType kept,
+	                        const SolverParametersType& solverParams) const
+	{
+		// we sort the eigenvalues
+		// note: eigenvalues are not ordered because DensityMatrix is diagonalized in blocks
+		typename PsimagLite::Vector<SizeType>::Type perm(eigs.size());
+		PsimagLite::Sort<typename PsimagLite::Vector<RealType>::Type > sort;
+		sort.sort(eigs,perm);
+
+		if (eigs.size()<=kept) return;
+		SizeType target = eigs.size()-kept;
+
+		removedIndices.clear();
+
+		if (solverParams.options.find("inflate")!=PsimagLite::String::npos)
+			inclusiveRemoval(removedIndices,perm,eigs,target);
+		else exclusiveRemoval(removedIndices,perm,eigs,target);
+	}
+
+	const FactorsType& getFactors() const
+	{
+		return factors_;
+	}
+
+	void reorder(const typename PsimagLite::Vector<SizeType>::Type& permutationVector)
+	{
+		// reorder jmValues
+		jmValues_.reorder(permutationVector);
+
+		// reorder flavors
+		utils::reorder(flavors_,permutationVector);
+		utils::reorder(flavorsOld_,permutationVector);
+	}
+
+	void truncate(const typename PsimagLite::Vector<SizeType>::Type& removedIndices,
+	              const typename PsimagLite::Vector<SizeType>::Type& electrons)
+	{
+		electronsMax_= * (std::max_element(electrons.begin(),electrons.end()));
+
+		utils::truncateVector(flavors_,removedIndices);
+		flavorsMax_=* (std::max_element(flavors_.begin(),flavors_.end()));
+
+		jmValues_.truncate(removedIndices);
+		jMax_=0;
+		jmValues_.maxFirst<std::greater<SizeType> >(jMax_);
+		jMax_++;
+		calcReducedBasis();
+	}
+
+	SizeType size() const {return jmValues_.size(); }
+
+	template<typename IoInputter>
+	void load(IoInputter& io)
+	{
+		jmValues_.load(io);
+		io.read(flavors_,"#su2flavors");
+		io.readline(flavorsMax_,"#su2FlavorsMax=");
+		io.readline(electronsMax_,"#su2ElectronsMax=");
+		io.readline(jMax_,"#su2JMax=");
+		io.read(statesReduced_,"#su2StatesReduced");
+		io.read(jvals_,"#su2Jvals");
+	}
+
+	template<typename IoOutputter>
+	void save(IoOutputter& io) const
+	{
+		jmValues_.save(io);
+		io.printVector(flavors_,"#su2flavors");
+		PsimagLite::String s="#su2FlavorsMax=" + ttos(flavorsMax_)+"\n";
+		io.print(s);
+		s="#su2ElectronsMax="+ttos(electronsMax_)+"\n";
+		io.print(s);
+		s="#su2JMax="+ttos(jMax_)+"\n";
+		io.print(s);
+		io.printVector(statesReduced_,"#su2StatesReduced");
+		io.printVector(jvals_,"#su2Jvals");
+	}
+
+	SizeType flavor2Index(SizeType f1,
+	                      SizeType f2,
+	                      SizeType ne1,
+	                      SizeType ne2,
+	                      SizeType j1,
+	                      SizeType j2) const
+	{
+		return JmSubspaceType::flavor(f1,f2,ne1,ne2,j1,j2);
+	}
+
+	void flavor2Index(PsimagLite::Map<SizeType,SizeType>::Type& flavorsOldInverse,
+	                  const PairType& jm) const
+	{
+		for (SizeType i=0;i<flavorsOld_.size();i++) {
+			if (jmValues_[i]!=jm) continue;
+			flavorsOldInverse[flavorsOld_[i]]=i;
+		}
+	}
+
+	const typename PsimagLite::Vector<SizeType>::Type& flavorsOld() const
+	{
+		return flavorsOld_;
+	}
+
+	// reduced:
+	SizeType reducedIndex(SizeType i) const { return statesReduced_[i]; }
+
+	SizeType reducedSize() const { return statesReduced_.size(); }
+
+	SizeType jVals(SizeType i) const { return jvals_[i]; }
+
+	SizeType jVals() const { return jvals_.size(); }
+
+private:
+
+	template<typename JmSubspaceType>
+	SizeType  setFlavors(typename PsimagLite::Vector<SizeType>::Type& quantumNumbers,
+	                     JmSubspaceType& jmSubspace,
+	                     SizeType offset)
+	{
+		// order is important here, electrons must be set after quantumNumbers
+		SizeType flavors = jmSubspace.numberOfFlavors();
+		if (offset==0) {
+			quantumNumbers.clear();
+			jmValues_.clear();
+			flavors_.clear();
+		}
+		for (SizeType i=0;i<flavors;i++ ) {
+			PairType jm = jmSubspace.getJmValue();
+			quantumNumbers.push_back(neJmToIndex(jmSubspace.getNe(),jm));
+			jmValues_.push(jm,i+offset);
+			flavors_.push_back(jmSubspace.getFlavor(i));
+		}
+		offset += flavors;
+
+		return offset;
+	}
+
+	void setElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,
+	                  const typename PsimagLite::Vector<SizeType>::Type& qns)
+	{
+		electrons.resize(qns.size());
+		for (SizeType i=0;i<qns.size();i++) {
+			typename PsimagLite::Vector<SizeType>::Type v = decodeQuantumNumber(qns[i]);
+			electrons[i]=v[0] + v[1];
+		}
+	}
+
+	void normalizeFlavors()
+	{
+		flavorsOld_=flavors_;
+		typename PsimagLite::Vector<SizeType>::Type perm(flavors_.size());
+		PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type > sort;
+		sort.sort(flavors_,perm);
+
+		SizeType counter=0;
+		SizeType flavorSaved=flavors_[0];
+		typename PsimagLite::Vector<SizeType>::Type flavorsTmp(flavors_.size());
+
+		for (SizeType i=0;i<flavors_.size();i++) {
+			if (flavorSaved!=flavors_[i]) {
+				counter++;
+				flavorSaved=flavors_[i];
+			}
+			flavorsTmp[i]=counter;
+		}
+
+		for (SizeType i=0;i<flavors_.size();i++)
+			flavors_[perm[i]]=flavorsTmp[i];
+
+		flavorsMax_=counter+1;
+
+	}
+
+	void setFlavors(typename PsimagLite::Vector<SizeType>::Type& quantumNumbers)
+	{
+		SizeType offset=0;
+		for (SizeType i=0;i<jmSubspaces_.size();i++) {
+			offset = setFlavors(quantumNumbers,jmSubspaces_[i],offset);
+			jmSubspaces_[i].clear();
+		}
+	}
+
+	// note: j is actually 2j and m is actually m+j
+	// note: this is so that j and m are both always SizeType
+	void findAllowedJm(const ThisType& symm1,
+	                   const ThisType& symm2,
+	                   const typename PsimagLite::Vector<SizeType>::Type& electrons1,
+	                   const typename PsimagLite::Vector<SizeType>::Type& electrons2,
+	                   int pseudoQn)
+	{
+		SizeType ns = symm1.jmValues_.size();
+		SizeType ne = symm2.jmValues_.size();
+
+		jmSubspaces_.clear();
+		for (SizeType i=0;i<ns;i++) {
+			PairType jm1 = symm1.getJmValue(i);
+			for (SizeType j=0;j<ne;j++) {
+				PairType jm2 = symm2.getJmValue(j);
+				SizeType nelectrons = electrons1[i]+electrons2[j];
+				addAllowedJms(jm1,jm2,i,j,ns,nelectrons,pseudoQn);
+			}
+		}
+	}
+
+	void createFactors(SizeType ns,SizeType ne)
+	{
+		VerySparseMatrixType factors(ns*ne);
+		SizeType offset=0;
+		for (SizeType i=0;i<jmSubspaces_.size();i++) {
+			SizeType s=0;
+			s= jmSubspaces_[i].createFactors(factors,offset);
+			offset += s;
+		}
+		if (factors.nonZero()==0) {
+			for (SizeType i=0;i<jmSubspaces_.size();i++) {
+				std::cerr<<"subspace number "<<i;
+				SizeType nelectrons=jmSubspaces_[i].getNe();
+				std::cerr<<" nelectrons="<<nelectrons;
+				PairType jm = jmSubspaces_[i].getJmValue();
+				std::cerr<<" pseudo="<<pseudoEffectiveNumber(nelectrons,jm.first);
+
+				std::cerr<<" jm=("<<jm.first<<","<<jm.second<<")\n";
+				std::cerr<<" heavy="<<jmSubspaces_[i].heavy()<<"\n";
+				std::cerr<<"--------------------------------------------\n";
+			}
+			throw PsimagLite::RuntimeError("HSSU2.h::createFactors(): factors are empty\n");
+		}
+		factors.sort();
+		factors_ = factors;
+	}
+
+	// note: j is actually 2j and m is actually m+j
+	// note: this is so that j and m are both always SizeType
+	void addAllowedJms(const PairType& jm1,
+	                   const PairType& jm2,
+	                   SizeType alpha,
+	                   SizeType beta,
+	                   SizeType ns,
+	                   SizeType nelectrons,
+	                   int pseudoQn)
+	{
+		int j1 = jm1.first, j2=jm2.first;
+		int jinitial = j1-j2;
+		if (jinitial<0) jinitial = -jinitial;
+		for (int j=jinitial;j<=j1+j2;j++) {
+			// go over all hurdles:
+			// first hurdle (j1+j2+j is even)
+			if ((j1+j2+j) %2 !=0) continue;
+			// calculate m
+			// m = m1+m2+(j1+j2-j)/2
+			// note: (j1+j2-j) is even
+			// note: (j1+j2-j)>=0
+			int m = jm1.second+ jm2.second + int((-j1-j2+j)/2);
+			// second hurdle |2m-j| <= j
+			int tmp = 2*m-j;
+			if (tmp<0) tmp= -tmp;
+			if (tmp>j) continue;
+			PairType jm(j,m);
+			int heavy=1;
+			if (pseudoQn>=0 &&
+			    pseudoEffectiveNumber(nelectrons,jm.first) !=SizeType(pseudoQn)) {
+				heavy=0;
 			}
 
-			static void findQuantumNumbers(typename PsimagLite::Vector<SizeType> ::Type&q,
-			                               const BasisDataType& basisData)
-			{
-				q.resize(basisData.electrons.size());
-				for (SizeType i=0;i<q.size();i++) {
-					SizeType ne = basisData.electrons[i];
-					PairType jmpair = basisData.jmValues[i];
-					q[i]=neJmToIndex(ne,jmpair);
-				}
-			}
+			addJmPair(alpha+beta*ns,jm1,jm2,jm,nelectrons,heavy);
+		}
+	}
 
-			static SizeType neJmToIndex(SizeType ne,const PairType& jm) 
-			{
-				typename PsimagLite::Vector<SizeType>::Type v(3);
-				RealType m = jm.second+0.5*(ne-jm.first);
-				v[0]=static_cast<SizeType>(m);
-				assert(ne>=v[0]);
-				v[1] = ne - v[0];
-				v[2]=jm.first;
-				return encodeQuantumNumber(v);
-			}
+	void addJmPair(SizeType index,
+	               const PairType& jm1,
+	               const PairType& jm2,
+	               const PairType& jm,
+	               SizeType nelectrons,
+	               int heavy)
+	{
+		std::pair<PairType,SizeType> triplet;
+		triplet.first=jm;
+		triplet.second=nelectrons;
+		int x = PsimagLite::isInVector(jmSubspaces_,triplet);
+		if (x<0) { // add new jmSubspace
+			JmSubspace<VerySparseMatrixType,ThisType> jmSubspace(jm,
+			                                                     index,
+			                                                     jm1,
+			                                                     jm2,
+			                                                     nelectrons,
+			                                                     heavy);
+			jmSubspaces_.push_back(jmSubspace);
+		} else {
+			jmSubspaces_[x].push(index,jm1,jm2,nelectrons);
+		}
+	}
 
-			static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
-			{
-				SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
+	void inclusiveRemoval(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
+	                      const typename PsimagLite::Vector<SizeType>::Type& perm,
+	                      const typename PsimagLite::Vector<RealType>::Type& eigs,
+	                      SizeType target) const
+	{
+		typename PsimagLite::Vector<SizeType>::Type permInverse(perm.size());
+		for (SizeType i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
 
-				assert(v[0] < maxElectronsOneSpin);
-				assert(v[1] < maxElectronsOneSpin);
-				assert(v[2] < maxElectronsOneSpin);
+		for (SizeType i=0;i<target;i++) {
+			if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
+			removedIndices.push_back(perm[i]);
+		}
 
-				SizeType x= v[0] + v[1]*maxElectronsOneSpin;
-				if (v.size()==3) x += v[2]*maxElectronsOneSpin*maxElectronsOneSpin;
-				return x;
-			}
+		for (SizeType i=0;i<target;i++)	{
+			for (SizeType j=0;j<eigs.size();j++) {
 
-			static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(SizeType q)
-			{
-				SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
-
-				assert(q < maxElectronsOneSpin*maxElectronsOneSpin*maxElectronsOneSpin);
-
-				typename PsimagLite::Vector<SizeType>::Type v(3);
-				v[2] = SizeType(q/(maxElectronsOneSpin*maxElectronsOneSpin));
-				SizeType tmp = q - v[2]*maxElectronsOneSpin*maxElectronsOneSpin;
-				v[1] = SizeType(tmp/maxElectronsOneSpin);
-				v[0] = tmp % maxElectronsOneSpin;
-				return v;
-			}
-
-			//! targets[0]=nup, targets[1]=ndown,  targets[2]=2j
-			static SizeType pseudoQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
-			{
-				SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
-
-				SizeType x= v[0] + v[1];
-
-				assert(x < 2*maxElectronsOneSpin);
-
-				x += v[2]*2*maxElectronsOneSpin;
-				return x;
-			}
-
-			SizeType pseudoEffectiveNumber(SizeType nelectrons,SizeType jtilde) const
-			{
-				typename PsimagLite::Vector<SizeType>::Type v(3);
-				v[0]=nelectrons;
-				v[1]=0;
-				v[2]=jtilde;
-				return pseudoQuantumNumber(v);
-			}
-
-			void setToProduct(
-					const HamiltonianSymmetrySu2& symm1,
-					const HamiltonianSymmetrySu2& symm2,
-					int pseudoQn,
-					const typename PsimagLite::Vector<SizeType>::Type& electrons1,
-     					const typename PsimagLite::Vector<SizeType>::Type& electrons2,
-					typename PsimagLite::Vector<SizeType>::Type& electrons,
-					typename PsimagLite::Vector<SizeType>::Type& quantumNumbers)
-			{
-				SizeType ns = symm1.jmValues_.size();
-				SizeType ne = symm2.jmValues_.size();
-
-				JmSubspaceType::setToProduct(&symm1,&symm2,electrons1,electrons2);
-
-				findAllowedJm(symm1,symm2,electrons1,electrons2,pseudoQn);;
-				createFactors(ns,ne);
-				setFlavors(quantumNumbers);
-				assert(quantumNumbers.size()==(ns*ne));
-			
-				jMax_=0;
-				jmValues_.maxFirst<std::greater<SizeType> >(jMax_);
-				jMax_++;
-				calcReducedBasis();
-				normalizeFlavors();
-				setElectrons(electrons,quantumNumbers);
-				electronsMax_ = *(std::max_element(
-						electrons.begin(),electrons.end()));
-		//				electrons[utils::vectorMax<SizeType,std::greater<SizeType> >(electrons,0)];
-			}
-
-			PairType getJmValue(SizeType alpha) const
-			{
-				return jmValues_[alpha];
-			}
-
-			SizeType getFlavor(SizeType alpha) const
-			{
-				return flavors_[alpha];
-			}
-
-			SizeType flavorsMax() const { return flavorsMax_; }
-
-			SizeType electronsMax() const { return electronsMax_; }
-
-			SizeType jMax() const { return jMax_; }
-
-			template<typename SolverParametersType>
-			void calcRemovedIndices(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
-						typename PsimagLite::Vector<RealType>::Type& eigs,
-						SizeType kept,
-						const SolverParametersType& solverParams) const
-			{
-//				normalizeFlavors();
-
-				// we sort the eigenvalues
-				// note: eigenvalues are not ordered because DensityMatrix is diagonalized in blocks
-				typename PsimagLite::Vector<SizeType>::Type perm(eigs.size());
-				PsimagLite::Sort<typename PsimagLite::Vector<RealType>::Type > sort;
-				sort.sort(eigs,perm);
-				
-				if (eigs.size()<=kept) return;
-				SizeType target = eigs.size()-kept;
-
-				removedIndices.clear();
-
-				if (solverParams.options.find("inflate")!=PsimagLite::String::npos)
-					inclusiveRemoval(removedIndices,perm,eigs,target);
-				else exclusiveRemoval(removedIndices,perm,eigs,target);
-			}
-
-			const FactorsType& getFactors() const 
-			{
-				return factors_;
-			}
-
-			void reorder(const typename PsimagLite::Vector<SizeType>::Type& permutationVector)
-			{
-				// reorder jmValues
-				jmValues_.reorder(permutationVector);
-
-				// reorder flavors
-				utils::reorder(flavors_,permutationVector);
-				utils::reorder(flavorsOld_,permutationVector);
-			}
-
-			void truncate(const typename PsimagLite::Vector<SizeType>::Type& removedIndices,
-			              const typename PsimagLite::Vector<SizeType>::Type& electrons)
-			{
-				electronsMax_= * (std::max_element(
-						electrons.begin(),electrons.end()));
-				//electrons[utils::vectorMax<SizeType,std::greater<SizeType> >(electrons,0)];
-
-				utils::truncateVector(flavors_,removedIndices);
-				flavorsMax_=* (std::max_element(
-						flavors_.begin(),flavors_.end()));
-				//flavors_[utils::vectorMax<SizeType,std::greater<SizeType> >(flavors_,0)];
-
-				jmValues_.truncate(removedIndices);
-				jMax_=0;
-				jmValues_.maxFirst<std::greater<SizeType> >(jMax_);
-				jMax_++;
-				calcReducedBasis();
-			}
-
-			SizeType size() const {return jmValues_.size(); }
-
-			template<typename IoInputter>
-			void load(IoInputter& io) 
-			{
-				jmValues_.load(io); 
-				io.read(flavors_,"#su2flavors");
-				io.readline(flavorsMax_,"#su2FlavorsMax=");
-				io.readline(electronsMax_,"#su2ElectronsMax=");
-				io.readline(jMax_,"#su2JMax=");
-				io.read(statesReduced_,"#su2StatesReduced");
-				io.read(jvals_,"#su2Jvals");
-			}
-
-			template<typename IoOutputter>
-			void save(IoOutputter& io) const
-			{
-				jmValues_.save(io);
-				io.printVector(flavors_,"#su2flavors");
-				PsimagLite::String s="#su2FlavorsMax=" + ttos(flavorsMax_)+"\n";
-				io.print(s); 
-				s="#su2ElectronsMax="+ttos(electronsMax_)+"\n";
-				io.print(s); 
-				s="#su2JMax="+ttos(jMax_)+"\n";
-				io.print(s);
-				io.printVector(statesReduced_,"#su2StatesReduced");
-				io.printVector(jvals_,"#su2Jvals");
-			}
-
-			SizeType flavor2Index(SizeType f1,SizeType f2,SizeType ne1,SizeType ne2,SizeType j1,SizeType j2) const
-			{
-				return JmSubspaceType::flavor(f1,f2,ne1,ne2,j1,j2);
-				
-			}
-
-			void flavor2Index(PsimagLite::Map<SizeType,SizeType>::Type& flavorsOldInverse, const PairType& jm) const
-			{
-				for (SizeType i=0;i<flavorsOld_.size();i++) {
-					if (jmValues_[i]!=jm) continue;
-					flavorsOldInverse[flavorsOld_[i]]=i;
-				}
-				
-			}
-
-			const typename PsimagLite::Vector<SizeType>::Type& flavorsOld() const
-			{
-				return flavorsOld_;
-				
-			}
-
-			// reduced:
-			SizeType reducedIndex(SizeType i) const { return statesReduced_[i]; }
-
-			SizeType reducedSize() const { return statesReduced_.size(); }
-
-			SizeType jVals(SizeType i) const { return jvals_[i]; }
-
-			SizeType jVals() const { return jvals_.size(); }
-
-		private:
-
-			template<typename JmSubspaceType>
-			SizeType  setFlavors(typename PsimagLite::Vector<SizeType>::Type& quantumNumbers,JmSubspaceType& jmSubspace,SizeType offset)
-			{
-				// order is important here, electrons must be set after quantumNumbers
-				SizeType flavors = jmSubspace.numberOfFlavors();
-				if (offset==0) {
-					quantumNumbers.clear();
-					jmValues_.clear();
-					flavors_.clear();
-				}
-				for (SizeType i=0;i<flavors;i++ ) {
-					PairType jm = jmSubspace.getJmValue();
-					quantumNumbers.push_back(neJmToIndex(jmSubspace.getNe(),jm));
-					jmValues_.push(jm,i+offset);
-					flavors_.push_back(jmSubspace.getFlavor(i));
-				}
-				offset += flavors;
-
-				return offset;
-			}
-
-			void setElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,const typename PsimagLite::Vector<SizeType>::Type& qns)
-			{
-				electrons.resize(qns.size());
-				for (SizeType i=0;i<qns.size();i++) {
-					typename PsimagLite::Vector<SizeType>::Type v = decodeQuantumNumber(qns[i]);
-					electrons[i]=v[0] + v[1];
-				}
-			}
-
-			void normalizeFlavors()
-			{
-				flavorsOld_=flavors_;
-				typename PsimagLite::Vector<SizeType>::Type perm(flavors_.size());
-				PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type > sort;
-				sort.sort(flavors_,perm);
-
-				SizeType counter=0;
-				SizeType flavorSaved=flavors_[0];
-				typename PsimagLite::Vector<SizeType>::Type flavorsTmp(flavors_.size());
-
-				for (SizeType i=0;i<flavors_.size();i++) {
-					if (flavorSaved!=flavors_[i]) {
-						counter++;
-						flavorSaved=flavors_[i];
+				if (flavors_[j]==flavors_[perm[i]] &&
+				    jmValues_[j].first==jmValues_[perm[i]].first) {
+					int x = PsimagLite::isInVector(removedIndices,j);
+					if (x<0) {
+						typename PsimagLite::Vector<SizeType>::Type::iterator p1 =
+						        find(removedIndices.begin(),removedIndices.end(),perm[i]);
+						if (p1==removedIndices.end()) continue;
+						removedIndices.erase(p1);
+						if (fabs(eigs[permInverse[j]]-eigs[i])>1e-6) {
+							std::cerr<<"ind="<<perm[i]<<" j="<<permInverse[j];
+							std::cerr<<" e[ind]="<<eigs[i];
+							std::cerr<<" e[j]="<<eigs[permInverse[j]]<<"\n";
+							std::cerr<<"flavor="<<flavors_[j];
+							std::cerr<<" jm=("<<jmValues_[j].first<<",";
+							std::cerr<<jmValues_[j].second<<") ";
+							std::cerr<<" jm[ind]=(";
+							std::cerr<<jmValues_[perm[i]].first<<",";
+							std::cerr<<jmValues_[perm[i]].second<<")\n";
+						}
+						break;
 					}
-					flavorsTmp[i]=counter;
-				}
-
-				for (SizeType i=0;i<flavors_.size();i++) 
-					flavors_[perm[i]]=flavorsTmp[i];
-
-				flavorsMax_=counter+1;
-
-			}
-
-			void setFlavors(typename PsimagLite::Vector<SizeType>::Type& quantumNumbers) 
-			{
-				SizeType offset=0;
-				for (SizeType i=0;i<jmSubspaces_.size();i++) {
-					offset = setFlavors(quantumNumbers,jmSubspaces_[i],offset);
-					jmSubspaces_[i].clear();
 				}
 			}
+		}
+	}
 
-			// note: j is actually 2j and m is actually m+j
-			// note: this is so that j and m are both always SizeType
-			void findAllowedJm(const ThisType& symm1,const ThisType& symm2,const typename PsimagLite::Vector<SizeType>::Type& electrons1,
-					   const typename PsimagLite::Vector<SizeType>::Type& electrons2,int pseudoQn) 
-			{
-				SizeType ns = symm1.jmValues_.size();
-				SizeType ne = symm2.jmValues_.size();
+	void exclusiveRemoval(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
+	                      const typename PsimagLite::Vector<SizeType>::Type& perm,
+	                      const typename PsimagLite::Vector<RealType>::Type& eigs,
+	                      SizeType target) const
+	{
+		typename PsimagLite::Vector<SizeType>::Type permInverse(perm.size());
+		for (SizeType i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
 
-				jmSubspaces_.clear();
-				for (SizeType i=0;i<ns;i++) {
-					PairType jm1 = symm1.getJmValue(i);
-					for (SizeType j=0;j<ne;j++) {
-						PairType jm2 = symm2.getJmValue(j);
-						SizeType nelectrons = electrons1[i]+electrons2[j];
-						addAllowedJms(jm1,jm2,i,j,ns,nelectrons,pseudoQn);
-					}
-				}
-			}
-			
-			void createFactors(SizeType ns,SizeType ne)
-			{
-				VerySparseMatrixType factors(ns*ne);
-				SizeType offset=0;
-				for (SizeType i=0;i<jmSubspaces_.size();i++) {
-					SizeType s=0;
-					s= jmSubspaces_[i].createFactors(factors,offset);
-					offset += s;
-				}
-				if (factors.nonZero()==0) {
-					for (SizeType i=0;i<jmSubspaces_.size();i++) {
-						std::cerr<<"subspace number "<<i;
-						SizeType nelectrons=jmSubspaces_[i].getNe();
-						std::cerr<<" nelectrons="<<nelectrons;
-						PairType jm = jmSubspaces_[i].getJmValue();
-						std::cerr<<" pseudo="<<pseudoEffectiveNumber(nelectrons,jm.first);
-						
-						std::cerr<<" jm=("<<jm.first<<","<<jm.second<<")\n";
-						std::cerr<<" heavy="<<jmSubspaces_[i].heavy()<<"\n";
-						std::cerr<<"--------------------------------------------\n";
-					}
-					throw PsimagLite::RuntimeError("HSSU2.h::createFactors(): factors are empty\n");
-				}
-				factors.sort();
-				factors_ = factors;
-			}
+		for (SizeType i=0;i<target;i++) {
+			if (removedIndices.size()>=target) break;
+			if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
+			removedIndices.push_back(perm[i]);
 
-			// note: j is actually 2j and m is actually m+j
-			// note: this is so that j and m are both always SizeType
-			void addAllowedJms(const PairType& jm1,const PairType& jm2,SizeType alpha,SizeType beta,SizeType ns,SizeType nelectrons,
-					int pseudoQn)
-			{
-				int j1 = jm1.first, j2=jm2.first;
-				int jinitial = j1-j2;
-				if (jinitial<0) jinitial = -jinitial;
-				for (int j=jinitial;j<=j1+j2;j++) {
-					// go over all hurdles:
-					// first hurdle (j1+j2+j is even)
-					//if (alpha==6 && beta==0) std::cerr<<__LINE__<<"\n";
-					if ((j1+j2+j) %2 !=0) continue;
-					// calculate m
-					// m = m1+m2+(j1+j2-j)/2
-					// note: (j1+j2-j) is even
-					// note: (j1+j2-j)>=0
-					int m = jm1.second+ jm2.second + int((-j1-j2+j)/2);
-					// second hurdle |2m-j| <= j
-					int tmp = 2*m-j;
-					if (tmp<0) tmp= -tmp;
-					if (tmp>j) continue;
-					PairType jm(j,m);
-					int heavy=1;
-					if (pseudoQn>=0 &&  pseudoEffectiveNumber(nelectrons,jm.first) !=SizeType(pseudoQn)) {
-						heavy=0;
-					}
-					addJmPair(alpha+beta*ns,jm1,jm2,jm,nelectrons,heavy);
-				}
-			}
+			for (SizeType j=0;j<eigs.size();j++) {
 
-			void addJmPair(SizeType index,const PairType& jm1,const PairType& jm2,const PairType& jm,SizeType nelectrons,int heavy)
-			{
-				std::pair<PairType,SizeType> triplet;
-				triplet.first=jm;
-				triplet.second=nelectrons;
-				int x = PsimagLite::isInVector(jmSubspaces_,triplet);
-				if (x<0) { // add new jmSubspace
-					JmSubspace<VerySparseMatrixType,ThisType> jmSubspace(jm,index,jm1,jm2,nelectrons,heavy);
-					jmSubspaces_.push_back(jmSubspace);
-				} else {
-					jmSubspaces_[x].push(index,jm1,jm2,nelectrons);
-				}
-			}
-
-			void inclusiveRemoval(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
-					      const typename PsimagLite::Vector<SizeType>::Type& perm,
-					      const typename PsimagLite::Vector<RealType>::Type& eigs,
-					      SizeType target) const
-			{
-				typename PsimagLite::Vector<SizeType>::Type permInverse(perm.size());
-				for (SizeType i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
-
-				for (SizeType i=0;i<target;i++) {
-					if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
-					removedIndices.push_back(perm[i]);
-				}
-
-				for (SizeType i=0;i<target;i++)	{
-					for (SizeType j=0;j<eigs.size();j++) {
-						
-						if (flavors_[j]==flavors_[perm[i]] && jmValues_[j].first==jmValues_[perm[i]].first) {
-							int x = PsimagLite::isInVector(removedIndices,j);
-							if (x<0) {
-								typename PsimagLite::Vector<SizeType>::Type::iterator p1 =
-										find(removedIndices.begin(),removedIndices.end(),perm[i]);
-								if (p1==removedIndices.end()) continue;
-								removedIndices.erase(p1);
-								if (fabs(eigs[permInverse[j]]-eigs[i])>1e-6) {
-									std::cerr<<"ind="<<perm[i]<<" j="<<permInverse[j];
-									std::cerr<<" e[ind]="<<eigs[i];
-									std::cerr<<" e[j]="<<eigs[permInverse[j]]<<"\n";
-									std::cerr<<"flavor="<<flavors_[j];
-									std::cerr<<" jm=("<<jmValues_[j].first<<",";
-									std::cerr<<jmValues_[j].second<<") ";
-									std::cerr<<" jm[ind]=(";
-									std::cerr<<jmValues_[perm[i]].first<<",";
-									std::cerr<<jmValues_[perm[i]].second<<")\n";
-								}
-								break;
-							}
+				if (flavors_[j]==flavors_[perm[i]] &&
+				    jmValues_[j].first==jmValues_[perm[i]].first) {
+					int x = PsimagLite::isInVector(removedIndices,j);
+					if (x<0) {
+						removedIndices.push_back(j);
+						if (fabs(eigs[permInverse[j]]-eigs[i])>1e-6) {
+							std::cerr<<"ind="<<perm[i]<<" j="<<permInverse[j];
+							std::cerr<<" e[ind]="<<eigs[i];
+							std::cerr<<" e[j]="<<eigs[permInverse[j]]<<"\n";
+							std::cerr<<"flavor="<<flavors_[j]<<" jm=";
+							std::cerr<<jmValues_[j].first<<" ";
+							std::cerr<<jmValues_[j].second<<" ";
+							std::cerr<<" jm[ind]=";
+							std::cerr<<jmValues_[perm[i]].first<<" ";
+							std::cerr<<jmValues_[perm[i]].second<<"\n";
 						}
 					}
 				}
 			}
+		}
+	}
 
-			void exclusiveRemoval(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
-					      const typename PsimagLite::Vector<SizeType>::Type& perm,
-					      const typename PsimagLite::Vector<RealType>::Type& eigs,
-					      SizeType target) const
-			{
-				typename PsimagLite::Vector<SizeType>::Type permInverse(perm.size());
-				for (SizeType i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
+	void calcReducedBasis()
+	{
+		jvals_.clear();
+		statesReduced_.clear();
+		for (SizeType i1=0;i1<jmValues_.size();i1++) {
+			PairType jm1 = jmValues_[i1];
+			if (jm1.first!=jm1.second) continue;
+			statesReduced_.push_back(i1);
+			int x = PsimagLite::isInVector(jvals_,jm1.first);
+			if (x<0) jvals_.push_back(jm1.first);
+		}
+	}
 
-				for (SizeType i=0;i<target;i++) {
-					if (removedIndices.size()>=target) break;
-					if (PsimagLite::isInVector(removedIndices,perm[i])>=0) continue;
-						removedIndices.push_back(perm[i]);
-
-					for (SizeType j=0;j<eigs.size();j++) {
-
-						if (flavors_[j]==flavors_[perm[i]] && jmValues_[j].first==jmValues_[perm[i]].first) {
-							int x = PsimagLite::isInVector(removedIndices,j);
-							if (x<0) {
-								removedIndices.push_back(j);
-								if (fabs(eigs[permInverse[j]]-eigs[i])>1e-6) {
-									std::cerr<<"ind="<<perm[i]<<" j="<<permInverse[j];
-									std::cerr<<" e[ind]="<<eigs[i];
-									std::cerr<<" e[j]="<<eigs[permInverse[j]]<<"\n";
-									std::cerr<<"flavor="<<flavors_[j]<<" jm=";
-									std::cerr<<jmValues_[j].first<<" ";
-									std::cerr<<jmValues_[j].second<<" ";
-									std::cerr<<" jm[ind]=";
-									std::cerr<<jmValues_[perm[i]].first<<" ";
-									std::cerr<<jmValues_[perm[i]].second<<"\n";
-								}
-							}
-						}
-					}
-				}
-			}
-
-			void calcReducedBasis()
-			{
-				jvals_.clear();
-				statesReduced_.clear();
-				for (SizeType i1=0;i1<jmValues_.size();i1++) {
-					PairType jm1 = jmValues_[i1];
-					if (jm1.first!=jm1.second) continue;
-					statesReduced_.push_back(i1);
-					int x = PsimagLite::isInVector(jvals_,jm1.first);
-					if (x<0) jvals_.push_back(jm1.first);
-				}
-			}
-
-			JmPairsType jmValues_;
-			typename PsimagLite::Vector<SizeType>::Type flavors_,flavorsOld_;
-			SizeType flavorsMax_,electronsMax_,jMax_;
-			FactorsType factors_;
-			typename PsimagLite::Vector<JmSubspaceType>::Type jmSubspaces_;
-			// reduced:
-			typename PsimagLite::Vector<SizeType>::Type statesReduced_;
-			typename PsimagLite::Vector<SizeType>::Type jvals_;
-	}; //class HamiltonianSymmetrySu2
+	JmPairsType jmValues_;
+	typename PsimagLite::Vector<SizeType>::Type flavors_,flavorsOld_;
+	SizeType flavorsMax_,electronsMax_,jMax_;
+	FactorsType factors_;
+	typename PsimagLite::Vector<JmSubspaceType>::Type jmSubspaces_;
+	// reduced:
+	typename PsimagLite::Vector<SizeType>::Type statesReduced_;
+	typename PsimagLite::Vector<SizeType>::Type jvals_;
+}; //class HamiltonianSymmetrySu2
 } // namespace Dmrg
 
 /*@}*/
 #endif
+

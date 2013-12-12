@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -84,223 +84,232 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 
 namespace Dmrg {
-	
-	template<typename GeometryType,typename ModelHelperType,typename LinkProductType>
-	class HamiltonianConnection {
-		public:
-			typedef typename ModelHelperType::RealType RealType;
-			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef LinkProductStruct<SparseElementType> LinkProductStructType;
-			typedef typename ModelHelperType::LinkType LinkType;
-			typedef std::pair<SizeType,SizeType> PairType;
-			typedef typename GeometryType::AdditionalDataType AdditionalDataType;
-			typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
-			typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
-			typedef typename PsimagLite::Concurrency ConcurrencyType;
 
-		HamiltonianConnection(const GeometryType& geometry,
-		                      const ModelHelperType& modelHelper,
-		                      const LinkProductStructType* lps = 0,
-		                      typename PsimagLite::Vector<SparseElementType>::Type* x = 0,
-		                      const typename PsimagLite::Vector<SparseElementType>::Type* y = 0)
-			: geometry_(geometry),
-			  modelHelper_(modelHelper),
-			  lps_(*lps),x_(*x),y_(*y),
-			  systemBlock_(modelHelper.leftRightSuper().left().block()),
-			  envBlock_(modelHelper.leftRightSuper().right().block()),
-			  smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
-			  emin_(*std::min_element(envBlock_.begin(),envBlock_.end())),
-		      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::npthreads))
-			{}
+template<typename GeometryType,typename ModelHelperType,typename LinkProductType>
+class HamiltonianConnection {
 
-			bool compute(SizeType i,
-			             SizeType j,
-			             SparseMatrixType* matrixBlock,
-				     LinkProductStructType* lps,
-				     SizeType& total) const
-			{
-				bool flag=false;
-				SizeType ind = modelHelper_.leftRightSuper().super().block()[i];
-				SizeType jnd = modelHelper_.leftRightSuper().super().block()[j];
+public:
 
-				if (!geometry_.connected(smax_,emin_,ind,jnd)) return flag;
-				SizeType type = geometry_.connectionKind(smax_,ind,jnd);
+	typedef typename ModelHelperType::RealType RealType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef LinkProductStruct<SparseElementType> LinkProductStructType;
+	typedef typename ModelHelperType::LinkType LinkType;
+	typedef std::pair<SizeType,SizeType> PairType;
+	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
+	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
+	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
+	typedef typename PsimagLite::Concurrency ConcurrencyType;
 
-				if (type==ProgramGlobals::SYSTEM_SYSTEM || 
-					type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
+	HamiltonianConnection(const GeometryType& geometry,
+	                      const ModelHelperType& modelHelper,
+	                      const LinkProductStructType* lps = 0,
+	                      typename PsimagLite::Vector<SparseElementType>::Type* x = 0,
+	                      const typename PsimagLite::Vector<SparseElementType>::Type* y = 0)
+	    : geometry_(geometry),
+	      modelHelper_(modelHelper),
+	      lps_(*lps),x_(*x),y_(*y),
+	      systemBlock_(modelHelper.leftRightSuper().left().block()),
+	      envBlock_(modelHelper.leftRightSuper().right().block()),
+	      smax_(*std::max_element(systemBlock_.begin(),systemBlock_.end())),
+	      emin_(*std::min_element(envBlock_.begin(),envBlock_.end())),
+	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::npthreads))
+	{}
 
-				SparseMatrixType mBlock;
+	bool compute(SizeType i,
+	             SizeType j,
+	             SparseMatrixType* matrixBlock,
+	             LinkProductStructType* lps,
+	             SizeType& total) const
+	{
+		bool flag=false;
+		SizeType ind = modelHelper_.leftRightSuper().super().block()[i];
+		SizeType jnd = modelHelper_.leftRightSuper().super().block()[j];
 
-				AdditionalDataType additionalData;
+		if (!geometry_.connected(smax_,emin_,ind,jnd)) return flag;
+		SizeType type = geometry_.connectionKind(smax_,ind,jnd);
 
-				for (SizeType term=0;term<geometry_.terms();term++) {
-					geometry_.fillAdditionalData(additionalData,term,ind,jnd);
-					SizeType dofsTotal = LinkProductType::dofs(term,additionalData);
-					for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
-						std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,dofs,additionalData);
-						SparseElementType tmp = geometry_(smax_,emin_,ind,edofs.first,jnd,edofs.second,term);
-				
-						if (tmp==static_cast<RealType>(0.0)) continue;
+		if (type==ProgramGlobals::SYSTEM_SYSTEM ||
+		    type==ProgramGlobals::ENVIRON_ENVIRON) return flag;
 
-						if (ind > jnd) tmp = std::conj(tmp);
+		SparseMatrixType mBlock;
 
-						flag = true;
-						// if .. else here is inefficient FIXME
-						//std::cerr<<"Adding "<<i<<" "<<j<<" term"<<term<<" dofs="<<dofs<<" value="<<tmp<<"\n";
-						if (lps!=0) {
-							lps->isaved[total]=i;
-							lps->jsaved[total]=j;
-							//lps->dof1saved.push_back(dof1);
-							//lps->dof2saved.push_back(dof2);
-							lps->typesaved[total]=type;
-							lps->tmpsaved[total]=tmp;
-							lps->termsaved[total]=term;
-							lps->dofssaved[total]=dofs;
-							total++;
-						} else {
-							calcBond(mBlock,i,j,type,tmp,term,dofs,additionalData);
-							*matrixBlock += mBlock;
-						}
-					}
-				}
-				return flag;
-			}
+		AdditionalDataType additionalData;
 
-			void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
-			{
+		for (SizeType term=0;term<geometry_.terms();term++) {
+			geometry_.fillAdditionalData(additionalData,term,ind,jnd);
+			SizeType dofsTotal = LinkProductType::dofs(term,additionalData);
+			for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
+				std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,dofs,additionalData);
+				SparseElementType tmp = geometry_(smax_,emin_,ind,edofs.first,jnd,edofs.second,term);
 
-				xtemp_[threadNum].resize(x_.size(),0);
-				SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
-				SparseElementType tmp = 0.0;
+				if (tmp==static_cast<RealType>(0.0)) continue;
 
-				SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
-				SizeType npthreads = PsimagLite::Concurrency::npthreads;
+				if (ind > jnd) tmp = std::conj(tmp);
 
-				for (SizeType p=0;p<blockSize;p++) {
-					SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p;
-					if (ix>=total) break;
+				flag = true;
 
-					AdditionalDataType additionalData;
-					prepare(ix,i,j,type,tmp,term,dofs,additionalData);
-
-					linkProduct(xtemp_[threadNum],y_,i,j,type,tmp,term,dofs,additionalData);
-					
+				if (lps!=0) {
+					lps->isaved[total]=i;
+					lps->jsaved[total]=j;
+					lps->typesaved[total]=type;
+					lps->tmpsaved[total]=tmp;
+					lps->termsaved[total]=term;
+					lps->dofssaved[total]=dofs;
+					total++;
+				} else {
+					calcBond(mBlock,i,j,type,tmp,term,dofs,additionalData);
+					*matrixBlock += mBlock;
 				}
 			}
+		}
+		return flag;
+	}
 
-			void sync()
-			{
-				typename PsimagLite::Vector<SparseElementType>::Type x(x_.size(),0);
-				for (SizeType threadNum = 0; threadNum < xtemp_.size(); threadNum++)
-					for (SizeType i=0;i<x_.size();i++)
-						x[i]+=xtemp_[threadNum][i];
+	void thread_function_(SizeType threadNum,
+	                      SizeType blockSize,
+	                      SizeType total,
+	                      pthread_mutex_t* myMutex)
+	{
 
-				PsimagLite::MPI::allReduce(x);
-				for (SizeType i=0;i<x_.size();i++)
-					x_[i] += x[i];
-			}
+		xtemp_[threadNum].resize(x_.size(),0);
+		SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
+		SparseElementType tmp = 0.0;
 
-			void prepare(SizeType ix,SizeType& i,SizeType& j,SizeType& type,SparseElementType& tmp,SizeType& term,SizeType& dofs,AdditionalDataType& additionalData) const
-			{
-				i=lps_.isaved[ix];
-				j=lps_.jsaved[ix];
-				type=lps_.typesaved[ix];
-				term = lps_.termsaved[ix];
-				dofs = lps_.dofssaved[ix];
-				tmp=lps_.tmpsaved[ix];
-				SizeType ind = modelHelper_.leftRightSuper().super().block()[i];
-				SizeType jnd = modelHelper_.leftRightSuper().super().block()[j];
-				geometry_.fillAdditionalData(additionalData,term,ind,jnd);
-			}
+		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
-			LinkType getKron(const SparseMatrixType** A,
-							 const SparseMatrixType** B,
-							 SizeType i,
-							 SizeType j,
-							 SizeType type,
-							 const SparseElementType& valuec,
-							 SizeType term,
-							 SizeType dofs,
-							 const AdditionalDataType& additionalData) const
-			{
-				int offset = modelHelper_.leftRightSuper().left().block().size();
-				PairType ops;
-				std::pair<char,char> mods('N','C');
-				SizeType fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
-				RealType angularFactor=0;
-				bool isSu2 = modelHelper_.isSu2();
-				SparseElementType value = valuec;
-				LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData);
-				LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData);
-				LinkType link2(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
-				SizeType sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
-				SizeType envOrSys = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::Environ : ModelHelperType::System;
-				SizeType site1Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site1 : link2.site1-offset;
-				SizeType site2Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site2-offset : link2.site2;
+		for (SizeType p=0;p<blockSize;p++) {
+			SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p;
+			if (ix>=total) break;
 
-				*A = &modelHelper_.getReducedOperator(link2.mods.first,site1Corrected,link2.ops.first,sysOrEnv);
-				*B = &modelHelper_.getReducedOperator(link2.mods.second,site2Corrected,link2.ops.second,envOrSys);
-//				printFullMatrix(**A,"A");
-//				printFullMatrix(**B,"B");
-//				std::cout<<"link2.value="<<link2.value<<"i="<<i<<" j="<<j<<" type="<<type<<" valuec="<<valuec<<" term="<<term<<" dofs="<<dofs<<"\n";
-				return link2;
-			}
+			AdditionalDataType additionalData;
+			prepare(ix,i,j,type,tmp,term,dofs,additionalData);
 
-			template<typename SomeConcurrencyType,typename SomeOtherConcurrencyType>
-			void sync(SomeConcurrencyType& conc,SomeOtherConcurrencyType& conc2)
-			{
-				conc.reduce(x_,conc2);
-			}
+			linkProduct(xtemp_[threadNum],y_,i,j,type,tmp,term,dofs,additionalData);
 
-		private:
+		}
+	}
 
-			//! Adds a connector between system and environment
-			SizeType calcBond(SparseMatrixType &matrixBlock,
-					SizeType i,
-			                SizeType j,
-					SizeType type,
-			                const SparseElementType& valuec,
-			                SizeType term,
-					SizeType dofs,
-							const AdditionalDataType& additionalData) const
-			{
-				SparseMatrixType const* A = 0;
-				SparseMatrixType const* B = 0;
-				LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs,additionalData);
-				modelHelper_.fastOpProdInter(*A,*B,matrixBlock,link2);
+	void sync()
+	{
+		typename PsimagLite::Vector<SparseElementType>::Type x(x_.size(),0);
 
-				return matrixBlock.nonZero();
-			}
+		for (SizeType threadNum = 0; threadNum < xtemp_.size(); threadNum++)
+			for (SizeType i=0;i<x_.size();i++)
+				x[i]+=xtemp_[threadNum][i];
 
-			//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment 
-			void linkProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
-							 const typename PsimagLite::Vector<SparseElementType>::Type& y,
-							 SizeType i,
-							 SizeType j,
-							 SizeType type,
-							 const SparseElementType &valuec,
-							 SizeType term,
-							 SizeType dofs,
-							 const AdditionalDataType& additionalData) const
-			{
-				SparseMatrixType const* A = 0;
-				SparseMatrixType const* B = 0;
-				LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs,additionalData);
-				modelHelper_.fastOpProdInter(x,y,*A,*B,link2);
-			}
+		PsimagLite::MPI::allReduce(x);
+		for (SizeType i=0;i<x_.size();i++)
+			x_[i] += x[i];
+	}
 
-			const GeometryType& geometry_;
-			const ModelHelperType& modelHelper_;
-			const LinkProductStructType& lps_;
-			typename PsimagLite::Vector<SparseElementType>::Type& x_;
-			const typename PsimagLite::Vector<SparseElementType>::Type& y_;
-			const typename GeometryType::BlockType& systemBlock_;
-			const typename GeometryType::BlockType& envBlock_;
-			SizeType smax_,emin_;
-		    VectorVectorType xtemp_;
-	}; // class HamiltonianConnection
+	void prepare(SizeType ix,
+	             SizeType& i,
+	             SizeType& j,
+	             SizeType& type,
+	             SparseElementType& tmp,
+	             SizeType& term,
+	             SizeType& dofs,
+	             AdditionalDataType& additionalData) const
+	{
+		i=lps_.isaved[ix];
+		j=lps_.jsaved[ix];
+		type=lps_.typesaved[ix];
+		term = lps_.termsaved[ix];
+		dofs = lps_.dofssaved[ix];
+		tmp=lps_.tmpsaved[ix];
+		SizeType ind = modelHelper_.leftRightSuper().super().block()[i];
+		SizeType jnd = modelHelper_.leftRightSuper().super().block()[j];
+		geometry_.fillAdditionalData(additionalData,term,ind,jnd);
+	}
+
+	LinkType getKron(const SparseMatrixType** A,
+	                 const SparseMatrixType** B,
+	                 SizeType i,
+	                 SizeType j,
+	                 SizeType type,
+	                 const SparseElementType& valuec,
+	                 SizeType term,
+	                 SizeType dofs,
+	                 const AdditionalDataType& additionalData) const
+	{
+		int offset = modelHelper_.leftRightSuper().left().block().size();
+		PairType ops;
+		std::pair<char,char> mods('N','C');
+		SizeType fermionOrBoson=ProgramGlobals::FERMION,angularMomentum=0,category=0;
+		RealType angularFactor=0;
+		bool isSu2 = modelHelper_.isSu2();
+		SparseElementType value = valuec;
+		LinkProductType::valueModifier(value,term,dofs,isSu2,additionalData);
+		LinkProductType::setLinkData(term,dofs,isSu2,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category,additionalData);
+		LinkType link2(i,j,type, value,dofs,fermionOrBoson,ops,mods,angularMomentum,angularFactor,category);
+		SizeType sysOrEnv = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::System : ModelHelperType::Environ;
+		SizeType envOrSys = (link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? ModelHelperType::Environ : ModelHelperType::System;
+		SizeType site1Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site1 : link2.site1-offset;
+		SizeType site2Corrected =(link2.type==ProgramGlobals::SYSTEM_ENVIRON) ? link2.site2-offset : link2.site2;
+
+		*A = &modelHelper_.getReducedOperator(link2.mods.first,site1Corrected,link2.ops.first,sysOrEnv);
+		*B = &modelHelper_.getReducedOperator(link2.mods.second,site2Corrected,link2.ops.second,envOrSys);
+
+		return link2;
+	}
+
+	template<typename SomeConcurrencyType,typename SomeOtherConcurrencyType>
+	void sync(SomeConcurrencyType& conc,SomeOtherConcurrencyType& conc2)
+	{
+		conc.reduce(x_,conc2);
+	}
+
+private:
+
+	//! Adds a connector between system and environment
+	SizeType calcBond(SparseMatrixType &matrixBlock,
+	                  SizeType i,
+	                  SizeType j,
+	                  SizeType type,
+	                  const SparseElementType& valuec,
+	                  SizeType term,
+	                  SizeType dofs,
+	                  const AdditionalDataType& additionalData) const
+	{
+		SparseMatrixType const* A = 0;
+		SparseMatrixType const* B = 0;
+		LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs,additionalData);
+		modelHelper_.fastOpProdInter(*A,*B,matrixBlock,link2);
+
+		return matrixBlock.nonZero();
+	}
+
+	//! Computes x+=H_{ij}y where H_{ij} is a Hamiltonian that connects system and environment
+	void linkProduct(typename PsimagLite::Vector<SparseElementType>::Type& x,
+	                 const typename PsimagLite::Vector<SparseElementType>::Type& y,
+	                 SizeType i,
+	                 SizeType j,
+	                 SizeType type,
+	                 const SparseElementType &valuec,
+	                 SizeType term,
+	                 SizeType dofs,
+	                 const AdditionalDataType& additionalData) const
+	{
+		SparseMatrixType const* A = 0;
+		SparseMatrixType const* B = 0;
+		LinkType link2 = getKron(&A,&B,i,j,type,valuec,term,dofs,additionalData);
+		modelHelper_.fastOpProdInter(x,y,*A,*B,link2);
+	}
+
+	const GeometryType& geometry_;
+	const ModelHelperType& modelHelper_;
+	const LinkProductStructType& lps_;
+	typename PsimagLite::Vector<SparseElementType>::Type& x_;
+	const typename PsimagLite::Vector<SparseElementType>::Type& y_;
+	const typename GeometryType::BlockType& systemBlock_;
+	const typename GeometryType::BlockType& envBlock_;
+	SizeType smax_,emin_;
+	VectorVectorType xtemp_;
+}; // class HamiltonianConnection
 } // namespace Dmrg 
 
 /*@}*/
 #endif // HAMILTONIAN_CONNECTION_H
+
