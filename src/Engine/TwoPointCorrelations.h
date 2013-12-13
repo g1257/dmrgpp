@@ -133,7 +133,7 @@ namespace Dmrg {
 		{
 			typedef std::pair<size_t,size_t> PairType;
 
-			std::vector<PairType> pairs;
+			typename PsimagLite::Vector<PairType>::Type pairs;
 			for (SizeType i=0;i<rows;i++) {
 				for (SizeType j=i;j<cols;j++) {
 					if (i>j) continue;

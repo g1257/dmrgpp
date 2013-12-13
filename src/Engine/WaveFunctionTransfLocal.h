@@ -395,6 +395,7 @@ namespace Dmrg {
 			msg<<" Destination sectors "<<psiDest.sectors();
 			msg<<" Source sectors "<<psiSrc.sectors();
 			progress_.printline(msg,std::cout);
+			assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
 
 			VectorType psiV;
 			for (SizeType srcI = 0; srcI < psiSrc.sectors(); ++srcI) {
@@ -425,9 +426,6 @@ namespace Dmrg {
 			SizeType nalpha = lrs.left().permutationInverse().size();
 
 			assert(nip==dmrgWaveStruct_.ws.col());
-			assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
-
-
 			
 			const SparseMatrixType& we = dmrgWaveStruct_.we;
 			const SparseMatrixType& ws = dmrgWaveStruct_.ws;

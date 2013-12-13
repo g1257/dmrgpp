@@ -338,7 +338,7 @@ public:
 
 			if (f == myoperator[i].fermionSign) continue;
 
-			std::string str("CorrectionVectorTargetting: ");
+			PsimagLite::String str("CorrectionVectorTargetting: ");
 			str += "inconsistent sign for operators\n";
 			throw PsimagLite::RuntimeError(str);
 
