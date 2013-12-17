@@ -249,7 +249,7 @@ public:
 		params.Eg = Eg_;
 		params.weight = s2*weightForContinuedFraction_;
 		params.isign = s;
-		PostProcType cf(ab_,params);
+		PostProcType cf(ab_,reortho_,params);
 		PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(str);
 		commonTargetting_.save(block,io,cf,targetVectors_);
@@ -562,6 +562,7 @@ private:
 	RealType Eg_;
 	RealType weightForContinuedFraction_;
 	TridiagonalMatrixType ab_;
+	DenseMatrixType reortho_;
 }; // class DynamicTargetting
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,

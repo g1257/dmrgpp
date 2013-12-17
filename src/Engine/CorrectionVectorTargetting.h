@@ -299,7 +299,7 @@ public:
 		params.Eg = Eg_;
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
-		PostProcType cf(ab_,params);
+		PostProcType cf(ab_,reortho_,params);
 
 		commonTargetting_.save(block,io,cf,targetVectors_);
 		psi_.save(io,"PSI");
@@ -441,7 +441,7 @@ private:
 		LanczosSolverType lanczosSolver(h,params,&V);
 
 		lanczosSolver.decomposition(sv,ab_);
-		//calcIntensity(Eg,sv,V,ab);
+		reortho_ = lanczosSolver.reorthogonalizationMatrix();
 	}
 
 	void computeXiAndXr(VectorType& xi,
@@ -529,6 +529,7 @@ private:
 	bool correctionEnabled_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
+	DenseMatrixType reortho_;
 	RealType Eg_;
 	RealType weightForContinuedFraction_;
 
