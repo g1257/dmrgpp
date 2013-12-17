@@ -4,17 +4,21 @@ use strict;
 use warnings;
 use Utils;
 
-my ($site,$site2,$root,$cOrN) = @ARGV;
-defined($cOrN) or die "USAGE: $0 site site2 root cOrN\n";
-Utils::checkRange($cOrN,"c","n");
+my ($site,$site2,$root,$operatorLabel) = @ARGV;
+defined($operatorLabel) or die "USAGE: $0 site site2 root operatorLabel\n";
+Utils::checkRange($operatorLabel,"c","n","s+","s-","sz");
 ($site <= $site2) or die "$0: first site must be less or equal second site\n";
 
 my %params = Utils::loadParams("params.txt");
 
-my $matrixFermionSign = ($cOrN eq "c") ? -1 : 1;
+my $matrixFermionSign = ($operatorLabel eq "c") ? -1 : 1;
 my $templateInput = "inputTemplate.inp";
 
 my $n = Utils::getLabel($templateInput,"TotalNumberOfSites=");
+my $model = Utils::getLabel($templateInput,"Model=");
+checkOperatorLabels($operatorLabel,$model);
+my $hilbertSize = ($model eq "HeisenbergSpinOneHalf") ? 2 : 4;
+
 my @spectral;
 
 my $siteMin = ($site < $site2) ? $site : $site2;
@@ -39,7 +43,7 @@ if ($site2 >= $site) {
 
 die "$0: $result does not exist\n" unless (defined($result) and -r "$result");
 
-my $resultLanczos = doLanczos($input,"${dataRoot1}Lanczos",$cOrN);
+my $resultLanczos = doLanczos($input,"${dataRoot1}Lanczos",$operatorLabel);
 print STDERR "$0: Result $result for DMRG, Result $resultLanczos for Lanczos\n";
 
 sub postProc
@@ -68,8 +72,8 @@ sub postProc
 
 sub doLanczos
 {
-	my ($input,$dataRoot,$cOrN) = @_;
-	system("./lanczos -f $input -g $cOrN &> $dataRoot.comb");
+	my ($input,$dataRoot,$operatorLabel) = @_;
+	system("./lanczos -f $input -g $operatorLabel &> $dataRoot.comb");
 	return functionVsOmega($dataRoot);
 }
 
@@ -258,16 +262,45 @@ sub findMatrix
 {
 	my ($type,$type2)=@_;
 	my $m = findMatrixAux($type,$type2);
-	my $matrixEnd = "\nFERMIONSIGN=$matrixFermionSign\nJMVALUES 0 0\nAngularFactor=1\n\n";
+	my $matrixEnd = "FERMIONSIGN=$matrixFermionSign\nJMVALUES 0 0\nAngularFactor=1\n\n";
 	return "$m$matrixEnd";
 }
 
 sub findMatrixAux
 {
 	my ($type,$type2)=@_;
-	my $matrix = ($cOrN eq "c") ? "0 1 0 0\n0 0 0 0\n0 0 0 1\n0 0 0 0\n"
+	if ($model eq "HeisenbergSpinOneHalf") {
+		return findMatrixHeisenbergSpinOneHalf($type,$type2);
+	}
+
+	findMatrixHubbard($type,$type2);
+}
+
+sub findMatrixHeisenbergSpinOneHalf
+{
+	my ($type,$type2)=@_;
+	my $matrix = ($operatorLabel eq "sz") ? "1 0\n0 -1\n"
+                                    : "0 0\n1 0\n";
+	if (($type & 1) && !($operatorLabel eq "sz")) {
+		$matrix = "0 1\n0 0\n";
+	}
+
+	return $matrix if ($type2==0);
+
+	if ($type>1) {
+		$matrix = multiplyMatrix($matrix,-1);
+	}
+
+	return $matrix;
+}
+
+sub findMatrixHubbard
+{
+	my ($type,$type2)=@_;
+	
+	my $matrix = ($operatorLabel eq "c") ? "0 1 0 0\n0 0 0 0\n0 0 0 1\n0 0 0 0\n"
                                     : "0 0 0 0\n0 1 0 0\n0 0 0 0\n0 0 0 1\n";
-	if (($type & 1) && ($cOrN eq "c")) {
+	if (($type & 1) && ($operatorLabel eq "c")) {
 		 $matrix = "0 0 0 0\n1 0 0 0\n0 0 0 0\n0 0 1 0\n";
 	}
 
@@ -282,8 +315,15 @@ sub findMatrixAux
 
 sub zeroMatrix
 {
-	my $id =  "0 0 0 0\n0 0 0 0\n0 0 0 0\n0 0 0 0\n";
-	my $matrixEnd = "\nFERMIONSIGN=1\nJMVALUES 0 0\nAngularFactor=1\n\n";
+	my $id =  "";
+	for (my $i = 0; $i < $hilbertSize; ++$i) {
+		for (my $j = 0; $j < $hilbertSize; ++$j) {
+			$id .= "0 ";
+		}
+		$id .= "\n";
+	}
+
+	my $matrixEnd = "FERMIONSIGN=1\nJMVALUES 0 0\nAngularFactor=1\n\n";
         return "$id$matrixEnd";
 }
 
@@ -347,3 +387,15 @@ sub readEnergy
 	return $energy;
 }
 
+sub checkOperatorLabels
+{
+	my ($operatorLabel,$model) = @_;
+	if ($model eq "HeisenbergSpinOneHalf") {
+		return if ($operatorLabel eq "sz" or $operatorLabel eq "s+" or $operatorLabel eq "s-");
+		die "$0: $operatorLabel not valid for $model\n";
+	} else {
+		return if ($operatorLabel eq "c" or $operatorLabel eq "n");
+	}
+
+	die "$0: $operatorLabel not valid for $model\n";
+}

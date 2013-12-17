@@ -4,10 +4,10 @@ use strict;
 use warnings;
 use Utils;
 
-my ($dmrgOrLanczos,$root,$cOrN,$submit) = @ARGV;
-defined($submit) or die "USAGE: $0 dmrgOrLanczos root cOrN submit\n";
+my ($dmrgOrLanczos,$root,$operatorLabel,$submit) = @ARGV;
+defined($submit) or die "USAGE: $0 dmrgOrLanczos root operatorLabel submit\n";
 Utils::checkRange($dmrgOrLanczos,"Lanczos","Dmrg");
-Utils::checkRange($cOrN,"c","n");
+Utils::checkRange($operatorLabel,"c","n","s+","s-","sz");
 Utils::checkRange($submit,"nobatch","nosubmit","submit");
 
 my $templateInput = "inputTemplate.inp";
@@ -17,10 +17,10 @@ my $n = Utils::getLabel($templateInput,"TotalNumberOfSites=");
 for (my $site=0; $site<$n; $site++) {
 	for (my $site2=$site; $site2<$n; $site2++) {
 		if ($submit eq "nobatch") {
-			noBatch($site,$site2,$dmrgOrLanczos,$root,$cOrN);
+			noBatch($site,$site2,$dmrgOrLanczos,$root,$operatorLabel);
 			next;
 		}
-		my $batch = createBatch($site,$site2,$dmrgOrLanczos,$root,$cOrN);
+		my $batch = createBatch($site,$site2,$dmrgOrLanczos,$root,$operatorLabel);
 		system("sync");
 		submitBatch($batch) if ($submit eq "submit");
 	}
@@ -28,14 +28,14 @@ for (my $site=0; $site<$n; $site++) {
 
 sub noBatch
 {
-	my ($site,$site2,$dmrgOrLanczos,$root,$cOrN) = @_;
-	system("perl dynamics$dmrgOrLanczos.pl $site $site2 3 $root $cOrN");
+	my ($site,$site2,$dmrgOrLanczos,$root,$operatorLabel) = @_;
+	system("perl dynamics$dmrgOrLanczos.pl $site $site2 3 $root $operatorLabel");
 }
 
 
 sub createBatch
 {
-	my ($site,$site2,$dmrgOrLanczos,$root,$cOrN) = @_;
+	my ($site,$site2,$dmrgOrLanczos,$root,$operatorLabel) = @_;
 	my $ind = "$site"."_"."$site2";
         my $file = "Batch$ind.pbs";
         open(FOUT,">$file") or die "$0: Cannot write to $file: $!\n";

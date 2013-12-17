@@ -13,6 +13,9 @@ my %params = Utils::loadParams("params.txt");
 my $templateInput = "inputTemplate.inp";
 
 my $n = Utils::getLabel($templateInput,"TotalNumberOfSites=");
+my $model = Utils::getLabel($templateInput,"Model=");
+die "$0: Only HubbardOneBand supported, not $model\n" unless ($model eq "HubbardOneBand");
+my $hilbertSize = ($model eq "HeisenbergSpinOneHalf") ? 2 : 4;
 my @spectral;
 
 my $input = createInput($n,$site,$site2);

@@ -97,22 +97,22 @@ sub makeTemplateInput
 	print<<EOF;
 TSPOperator=raw
 RAW_MATRIX
-4 4
+\$hilbertSize \$hilbertSize
 \$matrix[0]
 
 TSPOperator=raw
 RAW_MATRIX
-4 4
+\$hilbertSize \$hilbertSize
 \$matrix[1]
 
 TSPOperator=raw
 RAW_MATRIX
-4 4
+\$hilbertSize \$hilbertSize
 \$matrix[2]
 
 TSPOperator=raw
 RAW_MATRIX
-4 4
+\$hilbertSize \$hilbertSize
 \$matrix[3]
 
 IsPeriodicX=0
