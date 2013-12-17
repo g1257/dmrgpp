@@ -52,9 +52,12 @@ public:
 	typedef PlotParams<RealType> PlotParamsType;
 	typedef ParametersForSolver<RealType> ParametersType;
 
-	ContinuedFraction(const TridiagonalMatrixType& ab,const ParametersType& params)
+	ContinuedFraction(const TridiagonalMatrixType& ab,
+	                  const MatrixType& reortho,
+	                  const ParametersType& params)
 	    : progress_("ContinuedFraction"),
 	      ab_(ab),
+	      reortho_(reortho),
 	      Eg_(params.Eg),
 	      weight_(params.weight),
 	      isign_(params.isign)
@@ -63,11 +66,12 @@ public:
 	}
 
 	ContinuedFraction() : progress_("ContinuedFraction"),
-	    ab_(),Eg_(0),weight_(0),isign_(1) { }
+	    ab_(),reortho_(),Eg_(0),weight_(0),isign_(1) { }
 
 	ContinuedFraction(IoSimple::In& io)
 	    : progress_("ContinuedFraction"),ab_(io)
 	{
+		io.readMatrix(reortho_,"#ReorthogonalizationMatrix");
 		io.readline(weight_,"#CFWeight=");
 		io.readline(Eg_,"#CFEnergy=");
 		io.readline(isign_,"#CFIsign=");
@@ -82,6 +86,8 @@ public:
 		io.setPrecision(12);
 		ab_.save(io);
 
+		io.printMatrix(reortho_,"#ReorthogonalizationMatrix");
+
 		io.print("#CFWeight=",weight_);
 
 		io.print("#CFEnergy=",Eg_);
@@ -92,13 +98,14 @@ public:
 		io.printVector(intensity_,"#CFIntensities");
 	}
 
-	void set(
-	        const TridiagonalMatrixType& ab,
-	        const RealType& Eg,
-	        RealType weight,
-	        int isign)
+	void set(const TridiagonalMatrixType& ab,
+	         const MatrixType& reortho,
+	         const RealType& Eg,
+	         RealType weight,
+	         int isign)
 	{
 		ab_ = ab;
+		reortho_ = reortho;
 		Eg_ = Eg;
 		weight_ = weight;
 		isign_ = isign;
@@ -148,6 +155,12 @@ private:
 		if (weight_==0) return;
 		MatrixType T;
 		ab_.buildDenseMatrix(T);
+
+		if (reortho_.n_row()>0) {
+			MatrixType tmp = T * reortho_;
+			T = multiplyTransposeConjugate(reortho_,tmp);
+		}
+
 		eigs_.resize(T.n_row());
 		diag(T,eigs_,'V');
 		intensity_.resize(T.n_row());
@@ -158,6 +171,7 @@ private:
 
 	ProgressIndicator progress_;
 	TridiagonalMatrixType ab_;
+	MatrixType reortho_;
 	RealType Eg_;
 	RealType weight_;
 	int isign_;

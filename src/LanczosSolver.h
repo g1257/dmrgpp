@@ -105,6 +105,7 @@ class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixTy
 
 	typedef typename SolverParametersType::RealType RealType;
 	typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
+	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
 
 public:
 
@@ -189,10 +190,14 @@ public:
 		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,std::cout);
 	}
 
-	template<typename DenseMatrixType>
 	void buildDenseMatrix(DenseMatrixType& T,const TridiagonalMatrixType& ab) const
 	{
 		ab.buildDenseMatrix(T);
+	}
+
+	const DenseMatrixType& reorthogonalizationMatrix()
+	{
+		return lanczosVectors_.reorthogonalizationMatrix();
 	}
 
 	void push(TridiagonalMatrixType& ab,const RealType& a,const RealType& b) const

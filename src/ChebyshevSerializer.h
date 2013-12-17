@@ -79,7 +79,9 @@ public:
 	typedef ParametersForSolver<RealType> ParametersType;
 	typedef KernelPolynomialParameters<RealType> KernelParametersType;
 
-	ChebyshevSerializer(const VectorType& ab,const ParametersType& params)
+	ChebyshevSerializer(const VectorType& ab,
+	                    const MatrixType& reortho,
+	                    const ParametersType& params)
 	    : progress_("ChebyshevSerializer"),
 	      moments_(ab),
 	      params_(params)

@@ -119,12 +119,13 @@ public:
 	typedef typename VectorType::value_type VectorElementType;
 	typedef ChebyshevSerializer<TridiagonalMatrixType> PostProcType;
 	typedef PsimagLite::Random48<RealType> RngType;
+	typedef Matrix<VectorElementType> DenseMatrixType;
 
 	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
 	ChebyshevSolver(MatrixType const &mat,
 	                SolverParametersType& params,
-	                Matrix<VectorElementType>* storageForLanczosVectors=0)
+	                DenseMatrixType* storageForLanczosVectors=0)
 	    : progress_("ChebyshevSolver"),
 	      mat_(mat),
 	      params_(params),
@@ -156,7 +157,7 @@ public:
 		unimplemented("computeGroundState");
 	}
 
-	void buildDenseMatrix(Matrix<VectorElementType>& T,
+	void buildDenseMatrix(DenseMatrixType& T,
 	                       const TridiagonalMatrixType& ab) const
 	{
 		unimplemented("buildDenseMatrix");
@@ -221,6 +222,11 @@ public:
 	}
 
 	SizeType steps() const {return params_.steps; }
+
+	const DenseMatrixType& reorthogonalizationMatrix()
+	{
+		return lanczosVectors_.reorthogonalizationMatrix();
+	}
 
 private:
 

@@ -313,6 +313,7 @@ std::istream& operator >> (std::istream& is, Matrix<T>& A)
 	SizeType nrow=0,ncol=0;
 	is >> nrow;
 	is >> ncol;
+
 	if (is) {
 		A.reset(nrow,ncol);
 		for (SizeType j=0; j<A.n_row(); j++) for (SizeType i=0; i<A.n_col(); i++) {

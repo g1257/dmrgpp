@@ -120,6 +120,7 @@ public:
 			data_ = storage;
 			return;
 		}
+
 		data_ = new DenseMatrixType();
 		needsDelete_ = true;
 	}
@@ -258,7 +259,100 @@ public:
 		}
 	}
 
+	const DenseMatrixType& reorthogonalizationMatrix()
+	{
+		if (reortho_.n_row() == 0) {
+			calculateReortho();
+		}
+
+		return reortho_;
+	}
+
 private:
+
+	void calculateReortho()
+	{
+		if (!lotaMemory_) return;
+
+		SizeType nlanczos = data_->n_col();
+		DenseMatrixType w(nlanczos,nlanczos);
+
+		computeOverlap(w);
+
+		reortho_.resize(nlanczos,nlanczos);
+		computeS(reortho_,w);
+	}
+
+private:
+
+	void computeOverlap(DenseMatrixType& w) const
+	{
+		SizeType nlanczos = w.n_row();
+
+		for (SizeType i = 0; i < nlanczos; ++i) {
+			for (SizeType j = i; j < nlanczos; ++j) {
+				w(i,j) = computeOverlap(i,j);
+			}
+		}
+	}
+
+	ComplexOrRealType computeOverlap(SizeType ind, SizeType jnd) const
+	{
+		ComplexOrRealType sum = 0.0;
+
+		SizeType n = data_->n_row();
+
+		for (SizeType i = 0; i < n; ++i) {
+			sum += std::conj(data_->operator ()(i,ind)) * data_->operator ()(i,jnd);
+		}
+
+		return sum;
+	}
+
+	void computeS(DenseMatrixType& s,const DenseMatrixType& w) const
+	{
+		SizeType nlanczos = s.n_row();
+		VectorType kvalue(nlanczos);
+		VectorType v(nlanczos);
+
+		for (SizeType n = 0; n < nlanczos; ++n) {
+			s(n,n) = 1.0;
+			computeS(s,w,n,kvalue,v);
+		}
+	}
+
+	void computeS(DenseMatrixType& s,
+	              const DenseMatrixType& w,
+	              SizeType n,
+	              VectorType& kvalue,
+	              VectorType& v) const
+	{
+		for (SizeType q = 0; q < n; ++q) {
+			kvalue[q] = 0.0;
+			for (SizeType k = 0; k <= q; ++k)
+				kvalue[q] += s(k,q) * w(n,k);
+		}
+
+		for (SizeType p = 0; p < n; ++p) {
+			v[p] = 0.0;
+			for (SizeType q = p; q < n; ++q)
+				v[p] -= kvalue[q] * s(p,q);
+		}
+
+		v[n] = 1;
+
+		RealType nn = 0;
+
+		for (SizeType p = 0; p <= n; ++p)
+			for (SizeType q = 0; q <= n; ++q)
+				nn += std::real(v[p] * v[q] * w(p,q));
+		assert(nn>0);
+		nn = 1.0/sqrt(nn);
+
+		for (SizeType p = 0; p <= n; ++p)
+			s(p,n) = v[p] * nn;
+
+	}
 
 	//! copy ctor and assigment operator are invalid
 	//! because this class contains a pointer:
@@ -273,6 +367,7 @@ private:
 	SizeType steps_;
 	VectorType ysaved_;
 	DenseMatrixType* data_;
+	DenseMatrixType reortho_;
 }; // class LanczosVectors
 
 } // namespace PsimagLite
