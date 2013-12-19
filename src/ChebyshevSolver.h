@@ -110,6 +110,8 @@ class ChebyshevSolver {
 
 	typedef typename SolverParametersType::RealType RealType;
 	typedef LanczosVectors<MatrixType,VectorType> LanczosVectorsType;
+	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
+	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
 
 public:
 
@@ -119,7 +121,6 @@ public:
 	typedef typename VectorType::value_type VectorElementType;
 	typedef ChebyshevSerializer<TridiagonalMatrixType> PostProcType;
 	typedef PsimagLite::Random48<RealType> RngType;
-	typedef Matrix<VectorElementType> DenseMatrixType;
 
 	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
 
@@ -223,7 +224,7 @@ public:
 
 	SizeType steps() const {return params_.steps; }
 
-	const DenseMatrixType& reorthogonalizationMatrix()
+	const DenseMatrixRealType& reorthogonalizationMatrix()
 	{
 		return lanczosVectors_.reorthogonalizationMatrix();
 	}

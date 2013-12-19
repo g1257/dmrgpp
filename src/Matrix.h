@@ -66,7 +66,8 @@ public:
 	}
 
 	template<typename RealType>
-	Matrix(const Matrix<RealType>& m)
+	Matrix(const Matrix<RealType>& m,
+	       typename EnableIf<!IsComplexNumber<RealType>::True,int>::Type dummy = 0)
 	{
 		nrow_=m.n_row();
 		ncol_=m.n_col();

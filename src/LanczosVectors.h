@@ -102,6 +102,7 @@ public:
 	typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 	typedef typename VectorType::value_type VectorElementType;
 	typedef PsimagLite::Matrix<VectorElementType> DenseMatrixType;
+	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef PsimagLite::ContinuedFraction<TridiagonalMatrixType> PostProcType;
 
 	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
@@ -259,7 +260,7 @@ public:
 		}
 	}
 
-	const DenseMatrixType& reorthogonalizationMatrix()
+	const DenseMatrixRealType& reorthogonalizationMatrix()
 	{
 		if (reortho_.n_row() == 0) {
 			calculateReortho();
@@ -309,7 +310,7 @@ private:
 		return sum;
 	}
 
-	void computeS(DenseMatrixType& s,const DenseMatrixType& w) const
+	void computeS(DenseMatrixRealType& s,const DenseMatrixType& w) const
 	{
 		SizeType nlanczos = s.n_row();
 		VectorType kvalue(nlanczos);
@@ -321,7 +322,7 @@ private:
 		}
 	}
 
-	void computeS(DenseMatrixType& s,
+	void computeS(DenseMatrixRealType& s,
 	              const DenseMatrixType& w,
 	              SizeType n,
 	              VectorType& kvalue,
@@ -350,7 +351,7 @@ private:
 		nn = 1.0/sqrt(nn);
 
 		for (SizeType p = 0; p <= n; ++p)
-			s(p,n) = v[p] * nn;
+			s(p,n) = std::real(v[p]) * nn;
 
 	}
 
@@ -367,7 +368,7 @@ private:
 	SizeType steps_;
 	VectorType ysaved_;
 	DenseMatrixType* data_;
-	DenseMatrixType reortho_;
+	DenseMatrixRealType reortho_;
 }; // class LanczosVectors
 
 } // namespace PsimagLite
