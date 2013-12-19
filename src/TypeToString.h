@@ -8,16 +8,16 @@
 #include "String.h"
 
 namespace PsimagLite {
-	template<class T>
-	String typeToString(T t)
-	{
-		std::stringstream ss;
-		String str;
-		ss.precision(10);
-		ss<<t;
-		ss>>str;
-		return str;
-	}
+template<class T>
+String typeToString(T t)
+{
+	std::stringstream ss;
+	String str;
+	ss.precision(10);
+	ss<<t;
+	ss>>str;
+	return str;
+}
 }
 
 template<class T>

@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -82,72 +79,73 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TRIDIAGONAL_MATRIX_H
 
 namespace PsimagLite {
-	
-	template<typename FieldType>
-	class TridiagonalMatrix {
-	public:
-		typedef FieldType value_type;
 
-		TridiagonalMatrix()  { }
+template<typename FieldType>
+class TridiagonalMatrix {
+public:
+	typedef FieldType value_type;
 
-		template<typename IoInputType>
-		TridiagonalMatrix(IoInputType& io)
-		{
-			io.read(a_,"#Avector");
-			io.read(b_,"#Bvector");
+	TridiagonalMatrix()  { }
+
+	template<typename IoInputType>
+	TridiagonalMatrix(IoInputType& io)
+	{
+		io.read(a_,"#Avector");
+		io.read(b_,"#Bvector");
+	}
+
+	template<typename IoOutputType>
+	void save(IoOutputType& io) const
+	{
+		io.printVector(a_,"#Avector");
+		io.printVector(b_,"#Bvector");
+	}
+
+	void resize(SizeType n,FieldType value)
+	{
+		resize(n);
+		for (SizeType i=0;i<n;i++) a_[i]=b_[i]=value;
+	}
+
+	void resize(SizeType n)
+	{
+		a_.resize(n);
+		b_.resize(n);
+	}
+
+	FieldType& a(SizeType i) { return a_[i]; }
+	FieldType& b(SizeType i) { return b_[i]; }
+
+	const FieldType& a(SizeType i) const { return a_[i]; }
+	const FieldType& b(SizeType i) const { return b_[i]; }
+
+	template<typename SomeMatrixType>
+	void buildDenseMatrix(SomeMatrixType& m) const
+	{
+		m.resize(a_.size(),a_.size());
+		for (SizeType i=0;i<m.n_row();i++)
+			for (SizeType j=0;j<m.n_col();j++)
+				m(i,j)=0;
+
+		for (SizeType i=0;i<a_.size();i++) {
+			m(i,i) = a_[i];
+			if (i>0) m(i,i-1) = m(i-1,i) = b_[i-1];
 		}
+	}
 
-		template<typename IoOutputType>
-		void save(IoOutputType& io) const
-		{
-			io.printVector(a_,"#Avector");
-			io.printVector(b_,"#Bvector");
-		}
+	void push(const FieldType& a,const FieldType& b)
+	{
+		a_.push_back(a);
+		b_.push_back(b);
+	}
 
-		void resize(SizeType n,FieldType value)
-		{
-			resize(n);
-			for (SizeType i=0;i<n;i++) a_[i]=b_[i]=value;
-		}
+	SizeType size() const { return a_.size(); }
 
-		void resize(SizeType n)
-		{
-			a_.resize(n);
-			b_.resize(n);
-		}
-
-		FieldType& a(SizeType i) { return a_[i]; }
-		FieldType& b(SizeType i) { return b_[i]; }
-
-		const FieldType& a(SizeType i) const { return a_[i]; }
-		const FieldType& b(SizeType i) const { return b_[i]; }
-
-		template<typename SomeMatrixType>
-		void buildDenseMatrix(SomeMatrixType& m) const
-		{
-			m.resize(a_.size(),a_.size());
-			for (SizeType i=0;i<m.n_row();i++) 
-				for (SizeType j=0;j<m.n_col();j++)
-					m(i,j)=0;
-
-			for (SizeType i=0;i<a_.size();i++) {
-				m(i,i) = a_[i];
-				if (i>0) m(i,i-1) = m(i-1,i) = b_[i-1];
-			}
-		}
-
-		void push(const FieldType& a,const FieldType& b)
-		{
-			a_.push_back(a);
-			b_.push_back(b);
-		}
-
-		SizeType size() const { return a_.size(); }
-
-	private:
-		typename Vector<FieldType>::Type a_,b_;
-	}; // class TridiagonalMatrix
+private:
+	typename Vector<FieldType>::Type a_,b_;
+}; // class TridiagonalMatrix
 } // namespace PsimagLite
 
 /*@}*/
 #endif
+
