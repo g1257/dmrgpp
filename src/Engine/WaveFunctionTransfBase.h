@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -80,40 +80,37 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef WFT_BASE_H
 #define WFT_BASE_H
 
-
 namespace Dmrg {
-	
-	template<typename DmrgWaveStructType,typename VectorWithOffsetType>
-	class WaveFunctionTransfBase {
-	public:
 
-		typedef typename DmrgWaveStructType::LeftRightSuperType
-			LeftRightSuperType;
-		typedef typename DmrgWaveStructType::BasisWithOperatorsType
-			BasisWithOperatorsType;
-		typedef typename BasisWithOperatorsType::BasisType BasisType;
+template<typename DmrgWaveStructType,typename VectorWithOffsetType>
+class WaveFunctionTransfBase {
+public:
 
-		virtual void transformVector(
-				VectorWithOffsetType& psiDest,
-				const VectorWithOffsetType& psiSrc,
-				const LeftRightSuperType& lrs,
-				const typename PsimagLite::Vector<SizeType>::Type& nk) const = 0;
+	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
+	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-		virtual ~WaveFunctionTransfBase() {}
+	virtual void transformVector(VectorWithOffsetType& psiDest,
+	                             const VectorWithOffsetType& psiSrc,
+	                             const LeftRightSuperType& lrs,
+	                             const VectorSizeType& nk) const = 0;
 
-	protected:
+	virtual ~WaveFunctionTransfBase() {}
 
-		SizeType volumeOf(const typename PsimagLite::Vector<SizeType>::Type& v) const
-		{
-			assert(v.size()>0);
-			SizeType ret = v[0];
-			for (SizeType i=1;i<v.size();i++) ret *= v[i];
-			return ret;
-		}
+protected:
 
+	SizeType volumeOf(const VectorSizeType& v) const
+	{
+		assert(v.size()>0);
+		SizeType ret = v[0];
+		for (SizeType i=1;i<v.size();i++) ret *= v[i];
+		return ret;
+	}
 
-	}; // class WaveFunctionTransfBase
+}; // class WaveFunctionTransfBase
 } // namespace Dmrg
 
 /*@}*/
 #endif // WFT_BASE_H
+
