@@ -128,6 +128,7 @@ public:
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
+	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef DynamicSerializer<VectorWithOffsetType,PostProcType> DynamicSerializerType;
 	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
@@ -529,7 +530,7 @@ private:
 	bool correctionEnabled_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
-	DenseMatrixType reortho_;
+	DenseMatrixRealType reortho_;
 	RealType Eg_;
 	RealType weightForContinuedFraction_;
 

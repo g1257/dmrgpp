@@ -123,6 +123,7 @@ public:
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
+	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
 	CommonTargettingType;
@@ -562,7 +563,7 @@ private:
 	RealType Eg_;
 	RealType weightForContinuedFraction_;
 	TridiagonalMatrixType ab_;
-	DenseMatrixType reortho_;
+	DenseMatrixRealType reortho_;
 }; // class DynamicTargetting
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,

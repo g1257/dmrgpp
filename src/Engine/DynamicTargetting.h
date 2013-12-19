@@ -133,6 +133,7 @@ public:
 	                              InternalProductType,
 	                              VectorType> LanczosSolverType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
+	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef CommonTargetting<ModelType,
@@ -530,7 +531,7 @@ private:
 	ParametersForSolverType paramsForSolver_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
-	DenseMatrixType reortho_;
+	DenseMatrixRealType reortho_;
 	RealType Eg_;
 	RealType weightForContinuedFraction_;
 }; // class DynamicTargetting
