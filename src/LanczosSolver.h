@@ -133,7 +133,7 @@ public:
 		setMode(params.options);
 		OstringStream msg;
 		msg<<"Constructing... mat.rank="<<mat_.rank();
-		msg<<" steps="<<steps_<<" eps="<<eps_;
+		msg<<" maximum steps="<<steps_<<" maximum eps="<<eps_<<" requested";
 		progress_.printline(msg,std::cout);
 	}
 
@@ -244,6 +244,7 @@ public:
 		RealType eold = 100.;
 		bool exitFlag=false;
 		SizeType j = 0;
+		RealType enew = 0;
 		lanczosVectors_.saveInitialVector(y);
 		typename Vector<RealType>::Type nullVector(0);
 		for (; j < max_nstep; j++) {
@@ -255,7 +256,6 @@ public:
 			ab.a(j) = atmp;
 			ab.b(j) = btmp;
 
-			RealType enew = 0;
 			if (eps_>0) {
 				ground(enew,j+1, ab,nullVector);
 				if (fabs (enew - eold) < eps_) exitFlag=true;
@@ -274,11 +274,12 @@ public:
 
 		OstringStream msg;
 		msg<<"Decomposition done for mat.rank="<<mat_.rank();
-		msg<<" after "<<j<<" steps.";
+		msg<<" after "<<j<<" steps";
+		if (eps_>0) msg<<", actual eps="<<fabs(enew - eold);
 
 		progress_.printline(msg,std::cout);
 
-		if (j == max_nstep) {
+		if (j == max_nstep && j != mat_.rank()) {
 			OstringStream msg2;
 			msg2<<"WARNING: Maximum number of steps used. ";
 			msg2<<"Increasing this maximum is recommended.";
