@@ -43,7 +43,7 @@ sub makeTemplateBatch
 	close(FILE);
 
 	print "cd \$PBS_O_WORKDIR\n";
-	print "date\nperl dynamics\$\$dmrgOrLanczos.pl \$\$site \$\$site2 3 \$\$root \$\$cOrN\ndate\n\n";
+	print "date\nperl dynamics\$\$dmrgOrLanczos.pl \$\$site \$\$site2 3 \$\$root \$\$operatorLabel\ndate\n\n";
 }
 
 sub makeTemplateInput
