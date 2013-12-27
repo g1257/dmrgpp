@@ -756,27 +756,30 @@ inline void transposeConjugate(CrsMatrix<S>& B,
 	}
 
 	// B(j,i) = conj(A(i,j))
+	SizeType counter=0;
 	for (SizeType i=0;i<n;i++) {
 		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 			col[A.getCol(k)].push_back(i);
 			S2 w = A.getValue(k);
 			value[A.getCol(k)].push_back(w);
+			counter++;
 		}
 	}
 
-	B.resize(A.col(),A.row());
+	B.clear();
+	B.resize(A.col(),A.row(),counter);
 
-	SizeType counter=0;
+	counter=0;
 	for (SizeType i=0;i<B.row();i++) {
 
 		B.setRow(i,counter);
 		for (SizeType j=0;j<col[i].size();j++) {
-			if (value[i][j]==static_cast<S>(0.0)) continue;
-			B.pushCol(col[i][j]);
-			B.pushValue(std::conj(value[i][j]));
+			B.setCol(counter,col[i][j]);
+			B.setValues(counter,std::conj(value[i][j]));
 			counter++;
 		}
 	}
+
 	B.setRow(B.row(),counter);
 }
 

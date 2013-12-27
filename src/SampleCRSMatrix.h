@@ -76,6 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <stdexcept>
 #include <cstdlib> // <-- just for drand48 and srand48(seed)
+#include <cassert>
 #include "Sort.h"
 #include "loki/TypeTraits.h"
 
@@ -147,6 +148,24 @@ public:
 		saveVector(io,rowptr_);
 		saveVector(io,colind_);
 		saveVector(io,values_);
+	}
+
+	SizeType getRowPtr(SizeType i) const
+	{
+		assert(i < rowptr_.size());
+		return rowptr_[i];
+	}
+
+	SizeType getCol(SizeType i) const
+	{
+		assert(i < colind_.size());
+		return colind_[i];
+	}
+
+	const T& getValues(SizeType i) const
+	{
+		assert(i < values_.size());
+		return values_[i];
 	}
 
 private:
