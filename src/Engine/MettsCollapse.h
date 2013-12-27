@@ -409,7 +409,7 @@ namespace Dmrg {
 		{
 			RealType tmp = std::norm(src);
 			if (fabs(tmp-1.0)>1e-3)
-				throw PsimagLite::RuntimeError("probability\n");
+				std::cerr<<"probability "<<tmp<<"\n";
 
 			RealType sum = 0;
 			for (SizeType alpha=0;alpha<volumeOfNk;alpha++) {
