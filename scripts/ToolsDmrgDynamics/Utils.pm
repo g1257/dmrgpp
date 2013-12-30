@@ -102,5 +102,25 @@ sub scale
 	close(FOUT);
 }
 
+sub findReflection
+{
+	my ($s,$L) = @_;
+
+	return $L - 1 - $s;
+}
+
+sub reflected
+{
+	my ($site1,$site2,$L) = @_;
+
+	my $rsite1 = findReflection($site1,$L);
+	my $rsite2 = findReflection($site2,$L);
+
+	die "$0: reflected $site1 $site2\n" unless ($rsite1 >= $rsite2);
+
+	return ($rsite2 >= $site1) ? 0 : 1;
+}
+
+	
 1;
 

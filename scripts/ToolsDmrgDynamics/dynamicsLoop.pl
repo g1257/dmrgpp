@@ -4,8 +4,8 @@ use strict;
 use warnings;
 use Utils;
 
-my ($dmrgOrLanczos,$q,$root) = @ARGV;
-defined($root) or die "USAGE: $0 dmrgOrLanczos q root\n";
+my ($dmrgOrLanczos,$q,$root,$useReflection) = @ARGV;
+defined($useReflection) or die "USAGE: $0 dmrgOrLanczos q root useReflection\n";
 Utils::checkRange($dmrgOrLanczos,"Lanczos","Dmrg");
 
 my $templateInput = "inputTemplate.inp";
@@ -18,8 +18,8 @@ my @spectral;
 for (my $site=0; $site<$n; $site++) {
 	for (my $site2=0; $site2<$n; $site2++) {
 
-		my $siteMin = ($site < $site2) ? $site : $site2;
-		my $siteMax = ($site < $site2) ? $site2 : $site;
+		my ($siteMin,$siteMax) = findSubstitutes($site,$site2,$n,$useReflection);
+
 		my $output = "$root${siteMin}_$siteMax";
 
 		if ($b  && ($site2 >= $site)) {
@@ -39,13 +39,31 @@ for (my $site=0; $site<$n; $site++) {
 			addThisCf("$output.cf",$site+$site2,\@expq);
 		}
 
-		print STDERR "$0: Done $site $site2\n";
+		print STDERR "$0: Done $site $site2";
+		print STDERR " (using $siteMin $siteMax)" if ($siteMin != $site);
+		print STDERR "\n";
 	}
 }
 
 printCf("${root}Total$q.cf",\@spectral);
 
 print "$0: Result is in ${root}Total$q.cf\n";
+
+sub findSubstitutes
+{
+	my ($site,$site2,$n,$useReflection) = @_;
+
+	my $siteMin = ($site < $site2) ? $site : $site2;
+	my $siteMax = ($site < $site2) ? $site2 : $site;
+
+	my ($s1,$s2) = ($siteMin,$siteMax);
+	if ($useReflection and Utils::reflected($siteMin,$siteMax,$n)) {
+		$s1 = Utils::findReflection($siteMax,$n);
+		$s2 = Utils::findReflection($siteMin,$n);
+	}
+
+	return ($s1,$s2);
+}
 
 sub findExp
 {

@@ -99,7 +99,11 @@ sub postProc
 	my $data = "";
 	for (my $type=0;$type<4;$type++) {
 		last if ($type>1 and $isDiagonal);
-		$data .= "${dataRoot}_$type.txt ";
+		my $dataTmp = "${dataRoot}_$type.txt";
+		$data .= "$dataTmp ";
+		unlink("EnvironStack$dataTmp");
+		unlink("SystemStack$dataTmp");
+		unlink("Wft$dataTmp");
 	}
 
 	my ($psimagLite,$begin,$end,$step,$eps) = ($params{"PsimagLite"},$params{"OmegaBegin"},$params{"OmegaEnd"},
@@ -107,6 +111,12 @@ sub postProc
 	system("$psimagLite/drivers/combineContinuedFraction $data > $dataRoot.comb");
 	setEnergy("$dataRoot.comb",$energy);
 	system("$psimagLite/drivers/continuedFractionCollection -f $dataRoot.comb -b -$begin -e $end -s $step -d $eps > $dataRoot.cf");
+
+	my @temp = split/ /,$data;
+	foreach (@temp) {
+		unlink ($_) if (/$dataRoot/);
+	}
+
 	return "$dataRoot.cf";
 }
 

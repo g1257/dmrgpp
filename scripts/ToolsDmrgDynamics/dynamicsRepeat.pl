@@ -4,8 +4,8 @@ use strict;
 use warnings;
 use Utils;
 
-my ($dmrgOrLanczos,$root,$operatorLabel,$submit) = @ARGV;
-defined($submit) or die "USAGE: $0 dmrgOrLanczos root operatorLabel submit\n";
+my ($dmrgOrLanczos,$root,$operatorLabel,$useReflectionSymmetry,$submit) = @ARGV;
+defined($useReflectionSymmetry) or die "USAGE: $0 dmrgOrLanczos root operatorLabel useReflectionSymmetry submit\n";
 Utils::checkRange($dmrgOrLanczos,"Lanczos","Dmrg");
 Utils::checkRange($operatorLabel,"c","n","s+","s-","sz");
 Utils::checkRange($submit,"nobatch","nosubmit","submit");
@@ -16,10 +16,13 @@ my $n = Utils::getLabel($templateInput,"TotalNumberOfSites=");
 
 for (my $site=0; $site<$n; $site++) {
 	for (my $site2=$site; $site2<$n; $site2++) {
+		next if ($useReflectionSymmetry and Utils::reflected($site,$site2,$n));
+		
 		if ($submit eq "nobatch") {
 			noBatch($site,$site2,$dmrgOrLanczos,$root,$operatorLabel);
 			next;
 		}
+
 		my $batch = createBatch($site,$site2,$dmrgOrLanczos,$root,$operatorLabel);
 		system("sync");
 		submitBatch($batch) if ($submit eq "submit");
