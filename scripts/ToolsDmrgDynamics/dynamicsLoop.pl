@@ -22,6 +22,7 @@ for (my $site=0; $site<$n; $site++) {
 
 		my $output = "$root${siteMin}_$siteMax";
 
+		die "$0: $output does not exist\n" unless (-r "$output.comb");
 		if ($b  && ($site2 >= $site)) {
 			my ($psimagLite,$begin,$end,$step,$eps) = ($params{"PsimagLite"},$params{"OmegaBegin"},$params{"OmegaEnd"},
 			                                           $params{"OmegaStep"},$params{"OmegaEps"});
