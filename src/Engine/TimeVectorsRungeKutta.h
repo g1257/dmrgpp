@@ -181,7 +181,7 @@ private:
 					  SizeType i0)
 			: E0_(E0),
 			  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
-			  modelHelper_(p_,lrs),
+			  modelHelper_(p_,lrs,0),
 			  lanczosHelper_(&model,&modelHelper_)
 		{
 		}

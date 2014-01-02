@@ -456,7 +456,8 @@ private:
 	        SizeType site,
 	        const VectorWithOffsetType& phiNew)
 	{
-		typename ModelType::ModelHelperType modelHelper(p,lrs_);
+		SizeType threadId = 0;
+		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadId);
 		typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 		LanczosMatrixType h(&model_,&modelHelper);
 

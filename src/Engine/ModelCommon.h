@@ -119,6 +119,7 @@ public:
 	typedef typename MyBasis::BasisDataType BasisDataType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+	typedef typename PsimagLite::Vector<LinkProductStructType>::Type VectorLinkProductStructType;
 
 	ModelCommon(const SolverParamsType& params,const GeometryType& geometry)
 	    : params_(params),geometry_(geometry),progress_("ModelCommon")
@@ -131,6 +132,16 @@ public:
 
 		Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 		MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
+
+		SizeType total = 1;
+		PsimagLite::String options = params_.options;
+		bool cTridiag = (options.find("concurrenttridiag") != PsimagLite::String::npos);
+		if (cTridiag) total = PsimagLite::Concurrency::npthreads;
+
+		SizeType maxSize = geometry_.maxConnections() * 4 * 16;
+		maxSize *= maxSize;
+		vlps_.resize(total,maxSize);
+
 	}
 
 	/** Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
@@ -181,7 +192,8 @@ public:
 			offset =lrs.super().partition(m);
 			bs = lrs.super().partition(m+1)-offset;
 			matrixBlock.makeDiagonal(bs);
-			ModelHelperType modelHelper(m,lrs);
+			SizeType threadId = 0;
+			ModelHelperType modelHelper(m,lrs,threadId);
 
 			VerySparseMatrixType vsm(matrixBlock.row());
 			addHamiltonianConnection(vsm,modelHelper);
@@ -206,15 +218,15 @@ public:
 	                                  const typename PsimagLite::Vector<SparseElementType>::Type& y,
 	                                  ModelHelperType const &modelHelper) const
 	{
-		SizeType n=modelHelper.leftRightSuper().super().block().size();
+		SizeType threadId = modelHelper.threadId();
 
-		//SparseMatrixType matrix;
-		SizeType maxSize = maxConnections() * 4 * 16;
-		maxSize *= maxSize;
+		if (threadId >= vlps_.size())
+			throw PsimagLite::RuntimeError("hamiltonianConnectionProduct\n");
 
-		LinkProductStructType lps(maxSize);
+		LinkProductStructType& lps = vlps_[threadId];
 		HamiltonianConnectionType hc(geometry_,modelHelper,&lps,&x,&y);
 
+		SizeType n=modelHelper.leftRightSuper().super().block().size();
 		SizeType total = 0;
 		for (SizeType i=0;i<n;i++) {
 			for (SizeType j=0;j<n;j++) {
@@ -283,9 +295,8 @@ public:
 	                              const ModelHelperType& modelHelper) const
 	{
 		SizeType n=modelHelper.leftRightSuper().super().block().size();
-		SizeType maxSize = geometry_.maxConnections() * 4 * 16;
-		maxSize *= maxSize;
 
+		SizeType maxSize = vlps_[0].isaved.size();
 		*lps = new LinkProductStructType(maxSize);
 
 		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
@@ -414,6 +425,7 @@ private:
 	const SolverParamsType& params_;
 	const GeometryType& geometry_;
 	PsimagLite::ProgressIndicator progress_;
+	mutable VectorLinkProductStructType vlps_;
 };     //class ModelCommon
 } // namespace Dmrg
 /*@}*/

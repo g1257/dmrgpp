@@ -320,7 +320,8 @@ namespace Dmrg {
 			typename PsimagLite::Vector<RealType>::Type tmpVec1,tmpVec2;
 			//srand48(7123443);
 
-			typename ModelType::ModelHelperType modelHelper(i,lrs); //,useReflection_);
+			SizeType threadId = 0;
+			typename ModelType::ModelHelperType modelHelper(i,lrs,threadId);
 
 			if (parameters_.options.find("debugmatrix")!=PsimagLite::String::npos) {
 				SparseMatrixType fullm;

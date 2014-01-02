@@ -112,9 +112,10 @@ namespace Dmrg {
 		typedef typename SparseMatrixType::value_type SparseElementType;
 		typedef Link<SparseElementType> LinkType;
 		
-		ModelHelperSu2(int m,const LeftRightSuperType& lrs)
+		ModelHelperSu2(int m,const LeftRightSuperType& lrs,SizeType threadId)
 		: m_(m),
 		  lrs_(lrs),
+		  threadId_(threadId),
 		  su2reduced_(m,lrs)
 		{}
 
@@ -435,9 +436,12 @@ namespace Dmrg {
 			return lrs_;
 		}
 
+		SizeType threadId() const { return threadId_; }
+
 	private:
 		int m_;
 		const LeftRightSuperType&  lrs_;
+		SizeType threadId_;
 		Su2Reduced<LeftRightSuperType> su2reduced_;
 	};
 } // namespace Dmrg

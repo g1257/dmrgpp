@@ -474,7 +474,8 @@ private:
 	                       const VectorType& sv,
 	                       SizeType p)
 	{
-		typename ModelType::ModelHelperType modelHelper(p,lrs_);
+		SizeType threadId = 0;
+		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadId);
 		typename LanczosSolverType::LanczosMatrixType h(&model_,&modelHelper);
 
 		LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);

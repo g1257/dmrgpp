@@ -122,7 +122,7 @@ public:
 			if (ii >= total) continue;
 
 			SizeType i = phi_.sector(ii);
-			steps_[ii] = triDiag(phi_,T_[ii],V_[ii],i);
+			steps_[ii] = triDiag(phi_,T_[ii],V_[ii],i,threadNum);
 		}
 	}
 
@@ -131,16 +131,18 @@ private:
 	SizeType triDiag(const VectorWithOffsetType& phi,
 	                 MatrixComplexOrRealType& T,
 	                 MatrixComplexOrRealType& V,
-	                 SizeType i0)
+	                 SizeType i0,
+	                 SizeType threadNum)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
-		typename ModelType::ModelHelperType modelHelper(p,lrs_);
+		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadNum);
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 
 		typename LanczosSolverType::ParametersSolverType params;
 		params.steps = model_.params().lanczosSteps;
 		params.tolerance = model_.params().lanczosEps;
 		params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
+		params.threadId = threadNum;
 
 		LanczosSolverType lanczosSolver(lanczosHelper,params,&V);
 

@@ -429,7 +429,8 @@ private:
 	                       const VectorType& sv,
 	                       SizeType p)
 	{
-		typename ModelType::ModelHelperType modelHelper(p,lrs_);
+		SizeType threadId = 0;
+		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadId);
 		typedef typename LanczosSolverType::LanczosMatrixType
 		        LanczosMatrixType;
 		LanczosMatrixType h(&model_,&modelHelper);
@@ -450,7 +451,8 @@ private:
 	                    const VectorType& sv,
 	                    SizeType p)
 	{
-		typename ModelType::ModelHelperType modelHelper(p,lrs_);
+		SizeType threadId = 0;
+		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadId);
 		LanczosMatrixType h(&model_,&modelHelper);
 		CorrectionVectorFunctionType cvft(h,tstStruct_);
 

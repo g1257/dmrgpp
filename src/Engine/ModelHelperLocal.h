@@ -107,9 +107,10 @@ namespace Dmrg {
 
 		ModelHelperLocal(SizeType m,
 		                 const LeftRightSuperType& lrs,
-		                 bool useReflection=false)
+		                 SizeType threadId)
 		: m_(m),
 		  lrs_(lrs),
+		  threadId_(threadId),
 		  buffer_(lrs_.left().size()),
 		  basis2tc_(lrs_.left().numberOfOperators()),
 		  basis3tc_(lrs_.right().numberOfOperators())
@@ -385,9 +386,12 @@ namespace Dmrg {
 			return lrs_;
 		}
 
+		SizeType threadId() const { return threadId_; }
+
 	private:
 		int m_;
 		const LeftRightSuperType&  lrs_;
+		SizeType threadId_;
 		typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;
 		typename PsimagLite::Vector<SparseMatrixType>::Type basis2tc_,basis3tc_;
 		typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;

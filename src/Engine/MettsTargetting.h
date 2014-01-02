@@ -1057,8 +1057,8 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget, SizeType i0) const
 			{
 				SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
-				typename ModelType::ModelHelperType modelHelper(p,lrs_);
-						//,useReflection_);
+				SizeType threadId = 0;
+				typename ModelType::ModelHelperType modelHelper(p,lrs_,threadId);
 				typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 
 
