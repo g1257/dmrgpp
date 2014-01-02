@@ -78,6 +78,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CONCURRENCY_HEADER_H
 #include <stdexcept>
 #include <cassert>
+#include <sys/syscall.h>
+#include <unistd.h>
 #include "Vector.h"
 #include "Mpi.h"
 

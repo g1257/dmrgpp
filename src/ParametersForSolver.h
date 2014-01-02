@@ -98,7 +98,8 @@ struct ParametersForSolver {
 
 	ParametersForSolver()
 	    : steps(0),tolerance(0),stepsForEnergyConvergence(0),
-	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(true)
+	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(true),
+	      threadId(0)
 	{}
 
 	SizeType steps;
@@ -110,7 +111,7 @@ struct ParametersForSolver {
 	RealType weight;
 	int isign;
 	bool lotaMemory;
-
+	SizeType threadId;
 }; // class ParametersForSolver
 } // namespace PsimagLite
 

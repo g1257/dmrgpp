@@ -23,36 +23,19 @@ Please see full open source license included in file LICENSE.
 #include "CrsMatrix.h"
 #include "Random48.h"
 #include "String.h"
+#include "ParametersForSolver.h"
 
 using namespace PsimagLite;
 
 typedef double RealType;
 typedef double ComplexOrRealType;
 
-struct SolverParameters {
-	typedef  ::RealType RealType;
-
-	SolverParameters()
-		: steps(200),
-		  tolerance(1e-10),
-		  stepsForEnergyConvergence(100),
-		  lotaMemory(true),
-		  options("")
-	{}
-
-	SizeType steps;
-	RealType tolerance;
-	SizeType stepsForEnergyConvergence;
-	bool lotaMemory;
-	String options;
-
-};
-
+typedef ParametersForSolver<RealType> ParametersForSolverType;
 typedef Vector<ComplexOrRealType>::Type VectorType;
 typedef CrsMatrix<ComplexOrRealType> SparseMatrixType;
-typedef LanczosOrDavidsonBase<SolverParameters,SparseMatrixType,VectorType> SparseSolverType;
-typedef LanczosSolver<SolverParameters,SparseMatrixType,VectorType> LanczosSolverType;
-typedef DavidsonSolver<SolverParameters,SparseMatrixType,VectorType> DavidsonSolverType;
+typedef LanczosOrDavidsonBase<ParametersForSolverType,SparseMatrixType,VectorType> SparseSolverType;
+typedef LanczosSolver<ParametersForSolverType,SparseMatrixType,VectorType> LanczosSolverType;
+typedef DavidsonSolver<ParametersForSolverType,SparseMatrixType,VectorType> DavidsonSolverType;
 
 void usage(const char *progName)
 {
@@ -134,7 +117,7 @@ int main(int argc,char *argv[])
 	assert(isHermitian(sparse));
 
 	// sparse solver setup
-	SolverParameters params;
+	ParametersForSolverType params;
 	params.lotaMemory=lotaMemory;
 	LanczosSolverType lanczosSolver(sparse,params);
 	DavidsonSolverType davisonSolver(sparse,params);

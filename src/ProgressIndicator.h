@@ -90,21 +90,27 @@ class ProgressIndicator {
 
 public:
 
-	ProgressIndicator(const String& caller)
-	    : caller_(caller),rank_(Concurrency::rank())
+	ProgressIndicator(String caller,SizeType threadId = 0)
+	    : threadId_(threadId)
 	{
+		if (threadId_ != 0) return;
+
+		caller_ = caller;
+		rank_ = Concurrency::rank();
 		prefix_ = caller_ + ": ";
 	}
 
 	template<typename SomeOutputType>
 	void printline(const String &s,SomeOutputType& os) const
 	{
+		if (threadId_ != 0) return;
 		if (rank_!=0) return;
 		os<<prefix_<<s<<"\n";
 	}
 
 	void printline(OstringStream &s,std::ostream& os) const
 	{
+		if (threadId_ != 0) return;
 		if (rank_!=0) return;
 		os<<prefix_<<s.str()<<"\n";
 		s.seekp(std::ios_base::beg);
@@ -112,6 +118,7 @@ public:
 
 	void print(const String& something,std::ostream& os) const
 	{
+		if (threadId_ != 0) return;
 		if (rank_!=0) return;
 		os<<prefix_<<something;
 	}
@@ -119,6 +126,7 @@ public:
 private:
 
 	String caller_;
+	SizeType threadId_;
 	SizeType rank_;
 	String prefix_;
 }; // ProgressIndicator

@@ -104,7 +104,7 @@ public:
 
 	DavidsonSolver(MatrixType const &mat,
 	               const SolverParametersType& params)
-	    : progress_("DavidsonSolver"),
+	    : progress_("DavidsonSolver",params.threadId),
 	      mat_(mat),
 	      steps_(params.steps),
 	      eps_(params.tolerance),

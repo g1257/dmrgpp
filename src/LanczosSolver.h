@@ -121,7 +121,7 @@ public:
 	LanczosSolver(MatrixType const &mat,
 	              const SolverParametersType& params,
 	              Matrix<VectorElementType>* storageForLanczosVectors=0)
-	    : progress_("LanczosSolver"),
+	    : progress_("LanczosSolver",params.threadId),
 	      mat_(mat),
 	      steps_(params.steps),
 	      eps_(params.tolerance),

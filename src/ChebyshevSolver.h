@@ -127,7 +127,7 @@ public:
 	ChebyshevSolver(MatrixType const &mat,
 	                SolverParametersType& params,
 	                DenseMatrixType* storageForLanczosVectors=0)
-	    : progress_("ChebyshevSolver"),
+	    : progress_("ChebyshevSolver",params.threadId),
 	      mat_(mat),
 	      params_(params),
 	      mode_(WITH_INFO),

@@ -71,7 +71,12 @@ public:
 	ContinuedFraction(IoSimple::In& io)
 	    : progress_("ContinuedFraction"),ab_(io)
 	{
-		io.readMatrix(reortho_,"#ReorthogonalizationMatrix");
+		try {
+			io.readMatrix(reortho_,"#ReorthogonalizationMatrix");
+		} catch (std::exception& e) {
+			io.rewind();
+		}
+
 		io.readline(weight_,"#CFWeight=");
 		io.readline(Eg_,"#CFEnergy=");
 		io.readline(isign_,"#CFIsign=");
