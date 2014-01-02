@@ -111,19 +111,17 @@ public:
 	typedef typename MyBasis::BasisDataType BasisDataType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
-	typedef ModelCommonBase<ModelHelperType> ModelCommonBaseType;
+	typedef ModelCommonBase<ModelHelperType,ParametersType> ModelCommonBaseType;
 	typedef typename ModelCommonBaseType::LinkProductStructType LinkProductStructType;
 	typedef typename ModelCommonBaseType::VectorType VectorType;
 	typedef ParametersType SolverParamsType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	ModelBase(const ParametersType& params,
-	          InputValidatorType& io,
+	ModelBase(InputValidatorType& io,
 	          const GeometryType& geometry,
 	          ModelCommonBaseType* modelCommon)
-	    : params_(params),
-	      geometry_(geometry),
+	    : geometry_(geometry),
 	      modelCommon_(modelCommon)
 	{}
 
@@ -241,7 +239,7 @@ public:
 
 	const GeometryType& geometry() const { return geometry_; }
 
-	const ParametersType& params() const { return params_; }
+	const ParametersType& params() const { return modelCommon_->params(); }
 
 	void orderBasis(HilbertBasisType& basis,
 	                VectorSizeType& q,
@@ -291,7 +289,6 @@ public:
 
 private:
 
-	const ParametersType& params_;
 	const GeometryType& geometry_;
 	ModelCommonBaseType* modelCommon_;
 

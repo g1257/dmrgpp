@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <vector>
 #include "TimeVectorsBase.h"
+#include "ParallelTriDiag.h"
 
 namespace Dmrg {
 
@@ -96,7 +97,11 @@ class TimeVectorsKrylov : public  TimeVectorsBase<
 		WaveFunctionTransfType,
 		LanczosSolverType,
 		VectorWithOffsetType> {
-	typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,LanczosSolverType,VectorWithOffsetType> BaseType;
+	typedef TimeVectorsBase<TargettingParamsType,
+	                        ModelType,
+	                        WaveFunctionTransfType,
+	                        LanczosSolverType,
+	                        VectorWithOffsetType> BaseType;
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargettingParamsType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -105,8 +110,12 @@ class TimeVectorsKrylov : public  TimeVectorsBase<
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type TargetVectorType;
+	typedef ParallelTriDiag<ModelType,
+	                        LanczosSolverType,
+	                        VectorWithOffsetType> ParallelTriDiagType;
+	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
+	typedef typename ParallelTriDiagType::TargetVectorType TargetVectorType;
+	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 
 public:
@@ -152,8 +161,8 @@ private:
 								const VectorWithOffsetType& phi,
 								SizeType systemOrEnviron)
 	{
-		typename PsimagLite::Vector<MatrixComplexOrRealType>::Type V(phi.sectors());
-		typename PsimagLite::Vector<MatrixComplexOrRealType>::Type T(phi.sectors());
+		VectorMatrixFieldType V(phi.sectors());
+		VectorMatrixFieldType T(phi.sectors());
 
 		typename PsimagLite::Vector<SizeType>::Type steps(phi.sectors());
 
@@ -172,8 +181,8 @@ private:
 	//! Do not normalize states here, it leads to wrong results (!)
 	void calcTargetVectors(const PairType& startEnd,
 	                       const VectorWithOffsetType& phi,
-						   const typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& T,
-						   const typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& V,
+						   const VectorMatrixFieldType& T,
+						   const VectorMatrixFieldType& V,
 						   RealType Eg,
 						   const typename PsimagLite::Vector<VectorRealType>::Type& eigs,
 						   typename PsimagLite::Vector<SizeType>::Type steps,
@@ -190,8 +199,8 @@ private:
 
 	void calcTargetVector(VectorWithOffsetType& v,
 	                      const VectorWithOffsetType& phi,
-	                      const typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& T,
-	                      const typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& V,
+	                      const VectorMatrixFieldType& T,
+	                      const VectorMatrixFieldType& V,
 	                      RealType Eg,
 	                      const typename PsimagLite::Vector<VectorRealType>::Type& eigs,
 	                      SizeType timeIndex,
@@ -272,43 +281,30 @@ private:
 		return ret;
 	}
 
-	void triDiag(
-			const VectorWithOffsetType& phi,
-			typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& T,
-			typename PsimagLite::Vector<MatrixComplexOrRealType>::Type& V,
-			typename PsimagLite::Vector<SizeType>::Type& steps)
+	void triDiag(const VectorWithOffsetType& phi,
+	             VectorMatrixFieldType& T,
+	             VectorMatrixFieldType& V,
+	             typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
-		for (SizeType ii=0;ii<phi.sectors();ii++) {
-			SizeType i = phi.sector(ii);
-			steps[ii] = triDiag(phi,T[ii],V[ii],i);
+		PsimagLite::String options = model_.params().options;
+		bool cTridiag = (options.find("concurrenttridiag") != PsimagLite::String::npos);
+
+		if (cTridiag) {
+			typedef PsimagLite::Parallelizer<ParallelTriDiagType> ParallelizerType;
+			ParallelizerType threadedTriDiag(PsimagLite::Concurrency::npthreads,
+			                                 PsimagLite::MPI::COMM_WORLD);
+
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,model_);
+
+			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
+		} else {
+			typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
+			ParallelizerType threadedTriDiag(1,PsimagLite::MPI::COMM_WORLD);
+
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,model_);
+
+			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 		}
-	}
-
-	SizeType triDiag(const VectorWithOffsetType& phi,MatrixComplexOrRealType& T,MatrixComplexOrRealType& V,SizeType i0)
-	{
-		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
-		typename ModelType::ModelHelperType modelHelper(p,lrs_);
-				//,useReflection_);
-		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
-
-		typename LanczosSolverType::ParametersSolverType params;
-		params.steps = model_.params().lanczosSteps;
-		params.tolerance = model_.params().lanczosEps;
-		params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
-
-		LanczosSolverType lanczosSolver(lanczosHelper,params,&V);
-
-		TridiagonalMatrixType ab;
-		SizeType total = phi.effectiveSize(i0);
-		TargetVectorType phi2(total);
-		phi.extract(phi2,i0);
-		/* PsimagLite::OstringStream msg;
-		msg<<"Calling tridiagonalDecomposition...\n";
-		progress_.printline(msg,std::cerr);*/
-		lanczosSolver.decomposition(phi2,ab);
-		lanczosSolver.buildDenseMatrix(T,ab);
-		//check1(V,phi2);
-		return lanczosSolver.steps();
 	}
 
 	RealType& currentTime_;

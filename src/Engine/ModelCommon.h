@@ -114,14 +114,14 @@ public:
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef HamiltonianConnection<GeometryType,ModelHelperType,LinkProductType> HamiltonianConnectionType;
 	typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
-	typedef typename ModelHelperType::LeftRightSuperType
-	LeftRightSuperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename MyBasis::BasisDataType BasisDataType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 
-	ModelCommon(const GeometryType& geometry)
-	    : geometry_(geometry),progress_("ModelCommon")
+	ModelCommon(const SolverParamsType& params,const GeometryType& geometry)
+	    : params_(params),geometry_(geometry),progress_("ModelCommon")
 	{
 		if (LinkProductType::terms() > geometry_.terms()) {
 			PsimagLite::String str("ModelCommon: NumberOfTerms must be ");
@@ -212,7 +212,7 @@ public:
 		SizeType maxSize = maxConnections() * 4 * 16;
 		maxSize *= maxSize;
 
-		static LinkProductStructType lps(maxSize);
+		LinkProductStructType lps(maxSize);
 		HamiltonianConnectionType hc(geometry_,modelHelper,&lps,&x,&y);
 
 		SizeType total = 0;
@@ -221,12 +221,24 @@ public:
 				hc.compute(i,j,0,&lps,total);
 			}
 		}
-		typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
-		ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
-		                                     PsimagLite::MPI::COMM_WORLD);
-		parallelConnections.loopCreate(total,hc);
+
+		PsimagLite::String options = params_.options;
+		bool cTridiag = (options.find("concurrenttridiag") != PsimagLite::String::npos);
+
+		if (cTridiag) {
+			typedef PsimagLite::NoPthreads<HamiltonianConnectionType> ParallelizerType;
+			ParallelizerType parallelConnections(1,
+			                                     PsimagLite::MPI::COMM_WORLD);
+			parallelConnections.loopCreate(total,hc);
+		} else {
+			typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
+			ParallelizerType parallelConnections(PsimagLite::Concurrency::npthreads,
+			                                     PsimagLite::MPI::COMM_WORLD);
+			parallelConnections.loopCreate(total,hc);
+		}
 
 		hc.sync();
+
 	}
 
 	/**
@@ -303,6 +315,8 @@ public:
 		LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs,additionalData);
 		return link2;
 	}
+
+	const SolverParamsType& params() const { return params_; }
 
 private:
 
@@ -397,6 +411,7 @@ private:
 		return A;
 	}
 
+	const SolverParamsType& params_;
 	const GeometryType& geometry_;
 	PsimagLite::ProgressIndicator progress_;
 };     //class ModelCommon

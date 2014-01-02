@@ -88,7 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 
-template<typename ModelHelperType>
+template<typename ModelHelperType,typename SolverParamsType>
 class ModelCommonBase  {
 
 
@@ -135,6 +135,7 @@ public:
 	virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
 	                              const ModelHelperType& modelHelper) const = 0;
 
+	virtual const SolverParamsType& params() const = 0;
 
 	virtual LinkType getConnection(const SparseMatrixType** A,
 	                       const SparseMatrixType** B,

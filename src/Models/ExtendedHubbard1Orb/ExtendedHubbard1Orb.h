@@ -120,7 +120,7 @@ namespace Dmrg {
 		ExtendedHubbard1Orb(const SolverParamsType& solverParams,
 		                    InputValidatorType& io,
 		                    GeometryType const &geometry)
-		: ModelBaseType(solverParams,io,geometry,new ModelCommonType(geometry)),
+		: ModelBaseType(io,geometry,new ModelCommonType(solverParams,geometry)),
 		  modelParameters_(io),
 		  geometry_(geometry),
 		  modelHubbard_(solverParams,io,geometry)

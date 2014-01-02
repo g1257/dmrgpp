@@ -193,9 +193,12 @@ public:
 
 	void sync()
 	{
-		typename PsimagLite::Vector<SparseElementType>::Type x(x_.size(),0);
-
+		SizeType total = 0;
 		for (SizeType threadNum = 0; threadNum < xtemp_.size(); threadNum++)
+			if (xtemp_[threadNum].size() == x_.size()) total++;
+
+		typename PsimagLite::Vector<SparseElementType>::Type x(x_.size(),0);
+		for (SizeType threadNum = 0; threadNum < total; threadNum++)
 			for (SizeType i=0;i<x_.size();i++)
 				x[i]+=xtemp_[threadNum][i];
 
