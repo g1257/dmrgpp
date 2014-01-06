@@ -224,8 +224,7 @@ namespace Dmrg {
 			if (what=="-") { // S^-
 				PsimagLite::Matrix<SparseElementType> tmp;
 				crsMatrixToFullMatrix(tmp,creationMatrix[0].data);
-				transposeConjugate(tmp);
-				return tmp;
+				return transposeConjugate(tmp);
 			}
 
 			if (what=="z") { // S^z
