@@ -284,7 +284,7 @@ namespace Dmrg {
 			int bs = lrs_.super().partition(m+1)-offset;
 			const SparseMatrixType& hamiltonian = lrs_.left().hamiltonian();
 			SizeType ns = lrs_.left().size();
-
+			SparseElementType sum = 0.0;
 			PackIndicesType pack(ns);
 			for (i=0;i<bs;i++) {
 				SizeType r,beta;
@@ -295,8 +295,11 @@ namespace Dmrg {
 					alphaPrime = hamiltonian.getCol(k);
 					int j = buffer_[alphaPrime][beta];
 					if (j<0) continue;
-					x[i]+= hamiltonian.getValue(k)*y[j];
+					sum += hamiltonian.getValue(k)*y[j];
 				}
+
+				x[i] += sum;
+				sum = 0.0;
 			}
 		}
 
@@ -313,7 +316,7 @@ namespace Dmrg {
 			int bs = lrs_.super().partition(m+1)-offset;
 			const SparseMatrixType& hamiltonian = lrs_.right().hamiltonian();
 			SizeType ns = lrs_.left().size();
-
+			SparseElementType sum = 0.0;
 			PackIndicesType pack(ns);
 			for (i=0;i<bs;i++) {
 				SizeType alpha,r;
@@ -323,8 +326,11 @@ namespace Dmrg {
 				for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
 					int j = buffer_[alpha][hamiltonian.getCol(k)];
 					if (j<0) continue;
-					x[i]+= hamiltonian.getValue(k)*y[j];
+					sum += hamiltonian.getValue(k)*y[j];
 				}
+
+				x[i] += sum;
+				sum = 0.0;
 			}
 		}
 
