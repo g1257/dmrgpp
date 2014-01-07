@@ -69,11 +69,10 @@ sub findSubstitutes
 sub findExp
 {
 	my ($site,$site2,$q) = @_;
-	my $momentum = ($q + 1) * acos(-1) / ($n + 1);
-	#my $tmp =  ($site - $site2) * $momentum;
-	#return (cos($tmp),sin($tmp));
-	my $tmp = 2.0 * sin(($site+1)*$momentum) * sin(($site2+1)*$momentum) / ($n+1.0);
-	return ($tmp,0);
+	my $factor = ($site == $site2) ? 4 : 0.5;
+	$factor = 1 if ($dmrgOrLanczos == "Lanczos");
+	my $tmp =  ($site - $site2) * $q;
+	return ($factor*cos($tmp),$factor*sin($tmp));
 }
 
 sub acos { atan2( sqrt(1 - $_[0] * $_[0]), $_[0] ) }
@@ -81,6 +80,7 @@ sub acos { atan2( sqrt(1 - $_[0] * $_[0]), $_[0] ) }
 sub addThisCf
 {
 	my ($file,$ind,$expq) = @_;
+
 	open(FILE,"$file") or die "$0: Cannot open $file: $!\n";
 	my $c = 0;
 	while(<FILE>) {
