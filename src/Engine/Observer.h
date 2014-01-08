@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -94,244 +94,240 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 
 namespace Dmrg {
-	
-	template<typename VectorWithOffsetType_,typename ModelType_,typename IoInputType>
-	class Observer {
-		typedef typename VectorWithOffsetType_::value_type FieldType;
-		typedef PsimagLite::SparseVector<FieldType> VectorType;
-		typedef typename ModelType_::RealType RealType;
-		typedef PsimagLite::Matrix<FieldType> MatrixType;
-		typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
-		typedef typename ModelType_::BasisWithOperatorsType
-				BasisWithOperatorsType;
-		typedef typename ModelType_::ModelHelperType::LeftRightSuperType
-				LeftRightSuperType;
-		typedef ObserverHelper<IoInputType,MatrixType,VectorType,
-			VectorWithOffsetType_,LeftRightSuperType> ObserverHelperType;
-		typedef CorrelationsSkeleton<ObserverHelperType,ModelType_>
-			CorrelationsSkeletonType;
-		typedef OnePointCorrelations<ObserverHelperType>
-			OnePointCorrelationsType;
-		typedef TwoPointCorrelations<CorrelationsSkeletonType>
-			TwoPointCorrelationsType;
-		typedef FourPointCorrelations<CorrelationsSkeletonType>
-			FourPointCorrelationsType;
-		typedef MultiPointCorrelations<CorrelationsSkeletonType>
-			MultiPointCorrelationsType;
-		typedef PsimagLite::Profiling ProfilingType;
 
-		static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
-		static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
-		static SizeType const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
-		static SizeType const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
-		enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,
-			TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
-		enum {LEFT_BRACKET=ObserverHelperType::LEFT_BRACKET,
-			RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
+template<typename VectorWithOffsetType_,typename ModelType_,typename IoInputType>
+class Observer {
 
-	public:
+	typedef typename VectorWithOffsetType_::value_type FieldType;
+	typedef PsimagLite::SparseVector<FieldType> VectorType;
+	typedef typename ModelType_::RealType RealType;
+	typedef PsimagLite::Matrix<FieldType> MatrixType;
+	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
+	typedef typename ModelType_::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename ModelType_::ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef ObserverHelper<IoInputType,
+	                       MatrixType,
+	                       VectorType,
+	                       VectorWithOffsetType_,
+	                       LeftRightSuperType> ObserverHelperType;
+	typedef CorrelationsSkeleton<ObserverHelperType,ModelType_> CorrelationsSkeletonType;
+	typedef OnePointCorrelations<ObserverHelperType> OnePointCorrelationsType;
+	typedef TwoPointCorrelations<CorrelationsSkeletonType> TwoPointCorrelationsType;
+	typedef FourPointCorrelations<CorrelationsSkeletonType> FourPointCorrelationsType;
+	typedef MultiPointCorrelations<CorrelationsSkeletonType> MultiPointCorrelationsType;
+	typedef PsimagLite::Profiling ProfilingType;
 
-		typedef ModelType_ ModelType;
-		typedef VectorWithOffsetType_ VectorWithOffsetType;
+	static SizeType const GROW_RIGHT = CorrelationsSkeletonType::GROW_RIGHT;
+	static SizeType const GROW_LEFT = CorrelationsSkeletonType::GROW_LEFT;
+	static SizeType const DIAGONAL = CorrelationsSkeletonType::DIAGONAL;
+	static SizeType const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
 
-		Observer(
-				IoInputType& io,
-				SizeType nf,
-				bool hasTimeEvolution,
-				const ModelType& model,
-				bool verbose=false)
-		: helper_(io,nf,model.params().nthreads,hasTimeEvolution,verbose),
-		  verbose_(verbose),
-		  onepoint_(helper_),
-		  skeleton_(helper_,model,verbose),
-		  twopoint_(helper_,skeleton_),
-		  fourpoint_(helper_,skeleton_)
-		{}
+	enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,
+		  TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
+	enum {LEFT_BRACKET=ObserverHelperType::LEFT_BRACKET,
+		  RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
 
-		SizeType size() const { return helper_.size(); }
+public:
 
-		RealType time(SizeType threadId) const { return helper_.time(threadId); }
+	typedef ModelType_ ModelType;
+	typedef VectorWithOffsetType_ VectorWithOffsetType;
 
-		SizeType site(SizeType threadId) const { return helper_.site(threadId); }
+	Observer(IoInputType& io,
+	         SizeType nf,
+	         bool hasTimeEvolution,
+	         const ModelType& model,
+	         bool verbose=false)
+	    : helper_(io,nf,model.params().nthreads,hasTimeEvolution,verbose),
+	      verbose_(verbose),
+	      onepoint_(helper_),
+	      skeleton_(helper_,model,verbose),
+	      twopoint_(helper_,skeleton_),
+	      fourpoint_(helper_,skeleton_)
+	{}
 
-		SizeType marker(SizeType threadId) const { return helper_.marker(threadId); }
+	SizeType size() const { return helper_.size(); }
 
-		void setPointer(SizeType threadId,SizeType x) { helper_.setPointer(threadId,x); }
+	RealType time(SizeType threadId) const { return helper_.time(threadId); }
 
-		bool endOfData() const { return helper_.endOfData(); }
+	SizeType site(SizeType threadId) const { return helper_.site(threadId); }
 
-		// return true if
-		// we're at site 1 or n-2
-		bool isAtCorner(SizeType numberOfSites,SizeType threadId) const
-		{
-			bool es = (helper_.direction(threadId) == ProgramGlobals::EXPAND_SYSTEM);
-			if (es && helper_.site(threadId) ==  numberOfSites-2) return true;
-			if (!es && helper_.site(threadId) == 1) return true;
-			return false;
-		}
+	SizeType marker(SizeType threadId) const { return helper_.marker(threadId); }
 
-		void setBrackets(const PsimagLite::String& left,const PsimagLite::String& right)
-		{
-			helper_.setBrackets(bracketStringToNumber(left),
-					bracketStringToNumber(right));
-		}
+	void setPointer(SizeType threadId,SizeType x) { helper_.setPointer(threadId,x); }
 
-		MatrixType correlations(
-				const MatrixType& O1,
-				const MatrixType& O2,
-				int fermionicSign,
-				SizeType rows,
-				SizeType cols)
-		{
-			return twopoint_(O1,O2,fermionicSign,rows,cols);
-		}
+	bool endOfData() const { return helper_.endOfData(); }
 
-		template<typename SomeBracketType>
-		VectorMatrixType ladder(const SomeBracketType& bracket,
-		                        SizeType rows,
-		                        SizeType cols,
-		                        SizeType threadId)
-		{
-			SizeType rowsOver2 = utils::exactDivision(rows,2);
+	// return true if
+	// we're at site 1 or n-2
+	bool isAtCorner(SizeType numberOfSites,SizeType threadId) const
+	{
+		bool es = (helper_.direction(threadId) == ProgramGlobals::EXPAND_SYSTEM);
+		if (es && helper_.site(threadId) ==  numberOfSites-2) return true;
+		if (!es && helper_.site(threadId) == 1) return true;
+		return false;
+	}
 
-			MatrixType m0,m1,m2,m3;
-			crsMatrixToFullMatrix(m0,bracket.op(0).data);
-			crsMatrixToFullMatrix(m1,bracket.op(1).data);
-			crsMatrixToFullMatrix(m2,bracket.op(2).data);
-			crsMatrixToFullMatrix(m3,bracket.op(3).data);
-			int f = bracket.op(0).fermionSign;
-			VectorMatrixType v(4);
-			for (SizeType i = 0; i < v.size(); ++i) v[i].resize(rowsOver2,rowsOver2);
+	void setBrackets(const PsimagLite::String& left,const PsimagLite::String& right)
+	{
+		helper_.setBrackets(bracketStringToNumber(left),
+		                    bracketStringToNumber(right));
+	}
 
-			for (SizeType i = 0; i < rowsOver2; i += 2) {
-				for (SizeType j = rowsOver2; j < rows; j += 2) {
-					SizeType jj = j - rowsOver2;
-					v[0](i,jj) = ladder_(m0,i,m1,i+1,m2,j,m3,j+1,f,threadId);
-					v[1](i,jj) = f*ladder_(m0,i,m1,i+1,m3,j,m2,j+1,f,threadId);
-					v[2](i,jj) = f*ladder_(m1,i,m0,i+1,m2,j,m3,j+1,f,threadId);
-					v[3](i,jj) = ladder_(m1,i,m0,i+1,m3,j,m2,j+1,f,threadId);
-				}
+	MatrixType correlations(const MatrixType& O1,
+	                        const MatrixType& O2,
+	                        int fermionicSign,
+	                        SizeType rows,
+	                        SizeType cols)
+	{
+		return twopoint_(O1,O2,fermionicSign,rows,cols);
+	}
+
+	template<typename SomeBracketType>
+	VectorMatrixType ladder(const SomeBracketType& bracket,
+	                        SizeType rows,
+	                        SizeType cols,
+	                        SizeType threadId)
+	{
+		SizeType rowsOver2 = utils::exactDivision(rows,2);
+
+		MatrixType m0,m1,m2,m3;
+		crsMatrixToFullMatrix(m0,bracket.op(0).data);
+		crsMatrixToFullMatrix(m1,bracket.op(1).data);
+		crsMatrixToFullMatrix(m2,bracket.op(2).data);
+		crsMatrixToFullMatrix(m3,bracket.op(3).data);
+		int f = bracket.op(0).fermionSign;
+		VectorMatrixType v(4);
+		for (SizeType i = 0; i < v.size(); ++i) v[i].resize(rowsOver2,rowsOver2);
+
+		for (SizeType i = 0; i < rowsOver2; i += 2) {
+			for (SizeType j = rowsOver2; j < rows; j += 2) {
+				SizeType jj = j - rowsOver2;
+				v[0](i,jj) = ladder_(m0,i,m1,i+1,m2,j,m3,j+1,f,threadId);
+				v[1](i,jj) = f*ladder_(m0,i,m1,i+1,m3,j,m2,j+1,f,threadId);
+				v[2](i,jj) = f*ladder_(m1,i,m0,i+1,m2,j,m3,j+1,f,threadId);
+				v[3](i,jj) = ladder_(m1,i,m0,i+1,m3,j,m2,j+1,f,threadId);
 			}
-
-
-			return v;
 		}
 
-		FieldType fourPoint(
-				char mod1,SizeType i1,const MatrixType& O1,
-				char mod2,SizeType i2,const MatrixType& O2,
-				char mod3,SizeType i3,const MatrixType& O3,
-				char mod4,SizeType i4,const MatrixType& O4,
-				int fermionicSign)
-		{
-			return fourpoint_(mod1,i1,O1,mod2,i2,O2,mod3,i3,O3,mod4,i4,O4,fermionicSign);
+		return v;
+	}
+
+	FieldType fourPoint(char mod1,SizeType i1,const MatrixType& O1,
+	                    char mod2,SizeType i2,const MatrixType& O2,
+	                    char mod3,SizeType i3,const MatrixType& O3,
+	                    char mod4,SizeType i4,const MatrixType& O4,
+	                    int fermionicSign)
+	{
+		return fourpoint_(mod1,i1,O1,mod2,i2,O2,mod3,i3,O3,mod4,i4,O4,fermionicSign);
+	}
+
+	template<typename SomeModelType>
+	void fourPointDeltas(MatrixType& fpd,
+	                     const typename PsimagLite::Vector<SizeType>::Type& gammas,
+	                     const SomeModelType& model)
+	{
+		if (gammas.size()!=4) {
+			std::cerr<<"Observer: fourPointDeltas(...):  wrong number of gammas ";
+			std::cerr<<" expected "<<4<<" got "<<gammas.size()<<"\n";
+			throw PsimagLite::RuntimeError("Observer::fourPointDeltas(...)\n");
 		}
 
-		template<typename SomeModelType>
-		void fourPointDeltas(MatrixType& fpd,
-				const typename PsimagLite::Vector<SizeType>::Type& gammas,
-				const SomeModelType& model)
-		{
-			if (gammas.size()!=4) {
-				std::cerr<<"Observer: fourPointDeltas(...):  wrong number of gammas ";
-				std::cerr<<" expected "<<4<<" got "<<gammas.size()<<"\n";
-				throw PsimagLite::RuntimeError("Observer::fourPointDeltas(...)\n");
+		SizeType nsites = 2*fpd.n_row();
+		assert(fpd.n_row()==fpd.n_col());
+
+		SizeType hs = model.hilbertSize(0);
+		SizeType nx = 0;
+		while (hs) {
+			hs>>=1;
+			nx++;
+		}
+
+		nx /= 2;
+
+		assert(fpd.n_row()>1);
+		typedef std::pair<SizeType,SizeType> PairType;
+
+		typename PsimagLite::Vector<PairType>::Type pairs;
+		for (SizeType i=0;i<fpd.n_row();i++) {
+			if (2*i+1>=nsites) continue;
+			for (SizeType j=i+1;j<fpd.n_col();j++) {
+				if (2*j+1>=nsites) continue;
+				pairs.push_back(PairType(i,j));
 			}
-
-			SizeType nsites = 2*fpd.n_row();
-			assert(fpd.n_row()==fpd.n_col());
-
-			SizeType hs = model.hilbertSize(0);
-			SizeType nx = 0;
-			while(hs) {
-				hs>>=1;
-				nx++;
-			}
-			nx /= 2;
-
-			assert(fpd.n_row()>1);
-			typedef std::pair<SizeType,SizeType> PairType;
-
-			typename PsimagLite::Vector<PairType>::Type pairs;
-			for (SizeType i=0;i<fpd.n_row();i++) {
-				if (2*i+1>=nsites) continue;
-				for (SizeType j=i+1;j<fpd.n_col();j++) {
-					if (2*j+1>=nsites) continue;
-					pairs.push_back(PairType(i,j));
-				}
-			}
-
-			typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
-			typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
-			ParallelizerType threaded4PointDs(PsimagLite::Concurrency::npthreads,
-			                                  PsimagLite::MPI::COMM_WORLD);
-
-			Parallel4PointDsType helper4PointDs(fpd,fourpoint_,model,gammas,pairs);
-
-			threaded4PointDs.loopCreate(pairs.size(),helper4PointDs);
 		}
 
-		template<typename ApplyOperatorType>
-		FieldType onePoint(SizeType site,
-				   const typename ApplyOperatorType::OperatorType& A,
-				   typename ApplyOperatorType::BorderEnum corner)
-		{
-			return onepoint_.template operator()<ApplyOperatorType>(site,A,corner);
-		}
+		typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
+		typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
+		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::npthreads,
+		                                  PsimagLite::MPI::COMM_WORLD);
 
-		template<typename ApplyOperatorType>
-		FieldType onePointHookForZero(SizeType site,
-				   const typename ApplyOperatorType::OperatorType& A,
-				   bool corner = false)
-		{
-			return onepoint_.template hookForZero<ApplyOperatorType>(site,A,corner);
-		}
+		Parallel4PointDsType helper4PointDs(fpd,fourpoint_,model,gammas,pairs);
 
-		template<typename VectorLikeType>
-		typename PsimagLite::EnableIf
-		<PsimagLite::IsVectorLike<VectorLikeType>::True,void>::Type
-		multiCorrelations(VectorLikeType& result,
-		                       const MatrixType& O,
-		                       SizeType rows,
-		                       SizeType cols)
-		{
-			size_t nthreads = 1;
-			MultiPointCorrelationsType multi(nthreads,helper_,skeleton_);
-			multi(result,O,rows,cols);
-		}
+		threaded4PointDs.loopCreate(pairs.size(),helper4PointDs);
+	}
 
-	private:
+	template<typename ApplyOperatorType>
+	FieldType onePoint(SizeType site,
+	                   const typename ApplyOperatorType::OperatorType& A,
+	                   typename ApplyOperatorType::BorderEnum corner)
+	{
+		return onepoint_.template operator()<ApplyOperatorType>(site,A,corner);
+	}
 
-		SizeType bracketStringToNumber(const PsimagLite::String& str) const
-		{
-			if (str=="gs") return GS_VECTOR;
-			if (str=="time") return TIME_VECTOR;
-			throw PsimagLite::RuntimeError("Observer::bracketStringToNumber(...): must be gs or time");
-		}
+	template<typename ApplyOperatorType>
+	FieldType onePointHookForZero(SizeType site,
+	                              const typename ApplyOperatorType::OperatorType& A,
+	                              bool corner = false)
+	{
+		return onepoint_.template hookForZero<ApplyOperatorType>(site,A,corner);
+	}
 
-		FieldType ladder_(const MatrixType& O1,
-		                  SizeType i1,
-		                  const MatrixType& O2,
-		                  SizeType i2,
-		                  const MatrixType& O3,
-		                  SizeType j1,
-		                  const MatrixType& O4,
-		                  SizeType j2,
-		                  int fermionicSign,
-		                  SizeType threadId)
-		{
-			char mod = 'N';
-			return fourpoint_(mod,i1,O1,mod,i2,O2,mod,j1,O3,mod,j2,O4,fermionicSign,threadId);
-		}
+	template<typename VectorLikeType>
+	typename PsimagLite::EnableIf
+	<PsimagLite::IsVectorLike<VectorLikeType>::True,void>::Type
+	multiCorrelations(VectorLikeType& result,
+	                  const MatrixType& O,
+	                  SizeType rows,
+	                  SizeType cols)
+	{
+		SizeType nthreads = 1;
+		MultiPointCorrelationsType multi(nthreads,helper_,skeleton_);
+		multi(result,O,rows,cols);
+	}
 
-		ObserverHelperType helper_;
-		bool verbose_;
-		OnePointCorrelationsType onepoint_;
-		CorrelationsSkeletonType skeleton_;
-		TwoPointCorrelationsType twopoint_;
-		FourPointCorrelationsType fourpoint_;
-	};  //class Observer
+private:
+
+	SizeType bracketStringToNumber(const PsimagLite::String& str) const
+	{
+		if (str=="gs") return GS_VECTOR;
+		if (str=="time") return TIME_VECTOR;
+		throw PsimagLite::RuntimeError("Observer::bracketStringToNumber: must be gs or time");
+	}
+
+	FieldType ladder_(const MatrixType& O1,
+	                  SizeType i1,
+	                  const MatrixType& O2,
+	                  SizeType i2,
+	                  const MatrixType& O3,
+	                  SizeType j1,
+	                  const MatrixType& O4,
+	                  SizeType j2,
+	                  int fermionicSign,
+	                  SizeType threadId)
+	{
+		char mod = 'N';
+		return fourpoint_(mod,i1,O1,mod,i2,O2,mod,j1,O3,mod,j2,O4,fermionicSign,threadId);
+	}
+
+	ObserverHelperType helper_;
+	bool verbose_;
+	OnePointCorrelationsType onepoint_;
+	CorrelationsSkeletonType skeleton_;
+	TwoPointCorrelationsType twopoint_;
+	FourPointCorrelationsType fourpoint_;
+};  //class Observer
 } // namespace Dmrg
 
 /*@}*/
 #endif
+
