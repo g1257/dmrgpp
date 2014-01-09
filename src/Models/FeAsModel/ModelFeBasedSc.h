@@ -129,7 +129,7 @@ namespace Dmrg {
 		ModelFeBasedSc(const SolverParamsType& solverParams,
 		               InputValidatorType& io,
 		               GeometryType const &geometry)
-			: ModelBaseType(io,geometry,new ModelCommonType(solverParams,geometry)),
+			: ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 			  reinterpretX_(6),
 			  reinterpretY_(9),
 			  modelParameters_(io),

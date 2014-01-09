@@ -132,7 +132,7 @@ namespace Dmrg {
 		Immm(const SolverParamsType& solverParams,
 		     InputValidatorType& io,
 		     GeometryType const &geometry)
-		: ModelBaseType(io,geometry,new ModelCommonType(solverParams,geometry)),
+		: ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 		  modelParameters_(io),
 		  geometry_(geometry),
 		  degreesOfFreedom_(geometry_.numberOfSites()),

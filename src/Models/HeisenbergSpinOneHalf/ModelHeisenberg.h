@@ -134,7 +134,7 @@ namespace Dmrg {
 		ModelHeisenberg(const SolverParamsType& solverParams,
 		                InputValidatorType& io,
 		                GeometryType const &geometry)
-		    : ModelBaseType(io,geometry,new ModelCommonType(solverParams,geometry)),
+		    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 		      modelParameters_(io),
 		      geometry_(geometry),
 		      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)

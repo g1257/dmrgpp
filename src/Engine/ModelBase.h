@@ -119,10 +119,8 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	ModelBase(InputValidatorType& io,
-	          const GeometryType& geometry,
 	          ModelCommonBaseType* modelCommon)
-	    : geometry_(geometry),
-	      modelCommon_(modelCommon)
+	    : modelCommon_(modelCommon)
 	{}
 
 	virtual ~ModelBase()
@@ -237,7 +235,7 @@ public:
 		addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 	}
 
-	const GeometryType& geometry() const { return geometry_; }
+	const GeometryType& geometry() const { return modelCommon_->geometry(); }
 
 	const ParametersType& params() const { return modelCommon_->params(); }
 
@@ -289,7 +287,6 @@ public:
 
 private:
 
-	const GeometryType& geometry_;
 	ModelCommonBaseType* modelCommon_;
 
 };     //class ModelBase

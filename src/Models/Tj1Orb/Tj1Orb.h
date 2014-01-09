@@ -127,7 +127,7 @@ namespace Dmrg {
 		Tj1Orb(const SolverParamsType& solverParams,
 		       InputValidatorType& io,
 		       GeometryType const &geometry)
-		    : ModelBaseType(io,geometry,new ModelCommonType(solverParams,geometry)),
+		    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 		      modelParameters_(io),
 		      geometry_(geometry),
 		      offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
