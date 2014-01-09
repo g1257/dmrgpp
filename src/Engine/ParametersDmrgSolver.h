@@ -300,13 +300,15 @@ namespace Dmrg {
 		FieldType lanczosEps;
 		SizeType sitesPerBlock;
 		std::pair<bool,FieldType> gsWeight;
+		SizeType maxMatrixRankStored;
 
 		//! Read Dmrg parameters from inp file
 		ParametersDmrgSolver(InputValidatorType& io)
 		    : lanczosSteps(200),
 		      lanczosEps(1e-12),
 		      sitesPerBlock(1),
-		      gsWeight(false,0.0)
+		      gsWeight(false,0.0),
+		      maxMatrixRankStored(lanczosSteps)
 		{
 			io.readline(model,"Model=");
 			io.readline(options,"SolverOptions=");
@@ -453,6 +455,12 @@ namespace Dmrg {
 				io.readline(gsWeight.second,"GsWeight=");
 				gsWeight.first = true;
 			} catch (std::exception& e) {}
+
+			try {
+				io.readline(maxMatrixRankStored,"MaxMatrixRankStored=");
+			} catch (std::exception& e) {}
+
+
 		}
 	};
 
@@ -491,6 +499,13 @@ namespace Dmrg {
 			os<<"parameters.restartFilename="<<parameters.checkpoint.filename<<"\n";
 		if (parameters.fileForDensityMatrixEigs!="")
 			os<<"parameters.fileForDensityMatrixEigs="<<parameters.fileForDensityMatrixEigs<<"\n";
+
+		if (parameters.gsWeight.first)
+			os<<"GsWeight="<<parameters.gsWeight.second<<"\n";
+
+		if (parameters.options.find("MatrixVectorStored")==PsimagLite::String::npos)
+			os<<"MaxMatrixRankStored="<<parameters.maxMatrixRankStored<<"\n";
+
 		return os;
 	}
 } // namespace Dmrg

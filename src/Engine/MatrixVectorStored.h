@@ -99,11 +99,12 @@ public:
 	MatrixVectorStored(ModelType const *model,
 	                   ModelHelperType const *modelHelper,
 	                   const ReflectionSymmetryType* rs=0)
-	    : matrixStored_(2),pointer_(0),progress_("MatrixVectorStored")
+	    :  model_(model),
+	       modelHelper_(modelHelper),
+	       matrixStored_(2),
+	       pointer_(0),
+	       progress_("MatrixVectorStored")
 	{
-		model_ = model;
-		modelHelper_=modelHelper;
-
 		if (!rs) {
 			matrixStored_[0].clear();
 			model->fullHamiltonian(matrixStored_[0],*modelHelper);

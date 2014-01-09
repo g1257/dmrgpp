@@ -104,6 +104,11 @@ public:
 	                 ReflectionSymmetryType* rs=0)
 	    : initKron_(*model,*modelHelper),kronMatrix_(initKron_)
 	{
+		SizeType maxMatrixRankStored = model->params().maxMatrixRankStored;
+		if (modelHelper->size() > maxMatrixRankStored) return;
+
+		model->fullHamiltonian(matrixStored_,*modelHelper);
+		assert(isHermitian(matrixStored_,true));
 	}
 
 	SizeType rank() const { return initKron_.size(); }
@@ -111,7 +116,10 @@ public:
 	template<typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
 	{
-		kronMatrix_.matrixVectorProduct(x,y);
+		if (matrixStored_.row() > 0)
+			matrixStored_.matrixVectorProduct(x,y);
+		else
+			kronMatrix_.matrixVectorProduct(x,y);
 	}
 
 	SizeType reflectionSector() const { return 0; }
@@ -122,6 +130,7 @@ private:
 
 	InitKronType initKron_;
 	KronMatrixType kronMatrix_;
+	SparseMatrixType matrixStored_;
 }; // class MatrixVectorKron
 } // namespace Dmrg
 

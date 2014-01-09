@@ -98,10 +98,13 @@ public:
 	MatrixVectorOnTheFly(ModelType const *model,
 	                     ModelHelperType const *modelHelper,
 	                     ReflectionSymmetryType* rs=0)
+	    : model_(model), modelHelper_(modelHelper)
 	{
-		model_ = model;
-		modelHelper_=modelHelper;
+		SizeType maxMatrixRankStored = model->params().maxMatrixRankStored;
+		if (modelHelper->size() > maxMatrixRankStored) return;
 
+		model->fullHamiltonian(matrixStored_,*modelHelper);
+		assert(isHermitian(matrixStored_,true));
 	}
 
 	SizeType rank() const { return modelHelper_->size(); }
@@ -109,7 +112,10 @@ public:
 	template<typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
 	{
-		model_->matrixVectorProduct(x,y,*modelHelper_);
+		if (matrixStored_.row() > 0)
+			matrixStored_.matrixVectorProduct(x,y);
+		else
+			model_->matrixVectorProduct(x,y,*modelHelper_);
 	}
 
 	SizeType reflectionSector() const { return 0; }
@@ -119,6 +125,7 @@ public:
 private:
 	ModelType const *model_;
 	ModelHelperType const *modelHelper_;
+	SparseMatrixType matrixStored_;
 }; // class MatrixVectorOnTheFly
 } // namespace Dmrg
 
