@@ -101,44 +101,32 @@ public:
 		for (SizeType j=0;j<ngroup;j++) {
 			SizeType j1 = istart(j);
 			SizeType j2 = istart(j+1);
-			typename PsimagLite::Vector<ComplexOrRealType>::Type p(j2-j1,0.0);
-			typename PsimagLite::Vector<bool>::Type mark(j2-j1,false);
 
-			for (SizeType i=0;i<ngroup;i++) {
+			for (SizeType i=0;i<ngroup;++i) {
 				SizeType i1 = istart(i);
 				SizeType i2 = istart(i+1);
 
-				data_(i,j) = SparseMatrixType(i2-i1,j2-j1);
-				SparseMatrixType& tmp = data_(i,j);
+				data_(i,j) = new SparseMatrixType(i2-i1,j2-j1);
+				SparseMatrixType& tmp = *data_(i,j);
 				SizeType counter = 0;
 
-				for (SizeType ii=i1;ii<i2;ii++) {
+				for (SizeType ii=i1;ii<i2;++ii) {
 					SizeType row = ii - i1;
 					tmp.setRow(row,counter);
 
 					SizeType start = sparse.getRowPtr(ii);
 					SizeType end = sparse.getRowPtr(ii+1);
-					SizeType minCol = 0;
-					SizeType maxCol = p.size()-1;
-					for (SizeType k = start;k<end;k++) {
+
+					for (SizeType k = start;k<end;++k) {
 						int col = sparse.getCol(k)-j1;
 						if (col<0) continue;
 						if (SizeType(col)>=j2-j1) continue; // ARE COLUMNS SORTED?
-						p[col] += sparse.getValue(k);
-						mark[col] = true;
-						if (SizeType(col)<minCol) minCol = col;
-						if (SizeType(col)>maxCol) maxCol = col;
-					}
-
-					for (SizeType rr=minCol;rr<=maxCol;rr++) {
-						if (!mark[rr]) continue;
-						tmp.pushCol(rr);
-						tmp.pushValue(p[rr]);
-						p[rr] = 0.0;
-						mark[rr] = false;
+						tmp.pushValue(sparse.getValue(k));
+						tmp.pushCol(col);
 						counter++;
 					}
 				}
+
 				tmp.setRow(i2-i1,counter);
 				tmp.checkValidity();
 			}
@@ -148,15 +136,19 @@ public:
 	const SparseMatrixType& operator()(SizeType i,SizeType j) const
 	{
 		assert(i<data_.n_row() && j<data_.n_col());
-		return data_(i,j);
+		return *data_(i,j);
 	}
 
 	~ArrayOfMatStruct()
-	{}
+	{
+		for (SizeType i = 0; i < data_.n_row(); ++i)
+			for (SizeType j = 0; j < data_.n_col(); ++j)
+				if (data_(i,j)) delete data_(i,j);
+	}
 
 private:
 
-	PsimagLite::Matrix<SparseMatrixType> data_;
+	PsimagLite::Matrix<SparseMatrixType*> data_;
 
 }; //class ArrayOfMatStruct
 } // namespace Dmrg

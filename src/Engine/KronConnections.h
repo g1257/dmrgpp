@@ -119,8 +119,8 @@ public:
 			SizeType outPatch = (threadNum+npthreads*mpiRank)*blockSize + p;
 			if (outPatch>=total) break;
 
-			for (SizeType inPatch=0;inPatch<total;inPatch++) {
-				for (SizeType ic=0;ic<nC;ic++) {
+			for (SizeType inPatch=0;inPatch<total;++inPatch) {
+				for (SizeType ic=0;ic<nC;++ic) {
 					const ComplexOrRealType& val = initKron_.value(ic);
 					const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 					const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
@@ -147,26 +147,27 @@ public:
 					const SparseMatrixType& tmp2 =  yiStruct(j,jp);
 
 					SizeType colsize = j2 -j1;
-					for (SizeType mr2=0;mr2<colsize;mr2++)
-						for (SizeType mr=0;mr<tmp1.row();mr++)
+					for (SizeType mr2=0;mr2<colsize;++mr2)
+						for (SizeType mr=0;mr<tmp1.row();++mr)
 							intermediate(mr,mr2)=0.0;
 
-					for (SizeType mr=0;mr<tmp1.row();mr++) {
-						for (int k3=tmp1.getRowPtr(mr);k3<tmp1.getRowPtr(mr+1);k3++) {
+					for (SizeType mr=0;mr<tmp1.row();++mr) {
+						for (int k3=tmp1.getRowPtr(mr);k3<tmp1.getRowPtr(mr+1);++k3) {
 							SizeType col3 = tmp1.getCol(k3)+i1;
 							ComplexOrRealType valtmp = val * tmp1.getValue(k3);
-							for (SizeType mr2=j1;mr2<j2;mr2++) {
+							for (SizeType mr2=j1;mr2<j2;++mr2) {
 								intermediate(mr,mr2-j1) += valtmp * V_(col3,mr2);
 							}
 						}
 					}
-					for (SizeType mr2=0;mr2<colsize;mr2++) {
+
+					for (SizeType mr2=0;mr2<colsize;++mr2) {
 						SizeType start = tmp2.getRowPtr(mr2);
 						SizeType end = tmp2.getRowPtr(mr2+1);
-						for (SizeType k4=start;k4<end;k4++) {
+						for (SizeType k4=start;k4<end;++k4) {
 							ComplexOrRealType value1 = tmp2.getValue(k4);
 							SizeType col4 = tmp2.getCol(k4)+jp1;
-							for (SizeType mr=0;mr<tmp1.row();mr++) {
+							for (SizeType mr=0;mr<tmp1.row();++mr) {
 								W_(mr+ip1,col4) += intermediate(mr,mr2) * value1;
 							}
 						}
