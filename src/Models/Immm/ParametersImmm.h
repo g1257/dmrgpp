@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009-2011, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,59 +67,56 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
 /*! \file ParametersImmm.h
  *
- *  Contains the parameters for the Immm model and function to read them from a JSON file
+ *  Contains the parameters for the Immm model and function to read them
  *
  */
 #ifndef PARAMETERS_IMMM_H
 #define PARAMETERS_IMMM_H
 
 namespace Dmrg {
-	template<typename Field>
-	struct ParametersImmm {
-		// no connections here please!!
-		// connections are handled by the geometry
-		
-		template<typename IoInputType>
-		ParametersImmm(IoInputType& io) 
-		{
-	
-			io.read(hubbardU,"hubbardU");
-			io.read(potentialV,"potentialV");
-			int tmp = 0;
-			io.readline(tmp,"Restricted=");
-			restricted = (tmp > 0);
-		}
-		
-		// Hubbard U values (one for each site)
-		typename PsimagLite::Vector<Field>::Type hubbardU; 
-		// Onsite potential values, one for each site
-		typename PsimagLite::Vector<Field>::Type potentialV;
-		// target number of electrons  in the system
-		bool restricted;
-	};
-	
-	//! Function that prints model parameters to stream os
-	template<typename FieldType>
-	std::ostream& operator<<(std::ostream &os,const ParametersImmm<FieldType>& parameters)
+template<typename Field>
+struct ParametersImmm {
+	// no connections here please!!
+	// connections are handled by the geometry
+
+	template<typename IoInputType>
+	ParametersImmm(IoInputType& io)
 	{
-		//os<<"parameters.density="<<parameters.density<<"\n";
-		os<<"hubbardU\n";
-		os<<parameters.hubbardU;
-		//utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
-		os<<"potentialV\n";
-		os<<parameters.potentialV;
-		os<<"Restricted="<<parameters.restricted<<"\n";
-		return os;
+
+		io.read(hubbardU,"hubbardU");
+		io.read(potentialV,"potentialV");
+		int tmp = 0;
+		io.readline(tmp,"Restricted=");
+		restricted = (tmp > 0);
 	}
+
+	// Hubbard U values (one for each site)
+	typename PsimagLite::Vector<Field>::Type hubbardU;
+	// Onsite potential values, one for each site
+	typename PsimagLite::Vector<Field>::Type potentialV;
+	// target number of electrons  in the system
+	bool restricted;
+};
+
+//! Function that prints model parameters to stream os
+template<typename FieldType>
+std::ostream& operator<<(std::ostream &os,const ParametersImmm<FieldType>& parameters)
+{
+	os<<"hubbardU\n";
+	os<<parameters.hubbardU;
+	os<<"potentialV\n";
+	os<<parameters.potentialV;
+	os<<"Restricted="<<parameters.restricted<<"\n";
+	return os;
+}
 } // namespace Dmrg
 
 /*@}*/
 #endif // PARAMETERS_IMMM_H
+

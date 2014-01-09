@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -81,13 +78,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  Bits meaning:
  *  0.....0  empty state
  *  0..1..0  a 1 at location x means state "x"
- *  0..010..010..0, a 1 at location x and a 1 at location y means 2 electrons on the site with states x and y respectively 
+ *  0..010..010..0, a 1 at location x and a 1 at location y means 2
+ *  electrons on the site with states x and y respectively
  *  ...
  *  1111...111111  all ones means N electrons each with a different state
- * 
+ *
  *  Note: this is a class
  *  Note: Length of state depends on site
- * 
+ *
  */
 #ifndef HILBERTSPACE_IMMM_H
 #define HILBERTSPACE_IMMM_H
@@ -96,142 +94,139 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	//! A class to operate on n-ary numbers (base n)
-	template<typename Word>
-	class HilbertSpaceImmm {
+//! A class to operate on n-ary numbers (base n)
+template<typename Word>
+class HilbertSpaceImmm {
 
-	public:
+public:
 
-		typedef Word HilbertState;
+	typedef Word HilbertState;
 
-		static const SizeType NUMBER_OF_SPINS = 2;
-		enum {SPIN_UP=0,SPIN_DOWN=1};
+	static const SizeType NUMBER_OF_SPINS = 2;
+	enum {SPIN_UP=0,SPIN_DOWN=1};
 
-		HilbertSpaceImmm(SizeType maxOrbitals)
-		: maxOrbitals_(maxOrbitals)
-		{}
+	HilbertSpaceImmm(SizeType maxOrbitals)
+	    : maxOrbitals_(maxOrbitals)
+	{}
 
-		SizeType dOf() const { return 2*maxOrbitals_; }
-		
-		// Get electronic state on site "j" in binary number "a"
-		Word get(Word const &a,SizeType j) const
-		{
-			SizeType k=degreesOfFreedomUpTo(j);
-			SizeType ones = (1<<(dOf()))-1;
-			Word mask=(ones<<k);
+	SizeType dOf() const { return 2*maxOrbitals_; }
 
-			mask &= a;
-			mask >>= k;
-			return mask;
-			
-		}
+	// Get electronic state on site "j" in binary number "a"
+	Word get(Word const &a,SizeType j) const
+	{
+		SizeType k=degreesOfFreedomUpTo(j);
+		SizeType ones = (1<<(dOf()))-1;
+		Word mask=(ones<<k);
 
-		// Create electron with internal dof  "sigma" on site "j" in binary number "a"
-		void create(Word &a,SizeType j,SizeType sigma) const
-		{
-			SizeType k=degreesOfFreedomUpTo(j);
-			Word mask=(1<<(k+sigma));
-			a |= mask;
-		}
-		
-		// Is there an electron with internal dof  "sigma" on site "i" in binary number "ket"?
-		bool isNonZero(Word const &ket,SizeType i,SizeType sigma) const
-		{
-			
-			Word tmp=get(ket,i);
-			//std::cerr<<"isNonZero, ket="<<ket<<" tmp="<<tmp<<"\n";
-			if (tmp & (1<<sigma)) return true;
-			
-			return false;
-		}
-		
-		//! returns the number of electrons of internal dof "value" in binary number "data"
-		int getNofDigits(const Word& data,SizeType value) const
-		{
-			int ret=0;
-			Word data2=data;
-			SizeType i=0;
-			SizeType dof = 0;
+		mask &= a;
+		mask >>= k;
+		return mask;
 
-			do {
-				SizeType k=degreesOfFreedomUpTo(i);
-				dof = dOf();
-				if ( (data & (1<<(k+value))) ) ret++;
-				i++;
-			} while (data2>>=dof);
-			
-			return ret;
-		}
-		
-		//! Number of electrons with spin spin (sums over bands)
-		int electronsWithGivenSpin(Word const &data,SizeType site,SizeType spin) const
-		{
-			
-			SizeType norb = dOf()/NUMBER_OF_SPINS;
-			SizeType beginX=spin*norb;
-			SizeType endX=beginX + norb;
-			SizeType sum=0;
+	}
 
-			for (SizeType x=beginX;x<endX;x++) sum += getNofDigits(data,x);
-			
-			return sum;	
-			
-		}
+	// Create electron with internal dof  "sigma" on site "j" in binary number "a"
+	void create(Word &a,SizeType j,SizeType sigma) const
+	{
+		SizeType k=degreesOfFreedomUpTo(j);
+		Word mask=(1<<(k+sigma));
+		a |= mask;
+	}
 
-		//! Number of electrons at given site (sum over all bands)
-		int electronsAtGivenSite(const Word& data,SizeType site) const
-		{
-			SizeType sum=0;
-			
-			for (SizeType sector=0;sector<dOf();sector++)
-				sum += calcNofElectrons(data,0,sector);
-			
-			return sum;	
-			
-		}
+	// Is there an electron with internal dof  "sigma" on site "i" in binary number "ket"?
+	bool isNonZero(Word const &ket,SizeType i,SizeType sigma) const
+	{
 
-		//! Number of electrons with dof sector between i and j excluding i and j in binary number "ket"
-		//!  intended for when i<j
-		 int calcNofElectrons(const Word& ket,SizeType i,SizeType j,SizeType sector) const
-		{
-			SizeType ii=i+1;
-			if (ii>=j) return 0;
-			Word m=0;
-			for (SizeType site = ii;site<j;site++) {
-				SizeType k = degreesOfFreedomUpTo(site);
-				SizeType dof = dOf();
-				for (SizeType sigma=0;sigma<dof;sigma++)
-					m |= (1<<(k+sigma));
-			}
-			m &= ket;
-			return getNofDigits(m,sector);
-		} 
+		Word tmp=get(ket,i);
+		if (tmp & (1<<sigma)) return true;
 
-		//! Number of electrons with dof sector on site i in binary number "ket"
-		int calcNofElectrons(Word const &ket,SizeType i,SizeType sector) const
-		{
-			Word m=0;
-			
-			SizeType k = degreesOfFreedomUpTo(i);
+		return false;
+	}
+
+	//! returns the number of electrons of internal dof "value" in binary number "data"
+	int getNofDigits(const Word& data,SizeType value) const
+	{
+		int ret=0;
+		Word data2=data;
+		SizeType i=0;
+		SizeType dof = 0;
+
+		do {
+			SizeType k=degreesOfFreedomUpTo(i);
+			dof = dOf();
+			if ( (data & (1<<(k+value))) ) ret++;
+			i++;
+		} while (data2>>=dof);
+
+		return ret;
+	}
+
+	//! Number of electrons with spin spin (sums over bands)
+	int electronsWithGivenSpin(Word const &data,SizeType site,SizeType spin) const
+	{
+
+		SizeType norb = dOf()/NUMBER_OF_SPINS;
+		SizeType beginX=spin*norb;
+		SizeType endX=beginX + norb;
+		SizeType sum=0;
+
+		for (SizeType x=beginX;x<endX;x++) sum += getNofDigits(data,x);
+
+		return sum;
+
+	}
+
+	//! Number of electrons at given site (sum over all bands)
+	int electronsAtGivenSite(const Word& data,SizeType site) const
+	{
+		SizeType sum=0;
+
+		for (SizeType sector=0;sector<dOf();sector++)
+			sum += calcNofElectrons(data,0,sector);
+
+		return sum;
+
+	}
+
+	//! Number of electrons with dof sector between i and j
+	//! excluding i and j in binary number "ket"
+	//!  intended for when i<j
+	int calcNofElectrons(const Word& ket,SizeType i,SizeType j,SizeType sector) const
+	{
+		SizeType ii=i+1;
+		if (ii>=j) return 0;
+		Word m=0;
+		for (SizeType site = ii;site<j;site++) {
+			SizeType k = degreesOfFreedomUpTo(site);
 			SizeType dof = dOf();
-			for (SizeType sigma=0;sigma<dof;sigma++) m |= (1<<(k+sigma));
-			
-			m &= ket;
-			return getNofDigits(m,sector);
+			for (SizeType sigma=0;sigma<dof;sigma++)
+				m |= (1<<(k+sigma));
 		}
+		m &= ket;
+		return getNofDigits(m,sector);
+	}
 
-	private:
+	//! Number of electrons with dof sector on site i in binary number "ket"
+	int calcNofElectrons(Word const &ket,SizeType i,SizeType sector) const
+	{
+		Word m=0;
 
-		SizeType degreesOfFreedomUpTo(SizeType j) const
-		{
-			return dOf()*j;
-/*			SizeType k=0;
-			for (SizeType kk=0;kk<j;kk++) k += dOf(kk);
-			return k;*/
-		}
+		SizeType k = degreesOfFreedomUpTo(i);
+		SizeType dof = dOf();
+		for (SizeType sigma=0;sigma<dof;sigma++) m |= (1<<(k+sigma));
 
-		SizeType maxOrbitals_;
-	}; // class HilbertSpaceImmm
+		m &= ket;
+		return getNofDigits(m,sector);
+	}
+
+private:
+
+	SizeType degreesOfFreedomUpTo(SizeType j) const
+	{
+		return dOf()*j;
+	}
+
+	SizeType maxOrbitals_;
+}; // class HilbertSpaceImmm
 } // namespace Dmrg
 
 /*@}*/	

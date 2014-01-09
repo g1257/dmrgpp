@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -81,157 +81,170 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 
 namespace Dmrg {
-	
-	template<typename ModelHelperType>
-	class LinkProductImmm {
 
-			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef std::pair<SizeType,SizeType> PairType;
+template<typename ModelHelperType>
+class LinkProductImmm {
 
-			enum {HOPPING_TERM,W_TERM}; // W_TERM is a term of the form Upd n_i n_j
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef std::pair<SizeType,SizeType> PairType;
 
-		public:
+	enum {HOPPING_TERM,W_TERM}; // W_TERM is a term of the form Upd n_i n_j
 
-			typedef typename ModelHelperType::RealType RealType;
+public:
 
-			//! The term=0 is for hoppings:
-			//! if sites are both TYPE_O then return 8, 2 orbitals, 2 spins, i.e. gamma sigma gamma' sigma = 2x2x2 = 8
-			//! if sites are TYPE_O and TYPE_C the returns 4, i.e. gamma sigma d sigma =  2x2
-			//! The term=1 is for Upd
-			template<typename SomeStructType>
-			static SizeType dofs(SizeType term,const SomeStructType& additionalData)
-			{
-				if (term==W_TERM) {
-					// No Upd allowed between Oxygens
-					if (additionalData.type1==additionalData.type2)
-						return 0;
-					return 1; // Upd n_o n_Cu
-				}
-				SizeType type1 = additionalData.type1;
-				SizeType type2 = additionalData.type2;
-				//! both cannot be TYPE_C
-				assert(type1!=type2 || type1!=additionalData.TYPE_C);
-				return (type1==type2) ? 8 : 4;
+	typedef typename ModelHelperType::RealType RealType;
+
+	//! The term=0 is for hoppings:
+	//! if sites are both TYPE_O then return 8, 2 orbitals, 2 spins,
+	//! i.e. gamma sigma gamma' sigma = 2x2x2 = 8
+	//! if sites are TYPE_O and TYPE_C the returns 4, i.e. gamma sigma d sigma =  2x2
+	//! The term=1 is for Upd
+	template<typename SomeStructType>
+	static SizeType dofs(SizeType term,const SomeStructType& additionalData)
+	{
+		if (term==W_TERM) {
+			// No Upd allowed between Oxygens
+			if (additionalData.type1==additionalData.type2)
+				return 0;
+			return 1; // Upd n_o n_Cu
+		}
+		SizeType type1 = additionalData.type1;
+		SizeType type2 = additionalData.type2;
+		//! both cannot be TYPE_C
+		assert(type1!=type2 || type1!=additionalData.TYPE_C);
+		return (type1==type2) ? 8 : 4;
+	}
+
+	//! has only dependence on orbital
+	template<typename SomeStructType>
+	static PairType connectorDofs(SizeType term,
+	                              SizeType dofs,
+	                              const SomeStructType& additionalData)
+	{
+		if (term==W_TERM) return PairType(0,0); // Upd
+
+		SizeType type1 = additionalData.type1;
+		SizeType type2 = additionalData.type2;
+		//! both cannot be TYPE_C
+		assert(type1!=type2 || type1!=additionalData.TYPE_C);
+		//! both TYPE_O:
+		if (type1==type2) {
+			SizeType spin = dofs/4;
+			SizeType xtmp = (spin==0) ? 0 : 4;
+			xtmp = dofs - xtmp;
+			SizeType orb1 = xtmp/2;
+			SizeType orb2 = (xtmp & 1);
+			return PairType(orb1,orb2); // has only dependence on orbital
+		}
+		//! TYPE_C and TYPE_O:
+		SizeType spin = dofs/2;
+		SizeType xtmp = (spin==0) ? 0 : 2;
+		return (type1==additionalData.TYPE_C) ? PairType(0,dofs-xtmp) : PairType(dofs-xtmp,0);
+	}
+
+	template<typename AdditionalDataType>
+	static void setLinkData(SizeType term,
+	                        SizeType dofs,
+	                        bool isSu2,
+	                        SizeType& fermionOrBoson,
+	                        PairType& ops,
+	                        std::pair<char,char>& mods,
+	                        SizeType& angularMomentum,
+	                        RealType& angularFactor,
+	                        SizeType& category,
+	                        const AdditionalDataType& additionalData)
+	{
+		if (term==W_TERM) {
+			fermionOrBoson = ProgramGlobals::BOSON;
+			assert(dofs==0);
+			if (additionalData.type1==additionalData.TYPE_C) {
+				ops.first = 2;
+				ops.second = 4;
+			} else {
+				ops.first = 4;
+				ops.second = 2;
 			}
+			angularFactor = 1;
+			angularMomentum = 1;
+			category = 0;
+			return;
+		}
 
-			//! has only dependence on orbital
-			template<typename SomeStructType>
-			static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additionalData)
-			{
-				if (term==W_TERM) return PairType(0,0); // Upd
+		fermionOrBoson = ProgramGlobals::FERMION;
+		SizeType spin = getSpin(dofs,additionalData);
+		ops = operatorDofs(dofs,additionalData);
+		angularFactor = 1;
+		if (spin==1) angularFactor = -1;
+		angularMomentum = 1;
+		category = spin;
+	}
 
-				SizeType type1 = additionalData.type1;
-				SizeType type2 = additionalData.type2;
-				//! both cannot be TYPE_C
-				assert(type1!=type2 || type1!=additionalData.TYPE_C);
-				//! both TYPE_O:
-				if (type1==type2) {
-					SizeType spin = dofs/4;
-					SizeType xtmp = (spin==0) ? 0 : 4;
-					xtmp = dofs - xtmp;
-					SizeType orb1 = xtmp/2;
-					SizeType orb2 = (xtmp & 1);
-					return PairType(orb1,orb2); // has only dependence on orbital
-				} 
-				//! TYPE_C and TYPE_O:
-				SizeType spin = dofs/2;
-				SizeType xtmp = (spin==0) ? 0 : 2;
-				return (type1==additionalData.TYPE_C) ? PairType(0,dofs-xtmp) : PairType(dofs-xtmp,0);
-			}
+	template<typename AdditionalDataType>
+	static void valueModifier(SparseElementType& value,
+	                          SizeType term,
+	                          SizeType dofs,
+	                          bool isSu2,
+	                          const AdditionalDataType& additionalData)
+	{
+		if (term==W_TERM) {
+			value *= 0.5;
+			return;
+		}
 
-			template<typename AdditionalDataType>
-			static void setLinkData(SizeType term,SizeType dofs,bool isSu2,SizeType& fermionOrBoson,PairType& ops,
-     					std::pair<char,char>& mods,
-					SizeType& angularMomentum,
-     					RealType& angularFactor,
-					SizeType& category,
-					const AdditionalDataType& additionalData)
-			{
-				if (term==W_TERM) {
-					fermionOrBoson = ProgramGlobals::BOSON;
-					assert(dofs==0);
-					if (additionalData.type1==additionalData.TYPE_C) {
-						ops.first = 2;
-						ops.second = 4;
-					} else {
-						ops.first = 4;
-						ops.second = 2;
-					}
-					angularFactor = 1;
-					angularMomentum = 1;
-					category = 0;
-					return;
-				}
+		value *= (-1.0);
+	}
 
-				//!FIXME: Depends on site!!!!
-				fermionOrBoson = ProgramGlobals::FERMION;
-				SizeType spin = getSpin(dofs,additionalData);
-				ops = operatorDofs(dofs,additionalData);
-				angularFactor = 1;
-				if (spin==1) angularFactor = -1;
-				angularMomentum = 1;
-				category = spin;
-			}
-			
-			template<typename AdditionalDataType>
-			static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const AdditionalDataType& additionalData)
-			{
-				if (term==W_TERM) {
-					value *= 0.5;
-					return;
-				}
+	static SizeType terms() { return 2; }
 
-				value *= (-1.0);
-			}
+private:
 
-			static SizeType terms() { return 2; }
+	// spin is diagonal
+	template<typename AdditionalDataType>
+	static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs,
+	                                                 const AdditionalDataType& additionalData)
+	{
+		SizeType type1 = additionalData.type1;
+		SizeType type2 = additionalData.type2;
+		//! both cannot be TYPE_C
+		assert(type1!=type2 || type1!=additionalData.TYPE_C);
+		//! both TYPE_O:
+		if (type1==type2) {
+			SizeType spin = dofs/4;
+			SizeType xtmp = (spin==0) ? 0 : 4;
+			xtmp = dofs - xtmp;
+			SizeType orb1 = xtmp/2;
+			SizeType orb2 = (xtmp & 1);
+			SizeType op1 = orb1 + spin*2;
+			SizeType op2 = orb2 + spin*2;
+			assert(op1<4 && op2<4);
+			return std::pair<SizeType,SizeType>(op1,op2);
+		}
 
-		private:
+		//! TYPE_C and TYPE_O:
+		assert(dofs<4);
+		SizeType spin = dofs/2;
+		SizeType xtmp = (spin==0) ? 0 : 2;
+		xtmp = dofs - xtmp;
+		SizeType op1 = spin;
+		SizeType op2 = xtmp + spin*2;
+		assert(op1<2 && op2<4);
+		return (type1==additionalData.TYPE_C) ? PairType(op1,op2) : PairType(op2,op1);
+	}
 
-			// spin is diagonal
-			template<typename AdditionalDataType>
-			static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs,const AdditionalDataType& additionalData)
-			{
-				SizeType type1 = additionalData.type1;
-				SizeType type2 = additionalData.type2;
-				//! both cannot be TYPE_C
-				assert(type1!=type2 || type1!=additionalData.TYPE_C);
-				//! both TYPE_O:
-				if (type1==type2) {
-					SizeType spin = dofs/4;
-					SizeType xtmp = (spin==0) ? 0 : 4;
-					xtmp = dofs - xtmp;
-					SizeType orb1 = xtmp/2;
-					SizeType orb2 = (xtmp & 1);
-					SizeType op1 = orb1 + spin*2;
-					SizeType op2 = orb2 + spin*2;
-					assert(op1<4 && op2<4);
-					return std::pair<SizeType,SizeType>(op1,op2);
-				}
-				//! TYPE_C and TYPE_O:
-				assert(dofs<4);
-				SizeType spin = dofs/2;
-				SizeType xtmp = (spin==0) ? 0 : 2;
-				xtmp = dofs - xtmp;
-				SizeType op1 = spin;
-				SizeType op2 = xtmp + spin*2;
-				assert(op1<2 && op2<4);
-				return (type1==additionalData.TYPE_C) ? PairType(op1,op2) : PairType(op2,op1);
-			}
+	template<typename AdditionalDataType>
+	static SizeType getSpin(SizeType dofs,const AdditionalDataType& additionalData)
+	{
+		SizeType type1 = additionalData.type1;
+		SizeType type2 = additionalData.type2;
+		//! both cannot be TYPE_C
+		assert(type1!=type2 || type1!=additionalData.TYPE_C);
 
-			template<typename AdditionalDataType>
-			static SizeType getSpin(SizeType dofs,const AdditionalDataType& additionalData)
-			{
-				SizeType type1 = additionalData.type1;
-				SizeType type2 = additionalData.type2;
-				//! both cannot be TYPE_C
-				assert(type1!=type2 || type1!=additionalData.TYPE_C);
+		return (type1==type2) ? dofs/4 : dofs/2;
+	}
 
-				return (type1==type2) ? dofs/4 : dofs/2;
-			}
-			
-	}; // class LinkProductImmm
+}; // class LinkProductImmm
 } // namespace Dmrg
 /*@}*/
 #endif // LINK_PRODUCT_IMMM_H
+
