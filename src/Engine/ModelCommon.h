@@ -97,6 +97,7 @@ namespace Dmrg {
 template<typename ModelBaseType,typename LinkProductType>
 class ModelCommon : public ModelBaseType::ModelCommonBaseType {
 
+	typedef typename ModelBaseType::ModelCommonBaseType ModelCommonBaseType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
@@ -122,9 +123,9 @@ public:
 	typedef typename PsimagLite::Vector<LinkProductStructType>::Type VectorLinkProductStructType;
 
 	ModelCommon(const SolverParamsType& params,const GeometryType& geometry)
-	    : params_(params),geometry_(geometry),progress_("ModelCommon")
+	    : ModelCommonBaseType(params,geometry),progress_("ModelCommon")
 	{
-		if (LinkProductType::terms() > geometry_.terms()) {
+		if (LinkProductType::terms() > this->geometry().terms()) {
 			PsimagLite::String str("ModelCommon: NumberOfTerms must be ");
 			str += ttos(LinkProductType::terms()) + " in input file for this model\n";
 			throw PsimagLite::RuntimeError(str);
@@ -134,11 +135,11 @@ public:
 		MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
 
 		SizeType total = 1;
-		PsimagLite::String options = params_.options;
+		PsimagLite::String options = this->params().options;
 		bool cTridiag = (options.find("concurrenttridiag") != PsimagLite::String::npos);
 		if (cTridiag) total = PsimagLite::Concurrency::npthreads;
 
-		SizeType maxSize = geometry_.maxConnections() * 4 * 16;
+		SizeType maxSize = this->geometry().maxConnections() * 4 * 16;
 		maxSize *= maxSize;
 		vlps_.resize(total,maxSize);
 
@@ -207,7 +208,7 @@ public:
 
 	SizeType maxConnections() const
 	{
-		return geometry_.maxConnections();
+		return this->geometry().maxConnections();
 	}
 
 	/**
@@ -224,7 +225,7 @@ public:
 			throw PsimagLite::RuntimeError("hamiltonianConnectionProduct\n");
 
 		LinkProductStructType& lps = vlps_[threadId];
-		HamiltonianConnectionType hc(geometry_,modelHelper,&lps,&x,&y);
+		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
 
 		SizeType n=modelHelper.leftRightSuper().super().block().size();
 		SizeType total = 0;
@@ -234,7 +235,7 @@ public:
 			}
 		}
 
-		PsimagLite::String options = params_.options;
+		PsimagLite::String options = this->params().options;
 		bool cTridiag = (options.find("concurrenttridiag") != PsimagLite::String::npos);
 
 		if (cTridiag) {
@@ -301,7 +302,7 @@ public:
 
 		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
 
-		HamiltonianConnectionType hc(geometry_,modelHelper,*lps,&x,&y);
+		HamiltonianConnectionType hc(this->geometry(),modelHelper,*lps,&x,&y);
 		SizeType total = 0;
 		for (SizeType i=0;i<n;i++) {
 			for (SizeType j=0;j<n;j++) {
@@ -318,7 +319,7 @@ public:
 	                       const ModelHelperType& modelHelper) const
 	{
 		typename PsimagLite::Vector<SparseElementType>::Type x,y; // bogus
-		HamiltonianConnectionType hc(geometry_,modelHelper,&lps,&x,&y);
+		HamiltonianConnectionType hc(this->geometry(),modelHelper,&lps,&x,&y);
 		SizeType i =0, j = 0, type = 0,term = 0, dofs =0;
 		SparseElementType tmp = 0.0;
 		typename HamiltonianConnectionType::AdditionalDataType additionalData;
@@ -326,8 +327,6 @@ public:
 		LinkType link2 = hc.getKron(A,B,i,j,type,tmp,term,dofs,additionalData);
 		return link2;
 	}
-
-	const SolverParamsType& params() const { return params_; }
 
 private:
 
@@ -347,7 +346,7 @@ private:
 		SizeType ind = block[i];
 		SizeType jnd = block[j];
 
-		if (!geometry_.connected(0,1,ind,jnd)) return;
+		if (!this->geometry().connected(0,1,ind,jnd)) return;
 		if (sysEnvOnly && ind < middle && jnd < middle) return;
 		if (sysEnvOnly && ind >= middle && jnd >= middle) return;
 
@@ -356,12 +355,12 @@ private:
 
 		typename GeometryType::AdditionalDataType additionalData;
 
-		for (SizeType term=0;term<geometry_.terms();term++) {
-			geometry_.fillAdditionalData(additionalData,term,ind,jnd);
+		for (SizeType term=0;term<this->geometry().terms();term++) {
+			this->geometry().fillAdditionalData(additionalData,term,ind,jnd);
 			SizeType dofsTotal = LinkProductType::dofs(term,additionalData);
 			for (SizeType dofs=0;dofs<dofsTotal;dofs++) {
 				std::pair<SizeType,SizeType> edofs = LinkProductType::connectorDofs(term,dofs,additionalData);
-				SparseElementType tmp = geometry_(ind,edofs.first,jnd,edofs.second,term);
+				SparseElementType tmp = this->geometry()(ind,edofs.first,jnd,edofs.second,term);
 
 				if (tmp==static_cast<RealType>(0.0)) continue;
 
@@ -398,7 +397,7 @@ private:
 		        GeometryType,
 		        ModelHelperType,
 		        LinkProductType> SomeHamiltonianConnectionType;
-		SomeHamiltonianConnectionType hc(geometry_,modelHelper);
+		SomeHamiltonianConnectionType hc(this->geometry(),modelHelper);
 
 		SizeType total = 0;
 		for (SizeType i=0;i<n;i++) {
@@ -422,8 +421,6 @@ private:
 		return A;
 	}
 
-	const SolverParamsType& params_;
-	const GeometryType& geometry_;
 	PsimagLite::ProgressIndicator progress_;
 	mutable VectorLinkProductStructType vlps_;
 };     //class ModelCommon

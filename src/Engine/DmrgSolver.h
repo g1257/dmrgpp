@@ -114,7 +114,7 @@ namespace Dmrg {
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 		typedef typename ModelType::InputValidatorType InputValidatorType;
-		typedef ParametersDmrgSolver<RealType,InputValidatorType> ParametersType;
+		typedef typename ModelType::SolverParamsType ParametersType;
 		typedef Diagonalization<ParametersType,TargettingType> DiagonalizationType;
 		typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 		typedef Truncation<LeftRightSuperType,ParametersType,TargettingType> TruncationType;
@@ -130,11 +130,10 @@ namespace Dmrg {
 
 		enum {SAVE_ALL=MyBasis::SAVE_ALL, SAVE_PARTIAL=MyBasis::SAVE_PARTIAL};
 
-		DmrgSolver(ParametersDmrgSolver<RealType,InputValidatorType> const &parameters,
-		           ModelType const &model,
+		DmrgSolver(ModelType const &model,
 		           TargettingParamsType& targetStruct)
-		: parameters_(parameters),
-		  model_(model),
+		    : model_(model),
+		  parameters_(model_.params()),
 		  targetStruct_(targetStruct),
 		  appInfo_("DmrgSolver:"),
 		  verbose_(false),
@@ -146,7 +145,7 @@ namespace Dmrg {
 		  checkpoint_(parameters_),
 		  wft_(parameters_),
 		  reflectionOperator_(lrs_,model_.hilbertSize(0),parameters_.useReflectionSymmetry,EXPAND_SYSTEM),
-		  diagonalization_(parameters,model,verbose_,
+		  diagonalization_(parameters_,model,verbose_,
 				   reflectionOperator_,io_,quantumSector_,wft_),
 		  truncate_(reflectionOperator_,wft_,parameters_,
 			    model_.geometry().maxConnections(),verbose_)
@@ -588,10 +587,10 @@ namespace Dmrg {
 			progress_.printline(msg2,std::cout);
 		}
 
-		PsimagLite::MemoryUsage musage_;
-		ParametersDmrgSolver<RealType,InputValidatorType> parameters_;
 		const ModelType& model_;
+		const ParametersType& parameters_;
 		const TargettingParamsType& targetStruct_;
+		PsimagLite::MemoryUsage musage_;
 		PsimagLite::ApplicationInfo appInfo_;
 		bool verbose_;
 		LeftRightSuperType lrs_;

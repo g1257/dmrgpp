@@ -111,7 +111,7 @@ public:
 	typedef typename MyBasis::BasisDataType BasisDataType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
-	typedef ModelCommonBase<ModelHelperType,ParametersType> ModelCommonBaseType;
+	typedef ModelCommonBase<ModelHelperType,ParametersType,GeometryType> ModelCommonBaseType;
 	typedef typename ModelCommonBaseType::LinkProductStructType LinkProductStructType;
 	typedef typename ModelCommonBaseType::VectorType VectorType;
 	typedef ParametersType SolverParamsType;

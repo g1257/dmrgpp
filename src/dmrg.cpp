@@ -68,7 +68,7 @@ typedef ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> Parameters
 template<typename GeometryType,
          typename TargettingType>
 void mainLoop3(GeometryType& geometry,
-               ParametersDmrgSolverType& dmrgSolverParams,
+               const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io)
 {
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
@@ -83,7 +83,7 @@ void mainLoop3(GeometryType& geometry,
 
 	//! Setup the dmrg solver:
 	typedef DmrgSolver<TargettingType> SolverType;
-	SolverType dmrgSolver(dmrgSolverParams,model,tsp);
+	SolverType dmrgSolver(model,tsp);
 
 	//! Calculate observables:
 	dmrgSolver.main(geometry);
@@ -98,7 +98,7 @@ template<typename GeometryType,
                   typename> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop2(GeometryType& geometry,
-               ParametersDmrgSolverType& dmrgSolverParams,
+               const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io)
 {
 	if (dmrgSolverParams.options.find("ChebyshevSolver")!=PsimagLite::String::npos) {
@@ -127,7 +127,7 @@ template<typename GeometryType,
                   typename> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop(GeometryType& geometry,
-              ParametersDmrgSolverType& dmrgSolverParams,
+              const ParametersDmrgSolverType& dmrgSolverParams,
               InputNgType::Readable& io)
 {
 	typedef Basis<MySparseMatrix> BasisType;
@@ -168,7 +168,7 @@ void mainLoop(GeometryType& geometry,
 
 template<typename MySparseMatrix>
 void mainLoop0(InputNgType::Readable& io,
-               ParametersDmrgSolverType& dmrgSolverParams,
+               const ParametersDmrgSolverType& dmrgSolverParams,
                InputCheck& inputCheck)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;

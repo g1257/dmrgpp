@@ -124,7 +124,7 @@ namespace Dmrg {
 
 		enum {SPIN_UP, SPIN_DOWN};
 
-		Tj1Orb(const SolverParamsType solverParams,
+		Tj1Orb(const SolverParamsType& solverParams,
 		       InputValidatorType& io,
 		       GeometryType const &geometry)
 		    : ModelBaseType(io,geometry,new ModelCommonType(solverParams,geometry)),

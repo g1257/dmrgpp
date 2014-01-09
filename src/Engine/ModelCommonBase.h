@@ -88,7 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 
-template<typename ModelHelperType,typename SolverParamsType>
+template<typename ModelHelperType,typename SolverParamsType,typename GeometryType>
 class ModelCommonBase  {
 
 
@@ -109,6 +109,10 @@ public:
 
 	typedef LinkProductStruct<SparseElementType> LinkProductStructType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
+
+	ModelCommonBase(const SolverParamsType& params,const GeometryType& geometry)
+	    : params_(params),geometry_(geometry)
+	{}
 
 	virtual ~ModelCommonBase() {}
 
@@ -135,13 +139,20 @@ public:
 	virtual SizeType getLinkProductStruct(LinkProductStructType** lps,
 	                              const ModelHelperType& modelHelper) const = 0;
 
-	virtual const SolverParamsType& params() const = 0;
-
 	virtual LinkType getConnection(const SparseMatrixType** A,
 	                       const SparseMatrixType** B,
 	                       SizeType ix,
 	                       const LinkProductStructType& lps,
 	                       const ModelHelperType& modelHelper) const = 0;
+
+	const SolverParamsType& params() const {return params_; }
+
+	const GeometryType& geometry() const {return geometry_; }
+
+private:
+
+	const SolverParamsType& params_;
+	const GeometryType& geometry_;
 
 };     //class ModelCommonBase
 } // namespace Dmrg
