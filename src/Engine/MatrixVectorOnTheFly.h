@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -67,15 +67,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
 /*! \file MatrixVectorOnTheFly.h
  *
- *  A class to encapsulate the product x+=Hy, where x and y are vectors and H is the Hamiltonian matrix
+ *  A class to encapsulate the product x+=Hy,
+ *  where x and y are vectors and H is the Hamiltonian matrix
  *
  */
 #ifndef	MATRIX_VECTOR_OTF_H
@@ -84,43 +83,43 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-	template<typename ModelType_>
-	class MatrixVectorOnTheFly {
+template<typename ModelType_>
+class MatrixVectorOnTheFly {
 
-	public:
+public:
 
-		typedef ModelType_ ModelType;
-		typedef typename ModelType::ModelHelperType ModelHelperType;
-		typedef typename ModelHelperType::RealType RealType;
-		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
-		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-		typedef typename SparseMatrixType::value_type value_type;
+	typedef ModelType_ ModelType;
+	typedef typename ModelType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::RealType RealType;
+	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type value_type;
 
-		MatrixVectorOnTheFly(ModelType const *model,
-					ModelHelperType const *modelHelper,
-					ReflectionSymmetryType* rs=0)
-		{
-			model_ = model;
-			modelHelper_=modelHelper;
-			
-		}
+	MatrixVectorOnTheFly(ModelType const *model,
+	                     ModelHelperType const *modelHelper,
+	                     ReflectionSymmetryType* rs=0)
+	{
+		model_ = model;
+		modelHelper_=modelHelper;
 
-		SizeType rank() const { return modelHelper_->size(); }
+	}
 
-		template<typename SomeVectorType>
-		void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
-		{
-			 model_->matrixVectorProduct(x,y,*modelHelper_);
-		}
+	SizeType rank() const { return modelHelper_->size(); }
 
-		SizeType reflectionSector() const { return 0; }
+	template<typename SomeVectorType>
+	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
+	{
+		model_->matrixVectorProduct(x,y,*modelHelper_);
+	}
 
-		void reflectionSector(SizeType p) {  }
+	SizeType reflectionSector() const { return 0; }
 
-	private:
-		ModelType const *model_;
-		ModelHelperType const *modelHelper_;
-	}; // class MatrixVectorOnTheFly
+	void reflectionSector(SizeType p) {  }
+
+private:
+	ModelType const *model_;
+	ModelHelperType const *modelHelper_;
+}; // class MatrixVectorOnTheFly
 } // namespace Dmrg
 
 /*@}*/

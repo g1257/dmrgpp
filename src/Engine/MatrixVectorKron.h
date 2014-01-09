@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -67,15 +67,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
 /*! \file MatrixVectorKron.h
  *
- *  A class to encapsulate the product x+=Hy, where x and y are vectors and H is the Hamiltonian matrix
+ *  A class to encapsulate the product x+=Hy,
+ *  where x and y are vectors and H is the Hamiltonian matrix
  *
  */
 #ifndef	MATRIX_VECTOR_KRON_H
@@ -86,44 +85,44 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "KronMatrix.h"
 
 namespace Dmrg {
-	template<typename ModelType_>
-	class MatrixVectorKron {
+template<typename ModelType_>
+class MatrixVectorKron {
 
-	public:
+public:
 
-		typedef ModelType_ ModelType;
-		typedef typename ModelType::ModelHelperType ModelHelperType;
-		typedef typename ModelHelperType::RealType RealType;
-		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
-		typedef InitKron<ModelType,ModelHelperType> InitKronType;
-		typedef KronMatrix<InitKronType> KronMatrixType;
-		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-		typedef typename SparseMatrixType::value_type value_type;
+	typedef ModelType_ ModelType;
+	typedef typename ModelType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::RealType RealType;
+	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
+	typedef InitKron<ModelType,ModelHelperType> InitKronType;
+	typedef KronMatrix<InitKronType> KronMatrixType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type value_type;
 
-		MatrixVectorKron(ModelType const *model,
-					ModelHelperType const *modelHelper,
-					ReflectionSymmetryType* rs=0)
-		: initKron_(*model,*modelHelper),kronMatrix_(initKron_)
-		{
-		}
+	MatrixVectorKron(ModelType const *model,
+	                 ModelHelperType const *modelHelper,
+	                 ReflectionSymmetryType* rs=0)
+	    : initKron_(*model,*modelHelper),kronMatrix_(initKron_)
+	{
+	}
 
-		SizeType rank() const { return initKron_.size(); }
+	SizeType rank() const { return initKron_.size(); }
 
-		template<typename SomeVectorType>
-		void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
-		{
-			 kronMatrix_.matrixVectorProduct(x,y);
-		}
+	template<typename SomeVectorType>
+	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
+	{
+		kronMatrix_.matrixVectorProduct(x,y);
+	}
 
-		SizeType reflectionSector() const { return 0; }
+	SizeType reflectionSector() const { return 0; }
 
-		void reflectionSector(SizeType p) {  }
+	void reflectionSector(SizeType p) {  }
 
-	private:
+private:
 
-		InitKronType initKron_;
-		KronMatrixType kronMatrix_;
-	}; // class MatrixVectorKron
+	InitKronType initKron_;
+	KronMatrixType kronMatrix_;
+}; // class MatrixVectorKron
 } // namespace Dmrg
 
 /*@}*/

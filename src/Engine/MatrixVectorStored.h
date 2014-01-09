@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -67,15 +67,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-
 /** \ingroup DMRG */
 /*@{*/
 
 /*! \file MatrixVectorStored.h
  *
- *  A class to encapsulate the product x+=Hy, where x and y are vectors and H is the Hamiltonian matrix
+ *  A class to encapsulate the product x+=Hy,
+ *  where x and y are vectors and H is the Hamiltonian matrix
  *
  */
 #ifndef MatrixVectorStored_HEADER_H
@@ -85,69 +84,70 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
-	template<typename ModelType_>
-	class MatrixVectorStored {
+template<typename ModelType_>
+class MatrixVectorStored {
 
-	public:	
+public:
 
-		typedef ModelType_ ModelType;
-		typedef typename ModelType::ModelHelperType ModelHelperType;
-		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-		typedef typename ModelHelperType::RealType RealType;
-		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
-		typedef typename SparseMatrixType::value_type value_type;
+	typedef ModelType_ ModelType;
+	typedef typename ModelType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename ModelHelperType::RealType RealType;
+	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
+	typedef typename SparseMatrixType::value_type value_type;
 
-		MatrixVectorStored(ModelType const *model,
-				      ModelHelperType const *modelHelper,
-				      const ReflectionSymmetryType* rs=0)
-		: matrixStored_(2),pointer_(0),progress_("MatrixVectorStored")
-		{
-			model_ = model;
-			modelHelper_=modelHelper;
+	MatrixVectorStored(ModelType const *model,
+	                   ModelHelperType const *modelHelper,
+	                   const ReflectionSymmetryType* rs=0)
+	    : matrixStored_(2),pointer_(0),progress_("MatrixVectorStored")
+	{
+		model_ = model;
+		modelHelper_=modelHelper;
 
-
-			if (!rs) {
-				matrixStored_[0].clear();
-				model->fullHamiltonian(matrixStored_[0],*modelHelper);
-				assert(isHermitian(matrixStored_[0],true));
-				PsimagLite::OstringStream msg;
-				msg<<"fullHamiltonian has rank="<<matrixStored_[0].row()<<" nonzeros="<<matrixStored_[0].nonZero();
-				progress_.printline(msg,std::cout);
-				return;
-			}
-			SparseMatrixType matrix2;
-			model->fullHamiltonian(matrix2,*modelHelper);
-			rs->transform(matrixStored_[0],matrixStored_[1],matrix2);
+		if (!rs) {
+			matrixStored_[0].clear();
+			model->fullHamiltonian(matrixStored_[0],*modelHelper);
+			assert(isHermitian(matrixStored_[0],true));
 			PsimagLite::OstringStream msg;
-			msg<<" sector="<<matrixStored_[0].row()<<" and sector="<<matrixStored_[1].row();
+			msg<<"fullHamiltonian has rank="<<matrixStored_[0].row();
+			msg<<" nonzeros="<<matrixStored_[0].nonZero();
 			progress_.printline(msg,std::cout);
+			return;
 		}
+		SparseMatrixType matrix2;
+		model->fullHamiltonian(matrix2,*modelHelper);
+		rs->transform(matrixStored_[0],matrixStored_[1],matrix2);
+		PsimagLite::OstringStream msg;
+		msg<<" sector="<<matrixStored_[0].row()<<" and sector="<<matrixStored_[1].row();
+		progress_.printline(msg,std::cout);
+	}
 
-		SizeType rank() const { return matrixStored_[pointer_].row(); }
+	SizeType rank() const { return matrixStored_[pointer_].row(); }
 
-		template<typename SomeVectorType>
-		void matrixVectorProduct(SomeVectorType &x, SomeVectorType const &y) const
-		{
-			 matrixStored_[pointer_].matrixVectorProduct(x,y);
-		}
+	template<typename SomeVectorType>
+	void matrixVectorProduct(SomeVectorType &x, SomeVectorType const &y) const
+	{
+		matrixStored_[pointer_].matrixVectorProduct(x,y);
+	}
 
-		value_type operator()(SizeType i,SizeType j) const
-		{
-			return matrixStored_[pointer_](i,j);
-		}
+	value_type operator()(SizeType i,SizeType j) const
+	{
+		return matrixStored_[pointer_](i,j);
+	}
 
-		SizeType reflectionSector() const { return pointer_; }
+	SizeType reflectionSector() const { return pointer_; }
 
-		void reflectionSector(SizeType p) { pointer_=p; }
+	void reflectionSector(SizeType p) { pointer_=p; }
 
-	private:
-		ModelType const *model_;
-		ModelHelperType const *modelHelper_;
-		typename PsimagLite::Vector<SparseMatrixType>::Type matrixStored_;
-		SizeType pointer_;
-		PsimagLite::ProgressIndicator progress_;
-	}; // class MatrixVectorStored
+private:
+	ModelType const *model_;
+	ModelHelperType const *modelHelper_;
+	typename PsimagLite::Vector<SparseMatrixType>::Type matrixStored_;
+	SizeType pointer_;
+	PsimagLite::ProgressIndicator progress_;
+}; // class MatrixVectorStored
 } // namespace Dmrg
 
 /*@}*/
 #endif
+
