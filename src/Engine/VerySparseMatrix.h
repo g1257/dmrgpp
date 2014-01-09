@@ -97,29 +97,20 @@ namespace Dmrg {
 
 		template<typename CrsMatrixType>
 		VerySparseMatrix(const CrsMatrixType& crs)
+		    : rank_(crs.row()),
+		      values_(crs.nonZero()),
+		      coordinates_(crs.nonZero()),
+		      sorted_(true)
 		{
 			assert(crs.row()==crs.col());
-			rank_=crs.row();
-			sorted_=true;
-			for (SizeType i=0;i<rank_;i++) {
-				for (int k=crs.getRowPtr(i);k<crs.getRowPtr(i+1);k++) { 
+			SizeType counter = 0;
+			for (SizeType i=0;i<rank_;++i) {
+				for (int k=crs.getRowPtr(i);k<crs.getRowPtr(i+1);++k) {
 					// (i,crs.getCol(k)) --> coordinate
-					PairType coordinate = PairType(i,crs.getCol(k));
-					coordinates_.push_back(coordinate);
-					values_.push_back(crs.getValue(k));
+					coordinates_[counter] = PairType(i,crs.getCol(k));
+					values_[counter++] = crs.getValue(k);
 				}
 			}
-		}
-
-		VerySparseMatrix(const VerySparseMatrix& vsm,const T& eps)
-		{
-			rank_=vsm.rank();
-			for (SizeType i=0;i<vsm.values_.size();i++) {
-				if (fabs(vsm.values_[i])<eps) continue;
-				coordinates_.push_back(vsm.coordinates_[i]);
-				values_.push_back(vsm.values_[i]);
-			}
-			sorted_=true;
 		}
 
 		T& operator()(SizeType row,SizeType col)
@@ -134,16 +125,6 @@ namespace Dmrg {
 			}
 			return values_[x];
 		}
-
-//		bool operator==(const VerySparseMatrix<T>& other) const
-//		{
-//			if (rank_!=other.rank_) return notEqual("rank");
-//
-//			if (!utils::vectorEqual(values_,other.values_)) return notEqual("values");
-//			if (!utils::vectorEqual(coordinates_,other.coordinates_)) return notEqual("coordinates");
-//			if (sorted_!=other.sorted_) return notEqual("sorted");
-//			return true;
-//		}
 
 		bool operator!=(const VerySparseMatrix<T>& other) const 
 		{
@@ -237,7 +218,11 @@ namespace Dmrg {
 
 		SizeType rank() const { return rank_; }
 
-		SizeType getRow(SizeType i) const { return coordinates_[i].first; }
+		SizeType getRow(SizeType i) const
+		{
+			assert(i < coordinates_.size());
+			return coordinates_[i].first;
+		}
 
 		void getRow(typename PsimagLite::Vector<SizeType>::Type& cols,SizeType row,SizeType startIndex=0) const
 		{
@@ -248,7 +233,11 @@ namespace Dmrg {
 			}
 		}
 
-		SizeType getColumn(SizeType i) const { return coordinates_[i].second; }
+		SizeType getColumn(SizeType i) const
+		{
+			assert(i < coordinates_.size());
+			return coordinates_[i].second;
+		}
 
 		void getColumn(typename PsimagLite::Vector<SizeType>::Type& rows,SizeType col) const
 		{
@@ -259,7 +248,11 @@ namespace Dmrg {
 
 		SizeType nonZero() const { return values_.size(); }
 
-		T getValue(SizeType i) const { return values_[i]; }
+		T getValue(SizeType i) const
+		{
+			assert(i < values_.size());
+			return values_[i];
+		}
 
 		template<typename T1>
 		friend std::ostream& operator<<(std::ostream& os,const VerySparseMatrix<T1>& m);
@@ -311,11 +304,7 @@ namespace Dmrg {
 		bool sorted() const { return sorted_; }
 		
 		
-	private:	
-		SizeType rank_;
-		typename PsimagLite::Vector<T>::Type values_;
-		typename PsimagLite::Vector<PairType>::Type coordinates_;
-		bool sorted_;
+	private:
 		
 		void plusEqualOrd(VerySparseMatrix<T>& other)
 		{
@@ -366,56 +355,17 @@ namespace Dmrg {
 			}
 			// this is sorted
 		}
-		
-// 		void plusEqualUnord(VerySparseMatrix<T>& other)
-// 		{
-// 			throw PsimagLite::RuntimeError("dfjdkfdf\n");
-// 			typename PsimagLite::Vector<SizeType>::Type cols1,cols2;
-// 			SizeType startIndex1=0,startIndex2=0;
-// 			typename PsimagLite::Vector<PairType>::Type newCoordinates;
-// 			typename PsimagLite::Vector<T>::Type newValues;
-// 			
-// 			for (SizeType i=0;i<other.rank_;i++) {
-// 				other.getRow(cols1,i,startIndex1);
-// 				getRow(cols2,i,startIndex2);
-// 				sumRows(newCoordinates,newValues,i,other,cols1,cols2);
-// 			}
-// 			for (SizeType i=0;i<newValues.size();i++) {
-// 				coordinates_.push_back(newCoordinates[i]);
-// 				values_.push_back(newValues[i]);
-// 			}
-// 			if (coordinates_.size()>0) sort();
-// 		}
-		
-// 		void sumRows(
-// 			typename PsimagLite::Vector<PairType>::Type& newCoordinates,
-// 			typename PsimagLite::Vector<T>::Type& newValues,
-// 			SizeType thisRow,
-//    			const VerySparseMatrix<T>& other,
-//       			const typename PsimagLite::Vector<SizeType>::Type& cols1,
-// 	 		const typename PsimagLite::Vector<SizeType>::Type& cols2)
-// 		{
-// 			typename PsimagLite::Vector<SizeType>::Type realCols2(cols2.size());
-// 			for (SizeType i=0;i<cols2.size();i++) realCols2[i] = getColumn(cols2[i]);
-// 
-// 			for (SizeType i=0;i<cols1.size();i++) {
-// 				SizeType col = other.getColumn(cols1[i]);
-// 				int x = PsimagLite\:\:isInVector(realCols2,col);
-// 				if (x<0) {
-// 					// add entry (thisRow,col) = other.getValue(cols1[i])
-// 					newCoordinates.push_back(PairType(thisRow,col));
-// 					newValues.push_back(other.getValue(cols1[i]));
-// 					continue;
-// 				}
-// 				values_[cols2[x]] += other.getValue(cols1[i]);
-// 			}
-// 		}
 
 		bool notEqual(const char *s) const
 		{
 			std::cerr<<"notEqual="<<s<<"\n";
 			return false;
 		}
+
+		SizeType rank_;
+		typename PsimagLite::Vector<T>::Type values_;
+		typename PsimagLite::Vector<PairType>::Type coordinates_;
+		bool sorted_;
 	}; // VerySparseMatrix
 
 	template<typename T>
