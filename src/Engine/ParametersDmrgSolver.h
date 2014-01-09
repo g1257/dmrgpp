@@ -308,7 +308,7 @@ namespace Dmrg {
 		      lanczosEps(1e-12),
 		      sitesPerBlock(1),
 		      gsWeight(false,0.0),
-		      maxMatrixRankStored(lanczosSteps)
+		      maxMatrixRankStored(0)
 		{
 			io.readline(model,"Model=");
 			io.readline(options,"SolverOptions=");
@@ -459,8 +459,6 @@ namespace Dmrg {
 			try {
 				io.readline(maxMatrixRankStored,"MaxMatrixRankStored=");
 			} catch (std::exception& e) {}
-
-
 		}
 	};
 
