@@ -91,7 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         typename InternalProductType_,
+         typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
 	class MettsTargetting  {
@@ -106,8 +106,8 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 		public:
 
-			typedef InternalProductType_ InternalProductType;
-			typedef typename InternalProductType::ModelType ModelType;
+			typedef MatrixVectorType_ MatrixVectorType;
+			typedef typename MatrixVectorType::ModelType ModelType;
 			typedef IoType_ IoType;
 			typedef typename ModelType::RealType RealType;
 			typedef typename ModelType::OperatorsType OperatorsType;
@@ -121,7 +121,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 			typedef typename VectorWithOffsetType::VectorType TargetVectorType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,TargetVectorType>
+			typedef LanczosSolverTemplate<ParametersForSolverType,MatrixVectorType,TargetVectorType>
 			    LanczosSolverType;
 			typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
@@ -1145,12 +1145,12 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 	};     //class MettsTargetting
 
 	template<template<typename,typename,typename> class LanczosSolverTemplate,
-	         typename InternalProductType,
+	         typename MatrixVectorType,
 	         typename WaveFunctionTransfType,
 	         typename IoType_>
 	std::ostream& operator<<(std::ostream& os,
 	                         const MettsTargetting<LanczosSolverTemplate,
-	                         InternalProductType,
+	                         MatrixVectorType,
 	                         WaveFunctionTransfType,IoType_>& tst)
 	{
 		tst.print(os);

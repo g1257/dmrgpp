@@ -93,15 +93,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         typename InternalProductType_,
+         typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
 class CorrectionVectorTargetting  {
 
 public:
 
-	typedef InternalProductType_ InternalProductType;
-	typedef typename InternalProductType::ModelType ModelType;
+	typedef MatrixVectorType_ MatrixVectorType;
+	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
@@ -120,7 +120,7 @@ public:
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,
-	                              InternalProductType,
+	                              MatrixVectorType,
 	                              VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
@@ -539,12 +539,12 @@ private:
 }; // class CorrectionVectorTargetting
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         typename InternalProductType,
+         typename MatrixVectorType,
          typename WaveFunctionTransfType,
          typename IoType_>
 std::ostream& operator<<(std::ostream& os,
                          const CorrectionVectorTargetting<LanczosSolverTemplate,
-                         InternalProductType,
+                         MatrixVectorType,
                          WaveFunctionTransfType,IoType_>& tst)
 {
 	os<<"DT=NothingToSeeHereYet\n";

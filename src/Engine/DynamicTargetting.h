@@ -99,15 +99,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         typename InternalProductType_,
+         typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
 class DynamicTargetting  {
 
 public:
 
-	typedef InternalProductType_ InternalProductType;
-	typedef typename InternalProductType::ModelType ModelType;
+	typedef MatrixVectorType_ MatrixVectorType;
+	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
@@ -130,7 +130,7 @@ public:
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,
-	                              InternalProductType,
+	                              MatrixVectorType,
 	                              VectorType> LanczosSolverType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
@@ -538,12 +538,12 @@ private:
 }; // class DynamicTargetting
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         typename InternalProductType,
+         typename MatrixVectorType,
          typename WaveFunctionTransfType,
          typename IoType_>
 std::ostream& operator<<(std::ostream& os,
                          const DynamicTargetting<LanczosSolverTemplate,
-                         InternalProductType,
+                         MatrixVectorType,
                          WaveFunctionTransfType,IoType_>& tst)
 {
 	os<<"DT=NothingToSeeHereYet\n";

@@ -73,13 +73,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file InternalProductKron.h
+/*! \file MatrixVectorKron.h
  *
  *  A class to encapsulate the product x+=Hy, where x and y are vectors and H is the Hamiltonian matrix
  *
  */
-#ifndef	INTERNALPRODUCT_KRON_H
-#define INTERNALPRODUCT_KRON_H
+#ifndef	MATRIX_VECTOR_KRON_H
+#define MATRIX_VECTOR_KRON_H
 
 #include <vector>
 #include "InitKron.h"
@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 	template<typename ModelType_>
-	class InternalProductKron {
+	class MatrixVectorKron {
 
 	public:
 
@@ -100,7 +100,7 @@ namespace Dmrg {
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type value_type;
 
-		InternalProductKron(ModelType const *model,
+		MatrixVectorKron(ModelType const *model,
 					ModelHelperType const *modelHelper,
 					ReflectionSymmetryType* rs=0)
 		: initKron_(*model,*modelHelper),kronMatrix_(initKron_)
@@ -123,7 +123,7 @@ namespace Dmrg {
 
 		InitKronType initKron_;
 		KronMatrixType kronMatrix_;
-	}; // class InternalProductKron
+	}; // class MatrixVectorKron
 } // namespace Dmrg
 
 /*@}*/

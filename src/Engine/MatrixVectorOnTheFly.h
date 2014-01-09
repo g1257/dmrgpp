@@ -73,19 +73,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file InternalProductOnTheFly.h
+/*! \file MatrixVectorOnTheFly.h
  *
  *  A class to encapsulate the product x+=Hy, where x and y are vectors and H is the Hamiltonian matrix
  *
  */
-#ifndef	INTERNALPRODUCT_OTF_H
-#define INTERNALPRODUCT_OTF_H
+#ifndef	MATRIX_VECTOR_OTF_H
+#define MATRIX_VECTOR_OTF_H
 
 #include <vector>
 
 namespace Dmrg {
 	template<typename ModelType_>
-	class InternalProductOnTheFly {
+	class MatrixVectorOnTheFly {
 
 	public:
 
@@ -96,7 +96,7 @@ namespace Dmrg {
 		typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 		typedef typename SparseMatrixType::value_type value_type;
 
-		InternalProductOnTheFly(ModelType const *model,
+		MatrixVectorOnTheFly(ModelType const *model,
 					ModelHelperType const *modelHelper,
 					ReflectionSymmetryType* rs=0)
 		{
@@ -120,7 +120,7 @@ namespace Dmrg {
 	private:
 		ModelType const *model_;
 		ModelHelperType const *modelHelper_;
-	}; // class InternalProductOnTheFly
+	}; // class MatrixVectorOnTheFly
 } // namespace Dmrg
 
 /*@}*/

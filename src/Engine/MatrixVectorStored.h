@@ -73,20 +73,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file InternalProductStored.h
+/*! \file MatrixVectorStored.h
  *
  *  A class to encapsulate the product x+=Hy, where x and y are vectors and H is the Hamiltonian matrix
  *
  */
-#ifndef InternalProductStored_HEADER_H
-#define InternalProductStored_HEADER_H
+#ifndef MatrixVectorStored_HEADER_H
+#define MatrixVectorStored_HEADER_H
 
 #include <vector>
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
 	template<typename ModelType_>
-	class InternalProductStored {
+	class MatrixVectorStored {
 
 	public:	
 
@@ -97,10 +97,10 @@ namespace Dmrg {
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 		typedef typename SparseMatrixType::value_type value_type;
 
-		InternalProductStored(ModelType const *model,
+		MatrixVectorStored(ModelType const *model,
 				      ModelHelperType const *modelHelper,
 				      const ReflectionSymmetryType* rs=0)
-		: matrixStored_(2),pointer_(0),progress_("InternalProductStored")
+		: matrixStored_(2),pointer_(0),progress_("MatrixVectorStored")
 		{
 			model_ = model;
 			modelHelper_=modelHelper;
@@ -146,7 +146,7 @@ namespace Dmrg {
 		typename PsimagLite::Vector<SparseMatrixType>::Type matrixStored_;
 		SizeType pointer_;
 		PsimagLite::ProgressIndicator progress_;
-	}; // class InternalProductStored
+	}; // class MatrixVectorStored
 } // namespace Dmrg
 
 /*@}*/

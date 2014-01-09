@@ -33,9 +33,9 @@ typedef float MatrixElementType;
 #include "Geometry/Geometry.h"
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
-#include "InternalProductOnTheFly.h"
-#include "InternalProductStored.h"
-#include "InternalProductKron.h"
+#include "MatrixVectorOnTheFly.h"
+#include "MatrixVectorStored.h"
+#include "MatrixVectorKron.h"
 #include "GroundStateTargetting.h"
 #include "TimeStepTargetting.h"
 #include "DynamicTargetting.h"
@@ -72,7 +72,7 @@ void mainLoop3(GeometryType& geometry,
                InputNgType::Readable& io)
 {
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
-	typedef typename TargettingType::InternalProductType::ModelType ModelBaseType;
+	typedef typename TargettingType::MatrixVectorType::ModelType ModelBaseType;
 
 	//! Setup the Model
 	ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
@@ -90,7 +90,7 @@ void mainLoop3(GeometryType& geometry,
 }
 
 template<typename GeometryType,
-         typename InternalProductType,
+         typename MatrixVectorType,
          typename WaveFunctionTransfType,
          template<template<typename,typename,typename> class,
                   typename,
@@ -103,14 +103,14 @@ void mainLoop2(GeometryType& geometry,
 {
 	if (dmrgSolverParams.options.find("ChebyshevSolver")!=PsimagLite::String::npos) {
 		typedef TargettingTemplate<PsimagLite::ChebyshevSolver,
-					   InternalProductType,
+					   MatrixVectorType,
 					   WaveFunctionTransfType,
 					   PsimagLite::IoSimple> TargettingType;
 		mainLoop3<GeometryType,TargettingType>
 		(geometry,dmrgSolverParams,io);
 	} else {
 		typedef TargettingTemplate<PsimagLite::LanczosSolver,
-					   InternalProductType,
+					   MatrixVectorType,
 					   WaveFunctionTransfType,
 					   PsimagLite::IoSimple> TargettingType;
 		mainLoop3<GeometryType,TargettingType>
@@ -144,21 +144,21 @@ void mainLoop(GeometryType& geometry,
 	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 	typedef WaveFunctionTransfFactory<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
 
-	if (dmrgSolverParams.options.find("InternalProductStored")!=PsimagLite::String::npos) {
+	if (dmrgSolverParams.options.find("MatrixVectorStored")!=PsimagLite::String::npos) {
 		mainLoop2<GeometryType,
-		         InternalProductStored<ModelBaseType>,
+		         MatrixVectorStored<ModelBaseType>,
 		         WaveFunctionTransfType,
 		         TargettingTemplate,
 		         MySparseMatrix>(geometry,dmrgSolverParams,io);
-	} else if (dmrgSolverParams.options.find("InternalProductKron")!=PsimagLite::String::npos) {
+	} else if (dmrgSolverParams.options.find("MatrixVectorKron")!=PsimagLite::String::npos) {
 		mainLoop2<GeometryType,
-			 InternalProductKron<ModelBaseType>,
+			 MatrixVectorKron<ModelBaseType>,
 			 WaveFunctionTransfType,
 			 TargettingTemplate,
 			 MySparseMatrix>(geometry,dmrgSolverParams,io);
 	} else {
  		mainLoop2<GeometryType,
-		         InternalProductOnTheFly<ModelBaseType>,
+		         MatrixVectorOnTheFly<ModelBaseType>,
 		         WaveFunctionTransfType,
 		         TargettingTemplate,
 		         MySparseMatrix>(geometry,dmrgSolverParams,io);

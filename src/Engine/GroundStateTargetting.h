@@ -92,15 +92,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         typename InternalProductType_,
+         typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
 class GroundStateTargetting {
 
 public:
 
-	typedef InternalProductType_ InternalProductType;
-	typedef typename InternalProductType::ModelType ModelType;
+	typedef MatrixVectorType_ MatrixVectorType;
+	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef IoType_ IoType;
 	typedef PsimagLite::IoSimple::In IoInputType;
 	typedef typename ModelType::RealType RealType;
@@ -114,7 +114,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,VectorType> LanczosSolverType;
+	typedef LanczosSolverTemplate<ParametersForSolverType,MatrixVectorType,VectorType> LanczosSolverType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
@@ -265,12 +265,12 @@ private:
 };     //class GroundStateTargetting
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         typename InternalProductType,
+         typename MatrixVectorType,
          typename WaveFunctionTransfType,
          typename IoType_>
 std::ostream& operator<<(std::ostream& os,
                          const GroundStateTargetting<LanczosSolverTemplate,
-                         InternalProductType,
+                         MatrixVectorType,
                          WaveFunctionTransfType,IoType_>& tst)
 {
 	os<<"GSTWeightGroundState=1\n";

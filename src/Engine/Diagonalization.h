@@ -109,7 +109,7 @@ namespace Dmrg {
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
-		typedef typename TargettingType::InternalProductType InternalProductType;
+		typedef typename TargettingType::MatrixVectorType MatrixVectorType;
 
 		Diagonalization(const ParametersType& parameters,
                         const ModelType& model,
@@ -367,7 +367,7 @@ namespace Dmrg {
 			ReflectionSymmetryType *rs = 0;
 			if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-			typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,InternalProductType,TargetVectorType> LanczosOrDavidsonBaseType;
+			typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,MatrixVectorType,TargetVectorType> LanczosOrDavidsonBaseType;
 			typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(&model_,&modelHelper,rs);
 
 			ParametersForSolverType params;
@@ -381,9 +381,9 @@ namespace Dmrg {
 
 			bool useDavidson = (parameters_.options.find("useDavidson")!=PsimagLite::String::npos);
 			if (useDavidson) {
-				lanczosOrDavidson = new PsimagLite::DavidsonSolver<ParametersForSolverType,InternalProductType,TargetVectorType>(lanczosHelper,params);
+				lanczosOrDavidson = new PsimagLite::DavidsonSolver<ParametersForSolverType,MatrixVectorType,TargetVectorType>(lanczosHelper,params);
 			} else {
-				lanczosOrDavidson = new PsimagLite::LanczosSolver<ParametersForSolverType,InternalProductType,TargetVectorType>(lanczosHelper,params);
+				lanczosOrDavidson = new PsimagLite::LanczosSolver<ParametersForSolverType,MatrixVectorType,TargetVectorType>(lanczosHelper,params);
 			}
 
 			if (lanczosHelper.rank()==0) {

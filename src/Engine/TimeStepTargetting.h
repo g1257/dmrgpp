@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         typename InternalProductType_,
+         typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
 	class TimeStepTargetting  {
@@ -98,8 +98,8 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 	public:
 
-		typedef InternalProductType_ InternalProductType;
-			typedef typename InternalProductType::ModelType ModelType;
+		typedef MatrixVectorType_ MatrixVectorType;
+			typedef typename MatrixVectorType::ModelType ModelType;
 			typedef IoType_ IoType;
 			typedef typename ModelType::RealType RealType;
 			typedef std::complex<RealType> ComplexType;
@@ -114,7 +114,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 			typedef typename VectorWithOffsetType::VectorType TargetVectorType;
 			typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-			typedef LanczosSolverTemplate<ParametersForSolverType,InternalProductType,TargetVectorType> LanczosSolverType;
+			typedef LanczosSolverTemplate<ParametersForSolverType,MatrixVectorType,TargetVectorType> LanczosSolverType;
 			typedef typename PsimagLite::Vector<RealType>::Type VectorType;
 			typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 			typedef typename BasisWithOperatorsType::OperatorType OperatorType;
@@ -898,12 +898,12 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 	};     //class TimeStepTargetting
 
 	template<template<typename,typename,typename> class LanczosSolverTemplate,
-	         typename InternalProductType,
+	         typename MatrixVectorType,
 	         typename WaveFunctionTransfType,
 	         typename IoType_>
 	std::ostream& operator<<(std::ostream& os,
 	                         const TimeStepTargetting<LanczosSolverTemplate,
-	                         InternalProductType,
+	                         MatrixVectorType,
 	                         WaveFunctionTransfType,IoType_>& tst)
 	{
 		tst.print(os);

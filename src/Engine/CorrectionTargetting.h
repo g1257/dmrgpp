@@ -90,15 +90,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         typename InternalProductType_,
+         typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
 class CorrectionTargetting  {
 
 public:
 
-	typedef InternalProductType_ InternalProductType;
-	typedef typename InternalProductType::ModelType ModelType;
+	typedef MatrixVectorType_ MatrixVectorType;
+	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef IoType_ IoType;
 	typedef PsimagLite::IoSimple::In IoInputType;
 	typedef typename ModelType::RealType RealType;
@@ -111,7 +111,7 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type TargetVectorType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,
-	                              InternalProductType,TargetVectorType> LanczosSolverType;
+	                              MatrixVectorType,TargetVectorType> LanczosSolverType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType BlockType;
@@ -291,12 +291,12 @@ private:
 };     //class CorrectionTargetting
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
-         typename InternalProductType,
+         typename MatrixVectorType,
          typename WaveFunctionTransfType,
          typename IoType_>
 std::ostream& operator<<(std::ostream& os,
                          const CorrectionTargetting<LanczosSolverTemplate,
-                         InternalProductType,
+                         MatrixVectorType,
                          WaveFunctionTransfType,IoType_>& tst)
 {
 	tst.print(os);
