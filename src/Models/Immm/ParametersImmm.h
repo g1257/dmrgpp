@@ -94,7 +94,9 @@ namespace Dmrg {
 	
 			io.read(hubbardU,"hubbardU");
 			io.read(potentialV,"potentialV");
-			//io.readline(density,"density=");
+			int tmp = 0;
+			io.readline(tmp,"Restricted=");
+			restricted = (tmp > 0);
 		}
 		
 		// Hubbard U values (one for each site)
@@ -102,9 +104,7 @@ namespace Dmrg {
 		// Onsite potential values, one for each site
 		typename PsimagLite::Vector<Field>::Type potentialV;
 		// target number of electrons  in the system
-		int nOfElectrons;
-		// target density
-		//Field density;
+		bool restricted;
 	};
 	
 	//! Function that prints model parameters to stream os
@@ -117,7 +117,7 @@ namespace Dmrg {
 		//utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
 		os<<"potentialV\n";
 		os<<parameters.potentialV;
-		//utils::vectorPrint(parameters.potentialV,"potentialV",os);
+		os<<"Restricted="<<parameters.restricted<<"\n";
 		return os;
 	}
 } // namespace Dmrg

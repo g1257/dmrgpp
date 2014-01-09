@@ -129,24 +129,27 @@ namespace Dmrg {
 		static const int SPIN_DOWN=HilbertSpaceImmmType::SPIN_DOWN;
 		static const SizeType NUMBER_OF_SPINS=HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
+		enum AtomEnum {ATOM_COPPER, ATOM_OXYGEN};
+
+		enum {ORBITALS_COPPER = 1, ORBITALS_OXYGEN = 2};
+
 		Immm(const SolverParamsType& solverParams,
 		     InputValidatorType& io,
 		     GeometryType const &geometry)
 		: ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 		  modelParameters_(io),
 		  geometry_(geometry),
-		  degreesOfFreedom_(geometry_.numberOfSites()),
-		  hilbertSpace_(degreesOfFreedom_)
+		  copperEach_(4),
+		  hilbertSpace_(ORBITALS_OXYGEN)
 		{
-			SizeType cooperEach = 4;
-			buildDofs(cooperEach);
+			statesCopper_ = (1<<ORBITALS_COPPER);
+			statesOxygen_ = (modelParameters_.restricted) ? 5 : (1<<ORBITALS_OXYGEN);
 		}
-
-		SizeType dOf(SizeType site) const { return degreesOfFreedom_[site]; }
 
 		SizeType hilbertSize(SizeType site) const
 		{
-			return (1<<dOf(site));
+			AtomEnum atom = atomAtSite(site);
+			return (atom == ATOM_OXYGEN) ? statesOxygen_ : statesCopper_;
 		} 
 
 		void print(std::ostream& os) const { operator<<(os,modelParameters_); }
@@ -189,7 +192,8 @@ namespace Dmrg {
 			SparseMatrixType nmatrix(natBasis.size(),natBasis.size());
 			SparseMatrixType cTranspose;
 
-			for (SizeType sigma=0;sigma<dOf(0);sigma++) {
+			SizeType total = NUMBER_OF_SPINS * orbitalsAtSite(0);
+			for (SizeType sigma=0;sigma<total;sigma++) {
 				if (!isAllowedThisDof(1<<sigma,block[0])) continue;
 				findOperatorMatrices(tmpMatrix,block[0],sigma,natBasis);
 				typename OperatorType::Su2RelatedType su2related;
@@ -212,10 +216,9 @@ namespace Dmrg {
 			BlockType block;
 			block.resize(1);
 			block[0]=site;
-			SizeType norb = dOf(block[0])/HilbertSpaceImmmType::NUMBER_OF_SPINS;
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
-			SizeType orbitals = dOf(site)/2;
+			SizeType orbitals = orbitalsAtSite(site);
 			SizeType orbital = dof % orbitals;
 			SizeType spin = dof / orbitals;
 			if (what=="+" or what=="i") {
@@ -235,7 +238,7 @@ namespace Dmrg {
 			} 
 			if (what=="c") {
 				SparseMatrixType tmp2;
-				transposeConjugate(tmp2,creationMatrix[orbital + spin*norb].data);
+				transposeConjugate(tmp2,creationMatrix[orbital + spin*orbitals].data);
 				MatrixType tmp;
 				crsMatrixToFullMatrix(tmp,tmp2);
 				return tmp;
@@ -260,7 +263,7 @@ namespace Dmrg {
 		                     const typename PsimagLite::Vector<SizeType>::Type& block) const
 		{
 			assert(block.size()==1);
-			SizeType dof =  dOf(0);
+			SizeType dof =  NUMBER_OF_SPINS * orbitalsAtSite(0);
 			HilbertState total = (1<<dof);
 
 			typename PsimagLite::Vector<HilbertState>::Type  basisTmp;
@@ -296,7 +299,7 @@ namespace Dmrg {
 		RealType sign(HilbertState const &ket, SizeType site,SizeType sigma) const
 		{
 			int value=0;
-			SizeType dof = dOf(0);
+			SizeType dof = NUMBER_OF_SPINS * orbitalsAtSite(0);
 			for (SizeType alpha=0;alpha<dof;alpha++) 
 				value += hilbertSpace_.calcNofElectrons(ket,0,site,alpha);
 
@@ -389,11 +392,6 @@ namespace Dmrg {
 
 				jmvalues.push_back(jmpair);
 
-// 				SizeType na = hilbertSpace_.calcNofElectrons(basis[i],0,0) +
-// 						hilbertSpace_.calcNofElectrons(basis[i],0,0+2);
-// 				SizeType nb = hilbertSpace_.calcNofElectrons(basis[i],0,1) +
-// 						hilbertSpace_.calcNofElectrons(basis[i],0,1+2);
-
 				SizeType flavor = 0; // na  + 3*nb;
 
 				flavors.push_back(flavor);
@@ -430,11 +428,12 @@ namespace Dmrg {
 
 			SizeType siteCorrected  = 0;
 			for (SizeType i=0;i<site;i++) {
-				if (dOf(i)>NUMBER_OF_SPINS) siteCorrected++;
+				if (orbitalsAtSite(i) == ORBITALS_OXYGEN) siteCorrected++;
 			}
 
-			for (SizeType dof=0;dof<dOf(site);dof++) {
-				SizeType norb = dOf(site)/NUMBER_OF_SPINS;
+			SizeType total = NUMBER_OF_SPINS * orbitalsAtSite(site);
+			for (SizeType dof=0;dof<total;dof++) {
+				SizeType norb = orbitalsAtSite(site);
 				assert(norb==1 || norb==2);
 				SizeType orb = dof % norb;
 				SizeType siteCorrected2 = (orb==0) ? site : siteCorrected;
@@ -446,7 +445,7 @@ namespace Dmrg {
 			}
 
 			// on-site U only for Cu sites, for now:
-			if (dOf(site)!=2) return;
+			if (total != NUMBER_OF_SPINS) return;
 			SparseElementType tmp = factorForDiagonals * modelParameters_.hubbardU[site];
 			hmatrix +=  tmp * nbar(cm[0].data) * nbar(cm[1].data);
 		}
@@ -488,7 +487,7 @@ namespace Dmrg {
 		{
 			assert(block.size()==1);
 			SizeType site = block[0];
-			SizeType norb = dOf(site)/NUMBER_OF_SPINS;
+			SizeType norb = orbitalsAtSite(site);
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			setOperatorMatrices(creationMatrix,block);
 			assert(creationMatrix.size()>0);
@@ -508,30 +507,47 @@ namespace Dmrg {
 			return cDaggerCi(block,spin,spin);
 		}
 
-		//! If there's only spin  at site i degreesOfFreedom_[i]=2
-		//! If there's spin an norb orbitals then degreesOfFreedom_[i]=2*norb
-		//! etc.
-		void buildDofs(SizeType copperEach)
-		{
-			SizeType counter = 5;
-			for (SizeType i=0;i<degreesOfFreedom_.size();i++) {
-				if (counter%copperEach==0) degreesOfFreedom_[i]=2;
-				else degreesOfFreedom_[i]=4;
-				counter++;
-			}
-		}
-
 		bool isAllowedThisDof(SizeType alpha,SizeType site) const
 		{
-			SizeType norb1 = dOf(site)/NUMBER_OF_SPINS;
-			if (norb1>1) return true;
-			return ((alpha & 10)==0) ? true : false;
+			if (modelParameters_.restricted)
+				return isAllowedThisDofRestricted(alpha,site);
+			else
+				return isAllowedThisDofFull(alpha,site);
+		}
+
+		bool isAllowedThisDofFull(SizeType alpha,SizeType site) const
+		{
+			SizeType norb1 = orbitalsAtSite(site);
+			if (norb1 == ORBITALS_OXYGEN) return true;
+			return ((alpha & 10) == 0);
+		}
+
+		bool isAllowedThisDofRestricted(SizeType alpha,SizeType site) const
+		{
+			SizeType norb = orbitalsAtSite(site);
+			if (norb == ORBITALS_COPPER)
+				return ((alpha & 10) == 0);
+
+			return (norb == 7 || norb == 11 || norb >= 13);
+		}
+
+		AtomEnum atomAtSite(SizeType site) const
+		{
+			SizeType tmp = (site + 1) % copperEach_;
+			return (tmp == 0) ? ATOM_COPPER : ATOM_OXYGEN;
+		}
+
+		SizeType orbitalsAtSite(SizeType site) const
+		{
+			return (atomAtSite(site) == ATOM_COPPER) ? ORBITALS_COPPER : ORBITALS_OXYGEN;
 		}
 
 		ParametersImmm<RealType>  modelParameters_;
 		GeometryType const &geometry_;
-		typename PsimagLite::Vector<SizeType>::Type degreesOfFreedom_;
+		SizeType copperEach_;
 		HilbertSpaceImmmType hilbertSpace_;
+		SizeType statesCopper_;
+		SizeType statesOxygen_;
 	};     //class Immm
 
 } // namespace Dmrg

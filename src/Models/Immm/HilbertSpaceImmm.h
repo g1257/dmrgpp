@@ -107,11 +107,11 @@ namespace Dmrg {
 		static const SizeType NUMBER_OF_SPINS = 2;
 		enum {SPIN_UP=0,SPIN_DOWN=1};
 
-		HilbertSpaceImmm(const typename PsimagLite::Vector<SizeType>::Type& degreesOfFreedom)
-		: degreesOfFreedom_(degreesOfFreedom)
+		HilbertSpaceImmm(SizeType maxOrbitals)
+		: maxOrbitals_(maxOrbitals)
 		{}
 
-		SizeType dOf() const { return degreesOfFreedom_[0]; }
+		SizeType dOf() const { return 2*maxOrbitals_; }
 		
 		// Get electronic state on site "j" in binary number "a"
 		Word get(Word const &a,SizeType j) const
@@ -230,7 +230,7 @@ namespace Dmrg {
 			return k;*/
 		}
 
-		const typename PsimagLite::Vector<SizeType>::Type& degreesOfFreedom_;
+		SizeType maxOrbitals_;
 	}; // class HilbertSpaceImmm
 } // namespace Dmrg
 
