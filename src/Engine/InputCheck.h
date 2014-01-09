@@ -141,8 +141,8 @@ namespace Dmrg {
 			registerOpts.push_back("noloadwft");
 			registerOpts.push_back("concurrenttridiag");
 			registerOpts.push_back("ChebyshevSolver");
-			registerOpts.push_back("InternalProductStored");
-			registerOpts.push_back("InternalProductKron");
+			registerOpts.push_back("MatrixVectorStored");
+			registerOpts.push_back("MatrixVectorKron");
 			registerOpts.push_back("useSu2Symmetry");
 			registerOpts.push_back("TimeStepTargetting");
 			registerOpts.push_back("DynamicTargetting");
