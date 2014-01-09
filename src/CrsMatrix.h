@@ -226,22 +226,26 @@ public:
 	template<typename VerySparseMatrixType>
 	void operator=(const VerySparseMatrixType& m)
 	{
-		resize(m.rank(),m.rank());
+		if (!m.sorted())
+			throw RuntimeError("CrsMatrix: VerySparseMatrix must be sorted\n");
+
+		clear();
+		SizeType nonZeros = m.nonZero();
+		resize(m.rank(),m.rank(),nonZeros);
+
 		SizeType counter=0;
-
-		for (SizeType i=0;i<m.rank();i++) {
+		for (SizeType i=0;i<m.rank();++i) {
 			setRow(i,counter);
-			SizeType counter2=0;
-			for (SizeType j=counter;j<m.nonZero();j++) {
-				if (m.getRow(j)!=i) break;
-				pushCol(m.getColumn(j));
-				pushValue(m.getValue(j));
-				counter2++;
-			}
-			counter+=counter2;
 
+			while(counter < nonZeros && m.getRow(counter) == i) {
+				colind_[counter] = m.getColumn(counter);
+				values_[counter] = m.getValue(counter);
+				counter++;
+			}
 		}
+
 		setRow(m.rank(),counter);
+		checkValidity();
 	}
 
 	void operator+=(CrsMatrix<T> const &m)
