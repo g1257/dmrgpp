@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -86,85 +83,86 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/FeAsModel/LinkProductFeAs.h"
 
 namespace Dmrg {
-	
-	template<typename ModelHelperType>
-	class LinkProductFeAsExtended {
-			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef std::pair<SizeType,SizeType> PairType;
-			typedef LinkProductFeAs<ModelHelperType> LinkProductFeAsType;
-			typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType>
-				LinkProductHeisenbergType;
-			typedef typename ModelHelperType::BasisType BasisType;
-			typedef typename ModelHelperType::OperatorType OperatorType;
-			//typedef OperatorsBase<OperatorType,BasisType> OperatorsType;
 
-			enum {TERM_HOPPING, TERM_J};
+template<typename ModelHelperType>
+class LinkProductFeAsExtended {
 
-			static const SizeType DEGREES_OF_FREEDOM = 4;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef std::pair<SizeType,SizeType> PairType;
+	typedef LinkProductFeAs<ModelHelperType> LinkProductFeAsType;
+	typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType> LinkProductHeisenbergType;
+	typedef typename ModelHelperType::BasisType BasisType;
+	typedef typename ModelHelperType::OperatorType OperatorType;
 
-		public:
-			typedef typename ModelHelperType::RealType RealType;
-			
-			template<typename SomeStructType>
-			static SizeType dofs(SizeType term,const SomeStructType& additional)
-			{
-				return (term==TERM_J) ?
-						LinkProductHeisenbergType::dofs(term,additional) :
-						LinkProductFeAsType::dofs(term,additional);
-			}
-			
-			// has only dependence on orbital
-			template<typename SomeStructType>
-			static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
-			{
-				if (term==TERM_HOPPING)
-					return LinkProductFeAsType::connectorDofs(term,dofs,additional);
+	enum {TERM_HOPPING, TERM_J};
 
-				return LinkProductHeisenbergType::connectorDofs(term,dofs,additional);
-			}
+	static const SizeType DEGREES_OF_FREEDOM = 4;
 
-			template<typename SomeStructType>
-			static void setLinkData(
-					SizeType term,
-					SizeType dofs,
-     					bool isSu2,
-					SizeType& fermionOrBoson,
-					PairType& ops,
-     					std::pair<char,char>& mods,
-					SizeType& angularMomentum,
-     					RealType& angularFactor,
-					SizeType& category,const SomeStructType& additional)
-			{
-				if (term==TERM_HOPPING)
-					return LinkProductFeAsType::setLinkData(
-						term,dofs,isSu2,fermionOrBoson,ops,mods,
-						angularMomentum,angularFactor,category,additional);
+public:
 
-				LinkProductHeisenbergType::setLinkData(
-						term,dofs,isSu2,fermionOrBoson,ops,mods,
-						angularMomentum,angularFactor,category,additional);
-				SizeType offset1 = DEGREES_OF_FREEDOM;
-				ops.first += offset1;
-				ops.second += offset1;
-			}
+	typedef typename ModelHelperType::RealType RealType;
 
-			template<typename SomeStructType>
-			static void valueModifier(
-					SparseElementType& value,
-					SizeType term,
-					SizeType dofs,bool isSu2,const SomeStructType& additional)
-			{
-				if (term==TERM_HOPPING) return
-						LinkProductFeAsType::valueModifier(
-							value,term,dofs,isSu2,additional);
-				LinkProductHeisenbergType::valueModifier(
-						value,term,dofs,isSu2,additional);
+	template<typename SomeStructType>
+	static SizeType dofs(SizeType term,const SomeStructType& additional)
+	{
+		return (term==TERM_J) ?
+		            LinkProductHeisenbergType::dofs(term,additional) :
+		            LinkProductFeAsType::dofs(term,additional);
+	}
 
-			}
+	// has only dependence on orbital
+	template<typename SomeStructType>
+	static PairType connectorDofs(SizeType term,
+	                              SizeType dofs,
+	                              const SomeStructType& additional)
+	{
+		if (term==TERM_HOPPING)
+			return LinkProductFeAsType::connectorDofs(term,dofs,additional);
 
-			static SizeType terms() { return 2; }
-	}; // class LinkProductFeAsExtended
+		return LinkProductHeisenbergType::connectorDofs(term,dofs,additional);
+	}
+
+	template<typename SomeStructType>
+	static void setLinkData(SizeType term,
+	                        SizeType dofs,
+	                        bool isSu2,
+	                        SizeType& fermionOrBoson,
+	                        PairType& ops,
+	                        std::pair<char,char>& mods,
+	                        SizeType& angularMomentum,
+	                        RealType& angularFactor,
+	                        SizeType& category,const SomeStructType& additional)
+	{
+		if (term==TERM_HOPPING)
+			return LinkProductFeAsType::setLinkData(
+			            term,dofs,isSu2,fermionOrBoson,ops,mods,
+			            angularMomentum,angularFactor,category,additional);
+
+		LinkProductHeisenbergType::setLinkData(
+		            term,dofs,isSu2,fermionOrBoson,ops,mods,
+		            angularMomentum,angularFactor,category,additional);
+		SizeType offset1 = DEGREES_OF_FREEDOM;
+		ops.first += offset1;
+		ops.second += offset1;
+	}
+
+	template<typename SomeStructType>
+	static void valueModifier(SparseElementType& value,
+	                          SizeType term,
+	                          SizeType dofs,bool isSu2,const SomeStructType& additional)
+	{
+		if (term==TERM_HOPPING) return LinkProductFeAsType::valueModifier(value,
+		                                                                  term,
+		                                                                  dofs,
+		                                                                  isSu2,
+		                                                                  additional);
+
+		LinkProductHeisenbergType::valueModifier(value,term,dofs,isSu2,additional);
+	}
+
+	static SizeType terms() { return 2; }
+}; // class LinkProductFeAsExtended
 } // namespace Dmrg
 /*@}*/
 #endif //LINK_PRODUCT_EX_H
