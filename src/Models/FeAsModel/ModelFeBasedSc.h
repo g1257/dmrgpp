@@ -608,9 +608,13 @@ private:
 	                    SizeType i,
 	                    RealType factorForDiagonals) const
 	{
+		if (modelParameters_.decay == 2) {
+			return addInteractionUmatrix(hmatrix,cm,i,factorForDiagonals);
+		}
+
 		addInteractionU1(hmatrix,cm,i,factorForDiagonals);
 		addInteractionU2(hmatrix,cm,i,factorForDiagonals);
-		if (!modelParameters_.decay) {
+		if (modelParameters_.decay == 0) {
 			addInteractionJ1(hmatrix,cm,i,factorForDiagonals);
 			addInteractionJ2(hmatrix,cm,i,factorForDiagonals);
 		} else {
@@ -620,7 +624,7 @@ private:
 
 	RealType findHubbardU(SizeType index, SizeType orb1, SizeType orb2) const
 	{
-		if (!modelParameters_.decay) {
+		if (modelParameters_.decay == 0) {
 			assert(index < modelParameters_.hubbardU.size());
 			return modelParameters_.hubbardU[index];
 		}
@@ -914,6 +918,37 @@ private:
 		         temp);
 
 		return result;
+	}
+
+	//! only for decay == 2
+	void addInteractionUmatrix(SparseMatrixType &hmatrix,
+	                           const VectorOperatorType& cm,
+	                           SizeType site,
+	                           RealType factorForDiagonals) const
+	{
+		const typename PsimagLite::Vector<RealType>::Type& U = modelParameters_.hubbardU;
+		SizeType orbitals = modelParameters_.orbitals;
+		SizeType dofs = orbitals * 2;
+		for (SizeType interaction = 0; interaction < 2; ++interaction) {
+			for (SizeType orb1=0;orb1<modelParameters_.orbitals;orb1++) {
+				for (SizeType orb2=orb1+1;orb2<modelParameters_.orbitals;orb2++) {
+					for (SizeType spin = 0; spin < 2; ++spin) {
+						SizeType spin2 = (interaction == 0) ? spin : 1 - spin;
+						const SparseMatrixType& cm1 = cm[orb1+spin*orbitals+site*dofs].data;
+						const SparseMatrixType& cm2 = cm[orb1+spin2*orbitals+site*dofs].data;
+						SizeType offset = orb1 + orb2*orbitals;
+						if (interaction == 1) offset += orbitals * orbitals;
+						SparseMatrixType tmpMatrix,tmpMatrix2;
+
+						multiply(tmpMatrix, n(cm1),n(cm2));
+						assert(offset < U.size());
+						multiplyScalar(tmpMatrix2,tmpMatrix,factorForDiagonals*U[offset]);
+
+						hmatrix += tmpMatrix2;
+					}
+				}
+			}
+		}
 	}
 
 	bool isAllowedThisDof(SizeType alpha) const

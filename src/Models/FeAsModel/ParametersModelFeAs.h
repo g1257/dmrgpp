@@ -100,15 +100,18 @@ struct ParametersModelFeAs {
 
 		try {
 			io.readline(decay,"Decay=");
-			if (decay !=0 && decay != 1)
-				throw PsimagLite::RuntimeError("Decay: expecting 0 or 1\n");
+			if (decay > 2)
+				throw PsimagLite::RuntimeError("Decay: expecting 0 or 1 or 2\n");
 		} catch (std::exception& e) {}
 
-		if (decay) {
+		if (decay > 0) {
+			if (hubbardU.size() != orbitals * orbitals)
+				throw PsimagLite::RuntimeError("Decay: expecting orbitals * orbitals U values\n");
+		}
+
+		if (decay == 1) {
 			if (orbitals != 3)
 				throw PsimagLite::RuntimeError("Decay: expecting 3 orbitals\n");
-			if (hubbardU.size() != 9)
-				throw PsimagLite::RuntimeError("Decay: expecting 9 U values\n");
 			io.readline(coulombV,"CoulombV=");
 		}
 
@@ -136,7 +139,7 @@ struct ParametersModelFeAs {
 	// Onsite potential values, one for each site
 	typename PsimagLite::Vector<Field>::Type potentialV;
 	typename PsimagLite::Vector<Field>::Type potentialT;
-	int decay;
+	SizeType decay;
 	Field coulombV;
 	PsimagLite::Matrix<Field> magneticField;
 	SizeType minElectronsPerSite;
@@ -156,7 +159,7 @@ std::ostream& operator<<(std::ostream &os,const ParametersModelFeAs<FieldType>& 
 	}
 
 	os<<"Decay="<<parameters.decay<<"\n";
-	if (parameters.decay)
+	if (parameters.decay == 1)
 		os<<"CoulombV="<<parameters.coulombV<<"\n";
 
 	if (parameters.potentialT.size()>0) {
