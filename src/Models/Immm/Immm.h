@@ -142,7 +142,26 @@ public:
 	      hilbertSpace_(ORBITALS_OXYGEN)
 	{
 		statesCopper_ = (1<<ORBITALS_COPPER * NUMBER_OF_SPINS);
-		statesOxygen_ = (modelParameters_.restricted) ? 5 : (1<<(ORBITALS_OXYGEN * NUMBER_OF_SPINS));
+		statesOxygen_ = (1<<(ORBITALS_OXYGEN * NUMBER_OF_SPINS));
+
+		switch (modelParameters_.minOxygenElectrons) {
+		case 0:
+			break;
+		case 1:
+			statesOxygen_--;
+			break;
+		case 2:
+			statesOxygen_ -= 5;
+			break;
+		case 3:
+			statesOxygen_ = 5;
+			break;
+		case 4:
+			statesOxygen_ = 1;
+			break;
+		default:
+			throw PsimagLite::RuntimeError("Immm: invalid param minOxygenElectrons\n");
+		}
 	}
 
 	SizeType hilbertSize(SizeType site) const
@@ -226,17 +245,21 @@ public:
 		if (what=="+" or what=="i") {
 			return cDaggerCi(block,SPIN_UP,SPIN_DOWN);
 		}
+
 		if (what=="-") {
 			return cDaggerCi(block,SPIN_DOWN,SPIN_UP);
 		}
+
 		if (what=="z") {
 			return nUpOrDown(block,SPIN_UP)-nUpOrDown(block,SPIN_DOWN);
 		}
+
 		if (what=="n") {
 			MatrixType tmp;
 			crsMatrixToFullMatrix(tmp,creationMatrix[creationMatrix.size()-1].data);
 			return tmp;
 		}
+
 		if (what=="c") {
 			SparseMatrixType tmp2;
 			transposeConjugate(tmp2,creationMatrix[orbital + spin*orbitals].data);
@@ -244,12 +267,24 @@ public:
 			crsMatrixToFullMatrix(tmp,tmp2);
 			return tmp;
 		}
+
 		if (what=="nup") {
 			return nUpOrDown(block,SPIN_UP);
 		}
+
 		if (what=="ndown") {
 			return nUpOrDown(block,SPIN_DOWN);
 		}
+
+		if (what == "o") {
+			SparseMatrixType tmp2;
+			transposeConjugate(tmp2,creationMatrix[orbital + spin*orbitals].data);
+			SparseMatrixType tmp3 = creationMatrix[orbital + spin*orbitals].data * tmp2;
+			MatrixType tmp;
+			crsMatrixToFullMatrix(tmp,tmp3);
+			return tmp;
+		}
+
 		if (what=="d") { // delta = c^\dagger * c^dagger
 			throw PsimagLite::RuntimeError("delta unimplemented for this model\n");
 		}
@@ -310,7 +345,7 @@ private:
 			value += hilbertSpace_.calcNofElectrons(ket,0,site,alpha);
 
 		// add electron on site 0 if needed
-		if (site>0) value += hilbertSpace_.electronsAtGivenSite(ket,0);
+		if (site>0) value += hilbertSpace_.electrons(ket);
 
 		//order for sign is: up a (sigma==0), down a (sigma==2), up b (sigma==1), down b(sigma==3)
 		unsigned int x = hilbertSpace_.get(ket,site);
@@ -516,7 +551,7 @@ private:
 
 	bool isAllowedThisDof(SizeType alpha,SizeType site) const
 	{
-		if (modelParameters_.restricted)
+		if (modelParameters_.minOxygenElectrons > 0)
 			return isAllowedThisDofRestricted(alpha,site);
 		else
 			return isAllowedThisDofFull(alpha,site);
@@ -535,7 +570,21 @@ private:
 		if (norb == ORBITALS_COPPER)
 			return ((alpha & 10) == 0);
 
-		return (alpha == 7 || alpha == 11 || alpha >= 13);
+		bool b1 = (alpha == 7 || alpha == 11 || alpha >= 13);
+		bool b2 = (alpha == 3 || alpha == 5  || alpha == 9 ||
+		           alpha == 6 || alpha == 10 || alpha == 12);
+		switch (modelParameters_.minOxygenElectrons) {
+		case 1:
+			return (alpha > 0);
+		case 2:
+			return (b1 | b2);
+		case 3:
+			return b1;
+		case 4:
+			return (alpha == 15);
+		}
+
+		throw PsimagLite::RuntimeError("Immm: isAllowedThisDofRestricted\n");
 	}
 
 	AtomEnum atomAtSite(SizeType site) const

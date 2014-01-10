@@ -175,16 +175,14 @@ public:
 
 	}
 
-	//! Number of electrons at given site (sum over all bands)
-	int electronsAtGivenSite(const Word& data,SizeType site) const
+	//! Number of electrons for data
+	SizeType electrons(const Word& data) const
 	{
 		SizeType sum=0;
-
 		for (SizeType sector=0;sector<dOf();sector++)
 			sum += calcNofElectrons(data,0,sector);
 
 		return sum;
-
 	}
 
 	//! Number of electrons with dof sector between i and j

@@ -91,9 +91,7 @@ struct ParametersImmm {
 
 		io.read(hubbardU,"hubbardU");
 		io.read(potentialV,"potentialV");
-		int tmp = 0;
-		io.readline(tmp,"Restricted=");
-		restricted = (tmp > 0);
+		io.readline(minOxygenElectrons,"MinOxygenElectrons=");
 	}
 
 	// Hubbard U values (one for each site)
@@ -101,7 +99,7 @@ struct ParametersImmm {
 	// Onsite potential values, one for each site
 	typename PsimagLite::Vector<Field>::Type potentialV;
 	// target number of electrons  in the system
-	bool restricted;
+	SizeType minOxygenElectrons;
 };
 
 //! Function that prints model parameters to stream os
@@ -112,7 +110,7 @@ std::ostream& operator<<(std::ostream &os,const ParametersImmm<FieldType>& param
 	os<<parameters.hubbardU;
 	os<<"potentialV\n";
 	os<<parameters.potentialV;
-	os<<"Restricted="<<parameters.restricted<<"\n";
+	os<<"MinOxygenElectrons="<<parameters.minOxygenElectrons<<"\n";
 	return os;
 }
 } // namespace Dmrg
