@@ -141,8 +141,8 @@ public:
 	      copperEach_(4),
 	      hilbertSpace_(ORBITALS_OXYGEN)
 	{
-		statesCopper_ = (1<<ORBITALS_COPPER);
-		statesOxygen_ = (modelParameters_.restricted) ? 5 : (1<<ORBITALS_OXYGEN);
+		statesCopper_ = (1<<ORBITALS_COPPER * NUMBER_OF_SPINS);
+		statesOxygen_ = (modelParameters_.restricted) ? 5 : (1<<(ORBITALS_OXYGEN * NUMBER_OF_SPINS));
 	}
 
 	SizeType hilbertSize(SizeType site) const
@@ -163,7 +163,7 @@ public:
 	                     const RealType& time)  const
 	{
 		assert(block.size()==1);
-		typename PsimagLite::Vector<HilbertState>::Type natBasis;
+		HilbertBasisType natBasis;
 		typename PsimagLite::Vector<SizeType>::Type qvector;
 		setNaturalBasis(natBasis,qvector,block);
 
@@ -181,7 +181,7 @@ public:
 	                         const BlockType& block) const
 	{
 		assert(block.size()==1);
-		typename PsimagLite::Vector<HilbertState>::Type natBasis;
+		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 		typename PsimagLite::Vector<SizeType>::Type qvector;
 		setNaturalBasis(natBasis,qvector,block);
@@ -194,7 +194,7 @@ public:
 
 		SizeType total = NUMBER_OF_SPINS * orbitalsAtSite(0);
 		for (SizeType sigma=0;sigma<total;sigma++) {
-			if (!isAllowedThisDof(1<<sigma,block[0])) continue;
+			if (!isAllowedThisDofFull(1<<sigma,block[0])) continue;
 			findOperatorMatrices(tmpMatrix,block[0],sigma,natBasis);
 			typename OperatorType::Su2RelatedType su2related;
 
@@ -259,7 +259,7 @@ public:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(typename PsimagLite::Vector<HilbertState>  ::Type&basis,
+	void setNaturalBasis(HilbertBasisType& basis,
 	                     typename PsimagLite::Vector<SizeType>::Type& q,
 	                     const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
@@ -267,7 +267,7 @@ public:
 		SizeType dof =  NUMBER_OF_SPINS * orbitalsAtSite(0);
 		HilbertState total = (1<<dof);
 
-		typename PsimagLite::Vector<HilbertState>::Type  basisTmp;
+		HilbertBasisType  basisTmp;
 		for (HilbertState a=0;a<total;a++) {
 			if (!isAllowedThisDof(a,block[0])) continue;
 			basisTmp.push_back(a);
@@ -280,17 +280,22 @@ public:
 	}
 
 	void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,
-	                   const typename PsimagLite::Vector<HilbertState>::Type& basis,
+	                   const HilbertBasisType& basis,
 	                   SizeType site) const
 	{
 		electrons.resize(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
 			// nup
-			SizeType nup = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_UP);
+			SizeType nup = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_UP);
 			// ndown
-			SizeType ndown = hilbertSpace_.electronsWithGivenSpin(basis[i],site,HilbertSpaceImmmType::SPIN_DOWN);
+			SizeType ndown = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_DOWN);
 			electrons[i] = nup + ndown;
 		}
+	}
+
+	virtual SizeType maxElectronsOneSpin() const
+	{
+		return NUMBER_OF_SPINS * ORBITALS_OXYGEN * geometry_.numberOfSites() + 1;
 	}
 
 private:
@@ -336,7 +341,7 @@ private:
 	void findOperatorMatrices(SparseMatrixType& creationMatrix,
 	                          SizeType site,
 	                          SizeType sigma,
-	                          const typename PsimagLite::Vector<HilbertState>::Type& natBasis) const
+	                          const HilbertBasisType& natBasis) const
 	{
 		HilbertState bra,ket;
 		SizeType n = natBasis.size();
@@ -363,7 +368,7 @@ private:
 	}
 
 	void findQuantumNumbers(typename PsimagLite::Vector<SizeType>::Type& q,
-	                        const typename PsimagLite::Vector<HilbertState>::Type& basis,
+	                        const HilbertBasisType& basis,
 	                        SizeType site) const
 	{
 		BasisDataType qq;
@@ -372,7 +377,7 @@ private:
 	}
 
 	void setSymmetryRelated(BasisDataType& q,
-	                        const typename PsimagLite::Vector<HilbertState>::Type& basis,
+	                        const HilbertBasisType& basis,
 	                        SizeType site) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
@@ -530,7 +535,7 @@ private:
 		if (norb == ORBITALS_COPPER)
 			return ((alpha & 10) == 0);
 
-		return (norb == 7 || norb == 11 || norb >= 13);
+		return (alpha == 7 || alpha == 11 || alpha >= 13);
 	}
 
 	AtomEnum atomAtSite(SizeType site) const

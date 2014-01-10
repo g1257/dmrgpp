@@ -117,8 +117,7 @@ public:
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
-		ProgramGlobals::init(model_->hilbertSize(0),
-		                     model_->geometry().numberOfSites());
+		ProgramGlobals::init(model_->maxElectronsOneSpin());
 
 		return *model_;
 	}

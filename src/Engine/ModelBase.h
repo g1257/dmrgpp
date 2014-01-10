@@ -235,6 +235,16 @@ public:
 		addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 	}
 
+	virtual SizeType maxElectronsOneSpin() const
+	{
+		SizeType tmp = hilbertSize(0);
+		tmp = static_cast<SizeType>(log(tmp)/log(2.0));
+		SizeType maxElectrons = static_cast<SizeType>(tmp/2);
+		if (tmp & 1) maxElectrons++;
+
+		return maxElectrons * modelCommon_->geometry().numberOfSites() + 1;
+	}
+
 	const GeometryType& geometry() const { return modelCommon_->geometry(); }
 
 	const ParametersType& params() const { return modelCommon_->params(); }
