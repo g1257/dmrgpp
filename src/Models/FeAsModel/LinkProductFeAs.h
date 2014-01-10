@@ -1,9 +1,8 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
 /** \ingroup DMRG */
 /*@{*/
 
@@ -83,97 +80,102 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LINK_PRODUCT_H
 
 namespace Dmrg {
-	
-	template<typename ModelHelperType>
-	class LinkProductFeAs {
-			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef std::pair<SizeType,SizeType> PairType;
-			
-			static SizeType orbitals_;
 
-	public:
+template<typename ModelHelperType>
+class LinkProductFeAs {
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef std::pair<SizeType,SizeType> PairType;
 
-			typedef typename ModelHelperType::RealType RealType;
+	static SizeType orbitals_;
 
-		static void setOrbitals(SizeType orbitals)
-		{
-			orbitals_=orbitals;
-			assert(orbitals_==2 || orbitals_==3);
-		}
+public:
 
-			//! There are orbitals*orbitals different orbitals
-			//! and 2 spins. Spin is diagonal so we end up with 2*orbitals*orbitals possiblities
-			//! a up a up, a up b up, b up a up, b up, b up, etc
-			//! and similarly for spin down.
-			template<typename SomeStructType>
-			static SizeType dofs(SizeType term,const SomeStructType& additional)
-			{
-				return 2*orbitals_*orbitals_;
-			}
-			
-			// has only dependence on orbital
-			template<typename SomeStructType>
-			static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
-			{
-				SizeType orbitalsSquared = orbitals_*orbitals_;
-				SizeType spin = dofs/orbitalsSquared;
-				SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
-				xtmp = dofs - xtmp;
-				SizeType orb1 = xtmp/orbitals_;
-				SizeType orb2 = xtmp % orbitals_;
-				return PairType(orb1,orb2); // has only dependence on orbital
-			}
+	typedef typename ModelHelperType::RealType RealType;
 
-			template<typename SomeStructType>
-			static void setLinkData(
-					SizeType term,
-					SizeType dofs,
-     					bool isSu2,
-					SizeType& fermionOrBoson,
-					PairType& ops,
-     					std::pair<char,char>& mods,
-					SizeType& angularMomentum,
-     					RealType& angularFactor,
-					SizeType& category,const SomeStructType& additional)
-			{
-				fermionOrBoson = ProgramGlobals::FERMION;
-				SizeType spin = getSpin(dofs);
-				ops = operatorDofs(dofs);
-				angularFactor = 1;
-				if (spin==1) angularFactor = -1;
-				angularMomentum = 1;
-				category = spin;
-			}
-			
-			template<typename SomeStructType>
-			static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType& additional)
-			{
-			}
+	static void setOrbitals(SizeType orbitals)
+	{
+		orbitals_=orbitals;
+		assert(orbitals_==2 || orbitals_==3);
+	}
 
-			static SizeType terms() { return 1; }
+	//! There are orbitals*orbitals different orbitals
+	//! and 2 spins. Spin is diagonal so we end up with 2*orbitals*orbitals possiblities
+	//! a up a up, a up b up, b up a up, b up, b up, etc
+	//! and similarly for spin down.
+	template<typename SomeStructType>
+	static SizeType dofs(SizeType term,const SomeStructType& additional)
+	{
+		return 2*orbitals_*orbitals_;
+	}
 
-	private:
-			// spin is diagonal
-			static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs)
-			{
-				SizeType orbitalsSquared = orbitals_*orbitals_;
-				SizeType spin = dofs/orbitalsSquared;
-				SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
-				xtmp = dofs - xtmp;
-				SizeType orb1 = xtmp/orbitals_;
-				SizeType orb2 = xtmp % orbitals_;
-				SizeType op1 = orb1 + spin*orbitals_;
-				SizeType op2 = orb2 + spin*orbitals_;
-				return std::pair<SizeType,SizeType>(op1,op2);
-			}
-			
-			static SizeType getSpin(SizeType dofs)
-			{
-				SizeType orbitalsSquared = orbitals_*orbitals_;
-				return dofs/orbitalsSquared;
-			}
-	}; // class LinkPRoductFeAs
+	// has only dependence on orbital
+	template<typename SomeStructType>
+	static PairType connectorDofs(SizeType term,
+	                              SizeType dofs,
+	                              const SomeStructType& additional)
+	{
+		SizeType orbitalsSquared = orbitals_*orbitals_;
+		SizeType spin = dofs/orbitalsSquared;
+		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
+		xtmp = dofs - xtmp;
+		SizeType orb1 = xtmp/orbitals_;
+		SizeType orb2 = xtmp % orbitals_;
+		return PairType(orb1,orb2); // has only dependence on orbital
+	}
+
+	template<typename SomeStructType>
+	static void setLinkData(
+	        SizeType term,
+	        SizeType dofs,
+	        bool isSu2,
+	        SizeType& fermionOrBoson,
+	        PairType& ops,
+	        std::pair<char,char>& mods,
+	        SizeType& angularMomentum,
+	        RealType& angularFactor,
+	        SizeType& category,const SomeStructType& additional)
+	{
+		fermionOrBoson = ProgramGlobals::FERMION;
+		SizeType spin = getSpin(dofs);
+		ops = operatorDofs(dofs);
+		angularFactor = 1;
+		if (spin==1) angularFactor = -1;
+		angularMomentum = 1;
+		category = spin;
+	}
+
+	template<typename SomeStructType>
+	static void valueModifier(SparseElementType& value,
+	                          SizeType term,
+	                          SizeType dofs,
+	                          bool isSu2,
+	                          const SomeStructType& additional)
+	{}
+
+	static SizeType terms() { return 1; }
+
+private:
+	// spin is diagonal
+	static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs)
+	{
+		SizeType orbitalsSquared = orbitals_*orbitals_;
+		SizeType spin = dofs/orbitalsSquared;
+		SizeType xtmp = (spin==0) ? 0 : orbitalsSquared;
+		xtmp = dofs - xtmp;
+		SizeType orb1 = xtmp/orbitals_;
+		SizeType orb2 = xtmp % orbitals_;
+		SizeType op1 = orb1 + spin*orbitals_;
+		SizeType op2 = orb2 + spin*orbitals_;
+		return std::pair<SizeType,SizeType>(op1,op2);
+	}
+
+	static SizeType getSpin(SizeType dofs)
+	{
+		SizeType orbitalsSquared = orbitals_*orbitals_;
+		return dofs/orbitalsSquared;
+	}
+}; // class LinkPRoductFeAs
 
 template<typename ModelHelperType>
 SizeType LinkProductFeAs<ModelHelperType>::orbitals_ = 2;
@@ -181,3 +183,4 @@ SizeType LinkProductFeAs<ModelHelperType>::orbitals_ = 2;
 } // namespace Dmrg
 /*@}*/
 #endif
+
