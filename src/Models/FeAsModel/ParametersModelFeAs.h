@@ -92,26 +92,39 @@ struct ParametersModelFeAs {
 
 	template<typename IoInputType>
 	ParametersModelFeAs(IoInputType& io)
-	    : potentialT(0),decay(0),coulombV(0),magneticField(0,0),minElectronsPerSite(0)
+	    : potentialT(0),feAsMode(0),coulombV(0),magneticField(0,0),minElectronsPerSite(0)
 	{
 		io.readline(orbitals,"Orbitals=");
 		io.read(hubbardU,"hubbardU");
 		io.read(potentialV,"potentialV");
 
+
+		bool decayInInputFile = false;
 		try {
-			io.readline(decay,"Decay=");
-			if (decay > 2)
-				throw PsimagLite::RuntimeError("Decay: expecting 0 or 1 or 2\n");
+			io.readline(feAsMode,"Decay=");
+			decayInInputFile = true;
 		} catch (std::exception& e) {}
 
-		if (decay > 0) {
-			if (hubbardU.size() != orbitals * orbitals)
-				throw PsimagLite::RuntimeError("Decay: expecting orbitals * orbitals U values\n");
+		if (decayInInputFile) {
+			PsimagLite::String str("Please use FeAsMode= instead of Decay=");
+			str += " in input file\n";
+			throw PsimagLite::RuntimeError(str);
 		}
 
-		if (decay == 1) {
+		try {
+			io.readline(feAsMode,"FeAsMode=");
+			if (feAsMode > 2)
+				throw PsimagLite::RuntimeError("FeAsMode: expecting 0 or 1 or 2\n");
+		} catch (std::exception& e) {}
+
+		if (feAsMode > 0) {
+			if (hubbardU.size() != orbitals * orbitals)
+				throw PsimagLite::RuntimeError("FeAsMode: expecting orbitals * orbitals U values\n");
+		}
+
+		if (feAsMode == 1) {
 			if (orbitals != 3)
-				throw PsimagLite::RuntimeError("Decay: expecting 3 orbitals\n");
+				throw PsimagLite::RuntimeError("FeAsMode: expecting 3 orbitals\n");
 			io.readline(coulombV,"CoulombV=");
 		}
 
@@ -139,7 +152,7 @@ struct ParametersModelFeAs {
 	// Onsite potential values, one for each site
 	typename PsimagLite::Vector<Field>::Type potentialV;
 	typename PsimagLite::Vector<Field>::Type potentialT;
-	SizeType decay;
+	SizeType feAsMode;
 	Field coulombV;
 	PsimagLite::Matrix<Field> magneticField;
 	SizeType minElectronsPerSite;
@@ -158,8 +171,8 @@ std::ostream& operator<<(std::ostream &os,const ParametersModelFeAs<FieldType>& 
 		os<<parameters.magneticField;
 	}
 
-	os<<"Decay="<<parameters.decay<<"\n";
-	if (parameters.decay == 1)
+	os<<"FeAsMode="<<parameters.feAsMode<<"\n";
+	if (parameters.feAsMode == 1)
 		os<<"CoulombV="<<parameters.coulombV<<"\n";
 
 	if (parameters.potentialT.size()>0) {

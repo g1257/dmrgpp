@@ -608,13 +608,13 @@ private:
 	                    SizeType i,
 	                    RealType factorForDiagonals) const
 	{
-		if (modelParameters_.decay == 2) {
+		if (modelParameters_.feAsMode == 2) {
 			return addInteractionUmatrix(hmatrix,cm,i,factorForDiagonals);
 		}
 
 		addInteractionU1(hmatrix,cm,i,factorForDiagonals);
 		addInteractionU2(hmatrix,cm,i,factorForDiagonals);
-		if (modelParameters_.decay == 0) {
+		if (modelParameters_.feAsMode == 0) {
 			addInteractionJ1(hmatrix,cm,i,factorForDiagonals);
 			addInteractionJ2(hmatrix,cm,i,factorForDiagonals);
 		} else {
@@ -624,7 +624,7 @@ private:
 
 	RealType findHubbardU(SizeType index, SizeType orb1, SizeType orb2) const
 	{
-		if (modelParameters_.decay == 0) {
+		if (modelParameters_.feAsMode == 0) {
 			assert(index < modelParameters_.hubbardU.size());
 			return modelParameters_.hubbardU[index];
 		}
@@ -920,7 +920,7 @@ private:
 		return result;
 	}
 
-	//! only for decay == 2
+	//! only for feAsMode == 2
 	void addInteractionUmatrix(SparseMatrixType &hmatrix,
 	                           const VectorOperatorType& cm,
 	                           SizeType site,
