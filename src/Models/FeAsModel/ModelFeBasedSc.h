@@ -141,7 +141,7 @@ public:
 	{
 		LinkProductType::setOrbitals(modelParameters_.orbitals);
 		HilbertSpaceFeAsType::setOrbitals(modelParameters_.orbitals);
-		//			setPauliMatrix();
+
 		if (modelParameters_.potentialV.size() !=
 		    2*modelParameters_.orbitals*geometry.numberOfSites()) {
 			PsimagLite::String str(__FILE__);

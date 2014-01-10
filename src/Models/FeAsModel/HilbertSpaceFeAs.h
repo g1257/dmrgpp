@@ -106,7 +106,6 @@ public:
 	static void setOrbitals(SizeType orbitals)
 	{
 		orbitals_=orbitals;
-		assert(orbitals_==2 || orbitals_==3);
 	}
 
 	// Get electronic state on site "j" in binary number "a"

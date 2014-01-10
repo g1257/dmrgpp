@@ -96,7 +96,6 @@ public:
 	static void setOrbitals(SizeType orbitals)
 	{
 		orbitals_=orbitals;
-		assert(orbitals_==2 || orbitals_==3);
 	}
 
 	//! There are orbitals*orbitals different orbitals
@@ -156,6 +155,7 @@ public:
 	static SizeType terms() { return 1; }
 
 private:
+
 	// spin is diagonal
 	static std::pair<SizeType,SizeType> operatorDofs(SizeType dofs)
 	{
