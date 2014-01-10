@@ -104,7 +104,7 @@ public:
 	                 ReflectionSymmetryType* rs=0)
 	    : initKron_(*model,*modelHelper),kronMatrix_(initKron_)
 	{
-		SizeType maxMatrixRankStored = model->params().maxMatrixRankStored;
+		int maxMatrixRankStored = model->params().maxMatrixRankStored;
 		if (modelHelper->size() > maxMatrixRankStored) return;
 
 		model->fullHamiltonian(matrixStored_,*modelHelper);
