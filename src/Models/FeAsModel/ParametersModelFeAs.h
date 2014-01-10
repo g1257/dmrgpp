@@ -92,7 +92,7 @@ struct ParametersModelFeAs {
 
 	template<typename IoInputType>
 	ParametersModelFeAs(IoInputType& io)
-	    : potentialT(0),decay(0),coulombV(0),magneticField(0,0)
+	    : potentialT(0),decay(0),coulombV(0),magneticField(0,0),minElectronsPerSite(0)
 	{
 		io.readline(orbitals,"Orbitals=");
 		io.read(hubbardU,"hubbardU");
@@ -114,20 +114,20 @@ struct ParametersModelFeAs {
 
 		try {
 			io.readMatrix(magneticField,"MagneticField");
-		} catch (std::exception& e) {
-
-		}
+		} catch (std::exception& e) {}
 
 		try {
 			io.read(potentialT,"potentialT");
-		} catch (std::exception& e) {
-
-		}
+		} catch (std::exception& e) {}
 
 		if (magneticField.n_row()!=0 && magneticField.n_row()!=3)
 			throw PsimagLite::RuntimeError("Magnetic Field: if present must have 3 rows\n");
 		if (magneticField.n_row()!=0 && magneticField.n_col()!=potentialV.size())
 			throw PsimagLite::RuntimeError("Magnetic Field: Expecting columns equal sites\n");
+
+		try {
+			io.readline(minElectronsPerSite,"MinElectronsPerSite=");
+		} catch (std::exception& e) {}
 	}
 
 	SizeType orbitals;
@@ -139,6 +139,7 @@ struct ParametersModelFeAs {
 	int decay;
 	Field coulombV;
 	PsimagLite::Matrix<Field> magneticField;
+	SizeType minElectronsPerSite;
 };
 
 //! Function that prints model parameters to stream os
@@ -162,6 +163,9 @@ std::ostream& operator<<(std::ostream &os,const ParametersModelFeAs<FieldType>& 
 		os<<"potentialT\n";
 		os<<parameters.potentialT;
 	}
+
+	os<<"MinElectronsPerSite="<<parameters.minElectronsPerSite<<"\n";
+
 	return os;
 }
 } // namespace Dmrg

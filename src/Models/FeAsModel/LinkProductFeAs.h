@@ -124,16 +124,15 @@ public:
 	}
 
 	template<typename SomeStructType>
-	static void setLinkData(
-	        SizeType term,
-	        SizeType dofs,
-	        bool isSu2,
-	        SizeType& fermionOrBoson,
-	        PairType& ops,
-	        std::pair<char,char>& mods,
-	        SizeType& angularMomentum,
-	        RealType& angularFactor,
-	        SizeType& category,const SomeStructType& additional)
+	static void setLinkData(SizeType term,
+	                        SizeType dofs,
+	                        bool isSu2,
+	                        SizeType& fermionOrBoson,
+	                        PairType& ops,
+	                        std::pair<char,char>& mods,
+	                        SizeType& angularMomentum,
+	                        RealType& angularFactor,
+	                        SizeType& category,const SomeStructType& additional)
 	{
 		fermionOrBoson = ProgramGlobals::FERMION;
 		SizeType spin = getSpin(dofs);

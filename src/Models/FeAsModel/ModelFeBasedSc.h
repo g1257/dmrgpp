@@ -139,9 +139,6 @@ public:
 	                   modelParameters_.orbitals,
 	                   2*modelParameters_.orbitals)
 	{
-		LinkProductType::setOrbitals(modelParameters_.orbitals);
-		HilbertSpaceFeAsType::setOrbitals(modelParameters_.orbitals);
-
 		if (modelParameters_.potentialV.size() !=
 		    2*modelParameters_.orbitals*geometry.numberOfSites()) {
 			PsimagLite::String str(__FILE__);
@@ -149,11 +146,49 @@ public:
 			str += "potentialV length must be 2*orbitals times the number of sites\n";
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
+
+		LinkProductType::setOrbitals(modelParameters_.orbitals);
+		HilbertSpaceFeAsType::setOrbitals(modelParameters_.orbitals);
+		statesPerSite_ = (1 << (modelParameters_.orbitals*2));
+
+		switch (modelParameters_.minElectronsPerSite) {
+		case 0:
+			break;
+		case 1:
+			statesPerSite_--;
+			break;
+		case 2:
+			statesPerSite_ -= 11;
+			break;
+		case 3:
+			statesPerSite_ -= 56;
+			break;
+		case 4:
+			statesPerSite_ -= 176;
+			break;
+		case 5:
+			statesPerSite_ -= 386;
+			break;
+		case 6:
+			statesPerSite_ -= 638;
+			break;
+		case 7:
+			statesPerSite_ -= 848;
+			break;
+		case 8:
+			statesPerSite_ -= 968;
+			break;
+		case 9:
+			statesPerSite_ -= 1013;
+			break;
+		default:
+			throw PsimagLite::RuntimeError("ModelFeBasedSc: invalid param minElectronsPerSite");
+		}
 	}
 
 	SizeType hilbertSize(SizeType site) const
 	{
-		return (SizeType)pow(2,modelParameters_.orbitals*2);
+		return statesPerSite_;
 	}
 
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
@@ -300,12 +335,14 @@ public:
 	                     const VectorSizeType& block) const
 	{
 		assert(block.size()==1);
-		HilbertState a=0;
 		int sitesTimesDof=2*modelParameters_.orbitals;
 		HilbertState total = (1<<sitesTimesDof);
 
-		HilbertBasisType basisTmp(total);
-		for (a=0;a<total;a++) basisTmp[a] = a;
+		HilbertBasisType basisTmp;
+		for (HilbertState a=0;a<total;a++) {
+			if (!isAllowedThisDof(a)) continue;
+			basisTmp.push_back(a);
+		}
 
 		// reorder the natural basis (needed for MULTIPLE BANDS)
 		findQuantumNumbers(q,basisTmp,block.size());
@@ -370,7 +407,7 @@ private:
 		for (SizeType alpha=0;alpha<dofs;alpha++)
 			value += HilbertSpaceFeAsType::calcNofElectrons(ket,0,i,alpha);
 		// add electron on site 0 if needed
-		if (i>0) value += HilbertSpaceFeAsType::electronsAtGivenSite(ket,0);
+		if (i>0) value += HilbertSpaceFeAsType::electrons(ket);
 
 		//order for sign is: a up, a down, b up, b down, etc
 		unsigned int x = HilbertSpaceFeAsType::get(ket,i);
@@ -461,10 +498,10 @@ private:
 
 			jmvalues.push_back(jmpair);
 
-			SizeType na = HilbertSpaceFeAsType::calcNofElectrons(basis[i],0,0) +
-			        HilbertSpaceFeAsType::calcNofElectrons(basis[i],0,0+2);
-			SizeType nb = HilbertSpaceFeAsType::calcNofElectrons(basis[i],0,1) +
-			        HilbertSpaceFeAsType::calcNofElectrons(basis[i],0,1+2);
+			SizeType na = HilbertSpaceFeAsType::calcNofElectrons(basis[i],0) +
+			        HilbertSpaceFeAsType::calcNofElectrons(basis[i],0+2);
+			SizeType nb = HilbertSpaceFeAsType::calcNofElectrons(basis[i],1) +
+			        HilbertSpaceFeAsType::calcNofElectrons(basis[i],1+2);
 
 			SizeType flavor = na  + 3*nb;
 
@@ -564,22 +601,6 @@ private:
 		cmCopy(y,y)=0.5*(cm(x,x)-cm(x,y)-cm(y,x)+cm(y,y));
 
 		cm = cmCopy;
-	}
-
-	int nini(const HilbertState& state,
-	         SizeType i,
-	         SizeType gamma1,
-	         SizeType spin1,
-	         SizeType gamma2,
-	         SizeType spin2) const
-	{
-		int tmp1 = HilbertSpaceFeAsType::calcNofElectrons(state,
-		                                                  i,
-		                                                  gamma1+spin1*modelParameters_.orbitals);
-		int tmp2 = HilbertSpaceFeAsType::calcNofElectrons(state,
-		                                                  i,
-		                                                  gamma2+spin2*modelParameters_.orbitals);
-		return tmp1*tmp2;
 	}
 
 	void addInteraction(SparseMatrixType &hmatrix,
@@ -895,6 +916,13 @@ private:
 		return result;
 	}
 
+	bool isAllowedThisDof(SizeType alpha) const
+	{
+		SizeType electrons = HilbertSpaceFeAsType::electrons(alpha);
+
+		return (electrons >= modelParameters_.minElectronsPerSite);
+	}
+
 	void diagTest(const SparseMatrixType& fullm,const PsimagLite::String& str) const
 	{
 		if (fullm.rank()!=256) return;
@@ -911,6 +939,7 @@ private:
 	GeometryType const &geometry_;
 	SpinSquaredHelper<RealType,HilbertState> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,HilbertState> > spinSquared_;
+	SizeType statesPerSite_;
 };     //class ModelFeBasedSc
 } // namespace Dmrg
 /*@}*/

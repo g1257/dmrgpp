@@ -170,13 +170,13 @@ public:
 
 	}
 
-	//! Number of electrons at given site (sum over all bands)
-	static int electronsAtGivenSite(Word const &data,SizeType site)
+	//! Number of electrons in binary number "data" (sum over all bands)
+	static SizeType electrons(const Word& data)
 	{
 		SizeType sum=0;
 		SizeType dofs = 2*orbitals_;
 		for (SizeType sector=0;sector<dofs;sector++)
-			sum += calcNofElectrons(data,site,sector);
+			sum += calcNofElectrons(data,sector);
 
 		return sum;
 
@@ -195,12 +195,12 @@ public:
 		return getNofDigits(m,sector);
 	}
 
-	//! Number of electrons with dof sector on site i in binary number "ket"
-	static int calcNofElectrons(Word const &ket,SizeType i,SizeType sector)
+	//! Number of electrons with dof sector in binary number "ket"
+	static int calcNofElectrons(Word const &ket,SizeType sector)
 	{
 		SizeType dofs = 2*orbitals_;
 		Word m=0;
-		for (SizeType k=dofs*i;k<dofs*(i+1);k++) m |= (1<<k);
+		for (SizeType k=0;k<dofs;k++) m |= (1<<k);
 		m = m & ket;
 		return getNofDigits(m,sector);
 	}
