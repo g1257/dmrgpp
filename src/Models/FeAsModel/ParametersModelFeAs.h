@@ -113,13 +113,19 @@ struct ParametersModelFeAs {
 
 		try {
 			io.readline(feAsMode,"FeAsMode=");
-			if (feAsMode > 2)
-				throw PsimagLite::RuntimeError("FeAsMode: expecting 0 or 1 or 2\n");
 		} catch (std::exception& e) {}
 
+		if (feAsMode > 2)
+			throw PsimagLite::RuntimeError("FeAsMode: expecting 0 or 1 or 2\n");
+
 		if (feAsMode > 0) {
-			if (hubbardU.size() != orbitals * orbitals)
-				throw PsimagLite::RuntimeError("FeAsMode: expecting orbitals * orbitals U values\n");
+			SizeType tmp = orbitals * orbitals;
+			if (feAsMode == 2) tmp *= 2;
+			if (hubbardU.size() != tmp) {
+				PsimagLite::String str("FeAsMode: expecting");
+				str += ttos(tmp) + " U values\n";
+				throw PsimagLite::RuntimeError(str);
+			}
 		}
 
 		if (feAsMode == 1) {

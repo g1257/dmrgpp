@@ -930,8 +930,8 @@ private:
 		SizeType orbitals = modelParameters_.orbitals;
 		SizeType dofs = orbitals * 2;
 		for (SizeType interaction = 0; interaction < 2; ++interaction) {
-			for (SizeType orb1=0;orb1<modelParameters_.orbitals;orb1++) {
-				for (SizeType orb2=orb1+1;orb2<modelParameters_.orbitals;orb2++) {
+			for (SizeType orb1=0;orb1<orbitals;orb1++) {
+				for (SizeType orb2=0;orb2<orbitals;orb2++) {
 					for (SizeType spin = 0; spin < 2; ++spin) {
 						SizeType spin2 = (interaction == 0) ? spin : 1 - spin;
 						const SparseMatrixType& cm1 = cm[orb1+spin*orbitals+site*dofs].data;
