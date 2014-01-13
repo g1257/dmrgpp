@@ -120,8 +120,7 @@ public:
 	SizeType calcDir(SizeType i1,SizeType i2) const
 	{
 		bool b1 = this->neighbors(i1,i2);
-		bool b2 = (fabs(i1-i2) == 2 && (i1 & 1) == 0);
-		assert(b1 ^ b2);
+		assert(b1 ^ (fabs(i1-i2) == 2 && (i1 & 1) == 0));
 
 		if (b1) return DIRECTION_X;
 		return DIRECTION_NNN;
