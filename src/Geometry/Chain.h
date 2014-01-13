@@ -92,9 +92,9 @@ public:
 	Chain(SizeType linSize,InputType& io) : linSize_(linSize)
 	{}
 
-	virtual SizeType maxConnections() const { return 4; }
+	virtual SizeType maxConnections() const { return 1; }
 
-	virtual SizeType dirs() const { return 2; }
+	virtual SizeType dirs() const { return 1; }
 
 	SizeType handle(SizeType i,SizeType j) const
 	{

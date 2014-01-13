@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "String.h"
 #include "Chain.h"
+#include "ChainEx.h"
 #include "Ladder.h"
 #include "LadderX.h"
 #include "LadderBath.h"
@@ -120,8 +121,8 @@ public:
 
 		if (s == "chain") {
 			geometryBase_ = new Chain<InputType>(linSize,io);
-		//} else if (s == "chainEx") {
-
+		} else if (s == "chainEx") {
+			geometryBase_ = new ChainEx<InputType>(linSize,io);
 		} else if (s=="ladder") {
 			geometryBase_ = new Ladder<InputType>(linSize,io);
 		} else if (s=="ladderx") {

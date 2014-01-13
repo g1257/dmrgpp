@@ -119,9 +119,9 @@ public:
 	}
 
 
-	virtual SizeType maxConnections() const { return 1; }
+	virtual SizeType maxConnections() const { return 4; }
 
-	virtual SizeType dirs() const { return 1; }
+	virtual SizeType dirs() const { return 2; }
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
