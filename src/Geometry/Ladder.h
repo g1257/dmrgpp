@@ -84,20 +84,34 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-class Ladder  {
+class Ladder : public GeometryBase {
 public:
 	enum {DIRECTION_X,DIRECTION_Y};
 
-	Ladder(SizeType linSize,SizeType leg,bool isPeriodicY)
-	    : linSize_(linSize),leg_(leg),isPeriodicY_(isPeriodicY)
+	Ladder(SizeType linSize)
+	    : linSize_(linSize)
 	{
-		if (leg & 1)
+
+		io.readline(leg_,"LadderLeg=");
+		if (leg_!=2) {
+			std::cerr<<"WARNING: LadderLeg!=2 is experimental!\n";
+		}
+		try {
+			io.readline(isPeriodicY_,"PeriodicY=");
+			if (leg_==2) throw RuntimeError("LadderLeg==2 cannot have PeriodicY set\n");
+			std::cerr<<"INFO: PeriodicY="<<isPeriodicY_<<"\n";
+		} catch (std::exception& e) {
+			if (leg_>2) throw RuntimeError("LadderLeg>2 must have PeriodicY= line\n");
+		}
+
+
+		if (leg_ & 1)
 			throw RuntimeError("Ladder: leg must be even\n");
 
-		if (leg == 2)
+		if (leg_ == 2)
 			isPeriodicY_ = false;
 
-		if (linSize % leg !=0)
+		if (linSize % leg_ !=0)
 			throw RuntimeError("Ladder: leg must divide number of sites\n");
 	}
 

@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-class KTwoNiFFour  {
+class KTwoNiFFour : public GeometryBase {
 
 	typedef std::pair<int,int> PairType;
 
@@ -101,10 +101,11 @@ public:
 		SizeType TYPE_C;
 	};
 
-	KTwoNiFFour(SizeType linSize,int signChange)
-	    : linSize_(linSize),signChange_(signChange)
+	KTwoNiFFour(SizeType linSize)
+	    : linSize_(linSize)
 	{
-		std::cerr<<"SIGN CHANGE="<<signChange<<"\n";
+		io.readline(signChange_,"SignChange=");
+		std::cerr<<"SIGN CHANGE="<<signChange_<<"\n";
 	}
 
 	SizeType getVectorSize(SizeType dirId) const

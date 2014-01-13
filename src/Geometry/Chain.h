@@ -77,20 +77,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef CHAIN_H
 #define CHAIN_H
-#include "GeometryUtils.h"
+#include "GeometryFactory.h"
 #include "String.h"
 
 namespace PsimagLite {
 
-class Chain  {
+class Chain : public GeometryBase {
 
 public:
 
 	enum { DIRECTION_X };
 
 	Chain(SizeType linSize) : linSize_(linSize)
-	{
-	}
+	{}
 
 	SizeType handle(SizeType i,SizeType j) const
 	{
@@ -118,7 +117,6 @@ public:
 	bool fringe(SizeType i,SizeType smax,SizeType emin) const
 	{
 		return (i==smax || i==emin);
-
 	}
 
 	// siteNew2 is fringe in the environment

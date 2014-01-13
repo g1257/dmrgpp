@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-class LadderX  {
+class LadderX : public GeometryBase {
 
 	typedef Ladder LadderType;
 
@@ -92,12 +92,9 @@ public:
 
 	enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_XPY,DIRECTION_XMY};
 
-	static const bool IS_PERIODIC_Y = false;
-
-	LadderX(SizeType linSize,SizeType leg)
-	    : ladder_(linSize,leg,IS_PERIODIC_Y),linSize_(linSize),leg_(leg)
-	{
-	}
+	LadderX(SizeType linSize)
+	    : ladder_(linSize),linSize_(linSize)
+	{}
 
 	SizeType getVectorSize(SizeType dirId) const
 	{

@@ -84,21 +84,29 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-class LadderBath  {
+class LadderBath : public GeometryBase {
 
 	typedef std::pair<int,int> PairType;
 	typedef Ladder LadderType;
-
-	static const bool IS_PERIODIC_Y = false;
 
 public:
 
 	enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_BATH};
 
-	LadderBath(SizeType linSize,SizeType leg,SizeType bathSitesPerSite) :
-	    linSize_(linSize),bathSitesPerSite_(bathSitesPerSite),
-	    clusterSize_(linSize_/(1+bathSitesPerSite_)),ladder_(clusterSize_,leg,IS_PERIODIC_Y)
+	LadderBath(SizeType linSize)
+	    : linSize_(linSize),ladder_(0)
 	{
+		io.readline(bathSitesPerSite_,"BathSitesPerSite=");
+		if (bathSitesPerSite_ < 0) throw RuntimeError("BathSitesPerSite<0 is an error\n");
+
+        clusterSize_ = linSize_/(1+bathSitesPerSite_);
+
+		ladder_ = new LadderType(clusterSize_);
+	}
+
+	~LadderBath()
+	{
+		if (ladder_) delete ladder_;
 	}
 
 	SizeType getVectorSize(SizeType dirId) const
@@ -247,7 +255,7 @@ private:
 	SizeType linSize_;
 	SizeType bathSitesPerSite_;
 	SizeType clusterSize_;
-	LadderType ladder_;
+	LadderType* ladder_;
 }; // class LadderBath
 } // namespace PsimagLite 
 
