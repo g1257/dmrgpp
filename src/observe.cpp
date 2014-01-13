@@ -214,7 +214,9 @@ void mainLoop0(InputNgType::Readable& io,
                const PsimagLite::String& list)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef PsimagLite::Geometry<ComplexOrRealType,ProgramGlobals> GeometryType;
+	typedef PsimagLite::Geometry<ComplexOrRealType,
+	                             InputNgType::Readable,
+	                             ProgramGlobals> GeometryType;
 
 	GeometryType geometry(io);
 	bool su2 = (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos);

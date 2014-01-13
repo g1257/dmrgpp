@@ -156,7 +156,9 @@ void mainLoop0(InputNgType::Readable& io,
                InputCheck& inputCheck)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef PsimagLite::Geometry<ComplexOrRealType,ProgramGlobals> GeometryType;
+	typedef PsimagLite::Geometry<ComplexOrRealType,
+	                             InputNgType::Readable,
+	                             ProgramGlobals> GeometryType;
 
 	GeometryType geometry(io);
 
