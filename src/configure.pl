@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 =pod
 // BEGIN LICENSE BLOCK
-Copyright (c) 2009 , UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 
 *********************************************************
 THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND

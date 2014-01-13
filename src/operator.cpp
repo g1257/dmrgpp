@@ -1,20 +1,4 @@
 #include "String.h"
-const PsimagLite::String license=
-"Copyright (c) 2009-2012 , UT-Battelle, LLC\n"
-"All rights reserved\n"
-"\n"
-"[DMRG++, Version 2.0.0]\n"
-"\n"
-"*********************************************************\n"
-"THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND\n"
-"CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED\n"
-"WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\n"
-"WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A\n"
-"PARTICULAR PURPOSE ARE DISCLAIMED.\n"
-"\n"
-"Please see full open source license included in file LICENSE.\n"
-"*********************************************************\n"
-"\n";
 
 #ifndef USE_FLOAT
 typedef double RealType;
@@ -213,7 +197,7 @@ int main(int argc,char *argv[])
 	
 	// print license
 	if (ConcurrencyType::root()) {
-		std::cerr<<license;
+		std::cerr<<ProgramGlobals::license;
 		Provenance provenance;
 		std::cout<<provenance;
 	}
