@@ -220,6 +220,11 @@ public:
 		return (i==1) ? leg_ : SizeType(linSize_/leg_);
 	}
 
+	SizeType leg() const
+	{
+		return leg_;
+	}
+
 	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
 	{
 		assert(dir<2);

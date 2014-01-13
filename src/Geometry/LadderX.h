@@ -94,7 +94,7 @@ public:
 	enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_XPY,DIRECTION_XMY};
 
 	LadderX(SizeType linSize,InputType& io)
-	    : ladder_(linSize,io),linSize_(linSize)
+	    : ladder_(linSize,io),linSize_(linSize),leg_(ladder_.leg())
 	{}
 
 	virtual SizeType maxConnections() const { return 4; }
