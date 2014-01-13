@@ -395,6 +395,11 @@ public:
 		}
 	}
 
+	virtual SizeType maxElectronsOneSpin() const
+	{
+		return 2 * modelParameters_.orbitals * geometry_.numberOfSites() + 1;
+	}
+
 private:
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to

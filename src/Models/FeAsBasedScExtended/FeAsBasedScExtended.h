@@ -237,6 +237,11 @@ public:
 		modelFeAs_.addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
 	}
 
+	virtual SizeType maxElectronsOneSpin() const
+	{
+		return 2 * modelParameters_.orbitals * geometry_.numberOfSites() + 1;
+	}
+
 private:
 
 	// add S^+_i to creationMatrix
