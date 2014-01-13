@@ -17,8 +17,8 @@ SolverOptions=none
 Version=aec8964f7a782d87d587c27276acd41760808139
 OutputFile=data103.txt
 InfiniteLoopKeptStates=100
-FiniteLoops 6  7 400 0 -7 400 0 -7 400 0 7 400 1 
-	7 400 1 -1 400 1 
+FiniteLoops 5  15 400 0 -15 400 0 -15 400 0 15 400 1 
+	15 400 1 
 TargetQuantumNumbers 3 0.5 0.5 0
    
 Threads=2
