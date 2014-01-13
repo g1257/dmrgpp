@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2013, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -68,37 +68,112 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 *********************************************************
 
 */
-
 /** \ingroup PsimagLite */
 /*@{*/
 
-/*! \file GeometryUtils.h
+/*! \file ChainEx.h
  *
+ *  DOC NEEDED FIXME
  */
-#ifndef GEOMETRY_UTILS_H
-#define GEOMETRY_UTILS_H
-
-#include "GeometryDirection.h"
-#include "GeometryFactory.h"
-#include <cassert>
+#ifndef CHAIN_EX_H
+#define CHAIN_EX_H
+#include "GeometryBase.h"
+#include "String.h"
 
 namespace PsimagLite {
 
-namespace GeometryUtils {
+template<typename InputType>
+class ChainEx : public GeometryBase<InputType> {
 
-bool neighbors(SizeType i1,SizeType i2,bool periodic = false,SizeType period = 1)
-{
-	SizeType imin = (i1<i2) ? i1 : i2;
-	SizeType imax = (i1>i2) ? i1 : i2;
-	bool b = (imax-imin==1);
-	if (!periodic) return b;
-	bool b2 = (imax-imin == period);
-	return (b || b2);
-}
+public:
 
-} // namespace GeometryUtils
+	enum { DIRECTION_X, DIRECTION_NNN };
 
-} // namespace PsimagLite
+	ChainEx(SizeType linSize,InputType& io) : linSize_(linSize)
+	{}
+
+	virtual SizeType maxConnections() const { return 2; }
+
+	virtual SizeType dirs() const { return 2; }
+
+	SizeType handle(SizeType i,SizeType j) const
+	{
+		this->unimplemented("handle");
+		return (i<j) ? i : j;
+	}
+
+	SizeType getVectorSize(SizeType dirId) const
+	{
+		this->unimplemented("getVectorSize");
+		return linSize_-1;
+	}
+
+	bool connected(SizeType i1,SizeType i2) const
+	{
+		if (i1==i2) return false;
+		bool b1 = this->neighbors(i1,i2);
+		bool b2 = (fabs(i1-i2) == 2 && (i1 & 1) == 0);
+		return (b1 | b2);
+	}
+
+	// assumes i1 and i2 are connected
+	SizeType calcDir(SizeType i1,SizeType i2) const
+	{
+		bool b1 = this->neighbors(i1,i2);
+		bool b2 = (fabs(i1-i2) == 2 && (i1 & 1) == 0);
+		assert(b1 ^ b2);
+
+		if (b1) return DIRECTION_X;
+		return DIRECTION_NNN;
+	}
+
+	bool fringe(SizeType i,SizeType smax,SizeType emin) const
+	{
+		bool b1 = (i==smax || i==emin);
+		if (smax & 1) {
+			return (b1 || (i == smax - 1));
+		}
+
+		return (b1 || (i == emin + 1));
+	}
+
+	// siteNew2 is fringe in the environment
+	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
+	{
+		return smax+1;
+	}
+
+	String label() const
+	{
+		return "chainEx";
+	}
+
+	SizeType findReflection(SizeType site) const
+	{
+		return linSize_ - site -1;
+	}
+
+	SizeType length(SizeType i) const
+	{
+		this->unimplemented("length");
+		return linSize_;
+	}
+
+	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	{
+		this->unimplemented("getVectorSize");
+
+		site+=amount;
+		while (site>=linSize_) site -= linSize_;
+		return site;
+	}
+
+private:
+
+	SizeType linSize_;
+}; // class ChainEx
+} // namespace PsimagLite 
+
 /*@}*/
-#endif // GEOMETRY_UTILS_H
+#endif // CHAIN_EX_H
 
