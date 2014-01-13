@@ -79,16 +79,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LADDER_H
 #define LADDER_H
 
-#include "GeometryUtils.h"
+#include "GeometryBase.h"
 #include "String.h"
 
 namespace PsimagLite {
 
-class Ladder : public GeometryBase {
+template<typename InputType>
+class Ladder : public GeometryBase<InputType> {
 public:
 	enum {DIRECTION_X,DIRECTION_Y};
 
-	Ladder(SizeType linSize)
+	Ladder(SizeType linSize,InputType& io)
 	    : linSize_(linSize)
 	{
 
@@ -97,7 +98,9 @@ public:
 			std::cerr<<"WARNING: LadderLeg!=2 is experimental!\n";
 		}
 		try {
-			io.readline(isPeriodicY_,"PeriodicY=");
+			int x = 0;
+			io.readline(x,"PeriodicY=");
+			isPeriodicY_ = (x > 0) ? true : false;
 			if (leg_==2) throw RuntimeError("LadderLeg==2 cannot have PeriodicY set\n");
 			std::cerr<<"INFO: PeriodicY="<<isPeriodicY_<<"\n";
 		} catch (std::exception& e) {
@@ -114,6 +117,11 @@ public:
 		if (linSize % leg_ !=0)
 			throw RuntimeError("Ladder: leg must divide number of sites\n");
 	}
+
+
+	virtual SizeType maxConnections() const { return 1; }
+
+	virtual SizeType dirs() const { return 1; }
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
@@ -132,8 +140,8 @@ public:
 		SizeType c2 = i2/leg_;
 		SizeType r1 = i1%leg_;
 		SizeType r2 = i2%leg_;
-		if (c1==c2) return GeometryUtils::neighbors(r1,r2,isPeriodicY_,leg_-1);
-		if (r1==r2) return GeometryUtils::neighbors(c1,c2);
+		if (c1==c2) return this->neighbors(r1,r2,isPeriodicY_,leg_-1);
+		if (r1==r2) return this->neighbors(c1,c2);
 		return false;
 	}
 

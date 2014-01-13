@@ -81,25 +81,33 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GEOMETRY_BASE_H
 #define GEOMETRY_BASE_H
 
-#include "Chain.h"
-#include "Ladder.h"
-#include "LadderX.h"
-#include "LadderBath.h"
-#include "KTwoNiFFour.h"
 #include "String.h"
 #include "InputNg.h"
 
 namespace PsimagLite {
 
+template<typename InputType>
 class GeometryBase {
 
 	typedef std::pair<SizeType,SizeType> PairType;
 
-	static SizeType refCounter_;
+	struct AdditionalData {
+		AdditionalData() : type1(0),type2(0),TYPE_C(GeometryBase::TYPE_C) {}
+
+		SizeType type1;
+		SizeType type2;
+		SizeType TYPE_C;
+	};
+
 
 public:
 
-	typedef KTwoNiFFour::AdditionalData AdditionalDataType;
+	enum {TYPE_O,TYPE_C};
+
+	typedef AdditionalData AdditionalDataType;
+
+	virtual ~GeometryBase()
+	{}
 
 	virtual SizeType dirs() const = 0;
 
@@ -147,7 +155,13 @@ public:
 		return 1;
 	}
 
-	bool neighbors(SizeType i1,SizeType i2,bool periodic = false,SizeType period = 1)
+	SizeType unimplemented(const String& str) const
+	{
+		PsimagLite::String str2 = "unimplemented " + str + "\n";
+		throw RuntimeError(str2);
+	}
+
+	bool neighbors(SizeType i1,SizeType i2,bool periodic = false,SizeType period = 1) const
 	{
 		SizeType imin = (i1<i2) ? i1 : i2;
 		SizeType imax = (i1>i2) ? i1 : i2;

@@ -82,22 +82,29 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_TERM_H
 
 #include "GeometryDirection.h"
-#include "GeometryFactory.h"
+#include "GeometryBase.h"
 #include <cassert>
 #include "String.h"
+#include "Chain.h"
+#include "Ladder.h"
+#include "LadderX.h"
+#include "LadderBath.h"
+#include "KTwoNiFFour.h"
 
 namespace PsimagLite {
 
-template<typename ComplexOrRealType>
+template<typename ComplexOrRealType,typename InputType>
 class GeometryTerm {
-	typedef GeometryDirection<ComplexOrRealType,GeometryFactory> GeometryDirectionType;
+
+	typedef GeometryBase<InputType> GeometryBaseType;
+	typedef GeometryDirection<ComplexOrRealType,GeometryBaseType> GeometryDirectionType;
+
 public:
 
-	typedef typename GeometryFactory::AdditionalDataType AdditionalDataType;
+	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 
-	template<typename IoInputter>
-	GeometryTerm(IoInputter& io,SizeType termId,SizeType linSize,bool debug=false) :
-	    linSize_(linSize),maxEdof_(0)
+	GeometryTerm(InputType& io,SizeType termId,SizeType linSize,bool debug=false) :
+	    linSize_(linSize),maxEdof_(0),geometryBase_(0)
 	{
 		int x;
 		io.readline(x,"DegreesOfFreedom=");
@@ -110,12 +117,25 @@ public:
 
 		String gOptions;
 		io.readline(gOptions,"GeometryOptions=");
-		//std::cerr<<"GeometryOptions "<<gOptions<<"\n";
 
-		geometryFactory_.init(io,s,linSize);
+		if (s == "chain") {
+			geometryBase_ = new Chain<InputType>(linSize,io);
+		//} else if (s == "chainEx") {
 
-		for (SizeType i=0;i<geometryFactory_.dirs();i++) {
-			directions_.push_back(GeometryDirectionType(io,i,edof,gOptions,geometryFactory_));
+		} else if (s=="ladder") {
+			geometryBase_ = new Ladder<InputType>(linSize,io);
+		} else if (s=="ladderx") {
+			geometryBase_ = new LadderX<InputType>(linSize,io);
+		} else if (s=="bathedcluster") {
+			geometryBase_ = new LadderBath<InputType>(linSize,io);
+		} else if (s=="ktwoniffour") {
+			geometryBase_ = new KTwoNiFFour<InputType>(linSize,io);
+		} else {
+			throw RuntimeError("Unknown geometry " + s + "\n");
+		}
+
+		for (SizeType i=0;i<geometryBase_->dirs();i++) {
+			directions_.push_back(GeometryDirectionType(io,i,edof,gOptions,geometryBase_));
 		}
 
 		findMaxEdof();
@@ -128,10 +148,15 @@ public:
 		}
 	}
 
+	~GeometryTerm()
+	{
+		if (geometryBase_) delete geometryBase_;
+	}
+
 	const ComplexOrRealType& operator()(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
 	{
-		int k1 = geometryFactory_.index(i1,edof1,maxEdof_);
-		int k2 = geometryFactory_.index(i2,edof2,maxEdof_);
+		int k1 = geometryBase_->index(i1,edof1,maxEdof_);
+		int k2 = geometryBase_->index(i2,edof2,maxEdof_);
 		assert(k1>=0 && k2>=0);
 		return cachedValues_(k1,k2);
 	}
@@ -144,8 +169,8 @@ public:
 	                           SizeType i2,
 	                           SizeType edof2) const
 	{
-		bool bothFringe = (geometryFactory_.fringe(i1,smax,emin) &&
-		                   geometryFactory_.fringe(i2,smax,emin));
+		bool bothFringe = (geometryBase_->fringe(i1,smax,emin) &&
+		                   geometryBase_->fringe(i2,smax,emin));
 		SizeType siteNew1 = i1;
 		SizeType siteNew2 = i2;
 		SizeType edofNew1 = edof1;
@@ -157,7 +182,7 @@ public:
 				edofNew1 = edof2;
 				edofNew2 = edof1;
 			}
-			siteNew2 = geometryFactory_.getSubstituteSite(smax,emin,siteNew2);
+			siteNew2 = geometryBase_->getSubstituteSite(smax,emin,siteNew2);
 		}
 		return operator()(siteNew1,edofNew1,siteNew2,edofNew2);
 	}
@@ -166,49 +191,49 @@ public:
 	{
 		if (i1==i2) return false;
 
-		bool bothFringe = (geometryFactory_.fringe(i1,smax,emin) &&
-		                   geometryFactory_.fringe(i2,smax,emin));
+		bool bothFringe = (geometryBase_->fringe(i1,smax,emin) &&
+		                   geometryBase_->fringe(i2,smax,emin));
 
-		if (!bothFringe) return geometryFactory_.connected(i1,i2);
+		if (!bothFringe) return geometryBase_->connected(i1,i2);
 		//std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
 		return true;
 	}
 
 	bool connected(SizeType i1,SizeType i2) const
 	{
-		return geometryFactory_.connected(i1,i2);
+		return geometryBase_->connected(i1,i2);
 	}
 
 	String label() const
 	{
-		return geometryFactory_.label();
+		return geometryBase_->label();
 	}
 
 	SizeType maxConnections() const
 	{
-		return geometryFactory_.maxConnections();
+		return geometryBase_->maxConnections();
 	}
 
 	void fillAdditionalData(AdditionalDataType& additionalData,
 	                        SizeType ind,
 	                        SizeType jnd) const
 	{
-		geometryFactory_.fillAdditionalData(additionalData,ind,jnd);
+		geometryBase_->fillAdditionalData(additionalData,ind,jnd);
 	}
 
 	SizeType findReflection(SizeType site) const
 	{
-		return geometryFactory_.findReflection(site);
+		return geometryBase_->findReflection(site);
 	}
 
 	SizeType length(SizeType i) const
 	{
-		return geometryFactory_.length(i);
+		return geometryBase_->length(i);
 	}
 
 	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
 	{
-		return geometryFactory_.translate(site,dir,amount);
+		return geometryBase_->translate(site,dir,amount);
 	}
 
 	void print(std::ostream& os,SizeType linSize) const
@@ -232,25 +257,25 @@ public:
 		}
 	}
 
-	template<typename ComplexOrRealType_>
+	template<typename ComplexOrRealType_,typename InputType_>
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const GeometryTerm<ComplexOrRealType_>& gt);
+	                                const GeometryTerm<ComplexOrRealType_,InputType_>& gt);
 
 private:
 
 	void cacheValues()
 	{
-		SizeType matrixRank = geometryFactory_.matrixRank(linSize_,maxEdof_);
+		SizeType matrixRank = geometryBase_->matrixRank(linSize_,maxEdof_);
 		cachedValues_.resize(matrixRank,matrixRank);
 
 		for (SizeType i1=0;i1<linSize_;i1++) {
 			for (SizeType i2=0;i2<linSize_;i2++) {
-				if (!geometryFactory_.connected(i1,i2)) continue;
+				if (!geometryBase_->connected(i1,i2)) continue;
 				for (SizeType edof1=0;edof1<maxEdof_;edof1++) {
-					int k1 = geometryFactory_.index(i1,edof1,maxEdof_);
+					int k1 = geometryBase_->index(i1,edof1,maxEdof_);
 					if (k1<0) continue;
 					for (SizeType edof2=0;edof2<maxEdof_;edof2++) {
-						int k2 = geometryFactory_.index(i2,edof2,maxEdof_);
+						int k2 = geometryBase_->index(i2,edof2,maxEdof_);
 						if (k2<0) continue;
 						cachedValues_(k1,k2)=calcValue(i1,edof1,i2,edof2);
 					}
@@ -271,22 +296,27 @@ private:
 
 	ComplexOrRealType calcValue(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
 	{
-		if (!geometryFactory_.connected(i1,i2)) return 0.0;
+		if (!geometryBase_->connected(i1,i2)) return 0.0;
 
-		SizeType dir = geometryFactory_.calcDir(i1,i2);
+		SizeType dir = geometryBase_->calcDir(i1,i2);
 		assert(dir<directions_.size());
 		return directions_[dir](i1,edof1,i2,edof2);
 	}
 
+	GeometryTerm(const GeometryTerm&);
+
+	GeometryTerm& operator=(const GeometryTerm&);
+
 	SizeType linSize_;
 	SizeType maxEdof_;
-	GeometryFactory geometryFactory_;
+	GeometryBaseType* geometryBase_;
 	typename Vector<GeometryDirectionType>::Type directions_;
 	PsimagLite::Matrix<ComplexOrRealType> cachedValues_;
 }; // class GeometryTerm
 
-template<typename ComplexOrRealType>
-std::ostream& operator<<(std::ostream& os,const GeometryTerm<ComplexOrRealType>& gt)
+template<typename ComplexOrRealType,typename InputType>
+std::ostream& operator<<(std::ostream& os,
+                         const GeometryTerm<ComplexOrRealType,InputType>& gt)
 {
 	os<<"#GeometryDirections="<<gt.directions_.size()<<"\n";
 	for (SizeType i=0;i<gt.directions_.size();i++) os<<gt.directions_[i];

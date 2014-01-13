@@ -79,29 +79,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define KTWONIFFOUR_H
 #include <stdexcept>
 #include <cassert>
+#include "GeometryBase.h"
 #include "String.h"
 
 namespace PsimagLite {
 
-class KTwoNiFFour : public GeometryBase {
+template<typename InputType>
+class KTwoNiFFour : public GeometryBase<InputType> {
 
 	typedef std::pair<int,int> PairType;
+	typedef GeometryBase<InputType> GeometryBaseType;
+	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 
-	enum {TYPE_O,TYPE_C};
+	enum {TYPE_O = GeometryBaseType::TYPE_O, TYPE_C = GeometryBaseType::TYPE_C};
+
 	enum {SUBTYPE_X,SUBTYPE_Y};
+
 	enum {DIR_X,DIR_Y,DIR_XPY,DIR_XMY};
 
 public:
 
-	struct AdditionalData {
-		AdditionalData() : type1(0),type2(0),TYPE_C(KTwoNiFFour::TYPE_C) {}
-
-		SizeType type1;
-		SizeType type2;
-		SizeType TYPE_C;
-	};
-
-	KTwoNiFFour(SizeType linSize)
+	KTwoNiFFour(SizeType linSize,InputType& io)
 	    : linSize_(linSize)
 	{
 		io.readline(signChange_,"SignChange=");
@@ -112,6 +110,18 @@ public:
 	{
 		assert(false);
 		throw RuntimeError("getVectorSize: unimplemented\n");
+	}
+
+	virtual SizeType dirs() const { return 4; }
+
+	virtual SizeType length(SizeType i) const
+	{
+		return this->unimplemented("length");
+	}
+
+	virtual SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	{
+		return this->unimplemented("translate");
 	}
 
 	bool connected(SizeType i1,SizeType i2) const
@@ -230,7 +240,7 @@ public:
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}
 
-	void fillAdditionalData(AdditionalData& additionalData,
+	void fillAdditionalData(AdditionalDataType& additionalData,
 	                        SizeType ind,
 	                        SizeType jnd) const
 	{

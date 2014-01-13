@@ -83,18 +83,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename ComplexOrRealType_,typename ProgramGlobalsType>
+template<typename ComplexOrRealType_,typename InputType,typename ProgramGlobalsType>
 class Geometry {
 
 public:
 
 	typedef ComplexOrRealType_ ComplexOrRealType;
-	typedef GeometryTerm<ComplexOrRealType> GeometryTermType;
+	typedef GeometryTerm<ComplexOrRealType,InputType> GeometryTermType;
 	typedef typename Vector<SizeType>::Type BlockType;
 	typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
 
-	template<typename IoInputter>
-	Geometry(IoInputter& io,bool debug=false)
+	Geometry(InputType& io,bool debug=false)
 	{
 		int x;
 		io.readline(x,"TotalNumberOfSites=");
@@ -104,12 +103,19 @@ public:
 		io.readline(x,"NumberOfTerms=");
 		if (x<0) throw RuntimeError("NumberOfTerms<0 is an error\n");
 
-		for (SizeType i=0;i<SizeType(x);i++) {
-			terms_.push_back(GeometryTermType(io,i,linSize_,debug));
+		terms_.resize(x,0);
+		for (SizeType i=0;i<terms_.size();i++) {
+			terms_[i] = new GeometryTermType(io,i,linSize_,debug);
 		}
 	}
 
-	String label(SizeType i) const { return terms_[i].label(); }
+	~Geometry()
+	{
+		for (SizeType i=0;i<terms_.size();i++)
+			if (terms_[i]) delete terms_[i];
+	}
+
+	String label(SizeType i) const { return terms_[i]->label(); }
 
 	SizeType connectionKind(SizeType smax,SizeType ind,SizeType jnd) const
 	{
@@ -124,21 +130,21 @@ public:
 	(SizeType smax,SizeType emin,
 	 SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
 	{
-		if (smax+1==emin) return terms_[term](i1,edof1,i2,edof2);
-		return terms_[term](smax,emin,i1,edof1,i2,edof2);
+		if (smax+1==emin) return terms_[term]->operator()(i1,edof1,i2,edof2);
+		return terms_[term]->operator()(smax,emin,i1,edof1,i2,edof2);
 	}
 
 	ComplexOrRealType operator()
 	(SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
 	{
-		return terms_[term](i1,edof1,i2,edof2);
+		return terms_[term]->operator()(i1,edof1,i2,edof2);
 	}
 
 	// needs to check all terms FIXME:
 	bool connected(SizeType smax,SizeType emin,SizeType i1,SizeType i2) const
 	{
-		if (smax+1==emin) return terms_[0].connected(i1,i2); // any term will do
-		return terms_[0].connected(smax,emin,i1,i2); // any term will do
+		if (smax+1==emin) return terms_[0]->connected(i1,i2); // any term will do
+		return terms_[0]->connected(smax,emin,i1,i2); // any term will do
 	}
 
 	SizeType terms() const { return terms_.size(); }
@@ -196,7 +202,7 @@ public:
 
 	SizeType maxConnections(SizeType termId = 0) const
 	{
-		return terms_[termId].maxConnections();
+		return terms_[termId]->maxConnections();
 	}
 
 	void fillAdditionalData(AdditionalDataType& additionalData,
@@ -204,46 +210,48 @@ public:
 	                        SizeType ind,
 	                        SizeType jnd) const
 	{
-		terms_[term].fillAdditionalData(additionalData,ind,jnd);
+		terms_[term]->fillAdditionalData(additionalData,ind,jnd);
 	}
 
 	SizeType findReflection(SizeType site,SizeType termId) const
 	{
-		return terms_[termId].findReflection(site);
+		return terms_[termId]->findReflection(site);
 	}
 
 	SizeType length(SizeType i,SizeType termId) const
 	{
-		return terms_[termId].length(i);
+		return terms_[termId]->length(i);
 	}
 
 	SizeType translate(SizeType site,SizeType dir, SizeType amount,SizeType termId) const
 	{
-		return terms_[termId].translate(site,dir,amount);
+		return terms_[termId]->translate(site,dir,amount);
 	}
 
 	void print(std::ostream& os) const
 	{
 		for (SizeType i=0;i<terms_.size();i++)
-			terms_[i].print(os,linSize_);
+			terms_[i]->print(os,linSize_);
 	}
 
-	template<typename RealType2,typename PgType>
-	friend std::ostream& operator<<(std::ostream& os,const Geometry<RealType2,PgType>& g);
+	template<typename RealType2,typename InputType2, typename PgType>
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const Geometry<RealType2,InputType2,PgType>& g);
 
 private:
 
 	SizeType linSize_;
-	typename Vector<GeometryTermType>::Type terms_;
+	typename Vector<GeometryTermType*>::Type terms_;
 
 }; // class Geometry
 
-template<typename ComplexOrRealType,typename PgType>
-std::ostream& operator<<(std::ostream& os,const Geometry<ComplexOrRealType,PgType>& g)
+template<typename ComplexOrRealType,typename InputType,typename PgType>
+std::ostream& operator<<(std::ostream& os,
+                         const Geometry<ComplexOrRealType,InputType,PgType>& g)
 {
 	os<<"#GeometrySize="<<g.linSize_<<"\n";
 	os<<"#GeometryTerms="<<g.terms_.size()<<"\n";
-	for (SizeType i=0;i<g.terms_.size();i++) os<<g.terms_[i];
+	for (SizeType i=0;i<g.terms_.size();i++) os<<*(g.terms_[i]);
 	return os;
 }
 } // namespace PsimagLite 

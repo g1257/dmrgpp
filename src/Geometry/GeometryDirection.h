@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template<typename ComplexOrRealType,typename GeometryFactoryType>
+template<typename ComplexOrRealType,typename GeometryBaseType>
 class GeometryDirection {
 
 	typedef Matrix<ComplexOrRealType> MatrixType;
@@ -94,8 +94,8 @@ public:
 	template<typename IoInputter>
 	GeometryDirection(IoInputter& io,SizeType dirId,SizeType edof,
 	                  const String& options,
-	                  const GeometryFactoryType& geometryFactory)
-	    : dirId_(dirId),geometryFactory_(&geometryFactory)
+	                  const GeometryBaseType* geometryFactory)
+	    : dirId_(dirId),geometryBase_(geometryFactory)
 	{
 		SizeType n = getVectorSize(options);
 		dataType_ = edof;
@@ -117,7 +117,7 @@ public:
 
 	ComplexOrRealType operator()(SizeType i,SizeType edof1,SizeType j,SizeType edof2) const
 	{
-		SizeType h = (constantValues()) ? 0 : geometryFactory_->handle(i,j);
+		SizeType h = (constantValues()) ? 0 : geometryBase_->handle(i,j);
 
 		if (dataType_==NUMBERS) {
 			assert(dataNumbers_.size()>h);
@@ -132,7 +132,7 @@ public:
 		              dataMatrices_[h].n_col()>edof1));
 
 		ComplexOrRealType tmp = (b) ? dataMatrices_[h](edof1,edof2) : dataMatrices_[h](edof2,edof1);
-		int signChange = geometryFactory_->signChange(i,j);
+		int signChange = geometryBase_->signChange(i,j);
 		return tmp * static_cast<typename PsimagLite::Real<ComplexOrRealType>::Type>(signChange);
 	}
 
@@ -156,9 +156,9 @@ public:
 		return (size()==1) ? true : false;
 	}
 
-	template<typename RealType_,typename GeometryFactoryType_>
+	template<typename RealType_,typename GeometryBaseType_>
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const GeometryDirection<RealType_,GeometryFactoryType_>& gd);
+	                                const GeometryDirection<RealType_,GeometryBaseType_>& gd);
 
 private:
 
@@ -167,22 +167,22 @@ private:
 		if (s.find("ConstantValues")!=String::npos)
 			return 1;
 
-		return geometryFactory_->getVectorSize(dirId_);
+		return geometryBase_->getVectorSize(dirId_);
 	}
 
 	SizeType dirId_;
-	const GeometryFactoryType* geometryFactory_;
+	const GeometryBaseType* geometryBase_;
 	SizeType dataType_;
 	typename Vector<ComplexOrRealType>::Type dataNumbers_;
 	typename Vector<MatrixType>::Type dataMatrices_;
 }; // class GeometryDirection
 
-template<typename ComplexOrRealType,typename GeometryFactoryType>
+template<typename ComplexOrRealType,typename GeometryBaseType>
 std::ostream& operator<<(std::ostream& os,
-                         const GeometryDirection<ComplexOrRealType,GeometryFactoryType>& gd)
+                         const GeometryDirection<ComplexOrRealType,GeometryBaseType>& gd)
 {
 	os<<"#GeometrydirId="<<gd.dirId_<<"\n";
-	if (gd.dataType_==GeometryDirection<ComplexOrRealType,GeometryFactoryType>::NUMBERS) {
+	if (gd.dataType_==GeometryDirection<ComplexOrRealType,GeometryBaseType>::NUMBERS) {
 		os<<"#GeometryNumbersSize="<<gd.dataNumbers_.size()<<"\n";
 		os<<"#GeometryNumbers=";
 		for (SizeType i=0;i<gd.dataNumbers_.size();i++) {

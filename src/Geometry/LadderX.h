@@ -84,17 +84,32 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-class LadderX : public GeometryBase {
+template<typename InputType>
+class LadderX : public GeometryBase<InputType> {
 
-	typedef Ladder LadderType;
+	typedef Ladder<InputType> LadderType;
 
 public:
 
 	enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_XPY,DIRECTION_XMY};
 
-	LadderX(SizeType linSize)
-	    : ladder_(linSize),linSize_(linSize)
+	LadderX(SizeType linSize,InputType& io)
+	    : ladder_(linSize,io),linSize_(linSize)
 	{}
+
+	virtual SizeType maxConnections() const { return 4; }
+
+	virtual SizeType dirs() const { return 4; }
+
+	virtual SizeType length(SizeType i) const
+	{
+		return this->unimplemented("length");
+	}
+
+	virtual SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	{
+		return this->unimplemented("translate");
+	}
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
@@ -115,9 +130,9 @@ public:
 		SizeType c2 = i2/leg_;
 		SizeType r1 = i1%leg_;
 		SizeType r2 = i2%leg_;
-		if (c1==c2) return GeometryUtils::neighbors(r1,r2);
-		if (r1==r2) return GeometryUtils::neighbors(c1,c2);
-		return (GeometryUtils::neighbors(r1,r2) && GeometryUtils::neighbors(c1,c2));
+		if (c1==c2) return this->neighbors(r1,r2);
+		if (r1==r2) return this->neighbors(c1,c2);
+		return (this->neighbors(r1,r2) && this->neighbors(c1,c2));
 	}
 
 	// assumes i1 and i2 are connected

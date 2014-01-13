@@ -84,16 +84,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-class LadderBath : public GeometryBase {
+template<typename InputType>
+class LadderBath : public GeometryBase<InputType> {
 
 	typedef std::pair<int,int> PairType;
-	typedef Ladder LadderType;
+	typedef Ladder<InputType> LadderType;
 
 public:
 
 	enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_BATH};
 
-	LadderBath(SizeType linSize)
+	LadderBath(SizeType linSize,InputType& io)
 	    : linSize_(linSize),ladder_(0)
 	{
 		io.readline(bathSitesPerSite_,"BathSitesPerSite=");
@@ -101,7 +102,7 @@ public:
 
         clusterSize_ = linSize_/(1+bathSitesPerSite_);
 
-		ladder_ = new LadderType(clusterSize_);
+		ladder_ = new LadderType(clusterSize_,io);
 	}
 
 	~LadderBath()
@@ -109,10 +110,22 @@ public:
 		if (ladder_) delete ladder_;
 	}
 
+	virtual SizeType dirs() const { return 3; }
+
+	virtual SizeType length(SizeType i) const
+	{
+		return this->unimplemented("length");
+	}
+
+	virtual SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	{
+		return this->unimplemented("translate");
+	}
+
 	SizeType getVectorSize(SizeType dirId) const
 	{
 		if (dirId==DIRECTION_BATH) return bathSitesPerSite_*clusterSize_;
-		return ladder_.getVectorSize(dirId);
+		return ladder_->getVectorSize(dirId);
 	}
 
 	bool connected(SizeType i1,SizeType i2) const
@@ -218,14 +231,14 @@ private:
 	bool connectedInCluster(SizeType i1,SizeType i2) const
 	{
 		ladderize(i1,i2);
-		return ladder_.connected(i1,i2);
+		return ladder_->connected(i1,i2);
 	}
 
 	// assumes i1 and i2 are connected and in the cluster
 	SizeType calcDirInCluster(SizeType i1,SizeType i2) const
 	{
 		ladderize(i1,i2);
-		return ladder_.calcDir(i1,i2);
+		return ladder_->calcDir(i1,i2);
 	}
 
 	// assumes i1 and i2 are in the cluster
@@ -235,14 +248,14 @@ private:
 		i -= firstClusterSite;
 		smax -= firstClusterSite;
 		emin -= firstClusterSite;
-		return ladder_.fringe(i,smax,emin);
+		return ladder_->fringe(i,smax,emin);
 	}
 
 	// assumes i1 and i2 are connected and in the cluster
 	SizeType handleInCluster(SizeType i1,SizeType i2) const
 	{
 		ladderize(i1,i2);
-		return ladder_.handle(i1,i2);
+		return ladder_->handle(i1,i2);
 	}
 
 	void ladderize(SizeType& i1,SizeType& i2) const

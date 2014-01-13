@@ -77,19 +77,24 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef CHAIN_H
 #define CHAIN_H
-#include "GeometryFactory.h"
+#include "GeometryBase.h"
 #include "String.h"
 
 namespace PsimagLite {
 
-class Chain : public GeometryBase {
+template<typename InputType>
+class Chain : public GeometryBase<InputType> {
 
 public:
 
 	enum { DIRECTION_X };
 
-	Chain(SizeType linSize) : linSize_(linSize)
+	Chain(SizeType linSize,InputType& io) : linSize_(linSize)
 	{}
+
+	virtual SizeType maxConnections() const { return 4; }
+
+	virtual SizeType dirs() const { return 2; }
 
 	SizeType handle(SizeType i,SizeType j) const
 	{
@@ -105,7 +110,7 @@ public:
 	bool connected(SizeType i1,SizeType i2) const
 	{
 		if (i1==i2) return false;
-		return GeometryUtils::neighbors(i1,i2);
+		return this->neighbors(i1,i2);
 	}
 
 	// assumes i1 and i2 are connected
