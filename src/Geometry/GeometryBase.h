@@ -155,6 +155,8 @@ public:
 		return 1;
 	}
 
+protected:
+
 	SizeType unimplemented(const String& str) const
 	{
 		PsimagLite::String str2 = "unimplemented " + str + "\n";

@@ -249,7 +249,7 @@ public:
 		additionalData.TYPE_C = TYPE_C;
 	}
 
-	SizeType matrixRank() const
+	SizeType matrixRank(SizeType linSize,SizeType maxEdof) const
 	{
 		SizeType sites = linSize_;
 		SizeType no = 0;
@@ -262,7 +262,7 @@ public:
 		return 2*no+nc;
 	}
 
-	int index(SizeType i,SizeType orb) const
+	int index(SizeType i,SizeType orb,SizeType edofTotal) const
 	{
 		SizeType type1 = findTypeOfSite(i).first;
 		if (type1==TYPE_C && orb>0) return -1;
