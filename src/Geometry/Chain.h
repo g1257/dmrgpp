@@ -90,7 +90,7 @@ public:
 	enum { DIRECTION_X };
 
 	Chain(SizeType linSize,InputType& io)
-		: linSize_(linSize),isPeriodic_(false)
+	    : linSize_(linSize),isPeriodic_(false)
 	{
 		try {
 			int x = 0;

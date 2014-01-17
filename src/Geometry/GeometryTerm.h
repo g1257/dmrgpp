@@ -100,6 +100,9 @@ class GeometryTerm {
 	typedef GeometryBase<InputType> GeometryBaseType;
 	typedef GeometryDirection<ComplexOrRealType,GeometryBaseType> GeometryDirectionType;
 
+	enum {NUMBERS = GeometryDirectionType::NUMBERS,
+		  MATRICES = GeometryDirectionType::MATRICES};
+
 public:
 
 	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
@@ -110,11 +113,10 @@ public:
 		int x;
 		io.readline(x,"DegreesOfFreedom=");
 		if (x<=0) throw RuntimeError("DegreesOfFreedom<=0 is an error\n");
-		//std::cerr<<"DegreesOfFreedom "<<x<<"\n";
-		SizeType edof = (x==1) ? GeometryDirectionType::NUMBERS : GeometryDirectionType::MATRICES;
+
+		SizeType edof = (x==1) ? NUMBERS : MATRICES;
 		String s;
 		io.readline(s,"GeometryKind=");
-		//std::cerr<<"GeometryKind "<<s<<"\n";
 
 		String gOptions;
 		io.readline(gOptions,"GeometryOptions=");
@@ -154,7 +156,10 @@ public:
 		if (geometryBase_) delete geometryBase_;
 	}
 
-	const ComplexOrRealType& operator()(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
+	const ComplexOrRealType& operator()(SizeType i1,
+	                                    SizeType edof1,
+	                                    SizeType i2,
+	                                    SizeType edof2) const
 	{
 		int k1 = geometryBase_->index(i1,edof1,maxEdof_);
 		int k2 = geometryBase_->index(i2,edof2,maxEdof_);
@@ -164,11 +169,11 @@ public:
 
 	//assumes 1<smax+1 < emin
 	const ComplexOrRealType& operator()(SizeType smax,
-	                           SizeType emin,
-	                           SizeType i1,
-	                           SizeType edof1,
-	                           SizeType i2,
-	                           SizeType edof2) const
+	                                    SizeType emin,
+	                                    SizeType i1,
+	                                    SizeType edof1,
+	                                    SizeType i2,
+	                                    SizeType edof2) const
 	{
 		bool bothFringe = (geometryBase_->fringe(i1,smax,emin) &&
 		                   geometryBase_->fringe(i2,smax,emin));
@@ -261,7 +266,8 @@ public:
 
 	template<typename ComplexOrRealType_,typename InputType_>
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const GeometryTerm<ComplexOrRealType_,InputType_>& gt);
+	                                const GeometryTerm<ComplexOrRealType_,
+	                                                   InputType_>& gt);
 
 private:
 
@@ -296,7 +302,10 @@ private:
 		}
 	}
 
-	ComplexOrRealType calcValue(SizeType i1,SizeType edof1,SizeType i2,SizeType edof2) const
+	ComplexOrRealType calcValue(SizeType i1,
+	                            SizeType edof1,
+	                            SizeType i2,
+	                            SizeType edof2) const
 	{
 		if (!geometryBase_->connected(i1,i2)) return 0.0;
 

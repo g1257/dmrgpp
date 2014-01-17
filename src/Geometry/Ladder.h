@@ -86,7 +86,9 @@ namespace PsimagLite {
 
 template<typename InputType>
 class Ladder : public GeometryBase<InputType> {
+
 public:
+
 	enum {DIRECTION_X,DIRECTION_Y};
 
 	Ladder(SizeType linSize,InputType& io)
@@ -107,7 +109,6 @@ public:
 			if (leg_>2) throw RuntimeError("LadderLeg>2 must have PeriodicY= line\n");
 		}
 
-
 		if (leg_ & 1)
 			throw RuntimeError("Ladder: leg must be even\n");
 
@@ -117,7 +118,6 @@ public:
 		if (linSize % leg_ !=0)
 			throw RuntimeError("Ladder: leg must divide number of sites\n");
 	}
-
 
 	virtual SizeType maxConnections() const { return 4; }
 

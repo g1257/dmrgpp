@@ -86,6 +86,7 @@ template<typename ComplexOrRealType,typename GeometryBaseType>
 class GeometryDirection {
 
 	typedef Matrix<ComplexOrRealType> MatrixType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
 public:
 
@@ -115,7 +116,10 @@ public:
 		}
 	}
 
-	ComplexOrRealType operator()(SizeType i,SizeType edof1,SizeType j,SizeType edof2) const
+	ComplexOrRealType operator()(SizeType i,
+	                             SizeType edof1,
+	                             SizeType j,
+	                             SizeType edof2) const
 	{
 		SizeType h = (constantValues()) ? 0 : geometryBase_->handle(i,j);
 
@@ -131,9 +135,10 @@ public:
 		assert(b ||  (dataMatrices_[h].n_row()>edof2 &&
 		              dataMatrices_[h].n_col()>edof1));
 
-		ComplexOrRealType tmp = (b) ? dataMatrices_[h](edof1,edof2) : dataMatrices_[h](edof2,edof1);
+		ComplexOrRealType tmp = (b) ?
+		            dataMatrices_[h](edof1,edof2) : dataMatrices_[h](edof2,edof1);
 		int signChange = geometryBase_->signChange(i,j);
-		return tmp * static_cast<typename PsimagLite::Real<ComplexOrRealType>::Type>(signChange);
+		return tmp * static_cast<RealType>(signChange);
 	}
 
 	SizeType nRow() const
@@ -158,7 +163,8 @@ public:
 
 	template<typename RealType_,typename GeometryBaseType_>
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const GeometryDirection<RealType_,GeometryBaseType_>& gd);
+	                                const GeometryDirection<RealType_,
+	                                                        GeometryBaseType_>& gd);
 
 private:
 

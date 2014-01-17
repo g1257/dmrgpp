@@ -92,15 +92,18 @@ class LadderBath : public GeometryBase<InputType> {
 
 public:
 
-	enum {DIRECTION_X=LadderType::DIRECTION_X,DIRECTION_Y=LadderType::DIRECTION_Y,DIRECTION_BATH};
+	enum {DIRECTION_X=LadderType::DIRECTION_X,
+		  DIRECTION_Y=LadderType::DIRECTION_Y,
+		  DIRECTION_BATH};
 
 	LadderBath(SizeType linSize,InputType& io)
 	    : linSize_(linSize),ladder_(0)
 	{
 		io.readline(bathSitesPerSite_,"BathSitesPerSite=");
-		if (bathSitesPerSite_ < 0) throw RuntimeError("BathSitesPerSite<0 is an error\n");
+		if (bathSitesPerSite_ < 0)
+			throw RuntimeError("BathSitesPerSite<0 is an error\n");
 
-        clusterSize_ = linSize_/(1+bathSitesPerSite_);
+		clusterSize_ = linSize_/(1+bathSitesPerSite_);
 
 		ladder_ = new LadderType(clusterSize_,io);
 	}
