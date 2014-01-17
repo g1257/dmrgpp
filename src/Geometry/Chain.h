@@ -89,8 +89,16 @@ public:
 
 	enum { DIRECTION_X };
 
-	Chain(SizeType linSize,InputType& io) : linSize_(linSize)
-	{}
+	Chain(SizeType linSize,InputType& io)
+		: linSize_(linSize),isPeriodic_(false)
+	{
+		try {
+			int x = 0;
+			io.readline(x,"IsPeriodicX=");
+			isPeriodic_ = (x > 0) ? true : false;
+			std::cout<<"periodic\n";
+		} catch (std::exception& e) {}
+	}
 
 	virtual SizeType maxConnections() const { return 1; }
 
@@ -110,7 +118,7 @@ public:
 	bool connected(SizeType i1,SizeType i2) const
 	{
 		if (i1==i2) return false;
-		return this->neighbors(i1,i2);
+		return this->neighbors(i1,i2,isPeriodic_,linSize_-1);
 	}
 
 	// assumes i1 and i2 are connected
@@ -158,6 +166,7 @@ public:
 private:
 
 	SizeType linSize_;
+	bool isPeriodic_;
 }; // class Ladder
 } // namespace PsimagLite 
 

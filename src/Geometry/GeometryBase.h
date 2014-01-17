@@ -99,7 +99,6 @@ class GeometryBase {
 		SizeType TYPE_C;
 	};
 
-
 public:
 
 	enum {TYPE_O,TYPE_C};
@@ -172,9 +171,6 @@ protected:
 		bool b2 = (imax-imin == period);
 		return (b || b2);
 	}
-
-private:
-
 }; // class GeometryBase
 } // namespace PsimagLite 
 

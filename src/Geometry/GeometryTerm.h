@@ -237,8 +237,9 @@ public:
 		return geometryBase_->translate(site,dir,amount);
 	}
 
-	void print(std::ostream& os,SizeType linSize) const
+	void print(std::ostream& os) const
 	{
+		SizeType linSize = linSize_;
 		SizeType dofs = 1;
 		for (SizeType dof1=0;dof1<dofs;dof1++) {
 			for (SizeType dof2=0;dof2<dofs;dof2++) {
@@ -321,6 +322,7 @@ std::ostream& operator<<(std::ostream& os,
 {
 	os<<"#GeometryDirections="<<gt.directions_.size()<<"\n";
 	for (SizeType i=0;i<gt.directions_.size();i++) os<<gt.directions_[i];
+	gt.print(os);
 	return os;
 }
 } // namespace PsimagLite
