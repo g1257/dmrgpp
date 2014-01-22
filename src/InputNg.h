@@ -630,7 +630,7 @@ public:
 			typedef typename Real<ComplexOrRealType>::Type RealType;
 
 			if (s[0]!='(') {
-				return stringToReal<RealType>(s.c_str());
+				return stringToReal(s.c_str());
 			}
 
 			std::string buffer("");
@@ -641,7 +641,7 @@ public:
 				buffer += s[i];
 			}
 
-			RealType r = stringToReal<RealType>(buffer);
+			RealType r = stringToReal(buffer);
 
 			start++;
 			buffer = "";
@@ -650,7 +650,7 @@ public:
 				buffer += s[i];
 			}
 
-			RealType img = stringToReal<RealType>(buffer);
+			RealType img = stringToReal(buffer);
 
 			return ComplexOrRealType(r,img);
 		}
@@ -660,11 +660,10 @@ public:
 		typename Real<ComplexOrRealType>::Type>::Type
 		stringToComplexOrReal(const PsimagLite::String& s) const
 		{
-			return stringToReal<typename Real<ComplexOrRealType>::Type>(s);
+			return static_cast<typename Real<ComplexOrRealType>::Type>(stringToReal(s));
 		}
 
-		template<typename RealType>
-		RealType stringToReal(const PsimagLite::String& s) const
+		double stringToReal(const PsimagLite::String& s) const
 		{
 			for (SizeType i = 0; i < s.length(); ++i) {
 				char c = s[i];
