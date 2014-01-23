@@ -92,7 +92,7 @@ public:
 	SampleCRSMatrix(SizeType rank) : rank_(rank),rowptr_(rank+1)
 	{}
 
-	SampleCRSMatrix(SizeType rank,T seed,SizeType nonZeros,T maxValue)
+	SampleCRSMatrix(SizeType rank,SizeType seed,SizeType nonZeros,T maxValue)
 	    : rank_(rank),rowptr_(rank+1)
 	{
 		srand48(seed);
