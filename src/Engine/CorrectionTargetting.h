@@ -118,12 +118,13 @@ public:
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef CorrectionParams<ModelType> TargettingParamsType;
-	typedef CommonTargetting<ModelType,
-	                         TargettingParamsType,
-	                         WaveFunctionTransfType,
+	typedef TargetHelper<ModelType,
+	                     TargettingParamsType,
+	                     WaveFunctionTransfType,
+	                     int> TargetHelperType;
+	typedef CommonTargetting<TargetHelperType,
 	                         VectorWithOffsetType,
 	                         LanczosSolverType> CommonTargettingType;
-	typedef typename CommonTargettingType::ApplyOperatorType ApplyOperatorType;
 
 	enum {DISABLED,ENABLED};
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -142,8 +143,7 @@ public:
 	      progress_("CorrectionTargetting"),
 	      stage_(DISABLED),
 	      targetVectors_(1),
-	      applyOpLocal_(lrs),
-	      commonTargetting_(lrs,model,correctionStruct,wft,psi_)
+	      commonTargetting_(lrs,model,correctionStruct,wft)
 	{}
 
 	const ModelType& model() const { return model_; }
@@ -283,10 +283,6 @@ private:
 	const TargettingParamsType& correctionStruct_;
 	const WaveFunctionTransfType& waveFunctionTransformation_;
 	PsimagLite::ProgressIndicator progress_;
-	SizeType stage_;
-	VectorWithOffsetType psi_;
-	typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
-	ApplyOperatorType applyOpLocal_;
 	CommonTargettingType commonTargetting_;
 };     //class CorrectionTargetting
 

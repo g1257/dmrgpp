@@ -75,7 +75,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "ApplyOperatorLocal.h"
 #include "TimeSerializer.h"
 #include "TimeStepParams.h"
 #include "ProgramGlobals.h"
@@ -122,7 +121,6 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			typedef TimeStepParams<ModelType> TargettingParamsType;
 			typedef typename BasisType::BlockType BlockType;
 			typedef BlockMatrix<ComplexMatrixType> ComplexBlockMatrixType;
-			typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 			typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 			typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 			typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
@@ -134,9 +132,15 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 										  LanczosSolverType,VectorWithOffsetType> TimeVectorsRungeKuttaType;
 			typedef TimeVectorsSuzukiTrotter<TargettingParamsType,ModelType,WaveFunctionTransfType,
 											 LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
-			typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
-		        CommonTargettingType;
-			typedef typename CommonTargettingType::VectorStringType VectorStringType;
+		typedef TargetHelper<ModelType,
+		                     TargettingParamsType,
+		                     WaveFunctionTransfType,
+		                     TimeVectorsBaseType> TargetHelperType;
+		typedef CommonTargetting<TargetHelperType,
+		                         VectorWithOffsetType,
+		                         LanczosSolverType> CommonTargettingType;
+		typedef typename CommonTargettingType::VectorStringType VectorStringType;
+		typedef typename CommonTargettingType::VectorVectorWithOffsetType VectorVectorWithOffsetType;
 
 			enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
@@ -157,12 +161,9 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			  tstStruct_(tstStruct),
 			  wft_(wft),
 			  progress_("TimeStepTargetting"),
-			  currentTime_(0),
 			  times_(tstStruct_.timeSteps),
 			  weight_(tstStruct_.timeSteps),
-			  targetVectors_(tstStruct_.timeSteps),
-			  commonTargetting_(lrs,model,tstStruct,wft,psi_),
-			  applyOpLocal_(lrs),
+			  commonTargetting_(lrs,model,tstStruct,wft,timeVectorsBase_),
 			  timeVectorsBase_(0)
 			{
 				if (!wft.isEnabled()) throw PsimagLite::RuntimeError
@@ -197,20 +198,22 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				PsimagLite::String s (__FILE__);
 				s += " Unknown algorithm\n";
 
-				RealType E0 = commonTargetting_.energy();
+				const RealType& E0 = commonTargetting_.energy();
+				const RealType& currentTime = commonTargetting_.currentTime();
 				const VectorSizeType& nonZeroQns = commonTargetting_.nonZeroQns();
+				const VectorVectorWithOffsetType& targetVectors = commonTargetting_.targetVectors();
 				switch (tstStruct_.algorithm) {
 				case TargettingParamsType::KRYLOV:
 					timeVectorsBase_ = new TimeVectorsKrylovType(
-								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0);
+								currentTime,tstStruct_,times_,targetVectors,model_,wft_,lrs_,E0);
 					break;
 				case TargettingParamsType::RUNGE_KUTTA:
 					timeVectorsBase_ = new TimeVectorsRungeKuttaType(
-								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0);
+								currentTime,tstStruct_,times_,targetVectors,model_,wft_,lrs_,E0);
 					break;
 				case TargettingParamsType::SUZUKI_TROTTER:
 					timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(
-								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0,&nonZeroQns);
+								currentTime,tstStruct_,times_,targetVectors,model_,wft_,lrs_,E0,&nonZeroQns);
 					break;
 				default:
 					throw PsimagLite::RuntimeError(s.c_str());
@@ -239,22 +242,22 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			RealType normSquared(SizeType i) const
 			{
-				return commonTargetting_.normSquared(targetVectors_[i]);
+				return commonTargetting_.normSquared(i);
 			}
 
 			template<typename SomeBasisType>
 			void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 				   const SomeBasisType& someBasis)
 			{
-				psi_.set(v,someBasis);
-				assert(psi_.size()==lrs_.super().size());
+				commonTargetting_.psi().set(v,someBasis);
+				assert(commonTargetting_.psi().size()==lrs_.super().size());
 			}
 
-			const ComplexType& operator[](SizeType i) const { return psi_[i]; }
+			const ComplexType& operator[](SizeType i) const { return commonTargetting_.psi()[i]; }
 
-			ComplexType& operator[](SizeType i) { return psi_[i]; }
+			ComplexType& operator[](SizeType i) { return commonTargetting_.psi()[i]; }
 
-			const VectorWithOffsetType& gs() const { return psi_; }
+			const VectorWithOffsetType& gs() const { return commonTargetting_.psi(); }
 
 			bool includeGroundStage() const
 			{
@@ -318,7 +321,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				for (SizeType i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
 				currentTime_ = ts.time();
 
-				psi_.load(io,"PSI");
+				commonTargetting_.psi().load(io,"PSI");
 			}
 
 			void print(std::ostream& os) const
@@ -332,7 +335,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			void initialGuess(VectorWithOffsetType& v,const VectorSizeType& block) const
 			{
-				commonTargetting_.initialGuess(v,wft_,block,psi_);
+				commonTargetting_.initialGuess(v,block);
 			}
 
 			template<typename IoOutputType>
@@ -347,7 +350,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 				TimeSerializerType ts(currentTime_,block[0],targetVectors_,marker);
 				ts.save(io);
-				psi_.save(io,"PSI");
+				commonTargetting_.psi().save(io,"PSI");
 			}
 
 			void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
@@ -381,7 +384,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				progress_.printline(msg,std::cout);
 
 				PsimagLite::OstringStream msg2;
-				msg2<<"gsNorm="<<std::norm(psi_)<<" norms= ";
+				msg2<<"gsNorm="<<std::norm(commonTargetting_.psi())<<" norms= ";
 				for (SizeType i = 0; i < weight_.size(); i++)
 					msg2<<normSquared(i)<<" ";
 				progress_.printline(msg2,std::cout);
@@ -593,19 +596,14 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 			}
 
-			VectorWithOffsetType psi_;
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
 			const TargettingParamsType& tstStruct_;
 			const WaveFunctionTransfType& wft_;
 			PsimagLite::ProgressIndicator progress_;
-			RealType currentTime_;
 			typename PsimagLite::Vector<RealType>::Type times_,weight_;
-			typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 			CommonTargettingType commonTargetting_;
 			RealType gsWeight_;
-			//typename IoType::Out io_;
-			ApplyOperatorType applyOpLocal_;
 			TimeVectorsBaseType* timeVectorsBase_;
 	};     //class TimeStepTargetting
 

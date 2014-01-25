@@ -120,11 +120,13 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef VectorType TargetVectorType;
 	typedef GroundStateParams<ModelType> TargettingParamsType;
-	typedef CommonTargetting<ModelType,
-	TargettingParamsType,
-	WaveFunctionTransfType,
-	VectorWithOffsetType,
-	LanczosSolverType> CommonTargettingType;
+	typedef TargetHelper<ModelType,
+	                     TargettingParamsType,
+	                     WaveFunctionTransfType,
+	                     int> TargetHelperType;
+	typedef CommonTargetting<TargetHelperType,
+	                         VectorWithOffsetType,
+	                         LanczosSolverType> CommonTargettingType;
 	typedef typename CommonTargettingType::ApplyOperatorType ApplyOperatorType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -140,7 +142,7 @@ public:
 	      model_(model),
 	      waveFunctionTransformation_(wft),
 	      progress_("GroundStateTargetting"),
-	      commonTargetting_(lrs,model,tstStruct,wft,psi_)
+	      commonTargetting_(lrs,model,tstStruct,wft)
 	{
 	}
 
@@ -166,12 +168,12 @@ public:
 	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<SizeType>::Type& weights,
 	           const SomeBasisType& someBasis)
 	{
-		psi_.set(v,someBasis);
+		commonTargetting_.psi().set(v,someBasis);
 	}
 
 	const VectorWithOffsetType& gs() const
 	{
-		return psi_;
+		return commonTargetting_.psi();
 	}
 
 	bool includeGroundStage() const {return true; }
@@ -201,7 +203,7 @@ public:
 
 		try {
 			assert(block1.size()>0);
-			commonTargetting_.cocoon(direction,block1[0],psi_,"PSI",0);
+			commonTargetting_.cocoon(direction,block1[0],"PSI",0);
 		} catch (std::exception& e) {
 			commonTargetting_.noCocoon("unsupported by the model");
 		}
@@ -215,10 +217,7 @@ public:
 	void initialGuess(VectorWithOffsetType& initialVector,
 	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
-		commonTargetting_.initialGuess(initialVector,
-		                               waveFunctionTransformation_,
-		                               block,
-		                               psi_);
+		commonTargetting_.initialGuess(initialVector,block);
 	}
 
 	template<typename IoOutputType>
@@ -231,7 +230,7 @@ public:
 		assert(block.size()>0);
 		PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(s);
-		psi_.save(io,"PSI");
+		commonTargetting_.psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)
@@ -241,7 +240,7 @@ public:
 		io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
 		if (site<0) throw PsimagLite::RuntimeError(
 		            "GST::load(...): site cannot be negative\n");
-		psi_.load(io,"PSI");
+		commonTargetting_.psi().load(io,"PSI");
 	}
 
 	RealType time() const { return 0; }
@@ -258,7 +257,6 @@ private:
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& waveFunctionTransformation_;
-	VectorWithOffsetType psi_;
 	PsimagLite::ProgressIndicator progress_;
 	CommonTargettingType commonTargetting_;
 

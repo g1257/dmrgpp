@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "ApplyOperatorLocal.h"
 #include "CorrectionVectorParams.h"
 #include "VectorWithOffsets.h"
 #include "CorrectionVectorFunction.h"
@@ -123,7 +122,6 @@ public:
 	                              MatrixVectorType,
 	                              VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
-	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
@@ -134,9 +132,11 @@ public:
 	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,
 	                                 TargettingParamsType> CorrectionVectorFunctionType;
-	typedef CommonTargetting<ModelType,
-	                         TargettingParamsType,
-	                         WaveFunctionTransfType,
+	typedef TargetHelper<ModelType,
+	                     TargettingParamsType,
+	                     WaveFunctionTransfType,
+	                     int> TargetHelperType;
+	typedef CommonTargetting<TargetHelperType,
 	                         VectorWithOffsetType,
 	                         LanczosSolverType> CommonTargettingType;
 
@@ -159,10 +159,9 @@ public:
 	      tstStruct_(tstStruct),
 	      wft_(wft),
 	      progress_("CorrectionVectorTargetting"),
-	      applyOpLocal_(lrs),
 	      gsWeight_(1.0),
 	      targetVectors_(4),
-	      commonTargetting_(lrs,model,tstStruct,wft,psi_),
+	      commonTargetting_(lrs,model,tstStruct,wft),
 	      correctionEnabled_(false)
 	{
 		if (!wft.isEnabled())
@@ -369,22 +368,6 @@ private:
 		xr /= tstStruct_.eta;
 	}
 
-	void guessPhiSectors(VectorWithOffsetType& phi,SizeType i,SizeType systemOrEnviron)
-	{
-		FermionSign fs(lrs_.left(),tstStruct_.electrons);
-		if (allStages(CONVERGING)) {
-			VectorWithOffsetType tmpVector = psi_;
-			for (SizeType j=0;j<tstStruct_.aOperators.size();j++) {
-				applyOpLocal_(phi,tmpVector,tstStruct_.aOperators[j],fs,
-				              systemOrEnviron);
-				tmpVector = phi;
-			}
-			return;
-		}
-		applyOpLocal_(phi,psi_,tstStruct_.aOperators[i],fs,
-		              systemOrEnviron);
-	}
-
 	void setWeights()
 	{
 		gsWeight_ = commonTargetting_.setGsWeight(0.5);
@@ -423,21 +406,17 @@ private:
 		gsWeight_ = 1.0-weight_[0];
 	}
 
-	VectorWithOffsetType psi_;
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
 	const TargettingParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
-	ApplyOperatorType applyOpLocal_;
 	RealType gsWeight_;
-	typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 	CommonTargettingType commonTargetting_;
 	bool correctionEnabled_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
-	RealType Eg_;
 	RealType weightForContinuedFraction_;
 
 }; // class CorrectionVectorTargetting

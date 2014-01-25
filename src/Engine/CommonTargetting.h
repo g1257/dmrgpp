@@ -88,23 +88,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ContinuedFraction.h"
 #include <cassert>
 #include "ApplyOperatorExpression.h"
+#include "TargetHelper.h"
 
 namespace Dmrg {
 
-template<typename ModelType,
-         typename TargettingParamsType,
-         typename WaveFunctionTransfType,
+template<typename TargetHelperType,
          typename VectorWithOffsetType,
          typename LanczosSolverType>
 class CommonTargetting  {
 
 public:
 
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType
-	LeftRightSuperType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
+	typedef typename TargetHelperType::RealType RealType;
+	typedef typename TargetHelperType::ModelType ModelType;
+	typedef typename TargetHelperType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
@@ -118,13 +116,15 @@ public:
 	typedef typename BasisType::BlockType BlockType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef ApplyOperatorExpression<ModelType,
-	                                TargettingParamsType,
-	                                WaveFunctionTransfType,
+	typedef ApplyOperatorExpression<TargetHelperType,
 	                                VectorWithOffsetType> ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::VectorSizeType VectorSizeType;
 	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
+	typedef typename TargetHelperType::WaveFunctionTransfType WaveFunctionTransfType;
+	typedef typename TargetHelperType::TimeVectorsBaseType TimeVectorsBaseType;
+	typedef typename TargetHelperType::TargettingParamsType TargettingParamsType;
+	typedef typename ApplyOperatorExpressionType::VectorVectorWithOffsetType VectorVectorWithOffsetType;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
@@ -136,14 +136,12 @@ public:
 
 	CommonTargetting(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
-	                 const TargettingParamsType& tstStruct,
-	                 const WaveFunctionTransfType& wft,
-	                 const VectorWithOffsetType& psi)
-	    : lrs_(lrs),
-	      model_(model),
-	      tstStruct_(tstStruct),
-	      progress_("CommonTargetting"),
-	      applyOpExpression_(lrs,model,tstStruct,wft,psi)
+                     const TargettingParamsType& tstStruct,
+                     const WaveFunctionTransfType& wft,
+	                 const TimeVectorsBaseType* timeVectorsBase = 0)
+	    : progress_("CommonTargetting"),
+	      targetHelper_(lrs,model,tstStruct,wft,timeVectorsBase),
+	      applyOpExpression_(targetHelper_)
 	{}
 
 	SizeType getPhi(VectorWithOffsetType& phiNew,
@@ -155,8 +153,19 @@ public:
 		return applyOpExpression_.getPhi(phiNew,Eg,direction,site,loopNumber);
 	}
 
-	RealType normSquared(const VectorWithOffsetType& v) const
+	VectorWithOffsetType& psi() // <--- FIXME
 	{
+		return applyOpExpression_.psi();
+	}
+
+	const VectorWithOffsetType& psi() const
+	{
+		return applyOpExpression_.psi();
+	}
+
+	RealType normSquared(SizeType i) const
+	{
+		const VectorWithOffsetType& v = applyOpExpression_.targetVectors()[i];
 		// call to mult will conjugate one of the vector
 		return std::real(multiply(v,v));
 	}
@@ -198,12 +207,20 @@ public:
 	}
 
 	void initialGuess(VectorWithOffsetType& v,
-	                  const WaveFunctionTransfType& wft,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block,
-	                  const VectorWithOffsetType& psi,
-	                  const typename PsimagLite::Vector<RealType>::Type& weights,
-	                  const typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors) const
+	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
+		const VectorVectorWithOffsetType& targetVectors = applyOpExpression_.targetVectors();
+		typename PsimagLite::Vector<RealType>::Type weights(targetVectors.size(),1.0);
+		initialGuess(v,block,weights);
+	}
+
+	void initialGuess(VectorWithOffsetType& v,
+	                  const typename PsimagLite::Vector<SizeType>::Type& block,
+	                  const typename PsimagLite::Vector<RealType>::Type& weights) const
+	{
+		const VectorWithOffsetType& psi = applyOpExpression_.psi();
+		const WaveFunctionTransfType& wft = targetHelper_.wft();
+		const VectorVectorWithOffsetType& targetVectors = applyOpExpression_.targetVectors();
 		initialGuess(v,wft,block,psi);
 		if (!allStages(WFT_NOADVANCE)) return;
 
@@ -220,8 +237,7 @@ public:
 
 	void initialGuess(VectorWithOffsetType& v,
 	                  const WaveFunctionTransfType& wft,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block,
-	                  const VectorWithOffsetType& psi) const
+	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
 		PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
@@ -238,10 +254,10 @@ public:
 	// in situ computation:
 	void cocoon(SizeType direction,
 	            SizeType site,
-	            const VectorWithOffsetType& psi,
 	            const PsimagLite::String& label,
 	            const RealType& currentTime) const
 	{
+		const VectorWithOffsetType& psi = applyOpExpression_.psi();
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
 		cocoon_(direction,site,psi,label,ApplyOperatorType::BORDER_NO,currentTime);
@@ -266,9 +282,9 @@ public:
 		BasisDataType q;
 
 		RealType time = 0;
-		model_.setNaturalBasis(creationMatrix,hmatrix,q,block1,time);
+		targetHelper_.model().setNaturalBasis(creationMatrix,hmatrix,q,block1,time);
 
-		FermionSign fs(lrs_.left(),q.electrons);
+		FermionSign fs(targetHelper_.lrs().left(),q.electrons);
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
 			applyOpExpression_.applyOpLocal()(phiTemp,psi,creationMatrix[j],
@@ -282,20 +298,20 @@ public:
 	           const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
 		for (SizeType i=0;i<block.size();i++)
-			nk.push_back(model_.hilbertSize(block[i]));
+			nk.push_back(targetHelper_.model().hilbertSize(block[i]));
 	}
 
 	RealType setGsWeight(RealType defaultValue) const
 	{
-		if (!model_.params().gsWeight.first)
+		if (!targetHelper_.model().params().gsWeight.first)
 			return 	defaultValue;
 
-		return model_.params().gsWeight.second;
+		return targetHelper_.model().params().gsWeight.second;
 	}
 
 	int findFermionSignOfTheOperators() const
 	{
-		const VectorOperatorType& myoperator = tstStruct_.aOperators;
+		const VectorOperatorType& myoperator = targetHelper_.tstStruct().aOperators;
 		int f = 0;
 
 		for (SizeType i = 0; i < myoperator.size(); ++i) {
@@ -325,14 +341,24 @@ public:
 		applyOpExpression_.setAllStagesTo(x);
 	}
 
-	RealType energy() const
+	const RealType& energy() const
 	{
 		return applyOpExpression_.energy();
+	}
+
+	const RealType& currentTime() const
+	{
+		return applyOpExpression_.currentTime();
 	}
 
 	const VectorSizeType& nonZeroQns() const
 	{
 		 return applyOpExpression_.nonZeroQns();
+	}
+
+	const VectorVectorWithOffsetType& targetVectors() const
+	{
+		return applyOpExpression_.targetVectors();
 	}
 
 private:
@@ -342,20 +368,20 @@ private:
 	                      const VectorWithOffsetType& psi,
 	                      const PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		bool noguess = (model_.params().options.find("targetnoguess") !=
+		bool noguess = (targetHelper_.model().params().options.find("targetnoguess") !=
 		        PsimagLite::String::npos);
 
 		if (noguess)
 			wft.createRandomVector(v);
 		else
-			wft.setInitialVector(v,psi,lrs_,nk);
+			wft.setInitialVector(v,psi,targetHelper_.lrs(),nk);
 	}
 
 	int findBorderSiteFrom(SizeType site, SizeType direction) const
 	{
 		if (site == 1 && direction == EXPAND_ENVIRON) return 0;
 
-		SizeType n = model_.geometry().numberOfSites();
+		SizeType n = targetHelper_.model().geometry().numberOfSites();
 		if (site == n - 2 && direction == EXPAND_SYSTEM) return n - 1;
 
 		return -1;
@@ -381,7 +407,7 @@ private:
 	VectorStringType getOperatorLabels() const
 	{
 		VectorStringType vecStr;
-		PsimagLite::tokenizer(model_.params().insitu,vecStr,",");
+		PsimagLite::tokenizer(targetHelper_.model().params().insitu,vecStr,",");
 		return vecStr;
 	}
 
@@ -402,7 +428,7 @@ private:
 				throw e;
 			}
 
-			PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator(opLabel,site,0));
+			PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(targetHelper_.model().naturalOperator(opLabel,site,0));
 			nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
 		}
 
@@ -419,8 +445,8 @@ private:
 	          const RealType& currentTime) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type electrons;
-		model_.findElectronsOfOneSite(electrons,site);
-		FermionSign fs(lrs_.left(),electrons);
+		targetHelper_.model().findElectronsOfOneSite(electrons,site);
+		FermionSign fs(targetHelper_.lrs().left(),electrons);
 		VectorWithOffsetType dest;
 		applyOpExpression_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
 
@@ -452,28 +478,21 @@ private:
 
 		PsimagLite::IoSimple::In io(label);
 
-		CookedOperator<ModelType> cookedOperator(model_);
+		CookedOperator<ModelType> cookedOperator(targetHelper_.model());
 
 		return OperatorType(io,cookedOperator,OperatorType::MUST_BE_NONZERO);
 	}
 
-	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
-	const TargettingParamsType& tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
+	TargetHelperType targetHelper_;
 	ApplyOperatorExpressionType applyOpExpression_;
 }; // class CommonTargetting
 
-template<typename ModelType,
-         typename TargettingParamsType,
-         typename WaveFunctionTransfType,
+template<typename TargetHelperType,
          typename VectorWithOffsetType,
-         typename LanczosSolverType
-         >
+         typename LanczosSolverType>
 std::ostream& operator<<(std::ostream& os,
-                         const CommonTargetting<ModelType,
-                                                TargettingParamsType,
-                                                WaveFunctionTransfType,
+                         const CommonTargetting<TargetHelperType,
                                                 VectorWithOffsetType,
                                                 LanczosSolverType>& tst)
 {

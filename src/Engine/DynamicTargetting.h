@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "ApplyOperatorLocal.h"
 #include "ParametersForSolver.h"
 #include "DynamicDmrgParams.h"
 #include "VectorWithOffsets.h"
@@ -125,7 +124,6 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
-	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
@@ -136,9 +134,11 @@ public:
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef CommonTargetting<ModelType,
-	                         TargettingParamsType,
-	                         WaveFunctionTransfType,
+	typedef TargetHelper<ModelType,
+	                     TargettingParamsType,
+	                     WaveFunctionTransfType,
+	                     int> TargetHelperType;
+	typedef CommonTargetting<TargetHelperType,
 	                         VectorWithOffsetType,
 	                         LanczosSolverType> CommonTargettingType;
 
@@ -162,9 +162,8 @@ public:
 	      tstStruct_(tstStruct),
 	      wft_(wft),
 	      progress_("DynamicTargetting"),
-	      applyOpLocal_(lrs),
 	      gsWeight_(1.0),
-	      commonTargetting_(lrs,model,tstStruct,wft,psi_),
+	      commonTargetting_(lrs,model,tstStruct,wft),
 	      weightForContinuedFraction_(0)
 	{
 		if (!wft.isEnabled())
@@ -428,21 +427,17 @@ private:
 		return sum;
 	}
 
-	VectorWithOffsetType psi_;
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
 	const TargettingParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
-	ApplyOperatorType applyOpLocal_;
 	RealType gsWeight_;
-	typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 	CommonTargettingType commonTargetting_;
 	ParametersForSolverType paramsForSolver_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
-	RealType Eg_;
 	RealType weightForContinuedFraction_;
 }; // class DynamicTargetting
 

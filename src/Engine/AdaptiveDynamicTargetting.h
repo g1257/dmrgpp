@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "ApplyOperatorLocal.h"
 #include "DynamicSerializer.h"
 #include "AdaptiveDynamicParams.h"
 #include "VectorWithOffsets.h"
@@ -118,15 +117,19 @@ public:
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,MatrixVectorType,VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
-	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
-	CommonTargettingType;
+	typedef TargetHelper<ModelType,
+	                     TargettingParamsType,
+	                     WaveFunctionTransfType,
+	                     int> TargetHelperType;
+	typedef CommonTargetting<TargetHelperType,
+	                         VectorWithOffsetType,
+	                         LanczosSolverType> CommonTargettingType;
 
 	enum {DISABLED=CommonTargettingType::DISABLED,
 		  OPERATOR=CommonTargettingType::OPERATOR,
@@ -148,10 +151,9 @@ public:
 	      lastLanczosVector_(0),
 	      dynCounter_(0),
 	      progress_("AdaptiveDynamicTargetting"),
-	      applyOpLocal_(lrs),
 	      gsWeight_(1.0),
 	      targetVectors_(2),
-	      commonTargetting_(lrs,model,tstStruct,wft,psi_),
+	      commonTargetting_(lrs,model,tstStruct,wft),
 	      done_(false),
 	      weightForContinuedFraction_(0)
 	{
@@ -444,7 +446,6 @@ private:
 		v /= x;
 	}
 
-	VectorWithOffsetType psi_;
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
 	const TargettingParamsType& tstStruct_;
@@ -452,9 +453,7 @@ private:
 	SizeType lastLanczosVector_;
 	SizeType dynCounter_;
 	PsimagLite::ProgressIndicator progress_;
-	ApplyOperatorType applyOpLocal_;
 	RealType gsWeight_;
-	typename PsimagLite::Vector<VectorWithOffsetType>::Type targetVectors_;
 	CommonTargettingType commonTargetting_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	bool done_;
