@@ -152,8 +152,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			                   const TargettingParamsType& tstStruct,
 			                   const WaveFunctionTransfType& wft,
 			                   const SizeType& quantumSector) // quantumSector is ignored here
-			: stage_(tstStruct.sites.size(),DISABLED),
-			  lrs_(lrs),
+			: lrs_(lrs),
 			  model_(model),
 			  tstStruct_(tstStruct),
 			  wft_(wft),
@@ -162,9 +161,8 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			  times_(tstStruct_.timeSteps),
 			  weight_(tstStruct_.timeSteps),
 			  targetVectors_(tstStruct_.timeSteps),
-			  commonTargetting_(lrs,model,tstStruct),
+			  commonTargetting_(lrs,model,tstStruct,wft,psi_),
 			  applyOpLocal_(lrs),
-			  E0_(0),
 			  timeVectorsBase_(0)
 			{
 				if (!wft.isEnabled()) throw PsimagLite::RuntimeError
@@ -198,18 +196,21 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 				PsimagLite::String s (__FILE__);
 				s += " Unknown algorithm\n";
+
+				RealType E0 = commonTargetting_.energy();
+				const VectorSizeType& nonZeroQns = commonTargetting_.nonZeroQns();
 				switch (tstStruct_.algorithm) {
 				case TargettingParamsType::KRYLOV:
 					timeVectorsBase_ = new TimeVectorsKrylovType(
-								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0_);
+								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0);
 					break;
 				case TargettingParamsType::RUNGE_KUTTA:
 					timeVectorsBase_ = new TimeVectorsRungeKuttaType(
-								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0_);
+								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0);
 					break;
 				case TargettingParamsType::SUZUKI_TROTTER:
 					timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(
-								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0_,&nonZeroQns_);
+								currentTime_,tstStruct_,times_,targetVectors_,model_,wft_,lrs_,E0,&nonZeroQns);
 					break;
 				default:
 					throw PsimagLite::RuntimeError(s.c_str());
@@ -226,13 +227,13 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			RealType weight(SizeType i) const
 			{
-				assert(!commonTargetting_.allStages(DISABLED,stage_));
+				assert(!commonTargetting_.allStages(DISABLED));
 				return weight_[i];
 			}
 
 			RealType gsWeight() const
 			{
-				if (commonTargetting_.allStages(DISABLED,stage_)) return 1.0;
+				if (commonTargetting_.allStages(DISABLED)) return 1.0;
 				return gsWeight_;
 			}
 
@@ -257,7 +258,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			bool includeGroundStage() const
 			{
-				if (!commonTargetting_.noStageIs(DISABLED,stage_)) return true;
+				if (!commonTargetting_.noStageIs(DISABLED)) return true;
 				bool b = (fabs(gsWeight_)>1e-6);
 
 //				std::cerr<<"includeGroundState="<<b<<"\n";
@@ -268,7 +269,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			SizeType size() const
 			{
-				if (commonTargetting_.allStages(DISABLED,stage_)) return 0;
+				if (commonTargetting_.allStages(DISABLED)) return 0;
 				return targetVectors_.size();
 			}
 
@@ -288,42 +289,12 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			            const BlockType& block2,
 			            SizeType loopNumber)
 			{
-
-				VectorWithOffsetType phiOld = psi_;
 				VectorWithOffsetType phiNew;
-				VectorWithOffsetType vectorSum;
-				SizeType max = tstStruct_.sites.size();
-
-				if (commonTargetting_.noStageIs(DISABLED,stage_)) {
-					max = 1;
-					for (SizeType i=0;i<stage_.size();i++) {
-						if (stage_[i]==OPERATOR) stage_[i] = WFT_NOADVANCE;
-						if (stage_[i]==WFT_ADVANCE) stage_[i] = WFT_NOADVANCE;
-					}
-				}
-
-				// Loop over each operator that needs to be applied 
-				// in turn to the g.s.
-
-				for (SizeType i=0;i<max;i++) {
-					bool wasAnOperatorApplied = false;
-					if (!evolve(i,phiNew,phiOld,Eg,direction,block1,loopNumber,max-1,wasAnOperatorApplied)) {
-						continue;
-					}
-					if (tstStruct_.concatenation==PRODUCT) {
-						phiOld = phiNew;
-					} else {
-						if (wasAnOperatorApplied) vectorSum += phiNew;
-						else vectorSum = phiNew;
-					}
-				}
-
-				//std::cerr<<"site="<<block1[0]<<" COUNT="<<count<<"\n";
-				if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
+				commonTargetting_.getPhi(phiNew,Eg,direction,block1[0],loopNumber);
 
 				typename TimeVectorsBaseType::PairType startEnd(0,times_.size());
-				bool allOperatorsApplied = (commonTargetting_.noStageIs(DISABLED,stage_) &&
-				                            commonTargetting_.noStageIs(OPERATOR,stage_));
+				bool allOperatorsApplied = (commonTargetting_.noStageIs(DISABLED) &&
+				                            commonTargetting_.noStageIs(OPERATOR));
 
 				timeVectorsBase_->calcTimeVectors(startEnd,
 				                                  Eg,
@@ -339,7 +310,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			void load(const PsimagLite::String& f)
 			{
-				for (SizeType i=0;i<stage_.size();i++) stage_[i] = WFT_NOADVANCE;
+				commonTargetting_.setAllStagesTo(WFT_NOADVANCE);
 
 				typename IoType::In io(f);
 
@@ -359,74 +330,6 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				os<<"TSTWeightGroundState="<<gsWeight_<<"\n";
 			}
 
-			bool evolve(SizeType i,
-				    VectorWithOffsetType& phiNew,
-				    const VectorWithOffsetType& phiOld,
-				    RealType Eg,
-				    SizeType direction,
-				    const BlockType& block,
-				    SizeType loopNumber,
-				    SizeType lastI,
-				    bool& wasAnOperatorApplied)
-			{
-				static SizeType  timesWithoutAdvancement=0;
-				static bool firstSeeLeftCorner = false;
-				wasAnOperatorApplied = false;
-
-				if (direction==INFINITE) {
-					E0_ = Eg;
-					return false;
-				}
-				if (tstStruct_.startingLoops.size()>0 && tstStruct_.startingLoops[i]>loopNumber)
-					return false;
-
-				assert(block.size()==1);
-				SizeType site = block[0];
-
-				if (site != tstStruct_.sites[i] && stage_[i]==DISABLED)
-					return false;
-
-				if (site != tstStruct_.sites[i] && stage_[i]!=DISABLED && i>0)
-					return false;
-
-				if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) {
-					stage_[i]=OPERATOR;
-					wasAnOperatorApplied=true;
-				} else {
-					stage_[i]=WFT_NOADVANCE;
-				}
-				if (stage_[i] == OPERATOR) commonTargetting_.checkOrder(i,stage_);
-
-				if (timesWithoutAdvancement >= tstStruct_.advanceEach) {
-					stage_[i] = WFT_ADVANCE;
-					if (i==lastI) {
-						currentTime_ += tstStruct_.tau;
-						timesWithoutAdvancement=1;
-					}
-				} else {
-					if (i==lastI && stage_[i]==WFT_NOADVANCE && firstSeeLeftCorner)
-						timesWithoutAdvancement++;
-				}
-
-				if (!firstSeeLeftCorner && i==lastI && stage_[i]==WFT_NOADVANCE && site==1)
-					firstSeeLeftCorner=true;
-
-				PsimagLite::OstringStream msg2;
-				msg2<<"Steps without advance: "<<timesWithoutAdvancement<<" site="<<site<<" currenTime="<<currentTime_;
-				if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
-				
-				PsimagLite::OstringStream msg;
-				msg<<"Evolving, stage="<<commonTargetting_.getStage(i,stage_);
-				msg<<" site="<<site<<" loopNumber="<<loopNumber;
-				msg<<" Eg="<<Eg;
-				progress_.printline(msg,std::cout);
-				
-				// phi = A|psi>
-				computePhi(i,phiNew,phiOld,direction,block);
-				
-				return true;
-			}
-
 			void initialGuess(VectorWithOffsetType& v,const VectorSizeType& block) const
 			{
 				commonTargetting_.initialGuess(v,wft_,block,psi_);
@@ -440,7 +343,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				progress_.printline(msg,std::cout);
 
 				SizeType marker = 0;
-				if (commonTargetting_.noStageIs(DISABLED,stage_)) marker = 1;
+				if (commonTargetting_.noStageIs(DISABLED)) marker = 1;
 
 				TimeSerializerType ts(currentTime_,block[0],targetVectors_,marker);
 				ts.save(io);
@@ -469,7 +372,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			void printNormsAndWeights() const
 			{
-				if (commonTargetting_.allStages(DISABLED,stage_)) return;
+				if (commonTargetting_.allStages(DISABLED)) return;
 
 				PsimagLite::OstringStream msg;
 				msg<<"gsWeight="<<gsWeight_<<" weights= ";
@@ -523,7 +426,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			{
 				std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-				if (commonTargetting_.noStageIs(DISABLED,stage_))
+				if (commonTargetting_.noStageIs(DISABLED))
 					std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 				else
 					std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
@@ -578,155 +481,6 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				test(psi_,psi_,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc);
 				s = "<P0|doubleOcc|P0>";
 				test(targetVectors_[0],targetVectors_[0],direction,s,site,doubleOcc);
-			}
-
-			void computePhi(SizeType i,
-			                VectorWithOffsetType& phiNew,
-			                const VectorWithOffsetType& phiOld,
-			                SizeType systemOrEnviron,
-			                const VectorSizeType& block)
-			{
-				if (block.size()!=1) {
-					PsimagLite::String str(__FILE__);
-					str += " " + ttos(__LINE__) + "\n";
-					str += "computePhi only blocks of one site supported\n";
-					throw PsimagLite::RuntimeError(str.c_str());
-				}
-				VectorSizeType nk;
-				commonTargetting_.setNk(nk,block);
-				SizeType site = block[0];
-
-				SizeType indexAdvance = times_.size()-1;
-				SizeType indexNoAdvance = 0;
-				if (stage_[i]==OPERATOR) {
-					PsimagLite::OstringStream msg;
-					msg<<"I'm applying a local operator at site "<<site<<" now";
-					progress_.printline(msg,std::cout);
-					VectorSizeType electrons;
-					model_.findElectronsOfOneSite(electrons,site);
-					FermionSign fs(lrs_.left(),electrons);
-					applyOpLocal_(phiNew,
-					              phiOld,
-					              tstStruct_.aOperators[i],
-					              fs,
-					              systemOrEnviron,
-					              ApplyOperatorType::BORDER_NO);
-
-					applyOperatorAtBorder(phiNew,phiOld,systemOrEnviron,block);
-
-					setQuantumNumbers(phiNew);
-
-				} else if (stage_[i]== WFT_NOADVANCE || stage_[i]== WFT_ADVANCE) {
-					SizeType advance = indexNoAdvance;
-					if (stage_[i] == WFT_ADVANCE) {
-						advance = indexAdvance;
-						timeVectorsBase_->timeHasAdvanced();
-					}
-					PsimagLite::OstringStream msg;
-					msg<<"I'm calling the WFT now";
-					progress_.printline(msg,std::cout);
-
-					if (tstStruct_.aOperators.size()==1)
-						guessPhiSectors(phiNew,i,systemOrEnviron,site);
-					else
-						phiNew.populateFromQns(nonZeroQns_,lrs_.super());
-
-					// OK, now that we got the partition number right, let's wft:
-					wft_.setInitialVector(phiNew,targetVectors_[advance],lrs_,nk); // generalize for su(2)
-//					phiNew.collapseSectors();
-//					std::cerr<<"WFT --> NORM of phiNew="<<norm(phiNew)<<" NORM of tv="<<norm(targetVectors_[advance])<<" when i="<<i<<" advance="<<advance<<"\n";
-
-				} else {
-					throw PsimagLite::RuntimeError("It's 5 am, do you know what line "
-						" your code is exec-ing?\n");
-				}
-				RealType norma = norm(phiNew);
-				if (norma==0) throw PsimagLite::RuntimeError("Norm of phi is zero\n");
-
-			}
-
-			void applyOperatorAtBorder(VectorWithOffsetType& phiNew,
-			                           const VectorWithOffsetType& phiOld,
-			                           SizeType systemOrEnviron,
-			                           const VectorSizeType& block)
-			{
-				SizeType whichBorder = findWhichBorder(block);
-				if (whichBorder == BORDER_NEITHER) return;
-
-				int iOfBorder = findBorderIndex(whichBorder);
-				if (iOfBorder < 0) return;
-
-				if (block.size() != 1) {
-					PsimagLite::String str("applyOperatorAtBorder(): ");
-					str += " implemented only for block.size() == 1\n";
-					throw PsimagLite::RuntimeError(str);
-				}
-
-				SizeType site = tstStruct_.sites[iOfBorder];
-
-				stage_[iOfBorder] = OPERATOR;
-
-				PsimagLite::OstringStream msg;
-				msg<<"I'm applying a local operator at site "<<site<<" now";
-				progress_.printline(msg,std::cout);
-				VectorSizeType electrons;
-				model_.findElectronsOfOneSite(electrons,site);
-				FermionSign fs(lrs_.left(),electrons);
-				VectorWithOffsetType phiNew2;
-				const VectorWithOffsetType& phiSrc = (tstStruct_.concatenation==PRODUCT) ?
-				            phiNew : phiOld;
-
-				applyOpLocal_(phiNew2,
-				              phiSrc,
-				              tstStruct_.aOperators[iOfBorder],
-				              fs,
-				              systemOrEnviron,
-				              ApplyOperatorType::BORDER_YES);
-
-				if (tstStruct_.concatenation==PRODUCT)
-					phiNew = phiNew2;
-				else
-					phiNew += phiNew2;
-			}
-
-			SizeType findWhichBorder(const VectorSizeType& block) const
-			{
-				SizeType sitesPerBlock = model_.params().sitesPerBlock;
-
-				SizeType siteMin = *std::min_element(block.begin(),block.end());
-				if (siteMin <= sitesPerBlock) return BORDER_LEFT;
-
-				SizeType siteMax = *std::max_element(block.begin(),block.end());
-				SizeType linSize = model_.geometry().numberOfSites();
-
-				if (siteMax + sitesPerBlock + 1 >= linSize) return BORDER_RIGHT;
-
-				return BORDER_NEITHER;
-
-			}
-
-			int findBorderIndex(SizeType whichBorder) const
-			{
-				assert(whichBorder == BORDER_LEFT || whichBorder == BORDER_RIGHT);
-
-				SizeType sitesPerBlock = model_.params().sitesPerBlock;
-				SizeType linSize = model_.geometry().numberOfSites();
-				assert(sitesPerBlock < linSize);
-				SizeType start = linSize - sitesPerBlock;
-
-				for (SizeType j = 0; j < tstStruct_.sites.size(); ++j) {
-					if (whichBorder == BORDER_LEFT) {
-						for (SizeType i = 0; i < sitesPerBlock; ++i) {
-							if (tstStruct_.sites[j] == i) return j;
-						}
-					} else {
-						for (SizeType i = start; i < linSize; ++i) {
-							if (tstStruct_.sites[j] == i) return j;
-						}
-					}
-				}
-
-				return -1;
 			}
 
 			void checkNorms() const
@@ -806,44 +560,6 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				}
 			}
 
-			void setQuantumNumbers(const VectorWithOffsetType& v)
-			{
-				nonZeroQns_.clear();
-				assert(v.size()==lrs_.super().size());
-				for (SizeType i=0;i<v.sectors();i++) {
-					SizeType i0 = v.sector(i);
-					SizeType state = v.offset(i0);
-					SizeType qn = lrs_.super().qn(state);
-					nonZeroQns_.push_back(qn);
-				}
-			}
-
-			void guessPhiSectors(VectorWithOffsetType& phi,SizeType i,SizeType systemOrEnviron,SizeType site)
-			{
-				VectorSizeType electrons;
-				model_.findElectronsOfOneSite(electrons,site);
-				FermionSign fs(lrs_.left(),electrons);
-				if (commonTargetting_.allStages(WFT_NOADVANCE,stage_)) {
-					VectorWithOffsetType tmpVector = psi_;
-					for (SizeType j=0;j<tstStruct_.aOperators.size();j++) {
-						applyOpLocal_(phi,
-						              tmpVector,
-						              tstStruct_.aOperators[j],
-						              fs,
-						              systemOrEnviron,
-						              ApplyOperatorType::BORDER_NO);
-						tmpVector = phi;
-					}
-					return;
-				}
-				applyOpLocal_(phi,
-				              psi_,
-				              tstStruct_.aOperators[i],
-				              fs,
-				              systemOrEnviron,
-				              ApplyOperatorType::BORDER_NO);
-			}
-
 			void test(const VectorWithOffsetType& src1,
 				  const VectorWithOffsetType& src2,
 				  SizeType systemOrEnviron,
@@ -877,7 +593,6 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 			}
 
-			VectorSizeType stage_;
 			VectorWithOffsetType psi_;
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
@@ -891,10 +606,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			RealType gsWeight_;
 			//typename IoType::Out io_;
 			ApplyOperatorType applyOpLocal_;
-			RealType E0_;
 			TimeVectorsBaseType* timeVectorsBase_;
-			VectorSizeType nonZeroQns_;
-
 	};     //class TimeStepTargetting
 
 	template<template<typename,typename,typename> class LanczosSolverTemplate,

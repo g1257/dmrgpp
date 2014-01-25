@@ -1,9 +1,8 @@
-
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,7 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
@@ -83,12 +82,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "ApplyOperatorLocal.h"
 #include "DynamicSerializer.h"
 #include "DynamicDmrgParams.h"
 #include "VectorWithOffsets.h"
 #include "ContinuedFraction.h"
 #include <cassert>
+#include "ApplyOperatorExpression.h"
 
 namespace Dmrg {
 
@@ -117,12 +116,19 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
-	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef ApplyOperatorExpression<ModelType,
+	                                TargettingParamsType,
+	                                WaveFunctionTransfType,
+	                                VectorWithOffsetType> ApplyOperatorExpressionType;
+	typedef typename ApplyOperatorExpressionType::VectorSizeType VectorSizeType;
+	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
+	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 
-	enum {DISABLED,OPERATOR,CONVERGING};
+	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
+		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
+		  WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -130,13 +136,23 @@ public:
 
 	CommonTargetting(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
-	                 const TargettingParamsType& tstStruct)
+	                 const TargettingParamsType& tstStruct,
+	                 const WaveFunctionTransfType& wft,
+	                 const VectorWithOffsetType& psi)
 	    : lrs_(lrs),
 	      model_(model),
 	      tstStruct_(tstStruct),
-	      applyOpLocal_(lrs),
-	      progress_("CommonTargetting")
+	      progress_("CommonTargetting"),
+	      applyOpExpression_(lrs,model,tstStruct,wft,psi)
+	{}
+
+	SizeType getPhi(VectorWithOffsetType& phiNew,
+	                RealType Eg,
+	                SizeType direction,
+	                SizeType site,
+	                SizeType loopNumber)
 	{
+		return applyOpExpression_.getPhi(phiNew,Eg,direction,site,loopNumber);
 	}
 
 	RealType normSquared(const VectorWithOffsetType& v) const
@@ -168,61 +184,28 @@ public:
 	void checkOrder(SizeType i,
 	                const typename PsimagLite::Vector<SizeType>::Type& stage) const
 	{
-		if (i==0) return;
-		for (SizeType j=0;j<i;j++) {
-			if (stage[j] == DISABLED) {
-				PsimagLite::String s ="TST:: Seeing dynamic site "+ttos(tstStruct_.sites[i]);
-				s =s + " before having seen";
-				s = s + " site "+ttos(tstStruct_.sites[j]);
-				s = s +". Please order your dynamic sites in order of appearance.\n";
-				throw PsimagLite::RuntimeError(s);
-			}
-		}
+		return applyOpExpression_.checkOrder(i,stage);
 	}
 
-	bool allStages(SizeType x,
-	               const typename PsimagLite::Vector<SizeType>::Type& stage) const
+	bool allStages(SizeType x) const
 	{
-		for (SizeType i=0;i<stage.size();i++)
-			if (stage[i]!=x) return false;
-		return true;
+		return applyOpExpression_.allStages(x);
 	}
 
-	bool noStageIs(SizeType x,
-	               const typename PsimagLite::Vector<SizeType>::Type& stage) const
+	bool noStageIs(SizeType x) const
 	{
-		for (SizeType i=0;i<stage.size();i++)
-			if (stage[i]==x) return false;
-		return true;
-	}
-
-	PsimagLite::String getStage(SizeType i,
-	                            const typename PsimagLite::Vector<SizeType>::Type& stage) const
-	{
-		switch (stage[i]) {
-		case DISABLED:
-			return "Disabled";
-			break;
-		case OPERATOR:
-			return "Applying operator for the first time";
-			break;
-		case CONVERGING:
-			return "Converging DDMRG";
-			break;
-		}
-		return "undefined";
+		return applyOpExpression_.noStageIs(x);
 	}
 
 	void initialGuess(VectorWithOffsetType& v,
 	                  const WaveFunctionTransfType& wft,
 	                  const typename PsimagLite::Vector<SizeType>::Type& block,
 	                  const VectorWithOffsetType& psi,
-	                  const typename PsimagLite::Vector<SizeType>::Type& stage,
 	                  const typename PsimagLite::Vector<RealType>::Type& weights,
 	                  const typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors) const
 	{
 		initialGuess(v,wft,block,psi);
-		if (!allStages(CONVERGING,stage)) return;
+		if (!allStages(WFT_NOADVANCE)) return;
 
 		PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
@@ -243,16 +226,6 @@ public:
 		PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
 		setInitialVector(v,wft,psi,nk);
-	}
-
-	void findElectronsOfOneSite(typename PsimagLite::Vector<SizeType>::Type& electrons,
-	                            SizeType site) const
-	{
-		typename PsimagLite::Vector<SizeType>::Type block(1,site);
-		typename ModelType::HilbertBasisType basis;
-		typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
-		model_.setNaturalBasis(basis,quantumNumbs,block);
-		model_.findElectrons(electrons,basis,site);
 	}
 
 	void noCocoon(const PsimagLite::String& msg) const
@@ -298,7 +271,7 @@ public:
 		FermionSign fs(lrs_.left(),q.electrons);
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
-			applyOpLocal_(phiTemp,psi,creationMatrix[j],
+			applyOpExpression_.applyOpLocal()(phiTemp,psi,creationMatrix[j],
 			              fs,direction,ApplyOperatorType::BORDER_NO);
 			if (j==0) v = phiTemp;
 			else v += phiTemp;
@@ -345,6 +318,21 @@ public:
 		}
 
 		return f;
+	}
+
+	void setAllStagesTo(SizeType x)
+	{
+		applyOpExpression_.setAllStagesTo(x);
+	}
+
+	RealType energy() const
+	{
+		return applyOpExpression_.energy();
+	}
+
+	const VectorSizeType& nonZeroQns() const
+	{
+		 return applyOpExpression_.nonZeroQns();
 	}
 
 private:
@@ -434,7 +422,7 @@ private:
 		model_.findElectronsOfOneSite(electrons,site);
 		FermionSign fs(lrs_.left(),electrons);
 		VectorWithOffsetType dest;
-		applyOpLocal_(dest,src1,A,fs,systemOrEnviron,border);
+		applyOpExpression_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
 
 		ComplexOrRealType sum = 0.0;
 		for (SizeType ii=0;ii<dest.sectors();ii++) {
@@ -472,8 +460,8 @@ private:
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
 	const TargettingParamsType& tstStruct_;
-	ApplyOperatorType applyOpLocal_;
 	PsimagLite::ProgressIndicator progress_;
+	ApplyOperatorExpressionType applyOpExpression_;
 }; // class CommonTargetting
 
 template<typename ModelType,

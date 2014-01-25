@@ -140,7 +140,7 @@ public:
 	      model_(model),
 	      waveFunctionTransformation_(wft),
 	      progress_("GroundStateTargetting"),
-	      commonTargetting_(lrs,model,tstStruct)
+	      commonTargetting_(lrs,model,tstStruct,wft,psi_)
 	{
 	}
 

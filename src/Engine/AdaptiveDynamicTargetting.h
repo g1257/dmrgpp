@@ -128,22 +128,20 @@ public:
 	typedef CommonTargetting<ModelType,TargettingParamsType,WaveFunctionTransfType,VectorWithOffsetType,LanczosSolverType>
 	CommonTargettingType;
 
-	enum {DISABLED,OPERATOR,CONVERGING};
+	enum {DISABLED=CommonTargettingType::DISABLED,
+		  OPERATOR=CommonTargettingType::OPERATOR,
+		  WFT_NOADVANCE=CommonTargettingType::WFT_NOADVANCE};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 		  INFINITE=WaveFunctionTransfType::INFINITE};
-
-	static SizeType const PRODUCT = TargettingParamsType::PRODUCT;
-	static SizeType const SUM = TargettingParamsType::SUM;
 
 	AdaptiveDynamicTargetting(const LeftRightSuperType& lrs,
 	                          const ModelType& model,
 	                          const TargettingParamsType& tstStruct,
 	                          const WaveFunctionTransfType& wft,
 	                          const SizeType& quantumSector) // quantumSector ignored here
-	    : stage_(tstStruct.sites.size(),DISABLED),
-	      lrs_(lrs),
+	    : lrs_(lrs),
 	      model_(model),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
@@ -153,7 +151,7 @@ public:
 	      applyOpLocal_(lrs),
 	      gsWeight_(1.0),
 	      targetVectors_(2),
-	      commonTargetting_(lrs,model,tstStruct),
+	      commonTargetting_(lrs,model,tstStruct,wft,psi_),
 	      done_(false),
 	      weightForContinuedFraction_(0)
 	{
@@ -165,7 +163,7 @@ public:
 
 	RealType weight(SizeType i) const
 	{
-		assert(commonTargetting_.allStages(DISABLED,stage_));
+		assert(commonTargetting_.allStages(DISABLED));
 		return weight_[i];
 	}
 
@@ -197,7 +195,7 @@ public:
 
 	SizeType size() const
 	{
-		if (!commonTargetting_.allStages(CONVERGING,stage_)) return 0;
+		if (!commonTargetting_.allStages(WFT_NOADVANCE)) return 0;
 		return lastLanczosVector_;
 	}
 
@@ -231,7 +229,7 @@ public:
 	void initialGuess(VectorWithOffsetType& v,
 	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
-		commonTargetting_.initialGuess(v,wft_,block,psi_,stage_,weight_,targetVectors_);
+		commonTargetting_.initialGuess(v,wft_,block,psi_,weight_,targetVectors_);
 	}
 
 	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -263,7 +261,7 @@ public:
 		typename IoType::In io(f);
 
 		try {
-			for (SizeType i=0;i<stage_.size();i++) stage_[i] = CONVERGING;
+			commonTargetting_.setAllStagesTo(WFT_NOADVANCE);
 
 			commonTargetting_.load(io,targetVectors_);
 			lastLanczosVector_ = targetVectors_.size()-1;
@@ -273,7 +271,7 @@ public:
 			psi_.load(io,"PSI");
 		} catch (std::exception& e) {
 			std::cout<<"WARNING: No special targets found in file "<<f<<"\n";
-			for (SizeType i=0;i<stage_.size();i++) stage_[i] = DISABLED;
+			commonTargetting_.setAllStagesTo(DISABLED);
 			io.rewind();
 			int site = 0;
 			io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
@@ -296,8 +294,10 @@ private:
 	{
 		Eg_ = Eg;
 		VectorWithOffsetType phiNew;
-		if (ab_.size()==0) getPhi(phiNew,Eg,direction,site,loopNumber);
-		if (!commonTargetting_.allStages(CONVERGING,stage_)) {
+		if (ab_.size()==0)
+			commonTargetting_.getPhi(phiNew,Eg,direction,site,loopNumber);
+
+		if (!commonTargetting_.allStages(WFT_NOADVANCE)) {
 			targetVectors_[0] = phiNew;
 			return;
 		}
@@ -306,108 +306,6 @@ private:
 		if (site>0 && site<numberOfSites-1) wftAllDynVectors(site);
 
 		if (!done_) calcDynVectors(site,phiNew);
-	}
-
-	void getPhi(VectorWithOffsetType& phiNew,
-	            RealType Eg,
-	            SizeType direction,
-	            SizeType site,
-	            SizeType loopNumber)
-	{
-		SizeType count =0;
-		VectorWithOffsetType phiOld = psi_;
-
-		VectorWithOffsetType vectorSum;
-
-		SizeType max = tstStruct_.sites.size();
-		if (commonTargetting_.allStages(CONVERGING,stage_)) max = 1;
-
-		// Loop over each operator that needs to be applied
-		// in turn to the g.s.
-		for (SizeType i=0;i<max;i++) {
-			count += evolve(i,phiNew,phiOld,Eg,direction,site,loopNumber,max-1);
-			if (tstStruct_.concatenation==PRODUCT) {
-				phiOld = phiNew;
-			} else {
-				vectorSum += phiNew;
-			}
-		}
-		if (tstStruct_.concatenation==SUM) phiNew = vectorSum;
-	}
-
-	SizeType evolve(
-	        SizeType i,
-	        VectorWithOffsetType& phiNew,
-	        VectorWithOffsetType& phiOld,
-	        RealType Eg,
-	        SizeType direction,
-	        SizeType site,
-	        SizeType loopNumber,
-	        SizeType lastI)
-	{
-		if (tstStruct_.startingLoops[i]>loopNumber || direction==INFINITE) return 0;
-
-		if (site != tstStruct_.sites[i] && stage_[i]==DISABLED) return 0;
-		if (site == tstStruct_.sites[i] && stage_[i]==DISABLED) stage_[i]=OPERATOR;
-		else stage_[i]=CONVERGING;
-		if (stage_[i] == OPERATOR) commonTargetting_.checkOrder(i,stage_);
-
-		PsimagLite::OstringStream msg;
-		msg<<"Evolving, stage="<<commonTargetting_.getStage(i,stage_);
-		msg<<" site="<<site<<" loopNumber="<<loopNumber;
-		msg<<" Eg="<<Eg;
-		progress_.printline(msg,std::cout);
-
-		// phi = A|psi>
-		computePhi(i,site,phiNew,phiOld,direction);
-
-		return 1;
-	}
-
-	void computePhi(SizeType i,
-	                SizeType site,
-	                VectorWithOffsetType& phiNew,
-	                VectorWithOffsetType& phiOld,
-	                SizeType systemOrEnviron) const
-	{
-		SizeType numberOfSites = lrs_.super().block().size();
-		if (stage_[i]==OPERATOR) {
-
-			BorderEnumType corner = (tstStruct_.sites[i]==0 ||
-			               tstStruct_.sites[i]==numberOfSites -1) ?
-			            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
-
-			PsimagLite::OstringStream msg;
-			msg<<"I'm applying a local operator now";
-			progress_.printline(msg,std::cout);
-			typename PsimagLite::Vector<SizeType>::Type electrons;
-			commonTargetting_.findElectronsOfOneSite(electrons,site);
-			FermionSign fs(lrs_.left(),electrons);
-			applyOpLocal_(phiNew,phiOld,tstStruct_.aOperators[i],
-			              fs,systemOrEnviron,corner);
-			RealType norma = std::norm(phiNew);
-			if (norma==0)
-				throw PsimagLite::RuntimeError("Norm of phi is zero\n");
-		} else if (stage_[i]== CONVERGING) {
-			if (site==0 || site==numberOfSites -1)  {
-				// don't wft since we did it before
-				phiNew = targetVectors_[0];
-				return;
-			}
-			PsimagLite::OstringStream msg;
-			msg<<"I'm calling the WFT now";
-			progress_.printline(msg,std::cout);
-
-			phiNew.populateSectors(lrs_.super());
-
-			// OK, now that we got the partition number right, let's wft:
-			typename PsimagLite::Vector<SizeType>::Type nk(1,model_.hilbertSize(site));
-			wft_.setInitialVector(phiNew,targetVectors_[0],lrs_,nk);
-			phiNew.collapseSectors();
-
-		} else {
-			throw PsimagLite::RuntimeError("computePhi\n");
-		}
 	}
 
 	void wftAllDynVectors(SizeType site)
@@ -546,7 +444,6 @@ private:
 		v /= x;
 	}
 
-	typename PsimagLite::Vector<SizeType>::Type stage_;
 	VectorWithOffsetType psi_;
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;

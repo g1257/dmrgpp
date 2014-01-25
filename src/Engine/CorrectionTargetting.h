@@ -143,7 +143,7 @@ public:
 	      stage_(DISABLED),
 	      targetVectors_(1),
 	      applyOpLocal_(lrs),
-	      commonTargetting_(lrs,model,correctionStruct)
+	      commonTargetting_(lrs,model,correctionStruct,wft,psi_)
 	{}
 
 	const ModelType& model() const { return model_; }
