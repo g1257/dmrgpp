@@ -122,7 +122,7 @@ public:
 	                              MatrixVectorType,
 	                              VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
-	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
+	typedef typename IoType::In IoInputType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
@@ -134,8 +134,7 @@ public:
 	                                 TargettingParamsType> CorrectionVectorFunctionType;
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
-	                     WaveFunctionTransfType,
-	                     int> TargetHelperType;
+	                     WaveFunctionTransfType> TargetHelperType;
 	typedef CommonTargetting<TargetHelperType,
 	                         VectorWithOffsetType,
 	                         LanczosSolverType> CommonTargettingType;
@@ -160,7 +159,6 @@ public:
 	      wft_(wft),
 	      progress_("CorrectionVectorTargetting"),
 	      gsWeight_(1.0),
-	      targetVectors_(4),
 	      commonTargetting_(lrs,model,tstStruct,wft),
 	      correctionEnabled_(false)
 	{
@@ -183,17 +181,17 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		return commonTargetting_.normSquared(targetVectors_[i]);
+		return commonTargetting_.normSquared(i);
 	}
 
 	template<typename SomeBasisType>
 	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 	           const SomeBasisType& someBasis)
 	{
-		psi_.set(v,someBasis);
+		commonTargetting_.psi().set(v,someBasis);
 	}
 
-	const VectorWithOffsetType& gs() const { return psi_; }
+	const VectorWithOffsetType& gs() const { return commonTargetting_.psi(); }
 
 	bool includeGroundStage() const {return true; }
 
@@ -201,12 +199,12 @@ public:
 	{
 		if (!correctionEnabled_) return 0;
 		if (commonTargetting_.allStages(DISABLED)) return 1;
-		return targetVectors_.size();
+		return commonTargetting_.targetVectors().size();
 	}
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return targetVectors_[i];
+		return commonTargetting_.targetVectors()[i];
 	}
 
 	void evolve(RealType Eg,
@@ -237,10 +235,6 @@ public:
 		VectorWithOffsetType phiNew;
 		SizeType count = commonTargetting_.getPhi(phiNew,Eg,direction,site,loopNumber);
 
-
-		if (!commonTargetting_.noStageIs(DISABLED))
-			Eg_ = Eg;
-
 		if (direction!=INFINITE) {
 			correctionEnabled_=true;
 			typename PsimagLite::Vector<SizeType>::Type block1(1,site);
@@ -255,7 +249,7 @@ public:
 	void initialGuess(VectorWithOffsetType& v,
 	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
-		commonTargetting_.initialGuess(v,wft_,block,psi_,weight_,targetVectors_);
+		commonTargetting_.initialGuess(v,block,weight_);
 	}
 
 	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -273,24 +267,25 @@ public:
 		int s3 = (type&1) ? -fermionSign : 1;
 
 		typename PostProcType::ParametersType params;
-		params.Eg = Eg_;
+		params.Eg = commonTargetting_.energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
 		PostProcType cf(ab_,reortho_,params);
 
-		commonTargetting_.save(block,io,cf,targetVectors_);
-		psi_.save(io,"PSI");
+		commonTargetting_.save(block,io,cf,commonTargetting_.targetVectors());
+		commonTargetting_.psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)
 	{
 		commonTargetting_.setAllStagesTo(CONVERGING);
 
-		typename IoType::In io(f);
+		IoInputType io(f);
 
-		commonTargetting_.load(io,targetVectors_);
+		TimeSerializerType dynS(io,IoInputType::LAST_INSTANCE);
+		commonTargetting_.loadTargetVectors(dynS);
 
-		psi_.load(io,"PSI");
+		commonTargetting_.psi().load(io,"PSI");
 	}
 
 	RealType time() const { return 0; }
@@ -305,8 +300,8 @@ private:
 	void calcDynVectors(const VectorWithOffsetType& phi,
 	                    SizeType systemOrEnviron)
 	{
-		for (SizeType i=1;i<targetVectors_.size();i++)
-			targetVectors_[i] = phi;
+		for (SizeType i=1;i<commonTargetting_.targetVectors().size();i++)
+			commonTargetting_.targetVectors(i) = phi;
 
 		for (SizeType i=0;i<phi.sectors();i++) {
 			VectorType sv;
@@ -314,14 +309,14 @@ private:
 			phi.extract(sv,i0);
 			// g.s. is included separately
 			// set Aq
-			targetVectors_[1].setDataInSector(sv,i0);
+			commonTargetting_.targetVectors(1).setDataInSector(sv,i0);
 			// set xi
 			SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 			VectorType xi(sv.size(),0),xr(sv.size(),0);
 			computeXiAndXr(xi,xr,sv,p);
-			targetVectors_[2].setDataInSector(xi,i0);
+			commonTargetting_.targetVectors(2).setDataInSector(xi,i0);
 			//set xr
-			targetVectors_[3].setDataInSector(xr,i0);
+			commonTargetting_.targetVectors(3).setDataInSector(xr,i0);
 			DenseMatrixType V;
 			getLanczosVectors(V,sv,p);
 		}
@@ -373,14 +368,14 @@ private:
 		gsWeight_ = commonTargetting_.setGsWeight(0.5);
 
 		RealType sum  = 0;
-		weight_.resize(targetVectors_.size());
+		weight_.resize(commonTargetting_.targetVectors().size());
 		for (SizeType r=1;r<weight_.size();r++) {
 			weight_[r] =0;
-			for (SizeType i=0;i<targetVectors_[1].sectors();i++) {
+			for (SizeType i=0;i<commonTargetting_.targetVectors()[1].sectors();i++) {
 				VectorType v,w;
-				SizeType i0 = targetVectors_[1].sector(i);
-				targetVectors_[1].extract(v,i0);
-				targetVectors_[r].extract(w,i0);
+				SizeType i0 = commonTargetting_.targetVectors()[1].sector(i);
+				commonTargetting_.targetVectors()[1].extract(v,i0);
+				commonTargetting_.targetVectors()[r].extract(w,i0);
 				weight_[r] += dynWeightOf(v,w);
 			}
 			sum += weight_[r];
@@ -400,7 +395,7 @@ private:
 
 	void addCorrection(SizeType direction,const BlockType& block1)
 	{
-		commonTargetting_.computeCorrection(targetVectors_[0],direction,block1,psi_);
+		commonTargetting_.computeCorrection(direction,block1);
 		weight_.resize(1);
 		weight_[0]=tstStruct_.correctionA;
 		gsWeight_ = 1.0-weight_[0];

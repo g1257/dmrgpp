@@ -120,7 +120,7 @@ class TimeVectorsKrylov : public  TimeVectorsBase<
 
 public:
 
-	TimeVectorsKrylov(RealType& currentTime,
+	TimeVectorsKrylov(RealType currentTime,
 					  const TargettingParamsType& tstStruct,
 					  const VectorRealType& times,
 					  typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
@@ -307,7 +307,7 @@ private:
 		}
 	}
 
-	RealType& currentTime_;
+	RealType currentTime_;
 	const TargettingParamsType& tstStruct_;
 	const VectorRealType& times_;
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;

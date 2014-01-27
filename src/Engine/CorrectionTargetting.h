@@ -120,8 +120,7 @@ public:
 	typedef CorrectionParams<ModelType> TargettingParamsType;
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
-	                     WaveFunctionTransfType,
-	                     int> TargetHelperType;
+	                     WaveFunctionTransfType> TargetHelperType;
 	typedef CommonTargetting<TargetHelperType,
 	                         VectorWithOffsetType,
 	                         LanczosSolverType> CommonTargettingType;
@@ -141,8 +140,6 @@ public:
 	      correctionStruct_(correctionStruct),
 	      waveFunctionTransformation_(wft),
 	      progress_("CorrectionTargetting"),
-	      stage_(DISABLED),
-	      targetVectors_(1),
 	      commonTargetting_(lrs,model,correctionStruct,wft)
 	{}
 
@@ -150,7 +147,7 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		return std::real(multiply(targetVectors_[i],targetVectors_[i]));
+		return std::real(multiply(commonTargetting_.targetVectors()[i],commonTargetting_.targetVectors()[i]));
 	}
 
 	RealType weight(SizeType i) const
@@ -168,25 +165,25 @@ public:
 	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 	           const SomeBasisType& someBasis)
 	{
-		psi_.set(v,someBasis);
+		commonTargetting_.psi().set(v,someBasis);
 	}
 
 	const VectorWithOffsetType& gs() const
 	{
-		return psi_;
+		return commonTargetting_.psi();
 	}
 
 	bool includeGroundStage() const {return true; }
 
 	SizeType size() const
 	{
-		if (stage_==DISABLED) return 0;
-		return targetVectors_.size();
+		if (commonTargetting_.allStages(DISABLED)) return 0;
+		return commonTargetting_.targetVectors().size();
 	}
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return targetVectors_[i];
+		return commonTargetting_.targetVectors()[i];
 	}
 
 	RealType time() const { return 0; }
@@ -200,9 +197,8 @@ public:
 		cocoon(block1,direction);
 
 		if (direction==INFINITE) return;
-		stage_ = ENABLED;
-
-		commonTargetting_.computeCorrection(targetVectors_[0],direction,block1,psi_);
+		commonTargetting_.setAllStagesTo(ENABLED);
+		commonTargetting_.computeCorrection(direction,block1);
 	}
 
 	const LeftRightSuperType& leftRightSuper() const
@@ -214,12 +210,9 @@ public:
 	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
 		RealType eps = 1e-6;
-		if (psi_.size()>0 && std::norm(psi_)<eps)
+		if (commonTargetting_.psi().size()>0 && std::norm(commonTargetting_.psi())<eps)
 			throw PsimagLite::RuntimeError("psi's norm is zero\n");
-		commonTargetting_.initialGuess(initialVector,
-		                               waveFunctionTransformation_,
-		                               block,
-		                               psi_);
+		commonTargetting_.initialGuess(initialVector,block);
 	}
 
 	template<typename IoOutputType>
@@ -235,7 +228,7 @@ public:
 
 		PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(s);
-		psi_.save(io,"PSI");
+		commonTargetting_.psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)
@@ -245,7 +238,7 @@ public:
 		io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
 		if (site<0)
 			throw PsimagLite::RuntimeError("GST::load(...): site cannot be negative\n");
-		psi_.load(io,"PSI");
+		commonTargetting_.psi().load(io,"PSI");
 	}
 
 	void print(std::ostream& os) const
@@ -272,7 +265,7 @@ private:
 
 		try {
 			assert(block1.size()>0);
-			commonTargetting_.cocoon(direction,block1[0],psi_,"PSI",0);
+			commonTargetting_.cocoon(direction,block1[0],commonTargetting_.psi(),"PSI");
 		} catch (std::exception& e) {
 			commonTargetting_.noCocoon("unsupported by the model");
 		}

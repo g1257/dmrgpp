@@ -117,14 +117,16 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef ApplyOperatorExpression<TargetHelperType,
-	                                VectorWithOffsetType> ApplyOperatorExpressionType;
+	                                VectorWithOffsetType,
+	                                LanczosSolverType> ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::VectorSizeType VectorSizeType;
 	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef typename TargetHelperType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename TargetHelperType::TimeVectorsBaseType TimeVectorsBaseType;
 	typedef typename TargetHelperType::TargettingParamsType TargettingParamsType;
 	typedef typename ApplyOperatorExpressionType::VectorVectorWithOffsetType VectorVectorWithOffsetType;
+	typedef typename ApplyOperatorExpressionType::VectorRealType VectorRealType;
+	typedef typename ApplyOperatorExpressionType::PairType PairType;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
@@ -137,10 +139,9 @@ public:
 	CommonTargetting(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
                      const TargettingParamsType& tstStruct,
-                     const WaveFunctionTransfType& wft,
-	                 const TimeVectorsBaseType* timeVectorsBase = 0)
+                     const WaveFunctionTransfType& wft)
 	    : progress_("CommonTargetting"),
-	      targetHelper_(lrs,model,tstStruct,wft,timeVectorsBase),
+	      targetHelper_(lrs,model,tstStruct,wft),
 	      applyOpExpression_(targetHelper_)
 	{}
 
@@ -180,14 +181,10 @@ public:
 		dynS.save(io);
 	}
 
-	template<typename IoInputType>
-	void load(IoInputType& io,
-	          typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors)
+	template<typename SomeSerializerType>
+	void loadTargetVectors(SomeSerializerType& serializer)
 	{
-		DynamicSerializerType dynS(io,IoInputType::In::LAST_INSTANCE);
-		for (SizeType i=0;i<targetVectors.size();i++)
-			targetVectors[i] = dynS.vector(i);
-
+		applyOpExpression_.loadTargetVectors(serializer);
 	}
 
 	void checkOrder(SizeType i,
@@ -218,21 +215,19 @@ public:
 	                  const typename PsimagLite::Vector<SizeType>::Type& block,
 	                  const typename PsimagLite::Vector<RealType>::Type& weights) const
 	{
-		const VectorWithOffsetType& psi = applyOpExpression_.psi();
-		const WaveFunctionTransfType& wft = targetHelper_.wft();
-		const VectorVectorWithOffsetType& targetVectors = applyOpExpression_.targetVectors();
-		initialGuess(v,wft,block,psi);
-		if (!allStages(WFT_NOADVANCE)) return;
+//		const VectorVectorWithOffsetType& targetVectors = applyOpExpression_.targetVectors();
+		initialGuess(v,block,weights);
+//		if (!allStages(WFT_NOADVANCE)) return;
 
-		PsimagLite::Vector<SizeType>::Type nk;
-		setNk(nk,block);
-		typename PsimagLite::Vector<VectorWithOffsetType>::Type vv(targetVectors.size());
-		for (SizeType i=0;i<targetVectors.size();i++) {
-			setInitialVector(vv[i],wft,targetVectors[i],nk);
-			if (std::norm(vv[i])<1e-6) continue;
-			VectorWithOffsetType w= weights[i]*vv[i];
-			v += w;
-		}
+//		PsimagLite::Vector<SizeType>::Type nk;
+//		setNk(nk,block);
+//		typename PsimagLite::Vector<VectorWithOffsetType>::Type vv(targetVectors.size());
+//		for (SizeType i=0;i<targetVectors.size();i++) {
+//			setInitialVector(vv[i],targetVectors[i],nk);
+//			if (std::norm(vv[i])<1e-6) continue;
+//			VectorWithOffsetType w= weights[i]*vv[i];
+//			v += w;
+//		}
 	}
 
 	void initialGuess(VectorWithOffsetType& v,
@@ -241,7 +236,7 @@ public:
 	{
 		PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
-		setInitialVector(v,wft,psi,nk);
+		setInitialVector(v,psi,nk);
 	}
 
 	void noCocoon(const PsimagLite::String& msg) const
@@ -254,28 +249,28 @@ public:
 	// in situ computation:
 	void cocoon(SizeType direction,
 	            SizeType site,
-	            const PsimagLite::String& label,
-	            const RealType& currentTime) const
+	            const VectorWithOffsetType& v,
+	            const PsimagLite::String& label) const
 	{
-		const VectorWithOffsetType& psi = applyOpExpression_.psi();
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-		cocoon_(direction,site,psi,label,ApplyOperatorType::BORDER_NO,currentTime);
+		cocoon_(direction,site,v,label,ApplyOperatorType::BORDER_NO);
 
 		int site2 = findBorderSiteFrom(site,direction);
 
 		if (site2 >= 0) {
-			cocoon_(direction,site2,psi,label,ApplyOperatorType::BORDER_YES,currentTime);
+			cocoon_(direction,site2,v,label,ApplyOperatorType::BORDER_YES);
 		}
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
-	void computeCorrection(VectorWithOffsetType& v,
-	                       SizeType direction,
-	                       const BlockType& block1,
-	                       const VectorWithOffsetType& psi) const
+	void computeCorrection(SizeType direction,
+	                       const BlockType& block1)
 	{
+		const VectorWithOffsetType& psi = applyOpExpression_.psi();
+		VectorWithOffsetType& v = applyOpExpression_.targetVectors(0);
+
 		// operators in the one-site basis:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		SparseMatrixType hmatrix;
@@ -361,20 +356,89 @@ public:
 		return applyOpExpression_.targetVectors();
 	}
 
+	VectorWithOffsetType& targetVectors(SizeType i)
+	{
+		return applyOpExpression_.targetVectors(i);
+	}
+
+	void targetVectorsResize(SizeType x)
+	{
+		applyOpExpression_.targetVectorsResize(x);
+	}
+
+	void initTimeVectors(const VectorRealType& times)
+	{
+		applyOpExpression_.initTimeVectors(times);
+	}
+
+	void setTime(RealType t)
+	{
+		applyOpExpression_.setTime(t);
+	}
+
+	void calcTimeVectors(const PairType& startEnd,
+	                             RealType Eg,
+	                             const VectorWithOffsetType& phi,
+	                             SizeType direction,
+	                             bool allOperatorsApplied,
+	                             const PsimagLite::Vector<SizeType>::Type& block)
+	{
+		return applyOpExpression_.calcTimeVectors(startEnd,
+		                                        Eg,
+			                                    phi,
+			                                    direction,
+			                                    allOperatorsApplied,
+			                                    block);
+	}
+
+	void cocoonLegacy(SizeType direction,const BlockType& block) const
+	{
+		const VectorWithOffsetType& psi = applyOpExpression_.psi();
+		const VectorWithOffsetType& tv0 = applyOpExpression_.targetVectors()[0];
+		const ModelType& model = targetHelper_.model();
+
+		SizeType site = block[0];
+		PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model.naturalOperator("nup",site,0));
+		int fermionSign1 = 1;
+		const std::pair<SizeType,SizeType> jm1(0,0);
+		RealType angularFactor1 = 1.0;
+		typename OperatorType::Su2RelatedType su2Related1;
+		OperatorType nup(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
+
+		nup.data = tmpC;
+		nup.fermionSign = 1;
+
+		test(psi,psi,direction,"<PSI|nup|PSI>",site,nup,ApplyOperatorType::BORDER_NO);
+		PsimagLite::String s = "<P0|nup|P0>";
+		test(tv0,tv0,direction,s,site,nup,ApplyOperatorType::BORDER_NO);
+
+		PsimagLite::CrsMatrix<ComplexOrRealType> tmpC2(model.naturalOperator("ndown",site,0));
+		OperatorType ndown(tmpC2,fermionSign1,jm1,angularFactor1,su2Related1);
+		test(psi,psi,direction,"<PSI|ndown|PSI>",site,ndown,ApplyOperatorType::BORDER_NO);
+		s = "<P0|ndown|P0>";
+		test(tv0,tv0,direction,s,site,ndown,ApplyOperatorType::BORDER_NO);
+
+		PsimagLite::CrsMatrix<ComplexOrRealType> tmpC3 = (nup.data * ndown.data);
+		OperatorType doubleOcc(tmpC3,fermionSign1,jm1,angularFactor1,su2Related1);
+		test(psi,psi,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc,ApplyOperatorType::BORDER_NO);
+		s = "<P0|doubleOcc|P0>";
+		test(tv0,tv0,direction,s,site,doubleOcc,ApplyOperatorType::BORDER_NO);
+	}
+
 private:
 
-	void setInitialVector(VectorWithOffsetType& v,
-	                      const WaveFunctionTransfType& wft,
-	                      const VectorWithOffsetType& psi,
+	void setInitialVector(VectorWithOffsetType& v1,
+	                      const VectorWithOffsetType& v2,
 	                      const PsimagLite::Vector<SizeType>::Type& nk) const
 	{
+		const WaveFunctionTransfType& wft = targetHelper_.wft();
 		bool noguess = (targetHelper_.model().params().options.find("targetnoguess") !=
 		        PsimagLite::String::npos);
 
 		if (noguess)
-			wft.createRandomVector(v);
+			wft.createRandomVector(v1);
 		else
-			wft.setInitialVector(v,psi,targetHelper_.lrs(),nk);
+			wft.setInitialVector(v1,v2,targetHelper_.lrs(),nk);
 	}
 
 	int findBorderSiteFrom(SizeType site, SizeType direction) const
@@ -388,10 +452,9 @@ private:
 	}
 
 	void cocoon_(SizeType direction,SizeType site,
-	             const VectorWithOffsetType& psi,
+	             const VectorWithOffsetType& v,
 	             const PsimagLite::String& label,
-	             BorderEnumType border,
-	             const RealType& currentTime) const
+	             BorderEnumType border) const
 	{
 		VectorStringType vecStr = getOperatorLabels();
 
@@ -400,7 +463,7 @@ private:
 			OperatorType nup = getOperatorForTest(opLabel,site);
 
 			PsimagLite::String tmpStr = "<"+ label + "|" + opLabel + "|" + label + ">";
-			test(psi,psi,direction,tmpStr,site,nup,border,currentTime);
+			test(v,v,direction,tmpStr,site,nup,border);
 		}
 	}
 
@@ -441,8 +504,7 @@ private:
 	          const PsimagLite::String& label,
 	          SizeType site,
 	          const OperatorType& A,
-	          BorderEnumType border,
-	          const RealType& currentTime) const
+	          BorderEnumType border) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type electrons;
 		targetHelper_.model().findElectronsOfOneSite(electrons,site);
@@ -462,7 +524,7 @@ private:
 					sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
 			}
 		}
-		std::cout<<site<<" "<<sum<<" "<<currentTime;
+		std::cout<<site<<" "<<sum<<" "<<currentTime();
 		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 	}
 

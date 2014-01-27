@@ -134,8 +134,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 											 LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
 		typedef TargetHelper<ModelType,
 		                     TargettingParamsType,
-		                     WaveFunctionTransfType,
-		                     TimeVectorsBaseType> TargetHelperType;
+		                     WaveFunctionTransfType> TargetHelperType;
 		typedef CommonTargetting<TargetHelperType,
 		                         VectorWithOffsetType,
 		                         LanczosSolverType> CommonTargettingType;
@@ -163,8 +162,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			  progress_("TimeStepTargetting"),
 			  times_(tstStruct_.timeSteps),
 			  weight_(tstStruct_.timeSteps),
-			  commonTargetting_(lrs,model,tstStruct,wft,timeVectorsBase_),
-			  timeVectorsBase_(0)
+			  commonTargetting_(lrs,model,tstStruct,wft)
 			{
 				if (!wft.isEnabled()) throw PsimagLite::RuntimeError
 				       (" TimeStepTargetting needs an enabled wft\n");
@@ -193,37 +191,8 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				gsWeight_=1.0-sum;
 				sum += gsWeight_;
 				assert(fabs(sum-1.0)<1e-5);
-//				std::cerr<<"GSWEIGHT="<<gsWeight_<<"\n";
 
-				PsimagLite::String s (__FILE__);
-				s += " Unknown algorithm\n";
-
-				const RealType& E0 = commonTargetting_.energy();
-				const RealType& currentTime = commonTargetting_.currentTime();
-				const VectorSizeType& nonZeroQns = commonTargetting_.nonZeroQns();
-				const VectorVectorWithOffsetType& targetVectors = commonTargetting_.targetVectors();
-				switch (tstStruct_.algorithm) {
-				case TargettingParamsType::KRYLOV:
-					timeVectorsBase_ = new TimeVectorsKrylovType(
-								currentTime,tstStruct_,times_,targetVectors,model_,wft_,lrs_,E0);
-					break;
-				case TargettingParamsType::RUNGE_KUTTA:
-					timeVectorsBase_ = new TimeVectorsRungeKuttaType(
-								currentTime,tstStruct_,times_,targetVectors,model_,wft_,lrs_,E0);
-					break;
-				case TargettingParamsType::SUZUKI_TROTTER:
-					timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(
-								currentTime,tstStruct_,times_,targetVectors,model_,wft_,lrs_,E0,&nonZeroQns);
-					break;
-				default:
-					throw PsimagLite::RuntimeError(s.c_str());
-				}
-			}
-
-			~TimeStepTargetting()
-			{
-				if (timeVectorsBase_)
-					delete timeVectorsBase_;
+				commonTargetting_.initTimeVectors(times_);
 			}
 
 			const ModelType& model() const { return model_; }
@@ -268,17 +237,17 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				return b;
 			}
 
-			const RealType& time() const {return currentTime_; }
+			const RealType& time() const {return commonTargetting_.currentTime(); }
 
 			SizeType size() const
 			{
 				if (commonTargetting_.allStages(DISABLED)) return 0;
-				return targetVectors_.size();
+				return commonTargetting_.targetVectors().size();
 			}
 
 			const VectorWithOffsetType& operator()(SizeType i) const
 			{
-				return targetVectors_[i];
+				return commonTargetting_.targetVectors()[i];
 			}
 
 			const LeftRightSuperType& leftRightSuper() const
@@ -299,7 +268,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				bool allOperatorsApplied = (commonTargetting_.noStageIs(DISABLED) &&
 				                            commonTargetting_.noStageIs(OPERATOR));
 
-				timeVectorsBase_->calcTimeVectors(startEnd,
+				commonTargetting_.calcTimeVectors(startEnd,
 				                                  Eg,
 				                                  phiNew,
 				                                  direction,
@@ -318,8 +287,10 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				typename IoType::In io(f);
 
 				TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
-				for (SizeType i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
-				currentTime_ = ts.time();
+				for (SizeType i=0;i<commonTargetting_.targetVectors().size();i++)
+					commonTargetting_.targetVectors(i) = ts.vector(i);
+
+				commonTargetting_.setTime(ts.time());
 
 				commonTargetting_.psi().load(io,"PSI");
 			}
@@ -348,7 +319,10 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				SizeType marker = 0;
 				if (commonTargetting_.noStageIs(DISABLED)) marker = 1;
 
-				TimeSerializerType ts(currentTime_,block[0],targetVectors_,marker);
+				TimeSerializerType ts(commonTargetting_.currentTime(),
+				                      block[0],
+				                      commonTargetting_.targetVectors(),
+				                      marker);
 				ts.save(io);
 				commonTargetting_.psi().save(io,"PSI");
 			}
@@ -362,13 +336,14 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 				SparseMatrixType hmatrix;
 				BasisDataType q;
-				model_.setNaturalBasis(creationMatrix,hmatrix,q,X,currentTime_);
+				model_.setNaturalBasis(creationMatrix,hmatrix,q,X,commonTargetting_.currentTime());
 				basisWithOps.setVarious(X,hmatrix,q,creationMatrix);
 			}
 
 			bool end() const
 			{
-				return (tstStruct_.maxTime != 0 && currentTime_ >= tstStruct_.maxTime);
+				return (tstStruct_.maxTime != 0 &&
+				        commonTargetting_.currentTime() >= tstStruct_.maxTime);
 			}
 
 		private:
@@ -392,8 +367,8 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			void printEnergies() const
 			{
-				for (SizeType i=0;i<targetVectors_.size();i++)
-					printEnergies(targetVectors_[i],i);
+				for (SizeType i=0;i<commonTargetting_.targetVectors().size();i++)
+					printEnergies(commonTargetting_.targetVectors()[i],i);
 			}
 
 			void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget) const
@@ -419,7 +394,8 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				TargetVectorType x(total);
 				lanczosHelper.matrixVectorProduct(x,phi2);
 				PsimagLite::OstringStream msg;
-				msg<<"Hamiltonian average at time="<<currentTime_<<" for target="<<whatTarget;
+				msg<<"Hamiltonian average at time="<<commonTargetting_.currentTime();
+				msg<<" for target="<<whatTarget;
 				msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<(phi2*x)<<" <phi(t)|phi(t)>="<<(phi2*phi2);
 				progress_.printline(msg,std::cout);
 			}
@@ -439,66 +415,28 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				if (modelName == "HubbardOneBand" ||
 				    modelName == "HubbardOneBandExtended" ||
 				    modelName == "Immm") {
-					cocoon_(direction,block);
+					commonTargetting_.cocoonLegacy(direction,block);
 				}
 
 				SizeType site = block[0];
 
-				commonTargetting_.cocoon(direction,site,psi_,"PSI",currentTime_);
-				commonTargetting_.cocoon(direction,site,targetVectors_[0],"P0",currentTime_);
+				commonTargetting_.cocoon(direction,site,commonTargetting_.psi(),"PSI");
+				commonTargetting_.cocoon(direction,site,commonTargetting_.targetVectors()[0],"P0");
 
 				std::cout<<"-------------&*&*&* In-situ measurements end\n";
-			}
-
-
-			void cocoon_(SizeType direction,const BlockType& block) const
-			{
-				SizeType site = block[0];
-				PsimagLite::CrsMatrix<ComplexType> tmpC(model_.naturalOperator("nup",site,0));
-				//PsimagLite::CrsMatrix<ComplexType> tmpCt;
-				//transposeConjugate(tmpCt,tmpC);
-				//multiply(A.data,tmpCt,tmpC);
-				int fermionSign1 = 1;
-				const std::pair<SizeType,SizeType> jm1(0,0);
-				RealType angularFactor1 = 1.0;
-				typename OperatorType::Su2RelatedType su2Related1;
-				OperatorType nup(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
-
-				nup.data = tmpC;
-				nup.fermionSign = 1;
-				//A.data = tmpC;
-
-				test(psi_,psi_,direction,"<PSI|nup|PSI>",site,nup);
-				PsimagLite::String s = "<P0|nup|P0>";
-				test(targetVectors_[0],targetVectors_[0],direction,s,site,nup);
-
-				PsimagLite::CrsMatrix<ComplexType> tmpC2(model_.naturalOperator("ndown",site,0));
-				OperatorType ndown(tmpC2,fermionSign1,jm1,angularFactor1,su2Related1);
-				//if (includeGroundStage())
-				test(psi_,psi_,direction,"<PSI|ndown|PSI>",site,ndown);
-				s = "<P0|ndown|P0>";
-				test(targetVectors_[0],targetVectors_[0],direction,s,site,ndown);
-
-				PsimagLite::CrsMatrix<ComplexType> tmpC3 = (nup.data * ndown.data);
-				OperatorType doubleOcc(tmpC3,fermionSign1,jm1,angularFactor1,su2Related1);
-				test(psi_,psi_,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc);
-				s = "<P0|doubleOcc|P0>";
-				test(targetVectors_[0],targetVectors_[0],direction,s,site,doubleOcc);
 			}
 
 			void checkNorms() const
 			{
 				PsimagLite::OstringStream msg;
 				msg<<"Checking norms: ";
-				for (SizeType i=0;i<targetVectors_.size();i++) {
-					RealType norma = std::norm(targetVectors_[i]);
+				for (SizeType i=0;i<commonTargetting_.targetVectors().size();i++) {
+					RealType norma = std::norm(commonTargetting_.targetVectors()[i]);
 					msg<<" norma["<<i<<"]="<<norma;
 					assert(norma>1e-10);
 				}
 				progress_.printline(msg,std::cout);
 			}
-
-
 
 			void check1(const VectorWithOffsetType& phi,SizeType i0) const
 			{
@@ -563,39 +501,6 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				}
 			}
 
-			void test(const VectorWithOffsetType& src1,
-				  const VectorWithOffsetType& src2,
-				  SizeType systemOrEnviron,
-				  const PsimagLite::String& label,
-				  SizeType site,
-				  const OperatorType& A) const
-			{
-				VectorSizeType electrons;
-				SizeType lastIndex = lrs_.left().block().size();
-				assert(lastIndex>0);
-				lastIndex--;
-				SizeType siteCorrected = lrs_.left().block()[lastIndex];
-				model_.findElectronsOfOneSite(electrons,siteCorrected);
-				FermionSign fs(lrs_.left(),electrons);
-				VectorWithOffsetType dest;
-				applyOpLocal_(dest,src1,A,fs,systemOrEnviron,ApplyOperatorType::BORDER_NO);
-
-				ComplexType sum = 0;
-				for (SizeType ii=0;ii<dest.sectors();ii++) {
-					SizeType i = dest.sector(ii);
-					SizeType offset1 = dest.offset(i);
-					for (SizeType jj=0;jj<src2.sectors();jj++) {
-						SizeType j = src2.sector(jj);
-						SizeType offset2 = src2.offset(j);
-						if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
-						for (SizeType k=0;k<dest.effectiveSize(i);k++) 
-							sum+= dest[k+offset1] * conj(src2[k+offset2]);
-					}
-				}
-				std::cout<<site<<" "<<sum<<" "<<" "<<currentTime_;
-				std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
-			}
-
 			const LeftRightSuperType& lrs_;
 			const ModelType& model_;
 			const TargettingParamsType& tstStruct_;
@@ -604,7 +509,6 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			typename PsimagLite::Vector<RealType>::Type times_,weight_;
 			CommonTargettingType commonTargetting_;
 			RealType gsWeight_;
-			TimeVectorsBaseType* timeVectorsBase_;
 	};     //class TimeStepTargetting
 
 	template<template<typename,typename,typename> class LanczosSolverTemplate,

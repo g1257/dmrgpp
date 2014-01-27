@@ -122,7 +122,7 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 
 public:
 
-	TimeVectorsSuzukiTrotter(RealType& currentTime,
+	TimeVectorsSuzukiTrotter(RealType currentTime,
 	                         const TargettingParamsType& tstStruct,
 	                         const VectorRealType& times,
 	                         typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
@@ -523,7 +523,7 @@ private:
 	}
 
 	PsimagLite::ProgressIndicator progress_;
-	RealType& currentTime_;
+	RealType currentTime_;
 	const TargettingParamsType& tstStruct_;
 	const VectorRealType& times_;
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;

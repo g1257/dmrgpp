@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "AdaptiveDynamicParams.h"
 #include "VectorWithOffsets.h"
 #include "ParametersForSolver.h"
+#include "CommonTargetting.h"
 
 namespace Dmrg {
 
@@ -117,7 +118,7 @@ public:
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,MatrixVectorType,VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
-	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
+	typedef typename IoType::In IoInputType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
@@ -125,8 +126,7 @@ public:
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
-	                     WaveFunctionTransfType,
-	                     int> TargetHelperType;
+	                     WaveFunctionTransfType> TargetHelperType;
 	typedef CommonTargetting<TargetHelperType,
 	                         VectorWithOffsetType,
 	                         LanczosSolverType> CommonTargettingType;
@@ -152,7 +152,6 @@ public:
 	      dynCounter_(0),
 	      progress_("AdaptiveDynamicTargetting"),
 	      gsWeight_(1.0),
-	      targetVectors_(2),
 	      commonTargetting_(lrs,model,tstStruct,wft),
 	      done_(false),
 	      weightForContinuedFraction_(0)
@@ -176,19 +175,22 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		return commonTargetting_.normSquared(targetVectors_[i]);
+		return commonTargetting_.normSquared(i);
 	}
 
 	template<typename SomeBasisType>
 	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 	           const SomeBasisType& someBasis)
 	{
-		psi_.set(v,someBasis);
+		commonTargetting_.psi().set(v,someBasis);
 	}
 
-	RealType& operator[](SizeType i) { return psi_[i]; }
+	RealType& operator[](SizeType i)
+	{
+		return commonTargetting_.targetVectors()[i];
+	}
 
-	const VectorWithOffsetType& gs() const { return psi_; }
+	const VectorWithOffsetType& gs() const { return commonTargetting_.psi(); }
 
 	bool includeGroundStage() const
 	{
@@ -203,7 +205,7 @@ public:
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return targetVectors_[i];
+		return commonTargetting_.targetVectors()[i];
 	}
 
 	void evolve(RealType Eg,
@@ -231,7 +233,7 @@ public:
 	void initialGuess(VectorWithOffsetType& v,
 	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
-		commonTargetting_.initialGuess(v,wft_,block,psi_,weight_,targetVectors_);
+		commonTargetting_.initialGuess(v,block,weight_);
 	}
 
 	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -253,31 +255,32 @@ public:
 		PostProcType cf(ab_,reortho_,params);
 		PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(str);
-		commonTargetting_.save(block,io,cf,targetVectors_);
+		commonTargetting_.save(block,io,cf,commonTargetting_.targetVectors());
 
-		psi_.save(io,"PSI");
+		commonTargetting_.psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)
 	{
-		typename IoType::In io(f);
+		IoInputType io(f);
 
 		try {
 			commonTargetting_.setAllStagesTo(WFT_NOADVANCE);
 
-			commonTargetting_.load(io,targetVectors_);
-			lastLanczosVector_ = targetVectors_.size()-1;
+			TimeSerializerType dynS(io,IoInputType::LAST_INSTANCE);
+			commonTargetting_.loadTargetVectors(dynS);
+			lastLanczosVector_ = commonTargetting_.targetVectors().size()-1;
 
 			//! WARNING: USE OF MAGIC BELOW:
 			dynCounter_ = 13; // FIXME: MAYBE SAVE AND LOAD ACTUAL NUMBER HERE
-			psi_.load(io,"PSI");
+			commonTargetting_.psi().load(io,"PSI");
 		} catch (std::exception& e) {
 			std::cout<<"WARNING: No special targets found in file "<<f<<"\n";
 			commonTargetting_.setAllStagesTo(DISABLED);
 			io.rewind();
 			int site = 0;
 			io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
-			psi_.loadOneSector(io,"PSI");
+			commonTargetting_.psi().loadOneSector(io,"PSI");
 		}
 	}
 
@@ -300,7 +303,7 @@ private:
 			commonTargetting_.getPhi(phiNew,Eg,direction,site,loopNumber);
 
 		if (!commonTargetting_.allStages(WFT_NOADVANCE)) {
-			targetVectors_[0] = phiNew;
+			commonTargetting_.targetVectors(0) = phiNew;
 			return;
 		}
 
@@ -326,27 +329,27 @@ private:
 		// OK, now that we got the partition number right, let's wft:
 
 		// FIXME generalize for su(2)
-		wft_.setInitialVector(result,targetVectors_[i],lrs_,nk);
+		wft_.setInitialVector(result,commonTargetting_.targetVectors()[i],lrs_,nk);
 		result.collapseSectors();
-		targetVectors_[i] = result;
+		commonTargetting_.targetVectors(i) = result;
 	}
 
 	void calcDynVectors(SizeType site,const VectorWithOffsetType& phiNew)
 	{
-		for (SizeType i=0;i<targetVectors_[0].sectors();i++) {
+		for (SizeType i=0;i<commonTargetting_.targetVectors()[0].sectors();i++) {
 			VectorType sv;
-			SizeType i0 = targetVectors_[0].sector(i);
-			targetVectors_[0].extract(sv,i0);
-			SizeType p = lrs_.super().findPartitionNumber(targetVectors_[0].offset(i0));
+			SizeType i0 = commonTargetting_.targetVectors()[0].sector(i);
+			commonTargetting_.targetVectors()[0].extract(sv,i0);
+			SizeType p = lrs_.super().findPartitionNumber(commonTargetting_.targetVectors()[0].offset(i0));
 			if (i==0) {
 				if (lastLanczosVector_==0)
-					targetVectors_[1] = targetVectors_[0];
+					commonTargetting_.targetVectors(1) = commonTargetting_.targetVectors()[0];
 			}
 			setLanczosVectors(i0,sv,p,site,phiNew);
 		}
 		setWeights();
 		if (lastLanczosVector_==1 && fabs(weightForContinuedFraction_)<1e-6)
-			weightForContinuedFraction_ = std::real(targetVectors_[0]*targetVectors_[0]);
+			weightForContinuedFraction_ = std::real(commonTargetting_.targetVectors()[0]*commonTargetting_.targetVectors()[0]);
 	}
 
 	void setLanczosVectors(
@@ -372,8 +375,8 @@ private:
 		VectorType x(sv.size(),0.0);
 		VectorType y = sv;
 		if (lastLanczosVector_>0) {
-			targetVectors_[1].extract(y,i0);
-			targetVectors_[0].extract(x,i0);
+			commonTargetting_.targetVectors()[1].extract(y,i0);
+			commonTargetting_.targetVectors()[0].extract(x,i0);
 		}
 
 		if (lastLanczosVector_==0) normalize(y);
@@ -396,8 +399,8 @@ private:
 		dynCounter_++;
 		if (lastLanczosVector_>1 && (dynCounter_%tstStruct_.advanceEach) != 0)
 			return;
-		targetVectors_[0].setDataInSector(x,i0);
-		targetVectors_[1].setDataInSector(y,i0);
+		commonTargetting_.targetVectors(0).setDataInSector(x,i0);
+		commonTargetting_.targetVectors(1).setDataInSector(y,i0);
 		if ((dynCounter_%tstStruct_.advanceEach) != 0) return;
 		if (ab_.size()>0) {
 			lanczosSolver.push(ab_,a,b);
@@ -418,7 +421,7 @@ private:
 	void setWeights()
 	{
 		RealType sum  = 0;
-		weight_.resize(targetVectors_.size());
+		weight_.resize(commonTargetting_.targetVectors().size());
 		for (SizeType r=0;r<weight_.size();r++) {
 			weight_[r] = (r>lastLanczosVector_) ? 0 : 1;
 			sum += weight_[r];

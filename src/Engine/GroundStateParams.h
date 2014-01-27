@@ -83,6 +83,9 @@ namespace Dmrg {
 template<typename ModelType>
 class GroundStateParams {
 public:
+
+	typedef typename ModelType::RealType RealType;
+
 	template<typename IoInputter>
 	GroundStateParams(IoInputter& io,const ModelType& model)
 	{}

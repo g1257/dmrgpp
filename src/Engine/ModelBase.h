@@ -171,7 +171,7 @@ public:
 
 	virtual void hamiltonianOnLink(SparseMatrixType& hmatrix,
 	                               const BlockType& block,
-	                               const RealType& time,
+	                               RealType time,
 	                               RealType factorForDiagonals) const
 	{
 		typename PsimagLite::Vector<OperatorType>::Type cm;

@@ -124,7 +124,7 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
-	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
+	typedef typename IoType::In IoInputType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,
@@ -136,8 +136,7 @@ public:
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
-	                     WaveFunctionTransfType,
-	                     int> TargetHelperType;
+	                     WaveFunctionTransfType> TargetHelperType;
 	typedef CommonTargetting<TargetHelperType,
 	                         VectorWithOffsetType,
 	                         LanczosSolverType> CommonTargettingType;
@@ -190,27 +189,30 @@ public:
 	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 	           const SomeBasisType& someBasis)
 	{
-		psi_.set(v,someBasis);
+		commonTargetting_.psi().set(v,someBasis);
 	}
 
 	RealType normSquared(SizeType i) const
 	{
-		return commonTargetting_.normSquared(targetVectors_[i]);
+		return commonTargetting_.normSquared(i);
 	}
 
-	const VectorWithOffsetType& gs() const { return psi_; }
+	const VectorWithOffsetType& gs() const
+	{
+		return commonTargetting_.psi();
+	}
 
 	bool includeGroundStage() const {return fabs(gsWeight_)>1e-6; }
 
 	SizeType size() const
 	{
 		if (commonTargetting_.allStages(DISABLED)) return 0;
-		return targetVectors_.size();
+		return commonTargetting_.targetVectors().size();
 	}
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return targetVectors_[i];
+		return commonTargetting_.targetVectors()[i];
 	}
 
 	void evolve(RealType Eg,
@@ -246,8 +248,6 @@ public:
 
 		if (count==0) return;
 
-		Eg_ = Eg;
-
 		calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
 
 		if (model_.params().insitu=="" || !includeGroundStage()) return;
@@ -258,7 +258,7 @@ public:
 		}
 
 		try {
-			commonTargetting_.cocoon(direction,site,psi_,"PSI",0);
+			commonTargetting_.cocoon(direction,site,commonTargetting_.psi(),"PSI");
 		} catch (std::exception& e) {
 			commonTargetting_.noCocoon("unsupported by the model");
 		}
@@ -267,7 +267,7 @@ public:
 	void initialGuess(VectorWithOffsetType& v,
 	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
-		commonTargetting_.initialGuess(v,wft_,block,psi_,weight_,targetVectors_);
+		commonTargetting_.initialGuess(v,block,weight_);
 	}
 
 	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
@@ -286,7 +286,7 @@ public:
 
 		if (ab_.size()<2) return;
 		typename PostProcType::ParametersType params = paramsForSolver_;
-		params.Eg = Eg_;
+		params.Eg = commonTargetting_.energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
 		if (tstStruct_.aOperators[0].fermionSign>0) s2 *= s;
@@ -296,25 +296,26 @@ public:
 		PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(str);
 
-		commonTargetting_.save(block,io,cf,targetVectors_);
+		commonTargetting_.save(block,io,cf,commonTargetting_.targetVectors());
 
-		psi_.save(io,"PSI");
+		commonTargetting_.psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)
 	{
-		typename IoType::In io(f);
+		IoInputType io(f);
 		try {
 			commonTargetting_.setAllStagesTo(CONVERGING);
-			commonTargetting_.load(io,targetVectors_);
-			psi_.load(io,"PSI");
+			TimeSerializerType dynS(io,IoInputType::LAST_INSTANCE);
+			commonTargetting_.loadTargetVectors(dynS);
+			commonTargetting_.psi().load(io,"PSI");
 		} catch (std::exception& e) {
 			std::cout<<"WARNING: No special targets found in file "<<f<<"\n";
 			commonTargetting_.setAllStagesTo(DISABLED);
 			io.rewind();
 			int site = 0;
 			io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
-			psi_.loadOneSector(io,"PSI");
+			commonTargetting_.psi().loadOneSector(io,"PSI");
 		}
 	}
 
@@ -344,9 +345,9 @@ private:
 			SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 			getLanczosVectors(V,sv,p);
 			if (i==0) {
-				targetVectors_.resize(V.n_col());
-				for (SizeType j=0;j<targetVectors_.size();j++)
-					targetVectors_[j] = phi;
+				commonTargetting_.targetVectorsResize(V.n_col());
+				for (SizeType j=0;j<commonTargetting_.targetVectors().size();j++)
+					commonTargetting_.targetVectors(j) = phi;
 			}
 			setVectors(V,i0);
 		}
@@ -359,7 +360,7 @@ private:
 
 	void wftLanczosVectors(SizeType site,const VectorWithOffsetType& phi)
 	{
-		targetVectors_[0] = phi;
+		commonTargetting_.targetVectors()[0] = phi;
 		// don't wft since we did it before
 		SizeType numberOfSites = lrs_.super().block().size();
 		if (site==0 || site==numberOfSites -1)  return;
@@ -371,11 +372,11 @@ private:
 		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
 		                             PsimagLite::MPI::COMM_WORLD);
 
-		ParallelWftType helperWft(targetVectors_,model_.hilbertSize(site),wft_,lrs_);
-		threadedWft.loopCreate(targetVectors_.size()-1,helperWft,model_.concurrency());
+		ParallelWftType helperWft(commonTargetting_.targetVectors(),model_.hilbertSize(site),wft_,lrs_);
+		threadedWft.loopCreate(commonTargetting_.targetVectors().size()-1,helperWft,model_.concurrency());
 
-		for (SizeType i=1;i<targetVectors_.size();i++) {
-			assert(targetVectors_[i].size()==targetVectors_[0].size());
+		for (SizeType i=1;i<commonTargetting_.targetVectors().size();i++) {
+			assert(commonTargetting_.targetVectors()[i].size()==commonTargetting_.targetVectors()[0].size());
 		}
 	}
 
@@ -397,10 +398,10 @@ private:
 	void setVectors(const DenseMatrixType& V,
 	                SizeType i0)
 	{
-		for (SizeType i=0;i<targetVectors_.size();i++) {
+		for (SizeType i=0;i<commonTargetting_.targetVectors().size();i++) {
 			VectorType tmp(V.n_row());
 			for (SizeType j=0;j<tmp.size();j++) tmp[j] = V(j,i);
-			targetVectors_[i].setDataInSector(tmp,i0);
+			commonTargetting_.targetVectors()[i].setDataInSector(tmp,i0);
 		}
 	}
 
@@ -408,7 +409,7 @@ private:
 	{
 		gsWeight_ = 0.0;
 		RealType sum  = 0;
-		weight_.resize(targetVectors_.size());
+		weight_.resize(commonTargetting_.targetVectors().size());
 		for (SizeType r=0;r<weight_.size();r++) {
 			weight_[r] = 1.0;
 			sum += weight_[r];
