@@ -159,7 +159,7 @@ public:
 	      wft_(wft),
 	      progress_("CorrectionVectorTargetting"),
 	      gsWeight_(1.0),
-	      commonTargetting_(lrs,model,tstStruct,wft),
+	      commonTargetting_(lrs,model,tstStruct,wft,4),
 	      correctionEnabled_(false)
 	{
 		if (!wft.isEnabled())

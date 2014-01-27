@@ -189,6 +189,7 @@ private:
 						   typename PsimagLite::Vector<SizeType>::Type steps,
 						   SizeType systemOrEnviron)
 	{
+		assert(0 < targetVectors_.size());
 		targetVectors_[0] = phi;
 		for (SizeType i=startEnd.first+1;i<startEnd.second;i++) {
 			assert(i<targetVectors_.size());

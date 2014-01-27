@@ -116,10 +116,14 @@ public:
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
-	ApplyOperatorExpression(const TargetHelperType& targetHelper)
+	ApplyOperatorExpression(const TargetHelperType& targetHelper,
+	                        SizeType targets)
 	    : progress_("ApplyOperatorExpression"),
 	      stage_(targetHelper.tstStruct().sites(),DISABLED),
+	      E0_(0.0),
+	      currentTime_(0.0),
 	      applyOpLocal_(targetHelper.lrs()),
+	      targetVectors_(targets),
 	      timeVectorsBase_(0),
 	      targetHelper_(targetHelper)
 	{}

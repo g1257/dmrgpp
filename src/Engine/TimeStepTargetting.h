@@ -1,9 +1,8 @@
-
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -162,7 +161,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			  progress_("TimeStepTargetting"),
 			  times_(tstStruct_.timeSteps()),
 			  weight_(tstStruct_.timeSteps()),
-			  commonTargetting_(lrs,model,tstStruct,wft)
+			  commonTargetting_(lrs,model,tstStruct,wft,times_.size())
 			{
 				if (!wft.isEnabled()) throw PsimagLite::RuntimeError
 				       (" TimeStepTargetting needs an enabled wft\n");

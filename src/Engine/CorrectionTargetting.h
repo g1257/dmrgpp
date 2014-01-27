@@ -140,7 +140,7 @@ public:
 	      correctionStruct_(correctionStruct),
 	      waveFunctionTransformation_(wft),
 	      progress_("CorrectionTargetting"),
-	      commonTargetting_(lrs,model,correctionStruct,wft)
+	      commonTargetting_(lrs,model,correctionStruct,wft,0)
 	{}
 
 	const ModelType& model() const { return model_; }

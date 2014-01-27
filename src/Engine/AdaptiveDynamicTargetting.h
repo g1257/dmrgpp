@@ -152,7 +152,7 @@ public:
 	      dynCounter_(0),
 	      progress_("AdaptiveDynamicTargetting"),
 	      gsWeight_(1.0),
-	      commonTargetting_(lrs,model,tstStruct,wft),
+	      commonTargetting_(lrs,model,tstStruct,wft,2),
 	      done_(false),
 	      weightForContinuedFraction_(0)
 	{

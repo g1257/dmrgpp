@@ -139,10 +139,11 @@ public:
 	CommonTargetting(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
                      const TargettingParamsType& tstStruct,
-                     const WaveFunctionTransfType& wft)
+                     const WaveFunctionTransfType& wft,
+	                 SizeType targets)
 	    : progress_("CommonTargetting"),
 	      targetHelper_(lrs,model,tstStruct,wft),
-	      applyOpExpression_(targetHelper_)
+	      applyOpExpression_(targetHelper_,targets)
 	{}
 
 	SizeType getPhi(VectorWithOffsetType& phiNew,

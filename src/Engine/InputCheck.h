@@ -180,18 +180,21 @@ namespace Dmrg {
 		{
 			PsimagLite::String targetting="GroundStateTargetting";
 
-			const char *targets[]={"TimeStepTargetting",
-			                       "DynamicTargetting",
+			const char *targets[]={"GroundStateTargetting",
+			                       "TimeStepTargetting",
 			                       "AdaptiveDynamicTargetting",
+			                       "DynamicTargetting",
 			                       "CorrectionVectorTargetting",
 			                       "CorrectionTargetting",
 			                       "MettsTargetting"};
 
-			SizeType totalTargets = 6;
+			SizeType totalTargets = 7;
 
 			SizeType count = 0;
 			for (SizeType i = 0;i<totalTargets;++i) {
 				if (options.find(targets[i])!=PsimagLite::String::npos) {
+					if (targetting == "AdaptiveDynamicTargetting" &&
+					    std::string(targets[i]) == "DynamicTargetting") continue;
 					targetting = targets[i];
 					count++;
 				}
