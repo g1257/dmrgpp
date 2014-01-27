@@ -207,6 +207,21 @@ namespace Dmrg {
 				return unimplemented("maxTime");
 			}
 
+			virtual bool useQns() const
+			{
+				return unimplemented("useQns");
+			}
+
+			virtual SizeType indexNoAdvance() const
+			{
+				return unimplemented("indexNoAdvance");
+			}
+
+			virtual SizeType indexAdvance() const
+			{
+				return unimplemented("indexAdvance");
+			}
+
 			VectorSizeType sites;
 			VectorSizeType startingLoops;
 			SizeType concatenation;

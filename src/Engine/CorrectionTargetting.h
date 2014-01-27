@@ -152,7 +152,7 @@ public:
 
 	RealType weight(SizeType i) const
 	{
-		assert(stage_ != DISABLED);
+		assert(commonTargetting_.noStageIs(DISABLED));
 		return correctionStruct_.correctionA();
 	}
 

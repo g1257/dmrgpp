@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include "TimeVectorsBase.h"
 #include "ParallelTriDiag.h"
+#include "NoPthreads.h"
 
 namespace Dmrg {
 
