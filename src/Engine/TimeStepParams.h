@@ -112,6 +112,11 @@ namespace Dmrg {
 			return maxTime_;
 		}
 
+		virtual bool useQns() const
+		{
+			return true;
+		}
+
 	private:
 
 		RealType maxTime_;

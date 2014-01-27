@@ -119,22 +119,22 @@ public:
 		}
 	}
 
-	SizeType timeSteps() const
+	virtual SizeType timeSteps() const
 	{
 		return timeSteps_;
 	}
 
-	SizeType advanceEach() const
+	virtual SizeType advanceEach() const
 	{
 		return advanceEach_;
 	}
 
-	SizeType algorithm() const
+	virtual SizeType algorithm() const
 	{
 		return algorithm_;
 	}
 
-	RealType tau() const
+	virtual RealType tau() const
 	{
 		return tau_;
 	}

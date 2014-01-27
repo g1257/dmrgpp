@@ -188,14 +188,9 @@ public:
 		return unimplemented("useQns");
 	}
 
-	virtual SizeType indexNoAdvance() const
+	virtual SizeType timeSteps() const
 	{
-		return unimplemented("indexNoAdvance");
-	}
-
-	virtual SizeType indexAdvance() const
-	{
-		return unimplemented("indexAdvance");
+		return unimplemented("timeSteps");
 	}
 
 	virtual void setConcatenation(SizeType x)

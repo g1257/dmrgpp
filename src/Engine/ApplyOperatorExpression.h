@@ -426,6 +426,7 @@ private:
 	                SizeType systemOrEnviron)
 	{
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
+		SizeType timeSteps = targetHelper_.tstStruct().timeSteps();
 
 		if (stage_[i]==OPERATOR) {
 
@@ -448,9 +449,9 @@ private:
 			if (targetHelper_.tstStruct().useQns()) setQuantumNumbers(phiNew);
 		} else if (stage_[i] >= WFT_NOADVANCE) {
 
-			SizeType advance = targetHelper_.tstStruct().indexNoAdvance();
+			SizeType advance = 0;
 			if (stage_[i] == WFT_ADVANCE) {
-				advance = targetHelper_.tstStruct().indexAdvance();
+				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
 				timeVectorsBase_->timeHasAdvanced();
 			}
 
