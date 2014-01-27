@@ -166,13 +166,13 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			{
 				if (!wft.isEnabled()) throw PsimagLite::RuntimeError
 				       (" TimeStepTargetting needs an enabled wft\n");
-				if (tstStruct_.sites.size()==0) throw PsimagLite::RuntimeError
+				if (tstStruct_.sites().size()==0) throw PsimagLite::RuntimeError
 				       (" TimeStepTargetting needs at least one TSPSite\n");
 
 				RealType tau =tstStruct_.tau();
 				RealType sum = 0;
 				SizeType n = times_.size();
-				gsWeight_ = (tstStruct_.concatenation == SUM) ? 0.1 : 0.0;
+				gsWeight_ = (tstStruct_.concatenation() == SUM) ? 0.1 : 0.0;
 				gsWeight_ = commonTargetting_.setGsWeight(gsWeight_);
 
 				RealType factor = (n+4.0)/(n+2.0);

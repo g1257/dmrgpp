@@ -289,7 +289,7 @@ public:
 		params.Eg = commonTargetting_.energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
-		if (tstStruct_.aOperators[0].fermionSign>0) s2 *= s;
+		if (tstStruct_.aOperators()[0].fermionSign>0) s2 *= s;
 
 		PostProcType cf(ab_,reortho_,params);
 

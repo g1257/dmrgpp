@@ -306,7 +306,7 @@ public:
 
 	int findFermionSignOfTheOperators() const
 	{
-		const VectorOperatorType& myoperator = targetHelper_.tstStruct().aOperators;
+		const VectorOperatorType& myoperator = targetHelper_.tstStruct().aOperators();
 		int f = 0;
 
 		for (SizeType i = 0; i < myoperator.size(); ++i) {

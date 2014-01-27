@@ -103,7 +103,7 @@ public:
 	AdaptiveDynamicParams(IoInputter& io,const ModelType& model)
 	    : TargetParamsCommonType(io,model)
 	{
-		this->concatenation = SUM;
+		this->setConcatenation(SUM);
 		io.readline(type_,"DynamicDmrgType=");
 		io.readline(advanceEach_,"DynamicDmrgAdvanceEach=");
 	}

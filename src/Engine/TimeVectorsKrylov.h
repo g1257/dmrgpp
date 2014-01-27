@@ -146,7 +146,7 @@ public:
 	                             bool allOperatorsApplied,
 	                             const PsimagLite::Vector<SizeType>::Type& block)
 	{
-		if (currentTime_==0 && tstStruct_.noOperator) {
+		if (currentTime_==0 && tstStruct_.noOperator()) {
 			for (SizeType i=0;i<times_.size();i++)
 				targetVectors_[i]=phi;
 			return;

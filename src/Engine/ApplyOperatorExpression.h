@@ -118,7 +118,7 @@ public:
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper)
 	    : progress_("ApplyOperatorExpression"),
-	      stage_(targetHelper.tstStruct().sites.size(),DISABLED),
+	      stage_(targetHelper.tstStruct().sites().size(),DISABLED),
 	      applyOpLocal_(targetHelper.lrs()),
 	      timeVectorsBase_(0),
 	      targetHelper_(targetHelper)
@@ -140,7 +140,7 @@ public:
 		VectorWithOffsetType phiOld = psi_;
 		VectorWithOffsetType vectorSum;
 
-		SizeType max = targetHelper_.tstStruct().sites.size();
+		SizeType max = targetHelper_.tstStruct().sites().size();
 		if (noStageIs(DISABLED)) {
 			max = 1;
 			for (SizeType i=0;i<stage_.size();i++) {
@@ -153,14 +153,14 @@ public:
 		// in turn to the g.s.
 		for (SizeType i=0;i<max;i++) {
 			count += evolve(i,phiNew,phiOld,Eg,direction,site,loopNumber,max-1);
-			if (targetHelper_.tstStruct().concatenation==PRODUCT) {
+			if (targetHelper_.tstStruct().concatenation() == PRODUCT) {
 				phiOld = phiNew;
 			} else {
 				vectorSum += phiNew;
 			}
 		}
 
-		if (targetHelper_.tstStruct().concatenation==SUM) phiNew = vectorSum;
+		if (targetHelper_.tstStruct().concatenation() == SUM) phiNew = vectorSum;
 
 		if (allStages(DISABLED)) E0_ = Eg;
 		return count;
@@ -186,9 +186,9 @@ public:
 		for (SizeType j=0;j<i;j++) {
 			if (stage_[j] == DISABLED) {
 				PsimagLite::String s ="TST:: Seeing dynamic site ";
-				s += ttos(targetHelper_.tstStruct().sites[i]);
+				s += ttos(targetHelper_.tstStruct().sites()[i]);
 				s =s + " before having seen";
-				s = s + " site "+ttos(targetHelper_.tstStruct().sites[j]);
+				s = s + " site "+ttos(targetHelper_.tstStruct().sites()[j]);
 				s = s +". Please order your dynamic sites in order of appearance.\n";
 				throw PsimagLite::RuntimeError(s);
 			}
@@ -362,21 +362,21 @@ private:
 		static SizeType timesWithoutAdvancement = 0;
 		static bool firstSeeLeftCorner = false;
 
-		if (direction==INFINITE) {
+		if (direction == ProgramGlobals::INFINITE) {
 			E0_ = Eg;
 			return 0;
 		}
 
-		if (targetHelper_.tstStruct().startingLoops.size()>0 &&
-		    targetHelper_.tstStruct().startingLoops[i]>loopNumber) return 0;
+		if (targetHelper_.tstStruct().startingLoops().size()>0 &&
+		    targetHelper_.tstStruct().startingLoops()[i]>loopNumber) return 0;
 
-		if (site != targetHelper_.tstStruct().sites[i] && stage_[i]==DISABLED)
+		if (site != targetHelper_.tstStruct().sites()[i] && stage_[i]==DISABLED)
 			return 0;
 
-		if (site != targetHelper_.tstStruct().sites[i] && stage_[i]!=DISABLED && i>0)
+		if (site != targetHelper_.tstStruct().sites()[i] && stage_[i]!=DISABLED && i>0)
 			return 0;
 
-		if (site == targetHelper_.tstStruct().sites[i] && stage_[i]==DISABLED) {
+		if (site == targetHelper_.tstStruct().sites()[i] && stage_[i]==DISABLED) {
 			stage_[i]=OPERATOR;
 		} else {
 			stage_[i]=WFT_NOADVANCE;
@@ -425,8 +425,8 @@ private:
 
 		if (stage_[i]==OPERATOR) {
 
-			BorderEnumType corner = (targetHelper_.tstStruct().sites[i]==0 ||
-			                         targetHelper_.tstStruct().sites[i]==numberOfSites -1) ?
+			BorderEnumType corner = (targetHelper_.tstStruct().sites()[i]==0 ||
+			                         targetHelper_.tstStruct().sites()[i]==numberOfSites -1) ?
 			            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
 
 			PsimagLite::OstringStream msg;
@@ -435,7 +435,7 @@ private:
 			typename PsimagLite::Vector<SizeType>::Type electrons;
 			findElectronsOfOneSite(electrons,site);
 			FermionSign fs(targetHelper_.lrs().left(),electrons);
-			applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators[i],
+			applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[i],
 			              fs,systemOrEnviron,corner);
 			RealType norma = std::norm(phiNew);
 			if (norma==0)
@@ -460,7 +460,7 @@ private:
 			msg<<"I'm calling the WFT now";
 			progress_.printline(msg,std::cout);
 
-			if (targetHelper_.tstStruct().aOperators.size() == 1) {
+			if (targetHelper_.tstStruct().aOperators().size() == 1) {
 				guessPhiSectors(phiNew,i,systemOrEnviron,site);
 			} else {
 				if (targetHelper_.tstStruct().useQns())
@@ -492,10 +492,10 @@ private:
 		FermionSign fs(targetHelper_.lrs().left(),electrons);
 		if (allStages(WFT_NOADVANCE)) {
 			VectorWithOffsetType tmpVector = psi_;
-			for (SizeType j=0;j<targetHelper_.tstStruct().aOperators.size();j++) {
+			for (SizeType j=0;j<targetHelper_.tstStruct().aOperators().size();j++) {
 				applyOpLocal_(phi,
 				              tmpVector,
-				              targetHelper_.tstStruct().aOperators[j],
+				              targetHelper_.tstStruct().aOperators()[j],
 				              fs,
 				              systemOrEnviron,
 				              ApplyOperatorType::BORDER_NO);
@@ -505,7 +505,7 @@ private:
 		}
 		applyOpLocal_(phi,
 		              psi_,
-		              targetHelper_.tstStruct().aOperators[i],
+		              targetHelper_.tstStruct().aOperators()[i],
 		              fs,
 		              systemOrEnviron,
 		              ApplyOperatorType::BORDER_NO);

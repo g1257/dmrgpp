@@ -94,14 +94,14 @@ public:
 
 	template<typename IoInputter>
 	MettsParams(IoInputter& io,const ModelType& model)
-	    : TimeVectorParamsType(io,model),noOperator(false)
+	    : TimeVectorParamsType(io,model)
 	{
 		io.readline(beta,"BetaDividedByTwo=");
 		io.readline(rngSeed,"TSPRngSeed=");
 		io.readline(collapse,"MettsCollapse=");
+		this->noOperator(false);
 	}
 
-	bool noOperator;
 	int long long rngSeed;
 	RealType beta;
 	PsimagLite::String collapse;

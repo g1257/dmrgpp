@@ -111,7 +111,7 @@ public:
 	      cgSteps_(1000),
 	      cgEps_(1e-6)
 	{
-		this->concatenation = SUM;
+		this->setConcatenation(SUM);
 		io.readline(type_,"DynamicDmrgType=");
 		io.readline(steps_,"DynamicDmrgSteps=");
 		io.readline(eps_,"DynamicDmrgEps=");

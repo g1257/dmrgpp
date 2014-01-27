@@ -97,22 +97,24 @@ namespace Dmrg {
 			typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 			typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 			typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
+			typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
 			enum {PRODUCT,SUM};
 
 			template<typename IoInputter>
 			TargetParamsCommon(IoInputter& io,const ModelType& model)
-			: sites(0),
-			  startingLoops(0),
-			  concatenation(PRODUCT),
-			   noOperator(false),
+			: sites_(0),
+			  startingLoops_(0),
+			  concatenation_(PRODUCT),
+			   noOperator_(false),
 			  model_(model)
 			{
-				io.read(sites,"TSPSites");
-				io.read(startingLoops,"TSPLoops");
-				PsimagLite::String productOrSum="product";
+				io.read(sites_,"TSPSites");
+				io.read(startingLoops_,"TSPLoops");
+
+				PsimagLite::String productOrSum_ = "product";
 				try {
-					io.readline(productOrSum,"TSPProductOrSum=");
+					io.readline(productOrSum_,"TSPProductOrSum=");
 				} catch (std::exception& e) {
 					PsimagLite::String s(__FILE__);
 					s += "\n FATAL: Must provide TSPProductOrSum=.\n"; 
@@ -123,28 +125,48 @@ namespace Dmrg {
 
 				//! Concatenation specifies what to do with
 				//! operators at different sites, add them or multiply them
-				if (productOrSum=="product") {
-					this->concatenation = PRODUCT;
-				} else if (productOrSum=="sum") {
-					this->concatenation = SUM;
+				if (productOrSum_ == "product") {
+					this->concatenation_ = PRODUCT;
+				} else if (productOrSum_ == "sum") {
+					this->concatenation_ = SUM;
 				} else {
 					PsimagLite::String s(__FILE__);
-					s += " : Unknown concatentation " + productOrSum + "\n";
+					s += " : Unknown concatentation " + productOrSum_ + "\n";
 					throw PsimagLite::RuntimeError(s.c_str());
 				}
 
-				aOperators.resize(sites.size());
+				aOperators_.resize(sites_.size());
 
 				CookedOperator<ModelType> cookedOperator(model_);
 
-				for (SizeType i=0;i<sites.size();i++) {
+				for (SizeType i=0;i<sites_.size();i++) {
 					OperatorType myOp(io,cookedOperator,OperatorType::MUST_BE_NONZERO);
-					aOperators[i] = myOp;
+					aOperators_[i] = myOp;
 				}
 
-				noOperator = isNoOperator();
+				noOperator_ = isNoOperator();
 				checkBorderOperators();
 				checkSizesOfOperators();
+			}
+
+			virtual const VectorSizeType& sites() const
+			{
+				return sites_;
+			}
+
+			virtual const VectorSizeType& startingLoops() const
+			{
+				return startingLoops_;
+			}
+
+			virtual SizeType concatenation() const
+			{
+				return concatenation_;
+			}
+
+			virtual const VectorOperatorType& aOperators() const
+			{
+				return aOperators_;
 			}
 
 			virtual RealType correctionA() const
@@ -221,37 +243,46 @@ namespace Dmrg {
 			{
 				return unimplemented("indexAdvance");
 			}
-
-			VectorSizeType sites;
-			VectorSizeType startingLoops;
-			SizeType concatenation;
-			typename PsimagLite::Vector<OperatorType>::Type aOperators;
-			bool noOperator;
 		
+			virtual void setConcatenation(SizeType x)
+			{
+				concatenation_ = x;
+			}
+
+			virtual bool noOperator() const
+			{
+				return noOperator_;
+			}
+
+			virtual void noOperator(bool x)
+			{
+				noOperator_ = x;
+			}
+
 		private:
 
 			bool isNoOperator() const
 			{
-				if (aOperators.size()!=1) return false;
-				return (isTheIdentity(aOperators[0].data) && aOperators[0].fermionSign);
+				if (aOperators_.size()!=1) return false;
+				return (isTheIdentity(aOperators_[0].data) && aOperators_[0].fermionSign);
 			}
 			
 			void checkSizesOfOperators() const
 			{
-				if (sites.size() != aOperators.size() ||
-				    sites.size() != startingLoops.size())
+				if (sites_.size() != aOperators_.size() ||
+				    sites_.size() != startingLoops_.size())
 					throw PsimagLite::RuntimeError("CommonTargetting\n");
 
-				for (SizeType i=0;i<aOperators.size();i++) {
-					SizeType n = aOperators[i].data.row();
-					if (n!=model_.hilbertSize(sites[i]))
+				for (SizeType i=0;i<aOperators_.size();i++) {
+					SizeType n = aOperators_[i].data.row();
+					if (n!=model_.hilbertSize(sites_[i]))
 						throw PsimagLite::RuntimeError("CommonTargetting\n");
 				}
 			}
 
 			void checkBorderOperators()
 			{
-				if (sites.size() == 0) return;
+				if (sites_.size() == 0) return;
 
 				SizeType linSize = model_.geometry().numberOfSites();
 
@@ -266,8 +297,8 @@ namespace Dmrg {
 
 			bool hasOperatorAt(SizeType site) const
 			{
-				for (SizeType i = 0; i < sites.size(); ++i) {
-					if (sites[i] == site) return true;
+				for (SizeType i = 0; i < sites_.size(); ++i) {
+					if (sites_[i] == site) return true;
 				}
 				return false;
 			}
@@ -288,6 +319,11 @@ namespace Dmrg {
 				throw PsimagLite::RuntimeError(s);
 			}
 
+			VectorSizeType sites_;
+			VectorSizeType startingLoops_;
+			SizeType concatenation_;
+			VectorOperatorType aOperators_;
+			bool noOperator_;
 			const ModelType& model_;
 	}; // class TargetParamsCommon
 	
@@ -295,14 +331,14 @@ namespace Dmrg {
 	inline std::ostream&
 	operator<<(std::ostream& os,const TargetParamsCommon<ModelType>& t)
 	{
-		os<<"#TargetParams.operators="<<t.aOperators.size()<<"\n";
-		for (SizeType i=0;i<t.aOperators.size();i++) {
+		os<<"#TargetParams.operators="<<t.aOperators().size()<<"\n";
+		for (SizeType i=0;i<t.aOperators().size();i++) {
 			os<<"#TargetParams.operator "<<i<<"\n";
-			os<<t.aOperators[i];
+			os<<t.aOperators()[i];
 		}
 
-		os<<"#TargetParams.site="<<t.sites;
-		os<<"#TargetParams.startingLoop="<<t.startingLoops<<"\n";
+		os<<"#TargetParams.site="<<t.sites();
+		os<<"#TargetParams.startingLoop="<<t.startingLoops()<<"\n";
 
 		return os;
 	}
