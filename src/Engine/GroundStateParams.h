@@ -77,14 +77,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef GROUNDSTATE_PARAMS_H
 #define GROUNDSTATE_PARAMS_H
-#include "TargetParamsCommon.h"
+#include "TargetParamsBase.h"
 
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class GroundStateParams : public TargetParamsCommon<ModelType> {
+class GroundStateParams : public TargetParamsBase<ModelType> {
 
-	typedef TargetParamsCommon<ModelType> BaseType;
+	typedef TargetParamsBase<ModelType> BaseType;
 
 public:
 
@@ -92,8 +92,10 @@ public:
 
 	template<typename IoInputter>
 	GroundStateParams(IoInputter& io,const ModelType& model)
-	: BaseType(io,model)
 	{}
+
+	virtual SizeType sites() const { return 0; }
+
 }; // class GroundStateParams
 
 template<typename ModelType>

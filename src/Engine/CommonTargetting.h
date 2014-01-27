@@ -206,37 +206,9 @@ public:
 	void initialGuess(VectorWithOffsetType& v,
 	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
-		const VectorVectorWithOffsetType& targetVectors = applyOpExpression_.targetVectors();
-		typename PsimagLite::Vector<RealType>::Type weights(targetVectors.size(),1.0);
-		initialGuess(v,block,weights);
-	}
-
-	void initialGuess(VectorWithOffsetType& v,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block,
-	                  const typename PsimagLite::Vector<RealType>::Type& weights) const
-	{
-//		const VectorVectorWithOffsetType& targetVectors = applyOpExpression_.targetVectors();
-		initialGuess(v,block,weights);
-//		if (!allStages(WFT_NOADVANCE)) return;
-
-//		PsimagLite::Vector<SizeType>::Type nk;
-//		setNk(nk,block);
-//		typename PsimagLite::Vector<VectorWithOffsetType>::Type vv(targetVectors.size());
-//		for (SizeType i=0;i<targetVectors.size();i++) {
-//			setInitialVector(vv[i],targetVectors[i],nk);
-//			if (std::norm(vv[i])<1e-6) continue;
-//			VectorWithOffsetType w= weights[i]*vv[i];
-//			v += w;
-//		}
-	}
-
-	void initialGuess(VectorWithOffsetType& v,
-	                  const WaveFunctionTransfType& wft,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
 		PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
-		setInitialVector(v,psi,nk);
+		setInitialVector(v,applyOpExpression_.psi(),nk);
 	}
 
 	void noCocoon(const PsimagLite::String& msg) const
@@ -429,7 +401,7 @@ private:
 
 	void setInitialVector(VectorWithOffsetType& v1,
 	                      const VectorWithOffsetType& v2,
-	                      const PsimagLite::Vector<SizeType>::Type& nk) const
+	                      const VectorSizeType& nk) const
 	{
 		const WaveFunctionTransfType& wft = targetHelper_.wft();
 		bool noguess = (targetHelper_.model().params().options.find("targetnoguess") !=

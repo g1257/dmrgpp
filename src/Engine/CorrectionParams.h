@@ -80,14 +80,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CORRECTION_PARAMS_H
 
 #include <vector>
-#include "TargetParamsCommon.h"
+#include "TargetParamsBase.h"
 
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class CorrectionParams : public TargetParamsCommon<ModelType> {
+class CorrectionParams : public TargetParamsBase<ModelType> {
 
-	typedef TargetParamsCommon<ModelType> BaseType;
+	typedef TargetParamsBase<ModelType> BaseType;
 
 public:
 
@@ -95,10 +95,11 @@ public:
 
 	template<typename IoInputter>
 	CorrectionParams(IoInputter& io,const ModelType& model)
-	    : BaseType(io,model)
 	{
 		io.readline(correctionA_,"CorrectionA=");
 	}
+
+	virtual SizeType sites() const { return 0; }
 
 	virtual RealType correctionA() const
 	{

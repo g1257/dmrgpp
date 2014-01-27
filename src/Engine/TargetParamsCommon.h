@@ -82,11 +82,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <iostream>
 #include "CookedOperator.h"
+#include "TargetParamsBase.h"
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
 	template<typename ModelType>
-	class TargetParamsCommon {
+	class TargetParamsCommon : public TargetParamsBase<ModelType> {
 		public:
 			typedef typename ModelType::RealType RealType;
 			
@@ -149,9 +150,15 @@ namespace Dmrg {
 				checkSizesOfOperators();
 			}
 
-			virtual const VectorSizeType& sites() const
+			virtual SizeType sites() const
 			{
-				return sites_;
+				return sites_.size();
+			}
+
+			virtual SizeType sites(SizeType i) const
+			{
+				assert(i < sites_.size());
+				return sites_[i];
 			}
 
 			virtual const VectorSizeType& startingLoops() const
@@ -168,81 +175,6 @@ namespace Dmrg {
 			{
 				return aOperators_;
 			}
-
-			virtual RealType correctionA() const
-			{
-				return unimplemented("correctionA");
-			}
-
-			virtual SizeType type() const
-			{
-				return unimplemented("type");
-			}
-
-			virtual SizeType steps() const
-			{
-				return unimplemented("steps");
-			}
-
-			virtual RealType eps() const
-			{
-				return unimplemented("eps");
-			}
-
-			virtual SizeType advanceEach() const
-			{
-				return unimplemented("advanceEach");
-			}
-
-			virtual SizeType cgSteps() const
-			{
-				return unimplemented("cgSteps");
-			}
-
-			virtual RealType omega() const
-			{
-				return unimplemented("omega");
-			}
-
-			virtual RealType eta() const
-			{
-				return unimplemented("eta");
-			}
-
-			virtual SizeType cgEps() const
-			{
-				return unimplemented("cgEps");
-			}
-
-			virtual SizeType algorithm() const
-			{
-				return unimplemented("algorithm");
-			}
-
-			virtual RealType tau() const
-			{
-				return unimplemented("tau");
-			}
-
-			virtual RealType maxTime() const
-			{
-				return unimplemented("maxTime");
-			}
-
-			virtual bool useQns() const
-			{
-				return unimplemented("useQns");
-			}
-
-			virtual SizeType indexNoAdvance() const
-			{
-				return unimplemented("indexNoAdvance");
-			}
-
-			virtual SizeType indexAdvance() const
-			{
-				return unimplemented("indexAdvance");
-			}
 		
 			virtual void setConcatenation(SizeType x)
 			{
@@ -258,6 +190,10 @@ namespace Dmrg {
 			{
 				noOperator_ = x;
 			}
+
+			template<typename ModelType_>
+			friend std::ostream& operator<<(std::ostream& os,
+			                                const TargetParamsCommon<ModelType_>& t);
 
 		private:
 
@@ -313,12 +249,6 @@ namespace Dmrg {
 				throw PsimagLite::RuntimeError(str);
 			}
 
-			RealType unimplemented(PsimagLite::String s) const
-			{
-				s = "TargetParamsBase: unimplemented " + s + "\n";
-				throw PsimagLite::RuntimeError(s);
-			}
-
 			VectorSizeType sites_;
 			VectorSizeType startingLoops_;
 			SizeType concatenation_;
@@ -331,14 +261,14 @@ namespace Dmrg {
 	inline std::ostream&
 	operator<<(std::ostream& os,const TargetParamsCommon<ModelType>& t)
 	{
-		os<<"#TargetParams.operators="<<t.aOperators().size()<<"\n";
-		for (SizeType i=0;i<t.aOperators().size();i++) {
+		os<<"#TargetParams.operators="<<t.aOperators_.size()<<"\n";
+		for (SizeType i=0;i<t.aOperators_.size();i++) {
 			os<<"#TargetParams.operator "<<i<<"\n";
-			os<<t.aOperators()[i];
+			os<<t.aOperators_[i];
 		}
 
-		os<<"#TargetParams.site="<<t.sites();
-		os<<"#TargetParams.startingLoop="<<t.startingLoops()<<"\n";
+		os<<"#TargetParams.site="<<t.sites_;
+		os<<"#TargetParams.startingLoop="<<t.startingLoops_<<"\n";
 
 		return os;
 	}

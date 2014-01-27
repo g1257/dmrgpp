@@ -83,17 +83,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CORRECTION_V_PARAMS_H
 
 #include "TargetParamsCommon.h"
-#include "CorrectionParams.h"
 
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class CorrectionVectorParams : public CorrectionParams<ModelType> {
+class CorrectionVectorParams : public TargetParamsCommon<ModelType> {
 
 public:
 
-	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
-	typedef CorrectionParams<ModelType> CorrectionParamsType;
+	typedef TargetParamsCommon<ModelType> BaseType;
 	typedef typename ModelType::RealType RealType;
 
 	typedef typename ModelType::OperatorType OperatorType;
@@ -102,12 +100,12 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrReal;
 	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
-	static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
-	static SizeType const SUM = TargetParamsCommonType::SUM;
+	static SizeType const PRODUCT = BaseType::PRODUCT;
+	static SizeType const SUM = BaseType::SUM;
 
 	template<typename IoInputter>
 	CorrectionVectorParams(IoInputter& io,const ModelType& model)
-	    : CorrectionParamsType(io,model),
+	    : BaseType(io,model),
 	      cgSteps_(1000),
 	      cgEps_(1e-6)
 	{
@@ -174,11 +172,11 @@ private:
 }; // class CorrectionVectorParams
 
 template<typename ModelType>
-inline std::ostream&
-operator<<(std::ostream& os,const CorrectionVectorParams<ModelType>& t)
+inline std::ostream& operator<<(std::ostream& os,
+                                const CorrectionVectorParams<ModelType>& t)
 {
 	os<<"#TargetParams.type=AdaptiveDynamic\n";
-	const typename TimeStepParams<ModelType>::TargetParamsCommonType& tp = t;
+	const TargetParamsCommon<ModelType>& tp = t;
 	os<<tp;
 	os<<"DynamicDmrgType="<<t.type()<<"\n";
 	os<<"DynamicDmrgSteps="<<t.steps()<<"\n";

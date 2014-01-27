@@ -142,8 +142,7 @@ public:
 	      waveFunctionTransformation_(wft),
 	      progress_("GroundStateTargetting"),
 	      commonTargetting_(lrs,model,tstStruct,wft)
-	{
-	}
+	{}
 
 	const ModelType& model() const { return model_; }
 

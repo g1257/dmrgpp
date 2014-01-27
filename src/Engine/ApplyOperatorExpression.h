@@ -118,7 +118,7 @@ public:
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper)
 	    : progress_("ApplyOperatorExpression"),
-	      stage_(targetHelper.tstStruct().sites().size(),DISABLED),
+	      stage_(targetHelper.tstStruct().sites(),DISABLED),
 	      applyOpLocal_(targetHelper.lrs()),
 	      timeVectorsBase_(0),
 	      targetHelper_(targetHelper)
@@ -140,7 +140,7 @@ public:
 		VectorWithOffsetType phiOld = psi_;
 		VectorWithOffsetType vectorSum;
 
-		SizeType max = targetHelper_.tstStruct().sites().size();
+		SizeType max = targetHelper_.tstStruct().sites();
 		if (noStageIs(DISABLED)) {
 			max = 1;
 			for (SizeType i=0;i<stage_.size();i++) {
@@ -186,9 +186,9 @@ public:
 		for (SizeType j=0;j<i;j++) {
 			if (stage_[j] == DISABLED) {
 				PsimagLite::String s ="TST:: Seeing dynamic site ";
-				s += ttos(targetHelper_.tstStruct().sites()[i]);
+				s += ttos(targetHelper_.tstStruct().sites(i));
 				s =s + " before having seen";
-				s = s + " site "+ttos(targetHelper_.tstStruct().sites()[j]);
+				s = s + " site "+ttos(targetHelper_.tstStruct().sites(j));
 				s = s +". Please order your dynamic sites in order of appearance.\n";
 				throw PsimagLite::RuntimeError(s);
 			}
@@ -370,13 +370,13 @@ private:
 		if (targetHelper_.tstStruct().startingLoops().size()>0 &&
 		    targetHelper_.tstStruct().startingLoops()[i]>loopNumber) return 0;
 
-		if (site != targetHelper_.tstStruct().sites()[i] && stage_[i]==DISABLED)
+		if (site != targetHelper_.tstStruct().sites(i) && stage_[i]==DISABLED)
 			return 0;
 
-		if (site != targetHelper_.tstStruct().sites()[i] && stage_[i]!=DISABLED && i>0)
+		if (site != targetHelper_.tstStruct().sites(i) && stage_[i]!=DISABLED && i>0)
 			return 0;
 
-		if (site == targetHelper_.tstStruct().sites()[i] && stage_[i]==DISABLED) {
+		if (site == targetHelper_.tstStruct().sites(i) && stage_[i]==DISABLED) {
 			stage_[i]=OPERATOR;
 		} else {
 			stage_[i]=WFT_NOADVANCE;
@@ -425,8 +425,8 @@ private:
 
 		if (stage_[i]==OPERATOR) {
 
-			BorderEnumType corner = (targetHelper_.tstStruct().sites()[i]==0 ||
-			                         targetHelper_.tstStruct().sites()[i]==numberOfSites -1) ?
+			BorderEnumType corner = (targetHelper_.tstStruct().sites(i)==0 ||
+			                         targetHelper_.tstStruct().sites(i)==numberOfSites -1) ?
 			            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
 
 			PsimagLite::OstringStream msg;
