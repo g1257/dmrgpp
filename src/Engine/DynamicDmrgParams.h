@@ -105,14 +105,31 @@ public:
 	    : TargetParamsCommonType(io,model)
 	{
 		this->concatenation = SUM;
-		io.readline(type,"DynamicDmrgType=");
-		io.readline(steps,"DynamicDmrgSteps=");
-		io.readline(eps,"DynamicDmrgEps=");
+		io.readline(type_,"DynamicDmrgType=");
+		io.readline(steps_,"DynamicDmrgSteps=");
+		io.readline(eps_,"DynamicDmrgEps=");
 	}
 
-	SizeType type;
-	SizeType steps;
-	RealType eps;
+	virtual SizeType type() const
+	{
+		return type_;
+	}
+
+	virtual SizeType steps() const
+	{
+		return steps_;
+	}
+
+	virtual RealType eps() const
+	{
+		return eps_;
+	}
+
+private:
+
+	SizeType type_;
+	SizeType steps_;
+	RealType eps_;
 
 }; // class DynamicDmrgParams
 
@@ -124,9 +141,9 @@ operator<<(std::ostream& os,const DynamicDmrgParams<ModelType>& t)
 	const typename DynamicDmrgParams<ModelType>::TargetParamsCommonType&
 	        tp = t;
 	os<<tp;
-	os<<"DynamicDmrgType="<<t.type<<"\n";
-	os<<"DynamicDmrgSteps="<<t.steps<<"\n";
-	os<<"DynamicDmrgEps="<<t.eps<<"\n";
+	os<<"DynamicDmrgType="<<t.type()<<"\n";
+	os<<"DynamicDmrgSteps="<<t.steps()<<"\n";
+	os<<"DynamicDmrgEps="<<t.eps()<<"\n";
 	return os;
 }
 } // namespace Dmrg 

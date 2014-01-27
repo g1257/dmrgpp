@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
 	template<typename ModelType>
-	class TimeStepParams : public TimeVectorsParams<ModelType>, public TargetParamsCommon<ModelType> {
+	class TimeStepParams : public TimeVectorsParams<ModelType>{
 
 	public:
 
@@ -100,15 +100,21 @@ namespace Dmrg {
 		template<typename IoInputter>
 		TimeStepParams(IoInputter& io,const ModelType& model)
 			: TimeVectorParamsType(io,model),
-		      TargetParamsCommonType(io,model),
-		      maxTime(0)
+		      maxTime_(0)
 		{
 			try {
-				io.readline(maxTime,"TSPMaxTime=");
+				io.readline(maxTime_,"TSPMaxTime=");
 			} catch (std::exception& e) {}
 		}
 
-		RealType maxTime;
+		virtual RealType maxTime() const
+		{
+			return maxTime_;
+		}
+
+	private:
+
+		RealType maxTime_;
 
 	}; // class TimeStepParams
 	
@@ -124,8 +130,8 @@ namespace Dmrg {
 		const typename TimeStepParams<ModelType>::TargetParamsCommonType& tp = t;
 		os<<tp;
 
-		if (t.maxTime > 0)
-			os<<"TSPMaxTime="<<t.maxTime<<"\n";
+		if (t.maxTime() > 0)
+			os<<"TSPMaxTime="<<t.maxTime()<<"\n";
 
 		return os;
 	}

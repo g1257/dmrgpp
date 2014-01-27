@@ -146,7 +146,67 @@ namespace Dmrg {
 				checkBorderOperators();
 				checkSizesOfOperators();
 			}
-			
+
+			virtual RealType correctionA() const
+			{
+				return unimplemented("correctionA");
+			}
+
+			virtual SizeType type() const
+			{
+				return unimplemented("type");
+			}
+
+			virtual SizeType steps() const
+			{
+				return unimplemented("steps");
+			}
+
+			virtual RealType eps() const
+			{
+				return unimplemented("eps");
+			}
+
+			virtual SizeType advanceEach() const
+			{
+				return unimplemented("advanceEach");
+			}
+
+			virtual SizeType cgSteps() const
+			{
+				return unimplemented("cgSteps");
+			}
+
+			virtual RealType omega() const
+			{
+				return unimplemented("omega");
+			}
+
+			virtual RealType eta() const
+			{
+				return unimplemented("eta");
+			}
+
+			virtual SizeType cgEps() const
+			{
+				return unimplemented("cgEps");
+			}
+
+			virtual SizeType algorithm() const
+			{
+				return unimplemented("algorithm");
+			}
+
+			virtual RealType tau() const
+			{
+				return unimplemented("tau");
+			}
+
+			virtual RealType maxTime() const
+			{
+				return unimplemented("maxTime");
+			}
+
 			VectorSizeType sites;
 			VectorSizeType startingLoops;
 			SizeType concatenation;
@@ -207,8 +267,13 @@ namespace Dmrg {
 				throw PsimagLite::RuntimeError(str);
 			}
 
+			RealType unimplemented(PsimagLite::String s) const
+			{
+				s = "TargetParamsBase: unimplemented " + s + "\n";
+				throw PsimagLite::RuntimeError(s);
+			}
+
 			const ModelType& model_;
-//			VectorMatrixType data_;
 	}; // class TargetParamsCommon
 	
 	template<typename ModelType>

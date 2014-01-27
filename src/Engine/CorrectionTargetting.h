@@ -153,7 +153,7 @@ public:
 	RealType weight(SizeType i) const
 	{
 		assert(stage_ != DISABLED);
-		return correctionStruct_.correctionA;
+		return correctionStruct_.correctionA();
 	}
 
 	RealType gsWeight() const
@@ -244,7 +244,7 @@ public:
 	void print(std::ostream& os) const
 	{
 		os<<"CorrectionWeightGroundState=1\n";
-		os<<"CorrectionWeightCorrection="<<correctionStruct_.correctionA<<"\n";
+		os<<"CorrectionWeightCorrection="<<correctionStruct_.correctionA()<<"\n";
 	}
 
 	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const

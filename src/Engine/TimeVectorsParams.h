@@ -84,7 +84,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class TimeVectorsParams {
+class TimeVectorsParams : public TargetParamsCommon<ModelType> {
+
+	typedef TargetParamsCommon<ModelType> BaseType;
 
 public:
 
@@ -94,19 +96,19 @@ public:
 
 	template<typename IoInputter>
 	TimeVectorsParams(IoInputter& io,const ModelType& model)
-	    : tau(0),timeSteps(0),advanceEach(0),algorithm(KRYLOV)
+	    : BaseType(io,model),timeSteps_(0),advanceEach_(0), algorithm_(KRYLOV),tau_(0)
 	{
-		io.readline(tau,"TSPTau=");
-		io.readline(timeSteps,"TSPTimeSteps=");
-		io.readline(advanceEach,"TSPAdvanceEach=");
+		io.readline(tau_,"TSPTau=");
+		io.readline(timeSteps_,"TSPTimeSteps=");
+		io.readline(advanceEach_,"TSPAdvanceEach=");
 		PsimagLite::String s="";
 
 		try {
 			io.readline(s,"TSPAlgorithm=");
 			if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta")
-				algorithm = RUNGE_KUTTA;
+				algorithm_ = RUNGE_KUTTA;
 			if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter")
-				algorithm = SUZUKI_TROTTER;
+				algorithm_ = SUZUKI_TROTTER;
 		} catch (std::exception& e) {
 			PsimagLite::String s(__FILE__);
 			s += "\n FATAL: TSPAlgorithm not found in input file.\n";
@@ -116,10 +118,32 @@ public:
 		}
 	}
 
-	RealType tau;
-	SizeType timeSteps;
-	SizeType advanceEach;
-	SizeType algorithm;
+	SizeType timeSteps() const
+	{
+		return timeSteps_;
+	}
+
+	SizeType advanceEach() const
+	{
+		return advanceEach_;
+	}
+
+	SizeType algorithm() const
+	{
+		return algorithm_;
+	}
+
+	RealType tau() const
+	{
+		return tau_;
+	}
+
+private:
+
+	SizeType timeSteps_;
+	SizeType advanceEach_;
+	SizeType algorithm_;
+	RealType tau_;
 
 }; // class TimeVectorsParams
 
@@ -128,10 +152,10 @@ inline std::ostream&
 operator<<(std::ostream& os,const TimeVectorsParams<ModelType>& t)
 {
 	os<<"#TargetParams.type=TimeVectors";
-	os<<"#TargetParams.tau="<<t.tau<<"\n";
-	os<<"#TargetParams.timeSteps="<<t.timeSteps<<"\n";
-	os<<"#TargetParams.advanceEach="<<t.advanceEach<<"\n";
-	os<<"#TargetParams.algorithm="<<t.algorithm<<"\n";
+	os<<"#TargetParams.tau="<<t.tau()<<"\n";
+	os<<"#TargetParams.timeSteps="<<t.timeSteps()<<"\n";
+	os<<"#TargetParams.advanceEach="<<t.advanceEach()<<"\n";
+	os<<"#TargetParams.algorithm="<<t.algorithm()<<"\n";
 	return os;
 }
 } // namespace Dmrg 

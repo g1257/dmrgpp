@@ -216,7 +216,7 @@ private:
 		//				std::cerr<<"norma of phi0="<<PsimagLite::norm(phi0)<<"\n";
 		FunctionForRungeKutta f(E0_,lrs_,model_,Eg,phi,i0);
 
-		RealType epsForRK = tstStruct_.tau/(times_.size()-1.0);
+		RealType epsForRK = tstStruct_.tau()/(times_.size()-1.0);
 		PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType> rungeKutta(f,epsForRK);
 
 		typename PsimagLite::Vector<TargetVectorType>::Type result;

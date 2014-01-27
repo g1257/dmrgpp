@@ -88,9 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class CorrectionVectorParams :
-        public TargetParamsCommon<ModelType>,
-        public CorrectionParams<ModelType> {
+class CorrectionVectorParams : public CorrectionParams<ModelType> {
 
 public:
 
@@ -109,34 +107,70 @@ public:
 
 	template<typename IoInputter>
 	CorrectionVectorParams(IoInputter& io,const ModelType& model)
-	    : TargetParamsCommonType(io,model),
-	      CorrectionParamsType(io,model),
-	      cgSteps(1000),
-	      cgEps(1e-6)
+	    : CorrectionParamsType(io,model),
+	      cgSteps_(1000),
+	      cgEps_(1e-6)
 	{
 		this->concatenation = SUM;
-		io.readline(type,"DynamicDmrgType=");
-		io.readline(steps,"DynamicDmrgSteps=");
-		io.readline(eps,"DynamicDmrgEps=");
-		io.readline(omega,"CorrectionVectorOmega=");
-		io.readline(eta,"CorrectionVectorEta=");
+		io.readline(type_,"DynamicDmrgType=");
+		io.readline(steps_,"DynamicDmrgSteps=");
+		io.readline(eps_,"DynamicDmrgEps=");
+		io.readline(omega_,"CorrectionVectorOmega=");
+		io.readline(eta_,"CorrectionVectorEta=");
 
 		try {
-			io.readline(cgSteps,"ConjugateGradientSteps=");
+			io.readline(cgSteps_,"ConjugateGradientSteps=");
 		} catch (std::exception& e) {}
 
 		try {
-			io.readline(cgEps,"ConjugateGradientEps=");
+			io.readline(cgEps_,"ConjugateGradientEps=");
 		} catch (std::exception& e) {}
 	}
 
-	SizeType type;
-	SizeType steps;
-	RealType eps;
-	RealType omega;
-	RealType eta;
-	SizeType cgSteps;
-	RealType cgEps;
+	virtual SizeType type() const
+	{
+		return type_;
+	}
+
+	virtual SizeType steps() const
+	{
+		return steps_;
+	}
+
+	virtual RealType eps() const
+	{
+		return eps_;
+	}
+
+	virtual SizeType cgSteps() const
+	{
+		return cgSteps_;
+	}
+
+	virtual RealType omega() const
+	{
+		return omega_;
+	}
+
+	virtual RealType eta() const
+	{
+		return eta_;
+	}
+
+	virtual SizeType cgEps() const
+	{
+		return cgEps_;
+	}
+
+private:
+
+	SizeType type_;
+	SizeType steps_;
+	RealType eps_;
+	SizeType cgSteps_;
+	RealType omega_;
+	RealType eta_;
+	RealType cgEps_;
 }; // class CorrectionVectorParams
 
 template<typename ModelType>
@@ -146,13 +180,13 @@ operator<<(std::ostream& os,const CorrectionVectorParams<ModelType>& t)
 	os<<"#TargetParams.type=AdaptiveDynamic\n";
 	const typename TimeStepParams<ModelType>::TargetParamsCommonType& tp = t;
 	os<<tp;
-	os<<"DynamicDmrgType="<<t.type<<"\n";
-	os<<"DynamicDmrgSteps="<<t.steps<<"\n";
-	os<<"DynamicDmrgEps="<<t.eps<<"\n";
-	os<<"CorrectionVectorOmega="<<t.omega<<"\n";
-	os<<"CorrectionVectorEta="<<t.eta<<"\n";
-	os<<"ConjugateGradientSteps"<<t.cgSteps<<"\n";
-	os<<"ConjugateGradientEps"<<t.cgEps<<"\n";
+	os<<"DynamicDmrgType="<<t.type()<<"\n";
+	os<<"DynamicDmrgSteps="<<t.steps()<<"\n";
+	os<<"DynamicDmrgEps="<<t.eps()<<"\n";
+	os<<"CorrectionVectorOmega="<<t.omega()<<"\n";
+	os<<"CorrectionVectorEta="<<t.eta()<<"\n";
+	os<<"ConjugateGradientSteps"<<t.cgSteps()<<"\n";
+	os<<"ConjugateGradientEps"<<t.cgEps()<<"\n";
 
 	return os;
 }

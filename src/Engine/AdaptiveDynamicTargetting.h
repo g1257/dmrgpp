@@ -243,7 +243,7 @@ public:
 	          IoOutputType& io) const
 	{
 		assert(block.size()==1);
-		SizeType type = tstStruct_.type;
+		SizeType type = tstStruct_.type();
 		int s = (type&1) ? -1 : 1;
 		int s2 = (type>1) ? -1 : 1;
 
@@ -397,11 +397,11 @@ private:
 			return;
 		}
 		dynCounter_++;
-		if (lastLanczosVector_>1 && (dynCounter_%tstStruct_.advanceEach) != 0)
+		if (lastLanczosVector_>1 && (dynCounter_%tstStruct_.advanceEach()) != 0)
 			return;
 		commonTargetting_.targetVectors(0).setDataInSector(x,i0);
 		commonTargetting_.targetVectors(1).setDataInSector(y,i0);
-		if ((dynCounter_%tstStruct_.advanceEach) != 0) return;
+		if ((dynCounter_%tstStruct_.advanceEach()) != 0) return;
 		if (ab_.size()>0) {
 			lanczosSolver.push(ab_,a,b);
 			return;
@@ -414,7 +414,7 @@ private:
 		RealType a1=0,b1=0;
 		lanczosSolver.oneStepDecomposition(xx,yy,a1,b1,lastLanczosVector_==0);
 		lanczosSolver.push(ab_,a1,b1);
-		if (tstStruct_.advanceEach<=1) return;
+		if (tstStruct_.advanceEach()<=1) return;
 		lanczosSolver.push(ab_,a,b);
 	}
 

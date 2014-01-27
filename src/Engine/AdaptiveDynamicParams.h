@@ -73,10 +73,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file AdaptiveDynamicParams.h
  *
- *  This is a structure to represent the parameters of the
- *  Adaptive Dynamic DMRG algorithm.
- *  Don't add functions to this class because
- *  this class's data is all public
  */
 #ifndef ADAPTIVE_DYNAMIC_PARAMS_H
 #define ADAPTIVE_DYNAMIC_PARAMS_H
@@ -108,12 +104,24 @@ public:
 	    : TargetParamsCommonType(io,model)
 	{
 		this->concatenation = SUM;
-		io.readline(type,"DynamicDmrgType=");
-		io.readline(advanceEach,"DynamicDmrgAdvanceEach=");
+		io.readline(type_,"DynamicDmrgType=");
+		io.readline(advanceEach_,"DynamicDmrgAdvanceEach=");
 	}
 
-	SizeType type;
-	SizeType advanceEach;
+	virtual SizeType type() const
+	{
+		return type_;
+	}
+
+	virtual SizeType advanceEach() const
+	{
+		return advanceEach_;
+	}
+
+private:
+
+	SizeType type_;
+	SizeType advanceEach_;
 
 }; // class AdaptiveDynamicParams
 
@@ -125,8 +133,8 @@ operator<<(std::ostream& os,const AdaptiveDynamicParams<ModelType>& t)
 	const typename TimeStepParams<ModelType>::TargetParamsCommonType&
 	        tp = t;
 	os<<tp;
-	os<<"DynamicDmrgType="<<t.type<<"\n";
-	os<<"DynamicDmrgAdvanceEach="<<t.advanceEach<<"\n";
+	os<<"DynamicDmrgType="<<t.type()<<"\n";
+	os<<"DynamicDmrgAdvanceEach="<<t.advanceEach()<<"\n";
 	return os;
 }
 } // namespace Dmrg 

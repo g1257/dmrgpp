@@ -260,7 +260,7 @@ public:
 	{
 		if (block.size()!=1)
 			throw PsimagLite::RuntimeError("CorrectionVectorTargetting only supports blocks of size 1\n");
-		SizeType type = tstStruct_.type;
+		SizeType type = tstStruct_.type();
 		int fermionSign = commonTargetting_.findFermionSignOfTheOperators();
 		int s = (type&1) ? -1 : 1;
 		int s2 = (type>1) ? -1 : 1;
@@ -335,8 +335,8 @@ private:
 		LanczosMatrixType h(&model_,&modelHelper);
 
 		ParametersForSolverType params;
-		params.steps = tstStruct_.steps;
-		params.tolerance = tstStruct_.eps;
+		params.steps = tstStruct_.steps();
+		params.tolerance = tstStruct_.eps();
 		params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 
 		LanczosSolverType lanczosSolver(h,params,&V);
@@ -359,8 +359,8 @@ private:
 		// make sure xr is zero
 		for (SizeType i=0;i<xr.size();i++) xr[i] = 0;
 		h.matrixVectorProduct(xr,xi);
-		xr -= tstStruct_.omega*xi;
-		xr /= tstStruct_.eta;
+		xr -= tstStruct_.omega()*xi;
+		xr /= tstStruct_.eta();
 	}
 
 	void setWeights()
@@ -397,7 +397,7 @@ private:
 	{
 		commonTargetting_.computeCorrection(direction,block1);
 		weight_.resize(1);
-		weight_[0]=tstStruct_.correctionA;
+		weight_[0]=tstStruct_.correctionA();
 		gsWeight_ = 1.0-weight_[0];
 	}
 

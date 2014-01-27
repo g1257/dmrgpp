@@ -180,9 +180,9 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" MettsTargetting "
 							"needs an enabled wft\n");
 
-				RealType tau =mettsStruct_.tau/(mettsStruct_.timeSteps-1);
-				SizeType n1 = mettsStruct_.timeSteps;
-				SizeType n = mettsStruct_.timeSteps + 1;
+				RealType tau =mettsStruct_.tau()/(mettsStruct_.timeSteps()-1);
+				SizeType n1 = mettsStruct_.timeSteps();
+				SizeType n = mettsStruct_.timeSteps() + 1;
 
 				betas_.resize(n1);
 				weight_.resize(n);
@@ -199,7 +199,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 				PsimagLite::String s (__FILE__);
 				s += " Unknown algorithm\n";
-				switch (mettsStruct_.algorithm) {
+				switch (mettsStruct_.algorithm()) {
 				case TargettingParamsType::KRYLOV:
 					timeVectorsBase_ = new TimeVectorsKrylovType(
 								currentBeta_,mettsStruct_,betas_,targetVectors_,model_,wft_,lrs_,0);
@@ -296,7 +296,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 					utils::blockUnion(sites,block1,block2);
 				else sites = block1;
 
-				SizeType n1 = mettsStruct_.timeSteps;
+				SizeType n1 = mettsStruct_.timeSteps();
 
 				if (direction==INFINITE) {
 					updateStochastics(block1,block2);
@@ -456,7 +456,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 					timesWithoutAdvancement_=0;
 					currentBeta_ = 0;
 					PsimagLite::OstringStream msg;
-					SizeType n1 = mettsStruct_.timeSteps;
+					SizeType n1 = mettsStruct_.timeSteps();
 					RealType x = std::norm(targetVectors_[n1]);
 					msg<<"Changing direction, setting collapsed with norm="<<x;
 					progress_.printline(msg,std::cout);
@@ -467,7 +467,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 					return;
 				}
 
-				if (timesWithoutAdvancement_ < mettsStruct_.advanceEach) {
+				if (timesWithoutAdvancement_ < mettsStruct_.advanceEach()) {
 					timesWithoutAdvancement_++;
 					printAdvancement();
 					return;
@@ -475,7 +475,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 				if (stage_!=COLLAPSE && currentBeta_<mettsStruct_.beta) {
 					stage_ = WFT_ADVANCE;
-					currentBeta_ += mettsStruct_.tau;
+					currentBeta_ += mettsStruct_.tau();
 					timesWithoutAdvancement_=0;
 					printAdvancement();
 					return;
@@ -489,7 +489,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				if (stage_!=COLLAPSE && currentBeta_>=mettsStruct_.beta) {
 					stage_ = COLLAPSE;
 					sitesCollapsed_.clear();
-					SizeType n1 = mettsStruct_.timeSteps;
+					SizeType n1 = mettsStruct_.timeSteps();
 					targetVectors_[n1].resize(0);
 					timesWithoutAdvancement_=0;
 					printAdvancement();

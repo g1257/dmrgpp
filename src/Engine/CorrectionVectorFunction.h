@@ -101,8 +101,8 @@ class	CorrectionVectorFunction {
 
 		void matrixVectorProduct(VectorType& x,const VectorType& y) const
 		{
-			RealType eta = info_.eta;
-			RealType omega = info_.omega;
+			RealType eta = info_.eta();
+			RealType omega = info_.omega();
 			VectorType xTmp(x.size(),0);
 			m_.matrixVectorProduct(xTmp,y); // xTmp = Hy
 			VectorType x2(x.size(),0);
@@ -122,7 +122,7 @@ class	CorrectionVectorFunction {
 public:
 
 	CorrectionVectorFunction(const MatrixType& m,const InfoType& info)
-	    : im_(m,info),cg_(info.cgSteps,info.cgEps)
+	    : im_(m,info),cg_(info.cgSteps(),info.cgEps())
 	{}
 
 	void getXi(VectorType& result,const VectorType& sv) const

@@ -168,8 +168,8 @@ public:
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError(" DynamicTargetting needs an enabled wft\n");
 
-		paramsForSolver_.steps = tstStruct_.steps;
-		paramsForSolver_.tolerance = tstStruct_.eps;
+		paramsForSolver_.steps = tstStruct_.steps();
+		paramsForSolver_.tolerance = tstStruct_.eps();
 		paramsForSolver_.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 	}
 
@@ -278,7 +278,7 @@ public:
 	{
 		assert(block.size()==1);
 
-		SizeType type = tstStruct_.type;
+		SizeType type = tstStruct_.type();
 		int fermionSign = commonTargetting_.findFermionSignOfTheOperators();
 		int s = (type&1) ? -1 : 1;
 		int s2 = (type>1) ? -1 : 1;
@@ -401,7 +401,7 @@ private:
 		for (SizeType i=0;i<commonTargetting_.targetVectors().size();i++) {
 			VectorType tmp(V.n_row());
 			for (SizeType j=0;j<tmp.size();j++) tmp[j] = V(j,i);
-			commonTargetting_.targetVectors()[i].setDataInSector(tmp,i0);
+			commonTargetting_.targetVectors(i).setDataInSector(tmp,i0);
 		}
 	}
 

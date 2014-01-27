@@ -160,8 +160,8 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			  tstStruct_(tstStruct),
 			  wft_(wft),
 			  progress_("TimeStepTargetting"),
-			  times_(tstStruct_.timeSteps),
-			  weight_(tstStruct_.timeSteps),
+			  times_(tstStruct_.timeSteps()),
+			  weight_(tstStruct_.timeSteps()),
 			  commonTargetting_(lrs,model,tstStruct,wft)
 			{
 				if (!wft.isEnabled()) throw PsimagLite::RuntimeError
@@ -169,7 +169,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				if (tstStruct_.sites.size()==0) throw PsimagLite::RuntimeError
 				       (" TimeStepTargetting needs at least one TSPSite\n");
 
-				RealType tau =tstStruct_.tau;
+				RealType tau =tstStruct_.tau();
 				RealType sum = 0;
 				SizeType n = times_.size();
 				gsWeight_ = (tstStruct_.concatenation == SUM) ? 0.1 : 0.0;
@@ -342,8 +342,8 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			bool end() const
 			{
-				return (tstStruct_.maxTime != 0 &&
-				        commonTargetting_.currentTime() >= tstStruct_.maxTime);
+				return (tstStruct_.maxTime() != 0 &&
+				        commonTargetting_.currentTime() >= tstStruct_.maxTime());
 			}
 
 		private:
