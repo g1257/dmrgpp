@@ -158,11 +158,16 @@ public:
 		// Loop over each operator that needs to be applied
 		// in turn to the g.s.
 		for (SizeType i=0;i<max;i++) {
-			count += evolve(i,phiNew,phiOld,Eg,direction,site,loopNumber,max-1);
+
+			SizeType count2 = evolve(i,phiNew,phiOld,Eg,direction,site,loopNumber,max-1);
+			if (count2 == 0) continue;
+			count += count2;
+
 			if (targetHelper_.tstStruct().concatenation() == PRODUCT) {
 				phiOld = phiNew;
 			} else {
-				vectorSum += phiNew;
+				if (stage_[i] == OPERATOR) vectorSum += phiNew;
+				else vectorSum = phiNew;
 			}
 		}
 
