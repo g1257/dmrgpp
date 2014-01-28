@@ -110,6 +110,7 @@ public:
 	      cgEps_(1e-6)
 	{
 		this->setConcatenation(SUM);
+		io.readline(correctionA_,"CorrectionA=");
 		io.readline(type_,"DynamicDmrgType=");
 		io.readline(steps_,"DynamicDmrgSteps=");
 		io.readline(eps_,"DynamicDmrgEps=");
@@ -123,6 +124,11 @@ public:
 		try {
 			io.readline(cgEps_,"ConjugateGradientEps=");
 		} catch (std::exception& e) {}
+	}
+
+	virtual RealType correctionA() const
+	{
+		return correctionA_;
 	}
 
 	virtual SizeType type() const
@@ -165,6 +171,7 @@ private:
 	SizeType type_;
 	SizeType steps_;
 	RealType eps_;
+	RealType correctionA_;
 	SizeType cgSteps_;
 	RealType omega_;
 	RealType eta_;

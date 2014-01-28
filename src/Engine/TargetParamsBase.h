@@ -125,7 +125,7 @@ public:
 
 	virtual RealType correctionA() const
 	{
-		return unimplemented("correctionA");
+		return 0;
 	}
 
 	virtual SizeType type() const
@@ -145,7 +145,7 @@ public:
 
 	virtual SizeType advanceEach() const
 	{
-		return unimplemented("advanceEach");
+		return 0;
 	}
 
 	virtual SizeType cgSteps() const
@@ -185,7 +185,7 @@ public:
 
 	virtual bool useQns() const
 	{
-		return unimplemented("useQns");
+		return false;
 	}
 
 	virtual SizeType timeSteps() const

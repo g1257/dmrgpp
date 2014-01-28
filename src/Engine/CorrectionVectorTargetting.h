@@ -159,7 +159,7 @@ public:
 	      wft_(wft),
 	      progress_("CorrectionVectorTargetting"),
 	      gsWeight_(1.0),
-	      commonTargetting_(lrs,model,tstStruct,wft,4),
+	      commonTargetting_(lrs,model,tstStruct,wft,4,1),
 	      correctionEnabled_(false)
 	{
 		if (!wft.isEnabled())
@@ -395,9 +395,9 @@ private:
 
 	void addCorrection(SizeType direction,const BlockType& block1)
 	{
-		commonTargetting_.computeCorrection(direction,block1);
 		weight_.resize(1);
 		weight_[0]=tstStruct_.correctionA();
+		commonTargetting_.computeCorrection(direction,block1);
 		gsWeight_ = 1.0-weight_[0];
 	}
 

@@ -140,10 +140,11 @@ public:
 	                 const ModelType& model,
                      const TargettingParamsType& tstStruct,
                      const WaveFunctionTransfType& wft,
-	                 SizeType targets)
+	                 SizeType targets,
+	                 SizeType indexNoAdvance)
 	    : progress_("CommonTargetting"),
 	      targetHelper_(lrs,model,tstStruct,wft),
-	      applyOpExpression_(targetHelper_,targets)
+	      applyOpExpression_(targetHelper_,targets,indexNoAdvance)
 	{}
 
 	SizeType getPhi(VectorWithOffsetType& phiNew,

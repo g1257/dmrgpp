@@ -161,7 +161,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			  progress_("TimeStepTargetting"),
 			  times_(tstStruct_.timeSteps()),
 			  weight_(tstStruct_.timeSteps()),
-			  commonTargetting_(lrs,model,tstStruct,wft,times_.size())
+			  commonTargetting_(lrs,model,tstStruct,wft,times_.size(),0)
 			{
 				if (!wft.isEnabled()) throw PsimagLite::RuntimeError
 				       (" TimeStepTargetting needs an enabled wft\n");

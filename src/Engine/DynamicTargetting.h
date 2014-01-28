@@ -162,7 +162,7 @@ public:
 	      wft_(wft),
 	      progress_("DynamicTargetting"),
 	      gsWeight_(1.0),
-	      commonTargetting_(lrs,model,tstStruct,wft,0),
+	      commonTargetting_(lrs,model,tstStruct,wft,0,0),
 	      weightForContinuedFraction_(0)
 	{
 		if (!wft.isEnabled())

@@ -117,11 +117,13 @@ public:
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper,
-	                        SizeType targets)
+	                        SizeType targets,
+	                        SizeType indexNoAdvance)
 	    : progress_("ApplyOperatorExpression"),
 	      stage_(targetHelper.tstStruct().sites(),DISABLED),
 	      E0_(0.0),
 	      currentTime_(0.0),
+	      indexNoAdvance_(indexNoAdvance),
 	      applyOpLocal_(targetHelper.lrs()),
 	      targetVectors_(targets),
 	      timeVectorsBase_(0),
@@ -365,6 +367,7 @@ private:
 	{
 		static SizeType timesWithoutAdvancement = 0;
 		static bool firstSeeLeftCorner = false;
+		SizeType advanceEach = targetHelper_.tstStruct().advanceEach();
 
 		if (direction == ProgramGlobals::INFINITE) {
 			E0_ = Eg;
@@ -388,7 +391,7 @@ private:
 
 		if (stage_[i] == OPERATOR) checkOrder(i);
 
-		if (timesWithoutAdvancement >= targetHelper_.tstStruct().advanceEach()) {
+		if (advanceEach > 0 && timesWithoutAdvancement >= advanceEach) {
 			stage_[i] = WFT_ADVANCE;
 			if (i==lastI) {
 				currentTime_ += targetHelper_.tstStruct().tau();
@@ -426,7 +429,7 @@ private:
 	                SizeType systemOrEnviron)
 	{
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
-		SizeType timeSteps = targetHelper_.tstStruct().timeSteps();
+		SizeType advanceEach = targetHelper_.tstStruct().advanceEach();
 
 		if (stage_[i]==OPERATOR) {
 
@@ -449,8 +452,9 @@ private:
 			if (targetHelper_.tstStruct().useQns()) setQuantumNumbers(phiNew);
 		} else if (stage_[i] >= WFT_NOADVANCE) {
 
-			SizeType advance = 0;
-			if (stage_[i] == WFT_ADVANCE) {
+			SizeType advance = indexNoAdvance_;
+			if (advanceEach > 0 && stage_[i] == WFT_ADVANCE) {
+				SizeType timeSteps = targetHelper_.tstStruct().timeSteps();
 				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
 				timeVectorsBase_->timeHasAdvanced();
 			}
@@ -532,6 +536,7 @@ private:
 	VectorSizeType stage_;
 	RealType E0_;
 	RealType currentTime_;
+	SizeType indexNoAdvance_;
 	ApplyOperatorType applyOpLocal_;
 	VectorSizeType nonZeroQns_;
 	VectorWithOffsetType psi_;
