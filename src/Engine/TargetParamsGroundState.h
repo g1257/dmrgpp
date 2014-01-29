@@ -71,18 +71,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file GroundStateParams.h
+/*! \file TargetParamsGroundState.h
  *
  * There's nothing to see here.
  */
-#ifndef GROUNDSTATE_PARAMS_H
-#define GROUNDSTATE_PARAMS_H
+#ifndef TARGET_PARAMS_GROUNDSTATE_H
+#define TARGET_PARAMS_GROUNDSTATE_H
 #include "TargetParamsBase.h"
 
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class GroundStateParams : public TargetParamsBase<ModelType> {
+class TargetParamsGroundState : public TargetParamsBase<ModelType> {
 
 	typedef TargetParamsBase<ModelType> BaseType;
 
@@ -91,16 +91,16 @@ public:
 	typedef typename ModelType::RealType RealType;
 
 	template<typename IoInputter>
-	GroundStateParams(IoInputter& io,const ModelType& model)
+	TargetParamsGroundState(IoInputter& io,const ModelType& model)
 	{}
 
 	virtual SizeType sites() const { return 0; }
 
-}; // class GroundStateParams
+}; // class TargetParamsGroundState
 
 template<typename ModelType>
 inline std::ostream&
-operator<<(std::ostream& os,const GroundStateParams<ModelType>& t)
+operator<<(std::ostream& os,const TargetParamsGroundState<ModelType>& t)
 {
 	os<<"#TargetParams.type=GroundState\n";
 	return os;
@@ -108,5 +108,5 @@ operator<<(std::ostream& os,const GroundStateParams<ModelType>& t)
 } // namespace Dmrg 
 
 /*@}*/
-#endif // GROUNDSTATE_PARAMS_H
+#endif // TARGET_PARAMS_GROUNDSTATE_H
 

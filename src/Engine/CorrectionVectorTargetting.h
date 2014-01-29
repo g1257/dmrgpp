@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
-#include "CorrectionVectorParams.h"
+#include "TargetParamsCorrectionVector.h"
 #include "VectorWithOffsets.h"
 #include "CorrectionVectorFunction.h"
 #include "CommonTargetting.h"
@@ -112,7 +112,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef CorrectionVectorParams<ModelType> TargettingParamsType;
+	typedef TargetParamsCorrectionVector<ModelType> TargettingParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;

@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "DynamicSerializer.h"
-#include "AdaptiveDynamicParams.h"
+#include "TargetParamsAdaptiveDynamic.h"
 #include "VectorWithOffsets.h"
 #include "ParametersForSolver.h"
 #include "CommonTargetting.h"
@@ -110,7 +110,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef AdaptiveDynamicParams<ModelType> TargettingParamsType;
+	typedef TargetParamsAdaptiveDynamic<ModelType> TargettingParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;

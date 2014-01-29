@@ -75,7 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "TimeSerializer.h"
-#include "TimeStepParams.h"
+#include "TargetParamsTimeStep.h"
 #include "ProgramGlobals.h"
 #include "ParametersForSolver.h"
 #include "ParallelWft.h"
@@ -119,7 +119,7 @@ public:
 	typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef TimeStepParams<ModelType> TargettingParamsType;
+	typedef TargetParamsTimeStep<ModelType> TargettingParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef BlockMatrix<ComplexMatrixType> ComplexBlockMatrixType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;

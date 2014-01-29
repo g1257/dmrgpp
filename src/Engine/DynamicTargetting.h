@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "ParametersForSolver.h"
-#include "DynamicDmrgParams.h"
+#include "TargetParamsDynamic.h"
 #include "VectorWithOffsets.h"
 #include "CommonTargetting.h"
 #include <cassert>
@@ -118,7 +118,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef DynamicDmrgParams<ModelType> TargettingParamsType;
+	typedef TargetParamsDynamic<ModelType> TargettingParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;

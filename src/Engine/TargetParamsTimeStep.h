@@ -78,27 +78,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  algorithm. Don't add functions to this class because
  *  this class's data is all public
  */
-#ifndef TIMESTEP_PARAMS_H
-#define TIMESTEP_PARAMS_H
+#ifndef TARGET_PARAMS_TIMESTEP_H
+#define TARGET_PARAMS_TIMESTEP_H
 
-#include "TimeVectorsParams.h"
+#include "TargetParamsTimeVectors.h"
 #include "TargetParamsCommon.h"
 
 namespace Dmrg {
 	//! Coordinates reading of TargetSTructure from input file
 	template<typename ModelType>
-	class TimeStepParams : public TimeVectorsParams<ModelType>{
+	class TargetParamsTimeStep : public TargetParamsTimeVectors<ModelType>{
 
 	public:
 
-		typedef TimeVectorsParams<ModelType> TimeVectorParamsType;
+		typedef TargetParamsTimeVectors<ModelType> TimeVectorParamsType;
 		typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
 		typedef typename ModelType::RealType RealType;
 
 		static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
 
 		template<typename IoInputter>
-		TimeStepParams(IoInputter& io,const ModelType& model)
+		TargetParamsTimeStep(IoInputter& io,const ModelType& model)
 			: TimeVectorParamsType(io,model),
 		      maxTime_(0)
 		{
@@ -121,18 +121,18 @@ namespace Dmrg {
 
 		RealType maxTime_;
 
-	}; // class TimeStepParams
+	}; // class TargetParamsTimeStep
 	
 	template<typename ModelType>
 	inline std::ostream&
-	operator<<(std::ostream& os,const TimeStepParams<ModelType>& t)
+	operator<<(std::ostream& os,const TargetParamsTimeStep<ModelType>& t)
 	{
 		os<<"#TargetParams.type=TimeStep\n";
 
-		const typename TimeStepParams<ModelType>::TimeVectorParamsType& tp1 = t;
+		const typename TargetParamsTimeStep<ModelType>::TimeVectorParamsType& tp1 = t;
 		os<<tp1;
 
-		const typename TimeStepParams<ModelType>::TargetParamsCommonType& tp = t;
+		const typename TargetParamsTimeStep<ModelType>::TargetParamsCommonType& tp = t;
 		os<<tp;
 
 		if (t.maxTime() > 0)
@@ -143,4 +143,4 @@ namespace Dmrg {
 } // namespace Dmrg 
 
 /*@}*/
-#endif // TIMESTEP_PARAMS_H
+#endif // TARGET_PARAMS_TIMESTEP_H

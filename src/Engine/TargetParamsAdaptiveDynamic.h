@@ -71,11 +71,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file AdaptiveDynamicParams.h
+/*! \file TargetParamsAdaptiveDynamic.h
  *
  */
-#ifndef ADAPTIVE_DYNAMIC_PARAMS_H
-#define ADAPTIVE_DYNAMIC_PARAMS_H
+#ifndef TARGET_PARAMS_ADAPTIVE_DYNAMIC_H
+#define TARGET_PARAMS_ADAPTIVE_DYNAMIC_H
 
 #include "TargetParamsCommon.h"
 
@@ -83,7 +83,7 @@ namespace Dmrg {
 
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class AdaptiveDynamicParams : public TargetParamsCommon<ModelType> {
+class TargetParamsAdaptiveDynamic : public TargetParamsCommon<ModelType> {
 
 public:
 
@@ -100,7 +100,7 @@ public:
 	static SizeType const SUM = TargetParamsCommonType::SUM;
 
 	template<typename IoInputter>
-	AdaptiveDynamicParams(IoInputter& io,const ModelType& model)
+	TargetParamsAdaptiveDynamic(IoInputter& io,const ModelType& model)
 	    : TargetParamsCommonType(io,model)
 	{
 		this->setConcatenation(SUM);
@@ -123,14 +123,14 @@ private:
 	SizeType type_;
 	SizeType advanceEach_;
 
-}; // class AdaptiveDynamicParams
+}; // class TargetParamsAdaptiveDynamic
 
 template<typename ModelType>
 inline std::ostream&
-operator<<(std::ostream& os,const AdaptiveDynamicParams<ModelType>& t)
+operator<<(std::ostream& os,const TargetParamsAdaptiveDynamic<ModelType>& t)
 {
 	os<<"#TargetParams.type=AdaptiveDynamic\n";
-	const typename TimeStepParams<ModelType>::TargetParamsCommonType&
+	const typename TargetParamsTimeStep<ModelType>::TargetParamsCommonType&
 	        tp = t;
 	os<<tp;
 	os<<"DynamicDmrgType="<<t.type()<<"\n";
@@ -140,5 +140,5 @@ operator<<(std::ostream& os,const AdaptiveDynamicParams<ModelType>& t)
 } // namespace Dmrg 
 
 /*@}*/
-#endif //ADAPTIVE_DYNAMIC_PARAMS_H
+#endif //TARGET_PARAMS_ADAPTIVE_DYNAMIC_H
 

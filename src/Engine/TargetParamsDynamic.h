@@ -71,22 +71,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file DynamicDmrgParams.h
+/*! \file TargetParamsDynamic.h
  *
  *  This is a structure to represent the parameters of the
  *  Dynamic DMRG algorithm.
  *  Don't add functions to this class because
  *  this class's data is all public
  */
-#ifndef DYNAMIC_DMRG_PARAMS_H
-#define DYNAMIC_DMRG_PARAMS_H
+#ifndef TARGET_PARAMS_DYNAMIC_H
+#define TARGET_PARAMS_DYNAMIC_H
 
 #include "TargetParamsCommon.h"
 
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class DynamicDmrgParams : public TargetParamsCommon<ModelType> {
+class TargetParamsDynamic : public TargetParamsCommon<ModelType> {
 public:
 	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
 	typedef typename ModelType::RealType RealType;
@@ -101,7 +101,7 @@ public:
 	static SizeType const SUM = TargetParamsCommonType::SUM;
 
 	template<typename IoInputter>
-	DynamicDmrgParams(IoInputter& io,const ModelType& model)
+	TargetParamsDynamic(IoInputter& io,const ModelType& model)
 	    : TargetParamsCommonType(io,model)
 	{
 		this->setConcatenation(SUM);
@@ -131,14 +131,14 @@ private:
 	SizeType steps_;
 	RealType eps_;
 
-}; // class DynamicDmrgParams
+}; // class TargetParamsDynamic
 
 template<typename ModelType>
 inline std::ostream&
-operator<<(std::ostream& os,const DynamicDmrgParams<ModelType>& t)
+operator<<(std::ostream& os,const TargetParamsDynamic<ModelType>& t)
 {
 	os<<"#TargetParams.type=DynamicDmrg\n";
-	const typename DynamicDmrgParams<ModelType>::TargetParamsCommonType&
+	const typename TargetParamsDynamic<ModelType>::TargetParamsCommonType&
 	        tp = t;
 	os<<tp;
 	os<<"DynamicDmrgType="<<t.type()<<"\n";
@@ -149,5 +149,5 @@ operator<<(std::ostream& os,const DynamicDmrgParams<ModelType>& t)
 } // namespace Dmrg 
 
 /*@}*/
-#endif //DYNAMIC_DMRG_PARAMS_H
+#endif //TARGET_PARAMS_DYNAMIC_H
 

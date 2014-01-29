@@ -72,20 +72,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TimeVectorsParams.h
+/*! \file TargetParamsTimeVectors.h
  *
  *  This is a structure to represent the parameters of the TimeStep Evolution
  *  algorithm. Don't add functions to this class because
  *  this class's data is all public
  */
-#ifndef TIME_VECTORS_PARAMS_H
-#define TIME_VECTORS_PARAMS_H
+#ifndef TARGET_PARAMS_TIME_VECTORS_H
+#define TARGET_PARAMS_TIME_VECTORS_H
 #include "TargetParamsCommon.h"
 
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class TimeVectorsParams : public TargetParamsCommon<ModelType> {
+class TargetParamsTimeVectors : public TargetParamsCommon<ModelType> {
 
 	typedef TargetParamsCommon<ModelType> BaseType;
 
@@ -96,7 +96,7 @@ public:
 	typedef typename ModelType::RealType RealType;
 
 	template<typename IoInputter>
-	TimeVectorsParams(IoInputter& io,const ModelType& model)
+	TargetParamsTimeVectors(IoInputter& io,const ModelType& model)
 	    : BaseType(io,model),timeSteps_(0),advanceEach_(0), algorithm_(KRYLOV),tau_(0)
 	{
 		io.readline(tau_,"TSPTau=");
@@ -146,11 +146,11 @@ private:
 	SizeType algorithm_;
 	RealType tau_;
 
-}; // class TimeVectorsParams
+}; // class TargetParamsTimeVectors
 
 template<typename ModelType>
 inline std::ostream&
-operator<<(std::ostream& os,const TimeVectorsParams<ModelType>& t)
+operator<<(std::ostream& os,const TargetParamsTimeVectors<ModelType>& t)
 {
 	os<<"#TargetParams.type=TimeVectors";
 	os<<"#TargetParams.tau="<<t.tau()<<"\n";
@@ -162,4 +162,4 @@ operator<<(std::ostream& os,const TimeVectorsParams<ModelType>& t)
 } // namespace Dmrg 
 
 /*@}*/
-#endif // TIME_VECTORS_PARAMS_H
+#endif // TARGET_PARAMS_TIME_VECTORS_H

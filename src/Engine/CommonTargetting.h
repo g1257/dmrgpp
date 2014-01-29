@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "DynamicSerializer.h"
-#include "DynamicDmrgParams.h"
+#include "TargetParamsDynamic.h"
 #include "VectorWithOffsets.h"
 #include "ContinuedFraction.h"
 #include <cassert>

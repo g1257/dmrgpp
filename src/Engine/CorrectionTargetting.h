@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CORRECTION_TARGETTING_H
 #include <iostream>
 #include "String.h"
-#include "CorrectionParams.h"
+#include "TargetParamsCorrection.h"
 #include "CommonTargetting.h"
 #include <stdexcept>
 
@@ -117,7 +117,7 @@ public:
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef CorrectionParams<ModelType> TargettingParamsType;
+	typedef TargetParamsCorrection<ModelType> TargettingParamsType;
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
 	                     WaveFunctionTransfType> TargetHelperType;

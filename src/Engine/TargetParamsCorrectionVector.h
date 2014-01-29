@@ -72,22 +72,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file CorrectionVectorParams.h
+/*! \file TargetParamsCorrectionVector.h
  *
  *  This is a structure to represent the parameters of the
  *  Correction vector DMRG algorithm.
  *  Don't add functions to this class because
  *  this class's data is all public
  */
-#ifndef CORRECTION_V_PARAMS_H
-#define CORRECTION_V_PARAMS_H
+#ifndef TARGET_PARAMS_CORRECTION_V_H
+#define TARGET_PARAMS_CORRECTION_V_H
 
 #include "TargetParamsCommon.h"
 
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class CorrectionVectorParams : public TargetParamsCommon<ModelType> {
+class TargetParamsCorrectionVector : public TargetParamsCommon<ModelType> {
 
 public:
 
@@ -104,7 +104,7 @@ public:
 	static SizeType const SUM = BaseType::SUM;
 
 	template<typename IoInputter>
-	CorrectionVectorParams(IoInputter& io,const ModelType& model)
+	TargetParamsCorrectionVector(IoInputter& io,const ModelType& model)
 	    : BaseType(io,model),
 	      cgSteps_(1000),
 	      cgEps_(1e-6)
@@ -176,11 +176,11 @@ private:
 	RealType omega_;
 	RealType eta_;
 	RealType cgEps_;
-}; // class CorrectionVectorParams
+}; // class TargetParamsCorrectionVector
 
 template<typename ModelType>
 inline std::ostream& operator<<(std::ostream& os,
-                                const CorrectionVectorParams<ModelType>& t)
+                                const TargetParamsCorrectionVector<ModelType>& t)
 {
 	os<<"#TargetParams.type=AdaptiveDynamic\n";
 	const TargetParamsCommon<ModelType>& tp = t;
@@ -198,5 +198,5 @@ inline std::ostream& operator<<(std::ostream& os,
 } // namespace Dmrg 
 
 /*@}*/
-#endif //CORRECTION_V_PARAMS_H
+#endif //TARGET_PARAMS_CORRECTION_V_H
 

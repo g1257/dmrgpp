@@ -80,16 +80,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef METTS_PARAMS_H
 #define METTS_PARAMS_H
 
-#include "TimeVectorsParams.h"
+#include "TargetParamsTimeVectors.h"
 
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class MettsParams : public TimeVectorsParams<ModelType> {
+class MettsParams : public TargetParamsTimeVectors<ModelType> {
 public:
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorType OperatorType;
-	typedef TimeVectorsParams<ModelType> TimeVectorParamsType;
+	typedef TargetParamsTimeVectors<ModelType> TimeVectorParamsType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 
 	template<typename IoInputter>

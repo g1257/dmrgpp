@@ -76,8 +76,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  * Contains the parameter a of PRB 72 180403(R) (2005)
  *
  */
-#ifndef CORRECTION_PARAMS_H
-#define CORRECTION_PARAMS_H
+#ifndef TARGET_PARAMS_CORRECTION_H
+#define TARGET_PARAMS_CORRECTION_H
 
 #include <vector>
 #include "TargetParamsBase.h"
@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
-class CorrectionParams : public TargetParamsBase<ModelType> {
+class TargetParamsCorrection : public TargetParamsBase<ModelType> {
 
 	typedef TargetParamsBase<ModelType> BaseType;
 
@@ -94,7 +94,7 @@ public:
 	typedef typename BaseType::RealType RealType;
 
 	template<typename IoInputter>
-	CorrectionParams(IoInputter& io,const ModelType& model)
+	TargetParamsCorrection(IoInputter& io,const ModelType& model)
 	{
 		io.readline(correctionA_,"CorrectionA=");
 	}
@@ -109,11 +109,11 @@ public:
 private:
 
 	RealType correctionA_;
-}; // class CorrectionParams
+}; // class TargetParamsCorrection
 
 template<typename ModelType>
 inline std::ostream&
-operator<<(std::ostream& os,const CorrectionParams<ModelType>& t)
+operator<<(std::ostream& os,const TargetParamsCorrection<ModelType>& t)
 {
 	os<<"#TargetParams.type=correction\n";
 	os<<"#TargetCorrection.correctionA="<<t.correctionA()<<"\n";
@@ -122,5 +122,5 @@ operator<<(std::ostream& os,const CorrectionParams<ModelType>& t)
 } // namespace Dmrg 
 
 /*@}*/
-#endif // CORRECTION_PARAMS_H
+#endif // TARGET_PARAMS_CORRECTION_H
 

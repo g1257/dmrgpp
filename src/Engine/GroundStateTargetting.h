@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GS_TARGETTING_H
 #include <iostream>
 #include "String.h"
-#include "GroundStateParams.h"
+#include "TargetParamsGroundState.h"
 #include "ApplyOperatorLocal.h"
 #include <stdexcept>
 #include "Tokenizer.h"
@@ -119,7 +119,7 @@ public:
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef VectorType TargetVectorType;
-	typedef GroundStateParams<ModelType> TargettingParamsType;
+	typedef TargetParamsGroundState<ModelType> TargettingParamsType;
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
 	                     WaveFunctionTransfType> TargetHelperType;
