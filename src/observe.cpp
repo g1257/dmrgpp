@@ -224,8 +224,8 @@ void mainLoop0(InputNgType::Readable& io,
 
 	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
 
-	if (targetting!="TargetingGroundState" && su2)
-		throw PsimagLite::RuntimeError("SU(2) supports only TargetingGroundState\n");
+	if (targetting!="GroundStateTargetting" && su2)
+		throw PsimagLite::RuntimeError("SU(2) supports only GroundStateTargetting");
 
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) {
@@ -238,7 +238,7 @@ void mainLoop0(InputNgType::Readable& io,
 		return;
 	}
 
-	if (targetting=="TargetingGroundState") {
+	if (targetting=="GroundStateTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,MySparseMatrix>
 		        (geometry,targetting,io,dmrgSolverParams, options, list);
 	} else if (targetting=="TimeStepTargetting") {

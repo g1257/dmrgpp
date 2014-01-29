@@ -167,8 +167,8 @@ void mainLoop0(InputNgType::Readable& io,
 
 	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
 
-	if (targetting!="TargetingGroundState" && su2) throw PsimagLite::RuntimeError("SU(2)"
- 		" supports only TargetingGroundState for now (sorry!)\n");
+	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
+ 		" supports only GroundStateTargetting for now (sorry!)\n");
 
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) {
@@ -181,27 +181,27 @@ void mainLoop0(InputNgType::Readable& io,
 		return;
 	}
 
-	if (targetting=="TargetingTimeStep") {
+	if (targetting=="TimeStepTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingTimeStep,
 			MySparseMatrixComplex>(geometry,dmrgSolverParams,io);
 			return;
 	}
-	if (targetting=="TargetingDynamic") {
+	if (targetting=="DynamicTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingDynamic,
 			MySparseMatrix>(geometry,dmrgSolverParams,io);
 			return;
 	}
-	if (targetting=="TargetingAdaptiveDynamic") {
+	if (targetting=="AdaptiveDynamicTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingAdaptiveDynamic,
 			MySparseMatrix>(geometry,dmrgSolverParams,io);
 			return;
 	}
-	if (targetting=="TargetingCorrectionVector") {
+	if (targetting=="CorrectionVectorTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingCorrectionVector,
 			MySparseMatrix>(geometry,dmrgSolverParams,io);
 			return;
 	}
-	if (targetting=="TargetingCorrection") {
+	if (targetting=="CorrectionTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingCorrection,
 			MySparseMatrix>(geometry,dmrgSolverParams,io);
 			return;
