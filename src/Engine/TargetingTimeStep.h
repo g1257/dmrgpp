@@ -194,22 +194,11 @@ public:
 		return gsWeight_;
 	}
 
-	const ComplexType& operator[](SizeType i) const { return this->common().psi()[i]; }
-
-	ComplexType& operator[](SizeType i) { return this->common().psi()[i]; }
-
 	bool includeGroundStage() const
 	{
 		if (!this->common().noStageIs(DISABLED)) return true;
 		bool b = (fabs(gsWeight_)>1e-6);
 		return b;
-	}
-
-	const RealType& time() const {return this->common().currentTime(); }
-
-	const VectorWithOffsetType& operator()(SizeType i) const
-	{
-		return this->common().targetVectors()[i];
 	}
 
 	void evolve(RealType Eg,
@@ -280,12 +269,6 @@ public:
 		BasisDataType q;
 		this->model().setNaturalBasis(creationMatrix,hmatrix,q,X,this->common().currentTime());
 		basisWithOps.setVarious(X,hmatrix,q,creationMatrix);
-	}
-
-	bool end() const
-	{
-		return (tstStruct_.maxTime() != 0 &&
-		        this->common().currentTime() >= tstStruct_.maxTime());
 	}
 
 private:

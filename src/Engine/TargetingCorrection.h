@@ -155,11 +155,6 @@ public:
 		return 1;
 	}
 
-	const VectorWithOffsetType& operator()(SizeType i) const
-	{
-		return this->common().targetVectors()[i];
-	}
-
 	void evolve(RealType Eg,
 	            SizeType direction,
 	            const BlockType& block1,

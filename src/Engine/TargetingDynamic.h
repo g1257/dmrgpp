@@ -184,11 +184,6 @@ public:
 		return gsWeight_;
 	}
 
-	const VectorWithOffsetType& operator()(SizeType i) const
-	{
-		return this->common().targetVectors()[i];
-	}
-
 	void evolve(RealType Eg,
 	            SizeType direction,
 	            const BlockType& block1,
@@ -209,23 +204,6 @@ public:
 		// //corner case
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		evolve(Eg,direction,x,loopNumber);
-	}
-
-	void evolve(RealType Eg,
-	            SizeType direction,
-	            SizeType site,
-	            SizeType loopNumber)
-	{
-
-		VectorWithOffsetType phiNew;
-		SizeType count = this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
-
-		if (count==0) return;
-
-		calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
-
-		typename PsimagLite::Vector<SizeType>::Type block(1,site);
-		this->common().cocoon(block,direction);
 	}
 
 	template<typename IoOutputType>
@@ -263,6 +241,23 @@ public:
 	}
 
 private:
+
+	void evolve(RealType Eg,
+	            SizeType direction,
+	            SizeType site,
+	            SizeType loopNumber)
+	{
+
+		VectorWithOffsetType phiNew;
+		SizeType count = this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
+
+		if (count==0) return;
+
+		calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
+
+		typename PsimagLite::Vector<SizeType>::Type block(1,site);
+		this->common().cocoon(block,direction);
+	}
 
 	void calcLanczosVectors(RealType& gsWeight,
 	                        typename PsimagLite::Vector<RealType>::Type& weights,

@@ -181,11 +181,6 @@ public:
 		return this->size();
 	}
 
-	const VectorWithOffsetType& operator()(SizeType i) const
-	{
-		return this->common().targetVectors()[i];
-	}
-
 	void evolve(RealType Eg,
 	            SizeType direction,
 	            const BlockType& block1,
@@ -206,23 +201,6 @@ public:
 		// //corner case
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		evolve(Eg,direction,x,loopNumber);
-	}
-
-	void evolve(RealType Eg,SizeType direction,SizeType site,
-	            SizeType loopNumber)
-	{
-		VectorWithOffsetType phiNew;
-		SizeType count = this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
-
-		if (direction!=INFINITE) {
-			correctionEnabled_=true;
-			typename PsimagLite::Vector<SizeType>::Type block1(1,site);
-			addCorrection(direction,block1);
-		}
-
-		if (count==0) return;
-
-		calcDynVectors(phiNew,direction);
 	}
 
 	template<typename IoOutputType>
@@ -253,6 +231,25 @@ public:
 	}
 
 private:
+
+	void evolve(RealType Eg,
+	            SizeType direction,
+	            SizeType site,
+	            SizeType loopNumber)
+	{
+		VectorWithOffsetType phiNew;
+		SizeType count = this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
+
+		if (direction!=INFINITE) {
+			correctionEnabled_=true;
+			typename PsimagLite::Vector<SizeType>::Type block1(1,site);
+			addCorrection(direction,block1);
+		}
+
+		if (count==0) return;
+
+		calcDynVectors(phiNew,direction);
+	}
 
 	void calcDynVectors(const VectorWithOffsetType& phi,
 	                    SizeType systemOrEnviron)

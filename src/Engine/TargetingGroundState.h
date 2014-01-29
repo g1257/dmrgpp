@@ -141,11 +141,6 @@ public:
 	      progress_("TargetingGroundState")
 	{}
 
-	RealType normSquared(SizeType i) const
-	{
-		throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
-	}
-
 	RealType weight(SizeType i) const
 	{
 		throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
@@ -160,11 +155,6 @@ public:
 	SizeType size() const
 	{
 		return 0;
-	}
-
-	const VectorWithOffsetType& operator()(SizeType i) const
-	{
-		throw PsimagLite::RuntimeError("TargetingGroundState::operator()(...)\n");
 	}
 
 	void evolve(RealType Eg,

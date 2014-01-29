@@ -137,11 +137,16 @@ public:
 	              SizeType indexNoAdvance)
 	    : lrs_(lrs),
 	      model_(model),
-	      waveFunctionTransformation_(wft),
+	      tstStruct_(tstStruct),
 	      commonTargetting_(lrs,model,tstStruct,wft,targets,indexNoAdvance)
 	{}
 
+	virtual ~TargetingBase()
+	{}
+
 	virtual RealType gsWeight() const = 0;
+
+	virtual RealType weight(SizeType i) const = 0;
 
 	virtual void evolve(RealType Eg,
 	                    SizeType direction,
@@ -159,13 +164,7 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		throw PsimagLite::RuntimeError("TargetingBase: What are you doing here?\n");
-	}
-
-	RealType weight(SizeType i) const
-	{
-		throw PsimagLite::RuntimeError("TargetingBase: What are you doing here?\n");
-		return 0;
+		return commonTargetting_.normSquared(i);
 	}
 
 	template<typename SomeBasisType>
@@ -184,7 +183,7 @@ public:
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		throw PsimagLite::RuntimeError("TargetingBase::operator()(...)\n");
+		return commonTargetting_.targetVectors()[i];
 	}
 
 	const LeftRightSuperType& leftRightSuper() const
@@ -198,14 +197,18 @@ public:
 		commonTargetting_.initialGuess(initialVector,block);
 	}
 
-	RealType time() const { return 0; }
+	const RealType& time() const {return commonTargetting_.currentTime(); }
 
 	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
 	{
 		// nothing to do here
 	}
 
-	bool end() const { return false; }
+	bool end() const
+	{
+		return (tstStruct_.maxTime() != 0 &&
+		        commonTargetting_.currentTime() >= tstStruct_.maxTime());
+	}
 
 protected:
 
@@ -223,7 +226,7 @@ private:
 
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
-	const WaveFunctionTransfType& waveFunctionTransformation_;
+	const TargettingParamsType& tstStruct_;
 	TargetingCommonType commonTargetting_;
 };     //class TargetingBase
 

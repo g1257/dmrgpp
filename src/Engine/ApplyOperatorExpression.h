@@ -101,10 +101,6 @@ class ApplyOperatorExpression {
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
 
-//	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-//		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-//		  INFINITE=WaveFunctionTransfType::INFINITE};
-
 public:
 
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
