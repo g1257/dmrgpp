@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "ApplyOperatorExpression.h"
 #include "TargetHelper.h"
+#include "IoSimple.h"
 
 namespace Dmrg {
 
@@ -99,6 +100,8 @@ class CommonTargetting  {
 
 public:
 
+	typedef PsimagLite::IoSimple IoType;
+	typedef typename IoType::In IoInputType;
 	typedef typename TargetHelperType::RealType RealType;
 	typedef typename TargetHelperType::ModelType ModelType;
 	typedef typename TargetHelperType::ModelHelperType ModelHelperType;
@@ -156,14 +159,16 @@ public:
 		return applyOpExpression_.getPhi(phiNew,Eg,direction,site,loopNumber);
 	}
 
-	VectorWithOffsetType& psi() // <--- FIXME
+	const VectorWithOffsetType& psi() const
 	{
 		return applyOpExpression_.psi();
 	}
 
-	const VectorWithOffsetType& psi() const
+	template<typename SomeBasisType>
+	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,
+	           const SomeBasisType& someBasis)
 	{
-		return applyOpExpression_.psi();
+		applyOpExpression_.psi().set(v,someBasis);
 	}
 
 	RealType normSquared(SizeType i) const
@@ -184,9 +189,42 @@ public:
 	}
 
 	template<typename SomeSerializerType>
-	void loadTargetVectors(SomeSerializerType& serializer)
+	void load(const PsimagLite::String& f)
 	{
-		applyOpExpression_.loadTargetVectors(serializer);
+		IoInputType io(f);
+
+		try {
+			setAllStagesTo(WFT_NOADVANCE);
+
+			SomeSerializerType ts(io,IoInputType::LAST_INSTANCE);
+			for (SizeType i=0;i<targetVectors().size();i++)
+				targetVectors(i) = ts.vector(i);
+
+			applyOpExpression_.setTime(ts.time());
+
+			applyOpExpression_.psi().load(io,"PSI");
+
+		} catch (std::exception& e) {
+			std::cout<<"WARNING: No special targets found in file "<<f<<"\n";
+			setAllStagesTo(DISABLED);
+			io.rewind();
+			int site = 0;
+			io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
+			applyOpExpression_.psi().loadOneSector(io,"PSI");
+		}
+	}
+
+	template<typename SomeSerializerType>
+	void load(const PsimagLite::String& f,int dummy)
+	{
+		IoInputType io(f);
+
+		int site=0;
+		io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
+		if (site<0)
+			throw PsimagLite::RuntimeError("GST::load(...): site cannot be negative\n");
+
+		applyOpExpression_.psi().load(io,"PSI");
 	}
 
 	bool allStages(SizeType x) const
@@ -304,11 +342,6 @@ public:
 	void initTimeVectors(const VectorRealType& times)
 	{
 		applyOpExpression_.initTimeVectors(times);
-	}
-
-	void setTime(RealType t)
-	{
-		applyOpExpression_.setTime(t);
 	}
 
 	void calcTimeVectors(const PairType& startEnd,

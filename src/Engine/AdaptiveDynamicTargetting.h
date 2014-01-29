@@ -182,12 +182,7 @@ public:
 	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 	           const SomeBasisType& someBasis)
 	{
-		commonTargetting_.psi().set(v,someBasis);
-	}
-
-	RealType& operator[](SizeType i)
-	{
-		return commonTargetting_.targetVectors()[i];
+		commonTargetting_.setGs(v,someBasis);
 	}
 
 	const VectorWithOffsetType& gs() const { return commonTargetting_.psi(); }
@@ -262,26 +257,9 @@ public:
 
 	void load(const PsimagLite::String& f)
 	{
-		IoInputType io(f);
-
-		try {
-			commonTargetting_.setAllStagesTo(WFT_NOADVANCE);
-
-			TimeSerializerType dynS(io,IoInputType::LAST_INSTANCE);
-			commonTargetting_.loadTargetVectors(dynS);
-			lastLanczosVector_ = commonTargetting_.targetVectors().size()-1;
-
-			//! WARNING: USE OF MAGIC BELOW:
-			dynCounter_ = 13; // FIXME: MAYBE SAVE AND LOAD ACTUAL NUMBER HERE
-			commonTargetting_.psi().load(io,"PSI");
-		} catch (std::exception& e) {
-			std::cout<<"WARNING: No special targets found in file "<<f<<"\n";
-			commonTargetting_.setAllStagesTo(DISABLED);
-			io.rewind();
-			int site = 0;
-			io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
-			commonTargetting_.psi().loadOneSector(io,"PSI");
-		}
+		commonTargetting_.template load<TimeSerializerType>(f);
+		lastLanczosVector_ = commonTargetting_.targetVectors().size()-1;
+		dynCounter_ = 13;
 	}
 
 	RealType time() const { return 0; }

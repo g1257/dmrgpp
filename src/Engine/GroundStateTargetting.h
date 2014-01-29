@@ -163,10 +163,10 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,//const typename PsimagLite::Vector<SizeType>::Type& weights,
+	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,
 	           const SomeBasisType& someBasis)
 	{
-		commonTargetting_.psi().set(v,someBasis);
+		commonTargetting_.setGs(v,someBasis);
 	}
 
 	const VectorWithOffsetType& gs() const
@@ -221,12 +221,7 @@ public:
 
 	void load(const PsimagLite::String& f)
 	{
-		IoInputType io(f);
-		int site=0;
-		io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
-		if (site<0) throw PsimagLite::RuntimeError(
-		            "GST::load(...): site cannot be negative\n");
-		commonTargetting_.psi().load(io,"PSI");
+		commonTargetting_.template load<int>(f,0);
 	}
 
 	RealType time() const { return 0; }

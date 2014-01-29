@@ -209,8 +209,7 @@ public:
 	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 	           const SomeBasisType& someBasis)
 	{
-		commonTargetting_.psi().set(v,someBasis);
-		assert(commonTargetting_.psi().size()==lrs_.super().size());
+		commonTargetting_.setGs(v,someBasis);
 	}
 
 	const ComplexType& operator[](SizeType i) const { return commonTargetting_.psi()[i]; }
@@ -271,17 +270,7 @@ public:
 
 	void load(const PsimagLite::String& f)
 	{
-		commonTargetting_.setAllStagesTo(WFT_NOADVANCE);
-
-		typename IoType::In io(f);
-
-		TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
-		for (SizeType i=0;i<commonTargetting_.targetVectors().size();i++)
-			commonTargetting_.targetVectors(i) = ts.vector(i);
-
-		commonTargetting_.setTime(ts.time());
-
-		commonTargetting_.psi().load(io,"PSI");
+		commonTargetting_.template load<TimeSerializerType>(f);
 	}
 
 	void print(std::ostream& os) const

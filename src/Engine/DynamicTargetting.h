@@ -189,7 +189,7 @@ public:
 	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 	           const SomeBasisType& someBasis)
 	{
-		commonTargetting_.psi().set(v,someBasis);
+		commonTargetting_.setGs(v,someBasis);
 	}
 
 	RealType normSquared(SizeType i) const
@@ -293,20 +293,7 @@ public:
 
 	void load(const PsimagLite::String& f)
 	{
-		IoInputType io(f);
-		try {
-			commonTargetting_.setAllStagesTo(CONVERGING);
-			TimeSerializerType dynS(io,IoInputType::LAST_INSTANCE);
-			commonTargetting_.loadTargetVectors(dynS);
-			commonTargetting_.psi().load(io,"PSI");
-		} catch (std::exception& e) {
-			std::cout<<"WARNING: No special targets found in file "<<f<<"\n";
-			commonTargetting_.setAllStagesTo(DISABLED);
-			io.rewind();
-			int site = 0;
-			io.readline(site,"#TCENTRALSITE=",IoType::In::LAST_INSTANCE);
-			commonTargetting_.psi().loadOneSector(io,"PSI");
-		}
+		commonTargetting_.template load<TimeSerializerType>(f);
 	}
 
 	RealType time() const { return 0; }

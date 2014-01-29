@@ -188,7 +188,7 @@ public:
 	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
 	           const SomeBasisType& someBasis)
 	{
-		commonTargetting_.psi().set(v,someBasis);
+		commonTargetting_.setGs(v,someBasis);
 	}
 
 	const VectorWithOffsetType& gs() const { return commonTargetting_.psi(); }
@@ -278,14 +278,7 @@ public:
 
 	void load(const PsimagLite::String& f)
 	{
-		commonTargetting_.setAllStagesTo(CONVERGING);
-
-		IoInputType io(f);
-
-		TimeSerializerType dynS(io,IoInputType::LAST_INSTANCE);
-		commonTargetting_.loadTargetVectors(dynS);
-
-		commonTargetting_.psi().load(io,"PSI");
+		commonTargetting_.template load<TimeSerializerType>(f);
 	}
 
 	RealType time() const { return 0; }
