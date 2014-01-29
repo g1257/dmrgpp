@@ -206,8 +206,7 @@ public:
 
 	bool end() const
 	{
-		return (tstStruct_.maxTime() != 0 &&
-		        commonTargetting_.currentTime() >= tstStruct_.maxTime());
+		return false;
 	}
 
 protected:
