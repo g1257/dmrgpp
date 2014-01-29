@@ -72,7 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file DynamicTargetting.h
+/*! \file TargetingDynamic.h
  *
  * Implements the targetting required by
  * a simple continued fraction calculation
@@ -80,15 +80,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  */
 
-#ifndef DYNAMICTARGETTING_H
-#define DYNAMICTARGETTING_H
+#ifndef TARGETING_DYNAMIC_H
+#define TARGETING_DYNAMIC_H
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "ParametersForSolver.h"
 #include "TargetParamsDynamic.h"
 #include "VectorWithOffsets.h"
-#include "CommonTargetting.h"
+#include "TargetingCommon.h"
 #include <cassert>
 #include "Concurrency.h"
 #include "Parallelizer.h"
@@ -101,7 +101,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class DynamicTargetting  {
+class TargetingDynamic  {
 
 public:
 
@@ -137,9 +137,9 @@ public:
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
 	                     WaveFunctionTransfType> TargetHelperType;
-	typedef CommonTargetting<TargetHelperType,
+	typedef TargetingCommon<TargetHelperType,
 	                         VectorWithOffsetType,
-	                         LanczosSolverType> CommonTargettingType;
+	                         LanczosSolverType> TargetingCommonType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 	enum {
@@ -151,7 +151,7 @@ public:
 	static SizeType const PRODUCT = TargettingParamsType::PRODUCT;
 	static SizeType const SUM = TargettingParamsType::SUM;
 
-	DynamicTargetting(const LeftRightSuperType& lrs,
+	TargetingDynamic(const LeftRightSuperType& lrs,
 	                  const ModelType& model,
 	                  const TargettingParamsType& tstStruct,
 	                  const WaveFunctionTransfType& wft,
@@ -160,13 +160,13 @@ public:
 	      model_(model),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
-	      progress_("DynamicTargetting"),
+	      progress_("TargetingDynamic"),
 	      gsWeight_(1.0),
 	      commonTargetting_(lrs,model,tstStruct,wft,0,0),
 	      weightForContinuedFraction_(0)
 	{
 		if (!wft.isEnabled())
-			throw PsimagLite::RuntimeError(" DynamicTargetting needs an enabled wft\n");
+			throw PsimagLite::RuntimeError(" TargetingDynamic needs an enabled wft\n");
 
 		paramsForSolver_.steps = tstStruct_.steps();
 		paramsForSolver_.tolerance = tstStruct_.eps();
@@ -411,20 +411,20 @@ private:
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
-	CommonTargettingType commonTargetting_;
+	TargetingCommonType commonTargetting_;
 	ParametersForSolverType paramsForSolver_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
-}; // class DynamicTargetting
+}; // class TargetingDynamic
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType,
          typename WaveFunctionTransfType,
          typename IoType_>
 std::ostream& operator<<(std::ostream& os,
-                         const DynamicTargetting<LanczosSolverTemplate,
+                         const TargetingDynamic<LanczosSolverTemplate,
                          MatrixVectorType,
                          WaveFunctionTransfType,IoType_>& tst)
 {
@@ -434,5 +434,5 @@ std::ostream& operator<<(std::ostream& os,
 
 } // namespace
 /*@}*/
-#endif // DYNAMICTARGETTING_H
+#endif // TARGETING_DYNAMIC_H
 

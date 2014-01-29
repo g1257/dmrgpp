@@ -68,8 +68,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 *********************************************************
 */
 
-#ifndef TIMESTEPTARGETTING_H
-#define TIMESTEPTARGETTING_H
+#ifndef TARGETING_TIMESTEP_H
+#define TARGETING_TIMESTEP_H
 
 #include <iostream>
 #include "ProgressIndicator.h"
@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsKrylov.h"
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
-#include "CommonTargetting.h"
+#include "TargetingCommon.h"
 
 namespace Dmrg {
 
@@ -90,7 +90,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class TimeStepTargetting  {
+class TargetingTimeStep  {
 
 	enum {BORDER_NEITHER, BORDER_LEFT, BORDER_RIGHT};
 
@@ -130,18 +130,18 @@ public:
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
 	                     WaveFunctionTransfType> TargetHelperType;
-	typedef CommonTargetting<TargetHelperType,
+	typedef TargetingCommon<TargetHelperType,
 	                         VectorWithOffsetType,
-	                         LanczosSolverType> CommonTargettingType;
-	typedef typename CommonTargettingType::VectorStringType VectorStringType;
-	typedef typename CommonTargettingType::VectorVectorWithOffsetType VectorVectorWithOffsetType;
+	                         LanczosSolverType> TargetingCommonType;
+	typedef typename TargetingCommonType::VectorStringType VectorStringType;
+	typedef typename TargetingCommonType::VectorVectorWithOffsetType VectorVectorWithOffsetType;
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
 	static SizeType const PRODUCT = TargettingParamsType::PRODUCT;
 	static SizeType const SUM = TargettingParamsType::SUM;
 
-	TimeStepTargetting(const LeftRightSuperType& lrs,
+	TargetingTimeStep(const LeftRightSuperType& lrs,
 	                   const ModelType& model,
 	                   const TargettingParamsType& tstStruct,
 	                   const WaveFunctionTransfType& wft,
@@ -150,15 +150,15 @@ public:
 	      model_(model),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
-	      progress_("TimeStepTargetting"),
+	      progress_("TargetingTimeStep"),
 	      times_(tstStruct_.timeSteps()),
 	      weight_(tstStruct_.timeSteps()),
 	      commonTargetting_(lrs,model,tstStruct,wft,times_.size(),0)
 	{
 		if (!wft.isEnabled()) throw PsimagLite::RuntimeError
-		        (" TimeStepTargetting needs an enabled wft\n");
+		        (" TargetingTimeStep needs an enabled wft\n");
 		if (tstStruct_.sites() == 0) throw PsimagLite::RuntimeError
-		        (" TimeStepTargetting needs at least one TSPSite\n");
+		        (" TargetingTimeStep needs at least one TSPSite\n");
 
 		RealType tau =tstStruct_.tau();
 		RealType sum = 0;
@@ -484,16 +484,16 @@ private:
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	typename PsimagLite::Vector<RealType>::Type times_,weight_;
-	CommonTargettingType commonTargetting_;
+	TargetingCommonType commonTargetting_;
 	RealType gsWeight_;
-};     //class TimeStepTargetting
+};     //class TargetingTimeStep
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType,
          typename WaveFunctionTransfType,
          typename IoType_>
 std::ostream& operator<<(std::ostream& os,
-                         const TimeStepTargetting<LanczosSolverTemplate,
+                         const TargetingTimeStep<LanczosSolverTemplate,
                          MatrixVectorType,
                          WaveFunctionTransfType,IoType_>& tst)
 {

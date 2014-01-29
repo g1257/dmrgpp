@@ -17,12 +17,13 @@ typedef float RealType;
 #include "ModelHelperSu2.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
-#include "GroundStateTargetting.h"
 #include "DmrgSolver.h" // only used for types
-#include "TimeStepTargetting.h"
-#include "DynamicTargetting.h"
-#include "AdaptiveDynamicTargetting.h"
-#include "CorrectionTargetting.h"
+#include "TargetingGroundState.h"
+#include "TargetingTimeStep.h"
+#include "TargetingDynamic.h"
+#include "TargetingAdaptiveDynamic.h"
+#include "TargetingCorrection.h"
+#include "TargetingCorrectionVector.h"
 #include "MettsTargetting.h"
 #include "BasisWithOperators.h"
 #include "LeftRightSuper.h"
@@ -223,8 +224,8 @@ void mainLoop0(InputNgType::Readable& io,
 
 	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
 
-	if (targetting!="GroundStateTargetting" && su2)
-		throw PsimagLite::RuntimeError("SU(2) supports only GroundStateTargetting\n");
+	if (targetting!="TargetingGroundState" && su2)
+		throw PsimagLite::RuntimeError("SU(2) supports only TargetingGroundState\n");
 
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) {
@@ -237,7 +238,7 @@ void mainLoop0(InputNgType::Readable& io,
 		return;
 	}
 
-	if (targetting=="GroundStateTargetting") {
+	if (targetting=="TargetingGroundState") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,MySparseMatrix>
 		        (geometry,targetting,io,dmrgSolverParams, options, list);
 	} else if (targetting=="TimeStepTargetting") {

@@ -71,15 +71,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file AdaptiveDynamicTargetting.h
+/*! \file TargetingAdaptiveDynamic.h
  *
  * Implements the targetting required by
  * arXiv:1012.5543v1
  *
  */
 
-#ifndef ADAPTIVE_DYN_TARGETTING_H
-#define ADAPTIVE_DYN_TARGETTING_H
+#ifndef TARGETING_ADAPTIVE_DYN_H
+#define TARGETING_ADAPTIVE_DYN_H
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsAdaptiveDynamic.h"
 #include "VectorWithOffsets.h"
 #include "ParametersForSolver.h"
-#include "CommonTargetting.h"
+#include "TargetingCommon.h"
 
 namespace Dmrg {
 
@@ -95,7 +95,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class AdaptiveDynamicTargetting  {
+class TargetingAdaptiveDynamic  {
 public:
 
 	typedef MatrixVectorType_ MatrixVectorType;
@@ -127,19 +127,19 @@ public:
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
 	                     WaveFunctionTransfType> TargetHelperType;
-	typedef CommonTargetting<TargetHelperType,
+	typedef TargetingCommon<TargetHelperType,
 	                         VectorWithOffsetType,
-	                         LanczosSolverType> CommonTargettingType;
+	                         LanczosSolverType> TargetingCommonType;
 
-	enum {DISABLED=CommonTargettingType::DISABLED,
-		  OPERATOR=CommonTargettingType::OPERATOR,
-		  WFT_NOADVANCE=CommonTargettingType::WFT_NOADVANCE};
+	enum {DISABLED=TargetingCommonType::DISABLED,
+		  OPERATOR=TargetingCommonType::OPERATOR,
+		  WFT_NOADVANCE=TargetingCommonType::WFT_NOADVANCE};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 		  INFINITE=WaveFunctionTransfType::INFINITE};
 
-	AdaptiveDynamicTargetting(const LeftRightSuperType& lrs,
+	TargetingAdaptiveDynamic(const LeftRightSuperType& lrs,
 	                          const ModelType& model,
 	                          const TargettingParamsType& tstStruct,
 	                          const WaveFunctionTransfType& wft,
@@ -150,7 +150,7 @@ public:
 	      wft_(wft),
 	      lastLanczosVector_(0),
 	      dynCounter_(0),
-	      progress_("AdaptiveDynamicTargetting"),
+	      progress_("TargetingAdaptiveDynamic"),
 	      gsWeight_(1.0),
 	      commonTargetting_(lrs,model,tstStruct,wft,2,0),
 	      done_(false),
@@ -435,7 +435,7 @@ private:
 	SizeType dynCounter_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
-	CommonTargettingType commonTargetting_;
+	TargetingCommonType commonTargetting_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	bool done_;
 	RealType Eg_;
@@ -449,7 +449,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename WaveFunctionTransfType,
          typename IoType_>
 std::ostream& operator<<(std::ostream& os,
-                         const AdaptiveDynamicTargetting<LanczosSolverTemplate,
+                         const TargetingAdaptiveDynamic<LanczosSolverTemplate,
                          MatrixVectorType,
                          WaveFunctionTransfType,IoType_>& tst)
 {
@@ -459,5 +459,5 @@ std::ostream& operator<<(std::ostream& os,
 
 } // namespace
 /*@}*/
-#endif // ADAPTIVE_DYN_TARGETTING_H
+#endif // TARGETING_ADAPTIVE_DYN_H
 

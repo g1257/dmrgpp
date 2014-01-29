@@ -71,22 +71,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file CorrectionVectorTargetting.h
+/*! \file TargetingCorrectionVector.h
  *
  * Implements the targetting required by
  * the correction targetting method
  *
  */
 
-#ifndef CORRECTION_VECTOR_TARG_H
-#define CORRECTION_VECTOR_TARG_H
+#ifndef TARGETING_CORRECTION_VECTOR_H
+#define TARGETING_CORRECTION_VECTOR_H
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "TargetParamsCorrectionVector.h"
 #include "VectorWithOffsets.h"
 #include "CorrectionVectorFunction.h"
-#include "CommonTargetting.h"
+#include "TargetingCommon.h"
 #include "ParametersForSolver.h"
 
 namespace Dmrg {
@@ -95,7 +95,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class CorrectionVectorTargetting  {
+class TargetingCorrectionVector  {
 
 public:
 
@@ -135,9 +135,9 @@ public:
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
 	                     WaveFunctionTransfType> TargetHelperType;
-	typedef CommonTargetting<TargetHelperType,
+	typedef TargetingCommon<TargetHelperType,
 	                         VectorWithOffsetType,
-	                         LanczosSolverType> CommonTargettingType;
+	                         LanczosSolverType> TargetingCommonType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
@@ -148,7 +148,7 @@ public:
 	static SizeType const PRODUCT = TargettingParamsType::PRODUCT;
 	static SizeType const SUM = TargettingParamsType::SUM;
 
-	CorrectionVectorTargetting(const LeftRightSuperType& lrs,
+	TargetingCorrectionVector(const LeftRightSuperType& lrs,
 	                           const ModelType& model,
 	                           const TargettingParamsType& tstStruct,
 	                           const WaveFunctionTransfType& wft,
@@ -157,13 +157,13 @@ public:
 	      model_(model),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
-	      progress_("CorrectionVectorTargetting"),
+	      progress_("TargetingCorrectionVector"),
 	      gsWeight_(1.0),
 	      commonTargetting_(lrs,model,tstStruct,wft,4,1),
 	      correctionEnabled_(false)
 	{
 		if (!wft.isEnabled())
-			throw PsimagLite::RuntimeError("CorrectionVectorTargetting needs wft\n");
+			throw PsimagLite::RuntimeError("TargetingCorrectionVector needs wft\n");
 	}
 
 	const ModelType& model() const { return model_; }
@@ -259,7 +259,7 @@ public:
 	          IoOutputType& io) const
 	{
 		if (block.size()!=1)
-			throw PsimagLite::RuntimeError("CorrectionVectorTargetting only supports blocks of size 1\n");
+			throw PsimagLite::RuntimeError("TargetingCorrectionVector only supports blocks of size 1\n");
 		SizeType type = tstStruct_.type();
 		int fermionSign = commonTargetting_.findFermionSignOfTheOperators();
 		int s = (type&1) ? -1 : 1;
@@ -400,21 +400,21 @@ private:
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
-	CommonTargettingType commonTargetting_;
+	TargetingCommonType commonTargetting_;
 	bool correctionEnabled_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
 
-}; // class CorrectionVectorTargetting
+}; // class TargetingCorrectionVector
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType,
          typename WaveFunctionTransfType,
          typename IoType_>
 std::ostream& operator<<(std::ostream& os,
-                         const CorrectionVectorTargetting<LanczosSolverTemplate,
+                         const TargetingCorrectionVector<LanczosSolverTemplate,
                          MatrixVectorType,
                          WaveFunctionTransfType,IoType_>& tst)
 {
@@ -424,5 +424,5 @@ std::ostream& operator<<(std::ostream& os,
 
 } // namespace
 /*@}*/
-#endif // CORRECTION_VECTOR_TARG_H
+#endif // TARGETING_CORRECTION_VECTOR_H
 

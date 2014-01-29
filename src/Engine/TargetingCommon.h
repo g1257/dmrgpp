@@ -71,14 +71,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file CommonTargetting.h
+/*! \file TargetingCommon.h
  *
  * Functionality used by many targetting classes
  *
  */
 
-#ifndef COMMON_TARGETTING_H
-#define COMMON_TARGETTING_H
+#ifndef TARGETING_COMMON_H
+#define TARGETING_COMMON_H
 
 #include "ProgressIndicator.h"
 #include "BLAS.h"
@@ -96,7 +96,7 @@ namespace Dmrg {
 template<typename TargetHelperType,
          typename VectorWithOffsetType,
          typename LanczosSolverType>
-class CommonTargetting  {
+class TargetingCommon  {
 
 public:
 
@@ -139,13 +139,13 @@ public:
 	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 	      INFINITE=WaveFunctionTransfType::INFINITE};
 
-	CommonTargetting(const LeftRightSuperType& lrs,
+	TargetingCommon(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
                      const TargettingParamsType& tstStruct,
                      const WaveFunctionTransfType& wft,
 	                 SizeType targets,
 	                 SizeType indexNoAdvance)
-	    : progress_("CommonTargetting"),
+	    : progress_("TargetingCommon"),
 	      targetHelper_(lrs,model,tstStruct,wft),
 	      applyOpExpression_(targetHelper_,targets,indexNoAdvance)
 	{}
@@ -572,13 +572,13 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	TargetHelperType targetHelper_;
 	ApplyOperatorExpressionType applyOpExpression_;
-}; // class CommonTargetting
+}; // class TargetingCommon
 
 template<typename TargetHelperType,
          typename VectorWithOffsetType,
          typename LanczosSolverType>
 std::ostream& operator<<(std::ostream& os,
-                         const CommonTargetting<TargetHelperType,
+                         const TargetingCommon<TargetHelperType,
                                                 VectorWithOffsetType,
                                                 LanczosSolverType>& tst)
 {
@@ -588,5 +588,5 @@ std::ostream& operator<<(std::ostream& os,
 
 } // namespace
 /*@}*/
-#endif // COMMON_TARGETTING_H
+#endif // TARGETING_COMMON_H
 

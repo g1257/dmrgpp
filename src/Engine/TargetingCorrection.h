@@ -72,7 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file CorrectionTargetting.h
+/*! \file TargetingCorrection.h
  *
  *  corrects the finite-size algorithm
  *  following PRB 72, 180403(R) (2005)
@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "String.h"
 #include "TargetParamsCorrection.h"
-#include "CommonTargetting.h"
+#include "TargetingCommon.h"
 #include <stdexcept>
 
 namespace Dmrg {
@@ -93,7 +93,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class CorrectionTargetting  {
+class TargetingCorrection  {
 
 public:
 
@@ -121,16 +121,16 @@ public:
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
 	                     WaveFunctionTransfType> TargetHelperType;
-	typedef CommonTargetting<TargetHelperType,
+	typedef TargetingCommon<TargetHelperType,
 	                         VectorWithOffsetType,
-	                         LanczosSolverType> CommonTargettingType;
+	                         LanczosSolverType> TargetingCommonType;
 
 	enum {DISABLED,ENABLED};
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 	      INFINITE=WaveFunctionTransfType::INFINITE};
 
-	CorrectionTargetting(const LeftRightSuperType& lrs,
+	TargetingCorrection(const LeftRightSuperType& lrs,
 	                     const ModelType& model,
 	                     const TargettingParamsType& correctionStruct,
 	                     const WaveFunctionTransfType& wft, // wft is ignored here
@@ -139,7 +139,7 @@ public:
 	      model_(model),
 	      correctionStruct_(correctionStruct),
 	      waveFunctionTransformation_(wft),
-	      progress_("CorrectionTargetting"),
+	      progress_("TargetingCorrection"),
 	      commonTargetting_(lrs,model,correctionStruct,wft,0,0)
 	{}
 
@@ -254,15 +254,15 @@ private:
 	const TargettingParamsType& correctionStruct_;
 	const WaveFunctionTransfType& waveFunctionTransformation_;
 	PsimagLite::ProgressIndicator progress_;
-	CommonTargettingType commonTargetting_;
-};     //class CorrectionTargetting
+	TargetingCommonType commonTargetting_;
+};     //class TargetingCorrection
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType,
          typename WaveFunctionTransfType,
          typename IoType_>
 std::ostream& operator<<(std::ostream& os,
-                         const CorrectionTargetting<LanczosSolverTemplate,
+                         const TargetingCorrection<LanczosSolverTemplate,
                          MatrixVectorType,
                          WaveFunctionTransfType,IoType_>& tst)
 {

@@ -20,12 +20,12 @@ typedef float MatrixElementType;
 #include "MatrixVectorOnTheFly.h"
 #include "MatrixVectorStored.h"
 #include "MatrixVectorKron.h"
-#include "GroundStateTargetting.h"
-#include "TimeStepTargetting.h"
-#include "DynamicTargetting.h"
-#include "AdaptiveDynamicTargetting.h"
-#include "CorrectionTargetting.h"
-#include "CorrectionVectorTargetting.h"
+#include "TargetingGroundState.h"
+#include "TargetingTimeStep.h"
+#include "TargetingDynamic.h"
+#include "TargetingAdaptiveDynamic.h"
+#include "TargetingCorrection.h"
+#include "TargetingCorrectionVector.h"
 #include "MettsTargetting.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
@@ -167,42 +167,42 @@ void mainLoop0(InputNgType::Readable& io,
 
 	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
 
-	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
- 		" supports only GroundStateTargetting for now (sorry!)\n");
+	if (targetting!="TargetingGroundState" && su2) throw PsimagLite::RuntimeError("SU(2)"
+ 		" supports only TargetingGroundState for now (sorry!)\n");
 
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) {
-			mainLoop<GeometryType,ModelHelperSu2,VectorWithOffsets,GroundStateTargetting,
+			mainLoop<GeometryType,ModelHelperSu2,VectorWithOffsets,TargetingGroundState,
 				MySparseMatrix>(geometry,dmrgSolverParams,io);
 		} else {
-			mainLoop<GeometryType,ModelHelperSu2,VectorWithOffset,GroundStateTargetting,
+			mainLoop<GeometryType,ModelHelperSu2,VectorWithOffset,TargetingGroundState,
 				MySparseMatrix>(geometry,dmrgSolverParams,io);
 		}
 		return;
 	}
 
-	if (targetting=="TimeStepTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TimeStepTargetting,
+	if (targetting=="TargetingTimeStep") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingTimeStep,
 			MySparseMatrixComplex>(geometry,dmrgSolverParams,io);
 			return;
 	}
-	if (targetting=="DynamicTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,DynamicTargetting,
+	if (targetting=="TargetingDynamic") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingDynamic,
 			MySparseMatrix>(geometry,dmrgSolverParams,io);
 			return;
 	}
-	if (targetting=="AdaptiveDynamicTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,AdaptiveDynamicTargetting,
+	if (targetting=="TargetingAdaptiveDynamic") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingAdaptiveDynamic,
 			MySparseMatrix>(geometry,dmrgSolverParams,io);
 			return;
 	}
-	if (targetting=="CorrectionVectorTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,CorrectionVectorTargetting,
+	if (targetting=="TargetingCorrectionVector") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingCorrectionVector,
 			MySparseMatrix>(geometry,dmrgSolverParams,io);
 			return;
 	}
-	if (targetting=="CorrectionTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,CorrectionTargetting,
+	if (targetting=="TargetingCorrection") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingCorrection,
 			MySparseMatrix>(geometry,dmrgSolverParams,io);
 			return;
 	}
@@ -212,7 +212,7 @@ void mainLoop0(InputNgType::Readable& io,
 			return;
 	}
 
-	mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,GroundStateTargetting,
+	mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,TargetingGroundState,
 		MySparseMatrix>(geometry,dmrgSolverParams,io);
 }
 

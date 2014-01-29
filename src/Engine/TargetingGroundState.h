@@ -72,21 +72,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file GroundStateTargetting.h
+/*! \file TargetingGroundState.h
  *
  *  targets the ground state
  *
  */
 
-#ifndef GS_TARGETTING_H
-#define GS_TARGETTING_H
+#ifndef TARGETING_GS_H
+#define TARGETING_GS_H
 #include <iostream>
 #include "String.h"
 #include "TargetParamsGroundState.h"
 #include "ApplyOperatorLocal.h"
 #include <stdexcept>
 #include "Tokenizer.h"
-#include "CommonTargetting.h"
+#include "TargetingCommon.h"
 #include "ParametersForSolver.h"
 
 namespace Dmrg {
@@ -95,7 +95,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class GroundStateTargetting {
+class TargetingGroundState {
 
 public:
 
@@ -123,16 +123,16 @@ public:
 	typedef TargetHelper<ModelType,
 	                     TargettingParamsType,
 	                     WaveFunctionTransfType> TargetHelperType;
-	typedef CommonTargetting<TargetHelperType,
+	typedef TargetingCommon<TargetHelperType,
 	                         VectorWithOffsetType,
-	                         LanczosSolverType> CommonTargettingType;
-	typedef typename CommonTargettingType::ApplyOperatorType ApplyOperatorType;
+	                         LanczosSolverType> TargetingCommonType;
+	typedef typename TargetingCommonType::ApplyOperatorType ApplyOperatorType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 		  INFINITE=WaveFunctionTransfType::INFINITE};
 
-	GroundStateTargetting(const LeftRightSuperType& lrs,
+	TargetingGroundState(const LeftRightSuperType& lrs,
 	                      const ModelType& model,
 	                      const TargettingParamsType& tstStruct,
 	                      const WaveFunctionTransfType& wft,  // wft is ignored here
@@ -140,7 +140,7 @@ public:
 	    : lrs_(lrs),
 	      model_(model),
 	      waveFunctionTransformation_(wft),
-	      progress_("GroundStateTargetting"),
+	      progress_("TargetingGroundState"),
 	      commonTargetting_(lrs,model,tstStruct,wft,0,0)
 	{}
 
@@ -183,7 +183,7 @@ public:
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		throw PsimagLite::RuntimeError("GroundStateTargetting::operator()(...)\n");
+		throw PsimagLite::RuntimeError("TargetingGroundState::operator()(...)\n");
 	}
 
 	void evolve(RealType Eg,
@@ -239,16 +239,16 @@ private:
 	const ModelType& model_;
 	const WaveFunctionTransfType& waveFunctionTransformation_;
 	PsimagLite::ProgressIndicator progress_;
-	CommonTargettingType commonTargetting_;
+	TargetingCommonType commonTargetting_;
 
-};     //class GroundStateTargetting
+};     //class TargetingGroundState
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType,
          typename WaveFunctionTransfType,
          typename IoType_>
 std::ostream& operator<<(std::ostream& os,
-                         const GroundStateTargetting<LanczosSolverTemplate,
+                         const TargetingGroundState<LanczosSolverTemplate,
                          MatrixVectorType,
                          WaveFunctionTransfType,IoType_>& tst)
 {
