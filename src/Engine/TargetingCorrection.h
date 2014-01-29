@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include "String.h"
 #include "TargetParamsCorrection.h"
-#include "TargetingCommon.h"
+#include "TargetingBase.h"
 #include <stdexcept>
 
 namespace Dmrg {
@@ -93,10 +93,17 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class TargetingCorrection  {
+class TargetingCorrection : public TargetingBase<LanczosSolverTemplate,
+                                                 MatrixVectorType_,
+                                                 WaveFunctionTransfType_,
+                                                 IoType_> {
 
 public:
 
+	typedef TargetingBase<LanczosSolverTemplate,
+	                      MatrixVectorType_,
+	                      WaveFunctionTransfType_,
+                          IoType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef IoType_ IoType;
@@ -118,41 +125,28 @@ public:
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef TargetParamsCorrection<ModelType> TargettingParamsType;
-	typedef TargetHelper<ModelType,
-	                     TargettingParamsType,
-	                     WaveFunctionTransfType> TargetHelperType;
-	typedef TargetingCommon<TargetHelperType,
-	                         VectorWithOffsetType,
-	                         LanczosSolverType> TargetingCommonType;
 
 	enum {DISABLED,ENABLED};
-	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-	      INFINITE=WaveFunctionTransfType::INFINITE};
 
 	TargetingCorrection(const LeftRightSuperType& lrs,
 	                     const ModelType& model,
 	                     const TargettingParamsType& correctionStruct,
-	                     const WaveFunctionTransfType& wft, // wft is ignored here
+	                     const WaveFunctionTransfType& wft,
 	                     const SizeType& quantumSector) // quantumSector ignored here
-	    : lrs_(lrs),
-	      model_(model),
+	    : BaseType(lrs,model,correctionStruct,wft,0,0),
 	      correctionStruct_(correctionStruct),
-	      waveFunctionTransformation_(wft),
-	      progress_("TargetingCorrection"),
-	      commonTargetting_(lrs,model,correctionStruct,wft,0,0)
+	      progress_("TargetingCorrection")
 	{}
-
-	const ModelType& model() const { return model_; }
 
 	RealType normSquared(SizeType i) const
 	{
-		return std::real(multiply(commonTargetting_.targetVectors()[i],commonTargetting_.targetVectors()[i]));
+		return std::real(multiply(this->common().targetVectors()[i],
+		                          this->common().targetVectors()[i]));
 	}
 
 	RealType weight(SizeType i) const
 	{
-		assert(commonTargetting_.noStageIs(DISABLED));
+		assert(this->common().noStageIs(DISABLED));
 		return correctionStruct_.correctionA();
 	}
 
@@ -161,32 +155,10 @@ public:
 		return 1;
 	}
 
-	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
-	           const SomeBasisType& someBasis)
-	{
-		commonTargetting_.setGs(v,someBasis);
-	}
-
-	const VectorWithOffsetType& gs() const
-	{
-		return commonTargetting_.psi();
-	}
-
-	bool includeGroundStage() const {return true; }
-
-	SizeType size() const
-	{
-		if (commonTargetting_.allStages(DISABLED)) return 0;
-		return commonTargetting_.targetVectors().size();
-	}
-
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return commonTargetting_.targetVectors()[i];
+		return this->common().targetVectors()[i];
 	}
-
-	RealType time() const { return 0; }
 
 	void evolve(RealType Eg,
 	            SizeType direction,
@@ -194,25 +166,11 @@ public:
 	            const BlockType& block2,
 	            SizeType loopNumber)
 	{
-		commonTargetting_.cocoon(block1,direction);
+		this->common().cocoon(block1,direction);
 
-		if (direction==INFINITE) return;
-		commonTargetting_.setAllStagesTo(ENABLED);
-		commonTargetting_.computeCorrection(direction,block1);
-	}
-
-	const LeftRightSuperType& leftRightSuper() const
-	{
-		return lrs_;
-	}
-
-	void initialGuess(VectorWithOffsetType& initialVector,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		RealType eps = 1e-6;
-		if (commonTargetting_.psi().size()>0 && std::norm(commonTargetting_.psi())<eps)
-			throw PsimagLite::RuntimeError("psi's norm is zero\n");
-		commonTargetting_.initialGuess(initialVector,block);
+		if (direction == ProgramGlobals::INFINITE) return;
+		this->common().setAllStagesTo(ENABLED);
+		this->common().computeCorrection(direction,block1);
 	}
 
 	template<typename IoOutputType>
@@ -228,12 +186,12 @@ public:
 
 		PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(s);
-		commonTargetting_.psi().save(io,"PSI");
+		this->common().psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)
 	{
-		commonTargetting_.template load<int>(f,0);
+		this->common().template load<int>(f,0);
 	}
 
 	void print(std::ostream& os) const
@@ -242,19 +200,10 @@ public:
 		os<<"CorrectionWeightCorrection="<<correctionStruct_.correctionA()<<"\n";
 	}
 
-	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
-	{}
-
-	bool end() const { return false; }
-
 private:
 
-	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
 	const TargettingParamsType& correctionStruct_;
-	const WaveFunctionTransfType& waveFunctionTransformation_;
 	PsimagLite::ProgressIndicator progress_;
-	TargetingCommonType commonTargetting_;
 };     //class TargetingCorrection
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,

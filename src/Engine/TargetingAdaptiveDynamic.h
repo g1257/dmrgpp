@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsAdaptiveDynamic.h"
 #include "VectorWithOffsets.h"
 #include "ParametersForSolver.h"
-#include "TargetingCommon.h"
+#include "TargetingBase.h"
 
 namespace Dmrg {
 
@@ -95,9 +95,16 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class TargetingAdaptiveDynamic  {
+class TargetingAdaptiveDynamic : public TargetingBase<LanczosSolverTemplate,
+                                                      MatrixVectorType_,
+                                                      WaveFunctionTransfType_,
+                                                      IoType_> {
 public:
 
+	typedef TargetingBase<LanczosSolverTemplate,
+	                      MatrixVectorType_,
+	                      WaveFunctionTransfType_,
+                          IoType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef IoType_ IoType;
@@ -124,16 +131,10 @@ public:
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef TargetHelper<ModelType,
-	                     TargettingParamsType,
-	                     WaveFunctionTransfType> TargetHelperType;
-	typedef TargetingCommon<TargetHelperType,
-	                         VectorWithOffsetType,
-	                         LanczosSolverType> TargetingCommonType;
 
-	enum {DISABLED=TargetingCommonType::DISABLED,
-		  OPERATOR=TargetingCommonType::OPERATOR,
-		  WFT_NOADVANCE=TargetingCommonType::WFT_NOADVANCE};
+	enum {DISABLED=BaseType::DISABLED,
+		  OPERATOR=BaseType::OPERATOR,
+		  WFT_NOADVANCE=BaseType::WFT_NOADVANCE};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -144,15 +145,13 @@ public:
 	                          const TargettingParamsType& tstStruct,
 	                          const WaveFunctionTransfType& wft,
 	                          const SizeType& quantumSector) // quantumSector ignored here
-	    : lrs_(lrs),
-	      model_(model),
+	    : BaseType(lrs,model,tstStruct,wft,2,0),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
 	      lastLanczosVector_(0),
 	      dynCounter_(0),
 	      progress_("TargetingAdaptiveDynamic"),
 	      gsWeight_(1.0),
-	      commonTargetting_(lrs,model,tstStruct,wft,2,0),
 	      done_(false),
 	      weightForContinuedFraction_(0)
 	{
@@ -160,11 +159,9 @@ public:
 		                                                     "needs an enabled wft\n");
 	}
 
-	const ModelType& model() const { return model_; }
-
 	RealType weight(SizeType i) const
 	{
-		assert(commonTargetting_.allStages(DISABLED));
+		assert(this->common().allStages(DISABLED));
 		return weight_[i];
 	}
 
@@ -173,34 +170,15 @@ public:
 		return gsWeight_;
 	}
 
-	RealType normSquared(SizeType i) const
-	{
-		return commonTargetting_.normSquared(i);
-	}
-
-	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
-	           const SomeBasisType& someBasis)
-	{
-		commonTargetting_.setGs(v,someBasis);
-	}
-
-	const VectorWithOffsetType& gs() const { return commonTargetting_.psi(); }
-
-	bool includeGroundStage() const
-	{
-		return (fabs(gsWeight_)>1e-6);
-	}
-
 	SizeType size() const
 	{
-		if (!commonTargetting_.allStages(WFT_NOADVANCE)) return 0;
+		if (!this->common().allStages(WFT_NOADVANCE)) return 0;
 		return lastLanczosVector_;
 	}
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return commonTargetting_.targetVectors()[i];
+		return this->common().targetVectors()[i];
 	}
 
 	void evolve(RealType Eg,
@@ -218,20 +196,12 @@ public:
 
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
-		SizeType numberOfSites = lrs_.super().block().size();
+		SizeType numberOfSites = this->leftRightSuper().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
 		//corner case
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		evolve(Eg,direction,x,loopNumber);
 	}
-
-	void initialGuess(VectorWithOffsetType& v,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		commonTargetting_.initialGuess(v,block);
-	}
-
-	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
 
 	template<typename IoOutputType>
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
@@ -250,26 +220,17 @@ public:
 		PostProcType cf(ab_,reortho_,params);
 		PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(str);
-		commonTargetting_.save(block,io,cf,commonTargetting_.targetVectors());
+		this->common().save(block,io,cf,this->common().targetVectors());
 
-		commonTargetting_.psi().save(io,"PSI");
+		this->common().psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)
 	{
-		commonTargetting_.template load<TimeSerializerType>(f);
-		lastLanczosVector_ = commonTargetting_.targetVectors().size()-1;
+		this->common().template load<TimeSerializerType>(f);
+		lastLanczosVector_ = this->common().targetVectors().size()-1;
 		dynCounter_ = 13;
 	}
-
-	RealType time() const { return 0; }
-
-	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
-	{
-		// nothing to do here
-	}
-
-	bool end() const { return false; }
 
 private:
 
@@ -278,14 +239,14 @@ private:
 		Eg_ = Eg;
 		VectorWithOffsetType phiNew;
 		if (ab_.size()==0)
-			commonTargetting_.getPhi(phiNew,Eg,direction,site,loopNumber);
+			this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
 
-		if (!commonTargetting_.allStages(WFT_NOADVANCE)) {
-			commonTargetting_.targetVectors(0) = phiNew;
+		if (!this->common().allStages(WFT_NOADVANCE)) {
+			this->common().targetVectors(0) = phiNew;
 			return;
 		}
 
-		SizeType numberOfSites = lrs_.super().block().size();
+		SizeType numberOfSites = this->leftRightSuper().super().block().size();
 		if (site>0 && site<numberOfSites-1) wftAllDynVectors(site);
 
 		if (!done_) calcDynVectors(site,phiNew);
@@ -299,35 +260,35 @@ private:
 
 	void wftOneDynVector(SizeType i,SizeType site)
 	{
-		typename PsimagLite::Vector<SizeType>::Type nk(1,model_.hilbertSize(site));
+		typename PsimagLite::Vector<SizeType>::Type nk(1,this->model().hilbertSize(site));
 
 		VectorWithOffsetType result;
-		result.populateSectors(lrs_.super());
+		result.populateSectors(this->leftRightSuper().super());
 
 		// OK, now that we got the partition number right, let's wft:
 
 		// FIXME generalize for su(2)
-		wft_.setInitialVector(result,commonTargetting_.targetVectors()[i],lrs_,nk);
+		wft_.setInitialVector(result,this->common().targetVectors()[i],this->leftRightSuper(),nk);
 		result.collapseSectors();
-		commonTargetting_.targetVectors(i) = result;
+		this->common().targetVectors(i) = result;
 	}
 
 	void calcDynVectors(SizeType site,const VectorWithOffsetType& phiNew)
 	{
-		for (SizeType i=0;i<commonTargetting_.targetVectors()[0].sectors();i++) {
+		for (SizeType i=0;i<this->common().targetVectors()[0].sectors();i++) {
 			VectorType sv;
-			SizeType i0 = commonTargetting_.targetVectors()[0].sector(i);
-			commonTargetting_.targetVectors()[0].extract(sv,i0);
-			SizeType p = lrs_.super().findPartitionNumber(commonTargetting_.targetVectors()[0].offset(i0));
+			SizeType i0 = this->common().targetVectors()[0].sector(i);
+			this->common().targetVectors()[0].extract(sv,i0);
+			SizeType p = this->leftRightSuper().super().findPartitionNumber(this->common().targetVectors()[0].offset(i0));
 			if (i==0) {
 				if (lastLanczosVector_==0)
-					commonTargetting_.targetVectors(1) = commonTargetting_.targetVectors()[0];
+					this->common().targetVectors(1) = this->common().targetVectors()[0];
 			}
 			setLanczosVectors(i0,sv,p,site,phiNew);
 		}
 		setWeights();
 		if (lastLanczosVector_==1 && fabs(weightForContinuedFraction_)<1e-6)
-			weightForContinuedFraction_ = std::real(commonTargetting_.targetVectors()[0]*commonTargetting_.targetVectors()[0]);
+			weightForContinuedFraction_ = std::real(this->common().targetVectors()[0]*this->common().targetVectors()[0]);
 	}
 
 	void setLanczosVectors(
@@ -338,13 +299,13 @@ private:
 	        const VectorWithOffsetType& phiNew)
 	{
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadId);
+		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
 		typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
-		LanczosMatrixType h(&model_,&modelHelper);
+		LanczosMatrixType h(&this->model(),&modelHelper);
 
 		ParametersForSolverType params;
-		params.steps = model_.params().lanczosSteps;
-		params.tolerance = model_.params().lanczosEps;
+		params.steps = this->model().params().lanczosSteps;
+		params.tolerance = this->model().params().lanczosEps;
 		params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 
 		LanczosSolverType lanczosSolver(h,params);
@@ -353,8 +314,8 @@ private:
 		VectorType x(sv.size(),0.0);
 		VectorType y = sv;
 		if (lastLanczosVector_>0) {
-			commonTargetting_.targetVectors()[1].extract(y,i0);
-			commonTargetting_.targetVectors()[0].extract(x,i0);
+			this->common().targetVectors()[1].extract(y,i0);
+			this->common().targetVectors()[0].extract(x,i0);
 		}
 
 		if (lastLanczosVector_==0) normalize(y);
@@ -377,8 +338,8 @@ private:
 		dynCounter_++;
 		if (lastLanczosVector_>1 && (dynCounter_%tstStruct_.advanceEach()) != 0)
 			return;
-		commonTargetting_.targetVectors(0).setDataInSector(x,i0);
-		commonTargetting_.targetVectors(1).setDataInSector(y,i0);
+		this->common().targetVectors(0).setDataInSector(x,i0);
+		this->common().targetVectors(1).setDataInSector(y,i0);
 		if ((dynCounter_%tstStruct_.advanceEach()) != 0) return;
 		if (ab_.size()>0) {
 			lanczosSolver.push(ab_,a,b);
@@ -399,13 +360,13 @@ private:
 	void setWeights()
 	{
 		RealType sum  = 0;
-		weight_.resize(commonTargetting_.targetVectors().size());
+		weight_.resize(this->common().targetVectors().size());
 		for (SizeType r=0;r<weight_.size();r++) {
 			weight_[r] = (r>lastLanczosVector_) ? 0 : 1;
 			sum += weight_[r];
 		}
 
-		gsWeight_ = commonTargetting_.setGsWeight(0.0);
+		gsWeight_ = this->common().setGsWeight(0.0);
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1-gsWeight_)/sum;
 	}
 
@@ -427,15 +388,12 @@ private:
 		v /= x;
 	}
 
-	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
 	const TargettingParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	SizeType lastLanczosVector_;
 	SizeType dynCounter_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
-	TargetingCommonType commonTargetting_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	bool done_;
 	RealType Eg_;

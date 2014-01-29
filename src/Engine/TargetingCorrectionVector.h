@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsCorrectionVector.h"
 #include "VectorWithOffsets.h"
 #include "CorrectionVectorFunction.h"
-#include "TargetingCommon.h"
+#include "TargetingBase.h"
 #include "ParametersForSolver.h"
 
 namespace Dmrg {
@@ -95,10 +95,17 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class TargetingCorrectionVector  {
+class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
+                                                       MatrixVectorType_,
+                                                       WaveFunctionTransfType_,
+                                                       IoType_> {
 
 public:
 
+	typedef TargetingBase<LanczosSolverTemplate,
+	                      MatrixVectorType_,
+	                      WaveFunctionTransfType_,
+                          IoType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef IoType_ IoType;
@@ -132,12 +139,6 @@ public:
 	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,
 	                                 TargettingParamsType> CorrectionVectorFunctionType;
-	typedef TargetHelper<ModelType,
-	                     TargettingParamsType,
-	                     WaveFunctionTransfType> TargetHelperType;
-	typedef TargetingCommon<TargetHelperType,
-	                         VectorWithOffsetType,
-	                         LanczosSolverType> TargetingCommonType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
@@ -153,20 +154,15 @@ public:
 	                           const TargettingParamsType& tstStruct,
 	                           const WaveFunctionTransfType& wft,
 	                           const SizeType& quantumSector) // quantumSector ignored here
-	    : lrs_(lrs),
-	      model_(model),
+	    : BaseType(lrs,model,tstStruct,wft,4,1),
 	      tstStruct_(tstStruct),
-	      wft_(wft),
 	      progress_("TargetingCorrectionVector"),
 	      gsWeight_(1.0),
-	      commonTargetting_(lrs,model,tstStruct,wft,4,1),
 	      correctionEnabled_(false)
 	{
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError("TargetingCorrectionVector needs wft\n");
 	}
-
-	const ModelType& model() const { return model_; }
 
 	RealType weight(SizeType i) const
 	{
@@ -179,32 +175,15 @@ public:
 		return gsWeight_;
 	}
 
-	RealType normSquared(SizeType i) const
-	{
-		return commonTargetting_.normSquared(i);
-	}
-
-	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
-	           const SomeBasisType& someBasis)
-	{
-		commonTargetting_.setGs(v,someBasis);
-	}
-
-	const VectorWithOffsetType& gs() const { return commonTargetting_.psi(); }
-
-	bool includeGroundStage() const {return true; }
-
 	SizeType size() const
 	{
 		if (!correctionEnabled_) return 0;
-		if (commonTargetting_.allStages(DISABLED)) return 1;
-		return commonTargetting_.targetVectors().size();
+		return this->size();
 	}
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return commonTargetting_.targetVectors()[i];
+		return this->common().targetVectors()[i];
 	}
 
 	void evolve(RealType Eg,
@@ -222,7 +201,7 @@ public:
 
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
-		SizeType numberOfSites = lrs_.super().block().size();
+		SizeType numberOfSites = this->leftRightSuper().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
 		// //corner case
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
@@ -233,7 +212,7 @@ public:
 	            SizeType loopNumber)
 	{
 		VectorWithOffsetType phiNew;
-		SizeType count = commonTargetting_.getPhi(phiNew,Eg,direction,site,loopNumber);
+		SizeType count = this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
 
 		if (direction!=INFINITE) {
 			correctionEnabled_=true;
@@ -246,14 +225,6 @@ public:
 		calcDynVectors(phiNew,direction);
 	}
 
-	void initialGuess(VectorWithOffsetType& v,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		commonTargetting_.initialGuess(v,block);
-	}
-
-	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
-
 	template<typename IoOutputType>
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
 	          IoOutputType& io) const
@@ -261,40 +232,33 @@ public:
 		if (block.size()!=1)
 			throw PsimagLite::RuntimeError("TargetingCorrectionVector only supports blocks of size 1\n");
 		SizeType type = tstStruct_.type();
-		int fermionSign = commonTargetting_.findFermionSignOfTheOperators();
+		int fermionSign = this->common().findFermionSignOfTheOperators();
 		int s = (type&1) ? -1 : 1;
 		int s2 = (type>1) ? -1 : 1;
 		int s3 = (type&1) ? -fermionSign : 1;
 
 		typename PostProcType::ParametersType params;
-		params.Eg = commonTargetting_.energy();
+		params.Eg = this->common().energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
 		PostProcType cf(ab_,reortho_,params);
 
-		commonTargetting_.save(block,io,cf,commonTargetting_.targetVectors());
-		commonTargetting_.psi().save(io,"PSI");
+		this->common().save(block,io,cf,this->common().targetVectors());
+		this->common().psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)
 	{
-		commonTargetting_.template load<TimeSerializerType>(f);
+		this->common().template load<TimeSerializerType>(f);
 	}
-
-	RealType time() const { return 0; }
-
-	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
-	{}
-
-	bool end() const { return false; }
 
 private:
 
 	void calcDynVectors(const VectorWithOffsetType& phi,
 	                    SizeType systemOrEnviron)
 	{
-		for (SizeType i=1;i<commonTargetting_.targetVectors().size();i++)
-			commonTargetting_.targetVectors(i) = phi;
+		for (SizeType i=1;i<this->common().targetVectors().size();i++)
+			this->common().targetVectors(i) = phi;
 
 		for (SizeType i=0;i<phi.sectors();i++) {
 			VectorType sv;
@@ -302,14 +266,14 @@ private:
 			phi.extract(sv,i0);
 			// g.s. is included separately
 			// set Aq
-			commonTargetting_.targetVectors(1).setDataInSector(sv,i0);
+			this->common().targetVectors(1).setDataInSector(sv,i0);
 			// set xi
-			SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
+			SizeType p = this->leftRightSuper().super().findPartitionNumber(phi.offset(i0));
 			VectorType xi(sv.size(),0),xr(sv.size(),0);
 			computeXiAndXr(xi,xr,sv,p);
-			commonTargetting_.targetVectors(2).setDataInSector(xi,i0);
+			this->common().targetVectors(2).setDataInSector(xi,i0);
 			//set xr
-			commonTargetting_.targetVectors(3).setDataInSector(xr,i0);
+			this->common().targetVectors(3).setDataInSector(xr,i0);
 			DenseMatrixType V;
 			getLanczosVectors(V,sv,p);
 		}
@@ -322,10 +286,10 @@ private:
 	                       SizeType p)
 	{
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadId);
+		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
 		typedef typename LanczosSolverType::LanczosMatrixType
 		        LanczosMatrixType;
-		LanczosMatrixType h(&model_,&modelHelper);
+		LanczosMatrixType h(&this->model(),&modelHelper);
 
 		ParametersForSolverType params;
 		params.steps = tstStruct_.steps();
@@ -344,8 +308,8 @@ private:
 	                    SizeType p)
 	{
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadId);
-		LanczosMatrixType h(&model_,&modelHelper);
+		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
+		LanczosMatrixType h(&this->model(),&modelHelper);
 		CorrectionVectorFunctionType cvft(h,tstStruct_);
 
 		cvft.getXi(xi,sv);
@@ -358,17 +322,17 @@ private:
 
 	void setWeights()
 	{
-		gsWeight_ = commonTargetting_.setGsWeight(0.5);
+		gsWeight_ = this->common().setGsWeight(0.5);
 
 		RealType sum  = 0;
-		weight_.resize(commonTargetting_.targetVectors().size());
+		weight_.resize(this->common().targetVectors().size());
 		for (SizeType r=1;r<weight_.size();r++) {
 			weight_[r] =0;
-			for (SizeType i=0;i<commonTargetting_.targetVectors()[1].sectors();i++) {
+			for (SizeType i=0;i<this->common().targetVectors()[1].sectors();i++) {
 				VectorType v,w;
-				SizeType i0 = commonTargetting_.targetVectors()[1].sector(i);
-				commonTargetting_.targetVectors()[1].extract(v,i0);
-				commonTargetting_.targetVectors()[r].extract(w,i0);
+				SizeType i0 = this->common().targetVectors()[1].sector(i);
+				this->common().targetVectors()[1].extract(v,i0);
+				this->common().targetVectors()[r].extract(w,i0);
 				weight_[r] += dynWeightOf(v,w);
 			}
 			sum += weight_[r];
@@ -390,17 +354,13 @@ private:
 	{
 		weight_.resize(1);
 		weight_[0]=tstStruct_.correctionA();
-		commonTargetting_.computeCorrection(direction,block1);
+		this->common().computeCorrection(direction,block1);
 		gsWeight_ = 1.0-weight_[0];
 	}
 
-	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
 	const TargettingParamsType& tstStruct_;
-	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
-	TargetingCommonType commonTargetting_;
 	bool correctionEnabled_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;

@@ -82,14 +82,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template<typename ModelType_,
-         typename TargettingParamsType_,
+         typename TargetParamsType_,
          typename WaveFunctionTransfType_>
 class TargetHelper {
 
 public:
 
 	typedef ModelType_ ModelType;
-	typedef TargettingParamsType_ TargettingParamsType;
+	typedef TargetParamsType_ TargetParamsType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -97,7 +97,7 @@ public:
 
 	TargetHelper(const LeftRightSuperType& lrs,
 	             const ModelType& model,
-	             const TargettingParamsType& tstStruct,
+	             const TargetParamsType& tstStruct,
 	             const WaveFunctionTransfType& wft)
 	    : lrs_(lrs),
 	      model_(model),
@@ -109,7 +109,7 @@ public:
 
 	const ModelType& model() const { return model_; }
 
-	const TargettingParamsType& tstStruct() const { return tstStruct_; }
+	const TargetParamsType& tstStruct() const { return tstStruct_; }
 
 	const WaveFunctionTransfType& wft() const  { return wft_; }
 
@@ -117,7 +117,7 @@ private:
 
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
-	const TargettingParamsType& tstStruct_;
+	const TargetParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 }; // TargetHelper
 

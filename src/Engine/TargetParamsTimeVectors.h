@@ -91,13 +91,15 @@ class TargetParamsTimeVectors : public TargetParamsCommon<ModelType> {
 
 public:
 
-	enum {KRYLOV,RUNGE_KUTTA,SUZUKI_TROTTER};
-
 	typedef typename ModelType::RealType RealType;
 
 	template<typename IoInputter>
 	TargetParamsTimeVectors(IoInputter& io,const ModelType& model)
-	    : BaseType(io,model),timeSteps_(0),advanceEach_(0), algorithm_(KRYLOV),tau_(0)
+	    : BaseType(io,model),
+	      timeSteps_(0),
+	      advanceEach_(0),
+	      algorithm_(BaseType::KRYLOV),
+	      tau_(0)
 	{
 		io.readline(tau_,"TSPTau=");
 		io.readline(timeSteps_,"TSPTimeSteps=");
@@ -107,9 +109,9 @@ public:
 		try {
 			io.readline(s,"TSPAlgorithm=");
 			if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta")
-				algorithm_ = RUNGE_KUTTA;
+				algorithm_ = BaseType::RUNGE_KUTTA;
 			if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter")
-				algorithm_ = SUZUKI_TROTTER;
+				algorithm_ = BaseType::SUZUKI_TROTTER;
 		} catch (std::exception& e) {
 			PsimagLite::String s(__FILE__);
 			s += "\n FATAL: TSPAlgorithm not found in input file.\n";

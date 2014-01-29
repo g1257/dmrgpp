@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsKrylov.h"
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
-#include "TargetingCommon.h"
+#include "TargetingBase.h"
 
 namespace Dmrg {
 
@@ -90,12 +90,20 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class TargetingTimeStep  {
+class TargetingTimeStep : public TargetingBase<LanczosSolverTemplate,
+                                               MatrixVectorType_,
+                                               WaveFunctionTransfType_,
+                                               IoType_> {
 
 	enum {BORDER_NEITHER, BORDER_LEFT, BORDER_RIGHT};
 
 public:
 
+	typedef TargetingBase<LanczosSolverTemplate,
+	                      MatrixVectorType_,
+	                      WaveFunctionTransfType_,
+                          IoType_> BaseType;
+	typedef std::pair<SizeType,SizeType> PairType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef IoType_ IoType;
@@ -125,16 +133,6 @@ public:
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
-	typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,
-	LanczosSolverType,VectorWithOffsetType> TimeVectorsBaseType;
-	typedef TargetHelper<ModelType,
-	                     TargettingParamsType,
-	                     WaveFunctionTransfType> TargetHelperType;
-	typedef TargetingCommon<TargetHelperType,
-	                         VectorWithOffsetType,
-	                         LanczosSolverType> TargetingCommonType;
-	typedef typename TargetingCommonType::VectorStringType VectorStringType;
-	typedef typename TargetingCommonType::VectorVectorWithOffsetType VectorVectorWithOffsetType;
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
@@ -146,14 +144,12 @@ public:
 	                   const TargettingParamsType& tstStruct,
 	                   const WaveFunctionTransfType& wft,
 	                   const SizeType& quantumSector) // quantumSector is ignored here
-	    : lrs_(lrs),
-	      model_(model),
+	    : BaseType(lrs,model,tstStruct,wft,times_.size(),0),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
 	      progress_("TargetingTimeStep"),
 	      times_(tstStruct_.timeSteps()),
-	      weight_(tstStruct_.timeSteps()),
-	      commonTargetting_(lrs,model,tstStruct,wft,times_.size(),0)
+	      weight_(tstStruct_.timeSteps())
 	{
 		if (!wft.isEnabled()) throw PsimagLite::RuntimeError
 		        (" TargetingTimeStep needs an enabled wft\n");
@@ -164,7 +160,7 @@ public:
 		RealType sum = 0;
 		SizeType n = times_.size();
 		gsWeight_ = (tstStruct_.concatenation() == SUM) ? 0.1 : 0.0;
-		gsWeight_ = commonTargetting_.setGsWeight(gsWeight_);
+		gsWeight_ = this->common().setGsWeight(gsWeight_);
 
 		RealType factor = (n+4.0)/(n+2.0);
 		factor *= (1.0 - gsWeight_);
@@ -183,64 +179,37 @@ public:
 		sum += gsWeight_;
 		assert(fabs(sum-1.0)<1e-5);
 
-		commonTargetting_.initTimeVectors(times_);
+		this->common().initTimeVectors(times_);
 	}
-
-	const ModelType& model() const { return model_; }
 
 	RealType weight(SizeType i) const
 	{
-		assert(!commonTargetting_.allStages(DISABLED));
+		assert(!this->common().allStages(DISABLED));
 		return weight_[i];
 	}
 
 	RealType gsWeight() const
 	{
-		if (commonTargetting_.allStages(DISABLED)) return 1.0;
+		if (this->common().allStages(DISABLED)) return 1.0;
 		return gsWeight_;
 	}
 
-	RealType normSquared(SizeType i) const
-	{
-		return commonTargetting_.normSquared(i);
-	}
+	const ComplexType& operator[](SizeType i) const { return this->common().psi()[i]; }
 
-	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
-	           const SomeBasisType& someBasis)
-	{
-		commonTargetting_.setGs(v,someBasis);
-	}
-
-	const ComplexType& operator[](SizeType i) const { return commonTargetting_.psi()[i]; }
-
-	ComplexType& operator[](SizeType i) { return commonTargetting_.psi()[i]; }
-
-	const VectorWithOffsetType& gs() const { return commonTargetting_.psi(); }
+	ComplexType& operator[](SizeType i) { return this->common().psi()[i]; }
 
 	bool includeGroundStage() const
 	{
-		if (!commonTargetting_.noStageIs(DISABLED)) return true;
+		if (!this->common().noStageIs(DISABLED)) return true;
 		bool b = (fabs(gsWeight_)>1e-6);
 		return b;
 	}
 
-	const RealType& time() const {return commonTargetting_.currentTime(); }
-
-	SizeType size() const
-	{
-		if (commonTargetting_.allStages(DISABLED)) return 0;
-		return commonTargetting_.targetVectors().size();
-	}
+	const RealType& time() const {return this->common().currentTime(); }
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return commonTargetting_.targetVectors()[i];
-	}
-
-	const LeftRightSuperType& leftRightSuper() const
-	{
-		return lrs_;
+		return this->common().targetVectors()[i];
 	}
 
 	void evolve(RealType Eg,
@@ -250,13 +219,13 @@ public:
 	            SizeType loopNumber)
 	{
 		VectorWithOffsetType phiNew;
-		commonTargetting_.getPhi(phiNew,Eg,direction,block1[0],loopNumber);
+		this->common().getPhi(phiNew,Eg,direction,block1[0],loopNumber);
 
-		typename TimeVectorsBaseType::PairType startEnd(0,times_.size());
-		bool allOperatorsApplied = (commonTargetting_.noStageIs(DISABLED) &&
-		                            commonTargetting_.noStageIs(OPERATOR));
+		PairType startEnd(0,times_.size());
+		bool allOperatorsApplied = (this->common().noStageIs(DISABLED) &&
+		                            this->common().noStageIs(OPERATOR));
 
-		commonTargetting_.calcTimeVectors(startEnd,
+		this->common().calcTimeVectors(startEnd,
 		                                  Eg,
 		                                  phiNew,
 		                                  direction,
@@ -270,7 +239,7 @@ public:
 
 	void load(const PsimagLite::String& f)
 	{
-		commonTargetting_.template load<TimeSerializerType>(f);
+		this->common().template load<TimeSerializerType>(f);
 	}
 
 	void print(std::ostream& os) const
@@ -282,11 +251,6 @@ public:
 		os<<"TSTWeightGroundState="<<gsWeight_<<"\n";
 	}
 
-	void initialGuess(VectorWithOffsetType& v,const VectorSizeType& block) const
-	{
-		commonTargetting_.initialGuess(v,block);
-	}
-
 	template<typename IoOutputType>
 	void save(const VectorSizeType& block,IoOutputType& io) const
 	{
@@ -295,14 +259,14 @@ public:
 		progress_.printline(msg,std::cout);
 
 		SizeType marker = 0;
-		if (commonTargetting_.noStageIs(DISABLED)) marker = 1;
+		if (this->common().noStageIs(DISABLED)) marker = 1;
 
-		TimeSerializerType ts(commonTargetting_.currentTime(),
+		TimeSerializerType ts(this->common().currentTime(),
 		                      block[0],
-		        commonTargetting_.targetVectors(),
+		        this->common().targetVectors(),
 		        marker);
 		ts.save(io);
-		commonTargetting_.psi().save(io,"PSI");
+		this->common().psi().save(io,"PSI");
 	}
 
 	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
@@ -310,25 +274,25 @@ public:
 
 		BlockType X = basisWithOps.block();
 		if (X.size()!=1) return;
-		assert(X[0]==0 || X[0]==lrs_.super().block().size()-1);
+		assert(X[0]==0 || X[0]==this->leftRightSuper().super().block().size()-1);
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		SparseMatrixType hmatrix;
 		BasisDataType q;
-		model_.setNaturalBasis(creationMatrix,hmatrix,q,X,commonTargetting_.currentTime());
+		this->model().setNaturalBasis(creationMatrix,hmatrix,q,X,this->common().currentTime());
 		basisWithOps.setVarious(X,hmatrix,q,creationMatrix);
 	}
 
 	bool end() const
 	{
 		return (tstStruct_.maxTime() != 0 &&
-		        commonTargetting_.currentTime() >= tstStruct_.maxTime());
+		        this->common().currentTime() >= tstStruct_.maxTime());
 	}
 
 private:
 
 	void printNormsAndWeights() const
 	{
-		if (commonTargetting_.allStages(DISABLED)) return;
+		if (this->common().allStages(DISABLED)) return;
 
 		PsimagLite::OstringStream msg;
 		msg<<"gsWeight="<<gsWeight_<<" weights= ";
@@ -337,16 +301,16 @@ private:
 		progress_.printline(msg,std::cout);
 
 		PsimagLite::OstringStream msg2;
-		msg2<<"gsNorm="<<std::norm(commonTargetting_.psi())<<" norms= ";
+		msg2<<"gsNorm="<<std::norm(this->common().psi())<<" norms= ";
 		for (SizeType i = 0; i < weight_.size(); i++)
-			msg2<<normSquared(i)<<" ";
+			msg2<<this->common().normSquared(i)<<" ";
 		progress_.printline(msg2,std::cout);
 	}
 
 	void printEnergies() const
 	{
-		for (SizeType i=0;i<commonTargetting_.targetVectors().size();i++)
-			printEnergies(commonTargetting_.targetVectors()[i],i);
+		for (SizeType i=0;i<this->common().targetVectors().size();i++)
+			printEnergies(this->common().targetVectors()[i],i);
 	}
 
 	void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget) const
@@ -361,10 +325,10 @@ private:
 	                   SizeType whatTarget,
 	                   SizeType i0) const
 	{
-		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
+		SizeType p = this->leftRightSuper().super().findPartitionNumber(phi.offset(i0));
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadId);
-		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,
+		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
+		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&this->model(),
 		                                                            &modelHelper);
 
 
@@ -374,7 +338,7 @@ private:
 		TargetVectorType x(total);
 		lanczosHelper.matrixVectorProduct(x,phi2);
 		PsimagLite::OstringStream msg;
-		msg<<"Hamiltonian average at time="<<commonTargetting_.currentTime();
+		msg<<"Hamiltonian average at time="<<this->common().currentTime();
 		msg<<" for target="<<whatTarget;
 		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<(phi2*x);
 		msg<<" <phi(t)|phi(t)>="<<(phi2*phi2);
@@ -386,20 +350,20 @@ private:
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 
-		if (commonTargetting_.noStageIs(DISABLED))
+		if (this->common().noStageIs(DISABLED))
 			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
 		else
 			std::cout<<"NOT ALL OPERATORS APPLIED YET\n";
 
-		PsimagLite::String modelName = model_.params().model;
+		PsimagLite::String modelName = this->model().params().model;
 
 		if (modelName == "HubbardOneBand" ||
 		    modelName == "HubbardOneBandExtended" ||
 		    modelName == "Immm") {
-			commonTargetting_.cocoonLegacy(direction,block);
+			this->common().cocoonLegacy(direction,block);
 		}
 
-		commonTargetting_.cocoon(block,direction);
+		this->common().cocoon(block,direction);
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
@@ -408,8 +372,8 @@ private:
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"Checking norms: ";
-		for (SizeType i=0;i<commonTargetting_.targetVectors().size();i++) {
-			RealType norma = std::norm(commonTargetting_.targetVectors()[i]);
+		for (SizeType i=0;i<this->common().targetVectors().size();i++) {
+			RealType norma = std::norm(this->common().targetVectors()[i]);
 			msg<<" norma["<<i<<"]="<<norma;
 			assert(norma>1e-10);
 		}
@@ -478,13 +442,10 @@ private:
 		}
 	}
 
-	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
 	const TargettingParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	typename PsimagLite::Vector<RealType>::Type times_,weight_;
-	TargetingCommonType commonTargetting_;
 	RealType gsWeight_;
 };     //class TargetingTimeStep
 

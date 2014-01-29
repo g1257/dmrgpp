@@ -98,6 +98,8 @@ public:
 
 	enum {PRODUCT,SUM};
 
+	enum {KRYLOV,RUNGE_KUTTA,SUZUKI_TROTTER};
+
 	virtual SizeType sites() const = 0;
 
 	virtual SizeType sites(SizeType) const

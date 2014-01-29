@@ -86,20 +86,20 @@ class ApplyOperatorExpression {
 
 	typedef typename TargetHelperType::RealType RealType;
 	typedef typename TargetHelperType::ModelType ModelType;
-	typedef typename TargetHelperType::TargettingParamsType TargettingParamsType;
+	typedef typename TargetHelperType::TargetParamsType TargetParamsType;
 	typedef typename TargetHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename TargetHelperType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,
+	typedef TimeVectorsBase<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsBaseType;
-	typedef TimeVectorsKrylov<TargettingParamsType,ModelType,WaveFunctionTransfType,
+	typedef TimeVectorsKrylov<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsKrylovType;
-	typedef TimeVectorsRungeKutta<TargettingParamsType,ModelType,WaveFunctionTransfType,
+	typedef TimeVectorsRungeKutta<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsRungeKuttaType;
-	typedef TimeVectorsSuzukiTrotter<TargettingParamsType,ModelType,WaveFunctionTransfType,
+	typedef TimeVectorsSuzukiTrotter<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
 
-	static SizeType const PRODUCT = TargettingParamsType::PRODUCT;
-	static SizeType const SUM = TargettingParamsType::SUM;
+	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
+	static SizeType const SUM = TargetParamsType::SUM;
 
 //	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 //		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -248,14 +248,14 @@ public:
 	{
 		const LeftRightSuperType& lrs = targetHelper_.lrs();
 		const ModelType& model = targetHelper_.model();
-		const TargettingParamsType& tstStruct = targetHelper_.tstStruct();
+		const TargetParamsType& tstStruct = targetHelper_.tstStruct();
 		const WaveFunctionTransfType& wft = targetHelper_.wft();
 
 		PsimagLite::String s (__FILE__);
 		s += " Unknown algorithm\n";
 
 		switch (tstStruct.algorithm()) {
-		case TargettingParamsType::KRYLOV:
+		case TargetParamsType::KRYLOV:
 			timeVectorsBase_ = new TimeVectorsKrylovType(currentTime_,
 			                                             tstStruct,
 			                                             times,
@@ -265,7 +265,7 @@ public:
 			                                             lrs,
 			                                             E0_);
 			break;
-		case TargettingParamsType::RUNGE_KUTTA:
+		case TargetParamsType::RUNGE_KUTTA:
 			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentTime_,
 			                                                 tstStruct,
 			                                                 times,
@@ -275,7 +275,7 @@ public:
 			                                                 lrs,
 			                                                 E0_);
 			break;
-		case TargettingParamsType::SUZUKI_TROTTER:
+		case TargetParamsType::SUZUKI_TROTTER:
 			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(currentTime_,
 			                                                    tstStruct,
 			                                                    times,

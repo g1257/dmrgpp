@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ApplyOperatorLocal.h"
 #include <stdexcept>
 #include "Tokenizer.h"
-#include "TargetingCommon.h"
+#include "TargetingBase.h"
 #include "ParametersForSolver.h"
 
 namespace Dmrg {
@@ -95,10 +95,17 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class TargetingGroundState {
+class TargetingGroundState : public TargetingBase<LanczosSolverTemplate,
+                                                  MatrixVectorType_,
+                                                  WaveFunctionTransfType_,
+                                                  IoType_> {
 
 public:
 
+	typedef TargetingBase<LanczosSolverTemplate,
+	                      MatrixVectorType_,
+	                      WaveFunctionTransfType_,
+                          IoType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef IoType_ IoType;
@@ -120,13 +127,6 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsGroundState<ModelType> TargettingParamsType;
-	typedef TargetHelper<ModelType,
-	                     TargettingParamsType,
-	                     WaveFunctionTransfType> TargetHelperType;
-	typedef TargetingCommon<TargetHelperType,
-	                         VectorWithOffsetType,
-	                         LanczosSolverType> TargetingCommonType;
-	typedef typename TargetingCommonType::ApplyOperatorType ApplyOperatorType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -135,16 +135,11 @@ public:
 	TargetingGroundState(const LeftRightSuperType& lrs,
 	                      const ModelType& model,
 	                      const TargettingParamsType& tstStruct,
-	                      const WaveFunctionTransfType& wft,  // wft is ignored here
+	                      const WaveFunctionTransfType& wft,
 	                      const SizeType& quantumSector) // quantumSector is ignored here
-	    : lrs_(lrs),
-	      model_(model),
-	      waveFunctionTransformation_(wft),
-	      progress_("TargetingGroundState"),
-	      commonTargetting_(lrs,model,tstStruct,wft,0,0)
+	    : BaseType(lrs,model,tstStruct,wft,0,0),
+	      progress_("TargetingGroundState")
 	{}
-
-	const ModelType& model() const { return model_; }
 
 	RealType normSquared(SizeType i) const
 	{
@@ -162,20 +157,6 @@ public:
 		return 1;
 	}
 
-	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<VectorType>::Type& v,
-	           const SomeBasisType& someBasis)
-	{
-		commonTargetting_.setGs(v,someBasis);
-	}
-
-	const VectorWithOffsetType& gs() const
-	{
-		return commonTargetting_.psi();
-	}
-
-	bool includeGroundStage() const {return true; }
-
 	SizeType size() const
 	{
 		return 0;
@@ -192,18 +173,7 @@ public:
 	            const BlockType& block2,
 	            SizeType loopNumber)
 	{
-		commonTargetting_.cocoon(block1,direction);
-	}
-
-	const LeftRightSuperType& leftRightSuper() const
-	{
-		return lrs_;
-	}
-
-	void initialGuess(VectorWithOffsetType& initialVector,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		commonTargetting_.initialGuess(initialVector,block);
+		this->common().cocoon(block1,direction);
 	}
 
 	template<typename IoOutputType>
@@ -216,30 +186,17 @@ public:
 		assert(block.size()>0);
 		PsimagLite::String s = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(s);
-		commonTargetting_.psi().save(io,"PSI");
+		this->common().psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)
 	{
-		commonTargetting_.template load<int>(f,0);
+		this->common().template load<int>(f,0);
 	}
-
-	RealType time() const { return 0; }
-
-	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
-	{
-		// nothing to do here
-	}
-
-	bool end() const { return false; }
 
 private:
 
-	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
-	const WaveFunctionTransfType& waveFunctionTransformation_;
 	PsimagLite::ProgressIndicator progress_;
-	TargetingCommonType commonTargetting_;
 
 };     //class TargetingGroundState
 

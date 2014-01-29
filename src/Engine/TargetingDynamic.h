@@ -88,7 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParametersForSolver.h"
 #include "TargetParamsDynamic.h"
 #include "VectorWithOffsets.h"
-#include "TargetingCommon.h"
+#include "TargetingBase.h"
 #include <cassert>
 #include "Concurrency.h"
 #include "Parallelizer.h"
@@ -101,10 +101,17 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
          typename WaveFunctionTransfType_,
          typename IoType_>
-class TargetingDynamic  {
+class TargetingDynamic : public TargetingBase<LanczosSolverTemplate,
+                                              MatrixVectorType_,
+                                              WaveFunctionTransfType_,
+                                              IoType_> {
 
 public:
 
+	typedef TargetingBase<LanczosSolverTemplate,
+	                      MatrixVectorType_,
+	                      WaveFunctionTransfType_,
+                          IoType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef IoType_ IoType;
@@ -134,12 +141,6 @@ public:
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef TargetHelper<ModelType,
-	                     TargettingParamsType,
-	                     WaveFunctionTransfType> TargetHelperType;
-	typedef TargetingCommon<TargetHelperType,
-	                         VectorWithOffsetType,
-	                         LanczosSolverType> TargetingCommonType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 	enum {
@@ -156,13 +157,11 @@ public:
 	                  const TargettingParamsType& tstStruct,
 	                  const WaveFunctionTransfType& wft,
 	                  const SizeType& quantumSector)
-	    : lrs_(lrs),
-	      model_(model),
+	    : BaseType(lrs,model,tstStruct,wft,0,0),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
 	      progress_("TargetingDynamic"),
 	      gsWeight_(1.0),
-	      commonTargetting_(lrs,model,tstStruct,wft,0,0),
 	      weightForContinuedFraction_(0)
 	{
 		if (!wft.isEnabled())
@@ -175,44 +174,19 @@ public:
 
 	RealType weight(SizeType i) const
 	{
-		assert(!commonTargetting_.allStages(DISABLED));
+		assert(!this->common().allStages(DISABLED));
 		return weight_[i];
 	}
 
 	RealType gsWeight() const
 	{
-		if (commonTargetting_.allStages(DISABLED)) return 1.0;
+		if (this->common().allStages(DISABLED)) return 1.0;
 		return gsWeight_;
-	}
-
-	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
-	           const SomeBasisType& someBasis)
-	{
-		commonTargetting_.setGs(v,someBasis);
-	}
-
-	RealType normSquared(SizeType i) const
-	{
-		return commonTargetting_.normSquared(i);
-	}
-
-	const VectorWithOffsetType& gs() const
-	{
-		return commonTargetting_.psi();
-	}
-
-	bool includeGroundStage() const {return fabs(gsWeight_)>1e-6; }
-
-	SizeType size() const
-	{
-		if (commonTargetting_.allStages(DISABLED)) return 0;
-		return commonTargetting_.targetVectors().size();
 	}
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return commonTargetting_.targetVectors()[i];
+		return this->common().targetVectors()[i];
 	}
 
 	void evolve(RealType Eg,
@@ -230,7 +204,7 @@ public:
 
 		SizeType site = block1[0];
 		evolve(Eg,direction,site,loopNumber);
-		SizeType numberOfSites = lrs_.super().block().size();
+		SizeType numberOfSites = this->leftRightSuper().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
 		// //corner case
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
@@ -244,23 +218,15 @@ public:
 	{
 
 		VectorWithOffsetType phiNew;
-		SizeType count = commonTargetting_.getPhi(phiNew,Eg,direction,site,loopNumber);
+		SizeType count = this->common().getPhi(phiNew,Eg,direction,site,loopNumber);
 
 		if (count==0) return;
 
 		calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
 
 		typename PsimagLite::Vector<SizeType>::Type block(1,site);
-		commonTargetting_.cocoon(block,direction);
+		this->common().cocoon(block,direction);
 	}
-
-	void initialGuess(VectorWithOffsetType& v,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		commonTargetting_.initialGuess(v,block);
-	}
-
-	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
 
 	template<typename IoOutputType>
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
@@ -269,14 +235,14 @@ public:
 		assert(block.size()==1);
 
 		SizeType type = tstStruct_.type();
-		int fermionSign = commonTargetting_.findFermionSignOfTheOperators();
+		int fermionSign = this->common().findFermionSignOfTheOperators();
 		int s = (type&1) ? -1 : 1;
 		int s2 = (type>1) ? -1 : 1;
 		int s3 = (type&1) ? -fermionSign : 1;
 
 		if (ab_.size()<2) return;
 		typename PostProcType::ParametersType params = paramsForSolver_;
-		params.Eg = commonTargetting_.energy();
+		params.Eg = this->common().energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
 		if (tstStruct_.aOperators()[0].fermionSign>0) s2 *= s;
@@ -286,26 +252,15 @@ public:
 		PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(str);
 
-		commonTargetting_.save(block,io,cf,commonTargetting_.targetVectors());
+		this->common().save(block,io,cf,this->common().targetVectors());
 
-		commonTargetting_.psi().save(io,"PSI");
+		this->common().psi().save(io,"PSI");
 	}
 
 	void load(const PsimagLite::String& f)
 	{
-		commonTargetting_.template load<TimeSerializerType>(f);
+		this->common().template load<TimeSerializerType>(f);
 	}
-
-	RealType time() const { return 0; }
-
-	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
-	{
-		// nothing to do here
-	}
-
-	const ModelType& model() const { return model_; }
-
-	bool end() const { return false; }
 
 private:
 
@@ -319,12 +274,12 @@ private:
 			SizeType i0 = phi.sector(i);
 			phi.extract(sv,i0);
 			DenseMatrixType V;
-			SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
+			SizeType p = this->leftRightSuper().super().findPartitionNumber(phi.offset(i0));
 			getLanczosVectors(V,sv,p);
 			if (i==0) {
-				commonTargetting_.targetVectorsResize(V.n_col());
-				for (SizeType j=0;j<commonTargetting_.targetVectors().size();j++)
-					commonTargetting_.targetVectors(j) = phi;
+				this->common().targetVectorsResize(V.n_col());
+				for (SizeType j=0;j<this->common().targetVectors().size();j++)
+					this->common().targetVectors(j) = phi;
 			}
 			setVectors(V,i0);
 		}
@@ -332,14 +287,13 @@ private:
 		setWeights();
 		if (fabs(weightForContinuedFraction_)<1e-6)
 			weightForContinuedFraction_ = std::real(phi*phi);
-		//			std::cerr<<"weight==============="<<weightForContinuedFraction_<<"\n";
 	}
 
 	void wftLanczosVectors(SizeType site,const VectorWithOffsetType& phi)
 	{
-		commonTargetting_.targetVectors()[0] = phi;
+		this->common().targetVectors()[0] = phi;
 		// don't wft since we did it before
-		SizeType numberOfSites = lrs_.super().block().size();
+		SizeType numberOfSites = this->leftRightSuper().super().block().size();
 		if (site==0 || site==numberOfSites -1)  return;
 
 		typedef ParallelWft<VectorWithOffsetType,
@@ -349,11 +303,11 @@ private:
 		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
 		                             PsimagLite::MPI::COMM_WORLD);
 
-		ParallelWftType helperWft(commonTargetting_.targetVectors(),model_.hilbertSize(site),wft_,lrs_);
-		threadedWft.loopCreate(commonTargetting_.targetVectors().size()-1,helperWft,model_.concurrency());
+		ParallelWftType helperWft(this->common().targetVectors(),this->model().hilbertSize(site),wft_,this->leftRightSuper());
+		threadedWft.loopCreate(this->common().targetVectors().size()-1,helperWft,this->model().concurrency());
 
-		for (SizeType i=1;i<commonTargetting_.targetVectors().size();i++) {
-			assert(commonTargetting_.targetVectors()[i].size()==commonTargetting_.targetVectors()[0].size());
+		for (SizeType i=1;i<this->common().targetVectors().size();i++) {
+			assert(this->common().targetVectors()[i].size()==this->common().targetVectors()[0].size());
 		}
 	}
 
@@ -362,8 +316,8 @@ private:
 	                       SizeType p)
 	{
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadId);
-		typename LanczosSolverType::LanczosMatrixType h(&model_,&modelHelper);
+		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
+		typename LanczosSolverType::LanczosMatrixType h(&this->model(),&modelHelper);
 
 		LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);
 
@@ -375,10 +329,10 @@ private:
 	void setVectors(const DenseMatrixType& V,
 	                SizeType i0)
 	{
-		for (SizeType i=0;i<commonTargetting_.targetVectors().size();i++) {
+		for (SizeType i=0;i<this->common().targetVectors().size();i++) {
 			VectorType tmp(V.n_row());
 			for (SizeType j=0;j<tmp.size();j++) tmp[j] = V(j,i);
-			commonTargetting_.targetVectors(i).setDataInSector(tmp,i0);
+			this->common().targetVectors(i).setDataInSector(tmp,i0);
 		}
 	}
 
@@ -386,7 +340,7 @@ private:
 	{
 		gsWeight_ = 0.0;
 		RealType sum  = 0;
-		weight_.resize(commonTargetting_.targetVectors().size());
+		weight_.resize(this->common().targetVectors().size());
 		for (SizeType r=0;r<weight_.size();r++) {
 			weight_[r] = 1.0;
 			sum += weight_[r];
@@ -405,13 +359,10 @@ private:
 		return sum;
 	}
 
-	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
 	const TargettingParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
-	TargetingCommonType commonTargetting_;
 	ParametersForSolverType paramsForSolver_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	TridiagonalMatrixType ab_;

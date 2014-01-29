@@ -88,7 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ContinuedFraction.h"
 #include <cassert>
 #include "ApplyOperatorExpression.h"
-#include "TargetHelper.h"
 #include "IoSimple.h"
 
 namespace Dmrg {
@@ -126,7 +125,7 @@ public:
 	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef typename TargetHelperType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename TargetHelperType::TargettingParamsType TargettingParamsType;
+	typedef typename TargetHelperType::TargetParamsType TargetParamsType;
 	typedef typename ApplyOperatorExpressionType::VectorVectorWithOffsetType VectorVectorWithOffsetType;
 	typedef typename ApplyOperatorExpressionType::VectorRealType VectorRealType;
 	typedef typename ApplyOperatorExpressionType::PairType PairType;
@@ -141,7 +140,7 @@ public:
 
 	TargetingCommon(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
-                     const TargettingParamsType& tstStruct,
+                     const TargetParamsType& tstStruct,
                      const WaveFunctionTransfType& wft,
 	                 SizeType targets,
 	                 SizeType indexNoAdvance)
