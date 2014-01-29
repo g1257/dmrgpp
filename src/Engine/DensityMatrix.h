@@ -85,7 +85,7 @@ template<typename DmrgBasisType,
          >
 class DensityMatrix {
 
-	enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
+	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
 	typedef typename DmrgBasisWithOperatorsType::SparseMatrixType
 	SparseMatrixType;

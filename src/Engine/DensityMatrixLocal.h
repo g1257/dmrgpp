@@ -96,7 +96,7 @@ namespace Dmrg {
 		typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 
-		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
+		enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
 	public:
 

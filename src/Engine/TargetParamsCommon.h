@@ -87,7 +87,9 @@ namespace Dmrg {
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
 class TargetParamsCommon : public TargetParamsBase<ModelType> {
+
 public:
+
 	typedef typename ModelType::RealType RealType;
 
 	typedef typename ModelType::OperatorType OperatorType;

@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -75,7 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file ConjugateGradient.h
  *
  *  impl. of the conjugate gradient method
- * 
+ *
  */
 #ifndef CONJ_GRAD_H
 #define CONJ_GRAD_H
@@ -86,83 +86,83 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename MatrixType>
-	class	ConjugateGradient {
-		typedef typename MatrixType::value_type FieldType;
-		typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
-		typedef typename PsimagLite::Real<FieldType>::Type RealType;
+template<typename MatrixType>
+class	ConjugateGradient {
+	typedef typename MatrixType::value_type FieldType;
+	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
+	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
-	public:
-		ConjugateGradient(SizeType max,RealType eps)
-		: progress_("ConjugateGradient"), max_(max), eps_(eps) {}
+public:
+	ConjugateGradient(SizeType max,RealType eps)
+	    : progress_("ConjugateGradient"), max_(max), eps_(eps) {}
 
-		//! A and b, the result x, and also the initial solution x0
-		void operator()(typename PsimagLite::Vector<VectorType>::Type& x,
-		                  const MatrixType& A,
-		                  const typename PsimagLite::Vector<FieldType>::Type& b) const
-		{
-			VectorType v = multiply(A,x[0]);
-			typename PsimagLite::Vector<VectorType>::Type r,p;
-			r.push_back(b);
-			p.push_back(b);
-			for (SizeType i=0;i<r[0].size();i++) {
-				r[0][i] = b[i] - v[i];
-				p[0][i] = r[0][i];
-			}
-			SizeType k = 0;
-			typename PsimagLite::Vector<FieldType>::Type alpha,beta;
-			while(k<max_) {
-				VectorType tmp = multiply(A,p[k]);
-				FieldType val = scalarProduct(r[k],r[k])/
-				           scalarProduct(p[k],tmp);
-				alpha.push_back(val);
-				v = x[k] + alpha[k] * p[k];
-				x.push_back(v);
-				v = r[k] - alpha[k] * tmp;
-				r.push_back(v);
-				if (PsimagLite::norm(r[k+1])<eps_) break;
-				val = scalarProduct(r[k+1],r[k+1])/scalarProduct(r[k],r[k]);
-				beta.push_back(val);
-				v = r[k+1] - beta[k]*p[k];
-				p.push_back(v);
-				k++;
-			}
-
-			PsimagLite::OstringStream msg;
-			msg<<"Finished after "<<k<<" steps out of "<<max_;
-			msg<<" requested eps= "<<eps_;
-			RealType finalEps = (r.size() > 0) ? PsimagLite::norm(r[r.size()-1]) ? 0.0;
-			if (r.size() > 0)
-				msg<<" actual eps= "<<finalEps;
-			progress_.printline(msg,std::cout);
-
-			if (r.size() == 0 || finalEps <= eps_) return;
-
-			PsimagLite::OstringStream msg2;
-			msg2<<"WARNING: actual eps "<<finalEps<<" greater than requested eps= "<<eps_;
-			progress_.printline(msg2,std::cout);
+	//! A and b, the result x, and also the initial solution x0
+	void operator()(typename PsimagLite::Vector<VectorType>::Type& x,
+	                const MatrixType& A,
+	                const typename PsimagLite::Vector<FieldType>::Type& b) const
+	{
+		VectorType v = multiply(A,x[0]);
+		typename PsimagLite::Vector<VectorType>::Type r,p;
+		r.push_back(b);
+		p.push_back(b);
+		for (SizeType i=0;i<r[0].size();i++) {
+			r[0][i] = b[i] - v[i];
+			p[0][i] = r[0][i];
+		}
+		SizeType k = 0;
+		typename PsimagLite::Vector<FieldType>::Type alpha,beta;
+		while (k<max_) {
+			VectorType tmp = multiply(A,p[k]);
+			FieldType val = scalarProduct(r[k],r[k])/
+			        scalarProduct(p[k],tmp);
+			alpha.push_back(val);
+			v = x[k] + alpha[k] * p[k];
+			x.push_back(v);
+			v = r[k] - alpha[k] * tmp;
+			r.push_back(v);
+			if (PsimagLite::norm(r[k+1])<eps_) break;
+			val = scalarProduct(r[k+1],r[k+1])/scalarProduct(r[k],r[k]);
+			beta.push_back(val);
+			v = r[k+1] - beta[k]*p[k];
+			p.push_back(v);
+			k++;
 		}
 
-	private:
+		PsimagLite::OstringStream msg;
+		msg<<"Finished after "<<k<<" steps out of "<<max_;
+		msg<<" requested eps= "<<eps_;
+		RealType finalEps = (r.size() > 0) ? PsimagLite::norm(r[r.size()-1]) : 0.0;
+		if (r.size() > 0)
+			msg<<" actual eps= "<<finalEps;
+		progress_.printline(msg,std::cout);
 
-		FieldType scalarProduct(const VectorType& v1,const VectorType& v2) const
-		{
-			FieldType sum = 0;
-			for (SizeType i=0;i<v1.size();i++) sum += std::conj(v1[i])*v2[i];
-			return sum;
-		}
+		if (r.size() == 0 || finalEps <= eps_) return;
 
-		VectorType multiply(const MatrixType& A,const VectorType& v) const
-		{
-			VectorType y(A.rank(),0);
-			A.matrixVectorProduct(y,v);
-			return y;
-		}
+		PsimagLite::OstringStream msg2;
+		msg2<<"WARNING: actual eps "<<finalEps<<" greater than requested eps= "<<eps_;
+		progress_.printline(msg2,std::cout);
+	}
 
-		PsimagLite::ProgressIndicator progress_;
-		SizeType max_;
-		RealType eps_;
-	}; // class ConjugateGradient
+private:
+
+	FieldType scalarProduct(const VectorType& v1,const VectorType& v2) const
+	{
+		FieldType sum = 0;
+		for (SizeType i=0;i<v1.size();i++) sum += std::conj(v1[i])*v2[i];
+		return sum;
+	}
+
+	VectorType multiply(const MatrixType& A,const VectorType& v) const
+	{
+		VectorType y(A.rank(),0);
+		A.matrixVectorProduct(y,v);
+		return y;
+	}
+
+	PsimagLite::ProgressIndicator progress_;
+	SizeType max_;
+	RealType eps_;
+}; // class ConjugateGradient
 
 } // namespace Dmrg
 

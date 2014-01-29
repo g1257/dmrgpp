@@ -95,7 +95,7 @@ namespace Dmrg {
 		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 		typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 		typedef typename DmrgBasisType::FactorsType FactorsType;
-		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
+		enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 		
 	public:
 		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;

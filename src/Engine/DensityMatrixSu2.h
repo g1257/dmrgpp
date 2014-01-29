@@ -97,7 +97,7 @@ namespace Dmrg {
 		typedef typename DmrgBasisType::FactorsType FactorsType;
 		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 
-		enum {EXPAND_SYSTEM = TargettingType::EXPAND_SYSTEM };
+		enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 		
 	public:
 		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
