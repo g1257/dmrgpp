@@ -161,7 +161,7 @@ public:
 		return eta_;
 	}
 
-	virtual SizeType cgEps() const
+	virtual RealType cgEps() const
 	{
 		return cgEps_;
 	}

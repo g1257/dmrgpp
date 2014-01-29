@@ -93,7 +93,7 @@ namespace Dmrg {
 		typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
 	public:
-		ConjugateGradient(SizeType max,const RealType& eps)
+		ConjugateGradient(SizeType max,RealType eps)
 		: progress_("ConjugateGradient"), max_(max), eps_(eps) {}
 
 		//! A and b, the result x, and also the initial solution x0
@@ -130,9 +130,17 @@ namespace Dmrg {
 
 			PsimagLite::OstringStream msg;
 			msg<<"Finished after "<<k<<" steps out of "<<max_;
+			msg<<" requested eps= "<<eps_;
+			RealType finalEps = (r.size() > 0) ? PsimagLite::norm(r[r.size()-1]) ? 0.0;
 			if (r.size() > 0)
-				msg<<" final norm= "<<PsimagLite::norm(r[r.size()-1]);
+				msg<<" actual eps= "<<finalEps;
 			progress_.printline(msg,std::cout);
+
+			if (r.size() == 0 || finalEps <= eps_) return;
+
+			PsimagLite::OstringStream msg2;
+			msg2<<"WARNING: actual eps "<<finalEps<<" greater than requested eps= "<<eps_;
+			progress_.printline(msg2,std::cout);
 		}
 
 	private:

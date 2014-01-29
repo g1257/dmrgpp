@@ -347,7 +347,11 @@ private:
 		case WFT_NOADVANCE:
 			return "WFT_NOADVANCE";
 			break;
+		case WFT_ADVANCE:
+			return "WFT_ADVANCE";
+			break;
 		}
+
 		return "undefined";
 	}
 

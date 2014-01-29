@@ -163,7 +163,7 @@ public:
 		return unimplemented("eta");
 	}
 
-	virtual SizeType cgEps() const
+	virtual RealType cgEps() const
 	{
 		return unimplemented("cgEps");
 	}
