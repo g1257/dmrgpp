@@ -250,18 +250,8 @@ public:
 
 		calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
 
-		if (model_.params().insitu=="" || !includeGroundStage()) return;
-
-		if (BasisType::useSu2Symmetry()) {
-			commonTargetting_.noCocoon("not when SU(2) symmetry is in use");
-			return;
-		}
-
-		try {
-			commonTargetting_.cocoon(direction,site,commonTargetting_.psi(),"PSI");
-		} catch (std::exception& e) {
-			commonTargetting_.noCocoon("unsupported by the model");
-		}
+		typename PsimagLite::Vector<SizeType>::Type block(1,site);
+		commonTargetting_.cocoon(block,direction);
 	}
 
 	void initialGuess(VectorWithOffsetType& v,

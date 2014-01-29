@@ -192,21 +192,7 @@ public:
 	            const BlockType& block2,
 	            SizeType loopNumber)
 	{
-		const VectorWithOffsetType& psi = commonTargetting_.psi();
-
-		if (model_.params().insitu=="") return;
-
-		if (BasisType::useSu2Symmetry()) {
-			commonTargetting_.noCocoon("not when SU(2) symmetry is in use");
-			return;
-		}
-
-		try {
-			assert(block1.size()>0);
-			commonTargetting_.cocoon(direction,block1[0],psi,"PSI");
-		} catch (std::exception& e) {
-			commonTargetting_.noCocoon("unsupported by the model");
-		}
+		commonTargetting_.cocoon(block1,direction);
 	}
 
 	const LeftRightSuperType& leftRightSuper() const

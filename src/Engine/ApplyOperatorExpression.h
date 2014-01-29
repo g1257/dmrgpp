@@ -191,21 +191,6 @@ public:
 		return true;
 	}
 
-	void checkOrder(SizeType i) const
-	{
-		if (i==0) return;
-		for (SizeType j=0;j<i;j++) {
-			if (stage_[j] == DISABLED) {
-				PsimagLite::String s ="TST:: Seeing dynamic site ";
-				s += ttos(targetHelper_.tstStruct().sites(i));
-				s =s + " before having seen";
-				s = s + " site "+ttos(targetHelper_.tstStruct().sites(j));
-				s = s +". Please order your dynamic sites in order of appearance.\n";
-				throw PsimagLite::RuntimeError(s);
-			}
-		}
-	}
-
 	const VectorSizeType& stage() const { return stage_; }
 
 	void setAllStagesTo(SizeType x)
@@ -334,6 +319,21 @@ public:
 	}
 
 private:
+
+	void checkOrder(SizeType i) const
+	{
+		if (i==0) return;
+		for (SizeType j=0;j<i;j++) {
+			if (stage_[j] == DISABLED) {
+				PsimagLite::String s ="TST:: Seeing dynamic site ";
+				s += ttos(targetHelper_.tstStruct().sites(i));
+				s =s + " before having seen";
+				s = s + " site "+ttos(targetHelper_.tstStruct().sites(j));
+				s = s +". Please order your dynamic sites in order of appearance.\n";
+				throw PsimagLite::RuntimeError(s);
+			}
+		}
+	}
 
 	PsimagLite::String getStage(SizeType i) const
 	{

@@ -189,12 +189,6 @@ public:
 		applyOpExpression_.loadTargetVectors(serializer);
 	}
 
-	void checkOrder(SizeType i,
-	                const typename PsimagLite::Vector<SizeType>::Type& stage) const
-	{
-		return applyOpExpression_.checkOrder(i,stage);
-	}
-
 	bool allStages(SizeType x) const
 	{
 		return applyOpExpression_.allStages(x);
@@ -211,32 +205,6 @@ public:
 		PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
 		setInitialVector(v,applyOpExpression_.psi(),nk);
-	}
-
-	void noCocoon(const PsimagLite::String& msg) const
-	{
-		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-		std::cout<<"----- NO IN-SITU MEAS. POSSIBLE, reason="<<msg<<"\n";
-		std::cout<<"-------------&*&*&* In-situ measurements end\n";
-	}
-
-	// in situ computation:
-	void cocoon(SizeType direction,
-	            SizeType site,
-	            const VectorWithOffsetType& v,
-	            const PsimagLite::String& label) const
-	{
-		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-
-		cocoon_(direction,site,v,label,ApplyOperatorType::BORDER_NO);
-
-		int site2 = findBorderSiteFrom(site,direction);
-
-		if (site2 >= 0) {
-			cocoon_(direction,site2,v,label,ApplyOperatorType::BORDER_YES);
-		}
-
-		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
 	void computeCorrection(SizeType direction,
@@ -261,13 +229,6 @@ public:
 			if (j==0) v = phiTemp;
 			else v += phiTemp;
 		}
-	}
-
-	void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,
-	           const typename PsimagLite::Vector<SizeType>::Type& block) const
-	{
-		for (SizeType i=0;i<block.size();i++)
-			nk.push_back(targetHelper_.model().hilbertSize(block[i]));
 	}
 
 	RealType setGsWeight(RealType defaultValue) const
@@ -365,6 +326,29 @@ public:
 			                                    block);
 	}
 
+	void cocoon(const BlockType& block,SizeType direction) const
+	{
+		const ModelType& model = targetHelper_.model();
+		const VectorVectorWithOffsetType& tv = applyOpExpression_.targetVectors();
+
+		if (model.params().insitu=="") return;
+
+		if (BasisType::useSu2Symmetry()) {
+			noCocoon("not when SU(2) symmetry is in use");
+			return;
+		}
+
+		try {
+			assert(block.size()>0);
+			cocoon(direction,block[0],psi(),"PSI");
+			if (tv.size() > 0)
+				cocoon(direction,block[0],tv[0],"P0");
+
+		} catch (std::exception& e) {
+			noCocoon("unsupported by the model");
+		}
+	}
+
 	void cocoonLegacy(SizeType direction,const BlockType& block) const
 	{
 		const VectorWithOffsetType& psi = applyOpExpression_.psi();
@@ -400,6 +384,39 @@ public:
 	}
 
 private:
+
+	void noCocoon(const PsimagLite::String& msg) const
+	{
+		std::cout<<"-------------&*&*&* In-situ measurements start\n";
+		std::cout<<"----- NO IN-SITU MEAS. POSSIBLE, reason="<<msg<<"\n";
+		std::cout<<"-------------&*&*&* In-situ measurements end\n";
+	}
+
+	// in situ computation:
+	void cocoon(SizeType direction,
+	            SizeType site,
+	            const VectorWithOffsetType& v,
+	            const PsimagLite::String& label) const
+	{
+		std::cout<<"-------------&*&*&* In-situ measurements start\n";
+
+		cocoon_(direction,site,v,label,ApplyOperatorType::BORDER_NO);
+
+		int site2 = findBorderSiteFrom(site,direction);
+
+		if (site2 >= 0) {
+			cocoon_(direction,site2,v,label,ApplyOperatorType::BORDER_YES);
+		}
+
+		std::cout<<"-------------&*&*&* In-situ measurements end\n";
+	}
+
+	void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,
+	           const typename PsimagLite::Vector<SizeType>::Type& block) const
+	{
+		for (SizeType i=0;i<block.size();i++)
+			nk.push_back(targetHelper_.model().hilbertSize(block[i]));
+	}
 
 	void setInitialVector(VectorWithOffsetType& v1,
 	                      const VectorWithOffsetType& v2,

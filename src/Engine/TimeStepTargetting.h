@@ -410,10 +410,7 @@ private:
 			commonTargetting_.cocoonLegacy(direction,block);
 		}
 
-		SizeType site = block[0];
-
-		commonTargetting_.cocoon(direction,site,commonTargetting_.psi(),"PSI");
-		commonTargetting_.cocoon(direction,site,commonTargetting_.targetVectors()[0],"P0");
+		commonTargetting_.cocoon(block,direction);
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}

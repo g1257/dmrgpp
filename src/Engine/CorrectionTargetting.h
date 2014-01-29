@@ -194,7 +194,7 @@ public:
 	            const BlockType& block2,
 	            SizeType loopNumber)
 	{
-		cocoon(block1,direction);
+		commonTargetting_.cocoon(block1,direction);
 
 		if (direction==INFINITE) return;
 		commonTargetting_.setAllStagesTo(ENABLED);
@@ -253,23 +253,6 @@ public:
 	bool end() const { return false; }
 
 private:
-
-	void cocoon(const BlockType& block1,SizeType direction) const
-	{
-		if (model_.params().insitu=="") return;
-
-		if (BasisType::useSu2Symmetry()) {
-			commonTargetting_.noCocoon("not when SU(2) symmetry is in use");
-			return;
-		}
-
-		try {
-			assert(block1.size()>0);
-			commonTargetting_.cocoon(direction,block1[0],commonTargetting_.psi(),"PSI");
-		} catch (std::exception& e) {
-			commonTargetting_.noCocoon("unsupported by the model");
-		}
-	}
 
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
