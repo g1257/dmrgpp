@@ -178,7 +178,7 @@ public:
 	SizeType size() const
 	{
 		if (!correctionEnabled_) return 0;
-		return this->size();
+		return BaseType::size();
 	}
 
 	void evolve(RealType Eg,
