@@ -144,7 +144,7 @@ public:
 	                   const TargettingParamsType& tstStruct,
 	                   const WaveFunctionTransfType& wft,
 	                   const SizeType& quantumSector) // quantumSector is ignored here
-	    : BaseType(lrs,model,tstStruct,wft,times_.size(),0),
+	    : BaseType(lrs,model,tstStruct,wft,tstStruct.timeSteps(),0),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
 	      progress_("TargetingTimeStep"),
