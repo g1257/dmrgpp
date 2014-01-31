@@ -133,7 +133,7 @@ public:
 	                     const TargettingParamsType& correctionStruct,
 	                     const WaveFunctionTransfType& wft,
 	                     const SizeType& quantumSector) // quantumSector ignored here
-	    : BaseType(lrs,model,correctionStruct,wft,0,0),
+	    : BaseType(lrs,model,correctionStruct,wft,1,0),
 	      correctionStruct_(correctionStruct),
 	      progress_("TargetingCorrection")
 	{}
