@@ -451,10 +451,15 @@ private:
 			applyOpLocal_(phiNew,phiOld,targetHelper_.tstStruct().aOperators()[i],
 			              fs,systemOrEnviron,corner);
 			RealType norma = std::norm(phiNew);
-			if (norma==0)
-				throw PsimagLite::RuntimeError("Norm of phi is zero\n");
+
+			if (norma<1e-6) {
+				PsimagLite::OstringStream msg2;
+				msg2<<"Norm of phi is zero\n";
+				progress_.printline(msg2,std::cout);
+			}
 
 			if (targetHelper_.tstStruct().useQns()) setQuantumNumbers(phiNew);
+
 		} else if (stage_[i] >= WFT_NOADVANCE) {
 
 			SizeType advance = indexNoAdvance_;
