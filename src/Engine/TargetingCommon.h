@@ -372,9 +372,9 @@ public:
 
 		try {
 			assert(block.size()>0);
-			cocoon(direction,block[0],psi(),"PSI");
+			cocoon(direction,block[0],psi(),"PSI",psi(),"PSI");
 			if (tv.size() > 0)
-				cocoon(direction,block[0],tv[0],"P0");
+				cocoon(direction,block[0],tv[0],"P0",tv[0],"P0");
 
 		} catch (std::exception& e) {
 			noCocoon("unsupported by the model");
@@ -415,31 +415,39 @@ public:
 		test(tv0,tv0,direction,s,site,doubleOcc,ApplyOperatorType::BORDER_NO);
 	}
 
+	// in situ computation:
+	void cocoon(SizeType direction,
+	            SizeType site,
+	            const VectorWithOffsetType& v1,
+	            PsimagLite::String label1,
+	            const VectorWithOffsetType& v2,
+	            PsimagLite::String label2) const
+	{
+
+		std::cout<<"-------------&*&*&* In-situ measurements start\n";
+
+		if (std::norm(v1)<1e-6 || std::norm(v2)<1e-6) {
+			std::cout<<"cocoon: NORM IS ZERO\n";
+			return;
+		}
+
+		cocoon_(direction,site,v1,label1,v2,label2,ApplyOperatorType::BORDER_NO);
+
+		int site2 = findBorderSiteFrom(site,direction);
+
+		if (site2 >= 0) {
+			cocoon_(direction,site2,v1,label1,v2,label2,ApplyOperatorType::BORDER_YES);
+		}
+
+		std::cout<<"-------------&*&*&* In-situ measurements end\n";
+	}
+
 private:
 
 	void noCocoon(const PsimagLite::String& msg) const
 	{
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
 		std::cout<<"----- NO IN-SITU MEAS. POSSIBLE, reason="<<msg<<"\n";
-		std::cout<<"-------------&*&*&* In-situ measurements end\n";
-	}
-
-	// in situ computation:
-	void cocoon(SizeType direction,
-	            SizeType site,
-	            const VectorWithOffsetType& v,
-	            const PsimagLite::String& label) const
-	{
-		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-
-		cocoon_(direction,site,v,label,ApplyOperatorType::BORDER_NO);
-
-		int site2 = findBorderSiteFrom(site,direction);
-
-		if (site2 >= 0) {
-			cocoon_(direction,site2,v,label,ApplyOperatorType::BORDER_YES);
-		}
-
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
@@ -475,8 +483,10 @@ private:
 	}
 
 	void cocoon_(SizeType direction,SizeType site,
-	             const VectorWithOffsetType& v,
-	             const PsimagLite::String& label,
+	             const VectorWithOffsetType& v1,
+	             PsimagLite::String label1,
+	             const VectorWithOffsetType& v2,
+	             PsimagLite::String label2,
 	             BorderEnumType border) const
 	{
 		VectorStringType vecStr = getOperatorLabels();
@@ -485,8 +495,8 @@ private:
 			const PsimagLite::String& opLabel = vecStr[i];
 			OperatorType nup = getOperatorForTest(opLabel,site);
 
-			PsimagLite::String tmpStr = "<"+ label + "|" + opLabel + "|" + label + ">";
-			test(v,v,direction,tmpStr,site,nup,border);
+			PsimagLite::String tmpStr = "<"+ label1 + "|" + opLabel + "|" + label2 + ">";
+			test(v1,v2,direction,tmpStr,site,nup,border);
 		}
 	}
 
@@ -524,7 +534,7 @@ private:
 	void test(const VectorWithOffsetType& src1,
 	          const VectorWithOffsetType& src2,
 	          SizeType systemOrEnviron,
-	          const PsimagLite::String& label,
+	          PsimagLite::String label,
 	          SizeType site,
 	          const OperatorType& A,
 	          BorderEnumType border) const
