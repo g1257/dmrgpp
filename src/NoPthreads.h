@@ -84,16 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "String.h"
 
-// bogus: to compile without pthreads
-void pthread_mutex_lock(int myMutex)
-{
-}
-
-// bogus: to compile without pthreads
-void pthread_mutex_unlock(int myMutex)
-{
-}
-
 namespace PsimagLite {
 template<typename PthreadFunctionHolderType>
 class NoPthreads {
