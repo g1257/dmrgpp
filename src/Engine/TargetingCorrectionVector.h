@@ -124,9 +124,9 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 
 			RealType operator()(SizeType k) const
 			{
-				RealType part1 = omega_ + E0_ - eigs_[k];
+				RealType part1 =  eigs_[k] - E0_ - omega_;
 				RealType denom = part1*part1 + eta_*eta_;
-				return (action_ == ACTION_IMAG) ? -eta_/denom : part1 / denom;
+				return (action_ == ACTION_IMAG) ? eta_/denom : part1 / denom;
 			}
 
 			void setReal() const
