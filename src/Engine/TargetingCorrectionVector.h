@@ -316,13 +316,14 @@ private:
 		SizeType threadId = 0;
 		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
 		LanczosMatrixType h(&this->model(),&modelHelper);
-		CorrectionVectorFunctionType cvft(h,tstStruct_);
+		RealType E0 = this->common().energy();
+		CorrectionVectorFunctionType cvft(h,tstStruct_,E0);
 
 		cvft.getXi(xi,sv);
 		// make sure xr is zero
 		for (SizeType i=0;i<xr.size();i++) xr[i] = 0;
 		h.matrixVectorProduct(xr,xi);
-		xr -= tstStruct_.omega()*xi;
+		xr -= (tstStruct_.omega()+E0)*xi;
 		xr /= tstStruct_.eta();
 	}
 

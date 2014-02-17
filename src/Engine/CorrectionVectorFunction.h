@@ -94,20 +94,20 @@ class	CorrectionVectorFunction {
 	public:
 
 		typedef FieldType value_type ;
-		InternalMatrix(const MatrixType& m,const InfoType& info)
-		    : m_(m),info_(info) {}
+		InternalMatrix(const MatrixType& m,const InfoType& info,RealType E0)
+		    : m_(m),info_(info),E0_(E0) {}
 
 		SizeType rank() const { return m_.rank(); }
 
 		void matrixVectorProduct(VectorType& x,const VectorType& y) const
 		{
 			RealType eta = info_.eta();
-			RealType omega = info_.omega();
+			RealType omegaMinusE0 = info_.omega() + E0_;
 			VectorType xTmp(x.size(),0);
 			m_.matrixVectorProduct(xTmp,y); // xTmp = Hy
 			VectorType x2(x.size(),0);
 			m_.matrixVectorProduct(x2,xTmp); // x2 = H^2 y
-			x = x2 -2 *omega * xTmp + (omega*omega + eta*eta)*y;
+			x = x2 -2 *omegaMinusE0 * xTmp + (omegaMinusE0*omegaMinusE0 + eta*eta)*y;
 			x /= (-eta);
 		}
 
@@ -115,14 +115,15 @@ class	CorrectionVectorFunction {
 
 		const MatrixType& m_;
 		const InfoType& info_;
+		RealType E0_;
 	};
 
 	typedef ConjugateGradient<InternalMatrix> ConjugateGradientType;
 
 public:
 
-	CorrectionVectorFunction(const MatrixType& m,const InfoType& info)
-	    : im_(m,info),cg_(info.cgSteps(),info.cgEps())
+	CorrectionVectorFunction(const MatrixType& m,const InfoType& info,RealType E0)
+	    : im_(m,info,E0),cg_(info.cgSteps(),info.cgEps())
 	{}
 
 	void getXi(VectorType& result,const VectorType& sv) const
