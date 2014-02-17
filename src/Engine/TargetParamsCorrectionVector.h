@@ -116,6 +116,7 @@ public:
 		io.readline(eps_,"DynamicDmrgEps=");
 		io.readline(omega_,"CorrectionVectorOmega=");
 		io.readline(eta_,"CorrectionVectorEta=");
+		io.readline(direct_,"CorrectionVectorDirect=");
 
 		try {
 			io.readline(cgSteps_,"ConjugateGradientSteps=");
@@ -166,6 +167,11 @@ public:
 		return cgEps_;
 	}
 
+	virtual SizeType direct() const
+	{
+		return direct_;
+	}
+
 private:
 
 	SizeType type_;
@@ -176,6 +182,7 @@ private:
 	RealType omega_;
 	RealType eta_;
 	RealType cgEps_;
+	SizeType direct_;
 }; // class TargetParamsCorrectionVector
 
 template<typename ModelType>

@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CorrectionVectorFunction.h"
 #include "TargetingBase.h"
 #include "ParametersForSolver.h"
+#include "ParallelTriDiag.h"
 
 namespace Dmrg {
 
@@ -100,20 +101,90 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
                                                        WaveFunctionTransfType_,
                                                        IoType_> {
 
-public:
-
 	typedef TargetingBase<LanczosSolverTemplate,
 	                      MatrixVectorType_,
 	                      WaveFunctionTransfType_,
                           IoType_> BaseType;
+
+	class CalcR {
+
+		typedef typename MatrixVectorType_::ModelType ModelType;
+		typedef typename ModelType::RealType RealType;
+		typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+
+		class Action {
+
+		public:
+
+			enum ActionEnum {ACTION_IMAG, ACTION_REAL};
+
+			Action(RealType omega,RealType E0,RealType eta,const VectorRealType& eigs)
+			    : omega_(omega),E0_(E0),eta_(eta),eigs_(eigs)
+			{}
+
+			RealType operator()(SizeType k) const
+			{
+				RealType part1 = omega_ + E0_ - eigs_[k];
+				RealType denom = part1*part1 + eta_*eta_;
+				return (action_ == ACTION_IMAG) ? -eta_/denom : part1 / denom;
+			}
+
+			void setReal() const
+			{
+				action_ = ACTION_REAL;
+			}
+
+			void setImag() const
+			{
+				action_ = ACTION_IMAG;
+			}
+
+		private:
+
+			RealType omega_;
+			RealType E0_;
+			RealType eta_;
+			const VectorRealType& eigs_;
+			mutable ActionEnum action_;
+		};
+
+	public:
+
+		typedef Action ActionType;
+
+		CalcR(RealType omega,RealType E0,RealType eta,const VectorRealType& eigs)
+		    : action_(omega,E0,eta,eigs)
+		{}
+
+		const Action& imag() const
+		{
+			action_.setImag();
+			return action_;
+		}
+
+		const Action& real() const
+		{
+			action_.setReal();
+			return action_;
+		}
+
+	private:
+
+		Action action_;
+	};
+
+	typedef CalcR CalcRType;
+
+public:
+
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType
-	LeftRightSuperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -139,6 +210,13 @@ public:
 	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,
 	                                 TargettingParamsType> CorrectionVectorFunctionType;
+	typedef ParallelTriDiag<ModelType,
+	                        LanczosSolverType,
+	                        VectorWithOffsetType> ParallelTriDiagType;
+	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
+	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
@@ -266,6 +344,18 @@ private:
 		for (SizeType i=1;i<this->common().targetVectors().size();i++)
 			this->common().targetVectors(i) = phi;
 
+		VectorMatrixFieldType V(phi.sectors());
+		VectorMatrixFieldType T(phi.sectors());
+
+		VectorSizeType steps(phi.sectors());
+
+		triDiag(phi,T,V,steps);
+
+		VectorVectorRealType eigs(phi.sectors());
+
+		for (SizeType ii=0;ii<phi.sectors();ii++)
+			PsimagLite::diag(T[ii],eigs[ii],'V');
+
 		for (SizeType i=0;i<phi.sectors();i++) {
 			VectorType sv;
 			SizeType i0 = phi.sector(i);
@@ -276,7 +366,13 @@ private:
 			// set xi
 			SizeType p = this->leftRightSuper().super().findPartitionNumber(phi.offset(i0));
 			VectorType xi(sv.size(),0),xr(sv.size(),0);
-			computeXiAndXr(xi,xr,sv,p);
+
+			if (tstStruct_.direct()) {
+				computeXiAndXrDirect(xi,xr,phi,i0,V[i],T[i],eigs[i],steps[i]);
+			} else {
+				computeXiAndXrIndirect(xi,xr,sv,p);
+			}
+
 			this->common().targetVectors(2).setDataInSector(xi,i0);
 			//set xr
 			this->common().targetVectors(3).setDataInSector(xr,i0);
@@ -308,10 +404,10 @@ private:
 		reortho_ = lanczosSolver.reorthogonalizationMatrix();
 	}
 
-	void computeXiAndXr(VectorType& xi,
-	                    VectorType& xr,
-	                    const VectorType& sv,
-	                    SizeType p)
+	void computeXiAndXrIndirect(VectorType& xi,
+	                            VectorType& xr,
+	                            const VectorType& sv,
+	                            SizeType p)
 	{
 		SizeType threadId = 0;
 		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
@@ -325,6 +421,101 @@ private:
 		h.matrixVectorProduct(xr,xi);
 		xr -= (tstStruct_.omega()+E0)*xi;
 		xr /= tstStruct_.eta();
+	}
+
+	void computeXiAndXrDirect(VectorType& xi,
+	                          VectorType& xr,
+	                          const VectorWithOffsetType& phi,
+	                          SizeType i0,
+	                          const MatrixComplexOrRealType& V,
+	                          const MatrixComplexOrRealType& T,
+	                          const VectorRealType& eigs,
+	                          SizeType steps)
+	{
+		SizeType n2 = steps;
+		SizeType n = V.n_row();
+		if (T.n_col()!=T.n_row()) throw PsimagLite::RuntimeError("T is not square\n");
+		if (V.n_col()!=T.n_col()) throw PsimagLite::RuntimeError("V is not nxn2\n");
+		// for (SizeType j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
+		ComplexOrRealType zone = 1.0;
+		ComplexOrRealType zzero = 0.0;
+
+		TargetVectorType tmp(n2);
+		VectorType r(n2);
+		CalcRType what(tstStruct_.omega(),this->common().energy(),tstStruct_.eta(),eigs);
+
+		calcR(r,what.imag(),T,V,phi,eigs,n2,i0);
+
+		psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0,0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1 );
+
+		xi.resize(n);
+		psimag::BLAS::GEMV('N', n,  n2, zone, &(V(0,0)), n, &(tmp[0]),1, zzero, &(xi[0]),   1 );
+
+		calcR(r,what.real(),T,V,phi,eigs,n2,i0);
+
+		psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0,0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1 );
+
+		xr.resize(n);
+		psimag::BLAS::GEMV('N', n,  n2, zone, &(V(0,0)), n, &(tmp[0]),1, zzero, &(xr[0]),   1 );
+	}
+
+	void calcR(TargetVectorType& r,
+	           const typename CalcRType::ActionType& whatRorI,
+			   const MatrixComplexOrRealType& T,
+			   const MatrixComplexOrRealType& V,
+			   const VectorWithOffsetType& phi,
+			   const VectorRealType& eigs,
+			   SizeType n2,
+			   SizeType i0)
+	{
+		for (SizeType k=0;k<n2;k++) {
+			ComplexOrRealType sum = 0.0;
+			for (SizeType kprime=0;kprime<n2;kprime++) {
+				ComplexOrRealType tmpV = calcVTimesPhi(kprime,V,phi,i0);
+				sum += std::conj(T(kprime,k))*tmpV;
+			}
+
+			r[k] = sum * whatRorI(k);
+		}
+	}
+
+	ComplexOrRealType calcVTimesPhi(SizeType kprime,
+	                                const MatrixComplexOrRealType& V,
+	                                const VectorWithOffsetType& phi,
+	                                SizeType i0) const
+	{
+		ComplexOrRealType ret = 0;
+		SizeType total = phi.effectiveSize(i0);
+
+		for (SizeType j=0;j<total;j++)
+			ret += std::conj(V(j,kprime))*phi.fastAccess(i0,j);
+		return ret;
+	}
+
+	void triDiag(const VectorWithOffsetType& phi,
+	             VectorMatrixFieldType& T,
+	             VectorMatrixFieldType& V,
+	             typename PsimagLite::Vector<SizeType>::Type& steps)
+	{
+		PsimagLite::String options = this->model().params().options;
+		bool cTridiag = (options.find("concurrenttridiag") != PsimagLite::String::npos);
+
+		if (cTridiag) {
+			typedef PsimagLite::Parallelizer<ParallelTriDiagType> ParallelizerType;
+			ParallelizerType threadedTriDiag(PsimagLite::Concurrency::npthreads,
+			                                 PsimagLite::MPI::COMM_WORLD);
+
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,this->leftRightSuper(),this->model());
+
+			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
+		} else {
+			typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
+			ParallelizerType threadedTriDiag(1,PsimagLite::MPI::COMM_WORLD);
+
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,this->leftRightSuper(),this->model());
+
+			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
+		}
 	}
 
 	void setWeights()
