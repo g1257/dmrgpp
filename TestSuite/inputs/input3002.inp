@@ -42,6 +42,7 @@ DynamicDmrgAdvanceEach=1
 
 CorrectionVectorOmega=0
 CorrectionVectorEta=0.3
+CorrectionVectorAlgorithm=Krylov
 
 TSPOperator=raw
 RAW_MATRIX

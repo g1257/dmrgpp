@@ -103,6 +103,8 @@ public:
 	static SizeType const PRODUCT = BaseType::PRODUCT;
 	static SizeType const SUM = BaseType::SUM;
 
+	enum {KRYLOV, CONJUGATE_GRADIENT};
+
 	template<typename IoInputter>
 	TargetParamsCorrectionVector(IoInputter& io,const ModelType& model)
 	    : BaseType(io,model),
@@ -116,7 +118,18 @@ public:
 		io.readline(eps_,"DynamicDmrgEps=");
 		io.readline(omega_,"CorrectionVectorOmega=");
 		io.readline(eta_,"CorrectionVectorEta=");
-		io.readline(direct_,"CorrectionVectorDirect=");
+
+		PsimagLite::String tmp;
+		io.readline(tmp,"CorrectionVectorAlgorithm=");
+		if (tmp == "Krylov") {
+			algorithm_ = KRYLOV;
+		} else if (tmp == "ConjugateGradient") {
+			algorithm_ = CONJUGATE_GRADIENT;
+		} else {
+			PsimagLite::String str("TargetParamsCorrectionVector ");
+			str += "Unknown algorithm " + tmp + "\n";
+			throw PsimagLite::RuntimeError(str);
+		}
 
 		try {
 			io.readline(cgSteps_,"ConjugateGradientSteps=");
@@ -167,9 +180,9 @@ public:
 		return cgEps_;
 	}
 
-	virtual SizeType direct() const
+	virtual SizeType algorithm() const
 	{
-		return direct_;
+		return algorithm_;
 	}
 
 private:
@@ -182,7 +195,7 @@ private:
 	RealType omega_;
 	RealType eta_;
 	RealType cgEps_;
-	SizeType direct_;
+	SizeType algorithm_;
 }; // class TargetParamsCorrectionVector
 
 template<typename ModelType>

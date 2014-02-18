@@ -367,8 +367,8 @@ private:
 			SizeType p = this->leftRightSuper().super().findPartitionNumber(phi.offset(i0));
 			VectorType xi(sv.size(),0),xr(sv.size(),0);
 
-			if (tstStruct_.direct()) {
-				computeXiAndXrDirect(xi,xr,phi,i0,V[i],T[i],eigs[i],steps[i]);
+			if (tstStruct_.algorithm() == TargettingParamsType::KRYLOV) {
+				computeXiAndXrKrylov(xi,xr,phi,i0,V[i],T[i],eigs[i],steps[i]);
 			} else {
 				computeXiAndXrIndirect(xi,xr,sv,p);
 			}
@@ -423,7 +423,7 @@ private:
 		xr /= tstStruct_.eta();
 	}
 
-	void computeXiAndXrDirect(VectorType& xi,
+	void computeXiAndXrKrylov(VectorType& xi,
 	                          VectorType& xr,
 	                          const VectorWithOffsetType& phi,
 	                          SizeType i0,
