@@ -78,12 +78,8 @@ sub doMain
 
 	(-r "$TestSuiteGlobals::specFile") or die "$0: doMain: $TestSuiteGlobals::specFile does not exist\n";
 
-	if (!$all) {
-		$TestSuiteGlobals::testNum = selectTest() if (!defined($TestSuiteGlobals::testNum));
-		if ($TestSuiteGlobals::testNum>=0) {
-			testSuite($TestSuiteGlobals::testNum);
-			exit(0);
-		}
+	if (!$all && !defined($TestSuiteGlobals::testNum)) {
+		$TestSuiteGlobals::testNum = selectTest();
 	}
 
 	$TestSuiteGlobals::testNum = 0 if (!defined($TestSuiteGlobals::testNum));
@@ -91,6 +87,8 @@ sub doMain
 	if($TestSuiteGlobals::testNum < 0) {
 		$TestSuiteGlobals::testNum = -$TestSuiteGlobals::testNum;
 	}
+
+	$lastTest = $TestSuiteGlobals::testNum if (!$all && !defined($lastTest));
 
 	runAllTests($TestSuiteGlobals::testNum,$lastTest);
 }
