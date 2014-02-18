@@ -89,7 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Checkpoint.h"
 #include "WaveFunctionTransfFactory.h"
 #include "Truncation.h"
-#include "MemoryUsage.h"
 
 namespace Dmrg {
 
@@ -292,7 +291,7 @@ namespace Dmrg {
 				if (!twoSiteDmrg) checkpoint_.push(pS,pE);
 				else checkpoint_.push(lrs_.left(),lrs_.right());
 
-				printMemoryUsage();
+				progress_.printMemoryUsage();
 			}
 			progress_.print("Infinite dmrg loop has been done!\n",std::cout);
 		}
@@ -424,7 +423,7 @@ namespace Dmrg {
 				if (finalStep(stepLength,stepFinal)) break;
 				if (stepCurrent_<0) throw PsimagLite::RuntimeError("DmrgSolver::finiteStep() currentStep_ is negative\n");
 
-				printMemoryUsage();
+				progress_.printMemoryUsage();
 
 				if (target.end()) break;
 			}
@@ -574,23 +573,9 @@ namespace Dmrg {
 			quantumSector_=MyBasis::pseudoQuantumNumber(targetQuantumNumbers);
 		}
 
-		void printMemoryUsage()
-		{
-			musage_.update();
-			PsimagLite::String vmPeak = musage_.findEntry("VmPeak:");
-			PsimagLite::String vmSize = musage_.findEntry("VmSize:");
-			PsimagLite::OstringStream msg;
-			msg<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
-			progress_.printline(msg,std::cout);
-			PsimagLite::OstringStream msg2;
-			msg2<<"Engine clock: "<<musage_.time()<<" seconds";
-			progress_.printline(msg2,std::cout);
-		}
-
 		const ModelType& model_;
 		const ParametersType& parameters_;
 		const TargettingParamsType& targetStruct_;
-		PsimagLite::MemoryUsage musage_;
 		PsimagLite::ApplicationInfo appInfo_;
 		bool verbose_;
 		LeftRightSuperType lrs_;
