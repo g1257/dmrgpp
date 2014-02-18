@@ -528,6 +528,16 @@ private:
 			nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
 		}
 
+		SizeType foundSize = nup.data.row();
+		SizeType expectedSize = targetHelper_.model().hilbertSize(0);
+		if (foundSize != expectedSize) {
+			PsimagLite::String str("getOperatorForTest ");
+			str += " Expected size " + ttos(expectedSize);
+			str += " but found size " + ttos(foundSize);
+			str += " for operator " + opLabel + "\n";
+			throw PsimagLite::RuntimeError(str);
+		}
+
 		return nup;
 	}
 
