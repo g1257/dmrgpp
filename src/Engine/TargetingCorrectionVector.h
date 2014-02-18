@@ -111,6 +111,7 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 		typedef typename MatrixVectorType_::ModelType ModelType;
 		typedef typename ModelType::RealType RealType;
 		typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+		typedef TargetParamsCorrectionVector<ModelType> TargettingParamsType;
 
 		class Action {
 
@@ -118,15 +119,18 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 
 			enum ActionEnum {ACTION_IMAG, ACTION_REAL};
 
-			Action(RealType omega,RealType E0,RealType eta,const VectorRealType& eigs)
-			    : omega_(omega),E0_(E0),eta_(eta),eigs_(eigs)
+			Action(const TargettingParamsType& tstStruct,
+			       RealType E0,
+			       const VectorRealType& eigs)
+			    : tstStruct_(tstStruct),E0_(E0),eigs_(eigs)
 			{}
 
 			RealType operator()(SizeType k) const
 			{
-				RealType part1 =  eigs_[k] - E0_ - omega_;
-				RealType denom = part1*part1 + eta_*eta_;
-				return (action_ == ACTION_IMAG) ? eta_/denom : part1 / denom;
+				RealType sign = (tstStruct_.type() == 0) ? -1.0 : 1.0;
+				RealType part1 =  (eigs_[k] - E0_)*sign + tstStruct_.omega();
+				RealType denom = part1*part1 + tstStruct_.eta()*tstStruct_.eta();
+				return (action_ == ACTION_IMAG) ? tstStruct_.eta()/denom : -part1 / denom;
 			}
 
 			void setReal() const
@@ -141,9 +145,8 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 
 		private:
 
-			RealType omega_;
+			const TargettingParamsType& tstStruct_;
 			RealType E0_;
-			RealType eta_;
 			const VectorRealType& eigs_;
 			mutable ActionEnum action_;
 		};
@@ -152,8 +155,10 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 
 		typedef Action ActionType;
 
-		CalcR(RealType omega,RealType E0,RealType eta,const VectorRealType& eigs)
-		    : action_(omega,E0,eta,eigs)
+		CalcR(const TargettingParamsType& tstStruct,
+		      RealType E0,
+		      const VectorRealType& eigs)
+		    : action_(tstStruct,E0,eigs)
 		{}
 
 		const Action& imag() const
@@ -442,7 +447,7 @@ private:
 
 		TargetVectorType tmp(n2);
 		VectorType r(n2);
-		CalcRType what(tstStruct_.omega(),this->common().energy(),tstStruct_.eta(),eigs);
+		CalcRType what(tstStruct_,this->common().energy(),eigs);
 
 		calcR(r,what.imag(),T,V,phi,eigs,n2,i0);
 
