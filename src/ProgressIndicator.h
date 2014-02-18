@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include "String.h"
 #include "Concurrency.h"
+#include "MemoryUsage.h"
 
 namespace PsimagLite {
 
@@ -97,7 +98,6 @@ public:
 
 		caller_ = caller;
 		rank_ = Concurrency::rank();
-		prefix_ = caller_ + ": ";
 	}
 
 	template<typename SomeOutputType>
@@ -105,14 +105,16 @@ public:
 	{
 		if (threadId_ != 0) return;
 		if (rank_!=0) return;
-		os<<prefix_<<s<<"\n";
+		prefix(os);
+		os<<"\n";
 	}
 
 	void printline(OstringStream &s,std::ostream& os) const
 	{
 		if (threadId_ != 0) return;
 		if (rank_!=0) return;
-		os<<prefix_<<s.str()<<"\n";
+		prefix(os);
+		os<<s.str()<<"\n";
 		s.seekp(std::ios_base::beg);
 	}
 
@@ -120,16 +122,34 @@ public:
 	{
 		if (threadId_ != 0) return;
 		if (rank_!=0) return;
-		os<<prefix_<<something;
+		prefix(os);
+		os<<something;
+	}
+
+	void printMemoryUsage()
+	{
+		musage_.update();
+		String vmPeak = musage_.findEntry("VmPeak:");
+		String vmSize = musage_.findEntry("VmSize:");
+		OstringStream msg;
+		msg<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
+		printline(msg,std::cout);
 	}
 
 private:
 
+	void prefix(std::ostream& os) const
+	{
+		os<<caller_<<" "<<"["<<musage_.time()<<"]: ";
+	}
+
 	String caller_;
 	SizeType threadId_;
 	SizeType rank_;
-	String prefix_;
+	static MemoryUsage musage_;
 }; // ProgressIndicator
+
+MemoryUsage ProgressIndicator::musage_;
 } // namespace PsimagLite 
 
 /*@}*/	

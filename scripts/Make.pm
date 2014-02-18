@@ -50,6 +50,7 @@ $what.o: $what.cpp  Makefile $additional
 $what: $what.o
 	\$(CXX) -o  $what $what.o \$(LDFLAGS)
 	$strip $what
+
 EOF
 }
 

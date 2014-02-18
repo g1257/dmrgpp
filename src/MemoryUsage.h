@@ -132,7 +132,7 @@ public:
 		return s2.substr(x,len);
 	}
 
-	double time()
+	double time() const
 	{
 		return ::time(0)-startTime_;
 	}
