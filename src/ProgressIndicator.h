@@ -138,7 +138,8 @@ public:
 
 private:
 
-	void prefix(std::ostream& os) const
+	template<typename SomeOutputStreamType>
+	void prefix(SomeOutputStreamType& os) const
 	{
 		os<<caller_<<" "<<"["<<musage_.time()<<"]: ";
 	}

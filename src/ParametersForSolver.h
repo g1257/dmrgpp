@@ -96,11 +96,55 @@ struct ParametersForSolver {
 
 	typedef RealType_ RealType;
 
+	static const SizeType MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
+	static const SizeType LanczosSteps = 200; // max number of external Lanczos steps
+
 	ParametersForSolver()
-	    : steps(0),tolerance(0),stepsForEnergyConvergence(0),
-	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(true),
+	    : steps(LanczosSteps),tolerance(1e-12),stepsForEnergyConvergence(MaxLanczosSteps),
+	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(false),
 	      threadId(0)
 	{}
+
+	template<typename IoInputType>
+	ParametersForSolver(IoInputType& io,PsimagLite::String prefix)
+	    : steps(LanczosSteps),tolerance(1e-12),stepsForEnergyConvergence(MaxLanczosSteps),
+	      options(""),oneOverA(0),b(0),Eg(0),weight(0),isign(0),lotaMemory(false),
+	      threadId(0)
+	{
+		try {
+			io.readline(steps,prefix + "Steps=");
+		} catch (std::exception& e) {}
+
+		try {
+			io.readline(tolerance,prefix + "Eps=");
+		} catch (std::exception& e) {}
+
+		try {
+			io.readline(stepsForEnergyConvergence,prefix + "StepsForEnergyConvergence=");
+		} catch (std::exception& e) {}
+
+		try {
+			io.readline(options,prefix + "Options=");
+		} catch (std::exception& e) {}
+
+		try {
+			io.readline(oneOverA,prefix + "OneOverA=");
+		} catch (std::exception& e) {}
+
+		try {
+			io.readline(b,prefix + "B=");
+		} catch (std::exception& e) {}
+
+		try {
+			io.readline(Eg,prefix + "Energy=");
+		} catch (std::exception& e) {}
+
+		try {
+			int x = 0;
+			io.readline(x,prefix + "SaveLanczosVectors=");
+			lotaMemory = (x > 0);
+		} catch (std::exception& e) {}
+	}
 
 	SizeType steps;
 	RealType tolerance;

@@ -303,10 +303,6 @@ private:
 		progress_.printline(msg,std::cout);
 
 		SolverParametersType params;
-		params.steps = 200;
-		params.tolerance = 1e-10;
-		params.stepsForEnergyConvergence=10000;
-
 		InternalMatrix mat2(mat_);
 		RealType eMax = 0;
 		LanczosSolver<SolverParametersType,InternalMatrix,VectorType>

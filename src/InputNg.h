@@ -707,6 +707,11 @@ public:
 	}
 
 }; //InputNg
+
+class InputEmptyCheck {
+
+};
+
 } // namespace PsimagLite
 
 /*@}*/

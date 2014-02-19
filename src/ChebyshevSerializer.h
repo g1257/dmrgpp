@@ -89,11 +89,8 @@ public:
 
 	template<typename IoInputType>
 	ChebyshevSerializer(IoInputType& io)
-	    : progress_("ChebyshevSerializer")
+	    : progress_("ChebyshevSerializer"),params_(io,"#Chebyshev")
 	{
-		io.readline(params_.Eg,"#ChebyshevEnergy=");
-		io.readline(params_.oneOverA,"#ChebyshevOneOverA=");
-		io.readline(params_.b,"#ChebyshevB");
 		io.read(moments_,"#ChebyshevMoments");
 	}
 
