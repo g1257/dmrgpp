@@ -94,7 +94,7 @@ public:
 	typedef typename TargettingType::RealType  RealType;
 	typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
-	typedef typename TargettingType::IoType IoType;
+	typedef typename PsimagLite::IoSimple IoType;
 	typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;
 	typedef DiskStack<BasisWithOperatorsType>  DiskStackType;
 

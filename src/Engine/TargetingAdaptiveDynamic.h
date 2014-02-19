@@ -93,21 +93,17 @@ namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
-         typename WaveFunctionTransfType_,
-         typename IoType_>
+         typename WaveFunctionTransfType_>
 class TargetingAdaptiveDynamic : public TargetingBase<LanczosSolverTemplate,
                                                       MatrixVectorType_,
-                                                      WaveFunctionTransfType_,
-                                                      IoType_> {
+                                                      WaveFunctionTransfType_> {
 public:
 
 	typedef TargetingBase<LanczosSolverTemplate,
 	                      MatrixVectorType_,
-	                      WaveFunctionTransfType_,
-                          IoType_> BaseType;
+	                      WaveFunctionTransfType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -125,7 +121,6 @@ public:
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,MatrixVectorType,VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
-	typedef typename IoType::In IoInputType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
@@ -398,12 +393,11 @@ private:
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType,
-         typename WaveFunctionTransfType,
-         typename IoType_>
+         typename WaveFunctionTransfType>
 std::ostream& operator<<(std::ostream& os,
                          const TargetingAdaptiveDynamic<LanczosSolverTemplate,
                          MatrixVectorType,
-                         WaveFunctionTransfType,IoType_>& tst)
+                         WaveFunctionTransfType>& tst)
 {
 	os<<"DT=NothingToSeeHereYet\n";
 	return os;

@@ -88,12 +88,10 @@ namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
-         typename WaveFunctionTransfType_,
-         typename IoType_>
+         typename WaveFunctionTransfType_>
 class TargetingTimeStep : public TargetingBase<LanczosSolverTemplate,
                                                MatrixVectorType_,
-                                               WaveFunctionTransfType_,
-                                               IoType_> {
+                                               WaveFunctionTransfType_> {
 
 	enum {BORDER_NEITHER, BORDER_LEFT, BORDER_RIGHT};
 
@@ -101,8 +99,7 @@ public:
 
 	typedef TargetingBase<LanczosSolverTemplate,
 	                      MatrixVectorType_,
-	                      WaveFunctionTransfType_,
-                          IoType_> BaseType;
+	                      WaveFunctionTransfType_> BaseType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
@@ -356,80 +353,6 @@ private:
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
-	void checkNorms() const
-	{
-		PsimagLite::OstringStream msg;
-		msg<<"Checking norms: ";
-		for (SizeType i=0;i<this->common().targetVectors().size();i++) {
-			RealType norma = std::norm(this->common().targetVectors()[i]);
-			msg<<" norma["<<i<<"]="<<norma;
-			assert(norma>1e-10);
-		}
-		progress_.printline(msg,std::cout);
-	}
-
-	void check1(const VectorWithOffsetType& phi,SizeType i0) const
-	{
-		ComplexType ret = 0;
-		SizeType total = phi.effectiveSize(i0);
-
-		for (SizeType j=0;j<total;j++)
-			ret += std::conj(phi.fastAccess(i0,j))*phi.fastAccess(i0,j);
-		std::cerr<<"check1, norm  of phi="<<ret<<"\n";
-
-	}
-
-	void check2(const ComplexMatrixType& T,
-	            const ComplexMatrixType& V,
-	            const VectorWithOffsetType& phi,
-	            SizeType n2,
-	            SizeType i0) const
-	{
-		check3(V);
-
-		TargetVectorType r(n2);
-
-		for (SizeType k=0;k<n2;k++) {
-			ComplexType sum = 0.0;
-			for (SizeType kprime=0;kprime<n2;kprime++) {
-				if (kprime!=k) continue;
-				ComplexType tmpV = calcVTimesPhi(kprime,V,phi,i0);
-				sum += tmpV;
-			}
-			r[k] = sum;
-		}
-		std::cerr<<"check2, norm  of  V . phi="<<PsimagLite::norm(r)<<"\n";
-
-	}
-
-	void check3(const ComplexMatrixType& V) const
-	{
-		for (SizeType i=0;i<V.n_col();i++) {
-			ComplexType sum = 0;
-			for (SizeType j=0;j<V.n_row();j++) {
-				sum += std::conj(V(j,i)) * V(j,0);
-			}
-			std::cerr<<"V["<<i<<"] * V[0] = "<<sum<<"\n";
-		}
-	}
-
-	//! This check is invalid if there are more than one sector
-	void check1(const ComplexMatrixType& V,const TargetVectorType& phi2)
-	{
-		assert(V.n_col()<=V.n_row());
-		TargetVectorType r(V.n_col());
-		for (SizeType k=0;k<V.n_col();k++) {
-			r[k] = 0.0;
-			for (SizeType j=0;j<V.n_row();j++)
-				r[k] += conj(V(j,k))*phi2[j];
-			// is r(k) == \delta(k,0)
-			if (k==0 && std::norm(r[k]-1.0)>1e-5)
-				std::cerr<<"WARNING: r[0]="<<r[0]<<" != 1\n";
-			if (k>0 && std::norm(r[k])>1e-5)
-				std::cerr<<"WARNING: r["<<k<<"]="<<r[k]<<" !=0\n";
-		}
-	}
-
 	const TargettingParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
@@ -439,12 +362,11 @@ private:
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType,
-         typename WaveFunctionTransfType,
-         typename IoType_>
+         typename WaveFunctionTransfType>
 std::ostream& operator<<(std::ostream& os,
                          const TargetingTimeStep<LanczosSolverTemplate,
                          MatrixVectorType,
-                         WaveFunctionTransfType,IoType_>& tst)
+                         WaveFunctionTransfType>& tst)
 {
 	tst.print(os);
 	return os;

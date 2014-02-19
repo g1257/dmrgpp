@@ -91,22 +91,18 @@ namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
-         typename WaveFunctionTransfType_,
-         typename IoType_>
+         typename WaveFunctionTransfType_>
 class TargetingCorrection : public TargetingBase<LanczosSolverTemplate,
                                                  MatrixVectorType_,
-                                                 WaveFunctionTransfType_,
-                                                 IoType_> {
+                                                 WaveFunctionTransfType_> {
 
 public:
 
 	typedef TargetingBase<LanczosSolverTemplate,
 	                      MatrixVectorType_,
-	                      WaveFunctionTransfType_,
-                          IoType_> BaseType;
+	                      WaveFunctionTransfType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef PsimagLite::IoSimple::In IoInputType;
 	typedef typename ModelType::RealType RealType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -203,12 +199,11 @@ private:
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType,
-         typename WaveFunctionTransfType,
-         typename IoType_>
+         typename WaveFunctionTransfType>
 std::ostream& operator<<(std::ostream& os,
                          const TargetingCorrection<LanczosSolverTemplate,
                          MatrixVectorType,
-                         WaveFunctionTransfType,IoType_>& tst)
+                         WaveFunctionTransfType>& tst)
 {
 	tst.print(os);
 	return os;

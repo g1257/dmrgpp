@@ -78,7 +78,6 @@ template<typename GeometryType,
          typename WaveFunctionTransfType,
          template<template<typename,typename,typename> class,
                   typename,
-                  typename,
                   typename> class TargettingTemplate,
          typename MySparseMatrix>
 void mainLoop2(GeometryType& geometry,
@@ -88,15 +87,13 @@ void mainLoop2(GeometryType& geometry,
 	if (dmrgSolverParams.options.find("ChebyshevSolver")!=PsimagLite::String::npos) {
 		typedef TargettingTemplate<PsimagLite::ChebyshevSolver,
 					   MatrixVectorType,
-					   WaveFunctionTransfType,
-					   PsimagLite::IoSimple> TargettingType;
+					   WaveFunctionTransfType> TargettingType;
 		mainLoop3<GeometryType,TargettingType>
 		(geometry,dmrgSolverParams,io);
 	} else {
 		typedef TargettingTemplate<PsimagLite::LanczosSolver,
 					   MatrixVectorType,
-					   WaveFunctionTransfType,
-					   PsimagLite::IoSimple> TargettingType;
+					   WaveFunctionTransfType> TargettingType;
 		mainLoop3<GeometryType,TargettingType>
 		(geometry,dmrgSolverParams,io);
 	}
@@ -106,7 +103,6 @@ template<typename GeometryType,
         template<typename> class ModelHelperTemplate,
          template<typename> class VectorWithOffsetTemplate,
          template<template<typename,typename,typename> class,
-                  typename,
                   typename,
                   typename> class TargettingTemplate,
          typename MySparseMatrix>

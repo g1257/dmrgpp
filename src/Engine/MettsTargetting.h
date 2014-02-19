@@ -92,8 +92,7 @@ namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
-         typename WaveFunctionTransfType_,
-         typename IoType_>
+         typename WaveFunctionTransfType_>
 	class MettsTargetting  {
 
 		typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -108,7 +107,6 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 			typedef MatrixVectorType_ MatrixVectorType;
 			typedef typename MatrixVectorType::ModelType ModelType;
-			typedef IoType_ IoType;
 			typedef typename ModelType::RealType RealType;
 			typedef typename ModelType::OperatorsType OperatorsType;
 			typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -370,10 +368,13 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			{
 				stage_ = WFT_NOADVANCE;
  
- 				typename IoType::In io(f);
+ 				typedef PsimagLite::IoSimple::In IoInType;
+
+				IoInType io(f);
  
- 				TimeSerializerType ts(io,IoType::In::LAST_INSTANCE);
- 				for (SizeType i=0;i<targetVectors_.size();i++) targetVectors_[i] = ts.vector(i);
+ 				TimeSerializerType ts(io,IoInType::LAST_INSTANCE);
+ 				for (SizeType i=0;i<targetVectors_.size();i++)
+					targetVectors_[i] = ts.vector(i);
  				currentBeta_ = ts.time();
 			}
 
@@ -1150,12 +1151,11 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 
 	template<template<typename,typename,typename> class LanczosSolverTemplate,
 	         typename MatrixVectorType,
-	         typename WaveFunctionTransfType,
-	         typename IoType_>
+	         typename WaveFunctionTransfType>
 	std::ostream& operator<<(std::ostream& os,
 	                         const MettsTargetting<LanczosSolverTemplate,
 	                         MatrixVectorType,
-	                         WaveFunctionTransfType,IoType_>& tst)
+	                         WaveFunctionTransfType>& tst)
 	{
 		tst.print(os);
 		return os;

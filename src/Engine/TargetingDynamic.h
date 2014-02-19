@@ -99,19 +99,16 @@ namespace Dmrg {
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType_,
-         typename WaveFunctionTransfType_,
-         typename IoType_>
+         typename WaveFunctionTransfType_>
 class TargetingDynamic : public TargetingBase<LanczosSolverTemplate,
                                               MatrixVectorType_,
-                                              WaveFunctionTransfType_,
-                                              IoType_> {
+                                              WaveFunctionTransfType_> {
 
 public:
 
 	typedef TargetingBase<LanczosSolverTemplate,
 	                      MatrixVectorType_,
-	                      WaveFunctionTransfType_,
-                          IoType_> BaseType;
+	                      WaveFunctionTransfType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
@@ -363,12 +360,11 @@ private:
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
          typename MatrixVectorType,
-         typename WaveFunctionTransfType,
-         typename IoType_>
+         typename WaveFunctionTransfType>
 std::ostream& operator<<(std::ostream& os,
                          const TargetingDynamic<LanczosSolverTemplate,
                          MatrixVectorType,
-                         WaveFunctionTransfType,IoType_>& tst)
+                         WaveFunctionTransfType>& tst)
 {
 	os<<"DT=NothingToSeeHereYet\n";
 	return os;

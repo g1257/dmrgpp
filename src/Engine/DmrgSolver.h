@@ -97,7 +97,6 @@ namespace Dmrg {
 	class DmrgSolver {
 
 		typedef typename TargettingType::ModelType ModelType;
-		typedef typename TargettingType::IoType IoType;
 		typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 		typedef typename ModelType::OperatorsType OperatorsType;
 		typedef typename OperatorsType::OperatorType OperatorType;
@@ -592,7 +591,7 @@ namespace Dmrg {
 		PsimagLite::ApplicationInfo appInfo_;
 		bool verbose_;
 		LeftRightSuperType lrs_;
-		typename IoType::Out ioOut_;
+		PsimagLite::IoSimple::Out ioOut_;
 		PsimagLite::ProgressIndicator progress_;
 		SizeType quantumSector_;
 		int stepCurrent_;
