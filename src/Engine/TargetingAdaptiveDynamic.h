@@ -131,6 +131,7 @@ public:
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	enum {DISABLED=BaseType::DISABLED,
 		  OPERATOR=BaseType::OPERATOR,
@@ -141,10 +142,12 @@ public:
 		  INFINITE=WaveFunctionTransfType::INFINITE};
 
 	TargetingAdaptiveDynamic(const LeftRightSuperType& lrs,
-	                          const ModelType& model,
-	                          const TargettingParamsType& tstStruct,
-	                          const WaveFunctionTransfType& wft,
-	                          const SizeType& quantumSector) // quantumSector ignored here
+	                         const ModelType& model,
+	                         const TargettingParamsType& tstStruct,
+	                         const WaveFunctionTransfType& wft,
+	                         const SizeType& quantumSector,
+	                         InputValidatorType& io)
+
 	    : BaseType(lrs,model,tstStruct,wft,2,0),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
@@ -153,7 +156,8 @@ public:
 	      progress_("TargetingAdaptiveDynamic"),
 	      gsWeight_(1.0),
 	      done_(false),
-	      weightForContinuedFraction_(0)
+	      weightForContinuedFraction_(0),
+	      paramsForSolver_(io,"DynamicDmrg")
 	{
 		if (!wft.isEnabled()) throw PsimagLite::RuntimeError(" DynamicTargetting "
 		                                                     "needs an enabled wft\n");
@@ -208,11 +212,11 @@ public:
 		int s2 = (type>1) ? -1 : 1;
 
 		if (ab_.size()<2) return;
-		typename PostProcType::ParametersType params;
-		params.Eg = Eg_;
-		params.weight = s2*weightForContinuedFraction_;
-		params.isign = s;
-		PostProcType cf(ab_,reortho_,params);
+
+		paramsForSolver_.Eg = Eg_;
+		paramsForSolver_.weight = s2*weightForContinuedFraction_;
+		paramsForSolver_.isign = s;
+		PostProcType cf(ab_,reortho_,paramsForSolver_);
 		PsimagLite::String str = "#TCENTRALSITE=" + ttos(block[0]);
 		io.printline(str);
 		this->common().save(block,io,cf,this->common().targetVectors());
@@ -297,13 +301,7 @@ private:
 		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
 		typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 		LanczosMatrixType h(&this->model(),&modelHelper);
-
-		ParametersForSolverType params;
-		params.steps = this->model().params().lanczosSteps;
-		params.tolerance = this->model().params().lanczosEps;
-		params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
-
-		LanczosSolverType lanczosSolver(h,params);
+		LanczosSolverType lanczosSolver(h,paramsForSolver_);
 
 		RealType a=0,b=0;
 		VectorType x(sv.size(),0.0);
@@ -395,6 +393,7 @@ private:
 	RealType weightForContinuedFraction_;
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
+	mutable ParametersForSolverType paramsForSolver_;
 }; // class DynamicTargetting
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,

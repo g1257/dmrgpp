@@ -97,25 +97,24 @@ namespace Dmrg {
 	 
 	 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 		typedef typename TargettingType::ModelType ModelType;
-		typedef typename TargettingType::IoType IoType;
 		typedef typename TargettingType::BasisType BasisType;
 		typedef typename TargettingType::BasisWithOperatorsType BasisWithOperatorsType;
 		typedef typename TargettingType::BlockType BlockType;
 		typedef typename TargettingType::TargetVectorType TargetVectorType;
 		typedef typename TargettingType::RealType RealType;
-		typedef typename IoType::Out IoOutType;
 		typedef typename ModelType::OperatorsType OperatorsType;
 		typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 		typedef typename TargettingType::MatrixVectorType MatrixVectorType;
+		typedef typename ModelType::InputValidatorType InputValidatorType;
 
 		Diagonalization(const ParametersType& parameters,
                         const ModelType& model,
                         const bool& verbose,
 			ReflectionSymmetryType& reflectionOperator,
-                        IoOutType& io,
+                        InputValidatorType& io,
                         const SizeType& quantumSector,
                        WaveFunctionTransfType& waveFunctionTransformation)
 		: parameters_(parameters),
@@ -298,13 +297,9 @@ namespace Dmrg {
 			target.setGs(vecSaved,lrs.super());
 
 			if (PsimagLite::Concurrency::root()) {
-				PsimagLite::OstringStream msg;
-				msg.precision(8);
-				msg<<"#Energy="<<gsEnergy;
-				if (counter>1) msg<<" attention: found "<<counter<<" matrix blocks";
-				io_.printline(msg);
 				oldEnergy_=gsEnergy;
 			}
+
 			return gsEnergy;
 		}
 
@@ -370,13 +365,7 @@ namespace Dmrg {
 			typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,MatrixVectorType,TargetVectorType> LanczosOrDavidsonBaseType;
 			typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(&model_,&modelHelper,rs);
 
-			ParametersForSolverType params;
-			params.steps = parameters_.lanczosSteps;
-			params.tolerance = parameters_.lanczosEps;
-			params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
-			params.options= parameters_.options;
-			params.lotaMemory=false; //!(parameters_.options.find("DoNotSaveLanczosVectors")!=PsimagLite::String::npos);
-
+			ParametersForSolverType params(io_,"Lanczos");
 			LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
 
 			bool useDavidson = (parameters_.options.find("useDavidson")!=PsimagLite::String::npos);
@@ -424,7 +413,7 @@ namespace Dmrg {
 		const ModelType& model_;
 		const bool& verbose_;
 		ReflectionSymmetryType& reflectionOperator_;
-		IoOutType& io_;
+		InputValidatorType& io_;
 		PsimagLite::ProgressIndicator progress_;
 		const SizeType& quantumSector_; // this needs to be a reference since DmrgSolver will change it
 		WaveFunctionTransfType& wft_;

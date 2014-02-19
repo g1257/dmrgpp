@@ -108,13 +108,10 @@ public:
                           IoType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef IoType_ IoType;
-	typedef PsimagLite::IoSimple::In IoInputType;
 	typedef typename ModelType::RealType RealType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType
-	LeftRightSuperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
@@ -127,16 +124,18 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsGroundState<ModelType> TargettingParamsType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 		  INFINITE=WaveFunctionTransfType::INFINITE};
 
 	TargetingGroundState(const LeftRightSuperType& lrs,
-	                      const ModelType& model,
-	                      const TargettingParamsType& tstStruct,
-	                      const WaveFunctionTransfType& wft,
-	                      const SizeType& quantumSector) // quantumSector is ignored here
+	                     const ModelType& model,
+	                     const TargettingParamsType& tstStruct,
+	                     const WaveFunctionTransfType& wft,
+	                     const SizeType& quantumSector,
+	                     InputValidatorType& io)
 	    : BaseType(lrs,model,tstStruct,wft,0,0),
 	      progress_("TargetingGroundState")
 	{}

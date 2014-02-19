@@ -146,6 +146,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 										  LanczosSolverType,VectorWithOffsetType> TimeVectorsRungeKuttaType;
 			typedef TimeVectorsSuzukiTrotter<TargettingParamsType,ModelType,WaveFunctionTransfType,
 											 LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
+			typedef typename ModelType::InputValidatorType InputValidatorType;
 
 			enum {DISABLED,WFT_NOADVANCE,WFT_ADVANCE,COLLAPSE};
 
@@ -159,13 +160,15 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 	 		                const ModelType& model,
 			                const TargettingParamsType& mettsStruct,
 			                const WaveFunctionTransfType& wft,
-			                const SizeType& quantumSector)
+			                const SizeType& quantumSector,
+			                InputValidatorType& ioIn)
 			: stage_(DISABLED),
 			  lrs_(lrs),
 			  model_(model),
 			  mettsStruct_(mettsStruct),
 			  wft_(wft),
 			  quantumSector_(quantumSector),
+			  ioIn_(ioIn),
 			  progress_("MettsTargetting"),
 			  currentBeta_(0),
 			  applyOpLocal_(lrs),
@@ -202,7 +205,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 				switch (mettsStruct_.algorithm()) {
 				case TargettingParamsType::KRYLOV:
 					timeVectorsBase_ = new TimeVectorsKrylovType(
-								currentBeta_,mettsStruct_,betas_,targetVectors_,model_,wft_,lrs_,0);
+								currentBeta_,mettsStruct_,betas_,targetVectors_,model_,wft_,lrs_,0,ioIn_);
 					break;
 				case TargettingParamsType::RUNGE_KUTTA:
 					timeVectorsBase_ = new TimeVectorsRungeKuttaType(
@@ -1127,6 +1130,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 			const TargettingParamsType& mettsStruct_;
 			const WaveFunctionTransfType& wft_;
 			const SizeType& quantumSector_;
+			InputValidatorType& ioIn_;
 			PsimagLite::ProgressIndicator progress_;
 			RealType currentBeta_;
 			typename PsimagLite::Vector<RealType>::Type betas_,weight_;

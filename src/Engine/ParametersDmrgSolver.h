@@ -296,17 +296,13 @@ namespace Dmrg {
 		int useReflectionSymmetry;
 		PsimagLite::String fileForDensityMatrixEigs;
 		PsimagLite::String insitu;
-		SizeType lanczosSteps;
-		FieldType lanczosEps;
 		SizeType sitesPerBlock;
 		std::pair<bool,FieldType> gsWeight;
 		SizeType maxMatrixRankStored;
 
 		//! Read Dmrg parameters from inp file
 		ParametersDmrgSolver(InputValidatorType& io)
-		    : lanczosSteps(200),
-		      lanczosEps(1e-12),
-		      sitesPerBlock(1),
+		    : sitesPerBlock(1),
 		      gsWeight(false,0.0),
 		      maxMatrixRankStored(0)
 		{
@@ -440,14 +436,6 @@ namespace Dmrg {
 			} catch (std::exception& e) {}
 
 			try {
-				io.readline(lanczosSteps,"LanczosSteps=");
-			} catch (std::exception& e) {}
-
-			try {
-				io.readline(lanczosEps,"LanczosEps=");
-			} catch (std::exception& e) {}
-
-			try {
 				io.readline(sitesPerBlock,"SitesPerBlock=");
 			} catch (std::exception& e) {}
 
@@ -477,8 +465,6 @@ namespace Dmrg {
 		os<<"parameters.keptStatesInfinite="<<parameters.keptStatesInfinite<<"\n";
 		os<<"finiteLoop\n";
 		os<<parameters.finiteLoop;
-		os<<"parameters.lanczosSteps="<<parameters.lanczosSteps<<"\n";
-		os<<"parameters.LanczosEps="<<parameters.lanczosEps<<"\n";
 
 		if (parameters.targetQuantumNumbers.size()>0) {
 			os<<"parameters.targetQuantumNumbers=";

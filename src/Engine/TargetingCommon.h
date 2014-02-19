@@ -129,6 +129,7 @@ public:
 	typedef typename ApplyOperatorExpressionType::VectorVectorWithOffsetType VectorVectorWithOffsetType;
 	typedef typename ApplyOperatorExpressionType::VectorRealType VectorRealType;
 	typedef typename ApplyOperatorExpressionType::PairType PairType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
@@ -338,9 +339,9 @@ public:
 		applyOpExpression_.targetVectorsResize(x);
 	}
 
-	void initTimeVectors(const VectorRealType& times)
+	void initTimeVectors(const VectorRealType& times,InputValidatorType& ioIn)
 	{
-		applyOpExpression_.initTimeVectors(times);
+		applyOpExpression_.initTimeVectors(times,ioIn);
 	}
 
 	void calcTimeVectors(const PairType& startEnd,

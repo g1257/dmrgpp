@@ -184,7 +184,6 @@ public:
 
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
@@ -205,7 +204,6 @@ public:
 	                              MatrixVectorType,
 	                              VectorType> LanczosSolverType;
 	typedef VectorType TargetVectorType;
-	typedef typename IoType::In IoInputType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
@@ -222,6 +220,7 @@ public:
 	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 
@@ -233,15 +232,18 @@ public:
 	static SizeType const SUM = TargettingParamsType::SUM;
 
 	TargetingCorrectionVector(const LeftRightSuperType& lrs,
-	                           const ModelType& model,
-	                           const TargettingParamsType& tstStruct,
-	                           const WaveFunctionTransfType& wft,
-	                           const SizeType& quantumSector) // quantumSector ignored here
+	                          const ModelType& model,
+	                          const TargettingParamsType& tstStruct,
+	                          const WaveFunctionTransfType& wft,
+	                          const SizeType& quantumSector,
+	                          InputValidatorType& ioIn)
 	    : BaseType(lrs,model,tstStruct,wft,4,1),
 	      tstStruct_(tstStruct),
+	      ioIn_(ioIn),
 	      progress_("TargetingCorrectionVector"),
 	      gsWeight_(1.0),
-	      correctionEnabled_(false)
+	      correctionEnabled_(false),
+	      paramsForSolver_(ioIn,"DynamicDmrg")
 	{
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError("TargetingCorrectionVector needs wft\n");
@@ -298,7 +300,7 @@ public:
 		int s2 = (type>1) ? -1 : 1;
 		int s3 = (type&1) ? -fermionSign : 1;
 
-		typename PostProcType::ParametersType params;
+		typename PostProcType::ParametersType params(ioIn_,"DynamicDmrg");
 		params.Eg = this->common().energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
@@ -397,13 +399,7 @@ private:
 		typedef typename LanczosSolverType::LanczosMatrixType
 		        LanczosMatrixType;
 		LanczosMatrixType h(&this->model(),&modelHelper);
-
-		ParametersForSolverType params;
-		params.steps = tstStruct_.steps();
-		params.tolerance = tstStruct_.eps();
-		params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
-
-		LanczosSolverType lanczosSolver(h,params,&V);
+		LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);
 
 		lanczosSolver.decomposition(sv,ab_);
 		reortho_ = lanczosSolver.reorthogonalizationMatrix();
@@ -510,14 +506,14 @@ private:
 			ParallelizerType threadedTriDiag(PsimagLite::Concurrency::npthreads,
 			                                 PsimagLite::MPI::COMM_WORLD);
 
-			ParallelTriDiagType helperTriDiag(phi,T,V,steps,this->leftRightSuper(),this->model());
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,this->leftRightSuper(),this->model(),ioIn_);
 
 			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 		} else {
 			typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
 			ParallelizerType threadedTriDiag(1,PsimagLite::MPI::COMM_WORLD);
 
-			ParallelTriDiagType helperTriDiag(phi,T,V,steps,this->leftRightSuper(),this->model());
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,this->leftRightSuper(),this->model(),ioIn_);
 
 			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 		}
@@ -562,6 +558,7 @@ private:
 	}
 
 	const TargettingParamsType& tstStruct_;
+	InputValidatorType& ioIn_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
 	bool correctionEnabled_;
@@ -569,7 +566,7 @@ private:
 	TridiagonalMatrixType ab_;
 	DenseMatrixRealType reortho_;
 	RealType weightForContinuedFraction_;
-
+	ParametersForSolverType paramsForSolver_;
 }; // class TargetingCorrectionVector
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,

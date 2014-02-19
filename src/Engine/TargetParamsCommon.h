@@ -100,15 +100,16 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	enum {PRODUCT,SUM};
 
-	template<typename IoInputter>
-	TargetParamsCommon(IoInputter& io,const ModelType& model)
+	TargetParamsCommon(InputValidatorType& io,const ModelType& model)
 	    : sites_(0),
 	      startingLoops_(0),
 	      concatenation_(PRODUCT),
 	      noOperator_(false),
+	      io_(io),
 	      model_(model)
 	{
 		io.read(sites_,"TSPSites");
@@ -255,6 +256,7 @@ private:
 	SizeType concatenation_;
 	VectorOperatorType aOperators_;
 	bool noOperator_;
+	InputValidatorType& io_;
 	const ModelType& model_;
 }; // class TargetParamsCommon
 

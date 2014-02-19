@@ -106,15 +106,12 @@ public:
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
 	typedef std::complex<RealType> ComplexType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType
-	LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType
-	BasisWithOperatorsType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
@@ -133,6 +130,7 @@ public:
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
@@ -140,10 +138,11 @@ public:
 	static SizeType const SUM = TargettingParamsType::SUM;
 
 	TargetingTimeStep(const LeftRightSuperType& lrs,
-	                   const ModelType& model,
-	                   const TargettingParamsType& tstStruct,
-	                   const WaveFunctionTransfType& wft,
-	                   const SizeType& quantumSector) // quantumSector is ignored here
+	                  const ModelType& model,
+	                  const TargettingParamsType& tstStruct,
+	                  const WaveFunctionTransfType& wft,
+	                  const SizeType& quantumSector,
+	                  InputValidatorType& ioIn)
 	    : BaseType(lrs,model,tstStruct,wft,tstStruct.timeSteps(),0),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
@@ -179,7 +178,7 @@ public:
 		sum += gsWeight_;
 		assert(fabs(sum-1.0)<1e-5);
 
-		this->common().initTimeVectors(times_);
+		this->common().initTimeVectors(times_,ioIn);
 	}
 
 	RealType weight(SizeType i) const

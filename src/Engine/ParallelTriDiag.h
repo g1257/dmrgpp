@@ -93,6 +93,7 @@ class ParallelTriDiag {
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 public:
 
@@ -105,8 +106,9 @@ public:
 	                VectorMatrixFieldType& V,
 	                typename PsimagLite::Vector<SizeType>::Type& steps,
 	                const LeftRightSuperType& lrs,
-	                const ModelType& model)
-	    : phi_(phi),T_(T),V_(V),steps_(steps),lrs_(lrs),model_(model)
+	                const ModelType& model,
+	                InputValidatorType& io)
+	    : phi_(phi),T_(T),V_(V),steps_(steps),lrs_(lrs),model_(model),io_(io)
 	{}
 
 	void thread_function_(SizeType threadNum,
@@ -138,10 +140,7 @@ private:
 		typename ModelType::ModelHelperType modelHelper(p,lrs_,threadNum);
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 
-		typename LanczosSolverType::ParametersSolverType params;
-		params.steps = model_.params().lanczosSteps;
-		params.tolerance = model_.params().lanczosEps;
-		params.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
+		typename LanczosSolverType::ParametersSolverType params(io_,"Tridiag");
 		params.threadId = threadNum;
 
 		LanczosSolverType lanczosSolver(lanczosHelper,params,&V);
@@ -161,6 +160,7 @@ private:
 	typename PsimagLite::Vector<SizeType>::Type& steps_;
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
+	InputValidatorType& io_;
 }; // class ParallelTriDiag
 } // namespace Dmrg 
 

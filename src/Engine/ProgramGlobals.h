@@ -86,7 +86,6 @@ namespace Dmrg {
 struct ProgramGlobals {
 
 	static SizeType maxElectronsOneSpin;
-	static SizeType const MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
 
 	static const PsimagLite::String license;
 

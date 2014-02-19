@@ -106,13 +106,11 @@ public:
                           IoType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef IoType_ IoType;
 	typedef PsimagLite::IoSimple::In IoInputType;
 	typedef typename ModelType::RealType RealType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType
-	LeftRightSuperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -125,14 +123,16 @@ public:
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef TargetParamsCorrection<ModelType> TargettingParamsType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	enum {DISABLED,ENABLED};
 
 	TargetingCorrection(const LeftRightSuperType& lrs,
-	                     const ModelType& model,
-	                     const TargettingParamsType& correctionStruct,
-	                     const WaveFunctionTransfType& wft,
-	                     const SizeType& quantumSector) // quantumSector ignored here
+	                    const ModelType& model,
+	                    const TargettingParamsType& correctionStruct,
+	                    const WaveFunctionTransfType& wft,
+	                    const SizeType& quantumSector,
+	                    InputValidatorType& io)
 	    : BaseType(lrs,model,correctionStruct,wft,1,0),
 	      correctionStruct_(correctionStruct),
 	      progress_("TargetingCorrection")

@@ -130,14 +130,16 @@ namespace Dmrg {
 		enum {SAVE_ALL=MyBasis::SAVE_ALL, SAVE_PARTIAL=MyBasis::SAVE_PARTIAL};
 
 		DmrgSolver(ModelType const &model,
-		           TargettingParamsType& targetStruct)
+		           TargettingParamsType& targetStruct,
+		           InputValidatorType& ioIn)
 		    : model_(model),
 		  parameters_(model_.params()),
 		  targetStruct_(targetStruct),
+		  ioIn_(ioIn),
 		  appInfo_("DmrgSolver:"),
 		  verbose_(false),
 		  lrs_("pSprime","pEprime","pSE"),
-		  io_(parameters_.filename),
+		  ioOut_(parameters_.filename),
 		  progress_("DmrgSolver"),
 		  quantumSector_(0),
 		  stepCurrent_(0),
@@ -145,24 +147,24 @@ namespace Dmrg {
 		  wft_(parameters_),
 		  reflectionOperator_(lrs_,model_.hilbertSize(0),parameters_.useReflectionSymmetry,EXPAND_SYSTEM),
 		  diagonalization_(parameters_,model,verbose_,
-				   reflectionOperator_,io_,quantumSector_,wft_),
+				   reflectionOperator_,ioIn,quantumSector_,wft_),
 		  truncate_(reflectionOperator_,wft_,parameters_,
 			    model_.geometry().maxConnections(),verbose_)
 		{
-			io_.print(appInfo_);
-			io_.print("PARAMETERS",parameters_);
-			io_.print("TARGETSTRUCT",targetStruct_);
+			ioOut_.print(appInfo_);
+			ioOut_.print("PARAMETERS",parameters_);
+			ioOut_.print("TARGETSTRUCT",targetStruct_);
 			if (parameters_.options.find("verbose")!=PsimagLite::String::npos) verbose_=true;
 		}
 
 		~DmrgSolver()
 		{
-			io_.print(appInfo_);
+			ioOut_.print(appInfo_);
 		}
 
 		void main(const GeometryType& geometry)
 		{
-			io_.print("GEOMETRY",geometry);
+			ioOut_.print("GEOMETRY",geometry);
 			if (checkpoint_())
 				std::cerr<<"WARNING: Will not check finite loops for consistency while checkpoint is in use\n";
 			 else 
@@ -173,7 +175,7 @@ namespace Dmrg {
 			msg<<"Turning the engine on";
 			progress_.printline(msg,std::cout);
 
-			io_.print("MODEL",model_);
+			ioOut_.print("MODEL",model_);
 			BlockType S,E;
 			typename PsimagLite::Vector<BlockType>::Type X,Y;
 			geometry.split(parameters_.sitesPerBlock,S,X,Y,E);
@@ -184,8 +186,8 @@ namespace Dmrg {
 			//wft_.init();
 			//if (parameters_.options.find("nowft")!=PsimagLite::String::npos) wft_.disable();
 
-			TargettingType psi(lrs_,model_,targetStruct_,wft_,quantumSector_);
-			io_.print("PSI",psi);
+			TargettingType psi(lrs_,model_,targetStruct_,wft_,quantumSector_,ioIn_);
+			ioOut_.print("PSI",psi);
 
 			MyBasisWithOperators pS("pS");
 			MyBasisWithOperators pE("pE");
@@ -284,7 +286,8 @@ namespace Dmrg {
 
 				lrs_.setToProduct(quantumSector_);
 
-				diagonalization_(psi,INFINITE,X[step],Y[step]);
+				RealType energy = diagonalization_(psi,INFINITE,X[step],Y[step]);
+				printEnergy(energy);
 
 				truncate_.changeBasis(pS,pE,psi,parameters_.keptStatesInfinite);
 
@@ -361,8 +364,8 @@ namespace Dmrg {
 				if (psi.end()) break;
 			}
 
-			checkpoint_.save(pS,pE,io_);
-			psi.save(sitesIndices_[stepCurrent_],io_);
+			checkpoint_.save(pS,pE,ioOut_);
+			psi.save(sitesIndices_[stepCurrent_],ioOut_);
 		}
 
 		void finiteStep(
@@ -417,6 +420,7 @@ namespace Dmrg {
 
 				bool needsPrinting = (saveOption & 1);
 				gsEnergy =diagonalization_(target,direction,sitesIndices_[stepCurrent_],loopIndex,needsPrinting);
+				printEnergy(gsEnergy);
 
 				changeTruncateAndSerialize(pS,pE,target,keptStates,direction,saveOption);
 
@@ -436,8 +440,8 @@ namespace Dmrg {
 			}
 			if (saveOption & 1) {
 				PsimagLite::String s="#WAVEFUNCTION_ENERGY="+ttos(gsEnergy);
-				io_.printline(s);
-//				io_.print("#WAVEFUNCTION_ENERGY=",gsEnergy);
+				ioOut_.printline(s);
+//				ioOut_.print("#WAVEFUNCTION_ENERGY=",gsEnergy);
 			}
 		}
 
@@ -458,7 +462,7 @@ namespace Dmrg {
 			truncate_(pS,pE,target,keptStates,direction);
 			PsimagLite::OstringStream msg2;
 			msg2<<"#Error="<<truncate_.error();
-			io_.printline(msg2);
+			ioOut_.printline(msg2);
 
 			if (direction==EXPAND_SYSTEM) {
 				checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,ProgramGlobals::SYSTEM);
@@ -480,9 +484,9 @@ namespace Dmrg {
 			DmrgSerializerType ds(fsS,fsE,lrs_,target.gs(),transform,direction);
 
 			SizeType saveOption2 = (saveOption & 4) ? SAVE_ALL : SAVE_PARTIAL;
-			ds.save(io_,saveOption2);
+			ds.save(ioOut_,saveOption2);
 
-			target.save(sitesIndices_[stepCurrent_],io_);
+			target.save(sitesIndices_[stepCurrent_],ioOut_);
 		}
 
 		bool finalStep(int stepLength,int stepFinal)
@@ -569,17 +573,26 @@ namespace Dmrg {
 			for (SizeType ii=0;ii<targetQuantumNumbers.size();ii++)
 				msg<<targetQuantumNumbers[ii]<<" ";
 			progress_.printline(msg,std::cout);
-			if (direction==INFINITE) io_.printVector(targetQuantumNumbers,"TargetedQuantumNumbers");
+			if (direction==INFINITE) ioOut_.printVector(targetQuantumNumbers,"TargetedQuantumNumbers");
 			quantumSector_=MyBasis::pseudoQuantumNumber(targetQuantumNumbers);
+		}
+
+		void printEnergy(RealType energy)
+		{
+			PsimagLite::OstringStream msg;
+			msg.precision(8);
+			msg<<"#Energy="<<energy;
+			ioOut_.printline(msg);
 		}
 
 		const ModelType& model_;
 		const ParametersType& parameters_;
 		const TargettingParamsType& targetStruct_;
+		InputValidatorType& ioIn_;
 		PsimagLite::ApplicationInfo appInfo_;
 		bool verbose_;
 		LeftRightSuperType lrs_;
-		typename IoType::Out io_;
+		typename IoType::Out ioOut_;
 		PsimagLite::ProgressIndicator progress_;
 		SizeType quantumSector_;
 		int stepCurrent_;

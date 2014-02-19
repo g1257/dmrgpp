@@ -114,12 +114,10 @@ public:
                           IoType_> BaseType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef IoType_ IoType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType
-	LeftRightSuperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -131,7 +129,6 @@ public:
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
-	typedef typename IoType::In IoInputType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,
@@ -141,6 +138,7 @@ public:
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	enum {DISABLED,OPERATOR,CONVERGING};
 	enum {
@@ -153,23 +151,21 @@ public:
 	static SizeType const SUM = TargettingParamsType::SUM;
 
 	TargetingDynamic(const LeftRightSuperType& lrs,
-	                  const ModelType& model,
-	                  const TargettingParamsType& tstStruct,
-	                  const WaveFunctionTransfType& wft,
-	                  const SizeType& quantumSector)
+	                 const ModelType& model,
+	                 const TargettingParamsType& tstStruct,
+	                 const WaveFunctionTransfType& wft,
+	                 const SizeType& quantumSector,
+	                 InputValidatorType& io)
 	    : BaseType(lrs,model,tstStruct,wft,0,0),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
 	      progress_("TargetingDynamic"),
 	      gsWeight_(1.0),
+	      paramsForSolver_(io,"DynamicDmrg"),
 	      weightForContinuedFraction_(0)
 	{
 		if (!wft.isEnabled())
 			throw PsimagLite::RuntimeError(" TargetingDynamic needs an enabled wft\n");
-
-		paramsForSolver_.steps = tstStruct_.steps();
-		paramsForSolver_.tolerance = tstStruct_.eps();
-		paramsForSolver_.stepsForEnergyConvergence =ProgramGlobals::MaxLanczosSteps;
 	}
 
 	RealType weight(SizeType i) const

@@ -97,6 +97,7 @@ class ApplyOperatorExpression {
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsRungeKuttaType;
 	typedef TimeVectorsSuzukiTrotter<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
 	static SizeType const SUM = TargetParamsType::SUM;
@@ -240,7 +241,7 @@ public:
 		targetVectors_.resize(x);
 	}
 
-	void initTimeVectors(const VectorRealType& times)
+	void initTimeVectors(const VectorRealType& times,InputValidatorType& ioIn)
 	{
 		const LeftRightSuperType& lrs = targetHelper_.lrs();
 		const ModelType& model = targetHelper_.model();
@@ -259,7 +260,8 @@ public:
 			                                             model,
 			                                             wft,
 			                                             lrs,
-			                                             E0_);
+			                                             E0_,
+			                                             ioIn);
 			break;
 		case TargetParamsType::RUNGE_KUTTA:
 			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentTime_,

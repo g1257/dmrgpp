@@ -135,16 +135,6 @@ public:
 		return unimplemented("type");
 	}
 
-	virtual SizeType steps() const
-	{
-		return unimplemented("steps");
-	}
-
-	virtual RealType eps() const
-	{
-		return unimplemented("eps");
-	}
-
 	virtual SizeType advanceEach() const
 	{
 		return 0;

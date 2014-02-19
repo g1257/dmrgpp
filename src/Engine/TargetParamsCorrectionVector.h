@@ -114,8 +114,6 @@ public:
 		this->setConcatenation(SUM);
 		io.readline(correctionA_,"CorrectionA=");
 		io.readline(type_,"DynamicDmrgType=");
-		io.readline(steps_,"DynamicDmrgSteps=");
-		io.readline(eps_,"DynamicDmrgEps=");
 		io.readline(omega_,"CorrectionVectorOmega=");
 		io.readline(eta_,"CorrectionVectorEta=");
 
@@ -150,16 +148,6 @@ public:
 		return type_;
 	}
 
-	virtual SizeType steps() const
-	{
-		return steps_;
-	}
-
-	virtual RealType eps() const
-	{
-		return eps_;
-	}
-
 	virtual SizeType cgSteps() const
 	{
 		return cgSteps_;
@@ -188,8 +176,6 @@ public:
 private:
 
 	SizeType type_;
-	SizeType steps_;
-	RealType eps_;
 	RealType correctionA_;
 	SizeType cgSteps_;
 	RealType omega_;
@@ -206,8 +192,6 @@ inline std::ostream& operator<<(std::ostream& os,
 	const TargetParamsCommon<ModelType>& tp = t;
 	os<<tp;
 	os<<"DynamicDmrgType="<<t.type()<<"\n";
-	os<<"DynamicDmrgSteps="<<t.steps()<<"\n";
-	os<<"DynamicDmrgEps="<<t.eps()<<"\n";
 	os<<"CorrectionVectorOmega="<<t.omega()<<"\n";
 	os<<"CorrectionVectorEta="<<t.eta()<<"\n";
 	os<<"ConjugateGradientSteps"<<t.cgSteps()<<"\n";

@@ -118,6 +118,7 @@ class TimeVectorsKrylov : public  TimeVectorsBase<
 	typedef typename ParallelTriDiagType::TargetVectorType TargetVectorType;
 	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
+	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 public:
 
@@ -128,7 +129,8 @@ public:
 					  const ModelType& model,
 					  const WaveFunctionTransfType& wft,
 					  const LeftRightSuperType& lrs,
-					  const RealType& E0)
+					  const RealType& E0,
+	                  InputValidatorType& ioIn)
 		: currentTime_(currentTime),
 		  tstStruct_(tstStruct),
 		  times_(times),
@@ -136,7 +138,8 @@ public:
 		  model_(model),
 		  wft_(wft),
 		  lrs_(lrs),
-		  E0_(E0)
+		  E0_(E0),
+	      ioIn_(ioIn)
 	{}
 
 	virtual void calcTimeVectors(const PairType& startEnd,
@@ -296,14 +299,14 @@ private:
 			ParallelizerType threadedTriDiag(PsimagLite::Concurrency::npthreads,
 			                                 PsimagLite::MPI::COMM_WORLD);
 
-			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,model_);
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,model_,ioIn_);
 
 			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 		} else {
 			typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
 			ParallelizerType threadedTriDiag(1,PsimagLite::MPI::COMM_WORLD);
 
-			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,model_);
+			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,model_,ioIn_);
 
 			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 		}
@@ -317,6 +320,7 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
 	RealType E0_;
+	InputValidatorType& ioIn_;
 }; //class TimeVectorsKrylov
 } // namespace Dmrg
 /*@}*/

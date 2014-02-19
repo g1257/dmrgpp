@@ -67,7 +67,7 @@ void mainLoop3(GeometryType& geometry,
 
 	//! Setup the dmrg solver:
 	typedef DmrgSolver<TargettingType> SolverType;
-	SolverType dmrgSolver(model,tsp);
+	SolverType dmrgSolver(model,tsp,io);
 
 	//! Calculate observables:
 	dmrgSolver.main(geometry);
