@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -83,10 +83,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsTimeVectors.h"
 
 namespace Dmrg {
+
 //! Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
 class MettsParams : public TargetParamsTimeVectors<ModelType> {
+
 public:
+
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef TargetParamsTimeVectors<ModelType> TimeVectorParamsType;
@@ -108,8 +111,7 @@ public:
 }; // class MettsParams
 
 template<typename ModelType>
-inline std::ostream&
-operator<<(std::ostream& os,const MettsParams<ModelType>& t)
+inline std::ostream& operator<<(std::ostream& os,const MettsParams<ModelType>& t)
 {
 	os<<"#TargetParams.type=Metts";
 	const typename MettsParams<ModelType>::TimeVectorParamsType& tp = t;
@@ -124,3 +126,4 @@ operator<<(std::ostream& os,const MettsParams<ModelType>& t)
 
 /*@}*/
 #endif // METTS_PARAMS_H
+
