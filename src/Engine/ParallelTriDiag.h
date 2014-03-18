@@ -141,6 +141,7 @@ private:
 		typename LanczosSolverType::LanczosMatrixType lanczosHelper(&model_,&modelHelper);
 
 		typename LanczosSolverType::ParametersSolverType params(io_,"Tridiag");
+		params.lotaMemory = true;
 		params.threadId = threadNum;
 
 		LanczosSolverType lanczosSolver(lanczosHelper,params,&V);
