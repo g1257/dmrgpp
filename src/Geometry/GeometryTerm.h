@@ -106,6 +106,7 @@ class GeometryTerm {
 public:
 
 	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
+	typedef typename Real<ComplexOrRealType>::Type RealType;
 
 	GeometryTerm(InputType& io,SizeType termId,SizeType linSize,bool debug=false) :
 	    linSize_(linSize),maxEdof_(0),geometryBase_(0)
