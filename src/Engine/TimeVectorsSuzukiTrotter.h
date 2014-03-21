@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsBase.h"
 #include "VectorWithOffsets.h"
 #include "MatrixOrIdentity.h"
+#include "Sort.h"
 
 namespace Dmrg {
 

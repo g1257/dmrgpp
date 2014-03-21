@@ -75,6 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define UTILS_HEADER_H
 
 #include "Vector.h"
+#include "CrsMatrix.h"
 
 namespace std {
 

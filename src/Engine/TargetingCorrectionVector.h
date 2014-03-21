@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingBase.h"
 #include "ParametersForSolver.h"
 #include "ParallelTriDiag.h"
+#include "TimeSerializer.h"
 
 namespace Dmrg {
 

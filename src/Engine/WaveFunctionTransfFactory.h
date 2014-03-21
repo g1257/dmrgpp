@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DmrgWaveStruct.h"
 #include "IoSimple.h"
 #include "Random48.h"
+#include "DiskStack.h"
 
 namespace Dmrg {
 template<typename LeftRightSuperType,typename VectorWithOffsetType_>

@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "ApplyOperatorExpression.h"
 #include "IoSimple.h"
+#include "Tokenizer.h"
 
 namespace Dmrg {
 

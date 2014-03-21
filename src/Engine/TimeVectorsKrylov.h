@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsBase.h"
 #include "ParallelTriDiag.h"
 #include "NoPthreads.h"
+#include "Parallelizer.h"
 
 namespace Dmrg {
 
