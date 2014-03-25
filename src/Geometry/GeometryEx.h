@@ -7,7 +7,56 @@
 namespace PsimagLite {
 
 template<typename GeometryTermType>
-class GeometryEx {
+class GeometryExBase {
+
+	typedef typename GeometryTermType::RealType RealType;
+
+public:
+
+	typedef typename Vector<RealType>::Type VectorRealType;
+
+	SizeType dimension(SizeType i = 0) const
+	{
+		throw PsimagLite::RuntimeError("GeometryEx: dimension\n");
+	}
+	
+	void index2Rvector(SizeType r,VectorRealType& rvector) const
+	{
+		throw PsimagLite::RuntimeError("GeometryEx: index2Rvector\n");
+	}
+	
+	void index2Kvector(SizeType k,VectorRealType& kvector) const
+	{
+		throw PsimagLite::RuntimeError("GeometryEx: index2Kvector\n");
+	}
+	
+	//! Number of symmetry operations for this K Geometry.
+	SizeType nGroupK() const
+	{
+		throw PsimagLite::RuntimeError("GeometryEx: nGroupK\n");
+	}
+	
+	SizeType ickequ(SizeType j,SizeType op) const
+	{
+		throw PsimagLite::RuntimeError("GeometryEx: ickequ\n");
+	}
+};
+
+#ifndef USE_MS_GEOMETRY_H
+template<typename GeometryTermType>
+class GeometryEx  : public GeometryExBase<GeometryTermType> {
+
+	typedef typename Vector<GeometryTermType*>::Type VectorGeometryTermType;
+	
+public:
+		
+	GeometryEx(SizeType linSize,VectorGeometryTermType& terms)
+	{}
+};
+#else
+
+template<typename GeometryTermType>
+class GeometryEx  : public GeometryExBase<GeometryTermType> {
 
 	typedef typename GeometryTermType::RealType RealType;
 	typedef typename Vector<GeometryTermType*>::Type VectorGeometryTermType;
@@ -17,7 +66,10 @@ public:
 	typedef typename Vector<RealType>::Type VectorRealType;
 	
 	GeometryEx(SizeType linSize,VectorGeometryTermType& terms)
-	: linSize_(linSize), terms_(terms)
+	: linSize_(linSize), 
+	  terms_(terms)
+	  nGroupR_(icrequ_data.n_row()),
+	  nGroupK_(ickequ_data.n_row())
 	{}
 
 	SizeType dimension(SizeType i = 0) const
@@ -42,9 +94,10 @@ public:
 		throw PsimagLite::RuntimeError("GeometryEx: index2Kvector\n");
 	}
 	
+	//! Number of symmetry operations for this K Geometry.
 	SizeType nGroupK() const
 	{
-		throw PsimagLite::RuntimeError("GeometryEx: nGroupK\n");
+		return nGroupK_; 
 	}
 	
 	SizeType ickequ(SizeType j,SizeType op) const
@@ -57,6 +110,7 @@ private:
 	SizeType linSize_;
 	VectorGeometryTermType& terms_;
 };
+#endif
 
 } // namespace PsimagLite
 
