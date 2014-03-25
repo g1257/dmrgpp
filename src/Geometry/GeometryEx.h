@@ -17,92 +17,110 @@ public:
 
 	SizeType dimension(SizeType i = 0) const
 	{
-		throw PsimagLite::RuntimeError("GeometryEx: dimension\n");
+		throw RuntimeError("GeometryEx: dimension\n");
 	}
-	
+
 	void index2Rvector(SizeType r,VectorRealType& rvector) const
 	{
-		throw PsimagLite::RuntimeError("GeometryEx: index2Rvector\n");
+		throw RuntimeError("GeometryEx: index2Rvector\n");
 	}
-	
+
 	void index2Kvector(SizeType k,VectorRealType& kvector) const
 	{
-		throw PsimagLite::RuntimeError("GeometryEx: index2Kvector\n");
+		throw RuntimeError("GeometryEx: index2Kvector\n");
 	}
-	
+
 	//! Number of symmetry operations for this K Geometry.
 	SizeType nGroupK() const
 	{
-		throw PsimagLite::RuntimeError("GeometryEx: nGroupK\n");
+		throw RuntimeError("GeometryEx: nGroupK\n");
 	}
-	
+
 	SizeType ickequ(SizeType j,SizeType op) const
 	{
-		throw PsimagLite::RuntimeError("GeometryEx: ickequ\n");
+		throw RuntimeError("GeometryEx: ickequ\n");
 	}
 };
 
-#ifndef USE_MS_GEOMETRY_H
+}
+
+#ifndef USE_MS_GEOMETRY
+namespace PsimagLite {
 template<typename GeometryTermType>
 class GeometryEx  : public GeometryExBase<GeometryTermType> {
 
 	typedef typename Vector<GeometryTermType*>::Type VectorGeometryTermType;
-	
+
 public:
-		
+
 	GeometryEx(SizeType linSize,VectorGeometryTermType& terms)
 	{}
 };
+
+}
+
 #else
+
+#include "msGeometry.h"
+
+namespace PsimagLite {
 
 template<typename GeometryTermType>
 class GeometryEx  : public GeometryExBase<GeometryTermType> {
 
 	typedef typename GeometryTermType::RealType RealType;
 	typedef typename Vector<GeometryTermType*>::Type VectorGeometryTermType;
-	
+
 public:
 
 	typedef typename Vector<RealType>::Type VectorRealType;
-	
+
 	GeometryEx(SizeType linSize,VectorGeometryTermType& terms)
-	: linSize_(linSize), 
+	: linSize_(linSize),
 	  terms_(terms)
-	  nGroupR_(icrequ_data.n_row()),
-	  nGroupK_(ickequ_data.n_row())
-	{}
+	{
+		SizeType ly = 2;
+		SizeType lx = 2;
+		SizeType meshPoints = 4;
+		msGeometryInit2D(lx,0,0,ly,meshPoints);
+	}
+
+	~GeometryEx()
+	{
+		msGeometryEnd();
+	}
 
 	SizeType dimension(SizeType i = 0) const
 	{
 		assert(terms_.size() > i);
-		PsimagLite::String s = terms_[i]->label();
-		
+		String s = terms_[i]->label();
+
 		if (s == "chain") return 1;
-		
+
 		if (s=="ladder" ||  s=="ladderbath") return 2;
-		
-		throw PsimagLite::RuntimeError("GeometryEx: dimension\n");
+
+		throw RuntimeError("GeometryEx: dimension\n");
 	}
-	
+
 	void index2Rvector(SizeType r,VectorRealType& rvector) const
 	{
-		throw PsimagLite::RuntimeError("GeometryEx: index2Rvector\n");
+		return msGeometryIndex2Rvector(r,rvector);
 	}
-	
+
 	void index2Kvector(SizeType k,VectorRealType& kvector) const
 	{
-		throw PsimagLite::RuntimeError("GeometryEx: index2Kvector\n");
+		return msGeometryIndex2Kvector(k,kvector);
 	}
-	
+
 	//! Number of symmetry operations for this K Geometry.
 	SizeType nGroupK() const
 	{
-		return nGroupK_; 
+		return msGeometryNgroupK();
 	}
-	
+
 	SizeType ickequ(SizeType j,SizeType op) const
 	{
-		throw PsimagLite::RuntimeError("GeometryEx: ickequ\n");
+		return msGeometryIckequ(j,op);
 	}
 
 private:
@@ -110,8 +128,9 @@ private:
 	SizeType linSize_;
 	VectorGeometryTermType& terms_;
 };
-#endif
 
 } // namespace PsimagLite
+#endif
 
 #endif // GEOMETRY_EX_H
+
