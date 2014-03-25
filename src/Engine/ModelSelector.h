@@ -47,6 +47,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "String.h"
 #include <stdexcept>
+#include "ProgramGlobals.h"
+#include "Utils.h"
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "../Models/HeisenbergSpinOneHalf/ModelHeisenberg.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"

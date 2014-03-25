@@ -100,6 +100,8 @@ public:
 
 	enum {KRYLOV,RUNGE_KUTTA,SUZUKI_TROTTER};
 
+	virtual ~TargetParamsBase() {}
+
 	virtual SizeType sites() const = 0;
 
 	virtual SizeType sites(SizeType) const
@@ -116,7 +118,7 @@ public:
 
 	virtual SizeType concatenation() const
 	{
-		return unimplemented("concatenation");
+		return unimplementedInt("concatenation");
 	}
 
 	virtual const VectorOperatorType& aOperators() const
@@ -132,7 +134,7 @@ public:
 
 	virtual SizeType type() const
 	{
-		return unimplemented("type");
+		return unimplementedInt("type");
 	}
 
 	virtual SizeType advanceEach() const
@@ -142,7 +144,7 @@ public:
 
 	virtual SizeType cgSteps() const
 	{
-		return unimplemented("cgSteps");
+		return unimplementedInt("cgSteps");
 	}
 
 	virtual RealType omega() const
@@ -162,7 +164,7 @@ public:
 
 	virtual SizeType algorithm() const
 	{
-		return unimplemented("algorithm");
+		return unimplementedInt("algorithm");
 	}
 
 	virtual RealType tau() const
@@ -182,7 +184,7 @@ public:
 
 	virtual SizeType timeSteps() const
 	{
-		return unimplemented("timeSteps");
+		return unimplementedInt("timeSteps");
 	}
 
 	virtual void setConcatenation(SizeType x)
@@ -192,7 +194,7 @@ public:
 
 	virtual bool noOperator() const
 	{
-		return unimplemented("noOperator");
+		return static_cast<bool>(unimplemented("noOperator"));
 	}
 
 	virtual void noOperator(bool x)
@@ -203,6 +205,12 @@ public:
 private:
 
 	RealType unimplemented(PsimagLite::String s) const
+	{
+		s = "TargetParamsBase: unimplemented " + s + "\n";
+		throw PsimagLite::RuntimeError(s);
+	}
+
+	SizeType unimplementedInt(PsimagLite::String s) const
 	{
 		s = "TargetParamsBase: unimplemented " + s + "\n";
 		throw PsimagLite::RuntimeError(s);
