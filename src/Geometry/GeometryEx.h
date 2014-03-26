@@ -40,6 +40,11 @@ public:
 	{
 		throw RuntimeError("GeometryEx: ickequ\n");
 	}
+
+	void getMeshVector(VectorRealType& kvector,SizeType k) const
+	{
+		throw RuntimeError("GeometryEx: getMeshVector\n");
+	}
 };
 
 }
@@ -121,6 +126,11 @@ public:
 	SizeType ickequ(SizeType j,SizeType op) const
 	{
 		return msGeometryIckequ(j,op);
+	}
+
+	void getMeshVector(VectorRealType& kvector,SizeType k) const
+	{
+		return msGeometryGetMeshVector(kvector,k);
 	}
 
 private:

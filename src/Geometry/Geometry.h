@@ -265,7 +265,12 @@ public:
 	{
 		return geometryEx_.ickequ(j,op) ;
 	}
-	
+
+	void getMeshVector(VectorRealType& kvector,SizeType k) const
+	{
+		return geometryEx_.getMeshVector(kvector,k);
+	}
+
 	// friends
 	template<typename RealType2,typename InputType2, typename PgType>
 	friend std::ostream& operator<<(std::ostream& os,
