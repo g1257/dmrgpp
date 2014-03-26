@@ -238,6 +238,10 @@ public:
 			terms_[i]->print(os,linSize_);
 	}
 
+	SizeType handle(SizeType t,SizeType ind, SizeType jnd) const
+	{
+		return terms_[t]->handle(ind,jnd);
+	}
 	// extended functions
 	
 	SizeType dimension(SizeType i = 0) const { return geometryEx_.dimension(i); }

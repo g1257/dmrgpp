@@ -130,7 +130,7 @@ public:
 			geometryBase_ = new Ladder<InputType>(linSize,io);
 		} else if (s=="ladderx") {
 			geometryBase_ = new LadderX<InputType>(linSize,io);
-		} else if (s=="bathedcluster") {
+		} else if (s=="ladderbath") {
 			geometryBase_ = new LadderBath<InputType>(linSize,io);
 		} else if (s=="ktwoniffour") {
 			geometryBase_ = new KTwoNiFFour<InputType>(linSize,io);
@@ -263,6 +263,11 @@ public:
 				os<<"\n";
 			}
 		}
+	}
+
+	SizeType handle(SizeType ind, SizeType jnd) const
+	{
+		return geometryBase_->handle(ind,jnd);
 	}
 
 	template<typename ComplexOrRealType_,typename InputType_>
