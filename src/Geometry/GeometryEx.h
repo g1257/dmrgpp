@@ -4,16 +4,18 @@
 #include "Vector.h"
 #include "String.h"
 
+#ifndef USE_MS_GEOMETRY
+
 namespace PsimagLite {
 
-template<typename GeometryTermType>
-class GeometryExBase {
-
-	typedef typename GeometryTermType::RealType RealType;
+template<typename RealType>
+class GeometryEx {
 
 public:
 
 	typedef typename Vector<RealType>::Type VectorRealType;
+
+	GeometryEx(SizeType) {}
 
 	SizeType dimension(SizeType i = 0) const
 	{
@@ -45,21 +47,11 @@ public:
 	{
 		throw RuntimeError("GeometryEx: getMeshVector\n");
 	}
-};
 
-}
-
-#ifndef USE_MS_GEOMETRY
-namespace PsimagLite {
-template<typename GeometryTermType>
-class GeometryEx  : public GeometryExBase<GeometryTermType> {
-
-	typedef typename Vector<GeometryTermType*>::Type VectorGeometryTermType;
-
-public:
-
-	GeometryEx(SizeType linSize,VectorGeometryTermType& terms)
-	{}
+	SizeType sizeOfMesh() const
+	{
+		throw RuntimeError("GeometryEx: sizeOfMesh\n");
+	}
 };
 
 }
@@ -70,23 +62,18 @@ public:
 
 namespace PsimagLite {
 
-template<typename GeometryTermType>
-class GeometryEx  : public GeometryExBase<GeometryTermType> {
-
-	typedef typename GeometryTermType::RealType RealType;
-	typedef typename Vector<GeometryTermType*>::Type VectorGeometryTermType;
+template<typename RealType>
+class GeometryEx  {
 
 public:
 
 	typedef typename Vector<RealType>::Type VectorRealType;
 
-	GeometryEx(SizeType linSize,VectorGeometryTermType& terms)
-	: linSize_(linSize),
-	  terms_(terms)
+	GeometryEx(SizeType meshPoints)
 	{
 		SizeType ly = 2;
 		SizeType lx = 2;
-		SizeType meshPoints = 4;
+		std::cerr<<"WARNING: GeometryEx(): lattice of 2x2 hard wired\n";
 		msGeometryInit2D(lx,0,0,ly,meshPoints);
 	}
 
@@ -97,14 +84,7 @@ public:
 
 	SizeType dimension(SizeType i = 0) const
 	{
-		assert(terms_.size() > i);
-		String s = terms_[i]->label();
-
-		if (s == "chain") return 1;
-
-		if (s=="ladder" ||  s=="ladderbath") return 2;
-
-		throw RuntimeError("GeometryEx: dimension\n");
+		return msGeometryDim();
 	}
 
 	void index2Rvector(SizeType r,VectorRealType& rvector) const
@@ -133,10 +113,10 @@ public:
 		return msGeometryGetMeshVector(kvector,k);
 	}
 
-private:
-
-	SizeType linSize_;
-	VectorGeometryTermType& terms_;
+	SizeType sizeOfMesh() const
+	{
+		return msGeometrySizeOfMesh();
+	}
 };
 
 } // namespace PsimagLite

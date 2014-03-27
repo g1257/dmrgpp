@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 
 template<typename ComplexOrRealType_,typename InputType,typename ProgramGlobalsType>
-class Geometry {
+class Geometry : public GeometryEx<typename Real<ComplexOrRealType_>::Type> {
 
 public:
 
@@ -93,11 +93,9 @@ public:
 	typedef GeometryTerm<ComplexOrRealType,InputType> GeometryTermType;
 	typedef typename Vector<SizeType>::Type BlockType;
 	typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
-	typedef GeometryEx<GeometryTermType> GeometryExType;
-	typedef typename GeometryExType::VectorRealType VectorRealType;
 
-	Geometry(InputType& io,bool debug=false)
-	: geometryEx_(linSize_,terms_)
+	Geometry(InputType& io,bool debug=false,SizeType meshPoints=0)
+	: GeometryEx<typename Real<ComplexOrRealType_>::Type>(meshPoints)
 	{
 		int x;
 		io.readline(x,"TotalNumberOfSites=");
@@ -242,35 +240,8 @@ public:
 	{
 		return terms_[t]->handle(ind,jnd);
 	}
-	// extended functions
+	// extended functions in GeometryEx
 	
-	SizeType dimension(SizeType i = 0) const { return geometryEx_.dimension(i); }
-	
-	void index2Rvector(SizeType r,VectorRealType& rvector) const
-	{
-		return geometryEx_.index2Rvector(r,rvector);
-	}
-	
-	void index2Kvector(SizeType k,VectorRealType& kvector) const
-	{
-		return geometryEx_.index2Kvector(k,kvector);
-	}
-	
-	SizeType nGroupK() const
-	{
-		return geometryEx_.nGroupK();
-	}
-	
-	SizeType ickequ(SizeType j,SizeType op)  const
-	{
-		return geometryEx_.ickequ(j,op) ;
-	}
-
-	void getMeshVector(VectorRealType& kvector,SizeType k) const
-	{
-		return geometryEx_.getMeshVector(kvector,k);
-	}
-
 	// friends
 	template<typename RealType2,typename InputType2, typename PgType>
 	friend std::ostream& operator<<(std::ostream& os,
@@ -280,8 +251,6 @@ private:
 
 	SizeType linSize_;
 	typename Vector<GeometryTermType*>::Type terms_;
-	GeometryExType geometryEx_;
-
 }; // class Geometry
 
 template<typename ComplexOrRealType,typename InputType,typename PgType>
