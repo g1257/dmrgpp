@@ -390,7 +390,7 @@ public:
 		const ModelType& model = targetHelper_.model();
 
 		SizeType site = block[0];
-		PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model.naturalOperator("nup",site,0));
+		SparseMatrixType tmpC(model.naturalOperator("nup",site,0));
 		int fermionSign1 = 1;
 		const std::pair<SizeType,SizeType> jm1(0,0);
 		RealType angularFactor1 = 1.0;
@@ -404,13 +404,13 @@ public:
 		PsimagLite::String s = "<P0|nup|P0>";
 		test(tv0,tv0,direction,s,site,nup,ApplyOperatorType::BORDER_NO);
 
-		PsimagLite::CrsMatrix<ComplexOrRealType> tmpC2(model.naturalOperator("ndown",site,0));
+		SparseMatrixType tmpC2(model.naturalOperator("ndown",site,0));
 		OperatorType ndown(tmpC2,fermionSign1,jm1,angularFactor1,su2Related1);
 		test(psi,psi,direction,"<PSI|ndown|PSI>",site,ndown,ApplyOperatorType::BORDER_NO);
 		s = "<P0|ndown|P0>";
 		test(tv0,tv0,direction,s,site,ndown,ApplyOperatorType::BORDER_NO);
 
-		PsimagLite::CrsMatrix<ComplexOrRealType> tmpC3 = (nup.data * ndown.data);
+		SparseMatrixType tmpC3 = (nup.data * ndown.data);
 		OperatorType doubleOcc(tmpC3,fermionSign1,jm1,angularFactor1,su2Related1);
 		test(psi,psi,direction,"<PSI|doubleOcc|PSI>",site,doubleOcc,ApplyOperatorType::BORDER_NO);
 		s = "<P0|doubleOcc|P0>";
@@ -526,7 +526,7 @@ private:
 				throw e;
 			}
 
-			PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(targetHelper_.model().naturalOperator(opLabel,site,0));
+			SparseMatrixType tmpC(targetHelper_.model().naturalOperator(opLabel,site,0));
 			nup = OperatorType(tmpC,fermionSign1,jm1,angularFactor1,su2Related1);
 		}
 
