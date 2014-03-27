@@ -8,6 +8,8 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+
+#ifdef USE_GSL
 extern "C" {
 #include <gsl/gsl_multimin.h>
 }
@@ -118,7 +120,35 @@ private:
 	gsl_multimin_fminimizer *gslS_;
 
 }; // class Minimizer
+}
+
+#else
+
+namespace PsimagLite {
+
+template<typename RealType,typename FunctionType>
+class Minimizer {
+
+	typedef typename FunctionType::FieldType FieldType;
+        typedef typename Vector<FieldType>::Type VectorType;
+
+public:
+
+	Minimizer(FunctionType& function,SizeType maxIter)
+	{
+		PsimagLite::String str("Minimizer needs the gsl\n");
+		throw PsimagLite::RuntimeError(str);
+	}
+
+	int simplex(VectorType& minVector,RealType delta=1e-3,RealType tolerance=1e-3)
+	{
+		PsimagLite::String str("Minimizer needs the gsl\n");
+		throw PsimagLite::RuntimeError(str);
+	}
+};
 
 } // namespace PsimagLite
+#endif 
+
 #endif // MINIMIZER_H
 
