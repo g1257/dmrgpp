@@ -33,6 +33,7 @@ Please see full open source license included in file LICENSE.
 #include <iostream>
 #include "TypeToString.h"
 #include "String.h"
+#include "ProgressIndicator.h"
 
 namespace PsimagLite {
 
