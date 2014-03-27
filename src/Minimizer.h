@@ -6,7 +6,7 @@
 #define MINIMIZER_H
 
 #include <iostream>
-#include <vector>
+#include "Vector.h"
 #include <stdexcept>
 
 #ifdef USE_GSL
@@ -16,33 +16,11 @@ extern "C" {
 
 namespace PsimagLite {
 
-template<typename FieldType>
-class MockVector {
-
-public:
-
-	MockVector(const gsl_vector *v) : v_(v)
-	{
-	}
-
-	const FieldType& operator[](SizeType i) const
-	{
-		return v_->data[i];
-	}
-
-	SizeType size() const { return v_->size; }
-
-private:
-
-	const gsl_vector *v_;
-}; // class MockVector
-
 template<typename FunctionType>
 typename FunctionType::FieldType myFunction(const gsl_vector *v, void *params)
 {
-	MockVector<typename FunctionType::FieldType> mv(v);
 	FunctionType* ft = (FunctionType *)params;
-	return ft->operator()(mv);
+	return ft->operator()(v->data,v->size);
 }
 
 template<typename RealType,typename FunctionType>
