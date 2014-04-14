@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -186,9 +186,23 @@ public:
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew) const
 	{
-		throw RuntimeError("Umhph, ouch, ayyayyayy, what?\n");
+		PairType c1 = getClusterSite(siteNew);
+		
+		// in the cluster
+		if (c1.first < 0) {
+			SizeType firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+			SizeType siteNewCluster = siteNew - firstClusterSite;
+			SizeType smaxCluster = smax - firstClusterSite;
+			SizeType eminCluster = emin - firstClusterSite;
+			SizeType siteSubs = ladder_->getSubstituteSite(smaxCluster,eminCluster,siteNewCluster);
+			return siteSubs + firstClusterSite;
+		}
+
+		PsimagLite::String str(__FILE__);
+		str += " " + ttos(__LINE__) + "Internal error in getSubstituteSite\n";
+		throw RuntimeError(str);
 	}
 
 	String label() const
