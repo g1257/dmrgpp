@@ -110,6 +110,11 @@ public:
 		throw PsimagLite::RuntimeError(s);
 	}
 
+	virtual void setSite(SizeType i, SizeType j)
+	{
+		unimplemented("type(setSite)");
+	}
+
 	virtual const VectorSizeType& startingLoops() const
 	{
 		PsimagLite::String s = "TargetParamsBase: unimplemented startingLoops\n";
@@ -137,6 +142,11 @@ public:
 		return unimplementedInt("type");
 	}
 
+	virtual void type(SizeType x)
+	{
+		unimplemented("type(SizeType)");
+	}
+
 	virtual SizeType advanceEach() const
 	{
 		return 0;
@@ -150,6 +160,11 @@ public:
 	virtual RealType omega() const
 	{
 		return unimplemented("omega");
+	}
+
+	virtual void omega(RealType x)
+	{
+		unimplemented("omega(RealType)");
 	}
 
 	virtual RealType eta() const
@@ -200,6 +215,11 @@ public:
 	virtual void noOperator(bool x)
 	{
 		unimplemented("noOperator");
+	}
+
+	virtual void transposeConjugate(SizeType i)
+	{
+		unimplemented("transposeConjugate");
 	}
 
 private:

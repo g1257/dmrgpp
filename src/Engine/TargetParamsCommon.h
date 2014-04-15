@@ -163,6 +163,12 @@ public:
 		return sites_[i];
 	}
 
+	virtual void setSite(SizeType i, SizeType j)
+	{
+		assert(i < sites_.size());
+		sites_[i] = j;
+	}
+
 	virtual const VectorSizeType& startingLoops() const
 	{
 		return startingLoops_;
@@ -193,6 +199,13 @@ public:
 		noOperator_ = x;
 	}
 
+	virtual void transposeConjugate(SizeType i)
+	{
+		assert(i < aOperators_.size());
+		SparseMatrixType tmp = aOperators_[i].data;
+		PsimagLite::transposeConjugate(aOperators_[i].data,tmp);
+	}
+
 	template<typename ModelType_>
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const TargetParamsCommon<ModelType_>& t);
@@ -207,8 +220,7 @@ private:
 
 	void checkSizesOfOperators() const
 	{
-		if (sites_.size() != aOperators_.size() ||
-		    sites_.size() != startingLoops_.size())
+		if (sites_.size() != aOperators_.size() || sites_.size() != startingLoops_.size())
 			throw PsimagLite::RuntimeError("CommonTargetting\n");
 
 		for (SizeType i=0;i<aOperators_.size();i++) {

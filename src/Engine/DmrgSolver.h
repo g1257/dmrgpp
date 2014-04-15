@@ -109,7 +109,8 @@ namespace Dmrg {
 		typedef typename ModelType::BasisWithOperatorsType MyBasisWithOperators;
 		typedef typename ModelType::ModelHelperType::LeftRightSuperType LeftRightSuperType;
 		typedef typename MyBasis::BasisDataType BasisDataType;
-		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
+		typedef typename TargettingType::TargetVectorType TargetVectorType;
+		typedef typename TargetVectorType::value_type DensityMatrixElementType;
 		typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 		typedef typename ModelType::InputValidatorType InputValidatorType;
 		typedef typename ModelType::SolverParamsType ParametersType;
@@ -209,9 +210,19 @@ namespace Dmrg {
 
 			finiteDmrgLoops(S,E,pS,pE,psi);
 
+			SizeType sites = geometry.numberOfSites();
+			inSitu_.resize(sites,0);
+			for (SizeType i = 0; i < sites; ++i)
+				inSitu_[i] = psi.inSitu(i);
+
 			PsimagLite::OstringStream msg2;
 			msg2<<"Turning off the engine.";
 			progress_.printline(msg2,std::cout);
+		}
+		
+		const DensityMatrixElementType& inSitu(SizeType i) const
+		{
+			return inSitu_[i];
 		}
 
 	private:
@@ -601,6 +612,7 @@ namespace Dmrg {
 		ReflectionSymmetryType reflectionOperator_;
 		DiagonalizationType diagonalization_;
 		TruncationType truncate_;
+		TargetVectorType inSitu_;
 
 	}; //class DmrgSolver
 } // namespace Dmrg

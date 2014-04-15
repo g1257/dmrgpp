@@ -148,6 +148,11 @@ public:
 		return type_;
 	}
 
+	virtual void type(SizeType x)
+	{
+		type_ = x;
+	}
+
 	virtual SizeType cgSteps() const
 	{
 		return cgSteps_;
@@ -156,6 +161,11 @@ public:
 	virtual RealType omega() const
 	{
 		return omega_;
+	}
+
+	virtual void omega(RealType x)
+	{
+		omega_ = x;
 	}
 
 	virtual RealType eta() const

@@ -454,6 +454,11 @@ public:
 
 	bool end() const { return false; }
 
+	ComplexOrRealType inSitu(SizeType site) const
+	{
+		return 0.0;
+	}
+
 private:
 
 	void evolve(SizeType index,

@@ -148,7 +148,8 @@ public:
 	                 SizeType indexNoAdvance)
 	    : progress_("TargetingCommon"),
 	      targetHelper_(lrs,model,tstStruct,wft),
-	      applyOpExpression_(targetHelper_,targets,indexNoAdvance)
+	      applyOpExpression_(targetHelper_,targets,indexNoAdvance),
+	      inSitu_(model.geometry().numberOfSites())
 	{}
 
 	SizeType getPhi(VectorWithOffsetType& phiNew,
@@ -443,6 +444,12 @@ public:
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
+	
+	const ComplexOrRealType& inSitu(SizeType site) const
+	{
+		assert(site < inSitu_.size());
+		return inSitu_[site];
+	}
 
 private:
 
@@ -569,6 +576,9 @@ private:
 					sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
 			}
 		}
+		
+		assert(site < inSitu_.size());
+		inSitu_[site] = sum;
 		std::cout<<site<<" "<<sum<<" "<<currentTime();
 		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 	}
@@ -593,6 +603,7 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	TargetHelperType targetHelper_;
 	ApplyOperatorExpressionType applyOpExpression_;
+	mutable VectorType inSitu_;
 }; // class TargetingCommon
 
 template<typename TargetHelperType,

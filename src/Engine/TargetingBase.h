@@ -206,6 +206,11 @@ public:
 	{
 		return false;
 	}
+	
+	const ComplexOrRealType& inSitu(SizeType i) const
+	{
+		return commonTargetting_.inSitu(i);
+	}
 
 protected:
 
