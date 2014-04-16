@@ -540,7 +540,7 @@ private:
 
 class MpiDisabled {
 
-	typedef typename PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 public:
 
