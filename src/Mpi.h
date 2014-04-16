@@ -77,6 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MPI_HEADER_H
 #define MPI_HEADER_H
 #include <stdexcept>
+#include <algorithm>
 #include "Vector.h"
 #ifdef USE_MPI
 #include <mpi.h>
@@ -537,6 +538,26 @@ private:
 
 }; // Mpi
 
+class MpiDisabled {
+
+	typedef typename PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+
+public:
+
+	void disable(PsimagLite::String label)
+	{
+		data_.push_back(label);
+	}
+
+	bool operator()(PsimagLite::String label) const 
+	{
+		return (find(data_.begin(),data_.end(),label) != data_.end());
+	}
+
+private:
+
+	VectorStringType data_;
+};
 } // namespace PsimagLite 
 
 /*@}*/	

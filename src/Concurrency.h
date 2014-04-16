@@ -86,6 +86,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 
 class Concurrency {
+
+	typedef MpiDisabled MpiDisabledType;
+
 public:
 
 	static SizeType mode;
@@ -175,10 +178,40 @@ public:
 		return (mode & PTHREADS);
 	}
 
+	static void mpiDisable(PsimagLite::String label)
+	{
+		mpiDisabled_.disable(label);
+	}
+
+	static void mpiDisableIfNeeded(SizeType& mpiRank,
+	                               SizeType& blockSize,
+	                               PsimagLite::String label,
+	                               SizeType total)
+	{
+		if (!hasMpi()) return;
+		if (!mpiDisabled_(label)) return;
+		mpiRank = 0;
+		blockSize = total;
+		if (!hasPthreads()) return;
+		PsimagLite::String str(__FILE__);
+		str += " mpiDisableIfNeeded label = " + label + "\n";
+		throw PsimagLite::RuntimeError(str);
+	}
+
+	static bool isMpiDisabled(PsimagLite::String label)
+	{
+		return mpiDisabled_(label);
+	}
+
+private:
+
+	static MpiDisabledType mpiDisabled_;
 };
 
 SizeType Concurrency::mode = 0;
 SizeType Concurrency::npthreads = 1;
+MpiDisabled Concurrency::mpiDisabled_;
+
 } // namespace PsimagLite 
 
 /*@}*/	
