@@ -119,6 +119,8 @@ namespace Dmrg {
 			SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 			SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
+			ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"ParallelDensityMatrix",total);
+
 			for (SizeType p=0;p<blockSize;p++) {
 				SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p;
 				if (ix>=target_.size()) break;

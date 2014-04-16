@@ -107,6 +107,8 @@ public:
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
+		ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"ParallelWft",total);
+
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p + 1;
 			if (ix>=targetVectors_.size()) break;

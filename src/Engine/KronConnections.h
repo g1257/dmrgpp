@@ -115,6 +115,8 @@ public:
 		SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
+		ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"KronConnections",total);
+
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType outPatch = (threadNum+npthreads*mpiRank)*blockSize + p;
 			if (outPatch>=total) break;
@@ -179,7 +181,8 @@ public:
 
 	void sync()
 	{
-		if (!hasMpi_) return;
+		if (!hasMpi_ || ConcurrencyType::isMpiDisabled("KronConnections"))
+			return;
 		PsimagLite::MPI::allReduce(W_);
 	}
 

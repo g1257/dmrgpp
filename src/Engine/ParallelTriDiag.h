@@ -119,6 +119,8 @@ public:
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
+		ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"ParallelTriDiag",total);
+
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType ii = (threadNum+npthreads*mpiRank)*blockSize + p;
 			if (ii >= total) continue;

@@ -150,6 +150,8 @@ transformed operator can be used (or not because of the reason limitation above)
 				SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 				SizeType npthreads = ConcurrencyType::npthreads;
 
+				ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"Operators",total);
+
 				for (SizeType p=0;p<blockSize;p++) {
 					SizeType taskNumber = (threadNum+npthreads*mpiRank)*blockSize + p;
 					if (taskNumber>=total) break;
@@ -166,6 +168,8 @@ transformed operator can be used (or not because of the reason limitation above)
 
 			void gather()
 			{
+				if (ConcurrencyType::isMpiDisabled("Operators")) return
+
 				if (!useSu2Symmetry_) {
 					gatherOperators();
 					bcastOperators();
