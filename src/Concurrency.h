@@ -180,6 +180,7 @@ public:
 
 	static void mpiDisable(PsimagLite::String label)
 	{
+		if (!hasMpi()) return;
 		mpiDisabled_.disable(label);
 	}
 
@@ -200,6 +201,7 @@ public:
 
 	static bool isMpiDisabled(PsimagLite::String label)
 	{
+		if (!hasMpi()) return false;
 		return mpiDisabled_(label);
 	}
 
