@@ -179,6 +179,8 @@ public:
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
+		ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"HamiltonianConnection",total);
+
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p;
 			if (ix>=total) break;
@@ -202,7 +204,9 @@ public:
 			for (SizeType i=0;i<x_.size();i++)
 				x[i]+=xtemp_[threadNum][i];
 
-		PsimagLite::MPI::allReduce(x);
+		if (!ConcurrencyType::isMpiDisabled("HamiltonianConnection"))
+			PsimagLite::MPI::allReduce(x);
+
 		for (SizeType i=0;i<x_.size();i++)
 			x_[i] += x[i];
 	}

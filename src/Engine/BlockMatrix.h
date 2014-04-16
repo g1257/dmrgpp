@@ -134,6 +134,8 @@ public:
 			SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 			SizeType npthreads = ConcurrencyType::npthreads;
 
+			ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"BlockMatrix",total);
+
 			for (SizeType p=0;p<blockSize;p++) {
 				SizeType taskNumber = (threadNum+npthreads*mpiRank)*blockSize + p;
 				if (taskNumber>=total) break;
@@ -149,7 +151,7 @@ public:
 
 		void gather()
 		{
-			if (hasMpi_) {
+			if (hasMpi_ & !ConcurrencyType::isMpiDisabled("BlockMatrix")) {
 				PsimagLite::MPI::pointByPointGather(eigsForGather);
 				PsimagLite::MPI::bcast(eigsForGather);
 				PsimagLite::MPI::pointByPointGather(C.data_);
