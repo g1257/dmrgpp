@@ -80,11 +80,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PARALLEL_WFT_H
 
 #include "Vector.h"
+#include "Concurrency.h"
 
 namespace Dmrg {
 
 template<typename VectorWithOffsetType,typename WaveFunctionTransfType,typename LeftRightSuperType>
 class ParallelWft {
+
+	typedef PsimagLite::Concurrency ConcurrencyType;
 
 public:
 

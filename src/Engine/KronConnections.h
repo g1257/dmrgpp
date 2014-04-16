@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define KRON_CONNECTIONS_H
 
 #include "Matrix.h"
+#include "Concurrency.h"
 
 namespace Dmrg {
 
@@ -94,6 +95,7 @@ class KronConnections {
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename InitKronType::GenGroupType GenGroupType;
+	typedef PsimagLite::Concurrency ConcurrencyType;
 
 public:
 

@@ -94,6 +94,7 @@ class ParallelTriDiag {
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef PsimagLite::Concurrency ConcurrencyType;
 
 public:
 

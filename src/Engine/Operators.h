@@ -168,7 +168,7 @@ transformed operator can be used (or not because of the reason limitation above)
 
 			void gather()
 			{
-				if (ConcurrencyType::isMpiDisabled("Operators")) return
+				if (ConcurrencyType::isMpiDisabled("Operators")) return;
 
 				if (!useSu2Symmetry_) {
 					gatherOperators();

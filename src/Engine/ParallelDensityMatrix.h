@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PARALLEL_DENSITY_MATRIX_H
 
 #include "ProgramGlobals.h"
-
+#include "Concurrency.h"
 
 namespace Dmrg {
 	
@@ -92,6 +92,7 @@ namespace Dmrg {
 		typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
 		typedef typename TargetVectorType::value_type DensityMatrixElementType;
 		typedef typename BasisWithOperatorsType::BasisType BasisType;
+		typedef PsimagLite::Concurrency ConcurrencyType;
 
 	public:
 
