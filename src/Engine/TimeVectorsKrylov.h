@@ -305,7 +305,7 @@ private:
 			threadedTriDiag.loopCreate(phi.sectors(),helperTriDiag);
 		} else {
 			typedef PsimagLite::NoPthreads<ParallelTriDiagType> ParallelizerType;
-			ParallelizerType threadedTriDiag(1,PsimagLite::MPI::COMM_WORLD);
+			ParallelizerType threadedTriDiag(1,0);
 
 			ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,model_,ioIn_);
 

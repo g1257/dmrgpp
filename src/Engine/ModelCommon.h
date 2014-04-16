@@ -240,8 +240,7 @@ public:
 
 		if (cTridiag) {
 			typedef PsimagLite::NoPthreads<HamiltonianConnectionType> ParallelizerType;
-			ParallelizerType parallelConnections(1,
-			                                     PsimagLite::MPI::COMM_WORLD);
+			ParallelizerType parallelConnections(1,0);
 			parallelConnections.loopCreate(total,hc);
 		} else {
 			typedef PsimagLite::Parallelizer<HamiltonianConnectionType> ParallelizerType;
