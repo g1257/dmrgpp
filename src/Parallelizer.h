@@ -92,8 +92,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifdef USE_MPI
 #include "Mpi.h"
-#endif // USE_MPI
+#else 
 #include "NoPthreads.h"
+#endif // USE_MPI
 
 #endif // USE_PTHREADS
 
