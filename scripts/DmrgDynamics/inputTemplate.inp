@@ -1,0 +1,49 @@
+TotalNumberOfSites=8
+NumberOfTerms=1
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0 
+Model=HubbardOneBand
+##U=8
+##V=-4
+hubbardU	8   8 8 8 8 8 8 8 8 
+potentialV      16  -4 -4 -4 -4 -4 -4 -4 -4
+                    -4 -4 -4 -4 -4 -4 -4 -4
+SolverOptions=CorrectionVectorTargetting
+CorrectionA=0
+Version=version
+OutputFile=$data
+InfiniteLoopKeptStates=200
+FiniteLoops 12
+$steps 200 0
+-$steps 200 0 -$steps 200 0 $steps 300 0 $steps 300 0 
+-$steps 200 0 -$steps 200 0 $steps 300 0 $steps 300 0
+-$steps 300 0 -$steps 300 0 $steps 400 0
+TargetElectronsUp=4
+TargetElectronsDown=4
+
+TSPSites 1 4     
+TSPLoops 1 0 
+DynamicDmrgType=0
+TSPProductOrSum=sum
+CorrectionVectorOmega=$omega
+CorrectionVectorEta=0.1
+CorrectionVectorAlgorithm=Krylov
+DynamicDmrgEps=1e-12
+DynamicDmrgSteps=500
+
+TSPOperator=raw
+RAW_MATRIX
+4 4
+0.0    0.0    0.0   0.0
+1.0    0.0    0.0   0.0
+0.0    0.0    0.0   0.0
+0.0    0.0    1.0   0.0
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
+IsPeriodicX=0
+IsPeriodicY=0
+

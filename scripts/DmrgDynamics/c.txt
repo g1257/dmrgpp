@@ -1,0 +1,11 @@
+TSPOperator=raw
+RAW_MATRIX
+4 4
+0.0    0.0    0.0   0.0
+1.0    0.0    0.0   0.0
+0.0    0.0    0.0   0.0
+0.0    0.0    1.0   0.0
+FERMIONSIGN=-1
+JMVALUES 0 0
+AngularFactor=1
+
