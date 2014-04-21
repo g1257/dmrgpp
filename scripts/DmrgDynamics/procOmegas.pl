@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-use lib "../ToolsDmrgDynamics";
 use Utils;
 
 my ($omega0,$total,$omegaStep,$what,$q) = @ARGV;
