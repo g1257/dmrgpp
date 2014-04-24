@@ -122,6 +122,7 @@ namespace Dmrg {
 		typedef Checkpoint<ParametersType,TargettingType> CheckpointType;
 		typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
+		typedef typename PsimagLite::Vector<BlockType>::Type VectorBlockType;
 
 		enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 			EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
@@ -177,7 +178,7 @@ namespace Dmrg {
 
 			ioOut_.print("MODEL",model_);
 			BlockType S,E;
-			typename PsimagLite::Vector<BlockType>::Type X,Y;
+			VectorBlockType X,Y;
 			geometry.split(parameters_.sitesPerBlock,S,X,Y,E);
 			for (SizeType i=0;i<X.size();i++) 
 				sitesIndices_.push_back(X[i]);
@@ -269,8 +270,8 @@ namespace Dmrg {
 		*/
 		void infiniteDmrgLoop(
 				BlockType const &S,
-				const typename PsimagLite::Vector<BlockType>::Type& X,
-				const typename PsimagLite::Vector<BlockType>::Type& Y,
+				const VectorBlockType& X,
+				const VectorBlockType& Y,
 				BlockType const &E,
 				MyBasisWithOperators &pS,
 				MyBasisWithOperators &pE,
@@ -283,11 +284,16 @@ namespace Dmrg {
 			RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
 			for (SizeType step=0;step<X.size();step++) {
 				PsimagLite::OstringStream msg;
-				msg<<"Infinite-loop: step="<<step<<" ( of "<<Y.size()<<"), size of blk. added="<<Y[step].size();
+				msg<<"Infinite-loop: step="<<step<<" ( of "<<X.size()<<"), ";
+				msg<<" size of blk. added="<<X[step].size();
 				progress_.printline(msg,std::cout);
 
 				lrs_.growLeftBlock(model_,pS,X[step],time); // grow system
-				lrs_.growRightBlock(model_,pE,Y[step],time); // grow environment
+				bool needsRightPush = true;
+				if (step < Y.size()) {
+					lrs_.growRightBlock(model_,pE,Y[step],time); // grow environment
+					needsRightPush = false;
+				}
 
 				progress_.print("Growth done.\n",std::cout);
 				lrs_.printSizes("Infinite",std::cout);
@@ -296,13 +302,18 @@ namespace Dmrg {
 
 				lrs_.setToProduct(quantumSector_);
 
-				RealType energy = diagonalization_(psi,INFINITE,X[step],Y[step]);
+				const BlockType& ystep = findRightBlock(Y,step,E);
+				RealType energy = diagonalization_(psi,INFINITE,X[step],ystep);
 				printEnergy(energy);
 
 				truncate_.changeBasis(pS,pE,psi,parameters_.keptStatesInfinite);
 
-				if (!twoSiteDmrg) checkpoint_.push(pS,pE);
-				else checkpoint_.push(lrs_.left(),lrs_.right());
+				if (needsRightPush) {
+					if (!twoSiteDmrg) checkpoint_.push(pS,pE);
+					else checkpoint_.push(lrs_.left(),lrs_.right());
+				} else {
+					checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,ProgramGlobals::SYSTEM);
+				}
 
 				progress_.printMemoryUsage();
 			}
@@ -595,6 +606,15 @@ namespace Dmrg {
 			ioOut_.printline(msg);
 		}
 
+		const BlockType& findRightBlock(const VectorBlockType& y,
+		                                SizeType step,
+		                                const BlockType& E) const
+		{
+			if (step < y.size()) return y[step];
+
+			return E;
+		}
+
 		const ModelType& model_;
 		const ParametersType& parameters_;
 		const TargettingParamsType& targetStruct_;
@@ -608,7 +628,7 @@ namespace Dmrg {
 		int stepCurrent_;
 		CheckpointType checkpoint_;
 		WaveFunctionTransfType wft_;
-		typename PsimagLite::Vector<BlockType>::Type sitesIndices_;
+		VectorBlockType sitesIndices_;
 		ReflectionSymmetryType reflectionOperator_;
 		DiagonalizationType diagonalization_;
 		TruncationType truncate_;
