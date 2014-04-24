@@ -160,9 +160,16 @@ public:
 	           BlockType& E) const
 	{
 		SizeType middle = linSize_/2;
-		if (linSize_& 1 ||
-		    linSize_ % sitesPerBlock!=0 ||
-		    SizeType(linSize_/sitesPerBlock)<3) {
+		if (linSize_ & 1) {
+			std::cerr<<"EXPERIMENTAL: Geometry::split(...): ";
+			std::cerr<<" Lattice is odd (it has "<<linSize_<<" sites).\n"; 
+			middle++;
+		}
+
+		bool b1 = ((linSize_ % sitesPerBlock) != 0);
+		b1  |= (static_cast<SizeType>(linSize_/sitesPerBlock) < 3);
+		bool b2 = (sitesPerBlock > 1);
+		if (b1 && b2) {
 			String str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
 			str += "split error, linSize_=" + ttos(linSize_);

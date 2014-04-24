@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LadderX.h"
 #include "LadderBath.h"
 #include "KTwoNiFFour.h"
+#include "Star.h"
 
 namespace PsimagLite {
 
@@ -134,6 +135,8 @@ public:
 			geometryBase_ = new LadderBath<InputType>(linSize,io);
 		} else if (s=="ktwoniffour") {
 			geometryBase_ = new KTwoNiFFour<InputType>(linSize,io);
+		} else if (s=="star") {
+			geometryBase_ = new Star<InputType>(linSize,io);
 		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
 		}
