@@ -398,6 +398,7 @@ public:
 	//! (see section about Symmetries in paper)
 	void findPartition()
 	{
+		assert(quantumNumbers_.size() > 0);
 		SizeType qtmp = quantumNumbers_[0]+1;
 		partition_.clear();
 		for (SizeType i=0;i<size();i++) {

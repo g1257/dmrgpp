@@ -279,6 +279,8 @@ namespace Dmrg {
 		{
 			bool twoSiteDmrg = (parameters_.options.find("twositedmrg")!=PsimagLite::String::npos);
 
+			lrs_.left(pS);
+			lrs_.right(pE);
 			checkpoint_.push(pS,pE);
 
 			RealType time = 0; // no time advancement possible in the infiniteDmrgLoop

@@ -155,7 +155,7 @@ namespace Dmrg {
 		PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
 		PsimagLite::String loops = "";
 		int x = totalSites/2-1; // must be signed
-		if (finiteLoop[0].stepLength > 0 && totalSites & 1) x++;
+		if (totalSites & 1) x++;
 		if (finiteLoop[0].stepLength<0) x++;
 		int prevDeltaSign = 1;
 		SizeType sopt = 0; // have we started saving yet?
