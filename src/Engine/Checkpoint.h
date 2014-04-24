@@ -190,6 +190,7 @@ private:
 	                              const TargettingType& target)
 	{
 		thisStack.pop();
+		assert(thisStack.size() > 0);
 		BasisWithOperatorsType& basisWithOps =  thisStack.top();
 		// only updates the extreme sites:
 		target.updateOnSiteForTimeDep(basisWithOps);

@@ -291,10 +291,10 @@ namespace Dmrg {
 				progress_.printline(msg,std::cout);
 
 				lrs_.growLeftBlock(model_,pS,X[step],time); // grow system
-				bool needsRightPush = true;
+				bool needsRightPush = false;
 				if (step < Y.size()) {
 					lrs_.growRightBlock(model_,pE,Y[step],time); // grow environment
-					needsRightPush = false;
+					needsRightPush = true;
 				}
 
 				progress_.print("Growth done.\n",std::cout);
