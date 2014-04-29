@@ -98,7 +98,6 @@ struct ParametersModelFeAs {
 		io.read(hubbardU,"hubbardU");
 		io.read(potentialV,"potentialV");
 
-
 		bool decayInInputFile = false;
 		try {
 			io.readline(feAsMode,"Decay=");
@@ -115,14 +114,14 @@ struct ParametersModelFeAs {
 			io.readline(feAsMode,"FeAsMode=");
 		} catch (std::exception& e) {}
 
-		if (feAsMode > 2)
-			throw PsimagLite::RuntimeError("FeAsMode: expecting 0 or 1 or 2\n");
+		if (feAsMode > 3)
+			throw PsimagLite::RuntimeError("FeAsMode: expecting 0 or 1 or 2 or 3\n");
 
-		if (feAsMode > 0) {
+		if (feAsMode == 1 || feAsMode == 2) {
 			SizeType tmp = orbitals * orbitals;
 			if (feAsMode == 2) tmp *= 2;
 			if (hubbardU.size() != tmp) {
-				PsimagLite::String str("FeAsMode: expecting");
+				PsimagLite::String str("FeAsMode: expecting ");
 				str += ttos(tmp) + " U values\n";
 				throw PsimagLite::RuntimeError(str);
 			}
@@ -132,6 +131,14 @@ struct ParametersModelFeAs {
 			if (orbitals != 3)
 				throw PsimagLite::RuntimeError("FeAsMode: expecting 3 orbitals\n");
 			io.readline(coulombV,"CoulombV=");
+		}
+
+		if (feAsMode == 0 || feAsMode == 3) {
+			if (hubbardU.size() != 4) {
+				PsimagLite::String str("FeAsMode: expecting");
+				str +=  " 4 U values\n";
+				throw PsimagLite::RuntimeError(str);
+			}
 		}
 
 		try {
@@ -194,3 +201,4 @@ std::ostream& operator<<(std::ostream &os,const ParametersModelFeAs<FieldType>& 
 
 /*@}*/
 #endif
+
