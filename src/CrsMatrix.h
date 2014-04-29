@@ -237,7 +237,7 @@ public:
 		for (SizeType i=0;i<m.rank();++i) {
 			setRow(i,counter);
 
-			while(counter < nonZeros && m.getRow(counter) == i) {
+			while (counter < nonZeros && m.getRow(counter) == i) {
 				colind_[counter] = m.getColumn(counter);
 				values_[counter] = m.getValue(counter);
 				counter++;
@@ -953,15 +953,6 @@ void sumBlock(CrsMatrix<T> &A,CrsMatrix<T> const &B,SizeType offset)
 }
 
 template<class T>
-bool isDiagonal(const CrsMatrix<T>& A)
-{
-	SizeType n = A.getSize();
-	for (SizeType i=0;i<n;i++) for (SizeType j=0;j<n;j++)
-		if (i!=j && fabs(A(i,j))>1e-6) return false;
-	return true;
-}
-
-template<class T>
 bool isZero(const CrsMatrix<T>& A,double eps = 1e-6)
 {
 	for (SizeType i=0;i<A.row();i++) {
@@ -977,7 +968,7 @@ bool isZero(const CrsMatrix<T>& A,double eps = 1e-6)
 }
 
 template<class T>
-bool isTheIdentity(const CrsMatrix<T>& A,double eps=1e-6)
+bool isDiagonal(const CrsMatrix<T>& A,double eps=1e-6,bool checkForIdentity=false)
 {
 	if (A.row()!=A.col()) return false;
 	SizeType n = A.row();
@@ -985,7 +976,7 @@ bool isTheIdentity(const CrsMatrix<T>& A,double eps=1e-6)
 		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 			SizeType col = A.getCol(k);
 			const T& val = A.getValue(k);
-			if (col==i && std::norm(val-1.0)>eps) {
+			if (checkForIdentity && col==i && std::norm(val-1.0)>eps) {
 				std::cerr<<"Diagonal is "<<val<<" at i="<<i<<"\n";
 				return false;
 			}
@@ -996,6 +987,12 @@ bool isTheIdentity(const CrsMatrix<T>& A,double eps=1e-6)
 		}
 	}
 	return true;
+}
+
+template<class T>
+bool isTheIdentity(const CrsMatrix<T>& A,double eps=1e-6)
+{
+	return isDiagonal(A,eps,true);
 }
 
 template<typename T>
