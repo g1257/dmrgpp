@@ -1012,6 +1012,9 @@ private:
 
 		for (SizeType orb1=0;orb1<orbitals;orb1++) {
 			for (SizeType orb2=0;orb2<orbitals;orb2++) {
+
+				if (orb1 == orb2) continue;
+
 				const SparseMatrixType& cm1 = cm[orb1+0*orbitals+site*dofs].data;
 				const SparseMatrixType& cm2 = cm[orb2+1*orbitals+site*dofs].data;
 
