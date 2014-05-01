@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef	MATRIX_VECTOR_KRON_H
 #define MATRIX_VECTOR_KRON_H
 
-#include <vector>
+#include "Vector.h"
 #include "InitKron.h"
 #include "KronMatrix.h"
 
@@ -97,12 +97,15 @@ public:
 	typedef InitKron<ModelType,ModelHelperType> InitKronType;
 	typedef KronMatrix<InitKronType> KronMatrixType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType; 
 	typedef typename SparseMatrixType::value_type value_type;
 
 	MatrixVectorKron(ModelType const *model,
 	                 ModelHelperType const *modelHelper,
 	                 ReflectionSymmetryType* rs=0)
-	    : initKron_(*model,*modelHelper),kronMatrix_(initKron_)
+	    : model_(model),initKron_(*model,*modelHelper),kronMatrix_(initKron_)
 	{
 		int maxMatrixRankStored = model->params().maxMatrixRankStored;
 		if (modelHelper->size() > maxMatrixRankStored) return;
@@ -126,8 +129,19 @@ public:
 
 	void reflectionSector(SizeType p) {  }
 
+	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
+	{
+		int maxMatrixRankStored = model_->params().maxMatrixRankStored;
+		if (matrixStored_.row() == 0 || matrixStored_.row() > maxMatrixRankStored)
+			throw PsimagLite::RuntimeError("fullDiag too big\n");
+
+		fm = matrixStored_.toDense();
+		diag(fm,eigs,'V');
+	}
+
 private:
 
+	const ModelType* model_;
 	InitKronType initKron_;
 	KronMatrixType kronMatrix_;
 	SparseMatrixType matrixStored_;

@@ -95,6 +95,9 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename SparseMatrixType::value_type value_type;
+        typedef typename SparseMatrixType::value_type ComplexOrRealType;
+        typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+        typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 
 	MatrixVectorStored(ModelType const *model,
 	                   ModelHelperType const *modelHelper,
@@ -139,6 +142,15 @@ public:
 	SizeType reflectionSector() const { return pointer_; }
 
 	void reflectionSector(SizeType p) { pointer_=p; }
+	                
+	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
+	{
+		if (matrixStored_[pointer_].row() == 0 || matrixStored_[pointer_].row() > 1000)
+			throw PsimagLite::RuntimeError("fullDiag too big\n");
+
+		fm = matrixStored_[pointer_].toDense();
+		diag(fm,eigs,'V');
+	}
 
 private:
 	ModelType const *model_;

@@ -94,6 +94,9 @@ public:
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type value_type;
+        typedef typename SparseMatrixType::value_type ComplexOrRealType;
+        typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+        typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 
 	MatrixVectorOnTheFly(ModelType const *model,
 	                     ModelHelperType const *modelHelper,
@@ -121,6 +124,16 @@ public:
 	SizeType reflectionSector() const { return 0; }
 
 	void reflectionSector(SizeType p) {  }
+
+	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
+	{
+		int maxMatrixRankStored = model_->params().maxMatrixRankStored;
+		if (matrixStored_.row() == 0 || matrixStored_.row() > maxMatrixRankStored)
+			throw PsimagLite::RuntimeError("fullDiag too big\n");
+
+		fm = matrixStored_.toDense();
+		diag(fm,eigs,'V');
+	}
 
 private:
 	ModelType const *model_;

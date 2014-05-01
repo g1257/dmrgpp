@@ -104,11 +104,13 @@ namespace Dmrg {
 		typedef typename TargettingType::RealType RealType;
 		typedef typename ModelType::OperatorsType OperatorsType;
 		typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
+		typedef typename SparseMatrixType::value_type ComplexOrRealType;
 		typedef typename ModelType::ModelHelperType ModelHelperType;
 		typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 		typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 		typedef typename TargettingType::MatrixVectorType MatrixVectorType;
 		typedef typename ModelType::InputValidatorType InputValidatorType;
+		typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 		Diagonalization(const ParametersType& parameters,
                         const ModelType& model,
@@ -386,7 +388,27 @@ namespace Dmrg {
 			*/
 			if (!reflectionOperator_.isEnabled()) {
 				tmpVec.resize(lanczosHelper.rank());
-				lanczosOrDavidson->computeGroundState(energyTmp,tmpVec,initialVector);
+				try {
+					lanczosOrDavidson->computeGroundState(energyTmp,tmpVec,initialVector);
+				} catch (std::exception& e) {
+
+					PsimagLite::OstringStream msg0;
+					msg0<<"Lanczos or Davidson solver failed, ";
+					msg0<<"trying with exact diagonalization...";
+					progress_.printline(msg0,std::cout);
+
+					VectorRealType eigs(lanczosHelper.rank());
+					PsimagLite::Matrix<ComplexOrRealType> fm;
+					lanczosHelper.fullDiag(eigs,fm);
+					for (SizeType j = 0; j < eigs.size(); ++j)
+						tmpVec[j] = fm(j,0);
+						energyTmp = eigs[0];
+
+					PsimagLite::OstringStream msg1;
+					msg1<<"Found lowest eigenvalue= "<<energyTmp<<" ";
+					progress_.printline(msg1,std::cout);
+                        	}
+
 				if (lanczosOrDavidson) delete lanczosOrDavidson;
 				return;
 			}
