@@ -188,6 +188,11 @@ public:
 		}
 
 		lanczosVectors_.hookForZ(z,c,ab);
+	
+		PsimagLite::String str = "LanczosSolver: computeGroundState: ";	
+		if (PsimagLite::norm(z)<1e-6)
+			throw RuntimeError(str + " norm is zero\n");
+
 		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,std::cout);
 	}
 
