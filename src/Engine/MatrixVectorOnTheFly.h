@@ -127,7 +127,8 @@ public:
 
 	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
 	{
-		int maxMatrixRankStored = model_->params().maxMatrixRankStored;
+		int tmp = model_->params().maxMatrixRankStored;
+		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
 		if (matrixStored_.row() == 0 || matrixStored_.row() > maxMatrixRankStored)
 			throw PsimagLite::RuntimeError("fullDiag too big\n");
 
