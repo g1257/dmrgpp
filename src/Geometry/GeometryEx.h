@@ -8,50 +8,69 @@
 
 namespace PsimagLite {
 
-template<typename RealType>
+template<typename RealType,typename InputType>
 class GeometryEx {
 
 public:
 
 	typedef typename Vector<RealType>::Type VectorRealType;
 
-	GeometryEx(SizeType) {}
+	GeometryEx(InputType& io, SizeType meshPoints)
+	{
+		meshLength_ = sqrt(meshPoints);
+		meshStep_ = static_cast<SizeType>(2*M_PI/meshLength_);
+		PsimagLite::String str;
+		io.readline(str,"GeometryKind=");
+		if (str != "star")
+			throw RuntimeError("GeometryEx: expecting GeometryKind=star\n");
+	}
 
 	SizeType dimension(SizeType i = 0) const
 	{
-		throw RuntimeError("GeometryEx: dimension\n");
+		return 2;
 	}
 
 	void index2Rvector(SizeType r,VectorRealType& rvector) const
 	{
-		throw RuntimeError("GeometryEx: index2Rvector\n");
+		rvector.resize(2);
+		rvector[0] = 0;
+		rvector[1] = 0;
 	}
 
 	void index2Kvector(SizeType k,VectorRealType& kvector) const
 	{
-		throw RuntimeError("GeometryEx: index2Kvector\n");
+		kvector.resize(2);
+		kvector[0] = 0;
+		kvector[1] = 0;
 	}
 
 	//! Number of symmetry operations for this K Geometry.
 	SizeType nGroupK() const
 	{
-		throw RuntimeError("GeometryEx: nGroupK\n");
+		return 1;	
 	}
 
 	SizeType ickequ(SizeType j,SizeType op) const
 	{
-		throw RuntimeError("GeometryEx: ickequ\n");
+		return 0;	
 	}
 
 	void getMeshVector(VectorRealType& kvector,SizeType k) const
 	{
-		throw RuntimeError("GeometryEx: getMeshVector\n");
+		div_t q = div(k,meshLength_);
+		kvector[0] = -M_PI + q.quot*meshStep_;
+		kvector[1] = -M_PI + q.rem*meshStep_;	
 	}
 
 	SizeType sizeOfMesh() const
 	{
-		throw RuntimeError("GeometryEx: sizeOfMesh\n");
+		return meshLength_*meshLength_;
 	}
+
+private:
+
+	SizeType meshLength_;
+	SizeType meshStep_;
 };
 
 }
@@ -62,14 +81,14 @@ public:
 
 namespace PsimagLite {
 
-template<typename RealType>
+template<typename RealType,typename InputType>
 class GeometryEx  {
 
 public:
 
 	typedef typename Vector<RealType>::Type VectorRealType;
 
-	GeometryEx(SizeType meshPoints)
+	GeometryEx(InputType& io,SizeType meshPoints)
 	{
 		SizeType ly = 2;
 		SizeType lx = 2;

@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 
 template<typename ComplexOrRealType_,typename InputType,typename ProgramGlobalsType>
-class Geometry : public GeometryEx<typename Real<ComplexOrRealType_>::Type> {
+class Geometry : public GeometryEx<typename Real<ComplexOrRealType_>::Type,InputType> {
 
 public:
 
@@ -93,9 +93,10 @@ public:
 	typedef GeometryTerm<ComplexOrRealType,InputType> GeometryTermType;
 	typedef typename Vector<SizeType>::Type BlockType;
 	typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
+	typedef GeometryEx<typename Real<ComplexOrRealType_>::Type,InputType> GeometryExType;
 
 	Geometry(InputType& io,bool debug=false,SizeType meshPoints=0)
-	: GeometryEx<typename Real<ComplexOrRealType_>::Type>(meshPoints)
+	: GeometryExType(io,meshPoints)
 	{
 		int x;
 		io.readline(x,"TotalNumberOfSites=");
