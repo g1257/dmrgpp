@@ -18,7 +18,7 @@ public:
 	GeometryEx(InputType& io, SizeType meshPoints)
 	{
 		meshLength_ = sqrt(meshPoints);
-		meshStep_ = static_cast<SizeType>(2*M_PI/meshLength_);
+		meshStep_ = static_cast<RealType>(2*M_PI/meshLength_);
 		PsimagLite::String str;
 		io.readline(str,"GeometryKind=");
 		if (str != "star")
@@ -70,7 +70,7 @@ public:
 private:
 
 	SizeType meshLength_;
-	SizeType meshStep_;
+	RealType meshStep_;
 };
 
 }
