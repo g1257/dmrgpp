@@ -280,7 +280,8 @@ void>::Type pointByPointGather(SomeVectorType& v,
 template<typename SomeVectorType>
 typename EnableIf<IsVectorLike<SomeVectorType>::True &
 !IsVectorLike<typename SomeVectorType::value_type>::True &
-!Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
+!Loki::TypeTraits<typename SomeVectorType::value_type>::isArith &
+!IsPairLike<typename SomeVectorType::value_type>::True,
 void>::Type pointByPointGather(SomeVectorType& v,
                                int root = 0,
                                CommType mpiComm = COMM_WORLD)
@@ -303,6 +304,36 @@ void>::Type pointByPointGather(SomeVectorType& v,
 				SizeType taskNumber = r*blockSize + p;
 				if (taskNumber >= v.size()) break;
 				v[taskNumber].recv(r,taskNumber,mpiComm);
+			}
+		}
+	}
+}
+
+template<typename SomeVectorType>
+typename EnableIf<IsVectorLike<SomeVectorType>::True &
+IsPairLike<typename SomeVectorType::value_type>::True,
+void>::Type pointByPointGather(SomeVectorType& v,
+                               int root = 0,
+                               CommType mpiComm = COMM_WORLD)
+{
+	int mpiRank = PsimagLite::MPI::commRank(mpiComm);
+	int nprocs = PsimagLite::MPI::commSize(mpiComm);
+	SizeType blockSize = static_cast<SizeType>(v.size()/nprocs);
+	if (v.size() % nprocs != 0) blockSize++;
+
+	if (mpiRank != root) {
+		for (SizeType p=0;p<blockSize;p++) {
+			SizeType taskNumber = mpiRank*blockSize + p;
+			if (taskNumber >= v.size()) break;
+			send(v[taskNumber],0,taskNumber,mpiComm);
+		}
+	} else {
+		for (int r=0;r<nprocs;r++) {
+			if (r == root) continue;
+			for (SizeType p=0;p<blockSize;p++) {
+				SizeType taskNumber = r*blockSize + p;
+				if (taskNumber >= v.size()) break;
+				recv(v[taskNumber],r,taskNumber,mpiComm);
 			}
 		}
 	}
@@ -549,7 +580,7 @@ public:
 		data_.push_back(label);
 	}
 
-	bool operator()(PsimagLite::String label) const 
+	bool operator()(PsimagLite::String label) const
 	{
 		return (find(data_.begin(),data_.end(),label) != data_.end());
 	}
