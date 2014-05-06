@@ -1,0 +1,18 @@
+CPPFLAGS = -Werror -Wall -I../  -I../src
+CXX = g++ -O3 -DNDEBUG
+all: libpsimaglite.a 
+
+libpsimaglite.a: Makefile.sample MersenneTwister.o
+	ar rcs libpsimaglite.a MersenneTwister.o
+
+MersenneTwister.o: ../src/MersenneTwister.cpp Makefile.sample
+	$(CXX) $(CPPFLAGS) -c ../src/MersenneTwister.cpp
+
+Makefile.dep: ../src/MersenneTwister.cpp
+	$(CXX) $(CPPFLAGS) -MM  ../src/MersenneTwister.cpp  > Makefile.dep
+
+clean: Makefile.dep
+	rm -f core* *.o *.dep
+
+include Makefile.dep
+
