@@ -14,8 +14,9 @@ MersenneTwister::seed(unsigned s)
 	index_ = 0;
 	state_[0] = s;
 	for (unsigned i = 1; i < N_; ++i) {
+		unsigned tmp = state_[i-1]^(state_[i-1]>>30);	
 		state_[i] =  keepLast32BitMask_ &
-		        (1812433253 * (state_[i-1]^(state_[i-1]>>30) + i));
+		        (1812433253 * (tmp + i));
 	}
 }
 
