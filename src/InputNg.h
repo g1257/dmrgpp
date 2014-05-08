@@ -375,7 +375,8 @@ public:
 	class Readable {
 
 		typedef typename Map<String,String,MyCompareType>::Type::iterator MapStringIteratorType;
-		typedef typename Map<String,Vector<String>::Type,MyCompareType>::Type::iterator MapStringVectorIteratorType;
+		typedef typename Map<String,Vector<String>::Type,MyCompareType>::Type::iterator
+		                 MapStringVectorIteratorType;
 
 	public:
 
@@ -384,7 +385,7 @@ public:
 			inputWriteable.set(mapStrStr_,mapStrVec_,labelsForRemoval_);
 		}
 
-		void readline(String& val,const String& label)
+		void readline(String& val,const String& label,bool clean = true)
 		{
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
@@ -392,7 +393,7 @@ public:
 
 			val= it->second.c_str();
 
-			cleanLabelsIfNeeded(label2,mapStrStr_,it);
+			if (clean) cleanLabelsIfNeeded(label2,mapStrStr_,it);
 		}
 
 		template<typename FloatingType>
@@ -633,7 +634,7 @@ public:
 				return stringToReal(s.c_str());
 			}
 
-			std::string buffer("");
+			PsimagLite::String buffer("");
 			SizeType start = 0;
 			for (SizeType i = 1; i < s.length(); ++i) {
 				start = i;

@@ -163,7 +163,7 @@ public:
 		SizeType middle = linSize_/2;
 		if (linSize_ & 1) {
 			std::cerr<<"EXPERIMENTAL: Geometry::split(...): ";
-			std::cerr<<" Lattice is odd (it has "<<linSize_<<" sites).\n"; 
+			std::cerr<<" Lattice is odd (it has "<<linSize_<<" sites).\n";
 			middle++;
 		}
 
@@ -248,8 +248,14 @@ public:
 	{
 		return terms_[t]->handle(ind,jnd);
 	}
+
+	SizeType directions(SizeType term) const
+	{
+		return terms_[term]->directions();
+	}
+
 	// extended functions in GeometryEx
-	
+
 	// friends
 	template<typename RealType2,typename InputType2, typename PgType>
 	friend std::ostream& operator<<(std::ostream& os,

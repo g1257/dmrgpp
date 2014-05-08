@@ -102,7 +102,7 @@ class GeometryTerm {
 	typedef GeometryDirection<ComplexOrRealType,GeometryBaseType> GeometryDirectionType;
 
 	enum {NUMBERS = GeometryDirectionType::NUMBERS,
-		  MATRICES = GeometryDirectionType::MATRICES};
+	      MATRICES = GeometryDirectionType::MATRICES};
 
 public:
 
@@ -271,6 +271,11 @@ public:
 	SizeType handle(SizeType ind, SizeType jnd) const
 	{
 		return geometryBase_->handle(ind,jnd);
+	}
+
+	SizeType directions() const
+	{
+		return geometryBase_->dirs();
 	}
 
 	template<typename ComplexOrRealType_,typename InputType_>

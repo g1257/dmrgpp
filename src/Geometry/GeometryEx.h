@@ -16,22 +16,24 @@ public:
 	typedef typename Vector<RealType>::Type VectorRealType;
 
 	GeometryEx(InputType& io, SizeType meshPoints)
+	: meshLength_(sqrt(meshPoints)),
+	  meshStep_(static_cast<RealType>(2*M_PI/meshLength_)),
+	  enabled_(false)
 	{
-		meshLength_ = sqrt(meshPoints);
-		meshStep_ = static_cast<RealType>(2*M_PI/meshLength_);
 		PsimagLite::String str;
-		io.readline(str,"GeometryKind=");
-		if (str != "star")
-			throw RuntimeError("GeometryEx: expecting GeometryKind=star\n");
+		io.readline(str,"GeometryKind=",false);
+		if (str == "star") enabled_ = true;
 	}
 
 	SizeType dimension(SizeType i = 0) const
 	{
+		assert(enabled_);
 		return 2;
 	}
 
 	void index2Rvector(SizeType r,VectorRealType& rvector) const
 	{
+		assert(enabled_);
 		rvector.resize(2);
 		rvector[0] = 0;
 		rvector[1] = 0;
@@ -39,6 +41,7 @@ public:
 
 	void index2Kvector(SizeType k,VectorRealType& kvector) const
 	{
+		assert(enabled_);
 		kvector.resize(2);
 		kvector[0] = 0;
 		kvector[1] = 0;
@@ -47,23 +50,27 @@ public:
 	//! Number of symmetry operations for this K Geometry.
 	SizeType nGroupK() const
 	{
-		return 1;	
+		assert(enabled_);
+		return 1;
 	}
 
 	SizeType ickequ(SizeType j,SizeType op) const
 	{
-		return 0;	
+		assert(enabled_);
+		return 0;
 	}
 
 	void getMeshVector(VectorRealType& kvector,SizeType k) const
 	{
+		assert(enabled_);
 		div_t q = div(k,meshLength_);
 		kvector[0] = -M_PI + q.quot*meshStep_;
-		kvector[1] = -M_PI + q.rem*meshStep_;	
+		kvector[1] = -M_PI + q.rem*meshStep_;
 	}
 
 	SizeType sizeOfMesh() const
 	{
+		assert(enabled_);
 		return meshLength_*meshLength_;
 	}
 
@@ -71,6 +78,7 @@ private:
 
 	SizeType meshLength_;
 	RealType meshStep_;
+	bool enabled_;
 };
 
 }
