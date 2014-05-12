@@ -106,7 +106,7 @@ public:
 		if (threadId_ != 0) return;
 		if (rank_!=0) return;
 		prefix(os);
-		os<<"\n";
+		os<<s<<"\n";
 	}
 
 	void printline(OstringStream &s,std::ostream& os) const
