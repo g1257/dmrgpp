@@ -90,8 +90,8 @@ namespace MPI {
 
 #ifdef USE_MPI
 typedef MPI_Comm CommType;
-CommType COMM_WORLD = MPI_COMM_WORLD;
-MPI_Op SUM = MPI_SUM;
+static CommType COMM_WORLD = MPI_COMM_WORLD;
+static MPI_Op SUM = MPI_SUM;
 
 template<typename T>
 struct MpiData
@@ -136,15 +136,17 @@ void finalize()
 
 SizeType commSize(CommType mpiComm)
 {
-	int tmp = 0;
-	MPI_Comm_size(mpiComm,&tmp);
+	int tmp = 1;
+	if (mpiComm != 0)
+		MPI_Comm_size(mpiComm,&tmp);
 	return tmp;
 }
 
 SizeType commRank(CommType mpiComm)
 {
 	int tmp = 0;
-	MPI_Comm_rank(mpiComm,&tmp);
+	if (mpiComm != 0)
+		MPI_Comm_rank(mpiComm,&tmp);
 	return tmp;
 }
 
@@ -429,7 +431,8 @@ void>::Type reduce(SomeVectorType& v,
 {
 	SomeVectorType w(v.size());
 	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
-	int errorCode = MPI_Reduce(&(v[0]),&(w[0]),v.size(),datatype,op,root,mpiComm);
+	int errorCode = (mpiComm == 0) ? MPI_SUCCESS :
+	                 MPI_Reduce(&(v[0]),&(w[0]),v.size(),datatype,op,root,mpiComm);
 	checkError(errorCode,"MPI_Reduce",mpiComm);
 
 	if (commRank(mpiComm) == static_cast<SizeType>(root))
@@ -446,7 +449,8 @@ void>::Type reduce(SomeVectorType& v,
 {
 	SomeVectorType w(v.size());
 	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
-	int errorCode = MPI_Reduce(&(v[0]),&(w[0]),2*v.size(),datatype,op,root,mpiComm);
+	int errorCode = (mpiComm == 0) ? MPI_SUCCESS :
+	                 MPI_Reduce(&(v[0]),&(w[0]),2*v.size(),datatype,op,root,mpiComm);
 	checkError(errorCode,"MPI_Reduce",mpiComm);
 
 	if (commRank(mpiComm) == static_cast<SizeType>(root))
