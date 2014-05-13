@@ -435,7 +435,7 @@ void>::Type reduce(SomeVectorType& v,
 	                 MPI_Reduce(&(v[0]),&(w[0]),v.size(),datatype,op,root,mpiComm);
 	checkError(errorCode,"MPI_Reduce",mpiComm);
 
-	if (commRank(mpiComm) == static_cast<SizeType>(root))
+	if (mpiComm && commRank(mpiComm) == static_cast<SizeType>(root))
 		v = w;
 }
 
@@ -453,7 +453,7 @@ void>::Type reduce(SomeVectorType& v,
 	                 MPI_Reduce(&(v[0]),&(w[0]),2*v.size(),datatype,op,root,mpiComm);
 	checkError(errorCode,"MPI_Reduce",mpiComm);
 
-	if (commRank(mpiComm) == static_cast<SizeType>(root))
+	if (mpiComm && commRank(mpiComm) == static_cast<SizeType>(root))
 		v = w;
 }
 
