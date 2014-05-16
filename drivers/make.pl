@@ -32,7 +32,7 @@ sub writeMakefile
 
 	my $libs = "$lapack    -lm  -lpthread";
 	my $cxx = "g++ -O3 -DNDEBUG";
-	my $cppflags = "-Werror -Wall -I../  -I../src";
+	my $cppflags = "-Werror -Wall -Wstrict-overflow=5 -I../  -I../src";
 	Make::make($fh,\@drivers,"PsimagLite","Linux",0,$libs,$cxx,$cppflags,"true"," "," ");
 
 	close($fh);

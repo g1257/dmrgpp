@@ -113,7 +113,7 @@ public:
 
 	void solve(typename Vector<VectorType>::Type& result,
 	           RealType t0,
-	           size_t N,
+	           SizeType N,
 	           const ArrayType& y0) const
 	{
 		ArrayType k1(y0), k2(y0), k3(y0), k4(y0);

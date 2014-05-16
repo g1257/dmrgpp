@@ -1,4 +1,4 @@
-CPPFLAGS = -Werror -Wall -I../  -I../src
+CPPFLAGS = -Werror -Wall -Wstrict-overflow=5 -I../  -I../src
 CXX = g++ -O3 -DNDEBUG
 all: libpsimaglite.a 
 
