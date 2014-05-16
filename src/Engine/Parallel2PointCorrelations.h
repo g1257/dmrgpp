@@ -88,13 +88,13 @@ namespace Dmrg {
 template<typename TwoPointCorrelationsType>
 class Parallel2PointCorrelations {
 
-	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename TwoPointCorrelationsType::MatrixType MatrixType;
 	typedef typename TwoPointCorrelationsType::SparseMatrixType SparseMatrixType;
 	typedef typename MatrixType::value_type FieldType;
 
 public:
 
+	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
 	Parallel2PointCorrelations(MatrixType& w,

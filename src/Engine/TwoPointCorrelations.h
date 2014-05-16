@@ -115,6 +115,8 @@ namespace Dmrg {
 
 		typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 		typedef typename ObserverHelperType::MatrixType MatrixType;
+		typedef Parallel2PointCorrelations<ThisType> Parallel2PointCorrelationsType;
+		typedef typename Parallel2PointCorrelationsType::PairType PairType;
 
 		TwoPointCorrelations(ObserverHelperType& helper,
 			CorrelationsSkeletonType& skeleton,
@@ -131,8 +133,6 @@ namespace Dmrg {
 				SizeType rows,
 				SizeType cols)
 		{
-			typedef std::pair<size_t,size_t> PairType;
-
 			typename PsimagLite::Vector<PairType>::Type pairs;
 			for (SizeType i=0;i<rows;i++) {
 				for (SizeType j=i;j<cols;j++) {
@@ -141,7 +141,6 @@ namespace Dmrg {
 				}
 			}
 
-			typedef Parallel2PointCorrelations<ThisType> Parallel2PointCorrelationsType;
 			typedef PsimagLite::Parallelizer<Parallel2PointCorrelationsType> ParallelizerType;
 			ParallelizerType threaded2Points(PsimagLite::Concurrency::npthreads,
 			                                 PsimagLite::MPI::COMM_WORLD);
