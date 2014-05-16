@@ -215,7 +215,8 @@ namespace Dmrg {
 			int ii=i+1;
 			if (ii>=j) return 0;
 			Word m=0;
-			for (int k=2*ii;k<2*j;k++) m |= (1<<k);
+			SizeType end = 2 * j;
+			for (SizeType k=2*ii;k<end;k++) m |= (1<<k);
 			m = m & ket;
 			return getNofDigits(m,sector);
 		}

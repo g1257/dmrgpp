@@ -156,7 +156,7 @@ sub createMakefile
 	$strip = " true " if ($build eq "debug" or $build eq "callgrind");
 
 
-	my $cppflags= "-Werror -Wall  -IEngine  ";
+	my $cppflags= "-Werror -Wall -Wstrict-overflow=5  -IEngine  ";
 	$cppflags .= "  -I$PsimagLite/src -I$PsimagLite $usePthreadsOrNot $floating";
 
 	Make::make($fh,\@drivers,"DMRG++",$platform,$mpi,"$lapack $pthreadsLib","$compiler $optimizations",$cppflags,$strip,"Engine/Version.h","Engine/Version.h gitrev");

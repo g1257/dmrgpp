@@ -414,7 +414,7 @@ private:
 			if ((HilbertSpaceHubbardType::get(ket,i) &1)) value++;
 
 		}
-		if (value==0 || value%2==0) return 1.0;
+		if (value%2==0) return 1.0;
 
 		return FERMION_SIGN;
 	}
