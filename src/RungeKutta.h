@@ -102,10 +102,10 @@ public:
 	    : f_(f),h_(h),verbose_(false)
 	{ }
 
-	void solve(typename Vector<VectorType>::Type& result,
-	           RealType t0,
-	           RealType t,
-	           const ArrayType& y0) const
+	void solveEx(typename Vector<VectorType>::Type& result,
+	             RealType t0,
+	             RealType t,
+	             const ArrayType& y0) const
 	{
 		SizeType N = static_cast<SizeType> (std::real((t - t0)/h_));
 		solve(result,t0,N,y0);
