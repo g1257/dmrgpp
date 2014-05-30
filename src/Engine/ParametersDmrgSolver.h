@@ -87,441 +87,443 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Provenance.h"
 
 namespace Dmrg {
-	/**
-	\\subsubsection{Enabling finite loops}
-	\\begin{itemize}
-	\\item
-	{\\bf options line:} \\verb=nofiniteloops=: Don't do finite loops, even if provided under {\\bf FiniteLoops} below.
-	\\item {\\bf InfiniteLoopKeptStates} $m$ value for the infinite algorithm.
-	\\item {\\bf FiniteLoops} A series of space-separated numbers. More than one space is allowed. The first
-	number is the number of finite algorithm ``movements,'' followed by series of three numbers for
-	each ``movement''. Of the three numbers, the first is the number of sites to go forward if positive
-	or backward if negative. The second number is the $m$ for this movement and the last number
-	is either 0 or 1, 0 will not save state data to disk and 1 will save all data to be able to calculate
-	observables. The first movement starts from where the infinite loop left off, at the middle of the
-	lattice.
-	\\end{itemize}
+/**
+\\subsubsection{Enabling finite loops}
+\\begin{itemize}
+\\item
+{\\bf options line:} \\verb=nofiniteloops=: Don't do finite loops, even if provided under {\\bf FiniteLoops} below.
+\\item {\\bf InfiniteLoopKeptStates} $m$ value for the infinite algorithm.
+\\item {\\bf FiniteLoops} A series of space-separated numbers. More than one space is allowed. The first
+number is the number of finite algorithm ``movements,'' followed by series of three numbers for
+each ``movement''. Of the three numbers, the first is the number of sites to go forward if positive
+or backward if negative. The second number is the $m$ for this movement and the last number
+is either 0 or 1, 0 will not save state data to disk and 1 will save all data to be able to calculate
+observables. The first movement starts from where the infinite loop left off, at the middle of the
+lattice.
+\\end{itemize}
 
-	\\subsubsection{Example of a Finite loops line in the input file}
-	\\begin{verbatim}
-	FiniteLoops 4 7 200 0 -7 200 0 7 200 1 7 200 1
-	\\end{verbatim}
-	The number 4 implies 4 finite loops. The first fine loop is ``7 200 0'', meaning
-	go forward 7 steps, use $m=200$ for this finite sweep, and 0: do not store transformation in disk.
-	The next is ``-7 200 0'', which goes backwards 7 sites, etc.
-	Remember that the finite loops start at the middle of the lattice, where the infinite loop left off.
-	\\todo{ADD FIGURE SHOWING WHAT THIS DOES.}
+\\subsubsection{Example of a Finite loops line in the input file}
+\\begin{verbatim}
+FiniteLoops 4 7 200 0 -7 200 0 7 200 1 7 200 1
+\\end{verbatim}
+The number 4 implies 4 finite loops. The first fine loop is ``7 200 0'', meaning
+go forward 7 steps, use $m=200$ for this finite sweep, and 0: do not store transformation in disk.
+The next is ``-7 200 0'', which goes backwards 7 sites, etc.
+Remember that the finite loops start at the middle of the lattice, where the infinite loop left off.
+\\todo{ADD FIGURE SHOWING WHAT THIS DOES.}
 
-	\\subsubsection{The third number in the triplet}
-	The save option is a bitwise option where the
-	first bit means  ``save or don't save,'' and the second bit
-	``compute the g.s. or WFT it.''
-	So there are 4 combinations (as of today):
+\\subsubsection{The third number in the triplet}
+The save option is a bitwise option where the
+first bit means  ``save or don't save,'' and the second bit
+``compute the g.s. or WFT it.''
+So there are 4 combinations (as of today):
 
-	\\begin{tabular}{ll}
-	0 & Don't save, compute the g.~s.\\\\
-	1 & Save, compute the g.~s.\\\\
-	2 & Don't save, WFT the g.~s.\\\\
-	3 & Save, WFT the g.~s.\\\\
-	\\end{tabular}
+\\begin{tabular}{ll}
+0 & Don't save, compute the g.~s.\\\\
+1 & Save, compute the g.~s.\\\\
+2 & Don't save, WFT the g.~s.\\\\
+3 & Save, WFT the g.~s.\\\\
+\\end{tabular}
 
-	\\subsubsection{Caveats and Troubleshooting}
-	\\begin{itemize}
-	\\item If \\verb=nofiniteloops= is an option in the options line of the input file then
-	the {\\bf FiniteLoops} line in the input file is ignored, and no finite loops are done.
-	In this case, DMRG++ stops when the infinite algorithm has finished.
+\\subsubsection{Caveats and Troubleshooting}
+\\begin{itemize}
+\\item If \\verb=nofiniteloops= is an option in the options line of the input file then
+the {\\bf FiniteLoops} line in the input file is ignored, and no finite loops are done.
+In this case, DMRG++ stops when the infinite algorithm has finished.
 
-	\\item Make sure the first number is the number of triplets that follow.
-	\\item Make sure
-	you don't fall off the lattice, by going forward or backwards too much.
-	Remember that at least one site must remain for the ``system'' part of the lattice.
-	So on a 16 site chain, when you start the finite loops you're at the middle, you
-	can go forward at most 7 sites, and backwards at most 7 sites.
-	\item There is some checking done to the finite loops input, see !PTEX\\_REF{139},
-	but you might find that it's not comprehensive.
-	\\end{itemize} */
-	struct FiniteLoop {
-		int stepLength; // how much to go right (+) or left (-)
-		SizeType keptStates; // kept states
-		int saveOption; // to save or not to save
-		FiniteLoop(int sl,int ks,int so)
-			: stepLength(sl),keptStates(ks),saveOption(so)
-		{}
-	};
+\\item Make sure the first number is the number of triplets that follow.
+\\item Make sure
+you don't fall off the lattice, by going forward or backwards too much.
+Remember that at least one site must remain for the ``system'' part of the lattice.
+So on a 16 site chain, when you start the finite loops you're at the middle, you
+can go forward at most 7 sites, and backwards at most 7 sites.
+\item There is some checking done to the finite loops input, see !PTEX\\_REF{139},
+but you might find that it's not comprehensive.
+\\end{itemize} */
+struct FiniteLoop {
+	int stepLength; // how much to go right (+) or left (-)
+	SizeType keptStates; // kept states
+	int saveOption; // to save or not to save
 
-	//!PTEX_LABEL{139}
-	inline void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,SizeType totalSites)
-	{
-		PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
-		PsimagLite::String loops = "";
-		int x = totalSites/2-1; // must be signed
-		if (totalSites & 1) x++;
-		if (finiteLoop[0].stepLength<0) x++;
-		int prevDeltaSign = 1;
-		SizeType sopt = 0; // have we started saving yet?
-		for (SizeType i=0;i<finiteLoop.size();i++)  {
-			SizeType thisSaveOption = (finiteLoop[i].saveOption & 1);
-			if (sopt == 1 && thisSaveOption ==0) {
-				s = "Error for finite loop number " + ttos(i) + "\n";
-				s += "Once you say 1 on a finite loop, then all";
-				s += " finite loops that follow must have 1.";
-				throw PsimagLite::RuntimeError(s.c_str());
-			}
-			if (sopt == 0 && thisSaveOption ==1) {
-				sopt = 1;
-				if (SizeType(x) != 1 && SizeType(x)!=totalSites-2) {
-					s = __FILE__ + PsimagLite::String(": FATAL: for finite loop number ")
-						+ ttos(i) + "\n";
-					s += "Saving finite loops must start at the left or";
-					s += " right end of the lattice\n";
-					throw PsimagLite::RuntimeError(s.c_str());
-				}
-			}
-			// naive location:
-			int delta = finiteLoop[i].stepLength;
-			x += delta;
-			loops = loops + ttos(delta) + " ";
+	FiniteLoop(int sl,int ks,int so)
+    : stepLength(sl),keptStates(ks),saveOption(so)
+	{}
+};
 
-			// take care of bounces:
-			if (i>0 && delta*prevDeltaSign < 0) x += prevDeltaSign;
-			prevDeltaSign = 1;
-			if (delta<0) prevDeltaSign = -1;
-
-			// check that we don't fall out
-			bool flag = false;
-			if (x<=0) {
-				s = s + "on the left end\n";
-				flag = true;
-			}
-			if (SizeType(x)>=totalSites-1) {
-				s = s + "on the right end\n";
-				flag = true;
-			}
-			if (flag) {
-				// complain and die if we fell out:
-				s = s + "Loops so far: " + loops + "\n";
-				s =s + "x=" + ttos(x) + " last delta=" +
-						ttos(delta);
-				s =s + " sites=" + ttos(totalSites);
+//!PTEX_LABEL{139}
+inline void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,SizeType totalSites)
+{
+	PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
+	PsimagLite::String loops = "";
+	int x = totalSites/2-1; // must be signed
+	if (totalSites & 1) x++;
+	if (finiteLoop[0].stepLength<0) x++;
+	int prevDeltaSign = 1;
+	SizeType sopt = 0; // have we started saving yet?
+	for (SizeType i=0;i<finiteLoop.size();i++)  {
+		SizeType thisSaveOption = (finiteLoop[i].saveOption & 1);
+		if (sopt == 1 && thisSaveOption ==0) {
+			s = "Error for finite loop number " + ttos(i) + "\n";
+			s += "Once you say 1 on a finite loop, then all";
+			s += " finite loops that follow must have 1.";
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
+		if (sopt == 0 && thisSaveOption ==1) {
+			sopt = 1;
+			if (SizeType(x) != 1 && SizeType(x)!=totalSites-2) {
+				s = __FILE__ + PsimagLite::String(": FATAL: for finite loop number ")
+				        + ttos(i) + "\n";
+				s += "Saving finite loops must start at the left or";
+				s += " right end of the lattice\n";
 				throw PsimagLite::RuntimeError(s.c_str());
 			}
 		}
+		// naive location:
+		int delta = finiteLoop[i].stepLength;
+		x += delta;
+		loops = loops + ttos(delta) + " ";
 
+		// take care of bounces:
+		if (i>0 && delta*prevDeltaSign < 0) x += prevDeltaSign;
+		prevDeltaSign = 1;
+		if (delta<0) prevDeltaSign = -1;
+
+		// check that we don't fall out
+		bool flag = false;
+		if (x<=0) {
+			s = s + "on the left end\n";
+			flag = true;
+		}
+		if (SizeType(x)>=totalSites-1) {
+			s = s + "on the right end\n";
+			flag = true;
+		}
+		if (flag) {
+			// complain and die if we fell out:
+			s = s + "Loops so far: " + loops + "\n";
+			s =s + "x=" + ttos(x) + " last delta=" +
+			        ttos(delta);
+			s =s + " sites=" + ttos(totalSites);
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
 	}
 
-	std::istream &operator>>(std::istream& is,FiniteLoop& fl)
+}
+
+std::istream &operator>>(std::istream& is,FiniteLoop& fl)
+{
+	is>>fl.stepLength;
+	is>>fl.keptStates;
+	is>>fl.saveOption;
+	return is;
+}
+
+std::ostream &operator<<(std::ostream& os,const FiniteLoop& fl)
+{
+	os<<fl.stepLength<<" ";
+	os<<fl.keptStates<<" ";
+	os<<fl.saveOption;
+	return os;
+}
+
+struct DmrgCheckPoint {
+	bool enabled;
+	PsimagLite::String filename;
+};
+
+std::istream &operator>>(std::istream& is,DmrgCheckPoint& c)
+{
+	is>>c.enabled;
+	is>>c.filename;
+	return is;
+}
+
+/** Structure that contains the Dmrg parameters
+\\inputItem{Model}
+A string indicating the model, be it HubbardOneBand HeisenbergSpinOneHalf, etc.
+
+\\inputItem{Options}
+A comma-separated list of strings. At least one of the following strings must be provided:
+\\inputSubItem{none}  Use this when no options are given, since the list of strings must be non-null.
+Note that ``none'' does not disable other options.
+
+\\inputSubItem{hasQuantumNumbers} If this option is given, the program will read the line ``QNS''
+described below and act accordingly. It is recommended that you set this option.  \\\\\n
+\\inputSubItem{wft}  Use the Wave Function Transformation speed-up, which is disabled by default.
+
+\\inputSubItem{useSu2Symmetry} Use the SU(2) symmetry for the model, and interpret quantum numbers in
+the line ``QNS'' appropriately. The option ``hasQuantumNumbers'' must be set for this to work.
+
+\\inputSubItem{nofiniteloops}  Don't do finite loops, even if provided under ``FiniteLoops'' below.
+
+\\inputItem{version}  A mandatory string that is read and ignored. Usually contains the result
+of doing ``git rev-parse HEAD''.
+
+\\inputItem{outputfile}  The output file. This file will be created if non-existent, and if it
+exits it will be truncated.
+
+\\inputItem{InfiniteLoopKeptStates}  ``m'' value for the infinite algorithm.
+
+\\inputItem{FiniteLoops} A series of space-separated numbers. More than one space is allowed.
+The first number is the number of finite algorithm ``movements'', followed by series
+of three numbers for each ``movement''. Of the three numbers, the first
+is the number of sites to go forward if positive or backward if negative.
+The second number is the ``m'' for this ``movement' and the last number is either 0 or 1,
+0 will not save state data to disk and 1 will save all data to be able to calculate observables.
+The first ``movement'' starts from where the infinite loop left off, at the middle of the lattice.
+\\inputItem{QNS}  A space-separated list of numbers. More than one space is allowed.
+The first number is the number of numbers to follow, these numbers being the density of quantum
+numbers for each conserved quantum number to be used.
+In a simpler way, usually this is 3 followed by $n_\\uparrow n_\\downarrow 0$  if not using
+SU(2) symmetry, where  $n_\\uparrow$, and $n_\\downarrow$ are the densities of up and down
+electrons respectively. If there is SU(2) symmetry then this is 3 followed by $n_\\uparrow n_\\downarrow j$,
+where $n_\\uparrow$, and $n_\\downarrow$ are the densities of up and down
+electrons respectively, and $j$ is twice the angular momentum divided by the number of sites.
+*/
+template<typename FieldType,typename InputValidatorType>
+struct ParametersDmrgSolver {
+
+	SizeType electronsUp;
+	SizeType electronsDown;
+	SizeType nthreads;
+	SizeType sitesPerBlock;
+	SizeType maxMatrixRankStored;
+	SizeType keptStatesInfinite;
+	int useReflectionSymmetry;
+	FieldType tolerance;
+	std::pair<bool,FieldType> gsWeight;
+	PsimagLite::String filename;
+	PsimagLite::String version;
+	PsimagLite::String options;
+	PsimagLite::String model;
+	PsimagLite::String insitu;
+	PsimagLite::String fileForDensityMatrixEigs;
+	DmrgCheckPoint checkpoint;
+	typename PsimagLite::Vector<FieldType>::Type targetQuantumNumbers;
+	typename PsimagLite::Vector<SizeType>::Type adjustQuantumNumbers;
+	typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
+
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,PsimagLite::String msg) const
 	{
-		is>>fl.stepLength;
-		is>>fl.keptStates;
-		is>>fl.saveOption;
-		return is;
+		PsimagLite::String str = msg;
+		msg += "ParametersDmrgSolver";
+		const char* start = (const char *)&electronsUp;
+		const char* end = (const char*)&electronsDown;
+		SizeType total = mres.memResolv(&electronsUp,end-start,str + "electronsUp");
+		start = end;
+		end = (const char*)&nthreads;
+		total += mres.memResolv(&electronsDown,end-start,str + "electronsDown");
+		start = end;
+		end = (const char*)&sitesPerBlock;
+		total += mres.memResolv(&nthreads,end-start,str + "nthreads");
+		start = end;
+		end = (const char*)&maxMatrixRankStored;
+		total += mres.memResolv(&sitesPerBlock,end-start,str + "sitesPerBlock");
+		start = end;
+		end = (const char*)&keptStatesInfinite;
+		total += mres.memResolv(&maxMatrixRankStored,end-start,str + "maxMatrixRankStored");
+		start = end;
+		end = (const char*)&useReflectionSymmetry;
+		total += mres.memResolv(&keptStatesInfinite,end-start,str + "keptStatesInfinite");
+		start = end;
+		end = (const char*)&tolerance;
+		total += mres.memResolv(&useReflectionSymmetry,end-start,str + "useReflectionSymmetry");
+		return total;
 	}
 
-	std::ostream &operator<<(std::ostream& os,const FiniteLoop& fl)
+	//! Read Dmrg parameters from inp file
+	ParametersDmrgSolver(InputValidatorType& io)
+	    : sitesPerBlock(1),
+	      maxMatrixRankStored(0),
+	      gsWeight(false,0.0)
 	{
-		os<<fl.stepLength<<" ";
-		os<<fl.keptStates<<" ";
-		os<<fl.saveOption;
-		return os;
-	}
-
-	struct DmrgCheckPoint {
-		bool enabled;
-		PsimagLite::String filename;
-	};
-
-	std::istream &operator>>(std::istream& is,DmrgCheckPoint& c)
-	{
-		is>>c.enabled;
-		is>>c.filename;
-		return is;
-	}
-
-	/** Structure that contains the Dmrg parameters
-	\\inputItem{Model}
-	A string indicating the model, be it HubbardOneBand HeisenbergSpinOneHalf, etc.
-
-	\\inputItem{Options}
-	A comma-separated list of strings. At least one of the following strings must be provided:
-	\\inputSubItem{none}  Use this when no options are given, since the list of strings must be non-null.
-	Note that ``none'' does not disable other options.
-
-	\\inputSubItem{hasQuantumNumbers} If this option is given, the program will read the line ``QNS''
-	described below and act accordingly. It is recommended that you set this option.  \\\\\n
-	\\inputSubItem{wft}  Use the Wave Function Transformation speed-up, which is disabled by default.
-
-	\\inputSubItem{useSu2Symmetry} Use the SU(2) symmetry for the model, and interpret quantum numbers in
-	the line ``QNS'' appropriately. The option ``hasQuantumNumbers'' must be set for this to work.
-
-	\\inputSubItem{nofiniteloops}  Don't do finite loops, even if provided under ``FiniteLoops'' below.
-
-	\\inputItem{version}  A mandatory string that is read and ignored. Usually contains the result
-	of doing ``git rev-parse HEAD''.
-
-	\\inputItem{outputfile}  The output file. This file will be created if non-existent, and if it
-	exits it will be truncated.
-
-	\\inputItem{InfiniteLoopKeptStates}  ``m'' value for the infinite algorithm.
-
-	\\inputItem{FiniteLoops} A series of space-separated numbers. More than one space is allowed.
-	The first number is the number of finite algorithm ``movements'', followed by series
-	of three numbers for each ``movement''. Of the three numbers, the first
-	is the number of sites to go forward if positive or backward if negative.
-	The second number is the ``m'' for this ``movement' and the last number is either 0 or 1,
-	0 will not save state data to disk and 1 will save all data to be able to calculate observables.
-	The first ``movement'' starts from where the infinite loop left off, at the middle of the lattice.
-	\\inputItem{QNS}  A space-separated list of numbers. More than one space is allowed.
-	The first number is the number of numbers to follow, these numbers being the density of quantum
-	numbers for each conserved quantum number to be used.
-	In a simpler way, usually this is 3 followed by $n_\\uparrow n_\\downarrow 0$  if not using
-	SU(2) symmetry, where  $n_\\uparrow$, and $n_\\downarrow$ are the densities of up and down
-	electrons respectively. If there is SU(2) symmetry then this is 3 followed by $n_\\uparrow n_\\downarrow j$,
-	where $n_\\uparrow$, and $n_\\downarrow$ are the densities of up and down
-	electrons respectively, and $j$ is twice the angular momentum divided by the number of sites.
-	*/
-	template<typename FieldType,typename InputValidatorType>
-	struct ParametersDmrgSolver {
-		SizeType electronsUp;
-		SizeType electronsDown;
-		SizeType nthreads;
-		SizeType sitesPerBlock;
-		SizeType maxMatrixRankStored;
-		SizeType keptStatesInfinite;
-		int useReflectionSymmetry;
-		FieldType tolerance;
-		std::pair<bool,FieldType> gsWeight;
-		PsimagLite::String filename;
-		PsimagLite::String version;
-		PsimagLite::String options;
-		PsimagLite::String model;
-		PsimagLite::String insitu;
-		PsimagLite::String fileForDensityMatrixEigs;
-		DmrgCheckPoint checkpoint;
-		typename PsimagLite::Vector<FieldType>::Type targetQuantumNumbers;
-		typename PsimagLite::Vector<SizeType>::Type adjustQuantumNumbers;
-		typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
-
-		template<typename SomeMemResolvType>
-		SizeType memResolv(SomeMemResolvType& mres,PsimagLite::String msg) const
-		{
-			PsimagLite::String str = msg;
-			msg += "ParametersDmrgSolver";
-			const char* start = (const char *)&electronsUp;
-			const char* end = (const char*)&electronsDown;
-			SizeType total = mres.memResolv(&electronsUp,end-start,str + "electronsUp");
-			start = end;
-			end = (const char*)&nthreads;
-			total += mres.memResolv(&electronsDown,end-start,str + "electronsDown");
-			start = end;
-			end = (const char*)&sitesPerBlock;
-			total += mres.memResolv(&nthreads,end-start,str + "nthreads");
-			start = end;
-			end = (const char*)&maxMatrixRankStored;
-			total += mres.memResolv(&sitesPerBlock,end-start,str + "sitesPerBlock");
-			start = end;
-			end = (const char*)&keptStatesInfinite;
-			total += mres.memResolv(&maxMatrixRankStored,end-start,str + "maxMatrixRankStored");
-			start = end;
-			end = (const char*)&useReflectionSymmetry;
-			total += mres.memResolv(&keptStatesInfinite,end-start,str + "keptStatesInfinite");
-			start = end;
-			end = (const char*)&tolerance;
-			total += mres.memResolv(&useReflectionSymmetry,end-start,str + "useReflectionSymmetry");
-			return total;
+		io.readline(model,"Model=");
+		io.readline(options,"SolverOptions=");
+		io.readline(version,"Version=");
+		io.readline(filename,"OutputFile=");
+		io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
+		typename PsimagLite::Vector<FieldType>::Type tmpVec;
+		io.read(tmpVec,"FiniteLoops");
+		for (SizeType i=0;i<tmpVec.size();i+=3) {
+			typename PsimagLite::Vector<int>::Type xTmp(3);
+			for (SizeType j=0;j<xTmp.size();j++) xTmp[j]=int(tmpVec[i+j]);
+			FiniteLoop fl(xTmp[0],xTmp[1],xTmp[2]);
+			finiteLoop.push_back(fl);
 		}
 
-		//! Read Dmrg parameters from inp file
-		ParametersDmrgSolver(InputValidatorType& io)
-		    : sitesPerBlock(1),
-		      maxMatrixRankStored(0),
-		      gsWeight(false,0.0)
-		{
-			io.readline(model,"Model=");
-			io.readline(options,"SolverOptions=");
-			io.readline(version,"Version=");
-			io.readline(filename,"OutputFile=");
-			io.readline(keptStatesInfinite,"InfiniteLoopKeptStates=");
-			typename PsimagLite::Vector<FieldType>::Type tmpVec;
-			io.read(tmpVec,"FiniteLoops");
-			for (SizeType i=0;i<tmpVec.size();i+=3) {
-				typename PsimagLite::Vector<int>::Type xTmp(3);
-				for (SizeType j=0;j<xTmp.size();j++) xTmp[j]=int(tmpVec[i+j]);
-				FiniteLoop fl(xTmp[0],xTmp[1],xTmp[2]);
+		SizeType repeat = 0;
+
+		try {
+			io.readline(repeat,"RepeatFiniteLoopsTimes=");
+		}  catch (std::exception& e) {}
+
+		SizeType fromFl = 0;
+		try {
+			io.readline(fromFl,"RepeatFiniteLoopsFrom=");
+		}  catch (std::exception& e) {}
+
+		SizeType upToFl = finiteLoop.size()-1;
+		try {
+			io.readline(upToFl,"RepeatFiniteLoopsTo=");
+		}  catch (std::exception& e) {}
+
+		if (upToFl>=finiteLoop.size()) {
+			PsimagLite::String s (__FILE__);
+			s += "\nFATAL: RepeatFiniteLoopsTo=" + ttos(upToFl) + " is larger than current finite loops\n";
+			s += "\nMaximum is " + ttos(finiteLoop.size())+ "\n";
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
+		if (fromFl>upToFl) {
+			PsimagLite::String s (__FILE__);
+			s += "\nFATAL: RepeatFiniteLoopsFrom=" + ttos(fromFl) + " is larger than RepeatFiniteLoopsTo\n";
+			s += "\nMaximum is " + ttos(upToFl)+ "\n";
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
+		upToFl++;
+
+		for (SizeType i=0;i<repeat;i++) {
+			for (SizeType j=fromFl;j<upToFl;j++) {
+				FiniteLoop fl = finiteLoop[j];
 				finiteLoop.push_back(fl);
 			}
-
-			SizeType repeat = 0;
-
-			try {
-				io.readline(repeat,"RepeatFiniteLoopsTimes=");
-			}  catch (std::exception& e) {}
-
-			SizeType fromFl = 0;
-			try {
-				io.readline(fromFl,"RepeatFiniteLoopsFrom=");
-			}  catch (std::exception& e) {}
-
-			SizeType upToFl = finiteLoop.size()-1;
-			try {
-				io.readline(upToFl,"RepeatFiniteLoopsTo=");
-			}  catch (std::exception& e) {}
-
-			if (upToFl>=finiteLoop.size()) {
-				PsimagLite::String s (__FILE__);
-				s += "\nFATAL: RepeatFiniteLoopsTo=" + ttos(upToFl) + " is larger than current finite loops\n";
-				s += "\nMaximum is " + ttos(finiteLoop.size())+ "\n";
-				throw PsimagLite::RuntimeError(s.c_str());
-			}
-			if (fromFl>upToFl) {
-				PsimagLite::String s (__FILE__);
-				s += "\nFATAL: RepeatFiniteLoopsFrom=" + ttos(fromFl) + " is larger than RepeatFiniteLoopsTo\n";
-				s += "\nMaximum is " + ttos(upToFl)+ "\n";
-				throw PsimagLite::RuntimeError(s.c_str());
-			}
-			upToFl++;
-
-			for (SizeType i=0;i<repeat;i++) {
-				for (SizeType j=fromFl;j<upToFl;j++) {
-					FiniteLoop fl = finiteLoop[j];
-					finiteLoop.push_back(fl);
-				}
-			}
-
-			if (options.find("hasQuantumNumbers")!=PsimagLite::String::npos) {
-				PsimagLite::String s = "*** WARNING: hasQuantumNumbers ";
-				s += "option is obsolete in input file\n";
-				std::cerr<<s;
-			}
-			try {
-				io.read(targetQuantumNumbers,"TargetQuantumNumbers");
-				PsimagLite::String s = "*** WARNING: TargetQuantumNumbers ";
-				s += "is deprecated in input file\n";
-				std::cerr<<s;
-			} catch (std::exception& e) {}
-
-			bool hasElectrons = false;
-			try {
-				io.readline(electronsUp,"TargetElectronsUp");
-				io.readline(electronsDown,"TargetElectronsDown");
-				hasElectrons = true;
-			} catch (std::exception& e) {}
-
-			if (hasElectrons && targetQuantumNumbers.size()>0) {
-				PsimagLite::String s (__FILE__);
-				s += "\nFATAL: Specifying both TargetElectronsUp/Down and TargetQuantumNumbers is an error.";
-				s += "\nSpecify one or the other only.\n";
-				throw PsimagLite::RuntimeError(s.c_str());
-			}
-
-			if (!hasElectrons && targetQuantumNumbers.size()==0) {
-				PsimagLite::String s (__FILE__);
-				s += "\nFATAL: Either TargetElectronsUp/Down or TargetQuantumNumbers must be specified.\n";
-				throw PsimagLite::RuntimeError(s.c_str());
-			}
-
-			if (options.find("useSu2Symmetry")!=PsimagLite::String::npos && hasElectrons) {
-				PsimagLite::String s (__FILE__);
-				s += "\nFATAL: TargetElectronsUp/Down cannot be specified while using SU(2) symmetry\n";
-				s += "\nTargetQuantumNumbers must be specified instead.\n";
-				throw PsimagLite::RuntimeError(s.c_str());
-			}
-
-			try {
-				io.read(adjustQuantumNumbers,"AdjustQuantumNumbers");
-			} catch (std::exception& e) {}
-
-			tolerance = -1.0;
-			try {
-				io.readline(tolerance,"TruncationTolerance=");
-			} catch (std::exception& e) {}
-
-			if (options.find("checkpoint")!=PsimagLite::String::npos)
-				io.readline(checkpoint.filename,"CheckpointFilename=");
-			else if (options.find("restart")!=PsimagLite::String::npos)
-				io.readline(checkpoint.filename,"RestartFilename=");
-
-			nthreads=1; // provide a default value
-			try {
-				io.readline(nthreads,"Threads=");
-			} catch (std::exception& e) {}
-
-			if (nthreads==0) {
-				PsimagLite::String s (__FILE__);
-				s += "\nFATAL: nthreads cannot be zero\n";
-				throw PsimagLite::RuntimeError(s.c_str());
-			}
-
-			useReflectionSymmetry=0;
-			try {
-				io.readline(useReflectionSymmetry,"UseReflectionSymmetry=");
-			} catch (std::exception& e) {}
-			fileForDensityMatrixEigs="";
-			try {
-				io.readline(fileForDensityMatrixEigs,"FileForDensityMatrixEigs=");
-			} catch (std::exception& e) {}
-
-			insitu = "";
-			try {
-				io.readline(insitu,"insitu=");
-			} catch (std::exception& e) {}
-
-			try {
-				io.readline(sitesPerBlock,"SitesPerBlock=");
-			} catch (std::exception& e) {}
-
-			try {
-				io.readline(gsWeight.second,"GsWeight=");
-				gsWeight.first = true;
-			} catch (std::exception& e) {}
-
-			try {
-				io.readline(maxMatrixRankStored,"MaxMatrixRankStored=");
-			} catch (std::exception& e) {}
 		}
-	};
 
-	//! print dmrg parameters
-	template<typename FieldType,typename InputValidatorType>
-	std::ostream &operator<<(std::ostream &os,
-				 ParametersDmrgSolver<FieldType,InputValidatorType> const &parameters)
-	{
-		os<<"#This is DMRG++\n";
-		Provenance provenance;
-		os<<provenance;
-		os<<"parameters.version="<<parameters.version<<"\n";
-		os<<"parameters.model="<<parameters.model<<"\n";
-		os<<"parameters.filename="<<parameters.filename<<"\n";
-		os<<"parameters.options="<<parameters.options<<"\n";
-		os<<"parameters.keptStatesInfinite="<<parameters.keptStatesInfinite<<"\n";
-		os<<"finiteLoop\n";
-		os<<parameters.finiteLoop;
-
-		if (parameters.targetQuantumNumbers.size()>0) {
-			os<<"parameters.targetQuantumNumbers=";
-			for (SizeType i=0;i<parameters.targetQuantumNumbers.size();i++)
-				os<<parameters.targetQuantumNumbers[i]<<" ";
-			os<<"\n";
-		} else {
-			os<<"parameters.electronsUp="<<parameters.electronsUp<<"\n";
-			os<<"parameters.electronsDown="<<parameters.electronsDown<<"\n";
+		if (options.find("hasQuantumNumbers")!=PsimagLite::String::npos) {
+			PsimagLite::String s = "*** WARNING: hasQuantumNumbers ";
+			s += "option is obsolete in input file\n";
+			std::cerr<<s;
 		}
-		if (parameters.tolerance>0)
-			os<<"parameters.tolerance="<<parameters.tolerance<<"\n";
-		os<<"parameters.nthreads="<<parameters.nthreads<<"\n";
-		os<<"parameters.useReflectionSymmetry="<<parameters.useReflectionSymmetry<<"\n";
-		if (parameters.checkpoint.filename!="")
-			os<<"parameters.restartFilename="<<parameters.checkpoint.filename<<"\n";
-		if (parameters.fileForDensityMatrixEigs!="")
-			os<<"parameters.fileForDensityMatrixEigs="<<parameters.fileForDensityMatrixEigs<<"\n";
+		try {
+			io.read(targetQuantumNumbers,"TargetQuantumNumbers");
+			PsimagLite::String s = "*** WARNING: TargetQuantumNumbers ";
+			s += "is deprecated in input file\n";
+			std::cerr<<s;
+		} catch (std::exception& e) {}
 
-		if (parameters.gsWeight.first)
-			os<<"GsWeight="<<parameters.gsWeight.second<<"\n";
+		bool hasElectrons = false;
+		try {
+			io.readline(electronsUp,"TargetElectronsUp");
+			io.readline(electronsDown,"TargetElectronsDown");
+			hasElectrons = true;
+		} catch (std::exception& e) {}
 
-		if (parameters.options.find("MatrixVectorStored")==PsimagLite::String::npos)
-			os<<"MaxMatrixRankStored="<<parameters.maxMatrixRankStored<<"\n";
+		if (hasElectrons && targetQuantumNumbers.size()>0) {
+			PsimagLite::String s (__FILE__);
+			s += "\nFATAL: Specifying both TargetElectronsUp/Down and TargetQuantumNumbers is an error.";
+			s += "\nSpecify one or the other only.\n";
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
 
-		return os;
+		if (!hasElectrons && targetQuantumNumbers.size()==0) {
+			PsimagLite::String s (__FILE__);
+			s += "\nFATAL: Either TargetElectronsUp/Down or TargetQuantumNumbers must be specified.\n";
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
+
+		if (options.find("useSu2Symmetry")!=PsimagLite::String::npos && hasElectrons) {
+			PsimagLite::String s (__FILE__);
+			s += "\nFATAL: TargetElectronsUp/Down cannot be specified while using SU(2) symmetry\n";
+			s += "\nTargetQuantumNumbers must be specified instead.\n";
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
+
+		try {
+			io.read(adjustQuantumNumbers,"AdjustQuantumNumbers");
+		} catch (std::exception& e) {}
+
+		tolerance = -1.0;
+		try {
+			io.readline(tolerance,"TruncationTolerance=");
+		} catch (std::exception& e) {}
+
+		if (options.find("checkpoint")!=PsimagLite::String::npos)
+			io.readline(checkpoint.filename,"CheckpointFilename=");
+		else if (options.find("restart")!=PsimagLite::String::npos)
+			io.readline(checkpoint.filename,"RestartFilename=");
+
+		nthreads=1; // provide a default value
+		try {
+			io.readline(nthreads,"Threads=");
+		} catch (std::exception& e) {}
+
+		if (nthreads==0) {
+			PsimagLite::String s (__FILE__);
+			s += "\nFATAL: nthreads cannot be zero\n";
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
+
+		useReflectionSymmetry=0;
+		try {
+			io.readline(useReflectionSymmetry,"UseReflectionSymmetry=");
+		} catch (std::exception& e) {}
+		fileForDensityMatrixEigs="";
+		try {
+			io.readline(fileForDensityMatrixEigs,"FileForDensityMatrixEigs=");
+		} catch (std::exception& e) {}
+
+		insitu = "";
+		try {
+			io.readline(insitu,"insitu=");
+		} catch (std::exception& e) {}
+
+		try {
+			io.readline(sitesPerBlock,"SitesPerBlock=");
+		} catch (std::exception& e) {}
+
+		try {
+			io.readline(gsWeight.second,"GsWeight=");
+			gsWeight.first = true;
+		} catch (std::exception& e) {}
+
+		try {
+			io.readline(maxMatrixRankStored,"MaxMatrixRankStored=");
+		} catch (std::exception& e) {}
 	}
+};
+
+//! print dmrg parameters
+template<typename FieldType,typename InputValidatorType>
+std::ostream &operator<<(std::ostream &os,
+                         ParametersDmrgSolver<FieldType,InputValidatorType> const &parameters)
+{
+	os<<"#This is DMRG++\n";
+	Provenance provenance;
+	os<<provenance;
+	os<<"parameters.version="<<parameters.version<<"\n";
+	os<<"parameters.model="<<parameters.model<<"\n";
+	os<<"parameters.filename="<<parameters.filename<<"\n";
+	os<<"parameters.options="<<parameters.options<<"\n";
+	os<<"parameters.keptStatesInfinite="<<parameters.keptStatesInfinite<<"\n";
+	os<<"finiteLoop\n";
+	os<<parameters.finiteLoop;
+
+	if (parameters.targetQuantumNumbers.size()>0) {
+		os<<"parameters.targetQuantumNumbers=";
+		for (SizeType i=0;i<parameters.targetQuantumNumbers.size();i++)
+			os<<parameters.targetQuantumNumbers[i]<<" ";
+		os<<"\n";
+	} else {
+		os<<"parameters.electronsUp="<<parameters.electronsUp<<"\n";
+		os<<"parameters.electronsDown="<<parameters.electronsDown<<"\n";
+	}
+	if (parameters.tolerance>0)
+		os<<"parameters.tolerance="<<parameters.tolerance<<"\n";
+	os<<"parameters.nthreads="<<parameters.nthreads<<"\n";
+	os<<"parameters.useReflectionSymmetry="<<parameters.useReflectionSymmetry<<"\n";
+	if (parameters.checkpoint.filename!="")
+		os<<"parameters.restartFilename="<<parameters.checkpoint.filename<<"\n";
+	if (parameters.fileForDensityMatrixEigs!="")
+		os<<"parameters.fileForDensityMatrixEigs="<<parameters.fileForDensityMatrixEigs<<"\n";
+
+	if (parameters.gsWeight.first)
+		os<<"GsWeight="<<parameters.gsWeight.second<<"\n";
+
+	if (parameters.options.find("MatrixVectorStored")==PsimagLite::String::npos)
+		os<<"MaxMatrixRankStored="<<parameters.maxMatrixRankStored<<"\n";
+
+	return os;
+}
 } // namespace Dmrg
 /*@}*/
 
