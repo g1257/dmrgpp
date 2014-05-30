@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Provenance.h"
 
 namespace Dmrg {
-	/** 
+	/**
 	\\subsubsection{Enabling finite loops}
 	\\begin{itemize}
 	\\item
@@ -128,16 +128,16 @@ namespace Dmrg {
 	\\subsubsection{Caveats and Troubleshooting}
 	\\begin{itemize}
 	\\item If \\verb=nofiniteloops= is an option in the options line of the input file then
-	the {\\bf FiniteLoops} line in the input file is ignored, and no finite loops are done. 
+	the {\\bf FiniteLoops} line in the input file is ignored, and no finite loops are done.
 	In this case, DMRG++ stops when the infinite algorithm has finished.
 
-	\\item Make sure the first number is the number of triplets that follow. 
+	\\item Make sure the first number is the number of triplets that follow.
 	\\item Make sure
 	you don't fall off the lattice, by going forward or backwards too much.
 	Remember that at least one site must remain for the ``system'' part of the lattice.
 	So on a 16 site chain, when you start the finite loops you're at the middle, you
 	can go forward at most 7 sites, and backwards at most 7 sites.
-	\item There is some checking done to the finite loops input, see !PTEX\\_REF{139}, 
+	\item There is some checking done to the finite loops input, see !PTEX\\_REF{139},
 	but you might find that it's not comprehensive.
 	\\end{itemize} */
 	struct FiniteLoop {
@@ -181,7 +181,7 @@ namespace Dmrg {
 			int delta = finiteLoop[i].stepLength;
 			x += delta;
 			loops = loops + ttos(delta) + " ";
-				
+
 			// take care of bounces:
 			if (i>0 && delta*prevDeltaSign < 0) x += prevDeltaSign;
 			prevDeltaSign = 1;
@@ -206,9 +206,9 @@ namespace Dmrg {
 				throw PsimagLite::RuntimeError(s.c_str());
 			}
 		}
-			
+
 	}
-	
+
 	std::istream &operator>>(std::istream& is,FiniteLoop& fl)
 	{
 		is>>fl.stepLength;
@@ -234,7 +234,7 @@ namespace Dmrg {
 	{
 		is>>c.enabled;
 		is>>c.filename;
-		return is;	
+		return is;
 	}
 
 	/** Structure that contains the Dmrg parameters
@@ -246,11 +246,11 @@ namespace Dmrg {
 	\\inputSubItem{none}  Use this when no options are given, since the list of strings must be non-null.
 	Note that ``none'' does not disable other options.
 
-	\\inputSubItem{hasQuantumNumbers} If this option is given, the program will read the line ``QNS'' 
+	\\inputSubItem{hasQuantumNumbers} If this option is given, the program will read the line ``QNS''
 	described below and act accordingly. It is recommended that you set this option.  \\\\\n
 	\\inputSubItem{wft}  Use the Wave Function Transformation speed-up, which is disabled by default.
 
-	\\inputSubItem{useSu2Symmetry} Use the SU(2) symmetry for the model, and interpret quantum numbers in 
+	\\inputSubItem{useSu2Symmetry} Use the SU(2) symmetry for the model, and interpret quantum numbers in
 	the line ``QNS'' appropriately. The option ``hasQuantumNumbers'' must be set for this to work.
 
 	\\inputSubItem{nofiniteloops}  Don't do finite loops, even if provided under ``FiniteLoops'' below.
@@ -281,31 +281,41 @@ namespace Dmrg {
 	*/
 	template<typename FieldType,typename InputValidatorType>
 	struct ParametersDmrgSolver {
-
+		SizeType electronsUp;
+		SizeType electronsDown;
+		SizeType nthreads;
+		SizeType sitesPerBlock;
+		SizeType maxMatrixRankStored;
+		int useReflectionSymmetry;
 		PsimagLite::String filename;
 		SizeType keptStatesInfinite;
-		typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
+		FieldType tolerance;
+		std::pair<bool,FieldType> gsWeight;
 		PsimagLite::String version;
 		PsimagLite::String options;
 		PsimagLite::String model;
-		typename PsimagLite::Vector<FieldType>::Type targetQuantumNumbers;
-		SizeType electronsUp,electronsDown;
-		typename PsimagLite::Vector<SizeType>::Type adjustQuantumNumbers;
-		FieldType tolerance;
-		DmrgCheckPoint checkpoint;
-		SizeType nthreads;
-		int useReflectionSymmetry;
-		PsimagLite::String fileForDensityMatrixEigs;
 		PsimagLite::String insitu;
-		SizeType sitesPerBlock;
-		std::pair<bool,FieldType> gsWeight;
-		SizeType maxMatrixRankStored;
+		PsimagLite::String fileForDensityMatrixEigs;
+		typename PsimagLite::Vector<FieldType>::Type targetQuantumNumbers;
+		typename PsimagLite::Vector<SizeType>::Type adjustQuantumNumbers;
+		typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
+		DmrgCheckPoint checkpoint;
+
+		template<typename SomeMemResolvType>
+		SizeType memResolv(SomeMemResolvType& mres) const
+		{
+			PsimagLite::String str("ParametersDmrgSolver");
+			SizeType integersSize = 6*8;
+			SizeType total = integersSize;
+			mres.push(SomeMemResolvType::MEMORY_DATA,integersSize,this,str + " integers");
+			return total;
+		}
 
 		//! Read Dmrg parameters from inp file
 		ParametersDmrgSolver(InputValidatorType& io)
 		    : sitesPerBlock(1),
-		      gsWeight(false,0.0),
-		      maxMatrixRankStored(0)
+		      maxMatrixRankStored(0),
+		      gsWeight(false,0.0)
 		{
 			io.readline(model,"Model=");
 			io.readline(options,"SolverOptions=");
