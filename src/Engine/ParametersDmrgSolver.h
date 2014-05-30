@@ -286,28 +286,47 @@ namespace Dmrg {
 		SizeType nthreads;
 		SizeType sitesPerBlock;
 		SizeType maxMatrixRankStored;
-		int useReflectionSymmetry;
-		PsimagLite::String filename;
 		SizeType keptStatesInfinite;
+		int useReflectionSymmetry;
 		FieldType tolerance;
 		std::pair<bool,FieldType> gsWeight;
+		PsimagLite::String filename;
 		PsimagLite::String version;
 		PsimagLite::String options;
 		PsimagLite::String model;
 		PsimagLite::String insitu;
 		PsimagLite::String fileForDensityMatrixEigs;
+		DmrgCheckPoint checkpoint;
 		typename PsimagLite::Vector<FieldType>::Type targetQuantumNumbers;
 		typename PsimagLite::Vector<SizeType>::Type adjustQuantumNumbers;
 		typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
-		DmrgCheckPoint checkpoint;
 
 		template<typename SomeMemResolvType>
-		SizeType memResolv(SomeMemResolvType& mres) const
+		SizeType memResolv(SomeMemResolvType& mres,PsimagLite::String msg) const
 		{
-			PsimagLite::String str("ParametersDmrgSolver");
-			SizeType integersSize = 6*8;
-			SizeType total = integersSize;
-			mres.push(SomeMemResolvType::MEMORY_DATA,integersSize,this,str + " integers");
+			PsimagLite::String str = msg;
+			msg += "ParametersDmrgSolver";
+			const char* start = (const char *)&electronsUp;
+			const char* end = (const char*)&electronsDown;
+			SizeType total = mres.memResolv(&electronsUp,end-start,str + "electronsUp");
+			start = end;
+			end = (const char*)&nthreads;
+			total += mres.memResolv(&electronsDown,end-start,str + "electronsDown");
+			start = end;
+			end = (const char*)&sitesPerBlock;
+			total += mres.memResolv(&nthreads,end-start,str + "nthreads");
+			start = end;
+			end = (const char*)&maxMatrixRankStored;
+			total += mres.memResolv(&sitesPerBlock,end-start,str + "sitesPerBlock");
+			start = end;
+			end = (const char*)&keptStatesInfinite;
+			total += mres.memResolv(&maxMatrixRankStored,end-start,str + "maxMatrixRankStored");
+			start = end;
+			end = (const char*)&useReflectionSymmetry;
+			total += mres.memResolv(&keptStatesInfinite,end-start,str + "keptStatesInfinite");
+			start = end;
+			end = (const char*)&tolerance;
+			total += mres.memResolv(&useReflectionSymmetry,end-start,str + "useReflectionSymmetry");
 			return total;
 		}
 
