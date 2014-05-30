@@ -142,12 +142,31 @@ but you might find that it's not comprehensive.
 \\end{itemize} */
 struct FiniteLoop {
 	int stepLength; // how much to go right (+) or left (-)
-	SizeType keptStates; // kept states
+	unsigned int keptStates; // kept states
 	int saveOption; // to save or not to save
 
-	FiniteLoop(int sl,int ks,int so)
+	FiniteLoop(int sl,unsigned int ks,int so)
     : stepLength(sl),keptStates(ks),saveOption(so)
 	{}
+
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		msg += "FiniteLoop";
+		const char* start = (const char *)&stepLength;
+		const char* end = (const char*)&keptStates;
+		SizeType total = mres.memResolv(&stepLength,end-start,str + " stepLength");
+
+		start = end;
+		end = (const char*)&saveOption;
+		total += mres.memResolv(&keptStates,end-start,str + " keptStates");
+		total += mres.memResolv(&saveOption,sizeof(*this)-total,str + " saveOption");
+
+		return total;
+	}
 };
 
 //!PTEX_LABEL{139}
@@ -242,9 +261,9 @@ struct DmrgCheckPoint {
 		msg += "DmrgCheckPoint";
 		const char* start = (const char *)&enabled;
 		const char* end = (const char*)&filename;
-		SizeType total = mres.memResolv(&enabled,end-start,str + "enabled");
+		SizeType total = mres.memResolv(&enabled,end-start,str + " enabled");
 
-		total += mres.memResolv(&filename,x-total,str + "filename");
+		total += mres.memResolv(&filename,x-total,str + " filename");
 
 		return total;
 	}
@@ -331,8 +350,6 @@ struct ParametersDmrgSolver {
 	                   SizeType x,
 	                   PsimagLite::String msg) const
 	{
-		assert(x == sizeof(ThisType));
-
 		PsimagLite::String str = msg;
 		msg += "ParametersDmrgSolver";
 		const char* start = (const char *)&electronsUp;
@@ -398,7 +415,7 @@ struct ParametersDmrgSolver {
 		end = (const char*)&finiteLoop;
 		total += mres.memResolv(&adjustQuantumNumbers,end-start,
 		                        str + "adjustQuantumNumbers");
-//		total += mres.memResolv(&finiteLoop,sizeof(ThisType)-total, str + "finiteLoop");
+		total += mres.memResolv(&finiteLoop,sizeof(*this)-total, str + "finiteLoop");
 
 		return total;
 	}
