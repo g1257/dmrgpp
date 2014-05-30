@@ -227,6 +227,28 @@ std::ostream &operator<<(std::ostream& os,const FiniteLoop& fl)
 }
 
 struct DmrgCheckPoint {
+
+	DmrgCheckPoint() : enabled(false)
+	{}
+
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x = sizeof(DmrgCheckPoint),
+	                   PsimagLite::String msg = "") const
+	{
+		assert(x == sizeof(DmrgCheckPoint));
+
+		PsimagLite::String str = msg;
+		msg += "DmrgCheckPoint";
+		const char* start = (const char *)&enabled;
+		const char* end = (const char*)&filename;
+		SizeType total = mres.memResolv(&enabled,end-start,str + "enabled");
+
+		total += mres.memResolv(&filename,x-total,str + "filename");
+
+		return total;
+	}
+
 	bool enabled;
 	PsimagLite::String filename;
 };
@@ -282,6 +304,7 @@ electrons respectively, and $j$ is twice the angular momentum divided by the num
 */
 template<typename FieldType,typename InputValidatorType>
 struct ParametersDmrgSolver {
+	typedef ParametersDmrgSolver<FieldType, InputValidatorType> ThisType;
 
 	SizeType electronsUp;
 	SizeType electronsDown;
@@ -304,8 +327,12 @@ struct ParametersDmrgSolver {
 	typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
 
 	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,PsimagLite::String msg) const
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
 	{
+		assert(x == sizeof(ThisType));
+
 		PsimagLite::String str = msg;
 		msg += "ParametersDmrgSolver";
 		const char* start = (const char *)&electronsUp;
@@ -322,13 +349,57 @@ struct ParametersDmrgSolver {
 		total += mres.memResolv(&sitesPerBlock,end-start,str + "sitesPerBlock");
 		start = end;
 		end = (const char*)&keptStatesInfinite;
-		total += mres.memResolv(&maxMatrixRankStored,end-start,str + "maxMatrixRankStored");
+		total += mres.memResolv(&maxMatrixRankStored,end-start,
+		                        str + "maxMatrixRankStored");
 		start = end;
 		end = (const char*)&useReflectionSymmetry;
-		total += mres.memResolv(&keptStatesInfinite,end-start,str + "keptStatesInfinite");
+		total += mres.memResolv(&keptStatesInfinite,end-start,
+		                        str + "keptStatesInfinite");
 		start = end;
 		end = (const char*)&tolerance;
-		total += mres.memResolv(&useReflectionSymmetry,end-start,str + "useReflectionSymmetry");
+		total += mres.memResolv(&useReflectionSymmetry,end-start,
+		                        str + "useReflectionSymmetry");
+		start = end;
+		end = (const char*)&gsWeight;
+		total += mres.memResolv(&tolerance,end-start,str + "tolerance");
+		start = end;
+		end = (const char*)&filename;
+		total += mres.memResolv(&gsWeight,end-start,str + "gsWeight");
+
+		start = end;
+		end = (const char*)&version;
+		total += mres.memResolv(&filename,end-start,str + "filename");
+		start = end;
+		end = (const char*)&options;
+		total += mres.memResolv(&version,end-start,str + "version");
+		start = end;
+		end = (const char*)&model;
+		total += mres.memResolv(&options,end-start,str + "options");
+		start = end;
+		end = (const char*)&insitu;
+		total += mres.memResolv(&model,end-start,str + "model");
+		start = end;
+		end = (const char*)&fileForDensityMatrixEigs;
+		total += mres.memResolv(&insitu,end-start,str + "insitu");
+		start = end;
+		end = (const char*)&checkpoint;
+		total += mres.memResolv(&fileForDensityMatrixEigs,end-start,
+		                        str + "fileForDensityMatrixEigs");
+
+		start = end;
+		end = (const char*)&targetQuantumNumbers;
+		total += mres.memResolv(&checkpoint,end-start, str + "checkpoint");
+
+		start = end;
+		end = (const char*)&adjustQuantumNumbers;
+		total += mres.memResolv(&targetQuantumNumbers,end-start,
+		                        str + "targetQuantumNumbers");
+		start = end;
+		end = (const char*)&finiteLoop;
+		total += mres.memResolv(&adjustQuantumNumbers,end-start,
+		                        str + "adjustQuantumNumbers");
+//		total += mres.memResolv(&finiteLoop,sizeof(ThisType)-total, str + "finiteLoop");
+
 		return total;
 	}
 
