@@ -9,7 +9,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -161,7 +161,7 @@ inline std::istream& operator>>(std::istream& is,std::vector<FieldType,A>& v)
 	}
 	return is;
 }
-} // namespace std 
+} // namespace std
 
 namespace PsimagLite {
 
@@ -189,13 +189,13 @@ namespace PsimagLite {
 	        enum {True = true};
 	};
 
-	// change this when using PsimagLite::Vector: 
+	// change this when using PsimagLite::Vector:
 	template<class T,typename A>
 	void vectorPrint(const std::vector<T,A>& v,char const *name,std::ostream &s)
 	{
 		for (SizeType i=0;i<v.size();i++) s<<name<<"["<<i<<"]="<<v[i]<<std::endl;
-	} 
-	
+	}
+
 	template<class X,typename A>
 	X norm(const std::vector<X,A>& v)
 	{
@@ -218,14 +218,14 @@ namespace PsimagLite {
 	{
 		for (SizeType i=0;i<v.size();i++) v[i] = a + b*r.random();
 	}
-	
+
 	template<typename X,typename Y,typename A>
 	int isInVector(const std::vector<X,A>& natBasis,Y const &v)
 	{
 		typename std::vector<X,A>::const_iterator x = find(natBasis.begin(),natBasis.end(),v);
 		if (x==natBasis.end()) return -1;
 		return x-natBasis.begin();
-		
+
 	}
 
 	template<typename SomeVectorType>
@@ -270,8 +270,8 @@ namespace PsimagLite {
 		enum {True = false};
 	};
 
-	template<typename T>
-	class IsPairLike<std::pair<T,T> > {
+	template<typename T1, typename T2>
+	class IsPairLike<std::pair<T1,T2> > {
 	public:
 		enum {True = true};
 	};
