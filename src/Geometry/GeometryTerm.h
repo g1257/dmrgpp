@@ -160,6 +160,36 @@ public:
 		if (geometryBase_) delete geometryBase_;
 	}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "GeometryTerm";
+		const char* start = (const char *)&linSize_;
+		const char* end = (const char*)&maxEdof_;
+		SizeType total = mres.memResolv(&linSize_,end-start,str + " linSize");
+
+		start = end;
+		end = (const char*)&geometryBase_;
+		total += mres.memResolv(&maxEdof_,end-start,str + " maxEdof");
+
+		start = end;
+		end = (const char*)&directions_;
+		total += mres.memResolv(&geometryBase_,end-start,str + " geometryBasePtr");
+
+		start = end;
+		end = (const char*)&cachedValues_;
+		total += mres.memResolv(&directions_,end-start,str + " directions");
+
+		total += mres.memResolv(&cachedValues_,sizeof(*this)-total, str+" cachedValues");
+
+//		total += mres.memResolv(geometryBase_,0,"geometryBase");
+
+		return total;
+	}
+
 	const ComplexOrRealType& operator()(SizeType i1,
 	                                    SizeType edof1,
 	                                    SizeType i2,

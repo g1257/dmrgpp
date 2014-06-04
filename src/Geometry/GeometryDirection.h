@@ -116,6 +116,34 @@ public:
 		}
 	}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "GeometryDirection";
+		const char* start = (const char *)&dirId_;
+		const char* end = (const char*)&dataType_;
+		SizeType total = mres.memResolv(&dirId_,end-start,str + " dirId");
+
+		start = end;
+		end = (const char*)&geometryBase_;
+		total += mres.memResolv(&dataType_,end-start,str + " dataType");
+
+		start = end;
+		end = (const char*)&dataNumbers_;
+		total += mres.memResolv(&geometryBase_,end-start,str + " geometryBase");
+
+		start = end;
+		end = (const char*)&dataMatrices_;
+		total += mres.memResolv(&dataNumbers_,end-start,str + " dataNumbers");
+
+		total += mres.memResolv(&dataMatrices_,sizeof(*this)-total, str+" dataMatrices");
+
+		return total;
+	}
+
 	ComplexOrRealType operator()(SizeType i,
 	                             SizeType edof1,
 	                             SizeType j,
@@ -177,8 +205,8 @@ private:
 	}
 
 	SizeType dirId_;
-	const GeometryBaseType* geometryBase_;
 	SizeType dataType_;
+	const GeometryBaseType* geometryBase_;
 	typename Vector<ComplexOrRealType>::Type dataNumbers_;
 	typename Vector<MatrixType>::Type dataMatrices_;
 }; // class GeometryDirection
@@ -202,7 +230,7 @@ std::ostream& operator<<(std::ostream& os,
 	}
 	return os;
 }
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
 /*@}*/
 #endif // GEOMETRY_DIR_H

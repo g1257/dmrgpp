@@ -175,7 +175,7 @@ while(<FILE>) {
 	$r = $_;
 	$r =~ s/[^\t]//g;
 	$ll += length($r) * $sizeOfTabs;
-	($ll<=80) or push @tooLongLines,($line,$ll);
+	($ll<=90) or push @tooLongLines,($line,$ll);
 	# check indentation level
 	my $o = $_;
 	if ($closeAfterNext>0) {

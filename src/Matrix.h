@@ -9,7 +9,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -75,6 +75,26 @@ public:
 		for (SizeType i=0;i<nrow_;i++)
 			for (SizeType j=0;j<ncol_;j++)
 				data_[i+j*nrow_] = m(i,j);
+	}
+
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "Matrix";
+		const char* start = (const char *)&nrow_;
+		const char* end = (const char*)&ncol_;
+		SizeType total = mres.memResolv(&nrow_,end-start,str + " nrow_");
+
+		start = end;
+		end = (const char*)&data_;
+		total += mres.memResolv(&ncol_,end-start,str + " ncol_");
+
+		total += mres.memResolv(&data_,sizeof(*this)-total, str+" data_");
+
+		return total;
 	}
 
 	// default assigment operator is fine

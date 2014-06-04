@@ -118,6 +118,26 @@ public:
 			if (terms_[i]) delete terms_[i];
 	}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "Geometry";
+		const char* start = (const char *)&linSize_;
+		const char* end = (const char*)&terms_;
+		SizeType total = mres.memResolv(&linSize_,end-start,str + " linSize");
+		total += mres.memResolv(&terms_,sizeof(*this)-total, str + " terms");
+
+		total += mres.memResolv(&terms_,0,msg);
+
+		for (SizeType i = 0; i < terms_.size(); ++i)
+			mres.memResolv(terms_[i],0,msg);
+
+		return total;
+	}
+
 	String label(SizeType i) const { return terms_[i]->label(); }
 
 	SizeType connectionKind(SizeType smax,SizeType ind,SizeType jnd) const
@@ -276,7 +296,7 @@ std::ostream& operator<<(std::ostream& os,
 	for (SizeType i=0;i<g.terms_.size();i++) os<<*(g.terms_[i]);
 	return os;
 }
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
 /*@}*/
 #endif // GEOMETRY_H
