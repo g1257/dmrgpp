@@ -123,14 +123,16 @@ public:
 	                   SizeType x,
 	                   PsimagLite::String msg) const
 	{
+		const char* start = (const char *)this;
+		const char* end = (const char*)&linSize_;
+		SizeType total = GeometryExType::memResolv(mres,end-start,msg);
 		PsimagLite::String str = msg;
 		str += "Geometry";
-		const char* start = (const char *)&linSize_;
-		const char* end = (const char*)&terms_;
-		SizeType total = mres.memResolv(&linSize_,end-start,str + " linSize");
-		total += mres.memResolv(&terms_,sizeof(*this)-total, str + " terms");
 
-		total += mres.memResolv(&terms_,0,msg);
+		start = end;
+		end = (const char*)&terms_;
+		total += mres.memResolv(&linSize_,end-start,str + " linSize");
+		total += mres.memResolvPtr(&terms_,sizeof(*this)-total, str + " terms");
 
 		for (SizeType i = 0; i < terms_.size(); ++i)
 			mres.memResolv(terms_[i],0,msg);

@@ -17,12 +17,33 @@ public:
 
 	GeometryEx(InputType& io, SizeType meshPoints)
 	: meshLength_(sqrt(meshPoints)),
-	  meshStep_(static_cast<RealType>(2*M_PI/meshLength_)),
-	  enabled_(false)
+	  enabled_(false),
+	  meshStep_(static_cast<RealType>(2*M_PI/meshLength_))
 	{
 		PsimagLite::String str;
 		io.readline(str,"GeometryKind=",false);
 		if (str == "star") enabled_ = true;
+	}
+
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "GeometryEx";
+		const char* start = (const char *)&meshLength_;
+		const char* end = (const char*)&enabled_;
+		SizeType total = mres.memResolv(&meshLength_,end-start,str + " meshLength");
+
+		start = end;
+		end = (const char*)&meshStep_;
+		total += mres.memResolv(&enabled_,end-start,str + " enabled");
+
+		assert(x > total);
+		total += mres.memResolv(&meshStep_,x - total, str + " meshStep");
+
+		return total;
 	}
 
 	SizeType dimension(SizeType i = 0) const
@@ -77,8 +98,8 @@ public:
 private:
 
 	SizeType meshLength_;
-	RealType meshStep_;
 	bool enabled_;
+	RealType meshStep_;
 };
 
 }

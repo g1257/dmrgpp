@@ -185,7 +185,7 @@ public:
 
 		total += mres.memResolv(&cachedValues_,sizeof(*this)-total, str+" cachedValues");
 
-//		total += mres.memResolv(geometryBase_,0,"geometryBase");
+		mres.memResolv(geometryBase_,0,"geometryBase");
 
 		return total;
 	}

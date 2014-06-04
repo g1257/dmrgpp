@@ -108,6 +108,19 @@ public:
 	virtual ~GeometryBase()
 	{}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		SizeType len = sizeof(*this);
+		mres.push(SomeMemResolvType::MEMORY_POINTER,
+		          len,
+		          this,
+		          msg + " GeometryBase virtual pointer");
+		return len;
+	}
+
 	virtual SizeType dirs() const = 0;
 
 	virtual SizeType handle(SizeType i,SizeType j) const = 0;
@@ -172,7 +185,7 @@ protected:
 		return (b || b2);
 	}
 }; // class GeometryBase
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
 /*@}*/
 #endif // GEOMETRY_BASE_H
