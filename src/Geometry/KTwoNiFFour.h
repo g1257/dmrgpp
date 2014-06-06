@@ -106,6 +106,26 @@ public:
 		std::cerr<<"SIGN CHANGE="<<signChange_<<"\n";
 	}
 
+	SizeType memResolv(PsimagLite::MemResolv& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "KTwoNiFFour";
+		const char* start = (const char *)this;
+		const char* end = (const char*)&linSize_;
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
+
+		start = end;
+		end = (const char*)&signChange_;
+		total += mres.memResolv(&linSize_,end-start,str + " linSize");
+
+		mres.memResolv(&signChange_,sizeof(*this) - total,str + " signChange");
+
+		return sizeof(*this);
+	}
+
 	SizeType getVectorSize(SizeType dirId) const
 	{
 		assert(false);
@@ -364,7 +384,7 @@ private:
 	SizeType linSize_;
 	int signChange_;
 }; // class KTwoNiFFour
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
 /*@}*/
 #endif // KTWONIFFOUR_H

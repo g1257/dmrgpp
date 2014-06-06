@@ -163,12 +163,30 @@ public:
 		return site;
 	}
 
+	SizeType memResolv(PsimagLite::MemResolv& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "Chain";
+		const char* start = (const char *)this;
+		const char* end = (const char*)&linSize_;
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
+		start = end;
+		end = (const char*)&isPeriodic_;
+		total += mres.memResolv(&linSize_,end-start,str + " linSize");
+		mres.memResolv(&isPeriodic_,sizeof(*this)-total, str + " isPeriodic");
+
+		return sizeof(*this);
+	}
+
 private:
 
 	SizeType linSize_;
 	bool isPeriodic_;
-}; // class Ladder
-} // namespace PsimagLite 
+}; // class Chain
+} // namespace PsimagLite
 
 /*@}*/
 #endif // LADDER_H

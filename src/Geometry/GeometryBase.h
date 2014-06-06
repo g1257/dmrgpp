@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "String.h"
 #include "InputNg.h"
+#include "MemResolv.h"
 
 namespace PsimagLite {
 
@@ -108,18 +109,9 @@ public:
 	virtual ~GeometryBase()
 	{}
 
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType x,
-	                   PsimagLite::String msg) const
-	{
-		SizeType len = sizeof(*this);
-		mres.push(SomeMemResolvType::MEMORY_POINTER,
-		          len,
-		          this,
-		          msg + " GeometryBase virtual pointer");
-		return len;
-	}
+	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
+	                           SizeType x,
+	                           PsimagLite::String msg) const = 0;
 
 	virtual SizeType dirs() const = 0;
 

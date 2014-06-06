@@ -92,6 +92,22 @@ public:
 	ChainEx(SizeType linSize,InputType& io) : linSize_(linSize)
 	{}
 
+	SizeType memResolv(PsimagLite::MemResolv& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "ChainEx";
+		const char* start = (const char *)this;
+		const char* end = (const char*)&linSize_;
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
+
+		mres.memResolv(&linSize_,sizeof(*this)-total, str + " linSize");
+
+		return sizeof(*this);
+	}
+
 	virtual SizeType maxConnections() const { return 2; }
 
 	virtual SizeType dirs() const { return 2; }
@@ -171,7 +187,7 @@ private:
 
 	SizeType linSize_;
 }; // class ChainEx
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
 /*@}*/
 #endif // CHAIN_EX_H

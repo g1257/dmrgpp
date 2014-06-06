@@ -119,6 +119,30 @@ public:
 			throw RuntimeError("Ladder: leg must divide number of sites\n");
 	}
 
+	SizeType memResolv(PsimagLite::MemResolv& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "Ladder";
+		const char* start = (const char *)this;
+		const char* end = (const char*)&linSize_;
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
+
+		start = end;
+		end = (const char*)&leg_;
+		total += mres.memResolv(&linSize_,end-start,str + " linSize");
+
+		start = end;
+		end = (const char*)&isPeriodicY_;
+		total += mres.memResolv(&leg_,end-start,str + " leg");
+
+		mres.memResolv(&isPeriodicY_,sizeof(*this)-total, str + " isPeriodicY");
+
+		return sizeof(*this);
+	}
+
 	virtual SizeType maxConnections() const { return 4; }
 
 	virtual SizeType dirs() const { return 2; }
@@ -261,7 +285,7 @@ private:
 	SizeType leg_;
 	bool isPeriodicY_;
 }; // class Ladder
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
 /*@}*/
 #endif // LADDER_H

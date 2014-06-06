@@ -93,6 +93,22 @@ public:
 	    : linSize_(linSize)
 	{}
 
+	SizeType memResolv(PsimagLite::MemResolv& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "Star";
+		const char* start = (const char *)this;
+		const char* end = (const char*)&linSize_;
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
+
+		mres.memResolv(&linSize_,sizeof(*this) - total,str + " linSize");
+
+		return sizeof(*this);
+	}
+
 	virtual SizeType maxConnections() const
 	{
 		return linSize_ - 1;
@@ -161,8 +177,8 @@ private:
 
 	SizeType linSize_;
 }; // class Star
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
 /*@}*/
-#endif // GEOMETRY_STAR_H 
+#endif // GEOMETRY_STAR_H
 

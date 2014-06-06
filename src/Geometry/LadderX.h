@@ -192,13 +192,37 @@ public:
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}
 
+	SizeType memResolv(PsimagLite::MemResolv& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "LadderBath";
+		const char* start = (const char *)this;
+		const char* end = (const char*)&ladder_;
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
+
+		start = end;
+		end = (const char*)&linSize_;
+		total += mres.memResolv(&ladder_,end-start,str + " ladder");
+
+		start = end;
+		end = (const char*)&leg_;
+		total += mres.memResolv(&linSize_,end-start,str + " linSize");
+
+		mres.memResolv(&leg_,sizeof(*this)-total, str + " leg");
+
+		return sizeof(*this);
+	}
+
 private:
 
 	LadderType ladder_; // owner
 	SizeType linSize_;
 	SizeType leg_;
 }; // class LadderBath
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
 /*@}*/
 #endif // GEOMETRY_H

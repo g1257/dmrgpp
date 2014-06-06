@@ -177,7 +177,11 @@ public:
 
 		start = end;
 		end = (const char*)&directions_;
-		total += mres.memResolv(&geometryBase_,end-start,str + " geometryBasePtr");
+		total += (end - start);
+		mres.push(SomeMemResolvType::MEMORY_HEAPPTR,
+		                               sizeof(geometryBase_),
+			                           &geometryBase_,
+			                           str + " geometryBase");
 
 		start = end;
 		end = (const char*)&cachedValues_;
@@ -185,7 +189,7 @@ public:
 
 		total += mres.memResolv(&cachedValues_,sizeof(*this)-total, str+" cachedValues");
 
-		mres.memResolv(geometryBase_,0,"geometryBase");
+		geometryBase_->memResolv(mres,x,str);
 
 		return total;
 	}

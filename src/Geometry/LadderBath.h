@@ -113,6 +113,39 @@ public:
 		if (ladder_) delete ladder_;
 	}
 
+	SizeType memResolv(PsimagLite::MemResolv& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg) const
+	{
+		PsimagLite::String str = msg;
+		str += "LadderBath";
+		const char* start = (const char *)this;
+		const char* end = (const char*)&linSize_;
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
+
+		start = end;
+		end = (const char*)&bathSitesPerSite_;
+		total += mres.memResolv(&linSize_,end-start,str + " linSize");
+
+		start = end;
+		end = (const char*)&clusterSize_;
+		total += mres.memResolv(&bathSitesPerSite_,end-start,str + " bathSitesPerSite");
+
+		start = end;
+		end = (const char*)&ladder_;
+		total += mres.memResolv(&clusterSize_,end-start,str + " clusterSize");
+
+		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
+		          sizeof(*this) - total,
+		          &ladder_,
+		          str + " Ladder ptr");
+
+		mres.memResolv(ladder_);
+
+		return sizeof(*this);
+	}
+
 	virtual SizeType dirs() const { return 3; }
 
 	virtual SizeType length(SizeType i) const
@@ -189,7 +222,7 @@ public:
 	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew) const
 	{
 		PairType c1 = getClusterSite(siteNew);
-		
+
 		// in the cluster
 		if (c1.first < 0) {
 			SizeType firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
@@ -287,7 +320,7 @@ private:
 	SizeType clusterSize_;
 	LadderType* ladder_;
 }; // class LadderBath
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
 /*@}*/
 #endif // GEOMETRY_H
