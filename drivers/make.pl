@@ -8,7 +8,7 @@ use Make;
 
 my @drivers = ("sparseSolverTest", "testCRSMatrix", "rungeKuttaTest", "combineContinuedFraction",
 "continuedFractionCollection", "gitrev", "jsonExample", "range",
-"kernelPolynomial", "linearPrediction", "options", "randomTest", "svd", "testLapack", "threads");
+"kernelPolynomial", "linearPrediction", "options", "randomTest", "svd", "testLapack", "threads","testIsClass");
 
 my $lapack = Make::findLapack();
 backupMakefile();

@@ -6,7 +6,7 @@ class A {};
 template<typename T>
 int testIsClass()
 {
-	return PsimagLite::IsClass<T>::True;
+	return PsimagLite::IsClass<T>::value;
 }
 
 int main()
