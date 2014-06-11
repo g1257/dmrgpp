@@ -125,6 +125,13 @@ public:
 	      extendedHubbard_(solverParams,io,geometry)
 	{}
 
+	SizeType memResolv(PsimagLite::MemResolv& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		return 0;
+	}
+
 	SizeType hilbertSize(SizeType site) const
 	{
 		return extendedHubbard_.hilbertSize(site);

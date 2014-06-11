@@ -147,6 +147,13 @@ public:
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{}
 
+	SizeType memResolv(PsimagLite::MemResolv& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		return 0;
+	}
+
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the size of the one-site Hilbert space. */
 	SizeType hilbertSize(SizeType site) const
 	{

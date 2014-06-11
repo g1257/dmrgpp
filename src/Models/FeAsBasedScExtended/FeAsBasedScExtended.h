@@ -130,6 +130,13 @@ public:
 	      orbitals_(modelParameters_.orbitals)
 	{}
 
+	SizeType memResolv(PsimagLite::MemResolv& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		return 0;
+	}
+
 	SizeType hilbertSize(SizeType site) const { return modelFeAs_.hilbertSize(site); }
 
 	void print(std::ostream& os) const { modelFeAs_.print(os); }

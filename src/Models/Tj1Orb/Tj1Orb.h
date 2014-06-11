@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -134,6 +134,13 @@ namespace Dmrg {
 		      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 		{}
 
+		SizeType memResolv(PsimagLite::MemResolv& mres,
+		                   SizeType x,
+		                   PsimagLite::String msg = "") const
+		{
+			return 0;
+		}
+
 		SizeType hilbertSize(SizeType site) const
 		{
 			return 3;
@@ -147,7 +154,7 @@ namespace Dmrg {
 		                             const BlockType& block,
 		                             const RealType& time) const
 		{
-			
+
 			HilbertBasisType natBasis;
 			typename PsimagLite::Vector<SizeType>::Type quantumNumbs;
 			setNaturalBasis(natBasis,quantumNumbs,block);
@@ -289,7 +296,7 @@ namespace Dmrg {
 			std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 		}
-		
+
 		//! find total number of electrons for each state in the basis
 		void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
 					   const typename PsimagLite::Vector<HilbertStateType>::Type& basis,
@@ -328,7 +335,7 @@ namespace Dmrg {
 			basis.clear();
 			for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
 		}
-		
+
 		void print(std::ostream& os) const
 		{
 			os<<modelParameters_;

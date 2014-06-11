@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -77,7 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  An implementation of the Quantum Heisenberg Model to use with  DmrgSolver
  *
  */
- 
+
 #ifndef DMRG_MODEL_HEISENBERG_HEADER_H
 #define DMRG_MODEL_HEISENBERG_HEADER_H
 
@@ -92,8 +92,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ModelCommon.h"
 
-namespace Dmrg {	
-	
+namespace Dmrg {
+
 	template<typename ModelBaseType>
 	class ModelHeisenberg : public ModelBaseType {
 
@@ -140,6 +140,13 @@ namespace Dmrg {
 		      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 		{}
 
+		SizeType memResolv(PsimagLite::MemResolv& mres,
+		                   SizeType x,
+		                   PsimagLite::String msg = "") const
+		{
+			return 0;
+		}
+
 		void print(std::ostream& os) const { os<<modelParameters_; }
 
 		SizeType hilbertSize(SizeType site) const { return modelParameters_.twiceTheSpin+1; }
@@ -153,14 +160,14 @@ namespace Dmrg {
 		                     const RealType& time) const
 		{
 			HilbertBasisType natBasis;
-			
+
 			typename PsimagLite::Vector<SizeType>::Type qvector;
 			setNaturalBasis(natBasis,qvector,block);
-			
+
 			setOperatorMatrices(operatorMatrices,block);
-			
+
 			setSymmetryRelated(q,natBasis,block.size());
-			
+
 			this->calcHamiltonian(hamiltonian,operatorMatrices,block,time);
 		}
 
@@ -170,7 +177,7 @@ namespace Dmrg {
 		{
 			HilbertBasisType natBasis;
 			SparseMatrixType tmpMatrix;
-			
+
 			typename PsimagLite::Vector<SizeType>::Type qvector;
 			setNaturalBasis(natBasis,qvector,block);
 
@@ -181,7 +188,7 @@ namespace Dmrg {
 
 				typename OperatorType::Su2RelatedType su2related;
 				su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-				su2related.source.push_back(i*DEGREES_OF_FREEDOM+NUMBER_OF_ORBITALS);	
+				su2related.source.push_back(i*DEGREES_OF_FREEDOM+NUMBER_OF_ORBITALS);
 				su2related.source.push_back(i*DEGREES_OF_FREEDOM);
 				su2related.transpose.push_back(-1);
 				su2related.transpose.push_back(-1);
@@ -235,7 +242,7 @@ namespace Dmrg {
 
 			throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 		}
-		
+
 		//! find all states in the natural basis for a block of n sites
 		void setNaturalBasis(HilbertBasisType& basis,
 		                     typename PsimagLite::Vector<SizeType>::Type& q,
@@ -248,7 +255,7 @@ namespace Dmrg {
 			setSymmetryRelated(qq,basis,block.size());
 			MyBasis::findQuantumNumbers(q,qq);
 		}
-		
+
 		//! Dummy since this model has no fermion sign
 		void findElectrons(typename PsimagLite::Vector<SizeType>::Type& electrons,
 				   const HilbertBasisType& basis,
@@ -314,14 +321,14 @@ namespace Dmrg {
 		void setSymmetryRelated(BasisDataType& q,const HilbertBasisType& basis,int n) const
 		{
 			if (n!=1) PsimagLite::RuntimeError("ModelFeAs::setSymmetryRelated() implemented for n=1 only\n");
-			
+
 			// find j,m and flavors (do it by hand since we assume n==1)
 			// note: we use 2j instead of j
 			// note: we use m+j instead of m
 			// This assures us that both j and m are SizeType
 			typedef std::pair<SizeType,SizeType> PairType;
 			typename PsimagLite::Vector<PairType>::Type jmvalues;
-			typename PsimagLite::Vector<SizeType>::Type flavors; 
+			typename PsimagLite::Vector<SizeType>::Type flavors;
 			PairType jmSaved;
 			jmSaved.first = modelParameters_.twiceTheSpin;
 			jmSaved.second = basis[0];

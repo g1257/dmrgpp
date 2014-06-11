@@ -84,6 +84,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ModelCommonBase.h"
 #include "Vector.h"
 #include "Sort.h"
+#include "MemResolv.h"
+
 
 namespace Dmrg {
 
@@ -294,6 +296,10 @@ public:
 		offset += symmetryBlock.size();
 		symmetryBlock.clear();
 	}
+
+	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
+	                           SizeType x,
+	                           PsimagLite::String msg = "") const = 0;
 
 private:
 

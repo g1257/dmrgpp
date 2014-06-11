@@ -164,6 +164,13 @@ public:
 		}
 	}
 
+	SizeType memResolv(PsimagLite::MemResolv& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		return 0;
+	}
+
 	SizeType hilbertSize(SizeType site) const
 	{
 		AtomEnum atom = atomAtSite(site);

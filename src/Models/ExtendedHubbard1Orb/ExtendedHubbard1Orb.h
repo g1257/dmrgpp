@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -125,6 +125,13 @@ namespace Dmrg {
 		  geometry_(geometry),
 		  modelHubbard_(solverParams,io,geometry)
 		{}
+
+		SizeType memResolv(PsimagLite::MemResolv& mres,
+		                   SizeType x,
+		                   PsimagLite::String msg = "") const
+		{
+			return 0;
+		}
 
 		SizeType hilbertSize(SizeType site) const
 		{
