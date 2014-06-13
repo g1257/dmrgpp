@@ -129,7 +129,35 @@ public:
 	                   SizeType x,
 	                   PsimagLite::String msg = "") const
 	{
-		return 0;
+		PsimagLite::String str = msg;
+		str += "ExtendedHubbard1Orb";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&modelParameters_);
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
+		          total,
+		          start,
+		          msg + " ExtendedHubbard1Orb vptr");
+
+		start = end;
+		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
+		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&modelHubbard_);
+		total += (end - start);
+		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
+		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
+		          start,
+		          str + " ref to geometry");
+
+		mres.memResolv(&geometry_, 0, str + " geometry");
+
+		total += mres.memResolv(&modelHubbard_,
+		                        sizeof(*this) - total, str + " modelHubbard");
+
+		return total;
 	}
 
 	SizeType hilbertSize(SizeType site) const
@@ -231,10 +259,6 @@ public:
 
 private:
 
-	ParametersModelHubbard<RealType>  modelParameters_;
-	const GeometryType &geometry_;
-	ModelHubbardType modelHubbard_;
-
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(int i,
 	                                      const VectorHilbertStateType& natBasis) const
@@ -285,6 +309,15 @@ private:
 			creationMatrix.push_back(myOp);
 		}
 	}
+
+	//serializr start class ExtendedHubbard1Orb
+	//serializr vptr
+	//serializr normal modelParameters_
+	ParametersModelHubbard<RealType>  modelParameters_;
+	//serializr ref geometry_ start
+	const GeometryType &geometry_;
+	//serializr normal modelHubbard_
+	ModelHubbardType modelHubbard_;
 };	//class ExtendedHubbard1Orb
 
 } // namespace Dmrg

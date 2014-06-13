@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,103 +67,83 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
 /*! \file ParametersModelHubbard.h
  *
- *  Contains the parameters for the Hubbard model and function to read them from a JSON file
+ *  Contains the parameters for the Hubbard model and function to read them from a file
  *
  */
 #ifndef PARAMETERSMODELHUBBARD_H
 #define PARAMETERSMODELHUBBARD_H
-//#include "SimpleReader.h"
 
 namespace Dmrg {
-	//! Hubbard Model Parameters
-	template<typename Field>
-	struct ParametersModelHubbard {
-		
-		template<typename IoInputType>
-		ParametersModelHubbard(IoInputType& io) 
-		{
-	
-			io.read(hubbardU,"hubbardU");
-			io.read(potentialV,"potentialV");
-//			SizeType level = 0;
-//			bool beQuiet = true;
-			try {
-				io.read(potentialT,"PotentialT"); //level,beQuiet);
-			} catch (std::exception& e) {
-			}
-			omega=0;
-			try {
-				io.readline(omega,"omega=");
-			} catch (std::exception& e) {
-			}
+//! Hubbard Model Parameters
+template<typename Field>
+struct ParametersModelHubbard {
 
-//			io.rewind();
+	template<typename IoInputType>
+	ParametersModelHubbard(IoInputType& io)
+	{
+
+		io.read(hubbardU,"hubbardU");
+		io.read(potentialV,"potentialV");
+		//			SizeType level = 0;
+		//			bool beQuiet = true;
+		try {
+			io.read(potentialT,"PotentialT"); //level,beQuiet);
+		} catch (std::exception& e) {
 		}
-		
-		// Do not include here connection parameters
-		// those are handled by the Geometry
-		// Hubbard U values (one for each site)
-		typename PsimagLite::Vector<Field>::Type hubbardU; 
-		// Onsite potential values, one for each site
-		typename PsimagLite::Vector<Field>::Type potentialV;
+		omega=0;
+		try {
+			io.readline(omega,"omega=");
+		} catch (std::exception& e) {
+		}
 
-		// for time-dependent H:
-		typename PsimagLite::Vector<Field>::Type potentialT;
-		Field omega;
-
-		// target number of electrons  in the system
-		int nOfElectrons;
-		// target density
-		//Field density;
-	};
-
-
-	//! Operator to read Model Parameters from JSON file.
-	/* template<typename FieldType>
-	ParametersModelHubbard<FieldType>&
-	operator <= (ParametersModelHubbard<FieldType>& parameters, const dca::JsonReader& reader) 
-	{
-
-		const dca::JsonAccessor<PsimagLite::String>& dmrg(reader["programSpecific"]["DMRG"]);
-		
-		parameters.hubbardU <= dmrg["hubbardU"];
-		parameters.potentialV <= dmrg["potentialV"];
-
-		parameters.linSize <= dmrg["linSize"];
-		
-		parameters.density <= dmrg["density"];
-		parameters.hoppings.resize(parameters.linSize,parameters.linSize);
-		parameters.hoppings  <= dmrg["hoppings"]["data"];
-		return parameters;
-	} */
-	
-	//! Function that prints model parameters to stream os
-	template<typename FieldType>
-	std::ostream& operator<<(std::ostream &os,const ParametersModelHubbard<FieldType>& parameters)
-	{
-		//os<<"parameters.density="<<parameters.density<<"\n";
-		os<<"hubbardU\n";
-		os<<parameters.hubbardU;
-//		utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
-		os<<"potentialV\n";
-		os<<parameters.potentialV;
-		if (parameters.potentialT.size()==0) return os;
-
-		// time-dependent stuff
-		os<<"potentialT\n";
-		os<<parameters.potentialT;
-		os<<"omega="<<parameters.omega<<"\n";
-		return os;
+		//			io.rewind();
 	}
+
+	// Do not include here connection parameters
+	// those are handled by the Geometry
+	// Hubbard U values (one for each site)
+	typename PsimagLite::Vector<Field>::Type hubbardU;
+	// Onsite potential values, one for each site
+	typename PsimagLite::Vector<Field>::Type potentialV;
+
+	// for time-dependent H:
+	typename PsimagLite::Vector<Field>::Type potentialT;
+	Field omega;
+
+	// target number of electrons  in the system
+	int nOfElectrons;
+	// target density
+	//Field density;
+};
+
+//! Function that prints model parameters to stream os
+template<typename FieldType>
+std::ostream& operator<<(std::ostream &os,
+                         const ParametersModelHubbard<FieldType>& parameters)
+{
+	//os<<"parameters.density="<<parameters.density<<"\n";
+	os<<"hubbardU\n";
+	os<<parameters.hubbardU;
+	//		utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
+	os<<"potentialV\n";
+	os<<parameters.potentialV;
+	if (parameters.potentialT.size()==0) return os;
+
+	// time-dependent stuff
+	os<<"potentialT\n";
+	os<<parameters.potentialT;
+	os<<"omega="<<parameters.omega<<"\n";
+	return os;
+}
 } // namespace Dmrg
 
 /*@}*/
 #endif
+
