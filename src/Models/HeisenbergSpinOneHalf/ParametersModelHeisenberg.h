@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -75,36 +75,39 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file ParametersModelHeisenberg.h
  *
- *  Contains the parameters for the Heisenberg model and function to read them from a JSON file
+ *  Contains the parameters for the Heisenberg model and function
+ *  to read them from a file
  *
  */
 #ifndef PARAMETERSMODELHEISENBERG_H
 #define PARAMETERSMODELHEISENBERG_H
 
 namespace Dmrg {
-	//! Heisenberg Model Parameters
-	template<typename Field>
-	struct ParametersModelHeisenberg {
+//! Heisenberg Model Parameters
+template<typename Field>
+struct ParametersModelHeisenberg {
 
-		// no connectors here, connectors are handled by the geometry
-		template<typename IoInputType>
-		ParametersModelHeisenberg(IoInputType& io)
-		    : twiceTheSpin(1)
-		{
-			//io.readline(twiceTheSpin,"TwiceTheSpin=");
-		}
-
-		SizeType twiceTheSpin;
-	};
-	
-	//! Function that prints model parameters to stream os
-	template<typename FieldType>
-	std::ostream& operator<<(std::ostream &os,const ParametersModelHeisenberg<FieldType>& parameters)
+	// no connectors here, connectors are handled by the geometry
+	template<typename IoInputType>
+	ParametersModelHeisenberg(IoInputType& io)
+	    : twiceTheSpin(1)
 	{
-		os<<"TwiceTheSpin="<<parameters.twiceTheSpin<<"\n";
-		return os;
+		//io.readline(twiceTheSpin,"TwiceTheSpin=");
 	}
+
+	SizeType twiceTheSpin;
+};
+
+//! Function that prints model parameters to stream os
+template<typename FieldType>
+std::ostream& operator<<(std::ostream &os,
+                         const ParametersModelHeisenberg<FieldType>& parameters)
+{
+	os<<"TwiceTheSpin="<<parameters.twiceTheSpin<<"\n";
+	return os;
+}
 } // namespace Dmrg
 
 /*@}*/
 #endif
+

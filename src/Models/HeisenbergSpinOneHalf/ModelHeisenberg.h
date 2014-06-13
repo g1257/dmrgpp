@@ -118,7 +118,6 @@ private:
 	typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef typename OperatorType::PairType PairType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
@@ -129,6 +128,7 @@ public:
 
 	typedef typename PsimagLite::Vector<unsigned int long long>::Type HilbertBasisType;
 	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename OperatorType::PairType PairType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -147,7 +147,41 @@ public:
 	                   SizeType x,
 	                   PsimagLite::String msg = "") const
 	{
-		return 0;
+		PsimagLite::String str = msg;
+		str += "ModelHeisenberg";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&modelParameters_);
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
+		          total,
+		          start,
+		          msg + " ModelHeisenberg vptr");
+
+		start = end;
+		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
+		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&spinSquaredHelper_);
+		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
+		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
+		          start,
+		          str + " ref to geometry");
+		total += (end - start);
+		mres.memResolv(&geometry_, 0, str + " geometry");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&spinSquared_);
+		total += mres.memResolv(&spinSquaredHelper_,
+		                        end-start,
+		                        str + " spinSquaredHelper");
+
+		total += mres.memResolv(&spinSquared_,
+		                        sizeof(*this) - total,
+		                        str + " spinSquared");
+
+		return total;
 	}
 
 	void print(std::ostream& os) const { os<<modelParameters_; }
@@ -284,11 +318,6 @@ public:
 
 private:
 
-	ParametersModelHeisenberg<RealType>  modelParameters_;
-	GeometryType const &geometry_;
-	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
-	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
-
 	//! Find S^+_i in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(int i,const HilbertBasisType& natBasis) const
 	{
@@ -375,6 +404,17 @@ private:
 			q.szPlusConst[i] = static_cast<SizeType>(q.szPlusConst[i]*0.5);
 		}
 	}
+
+	//serializr start class ModelHeisenberg
+	//serializr vptr
+	//serializr normal modelParameters_
+	ParametersModelHeisenberg<RealType>  modelParameters_;
+	//serializr ref geometry_ start
+	GeometryType const &geometry_;
+	//serializr normal spinSquaredHelper_
+	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
+	//serializr normal spinSquared_
+	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 }; // class ModelHeisenberg
 
 } // namespace Dmrg
