@@ -533,10 +533,17 @@ namespace Dmrg {
 			return jm;
 		}
 
+		//serializr start class Tj1Orb
+		//serializr vptr
+		//serializr normal modelParameters_
 		ParametersModelTj1Orb<RealType>  modelParameters_;
+		//serializr ref geometry_ end
 		const GeometryType &geometry_;
+		//serializr normal offset_
 		SizeType offset_;
+		//serializr normal spinSquaredHelper_
 		SpinSquaredHelper<RealType,HilbertStateType> spinSquaredHelper_;
+		//serializr normal spinSquared_
 		SpinSquared<SpinSquaredHelper<RealType,HilbertStateType> > spinSquared_;
 
 	};	//class Tj1Orb
@@ -544,3 +551,4 @@ namespace Dmrg {
 } // namespace Dmrg
 /*@}*/
 #endif // TJ_1ORB_H
+

@@ -155,7 +155,7 @@ struct FiniteLoop {
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
-		msg += "FiniteLoop";
+		str += "FiniteLoop";
 		const char* start = (const char *)&stepLength;
 		const char* end = (const char*)&keptStates;
 		SizeType total = mres.memResolv(&stepLength,end-start,str + " stepLength");
