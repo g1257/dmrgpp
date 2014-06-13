@@ -92,7 +92,11 @@ struct ParametersModelFeAs {
 
 	template<typename IoInputType>
 	ParametersModelFeAs(IoInputType& io)
-	    : potentialT(0),feAsMode(0),coulombV(0),magneticField(0,0),minElectronsPerSite(0)
+	    : minElectronsPerSite(0),
+	      potentialT(0),
+	      feAsMode(0),
+	      coulombV(0),
+	      magneticField(0,0)
 	{
 		io.readline(orbitals,"Orbitals=");
 		io.read(hubbardU,"hubbardU");
@@ -159,21 +163,74 @@ struct ParametersModelFeAs {
 		} catch (std::exception& e) {}
 	}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		str += "ParametersModelFeAs";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&minElectronsPerSite);
+		SizeType total = mres.memResolv(&orbitals, end-start, str + " orbitals");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&hubbardU);
+		total += mres.memResolv(&minElectronsPerSite, end-start, str + " minElectronsPerSite");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&potentialV);
+		total += mres.memResolv(&hubbardU, end-start, str + " hubbardU");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&potentialT);
+		total += mres.memResolv(&potentialV, end-start, str + " potentialV");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&feAsMode);
+		total += mres.memResolv(&potentialT, end-start, str + " potentialT");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&coulombV);
+		total += mres.memResolv(&feAsMode, end-start, str + " feAsMode");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&magneticField);
+		total += mres.memResolv(&coulombV, end-start, str + " coulombV");
+
+		total += mres.memResolv(&magneticField,
+		                        sizeof(*this) - total,
+		                        str + " magneticField");
+
+		return total;
+	}
+
+	//serializr start class ParametersModelFeAs
+	//serializr normal orbitals
 	SizeType orbitals;
+	//serializr normal minElectronsPerSite
+	SizeType minElectronsPerSite;
 	// Hubbard U values (one for each site)
+	//serializr normal hubbardU
 	typename PsimagLite::Vector<Field>::Type hubbardU;
 	// Onsite potential values, one for each site
+	//serializr normal potentialV
 	typename PsimagLite::Vector<Field>::Type potentialV;
+	//serializr normal potentialT
 	typename PsimagLite::Vector<Field>::Type potentialT;
+	//serializr normal feAsMode
 	SizeType feAsMode;
+	//serializr normal coulombV
 	Field coulombV;
+	//serializr normal magneticField
 	PsimagLite::Matrix<Field> magneticField;
-	SizeType minElectronsPerSite;
 };
 
 //! Function that prints model parameters to stream os
 template<typename FieldType>
-std::ostream& operator<<(std::ostream &os,const ParametersModelFeAs<FieldType>& parameters)
+std::ostream& operator<<(std::ostream &os,
+                         const ParametersModelFeAs<FieldType>& parameters)
 {
 	os<<"hubbardU\n";
 	os<<parameters.hubbardU;

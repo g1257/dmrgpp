@@ -95,6 +95,20 @@ struct ParametersModelHeisenberg {
 		//io.readline(twiceTheSpin,"TwiceTheSpin=");
 	}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		str += "ParametersModelHeisenberg";
+
+		mres.memResolv(&twiceTheSpin, sizeof(*this), str + " twiceTheSpin");
+		return sizeof(*this);
+	}
+
+	//serializr start class ParametersModelHeisenberg
+	//serializr normal twiceTheSpin
 	SizeType twiceTheSpin;
 };
 

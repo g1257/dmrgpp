@@ -190,7 +190,51 @@ public:
 	                   SizeType x,
 	                   PsimagLite::String msg = "") const
 	{
-		return 0;
+		PsimagLite::String str = msg;
+		str += "ModelFeBasedSc";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&reinterpretX_);
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
+		          total,
+		          start,
+		          msg + " ModelFeBasedSc vptr");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&reinterpretY_);
+		total += mres.memResolv(&reinterpretX_, end-start, str + " reinterpretX");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&modelParameters_);
+		total += mres.memResolv(&reinterpretY_, end-start, str + " reinterpretY");
+
+		start = end;
+		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
+		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&spinSquaredHelper_);
+		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
+		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
+		          start,
+		          str + " ref to geometry");
+		total += (end - start);
+		mres.memResolv(&geometry_, 0, str + " geometry");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&spinSquared_);
+		total += mres.memResolv(&spinSquaredHelper_, end-start, str + " spinSquaredHelper");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&statesPerSite_);
+		total += mres.memResolv(&spinSquared_, end-start, str + " spinSquared");
+
+		total += mres.memResolv(&statesPerSite_,
+		                        sizeof(*this) - total,
+		                        str + " statesPerSite");
+
+		return total;
 	}
 
 	SizeType hilbertSize(SizeType site) const
@@ -1089,13 +1133,23 @@ private:
 		std::cout<<fullm;
 	}
 
-	HilbertState reinterpretX_,reinterpretY_;
+	//serializr start class ModelFeBasedSc
+	//serializr vptr
+	//serializr normal reinterpretX_
+	HilbertState reinterpretX_;
+	//serializr normal reinterpretY_
+	HilbertState reinterpretY_;
+	//serializr normal modelParameters_
 	ParametersModelFeAs<RealType>  modelParameters_;
-	GeometryType const &geometry_;
+	//serializr ref geometry_ start
+	const GeometryType& geometry_;
+	//serializr normal spinSquaredHelper_
 	SpinSquaredHelper<RealType,HilbertState> spinSquaredHelper_;
+	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,HilbertState> > spinSquared_;
+	//serializr normal statesPerSite_
 	SizeType statesPerSite_;
-};     //class ModelFeBasedSc
+}; //class ModelFeBasedSc
 } // namespace Dmrg
 /*@}*/
 #endif
