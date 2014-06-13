@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -73,7 +73,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file ParametersModelTj1Orb.h
  *
- *  Contains the parameters for the Hubbard model and function to read them from a JSON file
+ *  Contains the parameters for the Hubbard model and function to
+ *  read them from a file
  *
  */
 #ifndef ParametersModelTj1Orb_H
@@ -81,33 +82,34 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 //#include "SimpleReader.h"
 
 namespace Dmrg {
-	//! Hubbard Model Parameters
-	template<typename Field>
-	struct ParametersModelTj1Orb {
-		
-		template<typename IoInputType>
-		ParametersModelTj1Orb(IoInputType& io)
-		{
-			io.read(potentialV,"potentialV");
-		}
-		
-		// Do not include here connection parameters
+//! Hubbard Model Parameters
+template<typename Field>
+struct ParametersModelTj1Orb {
 
-		// potential V, size=twice the number of sites: for spin up and then for spin down
-		typename PsimagLite::Vector<Field>::Type potentialV;
-
-		// target number of electrons  in the system
-		int nOfElectrons;
-	};
-	
-	//! Function that prints model parameters to stream os
-	template<typename FieldType>
-	std::ostream& operator<<(std::ostream &os,const ParametersModelTj1Orb<FieldType>& parameters)
+	template<typename IoInputType>
+	ParametersModelTj1Orb(IoInputType& io)
 	{
-		os<<"potentialV\n";
-		os<<parameters.potentialV;
-		return os;
+		io.read(potentialV,"potentialV");
 	}
+
+	// Do not include here connection parameters
+
+	// potential V, size=twice the number of sites: for spin up and then for spin down
+	typename PsimagLite::Vector<Field>::Type potentialV;
+
+	// target number of electrons  in the system
+	int nOfElectrons;
+};
+
+//! Function that prints model parameters to stream os
+template<typename FieldType>
+std::ostream& operator<<(std::ostream &os,
+                         const ParametersModelTj1Orb<FieldType>& parameters)
+{
+	os<<"potentialV\n";
+	os<<parameters.potentialV;
+	return os;
+}
 } // namespace Dmrg
 
 /*@}*/

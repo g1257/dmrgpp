@@ -142,7 +142,40 @@ public:
 	                   SizeType x,
 	                   PsimagLite::String msg = "") const
 	{
-		return 0;
+		PsimagLite::String str = msg;
+		str += "Tj1Orb";
+
+		const char* start = (const char *)this;
+		const char* end = 0;
+		SizeType total = PsimagLite::MemResolv::SIZEOF_VPTR;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
+		          total,
+		          start,
+		          msg + " Tj1Orb vptr");
+
+		total += mres.memResolv(&modelParameters_,
+		                        PsimagLite::MemResolv::SIZEOF_HEAPPTR,
+		                        str + " modelParameters");
+
+		end = start + total;
+		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
+		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
+		          end,
+		          str + " ref to geometry");
+
+		mres.memResolv(&geometry_, 0, str + " geometry");
+
+		start = end;
+		end = (const char *)&spinSquaredHelper_;
+		total += mres.memResolv(&offset_, end-start, str + " offset");
+
+		end = start;
+		start = (const char *)&spinSquared_;
+		total += mres.memResolv(&spinSquaredHelper_,end-start, str+" spinSquaredHelper");
+
+		total += mres.memResolv(&spinSquared_,sizeof(*this)-total, str + " spinSquared");
+
+		return total;
 	}
 
 	SizeType hilbertSize(SizeType site) const

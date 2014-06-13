@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "InputNg.h"
 #include "InputCheck.h"
 #include "ProgressIndicator.h"
+#include "NoPthreads.h"
 
 namespace Dmrg {
 
