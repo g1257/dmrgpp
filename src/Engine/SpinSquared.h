@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -81,138 +81,145 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SPIN_SQUARED_H
 #define SPIN_SQUARED_H
 
-
 namespace Dmrg {
-	template<typename CallbackType>
-	class SpinSquared {
-			typedef typename CallbackType::Word Word;
-			typedef typename CallbackType::FieldType FieldType;
-		public:
-			enum {SPIN_UP=0,SPIN_DOWN=1};
-			enum {ORBITAL_A=0,ORBITAL_B=1};
+template<typename CallbackType>
+class SpinSquared {
 
-			SpinSquared(CallbackType& callback,int NUMBER_OF_ORBITALS1,int DEGREES_OF_FREEDOM1) 
-				: callback_(callback),
-				  NUMBER_OF_ORBITALS(NUMBER_OF_ORBITALS1),
-				  DEGREES_OF_FREEDOM(DEGREES_OF_FREEDOM1)
-			{}
+	typedef typename CallbackType::Word Word;
+	typedef typename CallbackType::FieldType FieldType;
 
-			void doOnePairOfSitesA(const Word& ket,SizeType i,SizeType j) const
-			{
-				FieldType value = 0.5;
-				Word bra=ket;
-				int ret = c(bra,j,ORBITAL_A,SPIN_UP);
-				ret = cDagger(bra,j,ORBITAL_A,SPIN_DOWN,ret);
-				ret = c(bra,i,ORBITAL_A,SPIN_DOWN,ret);
-				ret = cDagger(bra,i,ORBITAL_A,SPIN_UP,ret);
-				if (ret==0) callback_(ket,bra,value);
-				if (NUMBER_OF_ORBITALS==1) return;
+public:
 
-				bra=ket;
-				ret = c(bra,j,ORBITAL_B,SPIN_UP);
-				ret = cDagger(bra,j,ORBITAL_B,SPIN_DOWN,ret);
-				ret = c(bra,i,ORBITAL_A,SPIN_DOWN,ret);
-				ret = cDagger(bra,i,ORBITAL_A,SPIN_UP,ret);
-				if (ret==0) callback_(ket,bra,value);
+	enum {SPIN_UP=0,SPIN_DOWN=1};
 
-				bra=ket;
-				ret = c(bra,j,ORBITAL_A,SPIN_UP);
-				ret = cDagger(bra,j,ORBITAL_A,SPIN_DOWN,ret);
-				ret = c(bra,i,ORBITAL_B,SPIN_DOWN,ret);
-				ret = cDagger(bra,i,ORBITAL_B,SPIN_UP,ret);
-				if (ret==0) callback_(ket,bra,value);
+	enum {ORBITAL_A=0,ORBITAL_B=1};
 
-				bra=ket;
-				ret = c(bra,j,ORBITAL_B,SPIN_UP);
-				ret = cDagger(bra,j,ORBITAL_B,SPIN_DOWN,ret);
-				ret = c(bra,i,ORBITAL_B,SPIN_DOWN,ret);
-				ret = cDagger(bra,i,ORBITAL_B,SPIN_UP,ret);
-				if (ret==0) callback_(ket,bra,value);
-			}
+	SpinSquared(CallbackType& callback,
+	            int NUMBER_OF_ORBITALS1,
+	            int DEGREES_OF_FREEDOM1)
+	    : callback_(callback),
+	      NUMBER_OF_ORBITALS(NUMBER_OF_ORBITALS1),
+	      DEGREES_OF_FREEDOM(DEGREES_OF_FREEDOM1)
+	{}
 
-			void doOnePairOfSitesB(const Word& ket,SizeType i,SizeType j) const
-			{
-				FieldType value = 0.5;
-				Word bra=ket;
-				int ret = c(bra,j,ORBITAL_A,SPIN_DOWN);
-				ret = cDagger(bra,j,ORBITAL_A,SPIN_UP,ret);
-				ret = c(bra,i,ORBITAL_A,SPIN_UP,ret);
-				ret = cDagger(bra,i,ORBITAL_A,SPIN_DOWN,ret);
-				if (ret==0) callback_(ket,bra,value);
-				if (NUMBER_OF_ORBITALS==1) return;
+	void doOnePairOfSitesA(const Word& ket,SizeType i,SizeType j) const
+	{
+		FieldType value = 0.5;
+		Word bra=ket;
+		int ret = c(bra,j,ORBITAL_A,SPIN_UP);
+		ret = cDagger(bra,j,ORBITAL_A,SPIN_DOWN,ret);
+		ret = c(bra,i,ORBITAL_A,SPIN_DOWN,ret);
+		ret = cDagger(bra,i,ORBITAL_A,SPIN_UP,ret);
+		if (ret==0) callback_(ket,bra,value);
+		if (NUMBER_OF_ORBITALS==1) return;
 
-				bra=ket;
-				ret = c(bra,j,ORBITAL_B,SPIN_DOWN);
-				ret = cDagger(bra,j,ORBITAL_B,SPIN_UP,ret);
-				ret = c(bra,i,ORBITAL_A,SPIN_UP,ret);
-				ret = cDagger(bra,i,ORBITAL_A,SPIN_DOWN,ret);
-				if (ret==0) callback_(ket,bra,value);
+		bra=ket;
+		ret = c(bra,j,ORBITAL_B,SPIN_UP);
+		ret = cDagger(bra,j,ORBITAL_B,SPIN_DOWN,ret);
+		ret = c(bra,i,ORBITAL_A,SPIN_DOWN,ret);
+		ret = cDagger(bra,i,ORBITAL_A,SPIN_UP,ret);
+		if (ret==0) callback_(ket,bra,value);
 
-				bra=ket;
-				ret = c(bra,j,ORBITAL_A,SPIN_DOWN);
-				ret = cDagger(bra,j,ORBITAL_A,SPIN_UP,ret);
-				ret = c(bra,i,ORBITAL_B,SPIN_UP,ret);
-				ret = cDagger(bra,i,ORBITAL_B,SPIN_DOWN,ret);
-				if (ret==0) callback_(ket,bra,value);
+		bra=ket;
+		ret = c(bra,j,ORBITAL_A,SPIN_UP);
+		ret = cDagger(bra,j,ORBITAL_A,SPIN_DOWN,ret);
+		ret = c(bra,i,ORBITAL_B,SPIN_DOWN,ret);
+		ret = cDagger(bra,i,ORBITAL_B,SPIN_UP,ret);
+		if (ret==0) callback_(ket,bra,value);
 
-				bra=ket;
-				ret = c(bra,j,ORBITAL_B,SPIN_DOWN);
-				ret = cDagger(bra,j,ORBITAL_B,SPIN_UP,ret);
-				ret = c(bra,i,ORBITAL_B,SPIN_UP,ret);
-				ret = cDagger(bra,i,ORBITAL_B,SPIN_DOWN,ret);
-				if (ret==0) callback_(ket,bra,value);
-			}
+		bra=ket;
+		ret = c(bra,j,ORBITAL_B,SPIN_UP);
+		ret = cDagger(bra,j,ORBITAL_B,SPIN_DOWN,ret);
+		ret = c(bra,i,ORBITAL_B,SPIN_DOWN,ret);
+		ret = cDagger(bra,i,ORBITAL_B,SPIN_UP,ret);
+		if (ret==0) callback_(ket,bra,value);
+	}
 
-			void doDiagonal(const Word& ket,SizeType i,SizeType j) const
-			{
-				FieldType value = spinZ(ket,i)*spinZ(ket,j);
-				callback_(ket,ket,value);
-			}
+	void doOnePairOfSitesB(const Word& ket,SizeType i,SizeType j) const
+	{
+		FieldType value = 0.5;
+		Word bra=ket;
+		int ret = c(bra,j,ORBITAL_A,SPIN_DOWN);
+		ret = cDagger(bra,j,ORBITAL_A,SPIN_UP,ret);
+		ret = c(bra,i,ORBITAL_A,SPIN_UP,ret);
+		ret = cDagger(bra,i,ORBITAL_A,SPIN_DOWN,ret);
+		if (ret==0) callback_(ket,bra,value);
+		if (NUMBER_OF_ORBITALS==1) return;
 
-			FieldType spinZ(const Word& ket,SizeType i) const
-			{
-				int sum=0;
-				for (SizeType gamma=0;gamma<SizeType(NUMBER_OF_ORBITALS);gamma++) {
-					sum += n(ket,i,gamma,SPIN_UP);
-					sum -= n(ket,i,gamma,SPIN_DOWN);
-				}	
-				return sum*0.5;
-			}	
+		bra=ket;
+		ret = c(bra,j,ORBITAL_B,SPIN_DOWN);
+		ret = cDagger(bra,j,ORBITAL_B,SPIN_UP,ret);
+		ret = c(bra,i,ORBITAL_A,SPIN_UP,ret);
+		ret = cDagger(bra,i,ORBITAL_A,SPIN_DOWN,ret);
+		if (ret==0) callback_(ket,bra,value);
 
-		private:
-			CallbackType& callback_;
-			int const NUMBER_OF_ORBITALS;
-			int const DEGREES_OF_FREEDOM;
+		bra=ket;
+		ret = c(bra,j,ORBITAL_A,SPIN_DOWN);
+		ret = cDagger(bra,j,ORBITAL_A,SPIN_UP,ret);
+		ret = c(bra,i,ORBITAL_B,SPIN_UP,ret);
+		ret = cDagger(bra,i,ORBITAL_B,SPIN_DOWN,ret);
+		if (ret==0) callback_(ket,bra,value);
 
-			int c(Word& ket,SizeType i,SizeType gamma,SizeType spin,int ret=0) const
-			{
-				if (ret<0) return ret;
-				SizeType shift_ = (DEGREES_OF_FREEDOM*i);
-				Word mask = 1<<(shift_ + gamma+spin*NUMBER_OF_ORBITALS);
-				if ((ket & mask)==0) return -1;
-				ket ^= mask;
-				return 0;
-			}
+		bra=ket;
+		ret = c(bra,j,ORBITAL_B,SPIN_DOWN);
+		ret = cDagger(bra,j,ORBITAL_B,SPIN_UP,ret);
+		ret = c(bra,i,ORBITAL_B,SPIN_UP,ret);
+		ret = cDagger(bra,i,ORBITAL_B,SPIN_DOWN,ret);
+		if (ret==0) callback_(ket,bra,value);
+	}
 
-			int cDagger(Word& ket,SizeType i,SizeType gamma,SizeType spin,int ret=0) const
-			{
-				if (ret<0) return ret;
-				SizeType shift_ = (DEGREES_OF_FREEDOM*i);
-				Word mask = 1<<(shift_+gamma+spin*NUMBER_OF_ORBITALS);
-				if ((ket & mask)>0) return -1;
-				ket |= mask;
-				return 0;
-			}
+	void doDiagonal(const Word& ket,SizeType i,SizeType j) const
+	{
+		FieldType value = spinZ(ket,i)*spinZ(ket,j);
+		callback_(ket,ket,value);
+	}
 
-			int n(const Word& ket,SizeType i,SizeType gamma,SizeType spin) const
-			{
-				SizeType shift_ = (DEGREES_OF_FREEDOM*i);
-				Word mask = 1<<(shift_+gamma+spin*NUMBER_OF_ORBITALS);
-				if ((ket & mask)>0) return 1;
-				return 0;
-			}
-	}; // JmPairs
+	FieldType spinZ(const Word& ket,SizeType i) const
+	{
+		int sum=0;
+		for (SizeType gamma=0;gamma<SizeType(NUMBER_OF_ORBITALS);gamma++) {
+			sum += n(ket,i,gamma,SPIN_UP);
+			sum -= n(ket,i,gamma,SPIN_DOWN);
+		}
+		return sum*0.5;
+	}
+
+private:
+
+	int c(Word& ket,SizeType i,SizeType gamma,SizeType spin,int ret=0) const
+	{
+		if (ret<0) return ret;
+		SizeType shift_ = (DEGREES_OF_FREEDOM*i);
+		Word mask = 1<<(shift_ + gamma+spin*NUMBER_OF_ORBITALS);
+		if ((ket & mask)==0) return -1;
+		ket ^= mask;
+		return 0;
+	}
+
+	int cDagger(Word& ket,SizeType i,SizeType gamma,SizeType spin,int ret=0) const
+	{
+		if (ret<0) return ret;
+		SizeType shift_ = (DEGREES_OF_FREEDOM*i);
+		Word mask = 1<<(shift_+gamma+spin*NUMBER_OF_ORBITALS);
+		if ((ket & mask)>0) return -1;
+		ket |= mask;
+		return 0;
+	}
+
+	int n(const Word& ket,SizeType i,SizeType gamma,SizeType spin) const
+	{
+		SizeType shift_ = (DEGREES_OF_FREEDOM*i);
+		Word mask = 1<<(shift_+gamma+spin*NUMBER_OF_ORBITALS);
+		if ((ket & mask)>0) return 1;
+		return 0;
+	}
+
+	CallbackType& callback_;
+	int const NUMBER_OF_ORBITALS;
+	int const DEGREES_OF_FREEDOM;
+}; // JmPairs
 } // namespace Dmrg
 
 /*@}*/
 #endif
+

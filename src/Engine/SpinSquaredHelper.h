@@ -91,6 +91,25 @@ public:
 
 	SpinSquaredHelper() : data_(0),ketSaved_(0) { }
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		str += "SpinSquaredHelper";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&ketSaved_);
+		SizeType total = mres.memResolv(&data_, end-start, str + " data");
+
+		total += mres.memResolv(&ketSaved_,
+		                        sizeof(*this)-total,
+		                        str + " ketSaved");
+
+		return total;
+	}
+
 	void operator()(const Word& ket,const Word& bra,const FieldType& value)
 	{
 		if (ket!=bra) {
@@ -112,9 +131,6 @@ public:
 	void clear() { data_=0; }
 
 private:
-
-	FieldType data_;
-	Word ketSaved_;
 
 	int perfectSquareOrCrash(const FieldType& t) const
 	{
@@ -147,6 +163,13 @@ private:
 			PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue: j+m not SizeType\n");
 		return ret;
 	}
+
+	//serializr start class SpinSquaredHelper
+	//serializr normal data_
+	FieldType data_;
+	//serializr normal ketSaved_
+	Word ketSaved_;
+
 }; // class SpinSquaredHelper
 } // namespace Dmrg
 
