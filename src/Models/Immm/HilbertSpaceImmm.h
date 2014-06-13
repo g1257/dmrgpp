@@ -109,6 +109,21 @@ public:
 	    : maxOrbitals_(maxOrbitals)
 	{}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		str += "HilbertSpaceImmm";
+
+		mres.memResolv(&maxOrbitals_,
+		               sizeof(*this),
+		               str + " maxOrbitals");
+
+		return sizeof(*this);
+	}
+
 	SizeType dOf() const { return 2*maxOrbitals_; }
 
 	// Get electronic state on site "j" in binary number "a"
@@ -223,9 +238,11 @@ private:
 		return dOf()*j;
 	}
 
+	//serializr start class HilbertSpaceImmm
+	//serializr normal maxOrbitals_
 	SizeType maxOrbitals_;
 }; // class HilbertSpaceImmm
 } // namespace Dmrg
 
-/*@}*/	
+/*@}*/
 #endif // HILBERTSPACE_IMMM_H

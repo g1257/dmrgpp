@@ -94,11 +94,38 @@ struct ParametersImmm {
 		io.readline(minOxygenElectrons,"MinOxygenElectrons=");
 	}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		str += "ParametersImmm";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&potentialV);
+		SizeType total = mres.memResolv(&hubbardU, end-start, str + " hubbardU");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&minOxygenElectrons);
+		total += mres.memResolv(&potentialV, end-start, str + " potentialV");
+
+		total += mres.memResolv(&minOxygenElectrons,
+		                        sizeof(*this) - total,
+		                        str + " minOxygenElectrons");
+
+		return total;
+	}
+
+	//serializr start class ParametersImmm
 	// Hubbard U values (one for each site)
+	//serializr normal hubbardU
 	typename PsimagLite::Vector<Field>::Type hubbardU;
 	// Onsite potential values, one for each site
+	//serializr normal potentialV
 	typename PsimagLite::Vector<Field>::Type potentialV;
 	// target number of electrons  in the system
+	//serializr normal minOxygenElectrons
 	SizeType minOxygenElectrons;
 };
 

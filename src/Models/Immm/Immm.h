@@ -168,8 +168,50 @@ public:
 	                   SizeType x,
 	                   PsimagLite::String msg = "") const
 	{
-		return 0;
+		PsimagLite::String str = msg;
+		str += "Immm";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&modelParameters_);
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
+		          total,
+		          start,
+		          msg + " Immm vptr");
+
+		start = end;
+		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
+		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&copperEach_);
+		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
+		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
+		          start,
+		          str + " ref to geometry");
+		total += (end -start);
+
+		mres.memResolv(&geometry_, 0, str + " geometry");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&hilbertSpace_);
+		total += mres.memResolv(&copperEach_, end-start, str + " copperEach");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&statesCopper_);
+		total += mres.memResolv(&hilbertSpace_, end-start, str + " hilbertSpace");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&statesOxygen_);
+		total += mres.memResolv(&statesCopper_, end-start, str + " statesCopper");
+
+		total += mres.memResolv(&statesOxygen_,
+		                        sizeof(*this) - total,
+		                        str + " statesOxygen");
+
+		return total;
 	}
+
 
 	SizeType hilbertSize(SizeType site) const
 	{
@@ -605,13 +647,21 @@ private:
 		return (atomAtSite(site) == ATOM_COPPER) ? ORBITALS_COPPER : ORBITALS_OXYGEN;
 	}
 
+	//serializr start class Immm
+	//serializr vptr
+	//serializr normal modelParameters_
 	ParametersImmm<RealType>  modelParameters_;
-	GeometryType const &geometry_;
+	//serializr ref geometry_ end
+	const GeometryType& geometry_;
+	//serializr normal copperEach_
 	SizeType copperEach_;
+	//serializr normal hilbertSpace_
 	HilbertSpaceImmmType hilbertSpace_;
+	//serializr normal statesCopper_
 	SizeType statesCopper_;
+	//serializr normal statesOxygen_
 	SizeType statesOxygen_;
-};     //class Immm
+}; //class Immm
 
 } // namespace Dmrg
 /*@}*/

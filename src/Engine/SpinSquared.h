@@ -102,6 +102,37 @@ public:
 	      DEGREES_OF_FREEDOM(DEGREES_OF_FREEDOM1)
 	{}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		str += "SpinSquared";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&NUMBER_OF_ORBITALS);
+		SizeType total = end - start;
+		mres.push(SomeMemResolvType::MEMORY_HEAPPTR,
+		          SomeMemResolvType::SIZEOF_HEAPREF,
+		          this,
+		          str + " ref to callback");
+
+		mres.memResolv(&callback_, 0, str + " callback");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&DEGREES_OF_FREEDOM);
+		total += mres.memResolv(&NUMBER_OF_ORBITALS,
+		                        end-start,
+		                        str + " NUMBER_OF_ORBITALS");
+
+		total += mres.memResolv(&DEGREES_OF_FREEDOM,
+		                        sizeof(*this) - total,
+		                        str + " DEGREES_OF_FREEDOM");
+
+		return total;
+	}
+
 	void doOnePairOfSitesA(const Word& ket,SizeType i,SizeType j) const
 	{
 		FieldType value = 0.5;
@@ -214,10 +245,14 @@ private:
 		return 0;
 	}
 
+	//serializr start class SpinSquared
+	//serializr ref callback_ this
 	CallbackType& callback_;
+	//serializr normal NUMBER_OF_ORBITALS
 	int const NUMBER_OF_ORBITALS;
+	//serializr normal DEGREES_OF_FREEDOM
 	int const DEGREES_OF_FREEDOM;
-}; // JmPairs
+}; // SpinSquared
 } // namespace Dmrg
 
 /*@}*/

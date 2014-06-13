@@ -169,8 +169,8 @@ public:
 		end = (const char *)&spinSquaredHelper_;
 		total += mres.memResolv(&offset_, end-start, str + " offset");
 
-		end = start;
-		start = (const char *)&spinSquared_;
+		start = end;
+		end = (const char *)&spinSquared_;
 		total += mres.memResolv(&spinSquaredHelper_,end-start, str+" spinSquaredHelper");
 
 		total += mres.memResolv(&spinSquared_,sizeof(*this)-total, str + " spinSquared");
