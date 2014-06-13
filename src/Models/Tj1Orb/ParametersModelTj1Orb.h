@@ -92,12 +92,34 @@ struct ParametersModelTj1Orb {
 		io.read(potentialV,"potentialV");
 	}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		str += "ParametersModelTj1Orb";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&nOfElectrons);
+		SizeType total = mres.memResolv(&potentialV, end-start, str + " potentialV");
+
+		total += mres.memResolv(&nOfElectrons,
+		                        sizeof(*this) - total,
+		                        str + " nOfElectrons");
+
+		return total;
+	}
+
 	// Do not include here connection parameters
 
 	// potential V, size=twice the number of sites: for spin up and then for spin down
+	//serializr start class ParametersModelTj1Orb
+	//serializr normal potentialV
 	typename PsimagLite::Vector<Field>::Type potentialV;
 
 	// target number of electrons  in the system
+	//serializr normal nOfElectrons
 	int nOfElectrons;
 };
 
@@ -114,3 +136,4 @@ std::ostream& operator<<(std::ostream &os,
 
 /*@}*/
 #endif
+

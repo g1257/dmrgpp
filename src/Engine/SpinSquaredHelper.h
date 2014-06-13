@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -80,66 +80,76 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SPIN_SQ_HELPER_H
 #define SPIN_SQ_HELPER_H
 
-namespace Dmrg {	
-	template<typename FieldType_,typename Word_>
-	class SpinSquaredHelper {
-		public:
-			typedef FieldType_ FieldType;
-			typedef Word_ Word;
-		
-			SpinSquaredHelper() : data_(0),ketSaved_(0) { }
-		
-			void operator()(const Word& ket,const Word& bra,const FieldType& value)
-			{
-				if (ket!=bra) {
-					throw PsimagLite::RuntimeError("SpinSquaredHelper::operator(): ket!=bra\n");
-				}
-				if (ket!=ketSaved_) data_=0;
-				ketSaved_=ket;
-				data_ += value;
-			}
+namespace Dmrg {
+template<typename FieldType_,typename Word_>
+class SpinSquaredHelper {
 
-			//! receives m, returns (2*j,m+j)
-			std::pair<SizeType,SizeType> getJmPair(const FieldType& m) const
-			{
-				SizeType j = getJvalue();
-				SizeType mtilde = getMvalue(m,j);
-				return std::pair<SizeType,SizeType>(j,mtilde);
-			}
+public:
 
-			void clear() { data_=0; }
+	typedef FieldType_ FieldType;
+	typedef Word_ Word;
 
-		private:
-			FieldType data_;
-			Word ketSaved_;
+	SpinSquaredHelper() : data_(0),ketSaved_(0) { }
 
-			int perfectSquareOrCrash(const FieldType& t) const
-			{
-				FieldType r = sqrt(t);
-				int ri=int(r);
-				if (ri!=r) PsimagLite::RuntimeError("SpinSquaredHelper:: sqrt(1+4d) not an integer\n");
-				return ri;
-			}
+	void operator()(const Word& ket,const Word& bra,const FieldType& value)
+	{
+		if (ket!=bra) {
+			throw PsimagLite::RuntimeError("SpinSquaredHelper::operator(): ket!=bra\n");
+		}
+		if (ket!=ketSaved_) data_=0;
+		ketSaved_=ket;
+		data_ += value;
+	}
 
-			SizeType getJvalue() const
-			{
-				if (data_<0) PsimagLite::RuntimeError("SpinSquaredHelper::getJvalue(): d<0\n");
-				int tmp = perfectSquareOrCrash(1.0+4.0*data_);
-				if (tmp<1) PsimagLite::RuntimeError("SpinSquaredHelper::getJvalue(): sqrt(1+4d)<1\n");
-				SizeType ret = tmp-1;
-				return ret;	
-			}
+	//! receives m, returns (2*j,m+j)
+	std::pair<SizeType,SizeType> getJmPair(const FieldType& m) const
+	{
+		SizeType j = getJvalue();
+		SizeType mtilde = getMvalue(m,j);
+		return std::pair<SizeType,SizeType>(j,mtilde);
+	}
 
-			SizeType getMvalue(const FieldType& m,SizeType j) const
-			{
-				FieldType tmp = m+j*0.5;
-				if (tmp<0)  PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue(): j+m <0\n");
-				SizeType ret = SizeType(tmp);
-				if (ret!=tmp) PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue(): j+m not SizeType\n");
-				return ret;
-			}
-		}; // class SpinSquaredHelper
+	void clear() { data_=0; }
+
+private:
+
+	FieldType data_;
+	Word ketSaved_;
+
+	int perfectSquareOrCrash(const FieldType& t) const
+	{
+		FieldType r = sqrt(t);
+		int ri=int(r);
+		if (ri!=r)
+			PsimagLite::RuntimeError("SpinSquaredHelper:: sqrt(1+4d) not an integer\n");
+
+		return ri;
+	}
+
+	SizeType getJvalue() const
+	{
+		if (data_<0)
+			PsimagLite::RuntimeError("SpinSquaredHelper::getJvalue(): d<0\n");
+		int tmp = perfectSquareOrCrash(1.0+4.0*data_);
+		if (tmp<1)
+			PsimagLite::RuntimeError("SpinSquaredHelper::getJvalue(): sqrt(1+4d)<1\n");
+		SizeType ret = tmp-1;
+		return ret;
+	}
+
+	SizeType getMvalue(const FieldType& m,SizeType j) const
+	{
+		FieldType tmp = m+j*0.5;
+		if (tmp<0)
+			PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue(): j+m <0\n");
+		SizeType ret = SizeType(tmp);
+		if (ret!=tmp)
+			PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue: j+m not SizeType\n");
+		return ret;
+	}
+}; // class SpinSquaredHelper
 } // namespace Dmrg
 
 /*@}*/
 #endif
+
