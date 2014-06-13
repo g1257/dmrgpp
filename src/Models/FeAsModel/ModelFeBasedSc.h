@@ -210,7 +210,7 @@ public:
 		total += mres.memResolv(&reinterpretY_, end-start, str + " reinterpretY");
 
 		start = end;
-		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
+		end = start + sizeof(modelParameters_);
 		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
 
 		start = end;
@@ -230,6 +230,7 @@ public:
 		end = reinterpret_cast<const char *>(&statesPerSite_);
 		total += mres.memResolv(&spinSquared_, end-start, str + " spinSquared");
 
+		assert(sizeof(*this) > total);
 		total += mres.memResolv(&statesPerSite_,
 		                        sizeof(*this) - total,
 		                        str + " statesPerSite");

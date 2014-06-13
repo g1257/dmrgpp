@@ -151,7 +151,45 @@ public:
 	                   SizeType x,
 	                   PsimagLite::String msg = "") const
 	{
-		return 0;
+		PsimagLite::String str = msg;
+		str += "ModelHubbard";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&modelParameters_);
+		SizeType total = end - start;
+		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
+		          total,
+		          start,
+		          msg + " ModelHubbard vptr");
+
+		start = end;
+		end = start + sizeof(modelParameters_);
+		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&offset_);
+		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
+		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
+		          start,
+		          str + " ref to geometry");
+
+		mres.memResolv(&geometry_, 0, str + " geometry");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&spinSquaredHelper_);
+		total += mres.memResolv(&offset_, end-start, str + " offset");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&spinSquared_);
+		total += mres.memResolv(&spinSquaredHelper_,
+		                        end-start,
+		                        str + " spinSquaredHelper");
+
+		assert(sizeof(*this) > total);
+		total += mres.memResolv(&spinSquared_,
+		                        sizeof(*this) - total, str + " spinSquared");
+
+		return total;
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the size of the one-site Hilbert space. */
@@ -514,10 +552,17 @@ private:
 		return jm;
 	}
 
+	//serializr start class ModelHubbard
+	//serializr vptr
+	//serializr normal modelParameters_
 	ParametersModelHubbard<RealType>  modelParameters_;
+	//serializr ref geometry_
 	const GeometryType &geometry_;
+	//serializr normal offset_
 	SizeType offset_;
+	//serializr normal spinSquaredHelper_
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
+	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 };	//class ModelHubbard
 

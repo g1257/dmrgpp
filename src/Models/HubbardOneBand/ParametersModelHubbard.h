@@ -106,21 +106,55 @@ struct ParametersModelHubbard {
 		//			io.rewind();
 	}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		str += "ParametersModelHubbard";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&potentialV);
+		SizeType total = mres.memResolv(&hubbardU, end-start, str + " hubbardU");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&potentialT);
+		total += mres.memResolv(&potentialV, end-start, str + " potentialV");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&omega);
+		total += mres.memResolv(&potentialT, end-start, str + " potentialT");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&nOfElectrons);
+		total += mres.memResolv(&omega, end-start, str + " omega");
+
+		total += mres.memResolv(&nOfElectrons,
+		                        sizeof(*this) - total, str + " nOfElectrons");
+
+		return total;
+	}
+
+	//serializr start class ParametersModelHubbard
 	// Do not include here connection parameters
 	// those are handled by the Geometry
 	// Hubbard U values (one for each site)
+	//serializr normal hubbardU
 	typename PsimagLite::Vector<Field>::Type hubbardU;
 	// Onsite potential values, one for each site
+	//serializr normal potentialV
 	typename PsimagLite::Vector<Field>::Type potentialV;
 
 	// for time-dependent H:
+	//serializr normal potentialT
 	typename PsimagLite::Vector<Field>::Type potentialT;
+	//serializr normal omega
 	Field omega;
 
 	// target number of electrons  in the system
+	//serializr normal nOfElectrons
 	int nOfElectrons;
-	// target density
-	//Field density;
 };
 
 //! Function that prints model parameters to stream os
