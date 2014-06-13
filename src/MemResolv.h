@@ -36,6 +36,9 @@ public:
 
 	enum MemoryKindEnum { MEMORY_DATA, MEMORY_HEAPPTR, MEMORY_TEXTPTR};
 
+	static const unsigned int SIZEOF_HEAPREF = sizeof(void*);
+	static const unsigned int SIZEOF_VPTR = sizeof(void*);
+	static const unsigned int SIZEOF_HEAPPTR = sizeof(void*);
 	static const long unsigned int  LABEL_LENGTH = 128;
 
 	template<typename T>
@@ -49,7 +52,8 @@ public:
 		refTextPtr_ = (long int)(*f);
 		memResolv(ptr);
 		finish();
-		garbage_.push_back(reinterpret_cast<unsigned char*>(ptr));
+		const unsigned char* ptr2 = reinterpret_cast<const unsigned char*>(ptr);
+		garbage_.push_back(const_cast<unsigned char*>(ptr2));
 		garbageSize_.push_back(0);
 	}
 
@@ -252,7 +256,7 @@ public:
 		const long unsigned int* c2 = (const long unsigned int*)c;
 		const char* c3 = (const char*)*c2;
 		SizeType len = sizeof(long unsigned int);
-		const char* ptr = c3;
+		char* ptr = const_cast<char *>(c3);
 		ptr -= len;
 		updateZeroes(len+1,0);
 		memcpy(reinterpret_cast<char *>(ptr),zeroes_,len);
@@ -319,7 +323,7 @@ public:
 		if (tmp == 0) return total;
 
 		push(MemResolv::MEMORY_DATA,tmp,&(vv[0]),msg + " vector data no class");
-		total += tmp;
+		//total += tmp;
 
 		return total;
 	}
