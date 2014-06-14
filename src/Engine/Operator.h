@@ -93,8 +93,36 @@ struct Su2Related {
 	{}		// we always print offset
 	// and when running Abelian
 	// it might be undefined
+
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		str += "Su2Related";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&source);
+		SizeType total = mres.memResolv(&offset, end-start, str + " offset");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&transpose);
+		total += mres.memResolv(&source, end-start, str + " source");
+
+		total += mres.memResolv(&transpose,
+		                        sizeof(*this) - total,
+		                        str + " transpose");
+
+		return total;
+	}
+
+	//serializr start class Su2Related
+	//serializr normal offset
 	SizeType offset;
+	//serializr normal source
 	PsimagLite::Vector<SizeType>::Type source;
+	//serializr normal transpose
 	PsimagLite::Vector<int>::Type transpose;
 };
 
@@ -195,6 +223,37 @@ struct Operator {
 		// FIXME: su2related needs to be set properly for when SU(2) is running
 	}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		str += "Operator";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&fermionSign);
+		SizeType total = mres.memResolv(&data, end-start, str + " data");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&jm);
+		total += mres.memResolv(&fermionSign, end-start, str + " fermionSign");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&angularFactor);
+		total += mres.memResolv(&jm, end-start, str + " jm");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&su2Related);
+		total += mres.memResolv(&angularFactor, end-start, str + " angularFactor");
+
+		total += mres.memResolv(&su2Related,
+		                        sizeof(*this) - total,
+		                        str + " su2Related");
+
+		return total;
+	}
+
 	void save(std::ostream& os) const
 	{
 		os<<"TSPOperator=raw\n";
@@ -225,12 +284,18 @@ struct Operator {
 		Dmrg::recv(su2Related,root,tag+4,mpiComm);
 	}
 
+	//serializr start class Operator
+	//serializr normal data
 	SparseMatrixType data;
 	// does this operator commute or anticommute with others of the
 	// same class on different sites
+	//serializr normal fermionSign
 	int fermionSign;
+	//serializr normal jm
 	PairType  jm; // angular momentum of this operator
+	//serializr normal angularFactor
 	RealType angularFactor;
+	//serializr normal su2Related
 	Su2RelatedType su2Related;
 
 private:
