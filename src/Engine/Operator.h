@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -86,207 +86,212 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 
 namespace Dmrg {
-	//! This is a structure, don't add member functions here!
-	struct Su2Related {
-		Su2Related()
-		: offset(0) // setting to zero is necessary, because
-		{}		// we always print offset
-				// and when running Abelian
-				// it might be undefined
-		SizeType offset;
-		PsimagLite::Vector<SizeType>::Type source;
-		PsimagLite::Vector<int>::Type transpose;
-	};
+//! This is a structure, don't add member functions here!
+struct Su2Related {
+	Su2Related()
+	    : offset(0) // setting to zero is necessary, because
+	{}		// we always print offset
+	// and when running Abelian
+	// it might be undefined
+	SizeType offset;
+	PsimagLite::Vector<SizeType>::Type source;
+	PsimagLite::Vector<int>::Type transpose;
+};
 
-	inline std::istream& operator>>(std::istream& is,Su2Related& x)
+inline std::istream& operator>>(std::istream& is,Su2Related& x)
+{
+	is>>x.offset;
+	return is;
+}
+
+inline std::ostream& operator<<(std::ostream& os,const Su2Related& x)
+{
+	os<<x.offset<<"\n";
+	return os;
+}
+
+void send(Su2Related& su2Related,int root,int tag,PsimagLite::MPI::CommType mpiComm)
+{
+	PsimagLite::MPI::send(su2Related.offset,root,tag,mpiComm);
+	PsimagLite::MPI::send(su2Related.source,root,tag+1,mpiComm);
+	PsimagLite::MPI::send(su2Related.transpose,root,tag+2,mpiComm);
+}
+
+void recv(Su2Related& su2Related,int root,int tag,PsimagLite::MPI::CommType mpiComm)
+{
+	PsimagLite::MPI::recv(su2Related.offset,root,tag,mpiComm);
+	PsimagLite::MPI::recv(su2Related.source,root,tag+1,mpiComm);
+	PsimagLite::MPI::recv(su2Related.transpose,root,tag+2,mpiComm);
+}
+
+void bcast(Su2Related& su2Related)
+{
+	PsimagLite::MPI::bcast(su2Related.offset);
+	PsimagLite::MPI::bcast(su2Related.source);
+	PsimagLite::MPI::bcast(su2Related.transpose);
+}
+
+//! This is a structure, don't add member functions here!
+template<typename SparseMatrixType_>
+struct Operator {
+
+	enum {CAN_BE_ZERO = false, MUST_BE_NONZERO = true};
+
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef SparseMatrixType_ SparseMatrixType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
+	typedef std::pair<SizeType,SizeType> PairType;
+	typedef Su2Related Su2RelatedType;
+
+	Operator() {}
+
+	Operator(const SparseMatrixType& data1,
+	         int fermionSign1,
+	         const PairType& jm1,
+	         RealType angularFactor1,
+	         const Su2RelatedType& su2Related1)
+	    : data(data1),
+	      fermionSign(fermionSign1),
+	      jm(jm1),
+	      angularFactor(angularFactor1),
+	      su2Related(su2Related1)
+	{}
+
+	template<typename IoInputType, typename CookedOperatorType>
+	Operator(IoInputType& io, CookedOperatorType& cookedOperator,bool checkNonZero)
 	{
-		is>>x.offset;
-		return is;
-	}
+		PsimagLite::String s;
+		PsimagLite::Matrix<SparseElementType> m;
 
-	inline std::ostream& operator<<(std::ostream& os,const Su2Related& x)
-	{
-		os<<x.offset<<"\n";
-		return os;
-	}
+		io.readline(s,"TSPOperator=");
 
-	void send(Su2Related& su2Related,int root,int tag,PsimagLite::MPI::CommType mpiComm)
-	{
-		PsimagLite::MPI::send(su2Related.offset,root,tag,mpiComm);
-		PsimagLite::MPI::send(su2Related.source,root,tag+1,mpiComm);
-		PsimagLite::MPI::send(su2Related.transpose,root,tag+2,mpiComm);
-	}
-
-	void recv(Su2Related& su2Related,int root,int tag,PsimagLite::MPI::CommType mpiComm)
-	{
-		PsimagLite::MPI::recv(su2Related.offset,root,tag,mpiComm);
-		PsimagLite::MPI::recv(su2Related.source,root,tag+1,mpiComm);
-		PsimagLite::MPI::recv(su2Related.transpose,root,tag+2,mpiComm);
-	}
-	
-
-	void bcast(Su2Related& su2Related)
-	{
-		PsimagLite::MPI::bcast(su2Related.offset);
-		PsimagLite::MPI::bcast(su2Related.source);
-		PsimagLite::MPI::bcast(su2Related.transpose);
-	}
-
-	//! This is a structure, don't add member functions here!
-	template<typename SparseMatrixType_>
-	struct Operator {
-
-		enum {CAN_BE_ZERO = false, MUST_BE_NONZERO = true};
-
-		typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-		typedef SparseMatrixType_ SparseMatrixType;
-		typedef typename SparseMatrixType::value_type SparseElementType;
-		typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
-		typedef std::pair<SizeType,SizeType> PairType;
-		typedef Su2Related Su2RelatedType;
-
-		Operator() {}
-
-		Operator(const SparseMatrixType& data1,
-		         int fermionSign1,
-		         const PairType& jm1,
-		         RealType angularFactor1,
-		         const Su2RelatedType& su2Related1)
-		: data(data1),fermionSign(fermionSign1),jm(jm1),angularFactor(angularFactor1),su2Related(su2Related1)
-		{}
-
-		template<typename IoInputType, typename CookedOperatorType>
-		Operator(IoInputType& io, CookedOperatorType& cookedOperator,bool checkNonZero)
-		{
-			PsimagLite::String s;
-			PsimagLite::Matrix<SparseElementType> m;
-
-			io.readline(s,"TSPOperator=");
-
-			if (s == "cooked") {
-				io.readline(s,"COOKED_OPERATOR=");
-				VectorSizeType v;
-				io.read(v,"COOKED_EXTRA");
-				cookedOperator(m,s,v);
-			} else if (s == "raw") {
-				io.readMatrix(m,"RAW_MATRIX");
-				if (checkNonZero) checkNotZeroMatrix(m);
-			} else {
-				PsimagLite::String str(__FILE__);
-				str += " : " + ttos(__LINE__) + "\n";
-				str += "Only TSPOperator=cooked or TSPOperator=raw ";
-				str += "allowed, not TSPOperator=" + s + "\n";
-				throw PsimagLite::RuntimeError(str.c_str());
-			}
-
-			fullMatrixToCrsMatrix(data,m);
-
-			io.readline(fermionSign,"FERMIONSIGN=");
-
-			VectorSizeType v(2);
-			io.readKnownSize(v,"JMVALUES");
-			jm.first = v[0]; jm.second = v[1];
-
-			io.readline(angularFactor,"AngularFactor=");
-
-			// FIXME: su2related needs to be set properly for when SU(2) is running
+		if (s == "cooked") {
+			io.readline(s,"COOKED_OPERATOR=");
+			VectorSizeType v;
+			io.read(v,"COOKED_EXTRA");
+			cookedOperator(m,s,v);
+		} else if (s == "raw") {
+			io.readMatrix(m,"RAW_MATRIX");
+			if (checkNonZero) checkNotZeroMatrix(m);
+		} else {
+			PsimagLite::String str(__FILE__);
+			str += " : " + ttos(__LINE__) + "\n";
+			str += "Only TSPOperator=cooked or TSPOperator=raw ";
+			str += "allowed, not TSPOperator=" + s + "\n";
+			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
-		void save(std::ostream& os) const
-		{
-			os<<"TSPOperator=raw\n";
-			os<<"RAW_MATRIX\n";
-			PsimagLite::Matrix<SparseElementType> m;
-			crsMatrixToFullMatrix(m,data);
-			os<<m;
-			os<<"FERMIONSIGN="<<fermionSign<<"\n";
-			os<<"JMVALUES "<<jm.first<<" "<<jm.second<<"\n";
-			os<<"AngularFactor="<<angularFactor<<"\n";
-		}
+		fullMatrixToCrsMatrix(data,m);
 
-		void send(int root,int tag,PsimagLite::MPI::CommType mpiComm)
-		{
-			data.send(root,tag,mpiComm);
-			PsimagLite::MPI::send(fermionSign,root,tag+1,mpiComm);
-			PsimagLite::MPI::send(jm,root,tag+2,mpiComm);
-			PsimagLite::MPI::send(angularFactor,root,tag+3,mpiComm);
-			Dmrg::send(su2Related,root,tag+4,mpiComm);
-		}
+		io.readline(fermionSign,"FERMIONSIGN=");
 
-		void recv(int root,int tag,PsimagLite::MPI::CommType mpiComm)
-		{
-			data.recv(root,tag,mpiComm);
-			PsimagLite::MPI::recv(fermionSign,root,tag+1,mpiComm);
-			PsimagLite::MPI::recv(jm,root,tag+2,mpiComm);
-			PsimagLite::MPI::recv(angularFactor,root,tag+3,mpiComm);
-			Dmrg::recv(su2Related,root,tag+4,mpiComm);
-		}
+		VectorSizeType v(2);
+		io.readKnownSize(v,"JMVALUES");
+		jm.first = v[0]; jm.second = v[1];
 
-		SparseMatrixType data;
-		int fermionSign; // does this operator commute or anticommute with others of the same class on different sites
-		PairType  jm; // angular momentum of this operator	
-		RealType angularFactor;
-		Su2RelatedType su2Related;
+		io.readline(angularFactor,"AngularFactor=");
 
-	private:
-
-		void checkNotZeroMatrix(const PsimagLite::Matrix<SparseElementType>& m) const
-		{
-			RealType norma = norm2(m);
-			RealType eps = 1e-6;
-			if (norma>eps) return;
-
-			PsimagLite::String s(__FILE__);
-			s += " : " + ttos(__LINE__) + "\n";
-			s += "RAW_MATRIX or COOKED_OPERATOR ";
-			s += " is less than " + ttos(eps) + "\n";
-			std::cerr<<"WARNING: "<<s;
-		}
-	};
-
-	template<typename SparseMatrixType>
-	void bcast(Operator<SparseMatrixType>& op)
-	{
-		PsimagLite::bcast(op.data);
-		PsimagLite::MPI::bcast(op.fermionSign);
-		PsimagLite::MPI::bcast(op.jm);
-		PsimagLite::MPI::bcast(op.angularFactor);
-		bcast(op.su2Related);
+		// FIXME: su2related needs to be set properly for when SU(2) is running
 	}
 
-	template<typename SparseMatrixType,
-	         template<typename,typename> class SomeVectorTemplate,
-	         typename SomeAllocator1Type,
-	         typename SomeAllocator2Type>
-	void fillOperator(SomeVectorTemplate<SparseMatrixType*,SomeAllocator1Type>& data,
-	                  SomeVectorTemplate<Operator<SparseMatrixType>,SomeAllocator2Type>& op)
+	void save(std::ostream& os) const
 	{
-		for (SizeType i=0;i<data.size();i++) {
-			data[i] = &(op[i].data);
-		}
+		os<<"TSPOperator=raw\n";
+		os<<"RAW_MATRIX\n";
+		PsimagLite::Matrix<SparseElementType> m;
+		crsMatrixToFullMatrix(m,data);
+		os<<m;
+		os<<"FERMIONSIGN="<<fermionSign<<"\n";
+		os<<"JMVALUES "<<jm.first<<" "<<jm.second<<"\n";
+		os<<"AngularFactor="<<angularFactor<<"\n";
 	}
 
-	template<typename SparseMatrixType>
-	std::istream& operator>>(std::istream& is,Operator<SparseMatrixType>& op)
+	void send(int root,int tag,PsimagLite::MPI::CommType mpiComm)
 	{
-		is>>op.data;
-		is>>op.fermionSign;
-		is>>op.jm;
-		is>>op.angularFactor;
-		is>>op.su2Related;
-		return is;
+		data.send(root,tag,mpiComm);
+		PsimagLite::MPI::send(fermionSign,root,tag+1,mpiComm);
+		PsimagLite::MPI::send(jm,root,tag+2,mpiComm);
+		PsimagLite::MPI::send(angularFactor,root,tag+3,mpiComm);
+		Dmrg::send(su2Related,root,tag+4,mpiComm);
 	}
 
-	template<typename SparseMatrixType>
-	std::ostream& operator<<(std::ostream& os,const Operator<SparseMatrixType>& op)
+	void recv(int root,int tag,PsimagLite::MPI::CommType mpiComm)
 	{
-		os<<op.data;
-		os<<op.fermionSign<<"\n";
-		os<<op.jm.first<<" "<<op.jm.second<<"\n";
-		os<<op.angularFactor<<"\n";
-		os<<op.su2Related;
-		return os;
+		data.recv(root,tag,mpiComm);
+		PsimagLite::MPI::recv(fermionSign,root,tag+1,mpiComm);
+		PsimagLite::MPI::recv(jm,root,tag+2,mpiComm);
+		PsimagLite::MPI::recv(angularFactor,root,tag+3,mpiComm);
+		Dmrg::recv(su2Related,root,tag+4,mpiComm);
 	}
+
+	SparseMatrixType data;
+	// does this operator commute or anticommute with others of the
+	// same class on different sites
+	int fermionSign;
+	PairType  jm; // angular momentum of this operator
+	RealType angularFactor;
+	Su2RelatedType su2Related;
+
+private:
+
+	void checkNotZeroMatrix(const PsimagLite::Matrix<SparseElementType>& m) const
+	{
+		RealType norma = norm2(m);
+		RealType eps = 1e-6;
+		if (norma>eps) return;
+
+		PsimagLite::String s(__FILE__);
+		s += " : " + ttos(__LINE__) + "\n";
+		s += "RAW_MATRIX or COOKED_OPERATOR ";
+		s += " is less than " + ttos(eps) + "\n";
+		std::cerr<<"WARNING: "<<s;
+	}
+};
+
+template<typename SparseMatrixType>
+void bcast(Operator<SparseMatrixType>& op)
+{
+	PsimagLite::bcast(op.data);
+	PsimagLite::MPI::bcast(op.fermionSign);
+	PsimagLite::MPI::bcast(op.jm);
+	PsimagLite::MPI::bcast(op.angularFactor);
+	bcast(op.su2Related);
+}
+
+template<typename SparseMatrixType,
+         template<typename,typename> class SomeVectorTemplate,
+         typename SomeAllocator1Type,
+         typename SomeAllocator2Type>
+void fillOperator(SomeVectorTemplate<SparseMatrixType*,SomeAllocator1Type>& data,
+                  SomeVectorTemplate<Operator<SparseMatrixType>,SomeAllocator2Type>& op)
+{
+	for (SizeType i=0;i<data.size();i++) {
+		data[i] = &(op[i].data);
+	}
+}
+
+template<typename SparseMatrixType>
+std::istream& operator>>(std::istream& is,Operator<SparseMatrixType>& op)
+{
+	is>>op.data;
+	is>>op.fermionSign;
+	is>>op.jm;
+	is>>op.angularFactor;
+	is>>op.su2Related;
+	return is;
+}
+
+template<typename SparseMatrixType>
+std::ostream& operator<<(std::ostream& os,const Operator<SparseMatrixType>& op)
+{
+	os<<op.data;
+	os<<op.fermionSign<<"\n";
+	os<<op.jm.first<<" "<<op.jm.second<<"\n";
+	os<<op.angularFactor<<"\n";
+	os<<op.su2Related;
+	return os;
+}
 } // namespace Dmrg
 
 /*@}*/

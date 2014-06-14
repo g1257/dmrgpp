@@ -94,6 +94,13 @@ public:
 	TargetParamsGroundState(IoInputter& io,const ModelType& model)
 	{}
 
+	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
+	                           SizeType x,
+	                           PsimagLite::String msg = "") const
+	{
+		return 0;
+	}
+
 	virtual SizeType sites() const { return 0; }
 
 }; // class TargetParamsGroundState
@@ -105,7 +112,7 @@ operator<<(std::ostream& os,const TargetParamsGroundState<ModelType>& t)
 	os<<"#TargetParams.type=GroundState\n";
 	return os;
 }
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // TARGET_PARAMS_GROUNDSTATE_H

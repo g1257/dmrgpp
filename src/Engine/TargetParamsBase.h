@@ -85,6 +85,7 @@ namespace Dmrg {
 template<typename ModelType>
 class TargetParamsBase {
 public:
+
 	typedef typename ModelType::RealType RealType;
 
 	typedef typename ModelType::OperatorType OperatorType;
@@ -101,6 +102,10 @@ public:
 	enum {KRYLOV,RUNGE_KUTTA,SUZUKI_TROTTER};
 
 	virtual ~TargetParamsBase() {}
+
+	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
+	                           SizeType x,
+	                           PsimagLite::String msg = "") const = 0;
 
 	virtual SizeType sites() const = 0;
 
@@ -237,7 +242,7 @@ private:
 	}
 }; // class TargetParamsBase
 
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // TARGET_PARAMS_BASE_H

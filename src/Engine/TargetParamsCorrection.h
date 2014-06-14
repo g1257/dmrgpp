@@ -99,6 +99,13 @@ public:
 		io.readline(correctionA_,"CorrectionA=");
 	}
 
+	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
+	                           SizeType x,
+	                           PsimagLite::String msg = "") const
+	{
+		return 0;
+	}
+
 	virtual SizeType sites() const { return 0; }
 
 	virtual RealType correctionA() const
@@ -119,7 +126,7 @@ operator<<(std::ostream& os,const TargetParamsCorrection<ModelType>& t)
 	os<<"#TargetCorrection.correctionA="<<t.correctionA()<<"\n";
 	return os;
 }
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // TARGET_PARAMS_CORRECTION_H

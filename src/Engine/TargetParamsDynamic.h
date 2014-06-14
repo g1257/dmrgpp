@@ -108,6 +108,13 @@ public:
 		io.readline(type_,"DynamicDmrgType=");
 	}
 
+	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
+	                           SizeType x,
+	                           PsimagLite::String msg = "") const
+	{
+		return 0;
+	}
+
 	virtual SizeType type() const
 	{
 		return type_;
@@ -130,7 +137,7 @@ operator<<(std::ostream& os,const TargetParamsDynamic<ModelType>& t)
 	os<<"DynamicDmrgType="<<t.type()<<"\n";
 	return os;
 }
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif //TARGET_PARAMS_DYNAMIC_H
