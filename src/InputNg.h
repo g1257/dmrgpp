@@ -385,6 +385,33 @@ public:
 			inputWriteable.set(mapStrStr_,mapStrVec_,labelsForRemoval_);
 		}
 
+		template<typename SomeMemResolvType>
+		SizeType memResolv(SomeMemResolvType& mres,
+		                   SizeType x,
+		                   PsimagLite::String msg = "") const
+		{
+			PsimagLite::String str = msg;
+			str += "InputNgReadable";
+
+			const char* start = reinterpret_cast<const char *>(this);
+			const char* end = reinterpret_cast<const char *>(&mapStrStr_);
+			SizeType total = mres.memResolv(&file_, end-start, str + " file");
+
+			start = end;
+			end = reinterpret_cast<const char *>(&mapStrVec_);
+			total += mres.memResolv(&mapStrStr_, end-start, str + " mapStrStr");
+
+			start = end;
+			end = reinterpret_cast<const char *>(&labelsForRemoval_);
+			total += mres.memResolv(&mapStrVec_, end-start, str + " mapStrVec");
+
+			total += mres.memResolv(&labelsForRemoval_,
+			                        sizeof(*this) - total,
+			                        str + " labelsForRemoval");
+
+			return total;
+		}
+
 		void readline(String& val,const String& label,bool clean = true)
 		{
 			String label2 = label2label(label);
@@ -690,9 +717,14 @@ public:
 			throw RuntimeError(s.c_str());
 		}
 
+		//serializr start class InputNgReadable
+		//serializr normal file_
 		PsimagLite::String file_;
+		//serializr normal mapStrStr_
 		typename Map<String,String,MyCompareType>::Type mapStrStr_;
+		//serializr normal mapStrVec_
 		typename Map<String,Vector<String>::Type,MyCompareType>::Type mapStrVec_;
+		//serializr normal labelsForRemoval_
 		Vector<String>::Type labelsForRemoval_;
 	}; // class Readable
 

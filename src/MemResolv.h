@@ -7,6 +7,7 @@
 #include "IsClass.h"
 #include <iostream>
 #include <fstream>
+#include "Map.h"
 
 namespace PsimagLite {
 
@@ -291,17 +292,6 @@ public:
 		return total;
 	}
 
-	template<typename SomeClassType>
-	typename EnableIf<!IsVectorLike<SomeClassType>::True &
-	!IsPairLike<SomeClassType>::True &
-	PsimagLite::IsClass<SomeClassType>::value,
-	SizeType>::Type memResolv(const SomeClassType* c,
-	                          SizeType x = 0,
-	                          String msg = "")
-	{
-		return c->memResolv(*this,x,msg);
-	}
-
 	template<typename SomeVectorType>
 	typename EnableIf<IsVectorLike<SomeVectorType>::True &
 	!PsimagLite::IsClass<typename SomeVectorType::value_type>::value,
@@ -375,6 +365,27 @@ public:
 		total += tmp;
 
 		return total;
+	}
+
+	template<typename SomeMapType>
+	typename EnableIf<IsMapLike<SomeMapType>::True,
+	SizeType>::Type memResolv(const SomeMapType* v,
+	                          SizeType x = 0,
+	                          String msg = "")
+	{
+		throw PsimagLite::RuntimeError("memResolv for std::map not implemented\n");
+	}
+
+	template<typename SomeClassType>
+	typename EnableIf<!IsVectorLike<SomeClassType>::True &
+	!IsPairLike<SomeClassType>::True &
+	!IsMapLike<SomeClassType>::True &
+	PsimagLite::IsClass<SomeClassType>::value,
+	SizeType>::Type memResolv(const SomeClassType* c,
+	                          SizeType x = 0,
+	                          String msg = "")
+	{
+		return c->memResolv(*this,x,msg);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const MemResolv& mresolv);

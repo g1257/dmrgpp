@@ -180,6 +180,37 @@ public:
 		setRow(a.n_row(),counter);
 	}
 
+	template<typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres,
+	                   SizeType x,
+	                   PsimagLite::String msg = "") const
+	{
+		PsimagLite::String str = msg;
+		str += "CrsMatrix";
+
+		const char* start = reinterpret_cast<const char *>(this);
+		const char* end = reinterpret_cast<const char *>(&colind_);
+		SizeType total = mres.memResolv(&rowptr_, end-start, str + " rowptr");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&values_);
+		total += mres.memResolv(&colind_, end-start, str + " colind");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&nrow_);
+		total += mres.memResolv(&values_, end-start, str + " values");
+
+		start = end;
+		end = reinterpret_cast<const char *>(&ncol_);
+		total += mres.memResolv(&nrow_, end-start, str + " nrow");
+
+		total += mres.memResolv(&ncol_,
+		                        sizeof(*this) - total,
+		                        str + " ncol");
+
+		return total;
+	}
+
 	void resize(SizeType nrow,SizeType ncol)
 	{
 		colind_.clear();
@@ -391,10 +422,18 @@ public:
 	friend void bcast(CrsMatrix<S>& m);
 
 private:
+
+	//serializr start class CrsMatrix
+	//serializr normal rowptr_
 	typename Vector<int>::Type rowptr_;
+	//serializr normal colind_
 	typename Vector<int>::Type colind_;
+	//serializr normal values_
 	typename Vector<T>::Type values_;
-	SizeType nrow_,ncol_;
+	//serializr normal nrow_
+	SizeType nrow_;
+	//serializr normal ncol_
+	SizeType ncol_;
 }; // class CrsMatrix
 
 // Companion functions below:
