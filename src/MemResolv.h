@@ -228,7 +228,7 @@ public:
 	}
 
 	template<typename NoClassType>
-	typename EnableIf<!PsimagLite::IsClass<NoClassType>::value,
+	typename EnableIf<!IsClass<NoClassType>::value,
 	SizeType>::Type memResolv(const NoClassType* c,
 	                          SizeType x = sizeof(NoClassType),
 	                          String msg = "")
@@ -243,6 +243,15 @@ public:
 		tmp += r;
 		push(MemResolv::MEMORY_DATA,tmp,c,msg + " fundamental type");
 		return tmp;
+	}
+
+	template<typename SomeComplexNumber>
+	typename EnableIf<IsComplexNumber<SomeComplexNumber>::True,
+	SizeType>::Type memResolv(const SomeComplexNumber* c,
+	                          SizeType x = sizeof(SomeComplexNumber),
+	                          String msg = "")
+	{
+		throw RuntimeError("memResolv for std::complex not implemented\n");
 	}
 
 	template<typename T1, typename T2, typename T3>
@@ -294,7 +303,7 @@ public:
 
 	template<typename SomeVectorType>
 	typename EnableIf<IsVectorLike<SomeVectorType>::True &
-	!PsimagLite::IsClass<typename SomeVectorType::value_type>::value,
+	!IsClass<typename SomeVectorType::value_type>::value,
 	SizeType>::Type memResolv(const SomeVectorType* v,
 	                          SizeType x = 0,
 	                          String msg = "")
@@ -320,7 +329,7 @@ public:
 
 	template<typename SomeVectorType>
 	typename EnableIf<IsVectorLike<SomeVectorType>::True &
-	PsimagLite::IsClass<typename SomeVectorType::value_type>::value,
+	IsClass<typename SomeVectorType::value_type>::value,
 	SizeType>::Type memResolv(const SomeVectorType* v,
 	                          SizeType x = 0,
 	                          String msg = "")
@@ -343,7 +352,7 @@ public:
 
 	template<typename SomeVectorType>
 	typename EnableIf<IsVectorLike<SomeVectorType>::True &
-	!PsimagLite::IsClass<typename SomeVectorType::value_type>::value,
+	!IsClass<typename SomeVectorType::value_type>::value,
 	SizeType>::Type memResolvPtr(const SomeVectorType* v,
 	                             SizeType x = 0,
 	                             String msg = "")
@@ -373,14 +382,15 @@ public:
 	                          SizeType x = 0,
 	                          String msg = "")
 	{
-		throw PsimagLite::RuntimeError("memResolv for std::map not implemented\n");
+		throw RuntimeError("memResolv for std::map not implemented\n");
 	}
 
 	template<typename SomeClassType>
 	typename EnableIf<!IsVectorLike<SomeClassType>::True &
 	!IsPairLike<SomeClassType>::True &
 	!IsMapLike<SomeClassType>::True &
-	PsimagLite::IsClass<SomeClassType>::value,
+	!IsComplexNumber<SomeClassType>::True &
+	IsClass<SomeClassType>::value,
 	SizeType>::Type memResolv(const SomeClassType* c,
 	                          SizeType x = 0,
 	                          String msg = "")
