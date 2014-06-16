@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include "Vector.h"
 #include "Provenance.h"
+#include "BoostSerializationHeaders.h"
 
 namespace Dmrg {
 /**
@@ -145,9 +146,20 @@ struct FiniteLoop {
 	unsigned int keptStates; // kept states
 	int saveOption; // to save or not to save
 
-	FiniteLoop(int sl,unsigned int ks,int so)
-    : stepLength(sl),keptStates(ks),saveOption(so)
+	FiniteLoop() : stepLength(0),keptStates(0),saveOption(0)
 	{}
+
+	FiniteLoop(int sl,unsigned int ks,int so)
+	    : stepLength(sl),keptStates(ks),saveOption(so)
+	{}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & stepLength;
+		ar & keptStates;
+		ar & saveOption;
+	}
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
@@ -170,7 +182,8 @@ struct FiniteLoop {
 };
 
 //!PTEX_LABEL{139}
-inline void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,SizeType totalSites)
+inline void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
+                             SizeType totalSites)
 {
 	PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
 	PsimagLite::String loops = "";
@@ -249,6 +262,13 @@ struct DmrgCheckPoint {
 
 	DmrgCheckPoint() : enabled(false)
 	{}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & enabled;
+		ar & filename;
+	}
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
@@ -345,6 +365,30 @@ struct ParametersDmrgSolver {
 	typename PsimagLite::Vector<SizeType>::Type adjustQuantumNumbers;
 	typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
 
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version1)
+	{
+		ar & electronsUp;
+		ar & electronsDown;
+		ar & nthreads;
+		ar & sitesPerBlock;
+		ar & maxMatrixRankStored;
+		ar & keptStatesInfinite;
+		ar & useReflectionSymmetry;
+		ar & tolerance;
+		ar & gsWeight;
+		ar & filename;
+		ar & version;
+		ar & options;
+		ar & model;
+		ar & insitu;
+		ar & fileForDensityMatrixEigs;
+		ar & checkpoint;
+		ar & targetQuantumNumbers;
+		ar & adjustQuantumNumbers;
+		ar & finiteLoop;
+	}
+
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
 	                   SizeType x,
@@ -420,6 +464,13 @@ struct ParametersDmrgSolver {
 		return total;
 	}
 
+	ParametersDmrgSolver(PsimagLite::String filename)
+	{
+		std::ifstream ifs(filename.c_str());
+		boost::archive::text_iarchive ia(ifs);
+		ia >> (*this);
+	}
+
 	//! Read Dmrg parameters from inp file
 	ParametersDmrgSolver(InputValidatorType& io)
 	    : sitesPerBlock(1),
@@ -458,13 +509,15 @@ struct ParametersDmrgSolver {
 
 		if (upToFl>=finiteLoop.size()) {
 			PsimagLite::String s (__FILE__);
-			s += "\nFATAL: RepeatFiniteLoopsTo=" + ttos(upToFl) + " is larger than current finite loops\n";
+			s += "\nFATAL: RepeatFiniteLoopsTo=" + ttos(upToFl);
+			s += " is larger than current finite loops\n";
 			s += "\nMaximum is " + ttos(finiteLoop.size())+ "\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 		if (fromFl>upToFl) {
 			PsimagLite::String s (__FILE__);
-			s += "\nFATAL: RepeatFiniteLoopsFrom=" + ttos(fromFl) + " is larger than RepeatFiniteLoopsTo\n";
+			s += "\nFATAL: RepeatFiniteLoopsFrom=" + ttos(fromFl);
+			s += " is larger than RepeatFiniteLoopsTo\n";
 			s += "\nMaximum is " + ttos(upToFl)+ "\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
@@ -487,7 +540,7 @@ struct ParametersDmrgSolver {
 			PsimagLite::String s = "*** WARNING: TargetQuantumNumbers ";
 			s += "is deprecated in input file\n";
 			std::cerr<<s;
-		} catch (std::exception& e) {}
+		} catch (std::exception& e){}
 
 		bool hasElectrons = false;
 		try {
@@ -498,20 +551,23 @@ struct ParametersDmrgSolver {
 
 		if (hasElectrons && targetQuantumNumbers.size()>0) {
 			PsimagLite::String s (__FILE__);
-			s += "\nFATAL: Specifying both TargetElectronsUp/Down and TargetQuantumNumbers is an error.";
+			s += "\nFATAL: Specifying both TargetElectronsUp/Down ";
+			s += "and TargetQuantumNumbers is an error.";
 			s += "\nSpecify one or the other only.\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
 		if (!hasElectrons && targetQuantumNumbers.size()==0) {
 			PsimagLite::String s (__FILE__);
-			s += "\nFATAL: Either TargetElectronsUp/Down or TargetQuantumNumbers must be specified.\n";
+			s += "\nFATAL: Either TargetElectronsUp/Down or TargetQuantumNumbers ";
+			s += "must be specified.\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
 		if (options.find("useSu2Symmetry")!=PsimagLite::String::npos && hasElectrons) {
 			PsimagLite::String s (__FILE__);
-			s += "\nFATAL: TargetElectronsUp/Down cannot be specified while using SU(2) symmetry\n";
+			s += "\nFATAL: TargetElectronsUp/Down cannot be specified while ";
+			s += "using SU(2) symmetry\n";
 			s += "\nTargetQuantumNumbers must be specified instead.\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
@@ -573,42 +629,42 @@ struct ParametersDmrgSolver {
 //! print dmrg parameters
 template<typename FieldType,typename InputValidatorType>
 std::ostream &operator<<(std::ostream &os,
-                         ParametersDmrgSolver<FieldType,InputValidatorType> const &parameters)
+                         const ParametersDmrgSolver<FieldType,InputValidatorType> & p)
 {
 	os<<"#This is DMRG++\n";
 	Provenance provenance;
 	os<<provenance;
-	os<<"parameters.version="<<parameters.version<<"\n";
-	os<<"parameters.model="<<parameters.model<<"\n";
-	os<<"parameters.filename="<<parameters.filename<<"\n";
-	os<<"parameters.options="<<parameters.options<<"\n";
-	os<<"parameters.keptStatesInfinite="<<parameters.keptStatesInfinite<<"\n";
+	os<<"parameters.version="<<p.version<<"\n";
+	os<<"parameters.model="<<p.model<<"\n";
+	os<<"parameters.filename="<<p.filename<<"\n";
+	os<<"parameters.options="<<p.options<<"\n";
+	os<<"parameters.keptStatesInfinite="<<p.keptStatesInfinite<<"\n";
 	os<<"finiteLoop\n";
-	os<<parameters.finiteLoop;
+	os<<p.finiteLoop;
 
-	if (parameters.targetQuantumNumbers.size()>0) {
+	if (p.targetQuantumNumbers.size()>0) {
 		os<<"parameters.targetQuantumNumbers=";
-		for (SizeType i=0;i<parameters.targetQuantumNumbers.size();i++)
-			os<<parameters.targetQuantumNumbers[i]<<" ";
+		for (SizeType i=0;i<p.targetQuantumNumbers.size();i++)
+			os<<p.targetQuantumNumbers[i]<<" ";
 		os<<"\n";
 	} else {
-		os<<"parameters.electronsUp="<<parameters.electronsUp<<"\n";
-		os<<"parameters.electronsDown="<<parameters.electronsDown<<"\n";
+		os<<"parameters.electronsUp="<<p.electronsUp<<"\n";
+		os<<"parameters.electronsDown="<<p.electronsDown<<"\n";
 	}
-	if (parameters.tolerance>0)
-		os<<"parameters.tolerance="<<parameters.tolerance<<"\n";
-	os<<"parameters.nthreads="<<parameters.nthreads<<"\n";
-	os<<"parameters.useReflectionSymmetry="<<parameters.useReflectionSymmetry<<"\n";
-	if (parameters.checkpoint.filename!="")
-		os<<"parameters.restartFilename="<<parameters.checkpoint.filename<<"\n";
-	if (parameters.fileForDensityMatrixEigs!="")
-		os<<"parameters.fileForDensityMatrixEigs="<<parameters.fileForDensityMatrixEigs<<"\n";
+	if (p.tolerance>0)
+		os<<"parameters.tolerance="<<p.tolerance<<"\n";
+	os<<"parameters.nthreads="<<p.nthreads<<"\n";
+	os<<"parameters.useReflectionSymmetry="<<p.useReflectionSymmetry<<"\n";
+	if (p.checkpoint.filename!="")
+		os<<"parameters.restartFilename="<<p.checkpoint.filename<<"\n";
+	if (p.fileForDensityMatrixEigs!="")
+		os<<"parameters.fileForDensityMatrixEigs="<<p.fileForDensityMatrixEigs<<"\n";
 
-	if (parameters.gsWeight.first)
-		os<<"GsWeight="<<parameters.gsWeight.second<<"\n";
+	if (p.gsWeight.first)
+		os<<"GsWeight="<<p.gsWeight.second<<"\n";
 
-	if (parameters.options.find("MatrixVectorStored")==PsimagLite::String::npos)
-		os<<"MaxMatrixRankStored="<<parameters.maxMatrixRankStored<<"\n";
+	if (p.options.find("MatrixVectorStored")==PsimagLite::String::npos)
+		os<<"MaxMatrixRankStored="<<p.maxMatrixRankStored<<"\n";
 
 	return os;
 }
@@ -616,3 +672,4 @@ std::ostream &operator<<(std::ostream &os,
 /*@}*/
 
 #endif
+
