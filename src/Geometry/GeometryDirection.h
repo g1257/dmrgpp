@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_DIR_H
 #include <cassert>
 #include "String.h"
+#include "BoostSerializationHeaders.h"
 
 namespace PsimagLite {
 
@@ -91,9 +92,13 @@ class GeometryDirection {
 public:
 
 	enum {NUMBERS,MATRICES};
+	GeometryDirection()
+	    : dirId_(0),geometryBase_(0)
+	{}
 
 	template<typename IoInputter>
-	GeometryDirection(IoInputter& io,SizeType dirId,SizeType edof,
+	GeometryDirection(IoInputter& io,
+	                  SizeType dirId,SizeType edof,
 	                  const String& options,
 	                  const GeometryBaseType* geometryFactory)
 	    : dirId_(dirId),geometryBase_(geometryFactory)
@@ -114,6 +119,16 @@ public:
 				dataMatrices_.push_back(m);
 			}
 		}
+	}
+
+	template<class Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+		ar & dirId_;
+        ar & dataType_;
+        ar & geometryBase_;
+		ar & dataNumbers_;
+		ar & dataMatrices_;
 	}
 
 	template<typename SomeMemResolvType>

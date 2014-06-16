@@ -89,9 +89,18 @@ public:
 
 	enum { DIRECTION_S};
 
+	Star() {}
+
 	Star(SizeType linSize,InputType& io)
 	    : linSize_(linSize)
 	{}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<GeometryBase<InputType> >(*this);
+		ar & linSize_;
+	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
 	                   SizeType x,

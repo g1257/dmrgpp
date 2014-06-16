@@ -96,6 +96,8 @@ public:
 		  DIRECTION_Y=LadderType::DIRECTION_Y,
 		  DIRECTION_BATH};
 
+	LadderBath() {}
+
 	LadderBath(SizeType linSize,InputType& io)
 	    : linSize_(linSize),ladder_(0)
 	{
@@ -111,6 +113,16 @@ public:
 	~LadderBath()
 	{
 		if (ladder_) delete ladder_;
+	}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<GeometryBase<InputType> >(*this);
+		ar & linSize_;
+		ar & bathSitesPerSite_;
+		ar & clusterSize_;
+		ar & ladder_;
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,

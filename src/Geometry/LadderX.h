@@ -96,6 +96,8 @@ public:
 		  DIRECTION_XPY,
 		  DIRECTION_XMY};
 
+	LadderX() {}
+
 	LadderX(SizeType linSize,InputType& io)
 	    : ladder_(linSize,io),linSize_(linSize),leg_(ladder_.leg())
 	{}
@@ -190,6 +192,15 @@ public:
 	SizeType findReflection(SizeType site) const
 	{
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
+	}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<GeometryBase<InputType> >(*this);
+		ar & ladder_;
+		ar & linSize_;
+		ar & leg_;
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,

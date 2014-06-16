@@ -109,6 +109,10 @@ public:
 	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 
+	GeometryTerm()
+	    : linSize_(0),maxEdof_(0),geometryBase_(0)
+	{}
+
 	GeometryTerm(InputType& io,SizeType termId,SizeType linSize,bool debug=false) :
 	    linSize_(linSize),maxEdof_(0),geometryBase_(0)
 	{
@@ -158,6 +162,23 @@ public:
 	~GeometryTerm()
 	{
 		if (geometryBase_) delete geometryBase_;
+	}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar.template register_type<Chain<InputType> >();
+		ar.template register_type<ChainEx<InputType> >();
+		ar.template register_type<Ladder<InputType> >();
+		ar.template register_type<LadderX<InputType> >();
+		ar.template register_type<LadderBath<InputType> >();
+		ar.template register_type<KTwoNiFFour<InputType> >();
+		ar.template register_type<Star<InputType> >();
+		ar & linSize_;
+		ar & maxEdof_;
+		ar & geometryBase_;
+		ar & directions_;
+		ar & cachedValues_;
 	}
 
 	template<typename SomeMemResolvType>

@@ -91,6 +91,8 @@ public:
 
 	enum {DIRECTION_X,DIRECTION_Y};
 
+	Ladder() {}
+
 	Ladder(SizeType linSize,InputType& io)
 	    : linSize_(linSize)
 	{
@@ -117,6 +119,15 @@ public:
 
 		if (linSize % leg_ !=0)
 			throw RuntimeError("Ladder: leg must divide number of sites\n");
+	}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<GeometryBase<InputType> >(*this);
+		ar & linSize_;
+		ar & leg_;
+		ar & isPeriodicY_;
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,

@@ -403,7 +403,7 @@ public:
 
 			start = end;
 			end = reinterpret_cast<const char *>(&labelsForRemoval_);
-			total += mres.memResolv(&mapStrVec_, end-start, str + " mapStrVec");
+			total += sizeof(mapStrVec_); //mres.memResolv(&mapStrVec_, end-start, str + " mapStrVec");
 
 			total += mres.memResolv(&labelsForRemoval_,
 			                        sizeof(*this) - total,

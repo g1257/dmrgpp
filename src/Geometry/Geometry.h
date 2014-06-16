@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GeometryTerm.h"
 #include "String.h"
 #include "GeometryEx.h"
+#include "BoostSerializationHeaders.h"
 
 namespace PsimagLite {
 
@@ -112,10 +113,25 @@ public:
 		}
 	}
 
+	Geometry(PsimagLite::String filename)
+	{
+		std::ifstream ifs(filename.c_str());
+		boost::archive::text_iarchive ia(ifs);
+		ia >> (*this);
+	}
+
 	~Geometry()
 	{
 		for (SizeType i=0;i<terms_.size();i++)
 			if (terms_[i]) delete terms_[i];
+	}
+
+	template<class Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+//		ar & boost::serialization::base_object<GeometryExType>(*this);
+        ar & linSize_;
+		ar & terms_;
 	}
 
 	template<typename SomeMemResolvType>

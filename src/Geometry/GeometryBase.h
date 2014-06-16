@@ -109,6 +109,10 @@ public:
 	virtual ~GeometryBase()
 	{}
 
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{}
+
 	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
 	                           SizeType x,
 	                           PsimagLite::String msg) const = 0;

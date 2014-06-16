@@ -265,7 +265,7 @@ public:
 
 		const long unsigned int* c2 = (const long unsigned int*)c;
 		const char* c3 = (const char*)*c2;
-		SizeType len = sizeof(long unsigned int);
+		SizeType len = sizeof(unsigned int);
 		char* ptr = const_cast<char *>(c3);
 		ptr -= len;
 		updateZeroes(len+1,0);
@@ -288,15 +288,24 @@ public:
 		typedef typename SomePairType::first_type FirstType;
 		typedef typename SomePairType::second_type SecondType;
 
-		assert(x == sizeof(SomePairType));
-
 		const FirstType* f = (const FirstType*)c;
-		SizeType total = memResolv(f,sizeof(FirstType *),msg + "->first");
+		SizeType total = memResolv(f,sizeof(FirstType),msg + "->first");
 
 		const char* s = (const char*)c;
 		s += sizeof(FirstType *);
 		const SecondType* s2 = (const SecondType*)s;
-		total += memResolv(s2,sizeof(SecondType *),msg + "->second");
+		total += memResolv(s2,sizeof(SecondType),msg + "->second");
+
+		assert(x >= sizeof(SomePairType));
+		SizeType r = x - sizeof(SomePairType);
+
+		if (r == 0) return total;
+
+		updateZeroes(r+1,0);
+		const char* s3 = reinterpret_cast<const char*>(c);
+		char* ptr = const_cast<char *>(s3);
+		ptr += sizeof(SomePairType);
+		memcpy(reinterpret_cast<char *>(ptr),zeroes_,r);
 
 		return total;
 	}
@@ -345,7 +354,7 @@ public:
 		if (vv.size() == 0) return total;
 		SizeType elementSize = sizeof(vv[0]);
 		for (SizeType i = 0; i < vv.size(); ++i)
-			total += memResolv(&vv[i],elementSize,msg);
+			memResolv(&vv[i],elementSize,msg);
 
 		return total;
 	}

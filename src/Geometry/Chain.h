@@ -89,6 +89,8 @@ public:
 
 	enum { DIRECTION_X };
 
+	Chain() {}
+
 	Chain(SizeType linSize,InputType& io)
 	    : linSize_(linSize),isPeriodic_(false)
 	{
@@ -161,6 +163,14 @@ public:
 		site+=amount;
 		while (site>=linSize_) site -= linSize_;
 		return site;
+	}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<GeometryBase<InputType> >(*this);
+		ar & linSize_;
+		ar & isPeriodic_;
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,

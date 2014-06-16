@@ -99,11 +99,21 @@ class KTwoNiFFour : public GeometryBase<InputType> {
 
 public:
 
+	KTwoNiFFour() {}
+
 	KTwoNiFFour(SizeType linSize,InputType& io)
 	    : linSize_(linSize)
 	{
 		io.readline(signChange_,"SignChange=");
 		std::cerr<<"SIGN CHANGE="<<signChange_<<"\n";
+	}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & boost::serialization::base_object<GeometryBase<InputType> >(*this);
+		ar & linSize_;
+		ar & signChange_;
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,

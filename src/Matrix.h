@@ -29,6 +29,7 @@ Please see full open source license included in file LICENSE.
 #include "TypeToString.h"
 #include "String.h"
 #include "Mpi.h"
+#include "BoostSerializationHeaders.h"
 
 namespace PsimagLite {
 
@@ -75,6 +76,14 @@ public:
 		for (SizeType i=0;i<nrow_;i++)
 			for (SizeType j=0;j<ncol_;j++)
 				data_[i+j*nrow_] = m(i,j);
+	}
+
+	template<class Archive>
+	void serialize(Archive & ar, const unsigned int version)
+	{
+		ar & nrow_;
+		ar & ncol_;
+		ar & data_;
 	}
 
 	template<typename SomeMemResolvType>

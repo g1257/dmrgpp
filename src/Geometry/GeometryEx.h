@@ -3,6 +3,7 @@
 
 #include "Vector.h"
 #include "String.h"
+#include "BoostSerializationHeaders.h"
 
 #ifndef USE_MS_GEOMETRY
 
@@ -15,6 +16,10 @@ public:
 
 	typedef typename Vector<RealType>::Type VectorRealType;
 
+	GeometryEx()
+	    : meshLength_(0), enabled_(false), meshStep_(0)
+	{}
+
 	GeometryEx(InputType& io, SizeType meshPoints)
 	: meshLength_(sqrt(meshPoints)),
 	  enabled_(false),
@@ -23,6 +28,14 @@ public:
 		PsimagLite::String str;
 		io.readline(str,"GeometryKind=",false);
 		if (str == "star") enabled_ = true;
+	}
+
+	template<class Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+		ar & meshLength_;
+        ar & enabled_;
+        ar & meshStep_;
 	}
 
 	template<typename SomeMemResolvType>
