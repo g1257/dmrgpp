@@ -29,7 +29,7 @@ Please see full open source license included in file LICENSE.
 #ifndef CHEBYSHEV_F_EXPLICIT_H
 #define CHEBYSHEV_F_EXPLICIT_H
 #include "ChebyshevFunction.h"
-
+#include <cmath>
 
 namespace PsimagLite {
 	template<typename RealType>
@@ -46,7 +46,7 @@ namespace PsimagLite {
 				case 1:
 					return x;
 			}
-			
+
 			RealType x1 = x*x;
 			switch (m) {
 				case 2:
@@ -56,7 +56,7 @@ namespace PsimagLite {
 				case 4:
 					return 8*x1*x1-8*x1+1;
 				case 5:
-					return 16*x1*x1*x1-20*x1*x+5*x;
+					return 16*x1*x1*x-20*x1*x+5*x;
 			}
 			
 			RealType x2 = x1*x1;
