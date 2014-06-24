@@ -114,9 +114,7 @@ struct ParametersModelFeAs {
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		try {
-			io.readline(feAsMode,"FeAsMode=");
-		} catch (std::exception& e) {}
+		io.readline(feAsMode,"FeAsMode=");
 
 		if (feAsMode > 3)
 			throw PsimagLite::RuntimeError("FeAsMode: expecting 0 or 1 or 2 or 3\n");
