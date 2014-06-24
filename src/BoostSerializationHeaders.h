@@ -7,7 +7,10 @@
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/serialization/split_free.hpp>
 #else
+#include <string>
+#include <stdexcept>
 namespace boost {
 
 void noboost(std::string msg)
