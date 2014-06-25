@@ -153,7 +153,8 @@ public:
 	      diagonalization_(parameters_,model,verbose_,
 	                       reflectionOperator_,ioIn,quantumSector_,wft_),
 	      truncate_(reflectionOperator_,wft_,parameters_,
-	                model_.geometry().maxConnections(),verbose_)
+	                model_.geometry().maxConnections(),verbose_),
+	      energy_(0.0)
 	{
 		ioOut_.print(appInfo_);
 		ioOut_.print("PARAMETERS",parameters_);
@@ -230,6 +231,8 @@ public:
 	{
 		return inSitu_[i];
 	}
+
+	RealType energy() const { return energy_; }
 
 private:
 
@@ -311,8 +314,8 @@ private:
 			lrs_.setToProduct(quantumSector_);
 
 			const BlockType& ystep = findRightBlock(Y,step,E);
-			RealType energy = diagonalization_(psi,INFINITE,X[step],ystep);
-			printEnergy(energy);
+			energy_ = diagonalization_(psi,INFINITE,X[step],ystep);
+			printEnergy(energy_);
 
 			truncate_.changeBasis(pS,pE,psi,parameters_.keptStatesInfinite);
 
@@ -416,7 +419,6 @@ private:
 		int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
 		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
 		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
-		RealType gsEnergy=0;
 
 		SizeType direction=EXPAND_SYSTEM;
 		if (stepLength<0) direction=EXPAND_ENVIRON;
@@ -458,12 +460,12 @@ private:
 			lrs_.setToProduct(quantumSector_);
 
 			bool needsPrinting = (saveOption & 1);
-			gsEnergy =diagonalization_(target,
+			energy_ = diagonalization_(target,
 			                           direction,
 			                           sitesIndices_[stepCurrent_],
 			                           loopIndex,
 			                           needsPrinting);
-			printEnergy(gsEnergy);
+			printEnergy(energy_);
 
 			changeTruncateAndSerialize(pS,pE,target,keptStates,direction,saveOption);
 
@@ -485,9 +487,8 @@ private:
 			pS = lrs_.left();
 		}
 		if (saveOption & 1) {
-			PsimagLite::String s="#WAVEFUNCTION_ENERGY="+ttos(gsEnergy);
+			PsimagLite::String s="#WAVEFUNCTION_ENERGY="+ttos(energy_);
 			ioOut_.printline(s);
-			//				ioOut_.print("#WAVEFUNCTION_ENERGY=",gsEnergy);
 		}
 	}
 
@@ -663,7 +664,7 @@ private:
 	DiagonalizationType diagonalization_;
 	TruncationType truncate_;
 	TargetVectorType inSitu_;
-
+	RealType energy_;
 }; //class DmrgSolver
 } // namespace Dmrg
 
