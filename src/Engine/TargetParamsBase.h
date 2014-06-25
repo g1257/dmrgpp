@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGET_PARAMS_BASE_H
 #include <vector>
 #include <stdexcept>
+#include "MemResolv.h"
 
 namespace Dmrg {
 
