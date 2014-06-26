@@ -221,10 +221,12 @@ public:
 		return sites_[i];
 	}
 
-	virtual void setSite(SizeType i, SizeType j)
+	virtual void setOperator(SizeType i, SizeType j, const OperatorType& op)
 	{
 		assert(i < sites_.size());
 		sites_[i] = j;
+		assert(i < aOperators_.size());
+		aOperators_[i] = op;
 	}
 
 	virtual const VectorSizeType& startingLoops() const
@@ -255,13 +257,6 @@ public:
 	virtual void noOperator(bool x)
 	{
 		noOperator_ = x;
-	}
-
-	virtual void transposeConjugate(SizeType i)
-	{
-		assert(i < aOperators_.size());
-		SparseMatrixType tmp = aOperators_[i].data;
-		PsimagLite::transposeConjugate(aOperators_[i].data,tmp);
 	}
 
 	template<typename ModelType_>

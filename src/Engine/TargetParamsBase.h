@@ -116,9 +116,9 @@ public:
 		throw PsimagLite::RuntimeError(s);
 	}
 
-	virtual void setSite(SizeType i, SizeType j)
+	virtual void setOperator(SizeType i, SizeType j, const OperatorType& op)
 	{
-		unimplemented("type(setSite)");
+		unimplemented("type(setOperator)");
 	}
 
 	virtual const VectorSizeType& startingLoops() const
@@ -221,11 +221,6 @@ public:
 	virtual void noOperator(bool x)
 	{
 		unimplemented("noOperator");
-	}
-
-	virtual void transposeConjugate(SizeType i)
-	{
-		unimplemented("transposeConjugate");
 	}
 
 private:

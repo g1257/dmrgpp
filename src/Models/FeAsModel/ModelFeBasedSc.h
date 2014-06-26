@@ -329,6 +329,12 @@ public:
 			return tmp;
 		}
 
+		if (what == "0") {
+			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 0.0;
+			return tmp;
+		}
+
 		if (what=="+") {
 			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
 			for (SizeType x=0;x<modelParameters_.orbitals;x++)
