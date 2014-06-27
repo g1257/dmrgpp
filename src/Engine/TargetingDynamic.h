@@ -265,6 +265,7 @@ private:
 			SizeType p = this->leftRightSuper().super().findPartitionNumber(phi.offset(i0));
 			getLanczosVectors(V,sv,p);
 			if (i==0) {
+				assert(V.n_col() > 0);
 				this->common().targetVectorsResize(V.n_col());
 				for (SizeType j=0;j<this->common().targetVectors().size();j++)
 					this->common().targetVectors(j) = phi;
@@ -306,7 +307,7 @@ private:
 		SizeType threadId = 0;
 		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
 		typename LanczosSolverType::LanczosMatrixType h(&this->model(),&modelHelper);
-
+		paramsForSolver_.lotaMemory = true;
 		LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);
 
 		lanczosSolver.decomposition(sv,ab_);

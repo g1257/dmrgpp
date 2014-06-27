@@ -473,6 +473,7 @@ private:
 
 			if (site==0 || site==numberOfSites -1)  {
 				// don't wft since we did it before
+				assert(advance < targetVectors_.size());
 				phiNew = targetVectors_[advance];
 				return;
 			}

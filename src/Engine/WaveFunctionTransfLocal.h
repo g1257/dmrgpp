@@ -507,7 +507,7 @@ private:
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
 		MatrixOrIdentityType wsRef(twoSiteDmrg_,dmrgWaveStruct_.ws);
-		SizeType nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.col() : nip;
+		SizeType nip2 = nip; //(twoSiteDmrg_) ? dmrgWaveStruct_.ws.col() : nip;
 
 		for (SizeType x=start;x<final;x++) {
 			psiDest[x] = 0.0;
