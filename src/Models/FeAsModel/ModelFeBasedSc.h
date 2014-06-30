@@ -322,34 +322,35 @@ public:
 		SizeType spin = dof/modelParameters_.orbitals;
 		assert(creationMatrix.size()>0);
 		SizeType nrow = creationMatrix[0].data.row();
+		PsimagLite::String what2 = what;
 
-		if (what == "i" || what=="identity") {
+		if (what2 == "i" || what2=="identity") {
 			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
 			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
 			return tmp;
 		}
 
-		if (what == "0") {
+		if (what2 == "0") {
 			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
 			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 0.0;
 			return tmp;
 		}
 
-		if (what=="+") {
+		if (what2=="+") {
 			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
 			for (SizeType x=0;x<modelParameters_.orbitals;x++)
 				tmp += multiplyTc(creationMatrix[x].data,
 				                  creationMatrix[x+modelParameters_.orbitals].data);
 			return tmp;
 		}
-		if (what=="-") {
+		if (what2=="-") {
 			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
 			for (SizeType x=0;x<modelParameters_.orbitals;x++)
 				tmp += multiplyTc(creationMatrix[x+modelParameters_.orbitals].data,
 				                  creationMatrix[x].data);
 			return tmp;
 		}
-		if (what=="z") {
+		if (what2=="z") {
 			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
 			PsimagLite::Matrix<SparseElementType> tmp2(nrow,nrow);
 			for (SizeType x=0;x<modelParameters_.orbitals;x++) {
@@ -359,12 +360,13 @@ public:
 			}
 			return tmp-tmp2;
 		}
-		if (what=="n") {
+		if (what2=="n") {
 			PsimagLite::Matrix<SparseElementType> tmp =
 			        multiplyTc(creationMatrix[dof].data,creationMatrix[dof].data);
 			return tmp;
 		}
-		if (what=="c") {
+
+		if (what2=="c") {
 			PsimagLite::Matrix<SparseElementType> tmp;
 			SparseMatrixType cdagger;
 			transposeConjugate(cdagger,
@@ -372,7 +374,16 @@ public:
 			crsMatrixToFullMatrix(tmp,cdagger);
 			return tmp;
 		}
-		if (what=="d") { // delta = c^\dagger * c^dagger
+
+		if (what2=="c\'") {
+			PsimagLite::Matrix<SparseElementType> tmp;
+			SparseMatrixType c = creationMatrix[orbital +
+			        spin*modelParameters_.orbitals].data;
+			crsMatrixToFullMatrix(tmp,c);
+			return tmp;
+		}
+
+		if (what2=="d") { // delta = c^\dagger * c^dagger
 			SparseMatrixType atmp;
 			multiply(atmp,
 			         creationMatrix[orbital+orbital+modelParameters_.orbitals].data,
