@@ -113,6 +113,12 @@ public:
 	    : linSize_(0),maxEdof_(0),geometryBase_(0)
 	{}
 
+	/** @class hide_geometry2
+	 - DegreesOfFreedom=integer Degrees of freedom on which the connectors depend on.
+	 - GeometryKind=string One of chain, chainEx, ladder, ladderx, ladderbath, ktwoniffour,
+	   or star.
+	 - GeometryOptions=string Either none or ConstantValues needs to explain more FIXME
+	*/
 	GeometryTerm(InputType& io,SizeType termId,SizeType linSize,bool debug=false) :
 	    linSize_(linSize),maxEdof_(0),geometryBase_(0)
 	{

@@ -96,6 +96,14 @@ public:
 	typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
 	typedef GeometryEx<typename Real<ComplexOrRealType_>::Type,InputType> GeometryExType;
 
+	
+	/** @class hide_geometry1
+	    - TotalNumberOfSites=integer This is the total number of sites including bath sites
+	      (if any) and all system and environment sites.
+	    - NumberOfTerms=integer This is the number of Hamiltonian off-site terms. This number
+	      must match the model's expected number of terms. Note that each Hamiltonian off-site
+	      term can have a different geometry!
+	*/
 	Geometry(InputType& io,bool debug=false,SizeType meshPoints=0)
 	: GeometryExType(io,meshPoints)
 	{
