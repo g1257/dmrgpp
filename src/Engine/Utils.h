@@ -87,7 +87,7 @@ namespace std {
 	}
 } // namespace std
 
-//! Utility functions that are still needed
+// Utility functions that are still needed
 namespace utils {
 
 template<template<typename,typename> class SomeVectorTemplate,

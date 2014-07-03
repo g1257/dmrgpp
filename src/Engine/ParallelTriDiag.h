@@ -72,10 +72,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ParallelTriDiag.h
- *
- * DOC TBW FIXME
- */
 #ifndef PARALLEL_TRIDIAG_H
 #define PARALLEL_TRIDIAG_H
 

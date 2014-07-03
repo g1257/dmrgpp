@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
-//! Move also checkpointing from DmrgSolver to here (FIXME)
+// Move also checkpointing from DmrgSolver to here (FIXME)
 template<typename LeftRightSuperType,typename VectorType>
 class DmrgSerializer {
 

@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 
 namespace Dmrg {
-/**
+/** @class hide_Operators
 The \\cppClass{!PTEX_THISCLASS} class stores the local operators for this basis.
 Only the local operators corresponding to the most recently added sites
 will be meaningful. Indeed, if we  apply transformation $W$ (possibly

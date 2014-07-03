@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BlockMatrix.h"
 
 namespace Dmrg {
-	//!
 	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
 		typename TargettingType

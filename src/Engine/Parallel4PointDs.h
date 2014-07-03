@@ -72,10 +72,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Parallel4PointDs.h
- *
- * DOC TBW FIXME
- */
 #ifndef PARALLEL_4POINT_DS_H
 #define PARALLEL_4POINT_DS_H
 

@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 
 namespace Dmrg {
-//! This is a structure, don't add member functions here!
+// This is a structure, don't add member functions here!
 struct Su2Related {
 	Su2Related()
 	    : offset(0) // setting to zero is necessary, because
@@ -159,7 +159,7 @@ void bcast(Su2Related& su2Related)
 	PsimagLite::MPI::bcast(su2Related.transpose);
 }
 
-//! This is a structure, don't add member functions here!
+// This is a structure, don't add member functions here!
 template<typename SparseMatrixType_>
 struct Operator {
 

@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-//! Coordinates reading of TargetSTructure from input file
+// Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
 class TargetParamsAdaptiveDynamic : public TargetParamsCommon<ModelType> {
 

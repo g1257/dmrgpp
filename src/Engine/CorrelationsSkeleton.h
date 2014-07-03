@@ -88,7 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-//! Don't add functions to this class
+// Don't add functions to this class
 template<typename FieldType>
 struct CorrelationData {
 	SizeType ni;
@@ -97,7 +97,7 @@ struct CorrelationData {
 	PsimagLite::SparseVector<FieldType> wavefunction;
 };
 
-//! Companion function:
+// Companion function:
 template<typename FieldType>
 std::ostream& operator<<(std::ostream& os,CorrelationData<FieldType>& c)
 {

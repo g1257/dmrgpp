@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 
 namespace Dmrg {
-	//!
 	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
 		typename TargettingType

@@ -72,10 +72,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ParallelDensityMatrix.h
- *
- * DOC TBW FIXME
- */
 #ifndef PARALLEL_DENSITY_MATRIX_H
 #define PARALLEL_DENSITY_MATRIX_H
 

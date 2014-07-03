@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "IoSimple.h"
 #include "ProgressIndicator.h"
 
-//! A disk stack, similar to std::stack but stores in disk not in memory
+// A disk stack, similar to std::stack but stores in disk not in memory
 namespace Dmrg {
 	template<typename DataType>
 	class DiskStack {

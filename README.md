@@ -1,7 +1,6 @@
-README
-========================
+# Quick Start
 
-\section license Licensing
+## Licensing
 
 
  The full software license for DMRG++ version 2.0.0
@@ -11,7 +10,7 @@ README
  obtained with DMRG++. If you do,
 <b>please cite this work</b> (see next subsection).
 
-\section disclaimer DISCLAIMER
+## DISCLAIMER
 
 <small>
 <pre>
@@ -40,7 +39,7 @@ README
 </pre>
 </small>
 
-\section citation How To Cite This Work
+## How To Cite This Work
 
 <small>
 <pre>
@@ -86,19 +85,19 @@ And also:
  re:webDmrgPlusPlus,
  Author = {G. Alvarez},
  Title = {DMRG++ Website},
- Publisher = {\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
+ Publisher = {\\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
 </pre>
 </small>
 
-\section hashes Code Integrity
+## Code Integrity
 
 Hash of the latest commit is also posted at
 
 https://web.ornl.gov/~gz1/hashes.html
 
-\section building Building and Running DMRG++
+## Building and Running DMRG++
 
-\subsection dependencies Required Software
+### Required Software
 
 - Item GNU C++
 
@@ -123,8 +122,6 @@ https://web.ornl.gov/~gz1/hashes.html
 
 - Item (optional) perl
 (only needed to run the configure.pl script)
-
-\subsection quickstart Quick Start
 
 ### To Build DMRG++: ###
 <code>

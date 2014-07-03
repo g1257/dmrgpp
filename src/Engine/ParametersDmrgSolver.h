@@ -88,7 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BoostSerializationHeaders.h"
 
 namespace Dmrg {
-/**
+/** @class hide_FiniteLoops
 \\subsubsection{Enabling finite loops}
 \\begin{itemize}
 \\item
@@ -181,7 +181,7 @@ struct FiniteLoop {
 	}
 };
 
-//!PTEX_LABEL{139}
+//PTEX_LABEL{139}
 inline void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
                              SizeType totalSites)
 {
@@ -299,7 +299,7 @@ std::istream &operator>>(std::istream& is,DmrgCheckPoint& c)
 	return is;
 }
 
-/** Structure that contains the Dmrg parameters
+/** @class hide_ParametersDmrgSolver Structure that contains the Dmrg parameters
 \\inputItem{Model}
 A string indicating the model, be it HubbardOneBand HeisenbergSpinOneHalf, etc.
 
@@ -626,7 +626,7 @@ struct ParametersDmrgSolver {
 	}
 };
 
-//! print dmrg parameters
+// print dmrg parameters
 template<typename FieldType,typename InputValidatorType>
 std::ostream &operator<<(std::ostream &os,
                          const ParametersDmrgSolver<FieldType,InputValidatorType> & p)

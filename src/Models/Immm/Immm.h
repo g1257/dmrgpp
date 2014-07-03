@@ -71,11 +71,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Immm.h
- *
- *  DOC TBW FIXME
- *
- */
 #ifndef IMMM_HEADER_H
 #define IMMM_HEADER_H
 #include "ModelBase.h"

@@ -641,7 +641,7 @@ namespace Dmrg {
 		return sum;
 	}
 
-	//! Isn't this function equal to the prev.? need to check FIXME
+	// Isn't this function equal to the prev.? need to check FIXME
 	template<typename FieldType>
 	inline std::complex<FieldType> operator*(const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v1,
 	                                         const Dmrg::VectorWithOffsets<std::complex<FieldType> >& v2)

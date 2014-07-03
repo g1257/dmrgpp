@@ -87,8 +87,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
-//! A class to represent in a light way a Dmrg basis (used only to implement symmetries).
-//! (See corresponding section in paper)
+// A class to represent in a light way a Dmrg basis (used only to implement symmetries).
+// (See corresponding section in paper)
 template<typename SparseMatrixType_>
 class	Basis {
 

@@ -88,8 +88,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-//! A block matrix class
-//! Blocks can be of any type and are templated with the type MatrixInBlockTemplate
+// A block matrix class
+// Blocks can be of any type and are templated with the type MatrixInBlockTemplate
 //
 template<typename MatrixInBlockTemplate>
 class BlockMatrix {
@@ -350,7 +350,7 @@ void operatorPlus(BlockMatrix<MatrixInBlockTemplate>& A,
 
 }
 
-//! Parallel version of the diagonalization of a block diagonal matrix
+// Parallel version of the diagonalization of a block diagonal matrix
 template<typename SomeVectorType,typename SomeFieldType>
 typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True,
 void>::Type

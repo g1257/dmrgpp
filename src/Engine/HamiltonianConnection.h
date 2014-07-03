@@ -71,11 +71,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 */
 /** \ingroup DMRG */
 /*@{*/
+/** \file HamiltonianConnection.h
+*/
 
-/*! \file HamiltonianConnection.h
- *
- * DOC TBW FIXME
- */
 #ifndef HAMILTONIAN_CONNECTION_H
 #define HAMILTONIAN_CONNECTION_H
 

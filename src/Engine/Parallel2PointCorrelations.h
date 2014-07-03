@@ -72,10 +72,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Parallel2PointCorrelations.h
- *
- * DOC TBW FIXME
- */
 #ifndef PARALLEL_2POINT_CORRELATIONS_H
 #define PARALLEL_2POINT_CORRELATIONS_H
 

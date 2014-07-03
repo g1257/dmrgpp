@@ -91,7 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-//!  A class to represent a generic solver for the Dmrg method
+//  A class to represent a generic solver for the Dmrg method
 template<typename TargettingType>
 class DmrgSolver {
 

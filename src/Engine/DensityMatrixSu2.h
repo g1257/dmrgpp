@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DensityMatrixBase.h"
 
 namespace Dmrg {
-	//!
 	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
 		typename TargettingType

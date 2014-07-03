@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsBase.h"
 
 namespace Dmrg {
-//! Coordinates reading of TargetSTructure from input file
+// Coordinates reading of TargetSTructure from input file
 template<typename ModelType>
 class TargetParamsCorrection : public TargetParamsBase<ModelType> {
 

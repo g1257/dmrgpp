@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h" // in PsimagLite
 
 namespace Dmrg {
-	//! Yet another sparse matrix class
+	// Yet another sparse matrix class
 	template<class T>
 	class VerySparseMatrix {
 		typedef std::pair<SizeType,SizeType> PairType;

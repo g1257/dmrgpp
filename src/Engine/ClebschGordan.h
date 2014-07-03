@@ -84,8 +84,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
-//! This is a class to compute ClebschGordan Coefficients
-//! Don't use this class directly, use ClebschGordanCached instead, it'll improve performance
+// This is a class to compute ClebschGordan Coefficients
+// Don't use this class directly, use ClebschGordanCached instead, it'll improve performance
 // Parts taken from Ref.S = http://caps.gsfc.nasa.gov/simpson/software/cg_f90.txt
 //( David G. Simpson NASA, Goddard Space Flight Center, Greenbelt, Maryland  20771)
 

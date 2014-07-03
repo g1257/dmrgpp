@@ -71,6 +71,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
+/*! \file BasisWithOperators.h
+*/
+
 #ifndef BASISWITHOPERATORS_HEADER_H
 #define BASISWITHOPERATORS_HEADER_H
 
@@ -79,7 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-/*! A class to represent a Hilbert Space for a strongly correlated electron model
+/*! @class hide_BasisWithOperators
+	A class to represent a Hilbert Space for a strongly correlated electron model
 		Derives from Basis
 
 	 C++ class \\cppClass{Basis} (and \\cppClass{BasisImplementation}) implement only
