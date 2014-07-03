@@ -41,6 +41,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 */
 /** \ingroup Dmrg */
 /*@{*/
+/** \file ModelSelector.h
+*/
 
 #ifndef MODEL_SELECTOR_H
 #define MODEL_SELECTOR_H

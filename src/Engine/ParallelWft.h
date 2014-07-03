@@ -71,6 +71,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 */
 /** \ingroup DMRG */
 /*@{*/
+/** \file ParallelWft.h
+*/
 
 #ifndef PARALLEL_WFT_H
 #define PARALLEL_WFT_H
