@@ -73,7 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ReflectionOperatorEmpty
+/*! \file ReflectionOperatorEmpty.h
  *
  *
  */

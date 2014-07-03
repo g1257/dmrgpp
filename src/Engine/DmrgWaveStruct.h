@@ -72,7 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file DmrgWaveStruct
+/*! \file DmrgWaveStruct.h
  *
  *  DOC NEEDED FIXME
  */

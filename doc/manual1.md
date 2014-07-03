@@ -1,17 +1,30 @@
-Input File Format
-=================================
+# Input 
 
-\section inputfile Input File
 
-There is a single input file that is passed as the first
-and only argument to the program.
+## Introduction
+
+There is a single input file that is passed as the argument to `-f`, like so
+
+    ./dmrg -f input.inp.
+
+Examples of input files can be found under `TestSuite/inputs/`
 There are three kinds of parameters in the input file:
 (i) model connections (``geometry'') parameters, (ii) model on-site parameters, and (iii) DMRG Solver parameters.
+Each type of input parameters is discussed below.
+
+## Geometry Input
+@copydoc hide_geometry1
+@copydoc hide_geometry2
+
+## Model Input
+
 The Model parameters vary from model to model.
-The DMRG Solver parameters are discussed below.
 
-@copydoc Dmrg::ParametersDmrgSolver
+## DMRG Solver parameters
 
-\section finiteloops Finite Loops
+@copydoc hide_ParametersDmrgSolver
 
-@copydoc Dmrg::FiniteLoop
+## Finite Loops
+
+@copydoc hide_FiniteLoop
+

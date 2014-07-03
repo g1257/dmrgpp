@@ -72,7 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file WaveFunctionTransformation.h
+/*! \file WaveFunctionTransfFactory.h
  *
  *  This class implements the wave function transformation factory,
  *  see PRL 77, 3633 (1996)

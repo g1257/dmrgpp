@@ -71,7 +71,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file WaveFunctionTransformation.h
+/*! \file WaveFunctionTransfLocal.h 
  *
  *  This class implements the wave function transformation, see PRL 77, 3633 (1996)
  *

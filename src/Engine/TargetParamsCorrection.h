@@ -71,7 +71,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file GroundStateParams.h
+/*! \file TargetParamsCorrection.h 
  *
  * Contains the parameter a of PRB 72 180403(R) (2005)
  *

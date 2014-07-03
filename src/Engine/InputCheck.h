@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup DMRG */
 /*@{*/
@@ -121,6 +120,17 @@ namespace Dmrg {
 			return false;
 		}
 
+		/**  @class hide_dmrgSolverOptions
+		  - Options=string
+		  A comma-separated list of strings. At least one of the following strings must be provided:
+		     + none  Use this when no options are given, since the list of strings must be non-null. 
+		        Note that ``none'' does not disable other options.
+
+		     + useSu2Symmetry Use the SU(2) symmetry for the model, and interpret quantum
+		         numbers in the line ``QNS'' appropriately. 
+
+		     + nofiniteloops  Don't do finite loops, even if provided under ``FiniteLoops'' below.
+		*/
 		void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType line)
 		{
 			if (label!="SolverOptions") return;

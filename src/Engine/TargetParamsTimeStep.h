@@ -72,7 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TargetStructureParams.h
+/*! \file TargetParamsTimeStep.h
  *
  *  This is a structure to represent the parameters of the TimeStep Evolution
  *  algorithm. Don't add functions to this class because
