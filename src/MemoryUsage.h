@@ -112,12 +112,12 @@ public:
 
 	String findEntry(const String& label)
 	{
-		SizeType x = data_.find(label);
+		long unsigned int x = data_.find(label);
 		if (x==String::npos) {
 			return "NOT_FOUND";
 		}
 		x += label.length();
-		SizeType y = data_.find("\n",x);
+		long unsigned int y = data_.find("\n",x);
 		SizeType len = y-x;
 		if (y==String::npos) len = data_.length()-x;
 		String s2 = data_.substr(x,len);

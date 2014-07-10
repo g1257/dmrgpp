@@ -490,7 +490,7 @@ public:
 			typedef typename Map<String,String,MyCompareType>::Type::iterator MyIteratorType;
 			for (MyIteratorType it=mapStrStr_.begin();it!=mapStrStr_.end();++it) {
 				String mystr = it->first;
-				SizeType it0 = mystr.find(label2);
+				long unsigned int it0 = mystr.find(label2);
 				if (it0 == String::npos) continue;
 				String::iterator it1 = find(mystr.begin(),mystr.end(),'[');
 				if (it1 == mystr.end()) continue;
