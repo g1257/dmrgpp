@@ -10,7 +10,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -46,7 +46,7 @@ int main(int argc,char *argv[])
 		return 1;
 	}
 
-	ContinuedFractionCollectionType cfCollection;
+	ContinuedFractionCollectionType cfCollection(FREQ_REAL);
 
 	String s = "#Avector";
 	for (int x = 1;x<argc;x++) {

@@ -11,7 +11,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -36,6 +36,7 @@ Please see full open source license included in file LICENSE.
 #include "PlotParams.h"
 #include "ParametersForSolver.h"
 #include "IoSimple.h"
+#include "FreqEnum.h"
 
 namespace PsimagLite {
 template<typename TridiagonalMatrixType_>
@@ -56,6 +57,7 @@ public:
 	                  const MatrixType& reortho,
 	                  const ParametersType& params)
 	    : progress_("ContinuedFraction"),
+	      freqEnum_(FREQ_REAL),
 	      ab_(ab),
 	      reortho_(reortho),
 	      Eg_(params.Eg),
@@ -65,11 +67,11 @@ public:
 		diagonalize();
 	}
 
-	ContinuedFraction() : progress_("ContinuedFraction"),
-	    ab_(),reortho_(),Eg_(0),weight_(0),isign_(1) { }
+	ContinuedFraction(FreqEnum freqEnum = FREQ_REAL) : progress_("ContinuedFraction"),
+	    freqEnum_(freqEnum),ab_(),reortho_(),Eg_(0),weight_(0),isign_(1) { }
 
 	ContinuedFraction(IoSimple::In& io)
-	    : progress_("ContinuedFraction"),ab_(io)
+	    : progress_("ContinuedFraction"), freqEnum_(FREQ_REAL),ab_(io)
 	{
 		try {
 			io.readMatrix(reortho_,"#ReorthogonalizationMatrix");
@@ -82,6 +84,9 @@ public:
 		io.readline(isign_,"#CFIsign=");
 		io.read(eigs_,"#CFEigs");
 		io.read(intensity_,"#CFIntensities");
+		PsimagLite::String f;
+		io.readline(f,"#FreqEnum=");
+		if (f == "Matsubara") freqEnum_ = FREQ_MATSUBARA;
 		diagonalize();
 	}
 
@@ -91,6 +96,8 @@ public:
 		io.setPrecision(12);
 		ab_.save(io);
 
+		PsimagLite::String f = (freqEnum_ == FREQ_MATSUBARA) ? "Matsubara" : "Real";
+		io.print("#FreqEnum=",f);
 		io.printMatrix(reortho_,"#ReorthogonalizationMatrix");
 
 		io.print("#CFWeight=",weight_);
@@ -120,6 +127,15 @@ public:
 
 	void plot(PlotDataType& result,const PlotParamsType& params) const
 	{
+		if (freqEnum_ == FREQ_MATSUBARA) {
+			plotMatsubara(result,params);
+		} else {
+			plotReal(result,params);
+		}
+	}
+
+	void plotReal(PlotDataType& result,const PlotParamsType& params) const
+	{
 		SizeType counter = 0;
 		SizeType n = SizeType((params.omega2 - params.omega1)/params.deltaOmega);
 		if (result.size()==0) result.resize(n);
@@ -132,6 +148,19 @@ public:
 		}
 	}
 
+	void plotMatsubara(PlotDataType& result,const PlotParamsType& params) const
+	{
+		SizeType counter = 0;
+		SizeType n = SizeType((params.omega2 - params.omega1)/params.deltaOmega);
+		if (result.size()==0) result.resize(n);
+		for (SizeType omegaIndex = 0; omegaIndex < params.numberOfMatsubaras; ++omegaIndex) {
+			ComplexType z(0, matsubara(omegaIndex,params));
+			ComplexType res = iOfOmega(z,Eg_,isign_);
+			std::pair<RealType,ComplexType> p(std::imag(z),res);
+			result[counter++] = p;
+			if (counter>=result.size()) break;
+		}
+	}
 	//! Cases:
 	//! (1) < phi0|A (z+(E0-e_k))^{-1}|A^\dagger|phi0> and
 	//! (2) < phi0|A^\dagger (z-(E0-e_k))^{-1}|A|phi0>
@@ -152,6 +181,8 @@ public:
 	}
 
 	SizeType size() const { return ab_.size(); }
+
+	FreqEnum freqType() const  { return freqEnum_; }
 
 private:
 
@@ -174,7 +205,17 @@ private:
 		}
 	}
 
+	RealType matsubara(int ind,const PlotParamsType& params) const
+	{
+		int halfNs = static_cast<int>(params.numberOfMatsubaras*0.5);
+		RealType factor = 2.0*M_PI/params.beta;
+		int ind2 = ind - halfNs;
+		if (ind2 >= 0) return factor*(ind2 + 1);
+		return factor*ind2;
+	}
+
 	ProgressIndicator progress_;
+	FreqEnum freqEnum_;
 	TridiagonalMatrixType ab_;
 	MatrixType reortho_;
 	RealType Eg_;
@@ -183,7 +224,7 @@ private:
 	typename Vector<RealType>::Type eigs_;
 	typename Vector<RealType>::Type intensity_;
 }; // class ContinuedFraction
-} // namespace PsimagLite 
+} // namespace PsimagLite
 /*@}*/
 #endif  //CONTINUED_FRACTION_H
 

@@ -10,7 +10,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -57,7 +57,7 @@ void plotAll(const ContinuedFractionCollectionType& cfCollection,
 void plotOneByOne(const ContinuedFractionCollectionType& cfCollection,
 		const PlotParamsType& params)
 {
-	
+
 	std::cout.precision(12);
 	for (SizeType i=0;i<cfCollection.size();i++) {
 		ContinuedFractionCollectionType::PlotDataType v;
@@ -112,7 +112,7 @@ int main(int argc,char *argv[])
 
 	IoSimple::In io(file);
 	ContinuedFractionCollectionType cfCollection(io);
-	PlotParamsType params(wbegin,wend,wstep,delta);
+	PlotParamsType params(wbegin,wend,wstep,delta,0.0,0);
 	if (!oneByOne) plotAll(cfCollection,params);
 	else plotOneByOne(cfCollection,params);
 }

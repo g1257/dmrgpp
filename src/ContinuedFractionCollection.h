@@ -11,7 +11,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -34,6 +34,7 @@ Please see full open source license included in file LICENSE.
 #include "TypeToString.h"
 #include "String.h"
 #include "ProgressIndicator.h"
+#include "FreqEnum.h"
 
 namespace PsimagLite {
 
@@ -50,14 +51,14 @@ public:
 	typedef typename ContinuedFractionType::PlotDataType PlotDataType;
 	typedef typename ContinuedFractionType::PlotParamsType PlotParamsType;
 
-	ContinuedFractionCollection()
-	    : progress_("ContinuedFractionCollection")
+	ContinuedFractionCollection(FreqEnum freqEnum)
+	    : freqEnum_(freqEnum), progress_("ContinuedFractionCollection")
 	{
 	}
 
 	template<typename IoInputType>
 	ContinuedFractionCollection(IoInputType& io,SizeType level = 0)
-	    : progress_("ContinuedFractionCollection")
+	    : freqEnum_(FREQ_REAL),progress_("ContinuedFractionCollection")
 	{
 		int n = 0;
 		io.readline(n,"#CONTINUEDFRACTIONCOLLECTION=",level);
@@ -70,6 +71,7 @@ public:
 		for (SizeType i=0;i<SizeType(n);i++) {
 			ContinuedFractionType cf(io);
 			data_.push_back(cf);
+			freqEnum_ = cf.freqType();
 		}
 	}
 
@@ -107,6 +109,8 @@ public:
 
 	SizeType size() const { return data_.size(); }
 
+	FreqEnum freqType() const  { return freqEnum_; }
+
 private:
 
 	void accumulate(PlotDataType& v1,const PlotDataType& v2) const
@@ -135,10 +139,11 @@ private:
 		}
 	}
 
+	FreqEnum freqEnum_;
 	ProgressIndicator progress_;
 	typename Vector<ContinuedFractionType>::Type data_;
 }; // class ContinuedFractionCollection
-} // namespace PsimagLite 
+} // namespace PsimagLite
 /*@}*/
 #endif  //CONTINUED_FRACTION_COLL_H
 
