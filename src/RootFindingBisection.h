@@ -32,7 +32,7 @@ public:
 			throw PsimagLite::RuntimeError("RootFindingBisection: condition not met\n");
 	}
 
-	RealType operator()()
+	RealType operator()() const
 	{
 		// INPUT: Function f, endpoint values a, b, tolerance TOL,
 		//                maximum iterations NMAX
@@ -40,26 +40,28 @@ public:
 		//                           f(a) > 0 and f(b) < 0
 		// OUTPUT: value which differs from a root of f(x)=0 by less than TOL
 
+		RealType a = a_;
+		RealType b = b_;
 		SizeType n = 0;
-		RealType functionAtA = function_(a_);
+		RealType functionAtA = function_(a);
 		while (n<maxIter_) {
-			RealType c = (a_ + b_)/2; // new midpoint
+			RealType c = (a + b)/2; // new midpoint
 			RealType tmp = function_(c);
 			if (fabs(tmp) < tolerance_) { //solution found
 				return c;
 			}
 			n++;
 			if (sign(tmp) == sign(functionAtA)) {
-				a_ = c;
+				a = c;
 				functionAtA = tmp;
 			} else {
-				b_ = c;
+				b = c;
 			}
 		}
 
 		PsimagLite::String msg("RootFindBisection, too many iterations ");
 		msg += "maximum = " + ttos(maxIter_) + " tolerance = ";
-		msg += ttos(tolerance_) + "\n";
+		msg += ttos(tolerance_) + " a = " + ttos(a_) + " b = " + ttos(b_) + "\n";
 		throw std::runtime_error(msg);
 	}
 

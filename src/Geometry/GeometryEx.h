@@ -91,7 +91,7 @@ public:
 	SizeType ickequ(SizeType j,SizeType op) const
 	{
 		assert(enabled_);
-		return 0;
+		return j;
 	}
 
 	void getMeshVector(VectorRealType& kvector,SizeType k) const
