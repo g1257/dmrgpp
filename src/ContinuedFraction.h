@@ -73,20 +73,15 @@ public:
 	ContinuedFraction(IoSimple::In& io)
 	    : progress_("ContinuedFraction"), freqEnum_(FREQ_REAL),ab_(io)
 	{
-		try {
-			io.readMatrix(reortho_,"#ReorthogonalizationMatrix");
-		} catch (std::exception& e) {
-			io.rewind();
-		}
-
+		PsimagLite::String f;
+		io.readline(f,"#FreqEnum=");
+		if (f == "Matsubara") freqEnum_ = FREQ_MATSUBARA;
+		io.readMatrix(reortho_,"#ReorthogonalizationMatrix");
 		io.readline(weight_,"#CFWeight=");
 		io.readline(Eg_,"#CFEnergy=");
 		io.readline(isign_,"#CFIsign=");
 		io.read(eigs_,"#CFEigs");
 		io.read(intensity_,"#CFIntensities");
-		PsimagLite::String f;
-		io.readline(f,"#FreqEnum=");
-		if (f == "Matsubara") freqEnum_ = FREQ_MATSUBARA;
 		diagonalize();
 	}
 
@@ -127,9 +122,12 @@ public:
 
 	void plot(PlotDataType& result,const PlotParamsType& params) const
 	{
-		if (freqEnum_ == FREQ_MATSUBARA) {
+		if (freqEnum_ == FREQ_MATSUBARA || params.numberOfMatsubaras > 0) {
 			plotMatsubara(result,params);
-		} else {
+			return;
+		}
+
+		if (freqEnum_ == FREQ_REAL || params.numberOfMatsubaras == 0) {
 			plotReal(result,params);
 		}
 	}
@@ -151,10 +149,10 @@ public:
 	void plotMatsubara(PlotDataType& result,const PlotParamsType& params) const
 	{
 		SizeType counter = 0;
-		SizeType n = SizeType((params.omega2 - params.omega1)/params.deltaOmega);
+		SizeType n = params.numberOfMatsubaras;
 		if (result.size()==0) result.resize(n);
 		for (SizeType omegaIndex = 0; omegaIndex < params.numberOfMatsubaras; ++omegaIndex) {
-			ComplexType z(0, matsubara(omegaIndex,params));
+			ComplexType z(params.delta, matsubara(omegaIndex,params));
 			ComplexType res = iOfOmega(z,Eg_,isign_);
 			std::pair<RealType,ComplexType> p(std::imag(z),res);
 			result[counter++] = p;

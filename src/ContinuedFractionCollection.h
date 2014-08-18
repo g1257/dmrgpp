@@ -88,9 +88,8 @@ public:
 		data_.push_back(cf);
 	}
 
-	void plot(
-	        PlotDataType& result,
-	        const PlotParamsType& params) const
+	void plot(PlotDataType& result,
+	          const PlotParamsType& params) const
 	{
 		for (SizeType i=0;i<data_.size();i++) {
 			PlotDataType result1;

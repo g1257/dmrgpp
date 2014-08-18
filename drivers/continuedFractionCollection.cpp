@@ -38,8 +38,7 @@ typedef ContinuedFractionType::PlotParamsType PlotParamsType;
 void usage(const char *progName)
 {
 	std::cerr<<"Usage: "<<progName<<" -f file  -b omega1";
-	std::cerr<<" -e omega2 -s omegaStep -d delta\n";
-	std::cerr<<"Conditions: omega1<omega2 omegaStep>0 delta>0\n";
+	std::cerr<<" -e omega2 -s omegaStep -d delta -B beta -m matsubaras\n";
 }
 
 void plotAll(const ContinuedFractionCollectionType& cfCollection,
@@ -77,9 +76,11 @@ int main(int argc,char *argv[])
 	RealType wend = 0;
 	RealType wstep = 0;
 	RealType delta = 0;
+	RealType beta = 0.0;
+	SizeType matsubaras = 0;
 	bool oneByOne = false;
 	while ((opt = getopt(argc, argv,
-		"f:b:e:s:d:1")) != -1) {
+		"f:b:e:s:d:m:B:1")) != -1) {
 		switch (opt) {
 		case 'f':
 			file = optarg;
@@ -99,20 +100,28 @@ int main(int argc,char *argv[])
 		case '1':
 			oneByOne = true;
 			break;
+		case 'm':
+			matsubaras = atoi(optarg);
+			break;
+		case 'B':
+			beta = atof(optarg);
+			break;
 		default:
 			usage(argv[0]);
 			return 1;
 		}
 	}
 	// sanity checks:
-	if (file=="" || wbegin>=wend || wstep<=0 || delta<=0) {
+	bool real1 = (wbegin>=wend || wstep<=0 || delta<=0);
+	bool imag1 = (beta <= 0 || matsubaras == 0);
+	if (file=="" || (real1 & imag1)) {
 		usage(argv[0]);
 		return 1;
 	}
 
 	IoSimple::In io(file);
 	ContinuedFractionCollectionType cfCollection(io);
-	PlotParamsType params(wbegin,wend,wstep,delta,0.0,0);
+	PlotParamsType params(wbegin,wend,wstep,delta,beta,matsubaras);
 	if (!oneByOne) plotAll(cfCollection,params);
 	else plotOneByOne(cfCollection,params);
 }
