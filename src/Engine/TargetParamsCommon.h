@@ -91,7 +91,7 @@ class TargetParamsCommon : public TargetParamsBase<ModelType> {
 public:
 
 	typedef typename ModelType::RealType RealType;
-
+	typedef TargetParamsBase<ModelType> BaseType;
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;

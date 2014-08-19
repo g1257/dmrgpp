@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <stdexcept>
 #include "MemResolv.h"
+#include "FreqEnum.h"
 
 namespace Dmrg {
 
@@ -88,7 +89,7 @@ class TargetParamsBase {
 public:
 
 	typedef typename ModelType::RealType RealType;
-
+	typedef std::pair<PsimagLite::FreqEnum, RealType> PairFreqType;
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
@@ -163,9 +164,10 @@ public:
 		return unimplementedInt("cgSteps");
 	}
 
-	virtual RealType omega() const
+	virtual PairFreqType omega() const
 	{
-		return unimplemented("omega");
+		PsimagLite::String s("TargetParamsBase: unimplemented omega \n");
+		throw PsimagLite::RuntimeError(s);
 	}
 
 	virtual void omega(RealType x)

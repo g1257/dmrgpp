@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParametersForSolver.h"
 #include "ParallelTriDiag.h"
 #include "TimeSerializer.h"
+#include "FreqEnum.h"
 
 namespace Dmrg {
 
@@ -125,10 +126,10 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 
 			RealType operator()(SizeType k) const
 			{
-				RealType sign = (tstStruct_.type() == 0) ? -1.0 : 1.0;
-				RealType part1 =  (eigs_[k] - E0_)*sign + tstStruct_.omega();
-				RealType denom = part1*part1 + tstStruct_.eta()*tstStruct_.eta();
-				return (action_ == ACTION_IMAG) ? tstStruct_.eta()/denom : -part1 / denom;
+				 if (tstStruct_.omega().first == PsimagLite::FREQ_REAL)
+					 return actionWhenReal(k);
+
+				 return actionWhenMatsubara(k);
 			}
 
 			void setReal() const
@@ -142,6 +143,23 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 			}
 
 		private:
+
+			RealType actionWhenReal(SizeType k) const
+			{
+				RealType sign = (tstStruct_.type() == 0) ? -1.0 : 1.0;
+				RealType part1 =  (eigs_[k] - E0_)*sign + tstStruct_.omega().second;
+				RealType denom = part1*part1 + tstStruct_.eta()*tstStruct_.eta();
+				return (action_ == ACTION_IMAG) ? tstStruct_.eta()/denom : -part1 / denom;
+			}
+
+			RealType actionWhenMatsubara(SizeType k) const
+			{
+				RealType sign = (tstStruct_.type() == 0) ? -1.0 : 1.0;
+				RealType wn = tstStruct_.omega().second;
+				RealType part1 =  (eigs_[k] - E0_)*sign;
+				RealType denom = part1*part1 + wn*wn;
+				return (action_ == ACTION_IMAG) ? wn/denom : -part1 / denom;
+			}
 
 			const TargettingParamsType& tstStruct_;
 			RealType E0_;
@@ -408,6 +426,9 @@ private:
 	                            const VectorType& sv,
 	                            SizeType p)
 	{
+		if (tstStruct_.omega().first != PsimagLite::FREQ_REAL)
+			throw PsimagLite::RuntimeError("Matsubara only with KRYLOV\n");
+
 		SizeType threadId = 0;
 		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
 		LanczosMatrixType h(&this->model(),&modelHelper);
@@ -418,7 +439,7 @@ private:
 		// make sure xr is zero
 		for (SizeType i=0;i<xr.size();i++) xr[i] = 0;
 		h.matrixVectorProduct(xr,xi);
-		xr -= (tstStruct_.omega()+E0)*xi;
+		xr -= (tstStruct_.omega().second+E0)*xi;
 		xr /= tstStruct_.eta();
 	}
 

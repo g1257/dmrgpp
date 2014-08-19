@@ -95,14 +95,18 @@ class	CorrectionVectorFunction {
 
 		typedef FieldType value_type ;
 		InternalMatrix(const MatrixType& m,const InfoType& info,RealType E0)
-		    : m_(m),info_(info),E0_(E0) {}
+		    : m_(m),info_(info),E0_(E0)
+		{
+			if (info_.omega().first != PsimagLite::FREQ_REAL)
+				throw PsimagLite::RuntimeError("Matsubara only with KRYLOV\n");
+		}
 
 		SizeType rank() const { return m_.rank(); }
 
 		void matrixVectorProduct(VectorType& x,const VectorType& y) const
 		{
 			RealType eta = info_.eta();
-			RealType omegaMinusE0 = info_.omega() + E0_;
+			RealType omegaMinusE0 = info_.omega().second + E0_;
 			VectorType xTmp(x.size(),0);
 			m_.matrixVectorProduct(xTmp,y); // xTmp = Hy
 			VectorType x2(x.size(),0);

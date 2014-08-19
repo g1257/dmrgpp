@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGET_PARAMS_CORRECTION_V_H
 
 #include "TargetParamsCommon.h"
+#include "FreqEnum.h"
 
 namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
@@ -93,7 +94,7 @@ public:
 
 	typedef TargetParamsCommon<ModelType> BaseType;
 	typedef typename ModelType::RealType RealType;
-
+	typedef typename BaseType::BaseType::PairFreqType PairFreqType;
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
@@ -114,10 +115,22 @@ public:
 		this->setConcatenation(SUM);
 		io.readline(correctionA_,"CorrectionA=");
 		io.readline(type_,"DynamicDmrgType=");
-		io.readline(omega_,"CorrectionVectorOmega=");
+		PsimagLite::String tmp;
+		io.readline(tmp,"CorrectionVectorFreqType=");
+		PsimagLite::FreqEnum freqEnum = PsimagLite::FREQ_REAL;
+
+		if (tmp == "Matsubara") {
+			freqEnum = PsimagLite::FREQ_MATSUBARA;
+		} else if (tmp != "Real") {
+			throw PsimagLite::RuntimeError("CorrectionVectorFreqType=Real or Matsubara\n");
+		}
+
+		RealType omega;
+		io.readline(omega,"CorrectionVectorOmega=");
+		omega_=PairFreqType(freqEnum, omega);
 		io.readline(eta_,"CorrectionVectorEta=");
 
-		PsimagLite::String tmp;
+
 		io.readline(tmp,"CorrectionVectorAlgorithm=");
 		if (tmp == "Krylov") {
 			algorithm_ = KRYLOV;
@@ -158,14 +171,14 @@ public:
 		return cgSteps_;
 	}
 
-	virtual RealType omega() const
+	virtual PairFreqType omega() const
 	{
 		return omega_;
 	}
 
-	virtual void omega(RealType x)
+	virtual void omega(PsimagLite::FreqEnum freqEnum,RealType x)
 	{
-		omega_ = x;
+		omega_ = PairFreqType(freqEnum,x);
 	}
 
 	virtual RealType eta() const
@@ -188,7 +201,7 @@ private:
 	SizeType type_;
 	RealType correctionA_;
 	SizeType cgSteps_;
-	RealType omega_;
+	PairFreqType omega_;
 	RealType eta_;
 	RealType cgEps_;
 	SizeType algorithm_;
@@ -209,7 +222,7 @@ inline std::ostream& operator<<(std::ostream& os,
 
 	return os;
 }
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif //TARGET_PARAMS_CORRECTION_V_H
