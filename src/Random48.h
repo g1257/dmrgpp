@@ -9,7 +9,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -36,10 +36,9 @@ public:
 		srand48(seed);
 		PsimagLite::Vector<LongType>::Type vOfSeeds(nprocs);
 		for (SizeType i=0;i<vOfSeeds.size();i++)
-			vOfSeeds[i] = LongType(10000*random());
+			vOfSeeds[i] = static_cast<LongType>(10000.0*random());
 		seed_=vOfSeeds[rank];
 		srand48(seed_);
-
 	}
 
 	T random() const // deprecated!!! use operator() instead

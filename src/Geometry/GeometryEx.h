@@ -23,7 +23,7 @@ public:
 	GeometryEx(InputType& io, SizeType meshPoints)
 	: meshLength_(sqrt(meshPoints)),
 	  enabled_(false),
-	  meshStep_(static_cast<RealType>(2*M_PI/meshLength_))
+	  meshStep_((meshLength_ > 0) ? static_cast<RealType>(2*M_PI/meshLength_) : 0)
 	{
 		PsimagLite::String str;
 		io.readline(str,"GeometryKind=",false);
