@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <unistd.h>
 #include "Vector.h"
 #include "Mpi.h"
+#include "FloatingPoint.h"
 
 namespace PsimagLite {
 
@@ -137,6 +138,7 @@ public:
 
 	Concurrency(int* argc, char **argv[],size_t nthreads)
 	{
+		FloatingPoint::enableExcept();
 		npthreads = nthreads;
 		mode = 0;
 #ifdef USE_PTHREADS
@@ -214,8 +216,8 @@ SizeType Concurrency::mode = 0;
 SizeType Concurrency::npthreads = 1;
 MpiDisabled Concurrency::mpiDisabled_;
 
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
-/*@}*/	
+/*@}*/
 #endif
 
