@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 
 namespace Dmrg {
-	
+
 	template<typename BlockMatrixType,typename BasisWithOperatorsType,
 			 typename TargettingType>
 	class ParallelDensityMatrix {
@@ -123,7 +123,9 @@ namespace Dmrg {
 			for (SizeType p=0;p<blockSize;p++) {
 				SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p;
 				if (ix>=target_.size()) break;
-				RealType w = target_.weight(ix)/target_.normSquared(ix);
+				RealType wnorm = target_.normSquared(ix);
+				if (fabs(wnorm) < 1e-6) continue;
+				RealType w = target_.weight(ix)/wnorm;
 				initPartition(matrixBlock_,pBasis_,m_,target_(ix),
 							  pBasisSummed_,pSE_,direction_,w);
 			}
@@ -261,7 +263,7 @@ namespace Dmrg {
 		BuildingBlockType& matrixBlock_;
 		bool hasMpi_;
 	}; // class ParallelDensityMatrix
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // PARALLEL_DENSITY_MATRIX_H

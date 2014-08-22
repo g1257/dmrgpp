@@ -555,6 +555,12 @@ private:
 			}
 			sum += weight_[r];
 		}
+
+		if (fabs(sum) < 1e-6) {
+			gsWeight_ = this->common().setGsWeight(1.0);
+			return;
+		}
+
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)/sum;
 	}
 

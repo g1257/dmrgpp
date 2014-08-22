@@ -428,9 +428,12 @@ public:
 	{
 
 		std::cout<<"-------------&*&*&* In-situ measurements start\n";
-
-		if (std::norm(v1)<1e-6 || std::norm(v2)<1e-6) {
-			std::cout<<"cocoon: NORM IS ZERO\n";
+		RealType norm1 = std::norm(v1);
+		RealType norm2 = std::norm(v2);
+		if (norm1 < 1e-6 || norm2 < 1e-6) {
+			std::cout<<"cocoon: At least 1 NORM IS ZERO ";
+			std::cout<<label1<<" has norm "<<norm1;
+			std::cout<<" "<<label2<<" has norm "<<norm2<<"\n";
 			return;
 		}
 
@@ -444,7 +447,7 @@ public:
 
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
-	
+
 	const ComplexOrRealType& inSitu(SizeType site) const
 	{
 		assert(site < inSitu_.size());
@@ -576,7 +579,7 @@ private:
 					sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
 			}
 		}
-		
+
 		assert(site < inSitu_.size());
 		inSitu_[site] = sum;
 		std::cout<<site<<" "<<sum<<" "<<currentTime();
