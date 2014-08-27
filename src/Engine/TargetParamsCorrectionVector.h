@@ -112,7 +112,6 @@ public:
 	      cgSteps_(1000),
 	      cgEps_(1e-6)
 	{
-		this->setConcatenation(SUM);
 		io.readline(correctionA_,"CorrectionA=");
 		io.readline(type_,"DynamicDmrgType=");
 		PsimagLite::String tmp;

@@ -210,11 +210,6 @@ public:
 		return unimplementedInt("timeSteps");
 	}
 
-	virtual void setConcatenation(SizeType x)
-	{
-		unimplemented("setConcatenation");
-	}
-
 	virtual bool noOperator() const
 	{
 		return static_cast<bool>(unimplemented("noOperator"));

@@ -115,9 +115,9 @@ public:
 		io.read(sites_,"TSPSites");
 		io.read(startingLoops_,"TSPLoops");
 
-		PsimagLite::String productOrSum_ = "product";
+		PsimagLite::String productOrSum = "product";
 		try {
-			io.readline(productOrSum_,"TSPProductOrSum=");
+			io.readline(productOrSum,"TSPProductOrSum=");
 		} catch (std::exception& e) {
 			PsimagLite::String s(__FILE__);
 			s += "\n FATAL: Must provide TSPProductOrSum=.\n";
@@ -128,13 +128,13 @@ public:
 
 		//! Concatenation specifies what to do with
 		//! operators at different sites, add them or multiply them
-		if (productOrSum_ == "product") {
+		if (productOrSum == "product") {
 			this->concatenation_ = PRODUCT;
-		} else if (productOrSum_ == "sum") {
+		} else if (productOrSum == "sum") {
 			this->concatenation_ = SUM;
 		} else {
 			PsimagLite::String s(__FILE__);
-			s += " : Unknown concatentation " + productOrSum_ + "\n";
+			s += " : Unknown concatentation " + productOrSum + "\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
@@ -242,11 +242,6 @@ public:
 	virtual const VectorOperatorType& aOperators() const
 	{
 		return aOperators_;
-	}
-
-	virtual void setConcatenation(SizeType x)
-	{
-		concatenation_ = x;
 	}
 
 	virtual bool noOperator() const

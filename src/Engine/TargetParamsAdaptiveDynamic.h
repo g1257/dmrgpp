@@ -103,7 +103,6 @@ public:
 	TargetParamsAdaptiveDynamic(IoInputter& io,const ModelType& model)
 	    : TargetParamsCommonType(io,model)
 	{
-		this->setConcatenation(SUM);
 		io.readline(type_,"DynamicDmrgType=");
 		io.readline(advanceEach_,"DynamicDmrgAdvanceEach=");
 	}
@@ -137,7 +136,7 @@ operator<<(std::ostream& os,const TargetParamsAdaptiveDynamic<ModelType>& t)
 	os<<"DynamicDmrgAdvanceEach="<<t.advanceEach()<<"\n";
 	return os;
 }
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif //TARGET_PARAMS_ADAPTIVE_DYNAMIC_H

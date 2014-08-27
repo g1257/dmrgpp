@@ -132,6 +132,8 @@ public:
 	typedef typename ApplyOperatorExpressionType::PairType PairType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 
+	static const SizeType SUM = TargetParamsType::SUM;
+
 	enum {DISABLED=ApplyOperatorExpressionType::DISABLED,
 		  OPERATOR=ApplyOperatorExpressionType::OPERATOR,
 		  WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
@@ -282,13 +284,15 @@ public:
 	int findFermionSignOfTheOperators() const
 	{
 		const VectorOperatorType& myoperator = targetHelper_.tstStruct().aOperators();
+		bool wereSumming = (targetHelper_.tstStruct().concatenation() == SUM);
 		int f = 0;
 
 		for (SizeType i = 0; i < myoperator.size(); ++i) {
 
 			RealType norma = norm2(myoperator[i].data);
 
-			if (norma==0) continue;
+			if (norma==0 && wereSumming) continue;
+			if (isTheIdentity(myoperator[i].data) && !wereSumming) continue;
 
 			if (f == 0) {
 				f = myoperator[i].fermionSign;

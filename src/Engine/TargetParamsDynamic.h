@@ -104,7 +104,6 @@ public:
 	TargetParamsDynamic(IoInputter& io,const ModelType& model)
 	    : TargetParamsCommonType(io,model)
 	{
-		this->setConcatenation(SUM);
 		io.readline(type_,"DynamicDmrgType=");
 	}
 
