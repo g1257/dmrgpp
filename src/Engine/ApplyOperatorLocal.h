@@ -361,12 +361,13 @@ private:
 			applyLocalOpSystem(dest,src,A,fermionSign,RIGHT_CORNER);
 			return;
 		}
+
 		applyLocalOpEnviron(dest,src,A,LEFT_CORNER);
 	}
 
 	const LeftRightSuperType& lrs_;
 }; // class ApplyOperatorLocal
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif //APPLY_OPERATOR_LOCAL_H

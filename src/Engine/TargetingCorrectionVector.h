@@ -299,6 +299,7 @@ public:
 		evolve(Eg,direction,site,loopNumber);
 		SizeType numberOfSites = this->leftRightSuper().super().block().size();
 		if (site>1 && site<numberOfSites-2) return;
+		if (site == 1 && direction == EXPAND_SYSTEM) return;
 		// //corner case
 		SizeType x = (site==1) ? 0 : numberOfSites-1;
 		evolve(Eg,direction,x,loopNumber);
@@ -563,8 +564,7 @@ private:
 			}
 		}
 
-		if (fabs(sum) < 1e-6)
-			throw PsimagLite::RuntimeError("setWeights\n");
+		if (fabs(sum) < 1e-6) return;
 
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)/sum;
 	}
