@@ -205,7 +205,7 @@ private:
 
 	RealType matsubara(int ind,const PlotParamsType& params) const
 	{
-		int halfNs = static_cast<int>(params.numberOfMatsubaras*0.5);
+		int halfNs = params.omega1;
 		RealType factor = 2.0*M_PI/params.beta;
 		int ind2 = ind - halfNs;
 		if (ind2 >= 0) return factor*(ind2 + 1);

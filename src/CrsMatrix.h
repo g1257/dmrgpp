@@ -998,7 +998,6 @@ bool isZero(const CrsMatrix<T>& A,double eps = 1e-6)
 		for (int k=A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
 			double x = std::real(std::norm(A.getValue(k)));
 			if (x>eps) {
-				std::cerr<<"A("<<i<<","<<A.getCol(k)<<")="<<A.getValue(k)<<"\n";
 				return false;
 			}
 		}
@@ -1020,7 +1019,6 @@ bool isDiagonal(const CrsMatrix<T>& A,double eps=1e-6,bool checkForIdentity=fals
 				return false;
 			}
 			if (col!=i && std::norm(val)>eps) {
-				std::cerr<<"A("<<i<<","<<col<<")="<<val<<"\n";
 				return false;
 			}
 		}

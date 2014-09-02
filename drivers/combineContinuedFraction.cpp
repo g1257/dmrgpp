@@ -36,7 +36,7 @@ typedef ContinuedFractionCollection<ContinuedFractionType> ContinuedFractionColl
 
 void usage(const char *progName)
 {
-	std::cerr<<"Usage: "<<progName<<" file1 file2";
+	std::cerr<<"Usage: "<<progName<<" file1 file2\n";
 }
 
 int main(int argc,char *argv[])
