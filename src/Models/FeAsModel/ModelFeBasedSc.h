@@ -682,7 +682,12 @@ private:
 	                    SizeType i,
 	                    RealType factorForDiagonals,
 	                    SizeType actualSite) const
-	{	if (modelParameters_.feAsMode == 3) {
+	{
+		if (modelParameters_.feAsMode == 4) {
+			return addInteractionKspace(hmatrix,cm,i,factorForDiagonals,actualSite);
+		}
+
+		if (modelParameters_.feAsMode == 3) {
 			return addInteractionImpurity(hmatrix,cm,i,factorForDiagonals,actualSite);
 		}
 
@@ -1027,6 +1032,43 @@ private:
 				}
 			}
 		}
+	}
+
+	//! only for feAsMode == 4
+	void addInteractionKspace(SparseMatrixType &hmatrix,
+	                          const VectorOperatorType& cm,
+	                          SizeType i,
+	                          RealType factorForDiagonals,
+	                          SizeType actualSite) const
+	{
+		if (actualSite > 0) return;
+
+		SizeType orbitals = modelParameters_.orbitals;
+		SizeType dofs = orbitals * 2;
+
+		for (SizeType orb1=0;orb1<orbitals;orb1++) {
+			for (SizeType orb2=orb1+1;orb2<orbitals;orb2++) {
+				const SparseMatrixType& cm1 = cm[orb1+SPIN_UP*orbitals+i*dofs].data;
+				const SparseMatrixType& cmq1 = cm[kPlusQ(orb1)+SPIN_UP*orbitals+i*dofs].data;
+				const SparseMatrixType& cm2 = cm[orb2+SPIN_DOWN*orbitals+i*dofs].data;
+				const SparseMatrixType& cmq2 = cm[kPlusQ(orb2)+SPIN_DOWN*orbitals+i*dofs].data;
+
+				SparseMatrixType tmpMatrix, tmpMatrix2, tmpMatrix3;
+				multiply(tmpMatrix, cm1, cmq1);
+				transposeConjugate(tmpMatrix2,tmpMatrix);
+
+				multiply(tmpMatrix,cm2, cmq2);
+				multiply(tmpMatrix3, tmpMatrix2, tmpMatrix);
+
+				hmatrix += factorForDiagonals*modelParameters_.hubbardU[0]*tmpMatrix3;
+			}
+		}
+	}
+
+	SizeType kPlusQ(SizeType orb) const
+	{
+		assert(orb < modelParameters_.orbitals);
+		return modelParameters_.orbitals - orb - 1;
 	}
 
 	//! only for feAsMode == 3

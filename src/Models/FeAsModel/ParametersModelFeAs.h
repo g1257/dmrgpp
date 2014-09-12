@@ -116,8 +116,8 @@ struct ParametersModelFeAs {
 
 		io.readline(feAsMode,"FeAsMode=");
 
-		if (feAsMode > 3)
-			throw PsimagLite::RuntimeError("FeAsMode: expecting 0 or 1 or 2 or 3\n");
+		if (feAsMode > 4)
+			throw PsimagLite::RuntimeError("FeAsMode: expecting 0 to 4\n");
 
 		if (feAsMode == 1 || feAsMode == 2) {
 			SizeType tmp = orbitals * orbitals;
@@ -143,6 +143,13 @@ struct ParametersModelFeAs {
 			}
 		}
 
+		if (feAsMode == 4) {
+			if (hubbardU.size() != 1) {
+				PsimagLite::String str("FeAsMode: expecting");
+				str +=  " just 1 U value\n";
+				throw PsimagLite::RuntimeError(str);
+			}
+		}
 		try {
 			io.readMatrix(magneticField,"MagneticField");
 		} catch (std::exception& e) {}
