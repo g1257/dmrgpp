@@ -1,6 +1,5 @@
-// BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 2.0.0]
@@ -39,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -68,9 +67,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
-// END LICENSE BLOCK
+
 /** \ingroup DMRG */
 /*@{*/
 
@@ -82,55 +80,62 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_PRODUCT_HubbardOneBand_H
 #define LINK_PRODUCT_HubbardOneBand_H
 
-
 namespace Dmrg {
 
-	template<typename ModelHelperType>
-	class LinkProductHubbardOneBand {
-			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			typedef std::pair<SizeType,SizeType> PairType;
+template<typename ModelHelperType>
+class LinkProductHubbardOneBand {
 
-		public:
-			typedef typename ModelHelperType::RealType RealType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
-			
-			template<typename SomeStructType>
-			static void setLinkData(
-					SizeType term,
-					SizeType dofs,
-     					bool isSu2,
-					SizeType& fermionOrBoson,
-					PairType& ops,
-     					std::pair<char,char>& mods,
-					SizeType& angularMomentum,
-     					RealType& angularFactor,
-					SizeType& category,const SomeStructType& additional)
-			{
-				fermionOrBoson = ProgramGlobals::FERMION;
-				
-				ops = PairType(dofs,dofs);
-				angularFactor = 1;
-				if (dofs==1) angularFactor = -1;
-				angularMomentum = 1;
-				category = dofs;
-			}
-			
-			template<typename SomeStructType>
-			static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType& additional)
-			{}
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef std::pair<SizeType,SizeType> PairType;
 
-			// up up and down down are the only connections possible for this model
-			template<typename SomeStructType>
-			static SizeType dofs(SizeType term,const SomeStructType& additional) { return 2; }
-			
-			template<typename SomeStructType>
-			static std::pair<SizeType,SizeType> connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
-			{
-				return PairType(0,0); // no orbital and no dependence on spin
-			}
+public:
+	typedef typename ModelHelperType::RealType RealType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
 
-			static SizeType terms() { return 1; }
-	}; // class LinkProductHubbardOneBand
+	template<typename SomeStructType>
+	static void setLinkData(
+	        SizeType term,
+	        SizeType dofs,
+	        bool isSu2,
+	        SizeType& fermionOrBoson,
+	        PairType& ops,
+	        std::pair<char,char>& mods,
+	        SizeType& angularMomentum,
+	        RealType& angularFactor,
+	        SizeType& category,const SomeStructType& additional)
+	{
+		fermionOrBoson = ProgramGlobals::FERMION;
+
+		ops = PairType(dofs,dofs);
+		angularFactor = 1;
+		if (dofs==1) angularFactor = -1;
+		angularMomentum = 1;
+		category = dofs;
+	}
+
+	template<typename SomeStructType>
+	static void valueModifier(SparseElementType& value,
+	                          SizeType term,
+	                          SizeType dofs,
+	                          bool isSu2,
+	                          const SomeStructType& additional)
+	{}
+
+	// up up and down down are the only connections possible for this model
+	template<typename SomeStructType>
+	static SizeType dofs(SizeType term,const SomeStructType& additional) { return 2; }
+
+	template<typename SomeStructType>
+	static std::pair<SizeType,SizeType> connectorDofs(SizeType term,
+	                                                  SizeType dofs,
+	                                                  const SomeStructType& additional)
+	{
+		return PairType(0,0); // no orbital and no dependence on spin
+	}
+
+	static SizeType terms() { return 1; }
+}; // class LinkProductHubbardOneBand
 } // namespace Dmrg
 /*@}*/
 #endif
+

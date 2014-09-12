@@ -126,12 +126,8 @@ struct ParametersModelHubbard {
 		end = reinterpret_cast<const char *>(&omega);
 		total += mres.memResolv(&potentialT, end-start, str + " potentialT");
 
-		start = end;
-		end = reinterpret_cast<const char *>(&nOfElectrons);
-		total += mres.memResolv(&omega, end-start, str + " omega");
-
-		total += mres.memResolv(&nOfElectrons,
-		                        sizeof(*this) - total, str + " nOfElectrons");
+		total += mres.memResolv(&omega,
+		                        sizeof(*this) - total, str + " omega");
 
 		return total;
 	}
@@ -151,10 +147,6 @@ struct ParametersModelHubbard {
 	typename PsimagLite::Vector<Field>::Type potentialT;
 	//serializr normal omega
 	Field omega;
-
-	// target number of electrons  in the system
-	//serializr normal nOfElectrons
-	int nOfElectrons;
 };
 
 //! Function that prints model parameters to stream os
@@ -162,10 +154,8 @@ template<typename FieldType>
 std::ostream& operator<<(std::ostream &os,
                          const ParametersModelHubbard<FieldType>& parameters)
 {
-	//os<<"parameters.density="<<parameters.density<<"\n";
 	os<<"hubbardU\n";
 	os<<parameters.hubbardU;
-	//		utils::vectorPrint(parameters.hubbardU,"hubbardU",os);
 	os<<"potentialV\n";
 	os<<parameters.potentialV;
 	if (parameters.potentialT.size()==0) return os;
