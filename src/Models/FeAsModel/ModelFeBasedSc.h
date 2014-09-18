@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LinkProductFeAs.h"
 #include "ProgramGlobals.h"
 #include "ModelCommon.h"
+#include "Geometry/GeometryDca.h"
 
 namespace Dmrg {
 template<typename ModelBaseType>
@@ -121,6 +122,7 @@ public:
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::BasisDataType BasisDataType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
+	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -135,6 +137,7 @@ public:
 	      reinterpretY_(9),
 	      modelParameters_(io),
 	      geometry_(geometry),
+	      geometryDca_(geometry,modelParameters_.orbitals),
 	      spinSquared_(spinSquaredHelper_,
 	                   modelParameters_.orbitals,
 	                   2*modelParameters_.orbitals)
@@ -1043,32 +1046,43 @@ private:
 	{
 		if (actualSite > 0) return;
 
-		SizeType orbitals = modelParameters_.orbitals;
-		SizeType dofs = orbitals * 2;
+		SizeType orbs = modelParameters_.orbitals;
+		SizeType dofs = orbs * 2;
 
-		for (SizeType orb1=0;orb1<orbitals;orb1++) {
-			for (SizeType orb2=orb1+1;orb2<orbitals;orb2++) {
-				const SparseMatrixType& cm1 = cm[orb1+SPIN_UP*orbitals+i*dofs].data;
-				const SparseMatrixType& cmq1 = cm[kPlusQ(orb1)+SPIN_UP*orbitals+i*dofs].data;
-				const SparseMatrixType& cm2 = cm[orb2+SPIN_DOWN*orbitals+i*dofs].data;
-				const SparseMatrixType& cmq2 = cm[kPlusQ(orb2)+SPIN_DOWN*orbitals+i*dofs].data;
+		for (SizeType orb1=0;orb1<orbs;orb1++) {
+			const SparseMatrixType& cm1 = cm[orb1+SPIN_UP*orbs+i*dofs].data;
+			for (SizeType orb2=0;orb2<orbs;orb2++) {
+				const SparseMatrixType& cm2 = cm[orb2+SPIN_UP*orbs+i*dofs].data;
+				for (SizeType orb3=0;orb3<orbs;orb3++) {
+					const SparseMatrixType& cm3 = cm[orb3+SPIN_DOWN*orbs+i*dofs].data;
 
-				SparseMatrixType tmpMatrix, tmpMatrix2, tmpMatrix3;
-				multiply(tmpMatrix, cm1, cmq1);
-				transposeConjugate(tmpMatrix2,tmpMatrix);
+					SizeType orb4 = getMomentum(orb1, orb2, orb3);
+					const SparseMatrixType& cm4 = cm[orb4+SPIN_DOWN*orbs+i*dofs].data;
 
-				multiply(tmpMatrix,cm2, cmq2);
-				multiply(tmpMatrix3, tmpMatrix2, tmpMatrix);
+					SparseMatrixType tmpMatrix, tmpMatrix2, tmpMatrix3;
+					multiply(tmpMatrix, cm1, cm3);
+					transposeConjugate(tmpMatrix2,tmpMatrix);
 
-				hmatrix += factorForDiagonals*modelParameters_.hubbardU[0]*tmpMatrix3;
+					multiply(tmpMatrix,cm2, cm4);
+					multiply(tmpMatrix3, tmpMatrix2, tmpMatrix);
+
+					hmatrix += factorForDiagonals*modelParameters_.hubbardU[0]*tmpMatrix3;
+				}
 			}
 		}
 	}
 
-	SizeType kPlusQ(SizeType orb) const
+	SizeType getMomentum(SizeType orb1, SizeType orb2, SizeType orb3) const
 	{
-		assert(orb < modelParameters_.orbitals);
-		return modelParameters_.orbitals - orb - 1;
+		assert(orb1 < modelParameters_.orbitals);
+		assert(orb2 < modelParameters_.orbitals);
+		assert(orb3 < modelParameters_.orbitals);
+
+		SizeType tmp = geometryDca_.kSum(orb3,orb1);
+		SizeType orb4 = geometryDca_.kSustract(tmp,orb2);
+
+		assert(orb4 < modelParameters_.orbitals);
+		return orb4;
 	}
 
 	//! only for feAsMode == 3
@@ -1203,6 +1217,7 @@ private:
 	ParametersModelFeAs<RealType>  modelParameters_;
 	//serializr ref geometry_ start
 	const GeometryType& geometry_;
+	GeometryDcaType geometryDca_;
 	//serializr normal spinSquaredHelper_
 	SpinSquaredHelper<RealType,HilbertState> spinSquaredHelper_;
 	//serializr normal spinSquared_
