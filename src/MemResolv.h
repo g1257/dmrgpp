@@ -587,7 +587,7 @@ private:
 			PairType offsetForHole(start2, offset);
 			offsetsForHoles.push_back(offsetForHole);
 			total += destHoleSize;
-			if (destHoleSize > maxHoleSize) maxHoleSize = destHoleSize;
+			if (static_cast<long unsigned int>(destHoleSize) > maxHoleSize) maxHoleSize = destHoleSize;
 
 			end = end2;
 			start = start2;
