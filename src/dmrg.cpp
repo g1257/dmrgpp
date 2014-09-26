@@ -49,11 +49,71 @@ using namespace Dmrg;
 typedef PsimagLite::InputNg<InputCheck> InputNgType;
 typedef ParametersDmrgSolver<MatrixElementType,InputNgType::Readable> ParametersDmrgSolverType;
 
+struct OperatorOptions {
+
+	OperatorOptions()
+	    : site(0),
+	      dof(0),
+	      label(""),
+	      fermionicSign(0),
+	      transpose(false),
+	      enabled(false)
+	{}
+
+	SizeType site;
+	SizeType dof;
+	PsimagLite::String label;
+	int fermionicSign;
+	bool transpose;
+	bool enabled;
+};
+
+void usageOperator()
+{
+	std::cerr<<"USAGE is operator -f filename -F ";
+	std::cerr<<"fermionicSign -l label [-d dof] [-s site] [-t]\n";
+}
+
+template<typename ModelBaseType>
+void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOptions)
+{
+	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::OperatorsType OperatorsType;
+	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename ModelHelperType::SparseElementType SparseElementType;
+	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef std::pair<SizeType,SizeType> PairType;
+
+	if (obsOptions.label=="" || obsOptions.fermionicSign == 0) {
+		usageOperator();
+		return;
+	}
+
+	MatrixType opC = model.naturalOperator(obsOptions.label,obsOptions.site,obsOptions.dof);
+	std::cerr<<"#label="<<obsOptions.label<<" site="<<obsOptions.site;
+	std::cerr<<" dof="<<obsOptions.dof<<"\n";
+
+	Su2Related su2Related;
+
+	MatrixType opC2;
+	if (obsOptions.transpose)
+		transposeConjugate(opC2,opC);
+
+	OperatorType opC3((obsOptions.transpose) ? opC2 : opC,
+	                  obsOptions.fermionicSign,
+	                  PairType(0,0),
+	                  1,
+	                  su2Related);
+
+	opC3.save(std::cout);
+}
+
 template<typename GeometryType,
          typename TargettingType>
 void mainLoop3(GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
-               InputNgType::Readable& io)
+               InputNgType::Readable& io,
+               const OperatorOptions& opOptions)
 {
 	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
 	typedef typename TargettingType::MatrixVectorType::ModelType ModelBaseType;
@@ -61,6 +121,11 @@ void mainLoop3(GeometryType& geometry,
 	//! Setup the Model
 	ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
 	const ModelBaseType& model = modelSelector(dmrgSolverParams,io,geometry);
+
+	if (opOptions.enabled) {
+		operatorDriver(model,opOptions);
+		return;
+	}
 
 	//! Read TimeEvolution if applicable:
 	TargettingParamsType tsp(io,model);
@@ -82,20 +147,21 @@ template<typename GeometryType,
          typename MySparseMatrix>
 void mainLoop2(GeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
-               InputNgType::Readable& io)
+               InputNgType::Readable& io,
+               const OperatorOptions& opOptions)
 {
 	if (dmrgSolverParams.options.find("ChebyshevSolver")!=PsimagLite::String::npos) {
 		typedef TargettingTemplate<PsimagLite::ChebyshevSolver,
-					   MatrixVectorType,
-					   WaveFunctionTransfType> TargettingType;
+		                           MatrixVectorType,
+		                           WaveFunctionTransfType> TargettingType;
 		mainLoop3<GeometryType,TargettingType>
-		(geometry,dmrgSolverParams,io);
+		(geometry,dmrgSolverParams,io,opOptions);
 	} else {
 		typedef TargettingTemplate<PsimagLite::LanczosSolver,
-					   MatrixVectorType,
-					   WaveFunctionTransfType> TargettingType;
+		                           MatrixVectorType,
+		                           WaveFunctionTransfType> TargettingType;
 		mainLoop3<GeometryType,TargettingType>
-		(geometry,dmrgSolverParams,io);
+		(geometry,dmrgSolverParams,io,opOptions);
 	}
 }
 
@@ -108,7 +174,8 @@ template<typename GeometryType,
          typename MySparseMatrix>
 void mainLoop(GeometryType& geometry,
               const ParametersDmrgSolverType& dmrgSolverParams,
-              InputNgType::Readable& io)
+              InputNgType::Readable& io,
+              const OperatorOptions& opOptions)
 {
 	typedef Basis<MySparseMatrix> BasisType;
 	typedef Operators<BasisType> OperatorsType;
@@ -122,34 +189,35 @@ void mainLoop(GeometryType& geometry,
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
-	typedef WaveFunctionTransfFactory<LeftRightSuperType,VectorWithOffsetType> WaveFunctionTransfType;
+	typedef WaveFunctionTransfFactory<LeftRightSuperType,
+	                                  VectorWithOffsetType> WaveFunctionTransfType;
 
 	if (dmrgSolverParams.options.find("MatrixVectorStored")!=PsimagLite::String::npos) {
 		mainLoop2<GeometryType,
 		         MatrixVectorStored<ModelBaseType>,
 		         WaveFunctionTransfType,
 		         TargettingTemplate,
-		         MySparseMatrix>(geometry,dmrgSolverParams,io);
+		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 	} else if (dmrgSolverParams.options.find("MatrixVectorKron")!=PsimagLite::String::npos) {
 		mainLoop2<GeometryType,
-			 MatrixVectorKron<ModelBaseType>,
-			 WaveFunctionTransfType,
-			 TargettingTemplate,
-			 MySparseMatrix>(geometry,dmrgSolverParams,io);
+		MatrixVectorKron<ModelBaseType>,
+		                 WaveFunctionTransfType,
+		                 TargettingTemplate,
+		                 MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 	} else {
- 		mainLoop2<GeometryType,
+		mainLoop2<GeometryType,
 		         MatrixVectorOnTheFly<ModelBaseType>,
 		         WaveFunctionTransfType,
 		         TargettingTemplate,
-		         MySparseMatrix>(geometry,dmrgSolverParams,io);
+		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 	}
 }
-
 
 template<typename MySparseMatrix>
 void mainLoop0(InputNgType::Readable& io,
                const ParametersDmrgSolverType& dmrgSolverParams,
-               InputCheck& inputCheck)
+               InputCheck& inputCheck,
+               const OperatorOptions& opOptions)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
 	typedef PsimagLite::Geometry<ComplexOrRealType,
@@ -163,53 +231,66 @@ void mainLoop0(InputNgType::Readable& io,
 
 	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
 
-	if (targetting!="GroundStateTargetting" && su2) throw PsimagLite::RuntimeError("SU(2)"
- 		" supports only GroundStateTargetting for now (sorry!)\n");
+	if (targetting!="GroundStateTargetting" && su2) {
+		PsimagLite::String str("SU(2) supports only GroundStateTargetting (sorry!)\n");
+		throw PsimagLite::RuntimeError(str);
+	}
 
 	if (su2) {
 		if (dmrgSolverParams.targetQuantumNumbers[2]>0) {
-			mainLoop<GeometryType,ModelHelperSu2,VectorWithOffsets,TargetingGroundState,
-				MySparseMatrix>(geometry,dmrgSolverParams,io);
+			mainLoop<GeometryType,
+			         ModelHelperSu2,
+			         VectorWithOffsets,
+			         TargetingGroundState,
+			         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 		} else {
-			mainLoop<GeometryType,ModelHelperSu2,VectorWithOffset,TargetingGroundState,
-				MySparseMatrix>(geometry,dmrgSolverParams,io);
+			mainLoop<GeometryType,
+			         ModelHelperSu2,
+			         VectorWithOffset,
+			         TargetingGroundState,
+			         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 		}
 		return;
 	}
 
 	if (targetting=="TimeStepTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingTimeStep,
-			MySparseMatrixComplex>(geometry,dmrgSolverParams,io);
-			return;
+		         MySparseMatrixComplex>(geometry,dmrgSolverParams,io,opOptions);
+		return;
 	}
+
 	if (targetting=="DynamicTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingDynamic,
-			MySparseMatrix>(geometry,dmrgSolverParams,io);
-			return;
+		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+		return;
 	}
+
 	if (targetting=="AdaptiveDynamicTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingAdaptiveDynamic,
-			MySparseMatrix>(geometry,dmrgSolverParams,io);
-			return;
+		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+		return;
 	}
+
 	if (targetting=="CorrectionVectorTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingCorrectionVector,
-			MySparseMatrix>(geometry,dmrgSolverParams,io);
-			return;
+		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+		return;
 	}
+
 	if (targetting=="CorrectionTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingCorrection,
-			MySparseMatrix>(geometry,dmrgSolverParams,io);
-			return;
+		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+		return;
 	}
+
 	if (targetting=="MettsTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,MettsTargetting,
-			MySparseMatrix>(geometry,dmrgSolverParams,io);
-			return;
+		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+		return;
 	}
 
 	mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,TargetingGroundState,
-		MySparseMatrix>(geometry,dmrgSolverParams,io);
+	         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 }
 
 int main(int argc,char *argv[])
@@ -219,10 +300,12 @@ int main(int argc,char *argv[])
 	InputCheck inputCheck;
 	PsimagLite::String filename="";
 	int opt = 0;
+	OperatorOptions options;
 	PsimagLite::String strUsage(argv[0]);
+	if (utils::basename(strUsage) == "operator") options.enabled = true;
 	strUsage += " -f filename";
 	PsimagLite::String insitu("");
-	while ((opt = getopt(argc, argv,"f:o:")) != -1) {
+	while ((opt = getopt(argc, argv,"f:o:s:l:d:t:F:")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -234,6 +317,21 @@ int main(int argc,char *argv[])
 				insitu += ",";
 				insitu += optarg;
 			}
+			break;
+		case 's':
+			options.site = atoi(optarg);
+			break;
+		case 'l':
+			options.label = optarg;
+			break;
+		case 'd':
+			options.dof = atoi(optarg);
+			break;
+		case 't':
+			options.transpose = true;
+			break;
+		case 'F':
+			options.fermionicSign = atoi(optarg);
 			break;
 		default:
 			inputCheck.usageMain(strUsage);
@@ -268,10 +366,10 @@ int main(int argc,char *argv[])
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
 #ifdef USE_COMPLEX
-		std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
-		mainLoop0<MySparseMatrixC>(io,dmrgSolverParams,inputCheck);
+	std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
+	mainLoop0<MySparseMatrixC>(io,dmrgSolverParams,inputCheck);
 #else
-		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck);
+	mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck,options);
 #endif
 
 }

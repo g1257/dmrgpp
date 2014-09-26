@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -76,6 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Vector.h"
 #include "CrsMatrix.h"
+#include "String.h"
 
 namespace std {
 
@@ -89,6 +90,21 @@ namespace std {
 
 // Utility functions that are still needed
 namespace utils {
+
+struct UnixPathSeparator
+{
+    bool operator()(char ch) const
+    {
+        return ch == '/';
+    }
+};
+
+PsimagLite::String basename(PsimagLite::String pathname)
+{
+	return PsimagLite::String(std::find_if(pathname.rbegin(),
+	                                       pathname.rend(),
+	                                       UnixPathSeparator()).base(), pathname.end());
+}
 
 template<template<typename,typename> class SomeVectorTemplate,
          typename SomeAllocator1Type,

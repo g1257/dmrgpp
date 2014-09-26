@@ -27,7 +27,7 @@ use Make;
 
 my $mpi=0;
 my $platform="linux";
-my @drivers = ("dmrg","observe","operator");
+my @drivers = ("dmrg","observe");
 my $lapack=Make::findLapack();
 my $PsimagLite="../../PsimagLite";
 my ($pthreads,$pthreadsLib)=(0,"");
@@ -159,12 +159,15 @@ sub createMakefile
 	my $cppflags= "-Werror -Wall -Wstrict-overflow=5  -IEngine  ";
 	$cppflags .= "  -I$PsimagLite/src -I$PsimagLite $usePthreadsOrNot $floating";
 
-	Make::make($fh,\@drivers,"DMRG++",$platform,$mpi,"$lapack $pthreadsLib","$compiler $optimizations",$cppflags,$strip,"Engine/Version.h","Engine/Version.h gitrev");
+	Make::make($fh,\@drivers,"DMRG++",$platform,$mpi,"$lapack $pthreadsLib","$compiler $optimizations",$cppflags,$strip,"Engine/Version.h","Engine/Version.h gitrev","operator");
 	local *FH = $fh;
 print FH<<EOF;
 
 Engine/Version.h: gitrev
 	./gitrev > Engine/Version.h
+
+operator: dmrg
+	cp dmrg operator
 
 EOF
 
