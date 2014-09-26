@@ -377,11 +377,11 @@ public:
 		PsimagLite::OstringStream msg0;
 		msg0<<"Truncating transform...";
 		utils::truncate(ftransform,removedIndices,false);
-		progress_.printline(msg0,std::cerr);
+		progress_.printline(msg0,std::cout);
 
 		PsimagLite::OstringStream msg2;
 		msg2<<"Truncating indices...";
-		progress_.printline(msg2,std::cerr);
+		progress_.printline(msg2,std::cout);
 		truncate(removedIndices);
 
 		// N.B.: false below means that we don't truncate the permutation vectors
@@ -389,7 +389,7 @@ public:
 		findPermutationAndPartition(false);
 		PsimagLite::OstringStream msg;
 		msg<<"Done with changeBasis";
-		progress_.printline(msg,std::cerr);
+		progress_.printline(msg,std::cout);
 		return calcError(eigs,removedIndices);
 	}
 
