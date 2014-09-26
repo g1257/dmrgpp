@@ -24,7 +24,8 @@ package Make;
 sub make
 {
 	local *FH = shift;
-	my ($drivers,$code,$platform,$mpi,$libs,$cxx,$cppflags,$strip,$additional,$additional2) = @_;
+	my ($drivers,$code,$platform,$mpi,$libs,$cxx,$cppflags,$strip,$additional,$additional2,$additional3) = @_;
+	$additional3 = "" unless defined($additional3);
 	my $allExecutables = combineAllDrivers($drivers,"");
 	my $allCpps = combineAllDrivers($drivers,".cpp");
 
@@ -38,7 +39,7 @@ print FH<<EOF;
 LDFLAGS =    $libs
 CPPFLAGS = $cppflags
 CXX = $cxx
-all: $allExecutables
+all: $allExecutables $additional3
 
 EOF
 
