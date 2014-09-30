@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LadderBath.h"
 #include "KTwoNiFFour.h"
 #include "Star.h"
+#include "LongChain.h"
 
 namespace PsimagLite {
 
@@ -147,6 +148,8 @@ public:
 			geometryBase_ = new KTwoNiFFour<InputType>(linSize,io);
 		} else if (s=="star") {
 			geometryBase_ = new Star<InputType>(linSize,io);
+		} else if (s=="longchain") {
+			geometryBase_ = new LongChain<InputType>(linSize,io);
 		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
 		}

@@ -49,6 +49,7 @@ public:
 	typedef typename std::complex<RealType> ComplexType;
 	typedef typename TridiagonalMatrixType::value_type FieldType;
 	typedef Matrix<FieldType> MatrixType;
+	typedef Matrix<RealType> MatrixRealType;
 	typedef typename Vector<std::pair<RealType,ComplexType> >::Type PlotDataType;
 	typedef PlotParams<RealType> PlotParamsType;
 	typedef ParametersForSolver<RealType> ParametersType;
@@ -106,7 +107,7 @@ public:
 	}
 
 	void set(const TridiagonalMatrixType& ab,
-	         const MatrixType& reortho,
+	         const MatrixRealType& reortho,
 	         const RealType& Eg,
 	         RealType weight,
 	         int isign)
@@ -215,7 +216,7 @@ private:
 	ProgressIndicator progress_;
 	FreqEnum freqEnum_;
 	TridiagonalMatrixType ab_;
-	MatrixType reortho_;
+	MatrixRealType reortho_;
 	RealType Eg_;
 	RealType weight_;
 	int isign_;
