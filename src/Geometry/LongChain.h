@@ -145,13 +145,22 @@ public:
 
 	bool fringe(SizeType i,SizeType smax,SizeType emin) const
 	{
-		return (i==smax || i==emin);
+		SizeType emin2 = smax + 1;
+		if (i <= smax) {
+			SizeType iPlus = i + distance_;
+			return (iPlus < linSize_ && iPlus >= emin2);
+		}
+
+		return (i >= distance_ && (i - distance_) < emin);
 	}
 
 	// siteNew2 is fringe in the environment
 	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
 	{
-		return smax+1;
+		assert(siteNew2 >= emin);
+		SizeType tmp = siteNew2 - emin + smax+1;
+		assert(tmp < linSize_);
+		return tmp;
 	}
 
 	String label() const
@@ -182,7 +191,7 @@ public:
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int version)
 	{
-		throw RuntimeError("LongChain::memResolv(): unimplemented\n");
+		throw RuntimeError("LongChain::serialize(): unimplemented\n");
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,

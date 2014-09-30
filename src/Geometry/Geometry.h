@@ -96,7 +96,7 @@ public:
 	typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
 	typedef GeometryEx<typename Real<ComplexOrRealType_>::Type,InputType> GeometryExType;
 
-	
+
 	/** @class hide_geometry1
 	    - TotalNumberOfSites=integer This is the total number of sites including bath sites
 	      (if any) and all system and environment sites.
@@ -189,11 +189,19 @@ public:
 		return terms_[term]->operator()(i1,edof1,i2,edof2);
 	}
 
-	// needs to check all terms FIXME:
 	bool connected(SizeType smax,SizeType emin,SizeType i1,SizeType i2) const
 	{
-		if (smax+1==emin) return terms_[0]->connected(i1,i2); // any term will do
-		return terms_[0]->connected(smax,emin,i1,i2); // any term will do
+		bool b = false;
+
+		if (smax+1==emin) {
+			for (SizeType t = 0; t < terms_.size(); ++t)
+				b |= terms_[t]->connected(i1,i2);
+			return b;
+		}
+
+		for (SizeType t = 0; t < terms_.size(); ++t)
+			b |= terms_[t]->connected(smax,emin,i1,i2);
+		return b;
 	}
 
 	SizeType terms() const { return terms_.size(); }
