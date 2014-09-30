@@ -115,6 +115,9 @@ public:
 			model_ = new Tj1OrbType(solverParams,io,geometry);
 		} else if (name_ == "SuperHubbardExtended") {
 			model_ = new SuperHubbardExtendedType(solverParams,io,geometry);
+		} else if (name_ == "KaneMeleHubbard") {
+			ModelHubbardType::LinkProductType::TERMS_ = 2;
+			model_ = new ModelHubbardType(solverParams,io,geometry);
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " Unknown model " + name_ + "\n";

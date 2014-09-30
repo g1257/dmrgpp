@@ -89,8 +89,11 @@ class LinkProductHubbardOneBand {
 	typedef std::pair<SizeType,SizeType> PairType;
 
 public:
+
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
+
+	static SizeType TERMS_;
 
 	template<typename SomeStructType>
 	static void setLinkData(
@@ -133,8 +136,12 @@ public:
 		return PairType(0,0); // no orbital and no dependence on spin
 	}
 
-	static SizeType terms() { return 1; }
+	static SizeType terms() { return TERMS_; }
 }; // class LinkProductHubbardOneBand
+
+template<typename ModelHelperType>
+SizeType LinkProductHubbardOneBand<ModelHelperType>::TERMS_ = 1;
+
 } // namespace Dmrg
 /*@}*/
 #endif

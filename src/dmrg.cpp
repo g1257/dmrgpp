@@ -367,7 +367,7 @@ int main(int argc,char *argv[])
 
 #ifdef USE_COMPLEX
 	std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
-	mainLoop0<MySparseMatrixC>(io,dmrgSolverParams,inputCheck);
+	mainLoop0<MySparseMatrixC>(io,dmrgSolverParams,inputCheck,options);
 #else
 	mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck,options);
 #endif
