@@ -21,7 +21,7 @@ public:
 	{}
 
 	GeometryEx(InputType& io, SizeType meshPoints)
-	: meshLength_(sqrt(meshPoints)),
+	: meshLength_(static_cast<SizeType>(sqrt(meshPoints))),
 	  enabled_(false),
 	  meshStep_((meshLength_ > 0) ? static_cast<RealType>(2*M_PI/meshLength_) : 0)
 	{

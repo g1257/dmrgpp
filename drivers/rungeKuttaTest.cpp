@@ -148,7 +148,7 @@ int main(int argc, char* argv[])
 	}
 
 	PsimagLite::Vector<VectorType>::Type result;
-	rk.solve(result,wbegin,wend, y0);
+	rk.solveEx(result,wbegin,wend, y0);
 	for (SizeType i=0;i<result.size();i++) {
 		RealType time = wbegin + wstep*i;
 		std::cout<<time<<" ";

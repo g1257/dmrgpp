@@ -23,7 +23,7 @@ public:
 
 	void setTo(T x)
 	{
-		for (int i = 0; i < data_.size(); ++i)
+		for (SizeType i = 0; i < data_.size(); ++i)
 			data_[i] = x;
 	}
 

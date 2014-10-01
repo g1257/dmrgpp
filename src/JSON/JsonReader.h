@@ -123,7 +123,7 @@ namespace dca {
 
 	const std::wstring& candidateKey = itr->first;
 
-	SizeType pos = candidateKey.rfind(wKey);
+	size_t pos = candidateKey.rfind(wKey);
 	// does the candidate key contain wKey?
 	if (pos == PsimagLite::String::npos)
 	  continue; // wKey not found skip it
