@@ -349,7 +349,7 @@ int main(int argc,char *argv[])
 	if (ConcurrencyType::root()) {
 		std::cerr<<ProgramGlobals::license;
 		Provenance provenance;
-		std::cout<<provenance;
+		std::cerr<<provenance;
 	}
 
 	InputNgType::Writeable ioWriteable(filename,inputCheck);
