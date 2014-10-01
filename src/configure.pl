@@ -1,6 +1,5 @@
 #!/usr/bin/perl
 =pod
-// BEGIN LICENSE BLOCK
 Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
@@ -16,8 +15,6 @@ PARTICULAR PURPOSE ARE DISCLAIMED.
 Please see full open source license included in file LICENSE.
 *********************************************************
 
-
-// END LICENSE BLOCK
 =cut
 use warnings;
 use strict;
@@ -143,7 +140,7 @@ sub createMakefile
 {
 	unlink("Engine/Version.h");
 	system("cp Makefile Makefile.bak") if (-r "Makefile");
-	my $compiler = compilerName();
+	my $compiler = "g++";
 	$compiler = " mpicxx " if ($mpi);
 	my $fh;
 	open($fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
@@ -156,10 +153,12 @@ sub createMakefile
 	$strip = " true " if ($build eq "debug" or $build eq "callgrind");
 
 
-	my $cppflags= "-Werror -Wall -Wstrict-overflow=5  -IEngine  ";
+	my $cppflags= " -IEngine  ";
 	$cppflags .= "  -I$PsimagLite/src -I$PsimagLite $usePthreadsOrNot $floating";
 
-	Make::make($fh,\@drivers,"DMRG++",$platform,$mpi,"$lapack $pthreadsLib","$compiler $optimizations",$cppflags,$strip,"Engine/Version.h","Engine/Version.h gitrev","operator");
+	Make::make($fh,\@drivers,"DMRG++",$platform,$mpi,"$lapack $pthreadsLib",
+	"$compiler $optimizations",$cppflags,$strip,"Engine/Version.h",
+	"Engine/Version.h gitrev","operator");
 	local *FH = $fh;
 print FH<<EOF;
 
@@ -192,21 +191,3 @@ sub isAMac
 	return 0;
 }
 
-
-sub compilerName
-{
-	return "g++";
-	my @tryThis = ("g++","g++4");
-	my $ret;
-	my $compiler;
-	foreach my $comp (@tryThis) {
-		my $ret = system("$comp > /dev/null 2>/dev/null");
-		if ($ret==0) {
-			$compiler = $comp;
-			last;
-		}
-
-	}
-	return $compiler if defined $compiler;
-	die "$0: No suitable compiler found\n";
-}
