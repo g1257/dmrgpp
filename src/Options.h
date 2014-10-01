@@ -117,7 +117,7 @@ public:
 
 				String s(__FILE__);
 				s += ": Unknown option " + optsThatAreSet[i] + "\n";
-				if (mode_==PERMISSIVE) std::cout<<" *** WARNING **: "<<s;
+				if (mode_==PERMISSIVE) std::cerr<<" *** WARNING **: "<<s;
 				if (mode_==STRICT) throw RuntimeError(s.c_str());
 			}
 		}

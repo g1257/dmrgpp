@@ -98,7 +98,7 @@ public:
 			int x = 0;
 			io.readline(x,"IsPeriodicX=");
 			isPeriodic_ = (x > 0) ? true : false;
-			std::cout<<"periodic\n";
+			if (isPeriodic_) std::cerr<<"LongChain::ctor(): periodic\n";
 		} catch (std::exception& e) {}
 
 		try {

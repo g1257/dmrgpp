@@ -85,8 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GeometryBase.h"
 #include <cassert>
 #include "String.h"
-#include "Chain.h"
-#include "ChainEx.h"
 #include "Ladder.h"
 #include "LadderX.h"
 #include "LadderBath.h"
@@ -134,10 +132,10 @@ public:
 		String gOptions;
 		io.readline(gOptions,"GeometryOptions=");
 
-		if (s == "chain") {
-			geometryBase_ = new Chain<InputType>(linSize,io);
+		if (s == "chain" || s=="longchain") {
+			geometryBase_ = new LongChain<InputType>(linSize,io);
 		} else if (s == "chainEx") {
-			geometryBase_ = new ChainEx<InputType>(linSize,io);
+			throw RuntimeError("GeometryTerm::ctor(): ChainEx: no longer supported.\n");
 		} else if (s=="ladder") {
 			geometryBase_ = new Ladder<InputType>(linSize,io);
 		} else if (s=="ladderx") {
@@ -148,8 +146,6 @@ public:
 			geometryBase_ = new KTwoNiFFour<InputType>(linSize,io);
 		} else if (s=="star") {
 			geometryBase_ = new Star<InputType>(linSize,io);
-		} else if (s=="longchain") {
-			geometryBase_ = new LongChain<InputType>(linSize,io);
 		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
 		}
@@ -176,8 +172,7 @@ public:
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int version)
 	{
-		ar.template register_type<Chain<InputType> >();
-		ar.template register_type<ChainEx<InputType> >();
+		ar.template register_type<LongChain<InputType> >();
 		ar.template register_type<Ladder<InputType> >();
 		ar.template register_type<LadderX<InputType> >();
 		ar.template register_type<LadderBath<InputType> >();
