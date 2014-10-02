@@ -15,7 +15,7 @@ potentialV   32
 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 
 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 
 
-SolverOptions=twositedmrg,CorrectionVectorTargetting
+SolverOptions=CorrectionVectorTargetting
 CorrectionA=0
 Version=1219aeb832f7990323cca0baa17ad7b87b731ea6
 OutputFile=data3001.txt
@@ -43,6 +43,7 @@ DynamicDmrgAdvanceEach=1
 CorrectionVectorOmega=0
 CorrectionVectorEta=0.3
 CorrectionVectorAlgorithm=Krylov
+CorrectionVectorFreqType=Real
 
 TSPOperator=raw
 RAW_MATRIX

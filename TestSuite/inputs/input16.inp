@@ -1,13 +1,13 @@
 TotalNumberOfSites=12 
 NumberOfTerms=1
 DegreesOfFreedom=1
-GeometryKind=bathedcluster
+GeometryKind=ladderbath
 GeometryOptions=ConstantValues
 LadderLeg=2
 BathSitesPerSite=2
-ConnectorsX 1 1.0
-ConnectorsY 1 0.8
-ConnectorsBath 1 0.5
+Connectors 1 1.0
+Connectors 1 0.8
+Connectors 1 0.5
 
 hubbardU	12 0 0 0 0 0 0 0 0 0 0 0 0 
 potentialV     24 0 0 0 0 0 0 0 0 0 0 0 0

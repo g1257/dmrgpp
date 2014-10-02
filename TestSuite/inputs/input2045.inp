@@ -1,7 +1,7 @@
 TotalNumberOfSites=8 
 NumberOfTerms=1
 DegreesOfFreedom=1
-GeometryKind=bathedcluster
+GeometryKind=ladderbath
 GeometryOptions=none
 LadderLeg=2
 BathSitesPerSite=1

@@ -15,7 +15,7 @@ potentialV   32
 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 
 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 -0 
 
-SolverOptions=twositedmrg,CorrectionVectorTargetting
+SolverOptions=CorrectionVectorTargetting
 CorrectionA=0
 Version=1219aeb832f7990323cca0baa17ad7b87b731ea6
 OutputFile=data3007.txt
@@ -35,7 +35,7 @@ DynamicDmrgType=3
 TSPSites 4      14 15 1 0
 TSPLoops 4      0   0 0 0
 TSPProductOrSum=sum
-
+CorrectionVectorFreqType=Real
 DynamicDmrgSteps=400
 DynamicDmrgEps=1e-16
 DynamicDmrgAdvanceEach=1
