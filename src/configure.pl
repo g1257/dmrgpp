@@ -112,7 +112,7 @@ sub askQuestions
 	$lapack = $_;
 
 	print "Please enter the type of build\n";
-	print "Available: production, debug, callgrind\n";
+	print "Available: production, debug, callgrind, drd\n";
 	print "Default is: production (press ENTER): ";
 	$_=<STDIN>;
 	chomp;
@@ -147,10 +147,10 @@ sub createMakefile
 	my $usePthreadsOrNot = " ";
 	$usePthreadsOrNot = " -DUSE_PTHREADS " if ($pthreads);
 	my $optimizations = " -O3 -DNDEBUG ";
-	$optimizations = " -g3 -D_GLIBCXX_DEBUG " if ($build eq "debug");
-	$optimizations .= " -g3 " if ($build eq "callgrind");
+	$optimizations = " -g3 -D_GLIBCXX_DEBUG -D_GLIBCXX_PROFILE " if ($build eq "debug");
+	$optimizations .= " -g3 " if ($build eq "callgrind" || $build eq "drd");
 	my $strip = "strip ";
-	$strip = " true " if ($build eq "debug" or $build eq "callgrind");
+	$strip = " true " if ($build eq "debug" or $build eq "callgrind" or $build eq "drd");
 
 
 	my $cppflags= " -IEngine  ";
