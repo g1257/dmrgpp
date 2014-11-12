@@ -376,7 +376,7 @@ private:
 		value = rng_() - 0.5;
 	}
 
-	void beforeWft(const LeftRightSuperType& lrs)
+	void beforeWft(const LeftRightSuperType&)
 	{
 		if (stage_==EXPAND_ENVIRON) {
 			if (wsStack_.size()>=1) {

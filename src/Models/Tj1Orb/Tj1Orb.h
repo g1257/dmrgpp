@@ -511,7 +511,7 @@ private:
 
 	void setSymmetryRelated(BasisDataType& q,
 	                        const HilbertBasisType& basis,
-	                        int) const
+	                        int n) const
 	{
 		assert(n==1);
 

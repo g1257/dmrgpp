@@ -99,12 +99,12 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType; 
+	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 	typedef typename SparseMatrixType::value_type value_type;
 
 	MatrixVectorKron(ModelType const *model,
 	                 ModelHelperType const *modelHelper,
-	                 ReflectionSymmetryType* rs=0)
+	                 ReflectionSymmetryType* = 0)
 	    : model_(model),initKron_(*model,*modelHelper),kronMatrix_(initKron_)
 	{
 		int maxMatrixRankStored = model->params().maxMatrixRankStored;
@@ -127,7 +127,7 @@ public:
 
 	SizeType reflectionSector() const { return 0; }
 
-	void reflectionSector(SizeType p) {  }
+	void reflectionSector(SizeType) {  }
 
 	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
 	{

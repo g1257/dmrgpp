@@ -197,7 +197,7 @@ public:
 
 	const RealType& time() const {return commonTargetting_.currentTime(); }
 
-	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
+	void updateOnSiteForTimeDep(BasisWithOperatorsType&) const
 	{
 		// nothing to do here
 	}
@@ -206,7 +206,7 @@ public:
 	{
 		return false;
 	}
-	
+
 	const ComplexOrRealType& inSitu(SizeType i) const
 	{
 		return commonTargetting_.inSitu(i);

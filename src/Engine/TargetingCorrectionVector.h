@@ -363,7 +363,7 @@ private:
 	}
 
 	void calcDynVectors(const VectorWithOffsetType& phi,
-	                    SizeType systemOrEnviron)
+	                    SizeType)
 	{
 		for (SizeType i=1;i<this->common().targetVectors().size();i++)
 			this->common().targetVectors(i) = phi;
@@ -485,7 +485,7 @@ private:
 			   const MatrixComplexOrRealType& T,
 			   const MatrixComplexOrRealType& V,
 			   const VectorWithOffsetType& phi,
-			   const VectorRealType& eigs,
+			   const VectorRealType&,
 			   SizeType n2,
 			   SizeType i0)
 	{

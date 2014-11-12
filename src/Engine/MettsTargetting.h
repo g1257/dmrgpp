@@ -269,8 +269,8 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type& v,
-	           const SomeBasisType& someBasis)
+	void setGs(const typename PsimagLite::Vector<TargetVectorType>::Type&,
+	           const SomeBasisType&)
 	{}
 
 	const RealType& operator[](SizeType i) const
@@ -549,7 +549,7 @@ private:
 
 	void advanceOrWft(SizeType index,
 	                  SizeType indexAdvance,
-	                  SizeType systemOrEnviron,
+	                  SizeType,
 	                  const VectorSizeType& block)
 	{
 		if (targetVectors_[index].size()==0) return;

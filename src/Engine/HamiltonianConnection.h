@@ -167,7 +167,7 @@ public:
 	void thread_function_(SizeType threadNum,
 	                      SizeType blockSize,
 	                      SizeType total,
-	                      pthread_mutex_t* myMutex)
+	                      pthread_mutex_t*)
 	{
 
 		xtemp_[threadNum].resize(x_.size(),0);
@@ -313,7 +313,7 @@ private:
 	SizeType smax_,emin_;
 	VectorVectorType xtemp_;
 }; // class HamiltonianConnection
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // HAMILTONIAN_CONNECTION_H

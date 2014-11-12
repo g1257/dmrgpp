@@ -100,7 +100,7 @@ public:
 
 	MatrixVectorOnTheFly(ModelType const *model,
 	                     ModelHelperType const *modelHelper,
-	                     ReflectionSymmetryType* rs=0)
+	                     ReflectionSymmetryType* = 0)
 	    : model_(model), modelHelper_(modelHelper)
 	{
 		int maxMatrixRankStored = model->params().maxMatrixRankStored;
@@ -123,7 +123,7 @@ public:
 
 	SizeType reflectionSector() const { return 0; }
 
-	void reflectionSector(SizeType p) {  }
+	void reflectionSector(SizeType) {  }
 
 	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
 	{

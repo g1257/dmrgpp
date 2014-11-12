@@ -201,7 +201,7 @@ public:
 	void evolve(RealType Eg,
 	            SizeType direction,
 	            const BlockType& block1,
-	            const BlockType& block2,
+	            const BlockType&,
 	            SizeType loopNumber)
 	{
 		VectorWithOffsetType phiNew;

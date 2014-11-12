@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -106,7 +106,7 @@ namespace Dmrg {
 	public:
 		Su2Reduced(int m,
 		           const LeftRightSuperType& lrs,
-		           bool useReflection=false)
+		           bool = false)
 		:m_(m),
 		 lrs_(lrs),
 		 cgObject_(Su2SymmetryGlobalsType::clebschGordanObject)
@@ -249,7 +249,7 @@ namespace Dmrg {
 		                           const BasisWithOperatorsType& basis,
 		                           const typename PsimagLite::Vector<SizeType>::Type& basisrInverse,
 		                           SizeType n,
-		                           SizeType counter)
+		                           SizeType)
 		{
 			PsimagLite::Matrix<SparseElementType> opDest1(n,n);
 			for (SizeType i=0;i<opSrc.size();i++)

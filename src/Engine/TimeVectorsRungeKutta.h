@@ -147,8 +147,8 @@ public:
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
 	                             SizeType systemOrEnviron,
-	                             bool allOperatorsApplied,
-	                             const PsimagLite::Vector<SizeType>::Type& block)
+	                             bool,
+	                             const PsimagLite::Vector<SizeType>::Type&)
 	{
 		PsimagLite::OstringStream msg;
 		msg<<"using RungeKutta";

@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -142,7 +142,7 @@ namespace Dmrg {
 			}
 			if (!found) throw PsimagLite::RuntimeError("Set failed\n");
 		}
-		
+
 		template<typename SomeBasisType>
 		void fromFull(const VectorType& v,const SomeBasisType& someBasis)
 		{
@@ -163,18 +163,18 @@ namespace Dmrg {
 
 		SizeType sectors() const { return 1; }
 
-		SizeType sector(SizeType dummy) const { return m_; }
+		SizeType sector(SizeType) const { return m_; }
 
-		SizeType offset(SizeType dummy) const { return offset_; }
+		SizeType offset(SizeType) const { return offset_; }
 
-		SizeType effectiveSize(SizeType dummy) const { return data_.size(); }
+		SizeType effectiveSize(SizeType) const { return data_.size(); }
 
-		void setDataInSector(const VectorType& v,SizeType dummy)
+		void setDataInSector(const VectorType& v,SizeType)
 		{
 			data_=v;
 		}
 
-		void extract(VectorType& v, SizeType dummy = 0) const
+		void extract(VectorType& v, SizeType = 0) const
 		{
 			v=data_;
 		}
@@ -241,8 +241,8 @@ namespace Dmrg {
 // 				throw PsimagLite::RuntimeError("VectorWithOffset\n");
 			return data_[i-offset_];
 		}
-		
-		const FieldType& fastAccess(SizeType i,SizeType j) const 
+
+		const FieldType& fastAccess(SizeType,SizeType j) const
 		{
 			assert(j<data_.size());
 			return data_[j];
@@ -268,7 +268,7 @@ namespace Dmrg {
 
 		template<typename FieldType3,typename FieldType2>
 		friend VectorWithOffset<FieldType2> operator*(const FieldType3& value,const VectorWithOffset<FieldType2>& v);
-		
+
 		template<typename FieldType2>
 		friend FieldType2 multiply(const VectorWithOffset<FieldType2>& v1,
 		                                         const VectorWithOffset<FieldType2>& v2);
@@ -306,7 +306,7 @@ namespace Dmrg {
 		SizeType size_;
 		VectorType data_;
 		SizeType offset_;
-		SizeType m_; // partition 
+		SizeType m_; // partition
 	}; // class VectorWithOffset
 
 	template<typename FieldType>
@@ -318,7 +318,7 @@ namespace Dmrg {
 //		s.print(os,"VectorWithOffset");
 //		return os;
 //	}
-	
+
 	template<typename FieldType>
 	inline FieldType operator*(const Dmrg::VectorWithOffset<FieldType>& v1,
 							   const Dmrg::VectorWithOffset<FieldType>& v2)
@@ -333,7 +333,7 @@ namespace Dmrg {
 		w.data_ *= value;
 		return w;
 	}
-	
+
 	template<typename FieldType>
 	inline FieldType multiply(const VectorWithOffset<FieldType>& v1,
 	                                        const VectorWithOffset<FieldType>& v2)

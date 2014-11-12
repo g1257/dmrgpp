@@ -200,7 +200,7 @@ namespace Dmrg {
 			SizeType total,
 			BasisType const &pSE,
 			SizeType ns,
-			SizeType ne)
+			SizeType)
 		{
 			DensityMatrixElementType sum=0;
 

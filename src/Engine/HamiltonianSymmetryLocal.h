@@ -119,7 +119,7 @@ public:
 		return v;
 	}
 
-	SizeType getFlavor(SizeType i) const
+	SizeType getFlavor(SizeType) const
 	{
 		return 0; // meaningless
 	}
@@ -148,7 +148,7 @@ public:
 	void calcRemovedIndices(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
 	                        typename PsimagLite::Vector<RealType>::Type& eigs,
 	                        SizeType kept,
-	                        const SolverParametersType& solverParams) const
+	                        const SolverParametersType&) const
 	{
 		if (eigs.size()<=kept) return;
 		// we sort the eigenvalues

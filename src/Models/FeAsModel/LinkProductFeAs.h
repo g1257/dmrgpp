@@ -103,16 +103,16 @@ public:
 	//! a up a up, a up b up, b up a up, b up, b up, etc
 	//! and similarly for spin down.
 	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType& additional)
+	static SizeType dofs(SizeType,const SomeStructType& additional)
 	{
 		return 2*orbitals_*orbitals_;
 	}
 
 	// has only dependence on orbital
 	template<typename SomeStructType>
-	static PairType connectorDofs(SizeType term,
+	static PairType connectorDofs(SizeType,
 	                              SizeType dofs,
-	                              const SomeStructType& additional)
+	                              const SomeStructType&)
 	{
 		SizeType orbitalsSquared = orbitals_*orbitals_;
 		SizeType spin = dofs/orbitalsSquared;
@@ -124,15 +124,15 @@ public:
 	}
 
 	template<typename SomeStructType>
-	static void setLinkData(SizeType term,
+	static void setLinkData(SizeType,
 	                        SizeType dofs,
-	                        bool isSu2,
+	                        bool,
 	                        SizeType& fermionOrBoson,
 	                        PairType& ops,
-	                        std::pair<char,char>& mods,
+	                        std::pair<char,char>&,
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
-	                        SizeType& category,const SomeStructType& additional)
+	                        SizeType& category,const SomeStructType&)
 	{
 		fermionOrBoson = ProgramGlobals::FERMION;
 		SizeType spin = getSpin(dofs);
@@ -144,11 +144,11 @@ public:
 	}
 
 	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,
-	                          SizeType term,
-	                          SizeType dofs,
-	                          bool isSu2,
-	                          const SomeStructType& additional)
+	static void valueModifier(SparseElementType&,
+	                          SizeType,
+	                          SizeType,
+	                          bool,
+	                          const SomeStructType&)
 	{}
 
 	static SizeType terms() { return 1; }

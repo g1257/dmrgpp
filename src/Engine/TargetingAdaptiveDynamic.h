@@ -289,7 +289,7 @@ private:
 	        SizeType i0,
 	        const VectorType& sv,
 	        SizeType p,
-	        SizeType site,
+	        SizeType,
 	        const VectorWithOffsetType& phiNew)
 	{
 		SizeType threadId = 0;

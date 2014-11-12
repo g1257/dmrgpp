@@ -252,10 +252,10 @@ private:
 		this->common().cocoon(block,direction);
 	}
 
-	void calcLanczosVectors(RealType& gsWeight,
-	                        typename PsimagLite::Vector<RealType>::Type& weights,
+	void calcLanczosVectors(RealType&,
+	                        typename PsimagLite::Vector<RealType>::Type&,
 	                        const VectorWithOffsetType& phi,
-	                        SizeType systemOrEnviron)
+	                        SizeType)
 	{
 		for (SizeType i=0;i<phi.sectors();i++) {
 			VectorType sv;

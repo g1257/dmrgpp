@@ -173,7 +173,7 @@ public:
 
 private:
 
-	void initialSetOfPures(LongType seed)
+	void initialSetOfPures(LongType)
 	{
 		for (SizeType i=0;i<pureStates_.size();i++)
 			pureStates_[i] = SizeType(rng_()*model_.hilbertSize(i));

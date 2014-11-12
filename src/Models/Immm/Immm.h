@@ -495,7 +495,7 @@ private:
 
 	//! Not implemented, su(2) symmetry won't work
 	template<typename PairType>
-	PairType calcJmvalue(const HilbertState& ket) const
+	PairType calcJmvalue(const HilbertState&) const
 	{
 		PairType jm(0,0);
 		return jm;
@@ -504,7 +504,7 @@ private:
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const VectorOperatorType& cm,
 	                                const BlockType& block,
-	                                RealType time,
+	                                RealType,
 	                                RealType factorForDiagonals=1.0) const
 	{
 		// on-site potential:

@@ -332,7 +332,7 @@ namespace Dmrg {
 			fullMatrixToCrsMatrix(reducedHamiltonian_,B2);
 		}
 
-		void reorder(SizeType k,const PsimagLite::Vector<SizeType>::Type& permutation)
+		void reorder(SizeType,const PsimagLite::Vector<SizeType>::Type& permutation)
 		{
 			if (!useSu2Symmetry_) return;
 			for (SizeType i=0;i<permutation.size();i++)
@@ -362,13 +362,13 @@ namespace Dmrg {
 		}
 
 		template<typename IoOutputter>
-		void save(IoOutputter& io,const PsimagLite::String& s) const
+		void save(IoOutputter& io,const PsimagLite::String&) const
 		{
 			io.printVector(reducedOperators_,"#OPERATORS");
 		}
 
 		template<typename IoOutputter>
-		void saveEmpty(IoOutputter& io,const PsimagLite::String& s) const
+		void saveEmpty(IoOutputter& io,const PsimagLite::String&) const
 		{
 			PsimagLite::Vector<SizeType>::Type tmp;
 			io.printVector(tmp,"#OPERATORS");
@@ -422,7 +422,7 @@ namespace Dmrg {
 			return ix;
 		}
 
-		void calcReducedMapping(const BasisType& basis2,const BasisType& basis3)
+		void calcReducedMapping(const BasisType&,const BasisType&)
 		{
 			SizeType fMax=0;
 			const PsimagLite::Vector<SizeType>::Type& flavorsOld=thisBasis_->flavorsOld();
