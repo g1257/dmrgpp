@@ -9,7 +9,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -24,7 +24,7 @@ namespace std {
 
 inline double real(double t) { return t; }
 
-inline double imag(double t) { return 0.0; }
+inline double imag(double) { return 0.0; }
 
 inline double conj(double t) { return t; }
 

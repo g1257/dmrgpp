@@ -143,9 +143,9 @@ public:
 
 	virtual SizeType findReflection(SizeType site) const = 0;
 
-	virtual void fillAdditionalData(AdditionalDataType& additionalData,
-	                                SizeType ind,
-	                                SizeType jnd) const
+	virtual void fillAdditionalData(AdditionalDataType&,
+	                                SizeType,
+	                                SizeType) const
 	{}
 
 	virtual int index(SizeType i1,SizeType edof1,SizeType edofTotal) const
@@ -158,7 +158,7 @@ public:
 		return linSize*maxEdof;
 	}
 
-	virtual int signChange(SizeType i1, SizeType i2) const
+	virtual int signChange(SizeType, SizeType) const
 	{
 		return 1;
 	}

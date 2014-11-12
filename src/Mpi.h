@@ -501,42 +501,42 @@ typedef int CommType;
 int COMM_WORLD = 0;
 int SUM = 0;
 
-void init(int argc, char *argv[]) {}
+void init(int, char **) {}
 
 void finalize() {}
 
-SizeType commSize(CommType mpiComm)
+SizeType commSize(CommType)
 {
 	return 1;
 }
 
-SizeType commRank(CommType mpiComm)
+SizeType commRank(CommType)
 {
 	return 0;
 }
 
 template<typename T>
-void bcast(T &t,int root = 0,CommType mpiComm = COMM_WORLD)
+void bcast(T&,int = 0,CommType = COMM_WORLD)
 {}
 
 template<typename T>
-void recv(T& v,int source, int tag, CommType mpiComm = COMM_WORLD)
+void recv(T&,int, int, CommType = COMM_WORLD)
 {}
 
 template<typename T>
-void send(T& v,int dest, int tag, CommType mpiComm = COMM_WORLD)
+void send(T&,int, int, CommType = COMM_WORLD)
 {}
 
 template<typename T>
-void pointByPointGather(T& v,int root = 0, CommType mpiComm = COMM_WORLD)
+void pointByPointGather(T&,int = 0, CommType = COMM_WORLD)
 {}
 
 template<typename T>
-void reduce(T &t,int op = 0,int root = 0,int comm = 0)
+void reduce(T&,int = 0,int = 0,int = 0)
 {}
 
 template<typename T>
-void allReduce(T &t)
+void allReduce(T&)
 {}
 
 #endif
@@ -593,8 +593,8 @@ private:
 
 	VectorStringType data_;
 };
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
-/*@}*/	
+/*@}*/
 #endif
 

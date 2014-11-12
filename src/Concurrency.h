@@ -136,7 +136,7 @@ public:
 		throw RuntimeError("storageIndex: wrong mode\n");
 	}
 
-	Concurrency(int* argc, char **argv[],size_t nthreads)
+	Concurrency(int*, char ***,size_t nthreads)
 	{
 		FloatingPoint::enableExcept();
 		npthreads = nthreads;

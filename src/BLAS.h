@@ -47,7 +47,7 @@ extern "C" void zgemm_(char*,char*,int*,int*,int*,const std::complex<double>*,
 		       const std::complex<double>*,int*,const std::complex<double>*,int*,
 		       const std::complex<double>*,std::complex<double>*,int*);
 //*****************************************************************************
-//*                           SYMM 
+//*                           SYMM
 //*****************************************************************************
 
 extern "C" void ssymm_(char*,char*,int*,int*,const float*,const float*,int*,
@@ -152,7 +152,7 @@ extern "C" void dgemv_(char*,int*,int*,const double*,const double*,int*,
 		       const double*,int*,const double*,double*,int*);
 extern "C" void cgemv_(char*,int*,int*,const std::complex<float>*,const std::complex<float>*,
 		       int*,const std::complex<float>*,int*,const std::complex<float>*,
-		       std::complex<float>*,int*);  
+		       std::complex<float>*,int*);
 extern "C" void zgemv_(char*,int*,int*,const std::complex<double>*,const std::complex<double>*,
 		       int*,const std::complex<double>*,int*,const std::complex<double>*,
 		       std::complex<double>*,int*);
@@ -169,7 +169,7 @@ extern "C" void cgbmv_(char*,int*,int*,int*,int*,const std::complex<float>*,
 extern "C" void zgbmv_(char*,int*,int*,int*,int*,const std::complex<double>*,
 		       const std::complex<double>*,int*,const std::complex<double>*,int*,
 		       const std::complex<double>*,std::complex<double>*,int*);
-			 
+
 // ****************************************************************************
 // *                          HEMV
 // ****************************************************************************
@@ -178,7 +178,7 @@ extern "C" void chemv_(char*,int*,const std::complex<float>*,const std::complex<
 		       std::complex<float>*,int*);
 extern "C" void zhemv_(char*,int*,const std::complex<double>*,const std::complex<double>*,
 		       int*,const std::complex<double>*,int*,const std::complex<double>*,
-		       std::complex<double>*,int*);			 
+		       std::complex<double>*,int*);
 // ****************************************************************************
 // *                         HBMV
 // ****************************************************************************
@@ -187,7 +187,7 @@ extern "C" void chbmv_(char*,int*,int*,const std::complex<float>*,const std::com
 		       std::complex<float>*,int*);
 extern "C" void zhbmv_(char*,int*,int*,const std::complex<double>*,const std::complex<double>*,
 		       int*,const std::complex<double>*,int*,const std::complex<double>*,
-		       std::complex<double>*,int*);			 
+		       std::complex<double>*,int*);
 // ****************************************************************************
 // *                         HPMV
 // ****************************************************************************
@@ -349,16 +349,16 @@ extern "C" void zhpr2_(char*,int*,const std::complex<double>*,const std::complex
 // ******************************************************************************
 // *Level 1 BLAS
 // ******************************************************************************
-  
+
 extern "C" void srotg_(float*,float*,float*,float*);
 extern "C" void drotg_(double*,double*,double*,double*);
-  
+
 extern "C" void srotmg_(float*,float*,float*,float*,float*);
 extern "C" void drotmg_(double*,double*,double*,double*,double*);
- 
+
 extern "C" void srot_(int*,float*,int*,float*,int*,const float*,const float*);
 extern "C" void drot_(int*,double*,int*,double*,int*,const double*,const double*);
-  
+
 extern "C" void srotm_(int*,float*,int*,float*,int*,const float*);
 extern "C" void drotm_(int*,double*,int*,double*,int*,const double*);
 
@@ -424,7 +424,7 @@ inline void GEMM(char c1,char c2,int sX,int sY,int sZ,const std::complex<double>
 // ***************************************************************************
 inline void SYMM(char c1,char c2,int sX,int sY,const float &a,const float* x,
 		 int sx,const float* y,int sy, const float &b,float* z,int sz){
-  ssymm_(&c1,&c2,&sX,&sY,&a,x,&sx,y,&sy,&b,z,&sz); 
+  ssymm_(&c1,&c2,&sX,&sY,&a,x,&sx,y,&sy,&b,z,&sz);
 }
 
 inline void SYMM(char c1,char c2,int sX,int sY,const double &a,const double* x,
@@ -433,26 +433,26 @@ inline void SYMM(char c1,char c2,int sX,int sY,const double &a,const double* x,
 }
 inline void SYMM(char c1,char c2,int sX,int sY,const std::complex<float> &a,
 		 const std::complex<float>* x,int sx,
-		 const std::complex<float>* y,int sy, 
+		 const std::complex<float>* y,int sy,
 		 const std::complex<float> &b,std::complex<float>* z,int sz){
   csymm_(&c1,&c2,&sX,&sY,&a,x,&sx,y,&sy,&b,z,&sz);
 }
 inline void SYMM(char c1,char c2,int sX,int sY,const std::complex<double> &a,
 		 const std::complex<double>* x,int sx,
-		 const std::complex<double>* y,int sy, 
+		 const std::complex<double>* y,int sy,
 		 const std::complex<double> &b,std::complex<double>* z,int sz){
   zsymm_(&c1,&c2,&sX,&sY,&a,x,&sx,y,&sy,&b,z,&sz);
 }
 // ---------------------------------------------------------------------------
 inline void HEMM(char c1,char c2,int sX,int sY, const std::complex<float> &a,
 		 const std::complex<float>* x,int sx,
-		 const std::complex<float>* y,int sy,
+		 const std::complex<float>* y,int,
 		 const std::complex<float> &b, std::complex<float>* z, int sz){
   chemm_(&c1,&c2,&sX,&sY,&a,x,&sx,y,&sx,&b,z,&sz);
 }
 inline void HEMM(char c1,char c2,int sX,int sY,const std::complex<double> &a,
 		 const std::complex<double>* x,int sx,
-		 const std::complex<double>* y,int sy,
+		 const std::complex<double>* y,int,
 		 const std::complex<double> &b,std::complex<double>* z,int sz){
   zhemm_(&c1,&c2,&sX,&sY,&a,x,&sx,y,&sx,&b,z,&sz);
 }
@@ -563,29 +563,29 @@ inline void TRSM(char side,char uplo,char transa,char diag,int m,int n,
 }
   // ***************************************************************************
 
-inline void GEMV(char c, int M, int N, 
+inline void GEMV(char c, int M, int N,
 		 const float &alpha, const float *A, int ldA,
 		 const float *x, int incX,
 		 const float &beta, float *y, int incY) {
   sgemv_(&c,&M,&N,&alpha,A,&ldA,x,&incX,&beta,y,&incY);
 }
 // ----------------------------------------------------------------------------
-inline void GEMV(char c, int M, int N, 
+inline void GEMV(char c, int M, int N,
 		 const double &alpha, const double *A, int ldA,
 		 const double *x, int incX,
 		 const double &beta, double *y, int incY) {
   dgemv_(&c,&M,&N,&alpha,A,&ldA,x,&incX,&beta,y,&incY);
 }
 // ---------------------------------------------------------------------------
-inline void GEMV(char c, int M, int N, 
+inline void GEMV(char c, int M, int N,
 		 const std::complex<float> &alpha, const std::complex<float> *A, int ldA,
 		 const std::complex<float> *x, int incX,
 		 const std::complex<float> &beta, std::complex<float> *y, int incY) {
   cgemv_(&c,&M,&N,&alpha,A,&ldA,x,&incX,&beta,y,&incY);
 }
 // ---------------------------------------------------------------------------
-inline void GEMV(char c, int M, int N, 
-		 const std::complex<double> &alpha, const std::complex<double> *A, 
+inline void GEMV(char c, int M, int N,
+		 const std::complex<double> &alpha, const std::complex<double> *A,
 		 int ldA,const std::complex<double> *x, int incX,
 		 const std::complex<double> &beta, std::complex<double> *y, int incY) {
   zgemv_(&c,&M,&N,&alpha,A,&ldA,x,&incX,&beta,y,&incY);
@@ -670,19 +670,19 @@ inline void SPMV(char uplo,int n,const double &alpha,const double *ap,const doub
   dspmv_(&uplo,&n,&alpha,ap,x,&incx,&beta,y,&incy);
 }
 // ****************************************************************************
-inline void TRMV(char uplo,char trans,char diag,int n,const float *a,int lda, 
+inline void TRMV(char uplo,char trans,char diag,int n,const float *a,int lda,
 		 float *x,int incx){
   strmv_(&uplo,&trans,&diag,&n,a,&lda,x,&incx);
 }
-inline void TRMV(char uplo,char trans,char diag,int n,const double *a,int lda, 
+inline void TRMV(char uplo,char trans,char diag,int n,const double *a,int lda,
 		 double *x,int incx){
   dtrmv_(&uplo,&trans,&diag,&n,a,&lda,x,&incx);
 }
-inline void TRMV(char uplo,char trans,char diag,int n,const std::complex<float> *a,int lda, 
+inline void TRMV(char uplo,char trans,char diag,int n,const std::complex<float> *a,int lda,
 		 std::complex<float> *x,int incx){
   ctrmv_(&uplo,&trans,&diag,&n,a,&lda,x,&incx);
 }
-inline void TRMV(char uplo,char trans,char diag,int n,const std::complex<double> *a,int lda, 
+inline void TRMV(char uplo,char trans,char diag,int n,const std::complex<double> *a,int lda,
 		 std::complex<double> *x,int incx){
   ztrmv_(&uplo,&trans,&diag,&n,a,&lda,x,&incx);
 }
@@ -719,19 +719,19 @@ inline void TPMV(char uplo,char trans,char diag,int n,const std::complex<double>
   ztpmv_(&uplo,&trans,&diag,&n,ap,x,&incx);
 }
 // ****************************************************************************
-inline void TRSV(char uplo,char trans,char diag,int n,const float *a,int lda, 
+inline void TRSV(char uplo,char trans,char diag,int n,const float *a,int lda,
 		 float *x,int incx){
   strsv_(&uplo,&trans,&diag,&n,a,&lda,x,&incx);
 }
-inline void TRSV(char uplo,char trans,char diag,int n,const double *a,int lda, 
+inline void TRSV(char uplo,char trans,char diag,int n,const double *a,int lda,
 		 double *x,int incx){
   dtrsv_(&uplo,&trans,&diag,&n,a,&lda,x,&incx);
 }
-inline void TRSV(char uplo,char trans,char diag,int n,const std::complex<float> *a,int lda, 
+inline void TRSV(char uplo,char trans,char diag,int n,const std::complex<float> *a,int lda,
 		 std::complex<float> *x,int incx){
   ctrsv_(&uplo,&trans,&diag,&n,a,&lda,x,&incx);
 }
-inline void TRSV(char uplo,char trans,char diag,int n,const std::complex<double> *a,int lda, 
+inline void TRSV(char uplo,char trans,char diag,int n,const std::complex<double> *a,int lda,
 		 std::complex<double> *x,int incx){
   ztrsv_(&uplo,&trans,&diag,&n,a,&lda,x,&incx);
 }
@@ -822,7 +822,7 @@ inline void HPR(char uplo,int n,const std::complex<float> &alpha,
 inline void HPR(char uplo,int n,const std::complex<double> &alpha,
 		const std::complex<double> *x,int incx,
 		std::complex<float> *ap){
-  zhpr_(&uplo,&n,&alpha,x,&incx,ap);  
+  zhpr_(&uplo,&n,&alpha,x,&incx,ap);
 }
 // *****************************************************************************
 inline void HER2(char uplo,int n,const std::complex<float> &alpha,
@@ -899,13 +899,13 @@ void AXPY(int size,const double &a,const double* x, int sx, double* y, int sy){
 }
 
 inline
-void AXPY(int size,const std::complex<float> &a,const std::complex<float>* x, int sx, 
+void AXPY(int size,const std::complex<float> &a,const std::complex<float>* x, int sx,
 	  std::complex<float>* y, int sy){
   caxpy_(&size,&a,x,&sx,y,&sy);
 }
 
 inline
-void AXPY(int size,const std::complex<double> &a,const std::complex<double>* x, int sx, 
+void AXPY(int size,const std::complex<double> &a,const std::complex<double>* x, int sx,
 	  std::complex<double>* y, int sy){
   zaxpy_(&size,&a,x,&sx,y,&sy);
 }

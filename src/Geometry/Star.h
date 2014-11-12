@@ -91,7 +91,7 @@ public:
 
 	Star() {}
 
-	Star(SizeType linSize,InputType& io)
+	Star(SizeType linSize,InputType&)
 	    : linSize_(linSize)
 	{}
 

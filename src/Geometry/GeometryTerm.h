@@ -118,7 +118,7 @@ public:
 	   or star.
 	 - GeometryOptions=string Either none or ConstantValues needs to explain more FIXME
 	*/
-	GeometryTerm(InputType& io,SizeType termId,SizeType linSize,bool debug=false) :
+	GeometryTerm(InputType& io,SizeType,SizeType linSize,bool debug=false) :
 	    linSize_(linSize),maxEdof_(0),geometryBase_(0)
 	{
 		int x;
