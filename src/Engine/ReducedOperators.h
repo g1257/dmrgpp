@@ -8,7 +8,7 @@ All rights reserved
 UT Battelle Open Source Software License 11242008
 
 OPEN SOURCE LICENSE
- 
+
 Subject to the conditions of this License, each
 contributor to this software hereby grants, free of
 charge, to any person obtaining a copy of this software
@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -109,7 +109,7 @@ namespace Dmrg {
 		}
 
 		template<typename IoInputter>
-		ReducedOperators(IoInputter& io,SizeType level,const BasisType* thisBasis)
+		ReducedOperators(IoInputter& io,SizeType,const BasisType* thisBasis)
 		: thisBasis_(thisBasis),
 		  useSu2Symmetry_(BasisType::useSu2Symmetry()),
 		  cgObject_(&(Su2SymmetryGlobalsType::clebschGordanObject))
@@ -602,7 +602,7 @@ namespace Dmrg {
 						if (m1prime > j1prime) continue;
 						PairType jm1prime(j1prime,m1prime);
 
-						// m1prime = m1 + M  
+						// m1prime = m1 + M
 						x = k - j1prime +j1;
 						if (x%2!=0) continue;
 						x/=2;

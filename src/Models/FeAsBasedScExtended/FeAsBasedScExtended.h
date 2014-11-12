@@ -326,7 +326,7 @@ private:
 	void cDaggerC(
 	        SparseMatrixType& sum,
 	        const typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	        const BlockType& block,
+	        const BlockType&,
 	        RealType value,
 	        SizeType spin1,
 	        SizeType spin2) const
@@ -346,9 +346,9 @@ private:
 
 	// add J_{ij} S^+_i S^-_j + S^-_i S^+_j to Hamiltonia
 	void addSplusSminus(
-	        SparseMatrixType &hamiltonian,
-	        const typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	        const BlockType& block) const
+	        SparseMatrixType &,
+	        const typename PsimagLite::Vector<OperatorType> ::Type&,
+	        const BlockType&) const
 	{
 		// nothing if block.size == 1
 	}
@@ -356,7 +356,7 @@ private:
 	// add J_{ij} S^z_i S^z_j to Hamiltonian
 	void addSzSz(
 	        SparseMatrixType &hamiltonian,
-	        const typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
+	        const typename PsimagLite::Vector<OperatorType> ::Type&,
 	        const BlockType& block) const
 	{
 		// nothing if block.size == 1

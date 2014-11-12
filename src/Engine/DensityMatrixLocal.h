@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -103,11 +103,11 @@ namespace Dmrg {
 		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 
 		DensityMatrixLocal(
-			const TargettingType& target,
+			const TargettingType&,
 			const DmrgBasisWithOperatorsType& pBasis,
-			const DmrgBasisWithOperatorsType& pBasisSummed,
-			const DmrgBasisType& pSE,
-			SizeType direction,bool debug=false,bool verbose=false) 
+			const DmrgBasisWithOperatorsType&,
+			const DmrgBasisType&,
+			SizeType,bool debug=false,bool verbose=false)
 		:
 			progress_("DensityMatrixLocal"),
 			data_(pBasis.size(),
@@ -123,11 +123,11 @@ namespace Dmrg {
 
 		virtual SizeType rank() { return data_.rank(); }
 
-		virtual void check(int direction)
+		virtual void check(int)
 		{
 		}
 
-		virtual void check2(int direction)
+		virtual void check2(int)
 		{
 		}
 
@@ -153,20 +153,20 @@ namespace Dmrg {
 			for (SizeType m=0;m<pBasis.partition()-1;m++) {
 				// size of this partition
 				SizeType bs = pBasis.partition(m+1)-pBasis.partition(m);
-				
+
 				// density matrix block for this partition:
 				BuildingBlockType matrixBlock(bs,bs);
-				
+
 				// weight of the ground state:
 				RealType w = target.gsWeight();
-				
+
 				// if we are to target the ground state do it now:
 				ParallelDensityMatrixType helperDm(target,pBasis,pBasisSummed,pSE,direction,m,matrixBlock);
 
 				if (target.includeGroundStage())
 					helperDm.initPartition(matrixBlock,pBasis,m,target.gs(),
 							pBasisSummed,pSE,direction,w);
-				
+
 				// target all other states if any:
 				if (target.size()>0) {
 					typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
@@ -192,7 +192,7 @@ namespace Dmrg {
 		template<typename DmrgBasisType_,
 			typename DmrgBasisWithOperatorsType_,
    			typename TargettingType_
-			> 
+			>
 		friend std::ostream& operator<<(std::ostream& os,
 				const DensityMatrixLocal<
     					DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_>& dm);
@@ -208,13 +208,13 @@ namespace Dmrg {
 	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
   		typename TargettingType
-		> 
+		>
 	std::ostream& operator<<(std::ostream& os,
 				const DensityMatrixLocal<DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType>& dm)
 	{
 		for (SizeType m=0;m<dm.data_.blocks();m++) {
 			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
-			os<<" ne="<<ne<<"\n"; 
+			os<<" ne="<<ne<<"\n";
 			os<<dm.data_(m)<<"\n";
 		}
 		return os;

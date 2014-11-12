@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 	template<typename ModelHelperType>
 	class LinkProductHeisenbergSpinOneHalf {
-			
+
 		public:
 			typedef std::pair<SizeType,SizeType> PairType;
 			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
@@ -91,7 +91,7 @@ namespace Dmrg {
 
 			template<typename SomeStructType>
 			static void setLinkData(
-					SizeType term,
+					SizeType,
 					SizeType dofs,
      					bool isSu2,
 					SizeType& fermionOrBoson,
@@ -100,7 +100,7 @@ namespace Dmrg {
 					SizeType& angularMomentum,
      					RealType& angularFactor,
 					SizeType& category,
-					const SomeStructType& additional)
+					const SomeStructType&)
 			{
 				fermionOrBoson = ProgramGlobals::BOSON;
 				ops = operatorDofs(dofs,isSu2);
@@ -125,22 +125,22 @@ namespace Dmrg {
 			}
 
 			template<typename SomeStructType>
-			static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType& additional)
+			static void valueModifier(SparseElementType& value,SizeType,SizeType dofs,bool isSu2,const SomeStructType&)
 			{
 				if (isSu2) value = -value;
 				if (dofs<2) value *= 0.5;
 				value *= 0.5;
 			}
-			
+
 			//! For TERM_J there are 3 terms:
 			//! Splus Sminus and
 			//! Sminus Splus and
 			//! Sz Sz
 			template<typename SomeStructType>
-			static SizeType dofs(SizeType term,const SomeStructType& additional) { return 3; }
+			static SizeType dofs(SizeType,const SomeStructType&) { return 3; }
 
 			template<typename SomeStructType>
-			static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
+			static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
 			{
 				return PairType(0,0); // no orbital and no anisotropy
 			}
@@ -148,7 +148,7 @@ namespace Dmrg {
 			static SizeType terms() { return 1; }
 
 		private:
-			
+
 			static PairType operatorDofs(SizeType dofs,bool isSu2)
 			{
 				if (dofs<2) return PairType(0,0);

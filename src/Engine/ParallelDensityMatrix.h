@@ -113,7 +113,7 @@ namespace Dmrg {
 		  hasMpi_(PsimagLite::Concurrency::hasMpi())
 		{}
 
-		void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
+		void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t*)
 		{
 			SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 			SizeType npthreads = PsimagLite::Concurrency::npthreads;
@@ -230,7 +230,7 @@ namespace Dmrg {
 			SizeType total,
 			BasisType const &pSE,
 			SizeType ns,
-			SizeType ne)
+			SizeType)
 		{
 			DensityMatrixElementType sum=0;
 

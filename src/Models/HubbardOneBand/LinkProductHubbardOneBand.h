@@ -97,15 +97,15 @@ public:
 
 	template<typename SomeStructType>
 	static void setLinkData(
-	        SizeType term,
+	        SizeType,
 	        SizeType dofs,
-	        bool isSu2,
+	        bool,
 	        SizeType& fermionOrBoson,
 	        PairType& ops,
-	        std::pair<char,char>& mods,
+	        std::pair<char,char>&,
 	        SizeType& angularMomentum,
 	        RealType& angularFactor,
-	        SizeType& category,const SomeStructType& additional)
+	        SizeType& category,const SomeStructType&)
 	{
 		fermionOrBoson = ProgramGlobals::FERMION;
 
@@ -117,21 +117,21 @@ public:
 	}
 
 	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,
-	                          SizeType term,
-	                          SizeType dofs,
-	                          bool isSu2,
-	                          const SomeStructType& additional)
+	static void valueModifier(SparseElementType&,
+	                          SizeType,
+	                          SizeType,
+	                          bool,
+	                          const SomeStructType&)
 	{}
 
 	// up up and down down are the only connections possible for this model
 	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType& additional) { return 2; }
+	static SizeType dofs(SizeType,const SomeStructType&) { return 2; }
 
 	template<typename SomeStructType>
-	static std::pair<SizeType,SizeType> connectorDofs(SizeType term,
-	                                                  SizeType dofs,
-	                                                  const SomeStructType& additional)
+	static std::pair<SizeType,SizeType> connectorDofs(SizeType,
+	                                                  SizeType,
+	                                                  const SomeStructType&)
 	{
 		return PairType(0,0); // no orbital and no dependence on spin
 	}

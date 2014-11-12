@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -89,12 +89,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 
 namespace Dmrg {
-	
+
 	template<typename ParametersType, typename TargettingType>
 	class Diagonalization {
 
 	public:
-	 
+
 	 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 		typedef typename TargettingType::ModelType ModelType;
 		typedef typename TargettingType::BasisType BasisType;
@@ -143,7 +143,7 @@ namespace Dmrg {
 			targetedSymmetrySectors(sectors,target.leftRightSuper());
 			reflectionOperator_.update(sectors);
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,blockLeft);
-			//  targetting: 
+			//  targetting:
 			target.evolve(gsEnergy,direction,blockLeft,blockRight,loopIndex);
 			wft_.triggerOff(target.leftRightSuper()); //,m);
 			return gsEnergy;
@@ -153,12 +153,12 @@ namespace Dmrg {
 		                    SizeType direction,
 		                    const BlockType& block,
 		                    SizeType loopIndex,
-		                    bool needsPrinting)
+		                    bool)
 		{
 			assert(direction!=WaveFunctionTransfType::INFINITE);
 
 			RealType gsEnergy = internalMain_(target,direction,loopIndex,false,block);
-			//  targetting: 
+			//  targetting:
 			target.evolve(gsEnergy,direction,block,block,loopIndex);
 			wft_.triggerOff(target.leftRightSuper()); //,m);
 			return gsEnergy;
@@ -180,7 +180,7 @@ namespace Dmrg {
 		RealType internalMain_(TargettingType& target,
 		                       SizeType direction,
 		                       SizeType loopIndex,
-		                       bool needsPrinting,
+		                       bool,
 		                       const typename PsimagLite::Vector<SizeType>::Type& block)
 
 		{
@@ -192,17 +192,17 @@ namespace Dmrg {
 			bool onlyWft = false;
 			if (direction != WaveFunctionTransfType::INFINITE)
 				onlyWft = ((parameters_.finiteLoop[loopIndex].saveOption & 2)>0) ? true : false;
-		
+
 			if (parameters_.options.find("MettsTargetting")!=PsimagLite::String::npos)
 				return gsEnergy;
 
 			PsimagLite::OstringStream msg0;
 			msg0<<"Setting up Hamiltonian basis of size="<<lrs.super().size();
 			progress_.printline(msg0,std::cout);
-		
+
 			typename PsimagLite::Vector<TargetVectorType>::Type vecSaved;
 			typename PsimagLite::Vector<RealType>::Type energySaved;
-			
+
 			SizeType total = lrs.super().partition()-1;
 
 			energySaved.resize(total);
@@ -226,7 +226,7 @@ namespace Dmrg {
 				if (lrs.super().pseudoEffectiveNumber(
 						lrs.super().partition(i))!=quantumSector_ )
 					weights[i]=0;
-				
+
 				counter+=bs;
 				vecSaved[i].resize(weights[i]);
 			}
@@ -234,7 +234,7 @@ namespace Dmrg {
 			typedef typename TargettingType::VectorWithOffsetType
 					VectorWithOffsetType;
 			VectorWithOffsetType initialVector(weights,lrs.super());
-			
+
 			target.initialGuess(initialVector,block);
 
 			for (SizeType i=0;i<total;i++) {
@@ -247,7 +247,7 @@ namespace Dmrg {
 				msg<<" pseudo="<<lrs.super().pseudoEffectiveNumber(
 						lrs.super().partition(i));
 				msg<<" quantumSector="<<quantumSector_;
-				
+
 				if (verbose_ && PsimagLite::Concurrency::root()) {
 					msg<<" diagonaliseOneBlock, i="<<i;
 					msg<<" and weight="<<weights[i];
@@ -305,7 +305,7 @@ namespace Dmrg {
 			return gsEnergy;
 		}
 
-		/** Diagonalise the i-th block of the matrix, return its eigenvectors 
+		/** Diagonalise the i-th block of the matrix, return its eigenvectors
 		    in tmpVec and its eigenvalues in energyTmp
 		!PTEX_LABEL{diagonaliseOneBlock} */
 		void diagonaliseOneBlock(int i,
@@ -349,7 +349,7 @@ namespace Dmrg {
 			progress_.printline(msg,std::cout);
 			diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,initialVector);
 		}
-		
+
 		void diagonaliseOneBlock(int i,
 					 TargetVectorType &tmpVec,
 					 RealType &energyTmp,
@@ -441,7 +441,7 @@ namespace Dmrg {
 		WaveFunctionTransfType& wft_;
 		RealType oldEnergy_;
 	}; // class Diagonalization
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif

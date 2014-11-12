@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -73,7 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file DensityMatrixSu2.h
  *
- *  
+ *
  *
  */
 #ifndef DENSITY_MATRIX_SU2_H
@@ -97,31 +97,31 @@ namespace Dmrg {
 		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 
 		enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
-		
+
 	public:
 		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
-		
+
 		DensityMatrixSu2(
-			const TargettingType& target,
+			const TargettingType&,
 			const DmrgBasisWithOperatorsType& pBasis,
-			const DmrgBasisWithOperatorsType& pBasisSummed,
-			const DmrgBasisType& pSE,
-			SizeType direction,bool debug=false,bool verbose=false) : data_(pBasis.size() ,pBasis.partition()-1),mMaximal_(pBasis.partition()-1),pBasis_(pBasis),
+			const DmrgBasisWithOperatorsType&,
+			const DmrgBasisType&,
+			SizeType,bool debug=false,bool verbose=false) : data_(pBasis.size() ,pBasis.partition()-1),mMaximal_(pBasis.partition()-1),pBasis_(pBasis),
 				debug_(debug),verbose_(verbose)
 		{
 		}
-		
+
 		BlockMatrixType& operator()()
 		{
 			return data_;
 		}
-		
+
 		SizeType rank() { return data_.rank(); }
-		
+
 		void check(int direction)
 		{
 			if (!debug_) return;
-			
+
 			if (verbose_) std::cerr<<"CHECKING DENSITY-MATRIX WITH OPTION="<<direction<<"\n";
 			for (SizeType m=0;m<data_.blocks();m++) {
 				// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
@@ -129,7 +129,7 @@ namespace Dmrg {
 				if (m==p) continue;
 				//is data_(m)==data_(p) ?
 				check(m,data_(m),p,data_(p));
-				
+
 			}
 		}
 
@@ -143,19 +143,19 @@ namespace Dmrg {
 				if (m==p) continue;
 				//is data_(m)==data_(p) ?
 				check2(m,data_(m),p,data_(p));
-				
+
 			}
 		}
 
 		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
 		{
 			diagonalise(data_,eigs,jobz);
-			
+
 			//make sure non-maximals are equal to maximals
 			// this is needed because otherwise there's no assure that m-independence
 			// is achieved due to the non unique phase of eigenvectors of the density matrix
 			for (SizeType m=0;m<data_.blocks();m++) {
-				
+
 				SizeType p = mMaximal_[m];
 				if (SizeType(m)==p) continue; // we already did these ones
 
@@ -164,9 +164,9 @@ namespace Dmrg {
 			if (verbose_) std::cerr<<"After diagonalise\n";
 
 			if (debug_) areAllMsEqual(pBasis_);
-			
+
 		}
-		
+
 		void init(
 				const TargettingType& target,
 				DmrgBasisWithOperatorsType const &pBasis,
@@ -175,26 +175,26 @@ namespace Dmrg {
 				int direction)
 		{
 			BuildingBlockType matrixBlock;
-			
+
 			for (SizeType m=0;m<pBasis.partition()-1;m++) {
 				// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
-				
+
 				if (DmrgBasisType::useSu2Symmetry()) {
 					mMaximal_[m] = findMaximalPartition(m,pBasis);
-					//if (enforceSymmetry && SizeType(m)!=mMaximal_[m]) continue; 
+					//if (enforceSymmetry && SizeType(m)!=mMaximal_[m]) continue;
 					// we'll fill non-maximal partitions later
 				}
 
 				SizeType bs = pBasis.partition(m+1)-pBasis.partition(m);
-				
+
 				matrixBlock.reset(bs,bs);
-				
+
 				for (SizeType i=pBasis.partition(m);i<pBasis.partition(m+1);i++) {
 					for (SizeType j=pBasis.partition(m);j<pBasis.partition(m+1);j++) {
-						
+
 						matrixBlock(i-pBasis.partition(m),j-pBasis.partition(m))=
 							densityMatrixAux(i,j,target,pBasisSummed,pSE,direction);
-						
+
 					}
 				}
 				data_.setBlock(m,pBasis.partition(m),matrixBlock);
@@ -212,7 +212,7 @@ namespace Dmrg {
 		template<typename DmrgBasisType_,
 			typename DmrgBasisWithOperatorsType_,
    			typename TargettingType_
-			> 
+			>
 		friend std::ostream& operator<<(std::ostream& os,
 				const DensityMatrixSu2<
     					DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_>& dm);
@@ -221,13 +221,13 @@ namespace Dmrg {
 		typename PsimagLite::Vector<SizeType>::Type mMaximal_;
 		const DmrgBasisWithOperatorsType& pBasis_;
 		bool debug_,verbose_;
-		
+
 		SizeType findMaximalPartition(SizeType p,DmrgBasisWithOperatorsType const &pBasis)
 		{
 			std::pair<SizeType,SizeType> jm2 = pBasis.jmValue(pBasis.partition(p));
 			SizeType ne2 = pBasis.electrons(pBasis.partition(p));
 			if (jm2.first==jm2.second) return p;
-			for (SizeType m=0;m<pBasis.partition()-1;m++) { 
+			for (SizeType m=0;m<pBasis.partition()-1;m++) {
 				std::pair<SizeType,SizeType> jm1 = pBasis.jmValue(pBasis.partition(m));
 				SizeType ne1 = pBasis.electrons(pBasis.partition(m));
 				if (jm1.first==jm2.first && jm1.first==jm1.second && ne1==ne2) return m;
@@ -236,7 +236,7 @@ namespace Dmrg {
 		}
 
 		//! only used for debugging
-		bool areAllMsEqual(DmrgBasisWithOperatorsType const &pBasis)
+		bool areAllMsEqual(DmrgBasisWithOperatorsType const &)
 		{
 //			PsimagLite::AlmostEqual<RealType> almostEqual(1e-5);
 
@@ -248,7 +248,7 @@ namespace Dmrg {
 //					SizeType ne2 = pBasis.electrons(pBasis.partition(p));
 
 //					if (jmPair1.first == jmPair2.first && ne1==ne2) {
-						
+
 //						if (!almostEqual(data_(m),data_(p))) {
 //							std::cerr<<"Checking m="<<m<<" against p="<<p<<"\n";
 //							throw PsimagLite::RuntimeError("error\n");
@@ -266,14 +266,14 @@ namespace Dmrg {
 			// the other targets might be complex, and C++ generic programming capabilities are weak... we need D!!!
 			if (target.includeGroundStage()) sum +=  densityMatrixHasFactors(alpha1,alpha2,target.gs(),
 			    		pBasisSummed,pSE,direction)*target.gsWeight();
-			
-			for (SizeType i=0;i<target.size();i++) 
+
+			for (SizeType i=0;i<target.size();i++)
 				sum += densityMatrixHasFactors(alpha1,alpha2,target(i),
 					pBasisSummed,pSE,direction)*target.weight(i)/target.normSquared(i);
 
 			return sum;
 		}
-		
+
 		template<typename TargetVectorType>
 		DensityMatrixElementType densityMatrixHasFactors(SizeType alpha1,SizeType alpha2,const TargetVectorType& v,
 			DmrgBasisWithOperatorsType const &pBasisSummed,DmrgBasisType const &pSE,SizeType direction)
@@ -285,7 +285,7 @@ namespace Dmrg {
 				ns=pBasisSummed.size();
 				ne=pSE.size()/ns;
 			}
-				
+
 			DensityMatrixElementType sum=0;
 
 			// Make sure we don't copy just get the reference here!!
@@ -299,15 +299,15 @@ namespace Dmrg {
 				if (direction!=EXPAND_SYSTEM) {
 					i1 = beta + alpha1*ns;
 					i2 = beta + alpha2*ns;
-				}		
+				}
 				for (int k1=factors.getRowPtr(i1);k1<factors.getRowPtr(i1+1);k1++) {
 					int eta1 = factors.getCol(k1);
 					int ii = pSE.permutationInverse(eta1);
 					for (int k2=factors.getRowPtr(i2);k2<factors.getRowPtr(i2+1);k2++) {
 						int eta2 =  factors.getCol(k2);
 						int jj = pSE.permutationInverse(eta2);
-					
-						DensityMatrixElementType tmp3= v[ii] * std::conj(v[jj]) * 
+
+						DensityMatrixElementType tmp3= v[ii] * std::conj(v[jj]) *
 							factors.getValue(k1) * factors.getValue(k2);
 						sum += tmp3;
 					}
@@ -347,10 +347,10 @@ namespace Dmrg {
 				}
 			}
 		}
-		
+
 		//! only used for debugging
 		void check2(SizeType p1,const BuildingBlockType& bp1,SizeType p2,const BuildingBlockType& bp2)
-		{ 
+		{
 			DensityMatrixElementType alpha=1.0,beta=0.0;
 			int n =bp1.n_col();
 			PsimagLite::Matrix<DensityMatrixElementType> result(n,n);
@@ -360,15 +360,15 @@ namespace Dmrg {
 				std::cerr<<"p1="<<p1<<" p2="<<p2<<"\n";
 				throw PsimagLite::RuntimeError("Density Matrix Check2: failed\n");
 			}
-					
+
 		}
-		
+
 	}; // class DensityMatrixSu2
-	
+
 	template<typename DmrgBasisType,
 		typename DmrgBasisWithOperatorsType,
   		typename TargettingType
-		> 
+		>
 	std::ostream& operator<<(std::ostream& os,
 				const DensityMatrixSu2<DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType>& dm)
 	{
@@ -377,7 +377,7 @@ namespace Dmrg {
 			// Definition: Given partition p with (j m) findMaximalPartition(p) returns the partition p' (with j,j)
 			std::pair<SizeType,SizeType> jm1 = dm.pBasis_.jmValue(dm.pBasis_.partition(m));
 			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
-			os<<"partitionNumber="<<m<<" j="<<jm1.first<<" m= "<<jm1.second<<" ne="<<ne<<"\n"; 
+			os<<"partitionNumber="<<m<<" j="<<jm1.first<<" m= "<<jm1.second<<" ne="<<ne<<"\n";
 			os<<dm.data_(m)<<"\n";
 		}
 		return os;
@@ -387,4 +387,4 @@ namespace Dmrg {
 /*@}*/
 #endif
 
- 
+

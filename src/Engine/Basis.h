@@ -123,7 +123,7 @@ public:
 	Basis(IoInputter& io,
 	      const PsimagLite::String& ss,
 	      SizeType counter=0,
-	      bool bogus = false)
+	      bool = false)
 	    : dmrgTransformed_(false), name_(ss), progress_(ss)
 	{
 		io.advance("#NAME="+ss,counter);

@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -73,7 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file Operators.h
  *
- *  Documentation needed FIXME 
+ *  Documentation needed FIXME
  *
  */
 #ifndef OPERATORS_H
@@ -109,12 +109,12 @@ transformed operator can be used (or not because of the reason limitation above)
 */
 	template<typename BasisType_>
 	class Operators {
-		
+
 		typedef std::pair<SizeType,SizeType> PairType;
 		static const bool EXCLUDE = false;
 
 	public:
-		
+
 		typedef BasisType_ BasisType;
 		typedef ReducedOperators<BasisType> ReducedOperatorsType;
 		typedef typename ReducedOperatorsType::OperatorType OperatorType;
@@ -181,8 +181,8 @@ transformed operator can be used (or not because of the reason limitation above)
 
 		private:
 
-			bool isExcluded(SizeType k,
-			                const BasisType* thisBasis)
+			bool isExcluded(SizeType,
+			                const BasisType*)
 	// 		               const std::pair<SizeType,SizeType>& startEnd)
 			{
 				if (!EXCLUDE) return false; // <-- this is the safest answer
@@ -247,7 +247,7 @@ transformed operator can be used (or not because of the reason limitation above)
 			if (!useSu2Symmetry_) operators_=ops;
 			else reducedOpImpl_.setOperators(ops);
 		}
-		
+
 		const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
 		{
 			assert(useSu2Symmetry_);

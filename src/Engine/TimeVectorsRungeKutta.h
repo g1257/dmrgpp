@@ -176,7 +176,7 @@ private:
 		FunctionForRungeKutta(const RealType& E0,
 					  const LeftRightSuperType& lrs,
 					  const ModelType& model,
-					  RealType Eg,
+					  RealType,
 					  const VectorWithOffsetType& phi,
 					  SizeType i0)
 			: E0_(E0),
@@ -186,7 +186,7 @@ private:
 		{
 		}
 
-		TargetVectorType operator()(const RealType& t,const TargetVectorType& y) const
+		TargetVectorType operator()(const RealType&,const TargetVectorType& y) const
 		{
 			TargetVectorType x(y.size());
 			lanczosHelper_.matrixVectorProduct(x,y);
@@ -207,7 +207,7 @@ private:
 	void calcTimeVectors(const PairType& startEnd,
 	                     RealType Eg,
 	                     const VectorWithOffsetType& phi,
-	                     SizeType systemOrEnviron,
+	                     SizeType,
 	                     SizeType i0)
 	{
 		SizeType total = phi.effectiveSize(i0);

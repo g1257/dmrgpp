@@ -109,7 +109,7 @@ public:
 		if (isEnabled) throw PsimagLite::RuntimeError("ReflectionOperatorEmpty\n");
 	}
 
-	void update(const typename PsimagLite::Vector<SizeType>::Type& sectors)
+	void update(const typename PsimagLite::Vector<SizeType>::Type&)
 	{
 	}
 
@@ -134,26 +134,26 @@ public:
 //	}
 
 	template<typename SomeVectorType>
-	void setInitState(const SomeVectorType& initVector,
-			  SomeVectorType& initVector1,
-			  SomeVectorType& initVector2) const
+	void setInitState(const SomeVectorType&,
+			  SomeVectorType&,
+			  SomeVectorType&) const
 	{
 		assert(false);
 	}
 
-	RealType setGroundState(VectorType& gs,
-				const RealType& gsEnergy1,
-				const VectorType& gsVector1,
-				const RealType& gsEnergy2,
-				const VectorType& gsVector2) const
+	RealType setGroundState(VectorType&,
+				const RealType&,
+				const VectorType&,
+				const RealType&,
+				const VectorType&) const
 	{
 		assert(false);
 		return 0;
 	}
 
-	void transform(SparseMatrixType& matrixA,
-		       SparseMatrixType& matrixB,
-		       const SparseMatrixType& matrix) const
+	void transform(SparseMatrixType&,
+		       SparseMatrixType&,
+		       const SparseMatrixType&) const
 	{
 		assert(false);
 	}

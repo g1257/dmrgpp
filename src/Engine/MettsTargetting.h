@@ -418,8 +418,8 @@ public:
 		os<<"MettsWeightGroundState="<<gsWeight_<<"\n";
 	}
 
-	void initialGuess(VectorWithOffsetType& v,
-	                  const VectorSizeType& block) const
+	void initialGuess(VectorWithOffsetType&,
+	                  const VectorSizeType&) const
 	{
 		PsimagLite::String s("MettsTargetting: Invalid call to initialGuess\n");
 		throw PsimagLite::RuntimeError(s.c_str());
@@ -447,14 +447,14 @@ public:
 
 	RealType time() const { return 0; }
 
-	void updateOnSiteForTimeDep(BasisWithOperatorsType& basisWithOps) const
+	void updateOnSiteForTimeDep(BasisWithOperatorsType&) const
 	{
 		// nothing to do here
 	}
 
 	bool end() const { return false; }
 
-	ComplexOrRealType inSitu(SizeType site) const
+	ComplexOrRealType inSitu(SizeType) const
 	{
 		return 0.0;
 	}

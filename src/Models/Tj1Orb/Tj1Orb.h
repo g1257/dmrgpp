@@ -481,9 +481,9 @@ private:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType& cm,
+	                                const VectorOperatorType&,
 	                                const BlockType& block,
-	                                RealType time,
+	                                RealType,
 	                                RealType factorForDiagonals=1.0) const
 	{
 		SizeType n=block.size();
@@ -511,7 +511,7 @@ private:
 
 	void setSymmetryRelated(BasisDataType& q,
 	                        const HilbertBasisType& basis,
-	                        int n) const
+	                        int) const
 	{
 		assert(n==1);
 

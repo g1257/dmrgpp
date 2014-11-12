@@ -140,7 +140,7 @@ public:
 		                          this->common().targetVectors()[i]));
 	}
 
-	RealType weight(SizeType i) const
+	RealType weight(SizeType) const
 	{
 		assert(this->common().noStageIs(DISABLED));
 		return correctionStruct_.correctionA();
@@ -151,11 +151,11 @@ public:
 		return 1;
 	}
 
-	void evolve(RealType Eg,
+	void evolve(RealType,
 	            SizeType direction,
 	            const BlockType& block1,
-	            const BlockType& block2,
-	            SizeType loopNumber)
+	            const BlockType&,
+	            SizeType)
 	{
 		this->common().cocoon(block1,direction);
 

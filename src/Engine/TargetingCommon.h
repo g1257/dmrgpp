@@ -219,7 +219,7 @@ public:
 	}
 
 	template<typename SomeSerializerType>
-	void load(const PsimagLite::String& f,int dummy)
+	void load(const PsimagLite::String& f,int)
 	{
 		IoInputType io(f);
 

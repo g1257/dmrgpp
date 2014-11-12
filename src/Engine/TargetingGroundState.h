@@ -137,7 +137,7 @@ public:
 	      progress_("TargetingGroundState")
 	{}
 
-	RealType weight(SizeType i) const
+	RealType weight(SizeType) const
 	{
 		throw PsimagLite::RuntimeError("GST: What are you doing here?\n");
 		return 0;
@@ -153,11 +153,11 @@ public:
 		return 0;
 	}
 
-	void evolve(RealType Eg,
+	void evolve(RealType,
 	            SizeType direction,
 	            const BlockType& block1,
-	            const BlockType& block2,
-	            SizeType loopNumber)
+	            const BlockType&,
+	            SizeType)
 	{
 		this->common().cocoon(block1,direction);
 	}

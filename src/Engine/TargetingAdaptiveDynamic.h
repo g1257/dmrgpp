@@ -397,7 +397,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 std::ostream& operator<<(std::ostream& os,
                          const TargetingAdaptiveDynamic<LanczosSolverTemplate,
                          MatrixVectorType,
-                         WaveFunctionTransfType>& tst)
+                         WaveFunctionTransfType>&)
 {
 	os<<"DT=NothingToSeeHereYet\n";
 	return os;
