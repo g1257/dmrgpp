@@ -120,7 +120,7 @@ public:
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	ModelBase(InputValidatorType& io,
+	ModelBase(InputValidatorType&,
 	          ModelCommonBaseType* modelCommon)
 	    : modelCommon_(modelCommon)
 	{}

@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -123,15 +123,15 @@ namespace Dmrg {
 		/**  @class hide_dmrgSolverOptions
 		  - Options=string
 		  A comma-separated list of strings. At least one of the following strings must be provided:
-		     + none  Use this when no options are given, since the list of strings must be non-null. 
+		     + none  Use this when no options are given, since the list of strings must be non-null.
 		        Note that ``none'' does not disable other options.
 
 		     + useSu2Symmetry Use the SU(2) symmetry for the model, and interpret quantum
-		         numbers in the line ``QNS'' appropriately. 
+		         numbers in the line ``QNS'' appropriately.
 
 		     + nofiniteloops  Don't do finite loops, even if provided under ``FiniteLoops'' below.
 		*/
-		void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType line)
+		void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
 		{
 			if (label!="SolverOptions") return;
 			PsimagLite::Vector<PsimagLite::String>::Type registerOpts;
@@ -230,7 +230,7 @@ namespace Dmrg {
 		OptionsReadableType* optsReadable_;
 
 	}; // class InputCheck
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif

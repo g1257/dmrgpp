@@ -131,8 +131,8 @@ public:
 	                     const ModelType& model,
 	                     const TargettingParamsType& tstStruct,
 	                     const WaveFunctionTransfType& wft,
-	                     const SizeType& quantumSector,
-	                     InputValidatorType& io)
+	                     const SizeType&,
+	                     InputValidatorType&)
 	    : BaseType(lrs,model,tstStruct,wft,0,0),
 	      progress_("TargetingGroundState")
 	{}
@@ -192,7 +192,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 std::ostream& operator<<(std::ostream& os,
                          const TargetingGroundState<LanczosSolverTemplate,
                          MatrixVectorType,
-                         WaveFunctionTransfType>& tst)
+                         WaveFunctionTransfType>&)
 {
 	os<<"GSTWeightGroundState=1\n";
 	return os;

@@ -139,7 +139,7 @@ public:
 	                  const ModelType& model,
 	                  const TargettingParamsType& tstStruct,
 	                  const WaveFunctionTransfType& wft,
-	                  const SizeType& quantumSector,
+	                  const SizeType&,
 	                  InputValidatorType& ioIn)
 	    : BaseType(lrs,model,tstStruct,wft,tstStruct.timeSteps(),0),
 	      tstStruct_(tstStruct),

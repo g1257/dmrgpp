@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -100,9 +100,9 @@ class ReflectionOperatorEmpty {
 public:
 
 	ReflectionOperatorEmpty(LeftRightSuperType& lrs,
-			   SizeType n0,
+			   SizeType,
 			   bool isEnabled,
-			   SizeType expandSys)
+			   SizeType)
 		: lrs_(lrs)
 	{
 		assert(!isEnabled);
@@ -163,7 +163,7 @@ private:
 	const LeftRightSuperType& lrs_;
 }; // class ReflectionOperatorEmpty
 
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // REFLECTION_OPERATOR_EMPTY_H

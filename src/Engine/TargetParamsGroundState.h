@@ -91,12 +91,12 @@ public:
 	typedef typename ModelType::RealType RealType;
 
 	template<typename IoInputter>
-	TargetParamsGroundState(IoInputter& io,const ModelType& model)
+	TargetParamsGroundState(IoInputter&,const ModelType&)
 	{}
 
-	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
-	                           SizeType x,
-	                           PsimagLite::String msg = "") const
+	virtual SizeType memResolv(PsimagLite::MemResolv&,
+	                           SizeType,
+	                           PsimagLite::String = "") const
 	{
 		return 0;
 	}
@@ -107,7 +107,7 @@ public:
 
 template<typename ModelType>
 inline std::ostream&
-operator<<(std::ostream& os,const TargetParamsGroundState<ModelType>& t)
+operator<<(std::ostream& os,const TargetParamsGroundState<ModelType>&)
 {
 	os<<"#TargetParams.type=GroundState\n";
 	return os;

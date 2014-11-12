@@ -89,7 +89,7 @@ struct ParametersModelHeisenberg {
 
 	// no connectors here, connectors are handled by the geometry
 	template<typename IoInputType>
-	ParametersModelHeisenberg(IoInputType& io)
+	ParametersModelHeisenberg(IoInputType&)
 	    : twiceTheSpin(1)
 	{
 		//io.readline(twiceTheSpin,"TwiceTheSpin=");
@@ -97,7 +97,7 @@ struct ParametersModelHeisenberg {
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;

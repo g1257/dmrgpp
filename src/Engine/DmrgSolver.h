@@ -277,7 +277,7 @@ private:
 		and continue with the growth phase of the algorithm.
 		*/
 	void infiniteDmrgLoop(
-	        BlockType const &S,
+	        BlockType const &,
 	        const VectorBlockType& X,
 	        const VectorBlockType& Y,
 	        BlockType const &E,
@@ -409,8 +409,8 @@ private:
 	}
 
 	void finiteStep(
-	        BlockType const &S,
-	        BlockType const &E,
+	        BlockType const &,
+	        BlockType const &,
 	        MyBasisWithOperators &pS,
 	        MyBasisWithOperators &pE,
 	        SizeType loopIndex,

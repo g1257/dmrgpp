@@ -9,7 +9,7 @@ public:
 
 }; // Provenance
 
-std::ostream& operator<<(std::ostream& os,const Provenance &prov)
+std::ostream& operator<<(std::ostream& os,const Provenance&)
 {
 	os<<"DMRG++: revision: "<<dmrgppRevision<<"\n";
 	os<<"DMRG++: diff: "<<dmrgppDiff<<"\n";

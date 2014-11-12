@@ -127,8 +127,8 @@ public:
 	                    const ModelType& model,
 	                    const TargettingParamsType& correctionStruct,
 	                    const WaveFunctionTransfType& wft,
-	                    const SizeType& quantumSector,
-	                    InputValidatorType& io)
+	                    const SizeType&,
+	                    InputValidatorType&)
 	    : BaseType(lrs,model,correctionStruct,wft,1,0),
 	      correctionStruct_(correctionStruct),
 	      progress_("TargetingCorrection")

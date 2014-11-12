@@ -71,7 +71,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TargetParamsCorrection.h 
+/*! \file TargetParamsCorrection.h
  *
  * Contains the parameter a of PRB 72 180403(R) (2005)
  *
@@ -94,7 +94,7 @@ public:
 	typedef typename BaseType::RealType RealType;
 
 	template<typename IoInputter>
-	TargetParamsCorrection(IoInputter& io,const ModelType& model)
+	TargetParamsCorrection(IoInputter& io,const ModelType&)
 	{
 		io.readline(correctionA_,"CorrectionA=");
 	}

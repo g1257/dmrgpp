@@ -151,7 +151,7 @@ public:
 	                 const ModelType& model,
 	                 const TargettingParamsType& tstStruct,
 	                 const WaveFunctionTransfType& wft,
-	                 const SizeType& quantumSector,
+	                 const SizeType&,
 	                 InputValidatorType& io)
 	    : BaseType(lrs,model,tstStruct,wft,0,0),
 	      tstStruct_(tstStruct),
@@ -365,7 +365,7 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 std::ostream& operator<<(std::ostream& os,
                          const TargetingDynamic<LanczosSolverTemplate,
                          MatrixVectorType,
-                         WaveFunctionTransfType>& tst)
+                         WaveFunctionTransfType>&)
 {
 	os<<"DT=NothingToSeeHereYet\n";
 	return os;
