@@ -157,8 +157,8 @@ private:
 		return yi.n_row();
 	}
 
-	void checkNorm(const PsimagLite::Matrix<ComplexOrRealType>& yi,
-	               const PsimagLite::Matrix<ComplexOrRealType>& y0)const
+	void checkNorm(const PsimagLite::Matrix<ComplexOrRealType>&,
+	               const PsimagLite::Matrix<ComplexOrRealType>&)const
 	{}
 
 	void checkNorm(const VectorType& yi,const VectorType& y0) const

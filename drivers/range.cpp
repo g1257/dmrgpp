@@ -1,23 +1,23 @@
 /** How to compile and run this driver
- * 
+ *
  * Serial version:
- * 
+ *
  * g++ -g3 -DNDEBUG  -Werror -Wall -I../src -I../src/JSON \
  * -I../src/JSON/JsonParser -lm  -lpthread   range.cpp   -o range \
  * /usr/lib64/libblas.so.3 /usr/lib64/liblapack.so.3
- * 
+ *
  * And run it with:
- * 
+ *
  * ./range
- * 
+ *
  * Parallel version:
- * 
+ *
  * mpicxx -DUSE_MPI -g3 -DNDEBUG  -Werror -Wall -I../src -I../src/JSON \
  * -I../src/JSON/JsonParser -lm  -lpthread   range.cpp   -o range \
  * /usr/lib64/libblas.so.3 /usr/lib64/liblapack.so.3
- * 
+ *
  * And run it with:
- * 
+ *
  * your batch system script
  *
  */
@@ -42,7 +42,7 @@ public:
 	void thread_function_(SizeType threadNum,
 	                      SizeType blockSize,
 	                      SizeType total,
-	                      ConcurrencyType::MutexType* myMutex)
+	                      ConcurrencyType::MutexType*)
 	{
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		for (SizeType p=0;p<blockSize;p++) {
@@ -128,5 +128,5 @@ int main(int argc,char *argv[])
 		std::cout<<"sum="<<sum<<"\n";
 		std::cout<<helper.v();
 	}
-		
+
 }

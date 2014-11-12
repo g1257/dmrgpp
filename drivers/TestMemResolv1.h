@@ -33,7 +33,7 @@ public:
 	}
 
 	SizeType memResolv(MemResolv& vmptr,
-	                   SizeType x = 0,
+	                   SizeType = 0,
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;

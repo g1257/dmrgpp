@@ -59,13 +59,13 @@ public:
 		return total;
 	}
 
-	SizeType dimension(SizeType i = 0) const
+	SizeType dimension(SizeType = 0) const
 	{
 		assert(enabled_);
 		return 2;
 	}
 
-	void index2Rvector(SizeType r,VectorRealType& rvector) const
+	void index2Rvector(SizeType,VectorRealType& rvector) const
 	{
 		assert(enabled_);
 		rvector.resize(2);
@@ -73,7 +73,7 @@ public:
 		rvector[1] = 0;
 	}
 
-	void index2Kvector(SizeType k,VectorRealType& kvector) const
+	void index2Kvector(SizeType,VectorRealType& kvector) const
 	{
 		assert(enabled_);
 		kvector.resize(2);
@@ -88,7 +88,7 @@ public:
 		return 1;
 	}
 
-	SizeType ickequ(SizeType j,SizeType op) const
+	SizeType ickequ(SizeType j,SizeType) const
 	{
 		assert(enabled_);
 		return j;

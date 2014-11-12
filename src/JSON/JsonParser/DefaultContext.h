@@ -3,9 +3,9 @@
 /** \ingroup JsonParser */
 /*@{*/
 
-/*! \file DefaultContext.h  
+/*! \file DefaultContext.h
  *
- *  
+ *
  *
  */
 
@@ -19,7 +19,7 @@
 #include "String.h"
 
 namespace JsonParser {
-  
+
   //======================================================================
 
   class DefaultContext {
@@ -33,7 +33,7 @@ namespace JsonParser {
     bool                      trace;
 
     //======================================================================
-    
+
     DefaultContext():
       result(),
       stack(1,&result),
@@ -46,12 +46,12 @@ namespace JsonParser {
     Whatever& currentObject() {
       return *stack.back();
     }
-    
+
     //======================================================================
 
     //* Object and Array Referenced objects are created when needed on LHS of assignment! */
     Whatever& referencedObject() {
-      
+
       Whatever&   current(currentObject());
       switch (current.type) {
       case Whatever::WHATEVER_MAP: {
@@ -75,24 +75,24 @@ namespace JsonParser {
 	return current;
       }
     }
-    
+
     //======================================================================
 
     template<int TypeId>
     void endObjectOrArray() {
-      if (trace) std::wcout << L"   DefaultContext is ending object '" 
-			    <<  currentObject().name() 
+      if (trace) std::wcout << L"   DefaultContext is ending object '"
+			    <<  currentObject().name()
 			    << L"' by popping the object stack!\n";
       if (stack.size() != 0) {
 	assert(currentObject().type == TypeId);
 	stack.pop_back();
 	if (trace) {
 	  if(stack.size() > 0) {
-	    std::wcout << L"   current object is now '" 
+	    std::wcout << L"   current object is now '"
 		       <<  currentObject().name() <<  L"\n";
 	  }
 	  else
-	    std::wcout << L"   Parsing completed! \n "; 
+	    std::wcout << L"   Parsing completed! \n ";
 	}
       }
       else {
@@ -101,7 +101,7 @@ namespace JsonParser {
 		   << L"   The last result was : " << result.name() << L"\n";
       }
     }
-    
+
     //======================================================================
 
     template<typename T>
@@ -116,66 +116,66 @@ namespace JsonParser {
     template<Whatever::WhateverType TypeId>
     void beginObjectOrArray() {
 
-      Whatever& refObj = referencedObject(); // Generally creates the object or array 
+      Whatever& refObj = referencedObject(); // Generally creates the object or array
                                              // (except for the first time when refObject == result )
       refObj.type = TypeId;                  // Sets the type
-      if (&refObj != &result)    	     // result is already on the stack, 
+      if (&refObj != &result)    	     // result is already on the stack,
                                              // so we dont' need to push it on.
 	stack.push_back(&refObj);            // Make the referenced object the current object
-      
-      if (trace) std::wcout << L" Set the type of " 
-			    << refObj.name() 
-			    << L" to " 
-			    << Whatever::typeName(TypeId) 
+
+      if (trace) std::wcout << L" Set the type of "
+			    << refObj.name()
+			    << L" to "
+			    << Whatever::typeName(TypeId)
 			    << " and make it the current object\n";
     }
 
     //======================================================================
-    
+
     PsimagLite::String CurrentContext() {
       std::wstring result(referencedObject().name());
       return PsimagLite::String(result.begin(),result.end());
     }
-    
+
     //======================================================================
-    
+
     void End(SizeType numChars, SizeType numLines) {
       std::cout << "Parsing completed! read " << numChars << " characters and " << numLines << " lines.\n";
     }
-    
+
     //======================================================================
-    
+
     void ObjectEnd() {
       endObjectOrArray<Whatever::WHATEVER_MAP>();
     }
-    
+
     //======================================================================
-    
+
     void MatrixEnd(SizeType charNum) {
       currentObject().endPos = charNum;
       endObjectOrArray<Whatever::WHATEVER_MAT>();
     }
-    
+
     //======================================================================
-    
+
     void ArrayEnd() {
       endObjectOrArray<Whatever::WHATEVER_VECTOR>();
     }
-    
+
     //======================================================================
-    
+
     void ArrayBegin() {
       beginObjectOrArray<Whatever::WHATEVER_VECTOR>();
     }
 
     //======================================================================
-    
+
     void ObjectBegin() {
       beginObjectOrArray<Whatever::WHATEVER_MAP>();
     }
 
     //======================================================================
-    
+
     void MatrixBegin(PsimagLite::String filename, SizeType charNum) {
       beginObjectOrArray<Whatever::WHATEVER_MAT>();
       currentObject().filename = filename;
@@ -183,15 +183,15 @@ namespace JsonParser {
     }
 
     //======================================================================
-    
+
     void Integer(ParseBuffer& s) {
       int i;
       s >> i;
       set(i);
     }
-    
+
     //======================================================================
-    
+
     void Float(ParseBuffer& s) {
       double d;
       s >> d;
@@ -199,54 +199,54 @@ namespace JsonParser {
     }
 
     //======================================================================
-    
+
     void Null( ) {
       set(Whatever::null());
     }
-    
+
     //======================================================================
-    
+
     void True( ) {
       set(true);
     }
-    
+
     //======================================================================
-    
+
     void False() {
       set(false);
     }
-    
+
     //======================================================================
-    
+
     void String(ParseBuffer& s) {
       set(s.str());
     }
-    
+
     //======================================================================
-    
+
     void Key(const std::wstring& s) {
       key = s;
       if (trace) std::wcout << L"   key = '" <<  key << L"'\n";
     }
-    
+
     //======================================================================
-    
-    void Max(PsimagLite::String s) {
+
+    void Max(PsimagLite::String) {
       throw PsimagLite::LogicError("Max! What is this?");
     }
-    
+
     //======================================================================
-    
-    void Comment(std::wstring s) {
+
+    void Comment(std::wstring) {
     }
-    
+
     //======================================================================
-    
+
     void None() {
       throw PsimagLite::LogicError("None! What is this?");
     }
 
-  
+
   };
 
   //======================================================================

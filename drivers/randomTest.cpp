@@ -6,7 +6,7 @@ using namespace PsimagLite;
 typedef double RealType;
 typedef Random48<RealType> RandomType;
 
-int main(int argc,char* argv[])
+int main(int,char* argv[])
 {
 	RandomType rng(100);
 	rng.seed(std::atoi(argv[1]));

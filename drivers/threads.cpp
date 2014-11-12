@@ -32,7 +32,7 @@ public:
 	void thread_function_(SizeType threadNum,
 	                      SizeType blockSize,
 	                      SizeType total,
-	                      ConcurrencyType::MutexType* myMutex)
+	                      ConcurrencyType::MutexType*)
 	{
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		for (SizeType p=0;p<blockSize;p++) {
@@ -54,7 +54,7 @@ int main(int argc,char *argv[])
 {
 	typedef PsimagLite::Concurrency ConcurrencyType;
 
-	
+
 	if (argc!=3) {
 		std::cout<<"USAGE: "<<argv[0]<<" nthreads ntasks\n";
 		return 1;
