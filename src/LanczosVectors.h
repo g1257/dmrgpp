@@ -169,7 +169,7 @@ public:
 
 	void hookForZ(VectorType& z,
 	              const typename Vector<RealType>::Type& c,
-	              const TridiagonalMatrixType& ab)
+	              const TridiagonalMatrixType&)
 	{
 		if (!lotaMemory_) {
 			VectorType x(z.size(),0.0);

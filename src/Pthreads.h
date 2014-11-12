@@ -112,7 +112,7 @@ class Pthreads  {
 
 public:
 
-	Pthreads(SizeType npthreads,int comm = 0)
+	Pthreads(SizeType npthreads,int = 0)
 	    : nthreads_(npthreads)
 	{}
 

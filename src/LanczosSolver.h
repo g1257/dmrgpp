@@ -188,8 +188,8 @@ public:
 		}
 
 		lanczosVectors_.hookForZ(z,c,ab);
-	
-		PsimagLite::String str = "LanczosSolver: computeGroundState: ";	
+
+		PsimagLite::String str = "LanczosSolver: computeGroundState: ";
 		if (PsimagLite::norm(z)<1e-6)
 			throw RuntimeError(str + " norm is zero\n");
 
@@ -297,7 +297,7 @@ public:
 	        VectorType& y,
 	        RealType& atmp,
 	        RealType& btmp,
-	        bool isFirst) const
+	        bool) const
 	{
 		lanczosVectors_.oneStepDecomposition(x,y,atmp,btmp);
 	}
