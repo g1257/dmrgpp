@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Checkpoint.h"
 #include "WaveFunctionTransfFactory.h"
 #include "Truncation.h"
+#include "ObservablesInSitu.h"
 
 namespace Dmrg {
 
@@ -99,8 +100,10 @@ class DmrgSolver {
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef ObservablesInSitu<typename TargettingType::TargetVectorType> ObservablesInSituType;
 
 public:
+
 	typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType::MyBasis MyBasis;
 	typedef typename MyBasis::RealType RealType;
@@ -217,10 +220,7 @@ public:
 
 		finiteDmrgLoops(S,E,pS,pE,psi);
 
-		SizeType sites = geometry.numberOfSites();
-		inSitu_.resize(sites,0);
-		for (SizeType i = 0; i < sites; ++i)
-			inSitu_[i] = psi.inSitu(i);
+		inSitu_.init(psi,geometry.numberOfSites());
 
 		PsimagLite::OstringStream msg2;
 		msg2<<"Turning off the engine.";
@@ -229,7 +229,7 @@ public:
 
 	const DensityMatrixElementType& inSitu(SizeType i) const
 	{
-		return inSitu_[i];
+		return inSitu_(i);
 	}
 
 	RealType energy() const { return energy_; }
@@ -663,7 +663,7 @@ private:
 	ReflectionSymmetryType reflectionOperator_;
 	DiagonalizationType diagonalization_;
 	TruncationType truncate_;
-	TargetVectorType inSitu_;
+	ObservablesInSituType inSitu_;
 	RealType energy_;
 }; //class DmrgSolver
 } // namespace Dmrg
