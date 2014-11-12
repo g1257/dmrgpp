@@ -117,7 +117,7 @@ public:
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg) const
 	{
 		PsimagLite::String str = msg;
@@ -136,7 +136,7 @@ public:
 		return sizeof(*this);
 	}
 
-	SizeType getVectorSize(SizeType dirId) const
+	SizeType getVectorSize(SizeType) const
 	{
 		assert(false);
 		throw RuntimeError("getVectorSize: unimplemented\n");
@@ -144,12 +144,12 @@ public:
 
 	virtual SizeType dirs() const { return 4; }
 
-	virtual SizeType length(SizeType i) const
+	virtual SizeType length(SizeType) const
 	{
 		return this->unimplemented("length");
 	}
 
-	virtual SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	virtual SizeType translate(SizeType,SizeType,SizeType) const
 	{
 		return this->unimplemented("translate");
 	}
@@ -231,7 +231,7 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType handle(SizeType i1,SizeType i2) const
+	SizeType handle(SizeType,SizeType) const
 	{
 		assert(false);
 		return 0;
@@ -265,7 +265,7 @@ public:
 		return 6;
 	}
 
-	SizeType findReflection(SizeType site) const
+	SizeType findReflection(SizeType) const
 	{
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}
@@ -279,7 +279,7 @@ public:
 		additionalData.TYPE_C = TYPE_C;
 	}
 
-	SizeType matrixRank(SizeType linSize,SizeType maxEdof) const
+	SizeType matrixRank(SizeType,SizeType) const
 	{
 		SizeType sites = linSize_;
 		SizeType no = 0;
@@ -292,7 +292,7 @@ public:
 		return 2*no+nc;
 	}
 
-	int index(SizeType i,SizeType orb,SizeType edofTotal) const
+	int index(SizeType i,SizeType orb,SizeType) const
 	{
 		SizeType type1 = findTypeOfSite(i).first;
 		if (type1==TYPE_C && orb>0) return -1;
@@ -348,7 +348,7 @@ private:
 		return (i==smax || i==emin);
 	}
 
-	SizeType subs0(SizeType smax,SizeType emin,SizeType i) const
+	SizeType subs0(SizeType smax,SizeType,SizeType) const
 	{
 		return smax+3;
 	}

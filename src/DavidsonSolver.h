@@ -137,9 +137,9 @@ public:
 		computeGroundState(gsEnergy,z,y);
 	}
 
-	virtual void computeGroundState(RealType &gsEnergy,
-	                                VectorType &z,
-	                                const VectorType& initialVector)
+	virtual void computeGroundState(RealType&,
+	                                VectorType&,
+	                                const VectorType&)
 	{
 		String s(__FILE__);
 		s += " Unimplemented\n";

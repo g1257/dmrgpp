@@ -247,9 +247,9 @@ public:
 
 	template<typename SomeComplexNumber>
 	typename EnableIf<IsComplexNumber<SomeComplexNumber>::True,
-	SizeType>::Type memResolv(const SomeComplexNumber* c,
-	                          SizeType x = sizeof(SomeComplexNumber),
-	                          String msg = "")
+	SizeType>::Type memResolv(const SomeComplexNumber*,
+	                          SizeType = sizeof(SomeComplexNumber),
+	                          String = "")
 	{
 		throw RuntimeError("memResolv for std::complex not implemented\n");
 	}
@@ -314,7 +314,7 @@ public:
 	typename EnableIf<IsVectorLike<SomeVectorType>::True &
 	!IsClass<typename SomeVectorType::value_type>::value,
 	SizeType>::Type memResolv(const SomeVectorType* v,
-	                          SizeType x = 0,
+	                          SizeType = 0,
 	                          String msg = "")
 	{
 		typedef typename SomeVectorType::value_type SomeElementType;
@@ -340,7 +340,7 @@ public:
 	typename EnableIf<IsVectorLike<SomeVectorType>::True &
 	IsClass<typename SomeVectorType::value_type>::value,
 	SizeType>::Type memResolv(const SomeVectorType* v,
-	                          SizeType x = 0,
+	                          SizeType = 0,
 	                          String msg = "")
 	{
 		SizeType tmp = sizeof(SomeVectorType);
@@ -363,7 +363,7 @@ public:
 	typename EnableIf<IsVectorLike<SomeVectorType>::True &
 	!IsClass<typename SomeVectorType::value_type>::value,
 	SizeType>::Type memResolvPtr(const SomeVectorType* v,
-	                             SizeType x = 0,
+	                             SizeType = 0,
 	                             String msg = "")
 	{
 		typedef typename SomeVectorType::value_type SomeElementType;
@@ -387,9 +387,9 @@ public:
 
 	template<typename SomeMapType>
 	typename EnableIf<IsMapLike<SomeMapType>::True,
-	SizeType>::Type memResolv(const SomeMapType* v,
-	                          SizeType x = 0,
-	                          String msg = "")
+	SizeType>::Type memResolv(const SomeMapType*,
+	                          SizeType = 0,
+	                          String = "")
 	{
 		throw RuntimeError("memResolv for std::map not implemented\n");
 	}

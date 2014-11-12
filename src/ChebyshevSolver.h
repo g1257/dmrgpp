@@ -158,8 +158,8 @@ public:
 		unimplemented("computeGroundState");
 	}
 
-	void buildDenseMatrix(DenseMatrixType& T,
-	                       const TridiagonalMatrixType& ab) const
+	void buildDenseMatrix(DenseMatrixType&,
+	                       const TridiagonalMatrixType&) const
 	{
 		unimplemented("buildDenseMatrix");
 	}

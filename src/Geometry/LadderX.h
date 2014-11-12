@@ -106,12 +106,12 @@ public:
 
 	virtual SizeType dirs() const { return 4; }
 
-	virtual SizeType length(SizeType i) const
+	virtual SizeType length(SizeType) const
 	{
 		return this->unimplemented("length");
 	}
 
-	virtual SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	virtual SizeType translate(SizeType,SizeType,SizeType) const
 	{
 		return this->unimplemented("translate");
 	}
@@ -189,7 +189,7 @@ public:
 		return "ladderx";
 	}
 
-	SizeType findReflection(SizeType site) const
+	SizeType findReflection(SizeType) const
 	{
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}
@@ -204,7 +204,7 @@ public:
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg) const
 	{
 		PsimagLite::String str = msg;

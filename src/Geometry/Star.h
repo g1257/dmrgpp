@@ -103,7 +103,7 @@ public:
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg) const
 	{
 		PsimagLite::String str = msg;
@@ -143,18 +143,18 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType i1,SizeType i2) const
+	SizeType calcDir(SizeType,SizeType) const
 	{
 		return DIRECTION_S;
 	}
 
-	bool fringe(SizeType i,SizeType smax,SizeType emin) const
+	bool fringe(SizeType i,SizeType,SizeType emin) const
 	{
 		return (i == emin);
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType,SizeType,SizeType siteNew2) const
 	{
 		return siteNew2;
 	}
@@ -164,7 +164,7 @@ public:
 		return "star";
 	}
 
-	SizeType findReflection(SizeType site) const
+	SizeType findReflection(SizeType) const
 	{
 		throw PsimagLite::RuntimeError("findReflection\n");
 	}
@@ -175,7 +175,7 @@ public:
 		return linSize_;
 	}
 
-	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	SizeType translate(SizeType,SizeType dir,SizeType) const
 	{
 		assert(dir==0);
 
