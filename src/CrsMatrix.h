@@ -950,7 +950,7 @@ void operatorPlus(CrsMatrix<T>& A,
 }
 
 template<typename T>
-bool isHermitian(const CrsMatrix<T>& A,bool doThrow=false)
+bool isHermitian(const CrsMatrix<T>& A,bool=false)
 {
 	if (A.row()!=A.col()) return false;
 	for (SizeType i=0;i<A.row();i++) {

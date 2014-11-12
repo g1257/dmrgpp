@@ -138,7 +138,7 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType i1,SizeType i2) const
+	SizeType calcDir(SizeType,SizeType) const
 	{
 		return DIRECTION_X;
 	}
@@ -194,9 +194,9 @@ public:
 		throw RuntimeError("LongChain::serialize(): unimplemented\n");
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType x,
-	                   PsimagLite::String msg) const
+	SizeType memResolv(PsimagLite::MemResolv&,
+	                   SizeType,
+	                   PsimagLite::String) const
 	{
 		throw RuntimeError("LongChain::memResolv(): unimplemented\n");
 	}

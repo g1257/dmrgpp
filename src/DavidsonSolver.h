@@ -157,9 +157,9 @@ private:
 	}
 
 	//! only for debugging:
-	void computeGroundStateTest(RealType &gsEnergy,
-	                            VectorType& z,
-	                            const VectorType& initialVector)
+	void computeGroundStateTest(RealType&,
+	                            VectorType&,
+	                            const VectorType&)
 	{
 		String s(__FILE__);
 		s += " Unimplemented\n";

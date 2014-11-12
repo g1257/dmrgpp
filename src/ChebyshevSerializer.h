@@ -11,7 +11,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -80,7 +80,7 @@ public:
 	typedef KernelPolynomialParameters<RealType> KernelParametersType;
 
 	ChebyshevSerializer(const VectorType& ab,
-	                    const MatrixType& reortho,
+	                    const MatrixType&,
 	                    const ParametersType& params)
 	    : progress_("ChebyshevSerializer"),
 	      moments_(ab),
@@ -211,6 +211,6 @@ private:
 
 template<typename VectorType>
 const String ChebyshevSerializer<VectorType>::stringMarker_ = "#ChebyshevSerializerMarker";
-} // namespace PsimagLite 
+} // namespace PsimagLite
 /*@}*/
 #endif  //CHEBYSHEV_SERIALIZER_H

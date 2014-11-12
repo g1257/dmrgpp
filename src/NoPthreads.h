@@ -90,7 +90,7 @@ class NoPthreads {
 
 public:
 
-	NoPthreads(SizeType npthreads=1,int comm = 0)
+	NoPthreads(SizeType npthreads=1,int = 0)
 	{
 		assert(npthreads==1);
 	}
