@@ -144,7 +144,7 @@ public:
 	{}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
@@ -186,7 +186,7 @@ public:
 
 	void print(std::ostream& os) const { os<<modelParameters_; }
 
-	SizeType hilbertSize(SizeType site) const
+	SizeType hilbertSize(SizeType) const
 	{
 		return modelParameters_.twiceTheSpin+1;
 	}
@@ -249,7 +249,7 @@ public:
 
 	MatrixType naturalOperator(const PsimagLite::String& what,
 	                           SizeType site,
-	                           SizeType dof) const
+	                           SizeType) const
 	{
 		BlockType block;
 		block.resize(1);
@@ -302,24 +302,24 @@ public:
 	//! Dummy since this model has no fermion sign
 	void findElectrons(VectorSizeType& electrons,
 	                   const HilbertBasisType& basis,
-	                   SizeType site) const
+	                   SizeType) const
 	{
 		electrons.resize(basis.size());
 		for (SizeType i=0;i<electrons.size();i++)
 			electrons[i] = 0;
 	}
 
-	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                        const VectorOperatorType& cm,
-	                                        const BlockType& block,
-	                                        RealType time,
-	                                        RealType factorForDiagonals=1.0)  const
+	virtual void addDiagonalsInNaturalBasis(SparseMatrixType&,
+	                                        const VectorOperatorType&,
+	                                        const BlockType&,
+	                                        RealType,
+	                                        RealType = 1.0)  const
 	{}
 
 private:
 
 	//! Find S^+_i in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(int i,const HilbertBasisType& natBasis) const
+	SparseMatrixType findSplusMatrices(int,const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
@@ -340,7 +340,7 @@ private:
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(int i,const HilbertBasisType& natBasis) const
+	SparseMatrixType findSzMatrices(int,const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);

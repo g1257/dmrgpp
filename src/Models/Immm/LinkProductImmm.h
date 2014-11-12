@@ -146,10 +146,10 @@ public:
 	template<typename AdditionalDataType>
 	static void setLinkData(SizeType term,
 	                        SizeType dofs,
-	                        bool isSu2,
+	                        bool,
 	                        SizeType& fermionOrBoson,
 	                        PairType& ops,
-	                        std::pair<char,char>& mods,
+	                        std::pair<char,char>&,
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
 	                        SizeType& category,
@@ -183,9 +183,9 @@ public:
 	template<typename AdditionalDataType>
 	static void valueModifier(SparseElementType& value,
 	                          SizeType term,
-	                          SizeType dofs,
-	                          bool isSu2,
-	                          const AdditionalDataType& additionalData)
+	                          SizeType,
+	                          bool,
+	                          const AdditionalDataType&)
 	{
 		if (term==W_TERM) {
 			value *= 0.5;

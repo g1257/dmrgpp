@@ -107,7 +107,7 @@ public:
 	}
 
 	//! ATTENTION: ONLY VALID ON X86 AND X86_64 WHERE += IS ATOMIC
-	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
+	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t*)
 	{
 		SizeType nC = initKron_.connections();
 		const GenGroupType& istartLeft = initKron_.istartLeft();

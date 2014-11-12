@@ -103,7 +103,7 @@ public:
 							SizeType& angularMomentum,
 							RealType& angularFactor,
 							SizeType& category,
-							const SomeStructType& additional)
+							const SomeStructType&)
 	{
 		char tmp = mods.first;
 		if (term==TERM_CICJ) {
@@ -165,7 +165,7 @@ public:
 	}
 
 	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType& additional)
+	static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType&)
 	{
 		if (term==TERM_CICJ) return;
 
@@ -186,7 +186,7 @@ public:
 	// S+ S- and S- S+
 	// Sz Sz
 	template<typename SomeStructType>
-	static SizeType dofs(SizeType term,const SomeStructType& additional)
+	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
 		if (term==TERM_CICJ) return 2; // c^\dagger c
 		if (term==TERM_SISJ) return 3; // S+ S-, S- S+ and Sz Sz
@@ -196,7 +196,7 @@ public:
 	}
 
 	template<typename SomeStructType>
-	static std::pair<SizeType,SizeType> connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
+	static std::pair<SizeType,SizeType> connectorDofs(SizeType,SizeType,const SomeStructType&)
 	{
 		return PairType(0,0); // no orbital and no dependence on spin
 	}

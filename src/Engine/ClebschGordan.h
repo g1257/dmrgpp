@@ -207,7 +207,7 @@ private:
 
 	// From Ref. S
 	FieldType cg_f2(FieldType j3,
-	                FieldType m3,
+	                FieldType,
 	                FieldType j1,
 	                FieldType m1,
 	                FieldType j2,

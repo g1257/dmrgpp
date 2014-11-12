@@ -125,9 +125,9 @@ public:
 	      extendedHubbard_(solverParams,io,geometry)
 	{}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType x,
-	                   PsimagLite::String msg = "") const
+	SizeType memResolv(PsimagLite::MemResolv&,
+	                   SizeType,
+	                   PsimagLite::String = "") const
 	{
 		return 0;
 	}
@@ -229,8 +229,8 @@ private:
 	}
 
 	//! Full hamiltonian from creation matrices cm
-	void addSiSj(SparseMatrixType &hmatrix,
-	             const VectorOperatorType& cm,
+	void addSiSj(SparseMatrixType &,
+	             const VectorOperatorType&,
 	             const BlockType& block) const
 	{
 		// Assume block.size()==1 and then problem solved!!

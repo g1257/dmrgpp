@@ -190,7 +190,7 @@ public:
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
@@ -241,7 +241,7 @@ public:
 		return total;
 	}
 
-	SizeType hilbertSize(SizeType site) const
+	SizeType hilbertSize(SizeType) const
 	{
 		return statesPerSite_;
 	}
@@ -423,7 +423,7 @@ public:
 
 	void findElectrons(VectorSizeType& electrons,
 	                   const HilbertBasisType& basis,
-	                   SizeType site) const
+	                   SizeType) const
 	{
 		electrons.resize(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {

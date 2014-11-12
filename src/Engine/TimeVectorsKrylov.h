@@ -147,8 +147,8 @@ public:
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
 	                             SizeType systemOrEnviron,
-	                             bool allOperatorsApplied,
-	                             const PsimagLite::Vector<SizeType>::Type& block)
+	                             bool,
+	                             const PsimagLite::Vector<SizeType>::Type&)
 	{
 		if (currentTime_==0 && tstStruct_.noOperator()) {
 			for (SizeType i=0;i<times_.size();i++)
@@ -191,7 +191,7 @@ private:
 						   RealType Eg,
 						   const typename PsimagLite::Vector<VectorRealType>::Type& eigs,
 						   typename PsimagLite::Vector<SizeType>::Type steps,
-						   SizeType systemOrEnviron)
+						   SizeType)
 	{
 		assert(0 < targetVectors_.size());
 		targetVectors_[0] = phi;
@@ -257,7 +257,7 @@ private:
 			   const MatrixComplexOrRealType& T,
 			   const MatrixComplexOrRealType& V,
 			   const VectorWithOffsetType& phi,
-			   RealType Eg,
+			   RealType,
 			   const VectorRealType& eigs,
 			   SizeType timeIndex,
 			   SizeType n2,

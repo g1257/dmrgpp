@@ -96,7 +96,7 @@ struct Su2Related {
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
@@ -225,7 +225,7 @@ struct Operator {
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;

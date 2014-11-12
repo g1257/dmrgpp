@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -116,7 +116,7 @@ namespace Dmrg {
 		}
 
 		//! indices_[alpha] = jm
-		void push(const PairType& jm,SizeType alpha)
+		void push(const PairType& jm,SizeType)
 		{
 			int x = PsimagLite::isInVector(jmPairs_,jm);
 

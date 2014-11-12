@@ -107,9 +107,9 @@ public:
 		io.readline(type_,"DynamicDmrgType=");
 	}
 
-	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
-	                           SizeType x,
-	                           PsimagLite::String msg = "") const
+	virtual SizeType memResolv(PsimagLite::MemResolv&,
+	                           SizeType,
+	                           PsimagLite::String = "") const
 	{
 		return 0;
 	}

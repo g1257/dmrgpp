@@ -99,9 +99,9 @@ public:
 		io.readline(correctionA_,"CorrectionA=");
 	}
 
-	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
-	                           SizeType x,
-	                           PsimagLite::String msg = "") const
+	virtual SizeType memResolv(PsimagLite::MemResolv&,
+	                           SizeType,
+	                           PsimagLite::String = "") const
 	{
 		return 0;
 	}

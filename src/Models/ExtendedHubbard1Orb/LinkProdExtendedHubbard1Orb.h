@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -99,13 +99,13 @@ namespace Dmrg {
 			static void setLinkData(
 					SizeType term,
 					SizeType dofs,
-     					bool isSu2,
+     					bool,
 					SizeType& fermionOrBoson,
 					PairType& ops,
-     					std::pair<char,char>& mods,
+     					std::pair<char,char>&,
 					SizeType& angularMomentum,
      					RealType& angularFactor,
-					SizeType& category,const SomeStructType& additional)
+					SizeType& category,const SomeStructType&)
 			{
 				if (term==TERM_NINJ) fermionOrBoson = ProgramGlobals::BOSON;
 				else fermionOrBoson = ProgramGlobals::FERMION;
@@ -119,15 +119,15 @@ namespace Dmrg {
 			}
 
 			template<typename SomeStructType>
-			static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType& additional)
+			static void valueModifier(SparseElementType&,SizeType,SizeType,bool,const SomeStructType&)
 			{
 			}
-			
+
 			template<typename SomeStructType>
-			static SizeType dofs(SizeType term,const SomeStructType& additional) { return (term==TERM_NINJ) ? 1 : 2; }
-			
+			static SizeType dofs(SizeType term,const SomeStructType&) { return (term==TERM_NINJ) ? 1 : 2; }
+
 			template<typename SomeStructType>
-			static PairType connectorDofs(SizeType term,SizeType dofs,const SomeStructType& additional)
+			static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
 			{
 				return PairType(0,0); // no orbital and no dependence on spin
 			}

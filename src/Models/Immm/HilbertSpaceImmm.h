@@ -111,7 +111,7 @@ public:
 
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
@@ -176,7 +176,7 @@ public:
 	}
 
 	//! Number of electrons with spin spin (sums over bands)
-	int electronsWithGivenSpin(Word const &data,SizeType site,SizeType spin) const
+	int electronsWithGivenSpin(Word const &data,SizeType,SizeType spin) const
 	{
 
 		SizeType norb = dOf()/NUMBER_OF_SPINS;

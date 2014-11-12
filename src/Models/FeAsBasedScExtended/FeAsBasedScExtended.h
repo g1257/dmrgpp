@@ -131,7 +131,7 @@ public:
 	{}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
@@ -355,9 +355,9 @@ private:
 
 	// add J_{ij} S^z_i S^z_j to Hamiltonian
 	void addSzSz(
-	        SparseMatrixType &hamiltonian,
+	        SparseMatrixType&,
 	        const typename PsimagLite::Vector<OperatorType> ::Type&,
-	        const BlockType& block) const
+	        const BlockType&) const
 	{
 		// nothing if block.size == 1
 	}

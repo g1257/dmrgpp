@@ -103,7 +103,7 @@ public:
 	//! a up a up, a up b up, b up a up, b up, b up, etc
 	//! and similarly for spin down.
 	template<typename SomeStructType>
-	static SizeType dofs(SizeType,const SomeStructType& additional)
+	static SizeType dofs(SizeType,const SomeStructType&)
 	{
 		return 2*orbitals_*orbitals_;
 	}

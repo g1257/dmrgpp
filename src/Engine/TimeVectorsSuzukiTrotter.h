@@ -283,7 +283,7 @@ private:
 	}
 
 	void calcTimeVectorsSuzukiTrotter(TargetVectorType& result,
-	                                  RealType Eg,
+	                                  RealType,
 	                                  const VectorWithOffsetType& phi,
 	                                  SizeType systemOrEnviron,
 	                                  SizeType i0,

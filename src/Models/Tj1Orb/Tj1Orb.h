@@ -139,7 +139,7 @@ public:
 	{}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
@@ -178,7 +178,7 @@ public:
 		return total;
 	}
 
-	SizeType hilbertSize(SizeType site) const
+	SizeType hilbertSize(SizeType) const
 	{
 		return 3;
 	}
@@ -339,7 +339,7 @@ public:
 	//! find total number of electrons for each state in the basis
 	void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
 	                   const VectorHilbertStateType& basis,
-	                   SizeType site) const
+	                   SizeType) const
 	{
 		int nup,ndown;
 		electrons.clear();
@@ -384,7 +384,7 @@ private:
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma}
 	//! to basis state ket
-	RealType sign(HilbertStateType const &ket, int i,int sigma) const
+	RealType sign(HilbertStateType const &, int,int) const
 	{
 		return 1;
 	}

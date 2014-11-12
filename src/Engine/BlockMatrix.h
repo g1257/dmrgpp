@@ -129,7 +129,7 @@ public:
 		void thread_function_(SizeType threadNum,
 		                      SizeType blockSize,
 		                      SizeType total,
-		                      typename PsimagLite::Concurrency::MutexType* myMutex)
+		                      typename PsimagLite::Concurrency::MutexType*)
 		{
 			SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 			SizeType npthreads = ConcurrencyType::npthreads;
@@ -419,7 +419,7 @@ void blockMatrixToSparseMatrix(PsimagLite::CrsMatrix<S>& fm,
 	fm.checkValidity();
 }
 } // namespace Dmrg
-/*@}*/	
+/*@}*/
 
 #endif
 

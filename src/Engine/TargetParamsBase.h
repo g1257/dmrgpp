@@ -117,7 +117,7 @@ public:
 		throw PsimagLite::RuntimeError(s);
 	}
 
-	virtual void setOperator(SizeType i, SizeType j, const OperatorType& op)
+	virtual void setOperator(SizeType, SizeType, const OperatorType&)
 	{
 		unimplemented("type(setOperator)");
 	}
@@ -149,7 +149,7 @@ public:
 		return unimplementedInt("type");
 	}
 
-	virtual void type(SizeType x)
+	virtual void type(SizeType)
 	{
 		unimplemented("type(SizeType)");
 	}
@@ -170,7 +170,7 @@ public:
 		throw PsimagLite::RuntimeError(s);
 	}
 
-	virtual void omega(RealType x)
+	virtual void omega(RealType)
 	{
 		unimplemented("omega(RealType)");
 	}
@@ -215,7 +215,7 @@ public:
 		return static_cast<bool>(unimplemented("noOperator"));
 	}
 
-	virtual void noOperator(bool x)
+	virtual void noOperator(bool)
 	{
 		unimplemented("noOperator");
 	}

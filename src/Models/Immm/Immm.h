@@ -160,7 +160,7 @@ public:
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
@@ -418,7 +418,7 @@ private:
 	//! Find c^\dagger_i\gamma\sigma in the natural basis natBasis
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void findOperatorMatrices(SparseMatrixType& creationMatrix,
-	                          SizeType site,
+	                          SizeType,
 	                          SizeType sigma,
 	                          const HilbertBasisType& natBasis) const
 	{

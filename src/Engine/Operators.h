@@ -145,7 +145,7 @@ transformed operator can be used (or not because of the reason limitation above)
 			void thread_function_(SizeType threadNum,
 			                      SizeType blockSize,
 			                      SizeType total,
-			                      typename ConcurrencyType::MutexType* myMutex)
+			                      typename ConcurrencyType::MutexType*)
 			{
 				SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
 				SizeType npthreads = ConcurrencyType::npthreads;

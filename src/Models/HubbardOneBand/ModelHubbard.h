@@ -148,7 +148,7 @@ public:
 	{}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
-	                   SizeType x,
+	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
@@ -193,7 +193,7 @@ public:
 	}
 
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the size of the one-site Hilbert space. */
-	SizeType hilbertSize(SizeType site) const
+	SizeType hilbertSize(SizeType) const
 	{
 		return (SizeType)pow(2,2*NUMBER_OF_ORBITALS);
 	}
@@ -350,7 +350,7 @@ public:
 		electrons for each state in the basis*/
 	void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
 	                   const typename PsimagLite::Vector<HilbertState>::Type& basis,
-	                   SizeType site) const
+	                   SizeType) const
 	{
 		int nup,ndown;
 		electrons.clear();
@@ -499,7 +499,7 @@ private:
 		MyBasis::findQuantumNumbers(q,qq);
 	}
 
-	void setSymmetryRelated(BasisDataType& q,HilbertBasisType  const &basis,int n) const
+	void setSymmetryRelated(BasisDataType& q,HilbertBasisType  const &basis,int) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
