@@ -81,10 +81,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MATRIX_VECTOR_OTF_H
 
 #include <vector>
+#include "MatrixVectorBase.h"
 
 namespace Dmrg {
 template<typename ModelType_>
-class MatrixVectorOnTheFly {
+class MatrixVectorOnTheFly : public MatrixVectorBase<ModelType_> {
+
+	typedef MatrixVectorBase<ModelType_> BaseType;
 
 public:
 
@@ -94,9 +97,9 @@ public:
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type value_type;
-        typedef typename SparseMatrixType::value_type ComplexOrRealType;
-        typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-        typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 
 	MatrixVectorOnTheFly(ModelType const *model,
 	                     ModelHelperType const *modelHelper,
@@ -121,22 +124,13 @@ public:
 			model_->matrixVectorProduct(x,y,*modelHelper_);
 	}
 
-	SizeType reflectionSector() const { return 0; }
-
-	void reflectionSector(SizeType) {  }
-
 	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
 	{
-		int tmp = model_->params().maxMatrixRankStored;
-		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
-		if (matrixStored_.row() == 0 || matrixStored_.row() > maxMatrixRankStored)
-			throw PsimagLite::RuntimeError("fullDiag too big\n");
-
-		fm = matrixStored_.toDense();
-		diag(fm,eigs,'V');
+		BaseType::fullDiag(eigs,fm,matrixStored_,model_->params().maxMatrixRankStored);
 	}
 
 private:
+
 	ModelType const *model_;
 	ModelHelperType const *modelHelper_;
 	SparseMatrixType matrixStored_;

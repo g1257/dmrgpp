@@ -83,10 +83,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "InitKron.h"
 #include "KronMatrix.h"
+#include "MatrixVectorBase.h"
 
 namespace Dmrg {
 template<typename ModelType_>
-class MatrixVectorKron {
+class MatrixVectorKron : public MatrixVectorBase<ModelType_> {
+
+	typedef MatrixVectorBase<ModelType_> BaseType;
 
 public:
 
@@ -125,19 +128,9 @@ public:
 			kronMatrix_.matrixVectorProduct(x,y);
 	}
 
-	SizeType reflectionSector() const { return 0; }
-
-	void reflectionSector(SizeType) {  }
-
 	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
 	{
-		int tmp = model_->params().maxMatrixRankStored;
-		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
-		if (matrixStored_.row() == 0 || matrixStored_.row() > maxMatrixRankStored)
-			throw PsimagLite::RuntimeError("fullDiag too big\n");
-
-		fm = matrixStored_.toDense();
-		diag(fm,eigs,'V');
+		BaseType::fullDiag(eigs,fm,matrixStored_,model_->params().maxMatrixRankStored);
 	}
 
 private:

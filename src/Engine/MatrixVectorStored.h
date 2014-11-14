@@ -82,10 +82,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <vector>
 #include "ProgressIndicator.h"
+#include "MatrixVectorBase.h"
 
 namespace Dmrg {
 template<typename ModelType_>
-class MatrixVectorStored {
+class MatrixVectorStored : public MatrixVectorBase<ModelType_> {
+
+	typedef MatrixVectorBase<ModelType_> BaseType;
 
 public:
 
@@ -95,18 +98,18 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelType::ReflectionSymmetryType ReflectionSymmetryType;
 	typedef typename SparseMatrixType::value_type value_type;
-        typedef typename SparseMatrixType::value_type ComplexOrRealType;
-        typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-        typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 
 	MatrixVectorStored(ModelType const *model,
 	                   ModelHelperType const *modelHelper,
 	                   const ReflectionSymmetryType* rs=0)
 	    :  model_(model),
-	       modelHelper_(modelHelper),
-	       matrixStored_(2),
-	       pointer_(0),
-	       progress_("MatrixVectorStored")
+	      modelHelper_(modelHelper),
+	      matrixStored_(2),
+	      pointer_(0),
+	      progress_("MatrixVectorStored")
 	{
 		if (!rs) {
 			matrixStored_[0].clear();
@@ -142,14 +145,13 @@ public:
 	SizeType reflectionSector() const { return pointer_; }
 
 	void reflectionSector(SizeType p) { pointer_=p; }
-	                
+
 	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
 	{
-		if (matrixStored_[pointer_].row() == 0 || matrixStored_[pointer_].row() > 1000)
-			throw PsimagLite::RuntimeError("fullDiag too big\n");
-
-		fm = matrixStored_[pointer_].toDense();
-		diag(fm,eigs,'V');
+		BaseType::fullDiag(eigs,
+		                   fm,
+		                   matrixStored_[pointer_],
+		                   model_->params().maxMatrixRankStored);
 	}
 
 private:
