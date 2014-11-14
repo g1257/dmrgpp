@@ -101,7 +101,7 @@ public:
 		: fpd_(fpd),fourpoint_(fourpoint),model_(model),gammas_(gammas),pairs_(pairs)
 	{}
 
-	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
+	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t*)
 	{
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
@@ -154,7 +154,7 @@ private:
 	const typename PsimagLite::Vector<SizeType>::Type& gammas_;
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
 }; // class Parallel4PointDs
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // PARALLEL_4POINT_DS_H

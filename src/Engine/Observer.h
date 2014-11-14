@@ -185,7 +185,7 @@ public:
 	template<typename SomeBracketType>
 	VectorMatrixType ladder(const SomeBracketType& bracket,
 	                        SizeType rows,
-	                        SizeType cols,
+	                        SizeType,
 	                        SizeType threadId)
 	{
 		SizeType rowsOver2 = utils::exactDivision(rows,2);

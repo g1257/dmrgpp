@@ -152,7 +152,7 @@ public:
 	void hookForZeroSystem(TargetVectorType& dest2,
 	                       const VectorWithOffsetType& src,
 	                       const OperatorType& A,
-	                       const FermionSign& fermionSign,
+	                       const FermionSign&,
 	                       SizeType i0) const
 	{
 		SizeType offset = src.offset(i0);

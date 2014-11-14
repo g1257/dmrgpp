@@ -98,7 +98,7 @@ public:
 		: m_(m),str_(str),threadId_(threadId)
 	{}
 
-	virtual OperatorType operator()(SizeType site) const { return m_; }
+	virtual OperatorType operator()(SizeType) const { return m_; }
 
 	virtual PsimagLite::String label() const { return str_; }
 
@@ -106,7 +106,7 @@ public:
 
 	virtual bool siteDependent() const { return false; }
 
-	virtual bool isValid(SizeType i0) const { return true; }
+	virtual bool isValid(SizeType) const { return true; }
 
 private:
 

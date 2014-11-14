@@ -138,7 +138,7 @@ public:
 	static const SizeType EXPAND_ENVIRON = ProgramGlobals::EXPAND_ENVIRON;
 
 	CorrelationsSkeleton(ObserverHelperType& helper,
-	                     const ModelType& model,
+	                     const ModelType&,
 	                     bool verbose = false)
 	    : helper_(helper),verbose_(verbose)
 	{}

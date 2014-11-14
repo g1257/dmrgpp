@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -91,7 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 
 namespace Dmrg {
-	
+
 	template<typename ObserverHelperType>
 	class OnePointCorrelations {
 		typedef typename ObserverHelperType::MatrixType MatrixType;
@@ -155,20 +155,20 @@ namespace Dmrg {
 	private:
 
 		template<typename ApplyOperatorType>
-		FieldType onePointInternal(SizeType site,
+		FieldType onePointInternal(SizeType,
 								   const typename ApplyOperatorType::OperatorType& A,
 								   const VectorWithOffsetType& src1,
 								   const VectorWithOffsetType& src2,
 								   typename ApplyOperatorType::BorderEnum corner,
 								   SizeType threadId)
 		{
-			
+
 			ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(threadId));
 			VectorWithOffsetType dest;
 //			assert(helper_.fermionicSignLeft().size()==helper_.leftRightSuper().left().size());
 			applyOpLocal1(dest,src1,A,helper_.fermionicSignLeft(threadId),
 					helper_.direction(threadId),corner);
-				
+
 			FieldType sum = static_cast<FieldType>(0.0);
 			const VectorWithOffsetType& v1 = dest;
 			const VectorWithOffsetType& v2 = src2;
@@ -178,7 +178,7 @@ namespace Dmrg {
 					SizeType j = v2.sector(jj);
 					if (i!=j) continue;
 					SizeType offset = v1.offset(i);
-					for (SizeType k=0;k<v1.effectiveSize(i);k++) 
+					for (SizeType k=0;k<v1.effectiveSize(i);k++)
 						sum+= v1[k+offset] * std::conj(v2[k+offset]);
 				}
 			}
@@ -186,11 +186,11 @@ namespace Dmrg {
 		}
 
 		template<typename ApplyOperatorType>
-		FieldType onePointInternalHookForZero(SizeType site,
+		FieldType onePointInternalHookForZero(SizeType,
 						      const typename ApplyOperatorType::OperatorType& A,
 						      const VectorWithOffsetType& src1,
 						      const VectorWithOffsetType& src2,
-							  bool corner, //= false
+							  bool, //= false
 											  SizeType threadId)
 		{
 
@@ -217,7 +217,7 @@ namespace Dmrg {
 
 		ObserverHelperType& helper_;
 		bool verbose_;
-		
+
 	};  //class OnePointCorrelations
 } // namespace Dmrg
 

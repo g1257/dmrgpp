@@ -191,7 +191,7 @@ namespace Dmrg {
 			SizeType i,
 			const SparseMatrixType& O1,
 			const SparseMatrixType& O2,
-			int fermionicSign,
+			int,
 			SizeType threadId)
 		{
 			SizeType n = O1.row();
