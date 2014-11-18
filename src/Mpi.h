@@ -91,7 +91,6 @@ namespace MPI {
 #ifdef USE_MPI
 typedef MPI_Comm CommType;
 static CommType COMM_WORLD = MPI_COMM_WORLD;
-static MPI_Op SUM = MPI_SUM;
 
 template<typename T>
 struct MpiData

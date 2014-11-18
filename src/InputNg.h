@@ -696,7 +696,7 @@ public:
 			for (SizeType i = 0; i < s.length(); ++i) {
 				char c = s[i];
 				bool b1 = (c<48 || c>57);
-				bool b2 = (c != '.' && c != '-' && c != '+');
+				bool b2 = (c != '.' && c != '-' && c != '+' && c != 'e');
 				if (b1 && b2) {
 					PsimagLite::String str = s +" is not a real number\n";
 					throw RuntimeError(str);
