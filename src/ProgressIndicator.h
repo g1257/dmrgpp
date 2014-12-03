@@ -1,4 +1,5 @@
-/* Copyright (c) 2009-2013, UT-Battelle, LLC
+/*
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -84,10 +85,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "String.h"
 #include "Concurrency.h"
 #include "MemoryUsage.h"
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace PsimagLite {
 
 class ProgressIndicator {
+
+	static MemoryUsage musage_;
+	static OstringStream buffer_;
+	static bool bufferActive_;
 
 public:
 
@@ -100,6 +107,27 @@ public:
 		rank_ = Concurrency::rank();
 	}
 
+	static void updateBuffer(int signal)
+	{
+		if (bufferActive_) {
+			pid_t p = getpid();
+			PsimagLite::String outName("buffer");
+			outName += ttos(p);
+			outName += ".txt";
+			std::ofstream fout(outName.c_str());
+			fout<<buffer_.str()<<"\n";
+			fout.close();
+			buffer_.str("");
+		}
+
+		bufferActive_ = !bufferActive_;
+
+		PsimagLite::String bufferActive = (bufferActive_) ? "active" : "inactive";
+		std::cerr<<"ProgressIndicator: signal "<<signal<<" received.";
+		std::cerr<<" buffer is now "<<bufferActive<<"\n";
+
+	}
+
 	template<typename SomeOutputType>
 	void printline(const String &s,SomeOutputType& os) const
 	{
@@ -107,6 +135,11 @@ public:
 		if (rank_!=0) return;
 		prefix(os);
 		os<<s<<"\n";
+
+		if (!bufferActive_) return;
+
+		prefix(buffer_);
+		buffer_<<s<<"\n";
 	}
 
 	void printline(OstringStream &s,std::ostream& os) const
@@ -116,6 +149,12 @@ public:
 		prefix(os);
 		os<<s.str()<<"\n";
 		s.seekp(std::ios_base::beg);
+
+		if (!bufferActive_) return;
+
+		prefix(buffer_);
+		buffer_<<s.str()<<"\n";
+		s.seekp(std::ios_base::beg);
 	}
 
 	void print(const String& something,std::ostream& os) const
@@ -124,6 +163,11 @@ public:
 		if (rank_!=0) return;
 		prefix(os);
 		os<<something;
+
+		if (!bufferActive_) return;
+
+		prefix(buffer_);
+		buffer_<<something;
 	}
 
 	void printMemoryUsage()
@@ -134,6 +178,11 @@ public:
 		OstringStream msg;
 		msg<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
 		printline(msg,std::cout);
+
+		if (!bufferActive_) return;
+
+		buffer_<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
+		printline(buffer_,std::cout);
 	}
 
 private:
@@ -147,12 +196,13 @@ private:
 	String caller_;
 	SizeType threadId_;
 	SizeType rank_;
-	static MemoryUsage musage_;
 }; // ProgressIndicator
 
 MemoryUsage ProgressIndicator::musage_;
-} // namespace PsimagLite 
+OstringStream ProgressIndicator::buffer_;
+bool ProgressIndicator::bufferActive_ = false;
+} // namespace PsimagLite
 
-/*@}*/	
+/*@}*/
 #endif
 
