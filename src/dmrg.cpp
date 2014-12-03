@@ -35,6 +35,7 @@ typedef float MatrixElementType;
 #include "InputNg.h"
 #include "InputCheck.h"
 #include "ModelSelector.h"
+#include "RegisterSignals.h"
 
 typedef  PsimagLite::CrsMatrix<std::complex<MatrixElementType> > MySparseMatrixComplex;
 typedef  PsimagLite::CrsMatrix<MatrixElementType> MySparseMatrixReal;
@@ -364,6 +365,8 @@ int main(int argc,char *argv[])
 #endif
 
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
+
+	registerSignals();
 
 #ifdef USE_COMPLEX
 	std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";

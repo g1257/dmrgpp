@@ -209,7 +209,7 @@ public:
 			applyOpExpression_.psi().load(io,"PSI");
 
 		} catch (std::exception& e) {
-			std::cout<<"WARNING: No special targets found in file "<<f<<"\n";
+			std::cout<<"WARNING: Only ground-state targets found in file "<<f<<"\n";
 			setAllStagesTo(DISABLED);
 			io.rewind();
 			int site = 0;
