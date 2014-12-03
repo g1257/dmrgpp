@@ -321,6 +321,16 @@ public:
 		params.Eg = this->common().energy();
 		params.weight = s2*weightForContinuedFraction_*s3;
 		params.isign = s;
+		if (ab_.size() == 0) {
+			PsimagLite::OstringStream msg;
+                	msg<<"WARNING:  Trying to save a tridiagonal matrix with size zero.\n";
+			msg<<"\tHINT: Maybe the dyn vectors were never calculated.\n";
+			msg<<"\tHINT: Maybe TSPLoops is too large";
+			if (params.weight != 0)
+				msg<<"\n\tExpect a crash anytime now...";
+                	progress_.printline(msg,std::cerr);
+		}
+	
 		PostProcType cf(ab_,reortho_,params);
 
 		this->common().save(block,io,cf,this->common().targetVectors());
