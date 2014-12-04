@@ -327,7 +327,7 @@ public:
 			msg<<"\tHINT: Maybe the dyn vectors were never calculated.\n";
 			msg<<"\tHINT: Maybe TSPLoops is too large";
 			if (params.weight != 0)
-				msg<<"\n\tExpect a crash anytime now...";
+				msg<<"\n\tExpect a throw anytime now...";
                 	progress_.printline(msg,std::cerr);
 		}
 	

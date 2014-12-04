@@ -97,7 +97,7 @@ void registerSignals()
 
 	int ret = sigaction(signum,&act,0);
 	if (ret != 0) {
-		PsimagLite::String msg("WARNING: sigaction failed\n");
+		PsimagLite::String msg("FATAL: sigaction failed\n");
 		throw PsimagLite::RuntimeError(msg);
 	}
 
