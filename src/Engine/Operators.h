@@ -340,8 +340,8 @@ transformed operator can be used (or not because of the reason limitation above)
 		sparse way (DMRG++ uses compressed row storage). In short, local
 		operators are always stored in the most recently transformed basis
 		for \\emph{all sites} and, if applicable, \\emph{all values} of the
-		internal degree of freedom $\\sigma$. See !PTEX\\_REF{setToProductOps}
-		and !PTEX\\_REF{HERE}.
+		internal degree of freedom $\\sigma$. See PTEXREF{setToProductOps}
+		and PTEXREF{HERE}.
 		*/
 		template<typename ApplyFactorsType>
 		void externalProduct(SizeType i,

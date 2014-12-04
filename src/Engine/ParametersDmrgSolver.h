@@ -137,7 +137,7 @@ Remember that at least one site must remain for the system part of the lattice.
 So on a 16 site chain, when you start the finite loops you're at the middle, you
 can go forward at most 7 sites, and backwards at most 7 sites.
 
-There is some checking done to the finite loops input, see !PTEX\\_REF{139},
+There is some checking done to the finite loops input, see PTEXREF{139},
 but you might find that it's not comprehensive.
 */
 struct FiniteLoop {

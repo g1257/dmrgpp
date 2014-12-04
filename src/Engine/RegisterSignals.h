@@ -87,6 +87,41 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
+/** @class hide_registerSignals
+ *
+ * PLEASE NOTE: This is an experimental (CITATION NEEDED FIXME) feature. To use it
+ *              you must add \c -DUSE_SIGNALS to 
+ *              \c CPPFLAGS in the Makefile.
+ *
+ * @section SIGUSR1
+ *
+ * Rationale: When running a process in a queue batching system the standard output
+ * and standard error might be buffered, and, thus, might not be seen until program
+ * completion.
+ * DMRG++ allows the user to store (a fragment of) the stdout and stderr buffers into
+ * a temporary file to monitor program process in situations where stdout and stderr
+ * would not normally
+ * be accessible.
+ *
+ * Sending the signal SIGUSR1 to the DMRG++ process will result in switching the state
+ * of the ProgressIndicator buffer: if the state was inactive it will become active, and
+ * viceversa. Only when the state of the ProgressIndicator buffer is active
+ * does ProgressIndicator store its
+ * stream in memory. This stream contains the standard output and standard error printed
+ * by DMRG++. When the state of the ProgressIndicator is switched back from active to
+ * inactive,
+ * DMRG++ dumps the buffer into a temporary file, and closes the buffer.
+ * The temporary file is named bufferN.txt where N is the PID of the DMRG++ process.
+ *
+ * HINT: qsig might be used to send a signal if the DMRG++ process is running in
+ *       PBS or torque.
+ *
+ * CAVEATS: Leaving the buffer on for long periods of time might cause high memory
+ * consumption. The temporary buffer file is overwritten if the buffer is used more
+ * than once by the same process. The temporary buffer file is not deleted at the end of
+ * program execution.
+ *
+ */
 void registerSignals()
 {
 #ifdef USE_SIGNALS
