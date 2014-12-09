@@ -1,4 +1,4 @@
-\documentclass[paper=letter]{scrartcl}
+\documentclass{book}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -118,23 +118,38 @@ All rights reserved
 \end{center}
 \pagebreak
 
-\section{Introduction}
-\ptexReadFile{../README.tex}
+\ptexReadFile{../README.md}
 
-\section{User's Guide}
-\subsection{Input File} \label{sec:inputfile}
-There is a single input file that is passed as the first
-and only argument to the program.
+\chapter{Input}\label{sec:inputfile}
+
+There is a single input file that is passed as the argument to \verb!-f!, like so
+
+\begin{lstlisting}
+    ./dmrg -f input.inp.
+\end{lstlisting}
+
+Examples of input files can be found under \verb!TestSuite/inputs/!
 There are three kinds of parameters in the input file:
-(i) model connections (``geometry'') parameters, (ii) model on-site parameters, and (iii) DMRG Solver parameters.
+(i) model connections (``geometry'') parameters, (ii) model on-site parameters,
+and (iii) DMRG Solver parameters.
+Each type of input parameters is discussed below.
+
+\subsection{Geometry Input}
+This needs to be in PsimagLite.
+
+\subsection{Model Input}
+
 The Model parameters vary from model to model.
-The DMRG Solver parameters are discussed below.
+
+\subsection{DMRG Solver parameters}
 
 \ptexPaste{ParametersDmrgSolver}
 
 \subsection{Finite Loops}
 
 \ptexPaste{FiniteLoop}
+
+\chapter{Developer's Guide}
 
 \section{Main Driver}
 The high level program is this

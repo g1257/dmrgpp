@@ -123,7 +123,7 @@ https://web.ornl.gov/~gz1/hashes.html
 - Item (optional) perl
 (only needed to run the configure.pl script)
 
-### To Build DMRG++: ###
+### Building DMRG++ 
 <code>
 <pre>
  cd src
@@ -133,7 +133,7 @@ https://web.ornl.gov/~gz1/hashes.html
 </pre>
 </code>
 
-### To Run DMRG++: ###
+### Running DMRG++
  <code>./dmrg -f input.inp</code>
 
  Sample input files can be found under <code>TestSuite/inputs/</code>.
