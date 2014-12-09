@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-/*! @class hide_BasisWithOperators
+/* PSIDOC BasisWithOperators
 	A class to represent a Hilbert Space for a strongly correlated electron model
 		Derives from Basis
 
@@ -90,7 +90,7 @@ namespace Dmrg {
 	 certain functionality associated with a Hilbert space basis, as mentioned in
 	 the previous section. However, more capabilities related to a Hilbert space basis are needed.
 
-	 C++ class \\cppClass{!PTEX_THISCLASS} inherits from \\cppClass{Basis}, and contains
+	 C++ class \\cppClass{BasisWithOperators} inherits from \\cppClass{Basis}, and contains
 	 certain local operators for the basis in question, as well as the Hamiltonian matrix.
 	 The operators that need to be considered here are operators necessary to compute
 	 the Hamiltonian across the system and environment, and to compute observables.
@@ -107,7 +107,7 @@ namespace Dmrg {
 	 its common implementation \\cppClass{OperatorsImplementation}, and the two examples provided
 	 \\cppClass{OperatorsHubbard} and \\cppClass{OperatorsHeisenberg} for the Hubbard
 	 and Heisenberg models, respectively.
-	 Additionally, \\cppClass{!PTEX_THISCLASS} has a number of member functions to
+	 Additionally, \\cppClass{BasisWithOperators} has a number of member functions to
 	 handle operations that the DMRG method performs on
 	 local operators in a Hilbert space basis. These include functions to create
 	 an outer product of two given Hilbert spaces, to transform a basis, to truncate a basis, etc.

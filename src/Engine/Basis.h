@@ -90,7 +90,7 @@ namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
 // (See corresponding section in paper)
 template<typename SparseMatrixType_>
-class	Basis {
+class Basis {
 
 	typedef typename SparseMatrixType_::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType_;
@@ -156,18 +156,18 @@ public:
 		electronsOld_=electrons_;
 	}
 
-	/**
+	/* PSIDOC BasisSetToProduct
 		The quantum numbers of the original (untransformed) real-space basis
-		are set by the model class (to be described in Section~\\ref{subsec:models}),
+		are set by the model class (to be described in Section~\ref{subsec:models}),
 		whereas the quantum numbers of outer products are handled
-		by the class \\cppClass{Basis} and \\cppClass{BasisImplementation},
-		function \cppFunction{setToProduct}. This can be done because if $|a\\rangle$
-		has quantum number $q_a$ and $|b\\rangle$ has quantum number
-		$q_b$, then $|a\\rangle\\otimes|b\\rangle$ has quantum number
-		$q_a+q_b$.  \\cppClass{!PTEX_THISCLASS} knows how quantum
+		by the class \cppClass{Basis} and \cppClass{BasisImplementation},
+		function \cppFunction{setToProduct}. This can be done because if $|a\rangle$
+		has quantum number $q_a$ and $|b\rangle$ has quantum number
+		$q_b$, then $|a\rangle\otimes|b\rangle$ has quantum number
+		$q_a+q_b$.  \cppClass{Basis} knows how quantum
 		numbers change when we change the basis: they
 		do not change since the DMRG transformation
-		preserves quantum numbers; and  \\cppClass{!PTEX_THISCLASS} also
+		preserves quantum numbers; and  \cppClass{Basis} also
 		knows what happens to quantum numbers when we truncate the basis:
 		quantum numbers of discarded states are discarded.
 		In this way, symmetries are implemented efficiently,
@@ -627,24 +627,24 @@ private:
 		}
 	}
 
-	/**
+	/* PSIDOC BasisQuantumNumbers
 		Symmetries will allow the solver to block the Hamiltonian matrix in blocks, using less memory, speeding up
 		the computation and allowing the code to parallelize matrix blocks related by symmetry.
-		Let us assume that our particular model has $N_s$ symmetries labeled by $0\\le \\alpha < N_s$.
+		Let us assume that our particular model has $N_s$ symmetries labeled by $0\le \alpha < N_s$.
 		Therefore, each element $k$  of the basis has $N_s$ associated ``good'' quantum numbers
-		 $\\tilde{q}_{k,\\alpha}$. These quantum numbers can refer to practically anything,
+		 $\tilde{q}_{k,\alpha}$. These quantum numbers can refer to practically anything,
 		 for example, to number of particles with a given spin or orbital or to the $z$ component of the spin.
 		We do not need to know the details to block the matrix. We know, however, that these numbers are
-		finite, and let $Q$ be an integer such that $\\tilde{q}_{k,\\alpha}< Q$ $\\forall k,\\alpha$.
+		finite, and let $Q$ be an integer such that $\tilde{q}_{k,\alpha}< Q$ $\forall k,\alpha$.
 		We can then combine all these quantum numbers into a single one,
-		like this: $q_k = \\sum_\\alpha \\tilde{q}_{k,\\alpha} Q^\\alpha$,
+		like this: $q_k = \sum_\alpha \tilde{q}_{k,\alpha} Q^\alpha$,
 		and this mapping is bijective. In essence, we combined all ``good''
 		quantum numbers into a single one and from now on we
 		will consider that we have only one Hamiltonian symmetry called the
 		``effective'' symmetry, and only one corresponding number $q_k$, the
 		``effective'' quantum number. These numbers are stored in the  member
-		{\\it quantumNumbers} of C++ class \\cppClass{!PTEX_THISCLASS}.
-		(Note that if one has 100 sites or less,\\footnote{This is probably a
+		{\it quantumNumbers} of C++ class \cppClass{Basis}.
+		(Note that if one has 100 sites or less,\footnote{This is probably a
 		maximum for systems of correlated electrons such as the Hubbard model
 		or the t-J model.} then the number $Q$ defined above is probably of the
 		order of hundreds for usual symmetries, making this implementation very practical for
@@ -655,13 +655,13 @@ private:
 	typename PsimagLite::Vector<SizeType>::Type electrons_;
 	typename PsimagLite::Vector<SizeType>::Type electronsOld_;
 
-	/**
+	/* PSIDOC BasisPartition
 		What remains to be done is to find a partition of the basis which
 		labels where the quantum number changes. Let us say that the
 		quantum numbers of the reordered basis states are
-		\\[
-		\\{3,3,3,3,8,8,9,9,9,15,\\cdots\\}.
-		\\]
+		\[
+		\{3,3,3,3,8,8,9,9,9,15,\cdots\}.
+		\]
 		Then we define a vector named ``partition'', such that partition[0]=0,
 		partition[1]=4, because the quantum number changes in the 4th position
 		(from 3 to 8), and then partition[2]=6, because the quantum number
@@ -672,18 +672,18 @@ private:
 	typename PsimagLite::Vector<SizeType>::Type partition_;
 	typename PsimagLite::Vector<SizeType>::Type partitionOld_;
 
-	/**
+	/* PSIDOC BasisPermutationVector
 		We then reorder our basis such that its elements are given in
 		increasing $q$ number. There will be a permutation vector associated
 		with this reordering, that will be stored in the member
-		\\verb!permutationVector! of class \\cppClass{!PTEX_THISCLASS}.
-		For ease of coding we also store its inverse in \\verb!permInverse!.
+		\verb!permutationVector! of class \cppClass{Basis}.
+		For ease of coding we also store its inverse in \verb!permInverse!.
 		*/
 	typename PsimagLite::Vector<SizeType>::Type permutationVector_;
 	typename PsimagLite::Vector<SizeType>::Type permInverse_;
 	HamiltonianSymmetryLocalType symmLocal_;
 	HamiltonianSymmetrySu2Type symmSu2_;
-	/**
+	/* PSIDOC BasisBlock
 		The variable block of a \cppClass{DmrgBasis} object indicates over
 		which sites the basis represented by this object is being built.
 		*/

@@ -120,7 +120,7 @@ namespace Dmrg {
 			return false;
 		}
 
-		/**  @class hide_dmrgSolverOptions
+		/* PSIDOC dmrgSolverOptions
 		  - Options=string
 		  A comma-separated list of strings. At least one of the following strings must be provided:
 		     + none  Use this when no options are given, since the list of strings must be non-null.

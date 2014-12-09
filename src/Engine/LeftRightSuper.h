@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
-	
+
 	template<typename BasisWithOperatorsType_,typename SuperBlockType>
 	class LeftRightSuper {
 		public:
@@ -259,22 +259,22 @@ namespace Dmrg {
 			}
 
 			//! add block X to basis pS and put the result in left_:
-			/**
-			Local operators are set for the basis in question with a call to 
-			\\cppClass{BasisWithOperators}'s member function \\cppFunction{setOperators()}.  
-			When adding sites to the system or environment the program does a 
-			full outer product, i.e., it increases the size of all local operators. 
+			/* PSIDOC LeftRightSuperGrow
+			Local operators are set for the basis in question with a call to
+			\\cppClass{BasisWithOperators}'s member function \\cppFunction{setOperators()}.
+			When adding sites to the system or environment the program does a
+			full outer product, i.e., it increases the size of all local operators.
 			This is performed by the call to \\verb!setToProduct(pSprime,pS,Xbasis,dir,option)!
 			in the grow function, which actually calls \\verb!pSprime.setToProduct(pS,xBasis,dir)!
-			This function also recalculates the Hamiltonian in the outer product 
-			of (i) the previous system basis $pS$, and (ii) the basis $Xbasis$ 
+			This function also recalculates the Hamiltonian in the outer product
+			of (i) the previous system basis $pS$, and (ii) the basis $Xbasis$
 			corresponding to the site(s) that is (are) being added.
-			To do this, the Hamiltonian connection between the two parts 
-			needs to be calculated and added, and this is done in the call to 
-			\\cppFunction{addHamiltonianConnection}. 
-			Finally, the resulting dmrgBasis object for the outer product, 
+			To do this, the Hamiltonian connection between the two parts
+			needs to be calculated and added, and this is done in the call to
+			\\cppFunction{addHamiltonianConnection}.
+			Finally, the resulting dmrgBasis object for the outer product,
 			pSprime, is set to contain this full Hamiltonian with the call
-			to  \\cppFunction{pSprime.setHamiltonian(matrix)}. 
+			to  \\cppFunction{pSprime.setHamiltonian(matrix)}.
 			*/
 			template<typename SomeModelType>
 			void grow(BasisWithOperatorsType& leftOrRight,
@@ -313,10 +313,10 @@ namespace Dmrg {
 			BasisWithOperatorsType* right_;
 			SuperBlockType* super_;
 			SizeType refCounter_;
-			
+
 	}; // class LeftRightSuper
 
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // LEFT_RIGHT_SUPER_H
