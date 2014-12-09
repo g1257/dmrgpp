@@ -15,6 +15,8 @@ my $find = "find ../src -iname \"*.h\" -or -iname \"*.cpp\"";
 defined($file) or die "USAGE: $find | $0 file\n";
 my %labels;
 
+loadFiles(\%labels,$file);
+
 loadLabels(\%labels);
 
 recursiveExpand(\%labels);
@@ -28,6 +30,39 @@ sub loadLabels
 		my $f = $_;
 		procFile(\%labels,$f);
 	}
+}
+
+sub loadFiles
+{
+	my ($a,$f) = @_;
+	my %labels = %$a;
+	open(FILE,$f) or die "$0: Cannot open $f : $!\n";
+
+	while (<FILE>) {
+		if (/\\ptexReadFile\{([^\}]+)\}/) {
+			my $file = $1;
+			my $ret = open(FILE2,$file);
+			if (!$ret) {
+				close(FILE);
+				die "$0: ERROR: Cannot read $file, line $_\n";
+			}
+
+			my $buffer = "";
+			while (<FILE2>) {
+				$buffer .= $_;
+			}
+
+			close(FILE2);
+
+			my $label = getLabelForFile($file);
+			my @temp = ($buffer);
+			$labels{"$label"} = \@temp;
+			next;
+		}
+	}
+
+	close(FILE);
+	%$a = %labels;
 }
 
 sub procFile
@@ -93,17 +128,11 @@ sub replaceLabels
 		}
 
 		if (/\\ptexReadFile\{([^\}]+)\}/) {
-			my $ret = open(FILE2,$1);
-			if (!$ret) {
-				print STDERR "$0: ERROR: Cannot read $1, line $_\n";
-				last;
-			}
-
-			while (<FILE2>) {
-				print FOUT;
-			}
-
-			close(FILE2);
+			my $file=$1;
+			my $label = getLabelForFile($file);
+			my $txt = getTextFromLabel($label,$a);
+			last if (!defined($txt));
+			print FOUT $txt;
 			next;
 		}
 
@@ -128,13 +157,15 @@ sub recursiveExpand
 		defined($ptr) or die "$0: Label $key has error\n";
 		scalar(@$ptr) > 0 or die "$0: Label $key has error\n";
 		my $txt = $ptr->[0];
+		next unless ($txt=~/PSIDOCCOPY/);
 		my $txt2 = expandIfNeeded($txt,$a);
 		$recurse = 1 if ($txt2=~/PSIDOCCOPY/);
 		my @buffer = ($txt2);
 		$ptr = \@buffer;
+		$labels{"$key"}=$ptr;
 	}
 
-	$a = \%labels;
+	%$a = %labels;
 
 	recursiveExpand($a) if ($recurse);
 }
@@ -176,4 +207,13 @@ sub getTextFromLabel
 	}
 
 	return $ptr->[0];
+}
+
+sub getLabelForFile
+{
+	my ($file) = @_;
+
+	$file=~s/\./DOT/g;
+	$file=~s/\//SLASH/g;
+	return "FILE$file";
 }
