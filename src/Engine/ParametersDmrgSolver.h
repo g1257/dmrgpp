@@ -92,38 +92,48 @@ namespace Dmrg {
 
 To enable finite loops make sure that the option `nofiniteloops` is <b>not</b>
 present under `SolverOptions=`. Remember that the entry <b>FiniteLoops</b>
-in the input file is a series of space-separated numbers. More than one space is allowed. The first
-number is the number of finite algorithm ``movements,'' followed by series of three numbers for
-each movement. Of the three numbers, the first is the number of sites to go forward if positive
-or backward if negative. The second number is the <i>m</i> for this movement and the last number
-is either 0 or 1, 0 will not save state data to disk and 1 will save all data to be able to calculate
-observables. The first movement starts from where the infinite loop left off, at the middle of the
+in the input file is a series of space-separated numbers. More than one space is allowed.
+The first
+number is the number of finite algorithm ``movements,'' followed by series of three
+numbers for
+each movement. Of the three numbers, the first is the number of sites to go forward
+if positive
+or backward if negative. The second number is the <i>m</i> for this movement and the
+last number
+is either 0 or 1, 0 will not save state data to disk and 1 will save all data to be
+able to calculate
+observables. The first movement starts from where the infinite loop left off, at the
+ middle of the
 lattice.
 
 \subsection{Example of a Finite loops line in the input file}
 
+\begin{verbatim}
 	FiniteLoops 4 7 200 0 -7 200 0 7 200 1 7 200 1
+\end{verbatim}
 
-The number 4 implies 4 finite loops. The first fine loop is `7 200 0`, meaning
-go forward 7 steps, use <i>m=200</i> for this finite sweep, and 0: do not store transformation in disk.
-The next is `-7 200 0`, which goes backwards 7 sites, etc.
-Remember that the finite loops start at the middle of the lattice, where the infinite loop left off.
-<b>ADD FIGURE SHOWING WHAT THIS DOES.</b>
+The number 4 implies 4 finite loops. The first fine loop is \verb!7 200 0!, meaning
+go forward 7 steps, use \emph{m=200} for this finite sweep, and 0: do not store
+transformation in disk.
+The next is \verb!-7 200 0!, which goes backwards 7 sites, etc.
+Remember that the finite loops start at the middle of the lattice, where the
+infinite loop left off.
+\todo{ADD FIGURE SHOWING WHAT THIS DOES.}
 
 \subsection{The third number in the triplet}
 The save option is a bitwise option where the
 first bit means save or don't save, and the second bit
 compute the g.s. or WFT it.
 So there are 4 combinations (as of today):
-
-Value | Description
----------|--------------------------------------------------
-0       | Don't save, compute the ground state
-1       | Save, compute the ground state
-2       | Don't save, WFT the ground state
-3       | Save, WFT the ground state
-------------------------------------------------------------
-
+\begin{table}
+\begin{tabular}{ll}
+Value & Description\\
+0       & Don't save, compute the ground state\\
+1       & Save, compute the ground state\\
+2       & Don't save, WFT the ground state\\
+3       & Save, WFT the ground state\\
+\end{tabular}
+\end{table}
 \subsection{Caveats and Troubleshooting}
 
 If `nofiniteloops` is an option in the options line of the input file then
@@ -299,32 +309,38 @@ std::istream &operator>>(std::istream& is,DmrgCheckPoint& c)
 }
 
 /* PSIDOC ParametersDmrgSolver
-- Model=string
+\begin{itemize}
+\item[Model=string]
 A string indicating the model, be it HubbardOneBand HeisenbergSpinOneHalf, etc.
 
 PSIDOCCOPY dmrgSolverOptions
 
-- version=string  A mandatory string that is read and ignored. Usually contains the result
-of doing `git rev-parse HEAD`.
+\item[version=string]  A mandatory string that is read and ignored. Usually contains the
+result
+of doing \verb!git rev-parse HEAD!.
 
-- outputfile=string  The output file. This file will be created if non-existent, and if it
+\item[outputfile=string]  The output file. This file will be created if non-existent,
+ and if it
 exits it will be truncated.
 
-- InfiniteLoopKeptStates=integer  <i>m</i> value for the infinite algorithm.
+\item[InfiniteLoopKeptStates=integer]  \emph{m} value for the infinite algorithm.
 
-- FiniteLoops=vector
+\item[FiniteLoops=vector]
 A series of space-separated numbers. More than one space is allowed.
 The first number is the number of finite algorithm movements, followed by series
 of three numbers for each movement. Of the three numbers, the first
 is the number of sites to go forward if positive or backward if negative.
 The second number is the <i>m</i> for this movement and the last number is either 0 or 1,
-0 will not save state data to disk and 1 will save all data to be able to calculate observables.
-The first movement starts from where the infinite loop left off, at the middle of the lattice.
+0 will not save state data to disk and 1 will save all data to be able to calculate
+observables.
+The first movement starts from where the infinite loop left off, at the middle of the
+ lattice.
 See the below for more information and examples on Finite Loops.
 
-- TargetElectronsUp=integer
+\item[TargetElectronsUp=integer]
 
-- TargetElectronsDown=integer
+\item[TargetElectronsDown=integer]
+\end{itemize}
 */
 template<typename FieldType,typename InputValidatorType>
 struct ParametersDmrgSolver {

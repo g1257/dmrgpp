@@ -12,7 +12,6 @@
 
 ## DISCLAIMER
 
-<small>
 <pre>
  THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
@@ -37,11 +36,9 @@
  INFORMATION, DATA, APPARATUS, PRODUCT, OR PROCESS
  DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 </pre>
-</small>
 
 ## How To Cite This Work
 
-<small>
 <pre>
 \@article{re:alvarez0209,
 author="G. Alvarez",
@@ -54,7 +51,8 @@ year="2009"}
 
 \@article{re:alvarez0310,
 author="G. Alvarez",
-title="Implementation of the SU(2) Hamiltonian Symmetry for the DMRG Algorithm",
+title="Implementation of the SU(2) Hamiltonian
+Symmetry for the DMRG Algorithm",
 journal="Computer Physics Communications",
 volume="183",
 pages="2226-2232",
@@ -64,7 +62,8 @@ year="2012"}
 \@article{re:alvarez0311,
 author="G. Alvarez and  L. G. G. V. Dias da Silva and
 E. Ponce and  E. Dagotto",
-title="Time Evolution with the DMRG Algorithm: A Generic Implementation
+title="Time Evolution with the DMRG Algorithm:
+A Generic Implementation
 for Strongly Correlated Electronic Systems",
 journal="Phys. Rev. E",
 volume="84",
@@ -87,7 +86,6 @@ And also:
  Title = {DMRG++ Website},
  Publisher = {\\url{http://www.ornl.gov/~gz1/dmrgPlusPlus}} }
 </pre>
-</small>
 
 ## Code Integrity
 
@@ -114,7 +112,8 @@ https://web.ornl.gov/~gz1/hashes.html
 - Item (required) PsimagLite.
 
  This is here https://github.com/g1257/PsimagLite/.
- You can do <code>git clone https://github.com/g1257/PsimagLite.git</code> in a separate directory
+ You can do <code>git clone https://github.com/g1257/PsimagLite.git</code>
+ in a separate directory
  outside of the DMRG++ distribution. `configure.pl` will ask you where you put it.
 
 - Item (optional) make or gmake
@@ -123,15 +122,13 @@ https://web.ornl.gov/~gz1/hashes.html
 - Item (optional) perl
 (only needed to run the configure.pl script)
 
-### Building DMRG++ 
-<code>
+### Building DMRG++
 <pre>
  cd src
  perl configure.pl
  (please answer questions regarding depedencies and libraries)
  make
 </pre>
-</code>
 
 ### Running DMRG++
  <code>./dmrg -f input.inp</code>

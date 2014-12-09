@@ -8,6 +8,7 @@
 \usepackage{graphicx}
 \usepackage{fancyvrb}
 \usepackage{fancyhdr}
+\usepackage{booktabs}
 \usepackage{hyperref}
 
 \cfoot{This manual is a work in progress.}
@@ -45,7 +46,7 @@
 
 %
 \begin{center}
-\textsc{Oak Ridge, 2009}
+\textsc{Oak Ridge, 2014}
 \end{center}
 
 \end{titlepage}
@@ -134,14 +135,14 @@ There are three kinds of parameters in the input file:
 and (iii) DMRG Solver parameters.
 Each type of input parameters is discussed below.
 
-\subsection{Geometry Input}
+\section{Geometry Input}
 This needs to be in PsimagLite.
 
-\subsection{Model Input}
+\section{Model Input}
 
 The Model parameters vary from model to model.
 
-\subsection{DMRG Solver parameters}
+\section{DMRG Solver parameters}
 
 \ptexPaste{ParametersDmrgSolver}
 
@@ -163,7 +164,6 @@ SolverType dmrgSolver(dmrgSolverParams,model,concurrency);
 //! Perform DMRG Loops:
 dmrgSolver.main();
 \end{lstlisting}
-
 
 \todo{Graphic showing the template dependencies of the classes}
 
