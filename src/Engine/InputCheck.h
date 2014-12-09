@@ -121,15 +121,21 @@ namespace Dmrg {
 		}
 
 		/* PSIDOC dmrgSolverOptions
-		  - Options=string
-		  A comma-separated list of strings. At least one of the following strings must be provided:
-		     + none  Use this when no options are given, since the list of strings must be non-null.
+		  \item[Options=string]
+		  A comma-separated list of strings. At least one of the following strings must
+		  be provided:
+		  \begin{itemize}
+		     \item[none]  Use this when no options are given, since the list of
+		   strings must be non-null.
 		        Note that ``none'' does not disable other options.
 
-		     + useSu2Symmetry Use the SU(2) symmetry for the model, and interpret quantum
+		     \item[useSu2Symmetry] Use the SU(2) symmetry for the model, and
+		    interpret quantum
 		         numbers in the line ``QNS'' appropriately.
 
-		     + nofiniteloops  Don't do finite loops, even if provided under ``FiniteLoops'' below.
+		     \item[nofiniteloops]  Don't do finite loops, even if provided under
+		    ``FiniteLoops'' below.
+			\end{itemize}
 		*/
 		void check(const PsimagLite::String& label,const PsimagLite::String& val,SizeType)
 		{

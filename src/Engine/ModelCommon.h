@@ -149,7 +149,7 @@ public:
 	/** Let H be the hamiltonian of the  model for basis1 and partition m consisting of the external product
 		 * of basis2 \otimes basis3
 		 * This function does x += H*y
-		 * The \\cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$. This function
+		 * The \cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$. This function
 		 * has a default implementation.
 		 */
 	void matrixVectorProduct(typename PsimagLite::Vector<RealType>::Type& x,
@@ -181,8 +181,8 @@ public:
 		the Hamiltonian connection (e.g. tight-binding links in the case of the Hubbard Model
 		or products $S_i\cdot S_j$ in the case of the Heisenberg model) between
 		two basis, $basis2$ and $basis3$, in the order of the outer product,
-		$basis1={\\rm SymmetryOrdering}(basis2\otimes basis3)$. This was
-		explained before in Section~\\ref{subsec:dmrgBasisWithOperators}.
+		$basis1={\rm SymmetryOrdering}(basis2\otimes basis3)$. This was
+		explained before in Section~\ref{subsec:dmrgBasisWithOperators}.
 		This function has a default implementation.
 		*/
 	void addHamiltonianConnection(SparseMatrixType &matrix,const LeftRightSuperType& lrs) const
@@ -256,7 +256,7 @@ public:
 
 	/**
 		Returns H, the hamiltonian for basis1 and partition
-		$m$ consisting of the external product of basis2$\\otimes$basis3
+		$m$ consisting of the external product of basis2$\otimes$basis3
 		Note: Used only for debugging purposes
 		*/
 	void fullHamiltonian(SparseMatrixType& matrix,const ModelHelperType& modelHelper) const

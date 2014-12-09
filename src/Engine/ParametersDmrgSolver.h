@@ -126,7 +126,7 @@ first bit means save or don't save, and the second bit
 compute the g.s. or WFT it.
 So there are 4 combinations (as of today):
 \begin{table}
-\begin{tabular}{ll}
+\begin{tabular}{ll}\toprule
 Value & Description\\
 0       & Don't save, compute the ground state\\
 1       & Save, compute the ground state\\

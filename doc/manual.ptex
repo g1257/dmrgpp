@@ -299,7 +299,7 @@ are described in \todo{FIXME}.
 
 \subsection{Finite Algorithm}
 
-\section{Hilbert Space Basis I: DmrgBasis and Symmetries}
+\section{Hilbert Space Basis I: DmrgBasis and Symmetries}\label{sec:dmrgbasis}
 
 \subsection{Local Symmetries}
 DMRG++ has two C++ classes that handle the concept of a basis (of a Hilbert space). The first one (\cppClass{DmrgBasis}) handles reordering
@@ -360,7 +360,11 @@ There,  since \verb!lrs_.super()! does provide information about effective symme
 and call  \cppFunction{diagonaliseOneBlock()}, see  \cppFunction{diagonaliseOneBlock}, for each symmetry block. Only those matrix blocks
 that contain the desired or targeted number of electrons (or other local symmetry) will be considered.
 
-\subsection{Lanczos Solver}
+\subsection{Truncation}
+\ptexPaste{Truncation}
+\ptexPaste{DiagOfDensityMatrix}
+
+\subsection{Lanczos Solver}\label{sec:lanczos}
 To diagonalize Hamiltonian $H$ we use the Lanczos method\cite{re:lanczos50,re:pettifor85}, although this is also templated.
 
 For the Lanczos diagonalization method we also want to provide as much code isolation and modularity as possible.

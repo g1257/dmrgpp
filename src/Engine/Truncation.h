@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 
 namespace Dmrg {
-	
+
 	template<typename LeftRightSuperType,
 	         typename ParametersType,
 	         typename TargettingType>
@@ -156,7 +156,7 @@ namespace Dmrg {
 		{
 			return ftransform_;
 		}
-		
+
 		const RealType& error() const { return error_; }
 
 		void changeBasis(BasisWithOperatorsType& sBasis,
@@ -179,7 +179,7 @@ namespace Dmrg {
 				 SizeType keptStates,
 				 SizeType direction)
 		{
-			/** !PTEX-START Truncation
+			/* PSIDOC Truncation
 			Let us define the density matrices for system:
 			\begin{equation}
 			(\hat{\rho}_S)_{\alpha,\alpha'} = \sum_{\beta\in\mathcal{V}(E')}\psi_{\alpha',\beta}^*\psi_{\alpha,\beta}
@@ -201,14 +201,14 @@ namespace Dmrg {
 
 			DensityMatrixType dmS(target,pBasis,pBasisSummed,lrs_.super(),direction);
 			dmS.check(direction);
-			
+
 			if (verbose_ && PsimagLite::Concurrency::root()) {
 				std::cerr<<"Trying to diagonalize density-matrix with size=";
 				std::cerr<<dmS.rank()<<"\n";
 			}
 
-			/** !PTEX-START DiagOfDensityMatrix
-			We then diagonalize $\hat{\rho}_S$, and obtain its eigenvalues and eigenvectors, 
+			/* PSIDOC DiagOfDensityMatrix
+			We then diagonalize $\hat{\rho}_S$, and obtain its eigenvalues and eigenvectors,
 			$w^S_{\alpha,\alpha'}$ in $\mathcal{V}(S')$ ordered in decreasing eigenvalue order.
 			We change basis for the operator $H^{S'}$ (and other operators as necessary), as follows:
 			\begin{equation}
@@ -297,18 +297,18 @@ namespace Dmrg {
 			error_ = discWeight;
 			progress_.printline(msg,std::cout);
 			// we report the discarded weight
-			msg<<"Discarded weight (Truncation error): "<< discWeight ; 
+			msg<<"Discarded weight (Truncation error): "<< discWeight ;
 			progress_.printline(msg,std::cout);
-			
+
 		}
 
-		/** !PTEX-START RemovalOfStates
-		Let $m_S$ (here given by \verb!keptStates_! be a fixed number that 
-		corresponds to the number of states in $\mathcal{V}(S')$ that we want to keep. 
-		Consider the first $m_S$ eigenvectors $w^S$, 
-		 and let us call the Hilbert space spanned by them, $\mathcal{V}_R(S')$, 
-		 the DMRG-reduced Hilbert space on 
-		block $S'$. If $m_S\ge\#\mathcal{V}(S')$ then we keep all eigenvectors 
+		/* PSIDOC RemovalOfStates
+		Let $m_S$ (here given by \verb!keptStates_! be a fixed number that
+		corresponds to the number of states in $\mathcal{V}(S')$ that we want to keep.
+		Consider the first $m_S$ eigenvectors $w^S$,
+		 and let us call the Hilbert space spanned by them, $\mathcal{V}_R(S')$,
+		 the DMRG-reduced Hilbert space on
+		block $S'$. If $m_S\ge\#\mathcal{V}(S')$ then we keep all eigenvectors
 		and there is effectively no truncation.
 		We truncate the matrices $(H^{S' {\rm new\,\,basis}})$ (and other operators as necessary)
 		such that they now act on this truncated Hilbert space, $\mathcal{V}_R(S')$.
@@ -325,13 +325,13 @@ namespace Dmrg {
 			SizeType total = parameters_.keptStatesInfinite;
 			RealType discWeight=sumUpTo(eigs,start);
 			// maybe we should use int instead of SizeType here!!!
-			
+
 			for (int i=start;i<maxToRemove;i++) {
 				// calculate the discarded weight if we keep i states.
-				discWeight += fabs(eigs[i]); 
+				discWeight += fabs(eigs[i]);
 				// if the discarded weight
 				// gets larger than the tolerance, we break the loop.
-				if (discWeight>parameters_.tolerance) { 
+				if (discWeight>parameters_.tolerance) {
 					total = eigs.size() - i;
 					discWeight -= fabs(eigs[i]);
 					break;
@@ -349,7 +349,7 @@ namespace Dmrg {
 		{
 			RealType discWeight = 0;
 			for (SizeType i=0;i<x;i++)
-				discWeight += fabs(eigs[i]); 
+				discWeight += fabs(eigs[i]);
 			return discWeight;
 		}
 
@@ -376,7 +376,7 @@ namespace Dmrg {
 		TruncationCache leftCache_,rightCache_;
 
 	}; // class Truncation
-	
+
 } // namespace
 /*@}*/
 #endif // DMRG_TRUNCATION_H

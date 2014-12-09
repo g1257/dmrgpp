@@ -86,28 +86,28 @@ namespace Dmrg {
 	A class to represent a Hilbert Space for a strongly correlated electron model
 		Derives from Basis
 
-	 C++ class \\cppClass{Basis} (and \\cppClass{BasisImplementation}) implement only
+	 C++ class \cppClass{Basis} (and \cppClass{BasisImplementation}) implement only
 	 certain functionality associated with a Hilbert space basis, as mentioned in
 	 the previous section. However, more capabilities related to a Hilbert space basis are needed.
 
-	 C++ class \\cppClass{BasisWithOperators} inherits from \\cppClass{Basis}, and contains
+	 C++ class \cppClass{BasisWithOperators} inherits from \cppClass{Basis}, and contains
 	 certain local operators for the basis in question, as well as the Hamiltonian matrix.
 	 The operators that need to be considered here are operators necessary to compute
 	 the Hamiltonian across the system and environment, and to compute observables.
 	 Therefore, the specific operators vary from model to model.
-	 For example, for the Hubbard model, we consider $c_{i\\sigma}$ operators,
-	 that destroy an electron with spin $\\sigma$ on site $i$.
+	 For example, for the Hubbard model, we consider $c_{i\sigma}$ operators,
+	 that destroy an electron with spin $\sigma$ on site $i$.
 	 For the Heisenberg model, we consider operators $S^+_i$ and $S^z_i$ for each site $i$.
-	 In each case these operators are calculated by the model class (see Section~\\ref{subsec:models})
+	 In each case these operators are calculated by the model class (see Section~\ref{subsec:models})
 	 on the ``natural'' basis,  and added to the basis in question with a call to
-	 \\cppFunction{setOperators()}.
+	 \cppFunction{setOperators()}.
 	 These local operators are stored as sparse matrices to save memory,
 	 although the matrix type is templated and could be anything.
-	 For details on the implementation of these operators, see \\cppClass{OperatorsBase},
-	 its common implementation \\cppClass{OperatorsImplementation}, and the two examples provided
-	 \\cppClass{OperatorsHubbard} and \\cppClass{OperatorsHeisenberg} for the Hubbard
+	 For details on the implementation of these operators, see \cppClass{OperatorsBase},
+	 its common implementation \cppClass{OperatorsImplementation}, and the two examples provided
+	 \cppClass{OperatorsHubbard} and \cppClass{OperatorsHeisenberg} for the Hubbard
 	 and Heisenberg models, respectively.
-	 Additionally, \\cppClass{BasisWithOperators} has a number of member functions to
+	 Additionally, \cppClass{BasisWithOperators} has a number of member functions to
 	 handle operations that the DMRG method performs on
 	 local operators in a Hilbert space basis. These include functions to create
 	 an outer product of two given Hilbert spaces, to transform a basis, to truncate a basis, etc.
