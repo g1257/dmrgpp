@@ -47,8 +47,23 @@ sub loadFiles
 				die "$0: ERROR: Cannot read $file, line $_\n";
 			}
 
+			my $isMdFile = ($file=~/\.md$/);
 			my $buffer = "";
 			while (<FILE2>) {
+				if ($isMdFile) {
+					s/^# +(.*)/\\chapter\{$1\}/;
+					s/^## +(.*)/\\section\{$1\}/;
+					s/^### +(.*)\n$/\\subsection\{$1\}/;
+					s/\\\@/\@/g;
+					s/<b>/\{\\bf /;
+					s/<\/b>/\}/;
+
+					s/<pre>/\\begin\{verbatim\}\n/;
+					s/<\/pre>/\\end\{verbatim\}\n/;
+					s/<code>/\{\\tt /g;
+					s/<\/code>/\}/g;
+				}
+
 				$buffer .= $_;
 			}
 
