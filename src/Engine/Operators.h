@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -107,219 +107,224 @@ geometries or connections, because all local opeators are availabel at all
 times. Each SCE model class is responsible for determining whether a
 transformed operator can be used (or not because of the reason limitation above).
 */
-	template<typename BasisType_>
-	class Operators {
+template<typename BasisType_>
+class Operators {
 
-		typedef std::pair<SizeType,SizeType> PairType;
-		static const bool EXCLUDE = false;
+	typedef std::pair<SizeType,SizeType> PairType;
+	static const bool EXCLUDE = false;
+
+public:
+
+	typedef BasisType_ BasisType;
+	typedef ReducedOperators<BasisType> ReducedOperatorsType;
+	typedef typename ReducedOperatorsType::OperatorType OperatorType;
+	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+
+	class MyLoop {
 
 	public:
 
-		typedef BasisType_ BasisType;
-		typedef ReducedOperators<BasisType> ReducedOperatorsType;
-		typedef typename ReducedOperatorsType::OperatorType OperatorType;
-		typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-		typedef typename SparseMatrixType::value_type ComplexOrRealType;
-		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-		typedef PsimagLite::Concurrency ConcurrencyType;
+		MyLoop(bool useSu2Symmetry,
+		       ReducedOperatorsType& reducedOpImpl,
+		       typename PsimagLite::Vector<OperatorType>::Type& operators,
+		       const SparseMatrixType& ftransform1,
+		       const BasisType* thisBasis1)
+		    : useSu2Symmetry_(useSu2Symmetry),
+		      reducedOpImpl_(reducedOpImpl),
+		      operators_(operators),
+		      ftransform(ftransform1),
+		      thisBasis(thisBasis1),
+		      hasMpi_(ConcurrencyType::hasMpi())
+		{
+			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
+		}
 
-		class MyLoop {
+		void thread_function_(SizeType threadNum,
+		                      SizeType blockSize,
+		                      SizeType total,
+		                      typename ConcurrencyType::MutexType*)
+		{
+			SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
+			SizeType npthreads = ConcurrencyType::npthreads;
 
-		public:
+			ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"Operators",total);
 
-			MyLoop(bool useSu2Symmetry,
-			       ReducedOperatorsType& reducedOpImpl,
-			       typename PsimagLite::Vector<OperatorType>::Type& operators,
-			       const SparseMatrixType& ftransform1,
-			       const BasisType* thisBasis1)
-			    : useSu2Symmetry_(useSu2Symmetry),
-			      reducedOpImpl_(reducedOpImpl),
-			      operators_(operators),
-			      ftransform(ftransform1),
-			      thisBasis(thisBasis1),
-			      hasMpi_(ConcurrencyType::hasMpi())
-			{
-				reducedOpImpl_.prepareTransform(ftransform,thisBasis);
-			}
+			for (SizeType p=0;p<blockSize;p++) {
+				SizeType taskNumber = (threadNum+npthreads*mpiRank)*blockSize + p;
+				if (taskNumber>=total) break;
 
-			void thread_function_(SizeType threadNum,
-			                      SizeType blockSize,
-			                      SizeType total,
-			                      typename ConcurrencyType::MutexType*)
-			{
-				SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
-				SizeType npthreads = ConcurrencyType::npthreads;
-
-				ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"Operators",total);
-
-				for (SizeType p=0;p<blockSize;p++) {
-					SizeType taskNumber = (threadNum+npthreads*mpiRank)*blockSize + p;
-					if (taskNumber>=total) break;
-
-					SizeType k = taskNumber;
-					if (isExcluded(k,thisBasis)) {
-						operators_[k].data.clear(); //resize(ftransform.n_col(),ftransform.n_col());
-						continue;
-					}
-					if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform);
-					reducedOpImpl_.changeBasis(k);
+				SizeType k = taskNumber;
+				if (isExcluded(k,thisBasis)) {
+					operators_[k].data.clear();
+					continue;
 				}
+				if (!useSu2Symmetry_) changeBasis(operators_[k].data,ftransform);
+				reducedOpImpl_.changeBasis(k);
 			}
+		}
 
-			void gather()
-			{
-				if (ConcurrencyType::isMpiDisabled("Operators")) return;
+		void gather()
+		{
+			if (ConcurrencyType::isMpiDisabled("Operators")) return;
 
-				if (!useSu2Symmetry_) {
-					gatherOperators();
-					bcastOperators();
-				} else {
-					reducedOpImpl_.gather();
-					reducedOpImpl_.bcast();
-				}
+			if (!useSu2Symmetry_) {
+				gatherOperators();
+				bcastOperators();
+			} else {
+				reducedOpImpl_.gather();
+				reducedOpImpl_.bcast();
 			}
-
-		private:
-
-			bool isExcluded(SizeType,
-			                const BasisType*)
-	// 		               const std::pair<SizeType,SizeType>& startEnd)
-			{
-				if (!EXCLUDE) return false; // <-- this is the safest answer
-	// 			if (k<startEnd.first || k>=startEnd.second) return true;
-				return false;
-			}
-
-			void gatherOperators()
-			{
-				if (!hasMpi_) return;
-				PsimagLite::MPI::pointByPointGather(operators_);
-			}
-
-			void bcastOperators()
-			{
-				if (!hasMpi_) return;
-				for (SizeType i = 0; i < operators_.size(); i++)
-					Dmrg::bcast(operators_[i]);
-			}
-
-			bool useSu2Symmetry_;
-			ReducedOperatorsType& reducedOpImpl_;
-			typename PsimagLite::Vector<OperatorType>::Type& operators_;
-			const SparseMatrixType& ftransform;
-			const BasisType* thisBasis;
-			bool hasMpi_;
-		};
-
-		Operators(const BasisType* thisBasis)
-		: useSu2Symmetry_(BasisType::useSu2Symmetry()),
-		  reducedOpImpl_(thisBasis),
-		  progress_("Operators")
-		{}
-
-		template<typename IoInputter>
-		Operators(IoInputter& io,
-		              SizeType level,
-		              const BasisType* thisBasis)
-		: useSu2Symmetry_(BasisType::useSu2Symmetry()),
-		  reducedOpImpl_(io,level,thisBasis),
-		  progress_("Operators")
-		{
-			if (!useSu2Symmetry_) io.read(operators_,"#OPERATORS");
-
-			io.readMatrix(hamiltonian_,"#HAMILTONIAN");
-			reducedOpImpl_.setHamiltonian(hamiltonian_);
 		}
 
-		template<typename IoInputter>
-		void load(IoInputter& io)
-		{
-			if (!useSu2Symmetry_)
-				io.read(operators_,"#OPERATORS");
-			else reducedOpImpl_.load(io);
+	private:
 
-			io.readMatrix(hamiltonian_,"#HAMILTONIAN");
-			reducedOpImpl_.setHamiltonian(hamiltonian_);
+		bool isExcluded(SizeType,
+		                const BasisType*)
+		// 		               const std::pair<SizeType,SizeType>& startEnd)
+		{
+			if (!EXCLUDE) return false; // <-- this is the safest answer
+			// 			if (k<startEnd.first || k>=startEnd.second) return true;
+			return false;
 		}
 
-		void setOperators(const typename PsimagLite::Vector<OperatorType>::Type& ops)
+		void gatherOperators()
 		{
-			if (!useSu2Symmetry_) operators_=ops;
-			else reducedOpImpl_.setOperators(ops);
+			if (!hasMpi_) return;
+			PsimagLite::MPI::pointByPointGather(operators_);
 		}
 
-		const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
+		void bcastOperators()
 		{
-			assert(useSu2Symmetry_);
-			return reducedOpImpl_.getReducedOperatorByIndex(modifier,p);
+			if (!hasMpi_) return;
+			for (SizeType i = 0; i < operators_.size(); i++)
+				Dmrg::bcast(operators_[i]);
 		}
 
-		const OperatorType& getOperatorByIndex(int i) const
-		{
-			assert(!useSu2Symmetry_);
-			assert(i>=0 && SizeType(i)<operators_.size());
-			return operators_[i];
+		bool useSu2Symmetry_;
+		ReducedOperatorsType& reducedOpImpl_;
+		typename PsimagLite::Vector<OperatorType>::Type& operators_;
+		const SparseMatrixType& ftransform;
+		const BasisType* thisBasis;
+		bool hasMpi_;
+	};
+
+	Operators(const BasisType* thisBasis)
+	    : useSu2Symmetry_(BasisType::useSu2Symmetry()),
+	      reducedOpImpl_(thisBasis),
+	      progress_("Operators")
+	{}
+
+	template<typename IoInputter>
+	Operators(IoInputter& io,
+	          SizeType level,
+	          const BasisType* thisBasis)
+	    : useSu2Symmetry_(BasisType::useSu2Symmetry()),
+	      reducedOpImpl_(io,level,thisBasis),
+	      progress_("Operators")
+	{
+		if (!useSu2Symmetry_) io.read(operators_,"#OPERATORS");
+
+		io.readMatrix(hamiltonian_,"#HAMILTONIAN");
+		reducedOpImpl_.setHamiltonian(hamiltonian_);
+	}
+
+	template<typename IoInputter>
+	void load(IoInputter& io)
+	{
+		if (!useSu2Symmetry_)
+			io.read(operators_,"#OPERATORS");
+		else reducedOpImpl_.load(io);
+
+		io.readMatrix(hamiltonian_,"#HAMILTONIAN");
+		reducedOpImpl_.setHamiltonian(hamiltonian_);
+	}
+
+	void setOperators(const typename PsimagLite::Vector<OperatorType>::Type& ops)
+	{
+		if (!useSu2Symmetry_) operators_=ops;
+		else reducedOpImpl_.setOperators(ops);
+	}
+
+	const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
+	{
+		assert(useSu2Symmetry_);
+		return reducedOpImpl_.getReducedOperatorByIndex(modifier,p);
+	}
+
+	const OperatorType& getOperatorByIndex(int i) const
+	{
+		assert(!useSu2Symmetry_);
+		assert(i>=0 && SizeType(i)<operators_.size());
+		return operators_[i];
+	}
+
+	const OperatorType& getReducedOperatorByIndex(int i) const
+	{
+		assert(useSu2Symmetry_);
+		return reducedOpImpl_.getReducedOperatorByIndex(i);
+	}
+
+	SizeType numberOfOperators() const
+	{
+		if (useSu2Symmetry_) return reducedOpImpl_.size();
+		return operators_.size();
+	}
+
+	void changeBasis(const SparseMatrixType& ftransform,
+	                 const BasisType* thisBasis)
+	{
+		typedef PsimagLite::Parallelizer<MyLoop> ParallelizerType;
+		ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
+		                              PsimagLite::MPI::COMM_WORLD);
+
+		MyLoop helper(useSu2Symmetry_,reducedOpImpl_,operators_,ftransform,thisBasis);
+
+		threadObject.loopCreate(numberOfOperators(),helper); // FIXME: needs weights
+
+		helper.gather();
+
+		changeBasis(hamiltonian_,ftransform);
+		reducedOpImpl_.changeBasisHamiltonian();
+	}
+
+	static void changeBasis(SparseMatrixType &v,const SparseMatrixType& ftransform)
+	{
+		SparseMatrixType transformConj;
+		transposeConjugate(transformConj,ftransform);
+		SparseMatrixType tmp = v*ftransform;
+		multiply(v,transformConj,tmp);
+	}
+
+	void reorder(const   VectorSizeType& permutation)
+	{
+		for (SizeType k=0;k<numberOfOperators();k++) {
+			if (!useSu2Symmetry_) reorder(operators_[k].data,permutation);
+			reducedOpImpl_.reorder(k,permutation);
 		}
+		reorder(hamiltonian_,permutation);
+		reducedOpImpl_.reorderHamiltonian(permutation);
+	}
 
-		const OperatorType& getReducedOperatorByIndex(int i) const
-		{
-			assert(useSu2Symmetry_);
-			return reducedOpImpl_.getReducedOperatorByIndex(i);
-		}
+	void setMomentumOfOperators(const   VectorSizeType& momentum)
+	{
+		reducedOpImpl_.setMomentumOfOperators(momentum);
+	}
 
-		SizeType numberOfOperators() const
-		{
-			if (useSu2Symmetry_) return reducedOpImpl_.size();
-			return operators_.size();
-		}
+	void setToProduct(const BasisType& basis2,
+	                  const BasisType& basis3,
+	                  SizeType x,
+	                  const BasisType* thisBasis)
+	{
+		if (!useSu2Symmetry_) operators_.resize(x);
+		reducedOpImpl_.setToProduct(basis2,basis3,x,thisBasis);
+	}
 
-		void changeBasis(const SparseMatrixType& ftransform,
-		                 const BasisType* thisBasis)
-		{
-			typedef PsimagLite::Parallelizer<MyLoop> ParallelizerType;
-			ParallelizerType threadObject(PsimagLite::Concurrency::npthreads,
-			                              PsimagLite::MPI::COMM_WORLD);
-
-			MyLoop helper(useSu2Symmetry_,reducedOpImpl_,operators_,ftransform,thisBasis);
-
-			threadObject.loopCreate(numberOfOperators(),helper); // FIXME: needs weights
-
-			helper.gather();
-
-			changeBasis(hamiltonian_,ftransform);
-			reducedOpImpl_.changeBasisHamiltonian();
-		}
-
-		static void changeBasis(SparseMatrixType &v,const SparseMatrixType& ftransform)
-		{
-			SparseMatrixType transformConj;
-			transposeConjugate(transformConj,ftransform);
-			SparseMatrixType tmp = v*ftransform;
-			multiply(v,transformConj,tmp);
-		}
-
-		void reorder(const typename PsimagLite::Vector<SizeType>::Type& permutation)
-		{
-			for (SizeType k=0;k<numberOfOperators();k++) {
-				if (!useSu2Symmetry_) reorder(operators_[k].data,permutation);
-				reducedOpImpl_.reorder(k,permutation);
-			}
-			reorder(hamiltonian_,permutation);
-			reducedOpImpl_.reorderHamiltonian(permutation);
-		}
-
-		void setMomentumOfOperators(const typename PsimagLite::Vector<SizeType>::Type& momentum)
-		{
-			reducedOpImpl_.setMomentumOfOperators(momentum);
-		}
-
-		void setToProduct(const BasisType& basis2,const BasisType& basis3,SizeType x,const BasisType* thisBasis)
-		{
-			if (!useSu2Symmetry_) operators_.resize(x);
-			reducedOpImpl_.setToProduct(basis2,basis3,x,thisBasis);
-		}
-
-		/* PSIDOC OperatorsExternalProduct
+	/* PSIDOC OperatorsExternalProduct
 		I will know explain how the full outer product between two operators
 		is implemented. If local operator $A$ lives in Hilbert space
 		$\mathcal{A}$ and local operator $B$ lives in Hilbert space
@@ -343,116 +348,119 @@ transformed operator can be used (or not because of the reason limitation above)
 		internal degree of freedom $\sigma$. See PTEXREF{setToProductOps}
 		and PTEXREF{HERE}.
 		*/
-		template<typename ApplyFactorsType>
-		void externalProduct(SizeType i,
-		                     const OperatorType& m,
-		                     int x,
-		                     const typename PsimagLite::Vector<RealType>::Type& fermionicSigns,
-		                     bool option,
-		                     ApplyFactorsType& apply)
-		{
-			assert(!useSu2Symmetry_);
-			PsimagLite::externalProduct(operators_[i].data,m.data,x,fermionicSigns,option);
-			// don't forget to set fermion sign and j:
-			operators_[i].fermionSign=m.fermionSign;
-			operators_[i].jm=m.jm;
-			operators_[i].angularFactor=m.angularFactor;
-			apply(operators_[i].data);
+	template<typename ApplyFactorsType>
+	void externalProduct(SizeType i,
+	                     const OperatorType& m,
+	                     int x,
+	                     const   VectorRealType& fermionicSigns,
+	                     bool option,
+	                     ApplyFactorsType& apply)
+	{
+		assert(!useSu2Symmetry_);
+		PsimagLite::externalProduct(operators_[i].data,m.data,x,fermionicSigns,option);
+		// don't forget to set fermion sign and j:
+		operators_[i].fermionSign=m.fermionSign;
+		operators_[i].jm=m.jm;
+		operators_[i].angularFactor=m.angularFactor;
+		apply(operators_[i].data);
+	}
+
+	void externalProductReduced(SizeType i,
+	                            const BasisType& basis2,
+	                            const BasisType& basis3,
+	                            bool option,
+	                            const OperatorType& A)
+	{
+		reducedOpImpl_.externalProduct(i,basis2,basis3,option,A);
+	}
+
+	template<typename ApplyFactorsType>
+	void outerProductHamiltonian(const SparseMatrixType& h2,
+	                             const SparseMatrixType& h3,
+	                             ApplyFactorsType& apply)
+	{
+		SparseMatrixType tmpMatrix;
+		assert(h2.row()==h2.col());
+		  VectorRealType ones(h2.row(),1.0);
+		PsimagLite::externalProduct(hamiltonian_,h2,h3.row(),ones,true);
+
+		PsimagLite::externalProduct(tmpMatrix,h3,h2.row(),ones,false);
+
+		hamiltonian_ += tmpMatrix;
+
+		apply(hamiltonian_);
+	}
+
+	void outerProductHamiltonianReduced(const BasisType& basis2,
+	                                    const BasisType& basis3,
+	                                    const SparseMatrixType& h2,
+	                                    const SparseMatrixType& h3)
+	{
+		reducedOpImpl_.outerProductHamiltonian(basis2,basis3,h2,h3);
+	}
+
+	void setHamiltonian(SparseMatrixType const &h)
+	{
+		hamiltonian_=h;
+		reducedOpImpl_.setHamiltonian(h);
+	}
+
+	const SparseMatrixType& hamiltonian() const { return hamiltonian_; }
+
+	const SparseMatrixType& reducedHamiltonian() const
+	{
+		return reducedOpImpl_.hamiltonian();
+	}
+
+	//const   VectorSizeType& electrons() const {return operatorsImpl_.electrons(); }
+
+	void print(int ind= -1) const
+	{
+		if (!useSu2Symmetry_) {
+			if (ind<0)
+				for (SizeType i=0;i<operators_.size();i++) std::cerr<<operators_[i];
+			else std::cerr<<operators_[ind];
+		} else {
+			reducedOpImpl_.print(ind);
 		}
+	}
 
-		void externalProductReduced(SizeType i,
-		                            const BasisType& basis2,
-		                            const BasisType& basis3,
-		                            bool option,
-		                            const OperatorType& A)
-		{
-			reducedOpImpl_.externalProduct(i,basis2,basis3,option,A);
-		}
+	template<typename IoOutputter>
+	void save(IoOutputter& io,const PsimagLite::String& s) const
+	{
+		if (!useSu2Symmetry_) io.printVector(operators_,"#OPERATORS");
+		else reducedOpImpl_.save(io,s);
+		io.printMatrix(hamiltonian_,"#HAMILTONIAN");
+	}
 
-		template<typename ApplyFactorsType>
-		void outerProductHamiltonian(const SparseMatrixType& h2,const SparseMatrixType& h3,ApplyFactorsType& apply)
-		{
-			SparseMatrixType tmpMatrix;
-			assert(h2.row()==h2.col());
-			typename PsimagLite::Vector<RealType>::Type ones(h2.row(),1.0);
-			PsimagLite::externalProduct(hamiltonian_,h2,h3.row(),ones,true);
+	template<typename IoOutputter>
+	void saveEmpty(IoOutputter& io,const PsimagLite::String& s) const
+	{
+		PsimagLite::Vector<SizeType>::Type tmp;
+		if (!useSu2Symmetry_) io.printVector(tmp,"#OPERATORS");
+		else reducedOpImpl_.saveEmpty(io,s);
+		PsimagLite::Matrix<SizeType> tmp2(0,0);
+		io.printMatrix(tmp2,"#HAMILTONIAN");
+	}
 
-			PsimagLite::externalProduct(tmpMatrix,h3,h2.row(),ones,false);
+	SizeType size() const { return operators_.size(); }
 
-			hamiltonian_ += tmpMatrix;
+private:
 
-			apply(hamiltonian_);
-		}
+	void reorder(SparseMatrixType &v,const   VectorSizeType& permutation)
+	{
+		SparseMatrixType matrixTmp;
 
-		void outerProductHamiltonianReduced(const BasisType& basis2,
-		                                    const BasisType& basis3,
-		                                    const SparseMatrixType& h2,
-		                                    const SparseMatrixType& h3)
-		{
-			reducedOpImpl_.outerProductHamiltonian(basis2,basis3,h2,h3);
-		}
+		permute(matrixTmp,v,permutation);
+		permuteInverse(v,matrixTmp,permutation);
+	}
 
-		void setHamiltonian(SparseMatrixType const &h)
-		{
-			hamiltonian_=h;
-			reducedOpImpl_.setHamiltonian(h);
-		}
-
-		const SparseMatrixType& hamiltonian() const { return hamiltonian_; }
-
-		const SparseMatrixType& reducedHamiltonian() const
-		{
-			return reducedOpImpl_.hamiltonian();
-		}
-
-		//const typename PsimagLite::Vector<SizeType>::Type& electrons() const {return operatorsImpl_.electrons(); }
-
-		void print(int ind= -1) const
-		{
-			if (!useSu2Symmetry_) {
-				if (ind<0) for (SizeType i=0;i<operators_.size();i++) std::cerr<<operators_[i];
-				else std::cerr<<operators_[ind];
-			} else {
-				reducedOpImpl_.print(ind);
-			}
-		}
-
-		template<typename IoOutputter>
-		void save(IoOutputter& io,const PsimagLite::String& s) const
-		{
-			if (!useSu2Symmetry_) io.printVector(operators_,"#OPERATORS");
-			else reducedOpImpl_.save(io,s);
-			io.printMatrix(hamiltonian_,"#HAMILTONIAN");
-		}
-
-		template<typename IoOutputter>
-		void saveEmpty(IoOutputter& io,const PsimagLite::String& s) const
-		{
-			PsimagLite::Vector<SizeType>::Type tmp;
-			if (!useSu2Symmetry_) io.printVector(tmp,"#OPERATORS");
-			else reducedOpImpl_.saveEmpty(io,s);
-			PsimagLite::Matrix<SizeType> tmp2(0,0);
-			io.printMatrix(tmp2,"#HAMILTONIAN");
-		}
-
-		SizeType size() const { return operators_.size(); }
-
-	private:
-
-		void reorder(SparseMatrixType &v,const typename PsimagLite::Vector<SizeType>::Type& permutation)
-		{
-			SparseMatrixType matrixTmp;
-
-			permute(matrixTmp,v,permutation);
-			permuteInverse(v,matrixTmp,permutation);
-		}
-
-		bool useSu2Symmetry_;
-		ReducedOperatorsType reducedOpImpl_;
-		typename PsimagLite::Vector<OperatorType>::Type operators_;
-		SparseMatrixType hamiltonian_;
-		PsimagLite::ProgressIndicator progress_;
-	}; //class Operators
+	bool useSu2Symmetry_;
+	ReducedOperatorsType reducedOpImpl_;
+	typename PsimagLite::Vector<OperatorType>::Type operators_;
+	SparseMatrixType hamiltonian_;
+	PsimagLite::ProgressIndicator progress_;
+}; //class Operators
 } // namespace Dmrg
 
 /*@}*/
