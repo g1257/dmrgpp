@@ -360,7 +360,7 @@ The actual task is delegated to the \cppClass{Basis} class
 In Fig.~\ref{fig:infiniteloop}(d) the diagonalization of the Hamiltonian for block pSE
 is performed,
 and the ground state vector is computed and stored in psi, following Eq.~(\ref{eq:psi}).
-The object called concurrency is used to handle parallelization over matrix blocks 
+The object called concurrency is used to handle parallelization over matrix blocks
 related to symmetries present in the model (see section).
 Next, in Fig.~\ref{fig:infiniteloop}(e) the bases are changed
 following Eqs.~(\ref{eq:rhoSystem},\ref{eq:rhoEnviron},\ref{eq:transformation}),
@@ -416,9 +416,97 @@ their labels are always known (see Fig.~\ref{fig:sxye}).
 
 \ptexPaste{BasisPartition}
 
-\subsection{Local Symmetries}
 \ptexPaste{BasisSetToProduct}
 
+\subsection{Product of Spaces}
+If $\mathcal{V}_1$ is a Hilbert space of dimension $n_1$, and $\mathcal{V}_2$ is a
+Hilbert space of dimension $n_2$, then a
+state $\psi\in\mathcal{V}_1\otimes\mathcal{V}_2$ is given by:
+$\psi_{\alpha,\beta}$ with $\alpha\in\mathcal{V}_1$ and $\beta\in\mathcal{V}_2$. In
+DMRG++ a single index is used to ``pack''
+$\alpha$ and $\beta$ together, like this $\alpha + n_1 \beta$ (you can prove that this
+is a bijection from
+$(\alpha,\beta)\longleftrightarrow \alpha + n_1 \beta$. This isn't the complete packing,
+however, because we need to reorder
+the states for symmetry reasons. We use then a permutation (actually it's the inverse
+permutation in the code) $P^{-1}$.
+Putting all together you get
+$\psi_i$,  with  $i=P^{-1}(\alpha + n_1 \beta)$. I like to write it more formally
+with a Kronecker delta, like this:
+$\sum_{i}\psi_i \delta_{P(i),\alpha+n_1\beta}$. Note how, for fixed $\alpha$ and
+$\beta$, the $\delta$ picks up the correct
+(packed and permuted) index $i$.
+
+
+\subsection{Left, Right, and Super}
+In standard DMRG, states are decomposed into left, right and super[block] spaces.
+The left and right spaces are further decomposed
+into a block plus a site, on the left side; and site plus a block, on the right side.
+There are then 3 products of spaces, giving
+rise to 3 packings  and 3 permutations. I use the notations $P_S$, $P_E$, and $P_{SE}$,
+respectively (or its inverses).
+The words left and system, right and environment, and super[block] and
+system-environment are used interchangably in the code.
+
+Consider the system or left block $\mathcal{S}$ as $\mathcal{S'}$ plus a site, like this:
+$\mathcal{S}=\mathcal{S'}\otimes\mathcal{V}_1$. Consider an operator $A_{x_1,x_1'}$
+acting on the space of one site,
+$\mathcal{V}_1$ such that both $x_1,x_1'\in\mathcal{V}_1$. Consider the superblock
+$\mathcal{S'}\otimes\mathcal{V}_1\otimes\mathcal{E}\equiv\mathcal{S}\otimes\mathcal{E}$.
+Consider a state on the superblock $\psi$. Then the $j-$th component of $A\psi$ is
+\begin{eqnarray}
+(A\psi)_j &=& \sum \delta_{P_{SE}(i),x+y n_s} \delta_{P_S(x),x0+x1 n_0)} A_{x_1,x_1'} \\
+& & \delta_{x',P_S^{-1}(x0+x1' n_0)}  \delta_{j,P_{SE}^{-1}(x'+y'n_s)}  \psi_i  f_S(x)
+\end{eqnarray}
+A sum over all indices except $j$ is assumed.
+Let's analyze this. Because $i$ is in the superblock, it's packed and permuted,
+so we have to unpack it and un-permute it, that is,
+find $x\in\mathcal{S}$ and $y\in\mathcal{E}$
+that correspond to it. Formally, in the equation in this paper, the delta picks up
+the right
+one: $\delta_{P_{SE}(i),x+y n_s}$. In the code we simply apply the permutation
+$P_{SE}$ to $i$ and then divide
+by $n_s$. The quotient is $y$ and the remainder is $x$.  Now, $A$ does not act on
+$\mathcal{E}$, so $y$ will remain the same.
+But $x\in\mathcal{S'}\otimes\mathcal{V}_1$, so again, we need to unpack it and
+un- permute it. That's what the next delta,
+$\delta_{P_S(x),x0+x1 n_0}$ does. Note that now the permutation is
+$P_S$ as opposed to $P_{SE}$. We are ready now to apply $A$, with
+$A_{x_1,x_1'}$.
+
+Next, the reverse procedure must be applied. We need to pack $x_0 ,x_1',y$
+into a single index and perform all permutations. We do this in two stages
+(two $\delta$s).
+The first one does $x_0,x_1'$ into $x'$, the second one $x',y$ into $j$,
+which is the free index.
+
+In the above, I left out a few complications, which I will now attend to.
+
+\subsubsection{Fermionic Sign}
+To apply $A_{x_1,x_1'}$ to $(x_0,x_1)$ we need to step over $x_0$, that is,
+the space  $\mathcal{S'}$. If $A$ is fermionic we might pick up a sign.
+This sign will be equal to 1 if the number of electrons of state $x_0$ is even,
+and -1 otherwise. This is represented by $ f_S(x)$ in the equation above.
+
+\subsubsection{Vectors in chunks}
+Because of symmetry, the vector $\psi$ has only one (or a few) non-zero chunks.
+Then we ought not to loop or sum over the whole superblock like in $\sum_i$.
+Instead, we need to only loop or sweep or sum over the non-zero chunk(s).
+This is easily taken care of by storing the partition of the superblock, and is mostly
+straightforward, except that there is one complication we must attend to.
+For simplicity, assume that $\psi$ has only one chunk. Then if the resulting $j$ is
+outside $\psi$'s chunk, $A\psi$ and $\psi$ will have
+different symmetries, and $A\psi$ will need to be stored in a different chunk.
+The DMRG++ class \verb!VectorWithOffsets! does this transparently.
+For performance reasons, there
+is also a \verb!VectorWithOffset! class to use when we know $A$ does not transport
+$\psi$ into a different symmetry chunk.
+
+\subsubsection{Sparse matrices}
+The matrix $A$ is usually stored in a sparse format. DMRG++ uses compressed
+row storage (CRS, REFERENCE HERE FIXME). Therefore the looping is done according
+to the CRS scheme.
+See the loop in \verb!ApplyOperatorLocal.h!, line 155 or whereabouts.
 \subsection{SU(2) Symmetry}
 
 \section{Hilbert Space Basis II: DmrgBasisWithOperators}
