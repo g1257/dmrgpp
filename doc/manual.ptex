@@ -24,14 +24,16 @@
 \newcommand{\cppFunction}[1]{{\tt #1}}
 % for the cover page:
 \newcommand{\HRule}{\noindent\rule{\linewidth}{1.5pt}}
-\newcommand{\ptexPaste}[1]{\fbox{\textcolor{red}{PLEASE RUN ptex.pl on this .ptex source to obtain the correct test for tag #1}}}
+\newcommand{\ptexPaste}[1]{\fbox{\textcolor{red}{PLEASE RUN ptex.pl on this .ptex source
+to obtain the correct test for tag #1}}}
 \newcommand{\ptexLabel}[1]{\ptexPaste{#1}}
 \newcommand{\ptexInterface}[1]{\ptexPaste{#1}}
 \newcommand{\ptexReadFile}[1]{\ptexPaste{#1}}
 \newcommand{\ptexReadFileVerbatim}[1]{\ptexPaste{#1}}
 
 \hyphenation{Wave-Function-Transformation}
-\lstset{language=c++,basicstyle=\footnotesize\ttfamily,keywordstyle=\color{blue}\bfseries,frame=shadowbox}
+\lstset{language=c++,basicstyle=\footnotesize\ttfamily,
+keywordstyle=\color{blue}\bfseries,frame=shadowbox}
 \pagestyle{fancy}
 \begin{document}
 
@@ -170,13 +172,18 @@ dmrgSolver.main();
 \section{DMRG Engine}
 \subsection{DMRG Algorithm}
 Let us define {\it block} to mean a finite set of sites.
-Let $C$ denote the states of a single site. This set is model dependent. For the Hubbard model it is given by:
-$C=\{e,\uparrow,\downarrow,(\uparrow,\downarrow)\}$, where $e$ is a formal element that denotes an empty state.
-For the t-J model it is given by  $C=\{e,\uparrow,\downarrow\}$, and for the Heisenberg model by  $C=\{\uparrow,\downarrow\}$.
+Let $C$ denote the states of a single site. This set is model dependent. For the
+Hubbard model it is given by:
+$C=\{e,\uparrow,\downarrow,(\uparrow,\downarrow)\}$, where $e$ is a formal element that
+denotes an empty state.
+For the t-J model it is given by  $C=\{e,\uparrow,\downarrow\}$, and for the Heisenberg
+model by  $C=\{\uparrow,\downarrow\}$.
 A {\it real-space-based Hilbert space} $\mathcal{V}$ on a block $B$ and  set $C$ is a
- Hilbert space with basis $B^{C}$.  I will simply denote this as $\mathcal{V}(B)$ and assume that $C$
+ Hilbert space with basis $B^{C}$.  I will simply denote this as $\mathcal{V}(B)$ and
+ assume that $C$
  is implicit and fixed.
-A {\it real-space-based Hilbert space} can also be thought of as the external product space of $\#B$ Hilbert spaces on a site, one for each
+A {\it real-space-based Hilbert space} can also be thought of as the external product
+space of $\#B$ Hilbert spaces on a site, one for each
  site in block $B$.
 We will consider general Hamiltonians   that
  act on Hilbert spaces $\mathcal{V}$, as previously defined.
@@ -184,68 +191,101 @@ We will consider general Hamiltonians   that
 \ptexPaste{DmrgSolverInfiniteDmrgLoop}
 \ptexPaste{DmrgSolverFiniteDmrgLoops}
 
-The advantage of the DMRG algorithm is that the truncation procedure described above keeps the error bounded and small.
+The advantage of the DMRG algorithm is that the truncation procedure described
+above keeps the error bounded and small.
 Assume $m_S=m_E=m$.
-At each DMRG step\cite{re:dechiara08} the truncation error $\epsilon_{tr}=\sum_{i>m} \lambda_i$, where $\lambda_i$ are the eigenvalues of the
-truncated density matrix $\rho_S$ in decreasing order. The parameter $m$ should be chosen such that $\epsilon_{tr}$ remains small, say \cite{re:dechiara08}
-$\epsilon_{tr}<10^{-6}$. For critical 1D systems $\epsilon_{tr}$ decays as a function of $m$ with a  power law, while for 1D system
-away from criticality it decays exponentially. For a more detailed description of the error introduced by the DMRG truncation in other
+At each DMRG step\cite{re:dechiara08} the truncation error
+$\epsilon_{tr}=\sum_{i>m} \lambda_i$, where $\lambda_i$ are the eigenvalues of the
+truncated density matrix $\rho_S$ in decreasing order. The parameter $m$ should
+be chosen such that $\epsilon_{tr}$ remains small, say \cite{re:dechiara08}
+$\epsilon_{tr}<10^{-6}$. For critical 1D systems $\epsilon_{tr}$ decays as a function
+of $m$ with a  power law, while for 1D system
+away from criticality it decays exponentially. For a more detailed description of
+the error introduced by the DMRG truncation in other
 systems see \cite{re:dechiara08,re:schollwock05,re:hallberg06,re:rodriguez02}.
 
 \subsection{Driver Program}
-Let us motivate the discussion by introducing a typical problem to be solved by DMRG: ``Using the DMRG method,
-one would like to calculate the local density of states on all sites for a Hubbard model with
+Let us motivate the discussion by introducing a typical problem to be solved by
+DMRG: ``Using the DMRG method,
+one would like to calculate the local density of states on all sites for a Hubbard
+model with
 inhomogeneous Hubbard U values on a one-dimensional (1D) chain''.
-We want to modularize as many tasks mentioned in the last sentence as possible. We certainly want to separate the DMRG solver from the model in question,
+We want to modularize as many tasks mentioned in the last sentence as possible.
+We certainly want to separate the DMRG solver from the model in question,
 since we could later want to do the same calculation for the t-J model; and
-the model from the lattice, since we might want to do the same calculation on, say, a n-leg ladder, instead of a 1D chain.
-C++ is a computer language that is very fit for this purpose, since it allows to template classes.
-Then we can write a C++ class to implement the DMRG method (\cppClass{DmrgSolver} class),  and template this class
-on a strongly-correlated-electron (SCE) model template, so that we can delegate all SCE model related code to the SCE model class.
+the model from the lattice, since we might want to do the same calculation on, say,
+a n-leg ladder, instead of a 1D chain.
+C++ is a computer language that is very fit for this purpose, since it allows to
+template classes.
+Then we can write a C++ class to implement the DMRG method (\cppClass{DmrgSolver}
+class),  and template this class
+on a strongly-correlated-electron (SCE) model template, so that we can delegate all
+SCE model related code to the SCE model class.
 
-However, for DmrgSolver to be able to use a given SCE model, we need a convention that such SCE model class
+However, for DmrgSolver to be able to use a given SCE model, we need a convention
+that such SCE model class
 will have to follow.
-This is known as a C++ public interface, and for a SCE model it is given in  \cppClass{DmrgModelBase}.
+This is known as a C++ public interface, and for a SCE model it is given in
+\cppClass{DmrgModelBase}.
 To do the calculation for a new SCE model, we simply need to
- implement all functions found in \cppClass{DmrgModelBase}  \emph{without} changing the \cppClass{DmrgSolver} class.
-The model will, in turn, be templated on the geometry. For example, the Hubbard model  with
-inhomogeneous Hubbard U values and inhomogeneous hoppings (class \cppClass{DmrgModelHubbard})
+ implement all functions found in \cppClass{DmrgModelBase}  \emph{without}
+ changing the \cppClass{DmrgSolver} class.
+The model will, in turn, be templated on the geometry. For example,
+the Hubbard model  with
+inhomogeneous Hubbard U values and inhomogeneous hoppings
+(class \cppClass{DmrgModelHubbard})
 delegates all geometry related operations to a templated geometry class.
-Then \cppClass{DmrgModelHubbard} can be used for, say, one-dimensional chains and n-leg ladders \emph{without} modification.
+Then \cppClass{DmrgModelHubbard} can be used for, say, one-dimensional
+chains and n-leg ladders \emph{without} modification.
 This is done by just instantiating
  \cppClass{DmrgModelHubbard} with the appropriate
 geometry class, either \cppClass{DmrgGeometryOneD} or
-\cppClass{DmrgGeometryLadder}, or some other class that the reader may wish to write, which implements the interface given in
+\cppClass{DmrgGeometryLadder}, or some other class that the reader may wish
+to write, which implements the interface given in
 \cppClass{DmrgGeometryBase}.
 \todo{Add figure showing interfaces}
 
 In the following sections I will describe these different modules. Since the reader
-may wish to first understand how the DMRG method is implemented, I will start with the core C++ classes that implement the method.
+may wish to first understand how the DMRG method is implemented, I will
+start with the core C++ classes that implement the method.
 The user of the program
-will not need to change these core classes to add functionality. Instead, new models and geometries can be added by creating implementations
-for \cppClass{DmrgModelBase} and \cppClass{DmrgGeometryBase}, and those public interfaces will be explained next.
+will not need to change these core classes to add functionality. Instead,
+new models and geometries can be added by creating implementations
+for \cppClass{DmrgModelBase} and \cppClass{DmrgGeometryBase}, and
+those public interfaces will be explained next.
 
-But for now I end this section by briefly describing the ``driver'' program  for a Hubbard model on a 1D chain (see file \verb!dmrg.cpp!).
-There, \cppClass{DmrgSolver} is instantiated with \cppClass{DmrgModelHubbard}, since in this case one wishes to perform the calculation for the Hubbard model.
-In turn, \cppClass{DmrgModelHubbard}  is instantiated with  \cppClass{DmrgGeometryOneD} since now one wishes to perform the calculation on a 1D chain.
+But for now I end this section by briefly describing the ``driver'' program
+for a Hubbard model on a 1D chain (see file \verb!dmrg.cpp!).
+There, \cppClass{DmrgSolver} is instantiated with \cppClass{DmrgModelHubbard},
+since in this case one wishes to perform the calculation for the Hubbard model.
+In turn, \cppClass{DmrgModelHubbard}  is instantiated with
+\cppClass{DmrgGeometryOneD} since now one wishes to perform the calculation on a 1D chain.
 
 \todo{Expand the driver explanation}
 
 \subsection{DmrgSolver and The ``Infinite'' DMRG Algorithm}
-The purpose of the \cppClass{DmrgSolver} class is to perform  the loop for the DMRG ``infinite algorithm'' discussed before.
+The purpose of the \cppClass{DmrgSolver} class is to perform  the loop
+for the DMRG ``infinite algorithm'' discussed before.
 This class  also performs
-the ``finite algorithm''  \cite{re:schollwock05} to allow for the calculation of static (and in the future dynamic)
+the ``finite algorithm''  \cite{re:schollwock05} to allow for the
+calculation of static (and in the future dynamic)
 observables, such as static correlations.
 
 The program is structured as a series of header files containing the
-implementation\footnote{Traditionally, implementation is written in cpp files that are compiled separately. However, here templates
-are used heavily, and to avoid complications related to templates that some C++ compilers cannot handle,
- we choose to have only one translation unit.} with each class written in the header file of the same name,
+implementation\footnote{Traditionally, implementation is written in cpp files
+that are compiled separately. However, here templates
+are used heavily, and to avoid complications related to templates that some
+C++ compilers cannot handle,
+ we choose to have only one translation unit.} with each class written
+ in the header file of the same name,
  and a ``driver'' program that uses the
 capabilities provided by the header files to solve a specific problem.
-To simplify the discussion, we start where the ``driver program'' starts, in its \cppFunction{int main()} function,
-which calls \cppFunction{dmrgSolver.main()}, whose main work is to perform  the loop for the
-``infinite'' DMRG algorithm. Let us now discuss this loop which is found in the \cppFunction{infiniteDmrgLoop} function,
+To simplify the discussion, we start where the ``driver program'' starts,
+in its \cppFunction{int main()} function,
+which calls \cppFunction{dmrgSolver.main()}, whose main work is to perform
+the loop for the
+``infinite'' DMRG algorithm. Let us now discuss this loop which is found in
+the \cppFunction{infiniteDmrgLoop} function,
 and is sketched in Fig.~\ref{fig:infiniteloop}.
 
 \begin{figure}
@@ -265,36 +305,49 @@ for (step=0;step<X.size();step++) {
   checkpoint_.push(pS,pE); //(g)
 }
 \end{lstlisting}
-\caption{\label{fig:infiniteloop}Implementation of the ``infinite'' DMRG loop for a general SCE model
+\caption{\label{fig:infiniteloop}Implementation of the ``infinite'' DMRG loop
+for a general SCE model
  on a general geometry.}
 \end{figure}
 %Again have in mind that the geometry is shown schematically in Figure~\ref{fig:sxye}.
-In Fig.~\ref{fig:infiniteloop}(a) the system pS is grown by adding the sites contained in block X[step]. Note that X is a vector of blocks to
+In Fig.~\ref{fig:infiniteloop}(a) the system pS is grown by adding the sites
+contained in block X[step]. Note that X is a vector of blocks to
 be added one at a time\footnote{So X is a vector of vector of integers, and
 X[step] is a vector of integers.}.  The block X[step] (usually just a single site)
 is  added \emph{to the right of} pS.  The result is stored in \verb!lrs_.left()!.
-Similarly is done in Fig.~\ref{fig:infiniteloop}(b) for the environment: the block Y[step]  (usually just a single site) is added to the environment
+Similarly is done in Fig.~\ref{fig:infiniteloop}(b) for the environment:
+the block Y[step]  (usually just a single site) is added to the environment
  given in pE and stored in \verb!lrs_.right()!.
 This time the addition is
 done \emph{to the left of} pE, since pE is the environment.
-In Fig.~\ref{fig:infiniteloop}(c) the outer product of \verb!lrs_.left()! (the new system) and \verb!lrs_.right()! (the new environment) is made and stored in pSE.
-The actual task is delegated to the \cppClass{Basis} class (see Section~\ref{sec:dmrgbasis}).
-In Fig.~\ref{fig:infiniteloop}(d) the diagonalization of the Hamiltonian for block pSE is performed,
-and the ground state vector is computed and stored in psi, following Eq.~(\ref{eq:psi}). %
-%The object called concurrency is used to handle parallelization over matrix blocks related to symmetries present in the model (see section).
+In Fig.~\ref{fig:infiniteloop}(c) the outer product of \verb!lrs_.left()!
+(the new system) and \verb!lrs_.right()! (the new environment) is made and stored in pSE.
+The actual task is delegated to the \cppClass{Basis} class
+(see Section~\ref{sec:dmrgbasis}).
+In Fig.~\ref{fig:infiniteloop}(d) the diagonalization of the Hamiltonian for block pSE
+is performed,
+and the ground state vector is computed and stored in psi, following Eq.~(\ref{eq:psi}).
+The object called concurrency is used to handle parallelization over matrix blocks 
+related to symmetries present in the model (see section).
 Next, in Fig.~\ref{fig:infiniteloop}(e) the bases are changed
-following Eqs.~(\ref{eq:rhoSystem},\ref{eq:rhoEnviron},\ref{eq:transformation}),  truncated if necessary, and the result is stored in
+following Eqs.~(\ref{eq:rhoSystem},\ref{eq:rhoEnviron},\ref{eq:transformation}),
+truncated if necessary, and the result is stored in
 pS for the system, and in pE, Fig.~\ref{fig:infiniteloop}(f),
-for the environment. Note that this overwrites the old pS and pE, preparing these variable for the next DMRG step.
+for the environment. Note that this overwrites the old pS and pE, preparing these
+variable for the next DMRG step.
 
-A copy of the current state of the system is pushed into a last-in-first-out stack in Fig.~\ref{fig:infiniteloop}(g),
+A copy of the current state of the system is pushed into a last-in-first-out stack
+in Fig.~\ref{fig:infiniteloop}(g),
 so that it can later be used in the finite DMRG algorithm (not discussed here, see code).
-The loop continues until all blocks in vector of blocks X have been added to the initial system S, and all blocks in vector of blocks Y have been added to
-the initial environment E. We repeat again that  vector of sites are used instead of simply sites to generalize the growth process,
+The loop continues until all blocks in vector of blocks X have been added to the initial
+system S, and all blocks in vector of blocks Y have been added to
+the initial environment E. We repeat again that  vector of sites are used instead of
+simply sites to generalize the growth process,
 in case one might want to add more than one site at a time.
 
 The implementation of
-the steps mentioned in the previous paragraph (i.e., growth process,  outer products, diagonalization, change of basis and truncation)
+the steps mentioned in the previous paragraph (i.e., growth process,  outer products,
+diagonalization, change of basis and truncation)
 are described in \todo{FIXME}.
 
 \subsection{Finite Algorithm}
@@ -302,14 +355,20 @@ are described in \todo{FIXME}.
 \section{Hilbert Space Basis I: DmrgBasis and Symmetries}\label{sec:dmrgbasis}
 
 \subsection{Local Symmetries}
-DMRG++ has two C++ classes that handle the concept of a basis (of a Hilbert space). The first one (\cppClass{DmrgBasis}) handles reordering
+DMRG++ has two C++ classes that handle the concept of a basis (of a Hilbert space).
+The first one (\cppClass{DmrgBasis}) handles reordering
 and symmetries in a general way, without the need to consider operators.
-The second one (\cppClass{DmrgBasisWithOperators})  does consider operators, and will be explained in
-the next sub-section. The advantage of dividing  functionality in this way will become apparent later.
+The second one (\cppClass{DmrgBasisWithOperators})  does consider operators, and
+will be explained in
+the next sub-section. The advantage of dividing  functionality in this way will
+become apparent later.
 
-In any actual computer simulation the ``infinite'' DMRG loop will actually stop at a certain point.
-Let us say that it stops after 50 sites have been added to the system\footnote{For simplicity, this explanatory text considers the case of
-blocks having a single site, so one site is added at a time, but a more general case can be handled by the code.}.
+In any actual computer simulation the ``infinite'' DMRG loop will actually stop at
+a certain point.
+Let us say that it stops after 50 sites have been added to the
+system\footnote{For simplicity, this explanatory text considers the case of
+blocks having a single site, so one site is added at a time, but a more general
+case can be handled by the code.}.
 There will also be at this point another 50 sites that constitute the environment.
 Now, from the beginning each of these 100 sites is given a fixed number from 0 to 99.
 Therefore, sites are always labeled in a fixed way and
@@ -333,7 +392,8 @@ their labels are always known (see Fig.~\ref{fig:sxye}).
 \subsection{Outer Product of Operators}\label{subsec:dmrgBasisWithOperators}
 \ptexPaste{BasisWithOperators}
 
-Let us now go back to the ``infinite'' DMRG loop and discuss in more detail Fig.~\ref{fig:infiniteloop}(a) ((b) is similar)), i.e.,
+Let us now go back to the ``infinite'' DMRG loop and discuss in more detail
+Fig.~\ref{fig:infiniteloop}(a) ((b) is similar)), i.e.,
 the function grow().
 
 \ptexPaste{LeftRightSuperGrow}
@@ -343,54 +403,86 @@ the function grow().
 \ptexPaste{Operators}
 
 Let us now examine in more detail Fig.~\ref{fig:infiniteloop}(c), where
-we form the outer product of the current system and current environment, and calculate its Hamiltonian.
-We could use the same procedure as outlined in the previous paragraph, i.e., to use the DmrgBasisWithOperators class
+we form the outer product of the current system and current environment,
+and calculate its Hamiltonian.
+We could use the same procedure as outlined in the previous paragraph, i.e.,
+to use the DmrgBasisWithOperators class
 to resize the matrices for all local operators.
-Storing matrices in this case (even in a sparse way and even considering that there is truncation) would be too much of
-a penalty for performance. Therefore, in this latter case we do the outer product on-the-fly only, without storing any matrices.
+Storing matrices in this case (even in a sparse way and even considering that
+there is truncation) would be too much of
+a penalty for performance. Therefore, in this latter case we do the outer product
+on-the-fly only, without storing any matrices.
 In Fig.~\ref{fig:infiniteloop}(c)  pSE contains the outer product
-of system and environment, but pSE is only a \cppClass{Basis} object, not a \cppClass{BasisWithOperators} object, i.e., it does not
-contain operators. In the code see \cppFunction{setToProductSolver}, and \cppFunction{setToProductLrs}.
+of system and environment, but pSE is only a \cppClass{Basis} object, not a
+\cppClass{BasisWithOperators} object, i.e., it does not
+contain operators. In the code see \cppFunction{setToProductSolver}, and
+\cppFunction{setToProductLrs}.
 
-We now consider Fig.~\ref{fig:infiniteloop}(d), where the diagonalization of the  system's plus environment's Hamiltonian is performed.
-Since \verb!lrs_.super()!, being only a \cppClass{Basis} object, does not contain all the information related to the outer product of system and environment
-(as we saw, this would be prohibitively expensive), we need to pass the system's basis (pSprime) and the environment's basis (pEprime) to
-the diagonalization functor \cppFunction{diagonalization\_()}, see \cppFunction{Diagonalization}, in order to be able to form the outer product on-the-fly.
-There,  since \verb!lrs_.super()! does provide information about effective symmetry blocking, we block the Hamiltonian matrix using effective symmetry,
-and call  \cppFunction{diagonaliseOneBlock()}, see  \cppFunction{diagonaliseOneBlock}, for each symmetry block. Only those matrix blocks
-that contain the desired or targeted number of electrons (or other local symmetry) will be considered.
+We now consider Fig.~\ref{fig:infiniteloop}(d), where the diagonalization of the
+system's plus environment's Hamiltonian is performed.
+Since \verb!lrs_.super()!, being only a \cppClass{Basis} object, does not contain
+all the information related to the outer product of system and environment
+(as we saw, this would be prohibitively expensive), we need to pass
+the system's basis (pSprime) and the environment's basis (pEprime) to
+the diagonalization functor \cppFunction{diagonalization\_()}, see
+\cppFunction{Diagonalization}, in order to be able to form the outer product on-the-fly.
+There,  since \verb!lrs_.super()! does provide information about effective symmetry
+blocking, we block the Hamiltonian matrix using effective symmetry,
+and call  \cppFunction{diagonaliseOneBlock()}, see  \cppFunction{diagonaliseOneBlock},
+for each symmetry block. Only those matrix blocks
+that contain the desired or targeted number of electrons (or other local symmetry)
+will be considered.
 
 \subsection{Truncation}
 \ptexPaste{Truncation}
 \ptexPaste{DiagOfDensityMatrix}
 
 \subsection{Lanczos Solver}\label{sec:lanczos}
-To diagonalize Hamiltonian $H$ we use the Lanczos method\cite{re:lanczos50,re:pettifor85}, although this is also templated.
+To diagonalize Hamiltonian $H$ we use the Lanczos
+method\cite{re:lanczos50,re:pettifor85}, although this is also templated.
 
-For the Lanczos diagonalization method we also want to provide as much code isolation and modularity as possible.
+For the Lanczos diagonalization method we also want to provide as much code
+isolation and modularity as possible.
 The Lanczos method needs only to know how
-to perform the operation $x+=Hy$, given vectors $x$ and $y$. Using this fact, we can separate the matrix type from the Lanczos method.
-To keep the discussion short this is not addressed here, but can be seen in the \cppFunction{diagonaliseOneBlock()} function, and in
-classes \cppClass{SolverLanczos}, \cppClass{HamiltonianInternalProduct}, and \cppClass{DmrgModelHelper}.
-The first of these classes contains an implementation of the Lanczos method that is templated on
-a class that simply has to provide the operation $x+=Hy$ and, therefore, it is generic and valid for any SCE model.
-It is important to remark that the operation  $x+=Hy$ is finally delegated to the model in question.
-As an example,  the operation $x+=Hy$ for the Hubbard model is performed in function \cppFunction{matrixVectorProduct()} in class \cppClass{DmrgModelHubbard}.
-This function performs only three tasks: (i)  $x+=H_{system}y$, (ii) $x+=H_{environment}y$ and (iii) $x+=H_{connection}y$.
-The fist two are straightforward, so we focus on the last one, in \cppFunction{hamiltonianConnectionProduct()},
+to perform the operation $x+=Hy$, given vectors $x$ and $y$. Using this fact,
+we can separate the matrix type from the Lanczos method.
+To keep the discussion short this is not addressed here, but can be seen in
+the \cppFunction{diagonaliseOneBlock()} function, and in
+classes \cppClass{SolverLanczos}, \cppClass{HamiltonianInternalProduct},
+and \cppClass{DmrgModelHelper}.
+The first of these classes contains an implementation of the Lanczos method
+that is templated on
+a class that simply has to provide the operation $x+=Hy$ and, therefore, it
+is generic and valid for any SCE model.
+It is important to remark that the operation  $x+=Hy$ is finally delegated to the
+model in question.
+As an example,  the operation $x+=Hy$ for the Hubbard model is performed in
+function \cppFunction{matrixVectorProduct()} in class \cppClass{DmrgModelHubbard}.
+This function performs only three tasks: (i)  $x+=H_{system}y$, (ii)
+$x+=H_{environment}y$ and (iii) $x+=H_{connection}y$.
+The fist two are straightforward, so we focus on the last one, in
+\cppFunction{hamiltonianConnectionProduct()},
 that considers the part of the Hamiltonian
-that connects system and environment. This function runs the following loop: for every site $i$ in the system and every site $j$ in the environment
-it calculates $x+=H_{ij}y$ in function \cppFunction{linkProduct}, after finding the appropriate tight binding hopping value.
+that connects system and environment. This function runs the following loop:
+for every site $i$ in the system and every site $j$ in the environment
+it calculates $x+=H_{ij}y$ in function \cppFunction{linkProduct}, after finding
+the appropriate tight binding hopping value.
 
 The function \cppFunction{linkProduct} is useful not only for the Hubbard model, but it is
- generic enough to use in other SCE models that include a tight binding connection of the type $c^\dagger_{i\sigma}c_{j\sigma}$,
+ generic enough to use in other SCE models that include a tight binding connection
+ of the type $c^\dagger_{i\sigma}c_{j\sigma}$,
   and, therefore, is part of a separate class,
- \cppClass{ConnectorHopping}. Likewise, the function \cppFunction{linkProduct} in \cppClass{ConnectorExchange} deals
- with Hamiltonian connections of the type $\vec{S}_i\cdot\vec{S}_j$, and can be used by models that include that type of term, such as the
+ \cppClass{ConnectorHopping}. Likewise, the function \cppFunction{linkProduct}
+ in \cppClass{ConnectorExchange} deals
+ with Hamiltonian connections of the type $\vec{S}_i\cdot\vec{S}_j$, and
+ can be used by models that include that type of term, such as the
  sample Heisenberg model provided with DMRG++.
-We remind readers that wish to understand this code that the function \cppFunction{linkProduct} and, in particular, the
-related function \cppFunction{fastOpProdInter} are more complicated than usual, since (i) the outer product is constructed on the fly, and (ii)
-the resulting states of this outer product need to be reordered so that effective symmetry blocking can be used.
+We remind readers that wish to understand this code that the function
+\cppFunction{linkProduct} and, in particular, the
+related function \cppFunction{fastOpProdInter} are more complicated than usual,
+since (i) the outer product is constructed on the fly, and (ii)
+the resulting states of this outer product need to be reordered so that effective
+symmetry blocking can be used.
 
 \section{Model Interface}\label{subsec:models}
 \subsection{Abstract Interface}
@@ -405,39 +497,54 @@ the resulting states of this outer product need to be reordered so that effectiv
 
 \section{Geometry Interface} \label{subsec:geometries}
 \subsection{Abstract Interface}
-I present two sample geometries, one for 1D chains and one for n-leg ladders in classes \cppClass{DmrgGeometryOneD}
+I present two sample geometries, one for 1D chains and one for n-leg ladders in
+classes \cppClass{DmrgGeometryOneD}
  and \cppClass{DmrgGeometryLadder}.
 Both derive from the abstract class \cppClass{DmrgGeometryBase}.
 To implement new geometries a new class needs to be derived from this base class,
 and the functions in the base class (the interface) needs to be implemented.
-As in the case of \cppClass{DmrgModelBase}, the interface is documented in the code, but here I briefly describe the most important functions.
+As in the case of \cppClass{DmrgModelBase}, the interface is documented in the code,
+but here I briefly describe the most important functions.
 
 The function \cppFunction{setBlocksOfSites}
- needs to set the initial block for system and environment, and for the vector of blocks $X$ and $Y$ to be added
-to system and environment, respectively, according to the convention given in Fig.~\ref{fig:sxye}.
-There are two \cppFunction{calcConnectorType} functions. Both calculate the type of connection between two sites $i$ and $j$,
+ needs to set the initial block for system and environment, and for the vector of
+ blocks $X$ and $Y$ to be added
+to system and environment, respectively, according to the convention given in
+Fig.~\ref{fig:sxye}.
+There are two \cppFunction{calcConnectorType} functions. Both calculate the type of
+connection between two sites $i$ and $j$,
 which can be SystemSystem, SystemEnviron,
-EnvironSystem or EnvironEnviron, where the names are self-explanatory. The function \cppFunction{calcConnectorValue}
- determines the value of the connector (e.g., tight-binding hopping for the Hubbard model or $J_{ij}$ for the
+EnvironSystem or EnvironEnviron, where the names are self-explanatory. The
+function \cppFunction{calcConnectorValue}
+ determines the value of the connector (e.g., tight-binding hopping for the
+ Hubbard model or $J_{ij}$ for the
  case of the Heisenberg model) between two sites, delegating
-the work to the model class if necessary.  The function \cppFunction{findExtremes} determines the
+the work to the model class if necessary.  The function
+\cppFunction{findExtremes} determines the
 extremes sites of a given block of sites and
-the function \cppFunction{findReflection} finds the ``reflection'' in the environment block of a given site in the system block or vice-versa.
+the function \cppFunction{findReflection} finds the ``reflection'' in the
+environment block of a given site in the system block or vice-versa.
 
 \subsection{One Dimensional Chains}
 \subsection{Ladders}
 
 \section{Concurrency Interface: Code Parallelization} \label{subsec:concurrency}
 \subsection{Abstract Interface}
-The \cppClass{Concurrency} class encapsulates parallelization. Two concrete classes that implement this interface
-are included in the present code. One is for serial code (\cppClass{ConcurrencySerial} class) that does no parallelization at all, and the other one
+The \cppClass{Concurrency} class encapsulates parallelization. Two concrete classes
+that implement this interface
+are included in the present code. One is for serial code (\cppClass{ConcurrencySerial}
+class) that does no parallelization at all, and the other one
 (\cppClass{ConcurrencyMpi} class)  is for
-parallelization based on the MPI\footnote{See, for example, http://www-unix.mcs.anl.gov/mpi/}.
-Other parallelization implementations, e.g. using pthreads, can be similarly written by implementing this interface.
+parallelization based on the MPI\footnote{See, for example,
+http://www-unix.mcs.anl.gov/mpi/}.
+Other parallelization implementations, e.g. using pthreads, can be similarly
+written by implementing this interface.
 The interface is described in place in class \cppClass{Concurrency}.
-Here, I briefly mention its most important functions. Function \cppFunction{rank()} returns the rank of the current processor or thread.
+Here, I briefly mention its most important functions. Function \cppFunction{rank()}
+returns the rank of the current processor or thread.
 \cppFunction{nprocs()} returns the total number of processors.
-Functions \cppFunction{loopCreate()} and \cppFunction{loop()} handle a parallelization of a standard loop.
+Functions \cppFunction{loopCreate()} and \cppFunction{loop()} handle a parallelization
+of a standard loop.
 Function \cppFunction{gather()} gathers data from each processor into the root processor.
 
 \subsection{MPI}
@@ -457,7 +564,8 @@ Function \cppFunction{gather()} gathers data from each processor into the root p
 \section{Optimizations}
 \subsection{Wave Function Transformation}
 I will describe the WFT when shrinking the system. The implementation of this is
-in class \cppClass{WaveFunctionTransformation}. Here I focus on the system without SU(2) symmetry support first.
+in class \cppClass{WaveFunctionTransformation}. Here I focus on the system
+without SU(2) symmetry support first.
 We need to consider that site $j$ has just been swallowed by the growing environment.
 See figure~\ref{fig:wft} for the setup.
 \begin{figure}
@@ -467,7 +575,8 @@ See figure~\ref{fig:wft} for the setup.
 \end{figure}
 Latin letters label points, Greek letters label states.
 The sub-index $p$ indicates the newest DMRG step.
-The approximate guess for the new wave-function $\psi^p_{\eta_p}$ is given in terms of the previous
+The approximate guess for the new wave-function $\psi^p_{\eta_p}$ is given in
+terms of the previous
 wave-function $\psi_{\eta}$ by:
 \begin{equation}
 \psi^p_{\eta_p} =
@@ -478,7 +587,8 @@ W^S_{\alpha,\epsilon}\psi_{\eta}W^E_{\beta,\beta_p}
 \delta_{P^E_p(\gamma_p);\kappa_p+\beta_p n_3},
 \end{equation}
 where the system transformation is $W^S$, the environment transformation is $W^E$,
-the new system-environment permutation $P^{SE}_p$, the new environment permutation $P^E_p$,
+the new system-environment permutation $P^{SE}_p$, the new environment
+permutation $P^E_p$,
 the old system-environment permutation $P^{SE}$, and the new system permutation $P^S$.
 A sum should be assumed for all indices except $\eta_p$.
 \subsection{SU(2) Reduced Operators}
@@ -535,15 +645,19 @@ OperatorC:
 0 0.5 -0.252775 1.67222e-07 0.0586682 ...
 ...
 \end{verbatim}
-Here we are computing $C_{ij} = \langle c_{i\uparrow}c_{j\uparrow}\rangle$, where $8 16$ are the dimensions of the matrix
+Here we are computing $C_{ij} = \langle c_{i\uparrow}c_{j\uparrow}\rangle$,
+where $8 16$ are the dimensions of the matrix
 that follow ($C_{ij}$ is not computed for $i>j$).
 For example $C_{00}=0.5$, $C_{01}=0.426244$, $C_{12}=-0.252775$.
 
-The same is done for $N_{ij} = \langle n_{i}n_{j}\rangle$, where $n_i = n_{i\uparrow}+n_{i\downarrow}$, and also for $\langle S_{i}^zS_{j}^z\rangle$
+The same is done for $N_{ij} = \langle n_{i}n_{j}\rangle$, where
+$n_i = n_{i\uparrow}+n_{i\downarrow}$, and also for $\langle S_{i}^zS_{j}^z\rangle$
 
-The observer driver (\verb=observe.cpp=) controls what is calculated. Please have a look at it and modify as necessary.
+The observer driver (\verb=observe.cpp=) controls what is calculated.
+Please have a look at it and modify as necessary.
 
-THIS SECTION NEEDS MORE WORK. IN PARTICULAR HOW TO SETUP THE INPUT FILE TO BE ABLE TO PRODUCE DATA FOR THE OBSERVER.
+\todo{THIS SECTION NEEDS MORE WORK. IN PARTICULAR HOW TO SETUP THE INPUT FILE
+TO BE ABLE TO PRODUCE DATA FOR THE OBSERVER.}
 
 
 \subsection{Ground State Energy and Error}
