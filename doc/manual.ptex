@@ -41,12 +41,16 @@ keywordstyle=\color{blue}\bfseries,frame=shadowbox}
 \vspace*{\stretch{1}}
 \HRule
 \begin{flushright}
-\LARGE  DMRG++ v2.0 Manual
+\LARGE  DMRG++ v3 Manual\\
 \end{flushright}
 \HRule
 \vspace*{\stretch{2}}
 
 %
+\begin{center}
+\Large Manual Version: \today\\
+\end{center}
+
 \begin{center}
 \textsc{Oak Ridge, 2014}
 \end{center}
@@ -151,6 +155,35 @@ The Model parameters vary from model to model.
 \subsection{Finite Loops}
 
 \ptexPaste{FiniteLoop}
+
+\chapter{Output}
+
+\section{Standard Output and Error}
+If you run
+\begin{verbatim}
+./dmrg -f input.inp
+\end{verbatim}
+you will see messages printed to the terminal.
+These are process by the \verb!PsimagLite! class \verb!ProgressIndicator! and
+are designed to show the DMRG++ progress.
+All these messages are of the form:
+\begin{verbatim}
+Class [T]: Message
+\end{verbatim}
+where \verb!Class! is the class that is currently executing and the message hints at
+what is being executed. The number \verb!T! between brackets is the wall
+time ellapsed since
+program start.
+
+\section{The Data file}
+
+\section{The Disk Stacks}
+
+\section{The Wft Data Files}
+
+\section{Signals}
+
+\ptexPaste{RegisterSignals}
 
 \chapter{Developer's Guide}
 
@@ -493,7 +526,7 @@ symmetry blocking can be used.
 \subsection{Heisenberg Model}
 \subsection{One-Orbital Hubbard Model}
 \subsection{Many-Orbital Hubbard Model}
-\subsection{$t-J$ model}
+\subsection{t-J model}
 
 \section{Geometry Interface} \label{subsec:geometries}
 \subsection{Abstract Interface}
