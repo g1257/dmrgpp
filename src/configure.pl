@@ -147,7 +147,7 @@ sub createMakefile
 	my $usePthreadsOrNot = " ";
 	$usePthreadsOrNot = " -DUSE_PTHREADS " if ($pthreads);
 	my $optimizations = " -O3 -DNDEBUG ";
-	$optimizations = " -g3 -D_GLIBCXX_DEBUG -D_GLIBCXX_PROFILE " if ($build eq "debug");
+	$optimizations = " -g3 -Wextra -D_GLIBCXX_DEBUG -D_GLIBCXX_PROFILE " if ($build eq "debug");
 	$optimizations .= " -g3 " if ($build eq "callgrind" || $build eq "drd");
 	my $strip = "strip ";
 	$strip = " true " if ($build eq "debug" or $build eq "callgrind" or $build eq "drd");
@@ -167,6 +167,12 @@ Engine/Version.h: gitrev
 
 operator: dmrg
 	cp dmrg operator
+
+../doc/manual.pdf: ../doc/manual.tex
+	cd ../doc; pdflatex manual.tex; pdflatex manual.tex; pdflatex manual.tex
+
+../doc/manual.tex: ../doc/manual.ptex
+	cd ../doc; find ../src -iname "*.h" -or -iname "*.cpp" | ../../PsimagLite/scripts/doc.pl manual.ptex
 
 EOF
 
