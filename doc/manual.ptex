@@ -6,13 +6,20 @@
 \usepackage{xcolor}
 \usepackage{listings}
 \usepackage{graphicx}
-\usepackage{fancyvrb}
+\usepackage{fancyvrb} %keep
 \usepackage{fancyhdr}
-\usepackage{booktabs}
+\usepackage{booktabs} %keep
 \usepackage{hyperref}
 
-\cfoot{This manual is a work in progress.}
-\lhead{}
+\fancyhead{}
+\fancyhead[LE]{\leftmark}
+\fancyhead[RO]{\rightmark}
+\cfoot{}
+\rfoot{\thepage} %exit
+
+\hypersetup{colorlinks=true}
+
+
 \newcommand{\cppFile}[1]{\texttt{#1}}
 \newcommand{\inputItem}[1]{\noindent\texttt{\bf #1} ---}
 \newcommand{\inputSubItem}[1]{\indent\texttt{\it #1} --}

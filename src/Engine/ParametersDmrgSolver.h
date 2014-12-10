@@ -90,15 +90,15 @@ namespace Dmrg {
 /* PSIDOC FiniteLoop
 \subsection{Enabling finite loops}
 
-To enable finite loops make sure that the option `nofiniteloops` is <b>not</b>
-present under `SolverOptions=`. Remember that the entry <b>FiniteLoops</b>
+To enable finite loops make sure that the option `nofiniteloops` is \emph{not}
+present under `SolverOptions=`. Remember that the entry \verb!FiniteLoops!
 in the input file is a series of space-separated numbers. More than one space is allowed.
 The first
 number is the number of finite algorithm ``movements,'' followed by series of three
 numbers for
 each movement. Of the three numbers, the first is the number of sites to go forward
 if positive
-or backward if negative. The second number is the <i>m</i> for this movement and the
+or backward if negative. The second number is the $m$ for this movement and the
 last number
 is either 0 or 1, 0 will not save state data to disk and 1 will save all data to be
 able to calculate
@@ -137,7 +137,7 @@ Value & Description\\
 \subsection{Caveats and Troubleshooting}
 
 If `nofiniteloops` is an option in the options line of the input file then
-the <b>FiniteLoops</b> line in the input file is ignored, and no finite loops are done.
+the \verb!FiniteLoops! line in the input file is ignored, and no finite loops are done.
 In this case, DMRG++ stops when the infinite algorithm has finished.
 
 Make sure the first number is the number of triplets that follow.
@@ -330,7 +330,7 @@ A series of space-separated numbers. More than one space is allowed.
 The first number is the number of finite algorithm movements, followed by series
 of three numbers for each movement. Of the three numbers, the first
 is the number of sites to go forward if positive or backward if negative.
-The second number is the <i>m</i> for this movement and the last number is either 0 or 1,
+The second number is the \emph{m} for this movement and the last number is either 0 or 1,
 0 will not save state data to disk and 1 will save all data to be able to calculate
 observables.
 The first movement starts from where the infinite loop left off, at the middle of the
