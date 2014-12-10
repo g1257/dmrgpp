@@ -221,7 +221,8 @@ private:
 			(H^{S' {\rm new\,\,basis}})_{\alpha,\alpha'}=(w^S)^{-1}_{\alpha,\gamma}
 		    (H^{ S'})_{\gamma,\gamma'}w^S_{\gamma',\alpha'}.
 			\label{eq:transformation}
-			\end{equation}*/
+			\end{equation}
+		*/
 
 		TruncationCache& cache = (direction==EXPAND_SYSTEM) ? leftCache_ : rightCache_;
 
