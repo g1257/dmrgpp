@@ -337,6 +337,11 @@ public:
 		return geometryBase_->dirs();
 	}
 
+	SizeType calcDir(SizeType i, SizeType j) const
+	{
+		return geometryBase_->calcDir(i,j);
+	}
+
 	template<typename ComplexOrRealType_,typename InputType_>
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const GeometryTerm<ComplexOrRealType_,

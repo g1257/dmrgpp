@@ -308,6 +308,12 @@ public:
 		return terms_[term]->directions();
 	}
 
+	SizeType calcDir(SizeType term, SizeType i, SizeType j) const
+	{
+		assert(term < terms_.size());
+		return terms_[term]->calcDir(i,j);
+	}
+
 	// extended functions in GeometryEx
 
 	// friends

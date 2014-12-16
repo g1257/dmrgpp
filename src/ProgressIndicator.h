@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MemoryUsage.h"
 #include <sys/types.h>
 #include <unistd.h>
+#include "TypeToString.h"
 
 namespace PsimagLite {
 
