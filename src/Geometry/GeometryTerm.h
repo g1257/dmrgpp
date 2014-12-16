@@ -119,7 +119,7 @@ public:
 	 - GeometryOptions=string Either none or ConstantValues needs to explain more FIXME
 	*/
 	GeometryTerm(InputType& io,SizeType,SizeType linSize,bool debug=false) :
-	    linSize_(linSize),maxEdof_(0),geometryBase_(0)
+	    linSize_(linSize),maxEdof_(0),geometryBase_(0),gOptions_("none")
 	{
 		int x;
 		io.readline(x,"DegreesOfFreedom=");
@@ -129,8 +129,7 @@ public:
 		String s;
 		io.readline(s,"GeometryKind=");
 
-		String gOptions;
-		io.readline(gOptions,"GeometryOptions=");
+		io.readline(gOptions_,"GeometryOptions=");
 
 		if (s == "chain" || s=="longchain") {
 			geometryBase_ = new LongChain<InputType>(linSize,io);
@@ -151,7 +150,11 @@ public:
 		}
 
 		for (SizeType i=0;i<geometryBase_->dirs();i++) {
-			directions_.push_back(GeometryDirectionType(io,i,edof,gOptions,geometryBase_));
+			directions_.push_back(GeometryDirectionType(io,
+			                                            i,
+			                                            edof,
+			                                            gOptions_,
+			                                            geometryBase_));
 		}
 
 		findMaxEdof();
@@ -342,6 +345,11 @@ public:
 		return geometryBase_->calcDir(i,j);
 	}
 
+	PsimagLite::String options() const
+	{
+		return gOptions_;
+	}
+
 	template<typename ComplexOrRealType_,typename InputType_>
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const GeometryTerm<ComplexOrRealType_,
@@ -399,6 +407,7 @@ private:
 	SizeType linSize_;
 	SizeType maxEdof_;
 	GeometryBaseType* geometryBase_;
+	PsimagLite::String gOptions_;
 	typename Vector<GeometryDirectionType>::Type directions_;
 	PsimagLite::Matrix<ComplexOrRealType> cachedValues_;
 }; // class GeometryTerm

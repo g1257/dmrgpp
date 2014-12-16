@@ -314,6 +314,12 @@ public:
 		return terms_[term]->calcDir(i,j);
 	}
 
+	PsimagLite::String options(SizeType term) const
+	{
+		assert(term < terms_.size());
+		return terms_[term]->options();
+	}
+
 	// extended functions in GeometryEx
 
 	// friends
