@@ -75,9 +75,24 @@ public:
 	    : progress_("ContinuedFraction"), freqEnum_(FREQ_REAL),ab_(io)
 	{
 		PsimagLite::String f;
-		io.readline(f,"#FreqEnum=");
+		try {
+			io.readline(f,"#FreqEnum=");
+		} catch(std::exception& e) {
+			std::cerr<<"ContinuedFraction: FreqEnum assumed REAL\n";
+			f = "Real";
+			io.rewind();
+		}
+
 		if (f == "Matsubara") freqEnum_ = FREQ_MATSUBARA;
-		io.readMatrix(reortho_,"#ReorthogonalizationMatrix");
+		try {
+			io.readMatrix(reortho_,"#ReorthogonalizationMatrix");
+		} catch(std::exception& e) {
+			assert(reortho_.n_row() == 0);
+			std::cerr<<"ContinuedFraction: #ReorthogonalizationMatrix (nrow=";
+			std::cerr<<reortho_.n_row()<<") DISABLED\n";
+			io.rewind();
+		}
+
 		io.readline(weight_,"#CFWeight=");
 		io.readline(Eg_,"#CFEnergy=");
 		io.readline(isign_,"#CFIsign=");
