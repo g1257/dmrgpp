@@ -255,14 +255,20 @@ private:
 			TargetVectorType initialVectorBySector(weights[i]);
 			initialVector.extract(initialVectorBySector,i);
 			RealType norma = PsimagLite::norm(initialVectorBySector);
-			assert(norma>1e-6);
-			initialVectorBySector /= norma;
+			if (fabs(norma)<1e-12) {
+				PsimagLite::String str("Norm of initial vector is zero\n");
+				if (onlyWft) throw PsimagLite::RuntimeError("FATAL " + str);
+			} else {
+				initialVectorBySector /= norma;
+			}
+
 			if (onlyWft) {
 				vecSaved[i]=initialVectorBySector;
 				gsEnergy = oldEnergy_;
 			} else {
 				diagonaliseOneBlock(i,vecSaved[i],gsEnergy,lrs,initialVectorBySector);
 			}
+
 			energySaved[i]=gsEnergy;
 		}
 
@@ -355,11 +361,10 @@ private:
 	                         RealType &energyTmp,
 	                         typename ModelType::ModelHelperType& modelHelper,
 	                         const TargetVectorType& initialVector)
-	//       		int reflectionSector= -1)
 	{
-		//if (reflectionSector>=0) modelHelper.setReflectionSymmetry(reflectionSector);
 		int n = modelHelper.size();
-		if (verbose_) std::cerr<<"Lanczos: About to do block number="<<i<<" of size="<<n<<"\n";
+		if (verbose_)
+			std::cerr<<"Lanczos: About to do block number="<<i<<" of size="<<n<<"\n";
 
 		ReflectionSymmetryType *rs = 0;
 		if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
@@ -374,7 +379,9 @@ private:
 		        MatrixVectorType,
 		        TargetVectorType> LanczosSolverType;
 
-		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(&model_,&modelHelper,rs);
+		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(&model_,
+		                                                             &modelHelper,
+		                                                             rs);
 
 		ParametersForSolverType params(io_,"Lanczos");
 		LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
@@ -392,12 +399,24 @@ private:
 			return;
 		}
 
+		RealType norma = PsimagLite::norm(initialVector);
+
 		if (!reflectionOperator_.isEnabled()) {
 			tmpVec.resize(lanczosHelper.rank());
 			try {
-				lanczosOrDavidson->computeGroundState(energyTmp,tmpVec,initialVector);
+				if (fabs(norma)<1e-12) {
+					PsimagLite::OstringStream msg;
+					msg<<"WARNING: diagonaliseOneBlock: Norm of guess vector is zero, ";
+					msg<<"ignoring guess\n";
+					progress_.printline(msg,std::cout);
+					lanczosOrDavidson->computeGroundState(energyTmp,
+					                                      tmpVec);
+				} else {
+					lanczosOrDavidson->computeGroundState(energyTmp,
+					                                      tmpVec,
+					                                      initialVector);
+				}
 			} catch (std::exception& e) {
-
 				PsimagLite::OstringStream msg0;
 				msg0<<"Lanczos or Davidson solver failed, ";
 				msg0<<"trying with exact diagonalization...";
@@ -418,6 +437,7 @@ private:
 			if (lanczosOrDavidson) delete lanczosOrDavidson;
 			return;
 		}
+
 		TargetVectorType initialVector1,initialVector2;
 		reflectionOperator_.setInitState(initialVector,initialVector1,initialVector2);
 		tmpVec.resize(initialVector1.size());
