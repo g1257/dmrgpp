@@ -464,6 +464,9 @@ void exp(Matrix<T>& m)
 
 void diag(Matrix<double> &m,Vector<double> ::Type& eigs,char option)
 {
+#ifdef NO_LAPACK
+	throw RuntimeError("diag: dsyev_: NO LAPACK!\n");
+#else
 	char jobz=option;
 	char uplo='U';
 	int n=m.n_row();
@@ -489,11 +492,14 @@ void diag(Matrix<double> &m,Vector<double> ::Type& eigs,char option)
 		std::cerr<<"info="<<info<<"\n";
 		throw RuntimeError("diag: dsyev_: failed with info!=0.\n");
 	}
-
+#endif
 }
 
 void diag(Matrix<std::complex<double> > &m,Vector<double> ::Type&eigs,char option)
 {
+#ifdef NO_LAPACK
+	throw RuntimeError("diag: zheev: NO LAPACK!\n");
+#else
 	char jobz=option;
 	char uplo='U';
 	int n=m.n_row();
@@ -514,11 +520,14 @@ void diag(Matrix<std::complex<double> > &m,Vector<double> ::Type&eigs,char optio
 		std::cerr<<"info="<<info<<"\n";
 		throw RuntimeError("diag: zheev: failed with info!=0.\n");
 	}
-
+#endif
 }
 
 void diag(Matrix<float> &m,Vector<float> ::Type& eigs,char option)
 {
+#ifdef NO_LAPACK
+	throw RuntimeError("diag: dsyev_: NO LAPACK!\n");
+#else
 	char jobz=option;
 	char uplo='U';
 	int n=m.n_row();
@@ -544,11 +553,14 @@ void diag(Matrix<float> &m,Vector<float> ::Type& eigs,char option)
 		std::cerr<<"info="<<info<<"\n";
 		throw RuntimeError("diag: dsyev_: failed with info!=0.\n");
 	}
-
+#endif
 }
 
 void diag(Matrix<std::complex<float> > &m,Vector<float> ::Type& eigs,char option)
 {
+#ifdef NO_LAPACK
+	throw RuntimeError("diag: cheev: NO LAPACK!\n");
+#else
 	char jobz=option;
 	char uplo='U';
 	int n=m.n_row();
@@ -569,12 +581,15 @@ void diag(Matrix<std::complex<float> > &m,Vector<float> ::Type& eigs,char option
 		std::cerr<<"info="<<info<<"\n";
 		throw RuntimeError("diag: cheev: failed with info!=0.\n");
 	}
-
+#endif
 }
 
 template<typename VectorLikeType>
 void svd(char jobz,Matrix<double> &a,VectorLikeType& s,Matrix<double>& vt)
 {
+#ifdef NO_LAPACK
+	throw RuntimeError("svd: dgesdd_: NO LAPACK!\n");
+#else
 	int m = a.n_row();
 	int n = a.n_col();
 	std::cerr<<"Trying PsimagLite::svd(...) "<<m<<"x"<<n<<"\n";
@@ -639,6 +654,7 @@ void svd(char jobz,Matrix<double> &a,VectorLikeType& s,Matrix<double>& vt)
 		throw RuntimeError(str.c_str());
 	}
 	a = u;
+#endif
 }
 
 template<typename T>
