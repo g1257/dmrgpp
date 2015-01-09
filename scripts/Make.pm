@@ -18,6 +18,7 @@ Please see full open source license included in file LICENSE.
 =cut
 use warnings;
 use strict;
+use File::Temp;
 
 package Make;
 
@@ -82,7 +83,7 @@ EOF
 print FH<<EOF;
 
 ../../PsimagLite/lib/libpsimaglite.a:
-	\$(MAKE) -f Makefile -C ../../PsimagLite/lib/ 
+	\$(MAKE) -f Makefile -C ../../PsimagLite/lib/
 
 Makefile.dep: $allCpps $additional
 	\$(CXX) \$(CPPFLAGS) -MM $allCpps  > Makefile.dep
@@ -172,7 +173,7 @@ sub psimagLiteLibMake
 {
 	my ($platform,$mpi,$libs,$normalFlags,$cppflags,$cxx) = @_;
 	my $libDir = "../../PsimagLite/lib";
-	backupMakefile($libDir);	
+	backupMakefile($libDir);
 	open(FOUT,">$libDir/Makefile") or die "$0: Cannot open $libDir/Makefile for writing: $!\n";
 	flock(FOUT, 2) || die "$0: Could not lock $libDir/Makefile\n";
 
@@ -205,6 +206,34 @@ sub backupMakefile
 	$dir = "." unless defined($dir);
 	system("cp $dir/Makefile $dir/Makefile.bak") if (-r "$dir/Makefile");
 	print "Backup of $dir/Makefile in $dir/Makefile.bak\n";
+}
+
+sub findGsl
+{
+	my $gslDefine = " -DUSE_GSL ";
+	my $gslLibs = " -lgsl -lgslcblas ";
+	my $slashTmp = "/tmp";
+	my @nothingFound = (" ", " ");
+	return @nothingFound unless (-w $slashTmp);
+
+	my $dir = File::Temp::tempdir(CLEANUP => 1);
+	my ($fh, $filename) = File::Temp::tempfile(DIR => $dir);
+
+	if (!$fh) {
+		return @nothingFound;
+	}
+
+print $fh <<EOF;
+#include "GslWrapper.h"
+int main() { return 0;}
+EOF
+	close($fh);
+	my $cppFile = $filename.".cpp";
+	system("mv $filename $cppFile");
+	unlink("a.out");
+	system("g++ -I../../PsimagLite/src $gslDefine $cppFile  $gslLibs 2>/dev/null");
+	return ($gslDefine, $gslLibs) if (-x "a.out");
+	return @nothingFound;
 }
 
 1;
