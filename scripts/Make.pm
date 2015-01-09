@@ -44,6 +44,15 @@ sub make
 	$normalFlags .= " -Wstrict-overflow=5 " if ($gccVersion >= 4.2);
 	$normalFlags .= " -frecord-gcc-switches " if ($gccVersion >= 4.3);
 
+	my $libTarget = "";
+	if ($libs=~/\-lpsimaglite/) {
+		$libTarget  = " ../../PsimagLite/lib/libpsimaglite.a";
+		if (!(-e "../../PsimagLite/lib/libpsimaglite.a") ||
+		    !(-e "../../PsimagLite/lib/Makefile")) {
+			psimagLiteLibMake($platform,$mpi,$libs,$normalFlags,$cppflags,$cxx);
+		}
+	}
+
 print FH<<EOF;
 # DO NOT EDIT!!! Changes will be lost. Modify $0 instead
 # This Makefile was written by $0
@@ -51,7 +60,7 @@ print FH<<EOF;
 # Platform: $platform
 # MPI: $mpi
 
-LDFLAGS =    $libs
+LDFLAGS = -L../../PsimagLite/lib   $libs
 CPPFLAGS = $normalFlags $cppflags
 CXX = $cxx
 all: $allExecutables $additional3
@@ -60,7 +69,7 @@ EOF
 
 foreach my $what (@$drivers) {
 print FH<<EOF;
-$what.o: $what.cpp  Makefile $additional
+$what.o: $what.cpp  Makefile $additional $libTarget
 	\$(CXX) \$(CPPFLAGS) -c $what.cpp
 
 $what: $what.o
@@ -71,6 +80,9 @@ EOF
 }
 
 print FH<<EOF;
+
+../../PsimagLite/lib/libpsimaglite.a:
+	\$(MAKE) -f Makefile -C ../../PsimagLite/lib/ 
 
 Makefile.dep: $allCpps $additional
 	\$(CXX) \$(CPPFLAGS) -MM $allCpps  > Makefile.dep
@@ -154,6 +166,45 @@ sub gccVersion
 	}
 
 	return $version;
+}
+
+sub psimagLiteLibMake
+{
+	my ($platform,$mpi,$libs,$normalFlags,$cppflags,$cxx) = @_;
+	my $libDir = "../../PsimagLite/lib";
+	backupMakefile($libDir);	
+	open(FOUT,">$libDir/Makefile") or die "$0: Cannot open $libDir/Makefile for writing: $!\n";
+	flock(FOUT, 2) || die "$0: Could not lock $libDir/Makefile\n";
+
+	print FOUT<<EOF;
+# DO NOT EDIT!!! Changes will be lost. Modify $0 instead
+# This Makefile was written by $0
+# PsimagLite by G.A.
+# Platform: $platform
+# MPI: $mpi
+
+LDFLAGS =  $libs
+CPPFLAGS = $normalFlags $cppflags
+CXX = $cxx
+EOF
+
+	open(FILE,"$libDir/Makefile.sample") or die "$0: Cannot open $libDir/Makefile.sample : $!";
+	while (<FILE>) {
+		next if (/^#/);
+		s/Makefile.sample/Makefile/;
+		print FOUT;
+	}
+
+	close(FILE);
+	close(FOUT);
+}
+
+sub backupMakefile
+{
+	my ($dir) = @_;
+	$dir = "." unless defined($dir);
+	system("cp $dir/Makefile $dir/Makefile.bak") if (-r "$dir/Makefile");
+	print "Backup of $dir/Makefile in $dir/Makefile.bak\n";
 }
 
 1;

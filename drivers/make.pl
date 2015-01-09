@@ -12,7 +12,7 @@ my @drivers = ("sparseSolverTest", "testCRSMatrix", "rungeKuttaTest", "combineCo
 "testIsClass","testMemResolv1");
 
 my $lapack = Make::findLapack();
-backupMakefile();
+Make::backupMakefile();
 writeMakefile();
 make();
 
@@ -21,17 +21,11 @@ sub make
 	system("make");
 }
 
-sub backupMakefile
-{
-	system("cp Makefile Makefile.bak") if (-r "Makefile");
-	print "Backup of Makefile in Makefile.bak\n";
-}
-
 sub writeMakefile
 {
 	open(my $fh,">Makefile") or die "Cannot open Makefile for writing: $!\n";
 
-	my $libs = "$lapack    -lm  -lpthread";
+	my $libs = "$lapack    -lm  -lpthread -lpsimaglite";
 	my $cxx = "g++ -O3 -DNDEBUG";
 	my $cppflags = " -I../  -I../src";
 	Make::make($fh,\@drivers,"PsimagLite","Linux",0,$libs,$cxx,$cppflags,"true"," "," ");

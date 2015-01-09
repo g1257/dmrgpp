@@ -1,5 +1,5 @@
-CPPFLAGS = -Werror -Wall -Wstrict-overflow=5 -I../  -I../src
-CXX = g++ -O3 -DNDEBUG
+#CPPFLAGS = -Werror -Wall -Wstrict-overflow=5 -I../  -I../src
+#CXX = g++ -O3 -DNDEBUG
 all: libpsimaglite.a 
 
 libpsimaglite.a: Makefile.sample MersenneTwister.o
@@ -12,7 +12,7 @@ Makefile.dep: ../src/MersenneTwister.cpp
 	$(CXX) $(CPPFLAGS) -MM  ../src/MersenneTwister.cpp  > Makefile.dep
 
 clean: Makefile.dep
-	rm -f core* *.o *.dep
+	rm -f core* *.o *.dep *.a
 
 include Makefile.dep
 
