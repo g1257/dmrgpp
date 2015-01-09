@@ -32,7 +32,7 @@ my $brand= "v3.0";
 my $build="production";
 my $floating="";
 
-system("make clean");
+system("make clean &> /dev/null");
 
 guessPlatform();
 
@@ -139,7 +139,7 @@ sub askQuestions
 sub createMakefile
 {
 	unlink("Engine/Version.h");
-	system("cp Makefile Makefile.bak") if (-r "Makefile");
+	Make::backupMakefile();
 	my $compiler = "g++";
 	$compiler = " mpicxx " if ($mpi);
 	my $fh;
@@ -156,11 +156,14 @@ sub createMakefile
 	my $cppflags= " -IEngine  ";
 	$cppflags .= "  -I$PsimagLite/src -I$PsimagLite $usePthreadsOrNot $floating";
 
-	Make::make($fh,\@drivers,"DMRG++",$platform,$mpi,"$lapack $pthreadsLib",
+	Make::make($fh,\@drivers,"DMRG++",$platform,$mpi,"$lapack $pthreadsLib -lpsimaglite",
 	"$compiler $optimizations",$cppflags,$strip,"Engine/Version.h",
 	"Engine/Version.h gitrev","operator");
 	local *FH = $fh;
 print FH<<EOF;
+
+gitrev: gitrev.cpp
+	\$(CXX) \$(CPPFLAGS) gitrev.cpp -o gitrev
 
 Engine/Version.h: gitrev
 	./gitrev > Engine/Version.h
