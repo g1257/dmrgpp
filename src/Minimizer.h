@@ -68,6 +68,8 @@ public:
 		gsl_multimin_fminimizer_set (gslS_, &func, x, xs);
 
 		SizeType iter = 0;
+		RealType prevValue = 0;
+
 		for (;iter<maxIter_;iter++) {
 			status_ = gsl_multimin_fminimizer_iterate (gslS_);
 
@@ -77,8 +79,12 @@ public:
 			RealType size = gsl_multimin_fminimizer_size(gslS_);
 			status_ = gsl_multimin_test_size(size, tolerance);
 
-			if (verbose_)
-				std::cerr<<"simplex(): "<<iter<<" "<<function_(gslS_->x->data,func.n)<<"\n";
+			if (verbose_) {
+				RealType thisValue = function_(gslS_->x->data,func.n);
+				RealType diff = fabs(thisValue - prevValue);
+				std::cerr<<"simplex(): "<<iter<<" "<<thisValue<<" (diff= "<<diff<<")\n";
+				prevValue = thisValue;
+			}
 
 			if (status_ == GSL_SUCCESS) {
 				found(minVector,gslS_->x,iter);
