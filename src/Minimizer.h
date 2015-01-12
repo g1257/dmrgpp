@@ -32,9 +32,13 @@ class Minimizer {
 
 public:
 
-	Minimizer(FunctionType& function,SizeType maxIter)
+	enum {GSL_SUCCESS=::GSL_SUCCESS, GSL_CONTINUE=::GSL_CONTINUE};
+
+	Minimizer(FunctionType& function,SizeType maxIter, bool verbose = false)
 	    : function_(function),
 	      maxIter_(maxIter),
+	      verbose_(verbose),
+	      status_(100),
 	      gslT_(gsl_multimin_fminimizer_nmsimplex2),
 	      gslS_(gsl_multimin_fminimizer_alloc(gslT_,function_.size()))
 	{}
@@ -63,25 +67,47 @@ public:
 		func.params = &function_;
 		gsl_multimin_fminimizer_set (gslS_, &func, x, xs);
 
-		for (SizeType iter=0;iter<maxIter_;iter++) {
-			int status = gsl_multimin_fminimizer_iterate (gslS_);
+		SizeType iter = 0;
+		for (;iter<maxIter_;iter++) {
+			status_ = gsl_multimin_fminimizer_iterate (gslS_);
 
-			if (status)
+			if (status_)
 				throw RuntimeError("Minimizer::simplex(...): Error encountered\n");
 
 			RealType size = gsl_multimin_fminimizer_size(gslS_);
-			status = gsl_multimin_test_size(size, tolerance);
+			status_ = gsl_multimin_test_size(size, tolerance);
 
-			if (status == GSL_SUCCESS) {
+			if (verbose_)
+				std::cerr<<"simplex(): "<<iter<<" "<<function_(gslS_->x->data,func.n)<<"\n";
+
+			if (status_ == GSL_SUCCESS) {
 				found(minVector,gslS_->x,iter);
 				gsl_vector_free (x);
 				gsl_vector_free (xs);
 				return iter;
 			}
 		}
+
 		gsl_vector_free (x);
 		gsl_vector_free (xs);
-		return -1;
+		return iter;
+	}
+
+	int status() const { return status_; }
+
+	PsimagLite::String statusString() const
+	{
+		switch (status_) {
+		case GSL_SUCCESS:
+			return "GSL_SUCCESS";
+			break;
+		case GSL_CONTINUE:
+			return "GSL_CONTINUE";
+			break;
+		default:
+			return "UNKNOWN";
+			break;
+		}
 	}
 
 private:
@@ -94,6 +120,8 @@ private:
 
 	FunctionType& function_;
 	SizeType maxIter_;
+	bool verbose_;
+	int status_;
 	const gsl_multimin_fminimizer_type *gslT_;
 	gsl_multimin_fminimizer *gslS_;
 
@@ -112,21 +140,30 @@ class Minimizer {
 
 public:
 
-	Minimizer(FunctionType& function,SizeType maxIter)
+	enum {GSL_SUCCESS=0, GSL_CONTINUE=1};
+
+	Minimizer(FunctionType&,SizeType, bool = false)
 	{
 		PsimagLite::String str("Minimizer needs the gsl\n");
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	int simplex(VectorType& minVector,RealType delta=1e-3,RealType tolerance=1e-3)
+	int simplex(VectorType&,RealType=1e-3,RealType=1e-3)
 	{
 		PsimagLite::String str("Minimizer needs the gsl\n");
 		throw PsimagLite::RuntimeError(str);
+	}
+
+	int status() const { return 1; }
+
+	PsimagLite::String statusString() const
+	{
+		return "Minimizer needs the gsl";
 	}
 };
 
 } // namespace PsimagLite
-#endif 
+#endif
 
 #endif // MINIMIZER_H
 
