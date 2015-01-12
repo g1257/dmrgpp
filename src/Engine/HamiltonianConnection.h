@@ -144,6 +144,7 @@ public:
 				if (tmp==static_cast<RealType>(0.0)) continue;
 
 				if (ind > jnd) tmp = std::conj(tmp);
+				if (dofsTotal == 2 && dofs == 1) tmp = std::conj(tmp);
 
 				flag = true;
 
