@@ -699,6 +699,7 @@ public:
 				bool b2 = (c != '.' && c != '-' && c != '+' && c != 'e');
 				if (b1 && b2) {
 					PsimagLite::String str = s +" is not a real number\n";
+					str += "Suggestion: Add -DUSE_COMPLEX to your Makefile.\n";
 					throw RuntimeError(str);
 				}
 			}
