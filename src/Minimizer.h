@@ -86,14 +86,10 @@ public:
 				prevValue = thisValue;
 			}
 
-			if (status_ == GSL_SUCCESS) {
-				found(minVector,gslS_->x,iter);
-				gsl_vector_free (x);
-				gsl_vector_free (xs);
-				return iter;
-			}
+			if (status_ == GSL_SUCCESS) break;
 		}
 
+		found(minVector,gslS_->x,iter);
 		gsl_vector_free (x);
 		gsl_vector_free (xs);
 		return iter;
