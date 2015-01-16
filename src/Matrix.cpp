@@ -1,6 +1,16 @@
 #include "Matrix.h"
+#include "String.h"
 
 namespace PsimagLite {
+
+void checkBlasStatus(int info,PsimagLite::String msg)
+{
+	if (info == 0) return;
+
+	PsimagLite::String str = msg;
+	str += " failed with info = " + ttos(info) + "\n";
+	throw RuntimeError(str);
+}
 
 void diag(Matrix<double> &m,Vector<double> ::Type& eigs,char option)
 {
@@ -131,7 +141,54 @@ void geev(char jobvl,
           Matrix<std::complex<double> >& vl,
           Matrix<std::complex<double> >& vr)
 {
+#ifdef NO_LAPACK
+	throw RuntimeError("diag: geev: NO LAPACK!\n");
+#else
+	int n = a.n_row();
+	int lda = a.n_col();
+	int ldvl = vl.n_row();
+	int ldvr = vr.n_row();
+	int info = 0;
+	Vector<std::complex<double> >::Type work(10,0);
+	Vector<double>::Type rwork(2*n+1,0);
+	int lwork = -1;
+	zgeev_(&jobvl,
+	      &jobvr,
+	      &n,
+	      &(a(0,0)),
+	      &lda,
+	      &(w[0]),
+	        &(vl(0,0)),
+	        &ldvl,
+	        &(vr(0,0)),
+	        &ldvr,
+	        &(work[0]),
+	        &lwork,
+	        &(rwork[0]),
+	        &info);
 
+	checkBlasStatus(info,"zgeev_");
+
+	lwork = std::real(work[0]);
+	work.resize(lwork,0.0);
+
+	zgeev_(&jobvl,
+	      &jobvr,
+	      &n,
+	      &(a(0,0)),
+	      &lda,
+	      &(w[0]),
+	        &(vl(0,0)),
+	        &ldvl,
+	        &(vr(0,0)),
+	        &ldvr,
+	        &(work[0]),
+	        &lwork,
+	        &(rwork[0]),
+	        &info);
+
+	checkBlasStatus(info,"zgeev_");
+#endif
 }
 
 } // namespace PsimagLite

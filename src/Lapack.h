@@ -28,19 +28,19 @@ extern "C" void   cheev_(char *,char *,int *,std::complex<float> *, int *, float
         std::complex<float> *,int *, float *, int *);
 extern "C" void dsyev_(char *,char *,int *,double *,int *, double *,double *,int *,int *);
 extern "C" void ssyev_(char *,char *,int *,float *,int *, float *,float *,int *,int *);
-extern "C" void zgeev(char*,
-                      char*,
-                      int*,
-                      std::complex<double>*,
-                      int*,
-                      std::complex<double>*,
-                      std::complex<double>*,
-                      int*,
-                      std::complex<double>*,
-                      int*,
-                      std::complex<double>*,
-                      int*,
-                      double*,
-                      int*);
+extern "C" void zgeev_(char*,
+                       char*,
+                       int*,
+                       std::complex<double>*,
+                       int*,
+                       std::complex<double>*,
+                       std::complex<double>*,
+                       int*,
+                       std::complex<double>*,
+                       int*,
+                       std::complex<double>*,
+                       int*,
+                       double*,
+                       int*);
 
 #endif
