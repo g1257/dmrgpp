@@ -195,6 +195,9 @@ EOF
 
 	close(FILE);
 	close(FOUT);
+
+	my $exe = "cd $libDir; make clean; make";
+	system($exe);
 }
 
 sub backupMakefile
