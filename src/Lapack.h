@@ -10,7 +10,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -28,4 +28,19 @@ extern "C" void   cheev_(char *,char *,int *,std::complex<float> *, int *, float
         std::complex<float> *,int *, float *, int *);
 extern "C" void dsyev_(char *,char *,int *,double *,int *, double *,double *,int *,int *);
 extern "C" void ssyev_(char *,char *,int *,float *,int *, float *,float *,int *,int *);
+extern "C" void zgeev(char*,
+                      char*,
+                      int*,
+                      std::complex<double>*,
+                      int*,
+                      std::complex<double>*,
+                      std::complex<double>*,
+                      int*,
+                      std::complex<double>*,
+                      int*,
+                      std::complex<double>*,
+                      int*,
+                      double*,
+                      int*);
+
 #endif

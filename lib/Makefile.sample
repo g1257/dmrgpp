@@ -2,11 +2,17 @@
 #CXX = g++ -O3 -DNDEBUG
 all: libpsimaglite.a 
 
-libpsimaglite.a: Makefile.sample MersenneTwister.o
-	ar rcs libpsimaglite.a MersenneTwister.o
+libpsimaglite.a: Makefile.sample MersenneTwister.o Matrix.o Mpi.o
+	ar rcs libpsimaglite.a MersenneTwister.o Matrix.o Mpi.o
 
-MersenneTwister.o: ../src/MersenneTwister.cpp Makefile.sample
+MersenneTwister.o: ../src/MersenneTwister.cpp ../src/MersenneTwister.h Makefile.sample
 	$(CXX) $(CPPFLAGS) -c ../src/MersenneTwister.cpp
+
+Matrix.o: ../src/Matrix.cpp ../src/Matrix.h Makefile.sample
+	$(CXX) $(CPPFLAGS) -c ../src/Matrix.cpp
+
+Mpi.o: ../src/Mpi.cpp ../src/Mpi.h Makefile.sample
+	$(CXX) $(CPPFLAGS) -c ../src/Mpi.cpp
 
 Makefile.dep: ../src/MersenneTwister.cpp
 	$(CXX) $(CPPFLAGS) -MM  ../src/MersenneTwister.cpp  > Makefile.dep

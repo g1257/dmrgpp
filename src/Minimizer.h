@@ -82,7 +82,8 @@ public:
 			if (verbose_) {
 				RealType thisValue = function_(gslS_->x->data,func.n);
 				RealType diff = fabs(thisValue - prevValue);
-				std::cerr<<"simplex(): "<<iter<<" "<<thisValue<<" (diff= "<<diff<<")\n";
+				std::cerr<<"simplex(): "<<iter<<" "<<thisValue<<" (diff= "<<diff<<")";
+				std::cerr<<" status= "<<status_<<" size="<<size<<"\n";
 				prevValue = thisValue;
 			}
 

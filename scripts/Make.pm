@@ -48,10 +48,7 @@ sub make
 	my $libTarget = "";
 	if ($libs=~/\-lpsimaglite/) {
 		$libTarget  = " ../../PsimagLite/lib/libpsimaglite.a";
-		if (!(-e "../../PsimagLite/lib/libpsimaglite.a") ||
-		    !(-e "../../PsimagLite/lib/Makefile")) {
-			psimagLiteLibMake($platform,$mpi,$libs,$normalFlags,$cppflags,$cxx);
-		}
+		psimagLiteLibMake($platform,$mpi,$libs,$normalFlags,$cppflags,$cxx);
 	}
 
 print FH<<EOF;

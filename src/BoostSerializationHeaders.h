@@ -13,7 +13,7 @@
 #include <stdexcept>
 namespace boost {
 
-void noboost(std::string msg)
+inline void noboost(std::string msg)
 {
 	std::string str("ERROR: Please compile with -DUSE_BOOST for ");
 	str += msg + " to work\n";

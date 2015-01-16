@@ -1,4 +1,4 @@
-/* Copyright (c) 2009-2013, UT-Battelle, LLC
+/* Copyright (c) 2009-2014, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
@@ -37,7 +37,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -74,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  * getrusage system call
  */
-  
+
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 #include <iostream>
@@ -82,26 +82,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "String.h"
 
 namespace PsimagLite {
-	void tokenizer(const String& str,
-	               Vector<String>::Type& tokens,
-                       const String& delimiters = " ") 
+void tokenizer(String str,
+               Vector<String>::Type& tokens,
+               String delimiters = " ")
+{
+	// Skip delimiters at beginning.
+	String::size_type lastPos = str.find_first_not_of(delimiters, 0);
+	// Find first "non-delimiter".
+	String::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+	while (String::npos != pos || String::npos != lastPos)
 	{
-		// Skip delimiters at beginning.
-		String::size_type lastPos = str.find_first_not_of(delimiters, 0);
-		// Find first "non-delimiter".
-		String::size_type pos     = str.find_first_of(delimiters, lastPos);
-
-		while (String::npos != pos || String::npos != lastPos)
-		{
-			// Found a token, add it to the vector.
-			tokens.push_back(str.substr(lastPos, pos - lastPos));
-			// Skip delimiters.  Note the "not_of"
-			lastPos = str.find_first_not_of(delimiters, pos);
-			// Find next "non-delimiter"
-			pos = str.find_first_of(delimiters, lastPos);
-		}
+		// Found a token, add it to the vector.
+		tokens.push_back(str.substr(lastPos, pos - lastPos));
+		// Skip delimiters.  Note the "not_of"
+		lastPos = str.find_first_not_of(delimiters, pos);
+		// Find next "non-delimiter"
+		pos = str.find_first_of(delimiters, lastPos);
 	}
-} // namespace PsimagLite 
+}
+} // namespace PsimagLite
 
-/*@}*/	
+/*@}*/
 #endif // TOKENIZER_H
