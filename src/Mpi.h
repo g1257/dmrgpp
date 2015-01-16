@@ -90,24 +90,13 @@ namespace MPI {
 
 #ifdef USE_MPI
 typedef MPI_Comm CommType;
+extern CommType COMM_WORLD;
 
 template<typename T>
 struct MpiData
 {
 	static const MPI_Datatype Type;
 };
-
-template<>
-const MPI_Datatype MpiData<unsigned int long>::Type = MPI_LONG;
-
-template<>
-const MPI_Datatype MpiData<unsigned int>::Type = MPI_INTEGER;
-
-template<>
-const MPI_Datatype MpiData<double>::Type = MPI_DOUBLE;
-
-template<>
-const MPI_Datatype MpiData<int>::Type = MPI_INTEGER;
 
 void checkError(int errorCode,PsimagLite::String caller,CommType comm = COMM_WORLD);
 
