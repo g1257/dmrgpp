@@ -240,6 +240,10 @@ void diag(Matrix<std::complex<double> > &m,Vector<double> ::Type&eigs,char optio
 void diag(Matrix<float> &m,Vector<float> ::Type& eigs,char option);
 
 void diag(Matrix<std::complex<float> > &m,Vector<float> ::Type& eigs,char option);
+
+void inverse(Matrix<std::complex<double> >& m);
+
+void inverse(Matrix<double>& m);
 // end in Matrix.cpp
 
 template<typename T>
@@ -280,24 +284,6 @@ void mathematicaPrint(std::ostream& os,const Matrix<T>& A)
 		if (i+1<A.n_row()) os<<",\n";
 	}
 	os<<"}\n";
-}
-
-template<typename T>
-void inverse(Matrix<T>& m)
-{
-	int n = m.n_row();
-	int info = 0;
-	typename Vector<int>::Type ipiv(n,0);
-	psimag::LAPACK::zgetrf_(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
-	int lwork = -1;
-	typename Vector<T>::Type work(2);
-	psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
-	lwork = std::real(work[0]);
-	work.resize(lwork+2);
-	psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
-	String s = "zgetri_ failed\n";
-	if (info!=0) throw RuntimeError(s.c_str());
-
 }
 
 template<typename T>

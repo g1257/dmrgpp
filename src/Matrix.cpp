@@ -191,5 +191,45 @@ void geev(char jobvl,
 #endif
 }
 
+void inverse(Matrix<std::complex<double> > &m)
+{
+#ifdef NO_LAPACK
+	throw RuntimeError("inverse: NO LAPACK!\n");
+#else
+	int n = m.n_row();
+	int info = 0;
+	typename Vector<int>::Type ipiv(n,0);
+	psimag::LAPACK::zgetrf_(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
+	int lwork = -1;
+	typename Vector<std::complex<double> >::Type work(2);
+	psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+	lwork = std::real(work[0]);
+	work.resize(lwork+2);
+	psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+	String s = "zgetri_ failed\n";
+	if (info!=0) throw RuntimeError(s.c_str());
+#endif
+}
+
+void inverse(Matrix<double> &m)
+{
+#ifdef NO_LAPACK
+	throw RuntimeError("inverse: NO LAPACK!\n");
+#else
+	int n = m.n_row();
+	int info = 0;
+	typename Vector<int>::Type ipiv(n,0);
+	psimag::LAPACK::dgetrf_(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
+	int lwork = -1;
+	typename Vector<double>::Type work(2);
+	psimag::LAPACK::dgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+	lwork = work[0];
+	work.resize(lwork+2);
+	psimag::LAPACK::dgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+	String s = "dgetri_ failed\n";
+	if (info!=0) throw RuntimeError(s.c_str());
+#endif
+}
+
 } // namespace PsimagLite
 
