@@ -23,6 +23,25 @@ typename FunctionType::FieldType myFunction(const gsl_vector *v, void *params)
 	return ft->operator()(v->data,v->size);
 }
 
+template<typename FunctionType>
+void myDfunction(const gsl_vector *v,
+                 void *params,
+                 gsl_vector* df)
+{
+	FunctionType* ft = (FunctionType *)params;
+	ft->df(v->data,v->size,df->data,df->size);
+}
+
+template<typename FunctionType>
+void myFdFunction(const gsl_vector *v,
+                  void *params,
+                  double *f,
+                  gsl_vector *df)
+{
+	*f = myFunction<FunctionType>(v, params);
+	myDfunction<FunctionType>(v, params, df);
+}
+
 template<typename RealType,typename FunctionType>
 class Minimizer {
 
@@ -40,12 +59,15 @@ public:
 	      verbose_(verbose),
 	      status_(100),
 	      gslT_(gsl_multimin_fminimizer_nmsimplex2),
-	      gslS_(gsl_multimin_fminimizer_alloc(gslT_,function_.size()))
+	      gslS_(gsl_multimin_fminimizer_alloc(gslT_,function_.size())),
+	      gslDt_(gsl_multimin_fdfminimizer_conjugate_fr),
+	      gslDs_(gsl_multimin_fdfminimizer_alloc (gslDt_, function_.size()))
 	{}
 
 	~Minimizer()
 	{
-		gsl_multimin_fminimizer_free (gslS_);
+		gsl_multimin_fminimizer_free(gslS_);
+		gsl_multimin_fdfminimizer_free(gslDs_);
 	}
 
 	int simplex(VectorType& minVector,RealType delta=1e-3,RealType tolerance=1e-3)
@@ -73,8 +95,12 @@ public:
 		for (;iter<maxIter_;iter++) {
 			status_ = gsl_multimin_fminimizer_iterate (gslS_);
 
-			if (status_)
-				throw RuntimeError("Minimizer::simplex(...): Error encountered\n");
+			if (status_) {
+				PsimagLite::String gslError(gsl_strerror(status_));
+				PsimagLite::String msg("Minimizer::simplex(...): GSL Error: ");
+				msg += gslError + "\n";
+				throw RuntimeError(msg);
+			}
 
 			RealType size = gsl_multimin_fminimizer_size(gslS_);
 			status_ = gsl_multimin_test_size(size, tolerance);
@@ -82,7 +108,7 @@ public:
 			if (verbose_) {
 				RealType thisValue = function_(gslS_->x->data,func.n);
 				RealType diff = fabs(thisValue - prevValue);
-				std::cerr<<"simplex(): "<<iter<<" "<<thisValue<<" (diff= "<<diff<<")";
+				std::cerr<<"simplex: "<<iter<<" "<<thisValue<<" diff= "<<diff;
 				std::cerr<<" status= "<<status_<<" size="<<size<<"\n";
 				prevValue = thisValue;
 			}
@@ -93,6 +119,58 @@ public:
 		found(minVector,gslS_->x,iter);
 		gsl_vector_free (x);
 		gsl_vector_free (xs);
+		return iter;
+	}
+
+	int conjugateGradient(VectorType& minVector,
+	                      RealType delta=1e-3,
+	                      RealType delta2=1e-3,
+	                      RealType tolerance=1e-3)
+	{
+		gsl_vector *x;
+		/* Starting point,  */
+		x = gsl_vector_alloc (function_.size());
+		for (SizeType i=0;i<minVector.size();i++)
+			gsl_vector_set (x, i, minVector[i]);
+
+		gsl_multimin_function_fdf func;
+		func.f= myFunction<FunctionType>;
+		func.df = myDfunction<FunctionType>;
+		func.fdf = myFdFunction<FunctionType>;
+		func.n = function_.size();
+		func.params = &function_;
+
+		gsl_multimin_fdfminimizer_set(gslDs_, &func, x, delta, delta2);
+
+		RealType prevValue = 0;
+		SizeType iter = 0;
+		for (;iter<maxIter_;iter++) {
+			status_ = gsl_multimin_fdfminimizer_iterate(gslDs_);
+
+			if (status_) {
+				PsimagLite::String gslError(gsl_strerror(status_));
+				PsimagLite::String msg("Minimizer::conjugateGradient(...): GSL Error: ");
+				msg += gslError + "\n";
+				throw RuntimeError(msg);
+			}
+
+			status_ = gsl_multimin_test_gradient (gslDs_->gradient, tolerance);
+
+			if (verbose_) {
+				RealType thisValue = function_(gslDs_->x->data,func.n);
+				RealType diff = fabs(thisValue - prevValue);
+				std::cerr<<"conjugateGradient: "<<iter<<" "<<thisValue;
+				std::cerr<<" diff= "<<diff;
+				std::cerr<<" status= "<<status_<<"\n";
+				prevValue = thisValue;
+			}
+
+			if (status_ == GSL_SUCCESS) break;
+
+		}
+
+		found(minVector,gslDs_->x,iter);
+		gsl_vector_free (x);
 		return iter;
 	}
 
@@ -127,6 +205,8 @@ private:
 	int status_;
 	const gsl_multimin_fminimizer_type *gslT_;
 	gsl_multimin_fminimizer *gslS_;
+	const gsl_multimin_fdfminimizer_type *gslDt_;
+	gsl_multimin_fdfminimizer *gslDs_;
 
 }; // class Minimizer
 }
@@ -139,7 +219,7 @@ template<typename RealType,typename FunctionType>
 class Minimizer {
 
 	typedef typename FunctionType::FieldType FieldType;
-        typedef typename Vector<FieldType>::Type VectorType;
+	typedef typename Vector<FieldType>::Type VectorType;
 
 public:
 
