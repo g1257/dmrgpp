@@ -198,10 +198,10 @@ void inverse(Matrix<std::complex<double> > &m)
 #else
 	int n = m.n_row();
 	int info = 0;
-	typename Vector<int>::Type ipiv(n,0);
+	Vector<int>::Type ipiv(n,0);
 	psimag::LAPACK::zgetrf_(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
 	int lwork = -1;
-	typename Vector<std::complex<double> >::Type work(2);
+	Vector<std::complex<double> >::Type work(2);
 	psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
 	lwork = std::real(work[0]);
 	work.resize(lwork+2);
@@ -218,10 +218,10 @@ void inverse(Matrix<double> &m)
 #else
 	int n = m.n_row();
 	int info = 0;
-	typename Vector<int>::Type ipiv(n,0);
+	Vector<int>::Type ipiv(n,0);
 	psimag::LAPACK::dgetrf_(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
 	int lwork = -1;
-	typename Vector<double>::Type work(2);
+	Vector<double>::Type work(2);
 	psimag::LAPACK::dgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
 	lwork = work[0];
 	work.resize(lwork+2);
