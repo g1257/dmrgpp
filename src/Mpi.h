@@ -457,6 +457,7 @@ void>::Type allReduce(NumericType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COM
 #else
 typedef int CommType;
 extern int COMM_WORLD;
+extern int SUM;
 
 void init(int, char **);
 

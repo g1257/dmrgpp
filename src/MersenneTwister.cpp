@@ -8,6 +8,18 @@ MersenneTwister::MersenneTwister(unsigned s)
 	seed(s);
 }
 
+MersenneTwister::MersenneTwister(unsigned s, int rank, int nprocs)
+: index_(0)
+{
+	seed(s);
+	int news = random();
+	for (int i = 1; i < rank; ++i) {
+		news = random();
+	}
+
+	seed(news);
+}
+
 void
 MersenneTwister::seed(unsigned s)
 {

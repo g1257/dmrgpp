@@ -7,9 +7,11 @@ class MersenneTwister {
 
 public:
 
-	MersenneTwister(unsigned seed);
+	MersenneTwister(unsigned,int,int);
 
-	void seed(unsigned s);
+	MersenneTwister(unsigned);
+
+	void seed(unsigned);
 
 	unsigned random();
 
