@@ -8,7 +8,7 @@ MersenneTwister::MersenneTwister(unsigned s)
 	seed(s);
 }
 
-MersenneTwister::MersenneTwister(unsigned s, int rank, int nprocs)
+MersenneTwister::MersenneTwister(unsigned s, int rank, int)
 : index_(0)
 {
 	seed(s);

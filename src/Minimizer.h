@@ -125,7 +125,8 @@ public:
 	int conjugateGradient(VectorType& minVector,
 	                      RealType delta=1e-3,
 	                      RealType delta2=1e-3,
-	                      RealType tolerance=1e-3)
+	                      RealType tolerance=1e-3,
+	                      SizeType saveEvery = 0)
 	{
 		gsl_vector *x;
 		/* Starting point,  */
@@ -167,6 +168,8 @@ public:
 
 			if (status_ == GSL_SUCCESS) break;
 
+			if (saveEvery > 0 && iter%saveEvery==0)
+				printIntermediate(gslDs_->x, iter);
 		}
 
 		found(minVector,gslDs_->x,iter);
@@ -197,6 +200,14 @@ private:
 	{
 		for (SizeType i=0;i<minVector.size();i++)
 			minVector[i] = gsl_vector_get(x,i);
+	}
+
+	void printIntermediate(gsl_vector* x, SizeType iter) const
+	{
+		std::cerr<<"INTERMEDIATE "<<iter<<"\n";
+		std::cerr<<x->size<<"\n";
+		for (SizeType i=0;i<x->size;i++)
+			std::cerr<<gsl_vector_get(x,i)<<"\n";
 	}
 
 	FunctionType& function_;
