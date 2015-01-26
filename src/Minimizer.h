@@ -162,6 +162,7 @@ public:
 				RealType diff = fabs(thisValue - prevValue);
 				std::cerr<<"conjugateGradient: "<<iter<<" "<<thisValue;
 				std::cerr<<" diff= "<<diff;
+				std::cerr<<" gradientNorm= "<<gradientNorm(gslDs_->x);
 				std::cerr<<" status= "<<status_<<"\n";
 				prevValue = thisValue;
 			}
@@ -208,6 +209,20 @@ private:
 		std::cerr<<x->size<<"\n";
 		for (SizeType i=0;i<x->size;i++)
 			std::cerr<<gsl_vector_get(x,i)<<"\n";
+	}
+
+	RealType gradientNorm(const gsl_vector *v) const
+	{
+		gsl_vector* df = gsl_vector_alloc (function_.size());
+		myDfunction<FunctionType>(v,&function_,df);
+		RealType sum = 0;
+		for (int i = 0; i < df->size; ++i) {
+			RealType tmp = gsl_vector_get(df,i);
+			sum += std::conj(tmp) * tmp;
+		}
+
+		gsl_vector_free (df);
+		return sqrt(sum);
 	}
 
 	FunctionType& function_;
