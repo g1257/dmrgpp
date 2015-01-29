@@ -194,6 +194,17 @@ public:
 			quantumNumbers_.clear();
 			electrons_.clear();
 
+			unsigned long long int check = ns*ne;
+			unsigned int shift = 8*sizeof(SizeType)-1;
+			unsigned long long int max = 1;
+			max <<= shift;
+			if (check >= max) {
+				PsimagLite::String msg("Basis::setToProduct: Basis too large. ");
+				msg += "Current= "+ ttos(check) + " max " + ttos(max) + " ";
+				msg += "Please recompile with -DUSE_LONG\n";
+				throw PsimagLite::RuntimeError(msg);
+			}
+
 			for (SizeType j=0;j<ne;j++) for (SizeType i=0;i<ns;i++) {
 				quantumNumbers_.push_back(su2Symmetry2.quantumNumbers_[i]+
 				                          su2Symmetry3.quantumNumbers_[j]);
