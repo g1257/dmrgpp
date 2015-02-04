@@ -128,8 +128,8 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
+	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+	      INFINITE=WaveFunctionTransfType::INFINITE};
 
 	enum {SAVE_ALL=MyBasis::SAVE_ALL, SAVE_PARTIAL=MyBasis::SAVE_PARTIAL};
 
@@ -568,9 +568,14 @@ private:
 	{
 		if (direction==INFINITE && parameters_.adjustQuantumNumbers.size()>0) {
 			VectorSizeType targetQuantumNumbers(2,0);
-			assert(step<parameters_.adjustQuantumNumbers.size());
-			targetQuantumNumbers[0]=parameters_.adjustQuantumNumbers[step];
-			targetQuantumNumbers[1]=parameters_.adjustQuantumNumbers[step];
+			if (2*step+1 >= parameters_.adjustQuantumNumbers.size()) {
+				PsimagLite::String msg("adjustQuantumNumbers must be a vector");
+				msg += " of size N-2, where N is the TotalNumberOfSites\n";
+				throw PsimagLite::RuntimeError(msg);
+			}
+
+			targetQuantumNumbers[0]=parameters_.adjustQuantumNumbers[2*step];
+			targetQuantumNumbers[1]=parameters_.adjustQuantumNumbers[2*step+1];
 			setQuantumSector(targetQuantumNumbers,direction);
 			return;
 		}
