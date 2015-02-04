@@ -22,6 +22,57 @@ use File::Temp;
 
 package Make;
 
+sub newMake
+{
+	local *FH = shift;
+	my ($drivers,
+	    $code,
+		$additional,
+		$additional2,
+		$additional3) = @_;
+	$additional3 = "" unless defined($additional3);
+	my $allExecutables = combineAllDrivers($drivers,"");
+	my $allCpps = combineAllDrivers($drivers,".cpp");
+
+print FH<<EOF;
+# DO NOT EDIT!!! Changes will be lost. Modify Config.make instead
+# This Makefile was written by $0
+# $code by G.A.
+
+include Config.make
+CPPFLAGS += -I../../PsimagLite -I../../PsimagLite/src -IEngine
+all: $allExecutables $additional3
+
+EOF
+
+foreach my $what (@$drivers) {
+print FH<<EOF;
+$what.o: $what.cpp  Makefile $additional
+	\$(CXX) \$(CPPFLAGS) -c $what.cpp
+
+$what: $what.o
+	\$(CXX) -o  $what $what.o \$(LDFLAGS)
+	\$(STRIP_COMMAND) $what
+
+EOF
+}
+
+print FH<<EOF;
+
+../../PsimagLite/lib/libpsimaglite.a:
+	\$(MAKE) -f Makefile -C ../../PsimagLite/lib/
+
+Makefile.dep: $allCpps $additional
+	\$(CXX) \$(CPPFLAGS) -MM $allCpps  > Makefile.dep
+
+clean: Makefile.dep
+	rm -f core* $allExecutables *.o *.dep $additional2
+
+include Makefile.dep
+EOF
+}
+
+
 sub make
 {
 	local *FH = shift;
