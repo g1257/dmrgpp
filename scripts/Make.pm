@@ -219,36 +219,7 @@ sub gccVersion
 
 sub psimagLiteLibMake
 {
-	my ($platform,$mpi,$libs,$normalFlags,$cppflags,$cxx) = @_;
-	my $libDir = "../../PsimagLite/lib";
-	backupMakefile($libDir);
-	open(FOUT,">$libDir/Makefile") or die "$0: Cannot open $libDir/Makefile for writing: $!\n";
-	flock(FOUT, 2) || die "$0: Could not lock $libDir/Makefile\n";
-
-	print FOUT<<EOF;
-# DO NOT EDIT!!! Changes will be lost. Modify $0 instead
-# This Makefile was written by $0
-# PsimagLite by G.A.
-# Platform: $platform
-# MPI: $mpi
-
-LDFLAGS =  $libs
-CPPFLAGS = $normalFlags $cppflags
-CXX = $cxx
-EOF
-
-	open(FILE,"$libDir/Makefile.sample") or die "$0: Cannot open $libDir/Makefile.sample : $!";
-	while (<FILE>) {
-		next if (/^#/);
-		s/Makefile.sample/Makefile/;
-		print FOUT;
-	}
-
-	close(FILE);
-	close(FOUT);
-
-	my $exe = "cd $libDir; make clean; make";
-	system($exe);
+	print STDERR "$0: Make sure to compile PsimagLite/lib first\n";
 }
 
 sub backupMakefile
