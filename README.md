@@ -124,9 +124,14 @@ https://web.ornl.gov/~gz1/hashes.html
 
 ### Building DMRG++
 <pre>
- cd src
+ cd PsimagLite/lib
  perl configure.pl
- (please answer questions regarding depedencies and libraries)
+ (you may now edit Config.make)
+ make
+ cd ../../
+ cd dmrgpp/src
+ perl configure.pl
+ (you may now edit Config.make)
  make
 </pre>
 
