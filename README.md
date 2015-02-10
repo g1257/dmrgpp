@@ -141,14 +141,10 @@ https://web.ornl.gov/~gz1/hashes.html
  Sample input files can be found under <code>TestSuite/inputs/</code>.
 
 <code>configure.pl</code> creates the <code>Makefile</code>
- according to the answers to questions given.
- In the Makefile, LDFLAGS must contain the linker flags to
- link with the LAPACK library. Defaults provided
- automatically by configure.pl should work in most cases.
- If MPI is not selected (serial code) then the compiler will be chosen to be g++.
- Other compilers may work but only the GNU C++ compiler, g++, was tested.
- If MPI is selected then the compiler will be chosen to be mpicxx, which
- is usually a wrapper script around g++ to take care of linking with MPI libraries
- and to include MPI headers. Depending on your MPI installation you might need to
- change the name of this script.
+ according to preferences in the file <code>Config.make</code>. 
+If <code>Config.make</code> does not exist, <code>configure.pl</code>
+ copies <code>Config.make.sample</code>
+into <code>Config.make</code>, but if <code>Config.make</code>
+ exists, <code>configure.pl</code> will not
+overwrite it.
 
