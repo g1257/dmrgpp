@@ -42,16 +42,16 @@ sub createMakefile
 print FH<<EOF;
 include Config.make
 all: libpsimaglite.a
-libpsimaglite.a: Makefile.sample MersenneTwister.o Matrix.o Mpi.o
+libpsimaglite.a: Makefile MersenneTwister.o Matrix.o Mpi.o
 \tar rcs libpsimaglite.a MersenneTwister.o Matrix.o Mpi.o
 
-MersenneTwister.o: ../src/MersenneTwister.cpp ../src/MersenneTwister.h Makefile.sample
+MersenneTwister.o: ../src/MersenneTwister.cpp ../src/MersenneTwister.h Makefile
 \t\$(CXX) \$(CPPFLAGS) -c ../src/MersenneTwister.cpp
 
-Matrix.o: ../src/Matrix.cpp ../src/Matrix.h Makefile.sample
+Matrix.o: ../src/Matrix.cpp ../src/Matrix.h Makefile
 \t\$(CXX) \$(CPPFLAGS) -c ../src/Matrix.cpp
 
-Mpi.o: ../src/Mpi.cpp ../src/Mpi.h Makefile.sample
+Mpi.o: ../src/Mpi.cpp ../src/Mpi.h Makefile
 \t\$(CXX) \$(CPPFLAGS) -c ../src/Mpi.cpp
 
 Makefile.dep: ../src/MersenneTwister.cpp

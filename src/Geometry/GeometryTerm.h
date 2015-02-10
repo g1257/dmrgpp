@@ -91,6 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "KTwoNiFFour.h"
 #include "Star.h"
 #include "LongChain.h"
+#include "LongRange.h"
 
 namespace PsimagLite {
 
@@ -101,7 +102,8 @@ class GeometryTerm {
 	typedef GeometryDirection<ComplexOrRealType,GeometryBaseType> GeometryDirectionType;
 
 	enum {NUMBERS = GeometryDirectionType::NUMBERS,
-	      MATRICES = GeometryDirectionType::MATRICES};
+	      MATRICES = GeometryDirectionType::MATRICES,
+	      RAW_GEOMETRY = GeometryDirectionType::RAW_GEOMETRY};
 
 public:
 
@@ -145,6 +147,15 @@ public:
 			geometryBase_ = new KTwoNiFFour<InputType>(linSize,io);
 		} else if (s=="star") {
 			geometryBase_ = new Star<InputType>(linSize,io);
+		} else if (s=="LongRange") {
+			if (edof != NUMBERS) {
+				PsimagLite::String msg("LongRange geometry ");
+				msg += "does not support multiple orbitals\n";
+				throw RuntimeError(msg);
+			}
+
+			geometryBase_ = new LongRange<InputType>(linSize,io);
+			edof = RAW_GEOMETRY;
 		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
 		}
@@ -181,6 +192,7 @@ public:
 		ar.template register_type<LadderBath<InputType> >();
 		ar.template register_type<KTwoNiFFour<InputType> >();
 		ar.template register_type<Star<InputType> >();
+		ar.template register_type<LongRange<InputType> >();
 		ar & linSize_;
 		ar & maxEdof_;
 		ar & geometryBase_;
@@ -207,9 +219,9 @@ public:
 		end = (const char*)&directions_;
 		total += (end - start);
 		mres.push(SomeMemResolvType::MEMORY_HEAPPTR,
-		                               sizeof(geometryBase_),
-			                           &geometryBase_,
-			                           str + " geometryBase");
+		          sizeof(geometryBase_),
+		          &geometryBase_,
+		          str + " geometryBase");
 
 		start = end;
 		end = (const char*)&cachedValues_;
@@ -353,7 +365,7 @@ public:
 	template<typename ComplexOrRealType_,typename InputType_>
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const GeometryTerm<ComplexOrRealType_,
-	                                                   InputType_>& gt);
+	                                InputType_>& gt);
 
 private:
 

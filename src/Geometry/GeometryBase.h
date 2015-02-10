@@ -91,6 +91,8 @@ template<typename InputType>
 class GeometryBase {
 
 	typedef std::pair<SizeType,SizeType> PairType;
+	typedef double RealType_;
+	typedef PsimagLite::Matrix<RealType_> MatrixType;
 
 	struct AdditionalData {
 		AdditionalData() : type1(0),type2(0),TYPE_C(GeometryBase::TYPE_C) {}
@@ -105,6 +107,7 @@ public:
 	enum {TYPE_O,TYPE_C};
 
 	typedef AdditionalData AdditionalDataType;
+	typedef RealType_ RealType;
 
 	virtual ~GeometryBase()
 	{}
@@ -142,6 +145,11 @@ public:
 	virtual SizeType maxConnections() const = 0;
 
 	virtual SizeType findReflection(SizeType site) const = 0;
+
+	virtual void set(MatrixType&) const
+	{
+		throw RuntimeError("GeometryBase::set() unimplemented for derived class\n");
+	}
 
 	virtual void fillAdditionalData(AdditionalDataType&,
 	                                SizeType,

@@ -91,19 +91,20 @@ class GeometryDirection {
 
 public:
 
-	enum {NUMBERS,MATRICES};
+	enum {NUMBERS,MATRICES,RAW_GEOMETRY};
 	GeometryDirection()
 	    : dirId_(0),geometryBase_(0)
 	{}
 
 	template<typename IoInputter>
 	GeometryDirection(IoInputter& io,
-	                  SizeType dirId,SizeType edof,
+	                  SizeType dirId,
+	                  SizeType edof,
 	                  const String& options,
 	                  const GeometryBaseType* geometryFactory)
 	    : dirId_(dirId),geometryBase_(geometryFactory)
 	{
-		SizeType n = getVectorSize(options);
+		SizeType n = (edof != RAW_GEOMETRY) ? getVectorSize(options) : 0;
 		dataType_ = edof;
 		if (edof==NUMBERS) {
 			io.read(dataNumbers_,"Connectors");
@@ -112,24 +113,27 @@ public:
 				s += " " + ttos(dataNumbers_.size()) + " != " + ttos(n) + "\n";
 				throw RuntimeError(s.c_str());
 			}
-		} else {
+		} else if (edof==MATRICES) {
 			if (n == 0) n = 1;
 			for (SizeType i=0;i<n;i++) {
 				MatrixType m;
 				io.readMatrix(m,"Connectors");
 				dataMatrices_.push_back(m);
 			}
+		} else {
+			geometryBase_->set(rawHoppings_);
 		}
 	}
 
 	template<class Archive>
-    void serialize(Archive & ar, const unsigned int version)
-    {
+	void serialize(Archive& ar, const unsigned int version)
+	{
 		ar & dirId_;
-        ar & dataType_;
-        ar & geometryBase_;
+		ar & dataType_;
+		ar & geometryBase_;
 		ar & dataNumbers_;
 		ar & dataMatrices_;
+		ar & rawHoppings_;
 	}
 
 	template<typename SomeMemResolvType>
@@ -165,12 +169,18 @@ public:
 	                             SizeType j,
 	                             SizeType edof2) const
 	{
+		if (dataType_ == RAW_GEOMETRY) {
+			assert(edof1 == 0 && edof2 == 0);
+			return rawHoppings_(i,j);
+		}
+
 		SizeType h = (constantValues()) ? 0 : geometryBase_->handle(i,j);
 
 		if (dataType_==NUMBERS) {
 			assert(dataNumbers_.size()>h);
 			return dataNumbers_[h];
 		}
+
 		assert(dataMatrices_.size()>h);
 
 		bool b = (dataMatrices_[h].n_row()>edof1 &&
@@ -187,17 +197,34 @@ public:
 
 	SizeType nRow() const
 	{
-		return (dataType_==NUMBERS) ? 1 : dataMatrices_[0].n_row();
+		switch(dataType_) {
+		case MATRICES:
+			return dataMatrices_[0].n_row();
+		default:
+			return 1;
+		}
 	}
 
 	SizeType nCol() const
 	{
-		return (dataType_==NUMBERS) ? 1 : dataMatrices_[0].n_col();
+		switch(dataType_) {
+		case MATRICES:
+			return dataMatrices_[0].n_col();
+		default:
+			return 1;
+		}
 	}
 
 	SizeType size() const
 	{
-		return (dataType_==NUMBERS) ? dataNumbers_.size() : dataMatrices_.size();
+		switch(dataType_) {
+		case NUMBERS:
+			return dataNumbers_.size();
+		case MATRICES:
+			return dataMatrices_.size();
+		}
+
+		throw RuntimeError("GeometryDirection: size() unimplemented for RAW_GEOMETRY\n");
 	}
 
 	bool constantValues() const
@@ -208,7 +235,7 @@ public:
 	template<typename RealType_,typename GeometryBaseType_>
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const GeometryDirection<RealType_,
-	                                                        GeometryBaseType_>& gd);
+	                                GeometryBaseType_>& gd);
 
 private:
 
@@ -225,6 +252,7 @@ private:
 	const GeometryBaseType* geometryBase_;
 	typename Vector<ComplexOrRealType>::Type dataNumbers_;
 	typename Vector<MatrixType>::Type dataMatrices_;
+	MatrixType rawHoppings_;
 }; // class GeometryDirection
 
 template<typename ComplexOrRealType,typename GeometryBaseType>
