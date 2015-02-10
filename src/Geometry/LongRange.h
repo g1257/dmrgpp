@@ -133,13 +133,16 @@ public:
 
 	bool fringe(SizeType i,SizeType smax,SizeType emin) const
 	{
-		throw RuntimeError("LongRange::fringe(): unimplemented\n");
+		return true;
 	}
 
 	// siteNew2 is fringe in the environment
 	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
 	{
-		throw RuntimeError("LongRange::getSubstituteSite(): unimplemented\n");
+		assert(siteNew2 >= emin);
+		SizeType tmp = siteNew2 - emin + smax+1;
+		assert(tmp < linSize_);
+		return tmp;
 	}
 
 	String label() const
