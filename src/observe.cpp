@@ -83,7 +83,7 @@ bool observeOneFullSweep(IoInputType& io,
 	SizeType n  = geometry.numberOfSites();
 
 	ObservableLibraryType observerLib(io,n,hasTimeEvolution,model,verbose);
-	
+
 	bool ot = false;
 	if (obsOptions.find("ot")!=PsimagLite::String::npos ||
 	    obsOptions.find("time")!=PsimagLite::String::npos) ot = true;
@@ -186,10 +186,10 @@ void mainLoop(GeometryType& geometry,
 	                  GeometryType> ModelBaseType;
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
 	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
-	
+
 	ModelSelector<ModelBaseType> modelSelector(params.model);
 	const ModelBaseType& model = modelSelector(params,io,geometry);
-	
+
 	bool moreData = true;
 	const PsimagLite::String& datafile = params.filename;
 	IoInputType dataIo(datafile);
@@ -262,14 +262,19 @@ int main(int argc,char *argv[])
 	PsimagLite::String filename="";
 	PsimagLite::String options("");
 	int opt = 0;
-
-	while ((opt = getopt(argc, argv,"f:o:")) != -1) {
+	int precision = 6;
+	while ((opt = getopt(argc, argv,"f:o:p:")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
 			break;
 		case 'o':
 			options = optarg;
+			break;
+		case 'p':
+			precision = atoi(optarg);
+			std::cout.precision(precision);
+			std::cerr.precision(precision);
 			break;
 		default:
 			usage(argv[0]);
@@ -287,7 +292,7 @@ int main(int argc,char *argv[])
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	ConcurrencyType concurrency(&argc,&argv,1);
-	
+
 	// print license
 	if (ConcurrencyType::root()) {
 		std::cerr<<ProgramGlobals::license;

@@ -306,7 +306,8 @@ int main(int argc,char *argv[])
 	if (utils::basename(strUsage) == "operator") options.enabled = true;
 	strUsage += " -f filename";
 	PsimagLite::String insitu("");
-	while ((opt = getopt(argc, argv,"f:o:s:l:d:t:F:")) != -1) {
+	int precision = 6;
+	while ((opt = getopt(argc, argv,"f:o:s:l:d:F:p:t")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -333,6 +334,11 @@ int main(int argc,char *argv[])
 			break;
 		case 'F':
 			options.fermionicSign = atoi(optarg);
+			break;
+		case 'p':
+			precision = atoi(optarg);
+			std::cout.precision(precision);
+			std::cerr.precision(precision);
 			break;
 		default:
 			inputCheck.usageMain(strUsage);
