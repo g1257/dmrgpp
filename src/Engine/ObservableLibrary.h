@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 
 namespace Dmrg {
-	
+
 	template<typename ObserverType>
 	class ObservableLibrary {
 	public:
@@ -142,7 +142,7 @@ namespace Dmrg {
 				MatrixType opC = model_.naturalOperator("c",site,0); // c_{0,0} spin up
 				MatrixType opCtranspose = transposeConjugate(opC);
 				measureOne("OperatorC",opC,"",opCtranspose,-1,rows,cols,threadId);
-				MatrixType opC2 = model_.naturalOperator("c",site,1); // c_{0,0} spin down 
+				MatrixType opC2 = model_.naturalOperator("c",site,1); // c_{0,0} spin down
 				MatrixType opCtranspose2 = transposeConjugate(opC2);
 				measureOne("OperatorC",opC2,"",opCtranspose2,-1,rows,cols,threadId);
 			} else if (label=="nn") {
@@ -366,8 +366,8 @@ namespace Dmrg {
 				onePointHookForZero(i0,opA,"gs",threadId);
 
 				FieldType tmp1 = observe_.template
-						onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
-				std::cout<<observe_.site(threadId)<<" "<<tmp1;
+				onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
+				std::cout<<observe_.site(threadId)<<" "<<tmp1<<"\n";
 
 				if (!observe_.isAtCorner(numberOfSites_,threadId)) continue;
 
@@ -381,8 +381,8 @@ namespace Dmrg {
 				// do the corner case
 				observe_.setBrackets(bra,ket);
 				tmp1 = observe_.template
-				        onePoint<ApplyOperatorType>(i0,opAcorner,ApplyOperatorType::BORDER_YES);
-				std::cout<<x<<" "<<tmp1;
+				onePoint<ApplyOperatorType>(i0,opAcorner,ApplyOperatorType::BORDER_YES);
+				std::cout<<x<<" "<<tmp1<<"\n";
 			}
 		}
 
@@ -402,7 +402,8 @@ namespace Dmrg {
 
 				if (i0==0) {
 					std::cout<<"site "<<preOperator.label()<<"(gs) ";
-					if (hasTimeEvolution_) std::cout<<preOperator.label()<<"(timevector) time";
+					if (hasTimeEvolution_)
+						std::cout<<preOperator.label()<<"(timevector) time";
 					std::cout<<"\n";
 				}
 				// for g.s. use this one:
@@ -425,6 +426,7 @@ namespace Dmrg {
 
 					std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
 				}
+
 				std::cout<<"\n";
 				// also calculate next or prev. site:
 				if (observe_.isAtCorner(numberOfSites_,threadId)) {
@@ -447,6 +449,7 @@ namespace Dmrg {
 								 onePoint<ApplyOperatorType>(i0,opAcorner,ApplyOperatorType::BORDER_YES);
 						std::cout<<" "<<tmp2<<" "<<observe_.time(threadId);
 					}
+
 					std::cout<<"\n";
 				}
 			}
@@ -510,7 +513,7 @@ namespace Dmrg {
 	}; // class ObservableLibrary
 
 
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // OBSERVABLE_LIBRARY_H
