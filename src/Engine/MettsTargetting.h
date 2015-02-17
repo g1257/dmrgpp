@@ -156,7 +156,7 @@ public:
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
 		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-		  INFINITE=WaveFunctionTransfType::INFINITE};
+	      INFINITE=WaveFunctionTransfType::INFINITE};
 
 	const static SizeType SYSTEM = ProgramGlobals::SYSTEM;
 
@@ -1023,7 +1023,7 @@ private:
 
 	SizeType getObservablesToTest(const PsimagLite::String& modelName) const
 	{
-		if (modelName=="HubbardOneBand" ||
+		if (modelName=="HubbardOneBand" || modelName=="HubbardOneBandExtended" ||
 		    modelName=="SuperHubbardExtended") return 1;
 
 		if (modelName=="FeAsBasedSc" ||
@@ -1042,15 +1042,21 @@ private:
 	{
 		OperatorType A;
 
-		if (modelName=="HubbardOneBand" || modelName=="SuperHubbardExtended") {
+		if (modelName=="HubbardOneBand" || modelName=="SuperHubbardExtended"
+		        || modelName=="HubbardOneBandExtended") {
 			assert(ind == 0);
-			PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator("nup",site,0));
+			PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator("nup",
+			                                                                     site,
+			                                                                     0));
 			A.data = tmpC;
 			A.fermionSign = 1;
 			return processSitesPerBlock(A,blockIndex,site);
 		}
+
 		if (modelName=="FeAsBasedSc" || modelName=="FeAsBasedScExtended") {
-			PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator("c",site,ind));
+			PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator("c",
+			                                                                     site,
+			                                                                     ind));
 			PsimagLite::CrsMatrix<ComplexOrRealType> tmpCdagger;
 			transposeConjugate(tmpCdagger,tmpC);
 			multiply(A.data,tmpCdagger,tmpC);
@@ -1066,7 +1072,7 @@ private:
 	PsimagLite::String getObservableLabel(SizeType i,
 	                                      const PsimagLite::String& modelName) const
 	{
-		if (modelName=="HubbardOneBand" ||
+		if (modelName=="HubbardOneBand" || modelName=="HubbardOneBandExtended" ||
 		    modelName=="SuperHubbardExtended") return "nup";
 
 		if (modelName=="FeAsBasedSc" ||
