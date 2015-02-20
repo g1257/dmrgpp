@@ -158,6 +158,13 @@ public:
 			throw PsimagLite::RuntimeError(msg);
 		}
 
+		for (SizeType i = 0; i < model.geometry().terms(); ++i) {
+			if (model.geometry().label(i) != "chain") {
+				PsimagLite::String msg("TargetingAncilla only for chain\n");
+				throw PsimagLite::RuntimeError(msg);
+			}
+		}
+
 		RealType tau =tstStruct_.tau();
 		RealType sum = 0;
 		SizeType n = times_.size();
@@ -192,15 +199,12 @@ public:
 
 	RealType gsWeight() const
 	{
-		if (this->common().allStages(DISABLED)) return 1.0;
-		return gsWeight_;
+		return 0;
 	}
 
 	bool includeGroundStage() const
 	{
-		if (!this->common().noStageIs(DISABLED)) return true;
-		bool b = (fabs(gsWeight_)>1e-6);
-		return b;
+		return false;
 	}
 
 	void evolve(RealType Eg,

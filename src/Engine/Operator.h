@@ -84,6 +84,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef OPERATOR_H
 #define OPERATOR_H
 #include "CrsMatrix.h"
+#include "IoSimple.h"
+#include "InputNg.h"
+#include "InputCheck.h"
 
 namespace Dmrg {
 // This is a structure, don't add member functions here!
@@ -189,10 +192,8 @@ struct Operator {
 	template<typename IoInputType, typename CookedOperatorType>
 	Operator(IoInputType& io, CookedOperatorType& cookedOperator,bool checkNonZero)
 	{
-		PsimagLite::String s;
+		PsimagLite::String s = readLabel(io,"TSPOperator=");
 		PsimagLite::Matrix<SparseElementType> m;
-
-		io.readline(s,"TSPOperator=");
 
 		if (s == "cooked") {
 			io.readline(s,"COOKED_OPERATOR=");
@@ -299,6 +300,22 @@ struct Operator {
 	Su2RelatedType su2Related;
 
 private:
+
+	PsimagLite::String readLabel(PsimagLite::IoSimple::In& io,
+	                             PsimagLite::String label)
+	{
+		PsimagLite::String s;
+		io.readline(s,label);
+		return s;
+	}
+
+	PsimagLite::String readLabel(PsimagLite::InputNg<InputCheck>::Readable& io,
+	                             PsimagLite::String label)
+	{
+		PsimagLite::String s;
+		io.readline(s,label,true,true);
+		return s;
+	}
 
 	void checkNotZeroMatrix(const PsimagLite::Matrix<SparseElementType>& m) const
 	{

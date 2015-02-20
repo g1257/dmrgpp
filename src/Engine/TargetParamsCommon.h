@@ -115,6 +115,13 @@ public:
 		io.read(sites_,"TSPSites");
 		io.read(startingLoops_,"TSPLoops");
 
+		if (sites_.size() != startingLoops_.size()) {
+			PsimagLite::String str(__FILE__);
+			str += " Listed sites is " + ttos(sites_.size());
+			str += " but delay loops found is " + ttos(startingLoops_.size()) + "\n";
+			throw PsimagLite::RuntimeError(str);
+		}
+
 		PsimagLite::String productOrSum = "product";
 		try {
 			io.readline(productOrSum,"TSPProductOrSum=");
@@ -138,13 +145,11 @@ public:
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
-		aOperators_.resize(sites_.size());
-
 		CookedOperator<ModelType> cookedOperator(model_);
 
 		for (SizeType i=0;i<sites_.size();i++) {
 			OperatorType myOp(io,cookedOperator,OperatorType::MUST_BE_NONZERO);
-			aOperators_[i] = myOp;
+			aOperators_.push_back(myOp);
 		}
 
 		noOperator_ = isNoOperator();
@@ -268,13 +273,22 @@ private:
 
 	void checkSizesOfOperators() const
 	{
-		if (sites_.size() != aOperators_.size() || sites_.size() != startingLoops_.size())
-			throw PsimagLite::RuntimeError("CommonTargetting\n");
+		if (sites_.size() != aOperators_.size()) {
+			PsimagLite::String str(__FILE__);
+			str += " Listed sites is " + ttos(sites_.size());
+			str += " but operators found is " + ttos(aOperators_.size()) + "\n";
+			throw PsimagLite::RuntimeError(str);
+		}
 
 		for (SizeType i=0;i<aOperators_.size();i++) {
 			SizeType n = aOperators_[i].data.row();
-			if (n!=model_.hilbertSize(sites_[i]))
-				throw PsimagLite::RuntimeError("CommonTargetting\n");
+			SizeType hilbert = model_.hilbertSize(sites_[i]);
+			if (n != hilbert) {
+				PsimagLite::String str(__FILE__);
+				str += " Operator rank is " + ttos(n) + " but ";
+				str += ttos(hilbert) + " was expected\n";
+				throw PsimagLite::RuntimeError(str);
+			}
 		}
 	}
 
