@@ -412,7 +412,10 @@ public:
 			return total;
 		}
 
-		void readline(String& val,const String& label,bool clean = true)
+		void readline(String& val,
+		              const String& label,
+		              bool clean = true,
+		              bool forceRemoval = false)
 		{
 			String label2 = label2label(label);
 			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
@@ -420,7 +423,7 @@ public:
 
 			val= it->second.c_str();
 
-			if (clean) cleanLabelsIfNeeded(label2,mapStrStr_,it);
+			if (clean) cleanLabelsIfNeeded(label2,mapStrStr_,it,forceRemoval);
 		}
 
 		template<typename FloatingType>
@@ -618,12 +621,13 @@ public:
 		template<typename SomeMapType>
 		void cleanLabelsIfNeeded(const String& label,
 		                         SomeMapType& mymap,
-		                         typename SomeMapType::iterator& it)
+		                         typename SomeMapType::iterator& it,
+		                         bool forceRemoval = false)
 		{
 			Vector<String>::Type::iterator it2 = find(labelsForRemoval_.begin(),
 			                                          labelsForRemoval_.end(),
 			                                          label);
-			if (it2!=labelsForRemoval_.end()) mymap.erase(it);
+			if (it2!=labelsForRemoval_.end() || forceRemoval) mymap.erase(it);
 		}
 
 		String label2label(const String& label)
