@@ -1,44 +1,25 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use strict;
+use warnings;
 my $counter=0;
 
-my ($site,$GlobalTimeSteps,$GlobalTau)=@ARGV;
+my ($site,$label)=@ARGV;
+defined($label) or die "USAGE: $0 site label < file\n";
 
 print "#site= $site\n";
-print "#timeSteps=$GlobalTimeSteps\n";
-print "#tau=$GlobalTau\n";
+print "#label=$label\n";
 
 while (<STDIN>) {
 	chomp;
-	next unless /P\d\|A\|P\d/;
+	next unless /\Q$label/;
 	if (/^${site} /) {
-		$counter = procLine($_,$counter);
+		my @temp = split;
+		my $value = procValue($temp[1]);
+		my $time = $temp[2];
+		my $superdensity = procValue($temp[4]);
+		print "$time  $value $superdensity\n";
 	}
-}
-
-sub procLine
-{
-	my ($t,$counter)=@_;
-	
-	my @temp = split/ +/,$t;
-	#print STDERR "Procing temp1=$temp[1]* temp[2]=$temp[2]*\n";
-	my $value = procValue($temp[1]);
-	my $time = procCounter($temp[2],\$counter);
-	#print STDERR "Procing time=$time* value=$value*\n";
-	print "$time  $value\n";
-	return $counter;
-}
-
-sub procCounter
-{
-	my ($t,$counterPtr)=@_;
-	my $x = $$counterPtr;
-	$$counterPtr++;
-	$$counterPtr = 0 if ($$counterPtr >= $GlobalTimeSteps);
-	#print STDERR "procCounter t=$t* GlobalTau=$GlobalTau*\n";
-	#print STDERR "c=".$$counterPtr."*\n";
-	return $t+($x)*$GlobalTau;	
 }
 
 sub procValue
