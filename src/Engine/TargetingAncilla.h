@@ -205,9 +205,14 @@ public:
 		this->common().initTimeVectors(times_,ioIn);
 	}
 
+	SizeType size() const
+	{
+		if (this->common().allStages(DISABLED)) return 1;
+		return this->size();
+	}
+
 	RealType weight(SizeType i) const
 	{
-		assert(!this->common().allStages(DISABLED));
 		return weight_[i];
 	}
 
