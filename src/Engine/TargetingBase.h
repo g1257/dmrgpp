@@ -212,6 +212,8 @@ public:
 		return commonTargetting_.inSitu(i);
 	}
 
+	const LeftRightSuperType& lrs() const { return lrs_; }
+
 protected:
 
 	TargetingCommonType& common()

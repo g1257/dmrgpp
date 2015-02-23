@@ -75,7 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "BLAS.h"
 #include "TimeSerializer.h"
-#include "TargetParamsTimeStep.h"
+#include "TargetParamsAncilla.h"
 #include "ProgramGlobals.h"
 #include "ParametersForSolver.h"
 #include "ParallelWft.h"
@@ -84,6 +84,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsSuzukiTrotter.h"
 #include "TargetingBase.h"
 #include "BlockMatrix.h"
+#include "MettsStochastics.h"
+#include "PackIndices.h"
 
 namespace Dmrg {
 
@@ -94,14 +96,29 @@ class TargetingAncilla : public TargetingBase<LanczosSolverTemplate,
                                                MatrixVectorType_,
                                                WaveFunctionTransfType_> {
 
+	typedef PsimagLite::PackIndices PackIndicesType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+
+	struct AncillaPrev {
+
+		AncillaPrev() : fixed(0),permutationInverse(0)
+		{}
+
+		SizeType fixed;
+		VectorSizeType permutationInverse;
+	};
+
 	enum {BORDER_NEITHER, BORDER_LEFT, BORDER_RIGHT};
+
+	enum {INFINITE=WaveFunctionTransfType_::INFINITE};
+
+	const static SizeType SYSTEM = ProgramGlobals::SYSTEM;
 
 public:
 
 	typedef TargetingBase<LanczosSolverTemplate,
 	                      MatrixVectorType_,
 	                      WaveFunctionTransfType_> BaseType;
-	typedef std::pair<SizeType,SizeType> PairType;
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
@@ -110,7 +127,6 @@ public:
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::VectorType TargetVectorType;
@@ -122,13 +138,16 @@ public:
 	typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef TargetParamsTimeStep<ModelType> TargettingParamsType;
+	typedef TargetParamsAncilla<ModelType> TargettingParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef BlockMatrix<ComplexMatrixType> ComplexBlockMatrixType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename PsimagLite::RandomForTests<RealType> RngType;
+	typedef MettsStochastics<ModelType,RngType> MettsStochasticsType;
+	typedef typename MettsStochasticsType::PairType PairType;
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
@@ -142,11 +161,13 @@ public:
 	                  const SizeType&,
 	                  InputValidatorType& ioIn)
 	    : BaseType(lrs,model,tstStruct,wft,tstStruct.timeSteps(),0),
+	      model_(model),
 	      tstStruct_(tstStruct),
 	      wft_(wft),
 	      progress_("TargetingAncilla"),
 	      times_(tstStruct_.timeSteps()),
-	      weight_(tstStruct_.timeSteps())
+	      weight_(tstStruct_.timeSteps()),
+	      mettsStochastics_(model,tstStruct.rngSeed())
 	{
 		if (!wft.isEnabled()) {
 			PsimagLite::String msg("TargetingAncilla needs an enabled wft\n");
@@ -156,13 +177,6 @@ public:
 		if (tstStruct_.sites() == 0) {
 			PsimagLite::String msg("TargetingAncilla needs at least one TSPSite\n");
 			throw PsimagLite::RuntimeError(msg);
-		}
-
-		for (SizeType i = 0; i < model.geometry().terms(); ++i) {
-			if (model.geometry().label(i) != "chain") {
-				PsimagLite::String msg("TargetingAncilla only for chain\n");
-				throw PsimagLite::RuntimeError(msg);
-			}
 		}
 
 		RealType tau =tstStruct_.tau();
@@ -210,9 +224,15 @@ public:
 	void evolve(RealType Eg,
 	            SizeType direction,
 	            const BlockType& block1,
-	            const BlockType&,
+	            const BlockType& block2,
 	            SizeType loopNumber)
 	{
+		if (direction==INFINITE) {
+			updateStochastics(block1,block2);
+			getNewPures(block1,block2);
+			return;
+		}
+
 		VectorWithOffsetType phiNew;
 		this->common().getPhi(phiNew,Eg,direction,block1[0],loopNumber);
 
@@ -288,6 +308,248 @@ public:
 	}
 
 private:
+
+	void updateStochastics(const VectorSizeType& block1,
+	                       const VectorSizeType& block2)
+	{
+		SizeType linSize = model_.geometry().numberOfSites();
+		VectorSizeType tqn(2,0);
+		if (model_.params().targetQuantumNumbers.size()>=2) {
+			tqn[0] = SizeType(round(model_.params().targetQuantumNumbers[0]*linSize));
+			tqn[1] = SizeType(round(model_.params().targetQuantumNumbers[1]*linSize));
+		} else {
+			tqn[0] = model_.params().electronsUp;
+			tqn[1] = model_.params().electronsDown;
+		}
+		SizeType qn = BasisType::pseudoQuantumNumber(tqn);
+		mettsStochastics_.update(qn,block1,block2,tstStruct_.rngSeed());
+	}
+
+	// direction here is INFINITE
+	void getNewPures(const VectorSizeType& block1,
+	                 const VectorSizeType& block2)
+	{
+		VectorSizeType alphaFixed(block1.size());
+		for (SizeType i=0;i<alphaFixed.size();i++)
+			alphaFixed[i] = mettsStochastics_.chooseRandomState(block1[i]);
+
+		VectorSizeType betaFixed(block2.size());
+		for (SizeType i=0;i<betaFixed.size();i++)
+			betaFixed[i] = mettsStochastics_.chooseRandomState(block2[i]);
+
+		PsimagLite::OstringStream msg;
+		msg<<"New pures for ";
+		for (SizeType i=0;i<alphaFixed.size();i++)
+			msg<<" site="<<block1[i]<<" is "<<alphaFixed[i];
+		msg<<" and for ";
+		for (SizeType i=0;i<betaFixed.size();i++)
+			msg<<" site="<<block2[i]<<" is "<<betaFixed[i];
+		progress_.printline(msg,std::cerr);
+
+		const SparseMatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
+		TargetVectorType newVector1(transformSystem.row(),0);
+
+		VectorSizeType nk1;
+		setNk(nk1,block1);
+		SizeType alphaFixedVolume = volumeOf(alphaFixed,nk1);
+
+		getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
+		           alphaFixedVolume,this->lrs().left(),transformSystem,block1);
+		pureVectors_.first = newVector1;
+
+		const SparseMatrixType& transformEnviron =
+		        wft_.transform(ProgramGlobals::ENVIRON);
+		TargetVectorType newVector2(transformEnviron.row(),0);
+
+		VectorSizeType nk2;
+		setNk(nk2,block2);
+		SizeType betaFixedVolume = volumeOf(betaFixed,nk2);
+		getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
+		           betaFixedVolume,this->lrs().right(),transformEnviron,block2);
+		pureVectors_.second = newVector2;
+		setFromInfinite(this->common().targetVectors(0));
+		assert(std::norm(targetVectors_[0])>1e-6);
+
+		systemPrev_.fixed = alphaFixedVolume;
+		systemPrev_.permutationInverse = this->lrs().left().permutationInverse();
+		environPrev_.fixed = betaFixedVolume;
+		environPrev_.permutationInverse = this->lrs().right().permutationInverse();
+	}
+
+	void getNewPure(TargetVectorType& newVector,
+	                TargetVectorType& oldVector,
+	                SizeType direction,
+	                SizeType alphaFixed,
+	                const BasisWithOperatorsType& basis,
+	                const SparseMatrixType& transform,
+	                const VectorSizeType& block)
+	{
+		if (oldVector.size()==0)
+			setInitialPure(oldVector,block);
+		TargetVectorType tmpVector;
+		if (transform.row()==0) {
+			tmpVector = oldVector;
+			assert(PsimagLite::norm(tmpVector)>1e-6);
+		} else {
+			delayedTransform(tmpVector,oldVector,direction,transform,block);
+			assert(PsimagLite::norm(tmpVector)>1e-6);
+		}
+		SizeType ns = tmpVector.size();
+		VectorSizeType nk;
+		setNk(nk,block);
+		SizeType volumeOfNk = volumeOf(nk);
+		SizeType newSize =  (transform.col()==0) ? (ns*ns) :
+		                                           transform.col() * volumeOfNk;
+		newVector.resize(newSize);
+		for (SizeType alpha=0;alpha<newVector.size();alpha++)
+			newVector[alpha] = 0;
+
+		for (SizeType alpha=0;alpha<ns;alpha++) {
+			SizeType gamma = (direction==ProgramGlobals::SYSTEM) ?
+			            basis.permutationInverse(alpha + alphaFixed*ns) :
+			            basis.permutationInverse(alphaFixed + alpha*volumeOfNk);
+			newVector[gamma] = tmpVector[alpha];
+		}
+
+		PsimagLite::OstringStream msg2;
+		msg2<<"Old size of pure is "<<ns<<" norm="<<PsimagLite::norm(tmpVector);
+		progress_.printline(msg2,std::cerr);
+		PsimagLite::OstringStream msg;
+		msg<<"New size of pure is "<<newSize<<" norm="<<PsimagLite::norm(newVector);
+		progress_.printline(msg,std::cerr);
+		assert(PsimagLite::norm(newVector)>1e-6);
+	}
+
+	void setFromInfinite(VectorWithOffsetType& phi) const
+	{
+		const LeftRightSuperType& lrs = this->lrs();
+		phi.populateSectors(lrs.super());
+		for (SizeType ii=0;ii<phi.sectors();ii++) {
+			SizeType i0 = phi.sector(ii);
+			TargetVectorType v;
+			getFullVector(v,i0,lrs);
+			RealType tmpNorm = PsimagLite::norm(v);
+			if (fabs(tmpNorm-1.0)<1e-6) {
+				SizeType j = lrs.super().qn(lrs.super().partition(i0));
+				VectorSizeType qns = BasisType::decodeQuantumNumber(j);
+				std::cerr<<"setFromInfinite: qns= ";
+				for (SizeType k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
+				std::cerr<<"\n";
+			}
+			phi.setDataInSector(v,i0);
+		}
+		phi.collapseSectors();
+		assert(std::norm(phi)>1e-6);
+	}
+
+	void setInitialPure(TargetVectorType& oldVector,const VectorSizeType& block)
+	{
+		int offset = (block[0]==block.size()) ? -block.size() : block.size();
+		VectorSizeType blockCorrected = block;
+		for (SizeType i=0;i<blockCorrected.size();i++)
+			blockCorrected[i] += offset;
+
+		VectorSizeType nk;
+		setNk(nk,blockCorrected);
+		SizeType volumeOfNk = volumeOf(nk);
+		VectorSizeType alphaFixed(nk.size());
+		for (SizeType i=0;i<alphaFixed.size();i++)
+			alphaFixed[i] = mettsStochastics_.chooseRandomState(blockCorrected[i]);
+
+		PsimagLite::OstringStream msg;
+		msg<<"New pures for site ";
+		for (SizeType i=0;i<blockCorrected.size();i++)
+			msg<<blockCorrected[i]<<" ";
+		msg<<" is "<<alphaFixed;
+		progress_.printline(msg,std::cerr);
+
+		SizeType volumeOfAlphaFixed = volumeOf(alphaFixed,nk);
+
+		oldVector.resize(volumeOfNk);
+		assert(volumeOfAlphaFixed<oldVector.size());
+		for (SizeType i=0;i<oldVector.size();i++) {
+			oldVector[i] = (i==volumeOfAlphaFixed) ? 1 : 0;
+		}
+		assert(PsimagLite::norm(oldVector)>1e-6);
+	}
+
+	void delayedTransform(TargetVectorType& newVector,
+	                      TargetVectorType& oldVector,
+	                      SizeType direction,
+	                      const SparseMatrixType& transform,
+	                      const VectorSizeType& block)
+	{
+		assert(oldVector.size()==transform.row());
+
+		VectorSizeType nk;
+		setNk(nk,block);
+		SizeType ne = volumeOf(nk);
+
+		const VectorSizeType& permutationInverse = (direction==SYSTEM)
+		        ? systemPrev_.permutationInverse : environPrev_.permutationInverse;
+		SizeType nsPrev = permutationInverse.size()/ne;
+
+		newVector.resize(transform.col());
+		//newVector = oldVector * transform;
+		for (SizeType gamma=0;gamma<newVector.size();gamma++) {
+			newVector[gamma] = 0;
+			for (SizeType alpha=0;alpha<nsPrev;alpha++) {
+				SizeType noPermIndex =  (direction==SYSTEM)
+				        ? alpha + systemPrev_.fixed*nsPrev
+				        : environPrev_.fixed + alpha*ne;
+
+				SizeType gammaPrime = permutationInverse[noPermIndex];
+
+				assert(gammaPrime<transform.row());
+				newVector[gamma] += transform.element(gammaPrime,gamma) *
+				        oldVector[gammaPrime];
+			}
+		}
+	}
+
+	void getFullVector(TargetVectorType& v,
+	                   SizeType m,
+	                   const LeftRightSuperType& lrs) const
+	{
+		int offset = lrs.super().partition(m);
+		int total = lrs.super().partition(m+1) - offset;
+
+		PackIndicesType pack(lrs.left().size());
+		v.resize(total);
+		assert(PsimagLite::norm(pureVectors_.first)>1e-6);
+		assert(PsimagLite::norm(pureVectors_.second)>1e-6);
+		for (int i=0;i<total;i++) {
+			SizeType alpha,beta;
+			pack.unpack(alpha,beta,lrs.super().permutation(i+offset));
+			v[i] = pureVectors_.first[alpha] * pureVectors_.second[beta];
+		}
+	}
+
+	void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,
+	           const typename PsimagLite::Vector<SizeType>::Type& block) const
+	{
+		for (SizeType i=0;i<block.size();i++)
+			nk.push_back(mettsStochastics_.model().hilbertSize(block[i]));
+	}
+
+	SizeType volumeOf(const typename PsimagLite::Vector<SizeType>::Type& v) const
+	{
+		assert(v.size()>0);
+		SizeType ret = v[0];
+		for (SizeType i=1;i<v.size();i++) ret *= v[i];
+		return ret;
+	}
+
+	SizeType volumeOf(const typename PsimagLite::Vector<SizeType>::Type& alphaFixed,
+	                  const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	{
+		assert(alphaFixed.size()>0);
+		assert(alphaFixed.size()==nk.size());
+		SizeType sum = alphaFixed[0];
+		for (SizeType i=1;i<alphaFixed.size();i++)
+			sum += alphaFixed[i]*nk[i-1];
+		return sum;
+	}
 
 	void printNormsAndWeights() const
 	{
@@ -368,11 +630,16 @@ private:
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
+	const ModelType& model_;
 	const TargettingParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	typename PsimagLite::Vector<RealType>::Type times_,weight_;
 	RealType gsWeight_;
+	MettsStochasticsType mettsStochastics_;
+	AncillaPrev systemPrev_;
+	AncillaPrev environPrev_;
+	std::pair<TargetVectorType,TargetVectorType> pureVectors_;
 };     //class TargetingAncilla
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,

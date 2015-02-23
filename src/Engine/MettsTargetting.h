@@ -758,20 +758,6 @@ private:
 		}
 	}
 
-	void simpleTransform(TargetVectorType& newVector,
-	                     TargetVectorType& oldVector,
-	                     const MatrixType& transform)
-	{
-		assert(oldVector.size()==transform.n_row());
-
-		for (SizeType gamma=0;gamma<newVector.size();gamma++) {
-			newVector[gamma] = 0;
-			for (SizeType gammaPrime=0;gammaPrime<oldVector.size();gammaPrime++) {
-				newVector[gamma] += transform(gammaPrime,gamma) * oldVector[gammaPrime];
-			}
-		}
-	}
-
 	void setInitialPure(TargetVectorType& oldVector,const VectorSizeType& block)
 	{
 		int offset = (block[0]==block.size()) ? -block.size() : block.size();
