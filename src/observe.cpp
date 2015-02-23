@@ -193,7 +193,9 @@ void mainLoop(GeometryType& geometry,
 	bool moreData = true;
 	const PsimagLite::String& datafile = params.filename;
 	IoInputType dataIo(datafile);
-	bool hasTimeEvolution = (targetting == "TimeStepTargetting" || targetting=="MettsTargetting") ? true : false;
+	bool hasTimeEvolution = (targetting == "TimeStepTargetting" ||
+	                         targetting=="MettsTargetting" ||
+	                         targetting=="TargetingAncilla");
 	while (moreData) {
 		try {
 			moreData = !observeOneFullSweep<GeometryType,VectorWithOffsetType,ModelBaseType,

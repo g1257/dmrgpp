@@ -166,6 +166,7 @@ namespace Dmrg {
 			registerOpts.push_back("CorrectionVectorTargetting");
 			registerOpts.push_back("CorrectionTargetting");
 			registerOpts.push_back("MettsTargetting");
+			registerOpts.push_back("TargetingAncilla");
 
 			PsimagLite::Options::Writeable optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
 			optsReadable_ = new  OptionsReadableType(optWriteable,val);

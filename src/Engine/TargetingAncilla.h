@@ -368,7 +368,7 @@ private:
 		           betaFixedVolume,this->lrs().right(),transformEnviron,block2);
 		pureVectors_.second = newVector2;
 		setFromInfinite(this->common().targetVectors(0));
-		assert(std::norm(targetVectors_[0])>1e-6);
+		assert(std::norm(this->common().targetVectors(0))>1e-6);
 
 		systemPrev_.fixed = alphaFixedVolume;
 		systemPrev_.permutationInverse = this->lrs().left().permutationInverse();

@@ -193,7 +193,8 @@ private:
 		if (direction != WaveFunctionTransfType::INFINITE)
 			onlyWft = ((parameters_.finiteLoop[loopIndex].saveOption & 2)>0) ? true : false;
 
-		if (parameters_.options.find("MettsTargetting")!=PsimagLite::String::npos)
+		if (parameters_.options.find("MettsTargetting")!=PsimagLite::String::npos ||
+		        parameters_.options.find("TargetingAncilla")!=PsimagLite::String::npos)
 			return gsEnergy;
 
 		PsimagLite::OstringStream msg0;
