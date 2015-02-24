@@ -1053,17 +1053,18 @@ private:
 			const SparseMatrixType& cm1 = cm[orb1+SPIN_UP*orbs+i*dofs].data;
 			for (SizeType orb2=0;orb2<orbs;orb2++) {
 				const SparseMatrixType& cm2 = cm[orb2+SPIN_UP*orbs+i*dofs].data;
+				SparseMatrixType tmpMatrix = cm2;
+				multiplyTc(tmpMatrix,cm1);
 				for (SizeType orb3=0;orb3<orbs;orb3++) {
 					const SparseMatrixType& cm3 = cm[orb3+SPIN_DOWN*orbs+i*dofs].data;
 
 					SizeType orb4 = getMomentum(orb1, orb2, orb3);
 					const SparseMatrixType& cm4 = cm[orb4+SPIN_DOWN*orbs+i*dofs].data;
 
-					SparseMatrixType tmpMatrix, tmpMatrix2, tmpMatrix3;
-					multiply(tmpMatrix, cm1, cm3);
-					transposeConjugate(tmpMatrix2,tmpMatrix);
+					SparseMatrixType tmpMatrix2 = cm4;
+					multiplyTc(cm4, cm3);
 
-					multiply(tmpMatrix,cm2, cm4);
+					SparseMatrixType tmpMatrix3;
 					multiply(tmpMatrix3, tmpMatrix2, tmpMatrix);
 
 					hmatrix += factorForDiagonals*modelParameters_.hubbardU[0]*tmpMatrix3;

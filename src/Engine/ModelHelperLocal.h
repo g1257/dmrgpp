@@ -352,8 +352,7 @@ namespace Dmrg {
 			} else {
 				hamiltonian = lrs_.right().hamiltonian();
 			}
-			PsimagLite::Matrix<SparseElementType> fullm;
-			crsMatrixToFullMatrix(fullm,hamiltonian);
+
 			matrixBlock.resize(bs,bs);
 
 			int counter=0;
