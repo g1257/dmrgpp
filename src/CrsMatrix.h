@@ -215,6 +215,7 @@ public:
 	{
 		colind_.clear();
 		values_.clear();
+		rowptr_.clear();
 		rowptr_.resize(nrow+1);
 		nrow_ = nrow;
 		ncol_ = ncol;

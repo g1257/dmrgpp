@@ -47,7 +47,7 @@ EOF
 
 foreach my $what (@$drivers) {
 print FH<<EOF;
-$what.o: $what.cpp  Makefile $additional
+$what.o: $what.cpp  Makefile $additional Config.make
 	\$(CXX) \$(CPPFLAGS) -c $what.cpp
 
 $what: $what.o
