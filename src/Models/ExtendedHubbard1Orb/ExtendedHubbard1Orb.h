@@ -257,6 +257,11 @@ public:
 		                                         factorForDiagonals);
 	}
 
+	SizeType stateConjugate(SizeType state, SizeType site) const
+	{
+		return modelHubbard_.stateConjugate(state,site);
+	}
+
 private:
 
 	//! Find n_i in the natural basis natBasis

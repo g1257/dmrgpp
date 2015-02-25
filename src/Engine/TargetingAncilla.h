@@ -240,6 +240,7 @@ public:
 		}
 
 		if (direction==INFINITE) {
+			firstCall(block1,block2);
 			updateStochastics(block1,block2);
 			getNewPures(block1,block2);
 			return;
@@ -321,6 +322,25 @@ public:
 
 private:
 
+	void firstCall(const BlockType& block1,
+	               const BlockType& block2)
+	{
+		SizeType n = model_.geometry().numberOfSites();
+		if (block1[0] != 1) return;
+
+		if (block1[0] == 1) {
+			if (block2[0] != n-2) {
+				PsimagLite::String msg("TargetingAncilla: internal error\n");
+				throw PsimagLite::RuntimeError(msg);
+			}
+		}
+
+		BlockType v1(1,0);
+		BlockType v2(1,n-1);
+		updateStochastics(v1,v2);
+		getNewPures(v1,v2);
+	}
+
 	void updateStochastics(const VectorSizeType& block1,
 	                       const VectorSizeType& block2)
 	{
@@ -342,12 +362,20 @@ private:
 	                 const VectorSizeType& block2)
 	{
 		VectorSizeType alphaFixed(block1.size());
-		for (SizeType i=0;i<alphaFixed.size();i++)
-			alphaFixed[i] = mettsStochastics_.chooseRandomState(block1[i]);
+		if (isAncilla(block1)) {
+			alphaFixed = stateConjugate(systemPrev_.fixed,block1);
+		} else {
+			for (SizeType i=0;i<alphaFixed.size();i++)
+				alphaFixed[i] = mettsStochastics_.chooseRandomState(block1[i]);
+		}
 
 		VectorSizeType betaFixed(block2.size());
-		for (SizeType i=0;i<betaFixed.size();i++)
-			betaFixed[i] = mettsStochastics_.chooseRandomState(block2[i]);
+		if (!isAncilla(block2)) {
+			betaFixed = stateConjugate(environPrev_.fixed,block2);
+		} else {
+			for (SizeType i=0;i<betaFixed.size();i++)
+				betaFixed[i] = mettsStochastics_.chooseRandomState(block2[i]);
+		}
 
 		PsimagLite::OstringStream msg;
 		msg<<"New pures for ";
@@ -364,7 +392,7 @@ private:
 
 		getNewPurePre(2,ProgramGlobals::ENVIRON,betaFixed,block2);
 		getNewPurePre(3,ProgramGlobals::ENVIRON,stateConjugate(betaFixed,block2),block2);
-		if (isAncilla(block2)) addVectors(2,3);
+		if (!isAncilla(block2)) addVectors(2,3);
 
 		setFromInfinite(this->common().targetVectors(0));
 		assert(std::norm(this->common().targetVectors(0))>1e-6);
@@ -402,15 +430,18 @@ private:
 	}
 
 	void getNewPure(TargetVectorType& newVector,
-	                TargetVectorType& oldVector,
+	                const TargetVectorType& oldVector,
 	                SizeType direction,
 	                SizeType alphaFixedVolume,
 	                const BasisWithOperatorsType& basis,
 	                const SparseMatrixType& transform,
 	                const VectorSizeType& block)
 	{
-		if (oldVector.size()==0)
-			setInitialPure(oldVector,block);
+		if (oldVector.size()==0) {
+			setInitialPure(newVector,block);
+			return;
+		}
+
 		TargetVectorType tmpVector;
 		if (transform.row()==0) {
 			tmpVector = oldVector;
@@ -499,7 +530,7 @@ private:
 	}
 
 	void delayedTransform(TargetVectorType& newVector,
-	                      TargetVectorType& oldVector,
+	                      const TargetVectorType& oldVector,
 	                      SizeType direction,
 	                      const SparseMatrixType& transform,
 	                      const VectorSizeType& block)
@@ -516,8 +547,14 @@ private:
 
 		newVector.resize(transform.col());
 
-		SizeType alphaFixedVolume = volumeOfPre(systemPrev_.fixed, block);
-		SizeType betaFixedVolume = volumeOfPre(environPrev_.fixed, block);
+		VectorSizeType alphaFixed =  (isAncilla(block)) ?
+		            stateConjugate(systemPrev_.fixed, block) : systemPrev_.fixed;
+
+		VectorSizeType betaFixed =  (!isAncilla(block)) ?
+		            stateConjugate(environPrev_.fixed, block) : environPrev_.fixed;
+
+		SizeType alphaFixedVolume = volumeOfPre(alphaFixed, block);
+		SizeType betaFixedVolume = volumeOfPre(betaFixed, block);
 		//newVector = oldVector * transform;
 		for (SizeType gamma=0;gamma<newVector.size();gamma++) {
 			newVector[gamma] = 0;

@@ -440,6 +440,12 @@ public:
 		}
 	}
 
+	SizeType stateConjugate(SizeType state, SizeType site) const
+	{
+		assert(state < 4);
+		return 3 - state;
+	}
+
 private:
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
