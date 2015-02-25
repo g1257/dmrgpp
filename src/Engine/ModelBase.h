@@ -297,6 +297,12 @@ public:
 		symmetryBlock.clear();
 	}
 
+	virtual SizeType stateConjugate(SizeType state, SizeType site) const
+	{
+		PsimagLite::String msg("ModelBase::stateConjugate() unimplemented\n");
+		throw PsimagLite::RuntimeError(msg);
+	}
+
 	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
 	                           SizeType x,
 	                           PsimagLite::String msg = "") const = 0;

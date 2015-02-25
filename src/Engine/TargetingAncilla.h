@@ -104,7 +104,7 @@ class TargetingAncilla : public TargetingBase<LanczosSolverTemplate,
 		AncillaPrev() : fixed(0),permutationInverse(0)
 		{}
 
-		SizeType fixed;
+		VectorSizeType fixed;
 		VectorSizeType permutationInverse;
 	};
 
@@ -234,6 +234,11 @@ public:
 	            const BlockType& block2,
 	            SizeType loopNumber)
 	{
+		if (block1.size() != 1 || block2.size() != 1) {
+			PsimagLite::String msg("TargetingAncilla requires blocks added of size 1\n");
+			throw PsimagLite::RuntimeError(msg);
+		}
+
 		if (direction==INFINITE) {
 			updateStochastics(block1,block2);
 			getNewPures(block1,block2);
@@ -353,29 +358,27 @@ private:
 			msg<<" site="<<block2[i]<<" is "<<betaFixed[i];
 		progress_.printline(msg,std::cerr);
 
-		SizeType alphaFixedVolume = getNewPurePre(0,
-		                                          ProgramGlobals::SYSTEM,
-		                                          alphaFixed,
-		                                          block1);
+		getNewPurePre(0,ProgramGlobals::SYSTEM,alphaFixed,block1);
+		getNewPurePre(1,ProgramGlobals::SYSTEM,stateConjugate(alphaFixed,block1),block1);
+		if (isAncilla(block1)) addVectors(0,1);
 
-		SizeType betaFixedVolume = getNewPurePre(2,
-		                                         ProgramGlobals::ENVIRON,
-		                                         betaFixed,
-		                                         block2);
+		getNewPurePre(2,ProgramGlobals::ENVIRON,betaFixed,block2);
+		getNewPurePre(3,ProgramGlobals::ENVIRON,stateConjugate(betaFixed,block2),block2);
+		if (isAncilla(block2)) addVectors(2,3);
 
 		setFromInfinite(this->common().targetVectors(0));
 		assert(std::norm(this->common().targetVectors(0))>1e-6);
 
-		systemPrev_.fixed = alphaFixedVolume;
+		systemPrev_.fixed = alphaFixed;
 		systemPrev_.permutationInverse = this->lrs().left().permutationInverse();
-		environPrev_.fixed = betaFixedVolume;
+		environPrev_.fixed = betaFixed;
 		environPrev_.permutationInverse = this->lrs().right().permutationInverse();
 	}
 
-	SizeType getNewPurePre(SizeType indexOfPure,
-	                       SizeType direction,
-	                       const VectorSizeType& alphaFixed,
-	                       const VectorSizeType& block)
+	void getNewPurePre(SizeType indexOfPure,
+	                   SizeType direction,
+	                   const VectorSizeType& alphaFixed,
+	                   const VectorSizeType& block)
 	{
 		const BasisWithOperatorsType& basis = (direction == ProgramGlobals::SYSTEM) ?
 		            this->lrs().left() : this->lrs().right();
@@ -396,8 +399,6 @@ private:
 		           block);
 
 		pureVectors_[indexOfPure] = newVector;
-
-		return alphaFixedVolume;
 	}
 
 	void getNewPure(TargetVectorType& newVector,
@@ -514,13 +515,16 @@ private:
 		SizeType nsPrev = permutationInverse.size()/ne;
 
 		newVector.resize(transform.col());
+
+		SizeType alphaFixedVolume = volumeOfPre(systemPrev_.fixed, block);
+		SizeType betaFixedVolume = volumeOfPre(environPrev_.fixed, block);
 		//newVector = oldVector * transform;
 		for (SizeType gamma=0;gamma<newVector.size();gamma++) {
 			newVector[gamma] = 0;
 			for (SizeType alpha=0;alpha<nsPrev;alpha++) {
 				SizeType noPermIndex =  (direction==SYSTEM)
-				        ? alpha + systemPrev_.fixed*nsPrev
-				        : environPrev_.fixed + alpha*ne;
+				        ? alpha + alphaFixedVolume*nsPrev
+				        : betaFixedVolume + alpha*ne;
 
 				SizeType gammaPrime = permutationInverse[noPermIndex];
 
@@ -549,14 +553,22 @@ private:
 		}
 	}
 
-	void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,
-	           const typename PsimagLite::Vector<SizeType>::Type& block) const
+	void setNk(VectorSizeType& nk,
+	           const VectorSizeType& block) const
 	{
 		for (SizeType i=0;i<block.size();i++)
 			nk.push_back(mettsStochastics_.model().hilbertSize(block[i]));
 	}
 
-	SizeType volumeOf(const typename PsimagLite::Vector<SizeType>::Type& v) const
+	SizeType volumeOfPre(const VectorSizeType& alphaFixed,
+	                     const VectorSizeType& block) const
+	{
+		VectorSizeType nk1;
+		setNk(nk1,block);
+		return volumeOf(alphaFixed,nk1);
+	}
+
+	SizeType volumeOf(const VectorSizeType& v) const
 	{
 		assert(v.size()>0);
 		SizeType ret = v[0];
@@ -564,8 +576,8 @@ private:
 		return ret;
 	}
 
-	SizeType volumeOf(const typename PsimagLite::Vector<SizeType>::Type& alphaFixed,
-	                  const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	SizeType volumeOf(const VectorSizeType& alphaFixed,
+	                  const VectorSizeType& nk) const
 	{
 		assert(alphaFixed.size()>0);
 		assert(alphaFixed.size()==nk.size());
@@ -573,6 +585,35 @@ private:
 		for (SizeType i=1;i<alphaFixed.size();i++)
 			sum += alphaFixed[i]*nk[i-1];
 		return sum;
+	}
+
+	VectorSizeType stateConjugate(const VectorSizeType& alphaFixed,
+	                              const VectorSizeType& block)
+	{
+		VectorSizeType c(alphaFixed.size());
+
+		for (SizeType i=0;i<alphaFixed.size();i++)
+			c[i] = model_.stateConjugate(alphaFixed[i],block[i]);
+		return c;
+	}
+
+	bool isAncilla(const VectorSizeType& block) const
+	{
+		assert(block.size() == 1);
+		return (block[0] & 1);
+	}
+
+	void addVectors(SizeType ind, SizeType jnd)
+	{
+		RealType oneOverSqrt2 = 1.0/sqrt(2.0);
+		TargetVectorType v(pureVectors_[ind].size(),0);
+		for (SizeType i = 0; i<v.size(); ++i) {
+			v[i] = pureVectors_[ind][i] - pureVectors_[jnd][i];
+			v[i] *= oneOverSqrt2;
+		}
+
+		pureVectors_[ind] = v;
+		pureVectors_[jnd] = v;
 	}
 
 	void printNormsAndWeights() const
