@@ -148,6 +148,7 @@ public:
 	typedef typename PsimagLite::RandomForTests<RealType> RngType;
 	typedef MettsStochastics<ModelType,RngType> MettsStochasticsType;
 	typedef typename MettsStochasticsType::PairType PairType;
+	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorTargetVectorType;
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
@@ -167,7 +168,8 @@ public:
 	      progress_("TargetingAncilla"),
 	      times_(tstStruct_.timeSteps()),
 	      weight_(tstStruct_.timeSteps()),
-	      mettsStochastics_(model,tstStruct.rngSeed())
+	      mettsStochastics_(model,tstStruct.rngSeed()),
+	      pureVectors_(4)
 	{
 		if (!wft.isEnabled()) {
 			PsimagLite::String msg("TargetingAncilla needs an enabled wft\n");
@@ -351,27 +353,16 @@ private:
 			msg<<" site="<<block2[i]<<" is "<<betaFixed[i];
 		progress_.printline(msg,std::cerr);
 
-		const SparseMatrixType& transformSystem =  wft_.transform(ProgramGlobals::SYSTEM);
-		TargetVectorType newVector1(transformSystem.row(),0);
+		SizeType alphaFixedVolume = getNewPurePre(0,
+		                                          ProgramGlobals::SYSTEM,
+		                                          alphaFixed,
+		                                          block1);
 
-		VectorSizeType nk1;
-		setNk(nk1,block1);
-		SizeType alphaFixedVolume = volumeOf(alphaFixed,nk1);
+		SizeType betaFixedVolume = getNewPurePre(2,
+		                                         ProgramGlobals::ENVIRON,
+		                                         betaFixed,
+		                                         block2);
 
-		getNewPure(newVector1,pureVectors_.first,ProgramGlobals::SYSTEM,
-		           alphaFixedVolume,this->lrs().left(),transformSystem,block1);
-		pureVectors_.first = newVector1;
-
-		const SparseMatrixType& transformEnviron =
-		        wft_.transform(ProgramGlobals::ENVIRON);
-		TargetVectorType newVector2(transformEnviron.row(),0);
-
-		VectorSizeType nk2;
-		setNk(nk2,block2);
-		SizeType betaFixedVolume = volumeOf(betaFixed,nk2);
-		getNewPure(newVector2,pureVectors_.second,ProgramGlobals::ENVIRON,
-		           betaFixedVolume,this->lrs().right(),transformEnviron,block2);
-		pureVectors_.second = newVector2;
 		setFromInfinite(this->common().targetVectors(0));
 		assert(std::norm(this->common().targetVectors(0))>1e-6);
 
@@ -381,10 +372,38 @@ private:
 		environPrev_.permutationInverse = this->lrs().right().permutationInverse();
 	}
 
+	SizeType getNewPurePre(SizeType indexOfPure,
+	                       SizeType direction,
+	                       const VectorSizeType& alphaFixed,
+	                       const VectorSizeType& block)
+	{
+		const BasisWithOperatorsType& basis = (direction == ProgramGlobals::SYSTEM) ?
+		            this->lrs().left() : this->lrs().right();
+		const SparseMatrixType& transform =
+		        wft_.transform(direction);
+		TargetVectorType newVector(transform.row(),0);
+
+		VectorSizeType nk1;
+		setNk(nk1,block);
+		SizeType alphaFixedVolume = volumeOf(alphaFixed,nk1);
+
+		getNewPure(newVector,
+		           pureVectors_[indexOfPure],
+		           direction,
+		           alphaFixedVolume,
+		           basis,
+		           transform,
+		           block);
+
+		pureVectors_[indexOfPure] = newVector;
+
+		return alphaFixedVolume;
+	}
+
 	void getNewPure(TargetVectorType& newVector,
 	                TargetVectorType& oldVector,
 	                SizeType direction,
-	                SizeType alphaFixed,
+	                SizeType alphaFixedVolume,
 	                const BasisWithOperatorsType& basis,
 	                const SparseMatrixType& transform,
 	                const VectorSizeType& block)
@@ -411,8 +430,8 @@ private:
 
 		for (SizeType alpha=0;alpha<ns;alpha++) {
 			SizeType gamma = (direction==ProgramGlobals::SYSTEM) ?
-			            basis.permutationInverse(alpha + alphaFixed*ns) :
-			            basis.permutationInverse(alphaFixed + alpha*volumeOfNk);
+			            basis.permutationInverse(alpha + alphaFixedVolume*ns) :
+			            basis.permutationInverse(alphaFixedVolume + alpha*volumeOfNk);
 			newVector[gamma] = tmpVector[alpha];
 		}
 
@@ -521,12 +540,12 @@ private:
 
 		PackIndicesType pack(lrs.left().size());
 		v.resize(total);
-		assert(PsimagLite::norm(pureVectors_.first)>1e-6);
-		assert(PsimagLite::norm(pureVectors_.second)>1e-6);
+		assert(PsimagLite::norm(pureVectors_[0])>1e-6);
+		assert(PsimagLite::norm(pureVectors_[2])>1e-6);
 		for (int i=0;i<total;i++) {
 			SizeType alpha,beta;
 			pack.unpack(alpha,beta,lrs.super().permutation(i+offset));
-			v[i] = pureVectors_.first[alpha] * pureVectors_.second[beta];
+			v[i] = pureVectors_[0][alpha] * pureVectors_[2][beta];
 		}
 	}
 
@@ -644,7 +663,7 @@ private:
 	MettsStochasticsType mettsStochastics_;
 	AncillaPrev systemPrev_;
 	AncillaPrev environPrev_;
-	std::pair<TargetVectorType,TargetVectorType> pureVectors_;
+	VectorTargetVectorType pureVectors_;
 };     //class TargetingAncilla
 
 template<template<typename,typename,typename> class LanczosSolverTemplate,
