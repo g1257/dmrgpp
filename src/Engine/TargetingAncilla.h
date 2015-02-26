@@ -209,12 +209,13 @@ public:
 
 	SizeType size() const
 	{
-		if (this->common().allStages(DISABLED)) return 1;
+		if (this->common().allStages(DISABLED)) return 4;
 		return this->size();
 	}
 
 	RealType weight(SizeType i) const
 	{
+		if (this->common().allStages(DISABLED)) return 0.25;
 		return weight_[i];
 	}
 
@@ -240,7 +241,6 @@ public:
 		}
 
 		if (direction==INFINITE) {
-			firstCall(block1,block2);
 			updateStochastics(block1,block2);
 			getNewPures(block1,block2);
 			return;
@@ -322,23 +322,39 @@ public:
 
 private:
 
-	void firstCall(const BlockType& block1,
-	               const BlockType& block2)
+	void firstCall(SizeType sysOrEnv,const VectorSizeType& block)
 	{
-		SizeType n = model_.geometry().numberOfSites();
-		if (block1[0] != 1) return;
+		VectorSizeType nk;
+		setNk(nk,block);
+		SizeType volumeOfNk = volumeOf(nk);
+		VectorSizeType alphaFixed(nk.size());
+		for (SizeType i=0;i<alphaFixed.size();i++)
+			alphaFixed[i] = mettsStochastics_.chooseRandomState(block[i]);
 
-		if (block1[0] == 1) {
-			if (block2[0] != n-2) {
-				PsimagLite::String msg("TargetingAncilla: internal error\n");
-				throw PsimagLite::RuntimeError(msg);
-			}
+		PsimagLite::OstringStream msg;
+		msg<<"New pures for site ";
+		for (SizeType i=0;i<block.size();i++)
+			msg<<block[i]<<" ";
+		msg<<" is "<<alphaFixed;
+		progress_.printline(msg,std::cerr);
+
+		SizeType ind = 0;
+		if (sysOrEnv == ProgramGlobals::SYSTEM) {
+			ind = 0;
+			systemPrev_.fixed = alphaFixed;
+		} else {
+			ind = 2;
+			environPrev_.fixed = alphaFixed;
 		}
 
-		BlockType v1(1,0);
-		BlockType v2(1,n-1);
-		updateStochastics(v1,v2);
-		getNewPures(v1,v2);
+		SizeType volumeOfAlphaFixed = volumeOf(alphaFixed,nk);
+		pureVectors_[ind].resize(volumeOfNk);
+		setInitialPure(pureVectors_[ind],volumeOfAlphaFixed);
+
+		alphaFixed = stateConjugate(alphaFixed,block);
+		volumeOfAlphaFixed = volumeOf(alphaFixed,nk);
+		pureVectors_[ind+1].resize(volumeOfNk);
+		setInitialPure(pureVectors_[ind+1],volumeOfAlphaFixed);
 	}
 
 	void updateStochastics(const VectorSizeType& block1,
@@ -361,12 +377,20 @@ private:
 	void getNewPures(const VectorSizeType& block1,
 	                 const VectorSizeType& block2)
 	{
+		if (systemPrev_.fixed.size() == 0) {
+			firstCall(ProgramGlobals::SYSTEM,block1);
+		}
+
 		VectorSizeType alphaFixed(block1.size());
 		if (isAncilla(block1)) {
 			alphaFixed = stateConjugate(systemPrev_.fixed,block1);
 		} else {
 			for (SizeType i=0;i<alphaFixed.size();i++)
 				alphaFixed[i] = mettsStochastics_.chooseRandomState(block1[i]);
+		}
+
+		if (environPrev_.fixed.size() == 0) {
+			firstCall(ProgramGlobals::ENVIRON,block2);
 		}
 
 		VectorSizeType betaFixed(block2.size());
@@ -394,8 +418,13 @@ private:
 		getNewPurePre(3,ProgramGlobals::ENVIRON,stateConjugate(betaFixed,block2),block2);
 		if (!isAncilla(block2)) addVectors(2,3);
 
-		setFromInfinite(this->common().targetVectors(0));
-		assert(std::norm(this->common().targetVectors(0))>1e-6);
+		for (SizeType i = 0; i < 2; ++i) {
+			setFromInfinite(this->common().targetVectors(2*i),i,2);
+			assert(std::norm(this->common().targetVectors(2*i))>1e-6);
+
+			setFromInfinite(this->common().targetVectors(2*i+1),i,3);
+			assert(std::norm(this->common().targetVectors(2*i+1))>1e-6);
+		}
 
 		systemPrev_.fixed = alphaFixed;
 		systemPrev_.permutationInverse = this->lrs().left().permutationInverse();
@@ -414,14 +443,10 @@ private:
 		        wft_.transform(direction);
 		TargetVectorType newVector(transform.row(),0);
 
-		VectorSizeType nk1;
-		setNk(nk1,block);
-		SizeType alphaFixedVolume = volumeOf(alphaFixed,nk1);
-
 		getNewPure(newVector,
 		           pureVectors_[indexOfPure],
 		           direction,
-		           alphaFixedVolume,
+		           alphaFixed,
 		           basis,
 		           transform,
 		           block);
@@ -430,17 +455,18 @@ private:
 	}
 
 	void getNewPure(TargetVectorType& newVector,
-	                const TargetVectorType& oldVector,
+	                TargetVectorType& oldVector,
 	                SizeType direction,
-	                SizeType alphaFixedVolume,
+	                const VectorSizeType& alphaFixed,
 	                const BasisWithOperatorsType& basis,
 	                const SparseMatrixType& transform,
 	                const VectorSizeType& block)
 	{
-		if (oldVector.size()==0) {
-			setInitialPure(newVector,block);
-			return;
-		}
+		assert(oldVector.size()>0);
+
+		VectorSizeType nk1;
+		setNk(nk1,block);
+		SizeType alphaFixedVolume = volumeOf(alphaFixed,nk1);
 
 		TargetVectorType tmpVector;
 		if (transform.row()==0) {
@@ -450,6 +476,7 @@ private:
 			delayedTransform(tmpVector,oldVector,direction,transform,block);
 			assert(PsimagLite::norm(tmpVector)>1e-6);
 		}
+
 		SizeType ns = tmpVector.size();
 		VectorSizeType nk;
 		setNk(nk,block);
@@ -476,14 +503,14 @@ private:
 		assert(PsimagLite::norm(newVector)>1e-6);
 	}
 
-	void setFromInfinite(VectorWithOffsetType& phi) const
+	void setFromInfinite(VectorWithOffsetType& phi, SizeType ind, SizeType jnd) const
 	{
 		const LeftRightSuperType& lrs = this->lrs();
 		phi.populateSectors(lrs.super());
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
 			TargetVectorType v;
-			getFullVector(v,i0,lrs);
+			getFullVector(v,i0,lrs, ind, jnd);
 			RealType tmpNorm = PsimagLite::norm(v);
 			if (fabs(tmpNorm-1.0)<1e-6) {
 				SizeType j = lrs.super().qn(lrs.super().partition(i0));
@@ -498,34 +525,14 @@ private:
 		assert(std::norm(phi)>1e-6);
 	}
 
-	void setInitialPure(TargetVectorType& oldVector,const VectorSizeType& block)
+	void setInitialPure(TargetVectorType& oldVector,
+	                    SizeType volumeOfAlphaFixed) const
 	{
-		int offset = (block[0]==block.size()) ? -block.size() : block.size();
-		VectorSizeType blockCorrected = block;
-		for (SizeType i=0;i<blockCorrected.size();i++)
-			blockCorrected[i] += offset;
-
-		VectorSizeType nk;
-		setNk(nk,blockCorrected);
-		SizeType volumeOfNk = volumeOf(nk);
-		VectorSizeType alphaFixed(nk.size());
-		for (SizeType i=0;i<alphaFixed.size();i++)
-			alphaFixed[i] = mettsStochastics_.chooseRandomState(blockCorrected[i]);
-
-		PsimagLite::OstringStream msg;
-		msg<<"New pures for site ";
-		for (SizeType i=0;i<blockCorrected.size();i++)
-			msg<<blockCorrected[i]<<" ";
-		msg<<" is "<<alphaFixed;
-		progress_.printline(msg,std::cerr);
-
-		SizeType volumeOfAlphaFixed = volumeOf(alphaFixed,nk);
-
-		oldVector.resize(volumeOfNk);
 		assert(volumeOfAlphaFixed<oldVector.size());
 		for (SizeType i=0;i<oldVector.size();i++) {
 			oldVector[i] = (i==volumeOfAlphaFixed) ? 1 : 0;
 		}
+
 		assert(PsimagLite::norm(oldVector)>1e-6);
 	}
 
@@ -574,19 +581,21 @@ private:
 
 	void getFullVector(TargetVectorType& v,
 	                   SizeType m,
-	                   const LeftRightSuperType& lrs) const
+	                   const LeftRightSuperType& lrs,
+	                   SizeType ind,
+	                   SizeType jnd) const
 	{
 		int offset = lrs.super().partition(m);
 		int total = lrs.super().partition(m+1) - offset;
 
 		PackIndicesType pack(lrs.left().size());
 		v.resize(total);
-		assert(PsimagLite::norm(pureVectors_[0])>1e-6);
-		assert(PsimagLite::norm(pureVectors_[2])>1e-6);
+		assert(PsimagLite::norm(pureVectors_[ind])>1e-6);
+		assert(PsimagLite::norm(pureVectors_[jnd])>1e-6);
 		for (int i=0;i<total;i++) {
 			SizeType alpha,beta;
 			pack.unpack(alpha,beta,lrs.super().permutation(i+offset));
-			v[i] = pureVectors_[0][alpha] * pureVectors_[2][beta];
+			v[i] = pureVectors_[ind][alpha] * pureVectors_[jnd][beta];
 		}
 	}
 
@@ -627,6 +636,7 @@ private:
 	VectorSizeType stateConjugate(const VectorSizeType& alphaFixed,
 	                              const VectorSizeType& block)
 	{
+		assert(alphaFixed.size() == block.size());
 		VectorSizeType c(alphaFixed.size());
 
 		for (SizeType i=0;i<alphaFixed.size();i++)
