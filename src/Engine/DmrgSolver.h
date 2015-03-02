@@ -173,12 +173,17 @@ public:
 	void main(const GeometryType& geometry)
 	{
 		ioOut_.print("GEOMETRY",geometry);
+		bool allInSystem = (parameters_.options.find("geometryallinsystem")!=
+		        PsimagLite::String::npos);
+
 		if (checkpoint_()) {
 			std::cerr<<"WARNING: Will not check finite loops for ";
 			std::cerr<<"consistency while checkpoint is in use\n";
 		} else {
 			if (parameters_.options.find("nofiniteloops")==PsimagLite::String::npos)
-				checkFiniteLoops(parameters_.finiteLoop,geometry.numberOfSites());
+				checkFiniteLoops(parameters_.finiteLoop,
+				                 geometry.numberOfSites(),
+				                 allInSystem);
 		}
 
 		PsimagLite::OstringStream msg;
@@ -188,7 +193,8 @@ public:
 		ioOut_.print("MODEL",model_);
 		BlockType S,E;
 		VectorBlockType X,Y;
-		geometry.split(parameters_.sitesPerBlock,S,X,Y,E);
+
+		geometry.split(parameters_.sitesPerBlock,S,X,Y,E,allInSystem);
 		for (SizeType i=0;i<X.size();i++)
 			sitesIndices_.push_back(X[i]);
 		for (SizeType i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);

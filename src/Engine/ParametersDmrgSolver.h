@@ -192,11 +192,12 @@ struct FiniteLoop {
 
 //PTEX_LABEL{139}
 inline void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
-                             SizeType totalSites)
+                             SizeType totalSites,
+                             bool allInSystem)
 {
 	PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
 	PsimagLite::String loops = "";
-	int x = totalSites/2-1; // must be signed
+	int x = (allInSystem) ? totalSites-2 : totalSites/2-1; // must be signed
 	if (totalSites & 1) x++;
 	if (finiteLoop[0].stepLength<0) x++;
 	int prevDeltaSign = 1;

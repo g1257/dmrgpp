@@ -169,6 +169,7 @@ public:
 		registerOpts.push_back("CorrectionTargetting");
 		registerOpts.push_back("MettsTargetting");
 		registerOpts.push_back("TargetingAncilla");
+		registerOpts.push_back("geometryallinsystem");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
