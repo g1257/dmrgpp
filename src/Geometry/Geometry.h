@@ -212,7 +212,8 @@ public:
 	           BlockType& S,
 	           typename Vector<BlockType>::Type& X,
 	           typename Vector<BlockType>::Type& Y,
-	           BlockType& E) const
+	           BlockType& E,
+	           bool allInSystem = false) const
 	{
 		SizeType middle = linSize_/2;
 		if (linSize_ & 1) {
@@ -254,7 +255,9 @@ public:
 				tmpV[j] = (linSize_-1-i-jj)+(middle-sitesPerBlock);
 				assert(tmpV[j]<linSize_);
 			}
-			Y.push_back(tmpV);
+
+			if (allInSystem) X.push_back(tmpV);
+			else Y.push_back(tmpV);
 			i+=sitesPerBlock;
 		}
 
