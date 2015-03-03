@@ -377,12 +377,17 @@ private:
 	void getNewPures(const VectorSizeType& block1,
 	                 const VectorSizeType& block2)
 	{
+		bool b1 = isAncilla(block1);
+		bool b2 = isAncilla(block2);
+
+		assert( (b1 && !b2) || (!b1 && b2));
+
 		if (systemPrev_.fixed.size() == 0) {
 			firstCall(ProgramGlobals::SYSTEM,block1);
 		}
 
 		VectorSizeType alphaFixed(block1.size());
-		if (isAncilla(block1)) {
+		if (b1) {
 			alphaFixed = stateConjugate(systemPrev_.fixed,block1);
 		} else {
 			for (SizeType i=0;i<alphaFixed.size();i++)
@@ -394,7 +399,7 @@ private:
 		}
 
 		VectorSizeType betaFixed(block2.size());
-		if (!isAncilla(block2)) {
+		if (!b2) {
 			betaFixed = stateConjugate(environPrev_.fixed,block2);
 		} else {
 			for (SizeType i=0;i<betaFixed.size();i++)
@@ -426,10 +431,10 @@ private:
 			assert(std::norm(this->common().targetVectors(2*i+1))>1e-6);
 		}
 
-		systemPrev_.fixed = alphaFixed;
 		systemPrev_.permutationInverse = this->lrs().left().permutationInverse();
-		environPrev_.fixed = betaFixed;
 		environPrev_.permutationInverse = this->lrs().right().permutationInverse();
+		systemPrev_.fixed = alphaFixed;
+		environPrev_.fixed = betaFixed;
 	}
 
 	void getNewPurePre(SizeType indexOfPure,
@@ -439,12 +444,11 @@ private:
 	{
 		const BasisWithOperatorsType& basis = (direction == ProgramGlobals::SYSTEM) ?
 		            this->lrs().left() : this->lrs().right();
-		const SparseMatrixType& transform =
-		        wft_.transform(direction);
+		const SparseMatrixType& transform = wft_.transform(direction);
 		TargetVectorType newVector(transform.row(),0);
 
 		getNewPure(newVector,
-		           pureVectors_[indexOfPure],
+		           indexOfPure,
 		           direction,
 		           alphaFixed,
 		           basis,
@@ -455,14 +459,14 @@ private:
 	}
 
 	void getNewPure(TargetVectorType& newVector,
-	                TargetVectorType& oldVector,
+	                SizeType indexOfPure,
 	                SizeType direction,
 	                const VectorSizeType& alphaFixed,
 	                const BasisWithOperatorsType& basis,
 	                const SparseMatrixType& transform,
 	                const VectorSizeType& block)
 	{
-		assert(oldVector.size()>0);
+		assert(pureVectors_[indexOfPure].size()>0);
 
 		VectorSizeType nk1;
 		setNk(nk1,block);
@@ -470,10 +474,10 @@ private:
 
 		TargetVectorType tmpVector;
 		if (transform.row()==0) {
-			tmpVector = oldVector;
+			tmpVector = pureVectors_[indexOfPure];
 			assert(PsimagLite::norm(tmpVector)>1e-6);
 		} else {
-			delayedTransform(tmpVector,oldVector,direction,transform,block);
+			delayedTransform(tmpVector,indexOfPure,direction,transform,block);
 			assert(PsimagLite::norm(tmpVector)>1e-6);
 		}
 
@@ -537,12 +541,12 @@ private:
 	}
 
 	void delayedTransform(TargetVectorType& newVector,
-	                      const TargetVectorType& oldVector,
+	                      SizeType indexOfPure,
 	                      SizeType direction,
 	                      const SparseMatrixType& transform,
 	                      const VectorSizeType& block)
 	{
-		assert(oldVector.size()==transform.row());
+		assert(pureVectors_[indexOfPure].size()==transform.row());
 
 		VectorSizeType nk;
 		setNk(nk,block);
@@ -554,27 +558,26 @@ private:
 
 		newVector.resize(transform.col());
 
-		VectorSizeType alphaFixed =  (isAncilla(block)) ?
-		            stateConjugate(systemPrev_.fixed, block) : systemPrev_.fixed;
-
-		VectorSizeType betaFixed =  (!isAncilla(block)) ?
-		            stateConjugate(environPrev_.fixed, block) : environPrev_.fixed;
+		VectorSizeType fixed = (direction==SYSTEM) ? systemPrev_.fixed : environPrev_.fixed;
+		VectorSizeType cFixed = stateConjugate(fixed,block);
+		bool b = (indexOfPure & 1);
+		VectorSizeType alphaFixed = (b) ? cFixed : fixed;
 
 		SizeType alphaFixedVolume = volumeOfPre(alphaFixed, block);
-		SizeType betaFixedVolume = volumeOfPre(betaFixed, block);
+
 		//newVector = oldVector * transform;
 		for (SizeType gamma=0;gamma<newVector.size();gamma++) {
 			newVector[gamma] = 0;
 			for (SizeType alpha=0;alpha<nsPrev;alpha++) {
 				SizeType noPermIndex =  (direction==SYSTEM)
 				        ? alpha + alphaFixedVolume*nsPrev
-				        : betaFixedVolume + alpha*ne;
+				        : alphaFixedVolume + alpha*ne;
 
 				SizeType gammaPrime = permutationInverse[noPermIndex];
 
 				assert(gammaPrime<transform.row());
 				newVector[gamma] += transform.element(gammaPrime,gamma) *
-				        oldVector[gammaPrime];
+				        pureVectors_[indexOfPure][gammaPrime];
 			}
 		}
 	}
