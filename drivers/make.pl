@@ -9,7 +9,7 @@ use Make;
 my @drivers = ("sparseSolverTest", "testCRSMatrix", "rungeKuttaTest", "combineContinuedFraction",
 "continuedFractionCollection", "gitrev", "jsonExample", "range",
 "kernelPolynomial", "linearPrediction", "options", "randomTest", "svd", "testLapack", "threads",
-"testIsClass","testMemResolv1");
+"testIsClass","testMemResolv1","sumDecomposition");
 
 my $lapack = Make::findLapack();
 Make::backupMakefile();
