@@ -81,19 +81,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 
 namespace Dmrg {
-template<typename DmrgBasisType,
-         typename DmrgBasisWithOperatorsType,
+template<typename BasisType,
+         typename BasisWithOperatorsType,
          typename TargettingType
          >
 
-class DensityMatrixLocal : public DensityMatrixBase<DmrgBasisType,
-        DmrgBasisWithOperatorsType,
+class DensityMatrixLocal : public DensityMatrixBase<BasisType,
+        BasisWithOperatorsType,
         TargettingType> {
-	typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
 	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef typename DmrgBasisType::FactorsType FactorsType;
+	typedef typename BasisType::FactorsType FactorsType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 
@@ -104,14 +104,14 @@ public:
 	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
 	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 	typedef ParallelDensityMatrix<BlockMatrixType,
-	        DmrgBasisWithOperatorsType,
-	        TargettingType> ParallelDensityMatrixType;
+	BasisWithOperatorsType,
+	TargetVectorType> ParallelDensityMatrixType;
 	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
 
 	DensityMatrixLocal(const TargettingType&,
-	                   const DmrgBasisWithOperatorsType& pBasis,
-	                   const DmrgBasisWithOperatorsType&,
-	                   const DmrgBasisType&,
+	                   const BasisWithOperatorsType& pBasis,
+	                   const BasisWithOperatorsType&,
+	                   const BasisType&,
 	                   SizeType,
 	                   bool debug=false,
 	                   bool verbose=false)
@@ -144,9 +144,9 @@ public:
 	}
 
 	virtual void init(const TargettingType& target,
-	                  DmrgBasisWithOperatorsType const &pBasis,
-	                  const DmrgBasisWithOperatorsType& pBasisSummed,
-	                  DmrgBasisType const &pSE,
+	                  BasisWithOperatorsType const &pBasis,
+	                  const BasisWithOperatorsType& pBasisSummed,
+	                  BasisType const &pSE,
 	                  int direction)
 	{
 		{
@@ -167,27 +167,22 @@ public:
 			RealType w = target.gsWeight();
 
 			// if we are to target the ground state do it now:
-			ParallelDensityMatrixType helperDm(target,
-			                                   pBasis,
-			                                   pBasisSummed,
-			                                   pSE,
-			                                   direction,
-			                                   m,
-			                                   matrixBlock);
-
-			if (target.includeGroundStage())
-				helperDm.initPartition(matrixBlock,pBasis,m,target.gs(),
-				                       pBasisSummed,pSE,direction,w);
+			if (target.includeGroundStage()) initPartition(matrixBlock,
+			                                               pBasis,
+			                                               m,
+			                                               target.gs(),
+			                                               pBasisSummed,
+			                                               pSE,
+			                                               direction,
+			                                               w);
 
 			// target all other states if any:
-			if (target.size()>0) {
-				SizeType savedNpthreads = ConcurrencyType::npthreads;
-				ConcurrencyType::npthreads = 1;
-				ParallelizerType threadedDm(ConcurrencyType::npthreads,
-				                            PsimagLite::MPI::COMM_WORLD);
-
-				threadedDm.loopCreate(target.size(),helperDm);
-				ConcurrencyType::npthreads = savedNpthreads;
+			for (SizeType ix = 0; ix < target.size(); ++ix) {
+				RealType wnorm = target.normSquared(ix);
+				if (fabs(wnorm) < 1e-6) continue;
+				RealType w = target.weight(ix)/wnorm;
+				initPartition(matrixBlock,pBasis,m,target(ix),
+				              pBasisSummed,pSE,direction,w);
 			}
 
 			// set this matrix block into data_
@@ -200,16 +195,41 @@ public:
 		}
 	}
 
-	template<typename DmrgBasisType_,
-	         typename DmrgBasisWithOperatorsType_,
+	template<typename BasisType_,
+	         typename BasisWithOperatorsType_,
 	         typename TargettingType_
 	         >
 	friend std::ostream& operator<<(std::ostream&,
-	                                const DensityMatrixLocal<DmrgBasisType_,
-	                                DmrgBasisWithOperatorsType_,
+	                                const DensityMatrixLocal<BasisType_,
+	                                BasisWithOperatorsType_,
 	                                TargettingType_>&);
 
 private:
+
+	void initPartition(BuildingBlockType& matrixBlock,
+	                   BasisWithOperatorsType const &pBasis,
+	                   SizeType m,
+	                   const TargetVectorType& v,
+	                   BasisWithOperatorsType const &pBasisSummed,
+	                   BasisType const &pSE,
+	                   SizeType direction,
+	                   RealType weight)
+	{
+		SizeType start = pBasis.partition(m);
+		SizeType length = pBasis.partition(m+1) - start;
+		ParallelDensityMatrixType helperDm(v,
+		                                   pBasis,
+		                                   pBasisSummed,
+		                                   pSE,
+		                                   direction,
+		                                   m,
+		                                   weight,
+		                                   matrixBlock);
+		ParallelizerType threadedDm(ConcurrencyType::npthreads,
+		                            PsimagLite::MPI::COMM_WORLD);
+		threadedDm.loopCreate(length,helperDm);
+
+	}
 
 	ProgressIndicatorType progress_;
 	BlockMatrixType data_;
@@ -217,13 +237,13 @@ private:
 
 }; // class DensityMatrixLocal
 
-template<typename DmrgBasisType,
-         typename DmrgBasisWithOperatorsType,
+template<typename BasisType,
+         typename BasisWithOperatorsType,
          typename TargettingType
          >
 std::ostream& operator<<(std::ostream& os,
-                         const DensityMatrixLocal<DmrgBasisType,
-                         DmrgBasisWithOperatorsType,
+                         const DensityMatrixLocal<BasisType,
+                         BasisWithOperatorsType,
                          TargettingType>& dm)
 {
 	for (SizeType m=0;m<dm.data_.blocks();m++) {
