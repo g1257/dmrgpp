@@ -82,188 +82,208 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	template<typename BlockMatrixType,typename BasisWithOperatorsType,
-			 typename TargettingType>
-	class ParallelDensityMatrix {
+template<typename BlockMatrixType,typename BasisWithOperatorsType,
+         typename TargettingType>
+class ParallelDensityMatrix {
 
-		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
-		typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
-		typedef typename TargetVectorType::value_type DensityMatrixElementType;
-		typedef typename BasisWithOperatorsType::BasisType BasisType;
-		typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
+	typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
+	typedef typename TargetVectorType::value_type DensityMatrixElementType;
+	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef PsimagLite::Concurrency ConcurrencyType;
 
-	public:
+public:
 
-		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
+	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 
-		ParallelDensityMatrix(const TargettingType& target,
-							  const BasisWithOperatorsType& pBasis,
-							  const BasisWithOperatorsType& pBasisSummed,
-							  const BasisType& pSE,
-							  int direction,
-							  SizeType m,
-							  BuildingBlockType& matrixBlock)
-		: target_(target),
-		  pBasis_(pBasis),
-		  pBasisSummed_(pBasisSummed),
-		  pSE_(pSE),
-		  direction_(direction),
-		  m_(m),
-		  matrixBlock_(matrixBlock),
-		  hasMpi_(PsimagLite::Concurrency::hasMpi())
-		{}
+	ParallelDensityMatrix(const TargettingType& target,
+	                      const BasisWithOperatorsType& pBasis,
+	                      const BasisWithOperatorsType& pBasisSummed,
+	                      const BasisType& pSE,
+	                      int direction,
+	                      SizeType m,
+	                      BuildingBlockType& matrixBlock)
+	    : target_(target),
+	      pBasis_(pBasis),
+	      pBasisSummed_(pBasisSummed),
+	      pSE_(pSE),
+	      direction_(direction),
+	      m_(m),
+	      matrixBlock_(matrixBlock),
+	      hasMpi_(PsimagLite::Concurrency::hasMpi())
+	{}
 
-		void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t*)
-		{
-			SizeType mpiRank = (hasMpi_) ? PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
-			SizeType npthreads = PsimagLite::Concurrency::npthreads;
+	void thread_function_(SizeType threadNum,
+	                      SizeType blockSize,
+	                      SizeType total,
+	                      pthread_mutex_t*)
+	{
+		SizeType mpiRank = (hasMpi_) ?
+		            PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) : 0;
+		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
-			ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"ParallelDensityMatrix",total);
+		ConcurrencyType::mpiDisableIfNeeded(mpiRank,
+		                                    blockSize,
+		                                    "ParallelDensityMatrix",
+		                                    total);
 
-			for (SizeType p=0;p<blockSize;p++) {
-				SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p;
-				if (ix>=target_.size()) break;
-				RealType wnorm = target_.normSquared(ix);
-				if (fabs(wnorm) < 1e-6) continue;
-				RealType w = target_.weight(ix)/wnorm;
-				initPartition(matrixBlock_,pBasis_,m_,target_(ix),
-							  pBasisSummed_,pSE_,direction_,w);
+		for (SizeType p=0;p<blockSize;p++) {
+			SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p;
+			if (ix>=target_.size()) break;
+			RealType wnorm = target_.normSquared(ix);
+			if (fabs(wnorm) < 1e-6) continue;
+			RealType w = target_.weight(ix)/wnorm;
+			initPartition(matrixBlock_,pBasis_,m_,target_(ix),
+			              pBasisSummed_,pSE_,direction_,w);
+		}
+	}
+
+	void initPartition(BuildingBlockType& matrixBlock,
+	                   BasisWithOperatorsType const &pBasis,
+	                   SizeType m,
+	                   const TargetVectorType& v,
+	                   BasisWithOperatorsType const &pBasisSummed,
+	                   BasisType const &pSE,
+	                   SizeType direction,
+	                   RealType weight)
+	{
+		if (direction!=ProgramGlobals::EXPAND_SYSTEM)
+			initPartitionExpandEnviron(matrixBlock,pBasis,m,v,pBasisSummed,pSE,weight);
+		else
+			initPartitionExpandSystem(matrixBlock,pBasis,m,v,pBasisSummed,pSE,weight);
+	}
+
+private:
+
+	void initPartitionExpandEnviron(BuildingBlockType& matrixBlock,
+	                                BasisWithOperatorsType const &pBasis,
+	                                SizeType m,
+	                                const TargetVectorType& v,
+	                                BasisWithOperatorsType const &pBasisSummed,
+	                                BasisType const &pSE,
+	                                RealType weight)
+	{
+
+		SizeType ns=pBasisSummed.size();
+		SizeType ne=pSE.size()/ns;
+		SizeType start = pBasis.partition(m);
+		SizeType length = pBasis.partition(m+1) - start;
+		SizeType total=pBasisSummed.size();
+
+		for (SizeType i=0;i<length;++i) {
+			SizeType ieff = i +start;
+			for (SizeType j=0;j<length;++j) {
+				matrixBlock(i,j) += densityMatrixExpandEnviron(ieff,
+				                                               j+start,
+				                                               v,
+				                                               total,
+				                                               pSE,
+				                                               ns,
+				                                               ne)*weight;
 			}
 		}
+	}
 
-		void initPartition(BuildingBlockType& matrixBlock,
-						   BasisWithOperatorsType const &pBasis,
-						   SizeType m,
-						   const TargetVectorType& v,
-						   BasisWithOperatorsType const &pBasisSummed,
-						   BasisType const &pSE,
-						   SizeType direction,
-						   RealType weight)
-		{
-			if (direction!=ProgramGlobals::EXPAND_SYSTEM)
-				initPartitionExpandEnviron(matrixBlock,pBasis,m,v,pBasisSummed,pSE,weight);
-			else
-				initPartitionExpandSystem(matrixBlock,pBasis,m,v,pBasisSummed,pSE,weight);
-		}
+	void initPartitionExpandSystem(BuildingBlockType& matrixBlock,
+	                               BasisWithOperatorsType const &pBasis,
+	                               SizeType m,
+	                               const TargetVectorType& v,
+	                               BasisWithOperatorsType const &pBasisSummed,
+	                               BasisType const &pSE,
+	                               RealType weight)
+	{
+		SizeType ne = pBasisSummed.size();
+		SizeType ns = pSE.size()/ne;
+		SizeType start = pBasis.partition(m);
+		SizeType length = pBasis.partition(m+1) - start;
+		SizeType total=pBasisSummed.size();
 
-	private:
-
-		void initPartitionExpandEnviron(BuildingBlockType& matrixBlock,
-										BasisWithOperatorsType const &pBasis,
-										SizeType m,
-										const TargetVectorType& v,
-										BasisWithOperatorsType const &pBasisSummed,
-										BasisType const &pSE,
-										RealType weight)
-		{
-
-			SizeType ns=pBasisSummed.size();
-			SizeType ne=pSE.size()/ns;
-			SizeType start = pBasis.partition(m);
-			SizeType length = pBasis.partition(m+1) - start;
-			SizeType total=pBasisSummed.size();
-
-			for (SizeType i=0;i<length;++i) {
-				SizeType ieff = i +start;
-				for (SizeType j=0;j<length;++j) {
-					matrixBlock(i,j) += densityMatrixExpandEnviron(ieff,j+start,v,total,pSE,ns,ne)*weight;
-				}
+		for (SizeType i=0;i<length;++i) {
+			SizeType ieff = i +start;
+			for (SizeType j=0;j<length;++j) {
+				matrixBlock(i,j) += densityMatrixExpandSystem(ieff,
+				                                              j+start,
+				                                              v,
+				                                              total,
+				                                              pSE,
+				                                              ns,
+				                                              ne)*weight;
 			}
 		}
+	}
 
-		void initPartitionExpandSystem(BuildingBlockType& matrixBlock,
-									   BasisWithOperatorsType const &pBasis,
-									   SizeType m,
-									   const TargetVectorType& v,
-									   BasisWithOperatorsType const &pBasisSummed,
-									   BasisType const &pSE,
-									   RealType weight)
-		{
-			SizeType ne = pBasisSummed.size();
-			SizeType ns = pSE.size()/ne;
-			SizeType start = pBasis.partition(m);
-			SizeType length = pBasis.partition(m+1) - start;
-			SizeType total=pBasisSummed.size();
+	DensityMatrixElementType densityMatrixExpandEnviron(
+	        SizeType alpha1,
+	        SizeType alpha2,
+	        const TargetVectorType& v,
+	        SizeType total,
+	        BasisType const &pSE,
+	        SizeType ns,
+	        SizeType)
+	{
+		DensityMatrixElementType sum=0;
 
-			for (SizeType i=0;i<length;++i) {
-				SizeType ieff = i +start;
-				for (SizeType j=0;j<length;++j) {
-					matrixBlock(i,j) += densityMatrixExpandSystem(ieff,j+start,v,total,pSE,ns,ne)*weight;
-				}
-			}
+		SizeType x2 = alpha2*ns;
+		SizeType x1 = alpha1*ns;
+		for (SizeType beta=0;beta<total;beta++) {
+			SizeType ii = pSE.permutationInverse(beta + x1);
+			int sector1 = v.index2Sector(ii);
+			if (sector1 < 0) continue;
+			SizeType start1 = v.offset(sector1);
+
+			SizeType jj = pSE.permutationInverse(beta + x2);
+			int sector2 = v.index2Sector(jj);
+			if (sector2 < 0) continue;
+			SizeType start2 = v.offset(sector2);
+
+			sum += v.fastAccess(sector1,ii-start1)*
+			        std::conj(v.fastAccess(sector2,jj-start2));
+		}
+		return sum;
+	}
+
+	DensityMatrixElementType densityMatrixExpandSystem(
+	        SizeType alpha1,
+	        SizeType alpha2,
+	        const TargetVectorType& v,
+	        SizeType total,
+	        BasisType const &pSE,
+	        SizeType ns,
+	        SizeType)
+	{
+		DensityMatrixElementType sum=0;
+
+		SizeType totalNs = total * ns;
+
+		for (SizeType betaNs=0;betaNs<totalNs;betaNs+=ns) {
+			SizeType ii = pSE.permutationInverse(alpha1+betaNs);
+			int sector1 = v.index2Sector(ii);
+			if (sector1 < 0) continue;
+			SizeType start1 = v.offset(sector1);
+
+			SizeType jj = pSE.permutationInverse(alpha2+betaNs);
+			int sector2 = v.index2Sector(jj);
+			if (sector2 < 0) continue;
+			SizeType start2 = v.offset(sector2);
+
+			sum += v.fastAccess(sector1,ii-start1)*
+			        std::conj(v.fastAccess(sector2,jj-start2));
 		}
 
-		DensityMatrixElementType densityMatrixExpandEnviron(
-			SizeType alpha1,
-			SizeType alpha2,
-			const TargetVectorType& v,
-			SizeType total,
-			BasisType const &pSE,
-			SizeType ns,
-			SizeType)
-		{
-			DensityMatrixElementType sum=0;
+		return sum;
+	}
 
-			SizeType x2 = alpha2*ns;
-			SizeType x1 = alpha1*ns;
-			for (SizeType beta=0;beta<total;beta++) {
-				SizeType ii = pSE.permutationInverse(beta + x1);
-				int sector1 = v.index2Sector(ii);
-				if (sector1 < 0) continue;
-				SizeType start1 = v.offset(sector1);
-
-				SizeType jj = pSE.permutationInverse(beta + x2);
-				int sector2 = v.index2Sector(jj);
-				if (sector2 < 0) continue;
-				SizeType start2 = v.offset(sector2);
-
-				sum += v.fastAccess(sector1,ii-start1)*
-				        std::conj(v.fastAccess(sector2,jj-start2));
-			}
-			return sum;
-		}
-
-		DensityMatrixElementType densityMatrixExpandSystem(
-			SizeType alpha1,
-			SizeType alpha2,
-			const TargetVectorType& v,
-			SizeType total,
-			BasisType const &pSE,
-			SizeType ns,
-			SizeType)
-		{
-			DensityMatrixElementType sum=0;
-
-			SizeType totalNs = total * ns;
-
-			for (SizeType betaNs=0;betaNs<totalNs;betaNs+=ns) {
-				SizeType ii = pSE.permutationInverse(alpha1+betaNs);
-				int sector1 = v.index2Sector(ii);
-				if (sector1 < 0) continue;
-				SizeType start1 = v.offset(sector1);
-
-				SizeType jj = pSE.permutationInverse(alpha2+betaNs);
-				int sector2 = v.index2Sector(jj);
-				if (sector2 < 0) continue;
-				SizeType start2 = v.offset(sector2);
-
-				sum += v.fastAccess(sector1,ii-start1)*
-				        std::conj(v.fastAccess(sector2,jj-start2));
-			}
-
-			return sum;
-		}
-
-		const TargettingType& target_;
-		const BasisWithOperatorsType& pBasis_;
-		const BasisWithOperatorsType& pBasisSummed_;
-		const BasisType& pSE_;
-		int direction_;
-		SizeType m_;
-		BuildingBlockType& matrixBlock_;
-		bool hasMpi_;
-	}; // class ParallelDensityMatrix
+	const TargettingType& target_;
+	const BasisWithOperatorsType& pBasis_;
+	const BasisWithOperatorsType& pBasisSummed_;
+	const BasisType& pSE_;
+	int direction_;
+	SizeType m_;
+	BuildingBlockType& matrixBlock_;
+	bool hasMpi_;
+}; // class ParallelDensityMatrix
 } // namespace Dmrg
 
 /*@}*/
 #endif // PARALLEL_DENSITY_MATRIX_H
+

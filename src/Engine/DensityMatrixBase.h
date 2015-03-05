@@ -1,9 +1,9 @@
 // BEGIN LICENSE BLOCK
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -76,7 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file DensityMatrixBase.h
  *
- *  
+ *
  *
  */
 #ifndef DENSITY_MATRIX_BASE_H
@@ -85,43 +85,42 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BlockMatrix.h"
 
 namespace Dmrg {
-	template<typename DmrgBasisType,
-		typename DmrgBasisWithOperatorsType,
-		typename TargettingType
-		>
-	class DensityMatrixBase {
-		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
-		typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
-		typedef typename DmrgBasisType::FactorsType FactorsType;
-		enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
-		
-	public:
-		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
-		
-		virtual ~DensityMatrixBase()
-		{
-                        // avoids compiler warning
-                }
+template<typename DmrgBasisType,
+         typename DmrgBasisWithOperatorsType,
+         typename TargettingType
+         >
+class DensityMatrixBase {
+	typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
+	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
+	typedef typename DmrgBasisType::FactorsType FactorsType;
+	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
-		virtual BlockMatrixType& operator()()=0;
-		
-		virtual SizeType rank()=0;
-		
-		virtual void check(int direction)=0;
+public:
+	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 
-		virtual void check2(int direction)=0;
+	virtual ~DensityMatrixBase()
+	{
+		// avoids compiler warning
+	}
 
-		virtual void init(
-				const TargettingType& target,
-				DmrgBasisWithOperatorsType const &pBasis,
-				const DmrgBasisWithOperatorsType& pBasisSummed,
-				DmrgBasisType const &pSE,
-				int direction)=0;
-	}; // class DensityMatrixBase
+	virtual BlockMatrixType& operator()()=0;
+
+	virtual SizeType rank()=0;
+
+	virtual void check(int direction)=0;
+
+	virtual void check2(int direction)=0;
+
+	virtual void init(
+	        const TargettingType& target,
+	        DmrgBasisWithOperatorsType const &pBasis,
+	        const DmrgBasisWithOperatorsType& pBasisSummed,
+	        DmrgBasisType const &pSE,
+	        int direction)=0;
+}; // class DensityMatrixBase
 } // namespace Dmrg
 
 /*@}*/
 #endif
 
- 

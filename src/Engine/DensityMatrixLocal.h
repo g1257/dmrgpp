@@ -1,9 +1,9 @@
 
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -81,144 +81,159 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 
 namespace Dmrg {
-	template<typename DmrgBasisType,
-		typename DmrgBasisWithOperatorsType,
-		typename TargettingType
-		>
+template<typename DmrgBasisType,
+         typename DmrgBasisWithOperatorsType,
+         typename TargettingType
+         >
 
-	class DensityMatrixLocal : public DensityMatrixBase<DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType> {
-		typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-		typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
-		typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
-		typedef PsimagLite::Concurrency ConcurrencyType;
-		typedef typename DmrgBasisType::FactorsType FactorsType;
-		typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
-		typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
+class DensityMatrixLocal : public DensityMatrixBase<DmrgBasisType,
+        DmrgBasisWithOperatorsType,
+        TargettingType> {
+	typedef typename DmrgBasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename TargettingType::VectorWithOffsetType TargetVectorType;
+	typedef typename TargettingType::TargetVectorType::value_type DensityMatrixElementType;
+	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef typename DmrgBasisType::FactorsType FactorsType;
+	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
+	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 
-		enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
+	enum {EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM };
 
-	public:
+public:
 
-		typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
-		typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
+	typedef BlockMatrix<PsimagLite::Matrix<DensityMatrixElementType> > BlockMatrixType;
+	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
+	typedef ParallelDensityMatrix<BlockMatrixType,
+	        DmrgBasisWithOperatorsType,
+	        TargettingType> ParallelDensityMatrixType;
+	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
 
-		DensityMatrixLocal(
-			const TargettingType&,
-			const DmrgBasisWithOperatorsType& pBasis,
-			const DmrgBasisWithOperatorsType&,
-			const DmrgBasisType&,
-			SizeType,bool debug=false,bool verbose=false)
-		:
-			progress_("DensityMatrixLocal"),
-			data_(pBasis.size(),
-			pBasis.partition()-1),
-			debug_(debug),verbose_(verbose)
-		{
-		}
-
-		virtual BlockMatrixType& operator()()
-		{
-			return data_;
-		}
-
-		virtual SizeType rank() { return data_.rank(); }
-
-		virtual void check(int)
-		{
-		}
-
-		virtual void check2(int)
-		{
-		}
-
-		void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
-		{
-			diagonalise(data_,eigs,jobz);
-		}
-
-		virtual void init(
-				const TargettingType& target,
-				DmrgBasisWithOperatorsType const &pBasis,
-				const DmrgBasisWithOperatorsType& pBasisSummed,
-				DmrgBasisType const &pSE,
-				int direction)
-		{
-			typedef ParallelDensityMatrix<BlockMatrixType,DmrgBasisWithOperatorsType,TargettingType> ParallelDensityMatrixType;
-			{
-				PsimagLite::OstringStream msg;
-				msg<<"Init partition for all targets";
-				progress_.printline(msg,std::cout);
-			}
-			//loop over all partitions:
-			for (SizeType m=0;m<pBasis.partition()-1;m++) {
-				// size of this partition
-				SizeType bs = pBasis.partition(m+1)-pBasis.partition(m);
-
-				// density matrix block for this partition:
-				BuildingBlockType matrixBlock(bs,bs);
-
-				// weight of the ground state:
-				RealType w = target.gsWeight();
-
-				// if we are to target the ground state do it now:
-				ParallelDensityMatrixType helperDm(target,pBasis,pBasisSummed,pSE,direction,m,matrixBlock);
-
-				if (target.includeGroundStage())
-					helperDm.initPartition(matrixBlock,pBasis,m,target.gs(),
-							pBasisSummed,pSE,direction,w);
-
-				// target all other states if any:
-				if (target.size()>0) {
-					typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
-					SizeType savedNpthreads = ConcurrencyType::npthreads;
-					ConcurrencyType::npthreads = 1;
-					ParallelizerType threadedDm(ConcurrencyType::npthreads,
-					                            PsimagLite::MPI::COMM_WORLD);
-
-					threadedDm.loopCreate(target.size(),helperDm);
-					ConcurrencyType::npthreads = savedNpthreads;
-				}
-
-				// set this matrix block into data_
-				data_.setBlock(m,pBasis.partition(m),matrixBlock);
-			}
-			{
-				PsimagLite::OstringStream msg;
-				msg<<"Done with init partition";
-				progress_.printline(msg,std::cout);
-			}
-		}
-
-		template<typename DmrgBasisType_,
-			typename DmrgBasisWithOperatorsType_,
-   			typename TargettingType_
-			>
-		friend std::ostream& operator<<(std::ostream& os,
-				const DensityMatrixLocal<
-    					DmrgBasisType_,DmrgBasisWithOperatorsType_,TargettingType_>& dm);
-
-	private:
-
-		ProgressIndicatorType progress_;
-		BlockMatrixType data_;
-		bool debug_,verbose_;
-
-	}; // class DensityMatrixLocal
-
-	template<typename DmrgBasisType,
-		typename DmrgBasisWithOperatorsType,
-  		typename TargettingType
-		>
-	std::ostream& operator<<(std::ostream& os,
-				const DensityMatrixLocal<DmrgBasisType,DmrgBasisWithOperatorsType,TargettingType>& dm)
+	DensityMatrixLocal(const TargettingType&,
+	                   const DmrgBasisWithOperatorsType& pBasis,
+	                   const DmrgBasisWithOperatorsType&,
+	                   const DmrgBasisType&,
+	                   SizeType,
+	                   bool debug=false,
+	                   bool verbose=false)
+	    :
+	      progress_("DensityMatrixLocal"),
+	      data_(pBasis.size(),
+	            pBasis.partition()-1),
+	      debug_(debug),verbose_(verbose)
 	{
-		for (SizeType m=0;m<dm.data_.blocks();m++) {
-			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
-			os<<" ne="<<ne<<"\n";
-			os<<dm.data_(m)<<"\n";
-		}
-		return os;
 	}
+
+	virtual BlockMatrixType& operator()()
+	{
+		return data_;
+	}
+
+	virtual SizeType rank() { return data_.rank(); }
+
+	virtual void check(int)
+	{
+	}
+
+	virtual void check2(int)
+	{
+	}
+
+	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
+	{
+		diagonalise(data_,eigs,jobz);
+	}
+
+	virtual void init(const TargettingType& target,
+	                  DmrgBasisWithOperatorsType const &pBasis,
+	                  const DmrgBasisWithOperatorsType& pBasisSummed,
+	                  DmrgBasisType const &pSE,
+	                  int direction)
+	{
+		{
+			PsimagLite::OstringStream msg;
+			msg<<"Init partition for all targets";
+			progress_.printline(msg,std::cout);
+		}
+
+		//loop over all partitions:
+		for (SizeType m=0;m<pBasis.partition()-1;m++) {
+			// size of this partition
+			SizeType bs = pBasis.partition(m+1)-pBasis.partition(m);
+
+			// density matrix block for this partition:
+			BuildingBlockType matrixBlock(bs,bs);
+
+			// weight of the ground state:
+			RealType w = target.gsWeight();
+
+			// if we are to target the ground state do it now:
+			ParallelDensityMatrixType helperDm(target,
+			                                   pBasis,
+			                                   pBasisSummed,
+			                                   pSE,
+			                                   direction,
+			                                   m,
+			                                   matrixBlock);
+
+			if (target.includeGroundStage())
+				helperDm.initPartition(matrixBlock,pBasis,m,target.gs(),
+				                       pBasisSummed,pSE,direction,w);
+
+			// target all other states if any:
+			if (target.size()>0) {
+				SizeType savedNpthreads = ConcurrencyType::npthreads;
+				ConcurrencyType::npthreads = 1;
+				ParallelizerType threadedDm(ConcurrencyType::npthreads,
+				                            PsimagLite::MPI::COMM_WORLD);
+
+				threadedDm.loopCreate(target.size(),helperDm);
+				ConcurrencyType::npthreads = savedNpthreads;
+			}
+
+			// set this matrix block into data_
+			data_.setBlock(m,pBasis.partition(m),matrixBlock);
+		}
+		{
+			PsimagLite::OstringStream msg;
+			msg<<"Done with init partition";
+			progress_.printline(msg,std::cout);
+		}
+	}
+
+	template<typename DmrgBasisType_,
+	         typename DmrgBasisWithOperatorsType_,
+	         typename TargettingType_
+	         >
+	friend std::ostream& operator<<(std::ostream&,
+	                                const DensityMatrixLocal<DmrgBasisType_,
+	                                DmrgBasisWithOperatorsType_,
+	                                TargettingType_>&);
+
+private:
+
+	ProgressIndicatorType progress_;
+	BlockMatrixType data_;
+	bool debug_,verbose_;
+
+}; // class DensityMatrixLocal
+
+template<typename DmrgBasisType,
+         typename DmrgBasisWithOperatorsType,
+         typename TargettingType
+         >
+std::ostream& operator<<(std::ostream& os,
+                         const DensityMatrixLocal<DmrgBasisType,
+                         DmrgBasisWithOperatorsType,
+                         TargettingType>& dm)
+{
+	for (SizeType m=0;m<dm.data_.blocks();m++) {
+		SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
+		os<<" ne="<<ne<<"\n";
+		os<<dm.data_(m)<<"\n";
+	}
+	return os;
+}
 } // namespace Dmrg
 
 #endif
+
