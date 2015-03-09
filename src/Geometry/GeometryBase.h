@@ -151,6 +151,11 @@ public:
 		throw RuntimeError("GeometryBase::set() unimplemented for derived class\n");
 	}
 
+	virtual void set(PsimagLite::Matrix<std::complex<RealType> >&) const
+	{
+		throw RuntimeError("GeometryBase::set() unimplemented for derived class\n");
+	}
+
 	virtual void fillAdditionalData(AdditionalDataType&,
 	                                SizeType,
 	                                SizeType) const
