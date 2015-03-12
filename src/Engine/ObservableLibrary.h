@@ -360,7 +360,8 @@ public:
 			preOperator.printMatrix(opA.data,preOperator.siteDependent(),i0);
 
 			if (i0==0) {
-				std::cout<<"site <"<<bra<<"|"<<preOperator.label()<<"|"<<ket<<"\n";
+				std::cout<<"site <"<<bra<<"|"<<preOperator.label();
+				std::cout<<"|"<<ket<<"> time\n";
 			}
 
 			observe_.setBrackets(bra,ket);
@@ -370,7 +371,8 @@ public:
 
 			FieldType tmp1 = observe_.template
 			        onePoint<ApplyOperatorType>(i0,opA,ApplyOperatorType::BORDER_NO);
-			std::cout<<observe_.site(threadId)<<" "<<tmp1<<"\n";
+			std::cout<<observe_.site(threadId)<<" "<<tmp1;
+			std::cout<<" "<<observe_.time(threadId)<<"\n";
 
 			if (!observe_.isAtCorner(numberOfSites_,threadId)) continue;
 
@@ -387,7 +389,8 @@ public:
 			        onePoint<ApplyOperatorType>(i0,
 			                                    opAcorner,
 			                                    ApplyOperatorType::BORDER_YES);
-			std::cout<<x<<" "<<tmp1<<"\n";
+			std::cout<<x<<" "<<tmp1;
+			std::cout<<" "<<observe_.time(threadId)<<"\n";
 		}
 	}
 
