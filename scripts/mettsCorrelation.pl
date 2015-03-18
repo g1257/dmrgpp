@@ -4,13 +4,15 @@ use strict;
 use warnings;
 use Math::Complex;
 
-my ($beta,$label)=@ARGV;
-defined($label) or die "USAGE: $0 beta label < observerOutput.txt\n";
+my ($beta,$label,$start)=@ARGV;
+defined($label) or die "USAGE: $0 beta label [start] < observerOutput.txt\n";
+$start = 0 if (!defined($start));
 
 my $flag=0;
 my @matrix;
 my @sum;
 my $counter=0;
+my $effectiveCounter=0;
 
 while (<STDIN>) {
 	if (/^\#Sites=0 1 2/) {
@@ -25,17 +27,21 @@ while (<STDIN>) {
 
 	if (/^\Q$label/ and $flag==2) {
 		matrixRead(\@matrix);
-		matrixAdd(\@sum,\@matrix);
+		if ($counter >= $start) {
+			$effectiveCounter++;
+			matrixAdd(\@sum,\@matrix);
+		}
+
 		$counter++;
 	}
 
 	$flag=0;
 }
 
-print STDERR "#Counter=$counter\n";
-($counter>0) or die "$0: counter==0\n";
+print STDERR "#Counter=$counter EffectiveCounter=$effectiveCounter\n";
+($effectiveCounter>0) or die "$0: effectiveCounter==0\n";
 
-matrixDivide(\@sum,$counter);
+matrixDivide(\@sum,$effectiveCounter);
 print "$label\n";
 matrixPrint(\@sum);
 

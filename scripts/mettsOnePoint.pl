@@ -39,17 +39,19 @@ while (<STDIN>) {
 	$maxSite = $temp[0] if ($temp[0] > $maxSite);
 }
 
-print STDERR "$0: Found $counter vectors, maxSite=$maxSite\n";
+print "#$0: Found $counter vectors, maxSite=$maxSite\n";
 
 for (my $i = 0; $i < $counter; ++$i) {
 	print "$i ";
-	my $undef = 0;
+	my $missing = 0;
 	my $sum = 0;
+	my $missingSite;
 	for (my $site = 0; $site <= $maxSite; ++$site) {
 		my $x = $value[$i][$site];
 		if (!defined($x)) {
-			$x = "UNDEF";
-			$undef = 1;
+			$x = "-100";
+			$missingSite = $site;
+			$missing++;
 		} else {
 			$sum += $x;
 		}
@@ -57,8 +59,25 @@ for (my $i = 0; $i < $counter; ++$i) {
 		print "$x ";
 	}
 
-	$sum = "UNDEF" if ($undef);
-	print "$sum \n";
+	if ($missing == 0) {
+		print "   $sum \n";
+		next;
+	}
+
+	if ($missing == 1 && $i > 0) {
+		my $iPrev = $i - 1;
+		my $x = $value[$iPrev][$missingSite];
+		if (!defined($x)) {
+			print "UNDEF\n";
+			next;
+		}
+
+		$sum += $x;
+		print "   $sum \n";
+		next;
+	}
+
+	print "  UNDEF\n";
 }
 
 sub isNumeric
