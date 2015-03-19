@@ -101,10 +101,14 @@ public:
 	typedef RngType_ RngType;
 	typedef typename RngType::LongType LongType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	MettsStochastics(const ModelType& model,int long long seed)
+	MettsStochastics(const ModelType& model,
+	                 int long long seed,
+	                 const VectorSizeType& pure)
 	    : model_(model),
 	      rng_(seed),
+	      pure_(pure),
 	      progress_("MettsStochastics"),
 	      addedSites_(0)
 	{}
@@ -113,14 +117,14 @@ public:
 
 	SizeType chooseRandomState(SizeType site) const
 	{
-		SizeType tmp = SizeType(rng_()*model_.hilbertSize(site));
-		return tmp;
+		if (site < pure_.size()) return pure_[site];
+
+		return SizeType(rng_()*model_.hilbertSize(site));
 	}
 
 	SizeType chooseRandomState(const VectorRealType& probs) const
 	{
 		RealType r = rng_();
-		std::cout<<"RANDOM="<<r<<"\n";
 		RealType s1 = 0;
 		RealType s2 = 0;
 		for (SizeType i=0;i<probs.size();++i) {
@@ -128,6 +132,7 @@ public:
 			if (s1<r && r<=s2) return i;
 			s1 = s2;
 		}
+
 		PsimagLite::String s(__FILE__);
 		s += PsimagLite::String(" ") + ttos(__LINE__) + " " + __FUNCTION__ +
 		        " Probabilities don't amount to 1\n";
@@ -181,6 +186,7 @@ private:
 
 	const ModelType& model_;
 	mutable RngType rng_;
+	const VectorSizeType& pure_;
 	PsimagLite::ProgressIndicator progress_;
 	typename PsimagLite::Vector<SizeType>::Type pureStates_;
 	typename PsimagLite::Vector<SizeType>::Type addedSites_;

@@ -176,7 +176,7 @@ public:
 	      progress_("MettsTargetting"),
 	      currentBeta_(0),
 	      applyOpLocal_(lrs),
-	      mettsStochastics_(model,mettsStruct.rngSeed),
+	      mettsStochastics_(model,mettsStruct.rngSeed,mettsStruct.pure),
 	      mettsCollapse_(mettsStochastics_,lrs_,mettsStruct),
 	      timesWithoutAdvancement_(0),
 	      timeVectorsBase_(0),

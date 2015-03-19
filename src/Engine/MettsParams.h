@@ -88,6 +88,9 @@ namespace Dmrg {
 template<typename ModelType>
 class MettsParams : public TargetParamsTimeVectors<ModelType> {
 
+	typedef TargetParamsTimeVectors<ModelType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
+
 public:
 
 	typedef typename ModelType::RealType RealType;
@@ -102,12 +105,24 @@ public:
 		io.readline(beta,"BetaDividedByTwo=");
 		io.readline(rngSeed,"TSPRngSeed=");
 		io.readline(collapse,"MettsCollapse=");
+		try {
+			io.read(pure,"MettsPure");
+		} catch (std::exception& e) {}
+
+		SizeType n = model.geometry().numberOfSites();
+		if (pure.size() > 0 && pure.size() != n) {
+			PsimagLite::String msg("MettsParams: If provided, MettsPure must be");
+			msg += " a vector of " + ttos(n) + " entries.\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+
 		this->noOperator(false);
 	}
 
 	int long long rngSeed;
 	RealType beta;
 	PsimagLite::String collapse;
+	VectorSizeType pure;
 }; // class MettsParams
 
 template<typename ModelType>
@@ -119,10 +134,11 @@ inline std::ostream& operator<<(std::ostream& os,const MettsParams<ModelType>& t
 	os<<"#BetaDividedByTwo="<<t.beta<<"\n";
 	os<<"#TSPRngSeed="<<t.rngSeed<<"\n";
 	os<<"#MettsCollapse="<<t.collapse<<"\n";
+	os<<"#MettsPure="<<t.pure<<"\n";
 	return os;
 }
 
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // METTS_PARAMS_H

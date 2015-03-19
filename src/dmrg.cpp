@@ -27,7 +27,6 @@ typedef float MatrixElementType;
 #include "TargetingCorrection.h"
 #include "TargetingCorrectionVector.h"
 #include "MettsTargetting.h"
-#include "TargetingAncilla.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
 #include "BasisWithOperators.h"
@@ -287,12 +286,6 @@ void mainLoop0(InputNgType::Readable& io,
 
 	if (targetting=="MettsTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,MettsTargetting,
-		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
-		return;
-	}
-
-	if (targetting=="TargetingAncilla") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingAncilla,
 		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 		return;
 	}
