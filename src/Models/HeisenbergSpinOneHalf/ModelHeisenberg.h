@@ -141,7 +141,15 @@ public:
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
-	{}
+	{
+		SizeType n = geometry_.numberOfSites();
+		SizeType m = modelParameters_.magneticField.size();
+		if (m > 0 && m != n) {
+			PsimagLite::String msg("ModelHeisenberg: If provided, ");
+			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+	}
 
 	SizeType memResolv(PsimagLite::MemResolv& mres,
 	                   SizeType,
@@ -309,12 +317,26 @@ public:
 			electrons[i] = 0;
 	}
 
-	virtual void addDiagonalsInNaturalBasis(SparseMatrixType&,
-	                                        const VectorOperatorType&,
-	                                        const BlockType&,
-	                                        RealType,
-	                                        RealType = 1.0)  const
-	{}
+	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+	                     const VectorOperatorType& cm,
+	                     const BlockType& block,
+	                     RealType,
+	                     RealType factorForDiagonals=1.0)  const
+	{
+		SizeType linSize = geometry_.numberOfSites();
+		if (modelParameters_.magneticField.size() != linSize) return;
+
+		SizeType n=block.size();
+		SparseMatrixType tmpMatrix;
+
+		for (SizeType i=0;i<n;i++) {
+			// magnetic field
+			RealType tmp = modelParameters_.magneticField[block[i]]*factorForDiagonals;
+			multiplyScalar(tmpMatrix,cm[1+i*2].data,tmp);
+
+			hmatrix += tmpMatrix;
+		}
+	}
 
 private:
 
