@@ -91,33 +91,26 @@ namespace Dmrg {
 
 			template<typename SomeStructType>
 			static void setLinkData(
-					SizeType,
+					SizeType term,
 					SizeType dofs,
      					bool isSu2,
 					SizeType& fermionOrBoson,
 					std::pair<SizeType,SizeType>& ops,
-					std::pair<char,char>& mods,
+					std::pair<char,char>&,
 					SizeType& angularMomentum,
      					RealType& angularFactor,
 					SizeType& category,
 					const SomeStructType&)
 			{
 				fermionOrBoson = ProgramGlobals::BOSON;
-				ops = operatorDofs(dofs,isSu2);
+				ops = operatorDofs(term,isSu2);
 				angularMomentum = 2;
-				char tmp = mods.first;
-				switch (dofs) {
+				switch (term) {
 					case 0:
 						angularFactor = -1;
 						category = 2;
 						break;
 					case 1:
-						angularFactor = -1;
-						category = 0;
-						mods.first = mods.second;
-						mods.second = tmp;
-						break;
-					case 2:
 						angularFactor = 0.5;
 						category = 1;
 						break;
@@ -125,33 +118,31 @@ namespace Dmrg {
 			}
 
 			template<typename SomeStructType>
-			static void valueModifier(SparseElementType& value,SizeType,SizeType dofs,bool isSu2,const SomeStructType&)
+			static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType&)
 			{
 				if (isSu2) value = -value;
-				if (dofs<2) value *= 0.5;
 				value *= 0.5;
 			}
 
-			//! For TERM_J there are 3 terms:
-			//! Splus Sminus and
-			//! Sminus Splus and
-			//! Sz Sz
 			template<typename SomeStructType>
-			static SizeType dofs(SizeType,const SomeStructType&) { return 3; }
+			static SizeType dofs(SizeType,const SomeStructType&) { return 1; }
 
 			template<typename SomeStructType>
 			static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
 			{
-				return PairType(0,0); // no orbital and no anisotropy
+				return PairType(0,0); // no orbital
 			}
 
-			static SizeType terms() { return 1; }
+			//! For TERM_J there are 2 terms:
+			//! Splus Sminus and
+			//! Sz Sz
+			static SizeType terms() { return 2; }
 
 		private:
 
-			static PairType operatorDofs(SizeType dofs,bool isSu2)
+			static PairType operatorDofs(SizeType term,bool isSu2)
 			{
-				if (dofs<2) return PairType(0,0);
+				if (term<1) return PairType(0,0);
 				SizeType x = (isSu2) ? 0 : 1;
 				return PairType(x,x);
 			}

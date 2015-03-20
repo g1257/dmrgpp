@@ -123,6 +123,7 @@ std::ostream& operator<<(std::ostream &os,
                          const ParametersModelHeisenberg<FieldType>& parameters)
 {
 	os<<"TwiceTheSpin="<<parameters.twiceTheSpin<<"\n";
+	os<<"MagneticField="<<parameters.magneticField<<"\n";
 	return os;
 }
 } // namespace Dmrg
