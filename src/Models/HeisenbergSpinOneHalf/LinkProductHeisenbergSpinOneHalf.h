@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -80,73 +80,78 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LINK_PRODUCT_HEIS_ONE_HALF_H
 
 namespace Dmrg {
-	template<typename ModelHelperType>
-	class LinkProductHeisenbergSpinOneHalf {
+template<typename ModelHelperType>
+class LinkProductHeisenbergSpinOneHalf {
 
-		public:
-			typedef std::pair<SizeType,SizeType> PairType;
-			typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-			typedef typename SparseMatrixType::value_type SparseElementType;
-			typedef typename ModelHelperType::RealType RealType;
+public:
+	typedef std::pair<SizeType,SizeType> PairType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename ModelHelperType::RealType RealType;
 
-			template<typename SomeStructType>
-			static void setLinkData(
-					SizeType term,
-					SizeType dofs,
-     					bool isSu2,
-					SizeType& fermionOrBoson,
-					std::pair<SizeType,SizeType>& ops,
-					std::pair<char,char>&,
-					SizeType& angularMomentum,
-     					RealType& angularFactor,
-					SizeType& category,
-					const SomeStructType&)
-			{
-				fermionOrBoson = ProgramGlobals::BOSON;
-				ops = operatorDofs(term,isSu2);
-				angularMomentum = 2;
-				switch (term) {
-					case 0:
-						angularFactor = -1;
-						category = 2;
-						break;
-					case 1:
-						angularFactor = 0.5;
-						category = 1;
-						break;
-				}
-			}
+	template<typename SomeStructType>
+	static void setLinkData(
+	        SizeType term,
+	        SizeType dofs,
+	        bool isSu2,
+	        SizeType& fermionOrBoson,
+	        std::pair<SizeType,SizeType>& ops,
+	        std::pair<char,char>&,
+	        SizeType& angularMomentum,
+	        RealType& angularFactor,
+	        SizeType& category,
+	        const SomeStructType&)
+	{
+		fermionOrBoson = ProgramGlobals::BOSON;
+		ops = operatorDofs(term,isSu2);
+		angularMomentum = 2;
+		switch (term) {
+		case 0:
+			angularFactor = -1;
+			category = 2;
+			break;
+		case 1:
+			angularFactor = 0.5;
+			category = 1;
+			break;
+		}
+	}
 
-			template<typename SomeStructType>
-			static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType&)
-			{
-				if (isSu2) value = -value;
-				value *= 0.5;
-			}
+	template<typename SomeStructType>
+	static void valueModifier(SparseElementType& value,
+	                          SizeType,
+	                          SizeType,
+	                          bool isSu2,
+	                          const SomeStructType&)
+	{
+		if (isSu2) value = -value;
+		value *= 0.5;
+	}
 
-			template<typename SomeStructType>
-			static SizeType dofs(SizeType,const SomeStructType&) { return 1; }
+	template<typename SomeStructType>
+	static SizeType dofs(SizeType,const SomeStructType&) { return 1; }
 
-			template<typename SomeStructType>
-			static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
-			{
-				return PairType(0,0); // no orbital
-			}
+	template<typename SomeStructType>
+	static PairType connectorDofs(SizeType,SizeType,const SomeStructType&)
+	{
+		return PairType(0,0); // no orbital
+	}
 
-			//! For TERM_J there are 2 terms:
-			//! Splus Sminus and
-			//! Sz Sz
-			static SizeType terms() { return 2; }
+	//! For TERM_J there are 2 terms:
+	//! Splus Sminus and
+	//! Sz Sz
+	static SizeType terms() { return 2; }
 
-		private:
+private:
 
-			static PairType operatorDofs(SizeType term,bool isSu2)
-			{
-				if (term<1) return PairType(0,0);
-				SizeType x = (isSu2) ? 0 : 1;
-				return PairType(x,x);
-			}
-	}; // class LinkProductHeisenbergSpinOneHalf
+	static PairType operatorDofs(SizeType term,bool isSu2)
+	{
+		if (term<1) return PairType(0,0);
+		SizeType x = (isSu2) ? 0 : 1;
+		return PairType(x,x);
+	}
+}; // class LinkProductHeisenbergSpinOneHalf
 } // namespace Dmrg
 /*@}*/
 #endif
+
