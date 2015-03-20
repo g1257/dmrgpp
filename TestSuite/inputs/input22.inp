@@ -1,9 +1,16 @@
 TotalNumberOfSites=60
-NumberOfTerms=1
+NumberOfTerms=2
+
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
 Connectors 1 0.5
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0.5
+
 Model=HeisenbergSpinOneHalf
 SolverOptions=nowft
 Version=e953d056acae438cabd88c58df0d92133368d52e

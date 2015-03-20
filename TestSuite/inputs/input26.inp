@@ -1,5 +1,6 @@
 TotalNumberOfSites=60
-NumberOfTerms=1
+NumberOfTerms=2
+
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=none
@@ -9,6 +10,17 @@ Connectors 59 0.118
 		0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
 		0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
 	      0.118
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=none
+Connectors 59 0.118
+                0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+                0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+                0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+                0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
+              0.118
+
 Model=HeisenbergSpinOneHalf
 SolverOptions=none
 Version=aec8964f7a782d87d587c27276acd41760808139
