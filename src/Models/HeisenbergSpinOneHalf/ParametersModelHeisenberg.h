@@ -94,6 +94,7 @@ struct ParametersModelHeisenberg {
 	ParametersModelHeisenberg(IoInputType& io)
 	    : twiceTheSpin(1)
 	{
+		io.readline(twiceTheSpin,"TwiceTheSpin=");
 		try {
 			io.read(magneticField,"MagneticField");
 		} catch (std::exception&) {}

@@ -100,6 +100,7 @@ class ModelHeisenberg : public ModelBaseType {
 public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::BasisType BasisType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkProductStructType LinkProductStructType;
@@ -147,6 +148,12 @@ public:
 		if (m > 0 && m != n) {
 			PsimagLite::String msg("ModelHeisenberg: If provided, ");
 			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+
+		if (BasisType::useSu2Symmetry() && modelParameters_.twiceTheSpin != 1) {
+			PsimagLite::String msg("ModelHeisenberg: SU(2) symmetry, ");
+			msg += " for spin different than 1/2 is not implemented yet.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 	}
@@ -383,7 +390,7 @@ private:
 	                        int n) const
 	{
 		if (n!=1)
-			PsimagLite::RuntimeError("ModelFeAs::setSymmetryRelated n=1 only\n");
+			PsimagLite::RuntimeError("ModelHeisenberg::setSymmetryRelated n=1 only\n");
 
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
