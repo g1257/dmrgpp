@@ -405,33 +405,21 @@ private:
 		jmSaved.first++;
 		jmSaved.second++;
 
-		VectorSizeType electronsUp(basis.size());
-		VectorSizeType electronsDown(basis.size());
+		q.szPlusConst.resize(basis.size());
+		q.electrons.resize(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair;
 			jmpair.first = modelParameters_.twiceTheSpin;
 			jmpair.second = basis[i];
-			SizeType ket = basis[i];
 			jmvalues.push_back(jmpair);
-
-			// nup
-			electronsUp[i] = (ket==0) ?  0 : 1;
-			// ndown
-			electronsDown[i] = (ket==1) ?  0 : 1;
-
-			flavors.push_back(electronsUp[i]+electronsDown[i]);
+			q.szPlusConst[i] = basis[i];
+			q.electrons[i] = 1;
+			flavors.push_back(1);
 			jmSaved = jmpair;
 		}
-		q.jmValues=jmvalues;
+
+		q.jmValues = jmvalues;
 		q.flavors = flavors;
-		q.electrons = electronsUp + electronsDown;
-		q.szPlusConst.resize(electronsUp.size());
-		for (SizeType i=0;i<q.szPlusConst.size();i++) {
-			q.szPlusConst[i] = (modelParameters_.twiceTheSpin + electronsUp[i]) -
-			        electronsDown[i];
-			assert(!(q.szPlusConst[i] & 1));
-			q.szPlusConst[i] = static_cast<SizeType>(q.szPlusConst[i]*0.5);
-		}
 	}
 
 	//serializr start class ModelHeisenberg

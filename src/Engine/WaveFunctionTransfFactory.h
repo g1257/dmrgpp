@@ -278,6 +278,7 @@ public:
 			SizeType final = offset + total;
 			createRandomVector(y,offset,final);
 		}
+
 		if (!isEnabled_) return; // don't make noise unless enabled
 		PsimagLite::OstringStream msg;
 		msg<<"Yes, I'm awake, but there's nothing heavy to do now";
@@ -294,6 +295,8 @@ public:
 			y[i]=tmp;
 			atmp += std::real(y[i]*std::conj(y[i]));
 		}
+
+		assert(fabs(atmp)>1e-10);
 		atmp = 1.0 / sqrt (atmp);
 		for (SizeType i=offset;i<final;i++) y[i] *= atmp;
 

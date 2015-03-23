@@ -137,8 +137,8 @@ public:
 			// sz + const.
 			qn[0] = basisData.szPlusConst[i];
 
-			assert(qn[1]>=qn[0]);
-			qn[1] -= qn[0];
+			//assert(qn[1]>=qn[0]);
+			//qn[1] -= qn[0];
 
 			q.push_back(encodeQuantumNumber(qn));
 		}
