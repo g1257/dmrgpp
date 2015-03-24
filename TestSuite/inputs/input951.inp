@@ -29,7 +29,8 @@ FiniteLoops 48  3 200 0 -3 200 0 -3 200 0 3 200 0
                 3 200 0 -3 200 0 -3 200 0 3 200 0
                 3 200 0 -3 200 0 -3 200 0 3 200 0
 
-TargetQuantumNumbers 2 0.5 0.5
+TargetElectronsUp=4
+TargetElectronsDown=4
 
 DynamicDmrgType=1
 DynamicDmrgAdvanceEach=4

@@ -23,7 +23,9 @@ FiniteLoops 17
 			 3 200 1
 
 			
-TargetQuantumNumbers 3 0.5 0.5 0.0
+TargetElectronsUp=4
+TargetElectronsDown=4
+TargetSpinTimesTwo=0
 Threads=2
 
 

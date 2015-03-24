@@ -16,6 +16,8 @@ Version=53725d9b8f22615ccccc782082f4cd6f51a4e374
 OutputFile=data0.txt
 InfiniteLoopKeptStates=100
 FiniteLoops 4  7 100 0 -7 100 0 -7 100 0 7 100 0
-TargetQuantumNumbers 3 0.5 0.5 0
+TargetElectronsUp=8
+TargetElectronsDown=8
+TargetSpinTimesTwo=0
 
    

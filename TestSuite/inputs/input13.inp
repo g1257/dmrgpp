@@ -20,6 +20,8 @@ InfiniteLoopKeptStates=256
 FiniteLoops 10 3 256 0 -3 256 0 -3 256 0 3 256 0
 	       3 256 0 -3 256 0 -3 256 0 3 300 1
 	       3 300 1 -1 300 1 
-TargetQuantumNumbers 3 0.375 0.375 0
+TargetElectronsUp=3
+TargetElectronsDown=3
+TargetSpinTimesTwo=0
 
    

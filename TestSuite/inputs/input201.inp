@@ -14,7 +14,8 @@ Version=6ce41a4b7dfa08978e53fa756f7f139e2fb18251
 OutputFile=data201.txt
 InfiniteLoopKeptStates=150 
 FiniteLoops 3  -7 200 0  -7 200 1 7 200 1 
-TargetQuantumNumbers 2 0.5 0.5
+TargetElectronsUp=8
+TargetElectronsDown=8
 RestartFilename=data200.txt
 
 TSPTau=0.1

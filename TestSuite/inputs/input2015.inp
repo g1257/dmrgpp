@@ -22,7 +22,9 @@ FiniteLoops 5   3 400 0
 RepeatFiniteLoopsFrom=1
 RepeatFiniteLoopsTimes=4
 
-TargetQuantumNumbers 3 0.25 0.25 0
+TargetElectronsUp=2
+TargetElectronsDown=2
+TargetSpinTimesTwo=0
 
 TSPTau=0.1
 TSPTimeSteps=2

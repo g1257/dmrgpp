@@ -37,5 +37,7 @@ Version=61289987cdd32b8485213ac0415baf4e9cd16432
 OutputFile=data340.txt
 InfiniteLoopKeptStates=60
 FiniteLoops 4  3 100 0 -3 100 0 -3 100 0 3 100 0 
-TargetQuantumNumbers 3 1.0 1.0 0.0
+TargetElectronsUp=8
+TargetElectronsDown=8
+TargetSpinTimesTwo=0
 

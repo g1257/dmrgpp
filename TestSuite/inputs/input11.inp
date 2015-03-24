@@ -17,5 +17,7 @@ OutputFile=data11.txt
 InfiniteLoopKeptStates=150
 FiniteLoops 6  5 200 0 -5 200 0 -5 200 0 5 200 1
 		5 200 1 -1 200 1 
-TargetQuantumNumbers 3 0.5 0.5 0.0
+TargetElectronsUp=6
+TargetElectronsDown=6
+TargetSpinTimesTwo=0
 Threads=2
