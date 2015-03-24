@@ -459,23 +459,19 @@ struct ParametersDmrgSolver {
 		}
 
 		if (options.find("hasQuantumNumbers")!=PsimagLite::String::npos) {
-			PsimagLite::String s = "*** WARNING: hasQuantumNumbers ";
-			s += "option is obsolete in input file\n";
-			std::cerr<<s;
-		}
-		try {
-			io.read(targetQuantumNumbers,"TargetQuantumNumbers");
-			PsimagLite::String s = "*** WARNING: TargetQuantumNumbers ";
-			s += "is deprecated in input file\n";
-			std::cerr<<s;
-		} catch (std::exception& e){}
-
-		if (targetQuantumNumbers.size()==0) {
-			PsimagLite::String s (__FILE__);
-			s += "\nFATAL: Either TargetElectronsUp/Down or TargetQuantumNumbers ";
-			s += "must be specified.\n";
+			PsimagLite::String s = "*** FATAL: hasQuantumNumbers ";
+			s += "option is no longer allowed in input file\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
+
+		try {
+			io.read(targetQuantumNumbers,"TargetQuantumNumbers");
+			PsimagLite::String s = "*** FATAL: TargetQuantumNumbers ";
+			s += "is no longer allowed in input file\n";
+			throw PsimagLite::RuntimeError(s.c_str());
+		} catch (std::exception&){}
+
+		assert(targetQuantumNumbers.size()==0);
 
 		try {
 			io.read(adjustQuantumNumbers,"AdjustQuantumNumbers");
