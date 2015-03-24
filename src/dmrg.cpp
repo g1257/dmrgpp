@@ -227,8 +227,12 @@ void mainLoop0(InputNgType::Readable& io,
 
 	GeometryType geometry(io);
 
-	bool su2=false;
-	if (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos) su2=true;
+	int tmp = 0;
+	try {
+		io.readline(tmp,"UseSu2Symmetry=");
+	} catch (std::exception&) {}
+
+	bool su2 = (tmp > 0);
 
 	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
 
@@ -238,19 +242,12 @@ void mainLoop0(InputNgType::Readable& io,
 	}
 
 	if (su2) {
-		if (dmrgSolverParams.targetQuantumNumbers[2]>0) {
-			mainLoop<GeometryType,
-			         ModelHelperSu2,
-			         VectorWithOffsets,
-			         TargetingGroundState,
-			         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
-		} else {
-			mainLoop<GeometryType,
-			         ModelHelperSu2,
-			         VectorWithOffset,
-			         TargetingGroundState,
-			         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
-		}
+		mainLoop<GeometryType,
+		        ModelHelperSu2,
+		        VectorWithOffsets,
+		        TargetingGroundState,
+		        MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+
 		return;
 	}
 

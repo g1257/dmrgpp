@@ -442,6 +442,7 @@ struct ParametersDmrgSolver {
 			s += "\nMaximum is " + ttos(finiteLoop.size())+ "\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
+
 		if (fromFl>upToFl) {
 			PsimagLite::String s (__FILE__);
 			s += "\nFATAL: RepeatFiniteLoopsFrom=" + ttos(fromFl);
@@ -449,6 +450,7 @@ struct ParametersDmrgSolver {
 			s += "\nMaximum is " + ttos(upToFl)+ "\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
+
 		upToFl++;
 
 		for (SizeType i=0;i<repeat;i++) {
@@ -466,12 +468,14 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.read(targetQuantumNumbers,"TargetQuantumNumbers");
+		} catch (std::exception&){}
+
+
+		if (targetQuantumNumbers.size()>0) {
 			PsimagLite::String s = "*** FATAL: TargetQuantumNumbers ";
 			s += "is no longer allowed in input file\n";
 			throw PsimagLite::RuntimeError(s.c_str());
-		} catch (std::exception&){}
-
-		assert(targetQuantumNumbers.size()==0);
+		}
 
 		try {
 			io.read(adjustQuantumNumbers,"AdjustQuantumNumbers");

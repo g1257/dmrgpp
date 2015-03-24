@@ -151,10 +151,8 @@ public:
 	static SizeType neJmToIndex(SizeType ne,const PairType& jm)
 	{
 		typename PsimagLite::Vector<SizeType>::Type v(3);
-		RealType m = jm.second+0.5*(ne-jm.first);
-		v[0]=static_cast<SizeType>(m);
-		assert(ne>=v[0]);
-		v[1] = ne - v[0];
+		v[0] = jm.second;
+		v[1] = ne;
 		v[2]=jm.first;
 		return encodeQuantumNumber(v);
 	}
@@ -191,7 +189,7 @@ public:
 	{
 		SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
 
-		SizeType x= v[0] + v[1];
+		SizeType x = v[1];
 
 		assert(x < 2*maxElectronsOneSpin);
 
@@ -202,8 +200,8 @@ public:
 	SizeType pseudoEffectiveNumber(SizeType nelectrons,SizeType jtilde) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type v(3);
-		v[0]=nelectrons;
-		v[1]=0;
+		v[0] = 0;
+		v[1] = nelectrons;
 		v[2]=jtilde;
 		return pseudoQuantumNumber(v);
 	}
@@ -397,7 +395,7 @@ private:
 		electrons.resize(qns.size());
 		for (SizeType i=0;i<qns.size();i++) {
 			typename PsimagLite::Vector<SizeType>::Type v = decodeQuantumNumber(qns[i]);
-			electrons[i]=v[0] + v[1];
+			electrons[i] = v[1];
 		}
 	}
 

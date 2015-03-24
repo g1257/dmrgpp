@@ -222,7 +222,12 @@ void mainLoop0(InputNgType::Readable& io,
 	                             ProgramGlobals> GeometryType;
 
 	GeometryType geometry(io);
-	bool su2 = (dmrgSolverParams.options.find("useSu2Symmetry")!=PsimagLite::String::npos);
+	int tmp = 0;
+	try {
+		io.readline(tmp,"UseSu2Symmetry=");
+	} catch (std::exception&) {}
+
+	bool su2 = (tmp > 0);
 
 	PsimagLite::String targetting=inputCheck.getTargeting(dmrgSolverParams.options);
 

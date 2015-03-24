@@ -161,7 +161,6 @@ public:
 		registerOpts.push_back("ChebyshevSolver");
 		registerOpts.push_back("MatrixVectorStored");
 		registerOpts.push_back("MatrixVectorKron");
-		registerOpts.push_back("useSu2Symmetry");
 		registerOpts.push_back("TimeStepTargetting");
 		registerOpts.push_back("DynamicTargetting");
 		registerOpts.push_back("AdaptiveDynamicTargetting");
