@@ -93,9 +93,8 @@ struct ParametersModelHeisenberg {
 	// no connectors here, connectors are handled by the geometry
 	template<typename IoInputType>
 	ParametersModelHeisenberg(IoInputType& io)
-	    : targetQuantum(io), twiceTheSpin(1)
+	    : targetQuantum(io,false)
 	{
-		io.readline(twiceTheSpin,"TwiceTheSpin=");
 		try {
 			io.read(magneticField,"MagneticField");
 		} catch (std::exception&) {}
@@ -106,17 +105,12 @@ struct ParametersModelHeisenberg {
 	                   SizeType,
 	                   PsimagLite::String msg = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "ParametersModelHeisenberg";
-
-		mres.memResolv(&twiceTheSpin, sizeof(*this), str + " twiceTheSpin");
-		return sizeof(*this);
+		return 0;
 	}
 
 	//serializr start class ParametersModelHeisenberg
 	TargetQuantumElectrons<RealType> targetQuantum;
 	//serializr normal twiceTheSpin
-	SizeType twiceTheSpin;
 	VectorRealType magneticField;
 };
 
@@ -125,7 +119,6 @@ template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
                          const ParametersModelHeisenberg<RealTypeType>& parameters)
 {
-	os<<"TwiceTheSpin="<<parameters.twiceTheSpin<<"\n";
 	os<<"MagneticField="<<parameters.magneticField<<"\n";
 	os<<parameters.targetQuantum;
 	return os;
