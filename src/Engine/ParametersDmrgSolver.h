@@ -342,7 +342,9 @@ See the below for more information and examples on Finite Loops.
 */
 template<typename FieldType,typename InputValidatorType>
 struct ParametersDmrgSolver {
+
 	typedef ParametersDmrgSolver<FieldType, InputValidatorType> ThisType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	SizeType nthreads;
 	SizeType sitesPerBlock;
@@ -358,8 +360,7 @@ struct ParametersDmrgSolver {
 	PsimagLite::String insitu;
 	PsimagLite::String fileForDensityMatrixEigs;
 	DmrgCheckPoint checkpoint;
-	typename PsimagLite::Vector<FieldType>::Type targetQuantumNumbers;
-	typename PsimagLite::Vector<SizeType>::Type adjustQuantumNumbers;
+	VectorSizeType adjustQuantumNumbers;
 	typename PsimagLite::Vector<FiniteLoop>::Type finiteLoop;
 
 	template<class Archive>
@@ -379,7 +380,6 @@ struct ParametersDmrgSolver {
 		ar & insitu;
 		ar & fileForDensityMatrixEigs;
 		ar & checkpoint;
-		ar & targetQuantumNumbers;
 		ar & adjustQuantumNumbers;
 		ar & finiteLoop;
 	}
@@ -466,12 +466,13 @@ struct ParametersDmrgSolver {
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
+		VectorSizeType tmpVector;
 		try {
-			io.read(targetQuantumNumbers,"TargetQuantumNumbers");
+			io.read(tmpVector,"TargetQuantumNumbers");
 		} catch (std::exception&){}
 
 
-		if (targetQuantumNumbers.size()>0) {
+		if (tmpVector.size()>0) {
 			PsimagLite::String s = "*** FATAL: TargetQuantumNumbers ";
 			s += "is no longer allowed in input file\n";
 			throw PsimagLite::RuntimeError(s.c_str());
@@ -546,11 +547,6 @@ std::ostream &operator<<(std::ostream &os,
 	os<<"parameters.keptStatesInfinite="<<p.keptStatesInfinite<<"\n";
 	os<<"finiteLoop\n";
 	os<<p.finiteLoop;
-
-	os<<"parameters.targetQuantumNumbers=";
-	for (SizeType i=0;i<p.targetQuantumNumbers.size();i++)
-		os<<p.targetQuantumNumbers[i]<<" ";
-	os<<"\n";
 
 	if (p.tolerance>0)
 		os<<"parameters.tolerance="<<p.tolerance<<"\n";

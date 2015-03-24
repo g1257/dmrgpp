@@ -120,7 +120,9 @@ public:
 	      factors_(0,0),
 	      statesReduced_(0),
 	      jvals_(0)
-	{}
+	{
+		std::cout<<"HamiltonianSymmetrySu2: ctor called\n";
+	}
 
 	PairType jmValue(SizeType i) const { return jmValues_[i]; }
 
@@ -202,7 +204,7 @@ public:
 		typename PsimagLite::Vector<SizeType>::Type v(3);
 		v[0] = 0;
 		v[1] = nelectrons;
-		v[2]=jtilde;
+		v[2] = jtilde;
 		return pseudoQuantumNumber(v);
 	}
 

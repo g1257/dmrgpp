@@ -235,13 +235,9 @@ void mainLoop0(InputNgType::Readable& io,
 		throw PsimagLite::RuntimeError("SU(2) supports only GroundStateTargetting");
 
 	if (su2) {
-		if (dmrgSolverParams.targetQuantumNumbers[2]>0) {
-			mainLoop<GeometryType,ModelHelperSu2,VectorWithOffsets,MySparseMatrix>
+		mainLoop<GeometryType,ModelHelperSu2,VectorWithOffsets,MySparseMatrix>
 			        (geometry,targetting,io,dmrgSolverParams, options, list);
-		} else {
-			mainLoop<GeometryType,ModelHelperSu2,VectorWithOffset,MySparseMatrix>
-			        (geometry,targetting,io,dmrgSolverParams, options, list);
-		}
+
 		return;
 	}
 
