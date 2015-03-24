@@ -338,17 +338,12 @@ The first movement starts from where the infinite loop left off, at the middle o
  lattice.
 See the below for more information and examples on Finite Loops.
 
-\item[TargetElectronsUp=integer]
-
-\item[TargetElectronsDown=integer]
 \end{itemize}
 */
 template<typename FieldType,typename InputValidatorType>
 struct ParametersDmrgSolver {
 	typedef ParametersDmrgSolver<FieldType, InputValidatorType> ThisType;
 
-	SizeType electronsUp;
-	SizeType electronsDown;
 	SizeType nthreads;
 	SizeType sitesPerBlock;
 	SizeType maxMatrixRankStored;
@@ -370,8 +365,6 @@ struct ParametersDmrgSolver {
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int version1)
 	{
-		ar & electronsUp;
-		ar & electronsDown;
 		ar & nthreads;
 		ar & sitesPerBlock;
 		ar & maxMatrixRankStored;
@@ -396,74 +389,7 @@ struct ParametersDmrgSolver {
 	                   SizeType x,
 	                   PsimagLite::String msg) const
 	{
-		PsimagLite::String str = msg;
-		msg += "ParametersDmrgSolver";
-		const char* start = (const char *)&electronsUp;
-		const char* end = (const char*)&electronsDown;
-		SizeType total = mres.memResolv(&electronsUp,end-start,str + "electronsUp");
-		start = end;
-		end = (const char*)&nthreads;
-		total += mres.memResolv(&electronsDown,end-start,str + "electronsDown");
-		start = end;
-		end = (const char*)&sitesPerBlock;
-		total += mres.memResolv(&nthreads,end-start,str + "nthreads");
-		start = end;
-		end = (const char*)&maxMatrixRankStored;
-		total += mres.memResolv(&sitesPerBlock,end-start,str + "sitesPerBlock");
-		start = end;
-		end = (const char*)&keptStatesInfinite;
-		total += mres.memResolv(&maxMatrixRankStored,end-start,
-		                        str + "maxMatrixRankStored");
-		start = end;
-		end = (const char*)&useReflectionSymmetry;
-		total += mres.memResolv(&keptStatesInfinite,end-start,
-		                        str + "keptStatesInfinite");
-		start = end;
-		end = (const char*)&tolerance;
-		total += mres.memResolv(&useReflectionSymmetry,end-start,
-		                        str + "useReflectionSymmetry");
-		start = end;
-		end = (const char*)&gsWeight;
-		total += mres.memResolv(&tolerance,end-start,str + "tolerance");
-		start = end;
-		end = (const char*)&filename;
-		total += mres.memResolv(&gsWeight,end-start,str + "gsWeight");
-
-		start = end;
-		end = (const char*)&version;
-		total += mres.memResolv(&filename,end-start,str + "filename");
-		start = end;
-		end = (const char*)&options;
-		total += mres.memResolv(&version,end-start,str + "version");
-		start = end;
-		end = (const char*)&model;
-		total += mres.memResolv(&options,end-start,str + "options");
-		start = end;
-		end = (const char*)&insitu;
-		total += mres.memResolv(&model,end-start,str + "model");
-		start = end;
-		end = (const char*)&fileForDensityMatrixEigs;
-		total += mres.memResolv(&insitu,end-start,str + "insitu");
-		start = end;
-		end = (const char*)&checkpoint;
-		total += mres.memResolv(&fileForDensityMatrixEigs,end-start,
-		                        str + "fileForDensityMatrixEigs");
-
-		start = end;
-		end = (const char*)&targetQuantumNumbers;
-		total += mres.memResolv(&checkpoint,end-start, str + "checkpoint");
-
-		start = end;
-		end = (const char*)&adjustQuantumNumbers;
-		total += mres.memResolv(&targetQuantumNumbers,end-start,
-		                        str + "targetQuantumNumbers");
-		start = end;
-		end = (const char*)&finiteLoop;
-		total += mres.memResolv(&adjustQuantumNumbers,end-start,
-		                        str + "adjustQuantumNumbers");
-		total += mres.memResolv(&finiteLoop,sizeof(*this)-total, str + "finiteLoop");
-
-		return total;
+		return 0;
 	}
 
 	ParametersDmrgSolver(PsimagLite::String filename)
@@ -544,33 +470,10 @@ struct ParametersDmrgSolver {
 			std::cerr<<s;
 		} catch (std::exception& e){}
 
-		bool hasElectrons = false;
-		try {
-			io.readline(electronsUp,"TargetElectronsUp");
-			io.readline(electronsDown,"TargetElectronsDown");
-			hasElectrons = true;
-		} catch (std::exception& e) {}
-
-		if (hasElectrons && targetQuantumNumbers.size()>0) {
-			PsimagLite::String s (__FILE__);
-			s += "\nFATAL: Specifying both TargetElectronsUp/Down ";
-			s += "and TargetQuantumNumbers is an error.";
-			s += "\nSpecify one or the other only.\n";
-			throw PsimagLite::RuntimeError(s.c_str());
-		}
-
-		if (!hasElectrons && targetQuantumNumbers.size()==0) {
+		if (targetQuantumNumbers.size()==0) {
 			PsimagLite::String s (__FILE__);
 			s += "\nFATAL: Either TargetElectronsUp/Down or TargetQuantumNumbers ";
 			s += "must be specified.\n";
-			throw PsimagLite::RuntimeError(s.c_str());
-		}
-
-		if (options.find("useSu2Symmetry")!=PsimagLite::String::npos && hasElectrons) {
-			PsimagLite::String s (__FILE__);
-			s += "\nFATAL: TargetElectronsUp/Down cannot be specified while ";
-			s += "using SU(2) symmetry\n";
-			s += "\nTargetQuantumNumbers must be specified instead.\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
@@ -644,15 +547,11 @@ std::ostream &operator<<(std::ostream &os,
 	os<<"finiteLoop\n";
 	os<<p.finiteLoop;
 
-	if (p.targetQuantumNumbers.size()>0) {
-		os<<"parameters.targetQuantumNumbers=";
-		for (SizeType i=0;i<p.targetQuantumNumbers.size();i++)
-			os<<p.targetQuantumNumbers[i]<<" ";
-		os<<"\n";
-	} else {
-		os<<"parameters.electronsUp="<<p.electronsUp<<"\n";
-		os<<"parameters.electronsDown="<<p.electronsDown<<"\n";
-	}
+	os<<"parameters.targetQuantumNumbers=";
+	for (SizeType i=0;i<p.targetQuantumNumbers.size();i++)
+		os<<p.targetQuantumNumbers[i]<<" ";
+	os<<"\n";
+
 	if (p.tolerance>0)
 		os<<"parameters.tolerance="<<p.tolerance<<"\n";
 	os<<"parameters.nthreads="<<p.nthreads<<"\n";

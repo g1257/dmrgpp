@@ -82,17 +82,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 #include "Matrix.h"
+#include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
 //! FeAs Model Parameters
-template<typename Field>
+template<typename RealType>
 struct ParametersModelFeAs {
 	// no connections here please!!
 	// connections are handled by the geometry
 
 	template<typename IoInputType>
 	ParametersModelFeAs(IoInputType& io)
-	    : minElectronsPerSite(0),
+	    : targetQuantum(io),
+	      minElectronsPerSite(0),
 	      potentialT(0),
 	      feAsMode(0),
 	      coulombV(0),
@@ -151,7 +153,7 @@ struct ParametersModelFeAs {
 			}
 		}
 		try {
-			io.readMatrix(magneticField,"MagneticField");
+			io.readMatrix(magneticField,"magneticField");
 		} catch (std::exception& e) {}
 
 		try {
@@ -159,9 +161,9 @@ struct ParametersModelFeAs {
 		} catch (std::exception& e) {}
 
 		if (magneticField.n_row()!=0 && magneticField.n_row()!=3)
-			throw PsimagLite::RuntimeError("Magnetic Field: if present must have 3 rows\n");
+			throw PsimagLite::RuntimeError("Magnetic RealType: if present must have 3 rows\n");
 		if (magneticField.n_row()!=0 && magneticField.n_col()!=potentialV.size())
-			throw PsimagLite::RuntimeError("Magnetic Field: Expecting columns equal sites\n");
+			throw PsimagLite::RuntimeError("Magnetic RealType: Expecting columns equal sites\n");
 
 		try {
 			io.readline(minElectronsPerSite,"MinElectronsPerSite=");
@@ -212,37 +214,41 @@ struct ParametersModelFeAs {
 	}
 
 	//serializr start class ParametersModelFeAs
+
+	TargetQuantumElectrons<RealType> targetQuantum;
+
 	//serializr normal orbitals
 	SizeType orbitals;
 	//serializr normal minElectronsPerSite
 	SizeType minElectronsPerSite;
 	// Hubbard U values (one for each site)
 	//serializr normal hubbardU
-	typename PsimagLite::Vector<Field>::Type hubbardU;
+	typename PsimagLite::Vector<RealType>::Type hubbardU;
 	// Onsite potential values, one for each site
 	//serializr normal potentialV
-	typename PsimagLite::Vector<Field>::Type potentialV;
+	typename PsimagLite::Vector<RealType>::Type potentialV;
 	//serializr normal potentialT
-	typename PsimagLite::Vector<Field>::Type potentialT;
+	typename PsimagLite::Vector<RealType>::Type potentialT;
 	//serializr normal feAsMode
 	SizeType feAsMode;
 	//serializr normal coulombV
-	Field coulombV;
+	RealType coulombV;
 	//serializr normal magneticField
-	PsimagLite::Matrix<Field> magneticField;
+	PsimagLite::Matrix<RealType> magneticField;
 };
 
 //! Function that prints model parameters to stream os
-template<typename FieldType>
+template<typename RealType>
 std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelFeAs<FieldType>& parameters)
+                         const ParametersModelFeAs<RealType>& parameters)
 {
+	os<<parameters.targetQuantum;
 	os<<"hubbardU\n";
 	os<<parameters.hubbardU;
 	os<<"potentialV\n";
 	os<<parameters.potentialV;
 	if (parameters.magneticField.n_row()>0) {
-		os<<"MagneticField\n";
+		os<<"magneticField\n";
 		os<<parameters.magneticField;
 	}
 

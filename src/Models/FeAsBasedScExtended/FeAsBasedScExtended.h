@@ -92,6 +92,7 @@ class FeAsBasedScExtended : public ModelBaseType {
 
 public:
 
+	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef ModelFeBasedSc<ModelBaseType> ModelFeAsType;
 	typedef typename ModelFeAsType::HilbertState HilbertState;
 	typedef typename ModelFeAsType::HilbertBasisType HilbertBasisType;
@@ -280,6 +281,13 @@ public:
 	virtual SizeType maxElectronsOneSpin() const
 	{
 		return 2 * modelParameters_.orbitals * geometry_.numberOfSites() + 1;
+	}
+
+	virtual void setTargetNumbers(VectorSizeType& t,
+	                              SizeType sites,
+	                              SizeType direction) const
+	{
+		modelFeAs_.setTargetNumbers(t,sites,direction);
 	}
 
 private:

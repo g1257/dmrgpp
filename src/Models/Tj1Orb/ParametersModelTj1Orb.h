@@ -79,55 +79,43 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef ParametersModelTj1Orb_H
 #define ParametersModelTj1Orb_H
-//#include "SimpleReader.h"
+#include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters
-template<typename Field>
+template<typename RealType>
 struct ParametersModelTj1Orb {
 
 	template<typename IoInputType>
 	ParametersModelTj1Orb(IoInputType& io)
+	    : targetQuantum(io)
 	{
 		io.read(potentialV,"potentialV");
 	}
 
 	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
+	SizeType memResolv(SomeMemResolvType&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   PsimagLite::String = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "ParametersModelTj1Orb";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&nOfElectrons);
-		SizeType total = mres.memResolv(&potentialV, end-start, str + " potentialV");
-
-		total += mres.memResolv(&nOfElectrons,
-		                        sizeof(*this) - total,
-		                        str + " nOfElectrons");
-
-		return total;
+		return 0;
 	}
 
 	// Do not include here connection parameters
 
+	TargetQuantumElectrons<RealType> targetQuantum;
 	// potential V, size=twice the number of sites: for spin up and then for spin down
 	//serializr start class ParametersModelTj1Orb
 	//serializr normal potentialV
-	typename PsimagLite::Vector<Field>::Type potentialV;
-
-	// target number of electrons  in the system
-	//serializr normal nOfElectrons
-	int nOfElectrons;
+	typename PsimagLite::Vector<RealType>::Type potentialV;
 };
 
 //! Function that prints model parameters to stream os
-template<typename FieldType>
+template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelTj1Orb<FieldType>& parameters)
+                         const ParametersModelTj1Orb<RealTypeType>& parameters)
 {
+	os<<parameters.targetQuantum;
 	os<<"potentialV\n";
 	os<<parameters.potentialV;
 	return os;

@@ -78,15 +78,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERS_IMMM_H
 #define PARAMETERS_IMMM_H
+#include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
-template<typename Field>
+template<typename RealType>
 struct ParametersImmm {
 	// no connections here please!!
 	// connections are handled by the geometry
 
 	template<typename IoInputType>
-	ParametersImmm(IoInputType& io)
+	ParametersImmm(IoInputType& io) : targetQuantum(io)
 	{
 
 		io.read(hubbardU,"hubbardU");
@@ -118,21 +119,24 @@ struct ParametersImmm {
 	}
 
 	//serializr start class ParametersImmm
+	TargetQuantumElectrons<RealType> targetQuantum;
+
 	// Hubbard U values (one for each site)
 	//serializr normal hubbardU
-	typename PsimagLite::Vector<Field>::Type hubbardU;
+	typename PsimagLite::Vector<RealType>::Type hubbardU;
 	// Onsite potential values, one for each site
 	//serializr normal potentialV
-	typename PsimagLite::Vector<Field>::Type potentialV;
+	typename PsimagLite::Vector<RealType>::Type potentialV;
 	// target number of electrons  in the system
 	//serializr normal minOxygenElectrons
 	SizeType minOxygenElectrons;
 };
 
 //! Function that prints model parameters to stream os
-template<typename FieldType>
-std::ostream& operator<<(std::ostream &os,const ParametersImmm<FieldType>& parameters)
+template<typename RealTypeType>
+std::ostream& operator<<(std::ostream &os,const ParametersImmm<RealTypeType>& parameters)
 {
+	os<<parameters.targetQuantum;
 	os<<"hubbardU\n";
 	os<<parameters.hubbardU;
 	os<<"potentialV\n";

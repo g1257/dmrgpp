@@ -588,14 +588,8 @@ private:
 	                       const VectorSizeType& block2)
 	{
 		SizeType linSize = model_.geometry().numberOfSites();
-		VectorSizeType tqn(2,0);
-		if (model_.params().targetQuantumNumbers.size()>=2) {
-			tqn[0] = SizeType(round(model_.params().targetQuantumNumbers[0]*linSize));
-			tqn[1] = SizeType(round(model_.params().targetQuantumNumbers[1]*linSize));
-		} else {
-			tqn[0] = model_.params().electronsUp;
-			tqn[1] = model_.params().electronsDown;
-		}
+		VectorSizeType tqn;
+		model_.setTargetNumbers(tqn,linSize,ProgramGlobals::SYSTEM);
 		SizeType qn = BasisType::pseudoQuantumNumber(tqn);
 		mettsStochastics_.update(qn,block1,block2,mettsStruct_.rngSeed);
 	}

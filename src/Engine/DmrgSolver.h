@@ -588,7 +588,9 @@ private:
 		if (parameters_.targetQuantumNumbers.size()>0) {
 			updateQuantumSectorT(sites,direction);
 		} else {
-			updateQuantumSectorUd(sites,direction);
+			VectorSizeType targetQuantumNumbers;
+			model_.setTargetNumbers(targetQuantumNumbers,sites,direction);
+			setQuantumSector(targetQuantumNumbers,direction);
 		}
 
 	}
@@ -606,24 +608,6 @@ private:
 			} else {
 				if (targetQuantumNumbers[2]%2==0) targetQuantumNumbers[2]++;
 			}
-		}
-		setQuantumSector(targetQuantumNumbers,direction);
-	}
-
-	void updateQuantumSectorUd(SizeType sites,SizeType direction)
-	{
-		assert(!MyBasis::useSu2Symmetry());
-		VectorSizeType targetQuantumNumbers(2);
-
-		if (direction==INFINITE) {
-			SizeType totalSites = model_.geometry().numberOfSites();
-			targetQuantumNumbers[0]=
-			        SizeType(round(parameters_.electronsUp*sites/totalSites));
-			targetQuantumNumbers[1]=
-			        SizeType(round(parameters_.electronsDown*sites/totalSites));
-		} else {
-			targetQuantumNumbers[0]=parameters_.electronsUp;
-			targetQuantumNumbers[1]=parameters_.electronsDown;
 		}
 
 		setQuantumSector(targetQuantumNumbers,direction);

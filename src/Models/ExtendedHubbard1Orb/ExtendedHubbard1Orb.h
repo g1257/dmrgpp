@@ -90,6 +90,7 @@ class ExtendedHubbard1Orb : public ModelBaseType {
 
 public:
 
+	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
@@ -257,9 +258,11 @@ public:
 		                                         factorForDiagonals);
 	}
 
-	SizeType stateConjugate(SizeType state, SizeType site) const
+	virtual void setTargetNumbers(VectorSizeType& t,
+	                              SizeType sites,
+	                              SizeType direction) const
 	{
-		return modelHubbard_.stateConjugate(state,site);
+		modelHubbard_.setTargetNumbers(t,sites,direction);
 	}
 
 private:

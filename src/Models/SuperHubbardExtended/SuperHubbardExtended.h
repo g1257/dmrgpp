@@ -89,6 +89,7 @@ class SuperHubbardExtended : public ModelBaseType {
 
 public:
 
+	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
@@ -217,6 +218,16 @@ public:
 		                                         block,
 		                                         time,
 		                                         factorForDiagonals);
+	}
+
+	virtual void setTargetNumbers(VectorSizeType& t,
+	                              SizeType sites,
+	                              SizeType direction) const
+	{
+		modelParameters_.targetQuantum.setTargetNumbers(t,
+		                                                sites,
+		                                                geometry_.numberOfSites(),
+		                                                direction);
 	}
 
 private:

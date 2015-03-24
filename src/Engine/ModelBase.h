@@ -119,6 +119,7 @@ public:
 	typedef ParametersType SolverParamsType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	ModelBase(InputValidatorType&,
 	          ModelCommonBaseType* modelCommon)
@@ -297,11 +298,9 @@ public:
 		symmetryBlock.clear();
 	}
 
-	virtual SizeType stateConjugate(SizeType, SizeType) const
-	{
-		PsimagLite::String msg("ModelBase::stateConjugate() unimplemented\n");
-		throw PsimagLite::RuntimeError(msg);
-	}
+	virtual void setTargetNumbers(VectorSizeType& t,
+	                              SizeType,
+	                              SizeType) const = 0;
 
 	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
 	                           SizeType x,

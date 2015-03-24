@@ -98,6 +98,7 @@ class ModelFeBasedSc : public ModelBaseType {
 
 public:
 
+	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
@@ -115,7 +116,6 @@ public:
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef LinkProductFeAs<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
@@ -470,6 +470,16 @@ public:
 	virtual SizeType maxElectronsOneSpin() const
 	{
 		return 2 * modelParameters_.orbitals * geometry_.numberOfSites() + 1;
+	}
+
+	virtual void setTargetNumbers(VectorSizeType& t,
+	                              SizeType sites,
+	                              SizeType direction) const
+	{
+		modelParameters_.targetQuantum.setTargetNumbers(t,
+		                                                sites,
+		                                                geometry_.numberOfSites(),
+		                                                direction);
 	}
 
 private:

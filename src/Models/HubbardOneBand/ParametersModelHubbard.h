@@ -79,20 +79,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERSMODELHUBBARD_H
 #define PARAMETERSMODELHUBBARD_H
+#include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters
-template<typename Field>
+template<typename RealType>
 struct ParametersModelHubbard {
 
 	template<typename IoInputType>
-	ParametersModelHubbard(IoInputType& io)
+	ParametersModelHubbard(IoInputType& io) : targetQuantum(io)
 	{
 
 		io.read(hubbardU,"hubbardU");
 		io.read(potentialV,"potentialV");
-		//			SizeType level = 0;
-		//			bool beQuiet = true;
+
 		try {
 			io.read(potentialT,"PotentialT"); //level,beQuiet);
 		} catch (std::exception& e) {
@@ -100,10 +100,7 @@ struct ParametersModelHubbard {
 		omega=0;
 		try {
 			io.readline(omega,"omega=");
-		} catch (std::exception& e) {
-		}
-
-		//			io.rewind();
+		} catch (std::exception&) {}
 	}
 
 	template<typename SomeMemResolvType>
@@ -135,25 +132,29 @@ struct ParametersModelHubbard {
 	//serializr start class ParametersModelHubbard
 	// Do not include here connection parameters
 	// those are handled by the Geometry
+
+	TargetQuantumElectrons<RealType> targetQuantum;
+
 	// Hubbard U values (one for each site)
 	//serializr normal hubbardU
-	typename PsimagLite::Vector<Field>::Type hubbardU;
+	typename PsimagLite::Vector<RealType>::Type hubbardU;
 	// Onsite potential values, one for each site
 	//serializr normal potentialV
-	typename PsimagLite::Vector<Field>::Type potentialV;
+	typename PsimagLite::Vector<RealType>::Type potentialV;
 
 	// for time-dependent H:
 	//serializr normal potentialT
-	typename PsimagLite::Vector<Field>::Type potentialT;
+	typename PsimagLite::Vector<RealType>::Type potentialT;
 	//serializr normal omega
-	Field omega;
+	RealType omega;
 };
 
 //! Function that prints model parameters to stream os
-template<typename FieldType>
+template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelHubbard<FieldType>& parameters)
+                         const ParametersModelHubbard<RealTypeType>& parameters)
 {
+	os<<parameters.targetQuantum;
 	os<<"hubbardU\n";
 	os<<parameters.hubbardU;
 	os<<"potentialV\n";

@@ -121,6 +121,7 @@ private:
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename ModelBaseType::VectorRealType VectorRealType;
 
 	static const int NUMBER_OF_ORBITALS=1;
 	static const int DEGREES_OF_FREEDOM=2; // spin up and down
@@ -343,6 +344,16 @@ public:
 
 			hmatrix += tmpMatrix;
 		}
+	}
+
+	virtual void setTargetNumbers(VectorSizeType& t,
+	                              SizeType sites,
+	                              SizeType direction) const
+	{
+		modelParameters_.targetQuantum.setTargetNumbers(t,
+		                                                sites,
+		                                                geometry_.numberOfSites(),
+		                                                direction);
 	}
 
 private:

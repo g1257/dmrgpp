@@ -90,6 +90,7 @@ template<typename ModelBaseType>
 class Immm : public ModelBaseType {
 
 	typedef unsigned int long long WordType;
+	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 
 public:
 
@@ -375,6 +376,16 @@ public:
 	virtual SizeType maxElectronsOneSpin() const
 	{
 		return NUMBER_OF_SPINS * ORBITALS_OXYGEN * geometry_.numberOfSites() + 1;
+	}
+
+	virtual void setTargetNumbers(VectorSizeType& t,
+	                              SizeType sites,
+	                              SizeType direction) const
+	{
+		modelParameters_.targetQuantum.setTargetNumbers(t,
+		                                                sites,
+		                                                geometry_.numberOfSites(),
+		                                                direction);
 	}
 
 private:

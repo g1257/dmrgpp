@@ -82,17 +82,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PARAMETERSMODELHEISENBERG_H
 #define PARAMETERSMODELHEISENBERG_H
 #include "Vector.h"
+#include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
 //! Heisenberg Model Parameters
-template<typename Field>
+template<typename RealType>
 struct ParametersModelHeisenberg {
 
-	typedef typename PsimagLite::Vector<Field>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template<typename IoInputType>
 	ParametersModelHeisenberg(IoInputType& io)
-	    : twiceTheSpin(1)
+	    : targetQuantum(io), twiceTheSpin(1)
 	{
 		io.readline(twiceTheSpin,"TwiceTheSpin=");
 		try {
@@ -113,18 +114,20 @@ struct ParametersModelHeisenberg {
 	}
 
 	//serializr start class ParametersModelHeisenberg
+	TargetQuantumElectrons<RealType> targetQuantum;
 	//serializr normal twiceTheSpin
 	SizeType twiceTheSpin;
 	VectorRealType magneticField;
 };
 
 //! Function that prints model parameters to stream os
-template<typename FieldType>
+template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelHeisenberg<FieldType>& parameters)
+                         const ParametersModelHeisenberg<RealTypeType>& parameters)
 {
 	os<<"TwiceTheSpin="<<parameters.twiceTheSpin<<"\n";
 	os<<"MagneticField="<<parameters.magneticField<<"\n";
+	os<<parameters.targetQuantum;
 	return os;
 }
 } // namespace Dmrg

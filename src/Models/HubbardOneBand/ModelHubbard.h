@@ -112,6 +112,7 @@ public:
 	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 	typedef typename ModelBaseType::BasisDataType BasisDataType;
+	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 
 private:
 
@@ -440,10 +441,14 @@ public:
 		}
 	}
 
-	SizeType stateConjugate(SizeType state, SizeType site) const
+	virtual void setTargetNumbers(VectorSizeType& t,
+	                              SizeType sites,
+	                              SizeType direction) const
 	{
-		assert(state < 4);
-		return 3 - state;
+		modelParameters_.targetQuantum.setTargetNumbers(t,
+		                                                sites,
+		                                                geometry_.numberOfSites(),
+		                                                direction);
 	}
 
 private:

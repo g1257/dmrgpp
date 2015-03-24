@@ -92,6 +92,7 @@ class Tj1Orb : public ModelBaseType {
 
 public:
 
+	typedef typename ModelBaseType::VectorRealType VectorRealType;
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
@@ -373,6 +374,16 @@ public:
 		sort.sort(q,iperm);
 		basis.clear();
 		for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
+	}
+
+	virtual void setTargetNumbers(VectorSizeType& t,
+	                              SizeType sites,
+	                              SizeType direction) const
+	{
+		modelParameters_.targetQuantum.setTargetNumbers(t,
+		                                                sites,
+		                                                geometry_.numberOfSites(),
+		                                                direction);
 	}
 
 	void print(std::ostream& os) const
