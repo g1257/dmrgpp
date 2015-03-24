@@ -93,6 +93,13 @@ public:
 	TargetQuantumElectrons(IoInputType& io, bool allowUpDown = true)
 	    : twiceJ_(0)
 	{
+		PsimagLite::String  msg("TargetQuantumElectrons: ");
+		bool hasTwiceJ = false;
+		try {
+			io.read(twiceJ_,"TargetSpinTimesTwo=");
+			hasTwiceJ = true;
+		} catch (std::exception&) {}
+
 		SizeType ready = 0;
 		if (allowUpDown) {
 			SizeType electronsUp = 0;
@@ -104,13 +111,12 @@ public:
 				szPlusConst_ = electronsUp;
 				ready++;
 			} catch (std::exception&) {}
+		} else {
+			if (!hasTwiceJ) {
+				msg += "TargetSpinTimesTwo is needed for this model\n";
+				throw PsimagLite::RuntimeError(msg);
+			}
 		}
-
-		bool hasTwiceJ = false;
-		try {
-			io.read(twiceJ_,"TargetSpinTimesTwo=");
-			hasTwiceJ = true;
-		} catch (std::exception&) {}
 
 		try {
 			io.read(totalElectrons_,"TargetElectronsTotal=");
@@ -118,7 +124,6 @@ public:
 			ready++;
 		} catch (std::exception&) {}
 
-		PsimagLite::String  msg("TargetQuantumElectrons: ");
 		switch (ready) {
 		case 2:
 			msg += "Provide either up/down or total/sz but not both.\n";
@@ -169,7 +174,8 @@ public:
 
 		if (t.size() < 3) return;
 
-		SizeType tmp = twiceJ_;
+		SizeType tmp = (direction == ProgramGlobals::INFINITE) ?
+		            static_cast<SizeType>(round(twiceJ_*sites/totalSites)) : twiceJ_;
 
 		if (totalElectrons_%2==0) {
 			if (t[2]%2 != 0) tmp++;

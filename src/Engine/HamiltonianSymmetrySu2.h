@@ -155,7 +155,7 @@ public:
 		typename PsimagLite::Vector<SizeType>::Type v(3);
 		v[0] = jm.second;
 		v[1] = ne;
-		v[2]=jm.first;
+		v[2] = jm.first;
 		return encodeQuantumNumber(v);
 	}
 

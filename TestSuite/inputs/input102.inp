@@ -11,7 +11,7 @@ hubbardU	16 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 potentialV	 32 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 
 	0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=HubbardOneBand
-SolverOptions=useSu2Symmetry
+SolverOptions=none
 Version=18846b60983586e6185bd2d797e7d639cc92ce0e
 OutputFile=data102.txt
 InfiniteLoopKeptStates=100
@@ -19,6 +19,6 @@ FiniteLoops 6  7 100 0 -7 100 0 -7 100 0  7 100 1 7 100 1 -2 100 1
 TargetElectronsUp=8
 TargetElectronsDown=8
 TargetSpinTimesTwo=0
-   
+UseSu2Symmetry=1   
 Threads=2
 

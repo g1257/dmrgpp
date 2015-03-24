@@ -25,13 +25,14 @@ potentialV   32   0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
                   
 Model=FeAsBasedSc
 FeAsMode=0
-SolverOptions=nowft,useSu2Symmetry,
+SolverOptions=nowft
 Version=61289987cdd32b8485213ac0415baf4e9cd16432
 OutputFile=data41.txt
 InfiniteLoopKeptStates=60
 FiniteLoops 4  3 100 0 -3 100 0 -3 100 0 3 100 0 
 TargetElectronsUp=8
 TargetElectronsDown=8
+UseSu2Symmetry=1
 TargetSpinTimesTwo=0
 Orbitals=2
 

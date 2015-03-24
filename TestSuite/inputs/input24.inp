@@ -19,5 +19,6 @@ InfiniteLoopKeptStates=60
 FiniteLoops 2   -7 200 0 7 200 0 
 TargetElectronsUp=8
 TargetElectronsDown=8
+TargetSpinTimesTwo=1
 RestartFilename=data23.txt
 

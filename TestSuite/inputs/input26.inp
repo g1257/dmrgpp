@@ -30,5 +30,6 @@ FiniteLoops 6  29 100 0 -29 100 0 -29 100 0 29 100 1
 	29 100 1 -1 100 1 
 TargetElectronsUp=30
 TargetElectronsDown=30
-TargetSpinTimesTwo=0
+TargetSpinTimesTwo=1
 Threads=2
+

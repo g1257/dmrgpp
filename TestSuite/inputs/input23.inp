@@ -19,4 +19,5 @@ InfiniteLoopKeptStates=60
 FiniteLoops 3  7 100 0 -5 100 0 -2 100 0 
 TargetElectronsUp=8
 TargetElectronsDown=8
-   
+TargetSpinTimesTwo=1
+ 
