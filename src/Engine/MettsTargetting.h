@@ -589,7 +589,7 @@ private:
 	{
 		SizeType linSize = model_.geometry().numberOfSites();
 		VectorSizeType tqn;
-		model_.setTargetNumbers(tqn,linSize,ProgramGlobals::SYSTEM);
+		model_.setTargetNumbers(tqn,linSize,INFINITE);
 		SizeType qn = BasisType::pseudoQuantumNumber(tqn);
 		mettsStochastics_.update(qn,block1,block2,mettsStruct_.rngSeed);
 	}
