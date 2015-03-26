@@ -174,13 +174,14 @@ public:
 
 		if (t.size() < 3) return;
 
+		RealType jReal = twiceJ_*sites/static_cast<RealType>(totalSites);
 		SizeType tmp = (direction == ProgramGlobals::INFINITE) ?
-		            static_cast<SizeType>(round(twiceJ_*sites/totalSites)) : twiceJ_;
+		            static_cast<SizeType>(round(jReal)) : twiceJ_;
 
 		if (totalElectrons_%2==0) {
-			if (t[2]%2 != 0) tmp++;
+			if (tmp%2 != 0) tmp++;
 		} else {
-			if (t[2]%2 == 0) tmp++;
+			if (tmp%2 == 0) tmp++;
 		}
 
 		t[2] = tmp;

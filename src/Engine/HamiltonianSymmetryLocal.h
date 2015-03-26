@@ -96,26 +96,26 @@ public:
 
 	static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
 	{
-		SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
+		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
 
-		assert(v[0] < maxElectronsOneSpin);
-		assert(v[1] < maxElectronsOneSpin);
+		assert(v[0] < maxElectrons);
+		assert(v[1] < maxElectrons);
 
-		SizeType x= v[0] + v[1]*maxElectronsOneSpin;
-		if (v.size()==3) x += v[2]*maxElectronsOneSpin*maxElectronsOneSpin;
+		SizeType x= v[0] + v[1]*maxElectrons;
+		if (v.size()==3) x += v[2]*maxElectrons*maxElectrons;
 		return x;
 	}
 
 	static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(SizeType q)
 	{
-		SizeType maxElectronsOneSpin = ProgramGlobals::maxElectronsOneSpin;
+		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
 
-		assert(q < maxElectronsOneSpin*maxElectronsOneSpin);
+		assert(q < maxElectrons*maxElectrons);
 
 		typename PsimagLite::Vector<SizeType>::Type v(2);
 		SizeType tmp = q ;
-		v[1] = SizeType(tmp/maxElectronsOneSpin);
-		v[0] = tmp % maxElectronsOneSpin;
+		v[1] = SizeType(tmp/maxElectrons);
+		v[0] = tmp % maxElectrons;
 		return v;
 	}
 
