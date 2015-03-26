@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef LINK_PRODUCT_EX_H
 #define LINK_PRODUCT_EX_H
-#include "../Models/HeisenbergSpinOneHalf/LinkProductHeisenbergSpinOneHalf.h"
+#include "../Models/Heisenberg/LinkProductHeisenberg.h"
 #include "../Models/FeAsModel/LinkProductFeAs.h"
 
 namespace Dmrg {
@@ -91,7 +91,7 @@ class LinkProductFeAsExtended {
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef LinkProductFeAs<ModelHelperType> LinkProductFeAsType;
-	typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType> LinkProductHeisenbergType;
+	typedef LinkProductHeisenberg<ModelHelperType> LinkProductHeisenbergType;
 	typedef typename ModelHelperType::BasisType BasisType;
 	typedef typename ModelHelperType::OperatorType OperatorType;
 

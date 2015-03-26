@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINKPROD_SUPER_HUBBARD_EXTENDED_H
 #define LINKPROD_SUPER_HUBBARD_EXTENDED_H
 
-#include "../Models/HeisenbergSpinOneHalf/LinkProductHeisenbergSpinOneHalf.h"
+#include "../Models/Heisenberg/LinkProductHeisenberg.h"
 #include "../Models/ExtendedHubbard1Orb/LinkProdExtendedHubbard1Orb.h"
 
 namespace Dmrg {
@@ -124,16 +124,16 @@ public:
 
 		assert(term == TERM_SUPER);
 
-		LinkProductHeisenbergSpinOneHalf<ModelHelperType>::setLinkData(0,
-		                                                               dofs,
-		                                                               isSu2,
-		                                                               fermionOrBoson,
-		                                                               ops,
-		                                                               mods,
-		                                                               angularMomentum,
-		                                                               angularFactor,
-		                                                               category,
-		                                                               additional);
+		LinkProductHeisenberg<ModelHelperType>::setLinkData(0,
+		                                                    dofs,
+		                                                    isSu2,
+		                                                    fermionOrBoson,
+		                                                    ops,
+		                                                    mods,
+		                                                    angularMomentum,
+		                                                    angularFactor,
+		                                                    category,
+		                                                    additional);
 		ops.first += 3;
 		ops.second += 3;
 	}
@@ -152,11 +152,11 @@ public:
 			                                                                   isSu2,
 			                                                                   additional);
 
-		return LinkProductHeisenbergSpinOneHalf<ModelHelperType>::valueModifier(value,
-		                                                                        0,
-		                                                                        dofs,
-		                                                                        isSu2,
-		                                                                        additional);
+		return LinkProductHeisenberg<ModelHelperType>::valueModifier(value,
+		                                                             0,
+		                                                             dofs,
+		                                                             isSu2,
+		                                                             additional);
 	}
 
 	template<typename SomeStructType>
@@ -165,7 +165,7 @@ public:
 		if (term == TERM_HOPPING || term == TERM_NINJ)
 			return LinkProdExtendedHubbard1Orb<ModelHelperType>::dofs(term,additional);
 
-		return LinkProductHeisenbergSpinOneHalf<ModelHelperType>::dofs(0,additional);
+		return LinkProductHeisenberg<ModelHelperType>::dofs(0,additional);
 	}
 
 	template<typename SomeStructType>
@@ -178,9 +178,9 @@ public:
 			                                                                   dofs,
 			                                                                   additional);
 
-		return LinkProductHeisenbergSpinOneHalf<ModelHelperType>::connectorDofs(0,
-		                                                                        dofs,
-		                                                                        additional);
+		return LinkProductHeisenberg<ModelHelperType>::connectorDofs(0,
+		                                                             dofs,
+		                                                             additional);
 	}
 
 	static SizeType terms() { return 3; }

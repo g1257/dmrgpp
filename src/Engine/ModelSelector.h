@@ -52,7 +52,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Utils.h"
 #include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "../Models/HeisenbergSpinOneHalf/ModelHeisenberg.h"
+#include "../Models/Heisenberg/ModelHeisenberg.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
 #include "../Models/FeAsModel/ModelFeBasedSc.h"
 #include "../Models/FeAsBasedScExtended/FeAsBasedScExtended.h"
@@ -85,7 +85,7 @@ class ModelSelector {
 public:
 
 	ModelSelector(const PsimagLite::String& name)
-	: name_(name),model_(0)
+	    : name_(name),model_(0)
 	{}
 
 	~ModelSelector()

@@ -71,9 +71,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LinkProductHeisenbergSpinOneHalf.h
+/*! \file LinkProductHeisenberg.h
  *
- *  LinkProduct for HeisenbergSpinOneHalf model
+ *  LinkProduct for Heisenberg model
  *
  */
 #ifndef LINK_PRODUCT_HEIS_ONE_HALF_H
@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 template<typename ModelHelperType>
-class LinkProductHeisenbergSpinOneHalf {
+class LinkProductHeisenberg {
 
 public:
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -150,7 +150,7 @@ private:
 		SizeType x = (isSu2) ? 0 : 1;
 		return PairType(x,x);
 	}
-}; // class LinkProductHeisenbergSpinOneHalf
+}; // class LinkProductHeisenberg
 } // namespace Dmrg
 /*@}*/
 #endif

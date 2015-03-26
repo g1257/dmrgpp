@@ -84,7 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <algorithm>
 #include "ModelBase.h"
 #include "ParametersModelHeisenberg.h"
-#include "LinkProductHeisenbergSpinOneHalf.h"
+#include "LinkProductHeisenberg.h"
 #include "CrsMatrix.h"
 #include "VerySparseMatrix.h"
 #include "SpinSquaredHelper.h"
@@ -116,7 +116,7 @@ private:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef unsigned int long long WordType;
-	typedef LinkProductHeisenbergSpinOneHalf<ModelHelperType> LinkProductType;
+	typedef LinkProductHeisenberg<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
@@ -326,10 +326,10 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                     const VectorOperatorType& cm,
-	                     const BlockType& block,
-	                     RealType,
-	                     RealType factorForDiagonals=1.0)  const
+	                                const VectorOperatorType& cm,
+	                                const BlockType& block,
+	                                RealType,
+	                                RealType factorForDiagonals=1.0)  const
 	{
 		SizeType linSize = geometry_.numberOfSites();
 		if (modelParameters_.magneticField.size() != linSize) return;
