@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TJ_1ORB_H
 #define TJ_1ORB_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "../Models/HeisenbergSpinOneHalf/ModelHeisenberg.h"
 #include "../Models/Tj1Orb/LinkProductTj1Orb.h"
 #include "../Models/Tj1Orb/ParametersModelTj1Orb.h"
 #include "ModelCommon.h"
@@ -94,7 +93,6 @@ public:
 
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
-	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;

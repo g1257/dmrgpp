@@ -181,6 +181,8 @@ public:
 		utils::blockUnion(block_,su2Symmetry2.block_,su2Symmetry3.block_);
 
 		if (useSu2Symmetry_) {
+			std::cout<<"Basis: SU(2) Symmetry is in use\n";
+
 			symmSu2_.setToProduct(su2Symmetry2.symmSu2_,
 			                      su2Symmetry3.symmSu2_,
 			                      pseudoQn,

@@ -111,11 +111,6 @@ public:
 				szPlusConst_ = electronsUp;
 				ready++;
 			} catch (std::exception&) {}
-		} else {
-			if (!hasTwiceJ) {
-				msg += "TargetSpinTimesTwo is needed for this model\n";
-				throw PsimagLite::RuntimeError(msg);
-			}
 		}
 
 		try {
