@@ -95,6 +95,8 @@ struct ParametersModelHeisenberg {
 	ParametersModelHeisenberg(IoInputType& io)
 	    : targetQuantum(io,false)
 	{
+		io.readline(twiceTheSpin,"HeisenbergTwiceS=");
+
 		try {
 			io.read(magneticField,"MagneticField");
 		} catch (std::exception&) {}
@@ -111,6 +113,7 @@ struct ParametersModelHeisenberg {
 	//serializr start class ParametersModelHeisenberg
 	TargetQuantumElectrons<RealType> targetQuantum;
 	//serializr normal twiceTheSpin
+	SizeType twiceTheSpin;
 	VectorRealType magneticField;
 };
 
@@ -120,6 +123,7 @@ std::ostream& operator<<(std::ostream &os,
                          const ParametersModelHeisenberg<RealTypeType>& parameters)
 {
 	os<<"MagneticField="<<parameters.magneticField<<"\n";
+	os<<"HeisenbergTwiceS="<<parameters.twiceTheSpin<<"\n";
 	os<<parameters.targetQuantum;
 	return os;
 }

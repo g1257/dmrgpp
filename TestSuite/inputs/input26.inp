@@ -22,6 +22,8 @@ Connectors 59 0.118
               0.118
 
 Model=HeisenbergSpinOneHalf
+HeisenbergTwiceS=1
+
 SolverOptions=none
 Version=aec8964f7a782d87d587c27276acd41760808139
 OutputFile=data26.txt
@@ -30,6 +32,5 @@ FiniteLoops 6  29 100 0 -29 100 0 -29 100 0 29 100 1
 	29 100 1 -1 100 1 
 TargetElectronsTotal=60
 TargetSzPlusConst=30
-TargetSpinTimesTwo=1
 Threads=2
 

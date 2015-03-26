@@ -12,6 +12,8 @@ GeometryOptions=ConstantValues
 Connectors 1 1.0
 
 Model=HeisenbergSpinOneHalf
+HeisenbergTwiceS=1
+
 SolverOptions=nowft
 Version=247b335fe1542909b90be8647456bfd8fd56191c
 OutputFile=data20.txt
@@ -19,5 +21,6 @@ InfiniteLoopKeptStates=60
 FiniteLoops 4  15 100 0 -15 100 0 -15 100 0 15 100 0 
 TargetElectronsTotal=32
 TargetSzPlusConst=16
-TargetSpinTimesTwo=1
+TargetSpinTimesTwo=0
 UseSu2Symmetry=1
+

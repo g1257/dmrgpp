@@ -147,8 +147,6 @@ public:
 		}
 	}
 
-	SizeType twiceJ() const { return twiceJ_; }
-
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
 	                   SizeType,

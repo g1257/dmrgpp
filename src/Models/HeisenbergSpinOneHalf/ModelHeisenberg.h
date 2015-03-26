@@ -152,7 +152,7 @@ public:
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		if (BasisType::useSu2Symmetry() && modelParameters_.targetQuantum.twiceJ() != 1) {
+		if (BasisType::useSu2Symmetry() && modelParameters_.twiceTheSpin != 1) {
 			PsimagLite::String msg("ModelHeisenberg: SU(2) symmetry, ");
 			msg += " for spin different than 1/2 is not implemented yet.\n";
 			throw PsimagLite::RuntimeError(msg);
@@ -204,7 +204,7 @@ public:
 
 	SizeType hilbertSize(SizeType) const
 	{
-		return modelParameters_.targetQuantum.twiceJ()+1;
+		return modelParameters_.twiceTheSpin + 1;
 	}
 
 	//! find  operator matrices for (i,sigma) in the natural basis,
@@ -308,7 +308,7 @@ public:
 	                     const VectorSizeType& block) const
 	{
 		assert(block.size()==1);
-		SizeType total = modelParameters_.targetQuantum.twiceJ() + 1;
+		SizeType total = modelParameters_.twiceTheSpin + 1;
 		for (SizeType i=0;i<total;i++) basis.push_back(i);
 		BasisDataType qq;
 		setSymmetryRelated(qq,basis,block.size());
@@ -363,7 +363,7 @@ private:
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
-		RealType j = 0.5*modelParameters_.targetQuantum.twiceJ();
+		RealType j = 0.5*modelParameters_.twiceTheSpin;
 
 		for (SizeType ii=0;ii<total;ii++) {
 			SizeType ket = natBasis[ii];
@@ -384,7 +384,7 @@ private:
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
-		RealType j = 0.5*modelParameters_.targetQuantum.twiceJ();
+		RealType j = 0.5*modelParameters_.twiceTheSpin;
 
 		for (SizeType ii=0;ii<total;ii++) {
 			SizeType ket = natBasis[ii];
@@ -411,7 +411,7 @@ private:
 		typename PsimagLite::Vector<PairType>::Type jmvalues;
 		VectorSizeType flavors;
 		PairType jmSaved;
-		jmSaved.first = modelParameters_.targetQuantum.twiceJ();
+		jmSaved.first = modelParameters_.twiceTheSpin;
 		jmSaved.second = basis[0];
 		jmSaved.first++;
 		jmSaved.second++;
@@ -420,7 +420,7 @@ private:
 		q.electrons.resize(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair;
-			jmpair.first = modelParameters_.targetQuantum.twiceJ();
+			jmpair.first = modelParameters_.twiceTheSpin;
 			jmpair.second = basis[i];
 			jmvalues.push_back(jmpair);
 			q.szPlusConst[i] = basis[i];
