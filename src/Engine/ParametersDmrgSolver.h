@@ -312,7 +312,7 @@ std::istream &operator>>(std::istream& is,DmrgCheckPoint& c)
 /* PSIDOC ParametersDmrgSolver
 \begin{itemize}
 \item[Model=string]
-A string indicating the model, be it HubbardOneBand HeisenbergSpinOneHalf, etc.
+A string indicating the model, be it HubbardOneBand Heisenberg, etc.
 
 PSIDOCCOPY dmrgSolverOptions
 

@@ -11,7 +11,7 @@ GeometryKind=chain
 GeometryOptions=ConstantValues
 Connectors 1 1.0
 
-Model=HeisenbergSpinOneHalf
+Model=Heisenberg
 HeisenbergTwiceS=2
 
 SolverOptions=none

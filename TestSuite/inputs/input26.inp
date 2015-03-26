@@ -21,7 +21,7 @@ Connectors 59 0.118
                 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
               0.118
 
-Model=HeisenbergSpinOneHalf
+Model=Heisenberg
 HeisenbergTwiceS=1
 
 SolverOptions=none

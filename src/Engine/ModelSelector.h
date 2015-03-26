@@ -101,7 +101,7 @@ public:
 
 		if (name_ == "HubbardOneBand") {
 			model_ = new ModelHubbardType(solverParams,io,geometry);
-		} else if (name_ == "HeisenbergSpinOneHalf") {
+		} else if (name_ == "Heisenberg") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtended") {
 			model_ = new ModelHubbardExtType(solverParams,io,geometry);

@@ -1004,7 +1004,7 @@ private:
 	SizeType getObservablesToTest(const PsimagLite::String& modelName) const
 	{
 		if (modelName=="HubbardOneBand" || modelName=="HubbardOneBandExtended" ||
-		    modelName=="SuperHubbardExtended" || modelName=="HeisenbergSpinOneHalf") return 1;
+		    modelName=="SuperHubbardExtended" || modelName=="Heisenberg") return 1;
 
 		if (modelName=="FeAsBasedSc" ||
 		    modelName=="FeAsBasedScExtended") return 2;
@@ -1044,7 +1044,7 @@ private:
 			return processSitesPerBlock(A,blockIndex,site);
 		}
 
-		if (modelName=="HeisenbergSpinOneHalf") {
+		if (modelName=="Heisenberg") {
 			PsimagLite::CrsMatrix<ComplexOrRealType> tmpC(model_.naturalOperator("z",
                                                                                              site,
                                                                                              ind));
@@ -1068,7 +1068,7 @@ private:
 		if (modelName=="FeAsBasedSc" ||
 		    modelName=="FeAsBasedScExtended") return "n" + ttos(i);
 
-		if (modelName=="HeisenbergSpinOneHalf") {
+		if (modelName=="Heisenberg") {
 			return "z";
 		}
 

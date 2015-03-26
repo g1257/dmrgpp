@@ -1,4 +1,4 @@
-CPPFLAGS = -I../src/Engine -I../src/Models/Heisenberg -I../src/Models/HeisenbergSpinOneHalf  -I../src/Models/HubbardOneBand -I../src/Models/FeAsModel \
+CPPFLAGS = -I../src/Engine -I../src/Models/Heisenberg -I../src/Models/Heisenberg -I../src/Models/HubbardOneBand -I../src/Models/FeAsModel \
 	   -IModels/Immm -I../src/Models/FeAsBasedScExtended -IModels/ExtendedHubbard1Orb -I../../PsimagLite/src -I../../PsimagLite/src/Geometry 
 CXX = g++ 
 
