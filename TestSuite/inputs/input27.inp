@@ -1,0 +1,24 @@
+TotalNumberOfSites=32
+NumberOfTerms=2
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0
+
+Model=HeisenbergSpinOneHalf
+HeisenbergTwiceS=2
+
+SolverOptions=none
+Version=version
+OutputFile=data27.txt
+InfiniteLoopKeptStates=60
+FiniteLoops 4  15 100 0 -15 100 0 -15 100 0 15 100 0 
+TargetElectronsTotal=32
+TargetSzPlusConst=32
+
