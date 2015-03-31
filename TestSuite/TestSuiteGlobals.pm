@@ -72,12 +72,8 @@ sub doMain
 #	Get command line options
 	my $all = 0;
 	my $lastTest;
-	die $! if(!GetOptions("n=i" => \$TestSuiteGlobals::testNum, "l=i" => \$lastTest, "all" => \$all,"s=s" => \$TestSuiteGlobals::specFile));
+	die $! if(!GetOptions("n=i" => \$TestSuiteGlobals::testNum, "l=i" => \$lastTest, "all" => \$all));
 	
-	defined($TestSuiteGlobals::specFile) or $TestSuiteGlobals::specFile = "../TestSuite/inputs/production.spec";
-
-	(-r "$TestSuiteGlobals::specFile") or die "$0: doMain: $TestSuiteGlobals::specFile does not exist\n";
-
 	if (!$all && !defined($TestSuiteGlobals::testNum)) {
 		$TestSuiteGlobals::testNum = selectTest();
 	}
@@ -144,7 +140,7 @@ sub hookGrep
 #Returns the hash key
 sub getSpecKey
 {
-	my $specKey = substr(`md5sum $TestSuiteGlobals::specFile`,0,8);
+	my $specKey = substr(`md5sum ../src/$TestSuiteGlobals::specFile`,0,8);
 	$specKey .= substr(`git rev-parse HEAD`,0,4);
 	
 	return $specKey;
@@ -202,6 +198,7 @@ sub testSuite
 	if(-r $procLib) {
 		if(-r "$procFile") {
 			print "*******START OF TEST $testNum*******\n";
+			$TestSuiteGlobals::specFile = getSpecFile($procFile);
 			my @analyses = extractAnalyses($procFile) ;
 			(@analyses) ? (processing(@analyses, $procLib)) : (print "Test $testNum does not includes any processing analyses.\n");
 			print "*******END OF TEST ".$testNum."*******\n";
@@ -481,7 +478,8 @@ sub hookExecute
 
 sub getLabel
 {
-	my ($file,$label)=@_;
+	my ($file,$label,$dieIfNotFound)=@_;
+	defined($dieIfNotFound) or $dieIfNotFound = 1;
 	open(FILELABEL,$file) or die "$0: Could not open $file: $!\n";
 	my $value;
 	while(<FILELABEL>) {
@@ -492,7 +490,18 @@ sub getLabel
 		}
 	}
 	close(FILELABEL);
-	die "$0: Label $label not found in file $file\n" if (!defined($value));
+	if ($dieIfNotFound and !defined($value)) {
+		die "$0: Label $label not found in file $file\n";
+	}
+
+	return $value;
+}
+
+sub getSpecFile
+{
+	my ($file) = @_;
+	my $value = getLabel($file,"CONFIG_MAKE=",0);
+	return "Config.make" if (!defined($value));
 	return $value;
 }
 
