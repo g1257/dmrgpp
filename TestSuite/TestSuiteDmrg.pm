@@ -104,15 +104,14 @@ sub runObserve
 sub createExecutable
 {
 	my ($specFile,$refKey, $execType) = @_;
-	
-	(-r "$specFile") or die "$0: createExecutable: $specFile does not exist\n";
 
 	my $configFile = "configure.pl";
-	my $arg1 = "./$configFile < $specFile &> /dev/null";
+	my $arg1 = "./$configFile  &> /dev/null";
 	my $arg2 = "make $execType -f Makefile &> /dev/null";
 	
 	my $err = chdir($TestSuiteGlobals::srcDir);
 	die "Changing directory to $TestSuiteGlobals::srcDir: $!" if(!$err);
+	(-r "$specFile") or die "$0: createExecutable: $specFile does not exist\n";
 	print "Configuring $execType in Test $TestSuiteGlobals::testNum...\n";
 	$err = system($arg1);
 	die "Configuration error using $configFile with $specFile: $!" if($err);

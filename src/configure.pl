@@ -22,6 +22,15 @@ use strict;
 use lib "../../PsimagLite/scripts";
 use Make;
 
+my ($arg) = @ARGV;
+
+if (defined($arg) and -r "$arg" and $arg ne "Config.make") {
+	my $cmd = "cp Config.make Config.make.bak";
+	system($cmd);
+	$cmd = "cp $arg Config.make";
+	system($cmd);
+}
+
 my @drivers = ("dmrg","observe");
 
 createMakefile();
@@ -64,5 +73,4 @@ EOF
 	close($fh);
 	print STDERR "File Makefile has been written\n";
 }
-
 
