@@ -106,7 +106,7 @@ sub createExecutable
 	my ($specFile,$refKey, $execType) = @_;
 
 	my $configFile = "configure.pl";
-	my $arg1 = "./$configFile  &> /dev/null";
+	my $arg1 = "./$configFile  $specFile &> /dev/null";
 	my $arg2 = "make $execType -f Makefile &> /dev/null";
 	
 	my $err = chdir($TestSuiteGlobals::srcDir);

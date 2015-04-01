@@ -44,7 +44,8 @@ Tests *with* SU(2) symmetry:
 	INF(60)+7(100)-7(100)-7(100)+7(100)
 60) t-J one-Orbital (tjOneOrbital) on a chain with t=1 J=1 with 16+16 sites
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
-#80 to 99 are reserved for Heisenberg spin 1
+80) Heisenberg spin 1 with 4 sites
+#81 to 99 are reserved for Heisenberg spin 1
 100) same as 0 but without su(2) symmetry
 101) same as 1 but without su(2) symmetry
 #102) same as 2 but without su(2) symmetry <-- DISABLED DUE TO BUG (SEE GITHUBISSUES)
