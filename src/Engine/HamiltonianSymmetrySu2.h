@@ -187,7 +187,7 @@ public:
 	//! targets[0]=nup, targets[1]=ndown,  targets[2]=2j
 	static SizeType pseudoQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
 	{
-		SizeType maxElectrons = ProgramGlobals::maxElectronsOneSpin;
+		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
 
 		SizeType x = v[1];
 

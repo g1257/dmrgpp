@@ -996,7 +996,10 @@ private:
 
 		std::cerr<<site2<<" "<<sum<<" "<<" "<<currentBeta_;
 		std::cerr<<" "<<label<<" "<<nor<<" "<<std::norm(src2);
-		std::cerr<<" "<<std::norm(dest)<<"    "<<sum/(nor*nor)<<"\n";
+		std::cerr<<" "<<std::norm(dest)<<"    ";
+		if (fabs(nor)>1e-10)
+			std::cerr<<sum/(nor*nor);
+		std::cerr<<"\n";
 
 		return site2;
 	}
