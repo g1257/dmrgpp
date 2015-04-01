@@ -7,7 +7,8 @@ testsuite.pl \- Systematically run tests for DMRG++
 [\-a] [\-n int] [\-l int] [\-r] [\-v] [\-m] [\-f] [\-u]
 .SH DESCRIPTION
 If a test number is not given to testsuite.pl, it will display a list of available tests and ask which test to run. The testsuite will create
-a driver program, a Makefile, and it will build DMRG++ and run it. Followed by interpretation of the results and comparisons with precomputed results. 
+a driver program, a Config.make, a Makefile, and it will build DMRG++ and run it. 
+Followed by interpretation of the results and comparisons with precomputed results. 
 At any given time, the user can escape the 
 .B testsuite.pl
 execution by pressing Control+C.
@@ -16,44 +17,23 @@ execution by pressing Control+C.
 .B \-a,\-\-all
 Runs all available tests sequentially starting from the lowest one.
 .TP
-.B \-n=[test number]
-If test number is positive, runs the test with the given number.
-If test number is negative, runs all tests starting from test number to the end
-.B (or until limit test number).
+.B \-n test number
+runs the test with the given number.
 .TP
-.B \-l=[last test number]
+.B \-l last test number
 Number that specifies the last test to run when running multiple tests. Can be used to specify a range of
 tests to be ran. Applied when using the
 .B \-\-all
-option or given a
-.B negative test number.
-.TP
-.B \-r, --remove
-Deletes all temporary files created during test configuration, compilation, and execution of DMRG++.
-To modify which files to remove, go to the
-.B removeFiles
-subroutine in
-.B testsuite.pl.
+option 
 .TP
 .B \-v, --verbose
 Displays messages created during test selection, configuration, compilation, and execution of DMRG++. This includes
 the descriptions of all tests which are found in
 .B inputs/descriptions.txt.
 .TP
-.B \-m, --manual
-Provides the functionality for the user to manually enter the configuration parameters for 
-.B configure.pl
-prior to test compilation and execution. Auto configuration is the default setting.
-.TP
 .B \-f, --force
 Runs the configuration and compilation processes even though they had already been made previously and valid executables exist for that test number.
 .TP
-.B \-u, --update
-Synchronizes and updates the hash table in 
-.B hashTable.txt
-with the existing executables in the 
-.B src/
-directory.
 .SH FILE ASSOCIATIONS
 Each test has a file associated with it
 .B (inputs/processing#.txt)
