@@ -140,7 +140,8 @@ sub hookGrep
 #Returns the hash key
 sub getSpecKey
 {
-	my $specKey = substr(`md5sum ../src/$TestSuiteGlobals::specFile`,0,8);
+	my $specKey = substr(`md5sum ../TestSuite/inputs/$TestSuiteGlobals::specFile`,0,8);
+	$specKey .= substr(`md5sum ../src/Makefile`,0,4);
 	$specKey .= substr(`git rev-parse HEAD`,0,4);
 	
 	return $specKey;
