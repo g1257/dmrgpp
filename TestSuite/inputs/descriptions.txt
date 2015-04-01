@@ -126,5 +126,6 @@ correction vector algorithm (type=2).
 3011) Dynamics: Non-local Green's function at sites (15,0) for a one-band Hubbard model for U=10 using
 correction vector algorithm (type=3).
 4000) KMH model simple test
-#4001 to 4099 are hereby reserved for the KMH model.
+4001) KMH model simple test 8 sites
+#4002 to 4099 are hereby reserved for the KMH model.
 #TAGEND DO NOT REMOVE THIS TAG
