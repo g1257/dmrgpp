@@ -1,0 +1,46 @@
+TotalNumberOfSites=6
+NumberOfTerms=2
+
+DegreesOfFreedom=1
+GeometryKind=ladderx
+LadderLeg=2
+GeometryOptions=none
+Connectors 4
+1 
+1
+1
+1
+
+Connectors 3
+1 0 1
+
+Connectors 3
+(0,-0.5) (0,0.5) 0 
+
+Connectors 3
+(0,0.5) (0,-0.5) 0
+
+DegreesOfFreedom=1
+GeometryKind=longchain
+LongChainDistance=4
+GeometryOptions=ConstantValues
+Connectors 1 (0,0.5)
+
+hubbardU        6 5 5 5 5 5 5 
+potentialV      12 0 0 0 0 0 0    0 0 0 0 0 0
+		   
+Model=KaneMeleHubbard
+SolverOptions=none
+Version=version
+OutputFile=data4000.txt
+InfiniteLoopKeptStates=200
+FiniteLoops 9  2 200 0
+              -2 200 0 -2 200 0 2 200 0 2 200 0
+              -2 300 0 -2 300 0 2 300 0 2 300 0
+
+TargetElectronsUp=0
+TargetElectronsDown=1
+IsPeriodicX=0
+IsPeriodicY=0
+Orbitals=1
+
