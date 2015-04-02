@@ -88,24 +88,24 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename TargettingParamsType,
+template<typename TargetParamsType,
 		 typename ModelType,
 		 typename WaveFunctionTransfType,
 		 typename LanczosSolverType,
 		 typename VectorWithOffsetType>
 class TimeVectorsKrylov : public  TimeVectorsBase<
-		TargettingParamsType,
+		TargetParamsType,
 		ModelType,
 		WaveFunctionTransfType,
 		LanczosSolverType,
 		VectorWithOffsetType> {
-	typedef TimeVectorsBase<TargettingParamsType,
+	typedef TimeVectorsBase<TargetParamsType,
 	                        ModelType,
 	                        WaveFunctionTransfType,
 	                        LanczosSolverType,
 	                        VectorWithOffsetType> BaseType;
 	typedef typename BaseType::PairType PairType;
-	typedef typename TargettingParamsType::RealType RealType;
+	typedef typename TargetParamsType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -124,7 +124,7 @@ class TimeVectorsKrylov : public  TimeVectorsBase<
 public:
 
 	TimeVectorsKrylov(const RealType& currentTime,
-					  const TargettingParamsType& tstStruct,
+					  const TargetParamsType& tstStruct,
 					  const VectorRealType& times,
 					  typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
 					  const ModelType& model,
@@ -314,7 +314,7 @@ private:
 	}
 
 	const RealType& currentTime_;
-	const TargettingParamsType& tstStruct_;
+	const TargetParamsType& tstStruct_;
 	const VectorRealType& times_;
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
 	const ModelType& model_;

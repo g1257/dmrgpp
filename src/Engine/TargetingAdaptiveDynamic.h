@@ -113,7 +113,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef TargetParamsAdaptiveDynamic<ModelType> TargettingParamsType;
+	typedef TargetParamsAdaptiveDynamic<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
@@ -138,7 +138,7 @@ public:
 
 	TargetingAdaptiveDynamic(const LeftRightSuperType& lrs,
 	                         const ModelType& model,
-	                         const TargettingParamsType& tstStruct,
+	                         const TargetParamsType& tstStruct,
 	                         const WaveFunctionTransfType& wft,
 	                         const SizeType&,
 	                         InputValidatorType& io)
@@ -376,7 +376,7 @@ private:
 		v /= x;
 	}
 
-	const TargettingParamsType& tstStruct_;
+	const TargetParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	SizeType lastLanczosVector_;
 	SizeType dynCounter_;

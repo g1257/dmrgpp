@@ -97,21 +97,21 @@ std::complex<RealType> minusOneOrMinusI(const std::complex<RealType>&)
 	return std::complex<RealType>(0.0,-1.0);
 }
 
-template<typename TargettingParamsType,
+template<typename TargetParamsType,
 		 typename ModelType,
 		 typename WaveFunctionTransfType,
 		 typename LanczosSolverType,
 		 typename VectorWithOffsetType>
 class TimeVectorsRungeKutta : public  TimeVectorsBase<
-		TargettingParamsType,
+		TargetParamsType,
 		ModelType,
 		WaveFunctionTransfType,
 		LanczosSolverType,
 		VectorWithOffsetType> {
 
-	typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,LanczosSolverType,VectorWithOffsetType> BaseType;
+	typedef TimeVectorsBase<TargetParamsType,ModelType,WaveFunctionTransfType,LanczosSolverType,VectorWithOffsetType> BaseType;
 	typedef typename BaseType::PairType PairType;
-	typedef typename TargettingParamsType::RealType RealType;
+	typedef typename TargetParamsType::RealType RealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -125,7 +125,7 @@ class TimeVectorsRungeKutta : public  TimeVectorsBase<
 public:
 
 	TimeVectorsRungeKutta(RealType currentTime,
-						  const TargettingParamsType& tstStruct,
+						  const TargetParamsType& tstStruct,
 						  const VectorRealType& times,
 						  typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
 						  const ModelType& model,
@@ -230,7 +230,7 @@ private:
 
 	PsimagLite::ProgressIndicator progress_;
 	RealType currentTime_;
-	const TargettingParamsType& tstStruct_;
+	const TargetParamsType& tstStruct_;
 	const VectorRealType& times_;
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
 	const ModelType& model_;

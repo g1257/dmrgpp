@@ -122,7 +122,7 @@ public:
 	typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef TargetParamsTimeStep<ModelType> TargettingParamsType;
+	typedef TargetParamsTimeStep<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef BlockMatrix<ComplexMatrixType> ComplexBlockMatrixType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
@@ -132,12 +132,12 @@ public:
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
 
-	static SizeType const PRODUCT = TargettingParamsType::PRODUCT;
-	static SizeType const SUM = TargettingParamsType::SUM;
+	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
+	static SizeType const SUM = TargetParamsType::SUM;
 
 	TargetingTimeStep(const LeftRightSuperType& lrs,
 	                  const ModelType& model,
-	                  const TargettingParamsType& tstStruct,
+	                  const TargetParamsType& tstStruct,
 	                  const WaveFunctionTransfType& wft,
 	                  const SizeType&,
 	                  InputValidatorType& ioIn)
@@ -354,7 +354,7 @@ private:
 		std::cout<<"-------------&*&*&* In-situ measurements end\n";
 	}
 
-	const TargettingParamsType& tstStruct_;
+	const TargetParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	typename PsimagLite::Vector<RealType>::Type times_,weight_;

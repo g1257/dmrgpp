@@ -116,7 +116,7 @@ void mainLoop3(GeometryType& geometry,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions)
 {
-	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
+	typedef typename TargettingType::TargetParamsType TargetParamsType;
 	typedef typename TargettingType::MatrixVectorType::ModelType ModelBaseType;
 
 	//! Setup the Model
@@ -129,7 +129,7 @@ void mainLoop3(GeometryType& geometry,
 	}
 
 	//! Read TimeEvolution if applicable:
-	TargettingParamsType tsp(io,model);
+	TargetParamsType tsp(io,model);
 
 	//! Setup the dmrg solver:
 	typedef DmrgSolver<TargettingType> SolverType;

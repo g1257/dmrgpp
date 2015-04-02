@@ -120,7 +120,7 @@ public:
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
 	typedef VectorType TargetVectorType;
-	typedef TargetParamsGroundState<ModelType> TargettingParamsType;
+	typedef TargetParamsGroundState<ModelType> TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
@@ -129,7 +129,7 @@ public:
 
 	TargetingGroundState(const LeftRightSuperType& lrs,
 	                     const ModelType& model,
-	                     const TargettingParamsType& tstStruct,
+	                     const TargetParamsType& tstStruct,
 	                     const WaveFunctionTransfType& wft,
 	                     const SizeType&,
 	                     InputValidatorType&)

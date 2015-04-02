@@ -110,7 +110,7 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 		typedef typename MatrixVectorType_::ModelType ModelType;
 		typedef typename ModelType::RealType RealType;
 		typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-		typedef TargetParamsCorrectionVector<ModelType> TargettingParamsType;
+		typedef TargetParamsCorrectionVector<ModelType> TargetParamsType;
 
 		class Action {
 
@@ -118,7 +118,7 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 
 			enum ActionEnum {ACTION_IMAG, ACTION_REAL};
 
-			Action(const TargettingParamsType& tstStruct,
+			Action(const TargetParamsType& tstStruct,
 			       RealType E0,
 			       const VectorRealType& eigs)
 			    : tstStruct_(tstStruct),E0_(E0),eigs_(eigs)
@@ -161,7 +161,7 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 				return (action_ == ACTION_IMAG) ? wn/denom : -part1 / denom;
 			}
 
-			const TargettingParamsType& tstStruct_;
+			const TargetParamsType& tstStruct_;
 			RealType E0_;
 			const VectorRealType& eigs_;
 			mutable ActionEnum action_;
@@ -171,7 +171,7 @@ class TargetingCorrectionVector : public TargetingBase<LanczosSolverTemplate,
 
 		typedef Action ActionType;
 
-		CalcR(const TargettingParamsType& tstStruct,
+		CalcR(const TargetParamsType& tstStruct,
 		      RealType E0,
 		      const VectorRealType& eigs)
 		    : action_(tstStruct,E0,eigs)
@@ -210,7 +210,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef TargetParamsCorrectionVector<ModelType> TargettingParamsType;
+	typedef TargetParamsCorrectionVector<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
@@ -228,7 +228,7 @@ public:
 	typedef DynamicSerializer<VectorWithOffsetType,PostProcType> DynamicSerializerType;
 	typedef typename LanczosSolverType::LanczosMatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,
-	                                 TargettingParamsType> CorrectionVectorFunctionType;
+	                                 TargetParamsType> CorrectionVectorFunctionType;
 	typedef ParallelTriDiag<ModelType,
 	                        LanczosSolverType,
 	                        VectorWithOffsetType> ParallelTriDiagType;
@@ -244,12 +244,12 @@ public:
 	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
 	      INFINITE=WaveFunctionTransfType::INFINITE};
 
-	static SizeType const PRODUCT = TargettingParamsType::PRODUCT;
-	static SizeType const SUM = TargettingParamsType::SUM;
+	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
+	static SizeType const SUM = TargetParamsType::SUM;
 
 	TargetingCorrectionVector(const LeftRightSuperType& lrs,
 	                          const ModelType& model,
-	                          const TargettingParamsType& tstStruct,
+	                          const TargetParamsType& tstStruct,
 	                          const WaveFunctionTransfType& wft,
 	                          const SizeType&,
 	                          InputValidatorType& ioIn)
@@ -330,7 +330,7 @@ public:
 				msg<<"\n\tExpect a throw anytime now...";
                 	progress_.printline(msg,std::cerr);
 		}
-	
+
 		PostProcType cf(ab_,reortho_,params);
 
 		this->common().save(block,io,cf,this->common().targetVectors());
@@ -401,7 +401,7 @@ private:
 			SizeType p = this->leftRightSuper().super().findPartitionNumber(phi.offset(i0));
 			VectorType xi(sv.size(),0),xr(sv.size(),0);
 
-			if (tstStruct_.algorithm() == TargettingParamsType::KRYLOV) {
+			if (tstStruct_.algorithm() == TargetParamsType::KRYLOV) {
 				computeXiAndXrKrylov(xi,xr,phi,i0,V[i],T[i],eigs[i],steps[i]);
 			} else {
 				computeXiAndXrIndirect(xi,xr,sv,p);
@@ -597,7 +597,7 @@ private:
 		gsWeight_ = 1.0-weight_[0];
 	}
 
-	const TargettingParamsType& tstStruct_;
+	const TargetParamsType& tstStruct_;
 	InputValidatorType& ioIn_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;

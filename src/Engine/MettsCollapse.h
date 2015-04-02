@@ -91,7 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template<typename VectorWithOffsetType,
          typename MettsStochasticsType,
-         typename TargettingParamsType>
+         typename TargetParamsType>
 class MettsCollapse  {
 
 	typedef typename VectorWithOffsetType::VectorType VectorType;
@@ -115,7 +115,7 @@ public:
 
 	MettsCollapse(const MettsStochasticsType& mettsStochastics,
 	              const LeftRightSuperType& lrs,
-	              const TargettingParamsType& targetParams)
+	              const TargetParamsType& targetParams)
 	    : mettsStochastics_(mettsStochastics),
 	      lrs_(lrs),
 	      rng_(targetParams.rngSeed),
@@ -583,7 +583,7 @@ private:
 	const MettsStochasticsType& mettsStochastics_;
 	const LeftRightSuperType& lrs_;
 	mutable RngType rng_;
-	const TargettingParamsType& targetParams_;
+	const TargetParamsType& targetParams_;
 	PsimagLite::ProgressIndicator progress_;
 	SizeType prevDirection_;
 	MatrixType collapseBasis_;

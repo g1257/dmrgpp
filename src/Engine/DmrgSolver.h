@@ -113,7 +113,7 @@ public:
 	typedef typename MyBasis::BasisDataType BasisDataType;
 	typedef typename TargettingType::TargetVectorType TargetVectorType;
 	typedef typename TargetVectorType::value_type DensityMatrixElementType;
-	typedef typename TargettingType::TargettingParamsType TargettingParamsType;
+	typedef typename TargettingType::TargetParamsType TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename ModelType::SolverParamsType ParametersType;
 	typedef Diagonalization<ParametersType,TargettingType> DiagonalizationType;
@@ -134,7 +134,7 @@ public:
 	enum {SAVE_ALL=MyBasis::SAVE_ALL, SAVE_PARTIAL=MyBasis::SAVE_PARTIAL};
 
 	DmrgSolver(ModelType const &model,
-	           TargettingParamsType& targetStruct,
+	           TargetParamsType& targetStruct,
 	           InputValidatorType& ioIn)
 	    : model_(model),
 	      parameters_(model_.params()),
@@ -622,7 +622,7 @@ private:
 
 	const ModelType& model_;
 	const ParametersType& parameters_;
-	const TargettingParamsType& targetStruct_;
+	const TargetParamsType& targetStruct_;
 	InputValidatorType& ioIn_;
 	PsimagLite::ApplicationInfo appInfo_;
 	bool verbose_;

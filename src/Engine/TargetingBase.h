@@ -114,9 +114,9 @@ public:
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef TargetParamsBase<ModelType> TargettingParamsType;
+	typedef TargetParamsBase<ModelType> TargetParamsType;
 	typedef TargetHelper<ModelType,
-	                     TargettingParamsType,
+	                     TargetParamsType,
 	                     WaveFunctionTransfType> TargetHelperType;
 	typedef TargetingCommon<TargetHelperType,
 	                        VectorWithOffsetType,
@@ -129,7 +129,7 @@ public:
 
 	TargetingBase(const LeftRightSuperType& lrs,
 	              const ModelType& model,
-	              const TargettingParamsType& tstStruct,
+	              const TargetParamsType& tstStruct,
 	              const WaveFunctionTransfType& wft,
 	              SizeType targets,
 	              SizeType indexNoAdvance)
@@ -230,7 +230,7 @@ private:
 
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
-	const TargettingParamsType& tstStruct_;
+	const TargetParamsType& tstStruct_;
 	TargetingCommonType commonTargetting_;
 };     //class TargetingBase
 

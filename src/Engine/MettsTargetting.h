@@ -126,7 +126,7 @@ public:
 	LanczosSolverType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef MettsParams<ModelType> TargettingParamsType;
+	typedef MettsParams<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef PsimagLite::Matrix<RealType> MatrixType;
 	typedef BlockMatrix<MatrixType> BlockMatrixType;
@@ -138,16 +138,16 @@ public:
 	typedef typename MettsStochasticsType::PairType PairType;
 	typedef MettsCollapse<VectorWithOffsetType,
 	                      MettsStochasticsType,
-	                      TargettingParamsType> MettsCollapseType;
+	                      TargetParamsType> MettsCollapseType;
 	typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
-	typedef TimeVectorsBase<TargettingParamsType,ModelType,WaveFunctionTransfType,
+	typedef TimeVectorsBase<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsBaseType;
-	typedef TimeVectorsKrylov<TargettingParamsType,ModelType,WaveFunctionTransfType,
+	typedef TimeVectorsKrylov<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsKrylovType;
-	typedef TimeVectorsRungeKutta<TargettingParamsType,ModelType,WaveFunctionTransfType,
+	typedef TimeVectorsRungeKutta<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsRungeKuttaType;
-	typedef TimeVectorsSuzukiTrotter<TargettingParamsType,ModelType,WaveFunctionTransfType,
+	typedef TimeVectorsSuzukiTrotter<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
@@ -162,7 +162,7 @@ public:
 
 	MettsTargetting(const LeftRightSuperType& lrs,
 	                const ModelType& model,
-	                const TargettingParamsType& mettsStruct,
+	                const TargetParamsType& mettsStruct,
 	                const WaveFunctionTransfType& wft,
 	                const SizeType& quantumSector,
 	                InputValidatorType& ioIn)
@@ -207,7 +207,7 @@ public:
 		PsimagLite::String s (__FILE__);
 		s += " Unknown algorithm\n";
 		switch (mettsStruct_.algorithm()) {
-		case TargettingParamsType::KRYLOV:
+		case TargetParamsType::KRYLOV:
 			timeVectorsBase_ = new TimeVectorsKrylovType(currentBeta_,
 			                                             mettsStruct_,
 			                                             betas_,
@@ -218,7 +218,7 @@ public:
 			                                             0,
 			                                             ioIn_);
 			break;
-		case TargettingParamsType::RUNGE_KUTTA:
+		case TargetParamsType::RUNGE_KUTTA:
 			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentBeta_,
 			                                                 mettsStruct_,
 			                                                 betas_,
@@ -228,7 +228,7 @@ public:
 			                                                 lrs_,
 			                                                 0);
 			break;
-		case TargettingParamsType::SUZUKI_TROTTER:
+		case TargetParamsType::SUZUKI_TROTTER:
 			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(currentBeta_,
 			                                                    mettsStruct_,
 			                                                    betas_,
@@ -1170,7 +1170,7 @@ private:
 	SizeType stage_;
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
-	const TargettingParamsType& mettsStruct_;
+	const TargetParamsType& mettsStruct_;
 	const WaveFunctionTransfType& wft_;
 	const SizeType& quantumSector_;
 	InputValidatorType& ioIn_;

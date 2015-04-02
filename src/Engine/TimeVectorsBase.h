@@ -84,14 +84,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename TargettingParamsType,
+template<typename TargetParamsType,
 		 typename ModelType,
 		 typename WaveFunctionTransfType,
 		 typename LanczosSolverType,
 		 typename VectorWithOffsetType>
 class TimeVectorsBase  {
 
-	typedef typename TargettingParamsType::RealType RealType;
+	typedef typename TargetParamsType::RealType RealType;
 
 public:
 

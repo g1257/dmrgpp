@@ -118,14 +118,14 @@ public:
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef TargetParamsCorrection<ModelType> TargettingParamsType;
+	typedef TargetParamsCorrection<ModelType> TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	enum {DISABLED,ENABLED};
 
 	TargetingCorrection(const LeftRightSuperType& lrs,
 	                    const ModelType& model,
-	                    const TargettingParamsType& correctionStruct,
+	                    const TargetParamsType& correctionStruct,
 	                    const WaveFunctionTransfType& wft,
 	                    const SizeType&,
 	                    InputValidatorType&)
@@ -193,7 +193,7 @@ public:
 
 private:
 
-	const TargettingParamsType& correctionStruct_;
+	const TargetParamsType& correctionStruct_;
 	PsimagLite::ProgressIndicator progress_;
 };     //class TargetingCorrection
 

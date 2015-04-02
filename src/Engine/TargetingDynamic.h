@@ -120,7 +120,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef TargetParamsDynamic<ModelType> TargettingParamsType;
+	typedef TargetParamsDynamic<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
@@ -144,12 +144,12 @@ public:
 		INFINITE=WaveFunctionTransfType::INFINITE
 	};
 
-	static SizeType const PRODUCT = TargettingParamsType::PRODUCT;
-	static SizeType const SUM = TargettingParamsType::SUM;
+	static SizeType const PRODUCT = TargetParamsType::PRODUCT;
+	static SizeType const SUM = TargetParamsType::SUM;
 
 	TargetingDynamic(const LeftRightSuperType& lrs,
 	                 const ModelType& model,
-	                 const TargettingParamsType& tstStruct,
+	                 const TargetParamsType& tstStruct,
 	                 const WaveFunctionTransfType& wft,
 	                 const SizeType&,
 	                 InputValidatorType& io)
@@ -348,7 +348,7 @@ private:
 		return sum;
 	}
 
-	const TargettingParamsType& tstStruct_;
+	const TargetParamsType& tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
