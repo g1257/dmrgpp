@@ -287,6 +287,12 @@ void mainLoop0(InputNgType::Readable& io,
 		return;
 	}
 
+	if (targetting=="TargetingAncilla") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingTimeStep,
+		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+		return;
+	}
+
 	mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,TargetingGroundState,
 	         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 }
