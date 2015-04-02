@@ -10,7 +10,7 @@ Let $diff = $resultsDir/e$testNum.diff
 Let $output = $srcDir/data$testNum.txt
 CallOnce dmrg
 Grep Energy $output > $result
-Diff $result $oracle > $diff
+SmartDiff $result $oracle > $diff
 
 [observables]
 Let $input = $inputsDir/input$testNum.inp
