@@ -50,6 +50,7 @@ use strict;
 # use Cwd 'abs_path';
 package TestSuiteGlobals;
 use Getopt::Long;
+use Digest::MD5 qw(md5 md5_hex md5_base64);
 
 my ($testDir, $srcDir,$inputsDir,$oraclesDir,$resultsDir,$specFile);
 
@@ -119,8 +120,51 @@ sub hookDiff
 		my $subr = (caller(0))[3];
 		die "$subr: $@";
 	}
+}
 
-#	print "[$analysis]:Diff command was successful.\n" if($verbose);
+sub hookSmartDiff
+{
+	my ($analysis, $arg) = @_;
+
+	my @temp = split/ /,$arg;
+	die "$0: hookSmartDiff $arg\n" unless (scalar(@temp) == 4);
+	die "$0: hookSmartDiff $arg\n" unless ($temp[2] eq ">");
+	my ($file1,$file2,$ignore,$file3) = @temp;
+	open(FILE1,"$file1") or die "$0: Cannot open $file1\n";
+	open(FILE2,"$file2") or die "$0: Cannot open $file2\n";
+	open(FOUT,">$file3") or die "$0: Cannot open > $file3\n";
+	my $eps = 1e-6;
+	my $maxDiff = 0;
+	while (1) {
+		my $line1 = <FILE1>;
+		my $line2 = <FILE2>;
+		last if (!$line1 || !$line2);
+	
+		my @temp1 = split/=/,$line1;
+		(scalar(@temp1) == 2) or next;
+		my @temp2 = split/=/,$line2;
+		(scalar(@temp2) == 2) or next;
+		if ($temp1[0] ne $temp1[0]) {
+			print FOUT "$0: Mismatch $line1 $line2";
+		}
+
+		my $d = abs($temp1[1] - $temp2[1]);
+		if ($d>$maxDiff) {
+			$maxDiff = $d;
+		}
+	}
+
+	if ($maxDiff > $eps) {
+		print FOUT "$0: MaxDifference $maxDiff > $eps\n";
+	}
+
+	if (<FILE1> || <FILE2>) {
+		print FOUT "$0: $file1 and $file2 have different number of lines\n";
+	}
+
+	close(FOUT);
+	close(FILE1);
+	close(FILE2);	
 }
 
 #Hook routine for the 'grep' command
@@ -140,11 +184,10 @@ sub hookGrep
 #Returns the hash key
 sub getSpecKey
 {
-	my $specKey = substr(`md5sum ../TestSuite/inputs/$TestSuiteGlobals::specFile`,0,8);
-	$specKey .= substr(`md5sum ../src/Makefile`,0,4);
-	$specKey .= substr(`git rev-parse HEAD`,0,4);
-	
-	return $specKey;
+	my $buffer = `cat ../TestSuite/inputs/$TestSuiteGlobals::specFile`;
+	$buffer .= `cat ../src/Makefile`;
+	$buffer .= `git rev-parse HEAD`;
+	return md5_hex($buffer);
 }
 
 #Displays available tests until user selects a valid one
@@ -179,11 +222,6 @@ sub getAvailableTests
 
 	my @testsArray = split(/ /,$available);	
 	my $temp;
-	
-	for(my $i = 0;$i <= $#testsArray; $i++) {	
-		$temp = $testsArray[$i] + 100;
-		$available .= " $temp";		
-	}
 
 	return $available;
 }
@@ -422,7 +460,7 @@ sub commandsInterpreter
 	#Routines, in conjunction with meta language keywords, can be added to expand the runable commands in the processing library
 	#The commands will be executed following the order below from left to right
 	my @metaLang = ("Grep", "Execute", "Gprof", "CombineContinuedFraction","ComputeContinuedFraction",
-	                "MettsAverage","TimeEvolution","Diff","Xmgrace");
+	                "MettsAverage","TimeEvolution","Diff","Xmgrace","SmartDiff");
 	my @arrangeCommands;
 	
 	foreach my $word(@metaLang) {
