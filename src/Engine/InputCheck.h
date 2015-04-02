@@ -105,12 +105,11 @@ public:
 			if (vec.size()!=2) return error1("JMVALUES",line);
 			return true;
 		} else if (label=="RAW_MATRIX") {
-			SizeType row = atoi(vec[0].c_str());
-			SizeType col = atoi(vec[1].c_str());
-			SizeType n = row*col;
-			if (vec.size()!=n+2) return error1("RAW_MATRIX",line);
+			if (!checkForMatrix(vec)) return error1(label,line);
 			return true;
 		} else if (label=="Connectors") {
+			if (!checkForMatrix(vec) && !checkForVector(vec))
+				return error1(label,line);
 			return true;
 		} else if (label=="MagneticField") {
 			return true;
@@ -232,6 +231,22 @@ public:
 	}
 
 private:
+
+	bool checkForVector(const PsimagLite::Vector<PsimagLite::String>::Type& vec) const
+	{
+		if (vec.size() == 0) return false;
+		SizeType n = atoi(vec[0].c_str());
+		return (vec.size() == n+1);
+	}
+
+	bool checkForMatrix(const PsimagLite::Vector<PsimagLite::String>::Type& vec) const
+	{
+		if (vec.size() < 2) return false;
+		SizeType row = atoi(vec[0].c_str());
+		SizeType col = atoi(vec[1].c_str());
+		SizeType n = row*col;
+		return (vec.size() == n+2);
+	}
 
 	bool error1(const PsimagLite::String& message,SizeType line) const
 	{
