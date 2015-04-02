@@ -187,7 +187,8 @@ sub getSpecKey
 	my $buffer = `cat ../TestSuite/inputs/$TestSuiteGlobals::specFile`;
 	$buffer .= `cat ../src/Makefile`;
 	$buffer .= `git rev-parse HEAD`;
-	return md5_hex($buffer);
+	my $tmp = md5_hex($buffer);
+	return substr($tmp,0,8);
 }
 
 #Displays available tests until user selects a valid one
