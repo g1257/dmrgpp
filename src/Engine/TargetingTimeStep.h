@@ -105,7 +105,6 @@ public:
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
-	typedef std::complex<RealType> ComplexType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -113,18 +112,17 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 	typedef typename VectorWithOffsetType::VectorType TargetVectorType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef LanczosSolverTemplate<ParametersForSolverType,
 	                              MatrixVectorType,
 	                              TargetVectorType> LanczosSolverType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorType;
-	typedef PsimagLite::Matrix<ComplexType> ComplexMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef TargetParamsTimeStep<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
-	typedef BlockMatrix<ComplexMatrixType> ComplexBlockMatrixType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
@@ -326,8 +324,11 @@ private:
 		PsimagLite::OstringStream msg;
 		msg<<"Hamiltonian average at time="<<this->common().currentTime();
 		msg<<" for target="<<whatTarget;
-		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<(phi2*x);
-		msg<<" <phi(t)|phi(t)>="<<(phi2*phi2);
+		ComplexOrRealType numerator = phi2*x;
+		ComplexOrRealType den = phi2*phi2;
+		ComplexOrRealType division = (std::norm(den)<1e-10) ? 0 : numerator/den;
+		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<numerator;
+		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
 		progress_.printline(msg,std::cout);
 	}
 
