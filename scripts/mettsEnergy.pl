@@ -3,8 +3,10 @@
 use strict;
 use warnings;
 
-my ($beta)=@ARGV;
-defined($beta) or die "USAGE: $0 beta < file\n";
+my ($beta,$betaLabel)=@ARGV;
+defined($beta) or die "USAGE: $0 beta [betaLabel] < file\n";
+
+defined($betaLabel) or $betaLabel = "beta";
 
 my $minSite = 1;
 my $minMeas = 0;
@@ -24,7 +26,7 @@ while (<STDIN>) {
 		$meas++ if ($site==$minSite);
 	}
 
-	if (/Hamiltonian average at beta\=([^ ]+) for target\=0 /) {
+	if (/Hamiltonian average at $betaLabel\=([^ ]+) for target\=0 /) {
 		next unless ($1==$beta);
 		next unless ($meas>$minMeas);
 		next unless ($site==$minSite);
@@ -37,7 +39,7 @@ while (<STDIN>) {
 		}
 	}
 
-	if (/Hamiltonian average at beta\=([^ ]+) for target\=1 /) {
+	if (/Hamiltonian average at $betaLabel\=([^ ]+) for target\=1 /) {
 		next unless ($flag);
 		$flag=0;
 		$sum += $sum2;

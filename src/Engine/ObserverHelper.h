@@ -215,6 +215,7 @@ namespace Dmrg {
 
 		RealType time(SizeType threadId) const
 		{
+			if (timeSerializerV_.size() == 0) return 0.0;
 			checkPos(threadId);
 			return timeSerializerV_[currentPos_[threadId]].time();
 		}
