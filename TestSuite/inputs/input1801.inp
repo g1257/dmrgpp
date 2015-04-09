@@ -24,7 +24,7 @@ OutputFile=data1801.txt
 InfiniteLoopKeptStates=64
 FiniteLoops 4 
 
-10 100 0 -10 100 0 
+5 100 0 -10 100 0 
 
 10 100 0 -10 100 0 
 
@@ -33,7 +33,7 @@ RepeatFiniteLoopsTimes=100
 
 TargetElectronsTotal=12
 TargetSzPlusConst=6
-RestartFilename=dataEntangler.txt
+RestartFilename=data1800.txt
 
 TSPTau=0.1
 TSPTimeSteps=5
