@@ -64,6 +64,9 @@ hence non-trivial.
 1201) Tj 1 orb with hopping = 1 and J = 0.3 and W = -0.4 dens = 0.25
 1500) Figure 1 of METTS paper
 #1550) Same as 1500 with Suzuki-Trotter
+1800 Ancilla: Entangler Hamiltonian Heisenberg 6 sites
+1801 Ancilla: Real      Hamiltonian Heisenberg 6 sites
+#1802 to 1999 for Ancilla tests
 #2000) First Suzuki-Trotter test. The gs is time-evolved.
 #2001) Tests time evolution with 3 operators, which is more than the holon-doublon case, and
 #hence non-trivial. (Suzuki-Trotter)
