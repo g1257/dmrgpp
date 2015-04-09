@@ -1,0 +1,28 @@
+TotalNumberOfSites=12
+NumberOfTerms=2
+
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=none
+Connectors 10     0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+Connectors 6      -10 -10 -10 -10 -10 -10
+LadderLeg=2
+
+DegreesOfFreedom=1
+GeometryKind=ladder
+GeometryOptions=ConstantValues
+Connectors 1 0.0 
+Connectors 1 0.0
+LadderLeg=2
+
+Model=Heisenberg
+HeisenbergTwiceS=1
+
+SolverOptions=none
+Version=version
+OutputFile=data1800.txt
+InfiniteLoopKeptStates=60
+FiniteLoops 4  5 100 0 -5 100 0 -5 100 0 5 100 0 
+TargetElectronsTotal=12
+TargetSzPlusConst=6
+
