@@ -568,8 +568,7 @@ private:
 			}
 		}
 
-		RealType norma = std::norm(vec1);
-		return sum/norma;
+		return resultDivided(sum,vec1);
 	}
 
 	FieldType bracketEnviron_(const SparseMatrixType& A,
@@ -605,8 +604,8 @@ private:
 				}
 			}
 		}
-		RealType norma = std::norm(vec1);
-		return sum/norma;
+
+		return resultDivided(sum,vec1);
 	}
 
 	FieldType bracketRightCorner_(const SparseMatrixType& A,
@@ -678,8 +677,7 @@ private:
 			}
 		}
 
-		RealType norma = std::norm(vec1);
-		return sum/norma;
+		return resultDivided(sum,vec1);
 	}
 
 	FieldType brLftCrnrEnviron_(const SparseMatrixType& Acrs,
@@ -738,8 +736,7 @@ private:
 			}
 		}
 
-		RealType norma = std::norm(vec1);
-		return sum/norma;
+		return resultDivided(sum,vec1);
 	}
 
 	FieldType bracketRightCorner_(const SparseMatrixType& A1,
@@ -751,8 +748,6 @@ private:
 	                             SizeType threadId)
 	{
 		if (helper_.direction(threadId)!=EXPAND_SYSTEM) return 0;
-
-		RealType norma = std::norm(vec1);
 
 		if (verbose_)
 			std::cerr<<"SE.size="<<helper_.leftRightSuper(threadId).super().size()<<"\n";
@@ -812,7 +807,16 @@ private:
 				}
 			}
 		}
-		return sum/norma;
+
+		return resultDivided(sum,vec1);
+	}
+
+	FieldType resultDivided(FieldType sum, const VectorWithOffsetType& vec) const
+	{
+		FieldType tmp = vec*vec;
+		RealType norma2 = std::real(tmp);
+		assert(fabs(norma2)>1e-10 && fabs(std::imag(tmp))<1e-6);
+		return sum/norma2;
 	}
 
 	ObserverHelperType& helper_; //<-- NB: We are not the owner
