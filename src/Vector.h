@@ -52,6 +52,16 @@ inline X operator*(const std::vector<X,A>& v,const std::vector<X,A>& w)
 	return result;
 }
 
+template<typename A>
+inline bool operator==(const std::vector<SizeType,A>& v, const std::vector<SizeType,A>& w)
+{
+	if (v.size() != w.size()) return false;
+	for (SizeType i = 0; i < v.size(); ++i)
+		if (v[i] != w[i]) return false;
+
+	return true;
+}
+
 template<typename T1,typename T2,typename A,typename AA>
 inline std::vector<T2,A> operator*(const std::vector<std::vector<T1,A>,AA>& v1,
                                  const std::vector<T2,A>& v2)
@@ -91,7 +101,7 @@ template<typename T,typename A>
 T scalarProduct(const std::vector<T,A>& v1, const std::vector<T,A>& v2)
 {
 	T result = 0.0;
-	for(SizeType i=0; i < v2.size(); i++)
+	for (SizeType i=0; i < v2.size(); i++)
 		result += std::conj(v1[i]) * v2[i];
 	return result;
 }
