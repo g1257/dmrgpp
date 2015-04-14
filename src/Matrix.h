@@ -22,7 +22,7 @@ Please see full open source license included in file LICENSE.
 #include "Vector.h"
 #include <stdexcept>
 #include <iostream>
-#include "Lapack.h"
+#include "LapackExtra.h"
 #include "LAPACK.h"
 #include "Complex.h"
 #include <cassert>
