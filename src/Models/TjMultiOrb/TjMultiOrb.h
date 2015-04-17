@@ -128,8 +128,8 @@ public:
 	enum {SPIN_UP, SPIN_DOWN};
 
 	TjMultiOrb(const SolverParamsType& solverParams,
-	       InputValidatorType& io,
-	       GeometryType const &geometry)
+	           InputValidatorType& io,
+	           GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
@@ -269,8 +269,8 @@ public:
 	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
 	 *unmangled (natural) basis of one-site */
 	MatrixType naturalOperator(const PsimagLite::String& what,
-	                                                      SizeType site,
-	                                                      SizeType dof) const
+	                           SizeType site,
+	                           SizeType dof) const
 	{
 		BlockType block;
 		block.resize(1);

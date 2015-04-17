@@ -79,7 +79,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_LINK_PROD_TJ_MULTIORB_H
 #define DMRG_LINK_PROD_TJ_MULTIORB_H
 
-
 namespace Dmrg {
 
 template<typename ModelHelperType>
@@ -95,15 +94,15 @@ public:
 
 	template<typename SomeStructType>
 	static void setLinkData(SizeType term,
-							SizeType dofs,
-							bool isSu2,
-							SizeType& fermionOrBoson,
-							PairType& ops,
-							std::pair<char,char>& mods,
-							SizeType& angularMomentum,
-							RealType& angularFactor,
-							SizeType& category,
-							const SomeStructType&)
+	                        SizeType dofs,
+	                        bool isSu2,
+	                        SizeType& fermionOrBoson,
+	                        PairType& ops,
+	                        std::pair<char,char>& mods,
+	                        SizeType& angularMomentum,
+	                        RealType& angularFactor,
+	                        SizeType& category,
+	                        const SomeStructType&)
 	{
 		char tmp = mods.first;
 		if (term==TERM_CICJ) {
@@ -165,7 +164,11 @@ public:
 	}
 
 	template<typename SomeStructType>
-	static void valueModifier(SparseElementType& value,SizeType term,SizeType dofs,bool isSu2,const SomeStructType&)
+	static void valueModifier(SparseElementType& value,
+	                          SizeType term,
+	                          SizeType dofs,
+	                          bool isSu2,
+	                          const SomeStructType&)
 	{
 		if (term==TERM_CICJ) return;
 
@@ -196,7 +199,8 @@ public:
 	}
 
 	template<typename SomeStructType>
-	static std::pair<SizeType,SizeType> connectorDofs(SizeType,SizeType,const SomeStructType&)
+	static std::pair<SizeType,SizeType> connectorDofs(SizeType,SizeType,
+	                                                  const SomeStructType&)
 	{
 		return PairType(0,0); // no orbital and no dependence on spin
 	}
@@ -217,3 +221,4 @@ private:
 } // namespace Dmrg
 /*@}*/
 #endif
+
