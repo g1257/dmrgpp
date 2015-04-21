@@ -131,6 +131,15 @@ public:
 		a |= mask;
 	}
 
+	// Destroy electron with internal dof  "sigma" on site "j" in binary number "a"
+	static void destroy(Word &a,SizeType j,SizeType sigma)
+	{
+		SizeType dofs = 2*orbitals_;
+		SizeType k=dofs*j;
+		Word mask=(1<<(k+sigma));
+		a |= (~mask);
+	}
+
 	// Is there an electron with internal dof  "sigma" on site "i" in binary number "ket"?
 	static bool isNonZero(Word const &ket,SizeType i,SizeType sigma)
 	{
@@ -211,6 +220,6 @@ template<typename Word>
 SizeType HilbertSpaceFeAs<Word>::orbitals_ = 2;
 } // namespace Dmrg
 
-/*@}*/	
+/*@}*/
 #endif
 

@@ -20,6 +20,9 @@ LDFLAGS += -lpthread
 # Enable pthreads
 CPPFLAGS += -DUSE_PTHREADS
 
+# Enable warnings and treat warnings as errors
+CPPFLAGS += -Wall -Werror
+
 # This disables debugging
 CPPFLAGS += -DNDEBUG
 

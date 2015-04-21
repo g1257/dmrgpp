@@ -191,8 +191,10 @@ public:
 				creationMatrix.push_back(myOp);
 			}
 
+			SizeType orbital = 0;
+
 			// Set the operators S^+_i in the natural basis
-			tmpMatrix=findSplusMatrices(i,natBasis);
+			tmpMatrix=findSplusMatrices(i,orbital,natBasis);
 
 			typename OperatorType::Su2RelatedType su2related;
 
@@ -200,7 +202,7 @@ public:
 			creationMatrix.push_back(myOp);
 
 			// Set the operators S^z_i in the natural basis
-			tmpMatrix = findSzMatrices(i,natBasis);
+			tmpMatrix = findSzMatrices(i,orbital,natBasis);
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,1,PairType(0,0),1.0,su2related2);
 			creationMatrix.push_back(myOp2);
@@ -401,6 +403,7 @@ private:
 
 	//! Find S^+_i in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(int i,
+	                                   SizeType orb,
 	                                   const VectorHilbertStateType& natBasis) const
 	{
 		HilbertStateType bra,ket;
@@ -411,8 +414,8 @@ private:
 			bra=ket=natBasis[ii];
 			if (HilbertSpaceType::get(ket,i)==2) {
 				// it is a down electron, then flip it:
-				HilbertSpaceType::destroy(bra,i,SPIN_DOWN*NUMBER_OF_ORBITALS);
-				HilbertSpaceType::create(bra,i,SPIN_UP*NUMBER_OF_ORBITALS);
+				HilbertSpaceType::destroy(bra,i,orb + SPIN_DOWN*NUMBER_OF_ORBITALS);
+				HilbertSpaceType::create(bra,i,orb + SPIN_UP*NUMBER_OF_ORBITALS);
 				int jj = PsimagLite::isInVector(natBasis,bra);
 				assert(jj>=0);
 				cm(ii,jj)=1.0;
@@ -425,6 +428,7 @@ private:
 
 	//! Find S^z_i in the natural basis natBasis
 	SparseMatrixType findSzMatrices(int i,
+	                                SizeType orb,
 	                                const VectorHilbertStateType& natBasis) const
 	{
 		HilbertStateType ket;
@@ -434,9 +438,9 @@ private:
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			ket=natBasis[ii];
 			RealType value = 0.0;
-			if (HilbertSpaceType::isNonZero(ket,i,SPIN_UP*NUMBER_OF_ORBITALS))
+			if (HilbertSpaceType::isNonZero(ket,i,orb + SPIN_UP*NUMBER_OF_ORBITALS))
 				value += 1.0;
-			if (HilbertSpaceType::isNonZero(ket,i,SPIN_DOWN*NUMBER_OF_ORBITALS))
+			if (HilbertSpaceType::isNonZero(ket,i,orb + SPIN_DOWN*NUMBER_OF_ORBITALS))
 				value -= 1.0;
 
 			cm(ii,ii)=0.5*value;
