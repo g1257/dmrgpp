@@ -136,7 +136,11 @@ public:
 		throw RuntimeError("storageIndex: wrong mode\n");
 	}
 
+#ifndef USE_MPI
+	Concurrency(int*, char ***,size_t nthreads)
+#else
 	Concurrency(int* argc, char *** argv,size_t nthreads)
+#endif
 	{
 		FloatingPoint::enableExcept();
 		npthreads = nthreads;

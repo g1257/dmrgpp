@@ -131,7 +131,7 @@ public:
 		return 0;
 	}
 
-	bool fringe(SizeType i,SizeType smax,SizeType emin) const
+	bool fringe(SizeType,SizeType,SizeType) const
 	{
 		return true;
 	}
