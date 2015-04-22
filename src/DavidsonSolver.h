@@ -89,7 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Matrix.h"
 #include "Random48.h"
-#include "String.h"
 
 namespace PsimagLite {
 

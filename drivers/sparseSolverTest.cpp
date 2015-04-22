@@ -10,7 +10,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -22,7 +22,6 @@ Please see full open source license included in file LICENSE.
 #include "DavidsonSolver.h"
 #include "CrsMatrix.h"
 #include "Random48.h"
-#include "String.h"
 #include "ParametersForSolver.h"
 
 using namespace PsimagLite;
@@ -101,7 +100,7 @@ int main(int argc,char *argv[])
 			if (seenThisColumn[col]) continue;
 			seenThisColumn[col]=true;
 			ComplexOrRealType val = random()*maxValue;
-		
+
 			sparse.pushValue(val);
 			sparse.pushCol(col);
 			counter++;

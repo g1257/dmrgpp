@@ -41,7 +41,6 @@ Please see full open source license included in file LICENSE.
 #include "PlotParams.h"
 #include "ChebyshevFunction.h"
 #include <cassert>
-#include "String.h"
 
 namespace PsimagLite {
 

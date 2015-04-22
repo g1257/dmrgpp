@@ -3,21 +3,19 @@
 /** \ingroup JsonParser */
 /*@{*/
 // Author: Michael S. Summers (ORNL)
-/*! \file ActionsMixin.h  
+/*! \file ActionsMixin.h
  *
- *  
+ *
  *
  */
 
 #ifndef  JsonParser_ActionsMixin_H
 #define  JsonParser_ActionsMixin_H
 
-#include "String.h"
-
 namespace JsonParser {
-  
+
   class ActionsMixin {
-    
+
   public:
 
     /* The state and action codes.  */
@@ -42,9 +40,9 @@ namespace JsonParser {
       Abort,         /* Abort Parsing            */
       NR_ACTIONS
     } ActionType;
-    
+
     static PsimagLite::String  actionName(ActionType action) {
-      
+
       switch (action) {
       case Consume: return " Consume the character    ";
       case BeginObject: return " BeginObject              ";

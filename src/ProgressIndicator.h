@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include "String.h"
 #include "Concurrency.h"
 #include "MemoryUsage.h"
 #include <sys/types.h>

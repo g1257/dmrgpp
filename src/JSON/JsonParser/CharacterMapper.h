@@ -3,9 +3,9 @@
 /** \ingroup JsonParser */
 /*@{*/
 
-/*! \file CharacterMapper.h  
+/*! \file CharacterMapper.h
  *
- *  
+ *
  *
  */
 
@@ -13,7 +13,6 @@
 #define  JsonParser_CharacterMapper_H
 
 #include <wchar.h>
-#include "String.h"
 #include <stdexcept>
 
 namespace JsonParser {
@@ -61,7 +60,7 @@ namespace JsonParser {
       C_ABCDF,  /* ABCDF */
       C_E,      /* E */
       C_ETC,    /* everything else */
-      C_STAR,   /* * */   
+      C_STAR,   /* * */
       C_EOF,    /* end of file */
       C_ERR,    /* error */
       NR_CLASSES
@@ -126,23 +125,23 @@ namespace JsonParser {
 	C_ERR,     C_WHITE, C_WHITE,     C_ERR,     C_ERR,     C_WHITE,   C_ERR,    C_ERR,
 	C_ERR,     C_ERR,     C_ERR,     C_ERR,     C_ERR,     C_ERR,     C_ERR,    C_ERR,
 	C_ERR,     C_ERR,     C_ERR,     C_ERR,     C_ERR,     C_ERR,     C_ERR,    C_ERR,
-	
+
 	C_SPACE, C_ETC,   C_QUOTE, C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,
 	C_LPARN, C_RPARN, C_STAR,   C_PLUS,  C_COMMA, C_MINUS, C_POINT, C_SLASH,
 	C_ZERO,  C_DIGIT, C_DIGIT, C_DIGIT, C_DIGIT, C_DIGIT, C_DIGIT, C_DIGIT,
 	C_DIGIT, C_DIGIT, C_COLON, C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,
-	
+
 	C_ETC,   C_ABCDF, C_ABCDF, C_ABCDF, C_ABCDF, C_E,     C_ABCDF, C_ETC,
 	C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,
 	C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_ETC,
 	C_ETC,   C_ETC,   C_ETC,   C_LSQRB, C_BACKS, C_RSQRB, C_ETC,   C_ETC,
-	
+
 	C_ETC,   C_LOW_A, C_LOW_B, C_LOW_C, C_LOW_D, C_LOW_E, C_LOW_F, C_ETC,
 	C_ETC,   C_ETC,   C_ETC,   C_ETC,   C_LOW_L, C_ETC,   C_LOW_N, C_ETC,
 	C_ETC,   C_ETC,   C_LOW_R, C_LOW_S, C_LOW_T, C_LOW_U, C_ETC,   C_ETC,
 	C_ETC,   C_LOW_Y, C_ETC,   C_LCURB, C_ETC,   C_RCURB, C_ETC,   C_ETC
       };
-      
+
       CharacterClass& result = ascii_class[wctob(widec)];
 
       if (result == C_ERR) {
@@ -151,7 +150,7 @@ namespace JsonParser {
 	std::wstring m(msg.str());
 	throw PsimagLite::LogicError(PsimagLite::String(m.begin(), m.end()));
       }
-      
+
       return result;
     }
 
@@ -160,38 +159,38 @@ namespace JsonParser {
       if (nextClass == C_WHITE) return true;
       return false;
     }
-    
+
     static bool foo() { return false;}
 
     static bool is_legal_white_space(const std::wstring& s) {
 
       CharacterClass char_class;
       wchar_t c;
-      
-      if (s.size() == 0) 
+
+      if (s.size() == 0)
 	return false;
-      
+
       for (SizeType i=0; i< s.size(); i++) {
 	c = s[i];
-	if (c < 0 || c >= 128) 
+	if (c < 0 || c >= 128)
 	  return false;
       }
-     
+
       char_class = wcharToClass(c);
-      
-      if (char_class != C_SPACE && 
-	  char_class != C_WHITE ) 
+
+      if (char_class != C_SPACE &&
+	  char_class != C_WHITE )
 	return false;
 
       return true;
     }
 
     //======================================================================
-    
+
     static wchar_t getEscapedCharacter(std::wistream& inputStream) {
-	
+
       wchar_t secondChar = inputStream.get();
-      
+
       switch(secondChar) {
       case L'b':
 	return L'\b';
@@ -216,11 +215,11 @@ namespace JsonParser {
 	throw PsimagLite::LogicError("JsonParser: Encountered an escapped character that was not recognized.");
       }
     }
-      
+
     //======================================================================
 
     static void skipWhiteAnd(std::wstring chars, std::wistream& inputStream) {
-      
+
       while(true) {
 
 	wchar_t        nextChar;
@@ -228,14 +227,14 @@ namespace JsonParser {
 	if (chars.find_first_of(nextChar) != std::wstring::npos  ||
 	    isWhiteSpace(wcharToClass(nextChar)) )
 	  continue;
-	
+
 	inputStream.unget();
 	return;
       }
     }
 
     //======================================================================
-    
+
   };
 
 } // end namespace JsonParser

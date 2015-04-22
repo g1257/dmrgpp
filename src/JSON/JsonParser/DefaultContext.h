@@ -16,7 +16,6 @@
 #include <iostream>
 #include <sstream>
 #include "assert.h"
-#include "String.h"
 
 namespace JsonParser {
 

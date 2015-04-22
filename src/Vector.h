@@ -31,7 +31,6 @@ Please see full open source license included in file LICENSE.
 #include <stdexcept>
 #include "Complex.h"
 #include "AllocatorCpu.h"
-#include "String.h"
 
 // temporary hack until Vector is used:
 namespace std {

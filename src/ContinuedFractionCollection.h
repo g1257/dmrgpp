@@ -32,7 +32,6 @@ Please see full open source license included in file LICENSE.
 #define CONTINUED_FRACTION_COLL_H
 #include <iostream>
 #include "TypeToString.h"
-#include "String.h"
 #include "ProgressIndicator.h"
 #include "FreqEnum.h"
 

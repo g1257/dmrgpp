@@ -3,16 +3,14 @@
 /** \ingroup JsonParser */
 /*@{*/
 
-/*! \file StatesMixin.h  
+/*! \file StatesMixin.h
  *
- *  
+ *
  *
  */
 
 #ifndef  JsonParser_StatesMixin_H
 #define  JsonParser_StatesMixin_H
-
-#include "String.h"
 
 namespace JsonParser {
 
@@ -50,7 +48,7 @@ namespace JsonParser {
       END,  /* END of Parsing               */
       NR_STATES
     } StateType;
-    
+
     static PsimagLite::String  name(StateType state) {
 
       switch (state) {

@@ -10,30 +10,27 @@
 #include <cstddef>
 #include <iostream>
 #include <iomanip>
-#include "String.h"
-
 #include "PSIMAGAssert.h"
 #include "BLAS.h"
 #include "LAPACK.h"
-//#include "Tag.h"
 
 namespace psimag {
 
-  
+
   /*! \brief Template functions for types that provide member functions:
-    
-      - n_row, 
-      - n_col, and 
+
+      - n_row,
+      - n_col, and
       - operator()
-      
-      and support:     
-      
+
+      and support:
+
       typedef typename MatrixLikeType::value_type FieldType;
-      
+
       \author Mike Summers
   */
   namespace MatrixLike {
-    
+
     template<typename VectorLikeType>
     class DoubleVectorWrap {
 
@@ -45,14 +42,14 @@ namespace psimag {
       typedef typename InnerVectorType::value_type  FieldType;
 
       const DoubleVectorType& doubleVector;
-      
+
       DoubleVectorWrap(DoubleVectorType& dv):
 	doubleVector(dv)
       {}
 
       SizeType n_row() const { return doubleVector.size(); }
       SizeType n_col() const { return doubleVector[0].size(); }
-      
+
       value_type operator() (SizeType i, SizeType j) {
 	return doubleVector[i][j];
       }
@@ -60,45 +57,45 @@ namespace psimag {
       const value_type operator() (SizeType i, SizeType j) const {
 	return doubleVector[i][j];
       }
-      
+
       SizeType size() const {return n_row()*n_col();}
-      
+
     };
 
     template<typename MatrixLikeType>
     void size(const MatrixLikeType& matrix)  {
       return matrix.n_row() * matrix.n_col();
     }
-    
+
     template<typename MatrixLikeType>
     void printRow(const MatrixLikeType& matrix,
 		  SizeType row,
 		  std::ostream& os,
 		  int width=13) {
       os << "[";
-      for(SizeType j=0; j<matrix.n_col(); j++) 
+      for(SizeType j=0; j<matrix.n_col(); j++)
 	os << " " << std::setw(width) << matrix(row,j) << ",";
       os << "]";
     }
-    
+
     template<typename MatrixLikeType>
     void print(const MatrixLikeType& matrix,
 	       std::ostream& os,
 	       int width=13) {
       for(SizeType i=0; i<matrix.n_row(); i++) {
-	for(SizeType j=0; j<matrix.n_col; j++) 
+	for(SizeType j=0; j<matrix.n_col; j++)
 	  os << " " << std::setw(width) << matrix(i,j);
 	os << "\n";
       }
     }
-    
+
     template<typename MatrixLikeType>
     void printList(const MatrixLikeType& matrix,
 		   std::ostream& os,
 		   int           width  = 13,
 		   PsimagLite::String   offset = "") {
       os << "[";
-      
+
       SizeType lastRow = matrix.n_row()-1;
       for(SizeType row=0; row<matrix.n_row(); row++) {
 	if(row!= 0)
@@ -111,7 +108,7 @@ namespace psimag {
       }
       os << "]";
     }
-    
+
     template<typename MatrixLikeType>
     void printArray(const MatrixLikeType& matrix,
 		    std::ostream& os,
@@ -120,7 +117,7 @@ namespace psimag {
       printList(matrix,os,width,"       ");
       os << ")";
     }
-    
+
     /** \ingroup ostream
      *
      * Output stream operator for SuperCrystal
@@ -136,15 +133,15 @@ namespace psimag {
       print(matrix,tag.content);
       return tag;
     }*/
-    
-    // ======================================================================  
-    
+
+    // ======================================================================
+
     template<typename MatrixLikeType>
     void toJSN(const MatrixLikeType& matrix,
-	       std::ostream& os, 
+	       std::ostream& os,
 	       PsimagLite::String title="MatrixLike",
 	       int width=13) {
-      
+
       os.precision(width);
       os << std::fixed;
       os << "{ \'tile\': \'"    << title        << "\', \n"
@@ -154,44 +151,44 @@ namespace psimag {
       printArray(matrix,os,width);
       os << "\n}\n";
     }
-    
-    // ======================================================================  
-    
+
+    // ======================================================================
+
     template<typename MatrixLikeType>
     void writeVTK(const MatrixLikeType& matrix,
 		  PsimagLite::String fileName,
 		  PsimagLite::String version    = "0.1",
 		  PsimagLite::String byte_order = "BigEndian") {
-      
-      throw PsimagLite::LogicError("================================================= Later we will write a VTK file for fileName << \n");    
+
+      throw PsimagLite::LogicError("================================================= Later we will write a VTK file for fileName << \n");
     }
-    
+
 
     //======================================================================
 
     template<typename VectorLikeType,
-	     typename MatrixLikeType> 
+	     typename MatrixLikeType>
     VectorLikeType& setVectorFromRow(const MatrixLikeType& matrix,
-				     SizeType row, 
+				     SizeType row,
 				     VectorLikeType& result)  {
       for (SizeType col=0; col < matrix.n_col(); col++) {
 	result[col] = matrix(row,col);
       }
       return result;
     }
-    
+
     template<typename VectorLikeType,
-	     typename MatrixLikeType> 
+	     typename MatrixLikeType>
     VectorLikeType& setVectorFromCol(const MatrixLikeType& matrix,
-				 SizeType col, 
+				 SizeType col,
 				 VectorLikeType& result)  {
       for (SizeType row=0; row < matrix.n_row(); row++) {
 	result[row] = matrix(row,col);
       }
       return result;
     }
-    
-    template<typename VectorLikeType1, 
+
+    template<typename VectorLikeType1,
 	     typename VectorLikeType2>
     typename VectorLikeType2::value_type scalarProduct(const VectorLikeType1& v1,
 						       const VectorLikeType2& v2) {
@@ -201,78 +198,78 @@ namespace psimag {
       return result;
     }
 
-    template<typename MatrixLikeType> 
+    template<typename MatrixLikeType>
     inline
     MatrixLikeType& increment(MatrixLikeType& matrix,
 			      typename MatrixLikeType::value_type val) {
-      for (SizeType row=0; row < matrix.n_row(); row++) 
-	for (SizeType col=0; col < matrix.n_col(); col++) 
+      for (SizeType row=0; row < matrix.n_row(); row++)
+	for (SizeType col=0; col < matrix.n_col(); col++)
 	  matrix(row,col) += val;
       return matrix;
     }
-    
-    template<typename MatrixLikeType> 
+
+    template<typename MatrixLikeType>
     inline
     MatrixLikeType& decrement(MatrixLikeType& matrix,
 			      typename MatrixLikeType::value_type val) {
-      for (SizeType row=0; row < matrix.n_row(); row++) 
-	for (SizeType col=0; col < matrix.n_col(); col++) 
+      for (SizeType row=0; row < matrix.n_row(); row++)
+	for (SizeType col=0; col < matrix.n_col(); col++)
 	  matrix(row,col) -= val;
       return matrix;
     }
-    
-    template<typename MatrixLikeType> 
+
+    template<typename MatrixLikeType>
     inline
     MatrixLikeType& times(MatrixLikeType& matrix,
 			  typename MatrixLikeType::value_type val) {
-      for (SizeType row=0; row < matrix.n_row(); row++) 
-	for (SizeType col=0; col < matrix.n_col(); col++) 
+      for (SizeType row=0; row < matrix.n_row(); row++)
+	for (SizeType col=0; col < matrix.n_col(); col++)
 	  matrix(row,col) *= val;
       return matrix;
     }
-    
-    template<typename MatrixLikeType> 
+
+    template<typename MatrixLikeType>
     inline
     MatrixLikeType& divide(MatrixLikeType& matrix,
 			   typename MatrixLikeType::value_type val) {
-      for (SizeType row=0; row < matrix.n_row(); row++) 
-	for (SizeType col=0; col < matrix.n_col(); col++) 
+      for (SizeType row=0; row < matrix.n_row(); row++)
+	for (SizeType col=0; col < matrix.n_col(); col++)
 	  matrix(row,col) /= val;
       return matrix;
     }
-    
-    template<typename MatrixLikeType> 
+
+    template<typename MatrixLikeType>
     inline
     MatrixLikeType& squareElements(MatrixLikeType& matrix) {
-      for (SizeType row=0; row < matrix.n_row(); row++) 
-	for (SizeType col=0; col < matrix.n_col(); col++) 
+      for (SizeType row=0; row < matrix.n_row(); row++)
+	for (SizeType col=0; col < matrix.n_col(); col++)
 	  matrix(row,col) *= matrix(row,col);
       return matrix;
     }
-    
+
     template<typename MatrixLikeType1,
-	     typename MatrixLikeType2> 
+	     typename MatrixLikeType2>
     inline
     MatrixLikeType2& copy(const MatrixLikeType1& matrix1,
 			  MatrixLikeType2& matrix2) {
-      for (SizeType row=0; row < matrix2.n_row(); row++) 
-	for (SizeType col=0; col < matrix2.n_col(); col++) 
+      for (SizeType row=0; row < matrix2.n_row(); row++)
+	for (SizeType col=0; col < matrix2.n_col(); col++)
 	  matrix2(row,col) = matrix1(row,col);
       return matrix2;
     }
 
     template<typename MatrixLikeType1,
-	     typename MatrixLikeType2> 
+	     typename MatrixLikeType2>
     inline
     bool equals(const MatrixLikeType1& matrix1,
 		const MatrixLikeType2& matrix2) {
-      for (SizeType row=0; row < matrix1.n_row(); row++) 
-	for (SizeType col=0; col < matrix1.n_col(); col++) 
-	  if (matrix2(row,col) != matrix1(row,col)) 
+      for (SizeType row=0; row < matrix1.n_row(); row++)
+	for (SizeType col=0; col < matrix1.n_col(); col++)
+	  if (matrix2(row,col) != matrix1(row,col))
 	    return false;
       return true;
     }
-    
+
     template<typename MatrixLikeType>
     class INVERT {
     public:
@@ -280,14 +277,14 @@ namespace psimag {
       typedef typename MatrixLikeType::value_type T;
 
       int operator () (const MatrixLikeType& A, PsimagLite::Matrix<T>& INV) {
-	
+
 	ASSERT(A.n_row()==A.n_col(),
 	       std::range_error("A.n_row() != A.n_col() in INVERT for Matrix<T>"));
 	ASSERT(A.n_row()==INV.n_row(),
 	       std::range_error("A.n_row() != INV.n_row() in INVERT for Matrix<T>"));
 	ASSERT(A.n_col()==INV.n_col(),
 	       std::range_error("A.n_col() != INV.n_col() in INVERT for Matrix<T>"));
-	
+
 	copy(A,INV);
 	int N  (static_cast<int>(A.n_row()));
 	int LDA(N);  // Give this more though later &*&*
@@ -298,11 +295,11 @@ namespace psimag {
 
 	// GET LU Decomposition which will be stored in INV
 	LAPACK::GETRF(N,N,&INV(0,0),LDA,&pivots[0],info);
-      
+
 	if (info != 0) {
 	  PsimagLite::OstringStream message;
 	  message << "INVERT(A,B): GETRF failed! \n";
-	  if (info < 0) 
+	  if (info < 0)
 	    message << "The " << -info << "th argument had an illegal value!\n";
 	  else
 	    message << "U("<<info<<","<<info<<") was exactly zero. \n";
@@ -314,22 +311,22 @@ namespace psimag {
 
 	// Get the optimal block size
 	LAPACK::GETRI(N,&INV(0,0),LDA,&pivots[0],blocksize,-1,info);
-      
+
 	lwork  = static_cast<int>(blocksize)*N;
 	PsimagLite::Vector<double>::Type work(lwork);
-      
+
 	LAPACK::GETRI(N,&INV(0,0),LDA,&pivots[0],&work[0],lwork,info);
- 
+
 	if (info != 0) {
 	  PsimagLite::OstringStream message;
 	  message << "INVERT(A,B): GETRI failed! \n";
-	  if (info < 0) 
+	  if (info < 0)
 	    message << "The " << -info << "th argument had an illegal value!\n";
 	  else
 	    message << "U("<<info<<","<<info<<") was exactly zero. \n";
 	  throw PsimagLite::LogicError(message.str());
 	}
-	
+
 	return info;
       }
     private:
@@ -337,8 +334,8 @@ namespace psimag {
     };
 
   } /* namespace MatrixLike */
-  
+
 } /* namespace psimag */
 
 
-#endif 
+#endif

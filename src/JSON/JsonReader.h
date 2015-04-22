@@ -12,7 +12,6 @@
 #define DCA_JSON_READER_HEADER_H
 
 #include <stdio.h>
-#include "String.h"
 #include <vector>
 #include <dirent.h>
 #include <iostream>
@@ -56,8 +55,8 @@ namespace dca {
 	throw PsimagLite::RuntimeError(msg.str());
       }
 
-      parser.filename = fileName;		
-    
+      parser.filename = fileName;
+
       while(parser.parseChar(file));
 
       parseResult.flattenInto(flatMap);
@@ -112,7 +111,7 @@ namespace dca {
     }
 
     //====================================================================== map[]
-    
+
     const JsonAccessor& searchFlatMapFor(const PsimagLite::String key) const {
 
       std::wstring wKey(key.begin(), key.end());
@@ -129,7 +128,7 @@ namespace dca {
 	  continue; // wKey not found skip it
 
 	// candidate begins with key
-	if (pos == 0) { 
+	if (pos == 0) {
 	  if (candidateKey.length() == wKey.length() or
 	      candidateKey[pos+wKey.length()] == L':') {
 	    return *(itr->second);
@@ -141,13 +140,13 @@ namespace dca {
 
 	//candidate ends with key
 	if (pos == (candidateKey.length() - wKey.length())) {
-	  if (candidateKey[pos-1] == L':') 
+	  if (candidateKey[pos-1] == L':')
 	    return *(itr->second);
 	  continue;
 	}
 	//  key in middle of candidate
 // 	if (candidateKey[pos-1] == L':' and
-// 	    candidateKey[pos+wKey.length()] == L':') 
+// 	    candidateKey[pos+wKey.length()] == L':')
 // 	  return pair.second;
       }
       return JsonAccessor::null();
@@ -158,19 +157,19 @@ namespace dca {
   //======================================================================
 
   template<typename MatrixLikeType>
-  psimag::Transposer<MatrixLikeType>& operator <= 
-  (psimag::Transposer<MatrixLikeType>& lhs, 
+  psimag::Transposer<MatrixLikeType>& operator <=
+  (psimag::Transposer<MatrixLikeType>& lhs,
    const JsonParser::Whatever& w) {
-    
+
     if (w.type == JsonParser::Whatever::WHATEVER_MAP) {
-      
+
       int in_rows;  in_rows <= w["rows"];
       int in_cols;  in_cols <= w["cols"];
-      
+
       if ( lhs.n_row() > 0 or lhs.n_col() > 0) {
-	
+
 	// They must be the same:
-	if (int(lhs.n_row()) != in_rows or 
+	if (int(lhs.n_row()) != in_rows or
 	    int(lhs.n_col()) != in_cols) {
 	  PsimagLite::OstringStream msg;
 	  msg << "JsonReader => Transposer<matrix>: size mis-match!\n";
@@ -182,14 +181,14 @@ namespace dca {
 	  throw PsimagLite::LogicError(msg.str());
 	}
       }
-      else 
+      else
 	lhs.mat.resize(in_cols, in_rows);
-      
+
       lhs <= w["data"];
-      
+
       return lhs;
     }
-    
+
     loadMatrixLikeFromFile(lhs,w);
 
     return lhs;
@@ -197,17 +196,17 @@ namespace dca {
 
   //======================================================================
 
-  template <typename MatrixLikeType> 
+  template <typename MatrixLikeType>
   void loadMatrixLikeFromFile(MatrixLikeType& mat,
 			      const JsonParser::Whatever& w) {
-    
+
     if (w.type == JsonParser::Whatever::WHATEVER_MAT) {
-      
+
       PsimagLite::OstringStream msg;
       msg << "Whatever.loadMatrixLikeFromFile(" << mat.n_row() << "," << mat.n_col()  << ")\n";
-      
+
       std::wifstream file(w.filename.c_str());
-      
+
       if (! file.is_open()) {
 	enum {BUFF_SIZE=300};
 	char buffer[BUFF_SIZE];
@@ -216,18 +215,18 @@ namespace dca {
 	msg << " The current directory is: " << getcwd(buffer,BUFF_SIZE) << "\n";
 	throw PsimagLite::LogicError(msg.str());
       }
-      
+
       file.seekg(w.startPos);
 
       JsonParser::MatrixParser< MatrixLikeType > mParser(file,w.endPos,mat);
 
       return;
     }
-    
+
     if (w.type == JsonParser::Whatever::WHATEVER_VECTOR) {
 
       // Note that we resize if the matrix size is zero
-      if (mat.size() == 0) {  
+      if (mat.size() == 0) {
 	SizeType rows =  w.whateverVector.size();
 	SizeType cols =  w.whateverVector[0].size();
 	mat.resize(rows,cols);
@@ -247,21 +246,21 @@ namespace dca {
   }
 
   //======================================================================
-  
+
   template<typename T,template<typename> class MatrixTemplate>
-  MatrixTemplate<T>& operator <= 
-  (MatrixTemplate<T>& lhs, 
+  MatrixTemplate<T>& operator <=
+  (MatrixTemplate<T>& lhs,
    const JsonParser::Whatever& w) {
-    
+
     if (w.type == JsonParser::Whatever::WHATEVER_MAP) {
-      
+
       int in_rows;  in_rows <= w["rows"];
       int in_cols;  in_cols <= w["cols"];
-      
+
       if ( lhs.n_row() > 0 or lhs.n_col() > 0) {
-	
+
 	// They must be the same:
-	if (int(lhs.n_row()) != in_rows or 
+	if (int(lhs.n_row()) != in_rows or
 	    int(lhs.n_col()) != in_cols) {
 	  PsimagLite::OstringStream msg;
 	  msg << "JsonReader => matrix: Matrix size mis-match!\n";
@@ -273,23 +272,23 @@ namespace dca {
 	  throw PsimagLite::LogicError(msg.str());
 	}
       }
-      else 
+      else
 	lhs.resize(in_rows, in_cols);
 
       lhs <= w["data"];
-      
+
       return lhs;
     }
 
     if (w.type == JsonParser::Whatever::WHATEVER_MAT) {
-      
+
       MatrixTemplate<T>& mat(lhs);
 
       PsimagLite::OstringStream msg;
       msg << "Whatever.loadMatrix(" << mat.n_row() << "," << mat.n_col()  << ")\n";
-      
+
       std::wifstream file(w.filename.c_str());
-      
+
       if (! file.is_open()) {
 	enum {BUFF_SIZE=300};
 	char buffer[BUFF_SIZE];
@@ -298,7 +297,7 @@ namespace dca {
 	msg << " The current directory is: " << getcwd(buffer,BUFF_SIZE) << "\n";
 	throw PsimagLite::LogicError(msg.str());
       }
-      
+
       file.seekg(w.startPos);
 
       JsonParser::MatrixParser<MatrixTemplate<T> > mParser(file,w.endPos,mat);

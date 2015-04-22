@@ -1,8 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <complex>
-#include "String.h"
-
 #include "Vector.h"
 #include "Matrix.h"
 #include "RungeKutta.h"

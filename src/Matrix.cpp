@@ -1,5 +1,4 @@
 #include "Matrix.h"
-#include "String.h"
 
 namespace PsimagLite {
 

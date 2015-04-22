@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "Complex.h"
 #include <cassert>
-#include "String.h"
 #include "loki/TypeTraits.h"
 #include "Mpi.h"
 

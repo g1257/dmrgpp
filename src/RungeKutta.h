@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "Complex.h"
 #include "Vector.h"
-#include "String.h"
 
 namespace PsimagLite {
 

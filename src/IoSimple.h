@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include <cstdlib>
 #include "Map.h"
-#include "String.h"
 #include "Concurrency.h"
 
 namespace PsimagLite {
@@ -552,7 +551,7 @@ void operator>>(IoSimple::In& io,T& t)
 	io.fin_>>t;
 }
 
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
 namespace Spf {
 
@@ -564,6 +563,6 @@ public:
 	{}
 };
 }
-/*@}*/	
+/*@}*/
 #endif
 

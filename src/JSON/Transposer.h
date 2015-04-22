@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <iostream>
 #include <iomanip>
-#include "String.h"
 
 //#include "PSIMAGAssert.h"
 #include "BLAS.h"
@@ -21,23 +20,23 @@
 namespace psimag {
 
   template<typename T> class Matrix;
-  
+
   //======================================================================
 
   template<typename MatrixLikeType>
   class Transposer {
   public:
-    
+
     typedef Transposer<MatrixLikeType>          ThisType;
     typedef typename MatrixLikeType::value_type value_type;
     typedef value_type                          FieldType;
-    
+
     MatrixLikeType& mat;
-    
+
     Transposer(MatrixLikeType& m):
       mat(m)
     {}
-    
+
     MatrixLikeType& transpose() {
       return mat;
     }
@@ -61,15 +60,15 @@ namespace psimag {
     //======================================================================
 
     // ----- MatrixLike
-    
+
     SizeType n_col() const { return mat.n_row(); }
     SizeType n_row() const { return mat.n_col(); }
-    
+
     value_type& operator () (SizeType rowIndex, SizeType colIndex) {
       // Assuming mat provides it's own asserts!
       return mat(colIndex,rowIndex);
     }
-    
+
 
     const value_type& operator () (SizeType rowIndex, SizeType colIndex) const {
       // Assuming mat provides it's own asserts!
@@ -80,40 +79,40 @@ namespace psimag {
       mat.resize(nCol,nRow);
     }
 
-    // ----- VectorLike 
+    // ----- VectorLike
 
     // these probably should return elements is a different order ?? &*&*
 
     SizeType size()  const { return mat.size(); }
-    
+
     const value_type& operator[] (SizeType componentIndex) const {
       return mat[componentIndex];
     }
-    
+
     value_type& operator[] (SizeType componentIndex)  {
       return mat[componentIndex];
     }
   };
-  
+
   //====================================================================== This one owns it's Matrix
 
   template<typename MatrixLikeType>
   class Transposed {
   public:
-    
+
     typedef typename MatrixLikeType::value_type value_type;
     typedef value_type                          FieldType;
-    
+
     MatrixLikeType mat;
-    
+
     Transposed(SizeType nrows, SizeType nCols):
       mat(nrows,nCols)
     {}
-    
+
     Transposed(SizeType nrows):
       mat(nrows)
     {}
-    
+
     MatrixLikeType& transpose() {
       return mat;
     }
@@ -127,15 +126,15 @@ namespace psimag {
     }
 
     // ----- MatrixLike
-    
+
     SizeType n_col() const { return mat.n_row(); }
     SizeType n_row() const { return mat.n_col(); }
-    
+
     value_type& operator () (SizeType rowIndex, SizeType colIndex) {
       // Assuming mat provides it's own asserts!
       return mat(colIndex,rowIndex);
     }
-    
+
 
     value_type operator () (SizeType rowIndex, SizeType colIndex) const {
       // Assuming mat provides it's own asserts!
@@ -149,17 +148,17 @@ namespace psimag {
     // ----- VectorLike
 
     SizeType size()  const { return mat.size(); }
-    
+
     const value_type& operator[] (SizeType componentIndex) const {
       return mat[componentIndex];
     }
-    
+
     value_type& operator[] (SizeType componentIndex)  {
       return mat[componentIndex];
     }
   };
-  
+
 } /* namespace psimag */
 
 
-#endif 
+#endif

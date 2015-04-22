@@ -27,7 +27,6 @@ Please see full open source license included in file LICENSE.
 #include "Complex.h"
 #include <cassert>
 #include "TypeToString.h"
-#include "String.h"
 #include "Mpi.h"
 #include "BoostSerializationHeaders.h"
 

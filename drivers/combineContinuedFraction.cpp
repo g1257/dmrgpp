@@ -26,7 +26,6 @@ Please see full open source license included in file LICENSE.
 #include "TridiagonalMatrix.h"
 #include "ContinuedFraction.h"
 #include "ContinuedFractionCollection.h"
-#include "String.h"
 
 using namespace PsimagLite;
 typedef double RealType;

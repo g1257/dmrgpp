@@ -24,7 +24,6 @@ Please see full open source license included in file LICENSE.
 #include <unistd.h>
 #include "ChebyshevSerializer.h"
 #include "IoSimple.h"
-#include "String.h"
 
 void usage(const char *progName)
 {

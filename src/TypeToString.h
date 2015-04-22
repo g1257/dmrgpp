@@ -5,7 +5,7 @@
 #define TYPE_TO_STRING_H
 
 #include <sstream>
-#include "String.h"
+#include "AllocatorCpu.h"
 
 namespace PsimagLite {
 template<class T>

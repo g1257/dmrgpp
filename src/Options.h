@@ -85,7 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
-#include "String.h"
 
 namespace PsimagLite {
 

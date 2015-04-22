@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <iostream>
 #include <cassert>
-#include "String.h"
 
 namespace PsimagLite {
 template<typename PthreadFunctionHolderType>

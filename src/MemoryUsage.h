@@ -79,7 +79,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <fstream>
 #include <time.h>
-#include "String.h"
 
 namespace PsimagLite {
 class MemoryUsage {
@@ -143,8 +142,8 @@ private:
 	time_t startTime_;
 }; // class MemoryUsage
 
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
-/*@}*/	
+/*@}*/
 #endif // MEMORY_USAGE_H
 

@@ -89,7 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Random48.h"
 #include "ContinuedFraction.h"
 #include "LanczosOrDavidsonBase.h"
-#include "String.h"
 
 namespace PsimagLite {
 

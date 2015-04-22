@@ -3,9 +3,9 @@
 /** \ingroup JsonParser */
 /*@{*/
 
-/*! \file ModesMixin.h  
+/*! \file ModesMixin.h
  *
- *  
+ *
  *
  */
 
@@ -13,30 +13,29 @@
 #define  JsonParser_ModesMixin_H
 
 #include <vector>
-#include "String.h"
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 
 namespace JsonParser {
-  
+
   class ModesMixin {
   public:
 
     /* These modes can be pushed on the stack. */
     typedef enum modes {
-      MODE_ARRAY = 1, 
-      MODE_DONE = 2,  
-      MODE_KEY = 3,   
+      MODE_ARRAY = 1,
+      MODE_DONE = 2,
+      MODE_KEY = 3,
       MODE_OBJECT = 4
     } ModeType;
 
     PsimagLite::Vector<ModeType>::Type stack;
-    
+
     ModesMixin():
       stack(1,MODE_DONE)
     {}
-    
+
     //======================================================================
 
     PsimagLite::String modeName(ModeType m) {
@@ -59,7 +58,7 @@ namespace JsonParser {
     void push(ModeType mode) {
       stack.push_back(mode);
     }
-    
+
     void pop(ModeType expectedMode) {
       if (stack.size() == 0) {
 	PsimagLite::OstringStream msg;
@@ -75,7 +74,7 @@ namespace JsonParser {
       }
       stack.pop_back();
     }
-    
+
     const ModeType& currentMode() {
       return stack.back();
     }

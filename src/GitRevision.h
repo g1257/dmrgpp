@@ -32,7 +32,7 @@ Please see full open source license included in file LICENSE.
 #include <fstream>
 #include <cstdlib>
 #include <unistd.h>
-#include "String.h"
+#include "AllocatorCpu.h"
 
 namespace PsimagLite {
 
