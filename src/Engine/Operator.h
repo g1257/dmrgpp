@@ -192,7 +192,8 @@ struct Operator {
 	template<typename IoInputType, typename CookedOperatorType>
 	Operator(IoInputType& io, CookedOperatorType& cookedOperator,bool checkNonZero)
 	{
-		PsimagLite::String s = readLabel(io,"TSPOperator=");
+		PsimagLite::String s = "";
+		io.readline(s,"TSPOperator=");
 		PsimagLite::Matrix<SparseElementType> m;
 
 		if (s == "cooked") {

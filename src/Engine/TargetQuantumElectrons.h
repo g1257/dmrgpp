@@ -96,7 +96,7 @@ public:
 		PsimagLite::String  msg("TargetQuantumElectrons: ");
 		bool hasTwiceJ = false;
 		try {
-			io.read(twiceJ_,"TargetSpinTimesTwo=");
+			io.readline(twiceJ_,"TargetSpinTimesTwo=");
 			hasTwiceJ = true;
 		} catch (std::exception&) {}
 
@@ -105,8 +105,8 @@ public:
 			SizeType electronsUp = 0;
 			SizeType electronsDown = 0;
 			try {
-				io.read(electronsUp,"TargetElectronsUp=");
-				io.read(electronsDown,"TargetElectronsDown=");
+				io.readline(electronsUp,"TargetElectronsUp=");
+				io.readline(electronsDown,"TargetElectronsDown=");
 				totalElectrons_ = electronsUp + electronsDown;
 				szPlusConst_ = electronsUp;
 				ready++;
@@ -114,8 +114,8 @@ public:
 		}
 
 		try {
-			io.read(totalElectrons_,"TargetElectronsTotal=");
-			io.read(szPlusConst_,"TargetSzPlusConst=");
+			io.readline(totalElectrons_,"TargetElectronsTotal=");
+			io.readline(szPlusConst_,"TargetSzPlusConst=");
 			ready++;
 		} catch (std::exception&) {}
 
