@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGETING_BASE_H
 #define TARGETING_BASE_H
 #include <iostream>
-#include "String.h"
 #include "TargetParamsBase.h"
 #include "TargetHelper.h"
 #include "TargetingCommon.h"

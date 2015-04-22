@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGETING_GS_H
 #define TARGETING_GS_H
 #include <iostream>
-#include "String.h"
 #include "TargetParamsGroundState.h"
 #include "ApplyOperatorLocal.h"
 #include <stdexcept>

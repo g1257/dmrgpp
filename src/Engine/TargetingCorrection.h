@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CORRECTION_TARGETTING_H
 #define CORRECTION_TARGETTING_H
 #include <iostream>
-#include "String.h"
 #include "TargetParamsCorrection.h"
 #include "TargetingBase.h"
 #include <stdexcept>

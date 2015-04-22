@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PRE_OPERATOR_BASE_H
 #define PRE_OPERATOR_BASE_H
 #include <iostream>
-#include "String.h"
+#include "AllocatorCpu.h"
 
 namespace Dmrg {
 

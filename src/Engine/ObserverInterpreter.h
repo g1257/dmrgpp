@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef OBSERVER_INTERPRETER_H
 #define OBSERVER_INTERPRETER_H
 #include <iostream>
-#include "String.h"
 #include "Vector.h"
 #include "Tokenizer.h"
 

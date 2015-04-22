@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define COOKED_OPERATOR_H
 #include <iostream>
 #include "Vector.h"
-#include "String.h"
 #include "Matrix.h"
 
 namespace Dmrg {

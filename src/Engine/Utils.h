@@ -76,7 +76,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Vector.h"
 #include "CrsMatrix.h"
-#include "String.h"
 
 namespace std {
 

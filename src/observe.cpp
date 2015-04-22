@@ -1,5 +1,3 @@
-#include "String.h"
-
 #ifndef USE_FLOAT
 typedef double RealType;
 #else
