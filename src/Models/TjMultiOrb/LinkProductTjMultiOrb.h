@@ -95,10 +95,10 @@ public:
 	template<typename SomeStructType>
 	static void setLinkData(SizeType term,
 	                        SizeType dofs,
-	                        bool isSu2,
+	                        bool,
 	                        SizeType& fermionOrBoson,
 	                        PairType& ops,
-	                        std::pair<char,char>& mods,
+	                        std::pair<char,char>&,
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
 	                        SizeType& category,
@@ -150,7 +150,7 @@ public:
 	static void valueModifier(SparseElementType& value,
 	                          SizeType term,
 	                          SizeType dofs,
-	                          bool isSu2,
+	                          bool,
 	                          const SomeStructType&)
 	{
 		if (term==TERM_CICJ) return;

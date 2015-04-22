@@ -134,9 +134,9 @@ public:
 	      geometry_(geometry)
 	{}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   PsimagLite::String = "") const
 	{
 		return 0;
 	}
@@ -470,8 +470,8 @@ private:
 	}
 
 	//! Find Delta_i in the natural basis natBasis
-	SparseMatrixType findDeltaIMatrices(int i,
-	                                    const VectorHilbertStateType& natBasis) const
+	SparseMatrixType findDeltaIMatrices(int,
+	                                    const VectorHilbertStateType&) const
 	{
 		throw PsimagLite::RuntimeError("findDeltaIMatrices needs to be implemented\n");
 	}
@@ -552,7 +552,7 @@ private:
 	// This assures us that both j and m are SizeType
 	// Reinterprets 6 and 9
 	template<typename PairType>
-	PairType calcJmvalue(const HilbertStateType& ket) const
+	PairType calcJmvalue(const HilbertStateType&) const
 	{
 		return PairType(0,0);
 	}

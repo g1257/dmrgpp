@@ -120,8 +120,6 @@ public:
 	                      SizeType total,
 	                      pthread_mutex_t*)
 	{
-		SizeType npthreads = PsimagLite::Concurrency::npthreads;
-
 		SizeType start = pBasis_.partition(m_);
 		SizeType length = pBasis_.partition(m_+1) - start;
 
@@ -161,7 +159,6 @@ private:
 	                                                    SizeType alpha2,
 	                                                    const TargetVectorType& v)
 	{
-		SizeType ne = pBasis_.size();
 		SizeType ns = pBasisSummed_.size();
 		SizeType total = pBasisSummed_.size();
 		DensityMatrixElementType sum=0;

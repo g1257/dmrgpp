@@ -90,17 +90,16 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 
 	template<typename SomeStructType>
-	static void setLinkData(
-	        SizeType term,
-	        SizeType dofs,
-	        bool isSu2,
-	        SizeType& fermionOrBoson,
-	        std::pair<SizeType,SizeType>& ops,
-	        std::pair<char,char>&,
-	        SizeType& angularMomentum,
-	        RealType& angularFactor,
-	        SizeType& category,
-	        const SomeStructType&)
+	static void setLinkData( SizeType term,
+	                         SizeType,
+	                         bool isSu2,
+	                         SizeType& fermionOrBoson,
+	                         std::pair<SizeType,SizeType>& ops,
+	                         std::pair<char,char>&,
+	                         SizeType& angularMomentum,
+	                         RealType& angularFactor,
+	                         SizeType& category,
+	                         const SomeStructType&)
 	{
 		fermionOrBoson = ProgramGlobals::BOSON;
 		ops = operatorDofs(term,isSu2);
