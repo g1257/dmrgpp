@@ -78,7 +78,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GEOMETRY_STAR_H
 #define GEOMETRY_STAR_H
 #include "GeometryBase.h"
-#include "String.h"
 
 namespace PsimagLite {
 

@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <stdexcept>
 #include "Ladder.h"
-#include "String.h"
 
 namespace PsimagLite {
 

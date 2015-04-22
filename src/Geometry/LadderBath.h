@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LADDER_BATH_H
 
 #include "Ladder.h"
-#include "String.h"
 
 namespace PsimagLite {
 

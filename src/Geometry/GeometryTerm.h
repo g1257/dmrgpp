@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GeometryDirection.h"
 #include "GeometryBase.h"
 #include <cassert>
-#include "String.h"
 #include "Ladder.h"
 #include "LadderX.h"
 #include "LadderBath.h"

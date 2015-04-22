@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LADDER_H
 
 #include "GeometryBase.h"
-#include "String.h"
 
 namespace PsimagLite {
 

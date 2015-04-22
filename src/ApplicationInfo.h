@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <sys/time.h>
 #include <time.h>
-#include "String.h"
 
 namespace PsimagLite {
 
@@ -131,8 +130,8 @@ std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai)
 	return os;
 }
 
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
-/*@}*/	
+/*@}*/
 #endif // APPLICATION_INFO_H
 

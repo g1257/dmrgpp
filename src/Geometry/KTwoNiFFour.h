@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <cassert>
 #include "GeometryBase.h"
-#include "String.h"
 
 namespace PsimagLite {
 

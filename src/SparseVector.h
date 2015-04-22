@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -86,7 +86,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "Vector.h" // in PsimagLite
 #include "Sort.h"
-#include "String.h"
 
 namespace PsimagLite {
 	template<typename FieldType>
@@ -94,7 +93,7 @@ namespace PsimagLite {
 		public:
 			typedef FieldType value_type;
 			typedef std::pair<SizeType,SizeType> PairType;
-			
+
 			SparseVector(const typename Vector<FieldType>::Type& v)
 			: size_(v.size()),isSorted_(false)
 			{
@@ -106,7 +105,7 @@ namespace PsimagLite {
 					}
 				}
 			}
-			
+
 			void fromChunk(const typename Vector<FieldType>::Type& v,SizeType offset,SizeType total)
 			{
 				resize(total);
@@ -117,7 +116,7 @@ namespace PsimagLite {
 			}
 
 			SparseVector(SizeType n) : size_(n),isSorted_(false) { }
-			
+
 			void resize(SizeType x)
 			{
 				values_.clear();
@@ -150,22 +149,22 @@ namespace PsimagLite {
 			SizeType indices() const { return indices_.size(); }
 
 			SizeType index(SizeType x) const { return indices_[x]; }
-			
+
 			FieldType value(SizeType x) const { return values_[x]; }
 
 			void toChunk(typename Vector<FieldType>::Type& dest,SizeType i0, SizeType total, bool test=false) const
 			{
 				if (test) {
 					PairType firstLast = findFirstLast();
-					if (i0>firstLast.first || i0+total<firstLast.second) 
+					if (i0>firstLast.first || i0+total<firstLast.second)
 						throw RuntimeError("SparseVector::toChunk(...)"
 							" check failed\n");
 				}
 				dest.resize(total);
-				for (SizeType i=0;i<indices_.size();i++) 
+				for (SizeType i=0;i<indices_.size();i++)
 					dest[indices_[i]-i0]=values_[i];
 			}
-			
+
 			template<typename SomeBasisType>
 			SizeType toChunk(typename Vector<FieldType>::Type& dest,const SomeBasisType& parts) const
 			{
@@ -174,11 +173,11 @@ namespace PsimagLite {
 				SizeType total = parts.partition(part+1)-offset;
 				dest.resize(total);
 				for (SizeType i=0;i<total;i++) dest[i]=0;
-				for (SizeType i=0;i<indices_.size();i++) 
+				for (SizeType i=0;i<indices_.size();i++)
 					dest[indices_[i]-offset]=values_[i];
 				return part;
 			}
-			
+
 			template<typename SomeBasisType>
 			SizeType findPartition(const SomeBasisType& parts) const
 			{
@@ -310,9 +309,9 @@ namespace PsimagLite {
 
 			template<typename T,typename T2>
 			friend SparseVector<T2> operator*(const T& val,const SparseVector<T2>& sv);
-			
+
 		private:
-			
+
 
 
 			PairType findFirstLast() const
@@ -320,13 +319,13 @@ namespace PsimagLite {
 				return PairType(*(std::min_element(indices_.begin(),indices_.end() ) ),
 						*( std::max_element(indices_.begin(), indices_.end() ) ));
 			}
-			
+
 			typename Vector<FieldType>::Type values_;
 			typename Vector<SizeType>::Type indices_;
 			SizeType size_;
 			bool isSorted_;
 	}; // class SparseVector
-	
+
 	template<typename FieldType>
 	std::ostream& operator<<(std::ostream& os,const SparseVector<FieldType>& s)
 	{
@@ -357,7 +356,7 @@ namespace PsimagLite {
 		for (SizeType i=0;i<v.indices();i++) sum += std::conj(v.value(i))*v.value(i);
 		return sqrt(sum);
 	}
-	
+
 	template<typename FieldType>
 	inline FieldType norm(const PsimagLite::SparseVector<std::complex<FieldType> >& v)
 	{

@@ -78,7 +78,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GEOMETRY_DIR_H
 #define GEOMETRY_DIR_H
 #include <cassert>
-#include "String.h"
 #include "BoostSerializationHeaders.h"
 
 namespace PsimagLite {

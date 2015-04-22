@@ -79,7 +79,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_H
 
 #include "GeometryTerm.h"
-#include "String.h"
 #include "GeometryEx.h"
 #include "BoostSerializationHeaders.h"
 

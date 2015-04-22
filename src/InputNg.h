@@ -90,7 +90,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <algorithm>
 #include "Map.h"
 #include "Matrix.h"
-#include "String.h"
 #include "loki/TypeTraits.h"
 
 namespace PsimagLite {

@@ -78,7 +78,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PSI_GEOM_LONG_CHAIN_H
 #define PSI_GEOM_LONG_CHAIN_H
 #include "GeometryBase.h"
-#include "String.h"
 
 namespace PsimagLite {
 

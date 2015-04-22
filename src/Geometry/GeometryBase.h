@@ -81,7 +81,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GEOMETRY_BASE_H
 #define GEOMETRY_BASE_H
 
-#include "String.h"
 #include "InputNg.h"
 #include "MemResolv.h"
 

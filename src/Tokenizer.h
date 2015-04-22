@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TOKENIZER_H
 #include <iostream>
 #include <fstream>
-#include "String.h"
+#include "AllocatorCpu.h"
 
 namespace PsimagLite {
 void tokenizer(String str,

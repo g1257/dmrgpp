@@ -88,7 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include "ChebyshevSerializer.h"
 #include "LanczosSolver.h"
-#include "String.h"
 
 namespace PsimagLite {
 
