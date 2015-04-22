@@ -1,0 +1,36 @@
+TotalNumberOfSites=6
+NumberOfTerms=4
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors  1 0 
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors  1 0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors  1 0 
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors  1 -1
+
+Model=TjMultiOrb
+potentialV	 12 0 0 0 0 0 0 
+                    0 0 0 0 0 0
+SolverOptions=none
+Version=version
+OutputFile=data1850.txt
+InfiniteLoopKeptStates=60
+FiniteLoops 4
+2 100 0 -2 100 0 -2 100 0 2 100 0 
+TargetElectronsUp=3
+TargetElectronsDown=3
+MaxMatrixRankStored=512
+
