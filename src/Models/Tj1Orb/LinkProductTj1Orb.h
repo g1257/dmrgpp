@@ -201,7 +201,7 @@ public:
 		return PairType(0,0); // no orbital and no dependence on spin
 	}
 
-	static SizeType terms() { return 2; }
+	static SizeType terms() { return 3; }
 
 private:
 

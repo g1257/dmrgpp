@@ -408,9 +408,22 @@ private:
 	                          int sigma,
 	                          const HilbertBasisType& natBasis) const
 	{
-		HilbertStateType bra,ket;
 		int n = natBasis.size();
 		PsimagLite::Matrix<SparseElementType> cm(n,n);
+		findCreationDense(cm,i,sigma,natBasis);
+		SparseMatrixType temp;
+		fullMatrixToCrsMatrix(temp,cm);
+		transposeConjugate(creationMatrix,temp);
+
+	}
+	//! Find c^\dagger_i\gamma\sigma in the natural basis natBasis
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	void findCreationDense(PsimagLite::Matrix<SparseElementType>& cm,
+	                       int i,
+	                       int sigma,
+	                       const HilbertBasisType& natBasis) const
+	{
+		HilbertStateType bra,ket;
 
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			bra=ket=natBasis[ii];
@@ -430,10 +443,6 @@ private:
 				cm(ii,jj) = sign(ket,i,sigma);
 			}
 		}
-
-		SparseMatrixType temp;
-		fullMatrixToCrsMatrix(temp,cm);
-		transposeConjugate(creationMatrix,temp);
 	}
 
 	//! Find S^+_i in the natural basis natBasis
@@ -507,10 +516,32 @@ private:
 	}
 
 	//! Find Delta_i in the natural basis natBasis
-	SparseMatrixType findDeltaIMatrices(int,
-	                                    const VectorHilbertStateType&) const
+	SparseMatrixType findDeltaIMatrices(int i,
+	                                    const VectorHilbertStateType& natBasis) const
 	{
-		throw PsimagLite::RuntimeError("findDeltaIMatrices needs to be implemented\n");
+		assert(NUMBER_OF_ORBITALS == 2);
+		int n = natBasis.size();
+
+		PsimagLite::Matrix<SparseElementType> cru(n,n);
+		findCreationDense(cru,i,SPIN_UP*NUMBER_OF_ORBITALS,natBasis);
+
+		PsimagLite::Matrix<SparseElementType> cad(n,n);
+		findCreationDense(cad,i,1 + SPIN_DOWN*NUMBER_OF_ORBITALS,natBasis);
+
+		PsimagLite::Matrix<SparseElementType> crd(n,n);
+		findCreationDense(crd,i,SPIN_DOWN*NUMBER_OF_ORBITALS,natBasis);
+
+		PsimagLite::Matrix<SparseElementType> cau(n,n);
+		findCreationDense(cau,i,1 + SPIN_UP*NUMBER_OF_ORBITALS,natBasis);
+
+		PsimagLite::Matrix<SparseElementType> part1 = cru*cad;
+		PsimagLite::Matrix<SparseElementType> part2 = (-1.0)*crd*cau;
+
+		RealType oneOverSqrt2 = 1.0/sqrt(2.0);
+		PsimagLite::Matrix<SparseElementType> final = oneOverSqrt2*(part1 + part2);
+		SparseMatrixType temp;
+		fullMatrixToCrsMatrix(temp,final);
+		return temp;
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
@@ -523,17 +554,17 @@ private:
 
 		SizeType linSize = geometry_.numberOfSites();
 		for (SizeType i=0;i<n;i++) {
-			for (SizeType orb = 0; orb < NUMBER_OF_ORBITALS; ++orb) {
-				// potentialV
-				SparseMatrixType nup(naturalOperator("nup",i,orb));
-				SparseMatrixType ndown(naturalOperator("ndown",i,orb));
-				SparseMatrixType m = nup;
-				SizeType index = block[i]+orb*linSize + NUMBER_OF_ORBITALS*linSize;
-				assert(index<modelParameters_.potentialV.size());
-				m *= modelParameters_.potentialV[block[i] + orb*linSize];
-				m += modelParameters_.potentialV[index]*ndown;
-				hmatrix += factorForDiagonals * m;
-			}
+			SizeType orb = 0;
+			// potentialV
+			SparseMatrixType nup(naturalOperator("nup",i,orb));
+			SparseMatrixType ndown(naturalOperator("ndown",i,orb));
+			SparseMatrixType m = nup;
+			SizeType index = block[i]+orb*linSize;
+			assert(index<modelParameters_.potentialV.size());
+			m *= modelParameters_.potentialV[block[i] + orb*linSize];
+			m += modelParameters_.potentialV[index]*ndown;
+			hmatrix += factorForDiagonals * m;
+
 		}
 	}
 
@@ -563,25 +594,25 @@ private:
 		jmSaved.first++;
 		jmSaved.second++;
 
-		VectorSizeType electronsUp(basis.size());
-		VectorSizeType electronsDown(basis.size());
+		VectorSizeType ups(basis.size());
+		VectorSizeType downs(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 
 			jmvalues.push_back(jmpair);
 			// nup
-			electronsUp[i] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_UP);
+			ups[i] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_UP);
 			// ndown
-			electronsDown[i] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_DOWN);
+			downs[i] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_DOWN);
 
-			flavors.push_back(electronsUp[i]+electronsDown[i]);
+			flavors.push_back(ups[i]+downs[i]);
 			jmSaved = jmpair;
 		}
 
 		q.jmValues=jmvalues;
 		q.flavors = flavors;
-		q.electrons = electronsUp + electronsDown;
-		q.szPlusConst = electronsUp;
+		q.electrons = ups + downs;
+		q.szPlusConst = ups;
 	}
 
 	// note: we use 2j instead of j
