@@ -1,6 +1,6 @@
 #include "GitRevision.h"
 
-int main(int argc,char *argv[])
+int main(int,char **)
 {
 	PsimagLite::GitRevision gitrev("./","dmrgpp");
 	std::cout<<gitrev;

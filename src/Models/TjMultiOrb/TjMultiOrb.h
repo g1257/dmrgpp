@@ -182,7 +182,7 @@ public:
 		creationMatrix.clear();
 		for (SizeType i=0;i<block.size();i++) {
 			for (int sigma=0;sigma<2;sigma++) {
-				tmpMatrix = findOperatorMatrices(i,sigma*NUMBER_OF_ORBITALS,natBasis);
+				findOperatorMatrices(tmpMatrix,i,sigma*NUMBER_OF_ORBITALS,natBasis);
 				int asign= 1;
 				typename OperatorType::Su2RelatedType su2related;
 
@@ -277,6 +277,12 @@ public:
 			return tmp;
 		}
 
+		if (what=="d") {
+			MatrixType tmp;
+			crsMatrixToFullMatrix(tmp,creationMatrix[5].data);
+			return tmp;
+		}
+
 		if (what=="nup") {
 			MatrixType cup = naturalOperator("c",site,SPIN_UP);
 			MatrixType nup = multiplyTransposeConjugate(cup,cup);
@@ -326,13 +332,8 @@ public:
 
 		assert(basisTmp.size() == pow(3,NUMBER_OF_ORBITALS));
 		// reorder the natural basis (needed for MULTIPLE BANDS)
-		findQuantumNumbers(q,basisTmp,1);
-		VectorSizeType iperm(q.size());
-
-		PsimagLite::Sort<VectorSizeType > sort;
-		sort.sort(q,iperm);
-		basis.clear();
-		for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
+		findQuantumNumbers(q,basisTmp,block.size());
+		this->orderBasis(basis,q,basisTmp);
 	}
 
 	virtual void setTargetNumbers(VectorSizeType& t,
@@ -367,38 +368,72 @@ private:
 		return ((a1 & a2) == 0);
 	}
 
-	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma}
-	//! to basis state ket
-	RealType sign(HilbertStateType const &, int,int) const
+	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to
+	//! basis state ket
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	RealType sign(const HilbertStateType& ket, int i,SizeType sigma) const
 	{
-		throw PsimagLite::RuntimeError("sign needs to be implemented\n");
+		int value=0;
+		SizeType dofs=2*NUMBER_OF_ORBITALS;
+		for (SizeType alpha=0;alpha<dofs;alpha++)
+			value += HilbertSpaceType::calcNofElectrons(ket,0,i,alpha);
+		// add electron on site 0 if needed
+		if (i>0) value += HilbertSpaceType::electrons(ket);
+
+		//order for sign is: a up, a down, b up, b down, etc
+		unsigned int x = HilbertSpaceType::get(ket,i);
+		int spin = sigma/NUMBER_OF_ORBITALS;
+		SizeType orb = sigma % NUMBER_OF_ORBITALS;
+
+		for (SizeType j=0;j<orb;j++) {
+			for (SizeType k=0;k<2;k++) {
+				SizeType ind = j + k * NUMBER_OF_ORBITALS;
+				int mask = (1<<ind);
+				if (x & mask) value++;
+			}
+		}
+		if (spin==SPIN_DOWN) {
+			int mask = (1<<orb);
+			if (x & mask) value++;
+		}
+		if (value==0 || value%2==0) return 1.0;
+
+		return FERMION_SIGN;
 	}
 
-	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findOperatorMatrices(int i,
-	                                      int sigma,
-	                                      const VectorHilbertStateType& natBasis) const
+	//! Find c^\dagger_i\gamma\sigma in the natural basis natBasis
+	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
+	void findOperatorMatrices(SparseMatrixType& creationMatrix,
+	                          int i,
+	                          int sigma,
+	                          const HilbertBasisType& natBasis) const
 	{
 		HilbertStateType bra,ket;
 		int n = natBasis.size();
-		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
+		PsimagLite::Matrix<SparseElementType> cm(n,n);
 
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			bra=ket=natBasis[ii];
+
 			if (HilbertSpaceType::isNonZero(ket,i,sigma)) {
 
 			} else {
 				HilbertSpaceType::create(bra,i,sigma);
 				int jj = PsimagLite::isInVector(natBasis,bra);
 				if (jj<0) continue;
+				if (ii==SizeType(jj)) {
+					std::cerr<<"ii="<<i<<" ket="<<ket<<" bra="<<bra;
+					std::cerr<<" sigma="<<sigma<<"\n";
+					throw PsimagLite::RuntimeError("Creation operator diagonal\n");
+				}
+
 				cm(ii,jj) = sign(ket,i,sigma);
 			}
 		}
 
-		//std::cout<<"Cm\n";
-		//std::cout<<cm;
-		SparseMatrixType creationMatrix(cm);
-		return creationMatrix;
+		SparseMatrixType temp;
+		fullMatrixToCrsMatrix(temp,cm);
+		transposeConjugate(creationMatrix,temp);
 	}
 
 	//! Find S^+_i in the natural basis natBasis
@@ -409,13 +444,15 @@ private:
 		HilbertStateType bra,ket;
 		int n = natBasis.size();
 		MatrixType cm(n,n);
-
+		SizeType sigma1 = orb + SPIN_DOWN*NUMBER_OF_ORBITALS;
+		SizeType sigma2 = orb + SPIN_UP*NUMBER_OF_ORBITALS;
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			bra=ket=natBasis[ii];
-			if (HilbertSpaceType::get(ket,i)==2) {
+			if (HilbertSpaceType::isNonZero(ket,i,sigma1) &&
+			        !HilbertSpaceType::isNonZero(ket,i,sigma2)) {
 				// it is a down electron, then flip it:
-				HilbertSpaceType::destroy(bra,i,orb + SPIN_DOWN*NUMBER_OF_ORBITALS);
-				HilbertSpaceType::create(bra,i,orb + SPIN_UP*NUMBER_OF_ORBITALS);
+				HilbertSpaceType::destroy(bra,i,sigma1);
+				HilbertSpaceType::create(bra,i,sigma2);
 				int jj = PsimagLite::isInVector(natBasis,bra);
 				assert(jj>=0);
 				cm(ii,jj)=1.0;

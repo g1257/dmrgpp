@@ -122,7 +122,7 @@ public:
 
 	}
 
-	// Create electron with internal dof  "sigma" on site "j" in binary number "a"
+	// Create electron with internal dof "sigma" on site "j" in binary number "a"
 	static void create(Word &a,SizeType j,SizeType sigma)
 	{
 		SizeType dofs = 2*orbitals_;
@@ -131,16 +131,16 @@ public:
 		a |= mask;
 	}
 
-	// Destroy electron with internal dof  "sigma" on site "j" in binary number "a"
+	// Destroy electron with internal dof "sigma" on site "j" in binary number "a"
 	static void destroy(Word &a,SizeType j,SizeType sigma)
 	{
 		SizeType dofs = 2*orbitals_;
 		SizeType k=dofs*j;
 		Word mask=(1<<(k+sigma));
-		a |= (~mask);
+		a &= (~mask);
 	}
 
-	// Is there an electron with internal dof  "sigma" on site "i" in binary number "ket"?
+	// Is there an electron with internal dof "sigma" on site "i" in binary number "ket"?
 	static bool isNonZero(Word const &ket,SizeType i,SizeType sigma)
 	{
 
