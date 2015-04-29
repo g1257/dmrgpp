@@ -147,7 +147,7 @@ public:
 			atmp += std::real(y[i]*std::conj(y[i]));
 		}
 		if (mode_ & DEBUG) {
-			computeGroundStateTest(gsEnergy,z,y);
+			computeExcitedStateTest(gsEnergy,z,y,0);
 			return;
 		}
 		atmp = 1.0 / sqrt (atmp);
@@ -160,7 +160,7 @@ public:
 	                                const VectorType& initialVector)
 	{
 		if (mode_ & DEBUG) {
-			computeGroundStateTest(gsEnergy,z,initialVector);
+			computeExcitedStateTest(gsEnergy,z,initialVector,0);
 			return;
 		}
 
@@ -192,7 +192,36 @@ public:
 		if (PsimagLite::norm(z)<1e-6)
 			throw RuntimeError(str + " norm is zero\n");
 
-		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,std::cout);
+		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,0,std::cout);
+	}
+
+	virtual void computeExcitedState(RealType &gsEnergy,
+	                                 VectorType &z,
+	                                 const VectorType& initialVector,
+	                                 SizeType excited)
+	{
+		if (mode_ & DEBUG) {
+			computeExcitedStateTest(gsEnergy,z,initialVector,excited);
+			return;
+		}
+
+		SizeType n=mat_.rank();
+		VectorType y(n);
+
+		RealType atmp=0.0;
+		for (SizeType i=0;i<n;i++) {
+			y[i]=initialVector[i];
+			atmp += std::real(y[i]*std::conj(y[i]));
+		}
+		atmp = 1.0 / sqrt (atmp);
+		for (SizeType i = 0; i < mat_.rank(); i++) y[i] *= atmp;
+
+		TridiagonalMatrixType ab;
+
+		decomposition(y,ab);
+		gsEnergy = ab.excited(z,excited);
+
+		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,excited,std::cout);
 	}
 
 	void buildDenseMatrix(DenseMatrixType& T,const TridiagonalMatrixType& ab) const
@@ -311,7 +340,10 @@ private:
 		if (options.find("lanczosAllowsZero")!=String::npos) mode_ |= ALLOWS_ZERO;
 	}
 
-	void info(RealType energyTmp,const VectorType& x,std::ostream& os)
+	void info(RealType energyTmp,
+	          const VectorType& x,
+	          SizeType excited,
+	          std::ostream& os)
 	{
 		RealType norma=norm(x);
 		SizeType& iter = steps_;
@@ -322,7 +354,9 @@ private:
 
 		OstringStream msg;
 		msg.precision(8);
-		msg<<"Found lowest eigenvalue= "<<energyTmp<<" after "<<iter;
+		PsimagLite::String what = "lowest";
+		if (excited > 0) what = ttos(excited) + " excited";
+		msg<<"Found "<<what<<" eigenvalue= "<<energyTmp<<" after "<<iter;
 		msg<<" iterations, "<<" orig. norm="<<norma;
 		progress_.printline(msg,os);
 	}
@@ -427,9 +461,10 @@ private:
 	}
 
 	//! only for debugging:
-	void computeGroundStateTest(RealType&,
+	void computeExcitedStateTest(RealType&,
 	                            VectorType&,
-	                            const VectorType&)
+	                            const VectorType&,
+	                            SizeType excited)
 	{
 		SizeType n =mat_.rank();
 		Matrix<VectorElementType> a(n,n);
@@ -450,7 +485,7 @@ private:
 		for (SizeType i=0;i<a.n_row();i++) std::cerr<<a(i,0)<<" ";
 		std::cerr<<"\n";
 		std::cerr<<"--------------------------------\n";
-		std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
+		std::cerr<<"eigs["<<excited<<"]="<<eigs[excited]<<"\n";
 
 		throw RuntimeError("testing lanczos solver\n");
 	}

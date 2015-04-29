@@ -77,12 +77,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef TRIDIAGONAL_MATRIX_H
 #define TRIDIAGONAL_MATRIX_H
+#include "AllocatorCpu.h"
 
 namespace PsimagLite {
 
 template<typename FieldType>
 class TridiagonalMatrix {
+
+	typedef typename Vector<FieldType>::Type VectorType;
+
 public:
+
 	typedef FieldType value_type;
 
 	TridiagonalMatrix()  { }
@@ -114,9 +119,11 @@ public:
 	}
 
 	FieldType& a(SizeType i) { return a_[i]; }
+
 	FieldType& b(SizeType i) { return b_[i]; }
 
 	const FieldType& a(SizeType i) const { return a_[i]; }
+
 	const FieldType& b(SizeType i) const { return b_[i]; }
 
 	template<typename SomeMatrixType>
@@ -141,8 +148,14 @@ public:
 
 	SizeType size() const { return a_.size(); }
 
+	template<typename SomeVectorType>
+	FieldType excited(SomeVectorType &z, SizeType level) const
+	{
+		return 0.0;
+	}
+
 private:
-	typename Vector<FieldType>::Type a_,b_;
+	VectorType a_,b_;
 }; // class TridiagonalMatrix
 } // namespace PsimagLite
 
