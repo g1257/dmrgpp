@@ -110,6 +110,16 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
+	typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,
+	        MatrixVectorType,
+	        TargetVectorType> LanczosOrDavidsonBaseType;
+	typedef PsimagLite::DavidsonSolver<ParametersForSolverType,
+	        MatrixVectorType,
+	        TargetVectorType> DavidsonSolverType;
+	typedef PsimagLite::LanczosSolver<ParametersForSolverType,
+	        MatrixVectorType,
+	        TargetVectorType> LanczosSolverType;
 
 	Diagonalization(const ParametersType& parameters,
 	                const ModelType& model,
@@ -196,7 +206,7 @@ private:
 		if (parameters_.options.find("MettsTargetting")!=PsimagLite::String::npos)
 			return gsEnergy;
 
-		
+
 		if (parameters_.options.find("TargetingAncilla")!=PsimagLite::String::npos)
 			onlyWft = true;
 		PsimagLite::OstringStream msg0;
@@ -371,16 +381,6 @@ private:
 
 		ReflectionSymmetryType *rs = 0;
 		if (reflectionOperator_.isEnabled()) rs = &reflectionOperator_;
-		typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-		typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,
-		        MatrixVectorType,
-		        TargetVectorType> LanczosOrDavidsonBaseType;
-		typedef PsimagLite::DavidsonSolver<ParametersForSolverType,
-		        MatrixVectorType,
-		        TargetVectorType> DavidsonSolverType;
-		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-		        MatrixVectorType,
-		        TargetVectorType> LanczosSolverType;
 
 		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(&model_,
 		                                                             &modelHelper,
@@ -402,23 +402,10 @@ private:
 			return;
 		}
 
-		RealType norma = PsimagLite::norm(initialVector);
-
 		if (!reflectionOperator_.isEnabled()) {
 			tmpVec.resize(lanczosHelper.rank());
 			try {
-				if (fabs(norma)<1e-12) {
-					PsimagLite::OstringStream msg;
-					msg<<"WARNING: diagonaliseOneBlock: Norm of guess vector is zero, ";
-					msg<<"ignoring guess\n";
-					progress_.printline(msg,std::cout);
-					lanczosOrDavidson->computeGroundState(energyTmp,
-					                                      tmpVec);
-				} else {
-					lanczosOrDavidson->computeGroundState(energyTmp,
-					                                      tmpVec,
-					                                      initialVector);
-				}
+				energyTmp = computeLevel(*lanczosOrDavidson,tmpVec,initialVector);
 			} catch (std::exception& e) {
 				PsimagLite::OstringStream msg0;
 				msg0<<"Lanczos or Davidson solver failed, ";
@@ -444,15 +431,14 @@ private:
 		TargetVectorType initialVector1,initialVector2;
 		reflectionOperator_.setInitState(initialVector,initialVector1,initialVector2);
 		tmpVec.resize(initialVector1.size());
-		lanczosOrDavidson->computeGroundState(energyTmp,tmpVec,initialVector1);
+		energyTmp = computeLevel(*lanczosOrDavidson,tmpVec,initialVector1);
 
 		RealType gsEnergy1 = energyTmp;
 		TargetVectorType gsVector1 = tmpVec;
 
 		lanczosHelper.reflectionSector(1);
 		TargetVectorType gsVector2(initialVector2.size());
-		RealType gsEnergy2 = 0;
-		lanczosOrDavidson->computeGroundState(gsEnergy2,gsVector2,initialVector2);
+		RealType gsEnergy2 = computeLevel(*lanczosOrDavidson,gsVector2,initialVector2);
 
 		energyTmp=reflectionOperator_.setGroundState(tmpVec,
 		                                             gsEnergy1,
@@ -461,6 +447,26 @@ private:
 		                                             gsVector2);
 
 		if (lanczosOrDavidson) delete lanczosOrDavidson;
+	}
+
+	RealType computeLevel(LanczosOrDavidsonBaseType& object,
+	                      TargetVectorType &gsVector,
+	                      const TargetVectorType &initialVector) const
+	{
+		SizeType excited = parameters_.excited;
+		RealType norma = PsimagLite::norm(initialVector);
+		RealType gsEnergy = 0;
+		if (fabs(norma)<1e-12) {
+			PsimagLite::OstringStream msg;
+			msg<<"WARNING: diagonaliseOneBlock: Norm of guess vector is zero, ";
+			msg<<"ignoring guess\n";
+			progress_.printline(msg,std::cout);
+			object.computeExcitedState(gsEnergy,gsVector,excited);
+		} else {
+			object.computeExcitedState(gsEnergy,gsVector,initialVector,excited);
+		}
+
+		return gsEnergy;
 	}
 
 	const ParametersType& parameters_;

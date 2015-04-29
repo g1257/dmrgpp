@@ -350,6 +350,7 @@ struct ParametersDmrgSolver {
 	SizeType sitesPerBlock;
 	SizeType maxMatrixRankStored;
 	SizeType keptStatesInfinite;
+	SizeType excited;
 	int useReflectionSymmetry;
 	FieldType tolerance;
 	std::pair<bool,FieldType> gsWeight;
@@ -403,6 +404,7 @@ struct ParametersDmrgSolver {
 	ParametersDmrgSolver(InputValidatorType& io)
 	    : sitesPerBlock(1),
 	      maxMatrixRankStored(0),
+	      excited(0),
 	      gsWeight(false,0.0)
 	{
 		io.readline(model,"Model=");
@@ -528,6 +530,10 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.readline(maxMatrixRankStored,"MaxMatrixRankStored=");
+		} catch (std::exception& e) {}
+
+		try {
+			io.readline(excited,"Excited=");
 		} catch (std::exception& e) {}
 	}
 };
