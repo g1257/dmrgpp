@@ -85,6 +85,7 @@ template<typename FieldType>
 class TridiagonalMatrix {
 
 	typedef typename Vector<FieldType>::Type VectorType;
+	typedef typename Real<FieldType>::Type RealType;
 
 public:
 
@@ -151,7 +152,21 @@ public:
 	template<typename SomeVectorType>
 	FieldType excited(SomeVectorType &z, SizeType level) const
 	{
-		return 0.0;
+		if (a_.size() > 4900)
+			throw RuntimeError("TridiagonalMatrix::excited: too big\n");
+
+		typedef typename SomeVectorType::value_type ElementType;
+		Matrix<ElementType> m;
+		buildDenseMatrix(m);
+		SizeType n = m.n_row();
+		assert(m.n_col() == n);
+		typename Vector<RealType>::Type eigs(n);
+		diag(m,eigs,'V');
+		assert(level < n);
+		for (SizeType i = 0; i < n; ++i)
+			z[i] = m(i,level);
+
+		return eigs[level];
 	}
 
 private:
