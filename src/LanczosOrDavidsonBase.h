@@ -100,6 +100,13 @@ public:
 	                                VectorType &z,
 	                                const VectorType& initialVector)=0;
 
+	virtual void computeExcitedState(RealType& gsEnergy,VectorType& z,SizeType)=0;
+
+	virtual void computeExcitedState(RealType &gsEnergy,
+	                                 VectorType &z,
+	                                 const VectorType& initialVector,
+	                                 SizeType)=0;
+
 	// To avoid compiler warnings
 	virtual ~LanczosOrDavidsonBase() { }
 

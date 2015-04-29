@@ -145,6 +145,25 @@ public:
 		throw RuntimeError(s.c_str());
 	}
 
+	virtual void computeExcitedState(RealType&,
+	                                 VectorType&,
+	                                 SizeType)
+	{
+		String s(__FILE__);
+		s += " computeExcitedState Unimplemented\n";
+		throw RuntimeError(s.c_str());
+	}
+
+	virtual void computeExcitedState(RealType&,
+	                                 VectorType&,
+	                                 const VectorType&,
+	                                 SizeType)
+	{
+		String s(__FILE__);
+		s += " computeExcitedState Unimplemented\n";
+		throw RuntimeError(s.c_str());
+	}
+
 private:
 
 	void setMode(const String& options)

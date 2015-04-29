@@ -136,6 +136,7 @@ public:
 		progress_.printline(msg,std::cout);
 	}
 
+	// FIXME : Deprecate this function
 	virtual void computeGroundState(RealType& gsEnergy,VectorType& z)
 	{
 		SizeType n =mat_.rank();
@@ -155,6 +156,7 @@ public:
 		computeGroundState(gsEnergy,z,y);
 	}
 
+	// FIXME : Deprecate this function
 	virtual void computeGroundState(RealType &gsEnergy,
 	                                VectorType &z,
 	                                const VectorType& initialVector)
@@ -195,11 +197,34 @@ public:
 		if (mode_ & WITH_INFO) info(gsEnergy,initialVector,0,std::cout);
 	}
 
+	virtual void computeExcitedState(RealType& gsEnergy,VectorType& z,SizeType excited)
+	{
+		if (excited == 0) return computeGroundState(gsEnergy,z);
+
+		SizeType n =mat_.rank();
+		RealType atmp=0.0;
+		VectorType y(n);
+
+		for (SizeType i=0;i<n;i++) {
+			y[i]=rng_()-0.5;
+			atmp += std::real(y[i]*std::conj(y[i]));
+		}
+		if (mode_ & DEBUG) {
+			computeExcitedStateTest(gsEnergy,z,y,0);
+			return;
+		}
+		atmp = 1.0 / sqrt (atmp);
+		for (SizeType i = 0; i < n; i++) y[i] *= atmp;
+		computeExcitedState(gsEnergy,z,y,excited);
+	}
+
 	virtual void computeExcitedState(RealType &gsEnergy,
 	                                 VectorType &z,
 	                                 const VectorType& initialVector,
 	                                 SizeType excited)
 	{
+		if (excited == 0) return computeGroundState(gsEnergy,z,initialVector);
+
 		if (mode_ & DEBUG) {
 			computeExcitedStateTest(gsEnergy,z,initialVector,excited);
 			return;
@@ -436,12 +461,12 @@ private:
 		for (i = 1, s = d[l = 0]; i < n; i++)
 			if (d[i] < s) s = d[l = i];
 
-		if (gs.size()>0) {
-			for (k = 0, vki = v + l; k < n; k++, vki += n) gs[k] = (*vki);
-			delete [] v;
-		}
+			        if (gs.size()>0) {
+				for (k = 0, vki = v + l; k < n; k++, vki += n) gs[k] = (*vki);
+				delete [] v;
+			}
 
-		delete [] d;
+			delete [] d;
 		delete [] e;
 		if (intCounter>maxCounter)
 			throw RuntimeError("LanczosSolver::ground(): internal error\n");
@@ -462,9 +487,9 @@ private:
 
 	//! only for debugging:
 	void computeExcitedStateTest(RealType&,
-	                            VectorType&,
-	                            const VectorType&,
-	                            SizeType excited)
+	                             VectorType&,
+	                             const VectorType&,
+	                             SizeType excited)
 	{
 		SizeType n =mat_.rank();
 		Matrix<VectorElementType> a(n,n);
