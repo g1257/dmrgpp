@@ -383,6 +383,8 @@ private:
 		if (excited > 0) what = ttos(excited) + " excited";
 		msg<<"Found "<<what<<" eigenvalue= "<<energyTmp<<" after "<<iter;
 		msg<<" iterations, "<<" orig. norm="<<norma;
+		if (excited > 0)
+			msg<<"\nLanczosSolver: EXPERIMENTAL feature excited > 0 is in use";
 		progress_.printline(msg,os);
 	}
 
