@@ -123,6 +123,7 @@ public:
 	typedef typename MyBasis::BasisDataType BasisDataType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
+	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -312,7 +313,7 @@ public:
 		}
 	}
 
-	PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
+	MatrixType naturalOperator(const PsimagLite::String& what,
 	                                                      SizeType site,
 	                                                      SizeType dof) const
 	{
@@ -328,34 +329,34 @@ public:
 		PsimagLite::String what2 = what;
 
 		if (what2 == "i" || what2=="identity") {
-			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+			MatrixType tmp(nrow,nrow);
 			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
 			return tmp;
 		}
 
 		if (what2 == "0") {
-			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+			MatrixType tmp(nrow,nrow);
 			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 0.0;
 			return tmp;
 		}
 
 		if (what2=="+") {
-			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+			MatrixType tmp(nrow,nrow);
 			for (SizeType x=0;x<modelParameters_.orbitals;x++)
 				tmp += multiplyTc(creationMatrix[x].data,
 				                  creationMatrix[x+modelParameters_.orbitals].data);
 			return tmp;
 		}
 		if (what2=="-") {
-			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
+			MatrixType tmp(nrow,nrow);
 			for (SizeType x=0;x<modelParameters_.orbitals;x++)
 				tmp += multiplyTc(creationMatrix[x+modelParameters_.orbitals].data,
 				                  creationMatrix[x].data);
 			return tmp;
 		}
 		if (what2=="z") {
-			PsimagLite::Matrix<SparseElementType> tmp(nrow,nrow);
-			PsimagLite::Matrix<SparseElementType> tmp2(nrow,nrow);
+			MatrixType tmp(nrow,nrow);
+			MatrixType tmp2(nrow,nrow);
 			for (SizeType x=0;x<modelParameters_.orbitals;x++) {
 				tmp += multiplyTc(creationMatrix[x].data,creationMatrix[x].data);
 				tmp2 += multiplyTc(creationMatrix[x+modelParameters_.orbitals].data,
@@ -364,13 +365,13 @@ public:
 			return tmp-tmp2;
 		}
 		if (what2=="n") {
-			PsimagLite::Matrix<SparseElementType> tmp =
+			MatrixType tmp =
 			        multiplyTc(creationMatrix[dof].data,creationMatrix[dof].data);
 			return tmp;
 		}
 
 		if (what2=="c") {
-			PsimagLite::Matrix<SparseElementType> tmp;
+			MatrixType tmp;
 			SparseMatrixType cdagger;
 			transposeConjugate(cdagger,
 			                   creationMatrix[orbital + spin*modelParameters_.orbitals].data);
@@ -379,7 +380,7 @@ public:
 		}
 
 		if (what2=="c\'") {
-			PsimagLite::Matrix<SparseElementType> tmp;
+			MatrixType tmp;
 			SparseMatrixType c = creationMatrix[orbital +
 			        spin*modelParameters_.orbitals].data;
 			crsMatrixToFullMatrix(tmp,c);
@@ -391,7 +392,7 @@ public:
 			multiply(atmp,
 			         creationMatrix[orbital+orbital+modelParameters_.orbitals].data,
 			        creationMatrix[orbital].data);
-			PsimagLite::Matrix<SparseElementType> tmp;
+			MatrixType tmp;
 			crsMatrixToFullMatrix(tmp,atmp);
 			return tmp;
 		}
@@ -526,7 +527,7 @@ private:
 	{
 		HilbertState bra,ket;
 		int n = natBasis.size();
-		PsimagLite::Matrix<SparseElementType> cm(n,n);
+		MatrixType cm(n,n);
 
 		for (SizeType ii=0;ii<natBasis.size();ii++) {
 			bra=ket=natBasis[ii];
@@ -651,14 +652,14 @@ private:
 	//! SU(2) symmetry related block
 	//! Let |9> = |up a down b> and
 	//! Let |6> = |up b down a>  then
-	void reinterpret(PsimagLite::Matrix<SparseElementType>& cm,
+	void reinterpret(MatrixType& cm,
 	                 const HilbertBasisType& basis) const
 	{
 		int n  = cm.n_row();
 		if (n!=16)
 			throw PsimagLite::RuntimeError("blocks.size must be 1, and basis.size 16\n");
 
-		PsimagLite::Matrix<SparseElementType> cmCopy(n,n);
+		MatrixType cmCopy(n,n);
 		int i,j;
 		int x=PsimagLite::isInVector(basis,reinterpretX_);
 		int y=PsimagLite::isInVector(basis,reinterpretY_);
@@ -1208,7 +1209,7 @@ private:
 	void diagTest(const SparseMatrixType& fullm,const PsimagLite::String& str) const
 	{
 		if (fullm.rank()!=256) return;
-		PsimagLite::Matrix<SparseElementType> fullm2;
+		MatrixType fullm2;
 		crsMatrixToFullMatrix(fullm2,fullm);
 		typename PsimagLite::Vector<SparseElementType>::Type eigs(fullm2.n_row());
 		PsimagLite::diag(fullm2,eigs,'V');

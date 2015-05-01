@@ -97,8 +97,6 @@ class LinkProductHubbardAncilla {
 
 	enum {TERM_HOPPING, TERM_GAMMA};
 
-	static const SizeType DEGREES_OF_FREEDOM = 2*LinkProductFeAsType::orbitals_;
-
 public:
 
 	typedef typename ModelHelperType::RealType RealType;
@@ -139,7 +137,7 @@ public:
 			            angularMomentum,angularFactor,category,additional);
 
 		fermionOrBoson = ProgramGlobals::BOSON;
-		SizeType offset1 = DEGREES_OF_FREEDOM;
+		SizeType offset1 = 4;
 		ops.first += offset1;
 		ops.second += offset1;
 
@@ -162,3 +160,4 @@ public:
 } // namespace Dmrg
 /*@}*/
 #endif //DMRG_LINKPROD_HUBBARD_ANCILLA_H
+

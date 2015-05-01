@@ -78,6 +78,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_HUBBARD_ANCILLA_H
 #define DMRG_HUBBARD_ANCILLA_H
 #include "ModelCommon.h"
+#include "LinkProductHubbardAncilla.h"
+#include "ParametersHubbardAncilla.h"
 
 namespace Dmrg {
 
@@ -88,6 +90,7 @@ public:
 
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef ModelFeBasedSc<ModelBaseType> ModelFeAsType;
+	typedef typename ModelFeAsType::MatrixType MatrixType;
 	typedef typename ModelFeAsType::HilbertState HilbertState;
 	typedef typename ModelFeAsType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
@@ -102,7 +105,7 @@ public:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
-	typedef LinkProductFeAsExtended<ModelHelperType> LinkProductType;
+	typedef LinkProductHubbardAncilla<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -116,14 +119,17 @@ public:
 	static const SizeType SPIN_DOWN = ModelFeAsType::SPIN_DOWN;
 
 	HubbardAncilla(const SolverParamsType& solverParams,
-	                    InputValidatorType& io,
-	                    GeometryType const &geometry)
+	               InputValidatorType& io,
+	               GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
 	      modelFeAs_(solverParams,io,geometry),
 	      orbitals_(modelParameters_.orbitals)
-	{}
+	{
+		if (orbitals_ != 2)
+			throw PsimagLite::RuntimeError("HubbardAncilla: only for 2 orbitals\n");
+	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
@@ -152,13 +158,13 @@ public:
 		// add \Gamma^+_i to creationMatrix
 		setGammaMatrix(creationMatrix,block);
 
-		// FIXME: add J S^+_i S^-_i + S^-_i S^+_i to Hamiltonian
-		// addSplusSminus(hamiltonian,creationMatrix,block);
+		// add ONSITE J S^+_i S^-_i + S^-_i S^+_i to Hamiltonian
+		addSplusSminus(hamiltonian,creationMatrix,block);
 	}
 
 	//! set creation matrices for sites in block
 	void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	        BlockType const &block) const
+	                         BlockType const &block) const
 	{
 		blockIsSize1OrThrow(block);
 
@@ -211,8 +217,10 @@ public:
 	                                        RealType factorForDiagonals=1.0)  const
 	{
 		modelFeAs_.addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
-		// FIXME: add J S^+_i S^-_i + S^-_i S^+_i to Hamiltonian
-		// addSplusSminus(hamiltonian,creationMatrix,block);
+		// add ONSITE J S^+_i S^-_i + S^-_i S^+_i to Hamiltonian
+		SparseMatrixType tmpMatrix;
+		addSplusSminus(tmpMatrix,cm,block);
+		hmatrix += factorForDiagonals*tmpMatrix;
 	}
 
 	virtual SizeType maxElectronsOneSpin() const
@@ -229,10 +237,41 @@ public:
 
 private:
 
-	void setGammaMatrix(VectorOperatorType&,
-	                     const BlockType&)  const
+	void setGammaMatrix(VectorOperatorType& creationMatrix,
+	                    const BlockType& block)  const
 	{
-		throw PsimagLite::RuntimeError("setGammaMatrix not implemented\n");
+		blockIsSize1OrThrow(block);
+		assert(creationMatrix.size() == 2*modelParameters_.orbitals);
+
+		MatrixType m1 = creationMatrix[0].data.toDense();
+		MatrixType m2 = creationMatrix[1].data.toDense();
+		MatrixType m3 = creationMatrix[2].data.toDense();
+		MatrixType m4 = creationMatrix[3].data.toDense();
+		MatrixType m = m1*transposeConjugate(m2) + m3*transposeConjugate(m4);
+
+		Su2RelatedType su2related;
+		SparseMatrixType tmpMatrix(m);
+		OperatorType myOp(tmpMatrix,
+		                  1,
+		                  typename OperatorType::PairType(0,0),
+		                  1,
+		                  su2related);
+
+		creationMatrix.push_back(myOp);
+	}
+
+	void addSplusSminus(SparseMatrixType &hmatrix,
+	                    const VectorOperatorType& cm,
+	                    const BlockType& block) const
+	{
+		blockIsSize1OrThrow(block);
+		MatrixType m1 = cm[0].data.toDense();
+		MatrixType m2 = cm[1].data.toDense();
+		MatrixType m3 = cm[2].data.toDense();
+		MatrixType m4 = cm[3].data.toDense();
+		MatrixType m = m1*transposeConjugate(m3)*m4*transposeConjugate(m2);
+		MatrixType m5 = modelParameters_.ancillaJ*(m + transposeConjugate(m));
+		fullMatrixToCrsMatrix(hmatrix,m5);
 	}
 
 	void blockIsSize1OrThrow(const BlockType& block) const
@@ -241,15 +280,9 @@ private:
 		throw PsimagLite::RuntimeError("FeAsBasedExtended:: blocks must be of size 1\n");
 	}
 
-	//serializr start class HubbardAncilla
-	//serializr vptr
-	//serializr normal modelParameters_
-	ParametersModelFeAs<RealType>  modelParameters_;
-	//serializr ref geometry_ start
+	ParametersHubbardAncilla<RealType>  modelParameters_;
 	const GeometryType& geometry_;
-	//serializr normal modelFeAs_
 	ModelFeAsType modelFeAs_;
-	//serializr normal orbitals_
 	SizeType orbitals_;
 }; //class HubbardAncilla
 
