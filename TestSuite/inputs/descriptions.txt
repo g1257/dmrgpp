@@ -70,7 +70,8 @@ hence non-trivial.
 1850 Ancilla: Entangler Hamiltonian t-J 6 sites
 1851 Ancilla: Real      Hamiltonian t-J 6 sites
 #1852 to 1899 for tj Ancilla Tests
-#1899 to 1999 for Ancilla tests
+#1900 to 1950 for Hubbard Ancilla Tests
+#1951 to 1999 for Ancilla tests
 #2000) First Suzuki-Trotter test. The gs is time-evolved.
 #2001) Tests time evolution with 3 operators, which is more than the holon-doublon case, and
 #hence non-trivial. (Suzuki-Trotter)
