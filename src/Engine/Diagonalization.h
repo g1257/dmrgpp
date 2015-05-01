@@ -223,6 +223,7 @@ private:
 		  VectorSizeType weights(total);
 
 		SizeType counter=0;
+		SizeType weightsTotal = 0;
 		for (SizeType i=0;i<total;i++) {
 			SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 			if (verbose_) {
@@ -239,8 +240,15 @@ private:
 			if (lrs.super().pseudoEffectiveNumber(lrs.super().partition(i))!=quantumSector_ )
 				weights[i]=0;
 
+			weightsTotal += weights[i];
 			counter+=bs;
 			vecSaved[i].resize(weights[i]);
+		}
+
+		if (weightsTotal == 0) {
+			PsimagLite::String msg("Diagonalization: ");
+			msg += "No symmetry sectors found. Perhaps there are too many particles?\n";
+			throw PsimagLite::RuntimeError(msg);
 		}
 
 		typedef typename TargettingType::VectorWithOffsetType
