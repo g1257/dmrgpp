@@ -79,73 +79,30 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef ParametersHubbardAncilla_H
 #define ParametersHubbardAncilla_H
 #include "TargetQuantumElectrons.h"
+#include "../FeAsModel/ParametersModelFeAs.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters
 template<typename RealType>
-struct ParametersHubbardAncilla {
+struct ParametersHubbardAncilla : ParametersModelFeAs<RealType> {
+
+	typedef ParametersModelFeAs<RealType> BaseType;
 
 	template<typename IoInputType>
-	ParametersHubbardAncilla(IoInputType& io) : targetQuantum(io)
+	ParametersHubbardAncilla(IoInputType& io) : BaseType(io)
 	{
-
-		io.read(hubbardU,"hubbardU");
-		io.read(potentialV,"potentialV");
-
-		try {
-			io.read(potentialT,"PotentialT"); //level,beQuiet);
-		} catch (std::exception& e) {
-		}
-		omega=0;
-		try {
-			io.readline(omega,"omega=");
-		} catch (std::exception&) {}
+		io.readline(ancillaJ,"AncillaJ=");
 	}
 
 	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
+	SizeType memResolv(SomeMemResolvType&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   PsimagLite::String = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "ParametersHubbardAncilla";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&potentialV);
-		SizeType total = mres.memResolv(&hubbardU, end-start, str + " hubbardU");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&potentialT);
-		total += mres.memResolv(&potentialV, end-start, str + " potentialV");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&omega);
-		total += mres.memResolv(&potentialT, end-start, str + " potentialT");
-
-		total += mres.memResolv(&omega,
-		                        sizeof(*this) - total, str + " omega");
-
-		return total;
+		return 0;
 	}
 
-	//serializr start class ParametersHubbardAncilla
-	// Do not include here connection parameters
-	// those are handled by the Geometry
-
-	TargetQuantumElectrons<RealType> targetQuantum;
-
-	// Hubbard U values (one for each site)
-	//serializr normal hubbardU
-	typename PsimagLite::Vector<RealType>::Type hubbardU;
-	// Onsite potential values, one for each site
-	//serializr normal potentialV
-	typename PsimagLite::Vector<RealType>::Type potentialV;
-
-	// for time-dependent H:
-	//serializr normal potentialT
-	typename PsimagLite::Vector<RealType>::Type potentialT;
-	//serializr normal omega
-	RealType omega;
+	RealType ancillaJ;
 };
 
 //! Function that prints model parameters to stream os
@@ -153,17 +110,7 @@ template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
                          const ParametersHubbardAncilla<RealTypeType>& parameters)
 {
-	os<<parameters.targetQuantum;
-	os<<"hubbardU\n";
-	os<<parameters.hubbardU;
-	os<<"potentialV\n";
-	os<<parameters.potentialV;
-	if (parameters.potentialT.size()==0) return os;
-
-	// time-dependent stuff
-	os<<"potentialT\n";
-	os<<parameters.potentialT;
-	os<<"omega="<<parameters.omega<<"\n";
+	os<<"AncillaJ="<<parameters.ancillaJ<<"\n";
 	return os;
 }
 } // namespace Dmrg

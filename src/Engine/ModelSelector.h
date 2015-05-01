@@ -59,6 +59,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/Tj1Orb/Tj1Orb.h"
 #include "../Models/TjMultiOrb/TjMultiOrb.h"
 #include "../Models/SuperHubbardExtended/SuperHubbardExtended.h"
+#include "../Models/HubbardAncilla/HubbardAncilla.h"
 
 namespace Dmrg {
 
@@ -81,6 +82,7 @@ class ModelSelector {
 	typedef Tj1Orb<ModelBaseType> Tj1OrbType;
 	typedef TjMultiOrb<ModelBaseType> TjMultiOrbType;
 	typedef SuperHubbardExtended<ModelBaseType> SuperHubbardExtendedType;
+	typedef HubbardAncilla<ModelBaseType> HubbardAncillaType;
 	// end models
 
 public:
@@ -121,6 +123,8 @@ public:
 		} else if (name_ == "KaneMeleHubbard") {
 			ModelHubbardType::LinkProductType::TERMS_ = 2;
 			model_ = new ModelHubbardType(solverParams,io,geometry);
+		} else if (name_ == "HubbardAncilla") {
+			model_ = new HubbardAncillaType(solverParams,io,geometry);
 		} else {
 			PsimagLite::String s(__FILE__);
 			s += " Unknown model " + name_ + "\n";

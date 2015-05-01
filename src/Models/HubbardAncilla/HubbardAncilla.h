@@ -125,44 +125,11 @@ public:
 	      orbitals_(modelParameters_.orbitals)
 	{}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   PsimagLite::String = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "HubbardAncilla";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&modelParameters_);
-		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
-		          total,
-		          start,
-		          msg + " HubbardAncilla vptr");
-
-		start = end;
-		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
-		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&modelFeAs_);
-		total += (end - start);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to geometry");
-
-		mres.memResolv(&geometry_, 0, str + " geometry");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&orbitals_);
-		total += mres.memResolv(&modelFeAs_, end-start, str + " modelFeAs");
-
-		total += mres.memResolv(&orbitals_,
-		                        sizeof(*this) - total,
-		                        str + " orbitals");
-
-		return total;
+		return 0;
 	}
 
 	SizeType hilbertSize(SizeType site) const { return modelFeAs_.hilbertSize(site); }
@@ -172,7 +139,7 @@ public:
 	//! find creation operator matrices for (i,sigma) in the natural basis,
 	//! find quantum numbers and number of electrons
 	//! for each state in the basis
-	void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
+	void setNaturalBasis(VectorOperatorType& creationMatrix,
 	                     SparseMatrixType &hamiltonian,
 	                     BasisDataType &q,
 	                     BlockType const &block,
@@ -182,34 +149,23 @@ public:
 
 		modelFeAs_.setNaturalBasis(creationMatrix,hamiltonian,q,block,time);
 
-		// add S^+_i to creationMatrix
-		setSplus(creationMatrix,block);
+		// add \Gamma^+_i to creationMatrix
+		setGammaMatrix(creationMatrix,block);
 
-		// add S^z_i to creationMatrix
-		setSz(creationMatrix,block);
-
-		// add J_{ij} S^+_i S^-_j + S^-_i S^+_j to Hamiltonia
-		addSplusSminus(hamiltonian,creationMatrix,block);
-
-		// add J_{ij} S^z_i S^z_j to Hamiltonian
-		addSzSz(hamiltonian,creationMatrix,block);
-
+		// FIXME: add J S^+_i S^-_i + S^-_i S^+_i to Hamiltonian
+		// addSplusSminus(hamiltonian,creationMatrix,block);
 	}
 
 	//! set creation matrices for sites in block
-	void setOperatorMatrices(
-	        typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
+	void setOperatorMatrices(VectorOperatorType& creationMatrix,
 	        BlockType const &block) const
 	{
 		blockIsSize1OrThrow(block);
 
 		modelFeAs_.setOperatorMatrices(creationMatrix,block);
 
-		// add S^+_i to creationMatrix
-		setSplus(creationMatrix,block);
-
-		// add S^z_i to creationMatrix
-		setSz(creationMatrix,block);
+		// add \Gamma^+_i to creationMatrix
+		setGammaMatrix(creationMatrix,block);
 	}
 
 	PsimagLite::Matrix<SparseElementType> naturalOperator(const PsimagLite::String& what,
@@ -222,28 +178,13 @@ public:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		setOperatorMatrices(creationMatrix,block);
 
-		if (what=="z") {
-			PsimagLite::Matrix<SparseElementType> tmp;
-			SizeType x = 2*orbitals_+1;
-			crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
-			return tmp;
-		}
-
-		if (what=="+") {
+		if (what=="g") {
 			PsimagLite::Matrix<SparseElementType> tmp;
 			SizeType x = 2*orbitals_;
 			crsMatrixToFullMatrix(tmp,creationMatrix[x].data);
 			return tmp;
 		}
 
-		if (what=="-") { // delta = c^\dagger * c^dagger
-			PsimagLite::Matrix<SparseElementType> tmp;
-			SizeType x = 2*orbitals_;
-			SparseMatrixType tmp2;
-			transposeConjugate(tmp2,creationMatrix[x].data);
-			crsMatrixToFullMatrix(tmp,tmp2);
-			return tmp;
-		}
 		return modelFeAs_.naturalOperator(what,site,dof);
 	}
 
@@ -270,6 +211,8 @@ public:
 	                                        RealType factorForDiagonals=1.0)  const
 	{
 		modelFeAs_.addDiagonalsInNaturalBasis(hmatrix,cm,block,time,factorForDiagonals);
+		// FIXME: add J S^+_i S^-_i + S^-_i S^+_i to Hamiltonian
+		// addSplusSminus(hamiltonian,creationMatrix,block);
 	}
 
 	virtual SizeType maxElectronsOneSpin() const
@@ -286,82 +229,10 @@ public:
 
 private:
 
-	// add S^+_i to creationMatrix
-	void setSplus(
-	        typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	        const BlockType& block) const
+	void setGammaMatrix(VectorOperatorType&,
+	                     const BlockType&)  const
 	{
-		SparseMatrixType m;
-		cDaggerC(m,creationMatrix,block,1.0,SPIN_UP,SPIN_DOWN);
-		Su2RelatedType su2related;
-		SizeType offset = 2*orbitals_;
-		su2related.source.push_back(offset);
-		su2related.source.push_back(offset+1);
-		su2related.source.push_back(offset);
-		su2related.transpose.push_back(-1);
-		su2related.transpose.push_back(-1);
-		su2related.transpose.push_back(1);
-		su2related.offset = 1;
-
-		OperatorType sPlus(m,1,typename OperatorType::PairType(2,2),-1,
-		                   su2related);
-		creationMatrix.push_back(sPlus);
-	}
-
-	// add S^z_i to creationMatrix
-	void setSz(
-	        typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	        const BlockType& block) const
-	{
-		SparseMatrixType m1,m2;
-		cDaggerC(m1,creationMatrix,block,0.5,SPIN_UP,SPIN_UP);
-		cDaggerC(m2,creationMatrix,block,-0.5,SPIN_DOWN,SPIN_DOWN);
-		Su2RelatedType su2related2;
-		SparseMatrixType m = m1;
-		m += m2;
-		OperatorType sz(m,1,typename OperatorType::PairType(2,1),
-		                1.0/sqrt(2.0),su2related2);
-		creationMatrix.push_back(sz);
-	}
-
-	// add S^+_i to creationMatrix
-	void cDaggerC(
-	        SparseMatrixType& sum,
-	        const typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
-	        const BlockType&,
-	        RealType value,
-	        SizeType spin1,
-	        SizeType spin2) const
-	{
-		SparseMatrixType tmpMatrix,tmpMatrix2;
-		for (SizeType orbital=0;orbital<orbitals_;orbital++) {
-			transposeConjugate(tmpMatrix2,
-			                   creationMatrix[orbital+spin2*orbitals_].data);
-			multiply(tmpMatrix,
-			         creationMatrix[orbital+spin1*orbitals_].data,
-			        tmpMatrix2);
-			multiplyScalar(tmpMatrix2,tmpMatrix,value);
-			if (orbital == 0) sum = tmpMatrix2;
-			else sum += tmpMatrix2;
-		}
-	}
-
-	// add J_{ij} S^+_i S^-_j + S^-_i S^+_j to Hamiltonia
-	void addSplusSminus(
-	        SparseMatrixType &,
-	        const typename PsimagLite::Vector<OperatorType> ::Type&,
-	        const BlockType&) const
-	{
-		// nothing if block.size == 1
-	}
-
-	// add J_{ij} S^z_i S^z_j to Hamiltonian
-	void addSzSz(
-	        SparseMatrixType&,
-	        const typename PsimagLite::Vector<OperatorType> ::Type&,
-	        const BlockType&) const
-	{
-		// nothing if block.size == 1
+		throw PsimagLite::RuntimeError("setGammaMatrix not implemented\n");
 	}
 
 	void blockIsSize1OrThrow(const BlockType& block) const

@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_LINKPROD_HUBBARD_ANCILLA_H
 #define DMRG_LINKPROD_HUBBARD_ANCILLA_H
 #include "../Models/FeAsModel/LinkProductFeAs.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -94,9 +95,9 @@ class LinkProductHubbardAncilla {
 	typedef typename ModelHelperType::BasisType BasisType;
 	typedef typename ModelHelperType::OperatorType OperatorType;
 
-	enum {TERM_HOPPING, TERM_J};
+	enum {TERM_HOPPING, TERM_GAMMA};
 
-	static const SizeType DEGREES_OF_FREEDOM = 4;
+	static const SizeType DEGREES_OF_FREEDOM = 2*LinkProductFeAsType::orbitals_;
 
 public:
 
@@ -105,9 +106,7 @@ public:
 	template<typename SomeStructType>
 	static SizeType dofs(SizeType term,const SomeStructType& additional)
 	{
-		return (term==TERM_J) ?
-		            LinkProductHeisenbergType::dofs(term,additional) :
-		            LinkProductFeAsType::dofs(term,additional);
+		return (term==TERM_GAMMA) ? 1 : LinkProductFeAsType::dofs(term,additional);
 	}
 
 	// has only dependence on orbital
@@ -119,7 +118,7 @@ public:
 		if (term==TERM_HOPPING)
 			return LinkProductFeAsType::connectorDofs(term,dofs,additional);
 
-		return LinkProductHeisenbergType::connectorDofs(term,dofs,additional);
+		return PairType(0,0);
 	}
 
 	template<typename SomeStructType>
@@ -131,19 +130,19 @@ public:
 	                        std::pair<char,char>& mods,
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
-	                        SizeType& category,const SomeStructType& additional)
+	                        SizeType& category,
+	                        const SomeStructType& additional)
 	{
 		if (term==TERM_HOPPING)
 			return LinkProductFeAsType::setLinkData(
 			            term,dofs,isSu2,fermionOrBoson,ops,mods,
 			            angularMomentum,angularFactor,category,additional);
 
-		LinkProductHeisenbergType::setLinkData(
-		            term,dofs,isSu2,fermionOrBoson,ops,mods,
-		            angularMomentum,angularFactor,category,additional);
+		fermionOrBoson = ProgramGlobals::BOSON;
 		SizeType offset1 = DEGREES_OF_FREEDOM;
 		ops.first += offset1;
 		ops.second += offset1;
+
 	}
 
 	template<typename SomeStructType>
@@ -156,8 +155,6 @@ public:
 		                                                                  dofs,
 		                                                                  isSu2,
 		                                                                  additional);
-
-		LinkProductHeisenbergType::valueModifier(value,term,dofs,isSu2,additional);
 	}
 
 	static SizeType terms() { return 2; }
