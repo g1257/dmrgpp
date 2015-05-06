@@ -91,12 +91,64 @@ struct ParametersModelFeAs {
 	// no connections here please!!
 	// connections are handled by the geometry
 
+	enum IntEnum {INT_PAPER33,
+		          INT_V,
+		          INT_CODE2,
+		          INT_IMPURITY,
+		          INT_KSPACE,
+		          INT_ORBITAL0};
+
+	static PsimagLite::String modeString(IntEnum x)
+	{
+		switch (x) {
+		case INT_PAPER33:
+			return "INT_PAPER29_33";
+		case INT_V:
+			return "INT_V";
+		case INT_CODE2:
+			return "INT_CODE2";
+		case INT_IMPURITY:
+			return "INT_IMPURITY";
+		case INT_KSPACE:
+			return "INT_KSPACE";
+		case INT_ORBITAL0:
+			return "INT_ORBITAL0";
+		}
+
+		return "UNKNOWN";
+	}
+
+	static IntEnum convertToEnum(PsimagLite::String x)
+	{
+		if (x == "INT_PAPER29_33")
+			return INT_PAPER33;
+
+		if (x == "INT_V")
+			return INT_V;
+
+		if (x == "INT_CODE2")
+			return INT_CODE2;
+
+		if (x == "INT_IMPURITY")
+			return INT_IMPURITY;
+
+		if (x == "INT_KSPACE")
+			return INT_KSPACE;
+
+		if (x == "INT_ORBITAL0")
+			return INT_ORBITAL0;
+
+		PsimagLite::String all = "INT_PAPER29_33 INT_V INT_CODE2 INT_IMPURITY";
+		all += PsimagLite::String(" INT_KSPACE") + " INT_ORBITAL0";
+		throw PsimagLite::RuntimeError("FeAsMode= can only be one of " + all + "\n");
+	}
+
 	template<typename IoInputType>
 	ParametersModelFeAs(IoInputType& io)
 	    : targetQuantum(io),
 	      minElectronsPerSite(0),
 	      potentialT(0),
-	      feAsMode(0),
+	      feAsMode(INT_PAPER33),
 	      coulombV(0),
 	      magneticField(0,0)
 	{
@@ -106,9 +158,11 @@ struct ParametersModelFeAs {
 
 		bool decayInInputFile = false;
 		try {
-			io.readline(feAsMode,"Decay=");
+			PsimagLite::String tmp;
+			io.readline(tmp,"Decay=");
+			feAsMode = convertToEnum(tmp);
 			decayInInputFile = true;
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		if (decayInInputFile) {
 			PsimagLite::String str("Please use FeAsMode= instead of Decay=");
@@ -116,14 +170,13 @@ struct ParametersModelFeAs {
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		io.readline(feAsMode,"FeAsMode=");
+		PsimagLite::String tmp;
+		io.readline(tmp,"FeAsMode=");
+		feAsMode = convertToEnum(tmp);
 
-		if (feAsMode > 4)
-			throw PsimagLite::RuntimeError("FeAsMode: expecting 0 to 4\n");
-
-		if (feAsMode == 1 || feAsMode == 2) {
+		if (feAsMode == INT_V || feAsMode == INT_CODE2) {
 			SizeType tmp = orbitals * orbitals;
-			if (feAsMode == 2) tmp *= 2;
+			if (feAsMode == INT_CODE2) tmp *= 2;
 			if (hubbardU.size() != tmp) {
 				PsimagLite::String str("FeAsMode: expecting ");
 				str += ttos(tmp) + " U values\n";
@@ -131,13 +184,13 @@ struct ParametersModelFeAs {
 			}
 		}
 
-		if (feAsMode == 1) {
+		if (feAsMode == INT_V) {
 			if (orbitals != 3)
 				throw PsimagLite::RuntimeError("FeAsMode: expecting 3 orbitals\n");
 			io.readline(coulombV,"CoulombV=");
 		}
 
-		if (feAsMode == 0 || feAsMode == 3) {
+		if (feAsMode == INT_PAPER33 || feAsMode == INT_IMPURITY) {
 			if (hubbardU.size() != 4) {
 				PsimagLite::String str("FeAsMode: expecting");
 				str +=  " 4 U values\n";
@@ -145,7 +198,7 @@ struct ParametersModelFeAs {
 			}
 		}
 
-		if (feAsMode == 4) {
+		if (feAsMode == INT_KSPACE) {
 			if (hubbardU.size() != 1) {
 				PsimagLite::String str("FeAsMode: expecting");
 				str +=  " just 1 U value\n";
@@ -161,9 +214,9 @@ struct ParametersModelFeAs {
 		} catch (std::exception& e) {}
 
 		if (magneticField.n_row()!=0 && magneticField.n_row()!=3)
-			throw PsimagLite::RuntimeError("Magnetic RealType: if present must have 3 rows\n");
+			throw PsimagLite::RuntimeError("MagneticField: if present must have 3 rows\n");
 		if (magneticField.n_row()!=0 && magneticField.n_col()!=potentialV.size())
-			throw PsimagLite::RuntimeError("Magnetic RealType: Expecting columns equal sites\n");
+			throw PsimagLite::RuntimeError("MagneticField: Expecting columns == sites\n");
 
 		try {
 			io.readline(minElectronsPerSite,"MinElectronsPerSite=");
@@ -171,46 +224,11 @@ struct ParametersModelFeAs {
 	}
 
 	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
+	SizeType memResolv(SomeMemResolvType&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   PsimagLite::String = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "ParametersModelFeAs";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&minElectronsPerSite);
-		SizeType total = mres.memResolv(&orbitals, end-start, str + " orbitals");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&hubbardU);
-		total += mres.memResolv(&minElectronsPerSite, end-start, str + " minElectronsPerSite");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&potentialV);
-		total += mres.memResolv(&hubbardU, end-start, str + " hubbardU");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&potentialT);
-		total += mres.memResolv(&potentialV, end-start, str + " potentialV");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&feAsMode);
-		total += mres.memResolv(&potentialT, end-start, str + " potentialT");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&coulombV);
-		total += mres.memResolv(&feAsMode, end-start, str + " feAsMode");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&magneticField);
-		total += mres.memResolv(&coulombV, end-start, str + " coulombV");
-
-		total += mres.memResolv(&magneticField,
-		                        sizeof(*this) - total,
-		                        str + " magneticField");
-
-		return total;
+		return 0;
 	}
 
 	//serializr start class ParametersModelFeAs
@@ -230,7 +248,7 @@ struct ParametersModelFeAs {
 	//serializr normal potentialT
 	typename PsimagLite::Vector<RealType>::Type potentialT;
 	//serializr normal feAsMode
-	SizeType feAsMode;
+	IntEnum feAsMode;
 	//serializr normal coulombV
 	RealType coulombV;
 	//serializr normal magneticField
@@ -252,8 +270,9 @@ std::ostream& operator<<(std::ostream &os,
 		os<<parameters.magneticField;
 	}
 
-	os<<"FeAsMode="<<parameters.feAsMode<<"\n";
-	if (parameters.feAsMode == 1)
+	os<<"FeAsMode=";
+	os<<ParametersModelFeAs<RealType>::modeString(parameters.feAsMode)<<"\n";
+	if (parameters.feAsMode == ParametersModelFeAs<RealType>::INT_V)
 		os<<"CoulombV="<<parameters.coulombV<<"\n";
 
 	if (parameters.potentialT.size()>0) {

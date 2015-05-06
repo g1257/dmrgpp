@@ -124,6 +124,7 @@ public:
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef ParametersModelFeAs<RealType> ParamsModelFeAsType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
@@ -697,21 +698,25 @@ private:
 	                    RealType factorForDiagonals,
 	                    SizeType actualSite) const
 	{
-		if (modelParameters_.feAsMode == 4) {
+		if (modelParameters_.feAsMode == ParamsModelFeAsType::INT_ORBITAL0) {
+			return addInteractionAncilla(hmatrix,cm,i,factorForDiagonals,actualSite);
+		}
+
+		if (modelParameters_.feAsMode == ParamsModelFeAsType::INT_KSPACE) {
 			return addInteractionKspace(hmatrix,cm,i,factorForDiagonals,actualSite);
 		}
 
-		if (modelParameters_.feAsMode == 3) {
+		if (modelParameters_.feAsMode == ParamsModelFeAsType::INT_IMPURITY) {
 			return addInteractionImpurity(hmatrix,cm,i,factorForDiagonals,actualSite);
 		}
 
-		if (modelParameters_.feAsMode == 2) {
+		if (modelParameters_.feAsMode == ParamsModelFeAsType::INT_CODE2) {
 			return addInteractionUmatrix(hmatrix,cm,i,factorForDiagonals);
 		}
 
 		addInteractionU1(hmatrix,cm,i,factorForDiagonals);
 		addInteractionU2(hmatrix,cm,i,factorForDiagonals);
-		if (modelParameters_.feAsMode == 0) {
+		if (modelParameters_.feAsMode == ParamsModelFeAsType::INT_PAPER33) {
 			addInteractionJ1(hmatrix,cm,i,factorForDiagonals);
 			addInteractionJ2(hmatrix,cm,i,factorForDiagonals);
 		} else {
@@ -721,7 +726,8 @@ private:
 
 	RealType findHubbardU(SizeType index, SizeType orb1, SizeType orb2) const
 	{
-		if (modelParameters_.feAsMode == 0 || modelParameters_.feAsMode == 3) {
+		if (modelParameters_.feAsMode == ParamsModelFeAsType::INT_PAPER33 ||
+		        modelParameters_.feAsMode == ParamsModelFeAsType::INT_IMPURITY) {
 			assert(index < modelParameters_.hubbardU.size());
 			return modelParameters_.hubbardU[index];
 		}
@@ -1199,6 +1205,29 @@ private:
 		}
 	}
 
+	//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
+	void addInteractionAncilla(SparseMatrixType &hmatrix,
+	                           const VectorOperatorType& cm,
+	                           SizeType i,
+	                           RealType factorForDiagonals,
+	                           SizeType actualSite) const
+	{
+		int dof=2*modelParameters_.orbitals;
+		SparseMatrixType tmpMatrix,tmpMatrix2;
+
+		SizeType alpha = 0; // real sites, no ancilla
+		SparseMatrixType m1=cm[alpha+SPIN_UP*modelParameters_.orbitals+i*dof].data;
+		SparseMatrixType m2=cm[alpha+SPIN_DOWN*modelParameters_.orbitals+i*dof].data;
+
+		multiply(tmpMatrix,n(m1),n(m2));
+		assert(actualSite < modelParameters_.hubbardU.size());
+		multiplyScalar(tmpMatrix2,
+		               tmpMatrix,
+		               factorForDiagonals*modelParameters_.hubbardU[actualSite]);
+		hmatrix += tmpMatrix2;
+
+	}
+
 	bool isAllowedThisDof(SizeType alpha) const
 	{
 		SizeType electrons = HilbertSpaceFeAsType::electrons(alpha);
@@ -1224,7 +1253,7 @@ private:
 	//serializr normal reinterpretY_
 	HilbertState reinterpretY_;
 	//serializr normal modelParameters_
-	ParametersModelFeAs<RealType>  modelParameters_;
+	ParamsModelFeAsType  modelParameters_;
 	//serializr ref geometry_ start
 	const GeometryType& geometry_;
 	GeometryDcaType geometryDca_;
