@@ -102,7 +102,7 @@ struct ParametersModelFeAs {
 	{
 		switch (x) {
 		case INT_PAPER33:
-			return "INT_PAPER29_33";
+			return "INT_PAPER33";
 		case INT_V:
 			return "INT_V";
 		case INT_CODE2:
@@ -120,7 +120,7 @@ struct ParametersModelFeAs {
 
 	static IntEnum convertToEnum(PsimagLite::String x)
 	{
-		if (x == "INT_PAPER29_33")
+		if (x == "INT_PAPER33")
 			return INT_PAPER33;
 
 		if (x == "INT_V")
@@ -138,7 +138,7 @@ struct ParametersModelFeAs {
 		if (x == "INT_ORBITAL0")
 			return INT_ORBITAL0;
 
-		PsimagLite::String all = "INT_PAPER29_33 INT_V INT_CODE2 INT_IMPURITY";
+		PsimagLite::String all = "INT_PAPER33 INT_V INT_CODE2 INT_IMPURITY";
 		all += PsimagLite::String(" INT_KSPACE") + " INT_ORBITAL0";
 		throw PsimagLite::RuntimeError("FeAsMode= can only be one of " + all + "\n");
 	}
