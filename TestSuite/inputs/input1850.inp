@@ -1,10 +1,15 @@
 TotalNumberOfSites=6
-NumberOfTerms=4
+NumberOfTerms=5
 
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
 Connectors  1 0 
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors  1 0
 
 DegreesOfFreedom=1
 GeometryKind=chain

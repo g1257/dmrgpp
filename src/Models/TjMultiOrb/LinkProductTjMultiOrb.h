@@ -86,7 +86,7 @@ class LinkProductTjMultiOrb {
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
-	enum {TERM_CICJ, TERM_SISJ, TERM_NINJ, TERM_DIDJ};
+	enum {TERM_CICJ, TERM_SPSM, TERM_SZSZ, TERM_NINJ, TERM_DIDJ};
 
 public:
 	typedef typename ModelHelperType::RealType RealType;
@@ -95,15 +95,16 @@ public:
 	template<typename SomeStructType>
 	static void setLinkData(SizeType term,
 	                        SizeType dofs,
-	                        bool,
+	                        bool isSu2,
 	                        SizeType& fermionOrBoson,
 	                        PairType& ops,
-	                        std::pair<char,char>&,
+	                        std::pair<char,char>& mods,
 	                        SizeType& angularMomentum,
 	                        RealType& angularFactor,
 	                        SizeType& category,
 	                        const SomeStructType&)
 	{
+		assert(!isSu2);
 		angularFactor = 1;
 		angularMomentum = 0;
 		category = 0;
@@ -114,20 +115,36 @@ public:
 			return;
 		}
 
-		if (term == TERM_SISJ) {
+		if (term==TERM_SPSM) {
+			char tmp = mods.first;
 			fermionOrBoson = ProgramGlobals::BOSON;
 			switch (dofs) {
 			case 0: // S+ S-
+				angularFactor = -1;
+				category = 2;
+				angularMomentum = 2;
 				ops = PairType(2,2);
 				break;
 			case 1: // S- S+
+				angularFactor = -1;
+				category = 0;
+				mods.first = mods.second;
+				mods.second = tmp;
+				angularMomentum = 2;
 				ops = PairType(2,2);
-				break;
-			case 2: // Sz Sz
-				ops = PairType(3,3);
 				break;
 			}
 
+			return;
+		}
+
+		if (term==TERM_SZSZ) {
+			fermionOrBoson = ProgramGlobals::BOSON;
+			assert(dofs == 0);
+			angularFactor = 0.5;
+			category = 1;
+			angularMomentum = 2;
+			ops = PairType(3,3);
 			return;
 		}
 
@@ -150,9 +167,10 @@ public:
 	static void valueModifier(SparseElementType& value,
 	                          SizeType term,
 	                          SizeType dofs,
-	                          bool,
+	                          bool isSu2,
 	                          const SomeStructType&)
 	{
+		assert(!isSu2);
 		if (term==TERM_CICJ) return;
 
 		if (term==TERM_NINJ) {
@@ -160,8 +178,8 @@ public:
 			return;
 		}
 
-		if (term==TERM_SISJ) {
-			if (dofs<2) value *= 0.5;
+		if (term == TERM_SPSM || term == TERM_SZSZ) {
+			if (term == TERM_SPSM) value *= 0.5;
 			value *= 0.5;
 			return;
 		}
@@ -175,7 +193,8 @@ public:
 	static SizeType dofs(SizeType term,const SomeStructType&)
 	{
 		if (term==TERM_CICJ) return 2; // c^\dagger c
-		if (term==TERM_SISJ) return 3; // S+ S-, S- S+ and Sz Sz
+		if (term==TERM_SPSM) return 2; // S+ S- and S- S+
+		if (term==TERM_SZSZ) return 1; // Sz Sz
 		if (term==TERM_NINJ) return 1; // ninj
 		if (term==TERM_DIDJ) return 1; // dijd
 		assert(false);
@@ -189,7 +208,7 @@ public:
 		return PairType(0,0); // no orbital and no dependence on spin
 	}
 
-	static SizeType terms() { return 4; }
+	static SizeType terms() { return 5; }
 
 }; // class LinkProductTjMultiOrb
 } // namespace Dmrg
