@@ -1,6 +1,5 @@
 #include "IoBinary.h"
 #include "Vector.h"
-#include "String.h"
 
 typedef std::pair<SizeType,SizeType>PairType;
 

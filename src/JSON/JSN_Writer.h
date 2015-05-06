@@ -12,7 +12,6 @@ Author: Michael S. Summers
 #define dca_JSN_Writer_H
 
 #include "VectorLike.h"
-#include "String.h"
 
 namespace dca {
 
@@ -35,7 +34,7 @@ namespace dca {
       precis          (10),
       printedFirstLine(false)
     {}
-    
+
     //======================================================================
 
     class KeyReference {
@@ -86,7 +85,7 @@ namespace dca {
     MapType<String, const psimag::Matrix<std::complex<double> >*> cMatrices;
 
     MapType<String, ThisType>                   writers;
-    
+
     //======================================================================
 
     void add(String key, const bool&          b)   { bools  [key] = b;    }
@@ -105,7 +104,7 @@ namespace dca {
     //======================================================================
 
     template<class T>
-    void add(String key, const T& obj){ 
+    void add(String key, const T& obj){
       obj.toJSN(getComponentWriter(key));
     }
 
@@ -114,11 +113,11 @@ namespace dca {
     template<typename T>
     void add(String key, const Map<String, T>::Type& map) {
       typedef typename Map<String, T>::Type::const_iterator itr;
-      ThisType& writer = writers[key]; 
-      for(itr i=map.begin(); i!= map.end(); i++) 
+      ThisType& writer = writers[key];
+      for(itr i=map.begin(); i!= map.end(); i++)
 	writer.add(i->first,i->second);
     }
-    
+
     //======================================================================
 
     template<typename ValType>
@@ -126,7 +125,7 @@ namespace dca {
     int maxKeyWidth( const MapType<String, ValType>& map) {
       SizeType result = 0;
       typedef typename MapType<String, ValType>::const_iterator itr;
-      for(itr i=map.begin(); i!= map.end(); i++) 
+      for(itr i=map.begin(); i!= map.end(); i++)
 	if( i->first.length() > result)
 	  result = i->first.length();
       return result+2;
@@ -136,7 +135,7 @@ namespace dca {
 
     int maxKeyWidth() const {
       int result = 0;
-      int maxKeyLen = 0; 
+      int maxKeyLen = 0;
 
       maxKeyLen = maxKeyWidth(strings);
       if (maxKeyLen > result) result = maxKeyLen;
@@ -179,12 +178,12 @@ namespace dca {
     template<typename ValType>
     void printLines(std::ostream& os,
 		    const MapType<String, ValType>& map,
-		    int offset, 
+		    int offset,
 		    int keyWidth,
 		    Position position=Middle) const {
-      
+
       typedef typename MapType<String, ValType>::const_iterator itr;
-      
+
       for(itr i=map.begin(); i!= map.end(); i++) {
 	printLine(os,i->first,i->second,offset,keyWidth,printedFirstLine);
 	printedFirstLine = true;
@@ -192,20 +191,20 @@ namespace dca {
     }
 
     //======================================================================
-    
+
     template<typename ValType>
     static
     void printLine(std::ostream& os,
 		   const String& key,
 		   const ValType&     val,
-		   int  offset, 
+		   int  offset,
 		   int  keyWidth,
 		   bool printedFirstLine_,
 		   bool printVal=true)  {
 
-      if (printedFirstLine_) 
+      if (printedFirstLine_)
 	os << ",\n" << String(offset,' ') ;
-      
+
       os << std::setw(keyWidth) << std::left << quoted(key);
       os << " : ";
       if (printVal)
@@ -216,21 +215,21 @@ namespace dca {
     //======================================================================
 
     template<typename T>
-    static 
+    static
     void valString(std::ostream& os,int offset, int keyWidth,
 		   const T& val) {
       os << val;
     }
 
     template<typename T>
-    static 
+    static
     void valString(std::ostream& os,int offset, int keyWidth,
 		   const psimag::Matrix<T>* val) {
 
       const psimag::Matrix<T>& matrix(*val);
 
       int kWidth    = 6;
-      int newOffset = offset + keyWidth + 4; 
+      int newOffset = offset + keyWidth + 4;
 
       os << "{";
       printLine(os,"rows", matrix.n_row(), newOffset, kWidth, false);
@@ -287,7 +286,7 @@ namespace dca {
     }
 
     //======================================================================
-      
+
     static
     String toString(const Map<String, String>::Type& map) {
 
@@ -351,24 +350,24 @@ namespace dca {
 	 << " \'size\': " << vec.size() << ", \n";
       os << " \'data\': ";
       os << "array([[";
-      for(SizeType j=0; j<vec.size(); j++) 
+      for(SizeType j=0; j<vec.size(); j++)
 	os << " " << std::setw(precis) << vec[j] << ",\n";
       os << "]])\n";
-      
+
       os << "}";
     }
-    //====================================================================== 
-    static 
+    //======================================================================
+    static
     String quoted(String str) {
       PsimagLite::OstringStream result;
       result << "\"" << str << "\"";
       return result.str();
     }
-    
+
     //======================================================================
-   
+
   };
-  
+
 } // end namespace DCA
 
 

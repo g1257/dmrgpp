@@ -11,7 +11,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -28,13 +28,13 @@ Please see full open source license included in file LICENSE.
 #ifndef LINE_MARKER_H
 #define LINE_MARKER_H
 #include <iostream>
-#include "String.h"
+#include "AllocatorCpu.h"
 
 namespace PsimagLite {
 
 	class LineMarker  {
 	public:
-		
+
 
 		LineMarker(const String& name) : name_(name+"=0")
 		{
@@ -48,7 +48,7 @@ namespace PsimagLite {
 			io.readline(x,name_,level);
 
 		}
-		
+
 		template<typename IoOutputType>
 		void save(IoOutputType& io) const
 		{
@@ -59,6 +59,6 @@ namespace PsimagLite {
 		String name_;
 
 	}; // class LineMarker
-} // namespace PsimagLite 
+} // namespace PsimagLite
 /*@}*/
 #endif  //LINE_MARKER_H

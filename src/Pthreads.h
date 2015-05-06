@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <pthread.h>
 #include <iostream>
-#include "String.h"
+#include "AllocatorCpu.h"
 
 template<typename PthreadFunctionHolderType>
 struct PthreadFunctionStruct {

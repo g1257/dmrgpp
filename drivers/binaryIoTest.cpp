@@ -1,6 +1,5 @@
 #include "IoBinary.h"
 #include "Vector.h"
-#include "String.h"
 
 void readMe(const String& myfile)
 {

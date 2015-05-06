@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  added to the class itself as companions
  *
  */
-  
+
 #ifndef BINARY_LOAD_SAVE_H
 #define BINARY_LOAD_SAVE_H
 
@@ -88,7 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 #include <complex>
 #include "TypeToString.h"
-#include "String.h"
 
 namespace PsimagLite {
 
@@ -173,5 +172,5 @@ private:
 
 } // namespace PsimagLite
 
-/*@}*/	
+/*@}*/
 #endif

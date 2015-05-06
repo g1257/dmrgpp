@@ -77,7 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef TRIDIAGONAL_MATRIX_H
 #define TRIDIAGONAL_MATRIX_H
-#include "AllocatorCpu.h"
+#include "Matrix.h"
 
 namespace PsimagLite {
 

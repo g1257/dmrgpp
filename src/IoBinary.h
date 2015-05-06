@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -167,7 +167,7 @@ Total Size = 74 bytes.
 If it were written in ascii = 43 bytes.
 ----------------------------------------------------------------------
  */
-  
+
 #ifndef IO_BINARY_H
 #define IO_BINARY_H
 
@@ -180,7 +180,6 @@ If it were written in ascii = 43 bytes.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include "String.h"
 
 namespace PsimagLite {
 	//! IoBinary class handles Input/Output (IO) in binary format
@@ -435,7 +434,7 @@ namespace PsimagLite {
 				}
 			}
 
-			void close() 
+			void close()
 			{
 				if (!ENABLED) return;
 				filename_="FILE_IS_CLOSED";
@@ -464,7 +463,7 @@ namespace PsimagLite {
 				myread(fin_,&x,sizeof(x));
 
 				return sc.second;
-				
+
 			}
 
 			template<typename X>
@@ -488,7 +487,7 @@ namespace PsimagLite {
 				throw RuntimeError("Unimplemented read\n");
 			}
 
-			//! Assumes something of the form 
+			//! Assumes something of the form
 			//! label[key]=value
 //			template<typename X>
 //			void read(Map<String,X>::Type& x,
@@ -504,7 +503,7 @@ namespace PsimagLite {
 //						String key;
 //						X val=0;
 //						getKey(key,val,sc.first);
-				
+
 //						x[key]=val;
 //						counter++;
 //					} catch (std::exception& e) {
@@ -519,14 +518,14 @@ namespace PsimagLite {
 //					throw RuntimeError(s2.c_str());
 //				}
 //			}
-			
+
 //			template<typename X>
 //			std::pair<String,SizeType> readKnownSize(X &x,
 //			                                            String const &s,
 //			                                            LongIntegerType level=0)
 //			{
 //				std::pair<String,SizeType> sc = advance(s,level);
-				
+
 //				for (SizeType i=0;i<x.size();i++) {
 //					typename X::value_type tmp;
 //					fin_>>tmp;
@@ -576,7 +575,7 @@ namespace PsimagLite {
 					if (counter>1) advance(s,counter-2);
 					return std::pair<String,SizeType>(tempSaved,counter);
 				}
-				
+
 				//std::cerr<<"count="<<c<<"\n";
 				if (!found && tempSaved=="NOTFOUND") {
 					if (!beQuiet) {
@@ -588,7 +587,7 @@ namespace PsimagLite {
 				//std::cerr<<"------------\n";
 				return std::pair<String,SizeType>(tempSaved,counter);
 			}
-			
+
 //			SizeType count(const String& s)
 //			{
 //				SizeType i = 0;
@@ -604,7 +603,7 @@ namespace PsimagLite {
 //				String ss = "IoBinary::count(...): too many "
 //					+s+" in file "+filename_+"\n";
 //				throw RuntimeError(s.c_str());
-				
+
 //			}
 
 //			template<typename T>
@@ -641,7 +640,7 @@ namespace PsimagLite {
 //					fin_>>value;
 //					x[index]=value;
 //				}
-				
+
 //			}
 
 			template<typename X>
@@ -687,7 +686,7 @@ namespace PsimagLite {
 //				fin_.seekg(0, std::ios::beg); // move to the start of the file
 			}
 
-			const char* filename() const 
+			const char* filename() const
 			{
 				return filename_.c_str();
 			}
@@ -942,7 +941,7 @@ namespace PsimagLite {
 //		}
 //	}
 
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
 
 //namespace Spf {
@@ -952,5 +951,5 @@ namespace PsimagLite {
 //		IoBinaryIn(const char* fn) : PsimagLite::IoBinary::In(String(fn)) { }
 //	};
 //}
-/*@}*/	
+/*@}*/
 #endif

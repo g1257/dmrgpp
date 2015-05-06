@@ -3,16 +3,16 @@
 /** \ingroup JsonParser */
 /*@{*/
 
-/*! \file StatesAndActionsMixin.h  
+/*! \file StatesAndActionsMixin.h
  *
- *  
+ *
  *
  */
 
 #ifndef  JsonParser_StatesAndActionsMixin_H
 #define  JsonParser_StatesAndActionsMixin_H
 
-#include "String.h"
+#include "AllocatorCpu.h"
 
 namespace JsonParser {
 
@@ -84,7 +84,7 @@ namespace JsonParser {
     } StatesAndActionsType;
 
     static bool isState(StatesAndActionsType stateOrAction) {
-      if (stateOrAction < NR_STATES) 
+      if (stateOrAction < NR_STATES)
 	return true;
       return false;
     }
