@@ -1,11 +1,18 @@
 TotalNumberOfSites=8 
-NumberOfTerms=3
+NumberOfTerms=4
 DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
 Connectors
 	1
 	1.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        0.3
 
 DegreesOfFreedom=1
 GeometryKind=chain
