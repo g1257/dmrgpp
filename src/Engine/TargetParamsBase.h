@@ -220,6 +220,11 @@ public:
 		unimplemented("noOperator");
 	}
 
+	virtual bool skipTimeZero() const
+	{
+		return static_cast<bool>(unimplemented("skipTimeZero"));
+	}
+
 private:
 
 	RealType unimplemented(PsimagLite::String s) const

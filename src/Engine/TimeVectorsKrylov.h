@@ -150,22 +150,12 @@ public:
 	                             bool,
 	                             const PsimagLite::Vector<SizeType>::Type&)
 	{
-		if (currentTime_==0 && tstStruct_.noOperator()) {
+		if (currentTime_==0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
 			for (SizeType i=0;i<times_.size();i++)
 				targetVectors_[i]=phi;
 			return;
 		}
 
-		calcTimeVectorsKrylov1(startEnd,Eg,phi,systemOrEnviron);
-	}
-
-private:
-
-	void calcTimeVectorsKrylov1(const PairType& startEnd,
-	                            RealType Eg,
-								const VectorWithOffsetType& phi,
-								SizeType systemOrEnviron)
-	{
 		VectorMatrixFieldType V(phi.sectors());
 		VectorMatrixFieldType T(phi.sectors());
 
@@ -173,7 +163,7 @@ private:
 
 		triDiag(phi,T,V,steps);
 
-		typename PsimagLite::Vector<typename PsimagLite::Vector<RealType>::Type>::Type eigs(phi.sectors());
+		typename PsimagLite::Vector<VectorRealType>::Type eigs(phi.sectors());
 
 		for (SizeType ii=0;ii<phi.sectors();ii++)
 			PsimagLite::diag(T[ii],eigs[ii],'V');
@@ -182,6 +172,8 @@ private:
 
 		//checkNorms();
 	}
+
+private:
 
 	//! Do not normalize states here, it leads to wrong results (!)
 	void calcTargetVectors(const PairType& startEnd,

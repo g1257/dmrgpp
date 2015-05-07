@@ -120,8 +120,8 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef ApplyOperatorExpression<TargetHelperType,
-	                                VectorWithOffsetType,
-	                                LanczosSolverType> ApplyOperatorExpressionType;
+	VectorWithOffsetType,
+	LanczosSolverType> ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::VectorSizeType VectorSizeType;
 	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
@@ -139,15 +139,15 @@ public:
 		  WFT_NOADVANCE=ApplyOperatorExpressionType::WFT_NOADVANCE};
 
 	enum {EXPAND_ENVIRON=WaveFunctionTransfType::EXPAND_ENVIRON,
-	      EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
-	      INFINITE=WaveFunctionTransfType::INFINITE};
+		  EXPAND_SYSTEM=WaveFunctionTransfType::EXPAND_SYSTEM,
+		  INFINITE=WaveFunctionTransfType::INFINITE};
 
 	TargetingCommon(const LeftRightSuperType& lrs,
-	                 const ModelType& model,
-                     const TargetParamsType& tstStruct,
-                     const WaveFunctionTransfType& wft,
-	                 SizeType targets,
-	                 SizeType indexNoAdvance)
+	                const ModelType& model,
+	                const TargetParamsType& tstStruct,
+	                const WaveFunctionTransfType& wft,
+	                SizeType targets,
+	                SizeType indexNoAdvance)
 	    : progress_("TargetingCommon"),
 	      targetHelper_(lrs,model,tstStruct,wft),
 	      applyOpExpression_(targetHelper_,targets,indexNoAdvance),
@@ -186,7 +186,7 @@ public:
 	void save(const typename PsimagLite::Vector<SizeType>::Type& block,
 	          IoOutputType& io,
 	          const PostProcType& cf,
-	          const typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors) const
+	          const VectorVectorWithOffsetType& targetVectors) const
 	{
 		DynamicSerializerType dynS(cf,block[0],targetVectors);
 		dynS.save(io);
@@ -242,7 +242,7 @@ public:
 	}
 
 	void initialGuess(VectorWithOffsetType& v,
-	                  const typename PsimagLite::Vector<SizeType>::Type& block) const
+	                  const VectorSizeType& block) const
 	{
 		PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk,block);
@@ -267,7 +267,7 @@ public:
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
 			applyOpExpression_.applyOpLocal()(phiTemp,psi,creationMatrix[j],
-			              fs,direction,ApplyOperatorType::BORDER_NO);
+			                                  fs,direction,ApplyOperatorType::BORDER_NO);
 			if (j==0) v = phiTemp;
 			else v += phiTemp;
 		}
@@ -327,7 +327,7 @@ public:
 
 	const VectorSizeType& nonZeroQns() const
 	{
-		 return applyOpExpression_.nonZeroQns();
+		return applyOpExpression_.nonZeroQns();
 	}
 
 	const VectorVectorWithOffsetType& targetVectors() const
@@ -351,18 +351,18 @@ public:
 	}
 
 	void calcTimeVectors(const PairType& startEnd,
-	                             RealType Eg,
-	                             const VectorWithOffsetType& phi,
-	                             SizeType direction,
-	                             bool allOperatorsApplied,
-	                             const PsimagLite::Vector<SizeType>::Type& block)
+	                     RealType Eg,
+	                     const VectorWithOffsetType& phi,
+	                     SizeType direction,
+	                     bool allOperatorsApplied,
+	                     const PsimagLite::Vector<SizeType>::Type& block)
 	{
 		return applyOpExpression_.calcTimeVectors(startEnd,
-		                                        Eg,
-			                                    phi,
-			                                    direction,
-			                                    allOperatorsApplied,
-			                                    block);
+		                                          Eg,
+		                                          phi,
+		                                          direction,
+		                                          allOperatorsApplied,
+		                                          block);
 	}
 
 	void cocoon(const BlockType& block,SizeType direction) const
@@ -618,8 +618,8 @@ template<typename TargetHelperType,
          typename LanczosSolverType>
 std::ostream& operator<<(std::ostream& os,
                          const TargetingCommon<TargetHelperType,
-                                                VectorWithOffsetType,
-                                                LanczosSolverType>& tst)
+                         VectorWithOffsetType,
+                         LanczosSolverType>& tst)
 {
 	os<<"DT=NothingToSeeHereYet\n";
 	return os;

@@ -109,6 +109,7 @@ public:
 	      startingLoops_(0),
 	      concatenation_(PRODUCT),
 	      noOperator_(false),
+	      skipTimeZero_(false),
 	      io_(io),
 	      model_(model)
 	{
@@ -125,7 +126,7 @@ public:
 		PsimagLite::String productOrSum = "product";
 		try {
 			io.readline(productOrSum,"TSPProductOrSum=");
-		} catch (std::exception& e) {
+		} catch (std::exception&) {
 			PsimagLite::String s(__FILE__);
 			s += "\n FATAL: Must provide TSPProductOrSum=.\n";
 			s += "Please add TSPProductOrSum=product or TSPProductOrSum=sum  ";
@@ -145,6 +146,12 @@ public:
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
+		try {
+			int tmp = 0;
+			io.readline(tmp,"TSPSkipTimeZero=");
+			skipTimeZero_ = (tmp > 0);
+		} catch (std::exception&) {}
+
 		CookedOperator<ModelType> cookedOperator(model_);
 
 		for (SizeType i=0;i<sites_.size();i++) {
@@ -157,62 +164,11 @@ public:
 		checkSizesOfOperators();
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   PsimagLite::String = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "TargetParamsCommon";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&sites_);
-		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
-		          total,
-		          start,
-		          msg + " TargetParamsCommon vptr");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&startingLoops_);
-		total += mres.memResolv(&sites_, end-start, str + " sites");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&concatenation_);
-		total += mres.memResolv(&startingLoops_, end-start, str + " startingLoops");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&noOperator_);
-		total += mres.memResolv(&concatenation_, end-start, str + " concatenation");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&aOperators_);
-		total += mres.memResolv(&noOperator_, end-start, str + " noOperator");
-
-		start = end;
-		end = start + sizeof(aOperators_);
-		total += mres.memResolv(&aOperators_, end-start, str + " aOperators");
-
-		start = end;
-		end = start + PsimagLite::MemResolv::SIZEOF_HEAPREF;
-		total += (end - start);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to io");
-
-		mres.memResolv(&io_, 0, str + " io");
-
-		start = end;
-		end = start + PsimagLite::MemResolv::SIZEOF_HEAPREF;
-		total += (end - start);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to model");
-
-		mres.memResolv(&model_, 0, str + " model");
-		assert(total == sizeof(*this));
-		return total;
+		return 0;
 	}
 
 	virtual SizeType sites() const
@@ -257,6 +213,11 @@ public:
 	virtual void noOperator(bool x)
 	{
 		noOperator_ = x;
+	}
+
+	virtual bool skipTimeZero() const
+	{
+		return skipTimeZero_;
 	}
 
 	template<typename ModelType_>
@@ -335,6 +296,7 @@ private:
 	SizeType concatenation_;
 	//serializr normal noOperator_
 	bool noOperator_;
+	bool skipTimeZero_;
 	//serializr normal aOperators_
 	VectorOperatorType aOperators_;
 	//serializr ref io_
