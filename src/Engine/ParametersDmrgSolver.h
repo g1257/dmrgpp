@@ -100,9 +100,8 @@ each movement. Of the three numbers, the first is the number of sites to go forw
 if positive
 or backward if negative. The second number is the $m$ for this movement and the
 last number
-is either 0 or 1, 0 will not save state data to disk and 1 will save all data to be
-able to calculate
-observables. The first movement starts from where the infinite loop left off, at the
+is a bitwise option described in \S\ref{sec:thirdnumber}.
+The first movement starts from where the infinite loop left off, at the
  middle of the
 lattice.
 
@@ -120,19 +119,21 @@ Remember that the finite loops start at the middle of the lattice, where the
 infinite loop left off.
 \todo{ADD FIGURE SHOWING WHAT THIS DOES.}
 
-\subsection{The third number in the triplet}
-The save option is a bitwise option where the
-first bit means save or don't save, and the second bit
-compute the g.s. or WFT it.
-So there are 4 combinations (as of today):
+\subsection{The third number in the triplet}\label{sec:thirdnumber}
+The third number in the triplet is a bitwise option where the
+first bit means save or don't save, the second bit
+compute the g.s. or WFT it without eigenvalue or eigenvector updates,
+and the third bit compute the g.s. of WFT it updating eigenvalue and eigenvector.
+It is a fatal error to have both bits 1 and 2 set.
 \begin{table}
 \begin{tabular}{ll}\toprule
-Value & Description\\
-0       & Don't save, compute the ground state\\
-1       & Save, compute the ground state\\
-2       & Don't save, WFT the ground state\\
-3       & Save, WFT the ground state\\
+Bit & Description\\
+0       & save or don't save state for the observe code\\
+1       & compute the g.s. or fast WFT it\\
+2       & compute the g.s. or slowly WFT it\\
 \end{tabular}
+\caption{Meaning of each bit of the third number in the
+finite loop triplet. It is a fatal error to have both bits 1 and 2 set.}
 \end{table}
 \subsection{Caveats and Troubleshooting}
 
@@ -204,13 +205,13 @@ inline void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteL
 	SizeType sopt = 0; // have we started saving yet?
 	for (SizeType i=0;i<finiteLoop.size();i++)  {
 		SizeType thisSaveOption = (finiteLoop[i].saveOption & 1);
-		if (sopt == 1 && thisSaveOption ==0) {
+		if (sopt == 1 && !(thisSaveOption&1)) {
 			s = "Error for finite loop number " + ttos(i) + "\n";
 			s += "Once you say 1 on a finite loop, then all";
 			s += " finite loops that follow must have 1.";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
-		if (sopt == 0 && thisSaveOption ==1) {
+		if (sopt == 0 && (thisSaveOption&1)) {
 			sopt = 1;
 			if (SizeType(x) != 1 && SizeType(x)!=totalSites-2) {
 				s = __FILE__ + PsimagLite::String(": FATAL: for finite loop number ")

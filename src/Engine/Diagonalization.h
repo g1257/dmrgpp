@@ -199,13 +199,15 @@ private:
 
 		RealType gsEnergy = 0;
 
+		SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
+		checkSaveOption(saveOption);
+
 		bool onlyWft = false;
 		if (direction != WaveFunctionTransfType::INFINITE)
-			onlyWft = ((parameters_.finiteLoop[loopIndex].saveOption & 2)>0) ? true : false;
+			onlyWft = ((saveOption & 2)>0);
 
 		if (parameters_.options.find("MettsTargetting")!=PsimagLite::String::npos)
 			return gsEnergy;
-
 
 		if (parameters_.options.find("TargetingAncilla")!=PsimagLite::String::npos)
 			onlyWft = true;
@@ -287,7 +289,12 @@ private:
 				vecSaved[i]=initialVectorBySector;
 				gsEnergy = oldEnergy_;
 			} else {
-				diagonaliseOneBlock(i,vecSaved[i],gsEnergy,lrs,initialVectorBySector);
+				diagonaliseOneBlock(i,
+				                    vecSaved[i],
+				                    gsEnergy,
+				                    lrs,
+				                    initialVectorBySector,
+				                    saveOption);
 			}
 
 			energySaved[i]=gsEnergy;
@@ -340,7 +347,8 @@ private:
 	                         TargetVectorType &tmpVec,
 	                         RealType &energyTmp,
 	                         const LeftRightSuperType& lrs,
-	                         const TargetVectorType& initialVector)
+	                         const TargetVectorType& initialVector,
+	                         SizeType saveOption)
 	{
 		typename PsimagLite::Vector<RealType>::Type tmpVec1,tmpVec2;
 		//srand48(7123443);
@@ -374,14 +382,15 @@ private:
 		PsimagLite::OstringStream msg;
 		msg<<"I will now diagonalize a matrix of size="<<modelHelper.size();
 		progress_.printline(msg,std::cout);
-		diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,initialVector);
+		diagonaliseOneBlock(i,tmpVec,energyTmp,modelHelper,initialVector,saveOption);
 	}
 
 	void diagonaliseOneBlock(int i,
 	                         TargetVectorType &tmpVec,
 	                         RealType &energyTmp,
 	                         typename ModelType::ModelHelperType& modelHelper,
-	                         const TargetVectorType& initialVector)
+	                         const TargetVectorType& initialVector,
+	                         SizeType saveOption)
 	{
 		int n = modelHelper.size();
 		if (verbose_)
@@ -394,10 +403,16 @@ private:
 		                                                             &modelHelper,
 		                                                             rs);
 
+		if ((saveOption & 4)>0) {
+			energyTmp = slowWft(lanczosHelper,tmpVec,initialVector);
+			return;
+		}
+
 		ParametersForSolverType params(io_,"Lanczos");
 		LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
 
-		bool useDavidson = (parameters_.options.find("useDavidson")!=PsimagLite::String::npos);
+		bool useDavidson = (parameters_.options.find("useDavidson") !=
+		        PsimagLite::String::npos);
 		if (useDavidson) {
 			lanczosOrDavidson = new DavidsonSolverType(lanczosHelper,params);
 		} else {
@@ -475,6 +490,41 @@ private:
 		}
 
 		return gsEnergy;
+	}
+
+	RealType slowWft(const typename LanczosOrDavidsonBaseType::MatrixType& object,
+	                 TargetVectorType &gsVector,
+	                 const TargetVectorType &initialVector) const
+	{
+		SizeType excited = parameters_.excited;
+		if (excited > 0) {
+			PsimagLite::OstringStream msg;
+			msg<<"FATAL: slowWft: Not possible when excited > 0\n";
+			throw PsimagLite::RuntimeError(msg.str());
+		}
+
+		RealType norma = PsimagLite::norm(initialVector);
+		if (fabs(norma)<1e-12) {
+			PsimagLite::OstringStream msg;
+			msg<<"FATAL: slowWft: Norm of guess vector is zero\n";
+			throw PsimagLite::RuntimeError(msg.str());
+		}
+
+		TargetVectorType x(initialVector.size(),0.0);
+		object.matrixVectorProduct(x,initialVector);
+		RealType gsEnergy = std::real(initialVector*x);
+		gsVector = initialVector;
+		return gsEnergy;
+	}
+
+	void checkSaveOption(SizeType saveOption) const
+	{
+		bool bit1 = (saveOption & 2);
+		bool bit2 = (saveOption & 4);
+		if (!bit1 || !bit2) return;
+		PsimagLite::OstringStream msg;
+		msg<<"FATAL: Third number of triplet cannot have both bits 1 and 2 set\n";
+		throw PsimagLite::RuntimeError(msg.str());
 	}
 
 	const ParametersType& parameters_;
