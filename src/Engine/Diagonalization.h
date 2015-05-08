@@ -288,6 +288,10 @@ private:
 			if (onlyWft) {
 				vecSaved[i]=initialVectorBySector;
 				gsEnergy = oldEnergy_;
+				PsimagLite::OstringStream msg;
+				msg<<"Early exit due to user requesting (fast) WFT only, ";
+				msg<<"(non updated) energy= "<<gsEnergy;
+				progress_.printline(msg,std::cout);
 			} else {
 				diagonaliseOneBlock(i,
 				                    vecSaved[i],
@@ -379,6 +383,7 @@ private:
 			if (parameters_.options.find("test")!=PsimagLite::String::npos)
 				throw std::logic_error("Exiting due to option test in the input file\n");
 		}
+
 		PsimagLite::OstringStream msg;
 		msg<<"I will now diagonalize a matrix of size="<<modelHelper.size();
 		progress_.printline(msg,std::cout);
@@ -405,6 +410,9 @@ private:
 
 		if ((saveOption & 4)>0) {
 			energyTmp = slowWft(lanczosHelper,tmpVec,initialVector);
+			PsimagLite::OstringStream msg;
+			msg<<"Early exit due to user requesting (slow) WFT, energy= "<<energyTmp;
+			progress_.printline(msg,std::cout);
 			return;
 		}
 
@@ -421,6 +429,10 @@ private:
 
 		if (lanczosHelper.rank()==0) {
 			energyTmp=10000;
+			PsimagLite::OstringStream msg;
+			msg<<"Early exit due to matrix rank being zero.";
+			msg<<" BOGUS energy= "<<energyTmp;
+			progress_.printline(msg,std::cout);
 			if (lanczosOrDavidson) delete lanczosOrDavidson;
 			return;
 		}
