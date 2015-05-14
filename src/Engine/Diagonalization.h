@@ -354,13 +354,11 @@ private:
 	                         const TargetVectorType& initialVector,
 	                         SizeType saveOption)
 	{
-		typename PsimagLite::Vector<RealType>::Type tmpVec1,tmpVec2;
-		//srand48(7123443);
-
+		PsimagLite::String options = parameters_.options;
 		SizeType threadId = 0;
 		typename ModelType::ModelHelperType modelHelper(i,lrs,threadId);
 
-		if (parameters_.options.find("debugmatrix")!=PsimagLite::String::npos) {
+		if (options.find("debugmatrix")!=PsimagLite::String::npos) {
 			SparseMatrixType fullm;
 
 			model_.fullHamiltonian(fullm,modelHelper);
@@ -368,11 +366,8 @@ private:
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 			crsMatrixToFullMatrix(fullm2,fullm);
 			if (PsimagLite::isZero(fullm2)) std::cerr<<"Matrix is zero\n";
-			if (fullm.row()>40) {
-				printNonZero(fullm2,std::cerr);
-			} else {
+			if (fullm.row()<=40)
 				printFullMatrix(fullm,"matrix",1);
-			}
 
 			if (!isHermitian(fullm,true))
 				throw PsimagLite::RuntimeError("Not hermitian matrix block\n");
@@ -380,8 +375,20 @@ private:
 			typename PsimagLite::Vector<RealType>::Type eigs(fullm2.n_row());
 			PsimagLite::diag(fullm2,eigs,'V');
 			std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
-			if (parameters_.options.find("test")!=PsimagLite::String::npos)
-				throw std::logic_error("Exiting due to option test in the input file\n");
+			if (options.find("test")!=PsimagLite::String::npos)
+				throw std::logic_error("Exiting due to option test in the input\n");
+
+			if (options.find("exactdiag")!=PsimagLite::String::npos &&
+			        (saveOption & 4) == 0) {
+				energyTmp = eigs[0];
+				for (SizeType i = 0; i < tmpVec.size(); ++i)
+					tmpVec[i] = fullm2(i,0);
+				PsimagLite::OstringStream msg;
+				msg<<"Uses exact due to user request. ";
+				msg<<"Found lowest eigenvalue= "<<energyTmp;
+				progress_.printline(msg,std::cout);
+				return;
+			}
 		}
 
 		PsimagLite::OstringStream msg;

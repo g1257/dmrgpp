@@ -91,10 +91,11 @@ class	HamiltonianSymmetryLocal {
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
 	typedef  BasisData<std::pair<SizeType,SizeType> > BasisDataType;
 	typedef PsimagLite::CrsMatrix<RealType> FactorsType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
 
-	static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
+	static SizeType encodeQuantumNumber(const VectorSizeType& v)
 	{
 		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
 
@@ -106,13 +107,13 @@ public:
 		return x;
 	}
 
-	static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(SizeType q)
+	static VectorSizeType decodeQuantumNumber(SizeType q)
 	{
 		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
 
 		assert(q < maxElectrons*maxElectrons);
 
-		typename PsimagLite::Vector<SizeType>::Type v(2);
+		VectorSizeType v(2);
 		SizeType tmp = q ;
 		v[1] = SizeType(tmp/maxElectrons);
 		v[0] = tmp % maxElectrons;
@@ -126,11 +127,11 @@ public:
 
 	//! find quantum numbers for each state of this basis,
 	//! considered symmetries for this model are: n_up and n_down
-	static  void findQuantumNumbers(typename PsimagLite::Vector<SizeType> ::Type&q,
+	static void findQuantumNumbers(VectorSizeType& q,
 	                                const BasisDataType& basisData)
 	{
 		q.clear();
-		typename PsimagLite::Vector<SizeType>::Type qn(2);
+		VectorSizeType qn(2);
 		for (SizeType i=0;i<basisData.electrons.size();i++) {
 			// n
 			qn[1] = basisData.electrons[i];
@@ -145,18 +146,19 @@ public:
 	}
 
 	template<typename SolverParametersType>
-	void calcRemovedIndices(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
+	void calcRemovedIndices(VectorSizeType& removedIndices,
 	                        typename PsimagLite::Vector<RealType>::Type& eigs,
 	                        SizeType kept,
 	                        const SolverParametersType&) const
 	{
 		if (eigs.size()<=kept) return;
 		// we sort the eigenvalues
-		// note: eigenvalues are not ordered because DensityMatrix is diagonalized in blocks
-		typename PsimagLite::Vector<SizeType>::Type perm(eigs.size());
+		// note: eigenvalues are not ordered because DensityMatrix is
+		// diagonalized in blocks
+		VectorSizeType perm(eigs.size());
 		PsimagLite::Sort<typename PsimagLite::Vector<RealType>::Type > sort;
 		sort.sort(eigs,perm);
-		typename PsimagLite::Vector<SizeType>::Type permInverse(perm.size());
+		VectorSizeType permInverse(perm.size());
 		for (SizeType i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
 
 		SizeType target = eigs.size()-kept;
@@ -196,6 +198,7 @@ public:
 	}
 
 private:
+
 	FactorsType factors_;
 }; //class HamiltonianSymmetryLocal
 } // namespace Dmrg
