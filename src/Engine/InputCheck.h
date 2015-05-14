@@ -146,6 +146,7 @@ public:
 		registerOpts.push_back("debugmatrix");
 		registerOpts.push_back("test");
 		registerOpts.push_back("exactdiag");
+		registerOpts.push_back("nodmrgtransform");
 		registerOpts.push_back("useDavidson");
 		registerOpts.push_back("verbose");
 		registerOpts.push_back("nofiniteloops");

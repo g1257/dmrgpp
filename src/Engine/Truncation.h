@@ -232,6 +232,10 @@ private:
 
 		//! transform basis: dmS^\dagger * operator matrix * dms
 		cache.transform = dmS();
+		if (parameters_.options.find("nodmrgtransform") != PsimagLite::String::npos) {
+			cache.transform.setDiagonal();
+		}
+
 		rSprime = pBasis;
 		rSprime.changeBasis(cache.removedIndices,cache.eigs,keptStates,parameters_);
 

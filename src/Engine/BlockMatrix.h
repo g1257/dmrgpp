@@ -227,7 +227,22 @@ public:
 			offsets_.push_back(i);
 			data_.push_back(m);
 		}
+
 		offsets_.push_back(n);
+	}
+
+	void setDiagonal()
+	{
+		SizeType offsetsMinus1 = offsets_.size();
+		if (offsetsMinus1 == 0) return;
+		offsetsMinus1--;
+		for (SizeType i = 0; i < offsetsMinus1; ++i) {
+			offsets_.push_back(i);
+			SizeType n = data_[i].n_row();
+			MatrixInBlockTemplate tmp(n,n);
+			for (SizeType j = 0; j < n; ++j) tmp(j,j) = 1.0;
+			data_[i] = tmp;
+		}
 	}
 
 	//! Set block to the zero matrix,
