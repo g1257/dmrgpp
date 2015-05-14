@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -100,11 +100,17 @@ namespace Dmrg {
 		template<typename IoInputter>
 		TargetParamsTimeStep(IoInputter& io,const ModelType& model)
 			: TimeVectorParamsType(io,model),
-		      maxTime_(0)
+		      maxTime_(0),useQns_(false)
 		{
 			try {
 				io.readline(maxTime_,"TSPMaxTime=");
-			} catch (std::exception& e) {}
+			} catch (std::exception&) {}
+
+			try {
+				int x = 0;
+				io.readline(x,"TSPUseQns=");
+				useQns_ = (x > 0);
+			} catch (std::exception&) {}
 		}
 
 		virtual RealType maxTime() const
@@ -114,15 +120,16 @@ namespace Dmrg {
 
 		virtual bool useQns() const
 		{
-			return true;
+			return useQns_;
 		}
 
 	private:
 
 		RealType maxTime_;
+		bool useQns_;
 
 	}; // class TargetParamsTimeStep
-	
+
 	template<typename ModelType>
 	inline std::ostream&
 	operator<<(std::ostream& os,const TargetParamsTimeStep<ModelType>& t)
@@ -138,9 +145,11 @@ namespace Dmrg {
 		if (t.maxTime() > 0)
 			os<<"TSPMaxTime="<<t.maxTime()<<"\n";
 
+		os<<"TSPUseQns= "<<t.useQns()<<"\n";
+
 		return os;
 	}
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // TARGET_PARAMS_TIMESTEP_H
