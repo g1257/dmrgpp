@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2008-2012, UT-Battelle, LLC
+Copyright (c) 2008-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 1.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup DMRG */
 /*@{*/
@@ -106,10 +105,10 @@ class Observer {
 	typedef typename ModelType_::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename ModelType_::ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef ObserverHelper<IoInputType,
-	                       MatrixType,
-	                       VectorType,
-	                       VectorWithOffsetType_,
-	                       LeftRightSuperType> ObserverHelperType;
+	MatrixType,
+	VectorType,
+	VectorWithOffsetType_,
+	LeftRightSuperType> ObserverHelperType;
 	typedef CorrelationsSkeleton<ObserverHelperType,ModelType_> CorrelationsSkeletonType;
 	typedef OnePointCorrelations<ObserverHelperType> OnePointCorrelationsType;
 	typedef TwoPointCorrelations<CorrelationsSkeletonType> TwoPointCorrelationsType;
@@ -123,9 +122,9 @@ class Observer {
 	static SizeType const NON_DIAGONAL = CorrelationsSkeletonType::NON_DIAGONAL;
 
 	enum {GS_VECTOR=ObserverHelperType::GS_VECTOR,
-		  TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
+	      TIME_VECTOR=ObserverHelperType::TIME_VECTOR};
 	enum {LEFT_BRACKET=ObserverHelperType::LEFT_BRACKET,
-		  RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
+	      RIGHT_BRACKET=ObserverHelperType::RIGHT_BRACKET};
 
 public:
 
@@ -256,7 +255,8 @@ public:
 			}
 		}
 
-		typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
+		typedef Parallel4PointDs<ModelType,FourPointCorrelationsType>
+		        Parallel4PointDsType;
 		typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
 		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::npthreads,
 		                                  PsimagLite::MPI::COMM_WORLD);
@@ -301,7 +301,8 @@ private:
 	{
 		if (str=="gs") return GS_VECTOR;
 		if (str=="time") return TIME_VECTOR;
-		throw PsimagLite::RuntimeError("Observer::bracketStringToNumber: must be gs or time");
+		PsimagLite::String msg("Observer::bracketStringToNumber:");
+		throw PsimagLite::RuntimeError(msg + " must be gs or time\n");
 	}
 
 	FieldType ladder_(const MatrixType& O1,
@@ -316,7 +317,20 @@ private:
 	                  SizeType threadId)
 	{
 		char mod = 'N';
-		return fourpoint_(mod,i1,O1,mod,i2,O2,mod,j1,O3,mod,j2,O4,fermionicSign,threadId);
+		return fourpoint_(mod,
+		                  i1,
+		                  O1,
+		                  mod,
+		                  i2,
+		                  O2,
+		                  mod,
+		                  j1,
+		                  O3,
+		                  mod,
+		                  j2,
+		                  O4,
+		                  fermionicSign,
+		                  threadId);
 	}
 
 	ObserverHelperType helper_;

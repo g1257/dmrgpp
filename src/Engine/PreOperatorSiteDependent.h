@@ -124,10 +124,11 @@ public:
 		if (!siteDependent()) return true;
 		SizeType hilbert = model_.hilbertSize(i0);
 		SizeType nx=0;
-		while(hilbert) {
+		while (hilbert) {
 			nx++;
 			hilbert >>= 1;
 		}
+
 		if (nx>0) nx--;
 		return (dof_<nx && dof2_<nx);
 	}
@@ -153,3 +154,4 @@ private:
 } // namespace Dmrg
 /*@}*/
 #endif
+

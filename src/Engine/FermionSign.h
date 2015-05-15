@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -83,69 +83,76 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-	class FermionSign {
-		typedef PsimagLite::PackIndices PackIndicesType;
+class FermionSign {
 
-	public:
-		FermionSign(const PsimagLite::Vector<SizeType>::Type& electrons)
-		: signs_(electrons.size())
-		{
-			init(electrons);
+	typedef PsimagLite::PackIndices PackIndicesType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+
+public:
+
+	FermionSign(const PsimagLite::Vector<SizeType>::Type& electrons)
+	    : signs_(electrons.size())
+	{
+		init(electrons);
+	}
+
+	template<typename SomeBasisType>
+	FermionSign(const SomeBasisType& basis,const VectorSizeType& electrons)
+	{
+
+		const VectorSizeType& basisElectrons =
+		        basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
+		if (basisElectrons.size()!=basis.permutationInverse().size())
+			throw PsimagLite::RuntimeError("Problem\n");
+		SizeType nx = basisElectrons.size()/electrons.size();
+		VectorSizeType el(nx);
+		PackIndicesType pack(nx);
+		for (SizeType x=0;x<basisElectrons.size();x++) {
+			SizeType x0,x1;
+			pack.unpack(x0,x1,basis.permutation(x));
+			assert(x1<electrons.size());
+			int nx0 = basisElectrons[x]-electrons[x1];
+			assert(nx0>=0 && x0<el.size());
+			el[x0] = nx0;
 		}
 
-		template<typename SomeBasisType>
-		FermionSign(const SomeBasisType& basis,const typename PsimagLite::Vector<SizeType>::Type& electrons)
-		{
+		init(el);
+	}
 
-			const typename PsimagLite::Vector<SizeType>::Type& basisElectrons = basis.electronsVector(SomeBasisType::BEFORE_TRANSFORM);
-			if (basisElectrons.size()!=basis.permutationInverse().size()) throw PsimagLite::RuntimeError("Problem\n");
-			SizeType nx = basisElectrons.size()/electrons.size();
-			typename PsimagLite::Vector<SizeType>::Type el(nx);
-			PackIndicesType pack(nx);
-			for (SizeType x=0;x<basisElectrons.size();x++) {
-				SizeType x0,x1;
-				pack.unpack(x0,x1,basis.permutation(x));
-				assert(x1<electrons.size());
-				int nx0 = basisElectrons[x]-electrons[x1];
-				assert(nx0>=0 && x0<el.size());
-				el[x0] = nx0;
-			}
-			init(el);
-		  }
+	template<typename IoInputter>
+	FermionSign(IoInputter& io,bool bogus = false)
+	{
+		if (bogus) return;
+		io.read(signs_,"#FERMIONICSIGN");
+	}
 
-		template<typename IoInputter>
-		FermionSign(IoInputter& io,bool bogus = false)
-		{
-			if (bogus) return;
-			io.read(signs_,"#FERMIONICSIGN");
-		}
+	int operator()(SizeType i,int f) const
+	{
+		assert(i<signs_.size());
+		return (signs_[i]) ? f : 1;
+	}
 
-		int operator()(SizeType i,int f) const
-		{
-			assert(i<signs_.size());
-			return (signs_[i]) ? f : 1;
-		}
+	template<typename IoOutputter>
+	void save(IoOutputter& io) const
+	{
+		io.printVector(signs_,"#FERMIONICSIGN");
+	}
 
-		template<typename IoOutputter>
-		void save(IoOutputter& io) const
-		{
-			io.printVector(signs_,"#FERMIONICSIGN");
-		}
+	SizeType size() const { return signs_.size(); }
 
-		SizeType size() const { return signs_.size(); }
+private:
 
-	private:
+	void init(const VectorSizeType& electrons)
+	{
+		signs_.resize(electrons.size());
+		for (SizeType i=0;i<signs_.size();i++)
+			signs_[i] = (electrons[i] & 1);
+	}
 
-		void init(const PsimagLite::Vector<SizeType>::Type& electrons)
-		{
-			signs_.resize(electrons.size());
-			for (SizeType i=0;i<signs_.size();i++)
-				signs_[i] = (electrons[i] & 1);
-		}
-
-		PsimagLite::Vector<bool>::Type signs_;
-	}; // class FermionSign
-} // namespace Dmrg 
+	PsimagLite::Vector<bool>::Type signs_;
+}; // class FermionSign
+} // namespace Dmrg
 
 /*@}*/
 #endif // FEMION_SIGN_H
+

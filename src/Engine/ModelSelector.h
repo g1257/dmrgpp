@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2012, UT-Battelle, LLC
+Copyright (c) 2012-2015, UT-Battelle, LLC
 All rights reserved
 
 [MPS++, Version 0.1]
@@ -108,7 +108,7 @@ public:
 			model_ = new ModelHeisenbergType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtended") {
 			model_ = new ModelHubbardExtType(solverParams,io,geometry);
-		} else  if (name_ == "FeAsBasedSc") {
+		} else if (name_ == "FeAsBasedSc") {
 			model_ = new FeBasedScType(solverParams,io,geometry);
 		} else if (name_ == "FeAsBasedScExtended") {
 			model_ = new FeBasedScExtType(solverParams,io,geometry);
