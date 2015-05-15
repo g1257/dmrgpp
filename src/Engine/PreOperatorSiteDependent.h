@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup DMRG */
 /*@{*/
@@ -98,8 +97,12 @@ class PreOperatorSiteDependent  : public PreOperatorBase<ModelType> {
 
 public:
 
-	PreOperatorSiteDependent(SizeType dof,SizeType dof2,const ModelType& model,const PsimagLite::String& str,SizeType threadId)
-		: dof_(dof),dof2_(dof2),model_(model),str_(str),threadId_(threadId)
+	PreOperatorSiteDependent(SizeType dof,
+	                         SizeType dof2,
+	                         const ModelType& model,
+	                         const PsimagLite::String& str,
+	                         SizeType threadId)
+	    : dof_(dof),dof2_(dof2),model_(model),str_(str),threadId_(threadId)
 	{}
 
 	virtual OperatorType operator()(SizeType site) const

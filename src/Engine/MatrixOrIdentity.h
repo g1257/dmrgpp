@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup DMRG */
 /*@{*/
@@ -91,7 +90,7 @@ class MatrixOrIdentity {
 public:
 
 	MatrixOrIdentity(bool enabled,const SparseMatrixType& m)
-		: enabled_(enabled),m_(m),one_(1.0)
+	    : enabled_(enabled),m_(m),one_(1.0)
 	{}
 
 	SizeType getRowPtr(SizeType i) const
@@ -121,3 +120,4 @@ private:
 } // namespace Dmrg
 /*@}*/
 #endif // MATRIX_OR_IDENTITY
+

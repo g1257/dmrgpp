@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009,-2012 UT-Battelle, LLC
+Copyright (c) 2009,-2015 UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup DMRG */
 /*@{*/
@@ -82,7 +81,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename VectorWithOffsetType,typename WaveFunctionTransfType,typename LeftRightSuperType>
+template<typename VectorWithOffsetType,
+         typename WaveFunctionTransfType,
+         typename LeftRightSuperType>
 class ParallelWft {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
@@ -93,16 +94,19 @@ public:
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
 	ParallelWft(typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
-				SizeType nk,
-				const WaveFunctionTransfType& wft,
-				const LeftRightSuperType& lrs)
-		: targetVectors_(targetVectors),
-		  nk_(nk),
-		  wft_(wft),
-		  lrs_(lrs)
+	            SizeType nk,
+	            const WaveFunctionTransfType& wft,
+	            const LeftRightSuperType& lrs)
+	    : targetVectors_(targetVectors),
+	      nk_(nk),
+	      wft_(wft),
+	      lrs_(lrs)
 	{}
 
-	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t* myMutex)
+	void thread_function_(SizeType threadNum,
+	                      SizeType blockSize,
+	                      SizeType total,
+	                      pthread_mutex_t*)
 	{
 		SizeType nk = nk_;
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
@@ -126,7 +130,8 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
 }; // class ParallelWft
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // PARALLEL_WFT_H
+

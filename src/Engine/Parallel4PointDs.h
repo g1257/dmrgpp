@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009,-2012 UT-Battelle, LLC
+Copyright (c) 2009,-2015 UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup DMRG */
 /*@{*/
@@ -94,14 +93,17 @@ public:
 	typedef typename ModelType::RealType RealType;
 
 	Parallel4PointDs(MatrixType& fpd,
-					 const FourPointCorrelationsType& fourpoint,
-					 const ModelType& model,
-					 const typename PsimagLite::Vector<SizeType>::Type& gammas,
-					 const typename PsimagLite::Vector<PairType>::Type& pairs)
-		: fpd_(fpd),fourpoint_(fourpoint),model_(model),gammas_(gammas),pairs_(pairs)
+	                 const FourPointCorrelationsType& fourpoint,
+	                 const ModelType& model,
+	                 const typename PsimagLite::Vector<SizeType>::Type& gammas,
+	                 const typename PsimagLite::Vector<PairType>::Type& pairs)
+	    : fpd_(fpd),fourpoint_(fourpoint),model_(model),gammas_(gammas),pairs_(pairs)
 	{}
 
-	void thread_function_(SizeType threadNum,SizeType blockSize,SizeType total,pthread_mutex_t*)
+	void thread_function_(SizeType threadNum,
+	                      SizeType blockSize,
+	                      SizeType total,
+	                      pthread_mutex_t*)
 	{
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
@@ -117,35 +119,36 @@ public:
 		}
 	}
 
-	//			template<typename SomeConcurrencyType,typename SomeOtherConcurrencyType>
-	//			void sync(SomeConcurrencyType& conc,SomeOtherConcurrencyType& conc2)
-	//			{
-	//				conc.reduce(x_,conc2);
-	//			}
-
 private:
 
 	template<typename SomeModelType>
-	FieldType fourPointDelta(SizeType i,SizeType j,const typename PsimagLite::Vector<SizeType>::Type& gammas,const SomeModelType& model,SizeType threadId) const
+	FieldType fourPointDelta(SizeType i,
+	                         SizeType j,
+	                         const typename PsimagLite::Vector<SizeType>::Type& gammas,
+	                         const SomeModelType& model,SizeType threadId) const
 	{
 		SizeType hs = model.hilbertSize(0);
 		SizeType nx = 0;
-		while(hs) {
+		while (hs) {
 			hs>>=1;
 			nx++;
 		}
+
 		nx /= 2;
 		SizeType site = 0;
-		const MatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx); // C_{gamma0,up}
-		const MatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx); // C_{gamma1,down}
-		const MatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx); // C_{gamma2,down}
-		const MatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx); // C_{gamma3,up}
+		// C_{gamma0,up}
+		const MatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx);
+		// C_{gamma1,down}
+		const MatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx);
+		// C_{gamma2,down}
+		const MatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx);
+		// C_{gamma3,up}
+		const MatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx);
 
-		return fourpoint_(
-				'C',i,opC0,
-			   'C',i+1,opC1,
-			   'N',j,opC2,
-			   'N',j+1,opC3,-1,threadId);
+		return fourpoint_('C',i,opC0,
+		                  'C',i+1,opC1,
+		                  'N',j,opC2,
+		                  'N',j+1,opC3,-1,threadId);
 	}
 
 	MatrixType& fpd_;
@@ -158,3 +161,4 @@ private:
 
 /*@}*/
 #endif // PARALLEL_4POINT_DS_H
+
