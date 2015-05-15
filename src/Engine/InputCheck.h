@@ -210,9 +210,10 @@ public:
 		                       "CorrectionVectorTargetting",
 		                       "CorrectionTargetting",
 		                       "MettsTargetting",
+		                       "TargetingOneSectorAncilla",
 		                       "TargetingAncilla"};
 
-		SizeType totalTargets = 8;
+		SizeType totalTargets = 9;
 
 		SizeType count = 0;
 		for (SizeType i = 0;i<totalTargets;++i) {

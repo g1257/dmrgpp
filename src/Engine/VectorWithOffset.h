@@ -168,7 +168,7 @@ public:
 		}
 	}
 
-	SizeType sectors() const { return 1; }
+	SizeType sectors() const { return (size_ == 0) ? 0 : 1; }
 
 	SizeType sector(SizeType) const { return m_; }
 
@@ -227,11 +227,44 @@ public:
 		io.read(data_,"#data");
 	}
 
+	template<typename IoInputter>
+	void loadOneSector(IoInputter& io,
+	                   const PsimagLite::String& label,
+	                   SizeType counter=0)
+	{
+		load(io,label,counter);
+	}
+
+	template<typename SomeBasisType>
+	void populateSectors(const SomeBasisType&)
+	{
+		throw PsimagLite::RuntimeError("VectorWithOffset cannot populateSectors\n");
+	}
+
+	template<typename SomeBasisType>
+	void populateFromQns(const typename PsimagLite::Vector<SizeType>::Type&,
+	                     const SomeBasisType&)
+	{
+		throw PsimagLite::RuntimeError("VectorWithOffset cannot populateFromQns\n");
+	}
+
+	void collapseSectors() {}
+
 	SizeType size() const { return size_; }
 
 	SizeType effectiveSize() const { return data_.size(); }
 
 	SizeType offset() const { return offset_; }
+
+	VectorWithOffset<FieldType> operator+=(const VectorWithOffset<FieldType>& v)
+	{
+		if (size_ != v.size_ || offset_ != v.offset_ || m_ != v.m_)
+			throw PsimagLite::RuntimeError("VectorWithOffset::operator+=\n");
+
+		data_ += v.data_;
+
+		return *this;
+	}
 
 	const FieldType& operator[](SizeType i) const
 	{

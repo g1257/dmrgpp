@@ -245,6 +245,9 @@ void mainLoop0(InputNgType::Readable& io,
 	} else if (targetting=="TimeStepTargetting") {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,MySparseMatrixComplex>
 		        (geometry,targetting,io,dmrgSolverParams, options, list);
+	} else if (targetting=="TargetingOneSectorAncilla") {
+		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,MySparseMatrix>
+		        (geometry,targetting,io,dmrgSolverParams, options, list);
 	} else {
 		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,MySparseMatrix>
 		        (geometry,targetting,io,dmrgSolverParams, options, list);
