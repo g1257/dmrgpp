@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 /** \ingroup DMRG */
 /*@{*/
@@ -85,71 +84,72 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsCommon.h"
 
 namespace Dmrg {
-	// Coordinates reading of TargetSTructure from input file
-	template<typename ModelType>
-	class TargetParamsTimeStep : public TargetParamsTimeVectors<ModelType>{
+// Coordinates reading of TargetSTructure from input file
+template<typename ModelType>
+class TargetParamsTimeStep : public TargetParamsTimeVectors<ModelType> {
 
-	public:
+public:
 
-		typedef TargetParamsTimeVectors<ModelType> TimeVectorParamsType;
-		typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
-		typedef typename ModelType::RealType RealType;
+	typedef TargetParamsTimeVectors<ModelType> TimeVectorParamsType;
+	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
+	typedef typename ModelType::RealType RealType;
 
-		static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
+	static SizeType const PRODUCT = TargetParamsCommonType::PRODUCT;
 
-		template<typename IoInputter>
-		TargetParamsTimeStep(IoInputter& io,const ModelType& model)
-			: TimeVectorParamsType(io,model),
-		      maxTime_(0),useQns_(false)
-		{
-			try {
-				io.readline(maxTime_,"TSPMaxTime=");
-			} catch (std::exception&) {}
-
-			try {
-				int x = 0;
-				io.readline(x,"TSPUseQns=");
-				useQns_ = (x > 0);
-			} catch (std::exception&) {}
-		}
-
-		virtual RealType maxTime() const
-		{
-			return maxTime_;
-		}
-
-		virtual bool useQns() const
-		{
-			return useQns_;
-		}
-
-	private:
-
-		RealType maxTime_;
-		bool useQns_;
-
-	}; // class TargetParamsTimeStep
-
-	template<typename ModelType>
-	inline std::ostream&
-	operator<<(std::ostream& os,const TargetParamsTimeStep<ModelType>& t)
+	template<typename IoInputter>
+	TargetParamsTimeStep(IoInputter& io,const ModelType& model)
+	    : TimeVectorParamsType(io,model),
+	      maxTime_(0),useQns_(false)
 	{
-		os<<"#TargetParams.type=TimeStep\n";
+		try {
+			io.readline(maxTime_,"TSPMaxTime=");
+		} catch (std::exception&) {}
 
-		const typename TargetParamsTimeStep<ModelType>::TimeVectorParamsType& tp1 = t;
-		os<<tp1;
-
-		const typename TargetParamsTimeStep<ModelType>::TargetParamsCommonType& tp = t;
-		os<<tp;
-
-		if (t.maxTime() > 0)
-			os<<"TSPMaxTime="<<t.maxTime()<<"\n";
-
-		os<<"TSPUseQns= "<<t.useQns()<<"\n";
-
-		return os;
+		try {
+			int x = 0;
+			io.readline(x,"TSPUseQns=");
+			useQns_ = (x > 0);
+		} catch (std::exception&) {}
 	}
+
+	virtual RealType maxTime() const
+	{
+		return maxTime_;
+	}
+
+	virtual bool useQns() const
+	{
+		return useQns_;
+	}
+
+private:
+
+	RealType maxTime_;
+	bool useQns_;
+
+}; // class TargetParamsTimeStep
+
+template<typename ModelType>
+inline std::ostream&
+operator<<(std::ostream& os,const TargetParamsTimeStep<ModelType>& t)
+{
+	os<<"#TargetParams.type=TimeStep\n";
+
+	const typename TargetParamsTimeStep<ModelType>::TimeVectorParamsType& tp1 = t;
+	os<<tp1;
+
+	const typename TargetParamsTimeStep<ModelType>::TargetParamsCommonType& tp = t;
+	os<<tp;
+
+	if (t.maxTime() > 0)
+		os<<"TSPMaxTime="<<t.maxTime()<<"\n";
+
+	os<<"TSPUseQns= "<<t.useQns()<<"\n";
+
+	return os;
+}
 } // namespace Dmrg
 
 /*@}*/
 #endif // TARGET_PARAMS_TIMESTEP_H
+

@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -116,7 +116,8 @@ public:
 			PsimagLite::String s(__FILE__);
 			s += "\n FATAL: TSPAlgorithm not found in input file.\n";
 			s += "Please add either TSPAlgorithm=Krylov or TSPAlgorithm=RungeKutta";
-			s += " or TSPAlgorithm=SuzukiTrotter just below the TSPAdvanceEach= line in the input file.\n";
+			s += " or TSPAlgorithm=SuzukiTrotter just below the TSPAdvanceEach= ";
+			s += " line in the input file.\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 	}
@@ -161,7 +162,8 @@ operator<<(std::ostream& os,const TargetParamsTimeVectors<ModelType>& t)
 	os<<"#TargetParams.algorithm="<<t.algorithm()<<"\n";
 	return os;
 }
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // TARGET_PARAMS_TIME_VECTORS_H
+

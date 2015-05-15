@@ -121,14 +121,14 @@ public:
 		if (tmp == "Matsubara") {
 			freqEnum = PsimagLite::FREQ_MATSUBARA;
 		} else if (tmp != "Real") {
-			throw PsimagLite::RuntimeError("CorrectionVectorFreqType=Real or Matsubara\n");
+			PsimagLite::String msg("CorrectionVectorFreqType");
+			throw PsimagLite::RuntimeError(msg += "must be either Real or Matsubara\n");
 		}
 
 		RealType omega;
 		io.readline(omega,"CorrectionVectorOmega=");
 		omega_=PairFreqType(freqEnum, omega);
 		io.readline(eta_,"CorrectionVectorEta=");
-
 
 		io.readline(tmp,"CorrectionVectorAlgorithm=");
 		if (tmp == "Krylov") {
