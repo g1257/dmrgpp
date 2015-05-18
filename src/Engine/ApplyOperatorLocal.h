@@ -177,7 +177,7 @@ public:
 				SizeType x0prime = A.data.getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0prime+x1*nx);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				dest2[j] += src[i]*A.data.getValue(k)*sign;
+				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
 			}
 		}
 	}

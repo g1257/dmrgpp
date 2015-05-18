@@ -563,7 +563,8 @@ private:
 					SizeType t2 = helper_.leftRightSuper(threadId).super().
 					        permutationInverse(r2+eta*A.col());
 					if (t2<offset || t2>=total) continue;
-					sum += Acrs.getValue(k)*vec1[t]*std::conj(vec2[t2]);
+					sum += Acrs.getValue(k)*vec1.slowAccess(t)*
+					        std::conj(vec2.slowAccess(t2));
 				}
 			}
 		}
@@ -600,7 +601,8 @@ private:
 					SizeType t2 = helper_.leftRightSuper(threadId).super().
 					        permutationInverse(r+eta2*leftSize);
 					if (t2<offset || t2>=total) continue;
-					sum += Acrs.getValue(k)*vec1[t]*std::conj(vec2[t2])*sign;
+					sum += Acrs.getValue(k)*vec1.slowAccess(t)*
+					        std::conj(vec2.slowAccess(t2))*sign;
 				}
 			}
 		}
@@ -671,7 +673,8 @@ private:
 						        permutationInverse(rprime+eta2*leftSize);
 						if (t2<offset || t2>=total) continue;
 						sum += std::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*
-						        vec1[t]*std::conj(vec2[t2])*sign;
+						        vec1.slowAccess(t)*
+						        std::conj(vec2.slowAccess(t2))*sign;
 					}
 				}
 			}
@@ -729,8 +732,9 @@ private:
 						SizeType t2 = helper_.leftRightSuper(threadId).super().
 						        permutationInverse(eta2+rprime*leftSize);
 						if (t2<offset || t2>=total) continue;
-						sum += std::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*vec1[t]*
-						        std::conj(vec2[t2])*sign;
+						sum += std::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*
+						        vec1.slowAccess(t)*
+						        std::conj(vec2.slowAccess(t2))*sign;
 					}
 				}
 			}
@@ -801,7 +805,9 @@ private:
 							        permutationInverse(rprime+eta2*leftSize);
 							if (t2<offset || t2>=total) continue;
 							sum += std::conj(A1crs.getValue(k1)*A2crs.getValue(k2))*
-							        Bcrs.getValue(k3)*vec1[t]*std::conj(vec2[t2])*sign;
+							        Bcrs.getValue(k3)*
+							        vec1.slowAccess(t)*
+							        std::conj(vec2.slowAccess(t2))*sign;
 						}
 					}
 				}
