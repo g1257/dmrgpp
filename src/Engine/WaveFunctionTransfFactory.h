@@ -292,13 +292,13 @@ public:
 		RealType atmp=0;
 		for (SizeType i=offset;i<final;i++) {
 			myRandomT(tmp);
-			y[i]=tmp;
-			atmp += std::real(y[i]*std::conj(y[i]));
+			y.slowAccess(i)=tmp;
+			atmp += std::real(tmp*std::conj(tmp));
 		}
 
 		assert(fabs(atmp)>1e-10);
 		atmp = 1.0 / sqrt (atmp);
-		for (SizeType i=offset;i<final;i++) y[i] *= atmp;
+		for (SizeType i=offset;i<final;i++) y.slowAccess(i) *= atmp;
 
 	}
 

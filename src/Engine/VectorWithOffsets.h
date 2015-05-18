@@ -277,7 +277,7 @@ public:
 		return data_[i][j];
 	}
 
-	const FieldType& operator[](SizeType i) const
+	const FieldType& slowAccess(SizeType i) const
 	{
 		assert(i<index2Sector_.size());
 		int j = index2Sector_[i];
@@ -285,7 +285,7 @@ public:
 		return data_[j][i-offsets_[j]];
 	}
 
-	FieldType& operator[](SizeType i)
+	FieldType& slowAccess(SizeType i)
 	{
 		int j = index2Sector_[i];
 		if (j<0) {
@@ -605,7 +605,7 @@ inline std::complex<FieldType> operator*(const Dmrg::VectorWithOffsets<
 			if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
 			SizeType offset = v1.offset(i);
 			for (SizeType k=0;k<v1.effectiveSize(i);k++)
-				sum+= v1[k+offset] * conj(v2[k+offset]);
+				sum+= v1.slowAccess(k+offset)*conj(v2.slowAccess(k+offset));
 		}
 	}
 	return sum;
@@ -623,7 +623,7 @@ inline FieldType operator*(const Dmrg::VectorWithOffsets<FieldType>& v1,
 			if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
 			SizeType offset = v1.offset(i);
 			for (SizeType k=0;k<v1.effectiveSize(i);k++)
-				sum+= v1[k+offset] * std::conj(v2[k+offset]);
+				sum+= v1.slowAccess(k+offset)*std::conj(v2.slowAccess(k+offset));
 		}
 	}
 	return sum;

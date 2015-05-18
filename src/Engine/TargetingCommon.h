@@ -580,7 +580,8 @@ private:
 				SizeType offset2 = src2.offset(j);
 				if (i!=j) continue;
 				for (SizeType k=0;k<dest.effectiveSize(i);k++)
-					sum+= dest[k+offset1] * std::conj(src2[k+offset2]);
+					sum+= dest.slowAccess(k+offset1)*
+					        std::conj(src2.slowAccess(k+offset2));
 			}
 		}
 

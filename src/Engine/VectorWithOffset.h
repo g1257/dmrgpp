@@ -266,14 +266,16 @@ public:
 		return *this;
 	}
 
-	const FieldType& operator[](SizeType i) const
+	const FieldType& slowAccess(SizeType i) const
 	{
 		if (i<offset_ || i>= (offset_+data_.size())) return zero_;
 		return data_[i-offset_];
 	}
 
-	FieldType& operator[](SizeType i)
+	FieldType& slowAccess(SizeType i)
 	{
+		assert(i <= offset_);
+		assert(i-offset_ < data_.size());
 		return data_[i-offset_];
 	}
 

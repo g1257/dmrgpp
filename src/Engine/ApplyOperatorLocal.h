@@ -240,7 +240,7 @@ private:
 				SizeType x1prime = A.data.getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0+x1prime*nx);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				dest2[j] += src[i]*A.data.getValue(k)*sign;
+				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
 			}
 		}
 
@@ -295,7 +295,7 @@ private:
 				SizeType y0prime = A.data.getCol(k);
 				SizeType yprime = lrs_.right().permutationInverse(y0prime+y1*nx);
 				SizeType j = lrs_.super().permutationInverse(x+yprime*ns);
-				dest2[j] += src[i]*A.data.getValue(k)*sign;
+				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
 			}
 		}
 	}
@@ -318,7 +318,7 @@ private:
 			for (int k=A.data.getRowPtr(x);k<A.data.getRowPtr(x+1);k++) {
 				SizeType xprime = A.data.getCol(k);
 				SizeType j = lrs_.super().permutationInverse(xprime+y*ns);
-				dest2[j] += src[i]*A.data.getValue(k);
+				dest2[j] += src.slowAccess(i)*A.data.getValue(k);
 			}
 		}
 	}
@@ -346,7 +346,7 @@ private:
 			for (int k=A.data.getRowPtr(y);k<A.data.getRowPtr(y+1);k++) {
 				SizeType yprime = A.data.getCol(k);
 				SizeType j = lrs_.super().permutationInverse(x+yprime*ns);
-				dest2[j] += src[i]*A.data.getValue(k)*sign;
+				dest2[j] += src.slowAccess(i)*A.data.getValue(k)*sign;
 			}
 		}
 	}

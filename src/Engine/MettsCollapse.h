@@ -315,7 +315,8 @@ private:
 				SizeType iprime = packSuper.pack(alphaPrime,
 				                                 beta,
 				                                 lrs_.super().permutationInverse());
-				w[i+offset] += v[iprime]*collapseBasis_(alpha1Prime,indexFixed) *
+				w.slowAccess(i+offset) += v.slowAccess(iprime)*
+				        collapseBasis_(alpha1Prime,indexFixed)*
 				        collapseBasis_(alpha1,indexFixed);
 
 			}
@@ -343,7 +344,8 @@ private:
 				SizeType iprime = packSuper.pack(alpha,
 				                                 betaPrime,
 				                                 lrs_.super().permutationInverse());
-				w[i+offset] += v[iprime]*collapseBasis_(betaPrime,indexFixed) *
+				w.slowAccess(i+offset) += v.slowAccess(iprime)*
+				        collapseBasis_(betaPrime,indexFixed)*
 				        collapseBasis_(beta,indexFixed);
 			}
 		}
@@ -388,7 +390,8 @@ private:
 				SizeType iprime = packSuper.pack(alpha,
 				                                 betaPrime,
 				                                 lrs_.super().permutationInverse());
-				w[i+offset] += v[iprime]*collapseBasis_(beta0Prime,indexFixed) *
+				w.slowAccess(i+offset) += v.slowAccess(iprime)*
+				        collapseBasis_(beta0Prime,indexFixed)*
 				        collapseBasis_(beta0,indexFixed);
 			}
 		}
@@ -415,7 +418,8 @@ private:
 				SizeType iprime = packSuper.pack(alphaPrime,
 				                                 beta,
 				                                 lrs_.super().permutationInverse());
-				w[i+offset] += v[iprime]*collapseBasis_(alphaPrime,indexFixed) *
+				w.slowAccess(i+offset) += v.slowAccess(iprime)*
+				        collapseBasis_(alphaPrime,indexFixed)*
 				        collapseBasis_(alpha,indexFixed);
 			}
 		}

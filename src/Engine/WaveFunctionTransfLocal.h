@@ -71,7 +71,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file WaveFunctionTransfLocal.h 
+/*! \file WaveFunctionTransfLocal.h
  *
  *  This class implements the wave function transformation, see PRL 77, 3633 (1996)
  *
@@ -198,7 +198,7 @@ private:
 			SizeType ip,beta,kp,jp;
 			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x));
 			pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
-			psiDest[x]=createAux1b(psiSrc,ip,kp,jp,ws,weT,nk);
+			psiDest.slowAccess(x)=createAux1b(psiSrc,ip,kp,jp,ws,weT,nk);
 		}
 	}
 
@@ -223,7 +223,7 @@ private:
 			for (int k2=weT.getRowPtr(jp);k2<weT.getRowPtr(jp+1);k2++) {
 				SizeType j = weT.getCol(k2);
 				SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(i+j*ni);
-				sum += ws.getValue(k)*weT.getValue(k2)*psiSrc[x];
+				sum += ws.getValue(k)*weT.getValue(k2)*psiSrc.slowAccess(x);
 			}
 		}
 
@@ -271,7 +271,7 @@ private:
 			SizeType ip,beta,kp,jp;
 			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x));
 			pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
-			psiDest[x]=createAux1bFromInfinite(psiSrc,ip,kp,jp,ws,weT,nk);
+			psiDest.slowAccess(x)=createAux1bFromInfinite(psiSrc,ip,kp,jp,ws,weT,nk);
 		}
 	}
 
@@ -298,7 +298,7 @@ private:
 			for (int k = weT.getRowPtr(jp);k<weT.getRowPtr(jp+1);k++) {
 				SizeType jp2 = weT.getCol(k);
 				SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(alpha+jp2*ni);
-				sum += weT.getValue(k)*psiSrc[x]*wsRef2.getValue(k3);
+				sum += weT.getValue(k)*psiSrc.slowAccess(x)*wsRef2.getValue(k3);
 
 			}
 		}
@@ -347,7 +347,7 @@ private:
 			SizeType ip,alpha,kp,jp;
 			pack1.unpack(alpha,jp,(SizeType)lrs.super().permutation(x));
 			pack2.unpack(ip,kp,(SizeType)lrs.left().permutation(alpha));
-			psiDest[x]=createAux2b(psiSrc,ip,kp,jp,wsT,we,nk);
+			psiDest.slowAccess(x)=createAux2b(psiSrc,ip,kp,jp,wsT,we,nk);
 		}
 	}
 
@@ -374,7 +374,7 @@ private:
 			for (SizeType k2=begink;k2<endk;++k2) {
 				SizeType j = we.getCol(k2);
 				SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(alpha+j*nalpha);
-				sum += wsT.getValue(k)*we.getValue(k2)*psiSrc[x]; //*weRef.getValue(k3);
+				sum += wsT.getValue(k)*we.getValue(k2)*psiSrc.slowAccess(x);
 			}
 		}
 		return sum;
@@ -510,7 +510,7 @@ private:
 		SizeType nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.col() : nip;
 
 		for (SizeType x=start;x<final;x++) {
-			psiDest[x] = 0.0;
+			psiDest.slowAccess(x) = 0.0;
 			SizeType ip,beta,kp,jp;
 			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x));
 			for (SizeType k=wsRef.getRowPtr(ip);k<wsRef.getRowPtr(ip+1);k++) {
@@ -519,7 +519,7 @@ private:
 				pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
 				SizeType ipkp = dmrgWaveStruct_.lrs.left().permutationInverse(ip2 + kp*nip2);
 				SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ipkp + jp*nalpha);
-				psiDest[x] += psiSrc[y]*wsRef.getValue(k);
+				psiDest.slowAccess(x) += psiSrc.slowAccess(y)*wsRef.getValue(k);
 			}
 		}
 	}
@@ -560,7 +560,7 @@ private:
 		MatrixOrIdentityType weRef(twoSiteDmrg_,dmrgWaveStruct_.we);
 
 		for (SizeType x=start;x<final;x++) {
-			psiDest[x] = 0.0;
+			psiDest.slowAccess(x) = 0.0;
 
 			SizeType ip,alpha,kp,jp;
 			pack1.unpack(alpha,jp,(SizeType)lrs.super().permutation(x));
@@ -572,7 +572,7 @@ private:
 				SizeType kpjp = dmrgWaveStruct_.lrs.right().permutationInverse(kp + jp2*volumeOfNk);
 
 				SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + kpjp*nip);
-				psiDest[x] += psiSrc[y] * weRef.getValue(k);
+				psiDest.slowAccess(x) += psiSrc.slowAccess(y) * weRef.getValue(k);
 			}
 		}
 	}

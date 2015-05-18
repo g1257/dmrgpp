@@ -307,7 +307,8 @@ namespace Dmrg {
 						int eta2 =  factors.getCol(k2);
 						int jj = pSE.permutationInverse(eta2);
 
-						DensityMatrixElementType tmp3= v[ii] * std::conj(v[jj]) *
+						DensityMatrixElementType tmp3= v.slowAccess(ii)*
+						        std::conj(v.slowAccess(jj)) *
 							factors.getValue(k1) * factors.getValue(k2);
 						sum += tmp3;
 					}

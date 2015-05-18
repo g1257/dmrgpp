@@ -180,7 +180,7 @@ private:
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
 		for (SizeType x=start;x<final;x++) {
-			psiDest[x] = 0;
+			psiDest.slowAccess(x) = 0;
 			for (int kI = factorsInverseSE.getRowPtr(x);
 			     kI < factorsInverseSE.getRowPtr(x+1);
 			     kI++) {
@@ -191,7 +191,7 @@ private:
 				     k2I++) {
 					SizeType kp,jp;
 					pack2.unpack(kp,jp,(SizeType)factorsInverseE.getCol(k2I));
-					psiDest[x] += createVectorAux1bSu2(psiSrc,ip,kp,jp,factorsSEOld,ws,weT,nk)*
+					psiDest.slowAccess(x) += createVectorAux1bSu2(psiSrc,ip,kp,jp,factorsSEOld,ws,weT,nk)*
 					        factorsInverseSE.getValue(kI)*factorsInverseE.getValue(k2I);
 				}
 			}
@@ -224,7 +224,7 @@ private:
 					SizeType r = i+j*ni;
 					for (int kI=factorsSE.getRowPtr(r);kI<factorsSE.getRowPtr(r+1);kI++) {
 						SizeType x = factorsSE.getCol(kI);
-						sum += ws.getValue(k)*weT.getValue(k2)*psiSrc[x]*
+						sum += ws.getValue(k)*weT.getValue(k2)*psiSrc.slowAccess(x)*
 						        factorsSE.getValue(kI)*factorsS.getValue(k2I);
 					}
 				}
@@ -276,7 +276,7 @@ private:
 		PackIndicesType pack1(nalpha);
 		PackIndicesType pack2(nip);
 		for (SizeType x=start;x<final;x++) {
-			psiDest[x] = 0;
+			psiDest.slowAccess(x) = 0;
 			SizeType xx = x;
 			for (int kI=factorsInverseSE.getRowPtr(xx);
 			     kI<factorsInverseSE.getRowPtr(xx+1);
@@ -289,7 +289,7 @@ private:
 				     k2I++) {
 					SizeType ip,kp;
 					pack2.unpack(ip,kp,(SizeType)factorsInverseS.getCol(k2I));
-					psiDest[x] += fastAux2bSu2(psiSrc,ip,kp,jp,wsT,we,nk)*
+					psiDest.slowAccess(x) += fastAux2bSu2(psiSrc,ip,kp,jp,wsT,we,nk)*
 					        factorsInverseSE.getValue(kI)*factorsInverseS.getValue(k2I);
 				}
 			}
@@ -308,7 +308,7 @@ private:
 		// and will cause not trivial targeting  (like tst, dynamic, correction vector) to fail
 		PsimagLite::Random48<RealType> random(34343);
 		for (SizeType x=start;x<final;x++) {
-			psiDest[x] = random();
+			psiDest.slowAccess(x) = random();
 		}
 		msg3<<"WARNING: I have dropped your vector on the floor!";
 		progress_.printline(msg3,std::cout);
@@ -342,7 +342,7 @@ private:
 					SizeType r = alpha + j*nalpha;
 					for (int kI=factorsSE.getRowPtr(r);kI<factorsSE.getRowPtr(r+1);kI++) {
 						SizeType x = factorsSE.getCol(kI);
-						sum += wsT.getValue(k)*we.getValue(k2)*psiSrc[x]*
+						sum += wsT.getValue(k)*we.getValue(k2)*psiSrc.slowAccess(x)*
 						        factorsSE.getValue(kI)*factorsE.getValue(k2I);
 					}
 				}
