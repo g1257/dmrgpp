@@ -574,14 +574,12 @@ private:
 		ComplexOrRealType sum = 0.0;
 		for (SizeType ii=0;ii<dest.sectors();ii++) {
 			SizeType i = dest.sector(ii);
-			SizeType offset1 = dest.offset(i);
 			for (SizeType jj=0;jj<src2.sectors();jj++) {
 				SizeType j = src2.sector(jj);
-				SizeType offset2 = src2.offset(j);
 				if (i!=j) continue;
 				for (SizeType k=0;k<dest.effectiveSize(i);k++)
-					sum+= dest.slowAccess(k+offset1)*
-					        std::conj(src2.slowAccess(k+offset2));
+					sum+= dest.fastAccess(i,k)*
+					        std::conj(src2.fastAccess(j,k));
 			}
 		}
 

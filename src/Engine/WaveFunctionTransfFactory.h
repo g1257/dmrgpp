@@ -273,10 +273,7 @@ public:
 	{
 		for (SizeType jj=0;jj<y.sectors();jj++) {
 			SizeType j = y.sector(jj);
-			SizeType offset = y.offset(j);
-			SizeType total = y.effectiveSize(j);
-			SizeType final = offset + total;
-			createRandomVector(y,offset,final);
+			createRandomVector(y,j);
 		}
 
 		if (!isEnabled_) return; // don't make noise unless enabled
@@ -286,19 +283,20 @@ public:
 	}
 
 	template<typename SomeVectorType>
-	void createRandomVector(SomeVectorType& y,SizeType offset,SizeType final) const
+	void createRandomVector(SomeVectorType& y,SizeType i0) const
 	{
+		SizeType total = y.effectiveSize(i0);
 		typename SomeVectorType::value_type tmp;
 		RealType atmp=0;
-		for (SizeType i=offset;i<final;i++) {
+		for (SizeType i=0;i<total;i++) {
 			myRandomT(tmp);
-			y.slowAccess(i)=tmp;
+			y.fastAccess(i0,i)=tmp;
 			atmp += std::real(tmp*std::conj(tmp));
 		}
 
 		assert(fabs(atmp)>1e-10);
 		atmp = 1.0 / sqrt (atmp);
-		for (SizeType i=offset;i<final;i++) y.slowAccess(i) *= atmp;
+		for (SizeType i=0;i<total;i++) y.fastAccess(i0,i) *= atmp;
 
 	}
 

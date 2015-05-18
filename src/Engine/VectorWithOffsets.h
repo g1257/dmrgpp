@@ -609,10 +609,9 @@ inline std::complex<FieldType> operator*(const Dmrg::VectorWithOffsets<
 		SizeType i = v1.sector(ii);
 		for (SizeType jj=0;jj<v1.sectors();jj++) {
 			SizeType j = v2.sector(jj);
-			if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
-			SizeType offset = v1.offset(i);
+			if (i!=j) continue;
 			for (SizeType k=0;k<v1.effectiveSize(i);k++)
-				sum+= v1.slowAccess(k+offset)*conj(v2.slowAccess(k+offset));
+				sum+= v1.fastAccess(i,k)*conj(v2.fastAccess(j,k));
 		}
 	}
 	return sum;
@@ -627,10 +626,9 @@ inline FieldType operator*(const Dmrg::VectorWithOffsets<FieldType>& v1,
 		SizeType i = v1.sector(ii);
 		for (SizeType jj=0;jj<v1.sectors();jj++) {
 			SizeType j = v2.sector(jj);
-			if (i!=j) continue; //throw PsimagLite::RuntimeError("Not same sector\n");
-			SizeType offset = v1.offset(i);
+			if (i!=j) continue;
 			for (SizeType k=0;k<v1.effectiveSize(i);k++)
-				sum+= v1.slowAccess(k+offset)*std::conj(v2.slowAccess(k+offset));
+				sum+= v1.fastAccess(i,k)*std::conj(v2.fastAccess(j,k));
 		}
 	}
 	return sum;
