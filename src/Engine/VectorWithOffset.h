@@ -285,6 +285,12 @@ public:
 		return data_[j];
 	}
 
+	FieldType& fastAccess(SizeType,SizeType j)
+	{
+		assert(j<data_.size());
+		return data_[j];
+	}
+
 	int index2Sector(SizeType i) const
 	{
 		if (i < offset_ || i >= (offset_+data_.size()))

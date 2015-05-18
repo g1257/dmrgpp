@@ -185,7 +185,7 @@ private:
 		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.col());
 
 		SizeType start = psiDest.offset(i0);
-		SizeType final = psiDest.effectiveSize(i0)+start;
+		SizeType total = psiDest.effectiveSize(i0);
 
 		const SparseMatrixType& ws = dmrgWaveStruct_.ws;
 		const SparseMatrixType& we = dmrgWaveStruct_.we;
@@ -194,11 +194,11 @@ private:
 
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
-		for (SizeType x=start;x<final;x++) {
+		for (SizeType x=0;x<total;x++) {
 			SizeType ip,beta,kp,jp;
-			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x));
+			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x+start));
 			pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
-			psiDest.slowAccess(x)=createAux1b(psiSrc,ip,kp,jp,ws,weT,nk);
+			psiDest.fastAccess(i0,x)=createAux1b(psiSrc,ip,kp,jp,ws,weT,nk);
 		}
 	}
 
@@ -258,7 +258,7 @@ private:
 		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.col());
 
 		SizeType start = psiDest.offset(i0);
-		SizeType final = psiDest.effectiveSize(i0)+start;
+		SizeType total = psiDest.effectiveSize(i0);
 
 		SparseMatrixType ws(dmrgWaveStruct_.ws);
 		SparseMatrixType we(dmrgWaveStruct_.we);
@@ -267,11 +267,11 @@ private:
 
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
-		for (SizeType x=start;x<final;x++) {
+		for (SizeType x=0;x<total;x++) {
 			SizeType ip,beta,kp,jp;
-			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x));
+			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x+start));
 			pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
-			psiDest.slowAccess(x)=createAux1bFromInfinite(psiSrc,ip,kp,jp,ws,weT,nk);
+			psiDest.fastAccess(i0,x)=createAux1bFromInfinite(psiSrc,ip,kp,jp,ws,weT,nk);
 		}
 	}
 
@@ -334,7 +334,7 @@ private:
 		assert(nip==dmrgWaveStruct_.ws.col());
 
 		SizeType start = psiDest.offset(i0);
-		SizeType final = psiDest.effectiveSize(i0)+start;
+		SizeType total = psiDest.effectiveSize(i0);
 
 		const SparseMatrixType& we = dmrgWaveStruct_.we;
 		const SparseMatrixType& ws = dmrgWaveStruct_.ws;
@@ -343,11 +343,11 @@ private:
 
 		PackIndicesType pack1(nalpha);
 		PackIndicesType pack2(nip);
-		for (SizeType x=start;x<final;x++) {
+		for (SizeType x=0;x<total;x++) {
 			SizeType ip,alpha,kp,jp;
-			pack1.unpack(alpha,jp,(SizeType)lrs.super().permutation(x));
+			pack1.unpack(alpha,jp,(SizeType)lrs.super().permutation(x+start));
 			pack2.unpack(ip,kp,(SizeType)lrs.left().permutation(alpha));
-			psiDest.slowAccess(x)=createAux2b(psiSrc,ip,kp,jp,wsT,we,nk);
+			psiDest.fastAccess(i0,x)=createAux2b(psiSrc,ip,kp,jp,wsT,we,nk);
 		}
 	}
 
@@ -501,7 +501,7 @@ private:
 		assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
 
 		SizeType start = psiDest.offset(i0);
-		SizeType final = psiDest.effectiveSize(i0)+start;
+		SizeType total = psiDest.effectiveSize(i0);
 
 		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 		PackIndicesType pack1(nip);
@@ -509,17 +509,17 @@ private:
 		MatrixOrIdentityType wsRef(twoSiteDmrg_,dmrgWaveStruct_.ws);
 		SizeType nip2 = (twoSiteDmrg_) ? dmrgWaveStruct_.ws.col() : nip;
 
-		for (SizeType x=start;x<final;x++) {
-			psiDest.slowAccess(x) = 0.0;
+		for (SizeType x=0;x<total;x++) {
+			psiDest.fastAccess(i0,x) = 0.0;
 			SizeType ip,beta,kp,jp;
-			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x));
+			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x+start));
 			for (SizeType k=wsRef.getRowPtr(ip);k<wsRef.getRowPtr(ip+1);k++) {
 				int ip2 = wsRef.getColOrExit(k);
 				if (ip2 < 0) continue;
 				pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
 				SizeType ipkp = dmrgWaveStruct_.lrs.left().permutationInverse(ip2 + kp*nip2);
 				SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ipkp + jp*nalpha);
-				psiDest.slowAccess(x) += psiSrc.slowAccess(y)*wsRef.getValue(k);
+				psiDest.fastAccess(i0,x) += psiSrc.slowAccess(y)*wsRef.getValue(k);
 			}
 		}
 	}
@@ -554,25 +554,27 @@ private:
 		assert(dmrgWaveStruct_.lrs.super().permutationInverse().size()==psiSrc.size());
 
 		SizeType start = psiDest.offset(i0);
-		SizeType final = psiDest.effectiveSize(i0)+start;
+		SizeType total = psiDest.effectiveSize(i0);
 		PackIndicesType pack1(nalpha);
 		PackIndicesType pack2(nip);
 		MatrixOrIdentityType weRef(twoSiteDmrg_,dmrgWaveStruct_.we);
 
-		for (SizeType x=start;x<final;x++) {
-			psiDest.slowAccess(x) = 0.0;
+		for (SizeType x=0;x<total;x++) {
+			psiDest.fastAccess(i0,x) = 0.0;
 
 			SizeType ip,alpha,kp,jp;
-			pack1.unpack(alpha,jp,(SizeType)lrs.super().permutation(x));
+			pack1.unpack(alpha,jp,(SizeType)lrs.super().permutation(x+start));
 			pack2.unpack(ip,kp,(SizeType)lrs.left().permutation(alpha));
 
 			for (SizeType k=weRef.getRowPtr(jp);k<weRef.getRowPtr(jp+1);k++) {
 				int jp2 = weRef.getColOrExit(k);
 				if (jp2 < 0) continue;
-				SizeType kpjp = dmrgWaveStruct_.lrs.right().permutationInverse(kp + jp2*volumeOfNk);
+				SizeType kpjp = dmrgWaveStruct_.lrs.right().
+				        permutationInverse(kp + jp2*volumeOfNk);
 
-				SizeType y = dmrgWaveStruct_.lrs.super().permutationInverse(ip + kpjp*nip);
-				psiDest.slowAccess(x) += psiSrc.slowAccess(y) * weRef.getValue(k);
+				SizeType y = dmrgWaveStruct_.lrs.super().
+				        permutationInverse(ip + kpjp*nip);
+				psiDest.fastAccess(i0,x) += psiSrc.slowAccess(y) * weRef.getValue(k);
 			}
 		}
 	}

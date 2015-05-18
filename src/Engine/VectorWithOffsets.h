@@ -277,6 +277,13 @@ public:
 		return data_[i][j];
 	}
 
+	FieldType& fastAccess(SizeType i,SizeType j)
+	{
+		assert(i < data_.size());
+		assert(j < data_[i].size());
+		return data_[i][j];
+	}
+
 	const FieldType& slowAccess(SizeType i) const
 	{
 		assert(i<index2Sector_.size());
