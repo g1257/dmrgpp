@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cstdlib>
 #include "Map.h"
 #include "Concurrency.h"
+#include "Stack.h"
 
 namespace PsimagLite {
 //! IoSimple class handles Input/Output (IO) for the Dmrg++ program
@@ -548,7 +549,7 @@ IoSimple::Out& operator<<(IoSimple::Out& io,const T& t)
 template<typename T>
 void operator>>(IoSimple::In& io,T& t)
 {
-	io.fin_>>t;
+	(io.fin_)>>t;
 }
 
 } // namespace PsimagLite

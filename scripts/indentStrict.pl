@@ -9,6 +9,7 @@ GetOptions ("ne" => \$noerrors,    # do not display errors
 	"fix"  => \$fix,
 	"d" => \$debug,
 	"file=s"=>\$file);  # fix in place
+print STDERR "$0: Echo of command line: $file $noerrors $nowarn $debug\n";
 
 my $indentLevel = 0;
 my $line = 0;

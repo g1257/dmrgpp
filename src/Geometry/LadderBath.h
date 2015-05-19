@@ -101,9 +101,6 @@ public:
 	    : linSize_(linSize),ladder_(0)
 	{
 		io.readline(bathSitesPerSite_,"BathSitesPerSite=");
-		if (bathSitesPerSite_ < 0)
-			throw RuntimeError("BathSitesPerSite<0 is an error\n");
-
 		clusterSize_ = linSize_/(1+bathSitesPerSite_);
 
 		ladder_ = new LadderType(clusterSize_,io);
