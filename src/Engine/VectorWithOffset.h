@@ -268,7 +268,7 @@ public:
 
 	const FieldType& slowAccess(SizeType i) const
 	{
-		if (i<offset_ || i>= (offset_+data_.size())) return zero_;
+		assert(i>=offset_ && i<(offset_+data_.size()));
 		return data_[i-offset_];
 	}
 
