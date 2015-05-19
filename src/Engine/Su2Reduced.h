@@ -375,14 +375,14 @@ namespace Dmrg {
 
 				x = j1prime-k-j1;
 				if (x%2!=0) continue;
-				if (m1+mu1+int(x/2)<0) continue;
+				if (static_cast<int>(m1+mu1)+static_cast<int>(x/2)<0) continue;
 				SizeType m1prime = m1+mu1+SizeType(x/2);
 				if (m1prime>j1prime) continue;
 				PairType jm1prime(j1prime,m1prime);
 
 				x = j2prime-k-j2;
 				if (x%2!=0) continue;
-				if (m2+mu2+int(x/2)<0) continue;
+				if (static_cast<int>(m2+mu2)+static_cast<int>(x/2)<0) continue;
 				SizeType m2prime = m2+mu2+SizeType(x/2);
 				if (m2prime>j2prime) continue;
 				PairType jm2prime(j2prime,m2prime);

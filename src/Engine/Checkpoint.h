@@ -233,7 +233,7 @@ private:
 	PsimagLite::String appendWithDir(const PsimagLite::String& s1,
 	                                 const PsimagLite::String& s2) const
 	{
-		SizeType x = s2.find("/");
+		size_t x = s2.find("/");
 		if (x==PsimagLite::String::npos) return s1 + s2;
 		PsimagLite::String suf = s2.substr(x+1,s2.length());
 		PsimagLite::String dir = s2.substr(0,s2.length()-suf.length());
@@ -246,7 +246,7 @@ private:
 	DiskStackType systemDisk_,envDisk_;
 	PsimagLite::ProgressIndicator progress_;
 }; // class Checkpoint
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif

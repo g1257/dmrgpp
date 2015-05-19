@@ -170,7 +170,7 @@ public:
 		throw PsimagLite::RuntimeError(s);
 	}
 
-	virtual void omega(RealType)
+	virtual void omega(PsimagLite::FreqEnum, RealType)
 	{
 		unimplemented("omega(RealType)");
 	}

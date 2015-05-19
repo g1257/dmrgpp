@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -77,7 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  A class to represent a sparse matrix in trivial format
  *
  */
- 
+
 #ifndef VERY_SPARSE_MATRIX_HEADER_H
 #define VERY_SPARSE_MATRIX_HEADER_H
 
@@ -126,7 +126,7 @@ namespace Dmrg {
 			return values_[x];
 		}
 
-		bool operator!=(const VerySparseMatrix<T>& other) const 
+		bool operator!=(const VerySparseMatrix<T>& other) const
 		{
 			return !(*this == other);
 		}
@@ -143,13 +143,13 @@ namespace Dmrg {
 		void operator=(const CrsMatrixType& crs)
 		{
 			clear();
-			rank=crs.rank();
+			rank_=crs.rank();
 			sorted_=true;
-			for (SizeType i=0;i<rank_;i++) 
-				for (int k=crs.getRowPtr(i);k<crs.getRowPtr(i+1);k++) 
+			for (SizeType i=0;i<rank_;i++)
+				for (int k=crs.getRowPtr(i);k<crs.getRowPtr(i+1);k++)
 					// (i,crs.getCol(k)) --> coordinate
 					this->operator()(i,crs.getCol(k))=crs.getValue(k);
-					// crs.getValue(k) --> value			
+					// crs.getValue(k) --> value
 		}
 
 		//! same as T& operator() but doesn't check for dupes
@@ -177,7 +177,7 @@ namespace Dmrg {
 			return values_[i];
 		}
 
-		T& operator()(SizeType i) 
+		T& operator()(SizeType i)
 		{
 			return values_[i];
 		}
@@ -201,7 +201,7 @@ namespace Dmrg {
 			for (SizeType i=0;i<coordinates_.size();i++) {
 				rows[i]=coordinates_[i].first;
 				cols[i]=coordinates_[i].second;
-				
+
 			}
 
 			perm.resize(rows.size());
@@ -242,7 +242,7 @@ namespace Dmrg {
 		void getColumn(typename PsimagLite::Vector<SizeType>::Type& rows,SizeType col) const
 		{
 			rows.clear();
-			for (SizeType i=0;i<coordinates_.size();i++) 
+			for (SizeType i=0;i<coordinates_.size();i++)
 				if (coordinates_[i].second == col) rows.push_back(i);
 		}
 
@@ -300,12 +300,12 @@ namespace Dmrg {
 			std::cerr<<"rank="<<rank_<<"\n";
 			throw PsimagLite::RuntimeError("VerySparseMatrix::checkCoordinates()\n");
 		}
-		
+
 		bool sorted() const { return sorted_; }
-		
-		
+
+
 	private:
-		
+
 		void plusEqualOrd(VerySparseMatrix<T>& other)
 		{
 			SizeType j = 0;
@@ -371,7 +371,7 @@ namespace Dmrg {
 	template<typename T>
 	std::ostream& operator<<(std::ostream& os,const VerySparseMatrix<T>& m)
 	{
-		for (SizeType i=0;i<m.values_.size();i++) 
+		for (SizeType i=0;i<m.values_.size();i++)
 			os<<"verysparse("<<m.coordinates_[i].first<<","<<m.coordinates_[i].second<<")="<<m.values_[i]<<"\n";
 		return os;
 	}
@@ -380,7 +380,7 @@ namespace Dmrg {
 	bool isHermitian(const VerySparseMatrix<T>& m)
 	{
 		T eps =1e-6;
-		for (SizeType i=0;i<m.nonZero();i++) { 
+		for (SizeType i=0;i<m.nonZero();i++) {
 			SizeType row = m.getRow(i);
 			SizeType col = m.getColumn(i);
 			if (fabs(m.getValue(i)-m(col,row))>eps) {
@@ -390,5 +390,5 @@ namespace Dmrg {
 		return true;
 	}
 } // namespace Dmrg
-/*@}*/	
+/*@}*/
 #endif

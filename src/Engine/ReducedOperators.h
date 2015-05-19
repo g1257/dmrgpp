@@ -96,6 +96,7 @@ namespace Dmrg {
 		typedef ClebschGordanCached<RealType> ClebschGordanType;
 		typedef PsimagLite::Matrix<SparseElementType> DenseMatrixType;
 		typedef Su2SymmetryGlobals<RealType> Su2SymmetryGlobalsType;
+		typedef typename PsimagLite::Vector<OperatorType_>::Type VectorOperatorType;
 
 	public:
 
@@ -154,7 +155,7 @@ namespace Dmrg {
 				SizeType angularMomentum =ops[i].jm.first;
 				typename PsimagLite::Vector<const OperatorType*>::Type opSrc(angularMomentum+1);
 				if (ops[i].su2Related.source.size()==0) continue;
-				OperatorType myOp[angularMomentum+1];
+				VectorOperatorType myOp(angularMomentum+1);
 				SizeType transposeCounter=0;
 
 				for (SizeType m=0;m<=angularMomentum;m++) {
@@ -566,7 +567,12 @@ namespace Dmrg {
 			return calcLfactorRight(j1,j2,j1prime,jProd,jProdPrime,k);
 		}
 
-		SparseElementType calcLfactorLeft(SizeType j1,SizeType j2,SizeType j1prime,SizeType jProd,SizeType jProdPrime,SizeType k) const
+		SparseElementType calcLfactorLeft(SizeType j1,
+		                                  SizeType j2,
+		                                  SizeType j1prime,
+		                                  SizeType jProd,
+		                                  SizeType jProdPrime,
+		                                  SizeType k) const
 		{
 			SparseElementType sum=0;
 			for (SizeType m1=0;m1<=j1;m1++) {
@@ -579,7 +585,7 @@ namespace Dmrg {
 						int x = j1+j2-jProd;
 						if (x%2!=0) continue;
 						x/=2;
-						if (m1+m2-x<0) continue;
+						if (m1+m2<x) continue;
 						SizeType m = m1 + m2 - x;
 						if (m>jProd) continue;
 						PairType jm(jProd,m);
@@ -588,7 +594,7 @@ namespace Dmrg {
 						x = -jProdPrime + k +jProd;
 						if (x%2!=0) continue;
 						x/=2;
-						if (m +mCapital-x<0) continue;
+						if (m +mCapital<x) continue;
 						SizeType mPrime = m +mCapital-x;
 						if (mPrime>jProdPrime) continue;
 						PairType jmPrime(jProdPrime,mPrime);
@@ -597,7 +603,7 @@ namespace Dmrg {
 						x = j1prime + j2 - jProdPrime;
 						if (x%2!=0) continue;
 						x/=2;
-						if (mPrime + x - m2 < 0) continue;
+						if (mPrime + x < m2) continue;
 						SizeType m1prime = mPrime + x - m2;
 						if (m1prime > j1prime) continue;
 						PairType jm1prime(j1prime,m1prime);
@@ -606,7 +612,7 @@ namespace Dmrg {
 						x = k - j1prime +j1;
 						if (x%2!=0) continue;
 						x/=2;
-						if (m1 - x + mCapital < 0) continue;
+						if (m1 < x + mCapital) continue;
 						if (m1 - x + mCapital != m1prime) continue;
 
 						sum +=  cgObject_->operator()(jmPrime,jmCapital,jm)*
@@ -632,7 +638,7 @@ namespace Dmrg {
 						int x = j1+j2-jProd;
 						if (x%2!=0) continue;
 						x/=2;
-						if (m1+m2-x<0) continue;
+						if (m1+m2 < x) continue;
 						SizeType m = m1 + m2 - x;
 						if (m>jProd) continue;
 						PairType jm(jProd,m);
@@ -641,7 +647,7 @@ namespace Dmrg {
 						x = -jProdPrime + k +jProd;
 						if (x%2!=0) continue;
 						x/=2;
-						if (m - x + mCapital<0) continue;
+						if (m < x + mCapital) continue;
 						SizeType mPrime = m - x +mCapital;
 						if (mPrime>jProdPrime) continue;
 						PairType jmPrime(jProdPrime,mPrime);
@@ -650,7 +656,7 @@ namespace Dmrg {
 						x = j2prime + j1 - jProdPrime;
 						if (x%2!=0) continue;
 						x/=2;
-						if (mPrime + x - m1 < 0) continue;
+						if (mPrime + x < m1) continue;
 						SizeType m2prime = mPrime + x - m1;
 						if (m2prime > j2prime) continue;
 						PairType jm2prime(j2prime,m2prime);
@@ -659,7 +665,7 @@ namespace Dmrg {
 						x = k - j2prime + j2;
 						if (x%2!=0) continue;
 						x/=2;
-						if (m2 - x + mCapital < 0) continue;
+						if (m2 < x + mCapital) continue;
 						if (m2 - x + mCapital != m2prime) continue;
 
 						sum +=  cgObject_->operator()(jmPrime,jmCapital,jm)*

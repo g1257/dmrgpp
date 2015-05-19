@@ -103,7 +103,7 @@ public:
 	void fullDiag(VectorRealType& eigs,
 	              FullMatrixType& fm,
 	              const SparseMatrixType& matrixStored,
-	              SizeType tmp) const
+	              int tmp) const
 	{
 		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
 		if (matrixStored.row() == 0 || matrixStored.row() > maxMatrixRankStored) {

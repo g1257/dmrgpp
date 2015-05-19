@@ -140,7 +140,7 @@ private:
 		x *= jm.second;
 		x /= 2;
 		x += jm.first;
-		if (x<0 || x>=max2_)
+		if (x>=max2_)
 			throw PsimagLite::RuntimeError("problem calcSubIndex\n");
 		return x;
 	}
