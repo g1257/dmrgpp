@@ -95,6 +95,8 @@ class WaveFunctionTransfLocal : public
         WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
+	typedef WaveFunctionTransfBase<DmrgWaveStructType,VectorWithOffsetType> BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
 
 public:
 
@@ -108,8 +110,8 @@ public:
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
 	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 	typedef ParallelWftOne<VectorWithOffsetType,
-	        DmrgWaveStructType,
-	        LeftRightSuperType> ParallelWftType;
+	DmrgWaveStructType,
+	LeftRightSuperType> ParallelWftType;
 
 	static const SizeType INFINITE = ProgramGlobals::INFINITE;
 	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
@@ -135,7 +137,7 @@ public:
 	virtual void transformVector(VectorWithOffsetType& psiDest,
 	                             const VectorWithOffsetType& psiSrc,
 	                             const LeftRightSuperType& lrs,
-	                             const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                             const VectorSizeType& nk) const
 
 	{
 		if (stage_==EXPAND_ENVIRON) {
@@ -163,82 +165,48 @@ private:
 	void transformVector1(SomeVectorType& psiDest,
 	                      const SomeVectorType& psiSrc,
 	                      const LeftRightSuperType& lrs,
-	                      const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                      const VectorSizeType& nk) const
 	{
 		if (twoSiteDmrg_)
 			return transformVector1FromInfinite(psiDest,psiSrc,lrs,nk);
 
+		typename ParallelWftType::DirectionEnum dir1 = ParallelWftType::DIR_1;
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
-			transformVector1(psiDest,psiSrc,lrs,i0,nk);
+			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir1);
 		}
 	}
 
 	template<typename SomeVectorType>
-	void transformVector1(SomeVectorType& psiDest,
-	                      const SomeVectorType& psiSrc,
-	                      const LeftRightSuperType& lrs,
-	                      SizeType i0,
-	                      const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	void transformVectorParallel(SomeVectorType& psiDest,
+	                             const SomeVectorType& psiSrc,
+	                             const LeftRightSuperType& lrs,
+	                             SizeType i0,
+	                             const VectorSizeType& nk,
+	                             typename ParallelWftType::DirectionEnum dir) const
 	{
-		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
-		SizeType nip = lrs.super().permutationInverse().size()/
-		        lrs.right().permutationInverse().size();
-
-		assert(dmrgWaveStruct_.lrs.left().permutationInverse().size()==dmrgWaveStruct_.ws.row());
-		assert(lrs.right().permutationInverse().size()/volumeOfNk==dmrgWaveStruct_.we.col());
-
-		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
 
-		const SparseMatrixType& ws = dmrgWaveStruct_.ws;
-		const SparseMatrixType& we = dmrgWaveStruct_.we;
-		SparseMatrixType weT;
-		transposeConjugate(weT,we);
+		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
+		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
+		                             PsimagLite::MPI::COMM_WORLD);
 
-		PackIndicesType pack1(nip);
-		PackIndicesType pack2(volumeOfNk);
-		for (SizeType x=0;x<total;x++) {
-			SizeType ip,beta,kp,jp;
-			pack1.unpack(ip,beta,(SizeType)lrs.super().permutation(x+start));
-			pack2.unpack(kp,jp,(SizeType)lrs.right().permutation(beta));
-			psiDest.fastAccess(i0,x)=createAux1b(psiSrc,ip,kp,jp,ws,weT,nk);
-		}
-	}
+		ParallelWftType helperWft(psiDest,
+		                          psiSrc,
+		                          lrs,
+		                          i0,
+		                          nk,
+		                          dmrgWaveStruct_,
+		                          dir);
 
-	template<typename SomeVectorType>
-	SparseElementType createAux1b(const SomeVectorType& psiSrc,
-	                              SizeType ip,
-	                              SizeType kp,
-	                              SizeType jp,
-	                              const SparseMatrixType& ws,
-	                              const SparseMatrixType& weT,
-	                              const typename PsimagLite::Vector<SizeType>::Type& nk) const
-	{
-		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
-		SizeType ni=dmrgWaveStruct_.ws.col();
-		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
-		SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip+kp*nip);
-
-		SparseElementType sum=0;
-
-		for (int k = ws.getRowPtr(alpha);k<ws.getRowPtr(alpha+1);k++) {
-			SizeType i = ws.getCol(k);
-			for (int k2=weT.getRowPtr(jp);k2<weT.getRowPtr(jp+1);k2++) {
-				SizeType j = weT.getCol(k2);
-				SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(i+j*ni);
-				sum += ws.getValue(k)*weT.getValue(k2)*psiSrc.slowAccess(x);
-			}
-		}
-
-		return sum;
+		threadedWft.loopCreate(total, helperWft);
 	}
 
 	template<typename SomeVectorType>
 	void transformVector1FromInfinite(SomeVectorType& psiDest,
 	                                  const SomeVectorType& psiSrc,
 	                                  const LeftRightSuperType& lrs,
-	                                  const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                                  const VectorSizeType& nk) const
 	{
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
@@ -251,7 +219,7 @@ private:
 	                                  const SomeVectorType& psiSrc,
 	                                  const LeftRightSuperType& lrs,
 	                                  SizeType i0,
-	                                  const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                                  const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/
@@ -286,7 +254,7 @@ private:
 	                                          SizeType jp,
 	                                          const SparseMatrixType& ws,
 	                                          const SparseMatrixType& weT,
-	                                          const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                                          const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType ni=dmrgWaveStruct_.lrs.left().size();
@@ -313,45 +281,23 @@ private:
 	void transformVector2(SomeVectorType& psiDest,
 	                      const SomeVectorType& psiSrc,
 	                      const LeftRightSuperType& lrs,
-	                      const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                      const VectorSizeType& nk) const
 	{
 		if (twoSiteDmrg_)
 			return transformVector2FromInfinite(psiDest,psiSrc,lrs,nk);
 
+		typename ParallelWftType::DirectionEnum dir2 = ParallelWftType::DIR_2;
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
-			transformVector2(psiDest,psiSrc,lrs,i0,nk);
+			transformVectorParallel(psiDest,psiSrc,lrs,i0,nk,dir2);
 		}
-	}
-
-	template<typename SomeVectorType>
-	void transformVector2(SomeVectorType& psiDest,
-	                      const SomeVectorType& psiSrc,
-	                      const LeftRightSuperType& lrs,
-	                      SizeType i0,
-	                      const typename PsimagLite::Vector<SizeType>::Type& nk) const
-	{
-		SizeType total = psiDest.effectiveSize(i0);
-
-		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
-		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
-		                             PsimagLite::MPI::COMM_WORLD);
-
-		ParallelWftType helperWft(psiDest,
-		                          psiSrc,
-				                  lrs,
-				                  i0,
-				                  nk,
-				                  dmrgWaveStruct_);
-
-		threadedWft.loopCreate(total, helperWft);
 	}
 
 	template<typename SomeVectorType>
 	void transformVector2FromInfinite(SomeVectorType& psiDest,
 	                                  const SomeVectorType& psiSrc,
 	                                  const LeftRightSuperType& lrs,
-	                                  const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                                  const VectorSizeType& nk) const
 	{
 		PsimagLite::OstringStream msg;
 		msg<<" Destination sectors "<<psiDest.sectors();
@@ -381,7 +327,7 @@ private:
 	                                  const VectorType& psiV,
 	                                  SizeType offset,
 	                                  const LeftRightSuperType& lrs,
-	                                  const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                                  const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
@@ -414,7 +360,7 @@ private:
 	                                          SizeType jen,
 	                                          const SparseMatrixType& wsT,
 	                                          const SparseMatrixType& we,
-	                                          const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                                          const VectorSizeType& nk) const
 	{
 		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 		SparseElementType sum=0;
@@ -444,7 +390,7 @@ private:
 	void transformVector1bounce(SomeVectorType& psiDest,
 	                            const SomeVectorType& psiSrc,
 	                            const LeftRightSuperType& lrs,
-	                            const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                            const VectorSizeType& nk) const
 	{
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
@@ -457,7 +403,7 @@ private:
 	                            const SomeVectorType& psiSrc,
 	                            const LeftRightSuperType& lrs,
 	                            SizeType i0,
-	                            const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                            const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/lrs.right().permutationInverse().size();
@@ -495,7 +441,7 @@ private:
 	void transformVector2bounce(SomeVectorType& psiDest,
 	                            const SomeVectorType& psiSrc,
 	                            const LeftRightSuperType& lrs,
-	                            const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                            const VectorSizeType& nk) const
 	{
 		for (SizeType ii=0;ii<psiDest.sectors();ii++) {
 			SizeType i0 = psiDest.sector(ii);
@@ -508,7 +454,7 @@ private:
 	                            const SomeVectorType& psiSrc,
 	                            const LeftRightSuperType& lrs,
 	                            SizeType i0,
-	                            const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                            const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;

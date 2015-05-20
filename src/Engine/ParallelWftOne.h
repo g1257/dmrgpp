@@ -98,6 +98,8 @@ class ParallelWftOne {
 
 public:
 
+	enum DirectionEnum {DIR_1, DIR_2};
+
 	typedef typename VectorWithOffsetType::value_type VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
@@ -106,23 +108,46 @@ public:
 	               const LeftRightSuperType& lrs,
 	               SizeType i0,
 	               const VectorSizeType& nk,
-	               const DmrgWaveStructType& dmrgWaveStruct)
+	               const DmrgWaveStructType& dmrgWaveStruct,
+	               DirectionEnum dir)
 	    : psiDest_(psiDest),
 	      psiSrc_(psiSrc),
 	      lrs_(lrs),
 	      i0_(i0),
 	      nk_(nk),
 	      dmrgWaveStruct_(dmrgWaveStruct),
+	      dir_(dir),
 	      we_(dmrgWaveStruct_.we),
 	      ws_(dmrgWaveStruct_.ws),
-	      pack1_(lrs.left().permutationInverse().size()),
-	      pack2_(lrs.left().permutationInverse().size()/volumeOf(nk))
+	      pack1_(0),
+	      pack2_(0)
 	{
 		transposeConjugate(wsT_,ws_);
-		assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==
-		       dmrgWaveStruct_.we.row());
-		assert(lrs_.left().permutationInverse().size()/volumeOf(nk)==
-		       dmrgWaveStruct_.ws.col());
+		transposeConjugate(weT_,we_);
+
+		if (dir_ == DIR_2) {
+			assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==
+			       dmrgWaveStruct_.we.row());
+			assert(lrs_.left().permutationInverse().size()/volumeOf(nk)==
+			       dmrgWaveStruct_.ws.col());
+			pack1_ = new PackIndicesType(lrs.left().permutationInverse().size());
+			pack2_ = new PackIndicesType(lrs.left().permutationInverse().size()/
+			                             volumeOf(nk));
+		} else {
+			assert(dmrgWaveStruct_.lrs.left().permutationInverse().size()==
+			       dmrgWaveStruct_.ws.row());
+			assert(lrs_.right().permutationInverse().size()/volumeOf(nk)==
+			       dmrgWaveStruct_.we.col());
+			pack1_ = new PackIndicesType(lrs.super().permutationInverse().size()/
+			                             lrs.right().permutationInverse().size());
+			pack2_ = new PackIndicesType(volumeOf(nk));
+		}
+	}
+
+	~ParallelWftOne()
+	{
+		delete pack1_;
+		delete pack2_;
 	}
 
 	static SizeType volumeOf(const VectorSizeType& v)
@@ -148,14 +173,29 @@ public:
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType x = (threadNum+npthreads*mpiRank)*blockSize + p + 1;
 			if (x >= total) break;
-			SizeType ip,alpha,kp,jp;
-			pack1_.unpack(alpha,jp,(SizeType)lrs_.super().permutation(x+start));
-			pack2_.unpack(ip,kp,(SizeType)lrs_.left().permutation(alpha));
-			psiDest_.fastAccess(i0_,x) = createAux2b(psiSrc_,ip,kp,jp,wsT_,we_,nk_);
+
+			if (dir_ == DIR_2) {
+				SizeType ip,alpha,kp,jp;
+				pack1_->unpack(alpha,jp,(SizeType)lrs_.super().permutation(x+start));
+				pack2_->unpack(ip,kp,(SizeType)lrs_.left().permutation(alpha));
+				psiDest_.fastAccess(i0_,x) = createAux2b(psiSrc_,ip,kp,jp,wsT_,we_,nk_);
+			} else {
+				SizeType ip,beta,kp,jp;
+				pack1_->unpack(ip,beta,(SizeType)lrs_.super().permutation(x+start));
+				pack2_->unpack(kp,jp,(SizeType)lrs_.right().permutation(beta));
+				psiDest_.fastAccess(i0_,x)=createAux1b(psiSrc_,ip,kp,jp,ws_,weT_,nk_);
+			}
 		}
 	}
 
 private:
+
+	// This class has pointers, disallow copy ctor and assignment
+	template<typename T1, typename T2, typename T3>
+	ParallelWftOne(const ParallelWftOne<T1,T2,T3>&);
+
+	template<typename T1, typename T2, typename T3>
+	ParallelWftOne& operator=(const ParallelWftOne<T1,T2,T3>&);
 
 	template<typename SomeVectorType>
 	SparseElementType createAux2b(const SomeVectorType& psiSrc,
@@ -187,17 +227,47 @@ private:
 		return sum;
 	}
 
+	template<typename SomeVectorType>
+	SparseElementType createAux1b(const SomeVectorType& psiSrc,
+	                              SizeType ip,
+	                              SizeType kp,
+	                              SizeType jp,
+	                              const SparseMatrixType& ws,
+	                              const SparseMatrixType& weT,
+	                              const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	{
+		SizeType volumeOfNk = volumeOf(nk);
+		SizeType ni=dmrgWaveStruct_.ws.col();
+		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
+		SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip+kp*nip);
+
+		SparseElementType sum=0;
+
+		for (int k = ws.getRowPtr(alpha);k<ws.getRowPtr(alpha+1);k++) {
+			SizeType i = ws.getCol(k);
+			for (int k2=weT.getRowPtr(jp);k2<weT.getRowPtr(jp+1);k2++) {
+				SizeType j = weT.getCol(k2);
+				SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(i+j*ni);
+				sum += ws.getValue(k)*weT.getValue(k2)*psiSrc.slowAccess(x);
+			}
+		}
+
+		return sum;
+	}
+
 	VectorWithOffsetType& psiDest_;
 	const VectorWithOffsetType& psiSrc_;
 	const LeftRightSuperType& lrs_;
 	SizeType i0_;
 	const VectorSizeType& nk_;
 	const DmrgWaveStructType& dmrgWaveStruct_;
+	DirectionEnum dir_;
 	const SparseMatrixType& we_;
 	const SparseMatrixType& ws_;
-	PackIndicesType pack1_;
-	PackIndicesType pack2_;
+	PackIndicesType* pack1_;
+	PackIndicesType* pack2_;
 	SparseMatrixType wsT_;
+	SparseMatrixType weT_;
 }; // class ParallelWftOne
 } // namespace Dmrg
 
