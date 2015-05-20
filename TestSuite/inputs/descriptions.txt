@@ -66,6 +66,7 @@ hence non-trivial.
 #1550) Same as 1500 with Suzuki-Trotter
 1800 Ancilla: Entangler Hamiltonian Heisenberg 6 sites
 1801 Ancilla: Real      Hamiltonian Heisenberg 6 sites
+1810 Ancilla: Entangler Hamiltonian Heisenberg 6 sites Canonical
 #
 1850 Ancilla: Entangler Hamiltonian t-J 6 sites
 1851 Ancilla: Real      Hamiltonian t-J 6 sites

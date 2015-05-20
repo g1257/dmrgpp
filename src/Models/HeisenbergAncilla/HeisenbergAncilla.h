@@ -93,6 +93,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
+/* Order of the basis
+  For S=1/2 and NUMBER_OF_ORBITALS=2 it is
+  down A, down B; down A, up B; up A, down B; up A, up B;
+  */
 template<typename ModelBaseType>
 class HeisenbergAncilla : public ModelBaseType {
 
@@ -389,9 +393,34 @@ private:
 		return operatorMatrix;
 	}
 
-	SparseMatrixType findDeltaMatrices(int,const HilbertBasisType&) const
+	SparseMatrixType findDeltaMatrices(int,const HilbertBasisType& natBasis) const
 	{
-		throw PsimagLite::RuntimeError("HeisenbergAncilla::findSplusMatrices\n");
+		SizeType total = natBasis.size();
+		MatrixType cm(total,total);
+		RealType j = 0.5*modelParameters_.twiceTheSpin;
+		SizeType total1 = modelParameters_.twiceTheSpin + 1;
+		for (SizeType ii=0;ii<total;ii++) {
+			PairSizeType ket = getOneOrbital(natBasis[ii]);
+
+			SizeType bra1 = ket.first + 1;
+			if (bra1 >= total1) continue;
+
+			SizeType bra2 = ket.second + 1;
+			if (bra2 >= total1) continue;
+
+			PairSizeType bra(bra1,bra2);
+			SizeType jj = getFullIndex(bra);
+			RealType m = ket.first - j;
+			RealType x1 = j*(j+1)-m*(m+1);
+			assert(x1>=0);
+			m = ket.second - j;
+			RealType x2 = j*(j+1)-m*(m+1);
+			assert(x2>=0);
+			cm(ii,jj) = sqrt(x1)*sqrt(x2);
+		}
+
+		SparseMatrixType operatorMatrix(cm);
+		return operatorMatrix;
 	}
 
 	void setSymmetryRelated(BasisDataType& q,
@@ -434,12 +463,16 @@ private:
 
 	PairSizeType getOneOrbital(SizeType state) const
 	{
-		return PairSizeType(0,0);
+		SizeType total1 = modelParameters_.twiceTheSpin + 1;
+		assert(NUMBER_OF_ORBITALS == 2);
+		SizeType first = static_cast<SizeType>(state/total1);
+		SizeType second = state % total1;
+		return PairSizeType(first, second);
 	}
 
 	SizeType getFullIndex(PairSizeType p) const
 	{
-		return 0;
+		return p.first*(modelParameters_.twiceTheSpin + 1) + p.second;
 	}
 
 	//serializr start class HeisenbergAncilla
