@@ -93,7 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include "ProgramGlobals.h"
-#include "ParallelWft.h"
+#include "ParallelWftMany.h"
 
 namespace Dmrg {
 
@@ -285,18 +285,24 @@ private:
 		SizeType numberOfSites = this->leftRightSuper().super().block().size();
 		if (site==0 || site==numberOfSites -1)  return;
 
-		typedef ParallelWft<VectorWithOffsetType,
+		typedef ParallelWftMany<VectorWithOffsetType,
 		                    WaveFunctionTransfType,
 		                    LeftRightSuperType> ParallelWftType;
 		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
 		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
 		                             PsimagLite::MPI::COMM_WORLD);
 
-		ParallelWftType helperWft(this->common().targetVectors(),this->model().hilbertSize(site),wft_,this->leftRightSuper());
-		threadedWft.loopCreate(this->common().targetVectors().size()-1,helperWft,this->model().concurrency());
+		ParallelWftType helperWft(this->common().targetVectors(),
+		                          this->model().hilbertSize(site),
+		                          wft_,
+		                          this->leftRightSuper());
+		threadedWft.loopCreate(this->common().targetVectors().size()-1,
+		                       helperWft,
+		                       this->model().concurrency());
 
 		for (SizeType i=1;i<this->common().targetVectors().size();i++) {
-			assert(this->common().targetVectors()[i].size()==this->common().targetVectors()[0].size());
+			assert(this->common().targetVectors()[i].size()==
+			       this->common().targetVectors()[0].size());
 		}
 	}
 
@@ -305,7 +311,9 @@ private:
 	                       SizeType p)
 	{
 		SizeType threadId = 0;
-		typename ModelType::ModelHelperType modelHelper(p,this->leftRightSuper(),threadId);
+		typename ModelType::ModelHelperType modelHelper(p,
+		                                                this->leftRightSuper(),
+		                                                threadId);
 		typename LanczosSolverType::LanczosMatrixType h(&this->model(),&modelHelper);
 		paramsForSolver_.lotaMemory = true;
 		LanczosSolverType lanczosSolver(h,paramsForSolver_,&V);

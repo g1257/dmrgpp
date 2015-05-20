@@ -70,11 +70,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 */
 /** \ingroup DMRG */
 /*@{*/
-/** \file ParallelWft.h
+/** \file ParallelWftMany.h
 */
 
-#ifndef PARALLEL_WFT_H
-#define PARALLEL_WFT_H
+#ifndef DMRG_PARALLEL_WFT_MANY_H
+#define DMRG_PARALLEL_WFT_MANY_H
 
 #include "Vector.h"
 #include "Concurrency.h"
@@ -84,16 +84,18 @@ namespace Dmrg {
 template<typename VectorWithOffsetType,
          typename WaveFunctionTransfType,
          typename LeftRightSuperType>
-class ParallelWft {
+class ParallelWftMany {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type
+	VectorVectorWithOffsetType;
 
 public:
 
 	typedef typename VectorWithOffsetType::value_type VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
-	ParallelWft(typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
+	ParallelWftMany(VectorVectorWithOffsetType& targetVectors,
 	            SizeType nk,
 	            const WaveFunctionTransfType& wft,
 	            const LeftRightSuperType& lrs)
@@ -112,7 +114,7 @@ public:
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
-		ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"ParallelWft",total);
+		ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"ParallelWftMany",total);
 
 		for (SizeType p=0;p<blockSize;p++) {
 			SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p + 1;
@@ -125,13 +127,13 @@ public:
 
 private:
 
-	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
+	VectorVectorWithOffsetType& targetVectors_;
 	SizeType nk_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
-}; // class ParallelWft
+}; // class ParallelWftMany
 } // namespace Dmrg
 
 /*@}*/
-#endif // PARALLEL_WFT_H
+#endif // DMRG_PARALLEL_WFT_MANY_H
 
