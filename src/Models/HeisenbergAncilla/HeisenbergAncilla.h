@@ -107,6 +107,7 @@ public:
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef	typename ModelBaseType::VectorType VectorType;
+	typedef	typename std::pair<SizeType,SizeType> PairSizeType;
 
 private:
 
@@ -122,8 +123,7 @@ private:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
 
-	static const int NUMBER_OF_ORBITALS=1;
-	static const int DEGREES_OF_FREEDOM=2; // spin up and down
+	static const int NUMBER_OF_ORBITALS=2;
 
 public:
 
@@ -155,6 +155,12 @@ public:
 			msg += " is not implemented yet.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
+
+		if (modelParameters_.twiceTheSpin != 1) {
+			PsimagLite::String msg("HeisenbergAncilla: spin > 1/2");
+			msg += " HIGHLY EXPERIMENTAL!\n";
+			std::cout<<msg;
+		}
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
@@ -168,7 +174,7 @@ public:
 
 	SizeType hilbertSize(SizeType) const
 	{
-		return modelParameters_.twiceTheSpin + 1;
+		return pow(modelParameters_.twiceTheSpin + 1, NUMBER_OF_ORBITALS);
 	}
 
 	//! find  operator matrices for (i,sigma) in the natural basis,
@@ -196,6 +202,12 @@ public:
 	void setOperatorMatrices(VectorOperatorType& operatorMatrices,
 	                         const BlockType& block) const
 	{
+		if (block.size() != 1) {
+			PsimagLite::String msg("HeisenbergAncilla: only blocks");
+			msg += " of size 1 can be added for now.\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 
@@ -204,13 +216,13 @@ public:
 
 		operatorMatrices.clear();
 		for (SizeType i=0;i<block.size();i++) {
-			// Set the operators S^+_i in the natural basis
+			// Set the operators S^+_i for orbital a in the natural basis
 			tmpMatrix=findSplusMatrices(i,natBasis);
 
 			typename OperatorType::Su2RelatedType su2related;
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM+NUMBER_OF_ORBITALS);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
+			su2related.source.push_back(i*2);
+			su2related.source.push_back(i*2+NUMBER_OF_ORBITALS);
+			su2related.source.push_back(i*2);
 			su2related.transpose.push_back(-1);
 			su2related.transpose.push_back(-1);
 			su2related.transpose.push_back(1);
@@ -224,6 +236,12 @@ public:
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
 			operatorMatrices.push_back(myOp2);
+
+			// Set the operators \Delta_i in the natural basis
+			tmpMatrix = findDeltaMatrices(i,natBasis);
+			typename OperatorType::Su2RelatedType su2related3;
+			OperatorType myOp3(tmpMatrix,1,PairType(0,0),1.0,su2related3);
+			operatorMatrices.push_back(myOp3);
 		}
 	}
 
@@ -263,6 +281,12 @@ public:
 			return tmp;
 		}
 
+		if (what=="d") { // \Delta
+			MatrixType tmp;
+			crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
+			return tmp;
+		}
+
 		throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 	}
 
@@ -272,7 +296,8 @@ public:
 	                     const VectorSizeType& block) const
 	{
 		assert(block.size()==1);
-		SizeType total = modelParameters_.twiceTheSpin + 1;
+		SizeType total = hilbertSize(block[0]);
+
 		for (SizeType i=0;i<total;i++) basis.push_back(i);
 		BasisDataType qq;
 		setSymmetryRelated(qq,basis,block.size());
@@ -328,15 +353,18 @@ private:
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
 		RealType j = 0.5*modelParameters_.twiceTheSpin;
-
+		SizeType total1 = modelParameters_.twiceTheSpin + 1;
 		for (SizeType ii=0;ii<total;ii++) {
-			SizeType ket = natBasis[ii];
-			SizeType bra = ket + 1;
-			if (bra>=total) continue;
-			RealType m = ket - j;
+			PairSizeType ket = getOneOrbital(natBasis[ii]);
+
+			SizeType bra1 = ket.first + 1;
+			if (bra1 >= total1) continue;
+			PairSizeType bra(bra1,ket.second);
+			SizeType jj = getFullIndex(bra);
+			RealType m = ket.first - j;
 			RealType x = j*(j+1)-m*(m+1);
 			assert(x>=0);
-			cm(ket,bra) = sqrt(x);
+			cm(ii,jj) = sqrt(x);
 		}
 
 		SparseMatrixType operatorMatrix(cm);
@@ -351,13 +379,19 @@ private:
 		RealType j = 0.5*modelParameters_.twiceTheSpin;
 
 		for (SizeType ii=0;ii<total;ii++) {
-			SizeType ket = natBasis[ii];
-			RealType m = ket - j;
-			cm(ket,ket) = m;
+			PairSizeType ket = getOneOrbital(natBasis[ii]);
+
+			RealType m = ket.first - j;
+			cm(ii,ii) = m;
 		}
 
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
+	}
+
+	SparseMatrixType findDeltaMatrices(int,const HilbertBasisType&) const
+	{
+		throw PsimagLite::RuntimeError("HeisenbergAncilla::findSplusMatrices\n");
 	}
 
 	void setSymmetryRelated(BasisDataType& q,
@@ -387,8 +421,9 @@ private:
 			jmpair.first = modelParameters_.twiceTheSpin;
 			jmpair.second = basis[i];
 			jmvalues.push_back(jmpair);
-			q.szPlusConst[i] = basis[i];
-			q.electrons[i] = 1;
+			PairSizeType ket = getOneOrbital(basis[i]);
+			q.szPlusConst[i] = ket.first + ket.second;
+			q.electrons[i] = NUMBER_OF_ORBITALS;
 			flavors.push_back(1);
 			jmSaved = jmpair;
 		}
@@ -397,16 +432,22 @@ private:
 		q.flavors = flavors;
 	}
 
+	PairSizeType getOneOrbital(SizeType state) const
+	{
+		return PairSizeType(0,0);
+	}
+
+	SizeType getFullIndex(PairSizeType p) const
+	{
+		return 0;
+	}
+
 	//serializr start class HeisenbergAncilla
 	//serializr vptr
 	//serializr normal modelParameters_
 	ParametersHeisenbergAncilla<RealType>  modelParameters_;
 	//serializr ref geometry_ start
 	GeometryType const &geometry_;
-	//serializr normal spinSquaredHelper_
-	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
-	//serializr normal spinSquared_
-	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 }; // class HeisenbergAncilla
 
 } // namespace Dmrg

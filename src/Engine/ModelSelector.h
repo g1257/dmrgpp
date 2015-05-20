@@ -52,6 +52,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "../Models/Heisenberg/ModelHeisenberg.h"
+#include "../Models/HeisenbergAncilla/HeisenbergAncilla.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
 #include "../Models/FeAsModel/ModelFeBasedSc.h"
 #include "../Models/FeAsBasedScExtended/FeAsBasedScExtended.h"
@@ -74,6 +75,7 @@ class ModelSelector {
 
 	// start models here:
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
+	typedef HeisenbergAncilla<ModelBaseType> HeisenbergAncillaType;
 	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
 	typedef ModelFeBasedSc<ModelBaseType> FeBasedScType;
@@ -106,6 +108,8 @@ public:
 			model_ = new ModelHubbardType(solverParams,io,geometry);
 		} else if (name_ == "Heisenberg") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry);
+		} else if (name_ == "HeisenbergAncilla") {
+			model_ = new HeisenbergAncillaType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtended") {
 			model_ = new ModelHubbardExtType(solverParams,io,geometry);
 		} else if (name_ == "FeAsBasedSc") {

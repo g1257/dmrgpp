@@ -153,8 +153,8 @@ private:
 
 	static PairType operatorDofs(SizeType term,bool isSu2)
 	{
-		if (term == TERM_SPLUSSMINUS || TERM == TERM_ANCILLA)
-			return PairType(0,0);
+		if (term == TERM_SPLUSSMINUS || term == TERM_ANCILLA)
+			return PairType(term,term);
 		SizeType x = (isSu2) ? 0 : 1;
 		return PairType(x,x);
 	}
