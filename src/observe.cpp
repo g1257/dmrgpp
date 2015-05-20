@@ -84,7 +84,7 @@ bool observeOneFullSweep(IoInputType& io,
 
 	bool ot = false;
 	if (obsOptions.find("ot")!=PsimagLite::String::npos ||
-	    obsOptions.find("time")!=PsimagLite::String::npos) ot = true;
+	        obsOptions.find("time")!=PsimagLite::String::npos) ot = true;
 
 	if (hasTimeEvolution && ot) {
 		observerLib.measureTime("superDensity");
@@ -131,8 +131,8 @@ bool observeOneFullSweep(IoInputType& io,
 	}
 
 	if (modelName.find("FeAsBasedSc")!=PsimagLite::String::npos ||
-	    modelName.find("FeAsBasedScExtended")!=PsimagLite::String::npos ||
-	    modelName.find("HubbardOneBand")!=PsimagLite::String::npos) {
+	        modelName.find("FeAsBasedScExtended")!=PsimagLite::String::npos ||
+	        modelName.find("HubbardOneBand")!=PsimagLite::String::npos) {
 		bool dd4 = (obsOptions.find("dd4")!=PsimagLite::String::npos);
 
 		if (obsOptions.find("dd")!=PsimagLite::String::npos && !dd4) { // &&
@@ -147,7 +147,7 @@ bool observeOneFullSweep(IoInputType& io,
 	}
 
 	if (modelName.find("HubbardOneBand")!=PsimagLite::String::npos &&
-	    obsOptions.find("multi")!=PsimagLite::String::npos) {
+	        obsOptions.find("multi")!=PsimagLite::String::npos) {
 		observerLib.measure("multi",rows,n);
 	}
 
@@ -179,9 +179,9 @@ void mainLoop(GeometryType& geometry,
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
 	typedef ModelBase<ModelHelperType,
-	                  ParametersDmrgSolverType,
-	                  InputNgType::Readable,
-	                  GeometryType> ModelBaseType;
+	        ParametersDmrgSolverType,
+	        InputNgType::Readable,
+	        GeometryType> ModelBaseType;
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
 	typedef VectorWithOffsetTemplate<ComplexOrRealType> VectorWithOffsetType;
 
@@ -197,13 +197,32 @@ void mainLoop(GeometryType& geometry,
 	while (moreData) {
 		try {
 			moreData = !observeOneFullSweep<GeometryType,VectorWithOffsetType,ModelBaseType,
-			            MySparseMatrix>
-			(dataIo,model,obsOptions,list,hasTimeEvolution);
+			        MySparseMatrix>
+			        (dataIo,model,obsOptions,list,hasTimeEvolution);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"There's no more data\n";
 			break;
 		}
+	}
+}
+
+template<typename GeometryType,
+         template<typename> class ModelHelperTemplate,
+         typename MySparseMatrix>
+void mainLoop1(GeometryType& geometry,
+               const PsimagLite::String& targetting,
+               InputNgType::Readable& io,
+               const ParametersDmrgSolverType& params,
+               const PsimagLite::String& obsOptions,
+               const PsimagLite::String& list)
+{
+	if (params.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
+		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffsets,MySparseMatrix>
+		        (geometry,targetting,io,params, obsOptions, list);
+	} else {
+		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffset,MySparseMatrix>
+		        (geometry,targetting,io,params, obsOptions, list);
 	}
 }
 
@@ -216,8 +235,8 @@ void mainLoop0(InputNgType::Readable& io,
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
 	typedef PsimagLite::Geometry<ComplexOrRealType,
-	                             InputNgType::Readable,
-	                             ProgramGlobals> GeometryType;
+	        InputNgType::Readable,
+	        ProgramGlobals> GeometryType;
 
 	GeometryType geometry(io);
 	int tmp = 0;
@@ -233,23 +252,20 @@ void mainLoop0(InputNgType::Readable& io,
 		throw PsimagLite::RuntimeError("SU(2) supports only GroundStateTargetting");
 
 	if (su2) {
-		mainLoop<GeometryType,ModelHelperSu2,VectorWithOffsets,MySparseMatrix>
-			        (geometry,targetting,io,dmrgSolverParams, options, list);
+		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix>
+		        (geometry,targetting,io,dmrgSolverParams, options, list);
 
 		return;
 	}
 
 	if (targetting=="GroundStateTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,MySparseMatrix>
+		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>
 		        (geometry,targetting,io,dmrgSolverParams, options, list);
 	} else if (targetting=="TimeStepTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,MySparseMatrixComplex>
-		        (geometry,targetting,io,dmrgSolverParams, options, list);
-	} else if (targetting=="TargetingOneSectorAncilla") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,MySparseMatrix>
+		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrixComplex>
 		        (geometry,targetting,io,dmrgSolverParams, options, list);
 	} else {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,MySparseMatrix>
+		mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>
 		        (geometry,targetting,io,dmrgSolverParams, options, list);
 	}
 }
@@ -316,10 +332,10 @@ int main(int argc,char *argv[])
 	ConcurrencyType::npthreads = dmrgSolverParams.nthreads;
 
 #ifdef USE_COMPLEX
-		std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
-		mainLoop0<MySparseMatrixC>(io,dmrgSolverParams,inputCheck, options, list);
+	std::cerr<<argv[0]<<" EXPERIMENTAL option complex is in use\n";
+	mainLoop0<MySparseMatrixC>(io,dmrgSolverParams,inputCheck, options, list);
 #else
-		mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, options, list);
+	mainLoop0<MySparseMatrixReal>(io,dmrgSolverParams,inputCheck, options, list);
 #endif
 } // main
 

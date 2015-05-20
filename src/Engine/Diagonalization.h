@@ -211,8 +211,6 @@ private:
 
 		if (parameters_.options.find("TargetingAncilla")!=PsimagLite::String::npos)
 			onlyWft = true;
-		if (parameters_.options.find("TargetingOneSectorAncilla")!=PsimagLite::String::npos)
-			onlyWft = true;
 
 		PsimagLite::OstringStream msg0;
 		msg0<<"Setting up Hamiltonian basis of size="<<lrs.super().size();

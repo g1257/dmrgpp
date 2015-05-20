@@ -585,7 +585,7 @@ namespace Dmrg {
 						int x = j1+j2-jProd;
 						if (x%2!=0) continue;
 						x/=2;
-						if (m1+m2<x) continue;
+						if (m1+m2<static_cast<SizeType>(x)) continue;
 						SizeType m = m1 + m2 - x;
 						if (m>jProd) continue;
 						PairType jm(jProd,m);
@@ -594,7 +594,7 @@ namespace Dmrg {
 						x = -jProdPrime + k +jProd;
 						if (x%2!=0) continue;
 						x/=2;
-						if (m +mCapital<x) continue;
+						if (m +mCapital<static_cast<SizeType>(x)) continue;
 						SizeType mPrime = m +mCapital-x;
 						if (mPrime>jProdPrime) continue;
 						PairType jmPrime(jProdPrime,mPrime);
@@ -638,7 +638,7 @@ namespace Dmrg {
 						int x = j1+j2-jProd;
 						if (x%2!=0) continue;
 						x/=2;
-						if (m1+m2 < x) continue;
+						if (m1+m2 < static_cast<SizeType>(x)) continue;
 						SizeType m = m1 + m2 - x;
 						if (m>jProd) continue;
 						PairType jm(jProd,m);

@@ -212,6 +212,26 @@ void mainLoop(GeometryType& geometry,
 	}
 }
 
+template<typename GeometryType,
+        template<typename> class ModelHelperTemplate,
+         template<template<typename,typename,typename> class,
+                  typename,
+                  typename> class TargettingTemplate,
+         typename MySparseMatrix>
+void mainLoop1(GeometryType& geometry,
+              const ParametersDmrgSolverType& dmrgSolverParams,
+              InputNgType::Readable& io,
+              const OperatorOptions& opOptions)
+{
+	if (dmrgSolverParams.options.find("vectorwithoffsets")!=PsimagLite::String::npos) {
+		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffsets,TargettingTemplate,
+	         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+	} else {
+		mainLoop<GeometryType,ModelHelperTemplate,VectorWithOffset,TargettingTemplate,
+	         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
+	}
+}
+
 template<typename MySparseMatrix>
 void mainLoop0(InputNgType::Readable& io,
                const ParametersDmrgSolverType& dmrgSolverParams,
@@ -240,9 +260,8 @@ void mainLoop0(InputNgType::Readable& io,
 	}
 
 	if (su2) {
-		mainLoop<GeometryType,
+		mainLoop1<GeometryType,
 		        ModelHelperSu2,
-		        VectorWithOffsets,
 		        TargetingGroundState,
 		        MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 
@@ -250,54 +269,48 @@ void mainLoop0(InputNgType::Readable& io,
 	}
 
 	if (targetting=="TimeStepTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingTimeStep,
+		mainLoop1<GeometryType,ModelHelperLocal,TargetingTimeStep,
 		         MySparseMatrixComplex>(geometry,dmrgSolverParams,io,opOptions);
 		return;
 	}
 
 	if (targetting=="DynamicTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingDynamic,
+		mainLoop1<GeometryType,ModelHelperLocal,TargetingDynamic,
 		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 		return;
 	}
 
 	if (targetting=="AdaptiveDynamicTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingAdaptiveDynamic,
+		mainLoop1<GeometryType,ModelHelperLocal,TargetingAdaptiveDynamic,
 		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 		return;
 	}
 
 	if (targetting=="CorrectionVectorTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingCorrectionVector,
+		mainLoop1<GeometryType,ModelHelperLocal,TargetingCorrectionVector,
 		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 		return;
 	}
 
 	if (targetting=="CorrectionTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingCorrection,
+		mainLoop1<GeometryType,ModelHelperLocal,TargetingCorrection,
 		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 		return;
 	}
 
 	if (targetting=="MettsTargetting") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,MettsTargetting,
-		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
-		return;
-	}
-
-	if (targetting=="TargetingOneSectorAncilla") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,TargetingTimeStep,
+		mainLoop1<GeometryType,ModelHelperLocal,MettsTargetting,
 		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 		return;
 	}
 
 	if (targetting=="TargetingAncilla") {
-		mainLoop<GeometryType,ModelHelperLocal,VectorWithOffsets,TargetingTimeStep,
+		mainLoop1<GeometryType,ModelHelperLocal,TargetingTimeStep,
 		         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 		return;
 	}
 
-	mainLoop<GeometryType,ModelHelperLocal,VectorWithOffset,TargetingGroundState,
+	mainLoop1<GeometryType,ModelHelperLocal,TargetingGroundState,
 	         MySparseMatrix>(geometry,dmrgSolverParams,io,opOptions);
 }
 

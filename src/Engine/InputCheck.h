@@ -169,6 +169,7 @@ public:
 		registerOpts.push_back("MettsTargetting");
 		registerOpts.push_back("TargetingAncilla");
 		registerOpts.push_back("geometryallinsystem");
+		registerOpts.push_back("vectorwithoffsets");
 
 		PsimagLite::Options::Writeable
 		        optWriteable(registerOpts,PsimagLite::Options::Writeable::PERMISSIVE);
@@ -210,10 +211,9 @@ public:
 		                       "CorrectionVectorTargetting",
 		                       "CorrectionTargetting",
 		                       "MettsTargetting",
-		                       "TargetingOneSectorAncilla",
 		                       "TargetingAncilla"};
 
-		SizeType totalTargets = 9;
+		SizeType totalTargets = 8;
 
 		SizeType count = 0;
 		for (SizeType i = 0;i<totalTargets;++i) {
