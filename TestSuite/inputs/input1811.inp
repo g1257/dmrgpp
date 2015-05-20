@@ -1,0 +1,51 @@
+TotalNumberOfSites=6
+NumberOfTerms=3
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0 
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 1.0 
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors 1 0.0
+
+Model=HeisenbergAncilla
+HeisenbergTwiceS=1
+
+SolverOptions=restart,TargetingAncilla
+Version=version
+OutputFile=data1811.txt
+InfiniteLoopKeptStates=60
+FiniteLoops 4  
+2 100 0 -4 100 0
+4 100 0 -4 100 0
+
+RepeatFiniteLoopsFrom=2
+RepeatFiniteLoopsTimes=100
+
+TargetElectronsTotal=12
+TargetSzPlusConst=6
+RestartFilename=data1810.txt
+
+TSPTau=0.1
+TSPTimeSteps=5
+TSPAdvanceEach=10000
+TSPAlgorithm=Krylov
+TSPSites 1 3
+TSPLoops 1 2
+TSPProductOrSum=product
+
+TSPOperator=cooked
+COOKED_OPERATOR=i
+COOKED_EXTRA 2 0 0
+FERMIONSIGN=1
+JMVALUES 0 0
+AngularFactor=1
+
