@@ -264,8 +264,8 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		// call to mult will conjugate one of the vectors
-		return std::real(multiply(targetVectors_[i],targetVectors_[i]));
+		// call to operator* will conjugate one of the vectors
+		return std::real(targetVectors_[i]*targetVectors_[i]);
 	}
 
 	template<typename SomeBasisType>

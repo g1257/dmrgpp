@@ -427,16 +427,6 @@ public:
 	friend FieldType2 std::norm(const Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
 
 	template<typename FieldType2>
-	friend std::complex<FieldType2> multiply(const Dmrg::VectorWithOffsets<
-	                                         std::complex<FieldType2> >& v1,
-	                                         const Dmrg::VectorWithOffsets<
-	                                         std::complex<FieldType2> >& v2);
-
-	template<typename FieldType2>
-	friend FieldType2 multiply(const Dmrg::VectorWithOffsets<FieldType2>& v1,
-	                           const Dmrg::VectorWithOffsets<FieldType2>& v2);
-
-	template<typename FieldType2>
 	friend void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType2> >& v);
 
 	template<typename FieldType3,typename FieldType2>
@@ -569,52 +559,6 @@ inline void normalize(Dmrg::VectorWithOffsets<std::complex<FieldType> >& v)
 	for (SizeType i=0;i<v.data_.size();i++)
 		for (SizeType j=0;j<v.data_[i].size();j++)
 			v.data_[i][j] /= norma;
-}
-
-template<typename FieldType>
-inline std::complex<FieldType> multiply(const Dmrg::VectorWithOffsets<
-                                        std::complex<FieldType> >& v1,
-                                        const Dmrg::VectorWithOffsets<
-                                        std::complex<FieldType> >& v2)
-{
-	std::complex<FieldType> sum=0;
-	for (SizeType ii=0;ii<v1.nonzeroSectors_.size();ii++) {
-		SizeType i = v1.nonzeroSectors_[ii];
-		sum += v1.data_[i]*v2.data_[i]; // call to * will conj()
-	}
-	return sum;
-}
-
-template<typename FieldType>
-inline FieldType multiply(const Dmrg::VectorWithOffsets<FieldType>& v1,
-                          const Dmrg::VectorWithOffsets<FieldType>& v2)
-{
-	FieldType sum=0;
-	for (SizeType ii=0;ii<v1.nonzeroSectors_.size();ii++) {
-		SizeType i = v1.nonzeroSectors_[ii];
-		sum += v1.data_[i]*v2.data_[i]; // call to * will conj()
-	}
-	return sum;
-}
-
-// Isn't this function equal to the prev.? need to check FIXME
-template<typename FieldType>
-inline std::complex<FieldType> operator*(const Dmrg::VectorWithOffsets<
-                                         std::complex<FieldType> >& v1,
-                                         const Dmrg::VectorWithOffsets<
-                                         std::complex<FieldType> >& v2)
-{
-	std::complex<FieldType> sum = 0;
-	for (SizeType ii=0;ii<v1.sectors();ii++) {
-		SizeType i = v1.sector(ii);
-		for (SizeType jj=0;jj<v1.sectors();jj++) {
-			SizeType j = v2.sector(jj);
-			if (i!=j) continue;
-			for (SizeType k=0;k<v1.effectiveSize(i);k++)
-				sum+= v1.fastAccess(i,k)*conj(v2.fastAccess(j,k));
-		}
-	}
-	return sum;
 }
 
 template<typename FieldType>

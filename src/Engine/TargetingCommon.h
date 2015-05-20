@@ -179,7 +179,7 @@ public:
 	{
 		const VectorWithOffsetType& v = applyOpExpression_.targetVectors()[i];
 		// call to mult will conjugate one of the vector
-		return std::real(multiply(v,v));
+		return std::real(v*v);
 	}
 
 	template<typename IoOutputType>
