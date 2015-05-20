@@ -96,10 +96,11 @@ class ReducedOperators {
 	typedef PsimagLite::Matrix<SparseElementType> DenseMatrixType;
 	typedef Su2SymmetryGlobals<RealType> Su2SymmetryGlobalsType;
 	typedef typename PsimagLite::Vector<OperatorType_>::Type VectorOperatorType;
-	typedef typename PsimagLite::Vector<const OperatorType*>::Type
+	typedef typename PsimagLite::Vector<const OperatorType_*>::Type
 	VectorPointerOperatorType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
 
@@ -634,7 +635,7 @@ private:
 					int x = j1+j2-jProd;
 					if (x%2!=0) continue;
 					x/=2;
-					if (m1+m2<static_cast<SizeType>(x)) continue;
+					if (static_cast<int>(m1 + m2 - x) < 0) continue;
 					SizeType m = m1 + m2 - x;
 					if (m>jProd) continue;
 					PairType jm(jProd,m);
@@ -643,7 +644,7 @@ private:
 					x = -jProdPrime + k +jProd;
 					if (x%2!=0) continue;
 					x/=2;
-					if (m +mCapital<static_cast<SizeType>(x)) continue;
+					if (static_cast<int>(m + mCapital - x) < 0) continue;
 					SizeType mPrime = m +mCapital-x;
 					if (mPrime>jProdPrime) continue;
 					PairType jmPrime(jProdPrime,mPrime);
@@ -652,7 +653,7 @@ private:
 					x = j1prime + j2 - jProdPrime;
 					if (x%2!=0) continue;
 					x/=2;
-					if (mPrime + x < m2) continue;
+					if (static_cast<int>(mPrime + x - m2) < 0) continue;
 					SizeType m1prime = mPrime + x - m2;
 					if (m1prime > j1prime) continue;
 					PairType jm1prime(j1prime,m1prime);
@@ -661,7 +662,7 @@ private:
 					x = k - j1prime +j1;
 					if (x%2!=0) continue;
 					x/=2;
-					if (m1 < x + mCapital) continue;
+					if (static_cast<int>(m1 - x + mCapital) < 0) continue;
 					if (m1 - x + mCapital != m1prime) continue;
 
 					sum +=  cgObject_->operator()(jmPrime,jmCapital,jm)*
@@ -692,7 +693,7 @@ private:
 					int x = j1+j2-jProd;
 					if (x%2!=0) continue;
 					x/=2;
-					if (m1+m2 < static_cast<SizeType>(x)) continue;
+					if (static_cast<int>(m1 + m2 - x) < 0) continue;
 					SizeType m = m1 + m2 - x;
 					if (m>jProd) continue;
 					PairType jm(jProd,m);
@@ -701,7 +702,7 @@ private:
 					x = -jProdPrime + k +jProd;
 					if (x%2!=0) continue;
 					x/=2;
-					if (m < x + mCapital) continue;
+					if (static_cast<int>(m - x + mCapital) < 0) continue;
 					SizeType mPrime = m - x +mCapital;
 					if (mPrime>jProdPrime) continue;
 					PairType jmPrime(jProdPrime,mPrime);
@@ -710,7 +711,7 @@ private:
 					x = j2prime + j1 - jProdPrime;
 					if (x%2!=0) continue;
 					x/=2;
-					if (mPrime + x < m1) continue;
+					if (static_cast<int>(mPrime + x - m1) < 0) continue;
 					SizeType m2prime = mPrime + x - m1;
 					if (m2prime > j2prime) continue;
 					PairType jm2prime(j2prime,m2prime);
@@ -719,7 +720,7 @@ private:
 					x = k - j2prime + j2;
 					if (x%2!=0) continue;
 					x/=2;
-					if (m2 < x + mCapital) continue;
+					if (static_cast<int>(m2 - x + mCapital) < 0) continue;
 					if (m2 - x + mCapital != m2prime) continue;
 
 					sum +=  cgObject_->operator()(jmPrime,jmCapital,jm)*
