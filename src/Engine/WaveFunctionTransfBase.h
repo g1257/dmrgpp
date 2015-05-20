@@ -100,13 +100,7 @@ public:
 
 protected:
 
-	SizeType volumeOf(const VectorSizeType& v) const
-	{
-		assert(v.size()>0);
-		SizeType ret = v[0];
-		for (SizeType i=1;i<v.size();i++) ret *= v[i];
-		return ret;
-	}
+
 
 }; // class WaveFunctionTransfBase
 } // namespace Dmrg

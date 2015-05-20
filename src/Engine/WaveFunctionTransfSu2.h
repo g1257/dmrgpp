@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // so that std::norm() becomes visible here
 #include "WaveFunctionTransfBase.h"
 #include "Random48.h"
+#include "ParallelWftOne.h"
 
 namespace Dmrg {
 
@@ -105,6 +106,9 @@ public:
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
+	typedef ParallelWftOne<VectorWithOffsetType,
+	        DmrgWaveStructType,
+	        LeftRightSuperType> ParallelWftType;
 
 	static const SizeType INFINITE = ProgramGlobals::INFINITE;
 	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
@@ -163,7 +167,7 @@ private:
 	                         SizeType final,
 	                         const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		const FactorsType& factorsSE = lrs.super().getFactors();
 		const FactorsType& factorsSEOld = dmrgWaveStruct_.lrs.super().getFactors();
 		const FactorsType& factorsE = lrs.right().getFactors();
@@ -208,7 +212,7 @@ private:
 	                                       const SparseMatrixType& weT,
 	                                       const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType ni=dmrgWaveStruct_.ws.col();
 		const FactorsType& factorsS = dmrgWaveStruct_.lrs.left().getFactors();
 		SparseElementType sum=0;
@@ -257,7 +261,7 @@ private:
 	                         SizeType final,
 	                         const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.left().getFactors().row()/volumeOfNk;
 		SizeType nalpha = lrs.left().getFactors().row();
 
@@ -328,7 +332,7 @@ private:
 		SparseElementType sum=0;
 		const FactorsType& factorsE = dmrgWaveStruct_.lrs.right().getFactors();
 		const FactorsType& factorsSE = dmrgWaveStruct_.lrs.super().getFactors();
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType kpjp = kp+jp*volumeOfNk;
 		assert(kpjp<dmrgWaveStruct_.lrs.right().permutationInverse().size());
 		SizeType kpjpx = dmrgWaveStruct_.lrs.right().permutationInverse(kpjp);

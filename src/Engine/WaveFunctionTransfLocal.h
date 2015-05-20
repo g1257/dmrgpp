@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // so that std::norm() becomes visible here
 #include "WaveFunctionTransfBase.h"
 #include "MatrixOrIdentity.h"
+#include "ParallelWftOne.h"
 
 namespace Dmrg {
 
@@ -106,6 +107,9 @@ public:
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
 	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
+	typedef ParallelWftOne<VectorWithOffsetType,
+	        DmrgWaveStructType,
+	        LeftRightSuperType> ParallelWftType;
 
 	static const SizeType INFINITE = ProgramGlobals::INFINITE;
 	static const SizeType EXPAND_SYSTEM = ProgramGlobals::EXPAND_SYSTEM;
@@ -177,7 +181,7 @@ private:
 	                      SizeType i0,
 	                      const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/
 		        lrs.right().permutationInverse().size();
 
@@ -211,7 +215,7 @@ private:
 	                              const SparseMatrixType& weT,
 	                              const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType ni=dmrgWaveStruct_.ws.col();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType alpha = dmrgWaveStruct_.lrs.left().permutationInverse(ip+kp*nip);
@@ -249,7 +253,7 @@ private:
 	                                  SizeType i0,
 	                                  const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/
 		        lrs.right().permutationInverse().size();
 
@@ -284,7 +288,7 @@ private:
 	                                          const SparseMatrixType& weT,
 	                                          const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType ni=dmrgWaveStruct_.lrs.left().size();
 		SizeType nip = dmrgWaveStruct_.lrs.left().permutationInverse().size()/volumeOfNk;
 		MatrixOrIdentityType wsRef2(twoSiteDmrg_ && nip>volumeOfNk,ws);
@@ -323,61 +327,24 @@ private:
 	template<typename SomeVectorType>
 	void transformVector2(SomeVectorType& psiDest,
 	                      const SomeVectorType& psiSrc,
-	                      const LeftRightSuperType& lrs,SizeType i0,
+	                      const LeftRightSuperType& lrs,
+	                      SizeType i0,
 	                      const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = this->volumeOf(nk);
-		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
-		SizeType nalpha = lrs.left().permutationInverse().size();
-
-		assert(dmrgWaveStruct_.lrs.right().permutationInverse().size()==dmrgWaveStruct_.we.row());
-		assert(nip==dmrgWaveStruct_.ws.col());
-
-		SizeType start = psiDest.offset(i0);
 		SizeType total = psiDest.effectiveSize(i0);
 
-		const SparseMatrixType& we = dmrgWaveStruct_.we;
-		const SparseMatrixType& ws = dmrgWaveStruct_.ws;
-		SparseMatrixType wsT;
-		transposeConjugate(wsT,ws);
+		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
+		ParallelizerType threadedWft(PsimagLite::Concurrency::npthreads,
+		                             PsimagLite::MPI::COMM_WORLD);
 
-		PackIndicesType pack1(nalpha);
-		PackIndicesType pack2(nip);
-		for (SizeType x=0;x<total;x++) {
-			SizeType ip,alpha,kp,jp;
-			pack1.unpack(alpha,jp,(SizeType)lrs.super().permutation(x+start));
-			pack2.unpack(ip,kp,(SizeType)lrs.left().permutation(alpha));
-			psiDest.fastAccess(i0,x)=createAux2b(psiSrc,ip,kp,jp,wsT,we,nk);
-		}
-	}
+		ParallelWftType helperWft(psiDest,
+		                          psiSrc,
+				                  lrs,
+				                  i0,
+				                  nk,
+				                  dmrgWaveStruct_);
 
-	template<typename SomeVectorType>
-	SparseElementType createAux2b(const SomeVectorType& psiSrc,
-	                              SizeType ip,
-	                              SizeType kp,
-	                              SizeType jp,
-	                              const SparseMatrixType& wsT,
-	                              const SparseMatrixType& we,
-	                              const typename PsimagLite::Vector<SizeType>::Type& nk) const
-	{
-		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
-		assert(nalpha==wsT.col());
-
-		SparseElementType sum=0;
-		SizeType volumeOfNk = this->volumeOf(nk);
-		SizeType beta = dmrgWaveStruct_.lrs.right().permutationInverse(kp+jp*volumeOfNk);
-
-		for (int k=wsT.getRowPtr(ip);k<wsT.getRowPtr(ip+1);k++) {
-			SizeType alpha = wsT.getCol(k);
-			SizeType begink = we.getRowPtr(beta);
-			SizeType endk = we.getRowPtr(beta+1);
-			for (SizeType k2=begink;k2<endk;++k2) {
-				SizeType j = we.getCol(k2);
-				SizeType x = dmrgWaveStruct_.lrs.super().permutationInverse(alpha+j*nalpha);
-				sum += wsT.getValue(k)*we.getValue(k2)*psiSrc.slowAccess(x);
-			}
-		}
-		return sum;
+		threadedWft.loopCreate(total, helperWft);
 	}
 
 	template<typename SomeVectorType>
@@ -416,7 +383,7 @@ private:
 	                                  const LeftRightSuperType& lrs,
 	                                  const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 
@@ -451,7 +418,7 @@ private:
 	{
 		SizeType nalpha=dmrgWaveStruct_.lrs.left().permutationInverse().size();
 		SparseElementType sum=0;
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType ni = dmrgWaveStruct_.lrs.right().size()/volumeOfNk;
 
 		MatrixOrIdentityType weRef(twoSiteDmrg_ && ni>volumeOfNk,we);
@@ -492,7 +459,7 @@ private:
 	                            SizeType i0,
 	                            const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.super().permutationInverse().size()/lrs.right().permutationInverse().size();
 		PsimagLite::OstringStream msg;
 		msg<<" We're bouncing on the right, so buckle up!";
@@ -543,7 +510,7 @@ private:
 	                            SizeType i0,
 	                            const typename PsimagLite::Vector<SizeType>::Type& nk) const
 	{
-		SizeType volumeOfNk = this->volumeOf(nk);
+		SizeType volumeOfNk = ParallelWftType::volumeOf(nk);
 		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 
