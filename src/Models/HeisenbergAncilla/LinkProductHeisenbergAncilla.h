@@ -84,6 +84,9 @@ template<typename ModelHelperType>
 class LinkProductHeisenbergAncilla {
 
 public:
+
+	enum {TERM_SPLUSSMINUS, TERM_SZSZ, TERM_ANCILLA};
+
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -113,16 +116,21 @@ public:
 			angularFactor = 0.5;
 			category = 1;
 			break;
+		case 2:
+			angularFactor = 1;
+			category = 0;
+			break;
 		}
 	}
 
 	template<typename SomeStructType>
 	static void valueModifier(SparseElementType& value,
-	                          SizeType,
+	                          SizeType term,
 	                          SizeType,
 	                          bool isSu2,
 	                          const SomeStructType&)
 	{
+		if (term == TERM_ANCILLA) return;
 		if (isSu2) value = -value;
 		value *= 0.5;
 	}
@@ -136,16 +144,17 @@ public:
 		return PairType(0,0); // no orbital
 	}
 
-	//! For TERM_J there are 2 terms:
 	//! Splus Sminus and
 	//! Sz Sz
-	static SizeType terms() { return 2; }
+	//! delta^\dagger delta
+	static SizeType terms() { return 3; }
 
 private:
 
 	static PairType operatorDofs(SizeType term,bool isSu2)
 	{
-		if (term<1) return PairType(0,0);
+		if (term == TERM_SPLUSSMINUS || TERM == TERM_ANCILLA)
+			return PairType(0,0);
 		SizeType x = (isSu2) ? 0 : 1;
 		return PairType(x,x);
 	}

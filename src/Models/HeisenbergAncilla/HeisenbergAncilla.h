@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <algorithm>
 #include "ModelBase.h"
 #include "ParametersHeisenbergAncilla.h"
-#include "LinkProductHeisenberg.h"
+#include "LinkProductHeisenbergAncilla.h"
 #include "CrsMatrix.h"
 #include "VerySparseMatrix.h"
 #include "SpinSquaredHelper.h"
@@ -115,7 +115,7 @@ private:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef unsigned int long long WordType;
-	typedef LinkProductHeisenberg<ModelHelperType> LinkProductType;
+	typedef LinkProductHeisenbergAncilla<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
@@ -136,12 +136,11 @@ public:
 	typedef typename MyBasis::BasisDataType BasisDataType;
 
 	HeisenbergAncilla(const SolverParamsType& solverParams,
-	                InputValidatorType& io,
-	                GeometryType const &geometry)
+	                  InputValidatorType& io,
+	                  GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
-	      geometry_(geometry),
-	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
+	      geometry_(geometry)
 	{
 		SizeType n = geometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
@@ -151,52 +150,18 @@ public:
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		if (BasisType::useSu2Symmetry() && modelParameters_.twiceTheSpin != 1) {
-			PsimagLite::String msg("HeisenbergAncilla: SU(2) symmetry, ");
-			msg += " for spin different than 1/2 is not implemented yet.\n";
+		if (BasisType::useSu2Symmetry()) {
+			PsimagLite::String msg("HeisenbergAncilla: SU(2) symmetry");
+			msg += " is not implemented yet.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   PsimagLite::String = "") const
 	{
-		PsimagLite::String str = msg;
-		str += "HeisenbergAncilla";
-
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&modelParameters_);
-		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR,
-		          total,
-		          start,
-		          msg + " HeisenbergAncilla vptr");
-
-		start = end;
-		end = start + PsimagLite::MemResolv::SIZEOF_HEAPPTR;
-		total += mres.memResolv(&modelParameters_, end-start, str + " modelParameters");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquaredHelper_);
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
-		          PsimagLite::MemResolv::SIZEOF_HEAPREF,
-		          start,
-		          str + " ref to geometry");
-		total += (end - start);
-		mres.memResolv(&geometry_, 0, str + " geometry");
-
-		start = end;
-		end = reinterpret_cast<const char *>(&spinSquared_);
-		total += mres.memResolv(&spinSquaredHelper_,
-		                        end-start,
-		                        str + " spinSquaredHelper");
-
-		total += mres.memResolv(&spinSquared_,
-		                        sizeof(*this) - total,
-		                        str + " spinSquared");
-
-		return total;
+		return 0;
 	}
 
 	void print(std::ostream& os) const { os<<modelParameters_; }
