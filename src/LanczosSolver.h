@@ -281,7 +281,12 @@ public:
 	{
 		SizeType& max_nstep = steps_;
 
-		assert(initVector.size()==mat_.rank());
+		if (initVector.size()!=mat_.rank()) {
+			PsimagLite::String msg("decomposition: vector size ");
+			msg += ttos(initVector.size()) + " but matrix size ";
+			msg += ttos(mat_.rank()) + "\n";
+			throw RuntimeError(msg);
+		}
 
 		VectorType x(mat_.rank());
 		VectorType y = initVector;
@@ -463,12 +468,12 @@ private:
 		for (i = 1, s = d[l = 0]; i < n; i++)
 			if (d[i] < s) s = d[l = i];
 
-			        if (gs.size()>0) {
-				for (k = 0, vki = v + l; k < n; k++, vki += n) gs[k] = (*vki);
-				delete [] v;
-			}
+		if (gs.size()>0) {
+			for (k = 0, vki = v + l; k < n; k++, vki += n) gs[k] = (*vki);
+			delete [] v;
+		}
 
-			delete [] d;
+		delete [] d;
 		delete [] e;
 		if (intCounter>maxCounter)
 			throw RuntimeError("LanczosSolver::ground(): internal error\n");
