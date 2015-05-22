@@ -22,7 +22,7 @@ Connectors 6 6
 -1 -1 -1 -1 0  -1
 -1 -1 -1 -1 -1  0
 
-Model=HeisenbergAncilla
+Model=HeisenbergAncillaC
 HeisenbergTwiceS=1
 
 SolverOptions=none

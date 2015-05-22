@@ -71,19 +71,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file HeisenbergAncilla.h
+/*! \file HeisenbergAncillaC.h
  *
  *  An implementation of the Quantum Heisenberg Model to use with  DmrgSolver
  *
  */
 
-#ifndef DMRG_HEISENBERG_ANCILLA_H
-#define DMRG_HEISENBERG_ANCILLA_H
+#ifndef DMRG_HEISENBERG_ANCILLAC_H
+#define DMRG_HEISENBERG_ANCILLAC_H
 
 #include <algorithm>
 #include "ModelBase.h"
-#include "ParametersHeisenbergAncilla.h"
-#include "LinkProductHeisenbergAncilla.h"
+#include "ParametersHeisenbergAncillaC.h"
+#include "LinkProductHeisenbergAncillaC.h"
 #include "CrsMatrix.h"
 #include "VerySparseMatrix.h"
 #include "SpinSquaredHelper.h"
@@ -98,7 +98,7 @@ namespace Dmrg {
   down A, down B; down A, up B; up A, down B; up A, up B;
   */
 template<typename ModelBaseType>
-class HeisenbergAncilla : public ModelBaseType {
+class HeisenbergAncillaC : public ModelBaseType {
 
 public:
 
@@ -120,7 +120,7 @@ private:
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef unsigned int long long WordType;
-	typedef LinkProductHeisenbergAncilla<ModelHelperType> LinkProductType;
+	typedef LinkProductHeisenbergAncillaC<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
@@ -139,7 +139,7 @@ public:
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename MyBasis::BasisDataType BasisDataType;
 
-	HeisenbergAncilla(const SolverParamsType& solverParams,
+	HeisenbergAncillaC(const SolverParamsType& solverParams,
 	                  InputValidatorType& io,
 	                  GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
@@ -149,19 +149,19 @@ public:
 		SizeType n = geometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
 		if (m > 0 && m != n) {
-			PsimagLite::String msg("HeisenbergAncilla: If provided, ");
+			PsimagLite::String msg("HeisenbergAncillaC: If provided, ");
 			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
 		if (BasisType::useSu2Symmetry()) {
-			PsimagLite::String msg("HeisenbergAncilla: SU(2) symmetry");
+			PsimagLite::String msg("HeisenbergAncillaC: SU(2) symmetry");
 			msg += " is not implemented yet.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
 		if (modelParameters_.twiceTheSpin != 1) {
-			PsimagLite::String msg("HeisenbergAncilla: spin > 1/2");
+			PsimagLite::String msg("HeisenbergAncillaC: spin > 1/2");
 			msg += " HIGHLY EXPERIMENTAL!\n";
 			std::cout<<msg;
 		}
@@ -207,7 +207,7 @@ public:
 	                         const BlockType& block) const
 	{
 		if (block.size() != 1) {
-			PsimagLite::String msg("HeisenbergAncilla: only blocks");
+			PsimagLite::String msg("HeisenbergAncillaC: only blocks");
 			msg += " of size 1 can be added for now.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
@@ -428,7 +428,7 @@ private:
 	                        int n) const
 	{
 		if (n!=1)
-			PsimagLite::RuntimeError("HeisenbergAncilla::setSymmetryRelated n=1 only\n");
+			PsimagLite::RuntimeError("HeisenbergAncillaC::setSymmetryRelated n=1 only\n");
 
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -475,15 +475,15 @@ private:
 		return p.first*(modelParameters_.twiceTheSpin + 1) + p.second;
 	}
 
-	//serializr start class HeisenbergAncilla
+	//serializr start class HeisenbergAncillaC
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersHeisenbergAncilla<RealType>  modelParameters_;
+	ParametersHeisenbergAncillaC<RealType>  modelParameters_;
 	//serializr ref geometry_ start
 	GeometryType const &geometry_;
-}; // class HeisenbergAncilla
+}; // class HeisenbergAncillaC
 
 } // namespace Dmrg
 /*@}*/
-#endif //DMRG_HEISENBERG_ANCILLA_H
+#endif //DMRG_HEISENBERG_ANCILLAC_H
 

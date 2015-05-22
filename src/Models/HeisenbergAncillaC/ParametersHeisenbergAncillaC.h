@@ -72,26 +72,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ParametersHeisenbergAncilla.h
+/*! \file ParametersHeisenbergAncillaC.h
  *
  *  Contains the parameters for the Heisenberg model and function
  *  to read them from a file
  *
  */
-#ifndef DMRG_PARAMS_HEISENBERG_ANCILLA_H
-#define DMRG_PARAMS_HEISENBERG_ANCILLA_H
+#ifndef DMRG_PARAMS_HEISENBERG_ANCILLAC_H
+#define DMRG_PARAMS_HEISENBERG_ANCILLAC_H
 #include "Vector.h"
 #include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
 //! Heisenberg Model Parameters
 template<typename RealType>
-struct ParametersHeisenbergAncilla {
+struct ParametersHeisenbergAncillaC {
 
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template<typename IoInputType>
-	ParametersHeisenbergAncilla(IoInputType& io)
+	ParametersHeisenbergAncillaC(IoInputType& io)
 	    : targetQuantum(io,false)
 	{
 		io.readline(twiceTheSpin,"HeisenbergTwiceS=");
@@ -109,7 +109,7 @@ struct ParametersHeisenbergAncilla {
 		return 0;
 	}
 
-	//serializr start class ParametersHeisenbergAncilla
+	//serializr start class ParametersHeisenbergAncillaC
 	TargetQuantumElectrons<RealType> targetQuantum;
 	//serializr normal twiceTheSpin
 	SizeType twiceTheSpin;
@@ -119,7 +119,7 @@ struct ParametersHeisenbergAncilla {
 //! Function that prints model parameters to stream os
 template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
-                         const ParametersHeisenbergAncilla<RealTypeType>& parameters)
+                         const ParametersHeisenbergAncillaC<RealTypeType>& parameters)
 {
 	os<<"MagneticField="<<parameters.magneticField<<"\n";
 	os<<"HeisenbergTwiceS="<<parameters.twiceTheSpin<<"\n";

@@ -71,17 +71,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LinkProductHeisenbergAncilla.h
+/*! \file LinkProductHeisenbergAncillaC.h
  *
  *  LinkProduct for Heisenberg model
  *
  */
-#ifndef DMRG_LINK_PROD_HEISENBERG_ANCILLA_H
-#define DMRG_LINK_PROD_HEISENBERG_ANCILLA_H
+#ifndef DMRG_LINK_PROD_HEISENBERG_ANCILLAC_H
+#define DMRG_LINK_PROD_HEISENBERG_ANCILLAC_H
 
 namespace Dmrg {
 template<typename ModelHelperType>
-class LinkProductHeisenbergAncilla {
+class LinkProductHeisenbergAncillaC {
 
 public:
 
@@ -158,7 +158,7 @@ private:
 		SizeType x = (isSu2) ? 0 : 1;
 		return PairType(x,x);
 	}
-}; // class LinkProductHeisenbergAncilla
+}; // class LinkProductHeisenbergAncillaC
 } // namespace Dmrg
 /*@}*/
 #endif

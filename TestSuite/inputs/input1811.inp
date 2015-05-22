@@ -16,7 +16,7 @@ GeometryKind=chain
 GeometryOptions=ConstantValues
 Connectors 1 0.0
 
-Model=HeisenbergAncilla
+Model=HeisenbergAncillaC
 HeisenbergTwiceS=1
 
 SolverOptions=restart,TargetingAncilla
