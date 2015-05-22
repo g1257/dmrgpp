@@ -72,22 +72,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file TjMultiOrb.h
+/*! \file TjAncillaC.h
  *
  *  Hubbard + Heisenberg
  *
  */
-#ifndef DMRG_TJ_MULTIORB_H
-#define DMRG_TJ_MULTIORB_H
+#ifndef DMRG_TJ_ANCILLAC_H
+#define DMRG_TJ_ANCILLAC_H
 #include "../Models/FeAsModel/ModelFeBasedSc.h"
-#include "../Models/TjMultiOrb/LinkProductTjMultiOrb.h"
-#include "../Models/TjMultiOrb/ParametersModelTjMultiOrb.h"
+#include "../Models/TjAncillaC/LinkProductTjAncillaC.h"
+#include "../Models/TjAncillaC/ParametersTjAncillaC.h"
 #include "ModelCommon.h"
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment
 template<typename ModelBaseType>
-class TjMultiOrb : public ModelBaseType {
+class TjAncillaC : public ModelBaseType {
 
 public:
 
@@ -104,7 +104,7 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProductTjMultiOrb<ModelHelperType> LinkProductType;
+	typedef LinkProductTjAncillaC<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -126,14 +126,14 @@ public:
 
 	enum {SPIN_UP, SPIN_DOWN};
 
-	TjMultiOrb(const SolverParamsType& solverParams,
+	TjAncillaC(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
 	           GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry)
 	{
-		std::cout<<"TjMultiOrb: This model is EXPERIMENTAL\n";
+		std::cout<<"TjAncillaC: This model is EXPERIMENTAL\n";
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
@@ -627,15 +627,15 @@ private:
 		return PairType(0,0);
 	}
 
-	//serializr start class TjMultiOrb
+	//serializr start class TjAncillaC
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersModelTjMultiOrb<RealType>  modelParameters_;
+	ParametersTjAncillaC<RealType>  modelParameters_;
 	//serializr ref geometry_ end
 	const GeometryType &geometry_;
-};	//class TjMultiOrb
+};	//class TjAncillaC
 
 } // namespace Dmrg
 /*@}*/
-#endif // DMRG_TJ_MULTIORB_H
+#endif // DMRG_TJ_ANCILLAC_H
 

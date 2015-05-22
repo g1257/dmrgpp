@@ -71,23 +71,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ParametersModelTjMultiOrb.h
+/*! \file ParametersTjAncillaC.h
  *
  *  Contains the parameters for the Hubbard model and function to
  *  read them from a file
  *
  */
-#ifndef DMRG_PARAMS_TJ_MULTIORB_H
-#define DMRG_PARAMS_TJ_MULTIORB_H
+#ifndef DMRG_PARAMS_TJ_ANCILLAC_H
+#define DMRG_PARAMS_TJ_ANCILLAC_H
 #include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters
 template<typename RealType>
-struct ParametersModelTjMultiOrb {
+struct ParametersTjAncillaC {
 
 	template<typename IoInputType>
-	ParametersModelTjMultiOrb(IoInputType& io)
+	ParametersTjAncillaC(IoInputType& io)
 	    : targetQuantum(io)
 	{
 		io.read(potentialV,"potentialV");
@@ -105,7 +105,7 @@ struct ParametersModelTjMultiOrb {
 
 	TargetQuantumElectrons<RealType> targetQuantum;
 	// potential V, size=twice the number of sites: for spin up and then for spin down
-	//serializr start class ParametersModelTjMultiOrb
+	//serializr start class ParametersTjAncillaC
 	//serializr normal potentialV
 	typename PsimagLite::Vector<RealType>::Type potentialV;
 };
@@ -113,7 +113,7 @@ struct ParametersModelTjMultiOrb {
 //! Function that prints model parameters to stream os
 template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
-                         const ParametersModelTjMultiOrb<RealTypeType>& parameters)
+                         const ParametersTjAncillaC<RealTypeType>& parameters)
 {
 	os<<parameters.targetQuantum;
 	os<<"potentialV\n";
