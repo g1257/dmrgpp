@@ -258,6 +258,11 @@ public:
 
 	VectorWithOffset<FieldType> operator+=(const VectorWithOffset<FieldType>& v)
 	{
+		if (size_ == 0 && offset_ == 0 && m_ == 0) {
+			data_ = v.data_;
+			return *this;
+		}
+
 		if (size_ != v.size_ || offset_ != v.offset_ || m_ != v.m_)
 			throw PsimagLite::RuntimeError("VectorWithOffset::operator+=\n");
 
