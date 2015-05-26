@@ -161,8 +161,38 @@ public:
 		}
 	}
 
+	static SizeType pseudoEffectiveNumber(SizeType nelectrons,
+	                                      SizeType jtilde)
+	{
+		VectorSizeType v(3);
+		v[0] = 0;
+		v[1] = nelectrons;
+		v[2] = jtilde;
+		return pseudoQuantumNumber_(v);
+	}
+
+	static PsimagLite::String qnPrint(SizeType q)
+	{
+		PsimagLite::String str("");
+		VectorSizeType qns = decodeQuantumNumber(q);
+		for (SizeType k=0;k<qns.size();k++) str += ttos(qns[k]) + " ";
+		return str;
+	}
+
+	//! Encodes (flavor,jvalue,density) into a unique number and returns it
+	static SizeType pseudoQuantumNumber(const VectorSizeType& targets,
+	                                    bool useSu2Symmetry)
+	{
+		if (useSu2Symmetry)
+			return pseudoQuantumNumber_(targets);
+		else
+			return encodeQuantumNumber(targets);
+	}
+
+private:
+
 	//! targets[0]=nup, targets[1]=ndown,  targets[2]=2j
-	static SizeType pseudoQuantumNumber(const VectorSizeType& v)
+	static SizeType pseudoQuantumNumber_(const VectorSizeType& v)
 	{
 		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
 
@@ -172,16 +202,6 @@ public:
 
 		x += v[2]*maxElectrons;
 		return x;
-	}
-
-	static SizeType pseudoEffectiveNumber(SizeType nelectrons,
-	                                      SizeType jtilde)
-	{
-		VectorSizeType v(3);
-		v[0] = 0;
-		v[1] = nelectrons;
-		v[2] = jtilde;
-		return pseudoQuantumNumber(v);
 	}
 
 	static SizeType encodeQuantumNumber(const VectorSizeType& v)
@@ -196,16 +216,6 @@ public:
 		if (v.size()==3) x += v[2]*maxElectrons*maxElectrons;
 		return x;
 	}
-
-	static PsimagLite::String qnPrint(SizeType q)
-	{
-		PsimagLite::String str("");
-		VectorSizeType qns = decodeQuantumNumber(q);
-		for (SizeType k=0;k<qns.size();k++) str += ttos(qns[k]) + " ";
-		return str;
-	}
-
-private:
 
 	static VectorSizeType decodeQuantumNumber(SizeType q)
 	{

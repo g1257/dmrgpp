@@ -600,7 +600,8 @@ private:
 		progress_.printline(msg,std::cout);
 		if (direction==INFINITE)
 			ioOut_.printVector(targetQuantumNumbers,"TargetedQuantumNumbers");
-		quantumSector_=MyBasis::pseudoQuantumNumber(targetQuantumNumbers);
+		quantumSector_ = BasisDataType::pseudoQuantumNumber(targetQuantumNumbers,
+		                                                    MyBasis::useSu2Symmetry());
 	}
 
 	void printEnergy(RealType energy)

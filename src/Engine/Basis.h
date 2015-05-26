@@ -315,21 +315,6 @@ public:
 			return HamiltonianSymmetryLocalType::encodeQuantumNumber(quantumNumbers);
 	}
 
-	//! Inverse for encodeQuantumNumber
-//	static VectorSizeType decodeQuantumNumber(int q)
-//	{
-//		return BasisDataType::decodeQuantumNumber(q);
-//	}
-
-	//! Encodes (flavor,jvalue,density) into a unique number and returns it
-	static SizeType pseudoQuantumNumber(const VectorSizeType& targets)
-	{
-		if (useSu2Symmetry_)
-			return BasisDataType::pseudoQuantumNumber(targets);
-		else
-			return BasisDataType::encodeQuantumNumber(targets);
-	}
-
 	//! Inverse of pseudoQuantumNumber
 	SizeType pseudoEffectiveNumber(SizeType i) const
 	{
