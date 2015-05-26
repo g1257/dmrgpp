@@ -103,6 +103,7 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
+	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
@@ -378,14 +379,9 @@ public:
 		return NUMBER_OF_SPINS * ORBITALS_OXYGEN * geometry_.numberOfSites() + 1;
 	}
 
-	virtual void setTargetNumbers(VectorSizeType& t,
-	                              SizeType sites,
-	                              SizeType direction) const
+	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
-		modelParameters_.targetQuantum.setTargetNumbers(t,
-		                                                sites,
-		                                                geometry_.numberOfSites(),
-		                                                direction);
+		return modelParameters_.targetQuantum;
 	}
 
 private:

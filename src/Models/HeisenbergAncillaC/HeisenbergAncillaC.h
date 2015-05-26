@@ -110,6 +110,7 @@ public:
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::RealType RealType;
+	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef	typename ModelBaseType::VectorType VectorType;
 	typedef	typename std::pair<SizeType,SizeType> PairSizeType;
 
@@ -339,14 +340,9 @@ public:
 		}
 	}
 
-	virtual void setTargetNumbers(VectorSizeType& t,
-	                              SizeType sites,
-	                              SizeType direction) const
+	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
-		modelParameters_.targetQuantum.setTargetNumbers(t,
-		                                                sites,
-		                                                geometry_.numberOfSites(),
-		                                                direction);
+		return modelParameters_.targetQuantum;
 	}
 
 private:

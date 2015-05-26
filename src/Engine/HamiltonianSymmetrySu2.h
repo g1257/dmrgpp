@@ -106,7 +106,7 @@ private:
 	typedef HamiltonianSymmetrySu2<SparseMatrixType> ThisType;
 	typedef JmSubspace<VerySparseMatrixType,ThisType> JmSubspaceType;
 	typedef typename JmSubspaceType::FlavorType FlavorType;
-	typedef  BasisData<PairType> BasisDataType;
+	typedef  BasisData<PairType, RealType> BasisDataType;
 
 public:
 

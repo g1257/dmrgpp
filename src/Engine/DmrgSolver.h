@@ -573,35 +573,20 @@ private:
 	void updateQuantumSector(SizeType sites,SizeType direction,SizeType step)
 	{
 		if (direction==INFINITE && parameters_.adjustQuantumNumbers.size()>0) {
-			VectorSizeType targetQuantumNumbers(2,0);
-			if (2*step+1 >= parameters_.adjustQuantumNumbers.size()) {
-				PsimagLite::String msg("adjustQuantumNumbers must be a vector");
-				msg += " of size N-2, where N is the TotalNumberOfSites\n";
-				throw PsimagLite::RuntimeError(msg);
-			}
-
-			targetQuantumNumbers[0]=parameters_.adjustQuantumNumbers[2*step];
-			targetQuantumNumbers[1]=parameters_.adjustQuantumNumbers[2*step+1];
-			setQuantumSector(targetQuantumNumbers,direction);
+			quantumSector_ = BasisDataType::adjustQn(parameters_.adjustQuantumNumbers,
+			                                         direction,
+			                                         ioOut_,
+			                                         MyBasis::useSu2Symmetry(),
+			                                         step);
 			return;
 		}
 
-		VectorSizeType targetQuantumNumbers;
-		model_.setTargetNumbers(targetQuantumNumbers,sites,direction);
-		setQuantumSector(targetQuantumNumbers,direction);
-	}
-
-	void setQuantumSector(const VectorSizeType& targetQuantumNumbers,SizeType direction)
-	{
-		PsimagLite::OstringStream msg;
-		msg<<"Integer target quantum numbers are: ";
-		for (SizeType ii=0;ii<targetQuantumNumbers.size();ii++)
-			msg<<targetQuantumNumbers[ii]<<" ";
-		progress_.printline(msg,std::cout);
-		if (direction==INFINITE)
-			ioOut_.printVector(targetQuantumNumbers,"TargetedQuantumNumbers");
-		quantumSector_ = BasisDataType::pseudoQuantumNumber(targetQuantumNumbers,
-		                                                    MyBasis::useSu2Symmetry());
+		quantumSector_ = BasisDataType::getQuantumSector(model_.targetQuantum(),
+		                                                 sites,
+		                                                 model_.geometry().numberOfSites(),
+		                                                 direction,
+		                                                 &ioOut_,
+		                                                 MyBasis::useSu2Symmetry());
 	}
 
 	void printEnergy(RealType energy)

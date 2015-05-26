@@ -81,13 +81,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define  BASIS_DATA_H
 #include "Vector.h"
 #include "TypeToString.h"
+#include "ProgramGlobals.h"
+#include "IoSimple.h"
+#include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
-template<typename PairType>
+
+template<typename PairType, typename RealType>
 class BasisData {
 
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairSizeType;
+	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 
 public:
 
@@ -179,6 +184,27 @@ public:
 		return str;
 	}
 
+	static SizeType adjustQn(const VectorSizeType& adjustQuantumNumbers,
+	                         SizeType direction,
+	                         PsimagLite::IoSimple::Out& ioOut,
+	                         bool useSu2Symmetry,
+	                         SizeType step)
+	{
+		VectorSizeType targetQuantumNumbers(2,0);
+		if (2*step+1 >= adjustQuantumNumbers.size()) {
+			PsimagLite::String msg("adjustQuantumNumbers must be a vector");
+			msg += " of size N-2, where N is the TotalNumberOfSites\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+
+		targetQuantumNumbers[0] = adjustQuantumNumbers[2*step];
+		targetQuantumNumbers[1] = adjustQuantumNumbers[2*step+1];
+		return getQuantumSector(targetQuantumNumbers,
+		                        direction,
+		                        &ioOut,
+		                        useSu2Symmetry);
+	}
+
 	//! Encodes (flavor,jvalue,density) into a unique number and returns it
 	static SizeType pseudoQuantumNumber(const VectorSizeType& targets,
 	                                    bool useSu2Symmetry)
@@ -189,7 +215,34 @@ public:
 			return encodeQuantumNumber(targets);
 	}
 
+	static SizeType getQuantumSector(const TargetQuantumElectronsType& targetQuantum,
+	                                 SizeType sites,
+	                                 SizeType total,
+                                     SizeType direction,
+	                                 PsimagLite::IoSimple::Out* ioOut,
+			                         bool useSu2Symmetry)
+	{
+		VectorSizeType v;
+		targetQuantum.setTargetNumbers(v,sites,total,direction);
+		return getQuantumSector(v,direction,ioOut,useSu2Symmetry);
+	}
+
 private:
+
+	static SizeType getQuantumSector(const VectorSizeType& targetQuantumNumbers,
+	                                 SizeType direction,
+	                                 PsimagLite::IoSimple::Out* ioOut,
+	                                 bool useSu2Symmetry)
+	{
+		PsimagLite::OstringStream msg;
+		msg<<"Integer target quantum numbers are: ";
+		for (SizeType ii=0;ii<targetQuantumNumbers.size();ii++)
+			msg<<targetQuantumNumbers[ii]<<" ";
+		std::cout<<msg<<"\n";
+		if (ioOut && direction == ProgramGlobals::INFINITE)
+			ioOut->printVector(targetQuantumNumbers,"TargetedQuantumNumbers");
+		return pseudoQuantumNumber(targetQuantumNumbers,useSu2Symmetry);
+	}
 
 	//! targets[0]=nup, targets[1]=ndown,  targets[2]=2j
 	static SizeType pseudoQuantumNumber_(const VectorSizeType& v)
@@ -237,8 +290,8 @@ private:
 	VectorSizeType flavors_;
 }; // struct BasisData
 
-template<typename IoOutputter, typename PairType>
-void save(IoOutputter& io,const BasisData<PairType>& bd)
+template<typename IoOutputter, typename PairType, typename RealType>
+void save(IoOutputter& io,const BasisData<PairType, RealType>& bd)
 {
 	io.printVector(bd.electronsUp,"#bdElectronsUp");
 	io.printVector(bd.electronsDown,"#bdElectronsDown");

@@ -103,7 +103,7 @@ public:
 
 	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
-	typedef  BasisData<PairType> BasisDataType;
+	typedef  BasisData<PairType, RealType_> BasisDataType;
 	typedef VectorSizeType BlockType;
 	typedef SparseMatrixType_ SparseMatrixType;
 	typedef RealType_ RealType;

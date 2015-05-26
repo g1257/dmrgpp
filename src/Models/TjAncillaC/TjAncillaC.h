@@ -102,6 +102,7 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelHelperType::RealType RealType;
+	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProductTjAncillaC<ModelHelperType> LinkProductType;
@@ -338,14 +339,9 @@ public:
 		this->orderBasis(basis,q,basisTmp);
 	}
 
-	virtual void setTargetNumbers(VectorSizeType& t,
-	                              SizeType sites,
-	                              SizeType direction) const
+	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
-		modelParameters_.targetQuantum.setTargetNumbers(t,
-		                                                sites,
-		                                                geometry_.numberOfSites(),
-		                                                direction);
+		return modelParameters_.targetQuantum;
 	}
 
 	void print(std::ostream& os) const

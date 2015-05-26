@@ -100,6 +100,7 @@ public:
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename ModelHelperType::RealType RealType;
+	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProdExtendedHubbard1Orb<ModelHelperType> LinkProductType;
@@ -258,11 +259,9 @@ public:
 		                                         factorForDiagonals);
 	}
 
-	virtual void setTargetNumbers(VectorSizeType& t,
-	                              SizeType sites,
-	                              SizeType direction) const
+	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
-		modelHubbard_.setTargetNumbers(t,sites,direction);
+		return modelHubbard_.targetQuantum();
 	}
 
 private:

@@ -85,7 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Sort.h"
 #include "MemResolv.h"
-
+#include "TargetQuantumElectrons.h"
 
 namespace Dmrg {
 
@@ -104,6 +104,7 @@ public:
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelHelperType::RealType RealType;
+	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelHelperType::BasisType MyBasis;
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -298,9 +299,7 @@ public:
 		symmetryBlock.clear();
 	}
 
-	virtual void setTargetNumbers(VectorSizeType& t,
-	                              SizeType,
-	                              SizeType) const = 0;
+	virtual const TargetQuantumElectronsType& targetQuantum() const = 0;
 
 	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
 	                           SizeType x,

@@ -89,7 +89,7 @@ class	HamiltonianSymmetryLocal {
 
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
-	typedef  BasisData<std::pair<SizeType,SizeType> > BasisDataType;
+	typedef  BasisData<std::pair<SizeType,SizeType>, RealType> BasisDataType;
 	typedef PsimagLite::CrsMatrix<RealType> FactorsType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 

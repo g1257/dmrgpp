@@ -98,7 +98,6 @@ class MettsTargetting  {
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
-	typedef BasisData<PairSizeType> BasisDataType;
 
 	struct MettsPrev {
 
@@ -114,6 +113,7 @@ public:
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
+	typedef BasisData<PairSizeType,RealType> BasisDataType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -591,10 +591,12 @@ private:
 	                       const VectorSizeType& block2)
 	{
 		SizeType linSize = model_.geometry().numberOfSites();
-		VectorSizeType tqn;
-		model_.setTargetNumbers(tqn,linSize,INFINITE);
-		SizeType qn = BasisDataType::pseudoQuantumNumber(tqn,
-		                                                 BasisType::useSu2Symmetry());
+		SizeType qn = BasisDataType::getQuantumSector(model_.targetQuantum(),
+		                                              linSize,
+	                                                  linSize,
+	                                                  INFINITE,
+	                                                  0,
+	                                                  BasisType::useSu2Symmetry());
 		mettsStochastics_.update(qn,block1,block2,mettsStruct_.rngSeed);
 	}
 

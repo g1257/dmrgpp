@@ -95,7 +95,6 @@ class Diagonalization {
 public:
 
 	typedef std::pair<SizeType,SizeType> PairSizeType;
-	typedef BasisData<PairSizeType> BasisDataType;
 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename TargettingType::ModelType ModelType;
 	typedef typename TargettingType::BasisType BasisType;
@@ -103,6 +102,7 @@ public:
 	typedef typename TargettingType::BlockType BlockType;
 	typedef typename TargettingType::TargetVectorType TargetVectorType;
 	typedef typename TargettingType::RealType RealType;
+	typedef BasisData<PairSizeType,RealType> BasisDataType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
