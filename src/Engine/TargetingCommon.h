@@ -263,7 +263,7 @@ public:
 		RealType time = 0;
 		targetHelper_.model().setNaturalBasis(creationMatrix,hmatrix,q,block1,time);
 
-		FermionSign fs(targetHelper_.lrs().left(),q.electrons);
+		FermionSign fs(targetHelper_.lrs().left(),q.electrons());
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
 			applyOpExpression_.applyOpLocal()(phiTemp,psi,creationMatrix[j],

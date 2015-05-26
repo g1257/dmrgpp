@@ -605,10 +605,7 @@ private:
 			                                                                SPIN_DOWN);
 		}
 
-		q.jmValues=jmvalues;
-		q.flavors = flavors;
-		q.electrons = electronsUp + electronsDown;
-		q.szPlusConst = electronsUp;
+		q.set(jmvalues,flavors,electronsUp+electronsDown,electronsUp);
 	}
 
 	// note: we use 2j instead of j

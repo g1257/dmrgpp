@@ -130,19 +130,7 @@ public:
 	static void findQuantumNumbers(VectorSizeType& q,
 	                                const BasisDataType& basisData)
 	{
-		q.clear();
-		VectorSizeType qn(2);
-		for (SizeType i=0;i<basisData.electrons.size();i++) {
-			// n
-			qn[1] = basisData.electrons[i];
-			// sz + const.
-			qn[0] = basisData.szPlusConst[i];
-
-			//assert(qn[1]>=qn[0]);
-			//qn[1] -= qn[0];
-
-			q.push_back(encodeQuantumNumber(qn));
-		}
+		basisData.findQuantumNumbersLocal(q);
 	}
 
 	template<typename SolverParametersType>

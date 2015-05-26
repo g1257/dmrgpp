@@ -498,10 +498,8 @@ private:
 			// ndown
 			electronsDown[i] = hilbertSpace_.electronsWithGivenSpin(basis[i],site,SPIN_DOWN);
 		}
-		q.jmValues=jmvalues;
-		q.flavors = flavors;
-		q.electrons = electronsUp + electronsDown;
-		q.szPlusConst = electronsUp;
+
+		q.set(jmvalues,flavors,electronsUp+electronsDown,electronsUp);
 	}
 
 	//! Not implemented, su(2) symmetry won't work

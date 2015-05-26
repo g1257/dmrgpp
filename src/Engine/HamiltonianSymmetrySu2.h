@@ -126,11 +126,10 @@ public:
 
 	void set(const BasisDataType& basisData)
 	{
-		jmValues_=basisData.jmValues;
-		flavors_=basisData.flavors;
+		jmValues_=basisData.jmValues();
+		flavors_=basisData.flavors();
 		flavorsMax_= *(std::max_element(flavors_.begin(),flavors_.end()));
-		electronsMax_ = *(std::max_element(basisData.electrons.begin(),
-		                                   basisData.electrons.end()));
+		electronsMax_ = basisData.electronsMax();
 		jMax_=0;
 		jmValues_.maxFirst<std::greater<SizeType> >(jMax_);
 		jMax_++;
@@ -140,34 +139,7 @@ public:
 	static void findQuantumNumbers(typename PsimagLite::Vector<SizeType> ::Type&q,
 	                               const BasisDataType& basisData)
 	{
-		q.resize(basisData.electrons.size());
-		for (SizeType i=0;i<q.size();i++) {
-			SizeType ne = basisData.electrons[i];
-			PairType jmpair = basisData.jmValues[i];
-			q[i]=neJmToIndex(ne,jmpair);
-		}
-	}
-
-	static SizeType neJmToIndex(SizeType ne,const PairType& jm)
-	{
-		typename PsimagLite::Vector<SizeType>::Type v(3);
-		v[0] = jm.second;
-		v[1] = ne;
-		v[2] = jm.first;
-		return encodeQuantumNumber(v);
-	}
-
-	static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& v)
-	{
-		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
-
-		assert(v[0] < maxElectrons);
-		assert(v[1] < maxElectrons);
-		assert(v[2] < maxElectrons);
-
-		SizeType x= v[0] + v[1]*maxElectrons;
-		if (v.size()==3) x += v[2]*maxElectrons*maxElectrons;
-		return x;
+		basisData.findQuantumNumbersSu2(q);
 	}
 
 	static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(SizeType q)
@@ -380,7 +352,7 @@ private:
 		}
 		for (SizeType i=0;i<flavors;i++ ) {
 			PairType jm = jmSubspace.getJmValue();
-			quantumNumbers.push_back(neJmToIndex(jmSubspace.getNe(),jm));
+			quantumNumbers.push_back(BasisDataType::neJmToIndex(jmSubspace.getNe(),jm));
 			jmValues_.push(jm,i+offset);
 			flavors_.push_back(jmSubspace.getFlavor(i));
 		}

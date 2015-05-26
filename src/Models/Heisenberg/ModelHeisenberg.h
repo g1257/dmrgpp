@@ -416,21 +416,20 @@ private:
 		jmSaved.first++;
 		jmSaved.second++;
 
-		q.szPlusConst.resize(basis.size());
-		q.electrons.resize(basis.size());
+		VectorSizeType szPlusConst(basis.size());
+		VectorSizeType electrons(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair;
 			jmpair.first = modelParameters_.twiceTheSpin;
 			jmpair.second = basis[i];
 			jmvalues.push_back(jmpair);
-			q.szPlusConst[i] = basis[i];
-			q.electrons[i] = 1;
+			szPlusConst[i] = basis[i];
+			electrons[i] = 1;
 			flavors.push_back(1);
 			jmSaved = jmpair;
 		}
 
-		q.jmValues = jmvalues;
-		q.flavors = flavors;
+		q.set(jmvalues,flavors,electrons,szPlusConst);
 	}
 
 	//serializr start class ModelHeisenberg

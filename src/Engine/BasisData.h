@@ -79,17 +79,100 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef BASIS_DATA_H
 #define  BASIS_DATA_H
-#include <vector>
+#include "Vector.h"
+
 
 namespace Dmrg {
 template<typename PairType>
-struct BasisData {
+class BasisData {
 
-	typename PsimagLite::Vector<SizeType>::Type electrons;
-	typename PsimagLite::Vector<SizeType>::Type szPlusConst;
-	typename PsimagLite::Vector<PairType>::Type jmValues;
-	typename PsimagLite::Vector<SizeType>::Type flavors;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<PairType>::Type VectorPairSizeType;
 
+public:
+
+	void set(const VectorPairSizeType& jmvalues,
+	         const VectorSizeType& flavors,
+	         const VectorSizeType& electrons,
+	         const VectorSizeType& szPlusConst)
+	{
+		jmValues_ = jmvalues;
+		flavors_ = flavors;
+		electrons_ = electrons;
+		szPlusConst_ = szPlusConst;
+	}
+
+	SizeType electronsMax() const
+	{
+		return *(std::max_element(electrons_.begin(),electrons_.end()));
+	}
+
+	const VectorSizeType& electrons() const {return electrons_; }
+
+	const VectorSizeType& flavors() const { return flavors_; }
+
+	const VectorPairSizeType& jmValues() const
+	{
+		return jmValues_;
+	}
+
+	//! find quantum numbers for each state of this basis,
+	//! considered symmetries for this model are: n_up and n_down
+	void findQuantumNumbersLocal(VectorSizeType& q) const
+	{
+		q.clear();
+		VectorSizeType qn(2);
+		for (SizeType i=0;i<electrons_.size();i++) {
+			// n
+			qn[1] = electrons_[i];
+			// sz + const.
+			qn[0] = szPlusConst_[i];
+
+			//assert(qn[1]>=qn[0]);
+			//qn[1] -= qn[0];
+
+			q.push_back(encodeQuantumNumber(qn));
+		}
+	}
+
+	void findQuantumNumbersSu2(VectorSizeType& q) const
+	{
+		q.resize(electrons_.size());
+		for (SizeType i=0;i<q.size();i++) {
+			SizeType ne = electrons_[i];
+			PairType jmpair = jmValues_[i];
+			q[i]=neJmToIndex(ne,jmpair);
+		}
+	}
+
+	static SizeType neJmToIndex(SizeType ne,const PairType& jm)
+	{
+		VectorSizeType v(3);
+		v[0] = jm.second;
+		v[1] = ne;
+		v[2] = jm.first;
+		return encodeQuantumNumber(v);
+	}
+
+private:
+
+	static SizeType encodeQuantumNumber(const VectorSizeType& v)
+	{
+		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
+
+		assert(v[0] < maxElectrons);
+		assert(v[1] < maxElectrons);
+		assert(v[2] < maxElectrons);
+
+		SizeType x= v[0] + v[1]*maxElectrons;
+		if (v.size()==3) x += v[2]*maxElectrons*maxElectrons;
+		return x;
+	}
+
+	VectorSizeType electrons_;
+	VectorSizeType szPlusConst_;
+	VectorPairSizeType jmValues_;
+	VectorSizeType flavors_;
 }; // struct BasisData
 
 template<typename IoOutputter, typename PairType>
@@ -99,7 +182,8 @@ void save(IoOutputter& io,const BasisData<PairType>& bd)
 	io.printVector(bd.electronsDown,"#bdElectronsDown");
 	io.printVector(bd.jmValues,"#bdJmValues");
 	io.printVector(bd.flavors,"#bdFlavors=");
-
+	PsimagLite::String msg("Symmetry=");
+	msg += bd.symm->name();
 }
 
 } // namespace Dmrg

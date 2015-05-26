@@ -150,7 +150,7 @@ public:
 	void setSymmetryRelated(const BasisDataType& basisData)
 	{
 		if (useSu2Symmetry_) symmSu2_.set(basisData);
-		electrons_ = basisData.electrons;
+		electrons_ = basisData.electrons();
 		findQuantumNumbers(quantumNumbers_,basisData);
 		findPermutationAndPartition();
 		electronsOld_=electrons_;

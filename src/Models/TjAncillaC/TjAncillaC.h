@@ -611,10 +611,7 @@ private:
 			jmSaved = jmpair;
 		}
 
-		q.jmValues=jmvalues;
-		q.flavors = flavors;
-		q.electrons = ups + downs;
-		q.szPlusConst = ups;
+		q.set(jmvalues,flavors,ups,downs);
 	}
 
 	// note: we use 2j instead of j

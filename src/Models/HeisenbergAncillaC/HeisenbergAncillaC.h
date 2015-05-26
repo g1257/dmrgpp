@@ -444,22 +444,21 @@ private:
 		jmSaved.first++;
 		jmSaved.second++;
 
-		q.szPlusConst.resize(basis.size());
-		q.electrons.resize(basis.size());
+		VectorSizeType szPlusConst(basis.size());
+		VectorSizeType electrons(basis.size());
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair;
 			jmpair.first = modelParameters_.twiceTheSpin;
 			jmpair.second = basis[i];
 			jmvalues.push_back(jmpair);
 			PairSizeType ket = getOneOrbital(basis[i]);
-			q.szPlusConst[i] = ket.first + ket.second;
-			q.electrons[i] = NUMBER_OF_ORBITALS;
+			szPlusConst[i] = ket.first + ket.second;
+			electrons[i] = NUMBER_OF_ORBITALS;
 			flavors.push_back(1);
 			jmSaved = jmpair;
 		}
 
-		q.jmValues = jmvalues;
-		q.flavors = flavors;
+		q.set(jmvalues,flavors,electrons,szPlusConst);
 	}
 
 	PairSizeType getOneOrbital(SizeType state) const
