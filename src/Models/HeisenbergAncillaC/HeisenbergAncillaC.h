@@ -402,15 +402,16 @@ private:
 		for (SizeType ii=0;ii<total;ii++) {
 			PairSizeType ket = getOneOrbital(natBasis[ii]);
 
-			SizeType bra1 = ket.first + 1;
+			SizeType bra1 = ket.first;
 			if (bra1 >= total1) continue;
 
-			SizeType bra2 = ket.second + 1;
+			SizeType bra2 = ket.second;
 			if (bra2 >= total1) continue;
+			if (bra2 >= bra1) continue;
 
-			PairSizeType bra(bra1,bra2);
+			PairSizeType bra(bra2,bra1);
 			SizeType jj = getFullIndex(bra);
-			RealType m = ket.first - j;
+			RealType m = bra.first - j;
 			RealType x1 = j*(j+1)-m*(m+1);
 			assert(x1>=0);
 			m = ket.second - j;
