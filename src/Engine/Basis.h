@@ -97,13 +97,14 @@ class Basis {
 	typedef  Basis<SparseMatrixType_> ThisType;
 	typedef HamiltonianSymmetryLocal<SparseMatrixType_>  HamiltonianSymmetryLocalType;
 	typedef HamiltonianSymmetrySu2<SparseMatrixType_>  HamiltonianSymmetrySu2Type;
+	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
 
 	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
 	typedef  BasisData<PairType> BasisDataType;
-	typedef typename PsimagLite::Vector<SizeType>::Type BlockType;
+	typedef VectorSizeType BlockType;
 	typedef SparseMatrixType_ SparseMatrixType;
 	typedef RealType_ RealType;
 
@@ -235,8 +236,8 @@ public:
 	int partitionFromQn(SizeType qn,
 	                    SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
 	{
-		const typename PsimagLite::Vector<SizeType>::Type* quantumNumbers;
-		const typename PsimagLite::Vector<SizeType>::Type* partition;
+		const VectorSizeType* quantumNumbers;
+		const VectorSizeType* partition;
 
 		if (beforeOrAfterTransform==AFTER_TRANSFORM) {
 			quantumNumbers = &quantumNumbers_;
@@ -273,7 +274,7 @@ public:
 	}
 
 	//! Return the permutation vector
-	const typename PsimagLite::Vector<SizeType>::Type& permutationVector() const
+	const VectorSizeType& permutationVector() const
 	{
 		return  permutationVector_;
 	}
@@ -286,7 +287,7 @@ public:
 	}
 
 	//! returns the inverse permutation vector
-	const typename PsimagLite::Vector<SizeType>::Type& permutationInverse() const
+	const VectorSizeType& permutationInverse() const
 	{
 		return permInverse_;
 	}
@@ -306,7 +307,7 @@ public:
 	}
 
 	//! Encodes the quantum numbers into a single unique SizeType and returns it
-	static SizeType encodeQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& quantumNumbers)
+	static SizeType encodeQuantumNumber(const VectorSizeType& quantumNumbers)
 	{
 		if (useSu2Symmetry_)
 			return HamiltonianSymmetrySu2Type::encodeQuantumNumber(quantumNumbers);
@@ -315,34 +316,32 @@ public:
 	}
 
 	//! Inverse for encodeQuantumNumber
-	static typename PsimagLite::Vector<SizeType>::Type decodeQuantumNumber(int q)
+	static VectorSizeType decodeQuantumNumber(int q)
 	{
-		if (useSu2Symmetry_)
-			return HamiltonianSymmetrySu2Type::decodeQuantumNumber(q);
-		else
-			return HamiltonianSymmetryLocalType::decodeQuantumNumber(q);
+		return BasisDataType::decodeQuantumNumber(q);
 	}
 
 	//! Encodes (flavor,jvalue,density) into a unique number and returns it
-	static SizeType pseudoQuantumNumber(const typename PsimagLite::Vector<SizeType>::Type& targets)
+	static SizeType pseudoQuantumNumber(const VectorSizeType& targets)
 	{
 		if (useSu2Symmetry_)
-			return HamiltonianSymmetrySu2Type::pseudoQuantumNumber(targets);
+			return BasisDataType::pseudoQuantumNumber(targets);
 		else
-			return HamiltonianSymmetryLocalType::encodeQuantumNumber(targets);
+			return BasisDataType::encodeQuantumNumber(targets);
 	}
 
 	//! Inverse of pseudoQuantumNumber
 	SizeType pseudoEffectiveNumber(SizeType i) const
 	{
 		if (useSu2Symmetry_)
-			return symmSu2_.pseudoEffectiveNumber(electrons_[i],symmSu2_.jmValue(i).first);
+			return BasisDataType::pseudoEffectiveNumber(electrons_[i],
+			                                            symmSu2_.jmValue(i).first);
 		else
 			return quantumNumbers_[i];
 	}
 
 	//! Given the information in the structure bdt, calculates the quantum numbers in q
-	static void findQuantumNumbers(typename PsimagLite::Vector<SizeType>::Type& qn,
+	static void findQuantumNumbers(VectorSizeType& qn,
 	                               const BasisDataType& basisData)
 	{
 		if (useSu2Symmetry_)
@@ -355,7 +354,7 @@ public:
 	//! transforms this basis by transform
 	//! eigs cannot be const because su(2) needs to sort them due to being obtained in blocks
 	template<typename SolverParametersType>
-	void changeBasis(typename PsimagLite::Vector<SizeType>::Type& removedIndices,
+	void changeBasis(VectorSizeType& removedIndices,
 	                 typename PsimagLite::Vector<RealType>::Type& eigs,
 	                 SizeType kept,
 	                 const SolverParametersType& solverParams)
@@ -368,8 +367,8 @@ public:
 
 		if (removedIndices.size()==0) return;
 
-		typename PsimagLite::Vector<SizeType>::Type perm(removedIndices.size());
-		PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type > sort;
+		VectorSizeType perm(removedIndices.size());
+		PsimagLite::Sort<VectorSizeType > sort;
 		sort.sort(removedIndices,perm);
 	}
 
@@ -377,7 +376,7 @@ public:
 	RealType truncateBasis(SparseMatrixType& ftransform,
 	                       const BlockMatrixType& transform,
 	                       const typename PsimagLite::Vector<RealType>::Type& eigs,
-	                       const typename PsimagLite::Vector<SizeType>::Type& removedIndices)
+	                       const VectorSizeType& removedIndices)
 	{
 		quantumNumbersOld_ = quantumNumbers_;
 		partitionOld_ = partition_;
@@ -459,14 +458,14 @@ public:
 		symmSu2_.flavor2Index(mm,jm);
 	}
 
-	const typename PsimagLite::Vector<SizeType>::Type& flavorsOld() const
+	const VectorSizeType& flavorsOld() const
 	{
 		assert(useSu2Symmetry_);
 		return symmSu2_.flavorsOld();
 	}
 
 	//! Returns the vector of electrons for this basis
-	const typename PsimagLite::Vector<SizeType>::Type&
+	const VectorSizeType&
 	electronsVector(SizeType beforeOrAfterTransform=AFTER_TRANSFORM) const
 	{
 		if (beforeOrAfterTransform == AFTER_TRANSFORM) return electrons_;
@@ -595,7 +594,7 @@ private:
 	}
 
 	RealType calcError(const typename PsimagLite::Vector<RealType>::Type& eigs,
-	                   const typename PsimagLite::Vector<SizeType>::Type& removedIndices) const
+	                   const VectorSizeType& removedIndices) const
 	{
 		RealType sum=static_cast<RealType>(0.0);
 		for (SizeType i=0;i<eigs.size();i++)
@@ -603,7 +602,7 @@ private:
 		return 1.0-sum;
 	}
 
-	void truncate(const typename PsimagLite::Vector<SizeType>::Type& removedIndices)
+	void truncate(const VectorSizeType& removedIndices)
 	{
 		utils::truncateVector(quantumNumbers_,removedIndices);
 		utils::truncateVector(electrons_,removedIndices);
@@ -625,7 +624,7 @@ private:
 				for (SizeType i=0;i<permutationVector_.size();i++)
 					permutationVector_[i]=i;
 			} else {
-				PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type > sort;
+				PsimagLite::Sort<VectorSizeType > sort;
 				sort.sort(quantumNumbers_,permutationVector_);
 			}
 		}
@@ -663,10 +662,10 @@ private:
 		order of hundreds for usual symmetries, making this implementation very practical for
 		systems of correlated electrons.)
 		*/
-	typename PsimagLite::Vector<SizeType>::Type quantumNumbers_;
-	typename PsimagLite::Vector<SizeType>::Type quantumNumbersOld_;
-	typename PsimagLite::Vector<SizeType>::Type electrons_;
-	typename PsimagLite::Vector<SizeType>::Type electronsOld_;
+	VectorSizeType quantumNumbers_;
+	VectorSizeType quantumNumbersOld_;
+	VectorSizeType electrons_;
+	VectorSizeType electronsOld_;
 
 	/* PSIDOC BasisPartition
 		What remains to be done is to find a partition of the basis which
@@ -682,8 +681,8 @@ private:
 		Now we know that our Hamiltonian matrix will be composed first of a
 		block of 4x4, then of a block of 2x2, etc.
 		*/
-	typename PsimagLite::Vector<SizeType>::Type partition_;
-	typename PsimagLite::Vector<SizeType>::Type partitionOld_;
+	VectorSizeType partition_;
+	VectorSizeType partitionOld_;
 
 	/* PSIDOC BasisPermutationVector
 		We then reorder our basis such that its elements are given in
@@ -692,8 +691,8 @@ private:
 		\verb!permutationVector! of class \cppClass{Basis}.
 		For ease of coding we also store its inverse in \verb!permInverse!.
 		*/
-	typename PsimagLite::Vector<SizeType>::Type permutationVector_;
-	typename PsimagLite::Vector<SizeType>::Type permInverse_;
+	VectorSizeType permutationVector_;
+	VectorSizeType permInverse_;
 	HamiltonianSymmetryLocalType symmLocal_;
 	HamiltonianSymmetrySu2Type symmSu2_;
 	/* PSIDOC BasisBlock

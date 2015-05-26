@@ -154,7 +154,42 @@ public:
 		return encodeQuantumNumber(v);
 	}
 
-private:
+	static VectorSizeType decodeQuantumNumber(SizeType q)
+	{
+		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
+
+		assert(q < maxElectrons*maxElectrons*maxElectrons);
+
+		VectorSizeType v(3);
+		v[2] = SizeType(q/(maxElectrons*maxElectrons));
+		SizeType tmp = q - v[2]*maxElectrons*maxElectrons;
+		v[1] = SizeType(tmp/maxElectrons);
+		v[0] = tmp % maxElectrons;
+		return v;
+	}
+
+	//! targets[0]=nup, targets[1]=ndown,  targets[2]=2j
+	static SizeType pseudoQuantumNumber(const VectorSizeType& v)
+	{
+		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
+
+		SizeType x = v[1];
+
+		assert(x < maxElectrons);
+
+		x += v[2]*maxElectrons;
+		return x;
+	}
+
+	static SizeType pseudoEffectiveNumber(SizeType nelectrons,
+	                                      SizeType jtilde)
+	{
+		VectorSizeType v(3);
+		v[0] = 0;
+		v[1] = nelectrons;
+		v[2] = jtilde;
+		return pseudoQuantumNumber(v);
+	}
 
 	static SizeType encodeQuantumNumber(const VectorSizeType& v)
 	{
@@ -168,6 +203,8 @@ private:
 		if (v.size()==3) x += v[2]*maxElectrons*maxElectrons;
 		return x;
 	}
+
+private:
 
 	VectorSizeType electrons_;
 	VectorSizeType szPlusConst_;
