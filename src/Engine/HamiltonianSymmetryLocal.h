@@ -95,19 +95,6 @@ class	HamiltonianSymmetryLocal {
 
 public:
 
-//	static VectorSizeType decodeQuantumNumber(SizeType q)
-//	{
-//		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
-
-//		assert(q < maxElectrons*maxElectrons);
-
-//		VectorSizeType v(2);
-//		SizeType tmp = q ;
-//		v[1] = SizeType(tmp/maxElectrons);
-//		v[0] = tmp % maxElectrons;
-//		return v;
-//	}
-
 	SizeType getFlavor(SizeType) const
 	{
 		return 0; // meaningless

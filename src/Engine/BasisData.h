@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef BASIS_DATA_H
 #define  BASIS_DATA_H
 #include "Vector.h"
-
+#include "TypeToString.h"
 
 namespace Dmrg {
 template<typename PairType>
@@ -128,9 +128,6 @@ public:
 			// sz + const.
 			qn[0] = szPlusConst_[i];
 
-			//assert(qn[1]>=qn[0]);
-			//qn[1] -= qn[0];
-
 			q.push_back(encodeQuantumNumber(qn));
 		}
 	}
@@ -154,18 +151,14 @@ public:
 		return encodeQuantumNumber(v);
 	}
 
-	static VectorSizeType decodeQuantumNumber(SizeType q)
+	static void qnToElectrons(VectorSizeType& electrons,
+	                          const VectorSizeType& qns)
 	{
-		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
-
-		assert(q < maxElectrons*maxElectrons*maxElectrons);
-
-		VectorSizeType v(3);
-		v[2] = SizeType(q/(maxElectrons*maxElectrons));
-		SizeType tmp = q - v[2]*maxElectrons*maxElectrons;
-		v[1] = SizeType(tmp/maxElectrons);
-		v[0] = tmp % maxElectrons;
-		return v;
+		electrons.resize(qns.size());
+		for (SizeType i=0;i<qns.size();i++) {
+			VectorSizeType v = decodeQuantumNumber(qns[i]);
+			electrons[i] = v[1];
+		}
 	}
 
 	//! targets[0]=nup, targets[1]=ndown,  targets[2]=2j
@@ -204,7 +197,29 @@ public:
 		return x;
 	}
 
+	static PsimagLite::String qnPrint(SizeType q)
+	{
+		PsimagLite::String str("");
+		VectorSizeType qns = decodeQuantumNumber(q);
+		for (SizeType k=0;k<qns.size();k++) str += ttos(qns[k]) + " ";
+		return str;
+	}
+
 private:
+
+	static VectorSizeType decodeQuantumNumber(SizeType q)
+	{
+		SizeType maxElectrons = 2*ProgramGlobals::maxElectronsOneSpin;
+
+		assert(q < maxElectrons*maxElectrons*maxElectrons);
+
+		VectorSizeType v(3);
+		v[2] = SizeType(q/(maxElectrons*maxElectrons));
+		SizeType tmp = q - v[2]*maxElectrons*maxElectrons;
+		v[1] = SizeType(tmp/maxElectrons);
+		v[0] = tmp % maxElectrons;
+		return v;
+	}
 
 	VectorSizeType electrons_;
 	VectorSizeType szPlusConst_;

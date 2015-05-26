@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DavidsonSolver.h"
 #include "ParametersForSolver.h"
 #include "Concurrency.h"
+#include "BasisData.h"
 
 namespace Dmrg {
 
@@ -93,6 +94,8 @@ class Diagonalization {
 
 public:
 
+	typedef std::pair<SizeType,SizeType> PairSizeType;
+	typedef BasisData<PairSizeType> BasisDataType;
 	typedef typename TargettingType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename TargettingType::ModelType ModelType;
 	typedef typename TargettingType::BasisType BasisType;
@@ -231,10 +234,7 @@ private:
 			SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
 			if (verbose_) {
 				SizeType j = lrs.super().qn(lrs.super().partition(i));
-				  VectorSizeType qns = BasisType::decodeQuantumNumber(j);
-				//std::cerr<<"partition "<<i<<" of size="<<bs<<" has qns=";
-				for (SizeType k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
-				//std::cerr<<"\n";
+				std::cerr<<BasisDataType::qnPrint(j);
 			}
 
 			weights[i]=bs;
@@ -265,8 +265,7 @@ private:
 			PsimagLite::OstringStream msg;
 			msg<<"About to diag. sector with quantum numbs. ";
 			SizeType j = lrs.super().qn(lrs.super().partition(i));
-			  VectorSizeType qns = BasisType::decodeQuantumNumber(j);
-			for (SizeType k=0;k<qns.size();k++) msg<<qns[k]<<" ";
+			msg<<BasisDataType::qnPrint(j);
 			msg<<" pseudo="<<lrs.super().pseudoEffectiveNumber(
 			         lrs.super().partition(i));
 			msg<<" quantumSector="<<quantumSector_;
@@ -322,7 +321,6 @@ private:
 			if (weights[i]==0) continue;
 
 			SizeType j = lrs.super().qn(lrs.super().partition(i));
-			  VectorSizeType qns = BasisType::decodeQuantumNumber(j);
 			PsimagLite::OstringStream msg;
 			msg<<"Found targetted symmetry sector in partition "<<i;
 			msg<<" of size="<<vecSaved[i].size();
@@ -330,8 +328,7 @@ private:
 
 			PsimagLite::OstringStream msg2;
 			msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[i]);
-			msg2<<" and quantum numbers are ";
-			for (SizeType k=0;k<qns.size();k++) msg2<<qns[k]<<" ";
+			msg2<<" and quantum numbers are "<<BasisDataType::qnPrint(j);
 			progress_.printline(msg2,std::cout);
 			counter++;
 		}

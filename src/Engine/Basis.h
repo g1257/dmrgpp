@@ -316,10 +316,10 @@ public:
 	}
 
 	//! Inverse for encodeQuantumNumber
-	static VectorSizeType decodeQuantumNumber(int q)
-	{
-		return BasisDataType::decodeQuantumNumber(q);
-	}
+//	static VectorSizeType decodeQuantumNumber(int q)
+//	{
+//		return BasisDataType::decodeQuantumNumber(q);
+//	}
 
 	//! Encodes (flavor,jvalue,density) into a unique number and returns it
 	static SizeType pseudoQuantumNumber(const VectorSizeType& targets)

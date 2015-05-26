@@ -166,7 +166,7 @@ public:
 		jMax_++;
 		calcReducedBasis();
 		normalizeFlavors();
-		setElectrons(electrons,quantumNumbers);
+		BasisDataType::qnToElectrons(electrons,quantumNumbers);
 		electronsMax_ = *(std::max_element(electrons.begin(),electrons.end()));
 	}
 
@@ -323,16 +323,6 @@ private:
 		offset += flavors;
 
 		return offset;
-	}
-
-	void setElectrons(VectorSizeType& electrons,
-	                  const VectorSizeType& qns)
-	{
-		electrons.resize(qns.size());
-		for (SizeType i=0;i<qns.size();i++) {
-			VectorSizeType v = BasisDataType::decodeQuantumNumber(qns[i]);
-			electrons[i] = v[1];
-		}
 	}
 
 	void normalizeFlavors()

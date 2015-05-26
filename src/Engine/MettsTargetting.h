@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
 #include "CrsMatrix.h"
+#include "BasisData.h"
 
 namespace Dmrg {
 
@@ -96,6 +97,8 @@ template<template<typename,typename,typename> class LanczosSolverTemplate,
 class MettsTargetting  {
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef std::pair<SizeType,SizeType> PairSizeType;
+	typedef BasisData<PairSizeType> BasisDataType;
 
 	struct MettsPrev {
 
@@ -794,9 +797,8 @@ private:
 			RealType tmpNorm = PsimagLite::norm(v);
 			if (fabs(tmpNorm-1.0)<1e-6) {
 				SizeType j = lrs.super().qn(lrs.super().partition(i0));
-				VectorSizeType qns = BasisType::decodeQuantumNumber(j);
 				std::cerr<<"setFromInfinite: qns= ";
-				for (SizeType k=0;k<qns.size();k++) std::cerr<<qns[k]<<" ";
+				std::cerr<<BasisDataType::qnPrint(j);
 				std::cerr<<"\n";
 			}
 			phi.setDataInSector(v,i0);
