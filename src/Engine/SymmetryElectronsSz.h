@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009-2015, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 3.0]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -73,8 +73,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file SymmetryElectronsSz.h
  *
- *  Stores info for each state of the Hilbert space basis
- *  This is a structure, don't add member functions!
  *
  */
 #ifndef DMRG_SYMM_ELECTRONS_SZ_H
@@ -202,6 +200,32 @@ public:
 
 private:
 
+	void findQuantumNumbersSu2(VectorSizeType& q) const
+	{
+		q.resize(electrons_.size());
+		for (SizeType i=0;i<q.size();i++) {
+			SizeType ne = electrons_[i];
+			PairType jmpair = jmValues_[i];
+			q[i]=neJmToIndex(ne,jmpair);
+		}
+	}
+
+	//! find quantum numbers for each state of this basis,
+	//! considered symmetries for this model are: n_up and n_down
+	void findQuantumNumbersLocal(VectorSizeType& q) const
+	{
+		q.clear();
+		VectorSizeType qn(2);
+		for (SizeType i=0;i<electrons_.size();i++) {
+			// n
+			qn[1] = electrons_[i];
+			// sz + const.
+			qn[0] = szPlusConst_[i];
+
+			q.push_back(encodeQuantumNumber(qn));
+		}
+	}
+
 	static void setTargetNumbers(VectorSizeType& t,
 	                             const TargetQuantumElectronsType& targetQ,
 	                             SizeType sites,
@@ -231,32 +255,6 @@ private:
 		}
 
 		t[2] = tmp;
-	}
-
-	void findQuantumNumbersSu2(VectorSizeType& q) const
-	{
-		q.resize(electrons_.size());
-		for (SizeType i=0;i<q.size();i++) {
-			SizeType ne = electrons_[i];
-			PairType jmpair = jmValues_[i];
-			q[i]=neJmToIndex(ne,jmpair);
-		}
-	}
-
-	//! find quantum numbers for each state of this basis,
-	//! considered symmetries for this model are: n_up and n_down
-	void findQuantumNumbersLocal(VectorSizeType& q) const
-	{
-		q.clear();
-		VectorSizeType qn(2);
-		for (SizeType i=0;i<electrons_.size();i++) {
-			// n
-			qn[1] = electrons_[i];
-			// sz + const.
-			qn[0] = szPlusConst_[i];
-
-			q.push_back(encodeQuantumNumber(qn));
-		}
 	}
 
 	static SizeType getQuantumSector(const VectorSizeType& targetQuantumNumbers,
