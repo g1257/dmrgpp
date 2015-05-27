@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef VECTOR_WITH_OFFSET_H
 #define VECTOR_WITH_OFFSET_H
 #include "Vector.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 template<typename FieldType>
@@ -92,12 +93,14 @@ public:
 
 	static const FieldType zero_;
 
-	VectorWithOffset()  : size_(0),offset_(0),m_(0) { }
+	VectorWithOffset()
+	    : progress_("VectorWithOffset"), size_(0), offset_(0), m_(0)
+	{}
 
 	template<typename SomeBasisType>
 	VectorWithOffset(const typename PsimagLite::Vector<SizeType>::Type& weights,
 	                 const SomeBasisType& someBasis)
-	    : size_(someBasis.size())
+	    : progress_("VectorWithOffset"),size_(someBasis.size())
 	{
 		bool found = false;
 		for (SizeType i=0;i<weights.size();i++) {
@@ -242,10 +245,26 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void populateFromQns(const typename PsimagLite::Vector<SizeType>::Type&,
-	                     const SomeBasisType&)
+	void populateFromQns(const typename PsimagLite::Vector<SizeType>::Type& qns,
+	                     const SomeBasisType& someBasis)
 	{
-		throw PsimagLite::RuntimeError("VectorWithOffset cannot populateFromQns\n");
+		if (qns.size() == 0) return;
+		if (qns.size() != 1) {
+			PsimagLite::String msg("VectorWithOffset::populateFromQns: ");
+			throw PsimagLite::RuntimeError(msg + "more than one sector found\n");
+		}
+
+		size_ = someBasis.size();
+
+		SizeType q = qns[0];
+		SizeType ip = findPartitionWithThisQn(q,someBasis);
+		SizeType total = someBasis.partition(ip+1)-someBasis.partition(ip);
+		VectorType tmpV(total,0);
+		data_ = tmpV;
+
+		PsimagLite::OstringStream msg;
+		msg<<"populateFromQns succeeded";
+		progress_.printline(msg,std::cout);
 	}
 
 	void collapseSectors() {}
@@ -321,6 +340,19 @@ public:
 private:
 
 	template<typename SomeBasisType>
+	SizeType findPartitionWithThisQn(SizeType qn,
+	                                 const SomeBasisType& someBasis) const
+	{
+		SizeType np = someBasis.partition()-1;
+		for (SizeType i=0;i<np;i++) {
+			SizeType state = someBasis.partition(i);
+			if (SizeType(someBasis.qn(state))==qn) return i;
+		}
+
+		throw PsimagLite::RuntimeError("VectorWithOffset: findPartitionWithThisQn\n");
+	}
+
+	template<typename SomeBasisType>
 	SizeType findPartition(const VectorType& v,const SomeBasisType& someBasis)
 	{
 		bool found = false;
@@ -357,6 +389,7 @@ private:
 		return false;
 	}
 
+	PsimagLite::ProgressIndicator progress_;
 	SizeType size_;
 	VectorType data_;
 	SizeType offset_;
