@@ -112,7 +112,7 @@ public:
 	typedef unsigned int long long WordType;
 	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-	typedef typename ModelBaseType::BasisDataType BasisDataType;
+	typedef typename ModelBaseType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 
 private:
@@ -209,7 +209,7 @@ public:
 		fixed density, the number of electrons for each state is also needed.*/
 	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
 	                             SparseMatrixType &hamiltonian,
-	                             BasisDataType& q,
+	                             SymmetryElectronsSzType& q,
 	                             const BlockType& block,
 	                             const RealType& time) const
 	{
@@ -501,12 +501,12 @@ private:
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
-		BasisDataType qq;
+		SymmetryElectronsSzType qq;
 		setSymmetryRelated(qq,basis,n);
 		MyBasis::findQuantumNumbers(q,qq);
 	}
 
-	void setSymmetryRelated(BasisDataType& q,HilbertBasisType  const &basis,int) const
+	void setSymmetryRelated(SymmetryElectronsSzType& q,HilbertBasisType  const &basis,int) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j

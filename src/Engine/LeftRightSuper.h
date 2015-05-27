@@ -89,7 +89,7 @@ public:
 	typedef typename SuperBlockType::RealType RealType;
 	typedef BasisWithOperatorsType_ BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::BasisDataType BasisDataType;
+	typedef typename BasisType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType
 	SparseMatrixType;
 	typedef typename BasisWithOperatorsType::OperatorsType
@@ -284,7 +284,7 @@ private:
 	          RealType time)
 	{
 		SparseMatrixType hmatrix;
-		BasisDataType q;
+		SymmetryElectronsSzType q;
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		model.setNaturalBasis(creationMatrix,hmatrix,q,X,time);
 		BasisWithOperatorsType Xbasis("Xbasis");

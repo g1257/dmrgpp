@@ -100,7 +100,8 @@ class DmrgSolver {
 	typedef typename TargettingType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef ObservablesInSitu<typename TargettingType::TargetVectorType> ObservablesInSituType;
+	typedef ObservablesInSitu<typename TargettingType::TargetVectorType>
+	ObservablesInSituType;
 
 public:
 
@@ -110,7 +111,7 @@ public:
 	typedef typename MyBasis::BlockType BlockType;
 	typedef typename ModelType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelType::ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename MyBasis::BasisDataType BasisDataType;
+	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename TargettingType::TargetVectorType TargetVectorType;
 	typedef typename TargetVectorType::value_type DensityMatrixElementType;
 	typedef typename TargettingType::TargetParamsType TargetParamsType;
@@ -213,7 +214,7 @@ public:
 		} else { // move this block elsewhere:
 			typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 			SparseMatrixType hmatrix;
-			BasisDataType q;
+			SymmetryElectronsSzType q;
 
 			RealType time = 0;
 			model_.setNaturalBasis(creationMatrix,hmatrix,q,E,time);
@@ -573,7 +574,7 @@ private:
 	void updateQuantumSector(SizeType sites,SizeType direction,SizeType step)
 	{
 		if (direction==INFINITE && parameters_.adjustQuantumNumbers.size()>0) {
-			quantumSector_ = BasisDataType::adjustQn(parameters_.adjustQuantumNumbers,
+			quantumSector_ = SymmetryElectronsSzType::adjustQn(parameters_.adjustQuantumNumbers,
 			                                         direction,
 			                                         ioOut_,
 			                                         MyBasis::useSu2Symmetry(),
@@ -581,7 +582,7 @@ private:
 			return;
 		}
 
-		quantumSector_ = BasisDataType::getQuantumSector(model_.targetQuantum(),
+		quantumSector_ = SymmetryElectronsSzType::getQuantumSector(model_.targetQuantum(),
 		                                                 sites,
 		                                                 model_.geometry().numberOfSites(),
 		                                                 direction,

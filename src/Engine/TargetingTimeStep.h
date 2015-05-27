@@ -125,7 +125,8 @@ public:
 	typedef typename BasisType::BlockType BlockType;
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-	typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
+	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
+	SymmetryElectronsSzType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	enum {DISABLED,OPERATOR,WFT_NOADVANCE,WFT_ADVANCE};
@@ -261,7 +262,7 @@ public:
 		assert(X[0]==0 || X[0]==this->leftRightSuper().super().block().size()-1);
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		SparseMatrixType hmatrix;
-		BasisDataType q;
+		SymmetryElectronsSzType q;
 		this->model().setNaturalBasis(creationMatrix,hmatrix,q,X,this->common().currentTime());
 		basisWithOps.setVarious(X,hmatrix,q,creationMatrix);
 	}

@@ -115,7 +115,8 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::BasisDataType BasisDataType;
+	typedef typename BasisWithOperatorsType::SymmetryElectronsSzType
+	SymmetryElectronsSzType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -127,7 +128,8 @@ public:
 	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
 	typedef typename TargetHelperType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename TargetHelperType::TargetParamsType TargetParamsType;
-	typedef typename ApplyOperatorExpressionType::VectorVectorWithOffsetType VectorVectorWithOffsetType;
+	typedef typename ApplyOperatorExpressionType::VectorVectorWithOffsetType
+	VectorVectorWithOffsetType;
 	typedef typename ApplyOperatorExpressionType::VectorRealType VectorRealType;
 	typedef typename ApplyOperatorExpressionType::PairType PairType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
@@ -258,7 +260,7 @@ public:
 		// operators in the one-site basis:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		SparseMatrixType hmatrix;
-		BasisDataType q;
+		SymmetryElectronsSzType q;
 
 		RealType time = 0;
 		targetHelper_.model().setNaturalBasis(creationMatrix,hmatrix,q,block1,time);

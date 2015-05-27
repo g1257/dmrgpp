@@ -107,7 +107,7 @@ public:
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::TargetQuantumElectronsType TargetQuantumElectronsType;
 	typedef	typename ModelBaseType::VectorType VectorType;
 
 private:
@@ -135,7 +135,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::BasisDataType BasisDataType;
+	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 
 	ModelHeisenberg(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
@@ -213,7 +213,7 @@ public:
 	//! for each state in the basis
 	void setNaturalBasis(VectorOperatorType& operatorMatrices,
 	                     SparseMatrixType &hamiltonian,
-	                     BasisDataType &q,
+	                     SymmetryElectronsSzType &q,
 	                     const BlockType& block,
 	                     const RealType& time) const
 	{
@@ -311,7 +311,7 @@ public:
 		assert(block.size()==1);
 		SizeType total = modelParameters_.twiceTheSpin + 1;
 		for (SizeType i=0;i<total;i++) basis.push_back(i);
-		BasisDataType qq;
+		SymmetryElectronsSzType qq;
 		setSymmetryRelated(qq,basis,block.size());
 		MyBasis::findQuantumNumbers(q,qq);
 	}
@@ -392,7 +392,7 @@ private:
 		return operatorMatrix;
 	}
 
-	void setSymmetryRelated(BasisDataType& q,
+	void setSymmetryRelated(SymmetryElectronsSzType& q,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{

@@ -127,7 +127,7 @@ public:
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
 	typedef BasisWithOperators<OperatorsType> 	ThisType;
-	typedef typename BasisType::BasisDataType BasisDataType;
+	typedef typename BasisType::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename BasisType::FactorsType FactorsType;
 
 	enum {GROW_RIGHT,GROW_LEFT};
@@ -284,7 +284,7 @@ public:
 
 	void setVarious(BlockType const &block,
 	                SparseMatrixType const &h,
-	                BasisDataType const &qm,
+	                SymmetryElectronsSzType const &qm,
 	                const typename PsimagLite::Vector<OperatorType>::Type& ops)
 	{
 		this->set(block);

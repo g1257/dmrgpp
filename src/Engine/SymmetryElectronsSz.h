@@ -71,14 +71,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file BasisData.h
+/*! \file SymmetryElectronsSz.h
  *
  *  Stores info for each state of the Hilbert space basis
  *  This is a structure, don't add member functions!
  *
  */
-#ifndef BASIS_DATA_H
-#define  BASIS_DATA_H
+#ifndef DMRG_SYMM_ELECTRONS_SZ_H
+#define  DMRG_SYMM_ELECTRONS_SZ_H
 #include "Vector.h"
 #include "TypeToString.h"
 #include "ProgramGlobals.h"
@@ -87,9 +87,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename PairType, typename RealType>
-class BasisData {
+template<typename RealType>
+class SymmetryElectronsSz {
 
+	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairSizeType;
 	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
@@ -288,10 +289,10 @@ private:
 	VectorSizeType szPlusConst_;
 	VectorPairSizeType jmValues_;
 	VectorSizeType flavors_;
-}; // struct BasisData
+}; // struct SymmetryElectronsSz
 
-template<typename IoOutputter, typename PairType, typename RealType>
-void save(IoOutputter& io,const BasisData<PairType, RealType>& bd)
+template<typename IoOutputter, typename RealType>
+void save(IoOutputter& io,const SymmetryElectronsSz<RealType>& bd)
 {
 	io.printVector(bd.electronsUp,"#bdElectronsUp");
 	io.printVector(bd.electronsDown,"#bdElectronsDown");

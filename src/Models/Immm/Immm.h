@@ -117,7 +117,7 @@ public:
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::BasisDataType BasisDataType;
+	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 
 	static const int FERMION_SIGN = -1;
@@ -223,7 +223,7 @@ public:
 	//! for each state in the basis
 	void setNaturalBasis(typename PsimagLite::Vector<OperatorType>::Type& creationMatrix,
 	                     SparseMatrixType& hamiltonian,
-	                     BasisDataType& q,
+	                     SymmetryElectronsSzType& q,
 	                     const BlockType& block,
 	                     const RealType& time)  const
 	{
@@ -457,12 +457,12 @@ private:
 	                        const HilbertBasisType& basis,
 	                        SizeType site) const
 	{
-		BasisDataType qq;
+		SymmetryElectronsSzType qq;
 		setSymmetryRelated(qq,basis,site);
 		MyBasis::findQuantumNumbers(q,qq);
 	}
 
-	void setSymmetryRelated(BasisDataType& q,
+	void setSymmetryRelated(SymmetryElectronsSzType& q,
 	                        const HilbertBasisType& basis,
 	                        SizeType site) const
 	{

@@ -100,14 +100,14 @@ public:
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
+	typedef typename ModelBaseType::TargetQuantumElectronsType TargetQuantumElectronsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef LinkProdExtendedHubbard1Orb<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::BasisDataType BasisDataType;
+	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
@@ -172,7 +172,7 @@ public:
 	//! for each state in the basis
 	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
 	                             SparseMatrixType &hamiltonian,
-	                             BasisDataType& q,
+	                             SymmetryElectronsSzType& q,
 	                             const BlockType& block,
 	                             const RealType& time) const
 	{

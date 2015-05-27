@@ -106,7 +106,7 @@ private:
 	typedef HamiltonianSymmetrySu2<SparseMatrixType> ThisType;
 	typedef JmSubspace<VerySparseMatrixType,ThisType> JmSubspaceType;
 	typedef typename JmSubspaceType::FlavorType FlavorType;
-	typedef  BasisData<PairType, RealType> BasisDataType;
+	typedef SymmetryElectronsSz<RealType> SymmetryElectronsSzType;
 
 public:
 
@@ -125,7 +125,7 @@ public:
 
 	PairType jmValue(SizeType i) const { return jmValues_[i]; }
 
-	void set(const BasisDataType& basisData)
+	void set(const SymmetryElectronsSzType& basisData)
 	{
 		jmValues_=basisData.jmValues();
 		flavors_=basisData.flavors();
@@ -138,7 +138,7 @@ public:
 	}
 
 	static void findQuantumNumbers(typename PsimagLite::Vector<SizeType> ::Type&q,
-	                               const BasisDataType& basisData)
+	                               const SymmetryElectronsSzType& basisData)
 	{
 		basisData.findQuantumNumbersSu2(q);
 	}
@@ -166,7 +166,7 @@ public:
 		jMax_++;
 		calcReducedBasis();
 		normalizeFlavors();
-		BasisDataType::qnToElectrons(electrons,quantumNumbers);
+		SymmetryElectronsSzType::qnToElectrons(electrons,quantumNumbers);
 		electronsMax_ = *(std::max_element(electrons.begin(),electrons.end()));
 	}
 
@@ -316,7 +316,7 @@ private:
 		}
 		for (SizeType i=0;i<flavors;i++ ) {
 			PairType jm = jmSubspace.getJmValue();
-			quantumNumbers.push_back(BasisDataType::neJmToIndex(jmSubspace.getNe(),jm));
+			quantumNumbers.push_back(SymmetryElectronsSzType::neJmToIndex(jmSubspace.getNe(),jm));
 			jmValues_.push(jm,i+offset);
 			flavors_.push_back(jmSubspace.getFlavor(i));
 		}
@@ -398,7 +398,7 @@ private:
 				std::cerr<<" nelectrons="<<nelectrons;
 				PairType jm = jmSubspaces_[i].getJmValue();
 				std::cerr<<" pseudo=";
-				std::cerr<<BasisDataType::pseudoEffectiveNumber(nelectrons,jm.first);
+				std::cerr<<SymmetryElectronsSzType::pseudoEffectiveNumber(nelectrons,jm.first);
 
 				std::cerr<<" jm=("<<jm.first<<","<<jm.second<<")\n";
 				std::cerr<<" heavy="<<jmSubspaces_[i].heavy()<<"\n";
@@ -438,7 +438,7 @@ private:
 			if (tmp>j) continue;
 			PairType jm(j,m);
 			int heavy=1;
-			SizeType pseudo = BasisDataType::pseudoEffectiveNumber(nelectrons,jm.first);
+			SizeType pseudo = SymmetryElectronsSzType::pseudoEffectiveNumber(nelectrons,jm.first);
 			if (pseudoQn>=0 && pseudo !=static_cast<SizeType>(pseudoQn))
 				heavy=0;
 

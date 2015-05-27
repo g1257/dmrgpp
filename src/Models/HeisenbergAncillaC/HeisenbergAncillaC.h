@@ -138,7 +138,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::BasisDataType BasisDataType;
+	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 
 	HeisenbergAncillaC(const SolverParamsType& solverParams,
 	                  InputValidatorType& io,
@@ -187,7 +187,7 @@ public:
 	//! for each state in the basis
 	void setNaturalBasis(VectorOperatorType& operatorMatrices,
 	                     SparseMatrixType &hamiltonian,
-	                     BasisDataType &q,
+	                     SymmetryElectronsSzType &q,
 	                     const BlockType& block,
 	                     const RealType& time) const
 	{
@@ -304,7 +304,7 @@ public:
 		SizeType total = hilbertSize(block[0]);
 
 		for (SizeType i=0;i<total;i++) basis.push_back(i);
-		BasisDataType qq;
+		SymmetryElectronsSzType qq;
 		setSymmetryRelated(qq,basis,block.size());
 		MyBasis::findQuantumNumbers(q,qq);
 	}
@@ -420,7 +420,7 @@ private:
 		return operatorMatrix;
 	}
 
-	void setSymmetryRelated(BasisDataType& q,
+	void setSymmetryRelated(SymmetryElectronsSzType& q,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{

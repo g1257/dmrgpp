@@ -118,7 +118,7 @@ public:
 	typedef typename HamiltonianConnectionType::LinkProductStructType LinkProductStructType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename MyBasis::BasisDataType BasisDataType;
+	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename PsimagLite::Vector<LinkProductStructType>::Type VectorLinkProductStructType;

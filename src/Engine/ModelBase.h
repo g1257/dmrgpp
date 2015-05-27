@@ -111,7 +111,7 @@ public:
 	typedef ReflectionOperatorEmpty<LeftRightSuperType> ReflectionSymmetryType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename MyBasis::BasisDataType BasisDataType;
+	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
 	typedef ModelCommonBase<ModelHelperType,ParametersType,GeometryType> ModelCommonBaseType;
@@ -134,7 +134,7 @@ public:
 
 	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
 	                             SparseMatrixType &hamiltonian,
-	                             BasisDataType& q,
+	                             SymmetryElectronsSzType& q,
 	                             const BlockType& block,
 	                             const RealType& time) const = 0;
 

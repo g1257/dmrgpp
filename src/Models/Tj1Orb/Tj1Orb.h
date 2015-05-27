@@ -109,7 +109,7 @@ public:
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::BasisDataType BasisDataType;
+	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename ModelHubbardType::HilbertState HilbertStateType;
 	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelHelperType::BlockType BlockType;
@@ -155,7 +155,7 @@ public:
 	//! for each state in the basis
 	virtual void setNaturalBasis(VectorOperatorType& creationMatrix,
 	                             SparseMatrixType &hamiltonian,
-	                             BasisDataType& q,
+	                             SymmetryElectronsSzType& q,
 	                             const BlockType& block,
 	                             const RealType& time) const
 	{
@@ -476,12 +476,12 @@ private:
 	void findQuantumNumbers(VectorSizeType& q,
 	                        const HilbertBasisType& basis,int n) const
 	{
-		BasisDataType qq;
+		SymmetryElectronsSzType qq;
 		setSymmetryRelated(qq,basis,n);
 		MyBasis::findQuantumNumbers(q,qq);
 	}
 
-	void setSymmetryRelated(BasisDataType& q,
+	void setSymmetryRelated(SymmetryElectronsSzType& q,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{

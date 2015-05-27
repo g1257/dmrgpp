@@ -113,7 +113,7 @@ public:
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename MyBasis::BasisDataType BasisDataType;
+	typedef typename MyBasis::SymmetryElectronsSzType SymmetryElectronsSzType;
 	typedef typename MyBasis::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
@@ -181,7 +181,7 @@ public:
 	//! for each state in the basis
 	void setNaturalBasis(typename PsimagLite::Vector<OperatorType> ::Type&creationMatrix,
 	                     SparseMatrixType &hamiltonian,
-	                     BasisDataType &q,
+	                     SymmetryElectronsSzType &q,
 	                     BlockType const &block,
 	                     const RealType& time)  const
 	{

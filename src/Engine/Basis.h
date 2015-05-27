@@ -103,7 +103,7 @@ public:
 
 	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
 	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
-	typedef  BasisData<PairType, RealType_> BasisDataType;
+	typedef SymmetryElectronsSz<RealType_> SymmetryElectronsSzType;
 	typedef VectorSizeType BlockType;
 	typedef SparseMatrixType_ SparseMatrixType;
 	typedef RealType_ RealType;
@@ -147,8 +147,8 @@ public:
 	//! Sets the block of sites for this basis
 	void set(BlockType const &B) { block_ = B; }
 
-	//! Sets symmetry information for this basis, see BasisData.h for more
-	void setSymmetryRelated(const BasisDataType& basisData)
+	//! Sets symmetry information for this basis, see SymmetryElectronsSz.h for more
+	void setSymmetryRelated(const SymmetryElectronsSzType& basisData)
 	{
 		if (useSu2Symmetry_) symmSu2_.set(basisData);
 		electrons_ = basisData.electrons();
@@ -319,7 +319,7 @@ public:
 	SizeType pseudoEffectiveNumber(SizeType i) const
 	{
 		if (useSu2Symmetry_)
-			return BasisDataType::pseudoEffectiveNumber(electrons_[i],
+			return SymmetryElectronsSzType::pseudoEffectiveNumber(electrons_[i],
 			                                            symmSu2_.jmValue(i).first);
 		else
 			return quantumNumbers_[i];
@@ -327,7 +327,7 @@ public:
 
 	//! Given the information in the structure bdt, calculates the quantum numbers in q
 	static void findQuantumNumbers(VectorSizeType& qn,
-	                               const BasisDataType& basisData)
+	                               const SymmetryElectronsSzType& basisData)
 	{
 		if (useSu2Symmetry_)
 			HamiltonianSymmetrySu2Type::findQuantumNumbers(qn,basisData);

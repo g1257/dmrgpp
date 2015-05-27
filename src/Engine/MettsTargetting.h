@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
 #include "CrsMatrix.h"
-#include "BasisData.h"
+#include "SymmetryElectronsSz.h"
 
 namespace Dmrg {
 
@@ -113,7 +113,7 @@ public:
 	typedef MatrixVectorType_ MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
-	typedef BasisData<PairSizeType,RealType> BasisDataType;
+	typedef SymmetryElectronsSz<RealType> SymmetryElectronsSzType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -591,7 +591,7 @@ private:
 	                       const VectorSizeType& block2)
 	{
 		SizeType linSize = model_.geometry().numberOfSites();
-		SizeType qn = BasisDataType::getQuantumSector(model_.targetQuantum(),
+		SizeType qn = SymmetryElectronsSzType::getQuantumSector(model_.targetQuantum(),
 		                                              linSize,
 	                                                  linSize,
 	                                                  INFINITE,
@@ -801,7 +801,7 @@ private:
 			if (fabs(tmpNorm-1.0)<1e-6) {
 				SizeType j = lrs.super().qn(lrs.super().partition(i0));
 				std::cerr<<"setFromInfinite: qns= ";
-				std::cerr<<BasisDataType::qnPrint(j);
+				std::cerr<<SymmetryElectronsSzType::qnPrint(j);
 				std::cerr<<"\n";
 			}
 			phi.setDataInSector(v,i0);
