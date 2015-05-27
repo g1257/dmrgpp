@@ -106,14 +106,16 @@ struct TargetQuantumElectrons {
 				io.readline(electronsUp,"TargetElectronsUp=");
 				io.readline(electronsDown,"TargetElectronsDown=");
 				totalElectrons = electronsUp + electronsDown;
-				szPlusConst = electronsUp;
+				other.push_back(electronsUp);
 				ready++;
 			} catch (std::exception&) {}
 		}
 
 		try {
+			SizeType szPlusConst = 0;
 			io.readline(totalElectrons,"TargetElectronsTotal=");
 			io.readline(szPlusConst,"TargetSzPlusConst=");
+			other.push_back(szPlusConst);
 			ready++;
 		} catch (std::exception&) {}
 
@@ -126,6 +128,12 @@ struct TargetQuantumElectrons {
 			msg += "Provide at least one of up/down or total/sz.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
+
+		try {
+			SizeType extra = 0;
+			io.readline(extra,"TargetExtra=");
+			other.push_back(extra);
+		} catch (std::exception&) {}
 
 		int tmp = 0;
 		try {
@@ -150,7 +158,7 @@ struct TargetQuantumElectrons {
 
 	bool isSu2;
 	SizeType totalElectrons;
-	SizeType szPlusConst;
+	VectorSizeType other;
 	SizeType twiceJ;
 };
 
@@ -160,7 +168,7 @@ std::ostream& operator<<(std::ostream &os,
                          const TargetQuantumElectrons<RealTypeType>& p)
 {
 	os<<"TargetElectronsTotal="<<p.totalElectrons<<"\n";
-	os<<"TargetSzPlusConst="<<p.szPlusConst<<"\n";
+	os<<"TargetOther="<<p.other<<"\n";
 	if (p.isSu2)
 		os<<"TargetSpinTimesTwo="<<p.twiceJ<<"\n";
 	return os;

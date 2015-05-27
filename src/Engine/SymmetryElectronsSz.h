@@ -98,12 +98,12 @@ public:
 	void set(const VectorPairSizeType& jmvalues,
 	         const VectorSizeType& flavors,
 	         const VectorSizeType& electrons,
-	         const VectorSizeType& szPlusConst)
+	         const VectorSizeType& other)
 	{
 		jmValues_ = jmvalues;
 		flavors_ = flavors;
 		electrons_ = electrons;
-		szPlusConst_ = szPlusConst;
+		other_ = other;
 	}
 
 	SizeType electronsMax() const
@@ -214,14 +214,18 @@ private:
 	//! considered symmetries for this model are: n_up and n_down
 	void findQuantumNumbersLocal(VectorSizeType& q) const
 	{
+		bool mode = (other_.size() == electrons_.size());
+		assert(mode || other.size() == 2*electrons_.size());
+
 		q.clear();
-		VectorSizeType qn(2);
+		VectorSizeType qn((mode) ? 2 : 3);
 		for (SizeType i=0;i<electrons_.size();i++) {
 			// n
 			qn[1] = electrons_[i];
 			// sz + const.
-			qn[0] = szPlusConst_[i];
+			qn[0] = other_[i];
 
+			if (qn.size() == 3) qn[2] = other_[i + electrons_.size()];
 			q.push_back(encodeQuantumNumber(qn));
 		}
 	}
@@ -232,17 +236,31 @@ private:
 	                             SizeType totalSites,
 	                             SizeType direction)
 	{
-		t.resize((targetQ.isSu2) ? 3 : 2,0);
+		bool mode = (targetQ.other.size() == 1);
+		assert(mode || targetQ.other.size() == 2);
+		assert(!targetQ.isSu2 || mode);
+
+		t.resize((targetQ.isSu2 || !mode) ? 3 : 2,0);
 
 		if (direction == ProgramGlobals::INFINITE) {
-			t[0] = static_cast<SizeType>(round(targetQ.szPlusConst*sites/totalSites));
+			t[0] = static_cast<SizeType>(round(targetQ.other[0]*sites/totalSites));
 			t[1] = static_cast<SizeType>(round(targetQ.totalElectrons*sites/totalSites));
+			if (!mode) {
+				assert(t.size() == 3);
+				assert(targetQ.other() > 1);
+				t[2] = static_cast<SizeType>(round(targetQ.other[1]*sites/totalSites));
+			}
 		} else {
-			t[0] = targetQ.szPlusConst;
+			t[0] = targetQ.other[0];
 			t[1] = targetQ.totalElectrons;
+			if (!mode) {
+				assert(t.size() == 3);
+				assert(targetQ.other() > 1);
+				t[2] = static_cast<SizeType>(round(targetQ.other[1]*sites/totalSites));
+			}
 		}
 
-		if (t.size() < 3) return;
+		if (!targetQ.isSu2) return;
 
 		RealType jReal = targetQ.twiceJ*sites/static_cast<RealType>(totalSites);
 		SizeType tmp = (direction == ProgramGlobals::INFINITE) ?
@@ -323,7 +341,7 @@ private:
 	}
 
 	VectorSizeType electrons_;
-	VectorSizeType szPlusConst_;
+	VectorSizeType other_;
 	VectorPairSizeType jmValues_;
 	VectorSizeType flavors_;
 }; // struct SymmetryElectronsSz

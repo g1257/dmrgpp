@@ -592,22 +592,26 @@ private:
 		jmSaved.first++;
 		jmSaved.second++;
 
-		VectorSizeType ups(basis.size());
-		VectorSizeType downs(basis.size());
-		for (SizeType i=0;i<basis.size();i++) {
+		SizeType basisSize = basis.size();
+		VectorSizeType other(2*basisSize);
+		for (SizeType i=0;i<basisSize;i++) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 
 			jmvalues.push_back(jmpair);
 			// nup
-			ups[i] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_UP);
+			other[i] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_UP);
 			// ndown
-			downs[i] = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_DOWN);
+			SizeType ndown = HilbertSpaceType::electronsWithGivenSpin(basis[i],SPIN_DOWN);
 
-			flavors.push_back(ups[i]+downs[i]);
+			other[i + basisSize] =  HilbertSpaceType::calcNofElectrons(basis[i],
+			                                                           0);
+			other[i + basisSize] +=
+			        HilbertSpaceType::calcNofElectrons(basis[i],NUMBER_OF_ORBITALS);
+			flavors.push_back(other[i]+ndown);
 			jmSaved = jmpair;
 		}
 
-		q.set(jmvalues,flavors,ups+downs,ups);
+		q.set(jmvalues,flavors,flavors,other);
 	}
 
 	// note: we use 2j instead of j

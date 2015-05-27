@@ -37,5 +37,6 @@ FiniteLoops 4
 2 100 0 -2 100 0 -2 100 0 2 100 0 
 TargetElectronsUp=3
 TargetElectronsDown=3
+TargetExtra=3
 MaxMatrixRankStored=512
 
