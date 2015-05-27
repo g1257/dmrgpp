@@ -313,7 +313,7 @@ public:
 		for (SizeType i=0;i<total;i++) basis.push_back(i);
 		SymmetryElectronsSzType qq;
 		setSymmetryRelated(qq,basis,block.size());
-		MyBasis::findQuantumNumbers(q,qq);
+		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
 	}
 
 	//! Dummy since this model has no fermion sign

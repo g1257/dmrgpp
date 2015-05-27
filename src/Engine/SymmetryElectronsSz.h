@@ -122,30 +122,12 @@ public:
 		return jmValues_;
 	}
 
-	//! find quantum numbers for each state of this basis,
-	//! considered symmetries for this model are: n_up and n_down
-	void findQuantumNumbersLocal(VectorSizeType& q) const
+	void findQuantumNumbers(VectorSizeType& qn, bool useSu2Symmetry) const
 	{
-		q.clear();
-		VectorSizeType qn(2);
-		for (SizeType i=0;i<electrons_.size();i++) {
-			// n
-			qn[1] = electrons_[i];
-			// sz + const.
-			qn[0] = szPlusConst_[i];
-
-			q.push_back(encodeQuantumNumber(qn));
-		}
-	}
-
-	void findQuantumNumbersSu2(VectorSizeType& q) const
-	{
-		q.resize(electrons_.size());
-		for (SizeType i=0;i<q.size();i++) {
-			SizeType ne = electrons_[i];
-			PairType jmpair = jmValues_[i];
-			q[i]=neJmToIndex(ne,jmpair);
-		}
+		if (useSu2Symmetry)
+			findQuantumNumbersSu2(qn);
+		else
+			findQuantumNumbersLocal(qn);
 	}
 
 	static SizeType neJmToIndex(SizeType ne,const PairType& jm)
@@ -206,16 +188,6 @@ public:
 		                        useSu2Symmetry);
 	}
 
-	//! Encodes (flavor,jvalue,density) into a unique number and returns it
-	static SizeType pseudoQuantumNumber(const VectorSizeType& targets,
-	                                    bool useSu2Symmetry)
-	{
-		if (useSu2Symmetry)
-			return pseudoQuantumNumber_(targets);
-		else
-			return encodeQuantumNumber(targets);
-	}
-
 	static SizeType getQuantumSector(const TargetQuantumElectronsType& targetQuantum,
 	                                 SizeType sites,
 	                                 SizeType total,
@@ -230,6 +202,32 @@ public:
 
 private:
 
+	void findQuantumNumbersSu2(VectorSizeType& q) const
+	{
+		q.resize(electrons_.size());
+		for (SizeType i=0;i<q.size();i++) {
+			SizeType ne = electrons_[i];
+			PairType jmpair = jmValues_[i];
+			q[i]=neJmToIndex(ne,jmpair);
+		}
+	}
+
+	//! find quantum numbers for each state of this basis,
+	//! considered symmetries for this model are: n_up and n_down
+	void findQuantumNumbersLocal(VectorSizeType& q) const
+	{
+		q.clear();
+		VectorSizeType qn(2);
+		for (SizeType i=0;i<electrons_.size();i++) {
+			// n
+			qn[1] = electrons_[i];
+			// sz + const.
+			qn[0] = szPlusConst_[i];
+
+			q.push_back(encodeQuantumNumber(qn));
+		}
+	}
+
 	static SizeType getQuantumSector(const VectorSizeType& targetQuantumNumbers,
 	                                 SizeType direction,
 	                                 PsimagLite::IoSimple::Out* ioOut,
@@ -243,6 +241,16 @@ private:
 		if (ioOut && direction == ProgramGlobals::INFINITE)
 			ioOut->printVector(targetQuantumNumbers,"TargetedQuantumNumbers");
 		return pseudoQuantumNumber(targetQuantumNumbers,useSu2Symmetry);
+	}
+
+	//! Encodes (flavor,jvalue,density) into a unique number and returns it
+	static SizeType pseudoQuantumNumber(const VectorSizeType& targets,
+	                                    bool useSu2Symmetry)
+	{
+		if (useSu2Symmetry)
+			return pseudoQuantumNumber_(targets);
+		else
+			return encodeQuantumNumber(targets);
 	}
 
 	//! targets[0]=nup, targets[1]=ndown,  targets[2]=2j
@@ -298,8 +306,8 @@ void save(IoOutputter& io,const SymmetryElectronsSz<RealType>& bd)
 	io.printVector(bd.electronsDown,"#bdElectronsDown");
 	io.printVector(bd.jmValues,"#bdJmValues");
 	io.printVector(bd.flavors,"#bdFlavors=");
-	PsimagLite::String msg("Symmetry=");
-	msg += bd.symm->name();
+	PsimagLite::String msg("Symmetry=ElectronsSz\n");
+	io.print(msg);
 }
 
 } // namespace Dmrg

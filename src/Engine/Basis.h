@@ -152,7 +152,7 @@ public:
 	{
 		if (useSu2Symmetry_) symmSu2_.set(basisData);
 		electrons_ = basisData.electrons();
-		findQuantumNumbers(quantumNumbers_,basisData);
+		basisData.findQuantumNumbers(quantumNumbers_, useSu2Symmetry_);
 		findPermutationAndPartition();
 		electronsOld_=electrons_;
 	}
@@ -323,16 +323,6 @@ public:
 			                                            symmSu2_.jmValue(i).first);
 		else
 			return quantumNumbers_[i];
-	}
-
-	//! Given the information in the structure bdt, calculates the quantum numbers in q
-	static void findQuantumNumbers(VectorSizeType& qn,
-	                               const SymmetryElectronsSzType& basisData)
-	{
-		if (useSu2Symmetry_)
-			HamiltonianSymmetrySu2Type::findQuantumNumbers(qn,basisData);
-		else
-			HamiltonianSymmetryLocalType::findQuantumNumbers(qn,basisData);
 	}
 
 	//! removes the indices contained in removedIndices and

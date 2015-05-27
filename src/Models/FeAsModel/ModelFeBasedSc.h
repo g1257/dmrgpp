@@ -556,7 +556,7 @@ private:
 	{
 		SymmetryElectronsSzType qq;
 		setSymmetryRelated(qq,basis,n);
-		MyBasis::findQuantumNumbers(q,qq);
+		qq.findQuantumNumbers(q, MyBasis::useSu2Symmetry());
 	}
 
 	void setSymmetryRelated(SymmetryElectronsSzType& q,

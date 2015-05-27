@@ -100,14 +100,6 @@ public:
 		return 0; // meaningless
 	}
 
-	//! find quantum numbers for each state of this basis,
-	//! considered symmetries for this model are: n_up and n_down
-	static void findQuantumNumbers(VectorSizeType& q,
-	                                const SymmetryElectronsSzType& basisData)
-	{
-		basisData.findQuantumNumbersLocal(q);
-	}
-
 	template<typename SolverParametersType>
 	void calcRemovedIndices(VectorSizeType& removedIndices,
 	                        typename PsimagLite::Vector<RealType>::Type& eigs,

@@ -137,12 +137,6 @@ public:
 		calcReducedBasis();
 	}
 
-	static void findQuantumNumbers(typename PsimagLite::Vector<SizeType> ::Type&q,
-	                               const SymmetryElectronsSzType& basisData)
-	{
-		basisData.findQuantumNumbersSu2(q);
-	}
-
 	void setToProduct(const HamiltonianSymmetrySu2& symm1,
 	                  const HamiltonianSymmetrySu2& symm2,
 	                  int pseudoQn,
