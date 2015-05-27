@@ -607,7 +607,7 @@ private:
 			jmSaved = jmpair;
 		}
 
-		q.set(jmvalues,flavors,ups,downs);
+		q.set(jmvalues,flavors,ups+downs,ups);
 	}
 
 	// note: we use 2j instead of j
