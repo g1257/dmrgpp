@@ -83,20 +83,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 //! Hubbard Model Parameters
 template<typename RealType>
-class TargetQuantumElectrons {
+struct TargetQuantumElectrons {
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-public:
-
 	template<typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io, bool allowUpDown = true)
-	    : twiceJ_(0)
+	    : twiceJ(0)
 	{
 		PsimagLite::String  msg("TargetQuantumElectrons: ");
 		bool hasTwiceJ = false;
 		try {
-			io.readline(twiceJ_,"TargetSpinTimesTwo=");
+			io.readline(twiceJ,"TargetSpinTimesTwo=");
 			hasTwiceJ = true;
 		} catch (std::exception&) {}
 
@@ -107,15 +105,15 @@ public:
 			try {
 				io.readline(electronsUp,"TargetElectronsUp=");
 				io.readline(electronsDown,"TargetElectronsDown=");
-				totalElectrons_ = electronsUp + electronsDown;
-				szPlusConst_ = electronsUp;
+				totalElectrons = electronsUp + electronsDown;
+				szPlusConst = electronsUp;
 				ready++;
 			} catch (std::exception&) {}
 		}
 
 		try {
-			io.readline(totalElectrons_,"TargetElectronsTotal=");
-			io.readline(szPlusConst_,"TargetSzPlusConst=");
+			io.readline(totalElectrons,"TargetElectronsTotal=");
+			io.readline(szPlusConst,"TargetSzPlusConst=");
 			ready++;
 		} catch (std::exception&) {}
 
@@ -134,9 +132,9 @@ public:
 			io.readline(tmp,"UseSu2Symmetry=");
 		} catch (std::exception&) {}
 
-		isSu2_ = (tmp > 0);
+		isSu2 = (tmp > 0);
 
-		if (isSu2_ && !hasTwiceJ) {
+		if (isSu2 && !hasTwiceJ) {
 			msg += "Please provide TargetSpinTimesTwo when running with SU(2).\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
@@ -150,50 +148,10 @@ public:
 		return 0;
 	}
 
-	void setTargetNumbers(VectorSizeType& t,
-	                      SizeType sites,
-	                      SizeType totalSites,
-	                      SizeType direction) const
-	{
-		t.resize((isSu2_) ? 3 : 2,0);
-
-		if (direction == ProgramGlobals::INFINITE) {
-			t[0] = static_cast<SizeType>(round(szPlusConst_*sites/totalSites));
-			t[1] = static_cast<SizeType>(round(totalElectrons_*sites/totalSites));
-		} else {
-			t[0] = szPlusConst_;
-			t[1] = totalElectrons_;
-		}
-
-		if (t.size() < 3) return;
-
-		RealType jReal = twiceJ_*sites/static_cast<RealType>(totalSites);
-		SizeType tmp = (direction == ProgramGlobals::INFINITE) ?
-		            static_cast<SizeType>(round(jReal)) : twiceJ_;
-
-		if (totalElectrons_%2==0) {
-			if (tmp%2 != 0) tmp++;
-		} else {
-			if (tmp%2 == 0) tmp++;
-		}
-
-		t[2] = tmp;
-	}
-
-	void print(std::ostream& os) const
-	{
-		os<<"TargetElectronsTotal="<<totalElectrons_<<"\n";
-		os<<"TargetSzPlusConst="<<szPlusConst_<<"\n";
-		if (isSu2_)
-			os<<"TargetSpinTimesTwo="<<twiceJ_<<"\n";
-	}
-
-private:
-
-	bool isSu2_;
-	SizeType totalElectrons_;
-	SizeType szPlusConst_;
-	SizeType twiceJ_;
+	bool isSu2;
+	SizeType totalElectrons;
+	SizeType szPlusConst;
+	SizeType twiceJ;
 };
 
 //! Function that prints model parameters to stream os
@@ -201,7 +159,10 @@ template<typename RealTypeType>
 std::ostream& operator<<(std::ostream &os,
                          const TargetQuantumElectrons<RealTypeType>& p)
 {
-	p.print(os);
+	os<<"TargetElectronsTotal="<<p.totalElectrons<<"\n";
+	os<<"TargetSzPlusConst="<<p.szPlusConst<<"\n";
+	if (p.isSu2)
+		os<<"TargetSpinTimesTwo="<<p.twiceJ<<"\n";
 	return os;
 }
 } // namespace Dmrg

@@ -196,11 +196,42 @@ public:
 			                         bool useSu2Symmetry)
 	{
 		VectorSizeType v;
-		targetQuantum.setTargetNumbers(v,sites,total,direction);
+		setTargetNumbers(v,targetQuantum,sites,total,direction);
 		return getQuantumSector(v,direction,ioOut,useSu2Symmetry);
 	}
 
 private:
+
+	static void setTargetNumbers(VectorSizeType& t,
+	                             const TargetQuantumElectronsType& targetQ,
+	                             SizeType sites,
+	                             SizeType totalSites,
+	                             SizeType direction)
+	{
+		t.resize((targetQ.isSu2) ? 3 : 2,0);
+
+		if (direction == ProgramGlobals::INFINITE) {
+			t[0] = static_cast<SizeType>(round(targetQ.szPlusConst*sites/totalSites));
+			t[1] = static_cast<SizeType>(round(targetQ.totalElectrons*sites/totalSites));
+		} else {
+			t[0] = targetQ.szPlusConst;
+			t[1] = targetQ.totalElectrons;
+		}
+
+		if (t.size() < 3) return;
+
+		RealType jReal = targetQ.twiceJ*sites/static_cast<RealType>(totalSites);
+		SizeType tmp = (direction == ProgramGlobals::INFINITE) ?
+		            static_cast<SizeType>(round(jReal)) : targetQ.twiceJ;
+
+		if (targetQ.totalElectrons%2==0) {
+			if (tmp%2 != 0) tmp++;
+		} else {
+			if (tmp%2 == 0) tmp++;
+		}
+
+		t[2] = tmp;
+	}
 
 	void findQuantumNumbersSu2(VectorSizeType& q) const
 	{

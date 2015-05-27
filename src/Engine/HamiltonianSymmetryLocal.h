@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HAM_SYMM_LOCAL_H
 #define HAM_SYMM_LOCAL_H
 #include "Sort.h"
-#include "SymmetryElectronsSz.h"
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
@@ -89,7 +88,6 @@ class	HamiltonianSymmetryLocal {
 
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
-	typedef  SymmetryElectronsSz<RealType> SymmetryElectronsSzType;
 	typedef PsimagLite::CrsMatrix<RealType> FactorsType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
