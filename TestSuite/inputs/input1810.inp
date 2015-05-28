@@ -30,6 +30,6 @@ Version=version
 OutputFile=data1810.txt
 InfiniteLoopKeptStates=60
 FiniteLoops 4  2 100 0 -2 100 0 -2 100 0 2 100 0 
-TargetElectronsTotal=12
+TargetElectronsTotal=3
 TargetSzPlusConst=6
 

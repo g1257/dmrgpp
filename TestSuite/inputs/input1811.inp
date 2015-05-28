@@ -30,8 +30,9 @@ FiniteLoops 4
 RepeatFiniteLoopsFrom=2
 RepeatFiniteLoopsTimes=100
 
-TargetElectronsTotal=12
+TargetElectronsTotal=3
 TargetSzPlusConst=6
+
 RestartFilename=data1810.txt
 
 TSPTau=0.1

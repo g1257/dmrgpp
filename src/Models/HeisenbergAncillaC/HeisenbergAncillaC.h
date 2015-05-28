@@ -449,7 +449,7 @@ private:
 			jmvalues.push_back(jmpair);
 			PairSizeType ket = getOneOrbital(basis[i]);
 			szPlusConst[i] = ket.first + ket.second;
-			electrons[i] = NUMBER_OF_ORBITALS;
+			electrons[i] = ket.first;
 			flavors.push_back(1);
 			jmSaved = jmpair;
 		}
