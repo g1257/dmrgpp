@@ -171,6 +171,12 @@ public:
 		if (targetHelper_.tstStruct().concatenation() == SUM) phiNew = vectorSum;
 
 		if (allStages(DISABLED)) E0_ = Eg;
+
+		if (noStageIs(DISABLED)) {
+			if (targetHelper_.tstStruct().isEnergyForExp())
+				E0_ = targetHelper_.tstStruct().energyForExp();
+		}
+
 		return count;
 	}
 

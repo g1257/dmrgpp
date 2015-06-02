@@ -110,6 +110,8 @@ public:
 	      concatenation_(PRODUCT),
 	      noOperator_(false),
 	      skipTimeZero_(false),
+	      isEnergyForExp_(false),
+	      energyForExp_(0.0),
 	      io_(io),
 	      model_(model)
 	{
@@ -150,6 +152,11 @@ public:
 			int tmp = 0;
 			io.readline(tmp,"TSPSkipTimeZero=");
 			skipTimeZero_ = (tmp > 0);
+		} catch (std::exception&) {}
+
+		try {
+			io.readline(energyForExp_,"TSPEnergyForExp=");
+			isEnergyForExp_ = true;
 		} catch (std::exception&) {}
 
 		CookedOperator<ModelType> cookedOperator(model_);
@@ -218,6 +225,16 @@ public:
 	virtual bool skipTimeZero() const
 	{
 		return skipTimeZero_;
+	}
+
+	virtual bool isEnergyForExp() const
+	{
+		return isEnergyForExp_;
+	}
+
+	virtual RealType energyForExp() const
+	{
+		return energyForExp_;
 	}
 
 	template<typename ModelType_>
@@ -297,6 +314,8 @@ private:
 	//serializr normal noOperator_
 	bool noOperator_;
 	bool skipTimeZero_;
+	bool isEnergyForExp_;
+	RealType energyForExp_;
 	//serializr normal aOperators_
 	VectorOperatorType aOperators_;
 	//serializr ref io_

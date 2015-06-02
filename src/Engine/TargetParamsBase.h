@@ -225,6 +225,16 @@ public:
 		return static_cast<bool>(unimplemented("skipTimeZero"));
 	}
 
+	virtual bool isEnergyForExp() const
+	{
+		return static_cast<bool>(unimplemented("isEnergyForExp"));
+	}
+
+	virtual RealType energyForExp() const
+	{
+		return unimplemented("energyForExp");
+	}
+
 private:
 
 	RealType unimplemented(PsimagLite::String s) const
