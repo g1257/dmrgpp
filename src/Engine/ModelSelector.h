@@ -59,6 +59,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/Immm/Immm.h"
 #include "../Models/Tj1Orb/Tj1Orb.h"
 #include "../Models/TjAncillaC/TjAncillaC.h"
+#include "../Models/TjAncillaG/TjAncillaG.h"
 #include "../Models/SuperHubbardExtended/SuperHubbardExtended.h"
 #include "../Models/HubbardAncilla/HubbardAncilla.h"
 
@@ -83,6 +84,7 @@ class ModelSelector {
 	typedef Immm<ModelBaseType> ImmmType;
 	typedef Tj1Orb<ModelBaseType> Tj1OrbType;
 	typedef TjAncillaC<ModelBaseType> TjAncillaCType;
+	typedef TjAncillaG<ModelBaseType> TjAncillaGType;
 	typedef SuperHubbardExtended<ModelBaseType> SuperHubbardExtendedType;
 	typedef HubbardAncilla<ModelBaseType> HubbardAncillaType;
 	// end models
@@ -122,6 +124,8 @@ public:
 			model_ = new Tj1OrbType(solverParams,io,geometry);
 		} else if (name_ == "TjAncillaC") {
 			model_ = new TjAncillaCType(solverParams,io,geometry);
+		} else if (name_ == "TjAncillaG") {
+			model_ = new TjAncillaGType(solverParams,io,geometry);
 		} else if (name_ == "SuperHubbardExtended") {
 			model_ = new SuperHubbardExtendedType(solverParams,io,geometry);
 		} else if (name_ == "KaneMeleHubbard") {

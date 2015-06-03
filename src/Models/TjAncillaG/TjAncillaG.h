@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "../Models/Tj1Orb/Tj1Orb.h"
 #include "../Models/TjAncillaG/LinkProductTjAncillaG.h"
-#include "../Models/TjAncillaG/ParametersModelTjAncillaG.h"
+#include "../Models/Tj1Orb/ParametersModelTj1Orb.h"
 #include "ModelCommon.h"
 
 namespace Dmrg {
@@ -167,13 +167,40 @@ public:
 		VectorSizeType quantumNumbs;
 		tj1orb_.setNaturalBasis(natBasis,quantumNumbs,block);
 
-		tj1orb_.setOperatorMatrices(creationMatrix,block);
+		setOperatorMatrices(creationMatrix,block);
 
 		//! Set symmetry related
 		setSymmetryRelated(q,natBasis,block.size());
 
 		//! set hamiltonian
 		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
+	}
+
+	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
+	                                 const BlockType& block) const
+	{
+		return tj1orb_.setOperatorMatrices(creationMatrix,block);
+	}
+
+	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+	                                const VectorOperatorType&,
+	                                const BlockType& block,
+	                                RealType,
+	                                RealType factorForDiagonals=1.0) const
+	{
+		SizeType n=block.size();
+
+		SizeType linSize = geometry_.numberOfSites();
+		for (SizeType i=0;i<n;i++) {
+			// potentialV
+			SparseMatrixType nup(naturalOperator("nup",i,0));
+			SparseMatrixType ndown(naturalOperator("ndown",i,0));
+			SparseMatrixType m = nup;
+			assert(block[i]+linSize<modelParameters_.potentialV.size());
+			m *= modelParameters_.potentialV[block[i]];
+			m += modelParameters_.potentialV[block[i]+linSize]*ndown;
+			hmatrix += factorForDiagonals * m;
+		}
 	}
 
 	//! find all states in the natural basis for a block of n sites
@@ -255,22 +282,23 @@ private:
 		jmSaved.first++;
 		jmSaved.second++;
 
-		VectorSizeType electronsUp(basis.size());
-		VectorSizeType electronsDown(basis.size());
+		VectorSizeType szPlusConst(basis.size());
+		VectorSizeType bogus(basis.size(),0);
 		for (SizeType i=0;i<basis.size();i++) {
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 
 			jmvalues.push_back(jmpair);
 			// nup
-			electronsUp[i] = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_UP);
+			SizeType ups = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_UP);
 			// ndown
-			electronsDown[i] = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_DOWN);
+			SizeType downs = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_DOWN);
 
-			flavors.push_back(electronsUp[i]+electronsDown[i]);
+			flavors.push_back(0);
 			jmSaved = jmpair;
+			szPlusConst[i] = (ups + geometry_.numberOfSites()) - downs;
 		}
 
-		q.set(jmvalues,flavors,electronsUp+electronsDown,electronsUp);
+		q.set(jmvalues,flavors,szPlusConst,bogus);
 	}
 
 	// note: we use 2j instead of j
@@ -306,7 +334,7 @@ private:
 	//serializr start class TjAncillaG
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersModelTjAncillaG<RealType>  modelParameters_;
+	ParametersModelTj1Orb<RealType>  modelParameters_;
 	//serializr ref geometry_ end
 	const GeometryType &geometry_;
 	Tj1OrbType tj1orb_;
