@@ -71,19 +71,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file LinkProductTj1Orb.h
+/*! \file LinkProductTjAncillaG.h
  *
  *  FIXME
  *
  */
-#ifndef LINK_PROD_TJ_1ORB_H
-#define LINK_PROD_TJ_1ORB_H
+#ifndef DMRG_LINKPROD_TJ_ANCILLAG_H
+#define DMRG_LINKPROD_TJ_ANCILLAG_H
 
 
 namespace Dmrg {
 
 template<typename ModelHelperType>
-class LinkProductTj1Orb {
+class LinkProductTjAncillaG {
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef std::pair<SizeType,SizeType> PairType;
 
@@ -224,7 +224,7 @@ private:
 		return PairType(x,x);
 	}
 
-}; // class LinkProductTj1Orb
+}; // class LinkProductTjAncillaG
 } // namespace Dmrg
 /*@}*/
 #endif

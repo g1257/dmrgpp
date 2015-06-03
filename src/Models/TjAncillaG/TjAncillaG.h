@@ -72,22 +72,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file Tj1Orb.h
+/*! \file TjAncillaG.h
  *
  *  Hubbard + Heisenberg
  *
  */
-#ifndef TJ_1ORB_H
-#define TJ_1ORB_H
+#ifndef DMRG_TJ_ANCILLAG_H
+#define DMRG_TJ_ANCILLAG_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "../Models/Tj1Orb/LinkProductTj1Orb.h"
-#include "../Models/Tj1Orb/ParametersModelTj1Orb.h"
+#include "../Models/TjAncillaG/LinkProductTjAncillaG.h"
+#include "../Models/TjAncillaG/ParametersModelTjAncillaG.h"
 #include "ModelCommon.h"
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment
 template<typename ModelBaseType>
-class Tj1Orb : public ModelBaseType {
+class TjAncillaG : public ModelBaseType {
 
 public:
 
@@ -105,7 +105,7 @@ public:
 	typedef TargetQuantumElectrons<RealType> TargetQuantumElectronsType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef LinkProductTj1Orb<ModelHelperType> LinkProductType;
+	typedef LinkProductTjAncillaG<ModelHelperType> LinkProductType;
 	typedef ModelCommon<ModelBaseType,LinkProductType> ModelCommonType;
 	typedef	typename ModelBaseType::MyBasis MyBasis;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
@@ -128,7 +128,7 @@ public:
 
 	enum {SPIN_UP, SPIN_DOWN};
 
-	Tj1Orb(const SolverParamsType& solverParams,
+	TjAncillaG(const SolverParamsType& solverParams,
 	       InputValidatorType& io,
 	       GeometryType const &geometry)
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
@@ -546,10 +546,10 @@ private:
 		return jm;
 	}
 
-	//serializr start class Tj1Orb
+	//serializr start class TjAncillaG
 	//serializr vptr
 	//serializr normal modelParameters_
-	ParametersModelTj1Orb<RealType>  modelParameters_;
+	ParametersModelTjAncillaG<RealType>  modelParameters_;
 	//serializr ref geometry_ end
 	const GeometryType &geometry_;
 	//serializr normal offset_
@@ -559,9 +559,9 @@ private:
 	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,HilbertStateType> > spinSquared_;
 
-};	//class Tj1Orb
+};	//class TjAncillaG
 
 } // namespace Dmrg
 /*@}*/
-#endif // TJ_1ORB_H
+#endif // DMRG_TJ_ANCILLAG_H
 
