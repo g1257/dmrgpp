@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_TJ_ANCILLAG_H
 #define DMRG_TJ_ANCILLAG_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
+#include "../Models/Tj1Orb/Tj1Orb.h"
 #include "../Models/TjAncillaG/LinkProductTjAncillaG.h"
 #include "../Models/TjAncillaG/ParametersModelTjAncillaG.h"
 #include "ModelCommon.h"
@@ -93,6 +94,7 @@ public:
 
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
+	typedef Tj1Orb<ModelBaseType> Tj1OrbType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::GeometryType GeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
@@ -134,6 +136,7 @@ public:
 	    : ModelBaseType(io,new ModelCommonType(solverParams,geometry)),
 	      modelParameters_(io),
 	      geometry_(geometry),
+	      tj1orb_(solverParams,io,geometry),
 	      offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{}
@@ -145,9 +148,9 @@ public:
 		return 0;
 	}
 
-	SizeType hilbertSize(SizeType) const
+	SizeType hilbertSize(SizeType site) const
 	{
-		return 3;
+		return tj1orb_.hilbertSize(site);
 	}
 
 	//! find creation operator matrices for (i,sigma) in the natural basis,
@@ -162,9 +165,9 @@ public:
 
 		HilbertBasisType natBasis;
 		VectorSizeType quantumNumbs;
-		setNaturalBasis(natBasis,quantumNumbs,block);
+		tj1orb_.setNaturalBasis(natBasis,quantumNumbs,block);
 
-		setOperatorMatrices(creationMatrix,block);
+		tj1orb_.setOperatorMatrices(creationMatrix,block);
 
 		//! Set symmetry related
 		setSymmetryRelated(q,natBasis,block.size());
@@ -173,153 +176,9 @@ public:
 		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
 	}
 
-	//! set creation matrices for sites in block
-	void setOperatorMatrices(VectorOperatorType&creationMatrix,
-	                         const BlockType& block) const
-	{
-		VectorHilbertStateType natBasis;
-		SparseMatrixType tmpMatrix;
-		VectorSizeType quantumNumbs;
-		setNaturalBasis(natBasis,quantumNumbs,block);
-
-		// Set the operators c^\daggger_{i\sigma} in the natural basis
-		creationMatrix.clear();
-		for (SizeType i=0;i<block.size();i++) {
-			for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
-				tmpMatrix = findOperatorMatrices(i,sigma,natBasis);
-				int asign= 1;
-				if (sigma>0) asign= 1;
-				typename OperatorType::Su2RelatedType su2related;
-				if (sigma==0) {
-					su2related.source.push_back(i*offset_);
-					su2related.source.push_back(i*offset_+1);
-					su2related.transpose.push_back(-1);
-					su2related.transpose.push_back(-1);
-					su2related.offset = NUMBER_OF_ORBITALS;
-				}
-				OperatorType myOp(tmpMatrix,-1,PairType(1,1-sigma),asign,su2related);
-
-				creationMatrix.push_back(myOp);
-			}
-
-			// Set the operators S^+_i in the natural basis
-			tmpMatrix=findSplusMatrices(i,natBasis);
-
-			typename OperatorType::Su2RelatedType su2related;
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM+NUMBER_OF_ORBITALS);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(1);
-			su2related.offset = NUMBER_OF_ORBITALS;
-
-			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
-			creationMatrix.push_back(myOp);
-
-			// Set the operators S^z_i in the natural basis
-			tmpMatrix = findSzMatrices(i,natBasis);
-			typename OperatorType::Su2RelatedType su2related2;
-			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
-			creationMatrix.push_back(myOp2);
-
-			// Set ni matrices:
-			SparseMatrixType tmpMatrix = findNiMatrices(0,natBasis);
-			RealType angularFactor= 1;
-			typename OperatorType::Su2RelatedType su2related3;
-			su2related3.offset = 1; //check FIXME
-			OperatorType myOp3(tmpMatrix,1,PairType(0,0),angularFactor,su2related3);
-
-			creationMatrix.push_back(myOp3);
-		}
-	}
-
-	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
-	 *unmangled (natural) basis of one-site */
-	MatrixType naturalOperator(const PsimagLite::String& what,
-	                                                      SizeType site,
-	                                                      SizeType dof) const
-	{
-		BlockType block;
-		block.resize(1);
-		block[0]=site;
-		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		setOperatorMatrices(creationMatrix,block);
-		assert(creationMatrix.size()>0);
-		SizeType nrow = creationMatrix[0].data.row();
-
-		if (what == "i" || what=="identity") {
-			MatrixType tmp(nrow,nrow);
-			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
-			return tmp;
-		}
-
-		if (what=="+") {
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
-			return tmp;
-		}
-
-		if (what=="-") {
-			SparseMatrixType tmp2;
-			transposeConjugate(tmp2,creationMatrix[2].data);
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,tmp2);
-			return tmp;
-		}
-
-		if (what=="z") {
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[3].data);
-			return tmp;
-		}
-
-		if (what=="c") {
-			MatrixType tmp;
-			assert(dof<2);
-			crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
-			return tmp;
-		}
-
-		if (what=="n") {
-			MatrixType tmp;
-			crsMatrixToFullMatrix(tmp,creationMatrix[4].data);
-			return tmp;
-		}
-
-		if (what=="nup") {
-			MatrixType cup = naturalOperator("c",site,SPIN_UP);
-			MatrixType nup = multiplyTransposeConjugate(cup,cup);
-			return nup;
-		}
-
-		if (what=="ndown") {
-			MatrixType cdown = naturalOperator("c",site,SPIN_DOWN);
-			MatrixType ndown = multiplyTransposeConjugate(cdown,cdown);
-			return ndown;
-		}
-
-		std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
-		throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
-	}
-
-	//! find total number of electrons for each state in the basis
-	void findElectrons(typename PsimagLite::Vector<SizeType> ::Type&electrons,
-	                   const VectorHilbertStateType& basis,
-	                   SizeType) const
-	{
-		int nup,ndown;
-		electrons.clear();
-		for (SizeType i=0;i<basis.size();i++) {
-			nup = HilbertSpaceHubbardType::getNofDigits(basis[i],0);
-			ndown = HilbertSpaceHubbardType::getNofDigits(basis[i],1);
-			electrons.push_back(nup+ndown);
-		}
-	}
-
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setNaturalBasis(HilbertBasisType  &basis,
+	void setNaturalBasis(HilbertBasisType& basis,
 	                     VectorSizeType& q,
 	                     const VectorSizeType& block) const
 	{
@@ -342,6 +201,23 @@ public:
 		for (a=0;a<total;a++) basis.push_back(basisTmp[iperm[a]]);
 	}
 
+	/** \cppFunction{!PTEX_THISFUNCTION} returns the operator in the
+	 *unmangled (natural) basis of one-site */
+	MatrixType naturalOperator(const PsimagLite::String& what,
+	                                                      SizeType site,
+	                                                      SizeType dof) const
+	{
+		return tj1orb_.naturalOperator(what,site,dof);
+	}
+
+	//! find total number of electrons for each state in the basis
+	void findElectrons(VectorSizeType& electrons,
+	                   const VectorHilbertStateType& basis,
+	                   SizeType other) const
+	{
+		tj1orb_.findElectrons(electrons,basis,other);
+	}
+
 	virtual const TargetQuantumElectronsType& targetQuantum() const
 	{
 		return modelParameters_.targetQuantum;
@@ -353,125 +229,6 @@ public:
 	}
 
 private:
-
-	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma}
-	//! to basis state ket
-	RealType sign(HilbertStateType const &, int,int) const
-	{
-		return 1;
-	}
-
-	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findOperatorMatrices(int i,
-	                                      int sigma,
-	                                      const VectorHilbertStateType& natBasis) const
-	{
-		HilbertStateType bra,ket;
-		int n = natBasis.size();
-		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
-
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
-			bra=ket=natBasis[ii];
-			if (HilbertSpaceHubbardType::isNonZero(ket,i,sigma)) {
-
-			} else {
-				HilbertSpaceHubbardType::create(bra,i,sigma);
-				int jj = PsimagLite::isInVector(natBasis,bra);
-				if (jj<0) continue;
-				cm(ii,jj) =sign(ket,i,sigma);
-			}
-		}
-		//std::cout<<"Cm\n";
-		//std::cout<<cm;
-		SparseMatrixType creationMatrix(cm);
-		return creationMatrix;
-	}
-
-	//! Find S^+_i in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(int i,
-	                                   const VectorHilbertStateType& natBasis) const
-	{
-		HilbertStateType bra,ket;
-		int n = natBasis.size();
-		MatrixType cm(n,n);
-
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
-			bra=ket=natBasis[ii];
-			if (HilbertSpaceHubbardType::get(ket,i)==2) {
-				// it is a down electron, then flip it:
-				HilbertSpaceHubbardType::destroy(bra,i,1);
-				HilbertSpaceHubbardType::create(bra,i,0);
-				int jj = PsimagLite::isInVector(natBasis,bra);
-				assert(jj>=0);
-				cm(ii,jj)=1.0;
-			}
-		}
-		SparseMatrixType operatorMatrix(cm);
-		return operatorMatrix;
-	}
-
-	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(int i,
-	                                const VectorHilbertStateType& natBasis) const
-	{
-		HilbertStateType ket;
-		int n = natBasis.size();
-		MatrixType cm(n,n);
-
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
-			ket=natBasis[ii];
-			SizeType value = HilbertSpaceHubbardType::get(ket,i);
-			switch (value) {
-			case 1:
-				cm(ii,ii)=0.5;
-				break;
-			case 2:
-				cm(ii,ii)= -0.5;
-				break;
-			}
-		}
-		SparseMatrixType operatorMatrix(cm);
-		return operatorMatrix;
-	}
-
-	//! Find n_i in the natural basis natBasis
-	SparseMatrixType findNiMatrices(int i,
-	                                const VectorHilbertStateType& natBasis) const
-	{
-		SizeType n = natBasis.size();
-		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
-
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
-			HilbertStateType ket=natBasis[ii];
-			cm(ii,ii) = 0.0;
-			for (SizeType sigma=0;sigma<2;sigma++)
-				if (HilbertSpaceHubbardType::isNonZero(ket,i,sigma))
-					cm(ii,ii) += 1.0;
-		}
-		SparseMatrixType creationMatrix(cm);
-		return creationMatrix;
-	}
-
-	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const VectorOperatorType&,
-	                                const BlockType& block,
-	                                RealType,
-	                                RealType factorForDiagonals=1.0) const
-	{
-		SizeType n=block.size();
-
-		SizeType linSize = geometry_.numberOfSites();
-		for (SizeType i=0;i<n;i++) {
-			// potentialV
-			SparseMatrixType nup(naturalOperator("nup",i,0));
-			SparseMatrixType ndown(naturalOperator("ndown",i,0));
-			SparseMatrixType m = nup;
-			assert(block[i]+linSize<modelParameters_.potentialV.size());
-			m *= modelParameters_.potentialV[block[i]];
-			m += modelParameters_.potentialV[block[i]+linSize]*ndown;
-			hmatrix += factorForDiagonals * m;
-		}
-	}
 
 	void findQuantumNumbers(VectorSizeType& q,
 	                        const HilbertBasisType& basis,int n) const
@@ -552,6 +309,7 @@ private:
 	ParametersModelTjAncillaG<RealType>  modelParameters_;
 	//serializr ref geometry_ end
 	const GeometryType &geometry_;
+	Tj1OrbType tj1orb_;
 	//serializr normal offset_
 	SizeType offset_;
 	//serializr normal spinSquaredHelper_
