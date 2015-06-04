@@ -257,8 +257,9 @@ public:
 		size_ = someBasis.size();
 
 		SizeType q = qns[0];
-		SizeType ip = findPartitionWithThisQn(q,someBasis);
-		SizeType total = someBasis.partition(ip+1)-someBasis.partition(ip);
+		m_ = findPartitionWithThisQn(q,someBasis);
+		offset_ = someBasis.partition(m_);
+		SizeType total = someBasis.partition(m_+1) - offset_;
 		VectorType tmpV(total,0);
 		data_ = tmpV;
 
