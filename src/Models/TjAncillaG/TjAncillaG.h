@@ -139,7 +139,12 @@ public:
 	      tj1orb_(solverParams,io,geometry),
 	      offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
-	{}
+	{
+		std::cout<<"TjAncillaG: This model is EXPERIMENTAL\n";
+		if (MyBasis::useSu2Symmetry()) {
+			throw PsimagLite::RuntimeError("TjAncillaG: SU(2) not supported\n");
+		}
+	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
 	                   SizeType,
@@ -165,7 +170,7 @@ public:
 
 		HilbertBasisType natBasis;
 		VectorSizeType quantumNumbs;
-		tj1orb_.setNaturalBasis(natBasis,quantumNumbs,block);
+		setNaturalBasis(natBasis,quantumNumbs,block);
 
 		setOperatorMatrices(creationMatrix,block);
 
@@ -176,13 +181,68 @@ public:
 		this->calcHamiltonian(hamiltonian,creationMatrix,block,time);
 	}
 
-	virtual void setOperatorMatrices(VectorOperatorType& creationMatrix,
-	                                 const BlockType& block) const
+	//! set creation matrices for sites in block
+	void setOperatorMatrices(VectorOperatorType&creationMatrix,
+	                         const BlockType& block) const
 	{
-		return tj1orb_.setOperatorMatrices(creationMatrix,block);
+		VectorHilbertStateType natBasis;
+		SparseMatrixType tmpMatrix;
+		VectorSizeType quantumNumbs;
+		setNaturalBasis(natBasis,quantumNumbs,block);
+
+		// Set the operators c^\daggger_{i\sigma} in the natural basis
+		creationMatrix.clear();
+		for (SizeType i=0;i<block.size();i++) {
+			for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
+				tmpMatrix = tj1orb_.findOperatorMatrices(i,sigma,natBasis);
+				int asign= 1;
+				if (sigma>0) asign= 1;
+				typename OperatorType::Su2RelatedType su2related;
+				if (sigma==0) {
+					su2related.source.push_back(i*offset_);
+					su2related.source.push_back(i*offset_+1);
+					su2related.transpose.push_back(-1);
+					su2related.transpose.push_back(-1);
+					su2related.offset = NUMBER_OF_ORBITALS;
+				}
+				OperatorType myOp(tmpMatrix,-1,PairType(1,1-sigma),asign,su2related);
+
+				creationMatrix.push_back(myOp);
+			}
+
+			// Set the operators S^+_i in the natural basis
+			tmpMatrix=tj1orb_.findSplusMatrices(i,natBasis);
+
+			typename OperatorType::Su2RelatedType su2related;
+			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
+			su2related.source.push_back(i*DEGREES_OF_FREEDOM+NUMBER_OF_ORBITALS);
+			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
+			su2related.transpose.push_back(-1);
+			su2related.transpose.push_back(-1);
+			su2related.transpose.push_back(1);
+			su2related.offset = NUMBER_OF_ORBITALS;
+
+			OperatorType myOp(tmpMatrix,1,PairType(2,2),-1,su2related);
+			creationMatrix.push_back(myOp);
+
+			// Set the operators S^z_i in the natural basis
+			tmpMatrix = tj1orb_.findSzMatrices(i,natBasis);
+			typename OperatorType::Su2RelatedType su2related2;
+			OperatorType myOp2(tmpMatrix,1,PairType(2,1),1.0/sqrt(2.0),su2related2);
+			creationMatrix.push_back(myOp2);
+
+			// Set ni matrices:
+			SparseMatrixType tmpMatrix = tj1orb_.findNiMatrices(0,natBasis);
+			RealType angularFactor= 1;
+			typename OperatorType::Su2RelatedType su2related3;
+			su2related3.offset = 1; //check FIXME
+			OperatorType myOp3(tmpMatrix,1,PairType(0,0),angularFactor,su2related3);
+
+			creationMatrix.push_back(myOp3);
+		}
 	}
 
-	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const VectorOperatorType&,
 	                                const BlockType& block,
 	                                RealType,
@@ -234,7 +294,67 @@ public:
 	                                                      SizeType site,
 	                                                      SizeType dof) const
 	{
-		return tj1orb_.naturalOperator(what,site,dof);
+		BlockType block;
+		block.resize(1);
+		block[0]=site;
+		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
+		setOperatorMatrices(creationMatrix,block);
+		assert(creationMatrix.size()>0);
+		SizeType nrow = creationMatrix[0].data.row();
+
+		if (what == "i" || what=="identity") {
+			MatrixType tmp(nrow,nrow);
+			for (SizeType i = 0; i < tmp.n_row(); ++i) tmp(i,i) = 1.0;
+			return tmp;
+		}
+
+		if (what=="+") {
+			MatrixType tmp;
+			crsMatrixToFullMatrix(tmp,creationMatrix[2].data);
+			return tmp;
+		}
+
+		if (what=="-") {
+			SparseMatrixType tmp2;
+			transposeConjugate(tmp2,creationMatrix[2].data);
+			MatrixType tmp;
+			crsMatrixToFullMatrix(tmp,tmp2);
+			return tmp;
+		}
+
+		if (what=="z") {
+			MatrixType tmp;
+			crsMatrixToFullMatrix(tmp,creationMatrix[3].data);
+			return tmp;
+		}
+
+		if (what=="c") {
+			MatrixType tmp;
+			assert(dof<2);
+			crsMatrixToFullMatrix(tmp,creationMatrix[dof].data);
+			return tmp;
+		}
+
+		if (what=="n") {
+			MatrixType tmp;
+			crsMatrixToFullMatrix(tmp,creationMatrix[4].data);
+			return tmp;
+		}
+
+		if (what=="nup") {
+			MatrixType cup = naturalOperator("c",site,SPIN_UP);
+			MatrixType nup = multiplyTransposeConjugate(cup,cup);
+			return nup;
+		}
+
+		if (what=="ndown") {
+			MatrixType cdown = naturalOperator("c",site,SPIN_DOWN);
+			MatrixType ndown = multiplyTransposeConjugate(cdown,cdown);
+			return ndown;
+		}
+
+		std::cerr<<"Argument: "<<what<<" "<<__FILE__<<"\n";
+		throw std::logic_error("DmrgObserve::spinOperator(): invalid argument\n");
 	}
 
 	//! find total number of electrons for each state in the basis
@@ -288,17 +408,13 @@ private:
 			PairType jmpair = calcJmvalue<PairType>(basis[i]);
 
 			jmvalues.push_back(jmpair);
-			// nup
-			SizeType ups = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_UP);
-			// ndown
-			SizeType downs = HilbertSpaceHubbardType::getNofDigits(basis[i],SPIN_DOWN);
 
 			flavors.push_back(0);
 			jmSaved = jmpair;
-			szPlusConst[i] = (ups + geometry_.numberOfSites()) - downs;
+			szPlusConst[i] = (basis[i] == 2) ? 0 : basis[i] + 1;
 		}
 
-		q.set(jmvalues,flavors,szPlusConst,bogus);
+		q.set(jmvalues,flavors,bogus,szPlusConst);
 	}
 
 	// note: we use 2j instead of j

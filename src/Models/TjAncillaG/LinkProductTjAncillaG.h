@@ -176,21 +176,7 @@ public:
 				angularMomentum = 0;
 				category = 0;
 				break;
-			case 1:// -c^\dagger_down c^\dagger_up
-				ops = PairType(1,0);
-				mods = std::pair<char,char>('N','N');
-				angularFactor = 1;
-				angularMomentum = 0;
-				category = 0;
-				break;
-			case 2: // c_down c_up
-				ops = PairType(1,0);
-				mods = std::pair<char,char>('C','C');
-				angularFactor = 1;
-				angularMomentum = 0;
-				category = 0;
-				break;
-			case 3:// -c_up c_down
+			case 1: // c_down c_up
 				ops = PairType(0,1);
 				mods = std::pair<char,char>('C','C');
 				angularFactor = 1;
@@ -220,7 +206,6 @@ public:
 		}
 
 		if (term == TERM_ANCILLA) {
-			if (dofs & 1) value *= (-1.0);
 			return;
 		}
 
@@ -242,7 +227,7 @@ public:
 		if (term==TERM_SPSM) return 2; // S+ S- and S- S+
 		if (term==TERM_SZSZ) return 1; // Sz Sz
 		if (term==TERM_NINJ) return 1; // ninj
-		if (term==TERM_ANCILLA) return 4; // 4 terms for ancilla
+		if (term==TERM_ANCILLA) return 2; // 2 terms for ancilla
 		assert(false);
 		return 0; // bogus
 	}

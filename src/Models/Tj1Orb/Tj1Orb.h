@@ -352,8 +352,6 @@ public:
 		os<<modelParameters_;
 	}
 
-private:
-
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma}
 	//! to basis state ket
 	RealType sign(HilbertStateType const &, int,int) const
@@ -472,6 +470,8 @@ private:
 			hmatrix += factorForDiagonals * m;
 		}
 	}
+
+private:
 
 	void findQuantumNumbers(VectorSizeType& q,
 	                        const HilbertBasisType& basis,int n) const
