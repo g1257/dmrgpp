@@ -111,7 +111,7 @@ public:
 	      rng_(343311)
 	{
 		setMode(params.options);
-		PsimagLite::OstringStream msg;
+		OstringStream msg;
 		msg<<"Constructing... mat.rank="<<mat_.rank();
 		msg<<" steps="<<steps_<<" eps="<<eps_;
 		progress_.printline(msg,std::cout);
@@ -211,7 +211,7 @@ private:
 
 	void largestEigenpair(RealType& theta,
 	                      VectorType& s,
-	                      const PsimagLite::Matrix<ComplexOrRealType>& M)
+	                      const Matrix<ComplexOrRealType>& M)
 	{
 		String st(__FILE__);
 		st += " Unimplemented\n";
@@ -223,7 +223,7 @@ private:
 	SizeType steps_;
 	RealType eps_;
 	SizeType mode_;
-	PsimagLite::Random48<RealType> rng_;
+	Random48<RealType> rng_;
 }; // class DavidsonSolver
 } // namespace PsimagLite
 

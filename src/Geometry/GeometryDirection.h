@@ -86,7 +86,7 @@ template<typename ComplexOrRealType,typename GeometryBaseType>
 class GeometryDirection {
 
 	typedef Matrix<ComplexOrRealType> MatrixType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef typename Real<ComplexOrRealType>::Type RealType;
 
 public:
 
@@ -138,9 +138,9 @@ public:
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
 	                   SizeType,
-	                   PsimagLite::String msg) const
+	                   String msg) const
 	{
-		PsimagLite::String str = msg;
+		String str = msg;
 		str += "GeometryDirection";
 		const char* start = (const char *)&dirId_;
 		const char* end = (const char*)&dataType_;

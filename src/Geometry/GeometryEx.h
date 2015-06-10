@@ -24,7 +24,7 @@ public:
 	  enabled_(false),
 	  meshStep_((meshLength_ > 0) ? static_cast<RealType>(2*M_PI/meshLength_) : 0)
 	{
-		PsimagLite::String str;
+		String str;
 		io.readline(str,"GeometryKind=",false);
 		if (str == "star") enabled_ = true;
 	}
@@ -40,9 +40,9 @@ public:
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
 	                   SizeType x,
-	                   PsimagLite::String msg) const
+	                   String msg) const
 	{
-		PsimagLite::String str = msg;
+		String str = msg;
 		str += "GeometryEx";
 		const char* start = (const char *)&meshLength_;
 		const char* end = (const char*)&enabled_;

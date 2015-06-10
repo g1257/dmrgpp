@@ -45,7 +45,7 @@ public:
 
 	typedef TridiagonalMatrixType_ TridiagonalMatrixType;
 	typedef typename TridiagonalMatrixType::value_type MatrixElementType;
-	typedef typename PsimagLite::Real<MatrixElementType>::Type RealType;
+	typedef typename Real<MatrixElementType>::Type RealType;
 	typedef typename std::complex<RealType> ComplexType;
 	typedef typename TridiagonalMatrixType::value_type FieldType;
 	typedef Matrix<FieldType> MatrixType;
@@ -74,7 +74,7 @@ public:
 	ContinuedFraction(IoSimple::In& io)
 	    : progress_("ContinuedFraction"), freqEnum_(FREQ_REAL),ab_(io)
 	{
-		PsimagLite::String f;
+		String f;
 		try {
 			io.readline(f,"#FreqEnum=");
 		} catch(std::exception& e) {
@@ -107,7 +107,7 @@ public:
 		io.setPrecision(12);
 		ab_.save(io);
 
-		PsimagLite::String f = (freqEnum_ == FREQ_MATSUBARA) ? "Matsubara" : "Real";
+		String f = (freqEnum_ == FREQ_MATSUBARA) ? "Matsubara" : "Real";
 		io.print("#FreqEnum=",f);
 		io.printMatrix(reortho_,"#ReorthogonalizationMatrix");
 

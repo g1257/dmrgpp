@@ -193,9 +193,9 @@ public:
 		throw RuntimeError("LongChain::serialize(): unimplemented\n");
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
+	SizeType memResolv(MemResolv&,
 	                   SizeType,
-	                   PsimagLite::String) const
+	                   String) const
 	{
 		throw RuntimeError("LongChain::memResolv(): unimplemented\n");
 	}

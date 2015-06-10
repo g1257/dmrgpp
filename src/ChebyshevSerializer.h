@@ -64,7 +64,7 @@ template<typename VectorType_>
 class ChebyshevSerializer  {
 
 	typedef typename VectorType_::value_type VectorElementType;
-	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
+	typedef typename Real<VectorElementType>::Type RealType;
 
 	static const String stringMarker_;
 

@@ -148,7 +148,7 @@ public:
 			geometryBase_ = new Star<InputType>(linSize,io);
 		} else if (s=="LongRange") {
 			if (edof != NUMBERS) {
-				PsimagLite::String msg("LongRange geometry ");
+				String msg("LongRange geometry ");
 				msg += "does not support multiple orbitals\n";
 				throw RuntimeError(msg);
 			}
@@ -202,9 +202,9 @@ public:
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
 	                   SizeType x,
-	                   PsimagLite::String msg) const
+	                   String msg) const
 	{
-		PsimagLite::String str = msg;
+		String str = msg;
 		str += "GeometryTerm";
 		const char* start = (const char *)&linSize_;
 		const char* end = (const char*)&maxEdof_;
@@ -356,7 +356,7 @@ public:
 		return geometryBase_->calcDir(i,j);
 	}
 
-	PsimagLite::String options() const
+	String options() const
 	{
 		return gOptions_;
 	}
@@ -418,9 +418,9 @@ private:
 	SizeType linSize_;
 	SizeType maxEdof_;
 	GeometryBaseType* geometryBase_;
-	PsimagLite::String gOptions_;
+	String gOptions_;
 	typename Vector<GeometryDirectionType>::Type directions_;
-	PsimagLite::Matrix<ComplexOrRealType> cachedValues_;
+	Matrix<ComplexOrRealType> cachedValues_;
 }; // class GeometryTerm
 
 template<typename ComplexOrRealType,typename InputType>

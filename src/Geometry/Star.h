@@ -101,16 +101,16 @@ public:
 		ar & linSize_;
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(MemResolv& mres,
 	                   SizeType,
-	                   PsimagLite::String msg) const
+	                   String msg) const
 	{
-		PsimagLite::String str = msg;
+		String str = msg;
 		str += "Star";
 		const char* start = (const char *)this;
 		const char* end = (const char*)&linSize_;
 		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
+		mres.push(MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
 
 		mres.memResolv(&linSize_,sizeof(*this) - total,str + " linSize");
 
@@ -165,7 +165,7 @@ public:
 
 	SizeType findReflection(SizeType) const
 	{
-		throw PsimagLite::RuntimeError("findReflection\n");
+		throw RuntimeError("findReflection\n");
 	}
 
 	SizeType length(SizeType i) const
@@ -178,7 +178,7 @@ public:
 	{
 		assert(dir==0);
 
-		throw PsimagLite::RuntimeError("translate\n");
+		throw RuntimeError("translate\n");
 	}
 
 private:

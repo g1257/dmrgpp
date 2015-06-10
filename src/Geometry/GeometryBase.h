@@ -91,7 +91,7 @@ class GeometryBase {
 
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef double RealType_;
-	typedef PsimagLite::Matrix<RealType_> MatrixType;
+	typedef Matrix<RealType_> MatrixType;
 
 	struct AdditionalData {
 		AdditionalData() : type1(0),type2(0),TYPE_C(GeometryBase::TYPE_C) {}
@@ -115,9 +115,9 @@ public:
 	void serialize(Archive & ar, const unsigned int version)
 	{}
 
-	virtual SizeType memResolv(PsimagLite::MemResolv& mres,
+	virtual SizeType memResolv(MemResolv& mres,
 	                           SizeType x,
-	                           PsimagLite::String msg) const = 0;
+	                           String msg) const = 0;
 
 	virtual SizeType dirs() const = 0;
 
@@ -150,7 +150,7 @@ public:
 		throw RuntimeError("GeometryBase::set() unimplemented for derived class\n");
 	}
 
-	virtual void set(PsimagLite::Matrix<std::complex<RealType> >&) const
+	virtual void set(Matrix<std::complex<RealType> >&) const
 	{
 		throw RuntimeError("GeometryBase::set() unimplemented for derived class\n");
 	}
@@ -179,7 +179,7 @@ protected:
 
 	SizeType unimplemented(const String& str) const
 	{
-		PsimagLite::String str2 = "unimplemented " + str + "\n";
+		String str2 = "unimplemented " + str + "\n";
 		throw RuntimeError(str2);
 	}
 

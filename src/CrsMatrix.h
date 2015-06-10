@@ -182,9 +182,9 @@ public:
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
 	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	                   String msg = "") const
 	{
-		PsimagLite::String str = msg;
+		String str = msg;
 		str += "CrsMatrix";
 
 		const char* start = reinterpret_cast<const char *>(this);
@@ -352,9 +352,9 @@ public:
 
 	const T& getValue(SizeType i) const { assert(i<values_.size()); return values_[i]; }
 
-	PsimagLite::Matrix<T> toDense() const
+	Matrix<T> toDense() const
 	{
-		PsimagLite::Matrix<T> m;
+		Matrix<T> m;
 		crsMatrixToFullMatrix(m,*this);
 		return m;
 	}
@@ -492,11 +492,11 @@ std::istream &operator>>(std::istream &is,CrsMatrix<T>& m)
 template<typename S>
 void bcast(CrsMatrix<S>& m)
 {
-	PsimagLite::MPI::bcast(m.rowptr_);
-	PsimagLite::MPI::bcast(m.colind_);
-	PsimagLite::MPI::bcast(m.values_);
-	PsimagLite::MPI::bcast(m.nrow_);
-	PsimagLite::MPI::bcast(m.ncol_);
+	MPI::bcast(m.rowptr_);
+	MPI::bcast(m.colind_);
+	MPI::bcast(m.values_);
+	MPI::bcast(m.nrow_);
+	MPI::bcast(m.ncol_);
 }
 
 //! Transforms a Compressed-Row-Storage (CRS) into a full Matrix (Fast version)
@@ -668,7 +668,7 @@ void printFullMatrix(const CrsMatrix<T>& s,
                      SizeType how=0,
                      double eps = 1e-20)
 {
-	PsimagLite::Matrix<T> fullm(s.row(),s.col());
+	Matrix<T> fullm(s.row(),s.col());
 	crsMatrixToFullMatrix(fullm,s);
 	std::cout<<"--------->   "<<name;
 	std::cout<<" rank="<<s.row()<<"x"<<s.col()<<" <----------\n";

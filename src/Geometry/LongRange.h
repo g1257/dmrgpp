@@ -84,7 +84,7 @@ namespace PsimagLite {
 template<typename InputType>
 class LongRange : public GeometryBase<InputType> {
 
-	typedef PsimagLite::Matrix<typename GeometryBase<InputType>::RealType> MatrixType;
+	typedef Matrix<typename GeometryBase<InputType>::RealType> MatrixType;
 
 public:
 
@@ -175,9 +175,9 @@ public:
 		throw RuntimeError("LongRange::serialize(): unimplemented\n");
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
+	SizeType memResolv(MemResolv&,
 	                   SizeType,
-	                   PsimagLite::String) const
+	                   String) const
 	{
 		throw RuntimeError("LongRange::memResolv(): unimplemented\n");
 	}

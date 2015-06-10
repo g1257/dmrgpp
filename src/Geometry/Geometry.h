@@ -120,7 +120,7 @@ public:
 		}
 	}
 
-	Geometry(PsimagLite::String filename)
+	Geometry(String filename)
 	{
 		std::ifstream ifs(filename.c_str());
 		boost::archive::text_iarchive ia(ifs);
@@ -144,12 +144,12 @@ public:
 	template<typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
 	                   SizeType,
-	                   PsimagLite::String msg) const
+	                   String msg) const
 	{
 		const char* start = (const char *)this;
 		const char* end = (const char*)&linSize_;
 		SizeType total = GeometryExType::memResolv(mres,end-start,msg);
-		PsimagLite::String str = msg;
+		String str = msg;
 		str += "Geometry";
 
 		start = end;
@@ -316,7 +316,7 @@ public:
 		return terms_[term]->calcDir(i,j);
 	}
 
-	PsimagLite::String options(SizeType term) const
+	String options(SizeType term) const
 	{
 		assert(term < terms_.size());
 		return terms_[term]->options();

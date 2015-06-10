@@ -121,16 +121,16 @@ public:
 		ar & ladder_;
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(MemResolv& mres,
 	                   SizeType,
-	                   PsimagLite::String msg) const
+	                   String msg) const
 	{
-		PsimagLite::String str = msg;
+		String str = msg;
 		str += "LadderBath";
 		const char* start = (const char *)this;
 		const char* end = (const char*)&linSize_;
 		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
+		mres.push(MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
 
 		start = end;
 		end = (const char*)&bathSitesPerSite_;
@@ -144,7 +144,7 @@ public:
 		end = (const char*)&ladder_;
 		total += mres.memResolv(&clusterSize_,end-start,str + " clusterSize");
 
-		mres.push(PsimagLite::MemResolv::MEMORY_HEAPPTR,
+		mres.push(MemResolv::MEMORY_HEAPPTR,
 		          sizeof(*this) - total,
 		          &ladder_,
 		          str + " Ladder ptr");
@@ -241,7 +241,7 @@ public:
 			return siteSubs + firstClusterSite;
 		}
 
-		PsimagLite::String str(__FILE__);
+		String str(__FILE__);
 		str += " " + ttos(__LINE__) + "Internal error in getSubstituteSite\n";
 		throw RuntimeError(str);
 	}

@@ -184,7 +184,7 @@ public:
 		return (mode & PTHREADS);
 	}
 
-	static void mpiDisable(PsimagLite::String label)
+	static void mpiDisable(String label)
 	{
 		if (!hasMpi()) return;
 		mpiDisabled_.disable(label);
@@ -192,7 +192,7 @@ public:
 
 	static void mpiDisableIfNeeded(SizeType& mpiRank,
 	                               SizeType& blockSize,
-	                               PsimagLite::String label,
+	                               String label,
 	                               SizeType total)
 	{
 		if (!hasMpi()) return;
@@ -200,12 +200,12 @@ public:
 		mpiRank = 0;
 		blockSize = total;
 		if (!hasPthreads()) return;
-		PsimagLite::String str(__FILE__);
+		String str(__FILE__);
 		str += " mpiDisableIfNeeded label = " + label + "\n";
-		throw PsimagLite::RuntimeError(str);
+		throw RuntimeError(str);
 	}
 
-	static bool isMpiDisabled(PsimagLite::String label)
+	static bool isMpiDisabled(String label)
 	{
 		if (!hasMpi()) return false;
 		return mpiDisabled_(label);

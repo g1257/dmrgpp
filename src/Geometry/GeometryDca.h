@@ -52,16 +52,16 @@ public:
 
 private:
 
-	void printErrorAndDie(PsimagLite::String func) const
+	void printErrorAndDie(String func) const
 	{
-		PsimagLite::String str("GeometryDca:: Only valid for 2x2 clusters\n");
+		String str("GeometryDca:: Only valid for 2x2 clusters\n");
 		str += "Not for " + message_ + " orbitals.\n";
 		str += "\tWhile calling function " + func + "\n";
-		throw PsimagLite::RuntimeError(str);
+		throw RuntimeError(str);
 	}
 
 	bool enabled_;
-	PsimagLite::String message_;
+	String message_;
 }; // class GeometryDca
 
 } // namespace PsimagLite

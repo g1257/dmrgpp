@@ -129,16 +129,16 @@ public:
 		ar & isPeriodicY_;
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv& mres,
+	SizeType memResolv(MemResolv& mres,
 	                   SizeType,
-	                   PsimagLite::String msg) const
+	                   String msg) const
 	{
-		PsimagLite::String str = msg;
+		String str = msg;
 		str += "Ladder";
 		const char* start = (const char *)this;
 		const char* end = (const char*)&linSize_;
 		SizeType total = end - start;
-		mres.push(PsimagLite::MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
+		mres.push(MemResolv::MEMORY_TEXTPTR, total, start,str+" vptr");
 
 		start = end;
 		end = (const char*)&leg_;
